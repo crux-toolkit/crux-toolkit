@@ -1808,8 +1808,6 @@ int Barista :: getOverFDRProt(ProtScores &set, double fdr)
   
 }
 
-
-/*
 double Barista :: get_protein_score(int protind)
 {
   int num_pep = d.protind2num_pep(protind);
@@ -1870,9 +1868,9 @@ void Barista :: calc_gradients(int protind, int label)
     }
   delete[] gc;
 }
-*/
 
 
+/*
 double Barista :: get_protein_score(int protind)
 {
   int num_pep = d.protind2num_pep(protind);
@@ -1881,16 +1879,16 @@ double Barista :: get_protein_score(int protind)
   max_psm_inds.erase(max_psm_inds.begin(),max_psm_inds.end());
   max_psm_scores.erase(max_psm_scores.begin(),max_psm_scores.end());
   int psm_count = 0;
-  //for (int i = 0; i < num_pep; i++)
-  for (int i = 0; i < 1; i++)
+  for (int i = 0; i < num_pep; i++)
+    //for (int i = 0; i < 1; i++)
     {
       int pepind = pepinds[i];
       int num_psms = d.pepind2num_psm(pepind);
       int *psminds = d.pepind2psminds(pepind);
       double max_sc = -1000000.0;
       int max_ind = 0;
-      //for (int j = 0; j < num_psms; j++)
-      for (int j = 0; j < 1; j++)
+      for (int j = 0; j < num_psms; j++)
+	//for (int j = 0; j < 1; j++)
 	{
 	  double *feat = d.psmind2features(psminds[j]);
 	  double *sc = net_clones[psm_count].fprop(feat);
@@ -1904,8 +1902,8 @@ double Barista :: get_protein_score(int protind)
       max_psm_inds.push_back(max_ind);
       max_psm_scores.push_back(max_sc);
     }
-  //assert((int)max_psm_inds.size() == num_pep);
-  //assert((int)max_psm_scores.size() == num_pep);
+  assert((int)max_psm_inds.size() == num_pep);
+  assert((int)max_psm_scores.size() == num_pep);
   
   double sm = 0.0;
   double n = pow(num_all_pep,alpha);
@@ -1925,8 +1923,8 @@ void Barista :: calc_gradients(int protind, int label)
   double *gc = new double[1];
   gc[0] = -label/n;
   int psm_count = 0;
-  //for(int i = 0; i < num_pep; i++)
-  for(int i = 0; i < 1; i++)
+  for(int i = 0; i < num_pep; i++)
+    //  for(int i = 0; i < 1; i++)
     {
       int pepind = pepinds[i];
       int num_psms = d.pepind2num_psm(pepind);
@@ -1936,7 +1934,7 @@ void Barista :: calc_gradients(int protind, int label)
     }
   delete[] gc;
 }
-
+*/
 
 
 double Barista :: train_hinge(int protind, int label)
@@ -1973,7 +1971,7 @@ double Barista :: train_hinge_psm(int psmind, int label)
   return err;
 }
 
-void Barista :: train_net(double selectionfdr, int interval)
+void Barista :: train_net(double selectionfdr)
 {
   for (int k = 0; k < nepochs; k++)
     {
@@ -1998,8 +1996,7 @@ void Barista :: train_net(double selectionfdr, int interval)
       
       if(verbose > 0)
 	{
-	  if(interval == trainset.size())
-	    cout << "err " << err_sum << "  ";
+	  cout << "err " << err_sum << "  ";
 	  cout << selectionfdr << " " << fdr_trn;
 	  if(testset.size() > 0)
 	    cout << " " << getOverFDRProt(testset,net,selectionfdr);
@@ -2031,7 +2028,7 @@ void Barista :: train_net(double selectionfdr, int interval)
 	    cout << " " << getOverFDRProt(testset,max_net_prot,selectionfdr);
 	  cout << endl;
 	}
-      if(0)
+      if(1)
 	{
 	  int fdr_trn_psm = getOverFDRPSM(psmtrainset, net, selectionfdr); 
 	  if(fdr_trn_psm > max_fdr_psm)
@@ -2040,7 +2037,7 @@ void Barista :: train_net(double selectionfdr, int interval)
 	      max_fdr_psm = fdr_trn_psm;
 	    }
 	}
-      if(0)
+      if(1)
 	{
 	  int fdr_trn_pep = getOverFDRPep(peptrainset, net, selectionfdr); 
 	  if(fdr_trn_pep > max_fdr_pep)
@@ -2073,15 +2070,14 @@ void Barista :: train_net_multi_task(double selectionfdr, int interval)
 	  int protind = trainset[ind].protind;
 	  int label = trainset[ind].label;
 	  err_sum += train_hinge(protind,label);
-	  	  
+
 	  ind = rand()%interval;
 	  int psmind = psmtrainset[ind].psmind;
 	  label = psmtrainset[ind].label;
-	  train_hinge_psm(psmind,label);
-	 
+	  train_hinge_psm(psmind,label);	
 	}      
-      int fdr_trn = getOverFDRProt(trainset,net,selectionfdr);
-      //int fdr_trn = getOverFDRProt(trainset,selectionfdr);
+      //int fdr_trn = getOverFDRProt(trainset,net,selectionfdr);
+      int fdr_trn = getOverFDRProt(trainset,selectionfdr);
       
       //fdebug << fixed;
       //for(int j = 0; j < trainset.size(); j++)
@@ -2252,7 +2248,7 @@ int Barista :: run()
   srand(seed);
   setup_for_training(0);
   
-  train_net(selectionfdr, trainset.size());
+  train_net(selectionfdr);
   
   return 0;
 
@@ -2274,9 +2270,11 @@ int Barista :: run_tries()
     {
       mu = mu_choices[k];
       net.make_random();
-      train_net(selectionfdr, trainset.size());
+      train_net(selectionfdr);
     }
   
+  report_all_results_xml_tab();
+
   return 0;
 
 }
@@ -2308,14 +2306,14 @@ int Barista :: run_tries_multi_task()
     }
     
   //net.copy(max_net_prot);
-  
+
   int interval= getOverFDRPSM(psmtrainset,max_net_psm,0.01)*2;
   if(interval > psmtrainset.size())
     interval = psmtrainset.size()/4;
   if(interval < 50)
     interval = psmtrainset.size()/4;
   train_net_multi_task(selectionfdr, interval);
-  
+
   //report_all_fdr_counts();
   report_all_results_xml_tab();
   
@@ -2763,7 +2761,8 @@ int Barista::main(int argc, char **argv) {
     return 1;
 
 
-  run();
+  //run();
+  run_tries();
   //run_tries_multi_task();
    if(skip_cleanup_flag != 1)
     sqtp.clean_up(out_dir);
