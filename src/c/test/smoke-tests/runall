@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Exit if there is an error.
+set -o errexit 
+
 # Make sure the testing script is executable.
 chmod 774 crux-test.pl
 
