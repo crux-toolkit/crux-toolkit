@@ -31,9 +31,6 @@
     <ProjectReference Include="..\hardklor\hardklor.vcxproj">
       <Project>{0e756a7f-b135-4e0b-a8c0-bed01c60c0bb}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\MSToolkit\MSToolkit.vcxproj">
-      <Project>{af642c17-5942-4a4a-90a6-ad75da06481e}</Project>
-    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{901DB888-E4A4-4ED1-9DB6-30DEABF099F7}</ProjectGuid>
@@ -85,6 +82,7 @@
     <LibraryPath>$(LibraryPath);$(SolutionDir)$(Configuration)\</LibraryPath>
     <SourcePath />
     <ExcludePath />
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>..\..\src\external\MSToolkit\include;..\..\src\c\hardklor;..\..\src\c\bullseye;..\..\src\c;$(VCInstallDir)include;$(WindowsSdkDir)include;</IncludePath>
@@ -92,6 +90,7 @@
     <LibraryPath>$(LibraryPath);$(SolutionDir)$(Configuration)\</LibraryPath>
     <SourcePath />
     <ExcludePath />
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>..\..\src\external\MSToolkit\include;..\..\src\c\hardklor;..\..\src\c\bullseye;..\..\src\c;$(VCInstallDir)include;$(WindowsSdkDir)include;</IncludePath>
@@ -99,6 +98,7 @@
     <LibraryPath>$(LibraryPath);$(SolutionDir)$(Configuration)\</LibraryPath>
     <SourcePath />
     <ExcludePath />
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>..\..\src\external\MSToolkit\include;..\..\src\c\hardklor;..\..\src\c\bullseye;..\..\src\c;$(VCInstallDir)include;$(WindowsSdkDir)include;</IncludePath>
@@ -106,6 +106,7 @@
     <LibraryPath>$(LibraryPath);$(SolutionDir)$(Configuration)\</LibraryPath>
     <SourcePath />
     <ExcludePath />
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
