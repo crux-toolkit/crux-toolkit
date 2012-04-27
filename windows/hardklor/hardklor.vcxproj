@@ -69,11 +69,6 @@
     <ClInclude Include="..\..\src\c\hardklor\Smooth.h" />
     <ClInclude Include="..\..\src\c\hardklor\SpecAnalyzeSupport.h" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\MSToolkit\MSToolkit.vcxproj">
-      <Project>{af642c17-5942-4a4a-90a6-ad75da06481e}</Project>
-    </ProjectReference>
-  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{0E756A7F-B135-4E0B-A8C0-BED01C60C0BB}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
@@ -126,6 +121,7 @@
     <ExcludePath />
     <LibraryPath>
     </LibraryPath>
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>..\..\src\external;..\..\src\external\MSToolkit\include;..\..\src\c;$(VCInstallDir)include;$(WindowsSdkDir)include;</IncludePath>
@@ -135,6 +131,7 @@
     <ExcludePath />
     <LibraryPath>
     </LibraryPath>
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>..\..\src\external;..\..\src\external\MSToolkit\include;..\..\src\c;$(VCInstallDir)include;$(WindowsSdkDir)include;</IncludePath>
@@ -144,6 +141,7 @@
     <ExcludePath />
     <LibraryPath>
     </LibraryPath>
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>..\..\src\external;..\..\src\external\MSToolkit\include;..\..\src\c;$(VCInstallDir)include;$(WindowsSdkDir)include;</IncludePath>
@@ -153,6 +151,7 @@
     <ExcludePath />
     <LibraryPath>
     </LibraryPath>
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -160,7 +159,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
+      <PreprocessorDefinitions>CRUX;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -173,7 +172,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
+      <PreprocessorDefinitions>CRUX;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
