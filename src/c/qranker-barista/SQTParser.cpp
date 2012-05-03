@@ -638,8 +638,7 @@ void SQTParser :: extract_features(sqt_match &m, int hits_read, int final_hits,e
       //write the feature vector out to file
       //extract_psm_features(m, enz, x, i);
       extract_psm_features(m, enz, x, i, hits_read);
-      
-     
+           
       if (num_spec_features > 0)
 	{
 	  

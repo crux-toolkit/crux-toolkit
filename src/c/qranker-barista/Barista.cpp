@@ -1647,7 +1647,9 @@ int Barista :: computeNSAF()
 		}
 	    }
 	  //compute NSAF for this protein
-	  double nsaf = (double)cnt/(double)len;
+	  double nsaf = 0.0;
+	  if(len != 0)
+	    nsaf = (double)cnt/(double)len;
 	  trainset[k].nsaf = nsaf;
 	  sum += nsaf;
  	}
@@ -1663,6 +1665,16 @@ int Barista :: computeNSAF()
     }
   else
     return 0;
+
+  /*
+  double check = 0.0;
+  for(int i = 0; i < trainset.size(); i++)
+    {
+      if(trainset[i]. label == 1)
+	check += trainset[i].nsaf;
+    }
+  cout << check << endl;
+  */
 
   psmind_to_ind.clear();
   return 1;
