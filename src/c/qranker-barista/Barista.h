@@ -81,6 +81,7 @@ class Barista : public CruxApplication
   double get_protein_score_parsimonious(int protind, NeuralNet &n);
   int getOverFDRProtParsimonious(ProtScores &set, NeuralNet &n, double fdr);
   void computePEP();
+  int computeNSAF();
 
   void write_results_prot(string &out_dir, int fdr);
   void report_all_results();

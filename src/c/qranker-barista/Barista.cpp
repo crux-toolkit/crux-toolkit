@@ -670,6 +670,7 @@ void Barista :: write_results_prot_xml(ofstream &os)
 	  os << " <protein_group group_id=" << "\"" << group << "\"" << ">" << endl;
 	  os << "  <q_value>" << trainset[i].q << "</q_value>" << endl;
 	  os << "  <score>" << trainset[i].score << "</score>" << endl;
+	  os << "  <nsaf>" << trainset[i].nsaf << "</nsaf>" << endl;
 	  os << "  <protein_ids>" << endl;
 	  protein_str = d.ind2prot(protind);
 	  get_tab_delim_proteins(protein_str, tab_delim_proteins);
@@ -1138,7 +1139,7 @@ void Barista :: write_results_prot_special_case_tab(ofstream &os, int i)
 
 void Barista :: write_results_prot_tab(ofstream &os)
 {
-  os << "group number" << "\t" << "q-value" << "\t" << "barista score" << "\t";
+  os << "group number" << "\t" << "q-value" << "\t" << "barista score" << "\t" << "NSAF score" << "\t";
   os << "proteins" << "\t" << "peptides-scan.charge" << endl;
 
   int cn = 0;
@@ -1158,6 +1159,7 @@ void Barista :: write_results_prot_tab(ofstream &os)
 	  os << group << "\t";
 	  os << trainset[i].q << "\t";
 	  os << trainset[i].score << "\t";
+	  os << trainset[i].nsaf << "\t";
 	  os << d.ind2prot(protind); 
 	  for(unsigned int j = 0; j < trainset[i].indistinguishable_protinds.size(); j++)
 	    {
@@ -1532,11 +1534,11 @@ void Barista :: report_all_results_tab()
 void Barista :: report_all_results_xml_tab()
 {
   setup_for_reporting_results();
-  d.clear_data_prot_training();
+  
 
   stringstream fname;
   
-  d.load_data_all_results();
+  
   
   report_all_results_xml();
   report_all_results_tab();
@@ -1588,10 +1590,84 @@ void Barista :: setup_for_reporting_results()
 #endif
   d.clear_labels_psm_training();
   
-  d.load_data_psm_results();
+  d.clear_data_prot_training();
+  d.load_data_all_results();
+    
+  computeNSAF();
   computePEP();
   
 }
+
+int Barista :: computeNSAF()
+{
+  //check that the lengths of the proteins are available
+  int cnt = 0;
+  for(int i = 0; i < trainset.size(); i++)
+    {
+      if(trainset[i].label == 1)
+	{
+	  int protind = trainset[i].protind;
+	  int len = d.protind2length(protind);
+	  if(len < 0)
+	    cnt++;
+	}
+    }
+  if(cnt > 0)
+    return 0;
+
+  //create auxiliary psmind_to_ind index
+  vector<int>psmind_to_ind;
+  psmind_to_ind.resize(psmtrainset.size(),0);
+  for(int i = 0; i < psmtrainset.size(); i++)
+    psmind_to_ind[psmtrainset[i].psmind] = i;
+
+  //compute NSAF for each protein
+  double sum = 0.0;
+  for(int k = 0; k < trainset.size(); k++)
+    {
+      if(trainset[k].label == 1)
+	{
+	  int protind = trainset[k].protind;
+	  int len = d.protind2length(protind);
+	  int num_pep = d.protind2num_pep(protind);
+	  int *pepinds = d.protind2pepinds(protind);
+	  int cnt = 0;
+	  for (int i = 0; i < num_pep; i++)
+	    {
+	      int pepind = pepinds[i];
+	      int num_psms = d.pepind2num_psm(pepind);
+	      int *psminds = d.pepind2psminds(pepind);
+	      for (int j = 0; j < num_psms; j++)
+		{
+		  int psmind = psminds[j];
+		  int ind  = psmind_to_ind[psmind];
+		  assert(psmtrainset[ind].psmind == psmind);
+		  if(psmtrainset[ind].q <= 0.01)
+		    cnt++;
+		}
+	    }
+	  //compute NSAF for this protein
+	  double nsaf = (double)cnt/(double)len;
+	  trainset[k].nsaf = nsaf;
+	  sum += nsaf;
+ 	}
+    }
+  
+  if(sum > 0)
+    {
+      for(int i = 0; i < trainset.size(); i++)
+	{
+	  if(trainset[i]. label == 1)
+	    trainset[i].nsaf /= sum;
+	}
+    }
+  else
+    return 0;
+
+  psmind_to_ind.clear();
+  return 1;
+}
+
 
 void Barista :: computePEP(){
   carp(CARP_DEBUG, "Computing PEPs");

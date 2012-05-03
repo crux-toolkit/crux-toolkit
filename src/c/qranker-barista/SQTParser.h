@@ -169,8 +169,11 @@ class SQTParser{
   
   //digested database info
   map<string,int> protein_to_num_all_pep_map;  
-  map<int,int> protind_to_num_all_pep_map;  
+  map<int,int> protind_to_num_all_pep_map;
+  map<string,int> protein_to_length_map;  
+  map<int,int> protind_to_length_map;
   int *protind_to_num_all_pep;
+  int *protind_to_length;
 
   //writing out data
   string in_dir;
@@ -194,6 +197,7 @@ class SQTParser{
   ofstream f_pepind_to_label;
   ofstream f_protind_to_label;
   ofstream f_protind_to_num_all_pep;
+  ofstream f_protind_to_length;
   ofstream f_fileind_to_fname;
   ofstream f_psmind_to_fileind;
   

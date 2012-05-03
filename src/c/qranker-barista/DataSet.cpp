@@ -13,7 +13,8 @@ Dataset::Dataset()
     pepind_to_label(0),
     num_prot(0), num_pos_prot(0), num_neg_prot(0),
     protind_to_label(0),
-    protind_to_num_all_pep(0)
+    protind_to_num_all_pep(0),
+    protind_to_length(0)
 {
 }
 
@@ -35,6 +36,7 @@ Dataset::~Dataset()
   delete [] psmind_to_fileind; psmind_to_fileind = (int*)0;
   delete[] protind_to_label; protind_to_label = (int*)0;
   delete[] protind_to_num_all_pep; protind_to_num_all_pep = (int*)0;
+  delete[] protind_to_length; protind_to_length = (int*)0;
   protind_to_pepinds.clear();
   ind_to_prot.clear();
 
@@ -511,6 +513,7 @@ void Dataset :: load_data_all_results()
 {
 
   ostringstream fname;
+
   //ind_to_pep
   fname << in_dir << "/ind_to_pep";
   ifstream f_ind_to_pep(fname.str().c_str(),ios::binary);
@@ -541,6 +544,19 @@ void Dataset :: load_data_all_results()
       f_ind_to_prot >> prot;
     }
   f_ind_to_prot.close();
+  fname.str("");
+
+  //protind_to_length
+  fname << in_dir << "/protind_to_length";
+  ifstream f_protind_to_length(fname.str().c_str(),ios::binary);
+  if(!f_protind_to_length.is_open())
+    {
+      cout << "could not open file " << fname.str() <<  " for reading data\n";
+      return;
+    }
+  protind_to_length = new int[num_prot];
+  f_protind_to_length.read((char*)protind_to_length,sizeof(int)*num_prot);
+  f_protind_to_length.close();
   fname.str("");
 
 
@@ -716,6 +732,7 @@ void Dataset :: clear_data_all_results()
   delete [] psmind_to_precursor_mass; psmind_to_precursor_mass = (double*)0;
   fileind_to_fname.clear();
   delete [] psmind_to_fileind; psmind_to_fileind = (int*)0;
+  delete [] protind_to_length; protind_to_length = (int*)0;
 
 }
 
