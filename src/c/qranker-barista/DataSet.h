@@ -64,6 +64,7 @@ class Dataset
   inline int protind2num_pep(int protind){return protind_to_pepinds.get_range_length(protind);}
   inline int* protind2pepinds(int protind){return protind_to_pepinds.get_range_indices(protind);}
   inline int protind2num_all_pep(int protind){return protind_to_num_all_pep[protind];}
+  inline int protind2length(int protind){return protind_to_length[protind];}
   //returns false if not subset, true if yes, subset
   inline bool is_prot_subset(int protind1, int protind2){return protind_to_pepinds.is_subset(protind1, protind2);}
 
@@ -99,6 +100,7 @@ class Dataset
   int *protind_to_label;
   BipartiteGraph protind_to_pepinds;
   int *protind_to_num_all_pep;
+  int *protind_to_length;
   map <int, string> ind_to_prot;
 
   string in_dir;

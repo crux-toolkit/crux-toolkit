@@ -12,6 +12,7 @@ public:
   int protind;
   int label;
   double q;
+  double nsaf;
   //meta group number
   int group_number;
   //flag indicating that it is protein identical to some other protein in terms of peptide composition
@@ -26,7 +27,7 @@ public:
   //intersection of peptides in a group
   vector<int> intersection;
   map<int, vector<int> > protind2complement;
-  ProtScoreHolder():score(0.0),protind(0),q(0.0),group_number(0),indistinguishable_prot(0),subset_prot(0), has_complement(0){;}
+ ProtScoreHolder():score(0.0),protind(0),q(0.0),nsaf(0.0),group_number(0),indistinguishable_prot(0),subset_prot(0), has_complement(0){;}
   ~ProtScoreHolder() {;}
 };
 

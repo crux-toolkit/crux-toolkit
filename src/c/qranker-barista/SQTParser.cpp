@@ -27,6 +27,7 @@ SQTParser :: SQTParser()
     x(0), 
     xs(0), 
     protind_to_num_all_pep(0),
+    protind_to_length(0),
     cur_fileind(0)
 {
   int capacity = 10;
@@ -72,6 +73,7 @@ void SQTParser :: clear()
   delete[] x; x = (double*)0;
   delete[] xs; xs = (double*)0;
   delete[] protind_to_num_all_pep; protind_to_num_all_pep = (int*)0;
+  delete[] protind_to_length; protind_to_length = (int*)0;
 
     pep_to_ind.clear();
   ind_to_pep.clear();
@@ -86,6 +88,8 @@ void SQTParser :: clear()
   protind_to_pepinds.clear();
   protein_to_num_all_pep_map.clear();
   protind_to_num_all_pep_map.clear();
+  protein_to_length_map.clear();
+  protind_to_length_map.clear();
 
   num_features = 0;
   num_spec_features = 0;
@@ -248,6 +252,7 @@ void SQTParser :: add_matches_to_tables(sqt_match &m, string &decoy_prefix, int 
 		  if(database_exists)
 		    {
 		      int cnt = 0;
+		      int len = 0;
 		      if(protein_to_num_all_pep_map.find(prot) == protein_to_num_all_pep_map.end())
 			{
 			  /*
@@ -261,7 +266,12 @@ void SQTParser :: add_matches_to_tables(sqt_match &m, string &decoy_prefix, int 
 			  */
 			}
 		      else
-			cnt = protein_to_num_all_pep_map[prot];
+			{
+			  cnt = protein_to_num_all_pep_map[prot];
+			  len = protein_to_length_map[prot];
+			  
+			}
+		      
 		      //add the cnt to protind_to_num_all_pep_map
 		      if(cnt == 0)
 			{
@@ -273,7 +283,10 @@ void SQTParser :: add_matches_to_tables(sqt_match &m, string &decoy_prefix, int 
 			  //carp(CARP_WARNING, "did not find protein %s from sqt file in the database ", prot.c_str());
 			}
 		      else
-			protind_to_num_all_pep_map[prot_ind] = cnt;
+			{
+			  protind_to_num_all_pep_map[prot_ind] = cnt;
+			  protind_to_length_map[prot_ind] = len;
+			}
 		    }
 		}
 	      else
@@ -317,6 +330,8 @@ void SQTParser :: fill_graphs_and_save_data(string &out_dir)
   //space for prot to number of all peptides info
   protind_to_num_all_pep = new int[num_cur_prot];
   memset(protind_to_num_all_pep,0,sizeof(int)*num_cur_prot);
+  protind_to_length = new int[num_cur_prot];
+  memset(protind_to_length,0,sizeof(int)*num_cur_prot);
   for(map<int,string>::iterator it = ind_to_prot.begin(); it != ind_to_prot.end(); it++)
     {
       int protind = it->first;
@@ -327,25 +342,30 @@ void SQTParser :: fill_graphs_and_save_data(string &out_dir)
 	{
 	  int cnt = (protind_to_pepinds_map[protind]).size();
 	  protind_to_num_all_pep[protind-prot_offset] = cnt;
+	  protind_to_length[protind-prot_offset] = -1;
 	}
       //if did not see any decoy proteins in the database or did not see half of the total proteins in the database
       else if ( ((double)num_prot_not_found_in_db > (double)num_prot/3.0))
 	{
 	  int cnt = (protind_to_pepinds_map[protind]).size();
 	  protind_to_num_all_pep[protind-prot_offset] = cnt;
+	  protind_to_length[protind-prot_offset] = -1;
 	}
       else
 	{
-	  //if did not find the protein in the count of all proteins, then just get the cound of observed proteins
+	  //if did not find the protein in the count of all proteins, then just get the count of observed proteins
 	  if(protind_to_num_all_pep_map.find(protind) == protind_to_num_all_pep_map.end())
 	    {
 	      int cnt = (protind_to_pepinds_map[protind]).size();
 	      protind_to_num_all_pep[protind-prot_offset] = cnt;
+	      protind_to_length[protind-prot_offset] = -1;
 	    }
 	  else
 	    {
 	      int cnt = protind_to_num_all_pep_map[protind];
 	      protind_to_num_all_pep[protind-prot_offset] = cnt;
+	      int len = protind_to_length_map[protind];
+	      protind_to_length[protind-prot_offset] = len;
 	    }
 	}
     }
@@ -353,10 +373,16 @@ void SQTParser :: fill_graphs_and_save_data(string &out_dir)
   //protind_to_num_all_pep
   protein_to_num_all_pep_map.clear();
   protind_to_num_all_pep_map.clear();
+  protein_to_length_map.clear();
+  protind_to_length_map.clear();
   fname << out_dir << "/protind_to_num_all_pep";
   f_protind_to_num_all_pep.write((char*)protind_to_num_all_pep,sizeof(int)*num_cur_prot);
   fname.str("");
   delete[] protind_to_num_all_pep; protind_to_num_all_pep = (int*)0;
+  fname << out_dir << "/protind_to_length";
+  f_protind_to_length.write((char*)protind_to_length,sizeof(int)*num_cur_prot);
+  fname.str("");
+  delete[] protind_to_length; protind_to_length = (int*)0;
   
 
   //ind_to_pep
@@ -865,110 +891,137 @@ int SQTParser :: check_input_dir(string &in_dir)
   fname << in_dir << "/summary";
   if(!check_file(fname))
     return 0;
-      
+  fname.str("");
+
   fname << in_dir << "/psm";
   if(!check_file(fname))
     return 0;
-   
+  fname.str("");   
+
   //psmind_to_label
   fname << in_dir << "/psmind_to_label";
   if(!check_file(fname))
     return 0;
- 
+  fname.str("");
+
   //psmind_to_pepind
   fname << in_dir << "/psmind_to_pepind";
   if(!check_file(fname))
     return 0;
+  fname.str("");
        
   //psmind_to_scan
   fname << in_dir << "/psmind_to_scan";
   if(!check_file(fname))
     return 0;
+  fname.str("");
   
   //psmind_to_charge
   fname << in_dir << "/psmind_to_charge";
   if(!check_file(fname))
     return 0;
-  
+  fname.str("");
+
   //psmind_to_precursor_mass
   fname << in_dir << "/psmind_to_precursor_mass";
   if(!check_file(fname))
     return 0;
-  
+  fname.str("");
+
   //psmind_to_fileind
   fname << in_dir << "/psmind_to_fileind";
   if(!check_file(fname))
     return 0;
-  
+  fname.str("");
+
   //fileind_to_fname
   fname << in_dir << "/fileind_to_fname";
   if(!check_file(fname))
     return 0;
-  
+  fname.str("");
+
   //psmind_to_xcorr
   fname << in_dir << "/psmind_to_xcorr";
   if(!check_file(fname))
     return 0;
-  
+  fname.str("");
+
   //psmind_to_spscore
   fname << in_dir << "/psmind_to_spscore";
   if(!check_file(fname))
     return 0;
-  
+  fname.str("");
+
   //psmind_to_spscore
   fname << in_dir << "/psmind_to_deltaCn";
   if(!check_file(fname))
     return 0;
-  
+  fname.str("");
+
   //psmind_to_calculated_mass
   fname << in_dir << "/psmind_to_calculated_mass";
   if(!check_file(fname))
     return 0;
-  
+  fname.str("");
+
   //pepind_to_label
   fname << in_dir << "/pepind_to_label";
   if(!check_file(fname))
     return 0;
-  
+  fname.str("");
+
   //protind_to_label
   fname << in_dir << "/protind_to_label";
   if(!check_file(fname))
     return 0;
-  
+  fname.str("");
+
   fname << in_dir << "/protind_to_num_all_pep";
   if(!check_file(fname))
     return 0;
-  
+  fname.str("");
+
+  fname << in_dir << "/protind_to_length";
+  if(!check_file(fname))
+    return 0;
+  fname.str("");
+
   //ind_to_pep
   fname << in_dir << "/ind_to_pep";
   if(!check_file(fname))
     return 0;
-  
+  fname.str("");
+
   //pep_to_ind
   fname << in_dir << "/pep_to_ind";
   if(!check_file(fname))
     return 0;
-  
+  fname.str("");
+
   //ind_to_prot
   fname << in_dir << "/ind_to_prot";
   if(!check_file(fname))
     return 0;
-  
+  fname.str("");
+
   //prot_to_ind
   fname << in_dir << "/prot_to_ind";
   if(!check_file(fname))
     return 0;
-  
+  fname.str("");
+
   //pepind_to_protinds
   fname << in_dir << "/pepind_to_protinds";
   if(!check_file(fname))
     return 0;
-  
+  fname.str("");
+
   //pepind_to_psminds
   fname << in_dir << "/pepind_to_psminds";
   if(!check_file(fname))
     return 0;
-  
+  fname.str("");
+
   return 1;
 }
 
@@ -1076,6 +1129,11 @@ void SQTParser :: clean_up(string dir)
   remove(fname.str().c_str());
   fname.str("");
 
+  //protind_to_length
+  fname << out_dir << "/protind_to_length";
+  remove(fname.str().c_str());
+  fname.str("");
+
 
   //protind_to_pepinds
   fname << out_dir << "/protind_to_pepinds";
@@ -1165,6 +1223,10 @@ void SQTParser :: open_files(string &out_dir)
   fname << out_dir << "/protind_to_num_all_pep";
   f_protind_to_num_all_pep.open(fname.str().c_str(),ios::binary);
   fname.str("");
+
+  fname << out_dir << "/protind_to_length";
+  f_protind_to_length.open(fname.str().c_str(),ios::binary);
+  fname.str("");
   
   fname << out_dir << "/fileind_to_fname";
   f_fileind_to_fname.open(fname.str().c_str(),ios::binary);
@@ -1196,6 +1258,7 @@ void SQTParser :: close_files()
   f_pepind_to_label.close();
   f_protind_to_label.close();
   f_protind_to_num_all_pep.close();
+  f_protind_to_length.close();
   f_fileind_to_fname.close();
   f_psmind_to_fileind.close();
 }
@@ -1240,6 +1303,7 @@ void SQTParser :: digest_database(ifstream &f_db, enzyme e)
 	      string sequence = seq.str();
 	      int cnt = cntEnzConstraints(sequence,e);
 	      protein_to_num_all_pep_map[prot] = cnt+1;
+	      protein_to_length_map[prot] = sequence.size();
 	      seq.str("");
 	    }
 	  prot = tempstr.substr(1,tempstr.size());
