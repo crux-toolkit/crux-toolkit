@@ -83,6 +83,7 @@
     <SourcePath />
     <ExcludePath />
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>..\..\src\external\MSToolkit\include;..\..\src\c\hardklor;..\..\src\c\bullseye;..\..\src\c;$(VCInstallDir)include;$(WindowsSdkDir)include;</IncludePath>
@@ -91,6 +92,7 @@
     <SourcePath />
     <ExcludePath />
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>..\..\src\external\MSToolkit\include;..\..\src\c\hardklor;..\..\src\c\bullseye;..\..\src\c;$(VCInstallDir)include;$(WindowsSdkDir)include;</IncludePath>
@@ -99,6 +101,7 @@
     <SourcePath />
     <ExcludePath />
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>..\..\src\external\MSToolkit\include;..\..\src\c\hardklor;..\..\src\c\bullseye;..\..\src\c;$(VCInstallDir)include;$(WindowsSdkDir)include;</IncludePath>
@@ -107,6 +110,7 @@
     <SourcePath />
     <ExcludePath />
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
