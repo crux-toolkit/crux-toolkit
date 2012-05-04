@@ -8,9 +8,6 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "percolator", "windows\percolator\percolator.vcxproj", "{EE63E11D-5BCD-4E4A-A1E6-D514BB8BE38D}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "xlink", "windows\xlink\xlink.vcxproj", "{F2853A94-C9D3-4AC2-8C50-31F88B052216}"
-	ProjectSection(ProjectDependencies) = postProject
-		{C4BCBCF8-E852-46CF-AF83-65353359B218} = {C4BCBCF8-E852-46CF-AF83-65353359B218}
-	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "crux", "windows\crux\crux.vcxproj", "{949410D5-52D9-4A79-80C0-EE85B80C4A6E}"
 	ProjectSection(ProjectDependencies) = postProject
