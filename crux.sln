@@ -27,8 +27,14 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "posterior_error", "windows\posterior_error\posterior_error.vcxproj", "{671CCD4C-C27C-41F7-BBA4-39FA197170B1}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hardklor", "windows\hardklor\hardklor.vcxproj", "{0E756A7F-B135-4E0B-A8C0-BED01C60C0BB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{63AB703E-4B0E-4EF4-AD34-F522609F4F01} = {63AB703E-4B0E-4EF4-AD34-F522609F4F01}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bullseye", "windows\bullseye\bullseye.vcxproj", "{901DB888-E4A4-4ED1-9DB6-30DEABF099F7}"
+	ProjectSection(ProjectDependencies) = postProject
+		{0E756A7F-B135-4E0B-A8C0-BED01C60C0BB} = {0E756A7F-B135-4E0B-A8C0-BED01C60C0BB}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MSToolkit", "windows\MSToolkit3\MSToolkit3.vcxproj", "{63AB703E-4B0E-4EF4-AD34-F522609F4F01}"
 EndProject
