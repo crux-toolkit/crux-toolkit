@@ -114,7 +114,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>..\..\src\external;..\..\src\external\MSToolkit\include;..\..\src\c;$(VCInstallDir)include;$(WindowsSdkDir)include;</IncludePath>
+    <IncludePath>..\..\src\external\MSToolkit\include;..\..\src\c;$(VCInstallDir)include;$(WindowsSdkDir)include;</IncludePath>
     <ReferencePath />
     <SourcePath>
     </SourcePath>
@@ -124,7 +124,7 @@
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>..\..\src\external;..\..\src\external\MSToolkit\include;..\..\src\c;$(VCInstallDir)include;$(WindowsSdkDir)include;</IncludePath>
+    <IncludePath>..\..\src\external\MSToolkit\include;..\..\src\c;$(VCInstallDir)include;$(WindowsSdkDir)include;</IncludePath>
     <ReferencePath />
     <SourcePath>
     </SourcePath>
@@ -134,7 +134,7 @@
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>..\..\src\external;..\..\src\external\MSToolkit\include;..\..\src\c;$(VCInstallDir)include;$(WindowsSdkDir)include;</IncludePath>
+    <IncludePath>..\..\src\external\MSToolkit\include;..\..\src\c;$(VCInstallDir)include;$(WindowsSdkDir)include;</IncludePath>
     <ReferencePath />
     <SourcePath>
     </SourcePath>
@@ -144,7 +144,7 @@
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>..\..\src\external;..\..\src\external\MSToolkit\include;..\..\src\c;$(VCInstallDir)include;$(WindowsSdkDir)include;</IncludePath>
+    <IncludePath>..\..\src\external\MSToolkit\include;..\..\src\c;$(VCInstallDir)include;$(WindowsSdkDir)include;</IncludePath>
     <ReferencePath />
     <SourcePath>
     </SourcePath>
