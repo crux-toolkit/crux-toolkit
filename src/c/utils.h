@@ -40,8 +40,10 @@ static const int LINELENGTH = 4096;
 
 extern int verbosity;
 
-#ifdef DARWINX
+#ifdef DARWIN
+#ifdef PRE_LION
 #define INCLUDE_GETLINE
+#endif
 #endif
 #ifdef WIN32
 #define INCLUDE_GETLINE
