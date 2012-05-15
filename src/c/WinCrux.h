@@ -1,7 +1,7 @@
 #ifndef WINCRUX_H
 #define WINCRUX_H
 
-#ifdef WIN32
+#ifdef _MSC_VER
 #include <direct.h>
 #include <fcntl.h>
 #include <io.h>

@@ -3,7 +3,7 @@
 #define CRUX
 
 #include <sys/types.h>
-#ifndef WIN32
+#ifndef _MSC_VER
 #include <dirent.h>
 #endif
 #include <iostream>

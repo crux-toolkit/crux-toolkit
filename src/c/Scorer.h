@@ -12,11 +12,11 @@
 #define SCORER_H
 
 #include <stdio.h>
-#ifndef WIN32
+#ifndef _MSC_VER
 #include <dirent.h>
 #endif
 #include <string>
-#ifdef WIN32
+#ifdef _MSC_VER
 #include "windirent.h"
 #endif
 #include "objects.h"

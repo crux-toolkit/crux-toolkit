@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
-#ifndef WIN32
+#ifndef _MSC_VER
 #include <sys/time.h>
 #include <unistd.h> 
 #endif
@@ -462,7 +462,7 @@ const char* date_and_time
     // FIXME: we should be able to get the date
     // from a function call rather than having
     // to call a shell command.
-#ifdef WIN32
+#ifdef _MSC_VER
     date_stream = (FILE *)popen("date /T", "r");
 #else
     date_stream = (FILE *)popen("date", "r");

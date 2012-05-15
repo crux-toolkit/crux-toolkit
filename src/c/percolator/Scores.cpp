@@ -24,7 +24,7 @@ using namespace std;
 #include "Globals.h"
 #include "PosteriorEstimator.h"
 #include "ssl.h"
-#ifdef WIN32
+#ifdef _MSC_VER
 #include "WinCrux.h"
 #endif
 

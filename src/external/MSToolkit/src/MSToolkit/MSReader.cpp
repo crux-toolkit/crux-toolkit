@@ -20,7 +20,7 @@ MSReader::MSReader(){
   for(int i=0;i<16;i++)	strcpy(header.header[i],"\0");
   headerIndex=0;
 
-  #ifdef _MSC_VER
+  #ifdef _MSC_VER_RAW
   CoInitialize( NULL );
 	HRESULT hr = m_Raw.CreateInstance("XRawfile.XRawfile.1");
   if (!FAILED(hr)) bRaw=true;
@@ -49,7 +49,7 @@ MSReader::~MSReader(){
     free(pScanIndex);
   }
 
-  #ifdef _MSC_VER
+  #ifdef _MSC_VER_RAW
   if(bRaw){
     if(rawFileOpen) m_Raw->Close();
     m_Raw.Release();
@@ -476,7 +476,7 @@ int MSReader::getPercent(){
   if(rampFileIn!=NULL){
     return (int)((double)rampIndex/rampLastScan*100);
   }
-#ifdef _MSC_VER
+#ifdef _MSC_VER_RAW
   if(rawFileOpen){
     return (int)((double)rawCurSpec/rawTotSpec*100);
   }
@@ -1364,7 +1364,7 @@ bool MSReader::readFile(const char* c, MSFileFormat f, Spectrum& s, int scNum){
 	case mzML:
     break;
   case raw:
-    #ifdef _MSC_VER
+    #ifdef _MS_VER_RAW
     //only read the raw file if the dll was present and loaded.
       if(bRaw) return readRawFile(c,s,scNum);
       else return false;
@@ -1605,7 +1605,7 @@ void MSReader::setCompression(bool b){
 
 
 void MSReader::setAverageRaw(bool b, int width, long cutoff){
-  #ifdef _MSC_VER
+  #ifdef _MSC_VER_RAW
   rawAvg=b;
   rawAvgWidth=width;
   rawAvgCutoff=cutoff;
@@ -1613,13 +1613,13 @@ void MSReader::setAverageRaw(bool b, int width, long cutoff){
 }
 
 void MSReader::setLabel(bool b){
-  #ifdef _MSC_VER
+  #ifdef _MSC_VER_RAW
   rawLabel=b;
   #endif
 }
 
 void MSReader::setRawFilter(char *c){
-  #ifdef _MSC_VER
+  #ifdef _MSC_VER_RAW
   strcpy(rawUserFilter,c);
   #endif
 }
@@ -1965,7 +1965,7 @@ MSFileFormat MSReader::checkFileFormat(const char *fn){
 
   //RAW could mean anything, Thermo should know better
   if(strcmp(fn+(i-4),".raw")==0 || strcmp(fn+(i-4),".RAW")==0 ) {
-    #ifdef _MSC_VER
+    #ifdef _MSC_VER_RAW
     if(bRaw) {
       return raw;
     } else {
@@ -2015,7 +2015,7 @@ MSFileFormat MSReader::checkFileFormat(const char *fn){
 
 }
 
-#ifdef _MSC_VER
+#ifdef _MSC_VER_RAW
 bool MSReader::readRawFile(const char *c, Spectrum &s, int scNum){
   HRESULT lRet;
   TCHAR pth[MAX_PATH];

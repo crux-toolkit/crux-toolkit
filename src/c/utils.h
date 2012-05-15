@@ -45,7 +45,7 @@ extern int verbosity;
 #define INCLUDE_GETLINE
 #endif
 #endif
-#ifdef WIN32
+#ifdef _MSC_VER
 #define INCLUDE_GETLINE
 #endif
 
