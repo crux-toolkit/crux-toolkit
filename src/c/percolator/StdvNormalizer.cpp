@@ -8,7 +8,7 @@
  *******************************************************************************/
 #include <vector>
 #include <iostream>
-#ifdef WIN32
+#ifdef _MSC_VER
 #include <float.h>
 #define isfinite _finite
 #endif

@@ -6,13 +6,13 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <ctype.h>
-#ifndef WIN32
+#ifndef _MSC_VER
 #include <dirent.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #endif
 #include <time.h>
-#ifdef WIN32
+#ifdef _MSC_VER
 #include "windirent.h"
 #endif
 #include "utils.h"

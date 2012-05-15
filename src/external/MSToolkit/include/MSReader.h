@@ -13,7 +13,7 @@
 //#include "mzXMLWriter.h"
 //#include "MSToolkitInterface.h"
 
-#ifdef _MSC_VER
+#ifdef _MSC_VER_RAW
 //#include <atlstr.h>
 #import "XRawfile2.dll"
 
@@ -157,7 +157,7 @@ class MSReader {
   void writeSpecHeader(FILE* fileOut, bool text, Spectrum& s);
   
   //support for rawfiles
-  #ifdef _MSC_VER
+  #ifdef _MSC_VER_RAW
   bool bRaw;
   long rawTotSpec;
   long rawCurSpec;

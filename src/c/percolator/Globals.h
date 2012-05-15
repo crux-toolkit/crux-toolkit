@@ -29,7 +29,7 @@
 #ifndef GLOBALS_H_
 #define GLOBALS_H_
 
-#ifdef WIN32
+#ifdef _MSC_VER
   #define C_DARRAY(name,nelem) double *name = (double *) _malloca((nelem) * sizeof(double));
   #define D_DARRAY(name) _freea(name);
 #else

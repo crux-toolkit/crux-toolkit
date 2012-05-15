@@ -11,13 +11,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#ifndef WIN32
+#ifndef _MSC_VER
 #include <dirent.h>
 #include <unistd.h>
 #endif
 #include <ctype.h>
 #include <sys/stat.h>
-#ifdef WIN32
+#ifdef _MSC_VER
 #include "windirent.h"
 #endif
 #include "objects.h"
@@ -40,7 +40,7 @@ static const int MAX_XCORR_OFFSET = 75;
 // These values should be good for double precision floating point
 // numbers compatible with the IEEE 754 standard.
 
-#ifndef WIN32
+#ifndef _MSC_VER
 /**
 * Constant for EVD p_value calculation
 */

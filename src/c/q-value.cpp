@@ -300,7 +300,7 @@ FLOAT_T* compute_PEP_from_pvalues(FLOAT_T* pvalues, int num_pvals){
   // put them in a score_label vector
   vector<pair<double, bool> > score_label;
 
-#ifdef WIN32
+#ifdef _MSC_VER
   // There is a bug in Microsoft's implementation of
   // make_pair<> that keeps this code from working.
   // They promise to fix it in VC 11

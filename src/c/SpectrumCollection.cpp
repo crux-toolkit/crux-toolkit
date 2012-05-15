@@ -8,7 +8,7 @@
 #include "ProteinIndex.h" 
 #include "Peak.h"
 #include "utils.h"
-#ifndef WIN32
+#ifndef _MSC_VER
 #include "unistd.h"
 #endif
 #include "parameter.h"

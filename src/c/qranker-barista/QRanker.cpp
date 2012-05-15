@@ -12,7 +12,10 @@ QRanker::QRanker() :
   skip_cleanup_flag(0),
   overwrite_flag(0),
   fileroot(""),
-  feature_file_flag(0)
+  feature_file_flag(0),
+  max_net_gen(NULL),
+  max_net_targ(NULL),
+  nets(NULL)
 {
 }
 
