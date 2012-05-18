@@ -14,7 +14,7 @@
 #include "mass.h"
 #include "utils.h"
 #include <sys/types.h>
-#ifndef WIN32
+#ifndef _MSC_VER
 #include <netinet/in.h>
 #include <inttypes.h>
 #endif

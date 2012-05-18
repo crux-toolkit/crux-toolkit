@@ -1542,7 +1542,7 @@ static void set_mz_bin_width()
 {
   double new_value = get_double_parameter("mz-bin-width");
 
-#ifdef WIN32
+#ifdef _MSC_VER
   // Peculiarities of Windows floating point handling 
   // results in us getting 0.0 here rather than Nan
   // FIXME: is there a more portable way of checking
