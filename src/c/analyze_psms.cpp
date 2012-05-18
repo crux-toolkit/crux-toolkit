@@ -4,7 +4,7 @@
 
 #include <vector>
 #include <functional>
-#ifdef WIN32
+#ifdef _MSC_VER
 #include <iterator>
 #endif
 #include "analyze_psms.h"
@@ -122,7 +122,7 @@ void analyze_matches_main(
   delete application;
 }
 
-#ifdef WIN32
+#ifdef _MSC_VER
 // The Microsoft 10.0 C++ compiler has trouble resolving the proper virtual
 // function call when the STL make_pair is combined with the STL ptr_fun.
 // They promise to fix this in v11, but until then we create our own wrapper
@@ -150,7 +150,7 @@ double* compute_PEP(double* target_scores, ///< scores for target matches
 
   // put all of the scores in a single vector of pairs: score, is_target
   vector<pair<double, bool> > score_labels;
-#ifdef WIN32
+#ifdef _MSC_VER
   // There is a bug in Microsoft's implementation of
   // make_pair<> that keeps this code from working.
   // They promise to fix it in VC 11

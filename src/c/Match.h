@@ -17,7 +17,7 @@
 #include <map>
 #include <ctype.h>
 #include <float.h>
-#ifndef WIN32
+#ifndef _MSC_VER
 #include <unistd.h>
 #endif
 #include "carp.h"

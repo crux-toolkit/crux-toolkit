@@ -36,7 +36,7 @@
 
 using namespace std;
 
-#ifdef WIN32
+#ifdef _MSC_VER
 #define random rand
 #endif
 

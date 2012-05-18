@@ -12,7 +12,7 @@
 #include <sstream>
 #include <math.h>
 #include <algorithm>
-#ifdef WIN32
+#ifdef _MSC_VER
 #include <float.h>
 #define isfinite _finite
 #endif

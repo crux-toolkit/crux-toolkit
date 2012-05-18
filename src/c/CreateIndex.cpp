@@ -79,7 +79,7 @@ int CreateIndex::main(int argc, char** argv) {
   carp(CARP_DETAILED_DEBUG, "Starting create_index");
 
   /* connect various signals to our clean-up function */
-#ifndef WIN32
+#ifndef _MSC_VER
   signal( SIGTERM, clean_up );
   signal( SIGINT, clean_up );
   signal( SIGQUIT, clean_up );

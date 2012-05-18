@@ -6,7 +6,7 @@
 #include <fstream>
 #include <errno.h>
 #include <sys/stat.h>
-#ifndef WIN32
+#ifndef _MSC_VER
 #include <unistd.h>
 #endif
 #include "crux-utils.h"
