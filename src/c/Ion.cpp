@@ -47,14 +47,14 @@ void Ion::initializeModificationMasses(
 {
   // set modification mass
   if(mass_type == MONO){
-    modification_masses[NH3] = MASS_NH3_MONO;
-    modification_masses[H2O] = MASS_H2O_MONO ;
+    modification_masses[NH3] = -MASS_NH3_MONO;
+    modification_masses[H2O] = -MASS_H2O_MONO ;
     modification_masses[ISOTOPE] = 1; // FIXME check this!!!
     modification_masses[FLANK] = 1; // FIXME check this!!!
   }
   else if(mass_type == AVERAGE){
-    modification_masses[NH3] = MASS_NH3_AVERAGE;
-    modification_masses[H2O] = MASS_H2O_AVERAGE;
+    modification_masses[NH3] = -MASS_NH3_AVERAGE;
+    modification_masses[H2O] = -MASS_H2O_AVERAGE;
     modification_masses[ISOTOPE] = 1; // FIXME check this!!!
     modification_masses[FLANK] = 1; // FIXME check this!!!
   }
