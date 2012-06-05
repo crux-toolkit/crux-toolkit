@@ -258,7 +258,7 @@ info, 60-detailed debug info. Default = 30.</li>
 <ul>
 
 <LI>
-<code>--min-peaks &lt;int&gt;</code> &ndash;
+<code>min-peaks &lt;int&gt;</code> &ndash;
 The minimum number of peaks a spectrum must have in order to be
 searched.  Default = 20.
 
@@ -274,6 +274,7 @@ search-for-matches</code>, default = F; for <code>crux
   sequest-search</code>, default = T; for <code> crux
 search-for-xlinks</code>, default = T.</li>
 
+<li>
 <code>precursor-window &lt;float&gt;</code> &ndash; Tolerance used for
 matching peptides to spectra.  Peptides must be within +/-
 '<code>precursor-window</code>' of the spectrum value.  Definition of
@@ -448,7 +449,7 @@ D). Default = trypsin.
 
 <li>
 <code>custom-enzyme &lt;residues before cleavage | residues after cleavage
-&gt;</code> &ndash
+&gt;</code> &ndash;
 Specify rules for <i>in silico</i> digestion of protein sequences.
 Overrides the <code>enzyme</code> option.  Two lists of residues are
 given enclosed in square brackets or curly braces and separated by a
