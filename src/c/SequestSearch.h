@@ -87,7 +87,13 @@ class SequestSearch: public CruxApplication {
    */
   virtual bool needsOutputDirectory();
 
+ /**
+  *hide SequestSearch 
+  */
+  virtual bool hidden(); 
+
 };
+
 
 #endif
 
