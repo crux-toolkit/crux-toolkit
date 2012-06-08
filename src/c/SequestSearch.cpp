@@ -382,6 +382,14 @@ bool SequestSearch::needsOutputDirectory() {
   return true;
 }
 
+/**
+ * hide sequest search 
+*/
+
+bool SequestSearch:: hidden(){
+  return true; 
+}
+
 /*
  * Local Variables:
  * mode: c
