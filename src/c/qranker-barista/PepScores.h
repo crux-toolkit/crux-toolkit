@@ -12,6 +12,7 @@ public:
   int pepind;
   double q;
   int label;
+  double nsaf;
  PepScoreHolder():score(0.0),pepind(0),q(0.0),label(0){;}
   virtual ~PepScoreHolder() {;}
 };

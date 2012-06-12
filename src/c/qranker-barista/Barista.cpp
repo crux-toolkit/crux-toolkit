@@ -887,6 +887,7 @@ void Barista :: write_results_peptides_xml(ofstream &os)
 	  os << " <peptide peptide_id=\"" << seq << "\">" << endl;
 	  os << "  <q_value>" << peptrainset[i].q << "</q_value>" << endl;
 	  os << "  <score>" << peptrainset[i].score << "</score>" << endl;
+	  os << "  <nsaf>" << peptrainset[i].nsaf << "</nsaf>" << endl;
 	  //write out peptides
 	  int psmind = pepind_to_max_psmind[pepind];
 	  if(psmind > -1)
@@ -1408,7 +1409,7 @@ void Barista :: write_results_subset_prot_tab(ofstream &os)
 
 void Barista :: write_results_peptides_tab(ofstream &os)
 {
-  os << "peptide" << "\t" << "q-value" << "\t" << "barista score" << "\t";
+  os << "peptide" << "\t" << "q-value" << "\t" << "barista score" << "\t" << "NSAF score" << "\t";
   os << "scan" << "\t" << "charge" << endl;
   int cn = 0;
   for(int i = 0; i < peptrainset.size(); i++)
@@ -1424,6 +1425,7 @@ void Barista :: write_results_peptides_tab(ofstream &os)
 	  os << pep << "\t";
 	  os << peptrainset[i].q << "\t";
 	  os << peptrainset[i].score << "\t";
+	  os << peptrainset[i].nsaf << "\t";
 	  //write out peptides
 	  int psmind = pepind_to_max_psmind[pepind];
 	  if(psmind > -1)
@@ -1594,6 +1596,7 @@ void Barista :: setup_for_reporting_results()
   d.load_data_all_results();
     
   computeNSAF();
+  computePepNSAF();
   computePEP();
   
 }
@@ -1676,6 +1679,72 @@ int Barista :: computeNSAF()
   cout << check << endl;
   */
 
+  psmind_to_ind.clear();
+  return 1;
+}
+
+int Barista :: computePepNSAF()
+{
+
+  //create auxiliary psmind_to_ind index
+  vector<int>psmind_to_ind;
+  psmind_to_ind.resize(psmtrainset.size(),0);
+  for(int i = 0; i < psmtrainset.size(); i++)
+    psmind_to_ind[psmtrainset[i].psmind] = i;
+
+  //compute NSAF for each peptide
+  double sum = 0.0;
+  for(int k = 0; k < peptrainset.size(); k++)
+    {
+      if(peptrainset[k].label == 1)
+	{
+	  int pepind = peptrainset[k].pepind;
+	  string pep = d.ind2pep(pepind);
+	  string seq, n,c;
+	  get_pep_seq(pep,seq,n,c);
+	  int len = seq.size();
+	  
+	  int cnt = 0;
+	  int num_psms = d.pepind2num_psm(pepind);
+	  int *psminds = d.pepind2psminds(pepind);
+	  for (int j = 0; j < num_psms; j++)
+	    {
+	      int psmind = psminds[j];
+	      int ind  = psmind_to_ind[psmind];
+	      assert(psmtrainset[ind].psmind == psmind);
+	      if(psmtrainset[ind].q <= 0.01)
+		cnt++;
+	    }
+	
+	  //compute NSAF for this protein
+	  double nsaf = 0.0;
+	  if(len != 0)
+	    nsaf = (double)cnt/(double)len;
+	  peptrainset[k].nsaf = nsaf;
+	  sum += nsaf;
+ 	}
+    }
+  
+  if(sum > 0)
+    {
+      for(int i = 0; i < peptrainset.size(); i++)
+	{
+	  if(peptrainset[i]. label == 1)
+	    peptrainset[i].nsaf /= sum;
+	}
+    }
+  else
+    return 0;
+
+  /*
+  double check = 0.0;
+  for(int i = 0; i < peptrainset.size(); i++)
+    {
+      if(peptrainset[i]. label == 1)
+	check += peptrainset[i].nsaf;
+    }
+  cout << check << endl;
+  */
   psmind_to_ind.clear();
   return 1;
 }
