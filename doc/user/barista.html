@@ -20,10 +20,9 @@ requires three inputs: a set of MS2 spectra, a protein database, and
 the results of searching the spectra against the database.  Barista
 produces as output three ranked lists of proteins, peptides and PSMs,
 based on how likely the proteins and peptides are to be present in the
-sample and how likely the PSMs are to be correct.  Note that Barista
-can jointly analyze the results of multiple shotgun proteomics
-experiments, corresponding to different experiments or replicate
-runs.</p>
+sample and how likely the PSMs are to be correct.  Barista can jointly
+analyze the results of multiple shotgun proteomics experiments,
+corresponding to different experiments or replicate runs.</p>
 
 <p>
 Barista uses a machine learning strategy that requires that the
@@ -78,8 +77,8 @@ multiple FASTA files (identified via the filename suffixes ".fa",
 in <a href="ms2-format.html">MS2 format</a>.  Like the database, the
 spectra can be specified in three different ways: (1) as a single file
 with suffix ".ms2", (2) as a text file containing a list of MS2 files
-or (3) as a directory in which all the MS2 files can be found.</li>
-
+or (3) as a directory in which all the MS2 files can be found
+(identified via the filename suffix ".ms2").</li>
 
 <li>
 <b>search results</b> &ndash; Barista recognizes search results
@@ -94,7 +93,6 @@ files matches the order of the SQT files.  Alternatively, when the MS2
 files and SQT files are provided via directories, Barista will search
 for pairs of files with the same root name but different extensions
 (".ms2" and ".sqt").</li>
-
 
 </ul>
 
@@ -147,7 +145,8 @@ of proteins:</li>
 
 <li>
 
-<b>barista_output.xml</b>: an xml file is subdivided into four main parts:
+<b>barista_output.xml</b>: an XML file that is subdivided into four
+main parts:
 <dl>
   <dd> &lt proteins &gt ... &lt /proteins &gt </dd>
   <dd> &lt subset_proteins &gt ... &lt /subset_proteins &gt </dd>
@@ -156,22 +155,29 @@ of proteins:</li>
 </dl>
 
 <ol>
-<li> Proteins contains the ranked list of groups of indistinguishable target proteins. 
-Each protein entry includes the following fields
+<li>
+Proteins contains the ranked list of groups of indistinguishable
+target proteins.  Each protein entry includes the following fields:
 <ol>
-<li>protein group: a number that identifies a group. </li>
-<li>q-value: The minimal protein-level false discovery rate at which this
-  protein is deemed significant.  This q-value is computed based on the
-  ranking of the proteins induced by the Barista score.</li>
-<li>score: The score assigned to the proteins by Barista.  Higher
-  values correspond to more confident identifications.</code>
-<li>protein_ids: proteins in the protein group. </li>
-<li> alternative_peptide_id: peptides are considered indistinguishable
-if they have identical amino acid sequences or they differ only by I/L
-or T/S in the same position in the peptide. If the peptides shared by the
+<li>
+protein group: a number that identifies a group. </li>
+<li>
+q-value: The minimal protein-level false discovery rate at which this
+protein is deemed significant.  This q-value is computed based on the
+ranking of the proteins induced by the Barista score.</li>
+<li>
+score: The score assigned to the proteins by Barista.  Higher values
+correspond to more confident identifications.</code>
+<li>
+protein_ids: proteins in the protein group. </li>
+<li>
+alternative_peptide_id: peptides are considered indistinguishable if
+they have identical amino acid sequences or they differ only by I/L or
+T/S in the same position in the peptide. If the peptides shared by the
 group are not identical, they are listed immediately after the
 proteins they belong to. </li>
-<li>peptide_ids: peptides that belong to each of the proteins in the
+<li>
+peptide_ids: peptides that belong to each of the proteins in the
 group.</li>
 </ol>
 
@@ -231,7 +237,9 @@ constitute a subset of some group in the proteins section in
 terms of the peptides identified in these proteins. Each entry includes
 <ol>
 <li>
-group id and parent group id: the identifier of the group and the identifier of the protein group which has the superset of the peptide set belonging the current group 
+group id and parent group id: the identifier of the group and the
+identifier of the protein group which has the superset of the peptide
+set belonging the current group
 </li>
 <li>
 protein_ids : proteins that belong to the group
@@ -243,39 +251,54 @@ peptide_ids: peptides that belong to the proteins in the group.
 </li>
 
 <li>
-  Peptides contains a ranked list of target peptides. Each peptide entry includes:  
+Peptides contains a ranked list of target peptides. Each peptide entry
+includes:
 <ol>
-<li> peptide: Peptide amino acid sequence.
-<li>q-value: The minimal peptide-level false discovery rate at which this
-  peptide is deemed significant.  This q-value is computed based on the
-  ranking of the peptides induced by the Barista score.</li>
-<li>score: The score assigned to the peptide by Barista.  Higher
-  values correspond to more confident identifications.</li>
-<li>main_psm_id: The PSM identifier based on which the peptide
-received its score. A peptide score is the maximum over all the PSMs
-that contain this peptide. </li>
-<li>psm_ids: The identifiers of all the PMS that contain this peptide .</li>
-<li> protein_ids: All the proteins that contain this peptide and were
+<li>
+peptide: Peptide amino acid sequence.
+<li>
+q-value: The minimal peptide-level false discovery rate at which this
+peptide is deemed significant.  This q-value is computed based on the
+ranking of the peptides induced by the Barista score.</li>
+<li>
+score: The score assigned to the peptide by Barista.  Higher values
+correspond to more confident identifications.</li>
+<li>
+main_psm_id: The PSM identifier based on which the peptide received
+its score. A peptide score is the maximum over all the PSMs that
+contain this peptide. </li>
+<li>
+psm_ids: The identifiers of all the PMS that contain this peptide .</li>
+<li>
+protein_ids: All the proteins that contain this peptide and were
 infered based on some PSMs from the database search. </li>
 </ol>
 
 </li>
 
 <li>
- PSMs contains ranked list of target peptide-spectrum matches. The
- following columns are included:
+PSMs contains ranked list of target peptide-spectrum matches. The
+following columns are included:
 <ol>
-<li> psm_id: PSM identifier. </li>
-<li>q-value: The minimal PSM-level false discovery rate at which this
-  PSM is deemed significant.  This q-value is computed based on the
-  ranking of the PSMs induced by the Barista score.</li>
-<li>score: The score assigned to the PSM by Barista.  Higher
-  values correspond to more confident identifications.</code>
-<li>scan: the scan number</li>
-<li>charge: the inferred charge state</li>
-<li> precursor_mass: precrusor mass as recorded during the MS1 scan </li>
-<li>peptide: the peptide sequence</li>
-<li>filename: name of the file in which the PSM appears</li>
+<li>
+psm_id: PSM identifier. </li>
+<li>
+q-value: The minimal PSM-level false discovery rate at which this PSM
+is deemed significant.  This q-value is computed based on the ranking
+of the PSMs induced by the Barista score.</li>
+<li>
+score: The score assigned to the PSM by Barista.  Higher values
+correspond to more confident identifications.</code>
+<li>
+scan: the scan number</li>
+<li>
+charge: the inferred charge state</li>
+<li>
+precursor_mass: precrusor mass as recorded during the MS1 scan </li>
+<li>
+peptide: the peptide sequence</li>
+<li>
+filename: name of the file in which the PSM appears</li>
 </ol>
 
 </ol>
@@ -287,20 +310,27 @@ infered based on some PSMs from the database search. </li>
 ranked list of groups of indistinguishable target proteins with
 associated Barista scores and q-values and with peptides that
 contributed to the identification of the protein group).  The
-following columns are included:  
+following columns are included:
 <ol>
-<li>protein group number: a number that identifies a group. </li>
-<li>q-value: The minimal protein-level false discovery rate at which this
-  protein is deemed significant.  This q-value is computed based on the
-  ranking of the proteins induced by the Barista score.</li>
-<li>barista score: The score assigned to the proteins by Barista.  Higher
-  values correspond to more confident identifications.</code>
-<li>proteins: proteins in the protein group. Each protein can be followed by peptides in parenthesis, if they belong only to this particular protein in the group. Since peptides are considered indistinguishable
+<li>
+protein group number: a number that identifies a group. </li>
+<li>
+q-value: The minimal protein-level false discovery rate at which this
+protein is deemed significant.  This q-value is computed based on the
+ranking of the proteins induced by the Barista score.</li>
+<li>
+barista score: The score assigned to the proteins by Barista.  Higher
+values correspond to more confident identifications.</code>
+<li>
+proteins: proteins in the protein group. Each protein can be followed
+by peptides in parenthesis, if they belong only to this particular
+protein in the group. Since peptides are considered indistinguishable
 if they have identical amino acid sequences or they differ only by I/L
 or T/S in the same position in the peptide, the peptides shared by the
 group may not all be identical identical.</li>
-<li>peptides-scan.charge: peptides belonging to each protein in the
-group, with scan and charge (for example, EAMPK-001285.2).</li>
+<li>
+peptides-scan.charge: peptides belonging to each protein in the group,
+with scan and charge (for example, EAMPK-001285.2).</li>
 </ol>
 </li>
 
@@ -311,16 +341,22 @@ subset of some group in the barista.target.proteins.txt file in terms
 of the peptides identified in these proteins. The following columns
 are included:
 <ol>
-<li>protein group number: a number that identifies a group. </li>
-<li>parent group numbers: group numbers of the protein groups in the
+<li>
+protein group number: a number that identifies a group. </li>
+<li>
+parent group numbers: group numbers of the protein groups in the
 barista.target.proteins.txt that are supersets of this group in terms
 of peptides. </li>
-<li>proteins: proteins in the protein group. Each protein can be followed by peptides in parenthesis, if they belong only to this particular protein in the group. Since peptides are considered indistinguishable
+<li>
+proteins: proteins in the protein group. Each protein can be followed
+by peptides in parenthesis, if they belong only to this particular
+protein in the group. Since peptides are considered indistinguishable
 if they have identical amino acid sequences or they differ only by I/L
 or T/S in the same position in the peptide, the peptides shared by the
 group may not all be identical identical.</li>
-<li>peptides-scan.charge: peptides belonging to each protein in the
-group, with scan and charge (for example, EAMPK-001285.2).</li>
+<li>
+peptides-scan.charge: peptides belonging to each protein in the group,
+with scan and charge (for example, EAMPK-001285.2).</li>
 </ol>
 </li>
 
@@ -329,17 +365,20 @@ group, with scan and charge (for example, EAMPK-001285.2).</li>
 ranked list of target peptides with the associated Barista scores and
 q-values.  The following columns are included:  
 <ol>
-<li> peptide: Peptide amino acid sequence.
-<li>q-value: The minimal peptide-level false discovery rate at which this
-  peptide is deemed significant.  This q-value is computed based on the
-  ranking of the peptides induced by the Barista score.</li>
-<li>barista score: The score assigned to the peptide by Barista.  Higher
-  values correspond to more confident identifications.</code>
-<li>scan: scan of spectrum in the peptide-spectrum match.</li>
-<li>charge: charge of spectrum in the peptide-spectrum match.</li>
+<li>
+peptide: Peptide amino acid sequence.
+<li>
+q-value: The minimal peptide-level false discovery rate at which this
+peptide is deemed significant.  This q-value is computed based on the
+ranking of the peptides induced by the Barista score.</li>
+<li>
+barista score: The score assigned to the peptide by Barista.  Higher
+values correspond to more confident identifications.</code>
+<li>
+scan: scan of spectrum in the peptide-spectrum match.</li>
+<li>
+charge: charge of spectrum in the peptide-spectrum match.</li>
 </ol>
-
-
 </li>
 
 <li>
@@ -347,15 +386,21 @@ q-values.  The following columns are included:
 ranked list of target peptide-spectrum matches with the associated
 Barista scores and q-values.  The following columns are included:
 <ol>
-<li>scan: the scan number</li>
-<li>charge: the inferred charge state</li>
-<li>q-value: The minimal PSM-level false discovery rate at which this
-  PSM is deemed significant.  This q-value is computed based on the
-  ranking of the PSMs induced by the Barista score.</li>
-<li>barista score: The score assigned to the PSM by Barista.  Higher
-  values correspond to more confident identifications.</code>
-<li>peptide: the peptide sequence</li>
-<li>filename: name of the file in which the PSM appears</li>
+<li>
+scan: the scan number</li>
+<li>
+charge: the inferred charge state</li>
+<li>
+q-value: The minimal PSM-level false discovery rate at which this PSM
+is deemed significant.  This q-value is computed based on the ranking
+of the PSMs induced by the Barista score.</li>
+<li>
+barista score: The score assigned to the PSM by Barista.  Higher
+values correspond to more confident identifications.</code>
+<li>
+peptide: the peptide sequence</li>
+<li>
+filename: name of the file in which the PSM appears</li>
 </ol>
 </li>
 
@@ -368,12 +413,7 @@ Barista scores and q-values.  The following columns are included:
 given to the current run.
 </li>
 
-
 </ul>
-
-
-
-
 
 <b>Options:</b>
 
@@ -473,9 +513,9 @@ info, 60-detailed debug info. Default = 30.</li>
 <b> Search was done against concatenated target-decoy database. </b>
 
 <ol>
-  <li> To analyse single files, with decoy prefix random_ (the
-  default for the decoy prefix is set to decoy_). The output is in
-  the directory crux-output by default:
+  <li> To analyse single files, with decoy prefix random_ (the default
+  for the decoy prefix is set to decoy_). The output is in the
+  directory crux-output by default:
     <br> <br>
     <code> crux barista --decoy-prefix random_ concatenated-database.fasta spectra.ms2 matches.sqt </code>
     <br><br>
@@ -491,22 +531,24 @@ info, 60-detailed debug info. Default = 30.</li>
     <br><br>
   </li>
 
-  <li> Assume that the search in 2. was against 10 different target-decoy databases, all located in the directory database-dir: 
+  <li> Assume that the search in 2. was against 10 different
+  target-decoy databases, all located in the directory database-dir:
     <br> <br>
     <code> crux barista --decoy-prefix reverse_ --overwrite T database-dir spectra-dir matches-dir </code>
     <br><br>
   </li>
   
   <li>
-    If the databases are listed in the file database-list.txt, and the output directory should be results-dir:
+    If the databases are listed in the file database-list.txt, and the
+    output directory should be results-dir:
     <br> <br>
     <code> crux barista --decoy-prefix reverse_ --output-dir results-dir database-list.txt spectra-dir matches-dir </code>
     <br><br>
   </li>
 
   <li> Barista uses reach feature set by default. When analyzing
-  larger datasets, it may be desirable to speed up feature
-  extraction step and to revert to minimal feature set:
+  larger datasets, it may be desirable to speed up feature extraction
+  step and to revert to minimal feature set:
     <br> <br>
     <code> crux barista --decoy-prefix reverse_ --output-dir results --overwrite T --use-spec-features F database-dir spectra-list.txt matches-list.txt </code>
     <br><br>
@@ -521,22 +563,29 @@ Both target and decoy databases should be provided to Barista for
 analysis. Therefore, the database input can be specified as a list of
 database files (database-list.txt, for example) or as a directory containing the
 databases (database-dir, for example). 
-<br> The searches against the target database are provided as the required &lt search results &gt argument. To specify the searches against the decoy database, use --separate-searches option.
+<br> The searches against the target database are provided as the
+required &lt search results &gt argument. To specify the searches
+against the decoy database, use --separate-searches option.
 
 <ol>
-<li> To analyse a single ms2 file and sqt files matches-target.sqt and matches-decoy.sqt:
+<li> To analyse a single ms2 file and sqt files matches-target.sqt and
+matches-decoy.sqt:
     <br> <br>
     <code> crux barista --decoy-prefix random_ --use-separate-searches matches-decoy.sqt database-dir spectra.ms2 matches-target.sqt </code>
     <br><br>
 </li>
 
-<li> If ms2 files are in spectra-dir directory, sqt files are in matches-target-dir and matches-decoy-dir, and databases are specified in database-list.txt:
+<li> If ms2 files are in spectra-dir directory, sqt files are in
+matches-target-dir and matches-decoy-dir, and databases are specified
+in database-list.txt:
     <br> <br>
     <code> crux barista --decoy-prefix random_ --use-separate-searches matches-decoy-dir database-list.txt spectra-dir matches-target-dir </code>
     <br><br>
 </li>
 
-<li> If ms2 files are listed in spectra-list.txt, sqt files are listed in matches-target-list.txt and matches-decoy-list.txt, and database are located in database-dir:
+<li> If ms2 files are listed in spectra-list.txt, sqt files are listed
+in matches-target-list.txt and matches-decoy-list.txt, and database
+are located in database-dir:
     <br> <br>
     <code> crux barista --decoy-prefix random_ --use-separate-searches matches-decoy-list.txt database-dir spectra-list.txt matches-target-list.txt </code>
     <br><br>
@@ -566,14 +615,14 @@ target database specified for the create-index command.
 
 <li>
 Crux create-index generates decoy sequences either at the protein
-level (see --decoys reverse or --decoys protein-shuffle
-options <a href="crux-create-index.html">create-index</a>) or at the
-peptide level (see --decoys peptide-shuffle). Please use only
-protein-level shuffling options for the Barista analysis (the default
-is --decoys protein-shuffle, which is compatible with Barista). The
-peptide-level shuffling is incompatible with the Barista protein-level
-analysis because it does not allow for a fixed full-length decoy
-protein sequence.
+level (see the <code>--decoys reverse</code> or <code>--decoys
+protein-shuffle</code> options
+for <a href="crux-create-index.html">create-index</a>) or at the
+peptide level (using <code>--decoys peptide-shuffle</code>). Please
+use the default protein-level shuffling option for Barista
+analysis. The peptide-level shuffling is incompatible with the Barista
+protein-level analysis because it does not allow for a fixed
+full-length decoy protein sequence.
 </li>
 
 </ol>
