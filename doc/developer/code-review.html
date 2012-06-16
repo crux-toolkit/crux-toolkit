@@ -22,18 +22,33 @@
 </p>
 
 <h2>Who reviews and when</h2>
-<p>Any member of the crux development team may review another
-  developer's code.  The developer should choose a reviewer who can
-  offer good suggestions, but the reviewer need not be a more
-  experienced programmer.  The reviewer may decline the request, but
-  once the review has been agreed on for a specific set of changes,
-  the developer cannot switch reviewers.
+
+<p>
+Any member of the crux development team may review another developer's
+code.  The developer should choose a reviewer who can offer good
+suggestions, but the reviewer need not be a more experienced
+programmer.  The reviewer may decline the request, but once the review
+has been agreed on for a specific set of changes, the developer cannot
+switch reviewers.
 </p>
 
 <p>Review early and often.  Often can mean around 100 lines of new
   code.  Any changes that are ready to be submitted, even tiny ones,
   are candidates for review.
 </p>
+
+<h2>Documentation review</h2>
+
+<p>
+Ultimately, to be useful, Crux code must be documented in a way that
+makes the toolkit understandable to a novice user.  Every update to
+the code should therefore be accompanied by updates to the
+documentation (including updating the release notes), and those
+updates should also be subject to review.  Documentation review may be
+carried out prior to or in parallel with the code review.  Please note
+that, once the code and documentation review is complete and checked
+into the trunk, you should send a diff file that contains just the
+documentation changes to Bill for final review.</p>
 
 <h2>The role of the reviewer</h2>
 <p>Offering a good review is a skill akin to writing good comments.
@@ -119,14 +134,12 @@
 </ul>
  
 <h3>Updating the coding standard</h3>
-<p>Crux as it is implemented in C has a fairly complete coding
-  standard.  As we transition to C++, we will need to update the
-  standard.  This can be an on-going and collaborative process.  If
-  the programmer and reviewer find a style issue not covered in the
-  standard, they can propose one by sending an email to
-  crux-developers@u.wash... with the proposed change.  After any
-  ensuing discussion, the agreed upon change can be added to the
-  coding standard file in
+<p>Crux has a fairly complete coding standard; however, the standard
+  itself can be updated as necessary.  If the programmer and reviewer
+  find a style issue not covered in the standard, they can propose one
+  by sending an email to crux-developers@uw.edu with the proposed
+  change.  After any ensuing discussion, the agreed upon change can be
+  added to the coding standard file in
   <a href="crux-coding-standards.html">
   crux/doc/developer/crux-coding-standards.html</a>.
 
