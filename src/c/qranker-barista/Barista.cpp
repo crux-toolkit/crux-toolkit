@@ -1,28 +1,24 @@
 #include "Barista.h"
-
-double Barista :: check_gradients_hinge_one_net(int protind, int label)
-{
+using namespace std; 
+double Barista :: check_gradients_hinge_one_net(int protind, int label){
   int num_pep = d.protind2num_pep(protind);
   int *pepinds = d.protind2pepinds(protind);
   max_psm_inds.erase(max_psm_inds.begin(),max_psm_inds.end());
   max_psm_scores.erase(max_psm_scores.begin(),max_psm_scores.end());
-  for (int i = 0; i < num_pep; i++)
-    {
-      int pepind = pepinds[i];
-      int num_psms = d.pepind2num_psm(pepind);
-      int *psminds = d.pepind2psminds(pepind);
-      double max_sc = -1000000.0;
-      int max_ind = 0;
-      for (int j = 0; j < num_psms; j++)
-	{
-	  double *feat = d.psmind2features(psminds[j]);
-	  double *sc = net.fprop(feat);
-	  if(sc[0] > max_sc)
-	    {
-	      max_sc = sc[0];
-	      max_ind = j;
-	    }
-	}
+  for (int i = 0; i < num_pep; i++){
+    int pepind = pepinds[i];
+    int num_psms = d.pepind2num_psm(pepind);
+    int *psminds = d.pepind2psminds(pepind);
+    double max_sc = -1000000.0;
+    int max_ind = 0;
+    for (int j = 0; j < num_psms; j++){
+      double *feat = d.psmind2features(psminds[j]);
+      double *sc = net.fprop(feat);
+      if(sc[0] > max_sc){
+        max_sc = sc[0];
+	max_ind = j;
+      }
+    }
       max_psm_inds.push_back(max_ind);
       max_psm_scores.push_back(max_sc);
     }
@@ -33,7 +29,6 @@ double Barista :: check_gradients_hinge_one_net(int protind, int label)
   double n = pow(num_pep,alpha);
   for(unsigned int i = 0; i < max_psm_inds.size() ; i++)
     sm+= max_psm_scores[i];
-
   sm /= n;
 
   //if(sm < 1)
@@ -41,39 +36,34 @@ double Barista :: check_gradients_hinge_one_net(int protind, int label)
   net.clear_gradients();
   double *gc = new double[1];
   gc[0] = -label/n;
-  for(int i = 0; i < num_pep; i++)
-    {
-      int pepind = pepinds[i];
-      int *psminds = d.pepind2psminds(pepind);
-      int max_psm_ind = psminds[max_psm_inds[i]];
-      double *feat = d.psmind2features(max_psm_ind);
-      net.fprop(feat);
-      net.bprop(gc);
-    }
+  for(int i = 0; i < num_pep; i++){
+    int pepind = pepinds[i];
+    int *psminds = d.pepind2psminds(pepind);
+    int max_psm_ind = psminds[max_psm_inds[i]];
+    double *feat = d.psmind2features(max_psm_ind);
+    net.fprop(feat);
+    net.bprop(gc);
+  }
 
   double h = 0.000001;
   double diff = -(1-sm*label);
   double err = 0.0;
   double *w = net.get_weights(1);
   double *dw = net.get_dweights(1);
-  for (int k = 0; k < d.get_num_features(); k++)
-    {
+  for (int k = 0; k < d.get_num_features(); k++){
       w[k] += h;
       max_psm_inds.erase(max_psm_inds.begin(),max_psm_inds.end());
       max_psm_scores.erase(max_psm_scores.begin(),max_psm_scores.end());
-      for (int i = 0; i < num_pep; i++)
-	{
+      for (int i = 0; i < num_pep; i++){
 	  int pepind = pepinds[i];
 	  int num_psms = d.pepind2num_psm(pepind);
 	  int *psminds = d.pepind2psminds(pepind);
 	  double max_sc = -1000000.0;
 	  int max_ind = 0;
-	  for (int j = 0; j < num_psms; j++)
-	    {
+	  for (int j = 0; j < num_psms; j++){
 	      double *feat = d.psmind2features(psminds[j]);
 	      double *sc = net.fprop(feat);
-	      if(sc[0] > max_sc)
-		{
+	      if(sc[0] > max_sc){
 		  max_sc = sc[0];
 		  max_ind = j;
 		}
@@ -1450,7 +1440,7 @@ void Barista :: write_results_psm_tab(ofstream &os)
 	{
 	  cn++;
 	  //write out proteins
-	  int psmind = psmtrainset[i].psmind;
+	  int psmind = psmtrainset[i].psmind; 
 	  //os << psmind << "\t";
 	  os << d.psmind2scan(psmind) << "\t";
 	  os << d.psmind2charge(psmind) << "\t";
@@ -2026,74 +2016,6 @@ void Barista :: calc_gradients(int protind, int label)
   delete[] gc;
 }
 
-
-/*
-double Barista :: get_protein_score(int protind)
-{
-  int num_pep = d.protind2num_pep(protind);
-  int num_all_pep = d.protind2num_all_pep(protind);
-  int *pepinds = d.protind2pepinds(protind);
-  max_psm_inds.erase(max_psm_inds.begin(),max_psm_inds.end());
-  max_psm_scores.erase(max_psm_scores.begin(),max_psm_scores.end());
-  int psm_count = 0;
-  for (int i = 0; i < num_pep; i++)
-    //for (int i = 0; i < 1; i++)
-    {
-      int pepind = pepinds[i];
-      int num_psms = d.pepind2num_psm(pepind);
-      int *psminds = d.pepind2psminds(pepind);
-      double max_sc = -1000000.0;
-      int max_ind = 0;
-      for (int j = 0; j < num_psms; j++)
-	//for (int j = 0; j < 1; j++)
-	{
-	  double *feat = d.psmind2features(psminds[j]);
-	  double *sc = net_clones[psm_count].fprop(feat);
-	  if(sc[0] > max_sc)
-	    {
-	      max_sc = sc[0];
-	      max_ind = j;
-	    }
-	  psm_count++;
-	}
-      max_psm_inds.push_back(max_ind);
-      max_psm_scores.push_back(max_sc);
-    }
-  assert((int)max_psm_inds.size() == num_pep);
-  assert((int)max_psm_scores.size() == num_pep);
-  
-  double sm = 0.0;
-  double n = pow(num_all_pep,alpha);
-  for(unsigned int i = 0; i < max_psm_inds.size() ; i++)
-    sm+= max_psm_scores[i];
-  sm /= n;
-  return sm;
-}
-
-void Barista :: calc_gradients(int protind, int label)
-{
-  int num_pep = d.protind2num_pep(protind);
-  int num_all_pep = d.protind2num_all_pep(protind);
-  int *pepinds = d.protind2pepinds(protind);
-  double n = pow(num_all_pep,alpha);
-
-  double *gc = new double[1];
-  gc[0] = -label/n;
-  int psm_count = 0;
-  for(int i = 0; i < num_pep; i++)
-    //  for(int i = 0; i < 1; i++)
-    {
-      int pepind = pepinds[i];
-      int num_psms = d.pepind2num_psm(pepind);
-      int clone_ind = psm_count+max_psm_inds[i];
-      net_clones[clone_ind].bprop(gc);
-      psm_count += num_psms;
-    }
-  delete[] gc;
-}
-*/
-
-
 double Barista :: train_hinge(int protind, int label)
 {
   double sm = get_protein_score(protind);
@@ -2502,6 +2424,7 @@ void Barista :: print_description()
   cout << "\t [--skip-cleanup <T/F>] \n \t     When set to T, prevents the deletion of lookup tables created during the preprocessing step. Default = F." << endl; 
   cout << "\t [--re-run <directory>] \n \t      Re-run Barista analysis using a previously computed set of lookup tables." <<endl;  
   cout << "\t [--use-spec-features <T/F>] \n \t      When set to F, use minimal feature set. Default T." <<endl;  
+  cout<<  "\t [--list-of-files <T/F>] \n \t      When set to T,there is a list of files for search result. Default= F." <<endl;  
   cout << endl; 
 
 }
@@ -2520,6 +2443,7 @@ int Barista :: crux_set_command_line_options(int argc, char *argv[])
     "use-spec-features",
     "parameter-file",
     "verbosity",
+    "list-of-files",
     "feature-file"
   };
   int num_options = sizeof(option_list)/sizeof(char*);
@@ -2531,9 +2455,14 @@ int Barista :: crux_set_command_line_options(int argc, char *argv[])
   };
   int num_arguments = sizeof(argument_list)/sizeof(char*);
 
-  initialize(argument_list, num_arguments, 
-	     option_list, num_options,
-	     argc, argv);
+  initialize(
+    argument_list, 
+    num_arguments, 
+    option_list,
+    num_options,
+    argc,
+    argv
+  );
   
   string db_source;
   string sqt_source;
@@ -2547,7 +2476,7 @@ int Barista :: crux_set_command_line_options(int argc, char *argv[])
 
   string dir_with_tables;
   int found_dir_with_tables;
-
+  bool list_of_files_flag; 
   bool spec_features_flag;
 
   fileroot = get_string_parameter_pointer("fileroot");
@@ -2555,26 +2484,20 @@ int Barista :: crux_set_command_line_options(int argc, char *argv[])
     fileroot.append(".");
   else
     fileroot = "";
-
+ 
+ 
   decoy_prefix = get_string_parameter_pointer("decoy-prefix");
-  sqtp.set_decoy_prefix(decoy_prefix);
 
   overwrite_flag = get_boolean_parameter("overwrite");
 
   enzyme = get_string_parameter_pointer("enzyme");
-  sqtp.set_enzyme(enzyme);
 
   spec_features_flag = get_boolean_parameter("use-spec-features");
-  //num of spec features
-  if(spec_features_flag)
-    sqtp.set_num_spec_features(3);
-  else
-    sqtp.set_num_spec_features(0);
-
+  
   skip_cleanup_flag = get_boolean_parameter("skip-cleanup");
   
   dir_with_tables = get_string_parameter_pointer("re-run"); 
-  if(dir_with_tables != "__NULL_STR")
+    if(dir_with_tables != "__NULL_STR")
     found_dir_with_tables = 1;
   else
     found_dir_with_tables = 0;
@@ -2583,333 +2506,105 @@ int Barista :: crux_set_command_line_options(int argc, char *argv[])
 
   feature_file_flag = get_boolean_parameter("feature-file");
   feature_file_name << output_directory << "/" << fileroot << "barista.features.txt";
-
-  if(found_dir_with_tables)
-    {
+  
+  if(found_dir_with_tables){
+      parser= new SQTParser();
       //set input and output dirs
-      sqtp.set_output_dir(dir_with_tables);
+      parser->set_output_dir(dir_with_tables);
       set_input_dir(dir_with_tables);
       set_output_dir(output_directory);
 
       carp(CARP_INFO, "directory with tables: %s", dir_with_tables.c_str());
       carp(CARP_INFO, "output_directory: %s", output_directory.c_str());
-    }
-  else
-    {
+    }else{
       db_source = get_string_parameter_pointer("database");
       ms2_source = get_string_parameter_pointer("spectra");
       sqt_source = get_string_parameter_pointer("search results");
       sqt_decoy_source = get_string_parameter_pointer("separate-searches"); 
-      if(sqt_decoy_source != "__NULL_STR")
-	separate_search_flag = 1;
-      else
-	separate_search_flag = 0;
+      list_of_files_flag=get_boolean_parameter("list-of-files");
+      vector<string> files; 
+      string files_list; 
+       
+      if(list_of_files_flag==1){
+        ifstream f(sqt_source.c_str());
+        f>>files_list; 
+        while(!f.eof()){
+          files.push_back(files_list);
+          f>> files_list; 
+        } 
+      }else{
+         files.push_back(sqt_source);
+       }
+     
+     for(int i=0; i<files.size();i++){
+        FILE_FORMAT_T format=check_file_format(files[i]);
+        //sqt_source 
+        switch (format) {
+          case SQT_FORMAT:
+            parser = new SQTParser();
+	    break;
+          case DELIMITED_FORMAT:
+	    parser = new CruxParser();
+	    break;
+          case INVALID_FORMAT:
+          default:
+	    carp(CARP_FATAL, "Please enter .sqt or .txt search results"); 
+        } 
+        
+        parser->set_decoy_prefix(decoy_prefix);
+        parser->set_enzyme(enzyme);
       
-      //set the output directory for the parser
-      if(!sqtp.set_output_dir(output_directory))
-	return 0;
-      //set input and output for the leaning algo (in and out are the same as the out for the parser)
-      set_input_dir(output_directory);
-      set_output_dir(output_directory);
-            
-      if(!sqtp.set_database_source(db_source))
-	carp(CARP_FATAL, "could not find the database");
+        //num of spec features
+        if(spec_features_flag)
+          parser->set_num_spec_features(3);
+        else
+          parser->set_num_spec_features(0);
+
+        if(sqt_decoy_source != "__NULL_STR")
+	  separate_search_flag = 1;
+        else
+	  separate_search_flag = 0;
       
-      if(separate_search_flag)
-	{
-	  if(!sqtp.set_input_sources(ms2_source, sqt_source, sqt_decoy_source))
-	    carp(CARP_FATAL, "could not extract features for training");
-	  sqtp.set_num_hits_per_spectrum(1);
-	}
-      else
-	{
-	  if(!sqtp.set_input_sources(ms2_source, sqt_source))
-	    carp(CARP_FATAL, "could not extract features for training");
-	}
-      
-      //print some info
-      carp(CARP_INFO, "database source: %s", db_source.c_str());
-      carp(CARP_INFO, "sqt source: %s", sqt_source.c_str()); 
-      carp(CARP_INFO, "ms2 source: %s", ms2_source.c_str());
-      carp(CARP_INFO, "output_directory: %s", output_directory.c_str());
-      carp(CARP_INFO, "enzyme: %s", enzyme.c_str());
-      carp(CARP_INFO, "decoy prefix: %s", decoy_prefix.c_str());
-      
-      sqtp.set_use_quadratic_features(1);
-      if(!sqtp.run())
-	carp(CARP_FATAL, "Could not proceed with training.");
-      sqtp.clear();
-    }
- 
-   if(!sqtp.check_input_dir(in_dir))
-    carp(CARP_FATAL, "Please re-run with database, ms2 input and sqt input.");
-
-  return 1;
-  
-}
-
-/*
-
-int Barista :: set_command_line_options(int argc, char *argv[])
-{
-  string db_source;
-  string sqt_source;
-  string sqt_decoy_source;
-  int separate_search_flag = 0;
-  string ms2_source;
-  string output_directory = "crux-output";
-  string enzyme = "trypsin";
-  string decoy_prefix = "decoy_";
-  string dir_with_tables = "";
-  int found_dir_with_tables = 0;
-  int spec_features_flag = 1;
-  int arg = 1;
-  
-  while (arg < argc)
-    {
-      string str = argv[arg];
-      //parse the options
-      if(str.find("--") != string::npos)
-	{
-	  //found enzyme
-	  if(str.find("enzyme") != string::npos)
-	    {
-	      arg++;
-	      enzyme = argv[arg];
-	      sqtp.set_enzyme(enzyme);
-	    }
-	  //found decoy prefix
-	  else if(str.find("decoy-prefix") != string::npos)
-	    {
-	      arg++;
-	      decoy_prefix = argv[arg];
-	      sqtp.set_decoy_prefix(decoy_prefix);
-	    }
-	  //found output directory
-	  else if(str.find("output-dir") != string::npos)
-	    {
-	      arg++;
-	      output_directory = argv[arg];
-	      if(output_directory.at(output_directory.size()-1) == '/')
-		output_directory = output_directory.substr(0, output_directory.size()-1);
-	      set_output_dir(output_directory);
-	    }
-	  //found overwrite directory
-	  else if(str.find("overwrite") != string::npos)
-	    {
-	      arg++;
-	      string opt = argv[arg];
-	      if (opt.compare("T") == 0)
-		overwrite_flag = 1;
-	      else
-		overwrite_flag = 0;
-	    }
-	  //found fileroot
-	  else if(str.find("fileroot") != string::npos)
-	    {
-	      arg++;
-	      fileroot = argv[arg];
-	      fileroot.append(".");
-	    }
-	  //no cleanup
-	  else if(str.find("skip-cleanup") != string::npos)
-	    {
-	      arg++;
-	      string opt = argv[arg];
-	      if (opt.compare("T") == 0)
-		{
-		  skip_cleanup_flag = 1;
-		  cout << "INFO: will not do cleanup" << endl;
-		}
-	    }
-	  //
-	  else if(str.find("re-run") != string::npos)
-	    {
-	      arg++;
-	      dir_with_tables = argv[arg];
-	      if(dir_with_tables.at(dir_with_tables.size()-1) == '/')
-		dir_with_tables = dir_with_tables.substr(0, dir_with_tables.size()-1);
-	      found_dir_with_tables = 1;
-	      cout << "INFO: directory with preprocessed data: " << dir_with_tables << endl;
-	    }
-	  //found spec-features
-	  else if(str.find("spec-features") != string::npos)
-	    {
-	      arg++;
-	      string opt = argv[arg];
-	      if (opt.compare("T") == 0)
-		spec_features_flag = 1;
-	      else
-		spec_features_flag = 0;
-	    }
-	  //found separate search
-	  else if(str.find("separate-search") != string::npos)
-	    {
-	      arg++;
-	      string opt = argv[arg];
-	      sqt_decoy_source = opt;
-	      separate_search_flag = 1;
-	      cout << sqt_decoy_source << endl;
-	    }
-	  else
-	    {
-	      cout << "FATAL: option " << str << " does not exist" << endl;
-	      return 0;
-	    }
-	}
-      else
-	break;
-      arg++;
-    }
-
-  ostringstream cmd;
-  for(int k = 0; k < argc; k++)
-    cmd << argv[k] << " ";
-  
-  if(found_dir_with_tables)
-    {
-      //set input and output dirs
-      sqtp.set_output_dir(dir_with_tables, overwrite_flag);
-      set_input_dir(dir_with_tables);
-      set_output_dir(output_directory);
-
-      set_verbosity_level(CARP_INFO);
-      initialize_parameters();
-      //open log file
-      set_boolean_parameter("overwrite", overwrite_flag);
-      set_string_parameter("output-dir", output_directory.c_str());
-      ostringstream logfname;
-      logfname << fileroot << "barista.log.txt";
-      string str = logfname.str();
-      char *log_file = my_copy_string(str.c_str());
-      open_log_file(&log_file);
-      free(log_file);
-
-      //print some info
-      carp(CARP_INFO, "COMMAND: %s", cmd.str().c_str());
-      carp(CARP_INFO, "directory with tables: %s", dir_with_tables.c_str());
-      carp(CARP_INFO, "output_directory: %s", output_directory.c_str());
-      carp(CARP_INFO, "enzyme: %s", enzyme.c_str());
-      carp(CARP_INFO, "decoy prefix: %s", decoy_prefix.c_str());
-      if(fileroot.compare("") != 0)
-	carp(CARP_INFO, "fileroot: %s", fileroot.c_str());
-
-      //write out a parameter file
-      stringstream fname;
-      fname << output_directory << "/" << fileroot << "barista.params.txt";
-      ofstream fparam(fname.str().c_str());
-      fparam << "enzyme=" << enzyme << endl;
-      fparam << "decoy prefix=" << decoy_prefix << endl;
-      if(separate_search_flag)
-	fparam << "separate search=" << sqt_decoy_source << endl;
-      fparam << "fileroot=" << fileroot << endl;
-      fparam << "output directory=" << output_directory << endl;
-      if(skip_cleanup_flag)
-	fparam << "skip-cleanup=T" << endl;
-      else
-	fparam << "skip-cleanup=F" << endl;
-      fparam << "re-run=" << dir_with_tables << endl;
-      if(spec_features_flag)
-	fparam << "use spec features=T" << endl;
-      else
-	fparam << "use spec features=F" << endl;
-      fparam.close();
-    }
-  else
-    {
-      if(argc-arg < 3)
-	{
-	  print_description();
+        //set the output directory for the parser
+        if(!parser->set_output_dir(output_directory))
 	  return 0;
-	} 
-      db_source = argv[arg]; arg++;
-      ms2_source = argv[arg]; arg++;
-      sqt_source = argv[arg];
-
-      //set the output directory for the parser
-      if(!sqtp.set_output_dir(output_directory, overwrite_flag))
-      	return 0;
-      //set input and output for the leaning algo (in and out are the same as the out for the parser)
-      set_input_dir(output_directory);
-      set_output_dir(output_directory);
-
-      //open log file 
-      set_verbosity_level(CARP_INFO);
-      initialize_parameters();
-      //open log file
-      set_boolean_parameter("overwrite", overwrite_flag);
-      set_string_parameter("output-dir", output_directory.c_str());
-      ostringstream logfname;
-      logfname << fileroot << "barista.log.txt";
-      string str = logfname.str();
-      char *log_file = my_copy_string(str.c_str());
-      open_log_file(&log_file);
-      free(log_file);
+        //set input and output for the leaning algo (in and out are the same as the out for the parser)
+        set_input_dir(output_directory);
+        set_output_dir(output_directory);
+            
+        if(!parser->set_database_source(db_source))
+	  carp(CARP_FATAL, "could not find the database");
       
-      if(!sqtp.set_database_source(db_source))
-	carp(CARP_FATAL, "could not find the database");
+        if(separate_search_flag){
+	    if(!parser->set_input_sources(ms2_source, sqt_source, sqt_decoy_source))
+	      carp(CARP_FATAL, "could not extract features for training");
+	    parser->set_num_hits_per_spectrum(1);
+        }else{
+	   if(!parser->set_input_sources(ms2_source, sqt_source))
+	      carp(CARP_FATAL, "could not extract features for training");
+         }
+        //print some info
+        carp(CARP_INFO, "database source: %s", db_source.c_str());
+        carp(CARP_INFO, "sqt source: %s", sqt_source.c_str()); 
+        carp(CARP_INFO, "ms2 source: %s", ms2_source.c_str());
+        carp(CARP_INFO, "output_directory: %s", output_directory.c_str());
+        carp(CARP_INFO, "enzyme: %s", enzyme.c_str());
+        carp(CARP_INFO, "decoy prefix: %s", decoy_prefix.c_str());
       
-      if(separate_search_flag)
-	{
-	  if(!sqtp.set_input_sources(ms2_source, sqt_source, sqt_decoy_source))
-	    carp(CARP_FATAL, "could not extract features for training");
-	  sqtp.set_num_hits_per_spectrum(1);
-	}
-      else
-	{
-	  if(!sqtp.set_input_sources(ms2_source, sqt_source))
-	    carp(CARP_FATAL, "could not extract features for training");
-	}
-      
-      //print some info
-      carp(CARP_INFO, "COMMAND: %s", cmd.str().c_str());
-      carp(CARP_INFO, "database source: %s", db_source.c_str());
-      carp(CARP_INFO, "sqt source: %s", sqt_source.c_str()); 
-      carp(CARP_INFO, "ms2 source: %s", ms2_source.c_str());
-      carp(CARP_INFO, "output_directory: %s", output_directory.c_str());
-      carp(CARP_INFO, "enzyme: %s", enzyme.c_str());
-      carp(CARP_INFO, "decoy prefix: %s", decoy_prefix.c_str());
-      if(fileroot.compare("") != 0)
-	carp(CARP_INFO, "fileroot: %s", fileroot.c_str());
-      
-      //write out a parameter file
-      stringstream fname;
-      fname << output_directory << "/" << fileroot << "barista.params.txt";
-      ofstream fparam(fname.str().c_str());
-      fparam << "enzyme=" << enzyme << endl;
-      fparam << "decoy prefix=" << decoy_prefix << endl;
-      if(separate_search_flag)
-	fparam << "separate search=" << sqt_decoy_source << endl;
-      fparam << "fileroot=" << fileroot << endl;
-      fparam << "output directory=" << output_directory << endl;
-      if(skip_cleanup_flag)
-	fparam << "skip-cleanup=T" << endl;
-      else
-	fparam << "skip-cleanup=F" << endl; 
-      if(spec_features_flag)
-	fparam << "use spec features=T" << endl;
-      else
-	fparam << "use spec features=F" << endl;
-      fparam.close();
-
-      //num of spec features
-      if(spec_features_flag)
-	sqtp.set_num_spec_features(3);
-      else
-	sqtp.set_num_spec_features(0);
-      if(!sqtp.run())
-	carp(CARP_FATAL, "Could not proceed with training.");
-      sqtp.clear();
+        parser->set_use_quadratic_features(1);
+        if(!parser->run())
+	  carp(CARP_FATAL, "Could not proceed with training.");
+        parser->clear();
+      } 
     }
-  
-  if(!sqtp.check_input_dir(in_dir))
+   
+ 
+   if(!parser->check_input_dir(in_dir))
     carp(CARP_FATAL, "Please re-run with database, ms2 input and sqt input.");
 
-  
   return 1;
-  
+
 }
-*/
 
 int Barista::main(int argc, char **argv) {
  //int main(int argc, char **argv){
@@ -2922,7 +2617,7 @@ int Barista::main(int argc, char **argv) {
   run_tries();
   //run_tries_multi_task();
    if(skip_cleanup_flag != 1)
-    sqtp.clean_up(out_dir);
+    parser->clean_up(out_dir);
   
   return 0;
 }   
@@ -2947,3 +2642,28 @@ string Barista::getDescription() {
 COMMAND_T Barista::getCommand(){
   return BARISTA_COMMAND;
 }
+
+// returns file extension 
+string Barista:: file_extension (string str){ 
+  return str.substr(str.find_last_of(".")+1);
+}
+
+
+//determins which parser to be called 
+FILE_FORMAT_T Barista:: check_file_format(string source){
+  string ext = file_extension(source);
+    if (ext=="sqt")
+      return SQT_FORMAT;
+    else if(ext=="txt")
+      return DELIMITED_FORMAT;
+    else 
+      carp(CARP_DEBUG,"The file format is invalid");
+    return INVALID_FORMAT;
+}
+
+/*
+*Local Variables: 
+*mode: c
+*c-basic-offset: 2
+*End:
+*/

@@ -1,13 +1,13 @@
-INFO: CPU: arginine.gs.washington.edu
-INFO: Thu Apr 12 15:46:14 PDT 2012
+INFO: CPU: canavanine.gs.washington.edu
+INFO: Tue Jun 26 18:23:47 PDT 2012
 COMMAND LINE: crux sequest-search --output-dir ss --fileroot no-decoys --parameter-file params/no-decoys-ss demo.ms2 small-yeast-index
 INFO: Preparing protein index small-yeast-index
 INFO: Reading in ms2 file demo.ms2
 INFO: Created 1 peptide mods, keeping 1 with 255 or fewer aa mods
 INFO: Searching spectrum number 96 (2+), search number 100
-INFO: Elapsed time: 1.51 s
+INFO: Elapsed time: 1.43 s
 INFO: Finished crux sequest-search
-INFO: Elapsed time: 1.52 s
+INFO: Elapsed time: 1.43 s
 INFO: Finished crux sequest-search.
 INFO: Return Code:0
 # Which isotopes to use in calculating fragment ion mass.
@@ -485,6 +485,13 @@ no-base=false
 # Available for crux extract-columns and extract-rows
 header=true
 
+# Barista can recognize search result as a file or a list of files. This
+# option allows users to specify the search results are provided as a
+# list of files by setting the --list-of-files option to T. Defualt=
+# false.
+# Availabe for barista.
+list-of-files=false
+
 # Minimum mass of spectra to be searched. Default=0.
 # Available for crux-search-for-matches.
 spectrum-min-mass=0.000000
@@ -745,7 +752,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Thu Apr 12 15:46:15 2012
+H	StartTime	Tue Jun 26 18:23:47 2012
 H	EndTime                               
 H	Database	small-yeast-index/small-yeast-binary-fasta
 H	DBSeqLength	?

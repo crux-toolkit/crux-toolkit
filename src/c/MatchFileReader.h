@@ -49,6 +49,14 @@ class MatchFileReader: public DelimitedFileReader {
     );
 
     /**
+     * \returns a MatchFileReader object and load the tab-delimited
+     * data specified by an input stream
+     */
+    MatchFileReader(
+      std::istream* iptr
+    );
+
+    /**
      * Destructor
      */
     virtual ~MatchFileReader();
@@ -76,6 +84,13 @@ class MatchFileReader: public DelimitedFileReader {
       MATCH_COLUMNS_T col_type ///<the column type
     );
    
+    /**
+     * \returns the double value of a cell, checks for infinity
+     */
+    double getDouble(
+      MATCH_COLUMNS_T col_type ///< the column type
+    );
+
     /**
      * \returns the integer value of a cell, checks for infinity.
      */

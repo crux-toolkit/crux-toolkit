@@ -30,6 +30,7 @@ SQTParser :: SQTParser()
     protind_to_length(0),
     cur_fileind(0)
 {
+
   int capacity = 10;
   m.xcorr_rank.reserve(capacity);
   m.sp_rank.reserve(capacity);
@@ -58,19 +59,19 @@ SQTParser :: SQTParser()
   max_len = 50;
   //min peptide length to be considered
    min_len = 7;
-  
 }
 
 
 SQTParser :: ~SQTParser()
 {
-  clear();  
+   clear();  
 }
 
 void SQTParser :: clear()
 {
   clear_matches();
-  delete[] x; x = (double*)0;
+  delete[] x; 
+  x = (double*)0;
   delete[] xs; xs = (double*)0;
   delete[] protind_to_num_all_pep; protind_to_num_all_pep = (int*)0;
   delete[] protind_to_length; protind_to_length = (int*)0;
@@ -136,7 +137,7 @@ void SQTParser :: clear_matches()
   m.xcorr_rank.clear();
   m.sp_rank.clear();
   m.calc_mass.clear();
-  m.delta_cn.clear();
+  m.delta_cn.clear(); 
   m.xcorr_score.clear();
   m.sp_score.clear();
   m.num_ions_matched.clear();
@@ -313,6 +314,8 @@ void SQTParser :: allocate_feature_space()
 {
   //space for feature vector
   x = new double[num_features];
+
+
   memset(x,0,sizeof(double)*num_features);
   //space for spec feature vector
   if (num_spec_features > 0)
@@ -1325,6 +1328,17 @@ void SQTParser :: digest_database(ifstream &f_db, enzyme e)
 }
 
 
+bool  SQTParser :: read_search_results(string& cur_fname) {
+  ifstream f_sqt(cur_fname.c_str());
+  if(!f_sqt.is_open()){
+    carp(CARP_WARNING, "could not open sqt file: %s", cur_fname.c_str());
+    return false; 
+  }
+      read_sqt_file(f_sqt, decoy_prefix, fhps,e);
+      f_sqt.close();
+  return true; 
+}
+
 int SQTParser :: run()
 {
   //parse database
@@ -1379,19 +1393,12 @@ int SQTParser :: run()
       cur_fileind = i;
       carp(CARP_INFO, "parsing file %s", cur_fname.c_str());
       f_fileind_to_fname << i << " " << cur_fname << endl;
-      ifstream f_sqt(cur_fname.c_str());
-      if(!f_sqt.is_open())
-	{
-	  carp(CARP_WARNING, "could not open sqt file: %s", cur_fname.c_str());
-	  continue;
-	}
-      read_sqt_file(f_sqt, decoy_prefix, fhps,e);
-      f_sqt.close();
-      num_files_read++;
+      if(read_search_results(cur_fname)) 
+        num_files_read++;
     }
   if(num_files_read < 1)
     {
-      carp(CARP_WARNING, "could not parse any sqt files");
+      carp(CARP_WARNING, "Could not parse any search result files");
       return 0;
     }
   
@@ -1405,15 +1412,15 @@ int SQTParser :: run()
       if( (double)num_prot_not_found_in_db > (double)num_prot/3.0)
 	{
 	  if( num_neg_prot_not_found_in_db == num_neg_prot && (double)num_pos_prot_not_found_in_db < (double)num_pos_prot/2.0)
-	    carp(CARP_WARNING, "The database did not contain any of the decoy proteins that were found in the sqt files. This might mean that only target but the decoy database was provided.");
+	    carp(CARP_WARNING, "The database did not contain any of the decoy proteins that were found in the search result files. This might mean that only target but the decoy database was provided.");
 	  else
-	    carp(CARP_WARNING, "The database did not contain %d of the % d proteins that were found in the sqt files. This might mean that the database does not match sqt files.", num_prot_not_found_in_db, num_prot);
+	    carp(CARP_WARNING, "The database did not contain %d of the % d proteins that were found in the search result files. This might mean that the database does not match search result files.", num_prot_not_found_in_db, num_prot);
 	}
     }
 
   if(num_neg_prot == 0)
     {
-      carp(CARP_WARNING, "Found %d decoy proteins in the sqt files.", num_neg_prot);
+      carp(CARP_WARNING, "Found %d decoy proteins in the search result files.", num_neg_prot);
       return 0;
     }
 
@@ -1563,8 +1570,12 @@ int SQTParser :: set_database_source(string &db_source)
   return 1;
 }
 
+string SQTParser::get_parser_extension() {
 
-int SQTParser :: match_sqt_to_ms2(string &sqt_source, string &prefix)
+  return ".sqt";
+}
+
+int SQTParser :: match_file_to_ms2(string &sqt_source, string &prefix)
 {
   DIR *dp;
   struct dirent *dirp;
@@ -1578,7 +1589,7 @@ int SQTParser :: match_sqt_to_ms2(string &sqt_source, string &prefix)
   //read sqt files in the directory 
   while ((dirp = readdir(dp)) != NULL) 
     {
-      string ext_sqt = ".sqt";
+      string ext_sqt = get_parser_extension();
       string fname = string(dirp->d_name);
       int pos = is_ending(fname, ext_sqt);
       if((pos != 0) && (fname.find(prefix,0) != string::npos))
@@ -1628,7 +1639,7 @@ int SQTParser :: collect_ms2_files(string &ms2_source, string & sqt_source)
 	  fstr << fname;
 	  string ms2name = fstr.str();
 	  fstr.str("");
-	  int num_matched = match_sqt_to_ms2(sqt_source, prefix);
+	  int num_matched = match_file_to_ms2(sqt_source, prefix);
 	  total_matched += num_matched;
 	  if(!num_matched)
 	    carp(CARP_WARNING, "could not find %s*.sqt in directory %s to match %s, skipping", prefix.c_str(), sqt_source.c_str(), ms2name.c_str());
@@ -1677,12 +1688,12 @@ int SQTParser :: set_input_sources(string &ms2_source, string &sqt_source)
   else
     {
       string ext_ms2 = ".ms2";
-      string ext_sqt = ".sqt";
+      string ext_sqt = get_parser_extension();
       if(is_ending(ms2_source, ext_ms2))
 	{
 	  if(!is_ending(sqt_source, ext_sqt))
 	    {
-	      carp(CARP_WARNING,  "expecting sqt file to accompany the ms2 file");
+	      carp(CARP_WARNING,  "expecting search file to accompany the ms2 file");
 	      return 0;
 	    }
 	  ms2_file_names.push_back(ms2_source);
@@ -1694,7 +1705,7 @@ int SQTParser :: set_input_sources(string &ms2_source, string &sqt_source)
 	  read_list_of_files(sqt_source, sqt_file_names);
 	  if(ms2_file_names.size() != sqt_file_names.size())
 	    {
-	      carp(CARP_WARNING, " the number of sqt and ms2 files does not match: each sqt file should be accompaned by ms2 file");
+	      carp(CARP_WARNING, " the number of search and ms2 files does not match: each search file should be accompaned by ms2 file");
 	      return 0;
 	    }
 	}
@@ -1705,7 +1716,7 @@ int SQTParser :: set_input_sources(string &ms2_source, string &sqt_source)
 
 /*************** for separate searches ********************************************************/
 
-int SQTParser :: match_target_sqt_to_ms2(string &sqt_source, string &prefix)
+int SQTParser :: match_target_file_to_ms2(string &sqt_source, string &prefix)
 {
   DIR *dp;
   struct dirent *dirp;
@@ -1716,8 +1727,10 @@ int SQTParser :: match_target_sqt_to_ms2(string &sqt_source, string &prefix)
       return 0;
     }
   int cn = 0;
-  //read sqt files in the directory 
-  string ext_sqt = ".target.sqt";
+  //read sqt files in the directory
+  ostringstream oss;
+  oss << ".target" << get_parser_extension(); 
+  string ext_sqt = oss.str();
   while ((dirp = readdir(dp)) != NULL) 
     {
       string fname = string(dirp->d_name);
@@ -1740,7 +1753,7 @@ int SQTParser :: match_target_sqt_to_ms2(string &sqt_source, string &prefix)
 }
 
 
-int SQTParser :: match_decoy_sqt_to_ms2(string &sqt_source, string &prefix)
+int SQTParser :: match_decoy_file_to_ms2(string &sqt_source, string &prefix)
 {
   DIR *dp;
   struct dirent *dirp;
@@ -1752,7 +1765,9 @@ int SQTParser :: match_decoy_sqt_to_ms2(string &sqt_source, string &prefix)
     }
   int cn = 0;
   //read sqt files in the directory 
-  string ext_sqt = ".decoy.sqt";
+  ostringstream oss;
+  oss << ".decoy" << get_parser_extension();
+  string ext_sqt = oss.str();
   while ((dirp = readdir(dp)) != NULL) 
     {
       string fname = string(dirp->d_name);
@@ -1803,8 +1818,8 @@ int SQTParser :: collect_ms2_files(string &ms2_source, string &sqt_target_source
 	  fstr << fname;
 	  string ms2name = fstr.str();
 	  fstr.str("");
-	  int num_matched_targets = match_target_sqt_to_ms2(sqt_target_source, prefix); 
-	  int num_matched_decoys = match_decoy_sqt_to_ms2(sqt_decoy_source, prefix); 
+	  int num_matched_targets = match_target_file_to_ms2(sqt_target_source, prefix); 
+	  int num_matched_decoys = match_decoy_file_to_ms2(sqt_decoy_source, prefix); 
 	  	  
 	  if(!num_matched_targets)
 	    {
@@ -1852,18 +1867,18 @@ int SQTParser :: set_input_sources(string &ms2_source, string &sqt_target_source
   else
     {
       string ext_ms2 = ".ms2";
-      string ext_sqt = ".sqt";
+      string ext_sqt = get_parser_extension();
       
       if(is_ending(ms2_source, ext_ms2))
       	{
 	  if(!is_ending(sqt_target_source, ext_sqt))
 	    {
-	      carp(CARP_WARNING,  "expecting target sqt file to accompany the ms2 file");
+	      carp(CARP_WARNING,  "expecting target search file to accompany the ms2 file");
 	      return 0;
 	    }
 	  if(!is_ending(sqt_decoy_source, ext_sqt))
 	    {
-	      carp(CARP_WARNING,  "expecting decoy sqt file to accompany the ms2 file and the target sqt file for the separate searches");
+	      carp(CARP_WARNING,  "expecting decoy search file to accompany the ms2 file and the target search file for the separate searches");
 	      return 0;
 	    }
 	  
@@ -1889,5 +1904,10 @@ int SQTParser :: set_input_sources(string &ms2_source, string &sqt_target_source
   return 1;
 }
 
-
+/*
+ * Local Variables:
+ * mode: c
+ * c-basic-offset: 2
+ * End:
+ */
 

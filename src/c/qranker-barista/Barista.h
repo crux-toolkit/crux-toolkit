@@ -1,7 +1,6 @@
 #ifndef BARISTA_H
 #define BARISTA_H
 #define CRUX
-
 #include <sys/types.h>
 #ifndef _MSC_VER
 #include <dirent.h>
@@ -13,12 +12,12 @@
 #include <assert.h>
 #include <cstdio>
 #include <iomanip>
-#ifdef CRUX
+
 #include "CruxApplication.h"
 #include "carp.h"
 #include "crux-utils.h"
 #include "parameter.h"
-#endif
+
 #include "analyze_psms.h"
 #include "PepXMLWriter.h"
 #include "DataSet.h"
@@ -27,8 +26,10 @@
 #include "PepScores.h"
 #include "NeuralNet.h"
 #include "SQTParser.h"
+#include "CruxParser.h"
+#include "QRanker.h"
 using namespace std;
-
+  
 
 class Barista : public CruxApplication
 {
@@ -38,6 +39,7 @@ class Barista : public CruxApplication
     skip_cleanup_flag(0),
     overwrite_flag(0),
     feature_file_flag(0),
+    list_of_files_flag(0),
     in_dir(""), 
     out_dir(""), 
     fileroot(""), 
@@ -127,13 +129,17 @@ class Barista : public CruxApplication
 
   double check_gradients_hinge_one_net(int protind, int label);
   double check_gradients_hinge_clones(int protind, int label);
+
+  FILE_FORMAT_T check_file_format(string filename);
+  string file_extension(string str); 
  protected:
-  SQTParser sqtp;
+  SQTParser* parser; 
   int verbose;
   int skip_cleanup_flag;
   int overwrite_flag;
   int feature_file_flag;
   ostringstream feature_file_name;
+  int list_of_files_flag; 
 
   Dataset d;
   string in_dir;

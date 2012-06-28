@@ -25,7 +25,9 @@ libqranker_barista_la_SOURCES = \
 	DataSet.cpp\
 	PepScores.h\
 	QRanker.cpp\
-	SQTParser.h
+	SQTParser.h\
+	CruxParser.cpp\
+	CruxParser.h
 
 libqranker_barista_la_CXXFLAGS = $(AM_CXXFLAGS) \
   -I$(top_srcdir)/src/c/
