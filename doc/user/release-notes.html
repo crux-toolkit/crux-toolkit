@@ -12,40 +12,66 @@
 <h3>Major enhancements</h3>
 
 <ul>
-<li> Hardklor and Bullseye now incorporated into crux. </li>
+
+<li>
+Hardklor and Bullseye are now incorporated into Crux.</li>
+
+<li>
+Barista has been modified extensively so that it more closely
+resembles the other tools in Crux:</li>
+
+<ul>
+<li>
+Barista accepts search results in tab-delimited format, in addition to
+SQT format.</li>
+<li>
+Barista now reports posterior error probabilities in addition to
+q-values.</li>
+</ul>
+
 </ul>
 
 <h3>Minor changes</h3>
 
 <ul>
 
-<li><code>crux predict-peptide-ions</code> to report ion-type as 'b','y','a',.., or 'p'.</li>
-<li><code>crux predict-peptide-ions</code> now only allows one modification per ion</li>
-<li><code>neutral-losses</code> removed from <code>crux predict-peptide-ions</code></li>
-<li><code>crux predict-peptide-ions</code> allows 'a' as an additional primary ion</li>
-
-<li>Updated spectrum parsing such that peaks with zero intensity do not
- get included as a viable peak.</li>
+<li>
+<code>crux predict-peptide-ions</code> to report ion-type as
+'b','y','a',.., or 'p'.</li>
 
 <li>
-Updated <code>crux spectral-counts</code> to allow RAW spectral count as 
-a measure option
+<code>crux predict-peptide-ions</code> now only allows one
+modification per ion.</li>
 
 <li>
-Updated <code>crux spectral-counts</code> to properly normalize NSAF 
-for protein quantification
-
+The <code>neutral-losses</code> option was removed from <code>crux
+predict-peptide-ions</code>.</li>
 
 <li>
-Updated crux search-for-xlinks to handle multiple missed cleavages
-correctly (controlled by missed-cleavages parameter).</li>
+<code>crux predict-peptide-ions</code> allows 'a' as an additional
+primary ion.</li>
+
+<li>
+The spectrum parsing was updated so that peaks with zero intensity are
+ignored.</li>
+
+<li>
+<code>crux spectral-counts</code> now has an option to compute the raw
+spectral count.</li>
+
+<li>
+A bug in <code>crux spectral-counts</code> was fixed so that it now
+properly normalizes the NSAF value.</li>
+
+<li>
+<code>crux search-for-xlinks</code> handles multiple missed cleavages
+correctly (controlled by the missed-cleavages parameter).</li>
 
 <li>
 Ambiguous amino acids are handled differently.  'J' is interpreted to
-indicate 'I or L' and its mass will be the same as that of I or L.
-Peptides containing B, Z, and X are no longer be considered, and a
-warning stating is issued when these amino acid codes are
-encountered.</li>
+indicate 'I' or 'L'.  Peptides containing B, Z, and X are no longer be
+allowed, and a warning stating is issued when these amino acid codes
+are encountered.</li>
 
 <li>
 The stand-alone <code>crux-predict-peptide-ions</code>
@@ -65,14 +91,9 @@ together with no accompanying labels.  This bug has been fixed so that
 Q-ranker once again returns only target PSMs.</li>
 
 <li>
-Q-ranker and barista now compute and report posterior error probabilities 
-in addition to q-values.</li>
-
-<li>
-The .pep.xml output of q-ranker and barista has been updated to be 
-compatible with the TPP, particularly as an input to ProteinProphet.</li>
-<li>
-Barista can recognize search results in tab-delimited format. Barista accepts the tab delimited files that are the output of search-for-matches and sequest-search as an alternative to the .sqt files.</li>
+The pep.xml output of q-ranker and barista has been updated to be
+compatible with the TPP, particularly as an input to
+ProteinProphet.</li>
 
 </ul>
 
