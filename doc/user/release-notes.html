@@ -27,6 +27,9 @@ SQT format.</li>
 <li>
 Barista now reports posterior error probabilities in addition to
 q-values.</li>
+<li>
+Barista's pep.xml output has been updated to be compatible with the
+TPP, particularly as an input to ProteinProphet.</li>
 </ul>
 
 </ul>
@@ -37,19 +40,19 @@ q-values.</li>
 
 <li>
 <code>crux predict-peptide-ions</code> to report ion-type as
-'b','y','a',.., or 'p'.</li>
+'b','y','a',.., or 'p'.</li> <!-- I don't understand this. -->
 
 <li>
 <code>crux predict-peptide-ions</code> now only allows one
-modification per ion.</li>
+modification per ion.</li> <!-- What did it do before? -->
 
 <li>
 The <code>neutral-losses</code> option was removed from <code>crux
-predict-peptide-ions</code>.</li>
+predict-peptide-ions</code>.</li> <!-- Why? -->
 
 <li>
 <code>crux predict-peptide-ions</code> allows 'a' as an additional
-primary ion.</li>
+primary ion.</li> <!-- Explain. -->
 
 <li>
 The spectrum parsing was updated so that peaks with zero intensity are
@@ -66,6 +69,7 @@ properly normalizes the NSAF value.</li>
 <li>
 <code>crux search-for-xlinks</code> handles multiple missed cleavages
 correctly (controlled by the missed-cleavages parameter).</li>
+<!-- Did it do it incorrectly before, or simply not do it? -->
 
 <li>
 Ambiguous amino acids are handled differently.  'J' is interpreted to
@@ -75,7 +79,7 @@ are encountered.</li>
 
 <li>
 The stand-alone <code>crux-predict-peptide-ions</code>
-and <code>crux-generate-peptides</a> applications have been integrated
+and <code>crux-generate-peptides</code> applications have been integrated
 into the main <code>crux</code> application.</li>
 
 <li>
@@ -89,11 +93,7 @@ along with target PSMs in the q-ranker.target.psms.txt file.  All PSMs
 were sorted by q-ranker score so the targets and decoys were mixed
 together with no accompanying labels.  This bug has been fixed so that
 Q-ranker once again returns only target PSMs.</li>
-
-<li>
-The pep.xml output of q-ranker and barista has been updated to be
-compatible with the TPP, particularly as an input to
-ProteinProphet.</li>
+<!-- I guess we can get rid of this. -->
 
 </ul>
 
