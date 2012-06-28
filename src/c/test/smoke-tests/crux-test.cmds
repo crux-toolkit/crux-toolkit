@@ -156,11 +156,18 @@
 # Run q-ranker 
 1 = qranker = good_results/qranker.target.txt = rm -rf crux-output; crux sequest-search --parameter-file params/set_rand_seed_only --decoy-location target-file --decoys peptide-shuffle demo.ms2 yeast-index/; crux q-ranker --parameter-file params/set_rand_seed_only --feature-file T demo.ms2 crux-output/sequest.target.sqt; cat crux-output/q-ranker.target.psms.txt
 
+# Run q-ranker tab-delimited file
+1 = qranker-txt = good_results/qranker-txt.target.txt =rm -rf crux-output; crux sequest-search --parameter-file params/set_rand_seed_only --decoy-location target-file --decoys peptide-shuffle demo.ms2 yeast-index/; crux q-ranker --parameter-file params/set_rand_seed_only --feature-file T demo.ms2 crux-output/sequest.target.txt; cat crux-output/q-ranker.target.psms.txt
+
+
 # Test the feature file
 1 = qranker-feature-file = good_results/qranker.features.txt = cat crux-output/q-ranker.features.txt = 
 
 # Run barista
 1 = barista = good_results/barista.target.txt = ls small-yeast.fasta yeast-index/small-yeast-random.fasta > fasta.list; crux barista --parameter-file params/set_rand_seed_only --feature-file T fasta.list demo.ms2 crux-output/sequest.target.sqt; cat crux-output/barista.target.psms.txt
+
+# Run barista tab-delimited file 
+1 = barista-txt= good_results/barista-txt.target.txt = ls small-yeast.fasta yeast-index/small-yeast-random.fasta > fasta.list; crux barista --parameter-file params/set_rand_seed_only --feature-file T fasta.list demo.ms2 crux-output/sequest.target.txt; cat crux-output/barista.target.psms.txt
 
 # Test the feature file
 1 = barista-feature-file = good_results/barista.features.txt = cat crux-output/barista.features.txt = 

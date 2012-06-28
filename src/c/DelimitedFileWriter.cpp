@@ -158,26 +158,6 @@ void DelimitedFileWriter::writeHeader(){
   current_row_.assign(column_names_.size(), "");
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /*
  * Local Variables:
  * mode: c

@@ -110,11 +110,10 @@ void QRanker :: write_results()
   for(unsigned int count = 0; count < qvals.size();count++)
     {
       fdr = getOverFDR(fullset, max_net_targ[count], selectionfdr);
-      if(fdr > max_fdr)
-	{
-	  max_fdr = fdr;
-	  ind = count;
-	}
+      if(fdr > max_fdr) {
+        max_fdr = fdr;
+        ind = count;
+      }
     }
   net = max_net_targ[ind];
   getOverFDR(fullset,net, selectionfdr);
@@ -224,7 +223,7 @@ void QRanker ::write_results_psm_xml(PepXMLWriter& xmlfile)
       vector<string> protein_descriptions;
       for(int prot_idx = 0; prot_idx < num_proteins; prot_idx++){
         string protein_name = d.ind2prot(protein_indexes[prot_idx]);
-	protein_names.push_back(protein_name);
+        protein_names.push_back(protein_name);
         protein_descriptions.push_back("");
         flanking_aas += "," + n + c; // todo
       }
@@ -275,7 +274,7 @@ void QRanker :: write_max_nets(string filename, NeuralNet* max_net)
       
       double qn;
       if(qvals[count] < 0.01)
-	qn = 0.0012;
+        qn = 0.0012;
       else
 	qn = 0.005;
       r = getOverFDR(testset,net, qvals[count]+qn);
@@ -303,15 +302,15 @@ void QRanker :: write_unique_peptides(string filename, NeuralNet* max_net)
       set<int> peps;
       int cn = 0;
       for(int i = 0; i < testset.size();i++)
-	{
+        {
 	  if(testset[i].label == 1)
-	    {
+            {
 	      cn++;
 	      int pepind = d.psmind2pepind(testset[i].psmind);
-	      peps.insert(pepind);
+              peps.insert(pepind);
 	    }
-	  if(cn > r) break;
-	}
+          if(cn > r) break;
+        }
       int num_tst = 0;
       for(set<int>::iterator it = peps.begin(); it != peps.end(); it++)
 	num_tst++;
@@ -606,18 +605,6 @@ void QRanker :: train_many_general_nets()
 	     qvals[6], overFDRmulti[6], qvals[7], overFDRmulti[7], qvals[8], overFDRmulti[8],
 	     qvals[9], overFDRmulti[9], qvals[10], overFDRmulti[10], qvals[11], overFDRmulti[11],
 	     qvals[12], overFDRmulti[12], qvals[13], overFDRmulti[13]);
-	
-	/*
-	cout << "Iteration " << i << " : \n";
-	cout << "trainset: ";
-	getMultiFDR(trainset,net,qvals);
-	printNetResults(overFDRmulti);
-	cout << "\n";
-	cout << "testset: ";
-	getMultiFDR(testset,net,qvals);
-	printNetResults(overFDRmulti);
-	cout << "\n";
-	*/
       }
   }
 
@@ -747,21 +734,6 @@ void QRanker::train_many_nets()
        qvals[6], overFDRmulti[6], qvals[7], overFDRmulti[7], qvals[8], overFDRmulti[8],
        qvals[9], overFDRmulti[9], qvals[10], overFDRmulti[10], qvals[11], overFDRmulti[11],
        qvals[12], overFDRmulti[12], qvals[13], overFDRmulti[13]);
-  
-  /*
-  cout << "Before iterating\n";
-  cout << "trainset: ";
-  getMultiFDRXCorr(trainset,qvals);
-  printNetResults(overFDRmulti);
-  cout << "\n";
-  for(int count = 0; count < num_qvals;count++)
-    if(overFDRmulti[count] > max_overFDR[count])
-      max_overFDR[count] = overFDRmulti[count];
-  cout << "testset: ";
-  getMultiFDR(testset,net,qvals);
-  printNetResults(overFDRmulti);
-  cout << "\n";
-  */
 
   train_many_general_nets();
   
@@ -801,31 +773,10 @@ int QRanker::run( ) {
   thresholdset = trainset;
   d.clear_labels_psm_training();
   train_many_nets();
-  
   write_results();
-
+  
   return 0;
 }
-
-
-/*
-int QRanker::set_command_line_options(int argc, char **argv)
-{
-  vector<string> fnames;
-  int arg = 1;
-  while(arg < argc)
-    {
-      fnames.push_back(argv[arg]);
-      arg++;
-    }
-  string out_dir = "crux-output";
-  pars.set_output_dir(out_dir);
-  if(!pars.run_on_xlink(fnames))
-    return 0;
-  pars.clear();
-  return 1;
-}
-*/
 
 void QRanker :: print_description()
 {
@@ -849,6 +800,21 @@ void QRanker :: print_description()
   cout << endl; 
 
 }
+string QRanker:: file_extension (string str){
+  string file_exten= str.substr(str.find_last_of(".")+1);
+  return file_exten; 
+}
+
+
+FILE_FORMAT_T QRanker::check_file_format(string& source) {
+  string ext = file_extension(source);
+
+    if (ext=="sqt") 
+      return SQT_FORMAT;
+    else if (ext=="txt") 
+      return DELIMITED_FORMAT;
+   return INVALID_FORMAT;
+}
 
 int QRanker :: crux_set_command_line_options(int argc, char *argv[])
 {
@@ -864,6 +830,7 @@ int QRanker :: crux_set_command_line_options(int argc, char *argv[])
     "use-spec-features",
     "parameter-file",
     "verbosity",
+     "list-of-files",
     "feature-file"
   };
   int num_options = sizeof(option_list)/sizeof(char*);
@@ -878,13 +845,12 @@ int QRanker :: crux_set_command_line_options(int argc, char *argv[])
 	     option_list, num_options,
 	     argc, argv);
 
-
+  
   string sqt_source;
   string ms2_source;
   string sqt_decoy_source;
   int separate_search_flag;
   string output_directory;
-
   string enzyme;
   string decoy_prefix;
 
@@ -892,9 +858,9 @@ int QRanker :: crux_set_command_line_options(int argc, char *argv[])
   int found_dir_with_tables;
 
   bool spec_features_flag;
-
+  bool list_of_files_flag; 
   overwrite_flag = get_boolean_parameter("overwrite");
-
+  
   fileroot = get_string_parameter_pointer("fileroot");
   if(fileroot != "__NULL_STR")
     fileroot.append(".");
@@ -902,20 +868,15 @@ int QRanker :: crux_set_command_line_options(int argc, char *argv[])
     fileroot = "";
 
   decoy_prefix = get_string_parameter_pointer("decoy-prefix");
-  sqtp.set_decoy_prefix(decoy_prefix);
+
 
   enzyme = get_string_parameter_pointer("enzyme");
-  sqtp.set_enzyme(enzyme);
 
   spec_features_flag = get_boolean_parameter("use-spec-features");
-  //num of spec features
-  if(spec_features_flag)
-    sqtp.set_num_spec_features(3);
-  else
-    sqtp.set_num_spec_features(0);
 
   skip_cleanup_flag = get_boolean_parameter("skip-cleanup");
   
+
   dir_with_tables = get_string_parameter_pointer("re-run"); 
   if(dir_with_tables != "__NULL_STR")
     found_dir_with_tables = 1;
@@ -930,7 +891,8 @@ int QRanker :: crux_set_command_line_options(int argc, char *argv[])
   if(found_dir_with_tables)
     {
       //set input and output dirs
-      sqtp.set_output_dir(dir_with_tables);
+      parser = new SQTParser();
+      parser -> set_output_dir(dir_with_tables);
       set_input_dir(dir_with_tables);
       set_output_dir(output_directory);
 
@@ -941,45 +903,88 @@ int QRanker :: crux_set_command_line_options(int argc, char *argv[])
     {
       ms2_source = get_string_parameter_pointer("spectra");
       sqt_source = get_string_parameter_pointer("search results");
-      sqt_decoy_source = get_string_parameter_pointer("separate-searches"); 
-      if(sqt_decoy_source != "__NULL_STR")
-	separate_search_flag = 1;
-      else
-	separate_search_flag = 0;
+      list_of_files_flag=get_boolean_parameter("list-of-files");
+      //check file format 
+     
+      vector<string> files; 
+      string files_list; 
+      if(list_of_files_flag==1){
+        ifstream f(sqt_source.c_str());
+        f>>files_list; 
+        while(!f.eof()){
+          files.push_back(files_list);
+          f>> files_list; 
+        } 
+      }else{
+         files.push_back(sqt_source);
+       }
       
-      //set the output directory for the parser
-      if(!sqtp.set_output_dir(output_directory))
-	return 0;
-      //set input and output for the leaning algo (in and out are the same as the out for the parser)
-      set_input_dir(output_directory);
-      set_output_dir(output_directory);
+      for(int i=0; i<files.size();i++){
+        FILE_FORMAT_T format = check_file_format(files[i]);
+        switch (format) {
+        case SQT_FORMAT:
+          parser = new SQTParser();
+	  break;
+        case DELIMITED_FORMAT:
+	  parser = new CruxParser();
+	  break;
+        case INVALID_FORMAT:
+        default:
+	  carp(CARP_FATAL, "Please enter .sqt or .txt search results"); 
+        }
+
+        parser->set_decoy_prefix(decoy_prefix);
+        parser->set_enzyme(enzyme);
+
+        //num of spec features
+        if(spec_features_flag)
+	  parser->set_num_spec_features(3);
+        else 
+	  parser->set_num_spec_features(0);
       
-      if(separate_search_flag)
-	{
-	  if(!sqtp.set_input_sources(ms2_source, sqt_source, sqt_decoy_source))
+
+        sqt_decoy_source = get_string_parameter_pointer("separate-searches"); 
+        if(sqt_decoy_source != "__NULL_STR")
+	  separate_search_flag = 1;
+        else
+	  separate_search_flag = 0;
+      
+        //set the output directory for the parser
+        if(!parser->set_output_dir(output_directory))
+	  return 0;
+        //set input and output for the leaning algo (in and out are the same as the out for the parser)
+        set_input_dir(output_directory);
+        set_output_dir(output_directory);
+      
+        if(separate_search_flag){
+	  if(!parser->set_input_sources(ms2_source, sqt_source, sqt_decoy_source)){
 	    carp(CARP_FATAL, "could not extract features for training");
-	  sqtp.set_num_hits_per_spectrum(1);
-	}
-      else
-	{
-	  if(!sqtp.set_input_sources(ms2_source, sqt_source))
+          }
+	  parser->set_num_hits_per_spectrum(1);
+	}else{
+	  if(!parser->set_input_sources(ms2_source, sqt_source)){
 	    carp(CARP_FATAL, "could not extract features for training");
-	}
+            }
+	 }
       
-      //print some info
-      carp(CARP_INFO, "sqt source: %s", sqt_source.c_str()); 
-      carp(CARP_INFO, "ms2 source: %s", ms2_source.c_str());
-      carp(CARP_INFO, "output_directory: %s", output_directory.c_str());
-      carp(CARP_INFO, "enzyme: %s", enzyme.c_str());
-      carp(CARP_INFO, "decoy prefix: %s", decoy_prefix.c_str());
+        //print some info
+        if(format==SQT_FORMAT)
+	  carp(CARP_INFO, "sqt source: %s", sqt_source.c_str());
+        if(format==DELIMITED_FORMAT)
+	  carp(CARP_INFO, "delmited source: %s", sqt_source.c_str());
+        carp(CARP_INFO, "ms2 source: %s", ms2_source.c_str());
+        carp(CARP_INFO, "output_directory: %s", output_directory.c_str());
+        carp(CARP_INFO, "enzyme: %s", enzyme.c_str());
+        carp(CARP_INFO, "decoy prefix: %s", decoy_prefix.c_str());
       
-      if(!sqtp.run())
-	carp(CARP_FATAL, "Could not proceed with training.");
-      sqtp.clear();
-    }
+        if(!parser->run())
+	  carp(CARP_FATAL, "Could not proceed with training.");
+        parser->clear();
+      }
+   }
  
-   if(!sqtp.check_input_dir(in_dir))
-    carp(CARP_FATAL, "Please re-run with ms2 input and sqt input.");
+   if(!parser->check_input_dir(in_dir))
+    carp(CARP_FATAL, "Please re-run with ms2 input and txt input.");
 
   return 1;
 
@@ -1032,275 +1037,6 @@ void QRanker::computePEP(){
 }
 
 
-
-/*
-int QRanker :: set_command_line_options(int argc, char *argv[])
-{
-  string db_source;
-  string sqt_source;
-  string sqt_decoy_source;
-  int separate_search_flag = 0;
-  string ms2_source;
-  string output_directory = "crux-output";
-  string enzyme = "trypsin";
-  string decoy_prefix = "reverse_";
-  string dir_with_tables = "";
-  int found_dir_with_tables = 0;
-  int spec_features_flag = 1;
-  int arg = 1;
-  int database_exists = 0;
-  
-  while (arg < argc)
-    {
-      string str = argv[arg];
-      //parse the options
-      if(str.find("--") != string::npos)
-	{
-	  //found enzyme
-	  if(str.find("enzyme") != string::npos)
-	    {
-	      arg++;
-	      enzyme = argv[arg];
-	      sqtp.set_enzyme(enzyme);
-	    }
-	  //found decoy prefix
-	  else if(str.find("decoy-prefix") != string::npos)
-	    {
-	      arg++;
-	      decoy_prefix = argv[arg];
-	      sqtp.set_decoy_prefix(decoy_prefix);
-	    }
-	  //found output directory
-	  else if(str.find("output-dir") != string::npos)
-	    {
-	      arg++;
-	      output_directory = argv[arg];
-	      set_output_dir(output_directory);
-	    }
-	  //found overwrite directory
-	  else if(str.find("overwrite") != string::npos)
-	    {
-	      arg++;
-	      string opt = argv[arg];
-	      if (opt.compare("T") == 0)
-		overwrite_flag = 1;
-	      else
-		overwrite_flag = 0;
-	    }
-	  //found fileroot
-	  else if(str.find("fileroot") != string::npos)
-	    {
-	      arg++;
-	      fileroot = argv[arg];
-	      fileroot.append(".");
-	    }
-	  //no cleanup
-	  else if(str.find("skip-cleanup") != string::npos)
-	    {
-	      arg++;
-	      string opt = argv[arg];
-	      if (opt.compare("T") == 0)
-		{
-		  skip_cleanup_flag = 1;
-		  cout << "INFO: will not do cleanup" << endl;
-		}
-	    }
-	  //
-	  else if(str.find("re-run") != string::npos)
-	    {
-	      arg++;
-	      dir_with_tables = argv[arg];
-	      found_dir_with_tables = 1;
-	      cout << "INFO: directory with preprocessed data: " << dir_with_tables << endl;
-	    }
-	  //found overwrite directory
-	  else if(str.find("spec-features") != string::npos)
-	    {
-	      arg++;
-	      string opt = argv[arg];
-	      if (opt.compare("T") == 0)
-		spec_features_flag = 1;
-	      else
-		spec_features_flag = 0;
-	    }
-	  //found separate search
-	  else if(str.find("separate-search") != string::npos)
-	    {
-	      arg++;
-	      string opt = argv[arg];
-	      sqt_decoy_source = opt;
-	      separate_search_flag = 1;
-	      cout << sqt_decoy_source << endl;
-	    }
-	  else
-	    {
-	      cout << "FATAL: option " << str << " does not exist" << endl;
-	      return 0;
-	    }
-	}
-      else
-	break;
-      arg++;
-    }
-  
-  ostringstream cmd;
-  for(int k = 0; k < argc; k++)
-    cmd << argv[k] << " ";
-
-  if(found_dir_with_tables)
-    {
-      sqtp.set_output_dir(dir_with_tables, overwrite_flag);
-      set_input_dir(dir_with_tables);
-      set_output_dir(output_directory);
-
-      set_verbosity_level(CARP_INFO);
-      initialize_parameters();
-      //open log file
-      set_boolean_parameter("overwrite", overwrite_flag);
-      set_string_parameter("output-dir", output_directory.c_str());
-      ostringstream logfname;
-      logfname << fileroot << "qranker.log.txt";
-      string str = logfname.str();
-      char *log_file = my_copy_string(str.c_str());
-      open_log_file(&log_file);
-      free(log_file);
-
-      carp(CARP_INFO, "COMMAND: %s", cmd.str().c_str());
-      carp(CARP_INFO, "directory with tables: %s", dir_with_tables.c_str());
-      carp(CARP_INFO, "output_directory: %s", output_directory.c_str());
-      carp(CARP_INFO, "enzyme: %s", enzyme.c_str());
-      carp(CARP_INFO, "decoy prefix: %s", decoy_prefix.c_str());
-      if(fileroot.compare("") != 0)
-	carp(CARP_INFO, "fileroot: %s", fileroot.c_str());
-
-      //write out a parameter file
-      stringstream fname;
-      fname << output_directory << "/" << fileroot << "qranker.params.txt";
-      ofstream fparam(fname.str().c_str());
-      fparam << "enzyme=" << enzyme << endl;
-      fparam << "decoy prefix=" << decoy_prefix << endl;
-      if(separate_search_flag)
-	fparam << "separate search=" << sqt_decoy_source << endl;
-      fparam << "fileroot=" << fileroot << endl;
-      fparam << "output directory=" << output_directory << endl;
-      if(skip_cleanup_flag)
-	fparam << "skip-cleanup=T" << endl;
-      else
-	fparam << "skip-cleanup=F" << endl;
-      fparam << "re-run=" << dir_with_tables << endl;
-      if(spec_features_flag)
-	fparam << "use spec features=T" << endl;
-      else
-	fparam << "use spec features=F" << endl;
-      fparam.close();
-    }
-  else
-    {
-      //if(argc-arg < 3)
-      if(argc-arg < 2)
-	{
-	  print_description();
-	  return 0;
-	} 
-      if(argc-arg == 2)
-	{
-	  //db_source = argv[arg]; arg++; 
-	  ms2_source = argv[arg]; arg++;
-	  sqt_source = argv[arg];
-	}
-      if(argc-arg == 3)
-	{
-	  db_source = argv[arg]; arg++; 
-	  ms2_source = argv[arg]; arg++;
-	  sqt_source = argv[arg];
-	  database_exists = 1;
-	}
-      //set the output directory
-      if(!sqtp.set_output_dir(output_directory, overwrite_flag))
-      	return 0;
-      set_input_dir(output_directory);
-      set_output_dir(output_directory);
-
-      set_verbosity_level(CARP_INFO);
-      initialize_parameters();
-      //open log file
-      set_boolean_parameter("overwrite", overwrite_flag);
-      set_string_parameter("output-dir", output_directory.c_str());
-      ostringstream logfname;
-      logfname << fileroot << "qranker.log.txt";
-      string str = logfname.str();
-      char *log_file = my_copy_string(str.c_str());
-      open_log_file(&log_file);
-      free(log_file);
-      
-      //write out a parameter file
-      stringstream fname;
-      fname << output_directory << "/" << fileroot << "qranker.params.txt";
-      ofstream fparam(fname.str().c_str());
-      fparam << "enzyme=" << enzyme << endl;
-      fparam << "decoy prefix=" << decoy_prefix << endl;
-      if(separate_search_flag)
-	fparam << "separate search=" << sqt_decoy_source << endl;
-      fparam << "fileroot=" << fileroot << endl;
-      fparam << "output directory=" << output_directory << endl;
-      if(skip_cleanup_flag)
-	fparam << "skip-cleanup=T" << endl;
-      else
-	fparam << "skip-cleanup=F" << endl; 
-      if(spec_features_flag)
-	fparam << "use spec features=T" << endl;
-      else
-	fparam << "use spec features=F" << endl;
-      fparam.close();
-
-      if(database_exists)
-	{
-	  if(!sqtp.set_database_source(db_source))
-	    carp(CARP_FATAL, "could not extract features for training");
-	}
-      if(separate_search_flag)
-	{
-	  if(!sqtp.set_input_sources(ms2_source, sqt_source, sqt_decoy_source))
-	    carp(CARP_FATAL, "could not extract features for training");
-	  sqtp.set_num_hits_per_spectrum(1);
-	}
-      else
-	{
-	  if(!sqtp.set_input_sources(ms2_source, sqt_source))
-	    carp(CARP_FATAL, "could not extract features for training");
-	}
-
-       carp(CARP_INFO, "COMMAND: %s", cmd.str().c_str());
-       carp(CARP_INFO, "database source: %s", db_source.c_str());
-       carp(CARP_INFO, "sqt source: %s", sqt_source.c_str()); 
-       carp(CARP_INFO, "ms2 source: %s", ms2_source.c_str());
-       carp(CARP_INFO, "output_directory: %s", output_directory.c_str());
-       carp(CARP_INFO, "enzyme: %s", enzyme.c_str());
-       carp(CARP_INFO, "decoy prefix: %s", decoy_prefix.c_str());
-       if(fileroot.compare("") != 0)
-	 carp(CARP_INFO, "fileroot: %s", fileroot.c_str());
-       
-       //num of spec features
-       if(spec_features_flag)
-	 sqtp.set_num_spec_features(7);
-       else
-	 sqtp.set_num_spec_features(0);
-       if(!sqtp.run())
-	 carp(CARP_FATAL, "Could not proceed with training.");
-       sqtp.clear();
-    }
-
-  if(!sqtp.check_input_dir(in_dir))
-    carp(CARP_FATAL, "Please re-run with database, ms2 input and sqt input.");
-
-  return 1;
-  
-
-}
-*/
-
-
-
 int QRanker::main(int argc, char **argv) {
 
   
@@ -1309,7 +1045,7 @@ int QRanker::main(int argc, char **argv) {
   
   run();
   if(skip_cleanup_flag != 1)
-    sqtp.clean_up(out_dir);
+    parser->clean_up(out_dir);
     
   return 0;
 }   
@@ -1323,7 +1059,6 @@ bool QRanker :: needsOutputDirectory()
 string QRanker::getName() {
   return "q-ranker";
 }
-
 string QRanker::getDescription() {
   return 
     "Analyze a collection of PSMs to target and decoy "
@@ -1334,3 +1069,10 @@ string QRanker::getDescription() {
 COMMAND_T QRanker::getCommand(){
   return QRANKER_COMMAND;
 }
+
+/*
+ * Local Variables:
+ * mode: c
+ * c-basic-offset: 2
+ * End:
+ */

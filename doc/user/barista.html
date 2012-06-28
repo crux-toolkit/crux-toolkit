@@ -82,17 +82,17 @@ or (3) as a directory in which all the MS2 files can be found
 
 <li>
 <b>search results</b> &ndash; Barista recognizes search results
-in <a href="sqt-format.html">SQT format</a>.  Like the spectra, the
-search results can be provided as a single file, a list of files or a
-directory of files.  Note, however, that the input mode for spectra
-and for search results must be the same; i.e., if you provide a list
-of files for the spectra, then you must also provide a list of files
-containing your search results.  When the MS2 files and SQT files are
-provided via a file listing, Barista assumes that the order of the MS2
-files matches the order of the SQT files.  Alternatively, when the MS2
-files and SQT files are provided via directories, Barista will search
-for pairs of files with the same root name but different extensions
-(".ms2" and ".sqt").</li>
+in <a href="sqt-format.html">SQT format</a> and <a href="txt-format.html">
+txt file format</a>.Like the spectra, the search results can be 
+provided as a single file, a list of files or a directory of files.  
+Note, however, that the input mode for spectra and for search results 
+must be the same; i.e., if you provide a list of files for the spectra, 
+then you must also provide a list of files containing your search results.
+When the MS2 files and the database search results files are provided via 
+a file listing, Barista assumes that the order of the MS2 files matches the 
+order of the search result files in txt or SQT format. Alternatively, when the MS2 files and search results files are provided via directories, Barista will search for pairs 
+of files with the same root name but different extensions
+(".ms2" and ".sqt" or ".txt").</li>
 
 </ul>
 
@@ -391,6 +391,37 @@ scan: the scan number</li>
 <li>
 charge: the inferred charge state</li>
 <li>
+spectrum precursor m/z: The observed m/z of the spectrum precursor ion</li>
+<li>
+spectrum neutral mass: The computed mass of the spectrum precursor at the given charge state. This is equal to the precursor m/z minus the mass of a proton (1.00727646677 Da), all multiplied by the charge.</li>
+<li>
+peptide mass: The mass of the peptide sequence, computed as the sum of the the amino acid masses plus the mass of water (18.010564684 Da or 18.0153 Da, depending on whether we are using monoisotopic or average mass).</li>
+<li>
+delta_cn: The normalized difference in xcorr for this PSM relative to other PSMs for this spectrum at this charge state.</li>
+<li>
+sp score: The SEQUEST-type preliminary score.</li>
+<li>
+sp rank: The rank of this PSM when sorted by sp score.</li>
+<li>
+xcorr score: The SEQUEST-type cross correlation score.</li>
+<li>
+ xcorr rank: The rank of this PSM when sorted by xcorr.</li>
+<li> 
+p-value: The p-value computed from the estimated Weibull parameters of the score distribution for this spectrum.</li>
+<li>
+b/y ions matched: The number of b-ions and y-ions in the peptide that have a corresponding peak in the spectrum.</li>
+<li>
+b/y ions total: The total number of b- and y-ions predicted for this peptide.</li>
+<li>
+matches/spectrum: The number of candidate peptides in the database found for this spectrum.</li>
+<li>
+sequence: The peptide sequence.</li>
+<li>
+cleavage type: The cleavage rules for generating this peptide based on the user-specified enzyme specificity.</li>
+<li>
+protein id: A comma-separated list of proteins in which this peptide appears.</li>
+<li>flanking aa: The amino acids that precede and follow this peptide in the parent protein id.</li>
+<li>
 q-value: The minimal PSM-level false discovery rate at which this PSM
 is deemed significant.  This q-value is computed based on the ranking
 of the PSMs induced by the Barista score.</li>
@@ -438,12 +469,9 @@ database search.  This option then allows the user to specify the
 location of the decoy search results.  Like the required arguments,
 these search results can be provided as a single file, a list of files
 or a directory.  However, the choice (file, list or directory) must be
-consistent for the MS2 files and the target and decoy SQT files.
-Also, if the MS2 and SQT files are provided in directories, then
-Barista will use the MS2 filename (<code>foo.ms2</code>) to identify
-corresponding target and decoy SQT files with names
-like <code>foo*.target.sqt</code> and <code>foo*.decoy.sqt</code>.
-This naming convention allows the target and decoy SQT files to reside
+consistent for the MS2 files and the target and decoy search results(in SQT or txt files format).Also, if the MS2 and the search results are provided in directories, then
+Barista will use the MS2 filename (<code>foo.ms2</code>) to identify corresponding target and decoy search results with names like <code>foo*.target.sqt</code> or <code>foo*.target.txt</code> and <code>foo*.decoy.sqt</code> or <code>foo*.decoy.txt</code>.
+This naming convention allows the target and decoy files(int txt or sqt file formats)to reside
 in the same directory.</li>
 
 <li>
@@ -489,11 +517,16 @@ A file containing command-line or additional parameters.  See
 the <a href="parameter-file.html">parameter documentation</a> page
 for details.  Default = no parameter file.</li>
 
-<LI> 
+<li> 
 <code>--feature-file &lt;T|F&gt;</code> &ndash;
 Optional file into which psm features are printed. Default = F.</li>
 
-<LI>
+
+<li> 
+<code>--list-of-files &lt;T|F&gt;</code> &ndash;
+Specify the search result is a list of files or a single file. Default = F.</li>
+
+<li>
 <code>--verbosity &lt;0-100&gt;</code> &ndash; 
 Specify the verbosity of the current processes. Each level prints the
 following messages, including all those at lower verbosity levels:
@@ -524,7 +557,7 @@ info, 60-detailed debug info. Default = 30.</li>
   <li> Assume that directory spectra-dir contains 10 ms2 files, and
   directory matches-dir constains the 10 sqt files, corresponding to
   searches against a single target-decoy database, with decoy prefix
-  reverse_. To analyse lists of ms2 and sqt files in the directores,
+  reverse_. To analyse lists of ms2 and search files in the directores,
   overwriting previous results:
     <br> <br>
     <code> crux barista --decoy-prefix reverse_ --overwrite T concatenated-database.fasta spectra-list.txt matches-list.txt </code>
@@ -574,8 +607,20 @@ matches-decoy.sqt:
     <code> crux barista --decoy-prefix random_ --use-separate-searches matches-decoy.sqt database-dir spectra.ms2 matches-target.sqt </code>
     <br><br>
 </li>
-
+<li>To analyse a single ms2 file and txt files matches-target.txtt and
+matches-decoy.txt:
+    <br> <br>
+    <code> crux barista --decoy-prefix random_ --use-separate-searches matches-decoy.txt database-dir spectra.ms2 matches-target.txt </code>
+    <br><br>
+</li>
 <li> If ms2 files are in spectra-dir directory, sqt files are in
+matches-target-dir and matches-decoy-dir, and databases are specified
+in database-list.txt:
+    <br> <br>
+    <code> crux barista --decoy-prefix random_ --use-separate-searches matches-decoy-dir database-list.txt spectra-dir matches-target-dir </code>
+    <br><br>
+</li>
+<li> If ms2 files are in spectra-dir directory, tab-delimited files are in
 matches-target-dir and matches-decoy-dir, and databases are specified
 in database-list.txt:
     <br> <br>
@@ -590,6 +635,13 @@ are located in database-dir:
     <code> crux barista --decoy-prefix random_ --use-separate-searches matches-decoy-list.txt database-dir spectra-list.txt matches-target-list.txt </code>
     <br><br>
 </li>
+<li> If ms2 files are listed in spectra-list.txt, txt files are listed
+in matches-target-list.txt and matches-decoy-list.txt, and database
+are located in database-dir:
+    <br> <br>
+    <code> crux barista --decoy-prefix random_ --use-separate-searches matches-decoy-list.txt database-dir spectra-list.txt matches-target-list.txt </code>
+    <br><br>
+</li>
 </ol>
 </li>
 
@@ -597,9 +649,9 @@ are located in database-dir:
 
 <ol>
 <li>
-Please use crux sequest-search because it produces database search
-results in the sqt format, compatible with Barista input. (see
-<a href="crux-sequest-search.html"> sequest-search</a>).
+You can use crux sequest-search which produces database search
+results in the sqt format or you can use crux search-for-matches which produces database search results in the tab-delimited format. Both of them are compatible with Barista input. (see
+<a href="crux-sequest-search.html"> sequest-search</a> and <a href="crux-search-for-matches.html"> search-for-matches</a>).
 </li>
 
 <li>

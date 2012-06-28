@@ -101,6 +101,7 @@
 <parameter name="re-run" value="__NULL_STR"/>
 <parameter name="no-base" value="false"/>
 <parameter name="header" value="true"/>
+<parameter name="list-of-files" value="false"/>
 <parameter name="spectrum-min-mass" value="0.000000"/>
 <parameter name="output-dir" value="crux-output"/>
 <parameter name="xlink-include-deadends" value="true"/>

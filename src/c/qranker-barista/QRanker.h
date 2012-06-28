@@ -23,15 +23,22 @@ using namespace std;
 #include "DataSet.h"
 #include "PSMScores.h"
 #include "SQTParser.h"
+#include "CruxParser.h"
 #include "TabDelimParser.h"
 #include "CruxApplication.h"
+
+enum FILE_FORMAT_T{
+  INVALID_FORMAT,
+  SQT_FORMAT,
+  DELIMITED_FORMAT
+};
 
 class QRanker: public CruxApplication
 {
 
 public:
-	QRanker();
-	virtual ~QRanker();
+    QRanker();
+    virtual ~QRanker();
 
     int run();
     void train_net_sigmoid(PSMScores &set, int interval);
@@ -66,7 +73,9 @@ public:
     virtual std::string getName();
     virtual std::string getDescription();
     virtual bool needsOutputDirectory();
-    virtual COMMAND_T getCommand();
+    virtual COMMAND_T getCommand(); 
+    FILE_FORMAT_T check_file_format(string &filePath);
+    string file_extension(string filename); 
 
 protected:
 
@@ -112,7 +121,8 @@ protected:
     ostringstream feature_file_name;
     
     TabDelimParser pars;
-    SQTParser sqtp;
+    SQTParser* parser; 
+     
 
 };
 

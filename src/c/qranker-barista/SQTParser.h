@@ -1,7 +1,6 @@
 #ifndef SQTPARSER_H
 #define SQTPARSER_H
 #define CRUX
-
 #include <sys/stat.h>
 #ifndef _MSC_VER
 #include <dirent.h>
@@ -41,7 +40,7 @@ class SQTParser{
     vector<double> delta_cn;
     vector<double> xcorr_score;
     vector<double> sp_score;
-    vector <double> num_ions_matched;
+    vector <int> num_ions_matched;
     vector<double> num_total_ions;
     vector<string> peptides;
     vector<int> num_proteins_in_match;
@@ -55,7 +54,7 @@ class SQTParser{
   SQTParser();
   ~SQTParser();
   void clear();
-  int run();
+  virtual int run();
   void clear_matches();
   void erase_matches();
   inline void set_num_features(int nf) {num_features = nf;}
@@ -75,16 +74,16 @@ class SQTParser{
   int is_ending(string &name, string &ext);
   int is_fasta(string &fname);
   int set_database_source(string &db_source);
-  int match_sqt_to_ms2(string &sqt_source, string &prefix);
+  virtual int match_file_to_ms2(string &sqt_source, string &prefix);
   int collect_ms2_files(string &ms2_source, string &sqt_source);
-  int set_input_sources(string &ms2_source, string &sqt_source);
+  virtual int set_input_sources(string &ms2_source, string &sqt_source);
   void read_list_of_files(string &list, vector<string> &fnames);
   
   /********* for separate database searches ********************************************/
-  int match_target_sqt_to_ms2(string &sqt_source, string &prefix);
-  int match_decoy_sqt_to_ms2(string &sqt_source, string &prefix);
+  virtual int match_target_file_to_ms2(string &sqt_source, string &prefix);
+  virtual int match_decoy_file_to_ms2(string &sqt_source, string &prefix);
   int collect_ms2_files(string &ms2_source, string &sqt_target_source, string &sqt_decoy_source);
-  int set_input_sources(string &ms2_source, string &sqt_target_source, string &sqt_decoy_source);
+  virtual int set_input_sources(string &ms2_source, string &sqt_target_source, string &sqt_decoy_source);
   /*************************************************************************************/
 
 
@@ -216,6 +215,10 @@ class SQTParser{
   int max_len;
   //min peptide length to be considered
   int min_len;
+
+  
+  virtual bool read_search_results(string& cur_fname); 
+  virtual string get_parser_extension();
   
 };
 

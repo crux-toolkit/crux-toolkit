@@ -2,7 +2,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Thu Apr 12 15:45:42 2012
+H	StartTime	Tue Jun 26 18:23:19 2012
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	Comment	Database shuffled; these are decoy matches
@@ -5214,6 +5214,13 @@ no-base=false
 # Print the header line of the tsv file. Default=T.
 # Available for crux extract-columns and extract-rows
 header=true
+
+# Barista can recognize search result as a file or a list of files. This
+# option allows users to specify the search results are provided as a
+# list of files by setting the --list-of-files option to T. Defualt=
+# false.
+# Availabe for barista.
+list-of-files=false
 
 # Minimum mass of spectra to be searched. Default=0.
 # Available for crux-search-for-matches.
