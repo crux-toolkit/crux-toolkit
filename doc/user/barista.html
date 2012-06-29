@@ -82,17 +82,20 @@ or (3) as a directory in which all the MS2 files can be found
 
 <li>
 <b>search results</b> &ndash; Barista recognizes search results
-in <a href="sqt-format.html">SQT format</a> and <a href="txt-format.html">
-txt file format</a>.Like the spectra, the search results can be 
-provided as a single file, a list of files or a directory of files.  
-Note, however, that the input mode for spectra and for search results 
-must be the same; i.e., if you provide a list of files for the spectra, 
-then you must also provide a list of files containing your search results.
-When the MS2 files and the database search results files are provided via 
-a file listing, Barista assumes that the order of the MS2 files matches the 
-order of the search result files in txt or SQT format. Alternatively, when the MS2 files and search results files are provided via directories, Barista will search for pairs 
-of files with the same root name but different extensions
-(".ms2" and ".sqt" or ".txt").</li>
+in <a href="sqt-format.html">SQT format</a> and in
+the <a href="txt-format.html">tab-delimited text format</a> produced
+by Crux.  Like the spectra, the search results can be provided as a
+single file, a list of files or a directory of files.  Note, however,
+that the input mode for spectra and for search results must be the
+same; i.e., if you provide a list of files for the spectra, then you
+must also provide a list of files containing your search results.
+When the MS2 files and the database search results files are provided
+via a file listing, Barista assumes that the order of the MS2 files
+matches the order of the search result files in txt or SQT
+format. Alternatively, when the MS2 files and search results files are
+provided via directories, Barista will search for pairs of files with
+the same root name but different extensions (".ms2" and
+".sqt"/".txt").</li>
 
 </ul>
 
@@ -104,44 +107,6 @@ The program writes files to the folder <code>crux-output</code> by
 default.  The name of the output folder can be set by the user using
 the <code>--output-dir</code> option.  The following files will be
 created:</p>
-
-<!--
-<li>
-<b>barista.target.html</b>: an HTML file that summarizes the protein
-ranking in a human-readable format.  Sets of indistinguishable
-proteins are grouped together, and their IDs are printed along with
-the Barista q-value.  Along with each protein group is a list of the
-corresponding peptides. The information about each peptide includes its
-amino acid sequence, scan and charge of the peptide, its position in
-the protein, the q-value and score assigned by Barista. Following is a
-portion of a sample output file, showing the identification of a pair
-of proteins:</li>
-
-<hr></hr>
-
-<p>
-<table cellpadding="10">
-
-<tr><td><b>q-value</b></td><td><b>score</b></td><td><b>ID</b></td>
-<td><b>Peptides</b></td><td><b>Matched</b></td>
-<td><b>Description</b></td></tr>
-
-<tr><td>0.001</td><td>1.25</td><td>foo</td><td>12</td><td>3</td>
-<td>Phosphotyrosine glutamate transporter</td></tr>
-<tr><td></td><td></td><td>foobar</td><td>7</td><td>3</td>
-<td>Phosphotyrosine glutamate transporter (N-terminal domain)</td></tr>
-</table>
-
-<ul>
-<table cellpadding="5" border="1">
-<tr><td>EAMPK</td><td>scan=000230</td><td>charge=2</td><td>20-24</td><td>q=0.07</td><td>score=1.27</td></tr>
-<tr><td>YRMLK</td><td>scan=004870</td><td>charge=2</td><td>27-31</td><td>q=0.09</td><td>score=1.05</td></tr>
-<tr><td>NLMMRPPK</td><td>scan=006790</td><td>charge=3</td><td>54-61</td><td>q=0.59</td><td>score=-0.09</td></tr>
-</table>
-</ul>
-
-<hr></hr>
--->
 
 <li>
 
@@ -393,34 +358,49 @@ charge: the inferred charge state</li>
 <li>
 spectrum precursor m/z: The observed m/z of the spectrum precursor ion</li>
 <li>
-spectrum neutral mass: The computed mass of the spectrum precursor at the given charge state. This is equal to the precursor m/z minus the mass of a proton (1.00727646677 Da), all multiplied by the charge.</li>
+spectrum neutral mass: The computed mass of the spectrum precursor at
+the given charge state. This is equal to the precursor m/z minus the
+mass of a proton (1.00727646677 Da), all multiplied by the
+charge.</li>
 <li>
-peptide mass: The mass of the peptide sequence, computed as the sum of the the amino acid masses plus the mass of water (18.010564684 Da or 18.0153 Da, depending on whether we are using monoisotopic or average mass).</li>
+peptide mass: The mass of the peptide sequence, computed as the sum of
+the amino acid masses plus the mass of water (18.010564684 Da or
+18.0153 Da, depending on whether we are using monoisotopic or average
+mass).</li>
 <li>
-delta_cn: The normalized difference in xcorr for this PSM relative to other PSMs for this spectrum at this charge state.</li>
+delta_cn: The normalized difference in xcorr for this PSM relative to
+other PSMs for this spectrum at this charge state.</li>
 <li>
-sp score: The SEQUEST-type preliminary score.</li>
+sp score: The SEQUEST preliminary score.</li>
 <li>
 sp rank: The rank of this PSM when sorted by sp score.</li>
 <li>
-xcorr score: The SEQUEST-type cross correlation score.</li>
+xcorr score: The SEQUEST cross correlation score.</li>
 <li>
- xcorr rank: The rank of this PSM when sorted by xcorr.</li>
-<li> 
-p-value: The p-value computed from the estimated Weibull parameters of the score distribution for this spectrum.</li>
+xcorr rank: The rank of this PSM when sorted by xcorr.</li>
 <li>
-b/y ions matched: The number of b-ions and y-ions in the peptide that have a corresponding peak in the spectrum.</li>
+p-value: The p-value computed from the estimated Weibull
+parameters of the score distribution for this spectrum.</li>
 <li>
-b/y ions total: The total number of b- and y-ions predicted for this peptide.</li>
+b/y ions matched: The number of b-ions and y-ions in the peptide that
+have a corresponding peak in the spectrum.</li>
 <li>
-matches/spectrum: The number of candidate peptides in the database found for this spectrum.</li>
+b/y ions total: The total number of b- and y-ions predicted for this
+peptide.</li>
+<li>
+matches/spectrum: The number of candidate peptides in the database
+found for this spectrum.</li>
 <li>
 sequence: The peptide sequence.</li>
 <li>
-cleavage type: The cleavage rules for generating this peptide based on the user-specified enzyme specificity.</li>
+cleavage type: The cleavage rules for generating this peptide based on
+the user-specified enzyme specificity.</li>
 <li>
-protein id: A comma-separated list of proteins in which this peptide appears.</li>
-<li>flanking aa: The amino acids that precede and follow this peptide in the parent protein id.</li>
+protein id: A comma-separated list of proteins in which this peptide
+appears.</li>
+<li>
+flanking aa: The amino acids that precede and follow this peptide
+in the parent protein id.</li>
 <li>
 q-value: The minimal PSM-level false discovery rate at which this PSM
 is deemed significant.  This q-value is computed based on the ranking
@@ -461,18 +441,22 @@ prefix of the protein names that indicates a decoy. Default = rand_.
 </li>
 
 <li>
-<code>--separate-searches &lt;string&gt;</code> &ndash; If the target
-and decoy searches were run separately, rather than using a
-concatenated database, then Barista will assume that the database
-search results provided as a required argument are from the target
-database search.  This option then allows the user to specify the
-location of the decoy search results.  Like the required arguments,
-these search results can be provided as a single file, a list of files
-or a directory.  However, the choice (file, list or directory) must be
-consistent for the MS2 files and the target and decoy search results(in SQT or txt files format).Also, if the MS2 and the search results are provided in directories, then
-Barista will use the MS2 filename (<code>foo.ms2</code>) to identify corresponding target and decoy search results with names like <code>foo*.target.sqt</code> or <code>foo*.target.txt</code> and <code>foo*.decoy.sqt</code> or <code>foo*.decoy.txt</code>.
-This naming convention allows the target and decoy files(int txt or sqt file formats)to reside
-in the same directory.</li>
+<code>--separate-searches &lt;string&gt;</code> &ndash; This option
+indicates that the target and decoy searches were run separately,
+rather than using a concatenated database.  In this case, Barista will
+assume that the database search results provided as a required
+argument are from the target database search.  This option then allows
+the user to specify the location of the decoy search results.  Like
+the required arguments, these search results can be provided as a
+single file, a list of files or a directory.  However, the choice
+(file, list or directory) must be consistent for the MS2 files and the
+target and decoy search results (in SQT or tab-delimited text format).
+Also, if the MS2 and the search results are provided in directories,
+then Barista will use the MS2 filename (<code>&lt;name&gt;.ms2</code>)
+to identify corresponding target and decoy search results with names
+<code>&lt;name&gt;*.target.sqt</code>, <code>&lt;name&gt;*.target.txt</code>,
+<code>&lt;name&gt;*.decoy.sqt</code>
+and <code>&lt;name&gt;*.decoy.txt</code>.</li>
 
 <li>
 <code>--fileroot &lt;string&gt;</code> &ndash;
@@ -519,12 +503,11 @@ for details.  Default = no parameter file.</li>
 
 <li> 
 <code>--feature-file &lt;T|F&gt;</code> &ndash;
-Optional file into which psm features are printed. Default = F.</li>
-
+Optional file into which PSM features are printed. Default = F.</li>
 
 <li> 
-<code>--list-of-files &lt;T|F&gt;</code> &ndash;
-Specify the search result is a list of files or a single file. Default = F.</li>
+<code>--list-of-files &lt;T|F&gt;</code> &ndash; Specify that the
+search result is a list of files. Default = F.</li>
 
 <li>
 <code>--verbosity &lt;0-100&gt;</code> &ndash; 
