@@ -36,7 +36,7 @@ generate a decoy database.</p>
 Barista assigns two types of statistical confidence estimates,
 q-values and posterior error probabilities, to identified spectra and
 to peptides.  For more information about these values, see the
-documentaion
+documentation
 for <a href=calibrate-scores.html>calibrate-scores</a>.</p>
 
 </blockquote>
@@ -65,37 +65,30 @@ target and decoy databases; the latter is supported with the
 <code>--separate-searches</code> option, described below. In either
 case, Barista distinguishes between target and decoy proteins based on
 the presence of a decoy prefix on the sequence identifiers (see
-the <code>--decoy-prefix</code> option, below).  The database can be
-provided in three different ways: (1) as a a single FASTA file with
-suffix ".fa", ".fsa" or ".fasta", (2) as a text file containing a list
-of FASTA files, one per line, or (3) as a directory containing
-multiple FASTA files (identified via the filename suffixes ".fa",
-".fsa" or ".fasta").</li>
+the <code>--decoy-prefix</code> option, below).</li>
 
 <li>
 <b>spectra</b> &ndash; The fragmentation spectra must be provided
-in <a href="ms2-format.html">MS2 format</a>.  Like the database, the
-spectra can be specified in three different ways: (1) as a single file
-with suffix ".ms2", (2) as a text file containing a list of MS2 files
-or (3) as a directory in which all the MS2 files can be found
-(identified via the filename suffix ".ms2").</li>
+in <a href="ms2-format.html">MS2 format</a>.</li>
 
 <li>
 <b>search results</b> &ndash; Barista recognizes search results
 in <a href="sqt-format.html">SQT format</a> and in
 the <a href="txt-format.html">tab-delimited text format</a> produced
-by Crux.  Like the spectra, the search results can be provided as a
-single file, a list of files or a directory of files.  Note, however,
-that the input mode for spectra and for search results must be the
-same; i.e., if you provide a list of files for the spectra, then you
-must also provide a list of files containing your search results.
-When the MS2 files and the database search results files are provided
-via a file listing, Barista assumes that the order of the MS2 files
-matches the order of the search result files in txt or SQT
-format. Alternatively, when the MS2 files and search results files are
-provided via directories, Barista will search for pairs of files with
-the same root name but different extensions (".ms2" and
-".sqt"/".txt").</li>
+by Crux.</li>
+
+<p>
+Each of the three required arguments can be provided in three
+different ways: (1) as a a single file, (2) as a text file containing
+a list of filenames, one per line, or (3) as a directory containing
+multiple files.  File types are identified based on the filename
+extension: ".fa", ".fasta" or ".fsa" for FASTA files, ".ms2" for MS2
+files, ".sqt" for SQT files, and ".txt" for tab-delimited text files
+or lists of filenames.  Note that the input mode for spectra and for
+search results must be the same; i.e., if you provide a list of files
+for the spectra, then you must also provide a list of files containing
+your search results.  This mode is specified using the
+<code>--list-of-files</code> option, described below.</p>
 
 </ul>
 
@@ -449,11 +442,11 @@ argument are from the target database search.  This option then allows
 the user to specify the location of the decoy search results.  Like
 the required arguments, these search results can be provided as a
 single file, a list of files or a directory.  However, the choice
-(file, list or directory) must be consistent for the MS2 files and the
-target and decoy search results (in SQT or tab-delimited text format).
-Also, if the MS2 and the search results are provided in directories,
-then Barista will use the MS2 filename (<code>&lt;name&gt;.ms2</code>)
-to identify corresponding target and decoy search results with names
+(file, list or directory) must be consistent for the spectrum files
+and the target and decoy search results.  Also, if the spectrum and
+the search results are provided in directories, then Barista will use
+the spectrum filename (<code>&lt;name&gt;.ms2</code>) to identify
+corresponding target and decoy search results with names
 <code>&lt;name&gt;*.target.sqt</code>, <code>&lt;name&gt;*.target.txt</code>,
 <code>&lt;name&gt;*.decoy.sqt</code>
 and <code>&lt;name&gt;*.decoy.txt</code>.</li>
@@ -491,10 +484,8 @@ For this option to work, the <code>--skip-cleanup</code> must have
 been set to true when Barista was run the first time.</li>
 
 <li>
-<code>--use-spec-features &lt;T/F&gt;</code> &ndash; Barista uses
-enriched feature set derived from the spectra in ms2 files. It can be
-forced to use minimal feature set by setting the --use-spec-features
-option to F. Default T.</li>
+<code>--use-spec-features &lt;T/F&gt;</code> &ndash; Barista uses an
+enriched feature set derived from the spectra. Default = T.</li>
 
 <li><code>--parameter-file &lt;filename&gt;</code> &ndash; 
 A file containing command-line or additional parameters.  See
@@ -507,7 +498,14 @@ Optional file into which PSM features are printed. Default = F.</li>
 
 <li> 
 <code>--list-of-files &lt;T|F&gt;</code> &ndash; Specify that the
-search result is a list of files. Default = F.</li>
+spectra and search results are provided as lists of files, rather than
+as individual files.  When the spectrum files and the database search
+results files are provided via a file listing, Barista assumes that
+the order of the spectrum files matches the order of the search result
+files. Alternatively, when the spectrum files and search results files
+are provided via directories, Barista will search for pairs of files
+with the same root name but different extensions (".ms2" and
+".sqt"/".txt").  Default = F.</li>
 
 <li>
 <code>--verbosity &lt;0-100&gt;</code> &ndash; 
