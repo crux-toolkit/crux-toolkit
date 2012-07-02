@@ -14,7 +14,8 @@
 <ul>
 
 <li>
-Hardklor and Bullseye are now incorporated into Crux.</li>
+Hardklor and Bullseye, tools for analyzing high-resolution precursor
+spectra, are now incorporated into Crux.</li>
 
 <li>
 Barista has been modified extensively so that it more closely
@@ -29,7 +30,7 @@ Barista now reports posterior error probabilities in addition to
 q-values.</li>
 <li>
 Barista's pep.xml output has been updated to be compatible with the
-TPP, particularly as an input to ProteinProphet.</li>
+TransProteomic Pipeline (TPP).</li>
 </ul>
 
 </ul>
@@ -99,22 +100,24 @@ The option <code>display-summed-masses</code> has been replaced by
 <code>mod-mass-format</code>.  With this option, there is a new format
 for reporting modificiations: the mass in the square braces is that of the
 preceeding amino acid plus the modification mass.  This format is compliant
-with TPP .pep.xml output.
+with TPP pep.xml output.</li>
 
 <li>
-Modifications reported differently in .pep.xml header to be compliant with 
-TPP.
+Modifications are reported differently in the pep.xml header to be
+compliant with the TPP.</li>
 
 <li>
 The command <code>crux compute-q-values</code> was renamed <code>crux
-calibrate-scores</code>.
+calibrate-scores</code>.</li>
 
 <li>
-Explicit error message when an incorrect .ms2 file is passed to either crux
-search command instead of reporting that no spectra were found.
+Crux now provides an explicit error message when an incorrectly
+formatted MS2 file is parsed.  Previously, crux simply reported that
+no spectra were found.</li>
 
 <li>
-Missing scores added to <code>q-ranker</code> .pep.xml files.
+Several additional scores were added to the <code>q-ranker</code>
+pep.xml files.</li>
 
 </ul>
 
