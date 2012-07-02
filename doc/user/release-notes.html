@@ -94,6 +94,28 @@ were sorted by q-ranker score so the targets and decoys were mixed
 together with no accompanying labels.  This bug has been fixed so that
 Q-ranker once again returns only target PSMs.</li>
 
+<li>
+The option <code>display-summed-masses</code> has been replaced by
+<code>mod-mass-format</code>.  With this option, there is a new format
+for reporting modificiations: the mass in the square braces is that of the
+preceeding amino acid plus the modification mass.  This format is compliant
+with TPP .pep.xml output.
+
+<li>
+Modifications reported differently in .pep.xml header to be compliant with 
+TPP.
+
+<li>
+The command <code>crux compute-q-values</code> was renamed <code>crux
+calibrate-scores</code>.
+
+<li>
+Explicit error message when an incorrect .ms2 file is passed to either crux
+search command instead of reporting that no spectra were found.
+
+<li>
+Missing scores added to <code>q-ranker</code> .pep.xml files.
+
 </ul>
 
 <h2>Version 1.37</h2> December 22, 2011
