@@ -434,7 +434,7 @@ prefix of the protein names that indicates a decoy. Default = rand_.
 </li>
 
 <li>
-<code>--separate-searches &lt;string&gt;</code> &ndash; This option
+<code>--separate-searches &lt;search&nbsp;results&gt;</code> &ndash; This option
 indicates that the target and decoy searches were run separately,
 rather than using a concatenated database.  In this case, Barista will
 assume that the database search results provided as a required
@@ -449,7 +449,9 @@ the spectrum filename (<code>&lt;name&gt;.ms2</code>) to identify
 corresponding target and decoy search results with names
 <code>&lt;name&gt;*.target.sqt</code>, <code>&lt;name&gt;*.target.txt</code>,
 <code>&lt;name&gt;*.decoy.sqt</code>
-and <code>&lt;name&gt;*.decoy.txt</code>.</li>
+and <code>&lt;name&gt;*.decoy.txt</code>.  Note that the decoy
+database can be provided as part of the required &lt;database&gt;
+argument.</li>
 
 <li>
 <code>--fileroot &lt;string&gt;</code> &ndash;
