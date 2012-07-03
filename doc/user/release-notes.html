@@ -41,27 +41,28 @@ TransProteomic Pipeline (TPP).</li>
 
 <li>
 <code>crux predict-peptide-ions</code> calculates the mass shift
-resulting from the nh3 or h2o neutral loss correctly.  Previously
-a neutral loss resulting in an addition of mass rather than subtraction.
+resulting from the nh3 or h2o neutral loss correctly.  Previously, a
+neutral loss resulted in an addition of mass rather than subtraction.
 </li>
 
 <li>
 <code>crux predict-peptide-ions</code> reports ion-type as
-'b','y','a', or 'p' rather than an number (i.e. 0, 1, 2, 3).</li>
+'b','y','a', or 'p' rather than a number (i.e. 0, 1, 2, 3).</li>
 
 <li>
-<code>crux predict-peptide-ions</code> now only allows one
-type of neutral loss modification per ion.  Previously, multiple 
-different types of neutral loss can be applied to an ion.</li>
+<code>crux predict-peptide-ions</code> now only allows one type of
+neutral loss modification per ion.  Previously, multiple different
+types of neutral loss could be applied simultaneously to a single
+ion.</li>
 
 <li>
 The <code>neutral-losses</code> option was removed from <code>crux
 predict-peptide-ions</code>, due to its redundancy with the supported
-the <code>--nh3</code> and <code>--h2o</code> options</li>.    
+the <code>--nh3</code> and <code>--h2o</code> options.</li>
 
 <li>
-<code>crux predict-peptide-ions</code> supports 'byaa' in the 
-<code>--primary-ions</code> parameter which will generate 
+<code>crux predict-peptide-ions</code> supports 'bya' in the
+<code>--primary-ions</code> parameter, which will generate 
 the a-ion series in addition to the 'b' and 'y' ions.</li> 
 
 <li>
@@ -73,16 +74,17 @@ ignored.</li>
 spectral count.</li>
 
 <li>
-<code>crux spectral-counts</code> now has an option to compute dnsaf values</li>
+<code>crux spectral-counts</code> now has an option to compute dNSAF
+values.</li>
 
 <li>
 A bug in <code>crux spectral-counts</code> was fixed so that it now
 properly normalizes the NSAF value.</li>
 
 <li>
-Multiple missed cleavages are now handled by <code>crux search-for-xlinks</code> 
-using the missed-cleavages parameter.  Before this was unsupported.
-</li>
+Multiple missed cleavages are now handled by <code>crux
+search-for-xlinks</code> using the missed-cleavages parameter.
+Previously, this was unsupported.</li>
 
 <li>
 Ambiguous amino acids are handled differently.  'J' is interpreted to
