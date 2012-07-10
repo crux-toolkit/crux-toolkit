@@ -34,10 +34,10 @@ generate a decoy database.</p>
 
 <p>
 Barista assigns two types of statistical confidence estimates,
-q-values and posterior error probabilities, to identified spectra and
-to peptides.  For more information about these values, see the
+q-values and posterior error probabilities, to identified PSMs,
+peptides and proteins.  For more information about these values, see the
 documentation
-for <a href=calibrate-scores.html>calibrate-scores</a>.</p>
+for <a href="calibrate-scores.html">calibrate-scores</a>.</p>
 
 </blockquote>
 
@@ -61,8 +61,7 @@ for <a href=calibrate-scores.html>calibrate-scores</a>.</p>
 <b>protein database</b> &ndash; The program requires the FASTA format
 protein database files against which the search was performed. The
 protein database input may be a concatenated database or separate
-target and decoy databases; the latter is supported with the
-<code>--separate-searches</code> option, described below. In either
+target and decoy databases. In either
 case, Barista distinguishes between target and decoy proteins based on
 the presence of a decoy prefix on the sequence identifiers (see
 the <code>--decoy-prefix</code> option, below).</li>
@@ -79,7 +78,7 @@ by Crux.</li>
 
 <p>
 Each of the three required arguments can be provided in three
-different ways: (1) as a a single file, (2) as a text file containing
+different ways: (1) as a single file, (2) as a text file containing
 a list of filenames, one per line, or (3) as a directory containing
 multiple files.  File types are identified based on the filename
 extension: ".fa", ".fasta" or ".fsa" for FASTA files, ".ms2" for MS2
@@ -103,7 +102,7 @@ created:</p>
 
 <li>
 
-<b>barista_output.xml:</b> a <a href="barista-xml-format.html">XML file format</a> that contains four main parts: 
+<b>barista_output.xml:</b> an <a href="barista-xml-format.html">XML file format</a> that contains four main parts: 
 <ol>
 <li>Proteins</li>
 <li>Subset Proteins</li>
@@ -361,15 +360,15 @@ are located in database-dir:
 <ol>
 <li>
 You can use crux sequest-search which produces database search
-results in the sqt format or you can use crux search-for-matches which produces database search results in the tab-delimited format. Both of them are compatible with Barista input. (see
-<a href="crux-sequest-search.html"> sequest-search</a> and <a href="crux-search-for-matches.html"> search-for-matches</a>).
+results in the sqt format or you can use crux search-for-matches which produces database search results in the tab-delimited format. Both of them are compatible with Barista input (see
+<a href="crux-sequest-search.html">sequest-search</a> and <a href="crux-search-for-matches.html">search-for-matches</a>).
 </li>
 
 <li>
 Crux database search requires only the target database for input and
 generates the decoy database. The crux command create-index creates
 the decoy database sequences used during the search and stores it in
-the &lt index name &gt directory specified by the second required
+the <code>&lt;index name&gt;</code> directory specified by the second required
 argument to the create-index command
 (See <a href="crux-create-index.html">create-index</a>). This decoy
 database is then available for Barista analysis, in addition to the
