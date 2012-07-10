@@ -103,309 +103,37 @@ created:</p>
 
 <li>
 
-<b>barista_output.xml</b>: an XML file that is subdivided into four
-main parts:
-<dl>
-  <dd> &lt proteins &gt ... &lt /proteins &gt </dd>
-  <dd> &lt subset_proteins &gt ... &lt /subset_proteins &gt </dd>
-  <dd> &lt peptides &gt ... &lt /peptides &gt </dd>
-  <dd> &lt psms &gt ... &lt /psms &gt </dd>
-</dl>
-
+<b>barista_output.xml:</b> a <a href="barista-xml-format.html">XML file format</a> that contains four main parts: 
 <ol>
-<li>
-Proteins contains the ranked list of groups of indistinguishable
-target proteins.  Each protein entry includes the following fields:
-<ol>
-<li>
-protein group: a number that identifies a group. </li>
-<li>
-q-value: The minimal protein-level false discovery rate at which this
-protein is deemed significant.  This q-value is computed based on the
-ranking of the proteins induced by the Barista score.</li>
-<li>
-score: The score assigned to the proteins by Barista.  Higher values
-correspond to more confident identifications.</code>
-<li>
-protein_ids: proteins in the protein group. </li>
-<li>
-alternative_peptide_id: peptides are considered indistinguishable if
-they have identical amino acid sequences or they differ only by I/L or
-T/S in the same position in the peptide. If the peptides shared by the
-group are not identical, they are listed immediately after the
-proteins they belong to. </li>
-<li>
-peptide_ids: peptides that belong to each of the proteins in the
-group.</li>
+<li>Proteins</li>
+<li>Subset Proteins</li>
+<li>Peptides</li>
+<li>PSMs</li>
 </ol>
-
-<br>
-For example, suppose that
-<dl>
-<dd> <b> protein_a </b> has peptide  <b> KLEAEVEALKK </b>  &nbsp &nbsp &nbsp  // 'L' in second position </dd>
-          <dd> and peptide  <b> VLGAK </b>  </dd>            
-<dd> <b> protein_b </b> has peptide  <b> KIEAEVEALKK </b>  &nbsp &nbsp &nbsp  // 'I' in second position
-          <dd> and peptide  <b> VLGAK </b> </dd>
-</dl>
-
-<br>
-Then the xml entry could look like this
-<dl>
-<dd> &lt proteins &gt </dd>
-
-<dl>
-
-<dd> &lt q_value &gt 0 &lt /q_value &gt
-<dd> &lt score &gt 8.9 &gt &lt /score &gt
-<dd> &lt protein_group group_id="1" &gt </dd>
-
-<dl>
-<dd> &lt protein_ids &gt </dd>
- 
-<dl>
-    <dd> &lt protein_id &gt protein_a  &lt /protein_id &gt </dd>
-    <dl>
-    <dd> &lt alternative_peptide_id &gt KLEAEVEALKK &lt /alternative_peptide_id &gt </dd>
-    </dl>
-    <dd> &lt protein_id &gt protein_b &lt /protein_id &gt </dd>
-    <dl>
-    <dd> &lt alternative_peptide_id &gt KIEAEVEALKK &lt /alternative_peptide_id &gt </dd>
-    </dl>
-</dl>
-
-<dd> &lt /protein_ids &gt </dd>
-
-
- <dd> &lt peptide_ids &gt </dd>
- <dl>
-     <dd> &lt peptide_id &gt VLGAK &lt /peptide_id &gt <dd>
- </dl>    
- <dd> &lt /peptide_ids &gt </dd>
-</dl>
-
-<dd> &lt /protein_group &gt </dd>
-</dl>
-<dd> &lt /proteins &gt </dd>
-</dl>
-</li>
-
 <li>
-Subset proteins contains groups of indistinguishable proteins, which
-constitute a subset of some group in the proteins section in
-terms of the peptides identified in these proteins. Each entry includes
-<ol>
-<li>
-group id and parent group id: the identifier of the group and the
-identifier of the protein group which has the superset of the peptide
-set belonging the current group
-</li>
-<li>
-protein_ids : proteins that belong to the group
-</li>
-<li>
-peptide_ids: peptides that belong to the proteins in the group.
-</li>
-</ol>
-</li>
-
-<li>
-Peptides contains a ranked list of target peptides. Each peptide entry
-includes:
-<ol>
-<li>
-peptide: Peptide amino acid sequence.
-<li>
-q-value: The minimal peptide-level false discovery rate at which this
-peptide is deemed significant.  This q-value is computed based on the
-ranking of the peptides induced by the Barista score.</li>
-<li>
-score: The score assigned to the peptide by Barista.  Higher values
-correspond to more confident identifications.</li>
-<li>
-main_psm_id: The PSM identifier based on which the peptide received
-its score. A peptide score is the maximum over all the PSMs that
-contain this peptide. </li>
-<li>
-psm_ids: The identifiers of all the PMS that contain this peptide .</li>
-<li>
-protein_ids: All the proteins that contain this peptide and were
-infered based on some PSMs from the database search. </li>
-</ol>
-
-</li>
-
-<li>
-PSMs contains ranked list of target peptide-spectrum matches. The
-following columns are included:
-<ol>
-<li>
-psm_id: PSM identifier. </li>
-<li>
-q-value: The minimal PSM-level false discovery rate at which this PSM
-is deemed significant.  This q-value is computed based on the ranking
-of the PSMs induced by the Barista score.</li>
-<li>
-score: The score assigned to the PSM by Barista.  Higher values
-correspond to more confident identifications.</code>
-<li>
-scan: the scan number</li>
-<li>
-charge: the inferred charge state</li>
-<li>
-precursor_mass: precrusor mass as recorded during the MS1 scan </li>
-<li>
-peptide: the peptide sequence</li>
-<li>
-filename: name of the file in which the PSM appears</li>
-</ol>
-
-</ol>
-</li>
-
-
-<li>
-<b>barista.target.proteins.txt</b>: a tab-delimited file containing a
+<b>barista.target.proteins.txt</b>: a <a href="txt-format.html"> tab-delimited file</a> containing a
 ranked list of groups of indistinguishable target proteins with
 associated Barista scores and q-values and with peptides that
-contributed to the identification of the protein group).  The
-following columns are included:
-<ol>
-<li>
-protein group number: a number that identifies a group. </li>
-<li>
-q-value: The minimal protein-level false discovery rate at which this
-protein is deemed significant.  This q-value is computed based on the
-ranking of the proteins induced by the Barista score.</li>
-<li>
-barista score: The score assigned to the proteins by Barista.  Higher
-values correspond to more confident identifications.</code>
-<li>
-proteins: proteins in the protein group. Each protein can be followed
-by peptides in parenthesis, if they belong only to this particular
-protein in the group. Since peptides are considered indistinguishable
-if they have identical amino acid sequences or they differ only by I/L
-or T/S in the same position in the peptide, the peptides shared by the
-group may not all be identical identical.</li>
-<li>
-peptides-scan.charge: peptides belonging to each protein in the group,
-with scan and charge (for example, EAMPK-001285.2).</li>
-</ol>
+contributed to the identification of the protein group).
 </li>
 
 <li>
-<b>barista.target.subset-proteins.txt</b>: a tab-delimited file
+<b>barista.target.subset-proteins.txt</b>: a <a href="txt-format.html">tab-delimited file</a>
 containing groups of indistinguishable proteins, which constitute a
 subset of some group in the barista.target.proteins.txt file in terms
-of the peptides identified in these proteins. The following columns
-are included:
-<ol>
-<li>
-protein group number: a number that identifies a group. </li>
-<li>
-parent group numbers: group numbers of the protein groups in the
-barista.target.proteins.txt that are supersets of this group in terms
-of peptides. </li>
-<li>
-proteins: proteins in the protein group. Each protein can be followed
-by peptides in parenthesis, if they belong only to this particular
-protein in the group. Since peptides are considered indistinguishable
-if they have identical amino acid sequences or they differ only by I/L
-or T/S in the same position in the peptide, the peptides shared by the
-group may not all be identical identical.</li>
-<li>
-peptides-scan.charge: peptides belonging to each protein in the group,
-with scan and charge (for example, EAMPK-001285.2).</li>
-</ol>
+of the peptides identified in these proteins. 
 </li>
 
 <li>
-<b>barista.target.peptides.txt</b>: a tab-delimited file containing a
+<b>barista.target.peptides.txt</b>: a <a href="txt-format.html">tab-delimited file </a>containing a
 ranked list of target peptides with the associated Barista scores and
-q-values.  The following columns are included:  
-<ol>
-<li>
-peptide: Peptide amino acid sequence.
-<li>
-q-value: The minimal peptide-level false discovery rate at which this
-peptide is deemed significant.  This q-value is computed based on the
-ranking of the peptides induced by the Barista score.</li>
-<li>
-barista score: The score assigned to the peptide by Barista.  Higher
-values correspond to more confident identifications.</code>
-<li>
-scan: scan of spectrum in the peptide-spectrum match.</li>
-<li>
-charge: charge of spectrum in the peptide-spectrum match.</li>
-</ol>
+q-values. 
 </li>
 
 <li>
-<b>barista.target.psm.txt</b>: a tab-delimited file containing a
+<b>barista.target.psm.txt</b>: a <a href="txt-format.html">tab-delimited file format </a>containing a
 ranked list of target peptide-spectrum matches with the associated
-Barista scores and q-values.  The following columns are included:
-<ol>
-<li>
-scan: the scan number</li>
-<li>
-charge: the inferred charge state</li>
-<li>
-spectrum precursor m/z: The observed m/z of the spectrum precursor ion</li>
-<li>
-spectrum neutral mass: The computed mass of the spectrum precursor at
-the given charge state. This is equal to the precursor m/z minus the
-mass of a proton (1.00727646677 Da), all multiplied by the
-charge.</li>
-<li>
-peptide mass: The mass of the peptide sequence, computed as the sum of
-the amino acid masses plus the mass of water (18.010564684 Da or
-18.0153 Da, depending on whether we are using monoisotopic or average
-mass).</li>
-<li>
-delta_cn: The normalized difference in xcorr for this PSM relative to
-other PSMs for this spectrum at this charge state.</li>
-<li>
-sp score: The SEQUEST preliminary score.</li>
-<li>
-sp rank: The rank of this PSM when sorted by sp score.</li>
-<li>
-xcorr score: The SEQUEST cross correlation score.</li>
-<li>
-xcorr rank: The rank of this PSM when sorted by xcorr.</li>
-<li>
-p-value: The p-value computed from the estimated Weibull
-parameters of the score distribution for this spectrum.</li>
-<li>
-b/y ions matched: The number of b-ions and y-ions in the peptide that
-have a corresponding peak in the spectrum.</li>
-<li>
-b/y ions total: The total number of b- and y-ions predicted for this
-peptide.</li>
-<li>
-matches/spectrum: The number of candidate peptides in the database
-found for this spectrum.</li>
-<li>
-sequence: The peptide sequence.</li>
-<li>
-cleavage type: The cleavage rules for generating this peptide based on
-the user-specified enzyme specificity.</li>
-<li>
-protein id: A comma-separated list of proteins in which this peptide
-appears.</li>
-<li>
-flanking aa: The amino acids that precede and follow this peptide
-in the parent protein id.</li>
-<li>
-q-value: The minimal PSM-level false discovery rate at which this PSM
-is deemed significant.  This q-value is computed based on the ranking
-of the PSMs induced by the Barista score.</li>
-<li>
-barista score: The score assigned to the PSM by Barista.  Higher
-values correspond to more confident identifications.</code>
-<li>
-peptide: the peptide sequence</li>
-<li>
-filename: name of the file in which the PSM appears</li>
-</ol>
+Barista scores and q-values.
 </li>
 
 <li>
