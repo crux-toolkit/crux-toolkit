@@ -26,12 +26,8 @@ using namespace std;
 #include "CruxParser.h"
 #include "TabDelimParser.h"
 #include "CruxApplication.h"
-
-enum FILE_FORMAT_T{
-  INVALID_FORMAT,
-  SQT_FORMAT,
-  DELIMITED_FORMAT
-};
+#include "mass.h"
+#include "objects.h"
 
 class QRanker: public CruxApplication
 {
@@ -69,6 +65,7 @@ public:
   int set_command_line_options(int argc, char **argv);
   int crux_set_command_line_options(int argc, char *argv[]);
 
+
   virtual int main(int argc, char** argv);
   virtual std::string getName();
   virtual std::string getDescription();
@@ -77,7 +74,8 @@ public:
   FILE_FORMAT_T check_file_format(string &filePath);
   string file_extension(string filename); 
   void get_protein_id(int pepind, vector<string> &prot); 
-  void  print_protein_ids(vector<string> &prots, ofstream &os, int psmind); 
+  void  print_protein_ids(vector<string> &prots, ofstream &os, int psmind);  
+
 protected:
 
     Dataset d;

@@ -23,7 +23,7 @@ resembles the other tools in Crux:</li>
 
 <ul>
 <li>
-Barista accepts search results in tab-delimited format, in addition to
+Barista and QRanker accept search results in tab-delimited format, in addition to
 SQT format.</li>
 <li>
 Barista now reports posterior error probabilities in addition to
@@ -138,7 +138,10 @@ pep.xml files.</li>
 <li>Fixed a bug in the normalization of the observed spectra.
 Previously, after the 10-bin normalization of intensities, peaks with
 heights below 5% of the maximum were not being removed.</li>
+<li>
+Assign Z state to spectrum that has no Z line</li>
 </ul>
+
 
 <h2>Version 1.37</h2> December 22, 2011
 
@@ -194,7 +197,9 @@ the number of target peptides compared to the spectrum and the decoy
 file has an additional column, 'decoy matches/spectrum' that gives the
 number of decoy peptides compared to the spectrum.  These two numbers
 may differ when decoys are not generated on-the-fly.</li>
-
+<li>
+The header lines of Barista and QRanker include all of the columns 
+in the search results.</li>
 </ul>
 
 <hr></hr>

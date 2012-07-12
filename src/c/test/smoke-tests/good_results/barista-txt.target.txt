@@ -1,4 +1,4 @@
-scan	charge	q-value	barista score	PEP	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	sp score	sp rank	xcorr score	xcorr rank	b/y ions matched	b/y ions total	matches/spectrum	sequence	cleavage type	protein id	flanking aa	filename
+scan	charge	q-value	barista score	barista PEP	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	sp score	sp rank	xcorr score	xcorr rank	b/y ions matched	b/y ions total	matches/spectrum	sequence	cleavage type	protein id	flanking aa	filename
 53	2	0	34.3651	4.41384e-16	745.749	1489.48	1489.73	0	2953.36	1	5.17451	1	21	24	8	NFLETVELQVGLK	trypsin-full-digest	YGL135W(27)	RN	crux-output/sequest.target.txt
 62	2	0	34.2637	4.41384e-16	745.859	1489.7	1489.73	0	2727.86	1	5.16812	1	21	24	6	NFLETVELQVGLK	trypsin-full-digest	YGL135W(27)	RN	crux-output/sequest.target.txt
 11	2	0	33.5069	4.41384e-16	745.269	1488.52	1489.73	0	2777.4	1	4.52613	1	21	24	10	NFLETVELQVGLK	trypsin-full-digest	YGL135W(27)	RN	crux-output/sequest.target.txt

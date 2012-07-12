@@ -45,7 +45,8 @@ class SQTParser{
     vector<string> peptides;
     vector<int> num_proteins_in_match;
     vector<string> proteins;
-    vector<int>peptide_pos; 
+    vector<int> peptide_pos; 
+
   };
   /*
  SQTParser() : num_spectra(0),num_psm(0),num_pos_psm(0),num_neg_psm(0),num_features(0),

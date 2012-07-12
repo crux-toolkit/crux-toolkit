@@ -1,4 +1,5 @@
 #include "Barista.h"
+#include "objects.h"
 using namespace std; 
 double Barista :: check_gradients_hinge_one_net(int protind, int label){
   int num_pep = d.protind2num_pep(protind);
@@ -659,6 +660,7 @@ void Barista :: write_results_prot_xml(ofstream &os)
 	  os << "  <q_value>" << trainset[i].q << "</q_value>" << endl;
 	  os << "  <score>" << trainset[i].score << "</score>" << endl;
 	  os << "  <nsaf>" << trainset[i].nsaf << "</nsaf>" << endl;
+          os<<"<barista PEP>"<<trainset[i].PEP<<"</barista PEP>"<<endl; 
 	  os << "  <protein_ids>" << endl;
 	  protein_str = d.ind2prot(protind);
 	  get_tab_delim_proteins(protein_str, tab_delim_proteins);
@@ -876,6 +878,7 @@ void Barista :: write_results_peptides_xml(ofstream &os)
 	  os << "  <q_value>" << peptrainset[i].q << "</q_value>" << endl;
 	  os << "  <score>" << peptrainset[i].score << "</score>" << endl;
 	  os << "  <nsaf>" << peptrainset[i].nsaf << "</nsaf>" << endl;
+          os << " <barista PEP>" <<peptrainset[i].PEP<<"</barista PEP>"<<endl; 
 	  //write out peptides
 	  int psmind = pepind_to_max_psmind[pepind];
 	  if(psmind > -1)
@@ -1129,7 +1132,8 @@ void Barista :: write_results_prot_special_case_tab(ofstream &os, int i)
 void Barista :: write_results_prot_tab(ofstream &os)
 {
   os << "group number" << "\t" << "q-value" << "\t" << "barista score" << "\t" << "NSAF score" << "\t";
-  os << "proteins" << "\t" << "peptides-scan.charge" << endl;
+  os<<"barista PEP\t";
+  os << "proteins" << "\t" << "peptides-scan.charge"<<endl;
 
   int cn = 0;
   for(int i = 0; i < trainset.size(); i++)
@@ -1149,6 +1153,7 @@ void Barista :: write_results_prot_tab(ofstream &os)
 	  os << trainset[i].q << "\t";
 	  os << trainset[i].score << "\t";
 	  os << trainset[i].nsaf << "\t";
+          os<<trainset[i].PEP<<"\t"; 
 	  os << d.ind2prot(protind); 
 	  for(unsigned int j = 0; j < trainset[i].indistinguishable_protinds.size(); j++)
 	    {
@@ -1399,8 +1404,9 @@ void Barista :: write_results_peptides_tab(ofstream &os)
 {
   os<< "q-value" << "\t" << "barista score" << "\t";
   os << "NSAF score" << "\t";
-  os << "scan" << "\t" << "charge" << "\t";
-  os<<"PEP\t";
+  os<<"barista PEP\t";
+  os << "scan" << "\t" ;
+  os<< "charge" << "\t";
   os<<"spectrum precursor m/z"<<"\t";
   os<<"spectrum neutral mass"<<"\t"; 
   os<<"peptide mass"<<"\t";
@@ -1412,7 +1418,7 @@ void Barista :: write_results_peptides_tab(ofstream &os)
   os<<"b/y ions matched"<<"\t";
   os<<"b/y ions total"<<"\t";
   os<<"matches/spectrum"<<"\t";
-  os<<"sequemce\t"; 
+  os<<"sequence\t"; 
   os<<"cleavage type"<<"\t"; 
   os<<"protein id"<<"\t";
   os<<"flanking_aa"<<endl;
@@ -1425,14 +1431,22 @@ void Barista :: write_results_peptides_tab(ofstream &os)
       string pep = d.ind2pep(pepind);
       string seq, n, c;
       get_pep_seq(pep, seq, n, c);
+      //q-value
       os << peptrainset[i].q << "\t";
+      //score 
       os << peptrainset[i].score << "\t";
+      ///nsaf
       os<<peptrainset[i].nsaf<<"\t";
+     //PEP
+      os<<peptrainset[i].PEP<<"\t"; 
+   
       //write out peptides
       int psmind = pepind_to_max_psmind[pepind];
       if(psmind > -1){
-	os << d.psmind2scan(psmind) << "\t" << d.psmind2charge(psmind)<<"\t";
-        os << psmtrainset[i].PEP << "\t";//<PEP
+       //scan  
+	os << d.psmind2scan(psmind) << "\t" ;
+       //charge
+        os<< d.psmind2charge(psmind)<<"\t";
         //mass-to-charge ratio 
         os<<(d.psmind2precursor_mass(psmind)+
         d.psmind2charge(psmind)*MASS_PROTON)/
@@ -1446,15 +1460,15 @@ void Barista :: write_results_peptides_tab(ofstream &os)
         //Sp Score
         os<<d.psmind2spscore(psmind)<<"\t";
         //Sp Rank 
-        os<<d.psmind2SpRank(psmind)<<"\t";
+        os<<d.psmind2sp_rank(psmind)<<"\t";
         //xcorr Score
       	os<<d.psmind2xcorr(psmind)<<"\t";
       	//xcorr rank
-      	os<<d.psmind2xcorrRank(psmind)<<"\t";
+      	os<<d.psmind2xcorr_rank(psmind)<<"\t";
       	//by ions match 
-      	os<<d.psmind2_by_ions_matched(psmind)<<"\t"; 
+      	os<<d.psmind2by_ions_matched(psmind)<<"\t"; 
       	//by ions total 
-      	os<<d.psmind2_by_ions_total(psmind)<<"\t";
+      	os<<d.psmind2by_ions_total(psmind)<<"\t";
       	//Matches/Spectrum 
       	os<<d.psmind2matches_spectrum(psmind)<<"\t";
         //sequence 
@@ -1471,6 +1485,7 @@ void Barista :: write_results_peptides_tab(ofstream &os)
 	  cout<< "waning: did not assign peptide max psmind\n";
           os<<"not assignd\t";
        }
+
     }
   }
 }
@@ -1479,7 +1494,7 @@ void Barista :: write_results_psm_tab(ofstream &os)
 {
   os << "scan" << "\t" << "charge" << "\t";
   os << "q-value" << "\t" << "barista score" << "\t";
-  os << "PEP\t";
+  os << "barista PEP\t";
   os<<"spectrum precursor m/z"<<"\t";
   os<<"spectrum neutral mass"<<"\t"; 
   os<<"peptide mass"<<"\t";
@@ -1527,15 +1542,15 @@ void Barista :: write_results_psm_tab(ofstream &os)
           //Sp Score
           os<<d.psmind2spscore(psmind)<<"\t";
           //Sp Rank 
-          os<<d.psmind2SpRank(psmind)<<"\t";
+          os<<d.psmind2sp_rank(psmind)<<"\t";
           //xcorr Score
       	  os<<d.psmind2xcorr(psmind)<<"\t";
       	  //xcorr rank
-      	  os<<d.psmind2xcorrRank(psmind)<<"\t";
+      	  os<<d.psmind2xcorr_rank(psmind)<<"\t";
       	  //by ions match 
-      	  os<<d.psmind2_by_ions_matched(psmind)<<"\t"; 
+      	  os<<d.psmind2by_ions_matched(psmind)<<"\t"; 
       	  //by ions total 
-      	  os<<d.psmind2_by_ions_total(psmind)<<"\t";
+      	  os<<d.psmind2by_ions_total(psmind)<<"\t";
       	  //Matches/Spectrum 
       	  os<<d.psmind2matches_spectrum(psmind)<<"\t";
       	  get_pep_seq(pep,seq,n,c);
@@ -1870,6 +1885,84 @@ void Barista :: computePEP(){
   delete target_scores;
   delete decoy_scores;
   delete PEPs;
+
+  /** 
+   * Calculate Peptide PEPs
+   */
+  target_scores_vect.clear();
+  decoy_scores_vect.clear();
+  
+  //pull out the target and decoy scores for peptide PEPs
+  for(int i=0;i<peptrainset.size();i++){
+    if(peptrainset[i].label==1)
+      target_scores_vect.push_back(peptrainset[i].score);
+    else 
+      decoy_scores_vect.push_back(peptrainset[i].score);
+  }
+  num_targets = target_scores_vect.size();
+  num_decoys = decoy_scores_vect.size();
+  carp(CARP_DEBUG, "Found %d targets and %d decoys", num_targets, num_decoys);  
+
+  // copy them to an array as required by the compute_PEP method
+  target_scores = new double[num_targets];
+  copy(target_scores_vect.begin(), target_scores_vect.end(), target_scores);
+  decoy_scores = new double[num_decoys];
+  copy(decoy_scores_vect.begin(), decoy_scores_vect.end(), decoy_scores);
+  PEPs = compute_PEP(target_scores, num_targets, 
+                             decoy_scores, num_decoys);
+
+  // fill in the data set with the new scores for the targets
+  target_idx = 0;
+  for(int full_idx = 0; full_idx < psmtrainset.size(); full_idx++){
+    if( peptrainset[full_idx].label == 1 ){
+      peptrainset[full_idx].PEP = PEPs[target_idx];
+      target_idx++; 
+    } // else, skip decoys
+  }
+
+  delete target_scores;
+  delete decoy_scores;
+  delete PEPs;
+
+
+  /** 
+   * Calculate Protein PEPs
+   */
+  target_scores_vect.clear();
+  decoy_scores_vect.clear();
+  
+  //pull out the target and decoy scores for peptide PEPs
+  for(int i=0;i<trainset.size();i++){
+    if(trainset[i].label==1)
+      target_scores_vect.push_back(trainset[i].score);
+    else 
+      decoy_scores_vect.push_back(trainset[i].score);
+  }
+  num_targets = target_scores_vect.size();
+  num_decoys = decoy_scores_vect.size();
+  carp(CARP_DEBUG, "Found %d targets and %d decoys of Protein", num_targets, num_decoys);  
+
+  // copy them to an array as required by the compute_PEP method
+  target_scores = new double[num_targets];
+  copy(target_scores_vect.begin(), target_scores_vect.end(), target_scores);
+  decoy_scores = new double[num_decoys];
+  copy(decoy_scores_vect.begin(), decoy_scores_vect.end(), decoy_scores);
+  PEPs = compute_PEP(target_scores, num_targets, 
+                             decoy_scores, num_decoys);
+
+  // fill in the data set with the new scores for the targets
+  target_idx = 0;
+  for(int full_idx = 0; full_idx < trainset.size(); full_idx++){
+    if( trainset[full_idx].label == 1 ){
+      trainset[full_idx].PEP = PEPs[target_idx];
+      target_idx++; 
+    } // else, skip decoys
+  }
+
+  delete target_scores;
+  delete decoy_scores;
+  delete PEPs;
+
 
 }
 

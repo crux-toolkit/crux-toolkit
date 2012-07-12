@@ -758,6 +758,17 @@ typedef std::map<Protein*, MetaProtein, bool(*)(Protein*, Protein*) > ProteinToM
  */
 typedef std::map<MetaProtein, int, bool(*)(MetaProtein, MetaProtein) > MetaToRank;
 
+
+/**
+ * \enum FILE_FORMAT_T
+ * \brief indication of which file format is read
+ * by the Barista or QRanker 
+ */
+enum FILE_FORMAT_T{
+  INVALID_FORMAT,
+  SQT_FORMAT,
+  DELIMITED_FORMAT
+};
 								    
 
 #endif
