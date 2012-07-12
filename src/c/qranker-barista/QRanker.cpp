@@ -141,8 +141,9 @@ void QRanker :: write_results()
 
 void QRanker :: write_results_psm_tab(ofstream &os)
 {
+
   os << "scan" << "\t" << "charge" << "\t" << "q-ranker q-value" << "\t" ;
-  os<< "q-ranker score" << "\t" << "PEP\t"; 
+  os<< "q-ranker score" << "\t" << "q-ranker PEP\t"; 
   os<<"spectrum precursor m/z"<<"\t";
   os<<"spectrum neutral mass"<<"\t"; 
   os<<"peptide mass"<<"\t";
@@ -159,7 +160,6 @@ void QRanker :: write_results_psm_tab(ofstream &os)
   os<<"protein id"<<"\t";
   os<<"flanking aa"<<"\t";
   os<< "filename" << endl;
-
   for(int i = 0; i < fullset.size(); i++){
     if( fullset[i].label == 1 ){ 
       // only print target psms
@@ -185,15 +185,15 @@ void QRanker :: write_results_psm_tab(ofstream &os)
       //Sp Score
       os<<d.psmind2spscore(psmind)<<"\t";
       //Sp Rank 
-      os<<d.psmind2SpRank(psmind)<<"\t";
+      os<<d.psmind2sp_rank(psmind)<<"\t";
       //xcorr Score
       os<<d.psmind2xcorr(psmind)<<"\t";
       //xcorr rank
-      os<<d.psmind2xcorrRank(psmind)<<"\t";
+      os<<d.psmind2xcorr_rank(psmind)<<"\t";
       //by ions match 
-      os<<d.psmind2_by_ions_matched(psmind)<<"\t"; 
+      os<<d.psmind2by_ions_matched(psmind)<<"\t"; 
       //by ions total 
-      os<<d.psmind2_by_ions_total(psmind)<<"\t";
+      os<<d.psmind2by_ions_total(psmind)<<"\t";
       //Matches/Spectrum 
       os<<d.psmind2matches_spectrum(psmind)<<"\t";
       get_pep_seq(pep,seq,n,c);
@@ -204,7 +204,28 @@ void QRanker :: write_results_psm_tab(ofstream &os)
       //protein id
       vector<string> prots;  
       get_protein_id(pepind,prots);
-      print_protein_ids(prots,os,psmind);
+
+       // TODO: find peptide position in SQT files 
+      //sqt files do not return peptide position in the protein.
+      //if the search result file is txt we can find file peptide_pos and print it 
+      // in front of protein, else do not print anything
+      if(file_format_=="txt"){
+        for (unsigned int j=0;j<prots.size();j++){ 
+          if(j==prots.size()-1)
+            os<<prots[j]<<"("<<d.psmind2peptide_position(psmind)<<")\t";
+          else 
+           os<<prots[j]<<"("<<d.psmind2peptide_position(psmind)<<")"<<",";
+       
+        }
+      }else if(file_format_=="sqt"){ 
+       
+        for (unsigned int j=0;j<prots.size();j++){
+          if(j==prots.size()-1)
+            os<<prots[j]<<"\t"; 
+          else 
+            os<<prots[j]<<",";
+        }
+       }
       //Flanking_aa 
       os<<n<<c<<"\t";   
       os<< d.psmind2fname(psmind) << endl;
@@ -1171,8 +1192,6 @@ void QRanker :: print_protein_ids(vector<string> &prots, ofstream &os, int psmin
   }
   prots.clear();
 }
-
-
 
 
 /*

@@ -60,6 +60,7 @@ SQTParser :: SQTParser()
   max_len = 50;
   //min peptide length to be considered
    min_len = 7;
+
   //feature header
   features_header_.push_back( "sp rank");
   features_header_.push_back(  "delta cn");
@@ -87,7 +88,7 @@ SQTParser :: SQTParser()
   //spec features 7 
   spec_features_header_7_.push_back("b ions");
   spec_features_header_7_.push_back("y ions");
-  spec_features_header_7_.push_back("falnking");
+  spec_features_header_7_.push_back("flanking");
   spec_features_header_7_.push_back("H2O-nl");
   spec_features_header_7_.push_back("CO2-nl");
   spec_features_header_7_.push_back("NH3-nl");

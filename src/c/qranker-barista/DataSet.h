@@ -67,14 +67,15 @@ class Dataset
   inline int protind2length(int protind){return protind_to_length[protind];}
   //returns false if not subset, true if yes, subset
   inline bool is_prot_subset(int protind1, int protind2){return protind_to_pepinds.is_subset(protind1, protind2);} 
-  inline int psmind2SpRank(int psmind){return psmind_to_sp_rank[psmind];}//Sp rank 
-  inline int psmind2xcorrRank(int psmind){return psmind_to_xcorr_rank[psmind];}//xcorr rank
-  inline double psmind2_by_ions_matched(int psmind){return psmind_to_by_ions_matched[psmind];}//b/y ions matched 
-  inline double psmind2_by_ions_total(int psmind){return psmind_to_by_ions_total[psmind];}//b/y ions total 
+  inline int psmind2sp_rank(int psmind){return psmind_to_sp_rank[psmind];}//Sp rank 
+  inline int psmind2xcorr_rank(int psmind){return psmind_to_xcorr_rank[psmind];}//xcorr rank
+  inline double psmind2by_ions_matched(int psmind){return psmind_to_by_ions_matched[psmind];}//b/y ions matched 
+  inline double psmind2by_ions_total(int psmind){return psmind_to_by_ions_total[psmind];}//b/y ions total 
   inline int psmind2matches_spectrum(int psmind) {return psmind_to_matches_spectrum[psmind];}///<matchs/spectrum
   inline int psmind2peptide_position(int psmind){return psmind_to_peptide_position[psmind];}///<peptide position in protein 
   
   inline void get_features_header(vector<string> str){features_header_.swap(str);}
+
 
  protected:
   int num_psms;

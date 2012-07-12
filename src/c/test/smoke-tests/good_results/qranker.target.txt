@@ -1,4 +1,4 @@
-scan	charge	q-ranker q-value	q-ranker score	PEP	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	sp score	sp rank	xcorr score	xcorr rank	b/y ions matched	b/y ions total	matches/spectrum	sequence	cleavage type	protein id	flanking aa	filename
+scan	charge	q-ranker q-value	q-ranker score	q-ranker PEP	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	sp score	sp rank	xcorr score	xcorr rank	b/y ions matched	b/y ions total	matches/spectrum	sequence	cleavage type	protein id	flanking aa	filename
 85	3	0	1.56385	5.27845e-16	497.618	1489.83	1489.73	0	2292.95	1	5.41164	1	27	48	6	NFLETVELQVGLK	trypsin-full-digest	YGL135W	RN	crux-output/sequest.target.sqt
 118	3	0	1.56358	5.27845e-16	1031.94	3092.79	3095.24	0	1896.11	1	5.42212	1	43	108	6	ELESAAYDHAEPVQPEDAPQDIANDELK	trypsin-full-digest	YGL009C	KD	crux-output/sequest.target.sqt
 92	3	0	1.56323	5.27845e-16	497.278	1488.81	1489.73	0	2126.37	1	4.51971	1	25	48	8	NFLETVELQVGLK	trypsin-full-digest	YGL135W	RN	crux-output/sequest.target.sqt

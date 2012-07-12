@@ -29,7 +29,7 @@
 #include "CruxParser.h"
 #include "QRanker.h"
 using namespace std;
-  
+#include "mass.h"
 
 class Barista : public CruxApplication
 {
