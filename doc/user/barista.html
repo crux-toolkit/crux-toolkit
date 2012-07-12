@@ -72,7 +72,7 @@ in <a href="ms2-format.html">MS2 format</a>.</li>
 
 <li>
 <b>search results</b> &ndash; Barista recognizes search results
-in <a href="sqt-format.html">SQT format</a> and in
+in <!--a href="sqt-format.html">SQT format</a--> <!--and in-->
 the <a href="txt-format.html">tab-delimited text format</a> produced
 by Crux.</li>
 
@@ -82,7 +82,7 @@ different ways: (1) as a single file, (2) as a text file containing
 a list of filenames, one per line, or (3) as a directory containing
 multiple files.  File types are identified based on the filename
 extension: ".fa", ".fasta" or ".fsa" for FASTA files, ".ms2" for MS2
-files, ".sqt" for SQT files, and ".txt" for tab-delimited text files
+files<!-- ".sqt" for SQT files,--> and ".txt" for tab-delimited text files
 or lists of filenames.  Note that the input mode for spectra and for
 search results must be the same; i.e., if you provide a list of files
 for the spectra, then you must also provide a list of files containing
@@ -174,8 +174,8 @@ and the target and decoy search results.  Also, if the spectrum and
 the search results are provided in directories, then Barista will use
 the spectrum filename (<code>&lt;name&gt;.ms2</code>) to identify
 corresponding target and decoy search results with names
-<code>&lt;name&gt;*.target.sqt</code>, <code>&lt;name&gt;*.target.txt</code>,
-<code>&lt;name&gt;*.decoy.sqt</code>
+<!--code>&lt;name&gt;*.target.sqt</code--><code>&lt;name&gt;*.target.txt</code>,
+<!--code>&lt;name&gt;*.decoy.sqt</code-->
 and <code>&lt;name&gt;*.decoy.txt</code>.  Note that the decoy
 database can be provided as part of the required &lt;database&gt;
 argument.</li>
@@ -215,7 +215,7 @@ been set to true when Barista was run the first time.</li>
 <li>
 <code>--use-spec-features &lt;T/F&gt;</code> &ndash; Barista uses an
 enriched feature set derived from the spectra. Default = T.</li>
-
+<!--SQT-->
 <li><code>--parameter-file &lt;filename&gt;</code> &ndash; 
 A file containing command-line or additional parameters.  See
 the <a href="parameter-file.html">parameter documentation</a> page
@@ -233,8 +233,8 @@ results files are provided via a file listing, Barista assumes that
 the order of the spectrum files matches the order of the search result
 files. Alternatively, when the spectrum files and search results files
 are provided via directories, Barista will search for pairs of files
-with the same root name but different extensions (".ms2" and
-".sqt"/".txt").  Default = F.</li>
+with the same root name but different extensions (".ms2" 
+<!--and--".sqt"/"-->.txt").  Default = F.</li>
 
 <li>
 <code>--verbosity &lt;0-100&gt;</code> &ndash; 
@@ -260,12 +260,12 @@ info, 60-detailed debug info. Default = 30.</li>
   for the decoy prefix is set to decoy_). The output is in the
   directory crux-output by default:
     <br> <br>
-    <code> crux barista --decoy-prefix random_ concatenated-database.fasta spectra.ms2 matches.sqt </code>
+    <code> crux barista --decoy-prefix random_ concatenated-database.fasta spectra.ms2 matches.<!--sqt-->txt </code>
     <br><br>
   </li>
 
   <li> Assume that directory spectra-dir contains 10 ms2 files, and
-  directory matches-dir constains the 10 sqt files, corresponding to
+  directory matches-dir constains the 10 <!--sqt-->tabd-delimited files, corresponding to
   searches against a single target-decoy database, with decoy prefix
   reverse_. To analyse lists of ms2 and search files in the directores,
   overwriting previous results:
@@ -311,25 +311,25 @@ required &lt search results &gt argument. To specify the searches
 against the decoy database, use --separate-searches option.
 
 <ol>
-<li> To analyse a single ms2 file and sqt files matches-target.sqt and
+<!--li> To analyse a single ms2 file and sqt files matches-target.sqt and
 matches-decoy.sqt:
     <br> <br>
     <code> crux barista --decoy-prefix random_ --use-separate-searches matches-decoy.sqt database-dir spectra.ms2 matches-target.sqt </code>
     <br><br>
-</li>
+</li-->
 <li>To analyse a single ms2 file and txt files matches-target.txtt and
 matches-decoy.txt:
     <br> <br>
     <code> crux barista --decoy-prefix random_ --use-separate-searches matches-decoy.txt database-dir spectra.ms2 matches-target.txt </code>
     <br><br>
 </li>
-<li> If ms2 files are in spectra-dir directory, sqt files are in
+<!--li> If ms2 files are in spectra-dir directory, sqt files are in
 matches-target-dir and matches-decoy-dir, and databases are specified
 in database-list.txt:
     <br> <br>
     <code> crux barista --decoy-prefix random_ --use-separate-searches matches-decoy-dir database-list.txt spectra-dir matches-target-dir </code>
     <br><br>
-</li>
+</li-->
 <li> If ms2 files are in spectra-dir directory, tab-delimited files are in
 matches-target-dir and matches-decoy-dir, and databases are specified
 in database-list.txt:
@@ -338,13 +338,13 @@ in database-list.txt:
     <br><br>
 </li>
 
-<li> If ms2 files are listed in spectra-list.txt, sqt files are listed
+<!--li> If ms2 files are listed in spectra-list.txt, sqt files are listed
 in matches-target-list.txt and matches-decoy-list.txt, and database
 are located in database-dir:
     <br> <br>
     <code> crux barista --decoy-prefix random_ --use-separate-searches matches-decoy-list.txt database-dir spectra-list.txt matches-target-list.txt </code>
     <br><br>
-</li>
+</li-->
 <li> If ms2 files are listed in spectra-list.txt, txt files are listed
 in matches-target-list.txt and matches-decoy-list.txt, and database
 are located in database-dir:
@@ -358,12 +358,15 @@ are located in database-dir:
 <li> <b> Running Barista with Crux database search </b>
 
 <ol>
-<li>
+<!--li>
 You can use crux sequest-search which produces database search
 results in the sqt format or you can use crux search-for-matches which produces database search results in the tab-delimited format. Both of them are compatible with Barista input (see
 <a href="crux-sequest-search.html">sequest-search</a> and <a href="crux-search-for-matches.html">search-for-matches</a>).
+</li-->
+<li>
+You can use crux search-for-matches which produces database search results in the tab-delimited format. (see
+<!--a href="crux-sequest-search.html">sequest-search</a> and--> <a href="crux-search-for-matches.html">search-for-matches</a>).
 </li>
-
 <li>
 Crux database search requires only the target database for input and
 generates the decoy database. The crux command create-index creates

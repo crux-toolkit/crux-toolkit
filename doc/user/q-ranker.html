@@ -49,8 +49,8 @@ or (3) as a directory in which all the MS2 files can be found.</li>
 
 
 <li>
-<b>search results</b> &ndash; Barista recognizes search results
-in <a href="sqt-format.html">SQT format</a> and in
+<b>search results</b> &ndash; QRanker recognizes search results
+in <!--a href="sqt-format.html">SQT format</a> and in-->
 the <a href="txt-format.html">tab-delimited text format</a> produced
 by Crux.</li>
 
@@ -60,7 +60,7 @@ different ways: (1) as a a single file, (2) as a text file containing
 a list of filenames, one per line, or (3) as a directory containing
 multiple files.  File types are identified based on the filename
 extension: ".fa", ".fasta" or ".fsa" for FASTA files, ".ms2" for MS2
-files, ".sqt" for SQT files, and ".txt" for tab-delimited text files
+files, <!--".sqt" for SQT files, -->and ".txt" for tab-delimited text files
 or lists of filenames.  Note that the input mode for spectra and for
 search results must be the same; i.e., if you provide a list of files
 for the spectra, then you must also provide a list of files containing
@@ -89,8 +89,8 @@ created:</p>
 <li> psm_id: PSM identifier. </li>
 <li>q-value: The minimal PSM-level false discovery rate at which this
   PSM is deemed significant.  This q-value is computed based on the
-  ranking of the PSMs induced by the Barista score.</li>
-<li>score: The score assigned to the PSM by Barista.  Higher
+  ranking of the PSMs induced by the QRanker score.</li>
+<li>score: The score assigned to the PSM by QRanker.  Higher
   values correspond to more confident identifications.</code>
 <li> precursor_mass: precrusor mass as recorded during the MS1 scan </li>
 <li>peptide: the peptide sequence</li>
@@ -143,12 +143,12 @@ the location of the decoy search results.  Like the required
 arguments, these search results can be provided as a single file, a
 list of files or a directory.  However, the choice (file, list or
 directory) must be consistent for the MS2 files and the target and
-decoy SQT files.  Also, if the MS2 and SQT files are provided in
-directories, then Q-ranker will use the MS2 filename
-(<code>foo.ms2</code>) to identify corresponding target and decoy SQT
-files with names like <code>foo*.target.sqt</code>
-and <code>foo*.decoy.sqt</code>.  This naming convention allows the
-target and decoy SQT files to reside in the same directory.</li>
+decoy search results files.  Also, if the MS2 and search results files are 
+provided in directories, then Q-ranker will use the MS2 filename
+(<code>foo.ms2</code>) to identify corresponding target and decoy 
+search result files with names like <code>foo*.target.txt</code>
+and <code>foo*.decoy.txt</code>.  This naming convention allows the
+target and decoy tab-delimited files to reside in the same directory.</li>
 
 <li>
 <code>--fileroot &lt;string&gt;</code> &ndash;
@@ -201,12 +201,12 @@ Optional file into which psm features are printed. Default = F.</li>
 <code>--list-of-files &lt;T|F&gt;</code> &ndash; Specify that the
 spectra and search results are provided as lists of files, rather than
 as individual files.  When the spectrum files and the database search
-results files are provided via a file listing, Barista assumes that
+results files are provided via a file listing, QRanker assumes that
 the order of the spectrum files matches the order of the search result
 files. Alternatively, when the spectrum files and search results files
-are provided via directories, Barista will search for pairs of files
+are provided via directories, QRanker will search for pairs of files
 with the same root name but different extensions (".ms2" and
-".sqt"/".txt").  Default = F.</li>
+<!--".sqt"/"-->.txt").  Default = F.</li>
 
 <LI>
 <code>--verbosity &lt;0-100&gt;</code> &ndash; 
@@ -234,21 +234,21 @@ info, 60-detailed debug info. Default = 30.</li>
   default for the decoy prefix is set to decoy_). The output is in
   the directory crux-output by default:
     <br> <br>
-    <code> crux q-ranker --decoy-prefix random_ spectra.ms2 matches.sqt </code>
+    <code> crux q-ranker --decoy-prefix random_ spectra.ms2 matches.txt </code>
     <br><br>
   </li>
 
   <li> Assume that directory spectra-dir contains 10 ms2 files, and
-  directory matches-dir constains the 10 sqt files, corresponding to
+  directory matches-dir constains the 10 tab-delimited text files, corresponding to
   searches against a single target-decoy database, with decoy prefix
-  reverse_. To analyse lists of ms2 and sqt files in the directores,
+  reverse_. To analyse lists of ms2 and tab-delimited files in the directores,
   overwriting previous results:
     <br> <br>
     <code> crux q-ranker --decoy-prefix reverse_ --overwrite T spectra-list.txt matches-list.txt </code>
     <br><br>
   </li>
 
-  <li> To specify directories with ms2 and sqt files, and the output directory called results-dir: 
+  <li> To specify directories with ms2 and tab-delimited files, and the output directory called results-dir: 
     <br> <br>
     <code> crux q-ranker --decoy-prefix reverse_ --output-dir results-dir spectra-dir matches-dir </code>
     <br><br>
@@ -272,19 +272,19 @@ The searches against the target database are provided as the required
 database, use --separate-searches option.
 
 <ol>
-<li> To analyse a single ms2 file and sqt files matches-target.sqt and matches-decoy.sqt:
+<li> To analyse a single "ms2" file and "txt" files matches-target.txt and matches-decoy.txt:
     <br> <br>
-    <code> crux q-ranker --decoy-prefix random_ --use-separate-searches matches-decoy.sqt spectra.ms2 matches-target.sqt </code>
+    <code> crux q-ranker --decoy-prefix random_ --use-separate-searches matches-decoy.txt spectra.ms2 matches-target.txt </code>
     <br><br>
 </li>
 
-<li> If ms2 files are in spectra-dir directory, sqt files are in matches-target-dir and matches-decoy-dir:
+<li> If ms2 files are in spectra-dir directory, tab-delimited files are in matches-target-dir and matches-decoy-dir:
     <br> <br>
     <code> crux q-ranker --decoy-prefix random_ --use-separate-searches matches-decoy-dir spectra-dir matches-target-dir </code>
     <br><br>
 </li>
 
-<li> If ms2 files are listed in spectra-list.txt, sqt files are listed in matches-target-list.txt and matches-decoy-list.txt:
+<li> If ms2 files are listed in spectra-list.txt, tab-delimited files are listed in matches-target-list.txt and matches-decoy-list.txt:
     <br> <br>
     <code> crux q-ranker --decoy-prefix random_ --use-separate-searches matches-decoy-list.txt spectra-list.txt matches-target-list.txt </code>
     <br><br>
@@ -296,9 +296,9 @@ database, use --separate-searches option.
 
 <ol>
 <li>
-Please use crux sequest-search because it produces database search
-results in the sqt and txt format, compatible with q-ranker input. (see
-<a href="crux-sequest-search.html"> sequest-search</a>).
+Please use crux <!--sequest-search--> search-for-matches because it produces database search
+results in the <!--sqt and--> txt format, compatible with q-ranker input. (see
+<a href="crux-search-for-matches.html"> search-for-matches</a>).
 </li>
 </ol>
 
