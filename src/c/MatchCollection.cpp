@@ -2128,9 +2128,6 @@ bool MatchCollection::printTabDelimited(
   int scan_num = spectrum->getFirstScan();
   FLOAT_T spectrum_precursor_mz = spectrum->getPrecursorMz();
 
-  // calculate delta_cn and populate fields in the matches
-  calculateDeltaCn(SEARCH_COMMAND);
-
   Match* match = NULL;
   
   // create match iterator

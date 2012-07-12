@@ -88,12 +88,18 @@ void CruxParser ::readMatches(
         PROTEIN_ID_COL, 
         protein_ids, 
         ','
-      );
+      ); 
       matches.num_proteins_in_match.push_back(protein_ids.size());
        for (size_t idx = 0;idx < protein_ids.size(); idx++) {
          string protein_id = protein_ids.at(idx);
-         //change the format of protein_id to be same as SQTParser  
-          protein_id = protein_id.substr(0,protein_id.find("("));
+         //change the format of protein_id to be same as SQTParser
+          string pep_pos= protein_id.substr(
+            (protein_id.find("(")),
+            protein_id.size()
+          );
+          pep_pos=pep_pos.substr(1,pep_pos.size()-2);       
+          matches.peptide_pos.push_back(atoi(pep_pos.c_str()));
+          protein_id=protein_id.substr(0,protein_id.find("("));
           matches.proteins.push_back(protein_id);
         }       
       hits_read++;

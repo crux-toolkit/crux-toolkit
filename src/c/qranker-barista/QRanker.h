@@ -37,46 +37,47 @@ class QRanker: public CruxApplication
 {
 
 public:
-    QRanker();
-    virtual ~QRanker();
+  QRanker();
+  virtual ~QRanker();
 
-    int run();
-    void train_net_sigmoid(PSMScores &set, int interval);
-    void train_net_ranking(PSMScores &set, int interval);
-    void train_net_hinge(PSMScores &set, int interval);
-    void count_pairs(PSMScores &set, int interval);
-    void train_many_general_nets();
-    void train_many_target_nets();
-    void train_many_nets();
+  int run();
+  void train_net_sigmoid(PSMScores &set, int interval);
+  void train_net_ranking(PSMScores &set, int interval);
+  void train_net_hinge(PSMScores &set, int interval);
+  void count_pairs(PSMScores &set, int interval);
+  void train_many_general_nets();
+  void train_many_target_nets();
+  void train_many_nets();
     
-    int getOverFDR(PSMScores &set, NeuralNet &n, double fdr);
-    void getMultiFDR(PSMScores &set, NeuralNet &n, vector<double> &qval);
-    void getMultiFDRXCorr(PSMScores &set, vector<double> &qval);
-    void printNetResults(vector<int> &scores);
-    void write_results();
-    void write_results_psm_tab(ofstream &os);
-    void get_pep_seq(string &pep, string &seq, string &n, string &c);
-    void write_results_psm_xml(PepXMLWriter& os);
-    void computePEP();
+  int getOverFDR(PSMScores &set, NeuralNet &n, double fdr);
+  void getMultiFDR(PSMScores &set, NeuralNet &n, vector<double> &qval);
+  void getMultiFDRXCorr(PSMScores &set, vector<double> &qval);
+  void printNetResults(vector<int> &scores);
+  void write_results();
+  void write_results_psm_tab(ofstream &os);
+  void get_pep_seq(string &pep, string &seq, string &n, string &c);
+  void write_results_psm_xml(PepXMLWriter& os);
+  void computePEP();
 
-    void write_max_nets(string filename, NeuralNet *max_net);
-    void write_unique_peptides(string filename, NeuralNet* max_net);
-    void write_num_psm_per_spectrum(NeuralNet* max_net);
+  void write_max_nets(string filename, NeuralNet *max_net);
+  void write_unique_peptides(string filename, NeuralNet* max_net);
+  void write_num_psm_per_spectrum(NeuralNet* max_net);
 
-    inline void set_input_dir(string input_dir) {in_dir = input_dir; d.set_input_dir(input_dir);}
-    inline void set_output_dir(string output_dir){out_dir = output_dir;}
-    void print_description();
-    int set_command_line_options(int argc, char **argv);
-    int crux_set_command_line_options(int argc, char *argv[]);
+  inline void set_input_dir(string input_dir) {in_dir = input_dir; d.set_input_dir(input_dir);}
+  inline void set_output_dir(string output_dir){out_dir = output_dir;}
+  void print_description();
+  int set_command_line_options(int argc, char **argv);
+  int crux_set_command_line_options(int argc, char *argv[]);
 
-    virtual int main(int argc, char** argv);
-    virtual std::string getName();
-    virtual std::string getDescription();
-    virtual bool needsOutputDirectory();
-    virtual COMMAND_T getCommand(); 
-    FILE_FORMAT_T check_file_format(string &filePath);
-    string file_extension(string filename); 
-
+  virtual int main(int argc, char** argv);
+  virtual std::string getName();
+  virtual std::string getDescription();
+  virtual bool needsOutputDirectory();
+  virtual COMMAND_T getCommand(); 
+  FILE_FORMAT_T check_file_format(string &filePath);
+  string file_extension(string filename); 
+  void get_protein_id(int pepind, vector<string> &prot); 
+  void  print_protein_ids(vector<string> &prots, ofstream &os, int psmind); 
 protected:
 
     Dataset d;
@@ -93,7 +94,7 @@ protected:
     int num_hu;
     double mu;
     double weightDecay;
-
+    string cleavage_type; 
     int ind_low;
     int interval;
     int niter;
@@ -119,6 +120,8 @@ protected:
     string fileroot;
     int feature_file_flag;
     ostringstream feature_file_name;
+    
+    string file_format_; 
     
     TabDelimParser pars;
     SQTParser* parser; 

@@ -15,6 +15,7 @@ QRanker::QRanker() :
   feature_file_flag(0),
   max_net_gen(NULL),
   max_net_targ(NULL),
+  file_format_(""),
   nets(NULL)
 {
 }
@@ -140,21 +141,75 @@ void QRanker :: write_results()
 
 void QRanker :: write_results_psm_tab(ofstream &os)
 {
-  os << "scan" << "\t" << "charge" << "\t" << "q-ranker q-value" << "\t" 
-     << "q-ranker score" << "\t" << "PEP\t" << "sequence" << "\t" 
-     << "filename" << endl;
+  os << "scan" << "\t" << "charge" << "\t" << "q-ranker q-value" << "\t" ;
+  os<< "q-ranker score" << "\t" << "PEP\t"; 
+  os<<"spectrum precursor m/z"<<"\t";
+  os<<"spectrum neutral mass"<<"\t"; 
+  os<<"peptide mass"<<"\t";
+  os<< "delta_cn"<< "\t";
+  os<<"sp score"<<"\t";
+  os<<"sp rank\t";
+  os<<"xcorr score"<<"\t";
+  os<<"xcorr rank"<<"\t";
+  os<<"b/y ions matched"<<"\t";
+  os<<"b/y ions total"<<"\t";
+  os<<"matches/spectrum"<<"\t";
+  os<<"sequence"<<"\t";
+  os<<"cleavage type"<<"\t"; 
+  os<<"protein id"<<"\t";
+  os<<"flanking aa"<<"\t";
+  os<< "filename" << endl;
 
-  for(int i = 0; i < fullset.size(); i++)
-    {
-      if( fullset[i].label == 1 ){ // only print target psms
-        int psmind = fullset[i].psmind;
-        int pepind = d.psmind2pepind(psmind);
-        os << d.psmind2scan(psmind) << "\t" << d.psmind2charge(psmind) << "\t" 
-           << fullset[i].q << "\t" << fullset[i].score << "\t"  
-           << fullset[i].PEP << "\t"
-           << d.ind2pep(pepind) << "\t" << d.psmind2fname(psmind) << endl;
-      }
+  for(int i = 0; i < fullset.size(); i++){
+    if( fullset[i].label == 1 ){ 
+      // only print target psms
+      int psmind = fullset[i].psmind;
+      int pepind = d.psmind2pepind(psmind);
+      string pep = d.ind2pep(pepind);
+      string seq, n,c;
+      os << d.psmind2scan(psmind) << "\t" ;
+      os<< d.psmind2charge(psmind) << "\t"; 
+      os<< fullset[i].q << "\t" ;
+      os<< fullset[i].score << "\t"; 
+      os<< fullset[i].PEP << "\t"; 
+      //mass-to-charge ratio 
+      os<<(d.psmind2precursor_mass(psmind)+
+      d.psmind2charge(psmind)*MASS_PROTON)/
+      d.psmind2charge(psmind)<<"\t";
+      //Spectrum Neutral Mass 
+      os<<d.psmind2precursor_mass(psmind)<<"\t";
+      //Peptide Mass
+      os<<d.psmind2peptide_mass(psmind)<<"\t";
+      //DELTA CN
+      os <<d.psmind2deltaCn(psmind)<< "\t";
+      //Sp Score
+      os<<d.psmind2spscore(psmind)<<"\t";
+      //Sp Rank 
+      os<<d.psmind2SpRank(psmind)<<"\t";
+      //xcorr Score
+      os<<d.psmind2xcorr(psmind)<<"\t";
+      //xcorr rank
+      os<<d.psmind2xcorrRank(psmind)<<"\t";
+      //by ions match 
+      os<<d.psmind2_by_ions_matched(psmind)<<"\t"; 
+      //by ions total 
+      os<<d.psmind2_by_ions_total(psmind)<<"\t";
+      //Matches/Spectrum 
+      os<<d.psmind2matches_spectrum(psmind)<<"\t";
+      get_pep_seq(pep,seq,n,c);
+      //Sequence 
+      os<<seq<<"\t";
+      //cleavage type
+      os<<cleavage_type<<"\t";
+      //protein id
+      vector<string> prots;  
+      get_protein_id(pepind,prots);
+      print_protein_ids(prots,os,psmind);
+      //Flanking_aa 
+      os<<n<<c<<"\t";   
+      os<< d.psmind2fname(psmind) << endl;
     }
+  }
 }
 
 
@@ -898,9 +953,7 @@ int QRanker :: crux_set_command_line_options(int argc, char *argv[])
 
       carp(CARP_INFO, "directory with tables: %s", dir_with_tables.c_str());
       carp(CARP_INFO, "output_directory: %s", output_directory.c_str());
-    }
-  else
-    {
+    }else{
       ms2_source = get_string_parameter_pointer("spectra");
       sqt_source = get_string_parameter_pointer("search results");
       list_of_files_flag=get_boolean_parameter("list-of-files");
@@ -923,26 +976,41 @@ int QRanker :: crux_set_command_line_options(int argc, char *argv[])
         FILE_FORMAT_T format = check_file_format(files[i]);
         switch (format) {
         case SQT_FORMAT:
+          file_format_="sqt"; 
           parser = new SQTParser();
 	  break;
         case DELIMITED_FORMAT:
+          file_format_="txt";
 	  parser = new CruxParser();
 	  break;
         case INVALID_FORMAT:
+          file_format_="NULL";
         default:
 	  carp(CARP_FATAL, "Please enter .sqt or .txt search results"); 
         }
 
         parser->set_decoy_prefix(decoy_prefix);
         parser->set_enzyme(enzyme);
+        if(enzyme.find("elastase") != string::npos){
+           cleavage_type="elastase-full-digest";
+        }else if (enzyme.find("chymotrypsin") != string::npos){
+           cleavage_type="chymotrypsin-full-digest";
+        }else if (enzyme.find("trypsin") != string::npos){
+           cleavage_type="trypsin-full-digest";
+        }else{
+           cleavage_type="Null";
+        }
 
         //num of spec features
         if(spec_features_flag)
 	  parser->set_num_spec_features(3);
         else 
 	  parser->set_num_spec_features(0);
-      
-
+        parser->write_features_header();
+        
+        if(parser->get_use_quadratic_features())
+          parser->add_quadratic_features_header(); 
+        d.get_features_header(parser->get_final_features_header());
         sqt_decoy_source = get_string_parameter_pointer("separate-searches"); 
         if(sqt_decoy_source != "__NULL_STR")
 	  separate_search_flag = 1;
@@ -996,7 +1064,6 @@ int QRanker :: crux_set_command_line_options(int argc, char *argv[])
  * probabilities. 
  */
 void QRanker::computePEP(){
-  carp(CARP_DEBUG, "Computing PEPs");
   vector<double> target_scores_vect;
   vector<double> decoy_scores_vect;
 
@@ -1010,8 +1077,7 @@ void QRanker::computePEP(){
   }
 
   int num_targets = target_scores_vect.size();
-  int num_decoys = decoy_scores_vect.size();
-  carp(CARP_DEBUG, "Found %d targets and %d decoys", num_targets, num_decoys); 
+  int num_decoys = decoy_scores_vect.size(); 
 
   // copy them to an array as required by the compute_PEP method
   double* target_scores = new double[num_targets];
@@ -1069,6 +1135,45 @@ string QRanker::getDescription() {
 COMMAND_T QRanker::getCommand(){
   return QRANKER_COMMAND;
 }
+
+
+void QRanker :: get_protein_id(int pepind, vector<string> &prot){
+  int * protinds= d.pepind2protinds(pepind) ;
+  int prot_length=d.pepind2num_prot(pepind);  
+  for (unsigned k=0;k<prot_length;k++){
+    string protein_str= d.ind2prot( protinds[k]);
+    prot.push_back(protein_str); 
+  }
+}
+
+
+void QRanker :: print_protein_ids(vector<string> &prots, ofstream &os, int psmind){
+    
+ // TODO: find peptide position in SQT files 
+ //sqt files do not return peptide position in the protein.
+ //if the search result file is txt we can find file peptide_pos and print it 
+ // in front of protein, else do not print anything
+
+  if(file_format_=="txt"){
+    for (unsigned int j=0;j<prots.size();j++){
+       if(j==prots.size()-1)
+      	 os<<prots[j]<<"("<<d.psmind2peptide_position(psmind)<<")\t";
+       else
+         os<<prots[j]<<"("<<d.psmind2peptide_position(psmind)<<")"<<",";
+    }
+  }else if(file_format_=="sqt"){
+    for (unsigned int j=0;j<prots.size();j++){
+      if(j==prots.size()-1)
+      	os<<prots[j]<<"\t";
+      else
+        os<<prots[j]<<",";
+    }
+  }
+  prots.clear();
+}
+
+
+
 
 /*
  * Local Variables:
