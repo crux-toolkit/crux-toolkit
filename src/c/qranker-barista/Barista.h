@@ -12,12 +12,12 @@
 #include <assert.h>
 #include <cstdio>
 #include <iomanip>
-
+#ifdef CRUX
 #include "CruxApplication.h"
 #include "carp.h"
 #include "crux-utils.h"
 #include "parameter.h"
-
+#endif
 #include "analyze_psms.h"
 #include "PepXMLWriter.h"
 #include "DataSet.h"
@@ -111,6 +111,8 @@ class Barista : public CruxApplication
   void report_pep_fdr_counts(vector<double> &qvals, ofstream &of);
   void report_all_fdr_counts();
   void clean_up();
+  void get_protein_id(int pepind, vector<string> &prots);
+  void print_protein_ids(vector<string> &proteins,ofstream &os,int psmind);  
 
   int getOverFDRPSM(PSMScores &set, NeuralNet &n, double fdr);
   double get_peptide_score(int pepind, NeuralNet &n);
@@ -146,6 +148,8 @@ class Barista : public CruxApplication
   string out_dir;
   string fileroot;
 
+  string cleavage_type; 
+
   int seed;
   double selectionfdr;
   int nepochs;
@@ -180,6 +184,7 @@ class Barista : public CruxApplication
   NeuralNet max_net_pep;
   int max_fdr_pep;
   
+  string file_format_; 
   ofstream fdebug;
 
 };

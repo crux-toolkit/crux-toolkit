@@ -1,3 +1,4 @@
+scan	label	sp rank	delta cn	delta cn	xcorr rank	sp score	matched ions/predicted ions	observed mass	peptide length	charge 1	charge 2	charge 3	c-term enz	t-term enz	missed cleavage	number of sequnce_comparision	delta mass	abs(delta mass)	b ions	y ions	flanking
 10	1	0	0	0.443172	0.862112	74.9409	0.272727	1270.66	16	0	1	0	1	1	0	0	0.171	0.171	102.344	107.522	113.208
 10	1	1.09861	0	0.47429	0.480048	49.5665	0.2	1270.66	15	0	1	0	1	1	0	0	-2.746	2.746	91.2772	8.23764	-59.1605
 10	-1	2.07944	0	0.237045	0.252366	9.8379	0.15	1270.66	15	0	1	0	1	1	0	0	-0.8627	0.8627	35.0916	12.8263	54.1266

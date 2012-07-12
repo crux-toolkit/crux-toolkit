@@ -546,21 +546,19 @@ void Barista :: get_pep_seq(string &pep, string &seq, string &n, string &c)
 
 void Barista :: get_tab_delim_proteins(string protein_str, vector<string> &proteins)
 {
-  proteins.clear();
+  proteins.clear(); 
   string str = protein_str;
-  size_t pos = str.find(1);
-  while(pos != string::npos)
-    {
-      if(pos == 0)
-	str = str.substr(1,str.size()-1);
-      else
-	{
-	  string prot = str.substr(0,pos);
-	  str = str.substr(pos+1,str.size()-1);
-	  proteins.push_back(prot);
-	}
-      pos = str.find(1);
+  size_t pos = str.find("\t");
+  while(pos != string::npos){
+    if(pos == 0){
+      str = str.substr(1,str.size()-1);
+   } else{
+      string prot = str.substr(0,pos);
+      str = str.substr(pos+1,str.size()-1); 
+      proteins.push_back(prot);
     }
+    pos = str.find("\t");
+  }
   proteins.push_back(str);
 }
 
@@ -1399,32 +1397,82 @@ void Barista :: write_results_subset_prot_tab(ofstream &os)
 
 void Barista :: write_results_peptides_tab(ofstream &os)
 {
-  os << "peptide" << "\t" << "q-value" << "\t" << "barista score" << "\t" << "NSAF score" << "\t";
-  os << "scan" << "\t" << "charge" << endl;
+  os<< "q-value" << "\t" << "barista score" << "\t";
+  os << "NSAF score" << "\t";
+  os << "scan" << "\t" << "charge" << "\t";
+  os<<"PEP\t";
+  os<<"spectrum precursor m/z"<<"\t";
+  os<<"spectrum neutral mass"<<"\t"; 
+  os<<"peptide mass"<<"\t";
+  os<< "delta_cn"<< "\t";
+  os<<"sp score"<<"\t";
+  os<<"sp rank\t";
+  os<<"xcorr score"<<"\t";
+  os<<"xcorr rank"<<"\t";
+  os<<"b/y ions matched"<<"\t";
+  os<<"b/y ions total"<<"\t";
+  os<<"matches/spectrum"<<"\t";
+  os<<"sequemce\t"; 
+  os<<"cleavage type"<<"\t"; 
+  os<<"protein id"<<"\t";
+  os<<"flanking_aa"<<endl;
   int cn = 0;
-  for(int i = 0; i < peptrainset.size(); i++)
-    {
-      if(peptrainset[i].label == 1)
-	{
-	  cn++;
-	  //write out proteins
-	  int pepind = peptrainset[i].pepind;
-	  string pep = d.ind2pep(pepind);
-	  string seq, n, c;
-	  get_pep_seq(pep, seq, n, c);
-	  os << pep << "\t";
-	  os << peptrainset[i].q << "\t";
-	  os << peptrainset[i].score << "\t";
-	  os << peptrainset[i].nsaf << "\t";
-	  //write out peptides
-	  int psmind = pepind_to_max_psmind[pepind];
-	  if(psmind > -1)
-	    os << d.psmind2scan(psmind) << "\t" << d.psmind2charge(psmind);
-	  else
-	    cout << "waning: did not assign peptide max psmind\n";
-	  os << endl;
-	}
+  for(int i = 0; i < peptrainset.size(); i++){
+    if(peptrainset[i].label == 1){
+      cn++;
+      //write out proteins
+      int pepind = peptrainset[i].pepind;
+      string pep = d.ind2pep(pepind);
+      string seq, n, c;
+      get_pep_seq(pep, seq, n, c);
+      os << peptrainset[i].q << "\t";
+      os << peptrainset[i].score << "\t";
+      os<<peptrainset[i].nsaf<<"\t";
+      //write out peptides
+      int psmind = pepind_to_max_psmind[pepind];
+      if(psmind > -1){
+	os << d.psmind2scan(psmind) << "\t" << d.psmind2charge(psmind)<<"\t";
+        os << psmtrainset[i].PEP << "\t";//<PEP
+        //mass-to-charge ratio 
+        os<<(d.psmind2precursor_mass(psmind)+
+        d.psmind2charge(psmind)*MASS_PROTON)/
+        d.psmind2charge(psmind)<<"\t";
+        //Spectrum Neutral Mass 
+        os<<d.psmind2precursor_mass(psmind)<<"\t";
+        //Peptide Mass
+        os<<d.psmind2peptide_mass(psmind)<<"\t";
+        //DELTA CN
+        os <<d.psmind2deltaCn(psmind)<< "\t";
+        //Sp Score
+        os<<d.psmind2spscore(psmind)<<"\t";
+        //Sp Rank 
+        os<<d.psmind2SpRank(psmind)<<"\t";
+        //xcorr Score
+      	os<<d.psmind2xcorr(psmind)<<"\t";
+      	//xcorr rank
+      	os<<d.psmind2xcorrRank(psmind)<<"\t";
+      	//by ions match 
+      	os<<d.psmind2_by_ions_matched(psmind)<<"\t"; 
+      	//by ions total 
+      	os<<d.psmind2_by_ions_total(psmind)<<"\t";
+      	//Matches/Spectrum 
+      	os<<d.psmind2matches_spectrum(psmind)<<"\t";
+        //sequence 
+        os<<seq<<"\t"; 
+        //cleavage type
+        os<<cleavage_type<<"\t"; 
+      	//protein id
+      	vector<string> prots;  
+        get_protein_id(pepind,prots);
+        print_protein_ids(prots,os,psmind);
+        //Flanking_aa 
+      	os<<n<<c<<endl;     
+      }else{
+	  cout<< "waning: did not assign peptide max psmind\n";
+          os<<"not assignd\t";
+       }
     }
+  }
 }
 
 void Barista :: write_results_psm_tab(ofstream &os)
@@ -1432,7 +1480,22 @@ void Barista :: write_results_psm_tab(ofstream &os)
   os << "scan" << "\t" << "charge" << "\t";
   os << "q-value" << "\t" << "barista score" << "\t";
   os << "PEP\t";
-  os << "peptide" << "\t" << "filename" << endl;
+  os<<"spectrum precursor m/z"<<"\t";
+  os<<"spectrum neutral mass"<<"\t"; 
+  os<<"peptide mass"<<"\t";
+  os<< "delta_cn"<< "\t";
+  os<<"sp score"<<"\t";
+  os<<"sp rank\t";
+  os<<"xcorr score"<<"\t";
+  os<<"xcorr rank"<<"\t";
+  os<<"b/y ions matched"<<"\t";
+  os<<"b/y ions total"<<"\t";
+  os<<"matches/spectrum"<<"\t";
+  os<<"sequence"<<"\t";
+  os<<"cleavage type"<<"\t"; 
+  os<<"protein id"<<"\t";
+  os<<"flanking aa"<<"\t";
+  os << "filename" << endl;
  int cn = 0;
   for(int i = 0; i < psmtrainset.size(); i++)
     {
@@ -1441,17 +1504,51 @@ void Barista :: write_results_psm_tab(ofstream &os)
 	  cn++;
 	  //write out proteins
 	  int psmind = psmtrainset[i].psmind; 
+	  int pepind = d.psmind2pepind(psmind);
+	  string pep = d.ind2pep(pepind);
+	  string seq, n,c;
+	  get_pep_seq(pep,seq,n,c);
 	  //os << psmind << "\t";
 	  os << d.psmind2scan(psmind) << "\t";
 	  os << d.psmind2charge(psmind) << "\t";
 	  os << psmtrainset[i].q << "\t";
 	  os << psmtrainset[i].score << "\t";
           os << psmtrainset[i].PEP << "\t";
-	  int pepind = d.psmind2pepind(psmind);
-	  string pep = d.ind2pep(pepind);
-	  string seq, n,c;
-	  get_pep_seq(pep,seq,n,c);
-	  os << pep << "\t";
+          //mass-to-charge ratio 
+          os<<(d.psmind2precursor_mass(psmind)+
+          d.psmind2charge(psmind)*MASS_PROTON)/
+          d.psmind2charge(psmind)<<"\t";
+          //Spectrum Neutral Mass 
+          os<<d.psmind2precursor_mass(psmind)<<"\t";
+          //Peptide Mass
+          os<<d.psmind2peptide_mass(psmind)<<"\t";
+          //DELTA CN
+          os <<d.psmind2deltaCn(psmind)<< "\t";
+          //Sp Score
+          os<<d.psmind2spscore(psmind)<<"\t";
+          //Sp Rank 
+          os<<d.psmind2SpRank(psmind)<<"\t";
+          //xcorr Score
+      	  os<<d.psmind2xcorr(psmind)<<"\t";
+      	  //xcorr rank
+      	  os<<d.psmind2xcorrRank(psmind)<<"\t";
+      	  //by ions match 
+      	  os<<d.psmind2_by_ions_matched(psmind)<<"\t"; 
+      	  //by ions total 
+      	  os<<d.psmind2_by_ions_total(psmind)<<"\t";
+      	  //Matches/Spectrum 
+      	  os<<d.psmind2matches_spectrum(psmind)<<"\t";
+      	  get_pep_seq(pep,seq,n,c);
+      	  //Sequence 
+      	  os<<seq<<"\t";
+      	  //cleavage type
+      	  os<<cleavage_type<<"\t";
+      	  //protein id
+      	  vector<string> prots;  
+          get_protein_id(pepind,prots);
+          print_protein_ids(prots,os,psmind);
+      	  //Flanking_aa 
+      	  os<<n<<c<<"\t";   
 	  os << d.psmind2fname(psmind) << endl;
 	}
     }
@@ -1462,7 +1559,7 @@ void Barista :: write_results_psm_tab(ofstream &os)
 void Barista :: report_all_results_xml()
 {
   ostringstream fname;
-  fname << out_dir << "/" << fileroot << "barista_output.xml";
+  fname << out_dir << "/" << fileroot << "barista.xml";
   ofstream of(fname.str().c_str());
   of << "<barista_output>" << endl;
   of << endl;
@@ -1526,15 +1623,9 @@ void Barista :: report_all_results_tab()
 void Barista :: report_all_results_xml_tab()
 {
   setup_for_reporting_results();
-  
-
   stringstream fname;
-  
-  
-  
   report_all_results_xml();
   report_all_results_tab();
-  
   d.clear_data_all_results(); 
   
 }
@@ -2541,9 +2632,11 @@ int Barista :: crux_set_command_line_options(int argc, char *argv[])
         //sqt_source 
         switch (format) {
           case SQT_FORMAT:
+            file_format_="sqt";
             parser = new SQTParser();
 	    break;
           case DELIMITED_FORMAT:
+            file_format_="txt";
 	    parser = new CruxParser();
 	    break;
           case INVALID_FORMAT:
@@ -2553,6 +2646,15 @@ int Barista :: crux_set_command_line_options(int argc, char *argv[])
         
         parser->set_decoy_prefix(decoy_prefix);
         parser->set_enzyme(enzyme);
+        if(enzyme.find("elastase") != string::npos){
+           cleavage_type="elastase-full-digest";
+        }else if (enzyme.find("chymotrypsin") != string::npos){
+           cleavage_type="chymotrypsin-full-digest";
+        }else if (enzyme.find("trypsin") != string::npos){
+           cleavage_type="trypsin-full-digest";
+        }else{
+           cleavage_type="Null";
+        }
       
         //num of spec features
         if(spec_features_flag)
@@ -2565,6 +2667,11 @@ int Barista :: crux_set_command_line_options(int argc, char *argv[])
         else
 	  separate_search_flag = 0;
       
+      parser->write_features_header();
+      parser->set_use_quadratic_features(1);
+      if(parser->get_use_quadratic_features())
+        parser->add_quadratic_features_header(); 
+      d.get_features_header(parser->get_final_features_header());
         //set the output directory for the parser
         if(!parser->set_output_dir(output_directory))
 	  return 0;
@@ -2591,7 +2698,7 @@ int Barista :: crux_set_command_line_options(int argc, char *argv[])
         carp(CARP_INFO, "enzyme: %s", enzyme.c_str());
         carp(CARP_INFO, "decoy prefix: %s", decoy_prefix.c_str());
       
-        parser->set_use_quadratic_features(1);
+        
         if(!parser->run())
 	  carp(CARP_FATAL, "Could not proceed with training.");
         parser->clear();
@@ -2659,6 +2766,34 @@ FILE_FORMAT_T Barista:: check_file_format(string source){
     else 
       carp(CARP_DEBUG,"The file format is invalid");
     return INVALID_FORMAT;
+}
+
+void Barista :: get_protein_id(int pepind, vector<string> &prot){
+  int * protinds= d.pepind2protinds(pepind) ;
+  int prot_length=d.pepind2num_prot(pepind);  
+  for (unsigned k=0;k<prot_length;k++){
+    string protein_str= d.ind2prot( protinds[k]);
+    prot.push_back(protein_str); 
+  }
+}
+
+void Barista :: print_protein_ids(vector<string> &prots, ofstream &os, int psmind){
+  if(file_format_=="txt"){
+    for (unsigned int j=0;j<prots.size();j++){
+       if(j==prots.size()-1)
+      	 os<<prots[j]<<"("<<d.psmind2peptide_position(psmind)<<")\t";
+       else
+         os<<prots[j]<<"("<<d.psmind2peptide_position(psmind)<<")"<<",";
+    }
+  }else if(file_format_=="sqt"){
+    for (unsigned int j=0;j<prots.size();j++){
+      if(j==prots.size()-1)
+      	os<<prots[j]<<"\t";
+      else
+        os<<prots[j]<<",";
+    }
+  }
+  prots.clear();
 }
 
 /*

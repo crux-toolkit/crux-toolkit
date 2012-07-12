@@ -37,7 +37,7 @@ class CruxParser:public SQTParser{
  public:
 
   CruxParser();
-  ~CruxParser();
+  virtual ~CruxParser();
 
  
 /**
