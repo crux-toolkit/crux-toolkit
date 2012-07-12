@@ -133,9 +133,11 @@ no spectra were found.</li>
 Several additional scores were added to the <code>q-ranker</code>
 pep.xml files.</li>
 
-<li>Fixed build to work on both Lion and pre-lion versions of OS X.</li>
+<li>Fixed the build procedure to work on both Lion and pre-Lion versions of OS X.</li>
 
-<li>Fixed a bug in the normalization of the observed spectra.</li>
+<li>Fixed a bug in the normalization of the observed spectra.
+Previously, after the 10-bin normalization of intensities, peaks with
+heights below 5% of the maximum were not being removed.</li>
 </ul>
 
 <h2>Version 1.37</h2> December 22, 2011
