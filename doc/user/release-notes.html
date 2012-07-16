@@ -110,7 +110,7 @@ together with no accompanying labels.  This bug has been fixed so that
 Q-ranker once again returns only target PSMs.</li>
 
 <li>
-The option <code>display-summed-masses</code> has been replaced by
+The search option <code>display-summed-masses</code> has been replaced by
 <code>mod-mass-format</code>.  With this option, there is a new format
 for reporting modificiations: the mass in the square braces is that of the
 preceeding amino acid plus the modification mass.  This format is compliant
@@ -121,8 +121,9 @@ Modifications are reported differently in the pep.xml header to be
 compliant with the TPP.</li>
 
 <li>
-The command <code>crux compute-q-values</code> was renamed <code>crux
-calibrate-scores</code>.</li>
+The command <code>crux compute-q-values</code> now reports posterior
+error probabilities in addition to q-values.  Consequently, the
+command was renamed <code>crux calibrate-scores</code>.</li>
 
 <li>
 Crux now provides an explicit error message when an incorrectly
