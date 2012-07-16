@@ -139,8 +139,14 @@ pep.xml files.</li>
 <li>Fixed a bug in the normalization of the observed spectra.
 Previously, after the 10-bin normalization of intensities, peaks with
 heights below 5% of the maximum were not being removed.</li>
+
 <li>
-Assign Z state to spectrum that has no Z line</li>
+When a fragmentation spectra file is read, the assumed
+peptide charge state information can be missing for the scans.  
+In cases where this information has not been provided, 
+Crux will now estimate the possible charge states.
+<li>
+
 </ul>
 
 

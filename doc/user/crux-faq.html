@@ -93,6 +93,21 @@ to be added depend on whether we are using the monoisotopic mass
 </ul>
 </p>
 
+<li>
+<b>How does Crux estimate the possible charge states of the peptides when the
+   information is not provided within the spectra file?</b>
+</li>
+<p>
+Crux calculates the ratio of the sum of the intensities from the 
+peaks in the the fragmentation spectrum whose m/z is greater than the precursor m/z versus
+the sum of the peaks whose m/z is smaller than the precursor.  If this ratio is
+greater or equal to a calculated threshold based upon the location of the precursor m/z and the max m/z 
+in the spectrum, Crux then assigns +2 and +3 as possible charge states to the spectrum.  
+Otherwise, Crux assigns +1 as the possible charge state.  The algorithm is based upon the 
+observation that fragmentation spectra collected from charged peptides with charge 
+higher than +1 should have many more peaks that are greater than the precursor m/z.
+</p>
+
 <!--
 <li>
 <b>What is the difference between Crux Percolator and the stand-alone
