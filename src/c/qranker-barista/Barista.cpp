@@ -279,11 +279,9 @@ double Barista :: check_gradients_hinge_clones(int protind, int label)
 int Barista :: getOverFDRPSM(PSMScores &s, NeuralNet &n,double fdr)
 {
   double* featVec;
-  int label = 0;
   for(int i = 0; i < s.size(); i++)
     {
       featVec = d.psmind2features(s[i].psmind);
-      label = s[i].label;
       double *r = n.fprop(featVec);
       s[i].score = r[0];
     }
@@ -417,7 +415,7 @@ double Barista :: get_protein_score_parsimonious(int protind, NeuralNet &n)
 	  int num_psms = d.pepind2num_psm(pepind);
 	  int *psminds = d.pepind2psminds(pepind);
 	  double max_sc = -1000000.0;
-	  int max_ind = 0;
+
 	  for (int j = 0; j < num_psms; j++)
 	    {
 	      double *feat = d.psmind2features(psminds[j]);
@@ -425,7 +423,6 @@ double Barista :: get_protein_score_parsimonious(int protind, NeuralNet &n)
 	      if(sc[0] > max_sc)
 		{
 		  max_sc = sc[0];
-		  max_ind = j;
 		}
 	    }
 	  sm += max_sc;
@@ -2096,7 +2093,7 @@ double Barista :: get_protein_score(int protind, NeuralNet &n)
       int num_psms = d.pepind2num_psm(pepind);
       int *psminds = d.pepind2psminds(pepind);
       double max_sc = -1000000.0;
-      int max_ind = 0;
+
       for (int j = 0; j < num_psms; j++)
 	{
 	  double *feat = d.psmind2features(psminds[j]);
@@ -2104,7 +2101,7 @@ double Barista :: get_protein_score(int protind, NeuralNet &n)
 	  if(sc[0] > max_sc)
 	    {
 	      max_sc = sc[0];
-	      max_ind = j;
+
 	    }
 	}
       sm += max_sc;

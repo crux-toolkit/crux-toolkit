@@ -269,7 +269,7 @@ Spectrum* Spectrum::newSpectrumMgf
   } else {
     delete spectrum;
   }
-  return false;
+  return NULL;
 }
 
 /**

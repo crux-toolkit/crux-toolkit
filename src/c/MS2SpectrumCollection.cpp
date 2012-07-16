@@ -166,7 +166,7 @@ Spectrum* MS2SpectrumCollection::getSpectrum(
   // check if file is still avaliable
   if ((file = fopen(filename_.c_str(), "rb")) == NULL) {
     carp(CARP_ERROR, "File %s could not be opened", filename_.c_str());
-    return (false);
+    return NULL;
   }
 
   Spectrum* return_spec = NULL;
