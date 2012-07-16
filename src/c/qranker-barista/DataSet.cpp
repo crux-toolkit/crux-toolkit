@@ -15,8 +15,8 @@ Dataset::Dataset()
     num_prot(0), num_pos_prot(0), num_neg_prot(0),
     protind_to_label(0),
     protind_to_num_all_pep(0),
-    protind_to_length(0),
     psmind_to_sp_rank((int*)0),
+    protind_to_length(0),
     psmind_to_xcorr_rank((int*)0),
     psmind_to_matches_spectrum((int*)0),
     psmind_to_by_ions_matched((double*)0),
@@ -931,7 +931,7 @@ int Dataset :: print_features(string &filename)
   fname.str("");
   //print features header
   os<<"scan\t"<<"label\t";
-  for(int i=0;i<features_header_.size()-1;i++)
+  for(unsigned i=0;i<features_header_.size()-1;i++)
     os<<features_header_[i]<<"\t";   
   os<<features_header_[features_header_.size()-1]<<endl;
 

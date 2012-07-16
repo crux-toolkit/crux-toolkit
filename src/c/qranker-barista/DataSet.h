@@ -92,31 +92,37 @@ class Dataset
   double *psmind_to_deltaCn;
   double *psmind_to_calculated_mass;
   double *psmind_to_precursor_mass;
+  int *psmind_to_fileind;
+  int num_pep;
+  int num_pos_pep;
+  int num_neg_pep;
+  int *pepind_to_label;
+  int num_prot;
+  int num_pos_prot;
+  int num_neg_prot;
+  int *protind_to_label;
+  int *protind_to_num_all_pep;
   int* psmind_to_sp_rank;//Sp rank 
+  int *protind_to_length;
   int* psmind_to_xcorr_rank;//xcorr rank 
   int *psmind_to_matches_spectrum;//matches/spectrum
   double* psmind_to_by_ions_matched; //b/y ions matched
   double* psmind_to_by_ions_total; //b/y ions total
   int*  psmind_to_peptide_position;//<pepetide position in protein 
+
   map <int, string> fileind_to_fname;
-  int *psmind_to_fileind;
  
   vector <string> features_header_;
-  int num_pep;
-  int num_pos_pep;
-  int num_neg_pep;
+  
   BipartiteGraph pepind_to_psminds;
   BipartiteGraph pepind_to_protinds;
   map <int, string> ind_to_pep;
-  int *pepind_to_label;
+  
 
-  int num_prot;
-  int num_pos_prot;
-  int num_neg_prot;
-  int *protind_to_label;
+ 
+  
   BipartiteGraph protind_to_pepinds;
-  int *protind_to_num_all_pep;
-  int *protind_to_length;
+ 
   map <int, string> ind_to_prot;
 
   string in_dir;
