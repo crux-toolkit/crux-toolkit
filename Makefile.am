@@ -68,9 +68,6 @@ bdist:
 		doc/user/*.css \
 		bdist/doc/
 	cp 	src/c/crux \
-		src/c/crux-get-ms2-spectrum \
-		src/c/crux-generate-peptides \
-		src/c/crux-predict-peptide-ions \
 		bdist/bin/
 	if [ "$(SEARCH_ENABLED)" = 'true' ] ; then \
 		mkdir bdist/tide; \
