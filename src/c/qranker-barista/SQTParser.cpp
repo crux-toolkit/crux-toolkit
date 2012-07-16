@@ -808,7 +808,7 @@ void SQTParser :: read_M_line(ifstream &is, sqt_match &m)
   m.sp_score.push_back(sp);
   
   //number of matched ions
-  double num_ions_matched;
+  int num_ions_matched;
   is >> num_ions_matched;
   m.num_ions_matched.push_back(num_ions_matched);
 
@@ -1258,12 +1258,12 @@ void SQTParser :: clean_up(string dir)
   fname.str("");
   
   //psmind_to_matches_spectrum
-  fname << out_dir << "/psmind_to_matches__spectrum";
+  fname << out_dir << "/psmind_to_matches_spectrum";
   remove(fname.str().c_str());
   fname.str("");
   
   //psmind_to_peptide_position
-  fname << out_dir << "/psmind_to_peptide__position";
+  fname << out_dir << "/psmind_to_peptide_position";
   remove(fname.str().c_str());
   fname.str("");
 

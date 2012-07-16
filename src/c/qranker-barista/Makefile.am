@@ -1,5 +1,5 @@
 # Automake template for xlink-search library
-AM_CXXFLAGS = -Wall -W $(USEDOUBLES) $(USEDARWIN) $(SEARCH_ENABLED) \
+AM_CXXFLAGS = -Wall -Werror -W $(USEDOUBLES) $(USEDARWIN) $(SEARCH_ENABLED) \
             -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE
 
 

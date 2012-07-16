@@ -7,16 +7,16 @@ QRanker::QRanker() :
   num_hu(4),
   mu(0.01),
   weightDecay(0.000),
+  max_net_gen(NULL),
+  max_net_targ(NULL),
+  nets(NULL),
   in_dir(""), 
   out_dir(""), 
   skip_cleanup_flag(0),
   overwrite_flag(0),
   fileroot(""),
   feature_file_flag(0),
-  max_net_gen(NULL),
-  max_net_targ(NULL),
-  file_format_(""),
-  nets(NULL)
+  file_format_("")
 {
 }
 
@@ -993,7 +993,7 @@ int QRanker :: crux_set_command_line_options(int argc, char *argv[])
          files.push_back(sqt_source);
        }
       
-      for(int i=0; i<files.size();i++){
+      for(unsigned i=0; i<files.size();i++){
         FILE_FORMAT_T format = check_file_format(files[i]);
         switch (format) {
         case SQT_FORMAT:
@@ -1160,7 +1160,7 @@ COMMAND_T QRanker::getCommand(){
 
 void QRanker :: get_protein_id(int pepind, vector<string> &prot){
   int * protinds= d.pepind2protinds(pepind) ;
-  int prot_length=d.pepind2num_prot(pepind);  
+  unsigned prot_length=d.pepind2num_prot(pepind);  
   for (unsigned k=0;k<prot_length;k++){
     string protein_str= d.ind2prot( protinds[k]);
     prot.push_back(protein_str); 

@@ -2720,7 +2720,7 @@ int Barista :: crux_set_command_line_options(int argc, char *argv[])
          files.push_back(sqt_source);
        }
      
-     for(int i=0; i<files.size();i++){
+     for(unsigned i=0; i<files.size();i++){
         FILE_FORMAT_T format=check_file_format(files[i]);
         //sqt_source 
         switch (format) {
@@ -2863,7 +2863,7 @@ FILE_FORMAT_T Barista:: check_file_format(string source){
 
 void Barista :: get_protein_id(int pepind, vector<string> &prot){
   int * protinds= d.pepind2protinds(pepind) ;
-  int prot_length=d.pepind2num_prot(pepind);  
+  unsigned prot_length=d.pepind2num_prot(pepind);  
   for (unsigned k=0;k<prot_length;k++){
     string protein_str= d.ind2prot( protinds[k]);
     prot.push_back(protein_str); 

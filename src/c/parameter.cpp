@@ -824,9 +824,9 @@ void initialize_parameters(void){
      "foo*.decoy.sqt. This naming convention allows the target and decoy SQT"
      "files to reside in the same directory.",
      "Available for q-ranker and barista.", "true");
- //**** Barista options. ******
+ //**** Barista and QRanker options. ******
  set_boolean_parameter("list-of-files",false, 
-    "Barista can recognize search result as a file or a list of files. This option"
+    "Search result can be as a file or a list of files. This option"
     " allows users to specify the search results are provided as a list of files by " 
     "setting the --list-of-files option to T."
     " Defualt= false.", 

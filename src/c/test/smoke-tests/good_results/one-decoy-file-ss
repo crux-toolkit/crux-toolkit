@@ -3165,10 +3165,9 @@ no-base=false
 # Available for crux extract-columns and extract-rows
 header=true
 
-# Barista can recognize search result as a file or a list of files. This
-# option allows users to specify the search results are provided as a
-# list of files by setting the --list-of-files option to T. Defualt=
-# false.
+# Search result can be as a file or a list of files. This option allows
+# users to specify the search results are provided as a list of files by
+# setting the --list-of-files option to T. Defualt= false.
 # Availabe for barista.
 list-of-files=false
 
