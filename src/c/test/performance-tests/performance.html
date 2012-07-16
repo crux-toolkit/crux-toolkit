@@ -11,13 +11,13 @@ are 2+ and 7055 are 3+.  Thus, there are a total of 14298 searches to
 be performed.  The database is comprised of 23,932 proteins and 10.5
 million amino acids, including <i>C. elegans</i> proteins plus some
 common contaminants.  The test runs <code>crux
-search-for-matches</code> and <code>crux sequest-search</code> using a
-3.0 Da precursor mass window, shuffled decoys and a fully tryptic
-digest.  The searches are followed up by analysis via <code>crux
-compute-q-values</code>, <code>crux percolator</code>, <code>crux
-q-ranker</code> and, if it is installed, the stand-alone version of
-Percolator.  The performance of each method is summarized as a plot
-showing the number of spectra identified as a function of q-value
+search-for-matches</code> using a 3.0 Da precursor mass window,
+shuffled decoys and a fully tryptic digest.  The searches are followed
+up by analysis via <code>crux calibrate-scores</code> (twice, using
+Weibull p-values or decoys as the null), <code>crux
+percolator</code>, <code>crux q-ranker</code> and <code>crux
+barista</code>.  The performance of each method is summarized as a
+plot showing the number of spectra identified as a function of q-value
 threshold.</p>
 
 <p>
@@ -41,39 +41,6 @@ should show up in the right-hand panel below:</p>
 </center>
 
 <p>
-The plot contains the following series:</p>
-
-<ul>
-<li>
-ranking on sequest-search XCorr with q-values estimated via an
-empirical null</li>
-
-<li>
-ranking on search-for-matches XCorr with q-values estimated from the
-Weibull curve fitting procedure</li>
-
-<li>
-<code>crux percolator</code> q-values based on sequest-search
-results</li>
-
-<li>
-<code>crux percolator</code> q-values based on search-for-matches
-results</li>
-
-<li>
-Stand-alone percolator q-values, if the stand-alone version of
-percolator is installed and is on the PATH.  This is only done for
-sequest-search results.</li>
-
-<li>
-<code>q-ranker</code> q-values based on sequest-search results</li>
-
-<li>
-<code>q-ranker</code> q-values based on search-for-matches results</li>
-
-</ul>
-
-<p>
 Here are some things to look for in the output:</p>
 
 <ul>
@@ -92,30 +59,10 @@ No method should leave the y-axis before about 1000 PSMs have been
 observed.</li>
 
 <li>
-Q-ranker should perform slightly better than Percolator.</li>
-
-<li>
-Percolator and stand-alone percolator should perform approximately the
-same.</li>
-
-<li>
-Q-ranker and both percolators should perform better than any of the
-series based on <code>compute-q-values</code>.</li>
-
-<li>
-Corresponding pairs of series from <code>search-for-matches</code>
-and <code>sequest-search</code> should be very similar.</li>
-
-<li>
-The series produced by treating the Weibull p-values as p-values
-versus treating them as an empirical null should be very similar.</li>
+The machine learning methods (Percolator, q-ranker and Barista) should
+perform better than the XCorr methods.</li>
 
 </ul>
-
-
-<p>
-WSN<br>
-9 June 2010</p>
 
 </body>
 </html

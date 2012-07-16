@@ -1,5 +1,4 @@
 #!/bin/bash -efx
-# FILE: run-performance-test.sh
 # AUTHOR: William Stafford Noble
 
 # This script runs a performance test on the crux toolkit.  Its usage
@@ -36,110 +35,93 @@ fi
 
 ms2=051708-worm-ASMS-10.ms2
 
-# Do the whole test twice, once for each search tool.
-for searchtool in sequest-search search-for-matches; do
-
-  if [[ $searchtool == "sequest-search" ]]; then
-     shortname=sequest
-     search_parameter="--parameter-file crux.param"
-  else
-     shortname=search
-     search_parameter="--parameter-file crux.param --compute-p-values T --compute-sp T"
-  fi
+# Do the whole test twice, once for each search tool.  (N.B. This loop
+# is temporarily not doing anything useful.  Once we get jimmy-search
+# integrated into Crux, then this loop will be useful again.)
+for searchtool in search-for-matches; do
 
   # Run the search.
-  if [[ -e $shortname/$shortname.target.txt ]]; then
-    echo Skipping $searchtool.
+  if [[ -e $searchtool/search.target.txt ]]; then
+    echo Skipping search-for-matches.
   else  
     $CRUX $searchtool \
-      $search_parameter \
+      --parameter-file crux.param \
       --num-decoys-per-target 1 \
-      --output-dir $shortname \
+      --output-dir $searchtool \
       $ms2 $db
   fi
 
-  # Run compute-q-values.
-  if [[ -e $shortname/qvalues.target.txt ]]; then
-    echo Skipping compute-q-values.
+  # Calibrate the scores.
+  if [[ -e $searchtool/qvalues.target.txt ]]; then
+    echo Skipping calibrate-scores \(Weibull\).
   else
-    $CRUX compute-q-values \
-      --output-dir $shortname \
-      $db $shortname
+    $CRUX calibrate-scores \
+      --output-dir $searchtool \
+      $db $searchtool
   fi
-  if [[ $searchtool == "sequest-search" ]]; then
-    $CRUX extract-columns $shortname/qvalues.target.txt "decoy q-value (xcorr)" > $shortname/qvalues.xcorr.decoy.txt
-    echo replot \"$shortname/qvalues.xcorr.decoy.txt\" using 1:0 title \"$shortname XCorr \(decoy\)\" with lines >> $gnuplot
-  else  
-    $CRUX extract-columns $shortname/qvalues.target.txt "Weibull est. q-value" > $shortname/qvalues.weibull.txt
-    echo replot \"$shortname/qvalues.weibull.txt\" using 1:0 title \"$shortname XCorr \(Weibull\)\" with lines >> $gnuplot
+
+  $CRUX extract-columns $searchtool/qvalues.target.txt "Weibull est. q-value" > $searchtool/qvalues.weibull.txt
+  echo replot \"$searchtool/qvalues.weibull.txt\" using 1:0 title \"XCorr \(Weibull\)\" with lines >> $gnuplot
+
+  # Re-do the calibration, but without the Weibull p-values.
+  if [[ -e decoys/qvalues.target.txt ]]; then
+    echo Skipping calibrate-scores \(decoy\).
+  else
+    # Make copies of the search results without the p-value column.
+    mkdir -p decoys
+    cut -f 1-10,12-22 search-for-matches/search.target.txt \
+      > decoys/search.target.txt
+    cut -f 1-10,12-22 search-for-matches/search.decoy.txt \
+      > decoys/search.decoy.txt
+    $CRUX calibrate-scores \
+      --output-dir decoys \
+      $db decoys
   fi
+
+  $CRUX extract-columns decoys/qvalues.target.txt "decoy q-value (xcorr)" > decoys/qvalues.xcorr.decoy.txt
+  echo replot \"decoys/qvalues.xcorr.decoy.txt\" using 1:0 title \"XCorr \(decoy\)\" with lines >> $gnuplot
   
   # Run Crux percolator
-  if [[ -e $shortname/percolator.target.txt ]]; then
+  if [[ -e $searchtool/percolator.target.txt ]]; then
     echo Skipping crux percolator.
   else
     $CRUX percolator \
-      --output-dir $shortname \
+      --output-dir $searchtool \
       --feature-file T \
-      $db $shortname 
+      $db $searchtool 
   fi
 
-  $CRUX extract-columns $shortname/percolator.target.txt "percolator q-value" > $shortname/qvalues.percolator.txt
-  echo replot \"$shortname/qvalues.percolator.txt\" using 1:0 title \"$shortname crux percolator\" with lines >> $gnuplot
+  $CRUX extract-columns $searchtool/percolator.target.txt "percolator q-value" > $searchtool/qvalues.percolator.txt
+  echo replot \"$searchtool/qvalues.percolator.txt\" using 1:0 title \"percolator\" with lines >> $gnuplot
 
   # Run q-ranker.
-  if [[ $searchtool == "search-for-matches" ]]; then
-    echo barista and q-ranker do not work with crux search-for-matches.
+  if [[ -e $searchtool/q-ranker.target.psms.txt ]]; then
+    echo Skipping q-ranker.
   else
-    if [[ -e $shortname/q-ranker.target.psms.txt ]]; then
-      echo Skipping q-ranker.
-    else
-      $CRUX q-ranker \
-        --output-dir $shortname \
-        --feature-file T \
-        --separate-searches $shortname/$shortname.decoy.sqt \
-        $ms2 $shortname/$shortname.target.sqt
-    fi
-    $CRUX extract-columns $shortname/q-ranker.target.psms.txt "q-ranker q-value" > $shortname/qvalues.qranker.txt
-  
-    echo replot \"$shortname/qvalues.qranker.txt\" using 1:0 title \"$shortname q-ranker\" with lines >> $gnuplot
-
-    if [[ -e $shortname/barista.target.psms.txt ]]; then
-      echo Skipping barista.
-    else
-      $CRUX barista \
-        --output-dir $shortname \
-        --feature-file T \
-        --separate-searches $shortname/$shortname.decoy.sqt \
-        $db $ms2 $shortname/$shortname.target.sqt
-    fi
-    $CRUX extract-columns $shortname/barista.target.psms.txt "q-value" > $shortname/qvalues.barista.txt
-  
-    echo replot \"$shortname/qvalues.barista.txt\" using 1:0 title \"$shortname barista\" with lines >> $gnuplot
-
+    $CRUX q-ranker \
+      --output-dir $searchtool \
+      --feature-file T \
+      --separate-searches $searchtool/search.decoy.txt \
+      $ms2 $searchtool/search.target.txt
   fi
-  
-  # Run Lukas's percolator
-  if [[ $searchtool == "search-for-matches" ]]; then
-    echo Stand-alone Percolator does not work with crux search-for-matches.
-  elif [[ `which percolator` == "" ]]; then
-    echo Skipping stand-alone Percolator -- not installed.
+
+  $CRUX extract-columns $searchtool/q-ranker.target.psms.txt "q-ranker q-value" > $searchtool/qvalues.qranker.txt
+  echo replot \"$searchtool/qvalues.qranker.txt\" using 1:0 title \"q-ranker\" with lines >> $gnuplot
+
+  # Run Barista.
+  if [[ -e $searchtool/barista.target.psms.txt ]]; then
+    echo Skipping barista.
   else
-    if [[ -e $shortname/l-percolator.features.tsv ]]; then
-      echo Skipping stand-alone Percolator.
-    else
-      percolator \
-        --tab-out $shortname/l-percolator.features.tsv \
-        --gist-out $shortname/l-percolator.gist.txt \
-        --weights $shortname/l-percolator.weights.txt \
-        --results $shortname/l-percolator.tsv \
-        --sqt-out $shortname/l-percolator.sqt \
-        --xml-output $shortname/l-percolator.xml \
-        $shortname/sequest.target.sqt \
-        $shortname/sequest.decoy.sqt
-    fi
-    echo replot \"$shortname/l-percolator.tsv\" using 3:0 title \"Stand-alone percolator\" with lines >> $gnuplot
+    $CRUX barista \
+      --output-dir $searchtool \
+      --feature-file T \
+      --overwrite T \
+      --separate-searches $searchtool/search.decoy.txt \
+      $db $ms2 $searchtool/search.target.txt
   fi
+
+  $CRUX extract-columns $searchtool/barista.target.psms.txt "q-value" > $searchtool/qvalues.barista.txt
+  echo replot \"$searchtool/qvalues.barista.txt\" using 1:0 title \"barista\" with lines >> $gnuplot
   
 done
 
