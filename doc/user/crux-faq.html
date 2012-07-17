@@ -97,23 +97,20 @@ to be added depend on whether we are using the monoisotopic mass
 <b>How does Crux estimate the possible charge states of the peptides when the
    information is not provided within the spectra file?</b>
 </li>
-<p>
-Crux calculates the ratio of the sum of the intensities from the 
-peaks in the the fragmentation spectrum whose m/z is greater than the precursor m/z versus
-the sum of the peaks whose m/z is smaller than the precursor.  If this ratio is
-greater or equal to a calculated threshold based upon the location of the precursor m/z and the max m/z 
-in the spectrum, Crux then assigns +2 and +3 as possible charge states to the spectrum.  
-Otherwise, Crux assigns +1 as the possible charge state.  The algorithm is based upon the 
-observation that fragmentation spectra collected from charged peptides with charge 
-higher than +1 should have many more peaks that are greater than the precursor m/z.
-</p>
 
-<!--
-<li>
-<b>What is the difference between Crux Percolator and the stand-alone
-version available
-from <a href="http://www.per-colator.com">http://www.per-colator.com</a>?</b></li>
--->
+<p>
+Crux calculates the ratio of two values: (1) the sum of the
+intensities from the peaks in the fragmentation spectrum whose m/z is
+greater than the precursor m/z versus (2) the sum of the peaks whose
+m/z is smaller than the precursor.  If this ratio is greater or equal
+to a calculated threshold based upon the location of the precursor m/z
+and the max m/z in the spectrum, Crux then assigns both +2 and +3 as
+possible charge states to the spectrum.  Otherwise, Crux assigns +1 as
+the charge state.  The algorithm is based upon the observation that
+fragmentation spectra collected from peptides with charge greater than
++1 should have many more peaks that are greater than the precursor
+m/z.
+</p>
 
 <li>
 <b>What operating systems does Crux work with?</b></li>
@@ -130,13 +127,13 @@ installed.</p>
 
 <p>
 Crux is not particularly optimized to run quickly on a FASTA file.  To
-get Crux to go fast, you must do the "crux create-index" step first,
-and then run your searches using the resulting index.  If, after doing
-this, you are still getting slow search speeds, it may be because you
-are using the Network File System (NFS).   Crux uses a memory mapping
-mechanism that often works poorly over a system like NFS.  The
-solution is to copy your index to a local disk.  Then Crux should run
-much more quickly.</p>
+get Crux to go fast, you must do the <code>crux create-index</code>
+step first, and then run your searches using the resulting index.  If,
+after doing this, you are still getting slow search speeds, it may be
+because you are using the Network File System (NFS).  Crux uses a
+memory mapping mechanism that often works poorly over a system like
+NFS.  The solution is to copy your index to a local disk.  Then Crux
+should run much more quickly.</p>
 
 <li>
 <b>How does Crux select candidate peptides from the database?</b></li>
@@ -197,6 +194,7 @@ peptide sequence. </p>
 
 <li>
 <b>How can I search my ITRAQ data?</b></li>
+
 <p>
 ITRAQ and other tagged seaches can be done by using terninal
 modifications.  For example, if your tag has a mass of 304.199040, add
@@ -236,17 +234,8 @@ includes the following:</p>
 Support for more input file types.</li>
 
 <li>
-The ability to compute peptide-level q-values
-via <code>compute-q-values</code>, <code>percolator</code>
-or <code>q-ranker</code>.</li>
-
-<li>
-Support for searching for post-translational modifications in Tide
-and <code>search-for-xlinks</code>.</li>
-
-<li>
-Tools to do protein-level inference, including identification and
-spectral counting.</li>
+Support for searching for post-translational modifications in 
+<code>search-for-xlinks</code>.</li>
 
 </ul>
 </p>

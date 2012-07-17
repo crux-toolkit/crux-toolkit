@@ -26,8 +26,8 @@ resembles the other tools in Crux:</li>
 Barista and Q-ranker accept search results in tab-delimited format, in addition to
 SQT format.</li>
 <li>
-Barista now reports posterior error probabilities in addition to
-q-values.</li>
+Barista now reports posterior error probabilities, in addition to
+q-values, for PSMs, peptides and proteins.</li>
 <li>
 Barista's pep.xml output has been updated to be compatible with the
 TransProteomic Pipeline (TPP).</li>
@@ -148,23 +148,21 @@ Crux will now estimate the possible charge states.
 </li>
 
 <li>
-The sequest-search program is no longer supported by the Crux tandem mass spectrometry 
-toolkit.
+The <code>sequest-search</code> command has been removed.</li>
+
+<li>
+The feature files for Q-ranker and Barista now contain a header
+describing each feature.
 </li>
 
 <li>
-Barista now reports posterior error probabilities for psms, peptides, and proteins.
-</li>
-
-<li>
-The feature files for Q-ranker and Barista now contain a header describing each feature.
-</li>
-
-<li>
-Q-ranker and Barista now output all of the fields as provided from the input search file(s).
+Q-ranker and Barista now output all of the fields provided in the
+input search files.
 </li>
 
 </ul>
+
+<hr></hr>
 
 
 <h2>Version 1.37</h2> December 22, 2011
