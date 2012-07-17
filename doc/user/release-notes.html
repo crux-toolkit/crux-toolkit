@@ -145,8 +145,15 @@ When a fragmentation spectra file is read, the assumed
 peptide charge state information can be missing for the scans.  
 In cases where this information has not been provided, 
 Crux will now estimate the possible charge states.
+</li>
 <li>
-
+Removing sequest-search from Crux tandem mass spectrometry toolkit. This program searches a protein database with a set of spectra and writes search results in an SQT file. The command crux search-for-matches handles modifications in the same way as crux sequest-search.</li>
+<li>
+Barista reports posterior error probability estimated from the q-ranker score.</li>
+<li>
+Add header line to QRanker and Barista feature file.</li>
+<li>
+QRnaker and Barista ouputs include all of the columns in the search file(s) used as input.</li>
 </ul>
 
 
