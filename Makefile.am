@@ -69,7 +69,7 @@ bdist:
 		bdist/doc/
 	cp 	src/c/crux \
 		bdist/bin/
-	if [ "$(SEARCH_ENABLED)" = 'true' ] ; then \
+	if [ "$(SEARCH_ENABLED)" = 'true' -a "x"$(name) = "xLinux" ] ; then \
 		mkdir bdist/tide; \
 		mkdir bdist/tide/images; \
 		cp tide/images/nibib.gif bdist/tide/images; \
@@ -90,9 +90,11 @@ bdist:
 		scp nexus.gs.washington.edu:/net/noble/vol1/data/crux-datasets/tide-data-1/worm.fasta bdist-data/;\
 	fi
 	zip -r $(distdir)-$(ar)-$(name).zip bdist
-	rm -fr bdist/
-	zip -r $(distdir)-data.zip bdist-data
-	rm -rf bdist-data
+	rm -fr bdist
+	if [ "x"$(name) = "xLinux" ] ; then \
+		zip -r $(distdir)-data.zip bdist-data; \
+		rm -rf bdist-data; \
+	fi
 
 checksum:
 	md5sum $(distdir)-$(ar)-$(name).zip > $(distdir)-$(ar)-$(name).zip.md5sum.txt
