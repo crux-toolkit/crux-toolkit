@@ -16,7 +16,7 @@
 <p> 
 After you have run a <a href="search-tutorial.html">search</a> and
 assigned confidence to your identified PSMs, you can now calculate
-relative quantification value for the proteins using spectral counting by running the
+relative quantification values for the proteins by running the
 command:<br>
 
 <div class=code>
@@ -29,8 +29,7 @@ Alternatively, you can use the pepXML output by q-ranker using the command:<br>
 <code>$ crux spectral-counts ./crux-output/q-ranker_output.xml small-yeast.fasta</code>
 </div>
 
-
-<p>While the command is running, you will see output like this:
+<p>While the command is running, you will see output like this
 </p>
 
 <pre>
@@ -65,13 +64,22 @@ YMR235C 0.0067826854
 YBR118W 0.0060274079
 </pre>
 
+<p>
+In this output, the first field is the identifier and the second field
+is the spectral-counting measure (NSAF, dNSAF, SIN, or EMPAI) result
+for each protein.  To select which measure is computed, see the
+<a href="spectral-counts.html">crux spectral-counts</a> documentation.</p>
 
-Where the first field is the id, and the second field will be the spectral-counting measure 
-(NSAF, dNSAF, SIN, or EMPAI) result for each protein. For setting the measure, see the 
-<a href="spectral-counts.html">crux spectral-counts</a> documentation for more details.<br>
 
+<h3>Using peptideprophet probability from pepXML</h3>
+<p><code>crux spectral-counts</code> also supports using the Peptide Prophet probability provided in the pepXML file.  Use the command:<br>
+<br>
+<div class=code>
+<code>$ crux spectral-counts --custom-threshold peptideprophet --threshold 0.9 --threshold-min F ./crux-output/q-ranker_output.xml small-yeast.fasta</code>
+</div>          
+This code will filter out matches whose Peptide Prophet probability is &lt; 0.9 and calculate NSAF for the proteins of the remaining PSMs.<br>
 
-
+</p>
 
 </div><!--end main-->
 
