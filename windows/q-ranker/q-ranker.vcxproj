@@ -499,6 +499,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\c\qranker-barista\Barista.cpp" />
     <ClCompile Include="..\..\src\c\qranker-barista\BipartiteGraph.cpp" />
+    <ClCompile Include="..\..\src\c\qranker-barista\CruxParser.cpp" />
     <ClCompile Include="..\..\src\c\qranker-barista\DataSet.cpp" />
     <ClCompile Include="..\..\src\c\qranker-barista\NeuralNet.cpp" />
     <ClCompile Include="..\..\src\c\qranker-barista\PepScores.cpp" />
@@ -513,6 +514,7 @@
     <ClInclude Include="..\..\src\c\crux-utils.h" />
     <ClInclude Include="..\..\src\c\qranker-barista\Barista.h" />
     <ClInclude Include="..\..\src\c\qranker-barista\BipartiteGraph.h" />
+    <ClInclude Include="..\..\src\c\qranker-barista\CruxParser.h" />
     <ClInclude Include="..\..\src\c\qranker-barista\DataSet.h" />
     <ClInclude Include="..\..\src\c\qranker-barista\NeuralNet.h" />
     <ClInclude Include="..\..\src\c\qranker-barista\PepScores.h" />
