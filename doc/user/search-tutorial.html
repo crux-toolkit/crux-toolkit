@@ -26,7 +26,7 @@ similarity.  These scores are reported in the output.  To conduct the
 search, use this command. </p>
 
 <div class=code>
-<code>$ crux search-for-matches demo.ms2 small-yeast.fasta</code>
+<code>$ crux search-for-matches --compute-sp T demo.ms2 small-yeast.fasta</code>
 </div>
 
 <p>While the search is running, you will see output like this
@@ -45,27 +45,17 @@ INFO: crux-search-for-matches finished
 </pre>
 
 <p>A new directory, <span class=file>crux-output</span>, will have been created. 
-Looking at the contents of the directory, you will see seven new files.
+Looking at the contents of the directory, you will see six new files.
  containing the search results: 
-The file
-<span class=file>demo.csm</span> containes the search results in a binary format that 
-can be read by 
-<span class=prog>crux percolator</span> 
-or 
-<span class=prog>crux compute-q-values</span>. 
-The files 
-<span class=file>search.target.sqt</span>
-and 
-<span class=file>search.target.txt</span>
-contain the search results in human readable plain text formats.
-<span class=file>search.target.sqt</span> uses the standard
-SQT format for spectrum-peptide matches,
-and
-<span class=file>search.target.txt</span>
-uses tab-delmited fields.
-The remaining files,
-<span class=file>decoy.sqt, decoy.txt, demo-decoy-1.csm, demo-decoy-2.csm</span>
-contain the results of searching a shuffled version of the protein database.
+
+<li>search.target.txt &ndash; search results in <a href="txt-format.html">tab-delimited format</a>.</li>
+<li>search.decoy.txt &ndash; search results from a decoy database in <a href="txt-format.html">tab-delimited format</a>.</li>
+<li>search.target.pep.xml &ndash; search results in pepXML format.</li>
+<li>search.decoy.pep.xml &ndash; search results from a decoy database in pepXML format.</li>
+<li>search.params.txt &ndash; parameters used in the search.</li>
+<li>search.log.txt &ndash; log file for the search.</li>
+
+
 </p>
 
 <p>The final step is to analyze our search results.  Each spectrum has
@@ -78,104 +68,52 @@ high-quality peptide-spectrum matches.  Run this command.
 </p>
 
 <div class=code><code>
-$ crux percolator small-yeast.fasta </code>
+$ crux q-ranker --separate-searches ./crux-output/search.decoy.txt demo.ms2 crux-output/search.target.txt</code>
 </div>
 
 <p>While the analysis is running, you will see output like this
 </p>
 
 <pre>
-INFO: Running percolator
-INFO: Getting PSMs from ./demo.csm
-INFO: Getting PSMs from ./demo-decoy-1.csm
-INFO: Getting PSMs from ./demo-decoy-2.csm
-INFO: Outputting matches.
+INFO: Beginning q-ranker.
+INFO: delmited source: ./crux-output/search.target.txt
+INFO: ms2 source: demo.ms2
 </pre>
 
 <p>When the analysis is complete it will print </p>
 <pre>
-INFO: crux percolator finished.
+INFO: Finished crux q-ranker.
+
 </pre>
 
-<p>There is new file called <span class=file>target.sqt</span>
-containing the results.  The beginning of the file looks like this
+<p>There will be five new files in the <span class=file>crux-output</span> directory.
 
+<li>q-ranker.target.psms.txt &ndash; q-ranker results in <a href="txt-format.html">tab-delimited format</a>.</li>
+<li>q-ranker.psms.at.fdr.thresholds.txt &ndash; number of psms accepted at a particular q-value threshold</li>
+<li>q-ranker.params.txt &ndash; parameters used for running q-ranker.</li>
+<li>q-ranker_output.xml &ndash; q-ranker results in pepXML format.</li>
+<li>q-ranker.log.txt &ndash; q-ranker log file.</li>
+
+</p>
+
+<p>
+
+The q-ranker.target.psms.txt file will look like:<br>
 <pre>
-H       SQTGenerator Crux
-H       SQTGeneratorVersion 1.0
-H       Comment Crux was written by...
-H       Comment ref...
-H       StartTime       Mon Mar  3 12:08:22 2008
-H       EndTime
-H       Database        index-yeast/small-yeast-binary-fasta
-H       DBSeqLength     ?
-H       DBLocusCount    56
-H       PrecursorMasses average
-H       FragmentMasses  mono
-H       Alg-PreMasTol   3.0
-H       Alg-FragMassTol 0.50
-H       Alg-XCorrMode   0
-H       Comment preliminary algorithm sp
-H       Comment final algorithm xcorr
-H       StaticMod       C=160.139
-H       Alg-DisplayTop  5
-H       EnzymeSpec      tryptic
-H       Comment matches analyzed by percolator
-S       10      10      2       0.00    server  636.34  0.00    0.00    2
-M       1       1       1270.49 0.00    -1.19   0.81    7       22      K.SGLIVEIQGVQK.E        U
-L       YDR093W DNF2 SGDID:S000002500, Chr IV from 631279-636117, Verified ORF, "Aminophospholipid translocase (flippase) that localizes primarily to the plasma membrane; contributes to endocytosis, protein"
-S       11      11      2       0.00    server  745.27  0.00    0.00    2
-M       1       1       1489.73 0.00    3.12    0.00    21      24      R.NFLETVELQVGLK.N       U
-L       YGL135W RPL1B SGDID:S000003103, Chr VII from 254646-255299, Verified ORF, "N-terminally acetylated protein component of the large (60S) ribosomal subunit, nearly identical to Rpl1Ap and has similari"
-S       12      12      3       0.00    server  472.56  0.00    0.00    7
-M       1       3       1414.62 0.00    -1.00   0.61    12      44      K.VLEFHPFDPVSK.K        U
-L       YGL008C PMA1 SGDID:S000002976, Chr VII from 482671-479915, reverse complement, Verified ORF, "Plasma membrane H+-ATPase, pumps protons out of the cell; major regulator of cytoplasmic pH and plasma m"
+scan    charge  q-ranker q-value        q-ranker score  q-ranker PEP    spectrum precursor m/z  spectrum neutral mass   peptide mass    delta_cn        sp score        sp rank xcorr score     xcorr rank      b/y ions matched    b/y ions total  matches/spectrum        sequence        cleavage type   protein id      flanking aa     filename
+53      2       0       3.14519 0.04186 745.749 1489.48 1489.73 0.816319        2953.36 1       4.28817 1       21      24      4       NFLETVELQVGLK   trypsin-full-digest     YGL135W(27)     RN      ./crux-output/search.target.txt
+62      2       0       3.14476 0.0418757       745.859 1489.7  1489.73 0.91249 2727.86 1       4.17594 1       21      24      3       NFLETVELQVGLK   trypsin-full-digest     YGL135W(27)     RN      ./crux-output/search.target.txt
+131     2       0       3.14439 0.0418892       745.849 1489.68 1489.73 0.911082        2887.16 1       3.96851 1       21      24      3       NFLETVELQVGLK   trypsin-full-digest     YGL135W(27)     RN      ./crux-output/search.target.txt
+11      2       0       3.14323 0.0419318       745.269 1488.52 1489.73 0.775185        2777.4  1       3.68443 1       21      24      5       NFLETVELQVGLK   trypsin-full-digest     YGL135W(27)     RN      ./crux-output/search.target.txt
+85      3       0       3.14293 0.0419427       497.618 1489.83 1489.73 0.890992        2292.95 1       4.88676 1       27      48      3       NFLETVELQVGLK   trypsin-full-digest     YGL135W(27)     RN      ./crux-output/search.target.txt
+77      2       0       3.14105 0.0420117       745.429 1488.84 1489.73 0.807153        2585.78 1       3.61218 1       21      24      4       NFLETVELQVGLK   trypsin-full-digest     YGL135W(27)     RN      ./crux-output/search.target.txt
+92      3       0       3.13973 0.0420601       497.278 1488.81 1489.73 0.855949        2126.37 1       4.52471 1       25      48      4       NFLETVELQVGLK   trypsin-full-digest     YGL135W(27)     RN      ./crux-output/search.target.txt
+118     3       0       3.13972 0.0420606       1031.94 3092.79 3095.24 0.928041        1896.11 1       4.5782  1       43      108     3       ELESAAYDHAEPVQPEDAPQDIANDELK    trypsin-full-digest     YGL009C(500)    KD ./crux-output/search.target.txt
+156     3       0       3.13791 0.0421271       1032.44 3094.29 3095.24 0.957132        1779.63 1       4.2332  1       41      108     2       ELESAAYDHAEPVQPEDAPQDIANDELK    trypsin-full-digest     YGL009C(500)    KD ./crux-output/search.target.txt
 </pre>
 
-<p>This file follows the SQT file format described <a
-href="http://fields.scripps.edu/sequest/SQTFormat.html">here</a>, with
-a few modifications. Lines beginning with <span class=out>H</span> are
-header lines and contain general information about the run.  Lines
-beginning with <span class=out>S</span> contain information about a
-spectrum including scan number (for the first example <span
-class=out>10</span>), charge (<span class=out>2</span>), two
-place-holders, the measured m/z of the precursor ion (<span
-class=out>636.34</span>), two place holders, and the number of
-peptides in the database that were compared to this spectrum (<span
-class=out>2)</span>. 
-
-<p>Lines beginning
-with <span class=out>M</span> give information about the
-peptide-spectrum match including the rank of the primary scoring
-function (<span class=out>1</span>), rank of the secondary scoring
-function (<span class=out>1</span>), calculated mass of the charged
-peptide (<span class=out>1270.49</span>), the relative difference
-between the previous score and this one (delta Cn, always 0 for the
-best match), the primary score (here, the percolator score, <span
-class=out>-1.19</span>), secondary score (here the q-value calculated 
-by percolator, <span class=out>0.81</span>), number of 
-ions matched  (<span class=out>7</span>), total number of ions
-predicted (<span class=out>22</span>), and the sequence of the 
-peptide in the context of the protein (<span
-class=out>K.SGLIVEIQGVQK.E</span>, the matched peptide is the sequence
-between the dots, the flanking residues are also shown.), and the
-manual validation code (<span class=out>U</span> for unvalidated).
-
-<p>Lines beginning with <span class=out>L</span>  give the name
-of the protein locus for this peptide.  If a peptide is found in more
-than one protein, it can be followed by multiple lines.  
-
-<p>The pattern of <span class=out>S, M, L</span> lines repeats for
-every spectrum searched.  In this example, there is only one <span
-class=out>M</span> line reported for each spectrum, but it is possible to
-report more.  See the <a
-href="customize-tutorial.html#">customization</a> page for information
-about options. 
-
-<!-- we should say something about the default behavior of -->
-<!-- analyze-matches being percolator.  Also, the S lines should -->
-<!-- report a charged mass calculated from m/z and there should be a U -->
-<!-- at the end of the M lines.  L lines should have descriptions -->
+Where the third column will have the q-ranker's q-value assigned to each psm.  The posterior error probabilities are in fifth column.
+The remainder of the columns are described <a href="txt-format.html">here</a>.
 </p>
 
 </div><!--end main-->
