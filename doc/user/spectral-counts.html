@@ -126,9 +126,9 @@
         
         <li>
           <code>&lt;input PSMs&gt;</code>&ndash;
-          A tab delimited text file produced by a <code>crux</code> post-search
-          command, for example <code>percolator.target.txt</code>
-          or <code>qranker.target.txt</code>.</li>
+          A PSM file of either tab delimited text file produced by a <code>crux</code> post-search
+          command, ( i.e. <code>percolator.target.txt</code> or <code>qranker.target.txt</code>),
+          or a pepXML file.</li>
         
         <li><code>&lt;protein database&gt;</code>&ndash; 
           The name of the file in fasta format or the directory containing the
@@ -145,11 +145,11 @@
             created:</p>
           
         <li>
-          <code>spectral-count.target.txt</code>: a tab-delimited text file
+          <code>spectral-counts.target.txt</code>: a tab-delimited text file
           containing the protein IDs and their corresponding scores, in sorted
           order.</li>
         
-        <li><code>spectral-count.log.txt</code>: All messages written to
+        <li><code>spectral-counts.log.txt</code>: All messages written to
           standard error.</li>
 
       </ul>
@@ -187,9 +187,28 @@
         
         <li>
           <code>--threshold &lt;double&gt; </code> &ndash; 
-          Only consider PSMs with a q-value lower than this threshold.  The
-          q-value may be in the file's "percolator q-value" column, "q-ranker
-          q-value" column or "decoy q-value (xcorr)" column. Default = 0.01. 
+          Only consider PSMs with a threshold value.  By default, a q-value
+          from percolator, q-ranker, or decoy q-value (xcorr) is thresholded 
+          by below or equal to the threshold value.  This behavior can be changed
+          using the <code>--custom-threshold</code> and <code>--threshold-min</code> 
+          parameters. Default = 0.01. 
+        </li>
+
+        <li>
+          <code>--custom-threshold &lt;string&gt;</code> &ndash;
+          Specify which match field to threshold the PSMs.  By default,
+          the threshold filters by q-value.  Setting this parameter 
+          will specify a different threshold field to use.  The direction
+          of the threshold (&gt;= or &lt;=) is governed by <code>--threshold-min</code>.
+          Default=<i>no custom threshold</i>.
+        </li>
+
+        <li>
+          <code>--threshold-min &lt;T|F&gt;</code> &ndash;
+          When a <code>custom-threshold</code> is set, <code>threshold-min</code>
+          determines whether to select matches have a <code>custom-threshold</code> 
+          that are greater-than or equal (F) or less-than or equal (T) than the 
+          <code>threshold</code> parameter.  Default = T.
         </li>
         
         <li>
