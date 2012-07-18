@@ -14,11 +14,11 @@
 <b>What input file formats does Crux support?</b></li>
 
 <p>
-Crux can search spectra in .ms2 and .mzXML file formats.  The .ms2
-files can be generated from Thermo .RAW files using the <a 
+Crux can search spectra in MS2 and mzXML file formats.  The MS2
+files can be generated from Thermo RAW files using the <a 
 href="http://proteome.gs.washington.edu/software.html">MakeMS2</a>
-program.  The .ms2 format is described <a href="ms2-format.html">here</a>. 
-When searching .mzXML files, use the <code>use-mstoolkit=T</code>
+program.  The MS2 format is described <a href="ms2-format.html">here</a>. 
+When searching mzXML files, use the <code>use-mstoolkit=T</code>
 option in the parameter file.  Additional file formats will be
 supported in future releases. 
 </p>
@@ -29,25 +29,44 @@ supported in future releases.
 <p>
 SEQUEST has split into at least four different development threads:
 (1) the version developed in the Yates lab, initially at the
-University of Washington and later at Scripps, (2) the version mainted
+University of Washington and later at Scripps, (2) the version maintained
 by Thermo Scientific, (3) the version mainted by Sage-N, and (4) the
 version maintained in the MacCoss lab at the University of Washington.
 Crux is based on the Yates lab development thread, SEQUEST version 28,
 whose last documented modification is dated 8/16/99.</p>
 
 <p>
-The Crux command <code>sequest-search</code> is an imperfect
-reimplementation of SEQUEST 28.  The imperfection arose because, to
-avoid copyright infringement, Crux was reverse engineered from the
-SEQUEST binary; i.e., the Crux developers did not have access to the
-SEQUEST source code.  The reverse engineering continued until the
-developers deemed the remaining differences to be of negligible
-importance.  A quantitative comparison of the scores computed by Crux
-and SEQUEST can be seen in
+The original Crux search code was an imperfect reimplementation of
+SEQUEST 28.  The imperfection arose because, to avoid copyright
+infringement, Crux was reverse engineered from the SEQUEST binary;
+i.e., the Crux developers did not have access to the SEQUEST source
+code.  The reverse engineering continued until the developers deemed
+the remaining differences to be of negligible importance.  A
+quantitative comparison of the scores computed by Crux and SEQUEST can
+be seen in
 the <a href="http://noble.gs.washington.edu/papers/park2008rapid.html">original
 Crux paper</a>.  The differences between Crux and SEQUEST v28 are
 comparable in magnitude to the differences between different versions
 of SEQUEST.</p>
+
+<p>
+Currently, the default behavior for
+the <code>search-for-matches</code> command differs in two systematic
+ways from the original behavior of SEQUEST.<p>
+<ul>
+<li>
+Originally, SEQUEST ranked candidate peptides (i.e., peptides that lie
+within the user-specified precursor window) initially according to a
+preliminary score called "Sp."  Subsequently, the top 500 matches were
+re-scored using XCorr.  Crux can compute the Sp score, but does not
+use it as an initial filter.</li>
+<li>
+The SEQUEST theoretical spectrum used to compute XCorr includes two
+flanking peaks on either side of each b- and y-ion. Crux does not
+include these peaks by default, though they can be turned on using the
+"use-flanking-peaks" parameter.</li>
+</ul>
+<p></p>
 
 <li>
 <b>How does Crux compute the masses of peptides and peptide
@@ -118,7 +137,7 @@ m/z.
 <p>
 Crux is written in C++, so in principle it should work on virtually
 any modern operating system.  We provide pre-compiled binaries for
-Linux and Windows.  The latter requires that you have Cygwin
+Linux, MacOS and Windows.  The latter requires that you have Cygwin
 installed.</p>
 
 <li>
@@ -219,6 +238,7 @@ observed spectrum undergo prior to comparison with the theoretical
 spectrum?</b></li>
 -->
 
+<!--
 <li>
 <b>What enhancements to Crux are planned?</b></li>
 
@@ -239,6 +259,7 @@ Support for searching for post-translational modifications in
 
 </ul>
 </p>
+-->
 
 <li>
 <b>How can I contribute to Crux?</b></li>
