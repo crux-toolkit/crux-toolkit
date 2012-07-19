@@ -48,7 +48,8 @@ class CruxParser:public SQTParser{
   void readMatches(
     MatchFileReader& reader,///<Reader for the delimted file.
     int final_hits,///<Total number of matches
-    enzyme enz ///<Enzyme in used on search 
+    enzyme enz, ///<Enzyme in used on search 
+    bool decoy ///< Are all the matches decoy
   );
 
   /*
@@ -56,7 +57,8 @@ class CruxParser:public SQTParser{
   *\returns true if it can open the file 
   */
   virtual bool read_search_results(
-    string& cur_fname ///< current delimited file path tp parse 
+    string& cur_fname, ///< current delimited file path tp parse 
+    bool decoy
   ); 
   virtual string  get_parser_extension(); 
 

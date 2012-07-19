@@ -103,6 +103,8 @@ LIBFILES= \
   MatchSearch.h \
   MatchCollection.cpp \
   MatchCollection.h \
+  MatchCollectionParser.cpp \
+  MatchCollectionParser.h \
   MatchCollectionIterator.cpp \
   MatchCollectionIterator.h \
   MatchIterator.cpp \
@@ -135,6 +137,8 @@ LIBFILES= \
   peptide_modifications.h \
   PeptideSrc.cpp \
   PeptideSrc.h \
+  PepXMLReader.cpp \
+  PepXMLReader.h \
   PepXMLWriter.cpp \
   PepXMLWriter.h \
   Percolator.cpp \

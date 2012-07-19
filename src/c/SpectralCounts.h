@@ -92,12 +92,44 @@ class SpectralCounts: public CruxApplication {
    * Checks that the normalized scores add up to one
    */
   void checkProteinNormalization();
+
+
+
   void computeEmpai();
   void makeUniqueMapping();
   void getSpectra(std::map<std::pair<int,int>, Spectrum*>& spectra);
   FLOAT_T sumMatchIntensity(Match* match,
                           SpectrumCollection* spectra);
   SCORER_TYPE_T get_qval_type(MatchCollection* match_collection);
+
+  /**
+   * filters matches based upon a custom threshold (not q-value)
+   */
+  void filterMatchesCustom(
+    MatchCollection* match_collection ///< match collection to filter
+  );
+
+  /**
+   * filters matches based upon q-value
+   */
+  void filterMatchesQValue(
+    MatchCollection* match_collection ///< match collection to filter
+  );
+
+  /**
+   * filters matches based upon a SCORER_TYPE_T
+   */
+  void filterMatchesScore(
+    MatchCollection* match_collection, ///< match collection to filter
+    SCORER_TYPE_T scorer ///< scorer to use
+  );
+
+  /**
+   * filters matches based upon a custom score that is not SCORER_TYPE_T
+   */
+  void filterMatchesCustomScore(
+    MatchCollection* match_collection ///< match collection to filter
+  );
 
   // member variables
   OutputFiles* output_;
@@ -110,6 +142,12 @@ class SpectralCounts: public CruxApplication {
   MEASURE_TYPE_T measure_;
   FLOAT_T bin_width_;
   std::set<Match*> matches_;
+
+  // For custom thresholding fields
+  bool threshold_min_; 
+  bool custom_threshold_;
+  std::string custom_threshold_name_;
+  
 
   PeptideToScore peptide_scores_;
   PeptideToScore peptide_scores_unique_;

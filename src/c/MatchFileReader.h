@@ -136,6 +136,13 @@ class MatchFileReader: public DelimitedFileReader {
      */
     void getMatchColumnsPresent (std::vector<bool>& col_is_present);
 
+
+    static MatchCollection* parse(
+      const char* file_path,
+      Database* database,
+      Database* decoy_database
+    );
+
 };
 
 #endif //MATCHFILEREADER_H

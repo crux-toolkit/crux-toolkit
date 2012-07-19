@@ -24,6 +24,31 @@ void MatchIterator::init() {
   match_total_ = 0;
 }
 
+MatchIterator::MatchIterator(
+  MatchCollection* match_collection
+  ) {
+    // TODO (BF 06-Feb-08): Could we pass back an iterator with has_next==False
+  if (match_collection == NULL){
+    carp(CARP_FATAL, "Null match collection passed to match iterator");
+  }
+  // is there an existing iterator?
+  if(match_collection->iterator_lock_){
+    carp(CARP_FATAL, 
+         "Can only have one match iterator instantiated at a time");
+  }
+  
+  init();
+  // set items
+  match_collection_ = match_collection;
+  match_idx_ = 0;
+  match_total_ = match_collection->match_total_;
+
+
+
+  // ok lock up match collection
+  match_collection->iterator_lock_ = true;
+}
+
 
 /**
  * create a new memory allocated match iterator, which iterates over

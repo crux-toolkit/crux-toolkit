@@ -362,7 +362,7 @@ bool PeptideSrc::parseTabDelimited(
 	size_t pos = protein_sequence.find(sequence);
 	
 	if (pos == string::npos) {
-	  carp(CARP_WARNING, "Can't find sequence %s in %s:%s",
+	  carp(CARP_FATAL, "Can't find sequence %s in %s:%s",
 	       sequence.c_str(),
 	       protein_id_string.c_str(),
 	       protein_sequence.c_str());

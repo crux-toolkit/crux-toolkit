@@ -1,0 +1,11 @@
+overwrite=T
+unique-mapping=F
+quant-level=protein
+input-ms2=demo.ms2
+parsimony=none
+measure=NSAF
+custom-threshold=peptideprophet
+threshold=0.5
+threshold-min=F
+
+

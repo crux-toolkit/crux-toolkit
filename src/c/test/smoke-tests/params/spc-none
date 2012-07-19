@@ -1,0 +1,8 @@
+overwrite=T
+unique-mapping=F
+quant-level=protein
+input-ms2=demo.ms2
+parsimony=none
+measure=NSAF
+
+

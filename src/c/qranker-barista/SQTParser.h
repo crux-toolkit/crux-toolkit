@@ -91,7 +91,7 @@ class SQTParser{
   /*************************************************************************************/
 
 
-  void read_sqt_file(ifstream &is, string &decoy_prefix, int final_hits_per_spectrum, enzyme enz);
+  void read_sqt_file(ifstream &is, string &decoy_prefix, int final_hits_per_spectrum, enzyme enz, bool decoy);
   int parse_sqt_spectrum_matches(ifstream &is, sqt_match &m);
   void read_S_line(ifstream &is, sqt_match &m);
   void read_M_line(ifstream &is, sqt_match &m);
@@ -106,7 +106,7 @@ class SQTParser{
   void extract_psm_features(sqt_match &m, enzyme enz, double *x, int i);
   void extract_psm_features(sqt_match &m, enzyme enz, double *x, int i, int hits_read);
   void extract_features(sqt_match &m, int hits_read, int final_hits,enzyme enz);
-  void add_matches_to_tables(sqt_match &m, string &decoy_prefix, int hits_read, int final_hits);
+  void add_matches_to_tables(sqt_match &m, string &decoy_prefix, int hits_read, int final_hits, bool decoy);
   void allocate_feature_space();
   void fill_graphs_and_save_data(string &out_dir);
   
@@ -236,7 +236,7 @@ class SQTParser{
   int min_len;
 
   
-  virtual bool read_search_results(string& cur_fname); 
+  virtual bool read_search_results(string& cur_fname, bool decoy); 
   virtual string get_parser_extension();
   
 };

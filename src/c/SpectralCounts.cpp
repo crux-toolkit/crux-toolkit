@@ -4,7 +4,9 @@
 #include "OutputFiles.h"
 #include "Peptide.h"
 #include "ProteinPeptideIterator.h"
+#include "MatchCollectionParser.h"
 #include "SpectrumCollectionFactory.h"
+
 #include "MatchCollectionIterator.h"
 
 using namespace std;
@@ -65,7 +67,9 @@ int SpectralCounts::main(int argc, char** argv) {
     "overwrite",
     "unique-mapping",
     "quant-level",
-    "measure"
+    "measure",
+    "custom-threshold",
+    "threshold-min"
   };
   const char* argument_list[] = {
     "input PSMs",
@@ -152,6 +156,13 @@ void SpectralCounts::getParameterValues(){
   parsimony_ = get_parsimony_type_parameter("parsimony");
   measure_ = get_measure_type_parameter("measure");
   bin_width_ = get_double_parameter("mz-bin-width");
+  
+  custom_threshold_name_ = get_string_parameter_pointer("custom-threshold");
+  if (custom_threshold_name_ != "__NULL_STR") {
+    custom_threshold_ = true;
+  }
+
+  threshold_min_ = get_boolean_parameter("threshold-min");
 }
 
 /**
@@ -418,15 +429,14 @@ void SpectralCounts::checkProteinNormalization() {
     sum += score;
   }
 
-  if (fabs(sum-1.0) > 0.00001) {
-    carp(CARP_ERROR, "Normalized protein scores do not add up to one!:%f", sum);
+  if (fabs(sum-1.0) > 0.0001) {
+    carp(CARP_WARNING, "Normalized protein scores do not add up to one!:%f", sum);
     for (ProteinToScore::iterator iter = protein_scores_.begin();
       iter != protein_scores_.end();
       ++iter) {
 
       carp(CARP_DEBUG, "%s %f",iter->first->getIdPointer(), iter->second);
     }
-    carp(CARP_FATAL, "Exiting crux spectral-counts");
   }
 }
 
@@ -580,67 +590,126 @@ void SpectralCounts::getPeptideScores()
  */
 void SpectralCounts::filterMatches() {
 
-  // get input file directory
-  char** path_info = parse_filename_path(psm_file_.c_str());
-  if( path_info[1] == NULL ){
-    path_info[1] = my_copy_string(".");
+  MatchCollection* match_collection = MatchCollectionParser::create(
+    psm_file_.c_str(),
+    database_name_.c_str());
+    
+    if (custom_threshold_) {
+      filterMatchesCustom(match_collection);
+    } else {
+      filterMatchesQValue(match_collection);
+    }
+}
+
+/**
+ * filters matches based upon a custom threshold (not q-value)
+ */
+void SpectralCounts::filterMatchesCustom(
+  MatchCollection* match_collection ///< match collection to filter
+  ) {
+
+  //first try to map from tab delimited headers
+  SCORER_TYPE_T scorer;
+  bool tab_header = string_to_scorer_type(custom_threshold_name_.c_str(), &scorer);
+
+  if (tab_header) {
+    //must be a custom field, this can happen with pep xml.
+    filterMatchesScore(match_collection, scorer);    
+    
+  } else {
+    filterMatchesCustomScore(match_collection);
   }
 
-  // create match collection
-  int decoy_count = 0;
-  MatchCollectionIterator* match_collection_it 
-    = new MatchCollectionIterator(path_info[1], 
-                                  database_name_.c_str(), &decoy_count);
 
-  matches_.clear();
-  MatchIterator* match_iterator = NULL;
-  MatchCollection* match_collection = NULL;
+}
 
-  while (match_collection_it->hasNext()){
-    
-    match_collection = match_collection_it->next();
+/**
+ * filters matches based upon a SCORER_TYPE_T
+ */
+void SpectralCounts::filterMatchesScore(
+  MatchCollection* match_collection, ///< match collection to filter
+  SCORER_TYPE_T scorer ///< scorer to use
+  ) {
 
-   // figure out which qvalue we are using
-    SCORER_TYPE_T qval_type = get_qval_type(match_collection);
-    if( qval_type == INVALID_SCORER_TYPE ){
-      carp(CARP_FATAL, "The matches in %s do not have q-values from percolator,"
-           " q-ranker, or compute-q-values.\n", psm_file_.c_str());
+  MatchIterator match_iterator(match_collection, scorer, false);
+  
+  while (match_iterator.hasNext()) {
+    Match* match = match_iterator.next();
+    if (!match->isDecoy()) {
+      if (threshold_min_) {
+        if (match->getScore(scorer) <= threshold_) {
+          matches_.insert(match);
+        } 
+      } else {
+        if (match->getScore(scorer) >= threshold_) {
+          matches_.insert(match);
+        }
+      }
     }
+  }
+}
 
-    carp(CARP_INFO,
-      "filterMatches(): Getting match iterator for %s", 
-      scorer_type_to_string(qval_type));
+/**
+ * filters matches based upon a custom score that is not SCORER_TYPE_T
+ */
+void SpectralCounts::filterMatchesCustomScore(
+  MatchCollection* match_collection ///< match collection to filter
+  ) {
 
-    match_iterator = new MatchIterator(match_collection, qval_type, true);
-    
- 
+  MatchIterator match_iterator(match_collection);
 
-    while(match_iterator->hasNext()){
-      Match* match = match_iterator->next();
-      
-      carp(CARP_DEBUG, "xcorr rank:%d q-value:%f",match->getRank(XCORR), match->getScore(qval_type));
-
-      if ((qval_type == DECOY_XCORR_QVALUE || qval_type == LOGP_QVALUE_WEIBULL_XCORR) && 
-        (match->getRank(XCORR) != 1)){
-        continue;
+  while(match_iterator.hasNext()) {
+    Match* match = match_iterator.next();
+    if (!match->isDecoy()) {
+      if (threshold_min_) {
+        if (match->getCustomScore(custom_threshold_name_) <= threshold_) {
+          matches_.insert(match);
+        }
+      } else {
+        if (match->getCustomScore(custom_threshold_name_) >= threshold_) {
+          matches_.insert(match);
+        }
       }
+    }
+  }
+}
+
+void SpectralCounts::filterMatchesQValue(
+  MatchCollection* match_collection
+  ) {
+  //assume we are using 
+  // figure out which qvalue we are using
+  SCORER_TYPE_T qval_type = get_qval_type(match_collection);
+  if( qval_type == INVALID_SCORER_TYPE ){
+    carp(CARP_FATAL, "The matches in %s do not have q-values from percolator,"
+      " q-ranker, or compute-q-values.\n", psm_file_.c_str());
+  }
+
+  carp(CARP_INFO,
+    "filterMatches(): Getting match iterator for %s", 
+    scorer_type_to_string(qval_type));
+
+  MatchIterator* match_iterator = new MatchIterator(match_collection, qval_type, true);
+
+  while(match_iterator->hasNext()){
+    Match* match = match_iterator->next();
+     
+    carp(CARP_DEBUG, "xcorr rank:%d q-value:%f",match->getRank(XCORR), match->getScore(qval_type));
+    if (match->isDecoy()) {
+      continue;
+    } 
+    if ((qval_type == DECOY_XCORR_QVALUE || qval_type == LOGP_QVALUE_WEIBULL_XCORR) && 
+      (match->getRank(XCORR) != 1)){
+      continue;
+    }
       
-      // find a qvalue score lower than threshold
-      if (match->getScore(qval_type) != FLT_MIN &&
-          match->getScore(qval_type) <= threshold_)  {
-        matches_.insert(match);
-      }
-    } // next match
-  } // next file
-  free(path_info[1]);
-  free(path_info[0]);
-  free(path_info);
-  // cannot delete the mach_collection_iterator b/c it deletes the
-  // database which deletes the proteins which are still in use after
-  // filterMatches returns.
-  // TODO create a database in calling function, pass to
-  // filterMatches, have a MatchCollectionIterator constructor that
-  // takes a database
+    // find a qvalue score lower than threshold
+    if (match->getScore(qval_type) != FLT_MIN &&
+        match->getScore(qval_type) <= threshold_)  {
+      matches_.insert(match);
+    }
+  } // next match
+  delete match_iterator;
 }
 
 /**

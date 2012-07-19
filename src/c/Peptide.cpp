@@ -1911,12 +1911,10 @@ string Peptide::getProteinIdsLocations() {
 
  
   std::ostringstream protein_field_stream;
-  
-   
-
-    if (!peptide_srcs_.empty()) {
-      for( PeptideSrcIterator iter = getPeptideSrcBegin();
-	   iter!=getPeptideSrcEnd();++iter){
+  if (!peptide_srcs_.empty()) {
+    for( PeptideSrcIterator iter = getPeptideSrcBegin();
+      iter!=getPeptideSrcEnd();++iter){
+      
       PeptideSrc* peptide_src =*iter;
       Protein* protein = peptide_src->getParentProtein();
       char* protein_id = protein->getId();
