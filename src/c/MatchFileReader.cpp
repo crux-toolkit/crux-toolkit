@@ -7,6 +7,8 @@
 #include "MatchFileReader.h"
 #include "DelimitedFile.h"
 
+#include "MatchCollection.h"
+
 using namespace std;
 
 /**
@@ -217,5 +219,22 @@ void MatchFileReader::getMatchColumnsPresent(
   for(int col_idx = 0; col_idx < NUMBER_MATCH_COLUMNS; col_idx++){
     col_is_present[col_idx] = (match_indices_[col_idx] > -1);
   }
+}
+
+MatchCollection* MatchFileReader::parse(
+  const char* file_path,
+  Database* database,
+  Database* decoy_database
+  ) {
+
+  MatchFileReader delimited_result_file(file_path);
+  MatchCollection* match_collection = new MatchCollection();
+  match_collection->preparePostProcess(database->getNumProteins());
+
+  match_collection->extendTabDelimited(database, delimited_result_file, decoy_database);
+
+  return match_collection;
+
+
 }
 

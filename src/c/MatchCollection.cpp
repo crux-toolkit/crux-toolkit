@@ -90,10 +90,10 @@ MatchCollection::~MatchCollection() {
   // free post_process_collection specific memory
   if(post_process_collection_){
     // free protein counter
-    free(post_protein_counter_);
+    delete []post_protein_counter_;
     
     // free protein peptide counter
-    free(post_protein_peptide_counter_);
+    delete []post_protein_peptide_counter_;
   
     // free hash table
     free_hash(post_hash_);
@@ -121,6 +121,30 @@ MatchCollection::MatchCollection(
   null_peptide_collection_ = is_decoy;
 }
 
+void MatchCollection::preparePostProcess(
+  int num_proteins
+  ) {
+
+  // prepare the match_collection
+  init();
+  // set this as a post_process match collection
+  post_process_collection_ = true;
+
+  post_protein_counter_size_ 
+   = num_proteins;
+
+  post_protein_counter_
+   = new int[post_protein_counter_size_]();
+  post_protein_peptide_counter_ 
+   = new int[post_protein_counter_size_]();
+
+  // create hash table for peptides
+  // Set initial capacity to protein count.
+  post_hash_ = new_hash(post_protein_counter_size_);
+
+}
+
+
 /**
  * \brief Creates a new match_collection from the match collection
  * iterator. 
@@ -140,24 +164,11 @@ MatchCollection::MatchCollection(
     ///< what set of match collection are we creating? (TARGET, DECOY1~3) -in 
   )
 { 
-  // prepare the match_collection
-  init();
-  // set this as a post_process match collection
-  post_process_collection_ = true;
-  
-  // the protein counter size, create protein counter
+
   Database* database = match_collection_iterator->getDatabase();
   Database* decoy_database = match_collection_iterator->getDecoyDatabase();
-  post_protein_counter_size_ 
-   = database->getNumProteins();
-  post_protein_counter_ 
-   = (int*)mycalloc(post_protein_counter_size_, sizeof(int));
-  post_protein_peptide_counter_ 
-   = (int*)mycalloc(post_protein_counter_size_, sizeof(int));
 
-  // create hash table for peptides
-  // Set initial capacity to protein count.
-  post_hash_ = new_hash(post_protein_counter_size_);
+  preparePostProcess(database->getNumProteins());
 
   // get the list of files to open
   vector<string> file_names;

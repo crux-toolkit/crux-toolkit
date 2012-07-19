@@ -205,7 +205,7 @@ void SQTParser :: erase_matches()
 }
 
 
-void SQTParser :: add_matches_to_tables(sqt_match &m, string &decoy_prefix, int hits_read, int final_hits)
+void SQTParser :: add_matches_to_tables(sqt_match &m, string &decoy_prefix, int hits_read, int final_hits, bool decoy)
 {
   int protein_pos = 0;
   for (int i = 0; i < min(hits_read,final_hits); i++){
@@ -215,10 +215,10 @@ void SQTParser :: add_matches_to_tables(sqt_match &m, string &decoy_prefix, int 
     for (int j = 0; j < m.num_proteins_in_match[i]; j++){
       string prot = m.proteins[protein_pos];
       proteins.insert(prot);
-      if(prot.find(decoy_prefix) != string::npos)
-	label = -1;
+      if(prot.find(decoy_prefix) != string::npos || decoy)
+        label = -1;
       else
-	label = 1;
+        label = 1;
       protein_pos++;
     }
     //record the psm label
@@ -880,7 +880,7 @@ int SQTParser :: parse_sqt_spectrum_matches(ifstream &is, sqt_match &m)
   
 }
 
-void SQTParser :: read_sqt_file(ifstream &is, string &decoy_prefix, int final_hits, enzyme enz)
+void SQTParser :: read_sqt_file(ifstream &is, string &decoy_prefix, int final_hits, enzyme enz, bool decoy)
 {
   int cn = 0;
   string line;
@@ -898,7 +898,7 @@ void SQTParser :: read_sqt_file(ifstream &is, string &decoy_prefix, int final_hi
     {
       assert(tempstr.compare("S") == 0);
       num_hits = parse_sqt_spectrum_matches(is,m);
-      add_matches_to_tables(m, decoy_prefix, num_hits, final_hits);
+      add_matches_to_tables(m, decoy_prefix, num_hits, final_hits, decoy);
       extract_features(m, num_hits, final_hits,enz);
       cn++;
       //if(cn > 10)
@@ -1479,13 +1479,13 @@ void SQTParser :: digest_database(ifstream &f_db, enzyme e)
 }
 
 
-bool  SQTParser :: read_search_results(string& cur_fname) {
+bool  SQTParser :: read_search_results(string& cur_fname, bool decoy) {
   ifstream f_sqt(cur_fname.c_str());
   if(!f_sqt.is_open()){
     carp(CARP_WARNING, "could not open sqt file: %s", cur_fname.c_str());
     return false; 
   }
-      read_sqt_file(f_sqt, decoy_prefix, fhps,e);
+      read_sqt_file(f_sqt, decoy_prefix, fhps,e, decoy);
       f_sqt.close();
   return true; 
 }
@@ -1544,7 +1544,7 @@ int SQTParser :: run()
       cur_fileind = i;
       carp(CARP_INFO, "parsing file %s", cur_fname.c_str());
       f_fileind_to_fname << i << " " << cur_fname << endl;
-      if(read_search_results(cur_fname)) 
+      if(read_search_results(cur_fname, i != 0)) 
         num_files_read++;
     }
   if(num_files_read < 1)
@@ -1572,8 +1572,8 @@ int SQTParser :: run()
   if(num_neg_prot == 0)
     {
       carp(CARP_WARNING, "Found %d decoy proteins in the search result files.", num_neg_prot);
-      return 0;
-    }
+      //return 0;
+    } 
 
   //save the data
   fill_graphs_and_save_data(out_dir);

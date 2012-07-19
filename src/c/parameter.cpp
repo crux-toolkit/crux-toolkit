@@ -887,11 +887,27 @@ void initialize_parameters(void){
        "MS2 file corresponding to the psm file. Required for SIN.",
        "Available for spectral-counts with measure=SIN.",
        "true");
-  set_double_parameter("threshold", 0.01, 0, 1, 
-       "The p-value or q-value threshold. Default=0.01.",
-       "Available for spectral-counts.  All PSMs with q-value higher than "
+  set_double_parameter("threshold", 0.01, -BILLION, BILLION, 
+       "The threshold to use for filtering matches.  If no" 
+       "custom-threshold parameter given, then q-value will be "
+       "used.  Default=0.01.",
+       "Available for spectral-counts.  All PSMs with higher (or lower) than "
        "this will be ignored.",
        "true");
+
+  set_boolean_parameter("threshold-min", true,
+    "Direction of threshold for matches.  If true, then all matches "
+     "whose value is <= threshold will be accepted.  If false, "
+     "then all matches >= threshold will be accepted.  Used with "
+     "custom-threshold parameter (default True).",
+     "Available for spectral-counts.",
+     "true");
+
+  set_string_parameter("custom-threshold", "__NULL_STR",
+     "Use a custom threshold rather than q-value (default NULL)",
+     "Availabel for spectral-counts.", "true");
+
+
   set_measure_type_parameter("measure", MEASURE_NSAF,
        "Type of analysis to make on the match results: "
        "(RAW|NSAF|dNSAF|SIN|EMPAI). "

@@ -23,6 +23,10 @@ class MatchIterator {
 
  public:
 
+  MatchIterator(
+    MatchCollection* match_collection ///< the match collection to iterate -in
+    );
+
   /**
    * create a new memory allocated match iterator
    * creates a new the generate_peptides_iterator inside the match_iterator

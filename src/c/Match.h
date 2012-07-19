@@ -17,6 +17,8 @@
 #include <map>
 #include <ctype.h>
 #include <float.h>
+#include <string>
+
 #ifndef _MSC_VER
 #include <unistd.h>
 #endif
@@ -65,7 +67,8 @@ class Match {
    */
   Spectrum* spectrum_; ///< the spectrum we are scoring with
   Peptide* peptide_;  ///< the peptide we are scoring
-  FLOAT_T match_scores_[NUMBER_SCORER_TYPES]; 
+  FLOAT_T match_scores_[NUMBER_SCORER_TYPES];
+  std::map<string,FLOAT_T> match_custom_scores_;
     ///< array of scores, one for each type (index with SCORER_TYPE_T) 
   int match_rank_[NUMBER_SCORER_TYPES];  
     ///< rank of this match for each type scored (index with SCORER_TYPE_T)
@@ -268,6 +271,34 @@ class Match {
     SCORER_TYPE_T match_mode, ///< the working mode (SP, XCORR) -in
     FLOAT_T match_score ///< the score of the match -in
     );
+
+  /**
+   * get the custom score
+   * \retuns the custom score if it exists
+   */
+  FLOAT_T getScore(
+    std::string& match_score_name ///< the name of the score -in
+    );
+
+
+  
+
+  /**
+   * set the custom match score
+   */
+  void setCustomScore(
+    const std::string& match_score_name, ///< the name of the score -in
+    FLOAT_T match_score ///< the score of the match -in
+    );
+
+  /**
+   * get the custom score
+   */
+  FLOAT_T getCustomScore(
+    const std::string& match_score_name ///< the name of the score -in
+    );
+
+  bool isDecoy();
 
   /**
    * Must ask for score that has been computed

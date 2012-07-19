@@ -2,7 +2,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Tue Jun 26 18:23:19 2012
+H	StartTime	Mon Jul 16 18:28:21 2012
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	Comment	Database shuffled; these are decoy matches
@@ -2367,7 +2367,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Thu Apr 12 15:45:42 2012
+H	StartTime	Mon Jul 16 18:28:21 2012
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	Comment	Database shuffled; these are decoy matches
@@ -4729,15 +4729,15 @@ scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	s
 159	2	745.7500	1489.4827	1488.7063	1.1784209	16.106224	2	-0.070026107	3	3	24	4	FPISALNVSFEHK	trypsin-full-digest	YDR037W(97)	KY	FHVSISNPEFLAK	4
 159	2	745.7500	1489.4827	1490.6510	1.6361779	2.0754061	4	-0.24968527	4	1	24	4	EVHNVDEMVFSGK	trypsin-full-digest	YOR168W(736)	KN	ESVMEHNFGDVVK	4
 INFO: CPU: arginine.gs.washington.edu
-INFO: Thu Apr 12 15:45:42 PDT 2012
+INFO: Mon Jul 16 18:28:21 PDT 2012
 COMMAND LINE: crux sequest-search --output-dir ss --fileroot separate --parameter-file params/separate-ss demo.ms2 small-yeast.fasta
 INFO: Preparing protein fasta file small-yeast.fasta
 INFO: Reading in ms2 file demo.ms2
 INFO: Created 1 peptide mods, keeping 1 with 255 or fewer aa mods
 INFO: Searching spectrum number 96 (2+), search number 100
-INFO: Elapsed time: 5.03 s
+INFO: Elapsed time: 5.29 s
 INFO: Finished crux sequest-search
-INFO: Elapsed time: 5.05 s
+INFO: Elapsed time: 5.31 s
 INFO: Finished crux sequest-search.
 INFO: Return Code:0
 # Which isotopes to use in calculating fragment ion mass.
@@ -5037,6 +5037,13 @@ spectrum-charge=all
 # Available for spectral-counts with measure=SIN.
 input-ms2=__NULL_STR
 
+# Direction of threshold for matches.  If true, then all matches whose
+# value is <= threshold will be accepted.  If false, then all matches >=
+# threshold will be accepted.  Used with custom-threshold parameter
+# (default True).
+# Available for spectral-counts.
+threshold-min=true
+
 # Show search progress by printing every n spectra searched. 
 # Default=10.
 # Set to 0 to show no search progress.  Available for crux
@@ -5096,6 +5103,10 @@ corr=0.850000
 # The maximum mass of peptides to consider. Default=8000.
 # Available from command line or parameter file for crux bullseye
 bullseye-max-mass=8000.000000
+
+# Use a custom threshold rather than q-value (default NULL)
+# Availabel for spectral-counts.
+custom-threshold=__NULL_STR
 
 # If the target and decoy searches were run separately, rather than
 # using a concatenated database, then Q-ranker will assume that
@@ -5315,9 +5326,10 @@ precision=8
 # will create as many decoy files as num-decoys-per-target.
 decoy-location=separate-decoy-files
 
-# The p-value or q-value threshold. Default=0.01.
-# Available for spectral-counts.  All PSMs with q-value higher than this
-# will be ignored.
+# The threshold to use for filtering matches.  If nocustom-threshold
+# parameter given, then q-value will be used.  Default=0.01.
+# Available for spectral-counts.  All PSMs with higher (or lower) than
+# this will be ignored.
 threshold=0.010000
 
 # Set the tolerance (+/-ppm) for exact match searches. Default = 10.0.
@@ -5481,7 +5493,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Thu Apr 12 15:45:42 2012
+H	StartTime	Mon Jul 16 18:28:21 2012
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	DBSeqLength	?
