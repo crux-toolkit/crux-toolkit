@@ -68,7 +68,7 @@ high-quality peptide-spectrum matches.  Run this command.
 </p>
 
 <div class=code><code>
-$ crux q-ranker --separate-searches ./crux-output/search.decoy.txt demo.ms2 crux-output/search.target.txt</code>
+$ crux q-ranker --output-dir qranker-output --separate-searches ./crux-output/search.decoy.txt demo.ms2 crux-output/search.target.txt</code>
 </div>
 
 <p>While the analysis is running, you will see output like this
@@ -86,7 +86,7 @@ INFO: Finished crux q-ranker.
 
 </pre>
 
-<p>There will be five new files in the <span class=file>crux-output</span> directory.
+<p>There will be five new files in the <span class=file>qranker-output</span> directory.
 <ul>
 <li>q-ranker.target.psms.txt &ndash; q-ranker results in <a href="txt-format.html">tab-delimited format</a>.</li>
 <li>q-ranker.psms.at.fdr.thresholds.txt &ndash; number of psms accepted at a particular q-value threshold</li>

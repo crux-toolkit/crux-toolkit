@@ -38,7 +38,8 @@ CruxParser :: ~CruxParser(){
 void CruxParser ::readMatches(
   MatchFileReader& reader, ///< Reader for the delimited file.
   int final_hits,  ///< Total number of matches
-  enzyme enz ///< Enzyme used in search
+  enzyme enz, ///< Enzyme used in search
+  bool decoy ///< Are all the matches decoy?
   ) {
   
   //set the matches to zero 
@@ -111,7 +112,8 @@ void CruxParser ::readMatches(
       matches, 
       decoy_prefix,
       hits_read, 
-      final_hits 
+      final_hits,
+      decoy
     );
 
     //call SQTParser method to generate feature vectors
@@ -130,7 +132,8 @@ void CruxParser ::readMatches(
   *\returns true if it can open the file 
   */
 bool CruxParser :: read_search_results(
-  string& cur_fname /// < current file path to parse
+  string& cur_fname, /// < current file path to parse
+  bool decoy ///< is this a file of decoys?
   ) {
 
   //read file 
@@ -141,7 +144,8 @@ bool CruxParser :: read_search_results(
   readMatches(
     reader, 
     fhps,  
-    e 
+    e,
+    decoy
   );
   return true; 
 }

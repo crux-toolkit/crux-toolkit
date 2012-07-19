@@ -159,7 +159,6 @@
 # Run q-ranker tab-delimited file
 1 = qranker-txt = good_results/qranker-txt.target.txt =rm -rf crux-output; crux sequest-search --parameter-file params/set_rand_seed_only --decoy-location target-file --decoys peptide-shuffle demo.ms2 yeast-index/; crux q-ranker --parameter-file params/set_rand_seed_only --feature-file T demo.ms2 crux-output/sequest.target.txt; cat crux-output/q-ranker.target.psms.txt
 
-
 # Test the feature file
 1 = qranker-feature-file = good_results/qranker.features.txt = cat crux-output/q-ranker.features.txt = 
 
@@ -171,6 +170,9 @@
 
 # Test the feature file
 1 = barista-feature-file = good_results/barista.features.txt = cat crux-output/barista.features.txt = 
+
+# Run q-ranker with separate searches
+1 = qranker-separate = good_results/qranker-sep.target.txt=rm -rf crux-output; crux search-for-matches --parameter-file params/set_rand_seed_only demo.ms2 yeast-index/;crux q-ranker --parameter-file params/set_rand_seed_only --separate-searches ./crux-output/search.decoy.txt demo.ms2 ./crux-output/search.target.txt; cat crux-output/q-ranker.target.psms.txt
 
 # Test the q-values generated from decoys
 1 = decoy_qval = good_results/decoy-qval.txt = rm -rf decoy-qval-pval; crux search-for-matches --parameter-file params/decoy-qval-pval demo.ms2 small-yeast.fasta; crux compute-q-values --parameter-file params/decoy-qval-pval small-yeast.fasta decoy-qval-pval; cat decoy-qval-pval/qvalues.target.txt
