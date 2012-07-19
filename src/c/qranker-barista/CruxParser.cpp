@@ -68,7 +68,7 @@ void CruxParser ::readMatches(
       matches.sp_score.push_back(reader.getDouble(SP_SCORE_COL));
       matches.calc_mass.push_back(reader.getDouble(PEPTIDE_MASS_COL));
       matches.xcorr_score.push_back(reader.getDouble(XCORR_SCORE_COL));
-      matches.num_ions_matched.push_back(reader.getDouble(BY_IONS_MATCHED_COL));
+      matches.num_ions_matched.push_back(reader.getInteger(BY_IONS_MATCHED_COL));
       matches.num_total_ions.push_back(reader.getFloat(BY_IONS_TOTAL_COL)); 
         
       //set sequence_id 
