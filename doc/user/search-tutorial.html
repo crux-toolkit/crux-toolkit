@@ -66,6 +66,14 @@ to chemical noise, multiple peptides co-eluting, poor fragmentation,
 etc.).  The analysis step filters out those spectra and returns only the
 high-quality peptide-spectrum matches.  Run this command.
 </p>
+<p><b>Note:</b>Q-Ranker and Barista detect decoy PSMs by use of decoy-prefix.
+If you run search-for-matches with a fasta file, the decoy prefix is not 
+attached and you will see the bellow error:</br>
+<pre>
+FATAL: Cannot compute PEP without target or decoy scores.
+</pre>
+For preventing the error, run the search with an 
+index file. This issue will be fixed for the next release. </p>
 
 <div class=code><code>
 $ crux q-ranker --output-dir qranker-output --separate-searches ./crux-output/search.decoy.txt demo.ms2 crux-output/search.target.txt</code>
