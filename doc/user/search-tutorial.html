@@ -13,20 +13,40 @@
 
 <h1>Running a Simple Search</h1>
 
-<p> Now that you have your environment <a
+<p>Now that you have your environment <a
 href="start-tutorial.html">set up</a> and the two input files 
 in your working directory, you can conduct the search. The search
-process compares each spectrum in <span class=file>demo.ms2</span> to
-peptides (subsequences of the proteins) in <span
-class=file>small-yeast.fasta</span>.  For each peptide a theoretical
+process compares each spectrum in <span class=file>demo.ms2</span> to 
+peptides (subsequences of the proteins) in fasta files provided in a dirctory, <span class=file>yeast-index/</span>.  For each peptide a theoretical
 spectrum is created based on the predicted fragmentation of the
 peptide.  The theoretical spectra are each compared to the
 experimental spectrum (in the ms2 file) and scored based on their
 similarity.  These scores are reported in the output.  To conduct the
-search, use this command. </p>
-
+search, we have to run <code>create-index</code> command and then use the 
+<code>search-for-mathes</code> command.</p>
+<ol>
+<li>
 <div class=code>
-<code>$ crux search-for-matches --compute-sp T demo.ms2 small-yeast.fasta</code>
+<code>$ crux create-index small-yeast.fasta yeast-index </code>
+</div>
+<p>While generating an index of all of its peptides , you will see output like this</p>
+
+<pre>
+INFO: Beginning create-index.
+INFO: Creating index from fasta file 'small-yeast.fasta'
+INFO: Total proteins found: 56
+</pre>
+<p>When the creating index  has completed, it will print: </p>
+<pre>
+INFO: Finished crux create-index.
+
+</pre>
+</li>
+
+<p>
+Now, you can run this command: </p>
+<div class=code>
+<li><code>$ crux search-for-matches  --compute-sp T demo.ms2 yeast-index/</code>
 </div>
 
 <p>While the search is running, you will see output like this
@@ -34,10 +54,12 @@ search, use this command. </p>
 
 <pre>
 INFO: Reading in ms2 file demo.ms2
-INFO: Preparing protein fasta file small-yeast.fasta
-INFO: Using amino acid alphabet (ACDEFGHIKLMNPQRSTVWYBUXZ).
-INFO: Searching spectra
+INFO: Preparing protein index yeast-index/
+INFO: Created 1 peptide mods, keeping 1 with 255 or fewer aa mods
+INFO: Searching spectrum number 18 (3+), search number 10 of 166, 6% complete
+
 </pre>
+</li>
 
 <p>When the search has completed, it will print</p>
 <pre>
@@ -45,18 +67,19 @@ INFO: crux-search-for-matches finished
 </pre>
 
 <p>A new directory, <span class=file>crux-output</span>, will have been created. 
-Looking at the contents of the directory, you will see seven new files.
- containing the search results: 
-
+Looking at the contents of the directory, you will see six new files
+containing the search results: 
+<ul>
 <li>search.target.txt &ndash; search results in <a href="txt-format.html">tab-delimited format</a>.</li>
 <li>search.decoy.txt &ndash; search results from a decoy database in <a href="txt-format.html">tab-delimited format</a>.</li>
 <li>search.target.pep.xml &ndash; search results in pepXML format.</li>
 <li>search.decoy.pep.xml &ndash; search results from a decoy database in pepXML format.</li>
 <li>search.params.txt &ndash; parameters used in the search.</li>
 <li>search.log.txt &ndash; log file for the search.</li>
-
+</ul>
 
 </p>
+</li>
 
 <p>The final step is to analyze our search results.  Each spectrum has
 been compared to many peptides and we would like to return only the
@@ -64,11 +87,12 @@ best match(es) for each spectrum.  We also expect that
 some fraction of the spectra will not be identifiable as peptides (due
 to chemical noise, multiple peptides co-eluting, poor fragmentation,
 etc.).  The analysis step filters out those spectra and returns only the
-high-quality peptide-spectrum matches.  Run this command.
+high-quality peptide-spectrum matches. If you run search-for-matches command with a fasta file, please 
+look <a href="known-issues.html">issue 1</a> before running the bellow command.
 </p>
-
+<li>
 <div class=code><code>
-$ crux q-ranker --separate-searches ./crux-output/search.decoy.txt demo.ms2 crux-output/search.target.txt</code>
+$ crux q-ranker --output-dir qranker-output --separate-searches ./crux-output/search.decoy.txt demo.ms2 crux-output/search.target.txt</code>
 </div>
 
 <p>While the analysis is running, you will see output like this
@@ -86,19 +110,19 @@ INFO: Finished crux q-ranker.
 
 </pre>
 
-<p>There will be new files in the <span class=file>crux-output</span> directory.
-
+<p>There will be five new files in the <span class=file>qranker-output</span> directory.
+<ul>
 <li>q-ranker.target.psms.txt &ndash; q-ranker results in <a href="txt-format.html">tab-delimited format</a>.</li>
 <li>q-ranker.psms.at.fdr.thresholds.txt &ndash; number of psms accepted at a particular q-value threshold</li>
 <li>q-ranker.params.txt &ndash; parameters used for running q-ranker.</li>
 <li>q-ranker_output.xml &ndash; q-ranker results in pepXML format.</li>
 <li>q-ranker.log.txt &ndash; q-ranker log file.</li>
-
+</ul>
 </p>
 
 <p>
 
-The q-ranker.target.psms.txt file will look like:<br>
+The q-ranker.target.psms.txt file will look like this:<br>
 <pre>
 scan    charge  q-ranker q-value        q-ranker score  q-ranker PEP    spectrum precursor m/z  spectrum neutral mass   peptide mass    delta_cn        sp score        sp rank xcorr score     xcorr rank      b/y ions matched    b/y ions total  matches/spectrum        sequence        cleavage type   protein id      flanking aa     filename
 53      2       0       3.14519 0.04186 745.749 1489.48 1489.73 0.816319        2953.36 1       4.28817 1       21      24      4       NFLETVELQVGLK   trypsin-full-digest     YGL135W(27)     RN      ./crux-output/search.target.txt
@@ -112,10 +136,12 @@ scan    charge  q-ranker q-value        q-ranker score  q-ranker PEP    spectrum
 156     3       0       3.13791 0.0421271       1032.44 3094.29 3095.24 0.957132        1779.63 1       4.2332  1       41      108     2       ELESAAYDHAEPVQPEDAPQDIANDELK    trypsin-full-digest     YGL009C(500)    KD ./crux-output/search.target.txt
 </pre>
 
-Where the third column will have the q-ranker's q-value assigned to each psm.  The posterior error probabilities are in fifth column.
-
+Here, the third column contains the q-ranker q-value assigned to each
+PSM, and the corresponding posterior error probabilities are in fifth column.
+The remainder of the columns are described <a href="txt-format.html">here</a>.
 </p>
-
+</li>
+</ol>
 </div><!--end main-->
 
 <hr></hr>
