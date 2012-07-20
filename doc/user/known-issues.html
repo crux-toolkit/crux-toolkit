@@ -13,13 +13,39 @@
   <ol>
   <li>
     Q-Ranker and Barista can detect decoy PSMs by use of decoy-prefix(i.e., rand_) that
-     put on the protein ids. The search-for-matches command with a fasta file 
+     put on the protein ids. The <code>search-for-matches</code> command with a 
+     <a href="sample.fasta">fasta file</a>
      generates decoy protein ids without the "rand_" specifier. A decoy file without decoy 
      prefix causes the bellow error for QRanker and Barista:</br>
     <pre>
     FATAL: Cannot compute PEP without target or decoy scores.</pre>
-    For preventing the error, run the search-for-matches with an 
+    To prevent the error, run the search-for-matches with an 
     index file. </li>
+  <li>
+    The <code>create-index</code> command will fail when running on Cygwin.
+    Crux will successfully create the index in a temporary directory
+    but will report an error when it tries to rename the temporary directory:
+    <pre>
+      WARNING: Cannot rename directory
+      FATAL: Failed to create index
+    </pre>
+    The temporary directory will be named <code>crux_XXXX</code>
+    where <code>XXXX</code> will consist of sequence of arbitrary letters and numbers.
+    You can recover from the error by renaming the index directory manually.
+  </li>
+  <li>
+    The <code>create-index</code> command may fail when running on Cygwin.
+    Cygwin does not allow users to adjust the maximum allowed number of 
+    simultaneously open files.
+    When the Crux reaches the open file limit,
+    indexing will halt with the following message.
+    <pre>
+      WARNING: cannot open all file handlers needed
+      FATAL: Could not open file handle for index 746.
+    </pre>
+    You can still run <code>search-for-matches</code> directly on the fasta file,
+    but this is significantly slower than a search using an index.
+  </li>
   </ol>
 </ul>
 
