@@ -13,20 +13,38 @@
 
 <h1>Running a Simple Search</h1>
 
-<p> Now that you have your environment <a
+<p>Now that you have your environment <a
 href="start-tutorial.html">set up</a> and the two input files 
 in your working directory, you can conduct the search. The search
-process compares each spectrum in <span class=file>demo.ms2</span> to
-peptides (subsequences of the proteins) in <span
-class=file>small-yeast.fasta</span>.  For each peptide a theoretical
+process compares each spectrum in <span class=file>demo.ms2</span> to 
+peptides (subsequences of the proteins) in fasta files provided in a dirctory, <span class=file>yeast-index/</span>.  For each peptide a theoretical
 spectrum is created based on the predicted fragmentation of the
 peptide.  The theoretical spectra are each compared to the
 experimental spectrum (in the ms2 file) and scored based on their
 similarity.  These scores are reported in the output.  To conduct the
-search, use this command. </p>
-
+search, we have to run <code>create-index</code> command and then use<code> search-for-mathes</code> command. </p>
+<ol>
+<li>
 <div class=code>
-<code>$ crux search-for-matches --compute-sp T demo.ms2 small-yeast.fasta</code>
+<code>$ crux create-index small-yeast.fasta yeast-index </code>
+</div>
+<pre>
+INFO: Beginning create-index.
+INFO: Creating index from fasta file 'small-yeast.fasta'
+INFO: Total proteins found: 56
+</pre>
+<p>When the creating index  has completed, it will print: </p>
+<pre>
+INFO: Finished crux create-index.
+
+</pre>
+</li>
+<p>While generating an index of all of its peptides , you will see output like this</p>
+
+<p>
+Now, you can run this command: </p>
+<div class=code>
+<li><code>$ crux search-for-matches  --compute-sp T demo.ms2 yeast-index/</code>
 </div>
 
 <p>While the search is running, you will see output like this
@@ -34,10 +52,12 @@ search, use this command. </p>
 
 <pre>
 INFO: Reading in ms2 file demo.ms2
-INFO: Preparing protein fasta file small-yeast.fasta
-INFO: Using amino acid alphabet (ACDEFGHIKLMNPQRSTVWYBUXZ).
-INFO: Searching spectra
+INFO: Preparing protein index yeast-index/
+INFO: Created 1 peptide mods, keeping 1 with 255 or fewer aa mods
+INFO: Searching spectrum number 18 (3+), search number 10 of 166, 6% complete
+
 </pre>
+</li>
 
 <p>When the search has completed, it will print</p>
 <pre>
@@ -57,6 +77,7 @@ containing the search results:
 </ul>
 
 </p>
+</li>
 
 <p>The final step is to analyze our search results.  Each spectrum has
 been compared to many peptides and we would like to return only the
@@ -67,6 +88,7 @@ etc.).  The analysis step filters out those spectra and returns only the
 high-quality peptide-spectrum matches. If you run search-for-matches command with a fasta file, please 
 look <a href="known-issues.html">issue 1</a> before running the bellow command.
 </p>
+<li>
 <div class=code><code>
 $ crux q-ranker --output-dir qranker-output --separate-searches ./crux-output/search.decoy.txt demo.ms2 crux-output/search.target.txt</code>
 </div>
@@ -116,7 +138,8 @@ Here, the third column contains the q-ranker q-value assigned to each
 PSM, and the corresponding posterior error probabilities are in fifth column.
 The remainder of the columns are described <a href="txt-format.html">here</a>.
 </p>
-
+</li>
+</ol>
 </div><!--end main-->
 
 <hr></hr>
