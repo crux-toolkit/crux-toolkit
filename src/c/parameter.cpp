@@ -769,17 +769,17 @@ void initialize_parameters(void){
      "argument for q-ranker and barista", "false");
   
   set_string_parameter("search results", NULL,
-     "Q-ranker recognizes search results in SQT format. Like the spectra, the "
+     "Q-ranker recognizes search results in tab-delimited format. Like the spectra, the "
      "search results can be provided as a single file, a list of files or a "
      "directory of files. Note, however, that the input mode for spectra and "
      "for search results must be the same; i.e., if you provide a list of "
      "files for the spectra, then you must also provide a list of files "
-     "containing your search results. When the MS2 files and SQT files are "
+     "containing your search results. When the MS2 files and tab-delimited text files are "
      "provided via a file listing, Q-ranker assumes that the order of the MS2 "
-     "files matches the order of the SQT files. Alternatively, when the MS2 "
-     "files and SQT files are provided via directories, Q-ranker will search "
+     "files matches the order of the tab-delimited files. Alternatively, when the MS2 "
+     "files and tab-delimited files are provided via directories, Q-ranker will search "
      "for pairs of files with the same root name but different extensions "
-     "(\".ms2\" and \".sqt\").", 
+     "(\".ms2\" and \".txt\").", 
      "argument for q-ranker and barista", "false");
   
 
@@ -802,28 +802,28 @@ void initialize_parameters(void){
   set_string_parameter("decoy-prefix", "rand_",
      "Specifies the prefix of the protein names that indicates a decoy. "
      "Default = rand_.",
-     "Available for q-ranker and barista.", "true");
+     " Available for q-ranker and barista.", "true");
 
   set_string_parameter("re-run", "__NULL_STR",
      "Re-run a previous Q-ranker analysis using a previously computed set of"
-     "lookup tables.",
-     "Available for q-ranker and barista.", "true");
+     " lookup tables.",
+     " Available for q-ranker and barista.", "true");
 
   set_string_parameter("separate-searches", "__NULL_STR",
      "If the target and decoy searches were run separately, rather than" 
      " using a concatenated database, then Q-ranker will assume that the"
-     "database search results provided as a required argument are from the"
-     "target database search. This option then allows the user to specify"
-     "the location of the decoy search results. Like the required arguments,"
-     "these search results can be provided as a single file, a list of files"
-     "or a directory. However, the choice (file, list or directory) must be"
-     "consistent for the MS2 files and the target and decoy SQT files. Also,"
-     "if the MS2 and SQT files are provided in directories, then Q-ranker"
-     "will use the MS2 filename (foo.ms2) to identify corresponding target"
-     "and decoy SQT files with names like foo*.target.sqt and"
-     "foo*.decoy.sqt. This naming convention allows the target and decoy SQT"
-     "files to reside in the same directory.",
-     "Available for q-ranker and barista.", "true");
+     " database search results provided as a required argument are from the"
+     " target database search. This option then allows the user to specify"
+     " the location of the decoy search results. Like the required arguments,"
+     " these search results can be provided as a single file, a list of files"
+     " or a directory. However, the choice (file, list or directory) must be"
+     " consistent for the MS2 files and the target and decoy tab-delimited files. Also,"
+     " if the MS2 and tab-delimited files are provided in directories, then Q-ranker"
+     " will use the MS2 filename (foo.ms2) to identify corresponding target"
+     " and decoy tab-delimited files with names like foo*.target.txt and"
+     " foo*.decoy.txt. This naming convention allows the target and decoy txt"
+     " files to reside in the same directory.",
+     " Available for q-ranker and barista.", "true");
  //**** Barista and QRanker options. ******
  set_boolean_parameter("list-of-files",false, 
     "Search result can be as a file or a list of files. This option"
