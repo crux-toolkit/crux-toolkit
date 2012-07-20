@@ -22,12 +22,15 @@ spectrum is created based on the predicted fragmentation of the
 peptide.  The theoretical spectra are each compared to the
 experimental spectrum (in the ms2 file) and scored based on their
 similarity.  These scores are reported in the output.  To conduct the
-search, we have to run <code>create-index</code> command and then use<code> search-for-mathes</code> command. </p>
+search, we have to run <code>create-index</code> command and then use the 
+<code>search-for-mathes</code> command.</p>
 <ol>
 <li>
 <div class=code>
 <code>$ crux create-index small-yeast.fasta yeast-index </code>
 </div>
+<p>While generating an index of all of its peptides , you will see output like this</p>
+
 <pre>
 INFO: Beginning create-index.
 INFO: Creating index from fasta file 'small-yeast.fasta'
@@ -39,7 +42,6 @@ INFO: Finished crux create-index.
 
 </pre>
 </li>
-<p>While generating an index of all of its peptides , you will see output like this</p>
 
 <p>
 Now, you can run this command: </p>
