@@ -1,0 +1,6 @@
+{
+  c = c
+  d = d
+  :10:13 error: expected element '##targetNamespace#*' instead of 'other1#any'
+}
+

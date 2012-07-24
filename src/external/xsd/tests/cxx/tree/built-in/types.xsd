@@ -1,0 +1,460 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.w3.org/2001/XMLSchema XMLSchema.xsd"
+            xmlns="http://www.codesynthesis.com/xmlns/test"
+            targetNamespace="http://www.codesynthesis.com/xmlns/test">
+
+  <!-- elements -->
+
+  <xsd:complexType name="Elements">
+    <xsd:sequence>
+
+      <!-- integers -->
+      <xsd:element name="byte"                  type="xsd:byte"/>
+      <xsd:element name="unsigned_byte"         type="xsd:unsignedByte"/>
+      <xsd:element name="short"                 type="xsd:short"/>
+      <xsd:element name="unsigned_short"        type="xsd:unsignedShort"/>
+      <xsd:element name="int"                   type="xsd:int"/>
+      <xsd:element name="unsigned_int"          type="xsd:unsignedInt"/>
+      <xsd:element name="long"                  type="xsd:long"/>
+      <xsd:element name="unsigned_long"         type="xsd:unsignedLong"/>
+      <xsd:element name="integer"               type="xsd:integer"/>
+      <xsd:element name="non_positive_integer"  type="xsd:nonPositiveInteger"/>
+      <xsd:element name="non_negative_integer"  type="xsd:nonNegativeInteger"/>
+      <xsd:element name="positive_integer"      type="xsd:positiveInteger"/>
+      <xsd:element name="negative_integer"      type="xsd:negativeInteger"/>
+
+
+      <!-- boolean -->
+      <xsd:element name="boolean"               type="xsd:boolean"/>
+
+
+      <!-- floats -->
+      <xsd:element name="float"                 type="xsd:float"/>
+      <xsd:element name="double"                type="xsd:double"/>
+      <xsd:element name="decimal"               type="xsd:decimal"/>
+
+
+      <!-- strings -->
+      <xsd:element name="string"                type="xsd:string"/>
+      <xsd:element name="normalized_string"     type="xsd:normalizedString"/>
+      <xsd:element name="token"                 type="xsd:token"/>
+      <xsd:element name="name"                  type="xsd:Name"/>
+      <xsd:element name="name_token"            type="xsd:NMTOKEN"/>
+      <xsd:element name="name_tokens"           type="xsd:NMTOKENS"/>
+      <xsd:element name="ncname"                type="xsd:NCName"/>
+      <xsd:element name="language"              type="xsd:language"/>
+
+      <!-- qualified name -->
+      <xsd:element name="qname"                 type="xsd:QName"/>
+
+
+      <!-- ID/IDREF -->
+      <xsd:element name="id"     maxOccurs="2"  type="xsd:ID"/>
+      <xsd:element name="id_ref"                type="xsd:IDREF"/>
+      <xsd:element name="id_refs"               type="xsd:IDREFS"/>
+
+
+      <!-- URI -->
+      <xsd:element name="any_uri"               type="xsd:anyURI"/>
+
+
+      <!-- binary -->
+      <xsd:element name="base64_binary"         type="xsd:base64Binary"/>
+      <xsd:element name="hex_binary"            type="xsd:hexBinary"/>
+
+
+      <!-- date/time -->
+      <xsd:element name="date"                  type="xsd:date"/>
+      <xsd:element name="date_time"             type="xsd:dateTime"/>
+      <xsd:element name="duration"              type="xsd:duration"/>
+      <xsd:element name="day"                   type="xsd:gDay"/>
+      <xsd:element name="month"                 type="xsd:gMonth"/>
+      <xsd:element name="month_day"             type="xsd:gMonthDay"/>
+      <xsd:element name="year"                  type="xsd:gYear"/>
+      <xsd:element name="year_month"            type="xsd:gYearMonth"/>
+      <xsd:element name="time"                  type="xsd:time"/>
+
+
+      <!-- entity -->
+      <!--
+      <xsd:element name="entity"                type="xsd:ENTITY"/>
+      <xsd:element name="entities"              type="xsd:ENTITIES"/>
+      -->
+
+
+      <!-- notation -->
+      <!-- xsd:element name="notation"              type="xsd:NOTATION"/ -->
+    </xsd:sequence>
+  </xsd:complexType>
+
+  <xsd:element name="elements" type="Elements"/>
+
+
+
+  <!-- attributes -->
+
+  <xsd:complexType name="Attributes">
+    <!-- integers -->
+    <xsd:attribute name="byte"                  type="xsd:byte"/>
+    <xsd:attribute name="unsigned_byte"         type="xsd:unsignedByte"/>
+    <xsd:attribute name="short"                 type="xsd:short"/>
+    <xsd:attribute name="unsigned_short"        type="xsd:unsignedShort"/>
+    <xsd:attribute name="int"                   type="xsd:int"/>
+    <xsd:attribute name="unsigned_int"          type="xsd:unsignedInt"/>
+    <xsd:attribute name="long"                  type="xsd:long"/>
+    <xsd:attribute name="unsigned_long"         type="xsd:unsignedLong"/>
+    <xsd:attribute name="integer"               type="xsd:integer"/>
+    <xsd:attribute name="non_positive_integer"  type="xsd:nonPositiveInteger"/>
+    <xsd:attribute name="non_negative_integer"  type="xsd:nonNegativeInteger"/>
+    <xsd:attribute name="positive_integer"      type="xsd:positiveInteger"/>
+    <xsd:attribute name="negative_integer"      type="xsd:negativeInteger"/>
+
+
+      <!-- boolean -->
+    <xsd:attribute name="boolean"               type="xsd:boolean"/>
+
+
+      <!-- floats -->
+    <xsd:attribute name="float"                 type="xsd:float"/>
+    <xsd:attribute name="double"                type="xsd:double"/>
+    <xsd:attribute name="decimal"               type="xsd:decimal"/>
+
+
+      <!-- strings -->
+    <xsd:attribute name="string"                type="xsd:string"/>
+    <xsd:attribute name="normalized_string"     type="xsd:normalizedString"/>
+    <xsd:attribute name="token"                 type="xsd:token"/>
+    <xsd:attribute name="name"                  type="xsd:Name"/>
+    <xsd:attribute name="name_token"            type="xsd:NMTOKEN"/>
+    <xsd:attribute name="name_tokens"           type="xsd:NMTOKENS"/>
+    <xsd:attribute name="ncname"                type="xsd:NCName"/>
+    <xsd:attribute name="language"              type="xsd:language"/>
+
+      <!-- qualified name -->
+    <xsd:attribute name="qname"                 type="xsd:QName"/>
+
+
+      <!-- ID/IDREF -->
+    <xsd:attribute name="id"                   type="xsd:ID"/>
+    <xsd:attribute name="id_ref"                type="xsd:IDREF"/>
+    <xsd:attribute name="id_refs"               type="xsd:IDREFS"/>
+
+
+      <!-- URI -->
+    <xsd:attribute name="any_uri"               type="xsd:anyURI"/>
+
+
+      <!-- binary -->
+    <xsd:attribute name="base64_binary"         type="xsd:base64Binary"/>
+    <xsd:attribute name="hex_binary"            type="xsd:hexBinary"/>
+
+
+      <!-- date/time -->
+    <xsd:attribute name="date"                  type="xsd:date"/>
+    <xsd:attribute name="date_time"             type="xsd:dateTime"/>
+    <xsd:attribute name="duration"              type="xsd:duration"/>
+    <xsd:attribute name="day"                   type="xsd:gDay"/>
+    <xsd:attribute name="month"                 type="xsd:gMonth"/>
+    <xsd:attribute name="month_day"             type="xsd:gMonthDay"/>
+    <xsd:attribute name="year"                  type="xsd:gYear"/>
+    <xsd:attribute name="year_month"            type="xsd:gYearMonth"/>
+    <xsd:attribute name="time"                  type="xsd:time"/>
+
+
+      <!-- entity -->
+    <!--
+    <xsd:attribute name="entity"                type="xsd:ENTITY"/>
+    <xsd:attribute name="entities"              type="xsd:ENTITIES"/>
+    -->
+
+
+    <!-- notation -->
+    <!-- xsd:element name="notation"              type="xsd:NOTATION"/ -->
+  </xsd:complexType>
+
+  <xsd:element name="attributes" type="Attributes"/>
+
+
+  <!-- inheritance -->
+
+  <!-- integers -->
+  <xsd:simpleType name="Byte">
+    <xsd:restriction base="xsd:byte"/>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="UnsignedByte">
+    <xsd:restriction base="xsd:unsignedByte"/>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="Short">
+    <xsd:restriction base="xsd:short"/>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="UnsignedShort">
+    <xsd:restriction base="xsd:unsignedShort"/>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="Int">
+    <xsd:restriction base="xsd:int"/>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="UnsignedInt">
+    <xsd:restriction base="xsd:unsignedInt"/>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="Long">
+    <xsd:restriction base="xsd:long"/>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="UnsignedLong">
+    <xsd:restriction base="xsd:unsignedLong"/>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="Integer">
+    <xsd:restriction base="xsd:integer"/>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="NonPositiveInteger">
+    <xsd:restriction base="xsd:nonPositiveInteger"/>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="NonNegativeInteger">
+    <xsd:restriction base="xsd:nonNegativeInteger"/>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="PositiveInteger">
+    <xsd:restriction base="xsd:positiveInteger"/>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="NegativeInteger">
+    <xsd:restriction base="xsd:negativeInteger"/>
+  </xsd:simpleType>
+
+
+  <!-- boolean -->
+  <xsd:simpleType name="Boolean">
+    <xsd:restriction base="xsd:boolean"/>
+  </xsd:simpleType>
+
+
+  <!-- floats -->
+  <xsd:simpleType name="Float">
+    <xsd:restriction base="xsd:float"/>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="Double">
+    <xsd:restriction base="xsd:double"/>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="Decimal">
+    <xsd:restriction base="xsd:decimal"/>
+  </xsd:simpleType>
+
+
+  <!-- strings -->
+  <xsd:simpleType name="String">
+    <xsd:restriction base="xsd:string"/>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="NormalizedString">
+    <xsd:restriction base="xsd:normalizedString"/>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="Token">
+    <xsd:restriction base="xsd:token"/>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="Name">
+    <xsd:restriction base="xsd:Name"/>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="NameToken">
+    <xsd:restriction base="xsd:NMTOKEN"/>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="NameTokens">
+    <xsd:restriction base="xsd:NMTOKENS"/>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="NCName">
+    <xsd:restriction base="xsd:NCName"/>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="Language">
+    <xsd:restriction base="xsd:language"/>
+  </xsd:simpleType>
+
+
+  <!-- qualified name -->
+  <xsd:simpleType name="QName">
+    <xsd:restriction base="xsd:QName"/>
+  </xsd:simpleType>
+
+
+  <!-- ID/IDREF -->
+  <xsd:simpleType name="Id">
+    <xsd:restriction base="xsd:ID"/>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="IdRef">
+    <xsd:restriction base="xsd:IDREF"/>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="IdRefs">
+    <xsd:restriction base="xsd:IDREFS"/>
+  </xsd:simpleType>
+
+
+  <!-- URI -->
+  <xsd:simpleType name="URI">
+    <xsd:restriction base="xsd:anyURI"/>
+  </xsd:simpleType>
+
+
+  <!-- binary -->
+  <xsd:simpleType name="Base64Binary">
+    <xsd:restriction base="xsd:base64Binary"/>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="HexBinary">
+    <xsd:restriction base="xsd:hexBinary"/>
+  </xsd:simpleType>
+
+
+  <!-- date/time -->
+  <xsd:simpleType name="Date">
+    <xsd:restriction base="xsd:date"/>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="DateTime">
+    <xsd:restriction base="xsd:dateTime"/>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="Duration">
+    <xsd:restriction base="xsd:duration"/>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="Day">
+    <xsd:restriction base="xsd:gDay"/>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="Month">
+    <xsd:restriction base="xsd:gMonth"/>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="MonthDay">
+    <xsd:restriction base="xsd:gMonthDay"/>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="Year">
+    <xsd:restriction base="xsd:gYear"/>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="YearMonth">
+    <xsd:restriction base="xsd:gYearMonth"/>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="Time">
+    <xsd:restriction base="xsd:time"/>
+  </xsd:simpleType>
+
+
+  <!-- entity -->
+  <!--
+    <xsd:element name="entity"                type="xsd:ENTITY"/>
+    <xsd:element name="entities"              type="xsd:ENTITIES"/>
+  -->
+
+
+  <!-- notation -->
+  <!-- xsd:element name="notation"              type="xsd:NOTATION"/ -->
+
+  <!-- elements -->
+
+  <xsd:complexType name="Inherited">
+    <xsd:sequence>
+
+      <!-- integers -->
+      <xsd:element name="byte"                  type="Byte"/>
+      <xsd:element name="unsigned_byte"         type="UnsignedByte"/>
+      <xsd:element name="short"                 type="Short"/>
+      <xsd:element name="unsigned_short"        type="UnsignedShort"/>
+      <xsd:element name="int"                   type="Int"/>
+      <xsd:element name="unsigned_int"          type="UnsignedInt"/>
+      <xsd:element name="long"                  type="Long"/>
+      <xsd:element name="unsigned_long"         type="UnsignedLong"/>
+      <xsd:element name="integer"               type="Integer"/>
+      <xsd:element name="non_positive_integer"  type="NonPositiveInteger"/>
+      <xsd:element name="non_negative_integer"  type="NonNegativeInteger"/>
+      <xsd:element name="positive_integer"      type="PositiveInteger"/>
+      <xsd:element name="negative_integer"      type="NegativeInteger"/>
+
+
+      <!-- boolean -->
+      <xsd:element name="boolean"               type="Boolean"/>
+
+
+      <!-- floats -->
+      <xsd:element name="float"                 type="Float"/>
+      <xsd:element name="double"                type="Double"/>
+      <xsd:element name="decimal"               type="Decimal"/>
+
+
+      <!-- strings -->
+      <xsd:element name="string"                type="String"/>
+      <xsd:element name="normalized_string"     type="NormalizedString"/>
+      <xsd:element name="token"                 type="Token"/>
+      <xsd:element name="name"                  type="Name"/>
+      <xsd:element name="name_token"            type="NameToken"/>
+      <xsd:element name="name_tokens"           type="NameTokens"/>
+      <xsd:element name="ncname"                type="NCName"/>
+      <xsd:element name="language"              type="Language"/>
+
+      <!-- qualified name -->
+      <xsd:element name="qname"                 type="QName"/>
+
+
+      <!-- ID/IDREF -->
+      <xsd:element name="id"     maxOccurs="2"  type="Id"/>
+      <xsd:element name="id_ref"                type="IdRef"/>
+      <xsd:element name="id_refs"               type="IdRefs"/>
+
+
+      <!-- URI -->
+      <xsd:element name="any_uri"               type="URI"/>
+
+
+      <!-- binary -->
+      <xsd:element name="base64_binary"         type="Base64Binary"/>
+      <xsd:element name="hex_binary"            type="HexBinary"/>
+
+
+      <!-- date/time -->
+      <xsd:element name="date"                  type="Date"/>
+      <xsd:element name="date_time"             type="DateTime"/>
+      <xsd:element name="duration"              type="Duration"/>
+      <xsd:element name="day"                   type="Day"/>
+      <xsd:element name="month"                 type="Month"/>
+      <xsd:element name="month_day"             type="MonthDay"/>
+      <xsd:element name="year"                  type="Year"/>
+      <xsd:element name="year_month"            type="YearMonth"/>
+      <xsd:element name="time"                  type="Time"/>
+
+
+      <!-- entity -->
+      <!--
+      <xsd:element name="entity"                type="xsd:ENTITY"/>
+      <xsd:element name="entities"              type="xsd:ENTITIES"/>
+      -->
+
+
+      <!-- notation -->
+      <!-- xsd:element name="notation"              type="xsd:NOTATION"/ -->
+    </xsd:sequence>
+  </xsd:complexType>
+
+  <xsd:element name="inherited" type="Inherited"/>
+
+</xsd:schema>

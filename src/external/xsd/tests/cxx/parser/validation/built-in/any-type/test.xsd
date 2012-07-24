@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:t="test" targetNamespace="test">
+
+  <complexType name="any-extension">
+    <complexContent mixed="true">
+      <extension base="anyType">
+	<attribute name="x" type="string"/>
+      </extension>
+    </complexContent>
+  </complexType>
+
+  <complexType name="any-simple-extension">
+    <simpleContent>
+      <extension base="anySimpleType">
+	<attribute name="x" type="string"/>
+      </extension>
+    </simpleContent>
+  </complexType>
+
+  <complexType name="type">
+    <choice maxOccurs="unbounded">
+      <element name="a" type="anyType"/>
+      <element name="a-extension" type="t:any-extension"/>
+      <element name="as-extension" type="t:any-simple-extension"/>
+    </choice>
+    <attribute name="as" type="anySimpleType"/>
+  </complexType>
+
+  <element name="root" type="t:type"/>
+
+</schema>

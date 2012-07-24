@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:t="test" targetNamespace="test">
+
+  <complexType name="id-ex">
+    <simpleContent>
+      <extension base="ID">
+        <attribute name="id" type="ID"/>
+      </extension>
+    </simpleContent>
+  </complexType>
+
+  <complexType name="inner">
+    <sequence>
+      <element name="id" type="ID" minOccurs="0"/>
+      <element name="id-ex" type="t:id-ex" minOccurs="0"/>
+      <element name="ref" type="IDREF" minOccurs="0"/>
+    </sequence>
+  </complexType>
+
+  <complexType name="outer">
+    <sequence>
+      <element name="i" type="t:inner" minOccurs="0"/>
+      <element name="ref" type="IDREF" minOccurs="0"/>
+    </sequence>
+  </complexType>
+
+  <!-- IDREF lists -->
+
+  <complexType name="id">
+    <attribute name="id" type="ID" use="required"/>
+  </complexType>
+
+  <complexType name="ids">
+    <sequence>
+      <element name="id" type="t:id" minOccurs="0" maxOccurs="unbounded"/>
+    </sequence>
+  </complexType>
+
+  <complexType name="idrefs1">
+    <attribute name="idrefs" type="IDREFS" use="required"/>
+  </complexType>
+
+  <simpleType name="idref-list">
+    <list itemType="IDREF"/>
+  </simpleType>
+
+  <complexType name="idrefs2">
+    <attribute name="idrefs" type="t:idref-list" use="required"/>
+  </complexType>
+
+  <complexType name="model">
+    <sequence>
+      <element name="ids" type="t:ids"/>
+      <element name="idrefs1" type="t:idrefs1"/>
+      <element name="idrefs2" type="t:idrefs2"/>
+    </sequence>
+  </complexType>
+
+</schema>

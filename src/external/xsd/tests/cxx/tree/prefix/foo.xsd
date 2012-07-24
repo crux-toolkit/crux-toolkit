@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+        xmlns:f="foo"
+	targetNamespace="foo">
+
+  <element name="efoo" type="int"/>
+
+  <complexType name="base">
+    <sequence>
+      <element name="x" type="int"/>
+    </sequence>
+  </complexType>
+
+  <element name="base" type="f:base"/>
+
+</schema>

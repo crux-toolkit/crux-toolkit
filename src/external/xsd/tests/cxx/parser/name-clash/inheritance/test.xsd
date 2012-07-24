@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:t="test" targetNamespace="test">
+
+  <complexType name="base">
+    <sequence>
+      <element name="e" type="string"/>
+    </sequence>
+  </complexType>
+
+  <complexType name="derived">
+    <complexContent>
+      <extension base="t:base">
+        <sequence>
+          <element name="e" type="string"/>
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+
+  <element name="root" type="t:derived"/>
+
+</schema>

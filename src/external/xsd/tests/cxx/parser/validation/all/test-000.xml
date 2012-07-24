@@ -1,0 +1,53 @@
+<t:root xmlns:t="test"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="test test.xsd">
+
+  <!-- all combinations -->
+  <all>
+    <a>a</a>
+    <b>b</b>
+    <c>c</c>
+  </all>
+
+  <all>
+    <a>a</a>
+    <c>c</c>
+    <b>b</b>
+  </all>
+
+  <all>
+    <b>b</b>
+    <a>a</a>
+    <c>c</c>
+  </all>
+
+  <all>
+    <b>b</b>
+    <c>c</c>
+    <a>a</a>
+  </all>
+
+  <all>
+    <c>c</c>
+    <a>a</a>
+    <b>b</b>
+  </all>
+
+  <all>
+    <c>c</c>
+    <b>b</b>
+    <a>a</a>
+  </all>
+
+  <!-- optional c is not present -->
+  <all>
+    <a>a</a>
+    <b>b</b>
+  </all>
+
+  <all>
+    <a>a</a>
+    <b>b</b>
+  </all>
+
+</t:root>

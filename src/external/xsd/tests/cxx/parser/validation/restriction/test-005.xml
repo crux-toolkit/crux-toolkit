@@ -1,0 +1,11 @@
+<t:root xmlns:t="test"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="test test.xsd">
+
+  <!-- valid extension but not restriction: y attribute -->
+  <restriction-b>
+    <a>a</a>
+    <b>b</b>
+  </restriction-b>
+
+</t:root>

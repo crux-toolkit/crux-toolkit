@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:t="test" targetNamespace="test">
+
+  <simpleType name="digit">
+    <restriction base="int">
+      <enumeration value="0"/>
+      <enumeration value="1"/>
+      <enumeration value="2"/>
+      <enumeration value="3"/>
+      <enumeration value="4"/>
+      <enumeration value="5"/>
+      <enumeration value="6"/>
+      <enumeration value="7"/>
+      <enumeration value="8"/>
+      <enumeration value="9"/>
+    </restriction>
+  </simpleType>
+
+  <simpleType name="gender">
+    <restriction base="string">
+      <enumeration value="male"/>
+      <enumeration value="female"/>
+    </restriction>
+  </simpleType>
+
+  <complexType name="type">
+    <choice maxOccurs="unbounded">
+      <element name="digit" type="t:digit"/>
+      <element name="gender" type="t:gender"/>
+    </choice>
+  </complexType>
+
+  <element name="root" type="t:type"/>
+
+</schema>

@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:xse="http://www.codesynthesis.com/xmlns/xml-schema-extension"
+            xmlns:test="http://www.codesynthesis.com/xmlns/test"
+            targetNamespace="http://www.codesynthesis.com/xmlns/test">
+
+  <!-- unresolvable type -->
+  
+  <xsd:attribute name="attribute" type="xsd:IDREF" xse:refType="test:author"/>
+
+</xsd:schema>

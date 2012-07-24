@@ -1,0 +1,80 @@
+#! /usr/bin/env bash
+
+# file      : build/configure
+# author    : Boris Kolpackov <boris@codesynthesis.com>
+# copyright : Copyright (c) 2005-2010 Code Synthesis Tools CC
+# license   : GNU GPL v2 + exceptions; see accompanying LICENSE file
+
+# $1  out file
+#
+# bld_root     - build root
+# project_name - project name
+#
+
+source $bld_root/dialog.bash
+
+
+$echo
+$echo
+$echo "configuring '$project_name'"
+$echo
+$echo
+
+$echo
+$echo "Would you like to build optional parts of '$project_name' that require"
+$echo "the 'zlib' library?"
+$echo
+
+with_zlib=`read_y_n n`
+
+$echo
+$echo "Would you like to build optional parts of '$project_name' that require"
+$echo "the 'ACE' library?"
+$echo
+
+with_ace=`read_y_n n`
+
+$echo
+$echo "Would you like to build optional parts of '$project_name' that require"
+$echo "the 'XDR' library (part of the system in most GNU/Linux and"
+$echo "UNIX distributions)?"
+$echo
+
+with_xdr=`read_y_n n`
+
+$echo
+$echo "Would you like to build optional parts of '$project_name' that require"
+$echo "the boost 'serialization' library?"
+$echo
+
+with_boost_serialization=`read_y_n n`
+
+
+$echo
+$echo "Would you like to build optional parts of '$project_name' that require"
+$echo "the boost 'date_time' library?"
+$echo
+
+with_boost_date_time=`read_y_n n`
+
+$echo
+$echo "Would you like to build optional parts of '$project_name' that require"
+$echo "the 'Berkeley DB XML' library?"
+$echo
+
+with_dbxml=`read_y_n n`
+
+$echo
+$echo "Would you like to build optional parts of '$project_name' that require"
+$echo "the XQilla library?"
+$echo
+
+with_xqilla=`read_y_n n`
+
+echo "xsd_with_zlib := $with_zlib"                                >$1
+echo "xsd_with_ace := $with_ace"                                 >>$1
+echo "xsd_with_xdr := $with_xdr"                                 >>$1
+echo "xsd_with_dbxml := $with_dbxml"                             >>$1
+echo "xsd_with_xqilla := $with_xqilla"                           >>$1
+echo "xsd_with_boost_date_time := $with_boost_date_time"         >>$1
+echo "xsd_with_boost_serialization := $with_boost_serialization" >>$1

@@ -1,0 +1,8 @@
+<t:root xmlns:t="test"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="test includer.xsd">
+		
+  <a>a</a>	
+  <t:b>b</t:b>
+  
+</t:root>

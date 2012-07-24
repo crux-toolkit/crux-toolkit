@@ -1,0 +1,14 @@
+<t:root xmlns:t="test"
+        xmlns:o="other"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="test test.xsd">
+
+  <!-- fail c minOccurs="1" -->
+  <sequence>
+    <d>d</d>
+    <t:any>any</t:any>
+    <f>f</f>
+    <e>e</e>
+  </sequence>
+
+</t:root>

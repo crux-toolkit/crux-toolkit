@@ -1,0 +1,19 @@
+<t:root xmlns:t="test"
+        xmlns:f="foo"
+	xmlns:b="bar"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="test test.xsd">
+
+  <a b:abar="456">
+    <f:efoo>123</f:efoo>
+  </a>
+
+  <b>
+    <b:derived><x>1</x><y>2</y></b:derived>
+  </b>
+
+  <c>
+    <f:base xsi:type="b:derived2"><x>1</x><z>2</z></f:base>
+  </c>
+
+</t:root>

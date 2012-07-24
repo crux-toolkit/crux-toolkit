@@ -1,0 +1,58 @@
+#! /usr/bin/env bash
+
+# file      : build/import/libace/configure
+# author    : Boris Kolpackov <boris@kolpackov.net>
+# copyright : Copyright (c) 2005-2009 Boris Kolpackov
+# license   : GNU GPL v2; see accompanying LICENSE file
+
+
+# $1           - out config file
+#
+# bld_root     - build root
+# project_name - project name
+#
+
+source $bld_root/dialog.bash
+
+
+$echo
+$echo "Configuring external dependency on 'ACE' for '$project_name'."
+$echo
+
+$echo
+$echo "Would you like to configure dependency on the installed version"
+$echo "of 'ACE' as opposed to the development build?"
+$echo
+
+installed=`read_y_n y`
+
+path=
+type=
+
+if [ "$installed" = "n" ]; then
+
+  $echo
+  $echo "Please enter the 'ACE' root directory (ACE_ROOT)."
+  $echo
+
+  root=`read_path --directory --exist`
+
+  $echo
+  $echo "Please select the library type you would like to use:"
+  $echo
+  $echo "(1) archive"
+  $echo "(2) shared object"
+  $echo
+
+  type=`read_option "archive shared" "shared"`
+
+fi
+
+echo libace_installed := $installed   >$1
+
+if [ "$installed" = "n" ]; then
+
+  echo libace_root := $root >>$1
+  echo libace_type := $type >>$1
+
+fi

@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:t="test" targetNamespace="test">
+
+  <complexType name="object">
+    <sequence>
+      <element name="data" type="string" maxOccurs="unbounded"/>
+    </sequence>
+    <attribute name="id" type="ID" use="required"/>
+  </complexType>
+
+  <complexType name="ref">
+    <simpleContent>
+      <extension base="IDREF"/>
+    </simpleContent>
+  </complexType>
+
+  <complexType name="subtree">
+    <sequence>
+      <element name="o" type="t:object" minOccurs="0" maxOccurs="unbounded"/>
+      <element name="r" type="t:ref" minOccurs="0" maxOccurs="unbounded"/>
+    </sequence>
+  </complexType>
+
+  <complexType name="model">
+    <sequence>
+      <element name="one" type="t:subtree"/>
+      <element name="opt" type="t:subtree" minOccurs="0"/>
+      <element name="seq" type="t:subtree" minOccurs="0" maxOccurs="unbounded"/>
+    </sequence>
+  </complexType>
+
+</schema>

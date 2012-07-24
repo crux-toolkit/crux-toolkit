@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<t:root xmlns:t="test" de="0" do="0" f="0" s="12.13">
+
+  <float>0</float>
+
+  <float>1</float>
+
+  <float>1e+06</float>
+
+  <float>1e-07</float>
+
+  <float-list>0 1 1e+06 1e-07</float-list>
+
+  <double>0</double>
+
+  <double>1</double>
+
+  <double>100000000000000</double>
+
+  <double>1e-15</double>
+
+  <double-list>0 1 100000000000000 1e-15</double-list>
+
+  <decimal>0</decimal>
+
+  <decimal>1</decimal>
+
+  <decimal>10000</decimal>
+
+  <decimal>100000000000000</decimal>
+
+  <decimal>0.000000000000001</decimal>
+
+  <decimal-list>0 1 100000000000000 0.000000000000001</decimal-list>
+
+  <simple>0</simple>
+
+  <simple>1</simple>
+
+  <simple>12.34</simple>
+
+  <simple>0.12</simple>
+
+  <simple>12.13</simple>
+
+  <simple>123.1</simple>
+
+  <simple>1234</simple>
+
+  <complex>0</complex>
+
+  <complex>1</complex>
+
+  <complex>12.34</complex>
+
+  <complex>0.12</complex>
+
+  <complex>12.13</complex>
+
+  <complex>123.1</complex>
+
+  <complex>1234</complex>
+
+  <complex>-12.12</complex>
+
+  <complex>-123.1</complex>
+
+</t:root>

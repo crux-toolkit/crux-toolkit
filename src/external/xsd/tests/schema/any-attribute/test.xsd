@@ -1,0 +1,22 @@
+<?xml version="1.0" ?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.w3.org/2001/XMLSchema XMLSchema.xsd"
+	    xmlns:test="http://www.codesynthesis.com/xmlns/test"
+            targetNamespace="http://www.codesynthesis.com/xmlns/test">
+
+
+  <xsd:complexType name="type">
+    <xsd:attribute name="a" type="xsd:string"/>
+    <xsd:anyAttribute namespace="##other" processContents="skip"/>
+    <xsd:attributeGroup ref="test:agroup"/>
+  </xsd:complexType>
+
+  <xsd:attributeGroup name="agroup">
+    <xsd:attribute name="b" type="xsd:string"/>
+    <xsd:anyAttribute namespace="##any" processContents="skip"/>
+  </xsd:attributeGroup>
+
+  <xsd:element name="root" type="test:type"/>
+
+</xsd:schema>

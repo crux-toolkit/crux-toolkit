@@ -1,0 +1,12 @@
+<t:root xmlns:t="test"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="test test.xsd">
+
+  <!-- valid base but not restriction: z attribute -->
+  <restriction-a>
+    <a>a</a>
+    <b>b</b>
+    <c>c</c>
+  </restriction-a>
+
+</t:root>

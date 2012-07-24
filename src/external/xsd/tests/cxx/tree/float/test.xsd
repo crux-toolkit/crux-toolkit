@@ -1,0 +1,74 @@
+<?xml version="1.0"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:t="test" targetNamespace="test">
+
+  <simpleType name="float-list">
+    <list itemType="float"/>
+  </simpleType>
+
+  <simpleType name="double-list">
+    <list itemType="double"/>
+  </simpleType>
+
+  <simpleType name="decimal-list">
+    <list itemType="decimal"/>
+  </simpleType>
+
+  <!-- decimal facets -->
+
+  <simpleType name="simple">
+    <restriction base="t:base-simple">
+      <fractionDigits value="2"/>
+    </restriction>
+  </simpleType>
+
+  <simpleType name="base-simple">
+    <restriction base="decimal">
+      <totalDigits value="4"/>
+    </restriction>
+  </simpleType>
+
+  <complexType name="complex">
+    <simpleContent>
+      <restriction base="t:base-complex">
+       <fractionDigits value="2"/>
+       <totalDigits value="4"/>
+       <attribute name="x" type="int"/>
+      </restriction>
+    </simpleContent>
+  </complexType>
+
+  <complexType name="base-complex">
+    <simpleContent>
+      <extension base="decimal">
+       <attribute name="x" type="int"/>
+      </extension>
+    </simpleContent>
+  </complexType>
+
+
+  <complexType name="type">
+    <sequence>
+      <element name="float" type="float" maxOccurs="unbounded"/>
+      <element name="float-list" type="t:float-list"/>
+      <element name="double" type="double" maxOccurs="unbounded"/>
+      <element name="double-list" type="t:double-list"/>
+      <element name="decimal" type="decimal" maxOccurs="unbounded"/>
+      <element name="decimal-list" type="t:decimal-list"/>
+
+      <element name="simple" type="t:simple" maxOccurs="unbounded"/>
+      <element name="complex" type="t:complex" maxOccurs="unbounded"/>
+
+    </sequence>
+    <attribute name="f" type="float" default="12.34"/>
+    <attribute name="do" type="double" default="1234.1234"/>
+    <attribute name="de" type="decimal" default="1234.1234"/>
+
+    <attribute name="s" type="t:simple"/>
+  </complexType>
+
+  <element name="root" type="t:type"/>
+
+  <element name="double" type="double"/>
+  <element name="decimal" type="decimal"/>
+
+</schema>

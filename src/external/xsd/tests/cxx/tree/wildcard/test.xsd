@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:t="test" targetNamespace="test">
+
+  <complexType name="type">
+    <sequence>
+      <any namespace="##other" processContents="skip"/>
+      <element name="foo" type="string"/>
+      <any namespace="##targetNamespace" minOccurs="0" processContents="skip"/>
+      <element name="bar" type="string"/>
+      <any namespace="##other" maxOccurs="unbounded" processContents="skip"/>
+    </sequence>
+    <attribute name="att" type="string"/>
+    <anyAttribute namespace="##any" processContents="skip"/>
+  </complexType>
+
+  <element name="root" type="t:type"/>
+
+</schema>

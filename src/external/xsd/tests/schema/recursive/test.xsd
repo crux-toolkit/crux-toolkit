@@ -1,0 +1,43 @@
+<?xml version="1.0" ?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.w3.org/2001/XMLSchema XMLSchema.xsd"
+	    xmlns:test="http://www.codesynthesis.com/xmlns/test"
+            targetNamespace="http://www.codesynthesis.com/xmlns/test">
+
+  <xsd:element name="BooleanExpression">
+    <xsd:complexType>
+      <xsd:choice>
+        <xsd:element name="literal" type="xsd:boolean"/>
+        <xsd:element ref="test:AND"/>
+        <xsd:element ref="test:OR"/>
+	<xsd:element ref="test:XOR"/>
+      </xsd:choice>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="AND">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element ref="test:BooleanExpression" maxOccurs="2"/>
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="OR">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element ref="test:BooleanExpression" maxOccurs="2"/>
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+ <xsd:element name="XOR">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element ref="test:BooleanExpression" maxOccurs="2"/>
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+</xsd:schema>

@@ -1,0 +1,24 @@
+pass-a
+{
+  b = b
+  any: test#foo = foo
+  any: test#bar = bar
+}
+
+pass-b
+{
+  a = a
+  b = b
+}
+
+pass-c
+{
+  a = a
+  b = b
+}
+
+fail
+{
+  :8:10 error: expected attribute 'a'
+}
+

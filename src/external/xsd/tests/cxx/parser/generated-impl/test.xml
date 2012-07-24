@@ -1,0 +1,168 @@
+<t:root xmlns:t="test"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="test test.xsd">
+
+  <gender>male</gender>
+  <gender-extension foo="foo">male</gender-extension>
+
+  <list>0 1 2 3</list>
+  <list-extension foo="foo">3 2 1 0</list-extension>
+
+  <union>9</union>
+  <union-extension foo="foo">string</union-extension>
+
+  <complex x="x">
+    <a>aaa</a>
+  </complex>
+
+  <complex-extension x="x" y="y">
+    <a>aaa</a>
+    <b>bbb</b>
+  </complex-extension>
+
+  <any-type>aaa<b>bbb</b>ccc</any-type>
+  <any-simple-type>abc123</any-simple-type>
+
+  <boolean>1</boolean>
+  <boolean> 0 </boolean>
+  <boolean>true</boolean>
+  <boolean> false </boolean>
+
+  <byte>0</byte>
+  <byte>123</byte>
+  <byte>-123</byte>
+
+  <unsigned-byte>0</unsigned-byte>
+  <unsigned-byte>123</unsigned-byte>
+
+  <short>0</short>
+  <short>-1234</short>
+  <short>1234</short>
+
+  <unsigned-short>0</unsigned-short>
+  <unsigned-short>1234</unsigned-short>
+
+  <int>0</int>
+  <int>-12345</int>
+  <int>12345</int>
+
+  <unsigned-int>0</unsigned-int>
+  <unsigned-int>12345</unsigned-int>
+
+  <long>0</long>
+  <long>-123456</long>
+  <long>123456</long>
+
+  <unsigned-long>0</unsigned-long>
+  <unsigned-long>123456</unsigned-long>
+
+  <integer>0</integer>
+  <integer>-123456</integer>
+  <integer>123456</integer>
+
+  <negative-integer>-123456</negative-integer>
+
+  <non-positive-integer>0</non-positive-integer>
+  <non-positive-integer>-123456</non-positive-integer>
+
+  <positive-integer>123456</positive-integer>
+
+  <non-negative-integer>0</non-negative-integer>
+  <non-negative-integer>123456</non-negative-integer>
+
+  <float>0</float>
+  <float>1.123</float>
+  <float>-1.123</float>
+
+  <double>0</double>
+  <double>1.1234</double>
+  <double>-1.1234</double>
+
+  <decimal>0</decimal>
+  <decimal>1.1234</decimal>
+  <decimal>-1.1234</decimal>
+
+  <string>string space newline</string>
+
+  <normalized-string>string space newline</normalized-string>
+
+  <token> string space newline</token>
+
+  <name>as123:345-.abs</name>
+
+  <nmtoken>1as123:345-.abs</nmtoken>
+
+  <nmtokens>abc 123</nmtokens>
+
+  <ncname>as123_345-.abs</ncname>
+
+  <id>abc</id>
+  <id>a123</id>
+
+  <idref>abc</idref>
+
+  <idrefs>abc a123</idrefs>
+
+  <language>en</language>
+  <language>en-us</language>
+
+  <uri>http://www.example.com/foo#bar</uri>
+
+  <qname>schemaLocation</qname>
+  <qname>xsi:schemaLocation</qname>
+
+  <base64_binary>MTIzNDVhYmNqaw==</base64_binary>
+  <base64_binary>YQ==</base64_binary>
+  <base64_binary>YWI=</base64_binary>
+  <base64_binary>YWJj</base64_binary>
+
+  <hex_binary></hex_binary>
+  <hex_binary>31323334356162636a6b</hex_binary>
+
+  <gday>---12+12:00</gday>
+  <gday>---01</gday>
+  <gday>---31</gday>
+  <gday>---15Z</gday>
+  <gday>---15-14:00</gday>
+
+  <gmonth>--10+12:00</gmonth>
+  <gmonth>--01</gmonth>
+  <gmonth>--12Z</gmonth>
+
+  <gyear>2007+12:00</gyear>
+  <gyear>0001</gyear>
+  <gyear>-20000Z</gyear>
+
+  <gmonth_day>--10-28+12:00</gmonth_day>
+  <gmonth_day>--12-31</gmonth_day>
+  <gmonth_day>--01-01Z</gmonth_day>
+
+  <gyear_month>2007-12+12:00</gyear_month>
+  <gyear_month>-2007-10</gyear_month>
+  <gyear_month>20007-10Z</gyear_month>
+  <gyear_month>-20007-01</gyear_month>
+
+  <date>2007-12-26+12:00</date>
+  <date>-2007-10-15</date>
+  <date>20007-12-31Z</date>
+  <date>-20007-01-01</date>
+
+  <time>12:46:23.456+12:00</time>
+  <time>12:13:14</time>
+  <time>12:13:14Z</time>
+
+  <date_time>2007-12-26T12:13:14.123+12:00</date_time>
+  <date_time>-2007-10-15T12:13:14</date_time>
+  <date_time>20007-12-31T12:13:14Z</date_time>
+  <date_time>-20007-01-01T12:13:14</date_time>
+
+  <duration>-P2007Y13M32DT25H61M61.123S</duration>
+  <duration>P1Y</duration>
+  <duration>P1M</duration>
+  <duration>P1D</duration>
+  <duration>PT1H</duration>
+  <duration>PT1M</duration>
+  <duration>PT1.1S</duration>
+  <duration>P1YT1S</duration>
+
+</t:root>

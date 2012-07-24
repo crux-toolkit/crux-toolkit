@@ -1,0 +1,56 @@
+{
+  c = c
+  d = d
+  any: test#any
+  {
+    chars = aaa
+  any: #a
+  {
+    chars = bbb
+  }
+    chars = ccc
+  }
+  f = f
+  e = e
+}
+
+{
+  a = a
+  b = b
+  c = c
+  d = d
+  d = d
+  d = d
+  any: other#any
+  {
+    chars = any
+  }
+  f = f
+  e = e
+  e = e
+}
+
+{
+  a = a
+  b = b
+  c = c
+  d = d
+  d = d
+  d = d
+  any: other#any
+  {
+    chars = any
+  }
+  f = f
+  e = e
+  e = e
+  c = c
+  d = d
+  any: test#any
+  {
+    chars = any
+  }
+  f = f
+  e = e
+}
+

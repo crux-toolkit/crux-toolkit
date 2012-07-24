@@ -1,0 +1,66 @@
+Compiler Prerequisites
+
+  build-time:
+
+    - build                >= 0.3.7   http://www.codesynthesis.com/projects/build/
+    - g++                  >= 3.4.3   http://gcc.gnu.org
+
+  run-time:
+
+    - libxsd-frontend      >= 1.17.0  http://www.codesynthesis.com/projects/libxsd-frontend/
+    - libbackend-elements  >= 1.7.2   http://kolpackov.net/projects/libbackend-elements/
+    - libcult              >= 1.4.6   http://kolpackov.net/projects/libcult/
+    - libxerces-c          >= 2.6.0   http://xerces.apache.org/xerces-c/
+    - libboost_filesystem  >= 1.33.1  http://boost.org
+    - libboost_regex       >= 1.33.1  http://boost.org
+
+Generated Code Prerequisites
+
+  build-time:
+
+    - libxsd (header-only XSD runtime library, part of the XSD distribution)
+
+  run-time:
+
+    - libxerces-c >= 2.5.0 (C++/Tree and C++/Parser mappings)
+      http://xerces.apache.org/xerces-c/
+
+    - libexpat >= 1.95.8 (C++/Parser mapping, alternative to libxerces-c)
+      http://www.libexpat.org
+
+
+Building XSD
+
+  To build in the source directory simply run 'make'. You can also
+  build in a separate directory, e.g.,
+
+  $ mkdir xsd-i686-pc-linux-gnu
+  $ cd xsd-i686-pc-linux-gnu
+  $ make -f ../xsd-x.y.z/makefile
+
+
+Installing XSD
+
+  To install XSD, run 'make install'. Use the install_prefix command
+  line variable to specify installation location (default is /usr/local),
+  e.g.,
+
+  $ make install_prefix=/usr install
+
+  You can fine-tune the installation locations with the following make
+  variables:
+
+  install_prefix       default is /usr/local
+  install_data_prefix  default is install_prefix
+  install_exec_prefix  default is install_prefix
+
+  install_bin_dir      default is install_exec_prefix/bin
+  install_sbin_dir     default is install_exec_prefix/sbin
+  install_lib_dir      default is install_exec_prefix/lib
+
+  install_data_dir     default is install_data_prefix/share
+  install_inc_dir      default is install_data_prefix/include
+
+  install_doc_dir      default is install_data_dir/doc
+  install_man_dir      default is install_data_dir/man
+  install_info_dir     default is install_data_dir/info

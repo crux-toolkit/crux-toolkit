@@ -1,0 +1,142 @@
+<?xml version="1.0"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:t="test" targetNamespace="test">
+
+  <!-- enum -->
+
+  <simpleType name="gender">
+    <restriction base="string">
+      <enumeration value="male"/>
+      <enumeration value="female"/>
+    </restriction>
+  </simpleType>
+
+  <complexType name="gender-extension">
+    <simpleContent>
+      <extension base="t:gender">
+        <attribute name="foo" type="string"/>
+      </extension>
+    </simpleContent>
+  </complexType>
+
+  <!-- list -->
+
+  <simpleType name="list">
+    <list itemType="int"/>
+  </simpleType>
+
+  <complexType name="list-extension">
+    <simpleContent>
+      <extension base="t:list">
+        <attribute name="foo" type="string"/>
+      </extension>
+    </simpleContent>
+  </complexType>
+
+  <!-- union -->
+
+  <simpleType name="union">
+    <union memberTypes="int string"/>
+  </simpleType>
+
+  <complexType name="union-extension">
+    <simpleContent>
+      <extension base="t:union">
+        <attribute name="foo" type="string"/>
+      </extension>
+    </simpleContent>
+  </complexType>
+
+  <!-- complex -->
+
+  <complexType name="complex">
+    <sequence>
+      <element name="a" type="string"/>
+    </sequence>
+    <attribute name="x" type="string"/>
+  </complexType>
+
+  <complexType name="complex-extension">
+    <complexContent>
+      <extension base="t:complex">
+        <sequence>
+          <element name="b" type="string"/>
+        </sequence>
+        <attribute name="y" type="string"/>
+      </extension>
+    </complexContent>
+  </complexType>
+
+  <complexType name="type">
+    <sequence>
+      <element name="gender" type="t:gender"/>
+      <element name="gender-extension" type="t:gender-extension"/>
+
+      <element name="list" type="t:list"/>
+      <element name="list-extension" type="t:list-extension"/>
+
+      <element name="union" type="t:union"/>
+      <element name="union-extension" type="t:union-extension"/>
+
+      <element name="complex" type="t:complex"/>
+      <element name="complex-extension" type="t:complex-extension"/>
+
+      <!-- Built-in types. -->
+
+      <element name="any-type" type="anyType" maxOccurs="unbounded"/>
+      <element name="any-simple-type" type="anySimpleType" maxOccurs="unbounded"/>
+
+      <element name="boolean" type="boolean" maxOccurs="unbounded"/>
+
+      <element name="byte" type="byte" maxOccurs="unbounded"/>
+      <element name="unsigned-byte" type="unsignedByte" maxOccurs="unbounded"/>
+      <element name="short" type="short" maxOccurs="unbounded"/>
+      <element name="unsigned-short" type="unsignedShort" maxOccurs="unbounded"/>
+      <element name="int" type="int" maxOccurs="unbounded"/>
+      <element name="unsigned-int" type="unsignedInt" maxOccurs="unbounded"/>
+      <element name="long" type="long" maxOccurs="unbounded"/>
+      <element name="unsigned-long" type="unsignedLong" maxOccurs="unbounded"/>
+
+      <element name="integer" type="integer" maxOccurs="unbounded"/>
+      <element name="negative-integer" type="negativeInteger" maxOccurs="unbounded"/>
+      <element name="non-positive-integer" type="nonPositiveInteger" maxOccurs="unbounded"/>
+      <element name="positive-integer" type="positiveInteger" maxOccurs="unbounded"/>
+      <element name="non-negative-integer" type="nonNegativeInteger" maxOccurs="unbounded"/>
+
+      <element name="float" type="float" maxOccurs="unbounded"/>
+      <element name="double" type="double" maxOccurs="unbounded"/>
+      <element name="decimal" type="decimal" maxOccurs="unbounded"/>
+
+      <element name="string" type="string" maxOccurs="unbounded"/>
+      <element name="normalized-string" type="normalizedString" maxOccurs="unbounded"/>
+      <element name="token" type="token" maxOccurs="unbounded"/>
+      <element name="name" type="Name" maxOccurs="unbounded"/>
+      <element name="nmtoken" type="NMTOKEN" maxOccurs="unbounded"/>
+      <element name="nmtokens" type="NMTOKENS" maxOccurs="unbounded"/>
+      <element name="ncname" type="NCName" maxOccurs="unbounded"/>
+      <element name="id" type="ID" maxOccurs="unbounded"/>
+      <element name="idref" type="IDREF" maxOccurs="unbounded"/>
+      <element name="idrefs" type="IDREFS" maxOccurs="unbounded"/>
+
+      <element name="language" type="language" maxOccurs="unbounded"/>
+      <element name="uri" type="anyURI" maxOccurs="unbounded"/>
+      <element name="qname" type="QName" maxOccurs="unbounded"/>
+
+      <element name="base64_binary" type="base64Binary" maxOccurs="unbounded"/>
+      <element name="hex_binary" type="hexBinary" maxOccurs="unbounded"/>
+
+      <element name="gday" type="gDay" maxOccurs="unbounded"/>
+      <element name="gmonth" type="gMonth" maxOccurs="unbounded"/>
+      <element name="gyear" type="gYear" maxOccurs="unbounded"/>
+      <element name="gmonth_day" type="gMonthDay" maxOccurs="unbounded"/>
+      <element name="gyear_month" type="gYearMonth" maxOccurs="unbounded"/>
+      <element name="date" type="date" maxOccurs="unbounded"/>
+      <element name="time" type="time" maxOccurs="unbounded"/>
+      <element name="date_time" type="dateTime" maxOccurs="unbounded"/>
+      <element name="duration" type="duration" maxOccurs="unbounded"/>
+
+    </sequence>
+  </complexType>
+
+  <element name="root" type="t:type"/>
+
+</schema>

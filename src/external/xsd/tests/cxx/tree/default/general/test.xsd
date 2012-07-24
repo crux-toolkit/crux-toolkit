@@ -1,0 +1,241 @@
+<?xml version="1.0"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:t="test" targetNamespace="test">
+
+  <!-- union -->
+
+  <xs:simpleType name="union">
+    <xs:union memberTypes="xs:int xs:string"/>
+  </xs:simpleType>
+
+  <xs:complexType name="union-test">
+    <xs:attribute default="abc" name="a" type="t:union"/>
+  </xs:complexType>
+
+  <!-- list -->
+
+  <xs:simpleType name="fix-list">
+    <xs:list itemType="xs:int"/>
+  </xs:simpleType>
+
+  <xs:simpleType name="var-list">
+    <xs:list itemType="xs:string"/>
+  </xs:simpleType>
+
+  <xs:simpleType name="list-item">
+    <xs:restriction base="xs:string"/>
+  </xs:simpleType>
+
+  <xs:simpleType name="usr-list">
+    <xs:list itemType="t:list-item"/>
+  </xs:simpleType>
+
+  <xs:simpleType name="union-list">
+    <xs:list itemType="t:union"/>
+  </xs:simpleType>
+
+  <xs:complexType name="list-test">
+    <xs:attribute default="123 345 678" name="a" type="t:fix-list"/>
+    <xs:attribute default=" ab   cd ef   " name="b" type="t:var-list"/>
+    <xs:attribute default="abc" name="c" type="t:usr-list"/>
+    <xs:attribute default="abc def" name="d" type="t:union-list"/>
+  </xs:complexType>
+
+  <!-- simple type -->
+
+  <xs:simpleType name="int-base">
+    <xs:restriction base="xs:int"/>
+  </xs:simpleType>
+
+  <xs:simpleType name="str-base">
+    <xs:restriction base="xs:string"/>
+  </xs:simpleType>
+
+  <xs:simpleType name="int">
+    <xs:restriction base="t:int-base"/>
+  </xs:simpleType>
+
+  <xs:simpleType name="str">
+    <xs:restriction base="t:str-base"/>
+  </xs:simpleType>
+
+  <xs:simpleType name="union-derived">
+    <xs:restriction base="t:union"/>
+  </xs:simpleType>
+
+  <xs:simpleType name="list-derived">
+    <xs:restriction base="t:usr-list"/>
+  </xs:simpleType>
+
+  <xs:complexType name="simple-test">
+    <xs:attribute default="123" name="a" type="t:int-base"/>
+    <xs:attribute default="abc" name="b" type="t:str-base"/>
+    <xs:attribute default="123" name="c" type="t:int"/>
+    <xs:attribute default="abc" name="d" type="t:str"/>
+    <xs:attribute default="abc" name="e" type="t:union-derived"/>
+    <xs:attribute default="abc 123" name="f" type="t:list-derived"/>
+  </xs:complexType>
+
+  <!-- date/time types -->
+
+  <xs:simpleType name="date-derived">
+    <xs:restriction base="xs:date"/>
+  </xs:simpleType>
+
+  <xs:complexType name="date-test">
+    <xs:attribute default="2009-03-31" name="a" type="xs:date"/>
+    <xs:attribute default="2009-03-31Z" name="b" type="xs:date"/>
+    <xs:attribute default="2009-03-31+00:00" name="c" type="xs:date"/>
+    <xs:attribute default="2009-03-31-00:00" name="d" type="xs:date"/>
+    <xs:attribute default="2009-03-31+12:30" name="e" type="xs:date"/>
+    <xs:attribute default="2009-03-31-12:30" name="f" type="xs:date"/>
+    <xs:attribute default="2002009-03-31-12:30" name="g" type="t:date-derived"/>
+  </xs:complexType>
+
+  <xs:complexType name="time-test">
+    <xs:attribute default="12:03:45" name="a" type="xs:time"/>
+    <xs:attribute default="12:03:45.123Z" name="b" type="xs:time"/>
+    <xs:attribute default="12:03:05.123+00:00" name="c" type="xs:time"/>
+    <xs:attribute default="12:03:45.123-00:00" name="d" type="xs:time"/>
+    <xs:attribute default="12:03:45.123+12:30" name="e" type="xs:time"/>
+    <xs:attribute default="12:03:45-12:30" name="f" type="xs:time"/>
+  </xs:complexType>
+
+  <xs:complexType name="date-time-test">
+    <xs:attribute default="2009-03-31T12:03:45" name="a" type="xs:dateTime"/>
+    <xs:attribute default="2009-03-31T12:03:45.123Z" name="b" type="xs:dateTime"/>
+    <xs:attribute default="2002009-03-31T12:03:05.123-12:30" name="c" type="xs:dateTime"/>
+  </xs:complexType>
+
+  <xs:complexType name="duration-test">
+    <xs:attribute default="P100Y" name="a" type="xs:duration"/>
+    <xs:attribute default="P100M" name="b" type="xs:duration"/>
+    <xs:attribute default="P100D" name="c" type="xs:duration"/>
+    <xs:attribute default="PT12H" name="d" type="xs:duration"/>
+    <xs:attribute default="PT12M" name="e" type="xs:duration"/>
+    <xs:attribute default="PT12.123S" name="f" type="xs:duration"/>
+    <xs:attribute default="-P100Y10M20DT12H12M1.123S" name="g" type="xs:duration"/>
+  </xs:complexType>
+
+  <xs:complexType name="day-test">
+    <xs:attribute default="---02" name="a" type="xs:gDay"/>
+    <xs:attribute default="---22Z" name="b" type="xs:gDay"/>
+    <xs:attribute default="---22-12:30" name="c" type="xs:gDay"/>
+  </xs:complexType>
+
+  <xs:complexType name="month-test">
+    <xs:attribute default="--02" name="a" type="xs:gMonth"/>
+    <xs:attribute default="--12Z" name="b" type="xs:gMonth"/>
+    <xs:attribute default="--12+12:30" name="c" type="xs:gMonth"/>
+  </xs:complexType>
+
+  <xs:complexType name="year-test">
+    <xs:attribute default="2009" name="a" type="xs:gYear"/>
+    <xs:attribute default="-2002009Z" name="b" type="xs:gYear"/>
+    <xs:attribute default="2009-12:30" name="c" type="xs:gYear"/>
+  </xs:complexType>
+
+  <xs:complexType name="month-day-test">
+    <xs:attribute default="--02-02" name="a" type="xs:gMonthDay"/>
+    <xs:attribute default="--12-22Z" name="b" type="xs:gMonthDay"/>
+    <xs:attribute default="--12-22+12:30" name="c" type="xs:gMonthDay"/>
+  </xs:complexType>
+
+  <xs:complexType name="year-month-test">
+    <xs:attribute default="2009-02" name="a" type="xs:gYearMonth"/>
+    <xs:attribute default="-2002009-12Z" name="b" type="xs:gYearMonth"/>
+    <xs:attribute default="2009-12-12:30" name="c" type="xs:gYearMonth"/>
+  </xs:complexType>
+
+
+  <xs:complexType name="type">
+    <xs:sequence>
+      <xs:element name="union" type="t:union-test"/>
+      <xs:element name="list" type="t:list-test"/>
+      <xs:element name="simple" type="t:simple-test"/>
+      <xs:element name="date" type="t:date-test"/>
+      <xs:element name="time" type="t:time-test"/>
+      <xs:element name="date-time" type="t:date-time-test"/>
+      <xs:element name="duration" type="t:duration-test"/>
+      <xs:element name="day" type="t:day-test"/>
+      <xs:element name="month" type="t:month-test"/>
+      <xs:element name="year" type="t:year-test"/>
+      <xs:element name="month-day" type="t:month-day-test"/>
+      <xs:element name="year-month" type="t:year-month-test"/>
+    </xs:sequence>
+
+<!--
+      <xs:attribute name="any" type="xs:anySimpleType" default=""/>
+-->
+
+      <xs:attribute name="bool1" type="xs:boolean" default="true"/>
+      <xs:attribute name="bool2" type="xs:boolean" default="1"/>
+      <xs:attribute name="bool3" type="xs:boolean" default="false"/>
+      <xs:attribute name="bool4" type="xs:boolean" default="0"/>
+
+      <xs:attribute name="byte" type="xs:byte" default="-99"/>
+      <xs:attribute name="ubyte" type="xs:unsignedByte" default="99"/>
+      <xs:attribute name="short" type="xs:short" default="-999"/>
+      <xs:attribute name="ushort" type="xs:unsignedShort" default="999"/>
+      <xs:attribute name="int" type="xs:int" default="-99999"/>
+      <xs:attribute name="uint" type="xs:unsignedInt" default="99999"/>
+      <xs:attribute name="long" type="xs:long" default="-99999"/>
+      <xs:attribute name="ulong" type="xs:unsignedLong" default="99999"/>
+
+      <xs:attribute name="integer" type="xs:integer" default="-99999"/>
+      <xs:attribute name="npinteger" type="xs:nonPositiveInteger" default="-99999"/>
+      <xs:attribute name="nninteger" type="xs:nonNegativeInteger" default="99999"/>
+      <xs:attribute name="pinteger" type="xs:positiveInteger" default="99999"/>
+      <xs:attribute name="ninteger" type="xs:negativeInteger" default="-99999"/>
+
+      <xs:attribute name="float1" type="xs:float" default="1.123"/>
+      <xs:attribute name="float2" type="xs:float" default="1.123e3"/>
+      <xs:attribute name="float3" type="xs:float" default="-.123E-3"/>
+      <xs:attribute name="float4" type="xs:float" default="NaN"/>
+      <xs:attribute name="float5" type="xs:float" default="-INF"/>
+
+      <xs:attribute name="double1" type="xs:double" default="1.12345"/>
+      <xs:attribute name="double2" type="xs:double" default="1.12345e3"/>
+      <xs:attribute name="double3" type="xs:double" default="-.12345E-3"/>
+      <xs:attribute name="double4" type="xs:double" default="NaN"/>
+      <xs:attribute name="double5" type="xs:double" default="-INF"/>
+
+      <xs:attribute name="decimal1" type="xs:decimal" default="1.12345"/>
+      <xs:attribute name="decimal2" type="xs:decimal" default="-.456"/>
+
+      <xs:attribute name="string1" type="xs:string" default=""/>
+      <xs:attribute name="string2" type="xs:string" default=" a  b "/>
+      <xs:attribute name="nstring" type="xs:normalizedString" default=" a  b "/>
+      <xs:attribute name="token" type="xs:token" default=" a  b "/>
+      <xs:attribute name="nmtoken" type="xs:NMTOKEN" default="ab:cd"/>
+      <xs:attribute name="nmtokens1" type="xs:NMTOKENS" default="  a:b  efg aaa  "/>
+      <xs:attribute name="nmtokens2" type="xs:NMTOKENS" default="abc"/>
+      <xs:attribute name="ncname" type="xs:NCName" default="  abcd  "/>
+      <xs:attribute name="language" type="xs:language" default=" en-us "/>
+      <xs:attribute name="id" type="xs:ID"/>
+      <xs:attribute name="idref" type="xs:IDREF" default="this"/>
+      <xs:attribute name="idrefs" type="xs:IDREFS" default=" this "/>
+      <xs:attribute name="uri" type="xs:anyURI" default=" http://example.com "/>
+
+      <xs:attribute name="qname1" type="xs:QName" default="foo"/>
+      <xs:attribute name="qname2" type="xs:QName" default="t:bar"/>
+
+      <xs:attribute name="base64_bin1" type="xs:base64Binary" default=""/>
+      <xs:attribute name="base64_bin2" type="xs:base64Binary" default="YmFzZTY0IGJpbmFyeQ=="/>
+
+      <xs:attribute name="hex_bin1" type="xs:hexBinary" default=""/>
+      <xs:attribute name="hex_bin2" type="xs:hexBinary" default="6865782052696E617279"/>
+
+      <!-- fixed -->
+
+      <xs:attribute name="fix1" type="xs:int" fixed="123"/>
+      <xs:attribute name="fix2" type="xs:int" fixed="123" use="required"/>
+      <xs:attribute name="fix3" type="xs:string" fixed="abc"/>
+      <xs:attribute name="fix4" type="xs:string" fixed="abc" use="required"/>
+      <xs:attribute name="fix5" type="xs:NMTOKENS" fixed="aaa bbb ccc"/>
+      <xs:attribute name="fix6" type="xs:NMTOKENS" fixed="aaa bbb ccc" use="required"/>
+
+  </xs:complexType>
+
+  <xs:element name="root" type="t:type"/>
+
+</xs:schema>

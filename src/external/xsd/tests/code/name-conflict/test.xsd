@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+  <xsd:simpleType name="enumeration">
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="enumeration"/>
+      <xsd:enumeration value="enumeration1"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+
+  <xsd:element name="enumeration" type="enumeration"/>
+
+  <xsd:complexType name="complex">
+    <xsd:sequence>
+      <xsd:element name="complex" type="xsd:string"/>
+      <xsd:element name="complex1" type="xsd:string"/>
+      <xsd:element name="type" type="xsd:string"/>
+      <xsd:element name="container" type="xsd:string" minOccurs="0"/>
+    </xsd:sequence>
+  </xsd:complexType>
+
+  <xsd:element name="complex" type="complex"/>
+
+  <xsd:complexType name="anonymous">
+    <xsd:sequence>
+      <xsd:element name="anonymous">
+        <xsd:complexType> <!-- this is really twisted -->
+          <xsd:sequence>
+            <xsd:element name="anonymous2" type="xsd:string"/>
+            <xsd:element name="anonymous21" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="anonymous1" type="xsd:string"/>
+    </xsd:sequence>
+  </xsd:complexType>
+
+  <xsd:element name="anonymous" type="anonymous"/>
+
+</xsd:schema>

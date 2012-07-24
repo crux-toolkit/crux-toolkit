@@ -1,0 +1,41 @@
+<t:root xmlns:t="test"
+        xmlns:o="other"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="test test.xsd"
+        as="123abc">
+
+  <!-- test dispatching of anyType nested elements and attributes -->
+
+  <a>
+    <o:any/>
+  </a>
+
+  <a>
+    <o:any x="xxx">aaa<a>bbb</a>ccc</o:any>
+  </a>
+
+  <a x="x">
+    <a>a</a>
+    <o:any x="xxx">aaa<a>bbb</a>ccc</o:any>
+  </a>
+
+  <!-- anyType extension -->
+
+  <a-extension>
+    <o:any/>
+  </a-extension>
+
+  <a-extension>
+    <o:any x="xxx">aaa<a>bbb</a>ccc</o:any>
+  </a-extension>
+
+  <a-extension x="x">
+    <a>a</a>
+    <o:any x="xxx">aaa<a>bbb</a>ccc</o:any>
+  </a-extension>
+
+  <!-- anySimpleType extension -->
+
+  <as-extension x="x">abc123</as-extension>
+
+</t:root>

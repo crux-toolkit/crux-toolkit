@@ -1,0 +1,12 @@
+<t:root xmlns:t="test"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="test test.xsd">
+
+  <!-- invalid -->
+  <all>
+   <a>a</a>
+   <b>b</b>
+   <a>a</a>
+  </all>
+
+</t:root>

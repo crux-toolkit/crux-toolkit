@@ -1,0 +1,5 @@
+{
+  c = c
+  :9:12 error: expected element 'd'
+}
+

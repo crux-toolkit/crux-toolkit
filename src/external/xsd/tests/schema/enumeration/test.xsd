@@ -1,0 +1,89 @@
+<?xml version="1.0" ?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.w3.org/2001/XMLSchema XMLSchema.xsd"
+	    xmlns:test="http://www.codesynthesis.com/xmlns/test"
+            targetNamespace="http://www.codesynthesis.com/xmlns/test">
+
+  <!-- string-based -->
+
+  <xsd:simpleType name="StringEnum">
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="one"/>
+      <xsd:enumeration value="two"/>
+      <xsd:enumeration value="three"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="StringSimple">
+    <xsd:restriction base="xsd:string"/>
+  </xsd:simpleType>  
+
+  <!-- inheritance of a enum from a simple type -->
+  <xsd:simpleType name="StringSimpleRestriction">
+    <xsd:restriction base="test:StringSimple">
+      <xsd:enumeration value="one"/>
+      <xsd:enumeration value="two"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+
+  <!-- inheritance of a enum from a strig-based enum -->
+  <xsd:simpleType name="StringEnumRestriction">
+    <xsd:restriction base="test:StringEnum">
+      <xsd:enumeration value="one"/>
+      <xsd:enumeration value="two"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+
+  <!-- inheritance of a complex type from a string-based enum -->
+  <xsd:complexType name="StringComplex">
+    <xsd:simpleContent>
+      <xsd:extension base="test:StringEnumRestriction">
+        <xsd:attribute name="lang" type="xsd:language"/>
+      </xsd:extension>
+    </xsd:simpleContent>
+  </xsd:complexType>
+
+
+
+  <!-- non string-based -->
+
+  <xsd:simpleType name="IntEnum">
+    <xsd:restriction base="xsd:int">
+      <xsd:enumeration value="1"/>
+      <xsd:enumeration value="2"/>
+      <xsd:enumeration value="3"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="IntSimple">
+    <xsd:restriction base="xsd:int"/>
+  </xsd:simpleType>  
+
+  <!-- inheritance of a enum from a simple type -->
+  <xsd:simpleType name="IntSimpleRestriction">
+    <xsd:restriction base="test:IntSimple">
+      <xsd:enumeration value="1"/>
+      <xsd:enumeration value="2"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+
+  <!-- inheritance of a enum from a enum -->
+  <xsd:simpleType name="IntEnumRestriction">
+    <xsd:restriction base="test:IntEnum">
+      <xsd:enumeration value="1"/>
+      <xsd:enumeration value="2"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+
+  <!-- inheritance of a complex type from a enum -->
+  <xsd:complexType name="IntComplex">
+    <xsd:simpleContent>
+      <xsd:extension base="test:IntEnumRestriction">
+        <xsd:attribute name="lang" type="xsd:language"/>
+      </xsd:extension>
+    </xsd:simpleContent>
+  </xsd:complexType>
+
+
+</xsd:schema>

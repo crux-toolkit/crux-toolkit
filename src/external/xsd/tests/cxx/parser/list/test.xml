@@ -1,0 +1,25 @@
+<t:root xmlns:t="test"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="test test.xsd">
+
+  <string-list/>
+
+  <string-list> </string-list>
+
+  <string-list>
+
+  </string-list>
+
+  <string-list>one</string-list>
+
+  <string-list>
+    one two
+    three
+  </string-list>
+
+  <string-list-lang lang="en">
+    one two
+    three
+  </string-list-lang>
+
+</t:root>

@@ -1,0 +1,122 @@
+gender: male
+foo: foo
+gender: male
+int: 0
+int: 1
+int: 2
+int: 3
+foo: foo
+int: 3
+int: 2
+int: 1
+int: 0
+union: 9
+foo: foo
+union: string
+x: x
+a: aaa
+x: x
+y: y
+a: aaa
+b: bbb
+boolean: 1
+boolean: 0
+boolean: 1
+boolean: 0
+byte: 0
+byte: 123
+byte: -123
+unsigned-byte: 0
+unsigned-byte: 123
+short: 0
+short: -1234
+short: 1234
+unsigned-short: 0
+unsigned-short: 1234
+int: 0
+int: -12345
+int: 12345
+unsigned-int: 0
+unsigned-int: 12345
+long: 0
+long: -123456
+long: 123456
+unsigned-long: 0
+unsigned-long: 123456
+integer: 0
+integer: -123456
+integer: 123456
+negative-integer: -123456
+non-positive-integer: 0
+non-positive-integer: -123456
+positive-integer: 123456
+non-negative-integer: 0
+non-negative-integer: 123456
+float: 0
+float: 1.123
+float: -1.123
+double: 0
+double: 1.1234
+double: -1.1234
+decimal: 0
+decimal: 1.1234
+decimal: -1.1234
+string: string space newline
+normalized-string: string space newline
+token: string space newline
+name: as123:345-.abs
+nmtoken: 1as123:345-.abs
+nmtokens: abc 123
+ncname: as123_345-.abs
+id: abc
+id: a123
+idref: abc
+idrefs: abc a123
+language: en
+language: en-us
+uri: http://www.example.com/foo#bar
+qname: schemaLocation
+qname: xsi:schemaLocation
+base64_binary: 10 bytes
+base64_binary: 1 bytes
+base64_binary: 2 bytes
+base64_binary: 3 bytes
+hex_binary: 0 bytes
+hex_binary: 10 bytes
+gday: ---12+12:0
+gday: ---1
+gday: ---31
+gday: ---15+0:0
+gday: ---15-14:0
+gmonth: --10+12:0
+gmonth: --1
+gmonth: --12+0:0
+gyear: 2007+12:0
+gyear: 1
+gyear: -20000+0:0
+gmonth_day: --10-28+12:0
+gmonth_day: --12-31
+gmonth_day: --1-1+0:0
+gyear_month: 2007-12+12:0
+gyear_month: -2007-10
+gyear_month: 20007-10+0:0
+gyear_month: -20007-1
+date: 2007-12-26+12:0
+date: -2007-10-15
+date: 20007-12-31+0:0
+date: -20007-1-1
+time: 12:46:23.456+12:0
+time: 12:13:14
+time: 12:13:14+0:0
+date_time: 2007-12-26T12:13:14.123+12:0
+date_time: -2007-10-15T12:13:14
+date_time: 20007-12-31T12:13:14+0:0
+date_time: -20007-1-1T12:13:14
+duration: -P2007Y13M32DT25H61M61.123S
+duration: P1Y0M0DT0H0M0S
+duration: P0Y1M0DT0H0M0S
+duration: P0Y0M1DT0H0M0S
+duration: P0Y0M0DT1H0M0S
+duration: P0Y0M0DT0H1M0S
+duration: P0Y0M0DT0H0M1.1S
+duration: P1Y0M0DT0H0M1S

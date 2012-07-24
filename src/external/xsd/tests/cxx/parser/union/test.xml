@@ -1,0 +1,10 @@
+<t:root xmlns:t="test"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="test test.xsd">
+
+  <int-string-union/>
+  <int-string-union> </int-string-union>
+  <int-string-union>one</int-string-union>
+  <int-string-union>1</int-string-union>
+
+</t:root>

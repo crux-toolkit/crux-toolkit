@@ -1,0 +1,72 @@
+<?xml version="1.0" ?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.w3.org/2001/XMLSchema XMLSchema.xsd"
+	    xmlns:test="http://www.codesynthesis.com/xmlns/test"
+            targetNamespace="http://www.codesynthesis.com/xmlns/test">
+
+  <xsd:simpleType name="IntList">
+    <xsd:list itemType="xsd:int"/>
+  </xsd:simpleType>
+
+  <!-- local element with anonymous list inside. -->
+
+  <xsd:complexType name="Foo">
+    <xsd:sequence>
+      <xsd:element name="string-list">
+        <xsd:simpleType>
+          <xsd:list itemType="xsd:string"/>
+        </xsd:simpleType>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+
+
+  <!-- global element with anonymous list inside. -->
+
+  <xsd:element name="string-list">
+    <xsd:simpleType>
+      <xsd:list itemType="xsd:string"/>
+    </xsd:simpleType>
+  </xsd:element>
+
+
+
+  <!-- global element and global list with conflicting names -->
+
+  <xsd:simpleType name="long-list">
+      <xsd:list itemType="xsd:long"/>
+  </xsd:simpleType>
+
+  <xsd:element name="long-list" type="test:long-list"/>
+
+
+  <!-- forward reference -->
+
+  <xsd:simpleType name="int-list">
+      <xsd:list itemType="test:int"/>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="int">
+    <xsd:restriction base="xsd:int"/>
+  </xsd:simpleType>
+
+
+  <!-- inheritance from list -->
+
+  <xsd:complexType name="IntComplex">
+    <xsd:simpleContent>
+      <xsd:extension base="test:IntList">
+        <xsd:attribute name="foo" type="xsd:string"/>
+      </xsd:extension>
+    </xsd:simpleContent>
+  </xsd:complexType>
+
+  <xsd:complexType name="IntComplexEmpty">
+    <xsd:simpleContent>
+      <xsd:extension base="test:IntList">
+      </xsd:extension>
+    </xsd:simpleContent>
+  </xsd:complexType>
+
+</xsd:schema>

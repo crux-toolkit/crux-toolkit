@@ -1,0 +1,73 @@
+#! /usr/bin/env bash
+
+# file      : build/import/libxerces-c/configure
+# author    : Boris Kolpackov <boris@kolpackov.net>
+# copyright : Copyright (c) 2005-2009 Boris Kolpackov
+# license   : GNU GPL v2; see accompanying LICENSE file
+
+
+# $1           - out config file
+#
+# bld_root     - build root
+# project_name - project name
+#
+
+source $bld_root/dialog.bash
+
+
+$echo
+$echo "Configuring external dependency on 'libxerces-c' for '$project_name'."
+$echo
+
+$echo
+$echo "Would you like to configure dependency on the installed version"
+$echo "of 'libxerces-c' as opposed to the development build?"
+$echo
+
+installed=`read_y_n y`
+
+path=
+type=
+
+if [ "$installed" = "n" ]; then
+
+  version=
+
+  while [ -z "$version" ]; do
+
+    $echo
+    $echo "Please enter the 'libxerces-c' root directory."
+    $echo
+
+    root=`read_path --directory --exist`
+
+    version=`sed -e 's/^VER=\([^_]*\)_\([^_]*\)_\([^_]*\)[ ]*$/\1.\2.\3/' \
+-e t -e d $root/version.incl 2>/dev/null`
+
+    if [ $? != 0 -o -z "$version" ]; then
+
+      version=
+      echo "Unable to read version information from $root/version.incl"
+    fi
+  done
+
+  $echo
+  $echo "Please select the library type you would like to use:"
+  $echo
+  $echo "(1) archive"
+  $echo "(2) shared object"
+  $echo
+
+  type=`read_option "archive shared" "shared"`
+
+fi
+
+echo libxerces_c_installed := $installed   >$1
+
+if [ "$installed" = "n" ]; then
+
+  echo libxerces_c_root    := $root    >>$1
+  echo libxerces_c_type    := $type    >>$1
+  echo libxerces_c_version := $version >>$1
+
+fi

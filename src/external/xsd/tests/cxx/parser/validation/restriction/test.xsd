@@ -1,0 +1,82 @@
+<?xml version="1.0"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:t="test" targetNamespace="test">
+
+  <!-- simple case -->
+  <complexType name="base-a">
+    <sequence minOccurs="1" maxOccurs="2">
+      <element name="a" type="string" minOccurs="0"/>
+      <element name="b" type="string"/>
+      <element name="c" type="string"/>
+    </sequence>
+    <attribute name="x" type="string"/>
+    <attribute name="y" type="string"/>
+    <attribute name="z" type="string"/>
+  </complexType>
+
+  <complexType name="restriction-a">
+    <complexContent>
+      <restriction base="t:base-a">
+        <sequence minOccurs="1" maxOccurs="1">
+          <element name="a" type="string" minOccurs="1"/>
+          <element name="b" type="string"/>
+          <element name="c" type="string"/>
+        </sequence>
+	<!-- Can be ommited if not changed, e.g., 'x'. -->
+	<attribute name="y" type="string"/> <!-- But can also be repeated without change. -->
+        <attribute name="z" type="string" use="required"/>
+      </restriction>
+    </complexContent>
+  </complexType>
+
+  <!-- restriction of an extension -->
+  <complexType name="base-b">
+    <sequence>
+      <element name="a" type="string" minOccurs="0"/>
+    </sequence>
+    <attribute name="x" type="string"/>
+  </complexType>
+
+  <complexType name="extension-b">
+    <complexContent>
+      <extension base="t:base-b">
+        <choice>
+          <element name="b" type="string" minOccurs="0"/>
+          <element name="c" type="string"/>
+        </choice>
+        <attribute name="y" type="string"/>
+      </extension>
+    </complexContent>
+  </complexType>
+
+  <complexType name="restriction-b">
+    <complexContent>
+      <restriction base="t:extension-b">
+        <sequence>
+	  <sequence>
+            <element name="a" type="string" minOccurs="1"/>
+          </sequence>
+	  <choice>
+            <element name="b" type="string" minOccurs="0"/>
+            <element name="c" type="string"/>
+          </choice>
+	</sequence>
+        <attribute name="y" type="string" use="required"/>
+      </restriction>
+    </complexContent>
+  </complexType>
+
+  <complexType name="type-b">
+    <choice maxOccurs="unbounded">
+      <element name="restriction-a" type="t:base-a"/>
+      <element name="restriction-b" type="t:extension-b"/>
+    </choice>
+  </complexType>
+
+  <complexType name="type-r">
+    <choice maxOccurs="unbounded">
+      <element name="restriction-a" type="t:restriction-a"/>
+      <element name="restriction-b" type="t:restriction-b"/>
+    </choice>
+  </complexType>
+
+</schema>

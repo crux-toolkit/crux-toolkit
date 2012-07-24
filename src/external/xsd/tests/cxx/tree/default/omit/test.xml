@@ -1,0 +1,9 @@
+<t:root xmlns:t="test"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="test test.xsd">
+
+  <derived q1="1" q2="2">
+    <a>a</a>
+  </derived>
+
+</t:root>

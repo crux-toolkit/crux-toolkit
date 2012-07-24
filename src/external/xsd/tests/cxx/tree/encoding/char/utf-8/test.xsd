@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:t="test" targetNamespace="test">
+
+  <simpleType name="strenum">
+
+    <annotation>
+      <documentation>
+        Test enum. Valid values are:
+        abc
+        a&#x555;c
+        &#xAAAA;bc
+        ab&#xAAAAA;
+      </documentation>
+    </annotation>
+
+    <restriction base="string">
+      <enumeration value="abc"/>
+      <enumeration value="a&#x555;c"/>
+      <enumeration value="&#xAAAA;bc"/>
+      <enumeration value="ab&#xAAAAA;"/>
+    </restriction>
+  </simpleType>
+
+  <complexType name="type">
+    <sequence>
+      <element name="a" type="string" maxOccurs="unbounded"/>
+      <element name="b" type="t:strenum" maxOccurs="unbounded"/>
+    </sequence>
+  </complexType>
+
+  <element name="root" type="t:type"/>
+
+</schema>

@@ -1,0 +1,17 @@
+<?xml version="1.0" ?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.w3.org/2001/XMLSchema XMLSchema.xsd"
+	    xmlns:Test="http://www.codesynthesis.com/xmlns/test"
+            targetNamespace="http://www.codesynthesis.com/xmlns/test">
+
+  <xsd:include schemaLocation="schemas/includee.xsd"/>
+
+  <xsd:simpleType name="derived">
+    <xsd:restriction base="Test:base"/>
+  </xsd:simpleType>
+
+  <xsd:element name="element" type="Test:base"/>
+  <xsd:attribute name="attribute" type="Test:base"/>
+
+</xsd:schema>

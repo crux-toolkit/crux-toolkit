@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.w3.org/2001/XMLSchema XMLSchema.xsd"
+            xmlns="http://www.codesynthesis.com/xmlns/test"
+            targetNamespace="http://www.codesynthesis.com/xmlns/test">
+
+
+  <!-- Easy case. -->
+
+  <xsd:attribute name="foo" type="xsd:string"/>
+
+  <xsd:complexType name="Foo">
+    <xsd:attribute ref="foo"/>
+  </xsd:complexType>
+
+
+
+  <!-- Forward reference to a yet undeclared attribute. -->
+
+  <xsd:complexType name="Bar">
+    <xsd:attribute ref="bar"/>
+  </xsd:complexType>
+
+  <xsd:attribute name="bar" type="xsd:string"/>
+
+
+
+  <!-- Reference to an attribute with a forward reference to a yet
+       undeclared type. -->
+
+  <xsd:attribute name="baz" type="Baz2"/>
+
+  <xsd:complexType name="Baz">
+    <xsd:attribute ref="baz"/>
+  </xsd:complexType>
+
+  <xsd:simpleType name="Baz2">
+    <xsd:restriction base="xsd:string"/>
+  </xsd:simpleType>
+
+</xsd:schema>

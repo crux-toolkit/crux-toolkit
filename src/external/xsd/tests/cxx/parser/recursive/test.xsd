@@ -1,0 +1,27 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:complexType name="sub_type">
+    <xs:sequence>
+      <xs:element name="sub" type="sub_type" minOccurs="0"/>
+      <xs:element name="indir" type="indir_type" minOccurs="0"/>
+      <xs:element name="sub2" type="sub_type" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:string" />
+  </xs:complexType>
+
+  <xs:complexType name="indir_type">
+    <xs:sequence>
+      <xs:element name="sub" type="sub_type" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:string" />
+  </xs:complexType>
+
+  <xs:complexType name="test_type">
+    <xs:sequence>
+      <xs:element name="sub" type="sub_type" />
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:string" />
+  </xs:complexType>
+
+  <xs:element name="test" type="test_type" />
+</xs:schema>

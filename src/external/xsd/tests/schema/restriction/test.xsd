@@ -1,0 +1,67 @@
+<?xml version="1.0" ?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.w3.org/2001/XMLSchema XMLSchema.xsd"
+	    xmlns:test="http://www.codesynthesis.com/xmlns/test"
+            targetNamespace="http://www.codesynthesis.com/xmlns/test">
+
+  <!-- Simple content. -->
+
+  <xsd:complexType name="SimpleBase">
+    <xsd:simpleContent>
+      <xsd:extension base="xsd:string">
+        <xsd:attribute name="lang" type="xsd:language"/>
+        <xsd:attribute name="note" type="xsd:string"/>
+      </xsd:extension>
+    </xsd:simpleContent>
+  </xsd:complexType>
+
+  <xsd:complexType name="SimpleType">
+    <xsd:simpleContent>
+      <xsd:restriction base="test:SimpleBase">
+        <xsd:maxLength value="255"/>
+        <xsd:attribute name="lang">
+          <xsd:simpleType>
+            <xsd:restriction base="xsd:language">
+	      <xsd:enumeration value="en"/>
+              <xsd:enumeration value="es"/>
+            </xsd:restriction>
+          </xsd:simpleType>
+        </xsd:attribute>
+      </xsd:restriction>
+    </xsd:simpleContent>
+  </xsd:complexType>
+
+  <!-- Complex content. -->
+
+  <xsd:complexType name="ComplexBase">
+    <xsd:sequence>
+      <xsd:element name="lang" type="xsd:language"/>
+      <xsd:element name="note" type="xsd:string" minOccurs="0"/>
+    </xsd:sequence>
+  </xsd:complexType>
+
+
+  <xsd:complexType name="ComplexType">
+    <xsd:complexContent>
+      <xsd:restriction base="test:ComplexBase">
+        <xsd:sequence>
+          <xsd:element name="lang" type="xsd:language"/>
+          <xsd:element name="note" type="xsd:string"/>
+        </xsd:sequence>
+      </xsd:restriction>
+    </xsd:complexContent>
+  </xsd:complexType>
+
+  <xsd:complexType name="AnyType">
+    <xsd:complexContent>
+      <xsd:restriction base="xsd:anyType">
+        <xsd:sequence>
+          <xsd:element name="lang" type="xsd:language"/>
+          <xsd:element name="note" type="xsd:string"/>
+        </xsd:sequence>
+      </xsd:restriction>
+    </xsd:complexContent>
+  </xsd:complexType>
+
+</xsd:schema>

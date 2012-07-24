@@ -1,0 +1,14 @@
+<t:root xmlns:t="test"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="test test.xsd">
+
+  <a>abc</a>
+  <a>&#x1FFF;&#xD7FF;</a>
+  <a>&#x10000;&#x10FFFD;</a>
+
+  <b>abc</b>
+  <b>a&#x1FFF;&#xD7FF;c</b>
+  <b>&#x10000;&#x10FFFD;bc</b>
+  <b>ab&#x10000;&#x10FFFD;</b>
+
+</t:root>

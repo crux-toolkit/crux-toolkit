@@ -1,0 +1,11 @@
+{
+  c = c
+  d = d
+  any: other#any
+  {
+    chars = any
+  }
+  a = a
+  :14:8 error: unexpected element 'b'
+}
+

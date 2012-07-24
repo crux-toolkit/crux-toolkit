@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+        xmlns:f="foo"
+        xmlns:b="bar"
+	targetNamespace="bar"
+	attributeFormDefault="qualified">
+
+  <import namespace="foo" schemaLocation="foo.xsd"/>
+
+  <attribute name="abar" type="int"/>
+
+  <complexType name="derived1">
+    <complexContent>
+      <extension base="f:base">
+        <sequence>
+          <element name="y" type="int"/>
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+
+  <complexType name="derived2">
+    <complexContent>
+      <extension base="f:base">
+        <sequence>
+          <element name="z" type="int"/>
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+
+  <element name="derived" type="b:derived1" substitutionGroup="f:base"/>
+
+</schema>

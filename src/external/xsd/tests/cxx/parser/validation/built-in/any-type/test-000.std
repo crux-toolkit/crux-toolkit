@@ -1,0 +1,99 @@
+{
+  any text: '123abc'
+}
+
+{
+  any text: '
+    '
+  start any element 'any'
+  end any element 'any'
+  any text: '
+  '
+}
+
+{
+  any text: '
+    '
+  start any element 'any'
+  any attribute x = 'xxx'
+  any text: 'aaa'
+  start any element 'a'
+  any text: 'bbb'
+  end any element 'a'
+  any text: 'ccc'
+  end any element 'any'
+  any text: '
+  '
+}
+
+{
+  any attribute x = 'x'
+  any text: '
+    '
+  start any element 'a'
+  any text: 'a'
+  end any element 'a'
+  any text: '
+    '
+  start any element 'any'
+  any attribute x = 'xxx'
+  any text: 'aaa'
+  start any element 'a'
+  any text: 'bbb'
+  end any element 'a'
+  any text: 'ccc'
+  end any element 'any'
+  any text: '
+  '
+}
+
+{
+  any text: '
+    '
+  start any element 'any'
+  end any element 'any'
+  any text: '
+  '
+}
+
+{
+  any text: '
+    '
+  start any element 'any'
+  any attribute x = 'xxx'
+  any text: 'aaa'
+  start any element 'a'
+  any text: 'bbb'
+  end any element 'a'
+  any text: 'ccc'
+  end any element 'any'
+  any text: '
+  '
+}
+
+{
+  x = x
+  any text: '
+    '
+  start any element 'a'
+  any text: 'a'
+  end any element 'a'
+  any text: '
+    '
+  start any element 'any'
+  any attribute x = 'xxx'
+  any text: 'aaa'
+  start any element 'a'
+  any text: 'bbb'
+  end any element 'a'
+  any text: 'ccc'
+  end any element 'any'
+  any text: '
+  '
+}
+
+{
+  x = x
+  any text: 'abc123'
+}
+

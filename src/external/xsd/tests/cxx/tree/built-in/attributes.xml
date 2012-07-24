@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<test:attributes
+  xmlns:test="http://www.codesynthesis.com/xmlns/test"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.codesynthesis.com/xmlns/test types.xsd"
+
+
+  byte="65"
+  unsigned_byte="66"
+  short="-222"
+  unsigned_short="57005"
+  int="-57005"
+  unsigned_int="3735928559"
+  long="-3735928559"
+  unsigned_long="16045690984833335023"
+  integer="-3735928559"
+  non_positive_integer="-3735928559"
+  non_negative_integer="3735928559"
+  positive_integer="3735928559"
+  negative_integer="-3735928559"
+
+
+
+  boolean="false"
+
+
+
+  float="1234.1234"
+  double="12345678.12345678"
+  decimal="12345678.12345678"
+
+
+
+  string="string"
+  normalized_string="normalized string"
+  token="  one   two three  "
+  name="name"
+  name_token="name-token"
+  name_tokens="name tokens"
+  ncname="ncname"
+  language="en-us"
+
+
+  qname="xsi:schemaLocation"
+
+
+
+  id="attributes"
+  id_ref="attributes"
+  id_refs="attributes"
+
+
+
+  any_uri="http://www.codesynthesis.com"
+
+
+
+  base64_binary="YmFzZTY0IGJpbmFyeQ=="
+  hex_binary="6865782052696E617279"
+
+
+
+  date="2001-10-26+02:00"
+  date_time="2001-10-26T21:32:52+02:00"
+  duration="P1Y2M3DT5H20M30S"
+  day="---01+02:00"
+  month="--11+02:00"
+  month_day="--11-02+02:00"
+  year="2001+02:00"
+  year_month="2001-11+02:00"
+  time="21:32:52+02:00"
+
+/>

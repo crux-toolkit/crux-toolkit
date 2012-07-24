@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:t="test" targetNamespace="test">
+
+  <complexType name="member">
+    <simpleContent>
+      <extension base="string">
+        <attribute name="x" type="int" use="required"/>
+      </extension>
+    </simpleContent>
+  </complexType>
+
+  <complexType name="complex">
+    <sequence>
+      <element name="a" type="int"/>
+      <element name="b" type="string" minOccurs="0"/>
+      <element name="c" type="t:member" maxOccurs="unbounded"/>
+    </sequence>
+      <attribute name="x" type="int"/>
+      <attribute name="y" type="string" use="required"/>
+  </complexType>
+
+  <complexType name="type">
+    <sequence>
+      <element name="complex" type="t:complex" maxOccurs="unbounded"/>
+    </sequence>
+  </complexType>
+
+  <element name="root" type="t:type"/>
+
+</schema>

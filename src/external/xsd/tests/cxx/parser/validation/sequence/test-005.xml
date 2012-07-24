@@ -1,0 +1,15 @@
+<t:root xmlns:t="test"
+        xmlns:o1="other1"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="test test.xsd">
+
+  <!-- fail any namespace="##targetNamespace other" -->
+  <sequence>
+    <c>c</c>
+    <d>d</d>
+    <o1:any>any</o1:any>
+    <f>f</f>
+    <e>e</e>
+  </sequence>
+
+</t:root>

@@ -1,0 +1,17 @@
+Prerequisites
+
+  run-time:
+
+    - libxerces-c >= 2.5.0  http://xerces.apache.org/xerces-c/
+
+
+Building libxsd
+
+  No building is necessary at the moment.
+
+
+Installing libxsd
+
+  Not supported in this version. You may want to copy libxsd/xsd
+  to $(prefix)/include so that you have $(prefix)/include/xsd/*.
+

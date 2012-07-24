@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.w3.org/2001/XMLSchema XMLSchema.xsd"
+            xmlns="http://www.codesynthesis.com/xmlns/test"
+            targetNamespace="http://www.codesynthesis.com/xmlns/test">
+
+
+  <!-- Typed with named type. -->
+
+  <xsd:complexType name="Foo">
+    <xsd:attribute name="foo" type="xsd:string"/>
+  </xsd:complexType>
+
+
+  <!-- Forward reference to a yet undeclared type. -->
+
+  <xsd:complexType name="Bar">
+    <xsd:attribute name="bar" type="Bar2"/>
+  </xsd:complexType>
+
+  <xsd:simpleType name="Bar2">
+    <xsd:restriction base="xsd:string"/>
+  </xsd:simpleType>
+
+
+  <!-- Typed with anonymous type. -->
+
+  <xsd:complexType name="Baz">
+    <xsd:attribute name="baz">
+      <xsd:simpleType>
+        <xsd:restriction base="xsd:string"/>
+      </xsd:simpleType>
+    </xsd:attribute>
+  </xsd:complexType>
+
+</xsd:schema>

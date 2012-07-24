@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:t="test" targetNamespace="test">
+
+  <!-- Test xpath for nested anonymous types. -->
+ 
+  <element name="a">
+    <complexType>
+      <sequence>
+        <element name="b">
+	  <complexType>
+            <sequence>
+              <element name="c" type="string"/>
+            </sequence>
+          </complexType>
+        </element>
+      </sequence>
+    </complexType>
+  </element> 
+
+</schema>

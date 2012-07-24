@@ -1,0 +1,31 @@
+<t:root xmlns:t="test"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="test test.xsd">
+
+  <restriction-a z="z">
+    <a>a</a>
+    <b>b</b>
+    <c>c</c>
+  </restriction-a>
+
+  <restriction-a x="x" y="y" z="z">
+    <a>a</a>
+    <b>b</b>
+    <c>c</c>
+  </restriction-a>
+
+  <restriction-b y="y">
+    <a>a</a>
+    <b>b</b>
+  </restriction-b>
+
+  <restriction-b y="y">
+    <a>a</a>
+    <c>c</c>
+  </restriction-b>
+
+  <restriction-b x="x" y="y">
+    <a>a</a>
+  </restriction-b>
+
+</t:root>

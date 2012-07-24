@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:t="test" targetNamespace="test">
+
+  <!-- Type base depends on derived which in turn depends on base -->
+ 
+  <complexType name="derived">
+    <complexContent>
+      <extension base="t:base"/>
+    </complexContent>
+  </complexType>
+  
+  <complexType name="base">
+    <sequence>
+      <element name="e">
+        <complexType>
+          <complexContent>
+            <extension base="t:derived"/>
+          </complexContent>
+        </complexType>
+      </element>
+    </sequence>
+  </complexType>
+
+  <element name="root" type="t:base"/>
+
+</schema>

@@ -1,0 +1,10 @@
+<t:root xmlns:t="test"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="test test.xsd">
+
+  <pass-a b="b" t:foo="foo" t:bar="bar"/>
+  <pass-b a="a" b="b"/>
+  <pass-c a="a" b="b"/>
+  <fail/>
+
+</t:root>

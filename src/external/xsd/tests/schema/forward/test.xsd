@@ -1,0 +1,32 @@
+<?xml version="1.0" ?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.w3.org/2001/XMLSchema XMLSchema.xsd"
+	    xmlns:test="http://www.codesynthesis.com/xmlns/test"
+            targetNamespace="http://www.codesynthesis.com/xmlns/test">
+
+<!--
+
+  Various weird forward reference combinations.
+
+-->
+
+  <!-- case 1 -->  
+    
+  <xsd:complexType name="Type1A">
+    <xsd:complexContent>
+      <xsd:extension base="test:Type1B">
+        <xsd:sequence>
+          <xsd:element name="bar" type="xsd:string"/>
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>  
+  </xsd:complexType>
+  
+  <xsd:complexType name="Type1B">
+    <xsd:sequence>
+      <xsd:element name="foo" type="xsd:string"/>
+    </xsd:sequence>
+  </xsd:complexType>
+ 
+</xsd:schema>

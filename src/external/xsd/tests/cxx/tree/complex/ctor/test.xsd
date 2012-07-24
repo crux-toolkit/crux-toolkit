@@ -1,0 +1,182 @@
+<?xml version="1.0"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:t="test" targetNamespace="test">
+
+  <!-- Test case A: several levels of inheritance with ultimate base. -->
+
+  <complexType name="a_base">
+    <simpleContent>
+      <extension base="string">
+        <attribute name="foo" type="string" use="required"/>
+      </extension>
+    </simpleContent>
+  </complexType>
+
+  <complexType name="a_derived">
+    <simpleContent>
+      <extension base="t:a_base">
+        <attribute name="bar" type="string" use="required"/>
+      </extension>
+    </simpleContent>
+  </complexType>
+
+  <!-- Test case B: string-based c-tors. -->
+
+  <simpleType name="b_simple">
+    <restriction base="string">
+    </restriction>
+  </simpleType>
+
+  <complexType name="b_base">
+    <simpleContent>
+      <extension base="t:b_simple">
+        <attribute name="foo" type="string" use="required"/>
+      </extension>
+    </simpleContent>
+  </complexType>
+
+  <complexType name="b_derived">
+    <simpleContent>
+      <extension base="t:b_base">
+        <attribute name="bar" type="string" use="required"/>
+      </extension>
+    </simpleContent>
+  </complexType>
+
+  <complexType name="b_type">
+    <sequence>
+      <element name="a" type="t:b_simple"/>
+    </sequence>
+  </complexType>
+
+  <!-- Test case C: enum-based c-tors. -->
+
+  <simpleType name="c_enum_base">
+    <restriction base="string">
+      <enumeration value="a"/>
+      <enumeration value="b"/>
+      <enumeration value="c"/>
+    </restriction>
+  </simpleType>
+
+  <simpleType name="c_enum">
+    <restriction base="t:c_enum_base">
+      <enumeration value="a"/>
+      <enumeration value="c"/>
+    </restriction>
+  </simpleType>
+
+  <simpleType name="c_simple">
+    <restriction base="t:c_enum">
+    </restriction>
+  </simpleType>
+
+  <complexType name="c_base">
+    <simpleContent>
+      <extension base="t:c_simple">
+        <attribute name="foo" type="string" use="required"/>
+      </extension>
+    </simpleContent>
+  </complexType>
+
+  <complexType name="c_derived">
+    <simpleContent>
+      <extension base="t:c_base">
+        <attribute name="bar" type="string" use="required"/>
+      </extension>
+    </simpleContent>
+  </complexType>
+
+  <complexType name="c_type">
+    <sequence>
+      <element name="a" type="t:c_simple"/>
+    </sequence>
+  </complexType>
+
+  <!-- Test case D: fundamental type c-tors. -->
+
+  <simpleType name="d_simple">
+    <restriction base="int">
+    </restriction>
+  </simpleType>
+
+  <complexType name="d_base">
+    <simpleContent>
+      <extension base="t:d_simple">
+        <attribute name="foo" type="string" use="required"/>
+      </extension>
+    </simpleContent>
+  </complexType>
+
+  <complexType name="d_derived">
+    <simpleContent>
+      <extension base="t:d_base">
+        <attribute name="bar" type="string" use="required"/>
+      </extension>
+    </simpleContent>
+  </complexType>
+
+  <complexType name="d_type">
+    <sequence>
+      <element name="a" type="t:d_simple"/>
+    </sequence>
+  </complexType>
+
+  <!-- Test case E: auto_ptr ctors. -->
+
+  <simpleType name="e_simple_type">
+    <restriction base="string">
+    </restriction>
+  </simpleType>
+
+  <complexType name="e_complex_type">
+    <sequence>
+      <element name="a" type="string"/>
+    </sequence>
+  </complexType>
+
+  <complexType name="e_base">
+    <sequence>
+      <element name="fund" type="int"/>
+      <element name="simple" type="t:e_simple_type"/>
+      <element name="complex" type="t:e_complex_type"/>
+    </sequence>
+  </complexType>
+
+  <complexType name="e_derived">
+    <complexContent>
+      <extension base="t:e_base">
+        <sequence>
+          <element name="fund1" type="boolean"/>
+          <element name="simple1" type="string"/>
+          <element name="complex1" type="t:e_complex_type"/>
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+
+  <!-- Test case F: auto_ptr args in c-tor (all-non-optional-members) -->
+
+  <simpleType name="f_simple_type">
+    <restriction base="string">
+    </restriction>
+  </simpleType>
+
+  <complexType name="f_complex_type">
+    <sequence>
+      <element name="a" type="string"/>
+    </sequence>
+  </complexType>
+
+  <complexType name="f_type">
+    <complexContent>
+      <restriction base="anyType">
+        <sequence>
+          <element name="fund" type="int"/>
+          <element name="simple" type="t:f_simple_type"/>
+          <element name="complex" type="t:f_complex_type"/>
+        </sequence>
+      </restriction>
+    </complexContent>
+  </complexType>
+
+</schema>

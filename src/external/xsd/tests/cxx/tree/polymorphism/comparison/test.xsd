@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:t="test" targetNamespace="test">
+
+  <complexType name="base">
+    <sequence>
+      <element name="a" type="string"/>
+      <element name="fund" type="int"/>
+    </sequence>
+  </complexType>
+
+  <complexType name="derived1">
+    <complexContent>
+      <extension base="t:base">
+        <sequence>
+          <element name="b" type="string" minOccurs="0"/>
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+
+  <complexType name="derived2">
+    <complexContent>
+      <extension base="t:base">
+        <sequence>
+          <element name="c" type="string" maxOccurs="unbounded"/>
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+
+  <complexType name="type">
+    <sequence>
+      <element name="base" type="t:base"/>
+    </sequence>
+  </complexType>
+
+  <element name="root" type="t:type"/>
+
+</schema>

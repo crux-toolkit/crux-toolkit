@@ -1,0 +1,7 @@
+namespace test
+{
+  include "gender.hxx";
+
+  digit int int;
+  gender ::gender ::gender;
+}

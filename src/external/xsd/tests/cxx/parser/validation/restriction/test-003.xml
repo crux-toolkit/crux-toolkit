@@ -1,0 +1,16 @@
+<t:root xmlns:t="test"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="test test.xsd">
+
+  <!-- valid base but not restriction: sequence maxOccurs="1" -->
+  <restriction-a z="z">
+    <a>a</a>
+    <b>b</b>
+    <c>c</c>
+
+    <a>a</a>
+    <b>b</b>
+    <c>c</c>
+  </restriction-a>
+
+</t:root>

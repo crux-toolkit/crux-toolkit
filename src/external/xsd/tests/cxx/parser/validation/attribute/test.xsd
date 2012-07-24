@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:t="test" targetNamespace="test">
+
+
+  <!-- Test optional and required attributes as well as a wildcard. -->
+  <complexType name="pass-a">
+    <attribute name="a" type="string" use="optional"/>
+    <attribute name="b" type="string" use="required"/>
+    <anyAttribute namespace="##targetNamespace" processContents="skip"/>
+  </complexType>
+
+
+  <!-- Test that in inheritance attributes are checked before wildcards. -->
+  <complexType name="pass-b-base">
+    <attribute name="a" type="string"/>
+    <anyAttribute namespace="#any" processContents="skip"/>
+  </complexType>
+
+  <complexType name="pass-b">
+    <complexContent>
+      <extension base="t:pass-b-base">
+        <attribute name="b" type="string"/>
+	<anyAttribute namespace="#any" processContents="skip"/>
+      </extension>
+    </complexContent>
+  </complexType>
+
+
+  <!-- Test that in inheritance by restriction required attribute is
+       checked for even though it is not explicitly mentioned in
+       derived. -->
+  <complexType name="pass-c-base">
+    <attribute name="a" type="string" use="required"/>
+    <attribute name="b" type="string" use="optional"/>
+  </complexType>
+
+  <complexType name="pass-c">
+    <complexContent>
+      <restriction base="t:pass-c-base">
+        <attribute name="b" type="string" use="required"/>
+      </restriction>
+    </complexContent>
+  </complexType>
+
+
+  <!-- Test detection of missing required attribute. -->
+  <complexType name="fail-base">
+    <attribute name="a" type="string" use="optional"/>
+  </complexType>
+
+  <complexType name="fail">
+    <complexContent>
+      <restriction base="t:fail-base">
+        <attribute name="a" type="string" use="required"/>
+      </restriction>
+    </complexContent>
+  </complexType>
+
+
+  <complexType name="type">
+    <sequence>
+      <element name="pass-a" type="t:pass-a"/>
+      <element name="pass-b" type="t:pass-b"/>
+      <element name="pass-c" type="t:pass-c"/>
+      <element name="fail" type="t:fail"/>
+    </sequence>
+  </complexType>
+
+  <element name="root" type="t:type"/>
+
+</schema>

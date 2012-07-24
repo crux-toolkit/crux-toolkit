@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:xse="http://www.codesynthesis.com/xmlns/xml-schema-extension"
+            xmlns:test="http://www.codesynthesis.com/xmlns/test"
+            targetNamespace="http://www.codesynthesis.com/xmlns/test">
+
+  <!-- attribute -->
+  
+  <xsd:attribute name="attribute" type="xsd:IDREFS" xse:refType="test:a-author"/>
+  
+  <xsd:complexType name="a-author">
+    <xsd:sequence>
+      <xsd:element name="name" type="xsd:string"/>
+    </xsd:sequence>
+    <xsd:attribute name="recommends" type="xsd:IDREFS" xse:refType="test:a-author"/>
+  </xsd:complexType>
+
+ 
+  <!-- element -->
+
+  <xsd:element name="element" type="xsd:IDREFS" xse:refType="test:e-author"/>
+
+  <xsd:complexType name="e-author">
+    <xsd:sequence>
+      <xsd:element name="recommends" type="xsd:IDREFS" xse:refType="test:e-author"/>
+    </xsd:sequence>    
+  </xsd:complexType>
+  
+  <!-- base -->
+  
+  <xsd:simpleType name="author-refs">
+    <xsd:restriction base="xsd:IDREFS" xse:refType="test:e-author"/>
+  </xsd:simpleType>
+
+
+  <!-- itemType - illegal -->
+  <!-- 
+  <xsd:simpleType name="author-refss">
+    <xsd:list itemType="xsd:IDREFS" xse:refType="test:e-author"/>
+  </xsd:simpleType>
+  -->
+
+</xsd:schema>

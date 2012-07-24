@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no" ?>
+<t:root xmlns:t="test">
+
+  <a>abc</a>
+
+  <a>æ</a>
+
+  <a>¢£¤¥</a>
+
+  <a>???</a>
+
+  <b>abc</b>
+
+  <b>aâc</b>
+
+  <b>âòbc</b>
+
+</t:root>

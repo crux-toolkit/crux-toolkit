@@ -1,0 +1,19 @@
+<t:root xmlns:t="test"
+        xmlns:o="other"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="test test.xsd"
+
+        att="att"
+        any="any"
+        t:any="t:any"
+        o:any="o:any">
+
+  <o:one>o:one</o:one>
+  <foo>foo</foo>
+  <t:bar>t:bar</t:bar>
+  <bar>bar</bar>
+  <o:seq1>o:one1</o:seq1>
+  <o:seq2>o:one2</o:seq2>
+  <o:seq3>o:one3</o:seq3>
+
+</t:root>

@@ -1,0 +1,29 @@
+{
+  start any element 'any'
+  end any element 'any'
+}
+
+{
+  start any element 'any'
+  any attribute x = 'xxx'
+  any text: 'aaa'
+  start any element 'a'
+  any text: 'bbb'
+  end any element 'a'
+  any text: 'ccc'
+  end any element 'any'
+}
+
+{
+  x = x
+  a = a
+  start any element 'any'
+  any attribute x = 'xxx'
+  any text: 'aaa'
+  start any element 'a'
+  any text: 'bbb'
+  end any element 'a'
+  any text: 'ccc'
+  end any element 'any'
+}
+

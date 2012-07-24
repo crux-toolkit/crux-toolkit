@@ -1,0 +1,22 @@
+{
+  a = a
+  b = b
+}
+
+{
+  c = c
+  d = d
+  any: other#any
+  {
+    chars = any
+  }
+  a = a
+}
+
+{
+  c = c
+  d = d
+  d = d
+  a = a
+}
+

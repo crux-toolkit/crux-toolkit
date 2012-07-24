@@ -1,0 +1,11 @@
+<test xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="test.xsd"
+      name="testName">
+       <sub name="subName">
+           <sub name="sub-subName"/>
+           <indir name="sub-indirName">
+             <sub name="sub-indir-subName"/>
+           </indir>
+           <sub2 name="sub-sub2Name"/>
+       </sub>
+</test>

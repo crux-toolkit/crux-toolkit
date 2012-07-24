@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:t="test" targetNamespace="test">
+
+  <complexType name="base">
+    <sequence>
+      <element name="a" type="string"/>
+    </sequence>
+  </complexType>
+
+  <element name="base" type="t:base"/>
+  <element name="derived" type="t:base" substitutionGroup="t:base"/>
+
+  <complexType name="type">
+    <sequence>
+      <element ref="t:base" maxOccurs="unbounded"/>
+    </sequence>
+  </complexType>
+
+  <element name="root" type="t:type"/>
+
+</schema>

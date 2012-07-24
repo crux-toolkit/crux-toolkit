@@ -1,0 +1,9 @@
+<t:root xmlns:t="test"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="test test.xsd">
+
+  <base><a>a</a><fund>1</fund></base>
+  <base xsi:type="t:derived1"><a>a</a><fund>1</fund><b>b</b></base>
+  <base xsi:type="t:derived2"><a>a</a><fund>1</fund><c>c1</c><c>c2</c></base>
+
+</t:root>

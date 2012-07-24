@@ -1,0 +1,21 @@
+<t:root xmlns:t="test"
+        xmlns:o="other"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="test test.xsd">
+
+  <!-- test dispatching of any-nested elements and attributes -->
+
+  <any-a>
+    <o:any/>
+  </any-a>
+
+  <any-a>
+    <o:any x="xxx">aaa<a>bbb</a>ccc</o:any>
+  </any-a>
+
+  <any-a x="x">
+    <a>a</a>
+    <o:any x="xxx">aaa<a>bbb</a>ccc</o:any>
+  </any-a>
+
+</t:root>

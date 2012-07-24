@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.w3.org/2001/XMLSchema XMLSchema.xsd"
+            xmlns="http://www.codesynthesis.com/xmlns/test"
+            targetNamespace="http://www.codesynthesis.com/xmlns/test">
+
+  <!-- type -->
+
+  <xsd:simpleType name="long">
+    <xsd:restriction base="xsd:long"/>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="strange.type-name.">
+    <xsd:restriction base="long"/>
+  </xsd:simpleType>
+
+  <xsd:element name="one-two-explicit">
+    <xsd:simpleType>
+      <xsd:restriction base="xsd:NCName">
+        <xsd:enumeration value="on.e-"/>
+        <xsd:enumeration value="t-wo."/>
+        <xsd:enumeration value="explicit"/>
+      </xsd:restriction>
+    </xsd:simpleType>
+  </xsd:element>
+
+
+  <!-- element [global/local] -->
+
+  <xsd:element name="switch" type="long"/>
+  <xsd:element name="strange.element-name." type="strange.type-name."/>
+
+
+  <xsd:element name="with-anonymous-type-1">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element name="for" type="long"/>
+        <xsd:element name="switch" minOccurs="0" type="long"/>
+        <xsd:element name="strange.element-name." maxOccurs="unbounded" type="strange.type-name."/>
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+
+
+  <!-- attributes [global/local] -->
+
+  <xsd:attribute name="default" type="long"/>
+  <xsd:attribute name="strange.attribute-name." type="strange.type-name."/>
+
+  <xsd:element name="with-anonymous-type-2">
+    <xsd:complexType>
+      <xsd:attribute name="and" type="long" use="required"/>
+      <xsd:attribute name="strange.attribute-name." type="strange.type-name."/>
+    </xsd:complexType>
+  </xsd:element>
+
+
+</xsd:schema>

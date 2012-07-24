@@ -1,0 +1,16 @@
+<t:root xmlns:t="test" id="this" fix2="123" fix4="abc" fix6="aaa bbb ccc">
+
+  <union/>
+  <list/>
+  <simple/>
+  <date/>
+  <time/>
+  <date-time/>
+  <duration/>
+  <day/>
+  <month/>
+  <year/>
+  <month-day/>
+  <year-month/>
+
+</t:root>

@@ -1,0 +1,65 @@
+@html2ps {
+  option {
+    toc: hb;
+    colour: 1;
+    hyphenate: 1;
+    titlepage: 1;
+  }
+
+  datefmt: "%B %Y";
+
+  titlepage {
+    content: "
+<div align=center>
+  <h1><big>C++/Parser Mapping</big></h1>
+  <h1><big>Getting Started Guide</big></h1>
+  <h1>&nbsp;</h1>
+  <h1>&nbsp;</h1>
+  <h1>&nbsp;</h1>
+  <h1>&nbsp;</h1>
+  <h1>&nbsp;</h1>
+  <h1>&nbsp;</h1>
+</div>
+  <p>Copyright &copy; 2005-2010 CODE SYNTHESIS TOOLS CC</p>
+
+  <p>Permission is granted to copy, distribute and/or modify this
+     document under the terms of the
+     <a href='http://www.codesynthesis.com/licenses/fdl-1.2.txt'>GNU Free
+     Documentation License, version 1.2</a>; with no Invariant Sections,
+     no Front-Cover Texts and no Back-Cover Texts.
+  </p>
+
+  <p>This document is available in the following formats:
+     <a href='http://www.codesynthesis.com/projects/xsd/documentation/cxx/parser/guide/index.xhtml'>XHTML</a>,
+     <a href='http://www.codesynthesis.com/projects/xsd/documentation/cxx/parser/guide/cxx-parser-guide.pdf'>PDF</a>, and
+     <a href='http://www.codesynthesis.com/projects/xsd/documentation/cxx/parser/guide/cxx-parser-guide.ps'>PostScript</a>.</p>";
+  }
+
+  toc {
+    indent: 2em;
+  }
+
+  header {
+    odd-right: $H;
+    even-left: $H;
+  }
+
+  footer {
+    odd-left: $D;
+    odd-center: $T;
+    odd-right: $N;
+
+    even-left: $N;
+    even-center: $T;
+    even-right: $D;
+  }
+}
+
+body {
+  font-size: 12pt;
+  text-align: justify;
+}
+
+pre {
+  font-size: 10pt;
+}

@@ -1,0 +1,19 @@
+<t:root xmlns:t="test"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="test test.xsd">
+
+  <complex x="123" y="abc">
+    <a>123</a>
+    <b>abc</b>
+    <c x="123">abc</c>
+    <c x="456">def</c>
+  </complex>
+
+  <complex x="123" y="abc">
+    <a>123</a>
+    <b>abc</b>
+    <c x="123">abc</c>
+    <c x="456">xyz</c>
+  </complex>
+
+</t:root>

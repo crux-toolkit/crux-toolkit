@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+        xmlns:f="foo"
+	xmlns:b="bar"
+	xmlns:t="test"
+	targetNamespace="test">
+
+  <import namespace="foo" schemaLocation="foo.xsd"/>
+  <import namespace="bar" schemaLocation="bar.xsd"/>
+
+  <complexType name="a">
+    <sequence>
+      <element ref="f:efoo"/>
+    </sequence>
+    <attribute ref="b:abar"/>
+  </complexType>
+
+  <complexType name="b">
+    <sequence>
+      <element ref="f:base"/>
+    </sequence>
+  </complexType>
+
+  <complexType name="c">
+    <sequence>
+      <element ref="f:base"/>
+    </sequence>
+  </complexType>
+
+  <complexType name="type">
+    <sequence>
+      <element name="a" type="t:a"/>
+      <element name="b" type="t:b"/>
+      <element name="c" type="t:c"/>
+    </sequence>
+  </complexType>
+
+  <element name="root" type="t:type"/>
+
+</schema>

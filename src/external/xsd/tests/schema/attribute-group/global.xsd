@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.w3.org/2001/XMLSchema XMLSchema.xsd"
+            xmlns="http://www.codesynthesis.com/xmlns/test"
+            targetNamespace="http://www.codesynthesis.com/xmlns/test">
+
+  <!-- Simple case. -->
+  
+  <xsd:attributeGroup name="gfoo_1">
+    <xsd:attribute name="foo_1_1" type="xsd:string"/>
+    <xsd:attribute name="foo_1_2" type="xsd:string"/>
+  </xsd:attributeGroup>
+
+  <xsd:attributeGroup name="gfoo_2">
+    <xsd:attributeGroup ref="gfoo_1"/>
+    <xsd:attribute name="foo_2_1" type="xsd:string"/>
+    <xsd:attribute name="foo_2_2" type="xsd:string"/>
+  </xsd:attributeGroup>
+
+  <xsd:complexType name="Foo">
+    <xsd:attributeGroup ref="gfoo_2"/>
+  </xsd:complexType>
+
+
+
+  <!-- Forward reference. -->
+
+  <xsd:attributeGroup name="gbar_3">
+    <xsd:attribute name="bar_3_1" type="xsd:string"/>
+    <xsd:attribute name="bar_3_2" type="xsd:string"/>
+    <xsd:attributeGroup ref="gbar_1"/>
+  </xsd:attributeGroup>
+
+  <xsd:complexType name="Bar">
+    <xsd:attributeGroup ref="gbar_2"/>
+  </xsd:complexType>
+
+  <xsd:attributeGroup name="gbar_2">
+    <xsd:attributeGroup ref="gbar_3"/>
+    <xsd:attribute name="bar_2_1" type="xsd:string"/>
+    <xsd:attribute name="bar_2_2" type="xsd:string"/>
+  </xsd:attributeGroup>
+
+  <xsd:attributeGroup name="gbar_1">
+    <xsd:attribute name="bar_1_1" type="xsd:string"/>
+    <xsd:attribute name="bar_1_2" type="xsd:string"/>
+  </xsd:attributeGroup>
+
+</xsd:schema>

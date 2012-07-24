@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:t="test" targetNamespace="test">
+
+  <simpleType name="string-enum-base">
+    <restriction base="string">
+      <enumeration value="a"/>
+      <enumeration value="b"/>
+      <enumeration value="c"/>
+    </restriction>
+  </simpleType>
+
+  <simpleType name="string-enum">
+    <restriction base="t:string-enum-base">
+      <enumeration value="a"/>
+      <enumeration value="c"/>
+    </restriction>
+  </simpleType>
+
+  <simpleType name="int-enum-base">
+    <restriction base="int">
+      <enumeration value="1"/>
+      <enumeration value="2"/>
+      <enumeration value="3"/>
+    </restriction>
+  </simpleType>
+
+  <simpleType name="int-enum">
+    <restriction base="t:int-enum-base">
+      <enumeration value="1"/>
+      <enumeration value="3"/>
+    </restriction>
+  </simpleType>
+
+  <complexType name="type">
+    <sequence>
+      <element name="a" type="t:string-enum"/>
+      <element name="b" type="t:int-enum"/>
+    </sequence>
+  </complexType>
+
+</schema>

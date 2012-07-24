@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:t="test" targetNamespace="test">
+
+  <complexType name="any-a">
+    <sequence>
+      <element name="a" type="string" minOccurs="0"/>
+      <any namespace="other" processContents="skip" maxOccurs="unbounded"/>
+    </sequence>
+    <attribute name="x" type="string"/>
+  </complexType>
+
+  <complexType name="type">
+    <choice maxOccurs="unbounded">
+      <element name="any-a" type="t:any-a"/>
+    </choice>
+  </complexType>
+
+  <element name="root" type="t:type"/>
+
+</schema>

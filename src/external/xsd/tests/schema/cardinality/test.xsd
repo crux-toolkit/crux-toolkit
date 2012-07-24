@@ -1,0 +1,46 @@
+<?xml version="1.0" ?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.w3.org/2001/XMLSchema XMLSchema.xsd"
+	    xmlns:test="http://www.codesynthesis.com/xmlns/test"
+            targetNamespace="http://www.codesynthesis.com/xmlns/test">
+
+  <!--
+    This test tries to cover various cardinality cases with
+    built-in and user-defined types.
+  -->
+
+  <xsd:complexType name="Foo">
+    <xsd:sequence>
+      <xsd:element name="foo" type="xsd:string"/>
+    </xsd:sequence>
+  </xsd:complexType>
+
+  <xsd:complexType name="Bar">
+    <xsd:sequence>
+
+      <xsd:element name="one-int" type="xsd:int"/>
+      <xsd:element name="opt-int" type="xsd:int" minOccurs="0"/>
+      <xsd:element name="seq-int" type="xsd:int" maxOccurs="unbounded"/>
+
+      <xsd:element name="one-string" type="xsd:string"/>
+      <xsd:element name="opt-string" type="xsd:string" minOccurs="0"/>
+      <xsd:element name="seq-string" type="xsd:string" maxOccurs="unbounded"/>
+
+      <xsd:element name="one-foo" type="test:Foo"/>
+      <xsd:element name="opt-foo" type="test:Foo" minOccurs="0"/>
+      <xsd:element name="seq-foo" type="test:Foo" maxOccurs="unbounded"/>
+
+    </xsd:sequence>
+
+    <xsd:attribute name="one-int-a" type="xsd:int" use="required"/>
+    <xsd:attribute name="opt-int-a" type="xsd:int"/>
+
+    <xsd:attribute name="one-string-a" type="xsd:string" use="required"/>
+    <xsd:attribute name="opt-string-a" type="xsd:string"/>
+
+  </xsd:complexType>
+
+  <xsd:element name="bar" type="test:Bar"/>
+
+</xsd:schema>

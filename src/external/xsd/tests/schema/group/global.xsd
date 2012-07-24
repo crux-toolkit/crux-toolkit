@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.w3.org/2001/XMLSchema XMLSchema.xsd"
+            xmlns="http://www.codesynthesis.com/xmlns/test"
+            targetNamespace="http://www.codesynthesis.com/xmlns/test">
+
+  <!-- Simple case. -->
+
+  <xsd:group name="gfoo">
+    <xsd:sequence>
+      <xsd:element name="foo_1" type="xsd:string"/>
+      <xsd:element name="foo_2" type="xsd:string"/>
+    </xsd:sequence>
+  </xsd:group>
+
+
+  <xsd:complexType name="Foo">
+    <xsd:group ref="gfoo"/>
+  </xsd:complexType>
+
+
+
+  <!-- Forward reference. -->
+
+  <xsd:complexType name="Bar">    
+    <xsd:group ref="gbar"/>
+  </xsd:complexType>
+
+  <xsd:group name="gbar">
+    <xsd:choice>
+      <xsd:element name="bar_1" type="xsd:string"/>
+      <xsd:element ref="bar_2"/>
+    </xsd:choice>
+  </xsd:group>
+
+  <xsd:element name="bar_2" type="xsd:string"/>
+
+</xsd:schema>

@@ -1,0 +1,22 @@
+test::pre
+test::name: testName
+sub::pre
+sub::name: subName
+sub::pre
+sub::name: sub-subName
+sub::post
+sub::sub
+indir::pre
+indir::name: sub-indirName
+sub::pre
+sub::name: sub-indir-subName
+sub::post
+indir::sub
+indir::post
+sub::pre
+sub::name: sub-sub2Name
+sub::post
+sub::sub2
+sub::post
+test::sub
+test::post

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<p1:root xmlns:p1="test">
+
+  <a xmlns:p3="bar" p3:abar="456" xmlns:p2="foo">
+    <p2:efoo>123</p2:efoo>
+  </a>
+
+  <b xmlns:p2="bar">
+    <p2:derived>
+      <x>1</x>
+      <y>2</y>
+    </p2:derived>
+  </b>
+
+  <c xmlns:p2="foo" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <p2:base xmlns:p3="bar" xsi:type="p3:derived2">
+      <x>1</x>
+      <z>2</z>
+    </p2:base>
+  </c>
+
+</p1:root>

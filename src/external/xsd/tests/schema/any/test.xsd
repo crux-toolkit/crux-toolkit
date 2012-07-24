@@ -1,0 +1,19 @@
+<?xml version="1.0" ?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.w3.org/2001/XMLSchema XMLSchema.xsd"
+	    xmlns:test="http://www.codesynthesis.com/xmlns/test"
+            targetNamespace="http://www.codesynthesis.com/xmlns/test">
+
+  <xsd:complexType name="person">
+    <xsd:sequence>
+      <xsd:element name="name" type="xsd:string"/>
+      <xsd:any namespace="##other" processContents="strict" maxOccurs="unbounded"/>
+    </xsd:sequence>
+    <xsd:attribute name="id" type="xsd:ID"/> 
+    <xsd:anyAttribute namespace="##other" processContents="strict"/>
+  </xsd:complexType>
+
+  <xsd:element name="person" type="test:person"/>
+  
+</xsd:schema>

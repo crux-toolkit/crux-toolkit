@@ -1,0 +1,46 @@
+<t:root xmlns:t="test"
+        xmlns:o="other"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="test test.xsd">
+
+  <sequence>
+    <c>c</c>
+    <d>d</d>
+    <t:any>aaa<a>bbb</a>ccc</t:any>
+    <f>f</f>
+    <e>e</e>
+  </sequence>
+
+  <sequence>
+    <a>a</a>
+    <b>b</b>
+    <c>c</c>
+    <d>d</d>
+    <d>d</d>
+    <d>d</d>
+    <o:any>any</o:any>
+    <f>f</f>
+    <e>e</e>
+    <e>e</e>
+  </sequence>
+
+  <sequence>
+    <a>a</a>
+    <b>b</b>
+    <c>c</c>
+    <d>d</d>
+    <d>d</d>
+    <d>d</d>
+    <o:any>any</o:any>
+    <f>f</f>
+    <e>e</e>
+    <e>e</e>
+
+    <c>c</c>
+    <d>d</d>
+    <t:any>any</t:any>
+    <f>f</f>
+    <e>e</e>
+  </sequence>
+
+</t:root>

@@ -1,0 +1,21 @@
+
+derived: 
+a: a
+x: foo
+q1: 1
+y: -20
+p: bar
+q2: 2
+default x: foo
+default y: -20
+fixed p: bar
+fixed q1: 1
+fixed q2: 2
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<t:root xmlns:t="test">
+
+  <derived q1="1" q2="2">
+    <a>a</a>
+  </derived>
+
+</t:root>

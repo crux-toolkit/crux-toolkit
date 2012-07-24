@@ -1,0 +1,65 @@
+<?xml version="1.0" ?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.w3.org/2001/XMLSchema XMLSchema.xsd"
+	    xmlns:test="http://www.codesynthesis.com/xmlns/test"
+            targetNamespace="http://www.codesynthesis.com/xmlns/test">
+
+  <xsd:simpleType name="IntUnion">
+    <xsd:union memberTypes="xsd:int xsd:string"/>
+  </xsd:simpleType>
+
+  <!-- local element with anonymous union inside. -->
+
+  <xsd:complexType name="Foo">
+    <xsd:sequence>
+      <xsd:element name="string-union">
+        <xsd:simpleType>
+	  <xsd:union memberTypes="xsd:int xsd:string"/>
+        </xsd:simpleType>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+
+
+  <!-- global element with anonymous union inside. -->
+
+  <xsd:element name="string-union">
+    <xsd:simpleType>
+      <xsd:union memberTypes="xsd:int xsd:string"/>
+    </xsd:simpleType>
+  </xsd:element>
+
+
+
+  <!-- global element and global union with conflicting names -->
+
+  <xsd:simpleType name="long-union">
+    <xsd:union memberTypes="xsd:long xsd:string"/>
+  </xsd:simpleType>
+
+  <xsd:element name="long-union" type="test:long-union"/>
+
+
+  <!-- forward reference -->
+
+  <xsd:simpleType name="int-union">
+    <xsd:union memberTypes="test:int xsd:string"/>
+  </xsd:simpleType>
+
+  <xsd:simpleType name="int">
+    <xsd:restriction base="xsd:int"/>
+  </xsd:simpleType>
+
+
+  <!-- inheritance from union -->
+
+  <xsd:complexType name="IntComplex">
+    <xsd:simpleContent>
+      <xsd:extension base="test:IntUnion">
+        <xsd:attribute name="foo" type="xsd:string"/>
+      </xsd:extension>
+    </xsd:simpleContent>
+  </xsd:complexType>
+
+</xsd:schema>

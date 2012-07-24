@@ -1,0 +1,120 @@
+<?xml version="1.0"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+        xmlns:t="test"
+        targetNamespace="test">
+
+  <simpleType name="list">
+    <list itemType="int"/>
+  </simpleType>
+
+  <simpleType name="union">
+    <union memberTypes="int string"/>
+  </simpleType>
+
+  <simpleType name="enumeration">
+    <restriction base="string">
+      <enumeration value="top"/>
+      <enumeration value="left"/>
+      <enumeration value="bottom"/>
+      <enumeration value="right"/>
+    </restriction>
+  </simpleType>
+
+  <complexType name="base">
+    <sequence>
+      <element name="a" type="string"/>
+    </sequence>
+    <attribute name="x" type="int" use="required"/>
+  </complexType>
+
+  <complexType name="complex">
+    <complexContent>
+      <extension base="t:base">
+        <sequence>
+          <element name="b" type="string" minOccurs="0"/>
+	  <element name="c" type="string" minOccurs="0" maxOccurs="unbounded"/>
+        </sequence>
+	<attribute name="y" type="int"/>
+      </extension>
+    </complexContent>
+  </complexType>
+
+
+  <complexType name="type">
+    <sequence>
+      <element name="list" type="t:list"/>
+      <element name="union" type="t:union"/>
+      <element name="enumeration" type="t:enumeration"/>
+      <element name="complex" type="t:complex" maxOccurs="unbounded"/>
+
+      <!-- integers -->
+      <element name="byte"                  type="byte"/>
+      <element name="unsigned_byte"         type="unsignedByte"/>
+      <element name="short"                 type="short"/>
+      <element name="unsigned_short"        type="unsignedShort"/>
+      <element name="int"                   type="int"/>
+      <element name="unsigned_int"          type="unsignedInt"/>
+      <element name="long"                  type="long"/>
+      <element name="unsigned_long"         type="unsignedLong"/>
+      <element name="integer"               type="integer"/>
+      <element name="non_positive_integer"  type="nonPositiveInteger"/>
+      <element name="non_negative_integer"  type="nonNegativeInteger"/>
+      <element name="positive_integer"      type="positiveInteger"/>
+      <element name="negative_integer"      type="negativeInteger"/>
+
+
+      <!-- boolean -->
+      <element name="boolean"               type="boolean"/>
+
+
+      <!-- floats -->
+      <element name="float"                 type="float"/>
+      <element name="double"                type="double"/>
+      <element name="decimal"               type="decimal"/>
+
+
+      <!-- strings -->
+      <element name="string"                type="string"/>
+      <element name="normalized_string"     type="normalizedString"/>
+      <element name="token"                 type="token"/>
+      <element name="name"                  type="Name"/>
+      <element name="name_token"            type="NMTOKEN"/>
+      <element name="name_tokens"           type="NMTOKENS"/>
+      <element name="ncname"                type="NCName"/>
+      <element name="language"              type="language"/>
+
+      <!-- qualified name -->
+      <element name="qname"                 type="QName"/>
+
+
+      <!-- ID/IDREF -->
+      <element name="id"     maxOccurs="2"  type="ID"/>
+      <element name="id_ref"                type="IDREF"/>
+      <element name="id_refs"               type="IDREFS"/>
+
+
+      <!-- URI -->
+      <element name="any_uri"               type="anyURI"/>
+
+
+      <!-- binary -->
+      <element name="base64_binary"         type="base64Binary"/>
+      <element name="hex_binary"            type="hexBinary"/>
+
+
+      <!-- date/time -->
+      <element name="date"                  type="date"/>
+      <element name="date_time"             type="dateTime"/>
+      <element name="duration"              type="duration"/>
+      <element name="day"                   type="gDay"/>
+      <element name="month"                 type="gMonth"/>
+      <element name="month_day"             type="gMonthDay"/>
+      <element name="year"                  type="gYear"/>
+      <element name="year_month"            type="gYearMonth"/>
+      <element name="time"                  type="time"/>
+    </sequence>
+  </complexType>
+
+  <element name="root" type="t:type"/>
+
+</schema>

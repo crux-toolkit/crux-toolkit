@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<t:root xmlns:t="test" base64_bin1="" base64_bin2="YmFzZTY0IGJpbmFyeQ==&#xA;" bool1="true" bool2="true" bool3="false" bool4="false" byte="-99" decimal1="1.12345" decimal2="-0.456" double1="1.12345" double2="1123.45" double3="-0.00012345" double4="NaN" double5="-INF" fix1="123" fix2="123" fix3="abc" fix4="abc" fix5="aaa bbb ccc" fix6="aaa bbb ccc" float1="1.123" float2="1123" float3="-0.000123" float4="NaN" float5="-INF" hex_bin1="" hex_bin2="6865782052696E617279" id="this" idref="this" idrefs="this" int="-99999" integer="-99999" language="en-us" long="-99999" ncname="abcd" ninteger="-99999" nmtoken="ab:cd" nmtokens1="a:b efg aaa" nmtokens2="abc" nninteger="99999" npinteger="-99999" nstring=" a  b " pinteger="99999" qname1="foo" qname2="t:bar" short="-999" string1="" string2=" a  b " token="a b" ubyte="99" uint="99999" ulong="99999" uri="http://example.com" ushort="999">
+
+  <union a="abc"/>
+
+  <list a="123 345 678" b="ab cd ef" c="abc" d="abc def"/>
+
+  <simple a="123" b="abc" c="123" d="abc" e="abc" f="abc 123"/>
+
+  <date a="2009-03-31" b="2009-03-31Z" c="2009-03-31Z" d="2009-03-31Z" e="2009-03-31+12:30" f="2009-03-31-12:30" g="2002009-03-31-12:30"/>
+
+  <time a="12:03:45" b="12:03:45.123Z" c="12:03:05.123Z" d="12:03:45.123Z" e="12:03:45.123+12:30" f="12:03:45-12:30"/>
+
+  <date-time a="2009-03-31T12:03:45" b="2009-03-31T12:03:45.123Z" c="2002009-03-31T12:03:05.123-12:30"/>
+
+  <duration a="P100Y" b="P100M" c="P100D" d="PT12H" e="PT12M" f="PT12.123S" g="-P100Y10M20DT12H12M1.123S"/>
+
+  <day a="---02" b="---22Z" c="---22-12:30"/>
+
+  <month a="--02" b="--12Z" c="--12+12:30"/>
+
+  <year a="2009" b="-2002009Z" c="2009-12:30"/>
+
+  <month-day a="--02-02" b="--12-22Z" c="--12-22+12:30"/>
+
+  <year-month a="2009-02" b="-2002009-12Z" c="2009-12-12:30"/>
+
+</t:root>
