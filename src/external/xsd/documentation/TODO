@@ -1,9 +1,0 @@
-!! Need to change include path in hello example.
-
-!! And change to #include <>
-
-!! Need to get rid of those header patterns or implement shortest stem.
-
-!! finish cxx-d.make
-
-@@ Add include-dep to examples.

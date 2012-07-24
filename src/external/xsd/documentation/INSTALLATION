@@ -1,5 +1,0 @@
-%% used install -d to create directories during installation.
-
-%@ splitting, completion, and cleanup
-
-%% terse messages for installation commands.
