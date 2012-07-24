@@ -1,0 +1,33 @@
+Prerequisites
+
+    - GNU make >= 3.81    http://www.gnu.org/software/make/
+    - GNU bash >= 2.05a   http://www.gnu.org/software/bash/
+
+
+Installing the build system
+
+  To install the build system you can execute the following command 
+  in the root directory of the source distribution:
+
+  $ make install
+
+  If you want to install it to a different location (default is 
+  /usr/local) you can do
+
+  $ make install_prefix=/usr install
+
+  Note that you need to install the build runtime into a place where GNU 
+  make will look by default (normally /usr/include and /usr/local/include).
+  Alternatively, you can install it into some other place (for example, 
+  your home directory) and set MAKEFLAGS accordingly:
+
+  $ make install install_prefix=/home/user/local
+  $ export MAKEFLAGS="-I /home/user/local/include"
+
+
+Building examples
+
+  There is a makefile accompanying each example. Running 'make' usually 
+  does the trick. Note that running 'make install' in an example directory
+  will install what the example has built as opposed to installing the 
+  example source code.

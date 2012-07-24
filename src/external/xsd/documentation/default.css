@@ -1,0 +1,160 @@
+body {
+  font-family      : sans-serif;
+  font-weight      : normal;
+
+  color            : black;
+  background       : white;
+
+  max-width        : 42em;
+  padding          : 2em 2em 2em 3em;
+  margin           : 0 auto;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family      : sans-serif;
+  font-weight      : 500;
+}
+
+h1 { font-size     : 170%; }
+h2 { font-size     : 145%; }
+h3 { font-size     : 125%; }
+h4 { font-size     : 110%; }
+h5 { font-size     : 106%; }
+h6 { font-size     : 100%; }
+
+
+p.indent {
+  margin-left      : 1.5em;
+}
+
+
+/* table of content */
+ul.toc li {
+    padding        : .4em 0em 0em 0em;
+}
+
+
+
+/* list of links */
+ul.menu {
+  list-style-type  : none;
+}
+
+ul.menu li {
+  padding-top      : 0.3em;
+  padding-bottom   : 0.3em;
+}
+
+
+
+/* @@ I should probably use child selector here */
+/* list with multiline list-elements */
+ul.multiline li {
+  padding-top      : 0.4em;
+  padding-bottom   : 0.4em;
+}
+
+ol.multiline li {
+  padding-top      : 0.4em;
+  padding-bottom   : 0.4em;
+}
+
+dl.multiline dd {
+  padding-top      : 0.4em;
+  padding-bottom   : 0.4em;
+}
+
+/* code */
+
+code {
+  font-size     : 114%;
+  font-family   : monospace;
+}
+
+
+/* C++ code snippet */
+pre.cxx {
+
+  margin-top       : 0em;
+  margin-bottom    : 2em;
+
+  margin-left      : 1em;
+}
+
+
+
+/* make code snippet */
+pre.make {
+
+  margin-top       : 0em;
+  margin-bottom    : 2em;
+
+  margin-left      : 1em;
+}
+
+
+
+/* terminal output */
+pre.term {
+
+  margin-top       : 0em;
+  margin-bottom    : 2em;
+
+  margin-left      : 1em;
+}
+
+
+/* Images */
+div.center {
+  text-align: center;
+}
+
+/* Navigation. */
+#navigation {
+  margin-top: 1em;
+  border-bottom: 1px dashed #000000;
+}
+
+#content {
+  margin-top: 2.5em;
+}
+
+
+/* Document info. */
+#docinfo {
+  margin-top: 4em;
+  border-top: 1px dashed #000000;
+  font-size: 70%;
+}
+
+/* distribution terms */
+div.terms {
+  font-size     : 114%;
+  font-family      : monospace;
+}
+
+
+
+/* Footnote */
+
+#footnote {
+  margin-top: 2em;
+}
+
+#footnote hr {
+  margin-left: 0;
+  margin-bottom: 1.5em;
+  width: 8em;
+  border-top: 1px solid #000000;
+  border-right: none;
+  border-bottom: none;
+  border-left: none;
+
+}
+
+#footnote p {
+  font-size: .91em;
+  text-indent: -0.8em;
+  padding-left: 0.8em;
+}
+

@@ -1,0 +1,72 @@
+@@ use shell && instead of multi-line rules since they don't consider
+   atomic (e.g. if something failed other files won't be deleted). Or
+   maybe not, think about it (and read the doc).
+
+@@ Some implicit rule should actually be two rules: one that looks
+   for the source under srd_root tree and the other under out_root.
+   Theoretically, any source could be just an intermidiate file generated
+   from something else (discovered while playing with idl).
+
+@@ Compensating rules: 'clean all' example.
+
+@@ Issues from "Multi-Architecture Builds Using GNU make":
+
+   - big (bloated) makefiles
+
+   - cannot say "make foo.o"
+
+@@ How can I integrate building of realpath utility in configuration
+   process?
+
+@@ Executing make from non-source directory is painful. Can I make it
+   easier?
+
+%% When shared library is linked with absolute path the loader is looking
+   for the library with the same path. See also -soname= and -rpath ls
+   options.
+
+@@ With multidir makefiles I loos the ability to say make where I am.
+   This is especially nasty when I edit a file and then say make. This
+   happens for example in CCF. The easy workaround is to say something
+   "make -C dir/to/test/driver". Once this is done life get very nice.
+   Actually I think this could be the best approach.
+
+@@ Variable inheritance doesn't play well with 'make foo.o'.
+
+@@ Configurations include absolute paths to imported libraries which
+   makes it hard to reuse them. In this light configurations on installed
+   libraries should not include any absolute paths.
+
+@@ Better name for project_name? build_name?
+
+@@ Repetition of paths in $(call message) is quite ugly. Anything I can do?
+
+@@ -MP conflicts with --no-implicit-phony. The new approach uses a special
+   terminal pattern rule to handle this. However headers without suffix
+   cannot be handled by this method.
+
+@! Delete-on-error does not cover .o.d files. I could specify it as a target
+   together with .o but then it will try to rebuild it.
+
+@! When you hide things from make (like .o.d or .l/.so) all sorts of bad things
+   happen.
+
+@@ What is a better term for development (not installed?) build?
+
+@@ /usr/bin/g++ is a link but extracted include paths have precise version in
+   them (e.g. 3.3.4). But then dependencies will trigger update, right?
+
+@! I am using some of the features of GNU find which are not available in SUS.
+
+@@ Since .l.cpp-options pattern does not have any prereqs then the file can
+   always be created (example: I misspelled file name).
+
+@@ Use abspath to prevent call-inclusion from -I dirs.
+
+@@ lib.cpp-options should be lib.cpp_options?
+
+@@ Use $@ in $$(dir $(out)/%).
+
+@! Need to make content of .l compiler-independant (rpath stuff).
+
+@@ export is now position-sensitive.

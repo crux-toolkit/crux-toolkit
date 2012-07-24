@@ -1,0 +1,64 @@
+
+@@ It would be nice if configuration happens only when it is 
+   required. For example if I need to build something that 
+   uses CORBA then only in this case happens configuration of
+   CORBA facilities.
+
+
+@@ 'configure' should depend on 'clean'
+
+
+@@ What if I change something in config file (let's say archive to shared)
+   and then say make - things will break.
+
+
+@@ It would be nice if I could keep build/ outside of the project. This
+   is going to be very useful when multiple projects share the same
+   build system.
+
+@@ it would be nice to have a project_base which will be 
+   $(root)/example/project. However, in normal most cases project will be 
+   the same as root, right? Look at CCF. Some comments:
+   
+   Saying -I$(root) would be exactly what I need if its value would be
+   .../example/project. This, according to the concept of clusters, could
+   be achived if I make .../example/project a cluster (which is quite 
+   natural thing to do). It would also be a good example of a cluster. 
+
+
+@@ Right now I have one global implicit rule for the project. In most
+   cases this is probably enough. But what if I want to use different
+   rules for different sub-projects (config clusters). For example two
+   parts of the same project could use different compilers or ORB or...
+   Probably the generic approach would be to provide sub-dir specific
+   rules.
+
+@@ concept of configuration clusters (no more src_root).
+
+
+@@ Can I get rid of src_root and out_root (i.e. can they be /)?
+
+
+@@ It would be nice if I could configure the same sub-system
+   (like CORBA) for dirrefent parts of the project differenty.
+
+
+@@ Do I really need those configuration clusters? Is the structure
+   of CCF right? Or am I just trying to hide problems of wrong
+   structuring? Isn't it overcomplication? Even if not shouldn't
+   I postpone this until I gain more experience?
+
+---------------------
+
+@@ Each project includes (in its root directory) copy of the build system.
+
+@@ The build system is configuration cluster.
+
+@@ Configuration cluster sets src/out_root.
+
+@@ Configuration cluster can inherit configuration from its parent.
+
+@@ Configuration cluster can override inherited values.
+
+@@ sub-projects in configuration cluster should not refer to anything
+   outside of this cluster.

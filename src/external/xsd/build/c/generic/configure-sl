@@ -1,0 +1,37 @@
+#! /usr/bin/env bash
+
+# file      : build/c/generic/configure-sl
+# author    : Boris Kolpackov <boris@codesynthesis.com>
+# copyright : Copyright (c) 2004-2011 Code Synthesis Tools CC
+# license   : GNU GPL v2; see accompanying LICENSE file
+
+# $1  out file
+#
+# bld_root     - build root
+# project_name - project name
+#
+
+source $bld_root/dialog.bash
+
+$echo
+$echo
+$echo "configuring '$project_name'"
+$echo
+$echo
+
+$echo
+$echo "Please enter C compiler option(s) used to build position-"
+$echo "independent code (e.g., -fPIC, -Kpic, etc)."
+$echo
+
+read -e -p "[]: " pic_option
+
+$echo
+$echo "Please enter C compiler option(s) used to build shared"
+$echo "libraries (e.g., -shared, -G, etc)."
+$echo
+
+read -e -p "[]: " shared_option
+
+echo "c_generic_pic_option    := $pic_option"     > $1
+echo "c_generic_shared_option := $shared_option" >> $1

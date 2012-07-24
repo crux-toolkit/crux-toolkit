@@ -1,0 +1,23 @@
+@@ write "t: p" instead of "t : p" or "t :p"
+
+@@ write $(call f,a) instead of $(call f, a) or $(call f , a)
+
+@@ Use '-' to separate words in function names (e.g. foo-bar);
+   use 'define' to define functions.
+   
+@@ Use '_' to separate words in variable names (e.g. foo_bar);
+   use := to assign value to a variable. Use '=' if you know
+   what you are doing.
+
+@@ Be careful with += in target-specific variables.
+
+@@ Action explicitly requested by the user (which should correspond
+   to verbs, e.g. install, clean, configure) should perform without
+   regards to up-to-dateness.
+   
+@@ Use verbs for .PHONY targets. There is one notable exception:...
+
+@! maybe declare `__' variable prefix reserved?
+
+@@ Use directory name as a default phony target in directory makefiles. 
+   (explain why).

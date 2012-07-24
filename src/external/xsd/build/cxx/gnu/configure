@@ -1,0 +1,55 @@
+#! /usr/bin/env bash
+
+# file      : build/cxx/gnu/configure
+# author    : Boris Kolpackov <boris@codesynthesis.com>
+# copyright : Copyright (c) 2004-2011 Code Synthesis Tools CC
+# license   : GNU GPL v2; see accompanying LICENSE file
+
+# $1  out file
+# $2  optimize (y/n)
+#
+# bld_root     - build root
+# project_name - project name
+#
+
+
+source $bld_root/dialog.bash
+
+$echo
+$echo
+$echo "configuring '$project_name'"
+$echo
+$echo
+
+$echo
+$echo "Please enter the g++ binary you would like to use, for example 'g++-3.4',"
+$echo "'/usr/local/bin/g++' or 'distcc g++'."
+$echo
+
+cxx_gnu=`read_path --command g++`
+cxx_gnu_libraries=`$cxx_gnu -print-search-dirs | sed -e 's/libraries: =//p' -e d`
+
+
+optimization=
+
+if [ "$2" == "y" ]; then
+
+  $echo
+  $echo "Please select the optimization level you would like to use:"
+  $echo
+  $echo "(1) -O1 [Tries to reduce code size and execution time, without"
+  $echo "         performing any optimizations that take a great deal of"
+  $echo "         compilation time.]"
+  $echo "(2) -O2 [Performs nearly all supported optimizations that do not"
+  $echo "         involve a space-speed tradeoff.]"
+  $echo "(3) -O3 [Optimize even more.]"
+  $echo "(4) -Os [Optimize for size.]"
+  $echo
+
+  optimization=`read_option "-O1 -O2 -O3 -Os" "-O2"`
+
+fi
+
+echo "cxx_gnu := $cxx_gnu"                            > $1
+echo "cxx_gnu_libraries := $cxx_gnu_libraries"       >> $1
+echo "cxx_gnu_optimization_options := $optimization" >> $1

@@ -1,0 +1,138 @@
+#! /usr/bin/env bash
+
+# file      : build/system/configure
+# author    : Boris Kolpackov <boris@codesynthesis.com>
+# copyright : Copyright (c) 2004-2011 Code Synthesis Tools CC
+# license   : GNU GPL v2; see accompanying LICENSE file
+
+# $1  out file
+#
+# bld_root     - build root
+# project_name - project name
+#
+
+source $bld_root/dialog.bash
+
+$echo
+$echo
+$echo "configuring '$project_name'"
+$echo
+$echo
+
+# Build system.
+#
+
+build=`$bld_root/system/config.guess`
+
+if [ $? != 0 ]; then
+
+  $echo "unable to determine build system type"
+  exit 1
+fi
+
+$echo "build system is $build"
+
+build_cpu=`echo $build | cut -f 1 -d -`
+build_mf=`echo $build | cut -f 2 -d -`
+build_kernel=`echo $build | cut -f 3 -d -`
+build_os=`echo $build | cut -f 4 -d -`
+
+if [ -z "$build_os" ]; then
+
+  # Old format: cpu-mf-os
+  #
+  build_os=$build_kernel
+  build_kernel=
+fi
+
+
+# Host system.
+#
+
+if [ -n "$host_system" ]; then
+
+  host=`$bld_root/system/config.sub "$host_system"`
+
+  if [ $? != 0 ]; then
+
+    $echo "unable to canonicalize host system '$host_system'"
+    exit 1
+  fi
+else
+  host=$build
+fi
+
+$echo "host system is $host"
+
+host_cpu=`echo $host | cut -f 1 -d -`
+host_mf=`echo $host | cut -f 2 -d -`
+host_kernel=`echo $host | cut -f 3 -d -`
+host_os=`echo $host | cut -f 4 -d -`
+
+if [ -z "$host_os" ]; then
+
+  # Old format: cpu-mf-os
+  #
+  host_os=$host_kernel
+  host_kernel=
+fi
+
+
+# Target system.
+#
+if [ -n "$target_system" ]; then
+
+  target=`$bld_root/system/config.sub "$target_system"`
+
+  if [ $? != 0 ]; then
+
+    $echo "unable to canonicalize target system '$target_system'"
+    exit 1
+  fi
+
+  $echo "target system is $target"
+
+  target_cpu=`echo $target | cut -f 1 -d -`
+  target_mf=`echo $target | cut -f 2 -d -`
+  target_kernel=`echo $target | cut -f 3 -d -`
+  target_os=`echo $target | cut -f 4 -d -`
+
+  if [ -z "$target_os" ]; then
+
+    # Old format: cpu-mf-os
+    #
+    target_os=$target_kernel
+    target_kernel=
+  fi
+
+else
+target=
+target_cpu=
+target_mf=
+target_kernel=
+target_os=
+fi
+
+
+
+# Write the configuration out.
+#
+echo "system_configuration := y"              >$1
+echo                                         >>$1
+echo "build_system        := $build"         >>$1
+echo "build_cpu           := $build_cpu"     >>$1
+echo "build_manufacturer  := $build_mf"      >>$1
+echo "build_os            := $build_os"      >>$1
+echo "build_kernel        := $build_kernel"  >>$1
+echo                                         >>$1
+echo "host_system         := $host"          >>$1
+echo "host_cpu            := $host_cpu"      >>$1
+echo "host_manufacturer   := $host_mf"       >>$1
+echo "host_os             := $host_os"       >>$1
+echo "host_kernel         := $host_kernel"   >>$1
+echo                                         >>$1
+echo "target_system       := $target"        >>$1
+echo "target_cpu          := $target_cpu"    >>$1
+echo "target_manufacturer := $target_mf"     >>$1
+echo "target_os           := $target_os"     >>$1
+echo "target_kernel       := $target_kernel" >>$1

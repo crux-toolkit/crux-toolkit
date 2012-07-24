@@ -1,0 +1,167 @@
+#! /usr/bin/env bash
+
+# file      : build/cxx/configure
+# author    : Boris Kolpackov <boris@codesynthesis.com>
+# copyright : Copyright (c) 2004-2011 Code Synthesis Tools CC
+# license   : GNU GPL v2; see accompanying LICENSE file
+
+# $1  out file
+# $2  origin of the cxx_pp_options make variable
+# $3  origin of the cxx_options make variable
+# $4  origin of the cxx_ld_options make variable
+# $5  origin of the cxx_libs make variable
+#
+# bld_root     - build root
+# project_name - project name
+#
+
+source $bld_root/dialog.bash
+
+
+$echo
+$echo
+$echo "configuring '$project_name'"
+$echo
+$echo
+
+$echo
+$echo "Please select the C++ compiler you would like to use:"
+$echo
+$echo "(1) GNU C++ (g++)"
+$echo "(2) Intel C++ (icc)"
+$echo "(3) Other C++ compiler"
+$echo
+
+id=`read_option "gnu intel generic" "gnu"`
+
+if [ "$id" != "generic" ]; then
+
+  $echo
+  $echo "Would you like the C++ compiler to optimize generated code?"
+  $echo
+
+  optimize=`read_y_n y`
+
+
+  $echo
+  $echo "Would you like the C++ compiler to generate debug information?"
+  $echo
+
+  debug=`read_y_n y`
+
+  $echo
+  $echo "Embed dynamic library paths into executables (rpath)?"
+  $echo
+
+  rpath=`read_y_n y`
+
+fi
+
+# pp_options
+#
+if [ "$2" != "undefined" ]; then
+
+  pp_options=$cxx_pp_options
+
+  if [ "$pp_options" ]; then
+    $echo
+    $echo "Extra C++ preprocessor options: $pp_options"
+    $echo
+  fi
+else
+
+  $echo
+  $echo "Please enter any extra C++ preprocessor options."
+  $echo
+
+  read -e -p "[]: " pp_options
+fi
+
+
+# options
+#
+if [ "$3" != "undefined" ]; then
+
+  options=$cxx_options
+
+  if [ "$options" ]; then
+    $echo
+    $echo "Extra C++ compiler options: $options"
+    $echo
+  fi
+else
+
+  $echo
+  $echo "Please enter any extra C++ compiler options."
+  $echo
+
+  read -p "[]: " options
+fi
+
+
+# ld_options
+#
+if [ "$4" != "undefined" ]; then
+
+  ld_options=$cxx_ld_options
+
+  if [ "$ld_options" ]; then
+    $echo
+    $echo "Extra C++ linker options: $ld_options"
+    $echo
+  fi
+else
+
+  $echo
+  $echo "Please enter any extra C++ linker options."
+  $echo
+
+  read -e -p "[]: " ld_options
+fi
+
+
+# libs
+#
+if [ "$5" != "undefined" ]; then
+
+  libs=$cxx_libs
+
+  if [ "$libs" ]; then
+    $echo
+    $echo "Extra C++ libraries: $libs"
+    $echo
+  fi
+else
+
+  $echo
+  $echo "Please enter any extra C++ libraries."
+  $echo
+
+  read -e -p "[]: " libs
+fi
+
+
+# Extract -L paths from the ld options.
+#
+paths=
+
+if [ "$ld_options" ]; then
+  paths=`echo "$ld_options" | sed -e 's/-L *\([^ ]*\)/\\
+-L\1\\
+/g' | sed -e 's/^-L\([^ ]*\)$/\1/' -e t -e d`
+  paths=`echo $paths | sed -e 's/ /:/g'`
+fi
+
+echo "cxx_id       := $id"             >$1
+
+if [ "$id" != "generic" ]; then
+  echo "cxx_optimize := $optimize"       >>$1
+  echo "cxx_debug    := $debug"          >>$1
+  echo "cxx_rpath    := $rpath"          >>$1
+fi
+
+echo "cxx_pp_extra_options := $pp_options" >>$1
+echo "cxx_extra_options    := $options"    >>$1
+echo "cxx_ld_extra_options := $ld_options" >>$1
+echo "cxx_extra_libs       := $libs"       >>$1
+echo "cxx_extra_lib_paths  := $paths"      >>$1

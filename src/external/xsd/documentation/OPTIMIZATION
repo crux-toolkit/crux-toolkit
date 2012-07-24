@@ -1,0 +1,21 @@
+%% I should keep a separate list of files that are included-once which
+   should also cache the realpaths.
+
+@@ It would make sense to use $(call include-once,out_dir) in cxx/cxx-o.make
+   etc.
+
+@@ Need to check what is being framed.
+
+@@ I wonder how much it costs to have the second expansion in implicit rule?
+
+@@ Make executes each line in a separate shell. I wonder if using && is
+   more efficient?
+
+%% check make's default hash table size.
+
+@@ would using `makefile: ' tecknique to prevent make from trying to
+   match against pattern-rules help?
+
+@@ Look for redundant $(eval ) calls (like I had in include-*).
+
+@@ use head -n 1 instead of sed -e 1q

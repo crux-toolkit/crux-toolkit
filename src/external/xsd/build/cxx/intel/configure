@@ -1,0 +1,52 @@
+#! /usr/bin/env bash
+
+# file      : build/cxx/intel/configure
+# author    : Boris Kolpackov <boris@codesynthesis.com>
+# copyright : Copyright (c) 2004-2011 Code Synthesis Tools CC
+# license   : GNU GPL v2; see accompanying LICENSE file
+
+# $1  out file
+# $2  optimize (y/n)
+#
+# bld_root     - build root
+# project_name - project name
+#
+
+
+source $bld_root/dialog.bash
+
+$echo
+$echo
+$echo "configuring '$project_name'"
+$echo
+$echo
+
+$echo
+$echo "Please enter the icc binary you would like to use, for example "
+$echo "'/opt/intel_cc_80/bin/icpc'."
+$echo
+
+cxx_intel=`read_path --command icpc`
+cxx_intel_libraries=`$cxx_intel -print-search-dirs | sed -e 's/libraries: =//p' -e d`
+
+# Intel optimizes by default.
+#
+optimization=-O0
+
+if [ "$2" == "y" ]; then
+
+  $echo
+  $echo "Please select the optimization level you would like to use:"
+  $echo
+  $echo "(1) -O1 [Enable optimizations.]"
+  $echo "(2) -O2 [Same as -O1.]"
+  $echo "(3) -O3 [As -O2 plus more aggressive optimizations that may not"
+  $echo "         improve performance for all programs.]"
+  $echo
+
+  optimization=`read_option "-O1 -O2 -O3" "-O2"`
+fi
+
+echo "cxx_intel := $cxx_intel"                          > $1
+echo "cxx_intel_libraries := $cxx_intel_libraries"     >> $1
+echo "cxx_intel_optimization_options := $optimization" >> $1

@@ -1,0 +1,30 @@
+
+# Configuration
+#
+
+configuration
+configure : disfigure
+disfigure : clean
+
+# build
+#
+
+build : configuration
+clean
+
+
+# test
+#
+test : build
+
+
+# install
+#
+install : build
+uninstall
+
+
+# help
+#
+
+help

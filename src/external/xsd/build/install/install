@@ -1,0 +1,22 @@
+#! /usr/bin/env bash
+
+# file      : build/install/install
+# author    : Boris Kolpackov <boris@codesynthesis.com>
+# copyright : Copyright (c) 2004-2011 Code Synthesis Tools CC
+# license   : GNU GPL v2; see accompanying LICENSE file
+
+# Run native install command if available and install-sh otherwise.
+# Also strip the -p argument (should be first) if calling install-sh
+# which doesn't support it.
+#
+
+type install >/dev/null 2>&1
+
+if [ $? -eq 0 ]; then
+  exec install $*
+else
+  if [ "$1" = "-p" ]; then
+    shift
+  fi
+  exec `dirname $0`/install-sh $*
+fi

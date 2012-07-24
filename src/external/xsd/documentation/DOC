@@ -1,0 +1,16 @@
+@@ Update to describe new option importing mechanism. Maybe even
+   include some general model of project building?
+   
+   
+@@ Create style section and put STYLE file there.
+
+
+@@ Describe canonical targets (from targets).
+
+@@ Currently I have no description of targtes (e.g., nobody knows about 
+   disfigure).
+
+@@ Update documentation with the new output from examples.
+
+@@ Add News section to the index.xhtml
+

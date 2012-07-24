@@ -1,0 +1,31 @@
+
+@@ I was thinking about the way make handles inclusion of missing
+   makefile. The following strategy seems like a better choice: 
+   if makefile is missing try to rebuild & read it immediately,
+   without parsing the rest of makefile and without reexecuting
+   make later. This approach has at least two benefits:
+   
+    + more efficient (no make re-execution) (this is not very
+      important in most cases, thoug)
+      
+    + more deterministic: if some of the code after (missing)
+      included makefile depends on some code from it (for
+      example a function) then things can break (example:
+      configuration of ORB).
+
+    - sequential (cannot build makefile in parallel)
+    
+    
+@! target/pattern-specific vpath
+        
+@@ no `target is up to date' message when commnds are executed
+   but target is not changed.
+
+@@ %.o %.d and include
+
+%% implicit double expansion: now supports target/pattern variables
+   and $-
+   
+%% create `examples' directory where I can put md5 and maybe hello.
+
+@! shortest stem

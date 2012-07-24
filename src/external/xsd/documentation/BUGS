@@ -1,0 +1,18 @@
+@@ Messages during configuration should be about 80 chars long.
+   Right now they are much shorter which makes it look really ugly.
+
+@@ some keywords (l:) are being framed
+
+%% Relative paths result in rebuilds.
+
+@% When configuring with -j N some strange warnings appear. Temporary
+   fix. Depends on GNU make bug #12229.
+
+%% Use src_root path as default value for out_root.
+
+@@ Intel C++ does not generate phony rule for non-existent headers.
+
+@@ It seems to me that in generated header prefix logic the dependency
+   patched by sed script and one produced by a subsequent run of the
+   compiler are different which triggers makefile reload. I wonder
+   why?

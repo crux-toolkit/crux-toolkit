@@ -1,0 +1,51 @@
+#! /usr/bin/env bash
+
+# file      : build/ld/configure-lib
+# author    : Boris Kolpackov <boris@codesynthesis.com>
+# copyright : Copyright (c) 2004-2011 Code Synthesis Tools CC
+# license   : GNU GPL v2; see accompanying LICENSE file
+
+# $1  out file
+#
+# bld_root     - build root
+# project_name - project name
+#
+
+source $bld_root/dialog.bash
+
+$echo
+$echo
+$echo "configuring '$project_name'"
+$echo
+$echo
+
+$echo
+$echo "Please select the default library type:"
+$echo
+$echo "(1) archive"
+$echo "(2) shared object"
+$echo
+
+type=`read_option "archive shared" "shared"`
+
+if [ "$type" == "archive" ]; then
+
+  $echo
+  $echo "Please enter the archiver (ar) binary you would like to use."
+  $echo
+
+  ar=`read_path --command ar`
+
+  $echo
+  $echo "Please enter the indexer (ranlib) binary you would like to use."
+  $echo
+
+  ranlib=`read_path --command ranlib`
+fi
+
+echo "ld_lib_type   := $type" > $1
+
+if [ "$type" == "archive" ]; then
+  echo "ld_lib_ar     := $ar"     >> $1
+  echo "ld_lib_ranlib := $ranlib" >> $1
+fi

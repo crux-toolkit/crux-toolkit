@@ -1,0 +1,76 @@
+#! /usr/bin/env bash
+
+# file      : build/meta/vc9proj
+# author    : Boris Kolpackov <boris@codesynthesis.com>
+# copyright : Copyright (c) 2009-2011 Code Synthesis Tools CC
+# license   : GNU GPL v2; see accompanying LICENSE file
+
+# Process VC++ 9 project file templates.
+#
+# Options:
+#
+# -o <output-file>
+#
+# Arguments:
+#
+# <template-file>
+#
+trap 'exit 1' ERR
+
+function error ()
+{
+  echo "$*" 1>&2
+}
+
+output=
+
+while [ $# -gt 0 ]; do
+  case $1 in
+    -o)
+      output=$2
+      shift 2
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
+
+input=$1
+
+if [ "$input" = "" ]; then
+  error "no input file"
+  exit 1
+fi
+
+if [ "$output" = "" ]; then
+  error "no output file"
+  exit 1
+fi
+
+m4=m4
+u2d=todos
+
+# Assume this script is never found via PATH.
+#
+meta=`dirname $0`
+
+build="$meta/.."
+install=$build/install/install
+
+
+# Determine available configurations.
+#
+conf=`sed -n -e \
+'/^[ 	]*<Configuration$/{n;s/[ 	]*Name="\([^"]*\)"$/"\1",/p};d' $input`
+conf=`echo $conf | sed -e 's/,$//'`
+
+export configurations=$conf
+
+# Make sure the output directory exist.
+#
+$install -d -m 755 `dirname $output`
+
+$m4 -P -D__meta_base__=$meta $meta/vc9proj.m4 $input >$output
+$u2d $output
+chmod 644 $output
