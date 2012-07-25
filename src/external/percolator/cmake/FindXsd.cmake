@@ -10,6 +10,7 @@ FIND_PATH(XSD_INCLUDE_DIR xsd/cxx/parser/elements.hxx PATH_SUFFIXES libxsd PATHS
   "[HKEY_CURRENT_USER\\software\\xsd\\include]"
   "[HKEY_CURRENT_USER]\\xsd\\include]"
   /usr/local/include
+/net/gs/vol3/software/modules-sw/xsd/3.3.0/Linux/RHEL5/x86_64/libxsd
   /usr/include
   $ENV{XSDDIR}/include
   ${CMAKE_PREFIX_PATH}/include
@@ -25,6 +26,8 @@ FIND_PROGRAM(XSD_EXECUTABLE
     "[HKEY_CURRENT_USER\\xsd\\bin]"
     /usr/local/bin
     /usr/bin
+    /net/gs/vol3/software/modules-sw/xsd/3.3.0/Linux/RHEL5/x86_64/bin/
+
     ${CMAKE_PREFIX_PATH}/bin
     "[HKEY_CURRENT_USER\\xsd\\bin]" $ENV{XSDDIR}/bin
     "C:/Program Files/CodeSynthesis XSD 3.3/bin"
