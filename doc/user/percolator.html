@@ -163,7 +163,7 @@ cross validation result and the reported end result. Default is 0.01.
 <code>--maxiter &lt;int&gt;</code> &ndash; Maximum number of iterations for training (default 10). </li>
 
 <li>
-<code>  --train-ratio &lt;float&gt;</code> &ndash;  Fraction of the negative data set to be used 
+<code>--train-ratio &lt;float&gt;</code> &ndash;  Fraction of the negative data set to be used 
 as train set when only providing one negative set, remaining examples will be used as test set. 
 Default 0.6.</li>
 
@@ -212,16 +212,16 @@ deviation normalization</li>
 
 <li>
 <code>--alpha &lt;float&gt;</code> &ndash; Probability with which a present protein emits an 
-associated peptide (to be used jointly with the --protein option). Set by grid search of not 
+associated peptide (to be used jointly with the <code>--protein</code> option). Set by grid search of not 
 specified.</li>
 
 <li>
 <code>--beta &lt;float&gt;</code> &ndash; Probability of the creation of a peptide from noise 
-(to be used jointly with the --protein option). Set by grid search of not specified.</li>
+(to be used jointly with the <code>--protein</code> option). Set by grid search of not specified.</li>
 
 <li>
 <code>--gamma &lt;float&gt;</code> &ndash; Prior probability of that a protein is present in 
-the sample ( to be used with the --protein option). Set by grid search of not specified.</li>
+the sample ( to be used with the <code>--protein</code> option). Set by grid search of not specified.</li>
 
 <li>
 <code>--test-each-iteration &lt;T|F&gt;</code> &ndash; Measure performance on test set each 
