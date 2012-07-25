@@ -1,13 +1,18 @@
 Here are the current steps to take to build percolator:
 
 1) Build Xerces
-./configure --disable-network
-make
+$ cd ../xerces
+$ ./configure --disable-network
+$ make
+$ cd ../percolator
 
 2) Load xsd module
-module load xsd
+$ module load xsd
 
-3) Update cmake/FindXSD.cmake with path to binary and include files, ex.
+3) Find where the xsd module is located
+$ which xsd
+
+4) Update cmake/FindXSD.cmake with path to binary and include files, ex.
 
 XSD_INCLUDE_DIR
 /net/gs/vol3/software/modules-sw/xsd/3.3.0/Linux/RHEL5/x86_64/libxsd
@@ -15,17 +20,25 @@ XSD_EXECUTABLE
 /net/gs/vol3/software/modules-sw/xsd/3.3.0/Linux/RHEL5/x86_64/bin/
 
 
-4) Load Boost module
+5) Load Boost module
+$ module load boost
 
-5) Edit percolator/src/CMakeLists.txt
-   Update CMAKE_INCLUDE_PATHs with directory to boost directory before find_package(Boost ...), ex.
+6) Find where the boost module is loaded
+$ echo $LD_LIBRARY_PATH
+
+7) Edit percolator/src/CMakeLists.txt to update CMAKE_INCLUDE_PATHs with directory to boost directory before find_package(Boost ...), ex.
+
    SET(CMAKE_INCLUDE_PATH "/net/gs/vol3/software/modules-sw/boost/1.45.0/Linux/RHEL5/x86_64/include" ${CMAKE_INCLUDE_PATH})
-SET(CMAKE_LIBRARY_PATH "/net/gs/vol3/software/modules-sw/boost/1.45.0/Linux/RHEL5/x86_64/lib" ${CMAKE_LIBRARY_PATH})
+   SET(CMAKE_LIBRARY_PATH "/net/gs/vol3/software/modules-sw/boost/1.45.0/Linux/RHEL5/x86_64/lib" ${CMAKE_LIBRARY_PATH})
+   find_package(Boost COMPONENTS filesystem system REQUIRED)
 
-find_package(Boost COMPONENTS filesystem system REQUIRED)
+8) Run cmake
+$ module load cmake
+$ cmake .
 
-6) cmake .
-7) make
-8) YAY!
+9) run make
+$ make
+
+10) YAY!
    
 
