@@ -127,16 +127,16 @@ printed to stderr.
 <ul>
 
 <li>
-<code>--protein &lt;T|F&gt;</code> &ndash;  Output protein level probabilities</li>
+<code>--protein &lt;T|F&gt;</code> &ndash;  Output protein level probabilities. Default F.</li>
 
 <!--
 <li>
-<code>--stdinput &lt;T|F&gt;</code> &ndash;  Read xml-input format (pin) from standard input</li>
+<code>--stdinput &lt;T|F&gt;</code> &ndash;  Read xml-input format (pin) from standard input.</li>
 -->
 
 <li>
 <code>--decoy-xml-output &lt;T|F&gt;</code> &ndash;  Include decoys (PSMs,peptides and/or proteins) 
-  in the xml-output.</li>
+  in the xml-output. Default F.</li>
 
 <li>
 <code>--decoy-prefix &lt;string&gt;</code> &ndash; Option for single SQT file mode defining the 
@@ -144,7 +144,7 @@ name pattern used for shuffled data base. Default random_.</li>
 
 <li>
 <code>--c-pos &lt;float&gt;</code> &ndash; Penalty for mistakes made on positive 
-examples. Set by cross validation if not specified.</li>
+examples. Set by cross validation if not specified. Default=cross-validate</li>
 
 <li>
 <code>--c-neg &lt;float&gt;</code> &ndash; Penalty for mistake made on negative 
@@ -168,9 +168,9 @@ as train set when only providing one negative set, remaining examples will be us
 Default 0.6.</li>
 
 <li>
-<code>--output-feature-file &lt;string&gt;</code> &ndash; Output the computed features to the 
+<code>--output-feature-file &lt;T|F&gt;</code> &ndash; Output the computed features to the 
 given file in tab-delimited format. A file with the features with the given file name will be 
-created.</li>
+created. Default F</li>
 
 <!--
 Do Not support this yet.
