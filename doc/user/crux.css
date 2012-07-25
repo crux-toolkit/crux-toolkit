@@ -103,3 +103,10 @@ textcopyright {
     font-family: Helvetica; 
     font-size: 11pt;
 }
+
+note{
+  color:#FF0000;
+  font-family: Arial; 
+  font-size: 13px;
+  font-style:italic;
+}

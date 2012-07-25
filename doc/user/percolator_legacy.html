@@ -1,0 +1,184 @@
+<html>
+<title>crux percolator</title>
+<link href="./crux.css" rel="styleSheet" type="text/css">
+</head>
+<body>
+<blockquote>
+
+<H1 ALIGN=CENTER>crux percolator</H1>
+
+<p>
+<b>Usage:</b></p>
+
+<blockquote>
+<code>crux percolator [options] &lt;protein&nbsp;input&gt; 
+   &lt;search results directory&gt;</code>
+</blockquote>
+
+<p>
+<b>Description:</b></p>
+
+<p>
+Percolator is a semi-supervised learning algorithm that dynamically
+learns to separate target from decoy PSMs.  The algorithm is described
+in this article:</p>
+
+<blockquote>
+Lukas K&auml;ll, Jesse Canterbury, Jason Weston, William Stafford
+Noble and Michael
+J. MacCoss.  <a href="http://noble.gs.washington.edu/papers/kall2007semi-supervised.html">"Semi-supervised
+learning for peptide identification from shotgun proteomics
+datasets."</a>
+<i>Nature Methods</i>.  4(11):923-925, 2007.
+</blockquote>
+
+<p>
+For more on q-values and posterior error probabilities (PEP), see the
+documentaion for <a href=calibrate-scores.html>calibrate-scores</a>.
+<p>
+<span class=prog>Crux</span> now includes code from
+<span class=prog>Percolator 1.05</span>.
+The current version of Percolator can be downloaded
+<a href="http://noble.gs.washington.edu/proj/percolator/">here</a>.
+External versions of Percolator can be applied to the output of the 
+<span class=prog>Crux</span> tools, but won't be used by the
+<code>crux percolator</code> command.
+
+<p>
+Percolator requires as input two collections of PSMs, one set derived
+from matching observed spectra against real ("target") peptides, and
+a second derived from matching against "decoy" peptides.  Crux generates
+these decoys on the fly.  Percolator will also accept a second set of
+decoy PSMs and use one set in training and one in calculating
+q-values.  Producing two sets of decoy PSMs is the search-for-matches
+default behavior.</p>
+
+<p>
+The features used by percolator to represent each PSM are summarized
+<a href="features.html">here</a>.</p>
+
+<p>
+<b>Input:</b></p>
+
+<ul>
+
+<LI>
+&lt;protein input &gt; &ndash; The name of the file in fasta format or
+the directory containing the protein index from which to retrieve
+proteins and peptides.</li>
+
+<li>
+&lt;search results directory&gt; &ndash; A folder in which all the PSM
+result files are located.  The program looks for files produced by 
+<code>crux search-for-matches</code> (ending in
+'<code>.search.target.txt</code>' or '<code>.search.decoy.txt</code>')
+<!--or by <code>crux sequest-search</code> (ending in
+'<code>.sequest.target.txt</code>' or
+'<code>.sequest.decoy.txt</code>')-->.  All such files in the given
+directory are analyzed jointly.  Note that the directory should not
+contain results from both types of search algorithms.</li>
+
+</ul>
+
+<B>Output:</B>
+
+<UL>
+<p>
+The program writes files to the folder <code>crux-output</code> by default.
+The name of the output folder can be set by the user using the <code>--output-dir</code> option.
+The following files will be created:</p>
+
+<li>
+<b>percolator.params.txt</b>:
+a file containing the name and value of all parameters/options for the current operation.  
+Not all parameters in the file may have been used in the operation.  
+The resulting file can be used with the <code>--parameter-file</code>
+option for other crux programs.
+</li>
+
+<li>
+<b>percolator.target.txt</b>: a tab-delimited text file containing the PSMs.
+See <a href="txt-format.html">txt file format</a> for a list of the
+fields.</li>
+
+<li>
+<b>percolator.target.pep.xml</b>: a file containing the PSMs in pepxml format.
+See <a href="http://tools.proteomecenter.org/wiki/index.php?title=Formats:pepXML">
+pep xml file format</a> for further reference. This file can be used as input to 
+some of the tools in the 
+<a href="http://tools.proteomecenter.org/wiki/index.php?title=Software:TPP">
+Transproteomic Pipeline</a>.
+</li>
+
+<li>
+<b>percolator.log.txt</b>: a log file containing a copy of all messages that were
+printed to stderr.
+</li>
+</ul>
+
+<b>Options:</b>
+
+<ul>
+
+<li>
+<code>--pi-zero &lt;value&gt;</code> &ndash;
+The estimated proportion of target scores that are drawn according to
+the null distribution.  Default=1.0.</li>
+
+<li>
+<code>mod-mass-format &lt;mod-only|total|separate&gt;<code> &ndash;
+Specify how sequence modifications are reported in various ouptut
+files.  Each modification is reported as a number enclosed in square
+braces following the modified reside; however, the number may
+correspond to one of three different masses: (1) 'mod-only' reports
+the value of the mass shift induced by the modification; (2) 'total'
+reports the mass of the residue with the modification (residue mass
+plus modification mass); (3) 'separate' is the same as 'mod-only', but
+multiple modifications to a single amino acid are reported as a
+comma-separated list of values. For example, suppose amino
+acid <i>D</i> has an unmodified mass of 115 as well as two
+modifications of masses +14 and +2.  In this case, the amino acid
+would be reported as D[16] with 'mod-only', D[131] with 'total', and
+D[14,2] with 'separate'.</li>
+
+<li>
+<code>--fileroot &lt;string&gt;</code> &ndash; 
+The <code>fileroot</code> string will be added as a prefix to all
+output file names. Default = none.</li>
+
+<li>
+<code>--output-dir &lt;filename&gt;</code> &ndash; 
+The name of the directory where output files will be created.
+Default = crux-output.</li>
+
+<li>
+<code>--overwrite &lt;T|F&gt;</code> Replace existing files if true (T) or
+fail when trying to overwrite a file if false (F). Default =  F.
+
+<LI>
+<code>--parameter-file &lt;filename&gt;</code> &ndash;
+A file containing command-line or additional parameters.  See the <a
+href=parameter-file.html>parameter documentation</a> page for details.</li>
+
+<LI> 
+<code>--feature-file &lt;string&gt;</code> &ndash;
+Optional file in which to write the features. Default = none.</li>
+
+<LI>
+<code>--verbosity &lt;0-100&gt;</code> &ndash; Specify the verbosity of the
+current processes. Each level prints the following messages, including
+all those at lower verbosity levels: 0-fatal errors, 10-non-fatal
+errors, 20-warnings, 30-information on the progress of execution,
+40-more progress information, 50-debug info, 60-detailed debug info.
+Default = 30.
+
+</ul>
+
+
+<hr></hr>
+
+<a href="crux.html">Crux home</a>
+
+</blockquote>
+</body>
+</html>
