@@ -26,6 +26,7 @@ endif
 # in open-source distribution of Crux.
 if SEARCH
   AM_CPPFLAGS += -DSEARCH_ENABLED
+  SEARCH_ENABLED = 1
 endif
 
 LIBFILES= \

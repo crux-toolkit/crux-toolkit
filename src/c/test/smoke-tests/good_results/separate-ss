@@ -2,7 +2,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Mon Jul 16 18:28:21 2012
+H	StartTime	Fri Jul 20 14:23:41 2012
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	Comment	Database shuffled; these are decoy matches
@@ -2367,7 +2367,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Mon Jul 16 18:28:21 2012
+H	StartTime	Fri Jul 20 14:23:41 2012
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	Comment	Database shuffled; these are decoy matches
@@ -4728,16 +4728,16 @@ scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	s
 159	2	745.7500	1489.4827	1486.6195	0.98986191	10.493883	3	0.0039789644	2	2	26	4	SPQGNTLNNEPGMK	trypsin-full-digest	YNL166C(201)	KL	SPMPQNNTLGGENK	4
 159	2	745.7500	1489.4827	1488.7063	1.1784209	16.106224	2	-0.070026107	3	3	24	4	FPISALNVSFEHK	trypsin-full-digest	YDR037W(97)	KY	FHVSISNPEFLAK	4
 159	2	745.7500	1489.4827	1490.6510	1.6361779	2.0754061	4	-0.24968527	4	1	24	4	EVHNVDEMVFSGK	trypsin-full-digest	YOR168W(736)	KN	ESVMEHNFGDVVK	4
-INFO: CPU: arginine.gs.washington.edu
-INFO: Mon Jul 16 18:28:21 PDT 2012
+INFO: CPU: canavanine.gs.washington.edu
+INFO: Fri Jul 20 14:23:41 PDT 2012
 COMMAND LINE: crux sequest-search --output-dir ss --fileroot separate --parameter-file params/separate-ss demo.ms2 small-yeast.fasta
 INFO: Preparing protein fasta file small-yeast.fasta
 INFO: Reading in ms2 file demo.ms2
 INFO: Created 1 peptide mods, keeping 1 with 255 or fewer aa mods
 INFO: Searching spectrum number 96 (2+), search number 100
-INFO: Elapsed time: 5.29 s
+INFO: Elapsed time: 5.45 s
 INFO: Finished crux sequest-search
-INFO: Elapsed time: 5.31 s
+INFO: Elapsed time: 5.9 s
 INFO: Finished crux sequest-search.
 INFO: Return Code:0
 # Which isotopes to use in calculating fragment ion mass.
@@ -5109,19 +5109,19 @@ bullseye-max-mass=8000.000000
 custom-threshold=__NULL_STR
 
 # If the target and decoy searches were run separately, rather than
-# using a concatenated database, then Q-ranker will assume that
-# thedatabase search results provided as a required argument are from
-# thetarget database search. This option then allows the user to
-# specifythe location of the decoy search results. Like the required
-# arguments,these search results can be provided as a single file, a
-# list of filesor a directory. However, the choice (file, list or
-# directory) must beconsistent for the MS2 files and the target and
-# decoy SQT files. Also,if the MS2 and SQT files are provided in
-# directories, then Q-rankerwill use the MS2 filename (foo.ms2) to
-# identify corresponding targetand decoy SQT files with names like
-# foo*.target.sqt andfoo*.decoy.sqt. This naming convention allows the
-# target and decoy SQTfiles to reside in the same directory.
-# Available for q-ranker and barista.
+# using a concatenated database, then Q-ranker will assume that the
+# database search results provided as a required argument are from the
+# target database search. This option then allows the user to specify
+# the location of the decoy search results. Like the required arguments,
+# these search results can be provided as a single file, a list of files
+# or a directory. However, the choice (file, list or directory) must be
+# consistent for the MS2 files and the target and decoy tab-delimited
+# files. Also, if the MS2 and tab-delimited files are provided in
+# directories, then Q-ranker will use the MS2 filename (foo.ms2) to
+# identify corresponding target and decoy tab-delimited files with names
+# like foo*.target.txt and foo*.decoy.txt. This naming convention allows
+# the target and decoy txt files to reside in the same directory.
+#  Available for q-ranker and barista.
 separate-searches=__NULL_STR
 
 # Set level of output to stderr (0-100).  Default=30.
@@ -5212,9 +5212,9 @@ precursor-window-decoy=20.000000
 # Available for crux hardklor
 depth=3
 
-# Re-run a previous Q-ranker analysis using a previously computed set
-# oflookup tables.
-# Available for q-ranker and barista.
+# Re-run a previous Q-ranker analysis using a previously computed set of
+# lookup tables.
+#  Available for q-ranker and barista.
 re-run=__NULL_STR
 
 # Specify "no base" averagine. Only modified averagine models will be
@@ -5438,7 +5438,7 @@ xlink-include-linears=true
 
 # Specifies the prefix of the protein names that indicates a decoy.
 # Default = rand_.
-# Available for q-ranker and barista.
+#  Available for q-ranker and barista.
 decoy-prefix=rand_
 
 # Include a decoy version of every peptide by shuffling or reversing the
@@ -5493,7 +5493,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Mon Jul 16 18:28:21 2012
+H	StartTime	Fri Jul 20 14:23:41 2012
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	DBSeqLength	?
