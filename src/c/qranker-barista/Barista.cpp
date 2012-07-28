@@ -1399,6 +1399,7 @@ void Barista :: write_results_subset_prot_tab(ofstream &os)
 
 void Barista :: write_results_peptides_tab(ofstream &os)
 {
+  int ps = pepind_to_max_psmind[peptrainset[0].pepind]; 
   os<< "q-value" << "\t" << "barista score" << "\t";
   os << "NSAF score" << "\t";
   os<<"barista PEP\t";
@@ -1408,12 +1409,16 @@ void Barista :: write_results_peptides_tab(ofstream &os)
   os<<"spectrum neutral mass"<<"\t"; 
   os<<"peptide mass"<<"\t";
   os<< "delta_cn"<< "\t";
-  os<<"sp score"<<"\t";
-  os<<"sp rank\t";
+  if(d.psmind2spscore(ps)!=-1){
+    os<<"sp score"<<"\t";
+    os<<"sp rank\t";
+  }
   os<<"xcorr score"<<"\t";
   os<<"xcorr rank"<<"\t";
-  os<<"b/y ions matched"<<"\t";
-  os<<"b/y ions total"<<"\t";
+  if(d.psmind2spscore(ps)!=-1){
+    os<<"b/y ions matched"<<"\t";
+    os<<"b/y ions total"<<"\t";
+  }
   os<<"matches/spectrum"<<"\t";
   os<<"sequence\t"; 
   os<<"cleavage type"<<"\t"; 
@@ -1454,18 +1459,22 @@ void Barista :: write_results_peptides_tab(ofstream &os)
         os<<d.psmind2peptide_mass(psmind)<<"\t";
         //DELTA CN
         os <<d.psmind2deltaCn(psmind)<< "\t";
-        //Sp Score
-        os<<d.psmind2spscore(psmind)<<"\t";
-        //Sp Rank 
-        os<<d.psmind2sp_rank(psmind)<<"\t";
+        if(d.psmind2spscore(ps)!=-1){
+          //Sp Score
+          os<<d.psmind2spscore(psmind)<<"\t";
+          //Sp Rank 
+          os<<d.psmind2sp_rank(psmind)<<"\t";
+        }
         //xcorr Score
       	os<<d.psmind2xcorr(psmind)<<"\t";
       	//xcorr rank
       	os<<d.psmind2xcorr_rank(psmind)<<"\t";
-      	//by ions match 
-      	os<<d.psmind2by_ions_matched(psmind)<<"\t"; 
-      	//by ions total 
-      	os<<d.psmind2by_ions_total(psmind)<<"\t";
+        if(d.psmind2spscore(ps)!=-1){
+          //by ions match 
+          os<<d.psmind2by_ions_matched(psmind)<<"\t"; 
+          //by ions total 
+          os<<d.psmind2by_ions_total(psmind)<<"\t";
+        }
       	//Matches/Spectrum 
       	os<<d.psmind2matches_spectrum(psmind)<<"\t";
         //sequence 
@@ -1489,6 +1498,7 @@ void Barista :: write_results_peptides_tab(ofstream &os)
 
 void Barista :: write_results_psm_tab(ofstream &os)
 {
+  int ps= psmtrainset[0].psmind; 
   os << "scan" << "\t" << "charge" << "\t";
   os << "q-value" << "\t" << "barista score" << "\t";
   os << "barista PEP\t";
@@ -1496,12 +1506,16 @@ void Barista :: write_results_psm_tab(ofstream &os)
   os<<"spectrum neutral mass"<<"\t"; 
   os<<"peptide mass"<<"\t";
   os<< "delta_cn"<< "\t";
-  os<<"sp score"<<"\t";
-  os<<"sp rank\t";
+  if(d.psmind2spscore(ps)!=-1){
+    os<<"sp score"<<"\t";
+    os<<"sp rank\t";
+  }
   os<<"xcorr score"<<"\t";
   os<<"xcorr rank"<<"\t";
-  os<<"b/y ions matched"<<"\t";
-  os<<"b/y ions total"<<"\t";
+  if(d.psmind2spscore(ps)!=-1){
+    os<<"b/y ions matched"<<"\t";
+    os<<"b/y ions total"<<"\t";
+  }
   os<<"matches/spectrum"<<"\t";
   os<<"sequence"<<"\t";
   os<<"cleavage type"<<"\t"; 
@@ -1536,18 +1550,22 @@ void Barista :: write_results_psm_tab(ofstream &os)
           os<<d.psmind2peptide_mass(psmind)<<"\t";
           //DELTA CN
           os <<d.psmind2deltaCn(psmind)<< "\t";
-          //Sp Score
-          os<<d.psmind2spscore(psmind)<<"\t";
-          //Sp Rank 
-          os<<d.psmind2sp_rank(psmind)<<"\t";
+          if(d.psmind2spscore(ps)!=-1){
+            //Sp Score
+            os<<d.psmind2spscore(psmind)<<"\t";
+            //Sp Rank 
+            os<<d.psmind2sp_rank(psmind)<<"\t";
+          }
           //xcorr Score
       	  os<<d.psmind2xcorr(psmind)<<"\t";
       	  //xcorr rank
       	  os<<d.psmind2xcorr_rank(psmind)<<"\t";
-      	  //by ions match 
-      	  os<<d.psmind2by_ions_matched(psmind)<<"\t"; 
-      	  //by ions total 
-      	  os<<d.psmind2by_ions_total(psmind)<<"\t";
+          if(d.psmind2spscore(ps)!=-1){
+            //by ions match 
+            os<<d.psmind2by_ions_matched(psmind)<<"\t"; 
+            //by ions total 
+            os<<d.psmind2by_ions_total(psmind)<<"\t";
+          }
       	  //Matches/Spectrum 
       	  os<<d.psmind2matches_spectrum(psmind)<<"\t";
       	  get_pep_seq(pep,seq,n,c);

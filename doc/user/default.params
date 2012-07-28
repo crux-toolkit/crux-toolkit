@@ -373,11 +373,12 @@ bullseye-max-mass=8000.000000
 # arguments,these search results can be provided as a single file, a
 # list of filesor a directory. However, the choice (file, list or
 # directory) must beconsistent for the MS2 files and the target and
-# decoy SQT files. Also,if the MS2 and SQT files are provided in
-# directories, then Q-rankerwill use the MS2 filename (foo.ms2) to
-# identify corresponding targetand decoy SQT files with names like
-# foo*.target.sqt andfoo*.decoy.sqt. This naming convention allows the
-# target and decoy SQTfiles to reside in the same directory.
+# decoy tab-delimited files. Also,if the MS2 and tab-delimited files are
+# provided in directories, then Q-rankerwill use the MS2 filename
+# (foo.ms2) to identify corresponding targetand decoy tab-delimited
+# files with names like foo*.target.txt andfoo*.decoy.txt. This naming
+# convention allows the target and decoy txtfiles to reside in the same
+# directory.
 # Available for q-ranker and barista.
 separate-searches=__NULL_STR
 
