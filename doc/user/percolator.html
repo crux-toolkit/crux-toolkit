@@ -11,7 +11,7 @@
 <b>Usage:</b></p>
 
 <blockquote>
-<code>crux percolator [options] &lt;pin.xml&gt; </code>
+<code>crux percolator [options] &lt;search results&gt; </code>
 </blockquote>
 
 <p>
@@ -19,8 +19,8 @@
 
 <p>
 Percolator is a semi-supervised learning algorithm that dynamically
-learns to separate target from decoy PSMs.  The algorithm is described
-in this article:</p>
+learns to separate target from decoy peptide-spectrum matches (PSMs).
+The algorithm is described in this article:</p>
 
 <blockquote>
 Lukas K&auml;ll, Jesse Canterbury, Jason Weston, William Stafford
@@ -33,27 +33,24 @@ datasets."</a>
 
 <p>
 For more on q-values and posterior error probabilities (PEP), see the
-documentaion for <a href=calibrate-scores.html>calibrate-scores</a>.
+documentation for <a href="calibrate-scores.html">calibrate-scores</a>.
 <p>
 <span class=prog>Crux</span> now includes code from
-<span class=prog>Percolator 2.04</span>.
-The current version of Percolator can be downloaded
-<a href="http://per-colator.com/">here</a>.
-External versions of Percolator can be applied to the output of the 
-<span class=prog>Crux</span> tools, but won't be used by the
-<code>crux percolator</code> command.
+<a href="http://per-colator.com/"><span class=prog>Percolator
+2.04</span></a>.</p>
 
 <p>
-Percolator requires as input pin.xml which contains two collections of PSMs, 
-one set derived from matching observed spectra against real ("target") peptides, and
-a second derived from matching against "decoy" peptides.  
-Percolator will also accept a second set of
-decoy PSMs and use one set in training and one in calculating
-q-values.  Producing two sets of decoy PSMs is the search-for-matches
-default behavior.</p>
+Percolator requires as input a file in pin.xml format containing two
+collections of PSMs, one set derived from matching observed spectra
+against real ("target") peptides, and a second derived from matching
+the same spectra against "decoy" peptides.  Optionally, Percolator will
+accept a second set of decoy PSMs <note>We need to create an option
+    for this</note> and use one set in training and one
+in calculating q-values.  Producing two sets of decoy PSMs is the
+search-for-matches default behavior.</p>
 
 <p>
-The features used by percolator to represent each PSM are summarized
+The features used by Percolator to represent each PSM are summarized
 <a href="features.html">here</a>.</p>
 
 <p>
@@ -61,256 +58,177 @@ The features used by percolator to represent each PSM are summarized
 
 <ul>
 <LI>
-<b>&lt;pin.xml&gt;</b> &ndash; PIN files are XML files for PIN format whose structure is defined by 
-the schema percolator_in.xml. <code>crux search-for-matches</code> generates this file.
-Also, this argument can be "-" which indicates the pin file will come from standard input.</li>
-<!--
-<li>&lt;protein input&gt; &ndash; The name of the file in fasta format or the directory containing the protein index from which to retrieve proteins and peptides.
-</li
-
-<li>
-&lt;search results directory&gt; &ndash; A folder in which all the PSM
-result files are located.  The program looks for files produced by 
-<code>crux search-for-matches</code> (ending in
-'<code>.search.target.txt</code>' or '<code>.search.decoy.txt</code>')
-<!--or by <code>crux sequest-search</code> (ending in
-'<code>.sequest.target.txt</code>' or
-'<code>.sequest.decoy.txt</code>').  All such files in the given
-directory are analyzed jointly.  Note that the directory should not
-contain results from both types of search algorithms.</li-->
+<b>&lt;search&nbsp;results&gt;</b> &ndash; A collection of target and
+decoy peptide-spectrum matches (PSMs) in pin.xml format, defined
+according to <a href="percolator_in.xml">this schema</a>.  The
+command <code>crux search-for-matches</code> generates results in this
+format.  Note that this argument can be "-", which indicates the
+pin.xml file should be read from standard input.</li>
 
 </ul>
 
 <B>Output:</B>
-<p>  
-After percolator finishes, the following files will be created in 
+
+<p> Percolator produces the following files in
 the <code>crux-output</code> directory:</p>
+
 <ul>
+
 <li>
-<b>percolator.params.txt</b>:
-a file containing the name and value of all parameters/options for the current operation.  
-Not all parameters in the file may have been used in the operation.  
-The resulting file can be used with the <code>--parameter-file</code>
-option for other crux programs.
+<b>percolator.pout.xml</b>: an XML file containing all of the
+Percolator results, defined according
+to <a href="percolator_out.xml">this schema</a>.
 </li>
 
 <li>
-<b>percolator.target.txt</b>: a tab-delimited file containing the target PSMs.
-See <note>here</note> for a list of the
-fields.</li>
+<b>percolator.target.txt</b>: a tab-delimited file containing the
+target PSMs.  See <note>here</note> for a list of the fields.</li>
 
 <li>
 <b>percolator.decoy.txt</b>: a tab-delimited file containing the decoy PSMs.
 </li>
 
 <li>
-<b>percolator.pout.xml</b>: percolator output xml file of the PSMs.
+<b>percolator.params.txt</b>: a file containing the name and value of
+all parameters for the current operation.  Not all parameters in the
+file may have been used in the operation.  The resulting file can be
+used with the <code>--parameter-file</code> option for other crux
+programs.
 </li>
 
 <li>
-<b>percolator.target.pep.xml</b>: a file containing the PSMs in pepxml format.
+<b>percolator.target.pep.xml</b>: a file containing the PSMs in pepxml
+format.
 See <a href="http://tools.proteomecenter.org/wiki/index.php?title=Formats:pepXML">
-pep xml file format</a> for further reference. This file can be used as input to 
-some of the tools in the 
+pep xml file format</a> for further reference. This file can be used
+as input to some of the tools in the
 <a href="http://tools.proteomecenter.org/wiki/index.php?title=Software:TPP">
 Transproteomic Pipeline</a>.
 </li>
 
 <li>
-<b>percolator.log.txt</b>: a log file containing a copy of all messages that were
-printed to stderr.
+<b>percolator.log.txt</b>: a log file containing a copy of all
+messages that were printed to standard error.
 </li>
 </ul>
 
-<b>Options:</b>
+<b>Percolator options:</b>
 
 <ul>
 
 <li>
-<code>--protein &lt;T|F&gt;</code> &ndash;  Output protein level probabilities. Default F.</li>
-
-<!--
-<li>
-<code>--stdinput &lt;T|F&gt;</code> &ndash;  Read xml-input format (pin) from standard input.</li>
--->
+<code>--decoy-xml-output &lt;T|F&gt;</code> &ndash; Include decoys
+(PSMs, peptides and/or proteins) in the XML output. Default = F.</li>
 
 <li>
-<code>--decoy-xml-output &lt;T|F&gt;</code> &ndash;  Include decoys (PSMs,peptides and/or proteins) 
-  in the xml-output. Default F.</li>
+<code>--decoy-prefix &lt;string&gt;</code> &ndash; Option for single
+SQT file mode defining the name pattern used for shuffled
+database. Default random_.  <note>I don't think this is
+required. --Bill</note></li>
 
 <li>
-<code>--decoy-prefix &lt;string&gt;</code> &ndash; Option for single SQT file mode defining the 
-name pattern used for shuffled data base. Default random_.</li>
+<code>--c-pos &lt;float&gt;</code> &ndash; Penalty for mistakes made
+on positive examples. This value is set via cross validation if it is
+not specified. <note>We need to specify the range of values that are
+considered in the cross-validation. --Bill</note></li>
 
 <li>
-<code>--c-pos &lt;float&gt;</code> &ndash; Penalty for mistakes made on positive 
-examples. Set by cross validation if not specified. Default=cross-validate</li>
+<code>--c-neg &lt;float&gt;</code> &ndash; Penalty for mistakes made on
+negative examples. Set by cross validation if not specified
+or <code>--c-pos</code> not specified. <note>This is not clear --
+  what happens if c-pos is specified? --Bill</note></li>
 
 <li>
-<code>--c-neg &lt;float&gt;</code> &ndash; Penalty for mistake made on negative 
-examples. Set by cross validation if not specified or <code>--c-pos</code> not specified.</li>
-<li>
-<code>--train-fdr &lt;value&gt;</code> &ndash; False discovery rate thereshold to define 
-positive examples in training. Set by cross validation if 0. Default is 0.01.</li>
-
+<code>--train-fdr &lt;value&gt;</code> &ndash; False discovery rate
+thereshold to define positive examples in training. Set by cross
+validation <note>Over what values? --Bill</note> if 0. Default is 0.01.</li>
 
 <li>
-<code>--test-fdr &lt;value&gt;</code> &ndash; False discovery rate threshold for evaluating best 
-cross validation result and the reported end result. Default is 0.01. 
+<code>--test-fdr &lt;value&gt;</code> &ndash; False discovery rate
+threshold for evaluating best cross validation result and the reported
+end result. Default is 0.01.
 <note> Set to 1.0? Keep all PSMs for thresholding in downstream function</note></li>
 
 <li>
-<code>--maxiter &lt;int&gt;</code> &ndash; Maximum number of iterations for training (default 10). </li>
+<code>--maxiter &lt;int&gt;</code> &ndash; Maximum number of
+iterations for training.  Default = 10.</li>
 
 <li>
-<code>--train-ratio &lt;float&gt;</code> &ndash;  Fraction of the negative data set to be used 
-as train set when only providing one negative set, remaining examples will be used as test set. 
-Default 0.6.</li>
+<code>--train-ratio &lt;float&gt;</code> &ndash; Fraction of the
+negative data set to be used as train set when only providing one
+negative set.  The remaining examples will be used as test set.
+Default = 0.6.</li>
 
 <li>
-<code>--output-feature-file &lt;T|F&gt;</code> &ndash; Output the computed features to the 
-given file in tab-delimited format. A file with the features with the given file name will be 
-created. Default F</li>
-
-<!--
-Do Not support this yet.
+<code>--output-feature-file &lt;T|F&gt;</code> &ndash; Output the
+computed features in tab-delimited text format to a file
+named "percolator.features.txt." Default = F</li>
 
 <li>
-<code>--input-feature-file &lt;filename&gt;</code> &ndash; Input files are given as a 
-tab-delimited file. In this case the only argument should be a file name of the data file. 
-The tab-delimited fields should be id &lt;tab&gt; label &lt;tab&gt; feature1 &lt;tab&gt; ... &lt;
-tab&gt; featureN &lt;tab&gt; peptide &lt;tab&gt; proteinId1 &lt;tab&gt; ... &lt;tab&gt; 
-proteinIdM Labels are interpreted as 1 -- positive set and test set, -1 -- negative</note> set. When the 
---doc option is true, the first and second feature (third and fourth column) should contain the retention 
-time and difference between observed and calculated mass.</li>
--->
+<code>--output-weights &lt;T|F&gt; </code>&ndash; Output final weights
+to a file named "percolator.weights.txt."  Default = F.</li>
 
 <li>
-<code>--output-weights &lt;<T|F>&gt; </code>&ndash; Output final weights to percolator.target.weights.txt.</li>
+<code>--input-weights &lt;string&gt;</code> &ndash; Read initial
+weights from the given file (one per line). Default = F.</li>
 
 <li>
-<code>--input-weights &lt;string&gt;</code> &ndash; Read initial weights from the given file 
-(one per line). Default do not read initial weights.</li>
-
-<li>
-<code>--default-direction &lt;int&gt;</code> &ndash; The most informative feature given as feature 
-number, can be negated to indicate that a lower value is better.
-<note>Why do we need this???</note>
+<code>--default-direction &lt;int&gt;</code> &ndash; The most
+informative feature, specified using the feature numbers
+from <a href="features.html">this table</a>, can be negated to
+indicate that a lower value is better.
+<note>Why do we need this???  Answer from Bill: I think this is used
+  to detect when something has gone wrong and revert to a simple,
+  pre-trained classifier.  But we need Lukas to explain this one to
+  us.</note>
 </li>
 
-<!--
 <li>
-<code>--verbosity &lt;int&gt;</code> &ndash; Set verbosity of output  
-
-0=no processing info, 
-5=all, default is 2.</li>
--->
+<code>--unitnorm &lt;T|F&gt;</code> &ndash; Use unit normalization
+[0-1] instead of standard deviation normalization.  Default = F.</li>
 
 <li>
-<code>--unitnorm &lt;T|F&gt;</code> &ndash; Use unit normalization [0-1] instead of standard 
-deviation normalization</li>
+<code>--test-each-iteration &lt;T|F&gt;</code> &ndash; Measure
+performance on the test set each iteration.  Default = F.</li>
 
 <li>
-<code>--alpha &lt;float&gt;</code> &ndash; Probability with which a present protein emits an 
-associated peptide (to be used jointly with the <code>--protein</code> option). Set by grid search of not 
-specified.</li>
+<code>--static-override &lt;T|F&gt;</code> &ndash; Override error
+check and do not fall back on default score vector in case of suspect
+score vector.  Default = F.</li>
 
 <li>
-<code>--beta &lt;float&gt;</code> &ndash; Probability of the creation of a peptide from noise 
-(to be used jointly with the <code>--protein</code> option). Set by grid search of not specified.</li>
+<code>--seed &lt;int&gt;</code> &ndash; Set the seed of the random
+number generator. Default = 0.</li>
 
 <li>
-<code>--gamma &lt;float&gt;</code> &ndash; Prior probability of that a protein is present in 
-the sample ( to be used with the <code>--protein</code> option). Set by grid search of not specified.</li>
-
-<li>
-<code>--test-each-iteration &lt;T|F&gt;</code> &ndash; Measure performance on test set each 
-iteration.</li>
-
-
-<li>
-<code>--static-override &lt;T|F&gt;</code> &ndash;  Override error check and do not fall back on default 
-score vector in case of suspect score vector.</li>
-
-<li>
-<code>--seed &lt;int&gt;</code> &ndash; Setting seed of the random number generator. Default value 
-is 0.</li>
-
-<li>
-<code>--klammer &lt;T|F&gt;</code> &ndash;  Using retention time features calculated as in Klammer et al.
+<code>--klammer &lt;T|F&gt;</code> &ndash; Using retention time
+features calculated as in Klammer et al. <note>Give full citation.</note>
 </li>
 
 <li> 
-<code>--doc &lt;T|F&gt; </code> &ndash; Include description of correct features.<note>What is this?</code>
-</li>
-
-<!--
-<li>
-<code><note>--results &lt;filename&gt;</note></code> &ndash; Output tab delimited results to a 
-file instead of stdout.<note>This should be hardcoded to our tab-delimited results file.</note>
-</li>
--->
-
-<!--
-<li>
-<code>--decoy-results &lt;filename&gt;</code> &ndash; Output tab delimited results for decoys 
-into a file.<note>This should be hardcoded to our tab-delimited file</note></li>
--->
-
-<li>
-<code>--unique-peptides &lt;T|F&gt;</code> &ndash; Do not remove redundant peptides, keep all 
-PSMs and exclude peptide level probability.
+<code>--doc &lt;T|F&gt; </code> &ndash; Include description of correct
+features.<note>What is this?</code>
 </li>
 
 <li>
-<code>--no-schema-validation &lt;T|F&gt;</code> &ndash; Skip validation of input file against xml 
-schema. Default False.</li>
-
-<!--
-<li>
-<code>--clock &lt;T|F&gt;</code> &ndash; Check time performance.</li>
--->
+<code>--unique-peptides &lt;T|F&gt;</code> &ndash; Do not remove
+redundant peptides; keep all PSMs and exclude peptide level
+probability.
+</li>
 
 <li>
-<code>--allow-protein-group &lt;T|F&gt;</code> &ndash; Treat ties as if it were one protein (Only 
-valid if option <code>--protein</code>=T).</li>
+<code>--no-schema-validation &lt;T|F&gt;</code> &ndash; Skip
+validation of input file against xml schema. Default = F.</li>
 
 <li>
-<code>--protein--level-pi0 &lt;T|F&gt;</code> &ndash; Use pi_0 value when calculating empirical 
-q-values (Only valid if option <code>--protein</code>=T).</li>
-
-<li>
-<code>--empirical-protein-q  &lt;T|F&gt;</code> &ndash; Output empirical q-values 
-(from target-decoy analysis). Only valid if option <code>--protein</code>=T</li>
-
-<li>
-<code>--group-proteins &lt;T|F&gt;</code> &ndash; Proteins with same probabilities will be 
-grouped (Only valid if option <code>--protein</code>=T is active).</li>
-
-<li>
-<code>--no-prune-proteins &lt;T|F&gt;</code> &ndash; Peptides with low score will not be pruned 
-before calculating protein probabilities(Only valid if option <code>--protein</code>=T is active).</li>
-
-<li>
-<code>--deepness &lt;0|1|2|3&gt;</code> &ndash; Setting deepness 0 or 1 or 2 or 3 from high 
-deepness to low deepness(less computational time) of the grid search for Alpha,Beta and 
-Gamma estimation(Only valid if option <code>--protein</code>=T). Default value is 3.</li>
-
-<!--
-<li>
-<code>--exp-mass &lt;T|F&gt;</code> &ndash; Include the experimental mass in the output file.</li><note>I think this should 
-always be true</note>
--->
-
-<li>
-<code>--fileroot &lt;string&gt;</code> &ndash; 
+<code>--fileroot &lt;string&gt;</code> &ndash;
 The <code>fileroot</code> string will be added as a prefix to all
 output file names. Default = none.</li>
 
 <li>
-<code>--output-dir &lt;filename&gt;</code> &ndash; 
-The name of the directory where output files will be created.
-Default = crux-output.</li>
+<code>--output-dir &lt;filename&gt;</code> &ndash; The name of the
+directory where output files will be created.  Default =
+crux-output.</li>
 
 <li>
 <code>--overwrite &lt;T|F&gt;</code> Replace existing files if true (T) or
@@ -336,6 +254,84 @@ Default = 30.</li>
 
 </ul>
 
+<b>Protein-level inference options:</b>
+
+<ul>
+
+<li>
+<code>--protein &lt;T|F&gt;</code> &ndash; Output protein level
+probabilities. If this option is not set, then none of the options
+below may be used.  Default = F.</li>
+
+<li>
+<code>--alpha &lt;float&gt;</code> &ndash; Specify the probability
+with which a present protein emits an associated peptide. Set by grid
+search
+<note>over what values?</note> if not specified.</li>
+
+<li>
+<code>--beta &lt;float&gt;</code> &ndash; Specify the probability of
+the creation of a peptide from noise. Set by grid search <note>Over
+what values?</note> if not specified.</li>
+
+<li>
+<code>--gamma &lt;float&gt;</code> &ndash; Specify the prior
+probability that a protein is present in the sample. Set by grid
+search of not specified.</li>
+
+<li>
+<code>--allow-protein-group &lt;T|F&gt;</code> &ndash; Treat ties as
+if it were one protein.  Default = F.</li>
+
+<li>
+<code>--protein--level-pi0 &lt;T|F&gt;</code> &ndash; Use pi_0 value
+when calculating empirical q-values.  Default = F.</li>
+
+<li>
+<code>--empirical-protein-q &lt;T|F&gt;</code> &ndash; Output
+empirical q-values (from target-decoy analysis). Default = F.</li>
+
+<li>
+<code>--group-proteins &lt;T|F&gt;</code> &ndash; Proteins with same
+probabilities will be grouped.  Default = F.</li>
+
+<li>
+<code>--no-prune-proteins &lt;T|F&gt;</code> &ndash; Peptides with low
+score will not be pruned before calculating protein probabilities.
+Default = F.</li>
+
+<li>
+<code>--deepness &lt;0|1|2|3&gt;</code> &ndash; Setting deepness 0 or
+1 or 2 or 3 from high deepness to low deepness (less computational
+time) of the grid search for alpha, beta and gamma estimation. Default
+= 3.</li>
+
+</ul>
+
+<p>
+<b>Options not supported</b></p>
+
+<ul>
+
+<li>
+<code>--input-feature-file &lt;filename&gt;</code> &ndash; Input files
+are given as a tab-delimited file. In this case the only argument
+should be a file name of the data file.  The tab-delimited fields
+should be id &lt;tab&gt; label &lt;tab&gt; feature1 &lt;tab&gt;
+... &lt; tab&gt; featureN &lt;tab&gt; peptide &lt;tab&gt; proteinId1
+&lt;tab&gt; ... &lt;tab&gt; proteinIdM Labels are interpreted as 1 --
+positive set and test set, -1 -- negative</note> set. When the --doc
+option is true, the first and second feature (third and fourth column)
+should contain the retention time and difference between observed and
+calculated mass.</li>
+
+<li>
+<code>--clock &lt;T|F&gt;</code> &ndash; Check time performance.</li>
+
+<li>
+<code>--exp-mass &lt;T|F&gt;</code> &ndash; Include the experimental
+mass in the output file. <note>I think this should always be
+true</note></li>
 
 <hr></hr>
 
