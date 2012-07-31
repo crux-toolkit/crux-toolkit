@@ -43,11 +43,7 @@ documentation for <a href="calibrate-scores.html">calibrate-scores</a>.
 Percolator requires as input a file in pin.xml format containing two
 collections of PSMs, one set derived from matching observed spectra
 against real ("target") peptides, and a second derived from matching
-the same spectra against "decoy" peptides.  Optionally, Percolator will
-accept a second set of decoy PSMs <note>We need to create an option
-    for this</note> and use one set in training and one
-in calculating q-values.  Producing two sets of decoy PSMs is the
-search-for-matches default behavior.</p>
+the same spectra against "decoy" peptides.</p>
 
 <p>
 The features used by Percolator to represent each PSM are summarized
@@ -82,7 +78,8 @@ to <a href="percolator_out.xml">this schema</a>.
 
 <li>
 <b>percolator.target.txt</b>: a tab-delimited file containing the
-target PSMs.  See <note>here</note> for a list of the fields.</li>
+target PSMs.  See <a href="txt-format.html">here</a> for a list of the
+fields.</li>
 
 <li>
 <b>percolator.decoy.txt</b>: a tab-delimited file containing the decoy PSMs.
@@ -173,15 +170,14 @@ to a file named "percolator.weights.txt."  Default = F.</li>
 weights from the given file (one per line). Default = F.</li>
 
 <li>
-<code>--default-direction &lt;int&gt;</code> &ndash; The most
-informative feature, specified using the feature numbers
-from <a href="features.html">this table</a>, can be negated to
-indicate that a lower value is better.
-<note>Why do we need this???  Answer from Bill: I think this is used
-  to detect when something has gone wrong and revert to a simple,
-  pre-trained classifier.  But we need Lukas to explain this one to
-  us.</note>
-</li>
+<code>--default-direction &lt;int&gt;</code> &ndash; In its initial
+round of training, Percolator uses one feature to induce a ranking of
+PSMs.  By default, Percolator will select the feature that produces
+the largest set of target PSMs at a specified FDR threshold
+(cf. <code>--train-fdr</code>).  This option allows the user to
+specify which feature is used for the initial ranking, using the
+indices from <a href="features.html">this table</a>.  The feature
+index can be negated to indicate that a lower value is better.</li>
 
 <li>
 <code>--unitnorm &lt;T|F&gt;</code> &ndash; Use unit normalization
@@ -206,9 +202,9 @@ features calculated as in Klammer et al. <note>Give full citation.</note>
 </li>
 
 <li> 
-<code>--doc &lt;T|F&gt; </code> &ndash; Include description of correct
-features.<note>What is this?</code>
-</li>
+<code>--doc &lt;T|F&gt; </code> &ndash; Tell Percolator to use
+retention time prediction features (pI and mass difference) in the
+training procedure.  Default = F.</li>
 
 <li>
 <code>--unique-peptides &lt;T|F&gt;</code> &ndash; Do not remove
@@ -333,9 +329,17 @@ calculated mass.</li>
 mass in the output file. <note>I think this should always be
 true</note></li>
 
+</ul>
+
 <hr></hr>
 
 <a href="crux.html">Crux home</a>
+
+<note>To do: Document the inclusion of Fido and of the retention time
+  stuff.  Add note explaining differences between crux Percolator and
+  stand-alone Percolator.  Complete the feature table and indicate
+  which ones are used by Percolator, q-ranker and Barista.  Add
+  Percolator to the tab-delimited text table.</note>
 
 </blockquote>
 </body>
