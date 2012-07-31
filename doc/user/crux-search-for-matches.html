@@ -33,7 +33,7 @@ This command searches a protein database with a set of spectra.  For
 each spectrum, the precursor mass is computed from either the measured precursor
 singly charged mass (m+h) or the mass-to-charge (m/z) and an assumed charge.  
 Candidate peptides whose masslies within a specified range of the precursor mass 
-are identified.  These candidate peptides scored with the SEQUEST XCorr 
+are identified.  These candidate peptides scored with the SEQUEST<sup>&reg;</sup> XCorr 
 and ranked by score. The top ranking matches are printed to file.  An 
 optional p-value may be computed for each spectrum based on the distribution 
 of scores for that spectrum (<a href="../../papers/klammer2009statistical.html">
@@ -270,8 +270,7 @@ mono). Default = mono.
 <li>
 <code>use-flanking-peaks &lt;T|F&gt;</code> &ndash;
 Turn on or off the peaks flanking the b/y ions.  For <code>crux 
-search-for-matches</code>, default = F<!--; for <code>crux
-  sequest-search</code>, default = T-->; for <code> crux
+search-for-matches</code>, default = F; for <code> crux
 search-for-xlinks</code>, default = T.</li>
 
 <li>
