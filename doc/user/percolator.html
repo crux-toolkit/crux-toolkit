@@ -335,11 +335,46 @@ true</note></li>
 
 <a href="crux.html">Crux home</a>
 
-<note>To do: Document the inclusion of Fido and of the retention time
-  stuff.  Add note explaining differences between crux Percolator and
-  stand-alone Percolator.  Complete the feature table and indicate
-  which ones are used by Percolator, q-ranker and Barista.  Add
-  Percolator to the tab-delimited text table.</note>
+<note>
+
+<p>
+To do:</p>
+
+<ul>
+<li>
+Document the inclusion of Fido and of the retention time
+stuff.</li>
+<li>
+Add note explaining differences between crux percolator and
+stand-alone Percolator.</li>
+<li>
+Complete the feature table and indicate  which ones are used by
+Percolator, q-ranker and Barista.</li>
+<li>
+Add Percolator to the tab-delimited text table.</li>
+</ul>
+
+<p>
+Changes we are proposing on the Percolator end of things:</p>
+<ul>
+<li>
+Bundle the main() procedure inside of a callable function.</li>
+<li>
+As parameters for that function, include output streams for (1)
+percolator_out.xml, (2) tab-delimited text, (3) pep.xml, (4) optional
+feature file, (5) log file.  Note that we may actually want to produce
+two or three separate tab-delimited text files, akin to what Barista
+does for PSMs, peptides and proteins.</li>
+<li>
+Make Percolator produce pep.xml.</li>
+<li>
+Modify Percolator's tab-delimited text file to resemble those produced
+by the other Crux tools.</li>
+<li>
+Remove the --exp-mass flag and always set it to T.</li>
+</ul>
+
+</note>
 
 </blockquote>
 </body>
