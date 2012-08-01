@@ -25,7 +25,7 @@
 #include "MatchFileReader.h"
 
 using namespace std;
-
+using namespace Crux;
 
 /**
  * Static variable definitions

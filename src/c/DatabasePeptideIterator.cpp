@@ -6,6 +6,7 @@
 #include "DatabasePeptideIterator.h"
 
 using namespace std;
+using namespace Crux;
 
 /***********************************************
  * database_peptide_Iterators - can use the light protein functionality 

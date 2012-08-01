@@ -10,10 +10,10 @@
 #include "analyze_psms.h"
 #include "ComputeQValues.h"
 #include "QRanker.h"
-#include "Percolator.h"
+//#include "Percolator.h"
 #include "MatchCollectionIterator.h"
 #include "MatchIterator.h"
-#include "PercolatorCInterface.h"
+//#include "PercolatorCInterface.h"
 #include "posterior-error/PosteriorEstimator.h"
 
 using namespace pep;
@@ -37,8 +37,9 @@ void analyze_matches_main(
     "output-dir",
     "fileroot"
   };
+
   int qvalue_num_options = sizeof(qvalue_option_list)/sizeof(char*);
-  const char* percolator_option_list[] = {
+/*  const char* percolator_option_list[] = {
     "pi-zero",
     "verbosity",
     "parameter-file",
@@ -48,7 +49,7 @@ void analyze_matches_main(
     "overwrite"
   };
   int percolator_num_options = sizeof(percolator_option_list)/sizeof(char*);
-
+*/
   // Define required command line arguments.
   const char* argument_list[] = {
     "protein database",
@@ -67,6 +68,7 @@ void analyze_matches_main(
       qvalue_option_list, qvalue_num_options, argc, argv);
   }
     break;
+/*
   case PERCOLATOR_COMMAND:
   {
     application = new Percolator();
@@ -74,7 +76,7 @@ void analyze_matches_main(
       percolator_option_list, percolator_num_options, argc, argv);
   }
     break;
-
+*/
   default:
     carp(CARP_FATAL, "Unknown command type.");
     break;
@@ -95,11 +97,13 @@ void analyze_matches_main(
                                   protein_database_name,
                                   output);
     break;
+/*
   case PERCOLATOR_COMMAND:
     match_collection = run_percolator(input_directory,
                                       protein_database_name,
                                       output);
     break;
+*/
   default:
     carp(CARP_FATAL, "Unknown command type.");
     break;
@@ -229,6 +233,7 @@ MatchCollection* run_percolator(
   char* fasta_file, // actually fasta or index
   OutputFiles& output){ 
 
+/*
   double* features = NULL;    
   double* results_q = NULL;
   double* results_score = NULL;
@@ -387,6 +392,8 @@ MatchCollection* run_percolator(
   // free_parameters();
 
   return target_match_collection;
+*/
+return NULL;
 }
 
 

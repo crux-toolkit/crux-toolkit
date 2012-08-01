@@ -4,8 +4,8 @@ SUBDIRS = ArrayLibrary percolator xlink posterior-error qranker-barista hardklor
 
 AM_CPPFLAGS = -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 \
  -D_GNU_SOURCE -DGCC -DHAVE_EXPAT_CONFIG_H
-AM_CFLAGS = -Wall -W -Werror
-AM_CXXFLAGS = -Wall -W -Werror
+AM_CFLAGS =  -W 
+AM_CXXFLAGS =  -W
 
 # Crux can use either single or double precision floating poinnt.
 if USEDOUBLES
@@ -30,7 +30,7 @@ endif
 
 LIBFILES= \
   Alphabet.cpp \
-  Alphabet.h \
+  Alphabet.h\
   analyze_psms.cpp \
   analyze_psms.h \
   carp.cpp \
@@ -141,8 +141,6 @@ LIBFILES= \
   PepXMLReader.h \
   PepXMLWriter.cpp \
   PepXMLWriter.h \
-  Percolator.cpp \
-  Percolator.h \
   GeneratePeptides.cpp \
   GeneratePeptides.h \
   PredictPeptideIons.cpp \
@@ -228,7 +226,12 @@ crux_CXXFLAGS = \
   -I$(top_srcdir)/src/c/xlink \
   -I$(top_srcdir)/src/c/qranker-barista \
   -I$(top_srcdir)/src/c/hardklor \
-  -I$(top_srcdir)/src/c/bullseye
+  -I$(top_srcdir)/src/c/bullseye \
+ -I$(top_srcdir)/src/external/percolator/src \
+ -I$(top_srcdir)/src/external/percolator/src/fido \
+ -I$(top_srcdir)/src/external/xerces/src \
+ -I/net/gs/vol3/software/modules-sw/xsd/3.3.0/Linux/RHEL5/x86_64/libxsd/ \
+ -I/net/gs/vol3/software/modules-sw/boost/1.47.0/Linux/RHEL5/x86_64/include
 
 crux_LDADD = \
   $(AM_LDFLAGS) \
@@ -244,7 +247,16 @@ crux_LDADD = \
   -L$(top_builddir)/src/c/posterior-error \
   -L$(top_builddir)/src/c/hardklor \
   -L$(top_builddir)/src/c/bullseye \
+  -L$(top_builddir)/src/external/percolator/src \
+  -L$(top_builddir)/src/external/xerces/src/.libs \
+  -L$(top_builddir)/src/external/percolator/src/fido \
+  -L/net/gs/vol3/software/modules-sw/boost/1.47.0/Linux/RHEL5/x86_64/lib \
   -lpercolator \
+  -lperclibrary \
+  -lfido \
+  -lxerces-c \
+  -lboost_filesystem \
+  -lboost_system \
   -lqranker_barista \
   -lhardklor \
   -lbullseye \

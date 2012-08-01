@@ -16,7 +16,7 @@
 class ProteinPeptideIterator {
 
  protected:
-  Protein* protein_; ///< The protein whose peptides to iterate over. 
+  Crux::Protein* protein_; ///< The protein whose peptides to iterate over. 
   unsigned short int cur_start_; ///< Start in protein of the current peptide.
   unsigned short int cur_length_; ///< The length of the current peptide.
   unsigned int peptide_idx_; ///< The index of the current peptide.
@@ -109,7 +109,7 @@ class ProteinPeptideIterator {
    * \returns a PROTEIN_PEPTIDE_ITERATOR_T object.
    */
   ProteinPeptideIterator(
-    Protein* protein,
+    Crux::Protein* protein,
     PeptideConstraint* peptide_constraint
   );
 
@@ -132,7 +132,7 @@ class ProteinPeptideIterator {
   /**
    *\returns the protein that the iterator was created on
    */
-  Protein* getProtein();
+  Crux::Protein* getProtein();
 
   /**
    * \returns The total number of peptides in this protein.

@@ -21,7 +21,7 @@ class DatabasePeptideIterator : public PeptideIterator {
     ///< The peptide iterator for the current protein.
   PeptideConstraint* peptide_constraint_; 
     ///< The constraint for the kind of peptide to iterate over.
-  Protein* prior_protein_; 
+  Crux::Protein* prior_protein_; 
     ///< the protein that was used before the current working protein
   bool first_passed_; 
     ///< is it ok to convert prior_protein to light?

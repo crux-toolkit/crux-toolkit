@@ -27,7 +27,7 @@
 #include "objects.h"
 #include "parameter.h"
 #include "Peak.h"
-#include "Index.h"
+
 
 #include "CruxApplication.h"
 

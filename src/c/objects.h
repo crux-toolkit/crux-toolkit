@@ -267,11 +267,14 @@ typedef enum _window_type WINDOW_TYPE_T;
 class PeptideSrc;
 
 
+namespace Crux {
 /**
  * \class Protein
  * \brief A protein sequence
  */
 class Protein;
+
+}
 
 /**
  * \class ProteinPeptideIterator
@@ -737,20 +740,20 @@ typedef std::map<Peptide*, FLOAT_T, bool(*)(Peptide*, Peptide*) > PeptideToScore
  * \typedef ProteinToScore
  * \brief Mapping of protein object to scores
  */
-typedef std::map<Protein*, FLOAT_T, bool(*)(Protein*, Protein*) > ProteinToScore;
+typedef std::map<Crux::Protein*, FLOAT_T, bool(*)(Crux::Protein*, Crux::Protein*) > ProteinToScore;
 
 /**
  * \typedef MetaProtein
  * \brief Collection of protein objects which contain exactly the same
  * set of peptides.
  */
-typedef std::set<Protein*, bool(*)(Protein*, Protein*) > MetaProtein;
+typedef std::set<Crux::Protein*, bool(*)(Crux::Protein*, Crux::Protein*) > MetaProtein;
 
 /**
  * \typedef ProteinToMeta
  * \brief Mapping of Protein to MetaProtein to which it belongs
  */
-typedef std::map<Protein*, MetaProtein, bool(*)(Protein*, Protein*) > ProteinToMetaProtein;
+typedef std::map<Crux::Protein*, MetaProtein, bool(*)(Crux::Protein*, Crux::Protein*) > ProteinToMetaProtein;
 
 /**
  * \typedef MetaToRank

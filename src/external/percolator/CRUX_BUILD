@@ -4,7 +4,9 @@ Here are the current steps to take to build percolator:
 $ cd ../xerces
 $ ./configure --disable-network
 $ make
+$export XERCESROOT=`pwd`
 $ cd ../percolator
+
 
 2) Load xsd module
 $ module load xsd

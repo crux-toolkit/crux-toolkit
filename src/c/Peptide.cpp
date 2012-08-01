@@ -11,7 +11,7 @@
 #include "MatchFileReader.h"
 
 using namespace std;
-
+using namespace Crux;
 /*
   TABLE OF CONTENTS
   Global variables

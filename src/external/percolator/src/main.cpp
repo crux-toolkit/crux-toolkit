@@ -22,7 +22,6 @@
 #include "Caller.h"
 using namespace std;
 
-
 int main(int argc, char** argv) {
   Caller* pCaller = new Caller();
   int retVal = -1;

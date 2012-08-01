@@ -1,6 +1,6 @@
 AM_CXXFLAGS=$(DEBUG_OPTIONS) -I$(top_srcdir)/src/c -I$(top_srcdir)/src/c/ArrayLibrary -D_LARGEFILE_SOURCE
 
-libpercolator_la_SOURCES = \
+libpercolator_legacy_la_SOURCES = \
   BaseSpline.cpp \
   BaseSpline.h \
   Caller.cpp \
@@ -39,7 +39,7 @@ libpercolator_la_SOURCES = \
   ssl.h \
   Transform.h 
 
-noinst_LTLIBRARIES = libpercolator.la
+noinst_LTLIBRARIES = libpercolator_legacy.la
 
 ignore-files:
 	svn update .svnignore

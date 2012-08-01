@@ -175,7 +175,7 @@ std::auto_ptr< ::percolatorInNs::fragSpectrumScan> FragSpectrumScanDatabase::get
     std::istringstream istr (it->second);
     binary_iarchive ia (istr);
     xml_schema::istream<binary_iarchive> is (ia);
-    std::auto_ptr< ::percolatorInNs::fragSpectrumScan> ret (new ::percolatorInNs::fragSpectrumScan (is)); 
+    std::auto_ptr< ::percolatorInNs::fragSpectrumScan > ret (new ::percolatorInNs::fragSpectrumScan (is)); 
     return ret;      
   #endif
 
@@ -218,7 +218,7 @@ void FragSpectrumScanDatabase::print(serializer & ser) {
       std::istringstream istr (it->second);
       binary_iarchive ia (istr);
       xml_schema::istream<binary_iarchive> is (ia);
-      std::auto_ptr< ::percolatorInNs::fragSpectrumScan> fss (new ::percolatorInNs::fragSpectrumScan (is));
+      std::auto_ptr< ::percolatorInNs::fragSpectrumScan > fss (new ::percolatorInNs::fragSpectrumScan (is));
       ser.next ( PERCOLATOR_IN_NAMESPACE, "fragSpectrumScan", *fss);
     }
   #endif

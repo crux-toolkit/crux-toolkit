@@ -20,6 +20,7 @@
  */
 
 #include "peptide_modifications.h"
+#include "Peptide.h"
 
 /* Private data types, typedefed in objects.h */
 /**

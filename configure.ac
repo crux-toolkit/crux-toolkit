@@ -126,6 +126,7 @@ AC_CONFIG_FILES([\
     src/c/ArrayLibrary/Makefile \
     src/external/MSToolkit/Makefile \
     src/c/percolator/Makefile \
+    src/c/percolator_legacy/Makefile \
     src/c/qranker-barista/Makefile \
     src/c/posterior-error/Makefile \
     src/c/xlink/Makefile \

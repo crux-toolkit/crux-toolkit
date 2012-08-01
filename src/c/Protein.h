@@ -14,6 +14,7 @@
 #include "carp.h"
 #include "PeptideConstraint.h"
 
+namespace Crux {
 
 class Protein {
  protected:
@@ -319,6 +320,7 @@ class Protein {
  */
 bool protein_id_less_than(Protein* protein_one, Protein* protein_two);
 
+};
 
 /*
  * Local Variables:

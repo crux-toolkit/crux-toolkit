@@ -17,7 +17,7 @@
 class ProteinIndexIterator {
  protected:
   FILE* file_;  ///< The file handler of the fasta file
-  Protein* next_protein_; ///< the next protein index to return
+  Crux::Protein* next_protein_; ///< the next protein index to return
   bool has_next_; ///< is there a new protein to return?
 
   /**
@@ -51,7 +51,7 @@ class ProteinIndexIterator {
    *
    *\return the next protein index in the protein index file
    */
-  Protein* next();
+  Crux::Protein* next();
 
 };
 

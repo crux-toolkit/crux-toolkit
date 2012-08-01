@@ -71,7 +71,7 @@ class Peptide {
   Peptide(
     unsigned char length,     ///< The length of the peptide -in
     FLOAT_T peptide_mass,       ///< The neutral mass of the peptide -in
-    Protein* parent_protein, ///< The parent_protein of this peptide -in
+    Crux::Protein* parent_protein, ///< The parent_protein of this peptide -in
     int start_idx ///< Start index of peptide in the protein sequence -in
     );
 
@@ -206,7 +206,7 @@ class Peptide {
   /**
    * returns a pointer to the peptide's first parent protein field of the peptide
    */
-  Protein* getParentProtein();
+  Crux::Protein* getParentProtein();
 
   /*  Get-set:  sequence */
 

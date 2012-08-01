@@ -12,42 +12,14 @@
 #include <string>
 #include <fstream>
 
+
 class PercolatorApplication: public CruxApplication {
 
  protected:
 
-  //Calls the main method in HardklorApp
-  static int hardklorMain(int argc, char* argv[]);
+  //Calls the main method in Percolator Application
+  static int percolatorMain(int argc, char* argv[]);
 
-
-
-  /**
-   * writes the ISOTOPE.DAT file for hardklor
-   */
-  static void writeIsotopeDat(
-    std::string& filename ///<path for dat file
-  );
-
-  /**
-   * write the ISOTOPE.DAT to an output stream
-   */
-  static void writeIsotopeDat(
-    std::ostream& os ///< the output stream to use
-  );
-
-  /**
-   * writes the Hardklor.dat to a path
-   */
-  static void writeHardklorDat(
-    std::string& filename ///<path to write the Hardklor.dat to
-    );  
-
-  /**
-   * writes the Hardklor.dat to a stream
-   */
-  static void writeHardklorDat(
-    std::ostream& os ///< stream to write to.
-    );  
 
  public:
 
@@ -86,7 +58,7 @@ class PercolatorApplication: public CruxApplication {
    * \returns whether hardklor was successful or not
    */
   static int main(
-    const std::string& input_spectra ///< file path of spectra to process
+    const std::string& input_pinxml ///< file path of spectra to process
   );
   
 };

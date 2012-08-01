@@ -20,7 +20,7 @@
  */
 
 #include "modifications.h"
-
+#include "mass.h"
 /* Private constants */
 //enum { MAX_PROTEIN_SEQ_LENGTH = 40000 };
 

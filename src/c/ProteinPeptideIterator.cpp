@@ -6,6 +6,7 @@
 #include "ProteinPeptideIterator.h"
 
 using namespace std;
+using namespace Crux;
 
 /*
  * Takes a cumulative distribution of peptide masses (the mass_array) and

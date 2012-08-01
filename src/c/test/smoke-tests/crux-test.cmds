@@ -50,7 +50,7 @@
 1 = search_for_matches_default = good_results/search_for_matches_default.target.txt = crux search-for-matches --decoys peptide-shuffle --parameter-file params/set_rand_seed test.ms2 test.fasta; cat crux-output/search.target.txt = 'Time' 'atabase'
 
 # Analyze existing search results
-1 = analyze_matches_existing = good_results/analyze_matches_existing.percolator.target.txt = crux percolator --overwrite T --output-dir existing_search test.fasta existing_search; cat existing_search/percolator.target.txt = 'Time' 'Database'
+1 = analyze_matches_existing = good_results/analyze_matches_existing.percolator.target.txt = crux percolator --no-schema-validation T  --feature-file T --overwrite T pin.xml; cat existing_search/percolator.target.txt = 'Time' 'Database'
 
 # Search fasta with duplicate peptides, return one copy of each
 1 = search_duplicates = good_results/search_for_matches_duplicates.target.txt = crux search-for-matches --decoys peptide-shuffle --parameter-file params/set_rand_seed --fileroot duplicates test.ms2 duplicates.fasta; cat crux-output/duplicates.search.target.txt

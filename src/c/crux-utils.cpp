@@ -11,6 +11,7 @@
 #endif
 #include "crux-utils.h"
 #include "parameter.h"
+#include "Index.h"
 #include "WinCrux.h"
 
 using namespace std;
