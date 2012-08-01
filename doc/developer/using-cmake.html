@@ -1,0 +1,91 @@
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <title>Using CMake to build Crux</title>
+  <style type="text/css" media="screen">
+    body {margin: 72px;
+  </style>
+</head>
+<body>
+<h1>Using CMake to build Crux</h1>
+<a href="http://www.cmake.org">CMake</a> is a tool for building sofware on multiple platforms.
+It is similar in function to the autotools (autoconf and automake),
+but CMake is easier to use and provides more sophisticated support 
+for a wider array of platforms.
+CMake also seems to build Crux more quickly than the automake tools.
+<p/>
+Documentation for CMake can be fournd <a
+href="http://www.cmake.org/cmake/help/documentation.html">here</a>.
+A CMake tutorial is <a href="http://www.cmake.org/cmake/help/cmake_tutorial.html">here</a>.
+<p />
+To use CMake you write a set of scripts specifying the build in the CMake language.  
+Each of these scripts is named <code>CMakeLists.txt</code>.
+The program <code>cmake</code> on a <code>CMakeLists.txt</code> file
+and it generates the appropriate 'make' files or Visual Studio project files
+need to perform the actual build.
+Typically a master <code>CMakeLists.txt</code> in the root directory of a project points to
+<code>CMakeLists.txt</code> files in each of the subdirectories involved in the build.
+<p />
+To use CMake on our lab computers you'll need to load the CMake module:
+<pre>
+module load cmake/latest
+</pre>
+In the root of the Crux project just run
+<pre>
+cmake .
+</pre>
+After cmake runs, just give the command 
+<pre>
+make
+</pre>
+to build the whole project, and
+<pre>
+make install
+</pre>
+to install it.
+As usual 
+<pre>
+make clean
+</pre>
+will remove any existing targets and intermediate files.
+There is no need to re-run cmake unless you want to change
+the build configuration.
+<p />
+The instructions above will build Crux in a default configuration.
+In particular, it will try to install Crux in /usr/local.
+To set a different installation location use
+<pre>
+cmake -DCMAKE_INSTALL_PREFIX:PATH=$HOME/crux .
+</pre>
+The <code>-DCMAKE_INSTALL_PREFIX:PATH=$HOME/crux</code> option will direct
+<code>make install</code>
+to install Crux in a subdirectory of your home directory.
+<p />
+On UNIX platforms CMake will default to a release build with
+no debugging symbols.
+If you'd like a debug build use the command:
+<pre>
+make clean
+cmake -DCMAKE_BUILD_TYPE=Debug .
+make
+</pre>
+To return to a release build
+<pre>
+make clean
+cmake -DCMAKE_BUILD_TYPE=Release .
+make
+</pre>
+By deault CMake will only show you warnings and error messages from the build.
+If you'd like to see the actuall commands executed during the build,
+you can turn on verbose make with this command:
+<pre>
+cmake -DCMAKE_VERBOSE_MAKEFILE=ON .
+make
+</pre>
+If typing these long configuration options seems painful CMake provides a
+custom proprerty editor that uses the <code>curese</code> library to create
+a point and click settings editor. Use the command
+<pre>ccmake</pre> 
+(only available  on 64-bit systems).
+</body>
+</html>
