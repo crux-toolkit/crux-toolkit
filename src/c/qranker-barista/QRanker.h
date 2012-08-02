@@ -59,12 +59,14 @@ public:
   void write_unique_peptides(string filename, NeuralNet* max_net);
   void write_num_psm_per_spectrum(NeuralNet* max_net);
 
-  inline void set_input_dir(string input_dir) {in_dir = input_dir; d.set_input_dir(input_dir);}
-  inline void set_output_dir(string output_dir){out_dir = output_dir;}
+  inline void set_fileroot(string &fl){fileroot = fl;}
+  inline void set_overwrite_flag(int flag) {overwrite_flag = flag;}
+  inline void set_input_dir(string &input_dir) {in_dir = input_dir; d.set_input_dir(input_dir);}
+  inline void set_output_dir(string &output_dir){out_dir = output_dir;}
   void print_description();
   int set_command_line_options(int argc, char **argv);
   int crux_set_command_line_options(int argc, char *argv[]);
-
+  
 
   virtual int main(int argc, char** argv);
   virtual std::string getName();

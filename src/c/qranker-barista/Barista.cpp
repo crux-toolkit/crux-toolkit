@@ -2643,7 +2643,8 @@ int Barista :: crux_set_command_line_options(int argc, char *argv[])
     "parameter-file",
     "verbosity",
     "list-of-files",
-    "feature-file"
+    "feature-file",
+    "optimization"
   };
   int num_options = sizeof(option_list)/sizeof(char*);
 
@@ -2669,7 +2670,7 @@ int Barista :: crux_set_command_line_options(int argc, char *argv[])
   string sqt_decoy_source;
   int separate_search_flag;
   string output_directory;
-
+  
   string enzyme;
   string decoy_prefix;
 
@@ -2678,16 +2679,22 @@ int Barista :: crux_set_command_line_options(int argc, char *argv[])
   bool list_of_files_flag; 
   bool spec_features_flag;
 
+  opt_type = get_string_parameter_pointer("optimization");
+
   fileroot = get_string_parameter_pointer("fileroot");
   if(fileroot != "__NULL_STR")
     fileroot.append(".");
   else
     fileroot = "";
- 
- 
-  decoy_prefix = get_string_parameter_pointer("decoy-prefix");
-
+  if(opt_type.compare("psm") == 0)
+    qr.set_fileroot(fileroot);
+  
   overwrite_flag = get_boolean_parameter("overwrite");
+  if(opt_type.compare("psm") == 0)
+    qr.set_overwrite_flag(overwrite_flag);
+
+  //options for the parser
+  decoy_prefix = get_string_parameter_pointer("decoy-prefix");
 
   enzyme = get_string_parameter_pointer("enzyme");
 
@@ -2710,6 +2717,11 @@ int Barista :: crux_set_command_line_options(int argc, char *argv[])
       parser= new SQTParser();
       //set input and output dirs
       parser->set_output_dir(dir_with_tables);
+      if(opt_type.compare("psm") == 0)
+	{
+	  qr.set_input_dir(dir_with_tables);
+	  qr.set_output_dir(output_directory);
+	}
       set_input_dir(dir_with_tables);
       set_output_dir(output_directory);
 
@@ -2776,7 +2788,8 @@ int Barista :: crux_set_command_line_options(int argc, char *argv[])
 	  separate_search_flag = 0;
       
       parser->write_features_header();
-      parser->set_use_quadratic_features(1);
+      if(opt_type.compare("protein") == 0)
+	parser->set_use_quadratic_features(1);
       if(parser->get_use_quadratic_features())
         parser->add_quadratic_features_header(); 
       d.get_features_header(parser->get_final_features_header());
@@ -2784,9 +2797,15 @@ int Barista :: crux_set_command_line_options(int argc, char *argv[])
         if(!parser->set_output_dir(output_directory))
 	  return 0;
         //set input and output for the leaning algo (in and out are the same as the out for the parser)
-        set_input_dir(output_directory);
-        set_output_dir(output_directory);
-            
+	
+	if(opt_type.compare("psm") == 0)
+	  {
+	    qr.set_input_dir(output_directory);
+	    qr.set_output_dir(output_directory);
+	  }
+	set_input_dir(output_directory);
+	set_output_dir(output_directory);
+	            
         if(!parser->set_database_source(db_source))
 	  carp(CARP_FATAL, "could not find the database");
       
@@ -2827,11 +2846,15 @@ int Barista::main(int argc, char **argv) {
   if(!crux_set_command_line_options(argc,argv))
     return 1;
 
-
-  //run();
-  run_tries();
-  //run_tries_multi_task();
-   if(skip_cleanup_flag != 1)
+  if(opt_type.compare("psm") == 0)
+    qr.run();
+  else
+    {
+      //run();
+      run_tries();
+      //run_tries_multi_task();
+    }
+  if(skip_cleanup_flag != 1)
     parser->clean_up(out_dir);
   
   return 0;
