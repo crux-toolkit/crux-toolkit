@@ -187,6 +187,9 @@ class Barista : public CruxApplication
   string file_format_; 
   ofstream fdebug;
 
+  string opt_type;
+  QRanker qr;
+
 };
 
 

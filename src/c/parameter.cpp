@@ -832,6 +832,12 @@ void initialize_parameters(void){
     " Defualt= false.", 
     "Availabe for barista.","true");
 
+  set_string_parameter("optimization", "protein",
+     "Specifies whether to do optimization at the protein, peptide or psm level. "
+     "Default = protein.",
+     "Available for barista.", "true");
+
+
   /* analyze-matches parameter options */
   set_double_parameter("pi-zero", 1.0, 0, 1, 
       "The estimated percent of target scores that are drawn from the "
