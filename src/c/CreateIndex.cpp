@@ -10,7 +10,6 @@
 
 #include "CreateIndex.h"
 
-#include <signal.h>
 #include "WinCrux.h"
 
 using namespace std;
@@ -77,17 +76,6 @@ int CreateIndex::main(int argc, char** argv) {
   /* For debugging of parameter processing */
   set_verbosity_level(CARP_ERROR);  
   carp(CARP_DETAILED_DEBUG, "Starting create_index");
-
-  /* connect various signals to our clean-up function */
-#ifndef _MSC_VER
-  signal( SIGTERM, clean_up );
-  signal( SIGINT, clean_up );
-  signal( SIGQUIT, clean_up );
-  signal( SIGHUP, clean_up );
-#else
-  // FIXME:CEGRANT Add windows equivalent
-#endif
-
 
   /* initialize the application */
   initialize(argument_list, num_arguments,

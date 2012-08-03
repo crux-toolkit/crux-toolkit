@@ -9,7 +9,7 @@
 #define CRUX
 
 #include <sys/stat.h>
-#ifndef _MSVC_VER
+#ifndef _MSC_VER
 #include <dirent.h>
 #endif
 #include <iostream>
