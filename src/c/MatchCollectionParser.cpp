@@ -9,6 +9,8 @@
 #include "MatchCollectionParser.h"
 #include "MatchFileReader.h"
 #include "PepXMLReader.h"
+#include "SQTReader.h"
+
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -70,6 +72,8 @@ MatchCollection* MatchCollectionParser::create(
     collection = MatchFileReader::parse(match_path, database, decoy_database);
   } else if( has_extension(match_path, ".xml")) {
     collection = PepXMLReader::parse(match_path, database, decoy_database);
+  } else if (has_extension(match_path, ".sqt")) {
+    collection = SQTReader::parse(match_path, database, decoy_database);
   } else {
     collection = MatchFileReader::parse(match_path, database, decoy_database);
   }

@@ -87,6 +87,8 @@ LIBFILES= \
   IonFilteredIterator.h \
   IonSeries.cpp \
   IonSeries.h \
+  LineFileReader.cpp \
+  LineFileReader.h \
   linked_list.cpp \
   linked_list.h \
   mass.cpp \
@@ -178,6 +180,8 @@ LIBFILES= \
   Spectrum.h \
   SpectrumZState.cpp \
   SpectrumZState.h \
+  SQTReader.cpp \
+  SQTReader.h \
   StatColumn.cpp \
   StatColumn.h \
   utils.cpp \

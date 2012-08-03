@@ -412,15 +412,34 @@ class Match {
     Scorer* scorer ///< the scorer from which to extract information -in
     );
 
+
+  /**
+   * sets the match b_y_ion_matched
+   */
+  void setBYIonFractionMatched(
+    FLOAT_T frac_matched ///< the fraction of ions matched
+    );
+
   /**
    * gets the match b_y_ion_match
    */
   FLOAT_T getBYIonFractionMatched();
 
   /**
+   * set the match b_y_ion_matched
+   */
+  void setBYIonMatched(
+    int matched ///< the number of ions matched
+    );
+
+  /**
    * gets the match b_y_ion_matched
    */
   int getBYIonMatched();
+
+  void setBYIonPossible(
+    int possible ///< the number of possible ions to match
+    );
 
   /**
    * gets the match b_y_ion_possible
