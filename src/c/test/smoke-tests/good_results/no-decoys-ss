@@ -1,13 +1,13 @@
-INFO: CPU: canavanine.gs.washington.edu
-INFO: Fri Jul 20 14:24:22 PDT 2012
+INFO: CPU: n013.grid.gs.washington.edu
+INFO: Thu Aug  2 17:34:05 PDT 2012
 COMMAND LINE: crux sequest-search --output-dir ss --fileroot no-decoys --parameter-file params/no-decoys-ss demo.ms2 small-yeast-index
 INFO: Preparing protein index small-yeast-index
 INFO: Reading in ms2 file demo.ms2
 INFO: Created 1 peptide mods, keeping 1 with 255 or fewer aa mods
 INFO: Searching spectrum number 96 (2+), search number 100
-INFO: Elapsed time: 1.45 s
+INFO: Elapsed time: 0.859 s
 INFO: Finished crux sequest-search
-INFO: Elapsed time: 1.46 s
+INFO: Elapsed time: 0.861 s
 INFO: Finished crux sequest-search.
 INFO: Return Code:0
 # Which isotopes to use in calculating fragment ion mass.
@@ -53,6 +53,11 @@ precursor-window-type-decoy=mass
 # Only available for crux-predict-peptide-ions.  Set automatically to
 # 'by' for searching.
 primary-ions=by
+
+# Specifies whether to do optimization at the protein, peptide or psm
+# level. Default = protein.
+# Available for barista.
+optimization=protein
 
 # Perform parsimony analysis on the proteins and report a parsimony rank
 # column in output file. Default=none. Can be
@@ -763,7 +768,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Fri Jul 20 14:24:23 2012
+H	StartTime	Thu Aug  2 17:34:05 2012
 H	EndTime                               
 H	Database	small-yeast-index/small-yeast-binary-fasta
 H	DBSeqLength	?
