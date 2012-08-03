@@ -21,12 +21,6 @@ static const int MAX_INDEX_FILES = 1024;
 
 
 /**
- * clean_up
- *
- */
-void clean_up( int dummy );
-
-/**
  * \class index
  * \brief A index of a database
  *
