@@ -112,7 +112,7 @@ int PercolatorApplication::main(int argc, char** argv) {
   };
 
   int num_options = sizeof(option_list) / sizeof(char*);
-  cerr << num_options << endl;
+  
   /* Define required command line arguments */
   const char* argument_list[] = {"pin.xml"};
   int num_arguments = sizeof(argument_list) / sizeof(char*);
@@ -291,11 +291,11 @@ int PercolatorApplication::main(
   char** perc_argv = new char*[perc_argc];
 
   perc_argv[0] = (char*)perc_args_vec[0].c_str();
-  cerr<<"perc_argv["<<0<<"]= "<<perc_argv[0]<<endl;
+  //cerr<<"perc_argv["<<0<<"]= "<<perc_argv[0]<<endl;
   for (int idx = 1;idx < perc_argc ; idx++) {
     perc_argv[idx] = (char*)perc_args_vec[idx].c_str();
     carp(CARP_DEBUG, "perc_argv[%d]=%s", idx, perc_argv[idx]);
-    cerr<<"perc_argv["<<idx<<"]= "<<perc_argv[idx]<<endl;
+    //cerr<<"perc_argv["<<idx<<"]= "<<perc_argv[idx]<<endl;
   }
 
   /* Call percolatorMain */
