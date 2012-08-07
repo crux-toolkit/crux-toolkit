@@ -31,6 +31,12 @@ class Dataset
   void clear_labels_prot_training();
   void load_data_all_results();
   void clear_data_all_results();
+  void load_data_pep_training();
+  void clear_data_pep_training();
+  void load_labels_pep_training();
+  void clear_labels_pep_training();
+  void load_data_pep_results();
+  void clear_data_pep_results();
 
   inline void set_input_dir(string input_dir){in_dir = input_dir;}
   void normalize_psms();

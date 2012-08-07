@@ -2491,7 +2491,6 @@ void Barista :: setup_for_training(int trn_to_tst)
   max_net_prot = net;
   max_net_psm = net;
   max_net_pep = net;
-
   
   //get the max num peptides
   max_peptides = 0;
@@ -2616,6 +2615,7 @@ void Barista :: print_description()
   cout << "OPTIONAL ARGUMENTS:" << endl << endl;
   cout << "\t [--enzyme <string>] \n \t     The enzyme used to digest the proteins in the experiment. Default trypsin." << endl;
   cout << "\t [--decoy-prefix <string>] \n \t     Specifies the prefix of the protein names that indicates a decoy. Default decoy_" << endl;
+  cout << "\t [--optimization <string>] \n \t     Specifies whether to do optimization at the protein, peptide or psm level Default protein" << endl;
   cout << "\t [--separate-searches <string>] \n \t     If the target and decoy searches were run separately, the option then allows the user to specify the location of the decoy search results, the target database search should be provided as required argument." << endl;
   cout << "\t [--fileroot <string>] \n \t     The fileroot string will be added as a prefix to all output file names. Default = none." <<endl;
   cout << "\t [--output-dir <directory>] \n \t     The name of the directory where output files will be created. Default = crux-output." << endl;
@@ -2680,6 +2680,7 @@ int Barista :: crux_set_command_line_options(int argc, char *argv[])
   bool spec_features_flag;
 
   opt_type = get_string_parameter_pointer("optimization");
+  
 
   fileroot = get_string_parameter_pointer("fileroot");
   if(fileroot != "__NULL_STR")
@@ -2688,10 +2689,14 @@ int Barista :: crux_set_command_line_options(int argc, char *argv[])
     fileroot = "";
   if(opt_type.compare("psm") == 0)
     qr.set_fileroot(fileroot);
+  else if(opt_type.compare("peptide") == 0)
+    pr.set_fileroot(fileroot);
   
   overwrite_flag = get_boolean_parameter("overwrite");
   if(opt_type.compare("psm") == 0)
     qr.set_overwrite_flag(overwrite_flag);
+  if(opt_type.compare("peptide") == 0)
+    pr.set_overwrite_flag(overwrite_flag);
 
   //options for the parser
   decoy_prefix = get_string_parameter_pointer("decoy-prefix");
@@ -2721,6 +2726,11 @@ int Barista :: crux_set_command_line_options(int argc, char *argv[])
 	{
 	  qr.set_input_dir(dir_with_tables);
 	  qr.set_output_dir(output_directory);
+	}
+      else if(opt_type.compare("peptide") == 0)
+	{
+	  pr.set_input_dir(dir_with_tables);
+	  pr.set_output_dir(output_directory);
 	}
       set_input_dir(dir_with_tables);
       set_output_dir(output_directory);
@@ -2797,11 +2807,16 @@ int Barista :: crux_set_command_line_options(int argc, char *argv[])
         if(!parser->set_output_dir(output_directory))
 	  return 0;
         //set input and output for the leaning algo (in and out are the same as the out for the parser)
-	
+		
 	if(opt_type.compare("psm") == 0)
 	  {
 	    qr.set_input_dir(output_directory);
 	    qr.set_output_dir(output_directory);
+	  }
+	else if(opt_type.compare("peptide") == 0)
+	  {
+	    pr.set_input_dir(output_directory);
+	    pr.set_output_dir(output_directory);
 	  }
 	set_input_dir(output_directory);
 	set_output_dir(output_directory);
@@ -2848,6 +2863,8 @@ int Barista::main(int argc, char **argv) {
 
   if(opt_type.compare("psm") == 0)
     qr.run();
+  else if(opt_type.compare("peptide") == 0)
+    pr.run();
   else
     {
       //run();
