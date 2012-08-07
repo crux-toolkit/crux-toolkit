@@ -827,8 +827,6 @@ void QRanker::train_many_nets()
 
   train_many_target_nets();  
  
-  
-
   ostringstream fname;
   fname << out_dir << "/" << fileroot << "q-ranker.psms.at.fdr.thresholds.txt";;
   write_max_nets(fname.str(), max_net_targ);
