@@ -1044,6 +1044,13 @@ static bool dump_peptide_all(
   Peptide** working_array = NULL;
   int bin_idx = 0;
   int file_idx = 0;
+
+#ifdef _MSC_VER
+  // Windows defaults to a fairly small number
+  // for the max open files. Increase this to the
+  // maximum allowed by the Microsoft CRT.
+  _setmaxstdio(WIN_MAX_OPEN_FILES);
+#endif
   
   // print out all remaining peptides in the file_array
   for(file_idx = 0; file_idx < num_bins; ++file_idx){
