@@ -130,21 +130,23 @@ not specified. <note>We need to specify the range of values that are
 considered in the cross-validation. --Bill</note></li>
 
 <li>
-<code>--c-neg &lt;float&gt;</code> &ndash; Penalty for mistakes made on
-negative examples. Set by cross validation if not specified
-or <code>--c-pos</code> not specified. <note>This is not clear --
-  what happens if c-pos is specified? --Bill</note></li>
+<code>--c-neg &lt;float&gt;</code> &ndash; Penalty for mistakes made
+on negative examples. This parameter requires
+that <code>--c-pos</code> is set explicitly;
+otherwise, <code>--c-neg</code> will have no effect.  Set by cross
+validation if not specified.</li>
 
 <li>
 <code>--train-fdr &lt;value&gt;</code> &ndash; False discovery rate
-thereshold to define positive examples in training. Set by cross
-validation <note>Over what values? --Bill</note> if 0. Default is 0.01.</li>
+threshold to define positive examples in training. Set by cross
+validation <note>Over what values? --Bill</note> if 0. Default =
+0.01.</li>
 
 <li>
 <code>--test-fdr &lt;value&gt;</code> &ndash; False discovery rate
-threshold for evaluating best cross validation result and the reported
-end result. Default is 0.01.
-<note> Set to 1.0? Keep all PSMs for thresholding in downstream function</note></li>
+threshold used in selecting hyperparameters during internal
+cross-validation and for reporting the final results. Default =
+0.01.</li>
 
 <li>
 <code>--maxiter &lt;int&gt;</code> &ndash; Maximum number of
@@ -181,7 +183,9 @@ index can be negated to indicate that a lower value is better.</li>
 
 <li>
 <code>--unitnorm &lt;T|F&gt;</code> &ndash; Use unit normalization
-[0-1] instead of standard deviation normalization.  Default = F.</li>
+(i.e., linearly rescale each PSM's feature vector to have a Euclidean
+length of 1), instead of standard deviation normalization.  Default =
+F.</li>
 
 <li>
 <code>--test-each-iteration &lt;T|F&gt;</code> &ndash; Measure
