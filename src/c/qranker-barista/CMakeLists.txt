@@ -31,15 +31,16 @@ add_library(
   barista
   STATIC
   Barista.cpp
-  CruxParser.cpp
-  ProtScores.cpp
-  NeuralNet.cpp
-  SpecFeatures.cpp
   BipartiteGraph.cpp
-  PSMScores.cpp
+  CruxParser.cpp
+  DataSet.cpp
+  NeuralNet.cpp
+  PepRanker.cpp
   PepScores.cpp
+  ProtScores.cpp
+  PSMScores.cpp
+  QRanker.cpp
+  SpecFeatures.cpp
   SQTParser.cpp
   TabDelimParser.cpp
-  DataSet.cpp
-  QRanker.cpp
 )
