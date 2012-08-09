@@ -216,18 +216,21 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     xlink
     crux-support
     MSToolkit
+    ws2_32
   )
   target_link_libraries(
     xlink-score-spectrum
     xlink
     crux-support
     MSToolkit
+    ws2_32
   )
   target_link_libraries(
     xlink-assign-ions
     xlink
     crux-support
     MSToolkit
+    ws2_32
   )
 else(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   target_link_libraries(
