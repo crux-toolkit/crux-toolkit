@@ -85,7 +85,7 @@ based on the Sp score</td>
 <td>6</td>
 <td><code>dM</code></td>
 <td>Float</td>
-<td>The difference in calculated and observed mass</td>
+<td>The difference between the calculated and observed mass</td>
 <td>&#10003</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
@@ -95,7 +95,7 @@ based on the Sp score</td>
 <td>7</td>
 <td><code>absdM</code></td>
 <td>Float</td>
-<td>The absolute value of the difference in calculated and observed mass</td>
+<td>The absolute value of the difference between the calculated and observed mass</td>
 <td>&#10003</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
@@ -105,7 +105,7 @@ based on the Sp score</td>
 <td>8</td>
 <td><code>ionFrac</code></td>
 <td>Float</td>
-<td>The fraction of matched b and y ions</td>
+<td>The fraction of b and y ions theoretical ions matched to the spectrum</td>
 <td>&#10003</td>
 <td></td>
 <td></td>
@@ -116,7 +116,7 @@ based on the Sp score</td>
 <td><code>lnSM</code></td>
 <td>Float</td>
 <td>The natural logarithm of the number of database
-peptides within the specified m/z range</td>
+peptides within the specified precursor range</td>
 <td>&#10003</td>
 <td></td>
 <td></td>
@@ -172,6 +172,9 @@ peptides within the specified m/z range</td>
 <td>&#10003</td>
 </tr>
 
+<!--
+This shouldn't be a feature SJM
+-->
 <tr bgcolor="#DEDEDE">
 <td>17</td>
 <td><code>scan</code></td>
@@ -181,6 +184,7 @@ peptides within the specified m/z range</td>
 <td>&#10003</td>
 <td>&#10003</td>
 </tr>
+
 
 <tr >
 <td>18</td>
@@ -235,7 +239,7 @@ peptides within the specified m/z range</td>
 
 <tr  bgcolor="#DEDEDE">
 <td>23</td>
-<td><code>number of sequnce_comparision</code></td>
+<td><code>number of sequnce comparisions</code></td>
 <td>Integer</td>
 <td>The number of sequnce comparision</td>
 <td>&nbsp;</td>
@@ -267,7 +271,7 @@ peptides within the specified m/z range</td>
 <td>26</td>
 <td><code>b ions</code></td>
 <td>Float</td>
-<td>The mass of b-ions which extended from N_Terminus.</td>
+<td>The XCorr from the theoretical b-ions.</td>
 <td>&nbsp;</td>
 <td>&#10003</td>
 <td>&#10003</td>
@@ -276,18 +280,18 @@ peptides within the specified m/z range</td>
 <tr bgcolor="#DEDEDE">
 <td>27</td>
 <td><code>y ions</code></td>
-<td>Flaot</td>
-<td>The mass of y ions which extended from C_Terminus.</td>
+<td>Float</td>
+<td>The XCorr from the theoretical y ions.</td>
 <td>&nbsp;</td>
 <td>&#10003</td>
 <td>&#10003</td>
 </tr>
 
-<tr >
+<tr>
 <td>28</td>
 <td><code>flanking</code></td>
 <td>Float</td>
-<td></td>
+<td>The XCorr from the flanking peaks</td>
 <td>&nbsp;</td>
 <td>&#10003</td>
 <td>&#10003</td>
