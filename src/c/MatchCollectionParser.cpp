@@ -10,7 +10,6 @@
 #include "MatchFileReader.h"
 #include "PepXMLReader.h"
 #include "SQTReader.h"
-
 #include <sys/types.h>
 #include <sys/stat.h>
 

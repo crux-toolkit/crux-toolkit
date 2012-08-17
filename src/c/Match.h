@@ -567,6 +567,7 @@ int comparePercolatorScore(
   Match** match_b  ///< the scond match -in
   );
 
+
 /**
  * compare two matches, used for QRANKER_SCORE
  * \returns the difference between QRANKER_SCORE score in match_a and match_b
@@ -618,6 +619,16 @@ int compareSpectrumPercolatorQValue(
   Match** match_b  ///< the scond match -in
   );
 
+/**
+ * Compare two matches by spectrum scan number.
+ * \returns -1 if match a spectrum number is less than that of match b
+ * or if scan number is same, if score of match a is less than
+ * match b.  1 if scan number and score are equal, else 0.
+ */
+int compareSpectrumScan(
+  Match** match_a, ///< the first match -in  
+  Match** match_b  ///< the scond match -in
+  );
 /**
  * Compare two matches by spectrum scan number and qranker q-value, 
  * used for qsort.

@@ -331,6 +331,7 @@ int MatchSearch::main(int argc, char** argv){
   bool combine_target_decoy = get_boolean_parameter("tdc");
   OutputFiles output_files(this); 
   output_files.writeHeaders(num_proteins, combine_target_decoy);
+  //output_files.writeHeader();
   // TODO (BF oct-21-09): consider adding pvalue file to OutputFiles
   FILE* decoy_pvalue_file = NULL;
   if( get_boolean_parameter("decoy-p-values") ){

@@ -14,7 +14,7 @@
 #include "DelimitedFile.h"
 #include "parameter.h"
 #include "MatchCollectionParser.h"
-
+#include "SQTReader.h"
 
 using namespace std;
 using namespace Crux;
@@ -178,7 +178,7 @@ void SQTReader::parseSpectrum(string& line) {
   charge_vec.push_back(charge);
   current_spectrum_ = new Spectrum(low_scan, high_scan, precursor_mz, charge_vec, "");
   current_zstate_.setNeutralMass(observed_mass, charge);
-
+  /*
   cerr << "spectrum line:"<<line<<endl;
   cerr << "low scan:"<<low_scan<<endl;
   cerr << "high scan:"<<high_scan<<endl;
@@ -186,7 +186,7 @@ void SQTReader::parseSpectrum(string& line) {
   cerr << "observed mass:"<<observed_mass<<endl;
   cerr << "num matches:"<<num_matches<<endl;
   cerr << "======================="<<endl;
-
+ */
 
 }
 

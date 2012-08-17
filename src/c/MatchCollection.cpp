@@ -15,6 +15,7 @@
 #include <string>
 
 #include "MatchFileReader.h"
+#include "SQTReader.h"
 #include "WinCrux.h"
 
 using namespace std;
@@ -595,7 +596,13 @@ void MatchCollection::sort(
     sort_by = PERCOLATOR_QVALUE;
     compare_match_function = (QSORT_COMPARE_METHOD)comparePercolatorQValue;
     break;
-
+/*
+  case PERCOLATOR_SCAN:
+    carp(CARP_INFO, "Sorting match collection by Percolator scan.");
+    sort_by = PERCOLATOR_SCAN;
+    compare_match_function = (QSORT_COMPARE_METHOD)compareSpectrum;
+    break;
+*/
   case QRANKER_SCORE:
     carp(CARP_DEBUG, "Sorting match collection by Q-ranker score.");
     sort_by = QRANKER_SCORE;
@@ -693,7 +700,14 @@ void MatchCollection::spectrumSort(
                 (QSORT_COMPARE_METHOD)compareSpectrumPercolatorQValue);
     last_sorted_ = PERCOLATOR_QVALUE;
     break;
-
+  case PERCOLATOR_SCAN: 
+    qsortMatch(
+      match_,
+      match_total_,
+      (QSORT_COMPARE_METHOD)compareSpectrumScan
+    );
+    last_sorted_=PERCOLATOR_SCAN;
+    break; 
   case QRANKER_SCORE:
     qsortMatch(match_, match_total_,
                 (QSORT_COMPARE_METHOD)compareSpectrumQRankerScore);
@@ -1705,7 +1719,6 @@ void MatchCollection::printXmlHeader(
   fprintf(output, "</search_summary>\n");
 
 }
-
 
 /**
  * Write header for .sqt file.  Assumes only sequest-search is writing

@@ -416,6 +416,7 @@ int comparePercolatorScore(
 
 }
 
+
 /**
  * Compare two matches by spectrum scan number and percolator score,
  * used for qsort. 
@@ -526,6 +527,26 @@ int compareSpectrumBaristaScore(
   return return_me;
 }
 
+
+/**
+ * Compare two matches by spectrum scan number,
+ * used for PinXMLWriter. 
+ * \returns -1 if match a spectrum number is less than that of match b
+ * or if scan number is same, if score of match a is less than
+ * match b.  1 if scan number and score are equal, else 0.
+ */
+int compareSpectrumScan(
+  Match** match_a, ///< the first match -in  
+  Match** match_b  ///< the scond match -in
+  )
+{
+
+  int return_me = compareSpectrum( match_a, match_b );
+  if( return_me == 0 ){
+    return_me = compareSpectrum(match_a, match_b);
+  }
+  return return_me;
+}
 /**
  * Compare two matches by spectrum scan number and q-value (from the decoys and xcorr score),
  * used for qsort. 

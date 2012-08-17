@@ -57,6 +57,8 @@ class SpectrumZState {
     FLOAT_T mz,
     int charge);
 
+  FLOAT_T getMZ();
+
 
   /**
    * Sets the m+h charged mass for this z-state

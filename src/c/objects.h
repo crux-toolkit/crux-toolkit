@@ -463,6 +463,7 @@ enum _scorer_type {
   PERCOLATOR_QVALUE,
   PERCOLATOR_PEPTIDE_QVALUE,
   PERCOLATOR_PEP,      ///< posterior error prob from percolator scores
+  PERCOLATOR_SCAN,    ///< for converting files to pin.xml format 
 
   QRANKER_SCORE,
   QRANKER_QVALUE,
@@ -770,6 +771,7 @@ typedef std::map<MetaProtein, int, bool(*)(MetaProtein, MetaProtein) > MetaToRan
 enum FILE_FORMAT_T{
   INVALID_FORMAT,
   SQT_FORMAT,
+  XML_FORMAT,
   DELIMITED_FORMAT
 };
 								    

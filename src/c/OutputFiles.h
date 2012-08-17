@@ -23,6 +23,7 @@
 #include "MatchCollection.h"
 #include "MatchFileWriter.h"
 #include "PepXMLWriter.h"
+#include "PinXMLWriter.h"
 
 class OutputFiles{
 
@@ -72,6 +73,13 @@ class OutputFiles{
                   const char* output_dir,
                   const char* filename,
                   bool overwrite);
+
+  bool createFile(
+    PinXMLWriter** pin_file_ptr,
+    const char* output_dir, 
+    const char* filename, 
+    bool overwrite
+  );
   string makeFileName(const char* fileroot,
                       CruxApplication* application,
                       const char* target_decoy,
@@ -99,14 +107,23 @@ class OutputFiles{
                            ///< array of collections from shuffled peptides
   Spectrum* spectrum = NULL);
 
+  void printMatchesPinXml(
+    MatchCollection* target_matches, ///< form real peptides 
+    std::vector<MatchCollection*>& decoy_maches_array, 
+                          ///< array of collection from shuffled peptides  
+    Spectrum* spectrum=NULL
+  );
+
   int num_files_;         ///< num files in each array
   std::string* target_decoy_list_; ///< target or decoy[-n] string of each file
   MatchFileWriter** delim_file_array_; ///< array of .txt files
   FILE** sqt_file_array_; ///< array of .sqt files
   PepXMLWriter** xml_file_array_; ///< array of .pep.xml files
-  FILE*  feature_file_;   ///< file for percolator/q-ranker to write features to
+  FILE*  feature_file_;   ///< file for percolator/q-ranker to write features to 
   int matches_per_spec_;  ///< print this many matches per spec
   CruxApplication* application_;///< crux application writing these files
+  PinXMLWriter* pin_xml_file_;///< file for inpupt of percolator
+ 
 };
 
 

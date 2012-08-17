@@ -62,10 +62,10 @@ SQTParser :: SQTParser()
    min_len = 7;
 
   //feature header
-  features_header_.push_back( "sp rank");
-  features_header_.push_back(  "delta cn");
-  features_header_.push_back( "delta cn"); 
-  features_header_.push_back( "xcorr rank");
+  features_header_.push_back("sp rank");
+  features_header_.push_back("delta cn");
+  features_header_.push_back("deltal cn"); 
+  features_header_.push_back("xcorr rank");
   features_header_.push_back("sp score");
   features_header_.push_back("matched ions/predicted ions");
   features_header_.push_back("observed mass");
@@ -73,8 +73,8 @@ SQTParser :: SQTParser()
   features_header_.push_back("charge 1");
   features_header_.push_back("charge 2");
   features_header_.push_back("charge 3");
-  features_header_.push_back( "c-term enz");
-  features_header_.push_back("t-term enz");
+  features_header_.push_back("c-term enz");
+  features_header_.push_back("n-term enz");
   features_header_.push_back("missed cleavage");
   features_header_.push_back("number of sequnce_comparision");
   features_header_.push_back("delta mass");

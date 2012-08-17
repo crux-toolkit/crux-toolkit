@@ -5,7 +5,7 @@ SUBDIRS = ArrayLibrary percolator xlink posterior-error qranker-barista hardklor
 AM_CPPFLAGS = -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 \
  -D_GNU_SOURCE -DGCC -DHAVE_EXPAT_CONFIG_H
 AM_CFLAGS =  -W 
-AM_CXXFLAGS =  -W
+AM_CXXFLAGS =  -Wall 
 
 # Crux can use either single or double precision floating poinnt.
 if USEDOUBLES
@@ -143,6 +143,8 @@ LIBFILES= \
   PepXMLReader.h \
   PepXMLWriter.cpp \
   PepXMLWriter.h \
+  PinXMLWriter.cpp\
+  PinXMLWriter.h\
   GeneratePeptides.cpp \
   GeneratePeptides.h \
   PredictPeptideIons.cpp \
