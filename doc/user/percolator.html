@@ -118,29 +118,23 @@ messages that were printed to standard error.
 (PSMs, peptides and/or proteins) in the XML output. Default = F.</li>
 
 <li>
-<code>--decoy-prefix &lt;string&gt;</code> &ndash; Option for single
-SQT file mode defining the name pattern used for shuffled
-database. Default random_.  <note>I don't think this is
-required. --Bill</note></li>
-
-<li>
 <code>--c-pos &lt;float&gt;</code> &ndash; Penalty for mistakes made
-on positive examples. This value is set via cross validation if it is
-not specified. <note>We need to specify the range of values that are
-considered in the cross-validation. --Bill</note></li>
+on positive examples. If this value is not specified, then it is set
+via cross validation over the values {0.1, 1, 10}, selecting the value
+that yields the largest number of PSMs identified at the q-value
+threshold set via the <code>--test-fdr</code> parameter.</li>
 
 <li>
 <code>--c-neg &lt;float&gt;</code> &ndash; Penalty for mistakes made
 on negative examples. This parameter requires
 that <code>--c-pos</code> is set explicitly;
-otherwise, <code>--c-neg</code> will have no effect.  Set by cross
-validation if not specified.</li>
+otherwise, <code>--c-neg</code> will have no effect.  If not
+specified, then this value is set by cross validation over {0.1, 1,
+10}.</li>
 
 <li>
 <code>--train-fdr &lt;value&gt;</code> &ndash; False discovery rate
-threshold to define positive examples in training. Set by cross
-validation <note>Over what values? --Bill</note> if 0. Default =
-0.01.</li>
+threshold to define positive examples in training. Default = 0.01.</li>
 
 <li>
 <code>--test-fdr &lt;value&gt;</code> &ndash; False discovery rate
@@ -201,14 +195,11 @@ score vector.  Default = F.</li>
 number generator. Default = 0.</li>
 
 <li>
-<code>--klammer &lt;T|F&gt;</code> &ndash; Using retention time
-features calculated as in Klammer et al. <note>Give full citation.</note>
-</li>
-
-<li> 
-<code>--doc &lt;T|F&gt; </code> &ndash; Tell Percolator to use
-retention time prediction features (pI and mass difference) in the
-training procedure.  Default = F.</li>
+<code>--klammer &lt;T|F&gt;</code> &ndash; Use retention time features
+calculated as in "Improving tandem mass spectrum identification using
+peptide retention time prediction across diverse chromatography
+conditions" by Klammer AA, Yi X, MacCoss MJ and Noble WS.
+(<i>Analytical Chemistry</i>. 2007 Aug 15;79(16):6111-8.)</li>
 
 <li>
 <code>--unique-peptides &lt;T|F&gt;</code> &ndash; Do not remove
@@ -325,14 +316,6 @@ option is true, the first and second feature (third and fourth column)
 should contain the retention time and difference between observed and
 calculated mass.</li>
 
-<li>
-<code>--clock &lt;T|F&gt;</code> &ndash; Check time performance.</li>
-
-<li>
-<code>--exp-mass &lt;T|F&gt;</code> &ndash; Include the experimental
-mass in the output file. <note>I think this should always be
-true</note></li>
-
 </ul>
 
 <hr></hr>
@@ -352,7 +335,7 @@ stuff.</li>
 Add note explaining differences between crux percolator and
 stand-alone Percolator.</li>
 <li>
-Complete the feature table and indicate  which ones are used by
+Complete the feature table and indicate which ones are used by
 Percolator, q-ranker and Barista.</li>
 <li>
 Add Percolator to the tab-delimited text table.</li>
@@ -364,20 +347,17 @@ Changes we are proposing on the Percolator end of things:</p>
 <li>
 Bundle the main() procedure inside of a callable function.</li>
 <li>
-We may actually want to produce two or three separate 
-tab-delimited text files, akin to what Barista does for PSMs, peptides, and proteins.</li>
-
+Produce three separate tab-delimited text files, akin to what Barista
+does for PSMs, peptides, and proteins.</li>
 <li>
-Re-route logging to carp functions
-</li>
-
+Duplicate standard error messages to a given log file.</li>
 <li>
 Make Percolator produce pep.xml.</li>
 <li>
 Modify Percolator's tab-delimited text file to resemble those produced
 by the other Crux tools.</li>
 <li>
-Remove the --exp-mass flag and always set it to T.</li>
+Remove the --exp-mass and --clock flags, always setting them to T.</li>
 </ul>
 
 </note>
