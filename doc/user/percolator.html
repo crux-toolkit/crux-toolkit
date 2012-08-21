@@ -265,18 +265,17 @@ below may be used.  Default = F.</li>
 <li>
 <code>--alpha &lt;float&gt;</code> &ndash; Specify the probability
 with which a present protein emits an associated peptide. Set by grid
-search
-<note>over what values?</note> if not specified.</li>
+search (see <code>--depth</code> parameter) if not specified.</li>
 
 <li>
 <code>--beta &lt;float&gt;</code> &ndash; Specify the probability of
-the creation of a peptide from noise. Set by grid search <note>Over
-what values?</note> if not specified.</li>
+the creation of a peptide from noise. Set by grid search
+(see <code>--depth</code> parameter) if not specified.</li>
 
 <li>
 <code>--gamma &lt;float&gt;</code> &ndash; Specify the prior
 probability that a protein is present in the sample. Set by grid
-search of not specified.</li>
+search (see <code>--depth</code> parameter) if not specified.</li>
 
 <li>
 <code>--allow-protein-group &lt;T|F&gt;</code> &ndash; Treat ties as
@@ -300,10 +299,26 @@ score will not be pruned before calculating protein probabilities.
 Default = F.</li>
 
 <li>
-<code>--deepness &lt;0|1|2|3&gt;</code> &ndash; Setting deepness 0 or
-1 or 2 or 3 from high deepness to low deepness (less computational
-time) of the grid search for alpha, beta and gamma estimation. Default
-= 3.</li>
+<code>--depth &lt;0|1|2|3&gt;</code> &ndash; Set depth of the grid
+search for alpha, beta and gamma estimation. The values considered,
+for each possible value of the <code>--depth</code> parameter, are as
+follows:
+<ul>
+<li>0: alpha = {0.01, 0.04, 0.09, 0.16, 0.25, 0.36, 0.5};
+       beta = {0.0, 0.01, 0.15, 0.025, 0.035, 0.05, 0.1}; 
+       gamma = {0.1, 0.25, 0.5, 0.75}.</li>
+<li>1: alpha = {0.01, 0.04, 0.09, 0.16, 0.25, 0.36};
+       beta = {0.0, 0.01, 0.15, 0.025, 0.035, 0.05};
+       gamma = {0.1, 0.25, 0.5}.</li>
+<li>2: alpha = {0.01, 0.04,  0.16, 0.25, 0.36};
+       beta = {0.0, 0.01, 0.15, 0.030, 0.05};
+       gamma = {0.1, 0.5}.</li>
+<li>3: alpha = {0.01, 0.04, 0.16, 0.25, 0.36};
+       beta = {0.0, 0.01, 0.15, 0.030, 0.05};
+       gamma = {0.5}.</li>
+</ul>
+Default = 3.
+</li>
 
 </ul>
 
