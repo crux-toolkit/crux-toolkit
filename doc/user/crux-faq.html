@@ -14,40 +14,60 @@
 <b>What input file formats does Crux support?</b></li>
 
 <p>
-Crux can search spectra in .ms2 and .mzXML file formats.  The .ms2
-files can be generated from Thermo .RAW files using the <a 
+Crux can search spectra in MS2 and mzXML file formats.  The MS2
+files can be generated from Thermo RAW files using the <a 
 href="http://proteome.gs.washington.edu/software.html">MakeMS2</a>
-program.  The .ms2 format is described <a href="ms2-format.html">here</a>. 
-When searching .mzXML files, use the <code>use-mstoolkit=T</code>
+program.  The MS2 format is described <a href="ms2-format.html">here</a>. 
+When searching mzXML files, use the <code>use-mstoolkit=T</code>
 option in the parameter file.  Additional file formats will be
 supported in future releases. 
 </p>
 
 <li>
-<b>How does Crux differ from SEQUEST?</b></li>
+<b>How does Crux differ from SEQUEST<sup>&reg;</sup>?</b></li>
 
 <p>
-SEQUEST has split into at least four different development threads:
+SEQUEST<sup>&reg;</sup> has split into at least four different development threads:
 (1) the version developed in the Yates lab, initially at the
-University of Washington and later at Scripps, (2) the version mainted
+University of Washington and later at Scripps, (2) the version maintained
 by Thermo Scientific, (3) the version mainted by Sage-N, and (4) the
 version maintained in the MacCoss lab at the University of Washington.
-Crux is based on the Yates lab development thread, SEQUEST version 28,
+Crux is based on the Yates lab development thread, SEQUEST<sup>&reg;</sup> version 28,
 whose last documented modification is dated 8/16/99.</p>
 
 <p>
-The Crux command <code>sequest-search</code> is an imperfect
-reimplementation of SEQUEST 28.  The imperfection arose because, to
-avoid copyright infringement, Crux was reverse engineered from the
-SEQUEST binary; i.e., the Crux developers did not have access to the
-SEQUEST source code.  The reverse engineering continued until the
-developers deemed the remaining differences to be of negligible
-importance.  A quantitative comparison of the scores computed by Crux
-and SEQUEST can be seen in
+The original Crux search code was an imperfect reimplementation of
+SEQUEST<sup>&reg;</sup> 28.  The imperfection arose because, to avoid
+copyright infringement, Crux was reverse engineered from the
+SEQUEST<sup>&reg;</sup> binary; i.e., the Crux developers did not have
+access to the SEQUEST<sup>&reg;</sup> source code.  The reverse
+engineering continued until the developers deemed the remaining
+differences to be of negligible importance.  A quantitative comparison
+of the scores computed by Crux and SEQUEST<sup>&reg;</sup> can be seen
+in
 the <a href="http://noble.gs.washington.edu/papers/park2008rapid.html">original
-Crux paper</a>.  The differences between Crux and SEQUEST v28 are
-comparable in magnitude to the differences between different versions
-of SEQUEST.</p>
+Crux paper</a>.  The differences between Crux and
+SEQUEST<sup>&reg;</sup> v28 are comparable in magnitude to the
+differences between different versions of SEQUEST<sup>&reg;</sup>.</p>
+
+<p>
+Currently, the default behavior for
+the <code>search-for-matches</code> command differs in two systematic
+ways from the original behavior of SEQUEST.<p>
+<ul>
+<li>
+Originally, SEQUEST ranked candidate peptides (i.e., peptides that lie
+within the user-specified precursor window) initially according to a
+preliminary score called "Sp."  Subsequently, the top 500 matches were
+re-scored using XCorr.  Crux can compute the Sp score, but does not
+use it as an initial filter.</li>
+<li>
+The SEQUEST theoretical spectrum used to compute XCorr includes two
+flanking peaks on either side of each b- and y-ion. Crux does not
+include these peaks by default, though they can be turned on using the
+"use-flanking-peaks" parameter.</li>
+</ul>
+<p></p>
 
 <li>
 <b>How does Crux compute the masses of peptides and peptide
@@ -93,12 +113,24 @@ to be added depend on whether we are using the monoisotopic mass
 </ul>
 </p>
 
-<!--
 <li>
-<b>What is the difference between Crux Percolator and the stand-alone
-version available
-from <a href="http://www.per-colator.com">http://www.per-colator.com</a>?</b></li>
--->
+<b>How does Crux estimate the possible charge states of the peptides when the
+   information is not provided within the spectra file?</b>
+</li>
+
+<p>
+Crux calculates the ratio of two values: (1) the sum of the
+intensities from the peaks in the fragmentation spectrum whose m/z is
+greater than the precursor m/z versus (2) the sum of the peaks whose
+m/z is smaller than the precursor.  If this ratio is greater or equal
+to a calculated threshold based upon the location of the precursor m/z
+and the max m/z in the spectrum, Crux then assigns both +2 and +3 as
+possible charge states to the spectrum.  Otherwise, Crux assigns +1 as
+the charge state.  The algorithm is based upon the observation that
+fragmentation spectra collected from peptides with charge greater than
++1 should have many more peaks that are greater than the precursor
+m/z.
+</p>
 
 <li>
 <b>What operating systems does Crux work with?</b></li>
@@ -106,7 +138,7 @@ from <a href="http://www.per-colator.com">http://www.per-colator.com</a>?</b></l
 <p>
 Crux is written in C++, so in principle it should work on virtually
 any modern operating system.  We provide pre-compiled binaries for
-Linux and Windows.  The latter requires that you have Cygwin
+Linux, MacOS and Windows.  The latter requires that you have Cygwin
 installed.</p>
 
 <li>
@@ -115,13 +147,13 @@ installed.</p>
 
 <p>
 Crux is not particularly optimized to run quickly on a FASTA file.  To
-get Crux to go fast, you must do the "crux create-index" step first,
-and then run your searches using the resulting index.  If, after doing
-this, you are still getting slow search speeds, it may be because you
-are using the Network File System (NFS).   Crux uses a memory mapping
-mechanism that often works poorly over a system like NFS.  The
-solution is to copy your index to a local disk.  Then Crux should run
-much more quickly.</p>
+get Crux to go fast, you must do the <code>crux create-index</code>
+step first, and then run your searches using the resulting index.  If,
+after doing this, you are still getting slow search speeds, it may be
+because you are using the Network File System (NFS).  Crux uses a
+memory mapping mechanism that often works poorly over a system like
+NFS.  The solution is to copy your index to a local disk.  Then Crux
+should run much more quickly.</p>
 
 <li>
 <b>How does Crux select candidate peptides from the database?</b></li>
@@ -182,6 +214,7 @@ peptide sequence. </p>
 
 <li>
 <b>How can I search my ITRAQ data?</b></li>
+
 <p>
 ITRAQ and other tagged seaches can be done by using terninal
 modifications.  For example, if your tag has a mass of 304.199040, add
@@ -206,6 +239,7 @@ observed spectrum undergo prior to comparison with the theoretical
 spectrum?</b></li>
 -->
 
+<!--
 <li>
 <b>What enhancements to Crux are planned?</b></li>
 
@@ -221,20 +255,12 @@ includes the following:</p>
 Support for more input file types.</li>
 
 <li>
-The ability to compute peptide-level q-values
-via <code>compute-q-values</code>, <code>percolator</code>
-or <code>q-ranker</code>.</li>
-
-<li>
-Support for searching for post-translational modifications in Tide
-and <code>search-for-xlinks</code>.</li>
-
-<li>
-Tools to do protein-level inference, including identification and
-spectral counting.</li>
+Support for searching for post-translational modifications in 
+<code>search-for-xlinks</code>.</li>
 
 </ul>
 </p>
+-->
 
 <li>
 <b>How can I contribute to Crux?</b></li>

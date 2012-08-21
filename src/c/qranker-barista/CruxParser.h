@@ -9,7 +9,7 @@
 #define CRUX
 
 #include <sys/stat.h>
-#ifndef _MSVC_VER
+#ifndef _MSC_VER
 #include <dirent.h>
 #endif
 #include <iostream>
@@ -49,7 +49,7 @@ class CruxParser:public SQTParser{
     MatchFileReader& reader,///<Reader for the delimted file.
     int final_hits,///<Total number of matches
     enzyme enz, ///<Enzyme in used on search 
-    bool decoy ///< Are all the matches decoy
+    bool decoy ///< Are all the matches decoy?
   );
 
   /*
@@ -58,7 +58,7 @@ class CruxParser:public SQTParser{
   */
   virtual bool read_search_results(
     string& cur_fname, ///< current delimited file path tp parse 
-    bool decoy
+    bool decoy ///< Are all the matches decoy?
   ); 
   virtual string  get_parser_extension(); 
 

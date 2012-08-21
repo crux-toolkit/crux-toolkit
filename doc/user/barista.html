@@ -161,6 +161,10 @@ prefix of the protein names that indicates a decoy. Default = rand_.
 </li>
 
 <li>
+<code>--optimization &lt;string&gt;</code> &ndash; Specifies whether to do optimization at the protein, peptide or psm level. Default = protein.
+</li>
+
+<li>
 <code>--separate-searches &lt;search&nbsp;results&gt;</code> &ndash; This option
 indicates that the target and decoy searches were run separately,
 rather than using a concatenated database.  In this case, Barista will
@@ -358,14 +362,9 @@ are located in database-dir:
 <li> <b> Running Barista with Crux database search </b>
 
 <ol>
-<!--li>
-You can use crux sequest-search which produces database search
-results in the sqt format or you can use crux search-for-matches which produces database search results in the tab-delimited format. Both of them are compatible with Barista input (see
-<a href="crux-sequest-search.html">sequest-search</a> and <a href="crux-search-for-matches.html">search-for-matches</a>).
-</li-->
 <li>
 You can use crux search-for-matches which produces database search results in the tab-delimited format. (see
-<!--a href="crux-sequest-search.html">sequest-search</a> and--> <a href="crux-search-for-matches.html">search-for-matches</a>).
+<a href="crux-search-for-matches.html">search-for-matches</a>).
 </li>
 <li>
 Crux database search requires only the target database for input and

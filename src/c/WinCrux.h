@@ -12,6 +12,10 @@
 #include "utils.h"
 #include "windirent.h"
 
+// The Windows C runtime has a hard limit on the 
+// number of simultaneously opened files
+#define WIN_MAX_OPEN_FILES 2048
+
 // Rename some functions to the windows version
 #define access _access
 #define drand48 rand
@@ -62,8 +66,6 @@ int scandir(
  );
 
 int alphasort(const void *d1, const void *d2);
-
-char *mkdtemp(char *temp);
 
 int isinf(FLOAT_T x);
 float log2(float x);

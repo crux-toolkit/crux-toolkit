@@ -19,31 +19,6 @@
     FATAL: Cannot compute PEP without target or decoy scores.</pre>
     To prevent the error, run the search-for-matches with an 
     <a href="index-tutorial.html">index</a>. </li>
-  <li>
-    The <code>create-index</code> command will fail when running on Cygwin.
-    Crux will successfully create the index in a temporary directory
-    but will report an error when it tries to rename the temporary directory:
-    <pre>
-      WARNING: Cannot rename directory
-      FATAL: Failed to create index
-    </pre>
-    The temporary directory will be named <code>crux_XXXX</code>
-    where <code>XXXX</code> will consist of sequence of arbitrary letters and numbers.
-    You can recover from the error by renaming the index directory manually.
-  </li>
-  <li>
-    The <code>create-index</code> command may fail when running on Cygwin.
-    Cygwin does not allow users to adjust the maximum allowed number of 
-    simultaneously open files.
-    When the Crux reaches the open file limit,
-    indexing will halt with the following message.
-    <pre>
-      WARNING: cannot open all file handlers needed
-      FATAL: Could not open file handle for index 746.
-    </pre>
-    You can still run <code>search-for-matches</code> directly on the fasta file,
-    but this is significantly slower than a search using an index.
-  </li>
   </ol>
 
 </blockquote>

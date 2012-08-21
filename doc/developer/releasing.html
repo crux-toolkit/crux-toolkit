@@ -97,7 +97,8 @@ recorded in <code>crux/ChangeLog</code>.  A more general description of changes
 <h3>Checklist</h3></a>
 <p>Here is a list of steps to follow, roughly in this order</p>
 <ol>
-<li>Do a clean checkout.
+<li>Create a release branch.
+<li>Do a clean checkout of the release branch.
 <h4>Update documentation</h4>
 <li>Change version number in <code>crux/configure.ac</code>.
 <li>Look at the SVN log since the last release and update release
@@ -112,6 +113,9 @@ recorded in <code>crux/ChangeLog</code>.  A more general description of changes
 <h4>Create files for distribution</h4>
 <li>Package the full version:
   <ul> 
+    <li><code>make distclean</code>
+    <li><code>./bootstrap</code>
+    <li><code>./configure</code>
     <li><code>make dist</code>  
     <li><code>make bdist</code>
     <li><code>make checksum</code>
@@ -126,8 +130,9 @@ You should now have these files:
   </ul>
 <li>Build and package the open-source version:
   <ul>
-    <li><code>make clean</code>
-    <li><code>configure --disable-search</code>
+    <li><code>make distclean</code>
+    <li><code>./bootstrap</code>
+    <li><code>./configure --disable-search</code>
     <li><code>make</code>
     <li>Check that search is disabled. 
         <code>src/c/crux search-for-matches a b</code>

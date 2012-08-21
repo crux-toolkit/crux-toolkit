@@ -1573,7 +1573,11 @@ int SQTParser :: run()
     {
       carp(CARP_WARNING, "Found %d decoy proteins in the search result files.", num_neg_prot);
       //return 0;
-    } 
+      //TODO SJM, how decoys are represented in the search results using a 
+      //fasta or index search is different for crux.  
+      //This temporary fix will work
+      //for q-ranker.
+    }
 
   //save the data
   fill_graphs_and_save_data(out_dir);

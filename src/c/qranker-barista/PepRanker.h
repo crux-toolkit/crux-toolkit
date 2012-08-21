@@ -1,5 +1,5 @@
-#ifndef QRANKER_H_
-#define QRANKER_H_
+#ifndef PEPRANKER_H_
+#define PEPRANKER_H_
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -22,6 +22,7 @@ using namespace std;
 #include "NeuralNet.h"
 #include "DataSet.h"
 #include "PSMScores.h"
+#include "PepScores.h"
 #include "SQTParser.h"
 #include "CruxParser.h"
 #include "TabDelimParser.h"
@@ -29,35 +30,44 @@ using namespace std;
 #include "mass.h"
 #include "objects.h"
 
-class QRanker: public CruxApplication
+class PepRanker: public CruxApplication
 {
 
 public:
-  QRanker();
-  virtual ~QRanker();
+  PepRanker();
+  virtual ~PepRanker();
 
   int run();
-  void train_net_sigmoid(PSMScores &set, int interval);
-  void train_net_ranking(PSMScores &set, int interval);
-  void train_net_hinge(PSMScores &set, int interval);
-  void count_pairs(PSMScores &set, int interval);
+  int getOverFDRPSM(PSMScores &set, NeuralNet &n, double fdr);
+  double get_peptide_score_xcorr(int pepind);
+  void getMultiFDRXCorr(PepScores &set, vector<double> &qvalues);
+  double get_peptide_score(int pepind, NeuralNet &n);
+  int getOverFDR(PepScores &set, NeuralNet &n, double fdr);
+  void getMultiFDR(PepScores &set, NeuralNet &n, vector<double> &qvalues);
+  void write_max_nets(string filename, NeuralNet *max_net);
+  double get_protein_score(int pepind);
+  void calc_gradients(int pepind, int label, int i);
+  void train_net_ranking(PepScores &set, int interval);
   void train_many_general_nets();
   void train_many_target_nets();
   void train_many_nets();
+  void setup_for_training();  
+  void setup_for_reporting_results();
+  void report_results_xml_tab();
     
-  int getOverFDR(PSMScores &set, NeuralNet &n, double fdr);
-  void getMultiFDR(PSMScores &set, NeuralNet &n, vector<double> &qval);
-  void getMultiFDRXCorr(PSMScores &set, vector<double> &qval);
-  void printNetResults(vector<int> &scores);
-  void write_results();
-  void write_results_psm_tab(ofstream &os);
+  void get_tab_delim_proteins(string protein_str, vector<string> &proteins);
   void get_pep_seq(string &pep, string &seq, string &n, string &c);
   void write_results_psm_xml(PepXMLWriter& os);
   void computePEP();
+  int computePepNSAF();
 
-  void write_max_nets(string filename, NeuralNet *max_net);
-  void write_unique_peptides(string filename, NeuralNet* max_net);
-  void write_num_psm_per_spectrum(NeuralNet* max_net);
+  void write_results_peptides_tab(ofstream &os);
+  void write_results_psm_tab(ofstream &os);
+  void report_results_tab();
+  void write_results_pep_xml(PepXMLWriter& xmlfile);
+  void write_results_peptides_xml(ofstream &os);
+  void write_results_psm_xml(ofstream &os);
+  void report_results_xml();
 
   inline void set_fileroot(string &fl){fileroot = fl;}
   inline void set_overwrite_flag(int flag) {overwrite_flag = flag;}
@@ -66,7 +76,6 @@ public:
   void print_description();
   int set_command_line_options(int argc, char **argv);
   int crux_set_command_line_options(int argc, char *argv[]);
-  
 
   virtual int main(int argc, char** argv);
   virtual std::string getName();
@@ -83,8 +92,11 @@ protected:
     Dataset d;
     string res_prefix;
 
-    PSMScores fullset; 
-    PSMScores trainset,testset,thresholdset;
+    PepScores fullset; 
+    PepScores trainset,testset,thresholdset;
+
+    PSMScores psmfullset;
+    PSMScores psmtrainset, psmtestset;
 
     int seed;
     double selectionfdr;
@@ -103,16 +115,18 @@ protected:
 
     int num_qvals;
     vector<double> qvals;
-    vector<double> qvals1;
-    vector<double> qvals2;
-    
     vector<int> overFDRmulti;
     vector<int> max_overFDR;
-    vector<int> ave_overFDR;
+
     NeuralNet* max_net_gen;
     NeuralNet* max_net_targ;
-    NeuralNet* nets;
+    NeuralNet *net_clones;
+    
+    int psm_count;
+    vector<int> max_psm_inds;
+    vector<int> pepind_to_max_psmind;
 
+    
     string in_dir;
     string out_dir;
     int skip_cleanup_flag;

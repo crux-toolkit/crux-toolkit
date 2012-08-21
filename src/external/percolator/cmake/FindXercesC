@@ -12,7 +12,7 @@ FIND_PATH(XERCESC_INCLUDE_DIR xercesc/dom/DOM.hpp xercesc/parsers/SAXParser.hpp
    "[HKEY_CURRENT_USER\\xerces-c\\src]"
    /usr/include
    /usr/local/include
-   ../../../xerces/src/
+   ../../xerces/src/
    $ENV{XERCESCROOT}/src
    $ENV{XERCESCROOT}/include
    $ENV{CODESYNTH}/include
@@ -30,7 +30,7 @@ FIND_LIBRARY(XERCESC_LIBRARIES NAMES xerces-c xerces-c_3 xerces-c_2 xerces-c_sta
    "[HKEY_CURRENT_USER\\xerces-c\\lib]"
    /usr/lib
    /usr/local/lib
-   ../../../xerces/src/.libs
+   ../../xerces/src/.libs
    $ENV{XERCESCROOT}/lib
    $ENV{CODESYNTH}/lib
    $ENV{XSDDIR}/lib

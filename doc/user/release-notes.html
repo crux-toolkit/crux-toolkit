@@ -11,9 +11,20 @@
 
 <h3>Major enchancements</h3>
 <h3>Minor changes</h3>
+<ul>
+<li>
 PepXML file support fixed for <code>crux spectral-counts</code> 
-
-<h2>Version 1.38</h2> July 16th, 2012
+</li>
+<li>
+Fixed bug in <code>crux create-index</code> on Windows and Cygin.
+The bug caused <code>crux create-index</code> to fail with the message:
+<pre>
+WARNING: Cannot rename directory
+FATAL: Failed to create index
+</pre>
+</li>
+</ul>
+<h2>Version 1.38</h2> July 20th, 2012
 
 <h3>Major enhancements</h3>
 
@@ -29,15 +40,22 @@ resembles the other tools in Crux:</li>
 
 <ul>
 <li>
-Barista and QRanker accept search results in tab-delimited format, in addition to
+Barista and Q-ranker accept search results in tab-delimited format, in addition to
 SQT format.</li>
 <li>
-Barista now reports posterior error probabilities in addition to
-q-values.</li>
+Barista now reports posterior error probabilities, in addition to
+q-values, for PSMs, peptides and proteins.</li>
 <li>
 Barista's pep.xml output has been updated to be compatible with the
 TransProteomic Pipeline (TPP).</li>
 </ul>
+
+<li>
+The <code>sequest-search</code> command has been removed.  The
+functionality of this command is still available using options for
+the <code>search-for-matches</code> command (see
+the <a href="crux-faq.html">frequently asked questions list</a> for
+details).</li>
 
 </ul>
 
@@ -116,7 +134,7 @@ together with no accompanying labels.  This bug has been fixed so that
 Q-ranker once again returns only target PSMs.</li>
 
 <li>
-The option <code>display-summed-masses</code> has been replaced by
+The search option <code>display-summed-masses</code> has been replaced by
 <code>mod-mass-format</code>.  With this option, there is a new format
 for reporting modificiations: the mass in the square braces is that of the
 preceeding amino acid plus the modification mass.  This format is compliant
@@ -127,8 +145,9 @@ Modifications are reported differently in the pep.xml header to be
 compliant with the TPP.</li>
 
 <li>
-The command <code>crux compute-q-values</code> was renamed <code>crux
-calibrate-scores</code>.</li>
+The command <code>crux compute-q-values</code> now reports posterior
+error probabilities in addition to q-values.  Consequently, the
+command was renamed <code>crux calibrate-scores</code>.</li>
 
 <li>
 Crux now provides an explicit error message when an incorrectly
@@ -144,23 +163,27 @@ pep.xml files.</li>
 <li>Fixed a bug in the normalization of the observed spectra.
 Previously, after the 10-bin normalization of intensities, peaks with
 heights below 5% of the maximum were not being removed.</li>
-<li>
-Estimate the charge state of MS2 or any fragmentation spectrum file that has no Z-line. 
-Z-line provides information about the assumed peptide charge state.</li>
-<li>
-Removing sequest-search from Crux tandem mass spectrometry toolkit. This program searches 
-a protein database with a set of spectra and writes search results in an SQT file. In the situations that 
-need peptide-spectrum matches, search-for-matches can be used. This command 
-handles modifications in the same way as crux sequest-search.</li>
-<li>
-Barista reports posterior error probability estimated from the q-ranker score.</li>
-<li>
-Add header line to QRanker and Barista feature file.</li>  
 
 <li>
-QRnaker and Barista ouputs include all of the columns in the search
-file(s) used as input.</li>
+When a fragmentation spectra file is read, the assumed
+peptide charge state information can be missing for the scans.  
+In cases where this information has not been provided, 
+Crux will now estimate the possible charge states.
+</li>
+
+<li>
+The feature files for Q-ranker and Barista now contain a header
+describing each feature.
+</li>
+
+<li>
+Q-ranker and Barista now output all of the fields provided in the
+input search files.
+</li>
+
 </ul>
+
+<hr></hr>
 
 
 <h2>Version 1.37</h2> December 22, 2011
@@ -236,7 +259,7 @@ modifications.</li>
 
 <li>
 Tide's version of XCorr has been modified so that it is always
-identical to those of a recent version SEQUEST.</li>
+identical to those of a recent version SEQUEST<sup>&reg;</sup>.</li>
 
 <li>
 Added support for user-specifiable maximum number of missed enzyme
@@ -533,12 +556,12 @@ searches.</li>
 <li>
 This version of Crux is released with a demo version of a new search
 engine, <a href="../tide/index.html">Tide</a>.  Tide is an independent
-reimplementation of the SEQUEST algorithm. The immediate ancestor of
-Tide is the Crux <code>search-for-matches</code> command, but Tide has
-been completely re-engineered to achieve a thousandfold improvement in
-speed while exactly replicating Crux XCorr scores.  Currently, Tide is
-not fully integrated with Crux, and is available only in binary
-executable format.</li>
+reimplementation of the SEQUEST<sup>&reg;</sup> algorithm. The
+immediate ancestor of Tide is the Crux <code>search-for-matches</code>
+command, but Tide has been completely re-engineered to achieve a
+thousandfold improvement in speed while exactly replicating Crux XCorr
+scores.  Currently, Tide is not fully integrated with Crux, and is
+available only in binary executable format.</li>
 
 </ul>
 
@@ -602,10 +625,11 @@ peptide pairs."</a> <i>Journal of Proteome Research</i>.  2010.
 A new search command, <code>sequest-search</code>, was added.  The
 original command, <code>search-for-matches</code>, behaves as before
 except that no .sqt files are printed and no Sp scoring is performed.
-The new <code>sequest-search</code> emulates SEQUEST searching.  It
-first scores all candidate peptides with the Sp score, then ranks and
-filters the results by that score, scoring the remaining candidates
-with xcorr.  Results are printed to .txt and .sqt files.</li>
+The new <code>sequest-search</code> emulates SEQUEST<sup>&reg;</sup>
+searching.  It first scores all candidate peptides with the Sp score,
+then ranks and filters the results by that score, scoring the
+remaining candidates with xcorr.  Results are printed to .txt and .sqt
+files.</li>
 
 <li>
 The .mzXML file format is now supported for crux search-for-matches
@@ -758,7 +782,7 @@ The internal normalization of the observed spectra has been modifed to
 drop those peaks whose intensity is less than 1/20 of the maximum
 intensity in the spectrum.  This brings the xcorr score
 for <code>crux</code> into closer agreement with the xcorr score
-for <code>sequest</code>.</li>
+for SEQUEST<sup>&reg;</sup>.</li>
 
 <li>
 Compute-q-values now generates three different q-values (1) from
@@ -938,7 +962,7 @@ P-values are now computed for decoy peptides.</li>
 <li>
 The algorithm used to calculated the xcorr score has been modified so
 that xcorr score will be in better agreement with scores generated by
-SEQUEST.</li>
+SEQUEST<sup>&reg;</sup>.</li>
 
 </ul>
 

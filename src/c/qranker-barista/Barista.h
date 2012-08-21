@@ -28,6 +28,7 @@
 #include "SQTParser.h"
 #include "CruxParser.h"
 #include "QRanker.h"
+#include "PepRanker.h"
 using namespace std;
 #include "mass.h"
 
@@ -186,6 +187,10 @@ class Barista : public CruxApplication
   
   string file_format_; 
   ofstream fdebug;
+
+  string opt_type;
+  QRanker qr;
+  PepRanker pr;
 
 };
 

@@ -1399,6 +1399,7 @@ void Barista :: write_results_subset_prot_tab(ofstream &os)
 
 void Barista :: write_results_peptides_tab(ofstream &os)
 {
+  int ps = pepind_to_max_psmind[peptrainset[0].pepind]; 
   os<< "q-value" << "\t" << "barista score" << "\t";
   os << "NSAF score" << "\t";
   os<<"barista PEP\t";
@@ -1408,12 +1409,16 @@ void Barista :: write_results_peptides_tab(ofstream &os)
   os<<"spectrum neutral mass"<<"\t"; 
   os<<"peptide mass"<<"\t";
   os<< "delta_cn"<< "\t";
-  os<<"sp score"<<"\t";
-  os<<"sp rank\t";
+  if(d.psmind2spscore(ps)!=-1){
+    os<<"sp score"<<"\t";
+    os<<"sp rank\t";
+  }
   os<<"xcorr score"<<"\t";
   os<<"xcorr rank"<<"\t";
-  os<<"b/y ions matched"<<"\t";
-  os<<"b/y ions total"<<"\t";
+  if(d.psmind2spscore(ps)!=-1){
+    os<<"b/y ions matched"<<"\t";
+    os<<"b/y ions total"<<"\t";
+  }
   os<<"matches/spectrum"<<"\t";
   os<<"sequence\t"; 
   os<<"cleavage type"<<"\t"; 
@@ -1454,18 +1459,22 @@ void Barista :: write_results_peptides_tab(ofstream &os)
         os<<d.psmind2peptide_mass(psmind)<<"\t";
         //DELTA CN
         os <<d.psmind2deltaCn(psmind)<< "\t";
-        //Sp Score
-        os<<d.psmind2spscore(psmind)<<"\t";
-        //Sp Rank 
-        os<<d.psmind2sp_rank(psmind)<<"\t";
+        if(d.psmind2spscore(ps)!=-1){
+          //Sp Score
+          os<<d.psmind2spscore(psmind)<<"\t";
+          //Sp Rank 
+          os<<d.psmind2sp_rank(psmind)<<"\t";
+        }
         //xcorr Score
       	os<<d.psmind2xcorr(psmind)<<"\t";
       	//xcorr rank
       	os<<d.psmind2xcorr_rank(psmind)<<"\t";
-      	//by ions match 
-      	os<<d.psmind2by_ions_matched(psmind)<<"\t"; 
-      	//by ions total 
-      	os<<d.psmind2by_ions_total(psmind)<<"\t";
+        if(d.psmind2spscore(ps)!=-1){
+          //by ions match 
+          os<<d.psmind2by_ions_matched(psmind)<<"\t"; 
+          //by ions total 
+          os<<d.psmind2by_ions_total(psmind)<<"\t";
+        }
       	//Matches/Spectrum 
       	os<<d.psmind2matches_spectrum(psmind)<<"\t";
         //sequence 
@@ -1489,6 +1498,7 @@ void Barista :: write_results_peptides_tab(ofstream &os)
 
 void Barista :: write_results_psm_tab(ofstream &os)
 {
+  int ps= psmtrainset[0].psmind; 
   os << "scan" << "\t" << "charge" << "\t";
   os << "q-value" << "\t" << "barista score" << "\t";
   os << "barista PEP\t";
@@ -1496,12 +1506,16 @@ void Barista :: write_results_psm_tab(ofstream &os)
   os<<"spectrum neutral mass"<<"\t"; 
   os<<"peptide mass"<<"\t";
   os<< "delta_cn"<< "\t";
-  os<<"sp score"<<"\t";
-  os<<"sp rank\t";
+  if(d.psmind2spscore(ps)!=-1){
+    os<<"sp score"<<"\t";
+    os<<"sp rank\t";
+  }
   os<<"xcorr score"<<"\t";
   os<<"xcorr rank"<<"\t";
-  os<<"b/y ions matched"<<"\t";
-  os<<"b/y ions total"<<"\t";
+  if(d.psmind2spscore(ps)!=-1){
+    os<<"b/y ions matched"<<"\t";
+    os<<"b/y ions total"<<"\t";
+  }
   os<<"matches/spectrum"<<"\t";
   os<<"sequence"<<"\t";
   os<<"cleavage type"<<"\t"; 
@@ -1536,18 +1550,22 @@ void Barista :: write_results_psm_tab(ofstream &os)
           os<<d.psmind2peptide_mass(psmind)<<"\t";
           //DELTA CN
           os <<d.psmind2deltaCn(psmind)<< "\t";
-          //Sp Score
-          os<<d.psmind2spscore(psmind)<<"\t";
-          //Sp Rank 
-          os<<d.psmind2sp_rank(psmind)<<"\t";
+          if(d.psmind2spscore(ps)!=-1){
+            //Sp Score
+            os<<d.psmind2spscore(psmind)<<"\t";
+            //Sp Rank 
+            os<<d.psmind2sp_rank(psmind)<<"\t";
+          }
           //xcorr Score
       	  os<<d.psmind2xcorr(psmind)<<"\t";
       	  //xcorr rank
       	  os<<d.psmind2xcorr_rank(psmind)<<"\t";
-      	  //by ions match 
-      	  os<<d.psmind2by_ions_matched(psmind)<<"\t"; 
-      	  //by ions total 
-      	  os<<d.psmind2by_ions_total(psmind)<<"\t";
+          if(d.psmind2spscore(ps)!=-1){
+            //by ions match 
+            os<<d.psmind2by_ions_matched(psmind)<<"\t"; 
+            //by ions total 
+            os<<d.psmind2by_ions_total(psmind)<<"\t";
+          }
       	  //Matches/Spectrum 
       	  os<<d.psmind2matches_spectrum(psmind)<<"\t";
       	  get_pep_seq(pep,seq,n,c);
@@ -2473,7 +2491,6 @@ void Barista :: setup_for_training(int trn_to_tst)
   max_net_prot = net;
   max_net_psm = net;
   max_net_pep = net;
-
   
   //get the max num peptides
   max_peptides = 0;
@@ -2598,6 +2615,7 @@ void Barista :: print_description()
   cout << "OPTIONAL ARGUMENTS:" << endl << endl;
   cout << "\t [--enzyme <string>] \n \t     The enzyme used to digest the proteins in the experiment. Default trypsin." << endl;
   cout << "\t [--decoy-prefix <string>] \n \t     Specifies the prefix of the protein names that indicates a decoy. Default decoy_" << endl;
+  cout << "\t [--optimization <string>] \n \t     Specifies whether to do optimization at the protein, peptide or psm level Default protein" << endl;
   cout << "\t [--separate-searches <string>] \n \t     If the target and decoy searches were run separately, the option then allows the user to specify the location of the decoy search results, the target database search should be provided as required argument." << endl;
   cout << "\t [--fileroot <string>] \n \t     The fileroot string will be added as a prefix to all output file names. Default = none." <<endl;
   cout << "\t [--output-dir <directory>] \n \t     The name of the directory where output files will be created. Default = crux-output." << endl;
@@ -2625,7 +2643,8 @@ int Barista :: crux_set_command_line_options(int argc, char *argv[])
     "parameter-file",
     "verbosity",
     "list-of-files",
-    "feature-file"
+    "feature-file",
+    "optimization"
   };
   int num_options = sizeof(option_list)/sizeof(char*);
 
@@ -2651,7 +2670,7 @@ int Barista :: crux_set_command_line_options(int argc, char *argv[])
   string sqt_decoy_source;
   int separate_search_flag;
   string output_directory;
-
+  
   string enzyme;
   string decoy_prefix;
 
@@ -2660,16 +2679,27 @@ int Barista :: crux_set_command_line_options(int argc, char *argv[])
   bool list_of_files_flag; 
   bool spec_features_flag;
 
+  opt_type = get_string_parameter_pointer("optimization");
+  
+
   fileroot = get_string_parameter_pointer("fileroot");
   if(fileroot != "__NULL_STR")
     fileroot.append(".");
   else
     fileroot = "";
- 
- 
-  decoy_prefix = get_string_parameter_pointer("decoy-prefix");
-
+  if(opt_type.compare("psm") == 0)
+    qr.set_fileroot(fileroot);
+  else if(opt_type.compare("peptide") == 0)
+    pr.set_fileroot(fileroot);
+  
   overwrite_flag = get_boolean_parameter("overwrite");
+  if(opt_type.compare("psm") == 0)
+    qr.set_overwrite_flag(overwrite_flag);
+  if(opt_type.compare("peptide") == 0)
+    pr.set_overwrite_flag(overwrite_flag);
+
+  //options for the parser
+  decoy_prefix = get_string_parameter_pointer("decoy-prefix");
 
   enzyme = get_string_parameter_pointer("enzyme");
 
@@ -2692,6 +2722,16 @@ int Barista :: crux_set_command_line_options(int argc, char *argv[])
       parser= new SQTParser();
       //set input and output dirs
       parser->set_output_dir(dir_with_tables);
+      if(opt_type.compare("psm") == 0)
+	{
+	  qr.set_input_dir(dir_with_tables);
+	  qr.set_output_dir(output_directory);
+	}
+      else if(opt_type.compare("peptide") == 0)
+	{
+	  pr.set_input_dir(dir_with_tables);
+	  pr.set_output_dir(output_directory);
+	}
       set_input_dir(dir_with_tables);
       set_output_dir(output_directory);
 
@@ -2758,7 +2798,8 @@ int Barista :: crux_set_command_line_options(int argc, char *argv[])
 	  separate_search_flag = 0;
       
       parser->write_features_header();
-      parser->set_use_quadratic_features(1);
+      if(opt_type.compare("protein") == 0)
+	parser->set_use_quadratic_features(1);
       if(parser->get_use_quadratic_features())
         parser->add_quadratic_features_header(); 
       d.get_features_header(parser->get_final_features_header());
@@ -2766,9 +2807,20 @@ int Barista :: crux_set_command_line_options(int argc, char *argv[])
         if(!parser->set_output_dir(output_directory))
 	  return 0;
         //set input and output for the leaning algo (in and out are the same as the out for the parser)
-        set_input_dir(output_directory);
-        set_output_dir(output_directory);
-            
+		
+	if(opt_type.compare("psm") == 0)
+	  {
+	    qr.set_input_dir(output_directory);
+	    qr.set_output_dir(output_directory);
+	  }
+	else if(opt_type.compare("peptide") == 0)
+	  {
+	    pr.set_input_dir(output_directory);
+	    pr.set_output_dir(output_directory);
+	  }
+	set_input_dir(output_directory);
+	set_output_dir(output_directory);
+	            
         if(!parser->set_database_source(db_source))
 	  carp(CARP_FATAL, "could not find the database");
       
@@ -2809,11 +2861,17 @@ int Barista::main(int argc, char **argv) {
   if(!crux_set_command_line_options(argc,argv))
     return 1;
 
-
-  //run();
-  run_tries();
-  //run_tries_multi_task();
-   if(skip_cleanup_flag != 1)
+  if(opt_type.compare("psm") == 0)
+    qr.run();
+  else if(opt_type.compare("peptide") == 0)
+    pr.run();
+  else
+    {
+      //run();
+      run_tries();
+      //run_tries_multi_task();
+    }
+  if(skip_cleanup_flag != 1)
     parser->clean_up(out_dir);
   
   return 0;

@@ -276,7 +276,7 @@ void PepXMLReader::searchHitOpen(
   string prev_aa;
   string next_aa;
 
-  double peptide_mass=0.0;
+  double peptide_mass = 0.0;
 
   for (int i = 0; attr[i]; i += 2) {
     if (strcmp(attr[i], "hit_rank") == 0) {
@@ -399,7 +399,7 @@ void PepXMLReader::searchScoreOpen(
   search_score_open_ = true;
 
   string name;
-  double value=0.0;
+  double value = 0.0;
 
   for (int i = 0; attr[i]; i += 2) {
     if (strcmp(attr[i], "name") == 0) {

@@ -53,10 +53,6 @@ const char* Index::decoy_index_file_prefix = "crux_decoy_index_";
 #define fcloseall()
 #endif
 
-// global variable to store the temp directory
-// used for deleting directory when SIGINT
-char temp_folder_name[12] = "";
-
 /* 
  * How does the create_index (the routine) work?
  *
@@ -840,16 +836,6 @@ bool Index::writeReadmeFile(
 
 
 /**
- * heap allocated, users must free
- * \returns a temporary directory name template
- */
-char* make_temp_dir_template(void){
-  char* dir_template = (char*)mycalloc(12, sizeof(char));
-  strcpy(dir_template, "crux_XXXXXX");
-  return dir_template;
-}
-
-/**
  * Combines the bin index and the file prefix into the name of the
  * index file for that bin.
  *\returns the filename for the given index
@@ -1058,7 +1044,7 @@ static bool dump_peptide_all(
   Peptide** working_array = NULL;
   int bin_idx = 0;
   int file_idx = 0;
-  
+
   // print out all remaining peptides in the file_array
   for(file_idx = 0; file_idx < num_bins; ++file_idx){
     carp(CARP_DETAILED_DEBUG, "Serializing bin %d", file_idx);
@@ -1114,48 +1100,43 @@ bool Index::create(
 {
   carp(CARP_DEBUG, "Creating index");
 
-  // check if index exists
-  bool replace_index = false;
-
+#ifdef _MSC_VER
+  // Windows defaults to a fairly small number
+  // for the max open files. Increase this to the
+  // maximum allowed by the Microsoft CRT.
+  _setmaxstdio(WIN_MAX_OPEN_FILES);
+#endif
+  
   if(on_disk_){
-    if(get_boolean_parameter("overwrite")){
-      replace_index = true;
+    if (get_boolean_parameter("overwrite")) {
       carp(CARP_DEBUG, "Will be replacing existing index");
-      // wait to delete until index is successfully created
-    }else{ // this should have already been checked, but...
+    } else { // this should have already been checked, but...
       carp(CARP_FATAL, "Index '%s' already exists.  " \
       "Use --overwrite T to replace", directory_);
     }
-    //change the ondisk status?
   }
   
-  // create temporary directory
-  // temp_dir_name = "foo"; // CYGWIN
-  char* temp_dir_name = NULL;
-  if(mkdir(temp_dir_name, S_IRWXO) != 0){
-    if((temp_dir_name = mkdtemp(make_temp_dir_template()))== NULL){
-      carp(CARP_WARNING, "Cannot create temporary directory");
-      return false;
-    }
+  // Create index directory if it doesn't already exist.
+  if (!on_disk_) {
+	  if(mkdir(directory_, S_IRWXU+S_IRWXG+S_IROTH+S_IXOTH) != 0){
+        carp(CARP_WARNING, "Cannot create index directory %s", directory_);
+		return false;
+      }
   }
-  // copy temporary folder name for SIGINT cleanup purpose
-  strncpy(temp_folder_name, temp_dir_name, 12); 
 
   // instantiate database(s)
-  if(! database_->transformTextToMemmap(temp_dir_name, false)){//binary not tmp
-    clean_up(1);
+  if(!database_->transformTextToMemmap(directory_, false)){//binary not tmp
     carp(CARP_FATAL, "Failed to create binary database from text fasta file");
   }
 
   if( decoy_database_ 
-      && ! decoy_database_->transformTextToMemmap(temp_dir_name, false) ){
-    clean_up(1);
+      && ! decoy_database_->transformTextToMemmap(directory_, false) ){
     carp(CARP_FATAL, "Failed to create binary decoy database from fasta file");
   }
 
-  // move into temporary directory
-  if(chdir(temp_dir_name) != 0){
-    carp(CARP_WARNING, "Cannot enter temporary directory");
+  // move into index directory
+  if(chdir(directory_) != 0){
+    carp(CARP_WARNING, "Cannot enter index directory %s", directory_);
     return false;
   }
 
@@ -1183,40 +1164,23 @@ bool Index::create(
     fclose(text_file);
     text_file = fopen("decoy-peptides.txt", "w");
   }
-
   
   // now index decoy database without the info files
   info_out = fopen("crux_decoy_index_map", "w");
   writeHeader(info_out);
   index_database(decoy_database_, Index::decoy_index_file_prefix, 
                  info_out, text_file);//NULL);
+  fclose(info_out);
+  info_out = NULL;
   if( text_file){
     fclose(text_file);
     text_file = NULL;
   }
   
-  //move out of temp dir
+  //move out of index dir
   if( chdir("..") == -1 ){ 
     return false;
   }
-
-  // rename temporary direcotry to final directory name
-  // if replacing an existing index, remove current files and delete
-  // dir
-  if( replace_index == true ){
-    carp(CARP_DEBUG,"About to delete existing index directory, %s", 
-         directory_);
-    delete_dir(directory_);
-  }
-  if(rename(temp_dir_name, directory_) != 0){
-    carp(CARP_WARNING, "Cannot rename directory");
-    return false;
-  }
-
-  std::free(temp_dir_name);
-
-  // set permission for the directory
-  chmod(directory_, S_IRWXU+S_IRWXG+S_IROTH+S_IXOTH);
 
   on_disk_ = true;
   return true;
@@ -1239,6 +1203,12 @@ void Index::index_database(
   // get number of bins/files needed
   int* mass_limits = (int*)mycalloc(2, sizeof(int));
   long num_bins = getNumBinsNeeded(mass_limits);
+
+#ifdef _MSC_VER
+  if (num_bins > WIN_MAX_OPEN_FILES) {
+	  carp(CARP_FATAL, "Needed to open %ld index files. Windows allows a maximum of %ld open files\n", num_bins, WIN_MAX_OPEN_FILES); 
+  }
+#endif
   
   // create file handle array
   FILE** file_array = (FILE**)mycalloc(num_bins, sizeof(FILE*));
@@ -1436,21 +1406,6 @@ bool Index::getIsUnique()
 DECOY_TYPE_T Index::getDecoyType(){
   return decoys_;
 }
-
-/**
- * clean_up
- * cleans up the temporary directory when SIGINT
- */
-void clean_up( int dummy ) {
-
-  fcloseall();
-  delete_dir(temp_folder_name);
-  exit(1);
-  
-  // quiet compiler
-  dummy = dummy;
-}
-
 
 /****************************
  * bin_peptide_iterator
