@@ -11,6 +11,7 @@ ExternalProject_Add(
   percolator
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/percolator
   PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/percolator
+  CMAKE_ARGS -DBoost_NO_BOOST_CMAKE=1 -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_SOURCE_DIR}/percolator
 )
 add_dependencies(percolator XercesC)
 add_subdirectory(MSToolkit)

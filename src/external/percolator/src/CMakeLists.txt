@@ -46,9 +46,6 @@ include_directories(${XSD_INCLUDE_DIR})
 SET (Boost_ADDITIONAL_VERSIONS "1.36" "1.36.0" "1.41" "1.41.0" "1.39" "1.39.0" "1.42.0" "1.42" "1.43.0" 
 			       "1.43." "1.44.0" "1.44.0" "1.45.0" "1.45" "1.46.0" "1.46" "1.47.0" "1.47")
 
-SET(CMAKE_INCLUDE_PATH "/net/gs/vol3/software/modules-sw/boost/1.47.0/Linux/RHEL5/x86_64/include" ${CMAKE_INCLUDE_PATH})
-SET(CMAKE_LIBRARY_PATH "/net/gs/vol3/software/modules-sw/boost/1.47.0/Linux/RHEL5/x86_64/lib" ${CMAKE_LIBRARY_PATH})
-
 find_package(Boost COMPONENTS filesystem system REQUIRED)
 
 
