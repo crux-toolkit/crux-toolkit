@@ -4,7 +4,6 @@ cmake_policy(VERSION 2.8.1)
 add_subdirectory(ArrayLibrary)
 add_subdirectory(bullseye)
 add_subdirectory(hardklor)
-add_subdirectory(percolator)
 add_subdirectory(posterior-error)
 add_subdirectory(qranker-barista)
 add_subdirectory(xlink)
@@ -13,7 +12,6 @@ include_directories(.)
 include_directories(ArrayLibrary)
 include_directories(bullseye)
 include_directories(hardklor)
-include_directories(percolator)
 include_directories(qranker-barista)
 include_directories(posterior-error)
 include_directories(xlink)
@@ -24,7 +22,6 @@ link_directories(.)
 link_directories(./ArrayLibrary)
 link_directories(./bullseye)
 link_directories(./hardklor)
-link_directories(./percolator)
 link_directories(./posterior-error)
 link_directories(./qranker-barista)
 link_directories(./xlink)
@@ -205,7 +202,6 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     crux-support
     hardklor
     MSToolkit
-    percolator
     posterior_error
     xlink
     ws2_32
@@ -242,7 +238,6 @@ else(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     hardklor
     m
     MSToolkit
-    percolator
     posterior_error
     pthread
     xlink

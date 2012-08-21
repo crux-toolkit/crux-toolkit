@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8.1)
 cmake_policy(VERSION 2.8.1)
 
 add_subdirectory(doc/user)
-add_subdirectory(src/external/MSToolkit)
+add_subdirectory(src/external)
 add_subdirectory(src/c)
 
 # build a CPack driven installer package
