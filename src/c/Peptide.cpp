@@ -1799,9 +1799,10 @@ bool Peptide::parseNoSrc(
   }
 
   // read in modified sequence
+  
   num_read = fread(modified_seq_, sizeof(MODIFIED_AA_T), 
                    mod_seq_len, file);
-
+ 
   // we didn't ad any peptide_src, make sure it's still empty
   peptide_srcs_.clear();
 

@@ -64,7 +64,7 @@ MatchCollection* MatchCollectionParser::create(
   loadDatabase(fasta_path, database, decoy_database);
 
   MatchCollection* collection = NULL;
-
+  
   if (S_ISDIR(stat_buff.st_mode)){
     carp(CARP_FATAL, "Internal error");
   }else if( has_extension(match_path, ".txt")){

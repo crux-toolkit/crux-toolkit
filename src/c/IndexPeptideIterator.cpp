@@ -6,11 +6,13 @@
 #include "IndexPeptideIterator.h"
 #include <errno.h>
 #include "WinCrux.h"
+#include <iostream>
+#include <fstream>
 
+using namespace std;
 static const int MAX_FILE_NAME_LENGTH = 300;
 static const int MAX_PARSE_COUNT = 3;
 static const int SLEEP_DURATION = 5;
-
 
 /***********************************************
  *  The basic index_peptide_iterator functions.

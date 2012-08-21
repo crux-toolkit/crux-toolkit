@@ -82,7 +82,7 @@ OutputFiles::OutputFiles(CruxApplication* program_name)
   }
 
   //pin xml 
-  if(command==SEARCH_COMMAND){
+  if(command==SEARCH_COMMAND || command == SEQUEST_COMMAND){
    string filename=makeFileName(
     fileroot, 
     application_,
@@ -414,7 +414,20 @@ void OutputFiles::writeHeaders(const vector<bool>& add_this_col){
   }
 }
 
-
+/**
+ * \brief Write header lines to the optional feature file.
+ */
+void OutputFiles::writeFeatureHeader(char** feature_names,
+                                     int num_names){
+  // write feature file header
+  if( feature_names && feature_file_ && num_names ){
+    fprintf(feature_file_, "scan\tlabel");
+    for(int name_idx = 0; name_idx < num_names; name_idx++){
+      fprintf(feature_file_, "\t%s", feature_names[name_idx]);
+    }
+    fprintf(feature_file_, "\n");
+  }
+}
 
 /**
  * \brief Write footer lines to .pep.xml and .pin.xml files
@@ -511,17 +524,18 @@ void OutputFiles::printMatchesPinXml(
   ) {
   vector<MatchCollection*> decoys; 
   decoys.push_back(decoy_matches_array[0]);
-  //sort by scan numbers
- 
+
+  if (pin_xml_file_ == NULL) {
+    return;
+  }
   
   if( spectrum ){
     
-    pin_xml_file_->write(target_matches, decoys,spectrum,1);
+    pin_xml_file_->write(target_matches, decoys, spectrum,1);
   }
   else 
     pin_xml_file_->write(target_matches,decoys);
    
-  
 }
 
 

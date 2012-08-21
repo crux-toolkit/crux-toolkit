@@ -11,9 +11,7 @@
 #include "MatchCollection.h"
 #include "MatchCollectionIterator.h"
 #include "MatchIterator.h"
-
 #include <string>
-
 #include "MatchFileReader.h"
 #include "SQTReader.h"
 #include "WinCrux.h"
@@ -582,13 +580,13 @@ void MatchCollection::sort(
     sort_by = LOGP_BONF_WEIBULL_XCORR;
     compare_match_function = (QSORT_COMPARE_METHOD)comparePValue;
     break;
-
+/*
   case PERCOLATOR_SCORE:
     carp(CARP_INFO, "Sorting match collection by Percolator score.");
     sort_by = PERCOLATOR_SCORE;
     compare_match_function = (QSORT_COMPARE_METHOD)comparePercolatorScore;
     break;
-
+*/
   case PERCOLATOR_QVALUE:
   case PERCOLATOR_PEPTIDE_QVALUE:
   case PERCOLATOR_PEP:
@@ -686,13 +684,13 @@ void MatchCollection::spectrumSort(
                 (QSORT_COMPARE_METHOD)compareSpectrumXcorr);
     last_sorted_ = XCORR;
     break;
-
+/*
   case PERCOLATOR_SCORE:
     qsortMatch(match_, match_total_,
                 (QSORT_COMPARE_METHOD)compareSpectrumPercolatorScore);
     last_sorted_ = PERCOLATOR_SCORE;
     break;
-
+*/
   case PERCOLATOR_QVALUE:
   case PERCOLATOR_PEPTIDE_QVALUE:
   case PERCOLATOR_PEP:

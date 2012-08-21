@@ -719,7 +719,6 @@ bool has_extension(const char* filename, const char* extension){
   }
   // point to the last few characters of the name 
   const char* look_here = filename + (name_length - extension_length);
-
   if( strcmp(look_here, extension) == 0){
     return true;
   }

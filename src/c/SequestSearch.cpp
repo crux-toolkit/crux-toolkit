@@ -154,7 +154,7 @@ int SequestSearch::main(int argc,   ///< number of cmd line tokens
       PEPTIDE_MOD_T* peptide_mod = peptide_mods[mod_idx];
 
       // get peptide iterator
-      ModifiedPeptidesIterator* peptide_iterator =
+     ModifiedPeptidesIterator* peptide_iterator =
         new ModifiedPeptidesIterator(mz,
                                      zstate,
                                      peptide_mod, 

@@ -228,7 +228,7 @@ void SQTReader::parseMatch(string& line) {
 
   current_prev_aa_ = sequence_tokens[0];
   current_next_aa_ = sequence_tokens[2];
-
+ /*
   cerr << "Match line:"<<line<<endl;
   cerr << "xcorr rank:"<<xcorr_rank<<endl;
   cerr << "sp rank:"<<sp_rank<<endl;
@@ -242,7 +242,7 @@ void SQTReader::parseMatch(string& line) {
   cerr << "prev_aa:"<<current_prev_aa_<<endl;
   cerr << "next_aa:"<<current_next_aa_<<endl;
   cerr << "====================" << endl;
-
+*/
   if (current_match_ != NULL) {
     current_match_collection_->addMatchToPostMatchCollection(current_match_);
   }
@@ -276,12 +276,12 @@ void SQTReader::parseLocus(string& line) {
   if (tokens.size() > 2) {
     protein_desc = tokens[locus_protein_desc_idx];
   }
-
+/*
   cerr << "Locus line:"<<line<<endl;
   cerr << "Protein id:"<<protein_id<<endl;
   cerr << "Protein desc:"<<protein_desc<<endl;
   cerr << "========================="<<endl;
-
+*/
   Protein* protein = database_->getProteinByIdString(protein_id.c_str());
 
   bool is_decoy = false;

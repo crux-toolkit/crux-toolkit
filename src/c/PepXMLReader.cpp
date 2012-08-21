@@ -554,7 +554,6 @@ int main(int argc, char** argv) {
 
   MatchCollection* match_collection = reader->parse();
 
-
   cerr << "there are "<<match_collection->getMatchTotal()<<" matches read"<<endl;
 
   MatchIterator* match_iterator = new MatchIterator(match_collection, XCORR, true);

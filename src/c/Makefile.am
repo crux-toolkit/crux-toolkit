@@ -254,13 +254,12 @@ crux_LDADD = \
   -L$(top_builddir)/src/c/hardklor \
   -L$(top_builddir)/src/c/bullseye \
   -L$(top_builddir)/src/external/percolator/src \
-  -L$(top_builddir)/src/external/xerces/src/.libs \
   -L$(top_builddir)/src/external/percolator/src/fido \
   -L/net/gs/vol3/software/modules-sw/boost/1.47.0/Linux/RHEL5/x86_64/lib \
   -lpercolator \
   -lperclibrary \
   -lfido \
-  -lxerces-c \
+  $(top_builddir)/src/external/xerces/src/libxerces-c.la \
   -lboost_filesystem \
   -lboost_system \
   -lqranker_barista \

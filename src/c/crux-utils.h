@@ -28,7 +28,6 @@
 #include "parameter.h"
 #include "Peak.h"
 
-
 #include "CruxApplication.h"
 
 
