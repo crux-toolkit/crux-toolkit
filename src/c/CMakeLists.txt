@@ -17,6 +17,10 @@ include_directories(posterior-error)
 include_directories(xlink)
 include_directories(../external)
 include_directories(../external/MSToolkit/include)
+include_directories(../external/xerces/include)
+include_directories(../external/percolator/src)
+include_directories(../external/xsd/)
+
 link_directories(../external/MSToolkit)
 link_directories(.)
 link_directories(./ArrayLibrary)
@@ -82,7 +86,7 @@ set (
   PeptideSrc.cpp
   PepXMLReader.cpp
   PepXMLWriter.cpp
-  Percolator.cpp
+  PercolatorApplication.cpp
   GeneratePeptides.cpp
   PredictPeptideIons.cpp
   PrintProcessedSpectra.cpp

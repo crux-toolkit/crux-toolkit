@@ -8,7 +8,7 @@ project_name := XSD
 # First try to include the bundled bootstrap.make if it exist. If that
 # fails, let make search for the external bootstrap.make.
 #
-build := build-0.3.9/build
+build := ../build/build-0.3.9/build
 
 -include $(dir $(lastword $(MAKEFILE_LIST)))../../$(build)/bootstrap.make
 
