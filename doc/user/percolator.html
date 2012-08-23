@@ -362,6 +362,10 @@ Complete the feature table and indicate which ones are used by
 Percolator, q-ranker and Barista.</li>
 <li>
 Add Percolator to the tab-delimited text table.</li>
+
+<li>Supplement Percolator's tab-delimited text file with the data
+supplied by the other crux tools</li> 
+
 </ul>
 
 <p>
@@ -371,12 +375,10 @@ Changes we are proposing on the Percolator end of things:</p>
 Produce three separate tab-delimited text files, akin to what Barista
 does for PSMs, peptides, and proteins.</li>
 <li>
-Duplicate standard error messages to a given log file.</li>
+Duplicate standard error messages to a given log file.  Accomplish this by writing logs to a FILE* or stream that can be set by crux.</li>
 <li>
-Make Percolator produce pep.xml.</li>
-<li>
-Modify Percolator's tab-delimited text file to resemble those produced
-by the other Crux tools.</li>
+Make Percolator produce pep.xml.
+</li>
 <li>
 Remove the --exp-mass and --clock flags, always setting them to T.</li>
 </ul>
