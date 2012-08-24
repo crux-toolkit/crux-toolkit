@@ -167,8 +167,10 @@ void SQTReader::parseSpectrum(string& line) {
   double observed_mass;
   from_string(observed_mass, tokens[spectrum_observed_mass_idx]);
 
-  int num_matches;
-  from_string(num_matches, tokens[spectrum_num_matches_idx]);
+  from_string(current_num_matches_, tokens[spectrum_num_matches_idx]);
+
+  ln_experiment_size_ = log(current_num_matches_);
+  
 
   
   last_parsed_ = SQT_LINE_SPECTRUM;
@@ -262,6 +264,7 @@ void SQTReader::parseMatch(string& line) {
   current_match_->setBYIonMatched(matched_ions);
   current_match_->setBYIonPossible(expected_ions);
   current_match_->setBYIonFractionMatched((FLOAT_T)matched_ions / (FLOAT_T)expected_ions);
+  current_match_->setLnExperimentSize(current_ln_experiment_size_);
 
   last_parsed_ = SQT_LINE_MATCH;
 }
