@@ -37,17 +37,14 @@ class PinXMLWriter{
     int top_rank
   );
  
-  
+  //write pin.xml file without spectrum, when reading matches form sqt or txt file
   void write (
     MatchCollection* target_collection,
-    std::vector<MatchCollection*>& decoy_psms 
+    std::vector<MatchCollection*>& decoy_psms
   );
   
   //header 
   void printHeader(
-    //std::string output_file_path, 
-    //std::string target_file_path, 
-    //std::string decoy_file_path
   );
 
   //get input file pathes
@@ -64,34 +61,42 @@ class PinXMLWriter{
   void printFeatureDescription(); 
   
   //footer
-  void printFooter();           
+  void printFooter();   
+
+  bool setProcessInfo( 
+    const char* target_file_path,
+    const char* decoy_file_path
+  );    
+ std::string absolutPath(const char* filename);    
  protected:
 
   FILE* output_file_;
   std::string enzyme_; 
   std::string decoy_file_path_;
   std::string target_file_path_;
+  std::string output_file_path_; 
+  std::string directory_;
   
   int precision_;
   int mass_precision_;
   int scan_number_;
   bool is_sp_; 
-   
+  bool is_decoy_; 
+  std::string decoy_prefix_; 
   void init(); 
 
   //proccess information 
-  void printProcessInfo(
-    std::string output_file_path, 
-    std::string target_file_path, 
-    std::string decoy_file_path 
+  void printProcessInfo();
+ 
+  void printFeatures(Match* match, 
+    bool is_sp
   );
-  void printFeatures(Match* match, bool is_sp);
 
   //write PSM
   void printPSM(
     Match* match, 
     Spectrum* spectrum, 
-    int is_decoy 
+    bool is_decoy 
   );
 
   //write Peptide sequence 
@@ -112,7 +117,8 @@ class PinXMLWriter{
   //footer frag
   void printFragSpecFooter();
   
-
+  //set decoy for sqt files 
+  bool isDecoy(Match* match);
 
   //return id for PSM 
   string getId(
@@ -121,17 +127,12 @@ class PinXMLWriter{
     int scan_number,
     int rank
   ); 
- //set charges for features 
- void setCharges(
-   int charge_state, 
-   bool charge1,  
-   bool charge2, 
-   bool charge3
- );
-
-  //TODO: calculate deltLCn and deltCn
-  //DeltaLCn=(xcorr(i)-xcorr(last))/xcorr(i)
-  //DeltaCn=(xcorr(i)-xcorr(1))/xcorr(i)
+ 
+  //calculating deltaCn and deltaLCn
+  void calculateDeltaCN(map<pair<int, int>, vector<Match*> >& scan_charge_to_matches);
+  void calculateDeltaCN(const vector<Match*>& collection);
+  void calculateDeltaCN(MatchCollection* collection);
+  void calculateDeltaCN(MatchCollection* target_collection, std::vector<MatchCollection*>& decoys);
 
 };
 #endif // PINXMLWRITER_H
