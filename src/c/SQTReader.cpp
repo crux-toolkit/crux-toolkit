@@ -169,9 +169,7 @@ void SQTReader::parseSpectrum(string& line) {
 
   from_string(current_num_matches_, tokens[spectrum_num_matches_idx]);
 
-  ln_experiment_size_ = log(current_num_matches_);
-  
-
+  current_ln_experiment_size_ = logf((FLOAT_T)current_num_matches_);
   
   last_parsed_ = SQT_LINE_SPECTRUM;
 
@@ -372,11 +370,9 @@ MatchCollection* SQTReader::parse(
   Database* database, ///< target protein database
   Database* decoy_database ///< decoy protein database (can be null)
   ) {
-
   SQTReader* reader = new SQTReader(file_path);
   reader->setDatabase(database);
   reader->setDecoyDatabase(decoy_database);
-
   MatchCollection* collection = reader->parse();
 
   return collection;
