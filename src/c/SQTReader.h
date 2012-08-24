@@ -39,7 +39,8 @@ class SQTReader {
   SpectrumZState current_zstate_; ///< keeps track of the current zstate
   std::string file_path_; ///< path of the xml file
   Crux::Spectrum* current_spectrum_; ///< Keeps track of the current spectrum object
-
+  int current_num_matches_; ///< Keeps track of the number of matches assigned to the current spectrum.
+  double current_ln_experiment_size_;
   Match* current_match_; ///< keeps track of the current match object
   std::string current_peptide_sequence_; ///< keeps track of the current peptide sequence
   std::string current_prev_aa_; ///< keeps track of the current previous amino acid
