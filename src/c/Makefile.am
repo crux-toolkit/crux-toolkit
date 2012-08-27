@@ -1,6 +1,6 @@
 distdir = $(PACKAGE)_$(VERSION)
 
-SUBDIRS = ArrayLibrary percolator xlink posterior-error qranker-barista hardklor bullseye .
+SUBDIRS = ArrayLibrary xlink posterior-error qranker-barista hardklor bullseye .
 
 AM_CPPFLAGS = -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 \
  -D_GNU_SOURCE -DGCC -DHAVE_EXPAT_CONFIG_H
@@ -148,6 +148,10 @@ LIBFILES= \
   PinXMLWriter.h\
   GeneratePeptides.cpp \
   GeneratePeptides.h \
+  Percolator.cpp \
+  Percolator.h \
+  PercolatorApplication.cpp \
+  PercolatorApplication.h \
   PredictPeptideIons.cpp \
   PredictPeptideIons.h \
   PrintProcessedSpectra.cpp \
@@ -198,7 +202,6 @@ noinst_LTLIBRARIES = libcrux.la
 libcrux_la_CFLAGS = \
   $(AM_CFLAGS) \
   -I$(top_srcdir)/src/external/MSToolkit/include \
-  -I$(top_srcdir)/src/c/percolator/ \
   -I$(top_srcdir)/src/c/qranker-barista/ \
   -I$(top_srcdir)/src/c/posterior-error/
 
@@ -206,7 +209,6 @@ libcrux_la_CXXFLAGS = \
   $(AM_CXXFLAGS) \
   -I$(top_srcdir)/src/external/MSToolkit/include \
   -I$(top_srcdir)/src/external/MSToolkit/RAMP \
-  -I$(top_srcdir)/src/c/percolator/ \
   -I$(top_srcdir)/src/c/qranker-barista/ \
   -I$(top_srcdir)/src/c/posterior-error/ \
   -I$(top_srcdir)/src/c/hardklor/ \
@@ -228,7 +230,6 @@ crux_CXXFLAGS = \
   $(AM_CXXFLAGS) \
   -DMAIN \
   -I$(top_srcdir)/src/external/MSToolkit \
-  -I$(top_srcdir)/src/c/percolator \
   -I$(top_srcdir)/src/c/posterior-error \
   -I$(top_srcdir)/src/c/xlink \
   -I$(top_srcdir)/src/c/qranker-barista \
