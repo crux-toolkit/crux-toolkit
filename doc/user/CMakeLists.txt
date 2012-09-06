@@ -14,7 +14,9 @@ set (
 	crux-predict-peptide-ions.html 
 	crux-search-for-matches.html 
 	crux-sequest-search.html 
-  crux-search-for-xlinks.html 
+        crux-search-for-xlinks.html 
+        spectral-counts.html
+        spectral-counts-tutorial.html
 	default.params 
 	customize-tutorial.html 
 	fasta-format.html 
