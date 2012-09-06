@@ -414,7 +414,7 @@ void OutputFiles::writeMatches(
 
   // print to each file type
   printMatchesTab(target_matches, decoy_matches_array, rank_type, spectrum);
-  
+
   printMatchesSqt(target_matches, decoy_matches_array, spectrum);
 
   printMatchesXml(target_matches, decoy_matches_array, spectrum, rank_type);

@@ -20,6 +20,8 @@ class IndexPeptideIterator : public PeptideIterator {
   FILE* index_file_; ///< The current file stream that we are reading from
   bool is_decoy_;    ///< return decoy or target peptides
 
+  PeptideConstraint* constraint_;
+
   /**
    * \brief Parses the "crux_index_map" file that contains the mapping
    * between each crux_index_* file and a mass range. Adds all
@@ -96,6 +98,7 @@ class IndexPeptideIterator : public PeptideIterator {
    */
   IndexPeptideIterator(
     Index* index, ///< The index -in
+    PeptideConstraint* constraint, ///< the constraint -in
     bool is_decoy = false ///< return target or decoy peptides
     );
 
