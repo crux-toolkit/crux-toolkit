@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 #ifndef _MSC_VER
 #include <unistd.h>
+#include <iostream>
 #endif
 #include "crux-utils.h"
 #include "parameter.h"
@@ -722,7 +723,6 @@ bool has_extension(const char* filename, const char* extension){
   if( strcmp(look_here, extension) == 0){
     return true;
   }
-
   return false;
 }
 

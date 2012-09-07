@@ -196,7 +196,9 @@ LIBFILES= \
   version.h \
   xlink_search.h \
   xlink_compute_qvalues.h \
-  WinCrux.h
+  WinCrux.h \
+  MakePinApplication.h \
+  MakePinApplication.cpp 
 
 noinst_LTLIBRARIES = libcrux.la
 libcrux_la_CFLAGS = \
@@ -204,7 +206,7 @@ libcrux_la_CFLAGS = \
   -I$(top_srcdir)/src/external/MSToolkit/include \
   -I$(top_srcdir)/src/c/qranker-barista/ \
   -I$(top_srcdir)/src/c/posterior-error/
-
+  
 libcrux_la_CXXFLAGS = \
   $(AM_CXXFLAGS) \
   -I$(top_srcdir)/src/external/MSToolkit/include \
@@ -213,7 +215,11 @@ libcrux_la_CXXFLAGS = \
   -I$(top_srcdir)/src/c/posterior-error/ \
   -I$(top_srcdir)/src/c/hardklor/ \
   -I$(top_srcdir)/src/c/bullseye/ \
-  -I$(top_srcdir)/src/external/
+  -I$(top_srcdir)/src/external/ \
+  -I$(top_srcdir)/src/external/percolator/src \
+  -I$(top_srcdir)/src/external/percolator/src/fido \
+  -I/net/gs/vol3/software/modules-sw/xsd/3.3.0/Linux/RHEL5/x86_64/libxsd/\
+  -I$(top_srcdir)/src/external/xerces/src 
 
 libcrux_la_SOURCES = $(LIBFILES)
 
@@ -258,7 +264,6 @@ crux_LDADD = \
   -L$(top_builddir)/src/external/percolator/src \
   -L$(top_builddir)/src/external/percolator/src/fido \
   -L/net/gs/vol3/software/modules-sw/boost/1.47.0/Linux/RHEL5/x86_64/lib \
-  -lpercolator \
   -lperclibrary \
   -lfido \
   $(top_builddir)/src/external/xerces/src/libxerces-c.la \

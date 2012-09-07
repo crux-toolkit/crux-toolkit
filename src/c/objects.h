@@ -463,7 +463,6 @@ enum _scorer_type {
   PERCOLATOR_QVALUE,
   PERCOLATOR_PEPTIDE_QVALUE,
   PERCOLATOR_PEP,      ///< posterior error prob from percolator scores
-  PERCOLATOR_SCAN,    ///< for converting files to pin.xml format 
 
   QRANKER_SCORE,
   QRANKER_QVALUE,

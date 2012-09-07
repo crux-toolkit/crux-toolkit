@@ -313,19 +313,24 @@ void QRanker ::write_results_psm_xml(PepXMLWriter& xmlfile)
       }
 
       // psm info
-      int psm_rank = 1;
+      int* psm_ranks = new int[NUMBER_SCORER_TYPES];
+      psm_ranks[XCORR]=1; 
       double delta_cn = d.psmind2deltaCn(psmind);
       scores[XCORR] = d.psmind2xcorr(psmind);
       scores[SP] = d.psmind2spscore(psmind);
       scores[QRANKER_SCORE] = fullset[i].score;
       scores[QRANKER_QVALUE] = fullset[i].q;
       scores[QRANKER_PEP] = fullset[i].PEP;
-
-      xmlfile.writePSM(scan, filename, spectrum_mass, charge, psm_rank,
+      psm_ranks[SP]=d.psmind2sp_rank(psmind);
+      double by_ions_matched=d.psmind2by_ions_matched(psmind);
+      
+      psm_ranks[XCORR]=d.psmind2xcorr_rank(psmind);
+      xmlfile.writePSM(scan, filename, spectrum_mass, charge, psm_ranks,
                        sequence, modified_sequence.c_str(),
                        peptide_mass, num_proteins,
                        flanking_aas.c_str(), protein_names, 
-                       protein_descriptions, delta_cn, scores_to_print, scores);
+                       protein_descriptions, delta_cn, scores_to_print, scores,by_ions_matched,
+                       d.psmind2by_ions_total(psmind), d.psmind2matches_spectrum(psmind));
 
       free(sequence);
       if( path_name[0] ){

@@ -997,19 +997,24 @@ void Barista :: write_results_pep_xml(PepXMLWriter& xmlfile)
       }
 
       // psm info
-      int psm_rank = 1;
+      int* psm_ranks = new int[NUMBER_SCORER_TYPES];
       double delta_cn = d.psmind2deltaCn(psmind);
+     
       scores[XCORR] = d.psmind2xcorr(psmind);
       scores[SP] = d.psmind2spscore(psmind);
       scores[QRANKER_SCORE] = psmtrainset[i].score;
       scores[QRANKER_QVALUE] = psmtrainset[i].q;
       scores[QRANKER_PEP] = psmtrainset[i].PEP;
-
-      xmlfile.writePSM(scan, filename, spectrum_mass, charge, psm_rank,
+      psm_ranks[SP]=d.psmind2sp_rank(psmind); 
+      psm_ranks[XCORR]=d.psmind2xcorr_rank(psmind);
+      double by_ion_matched=d.psmind2by_ions_matched(psmind);
+      xmlfile.writePSM(scan, filename, spectrum_mass, charge, psm_ranks,
                        sequence, modified_sequence.c_str(),
                        peptide_mass, num_proteins,
                        flanking_aas.c_str(), protein_names, 
-                       protein_descriptions, delta_cn, scores_to_print, scores);
+                       protein_descriptions, delta_cn, scores_to_print, scores,by_ion_matched, 
+                       d.psmind2by_ions_total(psmind), 
+                       d.psmind2matches_spectrum(psmind));
 
       free(sequence);
       if( path_name[0] ){

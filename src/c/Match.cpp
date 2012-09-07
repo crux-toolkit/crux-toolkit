@@ -56,7 +56,7 @@ void Match::init() {
   digest_ = INVALID_DIGEST;
   post_process_match_ = 0;
   delta_cn_ = 0;
-  ln_delta_cn_ = 0;
+  delta_lcn_ = 0;
   ln_experiment_size_ = 0;
   num_target_matches_ = 0;
   num_decoy_matches_ = 0;
@@ -1524,19 +1524,19 @@ FLOAT_T Match::getDeltaCn()
 /**
  * sets the match ln_delta_cn
  */
-void Match::setLnDeltaCn(
-  FLOAT_T ln_delta_cn  ///< the ln delta cn value of PSM -in
+void Match::setDeltaLCn(
+  FLOAT_T delta_lcn  ///< the delta lcn value of PSM -in
   )
 {
-  ln_delta_cn_ = ln_delta_cn;
+  delta_lcn_ = delta_lcn;
 }
 
 /**
- * gets the match ln_delta_cn
+ * gets the match delta_lcn
  */
-FLOAT_T Match::getLnDeltaCn()
+FLOAT_T Match::getDeltaLCn()
 {
-  return ln_delta_cn_;
+  return delta_lcn_;
 }
 
 /**

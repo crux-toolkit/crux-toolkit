@@ -1313,19 +1313,21 @@ void PepRanker :: write_results_pep_xml(PepXMLWriter& xmlfile)
       }
 
       // psm info
-      int psm_rank = 1;
+      int* psm_rank=new int[NUMBER_SCORER_TYPES] ;
+      psm_rank[XCORR]=1;
       double delta_cn = d.psmind2deltaCn(psmind);
       scores[XCORR] = d.psmind2xcorr(psmind);
       scores[SP] = d.psmind2spscore(psmind);
       scores[QRANKER_SCORE] = psmtrainset[i].score;
       scores[QRANKER_QVALUE] = psmtrainset[i].q;
       scores[QRANKER_PEP] = psmtrainset[i].PEP;
-
+        
       xmlfile.writePSM(scan, filename, spectrum_mass, charge, psm_rank,
                        sequence, modified_sequence.c_str(),
                        peptide_mass, num_proteins,
                        flanking_aas.c_str(), protein_names, 
-                       protein_descriptions, delta_cn, scores_to_print, scores);
+                       protein_descriptions, delta_cn, scores_to_print, scores,d.psmind2by_ions_matched(psmind),
+                       d.psmind2by_ions_total(psmind), d.psmind2matches_spectrum(psmind));
 
       free(sequence);
       if( path_name[0] ){

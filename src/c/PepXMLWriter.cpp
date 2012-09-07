@@ -94,7 +94,7 @@ void PepXMLWriter::writePSM(
                                   ///at this charge state
   int charge, ///< assumed charge state for the match
   
-  int PSM_rank, ///< rank of this peptide for the spectrum
+  int* PSM_ranks, ///< rank of this peptide for the spectrum
   const char* unmodified_peptide_sequence, ///< sequence with no mods
   const char* modified_peptide_sequence, ///< either with symbols or masses
   double peptide_mass, ///< mass of the peptide sequence
@@ -105,12 +105,15 @@ void PepXMLWriter::writePSM(
   vector<string>& protein_descriptions, ///<
   double delta_cn, ///<
   bool* scores_computed,
-  double* scores ///< indexed by score type
+  double* scores, ///< indexed by score type
+  unsigned by_ions_matched, 
+  unsigned by_ions_total, 
+  unsigned cur_num_matches
   ){
 
   string spectrum_title = getSpectrumTitle(spectrum_scan_number, 
                                            filename, charge);
-
+  //cerr<<"by_ion_fraction_matched: "<<by_ion_fraction_matched<<endl;
   // close the last spec element if this is a new spectrum and not the first
   if( !last_spectrum_printed_.empty()
       &&last_spectrum_printed_ != spectrum_title ){ 
@@ -124,19 +127,23 @@ void PepXMLWriter::writePSM(
     last_spectrum_printed_ = spectrum_title;
   }
   // else, just add to the search_result list
-
-  printPeptideElement(PSM_rank, 
-                      unmodified_peptide_sequence,
-                      modified_peptide_sequence, 
-                      peptide_mass,
-                      spectrum_neutral_mass,
-                      num_proteins,
-                      flanking_aas,
-                      protein_names,
-                      protein_descriptions,
-                      delta_cn,
-                      scores_computed,
-                      scores);
+  //cerr<<"3.LnExperimentSize: "<<current_ln_experiment_size<<endl;
+  printPeptideElement(PSM_ranks, 
+    unmodified_peptide_sequence,
+    modified_peptide_sequence, 
+    peptide_mass,
+    spectrum_neutral_mass,
+    num_proteins,
+    flanking_aas,
+    protein_names,
+    protein_descriptions,
+    delta_cn,
+    scores_computed,
+    scores,
+    by_ions_matched,
+    by_ions_total,
+    cur_num_matches
+  );
 
 
 }
@@ -186,18 +193,21 @@ void PepXMLWriter::closeSpectrumElement(){
 /**
  * Print everything between the <search_hit> tags for this match
  */
-void PepXMLWriter::printPeptideElement(int rank,
-                                       const char* peptide_sequence,
-                                       const char* modified_peptide_sequence,
-                                       double peptide_mass,
-                                       double spectrum_mass,
-                                       int num_proteins,
-                                       const char* flanking_aas,
-                                       vector<string>& protein_names,
-                                       vector<string>& protein_descriptions,
-                                       double delta_cn,
-                                       bool* scores_computed,
-                                       double* scores
+void PepXMLWriter::printPeptideElement(int *ranks,
+  const char* peptide_sequence,
+  const char* modified_peptide_sequence,
+  double peptide_mass,
+  double spectrum_mass,
+  int num_proteins,
+  const char* flanking_aas,
+  vector<string>& protein_names,
+  vector<string>& protein_descriptions,
+  double delta_cn,
+  bool* scores_computed,
+  double* scores,
+  unsigned by_ions_matched,
+  unsigned by_ions_total,
+  unsigned current_num_matches  
 ){
 
   // get values
@@ -215,22 +225,29 @@ void PepXMLWriter::printPeptideElement(int rank,
   // print <search_hit> tag
   fprintf(file_, "    <search_hit hit_rank=\"%i\" peptide=\"%s\" "
           "peptide_prev_aa=\"%c\" peptide_next_aa=\"%c\" protein=\"%s\" "
-          "num_tot_proteins=\"%i\" calc_neutral_pep_mass=\"%.*f\" "
+          "num_tot_proteins=\"%i\" "
+          "num_matched_ions=\"%i\" "
+          "tot_num_ions=\"%i\""
+          " calc_neutral_pep_mass=\"%.*f\" "
           "massdiff=\"%+.*f\" "
           "num_tol_term=\"%i\" num_missed_cleavages=\"%i\" "
+          "num_matched_peptides=\"%i\""
           " is_rejected=\"%i\" ",
-          rank, // -1 if unavailable, uses xcorr rank otherwise
+          ranks[XCORR], // -1 if unavailable, uses xcorr rank otherwise
           peptide_sequence,
           flanking_aas_prev,
           flanking_aas_next,
           protein_id.c_str(),
           num_proteins,
+          by_ions_matched,
+          by_ions_total,
           mass_precision_,
           peptide_mass,
           mass_precision_,
           spectrum_mass - peptide_mass,
           num_tol_term, 
           num_missed_cleavages, 
+          current_num_matches,
           0
           );
   fprintf(file_, "protein_descr=\"%s\">\n",
@@ -263,7 +280,7 @@ void PepXMLWriter::printPeptideElement(int rank,
   print_modifications_xml(modified_peptide_sequence, peptide_sequence, file_);
 
   // print scores
-  printScores(delta_cn, scores, scores_computed);
+  printScores(delta_cn, scores, scores_computed,ranks);
 
   // print post-search (analysis) fields
   printAnalysis(scores, scores_computed);
@@ -273,23 +290,31 @@ void PepXMLWriter::printPeptideElement(int rank,
 }
 
 void PepXMLWriter::printScores(double delta_cn, 
-                               double* scores, 
-                               bool* scores_computed){
+  double* scores, 
+  bool* scores_computed,
+  int* ranks
+ ){
   if( delta_cn == -0 ){
     delta_cn = 0;
   }
+  string ranks_to_string[2]= {"sp_rank","xcorr_rank"};
   fprintf(file_, 
           "        <search_score name=\"delta_cn\" value=\"%.*f\" />\n",
           precision_, delta_cn);
-
+  
   for(int score_idx = 0; score_idx < NUMBER_SCORER_TYPES; score_idx++){
     if(scores_computed[score_idx]){
-    fprintf(file_, 
-            "        <search_score name=\"%s\" value=\"%.*f\" />\n",
-            scorer_type_to_string((SCORER_TYPE_T)score_idx),
-            precision_, scores[score_idx]);
-    }
+      fprintf(file_, 
+        "        <search_score name=\"%s\" value=\"%.*f\" />\n",
+        scorer_type_to_string((SCORER_TYPE_T)score_idx),
+        precision_, scores[score_idx]);
 
+     fprintf(file_, 
+         "        <search_score name=\"%s\" value=\"%i\" />\n",
+         ranks_to_string[score_idx].c_str(),
+         ranks[score_idx]
+      );
+    }
   }
 
 }

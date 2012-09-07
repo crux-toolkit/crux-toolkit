@@ -33,6 +33,7 @@
 #include "CruxHardklorApplication.h"
 #include "CruxBullseyeApplication.h"
 #include "PercolatorApplication.h"
+#include "MakePinApplication.h"
 
 /**
  * The starting point for crux.  Prints a general usage statement when
@@ -81,8 +82,8 @@ int main(int argc, char** argv){
   applications.add(new PrintVersion());
   
 
-
-
+  // make pin file 
+  applications.add(new MakePinApplication());
   int ret = applications.main(argc, argv);
   return ret;
 

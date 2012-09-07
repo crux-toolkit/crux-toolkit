@@ -7,7 +7,6 @@
 #include "mass.h"
 #include "expat.h"
 
-
 #include "Protein.h"
 #include "Peptide.h"
 
@@ -135,7 +134,8 @@ MatchCollection* PepXMLReader::parse() {
 
   current_match_collection_ = new MatchCollection();
   current_match_collection_->preparePostProcess(database_->getNumProteins());
-
+  int total_matches=current_match_collection_->getMatchTotal();
+  cerr<<"total matches: "<< total_matches<<endl;
   XML_SetUserData(xml_parser, this);
   XML_SetElementHandler(xml_parser, open_handler, close_handler);
 
@@ -234,11 +234,21 @@ int PepXMLReader::findStart(
   string next_aa ///< the next amino acid after the sequence in the protein
   ) {
 
+  bool debug = false;
+  if (peptide_sequence == "YESATASALVN") {
+    debug = true;
+  }
+  int case_ = -1;
+
+  int ans = -1;
+
   if (prev_aa == "-") {
-    return 1;
+    case_ = 0;
+    ans = 1;
   } else if (next_aa == "-") {
-    return protein->getLength() - peptide_sequence.length();
-  } else {
+    case_ = 1;
+    ans = protein->getLength() - peptide_sequence.length() + 1;
+  } else { 
     //use the flanking amino acids to further constrain our search in the sequence
     size_t pos = string::npos; 
     string seq = prev_aa + peptide_sequence + next_aa;
@@ -252,10 +262,27 @@ int PepXMLReader::findStart(
       if (pos == string::npos) {
         carp(CARP_FATAL, "could not %s in protein %s\n%s", seq.c_str(), protein->getIdPointer(), protein_seq.c_str());
       }
-      return (pos+1);
+      case_ = 2;
+      ans = (pos+1);
+    } else {
+      case_ = 3;
+      ans = (pos+2);
     }
-    return (pos+2);
   }
+
+  if (debug) {
+    cerr << "findStart - case:"<<case_<<endl;
+    cerr << "findStart - sequence:"<<peptide_sequence<<endl;
+    cerr << "findStart - protein:"<<protein->getId()<<endl;
+    string protein_seq = protein->getSequencePointer();
+    string parsed_sequence = protein_seq.substr(ans-1, peptide_sequence.length());
+    cerr <<"findStart - mapped sequence:"<<parsed_sequence<<endl;
+    cerr <<"==============================="<<endl;
+    //carp(CARP_FATAL, "exitting..");
+  }
+
+  return ans;
+
 }
 
 /**
@@ -275,9 +302,11 @@ void PepXMLReader::searchHitOpen(
 
   string prev_aa;
   string next_aa;
+  unsigned  by_ions_matched=0; 
+  unsigned by_ions_total=0; 
+  unsigned current_num_matches=0; 
 
   double peptide_mass = 0.0;
-
   for (int i = 0; attr[i]; i += 2) {
     if (strcmp(attr[i], "hit_rank") == 0) {
       hit_rank = atoi(attr[i+1]);
@@ -287,12 +316,18 @@ void PepXMLReader::searchHitOpen(
       protein_string = attr[i+1];
     } else if (strcmp(attr[i], "num_tot_proteins") == 0) {
       ; // do nothing.
-    } else if (strcmp(attr[i], "calc_neutral_pep_mass") == 0) {
+    }else if (strcmp(attr[i], "num_matched_ions") == 0) {
+      by_ions_matched = atoi(attr[i+1]);  
+    }else if (strcmp(attr[i], "tot_num_ions") == 0){
+      by_ions_total = atoi(attr[i+1]); 
+    }else if (strcmp(attr[i], "calc_neutral_pep_mass") == 0) {
       peptide_mass = atof(attr[i+1]);
     } else if (strcmp(attr[i], "peptide_prev_aa") == 0) {
       prev_aa = attr[i+1];
     } else if (strcmp(attr[i], "peptide_next_aa") == 0) {
       next_aa = attr[i+1];
+    } else if( strcmp(attr[i], "num_matched_peptides") == 0){
+      current_num_matches=atoi(attr[i+1]);
     }
   }
 
@@ -314,15 +349,24 @@ void PepXMLReader::searchHitOpen(
      is_decoy = true;
     } 
   } 
-
+  //cerr << "findStart:"<<current_peptide_sequence_<<endl;
   int start_idx = findStart(protein, current_peptide_sequence_, prev_aa, next_aa);
 
   Peptide* peptide = new Peptide(length, peptide_mass, protein, start_idx);
 
 
   current_match_ = new Match(peptide, current_spectrum_, current_zstate_, is_decoy);
-  current_match_->setRank(XCORR, hit_rank);
-
+  //current_match_->setRank(XCORR, hit_rank);
+  if(by_ions_total>0){
+    current_match_->setBYIonMatched(by_ions_matched);
+    current_match_->setBYIonPossible(by_ions_total);
+    current_match_-> setBYIonFractionMatched((FLOAT_T)by_ions_matched/(FLOAT_T)by_ions_total); 
+  }else 
+    current_match_->setBYIonFractionMatched(0);
+  if(current_num_matches>0)
+    current_match_->setLnExperimentSize(logf(current_num_matches));
+  else 
+    current_match_->setLnExperimentSize(0);
 }
 
 /**
@@ -373,6 +417,7 @@ void PepXMLReader::alternativeProteinOpen(
     }
   }
 
+  //cerr <<"findStart2:"<<current_peptide_sequence_<<endl;
   int start_idx = findStart(protein, current_peptide_sequence_, prev_aa, next_aa);
 
   PeptideSrc* src = new PeptideSrc((DIGEST_T)0, protein, start_idx);
@@ -397,7 +442,6 @@ void PepXMLReader::searchScoreOpen(
   ) {
 
   search_score_open_ = true;
-
   string name;
   double value = 0.0;
 
@@ -414,8 +458,8 @@ void PepXMLReader::searchScoreOpen(
     current_match_->setScore(XCORR, value);
   } else if (name == "delta_cn") {
     current_match_->setDeltaCn(value);
-    current_match_->setLnDeltaCn(log(value));
   } else if (name == "sp") {
+    current_match_collection_->setScoredType(SP, true);
     current_match_->setScore(SP, value);
   } else if (name == "percolator_score") {
     current_match_collection_->setScoredType(PERCOLATOR_SCORE, true);
@@ -435,6 +479,10 @@ void PepXMLReader::searchScoreOpen(
   } else if (name == "qranker_PEP") {
     current_match_collection_->setScoredType(QRANKER_PEP, true);
     current_match_->setScore(QRANKER_PEP, value);
+  } else if(name=="xcorr_rank"){
+    current_match_->setRank(XCORR,value);
+  } else if(name=="sp_rank"){
+    current_match_->setRank(SP,value);
   } else {
     //it is a custom score
     current_match_->setCustomScore(name, value);

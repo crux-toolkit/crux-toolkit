@@ -376,6 +376,29 @@ void initialize_parameters(void){
     "Argument, not option for percolator",
     "false"
   );
+  /*make-pin arguments*/
+  set_string_parameter(
+    "target input", NULL,
+    "make-pin can convert any file format in sqt, tab-delimited and pep.xml file "
+    "to pin.xml file "
+    "Also, this argument can be  which indicates the pin file will come from standard input",
+    "Argument, not option for make-pin",
+    "false"
+  );
+  set_string_parameter(
+    "decoy input", NULL,
+    "make-pin can convert any file format in sqt, tab-delimited and pep.xml file "
+    "to pin.xml file ",
+    "Argument, not option for make-pin",
+    "false"
+  );
+  set_string_parameter(
+    "output-file", NULL,
+    "File where pin.xml will be written"
+    "to pin.xml file ",
+    "It is optional for make-pin",
+    "false"
+  );
   /* *** Initialize Options (command line and param file) *** */
 
   /* options for all executables */

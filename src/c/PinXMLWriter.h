@@ -14,6 +14,7 @@
 #include "SpectrumZState.h"
 #include "Spectrum.h"
 #include "Peptide.h"
+#include <limits>
 
 //#include "MatchReader.h"
 
@@ -67,7 +68,14 @@ class PinXMLWriter{
     const char* target_file_path,
     const char* decoy_file_path
   );    
- std::string absolutPath(const char* filename);    
+ std::string absolutPath(const char* filename);  
+ /*
+ template<typename T>
+ inline bool isInfinite(T value){
+  return std::numeric_limits<T>::has_infinity &&
+  value == std::numeric_limits<T>::infinity();
+ } 
+ */ 
  protected:
 
   FILE* output_file_;

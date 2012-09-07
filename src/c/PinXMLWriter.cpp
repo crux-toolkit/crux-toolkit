@@ -17,6 +17,7 @@
 #include "SQTReader.h"
 #include "SpectrumZState.h"
 #include <fstream>
+#include <limits>
 
 using namespace std;
 using namespace Crux; 
@@ -52,7 +53,7 @@ PinXMLWriter::~PinXMLWriter(){
 void PinXMLWriter::openFile(const char* filename, const char* output_dir,bool overwrite){
   output_file_=create_file_in_path(filename,output_dir,overwrite);
   if(output_file_==NULL){
-    carp(CARP_FATAL,"File is not valid");
+    carp(CARP_FATAL,"Cann't open %s file ",filename);
     return;
   }
 }
@@ -76,8 +77,10 @@ void PinXMLWriter::write(
   while (iterator -> hasNext()) {
     matches.push_back(iterator->next());
   }
+
   calculateDeltaCN(matches);
   for(unsigned idx=0; idx<matches.size(); idx++){
+   
     if(matches[idx]->getRank(XCORR)<=top_rank)
       printPSM(matches[idx],spectrum,matches[idx]->getNullPeptide());
     else 
@@ -99,21 +102,39 @@ void PinXMLWriter::calculateDeltaCN(map<pair<int, int>, vector<Match*> >& scan_c
 
 void PinXMLWriter::calculateDeltaCN(const vector<Match*>& collection) {
 
-  FLOAT_T first_xcorr = collection[1]->getScore(XCORR);
-  unsigned collection_size=collection.size();
-  FLOAT_T last_xcorr = collection[collection_size-1]->getScore(XCORR);
- 
-  for (size_t idx = 0 ;idx < collection_size;idx++) {
-    FLOAT_T current_xcorr = collection[idx]->getScore(XCORR);
-    FLOAT_T delta_cn = 0;
-    FLOAT_T delta_lcn = 0;
-    if (current_xcorr > 0) {
-      delta_cn = (current_xcorr - first_xcorr) / current_xcorr;
-      delta_lcn = (current_xcorr - last_xcorr) / current_xcorr; //last_xcorr 
+
+  unsigned collection_size= collection.size();
+  FLOAT_T last_xcorr=0.0;
+  FLOAT_T delta_cn = 0.0;
+  FLOAT_T delta_lcn = 0.0;
+  FLOAT_T next_xcorr=0.0;
+  FLOAT_T current_xcorr = 0 ;
+  if(collection_size>1){
+    last_xcorr = collection[collection_size-1]->getScore(XCORR);
+    for (size_t idx = 0 ;idx < collection_size;idx++) { 
+      current_xcorr = collection[idx]->getScore(XCORR);
+      if (idx+1<=collection_size-1)
+        next_xcorr=collection[idx+1]->getScore(XCORR);
+      if (current_xcorr > 0 ) {
+        delta_cn = (FLOAT_T)(current_xcorr - next_xcorr) / (FLOAT_T)current_xcorr;
+        delta_lcn = (FLOAT_T)(current_xcorr - last_xcorr) /(FLOAT_T)current_xcorr;
+      } else {
+        delta_cn = 0.0;
+        delta_lcn = 0.0;
+      }
+      
+      if(fabs(delta_cn)== numeric_limits<FLOAT_T>::infinity()){
+        cerr<<"delta_cn was "<<delta_cn<<" and set to zero. XCorr score is "<<current_xcorr<<endl;
+        delta_cn = 0.0;
+      }
+      if(fabs(delta_lcn) == numeric_limits<FLOAT_T>::infinity()){
+        cerr<<"delta_lcn was"<< delta_lcn<<" and set to zero. XCorr score is "<<current_xcorr<<endl;
+        delta_lcn = 0.0;
+      }
+      collection[idx]->setDeltaCn(delta_cn);
+      collection[idx]->setDeltaLCn(delta_lcn);
+      
     }
-    
-    collection[idx]->setDeltaCn(delta_cn);
-    collection[idx]->setLnDeltaCn(delta_lcn);
   }
 
 }
@@ -142,7 +163,6 @@ void PinXMLWriter::calculateDeltaCN(
  
   map<pair<int,int>, vector<Match*> > scan_charge_to_target_matches;
   map<pair<int,int>, vector<Match*> > scan_charge_to_decoy_matches;
-  map<pair<int,int>, vector<Match*> > scan_charge_to_matches;
   pair<int,int> scan_charge;
   
 
@@ -208,6 +228,8 @@ void PinXMLWriter::write(
 
   delete target_match_iterator; 
   delete decoy_match_iterator;
+
+
 }
 
 
@@ -273,7 +295,7 @@ void PinXMLWriter::write(
       printHeaderFragSpectrumMatch(scan_number_);
      
     }
-    for (unsigned idx = 0;idx < matches.size();idx++) { 
+    for (unsigned idx = 0;idx < matches.size();idx++) {   
       bool is_decoy=isDecoy(matches[idx]);
       if (matches[idx]->getRank(XCORR) <= 1){
         printPSM(matches[idx],matches[idx]->getSpectrum(),is_decoy);
@@ -294,6 +316,7 @@ bool PinXMLWriter:: isDecoy(Match* match){
     return true;
   return false; 
 }
+
 void PinXMLWriter::printHeader(
 ){
   fprintf(
@@ -339,7 +362,7 @@ void PinXMLWriter:: printFeatureDescription(){
     output_file_, 
     "\n<featureDescriptions xmlns=\"http://per-colator.com/percolator_in/12\">"
   );
-
+  
   if (is_sp_) {
     fprintf(output_file_,"\n  <featureDescription name=\"lnrSp\"/>");
   }
@@ -392,11 +415,11 @@ void PinXMLWriter:: printPSM(
   char flankC=flanking_aas[1];
   SpectrumZState& zstate = match->getZState();
   int charge=zstate.getCharge();
-    
+   
    //calculating experimental mz
    
     FLOAT_T exp_mz= zstate.getMZ();
-    isDecoy(match);
+    //isDecoy(match);
     if(is_decoy)
       decoy="true";
     else 
@@ -460,8 +483,18 @@ void PinXMLWriter::printFeatures(
   
   FLOAT_T ln_num_sp=match->getLnExperimentSize();
   FLOAT_T lnrSp=0.0; 
-  if(match->getRank(SP)>0)
+  if(match->getRank(SP)>0)  
     lnrSp=log(match->getRank(SP));
+  FLOAT_T delta_cn = match->getDeltaCn() ; 
+  FLOAT_T delta_lcn= match->getDeltaLCn();
+ 
+  
+  if(fabs(delta_cn)==numeric_limits<FLOAT_T>::infinity()){
+    delta_cn=0;
+  }else if(fabs(delta_lcn)==numeric_limits<FLOAT_T>::infinity()){
+    delta_lcn=0;     
+  }
+  
   if(is_sp_){
     fprintf(//< print 17 features 
       output_file_, 
@@ -485,8 +518,8 @@ void PinXMLWriter::printFeatures(
       "      <feature name=\"absdM\">%.*f</feature>\n"/*17.absdM*/
       "    </features>\n",
       precision_,lnrSp,/*1*/
-      precision_,match->getLnDeltaCn(),/*2*/ 
-      precision_,match->getDeltaCn(),/*3*/
+      precision_,delta_lcn,/*2. delta_l_Cn*/ 
+      precision_,delta_cn,/*3. delta_cn*/
       precision_,match->getScore(XCORR),/*4*/
       precision_,match->getScore(SP),/*5*/
       precision_,match-> getBYIonFractionMatched(),/*6*/
@@ -521,7 +554,7 @@ void PinXMLWriter::printFeatures(
       "      <feature name=\"dM\">%.*f</feature>\n"/*13.dM */
       "      <feature name=\"absdM\">%.*f</feature>\n"/*14.absdM */
       "     </features>\n",
-      precision_,match->getLnDeltaCn(), /*1.deltLCn*/
+      precision_,match->getDeltaLCn(), /*1.deltLCn*/
       precision_,match->getDeltaCn(),/*2.deltCn*/
       precision_,match->getScore(XCORR),/*3.Xcorr*/
       mass_precision_,match->getNeutralMass(),/*4.Mass*/
@@ -626,6 +659,7 @@ bool PinXMLWriter::setProcessInfo(
   return true; 
 }
 
+
 string PinXMLWriter::absolutPath(const char* file){
  string file_path;
  
@@ -668,9 +702,10 @@ int main(int argc, char** argv) {
   if(output_filename!=NULL && target_path!=NULL&& decoy_path!=NULL )
     writer->setProcessInfo(target_path, decoy_path);
   writer->write(target_collection, decoys);
+  
   writer->printFooter();
   writer->closeFile();
-
+  
   //delete writer;
   //delete decoy_collection;
   //delete target_collection; 

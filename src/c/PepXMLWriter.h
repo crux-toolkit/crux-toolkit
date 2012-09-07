@@ -63,7 +63,7 @@ class PepXMLWriter{
                                   ///at this charge state
     int charge, ///< assumed charge state for the match
     
-    int PSM_rank, ///< rank of this peptide for the spectrum
+    int* PSM_rank, ///< rank of this peptide for the spectrum
     const char* unmodified_peptide_sequence, ///< sequence with no mods
     const char* modified_peptide_sequence, ///< either with symbols or masses
     double peptide_mass, ///< mass of the peptide sequence
@@ -74,8 +74,11 @@ class PepXMLWriter{
     std::vector<std::string>& protein_descriptions, ///<
     double delta_cn, ///<
     bool* scores_computed,
-    double* scores ///< indexed by score type
-    );
+    double* scores, ///< indexed by score type
+    unsigned  num_matched_ions, 
+    unsigned tot_matched_ions,
+    unsigned current_num_matches
+  );
   
  protected:
   void initScoreNames();
@@ -87,7 +90,7 @@ class PepXMLWriter{
   std::string getSpectrumTitle(int spectrum_scan_number, 
                                const char* filename,
                                int charge);
-  void printPeptideElement(int rank,
+  void printPeptideElement(int* rank,
                            const char* peptide_sequence,
                            const char* mod_peptide_sequence,
                            double peptide_mass,
@@ -98,11 +101,16 @@ class PepXMLWriter{
                            std::vector<std::string>& protein_descriptions,
                            double delta_cn,
                            bool* scores_computed,
-                           double* scores);
+                           double* scores,
+                           unsigned by_ions_matched,
+                           unsigned by_ions_total,
+                           unsigned current_num_matches);
 
   void printScores(double delta_cn, 
-                   double* scores, 
-                   bool* scores_computed);
+    double* scores, 
+    bool* scores_computed,
+    int* ranks
+  );
 
   void printAnalysis(double* scores, bool* scores_computed);
 

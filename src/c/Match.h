@@ -87,7 +87,7 @@ class Match {
   // only valid when post_process_match is true
   bool post_process_match_; ///< Is this a post process match object?
   FLOAT_T delta_cn_; ///< the difference in top and second Xcorr scores
-  FLOAT_T ln_delta_cn_; ///< the natural log of delta_cn
+  FLOAT_T delta_lcn_; ///< the natural log of delta_cn
   FLOAT_T ln_experiment_size_; 
      ///< natural log of total number of candidate peptides evaluated
   int num_target_matches_; ///< total target candidates for this spectrum
@@ -362,14 +362,14 @@ class Match {
   /**
    * sets the match ln_delta_cn
    */
-  void setLnDeltaCn(
-    FLOAT_T ln_delta_cn  ///< the ln delta cn value of PSM -in
+  void setDeltaLCn(
+    FLOAT_T delta_lcn  ///< the ln delta cn value of PSM -in
     );
 
   /**
    * gets the match ln_delta_cn
    */
-  FLOAT_T getLnDeltaCn();
+  FLOAT_T getDeltaLCn();
 
   /**
    * sets the match ln_experiment_size

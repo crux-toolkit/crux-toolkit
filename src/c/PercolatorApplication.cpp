@@ -3,10 +3,7 @@
  * \brief Runs hardklor
  *****************************************************************************/
 #include "PercolatorApplication.h"
-//#include "DelimitedFileWriter.h"
-//#include "DelimitedFile.h"
-//#include "PinXmlWriter.h"
-#include "Caller.h"
+#include "src/external/percolator/src/Caller.h"
 #include "parameter.h"
 #include <string>
 #include <algorithm>
@@ -14,8 +11,6 @@
 #include <iomanip>
 #include <ios>
 using namespace std;
-
-
   /**
    * Turn the given value into a string.  For floating point numbers,
    * use the --precision option value.
@@ -119,8 +114,13 @@ int PercolatorApplication::main(int argc, char** argv) {
 
   /* Initialize the application */
 
-  initialize(argument_list, num_arguments,
-    option_list, num_options, argc, argv);
+  initialize(argument_list, 
+    num_arguments,
+    option_list, 
+    num_options, 
+    argc, 
+    argv)
+  ;
 
   string input_pinxml(get_string_parameter("pin.xml"));
 
@@ -129,7 +129,7 @@ int PercolatorApplication::main(int argc, char** argv) {
 }
 
 /**
- * \brief runs percolator on the input pin.xmlg142
+ * \brief runs percolator on the input pin.xml
  * \returns whether percolator was successful or not
  */
 int PercolatorApplication::main(
