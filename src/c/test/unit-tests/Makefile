@@ -6,7 +6,7 @@ BINDIR  =../../../../bin/
 SRCDIR  =../../
 PERCOLATOR_DIR=../../../c/percolator
 CC	= g++	
-INTERNAL_CXXFLAGS  = -g -Wall -I../../ -I$(PERCOLATOR_DIR) -Icheck -Lcheck $(CXXFLAGS)
+INTERNAL_CXXFLAGS  = -g -Wall -I../../ -Icheck -Lcheck $(CXXFLAGS)
 DEBUG   = -DNDEBUG -DBOUNDS_CHECK 
 DEBUG   = -DDEBUG -g
 
@@ -34,7 +34,6 @@ TESTS = \
 
 CRUX_LIBS = \
   ../../.libs/libcrux.a \
-  $(PERCOLATOR_DIR)/.libs/libpercolator.a \
   ../../../external/MSToolkit/.libs/libmstoolkit.a
 
 unittests:  $(SRC) $(TESTS) $(CRUX_LIBS)
