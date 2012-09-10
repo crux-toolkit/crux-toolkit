@@ -76,6 +76,8 @@ LIBFILES= \
   Index.h \
   IndexFile.cpp \
   IndexFile.h \
+  IndexMap.cpp \
+  IndexMap.h \
   IndexPeptideIterator.cpp \
   IndexPeptideIterator.h \
   IndexFilteredPeptideIterator.cpp \
