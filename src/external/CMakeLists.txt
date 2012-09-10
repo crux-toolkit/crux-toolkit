@@ -6,7 +6,8 @@ set(CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 ExternalProject_Add(
   XercesC
   PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
-  URL http://www.trieuvan.com/apache//xerces/c/3/sources/xerces-c-3.1.1.tar.gz 
+  URL http://www.motorlogy.com/apache//xerces/c/3/sources/xerces-c-3.1.1.tar.gz
+  URL_MD5 6a8ec45d83c8cfb1584c5a5345cb51ae
   DOWNLOAD_DIR downloads
   CONFIGURE_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/build/src/XercesC/configure --disable-network --prefix=${CMAKE_CURRENT_SOURCE_DIR}
   BUILD_COMMAND make
