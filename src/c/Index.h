@@ -16,6 +16,8 @@
 #include "PeptideConstraint.h"
 #include "Database.h"
 #include "Alphabet.h"
+#include "IndexMap.h"
+
 
 static const int MAX_INDEX_FILES = 1024;
 
@@ -62,6 +64,8 @@ class Index {
   int num_pointers_; ///< The number of pointers to this index.
   Database* database_; ///< The database that has been indexed.
   Database* decoy_database_; ///< The decoy verision of the database.
+  IndexMap* index_map_;
+  IndexMap* decoy_index_map_;
   char* directory_; ///< The directory containing the indexed files
   PeptideConstraint* disk_constraint_;///< Defines peptides on disk
   PeptideConstraint* search_constraint_;///< Defines peptides being searched
@@ -300,6 +304,18 @@ class Index {
   void setSearchConstraint(
     PeptideConstraint* constraint ///< Constraint for the next iterator
     );
+
+  /**
+   * \returns the disk constraint pointer from index
+   */
+  PeptideConstraint* getDiskConstraint();
+
+  /**
+   * \returns the IndexMap for the target or decoy index
+   */
+  IndexMap* getIndexMap(
+    bool decoy ///< return decoy index?
+  );
 
   /**
    *\returns TRUE if only allow unique peptides else FALSE

@@ -27,7 +27,8 @@ class IndexFile {
 
   
   char* getFilename();
-  
+  FLOAT_T getStartMass();
+  FLOAT_T getRange();
 
 };
 

@@ -10,26 +10,18 @@
 #include "IndexFile.h"
 #include "PeptideIterator.h"
 
+#include <vector>
+
 class IndexPeptideIterator : public PeptideIterator {
  protected:
   Index* index_; ///< The index object which we are iterating over
-  IndexFile* index_files_[MAX_INDEX_FILES]; 
-  ///< the index file array that contain information of each index file 
-  int total_index_files_; ///< the total count of index_files
-  int current_index_file_; ///< the index file open or one to open next 
+  std::vector<IndexFile*> index_files_;  
+  ///< the index file vector that contains information of each index file 
+  size_t current_index_file_; ///< the index file open or one to open next 
   FILE* index_file_; ///< The current file stream that we are reading from
   bool is_decoy_;    ///< return decoy or target peptides
 
   PeptideConstraint* constraint_;
-
-  /**
-   * \brief Parses the "crux_index_map" file that contains the mapping
-   * between each crux_index_* file and a mass range. Adds all
-   * crux_index_* files that are within the peptide constraint mass
-   * range. 
-   * \returns true if successfully parses crux_index_map
-   */
-  bool parseCruxIndexMap();
 
   /**
    * \brief Find the next peptide for the iterator to return.
@@ -76,19 +68,6 @@ class IndexPeptideIterator : public PeptideIterator {
    * the constraint.
    */
   bool fastForwardIndexFile();
-
-  /**
-   * \brief Adds a new index_file object to the index_file.  Checks that
-   * the total number of files does not exceed the limit.  Increases the
-   * total_index_files count.
-   * \returns true if successfully added the new index_file
-   */
-  bool addNewIndexFile(
-    ///< the index_peptide_iterator to add file -out
-    const char* filename_parsed,  ///< the filename to add -in
-    FLOAT_T start_mass,  ///< the start mass of the index file  -in
-    FLOAT_T range  ///< the mass range of the index file  -in
-    );
 
  public:
 
