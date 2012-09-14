@@ -229,7 +229,7 @@ MatchCollection* MatchFileReader::parse(
 
   MatchFileReader delimited_result_file(file_path);
   MatchCollection* match_collection = new MatchCollection();
-  match_collection->preparePostProcess(database->getNumProteins());
+  match_collection->preparePostProcess();
 
   match_collection->extendTabDelimited(database, delimited_result_file, decoy_database);
 
