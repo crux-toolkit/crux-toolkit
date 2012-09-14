@@ -316,11 +316,15 @@ void QRanker ::write_results_psm_xml(PepXMLWriter& xmlfile)
       int* psm_ranks = new int[NUMBER_SCORER_TYPES];
       psm_ranks[XCORR]=1; 
       double delta_cn = d.psmind2deltaCn(psmind);
+      
       scores[XCORR] = d.psmind2xcorr(psmind);
+      
       scores[SP] = d.psmind2spscore(psmind);
       scores[QRANKER_SCORE] = fullset[i].score;
       scores[QRANKER_QVALUE] = fullset[i].q;
       scores[QRANKER_PEP] = fullset[i].PEP;
+      psm_ranks[SP]=-1; 
+      
       psm_ranks[SP]=d.psmind2sp_rank(psmind);
       double by_ions_matched=d.psmind2by_ions_matched(psmind);
       

@@ -301,15 +301,14 @@ void PepXMLWriter::printScores(double delta_cn,
   fprintf(file_, 
           "        <search_score name=\"delta_cn\" value=\"%.*f\" />\n",
           precision_, delta_cn);
-  
   for(int score_idx = 0; score_idx < NUMBER_SCORER_TYPES; score_idx++){
     if(scores_computed[score_idx]){
       fprintf(file_, 
         "        <search_score name=\"%s\" value=\"%.*f\" />\n",
         scorer_type_to_string((SCORER_TYPE_T)score_idx),
         precision_, scores[score_idx]);
-
-     fprintf(file_, 
+     if(score_idx<2)
+       fprintf(file_, 
          "        <search_score name=\"%s\" value=\"%i\" />\n",
          ranks_to_string[score_idx].c_str(),
          ranks[score_idx]
