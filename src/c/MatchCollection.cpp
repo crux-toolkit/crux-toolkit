@@ -57,10 +57,6 @@ void MatchCollection::init() {
   num_xcorrs_ = 0;
 
   post_process_collection_ = false;
-  post_protein_counter_size_ = 0;
-  post_protein_counter_ = NULL;
-  post_protein_peptide_counter_ = NULL;
-  post_hash_ = NULL;
   post_scored_type_set_ = false;
   top_scoring_sp_ = NULL;
 
@@ -86,18 +82,6 @@ MatchCollection::~MatchCollection() {
     Match::freeMatch(sample_matches_[num_samples_]);
     sample_matches_[num_samples_] = NULL;
   }
-  
-  // free post_process_collection specific memory
-  if(post_process_collection_){
-    // free protein counter
-    delete []post_protein_counter_;
-    
-    // free protein peptide counter
-    delete []post_protein_peptide_counter_;
-  
-    // free hash table
-    free_hash(post_hash_);
-  }
 
   if(top_scoring_sp_){
     Match::freeMatch(top_scoring_sp_);
@@ -121,27 +105,12 @@ MatchCollection::MatchCollection(
   null_peptide_collection_ = is_decoy;
 }
 
-void MatchCollection::preparePostProcess(
-  int num_proteins
-  ) {
+void MatchCollection::preparePostProcess() {
 
   // prepare the match_collection
   init();
   // set this as a post_process match collection
   post_process_collection_ = true;
-
-  post_protein_counter_size_ 
-   = num_proteins;
-
-  post_protein_counter_
-   = new int[post_protein_counter_size_]();
-  post_protein_peptide_counter_ 
-   = new int[post_protein_counter_size_]();
-
-  // create hash table for peptides
-  // Set initial capacity to protein count.
-  post_hash_ = new_hash(post_protein_counter_size_);
-
 }
 
 
@@ -168,7 +137,7 @@ MatchCollection::MatchCollection(
   Database* database = match_collection_iterator->getDatabase();
   Database* decoy_database = match_collection_iterator->getDecoyDatabase();
 
-  preparePostProcess(database->getNumProteins());
+  preparePostProcess();
 
   // get the list of files to open
   vector<string> file_names;
@@ -2505,7 +2474,6 @@ bool MatchCollection::addMatchToPostMatchCollection(
   if( match == NULL ){
     carp(CARP_FATAL, "Cannot add NULL match to NULL collection.");
   }
-  Peptide* peptide = NULL;
 
   // only for post_process_collections
   if(!post_process_collection_){
@@ -2531,68 +2499,8 @@ bool MatchCollection::addMatchToPostMatchCollection(
   if(match_total_ % 1000 == 0){
     carp(CARP_INFO, "parsed PSM: %d", match_total_);
   }
-
-  // match peptide
-  peptide = match->getPeptide();
-  
-  // update protein counter, protein_peptide counter
-  updateProteinCounters(peptide);
-  
-  // update hash table
-  char* hash_value = peptide->getHashValue(); 
-  add_hash(post_hash_, hash_value, NULL); 
-  free(hash_value);
   
   return true;
-}
-
-/**
- * updates the protein_counter and protein_peptide_counter for 
- * run specific features
- */
-void MatchCollection::updateProteinCounters(
-  Peptide* peptide  ///< peptide information to update counters -in
-  )
-{
-  PeptideSrc* peptide_src = NULL;
-  Protein* protein = NULL;
-  unsigned int protein_idx = 0;
-  int hash_count = 0;
-  bool unique = false;
-  
-  // only for post_process_collections
-  if(!post_process_collection_){
-    carp(CARP_FATAL, 
-         "Must be a post process match collection to update protein counter.");
-  }
-  
-  // See if this peptide has been observed before?
-  char* hash_value = peptide->getHashValue();
-  hash_count = get_hash_count(post_hash_, hash_value);
-  free(hash_value);
-
-  if(hash_count < 1){
-    // yes this peptide is first time observed
-    unique = true;
-  }
-  // first update protein counter
-  // iterate overall parent proteins
-  for (PeptideSrcIterator iter = peptide->getPeptideSrcBegin();
-       iter != peptide->getPeptideSrcEnd();
-       ++iter) {
-
-    peptide_src = *iter;
-    protein = peptide_src->getParentProtein();
-    protein_idx = protein->getProteinIdx();
-    
-    // update the number of PSM this protein matches
-    ++post_protein_counter_[protein_idx];
-    
-    // number of peptides match this protein
-    if(unique){
-      ++post_protein_peptide_counter_[protein_idx];
-    }
-  }  
 }
 
 /**
@@ -2728,66 +2636,6 @@ bool MatchCollection::isDecoy()
 }
 
 /**
- *\returns the match_collection protein counter for the protein idx
- */
-int MatchCollection::getProteinCounter(
-  unsigned int protein_idx ///< the protein index to return protein counter -in
-  )
-{
-  // only for post_process_collections
-  if(!post_process_collection_){
-    carp(CARP_FATAL, "Must be a post process match collection to get protein counter.");
-  }
-
-  // number of PSMs match this protein
-  return post_protein_counter_[protein_idx];
-}
-
-/**
- *\returns the match_collection protein peptide counter for the protein idx
- */
-int MatchCollection::getProteinPeptideCounter(
-  unsigned int protein_idx ///< the protein index to return protein peptiide counter -in
-  )
-{
-  // only for post_process_collections
-  if(!post_process_collection_){
-    carp(CARP_FATAL, "Must be a post process match collection to get peptide counter.");
-  }
-  
-  // number of peptides match this protein
-  return post_protein_peptide_counter_[protein_idx];
-}
-
-/**
- *\returns the match_collection hash value of PSMS for which this is the best scoring peptide
- */
-int MatchCollection::getHash(
-  Peptide* peptide  ///< the peptide to check hash value -in
-  )
-{
-  // only for post_process_collections
-  if(!post_process_collection_){
-    carp(CARP_FATAL, "Must be a post process match collection, to get match_collection_hash");
-  }
-  
-  char* hash_value = peptide->getHashValue();
-  int count = get_hash_count(post_hash_, hash_value);
-  free(hash_value);
-  
-  return count;
-}
-
-/**
- * \brief Get the number of proteins in the database associated with
- * this match collection.
- */
-int MatchCollection::getNumProteins(){
-
-  return post_protein_counter_size_;
-}
-
-/**
  * Try setting the match collection's charge.  Successful if the
  * current charge is 0 (i.e. hasn't yet been set) or if the current
  * charge is the same as the given value.  Otherwise, returns false
@@ -2809,21 +2657,6 @@ bool MatchCollection::setZState(
     return false;
   }
 }
-/*
-bool set_match_collection_charge(
-  MATCH_COLLECTION_T* match_collection,  ///< match collection to change
-  int charge){///< new charge value
-
-  if( match_collection->charge == 0 ){
-    match_collection->charge = charge;
-    return true;
-  }// else error
-
-  carp(CARP_WARNING, "Cannot change the charge state of a match collection "
-       "once it has been set.");
-  return false;
-}
-*/
 
 /**
  * Search the given database or index using shuffled peptides and the
