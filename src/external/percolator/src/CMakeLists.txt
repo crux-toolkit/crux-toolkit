@@ -35,7 +35,10 @@ else(XERCESC_FOUND)
 endif(XERCESC_FOUND)
 include_directories(${XERCESC_INCLUDE_DIR})
 
+SET(CMAKE_INCLUDE_PATH "/net/gs/vol3/software/modules-sw/xsd/3.3.0/Linux/RHEL5/x86_64/include" ${CMAKE_INCLUDE_PATH})
+SET(CMAKE_LIBRARY_PATH "/net/gs/vol3/software/modules-sw/xsd/3.3.0/Linux/RHEL5/x86_64/lib" ${CMAKE_LIBRARY_PATH})
 find_package(Xsd REQUIRED) # CODESYNTHESIS
+
 if(XSD_FOUND)
   message(STATUS "Package CodeSynthesis XSD found: ${XSD_INCLUDE_DIR}")
 else(XSD_FOUND)
@@ -46,9 +49,8 @@ include_directories(${XSD_INCLUDE_DIR})
 SET (Boost_ADDITIONAL_VERSIONS "1.36" "1.36.0" "1.41" "1.41.0" "1.39" "1.39.0" "1.42.0" "1.42" "1.43.0" 
 			       "1.43." "1.44.0" "1.44.0" "1.45.0" "1.45" "1.46.0" "1.46" "1.47.0" "1.47")
 
+
 find_package(Boost COMPONENTS filesystem system REQUIRED)
-
-
 if(Boost_FOUND)
   message(STATUS "Package Boost-${Boost_VERSION} found : ${Boost_INCLUDE_DIR}")
 else(Boost_FOUND)
