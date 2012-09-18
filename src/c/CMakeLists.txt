@@ -31,6 +31,9 @@ link_directories(./hardklor)
 link_directories(./posterior-error)
 link_directories(./qranker-barista)
 link_directories(./xlink)
+link_directories(../external/build/src/percolator-build/src) 
+link_directories(../external/lib)
+link_directories(../external/build/src/percolator-build/src/fido)
 
 set (
   crux_lib_files
@@ -63,6 +66,8 @@ set (
   IonFilteredIterator.cpp
   IonSeries.cpp
   linked_list.cpp
+  LineFileReader.cpp
+  MakePinApplication.cpp
   mass.cpp
   Match.cpp
   MatchColumns.cpp
@@ -90,6 +95,7 @@ set (
   PepXMLWriter.cpp
   PercolatorApplication.cpp
   GeneratePeptides.cpp
+  PinXMLWriter.cpp
   PredictPeptideIons.cpp
   PrintProcessedSpectra.cpp
   PrintVersion.cpp
@@ -108,6 +114,7 @@ set (
   Spectrum.cpp
   SpectrumZState.cpp
   StatColumn.cpp
+  SQTReader.cpp
   utils.cpp
 )
 
@@ -208,6 +215,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     crux-support
     hardklor
     MSToolkit
+    perclibrary
     posterior_error
     xlink
     ws2_32
@@ -245,9 +253,14 @@ else(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     m
     MSToolkit
     posterior_error
+    perclibrary
     pthread
     xlink
     ArrayLibrary
+    xerces-c
+    boost_filesystem
+    boost_system
+    fido
   )
   target_link_libraries(
     xlink-predict-peptide-ions
