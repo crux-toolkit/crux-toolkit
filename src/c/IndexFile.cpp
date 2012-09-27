@@ -35,3 +35,12 @@ IndexFile::~IndexFile() {
 char* IndexFile::getFilename() {
   return filename_;
 }
+
+FLOAT_T IndexFile::getStartMass() {
+  return start_mass_;
+
+}
+
+FLOAT_T IndexFile::getRange() {
+  return interval_;
+}

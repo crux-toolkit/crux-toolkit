@@ -95,13 +95,6 @@ class MatchCollection {
   // post_process_collection boolean is true 
   bool post_process_collection_; 
   ///< Is this a post process match_collection?
-  int post_protein_counter_size_; 
-  ///< the size of the protein counter array, usually the number of proteins in database
-  int* post_protein_counter_; 
-  ///< the counter for how many each protein has matches other PSMs
-  int* post_protein_peptide_counter_; 
-  ///< the counter for how many each unique peptides each protein has matches other PSMs
-  HASH_T* post_hash_; ///< hash table that keeps tracks of the peptides
   bool post_scored_type_set_; 
   ///< has the scored type been confirmed for the match collection,
   // set after the first match collection is extended
@@ -258,9 +251,7 @@ class MatchCollection {
     bool value
   );
 
-  void preparePostProcess(
-    int num_proteins
-  );
+  void preparePostProcess();
 
   bool extendTabDelimited(
     Database* database, ///< the database holding the peptides -in
@@ -359,12 +350,6 @@ class MatchCollection {
    *\returns the delta cn value(difference in top and second ranked Xcorr values)
    */
   FLOAT_T getDeltaCn();
-
-  /**
-   * \brief Get the number of proteins in the database associated with
-   * this match collection.
-   */
-  int getNumProteins();
 
   /**
    * \brief Transfer the Weibull distribution parameters, including the
@@ -633,28 +618,6 @@ class MatchCollection {
    * Process run specific features from all the PSMs
    */
   void processRunSpecificFeatures();
-
-  /**
-   *\returns the match_collection protein counter for the protein idx
-   */
-  int getProteinCounter(
-    unsigned int protein_idx ///< the protein index to return protein counter -in
-    );
-
-  /**
-   *\returns the match_collection protein peptide counter for the protein idx
-   */
-  int getProteinPeptideCounter(
-    unsigned int protein_idx ///< the protein index to return protein peptiide counter -in
-    );
-
-  /**
-   *\returns the match_collection hash value of PSMS for which this 
-   * is the best scoring peptide
-   */
-  int getHash(
-    Peptide* peptide  ///< the peptide to check hash value
-    );
 
 // cheater functions for testing
   void forceScoredBy(SCORER_TYPE_T type);

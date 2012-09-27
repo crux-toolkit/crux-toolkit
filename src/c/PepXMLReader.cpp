@@ -133,7 +133,7 @@ MatchCollection* PepXMLReader::parse() {
   }
 
   current_match_collection_ = new MatchCollection();
-  current_match_collection_->preparePostProcess(database_->getNumProteins());
+  current_match_collection_->preparePostProcess();
   int total_matches=current_match_collection_->getMatchTotal();
   cerr<<"total matches: "<< total_matches<<endl;
   XML_SetUserData(xml_parser, this);

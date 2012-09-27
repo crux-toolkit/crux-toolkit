@@ -108,5 +108,10 @@ double packedNorm(const PackedVector& vec);
  */
 bool operator == (const PackedVector & lhs, const PackedVector & rhs);
 
+/**
+ * Returns dot product of two vectors
+ */
+double operator *(const PackedVector & lhs, const PackedVector & rhs);
+
 } // namespace
 #endif

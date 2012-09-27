@@ -6,13 +6,6 @@
 #include "IndexPeptideIterator.h"
 #include <errno.h>
 #include "WinCrux.h"
-#include <iostream>
-#include <fstream>
-
-using namespace std;
-static const int MAX_FILE_NAME_LENGTH = 300;
-static const int MAX_PARSE_COUNT = 3;
-static const int SLEEP_DURATION = 5;
 
 /***********************************************
  *  The basic index_peptide_iterator functions.
@@ -24,6 +17,7 @@ static const int SLEEP_DURATION = 5;
  */
 IndexPeptideIterator::IndexPeptideIterator(
   Index* index, ///< The index object which we are iterating over -in
+  PeptideConstraint* constraint, ///< the peptide constraint
   bool is_decoy ///< return target or decoy peptides
   )
   : is_decoy_(is_decoy)
@@ -34,26 +28,17 @@ IndexPeptideIterator::IndexPeptideIterator(
 
   // initialize a new index_peptide_iterator object
   index_ = NULL;
-  total_index_files_ = 0;
   current_index_file_ = 0;
   index_file_ = NULL;
   
   // set index
   index_ = index->copyPtr();
-  
-  // parse index_files that are within peptide_constraint from crux_index_map
-  // sets index_files and total_index_files
-  int parse_count = 0;
-  while(!parseCruxIndexMap()){
-    // failed to parse crux_index_map
-    if (parse_count++ > MAX_PARSE_COUNT){
-      carp(CARP_FATAL, 
-        "Failed to parse crux_index_map file after %i tries", MAX_PARSE_COUNT);
-    } else {
-      carp(CARP_ERROR, "Failed to parse crux_index_map file. Sleeping.");
-      sleep(SLEEP_DURATION);
-    }
+  if (constraint != NULL) {
+    constraint_ = PeptideConstraint::copyPtr(constraint);
   }
+
+  //Find the index files that match our constraint
+  index_->getIndexMap(is_decoy_)->getIndexFiles(constraint_, index_files_);
 
   // set remaining iterator fields
   current_index_file_ = 0;
@@ -69,13 +54,6 @@ IndexPeptideIterator::IndexPeptideIterator(
  */
 IndexPeptideIterator::~IndexPeptideIterator()
 {
-  
-  // free all index files
-  int file_idx;
-  for(file_idx=0;file_idx<total_index_files_;++file_idx){
-    delete index_files_[file_idx];
-  }
-  
   // if did not iterate over all peptides, free the last peptide not returned
   if(hasNext()){
     delete next_peptide_;
@@ -83,6 +61,11 @@ IndexPeptideIterator::~IndexPeptideIterator()
   
   // free the index
   Index::free(index_);
+
+  if (constraint_) {
+    PeptideConstraint::free(constraint_);
+  }
+
 }
 
 /**
@@ -103,7 +86,7 @@ bool IndexPeptideIterator::findNextIndexFile(){
     return true;
   }
   // no more files to open
-  if( current_index_file_ == total_index_files_ ){
+  if( current_index_file_ == index_files_.size() ){
   carp(CARP_DETAILED_DEBUG, "The last file has been opened. no more");
     return false;
   }
@@ -147,8 +130,11 @@ bool IndexPeptideIterator::findPeptideInCurrentIndexFile()
   // peptide to return, reuse this memory while we look
   Peptide* peptide = new Peptide();
   // constraint to meet
-  PeptideConstraint* index_constraint = index_->getSearchConstraint();
-
+  PeptideConstraint* index_constraint = constraint_;
+  if (index_constraint == NULL) {
+    carp(CARP_WARNING, "NULL constriant, getting from INDEX");
+    index_constraint = index_->getSearchConstraint();
+  }
   // loop until we get to a peptide that fits the constraint, 
   // a peptide bigger (mass) than the constraint, or reach eof
   bool peptide_fits = false;
@@ -284,151 +270,6 @@ bool IndexPeptideIterator::queueNextPeptide() {
   // no more index files to try
   next_peptide_ = NULL;
   return false;
-}
-
-
-
-/**
- * \brief Adds a new index_file object to the index_file.  Checks that
- * the total number of files does not exceed the limit.  Increases the
- * total_index_files count.
- * \returns true if successfully added the new index_file
- */
-bool IndexPeptideIterator::addNewIndexFile(
-  const char* filename_parsed,  ///< the filename to add -in
-  FLOAT_T start_mass,  ///< the start mass of the index file  -in
-  FLOAT_T range  ///< the mass range of the index file  -in
-  )
-{
-  char* filename = my_copy_string(filename_parsed);
-  carp(CARP_DETAILED_DEBUG, "Adding index file %s to iterator", filename);
-  
-  // check if total index files exceed MAX limit
-  if(total_index_files_ > MAX_INDEX_FILES-1){
-    carp(CARP_WARNING, "too many index files to read");
-    return false;
-  }
-  // create new index_file
-  index_files_[total_index_files_] =
-    new IndexFile(filename, start_mass, range);
-  
-  ++total_index_files_;
-  return true;
-}
-
-/**
- * \brief Parses the "crux_index_map" file that contains the mapping
- * between each crux_index_* file and a mass range. Adds all
- * crux_index_* files that are within the peptide constraint mass
- * range. 
- * \returns true if successfully parses crux_index_map
- */
-bool IndexPeptideIterator::parseCruxIndexMap()
-{
-  FILE* file = NULL;
-  
-  // used to parse each line from file
-  char* new_line = NULL;
-  int line_length;
-  size_t buf_length = 0;
-  
-  // used to parse within a line
-
-  FLOAT_T start_mass;
-  FLOAT_T range;
-  bool start_file = false;
-  FLOAT_T min_mass = 
-    index_->getSearchConstraint()->getMinMass();
-  FLOAT_T max_mass = 
-    index_->getSearchConstraint()->getMaxMass();
-
-  // used as buffer for reading in from file
-  char full_filename[MAX_FILE_NAME_LENGTH] = "";
-  strcpy(full_filename, index_->getDirectory());
-  int dir_name_length = strlen(full_filename);
-
-  // add a / to end of directory
-  if( full_filename[dir_name_length-1] != '/' ){
-    full_filename[dir_name_length] = '/';
-    dir_name_length++;
-  }
-  // for filename as read from map file
-  char* filename = full_filename + dir_name_length;
-  // first use to open map file
-  if( is_decoy_ ){
-    strcpy(filename, Index::decoy_index_file_prefix);
-    strcpy(filename + strlen(Index::decoy_index_file_prefix), "map");
-  } else {
-    strcpy(filename, Index::index_file_prefix);
-    strcpy(filename + strlen(Index::index_file_prefix), "map");
-  }
-
-  // open crux_index_file
-  carp(CARP_DETAILED_DEBUG, "Opening map file '%s'", full_filename);
-  file = fopen(full_filename, "r");
-  if(file == NULL){
-    int errsv = errno;
-    carp(CARP_WARNING, "Cannot open crux_index_map file.:%s\nError:%s", 
-      full_filename, 
-      strerror(errsv));
-    return false;
-  }
-  
-  while((line_length =  getline(&new_line, &buf_length, file)) != -1){
-    carp(CARP_DETAILED_DEBUG, "Index map file line reads '%s'", new_line);
-
-    if(new_line[0] == 'c' && new_line[1] == 'r'){
-      carp(CARP_DETAILED_DEBUG, "Looking for index file ");
-      // read the crux_index_file information
-
-      //      if(sscanf(new_line,"%s %f %f", 
-      //                filename, &start_mass, &range) < 3){
-      #ifdef USE_DOUBLES
-      int char_read = sscanf(new_line,"%s %lf %lf", 
-                             filename, &start_mass, &range);
-      #else
-      int char_read = sscanf(new_line,"%s %f %f", 
-                             filename, &start_mass, &range);
-      #endif
-      if(char_read != 3){
-        free(new_line);
-        carp(CARP_WARNING, "Incorrect file format");
-        fclose(file);
-        return false;
-      }
-      // find the first index file within mass range
-      if(!start_file){
-        if(min_mass > start_mass + range - 0.0001){
-          continue;
-        }
-        else{
-          start_file = true;
-          if(!addNewIndexFile(full_filename, start_mass, range)){
-            carp(CARP_WARNING, "Failed to add index file");
-            fclose(file);
-            free(new_line);
-            return false;
-          }
-          continue;
-        }
-      }// already added first file, add more
-      // add all index_files that are with in peptide constraint mass interval
-      else if(max_mass > (start_mass - 0.0001)){
-        if(!addNewIndexFile(
-            full_filename, start_mass, range)){
-          carp(CARP_WARNING, "Failed to add index file");
-          free(new_line);
-          return false;
-        }
-        continue;
-      }
-      // out of mass range
-      break;
-    }
-  }
-  free(new_line);
-  fclose(file);
-  return true;
 }
 
 Index* IndexPeptideIterator::getIndex() {

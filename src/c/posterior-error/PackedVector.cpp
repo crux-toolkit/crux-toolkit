@@ -173,4 +173,10 @@ bool operator == (const PackedVector & lhs, const PackedVector & rhs){
   }
   return !different;
 }
+
+double operator *(const PackedVector & lhs, const PackedVector & rhs)
+{
+  return lhs.packedDotProd(rhs);
+}
+
 } // namespace

@@ -31,7 +31,7 @@ GeneratePeptidesIterator::GeneratePeptidesIterator(
 
   if( index != NULL ){
     index->setSearchConstraint(constraint);
-    iterator_ = new IndexPeptideIterator(index, is_decoy);
+    iterator_ = new IndexPeptideIterator(index, constraint, is_decoy);
   } else {
     iterator_ = new DatabasePeptideIterator(database,
                                             constraint,
