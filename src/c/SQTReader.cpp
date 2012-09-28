@@ -98,7 +98,7 @@ MatchCollection* SQTReader::parse() {
 
   LineFileReader* line_reader = new LineFileReader(file_path_);
   current_match_collection_ = new MatchCollection();
-  current_match_collection_->preparePostProcess(database_->getNumProteins());
+  current_match_collection_->preparePostProcess();
   current_match_collection_->setScoredType(XCORR, true);
   current_match_collection_->setScoredType(SP, true);
   last_parsed_ = SQT_LINE_NONE;
