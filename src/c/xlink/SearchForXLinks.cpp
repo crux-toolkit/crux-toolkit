@@ -51,14 +51,14 @@ int SearchForXLinks::main(int argc, char** argv) {
     "xlink-include-deadends",
     "xlink-include-selfloops",
     "use-flanking-peaks",
-    "use-mgf"
+    "spectrum-parser"
   };
   int num_options = sizeof(option_list) / sizeof(char*);
 
   /* Define required command line arguments */
   const char* argument_list[] = {
     "ms2 file", 
-    "protein database", 
+    "protein-database", 
     "link sites", 
     "link mass"
   };

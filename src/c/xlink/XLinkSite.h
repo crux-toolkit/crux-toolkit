@@ -43,7 +43,7 @@ class XLinkSite {
    * \returns whether the peptide contains this site at the supplied sequence index.
    */
   bool hasSite(
-    Peptide* peptide, ///<peptide object pointer 
+    Crux::Peptide* peptide, ///<peptide object pointer 
     int idx             ///<sequence index
     ) const;
     

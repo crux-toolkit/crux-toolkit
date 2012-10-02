@@ -5,8 +5,9 @@
 BINDIR  =../../../../bin/
 SRCDIR  =../../
 PERCOLATOR_DIR=../../../c/percolator
+PWIZ_DIR=../../../external/proteowizard/install/
 CC	= g++	
-INTERNAL_CXXFLAGS  = -g -Wall -I../../ -I$(PERCOLATOR_DIR) -Icheck -Lcheck $(CXXFLAGS)
+INTERNAL_CXXFLAGS  = -g -Wall -I../../ -I$(PERCOLATOR_DIR) -I$(PWIZ_DIR)/include -Icheck -Lcheck $(CXXFLAGS)
 DEBUG   = -DNDEBUG -DBOUNDS_CHECK 
 DEBUG   = -DDEBUG -g
 
@@ -37,9 +38,29 @@ CRUX_LIBS = \
   $(PERCOLATOR_DIR)/.libs/libpercolator.a \
   ../../../external/MSToolkit/.libs/libmstoolkit.a
 
+PWIZ_LIBS = \
+  -L$(PWIZ_DIR)/lib \
+  -lpwiz_data_msdata \
+  -lpwiz_data_common \
+  -lpwiz_data_identdata \
+  -lpwiz_data_msdata_version \
+  -lpwiz_data_misc \
+  -lpwiz_utility_misc \
+  -lpwiz_utility_minimxml \
+  -lpwiz_data_identdata_version \
+  -lboost_system-mt-s \
+  -lboost_iostreams-mt-s \
+  -lz-mt-s-1_2 \
+  -lboost_filesystem-mt-s \
+  -lboost_regex-mt-s \
+  -lboost_thread-mt-s \
+  -lpthread
+
+
+
 unittests:  $(SRC) $(TESTS) $(CRUX_LIBS)
 	cd check && $(MAKE)
-	$(CC) -o unittests $(INTERNAL_CXXFLAGS) $(TESTS) $(CRUX_LIBS) check/check.ar  -lm -lpthread -ldl -D_GNU_SOURCE
+	$(CC) -o unittests $(INTERNAL_CXXFLAGS) $(TESTS) $(CRUX_LIBS) $(PWIZ_LIBS) check/check.ar  -lm -lpthread -ldl -D_GNU_SOURCE
 .PHONY : check clean
 
 check: unittests

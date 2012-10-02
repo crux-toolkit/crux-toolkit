@@ -79,8 +79,8 @@ int GetMs2Spectrum :: main(int argc, char** argv){
   const char* option_list[] = { 
     "version", 
     "stats", 
-    "verbosity"/*,
-    "use-mstoolkit"*/};
+    "verbosity",
+    "spectrum-parser"};
 
  int num_options = sizeof(option_list) / sizeof(char*);
 

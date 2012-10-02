@@ -32,6 +32,9 @@ static const int MAX_PEPTIDE_LENGTH = 255;
  * \class peptide
  * \brief A subsequence of a protein.
  */
+
+namespace Crux {
+
 class Peptide {
 
  protected:
@@ -653,6 +656,8 @@ class Peptide {
 
 };  // class Peptide
 
+};  // namespace Crux
+
 /*  Iterators */
 
 /**
@@ -660,7 +665,7 @@ class Peptide {
  * \returns a RESIDUE_ITERATOR_T object.
  */
 RESIDUE_ITERATOR_T* new_residue_iterator(
-  Peptide* peptide ///< peptide sequence to iterate -in
+  Crux::Peptide* peptide ///< peptide sequence to iterate -in
   );
 
 /**

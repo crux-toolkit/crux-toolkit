@@ -51,7 +51,7 @@ void analyze_matches_main(
 
   // Define required command line arguments.
   const char* argument_list[] = {
-    "protein database",
+    "protein-database",
     "search results directory"
   };
   int num_arguments = sizeof(argument_list) / sizeof(char*);
@@ -81,7 +81,7 @@ void analyze_matches_main(
   }
 
   // Get required arguments
-  char* protein_database_name = get_string_parameter("protein database");
+  char* protein_database_name = get_string_parameter("protein-database");
   char* input_directory = get_string_parameter("search results directory");
 
   // Prepare the output files.
@@ -353,7 +353,7 @@ MatchCollection* run_percolator(
   double* decoy_scores = new double[num_decoy_matches]; //first decoy set
   double* PEPs = NULL;
 
-  carp(CARP_DETAILED_DEBUG, "Processing PSMs");
+  carp(CARP_DETAILED_DEBUG, "Processing PSMs targets:%i decoys:%i", num_target_matches, num_decoy_matches);
   // Start processing
   pcExecute(); 
   pcGetScores(results_score, results_q); 

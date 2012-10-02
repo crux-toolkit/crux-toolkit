@@ -333,7 +333,10 @@ FLOAT_T* compute_PEP_from_pvalues(FLOAT_T* pvalues, int num_pvals){
   FLOAT_T* PEPs = new FLOAT_T[PEP_vector.size()];
   for(size_t pep_idx = 0; pep_idx < PEP_vector.size(); pep_idx++){
     PEPs[pep_idx] = PEP_vector[pep_idx];
+    carp(CARP_DEBUG, "pep[%i]=%f", pep_idx, PEPs[pep_idx]);
   }
+
+  
 
   return PEPs;
 }

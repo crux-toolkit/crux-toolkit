@@ -13,7 +13,7 @@ class PeptideIterator{
   bool has_next_;
   
  protected:
-  Peptide* next_peptide_;
+  Crux::Peptide* next_peptide_;
   
   /**
    * \brief Prepare the iterator to return the next peptide.  
@@ -38,8 +38,8 @@ class PeptideIterator{
   /**
    * Return the next peptide in the iterator or NULL if none are left.
    */
-  Peptide* next(){
-    Peptide* return_me = next_peptide_;
+  Crux::Peptide* next(){
+    Crux::Peptide* return_me = next_peptide_;
     has_next_ = queueNextPeptide();
     return return_me;
   }

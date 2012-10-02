@@ -21,6 +21,8 @@
 
 #include "peptide_modifications.h"
 
+using namespace Crux;
+
 /* Private data types, typedefed in objects.h */
 /**
  * \struct _peptide_mod

@@ -15,6 +15,7 @@
 
 #include "Spectrum.h"
 #include "../external/MSToolkit/include/Spectrum.h"
+#include "pwiz/data/msdata/SpectrumInfo.hpp"
 #include "SpectrumZState.h"
 
 /**
@@ -211,6 +212,12 @@ class Spectrum{
    */
   bool parseMstoolkitSpectrum(MSToolkit::Spectrum* mst_spectrum, 
                                 const char* filename = NULL);
+
+  /**
+   * Transfer values from a proteowizard Spectrum object to the
+   * crux spectrum.
+   */
+  bool parsePwizSpecInfo(const pwiz::msdata::SpectrumPtr& pwiz_spectrum);
 
   /**
    * Parse the spectrum from the tab-delimited result file

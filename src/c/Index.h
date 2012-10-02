@@ -362,7 +362,7 @@ bool void_index_peptide_iterator_has_next(
 /**
  * \returns The next peptide in the index.
  */
-Peptide* void_index_peptide_iterator_next(
+Crux::Peptide* void_index_peptide_iterator_next(
     void* index_peptide_iterator ///< the iterator of interest -in
     );
 
@@ -386,7 +386,7 @@ BIN_PEPTIDE_ITERATOR_T* new_bin_peptide_iterator(
  *  The basic iterator functions.
  * \returns The next peptide in the index.
  */
-Peptide* bin_peptide_iterator_next(
+Crux::Peptide* bin_peptide_iterator_next(
   BIN_PEPTIDE_ITERATOR_T* bin_peptide_iterator 
    ///< the bin_peptide_iterator to get peptide -in
   );
@@ -430,7 +430,7 @@ BIN_SORTED_PEPTIDE_ITERATOR_T* new_bin_sorted_peptide_iterator(
  *  The basic iterator functions.
  * \returns The next peptide in the index.
  */
-Peptide* bin_sorted_peptide_iterator_next(
+Crux::Peptide* bin_sorted_peptide_iterator_next(
   BIN_SORTED_PEPTIDE_ITERATOR_T* bin_sorted_peptide_iterator 
   ///< the bin_peptide_iterator to get peptide -in
   );

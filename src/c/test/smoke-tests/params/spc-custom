@@ -4,7 +4,8 @@ quant-level=protein
 input-ms2=test.ms2
 parsimony=greedy
 measure=NSAF
-custom-threshold=xcorr_score
-threshold-min=F
+threshold-type=custom
+custom-threshold-name=xcorr_score
+custom-threshold-min=F
 threshold=2
 

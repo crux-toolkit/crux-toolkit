@@ -1,13 +1,13 @@
-INFO: CPU: n013.grid.gs.washington.edu
-INFO: Thu Aug  2 17:34:03 PDT 2012
+INFO: CPU: arginine.gs.washington.edu
+INFO: Thu Sep 27 19:27:37 PDT 2012
 COMMAND LINE: crux sequest-search --output-dir ss --fileroot tdc --parameter-file params/tdc-ss demo.ms2 small-yeast.fasta
 INFO: Preparing protein fasta file small-yeast.fasta
 INFO: Reading in ms2 file demo.ms2
 INFO: Created 1 peptide mods, keeping 1 with 255 or fewer aa mods
 INFO: Searching spectrum number 96 (2+), search number 100
-INFO: Elapsed time: 1.6 s
+INFO: Elapsed time: 6.9 s
 INFO: Finished crux sequest-search
-INFO: Elapsed time: 1.61 s
+INFO: Elapsed time: 6.9 s
 INFO: Finished crux sequest-search.
 INFO: Return Code:0
 # Which isotopes to use in calculating fragment ion mass.
@@ -37,6 +37,10 @@ min-weibull-points=4000
 # --gap-tolerance. Default = 3.
 # Available for crux bullseye
 scan-tolerance=3
+
+# Use mzid's passThreshold attribute to filter matches. Default false.
+# Used when parsing mzIdentML files.
+mzid-use-pass-threshold=false
 
 # Predict the given number of isotope peaks (0|1|2). Default=0.
 # Only available for crux-predict-peptide-ion.  Automatically set to 0
@@ -92,6 +96,10 @@ precursor-window-type=mass
 # Available from the parameter file only for crux-search-for-matches,
 # crux-create-index, and crux-generate-peptides.
 precursor-window=3.000000
+
+# What type of threshold to use when parsing matches none|qvalue|custom
+# used for crux spectral-counts
+threshold-type=qvalue
 
 # Set the precision for masses and m/z written to sqt and .txt files. 
 # Default=4
@@ -259,6 +267,11 @@ overwrite=F
 # Available for crux hardklor
 hardklor-algorithm=fast-fewest-peptides
 
+# Parser to use for reading in spectra <string>=pwiz|mstoolkit|crux.
+# Default=crux.
+# Available for search-for-matches, search-for-xlinks.
+spectrum-parser=crux
+
 # Set additional options with values in the given file.
 # Available for all crux programs. Any options specified on the command
 # line will override values in the parameter file.
@@ -281,6 +294,13 @@ nh3=0
 # Factor, SIN is Spectral Index Normalized and EMPAI is Exponentially
 # Modified Protein Abundance Index
 measure=NSAF
+
+# Direction of threshold for matches.  If true, then all matches whose
+# value is <= threshold will be accepted.  If false, then all matches >=
+# threshold will be accepted.  Used with custom-threshold parameter
+# (default True).
+# Available for spectral-counts.
+custom-threshold-min=true
 
 # Number of psms per spectrum to score with xcorr after preliminary
 # scoring with Sp. Set to 0 to score all psms with xcorr. Default=500.
@@ -312,13 +332,6 @@ spectrum-charge=all
 # Available for spectral-counts with measure=SIN.
 input-ms2=__NULL_STR
 
-# Direction of threshold for matches.  If true, then all matches whose
-# value is <= threshold will be accepted.  If false, then all matches >=
-# threshold will be accepted.  Used with custom-threshold parameter
-# (default True).
-# Available for spectral-counts.
-threshold-min=true
-
 # Show search progress by printing every n spectra searched. 
 # Default=10.
 # Set to 0 to show no search progress.  Available for crux
@@ -331,10 +344,6 @@ print-search-progress=100
 # spectrum is analyzed.
 # Available for crux hardklor
 mz-window=__NULL_STR
-
-# Use MSToolkit to parse spectra. Default=F.
-# Available for crux-search-for-matches
-use-mstoolkit=false
 
 # Set the signal-to-noise threshold. Any integer or decimal value
 # greater than or equal to 0.0 is valid. The default value is 1.0.
@@ -378,10 +387,6 @@ corr=0.850000
 # The maximum mass of peptides to consider. Default=8000.
 # Available from command line or parameter file for crux bullseye
 bullseye-max-mass=8000.000000
-
-# Use a custom threshold rather than q-value (default NULL)
-# Availabel for spectral-counts.
-custom-threshold=__NULL_STR
 
 # If the target and decoy searches were run separately, rather than
 # using a concatenated database, then Q-ranker will assume that the
@@ -428,10 +433,6 @@ bullseye-min-mass=600.000000
 # Print the theoretical spectrum
 # Available for xlink-predict-peptide-ions (Default=F).
 print-theoretical-spectrum=false
-
-# Use MGF file format for parsing files
-# Available for search-for-xlinks program (Default=F).
-use-mgf=false
 
 # Set the tolerance (+/-units) around the retention time over which a
 # peptide can be matched to the MS/MS spectrum. The unit of time is
@@ -601,8 +602,7 @@ precision=8
 # will create as many decoy files as num-decoys-per-target.
 decoy-location=target-file
 
-# The threshold to use for filtering matches.  If nocustom-threshold
-# parameter given, then q-value will be used.  Default=0.01.
+# The threshold to use for filtering matches.  If noused.  Default=0.01.
 # Available for spectral-counts.  All PSMs with higher (or lower) than
 # this will be ignored.
 threshold=0.010000
@@ -672,6 +672,10 @@ column-type=string
 # modifications. Default=0.
 # Only available for crux-predict-peptide-ions.
 h2o=0
+
+# Use a name of custom threshold rather than (default NULL)
+# Available for spectral-counts.
+custom-threshold-name=__NULL_STR
 
 # Ignore peptides with multiple mappings to proteins (T,F). Default=F.
 # Available for spectral-counts.
@@ -768,7 +772,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Thu Aug  2 17:34:03 2012
+H	StartTime	Thu Sep 27 19:27:38 2012
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	DBSeqLength	?

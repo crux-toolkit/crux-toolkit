@@ -50,7 +50,7 @@
  * \returns the peptide objects from a sequence string
  * TODO - eliminate this from xlink (this is a HACK)
  */
-std::vector<Peptide*>& get_peptides_from_sequence(
+std::vector<Crux::Peptide*>& get_peptides_from_sequence(
   std::string& sequence ///< the peptide sequence string
   );
 

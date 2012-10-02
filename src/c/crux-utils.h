@@ -405,6 +405,8 @@ PARSIMONY_TYPE_T string_to_parsimony_type(char* name);
 char * parsimony_type_to_string(PARSIMONY_TYPE_T type);
 MEASURE_TYPE_T string_to_measure_type(char* name);
 char * measure_type_to_string(MEASURE_TYPE_T type);
+THRESHOLD_T string_to_threshold_type(char* name);
+char * threshold_type_to_string(THRESHOLD_T type);
 QUANT_LEVEL_TYPE_T string_to_quant_level_type(char* name);
 char * quant_level_type_to_string(QUANT_LEVEL_TYPE_T type);
 COLTYPE_T string_to_column_type(char* name);
@@ -417,6 +419,10 @@ char* mass_format_type_to_string(MASS_FORMAT_T type);
 HARDKLOR_ALGORITHM_T string_to_hardklor_algorithm_type(char* name);
 char* hardklor_algorithm_type_to_string(HARDKLOR_ALGORITHM_T type);
 char* hardklor_hardklor_algorithm_type_to_string(HARDKLOR_ALGORITHM_T type);
+
+SPECTRUM_PARSER_T string_to_spectrum_parser_type(char* name);
+char* spectrum_parser_type_to_string(SPECTRUM_PARSER_T type);
+
 
 /**
  * \brief Open either the index or fasta file and prepare it for

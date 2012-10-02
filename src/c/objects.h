@@ -62,6 +62,17 @@ typedef std::vector<Peak*>::const_iterator PeakIterator;
  */
 class SpectrumCollection;
 
+/** 
+ * the enum for SpectrumParsers
+ */
+enum SPECTRUM_PARSER_T {
+  INVALID_SPECTRUM_PARSER,
+  PROTEOWIZARD_SPECTRUM_PARSER,
+  MSTOOLKIT_SPECTRUM_PARSER,
+  CRUX_SPECTRUM_PARSER,
+  NUMBER_SPECTRUM_PARSERS
+};
+
 /**
  * \typedef SpectrumIterator
  * \brief An object to iterate over the spectra in a SpectrumCollection
@@ -78,7 +89,11 @@ class FilteredSpectrumChargeIterator;
  * \class Peptide
  * \brief A peptide subsequence of a protein
  */
-class Peptide;
+namespace Crux {
+
+  class Peptide;
+
+};
 
 /**
  * \class PeptideConstraint
@@ -193,6 +208,17 @@ enum _quant_level_type {
   PEPTIDE_QUANT_LEVEL,
   PROTEIN_QUANT_LEVEL,
   NUMBER_QUANT_LEVEL_TYPES
+};
+
+/**
+ * The enum of type of threshold to use for spectral counts
+ */
+enum THRESHOLD_T {
+  THRESHOLD_INVALID,
+  THRESHOLD_NONE,
+  THRESHOLD_QVALUE,
+  THRESHOLD_CUSTOM,
+  NUMBER_THRESHOLD_TYPES
 };
 
 /**
@@ -731,7 +757,7 @@ enum SPLITTYPE_T{
  * \typedef peptideToScore
  * \brief Mapping of peptide object to scores
  */
-typedef std::map<Peptide*, FLOAT_T, bool(*)(Peptide*, Peptide*) > PeptideToScore;
+typedef std::map<Crux::Peptide*, FLOAT_T, bool(*)(Crux::Peptide*, Crux::Peptide*) > PeptideToScore;
 
 /**
  * \typedef ProteinToScore

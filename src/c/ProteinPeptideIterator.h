@@ -127,7 +127,7 @@ class ProteinPeptideIterator {
   /**
    * \returns The next peptide in the protein, in an unspecified order
    */
-  Peptide* next();
+  Crux::Peptide* next();
 
   /**
    *\returns the protein that the iterator was created on

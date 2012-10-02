@@ -11,7 +11,7 @@
 #include "MatchFileReader.h"
 
 using namespace std;
-
+using namespace Crux;
 /*
   TABLE OF CONTENTS
   Global variables
@@ -451,12 +451,12 @@ char* Peptide::getUnshuffledSequence() {
     carp(CARP_ERROR, "Cannot get sequence from peptide with no peptide src.");
     return NULL;
   }
-
-  char* parent_sequence = 
-    getPeptideSrc()->getParentProtein()->getSequencePointer();
   int start_idx = getPeptideSrc()->getStartIdx();
+  char* parent_sequence = 
+    getPeptideSrc()->getParentProtein()->getSequencePointer(start_idx-1);
+  
 
-  char* copy_sequence = copy_string_part(&parent_sequence[start_idx-1],
+  char* copy_sequence = copy_string_part(parent_sequence,
                                          length_);
  
   return copy_sequence; 
@@ -476,11 +476,12 @@ char* Peptide::getSequencePointer() {
   if(peptide_srcs_.empty()){
     carp(CARP_FATAL, "ERROR: no peptide_src to retrieve peptide sequence pointer\n");
   }
-  char* parent_sequence = 
-    getPeptideSrc()->getParentProtein()->getSequencePointer();
-  int start_idx = getPeptideSrc()->getStartIdx();
 
-  char* pointer_peptide_sequence = &parent_sequence[start_idx-1];
+  int start_idx = getPeptideSrc()->getStartIdx();
+  char* parent_sequence = 
+    getPeptideSrc()->getParentProtein()->getSequencePointer(start_idx-1);
+
+  char* pointer_peptide_sequence = parent_sequence;
   
   return pointer_peptide_sequence;
 }
@@ -1918,9 +1919,14 @@ string Peptide::getProteinIdsLocations() {
       PeptideSrc* peptide_src =*iter;
       Protein* protein = peptide_src->getParentProtein();
       char* protein_id = protein->getId();
-      int peptide_loc = peptide_src->getStartIdx();
       std::ostringstream protein_loc_stream;
-      protein_loc_stream << protein_id << "(" << peptide_loc << ")";
+      protein_loc_stream << protein_id;
+
+      if (!protein->isPostProcess()) {
+        int peptide_loc = peptide_src->getStartIdx();
+        
+        protein_loc_stream << "(" << peptide_loc << ")";
+      }
       free(protein_id);
       protein_ids_locations.insert(protein_loc_stream.str());
     }

@@ -251,6 +251,10 @@ class MatchCollection {
     bool value
   );
 
+  void getCustomScoreNames(
+    std::vector<std::string>& custom_score_names
+  );
+
   void preparePostProcess();
 
   bool extendTabDelimited(

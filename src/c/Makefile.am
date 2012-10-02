@@ -5,7 +5,7 @@ SUBDIRS = ArrayLibrary percolator xlink posterior-error qranker-barista hardklor
 AM_CPPFLAGS = -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 \
  -D_GNU_SOURCE -DGCC -DHAVE_EXPAT_CONFIG_H
 AM_CFLAGS = -Wall -W -Werror
-AM_CXXFLAGS = -Wall -W -Werror
+AM_CXXFLAGS = -Wall -W 
 
 # Crux can use either single or double precision floating poinnt.
 if USEDOUBLES
@@ -122,6 +122,8 @@ LIBFILES= \
   MS2SpectrumCollection.h \
   MSToolkitSpectrumCollection.cpp \
   MSToolkitSpectrumCollection.h \
+  MzIdentMLReader.cpp \
+  MzIdentMLReader.h \
   objects.h \
   OutputFiles.cpp \
   OutputFiles.h \
@@ -156,10 +158,14 @@ LIBFILES= \
   PrintVersion.h \
   Protein.cpp \
   Protein.h \
+  PostProcessProtein.cpp \
+  PostProcessProtein.h \
   ProteinPeptideIterator.cpp \
   ProteinPeptideIterator.h \
   ProteinIndex.cpp \
   ProteinIndex.h \
+  PWIZSpectrumCollection.cpp \
+  PWIZSpectrumCollection.h \
   ProteinIndexIterator.cpp \
   ProteinIndexIterator.h \
   q-value.cpp \
@@ -196,6 +202,7 @@ noinst_LTLIBRARIES = libcrux.la
 libcrux_la_CFLAGS = \
   $(AM_CFLAGS) \
   -I$(top_srcdir)/src/external/MSToolkit/include \
+  -I$(top_srcdir)/src/external/proteowizard/install/include/ \
   -I$(top_srcdir)/src/c/percolator/ \
   -I$(top_srcdir)/src/c/qranker-barista/ \
   -I$(top_srcdir)/src/c/posterior-error/
@@ -204,6 +211,7 @@ libcrux_la_CXXFLAGS = \
   $(AM_CXXFLAGS) \
   -I$(top_srcdir)/src/external/MSToolkit/include \
   -I$(top_srcdir)/src/external/MSToolkit/RAMP \
+  -I$(top_srcdir)/src/external/proteowizard/install/include/ \
   -I$(top_srcdir)/src/c/percolator/ \
   -I$(top_srcdir)/src/c/qranker-barista/ \
   -I$(top_srcdir)/src/c/posterior-error/ \
@@ -212,6 +220,28 @@ libcrux_la_CXXFLAGS = \
   -I$(top_srcdir)/src/external/
 
 libcrux_la_SOURCES = $(LIBFILES)
+
+PWIZ_LIB_FILES = \
+  -lpwiz_data_msdata \
+  -lpwiz_data_common \
+  -lpwiz_data_identdata \
+  -lpwiz_data_msdata_version \
+  -lpwiz_data_misc \
+  -lpwiz_utility_chemistry \
+  -lpwiz_utility_misc \
+  -lpwiz_utility_minimxml \
+  -lpwiz_data_common \
+  -lpwiz_data_identdata \
+  -lpwiz_data_identdata_version \
+  -lpwiz_data_proteome \
+  -lboost_system-mt-s \
+  -lboost_iostreams-mt-s \
+  -lz-mt-s-1_2 \
+  -lboost_filesystem-mt-s \
+  -lboost_regex-mt-s \
+  -lboost_thread-mt-s \
+  -lpthread
+
 
 PROGRAM_FILES = \
   crux \
@@ -226,6 +256,7 @@ crux_CXXFLAGS = \
   $(AM_CXXFLAGS) \
   -DMAIN \
   -I$(top_srcdir)/src/external/MSToolkit \
+  -I$(top_srcdir)/src/external/proteowizard/install/include/ \
   -I$(top_srcdir)/src/c/percolator \
   -I$(top_srcdir)/src/c/posterior-error \
   -I$(top_srcdir)/src/c/xlink \
@@ -254,12 +285,15 @@ crux_LDADD = \
   -lpep \
   -lmstoolkit \
   -lm -lpthread -ldl \
-  -lArrayLibrary
+  -lArrayLibrary \
+  -L$(top_builddir)/src/external/proteowizard/install/lib \
+  $(PWIZ_LIB_FILES)
 
 xlink_predict_peptide_ions_SOURCES=./xlink/xhhc_predict_peptide_ions.cpp
 xlink_predict_peptide_ions_CXXFLAGS= \
   $(AM_CFLAGS) \
   -DMAIN \
+  -I$(top_srcdir)/src/external/proteowizard/install/include/ \
   -I$(top_srcdir)/src/c/xlink
 
 xlink_predict_peptide_ions_LDADD = \
@@ -269,12 +303,14 @@ xlink_predict_peptide_ions_LDADD = \
   -lm \
   -lxlink \
   libcrux.la \
+  -L$(top_builddir)/src/external/proteowizard/install/lib $(PWIZ_LIB_FILES) \
   -lmstoolkit
 
 xlink_score_spectrum_SOURCES=./xlink/xhhc_score_peptide_spectrum.cpp
 xlink_score_spectrum_CXXFLAGS= \
   $(AM_CFLAGS) \
   -DMAIN \
+  -I$(top_srcdir)/src/external/proteowizard/install/include/ \
   -I$(top_srcdir)/src/c/xlink
 
 xlink_score_spectrum_LDADD = \
@@ -284,12 +320,14 @@ xlink_score_spectrum_LDADD = \
   -lm -lpthread -ldl \
   -lxlink \
   libcrux.la \
+  -L$(top_builddir)/src/external/proteowizard/install/lib $(PWIZ_LIB_FILES) \
   -lmstoolkit
 
 xlink_assign_ions_SOURCES=./xlink/xlink_assign_ions.cpp
 xlink_assign_ions_CXXFLAGS= \
   $(AM_CFLAGS) \
   -DMAIN \
+  -I$(top_srcdir)/src/external/proteowizard/install/include/ \
   -I$(top_srcdir)/src/c/xlink
 
 xlink_assign_ions_LDADD = \
@@ -299,6 +337,7 @@ xlink_assign_ions_LDADD = \
   -lm -lpthread -ldl \
   -lxlink \
   libcrux.la \
+  -L$(top_builddir)/src/external/proteowizard/install/lib $(PWIZ_LIB_FILES) \
   -lmstoolkit
 
 

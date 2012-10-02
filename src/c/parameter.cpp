@@ -28,7 +28,8 @@ static const char* parameter_type_strings[NUMBER_PARAMETER_TYPES] = {
   "INT_ARG", "DOUBLE_ARG", "STRING_ARG", "MASS_TYPE_T", "DIGEST_T", 
   "ENZYME_T", 
   "bool", "SCORER_TYPE_T", "ION_TYPE_T",
-  "HARDKLOR_ALGORITHM_T", "ALGORITHM_TYPE_T", "WINDOW_TYPE_T", "MEASURE_TYPE_T", 
+  "ALGORITHM_T", "HARDKLOR_ALGORITHM_TYPE_T", "SPECTRUM_PARSER_T" ,
+  "WINDOW_TYPE_T", "MEASURE_TYPE_T", "THRESHOLD_T", 
   "PARSIMONY_TYPE_T", "QUANT_LEVEL_TYPE_T", "DECOY_TYPE_T", "MASS_FORMAT_T"};
 
 //one hash for parameter values, one for usage statements, one for types
@@ -180,6 +181,14 @@ bool set_window_type_parameter(
  const char* foruser
   );
 
+bool set_threshold_type_parameter(
+ const char*     name,  ///< the name of the parameter looking for -in
+ THRESHOLD_T set_value,  ///< the value to be set -in
+ const char* usage,      ///< string to print in usage statement
+ const char* filenotes,   ///< additional info for param file
+ const char* foruser
+  );
+
 bool set_algorithm_type_parameter(
  const char* name,
  ALGORITHM_TYPE_T set_value,
@@ -192,6 +201,13 @@ bool set_hardklor_algorithm_type_parameter(
   HARDKLOR_ALGORITHM_T set_value,
   const char* usage,
   const char* filenotes,
+  const char* foruser);
+
+bool set_spectrum_parser_parameter(
+  const char* name, ///< the name of the parameter looking for -in
+  SPECTRUM_PARSER_T set_value, ///< the value to be set -in
+  const char* usage, ///< string to print in usage statement
+  const char* filenotes, ///< additional info for param file
   const char* foruser);
 
 bool set_scorer_type_parameter(
@@ -318,9 +334,10 @@ void initialize_parameters(void){
   // all arguments are left out of param file
 
   /* generate_peptide arguments */
-  set_string_parameter("protein database", NULL, 
+  set_string_parameter("protein-database", NULL, 
       "Fasta file of proteins or directory containing an index.",
-      "Argument for generate, index, search, analyze.", "false");
+      "Argument for generate, index, search. Optional for analyze and spectral-counts.", 
+      "false");
 
   set_string_parameter("search results directory", NULL, 
       "Directory containing the results of one search.",
@@ -458,6 +475,12 @@ void initialize_parameters(void){
       "Available for search-for-matches, search-for-xlinks.",
       "true");
 
+  set_spectrum_parser_parameter("spectrum-parser", CRUX_SPECTRUM_PARSER,
+    "Parser to use for reading in spectra "
+    "<string>=pwiz|mstoolkit|crux. Default=crux.",
+    "Available for search-for-matches, search-for-xlinks.",
+    "true");
+
   set_string_parameter("custom-enzyme", NULL, 
       "Specify rules for in silico digestion of proteins. "
       "See HTML documentation for syntax. Default is trypsin.",
@@ -523,9 +546,6 @@ void initialize_parameters(void){
   set_boolean_parameter("compute-p-values", false, 
       "Compute p-values for the main score type. Default=F.",
       "Currently only implemented for XCORR.", "true");
-  set_boolean_parameter("use-mstoolkit", false,
-      "Use MSToolkit to parse spectra. Default=F.",
-      "Available for crux-search-for-matches", "true");
   set_string_parameter("scan-number", NULL,
       "Search only select spectra specified as a single "
       "scan number or as a range as in x-y.  Default=search all.",
@@ -886,22 +906,28 @@ void initialize_parameters(void){
        "Name of file in text format which holds match results.",
        "For quantify to retrieve scores for protein and peptides.",
        "false");
-  // also uses "protein database"
+  // also uses "protein-database"
 
   // ***** spectral-counts options *****
    set_string_parameter("input-ms2", NULL,
        "MS2 file corresponding to the psm file. Required for SIN.",
        "Available for spectral-counts with measure=SIN.",
        "true");
+
+  set_threshold_type_parameter("threshold-type", THRESHOLD_QVALUE,
+    "What type of threshold to use when parsing matches "
+    "none|qvalue|custom",
+    "used for crux spectral-counts",
+    "true");
+
   set_double_parameter("threshold", 0.01, -BILLION, BILLION, 
        "The threshold to use for filtering matches.  If no" 
-       "custom-threshold parameter given, then q-value will be "
        "used.  Default=0.01.",
        "Available for spectral-counts.  All PSMs with higher (or lower) than "
        "this will be ignored.",
        "true");
 
-  set_boolean_parameter("threshold-min", true,
+  set_boolean_parameter("custom-threshold-min", true,
     "Direction of threshold for matches.  If true, then all matches "
      "whose value is <= threshold will be accepted.  If false, "
      "then all matches >= threshold will be accepted.  Used with "
@@ -909,9 +935,9 @@ void initialize_parameters(void){
      "Available for spectral-counts.",
      "true");
 
-  set_string_parameter("custom-threshold", "__NULL_STR",
-     "Use a custom threshold rather than q-value (default NULL)",
-     "Availabel for spectral-counts.", "true");
+  set_string_parameter("custom-threshold-name", "__NULL_STR",
+     "Use a name of custom threshold rather than (default NULL)",
+     "Available for spectral-counts.", "true");
 
 
   set_measure_type_parameter("measure", MEASURE_NSAF,
@@ -939,6 +965,11 @@ void initialize_parameters(void){
        "Default=none. Can be <string>=none|simple|greedy",
        "Available for spectral-counts.",
        "true");
+
+  set_boolean_parameter("mzid-use-pass-threshold", false,
+    "Use mzid's passThreshold attribute to filter matches. Default false.",
+    "Used when parsing mzIdentML files.",
+    "true");
 
 
   // ***** static mods *****
@@ -1047,11 +1078,6 @@ void initialize_parameters(void){
   set_boolean_parameter("print-theoretical-spectrum", false,
       "Print the theoretical spectrum",
       "Available for xlink-predict-peptide-ions (Default=F).",
-      "true");
-
-  set_boolean_parameter("use-mgf", false,
-      "Use MGF file format for parsing files",
-      "Available for search-for-xlinks program (Default=F).",
       "true");
 
   set_boolean_parameter("use-old-xlink", true /* Turn to false later */,
@@ -2027,6 +2053,14 @@ bool check_option_type_and_bounds(const char* name){
                         value_str, name);
     }
     break;
+  case SPECTRUM_PARSER_P:
+    if (string_to_spectrum_parser_type(value_str) == INVALID_SPECTRUM_PARSER) {
+      success = false;
+      sprintf(die_str, "Illegal value '%s' for option '%s'.   "
+                       "Must be pwiz, mstoolkit, or crux",
+                       value_str, name);
+    }
+    break;
   case ION_TYPE_P:
     carp(CARP_DETAILED_DEBUG, "found ion_type param, value '%s'",
          value_str);
@@ -2052,6 +2086,15 @@ bool check_option_type_and_bounds(const char* name){
       success = false;
       sprintf(die_str, "Illegal measure type '%s' for option '%s'. "
               "Must be (NSAF, SIN, EMPAI)", value_str, name);
+    }
+    break;
+  case THRESHOLD_P:
+    carp(CARP_DETAILED_DEBUG, "found threshold type param, value '%s'",
+       value_str);
+    if (string_to_threshold_type(value_str) == THRESHOLD_INVALID) {
+      success = false;
+      sprintf(die_str, "Illegal threshold type '%s' for option '%s'."
+                       "Must be (none, qvalue, custom).", value_str, name);
     }
     break;
   case PARSIMONY_TYPE_P:
@@ -2590,6 +2633,23 @@ HARDKLOR_ALGORITHM_T get_hardklor_algorithm( const char* name ){
   return hk_algorithm;
 }
 
+SPECTRUM_PARSER_T get_spectrum_parser_parameter( const char* name ) {
+
+  char* param = (char*)get_hash_value(parameters, name);
+  SPECTRUM_PARSER_T spectrum_parser = 
+    string_to_spectrum_parser_type(param);
+  
+  if ( spectrum_parser == INVALID_SPECTRUM_PARSER) {
+    carp(CARP_FATAL, "spectrum parser parameter %s has "
+      "the value of %s which is not of the correct type.", name, param);
+  }
+
+  return spectrum_parser;
+
+
+}
+
+
 
 MASS_TYPE_T get_mass_type_parameter(
    const char* name
@@ -2615,6 +2675,17 @@ WINDOW_TYPE_T get_window_type_parameter(
 
   return param_value;
 }
+
+THRESHOLD_T get_threshold_type_parameter(
+  const char* name
+  ){
+  char* param_value_str = (char*)get_hash_value(parameters, name);
+  THRESHOLD_T param_value =  
+    string_to_threshold_type(param_value_str);
+
+  return param_value;
+}
+
 
 PARSIMONY_TYPE_T get_parsimony_type_parameter(
   const char* name
@@ -3015,6 +3086,35 @@ bool set_window_type_parameter(
 
 }
 
+bool set_threshold_type_parameter(
+ const char*     name,  ///< the name of the parameter looking for -in
+ THRESHOLD_T set_value,  ///< the value to be set -in
+ const char* usage,      ///< string to print in usage statement
+ const char* filenotes,   ///< additional info for param file
+ const char* foruser
+  ) {
+  bool result = true;
+  
+  // check if parameters can be changed
+  if(!parameter_plasticity){
+    carp(CARP_ERROR, "can't change parameters once they are confirmed");
+    return false;
+  }
+  
+  /* stringify the value */
+  char* value_str = threshold_type_to_string(set_value);
+
+  result = add_or_update_hash(parameters, name, value_str);
+  result = add_or_update_hash(usages, name, usage);
+  result = add_or_update_hash(file_notes, name, filenotes);
+  result = add_or_update_hash(for_users, name, foruser);
+  result = add_or_update_hash(types, name, "THRESHOLD_T");
+  free(value_str);
+  return result;
+
+}
+
+
 bool set_measure_type_parameter(
   const char* name, ///< the name of the parameter looking for -in
   MEASURE_TYPE_T set_value, ///< the value to be set -in
@@ -3207,6 +3307,34 @@ bool set_hardklor_algorithm_type_parameter(
   result = add_or_update_hash(types, name, (void*)"HARDKLOR_ALGORITHM_TYPE_T");
   return result;
   
+}
+
+bool set_spectrum_parser_parameter(
+  const char* name,
+  SPECTRUM_PARSER_T set_value,
+  const char* usage,
+  const char* filenotes,
+  const char* foruser) {
+
+  bool result = true;
+
+  // check if parameters can be changed
+  if (!parameter_plasticity) {
+    carp(CARP_ERROR, "can't change parameters once they are confirmed");
+    return false;
+  }
+  /* stringify value */
+  char* value_str = spectrum_parser_type_to_string(set_value);
+  carp(CARP_DETAILED_DEBUG, "setting spectrum_parser type to %s", value_str);
+
+  result = add_or_update_hash(parameters, name, value_str);
+  result &= add_or_update_hash(usages, name, usage);
+  result &= add_or_update_hash(file_notes, name, filenotes);
+  result &= add_or_update_hash(for_users, name, foruser);
+  result &= add_or_update_hash(types, name, (void*)"SPECTRUM_PARSER_T");
+
+  return result;
+
 }
 
 

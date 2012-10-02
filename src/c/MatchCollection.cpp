@@ -1344,6 +1344,22 @@ void MatchCollection::setScoredType(
 }
 
 /**
+ *
+ */
+void MatchCollection::getCustomScoreNames(
+  vector<string>& custom_score_names
+  ) {
+  custom_score_names.clear();
+
+  if (match_total_ > 0) {
+
+    match_[0]->getCustomScoreNames(custom_score_names);
+
+  }
+
+}
+
+/**
  *\returns true, if there is a  match_iterators instantiated by match collection 
  */
 bool MatchCollection::getIteratorLock()
@@ -1449,7 +1465,7 @@ void MatchCollection::printXmlHeader(
   time_t hold_time;
   ENZYME_T enzyme = get_enzyme_type_parameter("enzyme");
   char* enz_str = enzyme_type_to_string(enzyme);
-  char* database = get_string_parameter("protein database");
+  char* database = get_string_parameter("protein-database");
   char* msms_file = get_string_parameter("ms2 file");
   char* absolute_msms_path;
   if (msms_file == NULL){
@@ -1703,7 +1719,7 @@ void MatchCollection::printSqtHeader(
   fprintf(output, "H\tStartTime\t%s", ctime(&hold_time));
   fprintf(output, "H\tEndTime                               \n");
 
-  char* database = get_string_parameter("protein database");
+  char* database = get_string_parameter("protein-database");
   bool use_index = is_directory(database);
 
   if( use_index == true ){

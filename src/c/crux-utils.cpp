@@ -252,6 +252,35 @@ char * measure_type_to_string(MEASURE_TYPE_T type){
 }
 
 /**
+ * the string version of threshold type
+ */
+static const char* threshold_type_strings[NUMBER_THRESHOLD_TYPES] =
+  {"invalid","none","qvalue","custom"};
+
+THRESHOLD_T string_to_threshold_type(char* name) {
+
+  int threshold_int = convert_enum_type_str(name, INVALID_ENUM_STRING,
+    threshold_type_strings,
+    NUMBER_THRESHOLD_TYPES);
+
+  if ( threshold_int < 0) {
+    threshold_int = 0;
+  }
+  return (THRESHOLD_T)threshold_int;
+
+}
+
+char* threshold_type_to_string(THRESHOLD_T type) {
+  if ( (int)type > NUMBER_THRESHOLD_TYPES) {
+    return NULL;
+  }
+
+  char* type_str = my_copy_string(threshold_type_strings[type]);
+
+  return type_str;
+}
+
+/**
  * The string version of quantification level  types
  */
 static const char* quant_level_type_strings[NUMBER_QUANT_LEVEL_TYPES] =
@@ -422,6 +451,31 @@ char* hardklor_hardklor_algorithm_type_to_string(
   ){
 
   char *type_str = my_copy_string(hardklor_hardklor_algorithm_type_strings[type]);
+
+  return type_str;
+}
+
+static const char* spectrum_parser_type_strings[NUMBER_SPECTRUM_PARSERS] = 
+  {"invalid", "pwiz", "mstoolkit", "crux"};
+
+SPECTRUM_PARSER_T string_to_spectrum_parser_type(char* name) {
+
+  int spectrum_parser = convert_enum_type_str(name, INVALID_ENUM_STRING,
+    spectrum_parser_type_strings, NUMBER_SPECTRUM_PARSERS);
+
+  if (spectrum_parser < 0) {
+    spectrum_parser = 0;
+  }
+
+  return (SPECTRUM_PARSER_T)spectrum_parser;
+
+}
+
+char* spectrum_parser_type_to_string(
+  SPECTRUM_PARSER_T type
+  ) {
+
+  char* type_str = my_copy_string(spectrum_parser_type_strings[type]);
 
   return type_str;
 }

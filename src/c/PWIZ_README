@@ -1,0 +1,142 @@
+Notes on how pwiz stores spectrum data
+
+A spectrum has an isolation window which corresponds to what the
+instrument selected for fragmentation.  A spectrum has one precursor
+per isolation window. A precursor has a selected ion which
+corresponds to a peptide that was isoated and fragmented.  If more
+than one peptide was fragmented, the spectrum will have more than one
+selected ion. 
+
+Hardklor/Bullseye identifies the peptides selected/isolated/fragmented
+in each MS/MS spectrum.  That information is contained in the EZ lines
+and duplicated in the Z lines.  A pwiz spectrum object from these
+files will have one precursor and one selected ion for each Z line.
+The selected ion will store the charge as it appears in the file, the
+accurate mass as it appears in the file and the m/z computed from the
+accurate mass and the charge.  The accurate mass is the singly charged
+mass (M+H).
+
+A default .ms2 file has not been processed with Bullseye.  It will
+have a Z line for each possible charge state and the corresponding
+mass computed from the isolated m/z.  A pwiz spectrum object from
+these files will have one precursor, and one selected ion.  The
+selected ion will have one possible charge state for each z line.  The
+selected ion will also have selected_ion_m_z which is the precursor
+m/z.
+
+The SpectrumInfo struct can be used to access common fields from a
+spectrum object.  The struct fills the precursor m/z filed from the
+selected_ion_mz from the first selected ion.
+
+Notes on crux's use of pwiz
+
+The pwiz parser is only used when 'use-pwiz=T' is included in a
+parameter file.  We may want to change it to be the default, or have
+the parser selected at runtime. So far, the following tests have been
+run using crux search-for-matches:
+
+1. demo.ms2, small-yeast.fasta, use-pwiz=F
+2. demo.ms2, small-yeast.fasta, use-pwiz=T
+3. demo.cms2, small-yeast.fast, use-pwiz=T
+4. wormyraw-1.ms2, small-yeast.fasta, use-pwiz=F
+5. wormyraw-1.ms2, small-yeast.fasta, use-pwiz=T
+6. wormyraw-1.cms2, small-yeast.fasta, use-pwiz=T
+
+wormyraw-1 was processed by Bullseye so it contains accurate masses.
+The search.target.txt file has been compared between various pairs of 
+tests with these results.
+
+1 vs 2: Spectrum neutral mass is slightly different for +2 and +3.
+With the crux parser, we used the singly charged mass on the Z line
+and converted to neutral mass.  With the pwiz parser, we are using the
+precursor m/z and converting it with the assumed charge to neutral
+mass.
+
+2 vs 3: Identical.
+
+4 vs 5: Identical.
+
+5 vs 6: Spectrum neutral mass is mostly the same (some small
+differences), but the xcorrs are different.  A quick test suggested
+that both parsers (ms2 and cms2) are returning the same number of
+peaks.  It remains to be tested if the peaks are the same.
+
+In the crux code, we are using the presence of charge vs possible
+charge and the presence of accurate mass to determine if teh file has
+been run through Bullsye.  Ideally, the pwiz parser would set a
+parameter to indicate that it has.  
+
+As of April 12, 2012, the pwiz parser has not been tested with .mgf,
+.mzXML, or .mzML files.
+
+SVN revisions up to 5669 have been code reviewed.
+
+
+Notes on how to manage the pwiz dependency.
+
+The proteowizard project is stored in the crux repository as a
+tarball of source code.  To build crux, the pwiz tarball must be
+unpacked and built.  This should only need to happen once for a clean
+check out.
+
+When it is time to update the version of pwiz, go to the website and
+download one of their files (called artifacts).  They come in several
+flavors; the ones with no tests and no vendor API's have everything we
+need.
+
+We might want to consider extracting a subset of the pwiz tarball to
+save in the repository.  We use only a small fraction of the code.
+For example, we don't need anything in pwiz_tools.  It would save some
+space, but would require an extra step each time a new version of pwiz
+is introduced.
+
+Ideally, the unpacking and building of pwiz should happen as part of
+the configure and make process.  Until then, it can be done with the
+following steps:
+
+1. In crux/src/external/proteowizard, unpack with the command
+  $ tar -jxvf pwiz-src-without-tv-<version>.tar.bz2
+
+2. Build the project.
+  $ ./quickbuild.sh --without-mz5 pwiz/data/msdata/ \
+  pwiz/data/identdata/ 1> out 2> er
+
+Check the end of out to see if there were any failures.  It will say
+something like "At least one target failed to build" if there were
+errors.  If it says "...updated 42 targets..." then everything's fine.
+
+** Note about --without-mz5.  See Jamroot.jam for notes on some useful
+   options.  The tarball I checked in happened to be built without the
+   mz5 support so it requires that you build without it.  If you
+   download a new tarball from the website, you won't need this
+   option.
+
+3. Install the libraries and include files in a convenient location.
+  $ ./quickbuild.sh --without-mz5 libraries --prefix=install
+  
+This will create a new directory, install, with subdirectories include
+and lib.  We will point the compiler/linker to these locations when
+building crux.  
+
+** Note about library names.  In proteowizard/install/lib will be some
+   boost libraries.  The library names will include the compiler name
+   and version.  This is a function of how pwiz builds them.  Boost by
+   itself can be built with generic names (e.g. libboost_system.a),
+   but I have never figured out how to make that work within the pwiz
+   system. 
+
+4. Now you should be able to build crux as usual.  If you get errors
+about not finding boost libraries, you may have a different version of
+gcc installed (see note above).  Look in proteowizard/install/lib for
+the correct name of the libraries and update crux/src/c/Makefile.am
+accordingly. 
+
+Additional notes.  
+
+I have made a few changes to the pwiz code to silence the compiler
+warnings-as-errors.  Look for comments with BF for the changes.  
+
+Steps 2 and 3 can be combined by adding 'libraries --prefix=install'
+to the command in step 2.  The order of arguments doesn't seem to
+matter for bjam.
+

@@ -203,12 +203,16 @@ class Protein {
    * returns a heap allocated new copy of the sequence
    * user must free the return sequence 
    */
-  char* getSequence();
+  virtual char* getSequence(
+    int offset=0
+  );
 
   /**
    *\returns a pointer to the sequence of the protein
    */
-  char* getSequencePointer();
+  virtual char* getSequencePointer(
+    int offset=0
+  );
 
   /**
    * sets the sequence of the protein
@@ -220,7 +224,7 @@ class Protein {
   /**
    *\returns the length of the protein
    */
-  unsigned int getLength();
+  virtual unsigned int getLength();
 
   /**
    * sets the id of the protein
@@ -311,6 +315,19 @@ class Protein {
   void serialize(
     FILE* file ///< output stream -out
     );
+
+  /**
+   * \returns the start index of the sequence in the protein
+   * tries to use the previous aa and next aa to refine where
+   * this sequence exits
+   */
+  virtual int findStart(
+    std::string sequence,
+    std::string prev_aa,
+    std::string next_aa
+  );
+
+  virtual bool isPostProcess();
 
 };
 

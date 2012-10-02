@@ -291,7 +291,7 @@ int MatchSearch::main(int argc, char** argv){
   int num_options = sizeof(option_list) / sizeof(char*);
 
   /* Define required command line arguments */
-  const char* argument_list[] = {"ms2 file", "protein database"};
+  const char* argument_list[] = {"ms2 file", "protein-database"};
   int num_arguments = sizeof(argument_list) / sizeof(char*);
 
   initialize(argument_list, num_arguments,
@@ -313,7 +313,7 @@ int MatchSearch::main(int argc, char** argv){
        spectra->getNumSpectra());
 
   /* Get input: protein file */
-  char* input_file = get_string_parameter("protein database");
+  char* input_file = get_string_parameter("protein-database");
 
   /* Prepare input, fasta or index */
   Index* index = NULL;

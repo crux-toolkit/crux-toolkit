@@ -9,6 +9,7 @@
 #define MATCHCOLLECTIONPARSER_H
 
 #include "MatchCollection.h"
+#include "Protein.h"
 
 /**
  * Instantiates a MatchCollection based on the extension of the
@@ -36,6 +37,21 @@ class MatchCollectionParser {
     const char* fasta_file, ///< fasta or index path -in
     Database*& database,  ///< resulting database -out
     Database*& decoy_database ///< resulting decoy database -out
+  );
+
+  static Protein* getProtein(
+    Database* database,
+    Database* decoy_database,
+    std::string& protein_id,
+    bool& is_decoy
+  );
+
+  static Protein* getProtein(
+    Database* database,
+    Database* decoy_database,
+    std::string& protein_id,
+    std::string& sequence,
+    bool& is_decoy
   );
 
 };
