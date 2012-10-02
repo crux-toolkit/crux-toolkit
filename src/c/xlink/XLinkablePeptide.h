@@ -21,7 +21,7 @@
 class XLinkablePeptide {
 
  protected:
-  Peptide* peptide_; ///< the peptide object of this XLinkablePeptide (can be null)
+  Crux::Peptide* peptide_; ///< the peptide object of this XLinkablePeptide (can be null)
   char* sequence_; ///< the sequence 
   std::vector<int> link_sites_; ///< the sequence indices where linking is possible
 
@@ -43,7 +43,7 @@ class XLinkablePeptide {
    * Constructor that defines the peptide and the linking sites
    */
   XLinkablePeptide(
-    Peptide* peptide, ///< the peptide object 
+    Crux::Peptide* peptide, ///< the peptide object 
     std::vector<int>& link_sites ///< the linking sites
     );
 
@@ -52,7 +52,7 @@ class XLinkablePeptide {
    * on the peptide using the bondmap object
    */
   XLinkablePeptide(
-    Peptide* peptide, ///< the peptide object 
+    Crux::Peptide* peptide, ///< the peptide object 
     XLinkBondMap& bondmap ///< the bond map
   );
   
@@ -66,7 +66,7 @@ class XLinkablePeptide {
    * generate the possible link sites
    */
   static void findLinkSites(
-    Peptide* peptide,  ///< the peptide object -in
+    Crux::Peptide* peptide,  ///< the peptide object -in
     XLinkBondMap& bondmap,  ///< the bond map -in 
     std::vector<int>& link_sites ///< the found link sites -out
   );
@@ -80,7 +80,7 @@ class XLinkablePeptide {
   );
 
   static bool linkSeqPreventsCleavage(
-    Peptide* peptide, ///< the peptide
+    Crux::Peptide* peptide, ///< the peptide
     int seq_idx ///< the sequence index
   );
 
@@ -96,7 +96,7 @@ class XLinkablePeptide {
    * \returns whether the peptide is cleavable at this index
    */
   static bool isCleavageSite(
-    Peptide* peptide, ///< the peptide
+    Crux::Peptide* peptide, ///< the peptide
     int seq_idx ///< the sequence index
   );
 
@@ -104,7 +104,7 @@ class XLinkablePeptide {
    * \returns whether the aa at this index is a missed cleavage
    */
   static bool isMissedCleavageSite(
-    Peptide* peptide, ///< the peptide
+    Crux::Peptide* peptide, ///< the peptide
     int seq_idx ///< the sequence index
   );
 
@@ -128,7 +128,7 @@ class XLinkablePeptide {
    * \returns whether the peptide is linkable using the bond map
    */
   static bool isLinkable(
-    Peptide* peptide, ///< the peptide object
+    Crux::Peptide* peptide, ///< the peptide object
     XLinkBondMap& bondmap ///< the bond map
   );
 
@@ -152,13 +152,13 @@ class XLinkablePeptide {
    */
   int getMissedCleavageSites();
   static int getMissedCleavageSites(
-    Peptide* peptide ///< the peptide
+    Crux::Peptide* peptide ///< the peptide
   );
 
   /**
    * \returns the peptide object associated with this XLinkablePeptide
    */
-  Peptide* getPeptide();
+  Crux::Peptide* getPeptide();
 
   /**
    * \returns the mass of the xlinkable peptide

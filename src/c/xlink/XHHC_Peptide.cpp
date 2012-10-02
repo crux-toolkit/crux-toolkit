@@ -11,7 +11,7 @@
 
 
 using namespace std;
-
+using namespace Crux;
 /**
  * \returns a blank XHHC_Peptide object
  */

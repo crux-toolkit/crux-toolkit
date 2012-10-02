@@ -6,6 +6,7 @@
 #include "SpectrumZState.h"
 
 using namespace std;
+using namespace Crux;
 
 /**
  * Constructor that sets all fields with the given values.  Will

@@ -115,6 +115,10 @@ class Database {
     DECOY_TYPE_T decoys = NO_DECOYS ///< is this to be a decoy database
     );         
 
+  void addProtein(
+    Protein* protein
+  );
+
   /**
    * Frees an allocated protein object.
    */
@@ -294,7 +298,7 @@ bool void_database_peptide_iterator_has_next(
 /**
  * \returns The next peptide in the database.
  */
-Peptide* void_database_peptide_iterator_next(
+Crux::Peptide* void_database_peptide_iterator_next(
   void* database_peptide_iterator ///< the iterator of interest -in
   );
 
@@ -325,7 +329,7 @@ bool void_database_sorted_peptide_iterator_has_next(
  * returns each peptide in sorted order
  * \returns The next peptide in the database.
  */
-Peptide* void_database_sorted_peptide_iterator_next(
+Crux::Peptide* void_database_sorted_peptide_iterator_next(
   void* database_peptide_iterator ///< the iterator of interest -in
   );
 

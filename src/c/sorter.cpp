@@ -26,6 +26,8 @@
 #include "Database.h"
 #include "DatabasePeptideIterator.h"
 
+using namespace Crux; 
+
 /**
  * \struct sorted_peptide_iterator
  * \brief Object to iterate over the peptides in an

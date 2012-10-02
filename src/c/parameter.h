@@ -77,8 +77,10 @@ enum parameter_type {
   ION_TYPE_P,        ///< parameters of type ION_TYPE_T
   ALGORITHM_TYPE_P,  ///< parameters of type ALGORITHM_TYPE_T
   HARDKLOR_ALGORITHM_TYPE_P, ///< parameters of type HARDKLOR_ALGORITHM_T
+  SPECTRUM_PARSER_P, ///< parameters of type SPECTRUM_PARSER_T
   WINDOW_TYPE_P,     ///< parameters of type WINDOW_TYPE_T
   MEASURE_TYPE_P,    ///< parameters of type MEASURE_TYPE_T
+  THRESHOLD_P,       ///< parameters of type THRESHOLD_TYPE_T
   PARSIMONY_TYPE_P,  ///< parameters of type PARSIMONY_TYPE_T
   QUANT_LEVEL_TYPE_P,///< parameters of type QUANT_LEVEL_TYPE_T
   DECOY_TYPE_P,      ///< parameters of type DECOY_TYPE_T
@@ -223,6 +225,10 @@ WINDOW_TYPE_T get_window_type_parameter(
   const char* name
   );
 
+THRESHOLD_T get_threshold_type_parameter(
+  const char* name
+  );
+
 PARSIMONY_TYPE_T get_parsimony_type_parameter(
   const char* name
   );
@@ -248,6 +254,10 @@ int get_max_ion_charge_parameter(
   );
 
 HARDKLOR_ALGORITHM_T get_hardklor_algorithm(
+  const char* name
+  );
+
+SPECTRUM_PARSER_T get_spectrum_parser_parameter(
   const char* name
   );
 

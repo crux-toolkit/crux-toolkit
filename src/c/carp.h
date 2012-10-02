@@ -78,6 +78,7 @@ static const int CARP_MAX = 100;
 
 
 #include <stdio.h>
+#include <string>
 #include "utils.h"
 
 /**
@@ -120,6 +121,11 @@ void carp(
   int verbosity, 
   const char* format,
   ...
+);
+
+void carp(
+  int verbosity,
+  std::string& msg
 );
 
 void warn_once(

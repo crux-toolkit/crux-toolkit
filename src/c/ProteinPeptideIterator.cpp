@@ -6,6 +6,7 @@
 #include "ProteinPeptideIterator.h"
 
 using namespace std;
+using namespace Crux;
 
 /*
  * Takes a cumulative distribution of peptide masses (the mass_array) and
@@ -530,7 +531,7 @@ bool ProteinPeptideIterator::hasNext()
  * \returns The next peptide in the protein, in an unspecified order
  * the Peptide is new heap allocated object, user must free it
  */
-Peptide* ProteinPeptideIterator::next()
+Crux::Peptide* ProteinPeptideIterator::next()
 {
   if( !has_next_){
     carp(CARP_DEBUG, "Returning null");

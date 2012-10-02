@@ -69,7 +69,7 @@ int generate_peptide_mod_list(
  * but not more than once by a single aa_mod as defined in modifiable().
  * \returns TRUE if the sequence can be modified, else FALSE
  */
-bool is_peptide_modifiable( Peptide* peptide,
+bool is_peptide_modifiable( Crux::Peptide* peptide,
                             PEPTIDE_MOD_T* peptide_mod);
 
 
@@ -85,7 +85,7 @@ bool is_peptide_modifiable( Peptide* peptide,
  * \returns The number of modified peptides in the array pointed to by
  * modified_peptides. 
  */
-int modify_peptide(Peptide* peptide,
+int modify_peptide(Crux::Peptide* peptide,
                    PEPTIDE_MOD_T* peptide_mod,
                    LINKED_LIST_T* modified_peptides,
                    int max_aas_modified

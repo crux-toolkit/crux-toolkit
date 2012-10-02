@@ -102,34 +102,35 @@ class SpectralCounts: public CruxApplication {
                           SpectrumCollection* spectra);
   SCORER_TYPE_T get_qval_type(MatchCollection* match_collection);
 
+
+  /**
+   * adds all matches 
+   */
+  void filterMatchesNone();
+
   /**
    * filters matches based upon a custom threshold (not q-value)
    */
-  void filterMatchesCustom(
-    MatchCollection* match_collection ///< match collection to filter
-  );
+  void filterMatchesCustom();
 
   /**
    * filters matches based upon q-value
    */
-  void filterMatchesQValue(
-    MatchCollection* match_collection ///< match collection to filter
-  );
+  void filterMatchesQValue();
 
   /**
    * filters matches based upon a SCORER_TYPE_T
    */
   void filterMatchesScore(
-    MatchCollection* match_collection, ///< match collection to filter
     SCORER_TYPE_T scorer ///< scorer to use
   );
 
   /**
    * filters matches based upon a custom score that is not SCORER_TYPE_T
    */
-  void filterMatchesCustomScore(
-    MatchCollection* match_collection ///< match collection to filter
-  );
+  void filterMatchesCustomScore();
+
+  void invalidCustomScore();
 
   // member variables
   OutputFiles* output_;
@@ -137,15 +138,15 @@ class SpectralCounts: public CruxApplication {
   FLOAT_T threshold_;
   std::string database_name_;
   bool unique_mapping_;
+  THRESHOLD_T threshold_type_;
   QUANT_LEVEL_TYPE_T quantitation_;
   PARSIMONY_TYPE_T parsimony_;
   MEASURE_TYPE_T measure_;
   FLOAT_T bin_width_;
   std::set<Match*> matches_;
-
+  MatchCollection* match_collection_;
   // For custom thresholding fields
   bool threshold_min_; 
-  bool custom_threshold_;
   std::string custom_threshold_name_;
   
 

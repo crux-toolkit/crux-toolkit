@@ -9,6 +9,7 @@
 #include "LinkedPeptide.h"
 #include "XHHC_Peptide.h"
 
+using namespace Crux;
 
 /**
  * mass of the linker

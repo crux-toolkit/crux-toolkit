@@ -1,0 +1,44 @@
+
+PWIZ_DIR=../external/include
+
+CC=g++
+COPTS=-I../external/include 
+
+MST_LIB=-L../external/MSToolkit/ -lMSToolkit
+CRUX_LIB=-L. -lcrux-support
+
+PWIZ_LIB_FILES = \
+  -lpwiz_data_msdata \
+  -lpwiz_data_common \
+  -lpwiz_data_identdata \
+  -lpwiz_data_msdata_version \
+  -lpwiz_data_misc \
+  -lpwiz_utility_chemistry \
+  -lpwiz_utility_misc \
+  -lpwiz_utility_minimxml \
+  -lpwiz_data_common \
+  -lpwiz_data_identdata \
+  -lpwiz_data_identdata_version \
+  -lpwiz_data_proteome \
+  -lboost_system-mt-s \
+  -lboost_iostreams-mt-s \
+  -lz-mt-s-1_2 \
+  -lboost_filesystem-mt-s \
+  -lboost_regex-mt-s \
+  -lboost_thread-mt-s \
+  -lpthread
+
+PWIZ_LIB=-L../external/lib ${PWIZ_LIB_FILES}
+
+
+all:mzid
+
+
+mzid.o:mzid.cpp 
+	g++ ${COPTS} -c mzid.cpp -o mzid.o
+
+mzid:mzid.o
+	g++ mzid.o ${CRUX_LIB} ${MST_LIB} ${PWIZ_LIB} -o mzid
+
+clean:
+	rm -f mzid MzIdentMLReader.o

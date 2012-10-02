@@ -8,6 +8,7 @@
 #include "XLinkSite.h"
 
 using namespace std;
+using namespace Crux;
 
 /**
  * Default constructor

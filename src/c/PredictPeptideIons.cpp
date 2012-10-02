@@ -31,6 +31,7 @@
 #include "Peptide.h"
 
 using namespace std;
+using namespace Crux;
 
 /**
  * \returns A blank PredictPeptideIons object.

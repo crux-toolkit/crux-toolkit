@@ -20,6 +20,8 @@
 #endif
 #include "WinCrux.h"
 
+using namespace Crux;
+
 // At one point I need to reverse the endianness for pfile_create to work
   // Apparently that is no longer true. Hence 0 below.
   static const bool REVERSE_ENDIAN = 0;

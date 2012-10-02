@@ -1,9 +1,12 @@
 project(barista)
 
-cmake_minimum_required(VERSION 2.8.1)
-cmake_policy(VERSION 2.8.1)
+cmake_minimum_required(VERSION 2.8.4)
+cmake_policy(VERSION 2.8.4)
 
 include_directories(..)
+include_directories(../../external/include)
+include_directories(../../external/build/src/ProteoWizard/libraries/boost_1_43_0)
+include_directories(../../external/build/src/ProteoWizard/libraries/boost_aux)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   set_property(

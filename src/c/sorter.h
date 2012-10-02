@@ -63,7 +63,7 @@ bool sorted_peptide_iterator_has_next(
  * returns each peptide in sorted order
  * \returns The next peptide in the database.
  */
-Peptide* sorted_peptide_iterator_next(
+Crux::Peptide* sorted_peptide_iterator_next(
   SORTED_PEPTIDE_ITERATOR_T* peptide_iterator ///< the iterator of interest -in
   );
 
