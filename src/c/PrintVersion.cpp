@@ -27,11 +27,11 @@ PrintVersion::~PrintVersion() {
 int PrintVersion::main(int argc, char** argv) {
   (void)argc;
   (void)argv;
+
   printf("Crux version %s\n", VERSION);
   
-// TODO, get this working (link problem) SJM
-//  string proteowizard_version = pwiz::Version::str();
-//  printf("Proteowizard version %s\n", proteowizard_version.c_str());
+  string proteowizard_version = pwiz::Version::str();
+  printf("Proteowizard version %s\n", proteowizard_version.c_str());
 
   return 0;
 }
