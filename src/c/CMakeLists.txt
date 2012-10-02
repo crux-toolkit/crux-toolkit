@@ -278,6 +278,7 @@ else(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     pwiz_utility_chemistry
     pwiz_utility_minimxml
     pwiz_utility_misc
+    pwiz_version
     boost_system-mt-s
     boost_iostreams-mt-s
     z-mt-s-1_2
