@@ -21,7 +21,7 @@ open source warning -->
 
 <blockquote>
 <code>crux search-for-xlinks [options]
-&lt;ms2&nbsp;input&nbsp;filename&gt; &lt;protein&nbsp;input&gt;&nbsp;&lt;link&nbsp;sites&gt;&nbsp;&lt;link mass&gt;
+&lt;ms2&nbsp;input&nbsp;filename&gt; &lt;protein-database&gt;&nbsp;&lt;link&nbsp;sites&gt;&nbsp;&lt;link mass&gt;
 </code>
 </blockquote>
 
@@ -65,10 +65,12 @@ specified in the parameter file, as described below.</p>
 
 <LI>
 &lt;ms2 &gt; &ndash; The name of the file from which
-  to parse the spectra. </li>
+  to parse the MS/MS spectra. File can in a format supported by 
+  <a href="http://proteowizard.sourceforge.net/">proteowizard</a>, 
+  except for the vendor formats.</li>
 
 <LI>
-&lt;protein input&gt; &ndash; 
+&lt;protein-database&gt; &ndash; 
   The name of the file in fasta format from which to retrieve proteins and peptides.
 </li>
 
