@@ -10,8 +10,33 @@ add_subdirectory(src/c)
 # build a CPack driven installer package
 include (InstallRequiredSystemLibraries)
 
+set (CPACK_GENERATOR TGZ)
 set (CPACK_SOURCE_GENERATOR TGZ)
 set (CPACK_PACKAGE_VERSION_MAJOR 1)
 set (CPACK_PACKAGE_VERSION_MINOR 8)
-set (CPACK_SOURCE_IGNORE_FILES ${CPACK_SOURCE_IGNORE_FILES};/abstract/;/asms2007/;/developer/;/guispec/;/mods/;/paper/)
+set (
+ CPACK_SOURCE_IGNORE_FILES 
+   /_CPack_Packages/;
+   /CMakeCache.txt/;
+   /CMakeFiles/;
+   /\\\\.svn/;
+   /\\\\.svnignore/;
+   /\\\\.swp/;
+   /abstract/;
+   /asms2007/;
+   /benchmark/;
+   /bin/;
+   /build/;
+   /crux.sln/;
+   /developer/;
+   /download/;
+   /guispec/;
+   /mods/;
+   /open_source_download/;
+   /paper/;
+   /results/;
+   /windows/;
+   /*\\\\.cmake$/;
+   /*\\\\.gz$/
+)
 include (CPack)
