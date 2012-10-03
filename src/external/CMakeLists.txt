@@ -46,5 +46,5 @@ ExternalProject_Add_Step(
   DEPENDEES download
   DEPENDERS configure
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/build/src/ProteoWizard
-  COMMAND svn update libraries pwiz Jamroot.jam quickbuild.sh clean.sh
+  COMMAND svn update -r 3950 libraries pwiz Jamroot.jam quickbuild.sh clean.sh
 )
