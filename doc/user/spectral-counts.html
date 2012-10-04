@@ -127,8 +127,8 @@
         <li>
           <code>&lt;input PSMs&gt;</code>&ndash;
           A PSM file of either tab delimited text file produced by a <code>crux</code> post-search
-          command, ( i.e. <code>percolator.target.txt</code> or <code>qranker.target.txt</code>),
-          a pepXML (extension .xml), or a mzIdentML (extension .mzid) file.</li>
+          command, ( i.e. <code>percolator.target.txt</code>, <code>qranker.target.txt</code>, 
+          <code>barista.target.psms.txt</code>), a pepXML (extension .xml), or a mzIdentML (extension .mzid) file.</li>
 
       </ul>
       
@@ -162,9 +162,10 @@
           The database of protein may be provided in the mzIdentML (.mzid) file.
         </li>
         <li>
-          <code>--measure &lt;NSAF|dNSAF|SIN|EMPAI&gt;</code> &ndash;
-          Type of analysis to make on match results: (NSAF | dNSAF | SIN |
-          EMPAI). Default = NSAF. 
+          <code>--measure &lt;RAW|NSAF|dNSAF|SIN|EMPAI&gt;</code> &ndash;
+          Type of analysis to make on match results: (RAW | NSAF | dNSAF | SIN |
+          EMPAI). With exception of the RAW metric, the database of sequences need
+          to be provided using <code>--protein-database</code>.  Default = NSAF. 
         </li>
         
         <li>
@@ -273,7 +274,10 @@
       </ul>
       <hr>
       
-      <p><a href="crux.html">Crux home</a></p>
+      <p>
+        <a href="spectral-counts-tutorial.html">spectral-counts tutorial</a><br>
+        <a href="crux.html">Crux home</a>
+      </p>
       
     </blockquote>
   </body>
