@@ -1109,6 +1109,8 @@ Match* Match::parseTabDelimited(
   Database* decoy_database ///< database with decoy peptides
   ) {
 
+  string decoy_prefix = get_string_parameter_pointer("decoy-prefix");
+
   Match* match = new Match();
 
   Spectrum* spectrum = NULL;
@@ -1196,6 +1198,12 @@ Match* Match::parseTabDelimited(
   //We could check if unshuffled sequence is "", since that field is not
   //set for not null peptides.
   match -> null_peptide_ = !result_file.empty(UNSHUFFLED_SEQUENCE_COL);
+
+  if (!result_file.empty(PROTEIN_ID_COL) && 
+    result_file.getString(PROTEIN_ID_COL).find(decoy_prefix) != string::npos) {
+    match -> null_peptide_ = true;
+  }
+
 
   //assign fields
   match -> peptide_sequence_ = NULL;

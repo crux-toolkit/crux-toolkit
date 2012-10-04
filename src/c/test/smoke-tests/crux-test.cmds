@@ -167,7 +167,7 @@
 
 # Run barista tab-delimited file 
 1 = barista-txt= good_results/barista-txt.target.txt = ls small-yeast.fasta yeast-index/small-yeast-random.fasta > fasta.list; crux barista --parameter-file params/set_rand_seed_only --feature-file T fasta.list demo.ms2 crux-output/sequest.target.txt; cat crux-output/barista.target.psms.txt
-
+ 
 # Test the feature file
 1 = barista-feature-file = good_results/barista.features.txt = cat crux-output/barista.features.txt = 
 
@@ -257,6 +257,7 @@
 1 = hardklor-default = good_results/hardklor.mono.txt = crux hardklor hardklor.test.ms1; cat crux-output/hardklor.mono.txt
 #bullseye
 1 = bullseye-default = good_results/bullseye.pid.ms2 = crux bullseye --parameter-file params/default-bullseye hardklor.test.ms1 bullseye.test.ms2; cat crux-output/bullseye.pid.ms2
+
 
 
 # MORE TESTS TODO

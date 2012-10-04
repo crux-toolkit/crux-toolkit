@@ -616,7 +616,10 @@ void SpectralCounts::filterMatchesNone() {
   MatchIterator match_iterator(match_collection_);
 
   while(match_iterator.hasNext()) {
-    matches_.insert(match_iterator.next());
+    Match* current_match = match_iterator.next();
+    if (!current_match->isDecoy()) {
+      matches_.insert(current_match);
+    }
   }
 
 }
