@@ -44,7 +44,7 @@ void MatchCollectionParser::loadDatabase(
     } else {
       database = new Database(fasta_file, false);// not memmapped
       database->transformTextToMemmap(".", true);// is temp
-      decoy_database = NULL;
+      decoy_database = new Database();
     }
     database->parse();
   }
@@ -88,8 +88,10 @@ Protein* MatchCollectionParser::getProtein(
   protein->setId(protein_id.c_str());
   string decoy_prefix = get_string_parameter_pointer("decoy-prefix");
   if (protein_id.find(decoy_prefix) != string::npos) {
+    carp(CARP_DEBUG, "adding to decoy database");
     is_decoy = true;
     decoy_database->addProtein(protein);
+    
   } else {
     is_decoy = false;
     database->addProtein(protein);
