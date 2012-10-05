@@ -14,8 +14,15 @@ include (InstallRequiredSystemLibraries)
 
 set (CPACK_GENERATOR ZIP)
 set (CPACK_SOURCE_GENERATOR TGZ)
-set (CPACK_PACKAGE_VERSION_MAJOR 1)
-set (CPACK_PACKAGE_VERSION_MINOR 8)
+set (CPACK_PACKAGE_VERSION_MAJOR "1")
+set (CPACK_PACKAGE_VERSION_MINOR "39")
+set (CRUX_VERSION ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR})
+
+configure_file (
+ "src/c/CruxConfig.h.in"
+ "src/c/CruxConfig.h"
+ )
+
 set (
  CPACK_SOURCE_IGNORE_FILES 
    /_CPack_Packages/;

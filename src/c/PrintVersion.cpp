@@ -3,7 +3,7 @@
  * \brief Object for printing the crux version number.
  *****************************************************************************/
 #include "PrintVersion.h"
-#include "version.h"
+#include "CruxConfig.h"
 #include "pwiz/Version.hpp"
 
 using namespace std;
@@ -28,7 +28,7 @@ int PrintVersion::main(int argc, char** argv) {
   (void)argc;
   (void)argv;
 
-  printf("Crux version %s\n", VERSION);
+  printf("Crux version %s\n", CRUX_VERSION);
   
   string proteowizard_version = pwiz::Version::str();
   printf("Proteowizard version %s\n", proteowizard_version.c_str());
