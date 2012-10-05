@@ -45,6 +45,32 @@ Figure 1D of the above paper.</p>
   The name of the ms2 file in which the processed spectra will be printed.
 </ul>
 
+<b>Options:</b>
+
+<ul>
+<li>
+<code>--spectrum-parser &lt;pwiz|mstoolkit|crux&gt;</code> &ndash;
+Parser to use for reading in MS/MS spectra.  Default = crux.</li>
+</ul>
+
+<LI>
+<code>--verbosity &lt;0-100&gt;</code> &ndash; Specify the verbosity of the
+current processes. Each level prints the following messages, including
+all those at lower verbosity levels: 0-fatal errors, 10-non-fatal
+errors, 20-warnings, 30-information on the progress of execution,
+40-more progress information, 50-debug info, 60-detailed debug info.
+Default = 30.</li>
+
+<LI><code>--parameter-file &lt;filename&gt;</code> &ndash; 
+A file containing command-line or additional parameters.  See
+the <a href="parameter-file.html">parameter documentation</a> page
+for details.  Default = no parameter file.</li>
+
+<li>
+<code>--overwrite &lt;T|F&gt;</code> &ndash;
+Replace existing files if true (T) or fail when trying to overwrite a
+file if false (F). Default =  F.</li>
+
 <hr></hr>
 
 <p>

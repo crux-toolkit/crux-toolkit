@@ -46,6 +46,7 @@ int SearchForXLinks::main(int argc, char** argv) {
     "spectrum-min-mass",
     "spectrum-max-mass",
     "spectrum-charge",
+    "spectrum-parser",
     "top-match",
     "xlink-include-linears",
     "xlink-include-deadends",
