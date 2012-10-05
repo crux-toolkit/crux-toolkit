@@ -141,6 +141,9 @@ class Spectrum{
    */
   Spectrum(const Spectrum& old_spec);
 
+  void copyFrom(Spectrum* src);
+
+
   /**
    * Default destructor.
    */

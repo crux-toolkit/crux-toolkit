@@ -255,6 +255,39 @@ void Spectrum::printSqt(
   */
 }
 
+void Spectrum::copyFrom(Spectrum *src) {
+
+ first_scan_ = src->first_scan_;
+ last_scan_ = src->last_scan_;
+ precursor_mz_ = src->precursor_mz_;
+ zstates_ = src->zstates_;
+ min_peak_mz_ = src->min_peak_mz_;
+ max_peak_mz_ = src->max_peak_mz_;
+ total_energy_ = src->total_energy_;
+ filename_ = src->filename_;
+ i_lines_v_  = src->i_lines_v_;
+ d_lines_v_ = src-> d_lines_v_;
+ has_peaks_ = src-> has_peaks_;
+ sorted_by_mz_ = src->sorted_by_mz_;
+ sorted_by_intensity_ = src->sorted_by_intensity_;
+ has_mz_peak_array_ = src->has_mz_peak_array_;
+ // copy each peak
+ for(int peak_idx=0; peak_idx < (int)src->peaks_.size(); ++peak_idx){
+   this->addPeak(src->peaks_[peak_idx]->getIntensity(),
+                  src->peaks_[peak_idx]->getLocation());
+  }
+
+  /*  Should we do this??
+  if( old_spectrum.mz_peak_array ){
+    populateMzPeakArray();
+  }
+  */
+
+}
+
+
+
+
 /**
  * Parses a spectrum from an .mgf file
  * \returns A newly allocated spectrum or NULL on error or EOF.
@@ -936,9 +969,7 @@ bool Spectrum::parsePwizSpecInfo(const pzd::SpectrumPtr& pwiz_spectrum){
   // assign new values
   first_scan_ = pzd::id::valueAs<int>(pwiz_spectrum->id, "scan");
   last_scan_ = first_scan_;
-  total_energy_ = 
-   pwiz_spectrum->cvParam(pzd::MS_total_ion_current).valueAs<double>();
-  
+
   // get peaks
   int num_peaks = pwiz_spectrum->defaultArrayLength;
   vector<double>& mzs = pwiz_spectrum->getMZArray()->data;

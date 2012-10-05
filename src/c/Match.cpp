@@ -1164,6 +1164,11 @@ Match* Match::parseTabDelimited(
     match->match_scores_[QRANKER_QVALUE] = result_file.getFloat(QRANKER_QVALUE_COL);
   }
 
+  if (!result_file.empty(BARISTA_SCORE_COL)) {
+    match->match_scores_[BARISTA_SCORE] = result_file.getFloat(BARISTA_SCORE_COL);
+    match->match_scores_[BARISTA_QVALUE] = result_file.getFloat(BARISTA_QVALUE_COL);
+  }
+
   // get experiment size
   match->ln_experiment_size_ = log((FLOAT_T) result_file.getInteger(MATCHES_SPECTRUM_COL));
   match->num_target_matches_ = result_file.getInteger(MATCHES_SPECTRUM_COL);

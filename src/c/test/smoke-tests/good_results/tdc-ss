@@ -1,13 +1,13 @@
 INFO: CPU: arginine.gs.washington.edu
-INFO: Thu Sep 27 19:27:37 PDT 2012
+INFO: Tue Oct  2 17:20:08 PDT 2012
 COMMAND LINE: crux sequest-search --output-dir ss --fileroot tdc --parameter-file params/tdc-ss demo.ms2 small-yeast.fasta
 INFO: Preparing protein fasta file small-yeast.fasta
 INFO: Reading in ms2 file demo.ms2
 INFO: Created 1 peptide mods, keeping 1 with 255 or fewer aa mods
 INFO: Searching spectrum number 96 (2+), search number 100
-INFO: Elapsed time: 6.9 s
+INFO: Elapsed time: 6.84 s
 INFO: Finished crux sequest-search
-INFO: Elapsed time: 6.9 s
+INFO: Elapsed time: 6.84 s
 INFO: Finished crux sequest-search.
 INFO: Return Code:0
 # Which isotopes to use in calculating fragment ion mass.
@@ -97,7 +97,8 @@ precursor-window-type=mass
 # crux-create-index, and crux-generate-peptides.
 precursor-window=3.000000
 
-# What type of threshold to use when parsing matches none|qvalue|custom
+# What type of threshold to use when parsing matches none|qvalue|custom.
+# Default=qvalue.
 # used for crux spectral-counts
 threshold-type=qvalue
 
@@ -602,7 +603,7 @@ precision=8
 # will create as many decoy files as num-decoys-per-target.
 decoy-location=target-file
 
-# The threshold to use for filtering matches.  If noused.  Default=0.01.
+# The threshold to use for filtering matches. Default=0.01.
 # Available for spectral-counts.  All PSMs with higher (or lower) than
 # this will be ignored.
 threshold=0.010000
@@ -772,7 +773,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Thu Sep 27 19:27:38 2012
+H	StartTime	Tue Oct  2 17:20:08 2012
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	DBSeqLength	?

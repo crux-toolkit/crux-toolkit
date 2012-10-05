@@ -1500,7 +1500,7 @@ void Barista :: write_results_psm_tab(ofstream &os)
 {
   int ps= psmtrainset[0].psmind; 
   os << "scan" << "\t" << "charge" << "\t";
-  os << "q-value" << "\t" << "barista score" << "\t";
+  os << "barista q-value" << "\t" << "barista score" << "\t";
   os << "barista PEP\t";
   os<<"spectrum precursor m/z"<<"\t";
   os<<"spectrum neutral mass"<<"\t"; 
