@@ -56,6 +56,7 @@ int SequestSearch::main(int argc,   ///< number of cmd line tokens
     "verbosity",
     "parameter-file",
     "overwrite",
+    "spectrum-parser",
     "spectrum-min-mass",
     "spectrum-max-mass",
     "spectrum-charge",
