@@ -7,6 +7,8 @@ add_subdirectory(src/external/MSToolkit)
 add_subdirectory(src/external/)
 add_subdirectory(src/c)
 
+install (FILES license.txt DESTINATION .)
+
 # build a CPack driven installer package
 include (InstallRequiredSystemLibraries)
 
