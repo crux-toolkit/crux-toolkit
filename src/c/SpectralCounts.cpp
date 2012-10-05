@@ -63,6 +63,7 @@ int SpectralCounts::main(int argc, char** argv) {
     "threshold",
     "threshold-type",
     "input-ms2",
+    "spectrum-parser",
     "fileroot",
     "output-dir",
     "overwrite",
