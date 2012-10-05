@@ -7,9 +7,11 @@
 #include "PWIZSpectrumCollection.h" 
 #include "crux-utils.h"
 #include "parameter.h"
-#include "pwiz/data/msdata/MSDataFile.hpp"
+#include <iostream>
 #include "pwiz/data/msdata/SpectrumInfo.hpp"
 
+
+using namespace std;
 /**
  * Instantiates a new spectrum_collection object from a filename. 
  * Does not parse file. 
@@ -18,7 +20,17 @@ PWIZSpectrumCollection::PWIZSpectrumCollection(
   const char* filename   ///< The spectrum collection filename.
  ) : SpectrumCollection(filename){
 
+  reader_ = new pwiz::msdata::MSDataFile(filename_);
+  if( reader_ == NULL ){
+    carp(CARP_FATAL, "PWIZSpectrumCollection unable to open '%s'.", 
+         filename_.c_str());
+  }
 }
+
+PWIZSpectrumCollection::~PWIZSpectrumCollection() {
+  delete reader_;
+}
+
 
 /**
  * Parses all the spectra from file designated by the filename member
@@ -32,11 +44,6 @@ bool PWIZSpectrumCollection::parse() {
     return false;
   }
 
-  pwiz::msdata::MSDataFile* reader = new pwiz::msdata::MSDataFile(filename_);
-  if( reader == NULL ){
-    carp(CARP_FATAL, "PWIZSpectrumCollection unable to open '%s'.", 
-         filename_.c_str());
-  }
   carp(CARP_DEBUG, "Using proteowizard to parse spectra.");
 
   // todo see getFilters() below
@@ -59,15 +66,16 @@ bool PWIZSpectrumCollection::parse() {
   }
 
   // get info for translating identifiers into scan numbers
-  pwiz::msdata::CVID native_id_format = pwiz::msdata::id::getDefaultNativeIDFormat(*reader);
+  pwiz::msdata::CVID native_id_format = 
+    pwiz::msdata::id::getDefaultNativeIDFormat(*reader_);
   native_id_format = native_id_format;
 
   // look at all spectra in file
-  pwiz::msdata::SpectrumListPtr all_spectra = reader->run.spectrumListPtr;
+  pwiz::msdata::SpectrumListPtr all_spectra = reader_->run.spectrumListPtr;
   bool get_peaks = true;
   
   int num_spec = all_spectra->size();
-  carp(CARP_INFO, "PWIZ:Number of spectra:%i",num_spec);
+  carp(CARP_DEBUG, "PWIZ:Number of spectra:%i",num_spec);
   for(int spec_idx = 0; spec_idx < num_spec; spec_idx++){
     carp(CARP_DETAILED_DEBUG, "Parsing spectrum index %d.", spec_idx);
     pwiz::msdata::SpectrumPtr spectrum = all_spectra->spectrum(spec_idx, 
@@ -80,7 +88,7 @@ bool PWIZSpectrumCollection::parse() {
 
     // check that scan number is in range
     int scan_number = pwiz::msdata::id::valueAs<int>(spectrum->id, "scan");
-    carp(CARP_INFO,"found scan:%i",scan_number);
+    carp(CARP_DEBUG, "found scan:%i %i-%i", scan_number, first_scan, last_scan);
     if( scan_number < first_scan ){
       continue;
     } else if( scan_number > last_scan ){
@@ -94,7 +102,7 @@ bool PWIZSpectrumCollection::parse() {
     //?delete spectrum?;
   }
 
-  delete reader;
+  is_parsed_ = true;
 
   return true;
 }
@@ -110,29 +118,8 @@ bool PWIZSpectrumCollection::getSpectrum(
   Spectrum* spectrum   ///< Put the spectrum info here
   )
 {
-  (void)first_scan;
-  (void)spectrum;
-  carp(CARP_DEBUG, "Using proteowizard to parse spectrum");
-  /*
-  MSToolkit::MSReader* mst_reader = new MSToolkit::MSReader();
-  MSToolkit::Spectrum* mst_spectrum = new MSToolkit::Spectrum();
-  bool parsed = false;
-
-  mst_reader->readFile(filename_.c_str(), *mst_spectrum, first_scan);
-
-  if(mst_spectrum->getScanNumber() != 0) {
-    spectrum->parseMstoolkitSpectrum(mst_spectrum,
-                                     filename_.c_str());
-    parsed = true;
-  } else {
-    carp(CARP_ERROR, "Spectrum %d does not exist in file", first_scan);
-    parsed = false;
-  }
-  delete mst_spectrum;
-  delete mst_reader;
-  return parsed;
-  */
-  return false;
+  parse();
+  return SpectrumCollection::getSpectrum(first_scan, spectrum);
 }
 
 /**
@@ -144,28 +131,9 @@ Spectrum* PWIZSpectrumCollection::getSpectrum(
   int first_scan      ///< The first scan of the spectrum to retrieve -in
   )
 {
-  (void)first_scan;
-  carp(CARP_DEBUG, "Using proteowizard to parse spectrum");
-  /*
-  MSToolkit::MSReader* mst_reader = new MSToolkit::MSReader();
-  MSToolkit::Spectrum* mst_spectrum = new MSToolkit::Spectrum();
-  Spectrum* return_spec = NULL;  
 
-  mst_reader->readFile(filename_.c_str(), *mst_spectrum, first_scan);
-
-  if(mst_spectrum->getScanNumber() != 0) {
-    return_spec = new Spectrum();
-    return_spec->parseMstoolkitSpectrum(mst_spectrum,
-                                        filename_.c_str()); 
-  } else {
-    carp(CARP_ERROR, "Spectrum %d does not exist in file", first_scan);
-    return_spec = NULL;
-  }
-  delete mst_spectrum;
-  delete mst_reader;
-  return return_spec;
-  */
-  return NULL;
+  parse();
+  return SpectrumCollection::getSpectrum(first_scan);
 }
 
 /*

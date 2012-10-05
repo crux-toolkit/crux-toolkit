@@ -71,6 +71,7 @@ int SpectralCounts::main(int argc, char** argv) {
     "measure",
     "custom-threshold-name",
     "custom-threshold-min",
+    "mzid-use-pass-threshold",
     "protein-database"
   };
   const char* argument_list[] = {
@@ -783,6 +784,8 @@ SCORER_TYPE_T SpectralCounts::get_qval_type(
     scored_type = QRANKER_QVALUE;
   } else if(match_collection->getScoredType(DECOY_XCORR_QVALUE)){
     scored_type = DECOY_XCORR_QVALUE;
+  } else if(match_collection->getScoredType(BARISTA_QVALUE)) {
+    scored_type = BARISTA_QVALUE;
   }
 
   return scored_type;

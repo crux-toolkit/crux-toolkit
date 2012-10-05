@@ -251,7 +251,11 @@
 1 = spectral-counts-tsv-nodb = good_results/spectral-counts.raw.nodb.txt = crux spectral-counts --parameter-file params/raw ./crux-output/q-ranker.target.psms.txt ; cat crux-output/spectral-counts.target.txt
 
 #spectral-counts mzid
-1 = spectral-counts-mzid = good_results/spectral-counts.mzid.txt = crux spectral-counts --threshold-type none --parameter-file params/raw Sequest_example_ver1.1.mzid ; cat crux-output/spectral-counts.target.txt
+1 = spectral-counts-mzid = good_results/spectral-counts.mzid.txt = crux spectral-counts --threshold-type none --measure raw Sequest_example_ver1.1.mzid ; cat crux-output/spectral-counts.target.txt
+
+#spectral-counts barista
+1 = spectral-counts-barista = good_results/spectral-counts.barista.txt = crux barista --parameter-file params/set_rand_seed_only small-yeast.fasta demo.ms2 ./crux-output/sequest.target.txt; crux spectral-counts --protein-database yeast-index --parameter-file params/nsaf ./crux-output/barista.target.psms.txt; cat crux-output/spectral-counts.target.txt
+
 
 #hardklor
 1 = hardklor-default = good_results/hardklor.mono.txt = crux hardklor hardklor.test.ms1; cat crux-output/hardklor.mono.txt

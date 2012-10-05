@@ -2415,6 +2415,12 @@ bool MatchCollection::extendTabDelimited(
     scored_type_[QRANKER_QVALUE] = 
       !result_file.empty(QRANKER_QVALUE_COL);
 
+    scored_type_[BARISTA_SCORE] =
+      !result_file.empty(BARISTA_SCORE_COL);
+
+    scored_type_[BARISTA_QVALUE] =
+      !result_file.empty(BARISTA_QVALUE_COL);
+
     post_scored_type_set_ = true;
 
     // parse match object

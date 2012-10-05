@@ -916,13 +916,13 @@ void initialize_parameters(void){
 
   set_threshold_type_parameter("threshold-type", THRESHOLD_QVALUE,
     "What type of threshold to use when parsing matches "
-    "none|qvalue|custom",
+    "none|qvalue|custom. Default=qvalue.",
     "used for crux spectral-counts",
     "true");
 
   set_double_parameter("threshold", 0.01, -BILLION, BILLION, 
-       "The threshold to use for filtering matches.  If no" 
-       "used.  Default=0.01.",
+       "The threshold to use for filtering matches. " 
+       "Default=0.01.",
        "Available for spectral-counts.  All PSMs with higher (or lower) than "
        "this will be ignored.",
        "true");
