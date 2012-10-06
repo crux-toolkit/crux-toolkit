@@ -38,9 +38,9 @@ $HOME</code>
 
 <ol>
 <li><b>Download the files</b>  <span class=prog>Crux</span> is freely
-available for download under an academic use license.  Once you have
-submitted a license request, you will be sent a web address and login
-information.  On the download page you will be offered two types of files.
+available for download under an 
+<a href=""http://www.apache.org/licenses/LICENSE-2.0>Apache 2.0 license</a>.
+On the download page you will be offered two types of files.
 One is a set of compiled binaries (programs that are ready to run) and 
 documentation zipped together and the other is a tarball containing
 the source code and documentation.  If you are working on a Linux i686
@@ -60,15 +60,15 @@ $ md5sum <i>[downloaded file]</i></code>
 and compare the output to the "MD5 checksum" link next to the file you
 downloaded.  
 
-<li><b>Unpack the files</b>
-<ol>
-<li><b>Option 1: pre-compiled binaries.</b>  The file you downloaded
+<li><b>Unpack and install the files</b>
+<p />
+<b>Option 1: pre-compiled binaries.</b>  The file you downloaded
 should be named something like 
-<span class=file>crux_1.0x-i686-GNU-Linux.zip</span>.  Move it
+<span class=file>crux-1.xx-i686-GNU-Linux.zip</span>.  Move it
 to a convenient location and unpack the file with this command.
 
 <div class=code><code>
-$ unzip crux_1.0x-i686-GNU-Linux.zip</code>
+$ unzip crux-1.xx-i686-GNU-Linux.zip</code>
 </div>
 You should now have a new directory, <span class=file>bdist</span>,
 with two subdirectories <span class=file>bin</span>, and <span
@@ -79,56 +79,48 @@ more convenient for you, but otherwise, that completes the
 installation!  Skip ahead to 
 <a href="#path">Changing $PATH</a> for notes on how to run the executables.
 
-<li><b>Option 2: source files.</b> 
+<p />
+<b>Option 2: build from source.</b> 
 
+Building <span class=prog>crux</span> from source requires that you have previously
+installed a C++ compiler,
+<a href="http://www.cmake.org"><span class=prog>cmake</span></a>
+and
+<a href="http://subversion.apache.org"><span class=prog>svn</span></a>.
+Building <span class=prog>crux</span> also requires the
+<a href=""><span class=prog>Proteowizard</span></a>
+libraries. 
+These will automatically be copied from the <span class=prog>Proteowizard</span>
+SVN repository and staticlly linked into <span class=prog>crux</span>.
+<p />
 The file you downloaded should be named something like <span
-class=file>crux_1.0x.tar.gz</span>, where <span class=file>1.0x</span>
-is replaced with the most current release version, such as 1.01. Move it to a
-convenient location and unpack the file with this command.</li>
+class=file>crux-1.xx.Source.tar.gz</span>, where <span class=file>1.xx</span>
+is replaced with the most current release version, such as 1.37.
+<ol>
+<li><b>Unpack</b> Move the downloaded file to a
+convenient location and unpack it with this command.
 
 <div class=code><code>
-$ tar -zxvf crux_1.0x.tar.gz
+$ tar -zxvf crux-1.xx.Source.tar.gz
 </div>
-You should now have a new directory, <span class=file>bdist</span>,
-with two subdirectories <span class=file>bin</span>, and <span
-class=file>doc</span>.  The <span class=prog>crux</span> programs are
-in the <span class=file>bin</span> directory. You may want to move 
-these files somewhere
-more convenient for you, but otherwise, that completes the
-installation!  Skip ahead to <a
-href="#path">Changing $PATH</a> for notes on how to run the executables.
-
-A new directory named <span class=file>crux_1.0x</span> will be
+A new directory named <span class=file>crux-1.xx.Source</span> will be
 created and a long list of files will stream by as they are being put
 into the new directory.
-</ol>
+</li>
 
-<li><b>Configure</b>  Move into the <span class=file>crux_1.0x</span>
-directory from step 1 and confirm that there is a file called <span
-class=file>configure</span>.  This is a script you will run with one
-additional pieces of information, 
-the location where you wish to install the <span class=prog>crux</span>
-programs, lets call it <code>install-dir</code>.  If you want <span
-class=prog>crux</span> to go in <span class=file>$HOME/bin</span>,
-then <code>install-dir</code> would be <span class=file>$HOME</span>.
-Configure will automatically put the programs in a directory called
-<span class=file>bin</span>.  Run one of these two commands.
-
+<li><b>Configure</b>  Move into the <span class=file>crux-1.xx.Source</span>
+directory from step 1.
+Run the command
 <div class=code><code>
-$ ./configure --prefix install-dir
-</code></div>
-Crux defaults to single precision floating point arithmetic.
-It can be configured to use double precision floating point 
-by specifying the <code>--enable-doubles</code> configure option.
-<div class=code><code>
-$ ./configure --prefix install-dir --enable-doubles <br>
-</code></div>
-
-<div class=note><em>NOTE: <code>configure</code> will not accept
-relative paths, such as <span class=file>../../install-dir</span>.
-Use fully qualified paths beginning with <span
-class=file>/</span>.</em> 
+cmake -DCMAKE_INSTALL_PREFIX:PATH=&lt;install directory&gt; .
+</code>
 </div>
+where <span class=file>&lt;install directory&gt;</span> is
+the location where you wish to install the <span class=prog>crux</span> programs. 
+If you want <span class=prog>crux</span> to go in <span class=file>$HOME/bin</span>,
+then <span class=file>&lt;install directory&gt;</span> would be <span class=file>$HOME</span>.
+The installation process will automatically put the programs in a directory called
+<span class=file>bin</span>.
 
 <li><b>Make</b> To complete the process, run these two commands.</li>
 <div class=code><code>
@@ -138,11 +130,12 @@ $ make install
 </div>
 
 </ol>
+</ol>
 
-You should now see a number of executable files in <span
-class=file>install-dir/bin</span> beginning with <span
-class=prog>crux-</span>.  You will also find documentation and example
-files in <span class=file>install-dir/doc</span>.  
+You should now see several executable files in <span
+class=file>&lt;install directory&gt;/bin</span> beginning with <span
+class=prog>crux</span>.  You will also find documentation and example
+files in <span class=file>&lt;install directory&gt;/doc</span>.  
 
 <a name="path">
 <h2>Changing $PATH</h2>
@@ -151,7 +144,7 @@ files in <span class=file>install-dir/doc</span>.
 path.  For example,</p>
 
 <div class=code><code>
-$ <em>install-dir</em>/bin/crux search-for-matches</code>
+$ <em>&lt;install directory&gt;</em>/bin/crux search-for-matches</code>
 </div>
 
 <p>In this final step of the installation, we'll set things up so that
@@ -174,16 +167,16 @@ for a program.  If it doesn't find the program there it tries <span
 class=out>/usr/bin</span> and so on down the list.  You can either
 move the crux executable files into one of these directories already
 in your PATH, or you can add <span
-class=code><em>install-dir</em></span> to PATH with this
-command.  (Remember to replace the word <em>install-dir</em> with the
+class=code><em>&lt;install directory&gt;</em></span> to PATH with this
+command.  (Remember to replace the word <em>&lt;install directory&gt;</em> with the
 actual location of your installation)</p> 
 
 <div class=code><code>
-$ export PATH=$PATH:install-dir/bin</code>
+$ export PATH=$PATH:&lt;install directory&gt;/bin</code>
 </div>
 
 <p>Try '<span class=code>echo $PATH</span>' again to see that the
-change was made.  <em>install-dir/bin</em> should be at the end of the
+change was made.  <em>&lt;install directory&gt;/bin</em> should be at the end of the
 list.  Now you can 
 run the <span class=prog>crux</span> programs by just typing their
 names.  Try this.</p>
@@ -195,7 +188,7 @@ $ crux search-for-matches</code>
 <p>The change to <span class=code>$PATH</span> is only temporary.  As
 soon as you close the window, the change will disappear.  In order to
 make the change every time you log on, add the line <span
-class=code>export PATH=$PATH:install-dir</span> to the file <span
+class=code>export PATH=$PATH:&lt;install directory&gt;/bin</span> to the file <span
 class=out>.bashrc</span> located in your home directory.  You will
 have to log on again for the change to take effect.
 
