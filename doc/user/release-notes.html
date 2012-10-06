@@ -22,6 +22,10 @@ MS2<br>
 CMS2<br>
 Also, our MzIdentML parsing code is based upon this library.
 </li>
+<li>
+Crux now uses <code>cmake</code> for the build process rather than
+<code>autoconf</code>/<code>automake</code>.
+</li>
 </ul>
 <h3>Minor changes</h3>
 <ul>
@@ -34,6 +38,9 @@ mzIdentML file support added for <code>crux spectral-counts</code>
 </li>
 <li>
 PepXML file support fixed for <code>crux spectral-counts</code> 
+</li>
+<li>
+Fixed bug in packedNorm() that sometimes generated incorrect values for the posterior error probability.
 </li>
 <li>
 Fixed bug in <code>crux create-index</code> on Windows and Cygin.
