@@ -44,6 +44,7 @@ set (
    /open_source_download/;
    /paper/;
    /results/;
+   /test/;
    /windows/;
    /*\\\\.cmake$/;
    /*\\\\.gz$/
