@@ -21,7 +21,7 @@ Crux is now released under an Apache license for all users.
 <li>
 Parsing MS/MS spectra is now supported using <a href="http://proteowizard.sourceforge.net/">Proteowizard</a> (v. 3.0.3950).  
 This allows Crux to
-handle MS/MS spectra mzML (1.0 and 1.1), mzXML, MGF, MS2 and CMS2
+handle MS/MS spectra in mzML (1.0 and 1.1), mzXML, MGF, MS2 and CMS2
 formats.
 Use <code>spectrum-parser=pwiz</code> to enable Proteowizard parsing.</li>
 <li>
@@ -49,10 +49,10 @@ mzIdentML file support has been added for <code>crux spectral-counts</code>.
 PepXML file support has been fixed for <code>crux spectral-counts</code> .
 </li>
 <li>
-Fixed bug in packedNorm() that sometimes generated incorrect values for the posterior error probability.
+A bug was fixed that sometimes generated incorrect values for the posterior error probability.
 </li>
 <li>
-A bug was fixed in <code>crux create-index</code> that caused it to fail on Windows and Cygin.</li>
+A bug was fixed in <code>crux create-index</code> that caused it to fail on Cygwin.</li>
 </ul>
 
 <hr></hr>
