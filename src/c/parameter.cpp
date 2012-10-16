@@ -885,7 +885,7 @@ void initialize_parameters(void){
       "Predict flanking peaks for b and y ions (T,F). Default=F.",
       "Only available for crux-predict-peptide-ion.", "true");
   set_string_parameter("max-ion-charge", "peptide",
-      "Predict ions up to max charge state (1,2,...,6) or up to the charge state "
+      "Predict theoretical ions up to max charge state (1,2,...,6) or up to the charge state "
       "of the peptide (peptide).  If the max-ion-charge is greater than the "
       "charge state of the peptide, then the max is the peptide charge. "
       "Default='peptide'.",

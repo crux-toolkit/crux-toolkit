@@ -1,6 +1,8 @@
 #include "IonConstraint.h"
+#include <string>
 
 
+using namespace std;
 /*************************
  * ION_CONSTRAINT methods
  *************************/
@@ -56,7 +58,21 @@ IonConstraint::IonConstraint(
  
   // set all fields of constraint
   mass_type_ = mass_type;
-  max_charge_ = max_charge;
+
+  string charge_str = get_string_parameter_pointer("max-ion-charge");
+
+  max_charge_ = max(1, max_charge - 1);
+
+  if (charge_str != string("peptide")) {
+    int charge_val;
+    bool success = from_string(charge_val, charge_str);
+    if (success) {
+      max_charge_ = min(charge_val, max_charge_);
+    } else {
+      carp_once(CARP_WARNING, "Charge is not valid:%s", charge_str.c_str());
+    }
+  }
+
   min_charge_ = 0;
   exact_modifications_ = false;
   ion_type_ = ion_type;
@@ -162,15 +178,8 @@ IonConstraint* IonConstraint::newIonConstraintSequestSp(
   )
 {
   IonConstraint* constraint = NULL;
-  // charge = 1;
-  if(charge == 1){
-    constraint = new IonConstraint(MONO, 1, BY_ION, false);
-  }  
-  else{
-    --charge;
-    constraint = new IonConstraint(MONO, charge, BY_ION, false);
-  }
-  
+  constraint = new IonConstraint(MONO, charge, BY_ION, false);
+
   // set                                                     
   constraint->use_neutral_losses_ = true;
   
@@ -194,15 +203,8 @@ IonConstraint* IonConstraint::newIonConstraintSequestXcorr(
   )
 {
   IonConstraint* constraint = NULL;
-  // charge = 1;
-  if(charge == 1){
-    constraint = new IonConstraint(MONO, 1, BYA_ION, false);
-  }  
-  else{
-    --charge;
-    constraint = new IonConstraint(MONO, charge, BYA_ION, false);
-  }
-  
+  constraint = new IonConstraint(MONO, charge, BYA_ION, false);
+
   // set                                                     
   constraint->use_neutral_losses_ = true;
   

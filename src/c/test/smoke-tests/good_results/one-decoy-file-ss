@@ -2,7 +2,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Tue Oct  2 17:19:57 2012
+H	StartTime	Tue Oct 16 14:36:42 2012
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	Comment	Database shuffled; these are decoy matches
@@ -2678,16 +2678,16 @@ scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	s
 159	2	745.7500	1489.4827	1489.7319	0.47147983	56.186016	2	0.39247712	3	4	24	8	NVGVFTLQEELLK	trypsin-full-digest	YGL135W(27)	RN	NFLETVELQVGLK	8
 159	2	745.7500	1489.4827	1486.6195	0.99464184	10.493883	7	0.0039789644	4	2	26	8	SPQGNTLNNEPGMK	trypsin-full-digest	YNL166C(201)	KL	SPMPQNNTLGGENK	8
 159	2	745.7500	1489.4827	1488.7063	1.0068936	17.715406	4	-0.0051191286	5	3	24	8	FHENISLPVASFK	trypsin-full-digest	YDR037W(97)	KY	FHVSISNPEFLAK	8
-INFO: CPU: arginine.gs.washington.edu
-INFO: Tue Oct  2 17:19:57 PDT 2012
+INFO: CPU: n017.grid.gs.washington.edu
+INFO: Tue Oct 16 14:36:42 PDT 2012
 COMMAND LINE: crux sequest-search --output-dir ss --fileroot one-decoy-file --parameter-file params/one-decoy-file-ss demo.ms2 small-yeast.fasta
 INFO: Preparing protein fasta file small-yeast.fasta
 INFO: Reading in ms2 file demo.ms2
 INFO: Created 1 peptide mods, keeping 1 with 255 or fewer aa mods
 INFO: Searching spectrum number 96 (2+), search number 100
-INFO: Elapsed time: 10.3 s
+INFO: Elapsed time: 5.83 s
 INFO: Finished crux sequest-search
-INFO: Elapsed time: 10.3 s
+INFO: Elapsed time: 5.83 s
 INFO: Finished crux sequest-search.
 INFO: Return Code:0
 # Which isotopes to use in calculating fragment ion mass.
@@ -3238,10 +3238,10 @@ unique-peptides=true
 # Available for q-ranker and barista.
 skip-cleanup=false
 
-# Predict ions up to max charge state (1,2,...,6) or up to the charge
-# state of the peptide (peptide).  If the max-ion-charge is greater than
-# the charge state of the peptide, then the max is the peptide charge.
-# Default='peptide'.
+# Predict theoretical ions up to max charge state (1,2,...,6) or up to
+# the charge state of the peptide (peptide).  If the max-ion-charge is
+# greater than the charge state of the peptide, then the max is the
+# peptide charge. Default='peptide'.
 # Available for predict-peptide-ions and search-for-xlinks. Set to
 # 'peptide' for search.
 max-ion-charge=peptide
@@ -3453,7 +3453,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Tue Oct  2 17:19:57 2012
+H	StartTime	Tue Oct 16 14:36:42 2012
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	DBSeqLength	?
