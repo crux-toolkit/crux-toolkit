@@ -282,6 +282,7 @@ int MatchSearch::main(int argc, char** argv){
     "spectrum-min-mass",
     "spectrum-max-mass",
     "spectrum-charge",
+    "max-ion-charge",
     "scan-number",
     "mz-bin-width",
     "mz-bin-offset",

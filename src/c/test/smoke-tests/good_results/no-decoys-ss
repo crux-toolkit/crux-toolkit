@@ -1,13 +1,13 @@
-INFO: CPU: arginine.gs.washington.edu
-INFO: Tue Oct  2 17:20:15 PDT 2012
+INFO: CPU: n017.grid.gs.washington.edu
+INFO: Tue Oct 16 14:36:53 PDT 2012
 COMMAND LINE: crux sequest-search --output-dir ss --fileroot no-decoys --parameter-file params/no-decoys-ss demo.ms2 small-yeast-index
 INFO: Preparing protein index small-yeast-index
 INFO: Reading in ms2 file demo.ms2
 INFO: Created 1 peptide mods, keeping 1 with 255 or fewer aa mods
 INFO: Searching spectrum number 96 (2+), search number 100
-INFO: Elapsed time: 2.62 s
+INFO: Elapsed time: 1.78 s
 INFO: Finished crux sequest-search
-INFO: Elapsed time: 2.62 s
+INFO: Elapsed time: 1.78 s
 INFO: Finished crux sequest-search.
 INFO: Return Code:0
 # Which isotopes to use in calculating fragment ion mass.
@@ -558,10 +558,10 @@ unique-peptides=true
 # Available for q-ranker and barista.
 skip-cleanup=false
 
-# Predict ions up to max charge state (1,2,...,6) or up to the charge
-# state of the peptide (peptide).  If the max-ion-charge is greater than
-# the charge state of the peptide, then the max is the peptide charge.
-# Default='peptide'.
+# Predict theoretical ions up to max charge state (1,2,...,6) or up to
+# the charge state of the peptide (peptide).  If the max-ion-charge is
+# greater than the charge state of the peptide, then the max is the
+# peptide charge. Default='peptide'.
 # Available for predict-peptide-ions and search-for-xlinks. Set to
 # 'peptide' for search.
 max-ion-charge=peptide
@@ -773,7 +773,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Tue Oct  2 17:20:16 2012
+H	StartTime	Tue Oct 16 14:36:53 2012
 H	EndTime                               
 H	Database	small-yeast-index/small-yeast-binary-fasta
 H	DBSeqLength	?
