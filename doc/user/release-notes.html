@@ -7,21 +7,23 @@
 <blockquote> 
 <h1>Release notes for Crux</h1>
 
-<h2>Version X.XX</h2> Month day, 2012
+<h2>Version 1.39</h2> October 6, 2012
 
 <h3>Major enchancements</h3>
 
 <ul>
+
+<li>
+Crux is now released under an Apache license for all users.
+</li>
+
+
 <li>
 Parsing MS/MS spectra is now supported using <a href="http://proteowizard.sourceforge.net/">Proteowizard</a> (v. 3.0.3950).  
-Use <code>spectrum-parser=pwiz</code> to enable.  This allows Crux to handle MS/MS spectra in the following formats:<br>
-mzML (1.0 and 1.1)<BR>
-mzXML<br>
-MGF<br>
-MS2<br>
-CMS2<br>
-Also, our MzIdentML parsing code is based upon this library.
-</li>
+This allows Crux to
+handle MS/MS spectra in mzML (1.0 and 1.1), mzXML, MGF, MS2 and CMS2
+formats.
+Use <code>spectrum-parser=pwiz</code> to enable Proteowizard parsing.</li>
 <li>
 Crux now uses <code>cmake</code> for the build process rather than
 <code>autoconf</code>/<code>automake</code>.
@@ -31,27 +33,29 @@ Crux now uses <code>cmake</code> for the build process rather than
 <ul>
 
 <li>
-Parameter <code>protein database</code> is now <code>protein-database</code> an option rather than argument for <code>crux spectral-counts</code>
+The Tide database search software is no longer distributed as part of Crux because its license is not compatible with the new Crux license.
+</li>
+
+<li>
+The parameter <code>protein database</code> is now an option rather than a required argument for <code>crux spectral-counts</code>.
 </li>
 <li>
-mzIdentML file support added for <code>crux spectral-counts</code>
+mzIdentML file support has been added for <code>crux spectral-counts</code>.
 </li>
 <li>
-PepXML file support fixed for <code>crux spectral-counts</code> 
+PepXML file support has been fixed for <code>crux spectral-counts</code> .
 </li>
 <li>
 Fixed bug in packedNorm() that sometimes generated incorrect values for the posterior error probability.
 </li>
 <li>
-Fixed bug in <code>crux create-index</code> on Windows and Cygin.
-The bug caused <code>crux create-index</code> to fail with the message:
-<pre>
-WARNING: Cannot rename directory
-FATAL: Failed to create index
-</pre>
+Fixed bug in <code>crux create-index</code> on Windows and Cygwin that caused it to fail on Windows and Cygin.
 </li>
 </ul>
-<h2>Version 1.38</h2> July 20th, 2012
+
+<hr></hr>
+
+<h2>Version 1.38</h2> July 20, 2012
 
 <h3>Major enhancements</h3>
 
