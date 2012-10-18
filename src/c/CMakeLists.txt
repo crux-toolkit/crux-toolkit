@@ -36,6 +36,7 @@ link_directories(./xlink)
 
 set (
   crux_lib_files
+  CruxConfig.h
   Alphabet.cpp
   analyze_psms.cpp
   carp.cpp
