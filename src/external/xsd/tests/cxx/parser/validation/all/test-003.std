@@ -1,6 +1,0 @@
-{
-  a = a
-  b = b
-  :9:7 error: unexpected element 'a'
-}
-

@@ -1,5 +1,0 @@
-{
-  a = a
-  :9:8 error: expected element 'b' instead of 'a'
-}
-
