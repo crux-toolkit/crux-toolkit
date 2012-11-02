@@ -41,6 +41,7 @@ set (
   Alphabet.cpp
   analyze_psms.cpp
   carp.cpp
+  CarpStreamBuf.cpp
   ComputeQValues.cpp
   CreateIndex.cpp
   crux-utils.cpp

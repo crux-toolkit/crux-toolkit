@@ -10,6 +10,8 @@
 #include <sstream>
 #include <iomanip>
 #include <ios>
+#include "CarpStreamBuf.h"
+
 using namespace std;
   /**
    * Turn the given value into a string.  For floating point numbers,
@@ -298,6 +300,11 @@ int PercolatorApplication::main(
     //cerr<<"perc_argv["<<idx<<"]= "<<perc_argv[idx]<<endl;
   }
 
+  /* Re-route stdeer to log file. */
+  CarpStreamBuf buffer;
+  streambuf* old = std::cerr.rdbuf();
+  std::cerr.rdbuf(&buffer);
+
   /* Call percolatorMain */
   Caller* pCaller = new Caller();
   int retVal = -1;
@@ -307,6 +314,9 @@ int PercolatorApplication::main(
   delete pCaller;
   Globals::clean();
   delete []perc_argv;
+
+  /* Recover stderr */
+  std::cerr.rdbuf( old );
 
   return retVal;
 }
@@ -332,8 +342,6 @@ string PercolatorApplication::getDescription() {
 bool PercolatorApplication::needsOutputDirectory() {
   return true;
 }
-
-
 
 /*
  * Local Variables:
