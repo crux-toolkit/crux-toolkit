@@ -600,7 +600,7 @@ void initialize_parameters(void){
       "file is controlled by --output-dir.", "true");
 
   // user options regarding decoys
-  set_string_parameter("decoys", "peptide-shuffle",
+  set_string_parameter("decoys", "protein-shuffle",
       "Include a decoy version of every peptide by shuffling or reversing the "
       "target sequence.  <string>=none|reverse|protein-shuffle|peptide-shuffle."
       " Use 'none' for no decoys.  Default=protein-shuffle.",
@@ -650,9 +650,11 @@ void initialize_parameters(void){
       "true");
   set_int_parameter("psms-per-spectrum-reported", 0, 0, BILLION,
                    "place holder", "this may be replaced by top-match","false");
-  set_string_parameter("seed", "time", "HIDE ME FROM USER",
-      "Given a real-number value, will always produce the same decoy seqs",
-      "false");
+  set_string_parameter("seed", "time",
+      "When given a unsigned integer value seeds the random number generator with that value. "
+      "When given the string \"time\" seeds the random number generator with the system time. ",
+      "Available for all Crux commands.",
+      "true");
   set_double_parameter("precursor-window", 3.0, 0, 100, 
       "Search peptides within +/- 'precursor-window' "
       "of the spectrum mass.  Definition of precursor window depends "
