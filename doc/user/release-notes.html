@@ -7,6 +7,24 @@
 <blockquote> 
 <h1>Release notes for Crux</h1>
 
+<h2>Version 1.XX</h2> 
+<h3>Major enchancements</h3>
+<ul>
+</ul>
+<h3>Minor changes</h3>
+<ul>
+<li>
+The <code>seed</code> parameter is now available to control the seeding of random number generator.
+The default is to seed from the current value of the system clock, however the
+seed can be set to a user specified unsigned integer.
+</li>
+<li>
+Fixed the default value of the <code>decoys</code> parameter.
+The default had been <code>peptide-shuffle</code> though the documentation said the
+default was <code>protein-shuffle</code>.
+The code has been corrected so the default is <code>protein-shuffle</code>.
+</li>
+</ul>
 <h2>Version 1.39</h2> October 6, 2012
 
 <h3>Major enchancements</h3>
