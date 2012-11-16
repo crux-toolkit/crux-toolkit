@@ -120,7 +120,7 @@ for searchtool in search-for-matches; do
       $db $ms2 $searchtool/search.target.txt
   fi
 
-  $CRUX extract-columns $searchtool/barista.target.psms.txt "q-value" > $searchtool/qvalues.barista.txt
+  $CRUX extract-columns $searchtool/barista.target.psms.txt "barista q-value" > $searchtool/qvalues.barista.txt
   echo replot \"$searchtool/qvalues.barista.txt\" using 1:0 title \"barista\" with lines >> $gnuplot
   
 done
