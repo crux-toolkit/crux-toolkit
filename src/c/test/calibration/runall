@@ -18,7 +18,4 @@ set -o pipefail
 set -o errexit 
 set -o xtrace
 
-source /etc/profile.d/modules.sh
-module load modules modules-init modules-gs modules-noble
-
 ./run-calibration-test.sh

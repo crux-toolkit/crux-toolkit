@@ -30,14 +30,21 @@ fi
 
 ms2=../performance-tests/051708-worm-ASMS-10.ms2
 
+# Create a parameter file.
+params=parameters.txt
+echo top-match=10000 > $params
+echo num-decoys-per-target=1 >> $params
+echo output-dir=search >> $params
+echo compute-p-values=T >> $params
+echo precursor-window=0.5 >> $params
+
 # Run the search.
 if [[ -e search/search.target.txt ]]; then
   echo Skipping search-for-matches.
 else  
-  $CRUX search-for-matches \
-    --compute-p-values T \
-    --num-decoys-per-target 1 \
-    --output-dir search \
+  $CRUX search-for-matches --parameter-file $params \
     $ms2 $db
 fi
-./make-qq-plot.py -column-header p-value search/search.target.txt search
+$CRUX extra-columns p-value search/search.target.txt \
+  | awk 'NR > 1' \
+  | ./make-qq-plot.py - search
