@@ -45,6 +45,17 @@ else
   $CRUX search-for-matches --parameter-file $params \
     $ms2 $db
 fi
-$CRUX extra-columns p-value search/search.target.txt \
-  | awk 'NR > 1' \
-  | ./make-qq-plot.py - search
+
+# Extract just the p-value column.
+if [ ! -e pvalues.txt ]; then
+  $CRUX extract-columns search/search.target.txt p-value \
+    | awk 'NR > 1' \
+    > pvalues.txt
+fi
+
+# Make a histogram.
+histogram -bar-height distribution -minvalue 0 -binsize 0.001 1000 pvalues.txt \
+  | plot-histogram -format png - > histogram.png
+
+# Make a qq plot.
+./make-qq-plot.py pvalues.txt search

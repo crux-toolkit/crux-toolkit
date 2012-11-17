@@ -33,7 +33,6 @@ standard input.
 
 # Set default values.
 log_scale = 1
-column_header = ""
 log_values = 0
 file_format = "png"
 font_size = 24
