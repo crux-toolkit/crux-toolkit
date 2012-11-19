@@ -9,6 +9,8 @@
 #include <assert.h>
 #include <cstring>
 #include <math.h>
+#include "carp.h"
+
 using namespace std;
 
 #define NUM_IONS 2

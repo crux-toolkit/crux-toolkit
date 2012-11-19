@@ -455,6 +455,11 @@ void SpecFeaturesGenerator :: get_observed_spectrum(string &spec)
   if(f_ms2.fail())
     f_ms2.clear();
   pos_in_file = spec_to_pos_in_file[spec];
+
+  // not found in MS2 file
+  if (!pos_in_file)
+    carp(CARP_FATAL, "Spectrum \"%s\" not found in MS2 file", spec.c_str());
+
   f_ms2.seekg(pos_in_file,ios::beg);
   pos_in_file = f_ms2.tellg();
     

@@ -77,6 +77,13 @@ void CruxParser ::readMatches(
       //set flanking_aa 
       string flanking_aa = reader.getString(FLANKING_AA_COL); 
       
+      if (flanking_aa.length() != 2)
+      {
+        carp(CARP_WARNING,
+            "Flanking AA value length is expected to be 2, "
+            "but was %d", flanking_aa.length());
+      }
+
       ostringstream oss;
 
       oss << flanking_aa[0] << "." << sequence << "." << flanking_aa[1];
