@@ -24,11 +24,11 @@ ulimit -n 1024
 
 # Create a parameter file.
 params=parameters.txt
-echo num-decoys-per-target=0 >> $params
-echo top-match=1 >> $params
+echo num-decoys-per-target=1 >> $params
+echo top-match=1000000 >> $params
 echo output-dir=search >> $params
 echo compute-p-values=T >> $params
-#echo decoy-p-values=T >> $params  # Write raw p-values to a separate file.
+echo decoy-p-values=T >> $params  # Write raw p-values to a separate file.
 echo decoys=peptide-shuffle >> $params
 
 if [[ -e $db ]]; then
@@ -47,14 +47,26 @@ else
   $CRUX search-for-matches --parameter-file $params $ms2 $db
 fi
 
-# Extract just the p-value column.
-$CRUX extract-columns search/search.target.txt p-value \
-  | awk 'NR > 1' \
-  > pvalues.txt
+for peptide in target decoy; do
 
-# Make a histogram.
-histogram -bar-height distribution -minvalue 0 -binsize 0.01 100 pvalues.txt \
-  | plot-histogram -format png - > histogram.png
+  # Extract just the top-ranked p-values from the p-value column.
+  awk 'NR == 1 || $8 == 1' search/search.$peptide.txt \
+    | $CRUX extract-columns - p-value \
+    | awk 'NR > 1' \
+    > $peptide.pvalues.txt
 
-# Make a qq plot.
-./make-qq-plot.py pvalues.txt qq
+  # Make a histogram.
+  histogram -bar-height distribution -minvalue 0 -binsize 0.01 100 \
+      $peptide.pvalues.txt \
+    | plot-histogram -xlabel "$peptide p-value" -format png - \
+    > $peptide.histogram.png
+
+  # Make a qq plot.
+  ./make-qq-plot.py $peptide.pvalues.txt $peptide.qq
+done
+
+# Make a histogram of uncorrected decoy p-values.
+awk '$1 != "#"' search/search.decoy.p.txt \
+  | histogram -bar-height distribution -minvalue 0 -binsize 0.01 100 - \
+  | plot-histogram -format png - > decoy.png
+
