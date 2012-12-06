@@ -194,11 +194,10 @@ search.decoy.txt files. <code>crux q-ranker</code> accepts only one
 search.decoy.txt file.) Default = separate-decoy-files.
 
 <li>
-<code>compute-sp &lt;T|F&gt;</code> &ndash;
-Have <code>search-for-matches</code> compute the Sp score for all
-candidate peptides, which is recommended if results are to be analyzed
-by <code>percolator</code> or <code>q-ranker</code>.  
-<code>sequst-search</code> always computes Sp.  Default = F.
+<code>--compute-sp &lt;T|F&gt;</code> &ndash; Compute the preliminary
+score Sp for all candidate peptides.  This option is recommended if
+results are to be analyzed by <code>percolator</code>
+or <code>q-ranker</code>.  Default = F.</li>
 
 <li>
 <code>--compute-p-values &lt;T | F&gt;</code> &ndash
