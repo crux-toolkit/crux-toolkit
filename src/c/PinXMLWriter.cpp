@@ -499,23 +499,23 @@ void PinXMLWriter::printFeatures(
     fprintf(//< print 17 features 
       output_file_, 
       "    <features>\n"
-      "      <feature name=\"lnrSP\">%.*f</feature>\n"/*1.lnrSp*/
-      "      <feature name=\"deltLCn\">%.*f</feature>\n"/*2.deltLCN*/
-      "      <feature name=\"deltCn\">%.*f</feature>\n"/*3.deltCN*/
-      "      <feature name=\"Xcorr\">%.*f</feature>\n"/*4.Xcorr*/
-      "      <feature name=\"Sp\">%.*f</feature>\n"/*5.SP*/
-      "      <feature name=\"IonFrac\">%.*f</feature>\n"/*6.IonFrac */
-      "      <feature name=\"Mass\">%.*f</feature>\n"/*7.Mass */
-      "      <feature name=\"PepLen\">%u</feature>\n"/*8.PepLen */
-      "      <feature name=\"Charge1\">%u</feature>\n"/*9.Chrge1 */
-      "      <feature name=\"Charge2\">%u</feature>\n"/*10.charge2*/
-      "      <feature name=\"Charge3\">%u</feature>\n"/*11.charge3*/
-      "      <feature name=\"enzN\">%u</feature>\n"/*12.enzN*/
-      "      <feature name=\"enzC\">%u</feature>\n"/*13.enzC*/
-      "      <feature name=\"enzInt\">%u</feature>\n"/*14.enzInt*/
-      "      <feature name=\"LnNumSP\">%.*f</feature>\n"/*15.LnNumSP*/   
-      "      <feature name=\"dM\">%.*f</feature>\n"/*16.dM*/
-      "      <feature name=\"absdM\">%.*f</feature>\n"/*17.absdM*/
+      "      <feature>%.*f</feature>\n"/*1.lnrSp*/
+      "      <feature>%.*f</feature>\n"/*2.deltLCN*/
+      "      <feature>%.*f</feature>\n"/*3.deltCN*/
+      "      <feature>%.*f</feature>\n"/*4.Xcorr*/
+      "      <feature>%.*f</feature>\n"/*5.SP*/
+      "      <feature>%.*f</feature>\n"/*6.IonFrac */
+      "      <feature>%.*f</feature>\n"/*7.Mass */
+      "      <feature>%u</feature>\n"/*8.PepLen */
+      "      <feature>%u</feature>\n"/*9.Chrge1 */
+      "      <feature>%u</feature>\n"/*10.charge2*/
+      "      <feature>%u</feature>\n"/*11.charge3*/
+      "      <feature>%u</feature>\n"/*12.enzN*/
+      "      <feature>%u</feature>\n"/*13.enzC*/
+      "      <feature>%u</feature>\n"/*14.enzInt*/
+      "      <feature>%.*f</feature>\n"/*15.LnNumSP*/   
+      "      <feature>%.*f</feature>\n"/*16.dM*/
+      "      <feature>%.*f</feature>\n"/*17.absdM*/
       "    </features>\n",
       precision_,lnrSp,/*1*/
       precision_,delta_lcn,/*2. delta_l_Cn*/ 
@@ -539,20 +539,20 @@ void PinXMLWriter::printFeatures(
     fprintf(
       output_file_, 
       "    <features>\n"
-      "      <feature name=\"deltLCn\">%.*f</feature>\n"/*1.deltLCn*/
-      "      <feature name=\"deltCn\">%.*f</feature>\n"/*2.deltCn*/ 
-      "      <feature name=\"Xcorr\">%.*f</feature>\n"/*3.Xcorr*/
-      "      <feature name=\"Mass\">%.*f</feature>\n"/*4.Mass*/
-      "      <feature name=\"PepLen\">%u</feature>\n"/*5.PepLen */
-      "      <feature name=\"Charge1\">%u</feature>\n"/*6.Charge1*/  
-      "      <feature name=\"Charge2\">%u</feature>\n"/*7.charge2*/
-      "      <feature name=\"Charge3\">%u</feature>\n"/*8.charge3*/
-      "      <feature name=\"enzN\">%u</feature>\n"/*9.enzN */
-      "      <feature name=\"enzC\">%u</feature>\n"/*10.enzC */
-      "      <feature name=\"enzInt\">%u</feature>\n"/*11.enzInt*/
-      "      <feature name=\"LnNumSP\">%.*f</feature>\n"/*12.LnNumSp */ 
-      "      <feature name=\"dM\">%.*f</feature>\n"/*13.dM */
-      "      <feature name=\"absdM\">%.*f</feature>\n"/*14.absdM */
+      "      <feature>%.*f</feature>\n"/*1.deltLCn*/
+      "      <feature>%.*f</feature>\n"/*2.deltCn*/ 
+      "      <feature>%.*f</feature>\n"/*3.Xcorr*/
+      "      <feature>%.*f</feature>\n"/*4.Mass*/
+      "      <feature>%u</feature>\n"/*5.PepLen */
+      "      <feature>%u</feature>\n"/*6.Charge1*/  
+      "      <feature>%u</feature>\n"/*7.charge2*/
+      "      <feature>%u</feature>\n"/*8.charge3*/
+      "      <feature>%u</feature>\n"/*9.enzN */
+      "      <feature>%u</feature>\n"/*10.enzC */
+      "      <feature>%u</feature>\n"/*11.enzInt*/
+      "      <feature>%.*f</feature>\n"/*12.LnNumSp */ 
+      "      <feature>%.*f</feature>\n"/*13.dM */
+      "      <feature>%.*f</feature>\n"/*14.absdM */
       "     </features>\n",
       precision_,match->getDeltaLCn(), /*1.deltLCn*/
       precision_,match->getDeltaCn(),/*2.deltCn*/
