@@ -139,7 +139,6 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
       PROPERTY
       COMPILE_DEFINITIONS
       _CRT_SECURE_NO_WARNINGS
-      SEARCH_ENABLED
     )
 else (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	set_property(
@@ -152,7 +151,6 @@ else (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	  _GNU_SOURCE
 	  GCC
 	  HAVE_EXPAT_CONFIG_H
-    SEARCH_ENABLED
 	)
 	if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 	  set_property(
