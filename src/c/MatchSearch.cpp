@@ -266,7 +266,6 @@ void MatchSearch::addDecoyScores(
 
 }
 
-#ifdef SEARCH_ENABLED // Discard this code in open source release
 int MatchSearch::main(int argc, char** argv){
 
   /* Define optional command line arguments */
@@ -486,21 +485,6 @@ int MatchSearch::main(int argc, char** argv){
   return 0;
 }// end main
 
-#else // SEARCH_ENABLED not defined
-int MatchSearch::main(int argc, char **argv){
-  (void) argc;
-  (void) argv;
-  fputs(
-    "You are using the open source version of Crux. Due to intellectual\n"
-    "property issues, we are unable to provide database search functionality\n"
-    "in this version. To obtain a licence for the full functional version of\n"
-    "Crux that includes the database search tools, please visit the following URL:\n"
-    "\nhttp://depts.washington.edu/ventures/UW_Technology/Express_Licenses/crux.php\n",
-    stderr
-  );
-  return 1;
-}
-#endif // SEARCH_ENABLED
 
 /**
  * \returns the command name for MatchSearch
