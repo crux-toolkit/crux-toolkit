@@ -7,19 +7,30 @@
 <blockquote>
 
 <H1 ALIGN=CENTER>Known Issues</H1>
-<H2>Version 1.38</H2> July 19th, 2012
-  <ol>
-  <li>
-    Q-Ranker and Barista detect decoy PSMs by use of the <code>--decoy-prefix</code> string (ex. rand_) 
-    which is appended to the beginning of the peptide's protein ids. Currently, running the 
-	<code>search-for-matches</code> command with a <a href="sample.fasta">fasta file</a>
-     generates protein ids from decoy PSMs without the "rand_" prefix.  This issue will cause the 
-	following error for QRanker and Barista:</br>
+
+<ol>
+
+<li>
+Q-Ranker and Barista detect decoy PSMs by use of
+the <code>--decoy-prefix</code> string (ex. rand_) which is appended
+to the beginning of the peptide's protein ids. Currently, running
+the <code>search-for-matches</code> command with
+a <a href="sample.fasta">fasta file</a> generates protein ids from
+decoy PSMs without the "rand_" prefix.  This issue will cause the
+following error for QRanker and Barista:</br>
+
     <pre>
-    FATAL: Cannot compute PEP without target or decoy scores.</pre>
-    To prevent the error, run the search-for-matches with an 
-    <a href="index-tutorial.html">index</a>. </li>
-  </ol>
+    FATAL: Cannot compute PEP without target or decoy scores.
+    </pre>
+
+To prevent the error, run the search-for-matches with an 
+<a href="index-tutorial.html">index</a>. </li>
+
+<li>
+The <code>--use-spec-features</cope> option in Q-Ranker does not work
+if the search results contain modified peptides.</li>
+
+</ol>
 
 </blockquote>
 </body>
