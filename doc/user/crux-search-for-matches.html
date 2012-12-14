@@ -151,12 +151,12 @@ Default = crux-out.</li>
 
 
 <li>
-<code>--overwrite &lt;T|F&gt;</code> &ndash;
+<code>--overwrite T|F</code> &ndash;
 Replace existing files if true (T) or fail when trying to overwrite a
 file if false (F). Default =  F.</li>
 
 <LI>
-<code>--num-decoys-per-target &lt;n&gt;</code> &ndash; 
+<code>--num-decoys-per-target &lt;int&gt;</code> &ndash; 
 Specify the number of decoy peptides to search for every target
 peptide searched. Control where the decoys are returned (to what
 files) with <code>--decoy-location</code>. At least one decoy set (in
@@ -173,8 +173,7 @@ to shuffle the sequence between enzyme cleavage sites, leaving the
 termini in place. Use 'none' for no decoys.  Default=protein-shuffle. 
 
 <li>
-<code>--decoy-location &lt;target-file | one-decoy-file |
-separate-decoy-files&gt;</code> &ndash; 
+<code>--decoy-location target-file|one-decoy-file|separate-decoy-files</code> &ndash; 
 File(s) in which decoy results are returned.  Only applies
 when <code>num-decoys-per-target</code> is not zero.  Use
 'target-file' to mix target and decoy psms in one file. Use
@@ -185,13 +184,13 @@ search.decoy.txt files. <code>crux q-ranker</code> accepts only one
 search.decoy.txt file.) Default = separate-decoy-files.
 
 <li>
-<code>--compute-sp &lt;T|F&gt;</code> &ndash; Compute the preliminary
+<code>--compute-sp T|F</code> &ndash; Compute the preliminary
 score Sp for all candidate peptides.  This option is recommended if
 results are to be analyzed by <code>percolator</code>
 or <code>q-ranker</code>.  Default = F.</li>
 
 <li>
-<code>--compute-p-values &lt;T|F&gt;</code> &ndash;
+<code>--compute-p-values T|F</code> &ndash;
 Estimate the paramters of the score distribution for each spectrum and
 compute a p-value for each PSM.  The score distribution parameters are
 estimated only from target PSM scores.  The same parameters will be
@@ -199,7 +198,7 @@ used to compute p-values for the decoy PSMs. This option can be used
 in conjunction with <code>crux compute-q-values</code>. Default = F.</li>
 
 <li>
-<code>--spectrum-parser &lt;pwiz|mstoolkit|crux&gt;</code> &ndash;
+<code>--spectrum-parser pwiz|mstoolkit|crux</code> &ndash;
 Parser to use for reading in MS/MS spectra.  Default = crux.</li>
 
 <LI>
@@ -211,14 +210,14 @@ The lowest spectrum m/z to search in the ms2 file. Default = 0.0
 The highest spectrum m/z to search in the ms2 file. Default = no maximum.
 
 <LI> 
-<code>--spectrum-charge &lt;1|2|3|all&gt;</code> &ndash; 
+<code>--spectrum-charge 1|2|3|all</code> &ndash; 
 The spectrum charges to search. With 'all' every spectrum will be
 searched and spectra with multiple charge states will be searched once
 at each charge state.  With 1, 2, or 3 only spectra with that charge
 will be searched. Default = all.</li>
 
 <li>
-<code>--max-ion-charge &lt;1|2|3|peptide&gt;</code> &ndash; Predict
+<code>--max-ion-charge 1|2|3|peptide</code> &ndash; Predict
 fragment ions up to this charge-state. The integer options ('1', '2',
 and '3') specify a fixed maximum charge-state. The 'peptide' option
 indicates that the ions should range up to the maximum charge-state of
@@ -227,13 +226,13 @@ fragment ions of 1+ and 2+. One exception: 1+ charge state peptide
 always have ions of 1+. Default = peptide.</li>
 
 <LI>
-<code>--scan-number &lt;number range&gt;</code> &ndash;
+<code>--scan-number &lt;int&gt;|&lt;int&gt;-&lt;int&gt;</code> &ndash;
 A single scan number or a range of numbers to be searched. Range
 should be specified as 'first-last' which will include scans 'first'
 and 'last'.  Default = search all spectra.
 
 <li>
-<code>--mz-bin-width &lt;float&gt;</code> Before calculation of the
+<code>--mz-bin-width &lt;float&gt;</code> &ndash; Before calculation of the
 XCorr score, the m/z axes of the observed and theoretical spectra are
 discretized.  This parameter specifies the size of each bin.  By
 default, this value is 1.0005079 Da when searching using monoisotopic
@@ -268,12 +267,12 @@ The minimum number of peaks a spectrum must have in order to be
 searched.  Default = 20.
 
 <li>
-<code>fragment-mass &lt;average|mono&gt;</code> &ndash; 
+<code>fragment-mass average|mono</code> &ndash; 
 Which isotopes to use in calcuating fragment ion mass (average,
 mono). Default = mono.
 
 <li>
-<code>use-flanking-peaks &lt;T|F&gt;</code> &ndash;
+<code>use-flanking-peaks T|F</code> &ndash;
 Turn on or off the peaks flanking the b/y ions.  For <code>crux 
 search-for-matches</code>, default = F; for <code> crux
 search-for-xlinks</code>, default = T.</li>
@@ -286,7 +285,7 @@ precursor window units depends
 upon <code>precursor-window-type</code>. Default = 3.0.
 
 <li>
-<code>precursor-window-type &lt;mass|mz|ppm&gt;</code> &ndash; Specify
+<code>precursor-window-type mass|mz|ppm</code> &ndash; Specify
 the units for the window that is used to select peptides around the
 precursor mass location (mass, mz, ppm).  The magnitude of the window
 is defined by the <code>precursor-window</code> option, and candidate
@@ -308,7 +307,7 @@ is defined as spectrum mass / (1.0 - (<code>precursor-window</code> /
 1000000)).  Default = mass.</li>
 
 <li>
-<code>use-mstoolkit &lt;T|F&gt;</code> &ndash;
+<code>use-mstoolkit T|F</code> &ndash;
 Use MSToolkit to parse the spectra. Required for parsing spectra from
 .mzXML files. Default = F.
 
@@ -381,7 +380,7 @@ The maximum number of modified amino acids that can appear in one
 peptide.  Each aa can be modified multiple times. Default = no limit.
 
 <li>
-<code>mod-mass-format &lt;mod-only|total|separate&gt;<code> &ndash;
+<code>mod-mass-format mod-only|total|separate<code> &ndash;
 Specify how sequence modifications are reported in various ouptut
 files.  Each modification is reported as a number enclosed in square
 braces following the modified reside; however, the number may
@@ -428,8 +427,7 @@ The minimum length of the peptides to place in the index. Default = 6.
 The maximum length of the peptides to place in the index. Default = 50.
 
 <LI>
-<code>enzyme &lt;trypsin|chymotrypsin|elastase|clostripain|cyanogen-bromide|idosobenzoate|proline-endopeptidase|staph-protease|modified-chymotrypsin|elastase-trypsin-chymotrypsin|no-enzyme&gt;
-</code> &ndash;
+<code>enzyme trypsin|chymotrypsin|elastase|clostripain|cyanogen-bromide|idosobenzoate|proline-endopeptidase|staph-protease|modified-chymotrypsin|elastase-trypsin-chymotrypsin|no-enzyme</code> &ndash;
 Enzyme to use for <i>in silico</i> digestion of protein
 sequences. Used in conjunction with the <code>digestion</code>
 and <code>missed-cleavages</code> options. Use 'no-enzyme' for
@@ -443,8 +441,7 @@ modified-chymotrypsin [FWYL]|{P}, elastase-trypsin-chymotrypsin
 D). Default = trypsin.
 
 <li>
-<code>custom-enzyme &lt;residues before cleavage | residues after cleavage
-&gt;</code> &ndash;
+<code>custom-enzyme &lt;residues before cleavage&gt;|&lt;residues after cleavage&gt;</code> &ndash;
 Specify rules for <i>in silico</i> digestion of protein sequences.
 Overrides the <code>enzyme</code> option.  Two lists of residues are
 given enclosed in square brackets or curly braces and separated by a
@@ -458,7 +455,7 @@ which is represented as <code>[RK]|{P}</code>.  AspN cuts after any
 residue but only before D which is represented as <code>[X]|[D]</code>.
 
 <LI>
-<code>digestion &lt;full-digest|partial-digest&gt;</code> &ndash;
+<code>digestion full-digest|partial-digest</code> &ndash;
 Degree of digestion used to generate peptides . Either both ends
 (full-digest) or at least one end (partial-digest) of a peptide must
 conform to enzyme specificity rules. Used in conjunction with
@@ -467,12 +464,12 @@ when <code>enzyme</code> is not set to to 'no-enzyme'.   Default
 full-digest.
 
 <LI>
-<code>--missed-cleavages &lt;int&gt;</code> &ndash; Include in the
+<code>missed-cleavages &lt;int&gt;</code> &ndash; Include in the
 index peptides containing up to &lt;int&gt; missed cleavage sites.
 Default = 0.</li>
 
 <LI>
-<code>isotopic-mass &lt;average|mono&gt;</code> &ndash; 
+<code>isotopic-mass average|mono</code> &ndash; 
 Specify the type of isotopic masses to use when calculating the
 peptide mass. Default = average.
    
