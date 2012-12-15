@@ -13,18 +13,41 @@
 </ul>
 <h3>Minor changes</h3>
 <ul>
+
 <li>
-The <code>seed</code> parameter is now available to control the seeding of random number generator.
-The default is to seed from the current value of the system clock, however the
-seed can be set to a user specified unsigned integer.
+The formula that is used to convert fragment m/z values from real
+numbers into integers was modified.  Previously, the conversion was
+<pre>
+  floor( (x / mz-bin-size) + 0.5 + mz-bin-offset )
+</pre>
+The new conversion formula is 
+<pre>
+  floor( (x / mz-bin-size) + 1.0 - mz-bin-offset )
+</pre>
+The default values of the two parameters (mz-bin-size and
+mz-bin-offset) have not changed.  The allowed range of the
+mz-bin-offset parameter was previously [-1,1], but has been changed to
+[0,1].
 </li>
+
+<li>
+The <code>seed</code> parameter is now available to control the
+seeding of random number generator.  The default is to seed from the
+current value of the system clock; however, the seed can be set to a
+user specified unsigned integer.
+</li>
+
 <li>
 Fixed the default value of the <code>decoys</code> parameter.
 The default had been <code>peptide-shuffle</code> though the documentation said the
 default was <code>protein-shuffle</code>.
 The code has been corrected so the default is <code>protein-shuffle</code>.
 </li>
+
 </ul>
+
+<hr></hr>
+
 <h2>Version 1.39</h2> October 6, 2012
 
 <h3>Major enchancements</h3>
