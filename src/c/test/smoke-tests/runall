@@ -1,7 +1,22 @@
-#!/bin/bash
+#!/bin/bash -x
 
-# Exit if there is an error.
+# These three options make it harder to for some part of a script to
+# fail without you recognizing it. nounset means that references to an
+# unset variable result in an error. This means that you can no longer
+# do stuff like this if VAR is potentially unset, because "$VAR" returns
+# an error rather than "":
+#
+# if [ "$VAR" ]; then
+#
+# fi
+#
+# To explicitly indicate that you are OK with the variable potentially
+# being empty you can instead use ${VAR:-}.
+
+set -o nounset
+set -o pipefail
 set -o errexit 
+set -o xtrace
 
 # Make sure the testing script is executable.
 chmod 774 crux-test.pl

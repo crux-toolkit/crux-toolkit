@@ -96,7 +96,7 @@ static const int MAX_PER_REGION = 50;
  */
 
 #define INTEGERIZE(VALUE,BIN_SIZE,BIN_OFFSET) \
-  ((int)((VALUE / BIN_SIZE) + 0.5 + BIN_OFFSET))
+  ((int)( ( ( VALUE / BIN_SIZE ) + 1.0 ) - BIN_OFFSET ) )
 
 
 int ion_counter=0;

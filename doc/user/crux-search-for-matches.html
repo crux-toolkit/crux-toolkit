@@ -234,15 +234,18 @@ and 'last'.  Default = search all spectra.
 <li>
 <code>--mz-bin-width &lt;float&gt;</code> &ndash; Before calculation of the
 XCorr score, the m/z axes of the observed and theoretical spectra are
-discretized.  This parameter specifies the size of each bin.  By
-default, this value is 1.0005079 Da when searching using monoisotopic
-mass and 1.0011413 Da with average mass.</li>
+discretized.  This parameter specifies the size of each bin.  The
+exact formula is <i>floor((x/mz-bin-width) + 1.0 - mz-bin-offset)</i>,
+where <i>x</i> is the observed m/z value.  By default, the
+mz-bin-width is 1.0005079 Da when searching using monoisotopic mass
+and 1.0011413 Da with average mass.</li>
 
 <li>
 <code>--mz-bin-offset &lt;float&gt;</code> &ndash; In the
 discretization of the m/z axes of the observed and theoretical
 spectra, this parameter specifies the location of the left edge of the
-first bin.  Default=0.68.</li>
+first bin.  The parameter must lie in the range 0 &lte; mz-bin-offset
+&lt; 1. Default=0.68.</li>
 
 <LI><code>--parameter-file &lt;filename&gt;</code> &ndash; 
 A file containing command-line or additional parameters.  See

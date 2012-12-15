@@ -559,7 +559,7 @@ void initialize_parameters(void){
       "ions.  Default=1.0005079 for monoisotopic mass "
       "or 1.0011413 for average mass.",
       "Available for crux-search-for-matches and xlink-assign-ions.", "true");
-  set_double_parameter("mz-bin-offset", SMART_MZ_OFFSET, -1.0, 1.0,
+  set_double_parameter("mz-bin-offset", SMART_MZ_OFFSET, 0.0, 1.0,
       "Specify the location of the left edge of the "
       "first bin used to discretize the m/z axis. Default=0.68",
       "Available for crux-search-for-matches.", "true");
