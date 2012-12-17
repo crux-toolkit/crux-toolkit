@@ -15,7 +15,7 @@
 <ul>
 
 <li>
-The formula that is used to convert fragment m/z values from real
+<p>The formula that is used to convert fragment m/z values from real
 numbers into integers was modified.  Previously, the conversion was
 <pre>
   floor( (x / mz-bin-size) + 0.5 + mz-bin-offset )
@@ -27,8 +27,22 @@ The new conversion formula is
 The default values of the two parameters (mz-bin-size and
 mz-bin-offset) have not changed.  The allowed range of the
 mz-bin-offset parameter was previously [-1,1], but has been changed to
-[0,1].
-</li>
+[0,1].</p>
+
+<p>
+To understand the motivation for the changed formula, note that the
+mz-bin-offset parameter controls the location of bin edges, relative
+to integer masses on the mass scale.  In general, mz-bin-offset should
+be chosen so that bin edges fall between the expected clusters of
+fragment masses.  For fragments with 1+ charge, masses will cluster
+near integer values (after dividing by mz-bin-width), and the ideal
+value of mz-bin-offset would be 0.5.  For mixtures of fragments with
+1+ and 2+ charges, masses will cluster near integer and half-integer
+values, so mz-bin-offset near 0.25 or 0.75 would produce bin edges
+that best avoid the clusters of fragment masses.  The old conversion
+formula did not correctly locate bin edges, given a chosen
+mz-bin-offset.  The new conversion formula produces a proper
+translation of mz-bin-offset into bin edge locations.</p></li>
 
 <li>
 The <code>seed</code> parameter is now available to control the
