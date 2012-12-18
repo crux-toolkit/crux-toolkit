@@ -22,6 +22,10 @@ class XHHC_Scorer {
   Scorer* scorer_; ///< The crux scorer
   Spectrum* current_spectrum_; ///< Spectrum that this scorer works on
   FLOAT_T max_mz_; ///< Maximum mz allocated for scorer
+  int max_bin_; ///< Maximum bin idx for scorer.
+  FLOAT_T bin_width_; ///< bin width for scorer
+  FLOAT_T bin_offset_; ///<bin offset for scorer
+
   static int ion_counter_; ///< Ion counter
 
   /**

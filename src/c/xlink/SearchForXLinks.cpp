@@ -42,7 +42,10 @@ int SearchForXLinks::main(int argc, char** argv) {
     "precursor-window-type-decoy",
     "max-ion-charge",
     "min-weibull-points",
+    "mz-bin-width",
+    "mz-bin-offset",
     "xlink-prevents-cleavage", //TODO will be implemented later (SJM)
+    "scan-number",
     "spectrum-min-mass",
     "spectrum-max-mass",
     "spectrum-charge",
