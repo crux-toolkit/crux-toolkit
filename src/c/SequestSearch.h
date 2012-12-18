@@ -24,6 +24,8 @@
 
 class SequestSearch: public CruxApplication {
 
+  friend class MatchSearch;
+
  protected:
   /* Private function definitions */
 

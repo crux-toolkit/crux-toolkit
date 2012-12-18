@@ -47,6 +47,7 @@ OutputFiles::OutputFiles(CruxApplication* program_name)
   }
 
   makeTargetDecoyList();
+  bool only_sqt = (command == SEQUEST_COMMAND && get_boolean_parameter("sqt-output"));
 
   carp(CARP_DEBUG, 
        "OutputFiles is opening %d files (%d decoys) in '%s' with root '%s'."
@@ -54,14 +55,17 @@ OutputFiles::OutputFiles(CruxApplication* program_name)
        num_files_, num_decoy_files, output_directory, fileroot, overwrite);
 
   // all operations create tab files
-  createFiles(&delim_file_array_, 
-              output_directory, 
-              fileroot, 
-              application_, 
-              "txt");
+  if ( !only_sqt ){
+    createFiles(&delim_file_array_,
+                output_directory,
+                fileroot,
+                application_,
+                "txt");
+  }
 
   // almost all operations create xml files
-  if( command != SPECTRAL_COUNTS_COMMAND ){
+  if( command != SPECTRAL_COUNTS_COMMAND
+      && !only_sqt ){
     createFiles(&xml_file_array_,
                 output_directory,
                 fileroot,
