@@ -25,12 +25,12 @@ ulimit -n 1024
 # Create a parameter file.
 params=parameters.txt
 echo num-decoys-per-target=1 > $params
-echo top-match=1000000 >> $params
+echo top-match=1 >> $params
 echo output-dir=search >> $params
 echo compute-p-values=T >> $params
 echo decoy-p-values=T >> $params  # Write raw p-values to a separate file.
 echo decoys=peptide-shuffle >> $params
-echo precursor-window=10 >> $params
+echo precursor-window=3 >> $params
 
 if [[ -e $db ]]; then
   echo Skipping create-index.
