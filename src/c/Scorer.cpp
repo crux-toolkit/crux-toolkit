@@ -91,13 +91,6 @@ static const int NUM_REGIONS = 10;
  */ 
 static const int MAX_PER_REGION = 50;
 
-/**
- * Macro for converting floating point to integers.
- */
-
-#define INTEGERIZE(VALUE,BIN_SIZE,BIN_OFFSET) \
-  ((int)( ( ( VALUE / BIN_SIZE ) + 1.0 ) - BIN_OFFSET ) )
-
 
 int ion_counter=0;
 

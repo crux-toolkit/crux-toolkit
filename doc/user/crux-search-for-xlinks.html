@@ -7,16 +7,7 @@
 <blockquote>
 
 <H1 ALIGN=CENTER>crux search-for-xlinks</H1>
-<!-- open source warning
-<h2>
-You are using the open source version of Crux.
-Due to intellecutal property issues,
-we are unable to provide database search functionality in this version.
-To obtain a license for the fully functional version of Crux that includes
-the database search tools please visit 
-<a href="http://depts.washington.edu/ventures/UW_Technology/Express_Licenses/crux.php">UW TECHTRANSFER</a>.
-</h2>
-open source warning -->
+
 <B>Usage:</B>
 
 <blockquote>
@@ -231,6 +222,30 @@ Predict ions for the theoretical spectra up to max charge state
 (1,2,...,6) or up to the charge state of the peptide (peptide).  
 If the max-ion-charge is greater than the charge state of the 
 peptide, then the max is the peptide charge.  Default='peptide'.
+
+<LI>
+<code>--scan-number &lt;int&gt;|&lt;int&gt;-&lt;int&gt;</code> &ndash;
+A single scan number or a range of numbers to be searched. Range
+should be specified as 'first-last' which will include scans 'first'
+and 'last'.  Default = search all spectra.
+</li>
+
+<li>
+<code>--mz-bin-width &lt;float&gt;</code> &ndash; Before calculation of the
+XCorr score, the m/z axes of the observed and theoretical spectra are
+discretized.  This parameter specifies the size of each bin.  The
+exact formula is <i>floor((x/mz-bin-width) + 1.0 - mz-bin-offset)</i>,
+where <i>x</i> is the observed m/z value.  By default, the
+mz-bin-width is 1.0005079 Da when searching using monoisotopic mass
+and 1.0011413 Da with average mass.</li>
+
+<li>
+<code>--mz-bin-offset &lt;float&gt;</code> &ndash; In the
+discretization of the m/z axes of the observed and theoretical
+spectra, this parameter specifies the location of the left edge of the
+first bin.  The parameter must lie in the range 0 &lte; mz-bin-offset
+&lt; 1. Default=0.68.</li>
+
 
 <li>
 <code>mod-mass-format &lt;mod-only|total|separate&gt;<code> &ndash;
