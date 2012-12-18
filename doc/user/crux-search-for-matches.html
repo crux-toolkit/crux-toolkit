@@ -155,6 +155,10 @@ Default = crux-out.</li>
 Replace existing files if true (T) or fail when trying to overwrite a
 file if false (F). Default =  F.</li>
 
+<li>
+<code>--sqt-output &lt;T|F&gt;</code> &ndash;
+Output SQT in the output directory.  Default = F.</li>
+
 <LI>
 <code>--num-decoys-per-target &lt;int&gt;</code> &ndash; 
 Specify the number of decoy peptides to search for every target
@@ -187,7 +191,9 @@ search.decoy.txt file.) Default = separate-decoy-files.
 <code>--compute-sp T|F</code> &ndash; Compute the preliminary
 score Sp for all candidate peptides.  This option is recommended if
 results are to be analyzed by <code>percolator</code>
-or <code>q-ranker</code>.  Default = F.</li>
+or <code>q-ranker</code>.  If <code>sqt-output</code> is enabled,
+<code>compute-sp</code> is automatically enabled and cannot be
+overridden.  Default = F.</li>
 
 <li>
 <code>--compute-p-values T|F</code> &ndash;

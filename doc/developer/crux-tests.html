@@ -17,10 +17,10 @@ that you do have to run them on a 64-bit machine using 64-bit versions
 of crux. This is because the existing index files were built on a
 64-bit machine. You can also update the known good files to match the
 current output by using the command 
-<code>./crux-tests.pl -up crux-tests.cmd</code> in the 
-<code>src/c/smoke</code> directory. This will replace all of the known
-good files with the current output, so it should be used with
-caution.</p> 
+<code>./crux-test.pl -up /path/to/crux/src/c/ crux-test.cmds</code>
+in the <code>src/c/test/smoke-tests</code> directory. This will
+replace all of the known good files with the current output, so it
+should be used with caution.</p> 
 
 <p>
 The testing is by no means complete, but there are some tests for each
