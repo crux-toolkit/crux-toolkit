@@ -1,13 +1,13 @@
-INFO: CPU: n005.grid.gs.washington.edu
-INFO: Tue Dec 18 09:35:03 PST 2012
+INFO: CPU: n020.grid.gs.washington.edu
+INFO: Wed Dec 19 16:51:49 PST 2012
 COMMAND LINE: crux sequest-search --output-dir ss --fileroot no-decoys --parameter-file params/no-decoys-ss demo.ms2 small-yeast-index
 INFO: Preparing protein index small-yeast-index
 INFO: Reading in ms2 file demo.ms2
 INFO: Created 1 peptide mods, keeping 1 with 255 or fewer aa mods
 INFO: Searching spectrum 96 (2+), search 100
-INFO: Elapsed time: 3 s
+INFO: Elapsed time: 1.85 s
 INFO: Finished crux sequest-search
-INFO: Elapsed time: 3 s
+INFO: Elapsed time: 1.86 s
 INFO: Finished crux sequest-search.
 INFO: Return Code:0
 # Which isotopes to use in calculating fragment ion mass.
@@ -590,10 +590,6 @@ max-persist=2.000000
 # crux-search-for-matches.
 min-mass=200.000000
 
-# Output SQT in the output directory.  Default=F
-# Available for search-for-matches.
-sqt-output=false
-
 # Set the maximum number of peptides or proteins that are estimated from
 # the peaks found in a spectrum segment. The default value is 10.
 # Available for crux hardklor
@@ -783,7 +779,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Tue Dec 18 09:35:03 2012
+H	StartTime	Wed Dec 19 16:51:49 2012
 H	EndTime                               
 H	Database	small-yeast-index/small-yeast-binary-fasta
 H	DBSeqLength	?

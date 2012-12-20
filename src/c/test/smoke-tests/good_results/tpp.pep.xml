@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href=""?>
-<msms_pipeline_analysis date="Tue Dec 18 09:30:15 2012
+<msms_pipeline_analysis date="Wed Dec 19 16:48:49 2012
 " xmlns="http://regis-web.systemsbiology.net/pepXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://regis-web.systemsbiology.net/pepXML /usr/local/tpp/schema/pepXML_v110.xsd" summary_xml="">
 <msms_run_summary base_name="/net/maccoss/vol2/home/kaipot/svn/crux-trunk/src/c/test/smoke-tests/test" msManufacturer="NA" msModel="NA" msIonization="NA" msAnalyzer="NA" msDectector="NA" raw_data_type="NA" raw_data="NA" >
 <sample_enzyme name="trypsin">
@@ -119,7 +119,6 @@
 <parameter name="max-mass" value="7200.000000"/>
 <parameter name="max-persist" value="2.000000"/>
 <parameter name="min-mass" value="200.000000"/>
-<parameter name="sqt-output" value="false"/>
 <parameter name="max-p" value="10"/>
 <parameter name="precision" value="2"/>
 <parameter name="decoy-location" value="separate-decoy-files"/>
