@@ -2,7 +2,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Tue Dec 18 09:34:18 2012
+H	StartTime	Wed Dec 19 16:51:22 2012
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	Comment	Database shuffled; these are decoy matches
@@ -2357,7 +2357,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Tue Dec 18 09:34:18 2012
+H	StartTime	Wed Dec 19 16:51:22 2012
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	Comment	Database shuffled; these are decoy matches
@@ -4714,16 +4714,16 @@ scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	s
 159	2	745.7500	1489.4827	1490.6510	0.30806249	61.56905	1	0.63629514	2	5	24	4	EEGFMNSDHVVVK	trypsin-full-digest	YOR168W(736)	KN	ESVMEHNFGDVVK	4
 159	2	745.7500	1489.4827	1489.7319	1.0387511	13.952121	4	-0.035634954	3	2	24	4	NLVGFVLLQTEEK	trypsin-full-digest	YGL135W(27)	RN	NFLETVELQVGLK	4
 159	2	745.7500	1489.4827	1486.6195	1.0767	23.600668	3	-0.070532113	4	3	26	4	SQNGPNGTLNPMEK	trypsin-full-digest	YNL166C(201)	KL	SPMPQNNTLGGENK	4
-INFO: CPU: n005.grid.gs.washington.edu
-INFO: Tue Dec 18 09:34:18 PST 2012
+INFO: CPU: n020.grid.gs.washington.edu
+INFO: Wed Dec 19 16:51:21 PST 2012
 COMMAND LINE: crux sequest-search --decoys peptide-shuffle --output-dir ss --fileroot separate --parameter-file params/separate-ss demo.ms2 small-yeast.fasta
 INFO: Preparing protein fasta file small-yeast.fasta
 INFO: Reading in ms2 file demo.ms2
 INFO: Created 1 peptide mods, keeping 1 with 255 or fewer aa mods
 INFO: Searching spectrum 96 (2+), search 100
-INFO: Elapsed time: 10.1 s
+INFO: Elapsed time: 6.04 s
 INFO: Finished crux sequest-search
-INFO: Elapsed time: 10.1 s
+INFO: Elapsed time: 6.05 s
 INFO: Finished crux sequest-search.
 INFO: Return Code:0
 # Which isotopes to use in calculating fragment ion mass.
@@ -5306,10 +5306,6 @@ max-persist=2.000000
 # crux-search-for-matches.
 min-mass=200.000000
 
-# Output SQT in the output directory.  Default=F
-# Available for search-for-matches.
-sqt-output=false
-
 # Set the maximum number of peptides or proteins that are estimated from
 # the peaks found in a spectrum segment. The default value is 10.
 # Available for crux hardklor
@@ -5499,7 +5495,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Tue Dec 18 09:34:18 2012
+H	StartTime	Wed Dec 19 16:51:22 2012
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	DBSeqLength	?

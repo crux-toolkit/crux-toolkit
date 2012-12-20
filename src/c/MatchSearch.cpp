@@ -26,7 +26,6 @@
  */
 
 #include "MatchSearch.h"
-#include "SequestSearch.h"
 #include "FilteredSpectrumChargeIterator.h"
 #include "SearchProgress.h"
 #include "SpectrumCollectionFactory.h"
@@ -97,7 +96,6 @@ int MatchSearch::searchPepMods(
   SpectrumZState& zstate, ///< seach spectrum at this z-state
   PEPTIDE_MOD_T** peptide_mods, ///< list of peptide mods to apply
   int num_peptide_mods, ///< how many p_mods to use from the list
-  bool compute_sp,  ///< compute sp scores
   bool store_scores///< save all scores for p-value estimation
   ){
 
@@ -150,8 +148,8 @@ int MatchSearch::searchPepMods(
                             peptide_iterator,
                             is_decoy,
                             store_scores,
-                            compute_sp,
-                            false // don't filter by Sp
+                            get_boolean_parameter("compute-sp"),
+                            false // don't filtery by Sp
                             );
     
     carp(CARP_DEBUG, "Added %i matches", added);
@@ -275,7 +273,6 @@ int MatchSearch::main(int argc, char** argv){
     "fileroot",
     "output-dir",
     "overwrite",
-    "sqt-output",
     "num-decoys-per-target",
     "decoys",
     "decoy-location",
@@ -333,16 +330,8 @@ int MatchSearch::main(int argc, char** argv){
   /* Prepare output files */
 
   bool combine_target_decoy = get_boolean_parameter("tdc");
-  SequestSearch* sequest_search = NULL;
-  OutputFiles output_files(this);
-  OutputFiles* output_files_sqt = NULL;
+  OutputFiles output_files(this); 
   output_files.writeHeaders(num_proteins, combine_target_decoy);
-  if (get_boolean_parameter("sqt-output"))
-  {
-    sequest_search = new SequestSearch();
-    output_files_sqt = new OutputFiles(sequest_search);
-    output_files_sqt->writeHeaders(num_proteins, combine_target_decoy);
-  }
   // TODO (BF oct-21-09): consider adding pvalue file to OutputFiles
   FILE* decoy_pvalue_file = NULL;
   if( get_boolean_parameter("decoy-p-values") ){
@@ -365,13 +354,6 @@ int MatchSearch::main(int argc, char** argv){
     new FilteredSpectrumChargeIterator(spectra);
 
   // get search parameters for match_collection
-  bool compute_sp = get_boolean_parameter("compute-sp");
-  if (output_files_sqt && !compute_sp)
-  {
-    compute_sp = true;
-    carp(CARP_INFO, "Enabling parameter compute-sp since SQT output is enabled "
-                    " (this will increase runtime).");
-  }
   bool compute_pvalues = get_boolean_parameter("compute-p-values");
   int num_decoy_files = get_int_parameter("num-decoy-files");
 
@@ -406,7 +388,6 @@ int MatchSearch::main(int argc, char** argv){
                                         zstate,
                                         peptide_mods, 
                                         num_peptide_mods,
-                                        compute_sp,
                                         compute_pvalues); 
  
     // are there any matches?
@@ -439,7 +420,6 @@ int MatchSearch::main(int argc, char** argv){
                       zstate, 
                       peptide_mods, 
                       max_pep_mods,
-                      compute_sp,
                       compute_pvalues);
     }
 
@@ -478,15 +458,6 @@ int MatchSearch::main(int argc, char** argv){
                            combine_target_decoy, 
                            num_decoy_files);
 
-    if (output_files_sqt) {
-      sequest_search->printMatches(*output_files_sqt,
-                                  target_psms,
-                                  decoy_collection_list,
-                                  spectrum,
-                                  combine_target_decoy,
-                                  num_decoy_files);
-    }
-
     progress.increment(true);
 
     // clean up
@@ -501,10 +472,6 @@ int MatchSearch::main(int argc, char** argv){
   // clean up
   delete spectrum_iterator; 
   delete spectra;
-  if (output_files_sqt) {
-    delete output_files_sqt;
-    delete sequest_search;
-  }
   for(int mod_idx = 0; mod_idx < num_peptide_mods; mod_idx++){
     free_peptide_mod(peptide_mods[mod_idx]);
   }
