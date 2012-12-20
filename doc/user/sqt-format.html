@@ -10,14 +10,15 @@
 <p>
 The SQT file format is used to record the matches between MS/MS spectra
 and a sequence database.
-A full description of the SQT file format may be found in:
-<cite>
-McDonald,W.H. et al.
-MS1, MS2, and SQT-three unified, compact, and easily parsed file formats for the storage
-of shotgun proteomic spectra and identifications. Rapid Commun. Mass Spectrom.
-<b>18</b>, 2162-2168 (2004).
-</cite>
-</p>
+A full description of the SQT file format may be found in:</p>
+
+<blockquote>
+McDonald, W.H. et al.
+<a href="http://onlinelibrary.wiley.com/doi/10.1002/rcm.1603/abstract">"MS1, MS2, and SQT-three unified, compact, and easily parsed file formats for the storage
+of shotgun proteomic spectra and identifications."</a> <i>Rapid
+    Communications in Mass Spectrometry.</i> <b>18</b>, 2162-2168 (2004).
+</blockquote>
+
 <p>
 An SQT file consists of a header followed by one or more spectrum matches.
 The header and match data are broken into records, one record per line. 
@@ -26,6 +27,7 @@ Fields within a record are separated by white space.
 <p>
 A sample SQT file may be found <a href="target.sqt">here</a>.
 </p>
+
 <h2>Header details</h2>
 <p>
 Each line in the header must begin with an <code>H</code>.
@@ -141,6 +143,7 @@ The following field labels are optional, and may appear in the header:
 </tr>
 </tbody>
 </table>
+
 <h2>Match details</h2>
 <p>
 Each spectrum match begins with a spectrum (S) record, 
@@ -215,6 +218,20 @@ L	YGR027W-B
 </tr>
 </tbody>
 </table>
+
+<h2>Differences between Crux's SQT format and the published
+  version</h2>
+
+<ul>
+<li>
+Relative to the original specification of SQT, Crux expects an
+additional field [total ion intensity] in the "S" lines.</li>
+<li>
+In the original specification, the FragmentMasses and PrecursorMasses
+header lines used the values  "AVG" or "MONO", but Crux uses "average"
+and "mono".</li>
+</ul>
+
 <hr></hr>
 <p>
 <a href="crux.html">Crux home</a></p>
