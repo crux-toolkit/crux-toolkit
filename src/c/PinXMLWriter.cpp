@@ -431,9 +431,9 @@ void PinXMLWriter:: printPSM(
 
     fprintf(
       output_file_,
-      "\n  <peptideSpectrumMatch calculatedMassToCharge=\"%.*f\" "
+      "\n  <peptideSpectrumMatch calculatedMass=\"%.*f\" "
       "chargeState=\"%i\""
-      " experimentalMassToCharge=\"%.*f\""
+      " experimentalMass=\"%.*f\""
       " id=\"%s\" isDecoy=\"%s\">\n",
       mass_precision_, calculated_mass,
       charge, 
