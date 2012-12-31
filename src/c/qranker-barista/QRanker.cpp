@@ -131,7 +131,7 @@ void QRanker :: write_results()
   f1.close();
   fname.str("");
 
-  fname << out_dir << "/" << fileroot << "q-ranker_output.xml";
+  fname << out_dir << "/" << fileroot << "q-ranker.xml";
   PepXMLWriter xmlfile;
   xmlfile.openFile(fname.str().c_str(), overwrite_flag);
   write_results_psm_xml(xmlfile);
