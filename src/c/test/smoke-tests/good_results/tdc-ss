@@ -1,13 +1,13 @@
-INFO: CPU: n020.grid.gs.washington.edu
-INFO: Wed Dec 19 16:51:44 PST 2012
+INFO: CPU: n013.grid.gs.washington.edu
+INFO: Mon Dec 31 13:55:02 PST 2012
 COMMAND LINE: crux sequest-search --decoys peptide-shuffle --output-dir ss --fileroot tdc --parameter-file params/tdc-ss demo.ms2 small-yeast.fasta
 INFO: Preparing protein fasta file small-yeast.fasta
 INFO: Reading in ms2 file demo.ms2
 INFO: Created 1 peptide mods, keeping 1 with 255 or fewer aa mods
 INFO: Searching spectrum 96 (2+), search 100
-INFO: Elapsed time: 4.06 s
+INFO: Elapsed time: 3.73 s
 INFO: Finished crux sequest-search
-INFO: Elapsed time: 4.07 s
+INFO: Elapsed time: 3.75 s
 INFO: Finished crux sequest-search.
 INFO: Return Code:0
 # Which isotopes to use in calculating fragment ion mass.
@@ -779,7 +779,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Wed Dec 19 16:51:44 2012
+H	StartTime	Mon Dec 31 13:55:02 2012
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	DBSeqLength	?
