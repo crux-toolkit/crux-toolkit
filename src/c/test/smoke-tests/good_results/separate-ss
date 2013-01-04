@@ -2,7 +2,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Mon Dec 31 13:54:42 2012
+H	StartTime	Fri Jan  4 13:13:37 2013
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	Comment	Database shuffled; these are decoy matches
@@ -18,7 +18,7 @@ H	Comment	final algorithm xcorr_score
 H	StaticMod	C=160.160
 H	Alg-DisplayTop	5
 H	EnzymeSpec	trypsin-full-digest
-H	Line fields: S, scan number, scan number,charge, 0, precursor mass, 0, 0, number of matches
+H	Line fields: S, scan number, scan number,charge, 0, precursor neutral mass, 0, 0, number of matches
 H	Line fields: M, rank by xcorr score, rank by sp score, peptide mass, deltaCn, xcorr score, sp score, number ions matched, total ions compared, sequence
 S	10	10	2	0.0	server	1270.6627	0.00	0.00000000	6
 M	1	2	1273.4087	0.00	0.078213967	8.5949783	2	20	R.TNNVVLLETDR.T	U
@@ -2357,7 +2357,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Mon Dec 31 13:54:42 2012
+H	StartTime	Fri Jan  4 13:13:37 2013
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	Comment	Database shuffled; these are decoy matches
@@ -2373,7 +2373,7 @@ H	Comment	final algorithm xcorr_score
 H	StaticMod	C=160.160
 H	Alg-DisplayTop	5
 H	EnzymeSpec	trypsin-full-digest
-H	Line fields: S, scan number, scan number,charge, 0, precursor mass, 0, 0, number of matches
+H	Line fields: S, scan number, scan number,charge, 0, precursor neutral mass, 0, 0, number of matches
 H	Line fields: M, rank by xcorr score, rank by sp score, peptide mass, deltaCn, xcorr score, sp score, number ions matched, total ions compared, sequence
 S	10	10	2	0.0	server	1270.6627	0.00	0.00000000	6
 M	1	3	1272.5227	0.00	0.70848471	16.106853	3	22	-.MPEVDVVISGVK.G	U
@@ -4714,16 +4714,16 @@ scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	s
 159	2	745.7500	1489.4827	1490.6510	0.30806249	61.56905	1	0.63629514	2	5	24	4	EEGFMNSDHVVVK	trypsin-full-digest	YOR168W(736)	KN	ESVMEHNFGDVVK	4
 159	2	745.7500	1489.4827	1489.7319	1.0387511	13.952121	4	-0.035634954	3	2	24	4	NLVGFVLLQTEEK	trypsin-full-digest	YGL135W(27)	RN	NFLETVELQVGLK	4
 159	2	745.7500	1489.4827	1486.6195	1.0767	23.600668	3	-0.070532113	4	3	26	4	SQNGPNGTLNPMEK	trypsin-full-digest	YNL166C(201)	KL	SPMPQNNTLGGENK	4
-INFO: CPU: n013.grid.gs.washington.edu
-INFO: Mon Dec 31 13:54:41 PST 2012
+INFO: CPU: n005.grid.gs.washington.edu
+INFO: Fri Jan  4 13:13:37 PST 2013
 COMMAND LINE: crux sequest-search --decoys peptide-shuffle --output-dir ss --fileroot separate --parameter-file params/separate-ss demo.ms2 small-yeast.fasta
 INFO: Preparing protein fasta file small-yeast.fasta
 INFO: Reading in ms2 file demo.ms2
 INFO: Created 1 peptide mods, keeping 1 with 255 or fewer aa mods
 INFO: Searching spectrum 96 (2+), search 100
-INFO: Elapsed time: 5.69 s
+INFO: Elapsed time: 10.2 s
 INFO: Finished crux sequest-search
-INFO: Elapsed time: 5.7 s
+INFO: Elapsed time: 10.2 s
 INFO: Finished crux sequest-search.
 INFO: Return Code:0
 # Which isotopes to use in calculating fragment ion mass.
@@ -5495,7 +5495,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Mon Dec 31 13:54:42 2012
+H	StartTime	Fri Jan  4 13:13:37 2013
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	DBSeqLength	?
@@ -5510,7 +5510,7 @@ H	Comment	final algorithm xcorr_score
 H	StaticMod	C=160.160
 H	Alg-DisplayTop	5
 H	EnzymeSpec	trypsin-full-digest
-H	Line fields: S, scan number, scan number,charge, 0, precursor mass, 0, 0, number of matches
+H	Line fields: S, scan number, scan number,charge, 0, precursor neutral mass, 0, 0, number of matches
 H	Line fields: M, rank by xcorr score, rank by sp score, peptide mass, deltaCn, xcorr score, sp score, number ions matched, total ions compared, sequence
 S	10	10	2	0.0	server	1270.6627	0.00	0.00000000	6
 M	1	1	1270.4917	0.00	0.85080969	56.45171	5	22	K.SGLIVEIQGVQK.E	U
