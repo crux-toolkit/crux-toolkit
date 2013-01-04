@@ -2,7 +2,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Mon Dec 31 13:53:47 2012
+H	StartTime	Fri Jan  4 13:12:02 2013
 H	EndTime                               
 H	Database	index-for-sequest-comparison/for-sequest-comparison-binary-fasta
 H	DBSeqLength	?
@@ -18,7 +18,7 @@ H	StaticMod	C=160.160
 H	DiffMod	S*=+79.90
 H	Alg-DisplayTop	5
 H	EnzymeSpec	no-enzyme-non-specific-digest
-H	Line fields: S, scan number, scan number,charge, 0, precursor mass, 0, 0, number of matches
+H	Line fields: S, scan number, scan number,charge, 0, precursor neutral mass, 0, 0, number of matches
 H	Line fields: M, rank by xcorr score, rank by sp score, peptide mass, deltaCn, xcorr score, sp score, number ions matched, total ions compared, sequence
 S	2141	2141	2	0.0	server	851.1027	0.00	0.00	93
 M	1	1	848.9140	0.00	1.2	2.9e+02	7	10	A.EPYRER.L	U

@@ -1838,7 +1838,7 @@ void MatchCollection::printSqtHeader(
 
   // write a comment that says what the scores are
   fprintf(output, "H\tLine fields: S, scan number, scan number,"
-          "charge, 0, precursor mass, 0, 0, number of matches\n");
+          "charge, 0, precursor neutral mass, 0, 0, number of matches\n");
 
   fprintf(output, "H\tLine fields: M, rank by xcorr score, rank by sp score, "
           "peptide mass, deltaCn, xcorr score, sp score, number ions matched, "
