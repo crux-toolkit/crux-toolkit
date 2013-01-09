@@ -3,6 +3,7 @@
 #include "LinkedPeptide.h"
 
 #include "Spectrum.h"
+#include "Scorer.h"
 
 #include <fstream>
 
@@ -20,7 +21,12 @@ void XHHC_Scorer::init() {
   print_spectrums_ = false;
   scorer_ = NULL;
   max_mz_ = 0.0;
+  max_bin_ = 0;
   current_spectrum_ = NULL;
+
+  bin_width_ = get_double_parameter("mz-bin-width");
+  bin_offset_ = get_double_parameter("mz-bin-offset");
+
 }
 
 /**
@@ -123,9 +129,9 @@ FLOAT_T XHHC_Scorer::hhcGenScoreXcorr(
   }
 
   max_mz_ = scorer_->getSpMaxMz();
-
+  max_bin_ = scorer_->getMaxBin();
   // create theoretical array
-  theoretical = (FLOAT_T*)mycalloc((size_t)max_mz_, sizeof(FLOAT_T));
+  theoretical = (FLOAT_T*)mycalloc((size_t)max_bin_, sizeof(FLOAT_T));
   
  if (!hhcCreateIntensityArrayTheoretical(ion_series, theoretical)) {
     carp(CARP_ERROR, "failed to create theoretical spectrum for Xcorr");
@@ -222,11 +228,10 @@ bool XHHC_Scorer::hhcCreateIntensityArrayTheoretical(
 
   ION_TYPE_T ion_type;
   int intensity_array_idx = 0;
-  FLOAT_T bin_width = bin_width_mono;
   vector<LinkedPeptide>& ions = ion_series.getIons();
   // while there are ion's in ion iterator, add matched observed peak intensity
   for (vector<LinkedPeptide>::iterator ion = ions.begin(); ion != ions.end(); ++ion) {
-    intensity_array_idx = (int)(ion->getMZ(MONO) / bin_width + 0.5);
+    intensity_array_idx = INTEGERIZE(ion->getMZ(MONO), bin_width_, bin_offset_);
     ion_type = ion->getIonType();
     //ion_charge = ion->getCharge();
     // skip ions that are located beyond max mz limit
@@ -235,7 +240,7 @@ bool XHHC_Scorer::hhcCreateIntensityArrayTheoretical(
     // Add peaks of intensity 50.0 for B, Y type ions. 
     // In addition, add peaks of intensity of 25.0 to +/- 1 m/z flanking each B, Y ion.
     // Skip ions that are located beyond max mz limit
-    if((intensity_array_idx)< max_mz_){
+    if((intensity_array_idx)< max_bin_){
       //if (ion->type() == Y_ION)
       //add_intensity(theoretical, intensity_array_idx, 51);
       Scorer::addIntensity(theoretical, intensity_array_idx, 50);
@@ -244,7 +249,7 @@ bool XHHC_Scorer::hhcCreateIntensityArrayTheoretical(
         Scorer::addIntensity(theoretical, intensity_array_idx - 1, 25);
       }
       if(get_boolean_parameter("use-flanking-peaks") &&
-	   ((intensity_array_idx + 1)< max_mz_)) {
+	 ((intensity_array_idx + 1)< max_bin_)) {
         Scorer::addIntensity(theoretical, intensity_array_idx + 1, 25);
       }
     }
@@ -254,13 +259,17 @@ bool XHHC_Scorer::hhcCreateIntensityArrayTheoretical(
 
 
     if(ion_type == B_ION){
-      int h2o_array_idx = (int)((ion->getMZ(MONO) - (MASS_H2O_MONO/ion->getCharge()) ) / bin_width + 0.5);
-      if (h2o_array_idx < max_mz_)
+      int h2o_array_idx = 
+        INTEGERIZE((ion->getMZ(MONO) - (MASS_H2O_MONO/ion->getCharge())), bin_width_, bin_offset_);
+
+      if (h2o_array_idx < max_bin_)
 	Scorer::addIntensity(theoretical, h2o_array_idx, 10);
       }
 
-      int nh3_array_idx = (int)((ion->getMZ(MONO) -  (MASS_NH3_MONO/ion->getCharge())) / bin_width + 0.5);
-      if (nh3_array_idx < max_mz_) {
+      int nh3_array_idx = 
+        INTEGERIZE((ion->getMZ(MONO) -  (MASS_NH3_MONO/ion->getCharge())),
+		   bin_width_, bin_offset_);
+      if (nh3_array_idx < max_bin_) {
         Scorer::addIntensity(theoretical, nh3_array_idx, 10);
       }
   }

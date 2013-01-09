@@ -49,7 +49,7 @@ commands:</p>
 
 <tr>
 <td><a href="bullseye.html">bullseye</a></td>
-<td>Assign high resolution precursor m/z values to MS/MS data using the Hardkl&ouml;r algorithm
+<td>Assign high resolution precursor m/z values to MS/MS data using the Hardkl&ouml;r algorithm.
 </tr>
 
 <tr>
@@ -90,8 +90,8 @@ Re-rank a collection of PSMs using the Q-ranker algorithm.</td></tr>
 <td>
 <a href="barista.html">barista</a></td>
 <td>
-Rank proteins and assign a q-value, confidence measure, to each
-protein identification .</td></tr> 
+Rank proteins and assign a confidence measure to each
+protein identification.</td></tr> 
 
 
 <tr>
@@ -105,7 +105,7 @@ cross-linked peptide matches</td></tr>
 <td>
 <a href="spectral-counts.html">spectral-counts</a></td>
 <td>
-Score peptides or proteins by one of three quantification methods.</td></tr>
+Quantify peptides or proteins using one of three spectral counting methods.</td></tr>
 
 <tr>
 <td colspan="2"><b>Utilities</b></td>
@@ -115,26 +115,26 @@ Score peptides or proteins by one of three quantification methods.</td></tr>
 <td>
 <a href="crux-predict-peptide-ions.html">predict-peptide-ions</a></td>
 <td>
-Given a peptide and a charge state, predict the ions according to the
-provided options.</td>
+Given a peptide and a charge state, predict the m/z values of the
+resulting fragment ions.</td>
 </tr>
 
 <tr>
 <td><a href="hardklor.html">hardkl&ouml;r</a></td>
-<td>Identify isotopic distributions from high-resolution mass spectra</td>
+<td>Identify isotopic distributions from high-resolution mass spectra.</td>
 </tr>
 
 <tr>
 <td>
 <a href="crux-print-processed-spectra.html">print-processed-spectra</a></td>
 <td>
-Process spectra as for scoring xcorr and print results to file.</td></tr>
+Process spectra as for scoring xcorr and print the results to a file.</td></tr>
 
 <tr>
 <td>
 <a href="crux-generate-peptides.html">generate-peptides</a></td>
 <td>
-Given protein sequencs in a fasta file return a list of peptides
+Extract from a given set of protein sequences a list of peptides
 fitting the specified criteria.</td>
 </tr>
 
@@ -142,8 +142,8 @@ fitting the specified criteria.</td>
 <td>
 <a href="crux-get-ms2-spectrum.html">get-ms2-spectrum</a></td>
 <td>
-Extract one or more MS-MS spectra, specified by scan number, from
-a <code>.ms2</code> file.</td>
+Extract one or more MS/MS spectra, specified by scan number, from
+an <code>MS2</code> file.</td>
 </tr>
 
 <tr>
@@ -160,72 +160,178 @@ Print the Crux version number to standard output, then exit.</td>
 <tr>
 <td>
 <a href="extract-columns.html">extract-columns</a></td>
-<td>Print specified columns from a tab-delimited file</td>
+<td>Print specified columns from a tab-delimited file.</td>
 </tr>
 
 <tr>
 <td>
 <a href="extract-rows.html">extract-rows</a></td>
-<td>Print specified rows from a tab-delimited file</td>
+<td>Print specified rows from a tab-delimited file.</td>
 </tr>
 
 <tr>
 <td>
 <a href="stat-column.html">stat-column</a></td>
-<td>Collect summary statistics from a column in a tab-delimited file</td>
+<td>Collect summary statistics from a column in a tab-delimited file.</td>
 </tr>
 
 <tr>
 <td>
 <a href="sort-by-column.html">sort-by-column</a></td>
-<td>Sort a tab-delimited file by a column</td>
+<td>Sort a tab-delimited file by a column.</td>
 </tr>
-
 
 </table>
 
 <p>
-<b><a href="crux-faq.html">Crux frequently asked questions</a></b></p>
-
-<p>
-<b>Tide</b></p>
-
-<p>
-This version of Crux is released with a demo version of a new search
-engine, <a href="../tide/index.html">Tide</a>.  Tide is an independent
-reimplementation of the SEQUEST<sup>&reg;</sup> algorithm. The immediate ancestor of
-Tide is the Crux <code>search-for-matches</code> command, but Tide has
-been completely re-engineered to achieve a thousandfold improvement in
-speed while exactly replicating Crux XCorr scores.  Currently, Tide is
-not fully integrated with Crux, and is available only in binary
-executable format.</p>
-
-<b>File formats</b>
+<b>File formats</b></p>
 
 <ul>
+<table border="1">
+<tr>
 
-<li>
-<a href="ms2-format.html">MS2 spectrum files</a> (<a href="data/demo.ms2">sample</a>)</li>
+<td>&nbsp;</td>
 
-<li>
-<a href="fasta-format.html">FASTA sequence files</a>
-(<a href="sample.fasta">sample</a>)</li>
+<td>
+              <a href="ms2-format.html">MS1</a>
+</td>
 
-<li>
-Peptide database index files (binary)</li>
+<td>
+<a href="ms2-format.html">MS2</a>
+(<a href="data/demo.ms2">sample</a>)<br>
+mzML (1.0 and 1.1), <br>mzXML, MGF, CMS2
+</td>
 
-<li>
-<a href="sqt-format.html">Text SQT files for representing PSMs.</a>
-(<a href="data/target.sqt">sample</a>)</li>
+<td>
+<a href="fasta-format.html">FASTA</a><br>
+(<a href="sample.fasta">sample</a>)</td>
 
-<li>
-<a href="txt-format.html">Text feature files for representing PSMs.</a>
-(<a href="data/search.target.txt">sample</a>)</li>
+<td>
+database index</td>
 
-<li>
-<a href="parameter-file.html">Crux parameter files</a>
-(<a href="default.params">sample</a>)</li>
+<td>
+<a href="txt-format.html">Tab-delimited text</a><br>
+(<a href="data/search.target.txt">sample</a>)</td>
 
+<td>
+pepXML</td>
+
+<td>mzIdentML</td>
+
+<td>
+<a href="parameter-file.html">Crux parameters</a><br>
+(<a href="default.params">sample</a>)</td>
+</tr>
+
+<tr bgcolor="#DEDEDE">
+<td>bullseye</td>
+<td>in</td>
+<td>in</td>
+<td>in</td>
+<td>&nbsp;</td>
+<td>out</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>in/out</td>
+</tr>
+
+<tr>
+<td>create-index</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>in</td>
+<td>out</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>in/out</td>
+</tr>
+
+<tr bgcolor="#DEDEDE">
+<td>search-for-matches</td>
+<td>&nbsp;</td>
+<td>in</td>
+<td>in</td>
+<td>in</td>
+<td>out</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>in/out</td>
+</tr>
+
+<tr>
+<td>calibrate-scores</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>in</td>
+<td>&nbsp;</td>
+<td>in/out</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>in/out</td>
+</tr>
+
+<tr bgcolor="#DEDEDE">
+<td>percolator</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>in</td>
+<td>&nbsp;</td>
+<td>in/out</td>
+<td>out</td>
+<td>&nbsp;</td>
+<td>in/out</td>
+</tr>
+
+<tr>
+<td>q-ranker</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>in</td>
+<td>&nbsp;</td>
+<td>in/out</td>
+<td>out</td>
+<td>&nbsp;</td>
+<td>in/out</td>
+</tr>
+
+<tr bgcolor="#DEDEDE">
+<td>barista</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>in</td>
+<td>&nbsp;</td>
+<td>in/out</td>
+<td>out</td>
+<td>&nbsp;</td>
+<td>in/out</td>
+</tr>
+
+<tr>
+<td>search-for-xlinks</td>
+<td>&nbsp;</td>
+<td>in</td>
+<td>in</td>
+<td>in</td>
+<td>out</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>in/out</td>
+</tr>
+
+<tr bgcolor="#DEDEDE">
+<td>spectral-counts</td>
+<td>&nbsp;</td>
+<td>in</td>
+<td>in</td>
+<td>in</td>
+<td>in/out</td>
+<td>in</td>
+<td>in</td>
+<td>in/out</td>
+</tr>
+
+</table>
 </ul>
 
 <p>
@@ -257,28 +363,16 @@ Peptide database index files (binary)</li>
 <p>
 <b>Download</b>
 
-<p>
-Two versions of Crux are available:</p>
-
 <ul>
-
-<li>
-You can download a fully functional version of
-Crux <a href="download/index.html">here</a> once you agree to the
-license agreement and obtain a
-password <a href="http://depts.washington.edu/ventures/UW_Technology/Express_Licenses/crux.php">here</a>.
-The Crux source code is freely available for academic use and can be
-licensed for commercial use.  Currently, a single-user license costs
-US $50.</li>
-
-<li>
-An open source version of Crux can be downloaded <a href="open_source_download">here</a>.
-This version of Crux is covered by an <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache
-license</a>.  Due to intellectual property issues, this version of
-Crux has the search capability disabled, but all of the other Crux
-tools can be used in conjunction with a separate search engine.</li>
-
+Crux source code and binaries can be
+downloaded <a href="download/index.html">here</a>. 
+Crux is covered by an <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache
+license</a>.
 </ul>
+
+
+<p>
+<b><a href="crux-faq.html">Crux frequently asked questions</a></b></p>
 
 <p>
 To receive announcements of new versions, sign up for the Crux users 
@@ -308,7 +402,7 @@ can be found <a href="contributors.html">here</a>.</p>
 
 <table>
 <tr>
-<td><img src="nigms.png"></td>
+<td><img src="nigms_logo.png" alt="nigms_logo"></td>
 <td>
 <p>Maintenance and development of Crux is funded by the National
 Institute of General Medical Sciences grants R01&nbsp;GM096306

@@ -10,6 +10,8 @@
 #include "parameter.h"
 #include "utils.h"
 
+using namespace std;
+
 /**
  * Constants
  */
@@ -127,6 +129,12 @@ void carp( int verbosity, const char* format, ...) {
     exit(1);
 #endif
   }
+}
+
+void carp ( int verbosity, string& msg) {
+
+  string carp_msg = msg;
+  carp(verbosity, "%s", carp_msg.c_str());
 }
 
 /**

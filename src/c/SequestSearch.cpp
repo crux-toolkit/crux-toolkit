@@ -47,7 +47,6 @@ SequestSearch::~SequestSearch() {
  * 
  * then this is passed everything after the 'crux' token
  */
-#ifdef SEARCH_ENABLED // Discard this code in open source release
 int SequestSearch::main(int argc,   ///< number of cmd line tokens
                         char** argv)///< array of cmd line tokens
 {
@@ -56,6 +55,7 @@ int SequestSearch::main(int argc,   ///< number of cmd line tokens
     "verbosity",
     "parameter-file",
     "overwrite",
+    "spectrum-parser",
     "spectrum-min-mass",
     "spectrum-max-mass",
     "spectrum-charge",
@@ -69,14 +69,14 @@ int SequestSearch::main(int argc,   ///< number of cmd line tokens
   int num_options = sizeof(option_list) / sizeof(char*);
 
   // Define required command line arguments 
-  const char* argument_list[] = {"ms2 file", "protein database"};
+  const char* argument_list[] = {"ms2 file", "protein-database"};
   int num_arguments = sizeof(argument_list) / sizeof(char*);
 
   initialize(argument_list, num_arguments,
                  option_list, num_options, argc, argv);
 
   // Get input: protein file
-  char* input_file = get_string_parameter("protein database");
+  char* input_file = get_string_parameter("protein-database");
 
   // Prepare input, fasta or index 
   Index* index = NULL;
@@ -244,27 +244,6 @@ int SequestSearch::main(int argc,   ///< number of cmd line tokens
   
   return 0;
 }
-
-#else // SEARCH_ENABLED not defined
-int SequestSearch::main(int argc,   ///< number of cmd line tokens
-                        char** argv)///< array of cmd line tokens
-{
-  (void) argc;
-  (void) argv;
-  fputs(
-    "You are using the open source version of Crux. Due to intellectual\n"
-    "property issues, we are unable to provide database search functionality\n"
-    "in this version. To obtain a licence for the full functional version of\n"
-    "Crux that includes the database search tools, please visit the following URL:\n"
-    "\nhttp://depts.washington.edu/ventures/UW_Technology/Express_Licenses/crux.php\n",
-    stderr
-  );
-  return 1;
-}
-
-#endif // SEARCH_ENABLED
-
-
 
 /**
  * \brief Pring the target and decoy match collections to their

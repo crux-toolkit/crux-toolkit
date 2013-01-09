@@ -20,13 +20,13 @@ relative quantification values for the proteins by running the
 command:<br>
 
 <div class=code>
-<code>$ crux spectral-counts ./qranker-output/q-ranker.target.psms.txt small-yeast.fasta</code>
+<code>$ crux spectral-counts --protein-database yeast-index ./qranker-output/q-ranker.target.psms.txt</code>
 </div>
 <br>
 Alternatively, you can use the pepXML output by q-ranker using the command:<br>
 <br>
 <div class=code>
-<code>$ crux spectral-counts ./crux-output/q-ranker_output.xml small-yeast.fasta</code>
+<code>$ crux spectral-counts --protein-database yeast-index ./qranker-output/q-ranker_output.xml</code>
 </div>
 
 <p>While the command is running, you will see output like this
@@ -75,10 +75,19 @@ for each protein.  To select which measure is computed, see the
 <p><code>crux spectral-counts</code> also supports using the Peptide Prophet probability provided in the pepXML file.  Use the command:<br>
 <br>
 <div class=code>
-<code>$ crux spectral-counts --custom-threshold peptideprophet --threshold 0.9 --threshold-min F ./crux-output/q-ranker_output.xml small-yeast.fasta</code>
+<code>$ crux spectral-counts --protein-database yeast-index --threshold-type custom --custom-threshold-name peptideprophet --threshold 0.9 --custom-threshold-min F ./qranker-output/q-ranker_output.xml</code>
 </div>          
 This code will filter out matches whose Peptide Prophet probability is &lt; 0.9 and calculate NSAF for the proteins of the remaining PSMs.<br>
 
+<h3>Using mzIdentML files with spectral-counts</h3>
+<p><code>crux spectral-counts</code> also supports mzIdentML as input.  For example,  
+<div class=code>
+<code>$ crux spectral-counts --measure RAW file.mzid</code>
+</code>
+</p>
+<p>
+If the protein sequences are not provided in the mzIdentML file, then you will have to provide
+a database using the <code>protein-database</code> parameter for the NSAF, dNSAF, EMPAI, and SIN metrics.
 </p>
 
 </div><!--end main-->

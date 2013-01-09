@@ -294,9 +294,14 @@ class Match {
   /**
    * get the custom score
    */
-  FLOAT_T getCustomScore(
-    const std::string& match_score_name ///< the name of the score -in
+  bool getCustomScore(
+    const std::string& match_score_name, ///< the name of the score -in
+    FLOAT_T& score ///< the value of the score -out
     );
+
+  void getCustomScoreNames(
+    std::vector<std::string>& custom_score_names
+  );
 
   bool isDecoy();
 
@@ -412,6 +417,7 @@ class Match {
     Scorer* scorer ///< the scorer from which to extract information -in
     );
 
+  void calcBYIonFractionMatched();
 
   /**
    * sets the match b_y_ion_matched
@@ -426,20 +432,19 @@ class Match {
   FLOAT_T getBYIonFractionMatched();
 
   /**
-   * set the match b_y_ion_matched
+   * sets the match b_y_ion_matched
    */
-  void setBYIonMatched(
-    int matched ///< the number of ions matched
-    );
+  void setBYIonMatched(int matched);
 
   /**
    * gets the match b_y_ion_matched
    */
   int getBYIonMatched();
 
-  void setBYIonPossible(
-    int possible ///< the number of possible ions to match
-    );
+  /**
+   * sets the match b_y_ion_possible
+   */
+  void setBYIonPossible(int possible);
 
   /**
    * gets the match b_y_ion_possible

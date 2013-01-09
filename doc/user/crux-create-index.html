@@ -77,8 +77,7 @@ The minimum length of the peptides to place in the index. Default = 6.
 The maximum length of the peptides to place in the index. Default = 50.
 
 <LI>
-<code>--enzyme &lt;trypsin|chymotrypsin|elastase|clostripain|cyanogen-bromide|idosobenzoate|proline-endopeptidase|staph-protease|modified-chymotrypsin|elastase-trypsin-chymotrypsin|no-enzyme&gt;
-</code> &ndash;
+<code>--enzyme trypsin|chymotrypsin|elastase|clostripain|cyanogen-bromide|idosobenzoate|proline-endopeptidase|staph-protease|modified-chymotrypsin|elastase-trypsin-chymotrypsin|no-enzyme</code> &ndash;
 Enzyme to use for <i>in silico</i> digestion of protein
 sequences. Used in conjunction with the <code>digestion</code>
 and <code>missed-cleavages</code> options. Use 'no-enzyme' for
@@ -92,8 +91,7 @@ modified-chymotrypsin [FWYL]|{P}, elastase-trypsin-chymotrypsin
 D). Default = trypsin.
 
 <li>
-<code>--custom-enzyme &lt;residues before cleavage | residues after cleavage
-&gt;</code> &ndash
+<code>--custom-enzyme &lt;residues before cleavage&gt;|&lt;residues after cleavage&gt;</code> &ndash;
 Specify rules for <i>in silico</i> digestion of protein sequences.
 Overrides the <code>enzyme</code> option.  Two lists of residues are
 given enclosed in square brackets or curly braces and separated by a
@@ -107,7 +105,7 @@ which is represented as <code>[RK]|{P}</code>.  AspN cuts after any
 residue but only before D which is represented as <code>[X]|[D]</code>.
 
 <LI>
-<code>--digestion &lt;full-digest|partial-digest&gt; </code>&ndash
+<code>--digestion full-digest|partial-digest </code>&ndash;
 Degree of digestion used to generate peptides . Either both ends
 (full-digest) or at least one end (partial-digest) of a peptide must
 conform to enzyme specificity rules. Used in conjunction with
@@ -121,12 +119,12 @@ index peptides containing up to &lt;int&gt; missed cleavage sites.
 Default = 0.</li>
 
 <LI>
-<code>--isotopic-mass &lt;average|mono&gt;</code> &ndash;
+<code>--isotopic-mass average|mono</code> &ndash;
 Specify the type of isotopic masses to use when calculating the
 peptide mass. Default = average.</li>
 
 <li>
-<code>--peptide-list &lt;T|F&gt;</code> &ndash; Create in the output
+<code>--peptide-list T|F</code> &ndash; Create in the output
 directory a text file listing all of the peptides in the database,
 along with their neutral masses, one per line.  Default = F.</li>
 
@@ -137,10 +135,10 @@ Possible values are <code>none, reverse, protein-shuffle,
 peptide-shuffle</code>. Use 'reverse' to reverse each protein sequence,
 'protein-shuffle' to shuffle each protein sequence, or 'peptide-shuffle'
 to shuffle the sequence between enzyme cleavage sites, leaving the
-termini in place. Use 'none' for no decoys.  Default=protein-shuffle. 
+termini in place. Use 'none' for no decoys.  Default=peptide-shuffle. 
 
 <li>
-<code>--overwrite &lt;T|F&gt;</code> Replace existing files if true (T) or
+<code>--overwrite T|F</code> Replace existing files if true (T) or
 fail when trying to overwrite a file if false (F). Default = F.
 
 <LI>

@@ -22,6 +22,8 @@
 #include "IonFilteredIterator.h"
 #include "Spectrum.h"
 
+using namespace Crux;
+
 static const int BINARY_GMTK = 1;
 static const int PRINT_NULL_IONS = 1;
 static const int MIN_FRAMES = 3;

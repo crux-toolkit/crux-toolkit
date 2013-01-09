@@ -25,6 +25,7 @@
 #include "MSToolkit/include/Spectrum.h"
 
 using namespace std;
+namespace pzd = pwiz::msdata;
 
 /**
  * Default constructor.
@@ -253,6 +254,39 @@ void Spectrum::printSqt(
   }
   */
 }
+
+void Spectrum::copyFrom(Spectrum *src) {
+
+ first_scan_ = src->first_scan_;
+ last_scan_ = src->last_scan_;
+ precursor_mz_ = src->precursor_mz_;
+ zstates_ = src->zstates_;
+ min_peak_mz_ = src->min_peak_mz_;
+ max_peak_mz_ = src->max_peak_mz_;
+ total_energy_ = src->total_energy_;
+ filename_ = src->filename_;
+ i_lines_v_  = src->i_lines_v_;
+ d_lines_v_ = src-> d_lines_v_;
+ has_peaks_ = src-> has_peaks_;
+ sorted_by_mz_ = src->sorted_by_mz_;
+ sorted_by_intensity_ = src->sorted_by_intensity_;
+ has_mz_peak_array_ = src->has_mz_peak_array_;
+ // copy each peak
+ for(int peak_idx=0; peak_idx < (int)src->peaks_.size(); ++peak_idx){
+   this->addPeak(src->peaks_[peak_idx]->getIntensity(),
+                  src->peaks_[peak_idx]->getLocation());
+  }
+
+  /*  Should we do this??
+  if( old_spectrum.mz_peak_array ){
+    populateMzPeakArray();
+  }
+  */
+
+}
+
+
+
 
 /**
  * Parses a spectrum from an .mgf file
@@ -914,6 +948,84 @@ bool Spectrum::parseMstoolkitSpectrum
     }
   } else { // if no charge states detected, decide based on spectrum
     assignZState(); 
+  }
+
+  return true;
+}
+
+/**
+ * Transfer values from a proteowizard SpectrumInfo object to the
+ * crux spectrum.
+ */
+bool Spectrum::parsePwizSpecInfo(const pzd::SpectrumPtr& pwiz_spectrum){
+  // clear any existing values
+  zstates_.clear();
+  ezstates_.clear();
+  free_peak_vector(peaks_);
+  i_lines_v_.clear();
+  d_lines_v_.clear();
+  if( mz_peak_array_ ){ free(mz_peak_array_); }
+
+  // assign new values
+  first_scan_ = pzd::id::valueAs<int>(pwiz_spectrum->id, "scan");
+  last_scan_ = first_scan_;
+
+  // get peaks
+  int num_peaks = pwiz_spectrum->defaultArrayLength;
+  vector<double>& mzs = pwiz_spectrum->getMZArray()->data;
+  vector<double>& intensities = pwiz_spectrum->getIntensityArray()->data;
+  for(int peak_idx = 0; peak_idx < num_peaks; peak_idx++){
+    Peak* peak = new Peak(intensities[peak_idx], mzs[peak_idx]);
+    peaks_.push_back(peak);
+  }
+  has_peaks_ = true;
+
+  // get precursor m/z and charge
+  // is there exactly one precursor?
+  if( pwiz_spectrum->precursors.size() != 1 ){  
+    carp(CARP_FATAL, 
+         "Spectrum %d has more than one precursor.", first_scan_);
+  }
+  // get the isolation window as the precursor m/z
+  pzd::IsolationWindow iso_window = 
+                       pwiz_spectrum->precursors[0].isolationWindow;
+  precursor_mz_ =
+    iso_window.cvParam(pzd::MS_isolation_window_target_m_z).valueAs<double>();
+
+  // each charge state(s) stored in selectedIon(s)
+  // is there at least one selected ion?
+  vector<pzd::SelectedIon> ions = pwiz_spectrum->precursors[0].selectedIons;
+  if( ions.empty() ){
+    carp(CARP_FATAL, "No selected ions in spectrum %d.", first_scan_);
+  }
+
+  // possible charge states will all be stored in the first selected ion
+  if( ions[0].hasCVParam(pzd::MS_possible_charge_state) ){
+    vector<pzd::CVParam> charges = 
+      ions[0].cvParamChildren(pzd::MS_possible_charge_state);
+
+    for(size_t charge_idx = 0; charge_idx < charges.size(); charge_idx++){
+      SpectrumZState zstate;
+      zstate.setMZ(precursor_mz_, charges[charge_idx].valueAs<int>());
+      zstates_.push_back(zstate);
+    }
+  }
+  // bullseye-determined charge states and accurate masses will be stored
+  // one per selected ion
+  else if( ions[0].hasCVParam(pzd::MS_charge_state) ){
+
+    // get each charge state and possibly the associated mass
+    for(size_t ion_idx = 0; ion_idx < ions.size(); ion_idx++){
+      int charge = ions[ion_idx].cvParam(pzd::MS_charge_state).valueAs<int>();
+      FLOAT_T accurate_mass = 
+        ions[ion_idx].cvParam(pzd::MS_accurate_mass).valueAs<FLOAT_T>();
+ 
+      SpectrumZState zstate;
+      zstate.setSinglyChargedMass(accurate_mass, charge);
+      ezstates_.push_back(zstate);
+    }
+  } else { // we have no charge information
+    assignZState(); //do choose charge and add +1 or +2,+3
   }
 
   return true;

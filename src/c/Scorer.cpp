@@ -91,13 +91,6 @@ static const int NUM_REGIONS = 10;
  */ 
 static const int MAX_PER_REGION = 50;
 
-/**
- * Macro for converting floating point to integers.
- */
-
-#define INTEGERIZE(VALUE,BIN_SIZE,BIN_OFFSET) \
-  ((int)((VALUE / BIN_SIZE) + 0.5 + BIN_OFFSET))
-
 
 int ion_counter=0;
 
@@ -1631,7 +1624,7 @@ double score_logp_bonf_weibull(
     return 0.0;
   }
   else {
-    double p_value = exp(-pow(temp/eta, beta));
+    double p_value = exp(-pow((double) temp/eta, (double) beta));
     carp(CARP_DETAILED_DEBUG, "Stat: pvalue before = %.15f", p_value);
 
     // The Bonferroni correction 

@@ -61,19 +61,23 @@ int SpectralCounts::main(int argc, char** argv) {
     "parameter-file",
     "parsimony",
     "threshold",
+    "threshold-type",
     "input-ms2",
+    "spectrum-parser",
     "fileroot",
     "output-dir",
     "overwrite",
     "unique-mapping",
     "quant-level",
     "measure",
-    "custom-threshold",
-    "threshold-min"
+    "custom-threshold-name",
+    "custom-threshold-min",
+    "mzid-use-pass-threshold",
+    "protein-database"
   };
   const char* argument_list[] = {
     "input PSMs",
-    "protein database"
+    
   };
 
   int num_options = sizeof(option_list) / sizeof(char*);
@@ -150,19 +154,16 @@ int SpectralCounts::main(int argc, char** argv) {
 void SpectralCounts::getParameterValues(){
   psm_file_ = get_string_parameter_pointer("input PSMs");
   threshold_ = get_double_parameter("threshold");
-  database_name_ = get_string_parameter_pointer("protein database");
+  database_name_ = get_string_parameter_pointer("protein-database");
   unique_mapping_ = get_boolean_parameter("unique-mapping");
   quantitation_ = get_quant_level_type_parameter("quant-level");
   parsimony_ = get_parsimony_type_parameter("parsimony");
   measure_ = get_measure_type_parameter("measure");
   bin_width_ = get_double_parameter("mz-bin-width");
   
-  custom_threshold_name_ = get_string_parameter_pointer("custom-threshold");
-  if (custom_threshold_name_ != "__NULL_STR") {
-    custom_threshold_ = true;
-  }
-
-  threshold_min_ = get_boolean_parameter("threshold-min");
+  threshold_type_ = get_threshold_type_parameter("threshold-type");
+  custom_threshold_name_ = get_string_parameter_pointer("custom-threshold-name");
+  threshold_min_ = get_boolean_parameter("custom-threshold-min");
 }
 
 /**
@@ -590,34 +591,88 @@ void SpectralCounts::getPeptideScores()
  */
 void SpectralCounts::filterMatches() {
 
-  MatchCollection* match_collection = MatchCollectionParser::create(
+  match_collection_ = MatchCollectionParser::create(
     psm_file_.c_str(),
     database_name_.c_str());
-    
-    if (custom_threshold_) {
-      filterMatchesCustom(match_collection);
-    } else {
-      filterMatchesQValue(match_collection);
-    }
+  carp(CARP_INFO, "Number of matches:%d", match_collection_->getMatchTotal());
+
+  switch(threshold_type_) {
+    case THRESHOLD_NONE:
+      filterMatchesNone();
+      break;
+    case THRESHOLD_QVALUE:
+      filterMatchesQValue();
+      break;
+    case THRESHOLD_CUSTOM:
+      filterMatchesCustom();
+      break;
+    case THRESHOLD_INVALID:
+    case NUMBER_THRESHOLD_TYPES:
+      carp(CARP_FATAL, "Invalid threshold type");
+  }
+
 }
+
+void SpectralCounts::filterMatchesNone() {
+
+  MatchIterator match_iterator(match_collection_);
+
+  while(match_iterator.hasNext()) {
+    Match* current_match = match_iterator.next();
+    if (!current_match->isDecoy()) {
+      matches_.insert(current_match);
+    }
+  }
+
+}
+
+void SpectralCounts::invalidCustomScore() {
+
+    ostringstream oss;
+
+    oss << "Need valid name for custom threshold.  Available ones are:";
+
+    //print out custom names
+    for (int idx=0;idx < NUMBER_SCORER_TYPES;idx++) {
+    
+      if (match_collection_->getScoredType((SCORER_TYPE_T)idx)) {
+        oss << endl << "\t" << scorer_type_to_string((SCORER_TYPE_T)idx);
+      }
+
+    }
+    
+
+    vector<string> custom_score_names;
+    match_collection_->getCustomScoreNames(custom_score_names);
+
+    for (int idx=0;idx < custom_score_names.size();idx++) {
+      oss << endl << "\t" << custom_score_names[idx];
+    }
+
+    string die_str = oss.str();
+    carp(CARP_FATAL, die_str);
+}
+
 
 /**
  * filters matches based upon a custom threshold (not q-value)
  */
-void SpectralCounts::filterMatchesCustom(
-  MatchCollection* match_collection ///< match collection to filter
-  ) {
+void SpectralCounts::filterMatchesCustom() {
+
+  if (custom_threshold_name_ == string("__NULL_STR")) {
+    invalidCustomScore();
+  }
+
 
   //first try to map from tab delimited headers
   SCORER_TYPE_T scorer;
   bool tab_header = string_to_scorer_type(custom_threshold_name_.c_str(), &scorer);
 
   if (tab_header) {
-    //must be a custom field, this can happen with pep xml.
-    filterMatchesScore(match_collection, scorer);    
-    
+    //must be a custom field, this can happen with pep xml or mzid.
+    filterMatchesScore(scorer);    
   } else {
-    filterMatchesCustomScore(match_collection);
+    filterMatchesCustomScore();
   }
 
 
@@ -627,11 +682,10 @@ void SpectralCounts::filterMatchesCustom(
  * filters matches based upon a SCORER_TYPE_T
  */
 void SpectralCounts::filterMatchesScore(
-  MatchCollection* match_collection, ///< match collection to filter
   SCORER_TYPE_T scorer ///< scorer to use
   ) {
 
-  MatchIterator match_iterator(match_collection, scorer, false);
+  MatchIterator match_iterator(match_collection_, scorer, false);
   
   while (match_iterator.hasNext()) {
     Match* match = match_iterator.next();
@@ -652,21 +706,25 @@ void SpectralCounts::filterMatchesScore(
 /**
  * filters matches based upon a custom score that is not SCORER_TYPE_T
  */
-void SpectralCounts::filterMatchesCustomScore(
-  MatchCollection* match_collection ///< match collection to filter
-  ) {
+void SpectralCounts::filterMatchesCustomScore() {
 
-  MatchIterator match_iterator(match_collection);
+  MatchIterator match_iterator(match_collection_);
 
   while(match_iterator.hasNext()) {
     Match* match = match_iterator.next();
     if (!match->isDecoy()) {
+      FLOAT_T score;
+      bool success = match->getCustomScore(custom_threshold_name_, score);
+  
+      if (!success) {
+        invalidCustomScore();
+      }
       if (threshold_min_) {
-        if (match->getCustomScore(custom_threshold_name_) <= threshold_) {
+        if (score <= threshold_) {
           matches_.insert(match);
         }
       } else {
-        if (match->getCustomScore(custom_threshold_name_) >= threshold_) {
+        if (score >= threshold_) {
           matches_.insert(match);
         }
       }
@@ -674,22 +732,22 @@ void SpectralCounts::filterMatchesCustomScore(
   }
 }
 
-void SpectralCounts::filterMatchesQValue(
-  MatchCollection* match_collection
-  ) {
+void SpectralCounts::filterMatchesQValue() {
   //assume we are using 
   // figure out which qvalue we are using
-  SCORER_TYPE_T qval_type = get_qval_type(match_collection);
+  SCORER_TYPE_T qval_type = get_qval_type(match_collection_);
   if( qval_type == INVALID_SCORER_TYPE ){
     carp(CARP_FATAL, "The matches in %s do not have q-values from percolator,"
-      " q-ranker, or compute-q-values.\n", psm_file_.c_str());
+                     " q-ranker, or compute-q-values.\n"
+                     " please provide file with q-values or "
+                     "use threshold-type=none, custom", psm_file_.c_str());
   }
 
   carp(CARP_INFO,
     "filterMatches(): Getting match iterator for %s", 
     scorer_type_to_string(qval_type));
 
-  MatchIterator* match_iterator = new MatchIterator(match_collection, qval_type, true);
+  MatchIterator* match_iterator = new MatchIterator(match_collection_, qval_type, true);
 
   while(match_iterator->hasNext()){
     Match* match = match_iterator->next();
@@ -727,6 +785,8 @@ SCORER_TYPE_T SpectralCounts::get_qval_type(
     scored_type = QRANKER_QVALUE;
   } else if(match_collection->getScoredType(DECOY_XCORR_QVALUE)){
     scored_type = DECOY_XCORR_QVALUE;
+  } else if(match_collection->getScoredType(BARISTA_QVALUE)) {
+    scored_type = BARISTA_QVALUE;
   }
 
   return scored_type;

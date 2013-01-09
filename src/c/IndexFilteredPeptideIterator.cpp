@@ -8,6 +8,7 @@
 #include <vector>
 
 using namespace std;
+using namespace Crux;
 
 /**
  * Instantiates a new index_filtered_peptide_iterator from a index.

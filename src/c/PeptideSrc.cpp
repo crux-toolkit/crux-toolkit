@@ -23,6 +23,8 @@
 
 #include "DelimitedFile.h"
 #include "MatchFileReader.h"
+#include "MatchCollectionParser.h"
+
 
 using namespace std;
 using namespace Crux;
@@ -195,8 +197,8 @@ int PeptideSrc::getStartIdx() {
  */
 char* PeptideSrc::getSequencePointer() {
 
-  char* start_pointer = parent_protein_->getSequencePointer();
-  return &(start_pointer[start_idx_ - 1]);
+  return parent_protein_->getSequencePointer(start_idx_ - 1);
+
 }
 
 /**
@@ -320,6 +322,7 @@ bool PeptideSrc::parseTabDelimited(
       DIGEST_T digestion = 
 	string_to_digest_type((char*)file.getString(CLEAVAGE_TYPE_COL).c_str()); 
   
+
       Protein* parent_protein = NULL;
       int start_index = 1;
 
@@ -331,66 +334,40 @@ bool PeptideSrc::parseTabDelimited(
 
       if (left_paren_index == string::npos) {
 	//protein id is the string.
-	string protein_id_string = protein_id;
-	
-	parent_protein =
-	  database->getProteinByIdString(protein_id_string.c_str());
-	
-	if (parent_protein == NULL) {
-	  if( decoy_database != NULL ){
-	    parent_protein =
-	      decoy_database->getProteinByIdString(protein_id_string.c_str());
-	  }
-	  if (parent_protein == NULL) {
-	    carp(CARP_WARNING, "Can't find protein %s",protein_id_string.c_str());
+        bool is_decoy;
+
+        parent_protein=MatchCollectionParser::getProtein(
+          database, decoy_database, protein_id, is_decoy);
+        if (parent_protein == NULL) {
+	    carp(CARP_WARNING, "Can't find protein %s",protein_id.c_str());
 	    continue;
-	  }
 	}
 	
-	//find the start index by searching the protein sequence.
-	string protein_sequence(parent_protein->getSequencePointer());
 	
-	//if sequence is decoy sequence, recover the position from
-	//the unshuffled sequence.
-	string sequence;
-	
-	if (file.empty(UNSHUFFLED_SEQUENCE_COL)) {
-	  sequence = file.getString(SEQUENCE_COL);
-	} else {
-	  sequence = file.getString(UNSHUFFLED_SEQUENCE_COL);
-	}
-	size_t pos = protein_sequence.find(sequence);
-	
-	if (pos == string::npos) {
+	//find the start index
+        string sequence = file.getString(SEQUENCE_COL);
+        start_index = parent_protein->findStart(sequence, "", "");
+	if (start_index == -1) {
 	  carp(CARP_FATAL, "Can't find sequence %s in %s:%s",
 	       sequence.c_str(),
-	       protein_id_string.c_str(),
-	       protein_sequence.c_str());
-	  pos = 0;
+	       protein_id.c_str());
 	}
-	start_index = (int)pos + 1;
-	
       } else {
 	string protein_id_string = protein_id.substr(0, left_paren_index);
 	string peptide_start_index_string = protein_id.substr(left_paren_index+1, 
 							   protein_id.length() - 1);
-	
+
+        bool is_decoy;    
 	//  set fields in new peptide src
-	parent_protein =
-	  database->getProteinByIdString(protein_id_string.c_str());
-	
-	if (parent_protein == NULL) {
-	  if( decoy_database != NULL ){
-	    parent_protein =
-	      decoy_database->getProteinByIdString(protein_id_string.c_str());
-	  }
-	  if (parent_protein == NULL) {
-	    carp(CARP_WARNING, "Can't find protein %s", protein_id.c_str());
-	    continue;
-	  }
-	}
-	
+        parent_protein = MatchCollectionParser::getProtein(
+          database, decoy_database, protein_id_string, is_decoy);
+
 	from_string<int>(start_index, peptide_start_index_string); 
+
+        if (parent_protein -> isPostProcess()) {
+          //TODO - Find some way to keep the original start index.
+          start_index = parent_protein->findStart(file.getString(SEQUENCE_COL), "", "");
+        }
       }
       // set parent protein of the peptide src
       peptide_src->setParentProtein(parent_protein);

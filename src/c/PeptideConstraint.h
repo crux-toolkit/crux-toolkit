@@ -75,7 +75,7 @@ class PeptideConstraint {
    * \returns TRUE if the constraint is satisified. FALSE if not.
    */
   bool isSatisfied(
-   Peptide* peptide ///< the query peptide -in   
+   Crux::Peptide* peptide ///< the query peptide -in   
    );
 
   /**

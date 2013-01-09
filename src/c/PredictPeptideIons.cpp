@@ -31,6 +31,7 @@
 #include "Peptide.h"
 
 using namespace std;
+using namespace Crux;
 
 /**
  * \returns A blank PredictPeptideIons object.
@@ -114,19 +115,12 @@ int PredictPeptideIons::main(int argc, char** argv) {
    neutral_loss_count[FLANK] = (int)is_flanking;
    neutral_loss_count[ISOTOPE] = isotope_count;
 
-  int max_charge = -1;
-  if (strcmp(max_ion_charge,"peptide") == 0) {
-    max_charge = max(1,charge_state-1);
-  } else {
-    max_charge = min(atoi(max_ion_charge), charge_state);
-  }
-
   // create ion_constraint
   MASS_TYPE_T frag_masses = get_mass_type_parameter("fragment-mass");
   
   IonConstraint* ion_constraint = 
   //  new_ion_constraint(MONO, max_charge, ion_type, use_precursor_ions);
-    new IonConstraint(frag_masses, max_charge, ion_type, use_precursor_ions);
+    new IonConstraint(frag_masses, charge_state, ion_type, use_precursor_ions);
 
    
    // set ion_constraint3 modification counts, if modifications should occur

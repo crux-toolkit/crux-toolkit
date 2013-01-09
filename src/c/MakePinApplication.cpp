@@ -78,7 +78,7 @@ int MakePinApplication::main(int argc, char** argv) {
   /* Define required command line arguments */
   const char* argument_list[] = {"target input", 
     "decoy input",
-    "protein database"
+    "protein-database"
   };
   int num_arguments = sizeof(argument_list) / sizeof(char*);
 
@@ -97,7 +97,7 @@ int MakePinApplication::main(int argc, char** argv) {
   //Get input : decoy 
   char* decoy_path = get_string_parameter("decoy input");
   //Get input : protein 
-  char* protein_dbase = get_string_parameter("protein database");
+  char* protein_dbase = get_string_parameter("protein-database");
   //prepare output file
 
   //create MatchColletion 

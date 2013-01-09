@@ -8,15 +8,15 @@ import math
 usage = """USAGE: make-qq-plot.py <p-values> <root>
 
 Compare a given set of p-values to the uniform distribution by
-creating a QQ plot with log-log axes.  The program outputs three
-files: a gnuplot script (<root>.gnuplot), the data to be plotted
-(<root>.txt) and the plot itself (<root>.png).  Note that the stored
-values are downsampled to avoid having too many points in the plot.
+creating a QQ plot with log-log axes.  The input p-values are one per
+line.  The program outputs three files: a gnuplot script
+(<root>.gnuplot), the data to be plotted (<root>.txt) and the plot
+itself (<root>.png).  Note that the stored values are downsampled to
+avoid having too many points in the plot.
 
 
 Options:
   -no-log-scale
-  -column-header <string>  Header of column from which to get p-values.
   -minus-natural-log       Input values are negative log base e.
   -format png|eps          (default=png)
   -fontsize <int>          (only effective with "-format eps")
@@ -28,24 +28,11 @@ standard input.
 """
 
 ###############################################################################
-# Find a given word in a tab-delimited string of words.
-# Return the index.
-def findWord(header, word):
-
-  words = header.split("\t")
-  for index in range(0, len(words)):
-    if (words[index] == word):
-      return(index)
-  sys.stderr.write("Can't find %s in %s.\n" % (word, header))
-  sys.exit(1)
-
-###############################################################################
 # MAIN
 ###############################################################################
 
 # Set default values.
 log_scale = 1
-column_header = ""
 log_values = 0
 file_format = "png"
 font_size = 24
@@ -58,9 +45,6 @@ while (len(sys.argv) > 2):
   sys.argv = sys.argv[1:]
   if (next_arg == "-no-log-scale"):
     log_scale = 0
-  elif (next_arg == "-column-header"):
-    column_header = sys.argv[0]
-    sys.argv = sys.argv[1:]
   elif (next_arg == "-minus-natural-log"):
     log_values = 1
   elif (next_arg == "-format"):
@@ -86,37 +70,22 @@ if (pvalue_filename == "-"):
 else:
   pvalue_file = open(pvalue_filename, "r")
 
-# If a header string was specified, find the relevant column.
-if (column_header != ""):
-  header = pvalue_file.readline().rstrip()
-  column_index = findWord(header, column_header)
-  sys.stderr.write("Reading p-values from column %d.\n" % column_index)
-else:
-  column_index = 0
-
-# Read the p-values from the specified column.
+# Read the p-values.
 pvalues = []
 for line in pvalue_file:
   line = line.rstrip()
-  words = line.split("\t")
 
-  # Skip comment lines.
-  if (line[0] == "#"):
+  # Skip empty and comment lines.
+  if ((len(line) == 0) or (line[0] == "#")):
     continue
 
-  # Crash if the line is too short.
-  if (len(words) <= column_index):
-    sys.stderr.write("Too few columns (%d < %d).\n%s\n" 
-                     % (len(words), column_index, line))
-    sys.exit(1)
-
   # Skip NaNs.
-  if ((words[column_index] == "NaN") or
-      (words[column_index] == "nan")):
+  if ((line == "NaN") or
+      (line == "nan")):
     continue
 
   # Store this p-value.
-  pvalue = float(words[column_index])
+  pvalue = float(line)
   if (log_values):
     pvalue = math.exp(-1.0 * pvalue)
   pvalues.append(pvalue)

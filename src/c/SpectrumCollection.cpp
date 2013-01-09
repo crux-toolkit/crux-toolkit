@@ -16,6 +16,10 @@
 #include <cstring>
 #include "carp.h"
 #include "WinCrux.h"
+#include <iostream>
+
+using namespace std;
+
 
 /**
  * Instantiates a new spectrum_collection object from a filename. 
@@ -95,6 +99,52 @@ SpectrumIterator SpectrumCollection::end() {
   return spectra_.end();
 }
 
+/*
+ * Parses a single spectrum from a spectrum_collection with first scan
+ * number equal to first_scan.
+ * \returns The newly allocated Spectrum or NULL if scan number not found.
+ */
+Spectrum* SpectrumCollection::getSpectrum(
+  int first_scan      ///< The first scan of the spectrum to retrieve -in
+  ) {
+
+
+  Spectrum* spectrum = new Spectrum();
+  bool success = getSpectrum(first_scan, spectrum);
+  if (success) {
+    return spectrum;
+  } else {
+    delete spectrum;
+    return NULL;
+  }
+}
+
+/**
+ * Parses a single spectrum from a spectrum_collection with first scan
+ * number equal to first_scan.  Removes any existing information in the
+ * given spectrum.
+ * \returns True if the spectrum was allocated, false on error.
+ */
+bool SpectrumCollection::getSpectrum(
+  int first_scan,      ///< The first scan of the spectrum to retrieve -in
+  Spectrum* spectrum   ///< Put the spectrum info here
+  ) {
+
+  for (SpectrumIterator spectrum_iterator = this->begin();
+    spectrum_iterator != this->end();
+    ++spectrum_iterator) {
+
+    if ((*spectrum_iterator)->getFirstScan() == first_scan) {
+      
+      spectrum->copyFrom(*spectrum_iterator);
+      return true;
+    }
+  }
+  return false;
+
+}
+
+
 /**
  * Adds a spectrum to the spectrum_collection.
  * adds the spectrum to the end of the spectra array
@@ -162,6 +212,8 @@ void SpectrumCollection::removeSpectrum(
   spectra_.erase(spectra_.begin() + spectrum_index);
 
 } 
+
+
 
 
 

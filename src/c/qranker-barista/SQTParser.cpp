@@ -63,8 +63,8 @@ SQTParser :: SQTParser()
 
   //feature header
   features_header_.push_back("sp rank");
-  features_header_.push_back("delta cn");
-  features_header_.push_back("deltal cn"); 
+  features_header_.push_back("delta lcn");
+  features_header_.push_back("delta cn"); 
   features_header_.push_back("xcorr rank");
   features_header_.push_back("sp score");
   features_header_.push_back("matched ions/predicted ions");
@@ -73,8 +73,8 @@ SQTParser :: SQTParser()
   features_header_.push_back("charge 1");
   features_header_.push_back("charge 2");
   features_header_.push_back("charge 3");
-  features_header_.push_back("c-term enz");
   features_header_.push_back("n-term enz");
+  features_header_.push_back("c-term enz");
   features_header_.push_back("missed cleavage");
   features_header_.push_back("number of sequnce_comparision");
   features_header_.push_back("delta mass");
@@ -210,17 +210,21 @@ void SQTParser :: add_matches_to_tables(sqt_match &m, string &decoy_prefix, int 
   int protein_pos = 0;
   for (int i = 0; i < min(hits_read,final_hits); i++){
     set<string> proteins;
-    int label = 0;
+    int label = 1; //not decoy by default
     // go through the proteins of the match
+    
     for (int j = 0; j < m.num_proteins_in_match[i]; j++){
       string prot = m.proteins[protein_pos];
       proteins.insert(prot);
-      if(prot.find(decoy_prefix) != string::npos || decoy)
+ 
+      if(prot.find(decoy_prefix) != string::npos || decoy) {
         label = -1;
-      else
-        label = 1;
+      }
       protein_pos++;
     }
+
+ 
+
     //record the psm label
     f_psmind_to_label.write((char*)(&label),sizeof(int));
       

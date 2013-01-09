@@ -144,7 +144,7 @@ Possible values are <code>none, reverse, protein-shuffle,
 peptide-shuffle</code>. Use 'reverse' to reverse each protein sequence,
 'protein-shuffle' to shuffle each protein sequence, or 'peptide-shuffle'
 to shuffle the sequence between enzyme cleavage sites, leaving the
-termini in place. Use 'none' for no decoys.  Default=protein-shuffle. 
+termini in place. Use 'none' for no decoys.  Default=peptide-shuffle. 
 
 <LI>
 <code>--num-decoys-per-target &lt;n&gt;</code> &ndash; 
@@ -164,8 +164,11 @@ when <code>num-decoys-per-target</code> is not zero.  Use
 separate file.  Use 'separate-decoy-files' to print one .txt file for
 each decoy set.  (<code>crux percolator</code> accepts up to two
 search.decoy.txt files. <code>crux q-ranker</code> accepts only one
-search.decoy.txt file.) Default = separate-decoy-files.
+search.decoy.txt file.) Default = separate-decoy-files.</li>
 
+<li>
+<code>--spectrum-parser &lt;pwiz|mstoolkit|crux&gt;</code> &ndash;
+Parser to use for reading in MS/MS spectra.  Default = crux.</li>
 
 <LI>
 <code>--spectrum-min-mass &lt;float&gt;</code> &ndash; 

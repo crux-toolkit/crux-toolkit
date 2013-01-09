@@ -11,6 +11,51 @@ SET(CPP_ARGS "-I${CMAKE_CURRENT_SOURCE_DIR}/include")
 SET(LD_ARGS "-L${CMAKE_CURRENT_SOURCE_DIR}/lib")
 SET(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR})
 
+# Set up quickbuild arguments
+# quickbuild.sh is the script provided by proteowizard 
+# to bootstrap bjam and to run bjam for building the external
+# libraries and Proteowizard components..
+set(protwiz_args ./quickbuild.sh)
+set(protwiz_args ${protwiz_args} --without-binary-msdata)
+set(protwiz_args ${protwiz_args} --layout=system)
+set(protwiz_args ${protwiz_args} --prefix=${CMAKE_CURRENT_SOURCE_DIR})
+set(protwiz_args ${protwiz_args} libraries)
+set(protwiz_args ${protwiz_args} pwiz/data/common//pwiz_data_common)
+set(protwiz_args ${protwiz_args} pwiz/data/identdata//pwiz_data_identdata)
+set(protwiz_args ${protwiz_args} pwiz/data/identdata//pwiz_data_identdata_version)
+set(protwiz_args ${protwiz_args} pwiz/data/msdata//pwiz_data_msdata)
+set(protwiz_args ${protwiz_args} pwiz/data/msdata//pwiz_data_msdata_version)
+set(protwiz_args ${protwiz_args} pwiz/data/proteome//pwiz_data_proteome)
+set(protwiz_args ${protwiz_args} pwiz/utility/chemistry//pwiz_utility_chemistry)
+set(protwiz_args ${protwiz_args} pwiz/utility/minimxml//pwiz_utility_minimxml)
+set(protwiz_args ${protwiz_args} pwiz/utility/misc//pwiz_utility_misc)
+
+# We want to avoid checking out the entire Proteowizard repository
+# because of its massive size. We check out just the top level directory, 
+# and them use 'svn update' to obtain the needed files and directories.
+ExternalProject_Add(
+  ProteoWizard
+  SVN_REPOSITORY http://proteowizard.svn.sourceforge.net/svnroot/proteowizard/trunk/pwiz/
+  SVN_REVISION -r 3950 --depth empty
+  PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND ${protwiz_args}
+  INSTALL_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/create_links.sh --prefix=${CMAKE_CURRENT_SOURCE_DIR}
+  BUILD_IN_SOURCE 1
+)
+
+# Since we're not checking out the entire Proteowizard tree,
+# We need a separate step to use 'svn update' to pick up the files
+# and directories we need.
+ExternalProject_Add_Step(
+  ProteoWizard
+  update_selected_directories
+  DEPENDEES download
+  DEPENDERS configure
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/build/src/ProteoWizard
+  COMMAND svn update --force -r 3950 libraries pwiz Jamroot.jam quickbuild.sh clean.sh
+)
+
 ExternalProject_Add(
   XercesC
   PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
@@ -19,62 +64,79 @@ ExternalProject_Add(
   DOWNLOAD_DIR downloads
   CONFIGURE_COMMAND 
     ${CMAKE_CURRENT_SOURCE_DIR}/build/src/XercesC/configure 
-    --disable-network 
     --prefix=${CMAKE_CURRENT_SOURCE_DIR}
-  BUILD_COMMAND make
+    --enable-transcoder-iconv
+    --disable-network 
+    --disable-threads
+    --disable-shared
+  BUILD_COMMAND make LD_ARGS="-L${CMAKE_CURRENT_SOURCE_DIR}/lib -framework CoreServices"
   BUILD_IN_SOURCE 1
 )
 
-ExternalProject_Add(
-  Boost
-  PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
-  URL http://sourceforge.net/projects/boost/files/boost/1.44.0/boost_1_44_0.tar.bz2/download 
-  DOWNLOAD_DIR downloads
-  CONFIGURE_COMMAND ""
-  BUILD_COMMAND ./bjam --stage
-  INSTALL_COMMAND ./bjam --prefix=${CMAKE_CURRENT_SOURCE_DIR} install
-  BUILD_IN_SOURCE 1
-)
+if (APPLE)
+  ExternalProject_Add(
+    XSD
+    PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
+    URL http://www.codesynthesis.com/download/xsd/3.3/xsd-3.3.0-2+dep.tar.bz2
+    DOWNLOAD_DIR downloads
+    PATCH_COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/patches/XSD/mac_xdr_fix/xdr-stream-insertion.hxx ${CMAKE_CURRENT_SOURCE_DIR}/patches/XSD/mac_xdr_fix/xdr-stream-extraction.hxx ${CMAKE_CURRENT_SOURCE_DIR}/build/src/XSD/xsd/libxsd/xsd/cxx/tree/
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND make 
+      CPPFLAGS=${CPP_ARGS}
+      LDFLAGS=${LD_ARGS}
+      verbose=1
+    INSTALL_COMMAND make 
+      CPPFLAGS="${CPP_ARGS}"
+      LDFLAGS="${LD_ARGS}"
+      install_prefix=${CMAKE_CURRENT_SOURCE_DIR}
+      install
+    BUILD_IN_SOURCE 1
+  )
+else(APPLE)
+  ExternalProject_Add(
+    XSD
+    PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
+    URL http://www.codesynthesis.com/download/xsd/3.3/xsd-3.3.0-2+dep.tar.bz2
+    DOWNLOAD_DIR downloads
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND make 
+      CPPFLAGS=${CPP_ARGS}
+      LDFLAGS=${LD_ARGS}
+      verbose=1
+    INSTALL_COMMAND make 
+      CPPFLAGS="${CPP_ARGS}"
+      LDFLAGS="${LD_ARGS}"
+      install_prefix=${CMAKE_CURRENT_SOURCE_DIR}
+      install
+    BUILD_IN_SOURCE 1
+  )
+endif(APPLE)
 
-ExternalProject_Add_Step(
-  Boost
-  boostrap
-  DEPENDEES download
-  DEPENDERS configure
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/build/src/Boost
-  COMMAND ./bootstrap.sh
-)
 
-ExternalProject_Add(
-  XSD
-  PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
-  URL http://www.codesynthesis.com/download/xsd/3.3/xsd-3.3.0-2+dep.tar.bz2
-  DOWNLOAD_DIR downloads
-  CONFIGURE_COMMAND ""
-  BUILD_COMMAND make 
-    CPPFLAGS=${CPP_ARGS}
-    LDFLAGS=${LD_ARGS}
-    verbose=1
-  INSTALL_COMMAND make 
-    CPPFLAGS="${CPP_ARGS}"
-    LDFLAGS="${LD_ARGS}"
-    install_prefix=${CMAKE_CURRENT_SOURCE_DIR}
-    install
-  BUILD_IN_SOURCE 1
-)
-
+if (APPLE)
 ExternalProject_Add(
   percolator
   PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
-  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/percolator
-  CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_SOURCE_DIR} -DBoost_NO_SYSTEM_PATHS=1 -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_SOURCE_DIR}
-    
+  GIT_REPOSITORY https://github.com/percolator/percolator.git
+  GIT_TAG rel-2-04
+  CMAKE_ARGS -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_SOURCE_DIR} -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_SOURCE_DIR}
+  PATCH_COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_m_pi_def/EludeModel.cpp ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_find_boost/CMakeLists.txt ${CMAKE_CURRENT_SOURCE_DIR}/build/src/percolator/src
 )
-message(${CMAKE_INSTALL_PREFIX})
+else(APPLE)
+ExternalProject_Add(
+  percolator
+  PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
+  GIT_REPOSITORY https://github.com/percolator/percolator.git
+  GIT_TAG rel-2-04
+  CMAKE_ARGS -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_SOURCE_DIR} -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_SOURCE_DIR}
+  PATCH_COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_find_boost/CMakeLists.txt ${CMAKE_CURRENT_SOURCE_DIR}/build/src/percolator/src
+)
+endif(APPLE)
+
+add_dependencies(XSD Proteowizard)
 add_dependencies(XSD XercesC)
-add_dependencies(XSD Boost)
+add_dependencies(percolator Proteowizard)
 add_dependencies(percolator XercesC)
-add_dependencies(percolator Boost)
 add_dependencies(percolator XSD)
 add_subdirectory(MSToolkit)
 

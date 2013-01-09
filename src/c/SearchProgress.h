@@ -34,7 +34,7 @@ class SearchProgress{
     progress_increment_(get_int_parameter("print-search-progress")),
     total_searches_(1)
     { 
-      report_format_ = "Searching spectrum number %i (%i+), search number %i";
+      report_format_ = "Searching spectrum %i (%i+), search %i";
     };
 
   /**
@@ -47,7 +47,7 @@ class SearchProgress{
     progress_increment_(get_int_parameter("print-search-progress")),
     total_searches_(total_searches)
     { 
-      report_format_ = "Searching spectrum number %i (%i+), search number %i"
+      report_format_ = "Searching spectrum %i (%i+), search %i"
         " of %i, %.0f%% complete";
     };
 

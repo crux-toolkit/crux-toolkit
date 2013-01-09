@@ -13,6 +13,7 @@
 #include "ModifiedPeptidesIterator.h"
 
 using namespace std;
+using namespace Crux; 
 
 /**
  * \returns A blank GeneratePeptides object.
@@ -51,7 +52,7 @@ int GeneratePeptides::main(int argc, char** argv) {
   int num_options = sizeof(option_list) / sizeof(char*);
 
   // Define required command line arguments
-  const char* argument_list[] = { "protein database" }; 
+  const char* argument_list[] = { "protein-database" }; 
   int num_arguments = sizeof(argument_list) / sizeof(char*);
   
   initialize(argument_list, 
@@ -62,7 +63,7 @@ int GeneratePeptides::main(int argc, char** argv) {
 
   // Get arguments and options
   bool output_sequence = get_boolean_parameter("output-sequence");
-  string filename = get_string_parameter("protein database");
+  string filename = get_string_parameter("protein-database");
   bool use_index = is_directory(filename.c_str());
   Index* index = NULL;
   Database* database = NULL;
@@ -128,7 +129,7 @@ void GeneratePeptides::printHeader(){
   bool bool_val;
   int missed_cleavages;
 
-  char* database_name = get_string_parameter("protein database");
+  char* database_name = get_string_parameter("protein-database");
   printf("# PROTEIN DATABASE: %s\n", database_name);
 
   printf("# OPTIONS:\n");

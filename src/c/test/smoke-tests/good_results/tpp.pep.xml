@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href=""?>
-<msms_pipeline_analysis date="Thu Aug  2 17:33:06 2012
+<msms_pipeline_analysis date="Wed Dec 19 16:48:49 2012
 " xmlns="http://regis-web.systemsbiology.net/pepXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://regis-web.systemsbiology.net/pepXML /usr/local/tpp/schema/pepXML_v110.xsd" summary_xml="">
-<msms_run_summary base_name="/net/noble/vol1/home/cegrant/crux-clean/src/c/test/smoke-tests/test" msManufacturer="NA" msModel="NA" msIonization="NA" msAnalyzer="NA" msDectector="NA" raw_data_type="NA" raw_data="NA" >
+<msms_run_summary base_name="/net/maccoss/vol2/home/kaipot/svn/crux-trunk/src/c/test/smoke-tests/test" msManufacturer="NA" msModel="NA" msIonization="NA" msAnalyzer="NA" msDectector="NA" raw_data_type="NA" raw_data="NA" >
 <sample_enzyme name="trypsin">
 </sample_enzyme>
-<search_summary base_name="/net/noble/vol1/home/cegrant/crux-clean/src/c/test/smoke-tests/test" search_engine="Crux" precursor_mass_type="average" fragment_mass_type="monoisotopic" out_data_type="NA" out_data="NA" search_id="1" >
-<search_database local_path="/net/noble/vol1/home/cegrant/crux-clean/src/c/test/smoke-tests/small-yeast.fasta" type="AA" />
+<search_summary base_name="/net/maccoss/vol2/home/kaipot/svn/crux-trunk/src/c/test/smoke-tests/test" search_engine="Crux" precursor_mass_type="average" fragment_mass_type="monoisotopic" out_data_type="NA" out_data="NA" search_id="1" >
+<search_database local_path="/net/maccoss/vol2/home/kaipot/svn/crux-trunk/src/c/test/smoke-tests/small-yeast.fasta" type="AA" />
 <enzymatic_search_constraint enzyme="trypsin" max_num_internal_cleavages="0" min_number_termini="2"/>
 <aminoacid_modification aminoacid="C" mass="217.181727" massdiff="57.021464" variable="N" />
 <aminoacid_modification aminoacid="S" mass="166.978210" massdiff="79.900002" variable="Y" />
@@ -18,6 +18,7 @@
 <parameter name="comparison" value="eq"/>
 <parameter name="min-weibull-points" value="4000"/>
 <parameter name="scan-tolerance" value="3"/>
+<parameter name="mzid-use-pass-threshold" value="false"/>
 <parameter name="isotope" value="0"/>
 <parameter name="precursor-window-type-decoy" value="mass"/>
 <parameter name="primary-ions" value="by"/>
@@ -28,6 +29,7 @@
 <parameter name="quant-level" value="protein"/>
 <parameter name="precursor-window-type" value="mass"/>
 <parameter name="precursor-window" value="3.000000"/>
+<parameter name="threshold-type" value="qvalue"/>
 <parameter name="mass-precision" value="4"/>
 <parameter name="custom-enzyme" value="__NULL_STR"/>
 <parameter name="flanking" value="false"/>
@@ -61,19 +63,19 @@
 <parameter name="digestion" value="full-digest"/>
 <parameter name="overwrite" value="T"/>
 <parameter name="hardklor-algorithm" value="fast-fewest-peptides"/>
+<parameter name="spectrum-parser" value="crux"/>
 <parameter name="parameter-file" value="params/mods-tpp"/>
 <parameter name="min-peaks" value="20"/>
 <parameter name="nh3" value="0"/>
 <parameter name="measure" value="NSAF"/>
+<parameter name="custom-threshold-min" value="true"/>
 <parameter name="max-rank-preliminary" value="500"/>
 <parameter name="max-mods" value="255"/>
 <parameter name="persist-tolerance" value="10.000000"/>
 <parameter name="spectrum-charge" value="all"/>
 <parameter name="input-ms2" value="__NULL_STR"/>
-<parameter name="threshold-min" value="true"/>
 <parameter name="print-search-progress" value="10"/>
 <parameter name="mz-window" value="__NULL_STR"/>
-<parameter name="use-mstoolkit" value="false"/>
 <parameter name="signal-to-noise" value="1.000000"/>
 <parameter name="pi-zero" value="1.000000"/>
 <parameter name="distribution-area" value="false"/>
@@ -83,7 +85,6 @@
 <parameter name="compute-sp" value="false"/>
 <parameter name="corr" value="0.850000"/>
 <parameter name="bullseye-max-mass" value="8000.000000"/>
-<parameter name="custom-threshold" value="__NULL_STR"/>
 <parameter name="separate-searches" value="__NULL_STR"/>
 <parameter name="verbosity" value="30"/>
 <parameter name="mz-bin-offset" value="0.680000"/>
@@ -91,7 +92,6 @@
 <parameter name="cdm" value="Q"/>
 <parameter name="bullseye-min-mass" value="600.000000"/>
 <parameter name="print-theoretical-spectrum" value="false"/>
-<parameter name="use-mgf" value="false"/>
 <parameter name="retention-tolerance" value="0.500000"/>
 <parameter name="max-charge" value="5"/>
 <parameter name="num-decoys-per-target" value="1"/>
@@ -115,6 +115,7 @@
 <parameter name="unique-peptides" value="true"/>
 <parameter name="skip-cleanup" value="false"/>
 <parameter name="max-ion-charge" value="peptide"/>
+<parameter name="seed" value="7"/>
 <parameter name="max-mass" value="7200.000000"/>
 <parameter name="max-persist" value="2.000000"/>
 <parameter name="min-mass" value="200.000000"/>
@@ -132,6 +133,7 @@
 <parameter name="enzyme" value="trypsin"/>
 <parameter name="column-type" value="string"/>
 <parameter name="h2o" value="0"/>
+<parameter name="custom-threshold-name" value="__NULL_STR"/>
 <parameter name="unique-mapping" value="false"/>
 <parameter name="sensitivity" value="2"/>
 <parameter name="compute-p-values" value="false"/>
@@ -149,33 +151,33 @@
     <spectrum_query spectrum="test.00002.00002.2" start_scan="2" end_scan="2" precursor_neutral_mass="1151.0626" assumed_charge="2" index="1">
     <search_result>
     <search_hit hit_rank="1" peptide="DTIDFEAIVK" peptide_prev_aa="K" peptide_next_aa="E" protein="YBL076C" num_tot_proteins="1" calc_neutral_pep_mass="1150.2939" massdiff="+0.7687" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="ILS1 SGDID:S000000172, Chr II from 84259-81041, reverse complement, Verified ORF, 'Cytoplasmic isoleucine-tRNA synthetase, target of the G1-specific inhibitor reveromycin A'">
-        <search_score name="delta_cn" value="0.16" />
-        <search_score name="xcorr_score" value="0.42" />
+        <search_score name="delta_cn" value="0.01" />
+        <search_score name="xcorr_score" value="0.32" />
     </search_hit>
-    <search_hit hit_rank="2" peptide="HSTHSPPPSK" peptide_prev_aa="K" peptide_next_aa="S" protein="YOR267C" num_tot_proteins="1" calc_neutral_pep_mass="1154.0614" massdiff="-2.9988" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="HRK1 SGDID:S000005793, Chr XV from 824866-822587, reverse complement, Verified ORF, 'Protein kinase implicated in activation of the plasma membrane H(+)-ATPase Pma1p in response to glucose m">
-<modification_info modified_peptide="HSTHS[166.98]PPPSK">
-<mod_aminoacid_mass position="5" mass="166.98"/>
-</modification_info>
-        <search_score name="delta_cn" value="0.19" />
-        <search_score name="xcorr_score" value="0.35" />
+    <search_hit hit_rank="2" peptide="ENSSQNETLK" peptide_prev_aa="R" peptide_next_aa="V" protein="YLR298C" num_tot_proteins="1" calc_neutral_pep_mass="1149.1796" massdiff="+1.8831" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="YHC1 SGDID:S000004289, Chr XII from 725418-724723, reverse complement, Verified ORF, 'Component of the U1 snRNP complex required for pre-mRNA splicing; putative ortholog of human U1C protein">
+        <search_score name="delta_cn" value="0.12" />
+        <search_score name="xcorr_score" value="0.32" />
     </search_hit>
     <search_hit hit_rank="3" peptide="HSTHSPPPSK" peptide_prev_aa="K" peptide_next_aa="S" protein="YOR267C" num_tot_proteins="1" calc_neutral_pep_mass="1154.0614" massdiff="-2.9988" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="HRK1 SGDID:S000005793, Chr XV from 824866-822587, reverse complement, Verified ORF, 'Protein kinase implicated in activation of the plasma membrane H(+)-ATPase Pma1p in response to glucose m">
 <modification_info modified_peptide="HSTHSPPPS[166.98]K">
 <mod_aminoacid_mass position="9" mass="166.98"/>
 </modification_info>
-        <search_score name="delta_cn" value="0.24" />
-        <search_score name="xcorr_score" value="0.34" />
+        <search_score name="delta_cn" value="0.26" />
+        <search_score name="xcorr_score" value="0.28" />
     </search_hit>
-    <search_hit hit_rank="4" peptide="ENSSQNETLK" peptide_prev_aa="R" peptide_next_aa="V" protein="YLR298C" num_tot_proteins="1" calc_neutral_pep_mass="1149.1796" massdiff="+1.8831" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="YHC1 SGDID:S000004289, Chr XII from 725418-724723, reverse complement, Verified ORF, 'Component of the U1 snRNP complex required for pre-mRNA splicing; putative ortholog of human U1C protein">
-        <search_score name="delta_cn" value="0.37" />
-        <search_score name="xcorr_score" value="0.32" />
+    <search_hit hit_rank="4" peptide="HSTHSPPPSK" peptide_prev_aa="K" peptide_next_aa="S" protein="YOR267C" num_tot_proteins="1" calc_neutral_pep_mass="1154.0614" massdiff="-2.9988" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="HRK1 SGDID:S000005793, Chr XV from 824866-822587, reverse complement, Verified ORF, 'Protein kinase implicated in activation of the plasma membrane H(+)-ATPase Pma1p in response to glucose m">
+<modification_info modified_peptide="HSTHS[166.98]PPPSK">
+<mod_aminoacid_mass position="5" mass="166.98"/>
+</modification_info>
+        <search_score name="delta_cn" value="0.50" />
+        <search_score name="xcorr_score" value="0.24" />
     </search_hit>
     <search_hit hit_rank="5" peptide="HSTHSPPPSK" peptide_prev_aa="K" peptide_next_aa="S" protein="YOR267C" num_tot_proteins="1" calc_neutral_pep_mass="1154.0614" massdiff="-2.9988" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="HRK1 SGDID:S000005793, Chr XV from 824866-822587, reverse complement, Verified ORF, 'Protein kinase implicated in activation of the plasma membrane H(+)-ATPase Pma1p in response to glucose m">
 <modification_info modified_peptide="HST[181.01]HSPPPSK">
 <mod_aminoacid_mass position="3" mass="181.01"/>
 </modification_info>
-        <search_score name="delta_cn" value="0.40" />
-        <search_score name="xcorr_score" value="0.26" />
+        <search_score name="delta_cn" value="0.53" />
+        <search_score name="xcorr_score" value="0.16" />
     </search_hit>
     </search_result>
     </spectrum_query>
@@ -185,60 +187,60 @@
 <modification_info modified_peptide="INSIAIQENGT[181.01]IEGGK">
 <mod_aminoacid_mass position="11" mass="181.01"/>
 </modification_info>
-        <search_score name="delta_cn" value="0.40" />
+        <search_score name="delta_cn" value="0.41" />
         <search_score name="xcorr_score" value="0.75" />
     </search_hit>
     <search_hit hit_rank="2" peptide="NNFRPPPQVESSVVR" peptide_prev_aa="K" peptide_next_aa="L" protein="YPL266W" num_tot_proteins="1" calc_neutral_pep_mass="1725.9250" massdiff="+0.6676" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="DIM1 SGDID:S000006187, Chr XVI from 39121-40077, Verified ORF, 'Essential 18S rRNA dimethylase, responsible for conserved m6(2)Am6(2)A dimethylation in 3'-terminal loop of 18 S rRNA, part of">
-        <search_score name="delta_cn" value="0.43" />
-        <search_score name="xcorr_score" value="0.45" />
+        <search_score name="delta_cn" value="0.47" />
+        <search_score name="xcorr_score" value="0.44" />
     </search_hit>
     <search_hit hit_rank="3" peptide="LIDVDGKPQIQVEFK" peptide_prev_aa="K" peptide_next_aa="G" protein="YLL024C" num_tot_proteins="1" calc_neutral_pep_mass="1729.0062" massdiff="-2.4136" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="SSA2 SGDID:S000003947, Chr XII from 97484-95565, reverse complement, Verified ORF, 'ATP binding protein involved in protein folding and vacuolar import of proteins; member of heat shock prot">
-        <search_score name="delta_cn" value="0.45" />
-        <search_score name="xcorr_score" value="0.43" />
+        <search_score name="delta_cn" value="0.57" />
+        <search_score name="xcorr_score" value="0.39" />
     </search_hit>
     <search_hit hit_rank="4" peptide="LFTLFPGLGYAASYK" peptide_prev_aa="R" peptide_next_aa="V" protein="YDL198C" num_tot_proteins="1" calc_neutral_pep_mass="1727.8342" massdiff="-1.2416" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="GGC1 SGDID:S000002357, Chr IV from 104552-103650, reverse complement, Verified ORF, 'Mitochondrial GTP/GDP transporter, essential for mitochondrial genome maintenance; has a role in mitochon">
-<modification_info modified_peptide="LFTLFPGLGY[243.08]AASYK">
-<mod_aminoacid_mass position="10" mass="243.08"/>
-</modification_info>
-        <search_score name="delta_cn" value="0.55" />
-        <search_score name="xcorr_score" value="0.42" />
-    </search_hit>
-    <search_hit hit_rank="5" peptide="LFTLFPGLGYAASYK" peptide_prev_aa="R" peptide_next_aa="V" protein="YDL198C" num_tot_proteins="1" calc_neutral_pep_mass="1727.8342" massdiff="-1.2416" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="GGC1 SGDID:S000002357, Chr IV from 104552-103650, reverse complement, Verified ORF, 'Mitochondrial GTP/GDP transporter, essential for mitochondrial genome maintenance; has a role in mitochon">
 <modification_info modified_peptide="LFT[181.01]LFPGLGYAASYK">
 <mod_aminoacid_mass position="3" mass="181.01"/>
 </modification_info>
-        <search_score name="delta_cn" value="0.69" />
-        <search_score name="xcorr_score" value="0.34" />
+        <search_score name="delta_cn" value="0.58" />
+        <search_score name="xcorr_score" value="0.32" />
+    </search_hit>
+    <search_hit hit_rank="5" peptide="LFTLFPGLGYAASYK" peptide_prev_aa="R" peptide_next_aa="V" protein="YDL198C" num_tot_proteins="1" calc_neutral_pep_mass="1727.8342" massdiff="-1.2416" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="GGC1 SGDID:S000002357, Chr IV from 104552-103650, reverse complement, Verified ORF, 'Mitochondrial GTP/GDP transporter, essential for mitochondrial genome maintenance; has a role in mitochon">
+<modification_info modified_peptide="LFTLFPGLGY[243.08]AASYK">
+<mod_aminoacid_mass position="10" mass="243.08"/>
+</modification_info>
+        <search_score name="delta_cn" value="0.71" />
+        <search_score name="xcorr_score" value="0.31" />
     </search_hit>
     </search_result>
     </spectrum_query>
     <spectrum_query spectrum="test.00010.00010.2" start_scan="10" end_scan="10" precursor_neutral_mass="837.1428" assumed_charge="2" index="3">
     <search_result>
     <search_hit hit_rank="1" peptide="RPELGLR" peptide_prev_aa="K" peptide_next_aa="V" protein="YGL022W" num_tot_proteins="1" calc_neutral_pep_mass="839.9932" massdiff="-2.8504" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="STT3 SGDID:S000002990, Chr VII from 452409-454565, Verified ORF, 'Subunit of the oligosaccharyltransferase complex of the ER lumen, which catalyzes asparagine-linked glycosylation of newly s">
-        <search_score name="delta_cn" value="0.36" />
-        <search_score name="xcorr_score" value="0.58" />
+        <search_score name="delta_cn" value="0.30" />
+        <search_score name="xcorr_score" value="0.55" />
     </search_hit>
     <search_hit hit_rank="2" peptide="NSTIPTK" peptide_prev_aa="R" peptide_next_aa="K" protein="YLL024C" num_tot_proteins="1" calc_neutral_pep_mass="839.7578" massdiff="-2.6150" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="SSA2 SGDID:S000003947, Chr XII from 97484-95565, reverse complement, Verified ORF, 'ATP binding protein involved in protein folding and vacuolar import of proteins; member of heat shock prot">
 <modification_info modified_peptide="NST[181.01]IPTK">
 <mod_aminoacid_mass position="3" mass="181.01"/>
 </modification_info>
-        <search_score name="delta_cn" value="0.39" />
-        <search_score name="xcorr_score" value="0.37" />
+        <search_score name="delta_cn" value="0.32" />
+        <search_score name="xcorr_score" value="0.39" />
     </search_hit>
     <search_hit hit_rank="3" peptide="NSTIPTK" peptide_prev_aa="R" peptide_next_aa="K" protein="YLL024C" num_tot_proteins="1" calc_neutral_pep_mass="839.7578" massdiff="-2.6150" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="SSA2 SGDID:S000003947, Chr XII from 97484-95565, reverse complement, Verified ORF, 'ATP binding protein involved in protein folding and vacuolar import of proteins; member of heat shock prot">
 <modification_info modified_peptide="NS[166.98]TIPTK">
 <mod_aminoacid_mass position="2" mass="166.98"/>
 </modification_info>
-        <search_score name="delta_cn" value="0.91" />
-        <search_score name="xcorr_score" value="0.35" />
+        <search_score name="delta_cn" value="0.85" />
+        <search_score name="xcorr_score" value="0.37" />
     </search_hit>
-    <search_hit hit_rank="4" peptide="IGDYAGIK" peptide_prev_aa="K" peptide_next_aa="W" protein="YMR303C" num_tot_proteins="1" calc_neutral_pep_mass="835.9554" massdiff="+1.1874" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="ADH2 SGDID:S000004918, Chr XIII from 874336-873290, reverse complement, Verified ORF, 'Glucose-repressible alcohol dehydrogenase II, catalyzes the conversion of ethanol to acetaldehyde; invo">
-        <search_score name="delta_cn" value="1.09" />
-        <search_score name="xcorr_score" value="0.05" />
+    <search_hit hit_rank="4" peptide="ETSNFIK" peptide_prev_aa="K" peptide_next_aa="K" protein="YBR118W" num_tot_proteins="1" calc_neutral_pep_mass="837.9280" massdiff="-0.7852" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="TEF2 SGDID:S000000322, Chr II from 477665-479041, Verified ORF, 'Translational elongation factor EF-1 alpha; also encoded by TEF1; functions in the binding reaction of aminoacyl-tRNA (AA-tRN">
+        <search_score name="delta_cn" value="0.94" />
+        <search_score name="xcorr_score" value="0.08" />
     </search_hit>
-    <search_hit hit_rank="5" peptide="YDSTHGR" peptide_prev_aa="K" peptide_next_aa="Y" protein="YGR192C" num_tot_proteins="1" calc_neutral_pep_mass="834.8437" massdiff="+2.2991" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="TDH3 SGDID:S000003424, Chr VII from 883815-882817, reverse complement, Verified ORF, 'Glyceraldehyde-3-phosphate dehydrogenase, isozyme 3, involved in glycolysis and gluconeogenesis; tetrame">
-        <search_score name="delta_cn" value="1.09" />
-        <search_score name="xcorr_score" value="-0.05" />
+    <search_hit hit_rank="5" peptide="AAATAAMTK" peptide_prev_aa="K" peptide_next_aa="A" protein="YLR249W" num_tot_proteins="1" calc_neutral_pep_mass="834.9862" massdiff="+2.1566" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="YEF3 SGDID:S000004239, Chr XII from 636782-639916, Verified ORF, 'Translational elongation factor, stimulates the binding of aminoacyl-tRNA (AA-tRNA) to ribosomes by releasing EF-1 alpha fro">
+        <search_score name="delta_cn" value="0.95" />
+        <search_score name="xcorr_score" value="0.04" />
     </search_hit>
     </search_result>
     </spectrum_query>
@@ -248,33 +250,33 @@
 <modification_info modified_peptide="IS[166.98]GLIYEEVR">
 <mod_aminoacid_mass position="2" mass="166.98"/>
 </modification_info>
-        <search_score name="delta_cn" value="0.13" />
-        <search_score name="xcorr_score" value="0.79" />
+        <search_score name="delta_cn" value="0.36" />
+        <search_score name="xcorr_score" value="0.90" />
     </search_hit>
-    <search_hit hit_rank="2" peptide="VGSGGHWSATSK" peptide_prev_aa="R" peptide_next_aa="D" protein="YGR157W" num_tot_proteins="1" calc_neutral_pep_mass="1253.1505" massdiff="+2.5621" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="CHO2 SGDID:S000003389, Chr VII from 802445-805054, Verified ORF, 'Phosphatidylethanolamine methyltransferase (PEMT), catalyzes the first step in the conversion of phosphatidylethanolamine to">
+    <search_hit hit_rank="2" peptide="GLTPSQIGVLLR" peptide_prev_aa="K" peptide_next_aa="D" protein="YDR064W" num_tot_proteins="1" calc_neutral_pep_mass="1253.5076" massdiff="+2.2051" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="RPS13 SGDID:S000002471, Chr IV from 579456-579476,580016-580450, Verified ORF, 'Protein component of the small (40S) ribosomal subunit; has similarity to E. coli S15 and rat S13 ribosomal pr">
+        <search_score name="delta_cn" value="0.37" />
+        <search_score name="xcorr_score" value="0.57" />
+    </search_hit>
+    <search_hit hit_rank="3" peptide="VGSGGHWSATSK" peptide_prev_aa="R" peptide_next_aa="D" protein="YGR157W" num_tot_proteins="1" calc_neutral_pep_mass="1253.1505" massdiff="+2.5621" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="CHO2 SGDID:S000003389, Chr VII from 802445-805054, Verified ORF, 'Phosphatidylethanolamine methyltransferase (PEMT), catalyzes the first step in the conversion of phosphatidylethanolamine to">
 <modification_info modified_peptide="VGSGGHWSAT[181.01]SK">
 <mod_aminoacid_mass position="10" mass="181.01"/>
 </modification_info>
-        <search_score name="delta_cn" value="0.16" />
-        <search_score name="xcorr_score" value="0.69" />
-    </search_hit>
-    <search_hit hit_rank="3" peptide="VGSGGHWSATSK" peptide_prev_aa="R" peptide_next_aa="D" protein="YGR157W" num_tot_proteins="1" calc_neutral_pep_mass="1253.1505" massdiff="+2.5621" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="CHO2 SGDID:S000003389, Chr VII from 802445-805054, Verified ORF, 'Phosphatidylethanolamine methyltransferase (PEMT), catalyzes the first step in the conversion of phosphatidylethanolamine to">
-<modification_info modified_peptide="VGSGGHWSATS[166.98]K">
-<mod_aminoacid_mass position="11" mass="166.98"/>
-</modification_info>
-        <search_score name="delta_cn" value="0.28" />
-        <search_score name="xcorr_score" value="0.67" />
-    </search_hit>
-    <search_hit hit_rank="4" peptide="GLTPSQIGVLLR" peptide_prev_aa="K" peptide_next_aa="D" protein="YDR064W" num_tot_proteins="1" calc_neutral_pep_mass="1253.5076" massdiff="+2.2051" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="RPS13 SGDID:S000002471, Chr IV from 579456-579476,580016-580450, Verified ORF, 'Protein component of the small (40S) ribosomal subunit; has similarity to E. coli S15 and rat S13 ribosomal pr">
-        <search_score name="delta_cn" value="0.29" />
+        <search_score name="delta_cn" value="0.39" />
         <search_score name="xcorr_score" value="0.57" />
     </search_hit>
-    <search_hit hit_rank="5" peptide="ISGLIYEEVR" peptide_prev_aa="R" peptide_next_aa="A" protein="YBR009C" num_tot_proteins="1" calc_neutral_pep_mass="1258.2507" massdiff="-2.5381" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="HHF1 SGDID:S000000213, Chr II from 255682-255371, reverse complement, Verified ORF, 'One of two identical histone H4 proteins (see also HHF2); core histone required for chromatin assembly an">
+    <search_hit hit_rank="4" peptide="ISGLIYEEVR" peptide_prev_aa="R" peptide_next_aa="A" protein="YBR009C" num_tot_proteins="1" calc_neutral_pep_mass="1258.2507" massdiff="-2.5381" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="HHF1 SGDID:S000000213, Chr II from 255682-255371, reverse complement, Verified ORF, 'One of two identical histone H4 proteins (see also HHF2); core histone required for chromatin assembly an">
 <modification_info modified_peptide="ISGLIY[243.08]EEVR">
 <mod_aminoacid_mass position="6" mass="243.08"/>
 </modification_info>
-        <search_score name="delta_cn" value="0.45" />
-        <search_score name="xcorr_score" value="0.56" />
+        <search_score name="delta_cn" value="0.39" />
+        <search_score name="xcorr_score" value="0.55" />
+    </search_hit>
+    <search_hit hit_rank="5" peptide="VGSGGHWSATSK" peptide_prev_aa="R" peptide_next_aa="D" protein="YGR157W" num_tot_proteins="1" calc_neutral_pep_mass="1253.1505" massdiff="+2.5621" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="CHO2 SGDID:S000003389, Chr VII from 802445-805054, Verified ORF, 'Phosphatidylethanolamine methyltransferase (PEMT), catalyzes the first step in the conversion of phosphatidylethanolamine to">
+<modification_info modified_peptide="VGSGGHWSATS[166.98]K">
+<mod_aminoacid_mass position="11" mass="166.98"/>
+</modification_info>
+        <search_score name="delta_cn" value="0.57" />
+        <search_score name="xcorr_score" value="0.55" />
     </search_hit>
     </search_result>
     </spectrum_query>
@@ -284,8 +286,8 @@
 <modification_info modified_peptide="GS[166.98]VAAK">
 <mod_aminoacid_mass position="2" mass="166.98"/>
 </modification_info>
-        <search_score name="delta_cn" value="-0.07" />
-        <search_score name="xcorr_score" value="-0.12" />
+        <search_score name="delta_cn" value="-0.16" />
+        <search_score name="xcorr_score" value="-0.11" />
     </search_hit>
     <search_hit hit_rank="2" peptide="AYGGSR" peptide_prev_aa="R" peptide_next_aa="C" protein="YER056C-A" num_tot_proteins="1" calc_neutral_pep_mass="609.6396" massdiff="-0.5768" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="RPL34A SGDID:S000002135, Chr V from 270183-270147,269749-269421, reverse complement, Verified ORF, 'Protein component of the large (60S) ribosomal subunit, nearly identical to Rpl34Bp and ">
         <search_score name="delta_cn" value="0.00" />
@@ -296,31 +298,34 @@
     <spectrum_query spectrum="test.00014.00014.2" start_scan="14" end_scan="14" precursor_neutral_mass="998.8027" assumed_charge="2" index="6">
     <search_result>
     <search_hit hit_rank="1" peptide="DTEGDVDMD" peptide_prev_aa="K" peptide_next_aa="-" protein="YPL106C" num_tot_proteins="1" calc_neutral_pep_mass="995.9674" massdiff="+2.8353" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="SSE1 SGDID:S000006027, Chr XVI from 352272-350191, reverse complement, Verified ORF, 'ATPase that is a component of the heat shock protein Hsp90 chaperone complex; binds unfolded proteins; m">
-        <search_score name="delta_cn" value="0.65" />
-        <search_score name="xcorr_score" value="1.06" />
+        <search_score name="delta_cn" value="0.54" />
+        <search_score name="xcorr_score" value="0.69" />
     </search_hit>
-    <search_hit hit_rank="2" peptide="NGFQTGSASK" peptide_prev_aa="K" peptide_next_aa="A" protein="YLR185W" num_tot_proteins="1" calc_neutral_pep_mass="996.0446" massdiff="+2.7581" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="RPL37A SGDID:S000004175, Chr XII from 522665-522671,523031-523290, Verified ORF, 'Protein component of the large (60S) ribosomal subunit, has similarity to Rpl37Bp and to rat L37 ribosomal p">
+    <search_hit hit_rank="2" peptide="IAAVGAANGVR" peptide_prev_aa="K" peptide_next_aa="K" protein="YKL127W" num_tot_proteins="1" calc_neutral_pep_mass="998.1502" massdiff="+0.6525" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="PGM1 SGDID:S000001610, Chr XI from 203185-204897, Verified ORF, 'Phosphoglucomutase, minor isoform; catalyzes the conversion from glucose-1-phosphate to glucose-6-phosphate, which is a key s">
         <search_score name="delta_cn" value="0.74" />
-        <search_score name="xcorr_score" value="0.37" />
+        <search_score name="xcorr_score" value="0.32" />
     </search_hit>
-    <search_hit hit_rank="3" peptide="IAAVGAANGVR" peptide_prev_aa="K" peptide_next_aa="K" protein="YKL127W" num_tot_proteins="1" calc_neutral_pep_mass="998.1502" massdiff="+0.6525" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="PGM1 SGDID:S000001610, Chr XI from 203185-204897, Verified ORF, 'Phosphoglucomutase, minor isoform; catalyzes the conversion from glucose-1-phosphate to glucose-6-phosphate, which is a key s">
-        <search_score name="delta_cn" value="0.81" />
-        <search_score name="xcorr_score" value="0.28" />
-    </search_hit>
-    <search_hit hit_rank="4" peptide="ISLITASSK" peptide_prev_aa="K" peptide_next_aa="D" protein="YBR115C" num_tot_proteins="1" calc_neutral_pep_mass="998.9861" massdiff="-0.1834" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="LYS2 SGDID:S000000319, Chr II from 473920-469742, reverse complement, Verified ORF, 'Alpha aminoadipate reductase, catalyzes the reduction of alpha-aminoadipate to alpha-aminoadipate 6-semia">
-<modification_info modified_peptide="IS[166.98]LITASSK">
-<mod_aminoacid_mass position="2" mass="166.98"/>
-</modification_info>
-        <search_score name="delta_cn" value="0.84" />
-        <search_score name="xcorr_score" value="0.20" />
-    </search_hit>
-    <search_hit hit_rank="5" peptide="TVDGPSHK" peptide_prev_aa="K" peptide_next_aa="D" protein="YGR192C" num_tot_proteins="1" calc_neutral_pep_mass="999.7036" massdiff="-0.9009" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="TDH3 SGDID:S000003424, Chr VII from 883815-882817, reverse complement, Verified ORF, 'Glyceraldehyde-3-phosphate dehydrogenase, isozyme 3, involved in glycolysis and gluconeogenesis; tetrame">
+    <search_hit hit_rank="3" peptide="TVDGPSHK" peptide_prev_aa="K" peptide_next_aa="D" protein="YGR192C" num_tot_proteins="1" calc_neutral_pep_mass="999.7036" massdiff="-0.9009" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="TDH3 SGDID:S000003424, Chr VII from 883815-882817, reverse complement, Verified ORF, 'Glyceraldehyde-3-phosphate dehydrogenase, isozyme 3, involved in glycolysis and gluconeogenesis; tetrame">
 <modification_info modified_peptide="T[181.01]VDGPS[166.98]HK">
 <mod_aminoacid_mass position="1" mass="181.01"/>
 <mod_aminoacid_mass position="6" mass="166.98"/>
 </modification_info>
-        <search_score name="delta_cn" value="0.84" />
+        <search_score name="delta_cn" value="0.75" />
+        <search_score name="xcorr_score" value="0.18" />
+    </search_hit>
+    <search_hit hit_rank="4" peptide="SPFYYSR" peptide_prev_aa="K" peptide_next_aa="A" protein="YPL215W" num_tot_proteins="1" calc_neutral_pep_mass="998.9045" massdiff="-0.1018" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="CBP3 SGDID:S000006136, Chr XVI from 147415-148422, Verified ORF, 'Mitochondrial protein required for assembly of ubiquinol cytochrome-c reductase complex (cytochrome bc1 complex); interacts ">
+<modification_info modified_peptide="SPFYYS[166.98]R">
+<mod_aminoacid_mass position="6" mass="166.98"/>
+</modification_info>
+        <search_score name="delta_cn" value="0.77" />
         <search_score name="xcorr_score" value="0.17" />
+    </search_hit>
+    <search_hit hit_rank="5" peptide="SPFYYSR" peptide_prev_aa="K" peptide_next_aa="A" protein="YPL215W" num_tot_proteins="1" calc_neutral_pep_mass="998.9045" massdiff="-0.1018" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="CBP3 SGDID:S000006136, Chr XVI from 147415-148422, Verified ORF, 'Mitochondrial protein required for assembly of ubiquinol cytochrome-c reductase complex (cytochrome bc1 complex); interacts ">
+<modification_info modified_peptide="SPFY[243.08]YSR">
+<mod_aminoacid_mass position="4" mass="243.08"/>
+</modification_info>
+        <search_score name="delta_cn" value="0.78" />
+        <search_score name="xcorr_score" value="0.16" />
     </search_hit>
     </search_result>
     </spectrum_query>
@@ -330,76 +335,79 @@
 <modification_info modified_peptide="TLAETNIIS[166.98]ADIR">
 <mod_aminoacid_mass position="9" mass="166.98"/>
 </modification_info>
-        <search_score name="delta_cn" value="0.09" />
-        <search_score name="xcorr_score" value="0.75" />
+        <search_score name="delta_cn" value="0.34" />
+        <search_score name="xcorr_score" value="0.76" />
     </search_hit>
     <search_hit hit_rank="2" peptide="TLAETNIISADIR" peptide_prev_aa="K" peptide_next_aa="K" protein="YLR371W" num_tot_proteins="1" calc_neutral_pep_mass="1496.4943" massdiff="+1.7084" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="ROM2 SGDID:S000004363, Chr XII from 862713-866783, Verified ORF, 'GDP/GTP exchange protein (GEP) for Rho1p and Rho2p; mutations are synthetically lethal with mutations in rom1, which also en">
 <modification_info modified_peptide="TLAET[181.01]NIISADIR">
 <mod_aminoacid_mass position="5" mass="181.01"/>
 </modification_info>
-        <search_score name="delta_cn" value="0.21" />
-        <search_score name="xcorr_score" value="0.68" />
+        <search_score name="delta_cn" value="0.38" />
+        <search_score name="xcorr_score" value="0.50" />
     </search_hit>
-    <search_hit hit_rank="3" peptide="TLAETNIISADIR" peptide_prev_aa="K" peptide_next_aa="K" protein="YLR371W" num_tot_proteins="1" calc_neutral_pep_mass="1496.4943" massdiff="+1.7084" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="ROM2 SGDID:S000004363, Chr XII from 862713-866783, Verified ORF, 'GDP/GTP exchange protein (GEP) for Rho1p and Rho2p; mutations are synthetically lethal with mutations in rom1, which also en">
+    <search_hit hit_rank="3" peptide="TTSPTNTHEHSK" peptide_prev_aa="K" peptide_next_aa="A" protein="YDL223C" num_tot_proteins="1" calc_neutral_pep_mass="1499.1844" massdiff="-0.9818" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="HBT1 SGDID:S000002382, Chr IV from 60406-57266, reverse complement, Verified ORF, 'Substrate of the Hub1p ubiquitin-like protein that localizes to the shmoo tip (mating projection); mutants ">
+<modification_info modified_peptide="T[181.01]T[181.01]SPTNTHEHSK">
+<mod_aminoacid_mass position="1" mass="181.01"/>
+<mod_aminoacid_mass position="2" mass="181.01"/>
+</modification_info>
+        <search_score name="delta_cn" value="0.45" />
+        <search_score name="xcorr_score" value="0.47" />
+    </search_hit>
+    <search_hit hit_rank="4" peptide="TLAETNIISADIR" peptide_prev_aa="K" peptide_next_aa="K" protein="YLR371W" num_tot_proteins="1" calc_neutral_pep_mass="1496.4943" massdiff="+1.7084" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="ROM2 SGDID:S000004363, Chr XII from 862713-866783, Verified ORF, 'GDP/GTP exchange protein (GEP) for Rho1p and Rho2p; mutations are synthetically lethal with mutations in rom1, which also en">
 <modification_info modified_peptide="T[181.01]LAETNIISADIR">
 <mod_aminoacid_mass position="1" mass="181.01"/>
 </modification_info>
-        <search_score name="delta_cn" value="0.39" />
-        <search_score name="xcorr_score" value="0.60" />
-    </search_hit>
-    <search_hit hit_rank="4" peptide="TTSPTNTHEHSK" peptide_prev_aa="K" peptide_next_aa="A" protein="YDL223C" num_tot_proteins="1" calc_neutral_pep_mass="1499.1844" massdiff="-0.9818" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="HBT1 SGDID:S000002382, Chr IV from 60406-57266, reverse complement, Verified ORF, 'Substrate of the Hub1p ubiquitin-like protein that localizes to the shmoo tip (mating projection); mutants ">
-<modification_info modified_peptide="TTSPTNT[181.01]HEHS[166.98]K">
-<mod_aminoacid_mass position="7" mass="181.01"/>
-<mod_aminoacid_mass position="11" mass="166.98"/>
-</modification_info>
-        <search_score name="delta_cn" value="0.61" />
-        <search_score name="xcorr_score" value="0.46" />
+        <search_score name="delta_cn" value="0.65" />
+        <search_score name="xcorr_score" value="0.41" />
     </search_hit>
     <search_hit hit_rank="5" peptide="TTSPTNTHEHSK" peptide_prev_aa="K" peptide_next_aa="A" protein="YDL223C" num_tot_proteins="1" calc_neutral_pep_mass="1499.1844" massdiff="-0.9818" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="HBT1 SGDID:S000002382, Chr IV from 60406-57266, reverse complement, Verified ORF, 'Substrate of the Hub1p ubiquitin-like protein that localizes to the shmoo tip (mating projection); mutants ">
-<modification_info modified_peptide="TTSPT[181.01]NTHEHS[166.98]K">
-<mod_aminoacid_mass position="5" mass="181.01"/>
-<mod_aminoacid_mass position="11" mass="166.98"/>
+<modification_info modified_peptide="T[181.01]TS[166.98]PTNTHEHSK">
+<mod_aminoacid_mass position="1" mass="181.01"/>
+<mod_aminoacid_mass position="3" mass="166.98"/>
 </modification_info>
-        <search_score name="delta_cn" value="0.73" />
-        <search_score name="xcorr_score" value="0.29" />
+        <search_score name="delta_cn" value="0.68" />
+        <search_score name="xcorr_score" value="0.27" />
     </search_hit>
     </search_result>
     </spectrum_query>
     <spectrum_query spectrum="test.00015.00015.2" start_scan="15" end_scan="15" precursor_neutral_mass="975.6227" assumed_charge="2" index="8">
     <search_result>
-    <search_hit hit_rank="1" peptide="NAILYRPK" peptide_prev_aa="K" peptide_next_aa="V" protein="YLR058C" num_tot_proteins="1" calc_neutral_pep_mass="974.1710" massdiff="+1.4517" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="SHM2 SGDID:S000004048, Chr XII from 259402-257993, reverse complement, Verified ORF, 'Cytosolic serine hydroxymethyltransferase, involved in one-carbon metabolism'">
-        <search_score name="delta_cn" value="0.37" />
-        <search_score name="xcorr_score" value="0.78" />
-    </search_hit>
-    <search_hit hit_rank="2" peptide="MSSNAQVK" peptide_prev_aa="-" peptide_next_aa="T" protein="YBL030C" num_tot_proteins="1" calc_neutral_pep_mass="977.1843" massdiff="-1.5616" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="PET9 SGDID:S000000126, Chr II from 164000-163044, reverse complement, Verified ORF, 'Major ADP/ATP carrier of the mitochondrial inner membrane, exchanges cytosolic ADP for mitochondrially sy">
-<modification_info modified_peptide="MS[166.98]SNAQVK[161.47]">
+    <search_hit hit_rank="1" peptide="MSSDGMNR" peptide_prev_aa="-" peptide_next_aa="D" protein="YMR073C" num_tot_proteins="1" calc_neutral_pep_mass="976.8887" massdiff="-1.2660" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="YMR073C SGDID:S000004677, Chr XIII from 412872-412267, reverse complement, Uncharacterized ORF, 'Putative protein of unknown function; proposed to be involved in resistance to carboplatin an">
+<modification_info modified_peptide="MS[166.98]SDGMNR">
 <mod_aminoacid_mass position="2" mass="166.98"/>
-<mod_aminoacid_mass position="8" mass="161.47"/>
 </modification_info>
-        <search_score name="delta_cn" value="0.52" />
-        <search_score name="xcorr_score" value="0.49" />
+        <search_score name="delta_cn" value="0.22" />
+        <search_score name="xcorr_score" value="0.60" />
     </search_hit>
-    <search_hit hit_rank="3" peptide="SLNLTLR" peptide_prev_aa="R" peptide_next_aa="K" protein="YOR136W" num_tot_proteins="1" calc_neutral_pep_mass="975.7681" massdiff="-0.1453" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="IDH2 SGDID:S000005662, Chr XV from 580251-581360, Verified ORF, 'Subunit of mitochondrial NAD(+)-dependent isocitrate dehydrogenase, which catalyzes the oxidation of isocitrate to alpha-keto">
+    <search_hit hit_rank="2" peptide="SLNLTLR" peptide_prev_aa="R" peptide_next_aa="K" protein="YOR136W" num_tot_proteins="1" calc_neutral_pep_mass="975.7681" massdiff="-0.1453" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="IDH2 SGDID:S000005662, Chr XV from 580251-581360, Verified ORF, 'Subunit of mitochondrial NAD(+)-dependent isocitrate dehydrogenase, which catalyzes the oxidation of isocitrate to alpha-keto">
 <modification_info modified_peptide="S[166.98]LNLT[181.01]LR">
 <mod_aminoacid_mass position="1" mass="166.98"/>
 <mod_aminoacid_mass position="5" mass="181.01"/>
 </modification_info>
-        <search_score name="delta_cn" value="0.64" />
-        <search_score name="xcorr_score" value="0.38" />
+        <search_score name="delta_cn" value="0.33" />
+        <search_score name="xcorr_score" value="0.47" />
     </search_hit>
-    <search_hit hit_rank="4" peptide="AGGLAEGYR" peptide_prev_aa="R" peptide_next_aa="G" protein="YBR115C" num_tot_proteins="1" calc_neutral_pep_mass="972.8670" massdiff="+2.7557" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="LYS2 SGDID:S000000319, Chr II from 473920-469742, reverse complement, Verified ORF, 'Alpha aminoadipate reductase, catalyzes the reduction of alpha-aminoadipate to alpha-aminoadipate 6-semia">
+    <search_hit hit_rank="3" peptide="MSSNAQVK" peptide_prev_aa="-" peptide_next_aa="T" protein="YBL030C" num_tot_proteins="1" calc_neutral_pep_mass="977.1843" massdiff="-1.5616" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="PET9 SGDID:S000000126, Chr II from 164000-163044, reverse complement, Verified ORF, 'Major ADP/ATP carrier of the mitochondrial inner membrane, exchanges cytosolic ADP for mitochondrially sy">
+<modification_info modified_peptide="MS[166.98]SNAQVK[161.47]">
+<mod_aminoacid_mass position="2" mass="166.98"/>
+<mod_aminoacid_mass position="8" mass="161.47"/>
+</modification_info>
+        <search_score name="delta_cn" value="0.40" />
+        <search_score name="xcorr_score" value="0.40" />
+    </search_hit>
+    <search_hit hit_rank="4" peptide="MSSDGMNR" peptide_prev_aa="-" peptide_next_aa="D" protein="YMR073C" num_tot_proteins="1" calc_neutral_pep_mass="976.8887" massdiff="-1.2660" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="YMR073C SGDID:S000004677, Chr XIII from 412872-412267, reverse complement, Uncharacterized ORF, 'Putative protein of unknown function; proposed to be involved in resistance to carboplatin an">
+<modification_info modified_peptide="MSS[166.98]DGMNR">
+<mod_aminoacid_mass position="3" mass="166.98"/>
+</modification_info>
+        <search_score name="delta_cn" value="0.45" />
+        <search_score name="xcorr_score" value="0.36" />
+    </search_hit>
+    <search_hit hit_rank="5" peptide="AGGLAEGYR" peptide_prev_aa="R" peptide_next_aa="G" protein="YBR115C" num_tot_proteins="1" calc_neutral_pep_mass="972.8670" massdiff="+2.7557" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="LYS2 SGDID:S000000319, Chr II from 473920-469742, reverse complement, Verified ORF, 'Alpha aminoadipate reductase, catalyzes the reduction of alpha-aminoadipate to alpha-aminoadipate 6-semia">
 <modification_info modified_peptide="AGGLAEGY[243.08]R">
 <mod_aminoacid_mass position="8" mass="243.08"/>
 </modification_info>
-        <search_score name="delta_cn" value="0.66" />
-        <search_score name="xcorr_score" value="0.28" />
-    </search_hit>
-    <search_hit hit_rank="5" peptide="LSEGTSFR" peptide_prev_aa="K" peptide_next_aa="R" protein="YHR021C" num_tot_proteins="1" calc_neutral_pep_mass="975.8677" massdiff="-0.2450" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="RPS27B SGDID:S000001063, Chr VIII from 148662-148660,148109-147864, reverse complement, Verified ORF, 'Protein component of the small (40S) ribosomal subunit; nearly identical to Rps27Ap and">
-<modification_info modified_peptide="LS[166.98]EGTSFR">
-<mod_aminoacid_mass position="2" mass="166.98"/>
-</modification_info>
-        <search_score name="delta_cn" value="0.67" />
-        <search_score name="xcorr_score" value="0.27" />
+        <search_score name="delta_cn" value="0.47" />
+        <search_score name="xcorr_score" value="0.33" />
     </search_hit>
     </search_result>
     </spectrum_query>
@@ -409,111 +417,106 @@
 <modification_info modified_peptide="LAMFLTDSNT[181.01]IR">
 <mod_aminoacid_mass position="10" mass="181.01"/>
 </modification_info>
-        <search_score name="delta_cn" value="0.08" />
+        <search_score name="delta_cn" value="0.05" />
         <search_score name="xcorr_score" value="0.69" />
     </search_hit>
     <search_hit hit_rank="2" peptide="LAMFLTDSNTIR" peptide_prev_aa="R" peptide_next_aa="E" protein="YDR037W" num_tot_proteins="1" calc_neutral_pep_mass="1461.5099" massdiff="+1.9227" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="KRS1 SGDID:S000002444, Chr IV from 525437-527212, Verified ORF, 'Lysyl-tRNA synthetase; also identified as a negative regulator of general control of amino acid biosynthesis '">
 <modification_info modified_peptide="LAMFLTDS[166.98]NTIR">
 <mod_aminoacid_mass position="8" mass="166.98"/>
 </modification_info>
-        <search_score name="delta_cn" value="0.43" />
-        <search_score name="xcorr_score" value="0.64" />
+        <search_score name="delta_cn" value="0.40" />
+        <search_score name="xcorr_score" value="0.66" />
     </search_hit>
     <search_hit hit_rank="3" peptide="LAMFLTDSNTIR" peptide_prev_aa="R" peptide_next_aa="E" protein="YDR037W" num_tot_proteins="1" calc_neutral_pep_mass="1461.5099" massdiff="+1.9227" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="KRS1 SGDID:S000002444, Chr IV from 525437-527212, Verified ORF, 'Lysyl-tRNA synthetase; also identified as a negative regulator of general control of amino acid biosynthesis '">
 <modification_info modified_peptide="LAMFLT[181.01]DSNTIR">
 <mod_aminoacid_mass position="6" mass="181.01"/>
 </modification_info>
-        <search_score name="delta_cn" value="0.45" />
-        <search_score name="xcorr_score" value="0.39" />
+        <search_score name="delta_cn" value="0.51" />
+        <search_score name="xcorr_score" value="0.41" />
     </search_hit>
-    <search_hit hit_rank="4" peptide="MSESNAHFSFPK" peptide_prev_aa="-" peptide_next_aa="E" protein="YBL076C" num_tot_proteins="1" calc_neutral_pep_mass="1461.4258" massdiff="+2.0068" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="ILS1 SGDID:S000000172, Chr II from 84259-81041, reverse complement, Verified ORF, 'Cytoplasmic isoleucine-tRNA synthetase, target of the G1-specific inhibitor reveromycin A'">
-<modification_info modified_peptide="MS[166.98]ESNAHFSFPK">
-<mod_aminoacid_mass position="2" mass="166.98"/>
+    <search_hit hit_rank="4" peptide="IPGTFEPDTLSK" peptide_prev_aa="K" peptide_next_aa="S" protein="YDL223C" num_tot_proteins="1" calc_neutral_pep_mass="1464.2627" massdiff="-0.8301" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="HBT1 SGDID:S000002382, Chr IV from 60406-57266, reverse complement, Verified ORF, 'Substrate of the Hub1p ubiquitin-like protein that localizes to the shmoo tip (mating projection); mutants ">
+<modification_info modified_peptide="IPGTFEPDT[181.01]LS[166.98]K">
+<mod_aminoacid_mass position="9" mass="181.01"/>
+<mod_aminoacid_mass position="11" mass="166.98"/>
 </modification_info>
-        <search_score name="delta_cn" value="0.56" />
-        <search_score name="xcorr_score" value="0.38" />
+        <search_score name="delta_cn" value="0.64" />
+        <search_score name="xcorr_score" value="0.34" />
     </search_hit>
-    <search_hit hit_rank="5" peptide="ETAQDSPELLAK" peptide_prev_aa="K" peptide_next_aa="S" protein="YPL215W" num_tot_proteins="1" calc_neutral_pep_mass="1461.2162" massdiff="+2.2164" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="CBP3 SGDID:S000006136, Chr XVI from 147415-148422, Verified ORF, 'Mitochondrial protein required for assembly of ubiquinol cytochrome-c reductase complex (cytochrome bc1 complex); interacts ">
-<modification_info modified_peptide="ET[181.01]AQDS[166.98]PELLAK">
-<mod_aminoacid_mass position="2" mass="181.01"/>
-<mod_aminoacid_mass position="6" mass="166.98"/>
+    <search_hit hit_rank="5" peptide="DALPSVTSEQVR" peptide_prev_aa="K" peptide_next_aa="E" protein="YBL076C" num_tot_proteins="1" calc_neutral_pep_mass="1461.2192" massdiff="+2.2134" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="ILS1 SGDID:S000000172, Chr II from 84259-81041, reverse complement, Verified ORF, 'Cytoplasmic isoleucine-tRNA synthetase, target of the G1-specific inhibitor reveromycin A'">
+<modification_info modified_peptide="DALPS[166.98]VTS[166.98]EQVR">
+<mod_aminoacid_mass position="5" mass="166.98"/>
+<mod_aminoacid_mass position="8" mass="166.98"/>
 </modification_info>
-        <search_score name="delta_cn" value="0.59" />
-        <search_score name="xcorr_score" value="0.31" />
+        <search_score name="delta_cn" value="0.64" />
+        <search_score name="xcorr_score" value="0.25" />
     </search_hit>
     </search_result>
     </spectrum_query>
     <spectrum_query spectrum="test.00016.00016.2" start_scan="16" end_scan="16" precursor_neutral_mass="1039.9626" assumed_charge="2" index="10">
     <search_result>
-    <search_hit hit_rank="1" peptide="IATYQER" peptide_prev_aa="K" peptide_next_aa="D" protein="YGR192C" num_tot_proteins="1" calc_neutral_pep_mass="1039.7683" massdiff="+0.1943" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="TDH3 SGDID:S000003424, Chr VII from 883815-882817, reverse complement, Verified ORF, 'Glyceraldehyde-3-phosphate dehydrogenase, isozyme 3, involved in glycolysis and gluconeogenesis; tetrame">
-<modification_info modified_peptide="IAT[181.01]Y[243.08]QER">
-<mod_aminoacid_mass position="3" mass="181.01"/>
-<mod_aminoacid_mass position="4" mass="243.08"/>
-</modification_info>
-        <search_score name="delta_cn" value="0.35" />
-        <search_score name="xcorr_score" value="0.31" />
-    </search_hit>
-    <search_hit hit_rank="2" peptide="TFQSVIGK" peptide_prev_aa="R" peptide_next_aa="E" protein="YGL026C" num_tot_proteins="1" calc_neutral_pep_mass="1038.8240" massdiff="+1.1387" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="TRP5 SGDID:S000002994, Chr VII from 448540-446417, reverse complement, Verified ORF, 'Tryptophan synthase involved in tryptophan biosynthesis, regulated by the general control system of amin">
+    <search_hit hit_rank="1" peptide="TFQSVIGK" peptide_prev_aa="R" peptide_next_aa="E" protein="YGL026C" num_tot_proteins="1" calc_neutral_pep_mass="1038.8240" massdiff="+1.1387" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="TRP5 SGDID:S000002994, Chr VII from 448540-446417, reverse complement, Verified ORF, 'Tryptophan synthase involved in tryptophan biosynthesis, regulated by the general control system of amin">
 <modification_info modified_peptide="T[181.01]FQS[166.98]VIGK">
 <mod_aminoacid_mass position="1" mass="181.01"/>
 <mod_aminoacid_mass position="4" mass="166.98"/>
 </modification_info>
-        <search_score name="delta_cn" value="0.83" />
-        <search_score name="xcorr_score" value="0.20" />
+        <search_score name="delta_cn" value="0.10" />
+        <search_score name="xcorr_score" value="0.18" />
+    </search_hit>
+    <search_hit hit_rank="2" peptide="IATYQER" peptide_prev_aa="K" peptide_next_aa="D" protein="YGR192C" num_tot_proteins="1" calc_neutral_pep_mass="1039.7683" massdiff="+0.1943" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="TDH3 SGDID:S000003424, Chr VII from 883815-882817, reverse complement, Verified ORF, 'Glyceraldehyde-3-phosphate dehydrogenase, isozyme 3, involved in glycolysis and gluconeogenesis; tetrame">
+<modification_info modified_peptide="IAT[181.01]Y[243.08]QER">
+<mod_aminoacid_mass position="3" mass="181.01"/>
+<mod_aminoacid_mass position="4" mass="243.08"/>
+</modification_info>
+        <search_score name="delta_cn" value="0.64" />
+        <search_score name="xcorr_score" value="0.16" />
     </search_hit>
     <search_hit hit_rank="3" peptide="SVPAWFVR" peptide_prev_aa="R" peptide_next_aa="V" protein="YBL076C" num_tot_proteins="1" calc_neutral_pep_mass="1041.0315" massdiff="-1.0688" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="ILS1 SGDID:S000000172, Chr II from 84259-81041, reverse complement, Verified ORF, 'Cytoplasmic isoleucine-tRNA synthetase, target of the G1-specific inhibitor reveromycin A'">
 <modification_info modified_peptide="S[166.98]VPAWFVR">
 <mod_aminoacid_mass position="1" mass="166.98"/>
 </modification_info>
-        <search_score name="delta_cn" value="0.95" />
-        <search_score name="xcorr_score" value="0.05" />
+        <search_score name="delta_cn" value="1.11" />
+        <search_score name="xcorr_score" value="0.07" />
     </search_hit>
-    <search_hit hit_rank="4" peptide="LCELIGTR" peptide_prev_aa="R" peptide_next_aa="A" protein="YFR053C" num_tot_proteins="1" calc_neutral_pep_mass="1041.0138" massdiff="-1.0511" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="HXK1 SGDID:S000001949, Chr VI from 255036-253579, reverse complement, Verified ORF, 'Hexokinase isoenzyme 1, a cytosolic protein that catalyzes phosphorylation of glucose during glucose meta">
-<modification_info modified_peptide="LCELIGT[181.01]R">
-<mod_aminoacid_mass position="7" mass="181.01"/>
-</modification_info>
-<modification_info modified_peptide="LCELIGTR">
-<mod_aminoacid_mass position="2" mass="160.16"/>
-</modification_info>
-        <search_score name="delta_cn" value="1.02" />
-        <search_score name="xcorr_score" value="0.02" />
-    </search_hit>
-    <search_hit hit_rank="5" peptide="LFTLEAIR" peptide_prev_aa="R" peptide_next_aa="R" protein="YOR168W" num_tot_proteins="1" calc_neutral_pep_mass="1042.0570" massdiff="-2.0944" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="GLN4 SGDID:S000005694, Chr XV from 649304-651733, Verified ORF, 'Glutamine tRNA synthetase, monomeric class I tRNA synthetase that catalyzes the specific glutaminylation of tRNA(Glu); N-term">
+    <search_hit hit_rank="4" peptide="LFTLEAIR" peptide_prev_aa="R" peptide_next_aa="R" protein="YOR168W" num_tot_proteins="1" calc_neutral_pep_mass="1042.0570" massdiff="-2.0944" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="GLN4 SGDID:S000005694, Chr XV from 649304-651733, Verified ORF, 'Glutamine tRNA synthetase, monomeric class I tRNA synthetase that catalyzes the specific glutaminylation of tRNA(Glu); N-term">
 <modification_info modified_peptide="LFT[181.01]LEAIR">
 <mod_aminoacid_mass position="3" mass="181.01"/>
 </modification_info>
-        <search_score name="delta_cn" value="1.13" />
-        <search_score name="xcorr_score" value="-0.01" />
+        <search_score name="delta_cn" value="1.22" />
+        <search_score name="xcorr_score" value="-0.02" />
+    </search_hit>
+    <search_hit hit_rank="5" peptide="ALFHLAQNK" peptide_prev_aa="K" peptide_next_aa="K" protein="YMR235C" num_tot_proteins="1" calc_neutral_pep_mass="1041.2180" massdiff="-1.2554" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="RNA1 SGDID:S000004848, Chr XIII from 742734-741511, reverse complement, Verified ORF, 'GTPase activating protein (GAP) for Gsp1p, involved in nuclear transport'">
+        <search_score name="delta_cn" value="1.35" />
+        <search_score name="xcorr_score" value="-0.04" />
     </search_hit>
     </search_result>
     </spectrum_query>
     <spectrum_query spectrum="test.00016.00016.3" start_scan="16" end_scan="16" precursor_neutral_mass="1559.9426" assumed_charge="3" index="11">
     <search_result>
     <search_hit hit_rank="1" peptide="MSNIDFQYDDSVK" peptide_prev_aa="K" peptide_next_aa="S" protein="YBL076C" num_tot_proteins="1" calc_neutral_pep_mass="1561.6833" massdiff="-1.7407" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="ILS1 SGDID:S000000172, Chr II from 84259-81041, reverse complement, Verified ORF, 'Cytoplasmic isoleucine-tRNA synthetase, target of the G1-specific inhibitor reveromycin A'">
-        <search_score name="delta_cn" value="0.48" />
-        <search_score name="xcorr_score" value="0.66" />
+        <search_score name="delta_cn" value="0.45" />
+        <search_score name="xcorr_score" value="0.64" />
     </search_hit>
     <search_hit hit_rank="2" peptide="ISLNSSNNASADER" peptide_prev_aa="R" peptide_next_aa="A" protein="YMR309C" num_tot_proteins="1" calc_neutral_pep_mass="1557.4075" massdiff="+2.5352" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="NIP1 SGDID:S000004926, Chr XIII from 895425-892987, reverse complement, Verified ORF, 'Subunit of the eukaryotic translation initiation factor 3 (eIF3), involved in the assembly of preinitia">
 <modification_info modified_peptide="IS[166.98]LNSSNNASADER">
 <mod_aminoacid_mass position="2" mass="166.98"/>
 </modification_info>
-        <search_score name="delta_cn" value="0.67" />
+        <search_score name="delta_cn" value="0.58" />
         <search_score name="xcorr_score" value="0.35" />
     </search_hit>
     <search_hit hit_rank="3" peptide="AILYNIYYTALNK" peptide_prev_aa="R" peptide_next_aa="D" protein="YMR309C" num_tot_proteins="1" calc_neutral_pep_mass="1559.8253" massdiff="+0.1173" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="NIP1 SGDID:S000004926, Chr XIII from 895425-892987, reverse complement, Verified ORF, 'Subunit of the eukaryotic translation initiation factor 3 (eIF3), involved in the assembly of preinitia">
-        <search_score name="delta_cn" value="0.73" />
-        <search_score name="xcorr_score" value="0.22" />
+        <search_score name="delta_cn" value="0.67" />
+        <search_score name="xcorr_score" value="0.27" />
     </search_hit>
     <search_hit hit_rank="4" peptide="SHINVVVIGHVDSGK" peptide_prev_aa="K" peptide_next_aa="S" protein="YBR118W" num_tot_proteins="1" calc_neutral_pep_mass="1560.7734" massdiff="-0.8308" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="TEF2 SGDID:S000000322, Chr II from 477665-479041, Verified ORF, 'Translational elongation factor EF-1 alpha; also encoded by TEF1; functions in the binding reaction of aminoacyl-tRNA (AA-tRN">
-        <search_score name="delta_cn" value="0.73" />
-        <search_score name="xcorr_score" value="0.18" />
+        <search_score name="delta_cn" value="0.69" />
+        <search_score name="xcorr_score" value="0.21" />
     </search_hit>
     <search_hit hit_rank="5" peptide="SIIGATSIEDFISK" peptide_prev_aa="K" peptide_next_aa="L" protein="YHR183W" num_tot_proteins="1" calc_neutral_pep_mass="1560.5781" massdiff="-0.6355" num_tol_term="2" num_missed_cleavages="0"  is_rejected="0" protein_descr="GND1 SGDID:S000001226, Chr VIII from 470960-472429, Verified ORF, '6-phosphogluconate dehydrogenase (decarboxylating), catalyzes an NADPH regenerating reaction in the pentose phosphate pathw">
 <modification_info modified_peptide="S[166.98]IIGATSIEDFISK">
 <mod_aminoacid_mass position="1" mass="166.98"/>
 </modification_info>
-        <search_score name="delta_cn" value="0.84" />
-        <search_score name="xcorr_score" value="0.18" />
+        <search_score name="delta_cn" value="0.83" />
+        <search_score name="xcorr_score" value="0.20" />
     </search_hit>
     </search_result>
     </spectrum_query>

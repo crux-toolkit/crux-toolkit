@@ -11,65 +11,6 @@
 <ol>
 
 <li>
-<b>What input file formats does Crux support?</b></li>
-
-<p>
-Crux can search spectra in MS2 and mzXML file formats.  The MS2
-files can be generated from Thermo RAW files using the <a 
-href="http://proteome.gs.washington.edu/software.html">MakeMS2</a>
-program.  The MS2 format is described <a href="ms2-format.html">here</a>. 
-When searching mzXML files, use the <code>use-mstoolkit=T</code>
-option in the parameter file.  Additional file formats will be
-supported in future releases. 
-</p>
-
-<li>
-<b>How does Crux differ from SEQUEST<sup>&reg;</sup>?</b></li>
-
-<p>
-SEQUEST<sup>&reg;</sup> has split into at least four different development threads:
-(1) the version developed in the Yates lab, initially at the
-University of Washington and later at Scripps, (2) the version maintained
-by Thermo Scientific, (3) the version mainted by Sage-N, and (4) the
-version maintained in the MacCoss lab at the University of Washington.
-Crux is based on the Yates lab development thread, SEQUEST<sup>&reg;</sup> version 28,
-whose last documented modification is dated 8/16/99.</p>
-
-<p>
-The original Crux search code was an imperfect reimplementation of
-SEQUEST<sup>&reg;</sup> 28.  The imperfection arose because, to avoid
-copyright infringement, Crux was reverse engineered from the
-SEQUEST<sup>&reg;</sup> binary; i.e., the Crux developers did not have
-access to the SEQUEST<sup>&reg;</sup> source code.  The reverse
-engineering continued until the developers deemed the remaining
-differences to be of negligible importance.  A quantitative comparison
-of the scores computed by Crux and SEQUEST<sup>&reg;</sup> can be seen
-in
-the <a href="http://noble.gs.washington.edu/papers/park2008rapid.html">original
-Crux paper</a>.  The differences between Crux and
-SEQUEST<sup>&reg;</sup> v28 are comparable in magnitude to the
-differences between different versions of SEQUEST<sup>&reg;</sup>.</p>
-
-<p>
-Currently, the default behavior for
-the <code>search-for-matches</code> command differs in two systematic
-ways from the original behavior of SEQUEST.<p>
-<ul>
-<li>
-Originally, SEQUEST ranked candidate peptides (i.e., peptides that lie
-within the user-specified precursor window) initially according to a
-preliminary score called "Sp."  Subsequently, the top 500 matches were
-re-scored using XCorr.  Crux can compute the Sp score, but does not
-use it as an initial filter.</li>
-<li>
-The SEQUEST theoretical spectrum used to compute XCorr includes two
-flanking peaks on either side of each b- and y-ion. Crux does not
-include these peaks by default, though they can be turned on using the
-"use-flanking-peaks" parameter.</li>
-</ul>
-<p></p>
-
-<li>
 <b>How does Crux compute the masses of peptides and peptide
   fragments?</b></li>
 
@@ -229,6 +170,52 @@ on the n-terminus, the c-terminus and on both termini.  The -1 in the
 option means to add the modification regardless of where the peptide
 terminus lies relative to the rest of the protein.
 
+<li>
+<b>How does Crux differ from SEQUEST<sup>&reg;</sup>?</b></li>
+
+<p>
+SEQUEST<sup>&reg;</sup> has split into at least four different development threads:
+(1) the version developed in the Yates lab, initially at the
+University of Washington and later at Scripps, (2) the version maintained
+by Thermo Scientific, (3) the version mainted by Sage-N, and (4) the
+version maintained in the MacCoss lab at the University of Washington.
+Crux is based on the Yates lab development thread, SEQUEST<sup>&reg;</sup> version 28,
+whose last documented modification is dated 8/16/99.</p>
+
+<p>
+The original Crux search code was an imperfect reimplementation of
+SEQUEST<sup>&reg;</sup> 28.  The imperfection arose because, to avoid
+copyright infringement, Crux was reverse engineered from the
+SEQUEST<sup>&reg;</sup> binary; i.e., the Crux developers did not have
+access to the SEQUEST<sup>&reg;</sup> source code.  The reverse
+engineering continued until the developers deemed the remaining
+differences to be of negligible importance.  A quantitative comparison
+of the scores computed by Crux and SEQUEST<sup>&reg;</sup> can be seen
+in
+the <a href="http://noble.gs.washington.edu/papers/park2008rapid.html">original
+Crux paper</a>.  The differences between Crux and
+SEQUEST<sup>&reg;</sup> v28 are comparable in magnitude to the
+differences between different versions of SEQUEST<sup>&reg;</sup>.</p>
+
+<p>
+Currently, the default behavior for
+the <code>search-for-matches</code> command differs in two systematic
+ways from the original behavior of SEQUEST.<p>
+<ul>
+<li>
+Originally, SEQUEST ranked candidate peptides (i.e., peptides that lie
+within the user-specified precursor window) initially according to a
+preliminary score called "Sp."  Subsequently, the top 500 matches were
+re-scored using XCorr.  Crux can compute the Sp score, but does not
+use it as an initial filter.</li>
+<li>
+The SEQUEST theoretical spectrum used to compute XCorr includes two
+flanking peaks on either side of each b- and y-ion. Crux does not
+include these peaks by default, though they can be turned on using the
+"use-flanking-peaks" parameter.</li>
+</ul>
+<p></p>
+
 <!--
 <li>
 <b>How is the theoretical spectrum for a peptide generated?</b></li>
@@ -239,28 +226,57 @@ observed spectrum undergo prior to comparison with the theoretical
 spectrum?</b></li>
 -->
 
-<!--
-<li>
-<b>What enhancements to Crux are planned?</b></li>
+<p>
+<b>What happens if I decrease the size of the precursor window during
+searching?</b></p>
 
 <p>
-Crux is under constant development, so the following list of
-enhancements may be out of date.  As of November, 2010, the list
-includes the following:</p>
+Reducing the precursor mass tolerance has two main benefits.  One is
+reduced search time, and the other is improved statistical power to
+detect matches.  With a smaller window, fewer candidates are tested
+against a spectrum.  As a result, the statistical confidence measure
+calculated after multiple testing correction will be more significant.
+Of course, the flipside is that if you make the precursor window too
+small, then you may end up throwing out correct identifications.
+Control over the size of the window is provided by the using
+the <code>precursor-window</code> and
+<code>precursor-window-type</code> options.</p>
+
+<p>
+In order for the p-value to be accurately estimated, you may need many
+data points for fitting the Weibull distribution.  To achieve an
+accurate estimate, <code>crux search-for-xlinks</code> generates decoy
+peptides until it obtains <code>min-weibull-points</code> XCorr scores
+(default 4000).  The decoys are generated by shuffling target peptides
+from the database using a larger precursor window. The window size for
+the decoys is obtained from the <code>precursor-window-decoy</code>
+and <code>precursor-window-type-decoy</code> parameters.</p>
+
+</blockquote>
+
+<li>
+<b>What enhancements to Crux are planned?</b></li>
 
 <p>
 <ul>
 
 <li>
-Support for more input file types.</li>
+Speeding up variable modification search by storing modified peptides
+in the index.</li>
 
 <li>
 Support for searching for post-translational modifications in 
 <code>search-for-xlinks</code>.</li>
 
+<li>
+Allow users to specify variable modifications of specific N-term or
+C-term residues.</li>
+
+<li>
+Add support for multiple cores.</li>
+
 </ul>
 </p>
--->
 
 <li>
 <b>How can I contribute to Crux?</b></li>

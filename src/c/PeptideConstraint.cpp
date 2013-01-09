@@ -15,6 +15,7 @@
 #include "carp.h"
 #include "PeptideConstraint.h"
 
+using namespace Crux;
 
 /**
  * Allocates a new (empty) peptide_constraint object.

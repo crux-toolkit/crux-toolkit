@@ -266,7 +266,6 @@ void MatchSearch::addDecoyScores(
 
 }
 
-#ifdef SEARCH_ENABLED // Discard this code in open source release
 int MatchSearch::main(int argc, char** argv){
 
   /* Define optional command line arguments */
@@ -282,16 +281,18 @@ int MatchSearch::main(int argc, char** argv){
     "spectrum-min-mass",
     "spectrum-max-mass",
     "spectrum-charge",
+    "max-ion-charge",
     "scan-number",
     "mz-bin-width",
     "mz-bin-offset",
+    "spectrum-parser",
     "parameter-file",
     "verbosity"
   };
   int num_options = sizeof(option_list) / sizeof(char*);
 
   /* Define required command line arguments */
-  const char* argument_list[] = {"ms2 file", "protein database"};
+  const char* argument_list[] = {"ms2 file", "protein-database"};
   int num_arguments = sizeof(argument_list) / sizeof(char*);
 
   initialize(argument_list, num_arguments,
@@ -313,7 +314,7 @@ int MatchSearch::main(int argc, char** argv){
        spectra->getNumSpectra());
 
   /* Get input: protein file */
-  char* input_file = get_string_parameter("protein database");
+  char* input_file = get_string_parameter("protein-database");
 
   /* Prepare input, fasta or index */
   Index* index = NULL;
@@ -485,21 +486,6 @@ int MatchSearch::main(int argc, char** argv){
   return 0;
 }// end main
 
-#else // SEARCH_ENABLED not defined
-int MatchSearch::main(int argc, char **argv){
-  (void) argc;
-  (void) argv;
-  fputs(
-    "You are using the open source version of Crux. Due to intellectual\n"
-    "property issues, we are unable to provide database search functionality\n"
-    "in this version. To obtain a licence for the full functional version of\n"
-    "Crux that includes the database search tools, please visit the following URL:\n"
-    "\nhttp://depts.washington.edu/ventures/UW_Technology/Express_Licenses/crux.php\n",
-    stderr
-  );
-  return 1;
-}
-#endif // SEARCH_ENABLED
 
 /**
  * \returns the command name for MatchSearch

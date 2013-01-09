@@ -1130,6 +1130,8 @@ Match* Match::parseTabDelimited(
   Database* decoy_database ///< database with decoy peptides
   ) {
 
+  string decoy_prefix = get_string_parameter_pointer("decoy-prefix");
+
   Match* match = new Match();
 
   Spectrum* spectrum = NULL;
@@ -1183,6 +1185,11 @@ Match* Match::parseTabDelimited(
     match->match_scores_[QRANKER_QVALUE] = result_file.getFloat(QRANKER_QVALUE_COL);
   }
 
+  if (!result_file.empty(BARISTA_SCORE_COL)) {
+    match->match_scores_[BARISTA_SCORE] = result_file.getFloat(BARISTA_SCORE_COL);
+    match->match_scores_[BARISTA_QVALUE] = result_file.getFloat(BARISTA_QVALUE_COL);
+  }
+
   // get experiment size
   match->ln_experiment_size_ = log((FLOAT_T) result_file.getInteger(MATCHES_SPECTRUM_COL));
   match->num_target_matches_ = result_file.getInteger(MATCHES_SPECTRUM_COL);
@@ -1217,6 +1224,12 @@ Match* Match::parseTabDelimited(
   //We could check if unshuffled sequence is "", since that field is not
   //set for not null peptides.
   match -> null_peptide_ = !result_file.empty(UNSHUFFLED_SEQUENCE_COL);
+
+  if (!result_file.empty(PROTEIN_ID_COL) && 
+    result_file.getString(PROTEIN_ID_COL).find(decoy_prefix) != string::npos) {
+    match -> null_peptide_ = true;
+  }
+
 
   //assign fields
   match -> peptide_sequence_ = NULL;
@@ -1410,15 +1423,35 @@ void Match::setCustomScore(
 /**
  * get the custom score
  */
-FLOAT_T Match::getCustomScore(
-  const std::string& match_score_name ///< the name of the score -in
+bool Match::getCustomScore(
+  const std::string& match_score_name, ///< the name of the score -in
+  FLOAT_T& score ///< the value of the score -out
   ) {
 
   if (match_custom_scores_.find(match_score_name) == match_custom_scores_.end()) {
-    carp(CARP_FATAL, "custom match score:%s doesn't exist!", match_score_name.c_str());
+    carp(CARP_ERROR, "custom match score:%s doesn't exist!", match_score_name.c_str());
+    return false;
   }
-  return match_custom_scores_[match_score_name];
+
+  score = match_custom_scores_[match_score_name];
+  return true;
+
 }
+
+void Match::getCustomScoreNames(
+  vector<string>& custom_score_names
+  ) {
+
+  custom_score_names.clear();
+
+  for (map<string,FLOAT_T>::iterator iter = match_custom_scores_.begin();
+    iter != match_custom_scores_.end();
+      ++iter) {
+    custom_score_names.push_back(iter->first);
+  }
+
+}
+
 
 bool Match::isDecoy() {
 
@@ -1584,12 +1617,15 @@ void Match::setBYIonInfo(
   b_y_ion_possible_ = scorer->getSpBYIonPossible(); 
 }
 
-
 void Match::setBYIonFractionMatched(
   FLOAT_T fraction_matched
   ) {
 
   b_y_ion_fraction_matched_ = fraction_matched;
+}
+
+void Match::calcBYIonFractionMatched() {
+  b_y_ion_fraction_matched_ = (FLOAT_T)b_y_ion_matched_ / (FLOAT_T)b_y_ion_possible_;
 }
 
 /**
@@ -1600,11 +1636,15 @@ FLOAT_T Match::getBYIonFractionMatched()
   return b_y_ion_fraction_matched_;
 }
 
-void Match::setBYIonMatched(
-  int matched ///<the number of ions matched
-  ) {
-
+/**
+ * sets the match b_y_ion_matched
+ */
+void Match::setBYIonMatched(int matched) {
   b_y_ion_matched_ = matched;
+  if (b_y_ion_matched_ > 0 && b_y_ion_possible_ > 0) {
+    calcBYIonFractionMatched();
+  }
+  
 }
 
 /**
@@ -1616,12 +1656,15 @@ int Match::getBYIonMatched()
 }
 
 
-void Match::setBYIonPossible(
-  int possible ///< the number of possible ions to match
-  ) {
-
+/**
+ * sets the match b_y_ion_possible
+ */
+void Match::setBYIonPossible(int possible) {
   b_y_ion_possible_ = possible;
-}
+  if (b_y_ion_possible_ > 0 && b_y_ion_matched_ > 0) {
+    calcBYIonFractionMatched();
+  }
+} 
 
 /**
  * gets the match b_y_ion_possible

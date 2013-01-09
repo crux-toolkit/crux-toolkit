@@ -8,6 +8,7 @@
 #include "expat.h"
 
 #include "Protein.h"
+#include "PostProcessProtein.h"
 #include "Peptide.h"
 
 
@@ -234,9 +235,8 @@ int PepXMLReader::findStart(
   string next_aa ///< the next amino acid after the sequence in the protein
   ) {
 
-  bool debug = false;
-  if (peptide_sequence == "YESATASALVN") {
-    debug = true;
+  if (protein->getSequencePointer() == NULL) {
+    return -1;
   }
   int case_ = -1;
 
@@ -268,17 +268,6 @@ int PepXMLReader::findStart(
       case_ = 3;
       ans = (pos+2);
     }
-  }
-
-  if (debug) {
-    cerr << "findStart - case:"<<case_<<endl;
-    cerr << "findStart - sequence:"<<peptide_sequence<<endl;
-    cerr << "findStart - protein:"<<protein->getId()<<endl;
-    string protein_seq = protein->getSequencePointer();
-    string parsed_sequence = protein_seq.substr(ans-1, peptide_sequence.length());
-    cerr <<"findStart - mapped sequence:"<<parsed_sequence<<endl;
-    cerr <<"==============================="<<endl;
-    //carp(CARP_FATAL, "exitting..");
   }
 
   return ans;
@@ -334,26 +323,15 @@ void PepXMLReader::searchHitOpen(
   
   unsigned char length = current_peptide_sequence_.length();
     
-  Protein* protein = database_->getProteinByIdString(protein_string.c_str());
 
-  bool is_decoy = false;
+  bool is_decoy;
 
-  if (protein == NULL) { 
-    if (decoy_database_ == NULL) { 
-      carp(CARP_FATAL, "couldn't find protein %s in database!", protein_string.c_str()); 
-    } else { 
-      protein = decoy_database_->getProteinByIdString(protein_string.c_str()); 
-      if (protein == NULL) { 
-        carp(CARP_FATAL, "couldn't find protein %s in target or decoy database!", protein_string.c_str()); 
-      }
-     is_decoy = true;
-    } 
-  } 
-  //cerr << "findStart:"<<current_peptide_sequence_<<endl;
-  int start_idx = findStart(protein, current_peptide_sequence_, prev_aa, next_aa);
-
+  Protein* protein = 
+    MatchCollectionParser::getProtein(database_, decoy_database_, protein_string, is_decoy);
+  int start_idx = -1;
+  start_idx = protein->findStart(current_peptide_sequence_, prev_aa, next_aa);
   Peptide* peptide = new Peptide(length, peptide_mass, protein, start_idx);
-
+  
 
   current_match_ = new Match(peptide, current_spectrum_, current_zstate_, is_decoy);
   //current_match_->setRank(XCORR, hit_rank);
@@ -404,21 +382,12 @@ void PepXMLReader::alternativeProteinOpen(
     }
   }
   
-  Protein* protein = database_->getProteinByIdString(protein_string.c_str());
-  
-  if (protein == NULL) {
-    if (decoy_database_ == NULL) {
-      carp(CARP_FATAL, "couldn't find protein %s in database!", protein_string.c_str());
-    } else {
-      protein = decoy_database_->getProteinByIdString(protein_string.c_str());
-      if (protein == NULL) {
-        carp(CARP_FATAL, "couldn't find protein %s in target or decoy database!", protein_string.c_str());
-      }
-    }
-  }
+  bool is_decoy;
 
-  //cerr <<"findStart2:"<<current_peptide_sequence_<<endl;
-  int start_idx = findStart(protein, current_peptide_sequence_, prev_aa, next_aa);
+  Protein* protein = 
+    MatchCollectionParser::getProtein(database_, decoy_database_, protein_string, is_decoy);
+
+  int start_idx = protein->findStart(current_peptide_sequence_, prev_aa, next_aa);
 
   PeptideSrc* src = new PeptideSrc((DIGEST_T)0, protein, start_idx);
   current_match_->getPeptide()->addPeptideSrc(src);
@@ -479,14 +448,9 @@ void PepXMLReader::searchScoreOpen(
   } else if (name == "qranker_PEP") {
     current_match_collection_->setScoredType(QRANKER_PEP, true);
     current_match_->setScore(QRANKER_PEP, value);
-  } else if(name=="xcorr_rank"){
-    current_match_->setRank(XCORR,value);
-  } else if(name=="sp_rank"){
-    current_match_->setRank(SP,value);
-  } else {
-    //it is a custom score
-    current_match_->setCustomScore(name, value);
-  }
+  } 
+  //set the custom score
+  current_match_->setCustomScore(name, value);
 
 }
 
@@ -585,15 +549,16 @@ MatchCollection* PepXMLReader::parse(
 int main(int argc, char** argv) {
 
   initialize_parameters();
-
+  set_verbosity_level(CARP_INFO);
   char* file_path = argv[1];
   char* database_path = argv[2];
 
   Database* database;
   Database* decoy_database;
  
-  MatchCollectionFactory::loadDatabase(database_path, database, decoy_database);
-
+  //MatchCollectionFactory::loadDatabase(database_path, database, decoy_database);
+  database = new Database();
+  decoy_database = new Database();
 
 
   PepXMLReader* reader = new PepXMLReader(file_path);

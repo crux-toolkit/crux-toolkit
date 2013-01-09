@@ -26,6 +26,13 @@
 
 using namespace Crux;
 
+/**
+ * Macro for converting floating point to integers.
+ */
+
+#define INTEGERIZE(VALUE,BIN_SIZE,BIN_OFFSET) \
+  ((int)( ( ( VALUE / BIN_SIZE ) + 1.0 ) - BIN_OFFSET ) )
+
 class Scorer {
 
  protected:

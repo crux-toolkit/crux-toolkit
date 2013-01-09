@@ -10,7 +10,7 @@
         <b>Usage:</b></p>
       <blockquote>
         <code>crux spectral-counts [options] &lt;input
-          PSMs&gt;&nbsp;&lt;protein database&gt;</code>
+          PSMs&gt;</code>
       </blockquote>
       <p>
         <b>Description:</b>
@@ -126,13 +126,9 @@
         
         <li>
           <code>&lt;input PSMs&gt;</code>&ndash;
-          A PSM file of either tab delimited text file produced by a <code>crux</code> post-search
-          command, ( i.e. <code>percolator.target.txt</code> or <code>qranker.target.txt</code>),
-          or a pepXML file.</li>
-        
-        <li><code>&lt;protein database&gt;</code>&ndash; 
-          The name of the file in fasta format or the directory containing the
-          protein index from which to retrieve proteins and peptides.</li>
+          A PSM file in either tab delimited text format (as produced by 
+          <code>percolator</code>, <code>qranker</code> or <code>barista</a>)
+          or pepXML format.</li>
       </ul>
       
       <b>Output:</b>
@@ -158,10 +154,17 @@
       <br>
       <ul>
         
+        <li><code>--protein-database &lt;string&gt;</code>&ndash; 
+          The name of the file in fasta format or the directory containing the
+          protein index from which to retrieve proteins and peptides.  In order
+          to calculate NSAF, dNSAF, or SIN, the protein database is needed.
+          The database of protein may be provided in the mzIdentML (.mzid) file.
+        </li>
         <li>
-          <code>--measure &lt;NSAF|dNSAF|SIN|EMPAI&gt;</code> &ndash;
-          Type of analysis to make on match results: (NSAF | dNSAF | SIN |
-          EMPAI). Default = NSAF. 
+          <code>--measure &lt;RAW|NSAF|dNSAF|SIN|EMPAI&gt;</code> &ndash;
+          Type of analysis to make on match results: (RAW | NSAF | dNSAF | SIN |
+          EMPAI). With exception of the RAW metric, the database of sequences need
+          to be provided using <code>--protein-database</code>.  Default = NSAF. 
         </li>
         
         <li>
@@ -186,6 +189,13 @@
           = none.</li> 
         
         <li>
+          <code>--threshold-type &lt;none|qvalue|custom&gt;</code> &ndash;
+            Determines what type of threshold to use when filtering matches. 
+            none : read all matches, qvalue : use calculated q-value from percolator or q-ranker,
+            custom : use <code>--custom-threshold-name</code> and <code>--custom-threshold-min</code>
+            to define the threshold. Default=qvalue.
+        </li>
+        <li>
           <code>--threshold &lt;double&gt; </code> &ndash; 
           Only consider PSMs with a threshold value.  By default, a q-value
           from percolator, q-ranker, or decoy q-value (xcorr) is thresholded 
@@ -195,20 +205,20 @@
         </li>
 
         <li>
-          <code>--custom-threshold &lt;string&gt;</code> &ndash;
+          <code>--custom-threshold-name &lt;string&gt;</code> &ndash;
           Specify which match field to threshold the PSMs.  By default,
           the threshold filters by q-value.  Setting this parameter 
           will specify a different threshold field to use.  The direction
-          of the threshold (&gt;= or &lt;=) is governed by <code>--threshold-min</code>.
-          Default=<i>no custom threshold</i>.
+          of the threshold (&gt;= or &lt;=) is governed by <code>--custom-threshold-min</code>.
+          Default=<i>NULL</i>.
         </li>
 
         <li>
-          <code>--threshold-min &lt;T|F&gt;</code> &ndash;
-          When a <code>custom-threshold</code> is set, <code>threshold-min</code>
-          determines whether to select matches have a <code>custom-threshold</code> 
+          <code>--custom-threshold-min &lt;T|F&gt;</code> &ndash;
+          When selecting matches with a custom threshold, <code>custom-threshold-min</code>
+          determines whether to  filter matches with <code>custom-threshold-name</code> values 
           that are greater-than or equal (F) or less-than or equal (T) than the 
-          <code>threshold</code> parameter.  Default = T.
+          <code>threshold</code>.  Default = T.
         </li>
         
         <li>
@@ -220,7 +230,13 @@
         <li>
           <code>--input-ms2 &lt;string&gt;</code> &ndash;
           MS2 file corresponding to the PSM file. Required to measure the
-          SIN. Ignored for NSAF, dNSAF and EMPAI.
+          SIN. File can in a format supported by 
+          <a href="http://proteowizard.sourceforge.net/">proteowizard</a>, 
+          except for the vendor formats.  Ignored for NSAF, dNSAF and EMPAI.
+        </li>
+        
+        <li><code>--spectrum-parser &lt;pwiz|mstoolkit|crux&gt;</code> &ndash;
+          Parser to use for reading in MS/MS spectra.  Default = crux.
         </li>
         
         <li>
@@ -232,6 +248,11 @@
         <li>
           <code>--unique-mapping &lt;unique-mapping&gt;</code> &ndash;
           Ignore peptides with mappings to multiple proteins (T,F). Default (F)
+        </li>
+
+        <li>
+          <code>--mzid-use-pass-threshold &lt;T|F&gt;</code> &ndash;
+          Use mzid's passThreshold attribute to filter matches. Default (F)
         </li>
         
         <li>
@@ -256,7 +277,10 @@
       </ul>
       <hr>
       
-      <p><a href="crux.html">Crux home</a></p>
+      <p>
+        <a href="spectral-counts-tutorial.html">spectral-counts tutorial</a><br>
+        <a href="crux.html">Crux home</a>
+      </p>
       
     </blockquote>
   </body>
