@@ -989,8 +989,12 @@ bool Spectrum::parsePwizSpecInfo(const pzd::SpectrumPtr& pwiz_spectrum){
   // get the isolation window as the precursor m/z
   pzd::IsolationWindow iso_window = 
                        pwiz_spectrum->precursors[0].isolationWindow;
-  precursor_mz_ =
-    iso_window.cvParam(pzd::MS_isolation_window_target_m_z).valueAs<double>();
+  bool have_precursor_mz = false;
+  if (iso_window.hasCVParam(pzd::MS_isolation_window_target_m_z)) {
+    precursor_mz_ =
+      iso_window.cvParam(pzd::MS_isolation_window_target_m_z).valueAs<double>();
+    have_precursor_mz = true;
+  }
 
   // each charge state(s) stored in selectedIon(s)
   // is there at least one selected ion?
@@ -1001,6 +1005,7 @@ bool Spectrum::parsePwizSpecInfo(const pzd::SpectrumPtr& pwiz_spectrum){
 
   // possible charge states will all be stored in the first selected ion
   if( ions[0].hasCVParam(pzd::MS_possible_charge_state) ){
+    carp(CARP_INFO, "charges stored ion");
     vector<pzd::CVParam> charges = 
       ions[0].cvParamChildren(pzd::MS_possible_charge_state);
 
@@ -1010,20 +1015,45 @@ bool Spectrum::parsePwizSpecInfo(const pzd::SpectrumPtr& pwiz_spectrum){
       zstates_.push_back(zstate);
     }
   }
-  // bullseye-determined charge states and accurate masses will be stored
+  // determined charge states will be stored
   // one per selected ion
   else if( ions[0].hasCVParam(pzd::MS_charge_state) ){
-
     // get each charge state and possibly the associated mass
     for(size_t ion_idx = 0; ion_idx < ions.size(); ion_idx++){
       int charge = ions[ion_idx].cvParam(pzd::MS_charge_state).valueAs<int>();
-      FLOAT_T accurate_mass = 
-        ions[ion_idx].cvParam(pzd::MS_accurate_mass).valueAs<FLOAT_T>();
- 
-      SpectrumZState zstate;
-      zstate.setSinglyChargedMass(accurate_mass, charge);
-      ezstates_.push_back(zstate);
-    }
+      if ( ions[ion_idx].hasCVParam(pzd::MS_accurate_mass)) {
+        //bullseye-determined charge states
+        FLOAT_T accurate_mass = 
+          ions[ion_idx].cvParam(pzd::MS_accurate_mass).valueAs<FLOAT_T>();
+        carp(CARP_INFO, "accurate mass:%f charge:%i",accurate_mass, charge);
+        SpectrumZState zstate;
+        zstate.setSinglyChargedMass(accurate_mass, charge);
+        ezstates_.push_back(zstate);
+      } else if (ions[ion_idx].hasCVParam(pzd::MS_selected_ion_m_z)) {
+        FLOAT_T mz =
+          ions[ion_idx].cvParam(pzd::MS_selected_ion_m_z).valueAs<FLOAT_T>();
+        //if we don't have a precursor set yet, set it now.
+        if (!have_precursor_mz) {
+          precursor_mz_ = mz;
+	}
+        SpectrumZState zstate;
+        
+        zstate.setMZ(mz, charge);
+        ezstates_.push_back(zstate);
+      } else {
+
+	ostringstream oss;
+        oss << "Cannot find precursor mass! CVParams:"<<endl;
+
+	for (vector<pwiz::data::CVParam>::iterator iter = ions[0].cvParams.begin();
+	     iter != ions[0].cvParams.end();
+	     ++iter) {
+	  oss<<"id:"<<(int)iter->cvid<<" value:"<<iter->value;
+	}
+        string err_string = oss.str();
+        carp(CARP_FATAL, err_string);
+      }
+    }   
   } else { // we have no charge information
     assignZState(); //do choose charge and add +1 or +2,+3
   }
