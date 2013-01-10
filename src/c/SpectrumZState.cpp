@@ -61,6 +61,15 @@ void SpectrumZState::setMZ(
 
 }
 
+/**
+ * Gets the m/z for this z-state
+ */
+FLOAT_T SpectrumZState::getMZ() {
+
+  return FLOAT_T(neutral_mass_ / (double)charge_ + MASS_PROTON);
+
+}
+
 
 /**
  * Sets the neutral mass and charge for this z-state
