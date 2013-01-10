@@ -260,6 +260,15 @@ FILE* create_file_in_path(
   );
 
 /**
+ * \brief c++ version of create_file_in_path
+ */
+std::ofstream* create_stream_in_path(
+  const char* filename,  ///< the filename to create & open -in
+  const char* directory,  ///< the directory to open the file in -in
+  bool overwrite  ///< replace file (T) or die if exists (F)
+  );
+
+/**
  * check if the string has the correct suffix
  * \returns TRUE, if the string starts with the suffix, else FALSE
  */

@@ -83,6 +83,7 @@ set (
   MS2SpectrumCollection.cpp
   MSToolkitSpectrumCollection.cpp
   MzIdentMLReader.cpp
+  MzIdentMLWriter.cpp
   OutputFiles.cpp
   parameter.cpp
   parse_arguments.cpp
@@ -285,6 +286,7 @@ else(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     boost_regex-mt-s
     boost_thread-mt-s
   )
+    
   target_link_libraries(
     xlink-predict-peptide-ions
     dl
