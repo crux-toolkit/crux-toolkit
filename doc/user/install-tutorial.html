@@ -86,12 +86,26 @@ Building <span class=prog>crux</span> from source requires that you have previou
 installed a C++ compiler,
 <a href="http://www.cmake.org"><span class=prog>cmake</span></a>
 and
-<a href="http://subversion.apache.org"><span class=prog>svn</span></a>.
+<a href="http://subversion.apache.org"><span class=prog>svn</span></a>
+and
+<a href="http://git-scm.com"><span class=prog>git</span></a>.
 Building <span class=prog>crux</span> also requires the
-<a href=""><span class=prog>Proteowizard</span></a>
+<a href="http://proteowizard.sourceforge.net"><span class=prog>Proteowizard</span></a>
+and 
+<a href="http://per-colator.com"><span class=prog>Percolator</span></a>
 libraries. 
 These will automatically be copied from the <span class=prog>Proteowizard</span>
-SVN repository and staticlly linked into <span class=prog>crux</span>.
+and <span class=prog>Percolator</span></a> 
+repositories and staticlly linked into <span class=prog>crux</span>.
+<p />
+If you are building on OS X you may need to download an older C++ compiler
+from repositories suchs as <a href="http://www.macports.org">MacPorts</a>.
+Recent versions of the C++ compiler provided by Apple are much stricter than previous
+versions and will classify some language constructs used in the 
+<a href="http://per-colator.com"><span class=prog>Percolator</span></a> library
+as invalid C++ syntax.
+We have used version 4.7 of the GNU <span class=prog>g++</span> compiler
+downloaded from <a href="http://www.macports.org">MacPorts</a>.
 <p />
 The file you downloaded should be named something like <span
 class=file>crux-1.xx.Source.tar.gz</span>, where <span class=file>1.xx</span>
@@ -110,6 +124,20 @@ into the new directory.
 
 <li><b>Configure</b>  Move into the <span class=file>crux-1.xx.Source</span>
 directory from step 1.
+On Linux systems you will need to specify the location of the <span
+<a href="http://proteowizard.sourceforge.net"><span class=prog>Proteowizard</span></a>
+and 
+<a href="http://per-colator.com"><span class=prog>Percolator</span></a>
+libraries. 
+This is done by running the command:
+<div class=code><code>
+export LD_LIBRARY_PATH=&lt;path&gt;/external/lib:$LD_LIBRAY_PATH
+</code>
+</div>
+where <code>&lt;path&gt;</code>
+is the full path to the <span class=file>crux-1.xx.Source</span>
+directory.
+<br />
 Run the command
 <div class=code><code>
 cmake -DCMAKE_INSTALL_PREFIX:PATH=&lt;install directory&gt; .
