@@ -2,12 +2,14 @@ one-decoy-file:
 search.decoy.pep.xml
 search.decoy.txt
 search.log.txt
+search.mzid
 search.params.txt
 search.target.pep.xml
 search.target.txt
 
 tdc:
 search.log.txt
+search.mzid
 search.params.txt
 search.target.pep.xml
 search.target.txt

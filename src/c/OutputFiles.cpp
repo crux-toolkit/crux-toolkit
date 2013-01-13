@@ -27,6 +27,7 @@ OutputFiles::OutputFiles(CruxApplication* program_name)
   delim_file_array_ = NULL;
   xml_file_array_ = NULL;
   sqt_file_array_ = NULL;
+  mzid_file_ = NULL;
   feature_file_ = NULL;
   pin_xml_file_=NULL;
 
@@ -97,7 +98,13 @@ OutputFiles::OutputFiles(CruxApplication* program_name)
     );
   }
 
-  
+  if (command == SEARCH_COMMAND || command == SEQUEST_COMMAND) {
+    createFile(&mzid_file_,
+               output_directory,
+               fileroot,
+               application_,
+               "mzid");
+  }
 
   // only percolator and q-ranker create feature files
   if( (command == PERCOLATOR_COMMAND 
@@ -121,7 +128,13 @@ OutputFiles::~OutputFiles(){
     if( xml_file_array_ ){ xml_file_array_[file_idx]->closeFile(); }
     if(pin_xml_file_){pin_xml_file_->closeFile();}
   }
-  if( feature_file_){ fclose(feature_file_); }
+
+  if (mzid_file_) { 
+    mzid_file_->closeFile();
+    delete mzid_file_;
+  }
+
+  if( feature_file_ ){ fclose(feature_file_); }
 
   delete [] delim_file_array_;
   delete [] sqt_file_array_;
@@ -326,7 +339,20 @@ bool OutputFiles::createFile(FILE** file_ptr,
   return true;
 }
 
+bool OutputFiles::createFile(MzIdentMLWriter** file_ptr,
+                             const char* output_dir,
+                             const char* fileroot,
+                             CruxApplication* application,
+                             const char* extension) {
 
+  string filename = makeFileName( fileroot, application,
+                                    "",
+                                    extension, output_dir);
+  *file_ptr = new MzIdentMLWriter();
+  (*file_ptr)->openFile(filename, true);
+  return true;
+
+}
 
 /**
  * \brief A private function for opening a file according to the given
@@ -476,6 +502,8 @@ void OutputFiles::writeMatches(
   
   printMatchesPinXml(target_matches,decoy_matches_array,spectrum);
 
+  printMatchesMzid(target_matches, decoy_matches_array, rank_type);
+
 }
 
 // already confirmed that num_files_ = num decoy collections + 1
@@ -594,6 +622,46 @@ void OutputFiles::printMatchesXml(
     } // else if NULL, num_files_==1 and this is last loop
   }
   index++;
+
+}
+
+void OutputFiles::printMatchesMzid(
+  MatchCollection* target_matches,
+  vector<MatchCollection*>& decoy_matches_array,
+  SCORER_TYPE_T rank_type
+  ) {
+
+  if (mzid_file_ == NULL) {
+    return;
+  }
+
+  if (target_matches == NULL) {
+    return;
+  }
+
+  printMatchesMzid(target_matches, rank_type);
+
+  for (size_t idx = 0; idx < decoy_matches_array.size();idx++) {
+    printMatchesMzid(decoy_matches_array[idx], rank_type);
+  }
+
+}
+
+void OutputFiles::printMatchesMzid(
+  MatchCollection* collection,
+  SCORER_TYPE_T rank_type
+  ) {
+
+  MatchIterator match_iter(collection,rank_type);
+
+  while(match_iter.hasNext()) {
+    Match* current_match = match_iter.next();
+    if (current_match->getRank(rank_type) <= matches_per_spec_) {
+      mzid_file_->addMatch(collection, current_match);
+    } else {
+      break;
+    }
+  }
 
 }
 

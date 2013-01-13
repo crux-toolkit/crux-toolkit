@@ -25,7 +25,7 @@ void MatchCollectionParser::loadDatabase(
   Database*& decoy_database ///< resulting decoy database -out
   ) {
 
-  if (fasta_file == string("__NULL_STR")) {
+  if (fasta_file == NULL || string(fasta_file) == string("__NULL_STR")) {
     carp(CARP_DEBUG, "no database provided");
     database = new Database();
     decoy_database = new Database();
@@ -153,8 +153,9 @@ MatchCollection* MatchCollectionParser::create(
   ) {
 
   carp(CARP_DEBUG, "match path:%s", match_path);
-  carp(CARP_DEBUG, "fasta path:%s", fasta_path);
-
+  if (fasta_path) {
+    carp(CARP_DEBUG, "fasta path:%s", fasta_path);
+  }
   struct stat stat_buff ; 
   stat(match_path, &stat_buff);
   if(stat(match_path, &stat_buff)!=0){

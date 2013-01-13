@@ -1350,6 +1350,50 @@ FILE* create_file_in_path(
   return file;
 }
 
+ofstream* create_stream_in_path(
+  const char* filename,  ///< the filename to create & open -in
+  const char* directory,  ///< the directory to open the file in -in
+  bool overwrite  ///< replace file (T) or die if exists (F)
+  )
+{
+  char* file_full_path = get_full_filename(directory, filename);
+  // FIXME CEG consider using stat instead
+  FILE* file = fopen(file_full_path, "rb"); //to test if file exists
+  if( file != NULL ){  
+    //The file exists, are we allowed to overwrite it?
+    fclose(file);
+    file = NULL;
+    if( ! overwrite ){
+        // Not allowed to overwrite, we must die.
+        carp(
+          CARP_FATAL, 
+          "The file '%s' already exists and cannot be overwritten. " \
+            "Use --overwrite T to replace or choose a different output file name",
+          file_full_path
+        );
+    }
+    else {
+      // Allowed to overwrite, send warning message.
+      carp(
+        CARP_WARNING, 
+        "The file '%s' already exists and will be overwritten.",
+        file_full_path
+      );
+    }
+  }
+  
+  ofstream* fout = new ofstream(file_full_path);
+
+  if(fout == NULL){
+    carp(CARP_FATAL, "Failed to create and open file: %s", file_full_path);
+  }
+  
+  free(file_full_path);
+
+  return fout;
+}
+
+
 /**
  *\returns a heap allocated feature name array
  */

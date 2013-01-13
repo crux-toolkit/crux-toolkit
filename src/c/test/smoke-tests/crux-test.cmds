@@ -236,22 +236,22 @@
 1 = spectral-counts-dnsaf = good_results/spectral-counts.dnsaf.txt = crux spectral-counts --protein-database test.fasta --parameter-file params/dnsaf test.target.txt; cat crux-output/spectral-counts.target.txt
 
 #spectral-counts pepXML
-1 = spectral-counts-pepxml = good_results/spectral-counts.pepxml.txt = rm -rf crux-output; crux sequest-search --parameter-file params/set_rand_seed_only --decoy-location target-file --decoys peptide-shuffle demo.ms2 yeast-index/; crux q-ranker --parameter-file params/set_rand_seed_only --feature-file T demo.ms2 crux-output/sequest.target.txt; crux spectral-counts --protein-database yeast-index --parameter-file params/nsaf ./crux-output/q-ranker_output.xml; cat crux-output/spectral-counts.target.txt
+1 = spectral-counts-pepxml = good_results/spectral-counts.pepxml.txt = rm -rf crux-output; crux sequest-search --parameter-file params/set_rand_seed_only --decoy-location target-file --decoys peptide-shuffle demo.ms2 yeast-index/; crux q-ranker --parameter-file params/set_rand_seed_only --feature-file T demo.ms2 crux-output/sequest.target.txt; crux spectral-counts --protein-database yeast-index --parameter-file params/nsaf ./crux-output/q-ranker.xml; cat crux-output/spectral-counts.target.txt
 
 #spectral-counts custom
-1 = spectral-counts-custom = good_results/spectral-counts.pepxml.custom.txt = crux spectral-counts --protein-database yeast-index --parameter-file params/spc-custom ./crux-output/q-ranker_output.xml; cat crux-output/spectral-counts.target.txt
+1 = spectral-counts-custom = good_results/spectral-counts.pepxml.custom.txt = crux spectral-counts --protein-database yeast-index --parameter-file params/spc-custom ./crux-output/q-ranker.xml; cat crux-output/spectral-counts.target.txt
 
 #spectral-counts simple
-1 = spectral-counts-simple = good_results/spectral-counts.simple.txt = crux spectral-counts --protein-database yeast-index --parameter-file params/spc-simple ./crux-output/q-ranker_output.xml; cat crux-output/spectral-counts.target.txt
+1 = spectral-counts-simple = good_results/spectral-counts.simple.txt = crux spectral-counts --protein-database yeast-index --parameter-file params/spc-simple ./crux-output/q-ranker.xml; cat crux-output/spectral-counts.target.txt
 
 #spectral-counts none
-1 = spectral-counts-none = good_results/spectral-counts.none.txt = crux spectral-counts --protein-database yeast-index --parameter-file params/spc-none ./crux-output/q-ranker_output.xml; cat crux-output/spectral-counts.target.txt
+1 = spectral-counts-none = good_results/spectral-counts.none.txt = crux spectral-counts --protein-database yeast-index --parameter-file params/spc-none ./crux-output/q-ranker.xml; cat crux-output/spectral-counts.target.txt
 
 #spectral-counts peptideprophet
-1 = spectral-counts-peptideprophet = good_results/spectral-counts.peptideprophet.txt = crux spectral-counts --protein-database yeast-index --parameter-file params/spc-pp ./crux-output/q-ranker_output.xml; cat crux-output/spectral-counts.target.txt
+1 = spectral-counts-peptideprophet = good_results/spectral-counts.peptideprophet.txt = crux spectral-counts --protein-database yeast-index --parameter-file params/spc-pp ./crux-output/q-ranker.xml; cat crux-output/spectral-counts.target.txt
 
 #spectral-counts pepXML-nodb
-1 = spectral-counts-pepxml-nodb = good_results/spectral-counts.pepxml.nodb.txt = crux spectral-counts --parameter-file params/raw ./crux-output/q-ranker_output.xml; cat crux-output/spectral-counts.target.txt
+1 = spectral-counts-pepxml-nodb = good_results/spectral-counts.pepxml.nodb.txt = crux spectral-counts --parameter-file params/raw ./crux-output/q-ranker.xml; cat crux-output/spectral-counts.target.txt
 
 #spectral-counts tsv-nodb
 1 = spectral-counts-tsv-nodb = good_results/spectral-counts.raw.nodb.txt = crux spectral-counts --parameter-file params/raw ./crux-output/q-ranker.target.psms.txt ; cat crux-output/spectral-counts.target.txt
