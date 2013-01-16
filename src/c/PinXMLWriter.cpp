@@ -100,56 +100,17 @@ void PinXMLWriter::calculateDeltaCN(map<pair<int, int>, vector<Match*> >& scan_c
   }
 }
 
-void PinXMLWriter::calculateDeltaCN(const vector<Match*>& collection) {
+void PinXMLWriter::calculateDeltaCN(vector<Match*>& collection) {
 
-
-  unsigned collection_size= collection.size();
-  FLOAT_T last_xcorr=0.0;
-  FLOAT_T delta_cn = 0.0;
-  FLOAT_T delta_lcn = 0.0;
-  FLOAT_T next_xcorr=0.0;
-  FLOAT_T current_xcorr = 0 ;
-  if(collection_size>1){
-    last_xcorr = collection[collection_size-1]->getScore(XCORR);
-    for (size_t idx = 0 ;idx < collection_size;idx++) { 
-      current_xcorr = collection[idx]->getScore(XCORR);
-      if (idx+1<=collection_size-1)
-        next_xcorr=collection[idx+1]->getScore(XCORR);
-      if (current_xcorr > 0 ) {
-        delta_cn = (FLOAT_T)(current_xcorr - next_xcorr) / (FLOAT_T)current_xcorr;
-        delta_lcn = (FLOAT_T)(current_xcorr - last_xcorr) /(FLOAT_T)current_xcorr;
-      } else {
-        delta_cn = 0.0;
-        delta_lcn = 0.0;
-      }
-      
-      if(fabs(delta_cn)== numeric_limits<FLOAT_T>::infinity()){
-        cerr<<"delta_cn was "<<delta_cn<<" and set to zero. XCorr score is "<<current_xcorr<<endl;
-        delta_cn = 0.0;
-      }
-      if(fabs(delta_lcn) == numeric_limits<FLOAT_T>::infinity()){
-        cerr<<"delta_lcn was"<< delta_lcn<<" and set to zero. XCorr score is "<<current_xcorr<<endl;
-        delta_lcn = 0.0;
-      }
-      collection[idx]->setDeltaCn(delta_cn);
-      collection[idx]->setDeltaLCn(delta_lcn);
-      
-    }
+  MatchCollection* tmp_matches = new MatchCollection();
+  tmp_matches->setScoredType(XCORR, true);
+  for (vector<Match*>::iterator iter = collection.begin();
+    iter != collection.end();
+    ++iter) {
+    tmp_matches->addMatch(*iter);
   }
-
-}
-
-void PinXMLWriter::calculateDeltaCN(MatchCollection* collection) {
-
-  MatchIterator* match_iterator = new MatchIterator(collection, XCORR, true);
-  vector<Match*> matches;
-  while (match_iterator->hasNext()) {
-    matches.push_back(match_iterator->next());
-  }
-
-  delete match_iterator;
-
-  calculateDeltaCN(matches);
+  tmp_matches->calculateDeltaCn();
+  delete tmp_matches;
 
 }
 

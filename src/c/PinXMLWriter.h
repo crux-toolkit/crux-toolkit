@@ -138,8 +138,7 @@ class PinXMLWriter{
  
   //calculating deltaCn and deltaLCn
   void calculateDeltaCN(map<pair<int, int>, vector<Match*> >& scan_charge_to_matches);
-  void calculateDeltaCN(const vector<Match*>& collection);
-  void calculateDeltaCN(MatchCollection* collection);
+  void calculateDeltaCN(vector<Match*>& collection);
   void calculateDeltaCN(MatchCollection* target_collection, std::vector<MatchCollection*>& decoys);
 
 };

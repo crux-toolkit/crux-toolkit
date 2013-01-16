@@ -2656,33 +2656,37 @@ bool MatchCollection::calculateDeltaCn(
     last_sorted_ = XCORR;
   }
 
-  // get xcorr of first match
-  FLOAT_T max_xcorr = matches[0]->getScore(XCORR);
-
-  // for each match, calculate deltacn
-  for(int match_idx = 0; match_idx < num_matches; match_idx++){
-    FLOAT_T next_xcorr = 0;
+  FLOAT_T last_xcorr=0.0;
+  FLOAT_T delta_cn = 0.0;
+  FLOAT_T delta_lcn = 0.0;
+  FLOAT_T next_xcorr=0.0;
+  FLOAT_T current_xcorr = 0 ; 
+  if(num_matches>1){
+    last_xcorr = matches[num_matches-1]->getScore(XCORR);
+    for (size_t idx = 0 ;idx < num_matches;idx++) { 
+      current_xcorr = matches[idx]->getScore(XCORR);
+      if (idx+1<=num_matches-1)
+        next_xcorr=matches[idx+1]->getScore(XCORR);
+      if (current_xcorr > 0 ) { 
+        delta_cn = (FLOAT_T)(current_xcorr - next_xcorr) / (FLOAT_T)current_xcorr;
+        delta_lcn = (FLOAT_T)(current_xcorr - last_xcorr) /(FLOAT_T)current_xcorr;
+      } else {
+        delta_cn = 0.0;
+        delta_lcn = 0.0;
+      }   
     
-    if( search_type == SEQUEST_COMMAND ){ // use this match's xcorr
-      next_xcorr = matches[match_idx]->getScore(XCORR);
-    } else {                              // find next non-equal xcorr
-      FLOAT_T this_xcorr = matches[match_idx]->getScore(XCORR);
-      int score_idx = match_idx + 1;
-      
-      while( score_idx < num_matches &&
-             matches[score_idx]->getScore(XCORR) == this_xcorr ){
-        score_idx++;
-      }
-      
-      if( score_idx < num_matches ){
-        next_xcorr = matches[score_idx]->getScore(XCORR);
-      } else { // if this is the last match, set dcn to 0
-        next_xcorr = max_xcorr;
-      }
-    }
+      if(fabs(delta_cn)== numeric_limits<FLOAT_T>::infinity()){
+        cerr<<"delta_cn was "<<delta_cn<<" and set to zero. XCorr score is "<<current_xcorr<<endl;
+        delta_cn = 0.0;
+      }   
+      if(fabs(delta_lcn) == numeric_limits<FLOAT_T>::infinity()){
+        cerr<<"delta_lcn was"<< delta_lcn<<" and set to zero. XCorr score is "<<current_xcorr<<endl;
+        delta_lcn = 0.0;
+      }   
+      matches[idx]->setDeltaCn(delta_cn);
+      matches[idx]->setDeltaLCn(delta_lcn);
     
-    FLOAT_T delta_cn = (max_xcorr - next_xcorr) / max_xcorr;
-    matches[match_idx]->setDeltaCn(delta_cn);
+    }   
   }
 
   return true;
