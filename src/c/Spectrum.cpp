@@ -213,7 +213,7 @@ void Spectrum::printSqt(
           0.0, // FIXME dummy <process time>
           "server", // FIXME dummy <server>
           get_int_parameter("mass-precision"),
-          zstate.getNeutralMass(), //this is used in search
+          zstate.getSinglyChargedMass(), //this is used in search
           0.0, // FIXME dummy <total intensity>
           get_int_parameter("precision"),
           0.0, // FIXME dummy <lowest sp>

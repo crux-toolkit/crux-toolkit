@@ -382,7 +382,7 @@ void PinXMLWriter:: printFeatureDescription(){
   fprintf(output_file_,"\n  <featureDescription name=\"enzN\"/>");
   fprintf(output_file_,"\n  <featureDescription name=\"enzC\"/>");
   fprintf(output_file_,"\n  <featureDescription name=\"enzInt\"/>");
-  fprintf(output_file_,"\n  <featureDescription name=\"LnNumSP\"/>");
+  fprintf(output_file_,"\n  <featureDescription name=\"lnNumSP\"/>");
   fprintf(output_file_,"\n  <featureDescription name=\"dM\"/>");
   fprintf(output_file_,"\n  <featureDescription name=\"absdM\"/>");
   fprintf(output_file_,"\n</featureDescriptions>\n");
@@ -416,9 +416,9 @@ void PinXMLWriter:: printPSM(
   SpectrumZState& zstate = match->getZState();
   int charge=zstate.getCharge();
    
-   //calculating experimental mz
+   //calculating singly charged mass
    
-    FLOAT_T exp_mz= zstate.getMZ();
+    FLOAT_T exp_mass= zstate.getSinglyChargedMass();
     //isDecoy(match);
     if(is_decoy)
       decoy="true";
@@ -437,7 +437,7 @@ void PinXMLWriter:: printPSM(
       " id=\"%s\" isDecoy=\"%s\">\n",
       mass_precision_, calculated_mass,
       charge, 
-      mass_precision_,exp_mz,
+      mass_precision_,exp_mass,
       id.c_str(),
       decoy.c_str()
     );

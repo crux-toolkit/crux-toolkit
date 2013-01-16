@@ -173,11 +173,11 @@ void SQTReader::parseSpectrum(string& line) {
   
   last_parsed_ = SQT_LINE_SPECTRUM;
 
-  double precursor_mz = (observed_mass + (MASS_PROTON * (double)charge)) / (double)charge;
+  double precursor_mz = (observed_mass + (MASS_PROTON * (double)(charge - 1))) / (double)charge;
   vector<int> charge_vec;
   charge_vec.push_back(charge);
   current_spectrum_ = new Spectrum(low_scan, high_scan, precursor_mz, charge_vec, "");
-  current_zstate_.setNeutralMass(observed_mass, charge);
+  current_zstate_.setSinglyChargedMass(observed_mass, charge);
   /*
   cerr << "spectrum line:"<<line<<endl;
   cerr << "low scan:"<<low_scan<<endl;
@@ -321,7 +321,7 @@ int SQTReader::findStart(
   if (prev_aa == "-") {
     return 1;
   } else if (next_aa == "-") {
-    return protein->getLength() - peptide_sequence.length();
+    return protein->getLength() - peptide_sequence.length() + 1;
   } else {
     //use the flanking amino acids to further constrain our search in the sequence
     size_t pos = string::npos; 
