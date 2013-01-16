@@ -424,7 +424,9 @@ void PinXMLWriter::printFeatures(
   bool enz_c=false; 
   bool enz_n=false;  
   Peptide* peptide=match->getPeptide(); 
-  FLOAT_T dM=(match->getNeutralMass() - peptide->getPeptideMass())/charge_state;  
+  FLOAT_T obs_mass=match->getZState().getSinglyChargedMass();
+  FLOAT_T calc_mass=peptide->calcMass(get_mass_type_parameter("isotopic-mass"));
+  FLOAT_T dM=(obs_mass - calc_mass)/charge_state;
   if(peptide->getCTermFlankingAA()!='-')
      enz_c =true; 
   if(peptide->getNTermFlankingAA()!='-')
@@ -484,7 +486,7 @@ void PinXMLWriter::printFeatures(
       precision_,match->getScore(XCORR),/*4*/
       precision_,match->getScore(SP),/*5*/
       precision_,match-> getBYIonFractionMatched(),/*6*/
-      mass_precision_,match->getNeutralMass(),/*7*/
+      mass_precision_,obs_mass,/*7*/
       peptide->getLength(),/*8*/
       charge1,/*9*/ 
       charge2,/*10*/ 
@@ -518,7 +520,7 @@ void PinXMLWriter::printFeatures(
       precision_,match->getDeltaLCn(), /*1.deltLCn*/
       precision_,match->getDeltaCn(),/*2.deltCn*/
       precision_,match->getScore(XCORR),/*3.Xcorr*/
-      mass_precision_,match->getNeutralMass(),/*4.Mass*/
+      mass_precision_,obs_mass,/*4.Mass*/
       peptide->getLength(),/*5.PepLen*/
       charge1,/*6.charge1*/
       charge2,/*7.charge2*/
