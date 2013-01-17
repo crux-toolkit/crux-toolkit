@@ -19,7 +19,7 @@
 #include <iostream>
 
 using namespace std;
-
+using namespace Crux;
 
 /**
  * Instantiates a new spectrum_collection object from a filename. 

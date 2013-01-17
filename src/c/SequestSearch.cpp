@@ -19,6 +19,7 @@
 #include "ModifiedPeptidesIterator.h"
 
 using namespace std;
+using namespace Crux;
 
 /**
  * \returns a blank SequestSearch object

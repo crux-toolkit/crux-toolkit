@@ -12,6 +12,7 @@
 
 #include "OutputFiles.h"
 using namespace std;
+using namespace Crux;
 
 /**
  * Default constructor for OutputFiles.  Opens all of the needed

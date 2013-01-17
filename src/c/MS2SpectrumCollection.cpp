@@ -9,6 +9,8 @@
 #include "parameter.h"
 #include "Spectrum.h"
 
+using namespace Crux;
+
 /**
  * Instantiates a new spectrum_collection object from a filename. 
  * Does not parse file. 

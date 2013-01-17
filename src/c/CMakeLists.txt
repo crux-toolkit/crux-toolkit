@@ -103,6 +103,7 @@ set (
   PeptideSrc.cpp
   PepXMLReader.cpp
   PepXMLWriter.cpp
+  PercolatorAdapter.cpp
   PercolatorApplication.cpp
   GeneratePeptides.cpp
   PinXMLWriter.cpp

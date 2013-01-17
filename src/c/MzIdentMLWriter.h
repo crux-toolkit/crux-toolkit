@@ -92,7 +92,7 @@ class MzIdentMLWriter{
    */
   void addScores(
     MatchCollection* match_collection, ///< Parent collection of match
-    Match* match, ///< Match to add
+    Crux::Match* match, ///< Match to add
     pwiz::identdata::SpectrumIdentificationItemPtr item ///< item to add the scores to
   );
 
@@ -101,7 +101,7 @@ class MzIdentMLWriter{
    */
   void addRanks(
     MatchCollection* match_collection, ///< Parent collection of the match
-    Match* match, ///< Match to add
+    Crux::Match* match, ///< Match to add
     pwiz::identdata::SpectrumIdentificationItemPtr item ///< item to add the ranks to
   );
 
@@ -149,7 +149,7 @@ class MzIdentMLWriter{
    */
   void addMatch(
     MatchCollection* collection, ///< parent collection
-    Match* match ///< match to add
+    Crux::Match* match ///< match to add
   );
 
 };

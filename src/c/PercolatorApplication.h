@@ -53,11 +53,13 @@ class PercolatorApplication: public CruxApplication {
    */
   virtual bool needsOutputDirectory();
 
+  virtual COMMAND_T getCommand();
+
   /**
    * \brief runs hardklor on the input spectra
    * \returns whether hardklor was successful or not
    */
-  static int main(
+  int main(
     const std::string& input_pinxml ///< file path of spectra to process
   );
   

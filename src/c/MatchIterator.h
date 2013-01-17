@@ -67,7 +67,7 @@ class MatchIterator {
    * MUST set the iterator to correct mode before initialially calling this method
    *\returns the match in decreasing score order for the match_mode(SCORER_TYPE_T)
    */
-  Match* next();
+  Crux::Match* next();
 
 };
 

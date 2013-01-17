@@ -25,6 +25,7 @@
 #include "MSToolkit/include/Spectrum.h"
 
 using namespace std;
+using namespace Crux;
 namespace pzd = pwiz::msdata;
 
 /**

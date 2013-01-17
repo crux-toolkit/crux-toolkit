@@ -7,6 +7,8 @@
 #include "MGFSpectrumCollection.h"
 #include "parameter.h"
 
+using namespace Crux;
+
 /**
  * Constructor sets filename and initializes member variables.
  */

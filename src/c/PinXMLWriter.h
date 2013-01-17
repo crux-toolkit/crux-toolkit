@@ -27,14 +27,14 @@ class PinXMLWriter{
  
   void write(
     MatchIterator* iterator,
-    Spectrum* spectrum,
+    Crux::Spectrum* spectrum,
     int top_rank
   );
  
   void write (
     MatchCollection* target_collection, 
     std::vector<MatchCollection*>& decoy_matches,
-    Spectrum* spectrum, 
+    Crux::Spectrum* spectrum, 
     int top_rank
   );
  
@@ -96,25 +96,30 @@ class PinXMLWriter{
   //proccess information 
   void printProcessInfo();
  
-  void printFeatures(Match* match, 
+  void printFeatures(
+    Crux::Match* match, 
     bool is_sp
   );
 
   //write PSM
   void printPSM(
-    Match* match, 
-    Spectrum* spectrum, 
+    Crux::Match* match, 
+    Crux::Spectrum* spectrum, 
     bool is_decoy 
   );
 
   //write Peptide sequence 
-  void printPeptideSequence(Peptide* pepitde); 
+  void printPeptideSequence(
+    Crux::Peptide* pepitde
+  ); 
   
   //write features 
-  void printFeatures(Match* match);
+  void printFeatures(
+    Crux::Match* match
+  );
 
   //write occurance 
-  void printOccurence(char flankC, char flankN, Peptide* peptide); 
+  void printOccurence(char flankC, char flankN, Crux::Peptide* peptide); 
 
   //write FooterPSM
   void printPSMsFooter();
@@ -126,7 +131,9 @@ class PinXMLWriter{
   void printFragSpecFooter();
   
   //set decoy for sqt files 
-  bool isDecoy(Match* match);
+  bool isDecoy(
+    Crux::Match* match
+  );
 
   //return id for PSM 
   string getId(
@@ -137,8 +144,8 @@ class PinXMLWriter{
   ); 
  
   //calculating deltaCn and deltaLCn
-  void calculateDeltaCN(map<pair<int, int>, vector<Match*> >& scan_charge_to_matches);
-  void calculateDeltaCN(vector<Match*>& collection);
+  void calculateDeltaCN(map<pair<int, int>, vector<Crux::Match*> >& scan_charge_to_matches);
+  void calculateDeltaCN(vector<Crux::Match*>& collection);
   void calculateDeltaCN(MatchCollection* target_collection, std::vector<MatchCollection*>& decoys);
 
 };

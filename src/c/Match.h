@@ -38,6 +38,7 @@
 static const FLOAT_T NOT_SCORED = FLT_MIN;
 static const FLOAT_T P_VALUE_NA = -1.0;
 
+namespace Crux{
 
 class Match {
  protected:
@@ -65,8 +66,8 @@ class Match {
    * shuffled flanking sequence to determine the shuffled peptide's trypticity.
    *
    */
-  Spectrum* spectrum_; ///< the spectrum we are scoring with
-  Peptide* peptide_;  ///< the peptide we are scoring
+  Crux::Spectrum* spectrum_; ///< the spectrum we are scoring with
+  Crux::Peptide* peptide_;  ///< the peptide we are scoring
   FLOAT_T match_scores_[NUMBER_SCORER_TYPES];
   std::map<string,FLOAT_T> match_custom_scores_;
     ///< array of scores, one for each type (index with SCORER_TYPE_T) 
@@ -121,8 +122,8 @@ class Match {
   /**
    *
    */
-  Match(Peptide* peptide, ///< the peptide for this match
-        Spectrum* spectrum, ///< the spectrum for this match
+  Match(Crux::Peptide* peptide, ///< the peptide for this match
+        Crux::Spectrum* spectrum, ///< the spectrum for this match
         SpectrumZState& zstate, ///< the charge/mass of the spectrum
         bool is_decoy);///< is the peptide a decoy or not
 
@@ -324,12 +325,12 @@ class Match {
   /**
    *\returns the spectrum in the match object
    */
-  Spectrum* getSpectrum();
+  Crux::Spectrum* getSpectrum();
 
   /**
    *\returns the peptide in the match object
    */
-  Peptide* getPeptide();
+  Crux::Peptide* getPeptide();
 
   /**
    * sets the match charge and mass
@@ -458,6 +459,8 @@ class Match {
 
 };
 
+} /* Namespace for Match */
+
 /**
  * Comparator class for Match objects
  * Used for sorting.
@@ -472,8 +475,8 @@ class CompareMatch {
     int (*sort_by)(const void*, const void*)); ///<sort key
 
   bool operator()(
-    const Match*a, 
-    const Match*b
+    const Crux::Match*a, 
+    const Crux::Match*b
   );
 
 };
@@ -483,7 +486,7 @@ class CompareMatch {
  */
 /*
 void sortMatches(
-  Match** match_array, ///< the match arrray to sort -in
+  Crux::Match** match_array, ///< the match arrray to sort -in
   int match_total, ///< the total number of match objects -in
   int (*compare_method)(const void*, const void*) ///< the compare method to use -in
   );
@@ -493,7 +496,7 @@ void sortMatches(
  * sort the match array with the corresponding compare method
  */
 void qsortMatch(
-  Match** match_array, ///< the match array to sort -in  
+  Crux::Match** match_array, ///< the match array to sort -in  
   int match_total,  ///< the total number of match objects -in
   int (*compare_method)(const void*, const void*) ///< the compare method to use -in
   );
@@ -503,8 +506,8 @@ void qsortMatch(
  * \returns the difference between sp score in match_a and match_b
  */
 int compareSp(
-  Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the scond match -in
+  Crux::Match** match_a, ///< the first match -in  
+  Crux::Match** match_b  ///< the scond match -in
   );
 
 /**
@@ -512,8 +515,8 @@ int compareSp(
  * \returns the difference between xcorr score in match_a and match_b
  */
 int compareXcorr(
-  Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the scond match -in
+  Crux::Match** match_a, ///< the first match -in  
+  Crux::Match** match_b  ///< the scond match -in
   );
 
 /**
@@ -522,18 +525,18 @@ int compareXcorr(
  * score in match_a and match_b 
  */
 int comparePValue(
-  Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the scond match -in
+  Crux::Match** match_a, ///< the first match -in  
+  Crux::Match** match_b  ///< the scond match -in
   );
 
 int comparePercolatorQValue(
-  Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the scond match -in
+  Crux::Match** match_a, ///< the first match -in  
+  Crux::Match** match_b  ///< the scond match -in
 );
 
 int compareQRankerQValue(
-  Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the scond match -in
+  Crux::Match** match_a, ///< the first match -in  
+  Crux::Match** match_b  ///< the scond match -in
   );
 
 /**
@@ -541,8 +544,8 @@ int compareQRankerQValue(
  * \returns the difference between xcorr score in match_a and match_b
  */
 int compareQValue(
-  Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the scond match -in
+  Crux::Match** match_a, ///< the first match -in  
+  Crux::Match** match_b  ///< the scond match -in
   );
 
 /**
@@ -550,8 +553,8 @@ int compareQValue(
  * \returns the difference between qranker qvalue in match_a and match_b
  */
 int compareQRankerQValue(
-  Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the scond match -in
+  Crux::Match** match_a, ///< the first match -in  
+  Crux::Match** match_b  ///< the scond match -in
   );
 
 /**
@@ -559,8 +562,8 @@ int compareQRankerQValue(
  * \returns the difference between barista qvalue in match_a and match_b
  */
 int compareBaristaQValue(
-  Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the scond match -in
+  Crux::Match** match_a, ///< the first match -in  
+  Crux::Match** match_b  ///< the scond match -in
   );
 
 /**
@@ -568,8 +571,8 @@ int compareBaristaQValue(
  * \returns the difference between PERCOLATOR_SCORE score in match_a and match_b
  */
 int comparePercolatorScore(
-  Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the scond match -in
+  Crux::Match** match_a, ///< the first match -in  
+  Crux::Match** match_b  ///< the scond match -in
   );
 
 
@@ -578,8 +581,8 @@ int comparePercolatorScore(
  * \returns the difference between QRANKER_SCORE score in match_a and match_b
  */
 int compareQRankerScore(
-  Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the scond match -in
+  Crux::Match** match_a, ///< the first match -in  
+  Crux::Match** match_b  ///< the scond match -in
   );
 
 /**
@@ -587,8 +590,8 @@ int compareQRankerScore(
  * \returns the difference between BARISTA_SCORE score in match_a and match_b
  */
 int compareBaristaScore(
-  Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the scond match -in
+  Crux::Match** match_a, ///< the first match -in  
+  Crux::Match** match_b  ///< the scond match -in
   );
 
 /**
@@ -598,8 +601,8 @@ int compareBaristaScore(
  * match b.  1 if scan number and sp are equal, else 0.
  */
 int compareSpectrumSp(
-  Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the scond match -in
+  Crux::Match** match_a, ///< the first match -in  
+  Crux::Match** match_b  ///< the scond match -in
   );
 
 /**
@@ -609,8 +612,8 @@ int compareSpectrumSp(
  * match b.  1 if scan number and score are equal, else 0.
  */
 int compareSpectrumXcorr(
-  Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the scond match -in
+  Crux::Match** match_a, ///< the first match -in  
+  Crux::Match** match_b  ///< the scond match -in
   );
 
 /**
@@ -620,8 +623,8 @@ int compareSpectrumXcorr(
  * match b.  1 if scan number and score are equal, else 0.
  */
 int compareSpectrumPercolatorQValue(
-  Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the scond match -in
+  Crux::Match** match_a, ///< the first match -in  
+  Crux::Match** match_b  ///< the scond match -in
   );
 
 /**
@@ -631,8 +634,8 @@ int compareSpectrumPercolatorQValue(
  * match b.  1 if scan number and score are equal, else 0.
  */
 int compareSpectrumScan(
-  Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the scond match -in
+  Crux::Match** match_a, ///< the first match -in  
+  Crux::Match** match_b  ///< the scond match -in
   );
 /**
  * Compare two matches by spectrum scan number and qranker q-value, 
@@ -642,8 +645,8 @@ int compareSpectrumScan(
  * match b.  1 if scan number and score are equal, else 0.
  */
 int compareSpectrumQRankerQValue(
-  Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the scond match -in
+  Crux::Match** match_a, ///< the first match -in  
+  Crux::Match** match_b  ///< the scond match -in
   );
 
 /**
@@ -654,8 +657,8 @@ int compareSpectrumQRankerQValue(
  * match b.  1 if scan number and score are equal, else 0.
  */
 int compareSpectrumBaristaQValue(
-  Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the scond match -in
+  Crux::Match** match_a, ///< the first match -in  
+  Crux::Match** match_b  ///< the scond match -in
   );
 
 /**
@@ -666,8 +669,8 @@ int compareSpectrumBaristaQValue(
  * match b.  1 if scan number and score are equal, else 0.
  */
 int compareSpectrumPercolatorScore(
-  Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the scond match -in
+  Crux::Match** match_a, ///< the first match -in  
+  Crux::Match** match_b  ///< the scond match -in
   );
 
 /**
@@ -678,8 +681,8 @@ int compareSpectrumPercolatorScore(
  * match b.  1 if scan number and score are equal, else 0.
  */
 int compareSpectrumQRankerScore(
-  Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the scond match -in
+  Crux::Match** match_a, ///< the first match -in  
+  Crux::Match** match_b  ///< the scond match -in
   );
 
 /**
@@ -690,8 +693,8 @@ int compareSpectrumQRankerScore(
  * match b.  1 if scan number and score are equal, else 0.
  */
 int compareSpectrumBaristaScore(
-  Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the scond match -in
+  Crux::Match** match_a, ///< the first match -in  
+  Crux::Match** match_b  ///< the scond match -in
   );
 
 /**
@@ -702,8 +705,8 @@ int compareSpectrumBaristaScore(
  * match b.  1 if scan number and score are equal, else 0.
  */
 int compareSpectrumDecoyXcorrQValue(
-  Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the scond match -in
+  Crux::Match** match_a, ///< the first match -in  
+  Crux::Match** match_b  ///< the scond match -in
   );
 
 /**
@@ -714,8 +717,8 @@ int compareSpectrumDecoyXcorrQValue(
  * match b.  1 if scan number and score are equal, else 0.
  */
 int compareSpectrumDecoyPValueQValue(
-  Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the scond match -in
+  Crux::Match** match_a, ///< the first match -in  
+  Crux::Match** match_b  ///< the scond match -in
   );
 
 

@@ -12,6 +12,7 @@
 
 
 using namespace std;
+using namespace Crux;
 using namespace pwiz;
 using namespace identdata;
 
@@ -330,6 +331,12 @@ CVID MzIdentMLWriter::getScoreCVID(
       return MS_Sequest_xcorr;
     case SP:
       return MS_Sequest_PeptideSp;
+    case PERCOLATOR_SCORE:
+      return MS_percolator_score;
+    case PERCOLATOR_QVALUE:
+      return MS_percolator_Q_value;
+    case PERCOLATOR_PEP:
+      return MS_percolator_PEP;
     default:
       return CVID_Unknown;  
   }
@@ -372,9 +379,11 @@ void MzIdentMLWriter::addScores(
     }
   }
 
-  CVParam delta_cn(MS_Sequest_deltacn, match->getDeltaCn());
-  item->cvParams.push_back(delta_cn);
+  if (match_collection->getScoredType(XCORR)) {
 
+    CVParam delta_cn(MS_Sequest_deltacn, match->getDeltaCn());
+    item->cvParams.push_back(delta_cn);
+  }
   if (match_collection->getScoredType(SP)) {
     CVParam matched_ions(MS_Sequest_matched_ions, match->getBYIonMatched());
     item->cvParams.push_back(matched_ions);
@@ -434,7 +443,12 @@ void MzIdentMLWriter::addMatch(
   siip->chargeState = zstate.getCharge();
   siip->experimentalMassToCharge = zstate.getMZ();
   siip->calculatedMassToCharge = FLOAT_T((peptide->getPeptideMass()+MASS_PROTON)/(double)zstate.getCharge());
-  siip->rank = match->getRank(XCORR);
+
+  if (collection->getScoredType(PERCOLATOR_SCORE)) {
+    siip->rank = match->getRank(PERCOLATOR_SCORE);
+  } else if (collection->getScoredType(XCORR)) { 
+    siip->rank = match->getRank(XCORR);
+  }
   addScores(collection, match, siip);
   addRanks(collection, match, siip);
   siip->passThreshold = true;

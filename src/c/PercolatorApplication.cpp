@@ -3,6 +3,7 @@
  * \brief Runs hardklor
  *****************************************************************************/
 #include "PercolatorApplication.h"
+#include "PercolatorAdapter.h"
 #include "src/external/percolator/src/Caller.h"
 #include "parameter.h"
 #include <string>
@@ -11,6 +12,7 @@
 #include <iomanip>
 #include <ios>
 #include "CarpStreamBuf.h"
+#include "MzIdentMLWriter.h"
 
 using namespace std;
   /**
@@ -311,6 +313,33 @@ int PercolatorApplication::main(
   if (pCaller->parseOptions(perc_argc, perc_argv)) {
     retVal = pCaller->run();
   }
+
+  // FIXME ==========================================
+  MatchCollection* res = PercolatorAdapter::convertFromPsms(&(pCaller->fullset));
+  remove("adapter_test.mzid");
+  MzIdentMLWriter writer;
+  writer.openFile("adapter_test.mzid", true);
+  res->forceScoredBy(PERCOLATOR_SCORE);
+  writer.addMatches(res);
+  writer.closeFile();
+  
+  remove("adapter_test.txt");
+  MatchFileWriter writer2("adapter_test.txt");
+  vector<bool> to_print;
+  to_print.assign(NUMBER_MATCH_COLUMNS, false);
+  to_print[SCAN_COL] = true;
+  to_print[CHARGE_COL] = true;
+  to_print[SEQUENCE_COL] = true;
+  to_print[PROTEIN_ID_COL] = true;
+  writer2.addColumnNames(this, true, to_print);
+  writer2.writeHeader();
+  vector<int> zStates;
+  Crux::Spectrum spectrum(1, -1, 500.0, zStates, "");  // only first scan + precursor m/z matters for this
+  res->printTabDelimited(&writer2, 100, &spectrum, PERCOLATOR_SCORE);
+  
+  // FIXME ==========================================
+
+
   delete pCaller;
   Globals::clean();
   delete []perc_argv;
@@ -318,7 +347,14 @@ int PercolatorApplication::main(
   /* Recover stderr */
   std::cerr.rdbuf( old );
 
+
+
   return retVal;
+}
+
+COMMAND_T PercolatorApplication::getCommand() {
+  return PERCOLATOR_COMMAND;
+
 }
 
 /**

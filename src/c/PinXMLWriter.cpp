@@ -377,38 +377,42 @@ void PinXMLWriter:: printPSM(
   SpectrumZState& zstate = match->getZState();
   int charge=zstate.getCharge();
    
-   //calculating singly charged mass
-   
-    FLOAT_T exp_mass= zstate.getSinglyChargedMass();
-    //isDecoy(match);
-    if(is_decoy)
-      decoy="true";
-    else 
-      decoy="false";
+  //TODO - Figure out what is apppropiate here.  The xml asks for m/z, but we
+  //are providing singly charge mass for experimental m/z and mass for 
+  //calculated m/z.
+  //calculating singly charged mass
+  //FLOAT_T exp_mz= zstate.getMZ();
+  FLOAT_T exp_mass = zstate.getSinglyChargedMass();
+  //isDecoy(match);
+  if(is_decoy)
+    decoy="true";
+  else 
+    decoy="false";
 
-    string id = getId(charge,is_decoy,scan_number,1); 
+  string id = getId(charge,is_decoy,scan_number,1); 
     
-    FLOAT_T calculated_mass = peptide->calcMass(get_mass_type_parameter("isotopic-mass"));
+  //FLOAT_T calculated_mz = (peptide->calcMass(get_mass_type_parameter("isotopic-mass")) + (FLOAT_T)charge * MASS_PROTON) / (FLOAT_T)charge;
 
-    fprintf(
-      output_file_,
-      "\n  <peptideSpectrumMatch calculatedMass=\"%.*f\" "
-      "chargeState=\"%i\""
-      " experimentalMass=\"%.*f\""
-      " id=\"%s\" isDecoy=\"%s\">\n",
-      mass_precision_, calculated_mass,
-      charge, 
-      mass_precision_,exp_mass,
-      id.c_str(),
-      decoy.c_str()
-    );
+  FLOAT_T calculated_mass = peptide->calcMass(get_mass_type_parameter("isotopic-mass"));
+
+  fprintf(
+    output_file_,
+    "\n  <peptideSpectrumMatch calculatedMassToCharge=\"%.*f\" "
+    "chargeState=\"%i\""
+    " experimentalMassToCharge=\"%.*f\""
+    " id=\"%s\" isDecoy=\"%s\">\n",
+    mass_precision_, calculated_mass,
+    charge, 
+    mass_precision_,exp_mass,
+    id.c_str(),
+    decoy.c_str()
+  );
    
-    printFeatures(match);
-    printPeptideSequence(peptide);
-    printOccurence(flankC, flankN, peptide); 
-    printPSMsFooter();
+  printFeatures(match);
+  printPeptideSequence(peptide);
+  printOccurence(flankC, flankN, peptide); 
+  printPSMsFooter();
   
-
   delete []flanking_aas;
 }
 

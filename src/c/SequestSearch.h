@@ -41,7 +41,7 @@ class SequestSearch: public CruxApplication {
     OutputFiles& output_files,       ///< files to print to
     MatchCollection* target_psms, ///< target psms to print
     std::vector<MatchCollection*>& decoy_psms,///< decoy psms to print
-    Spectrum* spectrum,            ///< all matches are to this spec
+    Crux::Spectrum* spectrum,            ///< all matches are to this spec
     bool combine_target_decoy,  ///< merge targets and decoys?
     int num_decoy_files              ///< merge decoys?
   );

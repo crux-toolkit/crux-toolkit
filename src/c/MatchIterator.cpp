@@ -149,7 +149,7 @@ bool MatchIterator::hasNext()
  * return the next match struct!
  *\returns the match in decreasing score order for the match_mode(SCORER_TYPE_T)
  */
-Match* MatchIterator::next()
+Crux::Match* MatchIterator::next()
 {
   return match_collection_->match_[match_idx_++];
 }

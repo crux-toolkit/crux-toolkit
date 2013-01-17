@@ -16,6 +16,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+using namespace Crux;
+
 /**
    * Creates database object(s) from fasta or index file
    */

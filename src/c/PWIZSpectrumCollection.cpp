@@ -95,7 +95,7 @@ bool PWIZSpectrumCollection::parse() {
       break;
     }
 
-    Spectrum* crux_spectrum = new Spectrum();
+    Crux::Spectrum* crux_spectrum = new Crux::Spectrum();
     crux_spectrum->parsePwizSpecInfo(spectrum);
 
     this->addSpectrumToEnd(crux_spectrum);
@@ -115,7 +115,7 @@ bool PWIZSpectrumCollection::parse() {
  */
 bool PWIZSpectrumCollection::getSpectrum(
   int first_scan,      ///< The first scan of the spectrum to retrieve -in
-  Spectrum* spectrum   ///< Put the spectrum info here
+  Crux::Spectrum* spectrum   ///< Put the spectrum info here
   )
 {
   parse();
@@ -127,7 +127,7 @@ bool PWIZSpectrumCollection::getSpectrum(
  * number equal to first_scan.
  * \returns The spectrum data from file or NULL.
  */
-Spectrum* PWIZSpectrumCollection::getSpectrum(
+Crux::Spectrum* PWIZSpectrumCollection::getSpectrum(
   int first_scan      ///< The first scan of the spectrum to retrieve -in
   )
 {

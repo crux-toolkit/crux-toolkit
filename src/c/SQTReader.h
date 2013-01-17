@@ -42,7 +42,7 @@ class SQTReader {
   int current_num_matches_; ///< Keeps track of the number of matches assigned to the current spectrum.
   FLOAT_T current_ln_experiment_size_;
   FLOAT_T ln_experiment_size_; 
-  Match* current_match_; ///< keeps track of the current match object
+  Crux::Match* current_match_; ///< keeps track of the current match object
   std::string current_peptide_sequence_; ///< keeps track of the current peptide sequence
   std::string current_prev_aa_; ///< keeps track of the current previous amino acid
   std::string current_next_aa_; ///< keeps track of the current next amino acid
@@ -55,7 +55,7 @@ class SQTReader {
    * /returns the start position of the peptide sequence within the protein
    */
   int findStart(
-    Protein* protein, ///< the protein to find the sequence 
+    Crux::Protein* protein, ///< the protein to find the sequence 
     std::string peptide_sequence, ///< the peptide sequence to find
     std::string prev_aa, ///< the amino acid before the sequence in the protein
     std::string next_aa ///< the next amino acid after the sequence in the protein

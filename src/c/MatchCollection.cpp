@@ -17,7 +17,7 @@
 #include "WinCrux.h"
 
 using namespace std;
-
+using namespace Crux;
 
 /**
  * \returns An (empty) match_collection object.

@@ -36,7 +36,7 @@ class SpectralCounts: public CruxApplication {
    * \typedef PeptideSet
    * \brief Collection of peptide objects (not a meta-peptide)
    */
-  typedef std::set<Peptide*, bool(*)(Peptide*, Peptide*)> PeptideSet;
+  typedef std::set<Crux::Peptide*, bool(*)(Crux::Peptide*, Crux::Peptide*)> PeptideSet;
   /**
    * \typedef MetaMapping
    * \brief Mapping of peptideSet to MetaProtein
@@ -50,8 +50,8 @@ class SpectralCounts: public CruxApplication {
    * Mapping of Protein objects to a set of peptides that are part
    * of the protein sequence
    */
-  typedef std::map<Protein*, PeptideSet , 
-              bool(*)(Protein*, Protein*)> ProteinToPeptides;
+  typedef std::map<Crux::Protein*, PeptideSet , 
+    bool(*)(Crux::Protein*, Crux::Protein*)> ProteinToPeptides;
   /**
    * \typedef MetaToScore
    * \brief Mapping of MetaProtein to the score assigned to it
@@ -62,8 +62,8 @@ class SpectralCounts: public CruxApplication {
    * \typedef ProteinToMeta
    * \brief Mapping of Protein to MetaProtein to which it belongs
    */
-  typedef std::map<Protein*, MetaProtein, 
-              bool(*)(Protein*, Protein*)> ProteinToMetaProtein;
+  typedef std::map<Crux::Protein*, MetaProtein, 
+    bool(*)(Crux::Protein*, Crux::Protein*)> ProteinToMetaProtein;
   
   // private functions
   void getParameterValues();
@@ -97,8 +97,8 @@ class SpectralCounts: public CruxApplication {
 
   void computeEmpai();
   void makeUniqueMapping();
-  void getSpectra(std::map<std::pair<int,int>, Spectrum*>& spectra);
-  FLOAT_T sumMatchIntensity(Match* match,
+  void getSpectra(std::map<std::pair<int,int>, Crux::Spectrum*>& spectra);
+  FLOAT_T sumMatchIntensity(Crux::Match* match,
                           SpectrumCollection* spectra);
   SCORER_TYPE_T get_qval_type(MatchCollection* match_collection);
 
@@ -143,7 +143,7 @@ class SpectralCounts: public CruxApplication {
   PARSIMONY_TYPE_T parsimony_;
   MEASURE_TYPE_T measure_;
   FLOAT_T bin_width_;
-  std::set<Match*> matches_;
+  std::set<Crux::Match*> matches_;
   MatchCollection* match_collection_;
   // For custom thresholding fields
   bool threshold_min_; 

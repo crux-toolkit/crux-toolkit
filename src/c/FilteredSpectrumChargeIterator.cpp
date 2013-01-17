@@ -9,6 +9,7 @@
 #include "parameter.h"
 
 using namespace std;
+using namespace Crux;
 
 /**
  * \brief Sets up an iterator with the next spectrum that complies

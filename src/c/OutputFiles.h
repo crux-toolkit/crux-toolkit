@@ -40,9 +40,9 @@ class OutputFiles{
   void writeMatches(MatchCollection* matches,
                     std::vector<MatchCollection*>& decoy_matches_array,
                     SCORER_TYPE_T rank_type = XCORR,
-                    Spectrum* spectrum = NULL);
+                    Crux::Spectrum* spectrum = NULL);
   void writeMatches(MatchCollection* matches);
-  void writeMatchFeatures(Match* match, 
+  void writeMatchFeatures(Crux::Match* match, 
                           double* features,
                           int num_features);
   void writeRankedProteins(ProteinToScore& proteinToScore,
@@ -98,7 +98,7 @@ class OutputFiles{
   void printMatchesXml(
                        MatchCollection* target_matches,
                        vector<MatchCollection*>& decoy_matches_array,
-                       Spectrum* spectrum,
+                       Crux::Spectrum* spectrum,
                        SCORER_TYPE_T rank_type);
  
 
@@ -107,19 +107,19 @@ class OutputFiles{
     std::vector<MatchCollection*>& decoy_matches_array,  
                            ///< array of collections from shuffled peptides
     SCORER_TYPE_T rank_type,
-    Spectrum* spectrum = NULL);
+    Crux::Spectrum* spectrum = NULL);
 
   void printMatchesSqt(
     MatchCollection*  target_matches, ///< from real peptides
     std::vector<MatchCollection*>& decoy_matches_array,  
                            ///< array of collections from shuffled peptides
-  Spectrum* spectrum = NULL);
+    Crux::Spectrum* spectrum = NULL);
 
   void printMatchesPinXml(
     MatchCollection* target_matches, ///< form real peptides 
     std::vector<MatchCollection*>& decoy_maches_array, 
                           ///< array of collection from shuffled peptides  
-    Spectrum* spectrum=NULL
+    Crux::Spectrum* spectrum=NULL
   );
 
   void printMatchesMzid(

@@ -34,6 +34,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace Crux;
 
 //PRIVATE FUNCTIONS
 

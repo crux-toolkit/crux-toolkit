@@ -527,7 +527,12 @@ typedef enum _protein_scorer_type PROTEIN_SCORER_TYPE_T;
  *\class Match
  *\brief An object that contains the information of a peptide and the scoring of multiple types
  */
+
+namespace Crux {
+
 class Match;
+
+}
 
 /**
  *\class MatchCollection

@@ -35,6 +35,7 @@
 #include "MatchFileReader.h"
 
 using namespace std;
+using namespace Crux;
 
 void Match::init() {
 
