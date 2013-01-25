@@ -78,18 +78,12 @@ if (APPLE)
     XSD
     PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
     URL http://www.codesynthesis.com/download/xsd/3.3/xsd-3.3.0-2+dep.tar.bz2
+    URL_MD5 7ecee5029c119ef678bbe5ca4ef8a288
     DOWNLOAD_DIR downloads
     PATCH_COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/patches/XSD/mac_xdr_fix/xdr-stream-insertion.hxx ${CMAKE_CURRENT_SOURCE_DIR}/patches/XSD/mac_xdr_fix/xdr-stream-extraction.hxx ${CMAKE_CURRENT_SOURCE_DIR}/build/src/XSD/xsd/libxsd/xsd/cxx/tree/
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND make 
-      CPPFLAGS=${CPP_ARGS}
-      LDFLAGS=${LD_ARGS}
-      verbose=1
-    INSTALL_COMMAND make 
-      CPPFLAGS="${CPP_ARGS}"
-      LDFLAGS="${LD_ARGS}"
-      install_prefix=${CMAKE_CURRENT_SOURCE_DIR}
-      install
+    BUILD_COMMAND make CPPFLAGS=${CPP_ARGS} LDFLAGS=${LD_ARGS} verbose=1 .LIBPATTERNS=lib%.a 
+    INSTALL_COMMAND make CPPFLAGS="${CPP_ARGS}" LDFLAGS="${LD_ARGS}" install_prefix=${CMAKE_CURRENT_SOURCE_DIR} install
     BUILD_IN_SOURCE 1
   )
 else(APPLE)
@@ -97,17 +91,11 @@ else(APPLE)
     XSD
     PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
     URL http://www.codesynthesis.com/download/xsd/3.3/xsd-3.3.0-2+dep.tar.bz2
-    DOWNLOAD_DIR downloads
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND make 
-      CPPFLAGS=${CPP_ARGS}
-      LDFLAGS=${LD_ARGS}
-      verbose=1
-    INSTALL_COMMAND make 
-      CPPFLAGS="${CPP_ARGS}"
-      LDFLAGS="${LD_ARGS}"
-      install_prefix=${CMAKE_CURRENT_SOURCE_DIR}
-      install
+    URL_MD5 7ecee5029c119ef678bbe5ca4ef8a288
+    DOWNLOAD_DIR downloads 
+    CONFIGURE_COMMAND "" 
+    BUILD_COMMAND make CPPFLAGS=${CPP_ARGS} LDFLAGS=${LD_ARGS} verbose=1 .LIBPATTERNS=lib%.a 
+    INSTALL_COMMAND make CPPFLAGS="${CPP_ARGS}" LDFLAGS="${LD_ARGS}" install_prefix=${CMAKE_CURRENT_SOURCE_DIR} install
     BUILD_IN_SOURCE 1
   )
 endif(APPLE)
