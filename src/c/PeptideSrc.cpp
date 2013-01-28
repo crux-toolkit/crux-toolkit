@@ -346,7 +346,13 @@ bool PeptideSrc::parseTabDelimited(
 	
 	//find the start index
         string sequence = file.getString(SEQUENCE_COL);
-        start_index = parent_protein->findStart(sequence, "", "");
+        string flanking_aas = file.getString(FLANKING_AA_COL);
+        string prev_aa = "", next_aa = "";
+        if (flanking_aas.length() == 2) {
+          prev_aa = flanking_aas[0];
+          next_aa = flanking_aas[1];
+        }
+        start_index = parent_protein->findStart(sequence, prev_aa, next_aa);
 	if (start_index == -1) {
 	  carp(CARP_FATAL, "Can't find sequence %s in %s:%s",
 	       sequence.c_str(),
@@ -366,7 +372,14 @@ bool PeptideSrc::parseTabDelimited(
 
         if (parent_protein -> isPostProcess()) {
           //TODO - Find some way to keep the original start index.
-          start_index = parent_protein->findStart(file.getString(SEQUENCE_COL), "", "");
+          string sequence = file.getString(SEQUENCE_COL);
+          string flanking_aas = file.getString(FLANKING_AA_COL);
+          string prev_aa = "", next_aa = "";
+          if (flanking_aas.length() == 2) {
+            prev_aa = flanking_aas[0];
+            next_aa = flanking_aas[1];
+          }
+          start_index = parent_protein->findStart(sequence, prev_aa, next_aa);
         }
       }
       // set parent protein of the peptide src

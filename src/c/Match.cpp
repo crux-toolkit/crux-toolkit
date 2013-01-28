@@ -1299,11 +1299,11 @@ char* Match::getSequenceSqt(){
   char* final_string = (char*)mycalloc((strlen(seq)+5), sizeof(char));
 
   // copy pieces in
-  final_string[0] = c_term;
+  final_string[0] = n_term;
   final_string[1] = '.';
   strcpy(&final_string[2], seq);
   final_string[strlen(seq) + 2] = '.';
-  final_string[strlen(seq) + 3] = n_term;
+  final_string[strlen(seq) + 3] = c_term;
   final_string[strlen(seq) + 4] = '\0';
 
   carp(CARP_DETAILED_DEBUG, "start string %s, final %s", seq, final_string);

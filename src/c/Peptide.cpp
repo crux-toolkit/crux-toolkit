@@ -4,6 +4,7 @@
  ****************************************************************************/
 #include "Peptide.h"
 #include "PeptideSrc.h"
+#include "PostProcessProtein.h"
 #include <string.h>
 
 #include <set>
@@ -570,44 +571,54 @@ char* Peptide::getSequenceFromPeptideSrcSqt(
 }
 
 /**
- * \brief Return a char for the amino acid c-terminal to the peptide
+ * \brief Return a char for the amino acid n-terminal to the peptide
  * in the peptide src at the given index.
  *
  * \returns A char (A-Z) or - if peptide is the first in the protein.
  */
-char Peptide::getCTermFlankingAA() {
+char Peptide::getNTermFlankingAA() {
 
   // get protein seq
   Protein* protein = getPeptideSrc()->getParentProtein();
-  char* protein_seq = protein->getSequencePointer();
 
   // get peptide start idx, protein index starts at 1
   int start_index = getPeptideSrc()->getStartIdx();
+
+  if (protein->isPostProcess()) {
+    return ((PostProcessProtein*)protein)->getNTermFlankingAA(start_index - 1);
+  }
+  char* protein_seq = protein->getSequencePointer();
 
   char aa = '-';
   // if not at beginning, return char
   if( start_index > 1 ){
     aa = protein_seq[start_index - 2]; // -1 for 1-based shift
                                        // -1 for aa before start
-  } 
+  }
   return aa;
 }
 
 /**
- * \brief Return a char for the amino acid n-terminal to the peptide
+ * \brief Return a char for the amino acid c-terminal to the peptide
  * in the peptide src at the given index.
  *
  * \returns A char (A-Z) or - if peptide is the last in the protein.
  */
-char Peptide::getNTermFlankingAA() {
+char Peptide::getCTermFlankingAA() {
 
   // get protein seq and length
   Protein* protein = getPeptideSrc()->getParentProtein();
+
+  // get peptide start idx, protein index starts at 1
+  int start_index = getPeptideSrc()->getStartIdx();
+
+  if (protein->isPostProcess()) {
+    return ((PostProcessProtein*)protein)->getCTermFlankingAA(start_index - 1);
+  }
   char* protein_seq = protein->getSequencePointer();
   int protein_length = protein->getLength();
 
-  // get peptide end idx, protein index starts at 1
-  int start_index = getPeptideSrc()->getStartIdx();
+  // get peptide end idx
   int end_index = start_index + length_ - 1;
 
   char aa = '-';
@@ -1833,12 +1844,16 @@ int Peptide::getProteinInfo(vector<string>& protein_ids,
     Protein* protein = peptide_src->getParentProtein();
     protein_ids.push_back(protein->getIdPointer());
 
-    string description = protein->getAnnotationPointer();
-    // replace double quotes with single quotes
-    replace(description.begin(), description.end(), '"', '\'');
-    // remove any xml tags in the description by replacing <> with []
-    replace(description.begin(), description.end(), '<', '[');
-    replace(description.begin(), description.end(), '>', ']');
+    string description = "";
+    const char* annotation_pointer = protein->getAnnotationPointer();
+    if (annotation_pointer != NULL) {
+      description = protein->getAnnotationPointer();
+      // replace double quotes with single quotes
+      replace(description.begin(), description.end(), '"', '\'');
+      // remove any xml tags in the description by replacing <> with []
+      replace(description.begin(), description.end(), '<', '[');
+      replace(description.begin(), description.end(), '>', ']');
+    }
     protein_descriptions.push_back(description);
 
   } 
@@ -2030,9 +2045,20 @@ char* Peptide::getFlankingAAs() {
     PeptideSrc* peptide_src = *iter;
     Protein* protein = peptide_src->getParentProtein();
 
+    int start_index = peptide_src->getStartIdx();
+
+    if (protein->isPostProcess())
+    {
+      char n_term = ((PostProcessProtein*)protein)->getNTermFlankingAA(start_index - 1);
+      char c_term = ((PostProcessProtein*)protein)->getCTermFlankingAA(start_index - 1);
+      flanking_field = (char*)mymalloc(sizeof(char) * 2);
+      flanking_field[0] = n_term;
+      flanking_field[1] = c_term;
+      return flanking_field;
+    }
+
     int protein_length = protein->getLength();
     int peptide_length = getLength();
-    int start_index = peptide_src->getStartIdx();
     int end_index = start_index + peptide_length - 1;
     char* protein_seq = protein->getSequencePointer();
     const int allocation_factor = 1;
@@ -2044,11 +2070,11 @@ char* Peptide::getFlankingAAs() {
 
     // First flanking AA in list doesn't have leading ','
     
-    // Flanking C
+    // Flanking N
     *flanking_field_tail = (start_index > 1 ? protein_seq[start_index - 2] : '-');;
     ++flanking_field_tail;
     --flanking_field_free;
-    // Flanking N
+    // Flanking C
     *flanking_field_tail = (end_index < protein_length ? protein_seq[end_index] : '-');
     ++flanking_field_tail;
     --flanking_field_free;
@@ -2085,11 +2111,11 @@ char* Peptide::getFlankingAAs() {
       *flanking_field_tail = ',';
       ++flanking_field_tail;
       --flanking_field_free;
-      // Flanking C
+      // Flanking N
       *flanking_field_tail = (start_index > 1 ? protein_seq[start_index - 2] : '-');
       ++flanking_field_tail;
       --flanking_field_free;
-      // Flanking N
+      // Flanking C
       *flanking_field_tail = (end_index < protein_length ? protein_seq[end_index] : '-');
       ++flanking_field_tail;
       --flanking_field_free;

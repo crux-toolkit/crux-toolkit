@@ -72,6 +72,13 @@ class PostProcessProtein : public Crux::Protein {
     int offset=0 ///< The offset (or sequence index) for the sequence
   );
 
+  char getNTermFlankingAA(
+    int offset=0 ///< The offset (or sequence index) for the AA
+  );
+
+  char getCTermFlankingAA(
+    int offset=0 ///< The offset (or sequence index) for the AA
+  );
 
   /**
    * \returns true indicating that this is a PostProcessProtein object
