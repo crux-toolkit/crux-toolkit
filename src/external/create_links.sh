@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # script for creating symbolic links to the boost libraries (for LINUX)
 #
