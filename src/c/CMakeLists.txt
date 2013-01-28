@@ -115,6 +115,11 @@ set (
   ProteinPeptideIterator.cpp
   ProteinIndex.cpp
   ProteinIndexIterator.cpp
+  ProteinMatchCollection.cpp
+  AbstractMatch.cpp
+  ProteinMatch.cpp
+  PeptideMatch.cpp
+  SpectrumMatch.cpp
   PWIZSpectrumCollection.cpp
   q-value.cpp
   SequestSearch.cpp

@@ -13,6 +13,8 @@
 #include <ios>
 #include "CarpStreamBuf.h"
 #include "MzIdentMLWriter.h"
+#include "ProteinMatchCollection.h"
+
 
 using namespace std;
   /**
@@ -315,12 +317,17 @@ int PercolatorApplication::main(
   }
 
   // FIXME ==========================================
-  MatchCollection* res = PercolatorAdapter::convertFromPsms(&(pCaller->fullset));
+  //MatchCollection* res = PercolatorAdapter::psmScoresToMatchCollection(&(pCaller->fullset));
+  //ProteinMatchCollection* protein_match_collection = new ProteinMatchCollection(res);
+  ProteinMatchCollection* protein_match_collection = new ProteinMatchCollection();
+  PercolatorAdapter::addPsmScores(protein_match_collection, &(pCaller->fullset));
+  PercolatorAdapter::addPeptideScores(protein_match_collection, &(pCaller->fullset));
+  PercolatorAdapter::addProteinScores(protein_match_collection, &(pCaller->fullset));
   remove("adapter_test.mzid");
   MzIdentMLWriter writer;
   writer.openFile("adapter_test.mzid", true);
-  res->forceScoredBy(PERCOLATOR_SCORE);
-  writer.addMatches(res);
+  //writer.addMatches(res);
+  writer.addProteinMatches(protein_match_collection);
   writer.closeFile();
   
   remove("adapter_test.txt");
@@ -335,7 +342,7 @@ int PercolatorApplication::main(
   writer2.writeHeader();
   vector<int> zStates;
   Crux::Spectrum spectrum(1, -1, 500.0, zStates, "");  // only first scan + precursor m/z matters for this
-  res->printTabDelimited(&writer2, 100, &spectrum, PERCOLATOR_SCORE);
+  //res->printTabDelimited(&writer2, 100, &spectrum, PERCOLATOR_SCORE);
   
   // FIXME ==========================================
 

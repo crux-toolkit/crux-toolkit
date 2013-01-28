@@ -9,32 +9,31 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <vector>
 
 #include "MatchCollection.h"
+#include "PeptideMatch.h"
 #include "PostProcessProtein.h"
+#include "ProteinMatch.h"
+#include "SpectrumMatch.h"
 #include "src/external/percolator/src/Scores.h"
 
 using namespace std;
 
 class PercolatorAdapter {
+
 public:
   PercolatorAdapter();
-  PercolatorAdapter(Scores* scores);
   virtual ~PercolatorAdapter();
 
-  void setScores(Scores* scores);
-
-  MatchCollection* convertFromPsms();
-  static MatchCollection* convertFromPsms(Scores* scores);
-  MatchCollection* convertFromProteins();
-  static MatchCollection* convertFromProteins(Scores* scores);
-  MatchCollection* convertFromPeptides();
-  static MatchCollection* convertFromPeptides(Scores* scores);
+  static MatchCollection* psmScoresToMatchCollection(Scores* scores);
+  static void addPsmScores(ProteinMatchCollection* collection, Scores* scores);
+  static void addProteinScores(ProteinMatchCollection* collection, Scores* scores);
+  static void addPeptideScores(ProteinMatchCollection* collection, Scores* scores);
 
 protected:
-  Scores* scores_;
+  static int parseChargeState(string psm_id);
 
-  int parseChargeState(string psm_id);
 };
 
 #endif /* PERCOLATORADAPTER_H_ */
