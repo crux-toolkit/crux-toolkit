@@ -14,6 +14,7 @@
 #include "MatchCollection.h"
 #include "PeptideMatch.h"
 #include "PostProcessProtein.h"
+#include "ProteinMatchCollection.h"
 #include "ProteinMatch.h"
 #include "SpectrumMatch.h"
 #include "src/external/percolator/src/Scores.h"

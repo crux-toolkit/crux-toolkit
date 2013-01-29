@@ -9,30 +9,21 @@
 using namespace Crux;
 
 PercolatorAdapter::PercolatorAdapter() {
-  scores_ = NULL;
-}
-
-PercolatorAdapter::PercolatorAdapter(Scores* scores) {
-  scores_ = scores;
 }
 
 PercolatorAdapter::~PercolatorAdapter() {
   // TODO Auto-generated destructor stub
 }
 
-void PercolatorAdapter::setScores(Scores* scores) {
-  scores_ = scores;
-}
-
-MatchCollection* PercolatorAdapter::convertFromPsms() {
+MatchCollection* PercolatorAdapter::psmScoresToMatchCollection(Scores* scores) {
 
   // Create new MatchCollection object that will be the converted Percolator Scores
   MatchCollection* converted = new MatchCollection();
 
   // Iterate over each ScoreHolder in Scores object
   for (
-    vector<ScoreHolder>::iterator score_itr = scores_->begin();
-    score_itr != scores_->end();
+    vector<ScoreHolder>::iterator score_itr = scores->begin();
+    score_itr != scores->end();
     score_itr++
     ) {
 
@@ -48,7 +39,7 @@ MatchCollection* PercolatorAdapter::convertFromPsms() {
       //Database* database ///< the database of its origin
     PostProcessProtein* parent_protein = new PostProcessProtein();
     parent_protein->setId((*psm->proteinIds.begin()).c_str());
-    int start_idx = parent_protein->findStart(psm->getPeptideSequence(),"","");
+    int start_idx = parent_protein->findStart(psm->getPeptideSequence(), "", "");
       //unsigned char length,     ///< The length of the peptide -in
       //FLOAT_T peptide_mass,       ///< The neutral mass of the peptide -in
       //Protein* parent_protein, ///< The parent_protein of this peptide -in
@@ -89,37 +80,53 @@ MatchCollection* PercolatorAdapter::convertFromPsms() {
 
 }
 
-MatchCollection* PercolatorAdapter::convertFromPsms(Scores* scores) {
+void PercolatorAdapter::addPsmScores(ProteinMatchCollection* collection, Scores* scores) {
 
-  PercolatorAdapter* adapter = new PercolatorAdapter(scores);
-  MatchCollection* collection = adapter->convertFromPsms();
-
-  return collection;
+  MatchCollection* matches = psmScoresToMatchCollection(scores);
+  collection->addMatches(matches);
+  delete matches;
 
 }
 
-MatchCollection* PercolatorAdapter::convertFromProteins() {
-  // TODO
-  return 0;
+void PercolatorAdapter::addProteinScores(ProteinMatchCollection* collection, Scores* scores) {
+
+  // Iterate over each ScoreHolder in Scores object
+  for (
+    vector<ScoreHolder>::iterator score_itr = scores->begin();
+    score_itr != scores->end();
+    score_itr++
+    ) {
+
+    PSMDescription* psm = score_itr->pPSM;
+
+    // Set scores
+    ProteinMatch* protein_match = collection->getProteinMatch(*psm->proteinIds.begin());
+    protein_match->setScore(PERCOLATOR_SCORE, score_itr->score);
+    protein_match->setScore(PERCOLATOR_QVALUE, psm->q);
+    protein_match->setScore(PERCOLATOR_PEP, psm->pep);
+  }
+
 }
 
-MatchCollection* PercolatorAdapter::convertFromProteins(Scores* scores) {
-  PercolatorAdapter* adapter = new PercolatorAdapter(scores);
-  MatchCollection* collection = adapter->convertFromProteins();
+void PercolatorAdapter::addPeptideScores(ProteinMatchCollection* collection, Scores* scores) {
 
-  return collection;
-}
+  // Iterate over each ScoreHolder in Scores object
+  for (
+    vector<ScoreHolder>::iterator score_itr = scores->begin();
+    score_itr != scores->end();
+    score_itr++
+    ) {
 
-MatchCollection* PercolatorAdapter::convertFromPeptides() {
-  // TODO
-  return 0;
-}
+    PSMDescription* psm = score_itr->pPSM;
+    int charge_state = parseChargeState(psm->id);
 
-MatchCollection* PercolatorAdapter::convertFromPeptides(Scores* scores) {
-  PercolatorAdapter* adapter = new PercolatorAdapter(scores);
-  MatchCollection* collection = adapter->convertFromPeptides();
+    // Set scores
+    PeptideMatch* peptide_match = collection->getPeptideMatch(psm->getPeptideSequence());
+    peptide_match->setScore(PERCOLATOR_SCORE, score_itr->score);
+    peptide_match->setScore(PERCOLATOR_QVALUE, psm->q);
+    peptide_match->setScore(PERCOLATOR_PEP, psm->pep);
+  }
 
-  return collection;
 }
 
 /**
