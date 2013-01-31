@@ -13,34 +13,63 @@
 class SpectrumMatch : public AbstractMatch {
 
  protected:
-  PeptideMatch* peptide_match_;
-  Crux::Spectrum* spectrum_;
-  SpectrumZState zstate_;
+  PeptideMatch* peptide_match_; ///< PeptideMatch which this SpectrumMatch matches to
+  Crux::Spectrum* spectrum_; ///< Spectrum object
+  SpectrumZState zstate_; ///< Current zstate
 
  public:
+
+  /**
+   * \returns an empty SpectrumMatch
+   */
   SpectrumMatch();
+
+  /**
+   * \returns a SpectrumMatch, setting the spectrum
+   */
   SpectrumMatch(
-    Crux::Spectrum* spectrum_
+    Crux::Spectrum* spectrum_ ///< Spectrum object for this match
   );
 
-  ~SpectrumMatch();
+  /**
+   * Destructor
+   */
+  virtual ~SpectrumMatch();
 
+  /**
+   * sets the peptide match for this spectrummatch
+   */
   void setPeptideMatch(
-    PeptideMatch* peptide_match
+    PeptideMatch* peptide_match ///< peptide match to set
   );
 
+  /**
+   * \returns the associated PeptideMatch
+   */
   PeptideMatch* getPeptideMatch();
 
+  /**
+   * sets the spectrum object
+   */
   void setSpectrum(
-    Crux::Spectrum* spectrum
+    Crux::Spectrum* spectrum ///< spectrum to set
   );
 
+  /**
+   * \returns the spectrum
+   */
   Crux::Spectrum* getSpectrum();
 
+  /**
+   * sets the zstate
+   */
   void setZState(
-    SpectrumZState& zstate
+    SpectrumZState& zstate ///< zstate to set
   );
 
+  /**
+   * \returns the zstate
+   */
   SpectrumZState& getZState();
 
 };

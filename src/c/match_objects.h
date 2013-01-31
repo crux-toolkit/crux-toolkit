@@ -9,7 +9,7 @@ class ProteinMatchCollection;
 class ProteinMatch;
 class PeptideMatch;
 class SpectrumMatch;
-
+class AbstractMatch;
 
 typedef std::vector<SpectrumMatch*> SpectrumMatchCollection;
 typedef SpectrumMatchCollection::iterator SpectrumMatchIterator;
@@ -22,7 +22,7 @@ typedef std::vector<ProteinMatch*>::iterator ProteinMatchIterator;
 typedef std::map<SCORER_TYPE_T, FLOAT_T> ScoreMap;
 typedef ScoreMap::iterator ScoreMapIterator;
 
-#endif
+#endif //MATCHOBJECTS_H
 
 
 /*

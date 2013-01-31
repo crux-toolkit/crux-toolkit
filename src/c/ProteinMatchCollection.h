@@ -28,9 +28,11 @@ class ProteinMatchCollection {
 
   /**
    * \returns a ProteinMatchCollection using a MatchCollection
-   * TOOD - remove this later
+   * TODO - remove this later
    */
-  ProteinMatchCollection(MatchCollection* match_collection);
+  ProteinMatchCollection(
+    MatchCollection* match_collection ///< matches to add
+  );
   
   /**
    * Default destructor
@@ -116,4 +118,12 @@ class ProteinMatchCollection {
 
 };
 
-#endif
+#endif // PROTEINMATCHCOLLECTION_H
+
+/*
+ * Local Variables:
+ * mode: c
+ * c-basic-offset: 2
+ * End:
+ */
+

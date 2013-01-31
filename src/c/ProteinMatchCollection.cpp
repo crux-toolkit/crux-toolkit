@@ -1,3 +1,7 @@
+/**
+ * \file ProteinMatchCollection.cpp
+ * \brief Object for holding a collection of ProtinMatches, PeptideMatches, and SpectrumMatches
+ ********************************/
 #include "ProteinMatchCollection.h"
 #include "ProteinMatch.h"
 #include "PeptideMatch.h"
@@ -7,47 +11,75 @@
 #include "MatchCollection.h"
 
 using namespace Crux;
-
+  
+/**
+ * \returns a blank ProteinMatchCollection
+ */
 ProteinMatchCollection::ProteinMatchCollection() {
 }
 
+/**
+ * \returns a ProteinMatchCollection using a MatchCollection
+ * TODO - remove this later
+ */
 ProteinMatchCollection::ProteinMatchCollection(
-  MatchCollection* match_collection
+  MatchCollection* match_collection ///< matches to add
   ) {
 
   addMatches(match_collection);
 
 }
 
+  
+/**
+ * Default destructor
+ */
 ProteinMatchCollection::~ProteinMatchCollection() {
 }
 
+/**
+ * \returns the begin iterator for the ProteinMatch objects
+ */
 ProteinMatchIterator ProteinMatchCollection::proteinMatchBegin() {
 
   return protein_matches_.begin();
 }
 
+/**
+ * \returns the end iterator for the ProteinMatch objects
+ */
 ProteinMatchIterator ProteinMatchCollection::proteinMatchEnd() {
 
   return protein_matches_.end();
 }
 
+/**
+ * \returns the begin iterator for the PeptideMatch objects
+ */
 PeptideMatchIterator ProteinMatchCollection::peptideMatchBegin() {
   return peptide_matches_.begin();
 }
-
+  
+/**
+ * \returns the end iterator for the PeptideMatch objects
+ */
 PeptideMatchIterator ProteinMatchCollection::peptideMatchEnd() {
   return peptide_matches_.end();
 }
 
+/**
+ * \returns the begin iterator for all of the SpectrumMatch objects
+ */
 SpectrumMatchIterator ProteinMatchCollection::spectrumMatchBegin() {
   return spectrum_matches_.begin();
 }
 
+/**
+ * \returns the end iterator for all of the SpectrumMatch objects
+ */
 SpectrumMatchIterator ProteinMatchCollection::spectrumMatchEnd() {
   return spectrum_matches_.end();
 }
-
 
 /**
  * \returns the ProteinMatch for a Protein, creates a new
