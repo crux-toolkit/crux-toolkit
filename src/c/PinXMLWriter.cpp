@@ -9,8 +9,10 @@
 #include "crux-utils.h"
 #include "parameter.h"
 #include "MatchCollectionParser.h"
+#include <cctype>
 #include <cstdio>
 #include <cstring>
+#include <sstream>
 #include <vector>
 #include "Spectrum.h"
 #include "DelimitedFile.h"
@@ -542,11 +544,41 @@ void PinXMLWriter::printFeatures(
 
 void PinXMLWriter:: printPeptideSequence(Peptide* peptide){
   
+  // Get the modifications and convert them to XML for output
+  char* modified_sequence =
+    peptide->getModifiedSequenceWithMasses(MOD_MASSES_SEPARATE);
+  stringstream mod_output;
+  int aa_read = 0;  // stores the number of AA read for location attribute
+  string mass_delta = ""; // stores the mass shift of the current mod
+  // Iterate over each character in the modified sequence
+  for (int i = 0; i < strlen(modified_sequence); ++i) {
+    char cur = modified_sequence[i];
+    if (cur == ',' || cur == ']') {  // Found end of modification
+      mod_output << "      <modification location=\"" << aa_read << "\""
+                    " monoisotopicMassDelta=\"" << mass_delta << "\">\n"
+                    "        <uniMod accession=\"0\"/>\n"
+                    "      </modification>\n";
+      mass_delta.clear();
+    } else if (cur == '-' && mass_delta == "") {
+      mass_delta = '-';
+    } else if (isdigit(cur) ||
+              (cur == '.' && mass_delta.find('.') == string::npos)) {
+      mass_delta += cur;
+    } else if (isalpha(cur)) {
+      ++aa_read;
+    }
+  }
+  delete modified_sequence;
+
+  // Output peptide element with sequence and modifications
   fprintf(
     output_file_,
-    "    <peptide>\n      <peptideSequence>%s</peptideSequence>\n"
+    "    <peptide>\n"
+    "      <peptideSequence>%s</peptideSequence>\n"
+    "%s"
     "    </peptide>\n",
-    peptide->getSequence() 
+    peptide->getSequence(),
+    mod_output.str().c_str()
   );
 }
 
