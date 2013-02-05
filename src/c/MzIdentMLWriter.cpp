@@ -79,21 +79,81 @@ PeptidePtr MzIdentMLWriter::getPeptide(
   string sequence_str = sequence;
   free(sequence);
 
+  int mod_count = peptide->countModifiedAAs();
+
   vector<PeptidePtr>::iterator peptide_iter;
+  vector<ModificationPtr>::iterator mod_iter;
 
   for (peptide_iter = mzid_->sequenceCollection.peptides.begin();
        peptide_iter != mzid_->sequenceCollection.peptides.end();
        ++peptide_iter) {
-    if ((*peptide_iter)->peptideSequence == sequence_str) {
-      return (*peptide_iter);
+    PeptidePtr peptide_p = *peptide_iter;
+    if (peptide_p->peptideSequence == sequence_str) {
+      if (peptide_p -> modification.size() == mod_count) {
+        if (mod_count == 0) { // no modifications
+          return (peptide_p);
+	} else {
+	  MODIFIED_AA_T* mod_seq = peptide->getModifiedAASequence();
+	  AA_MOD_T** mod_list = NULL;
+	  int total_mods = get_all_aa_mod_list(&mod_list);
+	  bool match = true;
+          for (mod_iter = peptide_p->modification.begin();
+               mod_iter != peptide_p->modification.end();
+               ++mod_iter) {
+	    ModificationPtr current_mod = *mod_iter;
+	    int mod_location = current_mod -> location;
+	    //Crux only supports one mass for modifications.
+	    double mono_mass = current_mod ->monoisotopicMassDelta;
+            for (int mod_idx = 0 ; mod_idx < total_mods; mod_idx++) {
+              match = false;
+	      if (is_aa_modified(mod_seq[mod_location], mod_list[mod_idx])) {
+		if (aa_mod_get_mass_change(mod_list[mod_idx]) == mono_mass) {
+		  match = true; //we found a match, keep searching
+		  break;
+		}
+	      }
+	    }
+	    if (!match) {break;}
+	  }
+          free(mod_seq);
+	  //all modifications match, return peptide.
+	  if (match) {
+	    return peptide_p;
+	  }
+	}
+      }
     }
   }
+
+  //Okay, we didn't find a match, so create a new peptide object.
 
   PeptidePtr peptide_p(new pwiz::identdata::Peptide("PEP_"+boost::lexical_cast<string>(peptide_idx_++)));
   //peptide_p->id = sequence_str;
   peptide_p->peptideSequence = sequence_str;
+
+  if (mod_count != 0) {
+    //add the modifications.
+    MODIFIED_AA_T* mod_seq = peptide->getModifiedAASequence();
+    AA_MOD_T** mod_list = NULL;
+    int total_mods = get_all_aa_mod_list(&mod_list);
+    
+    for (int mod_seq_idx = 0;mod_seq_idx < peptide->getLength();mod_seq_idx++) {
+      for (int mod_idx =0 ; mod_idx < total_mods; mod_idx++) {
+	if (is_aa_modified(mod_seq[mod_seq_idx], mod_list[mod_idx])) {
+	  ModificationPtr mod_p(new pwiz::identdata::Modification());
+	  mod_p->location = mod_seq_idx;
+	  mod_p->monoisotopicMassDelta = aa_mod_get_mass_change(mod_list[mod_idx]);
+	  mod_p->residues.push_back(sequence_str.at(mod_seq_idx));
+	  mod_p->set(MS_unknown_modification);
+	  peptide_p->modification.push_back(mod_p);
+	}
+      }
+    }
+
+    free(mod_seq);
+  }
+
   mzid_->sequenceCollection.peptides.push_back(peptide_p);
-  //TODO handle peptide modifications.
 
   return peptide_p;
 
