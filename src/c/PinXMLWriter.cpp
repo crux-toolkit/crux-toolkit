@@ -65,7 +65,9 @@ void PinXMLWriter::openFile(const char* filename, const char* output_dir,bool ov
  */
 
 void PinXMLWriter::closeFile(){
-  if(output_file_!=NULL){      
+  if(output_file_!=NULL){
+    fclose(output_file_);
+    output_file_ = NULL;
   }
 }
 
@@ -433,10 +435,19 @@ void PinXMLWriter::printFeatures(
   FLOAT_T obs_mass=match->getZState().getSinglyChargedMass();
   FLOAT_T calc_mass=peptide->calcMass(get_mass_type_parameter("isotopic-mass"));
   FLOAT_T dM=(obs_mass - calc_mass)/charge_state;
-  if(peptide->getCTermFlankingAA()!='-')
-     enz_c =true; 
-  if(peptide->getNTermFlankingAA()!='-')
+  
+  char c_flank = peptide->getCTermFlankingAA();
+  char n_flank = peptide->getNTermFlankingAA();
+  char* sequence = peptide->getSequence();
+  char sequence_first = sequence[0];
+  char sequence_last = sequence[strlen(sequence) - 1];
+  delete[] sequence;
+  if (n_flank == '-' ||
+      ((n_flank == 'K' || n_flank == 'R') && sequence_first != 'P'))
     enz_n =true;
+  if (c_flank == '-' ||
+      ((sequence_last == 'K' || sequence_last == 'R') && c_flank != 'P'))
+    enz_c =true; 
  
   switch(charge_state){
     case 1:

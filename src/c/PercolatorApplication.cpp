@@ -2,6 +2,7 @@
  * \file PercolatorApplication.cpp 
  * \brief Runs hardklor
  *****************************************************************************/
+#include "MakePinApplication.h"
 #include "PercolatorApplication.h"
 #include "PercolatorAdapter.h"
 #include "src/external/percolator/src/Caller.h"
@@ -128,7 +129,45 @@ int PercolatorApplication::main(int argc, char** argv) {
     argv)
   ;
 
-  string input_pinxml(get_string_parameter("pin.xml"));
+  string input_pinxml(get_string_parameter_pointer("pin.xml"));
+
+  // Check if we need to run make-pin first
+  if (has_extension(input_pinxml.c_str(), "txt") ||
+      has_extension(input_pinxml.c_str(), "sqt") ||
+      has_extension(input_pinxml.c_str(), "pep.xml")) {
+    string input_decoy(input_pinxml);
+    int target_pos = input_pinxml.find("target");
+    if (target_pos < 0) {
+      int decoy_pos = input_pinxml.find("decoy");
+      if (decoy_pos < 0) {
+        carp(CARP_FATAL, "Not a PIN, target, or decoy file: %s",
+                         input_pinxml.c_str());
+      }
+      // user gave decoy results file
+      input_pinxml.replace(decoy_pos, 5, "target");
+    } else {
+      // user gave target results file
+      input_decoy.replace(target_pos, 6, "decoy");
+    }
+
+    // check that files exist
+    if (!file_exists(input_pinxml)) {
+      carp(CARP_FATAL, "Target file %s not found", input_pinxml.c_str());
+    } else if (!file_exists(input_decoy)) {
+      carp(CARP_FATAL, "Decoy file %s not found", input_decoy.c_str());
+    }
+
+    char* const make_pin_file = "crux-output/make-pin.pin.xml";
+
+    carp(CARP_INFO, "Running make-pin with '%s' and decoy file '%s'.",
+         input_pinxml.c_str(), input_decoy.c_str());
+    int ret = MakePinApplication::main(input_pinxml, input_decoy);
+    if (ret != 0 || !file_exists(make_pin_file)) {
+      carp(CARP_FATAL, "make-pin failed. Not running Percolator.");
+    }
+    carp(CARP_INFO, "Finished make-pin.");
+    input_pinxml = string(make_pin_file);
+  }
 
   return main(input_pinxml);
 

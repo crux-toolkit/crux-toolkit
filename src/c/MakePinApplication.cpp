@@ -76,9 +76,9 @@ int MakePinApplication::main(int argc, char** argv) {
   int num_options = sizeof(option_list) / sizeof(char*);
   
   /* Define required command line arguments */
-  const char* argument_list[] = {"target input", 
+  const char* argument_list[] = {
+    "target input", 
     "decoy input",
-    "protein-database"
   };
   int num_arguments = sizeof(argument_list) / sizeof(char*);
 
@@ -93,17 +93,23 @@ int MakePinApplication::main(int argc, char** argv) {
   ;
 
   //Get input: target
-  char* target_path = get_string_parameter("target input");
+  string target_path = string(get_string_parameter_pointer("target input"));
   //Get input : decoy 
-  char* decoy_path = get_string_parameter("decoy input");
-  //Get input : protein 
-  char* protein_dbase = get_string_parameter("protein-database");
-  //prepare output file
+  string decoy_path = string(get_string_parameter_pointer("decoy input"));
 
+  return main(target_path, decoy_path);
+}
+
+/**
+ * \runs make-pin application
+ */
+int MakePinApplication::main(string target_path, string decoy_path) {
   //create MatchColletion 
   vector<MatchCollection*> decoys;
-  MatchCollection* target_collection = MatchCollectionParser::create(target_path, protein_dbase); 
-  MatchCollection* decoy_collection =  MatchCollectionParser::create(decoy_path, protein_dbase);
+  MatchCollection* target_collection =
+    MatchCollectionParser::create(target_path.c_str(), "__NULL_STR"); 
+  MatchCollection* decoy_collection =
+    MatchCollectionParser::create(decoy_path.c_str(), "__NULL_STR");
   PinXMLWriter* writer=new PinXMLWriter();
   decoys.push_back(decoy_collection);
 
@@ -121,14 +127,17 @@ int MakePinApplication::main(int argc, char** argv) {
   writer->openFile(output_filename,output_dir.c_str(),overwrite);
 
   //set process information 
-  if(target_path!=NULL && decoy_path!=NULL )
-    writer->setProcessInfo(target_path, decoy_path);
+  writer->setProcessInfo(target_path.c_str(), decoy_path.c_str());
  //write .pin.xml file 
   writer->write(target_collection, decoys);
   writer->printFooter();
 
   //close file 
   writer->closeFile();
+
+  delete target_collection;
+  delete decoy_collection;
+  delete writer;
 
   return 0;
 }

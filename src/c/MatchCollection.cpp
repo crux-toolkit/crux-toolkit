@@ -1076,6 +1076,12 @@ int MatchCollection::addUnscoredPeptides(
   int matches_added = match_total_ - starting_number_of_psms;
   experiment_size_ += matches_added;
 
+  // Set ln experiment size for matches
+  FLOAT_T ln_experiment_size = logf((FLOAT_T)getTargetExperimentSize());
+  for (int i = 0; i < match_total_; i++) {
+    match_[i]->setLnExperimentSize(ln_experiment_size);  
+  }
+
   // matches are no longer correctly sorted
   last_sorted_ = (SCORER_TYPE_T)-1; // unsorted
   return matches_added;

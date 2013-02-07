@@ -11,7 +11,9 @@
 
 #include <string>
 #include <fstream>
+#include <string>
 
+using namespace std;
 
 class MakePinApplication: public CruxApplication {
 
@@ -31,6 +33,11 @@ class MakePinApplication: public CruxApplication {
    * main method for MakePinApplication
    */
   virtual int main(int argc, char** argv);
+
+  /**
+   * runs make-pin application
+   */
+  static int main(string target_path, string decoy_path);
 
   /**
    * \returns the command name for MakePinApplication

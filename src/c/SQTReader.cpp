@@ -283,23 +283,13 @@ void SQTReader::parseLocus(string& line) {
   cerr << "Protein desc:"<<protein_desc<<endl;
   cerr << "========================="<<endl;
 */
-  Protein* protein = database_->getProteinByIdString(protein_id.c_str());
+  bool is_decoy;
+  Protein* protein = MatchCollectionParser::getProtein(database_,
+                                                       decoy_database_,
+                                                       protein_id,
+                                                       is_decoy);
 
-  bool is_decoy = false;
-
-  if (protein == NULL) { 
-    if (decoy_database_ == NULL) { 
-      carp(CARP_FATAL, "couldn't find protein %s in database!", protein_id.c_str()); 
-    } else { 
-      protein = decoy_database_->getProteinByIdString(protein_id.c_str()); 
-      if (protein == NULL) { 
-        carp(CARP_FATAL, "couldn't find protein %s in target or decoy database!", protein_id.c_str()); 
-      }
-     is_decoy = true;
-    } 
-  } 
-
-  int start_idx = findStart(protein, current_peptide_sequence_, current_prev_aa_, current_next_aa_);
+  int start_idx = protein->findStart(current_peptide_sequence_, current_prev_aa_, current_next_aa_);
 
   PeptideSrc* peptide_src = new PeptideSrc((DIGEST_T)0, protein, start_idx);
 

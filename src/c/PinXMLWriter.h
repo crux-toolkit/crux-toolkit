@@ -9,6 +9,7 @@
 #include <vector>
 #include "objects.h"
 #include "Spectrum.h"
+#include "mass.h"
 #include "Match.h"
 #include "MatchCollection.h"
 #include "SpectrumZState.h"
