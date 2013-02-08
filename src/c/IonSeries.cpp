@@ -145,6 +145,9 @@ void IonSeries::update(
   if(modified_aa_seq_){
     free(modified_aa_seq_);
   }
+  if(loss_limit_){
+    free(loss_limit_);
+  }
   
   // iterate over all ions, and free them
   for (unsigned int idx=0;idx<ions_.size();idx++) {
@@ -169,6 +172,8 @@ void IonSeries::update(
   modified_aa_seq_ = copy_mod_aa_seq(mod_seq, peptide_length_);
   
   // Initialize the loss limit array for the new peptide
+  loss_limit_ = 
+    (LOSS_LIMIT_T*)mycalloc(peptide_length_, sizeof(LOSS_LIMIT_T));
   for(ion_idx =0; ion_idx < peptide_length_; ++ion_idx){
     loss_limit_->h2o = 0;
     loss_limit_->nh3 = 0;
@@ -330,20 +335,28 @@ void IonSeries::scanForAAForNeutralLoss()
   int peptide_length = peptide_length_;
   char* sequence = peptide_;
 
+  // make sure loss_limit array is the right size
+  if (peptide_length_ != strlen(sequence)){
+    if (loss_limit_){
+      free(loss_limit_);
+    }
+    loss_limit_ = 
+      (LOSS_LIMIT_T*)mycalloc(peptide_length_, sizeof(LOSS_LIMIT_T));
+  }
+
   int h2o_aa = 0;
   int nh3_aa = 0;
-  LOSS_LIMIT_T* loss_limit_count = NULL; // debug
 
   // search for the first instance of the amino acids
   int cleavage_idx;
   for(cleavage_idx=0; cleavage_idx < peptide_length; ++cleavage_idx){
+    LOSS_LIMIT_T* loss_limit_count = &loss_limit_[cleavage_idx];
     // is the AA  (S|T|E|D) ?
     if(sequence[cleavage_idx] == 'S' ||
        sequence[cleavage_idx] == 'T' ||
        sequence[cleavage_idx] == 'E' ||
        sequence[cleavage_idx] == 'D' )
       {
-        loss_limit_count = &loss_limit_[cleavage_idx];
         loss_limit_count->h2o = ++h2o_aa;
         loss_limit_count->nh3 = nh3_aa;
       }
@@ -353,12 +366,10 @@ void IonSeries::scanForAAForNeutralLoss()
             sequence[cleavage_idx] == 'Q' ||
             sequence[cleavage_idx] == 'N' )
       {
-        loss_limit_count = &loss_limit_[cleavage_idx];
         loss_limit_count->nh3 = ++nh3_aa;
         loss_limit_count->h2o = h2o_aa;
       }
     else{
-      loss_limit_count = &loss_limit_[cleavage_idx];
       loss_limit_count->h2o = h2o_aa;
       loss_limit_count->nh3 = nh3_aa;
     }
