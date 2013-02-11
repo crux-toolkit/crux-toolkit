@@ -2635,12 +2635,9 @@ void MatchCollection::processRunSpecificFeatures() {
 /**
  * \brief Calculate the delta_cn of each match and populate the field.
  * 
- * Delta_cn is the normalized difference between xcorrs of different
- * ranks.  For SEQUEST style searching
- * match[i] = (match[0] - match[i]) / match[0] 
- * For other searching
- * match[i] = (match[0] - match[i+1]) / match[0].  This function
- * defaults to the second case. Sorts match_collection by xcorr, if necessary.
+ * Delta_cn is the normalized difference between xcorrs of different ranks.
+ * match[i] = (match[i] - match[i+1]) / match[i].
+ * Sorts match_collection by xcorr, if necessary.
  * 
  */
 bool MatchCollection::calculateDeltaCn(

@@ -56,12 +56,17 @@ The features used by Percolator to represent each PSM are summarized
 <LI>
 <b>&lt;search&nbsp;results&gt;</b> &ndash; A collection of target and
 decoy peptide-spectrum matches (PSMs) in pin.xml format, defined
-according to <a href="percolator_in.xml">this schema</a>.  The
-command <code>crux search-for-matches</code> generates results in this
-format.  Note that this argument can be "-", which indicates the
-pin.xml file should be read from standard input. Input may also be given
-as SQT, PepXML, or tab-delimited files, in which case a pin.xml file will
-be generated in the output directory prior to execution.</li>
+according to <a href="https://github.com/percolator/percolator/blob/master/src/xml/percolator_in.xsd">
+this schema</a>.  The command <code>crux search-for-matches</code>
+generates results in this format.  Note that this argument can be "-",
+which indicates the pin.xml file should be read from standard input. Input
+may also be given as SQT, PepXML, or tab-delimited files, in which case a
+pin.xml file will be generated in the output directory prior to execution.
+Any SQT, PepXML, or tab-delimited file given as input is required to have a
+corresponding decoy file (or corresponding target file, if it is a decoy
+file). For example, if <code>search.target.txt</code> is to be used, the file
+<code>search.decoy.txt</code> must also exist.
+</li>
 
 </ul>
 
@@ -74,8 +79,8 @@ the <code>crux-output</code> directory:</p>
 
 <li>
 <b>percolator.pout.xml</b>: an XML file containing all of the
-Percolator results, defined according
-to <a href="percolator_out.xml">this schema</a>.
+Percolator results, defined according to <a href="https://github.com/percolator/percolator/blob/master/src/xml/percolator_out.xsd">
+this schema</a>.
 </li>
 
 <li>
