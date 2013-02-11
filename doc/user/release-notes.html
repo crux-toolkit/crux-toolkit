@@ -76,11 +76,11 @@ The q-ranker output file <code>qranker_output.xml</code> has been renamed to
 <li>
 Modified deltaCn computation to be consistent with Percolator. Rather than using
 <pre>
-deltaCn = (top xcorr - next xcorr) / top xcorr
+     deltaCn<sub>i</sub> = (xcorr<sub>1</sub> - xcorr<sub>i+1</sub>) / xcorr<sub>1</sub>
 </pre>
 it is now computed using
 <pre>
-deltaCn = (current xcorr - next xcorr) / current xcorr
+     deltaCn<sub>i</sub> = (xcorr<sub>i</sub> - xcorr<sub>i+1</sub>) / xcorr<sub>i</sub>
 </pre>
 </li>
 
