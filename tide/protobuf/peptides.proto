@@ -1,0 +1,49 @@
+option optimize_for = SPEED;
+package pb;
+
+import "raw_proteins.proto";
+
+message Location {
+  optional int32 protein_id = 1; 
+  // Typically, the id numbers in the file of proteins are expected to be
+  // numbered sequentially, so that this field can be treated as a pointer.
+  optional int32 pos = 2; // Start position within protein.
+}
+
+message Peptide {
+  // Comments below refer to usual practice when peptides appear in a file of
+  // records sorted by mass.
+  optional int32 id = 1; // Numbered sequentially.
+  optional double mass = 2; // Neutral mass.
+  optional int32 length = 3; // Number of amino acids.
+  optional Location first_location = 4; // First location within protein
+
+  enum Series { // Not used.
+    Y = 0;
+    B = 1;
+  }
+
+  // These fields represent the symetric vector difference between the
+  // correctly computed set of theoretical peaks and the approximate set
+  // set of theoretical peaks. peak1 and peak2 refer to positive values;
+  // neg_peak1 and neg_peak2 refer to negative values. See 
+  // theoretical_peak_set.h
+  // peak1 and neg_peak1 refer to charge 1 ions, and peak2 and neg_peak2 
+  // refer to charge 2 ions.
+  repeated int32 peak1 = 5 [packed = true];
+  repeated int32 peak2 = 6 [packed = true];
+  repeated int32 neg_peak1 = 7 [packed = true];
+  repeated int32 neg_peak2 = 8 [packed = true];
+
+  // array of (index << log_num_unique_deltas + mod), where index is the amino
+  // acid with the mod, which is an entry into unique_deltas in the ModTable.
+  repeated int32 modifications = 9 [packed = true];
+  
+  optional int32 aux_locations_index = 10; // Array index into AuxLocation
+
+}
+
+message AuxLocation {
+  repeated Location location = 1;
+}
+

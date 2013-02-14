@@ -1,0 +1,9 @@
+This directory contains the executables, documentation, and sample data for 
+Tide. Tide is a tool for identifying peptides from tandem mass spectra. It is 
+an independent reimplementation of the SEQUEST algorithm, which identifies 
+peptides by comparing the observed spectra to a catalog of theoretical spectra
+derived in silico  from a database of known proteins. The immediate ancestor of
+Tide is Crux, but Tide has been completely re-engineered to achieve a
+thousandfold improvement in speed while exactly replicating SEQUEST XCorr scores.
+
+For further information consult the HTML documentation in this directory.

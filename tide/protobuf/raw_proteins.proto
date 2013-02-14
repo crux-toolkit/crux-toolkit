@@ -1,0 +1,9 @@
+option optimize_for = SPEED;
+package pb;
+
+message Protein {
+  optional string name = 1;
+  optional int32 id = 2; // In a file of records of type Protein ids will
+                         // usually be numbered sequentially.
+  optional string residues = 3;
+}
