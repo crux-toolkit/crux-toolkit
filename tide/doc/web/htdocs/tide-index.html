@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-Strict.dtd"
+>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>tide-index</title>
+  <link href="./crux.css" rel="styleSheet" type="text/css">
+</head>
+<body>
+<blockquote>
+
+<h1 align=center>tide-index</h1>
+
+<b>Usage:</b>
+
+<blockquote>
+<code>tide-index [options] --fasta=&lt;filename&gt;</code>
+</blockquote>
+
+<b>Description:</b>
+
+<blockquote>
+The <code>tide-index</code> program converts a 
+<a href="http://noble.gs.washington.edu/proj/crux/fasta-format.html">FASTA</a>
+format file of protein sequences into a format that can be
+read efficiently by <code><a href="tide-search.html">tide-search</a></code>.
+</blockquote>
+
+<b>Input</b>
+<ul>
+<li>
+  A
+  <a href="http://noble.gs.washington.edu/proj/crux/fasta-format.html">FASTA</a>
+  file of protein sequences.  The input file name is set
+  using <code>--fasta=&lt;filename&gt;</code>.
+</li>
+</ul>
+
+<b>Output</b>
+<ul>
+<li>
+Peptide index - By default the name of the peptide index file will be
+the name of the
+input <a href="http://noble.gs.washington.edu/proj/crux/fasta-format.html">FASTA</a> file, but with the suffix <code>.pepix</code>.
+The peptide index file name can be set using the 
+<code>--peptides</code> option.
+</li>
+<li>
+Protein index -
+by default the name of the protein index file will be the name of the input
+<a href="http://noble.gs.washington.edu/proj/crux/fasta-format.html">FASTA</a>
+file, but with the suffix <code>.protix</code>.
+The protein index file name can be set using the 
+<code>--proteins</code> option.
+</li>
+<li>
+Auxiliary peptide location index. This binary file contains information on where
+peptides are located within indexed proteins in cases where a peptide appears in
+more than one location.
+By default the name of the auxiliary locations index file will be the name of the input
+<a href="http://noble.gs.washington.edu/proj/crux/fasta-format.html">FASTA</a>
+file, but with the suffix <code>.aux_locs</code>.
+The auxiliary peptide location file name can be set using the 
+<code>--aux_locations</code> option.
+</li>
+</ul>
+
+<b>Options</b>
+
+<ul>
+
+<li>
+<code>--enzyme=&lt;string&gt;</code> &ndash; Specify the enzyme used
+to digest the proteins <i>in silico</i>.  Available enzymes include
+trypsin, chymotrypsin, elastase, clostripain, cyanogen-bromide,
+idosobenzoate, proline-endopeptidase, staph-protease,
+modified-chymotrypsin, elastase-trypsin-chymotrypsin and aspn.
+Specifying <code>--enzyme=none</code> yields a non-enzymatic
+digest.  <b>Warning:</b> the resulting index may be quite large.
+Default=<code>none</code>.</li>
+
+<li>
+<code>--digestion=full-digest|partial-digest</code> &ndash; Specify
+whether every peptide in the database must have two enzymatic termini
+(<code>full-digest</code>) or if peptides with only one enzymatic
+terminus are also included (<code>partial-digest</code>).
+Default=<code>full-digest</code></li>
+
+<li>
+<code>--max_missed_cleavages</code> &ndash; Maximum number of missed cleavages
+per peptide to allow in enzymatic digestion.  If this option is not specified,
+then missed cleavages are not allowed.</li>
+
+<li>
+<code>--max_length=&lt;integer&gt;</code> &ndash; Specify the maximum
+length of the peptides included in the index.  Default=50.</li>
+
+<li>
+<code>--max_mass=&lt;integer&gt;</code> &ndash; Specify the maximum
+monoisotopic mass (in Da) of the peptides included in the index.
+Default=7200.</li>
+
+<li>
+<code>--min_length=&lt;integer&gt;</code> &ndash; Specify the minimum
+length of the peptides included in the index.  Default=6.</li>
+
+<li>
+<code>--min_mass=&lt;integer&gt;</code> &ndash; Specify the minimum
+monoisotopic mass (in Da) of the peptides included in the index.
+Default=200.</li>
+
+<li>
+<code>--peptides=&lt;filename&gt;</code> &ndash; Specify the name of
+the output peptide index.</li>
+
+<li>
+<code>--proteins=&lt;filename&gt;</code> &ndash; Specify the name of
+the output protein index.</li>
+
+<li>
+<code>--monoisotopic_precursor</code> &ndash; Use monoisotopic
+      precursor masses rather than average mass (default) for
+      precursor.
+</li>
+
+<li>
+<code>--mods_spec</code> &ndash; Expression for static and variable
+      mass modifications to include. Specify a comma-separated list of
+      modification specifications of the form:
+
+      <p><code>--mods_spec=C+57.02146,2M+15.9949,1STY+79.966331</code>,...
+
+      <p>The general form of a modification specification has 3
+      components, as exemplified
+      by <code><red>1</red><green>STY</green>+<blue>79.966331</blue></code>.
+
+      <p>The three components are:
+
+      <p><code>[<red>max_per_peptide</red>]<green>residues</green>+<blue>added_mass</blue></code>.
+
+      <p>In the exemplar, <code><red>max_per_peptide</red></code>
+      is <code><red>1</red></code>, <code><green>residues</green></code>
+      are <code><green>STY</green></code>,
+      and <code><blue>added_mass</blue></code>
+      is <code><blue>79.966331</blue></code>.
+
+<ul>
+      <li><code><green>residues</green></code> indicate which amino
+      acids may be affected by the modification.
+
+      <li><code><blue>added_mass</blue></code> indicates in Daltons
+      the mass to add to modified versions of the residues.
+
+      <li><code><red>max_per_peptide</red></code> indicates how
+      many occurrences of the indicated variable modification may
+      occur per peptide. The <code><red>max_per_peptide</red></code>
+      may be omitted, as in <code>C+57.02146</code>, to indicate a
+      static modification, which will be in force at all occurrences
+      of the amino acid residue.
+</ul>
+
+      <p>Notes: Currently only positive mass modifications are
+      specifiable (<code><blue>added_mass</blue></code> &gt; 0). Use
+      caution in specifying variable modifications: specifying many
+      modifications or higher numbers of max_per_peptide can increase
+      index size significantly.
+
+</li>
+
+</ul>
+
+<b>Example:</b>
+
+<blockquote>
+<code>./tide-index --enzyme=trypsin --mods_spec=C+57.02146 --fasta=yeast.fasta</code>
+</code>
+</body>

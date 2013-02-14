@@ -1,0 +1,13 @@
+Computational analysis of mass spectra remains the speed bottleneck in
+many proteomics experiments. SEQUEST was the earliest software package
+to identify peptides from mass spectra by searching a database of
+known peptides. Though still popular, SEQUEST performs slowly. Crux
+and TurboSEQUEST have successfully sped up SEQUEST by introducing a
+pre-computed index, but the demand for ever-faster
+peptide-identification software continues to grow. Tide, introduced
+here, is a software program for peptide identification that achieves a
+dramatic speedup over Crux, with no significant changes in program
+output. The speedup strategies detailed here are mostly algorithmic;
+some entail more efficient use of computer system resources. On
+tryptic benchmark sets tested, Tide ran approximately 1000 times more
+quickly than Crux and SEQUEST.

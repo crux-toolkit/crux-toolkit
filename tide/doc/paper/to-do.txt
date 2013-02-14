@@ -1,0 +1,18 @@
+\breview Pages 8--10. Somewhere in here you should have a discussion of
+peptides versus proteins and indexing versus linear scan. The original
+SEQUEST used a linear scan through a FASTA database, because a file of
+tryptic peptides or pointers to tryptic peptides in the FASTA database
+would be about as big as the database itself and semitryptic or
+nonspecific peptides would be much bigger. Now computer memories are
+much larger, so we can fit larger databases or indexes in main memory
+(but still not all the nonspecific human peptides of mass 1000–3000
+Da). For speed the big issue is probably cache hits. Edwards and
+Lippert have published two papers in Workshop on Algorithms in
+Bioinformatics (WABI) on these issues. The pFind people (Si-Min He,
+etc.) have a paper titled ``Speeding up Mass Spectrometry Based Protein
+Identification by Peptide and Spectrum Indexing'', but I don't know
+where it has appeared. \ereview
+
+=====================================================================================
+
+Caveat about Hoopquest: no support for missed cleavages

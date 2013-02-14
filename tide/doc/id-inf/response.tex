@@ -1,0 +1,229 @@
+Reviewer Comments to Author:
+
+Reviewer: 1
+Comments to the Author
+In their new manuscript, Diament et al consider a small set of the
+possibilities for improving MS/MS sampling with the addition of
+real-time identification capabilities.  Their report, however, is
+hampered by its evaluation approach, which is rooted in a simulation
+that produces results differing substantially from real-world
+performance.
+
+The maximum exclusion list size of 50 cited by this article dates from
+LCQ-era mass spectrometers.  Typically, LTQ and later instruments
+featured an exclusion list size of 500.
+
+RE-DO EXPERIMENTS WITH EXCLUSION LIST OF 500.
+
+The data sets employed in this manuscript were previously published,
+but the authors really should include more information about them in
+this manuscript.  At a bare minimum, stating that they include MS
+scans from an Orbitrap is rather important for understanding the new
+analysis.
+
+ADD THIS INFO (TRIVIAL).
+
+Purists might object to the first paragraph of Results, which suggests
+that all candidate peptides are subjected to XCorr.  At least in the
+original Sequest, only the five hundred best preliminary scoring
+peptides are subjected to XCorr.
+
+TRIVIAL FIX.
+
+The data in Figure 5 cast significant doubt on the ability of the
+simulator to predict real-world mass spectrometer performance.  The
+authors need to buttress the reader's faith that the simulator is
+providing useful information in understanding instrument performance.
+Until this discrepancy is explained better, all the conclusions of
+this article are in doubt.
+
+RE-STATE EXPLANATIONS FROM DISCUSSION.
+
+In the authors' description of the variable duration exclusion list,
+it would seem that determining whether or not a spectrum has been
+acquired recently does not require identification but rather merely a
+determination of whether or not the same fragments have recently been
+collected in another spectrum.  This is feasible through
+spectrum-spectrum comparison without identification.
+
+TRUE, BUT THIS IS A SEPARATE IDEA.
+
+The following paragraph would appear to reach two opposite predictions
+from the same scenario: The second peak-picking method that we
+investigated is based on the hypothesis that if a peak is not
+confidently identified, this may be due to noise, and a second attempt
+may enable a more confident identification on the second try (probably
+with the same result as before).  On the other hand, if a peak yields
+a poor spectrum, then there is no point in retrying, as a new attempt
+is likely to give the same difficulties.
+
+RE-WORD TO CLARIFY.
+
+At present, the Weibull-score Triage section describes a strategy that
+seems counterintuitive, at best, to this reader.  I'm unsurprised that
+they saw poor results in applying it.  At the moment this technique
+seems ill-considered, and I don't see any lessons from this section to
+be taken away by readers.
+
+ARGUE FOR WHY IT'S NOT ILL-CONSIDERED.
+
+The charge-state exclusion rule seems reasonable, but again I note
+that this rule can be implemented without knowledge of peptide
+identity.  The instrument control software can already determine the
+charge of precursors from isotope distributions, and so it can
+determine where other charges for a precursor can be found without an
+identification.
+
+BUT THE PEPTIDE ID MAKES THE EXCLUSION MORE PRECISE.
+
+Are the authors sure that this type of exclusion is
+not already practiced?
+
+NO.
+
+Given that we can discriminate identifications
+for +2s more effectively than for other charge states, it would seem
+that preferring this charge over all others, even when they are more
+intense, would be advantageous.
+
+TRUE.
+
+If the authors are plotting distinct sequence counts (rather than
+identified MS/MS counts) on the y axis of Figure 6, this might be
+important to emphasize, especially in the context of the charge state
+exclusion rule.
+
+FIX THIS.
+
+The authors may want to discuss how ions were selected as "most
+intense" for DDA.  Are they working from centroids or from profile MS
+scans?  Are they including isotopes in their assessment of intensity?
+Under what rules does Thermo's software appear to be assessing peak
+intensity?
+
+FIX THIS.
+
+If the authors are looking for very large numbers of replicates for a
+sample, they might consult with PNNL for the many LC-MS/MS files they
+have generated from Shewanella.  Another possibility would be the many
+LC-MS/MS shots of yeast collected by the CPTAC network.  If a simpler
+mixture would be more tractable, a QC set for a simple protein mixture
+such as the ISB 18 would be useful.
+
+DON'T DO THIS.
+
+
+Reviewer: 2
+Comments to the Author
+The key premise of this manuscript is that having the ability for
+real-time identification of tandem mass spectra should allow one to
+redesign LC/MS precursor selection strategies to further increase
+the number of identified MS/MS spectra. To assess the possible
+feasibility of such strategies, the authors created a precursor
+selection simulator based on pooled data from 11 real LC/MS/MS runs
+and used it to show that simple precursor selection strategies
+performed substantially worse (i.e., about 18% worse) than current
+m/z and retention-time exclusion window strategies.
+
+Overall this manuscript suffers from multiple serious issues.
+
+The first such issue is that the core hypothesis being tested is
+not clearly defined anywhere in the manuscript. While the overall
+premise that real-time identifications should allow one to improve
+precursor selection strategies, this concept is never explicitly
+translated to a testable hypothesis. The closest to such a
+formulation is given only on page 12 at the start of the
+"Weibull-score Triage" section where it is indicated that
+peptide-spectrum match (PSM) scores from real-time identification
+would be used to decide on the utility of precursor reacquisition
+in the hope of obtaining higher quality MS/MS spectra on
+reacquisition. Overall it remains unclear throughout the manuscript
+exactly how the authors propose that real-time identification
+should improve MS/MS identification rates other than through
+reacquisition with hopefully slightly higher signal to noise
+(though it was not assessed how often reacquisition did result in
+higher signal to noise nor how much this matters for
+identification).
+
+EASY TO FIX THIS.
+
+The second issue is that a manuscript aiming to report negative
+results needs to do a much more extensive and detailed presentation
+of the tested methods than manuscripts presenting positive results.
+In the latter case authors only need to report what worked well but
+in negative-results manuscripts the main contribution is that
+'something cannot be done in a certain way' so it is key to clearly
+define the 'something' being tested and to clearly describe the
+'certain way' and all the data used to assess it. The lack of such
+detailed assessment (or its reporting in supplementary materials)
+is prevalent throughout the paper but can also be illustrated by
+following up on the previous paragraph's comments on the
+Weibull-score triage strategy. The hypothesis underlying this
+strategy is that Weibull-score is a good indicator of whether an
+MS/MS spectrum will be more 'identifiable' upon reacquisition due
+to increased signal-to-noise ratio. However, this is not shown even
+in principle (e.g., by showing a plot of isolated ion intensity for
+each MS/MS spectrum vs its Weibull-score for accepted/rejected
+PSMs) and is not compared with the trivial strategy of just using
+MS/MS ion intensity nor compared with multiple competing strategies
+that assess spectrum quality without attempting any identification.
+A similar argument can be made for the variable duration exclusion
+list strategy - it would probably be much more efficient to adjust
+the exclusion time based on LC/MS retention time traces than to
+have to 'invest' another MS/MS event just to determine whether the
+same peptide is still there (which could be trivially assessed
+using MS/MS spectrum matching, no identification is required
+anyway) but these simpler strategies were not compared to the
+real-time identification strategy.
+
+Third, in addition to missing comparisons with alternative simpler
+strategies, the manuscript provides almost no details about exactly
+what methods were tested. For example, the simulator is said to
+have 'several interesting and uninteresting parameters' but these
+are not shown in detail anywhere in the manuscript.
+
+THIS IS A GOOD POINT, AND EASY TO FIX.
+
+In a negative
+results manuscript, these should have been thoroughly described and
+separately assessed against for their impact on precursor selection
+strategies. This is especially relevant since the proposed
+simulator was not even able to reproduce the behavior of current
+dynamic exclusion strategies - such lack of details makes it
+impossible to determine which parameters may have been missing or
+set to inappropriate values. There were also multiple claims that
+exclusion lists are unstable but no detailed examples or
+statistical data was provided to support this assessment. For
+example, how many and what fraction of "skipped peaks could not be
+'explained away' in this fashion" as claimed in page 10? What were
+the characteristics of those peaks that caused the exceptional
+behavior? What the most striking detailed example of how small
+differences in exclusion parameters caused dramatic instability
+about precursor selection later in the LC/MS run?
+
+GOOD POINTS.
+
+Fourth, one of the justifications for the suboptimal performance of
+the proposed approach was that it often selected peaks for which
+MS/MS spectra were not available to the simulator even after
+merging 11 replicate LC/MS runs. These include 5 PAnDA runs and
+thus are expected to include roughly six times the number of
+precursors that would be acquired in a single LC/MS run with
+dynamic exclusion. As such, it is strange that the proposed
+strategies would be selecting peaks that did not "look interesting
+to the instrument" even after 5 PAnDA runs. What are these "odd"
+precursors that the instrument software chooses to ignore so
+consistently but are picked by the proposed strategies? Are there
+any features of these precursors that would be indicative of their
+identifiability? For example, do these "odd" features contain
+unusual isotope patterns or correspond to co-eluting peptides?
+
+Finally, even if the proposed strategies had improved the MS/MS
+identification rate and absolute numbers, the manuscript would
+still have a steep hill to climb to show that the trade-offs of
+real-time acquisition using Tide+q-ranker also surpass the
+identification performance of standard dynamic exclusion coupled
+with standard identification strategies such as Mascot+Percolator.
+Ultimately this is the bar that must be passed for real-time
+acquisition to gain any acceptance and this comparison was
+completely ignored in this manuscript.

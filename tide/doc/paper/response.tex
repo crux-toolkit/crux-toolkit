@@ -1,0 +1,373 @@
+\documentclass{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage[dvips]{color}
+\usepackage{url}
+
+\newcommand{\breview}{\begin{quotation}\begin{em}\noindent}
+\newcommand{\ereview}{\end{em}\end{quotation}}
+
+\begin{document}
+
+\hspace*{3.0in}\today
+
+\vspace*{3ex}
+
+\noindent
+Dear Dr.\ McIntosh:
+
+\vspace*{1ex}
+
+We are submitting a revised version of the manuscript ``Faster SEQUEST
+Searching for Peptide Identification from Tandem Mass Spectra''
+(pr-2010-00367d) in which we address all of the reviewers' concerns.
+
+We made two primary changes to the manuscript.  First, to improve the
+overall utility of Tide, we implemented a straightforward approach to
+handling modifications.  Second, to increase the appeal of the
+manuscript to the {\em JPR} audience, we relegated much of the detail
+about the optimization to a supplement.
+
+At your suggestion, we also performed a timing comparison to several
+other search engines. In addition to Crux and the version of SEQUEST
+that it is based on, we now include a more recent version of SEQUEST,
+as well as X!Tandem and OMSSA. These results are now summarized in the
+Section called ``Final timing comparisons.''
+
+I would like to emphasize that we are committed to continuing to
+support and improve upon Tide in the future.  The reviewers clearly
+want to see, in addition to experimental results showing a substantial
+speedup from Tide, a piece of software that is useful in practice.  We
+agree with this goal.  Indeed, we have already released a binary
+version of Tide at the URL specified in the manuscript, and the
+software has garnered quite a bit of interest on the Crux users'
+mailing list.  We look forward to adding further features and
+enhancements in the coming years.
+
+We hope that the revised version is suitable for publication
+in the {\em Journal of Proteome Research}.
+
+\vspace*{1ex}
+
+\noindent
+Sincerely,
+
+\hspace*{1ex}
+
+\noindent
+William Stafford Noble\\
+Department of Genome Sciences\\
+University of Washington
+
+\clearpage
+\section*{Reviewer \#1}
+
+\breview Summary: This paper gives a sequence of improvements to the
+SEQUEST algorithm, resulting in an overall 1000x speed improvement for
+searching unmodified tryptic peptides. The single biggest improvement
+comes from using a database of tryptic peptides, rather than reading
+through the complete protein database for each spectrum. Other
+improvements include sparse theoretical spectra, dot products computed
+using indexing and adding, and peptides and spectra both sorted by
+mass order.
+
+General Comments: This paper is an interesting exercise in
+software engineering. Many of the speed-up tricks are well-known
+(e.g., X!Tandem, Turbo-SEQUEST, etc., use a tryptic-peptide index;
+Mascot sorts spectra by mass), but others are quite clever. The major
+weakness of the paper (and the software) is that Tide is currently a
+rather limited search engine, because it cannot identify
+modifications. The paper needs a mild rewrite to correct some
+imprecisions.  \ereview
+
+At the reviewer's suggestion, we have implemented in Tide the ability
+to perform searches using up to a user-specifiable number of
+modifications. The modification search strategy is described in the
+revised manuscript.
+
+\breview Page 3. You should say up front that Tide does not do
+modification search, and does not give a large speed-up on
+semi-tryptic and no-enzyme searches. Speed-up is most important for
+noenzyme and multi-modification searches, so Tide's limitations are
+fairly prominent. \ereview
+
+We have implemented and shown timing results for modification
+search. We have also modified the introduction to point out more
+clearly that the largest speedup occurs in the case of tryptic search.
+
+\breview In your survey of the state of the art, you might
+want to mention Sage-N Sorcerer, a hardware speed-up of SEQUEST, and
+speed-up via two-pass searching.  \ereview
+
+Per the reviewer's suggestion, we have cited these approaches in our
+survey of the state of the art.
+
+\breview Page 5. Line 2: Shouldn't the default precursor tolerance be,
+say, 1.5 Thompsons (m/z units) rather than 3.0 Daltons? \ereview
+
+For consistency with SEQUEST, we use 3.0 Da as the default precursor
+tolerance.  We plan to add to Tide the ability to select precursors
+based on a Th, Da or ppm criterion.
+
+\breview Line 37: What is ``the a-ion''? Do you mean each a-ion?
+\ereview
+
+Yes, we mean each $a$-ion.  We have clarified this sentence.
+
+\breview You don't mention doubly charged ions here, but you do
+mention them on page 15. Also you talk about water losses from
+charge-2 ions on page 15, but page 5 does not mention water losses
+from y-ions at all. You have to clear up these inconsistencies.
+\ereview
+
+We have edited the sections in question, per the reviewer's
+suggestions, clearly noting when charge-2 ions and water loss ions are
+included. Note that the reviewer's comments regarding ``page 15''
+refer to text that has now moved to the supplement.
+
+\breview Page 6. Line 12. You mean ``various versions of
+SEQUEST''. \ereview
+
+We fixed this typo (``version'' $\rightarrow$ ``versions'').
+
+\breview
+Page 8. I think that the paper would be improved by a little less
+detail. E.g., the reader probably doesn't care about MS2 input
+conversion. \ereview
+
+In response to feedback from the editor and from reviewer \#2, we have
+dramatically reduced the level of detail provided in the main
+manuscript, relegating most of the details about the optimization
+to a supplement.
+
+\breview Pages 8--10. Somewhere in here you should have a discussion of
+peptides versus proteins and indexing versus linear scan. The original
+SEQUEST used a linear scan through a FASTA database, because a file of
+tryptic peptides or pointers to tryptic peptides in the FASTA database
+would be about as big as the database itself and semitryptic or
+nonspecific peptides would be much bigger. Now computer memories are
+much larger, so we can fit larger databases or indexes in main memory
+(but still not all the nonspecific human peptides of mass 1000–3000
+Da). For speed the big issue is probably cache hits. Edwards and
+Lippert have published two papers in Workshop on Algorithms in
+Bioinformatics (WABI) on these issues. The pFind people (Si-Min He,
+etc.) have a paper titled ``Speeding up Mass Spectrometry Based Protein
+Identification by Peptide and Spectrum Indexing'', but I don't know
+where it has appeared. \ereview
+
+Per the reviewer's suggestion we have added a brief discussion of the
+issues mentioned here (see the paragraph beginning ``In any database
+approach to peptide identification \dots'') and have cited the pFind
+work.
+
+\breview Page 10, bottom. I don't understand why you would use either
+sort or heapify to find the best five matches in a list. Why not just
+keep the top five (i.e., keep a sorted list of 5) as you scan through
+the big list? \ereview
+
+It is true that, in the case of selecting only the top 5, keeping an
+explicit list and comparing to it would probably be as efficient as
+heapify.  However, we wanted Tide to generalize to cases when the user
+requests larger numbers of matches per spectrum.  In such cases,
+keeping the entire list quickly becomes suboptimal.
+
+In our experiments, the heapify operation takes up a negligible
+proportion of the profile.
+
+\breview Page 12. Line 31: You might want to multiply by 10, 25, or 50
+on the fly instead of caching these results. On many architectures
+multiply and add will be faster than index, memory lookup, and add,
+since you will be able to fit more theoretical spectra in cache
+memory. \ereview
+
+In practice, we will need to perform a lookup operation, regardless of
+whether we perform the multiply ahead of time.  Hence, it makes the
+most sense to simply store the multiplied value in the cache.  Please
+note that we are using the word ``cache'' simply to refer to a data
+structure, and not to refer to hardware architecture.
+
+\breview Line 48: A seek in C or C++ is not the same as a disk
+seek. The OS and disk controller handle disk I/O, paging, etc. Page
+14, line 37, has this same confusion. \ereview
+
+Thank you for pointing this out.  We have replaced three references to
+a ``disk seek'' with the phrase ``a call to the {\tt seek()} function''.
+
+\breview Page 15. I don't believe the 0.014\% number. This might be
+the right percentage if peptides had uniformly distributed masses, but
+peptides have characteristic mass defects so that 1000.0 Da is an
+unlikely mass and 1000.5 is a likely mass.  \ereview
+
+The number is correct.  It was determined empirically by examining the
+results from an actual run.  We do not know what the percentage would
+be if peptides had uniformly distributed masses, but we agree with the
+reviewer that the resulting percentage would likely be much different
+from the empirical percentage.
+
+\breview Section 3.3.7. Modern processors are optimized for floating
+point, so I would not expect a savings from fixed point. Generally
+speaking, floating point multiply, integer multiply, and floating
+point add are all about the same speed, and integer add and increment
+are faster. \ereview
+
+The reviewer's intuition turned out to be correct; as pointed out in
+the manuscript, the speedup achieved by switching to fixed point
+arithmetic was indeed quite small.
+
+\breview Page 16, lines 49–50, you save not just one memory lookup,
+but also one increment and comparison for the loop counter. \ereview
+
+The reviewer is correct that the optimization saves a memory lookup,
+an increment and a comparison; however, because memory lookup is so
+expensive relative to the other two operations, we believe the removal
+of the memory lookup to be the main source of the speedup.
+
+\breview By ``partial digestion'' you mean missed cleavages? Any
+number? Surely you need to allow at least one or two per peptide.
+\ereview
+
+No; ``partial digestion'' means that only one end of the peptide must
+be enzymatic.  This notion is quite different from a missed cleavage.
+
+Tide does allow the user to allow for missed cleavages, but we did not
+perform tests with this option turned on.
+
+\breview Page 18, line 30–32. I don't think you have to worry about
+people writing new algorithms less accurate than SEQUEST. (IMHO, newer
+search programs tend to be better than older ones.  The field as a
+whole is making some progress.) \ereview
+
+In the new version of the manuscript, we include a timing comparison
+to X!Tandem and OMSSA. The original sentence was perhaps phrased
+clumsily; we only meant to say that timing comparisons are most
+meaningful when comparing apples to apples. In the new manuscript, the
+sentence in question is no longer included.
+
+\breview Page 21. Typo: A.R. Aebersold. \ereview
+
+This typo has been fixed.
+
+\clearpage
+\section*{Reviewer \#2}
+
+\breview The authors present speed improvements to Crux, their
+implementation of a SEQUEST-like search engine. The speed-up is
+dramatic: several hundred-fold faster than a recent, non-commercial
+version of SEQUEST. While a search engine with such speed may have a
+wide audience, I have three concerns about the work as described: 1)
+the current implementation lacks certain baseline features of critical
+interest \& utility, and it is unclear whether adding these features
+would significantly compromise efficiency 2) while a fast SEQUEST
+implementation itself might be of broad interest, the detailed
+presentation of stepwise refinements taken to arrive at such will have
+a more limited audience 3) some direct demonstration of accuracy
+should be presented for the timing examples used; accuracy is here
+addressed by reference to Crux only (i.e. Tide scoring is identical to
+Crux when compiled 64-bit, and Crux has been previously shown to
+correlate well with SEQUEST). \ereview
+
+In response to these suggestions, we have 1) added to Tide the ability
+to search with modifications, 2) relegated much of the details of our
+optimization to a supplement, and 3) included a direct demonstration
+of the accuracy compared to SEQUEST.
+
+\breview A central motivation for this work is that search speed can
+be an impediment to analysis. Very constrained searches (e.g. fully
+tryptic, modest matching tolerances, no variable modifications) are
+seldom a bottleneck. Using such parameters on a modern multi-core
+server, search time is seldom longer than data acquistion time. The
+work presented here becomes compelling in the context of more
+exploratory searches, including, for example, multiple variable
+modifications. Unfortunately the work currently presented does not
+support variable modifications at all. PTMs are discussed briefly
+(potential ``index bloat'') and it is not clear from that discussion
+whether support could be added while maintaining the speed advantages
+of the careful prerocessing and caching schemes developed. \ereview
+
+In response to this critique, we have implemented a straightforward
+scheme for performing searches allowing a user-specifiable maximum
+number of PTMs to be included in the index. A description of is
+included in the revised paper.
+
+\breview Given that, as the authors acknowledge, many of the
+techniques applied here may not generalize to other scoring
+algorithms, it is not clear that such a detailed discussion of these
+techniques will be of general interest to the audience of JPR. At the
+very least, the exposition could be greatly shortened by reduced
+attention to changes that gave little or no benefit (e.g. fixed point)
+and by refering the reader to the literature instead of rehashing
+details. Section 3.1 could be shortened considerably by referring the
+reader to the original SEQUEST paper. Section 3.2 could be largely
+replaced by a reference to the Crux paper. Much of section 3.3.3 is
+described in Eng 2008. \ereview
+
+As suggested by the reviewer and the editor, we have dramatically
+reduced, in the main text, the level of detail with which we describe
+the individual optimizations.  For the interested reader, we provide
+these details in a supplement.
+
+\breview The result that SEQUEST may slow down only modestly (or even
+speed up!) for a semi-tryptic search is counter-intuitive. Given that
+a semi-tryptic search increases the number of candidate sequences for
+a given precursor mass, it would seem that this should be a ``sweet
+spot'' for Tide's optimizations. Could this be due to Sp pre-scoring or
+some other feature of SEQUEST not carried over to Crux/Tide? Some
+direct demonstration of the accuracy of Crux/Tide might help here. Did
+SEQUEST yield the same results as Crux/Tide for the ``partial'' searches
+in Table 2? \ereview
+
+We agree that this behavior of SEQUEST is counter-intuitive, and we
+did verify with Jimmy Eng that he observes the same behavior.
+However, we did not attempt to debug this problem further.  In the
+revised manuscript, we provide results indicating that the results for
+Tide, Crux and SEQUEST are very similar for all of our searches (see
+below for details).
+
+\breview In general, showing correlation between SEQUEST and Crux/Tide
+on the specific timing tests from Table 2 would be very helpful in
+demonstrating that these are really ``apples-to-apples'' comparisons. It
+would be good to have, at least as supplementary material, either
+scatterplots of Xcorr (as in the Crux paper) or Venn diagrams
+comparing peptides identified at, say, 5\% FDR by each
+algorithm. \ereview
+
+The supplement now includes the requested scatterplots of XCorr
+between Tide/Crux and SEQUEST.  We did not include scatterplots of
+Tide versus Crux, since the two outputs are identical (the plots look
+pretty boring!).  We do now mention, in the main text, that we
+verified that the results were identical for all of our searches.
+
+\breview On the bottom of page 16, should ``line 14 of Table 1'' be
+``line 13''? \ereview
+
+Yes; this has been fixed.
+
+\breview On page 5, does SEQUEST add neutral losses for *all* b- and
+y-ions, or only for +1? \ereview
+
+The SEQUEST method adds corresponding neutral loss ions for all $b$-
+and $y$- fragment ions that are generated, both at charge $+1$ and
+charge $+2$, as described in the manuscript. No higher-charge fragment
+ions of any species are generated by default. This holds for Tide,
+Crux, and SEQUEST version 2.8.
+%% An error in SEQUEST version 2.8,
+%% however, caused the neutral-loss ions corresponding to charge +2
+%% fragment ions to be placed incorrectly.
+
+\breview The protein database for the yeast searches is described
+explicitly (SGD 6298 ORFs). What protein database was used for the
+worm searches? \ereview
+
+This information is now reported (Wormbase v160).
+
+\breview Discussion of performance on semi-tryptic searching suggests
+a related question: how does Tide compare to SEQUEST on enzyme
+unconstrained search? \ereview
+
+This has been measured and is now discussed in the text:
+``In the non-enzymatic case Tide is only about 7--8 times faster than the recent
+SEQUEST version as tested---a far more modest gain. However, Tide was not
+specifically optimized for this setting, and other opportunities for improving
+Tide's algorithm might exist.''
+
+\end{document}

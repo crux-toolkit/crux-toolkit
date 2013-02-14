@@ -1,0 +1,84 @@
+Changes:
+
+Please use "Benjamin J. Diament" (with middle initial) as author's name.
+
+p. B, line 93: Change "peptide" to "spectrum".
+
+p. B, line 178: Use 1.0005079 Da/charge (adding "/charge") in the units
+specification. Thanks to the editor for the question.
+
+p. C, line 194: Use 1.0005079 Da/charge (adding "/charge") in the units
+specification.
+
+p. C, line 205: Remove indentation.
+
+p. C, line 217-218: In equation, replace subscript "r" with a lower-case "\tau".
+Note that this letter appears twice in the equation and should be replaced both
+times: once under the summation operator, and once as the rightmost symbol in
+the equation. Also, remove extra space in "\tau = -75" below summation.
+
+p. C, line 218: Change "scores" to "score".
+
+p. D, line 316: Change "5-fold sparser" with "5-fold sparser, as
+described below".
+
+p. D, line 371: Add a sentence at the end of the bullet item just ended: Details
+are given in section 9 of the Supporting Information.
+
+p. E, Table 1: In line 2, change "secions" to "sections".
+
+p. E, Table 1: In line 11, change "Stolre" to "Store".
+
+p. E, Table 1: In caption, delete "(section numbers preceded by S)".
+
+p. E, line 381: Use the letter "x" rather than a multiply symbol in
+"x86".
+
+p. E, line 407: change "below" to "above".
+
+p. F, line 464 and 472: "X!Tandem" should not be allowed to break lines. The
+term "X!Tandem" occurs in several places in the text and captions. A
+non-breaking version of this term should be used everywhere.
+
+p. H, line 556: Change "Figure 2" to "Figure 5".
+
+p. H, line 564-565: Remove paragraph break.
+
+
+Editor's questions:
+
+Author: Is Da (dalton) the correct unit in the paragraph below, for width
+1.0005079 Da? Da is the unit for atomic/molecular mass.
+
+The authors appreciate the Editor's question. Indeed, please use either
+"Da/charge" or "Th" or "Thompsons" as fits the journal's standards. The changes
+correspond to those noted below (p. B, line 178 and p. C, line 194).
+
+Author: When Supporting Information (SI) will be published, a brief statement or
+paragraph describing the SI must be included. Is is the description above
+acceptable?
+
+Yes; thanks.
+
+Author: Is a publication update or DOI number available for ref 20?
+
+J Proteome Res. 2011 Jun 3;10(6):2882-8.
+
+Author: Please supply the following for ref 23: name and location of the
+publisher, Editor name(s), and year of publication.
+
+Publisher: Springer
+Editor name: I. Jonassen and J. Kim
+Year of publication: 2004
+
+Author: Please supply pagination for ref 24.
+
+Mol Syst Biol. 2007;3:102. Epub 2007 Apr 17.
+
+Author: Please supply pagination for ref 26.
+
+This is how it is listed in Pubmed:
+
+Lundgren DH, Han DK, Eng JK.
+Curr Protoc Bioinformatics. 2005 Jul;Chapter 13:Unit 13.3.
+

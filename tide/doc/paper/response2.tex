@@ -1,0 +1,254 @@
+\documentclass{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage[dvips]{color}
+\usepackage{url}
+
+\newcommand{\breview}{\begin{quotation}\begin{em}\noindent}
+\newcommand{\ereview}{\end{em}\end{quotation}}
+
+\begin{document}
+
+\hspace*{3.0in}\today
+
+\vspace*{3ex}
+
+\noindent
+Dear Dr.\ Weintraub:
+
+\vspace*{1ex}
+
+We are submitting a revised version of the manuscript ``Faster SEQUEST
+Searching for Peptide Identification from Tandem Mass Spectra''
+(pr-2010-00367d) in which we address all of the reviewers' concerns.
+
+
+We hope that the revised version is suitable for publication
+in the {\em Journal of Proteome Research}.
+
+\vspace*{1ex}
+
+\noindent
+Sincerely,
+
+\hspace*{1ex}
+
+\noindent
+William Stafford Noble\\
+Department of Genome Sciences\\
+University of Washington
+
+\clearpage
+\section*{Reviewer \#1}
+
+\breview In this manuscript, Diament et al. describe their
+implementation of the Sequest algorithm, Tide, which shows dramatic
+improvements in search times compared to Sequest and their previously
+described Sequest implementation, Crux. The authors describe in detail
+the optimization and software engineering improvements required to
+attain these speedups. By extending Tide to PTM searching, the authors
+addressed one of the major criticisms from the initial review. An
+efficient, open-source version of Sequest is of great interest to the
+community and readers of JPR. However, the focus of the paper is on
+the software engineering steps required to attain these
+improvements. As such, the study is more appropriate for publication
+as a JPR ``Technical Note'', or publication in a more computer science
+focused journal such as Bioinformatics. Nevertheless, the findings are
+intriguing and would be useful to software developers in computational
+proteomics seeking to optimize other widely used search tools.
+\ereview
+
+The practical and scientific impact of being able to carry out
+database search orders of magnitude more quickly are profound.  We
+therefore believe (and our experience thus far with Tide supports this
+claim) that many people will be extremely interested in making use of
+the advances described in this manuscript.  Very sophisticated
+software engineering was necessary to accomplish this speedup.  As
+such, we do not believe that publishing the paper as a mere
+``Technical Note'' accurately reflects either its contribution nor its
+impact on the field.
+
+That said, if the editor feels strongly that the paper should be
+re-categorized, we will abide by her decision.
+
+\breview
+It was not clear why distinct sets of spectra were used for SEQUEST
+vs. other search algorithms in the timing experiments shown in Figure
+3 (100 vs. 10,000). 
+\ereview
+
+SEQUEST is so slow that running the search on 10,000 spectra simply
+took too long.  This point has now been clarified in the caption to
+Figure 3.  The 100 spectra were randomly sampled from the 10,000
+spectra, and the search times among the spectra varied little. The
+important point is that we are reporting an average, so we do not
+expect the results to change significantly if we average over a larger
+number of spectra.
+
+\breview
+Similarly, in Fig. 4, distinct sets of spectra with much different
+sizes are used in the comparisons. Please justify.
+\ereview
+
+We have also modified the caption to Figure 3 to clarify this point.
+
+\breview
+The term `partial digestion' is generally used in the literature to
+indicate incomplete proteolysis of proteins, i.e. the generation of
+large tryptic peptides with many missed cleavages, not semi-tryptic
+peptides. 
+\ereview
+
+We have changed this terminology throughout the manuscript,
+substituting ``semi-tryptic'' for ``partial''.
+
+\breview
+The reason for using an m/z bin width of 1.0005079 Da is unclear,
+given that ion trap MS/MS fragmentation spectra are acquired at low
+resolution/mass accuracy. 
+\ereview
+
+The m/z bin width was selected by Jimmy Eng and John Yates when
+SEQUEST was first designed, back in the early 90s.  The value comes
+from an analysis of the periodicity of theoretical peptide masses.
+A goal of Tide is to follow the SEQUEST method.
+
+\breview
+The reader is left to guess (or look at the supplement for) the
+meaning of the tau symbol in the Xcorr equation on page 6 (especially
+if they are unfamiliar with cross correlation). 
+\ereview
+
+The tau symbol is simply an index for a summation.  As such, the
+mathematical meaning of this symbol is clear from the equation; it is
+not common practice to define such indices.
+
+\breview
+On page 6 line 41, the authors indicate that scoring for Tide is
+identical to Crux when compiled with double-precision floating-point
+arithmetic; the reason for this is not explained until later in the
+paper. 
+\ereview
+
+We removed the mention of floating point issues from the Introduction,
+as it is not critical to understanding the key point here, namely,
+that Tide and Crux do the same thing.
+
+\breview
+In section 3 (page 2) of the supplement there is a question mark in
+place of a reference. 
+\ereview
+
+This problem has been fixed.
+
+\breview
+For phosphopeptides, the neutral loss of H3PO4 from fragment ions is
+very common. Incorporating these events into the computation of
+theoretical spectra would likely yield improved scoring discrimination
+(just a general comment, not a requested revision).
+\ereview
+
+We agree, and can think of many other ways to improve on SEQUEST's
+theoretical spectra.  However, our goal here was to reproduce the
+scores of a widely used algorithm, rather than introduce a novel
+algorithm.
+
+\breview
+Some of the PSM's shown in the comparisons between Tide and Sequest
+(Suppl. Fig. 1) deviate significantly from the diagonal. Do the
+authors have any insight into the reason for these differences? Could
+these be phosphopeptide PSM's?
+\ereview
+
+We have looked into these differences. They arise in more esoteric
+(and less interesting) parts of the SEQUEST algorithm. Examples are
+bin boundary differences arising from rounding errors, the application
+of slightly different cutoff values during spectrum preprocessing, and
+a couple of very minor bugs in the version of SEQUEST we compared
+with. For a small fraction of spectra, these differences accumulate
+enough to alter the computed XCorr value noticeably. We felt that a full
+discussion of these issues is unlikely to be interesting to a general
+audience.
+
+\section*{Reviewer \#2}
+
+\breview
+The authors Diament and Noble describe several sequential
+optimizations to the SEQUEST algorithm targeting specifically runtime.
+Although nothing really novel is presented algorithmically, several
+clever tricks may be of interest to bioinformaticians struggling with
+software efficiencies.  While previous reviewers found the first draft
+to be unbalanced in terms of complexity of detail versus wide appeal
+to the JPR audience, I found this current draft to be very readable as
+much of the detail has been shuffled off to the supplemental.  I have
+a few minor comments before the manuscript is published:
+
+The third paragraph on page 3 discusses categories of approaches for
+identifying peptides from MS/MS data sets.  Searching spectrum
+libraries is a fourth strategy that should be mentioned.
+\ereview
+
+We have made the requested change; the sentence now ends with ``and
+library search methods, which compare observed spectra to a library of
+previously observed, annotated spectra.''
+
+\breview
+On the sixth paragraph on page 3, ``SAGE" should be ``Sage-N".
+\ereview
+
+This has been fixed.
+
+\breview
+Again in the sixth paragraph on page 3, GPU acceleration is an
+additional method for speeding up analysis.  For example, SpectraST
+has been improved this way.  Unfortunately, the only reference I can
+find for it is: ``L.A. Baumgardner, A.K. Shanmugam, H. Lam, J.K. Eng,
+D.B. Martin, in press. Fast parallel tandem mass spectral library
+searching using GPU hardware acceleration, J. Proteome Res."
+referenced in an ASAP review article in Methods by Lam and Aebersold.
+\ereview
+
+We have added a mention of GPUs to the list of ways to speed up
+the search, and we have included the suggested citation.
+
+\breview
+The third paragraph on page 4 mentioned that the code is entirely
+single-threaded.  While I appreciate that this simplifies direct
+comparison with SEQUEST and Crux, database searching is a highly
+parallelizable task and with many modern commodity computers reaching
+four or eight cores, this seems like a strange choice.  Are the
+authors intending to remedy this?
+\ereview
+
+As the reviewer points out, the intention of running in a single
+thread is to give more reproducible timing measurements. As with
+SEQUEST and Crux, which are also implemented to run in a single
+thread, the user may run as many simultaneous instances of Tide as
+there are available cores on the computer.  We have updated the
+paragraph in question to explain this. A future version of Tide will
+help facilitate launching the appropriate number of program instances.
+
+\breview
+In the fourth paragraph of page 4 the authors discuss database
+searching parameters.  I note that there are no large database
+mammalian searches and no multi-species searches.  While the third
+paragraph on page 15 starts to touch on this, I think the
+ramifications of larger databases should be discussed more clearly,
+perhaps with a supplemental figure along the lines of Figure 3.
+\ereview
+
+We have added a paragraph describing how Tide behaves on larger
+databases:
+
+``For larger peptide databases, Tide's computation time per spectrum
+grows linearly in the size of the peptide database. This is because
+Tide evaluates all candidate peptides against each spectrum. Larger
+databases will yield proportionately larger sets of candidate peptides
+and will take proportionately longer to compute, under the same
+settings. The worm benchmark consists of 27,499 proteins, comparable
+to the number of proteins in the human genome, although consideration
+of protein isoforms in human would yield more peptides.''
+
+
+
+\end{document}

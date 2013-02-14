@@ -1,0 +1,264 @@
+PROTEIN SHEPHERDING FEATURE PLAN
+================================
+
+ 
+DESIGN:
+
+Indexing
+--------
+1. Ensure the code that reads the proteins checks that the protein
+   ID's are sequential. Do this right after the proteins are read in
+   via ReadToVector.  Use the CHECK macro and die upon failure.
+ 
+2. Make Location protocol buffer message independent of Peptide:
+   message Location {
+       optional int32 protein_id = 1; 
+       // Typically, the id numbers in the file of proteins are expected to be
+       // numbered sequentially, so that this field can be treated as a pointer.
+       optional int32 pos = 2; // Start position within protein.
+   }
+   
+3. Create the following auxiliary location protocol buffer:
+   message AuxLocations {
+       repeated Location locations = 1;
+   } 
+
+4. Change the Peptide protocol buffer to contain a reference to only the first
+   Location, then add an aux_locations_index that is an index into an array of
+   AuxLocations.
+   
+   message Peptide {
+      // Comments below refer to usual practice when peptides appear in a file of
+      // records sorted by mass.
+      optional int32 id = 1; // Numbered sequentially.
+      optional double mass = 2; // Neutral mass.
+      optional int32 length = 3; // Number of amino acids.
+      optional Location first_location = 4; // First location within protein
+
+      enum Series { // Not used.
+        Y = 0;
+        B = 1;
+      }
+
+      // These fields represent the symetric vector difference between the
+      // correctly computed set of theoretical peaks and the approximate set
+      // set of theoretical peaks. peak1 and peak2 refer to positive values;
+      // neg_peak1 and neg_peak2 refer to negative values. See 
+      // theoretical_peak_set.h
+      // peak1 and neg_peak1 refer to charge 1 ions, and peak2 and neg_peak2 
+      // refer to charge 2 ions.
+      repeated int32 peak1 = 5;
+      repeated int32 peak2 = 6;
+      repeated int32 neg_peak1 = 7;
+      repeated int32 neg_peak2 = 8;
+
+      // array of (index << log_num_unique_deltas + mod), where index is the amino
+      // acid with the mod, which is an entry into unique_deltas in the ModTable.
+      repeated int32 modifications = 9;
+      
+      optional int32 aux_locations_index = 10; // Array index into AuxLocation
+
+    }
+
+5. During indexing, build the auxiliary locations file while building the
+   peptides, and assign each peptide the aux_locations_index which is the 
+   index into an array of AuxLocations read into memory from the aux locations
+   file. Note that all modified versions of a given peptide will have the
+   same aux_locations_index.
+   
+   
+Search
+------
+1. Define a protocol buffer for results containing the following messages:
+
+	// The Results message consists of an experimental spectrum and a repeated
+	// field corresponding to the top n matching peptides, each represented by
+	// the Match message. Each Match message contains a reference to the Peptide,
+	// the charge and the xcorr score for the match.
+
+	message Match {
+	  optional double xcorr = 1;
+	  optional Peptide peptide = 2;
+	  optional int32 charge = 3;
+	}
+
+	message Results {
+	  optional Spectrum spectrum = 1;
+	  repeated Match matches = 2;
+	}
+
+2. Change the Reporter base class as follows:
+
+	class Reporter {
+	  public:
+		virtual void ReportSpectrum(pb::Spectrum *spectrum) = 0;
+		virtual void ReportMatch(int score, const Peptide& peptide, int charge) = 0;
+		virtual void WriteReport() = 0;
+	};
+	
+   This will allow us to report a single experimental spectrum followed by the
+   set of top N peptides matching this spectrum, then finally, commit the
+   results for the "current" spectrum to the Results protocol buffer file.
+   Without a separate function to indicate we should write the report, the
+   PBReporter would have no way of knowing when we're done reporting matches
+   for the very last spectrum. 
+
+3. The TextReporter will need to be modified to implement the new Reporter
+   base class, but its overall functionality will not change. The TextReporter
+   will do nothing in its imeplementation of the "WriteReport()" function 
+   - it will write each match to stdout as "ReportMatch()" is called.
+   
+4. We will need to create a reporter that writes the results to the Results
+   protocol buffer:
+
+    // Reporter that writes the results to a Results protocol buffer file that 
+	// can later be used by a postprocessor.
+	class PBReporter : public Reporter {
+	  public:
+		PBReporter(const string& filename, pb::Header &results_header);
+
+		// Reporter methods
+		virtual void ReportSpectrum(pb::Spectrum *spectrum);
+		virtual void ReportMatch(int score, const Peptide& peptide, int charge); 
+		virtual void WriteReport();
+	   
+	  private:
+		pb::Spectrum *spectrum_;
+		HeadedRecordWriter results_writer_;
+		pb::Results pb_results_;
+	};
+
+
+5. The Peptide class will need to be modified to provide access to Peptide
+   fields needed to rebuild the pb::Peptide when we write the results:
+       
+       int FirstLocProteinId() const { return first_loc_protein_id_; }
+       int FirstLocPos() const { return first_loc_pos_; }
+       int Mods(const ModCoder::Mod** mods) const {
+           *mods = mods_;
+           return num_mods_;
+       }
+       
+6. We need to provide the following optional flag that will allow users to 
+   specify the filename for the Results protocol buffer file:
+   
+   DEFINE_string(results_file, "results.tideres", "Results output file");
+   
+7. In Search's main function, we'll need to create a PBReporter instead of
+   a TextReporter and pass that along into the "Search()" function.
+
+
+Postprocessor
+-------------
+1. Create a C++ postprocessor to show the contents of the Results protocol 
+   buffer. We should provide options to the user to display the ouput in 
+   either Text or PepXML format:
+   
+   DEFINE_string(out_format, "text", "The output format to be generated. "
+									"Can be text or pepxml. Default is text.");
+   
+   DEFINE_string(out_filename, "", "Name of the output file to generate. "
+									"An extension will be added based on the "
+									"out_format.");
+
+2. A base class with a common interface will be created for both text and
+   pepxml output formats.
+   
+   TODO: DESCRIBE THIS IN MORE DETAIL ONCE I HAVE A BETTER IDEA WHAT THIS CLASS
+   WILL DO!
+   
+3. For both modes, we will need to read in the proteins separately into a 
+   Protein vector, then use the peptide.first_location field to index into 
+   the vector and grab the information we need, including the residue string
+   to get the peptide sequence.
+
+
+4. A text specific class will inherit from the base class in 2 above and 
+   display text output.
+
+   TODO: DESCRIBE THIS IN MORE DETAIL ONCE I HAVE A BETTER IDEA WHAT THIS CLASS
+   WILL DO!
+   
+   The text output will contain some combination of the following fields:
+   Spectrum Number  Precursor m/z   Charge  Xcorr   Sequence    Protein Name, Position
+
+   The user should be able to specify the fields they want displayed in the
+   order they want. This will be done via the following flag (valid only 
+   when "text" is specified as the out_format):
+   
+   DEFINE_string(out_fields, "spectrum_num,mz,charge,xcorr,sequence",
+							 "A comma delimited set of results fields to show "
+							 "in the text output in the order listed. "
+							 "Available options are: spectrum_num,mz,charge, "
+							 "xcorr,sequence,protein");
+      
+   By default, we only show the first protein associated with the 
+   peptide.first_location in the results record for each peptide. This way, 
+   we only load the auxiliary locations data if the user wants to pay the cost
+   of retrieving the rest of the proteins.  Provide the user with a flag to 
+   control whether they want to view all the proteins:
+   
+   DEFINE_bool(all_proteins, false, "Display all the proteins the peptide "
+                                    "was found in.");
+
+   If the user only cares about the first location, read one result at a time 
+   from the input results protocol buffer file, look up the protein information
+   via the peptide's first_location field, and print the results.
+   
+   In the case where we need to look up ALL the proteins, the entire auxiliary 
+   locations file will be read into a vector. We will then read one result at
+   a time from the results protocol buffer file and use the aux_locations_index 
+   of the peptide to look up the protein information corresponding to each 
+   location, and print the name of each protein and the starting position of
+   the peptide within the protein.
+
+5. A pepxml specific class will inherit from the base class in 2 above and
+   generate a pepxml file.
+
+   TODO: DESCRIBE THIS IN MORE DETAIL ONCE I HAVE A BETTER IDEA WHAT THIS CLASS
+   WILL DO! WHAT FIELDS DO WE NEED TO FILL IN FOR A PEPXML FILE? 
+      
+
+
+TESTING AND VERIFICATION:
+
+Functionality
+-------------
+
+Before making the changes, run the search program with “yeast.fasta”
+and “yeast-02-10000.ms2” as inputs.  Save the output in a text file.
+
+After the changes are in place, run the search program and then the
+postprocessor with the exact same input files and parameters as
+above. Do a diff between the two sets of results and verify they are
+the same.
+  
+
+Performance
+-----------
+
+1. make_peptides: Run the time command on the make_peptides program before
+   and after changes and save the data to a text file. 
+   
+   > time <make_peptides>
+
+   Manually analyze the differences between the two sets of time data. 
+   If this program takes > 10% longer after the changes, we need to run the 
+   program via the Google CPU profiler to identify the top time users.
+    
+2. Search program: Run the search program via the Google CPU profiler before
+   and after changes, collecting the the top time users and saving this data
+   to a text file. Also use the time command to get the time data.
+   
+   > time CPUPROFILE=<profile filename> <search>
+   > pprof -cum -text <search> <profile filename> > <output filename>
+
+   Manually analyze the differences between the two sets of profile data.
+
+3. Post-processor: Run the postprocessor via the Google CPU profiler and
+   identify the top time users:
+   
+   > CPUPROFILE=<profile filename> <postprocessor>
+   > pprof -cum -text <postprocessor> <profile filename> > <output filename>
+
+   Try to improve the  performance where necessary.

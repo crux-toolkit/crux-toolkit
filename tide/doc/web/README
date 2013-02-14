@@ -1,0 +1,8 @@
+The directory htdocs contains static HTML, stylesheets, images, javascript, and
+directories needed by the Tide web site. Copy the contents of this directory to
+and htdocs/images to /noble/www/htdocs/proj/tide. The subdirectories i686 and x86_64
+are used in creating the binary distribution for Tide, and need not be copied to the
+web site.
+
+Statically linked versions of tide-index, msconvert, and tide-sarch should
+be checked in to htdocs/i686 and htdocs/x86_64 (32-bit and 64-bit versions respectively).
