@@ -32,22 +32,41 @@ datasets."</a>
 </blockquote>
 
 <p>
-For more on q-values and posterior error probabilities (PEP), see the
-documentation for <a href="calibrate-scores.html">calibrate-scores</a>.
-<p>
-<span class=prog>Crux</span> now includes code from
-<a href="http://per-colator.com/"><span class=prog>Percolator
-2.04</span></a>.</p>
-
-<p>
-Percolator requires as input a file in pin.xml format containing two
-collections of PSMs, one set derived from matching observed spectra
-against real ("target") peptides, and a second derived from matching
-the same spectra against "decoy" peptides.</p>
+Percolator requires as input two collections of PSMs, one set derived
+from matching observed spectra against real ("target") peptides, and a
+second derived from matching the same spectra against "decoy"
+peptides.  The output consists of ranked lists of PSMs, peptides and
+proteins.  Peptides and proteins are assigned two types of statistical
+confidence estimates: q-values and posterior error probabilities.</p>
 
 <p>
 The features used by Percolator to represent each PSM are summarized
 <a href="features.html">here</a>.</p>
+
+<p>
+<code>Crux</code> now includes code from
+<a href="http://per-colator.com/"><span class=prog>Percolator
+2.04</span></a>.  Crux Percolator differs from the stand-alone version
+of Percolator in the following respects:</p>
+<ul>
+<li>
+In addition to the native Percolator XML file format, Crux Percolator
+supports additional input file formats (SQT, PepXML, tab-delimited
+text) and output file formats (SQT, PepXML, mzIdentML, tab-delimited
+text).</li>
+<li>
+To maintain consistency with the rest of the Crux commands, Crux
+Percolator uses different parameter syntax than the stand-alone
+version of Percolator.</li>
+<li>
+Crux Percolator does not support the
+options <code>--input-feature-file</code>, <code>--clock</code>
+and <code>--exp-mass</code>.</li>
+<li>
+Like the rest of the Crux commands, Crux Percolator writes its files
+to an output directory, logs all standard error messages to a log
+file, and is capable of reading parameters from a parameter file.</li>
+</ul>
 
 <p>
 <b>Input:</b></p>
@@ -326,25 +345,6 @@ follows:
 </ul>
 Default = 3.
 </li>
-
-</ul>
-
-<p>
-<b>Options not supported</b></p>
-
-<ul>
-
-<li>
-<code>--input-feature-file &lt;filename&gt;</code> &ndash; Input files
-are given as a tab-delimited file. In this case the only argument
-should be a file name of the data file.  The tab-delimited fields
-should be id &lt;tab&gt; label &lt;tab&gt; feature1 &lt;tab&gt;
-... &lt; tab&gt; featureN &lt;tab&gt; peptide &lt;tab&gt; proteinId1
-&lt;tab&gt; ... &lt;tab&gt; proteinIdM Labels are interpreted as 1 --
-positive set and test set, -1 -- negative</note> set. When the --doc
-option is true, the first and second feature (third and fourth column)
-should contain the retention time and difference between observed and
-calculated mass.</li>
 
 </ul>
 
