@@ -50,6 +50,18 @@ mz-bin-offset.  The new conversion formula produces a proper
 translation of mz-bin-offset into bin edge locations.</p></li>
 
 <li>
+The <code>seed</code> parameter is now available to control the
+seeding of random number generator.  The default is to seed from the
+current value of the system clock; however, the seed can be set to a
+user specified unsigned integer.
+<code>seed</code> is available as a parameter from all applications.
+It can be set as a command line option for 
+<code>crux search-for-matches</code>
+and 
+<code>crux percolator</code>.
+</li>
+
+<li>
 The default value of the <code>decoys</code> parameter for <code>crux
 search-for-matches</code> was incorrectly documented.  The default is
 actually <code>peptide-shuffle</code>, but the documentation said the

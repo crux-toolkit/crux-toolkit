@@ -162,6 +162,11 @@ Replace existing files if true (T) or fail when trying to overwrite a
 file if false (F). Default =  F.</li>
 
 <LI>
+<code>--seed &lt;int&gt;</code> &ndash; Set the seed of the random
+number generator. The default is to seed from the current value of the
+system clock.</li>
+
+<LI>
 <code>--num-decoys-per-target &lt;int&gt;</code> &ndash; 
 Specify the number of decoy peptides to search for every target
 peptide searched. Control where the decoys are returned (to what
@@ -260,6 +265,7 @@ must lie in the range 0 &le; mz-bin-offset &le; 1.  Default=0.68.</li>
 A file containing command-line or additional parameters.  See
 the <a href="parameter-file.html">parameter documentation</a> page
 for details.  Default = no parameter file.</li>
+
 
 <LI>
 <code>--verbosity &lt;0-100&gt;</code> &ndash; 
