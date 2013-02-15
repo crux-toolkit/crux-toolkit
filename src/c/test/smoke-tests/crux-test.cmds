@@ -154,10 +154,10 @@
 #1 = perc-feature-file = good_results/percolator.features.txt = cat crux-output/percolator.features.txt = 
 
 #Run make-pin with tab-delimited file  
-1=make-pin-txt = good_results/make-pin_txt.pin.xml = rm -rf crux-output; crux search-for-matches --parameter-file params/sp demo.ms2 yeast-index; crux make-pin --overwrite T --output-file make-pin_txt.pin.xml crux-output/search.target.txt crux-output/search.decoy.txt yeast-index/; cat crux-output/make-pin_txt.pin.xml 
+1=make-pin-txt = good_results/make-pin_txt.pin.xml = rm -rf crux-output; crux search-for-matches --parameter-file params/sp demo.ms2 yeast-index; crux make-pin --overwrite T --output-file make-pin_txt.pin.xml crux-output/search.target.txt crux-output/search.decoy.txt; cat crux-output/make-pin_txt.pin.xml 
 
 #Run make-pin with pep.xml file  
-1=make-pin-pep = good_results/make-pin_pep.pin.xml = rm -rf crux-output; crux search-for-matches --parameter-file params/sp demo.ms2 yeast-index; crux make-pin --overwrite T --output-file make-pin_pep.pin.xml crux-output/search.target.pep.xml crux-output/search.decoy.pep.xml yeast-index/; cat crux-output/make-pin_pep.pin.xml
+1=make-pin-pep = good_results/make-pin_pep.pin.xml = rm -rf crux-output; crux search-for-matches --parameter-file params/sp demo.ms2 yeast-index; crux make-pin --overwrite T --output-file make-pin_pep.pin.xml crux-output/search.target.pep.xml crux-output/search.decoy.pep.xml; cat crux-output/make-pin_pep.pin.xml
 
 # Run q-ranker 
 1 = qranker = good_results/qranker.target.txt = rm -rf crux-output; crux sequest-search --parameter-file params/set_rand_seed_only --decoy-location target-file --decoys peptide-shuffle demo.ms2 yeast-index/; crux q-ranker --parameter-file params/set_rand_seed_only --feature-file T demo.ms2 crux-output/sequest.target.sqt; cat crux-output/q-ranker.target.psms.txt
