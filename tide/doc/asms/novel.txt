@@ -1,2 +1,0 @@
-Execution time of SEQUEST and Crux is improved roughly 1000-fold, by
-application of various algorithmic and software-engineering methods.
