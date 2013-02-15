@@ -57,11 +57,11 @@ user specified unsigned integer.
 </li>
 
 <li>
-Fixed the default value of the <code>decoys</code> parameter in the documentation.
-The default is <code>peptide-shuffle</code> but the documentation said the
-default was <code>protein-shuffle</code>.
-The documentation has been corrected to state that the default is <code>peptide-shuffle</code>.
-</li>
+The default value of the <code>decoys</code> parameter for <code>crux
+search-for-matches</code> was incorrectly documentated.  The default
+is actually <code>peptide-shuffle</code>, but the documentation said
+the default was <code>protein-shuffle</code>.  The documentation has
+been corrected.</li>
 
 <li>
 The incorrectly labeled column header <code>xcorr rank</code> in barista and
@@ -74,7 +74,8 @@ The q-ranker output file <code>qranker_output.xml</code> has been renamed to
 </li>
 
 <li>
-Modified deltaCn computation to be consistent with Percolator. Rather than using
+The deltaCn computation has been modified to be consistent with
+Percolator. Rather than using
 <pre>
      deltaCn<sub>i</sub> = (xcorr<sub>1</sub> - xcorr<sub>i+1</sub>) / xcorr<sub>1</sub>
 </pre>
@@ -90,13 +91,14 @@ the PinXML format.
 </li>
 
 <li>
-Added flags to control whether various results files are created in the output directory:
+Flags were added to several commands allowing the user to control
+whether various results files are created in the output directory:
 <ul>
   <li><code>--sqt-output &lt;T|F&gt;</code> (search-for-matches)</li>
   <li><code>--mzid-output &lt;T|F&gt;</code> (search-for-matches)</li>
   <li><code>--pinxml-output &lt;T|F&gt;</code> (search-for-matches)</li>
-  <li><code>--pepxml-output &lt;T|F&gt;</code> (search-for-matches, qranker, barista)</li>
-  <li><code>--txt-output &lt;T|F&gt;</code> (search-for-matches, qranker, barista)</li>
+  <li><code>--pepxml-output &lt;T|F&gt;</code> (search-for-matches, q-ranker, barista)</li>
+  <li><code>--txt-output &lt;T|F&gt;</code> (search-for-matches, q-ranker, barista)</li>
 </ul>
 By default, all of these flags are set to false except <code>txt-output</code>.
 </li>
