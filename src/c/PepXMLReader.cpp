@@ -328,8 +328,7 @@ void PepXMLReader::searchHitOpen(
 
   Protein* protein = 
     MatchCollectionParser::getProtein(database_, decoy_database_, protein_string, is_decoy);
-  int start_idx = -1;
-  start_idx = protein->findStart(current_peptide_sequence_, prev_aa, next_aa);
+  int start_idx = protein->findStart(current_peptide_sequence_, prev_aa, next_aa);
   Peptide* peptide = new Peptide(length, peptide_mass, protein, start_idx);
   
 
@@ -425,11 +424,15 @@ void PepXMLReader::searchScoreOpen(
   if (name == "xcorr_score") {
     current_match_collection_->setScoredType(XCORR, true);
     current_match_->setScore(XCORR, value);
+  } else if (name == "xcorr_rank") {
+    current_match_->setRank(XCORR, value);
   } else if (name == "delta_cn") {
     current_match_->setDeltaCn(value);
   } else if (name == "sp") {
     current_match_collection_->setScoredType(SP, true);
     current_match_->setScore(SP, value);
+  } else if (name == "sp_rank") {
+    current_match_->setRank(SP, value);
   } else if (name == "percolator_score") {
     current_match_collection_->setScoredType(PERCOLATOR_SCORE, true);
     current_match_->setScore(PERCOLATOR_SCORE, value);
