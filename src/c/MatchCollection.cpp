@@ -221,8 +221,8 @@ int MatchCollection::addMatches(
     scoreMatchesOneSpectrum(SP, spectrum, zstate.getCharge(),
                                false); // don't store scores
     populateMatchRank(SP);
+    saveTopSpMatch();
     if( filter_by_sp ){ // keep only high-ranking sp psms
-      saveTopSpMatch();
       int sp_max_rank = get_int_parameter("max-rank-preliminary");
       truncate(sp_max_rank + 1, // extra for deltacn of last
                SP);
@@ -2141,8 +2141,11 @@ bool MatchCollection::printSqt(
 
   }// next match
   
-  // print the match with Sp rank==1 if its xcorr rank > top_match rank.  
-  if( top_scoring_sp_->getRank(XCORR) > top_match ){
+  // make sure top_scoring_sp_ has been set
+  if( top_scoring_sp_ == NULL){
+    carp(CARP_WARNING, "Top scoring SP was not set.");
+  } else if( top_scoring_sp_->getRank(XCORR) > top_match ){
+    // print the match with Sp rank==1 if its xcorr rank > top_match rank.  
     top_scoring_sp_->printSqt(output);
   }
   

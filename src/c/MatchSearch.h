@@ -48,6 +48,7 @@ class MatchSearch : public CruxApplication {
     SpectrumZState& zstate, ///< seach spectrum at this z-state
     PEPTIDE_MOD_T** peptide_mods, ///< list of peptide mods to apply
     int num_peptide_mods, ///< how many p_mods to use from the list
+    bool compute_sp,  ///< compute sp scores
     bool store_scores///< save all scores for p-value estimation
   );
 

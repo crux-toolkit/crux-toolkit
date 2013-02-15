@@ -120,22 +120,26 @@ void QRanker :: write_results()
   getOverFDR(fullset,net, selectionfdr);
   d.clear_data_psm_training();
   
-  ostringstream fname;
-  fname << out_dir << "/" << fileroot << "q-ranker.target.psms.txt";
-
   d.load_data_psm_results();
   computePEP();
 
-  ofstream f1(fname.str().c_str()); 
-  write_results_psm_tab(f1);
-  f1.close();
-  fname.str("");
+  ostringstream fname;
+  if (get_boolean_parameter("txt-output")) {
+    fname << out_dir << "/" << fileroot << "q-ranker.target.psms.txt";
 
-  fname << out_dir << "/" << fileroot << "q-ranker.xml";
-  PepXMLWriter xmlfile;
-  xmlfile.openFile(fname.str().c_str(), overwrite_flag);
-  write_results_psm_xml(xmlfile);
-  xmlfile.closeFile();
+    ofstream f1(fname.str().c_str()); 
+    write_results_psm_tab(f1);
+    f1.close();
+    fname.str("");
+  }
+
+  if (get_boolean_parameter("pepxml-output")) {
+    fname << out_dir << "/" << fileroot << "q-ranker.xml";
+    PepXMLWriter xmlfile;
+    xmlfile.openFile(fname.str().c_str(), overwrite_flag);
+    write_results_psm_xml(xmlfile);
+    xmlfile.closeFile();
+  }
   d.clear_data_psm_results();
 }
 
@@ -916,6 +920,8 @@ int QRanker :: crux_set_command_line_options(int argc, char *argv[])
     "fileroot",
     "output-dir",
     "overwrite",
+    "pepxml-output",
+    "txt-output",
     "skip-cleanup",
     "re-run",
     "use-spec-features",

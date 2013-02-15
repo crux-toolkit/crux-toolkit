@@ -1606,14 +1606,16 @@ void Barista :: report_all_results_xml()
 
   write_results_psm_xml(of);
 
-  ostringstream xml_file_name;
-  xml_file_name << out_dir << "/" << fileroot << "barista.target.pep.xml";
-  PepXMLWriter xmlfile;
-  xmlfile.openFile(xml_file_name.str().c_str(), overwrite_flag);
+  if (get_boolean_parameter("pepxml-output")) {
+    ostringstream xml_file_name;
+    xml_file_name << out_dir << "/" << fileroot << "barista.target.pep.xml";
+    PepXMLWriter xmlfile;
+    xmlfile.openFile(xml_file_name.str().c_str(), overwrite_flag);
 
-  //...
-  xmlfile.closeFile();
-  write_results_pep_xml(xmlfile);
+    //...
+    xmlfile.closeFile();
+    write_results_pep_xml(xmlfile);
+  }
 
   
   of << endl;
@@ -1660,7 +1662,9 @@ void Barista :: report_all_results_xml_tab()
   setup_for_reporting_results();
   stringstream fname;
   report_all_results_xml();
-  report_all_results_tab();
+  if (get_boolean_parameter("txt-output")) {
+    report_all_results_tab();
+  }
   d.clear_data_all_results(); 
   
 }
@@ -2642,6 +2646,8 @@ int Barista :: crux_set_command_line_options(int argc, char *argv[])
     "fileroot",
     "output-dir",
     "overwrite",
+    "pepxml-output",
+    "txt-output",
     "skip-cleanup",
     "re-run",
     "use-spec-features",

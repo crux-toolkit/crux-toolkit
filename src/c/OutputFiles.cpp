@@ -57,14 +57,17 @@ OutputFiles::OutputFiles(CruxApplication* program_name)
        num_files_, num_decoy_files, output_directory, fileroot, overwrite);
 
   // all operations create tab files
-  createFiles(&delim_file_array_, 
-              output_directory, 
-              fileroot, 
-              application_, 
-              "txt");
+  if( get_boolean_parameter("txt-output") ){
+    createFiles(&delim_file_array_, 
+                output_directory, 
+                fileroot, 
+                application_, 
+                "txt");
+  }
 
   // almost all operations create xml files
-  if( command != SPECTRAL_COUNTS_COMMAND ){
+  if( command != SPECTRAL_COUNTS_COMMAND &&
+      get_boolean_parameter("pepxml-output") ){
     createFiles(&xml_file_array_,
                 output_directory,
                 fileroot,
@@ -73,8 +76,9 @@ OutputFiles::OutputFiles(CruxApplication* program_name)
                 overwrite);
   }
   
-  // only sequest creates sqt files
-  if( command == SEQUEST_COMMAND ){
+  // sequest and search creates sqt files
+  if( command == SEQUEST_COMMAND ||
+      (command == SEARCH_COMMAND && get_boolean_parameter("sqt-output")) ){
     createFiles(&sqt_file_array_, 
                  output_directory, 
                  fileroot, 
@@ -84,7 +88,8 @@ OutputFiles::OutputFiles(CruxApplication* program_name)
   }
 
   //pin xml 
-  if(command==SEARCH_COMMAND || command == SEQUEST_COMMAND){
+  if( (command==SEARCH_COMMAND || command == SEQUEST_COMMAND) &&
+      get_boolean_parameter("pinxml-output") ){
    string filename=makeFileName(
     fileroot, 
     application_,
@@ -99,7 +104,8 @@ OutputFiles::OutputFiles(CruxApplication* program_name)
     );
   }
 
-  if (command == SEARCH_COMMAND || command == SEQUEST_COMMAND) {
+  if( (command == SEARCH_COMMAND || command == SEQUEST_COMMAND) && 
+      get_boolean_parameter("mzid-output") ){
     createFile(&mzid_file_,
                output_directory,
                fileroot,

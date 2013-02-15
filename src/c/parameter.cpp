@@ -558,6 +558,22 @@ void initialize_parameters(void){
       "Available only for crux-generate-peptides.", "true");
 
   /* search-for-matches command line options */
+  set_boolean_parameter("sqt-output", false,
+      "Output SQT in the output directory.  Default=F",
+      "Available for search-for-matches.", "true");
+  set_boolean_parameter("mzid-output", false,
+      "Output MZID in the output directory.  Default=F",
+      "Available for search-for-matches.", "true");
+  set_boolean_parameter("pinxml-output", false,
+      "Output PIN XML in the output directory.  Default=F",
+      "Available for search-for-matches.", "true");
+  set_boolean_parameter("pepxml-output", false,
+      "Output pepXML in the output directory.  Default=F",
+      "Available for search-for-matches, q-ranker, barista.", "true");
+  set_boolean_parameter("txt-output", true,
+      "Output tab-delimited text in the output directory.  Default=T",
+      "Available for search-for-matches, percolator, q-ranker, barista.",
+      "true");
   set_scorer_type_parameter("prelim-score-type", SP, 
       "Initial scoring (sp, xcorr). Default=sp,", 
       "Available for crux-search-for-matches.  The score applied to all "
