@@ -551,8 +551,6 @@ void OutputFiles::printMatchesPinXml(
   vector<MatchCollection*>& decoy_matches_array,
   Spectrum* spectrum
   ) {
-  vector<MatchCollection*> decoys; 
-  decoys.push_back(decoy_matches_array[0]);
 
   if (pin_xml_file_ == NULL) {
     return;
@@ -560,10 +558,10 @@ void OutputFiles::printMatchesPinXml(
   
   if( spectrum ){
     
-    pin_xml_file_->write(target_matches, decoys, spectrum,1);
+    pin_xml_file_->write(target_matches, decoy_matches_array, spectrum,1);
   }
   else 
-    pin_xml_file_->write(target_matches,decoys);
+    pin_xml_file_->write(target_matches, decoy_matches_array);
    
 }
 

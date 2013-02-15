@@ -106,15 +106,14 @@ void PinXMLWriter::calculateDeltaCN(map<pair<int, int>, vector<Match*> >& scan_c
 
 void PinXMLWriter::calculateDeltaCN(vector<Match*>& collection) {
 
-  MatchCollection* tmp_matches = new MatchCollection();
-  tmp_matches->setScoredType(XCORR, true);
+  MatchCollection tmp_matches = MatchCollection();
+  tmp_matches.setScoredType(XCORR, true);
   for (vector<Match*>::iterator iter = collection.begin();
     iter != collection.end();
     ++iter) {
-    tmp_matches->addMatch(*iter);
+    tmp_matches.addMatch(*iter);
   }
-  tmp_matches->calculateDeltaCn();
-  delete tmp_matches;
+  tmp_matches.calculateDeltaCn();
 
 }
 
@@ -123,43 +122,49 @@ void PinXMLWriter::calculateDeltaCN(
   vector<MatchCollection*>& decoys
 ) {
 
-  MatchIterator* target_match_iterator=new MatchIterator(target_collection, XCORR, true);  
-  MatchIterator* decoy_match_iterator=new MatchIterator(decoys[0], XCORR, true);  
  
   map<pair<int,int>, vector<Match*> > scan_charge_to_target_matches;
-  map<pair<int,int>, vector<Match*> > scan_charge_to_decoy_matches;
   pair<int,int> scan_charge;
-  
-
-  while (target_match_iterator->hasNext()){
-    Match* match = target_match_iterator->next();
+  MatchIterator target_match_iterator(target_collection, XCORR, true);  
+  while (target_match_iterator.hasNext()){
+    Match* match = target_match_iterator.next();
     int scan = match->getSpectrum()->getFirstScan();
     int charge = match->getZState().getCharge();
     scan_charge.first=scan; 
     scan_charge.second=charge; 
-    if (scan_charge_to_target_matches.find(scan_charge) == scan_charge_to_target_matches.end()) {
+    if (
+      scan_charge_to_target_matches.find(scan_charge) 
+        == scan_charge_to_target_matches.end()
+    ) {
       vector<Match*> matches;
       scan_charge_to_target_matches[scan_charge] = matches;
     }
     scan_charge_to_target_matches[scan_charge].push_back(match);
   }
-
-  while (decoy_match_iterator->hasNext()){
-    Match* match = decoy_match_iterator->next();
-    int scan = match->getSpectrum()->getFirstScan();  
-    int charge= match->getZState().getCharge();
-    scan_charge.first=scan;
-    scan_charge.second=charge;
-    if (scan_charge_to_decoy_matches.find(scan_charge) == scan_charge_to_decoy_matches.end()) {
-      vector<Match*> matches;
-      scan_charge_to_decoy_matches[scan_charge] = matches;
-    }
-    scan_charge_to_decoy_matches[scan_charge].push_back(match);
-  }
-  delete target_match_iterator; 
-  delete decoy_match_iterator;
   calculateDeltaCN(scan_charge_to_target_matches);
-  calculateDeltaCN(scan_charge_to_decoy_matches);
+
+  // Allow for multiple sets of decoys
+  for(
+    vector<MatchCollection*>::iterator decoy_set = decoys.begin(); 
+    decoy_set != decoys.end(); 
+    decoy_set++
+  ) {
+    map<pair<int,int>, vector<Match*> > scan_charge_to_decoy_matches;
+    MatchIterator decoy_match_iterator(*decoy_set, XCORR, true);  
+    while (decoy_match_iterator.hasNext()){
+      Match* match = decoy_match_iterator.next();
+      int scan = match->getSpectrum()->getFirstScan();  
+      int charge= match->getZState().getCharge();
+      scan_charge.first=scan;
+      scan_charge.second=charge;
+      if (scan_charge_to_decoy_matches.find(scan_charge) == scan_charge_to_decoy_matches.end()) {
+        vector<Match*> matches;
+        scan_charge_to_decoy_matches[scan_charge] = matches;
+      }
+      scan_charge_to_decoy_matches[scan_charge].push_back(match);
+    }
+    calculateDeltaCN(scan_charge_to_decoy_matches);
+  }
 
 }
 
@@ -176,9 +181,7 @@ void PinXMLWriter::write(
 
   calculateDeltaCN(target_collection, decoys);
 
-  MatchIterator* target_match_iterator=new MatchIterator(target_collection, XCORR, true);  
-  MatchIterator* decoy_match_iterator=new MatchIterator(decoys[0], XCORR, true);  
- 
+  MatchIterator target_match_iterator(target_collection, XCORR, true);  
 
   if (scan_number_ != spectrum->getFirstScan()) { 
     if (scan_number_ > 0) {
@@ -188,12 +191,17 @@ void PinXMLWriter::write(
     printHeaderFragSpectrumMatch(scan_number_);
   }
   
-  write(target_match_iterator, spectrum, top_rank);
-  write(decoy_match_iterator, spectrum, top_rank);
+  write(&target_match_iterator, spectrum, top_rank);
 
-  delete target_match_iterator; 
-  delete decoy_match_iterator;
-
+  // Allow for multiple sets of decoys
+  for(
+    vector<MatchCollection*>::iterator decoy_set = decoys.begin();
+    decoy_set != decoys.end(); 
+    decoy_set++
+  ) {
+    MatchIterator decoy_match_iterator(*decoy_set, XCORR, true);  
+    write(&decoy_match_iterator, spectrum, top_rank);
+  }
 
 }
 
@@ -207,8 +215,6 @@ void PinXMLWriter::write(
   
   calculateDeltaCN(target_collection, decoys);
   
-  MatchIterator* target_match_iterator=new MatchIterator(target_collection);  
-  MatchIterator* decoy_match_iterator=new MatchIterator(decoys[0]);  
 
   map<int, vector<Match*> > scan_to_matches;
   
@@ -216,9 +222,10 @@ void PinXMLWriter::write(
  if(target_collection->getScoredType(SP))
    is_sp_=true;
   
-  while (target_match_iterator->hasNext()) {
+  MatchIterator target_match_iterator = MatchIterator(target_collection);  
+  while (target_match_iterator.hasNext()) {
  
-    Match* match = target_match_iterator->next();
+    Match* match = target_match_iterator.next();
     //Spectrum* spectrum = match->getSpectrum();
     int scan = match->getSpectrum()->getFirstScan();
 
@@ -230,20 +237,27 @@ void PinXMLWriter::write(
     
   }
     
-  while (decoy_match_iterator->hasNext()){
-    
-    Match* match = decoy_match_iterator->next();
-    int scan = match->getSpectrum()->getFirstScan();
-    
-    if (scan_to_matches.find(scan) == scan_to_matches.end()) {
-      vector<Match*> matches;
-      scan_to_matches[scan] = matches;
+  // Allow for multiple sets of decoys
+  for(
+    vector<MatchCollection*>::iterator decoy_set = decoys.begin(); 
+    decoy_set != decoys.end(); 
+    decoy_set++
+  ) {
+    MatchIterator decoy_match_iterator = MatchIterator(*decoy_set);  
+    while (decoy_match_iterator.hasNext()){
+      
+      Match* match = decoy_match_iterator.next();
+      int scan = match->getSpectrum()->getFirstScan();
+      
+      if (scan_to_matches.find(scan) == scan_to_matches.end()) {
+        vector<Match*> matches;
+        scan_to_matches[scan] = matches;
+      }
+      scan_to_matches[scan].push_back(match); 
+      
     }
-    scan_to_matches[scan].push_back(match); 
-    
   }
-  delete target_match_iterator; 
-  delete decoy_match_iterator;
+
   //print header
   printHeader();
   for (map<int, vector<Match*> >::iterator iter = scan_to_matches.begin();
@@ -268,10 +282,6 @@ void PinXMLWriter::write(
     }
   } 
 }
-
-
-
-
 
 bool PinXMLWriter:: isDecoy(Match* match){
   string protein_id=match->getPeptide()->getProteinIds(); 
@@ -417,7 +427,7 @@ void PinXMLWriter:: printPSM(
   printOccurence(flankC, flankN, peptide); 
   printPSMsFooter();
   
-  delete []flanking_aas;
+  myfree(flanking_aas);
 }
 
 void PinXMLWriter::printFeatures(
