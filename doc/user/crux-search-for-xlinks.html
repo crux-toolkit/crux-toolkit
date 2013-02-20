@@ -200,10 +200,16 @@ spectrum mass / (1.0 + (<code>precursor-window</code> / 1000000)) and the upper 
 is defined as spectrum mass / (1.0 - (<code>precursor-window</code> / 1000000)).  
 Default = mass.</li>
 
-<li><code>--precursor-window-decoy &lt;0-1e6&gt;</code> &ndash; Search
-decoy peptides within +/- '<code>precursor-window-decoy</code>' of the precursor mass.
-Default = 20.
-</li>
+<li>
+<code>--precursor-window-decoy &lt;0-1e6&gt;</code> &ndash; Score
+decoy peptides within +/- <code>precursor-window-decoy</code> of the
+precursor mass.  The resulting scores are used <i>only</i> for fitting
+the Weibull distribution.  Default = 20.</li>
+
+<li>
+<code>--precursor-window-type-decoy mass|mz|ppm</code> &ndash; Window
+type to use in conjunction with
+the <code>precursor-window-decoy</code> parameter.  Default=mass.</li>
 
 <li><code>--min-weibull-points &lt;int&gt;</code> &ndash;
 Keep reshuffling and collecting XCorr scores until the minimum number 
