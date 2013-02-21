@@ -1435,17 +1435,17 @@ void initialize_parameters(void){
                                       xlink code is implemented */
                         );
 
-  set_double_parameter("precursor-window-decoy", 20.0, 0, 1e6, 
+  set_double_parameter("precursor-window-weibull", 20.0, 0, 1e6, 
       "Search decoy-peptides within +/- "
       " 'mass-window-decoy' of the spectrum mass.  Default=20.0.",
       "Available for crux search-for-xlinks. ",
       "true");
 
-  set_window_type_parameter("precursor-window-type-decoy", WINDOW_MASS,
+  set_window_type_parameter("precursor-window-type-weibull", WINDOW_MASS,
       "Window type to use for selecting "
       "decoy peptides from precursor mz. <string>=mass|mz|ppm. "
       "Default=mass.",
-      "Available for crux search-for-matches",
+      "Available for crux search-for-xlinks",
       "true");
 
   set_string_parameter("link sites", NULL, 

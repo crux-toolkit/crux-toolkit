@@ -80,11 +80,11 @@ int SearchForXLinks::xhhcSearchMain() {
   char* ms2_file = get_string_parameter("ms2 file");
 
   FLOAT_T precursor_window = get_double_parameter("precursor-window");
-  FLOAT_T precursor_window_decoy = get_double_parameter("precursor-window-decoy");
+  FLOAT_T precursor_window_weibull = get_double_parameter("precursor-window-weibull");
   WINDOW_TYPE_T precursor_window_type = 
     get_window_type_parameter("precursor-window-type");
-  WINDOW_TYPE_T window_type_decoy = 
-    get_window_type_parameter("precursor-window-type-decoy");
+  WINDOW_TYPE_T window_type_weibull = 
+    get_window_type_parameter("precursor-window-type-weibull");
 
   char* output_directory = get_string_parameter("output-dir");
 
@@ -233,13 +233,13 @@ int SearchForXLinks::xhhcSearchMain() {
     }
     
 
-    carp(CARP_DEBUG, "finding training xpeptides in decoy precursor window..%g", precursor_window_decoy);
+    carp(CARP_DEBUG, "finding training xpeptides in decoy precursor window..%g", precursor_window_weibull);
     get_ions_from_window(
 	target_decoy_xpeptides,
 	all_ions,
 	precursor_mass,
-	precursor_window_decoy,
-	window_type_decoy);
+	precursor_window_weibull,
+	window_type_weibull);
     
     carp(CARP_DETAILED_DEBUG, "Creating decoys for target window");
     //create the decoys from the target found in the target_mass_window.
