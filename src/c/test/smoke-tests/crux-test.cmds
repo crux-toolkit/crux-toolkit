@@ -97,7 +97,7 @@
 1 = ppm_window = good_results/ppmwin.search.target.txt = crux search-for-matches --parameter-file params/ppm_window --fileroot ppmwin demo.ms2 small-yeast.fasta; cat crux-output/ppmwin.search.target.txt =
 
 # search with mods and produce output complient with the TPP
-1 = tpp = good_results/tpp.pep.xml = crux search-for-matches --decoys peptide-shuffle --parameter-file params/mods-tpp --fileroot tpp test.ms2 small-yeast.fasta; cat crux-output/tpp.search.target.pep.xml = 'date' 'base_name' 'local_path'
+1 = tpp = good_results/tpp.pep.xml = crux search-for-matches --pepxml-output T --decoys peptide-shuffle --parameter-file params/mods-tpp --fileroot tpp test.ms2 small-yeast.fasta; cat crux-output/tpp.search.target.pep.xml = 'date' 'base_name' 'local_path'
 
 # TESTS WITH INDEX
 
@@ -157,7 +157,7 @@
 1=make-pin-txt = good_results/make-pin_txt.pin.xml = rm -rf crux-output; crux search-for-matches --parameter-file params/sp demo.ms2 yeast-index; crux make-pin --overwrite T --output-file make-pin_txt.pin.xml crux-output/search.target.txt crux-output/search.decoy.txt; cat crux-output/make-pin_txt.pin.xml 
 
 #Run make-pin with pep.xml file  
-1=make-pin-pep = good_results/make-pin_pep.pin.xml = rm -rf crux-output; crux search-for-matches --parameter-file params/sp demo.ms2 yeast-index; crux make-pin --overwrite T --output-file make-pin_pep.pin.xml crux-output/search.target.pep.xml crux-output/search.decoy.pep.xml; cat crux-output/make-pin_pep.pin.xml
+1=make-pin-pep = good_results/make-pin_pep.pin.xml = rm -rf crux-output; crux search-for-matches --pepxml-output T --parameter-file params/sp demo.ms2 yeast-index; crux make-pin --overwrite T --output-file make-pin_pep.pin.xml crux-output/search.target.pep.xml crux-output/search.decoy.pep.xml; cat crux-output/make-pin_pep.pin.xml
 
 # Run q-ranker 
 1 = qranker = good_results/qranker.target.txt = rm -rf crux-output; crux sequest-search --parameter-file params/set_rand_seed_only --decoy-location target-file --decoys peptide-shuffle demo.ms2 yeast-index/; crux q-ranker --parameter-file params/set_rand_seed_only --feature-file T demo.ms2 crux-output/sequest.target.sqt; cat crux-output/q-ranker.target.psms.txt
