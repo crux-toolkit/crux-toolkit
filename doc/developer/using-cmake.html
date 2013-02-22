@@ -47,16 +47,19 @@ As usual
 <pre>
 make clean
 </pre>
-will remove any existing targets and intermediate files.
-Running the command
+will remove most existing targets and intermediate files.
+Unfortunately <code>make clean</code> will leave behind
+old copies of the build of the external components.
+To remove those as well, run the command
 <pre>
 make deep-clean
 </pre>
-from the project root will first perform <code>make clean</code>
+from the project root.
+This will first perform <code>make clean</code>
 and then remove all the build files for the external components.
 This will force the external components to be rebuilt from scractch
 the next time <code>make</code> is run.
-To clean the external components without running <code>make clean</code>,
+To clean up the external components without running <code>make clean</code>,
 run
 <pre>
 make deep-clean-external
