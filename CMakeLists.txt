@@ -17,6 +17,13 @@ set (CPACK_PACKAGE_VERSION_MAJOR "1")
 set (CPACK_PACKAGE_VERSION_MINOR "39")
 set (CRUX_VERSION ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR})
 
+add_custom_target(
+  deep-clean
+  COMMAND ${CMAKE_MAKE_PROGRAM} clean
+  COMMAND ${CMAKE_MAKE_PROGRAM} deep-clean-external
+  COMMENT "Cleaning project tree."
+)
+
 configure_file (
  "src/c/CruxConfig.h.in"
  "src/c/CruxConfig.h"

@@ -30,6 +30,12 @@ set(protwiz_args ${protwiz_args} pwiz/utility/chemistry//pwiz_utility_chemistry)
 set(protwiz_args ${protwiz_args} pwiz/utility/minimxml//pwiz_utility_minimxml)
 set(protwiz_args ${protwiz_args} pwiz/utility/misc//pwiz_utility_misc)
 
+add_custom_target(
+  deep-clean-external
+  COMMAND rm -rf build lib/* include/* bin/*
+  COMMENT "Deleting all files for external tools."
+)
+
 # We want to avoid checking out the entire Proteowizard repository
 # because of its massive size. We check out just the top level directory, 
 # and them use 'svn update' to obtain the needed files and directories.
