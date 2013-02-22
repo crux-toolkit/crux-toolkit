@@ -48,6 +48,20 @@ As usual
 make clean
 </pre>
 will remove any existing targets and intermediate files.
+Running the command
+<pre>
+make deep-clean
+</pre>
+from the project root will first perform <code>make clean</code>
+and then remove all the build files for the external components.
+This will force the external components to be rebuilt from scractch
+the next time <code>make</code> is run.
+To clean the external components without running <code>make clean</code>,
+run
+<pre>
+make deep-clean-external
+</pre>
+<p />
 There is no need to re-run cmake unless you want to change
 the build configuration.
 <p />
