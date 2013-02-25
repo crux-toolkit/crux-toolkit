@@ -106,14 +106,20 @@ void PinXMLWriter::calculateDeltaCN(map<pair<int, int>, vector<Match*> >& scan_c
 
 void PinXMLWriter::calculateDeltaCN(vector<Match*>& collection) {
 
-  MatchCollection tmp_matches = MatchCollection();
-  tmp_matches.setScoredType(XCORR, true);
+  // We have to use an explicit 'new' here because
+  // the MatchCollection includes a couple of huge 'C' style
+  // arrays, which are guaranteed to blow the stack.
+  MatchCollection *tmp_matches = new MatchCollection();
+
+  tmp_matches->setScoredType(XCORR, true);
   for (vector<Match*>::iterator iter = collection.begin();
     iter != collection.end();
     ++iter) {
-    tmp_matches.addMatch(*iter);
+    tmp_matches->addMatch(*iter);
   }
-  tmp_matches.calculateDeltaCn();
+  tmp_matches->calculateDeltaCn();
+  
+  delete tmp_matches;
 
 }
 

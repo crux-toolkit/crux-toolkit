@@ -2837,7 +2837,7 @@ double get_double_parameter(
   
   /* there is a parameter with the right name.  Now 
      try to convert it to a double*/
-  value = strtod(double_value, &endptr);
+  value = strtod(double_value, NULL);
  
   return(value);
   
