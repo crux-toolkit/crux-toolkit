@@ -76,6 +76,8 @@ bool PWIZSpectrumCollection::parse() {
   
   int num_spec = all_spectra->size();
   carp(CARP_DEBUG, "PWIZ:Number of spectra:%i",num_spec);
+  bool assign_new_scans = false;
+  int scan_counter = 0;
   for(int spec_idx = 0; spec_idx < num_spec; spec_idx++){
     carp(CARP_DETAILED_DEBUG, "Parsing spectrum index %d.", spec_idx);
     pwiz::msdata::SpectrumPtr spectrum = all_spectra->spectrum(spec_idx, 
@@ -87,7 +89,18 @@ bool PWIZSpectrumCollection::parse() {
     }
 
     // check that scan number is in range
-    int scan_number = pwiz::msdata::id::valueAs<int>(spectrum->id, "scan");
+    int scan_number;
+    if (!assign_new_scans) {
+      scan_number = pwiz::msdata::id::valueAs<int>(spectrum->id, "scan");
+      if (scan_number == 0) {
+        assign_new_scans = true;
+        carp(CARP_ERROR, "Pwiz parser could not determine scan numbers "
+                         "for this file, assigning new scan numbers.");
+      }
+    }
+    if (assign_new_scans) {
+      scan_number = ++scan_counter;
+    }
     carp(CARP_DEBUG, "found scan:%i %i-%i", scan_number, first_scan, last_scan);
     if( scan_number < first_scan ){
       continue;
@@ -96,7 +109,7 @@ bool PWIZSpectrumCollection::parse() {
     }
 
     Crux::Spectrum* crux_spectrum = new Crux::Spectrum();
-    crux_spectrum->parsePwizSpecInfo(spectrum);
+    crux_spectrum->parsePwizSpecInfo(spectrum, scan_number);
 
     this->addSpectrumToEnd(crux_spectrum);
     //?delete spectrum?;

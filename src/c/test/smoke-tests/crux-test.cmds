@@ -211,6 +211,9 @@
 # Test .mgf file
 1 = mgf = good_results/mgf.search.target.txt = crux search-for-matches --fileroot mgf --parameter-file params/minimal test.mgf test.fasta; cat crux-output/mgf.search.target.txt
 
+# Test .mgf file with pwiz parser
+1 = mgf_pwiz = good_results/mgfpwiz.search.target.txt = crux search-for-matches --fileroot mgfpwiz --parameter-file params/minimal --spectrum-parser pwiz test.mgf test.fasta; cat crux-output/mgfpwiz.search.target.txt
+
 # xlink search
 0 = search-for-xlinks = good_results/search-xlink.target.txt =  crux search-for-xlinks --parameter-file params/xlink xlink.ms2 xlink.fasta E:K,D:K -18.01; cat crux-output/search.target.txt
 

@@ -371,14 +371,37 @@ bool Spectrum::parseMgf
       
       carp(CARP_DETAILED_DEBUG, "parsing scans:%s",scans_str.c_str());
       vector<string> tokens;
-      DelimitedFile::tokenize(scans_str, tokens, '-');
-      from_string(first_scan_, tokens[0]);
-
-      if (tokens.size() > 1) {
-        from_string(last_scan_,tokens[1]);
-      } else {
-        last_scan_ = first_scan_;
+      DelimitedFile::tokenize(scans_str, tokens, ',');
+      if (scans_str.size() > 1) {
+        carp_once(CARP_WARNING, "Disjoint scan range detected: '%s'",
+                                scans_str.c_str());
       }
+      for (vector<string>::iterator token_iter = tokens.begin();
+           token_iter != tokens.end();
+           ++token_iter) {
+        vector<string> range_tokens;
+        DelimitedFile::tokenize(*token_iter, range_tokens, '-');
+        for (vector<string>::iterator range_token_iter = range_tokens.begin();
+             range_token_iter != range_tokens.end();
+             ++range_token_iter) {
+          int scan_number;
+          if (!from_string(scan_number, *range_token_iter)) {
+            // skip, could not convert to number
+            carp(CARP_ERROR, "Unknown format for scan number '%s'",
+                             range_token_iter->c_str());
+            continue;
+          }
+          if (first_scan_ < 1 ||
+              scan_number < first_scan_) {
+            first_scan_ = scan_number;
+          }
+          if (last_scan_ < 1 ||
+              scan_number > last_scan_) {
+            last_scan_ = scan_number;
+          }
+        }
+      }
+
       carp(CARP_DETAILED_DEBUG,
         "first scan:%i last scan:%i",
         first_scan_,last_scan_);
@@ -958,7 +981,10 @@ bool Spectrum::parseMstoolkitSpectrum
  * Transfer values from a proteowizard SpectrumInfo object to the
  * crux spectrum.
  */
-bool Spectrum::parsePwizSpecInfo(const pzd::SpectrumPtr& pwiz_spectrum){
+bool Spectrum::parsePwizSpecInfo(
+  const pzd::SpectrumPtr& pwiz_spectrum,
+  int assigned_scan ///< forced scan number
+){
   // clear any existing values
   zstates_.clear();
   ezstates_.clear();
@@ -968,7 +994,8 @@ bool Spectrum::parsePwizSpecInfo(const pzd::SpectrumPtr& pwiz_spectrum){
   if( mz_peak_array_ ){ free(mz_peak_array_); }
 
   // assign new values
-  first_scan_ = pzd::id::valueAs<int>(pwiz_spectrum->id, "scan");
+  first_scan_ = (assigned_scan == 0) ?
+    pzd::id::valueAs<int>(pwiz_spectrum->id, "scan") : assigned_scan;
   last_scan_ = first_scan_;
 
   // get peaks

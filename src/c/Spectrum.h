@@ -220,7 +220,10 @@ class Spectrum{
    * Transfer values from a proteowizard Spectrum object to the
    * crux spectrum.
    */
-  bool parsePwizSpecInfo(const pwiz::msdata::SpectrumPtr& pwiz_spectrum);
+  bool parsePwizSpecInfo(
+    const pwiz::msdata::SpectrumPtr& pwiz_spectrum,
+    int assigned_scan = 0 ///< forced scan number
+  );
 
   /**
    * Parse the spectrum from the tab-delimited result file
