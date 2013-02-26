@@ -34,6 +34,24 @@ public:
 
 protected:
   static int parseChargeState(string psm_id);
+  
+  /**
+   * \returns a Crux peptide from the PSM
+   */
+  static Crux::Peptide* extractPeptide(
+    PSMDescription* psm, ///< psm
+    int charge_state, ///< charge state
+    bool is_decoy ///< is psm a decoy?
+    );
+    
+  /**
+   * \returns the modified and unmodified peptide sequence
+   * for the psm
+   */
+  static MODIFIED_AA_T* getModifiedAASequence(
+    PSMDescription* psm, ///< psm -in
+    string& seq ///< sequence -out
+    );
 
 };
 

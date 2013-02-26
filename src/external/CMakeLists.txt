@@ -114,7 +114,7 @@ ExternalProject_Add(
   GIT_REPOSITORY https://github.com/percolator/percolator.git
   GIT_TAG rel-2-04
   CMAKE_ARGS -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_SOURCE_DIR} -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_SOURCE_DIR}
-  PATCH_COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_m_pi_def/EludeModel.cpp ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_find_boost/CMakeLists.txt ${CMAKE_CURRENT_SOURCE_DIR}/build/src/percolator/src
+  PATCH_COMMAND cp  ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_var_mods/DataSet.cpp ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_m_pi_def/EludeModel.cpp ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_find_boost/CMakeLists.txt ${CMAKE_CURRENT_SOURCE_DIR}/build/src/percolator/src
 )
 else(APPLE)
 ExternalProject_Add(
@@ -123,7 +123,7 @@ ExternalProject_Add(
   GIT_REPOSITORY https://github.com/percolator/percolator.git
   GIT_TAG rel-2-04
   CMAKE_ARGS -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_SOURCE_DIR} -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_SOURCE_DIR}
-  PATCH_COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_find_boost/CMakeLists.txt ${CMAKE_CURRENT_SOURCE_DIR}/build/src/percolator/src
+  PATCH_COMMAND cp  ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_var_mods/DataSet.cpp ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_find_boost/CMakeLists.txt ${CMAKE_CURRENT_SOURCE_DIR}/build/src/percolator/src
 )
 endif(APPLE)
 

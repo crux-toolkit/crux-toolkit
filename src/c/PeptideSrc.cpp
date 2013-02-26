@@ -345,7 +345,13 @@ bool PeptideSrc::parseTabDelimited(
 	
 	
 	//find the start index
-        string sequence = file.getString(SEQUENCE_COL);
+	MODIFIED_AA_T* mod_seq;
+	int seq_length = convert_to_mod_aa_seq(file.getString(SEQUENCE_COL).c_str(), &mod_seq);
+	char* unmodified_sequence = modified_aa_to_unmodified_string(mod_seq, seq_length);
+	string sequence = unmodified_sequence;
+	std::free(unmodified_sequence);
+	std::free(mod_seq);
+
         string flanking_aas = file.getString(FLANKING_AA_COL);
         string prev_aa = "", next_aa = "";
         if (flanking_aas.length() == 2) {
@@ -372,7 +378,14 @@ bool PeptideSrc::parseTabDelimited(
 
         if (parent_protein -> isPostProcess()) {
           //TODO - Find some way to keep the original start index.
-          string sequence = file.getString(SEQUENCE_COL);
+	  MODIFIED_AA_T* mod_seq;
+	  int seq_length = convert_to_mod_aa_seq(file.getString(SEQUENCE_COL).c_str(), &mod_seq);
+	  char* unmodified_sequence = modified_aa_to_unmodified_string(mod_seq, seq_length);
+	  string sequence = unmodified_sequence;
+	  std::free(unmodified_sequence);
+	  std::free(mod_seq);
+
+          //string sequence = file.getString(SEQUENCE_COL);
           string flanking_aas = file.getString(FLANKING_AA_COL);
           string prev_aa = "", next_aa = "";
           if (flanking_aas.length() == 2) {

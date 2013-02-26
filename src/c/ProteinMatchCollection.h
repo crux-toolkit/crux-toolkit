@@ -98,8 +98,8 @@ class ProteinMatchCollection {
    * \returns the PeptideMatch for the sequence, null if it doesn't exist
    */
   PeptideMatch* getPeptideMatch(
-    const std::string& sequence ///< sequence to find
-  );
+    MODIFIED_AA_T* mod_seq ///< modified sequence to find
+    );
 
   /**
    * Helper method that adds a Crux match to the ProteinCollection,

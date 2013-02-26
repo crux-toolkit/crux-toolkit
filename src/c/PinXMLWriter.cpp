@@ -562,7 +562,7 @@ void PinXMLWriter:: printPeptideSequence(Peptide* peptide){
     }
   }
   delete modified_sequence;
-
+  char* unmodified_sequence = peptide -> getSequence();
   // Output peptide element with sequence and modifications
   fprintf(
     output_file_,
@@ -570,9 +570,10 @@ void PinXMLWriter:: printPeptideSequence(Peptide* peptide){
     "      <peptideSequence>%s</peptideSequence>\n"
     "%s"
     "    </peptide>\n",
-    peptide->getSequence(),
+    unmodified_sequence,
     mod_output.str().c_str()
   );
+  free(unmodified_sequence);
 }
 
 //wite Occurance 

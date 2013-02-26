@@ -313,6 +313,15 @@ class Peptide {
    */
   //MODIFIED_AA_T* get_peptide_modified_sequence( // why is this not working??!!
   unsigned short* getModifiedAASequence();
+  
+  /**
+   * sets the modified sequence for the peptide
+   */
+  void setModifiedAASequence(
+    MODIFIED_AA_T* mod_seq,  ///< modified sequence to set
+    bool decoy ///< is the peptide a decoy?
+  );
+  
 
   /**
    * \brief Get the modified aa sequence in string form.

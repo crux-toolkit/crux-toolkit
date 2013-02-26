@@ -113,22 +113,23 @@ PeptideMatch* ProteinMatchCollection::getPeptideMatch(
   bool create ///< create if it doesn't exist?
   ) {
 
-  char* seq = peptide->getSequence();
-  string seq_str = seq;
-  free(seq);
 
-  PeptideMatch* ans = getPeptideMatch(seq_str);
+  MODIFIED_AA_T* mod_seq = peptide->getModifiedAASequence();
+
+  PeptideMatch* ans = getPeptideMatch(mod_seq);
 
   if (ans == NULL) {
     if (create) {
       ans = new PeptideMatch(peptide);
       peptide_matches_.push_back(ans);
     } else {
-      carp(CARP_WARNING, 
+      carp(CARP_FATAL, 
         "Could not find peptidematch for sequence %s", 
-        seq_str.c_str());
+	   peptide->getSequence());
     }
   }
+
+  free(mod_seq);
 
   return ans;
 }
@@ -152,20 +153,27 @@ ProteinMatch* ProteinMatchCollection::getProteinMatch(
  * \returns the PeptideMatch for the sequence, null if it doesn't exist.
  */
 PeptideMatch* ProteinMatchCollection::getPeptideMatch(
-  const std::string& sequence ///<sequence to find
+  MODIFIED_AA_T* mod_seq ///< Modified Sequence to find
   ) {
-
-  for (size_t idx = 0; idx < peptide_matches_.size();idx++) {
-    char* seq = peptide_matches_[idx]->getPeptide()->getSequence();
-    string seq_str = seq;
-    free(seq);
-
-    if (seq_str == sequence) {
-      return peptide_matches_[idx];
+  int ans = -1;
+  for (size_t idx = 0; idx < peptide_matches_.size(); idx++) {
+    MODIFIED_AA_T* cur_seq = peptide_matches_[idx]->getPeptide()->getModifiedAASequence();
+    if (equal_seq(cur_seq, mod_seq)) {
+      ans = idx;
+      break;
     }
   }
-  return NULL;
+
+  if (ans == -1) { 
+    return NULL;
+  } else {
+    return peptide_matches_[ans];
+  }
+
+
 }
+
+
 
 /**
  * Helper method that adds a Crux match to the ProteinCollection,

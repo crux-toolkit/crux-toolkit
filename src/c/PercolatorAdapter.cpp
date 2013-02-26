@@ -15,6 +15,32 @@ PercolatorAdapter::~PercolatorAdapter() {
   // TODO Auto-generated destructor stub
 }
 
+/**
+* \returns a Crux peptide from the PSM
+*/
+Crux::Peptide* PercolatorAdapter::extractPeptide(
+  PSMDescription* psm, ///< psm
+  int charge_state, ///< charge state
+  bool is_decoy ///< is psm a decoy?
+  ) {
+
+  string seq;
+  MODIFIED_AA_T* mod_seq = getModifiedAASequence(psm, seq);
+
+  PostProcessProtein* parent_protein = new PostProcessProtein();
+  parent_protein->setId((*psm->proteinIds.begin()).c_str());
+  int start_idx = parent_protein->findStart(seq, "", "");
+
+  FLOAT_T peptide_mass = (psm->calcMass * charge_state) - ((charge_state - 1) * MASS_PROTON);
+  
+  Crux::Peptide* peptide = new Crux::Peptide(seq.length(), peptide_mass, parent_protein, start_idx);
+  peptide->setModifiedAASequence(mod_seq, is_decoy);
+
+  free(mod_seq);
+  return peptide;
+}
+
+
 MatchCollection* PercolatorAdapter::psmScoresToMatchCollection(Scores* scores) {
 
   // Create new MatchCollection object that will be the converted Percolator Scores
@@ -28,37 +54,18 @@ MatchCollection* PercolatorAdapter::psmScoresToMatchCollection(Scores* scores) {
     ) {
 
     PSMDescription* psm = score_itr->pPSM;
+    bool is_decoy = score_itr->isDecoy();
     int charge_state = parseChargeState(psm->id);
+    Crux::Peptide* peptide = extractPeptide(psm, charge_state, is_decoy);
 
-      //const char*         id, ///< The protein sequence id.
-      //const char*   sequence, ///< The protein sequence.
-      //unsigned int length, ///< The length of the protein sequence.
-      //const char* annotation,  ///< Optional protein annotation.  -in
-      //unsigned long int offset,///< The file location in the source file in the database -in
-      //unsigned int protein_idx,///< The index of the protein in its database. -in
-      //Database* database ///< the database of its origin
-    PostProcessProtein* parent_protein = new PostProcessProtein();
-    parent_protein->setId((*psm->proteinIds.begin()).c_str());
-    int start_idx = parent_protein->findStart(psm->getPeptideSequence(), "", "");
-      //unsigned char length,     ///< The length of the peptide -in
-      //FLOAT_T peptide_mass,       ///< The neutral mass of the peptide -in
-      //Protein* parent_protein, ///< The parent_protein of this peptide -in
-      //int start_idx ///< Start index of peptide in the protein sequence -in
-    FLOAT_T peptide_mass = (psm->expMass * charge_state) - ((charge_state - 1) * MASS_PROTON);
-    Crux::Peptide* peptide = new Crux::Peptide(psm->getPeptideSequence().size(), peptide_mass, parent_protein, start_idx);
-
-      //int               first_scan,         ///< number of the first scan -in
-      //int               last_scan,          ///< number of the last scan -in
-      //FLOAT_T           precursor_mz,       ///< m/z of the precursor
-      //const std::vector<int>& possible_z,   ///< possible charge states
-      //const char*       filename
     vector<int> zStates;
     zStates.push_back(charge_state);
     Crux::Spectrum* spectrum = new Crux::Spectrum(psm->scan, psm->scan, psm->expMass, zStates, "");
 
       //FLOAT_T neutral_mass,
       //int charge
-    SpectrumZState zState(peptide_mass, charge_state);
+    
+    SpectrumZState zState(psm->expMass, charge_state);
 
       //Peptide* peptide, ///< the peptide for this match
       //Spectrum* spectrum, ///< the spectrum for this match
@@ -108,7 +115,57 @@ void PercolatorAdapter::addProteinScores(ProteinMatchCollection* collection, Sco
 
 }
 
+/**
+ * \returns the modified and unmodified peptide sequence
+ * for the psm
+ */
+MODIFIED_AA_T* PercolatorAdapter::getModifiedAASequence(
+  PSMDescription* psm, ///< psm -in
+  string& seq ///< sequence -out
+  ) {
+
+  std::stringstream ss_seq;
+  string perc_seq = psm->getPeptideSequence();
+
+  vector<pair<int, const AA_MOD_T*> > mod_locations_types;
+  size_t count = 0;
+  for (size_t seq_idx = 0; seq_idx < perc_seq.length(); seq_idx++) {
+    if (perc_seq.at(seq_idx) == '[') {
+      //modification found.
+      size_t comma_idx = perc_seq.find(',', seq_idx);
+      size_t end_idx = perc_seq.find(']', seq_idx);
+      int mod_location = count-1;
+      FLOAT_T delta_mass;
+
+      from_string(delta_mass, perc_seq.substr(comma_idx+1, end_idx - comma_idx-1));
+      const AA_MOD_T* mod = get_aa_mod_from_mass(delta_mass);
+      if (mod == NULL) {
+	carp(CARP_FATAL, "Mod not found!");
+      }
+
+      mod_locations_types.push_back(pair<int, const AA_MOD_T*>(mod_location, mod));
+      seq_idx = end_idx;
+    } else {
+      ss_seq <<  perc_seq.at(seq_idx);
+      count++;
+    }
+  }
+  seq = ss_seq.str();
+
+  MODIFIED_AA_T* mod_seq;
+  convert_to_mod_aa_seq(seq.c_str(), &mod_seq);
+  for (size_t mod_idx = 0 ; mod_idx < mod_locations_types.size(); mod_idx++) {
+    size_t seq_idx = mod_locations_types[mod_idx].first;
+    const AA_MOD_T* mod = mod_locations_types[mod_idx].second;
+
+    modify_aa(mod_seq+seq_idx, (AA_MOD_T*)mod);
+  }
+  return mod_seq;
+}
+
 void PercolatorAdapter::addPeptideScores(ProteinMatchCollection* collection, Scores* scores) {
+
+  carp(CARP_INFO, "Setting peptide scores");
 
   // Iterate over each ScoreHolder in Scores object
   for (
@@ -119,12 +176,19 @@ void PercolatorAdapter::addPeptideScores(ProteinMatchCollection* collection, Sco
 
     PSMDescription* psm = score_itr->pPSM;
     int charge_state = parseChargeState(psm->id);
-
+    string sequence;
+    MODIFIED_AA_T* mod_seq = getModifiedAASequence(psm,sequence); 
     // Set scores
-    PeptideMatch* peptide_match = collection->getPeptideMatch(psm->getPeptideSequence());
+    PeptideMatch* peptide_match = collection->getPeptideMatch(mod_seq);
+    if (peptide_match == NULL) {
+      carp(CARP_FATAL, "Cannot find peptide %s %i",psm->getPeptideSequence().c_str(), score_itr->isDecoy());
+    }
     peptide_match->setScore(PERCOLATOR_SCORE, score_itr->score);
     peptide_match->setScore(PERCOLATOR_QVALUE, psm->q);
     peptide_match->setScore(PERCOLATOR_PEP, psm->pep);
+
+    free(mod_seq);
+
   }
 
 }

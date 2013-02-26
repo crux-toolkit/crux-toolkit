@@ -681,6 +681,29 @@ MODIFIED_AA_T* Peptide::getModifiedAASequence(){
 }
 
 /**
+ * sets the modified sequence for the peptide
+ */
+void Peptide::setModifiedAASequence(
+  MODIFIED_AA_T* mod_seq, ///< modified sequence to set
+  bool decoy ///< is the peptide a decoy?
+  ) {
+  
+  if (modified_seq_) {
+    free(modified_seq_);
+  }
+  modified_seq_ = copy_mod_aa_seq(mod_seq);
+
+  if (decoy) {
+    if (decoy_modified_seq_) {
+      free(decoy_modified_seq_);
+    }
+    decoy_modified_seq_ = copy_mod_aa_seq(mod_seq);
+  }
+
+}
+
+
+/**
  * \brief Get the modified aa sequence in string form.
  *
  * If the peptide has no modifications, returns same string as

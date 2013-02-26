@@ -507,6 +507,43 @@ MODIFIED_AA_T* copy_mod_aa_seq(MODIFIED_AA_T* source, int length){
 }
 
 /**
+ * \brief Allocate a new MODIFIED_AA_T array and copy values into it.
+ */
+MODIFIED_AA_T* copy_mod_aa_seq(
+  MODIFIED_AA_T* source ///< Sequence to copy
+  ) {
+
+  size_t length = 0;
+  while (source[length] != MOD_SEQ_NULL) {
+    length++;
+  }
+  return copy_mod_aa_seq(source, length);
+
+}
+
+
+/**
+ * \returns whether the two modified sequences are equal or not
+ */
+bool equal_seq(
+  MODIFIED_AA_T* seq1, ///< Sequence 1
+  MODIFIED_AA_T* seq2  ///< Sequence 2
+  ) {
+
+  size_t idx = 0;
+
+  while (seq1[idx] != MOD_SEQ_NULL && seq2[idx] != MOD_SEQ_NULL) {
+    if (seq1[idx] != seq2[idx]) {
+      return false;
+    }
+    idx++;
+  }
+
+  return (seq1[idx] == MOD_SEQ_NULL && seq2[idx] == MOD_SEQ_NULL);
+
+}
+
+/**
  * \brief Remove any characters not A-Z from a peptide sequence.
  * \returns A newly allocated string with the given sequence less any
  * modififcation symbols or masses.
