@@ -5,6 +5,7 @@
 #ifndef PINXMLWRITER_H
 #define PINXMLWRITER_H
 
+#include <set>
 #include <string>
 #include <vector>
 #include "objects.h"
@@ -91,7 +92,8 @@ class PinXMLWriter{
   int scan_number_;
   bool is_sp_; 
   bool is_decoy_; 
-  std::string decoy_prefix_; 
+  std::string decoy_prefix_;
+  std::set<int> charges_; 
   void init(); 
 
   //proccess information 

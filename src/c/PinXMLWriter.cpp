@@ -230,7 +230,7 @@ void PinXMLWriter::write(
   
   MatchIterator target_match_iterator = MatchIterator(target_collection);  
   while (target_match_iterator.hasNext()) {
- 
+    
     Match* match = target_match_iterator.next();
     //Spectrum* spectrum = match->getSpectrum();
     int scan = match->getSpectrum()->getFirstScan();
@@ -240,7 +240,7 @@ void PinXMLWriter::write(
       scan_to_matches[scan] = matches;
     }
     scan_to_matches[scan].push_back(match);
-    
+    charges_.insert(match->getZState().getCharge());
   }
     
   // Allow for multiple sets of decoys
@@ -260,7 +260,7 @@ void PinXMLWriter::write(
         scan_to_matches[scan] = matches;
       }
       scan_to_matches[scan].push_back(match); 
-      
+      charges_.insert(match->getZState().getCharge());
     }
   }
 
@@ -357,9 +357,12 @@ void PinXMLWriter:: printFeatureDescription(){
   }
   fprintf(output_file_,"\n  <featureDescription name=\"Mass\"/>");
   fprintf(output_file_,"\n  <featureDescription name=\"PepLen\"/>");
-  fprintf(output_file_,"\n  <featureDescription name=\"Charge1\"/>");
-  fprintf(output_file_,"\n  <featureDescription name=\"Charge2\"/>");
-  fprintf(output_file_,"\n  <featureDescription name=\"Charge3\"/>");
+  for (set<int>::iterator iter = charges_.begin();
+    iter != charges_.end();
+    ++iter) {
+
+    fprintf(output_file_,"\n  <featureDescription name=\"Charge%d\"/>",*iter);
+  }
   fprintf(output_file_,"\n  <featureDescription name=\"enzN\"/>");
   fprintf(output_file_,"\n  <featureDescription name=\"enzC\"/>");
   fprintf(output_file_,"\n  <featureDescription name=\"enzInt\"/>");
@@ -491,82 +494,45 @@ void PinXMLWriter::printFeatures(
     delta_lcn=0;     
   }
   
-  if(is_sp_){
-    fprintf(//< print 17 features 
-      output_file_, 
-      "    <features>\n"
-      "      <feature>%.*f</feature>\n"/*1.lnrSp*/
-      "      <feature>%.*f</feature>\n"/*2.deltLCN*/
-      "      <feature>%.*f</feature>\n"/*3.deltCN*/
-      "      <feature>%.*f</feature>\n"/*4.Xcorr*/
-      "      <feature>%.*f</feature>\n"/*5.SP*/
-      "      <feature>%.*f</feature>\n"/*6.IonFrac */
-      "      <feature>%.*f</feature>\n"/*7.Mass */
-      "      <feature>%u</feature>\n"/*8.PepLen */
-      "      <feature>%u</feature>\n"/*9.Chrge1 */
-      "      <feature>%u</feature>\n"/*10.charge2*/
-      "      <feature>%u</feature>\n"/*11.charge3*/
-      "      <feature>%u</feature>\n"/*12.enzN*/
-      "      <feature>%u</feature>\n"/*13.enzC*/
-      "      <feature>%u</feature>\n"/*14.enzInt*/
-      "      <feature>%.*f</feature>\n"/*15.LnNumSP*/   
-      "      <feature>%.*f</feature>\n"/*16.dM*/
-      "      <feature>%.*f</feature>\n"/*17.absdM*/
-      "    </features>\n",
-      precision_,lnrSp,/*1*/
-      precision_,delta_lcn,/*2. delta_l_Cn*/ 
-      precision_,delta_cn,/*3. delta_cn*/
-      precision_,match->getScore(XCORR),/*4*/
-      precision_,match->getScore(SP),/*5*/
-      precision_,match-> getBYIonFractionMatched(),/*6*/
-      mass_precision_,obs_mass,/*7*/
-      peptide->getLength(),/*8*/
-      charge1,/*9*/ 
-      charge2,/*10*/ 
-      charge3,/*11*/ 
-      enz_n,/*12*/
-      enz_c,/*13*/
-      peptide->getMissedCleavageSites(), /*14. enzInt */
-      precision_,ln_num_sp,/*15*/
-      mass_precision_,dM,/*16*/  
-      mass_precision_,fabs(dM)/*17*/
-    );
-  }else{ ///< print 14 features when Sp score is not valid 
-    fprintf(
-      output_file_, 
-      "    <features>\n"
-      "      <feature>%.*f</feature>\n"/*1.deltLCn*/
-      "      <feature>%.*f</feature>\n"/*2.deltCn*/ 
-      "      <feature>%.*f</feature>\n"/*3.Xcorr*/
-      "      <feature>%.*f</feature>\n"/*4.Mass*/
-      "      <feature>%u</feature>\n"/*5.PepLen */
-      "      <feature>%u</feature>\n"/*6.Charge1*/  
-      "      <feature>%u</feature>\n"/*7.charge2*/
-      "      <feature>%u</feature>\n"/*8.charge3*/
-      "      <feature>%u</feature>\n"/*9.enzN */
-      "      <feature>%u</feature>\n"/*10.enzC */
-      "      <feature>%u</feature>\n"/*11.enzInt*/
-      "      <feature>%.*f</feature>\n"/*12.LnNumSp */ 
-      "      <feature>%.*f</feature>\n"/*13.dM */
-      "      <feature>%.*f</feature>\n"/*14.absdM */
-      "     </features>\n",
-      precision_,match->getDeltaLCn(), /*1.deltLCn*/
-      precision_,match->getDeltaCn(),/*2.deltCn*/
-      precision_,match->getScore(XCORR),/*3.Xcorr*/
-      mass_precision_,obs_mass,/*4.Mass*/
-      peptide->getLength(),/*5.PepLen*/
-      charge1,/*6.charge1*/
-      charge2,/*7.charge2*/
-      charge3,/*8.charge3*/
-      enz_n,/*9.enzN*/
-      enz_c,/*10.EnzC*/
-      peptide->getMissedCleavageSites(), /*11.enzInt */
-      precision_,ln_num_sp,/*12.LnNumSp*/
-      mass_precision_,dM,/*13*/  
-      mass_precision_,fabs(dM)/*14*/
-    );
+  fprintf(output_file_, "    <features>\n");
+  if (is_sp_) {
+    fprintf(output_file_,  
+      "      <feature>%.*f</feature>\n", precision_,lnrSp);
   }
- 
+  fprintf(output_file_, 
+    "      <feature>%.*f</feature>\n", precision_,delta_lcn);
+  fprintf(output_file_, 
+    "      <feature>%.*f</feature>\n", precision_, delta_cn);
+  fprintf(output_file_, 
+    "      <feature>%.*f</feature>\n", precision_, match->getScore(XCORR));
+  if (is_sp_) {
+    fprintf(output_file_,
+      "      <feature>%.*f</feature>\n",  precision_, match->getScore(SP));
+    fprintf(output_file_,
+      "      <feature>%.*f</feature>\n",  precision_, match->getBYIonFractionMatched());
+  }
+
+  fprintf(output_file_,
+    "      <feature>%.*f</feature>\n", mass_precision_, obs_mass);
+  fprintf(output_file_,
+    "      <feature>%u</feature>\n",peptide->getLength()); 
+
+  for (set<int>::iterator iter = charges_.begin();
+    iter != charges_.end();
+    ++iter) {
+    fprintf(output_file_,
+	    "      <feature>%u</feature>\n",(charge_state == *iter));
+  }
+  fprintf(output_file_, "      <feature>%u</feature>\n", enz_n);
+  fprintf(output_file_, "      <feature>%u</feature>\n", enz_c);
+  fprintf(output_file_, 
+    "      <feature>%u</feature>\n", peptide-> getMissedCleavageSites());
+  fprintf(output_file_, "      <feature>%.*f</feature>\n", precision_, ln_num_sp);
+  fprintf(output_file_, "      <feature>%.*f</feature>\n", precision_, dM);
+  fprintf(output_file_, "      <feature>%.*f</feature>\n", precision_, fabs(dM));
+
+  fprintf(output_file_, "    </features>\n");
+
 }
 
 void PinXMLWriter:: printPeptideSequence(Peptide* peptide){
