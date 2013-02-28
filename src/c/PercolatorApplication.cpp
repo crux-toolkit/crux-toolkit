@@ -229,6 +229,26 @@ int PercolatorApplication::main(
      perc_args_vec.push_back("random_");
   }
 
+  string seed_parameter = get_string_parameter_pointer("seed");
+  unsigned int seed_value;
+  if (seed_parameter == "time") {
+    time_t seconds; // use current time to seed
+    time(&seconds); // Get value from sys clock and set seconds variable.
+    // percolator accepts seed values 1-20000
+    seed_value = (unsigned int)seconds % 20000 + 1;
+  } else {
+    // seed 0 causes segfault in percolator 
+    stringstream seed_extractor(seed_parameter);
+    seed_extractor >> seed_value;
+    if (seed_value == 0) {
+      ++seed_value;
+    }
+  }
+  stringstream seed_stream;
+  seed_stream << seed_value;
+  perc_args_vec.push_back("--seed");
+  perc_args_vec.push_back(seed_stream.str());
+
   perc_args_vec.push_back("-p");
   perc_args_vec.push_back(to_string(get_double_parameter("c-pos")));
  

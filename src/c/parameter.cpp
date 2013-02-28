@@ -699,9 +699,10 @@ void initialize_parameters(void){
       "true");
   set_int_parameter("psms-per-spectrum-reported", 0, 0, BILLION,
                    "place holder", "this may be replaced by top-match","false");
-  set_string_parameter("seed", "time",
+  set_string_parameter("seed", "1",
       "When given a unsigned integer value seeds the random number generator with that value. "
-      "When given the string \"time\" seeds the random number generator with the system time. ",
+      "When given the string \"time\" seeds the random number generator with the system time. "
+      "Default = 1.",
       "Available for all Crux commands.",
       "true");
   set_double_parameter("precursor-window", 3.0, 0, 100, 
