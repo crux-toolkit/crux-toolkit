@@ -49,6 +49,7 @@ set (
   CarpStreamBuf.cpp
   ComputeQValues.cpp
   CreateIndex.cpp
+  crux-file-utils.cpp
   crux-utils.cpp
   Database.cpp
   DatabaseProteinIterator.cpp
@@ -119,6 +120,9 @@ set (
   AbstractMatch.cpp
   ProteinMatch.cpp
   PeptideMatch.cpp
+  PMCDelimitedFileWriter.cpp
+  PMCPepXMLWriter.cpp
+  PMCSQTWriter.cpp
   SpectrumMatch.cpp
   PWIZSpectrumCollection.cpp
   q-value.cpp
@@ -133,6 +137,7 @@ set (
   SpectrumZState.cpp
   StatColumn.cpp
   SQTReader.cpp
+  SQTWriter.cpp
   utils.cpp
 )
 

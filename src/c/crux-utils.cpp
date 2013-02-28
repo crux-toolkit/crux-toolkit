@@ -521,7 +521,13 @@ static const char* scorer_type_strings[NUMBER_SCORER_TYPES] =
    "barista_score", 
    "barista_qvalue",
    "barista_peptide_qvalue",
-   "barista_PEP"
+   "barista_PEP",
+
+   "delta_cn",
+   "delta_lcn",
+   "by_ions_matched",
+   "by_ions_total",
+   "matches_spectrum"
   };
 
 bool string_to_scorer_type(const char* name, SCORER_TYPE_T* result){

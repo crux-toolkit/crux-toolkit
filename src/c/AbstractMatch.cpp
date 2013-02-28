@@ -36,6 +36,21 @@ FLOAT_T AbstractMatch::getScore(
 }
 
 /**
+ * \returns the match rank for a particular score type
+ */
+int AbstractMatch::getRank(
+  SCORER_TYPE_T type ///< score type desired
+  ) {
+
+  if (ranks_.find(type) == ranks_.end()) {
+    carp(CARP_WARNING, "Rank not set!");
+    return 0;
+  }
+  return ranks_[type];
+
+}
+
+/**
  * sets the match score for particular score type
  */
 void AbstractMatch::setScore(
@@ -48,6 +63,18 @@ void AbstractMatch::setScore(
 }
 
 /**
+ * sets the match rank for particular score type
+ */
+void AbstractMatch::setRank(
+  SCORER_TYPE_T type, ///< rank to set
+  int rank ///< rank value
+  ) {
+
+  ranks_[type] = rank;
+
+}
+
+/**
  * \returns whether the match has a particular score type assigned
  */
 bool AbstractMatch::hasScore(
@@ -55,6 +82,16 @@ bool AbstractMatch::hasScore(
   ) {
 
   return (scores_.find(type) != scores_.end());
+}
+
+/**
+ * \returns whether the match has a particular rank type assigned
+ */
+bool AbstractMatch::hasRank(
+  SCORER_TYPE_T type ///< rank to test
+  ) {
+
+  return (ranks_.find(type) != ranks_.end());
 }
 
 /**
@@ -79,6 +116,19 @@ ScoreMapIterator AbstractMatch::scoresEnd() {
   return scores_.end();
 }
 
+/**
+ * \returns the beginning iterator for all set ranks in the match
+ */
+RankMapIterator AbstractMatch::ranksBegin() {
+  return ranks_.begin();
+}
+
+/**
+ * \returns the end iterator for all set ranks in the match
+ */
+RankMapIterator AbstractMatch::ranksEnd() {
+  return ranks_.end();
+}
 
 /*
  * Local Variables:

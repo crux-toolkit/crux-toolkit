@@ -201,9 +201,17 @@ void ProteinMatchCollection::addMatch(
 
     SCORER_TYPE_T score_type = (SCORER_TYPE_T)score_idx;
     if (match_collection->getScoredType(score_type)) {
+      peptide_match->setScore(score_type, match->getScore(score_type));
+      peptide_match->setRank(score_type, match->getRank(score_type));
       spectrum_match->setScore(score_type, match->getScore(score_type));
+      spectrum_match->setRank(score_type, match->getRank(score_type));
     }
   }
+
+  peptide_match->setScore(DELTA_CN, match->getDeltaCn());
+  peptide_match->setScore(BY_IONS_MATCHED, match->getBYIonMatched());
+  peptide_match->setScore(BY_IONS_TOTAL, match->getBYIonPossible());
+  peptide_match->setScore(MATCHES_SPECTRUM, expf(match->getLnExperimentSize())+0.5);
 
   for (PeptideSrcIterator src_iter = peptide->getPeptideSrcBegin();
     src_iter != peptide->getPeptideSrcEnd();

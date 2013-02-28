@@ -31,7 +31,14 @@ ProteinMatch::ProteinMatch(
 ProteinMatch::~ProteinMatch() {
 
 }
-  
+
+/** 
+ * \returns the protein for the match
+ */
+Crux::Protein* ProteinMatch::getProtein() {
+  return protein_;
+}
+
 /**
  * \returns the begining of the peptidematches vector
  */

@@ -37,6 +37,8 @@ void PepXMLWriter::openFile(const char* filename, bool overwrite){
  */
 void PepXMLWriter::closeFile(){
   if( file_ != NULL ){
+    fclose(file_);
+    file_ = NULL;
   }
 }
 
@@ -103,11 +105,8 @@ void PepXMLWriter::writePSM(
                         /// following aas in the first protein 
   vector<string>& protein_names, ///<
   vector<string>& protein_descriptions, ///<
-  double delta_cn, ///<
   bool* scores_computed,
   double* scores, ///< indexed by score type
-  unsigned by_ions_matched, 
-  unsigned by_ions_total, 
   unsigned cur_num_matches
   ){
 
@@ -137,15 +136,55 @@ void PepXMLWriter::writePSM(
     flanking_aas,
     protein_names,
     protein_descriptions,
-    delta_cn,
     scores_computed,
     scores,
-    by_ions_matched,
-    by_ions_total,
     cur_num_matches
   );
 
 
+}
+
+/**
+ * Legacy function that sets delta_cn, by_ions_matched, and by_ions_total
+ */
+void PepXMLWriter::writePSM(
+  int spectrum_scan_number, ///< identifier for the spectrum
+  const char* filename, ///< file the spectrum came from
+  double spectrum_neutral_mass, ///< computed mass of the spectrum
+                                  ///at this charge state
+  int charge, ///< assumed charge state for the match
+  
+  int* PSM_ranks, ///< rank of this peptide for the spectrum
+  const char* unmodified_peptide_sequence, ///< sequence with no mods
+  const char* modified_peptide_sequence, ///< either with symbols or masses
+  double peptide_mass, ///< mass of the peptide sequence
+  int num_proteins, ///< proteins matched to this peptide
+  const char* flanking_aas, ///< "XY, AB, " X and Y are the preceeding and
+                        /// following aas in the first protein 
+  vector<string>& protein_names, ///<
+  vector<string>& protein_descriptions, ///<
+  double delta_cn, ///<
+  bool* scores_computed,
+  double* scores, ///< indexed by score type
+  unsigned by_ions_matched, 
+  unsigned by_ions_total, 
+  unsigned cur_num_matches
+  ){
+
+  scores[DELTA_CN] = delta_cn;
+  scores_computed[DELTA_CN] = true;
+
+  scores[BY_IONS_MATCHED] = by_ions_matched;
+  scores_computed[BY_IONS_MATCHED] = true;
+
+  scores[BY_IONS_TOTAL] = by_ions_total;
+  scores_computed[BY_IONS_TOTAL] = true;
+
+  writePSM(spectrum_scan_number, filename, spectrum_neutral_mass, charge,
+           PSM_ranks, unmodified_peptide_sequence, modified_peptide_sequence,
+           peptide_mass, num_proteins, flanking_aas,
+           protein_names, protein_descriptions, scores_computed, scores,
+           cur_num_matches);
 }
 
 /**
@@ -202,11 +241,8 @@ void PepXMLWriter::printPeptideElement(int *ranks,
   const char* flanking_aas,
   vector<string>& protein_names,
   vector<string>& protein_descriptions,
-  double delta_cn,
   bool* scores_computed,
   double* scores,
-  unsigned by_ions_matched,
-  unsigned by_ions_total,
   unsigned current_num_matches  
 ){
 
@@ -225,22 +261,25 @@ void PepXMLWriter::printPeptideElement(int *ranks,
   // print <search_hit> tag
   fprintf(file_, "    <search_hit hit_rank=\"%i\" peptide=\"%s\" "
           "peptide_prev_aa=\"%c\" peptide_next_aa=\"%c\" protein=\"%s\" "
-          "num_tot_proteins=\"%i\" "
-          "num_matched_ions=\"%i\" "
-          "tot_num_ions=\"%i\""
-          " calc_neutral_pep_mass=\"%.*f\" "
-          "massdiff=\"%+.*f\" "
-          "num_tol_term=\"%i\" num_missed_cleavages=\"%i\" "
-          "num_matched_peptides=\"%i\""
-          " is_rejected=\"%i\" ",
+          "num_tot_proteins=\"%i\" ",
           ranks[XCORR], // -1 if unavailable, uses xcorr rank otherwise
           peptide_sequence,
           flanking_aas_prev,
           flanking_aas_next,
           protein_id.c_str(),
-          num_proteins,
-          by_ions_matched,
-          by_ions_total,
+          num_proteins);
+  if (scores_computed[BY_IONS_MATCHED]) {
+    fprintf(file_, "num_matched_ions=\"%i\" ", (unsigned)scores[BY_IONS_MATCHED]);
+  }
+  if (scores_computed[BY_IONS_TOTAL]) {
+    fprintf(file_, "tot_num_ions=\"%i\" ", (unsigned)scores[BY_IONS_TOTAL]);
+  }
+
+  fprintf(file_, "calc_neutral_pep_mass=\"%.*f\" "
+          "massdiff=\"%+.*f\" "
+          "num_tol_term=\"%i\" num_missed_cleavages=\"%i\" "
+          "num_matched_peptides=\"%i\""
+          " is_rejected=\"%i\" ",
           mass_precision_,
           peptide_mass,
           mass_precision_,
@@ -280,7 +319,7 @@ void PepXMLWriter::printPeptideElement(int *ranks,
   print_modifications_xml(modified_peptide_sequence, peptide_sequence, file_);
 
   // print scores
-  printScores(delta_cn, scores, scores_computed,ranks);
+  printScores(scores, scores_computed,ranks);
 
   // print post-search (analysis) fields
   printAnalysis(scores, scores_computed);
@@ -289,19 +328,17 @@ void PepXMLWriter::printPeptideElement(int *ranks,
   fprintf(file_, "    </search_hit>\n");
 }
 
-void PepXMLWriter::printScores(double delta_cn, 
+void PepXMLWriter::printScores(
   double* scores, 
   bool* scores_computed,
   int* ranks
  ){
-  if( delta_cn == -0 ){
-    delta_cn = 0;
-  }
   string ranks_to_string[2]= {"sp_rank","xcorr_rank"};
-  fprintf(file_, 
-          "        <search_score name=\"delta_cn\" value=\"%.*f\" />\n",
-          precision_, delta_cn);
   for(int score_idx = 0; score_idx < NUMBER_SCORER_TYPES; score_idx++){
+    if(score_idx == BY_IONS_MATCHED || score_idx == BY_IONS_TOTAL ||
+       score_idx == MATCHES_SPECTRUM) {
+      continue;
+    }
     if(scores_computed[score_idx]){
       fprintf(file_, 
         "        <search_score name=\"%s\" value=\"%.*f\" />\n",

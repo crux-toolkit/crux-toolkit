@@ -393,10 +393,6 @@ void PinXMLWriter:: printPSM(
   Peptide* peptide= match->getPeptide();
   string decoy; 
 
-  //finding flanking_aas
-  char *flanking_aas= peptide->getFlankingAAs();
-  char flankN=flanking_aas[0];
-  char flankC=flanking_aas[1];
   SpectrumZState& zstate = match->getZState();
   int charge=zstate.getCharge();
    
@@ -433,10 +429,8 @@ void PinXMLWriter:: printPSM(
    
   printFeatures(match);
   printPeptideSequence(peptide);
-  printOccurence(flankC, flankN, peptide); 
+  printOccurence(peptide); 
   printPSMsFooter();
-  
-  myfree(flanking_aas);
 }
 
 void PinXMLWriter::printFeatures(
@@ -578,8 +572,6 @@ void PinXMLWriter:: printPeptideSequence(Peptide* peptide){
 
 //wite Occurance 
 void PinXMLWriter::printOccurence(
-  char flankC, 
-  char flankN, 
   Peptide* peptide
 ){
   
@@ -598,8 +590,8 @@ void PinXMLWriter::printOccurence(
     fprintf(
       output_file_,
       "    \n<occurence flankC=\"%c\" flankN=\"%c\" proteinId=\"%s\"/>",
-      flankC,
-      flankN,
+      peptide->getCTermFlankingAA(),
+      peptide->getNTermFlankingAA(),
       protein_id.c_str()
    );
   }

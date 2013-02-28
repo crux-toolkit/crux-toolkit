@@ -15,32 +15,6 @@ PercolatorAdapter::~PercolatorAdapter() {
   // TODO Auto-generated destructor stub
 }
 
-/**
-* \returns a Crux peptide from the PSM
-*/
-Crux::Peptide* PercolatorAdapter::extractPeptide(
-  PSMDescription* psm, ///< psm
-  int charge_state, ///< charge state
-  bool is_decoy ///< is psm a decoy?
-  ) {
-
-  string seq;
-  MODIFIED_AA_T* mod_seq = getModifiedAASequence(psm, seq);
-
-  PostProcessProtein* parent_protein = new PostProcessProtein();
-  parent_protein->setId((*psm->proteinIds.begin()).c_str());
-  int start_idx = parent_protein->findStart(seq, "", "");
-
-  FLOAT_T peptide_mass = (psm->calcMass * charge_state) - ((charge_state - 1) * MASS_PROTON);
-  
-  Crux::Peptide* peptide = new Crux::Peptide(seq.length(), peptide_mass, parent_protein, start_idx);
-  peptide->setModifiedAASequence(mod_seq, is_decoy);
-
-  free(mod_seq);
-  return peptide;
-}
-
-
 MatchCollection* PercolatorAdapter::psmScoresToMatchCollection(Scores* scores) {
 
   // Create new MatchCollection object that will be the converted Percolator Scores
@@ -62,15 +36,8 @@ MatchCollection* PercolatorAdapter::psmScoresToMatchCollection(Scores* scores) {
     zStates.push_back(charge_state);
     Crux::Spectrum* spectrum = new Crux::Spectrum(psm->scan, psm->scan, psm->expMass, zStates, "");
 
-      //FLOAT_T neutral_mass,
-      //int charge
-    
     SpectrumZState zState(psm->expMass, charge_state);
 
-      //Peptide* peptide, ///< the peptide for this match
-      //Spectrum* spectrum, ///< the spectrum for this match
-      //SpectrumZState& zstate, ///< the charge/mass of the spectrum
-      //bool is_decoy);///< is the peptide a decoy or not
     Match* match = new Match(peptide, spectrum, zState, score_itr->isDecoy());
     match->setScore(PERCOLATOR_SCORE, score_itr->score);
     match->setScore(PERCOLATOR_QVALUE, psm->q);
@@ -83,6 +50,10 @@ MatchCollection* PercolatorAdapter::psmScoresToMatchCollection(Scores* scores) {
   converted->forceScoredBy(PERCOLATOR_QVALUE);
   converted->forceScoredBy(PERCOLATOR_PEP);
   converted->populateMatchRank(PERCOLATOR_SCORE);
+
+  // sort by q-value
+  converted->sort(PERCOLATOR_QVALUE);
+
   return converted;
 
 }
@@ -98,6 +69,7 @@ void PercolatorAdapter::addPsmScores(ProteinMatchCollection* collection, Scores*
 void PercolatorAdapter::addProteinScores(ProteinMatchCollection* collection, Scores* scores) {
 
   // Iterate over each ScoreHolder in Scores object
+  vector<ProteinMatch*> matches;
   for (
     vector<ScoreHolder>::iterator score_itr = scores->begin();
     score_itr != scores->end();
@@ -111,8 +83,122 @@ void PercolatorAdapter::addProteinScores(ProteinMatchCollection* collection, Sco
     protein_match->setScore(PERCOLATOR_SCORE, score_itr->score);
     protein_match->setScore(PERCOLATOR_QVALUE, psm->q);
     protein_match->setScore(PERCOLATOR_PEP, psm->pep);
+
+    matches.push_back(protein_match);
   }
 
+  // set percolator score ranks
+  std::sort(matches.begin(), matches.end(),
+            PercolatorAdapter::comparePercolatorScores);
+  int cur_rank = 0;
+  for (vector<ProteinMatch*>::iterator iter = matches.begin();
+       iter != matches.end();
+       ++iter) {
+    ProteinMatch* match = *iter;
+    match->setRank(PERCOLATOR_SCORE, ++cur_rank);
+  }
+
+}
+
+void PercolatorAdapter::addPeptideScores(ProteinMatchCollection* collection, Scores* scores) {
+
+  carp(CARP_INFO, "Setting peptide scores");
+
+  // Iterate over each ScoreHolder in Scores object
+  for (
+    vector<ScoreHolder>::iterator score_itr = scores->begin();
+    score_itr != scores->end();
+    score_itr++
+    ) {
+
+    PSMDescription* psm = score_itr->pPSM;
+    string sequence;
+    MODIFIED_AA_T* mod_seq = getModifiedAASequence(psm, sequence);
+
+    // Set scores
+    PeptideMatch* peptide_match = collection->getPeptideMatch(mod_seq);
+    if (peptide_match == NULL) {
+      carp(CARP_FATAL, "Cannot find peptide %s %i",
+                       psm->getPeptideSequence().c_str(), score_itr->isDecoy());
+    }
+    peptide_match->setScore(PERCOLATOR_SCORE, score_itr->score);
+    peptide_match->setScore(PERCOLATOR_QVALUE, psm->q);
+    peptide_match->setScore(PERCOLATOR_PEP, psm->pep);
+
+    free(mod_seq);
+
+  }
+
+}
+
+/**
+ * Given a Percolator psm_id in the form ".*_([0-9]+)_[^_]*",
+ * find the charge state (matching group)
+ */
+int PercolatorAdapter::parseChargeState(string psm_id)
+{
+  size_t charge_begin, charge_end;
+
+  charge_end = psm_id.rfind("_");
+  if (charge_end < 0)
+  {
+    return -1;
+  }
+
+  charge_begin = psm_id.rfind("_", charge_end - 1) + 1;
+  if (charge_begin < 0)
+  {
+    return -1;
+  }
+
+  string charge_str = psm_id.substr(charge_begin, charge_end - charge_begin);
+  return atoi(charge_str.c_str());
+}
+
+/**
+ * Compares two AbstractMatches by Percolator score
+ */
+bool PercolatorAdapter::comparePercolatorScores(
+  AbstractMatch* lhs, ///< first match to compare
+  AbstractMatch* rhs ///< second match to compare
+) {
+  if (!lhs->hasScore(PERCOLATOR_SCORE) || !rhs->hasScore(PERCOLATOR_SCORE)) {
+    carp(CARP_FATAL, "Could not compare matches by Percolator score.");
+  }
+  return lhs->getScore(PERCOLATOR_SCORE) < rhs->getScore(PERCOLATOR_SCORE);
+}
+
+/**
+* \returns a Crux peptide from the PSM
+*/
+Crux::Peptide* PercolatorAdapter::extractPeptide(
+  PSMDescription* psm, ///< psm
+  int charge_state, ///< charge state
+  bool is_decoy ///< is psm a decoy?
+  ) {
+
+  string seq;
+  MODIFIED_AA_T* mod_seq = getModifiedAASequence(psm, seq);
+
+  string& full_peptide = psm->getFullPeptide();
+  string n_term = "";
+  string c_term = "";
+  if (!full_peptide.empty()) {
+    n_term += full_peptide[0];
+    c_term += full_peptide[full_peptide.length() - 1];
+  }
+
+  PostProcessProtein* parent_protein = new PostProcessProtein();
+  parent_protein->setId((*psm->proteinIds.begin()).c_str());
+  int start_idx = parent_protein->findStart(seq, n_term, c_term);
+
+  FLOAT_T peptide_mass = (psm->calcMass * charge_state) - ((charge_state - 1) * MASS_PROTON);
+  
+  Crux::Peptide* peptide = new Crux::Peptide(seq.length(), peptide_mass, parent_protein, start_idx);
+  peptide->setModifiedAASequence(mod_seq, is_decoy);
+
+  free(mod_seq);
+  return peptide;
 }
 
 /**
@@ -163,64 +249,10 @@ MODIFIED_AA_T* PercolatorAdapter::getModifiedAASequence(
   return mod_seq;
 }
 
-void PercolatorAdapter::addPeptideScores(ProteinMatchCollection* collection, Scores* scores) {
-
-  carp(CARP_INFO, "Setting peptide scores");
-
-  // Iterate over each ScoreHolder in Scores object
-  for (
-    vector<ScoreHolder>::iterator score_itr = scores->begin();
-    score_itr != scores->end();
-    score_itr++
-    ) {
-
-    PSMDescription* psm = score_itr->pPSM;
-    int charge_state = parseChargeState(psm->id);
-    string sequence;
-    MODIFIED_AA_T* mod_seq = getModifiedAASequence(psm,sequence); 
-    // Set scores
-    PeptideMatch* peptide_match = collection->getPeptideMatch(mod_seq);
-    if (peptide_match == NULL) {
-      carp(CARP_FATAL, "Cannot find peptide %s %i",psm->getPeptideSequence().c_str(), score_itr->isDecoy());
-    }
-    peptide_match->setScore(PERCOLATOR_SCORE, score_itr->score);
-    peptide_match->setScore(PERCOLATOR_QVALUE, psm->q);
-    peptide_match->setScore(PERCOLATOR_PEP, psm->pep);
-
-    free(mod_seq);
-
-  }
-
-}
-
-/**
- * Given a Percolator psm_id in the form ".*_([0-9]+)_[^_]*",
- * find the charge state (matching group)
- */
-int PercolatorAdapter::parseChargeState(string psm_id)
-{
-  size_t charge_begin, charge_end;
-
-  charge_end = psm_id.rfind("_");
-  if (charge_end < 0)
-  {
-    return -1;
-  }
-
-  charge_begin = psm_id.rfind("_", charge_end - 1) + 1;
-  if (charge_begin < 0)
-  {
-    return -1;
-  }
-
-  string charge_str = psm_id.substr(charge_begin, charge_end - charge_begin);
-  return atoi(charge_str.c_str());
-}
-
-
 /*
  * Local Variables:
  * mode: c
  * c-basic-offset: 2
  * End:
  */
+

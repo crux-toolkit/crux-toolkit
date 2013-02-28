@@ -34,7 +34,12 @@ public:
 
 protected:
   static int parseChargeState(string psm_id);
-  
+
+  /**
+   * Compare two AbstractMatches by Percolator score
+   */
+  static bool comparePercolatorScores(AbstractMatch* lhs, AbstractMatch* rhs);
+
   /**
    * \returns a Crux peptide from the PSM
    */
@@ -43,7 +48,7 @@ protected:
     int charge_state, ///< charge state
     bool is_decoy ///< is psm a decoy?
     );
-    
+
   /**
    * \returns the modified and unmodified peptide sequence
    * for the psm
@@ -52,7 +57,6 @@ protected:
     PSMDescription* psm, ///< psm -in
     string& seq ///< sequence -out
     );
-
 };
 
 #endif /* PERCOLATORADAPTER_H_ */
@@ -64,3 +68,4 @@ protected:
  * c-basic-offset: 2
  * End:
  */
+

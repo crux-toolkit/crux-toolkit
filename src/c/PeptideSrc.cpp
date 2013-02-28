@@ -315,6 +315,14 @@ bool PeptideSrc::parseTabDelimited(
       return false;
     }
 
+    vector<string> flanking_aas;
+    file.getStringVectorFromCell(FLANKING_AA_COL, flanking_aas);
+
+    if (protein_ids.size() != flanking_aas.size()) {
+      carp(CARP_ERROR, "Flanking AA count did not match protein count!");
+      return false;
+    }
+
     //For every protein id source, create the object and add it to the list.
     for (size_t idx = 0; idx < protein_ids.size(); idx++) {
     
@@ -327,6 +335,12 @@ bool PeptideSrc::parseTabDelimited(
       int start_index = 1;
 
       string protein_id = protein_ids.at(idx);
+      string flanking_aa = flanking_aas.at(idx);
+      string prev_aa = "", next_aa = "";
+      if (flanking_aa.length() == 2) {
+        prev_aa = flanking_aa[0];
+        next_aa = flanking_aa[1];
+      }
 
       carp(CARP_DETAILED_DEBUG,"Parsing %s", protein_id.c_str());
       // get the protein and peptide index e.g. X(10)
@@ -352,12 +366,6 @@ bool PeptideSrc::parseTabDelimited(
 	std::free(unmodified_sequence);
 	std::free(mod_seq);
 
-        string flanking_aas = file.getString(FLANKING_AA_COL);
-        string prev_aa = "", next_aa = "";
-        if (flanking_aas.length() == 2) {
-          prev_aa = flanking_aas[0];
-          next_aa = flanking_aas[1];
-        }
         start_index = parent_protein->findStart(sequence, prev_aa, next_aa);
 	if (start_index == -1) {
 	  carp(CARP_FATAL, "Can't find sequence %s in %s:%s",
@@ -386,12 +394,6 @@ bool PeptideSrc::parseTabDelimited(
 	  std::free(mod_seq);
 
           //string sequence = file.getString(SEQUENCE_COL);
-          string flanking_aas = file.getString(FLANKING_AA_COL);
-          string prev_aa = "", next_aa = "";
-          if (flanking_aas.length() == 2) {
-            prev_aa = flanking_aas[0];
-            next_aa = flanking_aas[1];
-          }
           start_index = parent_protein->findStart(sequence, prev_aa, next_aa);
         }
       }

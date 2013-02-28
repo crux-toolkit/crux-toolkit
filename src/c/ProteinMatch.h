@@ -38,6 +38,11 @@ class ProteinMatch : public AbstractMatch {
    */
   virtual ~ProteinMatch();
 
+  /** 
+   * \returns the peptide for the match
+   */
+  Crux::Protein* getProtein();
+
   /**
    * \returns the begining of the peptidematches vector
    */

@@ -2074,9 +2074,10 @@ char* Peptide::getFlankingAAs() {
     {
       char n_term = ((PostProcessProtein*)protein)->getNTermFlankingAA(start_index - 1);
       char c_term = ((PostProcessProtein*)protein)->getCTermFlankingAA(start_index - 1);
-      flanking_field = (char*)mymalloc(sizeof(char) * 2);
+      flanking_field = (char*)mymalloc(sizeof(char) * 3);
       flanking_field[0] = n_term;
       flanking_field[1] = c_term;
+      flanking_field[2] = '\0';
       return flanking_field;
     }
 

@@ -20,7 +20,9 @@ typedef PeptideMatchCollection::iterator PeptideMatchIterator;
 typedef std::vector<ProteinMatch*>::iterator ProteinMatchIterator;
 
 typedef std::map<SCORER_TYPE_T, FLOAT_T> ScoreMap;
+typedef std::map<SCORER_TYPE_T, int> RankMap;
 typedef ScoreMap::iterator ScoreMapIterator;
+typedef RankMap::iterator RankMapIterator;
 
 #endif //MATCHOBJECTS_H
 

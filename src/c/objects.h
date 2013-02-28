@@ -499,6 +499,12 @@ enum _scorer_type {
   BARISTA_QVALUE,
   BARISTA_PEPTIDE_QVALUE,
   BARISTA_PEP,        ///< posterior error prob from barista scores
+  
+  DELTA_CN,
+  DELTA_LCN,
+  BY_IONS_MATCHED,
+  BY_IONS_TOTAL,
+  MATCHES_SPECTRUM,
 
   NUMBER_SCORER_TYPES,
   INVALID_SCORER_TYPE

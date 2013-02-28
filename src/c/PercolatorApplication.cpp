@@ -15,6 +15,9 @@
 #include "CarpStreamBuf.h"
 #include "MzIdentMLWriter.h"
 #include "ProteinMatchCollection.h"
+#include "PMCDelimitedFileWriter.h"
+#include "PMCPepXMLWriter.h"
+#include "PMCSQTWriter.h"
 
 
 using namespace std;
@@ -402,6 +405,19 @@ int PercolatorApplication::main(
   vector<int> zStates;
   Crux::Spectrum spectrum(1, -1, 500.0, zStates, "");  // only first scan + precursor m/z matters for this
   //res->printTabDelimited(&writer2, 100, &spectrum, PERCOLATOR_SCORE);
+
+  PMCDelimitedFileWriter pmc_writer;
+  pmc_writer.writeAll(this, protein_match_collection, "crux-output/pmctest");
+  PMCPepXMLWriter pmc_writer_pep;
+  pmc_writer_pep.openFile("crux-output/pmctest.pep.xml", get_boolean_parameter("overwrite"));
+  pmc_writer_pep.write(protein_match_collection);
+  pmc_writer_pep.closeFile();
+  PMCSQTWriter pmc_writer_sqt;
+  pmc_writer_sqt.openFile("crux-output/pmctest.sqt");
+  pmc_writer_sqt.write(protein_match_collection, 5);
+  pmc_writer_sqt.closeFile();
+
+  delete protein_match_collection;
   
   // FIXME ==========================================
 

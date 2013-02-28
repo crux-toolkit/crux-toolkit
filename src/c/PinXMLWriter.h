@@ -122,7 +122,7 @@ class PinXMLWriter{
   );
 
   //write occurance 
-  void printOccurence(char flankC, char flankN, Crux::Peptide* peptide); 
+  void printOccurence(Crux::Peptide* peptide); 
 
   //write FooterPSM
   void printPSMsFooter();

@@ -711,6 +711,11 @@ void MzIdentMLWriter::addProteinScores(
     ++iter) {
 
     SCORER_TYPE_T score_type = iter->first;
+    if (score_type == DELTA_CN || score_type == DELTA_LCN ||
+        score_type == BY_IONS_MATCHED || score_type == BY_IONS_TOTAL ||
+        score_type == MATCHES_SPECTRUM) {
+      continue;
+    }
     FLOAT_T score = iter->second;
     CVID cvparam_type = getScoreCVID(score_type);
     if (cvparam_type != CVID_Unknown) {
@@ -742,6 +747,11 @@ void MzIdentMLWriter::addPeptideScores(
     ++iter) {
 
     SCORER_TYPE_T score_type = iter->first;
+    if (score_type == DELTA_CN || score_type == DELTA_LCN ||
+        score_type == BY_IONS_MATCHED || score_type == BY_IONS_TOTAL ||
+        score_type == MATCHES_SPECTRUM) {
+      continue;
+    }
     FLOAT_T score = iter->second;
     CVID cvparam_type = getScoreCVID(score_type);
     if (cvparam_type != CVID_Unknown) {

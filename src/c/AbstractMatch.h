@@ -12,6 +12,7 @@ class AbstractMatch {
 
  protected:
   ScoreMap scores_;  ///< map of scores
+  RankMap ranks_; ///< map of ranks for scores
 
  public:
 
@@ -33,11 +34,26 @@ class AbstractMatch {
     );
 
   /**
+   * \returns the match rank for a particular score type
+   */
+  virtual int getRank(
+    SCORER_TYPE_T type ///<score type desired
+    );
+
+  /**
    * sets the match score for particular score type
    */
   virtual void setScore(
     SCORER_TYPE_T type, ///< score to set
     FLOAT_T score ///< score value
+  );
+
+  /**
+   * sets the match rank for particular score type
+   */
+  virtual void setRank(
+    SCORER_TYPE_T type, ///< rank to set
+    int rank ///< rank value
   );
   
   /**
@@ -45,6 +61,10 @@ class AbstractMatch {
    */
   virtual bool hasScore(
     SCORER_TYPE_T type ///< score to test
+  );
+
+  virtual bool hasRank(
+    SCORER_TYPE_T type ///< rank to test
   );
 
   /**
@@ -61,6 +81,16 @@ class AbstractMatch {
    * \returns the end iterator for all set scores in the match
    */
   ScoreMapIterator scoresEnd();
+
+  /**
+   * \returns the beginning iterator for all set ranks in the match
+   */
+  RankMapIterator ranksBegin();
+
+  /**
+   * \returns the end iterator for all set ranks in the match
+   */
+  RankMapIterator ranksEnd();
 
 };
 
