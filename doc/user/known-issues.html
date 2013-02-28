@@ -32,7 +32,8 @@ if the search results contain modified peptides.</li>
 
 <li>
 The <code>crux</code> spectrum parser option does not handle disjoint scan
-ranges; it will simply take the lowest and highest scan numbers.
+ranges from SCANS lines in MGF files; Crux will create a single scan range from
+the lowest scan number to the highest scan number.
 </li>
 
 <li>
