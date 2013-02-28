@@ -44,7 +44,25 @@ The features used by Percolator to represent each PSM are summarized
 <a href="features.html">here</a>.</p>
 
 <p>
-<code>Crux</code> now includes code from
+Percolator also includes code
+from <a href="http://noble.gs.washington.edu/proj/fido/">Fido</a>,
+which performs protein-level inference.  The Fido algorithm is
+described in this article:</p>
+
+<blockquote>
+Oliver Serang, Michael J. MacCoss and William Stafford Noble.
+<a href="http://pubs.acs.org/doi/abs/10.1021/pr100594k">"Efficient
+marginalization to compute protein posterior probabilities from
+shotgun mass spectrometry data."</a>  <i>Journal of Proteome
+Research</i>. 9(10):5346-5357, 2010.</li>
+</blockquote>
+
+<p>
+Options related to Fido are described under the heading "Protein-level
+inference options," below.</p>
+
+<p>
+Crux includes code from
 <a href="http://per-colator.com/"><span class=prog>Percolator
 2.04</span></a>.  Crux Percolator differs from the stand-alone version
 of Percolator in the following respects:</p>
@@ -309,7 +327,7 @@ search (see <code>--depth</code> parameter) if not specified.</li>
 if it were one protein.  Default = F.</li>
 
 <li>
-<code>--protein--level-pi0 &lt;T|F&gt;</code> &ndash; Use pi_0 value
+<code>--protein-level-pi0 &lt;T|F&gt;</code> &ndash; Use pi_0 value
 when calculating empirical q-values.  Default = F.</li>
 
 <li>
@@ -352,46 +370,6 @@ Default = 3.
 <hr></hr>
 
 <a href="crux.html">Crux home</a>
-
-<note>
-
-<p>
-To do:</p>
-
-<ul>
-<li>
-Document the inclusion of Fido and of the retention time
-stuff.</li>
-<li>
-Add note explaining differences between crux percolator and
-stand-alone Percolator.</li>
-<li>
-Complete the feature table and indicate which ones are used by
-Percolator, q-ranker and Barista.</li>
-<li>
-Add Percolator to the tab-delimited text table.</li>
-
-<li>Supplement Percolator's tab-delimited text file with the data
-supplied by the other crux tools</li> 
-
-</ul>
-
-<p>
-Changes we are proposing on the Percolator end of things:</p>
-<ul>
-<li>
-Produce three separate tab-delimited text files, akin to what Barista
-does for PSMs, peptides, and proteins.</li>
-<li>
-Duplicate standard error messages to a given log file.  Accomplish this by writing logs to a FILE* or stream that can be set by crux.</li>
-<li>
-Make Percolator produce pep.xml.
-</li>
-<li>
-Remove the --exp-mass and --clock flags, always setting them to T.</li>
-</ul>
-
-</note>
 
 </blockquote>
 </body>
