@@ -8,14 +8,25 @@
 
 using namespace Crux;
 
+/**
+ * Constructor for PercolatorAdapter. This should not be called, since all of
+ * this class's functions are static.
+ */
 PercolatorAdapter::PercolatorAdapter() {
 }
 
+/**
+ * Destructor for PercolatorAdapter
+ */
 PercolatorAdapter::~PercolatorAdapter() {
-  // TODO Auto-generated destructor stub
 }
 
-MatchCollection* PercolatorAdapter::psmScoresToMatchCollection(Scores* scores) {
+/**
+ * Converts a set of Percolator scores into a Crux MatchCollection
+ */
+MatchCollection* PercolatorAdapter::psmScoresToMatchCollection(
+  Scores* scores ///< percolator scores to convert
+) {
 
   // Create new MatchCollection object that will be the converted Percolator Scores
   MatchCollection* converted = new MatchCollection();
@@ -58,7 +69,13 @@ MatchCollection* PercolatorAdapter::psmScoresToMatchCollection(Scores* scores) {
 
 }
 
-void PercolatorAdapter::addPsmScores(ProteinMatchCollection* collection, Scores* scores) {
+/**
+ * Adds PSM scores from Percolator objects into a ProteinMatchCollection
+ */
+void PercolatorAdapter::addPsmScores(
+  ProteinMatchCollection* collection, ///< collection to add scores to
+  Scores* scores ///< percolator scores to add
+) {
 
   MatchCollection* matches = psmScoresToMatchCollection(scores);
   collection->addMatches(matches);
@@ -66,7 +83,13 @@ void PercolatorAdapter::addPsmScores(ProteinMatchCollection* collection, Scores*
 
 }
 
-void PercolatorAdapter::addProteinScores(ProteinMatchCollection* collection, Scores* scores) {
+/**
+ * Adds protein scores from Percolator objects into a ProteinMatchCollection
+ */
+void PercolatorAdapter::addProteinScores(
+  ProteinMatchCollection* collection, ///< collection to add scores to
+  Scores* scores ///< percolator scores to add
+) {
 
   // Iterate over each ScoreHolder in Scores object
   vector<ProteinMatch*> matches;
@@ -100,7 +123,13 @@ void PercolatorAdapter::addProteinScores(ProteinMatchCollection* collection, Sco
 
 }
 
-void PercolatorAdapter::addPeptideScores(ProteinMatchCollection* collection, Scores* scores) {
+/**
+ * Adds peptide scores from Percolator objects into a ProteinMatchCollection
+ */
+void PercolatorAdapter::addPeptideScores(
+  ProteinMatchCollection* collection, ///< collection to add scores to
+  Scores* scores ///< percolator scores to add
+) {
 
   carp(CARP_INFO, "Setting peptide scores");
 
@@ -135,8 +164,9 @@ void PercolatorAdapter::addPeptideScores(ProteinMatchCollection* collection, Sco
  * Given a Percolator psm_id in the form ".*_([0-9]+)_[^_]*",
  * find the charge state (matching group)
  */
-int PercolatorAdapter::parseChargeState(string psm_id)
-{
+int PercolatorAdapter::parseChargeState(
+  string psm_id ///< psm to parse charge state from
+) {
   size_t charge_begin, charge_end;
 
   charge_end = psm_id.rfind("_");
@@ -159,8 +189,8 @@ int PercolatorAdapter::parseChargeState(string psm_id)
  * Compares two AbstractMatches by Percolator score
  */
 bool PercolatorAdapter::comparePercolatorScores(
-  AbstractMatch* lhs, ///< first match to compare
-  AbstractMatch* rhs ///< second match to compare
+  AbstractMatch* lhs, ///< first match with Percolator scores to compare
+  AbstractMatch* rhs ///< second match with Percolator scores to compare
 ) {
   if (!lhs->hasScore(PERCOLATOR_SCORE) || !rhs->hasScore(PERCOLATOR_SCORE)) {
     carp(CARP_FATAL, "Could not compare matches by Percolator score.");

@@ -24,21 +24,65 @@ using namespace std;
 class PercolatorAdapter {
 
 public:
+
+  /**
+   * Constructor for PercolatorAdapter. This should not be called, since all of
+   * this class's functions are static.
+   */
   PercolatorAdapter();
+
+  /**
+   * Destructor for PercolatorAdapter
+   */
   virtual ~PercolatorAdapter();
 
-  static MatchCollection* psmScoresToMatchCollection(Scores* scores);
-  static void addPsmScores(ProteinMatchCollection* collection, Scores* scores);
-  static void addProteinScores(ProteinMatchCollection* collection, Scores* scores);
-  static void addPeptideScores(ProteinMatchCollection* collection, Scores* scores);
+  /**
+   * Converts a set of Percolator scores into a Crux MatchCollection
+   */
+  static MatchCollection* psmScoresToMatchCollection(
+    Scores* scores ///< percolator scores to convert
+  );
+
+  /**
+   * Adds PSM scores from Percolator objects into a ProteinMatchCollection
+   */
+  static void addPsmScores(
+    ProteinMatchCollection* collection, ///< collection to add scores to
+    Scores* scores ///< percolator scores to add
+  );
+
+  /**
+   * Adds protein scores from Percolator objects into a ProteinMatchCollection
+   */
+  static void addProteinScores(
+    ProteinMatchCollection* collection, ///< collection to add scores to
+    Scores* scores ///< percolator scores to add
+  );
+
+  /**
+   * Adds peptide scores from Percolator objects into a ProteinMatchCollection
+   */
+  static void addPeptideScores(
+    ProteinMatchCollection* collection, ///< collection to add scores to
+    Scores* scores ///< percolator scores to add
+  );
 
 protected:
-  static int parseChargeState(string psm_id);
+  /**
+   * Given a Percolator psm_id in the form ".*_([0-9]+)_[^_]*",
+   * find the charge state (matching group)
+   */
+  static int parseChargeState(
+    string psm_id ///< psm to parse charge state from
+  );
 
   /**
    * Compare two AbstractMatches by Percolator score
    */
-  static bool comparePercolatorScores(AbstractMatch* lhs, AbstractMatch* rhs);
+  static bool comparePercolatorScores(
+    AbstractMatch* lhs, ///< first match with Percolator score to compare
+    AbstractMatch* rhs ///< second match with Percolator score to compare
+  );
 
   /**
    * \returns a Crux peptide from the PSM
