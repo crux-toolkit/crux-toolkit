@@ -15,6 +15,7 @@
 #include "MatchFileWriter.h"
 #include "Peptide.h"
 #include "PeptideMatch.h"
+#include "PostProcessProtein.h"
 #include "ProteinMatch.h"
 #include "ProteinMatchCollection.h"
 #include "Spectrum.h"

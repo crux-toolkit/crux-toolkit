@@ -284,11 +284,22 @@ void PMCDelimitedFileWriter::writePeptides(
 
     // collect proteins info
     vector<string> protein_ids;
+    vector<string> flanking_aas;
     for (ProteinMatchIterator prot_iter = match->proteinMatchBegin();
          prot_iter != match->proteinMatchEnd();
          ++prot_iter) {
       ProteinMatch* prot_match = *prot_iter;
-      protein_ids.push_back(prot_match->getProtein()->getIdPointer());
+      Protein* protein = prot_match->getProtein();
+      protein_ids.push_back(protein->getIdPointer());
+      /** TODO figure out why this works and getFlankingAAs() doesn't **/
+      if (protein->isPostProcess()) {
+        PostProcessProtein* post_process_protein = (PostProcessProtein*)protein;
+        string flanking_str = "";
+        flanking_str += post_process_protein->getNTermFlankingAA();
+        flanking_str += post_process_protein->getCTermFlankingAA();
+        flanking_aas.push_back(flanking_str);
+      }
+      /*****************************************************************/
     }
 
     setColumnCurrentRow(SCAN_COL, DelimitedFile::splice(spec_scans, ','));
@@ -313,7 +324,8 @@ void PMCDelimitedFileWriter::writePeptides(
     addScoreIfExists(match, MATCHES_SPECTRUM, MATCHES_SPECTRUM_COL);
     setColumnCurrentRow(CLEAVAGE_TYPE_COL, cleavage);
     setColumnCurrentRow(PROTEIN_ID_COL, DelimitedFile::splice(protein_ids, ','));
-    setAndFree(FLANKING_AA_COL, peptide->getFlankingAAs());
+    //setAndFree(FLANKING_AA_COL, peptide->getFlankingAAs());
+    setColumnCurrentRow(FLANKING_AA_COL, DelimitedFile::splice(flanking_aas, ','));
 
     writeRow();
   }

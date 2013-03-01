@@ -2059,95 +2059,39 @@ char* Peptide::getProteinIds() {
  */
 char* Peptide::getFlankingAAs() {
 
-  char *flanking_field = NULL;
+  string flanking_string = "";
 
-  if (!peptide_srcs_.empty()) {
-
-    // Peptide has at least one parent.
-     PeptideSrcIterator iter = getPeptideSrcBegin();
-    PeptideSrc* peptide_src = *iter;
-    Protein* protein = peptide_src->getParentProtein();
-
-    int start_index = peptide_src->getStartIdx();
-
-    if (protein->isPostProcess())
-    {
-      char n_term = ((PostProcessProtein*)protein)->getNTermFlankingAA(start_index - 1);
-      char c_term = ((PostProcessProtein*)protein)->getCTermFlankingAA(start_index - 1);
-      flanking_field = (char*)mymalloc(sizeof(char) * 3);
-      flanking_field[0] = n_term;
-      flanking_field[1] = c_term;
-      flanking_field[2] = '\0';
-      return flanking_field;
+  // iterate over all PeptideSrc
+  for (PeptideSrcIterator iter = getPeptideSrcBegin();
+       iter != getPeptideSrcEnd();
+       ++iter) {
+    // add comma if there is already flanking AA(s) in the string
+    if (!flanking_string.empty()) {
+      flanking_string += ',';
     }
-
-    int protein_length = protein->getLength();
-    int peptide_length = getLength();
-    int end_index = start_index + peptide_length - 1;
-    char* protein_seq = protein->getSequencePointer();
-    const int allocation_factor = 1;
-    size_t flanking_str_len = 2; // left and right flanking AA
-    size_t flanking_field_len = allocation_factor * flanking_str_len + 1;
-    flanking_field = (char*)mymalloc(sizeof(char) * flanking_field_len);
-    size_t flanking_field_free = flanking_field_len;
-    char *flanking_field_tail = flanking_field;
-
-    // First flanking AA in list doesn't have leading ','
-    
-    // Flanking N
-    *flanking_field_tail = (start_index > 1 ? protein_seq[start_index - 2] : '-');;
-    ++flanking_field_tail;
-    --flanking_field_free;
-    // Flanking C
-    *flanking_field_tail = (end_index < protein_length ? protein_seq[end_index] : '-');
-    ++flanking_field_tail;
-    --flanking_field_free;
-    // Terminating null
-    *flanking_field_tail = 0;
-
-    flanking_str_len = 3; // leadinng ',', left and right flanking AA
-
-    //start from second peptide_src 
-    iter++;
-    for(;iter!=getPeptideSrcEnd();++iter){
-
-      peptide_src = *iter;
-      protein = peptide_src->getParentProtein();
-      protein_length = protein->getLength();
-      peptide_length = getLength();
-      start_index = peptide_src->getStartIdx();
-      end_index = start_index + peptide_length - 1;
-      protein_seq = protein->getSequencePointer();
-
-      // Allocate more memory if needed
-      if (flanking_field_free < flanking_str_len + 1) {
-        size_t tail_offset = flanking_field_tail - flanking_field;
-        flanking_field = (char*)myrealloc(
-          flanking_field,
-          sizeof(char) * (allocation_factor * flanking_str_len + flanking_field_len)
-        ); 
-        flanking_field_len += (allocation_factor * flanking_str_len);
-        flanking_field_free += (allocation_factor * flanking_str_len);
-        flanking_field_tail = flanking_field + tail_offset;
-      } 
-         
-      // Following flanking AA in list have leading ','
-      *flanking_field_tail = ',';
-      ++flanking_field_tail;
-      --flanking_field_free;
-      // Flanking N
-      *flanking_field_tail = (start_index > 1 ? protein_seq[start_index - 2] : '-');
-      ++flanking_field_tail;
-      --flanking_field_free;
-      // Flanking C
-      *flanking_field_tail = (end_index < protein_length ? protein_seq[end_index] : '-');
-      ++flanking_field_tail;
-      --flanking_field_free;
-      // Terminating NULL
-      *flanking_field_tail = 0;
+    PeptideSrc* src = *iter;
+    Protein* protein = src->getParentProtein();
+    int start_idx = src->getStartIdx();
+    if (!protein->isPostProcess()) {
+      // not post process, get flanking AAs from protein sequence
+      int end_idx = start_idx + getLength() - 1;
+      int protein_length = protein->getLength();
+      char* protein_seq = protein->getSequencePointer();
+      flanking_string += (start_idx > 1) ? protein_seq[start_idx - 2] : '-';
+      flanking_string += (end_idx < protein_length) ? protein_seq[end_idx] : '-';
+    } else {
+      // post process, get flanking AAs from the protein object
+      PostProcessProtein* post_process_protein = (PostProcessProtein*)protein;
+      flanking_string += post_process_protein->getNTermFlankingAA(start_idx - 1);
+      flanking_string += post_process_protein->getCTermFlankingAA(start_idx - 1);
     }
-
   }
+
+  // convert to c string
+  int length = flanking_string.length();
+  char* flanking_field = (char*)malloc(sizeof(char)*(length + 1));
+  memcpy(flanking_field, flanking_string.c_str(), length);
+  flanking_field[length] = '\0';
 
   return flanking_field;
 }

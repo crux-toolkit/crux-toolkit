@@ -584,14 +584,24 @@ void PinXMLWriter::printOccurence(
   
    
   //string decoy_prefix="rand_";
- 
+
+  char* flanking_ptr = peptide->getFlankingAAs();
+  string flanking_str(flanking_ptr);
+  free(flanking_ptr);
+  vector<string> flanking_aas;
+  DelimitedFile::tokenize(flanking_str, flanking_aas, ',');
+  if (flanking_aas.size() != num_protein) {
+    carp(CARP_FATAL, "PinXMLWriter has only %d sets of flanking AAs "
+                     "for %d proteins", flanking_aas.size(), num_protein);
+  }
+
   for(unsigned prot_idx=0;prot_idx<num_protein;prot_idx++){
     string protein_id=protein_ids[prot_idx];
     fprintf(
       output_file_,
       "    \n<occurence flankC=\"%c\" flankN=\"%c\" proteinId=\"%s\"/>",
-      peptide->getCTermFlankingAA(),
-      peptide->getNTermFlankingAA(),
+      (flanking_aas[prot_idx])[0],
+      (flanking_aas[prot_idx])[1],
       protein_id.c_str()
    );
   }
