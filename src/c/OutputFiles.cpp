@@ -673,9 +673,10 @@ void OutputFiles::printMatchesMzid(
 void OutputFiles::writeMatches(
   MatchCollection*  matches ///< from multiple spectra
 ){
-  matches->printMultiSpectra(delim_file_array_[0],
-                              NULL);// no decoy file
-  matches->printMultiSpectraXml(xml_file_array_[0]);
+  matches->printMultiSpectra(delim_file_array_[0], NULL /* no decoy file */);
+  if (xml_file_array_) {
+    matches->printMultiSpectraXml(xml_file_array_[0]);
+  }
 }
 
 /**
