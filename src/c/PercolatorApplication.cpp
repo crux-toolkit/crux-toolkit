@@ -82,6 +82,9 @@ int PercolatorApplication::main(int argc, char** argv) {
     "fileroot",
     "output-dir",
     "overwrite",
+    "txt-output",
+    "mzid-output",
+    "pepxml-output",
     "feature-file",
     "parameter-file",
     "protein",
@@ -160,7 +163,9 @@ int PercolatorApplication::main(int argc, char** argv) {
       carp(CARP_FATAL, "Decoy file %s not found", input_decoy.c_str());
     }
 
-    char* const make_pin_file = "crux-output/make-pin.pin.xml";
+    string pin_location = string(get_string_parameter_pointer("output-dir")) +
+                          "/make-pin.pin.xml";
+    const char* make_pin_file = pin_location.c_str();
 
     carp(CARP_INFO, "Running make-pin with '%s' and decoy file '%s'.",
          input_pinxml.c_str(), input_decoy.c_str());
@@ -200,9 +205,10 @@ int PercolatorApplication::main(
   perc_args_vec.push_back("-X");
   perc_args_vec.push_back(output_xml);
 
+  // These files will be removed later
+  // They are only set so that the tab-delimited info is not written to stdout
   perc_args_vec.push_back("-r");
   perc_args_vec.push_back(output_target_tab);
-
   perc_args_vec.push_back("-B");
   perc_args_vec.push_back(output_decoy_tab);
 
@@ -378,50 +384,45 @@ int PercolatorApplication::main(
     retVal = pCaller->run();
   }
 
-  // FIXME ==========================================
-  //MatchCollection* res = PercolatorAdapter::psmScoresToMatchCollection(&(pCaller->fullset));
-  //ProteinMatchCollection* protein_match_collection = new ProteinMatchCollection(res);
+  // remove tab files
+  remove(output_target_tab.c_str());
+  remove(output_decoy_tab.c_str());
+
+  // get percolator score information into crux objects
   ProteinMatchCollection* protein_match_collection = new ProteinMatchCollection();
   PercolatorAdapter::addPsmScores(protein_match_collection, &(pCaller->fullset));
   PercolatorAdapter::addPeptideScores(protein_match_collection, &(pCaller->fullset));
   PercolatorAdapter::addProteinScores(protein_match_collection, &(pCaller->fullset));
-  remove("adapter_test.mzid");
-  MzIdentMLWriter writer;
-  writer.openFile("adapter_test.mzid", true);
-  //writer.addMatches(res);
-  writer.addProteinMatches(protein_match_collection);
-  writer.closeFile();
-  
-  remove("adapter_test.txt");
-  MatchFileWriter writer2("adapter_test.txt");
-  vector<bool> to_print;
-  to_print.assign(NUMBER_MATCH_COLUMNS, false);
-  to_print[SCAN_COL] = true;
-  to_print[CHARGE_COL] = true;
-  to_print[SEQUENCE_COL] = true;
-  to_print[PROTEIN_ID_COL] = true;
-  writer2.addColumnNames(this, true, to_print);
-  writer2.writeHeader();
-  vector<int> zStates;
-  Crux::Spectrum spectrum(1, -1, 500.0, zStates, "");  // only first scan + precursor m/z matters for this
-  //res->printTabDelimited(&writer2, 100, &spectrum, PERCOLATOR_SCORE);
 
-  PMCDelimitedFileWriter pmc_writer;
-  pmc_writer.writeAll(this, protein_match_collection, "crux-output/pmctest");
-  PMCPepXMLWriter pmc_writer_pep;
-  pmc_writer_pep.openFile("crux-output/pmctest.pep.xml", get_boolean_parameter("overwrite"));
-  pmc_writer_pep.write(protein_match_collection);
-  pmc_writer_pep.closeFile();
-  PMCSQTWriter pmc_writer_sqt;
-  pmc_writer_sqt.openFile("crux-output/pmctest.sqt");
-  pmc_writer_sqt.write(protein_match_collection, 5);
-  pmc_writer_sqt.closeFile();
+  string output_dir = string(get_string_parameter_pointer("output-dir"));
+
+  // write txt
+  if (get_boolean_parameter("txt-output")) {
+    PMCDelimitedFileWriter txt_writer;
+    string txt_path = make_file_path("percolator");
+    txt_writer.writeAll(this, protein_match_collection, txt_path);
+  }
+
+  // write mzid
+  if (get_boolean_parameter("mzid-output")) {
+    MzIdentMLWriter mzid_writer;
+    string mzid_path = make_file_path("percolator.mzid");
+    mzid_writer.openFile(mzid_path, get_boolean_parameter("overwrite"));
+    mzid_writer.addProteinMatches(protein_match_collection);
+    mzid_writer.closeFile();
+  }
+  
+  // write pepxml
+  if (get_boolean_parameter("pepxml-output")) {
+    PMCPepXMLWriter pep_writer;
+    string pep_path = make_file_path("percolator.pep.xml");
+    pep_writer.openFile(pep_path.c_str(), get_boolean_parameter("overwrite"));
+    pep_writer.write(protein_match_collection);
+    pep_writer.closeFile();
+  }
 
   delete protein_match_collection;
   
-  // FIXME ==========================================
-
-
   delete pCaller;
   Globals::clean();
   delete []perc_argv;
