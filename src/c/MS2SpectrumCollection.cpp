@@ -73,7 +73,7 @@ bool MS2SpectrumCollection::parse() {
   FILE* file;
 
   // get a list of scans to include if requested
-  const char* range_string = get_string_parameter("scan-number");
+  const char* range_string = get_string_parameter_pointer("scan-number");
   int first_scan;
   int last_scan;
   bool success = get_range_from_string(range_string, first_scan, last_scan);
@@ -103,6 +103,7 @@ bool MS2SpectrumCollection::parse() {
     } 
     // are we past the last scan?
     if( parsed_spectrum->getFirstScan() > last_scan ){
+      delete parsed_spectrum;
       break;
     }
     this->addSpectrumToEnd(parsed_spectrum);

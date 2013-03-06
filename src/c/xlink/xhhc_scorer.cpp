@@ -36,6 +36,17 @@ void XHHC_Scorer::init() {
 XHHC_Scorer::XHHC_Scorer() {
   init();
 }
+
+/**
+ * Destructor
+ */
+XHHC_Scorer::~XHHC_Scorer() {
+
+  if (scorer_ != NULL) {
+    delete scorer_;
+  }
+
+}
   
 /**
  * \returns an XHHC_Scorer object with the max_mz initialized

@@ -112,7 +112,6 @@ class XHHC_Peptide {
    */
   int linkSite();
 
-    
   /**
    * \returns the mass of the peptide
    */

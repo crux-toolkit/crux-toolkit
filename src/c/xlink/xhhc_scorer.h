@@ -58,6 +58,11 @@ class XHHC_Scorer {
     );
 
   /**
+   * Destructor
+   */
+  virtual ~XHHC_Scorer();
+
+  /**
    * \returns the max_mz
    */
   FLOAT_T getMaxMz();

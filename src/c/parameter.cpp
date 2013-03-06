@@ -3635,6 +3635,7 @@ bool set_spectrum_parser_parameter(
   const char* foruser) {
 
   bool result = true;
+  char value_str[SMALL_BUFFER];
 
   // check if parameters can be changed
   if (!parameter_plasticity) {
@@ -3642,7 +3643,7 @@ bool set_spectrum_parser_parameter(
     return false;
   }
   /* stringify value */
-  char* value_str = spectrum_parser_type_to_string(set_value);
+  strcpy(value_str, spectrum_parser_type_to_string(set_value));
   carp(CARP_DETAILED_DEBUG, "setting spectrum_parser type to %s", value_str);
 
   result = add_or_update_hash(parameters, name, value_str);

@@ -473,13 +473,11 @@ SPECTRUM_PARSER_T string_to_spectrum_parser_type(char* name) {
 
 }
 
-char* spectrum_parser_type_to_string(
+const char* spectrum_parser_type_to_string(
   SPECTRUM_PARSER_T type
   ) {
 
-  char* type_str = my_copy_string(spectrum_parser_type_strings[type]);
-
-  return type_str;
+  return spectrum_parser_type_strings[type];
 }
 
 
