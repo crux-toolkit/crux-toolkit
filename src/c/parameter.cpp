@@ -389,7 +389,10 @@ void initialize_parameters(void){
     "pin.xml", NULL,
     "PIN files are XML files for PIN format whose structure is defined by "
     "the schema percolator_in.xml. <code>crux search-for-matches</code> generates this file. "
-    "Also, this argument can be  which indicates the pin file will come from standard input",
+    "Also, this argument can be \"-\" which indicates the pin file will come from standard input. "
+    "Alternately, a SQT, PepXML, or tab-delimited file may be given (a corresponding decoy"
+    "file must also exist in the same directory), in which case a pin.xml file will be "
+    "generated in the output directory prior to execution.",
     "Argument, not option for percolator",
     "false"
   );
@@ -563,13 +566,14 @@ void initialize_parameters(void){
       "Available for search-for-matches.", "true");
   set_boolean_parameter("mzid-output", false,
       "Output MZID in the output directory.  Default=F",
-      "Available for search-for-matches.", "true");
+      "Available for search-for-matches, percolator.", "true");
   set_boolean_parameter("pinxml-output", false,
       "Output PIN XML in the output directory.  Default=F",
       "Available for search-for-matches.", "true");
   set_boolean_parameter("pepxml-output", false,
       "Output pepXML in the output directory.  Default=F",
-      "Available for search-for-matches, q-ranker, barista.", "true");
+      "Available for search-for-matches, q-ranker, barista, percolator.",
+      "true");
   set_boolean_parameter("txt-output", true,
       "Output tab-delimited text in the output directory.  Default=T",
       "Available for search-for-matches, percolator, q-ranker, barista.",

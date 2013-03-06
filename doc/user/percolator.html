@@ -115,27 +115,25 @@ the <code>crux-output</code> directory:</p>
 <ul>
 
 <li>
-<b>percolator.pout.xml</b>: an XML file containing all of the
+<b>percolator.target.pout.xml</b>: an XML file containing all of the
 Percolator results, defined according to <a href="https://github.com/percolator/percolator/blob/master/src/xml/percolator_out.xsd">
 this schema</a>.
 </li>
 
 <li>
-<b>percolator.psm.target.txt</b>: a tab-delimited file containing the
-target PSMs.  See <a href="txt-format.html">here</a> for a list of the
+<b>percolator.proteins.txt</b>: a tab-delimited file containing the
+protein matches.  See <a href="txt-format.html">here</a> for a list of the
 fields.</li>
 
 <li>
-<b>percolator.decoy.txt</b>: a tab-delimited file containing the decoy
-PSMs.</li>
+<b>percolator.peptides.txt</b>: a tab-delimited file containing the
+peptide matches.  See <a href="txt-format.html">here</a> for a list of the
+fields.</li>
 
 <li>
-<b>percolator.peptide.target.txt</b>: a tab-delimited file containing the
-target peptides.</li>
-
-<li>
-<b>percolator.protein.target.txt</b>: a tab-delimited file containing the
-target proteins.</li>
+<b>percolator.psms.txt</b>: a tab-delimited file containing the
+PSMs.  See <a href="txt-format.html">here</a> for a list of the
+fields.</li>
 
 <li>
 <b>percolator.params.txt</b>: a file containing the name and value of
@@ -146,13 +144,19 @@ programs.
 </li>
 
 <li>
-<b>percolator.target.pep.xml</b>: a file containing the PSMs in pepxml
+<b>percolator.pep.xml</b>: a file containing the PSMs in pepxml
 format.
 See <a href="http://tools.proteomecenter.org/wiki/index.php?title=Formats:pepXML">
 pep xml file format</a> for further reference. This file can be used
 as input to some of the tools in the
 <a href="http://tools.proteomecenter.org/wiki/index.php?title=Software:TPP">
 Transproteomic Pipeline</a>.
+</li>
+
+<li>
+<b>percolator.mzid</b>: a file containing the protein, peptide, and spectrum
+matches.  See <a href="http://www.psidev.info/mzidentml">the mzIdentML
+specification</a> for further reference.
 </li>
 
 <li>
@@ -166,8 +170,49 @@ messages that were printed to standard error.
 <ul>
 
 <li>
+<code>--fileroot &lt;string&gt;</code> &ndash;
+The <code>fileroot</code> string will be added as a prefix to all
+output file names. Default = none.</li>
+
+<li>
+<code>--output-dir &lt;filename&gt;</code> &ndash; The name of the
+directory where output files will be created.  Default =
+crux-output.</li>
+
+<li>
+<code>--overwrite &lt;T|F&gt;</code> Replace existing files if true (T) or
+fail when trying to overwrite a file if false (F). Default =  F.
+
+<li>
+<code>--txt-output &lt;T|F&gt;</code> &ndash; Output tab-delimited
+results files to the output directory. Default = T.</li>
+
+<li>
+<code>--mzid-output &lt;T|F&gt;</code> &ndash; Output an mzIdentML
+results file to the output directory. Default = F.</li>
+
+<li>
+<code>--pepxml-output &lt;T|F&gt;</code> &ndash; Output a pepXML
+results file to the output directory. Default = F.</li>
+
+<li>
+<code>--feature-file &lt;T|F&gt;</code> &ndash; Output the
+computed features in tab-delimited text format to a file
+named "percolator.feature.txt." Default = F</li>
+
+<LI>
+<code>--parameter-file &lt;filename&gt;</code> &ndash;
+A file containing command-line or additional parameters.  See the <a
+href=parameter-file.html>parameter documentation</a> page for details.</li>
+
+<li>
 <code>--decoy-xml-output &lt;T|F&gt;</code> &ndash; Include decoys
 (PSMs, peptides and/or proteins) in the XML output. Default = F.</li>
+
+<li>
+<code>--decoy-prefix &lt;string&gt;</code> &ndash;
+Specifies the prefix of the protein names that indicates a decoy.
+Default = "rand_".</li>
 
 <li>
 <code>--c-pos &lt;float&gt;</code> &ndash; Penalty for mistakes made
@@ -203,11 +248,6 @@ iterations for training.  Default = 10.</li>
 negative data set to be used as train set when only providing one
 negative set.  The remaining examples will be used as test set.
 Default = 0.6.</li>
-
-<li>
-<code>--output-feature-file &lt;T|F&gt;</code> &ndash; Output the
-computed features in tab-delimited text format to a file
-named "percolator.features.txt." Default = F</li>
 
 <li>
 <code>--output-weights &lt;T|F&gt; </code>&ndash; Output final weights
@@ -254,37 +294,14 @@ conditions" by Klammer AA, Yi X, MacCoss MJ and Noble WS.
 (<i>Analytical Chemistry</i>. 2007 Aug 15;79(16):6111-8.)</li>
 
 <li>
+<code>--doc &lt;T|F&gt;</code> &ndash; Include description of correct
+features. Default = F.</li>
+
+<li>
 <code>--unique-peptides &lt;T|F&gt;</code> &ndash; Do not remove
 redundant peptides; keep all PSMs and exclude peptide level
 probability.
 </li>
-
-<li>
-<code>--no-schema-validation &lt;T|F&gt;</code> &ndash; Skip
-validation of input file against xml schema. Default = F.</li>
-
-<li>
-<code>--fileroot &lt;string&gt;</code> &ndash;
-The <code>fileroot</code> string will be added as a prefix to all
-output file names. Default = none.</li>
-
-<li>
-<code>--output-dir &lt;filename&gt;</code> &ndash; The name of the
-directory where output files will be created.  Default =
-crux-output.</li>
-
-<li>
-<code>--overwrite &lt;T|F&gt;</code> Replace existing files if true (T) or
-fail when trying to overwrite a file if false (F). Default =  F.
-
-<LI>
-<code>--parameter-file &lt;filename&gt;</code> &ndash;
-A file containing command-line or additional parameters.  See the <a
-href=parameter-file.html>parameter documentation</a> page for details.</li>
-
-<LI> 
-<code>--feature-file &lt;string&gt;</code> &ndash;
-Optional file in which to write the features. Default = none.</li>
 
 <LI>
 <code>--verbosity &lt;0-100&gt;</code> &ndash; Specify the verbosity of the
@@ -293,6 +310,10 @@ all those at lower verbosity levels: 0-fatal errors, 10-non-fatal
 errors, 20-warnings, 30-information on the progress of execution,
 40-more progress information, 50-debug info, 60-detailed debug info.
 Default = 30.</li>
+
+<li>
+<code>--no-schema-validation &lt;T|F&gt;</code> &ndash; Skip
+validation of input file against xml schema. Default = F.</li>
 
 
 </ul>
@@ -343,7 +364,7 @@ score will not be pruned before calculating protein probabilities.
 Default = F.</li>
 
 <li>
-<code>--depth &lt;0|1|2|3&gt;</code> &ndash; Set depth of the grid
+<code>--deepness &lt;0|1|2|3&gt;</code> &ndash; Set depth of the grid
 search for alpha, beta and gamma estimation. The values considered,
 for each possible value of the <code>--depth</code> parameter, are as
 follows:
