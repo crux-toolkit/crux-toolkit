@@ -8,14 +8,10 @@ add_subdirectory(src/c)
 
 install (FILES license.txt DESTINATION .)
 
-# build a CPack driven installer package
-include (InstallRequiredSystemLibraries)
-
-set (CPACK_GENERATOR ZIP)
-set (CPACK_SOURCE_GENERATOR TGZ)
-set (CPACK_PACKAGE_VERSION_MAJOR "1")
-set (CPACK_PACKAGE_VERSION_MINOR "39")
-set (CRUX_VERSION ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR})
+configure_file (
+ "src/c/CruxConfig.h.in"
+ "src/c/CruxConfig.h"
+ )
 
 add_custom_target(
   deep-clean
@@ -24,11 +20,23 @@ add_custom_target(
   COMMENT "Cleaning project tree."
 )
 
-configure_file (
- "src/c/CruxConfig.h.in"
- "src/c/CruxConfig.h"
- )
+# build a CPack driven installer package
+include (InstallRequiredSystemLibraries)
 
+# Set default TARGET_ARCH
+if (NOT TARGET_ARCH)
+ set(TARGET_ARCH "${CMAKE_SYSTEM}")
+endif (NOT TARGET_ARCH)
+
+set (CPACK_GENERATOR ZIP)
+set (CPACK_SOURCE_GENERATOR TGZ)
+set (CPACK_PACKAGE_VERSION_MAJOR "1")
+set (CPACK_PACKAGE_VERSION_MINOR "40")
+set (CRUX_VERSION ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR})
+set(CPACK_PACKAGE_FILE_NAME
+  "${CMAKE_PROJECT_NAME}-${TARGET_ARCH}.${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}")
+set(CPACK_SOURCE_PACKAGE_FILE_NAME
+  "${CMAKE_PROJECT_NAME}-Source.${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}")
 set (
  CPACK_SOURCE_IGNORE_FILES 
    /_CPack_Packages/;
@@ -49,10 +57,12 @@ set (
    /mods/;
    /open_source_download/;
    /paper/;
+   /percolator/;
    /results/;
    /test/;
    /windows/;
    /*\\\\.cmake$/;
    /*\\\\.gz$/
+   /*\\\\.zip$/
 )
 include (CPack)
