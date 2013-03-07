@@ -97,12 +97,12 @@ according to <a href="https://github.com/percolator/percolator/blob/master/src/x
 this schema</a>.  The command <code>crux search-for-matches</code>
 generates results in this format.  Note that this argument can be "-",
 which indicates the pin.xml file should be read from standard input. Input
-may also be given as SQT, PepXML, or tab-delimited files, in which case a
+may also be given as SQT, PepXML, or tab-delimited text, in which case a
 pin.xml file will be generated in the output directory prior to execution.
 Any SQT, PepXML, or tab-delimited file given as input is required to have a
 corresponding decoy file (or corresponding target file, if it is a decoy
-file). For example, if <code>search.target.txt</code> is to be used, the file
-<code>search.decoy.txt</code> must also exist.
+file). For example, if <code>search.target.txt</code> is to be used,
+then the file <code>search.decoy.txt</code> must also exist.
 </li>
 
 </ul>
@@ -144,10 +144,9 @@ programs.
 </li>
 
 <li>
-<b>percolator.pep.xml</b>: a file containing the PSMs in pepxml
-format.
-See <a href="http://tools.proteomecenter.org/wiki/index.php?title=Formats:pepXML">
-pep xml file format</a> for further reference. This file can be used
+<b>percolator.pep.xml</b>: a file containing the PSMs in <a href="http://tools.proteomecenter.org/wiki/index.php?title=Formats:pepXML">pepXML
+format</a>.
+This file can be used
 as input to some of the tools in the
 <a href="http://tools.proteomecenter.org/wiki/index.php?title=Software:TPP">
 Transproteomic Pipeline</a>.
@@ -155,8 +154,8 @@ Transproteomic Pipeline</a>.
 
 <li>
 <b>percolator.mzid</b>: a file containing the protein, peptide, and spectrum
-matches.  See <a href="http://www.psidev.info/mzidentml">the mzIdentML
-specification</a> for further reference.
+matches in <a href="http://www.psidev.info/mzidentml">mzIdentML
+format</a>.
 </li>
 
 <li>
@@ -275,12 +274,15 @@ F.</li>
 
 <li>
 <code>--test-each-iteration &lt;T|F&gt;</code> &ndash; Measure
-performance on the test set each iteration.  Default = F.</li>
+performance on the test set at each iteration.  Default = F.</li>
 
 <li>
-<code>--static-override &lt;T|F&gt;</code> &ndash; Override error
-check and do not fall back on default score vector in case of suspect
-score vector.  Default = F.</li>
+<code>--static-override &lt;T|F&gt;</code> &ndash; By default,
+Percolator will examine the learned weights for each feature, and if
+the weights appear to be problematic, then Percolator will discard the
+learned weights and instead employ a previously trained, static score
+vector.  This switch allows this error checking to be overridden.
+Default = F.</li>
 
 <li>
 <code>--seed &lt;int&gt;</code> &ndash; Set the seed of the random
