@@ -265,7 +265,7 @@ int PercolatorApplication::main(
   perc_args_vec.push_back(to_string(get_double_parameter("c-neg")));
  
   perc_args_vec.push_back("--trainFDR");
-  perc_args_vec.push_back(to_string(get_double_parameter("trian-fdr")));
+  perc_args_vec.push_back(to_string(get_double_parameter("train-fdr")));
  
   perc_args_vec.push_back("--testFDR");
   perc_args_vec.push_back(to_string(get_double_parameter("test-fdr")));
@@ -325,8 +325,11 @@ int PercolatorApplication::main(
       perc_args_vec.push_back("--klammer");
 
 
-  if(get_boolean_parameter("doc"))
+  int doc_parameter = get_int_parameter("doc");
+  if(doc_parameter >= 0) {
     perc_args_vec.push_back("--doc");
+    perc_args_vec.push_back(to_string(doc_parameter));
+  }
 
 
   if(get_boolean_parameter("unique-peptides")&& set_protein == false){ 

@@ -830,17 +830,17 @@ void initialize_parameters(void){
   set_boolean_parameter(
     "decoy-xml-output",
     false,
-    "Include decoys (PSMs, peptides, and/or proteins) int the "
-    "xml-output. Only availabe if -X is used. Default=F",
-    "Available for crux peroclator",
+    "Include decoys (PSMs, peptides, and/or proteins) in the "
+    "xml-output. Only available if -X is used. Default=F",
+    "Available for crux percolator",
     "true"
   );
   set_string_parameter(
     "decoy-prefix",
     "random_",
-    "Option for single SQT fiel mode defining the name pattern "
-    "used for shuffled data base. Default=_random.",
-    "Available for peroclator",
+    "Option for single SQT file mode defining the name pattern "
+    "used for shuffled database. Default=random_.",
+    "Available for percolator",
     "true"
   );
  
@@ -857,7 +857,7 @@ void initialize_parameters(void){
     0.0,0.0,0.90,
     "Penalty for mistake made on negative examples. Set by cross "
     "validation if not specified or --c-pos not specified.",
-    "Available for crux peroclator",
+    "Available for crux percolator",
     "true"
   );
  
@@ -875,7 +875,7 @@ void initialize_parameters(void){
     0.01,0.0,1.0,
     "False discovery rate threshold for evaluating best cross validation result "
     "and the reported end result. Default is 0.01.",
-    "Availble for crux peroclator.",
+    "Availble for crux percolator.",
     "true"
   );
  
@@ -906,7 +906,7 @@ void initialize_parameters(void){
     NULL,
     " Read initial weights from the given file (one per line). Default do not read " 
     "initial weights. Default=F",
-    "Available for crux percoaltor ",
+    "Available for crux percolator ",
     "true"
   );
 /*
@@ -915,30 +915,31 @@ void initialize_parameters(void){
     false,
     " Output the computed features to the given file in tab-delimited format. " 
     "A file with the features with the given file name will be created. Default=F",
-    "Available for crux percoaltor ",
+    "Available for crux percolator ",
     "true"
   );
  */
   set_int_parameter(
-    "defualt-direction",
+    "default-direction",
     0,0,10,
     "The most informative feature given as feature number, can be negated to indicate "
-    "that a lower value is bette",
-    "Availabe for crux peroclator",
+    "that a lower value is better",
+    "Available for crux percolator",
     "true"
   );
   set_boolean_parameter(
     "unitnorm",
     false,
     "Use unit normalization [0-1] instead of standard deviation normalization",
-    "Available for crux percoaltor.",
-    "ture"
+    "Available for crux percolator.",
+    "true"
   );
  
-  set_int_parameter(
+  set_double_parameter(
     "train-fdr",
-    0,0,BILLION,
-    "Setting ssed of the random number generator. Default is 0",
+    0.01,0,BILLION,
+    "False discovery rate threshold to define positive examples in training. "
+    "Set by cross validation if 0. Default is 0.01.",
     "Available for crux percolator",
     "true"
   );
@@ -946,33 +947,33 @@ void initialize_parameters(void){
   set_double_parameter(
     "alpha",
     0.0,0.0,1.0,
-    "Probability with which a present protein emits an associated peptide (to "
-    "be used jointly with the <code>--protein</code> option). Set by grid search of not specified.",
-    "Available for crux percolator",
+    "Probability with which a present protein emits an associated peptide (--protein T "
+    "must be set). Set by grid search if not specified.",
+    "Available for crux percolator if --protein T is set.",
     "true"
   );
   set_double_parameter(
     "beta",
     0.0,0.0,10.0,
-    "Probability of the creation of a peptide from noise (to be used jointly with the protein option)."
-    " Set by grid search of not specified",
-    "Availabe for crux percolator.",
+    "Probability of the creation of a peptide from noise (--protein T "
+    "must be set). Set by grid search if not specified.",
+    "Available for crux percolator if --protein T is set.",
     "true"
   );
  
   set_double_parameter(
     "gamma",
     0.0,0.0,10.0,
-    "Prior probability of that a protein is present in the sample ( to be used with the protein option)."
-    " Set by grid search of not specified.",
-    "Available for crux peroclator",
+    "Prior probability of that a protein is present in the sample (--protein T "
+    "must be set). Set by grid search if not specified.",
+    "Available for crux percolator if --protein T is set.",
     "true"
   );
   set_boolean_parameter(
     "test-each-iteration",
     false,
     "Measure performance on test set each iteration",
-    "Availabe for crux percolator.",
+    "Available for crux percolator.",
     "true"
   );
  
@@ -980,7 +981,7 @@ void initialize_parameters(void){
     "static-override",
     false,
     "Override error check and do not fall back on default score vector in case of suspect score vector.",
-    "Availabe for crux percolator.",
+    "Available for crux percolator.",
     "true"
   );
  
@@ -988,15 +989,15 @@ void initialize_parameters(void){
     "klammer",
     false,
     "Using retention time features calculated as in Klammer et al.",
-    "Available for crux peroclator",
+    "Available for crux percolator",
     "true"
   );
 
 
-  set_boolean_parameter(
+  set_int_parameter(
     "doc",
-    false,
-    "Include description of correct features.Default=F.",
+    -1,0,15,
+    "Include description of correct features.",
     "Avilable for crux percolator",
     "true"
   );
@@ -1013,7 +1014,7 @@ void initialize_parameters(void){
     "no-schema-validation",
     false,
     "Skip validation of input file against xml schema. Default False",
-    "Availabe for crux percolator",
+    "Available for crux percolator",
     "true"
   );
  
@@ -1021,22 +1022,14 @@ void initialize_parameters(void){
     "allow-protein-group",
     false,
     "Treat ties as if it were one protein ",
-    "Available for crux peroclator. This option can be set, if --protein has bee set true.",
+    "Available for crux percolator.",
     "true"
   );
   set_boolean_parameter(
     "protein-level-pi0",
     false,
-    "Use pi_0 value when calculating empirical q-values",
-    "Available for crux percolator. This option can be used, if the --protien has ben set.",
-    "true"
-  );
- 
-  set_boolean_parameter(
-    "empirircal-pretein-q",
-    false,
-    "Output empirical q-values (from target-decoy analysis). Only valid if option --protein=T",
-    "Available for crux-percolator.",
+    "Use pi_0 value when calculating empirical q-values (--protein T must be set).",
+    "Available for crux percolator if --protein T is set.",
     "true"
   );
  
@@ -1051,25 +1044,25 @@ void initialize_parameters(void){
   set_boolean_parameter(
     "group-proteins",
     false,
-    "Proteins with same probabilities will be grouped (Only valid if option --protein=T is active)",
-    "Available for crux percolator",
+    "Proteins with same probabilities will be grouped (--protein T must be set).",
+    "Available for crux percolator if --protein T is set.",
     "true"
   );
 
   set_boolean_parameter(
     "empirical-protein-q",
     false,
-    "Output empirical q-values (from target-decoy analysis.) Only valid if --protein is ture.",
-    "Available for crux percolator",
+    "Output empirical q-values from target-decoy analysis (--protein T must be set).",
+    "Available for crux percolator if --protein T is set.",
     "true"
   );
  
   set_boolean_parameter(
     "no-prune-proteins",
     false,
-    "Peptides with low score will not be pruned before calculating protein probabilities(Only valid if "
-    "option --protein=T is active)",
-    "Available for crux percolator.",
+    "Peptides with low score will not be pruned before calculating protein probabilities "
+    "(--protein T must be set).",
+    "Available for crux percolator if --protein T is set.",
     "true"
   );
 
@@ -1077,9 +1070,9 @@ void initialize_parameters(void){
     "deepness",
     3,0,3,
     "Setting deepness 0 or 1 or 2 or 3 from high deepness to low deepness(less computational time) "
-    "f the grid search for Alpha,Beta and Gamma estimation(Only valid if option --protein. Default "
-    "value is 3.",
-    "Available for crux percolator",
+    "for the grid search for Alpha,Beta and Gamma estimation(--protein T must be set). "
+    "Default value is 3.",
+    "Available for crux percolator if --protein T is set.",
     "true"
   );
  
@@ -1168,8 +1161,8 @@ void initialize_parameters(void){
     "Search result can be as a file or a list of files. This option"
     " allows users to specify the search results are provided as a list of files by " 
     "setting the --list-of-files option to T."
-    " Defualt= false.", 
-    "Availabe for barista.","true");
+    " Default= false.", 
+    "Available for barista.","true");
 
   set_string_parameter("optimization", "protein",
      "Specifies whether to do optimization at the protein, peptide or psm level. "
