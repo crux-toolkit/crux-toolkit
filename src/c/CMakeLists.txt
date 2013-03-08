@@ -3,7 +3,7 @@ cmake_policy(VERSION 2.8.4)
 
 configure_file (
  "CruxConfig.h.in"
- "${PROJECT_BINARY_DIR}/CruxConfig.h"
+ "${CMAKE_CURRENT_BINARY_DIR}/CruxConfig.h"
  )
 
 add_subdirectory(ArrayLibrary)
@@ -13,7 +13,7 @@ add_subdirectory(posterior-error)
 add_subdirectory(qranker-barista)
 add_subdirectory(xlink)
 
-include_directories("${PROJECT_BINARY_DIR}")
+include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 include_directories(.)
 include_directories(ArrayLibrary)
 include_directories(bullseye)
