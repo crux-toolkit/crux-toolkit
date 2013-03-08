@@ -9,11 +9,6 @@ add_subdirectory(src/c/test/smoke-tests)
 
 install (FILES license.txt DESTINATION .)
 
-configure_file (
- "src/c/CruxConfig.h.in"
- "src/c/CruxConfig.h"
- )
-
 add_custom_target(
   deep-clean
   COMMAND ${CMAKE_MAKE_PROGRAM} clean
