@@ -8,12 +8,11 @@
 
 <h3>Before you begin</h3>
 <p>Confirm that a clean check out builds correctly and passes all the
-  smoke and unit tests.  Update the release notes
+  smoke and unit tests. Update the release notes
   (crux/doc/user/release-notes.html).  At the very least, the date
-  will need to be added.  Update index.html in doc/user/downloads and
-  in doc/user/open_source_download to point to the new version and to
-  include links to the previous version. You can also make sure that
-  the default.params file is up-to-date by running
+  will need to be added. Update index.html in doc/user/downloads
+  to point to the new version and to include links to the previous version.
+  You can also make sure that the default.params file is up-to-date by running
   write-default-params.sh in crux/src/c.
 
 <h3>Branching</h3>
@@ -28,35 +27,31 @@ will cease and that directory can be deleted.</p>
 <h3>Version numbers</h3>
 <p>Each time new files are made available for download, the version
 number should increment by 0.01 for minor releases or by 0.1 for major
-releases. The version number is maintained in crux/configure.ac in the
-line <pre>AM_INIT_AUTOMAKE(crux, 1.01)</pre>.  
+releases. The version number is maintained in CMakeLists.txt in the
+root Crux directory in the lines
+<pre>
+set (CPACK_PACKAGE_VERSION_MAJOR "X")
+set (CPACK_PACKAGE_VERSION_MINOR "XX")
+</pre>
 This controls the numbering of packages and what is reported by the 
-<code>--version</code> option.  You must run configure after changing
-configure.ac and make dist (see below) for the new version to take
-effect.</p>
-
-<h3>Creating an open source distribution</h3>
-The process of searching a protein database for matches to observed
-MS/MS spectra is part of the SEQUEST intellectual property. To create
-an open source distribution of Crux this function must be
-disabled. The search function is disabled by including the 
-<code>--disable-search</code> option on the <code>configure</code> 
-command line before running <code>make dist</code>. This option will 
-cause the <code>search_main()</code> function in the 
-<code>match_search.cpp</code> and <code>sequest-search.cpp</code>
-modules to be replaced with a stub. The stub simply prints a message
-that the function has been disabled and exits. A warning is added to
-the <code>crux-search-for-match.html</code> man page that searching
-has been disabled. 
+<code>--version</code> option.
+</p>
 
 <h3>Building packages</h3>
-<p>There are two targets in the root for building packages.  The
-command <code>make dist</code> will create a tarred and zipped file
-in the root containing source code and documentation.  The command
-<code>make bdist</code> will create a zipped file in the root
-containing the compiled binaries for all of the crux tools and the
-documentation.  The binary package can only be built after the
-executables have been built.  The binary package file will include the
+<p>Avoid building packages in the root.
+Create a sub-directory in the root for the relase type (source, 32-bit
+Linux, 64-bit Linux, Darwin).
+Move into the sub-directory and run
+<pre>
+cmake ..
+</pre>
+</p>
+<p>There are two targets for building packages.  
+The command <code>make package_source</code> will create a tarred and zipped file
+containing source code and documentation.
+The command <code>make package</code> will create a zipped file containing 
+the compiled binaries for all of the crux tools and the documentation.  
+The binary package file will include the
 computer architecture and operating system in the name so that builds
 on multiple computers can be easily distinguished.</p>
 
@@ -64,17 +59,6 @@ on multiple computers can be easily distinguished.</p>
 this for each bdist package built.  A new file with the output of the
 checksum is created for each package and will be included on the
 download page.</p>
-
-<p>The base name for the packages can be modified by specifying a value for
-the variable PACKAGE on the make command line. This is useful when creating
-the open source packages, so that the open source packages have a distinct name.
-For example:
-</p>
-<pre>
-    make dist PACKAGE="open_crux"
-    make bdist PACKAGE="open_crux"
-    make checksum PACKAGE="open_crux"
-</pre>
 
 <p>The distribution files are no longer being stored in SVN. However,
 putting the files in <code>crux/doc/user/downloads</code> will
@@ -100,53 +84,29 @@ recorded in <code>crux/ChangeLog</code>.  A more general description of changes
 <li>Create a release branch.
 <li>Do a clean checkout of the release branch.
 <h4>Update documentation</h4>
-<li>Change version number in <code>crux/configure.ac</code>.
+<li>Change version number in <code>crux/CMakeLists.txt</code>.
 <li>Look at the SVN log since the last release and update release
   notes accordingly.
 <li>Change the <code>crux/doc/user/download/index.html</code> page.
-<li>Change the <code>crux/doc/user/open_source_download/index.html</code> page.
 <h4>Build and test</h4>
-<li>Build, checking version number in the configure output.
+<li>Build.
 <li>Check unit and smoke tests.
 <li>Check version number with <code>crux version</code>.
 <li>Commit changes.
 <h4>Create files for distribution</h4>
-<li>Package the full version:
+<li>Create packages
   <ul> 
-    <li><code>make distclean</code>
-    <li><code>./bootstrap</code>
-    <li><code>./configure</code>
-    <li><code>make dist</code>  
-    <li><code>make bdist</code>
+    <li><code>cmake ..</code>
+    <li><code>make package_source</code>
+    <li><code>make package</code>
     <li><code>make checksum</code>
   </ul>
 You should now have these files:
   <ul>
-   <li>crux_1.xx-data.zip
    <li>crux_1.xx.tar.gz
    <li>crux_1.xx.tar.gz.md5sum.txt
    <li>crux_1.xx-PLATFORM.zip
    <li>crux_1.xx-PLATFORM.zip.md5sum.txt
-  </ul>
-<li>Build and package the open-source version:
-  <ul>
-    <li><code>make distclean</code>
-    <li><code>./bootstrap</code>
-    <li><code>./configure --disable-search</code>
-    <li><code>make</code>
-    <li>Check that search is disabled. 
-        <code>src/c/crux search-for-matches a b</code>
-    <li><code>make dist PACKAGE="open_crux"
-    <li><code>make bdist PACKAGE="open_crux"
-    <li><code>make checksum PACKAGE="open_crux"
-  </ul>
-You should have these files:
-  <ul>
-    <li>open_crux_1.xx-data.zip
-    <li>open_crux_1.xx.tar.gz
-    <li>open_crux_1.xx.tar.gz.md5sum.txt
-    <li>open_crux_1.xx-PLATFORM.zip
-    <li>open_crux_1.xx-PLATFORM.zip.md5sum.txt
   </ul>
 
 <li>Repeat the build and package steps for remaining platforms.  Note
