@@ -5,7 +5,7 @@
 #include "MakePinApplication.h"
 #include "PercolatorApplication.h"
 #include "PercolatorAdapter.h"
-#include "src/external/percolator/src/Caller.h"
+#include "Caller.h"
 #include "parameter.h"
 #include <string>
 #include <algorithm>

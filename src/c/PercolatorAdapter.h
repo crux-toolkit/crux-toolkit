@@ -17,7 +17,7 @@
 #include "ProteinMatchCollection.h"
 #include "ProteinMatch.h"
 #include "SpectrumMatch.h"
-#include "src/external/percolator/src/Scores.h"
+#include "Scores.h"
 
 using namespace std;
 

@@ -9,7 +9,12 @@ set (CRUX_VERSION ${CRUX_VERSION_MAJOR}.${CRUX_VERSION_MINOR})
 add_subdirectory(doc/user)
 add_subdirectory(src/external)
 add_subdirectory(src/c)
-add_subdirectory(src/c/test/smoke-tests)
+
+# Only process smoke tests directory if it exiists
+if (EXISTS "src/c/test/smoke-tests/runall")
+  add_subdirectory(src/c/test/smoke-tests)
+endif (EXISTS "src/c/test/smoke-tests/runall")
+
 install(FILES license.txt DESTINATION .)
 
 add_custom_target(
@@ -57,7 +62,6 @@ set (
    /mods/;
    /open_source_download/;
    /paper/;
-   /percolator/;
    /results/;
    /test/;
    /windows/;

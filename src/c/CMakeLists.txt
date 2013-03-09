@@ -27,10 +27,10 @@ include_directories(../external/include)
 include_directories(../external/build/src/ProteoWizard/libraries/boost_1_43_0)
 include_directories(../external/build/src/ProteoWizard/libraries/boost_aux)
 include_directories(../external/MSToolkit/include)
-include_directories(../external/build/src/percolator-build/src)
+include_directories(../external/build/src/percolator/src/)
+include_directories(../external/build/src/percolator/src/fido)
+include_directories(../external/build/src/percolator-build/src/)
 include_directories(../external/build/src/percolator-build/src/fido)
-include_directories(../external/percolator/src/)
-include_directories(../external/percolator/src/fido)
 
 
 link_directories(../external/lib)
