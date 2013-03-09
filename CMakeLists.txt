@@ -11,9 +11,9 @@ add_subdirectory(src/external)
 add_subdirectory(src/c)
 
 # Only process smoke tests directory if it exiists
-if (EXISTS "src/c/test/smoke-tests/runall")
+if (EXISTS "${CMAKE_SOURCE_DIR}/src/c/test/smoke-tests/runall")
   add_subdirectory(src/c/test/smoke-tests)
-endif (EXISTS "src/c/test/smoke-tests/runall")
+endif (EXISTS "${CMAKE_SOURCE_DIR}/src/c/test/smoke-tests/runall")
 
 install(FILES license.txt DESTINATION .)
 
