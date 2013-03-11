@@ -25,6 +25,15 @@ add_custom_target(
   COMMENT "Cleaning project tree."
 )
 
+#ar=`arch`
+#name=`uname`
+#add_custom_target(
+#  checksum
+#	COMMAND md5sum $(distdir)-$(ar)-$(name).zip > $(distdir)-$(ar)-$(name).zip.md5sum.txt
+#	COMMAND md5sum $(distdir).tar.gz > $(distdir).tar.gz.md5sum.txt
+#  COMMENT "Creating checksum files."
+#)
+
 # build a CPack driven installer package
 include (InstallRequiredSystemLibraries)
 
