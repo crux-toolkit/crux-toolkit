@@ -99,6 +99,7 @@ programs.
 <li>
 <b>sequest.target.sqt</b>: an <a href="sqt-format.html">SQT</a> file
 containing the PSMs.
+</li>
 
 <li>
 <b>sequest.target.txt</b>: a tab-delimited text file containing the
@@ -111,6 +112,7 @@ q-ranker</code>.
 <li>
 <b>sequest.log.txt</b>: a log file containing a copy of all messages
 that were printed to stderr.
+</li>
 
 </ul>
 
@@ -145,6 +147,7 @@ peptide-shuffle</code>. Use 'reverse' to reverse each protein sequence,
 'protein-shuffle' to shuffle each protein sequence, or 'peptide-shuffle'
 to shuffle the sequence between enzyme cleavage sites, leaving the
 termini in place. Use 'none' for no decoys.  Default=peptide-shuffle. 
+</li>
 
 <LI>
 <code>--num-decoys-per-target &lt;n&gt;</code> &ndash; 
@@ -173,10 +176,12 @@ Parser to use for reading in MS/MS spectra.  Default = crux.</li>
 <LI>
 <code>--spectrum-min-mass &lt;float&gt;</code> &ndash; 
 The lowest spectrum m/z to search in the ms2 file. Default = 0.0
+</li>
 
 <LI>
 <code>--spectrum-max-mass &lt;float&gt;</code> &ndash; 
 The highest spectrum m/z to search in the ms2 file. Default = no maximum.
+</li>
 
 <LI> 
 <code>--spectrum-charge &lt;1|2|3|all&gt;</code> &ndash; 
@@ -184,17 +189,20 @@ The spectrum charges to search. With 'all' every spectrum will be
 searched and spectra with multiple charge states will be searched once
 at each charge state.  With 1, 2, or 3 only spectra with that charge
 will be searched. Default = all. 
+</li>
 
 <LI>
 <code>--scan-number &lt;number range&gt;</code> &ndash;
 A single scan number or a range of numbers to be searched. Range
 should be specified as 'first-last' which will include scans 'first'
 and 'last'.  Default = search all spectra.
+</li>
 
 <LI><code>--parameter-file &lt;filename&gt;</code> &ndash; 
 A file containing command-line or additional parameters.  See
 the <a href="parameter-file.html">parameter documentation</a> page
 for details.  Default = no parameter file.
+</li>
 
 <LI>
 <code>--verbosity &lt;0-100&gt;</code> &ndash; 
@@ -203,6 +211,7 @@ following messages, including all those at lower verbosity levels:
 0-fatal errors, 10-non-fatal errors, 20-warnings, 30-information on
 the progress of execution, 40-more progress information, 50-debug
 info, 60-detailed debug info. Default = 30.
+</li>
 
 </UL>
 
@@ -214,6 +223,7 @@ info, 60-detailed debug info. Default = 30.
 <code>--min-peaks &lt;int&gt;</code> &ndash;
 The minimum number of peaks a spectrum must have in order to be
 searched.  Default = 20.
+</li>
 
 <li>
 <code>fragment-mass &lt;average|mono&gt;</code> &ndash; 
@@ -258,19 +268,16 @@ defined as spectrum mass / (1.0 - (<code>precursor-window</code> /
 1000000)).  Default = mass.</li>
 
 <li>
-<code>use-mstoolkit &lt;T|F&gt;</code> &ndash;
-Use MSToolkit to parse the spectra. Required for parsing spectra from
-.mzXML files. Default = F.
-
-<li>
 <code>top-match &lt;int&gt;</code> &ndash; 
 The number of psms per spectrum written to the output files. Default =
 5.
+</li>
 
 <li>
 <code>max-rank-preliminary &lt;int&gt;</code> &ndash;
 The number of PSMs to score with XCorr after ranking PSMs by Sp.
 Default = 500.
+</li>
 
 <li>
 
@@ -287,6 +294,7 @@ cross-linking respectively. The same modifications must be given for any
 post-search process (<code>crux compute-q-values</code>, <code>crux
 q-ranker</code>, <code>crux percolator</code>). Default = no
 variable modifications.
+</li>
 
 <li>
 <code>cmod &lt;mass change&gt;:&lt;max distance from protein
@@ -301,6 +309,7 @@ parameters does not exceed 11. The same modifications must be given
 for any post-search process (<code>crux
   compute-q-values</code>, <code>crux q-ranker</code>, <code>crux
   percolator</code>). Default = no c-terminal modifications.
+</li>
 
 <li>
 <code>nmod &lt;mass change&gt;:&lt;max distance from protein N-terminus&gt;
@@ -315,26 +324,31 @@ does not exceed 11. The same modifications must be given for any
 post-search process (<code>crux compute-q-values</code>, <code>crux 
 q-ranker</code>, <code>crux percolator</code>). Default = no
 n-terminal modifications.
+</li>
 
 <li>
 <code>cmod-fixed &lt;mass change&gt&ndash;</code>
 Add a modification of the given mass change to the C-terminus of every
 peptide.
+</li>
 
 <li>
 <code>nmod-fixed &lt;mass change&gt&ndash;</code>
 Add a modification of the given mass change to the N-terminus of every
 peptide.
+</li>
 
 <li>
 <code>max-mods &lt;int&gt;</code> &ndash;
 The maximum number of modifications that can be applied to a single
 peptide. Default = no limit.
+</li>
 
 <li>
 <code>max-aas-modified &lt;int&gt;</code> &ndash;
 The maximum number of modified amino acids that can appear in one
 peptide.  Each aa can be modified multiple times. Default = no limit.
+</li>
 
 <li>
 <code>mod-mass-format &lt;mod-only|total|separate&gt;<code> &ndash;
@@ -356,11 +370,13 @@ D[14,2] with 'separate'.</li>
 <code>precision &lt;int&gt;</code> &ndash;
 Set the precision (number of significant digits) for scores
 written to text files. Default = 8.
+</li>
 
 <li>
 <code>print-search-progress &lt;int&gt;</code> &ndash;
 Show search progress by printing every n spectra searched. Set to
 0 to show no search progress.  Default = 10.
+</li>
 
 <li>
 <code>reverse-sequence &lt;T|F&gt;</code> &ndash;
@@ -370,6 +386,7 @@ changed.  If the target sequence is a palindrome (the same when
 reversed), then the decoy will be generated by shuffling and a note to
 that effect will be printed at verbosity level 40 (DETAILED
 INFO). Default = generate decoys by shuffling.
+</li>
 
 <p>
 <i>NOTE: the following parameters are also used when creating an index
@@ -379,18 +396,22 @@ and must be compatible with any index used.</i></p>
 <code>min-mass &lt;float&gt;</code> &ndash; 
 The minimum neutral mass of the peptides to place in the index. Default
 = 200.
+</li>
 
 <LI>
 <code>max-mass &lt;float&gt;</code> &ndash; 
 The maximum neutral mass of the peptides to place in index. Default = 7200.
+</li>
 	
 <LI>
 <code>min-length &lt;int&gt;</code> &ndash; 
 The minimum length of the peptides to place in the index. Default = 6.
+</li>
 	
 <LI>
 <code>max-length &lt;int&gt;</code> &ndash; 
 The maximum length of the peptides to place in the index. Default = 50.
+</li>
 
 <LI>
 <code>enzyme &lt;trypsin|chymotrypsin|elastase|clostripain|cyanogen-bromide|idosobenzoate|proline-endopeptidase|staph-protease|modified-chymotrypsin|elastase-trypsin-chymotrypsin|no-enzyme&gt;
@@ -406,6 +427,7 @@ residues}.  trypsin [RK]|{P}, elastase [ALIV]|{P}, chymotrypsin
 modified-chymotrypsin [FWYL]|{P}, elastase-trypsin-chymotrypsin
 [ALIVKRWFY]|{P},aspn [X]|[D] (cuts after any residue and before
 D). Default = trypsin.
+</li>
 
 <li>
 <code>custom-enzyme &lt;residues before cleavage | residues after cleavage
@@ -421,6 +443,7 @@ are enclosed in curly braces, '{' and '}'.  Use X to indicate all
 residues.  For example, trypsin cuts after R or K but not before P
 which is represented as <code>[RK]|{P}</code>.  AspN cuts after any
 residue but only before D which is represented as <code>[X]|[D]</code>.
+</li>
 
 <LI>
 <code>digestion &lt;full-digest|partial-digest&gt;</code> &ndash;
@@ -430,17 +453,20 @@ conform to enzyme specificity rules. Used in conjunction with
 the <code>enzyme</code> or <code>custom-enzyme</code> option
 when <code>enzyme</code> is not set to to 'no-enzyme'.   Default
 full-digest.
+</li>
 
 <LI>
 <code>missed-cleavages &lt;T|F&gt;</code> &ndash;
 Allow missed cleavage sites within a peptide.  When used with 
 <code>enzyme</code> and set to true, includes peptides containing
 one or more potential cleavage sites. Default = F.
+</li>
 
 <LI>
 <code>isotopic-mass &lt;average|mono&gt;</code> &ndash; 
 Specify the type of isotopic masses to use when calculating the
 peptide mass. Default = average.
+</li>
    
 <li>
 <code>&lt;A-Z&gt &lt;float&gt;</code> &ndash; 
@@ -448,6 +474,7 @@ Specify static modifications.  This is a mass change applied to the
 given amino acid (in single-letter-code A thru Z) for every peptide in
 which it occurs. Use the <code>mod</code> option for generating
 peptides both with and without the mass change.  Default C=57.
+</li>
 </ul>
 
 <HR></hr>
