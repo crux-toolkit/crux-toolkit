@@ -3,9 +3,7 @@ cmake_policy(VERSION 2.8.1)
 
 # Only create webpage directory if in svn workspace
 if (EXISTS /noble/www/htdocs/proj/crux)
-  message(setting webpage target)
-  #set(WEBDIR /noble/www/htdocs/proj/crux)
-  set(WEBDIR ~/crux-webpage)
+  set(WEBDIR /noble/www/htdocs/proj/crux)
   add_custom_target(
     webpage
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/doc/user

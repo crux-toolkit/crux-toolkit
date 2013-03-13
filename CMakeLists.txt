@@ -25,32 +25,19 @@ add_custom_target(
   COMMENT "Cleaning project tree."
 )
 
-#ar=`arch`
-#name=`uname`
-#add_custom_target(
-#  checksum
-#	COMMAND md5sum $(distdir)-$(ar)-$(name).zip > $(distdir)-$(ar)-$(name).zip.md5sum.txt
-#	COMMAND md5sum $(distdir).tar.gz > $(distdir).tar.gz.md5sum.txt
-#  COMMENT "Creating checksum files."
-#)
-
 # build a CPack driven installer package
 include (InstallRequiredSystemLibraries)
 
-# Set default TARGET_ARCH
-if (NOT TARGET_ARCH)
- set(TARGET_ARCH "${CMAKE_SYSTEM}")
-endif (NOT TARGET_ARCH)
-
+execute_process(COMMAND uname -m OUTPUT_VARIABLE ARCH OUTPUT_STRIP_TRAILING_WHITESPACE)
 set (CPACK_GENERATOR ZIP)
 set (CPACK_SOURCE_GENERATOR TGZ)
 set (CPACK_PACKAGE_VERSION_MAJOR ${CRUX_VERSION_MAJOR})
 set (CPACK_PACKAGE_VERSION_MINOR ${CRUX_VERSION_MINOR})
 set (CRUX_VERSION ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR})
 set(CPACK_PACKAGE_FILE_NAME
-  "${CMAKE_PROJECT_NAME}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CMAKE_SYSTEM_NAME}")
+  ${CMAKE_PROJECT_NAME}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CMAKE_SYSTEM_NAME}.${ARCH})
 set(CPACK_SOURCE_PACKAGE_FILE_NAME
-  "${CMAKE_PROJECT_NAME}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.source")
+  "${CMAKE_PROJECT_NAME}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.Source")
 set (
  CPACK_SOURCE_IGNORE_FILES 
    /_CPack_Packages/;
@@ -78,4 +65,14 @@ set (
    /*\\\\.gz$/
    /*\\\\.zip$/
 )
+
+# Generate checksum files for binary and source packages.
+add_custom_target(
+  checksum
+ 	COMMAND ${CMAKE_COMMAND} -E  md5sum ${CPACK_PACKAGE_FILE_NAME}.zip > ${CPACK_PACKAGE_FILE_NAME}.zip.md5sum.txt
+ 	COMMAND ${CMAKE_COMMAND} -E  md5sum ${CPACK_SOURCE_PACKAGE_FILE_NAME}.tar.gz > ${CPACK_SOURCE_PACKAGE_FILE_NAME}.tar.gz.md5sum.txt
+  COMMENT "Creating checksum files."
+)
+
 include (CPack)
+add_custom_command(TARGET package POST_BUILD COMMAND echo "post package" COMMENT "Done with post package")
