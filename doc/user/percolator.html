@@ -296,13 +296,35 @@ conditions" by Klammer AA, Yi X, MacCoss MJ and Noble WS.
 (<i>Analytical Chemistry</i>. 2007 Aug 15;79(16):6111-8.)</li>
 
 <li>
-<code>--doc &lt;T|F&gt;</code> &ndash; Include description of correct
-features. Default = F.</li>
+<code>--doc &lt;integer&gt;</code> &ndash; With this option, Percolator
+will use so-called "description-of-correct" features, i.e., features
+for which desirable values are learned from the previously identified
+target PSMs.  The absolute value of the difference between the desired
+value and the observed value is then used as a predictive
+feature.  Percolator currently offers four description-of-correct
+features: iso-electric point, mass calibration, retention time and
+iso-electric point.  These features are selected by adding
+up the following values:
+<ul>
+1&nbsp;&nbsp;iso-electric point
+2&nbsp;&nbsp;mass calibration
+4&nbsp;&nbsp;retention time
+8&nbsp;&nbsp;delta_retention_time*delta_mass_calibration
+</ul>
+The recommended usage is to include all features except for the
+iso-electric point (i.e., <code>--doc 14</code>).  Note that when
+using retention time features, a file containing the observed
+retention times can be provided using the -2 option; otherwise, scan
+numbers are used as proxies for retention time.  If tab delimited
+input is used (the -j option), then the retention time and mass
+difference should be specified in the third and forth column of the
+tab delimited file. In that case, there is no need to give a separate
+retention time providing file with the -2 option. Default = 0.</li>
 
 <li>
 <code>--unique-peptides &lt;T|F&gt;</code> &ndash; Do not remove
 redundant peptides; keep all PSMs and exclude peptide level
-probability.
+probabilities.
 </li>
 
 <LI>
