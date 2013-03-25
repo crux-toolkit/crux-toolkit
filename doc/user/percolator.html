@@ -78,8 +78,7 @@ Percolator uses different parameter syntax than the stand-alone
 version of Percolator.</li>
 <li>
 Crux Percolator does not support the
-options <code>--input-feature-file</code>, <code>--clock</code>
-and <code>--exp-mass</code>.</li>
+option <code>--input-feature-file</code>.</li>
 <li>
 Like the rest of the Crux commands, Crux Percolator writes its files
 to an output directory, logs all standard error messages to a log
@@ -312,14 +311,9 @@ up the following values:
 8&nbsp;&nbsp;delta_retention_time*delta_mass_calibration
 </ul>
 The recommended usage is to include all features except for the
-iso-electric point (i.e., <code>--doc 14</code>).  Note that when
-using retention time features, a file containing the observed
-retention times can be provided using the -2 option; otherwise, scan
-numbers are used as proxies for retention time.  If tab delimited
-input is used (the -j option), then the retention time and mass
-difference should be specified in the third and forth column of the
-tab delimited file. In that case, there is no need to give a separate
-retention time providing file with the -2 option. Default = 0.</li>
+iso-electric point (i.e., <code>--doc 14</code>).  Note that if the
+input a file does not contain observed retention times, then scan
+numbers are used as proxies for retention time.  Default = 0.</li>
 
 <li>
 <code>--unique-peptides &lt;T|F&gt;</code> &ndash; Do not remove
