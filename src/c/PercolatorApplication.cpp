@@ -107,7 +107,7 @@ int PercolatorApplication::main(int argc, char** argv) {
     "static-override",
     "seed",
     "klammer",
-    "doc",
+    //"doc",
     "unique-peptides",
     "no-schema-validation",
     "allow-protein-group",
@@ -325,12 +325,13 @@ int PercolatorApplication::main(
       perc_args_vec.push_back("--klammer");
 
 
+  /* --doc option disabled, need retention times in pinxml file
   int doc_parameter = get_int_parameter("doc");
   if(doc_parameter >= 0) {
     perc_args_vec.push_back("--doc");
     perc_args_vec.push_back(to_string(doc_parameter));
   }
-
+  */
 
   if(get_boolean_parameter("unique-peptides")&& set_protein == false){ 
     perc_args_vec.push_back("--unique-peptides");
