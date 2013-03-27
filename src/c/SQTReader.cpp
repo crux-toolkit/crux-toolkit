@@ -173,11 +173,13 @@ void SQTReader::parseSpectrum(string& line) {
   
   last_parsed_ = SQT_LINE_SPECTRUM;
 
-  double precursor_mz = (observed_mass + (MASS_PROTON * (double)(charge - 1))) / (double)charge;
-  vector<int> charge_vec;
-  charge_vec.push_back(charge);
-  current_spectrum_ = new Spectrum(low_scan, high_scan, precursor_mz, charge_vec, "");
   current_zstate_.setSinglyChargedMass(observed_mass, charge);
+  current_spectrum_ = new Spectrum(
+    low_scan,
+    high_scan,
+    current_zstate_.getMZ(),
+    vector<int>(1, charge),
+    "");
   /*
   cerr << "spectrum line:"<<line<<endl;
   cerr << "low scan:"<<low_scan<<endl;
@@ -249,7 +251,7 @@ void SQTReader::parseMatch(string& line) {
 
   Peptide* peptide = new Peptide();
 
-  peptide->setPeptideMass(calculated_mass);
+  peptide->setPeptideMass(calculated_mass - MASS_PROTON);
   peptide->setLength(current_peptide_sequence_.length());
 
   current_match_ = new Match(peptide, current_spectrum_, current_zstate_, false);

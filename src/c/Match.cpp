@@ -623,7 +623,7 @@ void Match::printSqt(
           getRank(XCORR),
           getRank(SP),
           get_int_parameter("mass-precision"),
-          peptide->getPeptideMass(),
+          peptide->getPeptideMass() + MASS_PROTON,
           delta_cn,
           precision,
           score_main,

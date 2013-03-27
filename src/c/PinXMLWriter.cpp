@@ -396,11 +396,6 @@ void PinXMLWriter:: printPSM(
   SpectrumZState& zstate = match->getZState();
   int charge=zstate.getCharge();
    
-  //TODO - Figure out what is apppropiate here.  The xml asks for m/z, but we
-  //are providing singly charge mass for experimental m/z and mass for 
-  //calculated m/z.
-  //calculating singly charged mass
-  //FLOAT_T exp_mz= zstate.getMZ();
   FLOAT_T exp_mass = zstate.getSinglyChargedMass();
   //isDecoy(match);
   if(is_decoy)
@@ -410,10 +405,12 @@ void PinXMLWriter:: printPSM(
 
   string id = getId(charge,is_decoy,scan_number,1); 
     
-  //FLOAT_T calculated_mz = (peptide->calcMass(get_mass_type_parameter("isotopic-mass")) + (FLOAT_T)charge * MASS_PROTON) / (FLOAT_T)charge;
-
   FLOAT_T calculated_mass = peptide->calcMass(get_mass_type_parameter("isotopic-mass"));
 
+  /** TODO update:
+   * calculatedMassToCharge -> calculatedMass
+   * experimentalMassToCharge -> experimentalMass
+   */
   fprintf(
     output_file_,
     "\n  <peptideSpectrumMatch calculatedMassToCharge=\"%.*f\" "

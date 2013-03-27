@@ -235,7 +235,7 @@ void SQTWriter::writePSM(
          << "\t" << xcorr_rank
          << "\t" << sp_rank
          << "\t" << get_int_parameter("mass-precision")
-         << "\t" << peptide->getPeptideMass()
+         << "\t" << peptide->getPeptideMass() + MASS_PROTON
          << "\t" << delta_cn
          << "\t" << get_int_parameter("precision")
          << "\t" << xcorr_score
