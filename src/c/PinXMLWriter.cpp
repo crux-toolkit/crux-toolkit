@@ -405,7 +405,8 @@ void PinXMLWriter:: printPSM(
 
   string id = getId(charge,is_decoy,scan_number,1); 
     
-  FLOAT_T calculated_mass = peptide->calcMass(get_mass_type_parameter("isotopic-mass"));
+  FLOAT_T calculated_mph =
+    peptide->calcMass(get_mass_type_parameter("isotopic-mass")) + MASS_PROTON;
 
   /** TODO update:
    * calculatedMassToCharge -> calculatedMass
@@ -417,7 +418,7 @@ void PinXMLWriter:: printPSM(
     "chargeState=\"%i\""
     " experimentalMassToCharge=\"%.*f\""
     " id=\"%s\" isDecoy=\"%s\">\n",
-    mass_precision_, calculated_mass,
+    mass_precision_, calculated_mph,
     charge, 
     mass_precision_,exp_mass,
     id.c_str(),
