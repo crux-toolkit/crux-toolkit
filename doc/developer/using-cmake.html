@@ -68,6 +68,7 @@ make deep-clean-external
 There is no need to re-run cmake unless you want to change
 the build configuration.
 <p />
+<h2>CMake options</h2>
 The instructions above will build Crux in a default configuration.
 In particular, it will try to install Crux in /usr/local.
 To set a different installation location use
@@ -104,5 +105,66 @@ custom proprerty editor that uses the <code>curese</code> library to create
 a point and click settings editor. Use the command
 <pre>ccmake</pre> 
 (only available  on 64-bit systems).
+<p />
+<h2>Out of source builds</h2>
+CMake supports "out of source builds".
+This performs the build in a separate directory from the actual source tree.
+It turns out that this is very handy for several reasons. 
+It lets you keep separate debug and release builds,
+it makes for better integration with TeamCity or Jenkins,
+and it keeps random intermediate files from being inadvertently included
+in the source release.
+<p />
+To perform an out of source build of Crux: 
+<ul>
+<li>
+Create a director where you want to do the build.
+</li>
+<li>
+Move into that directory and run:
+<pre>
+  cmake [CMake options] <path to root directory of Crux distributions>
+  make
+</pre>
+</li>
+</ul>
+For example,
+if the Crux source tree is in <code>crux-source</code>
+and you wanted to create separate debug and release builds you could 
+run the following commands:
+<pre>
+mkdir debug
+mkdir release
+cd debug
+cmake -DCMAKE_BUILD_TYPE=Debug ../crux-src
+make
+cd ../release
+cmake ../crux-src
+make
+</pre>
+Or, if you wanted to build the source and binary distributions for Crux:
+<pre>
+mkdir source-dist
+mkdir linux-x86_64-dist
+cd source-dist
+cmake ../crux-src
+make package_source
+cd ../linux-x86_64-dist
+cmake ../crux-src
+make package
+</pre>
+<b>Note</b>:
+if you've already done a build in the source tree
+CMake won't let you do an out of source build.
+You'll first have to clean up all the CMake intermediate files.
+In the Crux source root run:
+<pre>
+make deep-clean
+</pre>
+<h2>Running smoke tests</h2>
+I've also added a target to run the smoke-tests:
+<pre>
+make smoke-tests
+</pre>
 </body>
 </html>
