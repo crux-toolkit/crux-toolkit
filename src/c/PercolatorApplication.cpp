@@ -86,6 +86,7 @@ int PercolatorApplication::main(int argc, char** argv) {
     "mzid-output",
     "pepxml-output",
     "feature-file",
+    "feature-in-file",
     "parameter-file",
     "protein",
     "decoy-xml-output",
@@ -136,47 +137,48 @@ int PercolatorApplication::main(int argc, char** argv) {
   ;
 
   string input_pinxml(get_string_parameter_pointer("pin.xml"));
-
-  // Check if we need to run make-pin first
-  if (has_extension(input_pinxml.c_str(), "txt") ||
-      has_extension(input_pinxml.c_str(), "sqt") ||
-      has_extension(input_pinxml.c_str(), "pep.xml")) {
-    string input_decoy(input_pinxml);
-    int target_pos = input_pinxml.find("target");
-    if (target_pos < 0) {
-      int decoy_pos = input_pinxml.find("decoy");
-      if (decoy_pos < 0) {
-        carp(CARP_FATAL, "Not a PIN, target, or decoy file: %s",
-                         input_pinxml.c_str());
+  
+  if (!get_boolean_parameter("feature-in-file")) {
+    // Check if we need to run make-pin first
+    if (has_extension(input_pinxml.c_str(), "txt") ||
+        has_extension(input_pinxml.c_str(), "sqt") ||
+        has_extension(input_pinxml.c_str(), "pep.xml")) {
+      string input_decoy(input_pinxml);
+      int target_pos = input_pinxml.find("target");
+      if (target_pos < 0) {
+        int decoy_pos = input_pinxml.find("decoy");
+        if (decoy_pos < 0) {
+          carp(CARP_FATAL, "Not a PIN, target, or decoy file: %s",
+                           input_pinxml.c_str());
+        }
+        // user gave decoy results file
+        input_pinxml.replace(decoy_pos, 5, "target");
+      } else {
+        // user gave target results file
+        input_decoy.replace(target_pos, 6, "decoy");
       }
-      // user gave decoy results file
-      input_pinxml.replace(decoy_pos, 5, "target");
-    } else {
-      // user gave target results file
-      input_decoy.replace(target_pos, 6, "decoy");
+  
+      // check that files exist
+      if (!file_exists(input_pinxml)) {
+        carp(CARP_FATAL, "Target file %s not found", input_pinxml.c_str());
+      } else if (!file_exists(input_decoy)) {
+        carp(CARP_FATAL, "Decoy file %s not found", input_decoy.c_str());
+      }
+  
+      string pin_location = string(get_string_parameter_pointer("output-dir")) +
+                            "/make-pin.pin.xml";
+      const char* make_pin_file = pin_location.c_str();
+  
+      carp(CARP_INFO, "Running make-pin with '%s' and decoy file '%s'.",
+           input_pinxml.c_str(), input_decoy.c_str());
+      int ret = MakePinApplication::main(input_pinxml, input_decoy);
+      if (ret != 0 || !file_exists(make_pin_file)) {
+        carp(CARP_FATAL, "make-pin failed. Not running Percolator.");
+      }
+      carp(CARP_INFO, "Finished make-pin.");
+      input_pinxml = string(make_pin_file);
     }
-
-    // check that files exist
-    if (!file_exists(input_pinxml)) {
-      carp(CARP_FATAL, "Target file %s not found", input_pinxml.c_str());
-    } else if (!file_exists(input_decoy)) {
-      carp(CARP_FATAL, "Decoy file %s not found", input_decoy.c_str());
-    }
-
-    string pin_location = string(get_string_parameter_pointer("output-dir")) +
-                          "/make-pin.pin.xml";
-    const char* make_pin_file = pin_location.c_str();
-
-    carp(CARP_INFO, "Running make-pin with '%s' and decoy file '%s'.",
-         input_pinxml.c_str(), input_decoy.c_str());
-    int ret = MakePinApplication::main(input_pinxml, input_decoy);
-    if (ret != 0 || !file_exists(make_pin_file)) {
-      carp(CARP_FATAL, "make-pin failed. Not running Percolator.");
-    }
-    carp(CARP_INFO, "Finished make-pin.");
-    input_pinxml = string(make_pin_file);
   }
-
   return main(input_pinxml);
 
 }
@@ -223,8 +225,6 @@ int PercolatorApplication::main(
   if(get_boolean_parameter("protein")){
      perc_args_vec.push_back("-A");
   }
-   
-
   
   if(get_boolean_parameter("decoy-xml-output")){
     perc_args_vec.push_back("-Z");
@@ -359,7 +359,13 @@ int PercolatorApplication::main(
     perc_args_vec.push_back("--deepness");
     perc_args_vec.push_back(to_string(get_int_parameter("deepness")));
   }
+  
+  //This has to be a the end in order for it to work.
+  if(get_boolean_parameter("feature-in-file")) {
+    perc_args_vec.push_back("-j");
+  }
 
+  
    perc_args_vec.push_back(input_pinxml);
 
    

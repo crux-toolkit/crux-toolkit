@@ -819,6 +819,16 @@ void initialize_parameters(void){
      "Available for percolator and q-ranker.  File will be named "
      "<fileroot>.percolator.features.txt or <fileroot>.qranker.features.txt.",
      "true");
+  
+  set_boolean_parameter("feature-in-file", false,
+      "Input files are given as a tab delimited file. In this case the only argument should be a file name "
+      "of the data file. The tab delimited fields should be id <tab> label <tab> feature1 "
+      "<tab> ... <tab> featureN <tab> peptide <tab> proteinId1 <tab> .. <tab> proteinIdM "
+      "Labels are interpreted as 1 -- positive set "
+      "and test set, -1 -- negative set.",
+      "Available for percolator",
+      "true");
+  
   set_boolean_parameter(
     "protein",
     false,

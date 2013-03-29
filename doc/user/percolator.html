@@ -77,9 +77,6 @@ To maintain consistency with the rest of the Crux commands, Crux
 Percolator uses different parameter syntax than the stand-alone
 version of Percolator.</li>
 <li>
-Crux Percolator does not support the
-option <code>--input-feature-file</code>.</li>
-<li>
 Like the rest of the Crux commands, Crux Percolator writes its files
 to an output directory, logs all standard error messages to a log
 file, and is capable of reading parameters from a parameter file.</li>
@@ -102,6 +99,8 @@ Any SQT, PepXML, or tab-delimited file given as input is required to have a
 corresponding decoy file (or corresponding target file, if it is a decoy
 file). For example, if <code>search.target.txt</code> is to be used,
 then the file <code>search.decoy.txt</code> must also exist.
+When <code>feature-in-file=T</code>, then the input file will be a tab-delimited
+feature file, see <code>feature-in-file</code> option below.
 </li>
 
 </ul>
@@ -197,6 +196,16 @@ results file to the output directory. Default = F.</li>
 <code>--feature-file &lt;T|F&gt;</code> &ndash; Output the
 computed features in tab-delimited text format to a file
 named "percolator.feature.txt." Default = F</li>
+
+<li>
+<code>--feature-in-file &lt;T|F&gt;</code> &ndash; Input files
+are given as a tab delimited file. In this case the only
+argument should be a file name of the data file. The tab delimited
+fields should be id &lt;tab&gt; label &lt;tab&gt; feature1 &lt;tab&gt; ... &lt;tab&gt;
+featureN &lt;tab&gt; peptide &lt;tab&gt; proteinId1 &lt;tab&gt; .. &lt;tab&gt; proteinIdM
+Labels are interpreted as 1 -- positive set and test set, -1 --
+negative set.
+</li>
 
 <LI>
 <code>--parameter-file &lt;filename&gt;</code> &ndash;
