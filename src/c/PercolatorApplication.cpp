@@ -403,7 +403,7 @@ int PercolatorApplication::main(
   // write txt
   if (get_boolean_parameter("txt-output")) {
     PMCDelimitedFileWriter txt_writer;
-    string txt_path = make_file_path("percolator");
+    string txt_path = make_file_path("percolator.target");
     txt_writer.writeAll(this, protein_match_collection, txt_path);
   }
 

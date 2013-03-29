@@ -187,6 +187,9 @@ void ProteinMatchCollection::addMatch(
   //create a spectrum match.
   SpectrumMatch* spectrum_match = new SpectrumMatch(match->getSpectrum());
   spectrum_match->setZState(match->getZState());
+  spectrum_match->setScore(DELTA_CN, match->getDeltaCn());
+  spectrum_match->setScore(BY_IONS_MATCHED, match->getBYIonMatched());
+  spectrum_match->setScore(BY_IONS_TOTAL, match->getBYIonPossible());
   spectrum_matches_.push_back(spectrum_match);
 
   Peptide* peptide = match->getPeptide();
@@ -207,11 +210,6 @@ void ProteinMatchCollection::addMatch(
       spectrum_match->setRank(score_type, match->getRank(score_type));
     }
   }
-
-  peptide_match->setScore(DELTA_CN, match->getDeltaCn());
-  peptide_match->setScore(BY_IONS_MATCHED, match->getBYIonMatched());
-  peptide_match->setScore(BY_IONS_TOTAL, match->getBYIonPossible());
-  peptide_match->setScore(MATCHES_SPECTRUM, expf(match->getLnExperimentSize())+0.5);
 
   for (PeptideSrcIterator src_iter = peptide->getPeptideSrcBegin();
     src_iter != peptide->getPeptideSrcEnd();

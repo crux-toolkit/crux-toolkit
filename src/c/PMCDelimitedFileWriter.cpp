@@ -249,7 +249,7 @@ void PMCDelimitedFileWriter::setUpPeptidesColumns(
   //addColumnName(XCORR_RANK_COL);
   //addColumnName(BY_IONS_MATCHED_COL);
   //addColumnName(BY_IONS_TOTAL_COL);
-  addColumnName(MATCHES_SPECTRUM_COL);
+  //addColumnName(MATCHES_SPECTRUM_COL);
   addColumnName(SEQUENCE_COL);
   addColumnName(CLEAVAGE_TYPE_COL);
   addColumnName(PROTEIN_ID_COL);
@@ -328,7 +328,7 @@ void PMCDelimitedFileWriter::writePeptides(
     addScoreIfExists(match, PERCOLATOR_QVALUE, PERCOLATOR_QVALUE_COL);
     addScoreIfExists(match, BY_IONS_MATCHED, BY_IONS_MATCHED_COL);
     addScoreIfExists(match, BY_IONS_TOTAL, BY_IONS_TOTAL_COL);
-    addScoreIfExists(match, MATCHES_SPECTRUM, MATCHES_SPECTRUM_COL);
+    //addScoreIfExists(match, MATCHES_SPECTRUM, MATCHES_SPECTRUM_COL);
 
     MODIFIED_AA_T* mod_seq = peptide->getModifiedAASequence();
     char* seq_with_masses = modified_aa_string_to_string_with_masses(
@@ -405,9 +405,9 @@ void PMCDelimitedFileWriter::writePSMs(
   ProteinMatchCollection* collection ///< collection to be written
   ) {
 
-    string cleavage = getCleavageType();
+  string cleavage = getCleavageType();
 
-    for (SpectrumMatchIterator iter = collection->spectrumMatchBegin();
+  for (SpectrumMatchIterator iter = collection->spectrumMatchBegin();
        iter != collection->spectrumMatchEnd();
        ++iter) {
     SpectrumMatch* match = *iter;
@@ -415,6 +415,21 @@ void PMCDelimitedFileWriter::writePSMs(
     SpectrumZState& zstate = match->getZState();
     PeptideMatch* pep_match = match->getPeptideMatch();
     Peptide* peptide = pep_match->getPeptide();
+
+    // collect peptides info
+    int matches_spectrum = 0;
+    for (PeptideMatchIterator pep_iter = collection->peptideMatchBegin();
+         pep_iter != collection->peptideMatchEnd();
+         ++pep_iter) {
+      for (SpectrumMatchIterator spec_iter = (*pep_iter)->spectrumMatchBegin();
+           spec_iter != (*pep_iter)->spectrumMatchEnd();
+           ++spec_iter) {
+        if ((*spec_iter)->getSpectrum()->getFirstScan() == spectrum->getFirstScan()) {
+          ++matches_spectrum;
+          break;
+        }
+      }
+    }
 
     setColumnCurrentRow(SCAN_COL, spectrum->getFirstScan());
     setColumnCurrentRow(CHARGE_COL, zstate.getCharge());
@@ -431,7 +446,7 @@ void PMCDelimitedFileWriter::writePSMs(
     addScoreIfExists(match, PERCOLATOR_QVALUE, PERCOLATOR_QVALUE_COL);
     addScoreIfExists(pep_match, BY_IONS_MATCHED, BY_IONS_MATCHED_COL);
     addScoreIfExists(pep_match, BY_IONS_TOTAL, BY_IONS_TOTAL_COL);
-    addScoreIfExists(pep_match, MATCHES_SPECTRUM, MATCHES_SPECTRUM_COL);
+    setColumnCurrentRow(MATCHES_SPECTRUM_COL, matches_spectrum);
 
     MODIFIED_AA_T* mod_seq = peptide->getModifiedAASequence();
     char* seq_with_masses = modified_aa_string_to_string_with_masses(

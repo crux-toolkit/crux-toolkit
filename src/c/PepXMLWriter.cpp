@@ -335,8 +335,7 @@ void PepXMLWriter::printScores(
  ){
   string ranks_to_string[2]= {"sp_rank","xcorr_rank"};
   for(int score_idx = 0; score_idx < NUMBER_SCORER_TYPES; score_idx++){
-    if(score_idx == BY_IONS_MATCHED || score_idx == BY_IONS_TOTAL ||
-       score_idx == MATCHES_SPECTRUM) {
+    if(score_idx == BY_IONS_MATCHED || score_idx == BY_IONS_TOTAL) {
       continue;
     }
     if(scores_computed[score_idx]){

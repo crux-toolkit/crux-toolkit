@@ -712,8 +712,7 @@ void MzIdentMLWriter::addProteinScores(
 
     SCORER_TYPE_T score_type = iter->first;
     if (score_type == DELTA_CN || score_type == DELTA_LCN ||
-        score_type == BY_IONS_MATCHED || score_type == BY_IONS_TOTAL ||
-        score_type == MATCHES_SPECTRUM) {
+        score_type == BY_IONS_MATCHED || score_type == BY_IONS_TOTAL) {
       continue;
     }
     FLOAT_T score = iter->second;
@@ -748,8 +747,7 @@ void MzIdentMLWriter::addPeptideScores(
 
     SCORER_TYPE_T score_type = iter->first;
     if (score_type == DELTA_CN || score_type == DELTA_LCN ||
-        score_type == BY_IONS_MATCHED || score_type == BY_IONS_TOTAL ||
-        score_type == MATCHES_SPECTRUM) {
+        score_type == BY_IONS_MATCHED || score_type == BY_IONS_TOTAL) {
       continue;
     }
     FLOAT_T score = iter->second;

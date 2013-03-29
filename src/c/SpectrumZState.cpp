@@ -32,6 +32,18 @@ SpectrumZState::SpectrumZState(
   area_ = 0;
 }
 
+/**
+ * copy constructor
+ */
+SpectrumZState::SpectrumZState(
+  const SpectrumZState& other
+) {
+  charge_ = other.charge_;
+  neutral_mass_ = other.neutral_mass_;
+  rtime_ = other.rtime_;
+  area_ = other.area_;
+}
+
 /** 
  * Default destructor
  */
@@ -63,7 +75,9 @@ void SpectrumZState::setMZ(
 
 FLOAT_T SpectrumZState::getMZ() {
 
-  return (neutral_mass_ + (FLOAT_T)charge_*MASS_PROTON) / (FLOAT_T)charge_;
+  return (neutral_mass_ > 0) ?
+    (neutral_mass_ + (FLOAT_T)charge_*MASS_PROTON) / (FLOAT_T)charge_ :
+    0;
 }
 
 
@@ -85,7 +99,9 @@ void SpectrumZState::setSinglyChargedMass(
  */
 FLOAT_T SpectrumZState:: getSinglyChargedMass() const {
   
-  return neutral_mass_ + MASS_PROTON;
+  return (neutral_mass_ > 0) ?
+    neutral_mass_ + MASS_PROTON :
+    0;
 }
 
 /**
@@ -105,7 +121,7 @@ void SpectrumZState::setNeutralMass(
  */
 FLOAT_T SpectrumZState::getNeutralMass() const {
 
-  return neutral_mass_;
+  return (neutral_mass_ > 0) ? neutral_mass_ : 0;
 }
 
 /** 

@@ -525,7 +525,6 @@ static const char* scorer_type_strings[NUMBER_SCORER_TYPES] =
    "delta_lcn",
    "by_ions_matched",
    "by_ions_total",
-   "matches_spectrum"
   };
 
 bool string_to_scorer_type(const char* name, SCORER_TYPE_T* result){

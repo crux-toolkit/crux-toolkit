@@ -39,6 +39,13 @@ class SpectrumZState {
     int charge
   );
 
+  /**
+   * copy constructor
+   */
+  SpectrumZState(
+    const SpectrumZState& other
+  );
+
   /** 
    * Default destructor
    */
