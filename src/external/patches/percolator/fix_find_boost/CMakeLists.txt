@@ -65,24 +65,55 @@ else()
   set( xdr_flags  --generate-insertion XDR --generate-extraction XDR  )
 endif()
 
+
 # RUN CODESYNTHESIS TO GENERATE xsdfiles for pin (percolator input)
 set(xsdfiles_in ${CMAKE_CURRENT_BINARY_DIR}/percolator_in.cxx ${CMAKE_CURRENT_BINARY_DIR}/percolator_in.hxx )
 set(percolator_in xml/percolator_in.xsd)
+if (CYGWIN)
+    # On Cygwin XSD expects Windows style paths so we use cygpath to covert from UNIX style paths.
+	message(STATUS "Running on cygwin")
+	execute_process(
+		COMMAND cygpath -w ${CMAKE_CURRENT_SOURCE_DIR}/${percolator_in}
+		OUTPUT_VARIABLE XSD_IN_INPUT_FILE
+		OUTPUT_STRIP_TRAILING_WHITESPACE
+	)
+else(CYGWIN)
+	message(STATUS "Not running on Cygwin")
+	set(XSD_IN_INPUT_FILE ${CMAKE_CURRENT_SOURCE_DIR}/${percolator_in})
+endif(CYGWIN)
+message(STATUS "XSD_IN_INPUT FILE = ${XSD_IN_INPUT_FILE}")
+message(STATUS "xsdfiles_in = ${xsdfiles_in}")
 add_custom_command(
   OUTPUT ${xsdfiles_in}   
-  COMMAND ${XSD_EXECUTABLE} ARGS cxx-tree   --generate-serialization  ${xdr_flags} --root-element-all  --namespace-map ${percolator-in-namespace}=percolatorInNs ${CMAKE_CURRENT_SOURCE_DIR}/${percolator_in}
-  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${percolator_in}
+  COMMAND ${XSD_EXECUTABLE} ARGS cxx-tree --generate-serialization ${xdr_flags} --root-element-all  --namespace-map ${percolator-in-namespace}=percolatorInNs '${XSD_IN_INPUT_FILE}'
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${percolator_in}
+  COMMENT "Running XSD"
 )
 
 # RUN CODESYNTHESIS TO GENERATE xsdfiles for pout (percolator output)
-set(xsdfiles_out ${CMAKE_CURRENT_BINARY_DIR}/percolator_out.cxx ${CMAKE_CURRENT_BINARY_DIR}/percolator_out.hxx )
+set(xsdfiles_out ${CMAKE_CURRENT_BINARY_DIR}/percolator_out.cxx ${CMAKE_CURRENT_BINARY_DIR}/percolator_out.hxx)
 set(percolator_out xml/percolator_out.xsd)
+if (CYGWIN)
+    # On Cygwin XSD expects Windows style paths so we use cygpath to covert from UNIX style paths.
+	message(STATUS "Running on Cygwin")
+	execute_process(
+		COMMAND cygpath -w ${CMAKE_CURRENT_SOURCE_DIR}/${percolator_out}
+		OUTPUT_VARIABLE XSD_OUT_INPUT_FILE
+		OUTPUT_STRIP_TRAILING_WHITESPACE
+	)
+else(CYGWIN)
+	message(STATUS "Not running on Cygwin")
+	set(XSD_OUT_INPUT_FILE ${CMAKE_CURRENT_SOURCE_DIR}/${percolator_out})
+endif(CYGWIN)
+message(STATUS "XSD_OUT_INPUT_FILE = ${XSD_OUT_INPUT_FILE}")
+message(STATUS "xsdfiles_out = ${xsdfiles_out}")
 add_custom_command(
   OUTPUT ${xsdfiles_out}   
-  COMMAND ${XSD_EXECUTABLE} ARGS cxx-tree   --generate-serialization ${xdr_flags} --root-element-all  --namespace-map ${percolator-out-namespace}=percolatorOutNs ${CMAKE_CURRENT_SOURCE_DIR}/${percolator_out}
-  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${percolator_out}
+  COMMAND ${XSD_EXECUTABLE} ARGS cxx-tree   --generate-serialization ${xdr_flags} --root-element-all  --namespace-map ${percolator-out-namespace}=percolatorOutNs '${XSD_OUT_INPUT_FILE}'
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${percolator_out}
+  COMMENT "Running XSD"
 )
 
 add_definitions(-D_NO_CEPHES -DOLD_BOOST -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_POSIX_SOURCE -D_POSIX_C_SOURCE -D_NOSQLITE)
