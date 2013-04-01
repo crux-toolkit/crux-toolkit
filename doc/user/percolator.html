@@ -198,14 +198,12 @@ computed features in tab-delimited text format to a file
 named "percolator.feature.txt." Default = F</li>
 
 <li>
-<code>--feature-in-file &lt;T|F&gt;</code> &ndash; Input files
-are given as a tab delimited file. In this case the only
-argument should be a file name of the data file. The tab delimited
-fields should be id &lt;tab&gt; label &lt;tab&gt; feature1 &lt;tab&gt; ... &lt;tab&gt;
-featureN &lt;tab&gt; peptide &lt;tab&gt; proteinId1 &lt;tab&gt; .. &lt;tab&gt; proteinIdM
-Labels are interpreted as 1 -- positive set and test set, -1 --
-negative set.
-</li>
+<code>--feature-in-file &lt;T|F&gt;</code> &ndash; Input files are
+given as a tab delimited file. In this case the only argument should
+be a file name of the data file. The tab-delimited fields should be
+identifier, label, feature1, ..., featureN, peptide, proteinId1, ...,
+proteinIdM.  Labels are interpreted as 1 = positive set and test set,
+-1 = negative set.</li>
 
 <LI>
 <code>--parameter-file &lt;filename&gt;</code> &ndash;
