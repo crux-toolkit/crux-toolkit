@@ -1995,7 +1995,7 @@ bool MatchCollection::printXml(
   }
 
   // calculate delta_cn and populate fields in the matches
-  calculateDeltaCn(SEARCH_COMMAND);
+  calculateDeltaCn();
 
   // for deciding when to quit
   int count = 0;
@@ -2116,7 +2116,7 @@ bool MatchCollection::printSqt(
   int num_matches = experiment_size_;
 
   // calculate delta_cn and populate fields in the matches
-  calculateDeltaCn(SEQUEST_COMMAND);
+  calculateDeltaCn();
 
   // First, print spectrum info
   spectrum->printSqt(output, num_matches, zstate);
@@ -2643,9 +2643,7 @@ void MatchCollection::processRunSpecificFeatures() {
  * Sorts match_collection by xcorr, if necessary.
  * 
  */
-bool MatchCollection::calculateDeltaCn(
-  COMMAND_T search_type
-  ){
+bool MatchCollection::calculateDeltaCn(){
 
   if( scored_type_[XCORR] == false ){
     carp(CARP_WARNING, 
@@ -2682,11 +2680,11 @@ bool MatchCollection::calculateDeltaCn(
       }   
     
       if(fabs(delta_cn)== numeric_limits<FLOAT_T>::infinity()){
-        cerr<<"delta_cn was "<<delta_cn<<" and set to zero. XCorr score is "<<current_xcorr<<endl;
+        carp(CARP_DEBUG, "delta_cn was %f and set to zero. XCorr score is %f", delta_cn, current_xcorr);
         delta_cn = 0.0;
       }   
       if(fabs(delta_lcn) == numeric_limits<FLOAT_T>::infinity()){
-        cerr<<"delta_lcn was"<< delta_lcn<<" and set to zero. XCorr score is "<<current_xcorr<<endl;
+        carp(CARP_DEBUG, "delta_lcn was %f and set to zero. XCorr score is %f", delta_lcn, current_xcorr);
         delta_lcn = 0.0;
       }   
       matches[idx]->setDeltaCn(delta_cn);

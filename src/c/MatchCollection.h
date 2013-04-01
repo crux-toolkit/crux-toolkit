@@ -345,9 +345,7 @@ class MatchCollection {
    */
   int getCharge();
 
-  bool calculateDeltaCn(
-    COMMAND_T search_type = SEARCH_COMMAND
-  );
+  bool calculateDeltaCn();
 
   /**
    * Must have been scored by Xcorr, returns error if not scored by Xcorr
