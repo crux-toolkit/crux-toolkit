@@ -7,6 +7,11 @@
 #define XSD_CXX_TREE_XDR_STREAM_INSERTION_HXX
 
 #include <rpc/types.h>
+// In Cygwin these types seem not to have been defined.
+typedef	unsigned char		u_char;
+typedef	unsigned short	u_short;
+typedef	unsigned int		u_int;
+typedef	unsigned long		u_long;
 #include <rpc/xdr.h>
 
 // Of course BSD has to be different and name its functions u_intXX
