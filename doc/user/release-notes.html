@@ -84,7 +84,7 @@ Percolator. Rather than using
 </pre>
 it is now computed using
 <pre>
-     deltaCn<sub>i</sub> = (xcorr<sub>i</sub> - xcorr<sub>i+1</sub>) / xcorr<sub>i</sub>
+     deltaCn<sub>i</sub> = (xcorr<sub>i</sub> - xcorr<sub>i+1</sub>) / max(xcorr<sub>i</sub>, 1.0)
 </pre>
 </li>
 

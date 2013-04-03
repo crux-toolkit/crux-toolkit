@@ -2671,13 +2671,8 @@ bool MatchCollection::calculateDeltaCn(){
       current_xcorr = matches[idx]->getScore(XCORR);
       if (idx+1<=num_matches-1)
         next_xcorr=matches[idx+1]->getScore(XCORR);
-      if (current_xcorr > 0 ) { 
-        delta_cn = (FLOAT_T)(current_xcorr - next_xcorr) / (FLOAT_T)current_xcorr;
-        delta_lcn = (FLOAT_T)(current_xcorr - last_xcorr) /(FLOAT_T)current_xcorr;
-      } else {
-        delta_cn = 0.0;
-        delta_lcn = 0.0;
-      }   
+      delta_cn = (current_xcorr - next_xcorr) / max(current_xcorr, (FLOAT_T)1.0);
+      delta_lcn = (current_xcorr - last_xcorr) / max(current_xcorr, (FLOAT_T)1.0);
     
       if(fabs(delta_cn)== numeric_limits<FLOAT_T>::infinity()){
         carp(CARP_DEBUG, "delta_cn was %f and set to zero. XCorr score is %f", delta_cn, current_xcorr);

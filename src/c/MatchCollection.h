@@ -11,6 +11,7 @@
 #define MATCH_COLLECTION_H
 
 
+#include <algorithm>
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
