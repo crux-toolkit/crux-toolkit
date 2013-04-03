@@ -79,7 +79,7 @@ ExternalProject_Add(
   BUILD_IN_SOURCE 1
 )
 
-if (APPLE)
+if (APPLE OR CYGWIN)
   ExternalProject_Add(
     XSD
     PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
@@ -92,7 +92,7 @@ if (APPLE)
     INSTALL_COMMAND make CPPFLAGS="${CPP_ARGS}" LDFLAGS="${LD_ARGS}" install_prefix=${CMAKE_CURRENT_SOURCE_DIR} install
     BUILD_IN_SOURCE 1
   )
-else(APPLE)
+else(APPLE OR CYGWIN)
   ExternalProject_Add(
     XSD
     PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
@@ -104,7 +104,7 @@ else(APPLE)
     INSTALL_COMMAND make CPPFLAGS="${CPP_ARGS}" LDFLAGS="${LD_ARGS}" install_prefix=${CMAKE_CURRENT_SOURCE_DIR} install
     BUILD_IN_SOURCE 1
   )
-endif(APPLE)
+endif(APPLE OR CYGWIN)
 
 
 if (APPLE)
