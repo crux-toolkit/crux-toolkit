@@ -110,7 +110,6 @@ int PercolatorApplication::main(int argc, char** argv) {
     "klammer",
     //"doc",
     "unique-peptides",
-    "no-schema-validation",
     "allow-protein-group",
     "protein-level-pi0",
     "empirical-protein-q",
@@ -337,7 +336,7 @@ int PercolatorApplication::main(
     perc_args_vec.push_back("--unique-peptides");
    }
   
-  if(get_boolean_parameter("no-schema-validation"))
+  // FIXME include schema as part of distribution and add option to turn on validation
     perc_args_vec.push_back("-s");
   
   if(get_boolean_parameter("allow-protein-group"))

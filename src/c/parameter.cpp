@@ -1021,14 +1021,6 @@ void initialize_parameters(void){
   );
 
   set_boolean_parameter(
-    "no-schema-validation",
-    false,
-    "Skip validation of input file against xml schema. Default False",
-    "Available for crux percolator",
-    "true"
-  );
- 
-  set_boolean_parameter(
     "allow-protein-group",
     false,
     "Treat ties as if it were one protein ",
