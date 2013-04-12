@@ -661,7 +661,7 @@ void initialize_parameters(void){
       "use decoys in the index or generate them from the fasta file.", "true");
   set_int_parameter("num-decoys-per-target", 1, 0, 10,
       "Number of decoy peptides to search for every target peptide searched."
-      "Only valid for fasta searches when --decoys is not none. Default=0.",
+      "Only valid for fasta searches when --decoys is not none. Default=1.",
       "Use --decoy-location to control where they are returned (which "
       "file(s)) and --decoys to control how targets are randomized.  Available "
       "for search-for-matches and sequest-search when searching a fasta file. ",
