@@ -45,11 +45,6 @@ mzid-use-pass-threshold=false
 # for Sp scoring and 1 for xcorr scoring.
 isotope=0
 
-# Window type to use for selecting decoy peptides from precursor mz.
-# <string>=mass|mz|ppm. Default=mass.
-# Available for crux search-for-matches
-precursor-window-type-decoy=mass
-
 # The ion series to predict (b,y,by,bya). Default='by' (both b and y
 # ions).
 # Only available for crux-predict-peptide-ions.  Set automatically to
@@ -60,6 +55,16 @@ primary-ions=by
 # level. Default = protein.
 # Available for barista.
 optimization=protein
+
+# Probability of the creation of a peptide from noise (--protein T must
+# be set). Set by grid search if not specified.
+# Available for crux percolator if --protein T is set.
+beta=0.000000
+
+#  Read initial weights from the given file (one per line). Default do
+# not read initial weights. Default=F
+# Available for crux percolator 
+input-weights=__NULL_STR
 
 # Perform parsimony analysis on the proteins and report a parsimony rank
 # column in output file. Default=none. Can be
@@ -82,6 +87,10 @@ xlink-include-selfloops=true
 # Default=PROTEIN.
 # Available for spectral-counts and either NSAF and SIN.
 quant-level=protein
+
+# Output PIN XML in the output directory.  Default=F
+# Available for search-for-matches.
+pinxml-output=false
 
 # Window type to use for selecting candidate peptides. 
 # <string>=mass|mz|ppm. Default=mass.
@@ -219,6 +228,11 @@ Y=0.000000
 # Available for all crux programs.  On command line use '--version T'.
 version=false
 
+# Peptides with low score will not be pruned before calculating protein
+# probabilities (--protein T must be set).
+# Available for crux percolator if --protein T is set.
+no-prune-proteins=false
+
 # Set the resolution of the observed spectra at m/z 400. Used in
 # conjunction with --instrument The default is 100000.
 # Available for crux hardklor
@@ -276,10 +290,23 @@ spectrum-parser=crux
 # line will override values in the parameter file.
 parameter-file=__NULL_STR
 
+# Output MZID in the output directory.  Default=F
+# Available for search-for-matches, percolator.
+mzid-output=false
+
 # The minimum number of peaks a spectrum must have for it to be
 # searched. Default=20.
 # Parameter file only for search-for-matches and sequest-search.
 min-peaks=20
+
+# Input files are given as a tab delimited file. In this case the only
+# argument should be a file name of the data file. The tab delimited
+# fields should be id <tab> label <tab> feature1 <tab> ... <tab>
+# featureN <tab> peptide <tab> proteinId1 <tab> .. <tab> proteinIdM
+# Labels are interpreted as 1 -- positive set and test set, -1 --
+# negative set.
+# Available for percolator
+feature-in-file=false
 
 # Predict peaks with the given maximum number of nh3 neutral loss
 # modifications. Default=0.
@@ -294,12 +321,22 @@ nh3=0
 # Modified Protein Abundance Index
 measure=NSAF
 
+# Override error check and do not fall back on default score vector in
+# case of suspect score vector.
+# Available for crux percolator.
+static-override=false
+
 # Direction of threshold for matches.  If true, then all matches whose
 # value is <= threshold will be accepted.  If false, then all matches >=
 # threshold will be accepted.  Used with custom-threshold parameter
 # (default True).
 # Available for spectral-counts.
 custom-threshold-min=true
+
+# Output empirical q-values from target-decoy analysis (--protein T must
+# be set).
+# Available for crux percolator if --protein T is set.
+empirical-protein-q=false
 
 # Number of psms per spectrum to score with xcorr after preliminary
 # scoring with Sp. Set to 0 to score all psms with xcorr. Default=500.
@@ -331,6 +368,11 @@ spectrum-charge=all
 # Available for spectral-counts with measure=SIN.
 input-ms2=__NULL_STR
 
+# False discovery rate threshold to define positive examples in
+# training. Set by cross validation if 0. Default is 0.01.
+# Available for crux percolator
+train-fdr=0.010000
+
 # Show search progress by printing every n spectra searched. 
 # Default=10.
 # Set to 0 to show no search progress.  Available for crux
@@ -357,6 +399,10 @@ pi-zero=1.000000
 # Reports peptide intensities as the distribution area. Default false.
 # Available for crux hardklor
 distribution-area=false
+
+# Include description of correct features.
+# Avilable for crux percolator
+doc=-1
 
 # Prefix added to output file names. Default=none. 
 # Used by crux search-for-matches, crux sequest-search, crux percolator
@@ -416,6 +462,11 @@ verbosity=30
 # Available for crux-search-for-matches.
 mz-bin-offset=0.680000
 
+# False discovery rate threshold for evaluating best cross validation
+# result and the reported end result. Default is 0.01.
+# Availble for crux percolator.
+test-fdr=0.010000
+
 # Create an ASCII version of the peptide list.  Default=F.
 # Creates an ASCII file in the output directory containing one peptide
 # per line.
@@ -440,14 +491,32 @@ print-theoretical-spectrum=false
 # Available for crux bullseye
 retention-tolerance=0.500000
 
+# output protein level probability. Default=F
+# Available for crux percolator
+protein=false
+
+# Use unit normalization [0-1] instead of standard deviation
+# normalization
+# Available for crux percolator.
+unitnorm=false
+
+# Search decoy-peptides within +/-  'mass-window-decoy' of the spectrum
+# mass.  Default=20.0.
+# Available for crux search-for-xlinks. 
+precursor-window-weibull=20.000000
+
 # Set the maximum charge state to look for when analyzing a spectrum.
 # Default=5.
 # Available for crux hardklor
 max-charge=5
 
+# Treat ties as if it were one protein 
+# Available for crux percolator.
+allow-protein-group=false
+
 # Number of decoy peptides to search for every target peptide
 # searched.Only valid for fasta searches when --decoys is not none.
-# Default=0.
+# Default=1.
 # Use --decoy-location to control where they are returned (which
 # file(s)) and --decoys to control how targets are randomized. 
 # Available for search-for-matches and sequest-search when searching a
@@ -464,6 +533,11 @@ scan-number=__NULL_STR
 # Available from parameter file for search-for-matches.
 max-aas-modified=255
 
+# Window type to use for selecting decoy peptides from precursor mz.
+# <string>=mass|mz|ppm. Default=mass.
+# Available for crux search-for-xlinks
+precursor-window-type-weibull=mass
+
 # Include peptides with up to n missed cleavage sites. Default=0.
 # Available from command line or parameter file for crux-create-index
 # and crux-generate-peptides.  Parameter file only for
@@ -477,11 +551,6 @@ missed-cleavages=0
 # Only available for crux search-for-matches. The location of this file
 # is controlled by --output-dir.
 search-decoy-pvalue-file=search.decoy.p.txt
-
-# Search decoy-peptides within +/-  'mass-window-decoy' of the spectrum
-# mass.  Default=20.0.
-# Available for crux search-for-xlinks. 
-precursor-window-decoy=20.000000
 
 # Set the depth of combinatorial analysis. Default 3.
 # Available for crux hardklor
@@ -497,24 +566,55 @@ re-run=__NULL_STR
 # Available for crux hardklor
 no-base=false
 
+# Fraction of the negative data set to be used as train set when only
+# providing one negative set, remaining examples will be used as test
+# set.Default 0.6
+# Available for crux percolator.
+train-ratio=0.600000
+
+# Probability with which a present protein emits an associated peptide
+# (--protein T must be set). Set by grid search if not specified.
+# Available for crux percolator if --protein T is set.
+alpha=0.000000
+
 # Print the header line of the tsv file. Default=T.
 # Available for crux extract-columns and extract-rows
 header=true
 
+# The most informative feature given as feature number, can be negtaed
+# to indicate that a lower value is better.
+# Available for crux-percolator.
+default-direction=1
+
+# Penalty for mistakes made on positive examples. Set by cross
+# validation if not specified. Default=cross-validate 
+# Available for crux percolator
+c-pos=0.010000
+
 # Search result can be as a file or a list of files. This option allows
 # users to specify the search results are provided as a list of files by
-# setting the --list-of-files option to T. Defualt= false.
-# Availabe for barista.
+# setting the --list-of-files option to T. Default= false.
+# Available for barista.
 list-of-files=false
 
 # Minimum mass of spectra to be searched. Default=0.
 # Available for crux-search-for-matches.
 spectrum-min-mass=0.000000
 
+# Proteins with same probabilities will be grouped (--protein T must be
+# set).
+# Available for crux percolator if --protein T is set.
+group-proteins=false
+
 # Folder to which results will be written. Default='crux-output'.
 # Used by crux create-index, crux search-for-matches, crux
 # compute-q-values, and crux percolator.
 output-dir=crux-output
+
+# Include decoys (PSMs, peptides, and/or proteins) in the xml-output.
+# Only available if -X is used. Default=F
+# Available for crux percolator
+decoy-xml-output=false
 
 # Include dead-end peptides in the database.  Default=T.
 # Available for crux search-for-xlinks program.
@@ -540,11 +640,9 @@ max-length=50
 # Available for crux hardklor
 mzxml-filter=none
 
-# Generate peptides only once, even if they appear in more than one
-# protein (T,F).  Default=F.
-# Available from command line or parameter file for
-# crux-genereate-peptides. Returns one line per peptide when true or one
-# line per peptide per protein occurence when false.  
+# Do not remove redundant peptides, keep all PSMs and exclude peptide
+# level probability.
+# Available for crux percolator
 unique-peptides=true
 
 # Q-ranker analysis begins with a pre-processsing step that creates a
@@ -556,6 +654,11 @@ unique-peptides=true
 # Available for q-ranker and barista.
 skip-cleanup=false
 
+# False discovery rate thereshold to define positive examples in
+# training. Set by cross validation if 0. Default is 0.01
+# Available for crux percolatior
+trian-fdr=0.010000
+
 # Predict theoretical ions up to max charge state (1,2,...,6) or up to
 # the charge state of the peptide (peptide).  If the max-ion-charge is
 # greater than the charge state of the peptide, then the max is the
@@ -566,9 +669,13 @@ max-ion-charge=peptide
 
 # When given a unsigned integer value seeds the random number generator
 # with that value. When given the string "time" seeds the random number
-# generator with the system time. 
+# generator with the system time. Default = 1.
 # Available for all Crux commands.
-seed=time
+seed=1
+
+# Output final weights to percolator.target.weights.txt.Default=T.
+# Available for crux percolator
+output-weights=false
 
 # The maximum mass of peptides to consider. Default=7200.
 # Available from command line or parameter file for crux-create-index
@@ -582,11 +689,19 @@ max-mass=7200.000000
 # Available for crux bullseye
 max-persist=2.000000
 
+# Using retention time features calculated as in Klammer et al.
+# Available for crux percolator
+klammer=false
+
 # The minimum mass of peptides to consider. Default=200.
 # Available from command line or parameter file for crux-create-index
 # and crux-generate-peptides. Parameter file only for
 # crux-search-for-matches.
 min-mass=200.000000
+
+# Output SQT in the output directory.  Default=F
+# Available for search-for-matches.
+sqt-output=false
 
 # Set the maximum number of peptides or proteins that are estimated from
 # the peaks found in a spectrum segment. The default value is 10.
@@ -606,6 +721,10 @@ precision=8
 # results in one file and all decoys in another. 'separate-decoy-files'
 # will create as many decoy files as num-decoys-per-target.
 decoy-location=separate-decoy-files
+
+# Measure performance on test set each iteration
+# Available for crux percolator.
+test-each-iteration=false
 
 # The threshold to use for filtering matches. Default=0.01.
 # Available for spectral-counts.  All PSMs with higher (or lower) than
@@ -634,10 +753,21 @@ use-spec-features=true
 # Available for crux hardklor
 max-width=4.000000
 
+# Prior probability of that a protein is present in the sample
+# (--protein T must be set). Set by grid search if not specified.
+# Available for crux percolator if --protein T is set.
+gamma=0.000000
+
 # Specify a fixed modification to apply to the C-terminus of peptides.
 # Available from parameter file for crux sequest-search and
 # search-for-matches.
 cmod-fixed=NO MODS
+
+# Setting deepness 0 or 1 or 2 or 3 from high deepness to low
+# deepness(less computational time) for the grid search for Alpha,Beta
+# and Gamma estimation(--protein T must be set). Default value is 3.
+# Available for crux percolator if --protein T is set.
+deepness=3
 
 # Optional file into which psm features are printed. Default=F.
 # Available for percolator and q-ranker.  File will be named
@@ -702,6 +832,11 @@ compute-p-values=false
 # Available for crux bullseye
 exact-match=false
 
+# Use pi_0 value when calculating empirical q-values (--protein T must
+# be set).
+# Available for crux percolator if --protein T is set.
+protein-level-pi0=false
+
 # Include alternative averagine models in the analysis that  incorporate
 # additional atoms or isotopic enrichments.
 # Available for crux hardklor
@@ -712,9 +847,22 @@ averagine-mod=__NULL_STR
 # Available from parameter file for crux-search-for-matches.
 top-match=5
 
+# Output tab-delimited text in the output directory.  Default=T
+# Available for search-for-matches, percolator, q-ranker, barista.
+txt-output=true
+
 # Maximum mass of spectra to search. Default no maximum.
 # Available for crux-search-for-matches.
 spectrum-max-mass=1000000000.000000
+
+# Penalty for mistake made on negative examples. Set by cross validation
+# if not specified or --c-pos not specified.
+# Available for crux percolator
+c-neg=0.000000
+
+# Output pepXML in the output directory.  Default=F
+# Available for search-for-matches, q-ranker, barista, percolator.
+pepxml-output=false
 
 # Include linear peptides in the database.  Default=T.
 # Available for crux search-for-xlinks program (Default=T).
@@ -728,10 +876,10 @@ decoy-prefix=rand_
 # Include a decoy version of every peptide by shuffling or reversing the
 # target sequence. 
 # <string>=none|reverse|protein-shuffle|peptide-shuffle. Use 'none' for
-# no decoys.  Default=protein-shuffle.
+# no decoys.  Default=peptide-shuffle.
 # For create-index, store the decoys in the index.  For search, either
 # use decoys in the index or generate them from the fasta file.
-decoys=protein-shuffle
+decoys=peptide-shuffle
 
 # Set the minimum charge state to look for when analyzing a spectrum.
 # Default=1.

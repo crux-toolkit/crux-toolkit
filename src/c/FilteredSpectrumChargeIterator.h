@@ -60,7 +60,7 @@ class FilteredSpectrumChargeIterator {
   /**
    * The basic iterator function next.
    */
-  Spectrum* next(SpectrumZState& zstate);
+  Crux::Spectrum* next(SpectrumZState& zstate);
 
 };
 

@@ -7,7 +7,7 @@
   </style>
 </head>
 <body>
-<h1>Using CMake to build Crux</h1>
+<h2>Using CMake to build Crux</h2>
 <a href="http://www.cmake.org">CMake</a> is a tool for building sofware on multiple platforms.
 It is similar in function to the autotools (autoconf and automake),
 but CMake is easier to use and provides more sophisticated support 
@@ -47,12 +47,30 @@ As usual
 <pre>
 make clean
 </pre>
-will remove any existing targets and intermediate files.
+will remove most existing targets and intermediate files.
+Unfortunately <code>make clean</code> will leave behind
+old copies of the build of the external components.
+To remove those as well, run the command
+<pre>
+make deep-clean
+</pre>
+from the project root.
+This will first perform <code>make clean</code>
+and then remove all the build files for the external components.
+This will force the external components to be rebuilt from scractch
+the next time <code>make</code> is run.
+To clean up the external components without running <code>make clean</code>,
+run
+<pre>
+make deep-clean-external
+</pre>
+<p />
 There is no need to re-run cmake unless you want to change
 the build configuration.
 <p />
+<h2>Setting the installation directory</h2>
 The instructions above will build Crux in a default configuration.
-In particular, it will try to install Crux in /usr/local.
+In particular it will try to install Crux in <code>/usr/local</code>.
 To set a different installation location use
 <pre>
 cmake -DCMAKE_INSTALL_PREFIX:PATH=$HOME/crux .
@@ -60,9 +78,9 @@ cmake -DCMAKE_INSTALL_PREFIX:PATH=$HOME/crux .
 The <code>-DCMAKE_INSTALL_PREFIX:PATH=$HOME/crux</code> option will direct
 <code>make install</code>
 to install Crux in a subdirectory of your home directory.
-<p />
+<h2>Setting the build type</h2>
 On UNIX platforms CMake will default to a release build with
-no debugging symbols.
+optimization turned on and no debugging symbols.
 If you'd like a debug build use the command:
 <pre>
 make clean
@@ -75,6 +93,7 @@ make clean
 cmake -DCMAKE_BUILD_TYPE=Release .
 make
 </pre>
+<h2>Turning on verbose build mode</h2>
 By deault CMake will only show you warnings and error messages from the build.
 If you'd like to see the actuall commands executed during the build,
 you can turn on verbose make with this command:
@@ -87,5 +106,66 @@ custom proprerty editor that uses the <code>curese</code> library to create
 a point and click settings editor. Use the command
 <pre>ccmake</pre> 
 (only available  on 64-bit systems).
+<p />
+<h2>Out of source builds</h2>
+CMake supports "out of source builds".
+This performs the build in a separate directory from the actual source tree.
+It turns out that this is very handy for several reasons. 
+It lets you keep separate debug and release builds,
+it makes for better integration with TeamCity or Jenkins,
+and it keeps random intermediate files from being inadvertently included
+in the source release.
+<p />
+To perform an out of source build of Crux: 
+<ul>
+<li>
+Create a director where you want to do the build.
+</li>
+<li>
+Move into that directory and run:
+<pre>
+  cmake [CMake options] &lt;path to Crux source directory&gt;
+  make
+</pre>
+</li>
+</ul>
+For example,
+if the Crux source tree is in <code>crux-source</code>
+and you wanted to create separate debug and release builds you could 
+run the following commands:
+<pre>
+mkdir debug
+mkdir release
+cd debug
+cmake -DCMAKE_BUILD_TYPE=Debug ../crux-src
+make
+cd ../release
+cmake ../crux-src
+make
+</pre>
+Or, if you wanted to build the source and binary distributions for Crux:
+<pre>
+mkdir source-dist
+mkdir linux-x86_64-dist
+cd source-dist
+cmake ../crux-src
+make package_source
+cd ../linux-x86_64-dist
+cmake ../crux-src
+make package
+</pre>
+<b>Note</b>:
+if you've already done a build in the source tree
+CMake won't let you do an out of source build.
+You'll first have to clean up all the CMake intermediate files.
+In the Crux source root run:
+<pre>
+make deep-clean
+</pre>
+<h2>Running smoke tests</h2>
+I've also added a target to run the smoke-tests:
+<pre>
+make smoke-tests
+</pre>
 </body>
 </html>

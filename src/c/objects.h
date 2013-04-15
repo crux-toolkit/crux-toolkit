@@ -293,11 +293,14 @@ typedef enum _window_type WINDOW_TYPE_T;
 class PeptideSrc;
 
 
+namespace Crux {
 /**
  * \class Protein
  * \brief A protein sequence
  */
 class Protein;
+
+}
 
 /**
  * \class ProteinPeptideIterator
@@ -496,6 +499,11 @@ enum _scorer_type {
   BARISTA_QVALUE,
   BARISTA_PEPTIDE_QVALUE,
   BARISTA_PEP,        ///< posterior error prob from barista scores
+  
+  DELTA_CN,
+  DELTA_LCN,
+  BY_IONS_MATCHED,
+  BY_IONS_TOTAL,
 
   NUMBER_SCORER_TYPES,
   INVALID_SCORER_TYPE
@@ -524,7 +532,12 @@ typedef enum _protein_scorer_type PROTEIN_SCORER_TYPE_T;
  *\class Match
  *\brief An object that contains the information of a peptide and the scoring of multiple types
  */
+
+namespace Crux {
+
 class Match;
+
+}
 
 /**
  *\class MatchCollection
@@ -763,20 +776,20 @@ typedef std::map<Crux::Peptide*, FLOAT_T, bool(*)(Crux::Peptide*, Crux::Peptide*
  * \typedef ProteinToScore
  * \brief Mapping of protein object to scores
  */
-typedef std::map<Protein*, FLOAT_T, bool(*)(Protein*, Protein*) > ProteinToScore;
+typedef std::map<Crux::Protein*, FLOAT_T, bool(*)(Crux::Protein*, Crux::Protein*) > ProteinToScore;
 
 /**
  * \typedef MetaProtein
  * \brief Collection of protein objects which contain exactly the same
  * set of peptides.
  */
-typedef std::set<Protein*, bool(*)(Protein*, Protein*) > MetaProtein;
+typedef std::set<Crux::Protein*, bool(*)(Crux::Protein*, Crux::Protein*) > MetaProtein;
 
 /**
  * \typedef ProteinToMeta
  * \brief Mapping of Protein to MetaProtein to which it belongs
  */
-typedef std::map<Protein*, MetaProtein, bool(*)(Protein*, Protein*) > ProteinToMetaProtein;
+typedef std::map<Crux::Protein*, MetaProtein, bool(*)(Crux::Protein*, Crux::Protein*) > ProteinToMetaProtein;
 
 /**
  * \typedef MetaToRank
@@ -793,6 +806,7 @@ typedef std::map<MetaProtein, int, bool(*)(MetaProtein, MetaProtein) > MetaToRan
 enum FILE_FORMAT_T{
   INVALID_FORMAT,
   SQT_FORMAT,
+  XML_FORMAT,
   DELIMITED_FORMAT
 };
 								    

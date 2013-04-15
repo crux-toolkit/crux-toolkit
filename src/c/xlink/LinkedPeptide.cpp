@@ -17,13 +17,26 @@ using namespace Crux;
 FLOAT_T LinkedPeptide::linker_mass_;
 
 /**
+ * Initializes the object
+ */
+void LinkedPeptide::init() {
+
+  mass_calculated_[MONO] = false;
+  mass_calculated_[AVERAGE] = false;
+  charge_ = 0;
+  type_ = NUMBER_ION_TYPES;
+  mass_[MONO] = 0.0;
+  mass_[AVERAGE] = 0.0;
+  mz_[MONO] = 0.0;
+  mz_[AVERAGE] = 0.0;
+
+}
+
+/**
  * \returns a blank LinkedPeptide object
  */
 LinkedPeptide::LinkedPeptide() {
-
-  mass_calculated_[MONO] = false; 
-  mass_calculated_[AVERAGE] = false;
-
+  init();
 }
 
 /**
@@ -40,6 +53,7 @@ LinkedPeptide::LinkedPeptide(
   int charge ///< charge of product
   ) {
 
+  init();
   mass_calculated_[MONO] = false;
   mass_calculated_[AVERAGE] = false;
   charge_ = charge;
@@ -72,6 +86,7 @@ LinkedPeptide::LinkedPeptide(
     int charge ///< charge of product
   ) {
 
+  init();
   charge_ = charge;
   decoy_ = false;
   mass_calculated_[MONO] = false;

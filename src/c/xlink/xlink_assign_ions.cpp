@@ -21,7 +21,7 @@
 #include <fstream>
 
 
-
+using namespace Crux;
 
 void print_spectrum(Spectrum* spectrum, LinkedIonSeries& ion_series);
 int main(int argc, char** argv){

@@ -156,7 +156,7 @@ int xlink_compute_qvalues(){
   /* Get Arguments */
 
   carp(CARP_INFO,"reading targets");
-  string output_dir = get_string_parameter("output-dir");
+  string output_dir = get_string_parameter_pointer("output-dir");
   string target_filename = "search.target.txt";
 
   //Read in targets.

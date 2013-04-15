@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include "objects.h"
+#include "match_objects.h"
 #include "pwiz/data/identdata/IdentData.hpp"
 
 class MzIdentMLWriter{
@@ -21,6 +22,9 @@ class MzIdentMLWriter{
   size_t peptide_idx_; ///<counter for pwiz Peptide
   size_t peptide_evidence_idx_; ///<counter for PeptideEvidence
   size_t dbs_idx_; ///< counter for DBSequence
+
+  size_t pag_idx_; ///< counter for ProteinAmbiguityGroups
+  size_t pdh_idx_; ///< counter for ProteinDetectionHypothesis
 
   /**
    * \returns DBSequence for the protein source.  If it doesn't exist, 
@@ -39,6 +43,12 @@ class MzIdentMLWriter{
     Crux::Peptide* peptide, ///< peptide -in
     bool is_decoy, ///< is this peptide a decoy? -in
     PeptideSrc* src ///< where the peptide is coming from -in
+  );
+
+  pwiz::identdata::PeptideEvidencePtr getPeptideEvidence(
+    Crux::Peptide* peptide,
+    bool is_decoy,
+    std::string& protein_id
   );
 
   /**
@@ -61,6 +71,14 @@ class MzIdentMLWriter{
    */
   pwiz::identdata::SpectrumIdentificationResultPtr getSpectrumIdentificationResult(
     Crux::Spectrum* spectrum ///< Crux spectrum object -in
+  );
+
+  /**
+   * \returns the SpectrumIdentificationItem for the SpectrumMatch.
+   * creating it first it it doesn't exist
+   */
+  pwiz::identdata::SpectrumIdentificationItemPtr getSpectrumIdentificationItem(
+    SpectrumMatch* spectrum_match
   );
 
   /**
@@ -92,7 +110,7 @@ class MzIdentMLWriter{
    */
   void addScores(
     MatchCollection* match_collection, ///< Parent collection of match
-    Match* match, ///< Match to add
+    Crux::Match* match, ///< Match to add
     pwiz::identdata::SpectrumIdentificationItemPtr item ///< item to add the scores to
   );
 
@@ -101,9 +119,61 @@ class MzIdentMLWriter{
    */
   void addRanks(
     MatchCollection* match_collection, ///< Parent collection of the match
-    Match* match, ///< Match to add
+    Crux::Match* match, ///< Match to add
     pwiz::identdata::SpectrumIdentificationItemPtr item ///< item to add the ranks to
   );
+
+  pwiz::identdata::ProteinDetectionListPtr getProteinIdentificationList();
+
+  /**
+   * \returns the ProteinAmbiguityGroup for the protein, creating one if
+   * it doesn't exist.
+   */
+  pwiz::identdata::ProteinAmbiguityGroupPtr getProteinAmbiguityGroup(
+    std::string& protein_id
+  );
+
+  pwiz::identdata::ProteinDetectionHypothesisPtr getProteinDetectionHypothesis(
+    pwiz::identdata::ProteinAmbiguityGroupPtr pagp,   
+    std::string& protein_id
+  );
+
+  pwiz::identdata::ProteinDetectionHypothesisPtr getProteinDetectionHypothesis(
+    std::string& protein_id
+  );
+
+  pwiz::identdata::PeptideHypothesis& getPeptideHypothesis(
+    ProteinMatch* protein_match,
+    PeptideMatch* peptide_match
+  );
+
+  pwiz::identdata::DBSequencePtr getDBSequence(
+    std::string& protein_id
+  );
+
+  void addProteinScores(
+    pwiz::identdata::ProteinDetectionHypothesisPtr pdhp,
+    ProteinMatch* protein_match
+    );
+
+  void addPeptideMatches(
+    ProteinMatch* protein_match
+  );
+
+  void addSpectrumMatches(
+    ProteinMatch* protein_match,
+    PeptideMatch* peptide_match
+  );
+
+  void addPeptideScores(
+    PeptideMatch* peptide_match
+  );
+
+  void addSpectrumScores(
+    SpectrumMatch* spectrum_match,
+    pwiz::identdata::SpectrumIdentificationItemPtr siip
+  );
+
 
  public:
 
@@ -149,8 +219,23 @@ class MzIdentMLWriter{
    */
   void addMatch(
     MatchCollection* collection, ///< parent collection
-    Match* match ///< match to add
+    Crux::Match* match ///< match to add
   );
+
+  /**
+   * Adds the protein matches to the mzid object
+   */
+  void addProteinMatches(
+    ProteinMatchCollection* protein_match_collection
+    );
+
+  /**
+   * Adds a protein match to the mzIdentML object
+   */
+  void addProteinMatch(
+    ProteinMatch* protein_match
+  );
+
 
 };
 

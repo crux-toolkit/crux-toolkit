@@ -11,8 +11,7 @@
 <b>Usage:</b></p>
 
 <blockquote>
-<code>crux percolator [options] &lt;protein-database&gt; 
-   &lt;search results directory&gt;</code>
+<code>crux percolator [options] &lt;search results&gt; </code>
 </blockquote>
 
 <p>
@@ -20,8 +19,8 @@
 
 <p>
 Percolator is a semi-supervised learning algorithm that dynamically
-learns to separate target from decoy PSMs.  The algorithm is described
-in this article:</p>
+learns to separate target from decoy peptide-spectrum matches (PSMs).
+The algorithm is described in this article:</p>
 
 <blockquote>
 Lukas K&auml;ll, Jesse Canterbury, Jason Weston, William Stafford
@@ -33,133 +32,301 @@ datasets."</a>
 </blockquote>
 
 <p>
-For more on q-values and posterior error probabilities (PEP), see the
-documentaion for <a href=calibrate-scores.html>calibrate-scores</a>.
-<p>
-<span class=prog>Crux</span> now includes code from
-<span class=prog>Percolator 1.05</span>.
-The current version of Percolator can be downloaded
-<a href="http://noble.gs.washington.edu/proj/percolator/">here</a>.
-External versions of Percolator can be applied to the output of the 
-<span class=prog>Crux</span> tools, but won't be used by the
-<code>crux percolator</code> command.
-
-<p>
 Percolator requires as input two collections of PSMs, one set derived
-from matching observed spectra against real ("target") peptides, and
-a second derived from matching against "decoy" peptides.  Crux generates
-these decoys on the fly.  Percolator will also accept a second set of
-decoy PSMs and use one set in training and one in calculating
-q-values.  Producing two sets of decoy PSMs is the search-for-matches
-default behavior.</p>
+from matching observed spectra against real ("target") peptides, and a
+second derived from matching the same spectra against "decoy"
+peptides.  The output consists of ranked lists of PSMs, peptides and
+proteins.  Peptides and proteins are assigned two types of statistical
+confidence estimates: q-values and posterior error probabilities.</p>
 
 <p>
-The features used by percolator to represent each PSM are summarized
+The features used by Percolator to represent each PSM are summarized
 <a href="features.html">here</a>.</p>
+
+<p>
+Percolator also includes code
+from <a href="http://noble.gs.washington.edu/proj/fido/">Fido</a>,
+which performs protein-level inference.  The Fido algorithm is
+described in this article:</p>
+
+<blockquote>
+Oliver Serang, Michael J. MacCoss and William Stafford Noble.
+<a href="http://pubs.acs.org/doi/abs/10.1021/pr100594k">"Efficient
+marginalization to compute protein posterior probabilities from
+shotgun mass spectrometry data."</a>  <i>Journal of Proteome
+Research</i>. 9(10):5346-5357, 2010.</li>
+</blockquote>
+
+<p>
+Options related to Fido are described under the heading "Protein-level
+inference options," below.</p>
+
+<p>
+Crux includes code from
+<a href="http://per-colator.com/"><span class=prog>Percolator
+2.04</span></a>.  Crux Percolator differs from the stand-alone version
+of Percolator in the following respects:</p>
+<ul>
+<li>
+In addition to the native Percolator XML file format, Crux Percolator
+supports additional input file formats (SQT, PepXML, tab-delimited
+text) and output file formats (PepXML, mzIdentML, tab-delimited
+text).</li>
+<li>
+To maintain consistency with the rest of the Crux commands, Crux
+Percolator uses different parameter syntax than the stand-alone
+version of Percolator.</li>
+<li>
+Like the rest of the Crux commands, Crux Percolator writes its files
+to an output directory, logs all standard error messages to a log
+file, and is capable of reading parameters from a parameter file.</li>
+</ul>
 
 <p>
 <b>Input:</b></p>
 
 <ul>
-
 <LI>
-&lt;protein-database &gt; &ndash; The name of the file in fasta format or
-the directory containing the protein index from which to retrieve
-proteins and peptides.</li>
-
-<li>
-&lt;search results directory&gt; &ndash; A folder in which all the PSM
-result files are located.  The program looks for files produced by 
-<code>crux search-for-matches</code> (ending in
-'<code>.search.target.txt</code>' or '<code>.search.decoy.txt</code>').  All such files in the given
-directory are analyzed jointly.  Note that the directory should not
-contain results from both types of search algorithms.</li>
+<b>&lt;search&nbsp;results&gt;</b> &ndash; A collection of target and
+decoy peptide-spectrum matches (PSMs) in pin.xml format, defined
+according to <a href="https://github.com/percolator/percolator/blob/master/src/xml/percolator_in.xsd">
+this schema</a>.  The command <code>crux search-for-matches</code>
+generates results in this format.  Note that this argument can be "-",
+which indicates the pin.xml file should be read from standard input. Input
+may also be given as SQT, PepXML, or tab-delimited text, in which case a
+pin.xml file will be generated in the output directory prior to execution.
+Any SQT, PepXML, or tab-delimited file given as input is required to have a
+corresponding decoy file (or corresponding target file, if it is a decoy
+file). For example, if <code>search.target.txt</code> is to be used,
+then the file <code>search.decoy.txt</code> must also exist.
+When <code>feature-in-file=T</code>, then the input file will be a tab-delimited
+feature file, see <code>feature-in-file</code> option below.
+</li>
 
 </ul>
 
 <B>Output:</B>
 
-<UL>
-<p>
-The program writes files to the folder <code>crux-output</code> by default.
-The name of the output folder can be set by the user using the <code>--output-dir</code> option.
-The following files will be created:</p>
+<p> Percolator produces the following files in
+the <code>crux-output</code> directory:</p>
+
+<ul>
 
 <li>
-<b>percolator.params.txt</b>:
-a file containing the name and value of all parameters/options for the current operation.  
-Not all parameters in the file may have been used in the operation.  
-The resulting file can be used with the <code>--parameter-file</code>
-option for other crux programs.
+<b>percolator.target.pout.xml</b>: an XML file containing all of the
+Percolator results, defined according to <a href="https://github.com/percolator/percolator/blob/master/src/xml/percolator_out.xsd">
+this schema</a>.
 </li>
 
 <li>
-<b>percolator.target.txt</b>: a tab-delimited text file containing the PSMs.
-See <a href="txt-format.html">txt file format</a> for a list of the
+<b>percolator.proteins.txt</b>: a tab-delimited file containing the
+protein matches.  See <a href="txt-format.html">here</a> for a list of the
 fields.</li>
 
 <li>
-<b>percolator.target.pep.xml</b>: a file containing the PSMs in pepxml format.
-See <a href="http://tools.proteomecenter.org/wiki/index.php?title=Formats:pepXML">
-pep xml file format</a> for further reference. This file can be used as input to 
-some of the tools in the 
+<b>percolator.peptides.txt</b>: a tab-delimited file containing the
+peptide matches.  See <a href="txt-format.html">here</a> for a list of the
+fields.</li>
+
+<li>
+<b>percolator.psms.txt</b>: a tab-delimited file containing the
+PSMs.  See <a href="txt-format.html">here</a> for a list of the
+fields.</li>
+
+<li>
+<b>percolator.params.txt</b>: a file containing the name and value of
+all parameters for the current operation.  Not all parameters in the
+file may have been used in the operation.  The resulting file can be
+used with the <code>--parameter-file</code> option for other crux
+programs.
+</li>
+
+<li>
+<b>percolator.pep.xml</b>: a file containing the PSMs in <a href="http://tools.proteomecenter.org/wiki/index.php?title=Formats:pepXML">pepXML
+format</a>.
+This file can be used
+as input to some of the tools in the
 <a href="http://tools.proteomecenter.org/wiki/index.php?title=Software:TPP">
 Transproteomic Pipeline</a>.
 </li>
 
 <li>
-<b>percolator.log.txt</b>: a log file containing a copy of all messages that were
-printed to stderr.
+<b>percolator.mzid</b>: a file containing the protein, peptide, and spectrum
+matches in <a href="http://www.psidev.info/mzidentml">mzIdentML
+format</a>.
+</li>
+
+<li>
+<b>percolator.log.txt</b>: a log file containing a copy of all
+messages that were printed to standard error.
 </li>
 </ul>
 
-<b>Options:</b>
+<b>Percolator options:</b>
 
 <ul>
 
 <li>
-<code>--pi-zero &lt;value&gt;</code> &ndash;
-The estimated proportion of target scores that are drawn according to
-the null distribution.  Default=1.0.</li>
-
-<li>
-<code>mod-mass-format &lt;mod-only|total|separate&gt;<code> &ndash;
-Specify how sequence modifications are reported in various ouptut
-files.  Each modification is reported as a number enclosed in square
-braces following the modified reside; however, the number may
-correspond to one of three different masses: (1) 'mod-only' reports
-the value of the mass shift induced by the modification; (2) 'total'
-reports the mass of the residue with the modification (residue mass
-plus modification mass); (3) 'separate' is the same as 'mod-only', but
-multiple modifications to a single amino acid are reported as a
-comma-separated list of values. For example, suppose amino
-acid <i>D</i> has an unmodified mass of 115 as well as two
-modifications of masses +14 and +2.  In this case, the amino acid
-would be reported as D[16] with 'mod-only', D[131] with 'total', and
-D[14,2] with 'separate'.</li>
-
-<li>
-<code>--fileroot &lt;string&gt;</code> &ndash; 
+<code>--fileroot &lt;string&gt;</code> &ndash;
 The <code>fileroot</code> string will be added as a prefix to all
 output file names. Default = none.</li>
 
 <li>
-<code>--output-dir &lt;filename&gt;</code> &ndash; 
-The name of the directory where output files will be created.
-Default = crux-output.</li>
+<code>--output-dir &lt;filename&gt;</code> &ndash; The name of the
+directory where output files will be created.  Default =
+crux-output.</li>
 
 <li>
 <code>--overwrite &lt;T|F&gt;</code> Replace existing files if true (T) or
 fail when trying to overwrite a file if false (F). Default =  F.
+
+<li>
+<code>--txt-output &lt;T|F&gt;</code> &ndash; Output tab-delimited
+results files to the output directory. Default = T.</li>
+
+<li>
+<code>--mzid-output &lt;T|F&gt;</code> &ndash; Output an mzIdentML
+results file to the output directory. Default = F.</li>
+
+<li>
+<code>--pepxml-output &lt;T|F&gt;</code> &ndash; Output a pepXML
+results file to the output directory. Default = F.</li>
+
+<li>
+<code>--feature-file &lt;T|F&gt;</code> &ndash; Output the
+computed features in tab-delimited text format to a file
+named "percolator.feature.txt." Default = F.</li>
+
+<li>
+<code>--feature-in-file &lt;T|F&gt;</code> &ndash; Input files are
+given as a tab delimited file. In this case the only argument should
+be a file name of the data file. The tab-delimited fields should be
+identifier, label, feature1, ..., featureN, peptide, proteinId1, ...,
+proteinIdM.  Labels are interpreted as 1 = target set, -1 = decoy set.
+Default = F.</li>
 
 <LI>
 <code>--parameter-file &lt;filename&gt;</code> &ndash;
 A file containing command-line or additional parameters.  See the <a
 href=parameter-file.html>parameter documentation</a> page for details.</li>
 
-<LI> 
-<code>--feature-file &lt;string&gt;</code> &ndash;
-Optional file in which to write the features. Default = none.</li>
+<li>
+<code>--decoy-xml-output &lt;T|F&gt;</code> &ndash; Include decoys
+(PSMs, peptides and/or proteins) in the XML output. Default = F.</li>
+
+<li>
+<code>--decoy-prefix &lt;string&gt;</code> &ndash;
+Specifies the prefix of the protein names that indicates a decoy.
+Default = "rand_".</li>
+
+<li>
+<code>--c-pos &lt;float&gt;</code> &ndash; Penalty for mistakes made
+on positive examples. If this value is not specified, then it is set
+via cross validation over the values {0.1, 1, 10}, selecting the value
+that yields the largest number of PSMs identified at the q-value
+threshold set via the <code>--test-fdr</code> parameter.</li>
+
+<li>
+<code>--c-neg &lt;float&gt;</code> &ndash; Penalty for mistakes made
+on negative examples. This parameter requires
+that <code>--c-pos</code> is set explicitly;
+otherwise, <code>--c-neg</code> will have no effect.  If not
+specified, then this value is set by cross validation over {0.1, 1,
+10}.</li>
+
+<li>
+<code>--train-fdr &lt;value&gt;</code> &ndash; False discovery rate
+threshold to define positive examples in training. Default = 0.01.</li>
+
+<li>
+<code>--test-fdr &lt;value&gt;</code> &ndash; False discovery rate
+threshold used in selecting hyperparameters during internal
+cross-validation and for reporting the final results. Default =
+0.01.</li>
+
+<li>
+<code>--maxiter &lt;int&gt;</code> &ndash; Maximum number of
+iterations for training.  Default = 10.</li>
+
+<li>
+<code>--train-ratio &lt;float&gt;</code> &ndash; Fraction of the
+negative data set to be used as train set when only providing one
+negative set.  The remaining examples will be used as test set.
+Default = 0.6.</li>
+
+<li>
+<code>--output-weights &lt;T|F&gt; </code>&ndash; Output final weights
+to a file named "percolator.weights.txt."  Default = F.</li>
+
+<li>
+<code>--input-weights &lt;string&gt;</code> &ndash; Read initial
+weights from the given file (one per line). Default = F.</li>
+
+<li>
+<code>--default-direction &lt;int&gt;</code> &ndash; In its initial
+round of training, Percolator uses one feature to induce a ranking of
+PSMs.  By default, Percolator will select the feature that produces
+the largest set of target PSMs at a specified FDR threshold
+(cf. <code>--train-fdr</code>).  This option allows the user to
+specify which feature is used for the initial ranking, using the
+indices from <a href="features.html">this table</a>.  The feature
+index can be negated to indicate that a lower value is better.</li>
+
+<li>
+<code>--unitnorm &lt;T|F&gt;</code> &ndash; Use unit normalization
+(i.e., linearly rescale each PSM's feature vector to have a Euclidean
+length of 1), instead of standard deviation normalization.  Default =
+F.</li>
+
+<li>
+<code>--test-each-iteration &lt;T|F&gt;</code> &ndash; Measure
+performance on the test set at each iteration.  Default = F.</li>
+
+<li>
+<code>--static-override &lt;T|F&gt;</code> &ndash; By default,
+Percolator will examine the learned weights for each feature, and if
+the weights appear to be problematic, then Percolator will discard the
+learned weights and instead employ a previously trained, static score
+vector.  This switch allows this error checking to be overridden.
+Default = F.</li>
+
+<li>
+<code>--seed &lt;int&gt;</code> &ndash; Set the seed of the random
+number generator. Default = 1.</li>
+
+<li>
+<code>--klammer &lt;T|F&gt;</code> &ndash; Use retention time features
+calculated as in "Improving tandem mass spectrum identification using
+peptide retention time prediction across diverse chromatography
+conditions" by Klammer AA, Yi X, MacCoss MJ and Noble WS.
+(<i>Analytical Chemistry</i>. 2007 Aug 15;79(16):6111-8.)</li>
+
+<!--<li>
+<code>--doc &lt;integer&gt;</code> &ndash; With this option, Percolator
+will use so-called "description-of-correct" features, i.e., features
+for which desirable values are learned from the previously identified
+target PSMs.  The absolute value of the difference between the desired
+value and the observed value is then used as a predictive
+feature.  Percolator currently offers four description-of-correct
+features: iso-electric point, mass calibration, retention time and
+iso-electric point.  These features are selected by adding
+up the following values:
+<ul>
+1&nbsp;&nbsp;iso-electric point
+2&nbsp;&nbsp;mass calibration
+4&nbsp;&nbsp;retention time
+8&nbsp;&nbsp;delta_retention_time*delta_mass_calibration
+</ul>
+The recommended usage is to include all features except for the
+iso-electric point (i.e., <code>--doc 14</code>).  Note that if the
+input a file does not contain observed retention times, then scan
+numbers are used as proxies for retention time.  Default = 0.</li>-->
+
+<li>
+<code>--unique-peptides &lt;T|F&gt;</code> &ndash; Do not remove
+redundant peptides; keep all PSMs and exclude peptide level
+probabilities.
+</li>
 
 <LI>
 <code>--verbosity &lt;0-100&gt;</code> &ndash; Specify the verbosity of the
@@ -167,10 +334,78 @@ current processes. Each level prints the following messages, including
 all those at lower verbosity levels: 0-fatal errors, 10-non-fatal
 errors, 20-warnings, 30-information on the progress of execution,
 40-more progress information, 50-debug info, 60-detailed debug info.
-Default = 30.
+Default = 30.</li>
 
 </ul>
 
+<b>Protein-level inference options:</b>
+
+<ul>
+
+<li>
+<code>--protein &lt;T|F&gt;</code> &ndash; Output protein level
+probabilities. If this option is not set, then none of the options
+below may be used.  Default = F.</li>
+
+<li>
+<code>--alpha &lt;float&gt;</code> &ndash; Specify the probability
+with which a present protein emits an associated peptide. Set by grid
+search (see <code>--depth</code> parameter) if not specified.</li>
+
+<li>
+<code>--beta &lt;float&gt;</code> &ndash; Specify the probability of
+the creation of a peptide from noise. Set by grid search
+(see <code>--depth</code> parameter) if not specified.</li>
+
+<li>
+<code>--gamma &lt;float&gt;</code> &ndash; Specify the prior
+probability that a protein is present in the sample. Set by grid
+search (see <code>--depth</code> parameter) if not specified.</li>
+
+<li>
+<code>--allow-protein-group &lt;T|F&gt;</code> &ndash; Treat ties as
+if it were one protein.  Default = F.</li>
+
+<li>
+<code>--protein-level-pi0 &lt;T|F&gt;</code> &ndash; Use pi_0 value
+when calculating empirical q-values.  Default = F.</li>
+
+<li>
+<code>--empirical-protein-q &lt;T|F&gt;</code> &ndash; Output
+empirical q-values (from target-decoy analysis). Default = F.</li>
+
+<li>
+<code>--group-proteins &lt;T|F&gt;</code> &ndash; Proteins with same
+probabilities will be grouped.  Default = F.</li>
+
+<li>
+<code>--no-prune-proteins &lt;T|F&gt;</code> &ndash; Peptides with low
+score will not be pruned before calculating protein probabilities.
+Default = F.</li>
+
+<li>
+<code>--deepness &lt;0|1|2|3&gt;</code> &ndash; Set depth of the grid
+search for alpha, beta and gamma estimation. The values considered,
+for each possible value of the <code>--depth</code> parameter, are as
+follows:
+<ul>
+<li>0: alpha = {0.01, 0.04, 0.09, 0.16, 0.25, 0.36, 0.5};
+       beta = {0.0, 0.01, 0.15, 0.025, 0.035, 0.05, 0.1}; 
+       gamma = {0.1, 0.25, 0.5, 0.75}.</li>
+<li>1: alpha = {0.01, 0.04, 0.09, 0.16, 0.25, 0.36};
+       beta = {0.0, 0.01, 0.15, 0.025, 0.035, 0.05};
+       gamma = {0.1, 0.25, 0.5}.</li>
+<li>2: alpha = {0.01, 0.04,  0.16, 0.25, 0.36};
+       beta = {0.0, 0.01, 0.15, 0.030, 0.05};
+       gamma = {0.1, 0.5}.</li>
+<li>3: alpha = {0.01, 0.04, 0.16, 0.25, 0.36};
+       beta = {0.0, 0.01, 0.15, 0.030, 0.05};
+       gamma = {0.5}.</li>
+</ul>
+Default = 3.
+</li>
+
+</ul>
 
 <hr></hr>
 

@@ -11,6 +11,8 @@
 #include "PeptideConstraint.h"
 #include "Protein.h"
 #include "Database.h"
+using namespace Crux; 
+
 // also from parameter.c
 void force_set_aa_mod_list(AA_MOD_T** amod_list, int num_mods);
 

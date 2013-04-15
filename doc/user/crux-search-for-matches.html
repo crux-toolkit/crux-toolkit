@@ -108,6 +108,12 @@ programs.
 </li>
 
 <li>
+<b>search.pin.xml</b>: a file containing the PSMs in PIN XML format
+(<a href="https://github.com/percolator/percolator/blob/master/src/xml/percolator_in.xsd">schema</a>). This file
+can be used as input to <code>crux percolator</code>.
+</li>
+
+<li>
 <b>search.target.txt</b>: a tab-delimited text file containing the
 PSMs.  See <a href="txt-format.html">txt file format</a> for a list of
 the fields.  These files can be used as input to <code>crux
@@ -127,7 +133,7 @@ Transproteomic Pipeline</a>.
 
 <li>
 <b>search.log.txt</b>: a log file containing a copy of all messages
-that were printed to stderr.
+that were printed to stderr.</li>
 
 </ul>
 
@@ -156,12 +162,16 @@ Replace existing files if true (T) or fail when trying to overwrite a
 file if false (F). Default =  F.</li>
 
 <LI>
+<code>--seed &lt;int&gt;</code> &ndash; Set the seed of the random
+number generator. Default = 1.</li>
+
+<LI>
 <code>--num-decoys-per-target &lt;int&gt;</code> &ndash; 
 Specify the number of decoy peptides to search for every target
 peptide searched. Control where the decoys are returned (to what
 files) with <code>--decoy-location</code>. At least one decoy set (in
 its own file) is required to run the algorithm 'percolator' in a
-subsequent crux run.  Default = 2. </li>
+subsequent crux run.  Default = 1. </li>
 
 <li>
 <code>--decoys &lt;string&gt;</code> &ndash; Include a decoy version
@@ -170,7 +180,8 @@ Possible values are <code>none, reverse, protein-shuffle,
 peptide-shuffle</code>. Use 'reverse' to reverse each protein sequence,
 'protein-shuffle' to shuffle each protein sequence, or 'peptide-shuffle'
 to shuffle the sequence between enzyme cleavage sites, leaving the
-termini in place. Use 'none' for no decoys.  Default=protein-shuffle. 
+termini in place. Use 'none' for no decoys.  Default=peptide-shuffle. 
+</li>
 
 <li>
 <code>--decoy-location target-file|one-decoy-file|separate-decoy-files</code> &ndash; 
@@ -182,6 +193,7 @@ separate file.  Use 'separate-decoy-files' to print one .txt file for
 each decoy set.  (<code>crux percolator</code> accepts up to two
 search.decoy.txt files. <code>crux q-ranker</code> accepts only one
 search.decoy.txt file.) Default = separate-decoy-files.
+</li>
 
 <li>
 <code>--compute-sp T|F</code> &ndash; Compute the preliminary
@@ -206,10 +218,12 @@ Parser to use for reading in MS/MS spectra.  Default = crux.</li>
 <LI>
 <code>--spectrum-min-mass &lt;float&gt;</code> &ndash; 
 The lowest spectrum m/z to search in the ms2 file. Default = 0.0
+</li>
 
 <LI>
 <code>--spectrum-max-mass &lt;float&gt;</code> &ndash; 
 The highest spectrum m/z to search in the ms2 file. Default = no maximum.
+</li>
 
 <LI> 
 <code>--spectrum-charge 1|2|3|all</code> &ndash; 
@@ -232,6 +246,7 @@ always have ions of 1+. Default = peptide.</li>
 A single scan number or a range of numbers to be searched. Range
 should be specified as 'first-last' which will include scans 'first'
 and 'last'.  Default = search all spectra.
+</li>
 
 <li>
 <code>--mz-bin-width &lt;float&gt;</code> &ndash; Before calculation of the
@@ -255,6 +270,7 @@ A file containing command-line or additional parameters.  See
 the <a href="parameter-file.html">parameter documentation</a> page
 for details.  Default = no parameter file.</li>
 
+
 <LI>
 <code>--verbosity &lt;0-100&gt;</code> &ndash; 
 Specify the verbosity of the current processes. Each level prints the
@@ -262,6 +278,26 @@ following messages, including all those at lower verbosity levels:
 0-fatal errors, 10-non-fatal errors, 20-warnings, 30-information on
 the progress of execution, 40-more progress information, 50-debug
 info, 60-detailed debug info. Default = 30.</li>
+
+<li>
+<code>--txt-output &lt;T|F&gt;</code> &ndash; Output a tab-delimited
+results file to the output directory. Default = T.</li>
+
+<li>
+<code>--sqt-output &lt;T|F&gt;</code> &ndash; Output a SQT
+results file to the output directory. Default = F.</li>
+
+<li>
+<code>--pepxml-output &lt;T|F&gt;</code> &ndash; Output a pepXML
+results file to the output directory. Default = F.</li>
+
+<li>
+<code>--mzid-output &lt;T|F&gt;</code> &ndash; Output an mzIdentML
+results file to the output directory. Default = F.</li>
+
+<li>
+<code>--pinxml-output &lt;T|F&gt;</code> &ndash; Output a PIN XML
+results file to the output directory. Default = F.</li>
 
 </UL>
 <B>Parameter file options:</B>
@@ -271,11 +307,13 @@ info, 60-detailed debug info. Default = 30.</li>
 <code>min-peaks &lt;int&gt;</code> &ndash;
 The minimum number of peaks a spectrum must have in order to be
 searched.  Default = 20.
+</li>
 
 <li>
 <code>fragment-mass average|mono</code> &ndash; 
 Which isotopes to use in calcuating fragment ion mass (average,
 mono). Default = mono.
+</li>
 
 <li>
 <code>use-flanking-peaks T|F</code> &ndash;
@@ -289,6 +327,7 @@ matching peptides to spectra.  Peptides must be within +/-
 '<code>precursor-window</code>' of the spectrum value.  Definition of
 precursor window units depends
 upon <code>precursor-window-type</code>. Default = 3.0.
+</li>
 
 <li>
 <code>precursor-window-type mass|mz|ppm</code> &ndash; Specify
@@ -313,14 +352,10 @@ is defined as spectrum mass / (1.0 - (<code>precursor-window</code> /
 1000000)).  Default = mass.</li>
 
 <li>
-<code>use-mstoolkit T|F</code> &ndash;
-Use MSToolkit to parse the spectra. Required for parsing spectra from
-.mzXML files. Default = F.
-
-<li>
 <code>top-match &lt;int&gt;</code> &ndash; 
 The number of psms per spectrum writen to the output files. Default =
 5.
+</li>
 
 <li>
 <code>mod &lt;mass&nbsp;change&gt;:&lt;aa&nbsp;list&gt;:&lt;max&nbsp;per&nbsp;peptide&gt;:&lt;prevents&nbsp;cleavage&gt;:&lt;prevents&nbsp;cross-link&gt;
@@ -336,6 +371,7 @@ cross-linking respectively. The same modifications must be given for any
 post-search process (<code>crux compute-q-values</code>, <code>crux
 q-ranker</code>, <code>crux percolator</code>). Default = no
 variable modifications.
+</li>
 
 <li>
 <code>cmod &lt;mass change&gt;:&lt;max distance from protein
@@ -350,6 +386,7 @@ parameters does not exceed 11. The same modifications must be given
 for any post-search process (<code>crux
   compute-q-values</code>, <code>crux q-ranker</code>, <code>crux
   percolator</code>). Default = no c-terminal modifications.
+</li>
 
 <li>
 <code>nmod &lt;mass change&gt;:&lt;max distance from protein N-terminus&gt;
@@ -364,26 +401,31 @@ does not exceed 11. The same modifications must be given for any
 post-search process (<code>crux compute-q-values</code>, <code>crux 
 q-ranker</code>, <code>crux percolator</code>). Default = no
 n-terminal modifications.
+</li>
 
 <li>
 <code>cmod-fixed &lt;mass change&gt</code>&ndash;
 Add a modification of the given mass change to the C-terminus of every
 peptide.
+</li>
 
 <li>
 <code>nmod-fixed &lt;mass change&gt;</code>&ndash;
 Add a modification of the given mass change to the N-terminus of every
 peptide.
+</li>
 
 <li>
 <code>max-mods &lt;int&gt;</code> &ndash;
 The maximum number of modifications that can be applied to a single
 peptide. Default = no limit.
+</li>
 
 <li>
 <code>max-aas-modified &lt;int&gt;</code> &ndash;
 The maximum number of modified amino acids that can appear in one
 peptide.  Each aa can be modified multiple times. Default = no limit.
+</li>
 
 <li>
 <code>mod-mass-format mod-only|total|separate</code> &ndash;
@@ -405,11 +447,13 @@ D[14,2] with 'separate'.</li>
 <code>precision &lt;int&gt;</code> &ndash;
 Set the precision (number of significant digits) for scores
 written to text files. Default = 8.
+</li>
 
 <li>
 <code>print-search-progress &lt;int&gt;</code> &ndash;
 Show search progress by printing every n spectra searched. Set to
 0 to show no search progress.  Default = 10.
+</li>
 
 <p>
 <i>NOTE: the following parameters are also used when creating an index
@@ -419,18 +463,22 @@ and must be compatible with any index used.</i></p>
 <code>min-mass &lt;float&gt;</code> &ndash; 
 The minimum neutral mass of the peptides to place in the index. Default
 = 200.
+</li>
 
 <LI>
 <code>max-mass &lt;float&gt;</code> &ndash; 
 The maximum neutral mass of the peptides to place in index. Default = 7200.
+</li>
 	
 <LI>
 <code>min-length &lt;int&gt;</code> &ndash; 
 The minimum length of the peptides to place in the index. Default = 6.
+</li>
 	
 <LI>
 <code>max-length &lt;int&gt;</code> &ndash; 
 The maximum length of the peptides to place in the index. Default = 50.
+</li>
 
 <LI>
 <code>enzyme trypsin|chymotrypsin|elastase|clostripain|cyanogen-bromide|idosobenzoate|proline-endopeptidase|staph-protease|modified-chymotrypsin|elastase-trypsin-chymotrypsin|no-enzyme</code> &ndash;
@@ -445,6 +493,7 @@ residues}.  trypsin [RK]|{P}, elastase [ALIV]|{P}, chymotrypsin
 modified-chymotrypsin [FWYL]|{P}, elastase-trypsin-chymotrypsin
 [ALIVKRWFY]|{P},aspn [X]|[D] (cuts after any residue and before
 D). Default = trypsin.
+</li>
 
 <li>
 <code>custom-enzyme &lt;residues before cleavage&gt;|&lt;residues after cleavage&gt;</code> &ndash;
@@ -459,6 +508,7 @@ are enclosed in curly braces, '{' and '}'.  Use X to indicate all
 residues.  For example, trypsin cuts after R or K but not before P
 which is represented as <code>[RK]|{P}</code>.  AspN cuts after any
 residue but only before D which is represented as <code>[X]|[D]</code>.
+</li>
 
 <LI>
 <code>digestion full-digest|partial-digest</code> &ndash;
@@ -468,6 +518,7 @@ conform to enzyme specificity rules. Used in conjunction with
 the <code>enzyme</code> or <code>custom-enzyme</code> option
 when <code>enzyme</code> is not set to to 'no-enzyme'.   Default
 full-digest.
+</li>
 
 <LI>
 <code>missed-cleavages &lt;int&gt;</code> &ndash; Include in the
@@ -478,6 +529,7 @@ Default = 0.</li>
 <code>isotopic-mass average|mono</code> &ndash; 
 Specify the type of isotopic masses to use when calculating the
 peptide mass. Default = average.
+</li>
    
 <li>
 <code>&lt;A-Z&gt &lt;float&gt;</code> &ndash; 
@@ -485,6 +537,7 @@ Specify static modifications.  This is a mass change applied to the
 given amino acid (in single-letter-code A thru Z) for every peptide in
 which it occurs. Use the <code>mod</code> option for generating
 peptides both with and without the mass change.  Default C=57.
+</li>
 </ul>
 
 <HR></hr>

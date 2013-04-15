@@ -120,22 +120,26 @@ void QRanker :: write_results()
   getOverFDR(fullset,net, selectionfdr);
   d.clear_data_psm_training();
   
-  ostringstream fname;
-  fname << out_dir << "/" << fileroot << "q-ranker.target.psms.txt";
-
   d.load_data_psm_results();
   computePEP();
 
-  ofstream f1(fname.str().c_str()); 
-  write_results_psm_tab(f1);
-  f1.close();
-  fname.str("");
+  ostringstream fname;
+  if (get_boolean_parameter("txt-output")) {
+    fname << out_dir << "/" << fileroot << "q-ranker.target.psms.txt";
 
-  fname << out_dir << "/" << fileroot << "q-ranker.xml";
-  PepXMLWriter xmlfile;
-  xmlfile.openFile(fname.str().c_str(), overwrite_flag);
-  write_results_psm_xml(xmlfile);
-  xmlfile.closeFile();
+    ofstream f1(fname.str().c_str()); 
+    write_results_psm_tab(f1);
+    f1.close();
+    fname.str("");
+  }
+
+  if (get_boolean_parameter("pepxml-output")) {
+    fname << out_dir << "/" << fileroot << "q-ranker.xml";
+    PepXMLWriter xmlfile;
+    xmlfile.openFile(fname.str().c_str(), overwrite_flag);
+    write_results_psm_xml(xmlfile);
+    xmlfile.closeFile();
+  }
   d.clear_data_psm_results();
 }
 
@@ -313,19 +317,28 @@ void QRanker ::write_results_psm_xml(PepXMLWriter& xmlfile)
       }
 
       // psm info
-      int psm_rank = 1;
+      int* psm_ranks = new int[NUMBER_SCORER_TYPES];
+      psm_ranks[XCORR]=1; 
       double delta_cn = d.psmind2deltaCn(psmind);
+      
       scores[XCORR] = d.psmind2xcorr(psmind);
+      
       scores[SP] = d.psmind2spscore(psmind);
       scores[QRANKER_SCORE] = fullset[i].score;
       scores[QRANKER_QVALUE] = fullset[i].q;
       scores[QRANKER_PEP] = fullset[i].PEP;
-
-      xmlfile.writePSM(scan, filename, spectrum_mass, charge, psm_rank,
+      psm_ranks[SP]=-1; 
+      
+      psm_ranks[SP]=d.psmind2sp_rank(psmind);
+      double by_ions_matched=d.psmind2by_ions_matched(psmind);
+      
+      psm_ranks[XCORR]=d.psmind2xcorr_rank(psmind);
+      xmlfile.writePSM(scan, filename, spectrum_mass, charge, psm_ranks,
                        sequence, modified_sequence.c_str(),
                        peptide_mass, num_proteins,
                        flanking_aas.c_str(), protein_names, 
-                       protein_descriptions, delta_cn, scores_to_print, scores);
+                       protein_descriptions, delta_cn, scores_to_print, scores,by_ions_matched,
+                       d.psmind2by_ions_total(psmind), d.psmind2matches_spectrum(psmind));
 
       free(sequence);
       if( path_name[0] ){
@@ -907,6 +920,8 @@ int QRanker :: crux_set_command_line_options(int argc, char *argv[])
     "fileroot",
     "output-dir",
     "overwrite",
+    "pepxml-output",
+    "txt-output",
     "skip-cleanup",
     "re-run",
     "use-spec-features",

@@ -55,7 +55,6 @@ add_library(
   src/expat-2.0.1/xmltok.c
   src/expat-2.0.1/xmltok_impl.c
   src/expat-2.0.1/xmltok_ns.c
-  src/sqlite-3.7.7.1/sqlite3.c
   src/MSToolkit/Spectrum.cpp
   src/MSToolkit/MSReader.cpp
   src/MSToolkit/MSObject.cpp

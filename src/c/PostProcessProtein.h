@@ -28,7 +28,7 @@
 /**
  *  TODO: support the flanking amino acids so that peptide->getFlankingAAs() works correctly.
  */
-class PostProcessProtein : public Protein {
+class PostProcessProtein : public Crux::Protein {
 
   std::vector<std::string> sequences_;  ///< sequences that we have seen so far.
   std::vector<std::string> prev_aas_; ///< previous amino acid to the sequence
@@ -72,6 +72,13 @@ class PostProcessProtein : public Protein {
     int offset=0 ///< The offset (or sequence index) for the sequence
   );
 
+  char getNTermFlankingAA(
+    int offset=0 ///< The offset (or sequence index) for the AA
+  );
+
+  char getCTermFlankingAA(
+    int offset=0 ///< The offset (or sequence index) for the AA
+  );
 
   /**
    * \returns true indicating that this is a PostProcessProtein object

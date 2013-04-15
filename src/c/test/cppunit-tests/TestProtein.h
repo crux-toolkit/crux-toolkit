@@ -13,7 +13,7 @@ class TestProtein : public CPPUNIT_NS::TestFixture
  protected:
   // variables to use in testing
   const char* tryptic_seq;
-  Protein* prot1;
+  Crux::Protein* prot1;
 
  public:
   void setUp();

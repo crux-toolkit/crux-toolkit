@@ -11,14 +11,13 @@
 #include "MatchCollection.h"
 #include "MatchCollectionIterator.h"
 #include "MatchIterator.h"
-
 #include <string>
-
 #include "MatchFileReader.h"
+#include "SQTReader.h"
 #include "WinCrux.h"
 
 using namespace std;
-
+using namespace Crux;
 
 /**
  * \returns An (empty) match_collection object.
@@ -222,8 +221,8 @@ int MatchCollection::addMatches(
     scoreMatchesOneSpectrum(SP, spectrum, zstate.getCharge(),
                                false); // don't store scores
     populateMatchRank(SP);
+    saveTopSpMatch();
     if( filter_by_sp ){ // keep only high-ranking sp psms
-      saveTopSpMatch();
       int sp_max_rank = get_int_parameter("max-rank-preliminary");
       truncate(sp_max_rank + 1, // extra for deltacn of last
                SP);
@@ -550,13 +549,13 @@ void MatchCollection::sort(
     sort_by = LOGP_BONF_WEIBULL_XCORR;
     compare_match_function = (QSORT_COMPARE_METHOD)comparePValue;
     break;
-
+/*
   case PERCOLATOR_SCORE:
     carp(CARP_INFO, "Sorting match collection by Percolator score.");
     sort_by = PERCOLATOR_SCORE;
     compare_match_function = (QSORT_COMPARE_METHOD)comparePercolatorScore;
     break;
-
+*/
   case PERCOLATOR_QVALUE:
   case PERCOLATOR_PEPTIDE_QVALUE:
   case PERCOLATOR_PEP:
@@ -564,7 +563,13 @@ void MatchCollection::sort(
     sort_by = PERCOLATOR_QVALUE;
     compare_match_function = (QSORT_COMPARE_METHOD)comparePercolatorQValue;
     break;
-
+/*
+  case PERCOLATOR_SCAN:
+    carp(CARP_INFO, "Sorting match collection by Percolator scan.");
+    sort_by = PERCOLATOR_SCAN;
+    compare_match_function = (QSORT_COMPARE_METHOD)compareSpectrum;
+    break;
+*/
   case QRANKER_SCORE:
     carp(CARP_DEBUG, "Sorting match collection by Q-ranker score.");
     sort_by = QRANKER_SCORE;
@@ -662,7 +667,16 @@ void MatchCollection::spectrumSort(
                 (QSORT_COMPARE_METHOD)compareSpectrumPercolatorQValue);
     last_sorted_ = PERCOLATOR_QVALUE;
     break;
-
+/*
+  case PERCOLATOR_SCAN: 
+    qsortMatch(
+      match_,
+      match_total_,
+      (QSORT_COMPARE_METHOD)compareSpectrumScan
+    );
+    last_sorted_=PERCOLATOR_SCAN;
+    break; 
+*/
   case QRANKER_SCORE:
     qsortMatch(match_, match_total_,
                 (QSORT_COMPARE_METHOD)compareSpectrumQRankerScore);
@@ -1061,6 +1075,12 @@ int MatchCollection::addUnscoredPeptides(
 
   int matches_added = match_total_ - starting_number_of_psms;
   experiment_size_ += matches_added;
+
+  // Set ln experiment size for matches
+  FLOAT_T ln_experiment_size = logf((FLOAT_T)getTargetExperimentSize());
+  for (int i = 0; i < match_total_; i++) {
+    match_[i]->setLnExperimentSize(ln_experiment_size);  
+  }
 
   // matches are no longer correctly sorted
   last_sorted_ = (SCORER_TYPE_T)-1; // unsorted
@@ -1691,7 +1711,6 @@ void MatchCollection::printXmlHeader(
 
 }
 
-
 /**
  * Write header for .sqt file.  Assumes only sequest-search is writing
  * this file type.
@@ -1900,11 +1919,15 @@ void MatchCollection::printMultiSpectraXml(
     Match* cur_match = match_[match_idx];
     bool is_decoy = cur_match->getNullPeptide();
     Spectrum* spectrum = cur_match->getSpectrum();
-
+    double cur_ln_experiment_size=0;
     if (! is_decoy){
-      int rank = -1;
+      int* ranks =new int[NUMBER_SCORER_TYPES];
+      ranks[XCORR]=-1; 
       if( scored_type_[XCORR] ){
-        rank = cur_match->getRank(XCORR);
+        ranks[XCORR] = cur_match->getRank(XCORR);
+      }else if(scored_type_[SP]){
+        ranks[SP]=cur_match->getRank(SP);
+        scores[SP]=cur_match->getScore(SP);
       }
       char* peptide_sequence = cur_match->getSequence();
       char* mod_peptide_sequence = cur_match->getModSequenceStrWithMasses(
@@ -1916,24 +1939,35 @@ void MatchCollection::printMultiSpectraXml(
       for(int score_idx = 0; score_idx < NUMBER_SCORER_TYPES; score_idx++){
         if( scored_type_[score_idx] == true ){
           scores[score_idx] = cur_match->getScore((SCORER_TYPE_T)score_idx);
+          ranks[score_idx]=cur_match->getRank((SCORER_TYPE_T)score_idx);
+         
         }
+  
       }
-      
+      unsigned num_matches = getTargetExperimentSize(); 
+      if(isDecoy())
+        num_matches=getExperimentSize();
+      else 
+        num_matches=getTargetExperimentSize(); 
       output->writePSM(spectrum->getFirstScan(),
-                       spectrum->getFilename(),
-                       cur_match->getNeutralMass(),
-                       cur_match->getCharge(),
-                       rank,
-                       peptide_sequence,
-                       mod_peptide_sequence,
-                       peptide->getPeptideMass(),
-                       num_proteins,
-                       flanking_aas,
-                       protein_ids,
-                       protein_descriptions,
-                       cur_match->getDeltaCn(),
-                       scored_type_,
-                       scores);
+        spectrum->getFilename(),
+        cur_match->getNeutralMass(),
+        cur_match->getCharge(),
+        ranks,
+        peptide_sequence,
+        mod_peptide_sequence,
+        peptide->getPeptideMass(),
+        num_proteins,
+        flanking_aas,
+        protein_ids,
+        protein_descriptions,
+        cur_match->getDeltaCn(),
+        scored_type_,
+        scores,
+        cur_match->getBYIonMatched(),
+        cur_match->getBYIonPossible(),
+        num_matches
+      );
     }
   }
   
@@ -1961,7 +1995,7 @@ bool MatchCollection::printXml(
   }
 
   // calculate delta_cn and populate fields in the matches
-  calculateDeltaCn(SEARCH_COMMAND);
+  calculateDeltaCn();
 
   // for deciding when to quit
   int count = 0;
@@ -1971,11 +2005,15 @@ bool MatchCollection::printXml(
   vector<string> protein_ids;
   vector<string> protein_descriptions;
   bool* scores_computed = new bool[NUMBER_SCORER_TYPES];
+  
   for(int score_idx = 0; score_idx < NUMBER_SCORER_TYPES; score_idx++){
     scores_computed[score_idx] = false;
   }
   scores_computed[main_score] = true;
+  if( scored_type_[SP])
+    scores_computed[SP] = true;
   double* scores = new double[NUMBER_SCORER_TYPES];
+  int* ranks=new int[NUMBER_SCORER_TYPES];
 
   Match* match = NULL;
   // create match iterator
@@ -1985,10 +2023,13 @@ bool MatchCollection::printXml(
   // iterate over matches
   while(match_iterator->hasNext()){
     match = match_iterator->next();
-    int cur_rank = match->getRank(main_score);
-  
-
-    
+    int cur_rank = match->getRank(main_score);   
+    if(scored_type_[XCORR])
+      ranks[XCORR]=match->getRank(XCORR);
+    if(scored_type_[SP]){
+      ranks[SP]= match->getRank(SP);
+      scores[SP]= match->getScore(SP);
+    }
     // print if we haven't reached the limit
     // or if we are at the limit but this match is a tie with the last
     if( count < top_match || last_rank == cur_rank ){
@@ -2000,24 +2041,35 @@ bool MatchCollection::printXml(
       char* flanking_aas = peptide->getFlankingAAs();
       int num_proteins = peptide->getProteinInfo(protein_ids, 
                                                  protein_descriptions);
-      scores[main_score] = match->getScore(main_score);
-
-
+     for(int score_idx=0; score_idx < NUMBER_SCORER_TYPES; score_idx++){
+      if(scored_type_[score_idx])
+        scores[score_idx] = match->getScore((SCORER_TYPE_T)score_idx);
+      
+     }   
+     unsigned num_matches= getTargetExperimentSize(); 
+     if(isDecoy())
+       num_matches= getExperimentSize(); 
+     else
+       num_matches= getTargetExperimentSize(); 
       output->writePSM(spectrum->getFirstScan(),
-                       spectrum->getFilename(),
-                       zstate_.getNeutralMass(),
-                       zstate_.getCharge(),
-                       cur_rank,
-                       peptide_sequence,
-                       mod_peptide_sequence,
-                       peptide->getPeptideMass(),
-                       num_proteins,
-                       flanking_aas,
-                       protein_ids,
-                       protein_descriptions,
-                       match->getDeltaCn(),
-                       scores_computed,
-                       scores);
+        spectrum->getFilename(),
+        zstate_.getNeutralMass(),
+        zstate_.getCharge(),
+        ranks,
+        peptide_sequence,
+        mod_peptide_sequence,
+        peptide->getPeptideMass(),
+        num_proteins,
+        flanking_aas,
+        protein_ids,
+        protein_descriptions,
+        match->getDeltaCn(),
+        scores_computed,
+        scores,
+        match->getBYIonMatched(),
+        match->getBYIonPossible(), 
+        num_matches
+      );
       count++;
       last_rank = cur_rank;
       free(peptide_sequence);
@@ -2064,7 +2116,7 @@ bool MatchCollection::printSqt(
   int num_matches = experiment_size_;
 
   // calculate delta_cn and populate fields in the matches
-  calculateDeltaCn(SEQUEST_COMMAND);
+  calculateDeltaCn();
 
   // First, print spectrum info
   spectrum->printSqt(output, num_matches, zstate);
@@ -2089,8 +2141,11 @@ bool MatchCollection::printSqt(
 
   }// next match
   
-  // print the match with Sp rank==1 if its xcorr rank > top_match rank.  
-  if( top_scoring_sp_->getRank(XCORR) > top_match ){
+  // make sure top_scoring_sp_ has been set
+  if( top_scoring_sp_ == NULL){
+    carp(CARP_WARNING, "Top scoring SP was not set.");
+  } else if( top_scoring_sp_->getRank(XCORR) > top_match ){
+    // print the match with Sp rank==1 if its xcorr rank > top_match rank.  
     top_scoring_sp_->printSqt(output);
   }
   
@@ -2433,9 +2488,8 @@ bool MatchCollection::extendTabDelimited(
     //set all spectrum specific features to parsed match
     match->setZState(zstate_);
     match->setDeltaCn(delta_cn);
-    match->setLnDeltaCn(ln_delta_cn);
-    match->setLnExperimentSize(ln_experiment_size);
-
+    match->setDeltaLCn(ln_delta_cn);
+    match->setLnExperimentSize(ln_experiment_size);    
     //add match to match collection.
     addMatchToPostMatchCollection(match);
     //increment pointer.
@@ -2584,17 +2638,12 @@ void MatchCollection::processRunSpecificFeatures() {
 /**
  * \brief Calculate the delta_cn of each match and populate the field.
  * 
- * Delta_cn is the normalized difference between xcorrs of different
- * ranks.  For SEQUEST style searching
- * match[i] = (match[0] - match[i]) / match[0] 
- * For other searching
- * match[i] = (match[0] - match[i+1]) / match[0].  This function
- * defaults to the second case. Sorts match_collection by xcorr, if necessary.
+ * Delta_cn is the normalized difference between xcorrs of different ranks.
+ * match[i] = (match[i] - match[i+1]) / match[i].
+ * Sorts match_collection by xcorr, if necessary.
  * 
  */
-bool MatchCollection::calculateDeltaCn(
-  COMMAND_T search_type
-  ){
+bool MatchCollection::calculateDeltaCn(){
 
   if( scored_type_[XCORR] == false ){
     carp(CARP_WARNING, 
@@ -2611,33 +2660,32 @@ bool MatchCollection::calculateDeltaCn(
     last_sorted_ = XCORR;
   }
 
-  // get xcorr of first match
-  FLOAT_T max_xcorr = matches[0]->getScore(XCORR);
-
-  // for each match, calculate deltacn
-  for(int match_idx = 0; match_idx < num_matches; match_idx++){
-    FLOAT_T next_xcorr = 0;
+  FLOAT_T last_xcorr=0.0;
+  FLOAT_T delta_cn = 0.0;
+  FLOAT_T delta_lcn = 0.0;
+  FLOAT_T next_xcorr=0.0;
+  FLOAT_T current_xcorr = 0 ; 
+  if(num_matches>1){
+    last_xcorr = matches[num_matches-1]->getScore(XCORR);
+    for (size_t idx = 0 ;idx < num_matches;idx++) { 
+      current_xcorr = matches[idx]->getScore(XCORR);
+      if (idx+1<=num_matches-1)
+        next_xcorr=matches[idx+1]->getScore(XCORR);
+      delta_cn = (current_xcorr - next_xcorr) / max(current_xcorr, (FLOAT_T)1.0);
+      delta_lcn = (current_xcorr - last_xcorr) / max(current_xcorr, (FLOAT_T)1.0);
     
-    if( search_type == SEQUEST_COMMAND ){ // use this match's xcorr
-      next_xcorr = matches[match_idx]->getScore(XCORR);
-    } else {                              // find next non-equal xcorr
-      FLOAT_T this_xcorr = matches[match_idx]->getScore(XCORR);
-      int score_idx = match_idx + 1;
-      
-      while( score_idx < num_matches &&
-             matches[score_idx]->getScore(XCORR) == this_xcorr ){
-        score_idx++;
-      }
-      
-      if( score_idx < num_matches ){
-        next_xcorr = matches[score_idx]->getScore(XCORR);
-      } else { // if this is the last match, set dcn to 0
-        next_xcorr = max_xcorr;
-      }
-    }
+      if(fabs(delta_cn)== numeric_limits<FLOAT_T>::infinity()){
+        carp(CARP_DEBUG, "delta_cn was %f and set to zero. XCorr score is %f", delta_cn, current_xcorr);
+        delta_cn = 0.0;
+      }   
+      if(fabs(delta_lcn) == numeric_limits<FLOAT_T>::infinity()){
+        carp(CARP_DEBUG, "delta_lcn was %f and set to zero. XCorr score is %f", delta_lcn, current_xcorr);
+        delta_lcn = 0.0;
+      }   
+      matches[idx]->setDeltaCn(delta_cn);
+      matches[idx]->setDeltaLCn(delta_lcn);
     
-    FLOAT_T delta_cn = (max_xcorr - next_xcorr) / max_xcorr;
-    matches[match_idx]->setDeltaCn(delta_cn);
+    }   
   }
 
   return true;

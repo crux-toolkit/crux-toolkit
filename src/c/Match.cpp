@@ -35,6 +35,7 @@
 #include "MatchFileReader.h"
 
 using namespace std;
+using namespace Crux;
 
 void Match::init() {
 
@@ -56,7 +57,7 @@ void Match::init() {
   digest_ = INVALID_DIGEST;
   post_process_match_ = 0;
   delta_cn_ = 0;
-  ln_delta_cn_ = 0;
+  delta_lcn_ = 0;
   ln_experiment_size_ = 0;
   num_target_matches_ = 0;
   num_decoy_matches_ = 0;
@@ -416,6 +417,7 @@ int comparePercolatorScore(
 
 }
 
+
 /**
  * Compare two matches by spectrum scan number and percolator score,
  * used for qsort. 
@@ -526,6 +528,26 @@ int compareSpectrumBaristaScore(
   return return_me;
 }
 
+
+/**
+ * Compare two matches by spectrum scan number,
+ * used for PinXMLWriter. 
+ * \returns -1 if match a spectrum number is less than that of match b
+ * or if scan number is same, if score of match a is less than
+ * match b.  1 if scan number and score are equal, else 0.
+ */
+int compareSpectrumScan(
+  Match** match_a, ///< the first match -in  
+  Match** match_b  ///< the scond match -in
+  )
+{
+
+  int return_me = compareSpectrum( match_a, match_b );
+  if( return_me == 0 ){
+    return_me = compareSpectrum(match_a, match_b);
+  }
+  return return_me;
+}
 /**
  * Compare two matches by spectrum scan number and q-value (from the decoys and xcorr score),
  * used for qsort. 
@@ -601,7 +623,7 @@ void Match::printSqt(
           getRank(XCORR),
           getRank(SP),
           get_int_parameter("mass-precision"),
-          peptide->getPeptideMass(),
+          peptide->getPeptideMass() + MASS_PROTON,
           delta_cn,
           precision,
           score_main,
@@ -1277,11 +1299,11 @@ char* Match::getSequenceSqt(){
   char* final_string = (char*)mycalloc((strlen(seq)+5), sizeof(char));
 
   // copy pieces in
-  final_string[0] = c_term;
+  final_string[0] = n_term;
   final_string[1] = '.';
   strcpy(&final_string[2], seq);
   final_string[strlen(seq) + 2] = '.';
-  final_string[strlen(seq) + 3] = n_term;
+  final_string[strlen(seq) + 3] = c_term;
   final_string[strlen(seq) + 4] = '\0';
 
   carp(CARP_DETAILED_DEBUG, "start string %s, final %s", seq, final_string);
@@ -1536,19 +1558,19 @@ FLOAT_T Match::getDeltaCn()
 /**
  * sets the match ln_delta_cn
  */
-void Match::setLnDeltaCn(
-  FLOAT_T ln_delta_cn  ///< the ln delta cn value of PSM -in
+void Match::setDeltaLCn(
+  FLOAT_T delta_lcn  ///< the delta lcn value of PSM -in
   )
 {
-  ln_delta_cn_ = ln_delta_cn;
+  delta_lcn_ = delta_lcn;
 }
 
 /**
- * gets the match ln_delta_cn
+ * gets the match delta_lcn
  */
-FLOAT_T Match::getLnDeltaCn()
+FLOAT_T Match::getDeltaLCn()
 {
-  return ln_delta_cn_;
+  return delta_lcn_;
 }
 
 /**
@@ -1596,6 +1618,13 @@ void Match::setBYIonInfo(
   b_y_ion_possible_ = scorer->getSpBYIonPossible(); 
 }
 
+void Match::setBYIonFractionMatched(
+  FLOAT_T fraction_matched
+  ) {
+
+  b_y_ion_fraction_matched_ = fraction_matched;
+}
+
 void Match::calcBYIonFractionMatched() {
   b_y_ion_fraction_matched_ = (FLOAT_T)b_y_ion_matched_ / (FLOAT_T)b_y_ion_possible_;
 }
@@ -1626,6 +1655,7 @@ int Match::getBYIonMatched()
 {
   return b_y_ion_matched_;
 }
+
 
 /**
  * sets the match b_y_ion_possible
