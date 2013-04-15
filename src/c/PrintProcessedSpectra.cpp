@@ -90,7 +90,7 @@ int PrintProcessedSpectra::main(int argc, char** argv) {
   while(spectrum_iterator->hasNext()){
     SpectrumZState cur_zstate;
     int cur_charge = 0;
-    Spectrum* cur_spectrum = 
+    Crux::Spectrum* cur_spectrum = 
       spectrum_iterator->next(cur_zstate);
 
     cur_charge = cur_zstate.getCharge();

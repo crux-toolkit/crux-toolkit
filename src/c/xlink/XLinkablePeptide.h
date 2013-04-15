@@ -59,7 +59,7 @@ class XLinkablePeptide {
   /**
    * Default destructor
    */
-  ~XLinkablePeptide();
+  virtual ~XLinkablePeptide();
 
   /**
    * given a peptide and a XLinkBondMap object,

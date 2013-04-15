@@ -47,8 +47,8 @@ int PostProcessProtein::findStart(
 
   if (ans == -1) {
     sequences_.push_back(sequence);
-    prev_aas_.push_back(sequence);
-    next_aas_.push_back(sequence);
+    prev_aas_.push_back(prev_aa);
+    next_aas_.push_back(next_aa);
     ans = sequences_.size();
   }
 
@@ -78,6 +78,18 @@ char* PostProcessProtein::getSequencePointer(
 
 }
 
+char PostProcessProtein::getNTermFlankingAA(
+  int offset ///< The offset (or sequence index) for the flanking AA
+  ) {
+  return prev_aas_[offset][0];
+}
+
+char PostProcessProtein::getCTermFlankingAA(
+  int offset ///< The offset (or sequence index) for the flanking AA
+  ) {
+  return next_aas_[offset][0];
+}
+
 /**
  * \returns true indicating that this is a PostProcessProtein object
  */
@@ -93,9 +105,11 @@ bool PostProcessProtein::isPostProcess() {
 unsigned int PostProcessProtein::getLength() {
 
   if (sequence_ == NULL) {
-    carp(CARP_FATAL, "Need protein sequence in order to calculate protein length.\n"
+    carp_once(CARP_WARNING, "Need protein sequence in order to calculate protein length.\n"
                      "   Please provide protein fasta or index using the protein-database parameter\n"
                      "   Protein %s doesn't have the full sequence", getIdPointer());
+
+    return 0;
   }
 
   return length_;

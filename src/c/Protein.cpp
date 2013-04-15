@@ -21,7 +21,7 @@
 #include "ProteinPeptideIterator.h"
 
 using namespace std;
-
+using namespace Crux;
 /**
  * Constants
  */
@@ -872,7 +872,7 @@ Database* Protein::getDatabase()
 /** 
  * Comparison function for sorting proteins by protein id.
  */
-bool protein_id_less_than(Protein* protein_one, Protein* protein_two){
+bool Crux::protein_id_less_than(Protein* protein_one, Protein* protein_two){
   int compare = strcmp(protein_one->getIdPointer(),
                        protein_two->getIdPointer());
   return (compare > 0);

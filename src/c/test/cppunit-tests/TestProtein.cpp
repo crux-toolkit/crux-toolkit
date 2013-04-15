@@ -2,7 +2,7 @@
 #include "TestProtein.h"
 #include "parameter.h" 
 //#include "objects.h"
-
+using namespace Crux;
 CPPUNIT_TEST_SUITE_REGISTRATION( TestProtein );
 
 void TestProtein::setUp(){

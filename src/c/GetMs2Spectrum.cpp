@@ -29,6 +29,7 @@
 #include "ModifiedPeptidesIterator.h"
 
 using namespace std;
+using namespace Crux;
 
 /**
  * \returns A blank GetMs2Spectrum object.

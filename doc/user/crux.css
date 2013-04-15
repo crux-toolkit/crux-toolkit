@@ -24,27 +24,27 @@ font {
 	color: #000000;
 }
 p {
-	font-size: 12px; 
+	font-size: 14px; 
 	font-family: Arial; 
 	color: #000000;
 }
 blockquote {
-	font-size: 12px; 
+	font-size: 14px; 
 	font-family: Arial; 
 	color: #000000;
 }
 dt {
-	font-size: 12px; 
+	font-size: 14px; 
 	font-family: Arial; 
 	color: #000000;
 }
 dd {
-	font-size: 12px; 
+	font-size: 14px; 
 	font-family: Arial; 
 	color: #000000;
 }
 li {
-	font-size: 12px; 
+	font-size: 14px; 
 	font-family: Arial; 
 	color: #000000;
 }
@@ -65,19 +65,19 @@ th {
     margin: 0px; 
     padding: 5px;
     font-family: Arial; 
-    font-size: 10pt;
+    font-size: 12pt;
     color: #000000;     
 }
 td {
     margin: 0px;
     padding: 5px;
     font-family: Arial;
-    font-size: 12px;
+    font-size: 14px;
     color: #000000;
 }
 textarea {
     background: #E4ECEC;	
-    font-size: 12px;
+    font-size: 14px;
     font-family: Arial;	
     color: #000000;
     border: #000000 solid 1px	
@@ -102,4 +102,11 @@ textcopyright {
     color: 220044; 
     font-family: Helvetica; 
     font-size: 11pt;
+}
+
+note{
+  color:#FF0000;
+  font-family: Arial; 
+  font-size: 15px;
+  font-style:italic;
 }

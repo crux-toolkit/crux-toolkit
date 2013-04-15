@@ -23,6 +23,7 @@
 #include "MatchCollection.h"
 #include "MatchFileWriter.h"
 #include "PepXMLWriter.h"
+#include "PinXMLWriter.h"
 #include "MzIdentMLWriter.h"
 
 class OutputFiles{
@@ -39,9 +40,9 @@ class OutputFiles{
   void writeMatches(MatchCollection* matches,
                     std::vector<MatchCollection*>& decoy_matches_array,
                     SCORER_TYPE_T rank_type = XCORR,
-                    Spectrum* spectrum = NULL);
+                    Crux::Spectrum* spectrum = NULL);
   void writeMatches(MatchCollection* matches);
-  void writeMatchFeatures(Match* match, 
+  void writeMatchFeatures(Crux::Match* match, 
                           double* features,
                           int num_features);
   void writeRankedProteins(ProteinToScore& proteinToScore,
@@ -80,6 +81,13 @@ class OutputFiles{
                   const char* output_dir,
                   const char* filename,
                   bool overwrite);
+
+  bool createFile(
+    PinXMLWriter** pin_file_ptr,
+    const char* output_dir, 
+    const char* filename, 
+    bool overwrite
+  );
   string makeFileName(const char* fileroot,
                       CruxApplication* application,
                       const char* target_decoy,
@@ -90,7 +98,7 @@ class OutputFiles{
   void printMatchesXml(
                        MatchCollection* target_matches,
                        vector<MatchCollection*>& decoy_matches_array,
-                       Spectrum* spectrum,
+                       Crux::Spectrum* spectrum,
                        SCORER_TYPE_T rank_type);
  
 
@@ -99,13 +107,20 @@ class OutputFiles{
     std::vector<MatchCollection*>& decoy_matches_array,  
                            ///< array of collections from shuffled peptides
     SCORER_TYPE_T rank_type,
-    Spectrum* spectrum = NULL);
+    Crux::Spectrum* spectrum = NULL);
 
   void printMatchesSqt(
     MatchCollection*  target_matches, ///< from real peptides
     std::vector<MatchCollection*>& decoy_matches_array,  
                            ///< array of collections from shuffled peptides
-  Spectrum* spectrum = NULL);
+    Crux::Spectrum* spectrum = NULL);
+
+  void printMatchesPinXml(
+    MatchCollection* target_matches, ///< form real peptides 
+    std::vector<MatchCollection*>& decoy_maches_array, 
+                          ///< array of collection from shuffled peptides  
+    Crux::Spectrum* spectrum=NULL
+  );
 
   void printMatchesMzid(
     MatchCollection* target_matches,
@@ -118,7 +133,6 @@ class OutputFiles{
     SCORER_TYPE_T rank_type
   );
 
-
   int num_files_;         ///< num files in each array
   std::string* target_decoy_list_; ///< target or decoy[-n] string of each file
   MatchFileWriter** delim_file_array_; ///< array of .txt files
@@ -126,9 +140,11 @@ class OutputFiles{
   MzIdentMLWriter* mzid_file_;
  
   PepXMLWriter** xml_file_array_; ///< array of .pep.xml files
-  FILE*  feature_file_;   ///< file for percolator/q-ranker to write features to
+  FILE*  feature_file_;   ///< file for percolator/q-ranker to write features to 
   int matches_per_spec_;  ///< print this many matches per spec
   CruxApplication* application_;///< crux application writing these files
+  PinXMLWriter* pin_xml_file_;///< file for inpupt of percolator
+ 
 };
 
 

@@ -13,6 +13,7 @@
 #define MIN_MZ 400;
 #define NO_FLANKS 1
 
+using namespace Crux;
 
 /**
  * Initializes an empty XHHC_Scorer object
@@ -34,6 +35,17 @@ void XHHC_Scorer::init() {
  */
 XHHC_Scorer::XHHC_Scorer() {
   init();
+}
+
+/**
+ * Destructor
+ */
+XHHC_Scorer::~XHHC_Scorer() {
+
+  if (scorer_ != NULL) {
+    delete scorer_;
+  }
+
 }
   
 /**

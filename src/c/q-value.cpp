@@ -23,6 +23,7 @@
 #include <utility>
 
 using namespace std;
+using namespace Crux;
 
 static const int MAX_PSMS = 10000000;
 // 14th decimal place

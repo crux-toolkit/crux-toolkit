@@ -39,12 +39,12 @@ class DatabaseProteinIterator {
   /**
    * \returns The next protein in the database.
    */
-  Protein* next();
+  Crux::Protein* next();
   
   /**
    * \returns the protein to the corresponding protein_idx in the database.
    */
-  Protein* getProtein(
+  Crux::Protein* getProtein(
     unsigned int protein_idx ///< protein_idx to which protein to return -in
     );
 

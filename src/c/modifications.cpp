@@ -20,7 +20,7 @@
  */
 
 #include "modifications.h"
-
+#include "mass.h"
 /* Private constants */
 //enum { MAX_PROTEIN_SEQ_LENGTH = 40000 };
 
@@ -504,6 +504,43 @@ MODIFIED_AA_T* copy_mod_aa_seq(MODIFIED_AA_T* source, int length){
   new_seq[length] = MOD_SEQ_NULL;
 
   return new_seq;
+}
+
+/**
+ * \brief Allocate a new MODIFIED_AA_T array and copy values into it.
+ */
+MODIFIED_AA_T* copy_mod_aa_seq(
+  MODIFIED_AA_T* source ///< Sequence to copy
+  ) {
+
+  size_t length = 0;
+  while (source[length] != MOD_SEQ_NULL) {
+    length++;
+  }
+  return copy_mod_aa_seq(source, length);
+
+}
+
+
+/**
+ * \returns whether the two modified sequences are equal or not
+ */
+bool equal_seq(
+  MODIFIED_AA_T* seq1, ///< Sequence 1
+  MODIFIED_AA_T* seq2  ///< Sequence 2
+  ) {
+
+  size_t idx = 0;
+
+  while (seq1[idx] != MOD_SEQ_NULL && seq2[idx] != MOD_SEQ_NULL) {
+    if (seq1[idx] != seq2[idx]) {
+      return false;
+    }
+    idx++;
+  }
+
+  return (seq1[idx] == MOD_SEQ_NULL && seq2[idx] == MOD_SEQ_NULL);
+
 }
 
 /**

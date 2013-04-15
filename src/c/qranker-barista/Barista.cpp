@@ -997,19 +997,24 @@ void Barista :: write_results_pep_xml(PepXMLWriter& xmlfile)
       }
 
       // psm info
-      int psm_rank = 1;
+      int* psm_ranks = new int[NUMBER_SCORER_TYPES];
       double delta_cn = d.psmind2deltaCn(psmind);
+     
       scores[XCORR] = d.psmind2xcorr(psmind);
       scores[SP] = d.psmind2spscore(psmind);
       scores[QRANKER_SCORE] = psmtrainset[i].score;
       scores[QRANKER_QVALUE] = psmtrainset[i].q;
       scores[QRANKER_PEP] = psmtrainset[i].PEP;
-
-      xmlfile.writePSM(scan, filename, spectrum_mass, charge, psm_rank,
+      psm_ranks[SP]=d.psmind2sp_rank(psmind); 
+      psm_ranks[XCORR]=d.psmind2xcorr_rank(psmind);
+      double by_ion_matched=d.psmind2by_ions_matched(psmind);
+      xmlfile.writePSM(scan, filename, spectrum_mass, charge, psm_ranks,
                        sequence, modified_sequence.c_str(),
                        peptide_mass, num_proteins,
                        flanking_aas.c_str(), protein_names, 
-                       protein_descriptions, delta_cn, scores_to_print, scores);
+                       protein_descriptions, delta_cn, scores_to_print, scores,by_ion_matched, 
+                       d.psmind2by_ions_total(psmind), 
+                       d.psmind2matches_spectrum(psmind));
 
       free(sequence);
       if( path_name[0] ){
@@ -1601,14 +1606,16 @@ void Barista :: report_all_results_xml()
 
   write_results_psm_xml(of);
 
-  ostringstream xml_file_name;
-  xml_file_name << out_dir << "/" << fileroot << "barista.target.pep.xml";
-  PepXMLWriter xmlfile;
-  xmlfile.openFile(xml_file_name.str().c_str(), overwrite_flag);
+  if (get_boolean_parameter("pepxml-output")) {
+    ostringstream xml_file_name;
+    xml_file_name << out_dir << "/" << fileroot << "barista.target.pep.xml";
+    PepXMLWriter xmlfile;
+    xmlfile.openFile(xml_file_name.str().c_str(), overwrite_flag);
 
-  //...
-  xmlfile.closeFile();
-  write_results_pep_xml(xmlfile);
+    //...
+    xmlfile.closeFile();
+    write_results_pep_xml(xmlfile);
+  }
 
   
   of << endl;
@@ -1655,7 +1662,9 @@ void Barista :: report_all_results_xml_tab()
   setup_for_reporting_results();
   stringstream fname;
   report_all_results_xml();
-  report_all_results_tab();
+  if (get_boolean_parameter("txt-output")) {
+    report_all_results_tab();
+  }
   d.clear_data_all_results(); 
   
 }
@@ -2637,6 +2646,8 @@ int Barista :: crux_set_command_line_options(int argc, char *argv[])
     "fileroot",
     "output-dir",
     "overwrite",
+    "pepxml-output",
+    "txt-output",
     "skip-cleanup",
     "re-run",
     "use-spec-features",

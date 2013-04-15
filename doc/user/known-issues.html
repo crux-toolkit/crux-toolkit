@@ -27,8 +27,24 @@ To prevent the error, run the search-for-matches with an
 <a href="index-tutorial.html">index</a>. </li>
 
 <li>
-The <code>--use-spec-features</cope> option in Q-Ranker does not work
+The <code>--use-spec-features</code> option in Q-Ranker does not work
 if the search results contain modified peptides.</li>
+
+<li>
+The <code>crux</code> spectrum parser option does not handle disjoint scan
+ranges from SCANS lines in MGF files; Crux will create a single scan range from
+the lowest scan number to the highest scan number.
+</li>
+
+<li>
+The <code>pwiz</code> spectrum parser option does not parse the SCANS line from
+MGF files. Crux will assign new sequential scan numbers to the spectra.
+</li>
+
+<li>
+In Percolator, a seed value of 0 will produce a segmentation fault, so
+it is automatically set to 1 instead.
+</li>
 
 </ol>
 

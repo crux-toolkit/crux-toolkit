@@ -34,6 +34,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace Crux;
 
 //PRIVATE FUNCTIONS
 
@@ -76,16 +77,16 @@ int SearchForXLinks::xhhcSearchMain() {
   carp(CARP_INFO, "Beginning crux xlink-search");
 
   //Get parameters
-  char* ms2_file = get_string_parameter("ms2 file");
+  const char* ms2_file = get_string_parameter_pointer("ms2 file");
 
   FLOAT_T precursor_window = get_double_parameter("precursor-window");
-  FLOAT_T precursor_window_decoy = get_double_parameter("precursor-window-decoy");
+  FLOAT_T precursor_window_weibull = get_double_parameter("precursor-window-weibull");
   WINDOW_TYPE_T precursor_window_type = 
     get_window_type_parameter("precursor-window-type");
-  WINDOW_TYPE_T window_type_decoy = 
-    get_window_type_parameter("precursor-window-type-decoy");
+  WINDOW_TYPE_T window_type_weibull = 
+    get_window_type_parameter("precursor-window-type-weibull");
 
-  char* output_directory = get_string_parameter("output-dir");
+  const char* output_directory = get_string_parameter_pointer("output-dir");
 
   unsigned int min_weibull_points = 
     (unsigned int)get_int_parameter("min-weibull-points");
@@ -100,7 +101,8 @@ int SearchForXLinks::xhhcSearchMain() {
 
   vector<LinkedPeptide> all_ions;
   carp(CARP_DETAILED_DEBUG,"Calling find all precursor ions");
-  find_all_precursor_ions(all_ions);
+  Database* database = new Database(get_string_parameter_pointer("protein-database"), false);
+  find_all_precursor_ions(database, all_ions);
   carp(CARP_DETAILED_DEBUG,"Sort");
   // sort filtered ions and decoy ions by mass
   //sort(all_ions.begin(), all_ions.end());
@@ -119,8 +121,8 @@ int SearchForXLinks::xhhcSearchMain() {
     return 0;
   }
 
-  carp(CARP_INFO,"Loading Spectra");
-  Spectrum* spectrum = new Spectrum();
+  carp(CARP_INFO, "Loading Spectra");
+  Spectrum* spectrum = NULL;
   SpectrumCollection* spectra = SpectrumCollectionFactory::create(ms2_file);
   spectra->parse();
 
@@ -232,13 +234,13 @@ int SearchForXLinks::xhhcSearchMain() {
     }
     
 
-    carp(CARP_DEBUG, "finding training xpeptides in decoy precursor window..%g", precursor_window_decoy);
+    carp(CARP_DEBUG, "finding training xpeptides in decoy precursor window..%g", precursor_window_weibull);
     get_ions_from_window(
 	target_decoy_xpeptides,
 	all_ions,
 	precursor_mass,
-	precursor_window_decoy,
-	window_type_decoy);
+	precursor_window_weibull,
+	window_type_weibull);
     
     carp(CARP_DETAILED_DEBUG, "Creating decoys for target window");
     //create the decoys from the target found in the target_mass_window.
@@ -250,16 +252,18 @@ int SearchForXLinks::xhhcSearchMain() {
     
     carp(CARP_DETAILED_DEBUG, "Creating decoys for decoy mass window");
     //create the decoys from the target found in the decoy_mass_window.
-    while (decoy_train_xpeptides.size() < min_weibull_points) {
+    while ((decoy_train_xpeptides.size() + target_xpeptides.size()) < min_weibull_points) {
       for (vector<LinkedPeptide>::iterator ion = target_decoy_xpeptides.begin();
 	   ion != target_decoy_xpeptides.end(); ++ion) {
 	add_decoy(decoy_train_xpeptides, *ion);
       }
     }    
 
+    size_t num_training_points = decoy_train_xpeptides.size() + target_xpeptides.size();
+
     carp(CARP_DEBUG, "num targets:%d",target_xpeptides.size());
     carp(CARP_DEBUG, "num decoys:%d", decoy_xpeptides.size());
-    carp(CARP_DEBUG, "num training decoys:%d", decoy_train_xpeptides.size());
+    carp(CARP_DEBUG, "num training points:%d", num_training_points);
 
     clock_t candidate_clock = clock();
 
@@ -277,8 +281,6 @@ int SearchForXLinks::xhhcSearchMain() {
       scores.push_back(make_pair(score, target_xpeptides[idx]));
     }
 
-    clock_t target_clock = clock();
-
     carp(CARP_DEBUG, "Scoring decoys.");
     for (unsigned int idx=0;idx<decoy_xpeptides.size();idx++) {
       //LinkedIonSeries ion_series = LinkedIonSeries(links, charge);
@@ -291,7 +293,7 @@ int SearchForXLinks::xhhcSearchMain() {
 
     //use the decoy scores to build the estimator.
     // create arrays to pass to crux's weibull methods
-    FLOAT_T* linked_decoy_scores_array = new FLOAT_T[decoy_train_xpeptides.size()+target_xpeptides.size()];
+    FLOAT_T* linked_decoy_scores_array = new FLOAT_T[num_training_points];
 
     clock_t decoy_clock = clock();
     carp(CARP_DEBUG, "scoring training decoys...");
@@ -304,23 +306,12 @@ int SearchForXLinks::xhhcSearchMain() {
       linked_decoy_scores_array[idx] = score;
     }
   
-    
-
     clock_t train_decoy_clock = clock();
-
-
-
-
-    
+  
     for (unsigned int idx=0;idx<scores.size();idx++) {
       if (!scores[idx].second.isDecoy())
 	linked_decoy_scores_array[idx+decoy_train_xpeptides.size()] = scores[idx].first;
     }
-    
-    // sort scores
-    sort(scores.begin(), scores.end(), greater<pair<FLOAT_T, LinkedPeptide> >());
-
-    clock_t create_array_clock = clock();
 
 
    // weibull parameters for candidates
@@ -331,29 +322,22 @@ int SearchForXLinks::xhhcSearchMain() {
 
     // fit weibull to decoys
 
+    carp(CARP_DEBUG, "Fitting weibull to %d scores", num_training_points);
     hhc_estimate_weibull_parameters_from_xcorrs(linked_decoy_scores_array, 
-						decoy_train_xpeptides.size(), 
+						num_training_points, 
 						&eta_linked, &beta_linked, 
 						&shift_linked, &correlation_linked, 
 						spectrum, charge);
+
+    //okay we don't need the training peptides/scores anymore
+    delete []linked_decoy_scores_array;
+    vector<LinkedPeptide>().swap(decoy_train_xpeptides);
+        
+    // sort scores
     
-    clock_t weibull_clock = clock();
-    double candidate_time = (double(candidate_clock) - double(start_clock)) / CLOCKS_PER_SEC;
-    double target_time = (double(target_clock) - double(candidate_clock)) / CLOCKS_PER_SEC;
-    double decoy_time = (double(decoy_clock) - double(target_clock)) / CLOCKS_PER_SEC;
-    double train_decoy_time = (double(train_decoy_clock) - double(decoy_clock)) / CLOCKS_PER_SEC;
-    double create_array_time =(double(create_array_clock) - double(train_decoy_clock)) / CLOCKS_PER_SEC;
-    double weibull_time = (double(weibull_clock) - double(create_array_clock)) / CLOCKS_PER_SEC;
-
-    carp(CARP_DEBUG, "candidate:%g", candidate_time);
-    carp(CARP_DEBUG, "target:%g", target_time);
-    carp(CARP_DEBUG, "decoy:%g", decoy_time);
-    carp(CARP_DEBUG, "train decoy:%g", train_decoy_time);
-    carp(CARP_DEBUG, "create array:%g", create_array_time);
-    carp(CARP_DEBUG, "weibull:%g", weibull_time);
-    carp(CARP_DEBUG, "========================");
-
-
+    carp(CARP_DEBUG, "sorting %u scores", scores.size());
+    sort(scores.begin(), scores.end(), greater<pair<FLOAT_T, LinkedPeptide> >());
+    carp(CARP_INFO, "done sorting");
     int ndecoys = 0;
     int ntargets = 0;
     unsigned int score_index = 0;
@@ -453,20 +437,32 @@ int SearchForXLinks::xhhcSearchMain() {
       score_index++;
     }
 
-    delete [] linked_decoy_scores_array;
     //free_spectrum(spectrum);
 
     carp(CARP_DETAILED_DEBUG,"Done with spectrum %d", scan_num);
   } // get next spectrum
   search_target_file.close();
   search_decoy_file.close();
-  //free_spectrum_collection(spectra);
-  //free_spectrum(spectrum);
 
   //Calculate q-values.
   carp(CARP_INFO,"Computing Q-Values");
-  xlink_compute_qvalues();
 
+  //free memory.
+  xlink_compute_qvalues();
+  delete spectrum_iterator;
+  delete spectra;
+  free_peptides();
+  Database::freeDatabase(database);
+
+  // get list of mods
+  PEPTIDE_MOD_T** peptide_mods = NULL;
+  int num_peptide_mods = generate_peptide_mod_list( &peptide_mods );
+  for(int mod_idx = 0; mod_idx < num_peptide_mods; mod_idx++){
+    free_peptide_mod(peptide_mods[mod_idx]);
+  }
+  free(peptide_mods);
+
+  free_parameters();
   carp(CARP_INFO, "Elapsed time: %.3g s", wall_clock() / 1e6);
   carp(CARP_INFO, "Finished crux search-for-xlinks.");
 
@@ -543,11 +539,10 @@ void get_protein_ids_locations(
 
     PeptideSrc* peptide_src = *iter;
     Protein* protein = peptide_src->getParentProtein();
-    char* protein_id = protein->getId();
+    char* protein_id = protein->getIdPointer();
     int peptide_loc = peptide_src->getStartIdx();
     std::ostringstream protein_loc_stream;
     protein_loc_stream << protein_id << "(" << peptide_loc << ")";
-    free(protein_id);
     protein_ids_locations.insert(protein_loc_stream.str());
     
   }

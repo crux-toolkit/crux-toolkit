@@ -79,7 +79,7 @@ void CruxParser ::readMatches(
       
       if (flanking_aa.length() != 2)
       {
-        carp(CARP_WARNING,
+        carp(CARP_DEBUG,
             "Flanking AA value length is expected to be 2, "
             "but was %d", flanking_aa.length());
       }

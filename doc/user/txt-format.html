@@ -10,12 +10,9 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 </p>
 <table border="1" align="center" width="90%">
 <!-- table headers-->
-   <col align="center"/>
-   <col width="12%"/>
-   <col align="left"/>
-   <col align="center"/>
-   <col align="center"/>
-   <col align="center"/>
+
+   
+
 <tr>
 <th rowspan="2"></th>
 <th rowspan="2">Name</th>
@@ -23,19 +20,26 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <th rowspan="2">search-for-matches</th>
 <th colspan="4">barista</th>
 <th rowspan="2">q-ranker</th>
+<th colspan="3">percolator</th>
 </tr>
+
 <tr>
+<!--barista-->
 <th>PSM</th>
 <th>peptides</th>
 <th>proteins</th>
 <th>sub-proteins</th>
-<tr>
+<!--percolator-->
+<th>PSM</th>
+<th>peptides</th>
+<th>proteins</th>
 </tr>
-<!--1.scan -->
 
 <!--"✓"= "&#10003" or "&#10004"-->
 <!--"✕"= "&#10005" or "&#10006"-->
 <!--"–"=&#8211-->
+
+<!--1.scan -->
 <tr bgcolor="#DEDEDE">
 <td>1</td>
 <td>scan</td>
@@ -45,8 +49,11 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&#10003</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-
 <td>&#10003</td>
+<!--percolator-->
+<td>&#10003</td>
+<td>&#10003</td>
+<td>&nbsp;</td>
 </tr>
 
 <!--2.charge-->
@@ -61,6 +68,10 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&#10003</td>
+<!--percolator-->
+<td>&#10003</td>
+<td>&#10003</td>
+<td>&nbsp;</td>
 </tr>
 <!--3.spectrum precursor m/z-->
 
@@ -68,13 +79,19 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>3</td>
 <td>spectrum precursor m/z</td>
 <td>The observed m/z of the spectrum precursor ion.</td>
+<!--search for matches-->
 <td>&#10003</td>
-<!--td>&#10003</td-->
+<!--barista-->
 <td>&#10003</td>
 <td>&#10003</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
+<!--qrnaker-->
 <td>&#10003</td>
+<!--percolator-->
+<td>&#10003</td>
+<td>&#10003</td>
+<td>&nbsp;</td>
 </tr>
 <!--4.spectrum neutral mass-->
 
@@ -89,9 +106,13 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&nbsp;</td>
    <td>&#10003</td>
+<!--percolator-->
+<td>&#10003</td>
+<td>&#10003</td>
+<td>&nbsp;</td>
 </tr>
-<!--5.peptide mass-->
 
+<!--5.peptide mass-->
 <tr bgcolor="#DEDEDE">
    <td>5</td>
    <td>peptide mass</td>
@@ -103,23 +124,31 @@ Various programs in Crux report their output and read inputs in tab-delimited te
    <td>&nbsp;</td>
    <td>&nbsp;</td>
    <td>&#10003</td>
+<!--percolator-->
+<td>&#10003</td>
+<td>&#10003</td>
+<td>&nbsp;</td>
 </tr>
+
 <!--6.delta cn-->
-
 <tr>
-   <td>6</td>
-   <td>delta_cn</td>
-   <td>The normalized difference in xcorr for this PSM relative to other PSMs for this spectrum at this charge state.</td>
-   <td>&#10003</td>
-   <!--td>&#10003</td-->
+<td>6</td>
+<td>delta_cn</td>
+<td>The normalized difference in xcorr for this PSM relative to other PSMs for this spectrum at this charge state.</td>
+<td>&#10003</td>
+<!--td>&#10003</td-->
 <td>&#10003</td>
 <td>&#10003</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-   <td>&#10003</td>
+<td>&#10003</td>
+<!--percolator-->
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
-<!--7.sp score-->
 
+<!--7.sp score-->
 <tr bgcolor="#DEDEDE">
 <td>7</td>
 <td>sp score</td>
@@ -131,9 +160,13 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&#10003</td>
+<!--percolator-->
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
-<!--8.sp rank-->
 
+<!--8.sp rank-->
 <tr>
 <td>8</td>
 <td>sp rank</td>
@@ -145,9 +178,13 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&#10003</td>
+<!--percolator-->
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
-<!--9.xcorr score-->
 
+<!--9.xcorr score-->
 <tr bgcolor="#DEDEDE">
 <td>9</td>
 <td>xcorr score</td>
@@ -159,6 +196,10 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&#10003</td>
+<!--percolator-->
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
 <!--10.xcorr rank-->
 
@@ -166,27 +207,39 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>10</td>
 <td>xcorr rank</td>
 <td>The rank of this PSM when sorted by xcorr.</td>
+<!--search for matches-->
 <td>&#10003</td>
-<!--td>&#10003</td-->
+<!--barista-->
 <td>&#10003</td>
 <td>&#10003</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
+<!--qranker-->
 <td>&#10003</td>
+<!--percolator-->
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
-<!--11.p-value-->
 
+<!--11.p-value-->
 <tr bgcolor="#DEDEDE">
 <td>11</td>
 <td>p-value</td>
 <td>The p-value computed from the estimated Weibull parameters of the score distribution for this spectrum.</td>
+<!--search for matches-->
 <td>&#10003</td>
-<!--td>&#10003</td-->
+<!--barista-->
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
+<!--qranker-->
 <td>&#10003</td>
+<!--percolator-->
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
 <!--12. weibull est. q_value-->
 
@@ -194,10 +247,16 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>12</td>
 <td>Weibull est. q-value</td>
 <td>The q-value computed from the p-value.</td>
+<!--search for matches-->
 <td>&#10003</td>
-<!--td>&nbsp;</td-->
+<!--barista-->
 <td>&nbsp;</td>
 <td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<!--qranker-->
+<td>&nbsp;</td>
+<!--percolator-->
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
@@ -216,6 +275,10 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
+<!--percolator-->
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
 <!--14.decoy q_value (xcorr)-->
 
@@ -227,6 +290,10 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <!--td>&nbsp;</td-->
 <td>&nbsp;</td>
 <td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<!--percolator-->
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
@@ -244,59 +311,87 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
+<!--percolator-->
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
 <!--16.precolator score-->
 
 <tr>
 <td>16</td>
 <td>percolator score</td>
-<td>he discriminant score assigned by percolator.</td>
+<td>The discriminant score assigned by percolator.</td>
+<!--search for matches-->
+<td>&nbsp;</td>
+<!--barista-->
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<!--qranker-->
+<td>&nbsp;</td>
+<!--percolator-->
 <td>&#10003</td>
-<!--td>&nbsp;</td-->
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
+<td>&#10003</td>
+<td>&#10003</td>
 </tr>
 <!--17.precolator rank-->
 
 <tr bgcolor="#DEDEDE">
 <td>17</td>
 <td>percolator rank</td>
-<td>The rank of this PSM when sorted by percolator score.</td>
+<td>The rank of this PSM, peptide or protein when sorted by percolator score.</td>
+<!--search for matches-->
+<td>&nbsp;</td>
+<!--barista-->
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<!--qranker-->
+<td>&nbsp;</td>
+<!--percolator-->
 <td>&#10003</td>
-<!--td>&nbsp;</td-->
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
+<td>&#10003</td>
+<td>&#10003</td>
 </tr>
-<!--18.precolator q-value-->
 
+<!--18.precolator q-value-->
 <tr>
 <td>18</td>
 <td>percolator q-value</td>
 <td>The q-value assigned by percolator.</td>
+<!--search for matches-->
+<td>&nbsp;</td>
+<!--barista-->
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<!--qranker-->
+<td>&nbsp;</td>
+<!--percolator-->
 <td>&#10003</td>
-<!--td>&nbsp;</td-->
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
+<td>&#10003</td>
+<td>&#10003</td>
 </tr>
-<!--19.percolator PEP-->
 
+<!--19.percolator PEP-->
 <tr bgcolor="#DEDEDE">
 <td>19</td>
 <td>percolator PEP</td>
 <td> The PEP assigned by percolator.</td>
-<td>&#10003</td>
-<!---td>&nbsp;</td-->
+<!--search for matches-->
+<td>&nbsp;</td>
+<!--barista-->
 <td>&nbsp;</td>
 <td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<!--qrnaker-->
+<td>&nbsp;</td>
+<!--percolator-->
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
@@ -313,7 +408,11 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-<td>&#10003</td>
+<td>&#10003</td
+<!--percolator-->
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
 <!--21.q-ranker q-value-->
 
@@ -328,9 +427,13 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&#10003</td>
+<!--percolator-->
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
-<!--22.q-ranker PEP-->
 
+<!--22.q-ranker PEP-->
 <tr>
 <td>22</td>
 <td>q-ranker PEP</td>
@@ -342,9 +445,13 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&#10003</td>
+<!--percolator-->
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
-<!--23.barista score-->
 
+<!--23.barista score-->
 <tr bgcolor="#DEDEDE">
 <td>23</td>
 <td>barista score</td>
@@ -356,8 +463,13 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&#10003</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-</tr><!--24.barista q-value-->
+<!--percolator-->
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
 
+<!--24.barista q-value-->
 <tr>
 <td>24</td>
 <td>barista q-value</td>
@@ -369,8 +481,13 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&#10003</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-</tr><!--25.barista PEP-->
+<!--percolator-->
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
 
+<!--25.barista PEP-->
 <tr bgcolor="#DEDEDE">
 <td>25</td>
 <td>barista PEP</td>
@@ -382,9 +499,13 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
+<!--percolator-->
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
-<!--26.b/y ions matched-->
 
+<!--26.b/y ions matched-->
 <tr>
 <td>26</td>
 <td>b/y ions matched</td>
@@ -396,7 +517,12 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&#10003</td>
+<!--percolator-->
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
+
 <!--27.b/y ions total-->
 
 <tr bgcolor="#DEDEDE">
@@ -410,8 +536,12 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&#10003</td>
+<!--percolator-->
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
-<!--28. matche/spectrum-->
+<!--28. matches/spectrum-->
 
 <tr>
 <td>28</td>
@@ -424,6 +554,10 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&#10003</td>
+<!--percolator-->
+<td>&#10003</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
 <!--29.sequence-->
 
@@ -438,6 +572,10 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&#10003</td>
+<!--percolator-->
+<td>&#10003</td>
+<td>&#10003</td>
+<td>&nbsp;</td>
 </tr>
 <!--30.cleavage type-->
 
@@ -452,6 +590,10 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&#10003</td>
+<!--percolator-->
+<td>&#10003</td>
+<td>&#10003</td>
+<td>&nbsp;</td>
 </tr>
 <!--31. protein id-->
 
@@ -465,6 +607,10 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&#10003</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
+<td>&#10003</td>
+<!--percolator-->
+<td>&#10003</td>
+<td>&#10003</td>
 <td>&#10003</td>
 </tr>
 <!--32. falnking aa-->
@@ -480,6 +626,10 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&#10003</td>
+<!--percolator-->
+<td>&#10003</td>
+<td>&#10003</td>
+<td>&nbsp;</td>
 </tr>
 <!--33. unshuffled sequence-->
 
@@ -494,9 +644,13 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
+<!--percolator-->
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
-<!--34. eta-->
 
+<!--34. eta-->
 <tr>
 <td>34</td>
 <td>eta</td>
@@ -508,9 +662,13 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
+<!--percolator-->
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
-<!--35.beta-->
 
+<!--35.beta-->
 <tr bgcolor="#DEDEDE">
 <td>35</td>
 <td>beta</td>
@@ -522,9 +680,13 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
+<!--percolator-->
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
-<!--36.shift-->
 
+<!--36.shift-->
 <tr>
 <td>36</td>
 <td>shift</td>
@@ -533,6 +695,10 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <!--td>&nbsp;</td-->
 <td>&nbsp;</td>
 <td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<!--percolator-->
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
@@ -550,6 +716,10 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
+<!--percolator-->
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
 <!--38.RAW-->
 
@@ -564,21 +734,30 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-</tr><!--39.SIN: A protein quantification score computed by spectral-counts. -->
+<!--percolator-->
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
 
+<!--39.SIN: A protein quantification score computed by spectral-counts. -->
 <tr bgcolor="#DEDEDE">
 <td>39</td>
 <td>SIN</td>
 <td>A protein quantification score computed by spectral-counts.</td>
 <td>&#10003</td>
-<!--td>&nbsp;</td-->
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-</tr><!--40.NSAF-->
+<!--percolator-->
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
 
+<!--40.NSAF-->
 <tr>
 <td>40</td>
 <td>NSAF</td>
@@ -587,6 +766,10 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <!--td>&#10003</td-->
 <td>&#10003</td>
 <td>&#10003</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<!--percolator-->
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
@@ -604,8 +787,13 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-</tr><!--42.EMPAI-->
+<!--percolator-->
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
 
+<!--42.EMPAI-->
 <tr>
 <td>42</td>
 <td>EMPAI</td>
@@ -617,8 +805,13 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-</tr><!--43.parsimony rank-->
+<!--percolator-->
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
 
+<!--43.parsimony rank-->
 <tr bgcolor="#DEDEDE">
 <td>43</td>
 <td> parsimony rank</td>
@@ -630,8 +823,13 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-</tr><!--44.decoy matches/spectrum-->
+<!--percolator-->
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
 
+<!--44.decoy matches/spectrum-->
 <tr>
 <td>44</td>
 <td>decoy matches/spectrum</td>
@@ -643,9 +841,13 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
+<!--percolator-->
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
-<!--45.filename-->
 
+<!--45.filename-->
 <tr bgcolor="#DEDEDE">
 <td>45</td>
 <td>filename</td>
@@ -657,7 +859,12 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&#10003</td>
+<!--percolator-->
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
+
 <!--46. psm-id-->
 <tr>
 <td>46</td>
@@ -670,19 +877,27 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&#10003</td>
+<!--percolator-->
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
 
 <!--47.protein group number-->
 <tr bgcolor="#DEDEDE">
 <td>47</td>
 <td>protein group number</td>
-<td>A number that identifies a group.</td>
+<td>Protein group index</td>
 <td>&nbsp;</td>
 <!--td>&nbsp;</td-->
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&#10003</td>
+<td>&nbsp;</td>
+<!--percolator-->
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 <td>&nbsp;</td>
 </tr>
 
@@ -690,7 +905,7 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <tr>
 <td>48</td>
 <td>peptides-scan.charge</td>
-<td>Peptides belonging to each protein in the group, with scan and charge (for example, EAMPK-001285.2).</td>
+<td>Peptides belonging to each protein in the group, with scan and charge (for example, EAMPK-001285.2)</td>
 <td>&nbsp;</td>
 <!--td>&nbsp;</td-->
 <td>&nbsp;</td>
@@ -698,7 +913,12 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&#10003</td>
 <td>&#10003</td>
 <td>&nbsp;</td>
+<!--percolator-->
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003</td>
 </tr>
+
 <!--49. proteins-->
 <tr bgcolor="#DEDEDE">
 <td>49</td>
@@ -710,6 +930,10 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&#10003</td>
 <td>&#10003</td>
+<td>&nbsp;</td>
+<!--percolator-->
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 <td>&nbsp;</td>
 </tr>
 <!--50. parent group numbers-->
@@ -724,7 +948,12 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&#10003</td>
 <td>&nbsp;</td>
+<!--percolator-->
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
+
 </table> 
 
 </html>

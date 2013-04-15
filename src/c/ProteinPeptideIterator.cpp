@@ -363,6 +363,9 @@ void ProteinPeptideIterator::prepareMc(
 
   int num_cleavage_positions = cleavage_position_idx;
   int num_non_cleavage_positions = non_cleavage_position_idx;
+  if (mass_array_ != NULL) {
+    free(mass_array_);
+  }
   mass_array_ = mass_array;
 
   carp(CARP_DETAILED_DEBUG, "num_cleavage_positions = %i", num_cleavage_positions);

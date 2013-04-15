@@ -19,6 +19,7 @@
 #include "ModifiedPeptidesIterator.h"
 
 using namespace std;
+using namespace Crux;
 
 /**
  * \returns a blank SequestSearch object
@@ -55,6 +56,10 @@ int SequestSearch::main(int argc,   ///< number of cmd line tokens
     "verbosity",
     "parameter-file",
     "overwrite",
+    "mzid-output",
+    "pinxml-output",
+    "pepxml-output",
+    "txt-output",
     "spectrum-parser",
     "spectrum-min-mass",
     "spectrum-max-mass",
@@ -154,7 +159,7 @@ int SequestSearch::main(int argc,   ///< number of cmd line tokens
       PEPTIDE_MOD_T* peptide_mod = peptide_mods[mod_idx];
 
       // get peptide iterator
-      ModifiedPeptidesIterator* peptide_iterator =
+     ModifiedPeptidesIterator* peptide_iterator =
         new ModifiedPeptidesIterator(mz,
                                      zstate,
                                      peptide_mod, 

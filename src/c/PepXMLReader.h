@@ -26,7 +26,7 @@ class PepXMLReader {
   SpectrumZState current_zstate_; ///< keeps track of the current zstate
   std::string file_path_; ///< path of the xml file
   Crux::Spectrum* current_spectrum_; ///< Keeps track of the current spectrum object
-  Match* current_match_; ///< keeps track of the current match object
+  Crux::Match* current_match_; ///< keeps track of the current match object
   std::string current_peptide_sequence_; ///< keeps track of the current peptide sequence
   MatchCollection* current_match_collection_; ///< keeps track of the current match collection object
 
@@ -41,7 +41,7 @@ class PepXMLReader {
    * /returns the start position of the peptide sequence within the protein
    */
   int findStart(
-    Protein* protein, ///< the protein to find the sequence 
+    Crux::Protein* protein, ///< the protein to find the sequence 
     std::string peptide_sequence, ///< the peptide sequence to find
     std::string prev_aa, ///< the amino acid before the sequence in the protein
     std::string next_aa ///< the next amino acid after the sequence in the protein

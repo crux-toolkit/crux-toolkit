@@ -38,13 +38,13 @@ int SearchForXLinks::main(int argc, char** argv) {
     "output-dir",
     "precursor-window",
     "precursor-window-type",
-    "precursor-window-decoy",
-    "precursor-window-type-decoy",
+    "precursor-window-weibull",
+    "precursor-window-type-weibull",
     "max-ion-charge",
     "min-weibull-points",
     "mz-bin-width",
     "mz-bin-offset",
-    "xlink-prevents-cleavage", //TODO will be implemented later (SJM)
+    "xlink-prevents-cleavage", 
     "scan-number",
     "spectrum-min-mass",
     "spectrum-max-mass",
@@ -54,8 +54,7 @@ int SearchForXLinks::main(int argc, char** argv) {
     "xlink-include-linears",
     "xlink-include-deadends",
     "xlink-include-selfloops",
-    "use-flanking-peaks",
-    "spectrum-parser"
+    "use-flanking-peaks"
   };
   int num_options = sizeof(option_list) / sizeof(char*);
 

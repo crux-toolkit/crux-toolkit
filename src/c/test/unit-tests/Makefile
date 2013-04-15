@@ -35,7 +35,6 @@ TESTS = \
 
 CRUX_LIBS = \
   ../../.libs/libcrux.a \
-  $(PERCOLATOR_DIR)/.libs/libpercolator.a \
   ../../../external/MSToolkit/.libs/libmstoolkit.a
 
 PWIZ_LIBS = \

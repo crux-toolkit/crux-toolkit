@@ -20,6 +20,7 @@
  */
 
 #include "peptide_modifications.h"
+#include "Peptide.h"
 
 using namespace Crux;
 

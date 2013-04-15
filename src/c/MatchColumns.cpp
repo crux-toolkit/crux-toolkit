@@ -51,6 +51,7 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "sequence",
   "cleavage type",
   "protein id",
+  "peptides",
   "flanking aa",
   "unshuffled sequence",
   "eta",

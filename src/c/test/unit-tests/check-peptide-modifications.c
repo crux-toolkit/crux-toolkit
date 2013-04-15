@@ -3,7 +3,7 @@
 #include "peptide_modifications.h"
 #include "Peptide.h"
 #include "Protein.h"
-
+using namespace Crux; 
 // also from modifications
 int generate_peptide_mod_list_TESTER(
  PEPTIDE_MOD_T*** peptide_mod_list,

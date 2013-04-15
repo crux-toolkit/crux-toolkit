@@ -3,7 +3,7 @@
 #include "parameter.h" 
 #include "MatchSearch.h"
 #include "SequestSearch.h"
-#include "Percolator.h"
+//#include "Percolator.h"
 #include "QRanker.h"
 #include "ComputeQValues.h"
 
@@ -235,7 +235,7 @@ void TestMatchFileWriter::setColumnsCommand(){
   printThese[FLANKING_AA_COL] = true;
   //  printThese[UNSHUFFLED_SEQUENCE_COL] = true;
 
-  // percolator
+  /* percolator
   defaultWriterPtr = new MatchFileWriter(filename);
   defaultApplicationPtr = new Percolator();
   defaultWriterPtr->addColumnNames(defaultApplicationPtr, false, printThese);
@@ -245,7 +245,7 @@ void TestMatchFileWriter::setColumnsCommand(){
   defaultWriterPtr = NULL;
   defaultApplicationPtr = NULL;
   testFileLine(filename, "scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	xcorr score	xcorr rank	percolator score	percolator rank	percolator q-value	percolator PEP	matches/spectrum	sequence	cleavage type	protein id	flanking aa");
-
+*/
   // q-ranker
   defaultWriterPtr = new MatchFileWriter(filename);
   defaultApplicationPtr = new QRanker();

@@ -15,7 +15,8 @@
 #include "search.h"
 #include "q-value.h"
 #include "xlink_search.h"
-#include "PercolatorCInterface.h"
+//#include "PercolatorCInterface.h"
 #include "SpectralCounts.h"
 #include "analyze_psms.h"
+#include "xlink_search.h"
 

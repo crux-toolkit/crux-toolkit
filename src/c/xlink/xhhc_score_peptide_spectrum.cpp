@@ -20,6 +20,9 @@
 #endif
 #include <iostream>
 #include <fstream>
+
+using namespace Crux;
+
 #define bin_width_mono 1.0005079
 
 
