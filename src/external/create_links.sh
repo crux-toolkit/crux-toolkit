@@ -6,7 +6,6 @@
 echo "CREATING GENERICALLY NAMED SYMBOLIC LINKS TO LIBRARIES"
 
 install_path=.
-STARING_DIR=$(pwd)
 for arg in $*; do
     echo "arg:$arg"
     if [[ $arg = --prefix=* ]]; then
@@ -46,6 +45,4 @@ ln -s libfreetype-*-mt-2_4.a  libfreetype-mt-s-2_4.a
 ln -s libfreetype-*-mt-2_4.a  libfreetype.a
 ln -s libpng-*-mt-1_5.a libpng-mt-s-1_5.a
 ln -s libpng-*-mt-1_5.a libpng.a
-
-cd $STARTING_DIR
 
