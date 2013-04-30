@@ -387,7 +387,7 @@ int PercolatorApplication::main(
   std::cerr.rdbuf(&buffer);
 
   /* Call percolatorMain */
-  Caller* pCaller = new Caller();
+  PercolatorAdapter* pCaller = new PercolatorAdapter();
   int retVal = -1;
   if (pCaller->parseOptions(perc_argc, perc_argv)) {
     retVal = pCaller->run();
@@ -398,11 +398,8 @@ int PercolatorApplication::main(
   remove(output_decoy_tab.c_str());
 
   // get percolator score information into crux objects
-  ProteinMatchCollection* protein_match_collection = new ProteinMatchCollection();
-  PercolatorAdapter::addPsmScores(protein_match_collection, &(pCaller->fullset));
-  PercolatorAdapter::addPeptideScores(protein_match_collection, &(pCaller->fullset));
-  PercolatorAdapter::addProteinScores(protein_match_collection, &(pCaller->fullset));
-
+  
+  ProteinMatchCollection* protein_match_collection = pCaller->getProteinMatchCollection();
   string output_dir = string(get_string_parameter_pointer("output-dir"));
 
   // write txt

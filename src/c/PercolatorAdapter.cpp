@@ -6,35 +6,70 @@
 
 #include "PercolatorAdapter.h"
 
-using namespace Crux;
+#include<map>
+#include<string>
+
+using namespace std;
 
 /**
- * Constructor for PercolatorAdapter. This should not be called, since all of
- * this class's functions are static.
+ * Constructor for PercolatorAdapter. 
  */
-PercolatorAdapter::PercolatorAdapter() {
+PercolatorAdapter::PercolatorAdapter() : Caller() {
+  carp(CARP_DEBUG, "PercolatorAdapter::PercolatorAdapter");
+  collection_ = new ProteinMatchCollection();
 }
 
 /**
  * Destructor for PercolatorAdapter
  */
 PercolatorAdapter::~PercolatorAdapter() {
+  carp(CARP_DEBUG, "PercolatorAdapter::~PercolatorAdapter");
+  //delete collection_;  //TODO find out why this crashes
+  carp(CARP_DEBUG, "PercolatorAdapter::~PercolatorAdapeter - done");
+}
+
+/**
+  * Calls Percolator's overridden Caller::writeXML_PSMs() and then
+  * Collects all of the psm results
+  */
+void PercolatorAdapter::writeXML_PSMs() {
+  carp(CARP_DEBUG, "PercolatorAdapter::writeXML_PSMs");
+  Caller::writeXML_PSMs();
+  addPsmScores();  
+}
+
+/**
+ * Calls Percolator's overridden Caller::writeXML_Peptides() and then
+ * Collects all of the peptide results from the fullset
+ */
+void PercolatorAdapter::writeXML_Peptides() {
+  carp(CARP_DEBUG, "PercolatorAdapter::writeXML_Peptides");
+  Caller::writeXML_Peptides();
+  addPeptideScores();
+}
+
+/**
+ * Calls Percolator's overriden Caller::writeXMLProteins() and then
+ * Collects all of the protein results from fido
+ */  
+void PercolatorAdapter::writeXML_Proteins() {
+  carp(CARP_DEBUG, "PercolatorAdapter::writeXML_Proteins");
+  Caller::writeXML_Proteins();
+  addProteinScores();
 }
 
 /**
  * Converts a set of Percolator scores into a Crux MatchCollection
  */
-MatchCollection* PercolatorAdapter::psmScoresToMatchCollection(
-  Scores* scores ///< percolator scores to convert
-) {
+MatchCollection* PercolatorAdapter::psmScoresToMatchCollection() {
 
   // Create new MatchCollection object that will be the converted Percolator Scores
   MatchCollection* converted = new MatchCollection();
 
   // Iterate over each ScoreHolder in Scores object
   for (
-    vector<ScoreHolder>::iterator score_itr = scores->begin();
-    score_itr != scores->end();
+    vector<ScoreHolder>::iterator score_itr = fullset.begin();
+    score_itr != fullset.end();
     score_itr++
     ) {
 
@@ -54,7 +89,7 @@ MatchCollection* PercolatorAdapter::psmScoresToMatchCollection(
       psm->scan, psm->scan, zState.getMZ(), vector<int>(1, charge_state), ""
     );
 
-    Match* match = new Match(peptide, spectrum, zState, is_decoy);
+    Crux::Match* match = new Crux::Match(peptide, spectrum, zState, is_decoy);
     match->setScore(PERCOLATOR_SCORE, score_itr->score);
     match->setScore(PERCOLATOR_QVALUE, psm->q);
     match->setScore(PERCOLATOR_PEP, psm->pep);
@@ -77,13 +112,10 @@ MatchCollection* PercolatorAdapter::psmScoresToMatchCollection(
 /**
  * Adds PSM scores from Percolator objects into a ProteinMatchCollection
  */
-void PercolatorAdapter::addPsmScores(
-  ProteinMatchCollection* collection, ///< collection to add scores to
-  Scores* scores ///< percolator scores to add
-) {
+void PercolatorAdapter::addPsmScores() {
 
-  MatchCollection* matches = psmScoresToMatchCollection(scores);
-  collection->addMatches(matches);
+  MatchCollection* matches = psmScoresToMatchCollection();
+  collection_->addMatches(matches);
   delete matches;
 
 }
@@ -91,32 +123,24 @@ void PercolatorAdapter::addPsmScores(
 /**
  * Adds protein scores from Percolator objects into a ProteinMatchCollection
  */
-void PercolatorAdapter::addProteinScores(
-  ProteinMatchCollection* collection, ///< collection to add scores to
-  Scores* scores ///< percolator scores to add
-) {
+void PercolatorAdapter::addProteinScores() {
 
-  // Iterate over each ScoreHolder in Scores object
   vector<ProteinMatch*> matches;
+  map<const string,Protein> protein_scores = protEstimator->getProteins();
+  
   for (
-    vector<ScoreHolder>::iterator score_itr = scores->begin();
-    score_itr != scores->end();
-    score_itr++
-    ) {
-
-    if (score_itr->isDecoy()) {
-      continue;
+    map<const string,Protein>::iterator score_iter = protein_scores.begin();
+    score_iter != protein_scores.end();
+    score_iter++) {
+    
+    if (!score_iter->second.getIsDecoy()) {
+      // Set scores
+      ProteinMatch* protein_match = collection_->getProteinMatch(score_iter->second.getName());
+      protein_match->setScore(PERCOLATOR_SCORE, -log(score_iter->second.getP()));
+      protein_match->setScore(PERCOLATOR_QVALUE, score_iter->second.getQ());
+      protein_match->setScore(PERCOLATOR_PEP, score_iter->second.getPEP());
+      matches.push_back(protein_match);
     }
-
-    PSMDescription* psm = score_itr->pPSM;
-
-    // Set scores
-    ProteinMatch* protein_match = collection->getProteinMatch(*psm->proteinIds.begin());
-    protein_match->setScore(PERCOLATOR_SCORE, score_itr->score);
-    protein_match->setScore(PERCOLATOR_QVALUE, psm->q);
-    protein_match->setScore(PERCOLATOR_PEP, psm->pep);
-
-    matches.push_back(protein_match);
   }
 
   // set percolator score ranks
@@ -135,17 +159,14 @@ void PercolatorAdapter::addProteinScores(
 /**
  * Adds peptide scores from Percolator objects into a ProteinMatchCollection
  */
-void PercolatorAdapter::addPeptideScores(
-  ProteinMatchCollection* collection, ///< collection to add scores to
-  Scores* scores ///< percolator scores to add
-) {
+void PercolatorAdapter::addPeptideScores() {
 
-  carp(CARP_INFO, "Setting peptide scores");
+  carp(CARP_DEBUG, "Setting peptide scores");
 
   // Iterate over each ScoreHolder in Scores object
   for (
-    vector<ScoreHolder>::iterator score_itr = scores->begin();
-    score_itr != scores->end();
+    vector<ScoreHolder>::iterator score_itr = fullset.begin();
+    score_itr != fullset.end();
     score_itr++
     ) {
 
@@ -159,7 +180,7 @@ void PercolatorAdapter::addPeptideScores(
     MODIFIED_AA_T* mod_seq = getModifiedAASequence(psm, sequence, peptide_mass);
 
     // Set scores
-    PeptideMatch* peptide_match = collection->getPeptideMatch(mod_seq);
+    PeptideMatch* peptide_match = collection_->getPeptideMatch(mod_seq);
     if (peptide_match == NULL) {
       carp(CARP_FATAL, "Cannot find peptide %s %i",
                        psm->getPeptideSequence().c_str(), score_itr->isDecoy());
@@ -172,6 +193,13 @@ void PercolatorAdapter::addPeptideScores(
 
   }
 
+}
+  
+/*
+ *\returns the ProteinMatchCollection, to be called after Caller::run() is finished
+ */
+ProteinMatchCollection* PercolatorAdapter::getProteinMatchCollection() {
+  return collection_;
 }
 
 /**
@@ -302,7 +330,7 @@ MODIFIED_AA_T* PercolatorAdapter::getModifiedAASequence(
     }
   }
   seq = ss_seq.str();
-  peptide_mass += Peptide::calcSequenceMass(seq.c_str(),
+  peptide_mass += Crux::Peptide::calcSequenceMass(seq.c_str(),
                   get_mass_type_parameter("isotopic-mass"));
 
   MODIFIED_AA_T* mod_seq;

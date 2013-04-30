@@ -18,16 +18,26 @@
 #include "ProteinMatch.h"
 #include "SpectrumMatch.h"
 #include "Scores.h"
-
+#include "Caller.h"
 using namespace std;
 
-class PercolatorAdapter {
+/**
+ * \brief: Converts Percolator results objects to Crux results objects.
+ * Class inherits the Caller class from percolator, which runs the percolator
+ * algorithm and prints out the results.  During the printing of the results, the
+ * PercolatorAdapter class overrides the methods for printing out the xml result file
+ * to collect the psm, peptide, and protein results from the internal fullset.
+ * All of the collections can then be accessed via the ProteinMatchCollection object.
+ * During the execution of Caller::run(), percolator discards the psms after
+ * Calculating the peptide level statistics, hence the need to pull the data for the
+ * psms before the removal occurs.
+ */
+class PercolatorAdapter : public Caller {
 
 public:
 
   /**
-   * Constructor for PercolatorAdapter. This should not be called, since all of
-   * this class's functions are static.
+   * Constructor for PercolatorAdapter.
    */
   PercolatorAdapter();
 
@@ -39,35 +49,50 @@ public:
   /**
    * Converts a set of Percolator scores into a Crux MatchCollection
    */
-  static MatchCollection* psmScoresToMatchCollection(
-    Scores* scores ///< percolator scores to convert
-  );
+  MatchCollection* psmScoresToMatchCollection();
 
   /**
    * Adds PSM scores from Percolator objects into a ProteinMatchCollection
    */
-  static void addPsmScores(
-    ProteinMatchCollection* collection, ///< collection to add scores to
-    Scores* scores ///< percolator scores to add
-  );
+  void addPsmScores();
 
   /**
    * Adds protein scores from Percolator objects into a ProteinMatchCollection
    */
-  static void addProteinScores(
-    ProteinMatchCollection* collection, ///< collection to add scores to
-    Scores* scores ///< percolator scores to add
-  );
+  void addProteinScores();
 
   /**
    * Adds peptide scores from Percolator objects into a ProteinMatchCollection
    */
-  static void addPeptideScores(
-    ProteinMatchCollection* collection, ///< collection to add scores to
-    Scores* scores ///< percolator scores to add
-  );
+  void addPeptideScores();
 
+  /*
+   *\returns the ProteinMatchCollection, to be called after Caller::run() is finished
+   */
+  ProteinMatchCollection* getProteinMatchCollection();
+  
 protected:
+    
+  ProteinMatchCollection* collection_; ///< Collection containing all of the psm, peptide, and protein results.
+  
+  /**
+   * Calls Percolator's overridden Caller::writeXML_PSMs() and then
+   * Collects all of the psm results
+   */
+  virtual void writeXML_PSMs();
+  
+  /**
+   * Calls Percolator's overridden Caller::writeXML_Peptides() and then
+   * Collects all of the peptide results from the fullset
+   */
+  virtual void writeXML_Peptides();
+  
+  /**
+   * Calls Percolator's overriden Caller::writeXMLProteins() and then
+   * Collects all of the protein results from fido
+   */
+  virtual void writeXML_Proteins();
+  
   /**
    * Given a Percolator psm_id in the form ".*_([0-9]+)_[^_]*",
    * find the charge state (matching group)
