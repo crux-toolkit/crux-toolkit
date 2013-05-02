@@ -211,6 +211,10 @@ int MatchCollection::addMatches(
                                               peptide_iterator, is_decoy);
 
   if( num_matches_added == 0 ){
+    if (do_sp_scoring) {
+      scored_type_[SP] = true;
+    }
+    scored_type_[XCORR] = true;
     return num_matches_added;
   }
 

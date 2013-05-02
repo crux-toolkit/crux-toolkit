@@ -1460,6 +1460,14 @@ bool Match::isDecoy() {
 
 }
 
+/**
+ * sets whether the match is post process or not
+ */
+void Match::setPostProcess(
+  bool post_process ///< whether the match is post process or not
+) {
+  post_process_match_ = post_process;
+}
 
 /**
  * Must ask for score that has been computed

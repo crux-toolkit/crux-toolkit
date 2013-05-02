@@ -25,8 +25,7 @@ using namespace Crux;
 using namespace boost;
 using namespace std;
 
-class PMCDelimitedFileWriter :
-  public MatchFileWriter {
+class PMCDelimitedFileWriter : public MatchFileWriter {
 
 public:
   /**
@@ -43,6 +42,16 @@ public:
    * Destructor
    */
   ~PMCDelimitedFileWriter();
+
+  /**
+   * Opens a file, writes it, and closes the file
+   */
+  void writeFile(
+    CruxApplication* application, ///< application writing the file
+    string filename, ///< name of the file to open
+    MATCH_FILE_TYPE type, ///< type of file to be written
+    ProteinMatchCollection* collection ///< collection to be written
+  );
 
   /**
    * Closes any open file, then opens a file for the specified type of writing

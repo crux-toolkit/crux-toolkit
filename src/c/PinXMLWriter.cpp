@@ -228,7 +228,7 @@ void PinXMLWriter::write(
  if(target_collection->getScoredType(SP))
    is_sp_=true;
   
-  MatchIterator target_match_iterator = MatchIterator(target_collection);  
+  MatchIterator target_match_iterator(target_collection);  
   while (target_match_iterator.hasNext()) {
     
     Match* match = target_match_iterator.next();
@@ -249,7 +249,7 @@ void PinXMLWriter::write(
     decoy_set != decoys.end(); 
     decoy_set++
   ) {
-    MatchIterator decoy_match_iterator = MatchIterator(*decoy_set);  
+    MatchIterator decoy_match_iterator(*decoy_set);  
     while (decoy_match_iterator.hasNext()){
       
       Match* match = decoy_match_iterator.next();

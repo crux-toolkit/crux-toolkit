@@ -40,6 +40,15 @@ Crux::Protein* ProteinMatch::getProtein() {
 }
 
 /**
+ * sets the protein for the match
+ */
+void ProteinMatch::setProtein(
+  Crux::Protein* protein ///< Protein to set
+) {
+  protein_ = protein;
+}
+
+/**
  * \returns the begining of the peptidematches vector
  */
 PeptideMatchIterator ProteinMatch::peptideMatchBegin() {
@@ -59,18 +68,21 @@ PeptideMatchIterator ProteinMatch::peptideMatchEnd() {
 void ProteinMatch::addPeptideMatch(
   PeptideMatch* peptide_match ///<PeptideMatch to add
   ) {
-
+  for (deque<PeptideMatch*>::iterator iter = peptide_matches_.begin();
+       iter != peptide_matches_.end();
+       ++iter) {
+    if (*iter == peptide_match) {
+      return;
+    }
+  }
   peptide_matches_.push_back(peptide_match);
-
 }
 
 /**
  * \returns the id for this protein
  */
-string ProteinMatch::getId() {
-  string ans = protein_->getIdPointer();
-  return ans;
-
+string ProteinMatch::getId() const {
+  return string(protein_->getIdPointer());
 }
 
 /*

@@ -173,8 +173,8 @@ MODIFIED_AA_T* copy_mod_aa_seq(
  * \returns whether the two modified sequences are equal or not
  */
 bool equal_seq(
-  MODIFIED_AA_T* seq1, ///< Sequence 1
-  MODIFIED_AA_T* seq2 ///< Sequence 2
+  const MODIFIED_AA_T* seq1, ///< Sequence 1
+  const MODIFIED_AA_T* seq2 ///< Sequence 2
   );
 
 /**

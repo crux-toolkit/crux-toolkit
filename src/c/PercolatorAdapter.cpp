@@ -24,8 +24,27 @@ PercolatorAdapter::PercolatorAdapter() : Caller() {
  */
 PercolatorAdapter::~PercolatorAdapter() {
   carp(CARP_DEBUG, "PercolatorAdapter::~PercolatorAdapter");
+
+  // delete match collections created by this adapter
+  int collectionsDeleted = 0;
+  for (vector<MatchCollection*>::iterator iter = match_collections_made_.begin();
+       iter != match_collections_made_.end();
+       ++iter) {
+    delete *iter;
+    ++collectionsDeleted;
+  }
+  // delete proteins created by this adapter
+  int proteinsDeleted = 0;
+  for (vector<PostProcessProtein*>::iterator iter = proteins_made_.begin();
+       iter != proteins_made_.end();
+       ++iter) {
+    delete *iter;
+    ++proteinsDeleted;
+  }
+
   //delete collection_;  //TODO find out why this crashes
-  carp(CARP_DEBUG, "PercolatorAdapter::~PercolatorAdapeter - done");
+  carp(CARP_DEBUG, "PercolatorAdapter::~PercolatorAdapter - done. %d "
+       "MatchCollections deleted.", collectionsDeleted);
 }
 
 /**
@@ -65,6 +84,7 @@ MatchCollection* PercolatorAdapter::psmScoresToMatchCollection() {
 
   // Create new MatchCollection object that will be the converted Percolator Scores
   MatchCollection* converted = new MatchCollection();
+  match_collections_made_.push_back(converted);
 
   // Iterate over each ScoreHolder in Scores object
   for (
@@ -95,6 +115,8 @@ MatchCollection* PercolatorAdapter::psmScoresToMatchCollection() {
     match->setScore(PERCOLATOR_PEP, psm->pep);
 
     converted->addMatch(match);
+    match->setPostProcess(true); // so spectra get deleted when match does
+    Crux::Match::freeMatch(match); // so match gets deleted when collection does
   }
 
   converted->forceScoredBy(PERCOLATOR_SCORE);
@@ -113,11 +135,8 @@ MatchCollection* PercolatorAdapter::psmScoresToMatchCollection() {
  * Adds PSM scores from Percolator objects into a ProteinMatchCollection
  */
 void PercolatorAdapter::addPsmScores() {
-
   MatchCollection* matches = psmScoresToMatchCollection();
   collection_->addMatches(matches);
-  delete matches;
-
 }
 
 /**
@@ -254,7 +273,7 @@ Crux::Peptide* PercolatorAdapter::extractPeptide(
   
   MODIFIED_AA_T* mod_seq = getModifiedAASequence(psm, seq, peptide_mass);
 
-  string& full_peptide = psm->getFullPeptide();
+  string full_peptide(psm->getFullPeptide());
   string n_term = "";
   string c_term = "";
   if (!full_peptide.empty()) {
@@ -263,6 +282,7 @@ Crux::Peptide* PercolatorAdapter::extractPeptide(
   }
 
   PostProcessProtein* parent_protein = new PostProcessProtein();
+  proteins_made_.push_back(parent_protein);
   parent_protein->setId((*psm->proteinIds.begin()).c_str());
   int start_idx = parent_protein->findStart(seq, n_term, c_term);
 
@@ -278,6 +298,7 @@ Crux::Peptide* PercolatorAdapter::extractPeptide(
       continue;
     }
     PostProcessProtein* secondary_protein = new PostProcessProtein();
+    proteins_made_.push_back(secondary_protein);
     secondary_protein->setId(iter->c_str());
     int secondary_idx = secondary_protein->findStart(seq, n_term, c_term);
     peptide->addPeptideSrc(
@@ -325,7 +346,7 @@ MODIFIED_AA_T* PercolatorAdapter::getModifiedAASequence(
       mod_locations_types.push_back(pair<int, const AA_MOD_T*>(mod_location, mod));
       seq_idx = end_idx;
     } else {
-      ss_seq <<  perc_seq.at(seq_idx);
+      ss_seq << perc_seq.at(seq_idx);
       count++;
     }
   }

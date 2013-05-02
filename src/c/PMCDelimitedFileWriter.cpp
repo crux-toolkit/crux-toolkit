@@ -14,6 +14,20 @@ PMCDelimitedFileWriter::~PMCDelimitedFileWriter() {
 }
 
 /**
+ * Opens a file, writes it, and closes the file
+ */
+void PMCDelimitedFileWriter::writeFile(
+  CruxApplication* application, ///< application writing the file
+  string filename, ///< name of the file to open
+  MATCH_FILE_TYPE type, ///< type of file to be written
+  ProteinMatchCollection* collection ///< collection to be written
+) {
+  openFile(application, filename, type);
+  write(collection);
+  closeFile();
+}
+
+/**
  * Closes any open file, then opens a file for the specified type of writing
  */
 void PMCDelimitedFileWriter::openFile(
@@ -153,16 +167,18 @@ void PMCDelimitedFileWriter::setUpProteinsColumns(
 void PMCDelimitedFileWriter::writeProteins(
   ProteinMatchCollection* collection ///< collection to be written
   ) {
+
+  carp(CARP_DEBUG, "Writing proteins");
+
+  MASS_FORMAT_T mass_format_type =
+    get_mass_format_type_parameter("mod-mass-format");
+
   for (ProteinMatchIterator iter = collection->proteinMatchBegin();
        iter != collection->proteinMatchEnd();
        ++iter) {
     ProteinMatch* match = *iter;
     Protein* protein = match->getProtein();
 
-#ifndef NEW_COLUMNS
-    addScoreIfExists(match, BARISTA_SCORE, BARISTA_SCORE_COL);
-    addScoreIfExists(match, BARISTA_QVALUE, BARISTA_QVALUE_COL);
-#endif
     addScoreIfExists(match, PERCOLATOR_SCORE, PERCOLATOR_SCORE_COL);
     addRankIfExists(match, PERCOLATOR_SCORE, PERCOLATOR_RANK_COL);
     addScoreIfExists(match, PERCOLATOR_QVALUE, PERCOLATOR_QVALUE_COL);
@@ -178,8 +194,7 @@ void PMCDelimitedFileWriter::writeProteins(
 
       MODIFIED_AA_T* mod_seq = peptide->getModifiedAASequence();
       char* seq_with_masses = modified_aa_string_to_string_with_masses(
-        mod_seq, peptide->getLength(),
-        get_mass_format_type_parameter("mod-mass-format"));
+        mod_seq, peptide->getLength(), mass_format_type);
       string sequence_str(seq_with_masses);
       free(seq_with_masses);
       free(mod_seq);
@@ -263,7 +278,11 @@ void PMCDelimitedFileWriter::writePeptides(
   ProteinMatchCollection* collection ///< collection to be written
   ) {
 
+  carp(CARP_DEBUG, "Writing peptides");
+
   string cleavage = getCleavageType();
+  MASS_FORMAT_T mass_format_type =
+    get_mass_format_type_parameter("mod-mass-format");
 
   for (PeptideMatchIterator iter = collection->peptideMatchBegin();
        iter != collection->peptideMatchEnd();
@@ -319,10 +338,6 @@ void PMCDelimitedFileWriter::writePeptides(
     addRankIfExists(match, SP, SP_RANK_COL);
     addScoreIfExists(match, XCORR, XCORR_SCORE_COL);
     addRankIfExists(match, XCORR, XCORR_RANK_COL);
-#ifndef NEW_COLUMNS
-    addScoreIfExists(match, BARISTA_SCORE, BARISTA_SCORE_COL);
-    addScoreIfExists(match, BARISTA_QVALUE, BARISTA_QVALUE_COL);
-#endif
     addScoreIfExists(match, PERCOLATOR_SCORE, PERCOLATOR_SCORE_COL);
     addRankIfExists(match, PERCOLATOR_SCORE, PERCOLATOR_RANK_COL);
     addScoreIfExists(match, PERCOLATOR_QVALUE, PERCOLATOR_QVALUE_COL);
@@ -332,8 +347,7 @@ void PMCDelimitedFileWriter::writePeptides(
 
     MODIFIED_AA_T* mod_seq = peptide->getModifiedAASequence();
     char* seq_with_masses = modified_aa_string_to_string_with_masses(
-      mod_seq, peptide->getLength(),
-      get_mass_format_type_parameter("mod-mass-format"));
+      mod_seq, peptide->getLength(), mass_format_type);
     free(mod_seq);
     setAndFree(SEQUENCE_COL, seq_with_masses);
 
@@ -405,7 +419,30 @@ void PMCDelimitedFileWriter::writePSMs(
   ProteinMatchCollection* collection ///< collection to be written
   ) {
 
+  carp(CARP_DEBUG, "Writing PSMs");
+
   string cleavage = getCleavageType();
+  MASS_FORMAT_T mass_format_type =
+    get_mass_format_type_parameter("mod-mass-format");
+
+  // count matches/spectrum
+  map<int, int> spectrum_counts;
+  for (PeptideMatchIterator pep_iter = collection->peptideMatchBegin();
+       pep_iter != collection->peptideMatchEnd();
+       ++pep_iter) {
+    PeptideMatch* pep_match = *pep_iter;
+    for (SpectrumMatchIterator spec_iter = pep_match->spectrumMatchBegin();
+      spec_iter != pep_match->spectrumMatchEnd();
+      ++spec_iter) {
+      int scan_num = (*spec_iter)->getSpectrum()->getFirstScan();
+      map<int, int>::iterator find_scan = spectrum_counts.find(scan_num);
+      if (find_scan == spectrum_counts.end()) {
+        spectrum_counts[scan_num] = 1;
+      } else {
+        ++spectrum_counts[scan_num];
+      }
+    }
+  }
 
   for (SpectrumMatchIterator iter = collection->spectrumMatchBegin();
        iter != collection->spectrumMatchEnd();
@@ -415,21 +452,6 @@ void PMCDelimitedFileWriter::writePSMs(
     SpectrumZState& zstate = match->getZState();
     PeptideMatch* pep_match = match->getPeptideMatch();
     Peptide* peptide = pep_match->getPeptide();
-
-    // collect peptides info
-    int matches_spectrum = 0;
-    for (PeptideMatchIterator pep_iter = collection->peptideMatchBegin();
-         pep_iter != collection->peptideMatchEnd();
-         ++pep_iter) {
-      for (SpectrumMatchIterator spec_iter = (*pep_iter)->spectrumMatchBegin();
-           spec_iter != (*pep_iter)->spectrumMatchEnd();
-           ++spec_iter) {
-        if ((*spec_iter)->getSpectrum()->getFirstScan() == spectrum->getFirstScan()) {
-          ++matches_spectrum;
-          break;
-        }
-      }
-    }
 
     setColumnCurrentRow(SCAN_COL, spectrum->getFirstScan());
     setColumnCurrentRow(CHARGE_COL, zstate.getCharge());
@@ -446,12 +468,13 @@ void PMCDelimitedFileWriter::writePSMs(
     addScoreIfExists(match, PERCOLATOR_QVALUE, PERCOLATOR_QVALUE_COL);
     addScoreIfExists(pep_match, BY_IONS_MATCHED, BY_IONS_MATCHED_COL);
     addScoreIfExists(pep_match, BY_IONS_TOTAL, BY_IONS_TOTAL_COL);
-    setColumnCurrentRow(MATCHES_SPECTRUM_COL, matches_spectrum);
+    map<int, int>::iterator spec_lookup = spectrum_counts.find(spectrum->getFirstScan());
+    int spec_count = (spec_lookup != spectrum_counts.end()) ? spec_lookup->second : 0;
+    setColumnCurrentRow(MATCHES_SPECTRUM_COL, spec_count);
 
     MODIFIED_AA_T* mod_seq = peptide->getModifiedAASequence();
     char* seq_with_masses = modified_aa_string_to_string_with_masses(
-      mod_seq, peptide->getLength(),
-      get_mass_format_type_parameter("mod-mass-format"));
+      mod_seq, peptide->getLength(), mass_format_type);
     free(mod_seq);
     setAndFree(SEQUENCE_COL, seq_with_masses);
 
