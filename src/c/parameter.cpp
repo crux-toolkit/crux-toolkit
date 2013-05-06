@@ -1013,7 +1013,7 @@ void initialize_parameters(void){
   );
  
   set_boolean_parameter(
-    "unique-peptides",
+    "only-psms",
     false,
     "Do not remove redundant peptides, keep all PSMs and exclude peptide level probability.",
     "Available for crux percolator",
