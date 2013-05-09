@@ -30,7 +30,8 @@ void PinXMLWriter::init() {
   ENZYME_T enzyme= get_enzyme_type_parameter("enzyme");
   enzyme_= enzyme_type_to_string(enzyme);
   precision_ = get_int_parameter("precision");
-  is_sp_=get_boolean_parameter("compute-sp");
+  is_sp_=get_boolean_parameter("compute-sp") ||
+         get_boolean_parameter("sqt-output");
   scan_number_=-1;
   decoy_prefix_=get_string_parameter("decoy-prefix");
   is_decoy_=false;
@@ -181,9 +182,6 @@ void PinXMLWriter::write(
   int top_rank
  ){
   carp(CARP_DEBUG,"Start writing PIN xml file!");
- //set SP 
- if(target_collection->getScoredType(SP))
-   is_sp_=true; 
 
   calculateDeltaCN(target_collection, decoys);
 
@@ -225,8 +223,7 @@ void PinXMLWriter::write(
   map<int, vector<Match*> > scan_to_matches;
   
  //set SP 
- if(target_collection->getScoredType(SP))
-   is_sp_=true;
+  is_sp_ = target_collection->getScoredType(SP);
   
   MatchIterator target_match_iterator(target_collection);  
   while (target_match_iterator.hasNext()) {
@@ -437,9 +434,7 @@ void PinXMLWriter::printFeatures(
   
   //Spectrum* spectrum= match->getSpectrum();
   int charge_state = match->getCharge();
-  bool charge1, charge2, charge3;
   SpectrumZState zstate= match->getZState ();
-  charge1=charge2=charge3=false;   
   bool enz_c=false; 
   bool enz_n=false;  
   Peptide* peptide=match->getPeptide(); 
@@ -460,18 +455,6 @@ void PinXMLWriter::printFeatures(
       ((sequence_last == 'K' || sequence_last == 'R') && c_flank != 'P'))
     enz_c =true; 
  
-  switch(charge_state){
-    case 1:
-      charge1=true;
-      break; 
-    case 2: 
-      charge2=true; 
-      break; 
-    case 3:
-      charge3=true; 
-      break; 
-  }
-  
   FLOAT_T ln_num_sp=match->getLnExperimentSize();
   FLOAT_T lnrSp=0.0; 
   if(match->getRank(SP)>0)  
