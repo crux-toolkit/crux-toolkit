@@ -286,11 +286,12 @@ void DataSet::readFragSpectrumScans( const ::percolatorInNs::fragSpectrumScan & 
           found=mypept.find('[',f2+1);
         }
         std::stringstream ss;
-        ss << "[UNIMOD:" << modIter->uniMod().accession();
-	double mono_delta = modIter->monoisotopicMassDelta().get();
-	ss<< "," << mono_delta; 
-	ss << "]";
 
+	if (modIter->uniMod().accession() == 0) {
+	  ss<< "[" << modIter->monoisotopicMassDelta().get() << "]"; 
+	} else {
+	  ss << "[UNIMOD:" << modIter->uniMod().accession() << "]";
+	}
 	mypept.insert(loc,ss.str());
       }
 
