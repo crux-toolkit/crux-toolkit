@@ -304,18 +304,26 @@ MODIFIED_AA_T* PercolatorAdapter::getModifiedAASequence(
   std::stringstream ss_seq;
   string perc_seq = psm->getPeptideSequence();
   peptide_mass = 0.0;
+  
+  if (perc_seq.find("UNIMOD") != string::npos) {
+    carp(CARP_FATAL, 
+	 "UNIMOD modifications currently not supported:%s", 
+	 perc_seq.c_str());
+  }
+
 
   vector<pair<int, const AA_MOD_T*> > mod_locations_types;
   size_t count = 0;
   for (size_t seq_idx = 0; seq_idx < perc_seq.length(); seq_idx++) {
     if (perc_seq.at(seq_idx) == '[') {
       //modification found.
-      size_t comma_idx = perc_seq.find(',', seq_idx);
-      size_t end_idx = perc_seq.find(']', seq_idx);
+      size_t begin_idx = seq_idx+1;
+      size_t end_idx = perc_seq.find(']', begin_idx);
       int mod_location = count-1;
       FLOAT_T delta_mass;
 
-      from_string(delta_mass, perc_seq.substr(comma_idx+1, end_idx - comma_idx-1));
+      from_string(delta_mass, perc_seq.substr(begin_idx, end_idx - begin_idx));
+      carp(CARP_DEBUG,"seq:%s, i:%i m:%f", perc_seq.c_str(), seq_idx, delta_mass);
       peptide_mass += delta_mass;
       const AA_MOD_T* mod = get_aa_mod_from_mass(delta_mass);
       if (mod == NULL) {
