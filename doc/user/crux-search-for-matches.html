@@ -174,14 +174,13 @@ its own file) is required to run the algorithm 'percolator' in a
 subsequent crux run.  Default = 1. </li>
 
 <li>
-<code>--decoys &lt;string&gt;</code> &ndash; Include a decoy version
-of every peptide by shuffling or reversing the target sequence.
-Possible values are <code>none, reverse, protein-shuffle,
-peptide-shuffle</code>. Use 'reverse' to reverse each protein sequence,
-'protein-shuffle' to shuffle each protein sequence, or 'peptide-shuffle'
-to shuffle the sequence between enzyme cleavage sites, leaving the
-termini in place. Use 'none' for no decoys.  Default=peptide-shuffle. 
-</li>
+<code>--decoys none|reverse|protein-shuffle|peptide-shuffle</code>
+&ndash; Include a decoy version of every peptide by shuffling or
+reversing the target sequence.  Use 'reverse' to reverse each protein
+sequence, 'protein-shuffle' to shuffle each protein sequence, or
+'peptide-shuffle' to shuffle the sequence between enzyme cleavage
+sites, leaving the termini in place.  Use 'none' for no decoys.
+Default=peptide-shuffle.</li>
 
 <li>
 <code>--decoy-location target-file|one-decoy-file|separate-decoy-files</code> &ndash; 
