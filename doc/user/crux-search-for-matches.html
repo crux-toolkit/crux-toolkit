@@ -21,54 +21,51 @@
 <blockquote>
 <p>
 This command searches a protein database with a set of spectra.  For
-each spectrum, the precursor mass is computed from either the measured precursor
-singly charged mass (m+h) or the mass-to-charge (m/z) and an assumed charge.  
-Candidate peptides whose masslies within a specified range of the precursor mass 
-are identified.  These candidate peptides scored with the SEQUEST<sup>&reg;</sup> XCorr 
-and ranked by score. The top ranking matches are printed to file.  An 
-optional p-value may be computed for each spectrum based on the distribution 
-of scores for that spectrum (<a href="../../papers/klammer2009statistical.html">
-Aaron A. Klammer, Christopher Y. Park and William
-Stafford Noble. "Statistical calibration of the SEQUEST XCorr
-function." <i>Journal of Proteome Research.</i> 8(4):2106-2113,
-2009</a>). The input protein database may either be in FASTA format or
+each spectrum, the precursor mass is computed from either the measured
+precursor singly charged mass (m+h) or the mass-to-charge (m/z) and an
+assumed charge.  Candidate peptides whose mass lies within a specified
+range of the precursor mass are identified.  These candidate peptides
+are scored with the SEQUEST<sup>&reg;</sup> XCorr, and the top-ranking
+matches for each spectrum are reported.
+
+<p>
+An optional p-value may be computed for each spectrum based on the
+distribution of scores for that spectrum
+(<a href="../../papers/klammer2009statistical.html"> Aaron A. Klammer,
+Christopher Y. Park and William Stafford Noble. "Statistical
+calibration of the SEQUEST XCorr function." <i>Journal of Proteome
+Research.</i> 8(4):2106-2113, 2009</a>).</p>
+
+<p>
+The input protein database may either be in FASTA format or
 it may be a binary index created by <code>crux create-index</code>.
 Using an index will typically yield much faster search speeds.</p>
 
 <p>
 <b>Modifications:</b> Crux handles two types of modifications: static
-and variable.  Static modifications are a change of mass applied to
-a given amino acid in every peptide in which it occurs.  By default, a
-static modification of +57 da to cystine (C) is applied.
-Variable modifications allow peptides to be generated with and without
-a mass change to a given amino acid.  Crux handles variable 
-modifications as follows.   
-The user specifies an allowed set of amino acid modifications, using
-the options <code>mod</code>, <code>cmod</code> and <code>nmod</code>,
-which are described below.  Before any search is performed, Crux
-generates an exhaustive list of all possible combinations of amino
-acid modifications that could be applied to a peptide.  For example,
-if the user specifies a modification of +79 to serine (S) or threonine
-(T) which can be present twice on any peptide and a modification of
-+30 to methianine (M) which can be present only once, then the list
-will contain modifications corresponding to +79 on one residue, +79 on
-two different residues, +30 on one residue, +79 on one and +30 on one,
-+79 on two and +30 on one.  Subsequently, for each spectrum, Crux
-performs one search for each possible combination of modifications
-including no modifications.  For example, if the precursor m/z for a
-spectrum is 800 da, the charge state is +2, and Crux is considering a
-modification of +79, then Crux will retrieve from the database all
-candidate peptides whose total mass is close to 321 da.  The candidate
-peptide list is then updated to remove any peptides that cannot be
-modified (in this example, contain no S or T) and expanded to include
-all possible modified forms of each candidate.  Continuing with our
-example, a peptide containing two S residues would be added with two
-modified forms: one with the first S modified and one with the second
-S modified.  These candidates are scored as usual and the top <i>n</i>
-candidate peptides are added to a composite, sorted list of peptides.
-Finally, after all modifications have been searched, Crux reports for
-the current spectrum the top <i>m</i> peptides from the composite
-list.</p> 
+and variable.  Static modifications are a change of mass applied to a
+given amino acid in every peptide in which it occurs.  By default, a
+static modification of +57 da to cystine (C) is applied.  Variable
+modifications allow peptides to be generated with and without a mass
+change to a given amino acid.  Crux handles variable modifications as
+follows.  The user specifies an allowed set of amino acid
+modifications, using the options <code>mod</code>, <code>cmod</code>
+and <code>nmod</code>, which are described below.  Before any search
+is performed, Crux generates an exhaustive list of all possible
+combinations of amino acid modifications that could be applied to a
+peptide.  Subsequently, for each spectrum, Crux performs one search
+for each possible combination of modifications including no
+modifications.  For example, if the precursor m/z for a spectrum is
+800 Th, the charge state is 2+, and Crux is considering a modification
+of +79, then Crux will retrieve from the database all candidate
+peptides whose total mass is close to 321 Th.  The candidate peptide
+list is then updated to remove any peptides that cannot be modified
+(because they contain no modifiable amino acids) and expanded to
+include all possible modified forms of each candidate.  These
+candidates are scored as usual and the top <i>n</i> candidate peptides
+are added to a composite, sorted list of peptides.  Finally, after all
+modifications have been searched, Crux reports for the current
+spectrum the top <i>m</i> peptides from the composite list.</p>
 
 </blockquote>
 
@@ -183,8 +180,9 @@ sites, leaving the termini in place.  Use 'none' for no decoys.
 Default=peptide-shuffle.</li>
 
 <li>
-<code>--decoy-location target-file|one-decoy-file|separate-decoy-files</code> &ndash; 
-File(s) in which decoy results are returned.  Only applies
+<code>--decoy-location
+target-file|one-decoy-file|separate-decoy-files</code> &ndash; File(s)
+in which decoy results are returned.  Only applies
 when <code>num-decoys-per-target</code> is not zero.  Use
 'target-file' to mix target and decoy psms in one file. Use
 'one-decoy-file' to print target psms to one file and all decoys to a
@@ -197,10 +195,10 @@ search.decoy.txt file.) Default = separate-decoy-files.
 <li>
 <code>--compute-sp T|F</code> &ndash; Compute the preliminary
 score Sp for all candidate peptides.  This option is recommended if
-results are to be analyzed by <code>percolator</code>
-or <code>q-ranker</code>.  If <code>sqt-output</code> is enabled,
-<code>compute-sp</code> is automatically enabled and cannot be
-overridden.  Default = F.</li>
+results are to be analyzed by <code>percolator</code>,
+<code>q-ranker</code> or <code>barista</code>.  Note that,
+if <code>sqt-output</code> is enabled, then <code>compute-sp</code> is
+automatically enabled and cannot be overridden.  Default = F.</li>
 
 <li>
 <code>--compute-p-values T|F</code> &ndash;
