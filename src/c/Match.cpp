@@ -1289,7 +1289,9 @@ char* Match::getSequenceSqt(){
   int length = getPeptide()->getLength();
 
   // turn it into string
-  char* seq = modified_aa_string_to_string_with_symbols(mod_seq, length);
+  //char* seq = modified_aa_string_to_string_with_symbols(mod_seq, length);
+  char* seq = modified_aa_string_to_string_with_masses(mod_seq, length,
+                get_mass_format_type_parameter("mod-mass-format"));
 
   // get peptide flanking residues 
   char c_term = peptide_->getCTermFlankingAA();

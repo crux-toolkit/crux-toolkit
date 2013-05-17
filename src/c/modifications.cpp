@@ -512,6 +512,10 @@ MODIFIED_AA_T* copy_mod_aa_seq(MODIFIED_AA_T* source, int length){
 MODIFIED_AA_T* copy_mod_aa_seq(
   MODIFIED_AA_T* source ///< Sequence to copy
   ) {
+  if (source == NULL) {
+    carp(CARP_ERROR, "Cannot copy NULL sequence of modified_aa's.");
+    return NULL;
+  }
 
   size_t length = 0;
   while (source[length] != MOD_SEQ_NULL) {

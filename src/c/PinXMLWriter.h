@@ -145,6 +145,9 @@ class PinXMLWriter{
     int scan_number,
     int rank
   ); 
+
+  //get peptide mass with modifications
+  FLOAT_T calcMassOfMods(Crux::Peptide* peptide);
  
   //calculating deltaCn and deltaLCn
   void calculateDeltaCN(map<pair<int, int>, vector<Crux::Match*> >& scan_charge_to_matches);

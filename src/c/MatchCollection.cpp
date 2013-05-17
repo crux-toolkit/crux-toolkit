@@ -2147,7 +2147,7 @@ bool MatchCollection::printSqt(
   
   // make sure top_scoring_sp_ has been set
   if( top_scoring_sp_ == NULL){
-    carp(CARP_WARNING, "Top scoring SP was not set.");
+    carp(CARP_DEBUG, "Top scoring SP was not set.");
   } else if( top_scoring_sp_->getRank(XCORR) > top_match ){
     // print the match with Sp rank==1 if its xcorr rank > top_match rank.  
     top_scoring_sp_->printSqt(output);
