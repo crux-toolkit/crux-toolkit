@@ -86,9 +86,7 @@ Building <span class=prog>crux</span> from source requires that you have previou
 installed a C++ compiler,
 <a href="http://www.cmake.org"><span class=prog>cmake</span></a>
 and
-<a href="http://subversion.apache.org"><span class=prog>svn</span></a>
-and
-<a href="http://git-scm.com"><span class=prog>git</span></a>.
+<a href="http://subversion.apache.org"><span class=prog>svn</span></a>.
 Building <span class=prog>crux</span> also requires the
 <a href="http://proteowizard.sourceforge.net"><span class=prog>Proteowizard</span></a>
 and 
@@ -124,20 +122,6 @@ into the new directory.
 
 <li><b>Configure</b>  Move into the <span class=file>crux-x.xx.Source</span>
 directory from step 1.
-On Linux systems you will need to specify the location of the <span
-<a href="http://proteowizard.sourceforge.net"><span class=prog>Proteowizard</span></a>
-and 
-<a href="http://per-colator.com"><span class=prog>Percolator</span></a>
-libraries. 
-This is done by running the command:
-<div class=code><code>
-export LD_LIBRARY_PATH=&lt;path&gt;/external/lib:$LD_LIBRAY_PATH
-</code>
-</div>
-where <code>&lt;path&gt;</code>
-is the full path to the <span class=file>crux-x.xx.Source</span>
-directory.
-<br />
 Run the command
 <div class=code><code>
 cmake -DCMAKE_INSTALL_PREFIX:PATH=&lt;install directory&gt; .
