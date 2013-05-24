@@ -64,7 +64,7 @@ inference options," below.</p>
 <p>
 Crux includes code from
 <a href="http://per-colator.com/"><span class=prog>Percolator
-2.04</span></a>.  Crux Percolator differs from the stand-alone version
+2.04b</span></a>.  Crux Percolator differs from the stand-alone version
 of Percolator in the following respects:</p>
 <ul>
 <li>
@@ -198,12 +198,12 @@ computed features in tab-delimited text format to a file
 named "percolator.feature.txt." Default = F.</li>
 
 <li>
-<code>--feature-in-file &lt;T|F&gt;</code> &ndash; Input files are
-given as a tab delimited file. In this case the only argument should
-be a file name of the data file. The tab-delimited fields should be
-identifier, label, feature1, ..., featureN, peptide, proteinId1, ...,
-proteinIdM.  Labels are interpreted as 1 = target set, -1 = decoy set.
-Default = F.</li>
+<code>--feature-in-file &lt;T|F&gt;</code> &ndash; When set
+to <code>T</code>, the <code>&lt;search&nbsp;results&gt;</code>
+argument should be a tab-delimited file, in which the first row is a
+header, and each subsequent row is a PSM.  The fields should be
+identifier, label (1 = target, -1 = decoy), feature1, ..., featureN,
+peptide, proteins.  Default = F.</li>
 
 <LI>
 <code>--parameter-file &lt;filename&gt;</code> &ndash;
@@ -323,7 +323,7 @@ input a file does not contain observed retention times, then scan
 numbers are used as proxies for retention time.  Default = 0.</li>-->
 
 <li>
-<code>--unique-peptides &lt;T|F&gt;</code> &ndash; Do not remove
+<code>--only-psms &lt;T|F&gt;</code> &ndash; Do not remove
 redundant peptides; keep all PSMs and exclude peptide level
 probabilities.
 </li>

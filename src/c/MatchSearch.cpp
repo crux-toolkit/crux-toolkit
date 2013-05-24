@@ -216,10 +216,6 @@ void MatchSearch::printSpectrumMatches(
       // NOTE (BF 09-14-10): since the multiple decoy collections have already
       // been truncated, the merged ranks aren't accurate for the total space
       // of decoys searched
-      if ( merged_decoy_psms->getScoredType(SP) ){
-        merged_decoy_psms->populateMatchRank(SP);
-        merged_decoy_psms->saveTopSpMatch();
-      } 
       merged_decoy_psms->populateMatchRank(XCORR);
       
       vector<MatchCollection*> decoy_list(1, merged_decoy_psms);

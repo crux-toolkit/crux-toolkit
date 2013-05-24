@@ -6,6 +6,7 @@
 #include "SpectrumMatch.h"
 
 using namespace Crux;
+using namespace std;
 
 /**
  * \returns an empty PeptideMatch
@@ -58,7 +59,13 @@ void PeptideMatch::addProteinMatch(
   ProteinMatch* protein_match, ///< ProteinMatch to set
   PeptideSrc* src ///< PeptideSrc 
   ) {
-
+  for (deque<ProteinMatch*>::iterator iter = protein_matches_.begin();
+       iter != protein_matches_.end();
+       ++iter) {
+    if (*iter == protein_match) {
+      return;
+    }
+  }
   protein_matches_.push_back(protein_match);
   protein_match_to_peptide_src_[protein_match] = src;
 }
@@ -80,6 +87,13 @@ PeptideSrc* PeptideMatch::getSrc(
 void PeptideMatch::addSpectrumMatch(
   SpectrumMatch* spectrum_match ///< SpectrumMatch to add
   ) {
+  for (deque<SpectrumMatch*>::iterator iter = spectrum_matches_.begin();
+       iter != spectrum_matches_.end();
+       ++iter) {
+    if (*iter == spectrum_match) {
+      return;
+    }
+  }
   spectrum_matches_.push_back(spectrum_match);
   spectrum_match->setPeptideMatch(this);  
 }

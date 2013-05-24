@@ -16,7 +16,7 @@
 class ProteinMatch : public AbstractMatch {
 
  protected:
-  std::vector<PeptideMatch*> peptide_matches_; ///< PeptideMatches associated with this ProteinMatch
+  std::deque<PeptideMatch*> peptide_matches_; ///< PeptideMatches associated with this ProteinMatch
   Crux::Protein* protein_; ///< Protein 
   
  public:
@@ -39,9 +39,16 @@ class ProteinMatch : public AbstractMatch {
   virtual ~ProteinMatch();
 
   /** 
-   * \returns the peptide for the match
+   * \returns the protein for the match
    */
   Crux::Protein* getProtein();
+
+  /**
+   * sets the protein for the match
+   */
+  void setProtein(
+    Crux::Protein* protein ///< Protein to set
+  );
 
   /**
    * \returns the begining of the peptidematches vector
@@ -63,7 +70,7 @@ class ProteinMatch : public AbstractMatch {
   /**
    * \returns the id for this protein
    */
-  std::string getId();
+  std::string getId() const;
 
 };
 

@@ -25,13 +25,15 @@ AbstractMatch::~AbstractMatch() {
  */
 FLOAT_T AbstractMatch::getScore(
   SCORER_TYPE_T type ///< score type desired
-  ) {
+  ) const {
 
-  if (scores_.find(type) == scores_.end()) {
+  ScoreMap::const_iterator findScore = scores_.find(type);
+  if (findScore == scores_.end()) {
     carp(CARP_WARNING, "Score not set!");
     return 0.0;
   }
-  return scores_[type];
+
+  return findScore->second;
 
 }
 
@@ -40,13 +42,15 @@ FLOAT_T AbstractMatch::getScore(
  */
 int AbstractMatch::getRank(
   SCORER_TYPE_T type ///< score type desired
-  ) {
+  ) const {
 
-  if (ranks_.find(type) == ranks_.end()) {
+  RankMap::const_iterator findRank = ranks_.find(type);
+  if (findRank == ranks_.end()) {
     carp(CARP_WARNING, "Rank not set!");
     return 0;
   }
-  return ranks_[type];
+
+  return findRank->second;
 
 }
 
@@ -79,7 +83,7 @@ void AbstractMatch::setRank(
  */
 bool AbstractMatch::hasScore(
   SCORER_TYPE_T type ///< score to test
-  ) {
+  ) const {
 
   return (scores_.find(type) != scores_.end());
 }
@@ -89,7 +93,7 @@ bool AbstractMatch::hasScore(
  */
 bool AbstractMatch::hasRank(
   SCORER_TYPE_T type ///< rank to test
-  ) {
+  ) const {
 
   return (ranks_.find(type) != ranks_.end());
 }

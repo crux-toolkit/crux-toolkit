@@ -5,19 +5,40 @@
  ************************************************************************************************/
 #ifndef PROTEINMATCHCOLLECTION_H_
 #define PROTEINMATCHCOLLECTION_H_
+#include "PeptideMatch.h"
+#include "ProteinMatch.h"
 #include "objects.h"
 #include "match_objects.h"
 
+#include <deque>
+#include <set>
 #include <string>
-
-
 
 class ProteinMatchCollection {
 
  protected:
-  std::vector<ProteinMatch*> protein_matches_; ///< All protein matches
-  std::vector<PeptideMatch*> peptide_matches_; ///< All peptide matches
-  std::vector<SpectrumMatch*> spectrum_matches_; ///< All spectrum matches
+
+  struct cmpSeq {
+    bool operator() (const MODIFIED_AA_T* lhs, const MODIFIED_AA_T* rhs) {
+      size_t idx = -1;
+      MODIFIED_AA_T lhs_aa, rhs_aa;
+      do {
+        ++idx;
+        lhs_aa = lhs[idx];
+        rhs_aa = rhs[idx];
+        if (lhs_aa != rhs_aa) {
+          return lhs_aa < rhs_aa;
+        }
+      } while (lhs_aa != MOD_SEQ_NULL && rhs_aa != MOD_SEQ_NULL);
+      return rhs_aa != MOD_SEQ_NULL;
+    }
+  };
+
+  std::map<std::string, ProteinMatch*> protein_match_map_;
+  std::map<MODIFIED_AA_T*, PeptideMatch*, cmpSeq> peptide_match_map_;
+  std::deque<ProteinMatch*> protein_matches_; ///< All protein matches
+  std::deque<PeptideMatch*> peptide_matches_; ///< All peptide matches
+  std::deque<SpectrumMatch*> spectrum_matches_; ///< All spectrum matches
 
  public:
 

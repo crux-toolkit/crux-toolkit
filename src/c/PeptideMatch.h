@@ -1,5 +1,5 @@
 /**
- * \file SpectrumMatch.h
+ * \file PeptideMatch.h
  * $Revision: 1.00 $
  * \brief Object for holding peptide scores
  ******************************************************/
@@ -8,13 +8,14 @@
 
 #include "AbstractMatch.h"
 #include "match_objects.h"
+#include "Peptide.h"
 
 class PeptideMatch : public AbstractMatch {
 
  protected:  
-  std::vector<ProteinMatch*> protein_matches_; ///< protein matches associated with this peptide match
+  std::deque<ProteinMatch*> protein_matches_; ///< protein matches associated with this peptide match
   std::map<ProteinMatch*, PeptideSrc*> protein_match_to_peptide_src_; ///< peptide srcs for the protein match
-  std::vector<SpectrumMatch*> spectrum_matches_; ///< spectrum matches for this peptide
+  std::deque<SpectrumMatch*> spectrum_matches_; ///< spectrum matches for this peptide
   Crux::Peptide* peptide_; ///< peptide itself
 
  public:

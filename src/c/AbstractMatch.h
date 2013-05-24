@@ -31,14 +31,14 @@ class AbstractMatch {
    */
   virtual FLOAT_T getScore(
     SCORER_TYPE_T type ///<score type desired
-    );
+    ) const;
 
   /**
    * \returns the match rank for a particular score type
    */
   virtual int getRank(
     SCORER_TYPE_T type ///<score type desired
-    );
+    ) const;
 
   /**
    * sets the match score for particular score type
@@ -61,11 +61,11 @@ class AbstractMatch {
    */
   virtual bool hasScore(
     SCORER_TYPE_T type ///< score to test
-  );
+  ) const;
 
   virtual bool hasRank(
     SCORER_TYPE_T type ///< rank to test
-  );
+  ) const;
 
   /**
    * \returns whether the match is a decoy or not (default false).

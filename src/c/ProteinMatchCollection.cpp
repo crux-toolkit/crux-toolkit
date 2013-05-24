@@ -10,8 +10,9 @@
 #include "Match.h"
 #include "MatchCollection.h"
 
+using namespace std;
 using namespace Crux;
-  
+
 /**
  * \returns a blank ProteinMatchCollection
  */
@@ -35,6 +36,29 @@ ProteinMatchCollection::ProteinMatchCollection(
  * Default destructor
  */
 ProteinMatchCollection::~ProteinMatchCollection() {
+
+  // delete protein matches
+  for (ProteinMatchIterator iter = proteinMatchBegin();
+       iter != proteinMatchEnd();
+       ++iter) {
+    delete *iter;
+  }
+
+  // delete modified aa strings + peptide matches
+  for (map<MODIFIED_AA_T*, PeptideMatch*>::iterator iter = peptide_match_map_.begin();
+       iter != peptide_match_map_.end();
+       ++iter) {
+      free(iter->first);
+      delete iter->second;
+  }
+
+  // delete spectrum matches
+  for (SpectrumMatchIterator iter = spectrumMatchBegin();
+       iter != spectrumMatchEnd();
+       ++iter) {
+    delete *iter;
+  }
+
 }
 
 /**
@@ -86,7 +110,7 @@ SpectrumMatchIterator ProteinMatchCollection::spectrumMatchEnd() {
  * one if it is not found and create is true
  */  
 ProteinMatch* ProteinMatchCollection::getProteinMatch(
-  Crux::Protein* protein,  ///< Protein for which to find the protein match
+  Protein* protein,  ///< Protein for which to find the protein match
   bool create ///< Create the ProteinMatch if it doesn't exist
   ) {
 
@@ -97,6 +121,7 @@ ProteinMatch* ProteinMatchCollection::getProteinMatch(
     if (create) {
       ans = new ProteinMatch(protein);
       protein_matches_.push_back(ans);
+      protein_match_map_.insert(pair<string, ProteinMatch*>(id, ans));
     } else {
       carp(CARP_WARNING, "ProteinMatch for %s not found!", protein->getIdPointer());
     }
@@ -122,14 +147,15 @@ PeptideMatch* ProteinMatchCollection::getPeptideMatch(
     if (create) {
       ans = new PeptideMatch(peptide);
       peptide_matches_.push_back(ans);
+      peptide_match_map_.insert(pair<MODIFIED_AA_T*, PeptideMatch*>(mod_seq, ans));
     } else {
-      carp(CARP_FATAL, 
-        "Could not find peptidematch for sequence %s", 
-	   peptide->getSequence());
+      free(mod_seq);
+      carp(CARP_FATAL, "Could not find peptidematch for sequence %s",
+  	       peptide->getSequence());
     }
+  } else {
+    free(mod_seq);
   }
-
-  free(mod_seq);
 
   return ans;
 }
@@ -138,15 +164,10 @@ PeptideMatch* ProteinMatchCollection::getPeptideMatch(
  * \returns the ProteinMatch for a Protein, null if it doesn't exist
  */
 ProteinMatch* ProteinMatchCollection::getProteinMatch(
-  const std::string& id ///< id of the protein
+  const string& id ///< id of the protein
   ) {
-
-  for (ProteinMatchIterator iter = proteinMatchBegin(); iter != proteinMatchEnd(); ++iter) {
-    if ((*iter)->getId() == id) {
-      return *iter;
-    }
-  }
-  return NULL;
+  map<string, ProteinMatch*>::iterator iter = protein_match_map_.find(id);
+  return (iter != protein_match_map_.end()) ? iter->second : NULL;
 }
 
 /**
@@ -155,22 +176,8 @@ ProteinMatch* ProteinMatchCollection::getProteinMatch(
 PeptideMatch* ProteinMatchCollection::getPeptideMatch(
   MODIFIED_AA_T* mod_seq ///< Modified Sequence to find
   ) {
-  int ans = -1;
-  for (size_t idx = 0; idx < peptide_matches_.size(); idx++) {
-    MODIFIED_AA_T* cur_seq = peptide_matches_[idx]->getPeptide()->getModifiedAASequence();
-    if (equal_seq(cur_seq, mod_seq)) {
-      ans = idx;
-      break;
-    }
-  }
-
-  if (ans == -1) { 
-    return NULL;
-  } else {
-    return peptide_matches_[ans];
-  }
-
-
+  map<MODIFIED_AA_T*, PeptideMatch*>::iterator iter = peptide_match_map_.find(mod_seq);
+  return (iter != peptide_match_map_.end()) ? iter->second : NULL;
 }
 
 
@@ -199,7 +206,7 @@ void ProteinMatchCollection::addMatch(
   peptide_match->addSpectrumMatch(spectrum_match);
 
   for (int score_idx = (int)SP;
-    score_idx < (int)NUMBER_SCORER_TYPES;
+       score_idx < (int)NUMBER_SCORER_TYPES;
        score_idx++) {
 
     SCORER_TYPE_T score_type = (SCORER_TYPE_T)score_idx;
@@ -212,9 +219,8 @@ void ProteinMatchCollection::addMatch(
   }
 
   for (PeptideSrcIterator src_iter = peptide->getPeptideSrcBegin();
-    src_iter != peptide->getPeptideSrcEnd();
+       src_iter != peptide->getPeptideSrcEnd();
        ++src_iter) {
-
     PeptideSrc* src = *src_iter;
     Protein* protein = src->getParentProtein();
     ProteinMatch* protein_match = getProteinMatch(protein);
@@ -231,10 +237,14 @@ void ProteinMatchCollection::addMatches(
   MatchCollection* match_collection ///< collection to add
   ) {
 
+  carp(CARP_DEBUG, "Adding %d matches to ProteinMatchCollection",
+       match_collection->getMatchTotal());
+
   MatchIterator match_iter(match_collection);
   while(match_iter.hasNext()) {
     addMatch(match_collection, match_iter.next());
   }
+
 }
 
 /*
