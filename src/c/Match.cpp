@@ -1289,7 +1289,8 @@ char* Match::getSequenceSqt(){
   int length = getPeptide()->getLength();
 
   // turn it into string
-  char* seq = modified_aa_string_to_string_with_symbols(mod_seq, length);
+  char* seq = modified_aa_string_to_string_with_masses(mod_seq, length,
+                get_mass_format_type_parameter("mod-mass-format"));
 
   // get peptide flanking residues 
   char c_term = peptide_->getCTermFlankingAA();
@@ -1460,6 +1461,14 @@ bool Match::isDecoy() {
 
 }
 
+/**
+ * sets whether the match is post process or not
+ */
+void Match::setPostProcess(
+  bool post_process ///< whether the match is post process or not
+) {
+  post_process_match_ = post_process;
+}
 
 /**
  * Must ask for score that has been computed

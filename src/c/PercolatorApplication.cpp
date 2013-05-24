@@ -109,7 +109,7 @@ int PercolatorApplication::main(int argc, char** argv) {
     "seed",
     "klammer",
     //"doc",
-    "unique-peptides",
+    "only-psms",
     "allow-protein-group",
     "protein-level-pi0",
     "empirical-protein-q",
@@ -230,7 +230,7 @@ int PercolatorApplication::main(
   }
 
   perc_args_vec.push_back("-P");
-  string decoy_pre=get_string_parameter("decoy-prefix");
+  string decoy_pre=get_string_parameter_pointer("decoy-prefix");
   if(decoy_pre.length()){
      perc_args_vec.push_back(decoy_pre);
   }else{
@@ -332,9 +332,9 @@ int PercolatorApplication::main(
   }
   */
 
-  if(get_boolean_parameter("unique-peptides")&& set_protein == false){ 
+  if (get_boolean_parameter("only-psms") && !set_protein) { 
     perc_args_vec.push_back("--unique-peptides");
-   }
+  }
   
   // FIXME include schema as part of distribution and add option to turn on validation
     perc_args_vec.push_back("-s");
@@ -406,13 +406,22 @@ int PercolatorApplication::main(
   if (get_boolean_parameter("txt-output")) {
     PMCDelimitedFileWriter txt_writer;
     string txt_path = make_file_path("percolator.target");
-    txt_writer.writeAll(this, protein_match_collection, txt_path);
+
+    txt_writer.writeFile(this, txt_path + ".psms.txt",
+                         PMCDelimitedFileWriter::PSMS, protein_match_collection);
+    txt_writer.writeFile(this, txt_path + ".peptides.txt",
+                         PMCDelimitedFileWriter::PEPTIDES, protein_match_collection);
+
+    if (set_protein) {
+      txt_writer.writeFile(this, txt_path + ".proteins.txt",
+                           PMCDelimitedFileWriter::PROTEINS, protein_match_collection);
+    }
   }
 
   // write mzid
   if (get_boolean_parameter("mzid-output")) {
     MzIdentMLWriter mzid_writer;
-    string mzid_path = make_file_path("percolator.mzid");
+    string mzid_path = make_file_path("percolator.target.mzid");
     mzid_writer.openFile(mzid_path, get_boolean_parameter("overwrite"));
     mzid_writer.addProteinMatches(protein_match_collection);
     mzid_writer.closeFile();
@@ -421,7 +430,7 @@ int PercolatorApplication::main(
   // write pepxml
   if (get_boolean_parameter("pepxml-output")) {
     PMCPepXMLWriter pep_writer;
-    string pep_path = make_file_path("percolator.pep.xml");
+    string pep_path = make_file_path("percolator.target.pep.xml");
     pep_writer.openFile(pep_path.c_str(), get_boolean_parameter("overwrite"));
     pep_writer.write(protein_match_collection);
     pep_writer.closeFile();

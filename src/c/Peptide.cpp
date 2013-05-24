@@ -540,7 +540,8 @@ char* Peptide::getSequenceFromPeptideSrcSqt(
     protein->getSequencePointer();
 
   // get modified petpide sequence
-  char* mod_pep_seq = getModifiedSequenceWithSymbols();
+  char* mod_pep_seq = getModifiedSequenceWithMasses(
+    get_mass_format_type_parameter("mod-mass-format"));
   int mod_pep_len = strlen(mod_pep_seq);
 
   // allocate peptide memory

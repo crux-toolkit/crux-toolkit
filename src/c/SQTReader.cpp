@@ -226,10 +226,11 @@ void SQTReader::parseMatch(string& line) {
   vector<string> sequence_tokens;
   DelimitedFile::tokenize(sqt_sequence, sequence_tokens, '.');
 
-  current_peptide_sequence_ = sequence_tokens[1];
-
-  current_prev_aa_ = sequence_tokens[0];
-  current_next_aa_ = sequence_tokens[2];
+  current_prev_aa_ = sequence_tokens.front();
+  current_next_aa_ = sequence_tokens.back();
+  sequence_tokens.erase(sequence_tokens.begin());
+  sequence_tokens.pop_back();
+  current_peptide_sequence_ = DelimitedFile::splice(sequence_tokens, '.');
  /*
   cerr << "Match line:"<<line<<endl;
   cerr << "xcorr rank:"<<xcorr_rank<<endl;
@@ -252,7 +253,15 @@ void SQTReader::parseMatch(string& line) {
   Peptide* peptide = new Peptide();
 
   peptide->setPeptideMass(calculated_mass - MASS_PROTON);
+
+  MODIFIED_AA_T* mods = NULL;
+  convert_to_mod_aa_seq(current_peptide_sequence_.c_str(), &mods);
+
+  char* unmodified_sequence_pointer = unmodify_sequence(current_peptide_sequence_.c_str());
+  current_peptide_sequence_ = unmodified_sequence_pointer;
+  free(unmodified_sequence_pointer);
   peptide->setLength(current_peptide_sequence_.length());
+  peptide->setModifiedAASequence(mods, false);
 
   current_match_ = new Match(peptide, current_spectrum_, current_zstate_, false);
   current_match_->setScore(XCORR, xcorr);

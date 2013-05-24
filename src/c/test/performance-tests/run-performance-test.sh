@@ -36,7 +36,7 @@ fi
 ms2=051708-worm-ASMS-10.ms2
 
 # Do the whole test twice, once for each search tool.  (N.B. This loop
-# is temporarily not doing anything useful.  Once we get jimmy-search
+# is temporarily not doing anything useful.  Once we get comet and tide
 # integrated into Crux, then this loop will be useful again.)
 for searchtool in search-for-matches; do
 
@@ -82,16 +82,16 @@ for searchtool in search-for-matches; do
   echo replot \"decoys/qvalues.xcorr.decoy.txt\" using 1:0 title \"XCorr \(decoy\)\" with lines >> $gnuplot
   
   # Run Crux percolator
-  if [[ -e $searchtool/percolator.target.txt ]]; then
+  if [[ -e $searchtool/percolator.target.psms.txt ]]; then
     echo Skipping crux percolator.
   else
     $CRUX percolator \
       --output-dir $searchtool \
       --feature-file T \
-      $db $searchtool 
+      $searchtool/search.pin.xml
   fi
 
-  $CRUX extract-columns $searchtool/percolator.target.txt "percolator q-value" > $searchtool/qvalues.percolator.txt
+  $CRUX extract-columns $searchtool/percolator.target.psms.txt "percolator q-value" > $searchtool/qvalues.percolator.txt
   echo replot \"$searchtool/qvalues.percolator.txt\" using 1:0 title \"percolator\" with lines >> $gnuplot
 
   # Run q-ranker.

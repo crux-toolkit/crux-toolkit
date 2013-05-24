@@ -412,6 +412,13 @@ class Match {
   bool getNullPeptide();
 
   /**
+   * sets whether the match is post process or not
+   */
+  void setPostProcess(
+    bool post_process ///< whether the match is post process or not
+  );
+
+  /**
    * sets the match b_y_ion info
    */
   void setBYIonInfo(

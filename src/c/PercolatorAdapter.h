@@ -74,6 +74,8 @@ public:
 protected:
     
   ProteinMatchCollection* collection_; ///< Collection containing all of the psm, peptide, and protein results.
+  vector<MatchCollection*> match_collections_made_; ///< MatchCollections created
+  vector<PostProcessProtein*> proteins_made_; ///< Proteins created
   
   /**
    * Calls Percolator's overridden Caller::writeXML_PSMs() and then
@@ -112,7 +114,7 @@ protected:
   /**
    * \returns a Crux peptide from the PSM
    */
-  static Crux::Peptide* extractPeptide(
+  Crux::Peptide* extractPeptide(
     PSMDescription* psm, ///< psm
     int charge_state, ///< charge state
     bool is_decoy ///< is psm a decoy?

@@ -211,6 +211,10 @@ int MatchCollection::addMatches(
                                               peptide_iterator, is_decoy);
 
   if( num_matches_added == 0 ){
+    if (do_sp_scoring) {
+      scored_type_[SP] = true;
+    }
+    scored_type_[XCORR] = true;
     return num_matches_added;
   }
 
@@ -2143,7 +2147,7 @@ bool MatchCollection::printSqt(
   
   // make sure top_scoring_sp_ has been set
   if( top_scoring_sp_ == NULL){
-    carp(CARP_WARNING, "Top scoring SP was not set.");
+    carp(CARP_DEBUG, "Top scoring SP was not set.");
   } else if( top_scoring_sp_->getRank(XCORR) > top_match ){
     // print the match with Sp rank==1 if its xcorr rank > top_match rank.  
     top_scoring_sp_->printSqt(output);

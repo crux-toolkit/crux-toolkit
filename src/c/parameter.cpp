@@ -543,7 +543,7 @@ void initialize_parameters(void){
 
   set_boolean_parameter("unique-peptides", true,
       "Generate peptides only once, even if they appear in more "
-      "than one protein (T,F).  Default=F.",
+      "than one protein (T,F).  Default=T.",
       "Available from command line or parameter file for "
       "crux-genereate-peptides. Returns one line per peptide "
       "when true or one line per peptide per protein occurence when false.  ",
@@ -1013,8 +1013,8 @@ void initialize_parameters(void){
   );
  
   set_boolean_parameter(
-    "unique-peptides",
-    true,
+    "only-psms",
+    false,
     "Do not remove redundant peptides, keep all PSMs and exclude peptide level probability.",
     "Available for crux percolator",
     "true"
@@ -3618,6 +3618,7 @@ bool set_hardklor_algorithm_type_parameter(
   result = add_or_update_hash(file_notes, name, filenotes);
   result = add_or_update_hash(for_users, name, foruser);
   result = add_or_update_hash(types, name, (void*)"HARDKLOR_ALGORITHM_TYPE_T");
+  free(value_str);
   return result;
   
 }

@@ -30,7 +30,8 @@ void PinXMLWriter::init() {
   ENZYME_T enzyme= get_enzyme_type_parameter("enzyme");
   enzyme_= enzyme_type_to_string(enzyme);
   precision_ = get_int_parameter("precision");
-  is_sp_=get_boolean_parameter("compute-sp");
+  is_sp_=get_boolean_parameter("compute-sp") ||
+         get_boolean_parameter("sqt-output");
   scan_number_=-1;
   decoy_prefix_=get_string_parameter("decoy-prefix");
   is_decoy_=false;
@@ -181,9 +182,6 @@ void PinXMLWriter::write(
   int top_rank
  ){
   carp(CARP_DEBUG,"Start writing PIN xml file!");
- //set SP 
- if(target_collection->getScoredType(SP))
-   is_sp_=true; 
 
   calculateDeltaCN(target_collection, decoys);
 
@@ -225,10 +223,9 @@ void PinXMLWriter::write(
   map<int, vector<Match*> > scan_to_matches;
   
  //set SP 
- if(target_collection->getScoredType(SP))
-   is_sp_=true;
+  is_sp_ = target_collection->getScoredType(SP);
   
-  MatchIterator target_match_iterator = MatchIterator(target_collection);  
+  MatchIterator target_match_iterator(target_collection);  
   while (target_match_iterator.hasNext()) {
     
     Match* match = target_match_iterator.next();
@@ -249,7 +246,7 @@ void PinXMLWriter::write(
     decoy_set != decoys.end(); 
     decoy_set++
   ) {
-    MatchIterator decoy_match_iterator = MatchIterator(*decoy_set);  
+    MatchIterator decoy_match_iterator(*decoy_set);  
     while (decoy_match_iterator.hasNext()){
       
       Match* match = decoy_match_iterator.next();
@@ -406,7 +403,8 @@ void PinXMLWriter:: printPSM(
   string id = getId(charge,is_decoy,scan_number,1); 
     
   FLOAT_T calculated_mph =
-    peptide->calcMass(get_mass_type_parameter("isotopic-mass")) + MASS_PROTON;
+    peptide->calcMass(get_mass_type_parameter("isotopic-mass")) + MASS_PROTON
+    + calcMassOfMods(peptide);
 
   /** TODO update:
    * calculatedMassToCharge -> calculatedMass
@@ -437,14 +435,14 @@ void PinXMLWriter::printFeatures(
   
   //Spectrum* spectrum= match->getSpectrum();
   int charge_state = match->getCharge();
-  bool charge1, charge2, charge3;
   SpectrumZState zstate= match->getZState ();
-  charge1=charge2=charge3=false;   
   bool enz_c=false; 
   bool enz_n=false;  
   Peptide* peptide=match->getPeptide(); 
   FLOAT_T obs_mass=match->getZState().getSinglyChargedMass();
-  FLOAT_T calc_mass=peptide->calcMass(get_mass_type_parameter("isotopic-mass"));
+  FLOAT_T calc_mass =
+    peptide->calcMass(get_mass_type_parameter("isotopic-mass"))
+    + calcMassOfMods(peptide);
   FLOAT_T dM=(obs_mass - calc_mass)/charge_state;
   
   char c_flank = peptide->getCTermFlankingAA();
@@ -460,18 +458,6 @@ void PinXMLWriter::printFeatures(
       ((sequence_last == 'K' || sequence_last == 'R') && c_flank != 'P'))
     enz_c =true; 
  
-  switch(charge_state){
-    case 1:
-      charge1=true;
-      break; 
-    case 2: 
-      charge2=true; 
-      break; 
-    case 3:
-      charge3=true; 
-      break; 
-  }
-  
   FLOAT_T ln_num_sp=match->getLnExperimentSize();
   FLOAT_T lnrSp=0.0; 
   if(match->getRank(SP)>0)  
@@ -529,32 +515,25 @@ void PinXMLWriter::printFeatures(
 
 void PinXMLWriter:: printPeptideSequence(Peptide* peptide){
   
-  // Get the modifications and convert them to XML for output
-  char* modified_sequence =
-    peptide->getModifiedSequenceWithMasses(MOD_MASSES_SEPARATE);
+  MODIFIED_AA_T* mod_seq = peptide->getModifiedAASequence();
+  AA_MOD_T** mod_list = NULL;
   stringstream mod_output;
-  int aa_read = 0;  // stores the number of AA read for location attribute
-  string mass_delta = ""; // stores the mass shift of the current mod
-  // Iterate over each character in the modified sequence
-  for (int i = 0; i < strlen(modified_sequence); ++i) {
-    char cur = modified_sequence[i];
-    if (cur == ',' || cur == ']') {  // Found end of modification
-      mod_output << "      <modification location=\"" << aa_read << "\""
-                    " monoisotopicMassDelta=\"" << mass_delta << "\">\n"
-                    "        <uniMod accession=\"0\"/>\n"
-                    "      </modification>\n";
-      mass_delta.clear();
-    } else if (cur == '-' && mass_delta == "") {
-      mass_delta = '-';
-    } else if (isdigit(cur) ||
-              (cur == '.' && mass_delta.find('.') == string::npos)) {
-      mass_delta += cur;
-    } else if (isalpha(cur)) {
-      ++aa_read;
+  mod_output << setprecision(get_int_parameter("mod-precision")) << fixed;
+  int total_mods = get_all_aa_mod_list(&mod_list);
+  for (size_t i = 0; mod_seq[i] != MOD_SEQ_NULL; ++i) {
+    for (size_t j = 0; j < total_mods; ++j) {
+      if (is_aa_modified(mod_seq[i], mod_list[j])) {
+        FLOAT_T mass_delta = aa_mod_get_mass_change(mod_list[j]);
+        mod_output << "      <modification location=\"" << i + 1 << "\""
+                      " monoisotopicMassDelta=\"" << mass_delta << "\">\n"
+                      "        <uniMod accession=\"0\"/>\n"
+                      "      </modification>\n";
+      }
     }
   }
-  delete modified_sequence;
-  char* unmodified_sequence = peptide -> getSequence();
+  free(mod_seq);
+
+  char* unmodified_sequence = peptide->getSequence();
   // Output peptide element with sequence and modifications
   fprintf(
     output_file_,
@@ -638,6 +617,20 @@ string PinXMLWriter::getId(
   psm_id<<fileId<<"_"<<scan_number<<"_";
   psm_id<<charge<<"_"<<rank;
   return psm_id.str();   
+}
+
+FLOAT_T PinXMLWriter::calcMassOfMods(Peptide* peptide) {
+  FLOAT_T total_mass_delta = 0;
+  MODIFIED_AA_T* mod_seq = peptide->getModifiedAASequence();
+  AA_MOD_T** mod_list = NULL;
+  int total_mods = get_all_aa_mod_list(&mod_list);
+  for (size_t i = 0; mod_seq[i] != MOD_SEQ_NULL; ++i)
+    for (size_t j = 0; j < total_mods; ++j)
+      if (is_aa_modified(mod_seq[i], mod_list[j]))
+        total_mass_delta += aa_mod_get_mass_change(mod_list[j]);
+
+  free(mod_seq);
+  return total_mass_delta;
 }
 
 bool PinXMLWriter::setProcessInfo(
