@@ -43,7 +43,8 @@ class PinXMLWriter{
   //write pin.xml file without spectrum, when reading matches form sqt or txt file
   void write (
     MatchCollection* target_collection,
-    std::vector<MatchCollection*>& decoy_psms
+    std::vector<MatchCollection*>& decoy_psms,
+    int top_rank
   );
   
   //header 
