@@ -213,7 +213,8 @@ void PinXMLWriter::write(
 /*creates a pin.xml file from two sqt, txt ,or pep.xml files*/
 void PinXMLWriter::write( 
   MatchCollection* target_collection,
-  vector<MatchCollection*>& decoys
+  vector<MatchCollection*>& decoys,
+  int top_rank
  ){
   carp(CARP_DEBUG,"Start writing PIN xml file!");
   
@@ -279,7 +280,7 @@ void PinXMLWriter::write(
     }
     for (unsigned idx = 0;idx < matches.size();idx++) {   
       bool is_decoy=isDecoy(matches[idx]);
-      if (matches[idx]->getRank(XCORR) <= 1){
+      if (matches[idx]->getRank(XCORR) <= top_rank){
         printPSM(matches[idx],matches[idx]->getSpectrum(),is_decoy);
       }
     }

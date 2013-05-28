@@ -134,7 +134,7 @@ int MakePinApplication::main(string target_path, string decoy_path) {
   //set process information 
   writer->setProcessInfo(target_path.c_str(), decoy_path.c_str());
  //write .pin.xml file 
-  writer->write(target_collection, decoys);
+  writer->write(target_collection, decoys, get_int_parameter("top-match"));
   writer->printFooter();
 
   //close file 

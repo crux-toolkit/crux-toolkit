@@ -564,10 +564,12 @@ void OutputFiles::printMatchesPinXml(
   
   if( spectrum ){
     
-    pin_xml_file_->write(target_matches, decoy_matches_array, spectrum,1);
+    pin_xml_file_->write(target_matches, decoy_matches_array,
+                         spectrum, matches_per_spec_);
   }
   else 
-    pin_xml_file_->write(target_matches, decoy_matches_array);
+    pin_xml_file_->write(target_matches, decoy_matches_array,
+                         matches_per_spec_);
    
 }
 
