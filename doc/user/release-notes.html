@@ -14,9 +14,11 @@
 
 <h3>Minor changes</h3>
 <ul>
-<li>When running <code>search-for-matches</code>, the <code>top-match</code>
-parameter now controls the worst rank PSM that will be written to PinXML
-files.</li>
+<li>
+Previously, the PinXML file produced
+by <code>search-for-matches</code> always contained a single PSM per
+charge/spectrum combination.  Now the <code>top-match</code> parameter
+controls how many PSMs are written to the PinXML file.</li>
 </ul>
 
 <h2>Version 1.40</h2> 
