@@ -34,6 +34,10 @@
 #include "CruxBullseyeApplication.h"
 #include "PercolatorApplication.h"
 #include "MakePinApplication.h"
+#include "TideIndexApplication.h"
+#include "TideReadSpectrumRecordsApplication.h"
+#include "TideResultsApplication.h"
+#include "TideSearchApplication.h"
 
 /**
  * The starting point for crux.  Prints a general usage statement when
@@ -51,11 +55,13 @@ int main(int argc, char** argv){
   CruxApplicationList applications("crux");
 
   applications.add(new CreateIndex());
+  applications.add(new TideIndexApplication());
 
   // search
   applications.add(new MatchSearch());
   applications.add(new SequestSearch());
   applications.add(new SearchForXLinks());
+  applications.add(new TideSearchApplication());
 
   // post-search
   applications.add(new ComputeQValues());
@@ -64,6 +70,8 @@ int main(int argc, char** argv){
   applications.add(new QRanker());
   applications.add(new Barista());
   applications.add(new SpectralCounts());
+  applications.add(new TideReadSpectrumRecordsApplication());
+  applications.add(new TideResultsApplication());
 
   // fasta/ms2 utilities
   applications.add(new PrintProcessedSpectra());

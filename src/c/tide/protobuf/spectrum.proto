@@ -1,0 +1,25 @@
+option optimize_for = SPEED;
+package pb;
+
+message Spectrum {
+  // For compactness, store m_z and intensity arrays separately, which allows
+  // [packed = true]. Conceptually, each peak has an m_z and a corresponding
+  // intensity. The arrays are expected to be the same size.
+
+  // Peaks are stored as ints, which are more compact than doubles, especially
+  // when small. They are interpreted as numerators of a fraction; the common
+  // denominator fields are given once for each spectrum, based on the precision
+  // of the data. Example: m/z value of 123.45 is represented as 12345/100.
+
+  // Actual peak_m_z values are expected to be strictly increasing, so we store
+  // the deltas of the numerators to keep the numbers smaller.
+  repeated int64 peak_m_z = 1 [packed = true];
+  repeated int64 peak_intensity = 2 [packed = true];
+  optional int32 peak_m_z_denominator = 3; // common denominator for all m_z's
+  optional int32 peak_intensity_denominator = 4; // common for all intensities
+
+  optional int32 spectrum_number = 5;
+  optional double precursor_m_z = 6;
+  optional double rtime = 8;
+  repeated int32 charge_state = 7 [packed = true]; // may as well use packed
+}
