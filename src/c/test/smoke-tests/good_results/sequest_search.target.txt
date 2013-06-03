@@ -1,10 +1,10 @@
 scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	sp score	sp rank	xcorr score	xcorr rank	b/y ions matched	b/y ions total	matches/spectrum	sequence	cleavage type	protein id	flanking aa
-14	2	500.4100	998.8027	1001.1503	0	57.969658	1	0.31442371	1	5	14	1	FHLELSQK	trypsin-full-digest	gi|6381999|ref|NP_009311.2|(226)	KD
-14	3	500.4100	1498.2026	1495.8149	0	34.453995	1	-0.15933563	1	7	44	1	VMFTTFYMITNK	trypsin-full-digest	gi|6382000|ref|NP_009314.2|(29)	RY
+14	2	500.4100	998.8027	1001.1503	0	53.925259	1	0.31442371	1	5	14	1	FHLELSQK	trypsin-full-digest	gi|6381999|ref|NP_009311.2|(226)	KD
+14	3	500.4100	1498.2026	1495.8149	0	29.959993	1	-0.15933563	1	7	44	1	VMFTTFYMITNK	trypsin-full-digest	gi|6382000|ref|NP_009314.2|(29)	RY
 15	2	488.8200	975.6227	973.0936	0	0	1	-0.052767735	1	0	16	1	SGATAYIYK	trypsin-full-digest	gi|6381999|ref|NP_009311.2|(257)	KA
-15	3	488.8200	1463.4326	1464.8112	0	23.350258	1	-0.094964653	1	6	44	1	QYLLLNIAYLLK	trypsin-full-digest	gi|6381999|ref|NP_009311.2|(292)	KL
+15	3	488.8200	1463.4326	1464.8112	0	21.721169	1	-0.094964653	1	6	44	1	QYLLLNIAYLLK	trypsin-full-digest	gi|6381999|ref|NP_009311.2|(292)	KL
 scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	sp score	sp rank	xcorr score	xcorr rank	b/y ions matched	b/y ions total	matches/spectrum	sequence	cleavage type	protein id	flanking aa	unshuffled sequence	decoy matches/spectrum
-14	2	500.4100	998.8027	1001.1503	0	20.184793	1	0.088464543	1	3	14	1	FQHSLLEK	trypsin-full-digest	rand_gi|6381999|ref|NP_009311.2|(226)	KD	FQHSLLEK	1
+14	2	500.4100	998.8027	1001.1503	0	18.77655	1	0.088464543	1	3	14	1	FQHSLLEK	trypsin-full-digest	rand_gi|6381999|ref|NP_009311.2|(226)	KD	FQHSLLEK	1
 14	3	500.4100	1498.2026	1495.8149	0	9.776268	1	-0.033651296	1	4	44	1	VYFTMTTIMFNK	trypsin-full-digest	rand_gi|6382000|ref|NP_009314.2|(29)	RY	VYFTMTTIMFNK	1
 15	2	488.8200	975.6227	973.0936	0	0.44468683	1	-0.13302602	1	1	16	1	SAYATGYIK	trypsin-full-digest	rand_gi|6381999|ref|NP_009311.2|(257)	KA	SAYATGYIK	1
-15	3	488.8200	1463.4326	1464.8112	0	9.7084961	1	-0.051158972	1	4	44	1	QILYLALYNLLK	trypsin-full-digest	rand_gi|6381999|ref|NP_009311.2|(292)	KL	QILYLALYNLLK	1
+15	3	488.8200	1463.4326	1464.8112	0	9.0311584	1	-0.051158972	1	4	44	1	QILYLALYNLLK	trypsin-full-digest	rand_gi|6381999|ref|NP_009311.2|(292)	KL	QILYLALYNLLK	1
