@@ -78,22 +78,12 @@ void Spectrum::FillPB(pb::Spectrum* spec) {
   spec->set_peak_m_z_denominator(m_z_denom);
   spec->set_peak_intensity_denominator(intensity_denom);
   uint64 last = 0;
-  int last_index = -1;
-  uint64 intensity_sum = 0;
   for (int i = 0; i < size; ++i) {
     uint64 val = uint64(peak_m_z_[i]*m_z_denom + 0.5);
-    CHECK(val >= last);
-    uint64 intensity = uint64(peak_intensity_[i]*intensity_denom + 0.5);
-    if (val == last) {
-      intensity_sum += intensity;
-      spec->set_peak_intensity(last_index, intensity_sum);
-    } else {
-      spec->add_peak_m_z(val - last);
-      last = val;
-      spec->add_peak_intensity(intensity);
-      ++last_index;
-      intensity_sum = intensity;
-    }
+    CHECK(val > last);
+    spec->add_peak_m_z(val - last);
+    last = val;
+    spec->add_peak_intensity(uint64(peak_intensity_[i]*intensity_denom + 0.5));
   }
 }
 
