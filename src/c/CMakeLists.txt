@@ -12,6 +12,7 @@ add_subdirectory(hardklor)
 add_subdirectory(posterior-error)
 add_subdirectory(qranker-barista)
 add_subdirectory(xlink)
+add_subdirectory(tide)
 
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 include_directories(.)
@@ -21,6 +22,7 @@ include_directories(hardklor)
 include_directories(qranker-barista)
 include_directories(posterior-error)
 include_directories(xlink)
+include_directories(tide/protoobj)
 include_directories(../..)
 include_directories(../external)
 include_directories(../external/include)
@@ -144,6 +146,10 @@ set (
   StatColumn.cpp
   SQTReader.cpp
   SQTWriter.cpp
+  TideIndexApplication.cpp
+  TideReadSpectrumRecordsApplication.cpp
+  TideResultsApplication.cpp
+  TideSearchApplication.cpp
   utils.cpp
 )
 
@@ -160,6 +166,7 @@ add_library(
   STATIC
   ${crux_lib_files}
 )
+add_dependencies(crux-support tide-support)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     set_property(
@@ -287,6 +294,9 @@ else(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     barista
     bullseye
     crux-support
+    tide-support
+    protobuf
+    gflags
     dl
     hardklor
     m

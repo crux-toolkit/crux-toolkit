@@ -1,0 +1,78 @@
+// Benjamin Diament
+// We place a header record at the top of every Tide-generated file
+// to indicate the settings and sources used to generate it.
+
+package pb;
+
+message Modification {
+  optional string amino_acids = 1;
+  optional double delta = 2;
+  optional int32 max_count = 3;
+}
+
+message ModTable {
+  repeated Modification variable_mod = 1;
+  repeated Modification static_mod = 2;
+  repeated double unique_deltas = 10;
+}
+
+message Header {
+  enum FileType {
+    RAW_PROTEINS = 0;
+    PEPTIDES = 1;
+    SPECTRA = 2;
+    PARAMS = 3;
+    MOD_TABLE = 4;
+    RESULTS = 5;
+    AUX_LOCATIONS = 6;
+  }
+
+  message Source { // represents a source file used in building current file.
+    optional string filename = 1;
+    optional Header header = 2; // either header or filetype should be given.
+    optional string filetype = 3;
+  }
+
+  message RawProteinsHeader {
+  }
+
+  message PeptidesHeader {
+    optional double min_mass = 3;
+    optional double max_mass = 4;
+    optional int32 min_length = 5;
+    optional int32 max_length = 6;
+    optional string enzyme = 7;
+    optional bool full_digestion = 8;
+    optional int32 max_missed_cleavages = 14;
+    optional bool monoisotopic_precursor = 13;
+
+    optional bool has_peaks = 10;
+    optional double downselect_fraction = 11;
+    optional ModTable mods = 12;
+  }
+
+  message SpectraHeader {
+    optional bool sorted = 2;
+  }
+  
+  message ResultsHeader {
+    optional double mass_window = 1;
+    optional int32 top_matches = 2;
+    optional PeptidesHeader peptides_header = 3;
+  }
+  
+  message AuxLocationsHeader {
+  }
+
+  repeated Source source = 1;
+
+  // The FileType should be indicated and one of the three header subfields
+  // should be included to correspond to the type.
+  required FileType file_type = 2;
+  optional RawProteinsHeader raw_proteins_header = 3;
+  optional PeptidesHeader peptides_header = 4;
+  optional SpectraHeader spectra_header = 5;
+  optional ResultsHeader results_header = 6;
+  optional AuxLocationsHeader aux_locs_header = 7;
+  optional string command_line = 8;
+}

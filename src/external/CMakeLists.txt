@@ -128,6 +128,34 @@ ExternalProject_Add(
 )
 endif(APPLE)
 
+ExternalProject_Add(
+  ProtocolBuffers
+  PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
+  URL http://protobuf.googlecode.com/files/protobuf-2.5.0.tar.bz2
+  URL_MD5 a72001a9067a4c2c4e0e836d0f92ece4
+  DOWNLOAD_DIR downloads
+  CONFIGURE_COMMAND
+    ${CMAKE_CURRENT_SOURCE_DIR}/build/src/ProtocolBuffers/configure
+    --prefix=${CMAKE_CURRENT_SOURCE_DIR}
+  BUILD_COMMAND make
+  INSTALL_COMMAND make install
+  BUILD_IN_SOURCE 1
+)
+
+ExternalProject_Add(
+  google-gflags
+  PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
+  URL http://gflags.googlecode.com/files/gflags-2.0.tar.gz
+  URL_MD5 e02268c1e90876c809ec0ffa095da864
+  DOWNLOAD_DIR downloads
+  CONFIGURE_COMMAND
+    ${CMAKE_CURRENT_SOURCE_DIR}/build/src/google-gflags/configure
+    --prefix=${CMAKE_CURRENT_SOURCE_DIR}
+  BUILD_COMMAND make
+  INSTALL_COMMAND make install
+  BUILD_IN_SOURCE 1
+)
+
 add_dependencies(XSD Proteowizard)
 add_dependencies(XSD XercesC)
 add_dependencies(percolator Proteowizard)

@@ -604,6 +604,10 @@ enum _command {
   SEQUEST_COMMAND,      ///< sequest-search
   QVALUE_COMMAND,       ///< compute-q-values
   PERCOLATOR_COMMAND,   ///< percolator
+  TIDE_INDEX_COMMAND,   ///< tide-index
+  TIDE_SEARCH_COMMAND,  ///< tide-search
+  TIDE_RESULTS_COMMAND, ///< tide-results
+  TIDE_READ_SPECTRUMRECORDS_COMMAND, ///< tide-read-spectrumrecords
   SPECTRAL_COUNTS_COMMAND, ///< spectral counts
   QRANKER_COMMAND,      ///< q-ranker
   BARISTA_COMMAND,      ///< barista
