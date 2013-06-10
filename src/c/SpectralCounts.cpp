@@ -470,7 +470,7 @@ void SpectralCounts::computeEmpai(){
  * \return The sum of unmodified b and y ions.
  */
 FLOAT_T SpectralCounts::sumMatchIntensity(Match* match,
-                                        SpectrumCollection* spectra)
+                                        Crux::SpectrumCollection* spectra)
 {
   FLOAT_T match_intensity = 0;
   char* peptide_seq = match->getSequence();
@@ -527,7 +527,7 @@ FLOAT_T SpectralCounts::sumMatchIntensity(Match* match,
  */
 void SpectralCounts::getPeptideScores()
 {
-  SpectrumCollection* spectra = NULL;
+  Crux::SpectrumCollection* spectra = NULL;
 
   // for SIN, parse out spectrum collection from ms2 fiel
   if( measure_ == MEASURE_SIN ){

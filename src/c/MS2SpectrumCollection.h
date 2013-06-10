@@ -17,7 +17,7 @@ typedef std::vector<Crux::Spectrum*>::iterator SpectrumIterator;
  * \class spectrum_collection 
  * \brief A object to group together one or more spectrum objects.
  */
-class MS2SpectrumCollection : public SpectrumCollection {
+class MS2SpectrumCollection : public Crux::SpectrumCollection {
 
 
  protected:

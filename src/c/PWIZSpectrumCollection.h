@@ -15,7 +15,7 @@
  * \class SpectrumCollection
  * \brief An abstract class for accessing spectra from a file.
  */
-class PWIZSpectrumCollection : public SpectrumCollection {
+class PWIZSpectrumCollection : public Crux::SpectrumCollection {
 
  protected:
   pwiz::msdata::MSDataFile* reader_;

@@ -3,8 +3,8 @@
  * $Revision: 1.52 $
  * \brief Object for representing one peptide.
  */
-#ifndef CRUXPEPTIDE_H 
-#define CRUXPEPTIDE_H
+#ifndef CRUX_PEPTIDE_H 
+#define CRUX_PEPTIDE_H
 
 #include <math.h>
 #include <stdio.h>

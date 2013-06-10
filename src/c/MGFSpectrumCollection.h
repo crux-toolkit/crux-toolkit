@@ -17,7 +17,7 @@
  * \class SpectrumCollection
  * \brief An abstract class for accessing spectra from a file.
  */
-class MGFSpectrumCollection : public SpectrumCollection {
+class MGFSpectrumCollection : public Crux::SpectrumCollection {
 
  protected:
   int cur_spec_number_;  ///< number spec sequentially in lieu of scan numbers

@@ -13,7 +13,7 @@
 
 class FilteredSpectrumChargeIterator {
  protected:
-  SpectrumCollection* spectrum_collection_;///< spectra to iterate over
+  Crux::SpectrumCollection* spectrum_collection_;///< spectra to iterate over
   bool has_next_;  ///< is there a spec that passes criteria
   int spectrum_index_; ///< The index of the current spectrum
   std::vector<SpectrumZState> zstates_;        ///< Array of possible zstates to search
@@ -44,7 +44,7 @@ class FilteredSpectrumChargeIterator {
  * \returns a SPECTRUM_ITERATOR_T object.
  */
   FilteredSpectrumChargeIterator(
-    SpectrumCollection* spectrum_collection
+    Crux::SpectrumCollection* spectrum_collection
   );
   
   /**

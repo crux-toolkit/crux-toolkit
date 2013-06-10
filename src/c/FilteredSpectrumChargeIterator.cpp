@@ -81,7 +81,7 @@ void FilteredSpectrumChargeIterator::queueNextSpectrum() {
  * \returns a SPECTRUM_ITERATOR_T object.
  */
 FilteredSpectrumChargeIterator::FilteredSpectrumChargeIterator(
-  SpectrumCollection* spectrum_collection
+  Crux::SpectrumCollection* spectrum_collection
 ) {
 
   spectrum_collection_ = spectrum_collection;  

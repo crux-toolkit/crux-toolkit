@@ -607,7 +607,7 @@ enum _command {
   TIDE_INDEX_COMMAND,   ///< tide-index
   TIDE_SEARCH_COMMAND,  ///< tide-search
   TIDE_RESULTS_COMMAND, ///< tide-results
-  TIDE_READ_SPECTRUMRECORDS_COMMAND, ///< tide-read-spectrumrecords
+  READ_SPECTRUMRECORDS_COMMAND, ///< read-spectrumrecords
   SPECTRAL_COUNTS_COMMAND, ///< spectral counts
   QRANKER_COMMAND,      ///< q-ranker
   BARISTA_COMMAND,      ///< barista

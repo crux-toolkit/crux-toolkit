@@ -134,6 +134,7 @@ set (
   SpectrumMatch.cpp
   PWIZSpectrumCollection.cpp
   q-value.cpp
+  ReadSpectrumRecordsApplication.cpp
   SequestSearch.cpp
   SortColumn.cpp
   Scorer.cpp
@@ -147,7 +148,6 @@ set (
   SQTReader.cpp
   SQTWriter.cpp
   TideIndexApplication.cpp
-  TideReadSpectrumRecordsApplication.cpp
   TideResultsApplication.cpp
   TideSearchApplication.cpp
   utils.cpp

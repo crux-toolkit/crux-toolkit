@@ -1,25 +1,36 @@
-#ifndef TIDEREADSPECTRUMRECORDSAPPLICATION_H
-#define TIDEREADSPECTRUMRECORDSAPPLICATION_H
+#ifndef READSPECTRUMRECORDSAPPLICATION_H
+#define READSPECTRUMRECORDSAPPLICATION_H
 
 #include "CruxApplication.h"
 
+#include <stdio.h>
+#include <iostream>
+#include <iomanip>
+#include <fstream>
+#include <string>
+#include <gflags/gflags.h>
+#include "tide/spectrum_collection.h"
+#include "tide/records.h"
+
 using namespace std;
 
-class TideReadSpectrumRecordsApplication : public CruxApplication {
+class ReadSpectrumRecordsApplication : public CruxApplication {
 
 protected:
+
+  void show(HeadedRecordReader& reader);
 
 public:
 
   /**
    * Constructor
    */
-  TideReadSpectrumRecordsApplication();
+  ReadSpectrumRecordsApplication();
 
   /**
    * Destructor
    */
-  ~TideReadSpectrumRecordsApplication();
+  ~ReadSpectrumRecordsApplication();
 
   /**
    * Main method
