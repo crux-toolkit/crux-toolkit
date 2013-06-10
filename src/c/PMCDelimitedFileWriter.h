@@ -21,8 +21,6 @@
 #include "Spectrum.h"
 #include "SpectrumMatch.h"
 
-using namespace Crux;
-using namespace boost;
 using namespace std;
 
 class PMCDelimitedFileWriter : public MatchFileWriter {

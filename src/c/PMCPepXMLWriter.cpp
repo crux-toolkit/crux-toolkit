@@ -1,5 +1,7 @@
 #include "PMCPepXMLWriter.h"
 
+using namespace Crux;
+
 /**
  * Writes the data in a ProteinMatchCollection to the currently open file
  */

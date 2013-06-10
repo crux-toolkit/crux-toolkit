@@ -17,7 +17,7 @@
 class SpectrumCollectionFactory {
 
  public:
-  static SpectrumCollection* create(const char* filename);
+  static Crux::SpectrumCollection* create(const char* filename);
 
 };
 

@@ -1,5 +1,7 @@
 #include "SQTWriter.h"
 
+using namespace Crux;
+
 SQTWriter::SQTWriter() {
 
 }

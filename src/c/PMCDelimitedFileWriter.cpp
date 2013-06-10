@@ -1,5 +1,8 @@
 #include "PMCDelimitedFileWriter.h"
 
+using namespace Crux;
+using namespace boost;
+
 /** 
  * Returns an empty PMCDelimitedFileWriter object
  */

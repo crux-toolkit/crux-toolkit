@@ -123,7 +123,7 @@ int SearchForXLinks::xhhcSearchMain() {
 
   carp(CARP_INFO, "Loading Spectra");
   Spectrum* spectrum = NULL;
-  SpectrumCollection* spectra = SpectrumCollectionFactory::create(ms2_file);
+  Crux::SpectrumCollection* spectra = SpectrumCollectionFactory::create(ms2_file);
   spectra->parse();
 
   FilteredSpectrumChargeIterator* spectrum_iterator =

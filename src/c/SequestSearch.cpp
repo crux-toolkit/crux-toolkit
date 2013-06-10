@@ -98,7 +98,7 @@ int SequestSearch::main(int argc,   ///< number of cmd line tokens
   const char* ms2_file = get_string_parameter_pointer("ms2 file");
 
   // open ms2 file
-  SpectrumCollection* spectra = SpectrumCollectionFactory::create(ms2_file);
+  Crux::SpectrumCollection* spectra = SpectrumCollectionFactory::create(ms2_file);
 
   // parse the ms2 file for spectra
   carp(CARP_INFO, "Reading in ms2 file %s", ms2_file);

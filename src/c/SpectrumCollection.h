@@ -4,8 +4,8 @@
  * CREATE DATE: 14 April 2011
  * \brief An abstract class for accessing spectra from a file.
  */
-#ifndef SPECTRUM_COLLECTION_H
-#define SPECTRUM_COLLECTION_H
+#ifndef CRUX_SPECTRUM_COLLECTION_H
+#define CRUX_SPECTRUM_COLLECTION_H
 
 #include <stdio.h>
 #include "objects.h"
@@ -17,9 +17,11 @@
  * \class SpectrumCollection
  * \brief An abstract class for accessing spectra from a file.
  */
+namespace Crux {
+
 class SpectrumCollection {
 
- friend class FilteredSpectrumChargeIterator;
+ friend class ::FilteredSpectrumChargeIterator;
 
  protected:
   std::vector<Crux::Spectrum*> spectra_;  ///< spectra from the file
@@ -131,6 +133,8 @@ class SpectrumCollection {
    */
   bool getIsParsed();
 };
+
+}  // namespace Crux
 
 /*
  * Local Variables:

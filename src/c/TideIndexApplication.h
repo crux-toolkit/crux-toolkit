@@ -3,6 +3,17 @@
 
 #include "CruxApplication.h"
 
+#include <sys/stat.h>
+#include <unistd.h>
+#include <errno.h>
+#include <gflags/gflags.h>
+#include "header.pb.h"
+#include "tide/records.h"
+#include "tide/peptide.h"
+#include "tide/theoretical_peak_set.h"
+#include "tide/abspath.h"
+#include "crux-utils.h"
+
 using namespace std;
 
 class TideIndexApplication : public CruxApplication {

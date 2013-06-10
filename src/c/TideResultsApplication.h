@@ -3,6 +3,10 @@
 
 #include "CruxApplication.h"
 
+#include <fstream>
+#include "tide/abspath.h"
+#include "tide/results_writer.h"
+
 using namespace std;
 
 class TideResultsApplication : public CruxApplication {

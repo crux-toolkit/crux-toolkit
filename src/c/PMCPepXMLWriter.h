@@ -11,7 +11,6 @@
 #include "Spectrum.h"
 #include "SpectrumMatch.h"
 
-using namespace Crux;
 using namespace std;
 
 class PMCPepXMLWriter : public PepXMLWriter {
