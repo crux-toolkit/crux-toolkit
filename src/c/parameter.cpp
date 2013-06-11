@@ -1102,13 +1102,6 @@ void initialize_parameters(void){
     "true"
   );
   // **** tide options ****
-  set_int_parameter("max-missed-cleavages", 0, 0, BILLION,
-    "Maximum number of missed cleavages per peptide to allow in enzymatic "
-    "digestion. "
-    "Default 0",
-    "Available for tide-index",
-    "true"
-  );
   set_string_parameter("peptides", "",
     "Specify the name of the output peptide index.",
     "Available for tide-index",
