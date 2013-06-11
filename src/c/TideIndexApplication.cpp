@@ -33,7 +33,7 @@ int TideIndexApplication::main(int argc, char** argv) {
   const char* option_list[] = {
     "enzyme",
     "digestion",
-    "max-missed-cleavages",
+    "missed-cleavages",
     "max-length",
     "max-mass",
     "min-length",
@@ -72,7 +72,7 @@ int TideIndexApplication::main(int argc, char** argv) {
     carp(CARP_FATAL, "'digestion' must be 'full-digest' or 'partial-digest'");
   }
   FLAGS_digestion = digest_type_to_string(digestion);
-  FLAGS_max_missed_cleavages = get_int_parameter("max-missed-cleavages");
+  FLAGS_max_missed_cleavages = get_int_parameter("missed-cleavages");
   FLAGS_max_length = get_int_parameter("max-length");
   FLAGS_max_mass = get_double_parameter("max-mass");
   FLAGS_min_length = get_int_parameter("min-length");
