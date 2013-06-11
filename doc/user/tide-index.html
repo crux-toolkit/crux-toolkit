@@ -99,57 +99,57 @@ that were printed to the screen during execution.</li>
 <ul>
 
 <li>
-<code>--enzyme=&lt;string&gt;</code> &ndash; Specify the enzyme used
+<code>--enzyme &lt;string&gt;</code> &ndash; Specify the enzyme used
 to digest the proteins <i>in silico</i>.  Available enzymes include
 trypsin, chymotrypsin, elastase, clostripain, cyanogen-bromide,
 idosobenzoate, proline-endopeptidase, staph-protease,
 modified-chymotrypsin, elastase-trypsin-chymotrypsin and aspn.
 Specifying <code>--enzyme=none</code> yields a non-enzymatic
 digest.  <b>Warning:</b> the resulting index may be quite large.
-Default=<code>none</code>.</li>
+Default=<code>trypsin</code>.</li>
 
 <li>
-<code>--digestion=full-digest|partial-digest</code> &ndash; Specify
+<code>--digestion &lt;full-digest|partial-digest&gt;</code> &ndash; Specify
 whether every peptide in the database must have two enzymatic termini
 (<code>full-digest</code>) or if peptides with only one enzymatic
 terminus are also included (<code>partial-digest</code>).
 Default=<code>full-digest</code></li>
 
 <li>
-<code>--max_missed_cleavages</code> &ndash; Maximum number of missed cleavages
-per peptide to allow in enzymatic digestion.  If this option is not specified,
-then missed cleavages are not allowed.</li>
+<code>--missed-cleavages &lt;integer&gt;</code> &ndash; Maximum number of missed
+cleavages per peptide to allow in enzymatic digestion.  If this option is not
+specified, then missed cleavages are not allowed.</li>
 
 <li>
-<code>--max_length=&lt;integer&gt;</code> &ndash; Specify the maximum
+<code>--max-length &lt;integer&gt;</code> &ndash; Specify the maximum
 length of the peptides included in the index.  Default=50.</li>
 
 <li>
-<code>--max_mass=&lt;integer&gt;</code> &ndash; Specify the maximum
+<code>--max-mass &lt;integer&gt;</code> &ndash; Specify the maximum
 monoisotopic mass (in Da) of the peptides included in the index.
 Default=7200.</li>
 
 <li>
-<code>--min_length=&lt;integer&gt;</code> &ndash; Specify the minimum
+<code>--min-length &lt;integer&gt;</code> &ndash; Specify the minimum
 length of the peptides included in the index.  Default=6.</li>
 
 <li>
-<code>--min_mass=&lt;integer&gt;</code> &ndash; Specify the minimum
+<code>--min-mass &lt;integer&gt;</code> &ndash; Specify the minimum
 monoisotopic mass (in Da) of the peptides included in the index.
 Default=200.</li>
 
 <li>
-<code>--monoisotopic_precursor</code> &ndash; Use monoisotopic
+<code>--monoisotopic-precursor &lt;T|F&gt;</code> &ndash; Use monoisotopic
 precursor masses rather than average mass (default) for
 precursor.
 </li>
 
 <li>
-<code>--mods_spec</code> &ndash; Expression for static and variable
+<code>--mods-spec &lt;string&gt;</code> &ndash; Expression for static and variable
       mass modifications to include. Specify a comma-separated list of
       modification specifications of the form:
 
-      <p><code>--mods_spec=C+57.02146,2M+15.9949,1STY+79.966331</code>,...
+      <p><code>--mods-spec C+57.02146,2M+15.9949,1STY+79.966331</code>,...
 
       <p>The general form of a modification specification has 3
       components, as exemplified
@@ -191,10 +191,10 @@ precursor.
 <li>
 <code>--output-dir &lt;filename&gt;</code> &ndash; 
 The name of the directory where output files will be created.
-Default = crux-out.</li>
+Default = crux-output.</li>
 
 <li>
-<code>--overwrite T|F</code> &ndash;
+<code>--overwrite &lt;T|F&gt;</code> &ndash;
 Replace existing files if true (T) or fail when trying to overwrite a
 file if false (F). Default =  F.</li>
 
