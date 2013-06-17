@@ -1102,16 +1102,6 @@ void initialize_parameters(void){
     "true"
   );
   // **** tide options ****
-  set_string_parameter("peptides", "",
-    "Specify the name of the output peptide index.",
-    "Available for tide-index",
-    "true"
-  );
-  set_string_parameter("proteins", "",
-    "Specify the name of the output protein index.",
-    "Available for tide-index",
-    "true"
-  );
   set_boolean_parameter("monoisotopic-precursor", false,
     "Use monoisotopic precursor masses rather than average mass for precursor. "
     "Default F",
