@@ -1,10 +1,11 @@
+#include <cstdio>
+#include "carp.h"
+#include "CarpStreamBuf.h"
 #include "TideIndexApplication.h"
 
 #include "tide/records_to_vector-inl.h"
 
 #include "tide/index_settings.cc"
-
-#include "carp.h"
 
 extern void TranslateFastaToPB(const string& fasta_filename,
                   			       const string& proteins_filename,
@@ -16,7 +17,6 @@ extern bool MakePeptides(pb::Header* header,
 extern void AddTheoreticalPeaks(const vector<const pb::Protein*>& proteins,
                         				const string& input_filename,
                         				const string& output_filename);
-//extern void SettingsFromFlags(pb::Header* header);
 extern void AddMods(HeadedRecordReader* reader,
                     string out_file,
             		    const pb::Header& header,
@@ -38,64 +38,97 @@ int TideIndexApplication::main(int argc, char** argv) {
     "max-mass",
     "min-length",
     "min-mass",
-    "peptides",
-    "proteins",
     "monoisotopic-precursor",
-    "mods-spec"
+    "mods-spec",
+    "output-dir",
+    "overwrite",
+    "parameter-file",
+    "verbosity"
   };
+
+  // Crux command line parsing
   int num_options = sizeof(option_list) / sizeof(char*);
   const char* arg_list[] = {
-    "protein fasta file"
+    "protein fasta file",
+    "index name"
   };
   int num_args = sizeof(arg_list) / sizeof(char*);
   initialize(arg_list, num_args, option_list, num_options, argc, argv);
 
   carp(CARP_INFO, "Running tide-index...");
 
+  // Build command line string
   string cmd_line = "crux tide-index";
   for (int i = 1; i < argc; ++i) {
     cmd_line += " ";
     cmd_line += argv[i];
   }
 
+  // Set up output paths
   string fasta = get_string_parameter_pointer("protein fasta file");
+  string index = get_string_parameter_pointer("index name");
+  bool overwrite = get_boolean_parameter("overwrite");
 
+  if (!file_exists(fasta)) {
+    carp(CARP_FATAL, "Fasta file %s does not exist", fasta.c_str());
+  }
+
+  string out_proteins = index + "/" + "protix";
+  string out_peptides = index + "/" + "pepix";
+  string out_aux = index + "/" + "auxlocs";
+  string modless_peptides = out_peptides + ".nomods.tmp";
+  string peakless_peptides = out_peptides + ".nopeaks.tmp";
+
+  if (create_output_directory(index.c_str(), overwrite) != 0) {
+    carp(CARP_FATAL, "Error creating index directory");
+  } else if (file_exists(out_proteins) ||
+             file_exists(out_peptides) ||
+             file_exists(out_aux)) {
+    if (overwrite) {
+      carp(CARP_DEBUG, "Cleaning old index file(s)");
+      remove(out_proteins.c_str());
+      remove(out_peptides.c_str());
+      remove(out_aux.c_str());
+      remove(modless_peptides.c_str());
+      remove(peakless_peptides.c_str());
+    } else {
+      carp(CARP_FATAL, "Index file(s) already exist, use --overwrite T or a "
+                       "different index name");
+    }
+  }
+
+  // Set up parameters
   string enzyme = enzyme_type_to_string(get_enzyme_type_parameter("enzyme"));
-  if (enzyme == "no-enzyme")
+  if (enzyme == "no-enzyme") {
     enzyme = "none";
-  FLAGS_enzyme = enzyme;
-
+  }
   DIGEST_T digestion = get_digest_type_parameter("digestion");
   if (enzyme == "none" && digestion == NON_SPECIFIC_DIGEST) {
     digestion = FULL_DIGEST;
   } else if (digestion != FULL_DIGEST && digestion != PARTIAL_DIGEST) {
     carp(CARP_FATAL, "'digestion' must be 'full-digest' or 'partial-digest'");
   }
+
+  // Set tide-index flags
+  FLAGS_enzyme = enzyme;
   FLAGS_digestion = digest_type_to_string(digestion);
   FLAGS_max_missed_cleavages = get_int_parameter("missed-cleavages");
   FLAGS_max_length = get_int_parameter("max-length");
   FLAGS_max_mass = get_double_parameter("max-mass");
   FLAGS_min_length = get_int_parameter("min-length");
   FLAGS_min_mass = get_double_parameter("min-mass");
-
-  string out_proteins = get_string_parameter_pointer("proteins");
-  if (out_proteins.empty())
-    out_proteins = fasta + ".protix";
-  string out_peptides = get_string_parameter_pointer("peptides");
-  if (out_peptides.empty())
-    out_peptides = fasta + ".pepix";
-  string out_aux = fasta + ".auxlocs";
-
   FLAGS_monoisotopic_precursor = get_boolean_parameter("monoisotopic-precursor");
   FLAGS_mods_spec = get_string_parameter_pointer("mods-spec");
 
+  // Reroute stderr
+  CarpStreamBuf buffer;
+  streambuf* old = cerr.rdbuf();
+  cerr.rdbuf(&buffer);
+
+  // Start tide-index
   pb::Header raw_proteins_header;
-  if (file_exists(out_proteins)) {
-    HeadedRecordReader reader(out_proteins, &raw_proteins_header);
-  } else {
-    carp(CARP_INFO, "Reading %s", fasta.c_str());
-    TranslateFastaToPB(fasta, out_proteins, &cmd_line, &raw_proteins_header);
-  }
+  carp(CARP_INFO, "Reading %s", fasta.c_str());
+  TranslateFastaToPB(fasta, out_proteins, &cmd_line, &raw_proteins_header);
 
   pb::Header header_with_mods;
   SettingsFromFlags(&header_with_mods);
@@ -111,31 +144,28 @@ int TideIndexApplication::main(int argc, char** argv) {
   del->mutable_variable_mod()->Clear();
   del->mutable_unique_deltas()->Clear();
 
-  string modless_peptides = out_peptides + ".nomods.tmp";
-  string peakless_peptides = out_peptides + ".nopeaks.tmp";
   bool need_mods = header_with_mods.peptides_header().mods().variable_mod_size() > 0;
   string basic_peptides = need_mods ? modless_peptides : peakless_peptides;
 
-  if (!file_exists(basic_peptides) || !file_exists(out_aux)) {
-    carp(CARP_INFO, "Computing unmodified peptides...");
-    MakePeptides(&header_no_mods, basic_peptides, out_aux);
-  }
+  carp(CARP_INFO, "Computing unmodified peptides...");
+  MakePeptides(&header_no_mods, basic_peptides, out_aux);
 
   vector<const pb::Protein*> proteins;
   if (!ReadRecordsToVector<pb::Protein>(&proteins, out_proteins)) {
     carp(CARP_FATAL, "Error reading proteins file");
   }
 
-  if (need_mods && !file_exists(peakless_peptides)) {
+  if (need_mods) {
     carp(CARP_INFO, "Computing modified peptides...");
-    HeadedRecordReader reader(modless_peptides, NULL, 1024 << 10); // 1024kb,convert to bytes = default bufsize
+    HeadedRecordReader reader(modless_peptides, NULL, 1024 << 10); // 1024kb buffer
     AddMods(&reader, peakless_peptides, header_with_mods, proteins);
   }
 
-  if (!file_exists(out_peptides)) {
-    carp(CARP_INFO, "Precomputing theoretical spectra...");
-    AddTheoreticalPeaks(proteins, peakless_peptides, out_peptides);
-  }
+  carp(CARP_INFO, "Precomputing theoretical spectra...");
+  AddTheoreticalPeaks(proteins, peakless_peptides, out_peptides);
+
+  // Recover stderr
+  cerr.rdbuf(old);
 
   return 0;
 }
