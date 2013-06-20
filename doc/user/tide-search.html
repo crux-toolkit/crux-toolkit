@@ -129,6 +129,13 @@ Subsequent runs of <code>crux tide-search</code> will execute more
 quickly if provided with the spectra in binary format.</li>
 
 <li>
+<code>--compute-sp &lt;T|F&gt;</code> &ndash; Compute the preliminary score Sp
+for all candidate peptides. This option is recommended if results are to be
+analyzed by <code>percolator</code> or <code>q-ranker</code>. If <code>
+sqt-output</code> is enabled, <code>compute-sp</code> is automatically enabled
+and cannot be overridden. Default = F.</li>
+
+<li>
 <code>--txt-output &lt;T|F&gt;</code> &ndash; Output a tab-delimited
 results file to the output directory. Default = T.</li>
 
