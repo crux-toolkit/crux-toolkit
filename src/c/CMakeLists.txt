@@ -143,12 +143,13 @@ set (
   SpectrumCollection.cpp
   SpectrumCollectionFactory.cpp
   Spectrum.cpp
+  SpectrumRecordWriter.cpp
   SpectrumZState.cpp
   StatColumn.cpp
   SQTReader.cpp
   SQTWriter.cpp
   TideIndexApplication.cpp
-  TideResultsApplication.cpp
+  TideMatchSet.cpp
   TideSearchApplication.cpp
   utils.cpp
 )

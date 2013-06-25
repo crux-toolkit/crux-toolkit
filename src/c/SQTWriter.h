@@ -22,6 +22,7 @@ class SQTWriter {
   void closeFile();
 
   void writeHeader(
+    string database,
     int num_proteins,
     bool is_decoy = false
   );

@@ -82,6 +82,10 @@ COMMAND_T ReadSpectrumRecordsApplication::getCommand() {
   return READ_SPECTRUMRECORDS_COMMAND;
 }
 
+bool ReadSpectrumRecordsApplication::hidden() {
+  return true; 
+}
+
 /*
  * Local Variables:
  * mode: c

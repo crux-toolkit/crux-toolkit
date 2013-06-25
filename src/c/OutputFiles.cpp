@@ -78,7 +78,8 @@ OutputFiles::OutputFiles(CruxApplication* program_name)
   
   // sequest and search creates sqt files
   if( command == SEQUEST_COMMAND ||
-      (command == SEARCH_COMMAND && get_boolean_parameter("sqt-output")) ){
+      (command == SEARCH_COMMAND && get_boolean_parameter("sqt-output")) ||
+      (command == TIDE_SEARCH_COMMAND && get_boolean_parameter("sqt-output")) ){
     createFiles(&sqt_file_array_, 
                  output_directory, 
                  fileroot, 
@@ -409,8 +410,18 @@ void OutputFiles::writeHeaders(int num_proteins, bool isMixedTargetDecoy){
     }
 
     if( sqt_file_array_ ){
+      string database = get_string_parameter_pointer("protein-database");
+      if (file_exists(database.c_str())) {
+        if (is_directory(database.c_str())) {
+          char* fasta_name  = Index::getBinaryFastaName(database.c_str());
+          database = fasta_name;
+          free(fasta_name);
+        }
+      } else {
+        database = get_string_parameter_pointer("tide database index");
+      }
       MatchCollection::printSqtHeader(sqt_file_array_[file_idx],
-                       tag, num_proteins); 
+                       tag, database, num_proteins); 
     }
     
     if ( xml_file_array_){

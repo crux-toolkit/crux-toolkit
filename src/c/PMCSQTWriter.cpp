@@ -5,6 +5,7 @@
  */
 void PMCSQTWriter::write(
   ProteinMatchCollection* collection, ///< collection to be written
+  string database, ///< the database name
   int top_match ///< the top matches to output
 ) {
   if (!file_) {
@@ -19,7 +20,7 @@ void PMCSQTWriter::write(
     ++num_proteins;
   }
 
-  writeHeader(num_proteins);
+  writeHeader(database, num_proteins);
   writePSMs(collection, top_match);
 }
 

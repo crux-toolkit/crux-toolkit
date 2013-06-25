@@ -38,6 +38,7 @@ Spectrum::Spectrum() :
    min_peak_mz_(0),
    max_peak_mz_(0),
    total_energy_(0),
+   lowest_sp_(0),
    has_peaks_(false),
    sorted_by_mz_(false),
    sorted_by_intensity_(false),
@@ -215,9 +216,9 @@ void Spectrum::printSqt(
           "server", // FIXME dummy <server>
           get_int_parameter("mass-precision"),
           zstate.getSinglyChargedMass(), //this is used in search
-          0.0, // FIXME dummy <total intensity>
+          total_energy_,
           get_int_parameter("precision"),
-          0.0, // FIXME dummy <lowest sp>
+          lowest_sp_,
           num_matches);
 }
 
@@ -1300,6 +1301,22 @@ int Spectrum::getNumPeaks()
 double Spectrum::getTotalEnergy()
 {
   return total_energy_;
+}
+
+/**
+ * Sets the total ion current.
+ */
+void Spectrum::setTotalEnergy(FLOAT_T tic)
+{
+  total_energy_ = tic;
+}
+
+/**
+ * Sets the lowest Sp score.
+ */
+void Spectrum::setLowestSp(FLOAT_T sp)
+{
+  lowest_sp_ = sp;
 }
 
 /**

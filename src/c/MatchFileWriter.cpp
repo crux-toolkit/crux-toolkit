@@ -213,6 +213,15 @@ void MatchFileWriter::addColumnNames(CruxApplication* application,
     }
     break;
 
+  case TIDE_SEARCH_COMMAND: ///< tide-search
+    if (get_boolean_parameter("compute-sp") || get_boolean_parameter("sqt-output")) {
+      addColumnName(SP_SCORE_COL);
+      addColumnName(SP_RANK_COL);
+      addColumnName(BY_IONS_MATCHED_COL);
+      addColumnName(BY_IONS_TOTAL_COL);
+    }
+    break;
+
   case SEQUEST_COMMAND:      ///< sequest-search
     if( get_int_parameter("max-rank-preliminary") > 0 ){
       addColumnName(SP_SCORE_COL);
