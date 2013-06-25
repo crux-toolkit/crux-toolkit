@@ -36,7 +36,6 @@
 #include "MakePinApplication.h"
 #include "TideIndexApplication.h"
 #include "ReadSpectrumRecordsApplication.h"
-#include "TideResultsApplication.h"
 #include "TideSearchApplication.h"
 
 /**
@@ -59,9 +58,9 @@ int main(int argc, char** argv){
 
   // search
   applications.add(new MatchSearch());
+  applications.add(new TideSearchApplication());
   applications.add(new SequestSearch());
   applications.add(new SearchForXLinks());
-  applications.add(new TideSearchApplication());
 
   // post-search
   applications.add(new ComputeQValues());
@@ -71,7 +70,6 @@ int main(int argc, char** argv){
   applications.add(new Barista());
   applications.add(new SpectralCounts());
   applications.add(new ReadSpectrumRecordsApplication());
-  applications.add(new TideResultsApplication());
 
   // fasta/ms2 utilities
   applications.add(new PrintProcessedSpectra());

@@ -16,6 +16,7 @@ class PMCSQTWriter : public SQTWriter {
    */
   void write(
     ProteinMatchCollection* collection, ///< collection to be written
+    string database, ///< the database name
     int top_match ///< the top matches to output
   );
 

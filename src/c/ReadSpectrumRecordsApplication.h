@@ -53,6 +53,8 @@ public:
   virtual bool needsOutputDirectory();
 
   virtual COMMAND_T getCommand();
+
+  virtual bool hidden();
   
 };
 

@@ -1399,6 +1399,11 @@ int MatchCollection::getMatchTotal()
   return match_total_;
 }
 
+void MatchCollection::setExperimentSize(int size)
+{
+  experiment_size_ = size;
+}
+
 /**
  * \returns The total number of peptides searched for this spectrum,
  * target peptides for a target collection or decoy peptides for a
@@ -1722,6 +1727,7 @@ void MatchCollection::printXmlHeader(
 void MatchCollection::printSqtHeader(
  FILE* output, 
  const char* type, 
+ string database,
  int num_proteins){  
   if( output == NULL ){
     return;
@@ -1742,16 +1748,7 @@ void MatchCollection::printSqtHeader(
   fprintf(output, "H\tStartTime\t%s", ctime(&hold_time));
   fprintf(output, "H\tEndTime                               \n");
 
-  char* database = get_string_parameter("protein-database");
-  bool use_index = is_directory(database);
-
-  if( use_index == true ){
-    char* fasta_name  = Index::getBinaryFastaName(database);
-    free(database);
-    database = fasta_name;
-  }
-  fprintf(output, "H\tDatabase\t%s\n", database);
-  free(database);
+  fprintf(output, "H\tDatabase\t%s\n", database.c_str());
 
   if(decoy){
   fprintf(output, "H\tComment\tDatabase shuffled; these are decoy matches\n");
@@ -1860,12 +1857,13 @@ void MatchCollection::printSqtHeader(
   free(dig_str);
 
   // write a comment that says what the scores are
-  fprintf(output, "H\tLine fields: S, scan number, scan number,"
-          "charge, 0, precursor neutral mass, 0, 0, number of matches\n");
+  fprintf(output, "H\tLine fields: S, scan number, scan number, "
+          "charge, 0, server, experimental mass, total ion intensity, "
+          "lowest Sp, number of matches\n");
 
   fprintf(output, "H\tLine fields: M, rank by xcorr score, rank by sp score, "
           "peptide mass, deltaCn, xcorr score, sp score, number ions matched, "
-          "total ions compared, sequence\n");
+          "total ions compared, sequence, validation status\n");
 }
 
 /**
@@ -2089,6 +2087,9 @@ bool MatchCollection::printXml(
        count, match_total_);
 
   delete match_iterator;
+  delete scores_computed;
+  delete scores;
+  delete ranks;
 
   return true;
 }

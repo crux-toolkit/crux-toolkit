@@ -26,6 +26,7 @@ void SQTWriter::closeFile() {
 }
 
 void SQTWriter::writeHeader(
+  string database,
   int num_proteins,
   bool is_decoy
 ) {
@@ -37,7 +38,6 @@ void SQTWriter::writeHeader(
 
   time_t hold_time = time(0);
 
-  string database = get_string_parameter_pointer("protein-database");
   if (file_exists(database.c_str()) && is_directory(database.c_str())) {
     database = Index::getBinaryFastaName(database.c_str());
   }
@@ -166,7 +166,7 @@ void SQTWriter::writeHeader(
 
   // write a comment that says what the scores are
   *file_ << "H\tLine fields: S, scan number, scan number,"
-         << "charge, 0, precursor mass, 0, 0, number of matches" << endl
+         << "charge, 0, server, precursor mass, 0, 0, number of matches" << endl
          << "H\tLine fields: M, rank by xcorr score, rank by sp score, "
          << "peptide mass, deltaCn, xcorr score, sp score, number ions matched, "
          << "total ions compared, sequence" << endl;
@@ -185,13 +185,13 @@ void SQTWriter::writeSpectrum(
          << "\t" << spectrum->getFirstScan()
          << "\t" << spectrum->getLastScan()
          << "\t" << z_state.getCharge()
-         << "\t0.0"
+         << "\t0.0" // process time
          << "\tserver"
-         << "\t" << get_int_parameter("mass-precision")
-         << "\t" << z_state.getSinglyChargedMass()
-         << "\t0.0"
-         << "\t" << get_int_parameter("precision")
-         << "\t0.0"
+         << "\t" << setprecision(get_int_parameter("mass-precision"))
+         << z_state.getSinglyChargedMass()
+         << "\t0.0" // tic
+         << "\t" << setprecision(get_int_parameter("precision"))
+         << "0.0" // lowest sp
          << "\t" << num_matches
          << endl;
 }
@@ -236,12 +236,11 @@ void SQTWriter::writePSM(
   *file_ << "M"
          << "\t" << xcorr_rank
          << "\t" << sp_rank
-         << "\t" << get_int_parameter("mass-precision")
-         << "\t" << peptide->getPeptideMass() + MASS_PROTON
+         << "\t" << setprecision(get_int_parameter("mass-precision"))
+         << peptide->getPeptideMass() + MASS_PROTON
          << "\t" << delta_cn
-         << "\t" << get_int_parameter("precision")
-         << "\t" << xcorr_score
-         << "\t" << get_int_parameter("precision")
+         << "\t" << setprecision(get_int_parameter("precision"))
+         << xcorr_score
          << "\t" << sp_score
          << "\t" << b_y_matched
          << "\t" << b_y_total

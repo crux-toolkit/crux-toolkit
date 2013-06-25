@@ -3,9 +3,8 @@
 #include "CarpStreamBuf.h"
 #include "TideIndexApplication.h"
 
+#include "tide/modifications.h"
 #include "tide/records_to_vector-inl.h"
-
-#include "tide/index_settings.cc"
 
 extern void TranslateFastaToPB(const string& fasta_filename,
                   			       const string& proteins_filename,
@@ -97,29 +96,6 @@ int TideIndexApplication::main(int argc, char** argv) {
     }
   }
 
-  // Set up parameters
-  string enzyme = enzyme_type_to_string(get_enzyme_type_parameter("enzyme"));
-  if (enzyme == "no-enzyme") {
-    enzyme = "none";
-  }
-  DIGEST_T digestion = get_digest_type_parameter("digestion");
-  if (enzyme == "none" && digestion == NON_SPECIFIC_DIGEST) {
-    digestion = FULL_DIGEST;
-  } else if (digestion != FULL_DIGEST && digestion != PARTIAL_DIGEST) {
-    carp(CARP_FATAL, "'digestion' must be 'full-digest' or 'partial-digest'");
-  }
-
-  // Set tide-index flags
-  FLAGS_enzyme = enzyme;
-  FLAGS_digestion = digest_type_to_string(digestion);
-  FLAGS_max_missed_cleavages = get_int_parameter("missed-cleavages");
-  FLAGS_max_length = get_int_parameter("max-length");
-  FLAGS_max_mass = get_double_parameter("max-mass");
-  FLAGS_min_length = get_int_parameter("min-length");
-  FLAGS_min_mass = get_double_parameter("min-mass");
-  FLAGS_monoisotopic_precursor = get_boolean_parameter("monoisotopic-precursor");
-  FLAGS_mods_spec = get_string_parameter_pointer("mods-spec");
-
   // Reroute stderr
   CarpStreamBuf buffer;
   streambuf* old = cerr.rdbuf();
@@ -131,7 +107,40 @@ int TideIndexApplication::main(int argc, char** argv) {
   TranslateFastaToPB(fasta, out_proteins, &cmd_line, &raw_proteins_header);
 
   pb::Header header_with_mods;
-  SettingsFromFlags(&header_with_mods);
+
+  // Set up peptides header
+  pb::Header_PeptidesHeader& pep_header = *(header_with_mods.mutable_peptides_header());
+  pep_header.Clear();
+  pep_header.set_min_mass(get_double_parameter("min-mass"));
+  pep_header.set_max_mass(get_double_parameter("max-mass"));
+  pep_header.set_min_length(get_int_parameter("min-length"));
+  pep_header.set_max_length(get_int_parameter("max-length"));
+  pep_header.set_monoisotopic_precursor(
+    get_boolean_parameter("monoisotopic-precursor"));
+  string enzyme = enzyme_type_to_string(get_enzyme_type_parameter("enzyme"));
+  if (enzyme == "no-enzyme") {
+    enzyme = "none";
+  } else {
+    DIGEST_T digestion = get_digest_type_parameter("digestion");
+    if (digestion != FULL_DIGEST && digestion != PARTIAL_DIGEST) {
+      carp(CARP_FATAL, "'digestion' must be 'full-digest' or 'partial-digest'");
+    }
+    pep_header.set_full_digestion(digestion == FULL_DIGEST);
+    pep_header.set_max_missed_cleavages(get_int_parameter("missed-cleavages"));
+  }
+  pep_header.set_enzyme(enzyme);
+  string mods_spec = get_string_parameter_pointer("mods-spec");
+  if (!mods_spec.empty()) {
+    VariableModTable var_mod_table;
+    if (!var_mod_table.Parse(mods_spec.c_str())) {
+      carp(CARP_FATAL, "Error parsing mods");
+    }
+    pep_header.mutable_mods()->CopyFrom(*(var_mod_table.ParsedModTable()));
+    if (!MassConstants::Init(var_mod_table.ParsedModTable())) {
+      carp(CARP_FATAL, "Error in MassConstants::Init");
+    }
+  }
+
   header_with_mods.set_file_type(pb::Header::PEPTIDES);
   header_with_mods.set_command_line(cmd_line);
   pb::Header_Source* source = header_with_mods.add_source();
@@ -146,6 +155,7 @@ int TideIndexApplication::main(int argc, char** argv) {
 
   bool need_mods = header_with_mods.peptides_header().mods().variable_mod_size() > 0;
   string basic_peptides = need_mods ? modless_peptides : peakless_peptides;
+  carp(CARP_DETAILED_DEBUG, "basic_peptides=%s", basic_peptides.c_str());
 
   carp(CARP_INFO, "Computing unmodified peptides...");
   MakePeptides(&header_no_mods, basic_peptides, out_aux);

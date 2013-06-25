@@ -308,6 +308,11 @@ class MatchCollection {
   int getMatchTotal();
 
   /**
+   * Sets the total peptides searched in the experiment in match_collection
+   */
+  void setExperimentSize(int size);
+
+  /**
    *\returns the total peptides searched in the experiment in match_collection
    */
   int getExperimentSize();
@@ -438,7 +443,8 @@ class MatchCollection {
   static void printSqtHeader(
     FILE* outfile, 
     const char* type, 
-    int proteins 
+    string database,
+    int num_proteins 
     );
 
   /*
