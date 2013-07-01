@@ -137,7 +137,11 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <tr>
 <td>8</td>
 <td>sp rank</td>
-<td>The rank of this PSM when sorted by sp score.</td>
+<td>The rank of this PSM when sorted by Sp score.  Note that,
+  in <code>tide-search</code>, the Sp score is only computed for PSMs
+  that are reported to the user.  Hence, the rank of the Sp score
+  will be in the range from 1 to <i>n</i>, where the value
+  of <i>n</i> is determined by the <code>--top-match</code> parameter.</td>
 <td>&#10003</td>
 <!--td>&#10003</td-->
 <td>&#10003</td>
