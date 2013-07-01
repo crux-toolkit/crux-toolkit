@@ -175,11 +175,11 @@ version of every peptide by shuffling or reversing the target
 sequence.  Each peptide is either or reversed or shuffled, leaving the
 N-terminal and C-terminal amino acids in place. Note that peptides
 that appear multiple times in the target database are only shuffled
-once.  Also, if a shuffled peptide produces an overlap with the target
-or decoy database, then the peptide is re-shuffled up to 10 times.
-Note that, despite this repeated shuffling, homopolymers or (with
-the <code>reverse</code> option) palindromic peptides will appear in
-both the target and decoy database.  Default=shuffle.</li>
+once.  In <code>reverse</code> mode, palindromic peptides are
+shuffled.  Also, if a shuffled peptide produces an overlap with the
+target or decoy database, then the peptide is re-shuffled up to 5
+times.  Note that, despite this repeated shuffling, homopolymers will
+appear in both the target and decoy database.  Default=shuffle.</li>
 
 </ul>
 
