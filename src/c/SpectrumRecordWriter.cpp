@@ -57,7 +57,8 @@ bool SpectrumRecordWriter::convert(
     pwiz::msdata::SpectrumPtr s = sl.spectrum(i, true);
     if (s->cvParam(pwiz::cv::MS_ms_level).valueAs<int>() > 1 &&
         !s->precursors.empty() &&
-        !s->precursors[0].selectedIons.empty()) {
+        !s->precursors[0].selectedIons.empty() &&
+        s->defaultArrayLength > 0) {
       // Get scan number
       pb::Spectrum pb_spectrum;
       string scan_num = pwiz::msdata::id::translateNativeIDToScanNumber(
@@ -76,12 +77,17 @@ bool SpectrumRecordWriter::convert(
       if (!chargeParam.empty()) {
         pb_spectrum.mutable_charge_state()->Add(chargeParam.valueAs<int>());
       } else {
+        bool possibleCharge = false;
         for (vector<pwiz::msdata::CVParam>::const_iterator param = si.cvParams.begin();
              param != si.cvParams.end();
              ++param) {
           if (param->cvid == pwiz::cv::MS_possible_charge_state) {
+            possibleCharge = true;
             pb_spectrum.mutable_charge_state()->Add(param->valueAs<int>());
           }
+        }
+        if (!possibleCharge) {
+          carp(CARP_FATAL, "Scan %s has no charge state", scan_num.c_str());
         }
       }
       // Get each m/z, intensity pair
