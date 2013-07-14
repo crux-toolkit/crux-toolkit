@@ -40,6 +40,8 @@ class ProteinMatchCollection {
   std::deque<PeptideMatch*> peptide_matches_; ///< All peptide matches
   std::deque<SpectrumMatch*> spectrum_matches_; ///< All spectrum matches
 
+  std::map<std::pair<int, int>, int> spectrum_counts_; ///< matches/spectrum
+
  public:
 
   /**
@@ -136,6 +138,11 @@ class ProteinMatchCollection {
    * Adding all SpectrumMatch, PeptideMatch, and ProteinMatch objects.
    */
   void addMatches(MatchCollection* match_collection);
+
+  /**
+   * Get the matches/spectrum as a map, where the key is <scan, charge>
+   */
+  const std::map<std::pair<int, int>, int>& getMatchesSpectrum();
 
 };
 

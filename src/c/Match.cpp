@@ -1509,6 +1509,15 @@ Peptide* Match::getPeptide()
 }
 
 /**
+ * sets whether the match is a null peptide match or not
+ */
+void Match::setNullPeptide(
+  bool null_peptide ///< whether the match is a null peptide match or not
+) {
+  null_peptide_ = null_peptide;
+}
+
+/**
  * gets the match if it is a null_peptide match
  *\returns true if match is null peptide, else false
  */

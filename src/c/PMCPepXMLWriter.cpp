@@ -24,25 +24,7 @@ void PMCPepXMLWriter::writePSMs(
   ProteinMatchCollection* collection ///< collection to be written
 ) {
 
-  // count matches per spectrum
-  map<SpectrumMatch*, int> match_counts;
-  for (PeptideMatchIterator pep_iter = collection->peptideMatchBegin();
-       pep_iter != collection->peptideMatchEnd();
-       ++pep_iter) {
-    PeptideMatch* pep_match = *pep_iter;
-    for (SpectrumMatchIterator spec_iter = pep_match->spectrumMatchBegin();
-         spec_iter != pep_match->spectrumMatchEnd();
-         ++spec_iter) {
-      SpectrumMatch* spec_match = *spec_iter;
-      map<SpectrumMatch*, int>::iterator find_spec_match =
-        match_counts.find(spec_match);
-      if (find_spec_match == match_counts.end()) {
-        match_counts[spec_match] = 1;
-      } else {
-        find_spec_match->second += 1;
-      }
-    }
-  }
+  const map<pair<int, int>, int>& spectrum_counts = collection->getMatchesSpectrum();
 
   // iterate over matches
   for (SpectrumMatchIterator spec_iter = collection->spectrumMatchBegin();
@@ -111,13 +93,15 @@ void PMCPepXMLWriter::writePSMs(
     FLOAT_T peptide_mass = peptide->getPeptideMass();
 
     // write psm
+    map<pair<int, int>, int>::const_iterator lookup =
+      spectrum_counts.find(make_pair(spec_scan, spec_charge));
     writePSM(spec_scan, spec_filename.c_str(),
              spec_neutral_mass, spec_charge,
              ranks, seq_str.c_str(), mod_seq_str.c_str(), peptide_mass,
              protein_names.size(), flanking_str.c_str(),
              protein_names, protein_descriptions,
              scores_computed, scores,
-             match_counts[spec_match]);
+             (lookup != spectrum_counts.end()) ? lookup->second : 0);
   }
 
 }

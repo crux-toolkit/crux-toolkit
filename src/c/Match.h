@@ -406,6 +406,13 @@ class Match {
   void incrementPointerCount();
 
   /**
+   * sets whether the match is a null peptide match or not
+   */
+  void setNullPeptide(
+    bool null_peptide ///< whether the match is a null peptide match or not
+  );
+
+  /**
    * gets the match if it is a null_peptide match
    *\returns true if match is null peptide, else false
    */

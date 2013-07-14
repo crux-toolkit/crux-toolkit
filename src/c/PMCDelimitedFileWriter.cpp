@@ -252,6 +252,7 @@ void PMCDelimitedFileWriter::setUpPeptidesColumns(
     addColumnName(PERCOLATOR_SCORE_COL);
     addColumnName(PERCOLATOR_RANK_COL);
     addColumnName(PERCOLATOR_QVALUE_COL);
+    addColumnName(PERCOLATOR_PEP_COL);
     break;
   }
 
@@ -344,6 +345,7 @@ void PMCDelimitedFileWriter::writePeptides(
     addScoreIfExists(match, PERCOLATOR_SCORE, PERCOLATOR_SCORE_COL);
     addRankIfExists(match, PERCOLATOR_SCORE, PERCOLATOR_RANK_COL);
     addScoreIfExists(match, PERCOLATOR_QVALUE, PERCOLATOR_QVALUE_COL);
+    addScoreIfExists(match, PERCOLATOR_PEP, PERCOLATOR_PEP_COL);
     addScoreIfExists(match, BY_IONS_MATCHED, BY_IONS_MATCHED_COL);
     addScoreIfExists(match, BY_IONS_TOTAL, BY_IONS_TOTAL_COL);
     //addScoreIfExists(match, MATCHES_SPECTRUM, MATCHES_SPECTRUM_COL);
@@ -428,24 +430,7 @@ void PMCDelimitedFileWriter::writePSMs(
   MASS_FORMAT_T mass_format_type =
     get_mass_format_type_parameter("mod-mass-format");
 
-  // count matches/spectrum
-  map<int, int> spectrum_counts;
-  for (PeptideMatchIterator pep_iter = collection->peptideMatchBegin();
-       pep_iter != collection->peptideMatchEnd();
-       ++pep_iter) {
-    PeptideMatch* pep_match = *pep_iter;
-    for (SpectrumMatchIterator spec_iter = pep_match->spectrumMatchBegin();
-      spec_iter != pep_match->spectrumMatchEnd();
-      ++spec_iter) {
-      int scan_num = (*spec_iter)->getSpectrum()->getFirstScan();
-      map<int, int>::iterator find_scan = spectrum_counts.find(scan_num);
-      if (find_scan == spectrum_counts.end()) {
-        spectrum_counts[scan_num] = 1;
-      } else {
-        ++spectrum_counts[scan_num];
-      }
-    }
-  }
+  const map<pair<int, int>, int>& spectrum_counts = collection->getMatchesSpectrum();
 
   for (SpectrumMatchIterator iter = collection->spectrumMatchBegin();
        iter != collection->spectrumMatchEnd();
@@ -471,10 +456,10 @@ void PMCDelimitedFileWriter::writePSMs(
     addScoreIfExists(match, PERCOLATOR_QVALUE, PERCOLATOR_QVALUE_COL);
     addScoreIfExists(pep_match, BY_IONS_MATCHED, BY_IONS_MATCHED_COL);
     addScoreIfExists(pep_match, BY_IONS_TOTAL, BY_IONS_TOTAL_COL);
-    map<int, int>::iterator spec_lookup = spectrum_counts.find(spectrum->getFirstScan());
-    int spec_count = (spec_lookup != spectrum_counts.end()) ? spec_lookup->second : 0;
-    setColumnCurrentRow(MATCHES_SPECTRUM_COL, spec_count);
-
+    pair<int, int> scan_charge = make_pair(spectrum->getFirstScan(), zstate.getCharge());
+    map<pair<int, int>, int>::const_iterator lookup = spectrum_counts.find(scan_charge);
+    setColumnCurrentRow(MATCHES_SPECTRUM_COL,
+                        (lookup != spectrum_counts.end()) ? lookup->second : 0);
     MODIFIED_AA_T* mod_seq = peptide->getModifiedAASequence();
     char* seq_with_masses = modified_aa_string_to_string_with_masses(
       mod_seq, peptide->getLength(), mass_format_type);

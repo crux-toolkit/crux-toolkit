@@ -400,31 +400,44 @@ int PercolatorApplication::main(
   // get percolator score information into crux objects
   
   ProteinMatchCollection* protein_match_collection = pCaller->getProteinMatchCollection();
+  ProteinMatchCollection* decoy_protein_match_collection =
+    pCaller->getDecoyProteinMatchCollection();
   string output_dir = string(get_string_parameter_pointer("output-dir"));
 
   // write txt
   if (get_boolean_parameter("txt-output")) {
     PMCDelimitedFileWriter txt_writer;
     string txt_path = make_file_path("percolator.target");
+    string decoy_txt_path = make_file_path("percolator.decoy");
 
     txt_writer.writeFile(this, txt_path + ".psms.txt",
                          PMCDelimitedFileWriter::PSMS, protein_match_collection);
+    txt_writer.writeFile(this, decoy_txt_path + ".psms.txt",
+                         PMCDelimitedFileWriter::PSMS, decoy_protein_match_collection);
     txt_writer.writeFile(this, txt_path + ".peptides.txt",
                          PMCDelimitedFileWriter::PEPTIDES, protein_match_collection);
+    txt_writer.writeFile(this, decoy_txt_path + ".peptides.txt",
+                         PMCDelimitedFileWriter::PEPTIDES, decoy_protein_match_collection);
 
     if (set_protein) {
       txt_writer.writeFile(this, txt_path + ".proteins.txt",
                            PMCDelimitedFileWriter::PROTEINS, protein_match_collection);
+      txt_writer.writeFile(this, decoy_txt_path + ".proteins.txt",
+                           PMCDelimitedFileWriter::PROTEINS, decoy_protein_match_collection);
     }
   }
 
   // write mzid
   if (get_boolean_parameter("mzid-output")) {
-    MzIdentMLWriter mzid_writer;
+    MzIdentMLWriter mzid_writer, decoy_mzid_writer;
     string mzid_path = make_file_path("percolator.target.mzid");
     mzid_writer.openFile(mzid_path, get_boolean_parameter("overwrite"));
     mzid_writer.addProteinMatches(protein_match_collection);
     mzid_writer.closeFile();
+    mzid_path = make_file_path("percolator.decoy.mzid");
+    decoy_mzid_writer.openFile(mzid_path, get_boolean_parameter("overwrite"));
+    decoy_mzid_writer.addProteinMatches(decoy_protein_match_collection);
+    decoy_mzid_writer.closeFile();
   }
   
   // write pepxml
@@ -433,6 +446,10 @@ int PercolatorApplication::main(
     string pep_path = make_file_path("percolator.target.pep.xml");
     pep_writer.openFile(pep_path.c_str(), get_boolean_parameter("overwrite"));
     pep_writer.write(protein_match_collection);
+    pep_writer.closeFile();
+    pep_path = make_file_path("percolator.decoy.pep.xml");
+    pep_writer.openFile(pep_path.c_str(), get_boolean_parameter("overwrite"));
+    pep_writer.write(decoy_protein_match_collection);
     pep_writer.closeFile();
   }
 
