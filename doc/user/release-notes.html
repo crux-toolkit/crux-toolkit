@@ -19,7 +19,21 @@ Previously, the PinXML file produced
 by <code>search-for-matches</code> always contained a single PSM per
 charge/spectrum combination.  Now the <code>top-match</code> parameter
 controls how many PSMs are written to the PinXML file.</li>
+<li>Percolator outputs decoy files in addition to target files.</li>
+<li>Percolator tab-delimited peptides output now contains PEP column.</li>
+<li>Percolator tab-delimited peptides output has been corrected to show the PSM
+with the best score.</li>
+<li>Percolator tab-delimited PSMs output "matches/spectrum" value has been
+corrected.</li>
+<li>The hidden <code>make-pin</code> command (automatically invoked by
+Percolator when given a non-PinXML format as input) now marks matches from decoy
+files as decoys.</li>
+<li><code>make-pin</code> command now uses the <code>top-match</code> parameter
+to determine how many PSMs per spectrum will be written, rather than only
+writing the top ranked PSM.</li>
 </ul>
+
+<hr />
 
 <h2>Version 1.40</h2> 
 <h3>Major enchancements</h3>

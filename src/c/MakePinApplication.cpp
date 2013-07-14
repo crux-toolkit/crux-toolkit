@@ -110,6 +110,15 @@ int MakePinApplication::main(string target_path, string decoy_path) {
     MatchCollectionParser::create(target_path.c_str(), "__NULL_STR"); 
   MatchCollection* decoy_collection =
     MatchCollectionParser::create(decoy_path.c_str(), "__NULL_STR");
+
+  // Mark decoy matches
+  MatchIterator* decoy_iter = new MatchIterator(decoy_collection);
+  while (decoy_iter->hasNext()) {
+    Crux::Match* decoy_match = decoy_iter->next();
+    decoy_match->setNullPeptide(true);
+  }
+  delete decoy_iter;
+
   PinXMLWriter* writer=new PinXMLWriter();
   decoys.push_back(decoy_collection);
 

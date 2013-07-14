@@ -32,25 +32,7 @@ void PMCSQTWriter::writePSMs(
   int top_match ///< the top matches to output
 ) {
 
-  // count matches per spectrum
-  map<SpectrumMatch*, int> match_counts;
-  for (PeptideMatchIterator pep_iter = collection->peptideMatchBegin();
-       pep_iter != collection->peptideMatchEnd();
-       ++pep_iter) {
-    PeptideMatch* pep_match = *pep_iter;
-    for (SpectrumMatchIterator spec_iter = pep_match->spectrumMatchBegin();
-         spec_iter != pep_match->spectrumMatchEnd();
-         ++spec_iter) {
-      SpectrumMatch* spec_match = *spec_iter;
-      map<SpectrumMatch*, int>::iterator find_spec_match =
-        match_counts.find(spec_match);
-      if (find_spec_match == match_counts.end()) {
-        match_counts[spec_match] = 1;
-      } else {
-        find_spec_match->second += 1;
-      }
-    }
-  }
+  const map<pair<int, int>, int>& spectrum_counts = collection->getMatchesSpectrum();
 
   // iterate over matches
   for (SpectrumMatchIterator spec_iter = collection->spectrumMatchBegin();
@@ -60,9 +42,12 @@ void PMCSQTWriter::writePSMs(
     PeptideMatch* pep_match = spec_match->getPeptideMatch();
 
     // write spectrum
-    writeSpectrum(spec_match->getSpectrum(),
-                  spec_match->getZState(),
-                  match_counts[spec_match]);
+    Crux::Spectrum* spectrum = spec_match->getSpectrum();
+    SpectrumZState z_state = spec_match->getZState();
+    map<pair<int, int>, int>::const_iterator lookup =
+      spectrum_counts.find(make_pair(spectrum->getFirstScan(), z_state.getCharge()));
+    writeSpectrum(spectrum, z_state, (lookup != spectrum_counts.end()) ?
+                  lookup->second : 0);
 
     FLOAT_T xcorr_score = -1.0;
     int xcorr_rank = -1;

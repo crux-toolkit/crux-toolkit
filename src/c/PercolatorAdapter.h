@@ -49,7 +49,10 @@ public:
   /**
    * Converts a set of Percolator scores into a Crux MatchCollection
    */
-  MatchCollection* psmScoresToMatchCollection();
+  void psmScoresToMatchCollection(
+    MatchCollection** match_collection,  ///< out parameter for targets
+    MatchCollection** decoy_match_collection ///< out parameter for decoys
+  );
 
   /**
    * Adds PSM scores from Percolator objects into a ProteinMatchCollection
@@ -70,10 +73,16 @@ public:
    *\returns the ProteinMatchCollection, to be called after Caller::run() is finished
    */
   ProteinMatchCollection* getProteinMatchCollection();
+
+  /**
+   *\returns the decoy ProteinMatchCollection, to be called after Caller::run() is finished
+   */
+  ProteinMatchCollection* getDecoyProteinMatchCollection();
   
 protected:
     
   ProteinMatchCollection* collection_; ///< Collection containing all of the psm, peptide, and protein results.
+  ProteinMatchCollection* decoy_collection_;  ///< Decoy ProteinMatchCollection
   vector<MatchCollection*> match_collections_made_; ///< MatchCollections created
   vector<PostProcessProtein*> proteins_made_; ///< Proteins created
   
