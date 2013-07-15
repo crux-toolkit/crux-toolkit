@@ -37,30 +37,18 @@ add_custom_target(
   COMMENT "Deleting all files for external tools."
 )
 
-# We want to avoid checking out the entire Proteowizard repository
-# because of its massive size. We check out just the top level directory, 
-# and them use 'svn update' to obtain the needed files and directories.
+# Download a partial distribution of pwiz r3950 stored
+# as a tar ball on the Noble Lab server.
 ExternalProject_Add(
   ProteoWizard
-  SVN_REPOSITORY http://proteowizard.svn.sourceforge.net/svnroot/proteowizard/trunk/pwiz/
-  SVN_REVISION -r 3950 --depth empty
+  URL http://noble.gs.washington.edu/proj/crux/download/pwiz-3950.tar.gz
+  URL_MD5 5389d4ee1cf43521667e1677a77331ac
+  DOWNLOAD_DIR downloads
   PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
   CONFIGURE_COMMAND ""
   BUILD_COMMAND ${protwiz_args}
   INSTALL_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/create_links.sh --prefix=${CMAKE_CURRENT_SOURCE_DIR}
   BUILD_IN_SOURCE 1
-)
-
-# Since we're not checking out the entire Proteowizard tree,
-# We need a separate step to use 'svn update' to pick up the files
-# and directories we need.
-ExternalProject_Add_Step(
-  ProteoWizard
-  update_selected_directories
-  DEPENDEES download
-  DEPENDERS configure
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/build/src/ProteoWizard
-  COMMAND svn update --force -r 3950 libraries pwiz Jamroot.jam quickbuild.sh clean.sh
 )
 
 ExternalProject_Add(
