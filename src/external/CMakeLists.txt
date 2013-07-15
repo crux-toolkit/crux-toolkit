@@ -42,7 +42,7 @@ add_custom_target(
 ExternalProject_Add(
   ProteoWizard
   URL http://noble.gs.washington.edu/proj/crux/download/pwiz-3950.tar.gz
-  URL_MD5 5389d4ee1cf43521667e1677a77331ac
+  URL_MD5 da8f48ec2731d2d70b435b09072870c8
   DOWNLOAD_DIR downloads
   PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
   CONFIGURE_COMMAND ""
