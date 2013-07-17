@@ -125,6 +125,7 @@ ExternalProject_Add(
   CONFIGURE_COMMAND
     ${CMAKE_CURRENT_SOURCE_DIR}/build/src/ProtocolBuffers/configure
     --prefix=${CMAKE_CURRENT_SOURCE_DIR}
+    --enable-shared=no
   BUILD_COMMAND make
   INSTALL_COMMAND make install
   BUILD_IN_SOURCE 1
@@ -139,6 +140,7 @@ ExternalProject_Add(
   CONFIGURE_COMMAND
     ${CMAKE_CURRENT_SOURCE_DIR}/build/src/google-gflags/configure
     --prefix=${CMAKE_CURRENT_SOURCE_DIR}
+   --enable-shared=no
   BUILD_COMMAND make
   INSTALL_COMMAND make install
   BUILD_IN_SOURCE 1
