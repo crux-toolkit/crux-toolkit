@@ -238,7 +238,9 @@ output file names. Default = none.</li>
 <code>--store-spectra &lt;filename&gt;</code> &ndash; Specify the name
 of the file where the binarized fragmentation spectra will be stored.
 Subsequent runs of <code>crux tide-search</code> will execute more
-quickly if provided with the spectra in binary format.</li>
+quickly if provided with the spectra in binary format.  The filename
+is specified relative to the current working directory, not the Crux
+output directory (as specified by <code>--output-dir</code>).</li>
 
 <li>
 <code>--output-dir &lt;filename&gt;</code> &ndash; 
