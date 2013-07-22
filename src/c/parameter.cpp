@@ -348,7 +348,8 @@ void initialize_parameters(void){
   /* create_index arguments */
   set_string_parameter("protein fasta file", NULL,
                        "File containing protein sequences in fasta format.",
-                       "Argument for crux-create-index and tide-index.", "false");
+                       "Argument for crux-create-index, tide-index, and "
+                       "generate-decoys.", "false");
   set_string_parameter("index name", NULL,
     "Name to give the new directory containing index files.",
     "Argument for create index.", "false");
@@ -446,29 +447,30 @@ void initialize_parameters(void){
   set_int_parameter("min-length", 6, 1, MAX_PEPTIDE_LENGTH,
       "The minimum length of peptides to consider. Default=6.",
       "Used from the command line or parameter file by "
-      "crux-create-index, crux-generate-peptides, and crux tide-index. "
-      "Parameter file only for crux-search-for-matches.", "true");
+      "crux-create-index, crux-generate-peptides, crux tide-index, and crux "
+      "generate-decoys. Parameter file only for crux-search-for-matches.",
+      "true");
   set_int_parameter("max-length", 50, 1, MAX_PEPTIDE_LENGTH,
       "The maximum length of peptides to consider. Default=50.",
       "Available from command line or parameter file for crux-create-index, "
-      "crux-generate-peptides, and crux tide-index. Parameter file only for "
-      "crux-search-for-matches.", "true");
+      "crux-generate-peptides, crux tide-index, and crux generate-decoys. "
+      "Parameter file only for crux-search-for-matches.", "true");
   set_double_parameter("min-mass", 200, 0, BILLION,
       "The minimum mass of peptides to consider. Default=200.",
       "Available from command line or parameter file for crux-create-index, "
-      "crux-generate-peptides, and crux tide-index. Parameter file only for "
-      "crux-search-for-matches.", "true");
+      "crux-generate-peptides, crux tide-index, and crux generate-decoys. "
+      "Parameter file only for crux-search-for-matches.", "true");
   set_double_parameter("max-mass", 7200, 1, BILLION, 
       "The maximum mass of peptides to consider. Default=7200.",
       "Available from command line or parameter file for crux-create-index, "
-      "crux-generate-peptides, and crux tide-index. Parameter file only for "
-      "crux-search-for-matches.", "true");
+      "crux-generate-peptides, crux tide-index, and crux generate-decoys. "
+      "Parameter file only for crux-search-for-matches.", "true");
   set_mass_type_parameter("isotopic-mass", AVERAGE, 
       "Which isotopes to use in calcuating peptide mass. "
       "<string>=average|mono. Default=average.", 
-      "Used from command line or parameter file by crux-create-index and "
-      "crux-generate-peptides.  Parameter file only for "
-      "crux-search-for-matches.", "true");
+      "Used from command line or parameter file by crux-create-index, "
+      "crux-generate-peptides, and crux generate-decoys.  Parameter file only "
+      "for crux-search-for-matches.", "true");
   set_int_parameter("min-peaks", 20, 0, BILLION,
       "The minimum number of peaks a spectrum must have for it to be searched."
       " Default=20.", 
@@ -480,9 +482,9 @@ void initialize_parameters(void){
       "Default=full-digest.",
       "Used in conjunction with enzyme option when enzyme is not set to "
       "to 'no-enzyme'.  Available from command line or parameter file for "
-      "crux-generate-peptides, crux create-index, and crux tide-index. "
-      "Available from parameter file for crux search-for-matches. "
-      "Digestion rules are as "
+      "crux-generate-peptides, crux create-index, crux tide-index, and crux "
+      "generate-decoys. Available from parameter file for crux "
+      "search-for-matches. Digestion rules are as "
       "follows: enzyme name [cuts after one of these residues][but not before "
       "one of these residues].  trypsin [RK][P], elastase [ALIV][P], "
       "chymotrypsin [FWY][P].",
@@ -496,15 +498,15 @@ void initialize_parameters(void){
       "Used in conjunction with the options digestion and missed-cleavages. "
       "Use 'no-enzyme' for non-specific digestion.  Available "
       "from command line or parameter file for crux-generate-peptides, "
-      "crux create-index, and crux tide-index.  Available from parameter file "
-      "for crux search-for-matches.   Digestion rules: enzyme name [cuts after "
-      "one of these residues]|{but not before one of these residues}.  "
-      "trypsin [RK]|{P}, elastase [ALIV]|{P}, chymotrypsin [FWY]|{P}, "
-      "clostripain [R]|[], cyanogen-bromide [M]|[], "
-      "iodosobenzoate [W]|[], proline-endopeptidase [P]|[], staph-protease "
-      "[E]|[], modified-chymotrypsin [FWYL]|{P}, elastase-trypsin-chymotrypsin "
-      "[ALIVKRWFY]|{P},aspn []|[D] (cuts before D).",
-      "true");
+      "crux create-index, crux tide-index, and crux generate-decoys.  "
+      "Available from parameter file for crux search-for-matches. "
+      "Digestion rules: enzyme name [cuts after one of these residues]|{but "
+      "not before one of these residues}. trypsin [RK]|{P}, elastase "
+      "[ALIV]|{P}, chymotrypsin [FWY]|{P}, clostripain [R]|[], "
+      "cyanogen-bromide [M]|[], iodosobenzoate [W]|[], proline-endopeptidase "
+      "[P]|[], staph-protease [E]|[], modified-chymotrypsin [FWYL]|{P}, "
+      "elastase-trypsin-chymotrypsin [ALIVKRWFY]|{P},aspn []|[D] (cuts before "
+      "D).", "true");
 
   set_window_type_parameter("precursor-window-type", WINDOW_MASS,
       "Window type to use for selecting candidate "
@@ -536,11 +538,11 @@ void initialize_parameters(void){
   set_int_parameter("missed-cleavages",
                     0, 0, 500,
       "Include peptides with up to n missed cleavage sites. Default=0.",
-      "Available from command line or parameter file for crux-create-index "
-      "and crux-generate-peptides.  Parameter file only for crux-search-"
-      "for-matches.  When used with enzyme=<trypsin|elastase|chymotrpysin> "
-      " includes peptides containing one or more potential cleavage sites.",
-      "true");   
+      "Available from command line or parameter file for crux-create-index, "
+      "crux-generate-peptides, and crux generate-decoys.  Parameter file only "
+      "for crux-search-for-matches.  When used with enzyme=<trypsin|elastase|"
+      "chymotrpysin> includes peptides containing one or more potential "
+      "cleavage sites.", "true");   
 
   set_boolean_parameter("unique-peptides", true,
       "Generate peptides only once, even if they appear in more "
