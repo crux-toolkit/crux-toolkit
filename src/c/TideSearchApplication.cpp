@@ -19,7 +19,8 @@ TideSearchApplication::~TideSearchApplication() {
 int TideSearchApplication::main(int argc, char** argv) {
 
   const char* option_list[] = {
-    "mass-window",
+    "precursor-window",
+    "precursor-window-type",
     "top-match",
     "store-spectra",
     "compute-sp",
@@ -53,7 +54,8 @@ int TideSearchApplication::main(int argc, char** argv) {
   string proteins_file = index_dir + "/protix";
   string spectra_file = get_string_parameter_pointer("tide spectra file");
 
-  double mass_window = get_double_parameter("mass-window");
+  double window = get_double_parameter("precursor-window");
+  WINDOW_TYPE_T window_type = get_window_type_parameter("precursor-window-type");
   int top_matches = get_int_parameter("top-match");
 
   bool compute_sp = get_boolean_parameter("compute-sp");
@@ -131,8 +133,8 @@ int TideSearchApplication::main(int argc, char** argv) {
   // Do the search
   carp(CARP_INFO, "Running search");
   cleanMods();
-  search(spectra.SpecCharges(), active_peptide_queue, proteins,
-         mass_window, top_matches, spectra.FindHighestMZ(), compute_sp);
+  search(spectra.SpecCharges(), active_peptide_queue, proteins, window,
+         window_type, top_matches, spectra.FindHighestMZ(), compute_sp);
 
   // Delete temporary spectrumrecords file
   if (!delete_spectra_file.empty()) {
@@ -164,7 +166,8 @@ void TideSearchApplication::search(
   const vector<SpectrumCollection::SpecCharge>* spec_charges,
   ActivePeptideQueue* active_peptide_queue,
   const ProteinVec& proteins,
-  double mass_window,
+  double precursor_window,
+  WINDOW_TYPE_T window_type,
   int top_matches,
   double highest_mz,
   bool compute_sp
@@ -188,10 +191,34 @@ void TideSearchApplication::search(
     observed.PreprocessSpectrum(*spectrum, charge);
 
     // The active peptide queue holds the candidate peptides for spectrum.
-    // These reside in a window of 2 * FLAGS_mass_window Daltons around the
-    // neutral precursor mass of the spectrum.
-    int size = active_peptide_queue->SetActiveRange(pre_mass - mass_window, 
-                                                    pre_mass + mass_window);
+    // Calculate and set the window, depending on the window type.
+    double min_mass, max_mass;
+    switch (window_type) {
+    case WINDOW_MASS:
+      min_mass = pre_mass - precursor_window;
+      max_mass = pre_mass + precursor_window;
+      break;
+    case WINDOW_MZ: {
+      double mz_minus_proton = spectrum->PrecursorMZ() - MASS_PROTON;
+      min_mass = (mz_minus_proton - precursor_window) * charge;
+      max_mass = (mz_minus_proton + precursor_window) * charge;
+      break;
+      }
+    case WINDOW_PPM: {
+      double tiny_precursor = precursor_window * 1e-6;
+      min_mass = pre_mass / (1.0 + tiny_precursor);
+      max_mass = pre_mass / (1.0 - tiny_precursor);
+      break;
+      }
+    default:
+      carp(CARP_FATAL, "Invalid window type");
+    }
+    carp(CARP_DETAILED_DEBUG, "Scan %d (%f m/z, %f neutral mass, charge %d) "
+         "mass window is [%f, %f]",
+         spectrum->SpectrumNumber(), spectrum->PrecursorMZ(), pre_mass, charge,
+         min_mass, max_mass);
+
+    int size = active_peptide_queue->SetActiveRange(min_mass, max_mass);
     MatchSet::Arr match_arr(size); // Scored peptides will go here.
 
     // Programs for taking the dot-product with the observed spectrum are laid

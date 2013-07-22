@@ -511,7 +511,8 @@ void initialize_parameters(void){
   set_window_type_parameter("precursor-window-type", WINDOW_MASS,
       "Window type to use for selecting candidate "
       "peptides.  <string>=mass|mz|ppm. Default=mass.",
-      "Available for search-for-matches, search-for-xlinks.",
+      "Available for search-for-matches, search-for-xlinks, "
+      "and tide-search.",
       "true");
 
   set_spectrum_parser_parameter("spectrum-parser", CRUX_SPECTRUM_PARSER,
@@ -716,8 +717,8 @@ void initialize_parameters(void){
       "Search peptides within +/- 'precursor-window' "
       "of the spectrum mass.  Definition of precursor window depends "
       "upon precursor-window-type. Default=3.0.",
-      "Available from the parameter file only for crux-search-for-matches, "
-      "crux-create-index, and crux-generate-peptides.",
+      "Available for tide-search and from the parameter file only for "
+      "crux-search-for-matches, crux-create-index, crux-generate-peptides.",
       "true");
   set_mass_type_parameter("fragment-mass", MONO, 
       "Which isotopes to use in calculating fragment ion mass. "
@@ -1117,12 +1118,6 @@ void initialize_parameters(void){
     "Specify a comma-separated list of modification sequences of the form: "
     "C+57.02146,2M+15.9949,1STY+79.966331,...",
     "Available for tide-index",
-    "true"
-  );
-  set_double_parameter("mass-window", 3.0, 0, BILLION,
-    "Specify the precursor mass tolerance in Daltons. "
-    "Default 3",
-    "Available for tide-search",
     "true"
   );
   set_string_parameter("store-spectra", "",

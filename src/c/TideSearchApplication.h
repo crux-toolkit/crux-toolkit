@@ -28,7 +28,8 @@ protected:
     const vector<SpectrumCollection::SpecCharge>* spec_charges,
     ActivePeptideQueue* active_peptide_queue,
     const ProteinVec& proteins,
-    double mass_window,
+    double precursor_window,
+    WINDOW_TYPE_T window_type,
     int top_matches,
     double highest_mz,
     bool compute_sp
