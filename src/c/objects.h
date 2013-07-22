@@ -603,10 +603,10 @@ enum _command {
   SEARCH_COMMAND,       ///< search-for-matches
   SEQUEST_COMMAND,      ///< sequest-search
   QVALUE_COMMAND,       ///< compute-q-values
+  GENERATE_DECOYS_COMMAND, ///< generate-decoys
   PERCOLATOR_COMMAND,   ///< percolator
   TIDE_INDEX_COMMAND,   ///< tide-index
   TIDE_SEARCH_COMMAND,  ///< tide-search
-  TIDE_RESULTS_COMMAND, ///< tide-results
   READ_SPECTRUMRECORDS_COMMAND, ///< read-spectrumrecords
   SPECTRAL_COUNTS_COMMAND, ///< spectral counts
   QRANKER_COMMAND,      ///< q-ranker

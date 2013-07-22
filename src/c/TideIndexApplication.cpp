@@ -45,6 +45,8 @@ int TideIndexApplication::main(int argc, char** argv) {
     "verbosity"
   };
 
+  const string default_cysteine = "C+57.0214637206";
+
   // Crux command line parsing
   int num_options = sizeof(option_list) / sizeof(char*);
   const char* arg_list[] = {
@@ -130,15 +132,20 @@ int TideIndexApplication::main(int argc, char** argv) {
   }
   pep_header.set_enzyme(enzyme);
   string mods_spec = get_string_parameter_pointer("mods-spec");
-  if (!mods_spec.empty()) {
-    VariableModTable var_mod_table;
-    if (!var_mod_table.Parse(mods_spec.c_str())) {
-      carp(CARP_FATAL, "Error parsing mods");
-    }
-    pep_header.mutable_mods()->CopyFrom(*(var_mod_table.ParsedModTable()));
-    if (!MassConstants::Init(var_mod_table.ParsedModTable())) {
-      carp(CARP_FATAL, "Error in MassConstants::Init");
-    }
+  if (mods_spec.find('C') == string::npos) {
+    mods_spec = (mods_spec.empty()) ?
+      default_cysteine : default_cysteine + ',' + mods_spec;
+    carp(CARP_DEBUG, "Using default cysteine mod '%s' ('%s')",
+         default_cysteine.c_str(), mods_spec.c_str());
+  }
+
+  VariableModTable var_mod_table;
+  if (!var_mod_table.Parse(mods_spec.c_str())) {
+    carp(CARP_FATAL, "Error parsing mods");
+  }
+  pep_header.mutable_mods()->CopyFrom(*(var_mod_table.ParsedModTable()));
+  if (!MassConstants::Init(var_mod_table.ParsedModTable())) {
+    carp(CARP_FATAL, "Error in MassConstants::Init");
   }
 
   header_with_mods.set_file_type(pb::Header::PEPTIDES);

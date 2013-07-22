@@ -96,9 +96,9 @@ add_library(tide-support STATIC ${tide_lib_files})
 #target_link_libraries(tide-peptide-counter tide-support gflags protobuf)
 
 ############### Build tide-search  ###############
-#add_executable(tide-search search.cc)
-#set_property(TARGET tide-search PROPERTY COMPILE_DEFINITIONS MAIN)
-#target_link_libraries(tide-search tide-support gflags protobuf)
+add_executable(tide-search search.cc)
+set_property(TARGET tide-search PROPERTY COMPILE_DEFINITIONS MAIN)
+target_link_libraries(tide-search tide-support gflags protobuf)
 
 ############ Build tide-test-read-ms2 ############
 #add_executable(tide-test-read-ms2 test_read_ms2.cc)
@@ -176,9 +176,9 @@ add_library(tide-support STATIC ${tide_lib_files})
 #target_link_libraries(tide-peptide-peaks tide-support gflags protobuf)
 
 ################ Build tide-index ################
-#add_executable(tide-index index.cc)
-#set_property(TARGET tide-index PROPERTY COMPILE_DEFINITIONS MAIN)
-#target_link_libraries(tide-index tide-support gflags protobuf)
+add_executable(tide-index index.cc)
+set_property(TARGET tide-index PROPERTY COMPILE_DEFINITIONS MAIN)
+target_link_libraries(tide-index tide-support gflags protobuf)
 
 ############## Build tide-view-ms1  ##############
 #add_executable(tide-view-ms1 view_ms1.cc)
