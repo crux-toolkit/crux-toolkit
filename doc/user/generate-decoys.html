@@ -12,7 +12,7 @@
 <b>Usage:</b></p>
 
 <blockquote>
-<code>crux generate-decoys [options]  &lt;protein&nbsp;input&nbs;file&gt;</code>
+<code>crux generate-decoys [options]  &lt;protein&nbsp;input&nbsp;file&gt;</code>
 </blockquote>
 
 <p>
@@ -37,7 +37,7 @@ these target/decoy overlaps is recorded in the log file.</p>
 <ul>
 
 <li>
-&lt;protein&nbsp;input&nbsp;file &ndash; A file in FASTA format
+&lt;protein&nbsp;input&nbsp;file&gt; &ndash; A file in FASTA format
 containing proteins.</li>
 
 </ul>
@@ -53,27 +53,26 @@ created:</p>
 
 <li>
 <b>peptides.target.txt</b>: a text file containing the target
-peptides, one per line, sorted by mass.</p>
+peptides, one per line, sorted by mass.</li>
 
 <li>
 <b>peptides.decoy.txt</b>: a text file containing the decoy peptides,
 one per line, sorted by mass.  There is a one-to-one correspondence
-between targets and decoys.</p>
+between targets and decoys.</li>
 
 <li>
-<b>proteins.decoy.txt</a>: a FASTA format file containing decoy
+<b>proteins.decoy.txt</b>: a FASTA format file containing decoy
 proteins, in which all of the peptides have been replaced with their
 shuffled or reversed counterparts.  Note that this file will only be
 created if the enzyme specificity is "full-digest" and no missed
-cleavages are allowed.</p>
+cleavages are allowed.</li>
 
 <li>
 <b>generate-decoys.params.txt</b>: a file containing the name and value of all
 parameters/options for the current operation.  Not all parameters in
 the file may have been used in the operation.  The resulting file can
 be used with the <code>--parameter-file</code> option for other crux
-programs.
-</li>
+programs.</li>
 
 <li>
 <b>tide-search.log.txt</b>: a log file containing a copy of all messages
