@@ -100,6 +100,12 @@ that were printed to the screen during execution.</li>
 <ul>
 
 <li>
+<red><code>--monoisotopic-precursor &lt;T|F&gt;</code> &ndash; When
+computing the mass of a peptide, use monoisotopic masses rather than
+average mass values.  Default = F.</red>
+</li>
+
+<li>
 <code>--max-length &lt;integer&gt;</code> &ndash; Specify the maximum
 length of the peptides included in the index.  Default=50.</li>
 
@@ -126,6 +132,15 @@ Default=200.</li>
 <li>
 <code>--use-flanking-peaks T|F</code> &ndash; Turn on or off the peaks
 flanking the b/y ions.  Default = F.</li>
+
+<li>
+<red><code>--max-ion-charge 1|2|3|peptide</code> &ndash; Predict fragment
+ions up to this charge-state. The integer options ('1', '2', and '3')
+specify a fixed maximum charge-state. The 'peptide' option indicates
+that the ions should range up to the maximum charge-state of the
+peptide itself minus 1. Thus, a 3+ charge state peptide would have
+fragment ions of 1+ and 2+. One exception: 1+ charge state peptide
+always have ions of 1+. Default = peptide.</red></li>
 
 </ul>
 
