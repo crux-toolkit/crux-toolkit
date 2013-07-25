@@ -29,6 +29,12 @@ program will shuffle each peptide multiple times to attempt to ensure
 that there is no overlap between the target and decoy peptides.  For
 homopolymers, this is not possible.  In this case, the occurrence of
 these target/decoy overlaps is recorded in the log file.</p>
+
+<p>
+The program considers only the standard set of 20 amino acids.
+Peptides containing non-amino acid alphanumeric characters (BJOUXZ)
+are skipped.  Non-alphanumeric characters are ignored completely.</p>
+
 </blockquote>
 
 <p>
