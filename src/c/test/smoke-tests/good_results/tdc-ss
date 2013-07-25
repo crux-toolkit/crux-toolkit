@@ -1,13 +1,13 @@
-INFO: CPU: n005.grid.gs.washington.edu
-INFO: Fri Jan  4 13:14:13 PST 2013
+INFO: CPU: n020.grid.gs.washington.edu
+INFO: Wed Dec 19 16:51:44 PST 2012
 COMMAND LINE: crux sequest-search --decoys peptide-shuffle --output-dir ss --fileroot tdc --parameter-file params/tdc-ss demo.ms2 small-yeast.fasta
 INFO: Preparing protein fasta file small-yeast.fasta
 INFO: Reading in ms2 file demo.ms2
 INFO: Created 1 peptide mods, keeping 1 with 255 or fewer aa mods
 INFO: Searching spectrum 96 (2+), search 100
-INFO: Elapsed time: 6.67 s
+INFO: Elapsed time: 4.06 s
 INFO: Finished crux sequest-search
-INFO: Elapsed time: 6.68 s
+INFO: Elapsed time: 4.07 s
 INFO: Finished crux sequest-search.
 INFO: Return Code:0
 # Which isotopes to use in calculating fragment ion mass.
@@ -779,7 +779,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Fri Jan  4 13:14:13 2013
+H	StartTime	Wed Dec 19 16:51:44 2012
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	DBSeqLength	?
@@ -794,7 +794,7 @@ H	Comment	final algorithm xcorr_score
 H	StaticMod	C=160.160
 H	Alg-DisplayTop	5
 H	EnzymeSpec	trypsin-full-digest
-H	Line fields: S, scan number, scan number,charge, 0, precursor neutral mass, 0, 0, number of matches
+H	Line fields: S, scan number, scan number,charge, 0, precursor mass, 0, 0, number of matches
 H	Line fields: M, rank by xcorr score, rank by sp score, peptide mass, deltaCn, xcorr score, sp score, number ions matched, total ions compared, sequence
 S	10	10	2	0.0	server	1270.6627	0.00	0.00000000	12
 M	1	1	1270.4917	0.00	0.85080969	56.45171	5	22	K.SGLIVEIQGVQK.E	U

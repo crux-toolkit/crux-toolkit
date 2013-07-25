@@ -45,7 +45,9 @@ void get_linear_peptides(
     while (peptide_iterator->hasNext()) {
       //peptide = database_peptide_iterator_next(peptide_iterator);
       peptide = peptide_iterator->next();
-      sequence = peptide->getSequence(); 
+      char* seq = peptide->getSequence();
+      sequence = seq; 
+      free(seq);
 
       if (peptide->getMissedCleavageSites() <= max_missed_cleavages) {
         carp(CARP_DEBUG, "Adding linear peptide:%s",peptide->getSequence());
@@ -64,9 +66,17 @@ void get_linear_peptides(
         } else {
           find_iter -> second.push_back(peptide);
         }
+      } else {
+        delete peptide;
       }
+
     }
-  } 
+    delete peptide_iterator;
+  }
+
+  
+
+
 }
 
 vector<Peptide*>& get_peptides_from_sequence(string& sequence) {
@@ -109,8 +119,10 @@ void get_linkable_peptides(
     while (peptide_iterator->hasNext()) {
       //peptide = database_peptide_iterator_next(peptide_iterator);
       peptide = peptide_iterator->next();
-      sequence = peptide->getSequence(); 
-
+      char* seq = peptide->getSequence();
+      sequence = seq;
+      free(seq);
+ 
       map<string, vector<Peptide*> >::iterator find_iter;
 
       find_iter = sequence_peptide_map.find(sequence);
@@ -125,16 +137,15 @@ void get_linkable_peptides(
         find_iter -> second.push_back(peptide);
       }
 
-      char* seq = peptide->getSequence();
-
       XLinkablePeptide xlinkable(peptide, bondmap);
   
       if (xlinkable.isLinkable()) {
         peptides.insert(xlinkable);
       }
-      free(seq);
+
     }
-  } 
+    delete peptide_iterator;
+  }
 }
 
 void print_precursor_count(vector<LinkedPeptide>& all_ions) {
@@ -166,13 +177,10 @@ void print_precursor_count(vector<LinkedPeptide>& all_ions) {
 
 // creates an index of all linked peptides from a fasta file
 void find_all_precursor_ions(
+  Database* db,
   vector<LinkedPeptide>& all_ions
   ) {
-
-  char* database_file = get_string_parameter("protein-database");
-  
   carp(CARP_DEBUG,"find_all_precursor_ions: start()");
-  Database* db = new Database(database_file, false);
   carp(CARP_DEBUG,"peptide constraint");
   PeptideConstraint* peptide_constraint = 
     PeptideConstraint::newFromParameters();

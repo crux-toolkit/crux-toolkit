@@ -53,6 +53,7 @@ class Spectrum{
   FLOAT_T          min_peak_mz_;   ///< The minimum m/z of all peaks
   FLOAT_T          max_peak_mz_;   ///< The maximum m/z of all peaks
   double           total_energy_;  ///< The sum of intensities in all peaks
+  FLOAT_T          lowest_sp_;  ///< The lowest Sp score (for writing SQT)
   std::string           filename_;      ///< Optional filename
   std::string           stripped_filename_; ///< filename, no path or extension
   std::vector<std::string> i_lines_v_;  ///< store i lines
@@ -220,7 +221,10 @@ class Spectrum{
    * Transfer values from a proteowizard Spectrum object to the
    * crux spectrum.
    */
-  bool parsePwizSpecInfo(const pwiz::msdata::SpectrumPtr& pwiz_spectrum);
+  bool parsePwizSpecInfo(
+    const pwiz::msdata::SpectrumPtr& pwiz_spectrum,
+    int assigned_scan = 0 ///< forced scan number
+  );
 
   /**
    * Parse the spectrum from the tab-delimited result file
@@ -323,6 +327,20 @@ class Spectrum{
    * \returns The sum of intensities in all peaks.
    */
   double getTotalEnergy();
+
+  /**
+   * Sets the total ion current.
+   */
+  void setTotalEnergy(
+    FLOAT_T tic ///< the total ion current
+  );
+
+  /**
+   * Sets the lowest Sp score.
+   */
+  void setLowestSp(
+    FLOAT_T sp ///< the lowest Sp score for this spectrum
+  );
 
   /**
    * \returns The intensity of the peak with the maximum intensity.

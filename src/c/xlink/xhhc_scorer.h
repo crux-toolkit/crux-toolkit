@@ -20,7 +20,7 @@ class XHHC_Scorer {
  private:
   bool print_spectrums_; ///< Indicator of whether to print the spectrums
   Scorer* scorer_; ///< The crux scorer
-  Spectrum* current_spectrum_; ///< Spectrum that this scorer works on
+  Crux::Spectrum* current_spectrum_; ///< Spectrum that this scorer works on
   FLOAT_T max_mz_; ///< Maximum mz allocated for scorer
   int max_bin_; ///< Maximum bin idx for scorer.
   FLOAT_T bin_width_; ///< bin width for scorer
@@ -35,7 +35,7 @@ class XHHC_Scorer {
    */
   void printSpectrums(
     FLOAT_T* theoretical, ///< The theoretical spectrum array
-    Spectrum* spectrum ///< The spectrum to print
+    Crux::Spectrum* spectrum ///< The spectrum to print
     );
   
   /**
@@ -58,6 +58,11 @@ class XHHC_Scorer {
     );
 
   /**
+   * Destructor
+   */
+  virtual ~XHHC_Scorer();
+
+  /**
    * \returns the max_mz
    */
   FLOAT_T getMaxMz();
@@ -66,7 +71,7 @@ class XHHC_Scorer {
    * \returns the xcorr score for the spectrum and the ion_series
    */
   FLOAT_T scoreSpectrumVsSeries(
-    Spectrum* spectrum, ///< Spectrum to score
+    Crux::Spectrum* spectrum, ///< Spectrum to score
     LinkedIonSeries& ion_series ///< LinkedIonSeries to score
     );
 
@@ -75,7 +80,7 @@ class XHHC_Scorer {
    * matched to peaks in the spectrum
    */
   static int getMatchedBYIons(
-    Spectrum* spectrum, ///< Spectrum to match peaks with
+    Crux::Spectrum* spectrum, ///< Spectrum to match peaks with
     LinkedIonSeries& ion_series ///< IonSeries to use
     );
 
@@ -116,7 +121,7 @@ class XHHC_Scorer {
    * Generates the theoretical/observed arrays and scores the spectrum for xcorr
    */
   FLOAT_T hhcGenScoreXcorr(
-    Spectrum* spectrum,    ///< the spectrum to score -in
+    Crux::Spectrum* spectrum,    ///< the spectrum to score -in
     LinkedIonSeries& ion_series ///< the ion series to score against the spectrum -in
     );
 
@@ -126,7 +131,7 @@ class XHHC_Scorer {
    */ 
   FLOAT_T getIonCurrentExplained(
     LinkedIonSeries& ion_series, ///<The LinkedIonSeries to match 
-    Spectrum* spectrum, ///<The spectrum to match
+    Crux::Spectrum* spectrum, ///<The spectrum to match
     FLOAT_T& explained, ///<The ion current explained -out
     int& by_observed ///<The number of by ions matched
     );

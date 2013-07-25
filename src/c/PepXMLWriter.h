@@ -63,7 +63,31 @@ class PepXMLWriter{
                                   ///at this charge state
     int charge, ///< assumed charge state for the match
     
-    int PSM_rank, ///< rank of this peptide for the spectrum
+    int* PSM_rank, ///< rank of this peptide for the spectrum
+    const char* unmodified_peptide_sequence, ///< sequence with no mods
+    const char* modified_peptide_sequence, ///< either with symbols or masses
+    double peptide_mass, ///< mass of the peptide sequence
+    int num_proteins, ///< proteins matched to this peptide
+    const char* flanking,  ///< "XY, AB, " X and Y are the preceeding and
+                        /// following aas in the first protein 
+    std::vector<std::string>& protein_names, ///<
+    std::vector<std::string>& protein_descriptions, ///<
+    bool* scores_computed,
+    double* scores, ///< indexed by score type
+    unsigned current_num_matches
+  );
+
+  /**
+   * Legacy function that sets delta_cn, by_ions_matched, and by_ions_total
+   */
+  void writePSM(
+    int spectrum_scan_number, ///< identifier for the spectrum
+    const char* filename, ///< file that spectrum came from
+    double spectrum_neutral_mass, ///< computed mass of the spectrum
+                                  ///at this charge state
+    int charge, ///< assumed charge state for the match
+    
+    int* PSM_rank, ///< rank of this peptide for the spectrum
     const char* unmodified_peptide_sequence, ///< sequence with no mods
     const char* modified_peptide_sequence, ///< either with symbols or masses
     double peptide_mass, ///< mass of the peptide sequence
@@ -74,8 +98,11 @@ class PepXMLWriter{
     std::vector<std::string>& protein_descriptions, ///<
     double delta_cn, ///<
     bool* scores_computed,
-    double* scores ///< indexed by score type
-    );
+    double* scores, ///< indexed by score type
+    unsigned  num_matched_ions, 
+    unsigned tot_matched_ions,
+    unsigned current_num_matches
+  );
   
  protected:
   void initScoreNames();
@@ -87,7 +114,7 @@ class PepXMLWriter{
   std::string getSpectrumTitle(int spectrum_scan_number, 
                                const char* filename,
                                int charge);
-  void printPeptideElement(int rank,
+  void printPeptideElement(int* rank,
                            const char* peptide_sequence,
                            const char* mod_peptide_sequence,
                            double peptide_mass,
@@ -96,13 +123,15 @@ class PepXMLWriter{
                            const char* flanking_aas,
                            std::vector<std::string>& protein_names, 
                            std::vector<std::string>& protein_descriptions,
-                           double delta_cn,
                            bool* scores_computed,
-                           double* scores);
+                           double* scores,
+                           unsigned current_num_matches);
 
-  void printScores(double delta_cn, 
-                   double* scores, 
-                   bool* scores_computed);
+  void printScores(
+    double* scores, 
+    bool* scores_computed,
+    int* ranks
+  );
 
   void printAnalysis(double* scores, bool* scores_computed);
 

@@ -29,7 +29,7 @@
 #include "Scorer.h"
 #include "parameter.h"
 
-
+using namespace Crux;
 
 /**
  * Maximum range for cross correlation offset.

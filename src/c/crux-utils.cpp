@@ -8,9 +8,11 @@
 #include <sys/stat.h>
 #ifndef _MSC_VER
 #include <unistd.h>
+#include <iostream>
 #endif
 #include "crux-utils.h"
 #include "parameter.h"
+#include "Index.h"
 #include "WinCrux.h"
 
 using namespace std;
@@ -471,13 +473,11 @@ SPECTRUM_PARSER_T string_to_spectrum_parser_type(char* name) {
 
 }
 
-char* spectrum_parser_type_to_string(
+const char* spectrum_parser_type_to_string(
   SPECTRUM_PARSER_T type
   ) {
 
-  char* type_str = my_copy_string(spectrum_parser_type_strings[type]);
-
-  return type_str;
+  return spectrum_parser_type_strings[type];
 }
 
 
@@ -519,7 +519,12 @@ static const char* scorer_type_strings[NUMBER_SCORER_TYPES] =
    "barista_score", 
    "barista_qvalue",
    "barista_peptide_qvalue",
-   "barista_PEP"
+   "barista_PEP",
+
+   "delta_cn",
+   "delta_lcn",
+   "by_ions_matched",
+   "by_ions_total",
   };
 
 bool string_to_scorer_type(const char* name, SCORER_TYPE_T* result){
@@ -772,11 +777,9 @@ bool has_extension(const char* filename, const char* extension){
   }
   // point to the last few characters of the name 
   const char* look_here = filename + (name_length - extension_length);
-
   if( strcmp(look_here, extension) == 0){
     return true;
   }
-
   return false;
 }
 

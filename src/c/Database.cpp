@@ -33,7 +33,7 @@
 #include <iostream>
 
 using namespace std;
-
+using namespace Crux; 
 const string Database::binary_suffix = "-binary-fasta";
 const string Database::decoy_binary_suffix = "-binary-fasta-decoy";
 const string Database::decoy_fasta_suffix = "-random.fasta";

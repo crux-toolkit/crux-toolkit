@@ -10,6 +10,8 @@
 #include "crux-utils.h"
 #include "parameter.h"
 #include "WinCrux.h"
+#include "Peptide.h"
+#include <iostream>
 
 using namespace std;
 
@@ -346,7 +348,8 @@ void initialize_parameters(void){
   /* create_index arguments */
   set_string_parameter("protein fasta file", NULL,
                        "File containing protein sequences in fasta format.",
-                       "Argument for crux-create-index.", "false");
+                       "Argument for crux-create-index, tide-index, and "
+                       "generate-decoys.", "false");
   set_string_parameter("index name", NULL,
     "Name to give the new directory containing index files.",
     "Argument for create index.", "false");
@@ -382,7 +385,41 @@ void initialize_parameters(void){
                        "Argument, not option, for hardklor",
                        "false");
 
-
+  /*Percolator arguments*/
+  set_string_parameter(
+    "pin.xml", NULL,
+    "PIN files are XML files for PIN format whose structure is defined by "
+    "the schema percolator_in.xml. <code>crux search-for-matches</code> generates this file. "
+    "Also, this argument can be \"-\" which indicates the pin file will come from standard input. "
+    "Alternately, a SQT, PepXML, or tab-delimited file may be given (a corresponding decoy"
+    "file must also exist in the same directory), in which case a pin.xml file will be "
+    "generated in the output directory prior to execution.",
+    "Argument, not option for percolator",
+    "false"
+  );
+  /*make-pin arguments*/
+  set_string_parameter(
+    "target input", NULL,
+    "make-pin can convert any file format in sqt, tab-delimited and pep.xml file "
+    "to pin.xml file "
+    "Also, this argument can be  which indicates the pin file will come from standard input",
+    "Argument, not option for make-pin",
+    "false"
+  );
+  set_string_parameter(
+    "decoy input", NULL,
+    "make-pin can convert any file format in sqt, tab-delimited and pep.xml file "
+    "to pin.xml file ",
+    "Argument, not option for make-pin",
+    "false"
+  );
+  set_string_parameter(
+    "output-file", NULL,
+    "File where pin.xml will be written"
+    "to pin.xml file ",
+    "It is optional for make-pin",
+    "false"
+  );
   /* *** Initialize Options (command line and param file) *** */
 
   /* options for all executables */
@@ -410,29 +447,30 @@ void initialize_parameters(void){
   set_int_parameter("min-length", 6, 1, MAX_PEPTIDE_LENGTH,
       "The minimum length of peptides to consider. Default=6.",
       "Used from the command line or parameter file by "
-      "crux-create-index and crux-generate-peptides.  Parameter file "
-      "only for crux-search-for-matches.", "true");
+      "crux-create-index, crux-generate-peptides, crux tide-index, and crux "
+      "generate-decoys. Parameter file only for crux-search-for-matches.",
+      "true");
   set_int_parameter("max-length", 50, 1, MAX_PEPTIDE_LENGTH,
       "The maximum length of peptides to consider. Default=50.",
-      "Available from command line or parameter file for crux-create-index "
-      " and crux-generate-peptides. Parameter file only for crux-search-"
-      "for-matches.", "true");
+      "Available from command line or parameter file for crux-create-index, "
+      "crux-generate-peptides, crux tide-index, and crux generate-decoys. "
+      "Parameter file only for crux-search-for-matches.", "true");
   set_double_parameter("min-mass", 200, 0, BILLION,
       "The minimum mass of peptides to consider. Default=200.",
-      "Available from command line or parameter file for crux-create-index "
-      "and crux-generate-peptides. Parameter file only for crux-search-"
-      "for-matches.", "true");
+      "Available from command line or parameter file for crux-create-index, "
+      "crux-generate-peptides, crux tide-index, and crux generate-decoys. "
+      "Parameter file only for crux-search-for-matches.", "true");
   set_double_parameter("max-mass", 7200, 1, BILLION, 
       "The maximum mass of peptides to consider. Default=7200.",
-      "Available from command line or parameter file for crux-create-index "
-      "and crux-generate-peptides. Parameter file only for crux-search-"
-      "for-matches.", "true");
+      "Available from command line or parameter file for crux-create-index, "
+      "crux-generate-peptides, crux tide-index, and crux generate-decoys. "
+      "Parameter file only for crux-search-for-matches.", "true");
   set_mass_type_parameter("isotopic-mass", AVERAGE, 
       "Which isotopes to use in calcuating peptide mass. "
       "<string>=average|mono. Default=average.", 
-      "Used from command line or parameter file by crux-create-index and "
-      "crux-generate-peptides.  Parameter file only for "
-      "crux-search-for-matches.", "true");
+      "Used from command line or parameter file by crux-create-index, "
+      "crux-generate-peptides, and crux generate-decoys.  Parameter file only "
+      "for crux-search-for-matches.", "true");
   set_int_parameter("min-peaks", 20, 0, BILLION,
       "The minimum number of peaks a spectrum must have for it to be searched."
       " Default=20.", 
@@ -444,8 +482,9 @@ void initialize_parameters(void){
       "Default=full-digest.",
       "Used in conjunction with enzyme option when enzyme is not set to "
       "to 'no-enzyme'.  Available from command line or parameter file for "
-      "crux-generate-peptides and crux create-index.  Available from parameter"
-      " file for crux search-for-matches.  Digestion rules are as "
+      "crux-generate-peptides, crux create-index, crux tide-index, and crux "
+      "generate-decoys. Available from parameter file for crux "
+      "search-for-matches. Digestion rules are as "
       "follows: enzyme name [cuts after one of these residues][but not before "
       "one of these residues].  trypsin [RK][P], elastase [ALIV][P], "
       "chymotrypsin [FWY][P].",
@@ -458,21 +497,22 @@ void initialize_parameters(void){
       "Default=trypsin.", 
       "Used in conjunction with the options digestion and missed-cleavages. "
       "Use 'no-enzyme' for non-specific digestion.  Available "
-      "from command line or parameter file for crux-generate-peptides "
-      "and crux create-index.  Available from parameter file for crux "
-      "search-for-matches.   Digestion rules: enzyme name [cuts after one "
-      "of these residues]|{but not before one of these residues}.  "
-      "trypsin [RK]|{P}, elastase [ALIV]|{P}, chymotrypsin [FWY]|{P}, "
-      "clostripain [R]|[], cyanogen-bromide [M]|[], "
-      "iodosobenzoate [W]|[], proline-endopeptidase [P]|[], staph-protease "
-      "[E]|[], modified-chymotrypsin [FWYL]|{P}, elastase-trypsin-chymotrypsin "
-      "[ALIVKRWFY]|{P},aspn []|[D] (cuts before D).",
-      "true");
+      "from command line or parameter file for crux-generate-peptides, "
+      "crux create-index, crux tide-index, and crux generate-decoys.  "
+      "Available from parameter file for crux search-for-matches. "
+      "Digestion rules: enzyme name [cuts after one of these residues]|{but "
+      "not before one of these residues}. trypsin [RK]|{P}, elastase "
+      "[ALIV]|{P}, chymotrypsin [FWY]|{P}, clostripain [R]|[], "
+      "cyanogen-bromide [M]|[], iodosobenzoate [W]|[], proline-endopeptidase "
+      "[P]|[], staph-protease [E]|[], modified-chymotrypsin [FWYL]|{P}, "
+      "elastase-trypsin-chymotrypsin [ALIVKRWFY]|{P},aspn []|[D] (cuts before "
+      "D).", "true");
 
   set_window_type_parameter("precursor-window-type", WINDOW_MASS,
       "Window type to use for selecting candidate "
       "peptides.  <string>=mass|mz|ppm. Default=mass.",
-      "Available for search-for-matches, search-for-xlinks.",
+      "Available for search-for-matches, search-for-xlinks, "
+      "and tide-search.",
       "true");
 
   set_spectrum_parser_parameter("spectrum-parser", CRUX_SPECTRUM_PARSER,
@@ -499,15 +539,15 @@ void initialize_parameters(void){
   set_int_parameter("missed-cleavages",
                     0, 0, 500,
       "Include peptides with up to n missed cleavage sites. Default=0.",
-      "Available from command line or parameter file for crux-create-index "
-      "and crux-generate-peptides.  Parameter file only for crux-search-"
-      "for-matches.  When used with enzyme=<trypsin|elastase|chymotrpysin> "
-      " includes peptides containing one or more potential cleavage sites.",
-      "true");   
+      "Available from command line or parameter file for crux-create-index, "
+      "crux-generate-peptides, and crux generate-decoys.  Parameter file only "
+      "for crux-search-for-matches.  When used with enzyme=<trypsin|elastase|"
+      "chymotrpysin> includes peptides containing one or more potential "
+      "cleavage sites.", "true");   
 
   set_boolean_parameter("unique-peptides", true,
       "Generate peptides only once, even if they appear in more "
-      "than one protein (T,F).  Default=F.",
+      "than one protein (T,F).  Default=T.",
       "Available from command line or parameter file for "
       "crux-genereate-peptides. Returns one line per peptide "
       "when true or one line per peptide per protein occurence when false.  ",
@@ -525,6 +565,23 @@ void initialize_parameters(void){
       "Available only for crux-generate-peptides.", "true");
 
   /* search-for-matches command line options */
+  set_boolean_parameter("sqt-output", false,
+      "Output SQT in the output directory.  Default=F",
+      "Available for search-for-matches.", "true");
+  set_boolean_parameter("mzid-output", false,
+      "Output MZID in the output directory.  Default=F",
+      "Available for search-for-matches, percolator.", "true");
+  set_boolean_parameter("pinxml-output", false,
+      "Output PIN XML in the output directory.  Default=F",
+      "Available for search-for-matches.", "true");
+  set_boolean_parameter("pepxml-output", false,
+      "Output pepXML in the output directory.  Default=F",
+      "Available for search-for-matches, q-ranker, barista, percolator.",
+      "true");
+  set_boolean_parameter("txt-output", true,
+      "Output tab-delimited text in the output directory.  Default=T",
+      "Available for search-for-matches, percolator, q-ranker, barista.",
+      "true");
   set_scorer_type_parameter("prelim-score-type", SP, 
       "Initial scoring (sp, xcorr). Default=sp,", 
       "Available for crux-search-for-matches.  The score applied to all "
@@ -541,8 +598,8 @@ void initialize_parameters(void){
       "or sp (xcorr-pvalue, sp-pvalue).", "false"); 
   set_boolean_parameter("compute-sp", false,
       "Compute the Sp score for all candidate peptides.  Default=F",
-      "Available for search-for-matches.  Sp scoring is always done for "
-      "sequest-search.", "true");
+      "Available for search-for-matches and tide-search.  Sp scoring is always "
+      "done for sequest-search.", "true");
   set_boolean_parameter("compute-p-values", false, 
       "Compute p-values for the main score type. Default=F.",
       "Currently only implemented for XCORR.", "true");
@@ -600,15 +657,15 @@ void initialize_parameters(void){
       "file is controlled by --output-dir.", "true");
 
   // user options regarding decoys
-  set_string_parameter("decoys", "protein-shuffle",
+  set_string_parameter("decoys", "peptide-shuffle",
       "Include a decoy version of every peptide by shuffling or reversing the "
       "target sequence.  <string>=none|reverse|protein-shuffle|peptide-shuffle."
-      " Use 'none' for no decoys.  Default=protein-shuffle.",
+      " Use 'none' for no decoys.  Default=peptide-shuffle.",
       "For create-index, store the decoys in the index.  For search, either "
       "use decoys in the index or generate them from the fasta file.", "true");
   set_int_parameter("num-decoys-per-target", 1, 0, 10,
       "Number of decoy peptides to search for every target peptide searched."
-      "Only valid for fasta searches when --decoys is not none. Default=0.",
+      "Only valid for fasta searches when --decoys is not none. Default=1.",
       "Use --decoy-location to control where they are returned (which "
       "file(s)) and --decoys to control how targets are randomized.  Available "
       "for search-for-matches and sequest-search when searching a fasta file. ",
@@ -646,21 +703,22 @@ void initialize_parameters(void){
   set_int_parameter("top-match", 5, 1, BILLION, 
       "The number of PSMs per spectrum writen to the output " 
       " file(s).  Default=5.",
-      "Available from parameter file for crux-search-for-matches.",
+      "Available for tide-search and from parameter file for crux-search-for-matches.",
       "true");
   set_int_parameter("psms-per-spectrum-reported", 0, 0, BILLION,
                    "place holder", "this may be replaced by top-match","false");
-  set_string_parameter("seed", "time",
+  set_string_parameter("seed", "1",
       "When given a unsigned integer value seeds the random number generator with that value. "
-      "When given the string \"time\" seeds the random number generator with the system time. ",
+      "When given the string \"time\" seeds the random number generator with the system time. "
+      "Default = 1.",
       "Available for all Crux commands.",
       "true");
   set_double_parameter("precursor-window", 3.0, 0, 100, 
       "Search peptides within +/- 'precursor-window' "
       "of the spectrum mass.  Definition of precursor window depends "
       "upon precursor-window-type. Default=3.0.",
-      "Available from the parameter file only for crux-search-for-matches, "
-      "crux-create-index, and crux-generate-peptides.",
+      "Available for tide-search and from the parameter file only for "
+      "crux-search-for-matches, crux-create-index, crux-generate-peptides.",
       "true");
   set_mass_type_parameter("fragment-mass", MONO, 
       "Which isotopes to use in calculating fragment ion mass. "
@@ -765,7 +823,310 @@ void initialize_parameters(void){
      "Available for percolator and q-ranker.  File will be named "
      "<fileroot>.percolator.features.txt or <fileroot>.qranker.features.txt.",
      "true");
+  
+  set_boolean_parameter("feature-in-file", false,
+      "Input files are given as a tab delimited file. In this case the only argument should be a file name "
+      "of the data file. The tab delimited fields should be id <tab> label <tab> feature1 "
+      "<tab> ... <tab> featureN <tab> peptide <tab> proteinId1 <tab> .. <tab> proteinIdM "
+      "Labels are interpreted as 1 -- positive set "
+      "and test set, -1 -- negative set.",
+      "Available for percolator",
+      "true");
+  
+  set_boolean_parameter(
+    "protein",
+    false,
+    "output protein level probability. Default=F",
+    "Available for crux percolator",
+    "true"
+  );
+ 
+  set_boolean_parameter(
+    "decoy-xml-output",
+    false,
+    "Include decoys (PSMs, peptides, and/or proteins) in the "
+    "xml-output. Only available if -X is used. Default=F",
+    "Available for crux percolator",
+    "true"
+  );
+  set_string_parameter(
+    "decoy-prefix",
+    "random_",
+    "Option for single SQT file mode defining the name pattern "
+    "used for shuffled database. Default=random_.",
+    "Available for percolator",
+    "true"
+  );
+ 
+  set_double_parameter(
+    "c-pos",
+    0.01,-BILLION,BILLION,
+    "Penalty for mistakes made on positive examples. Set by "
+    "cross validation if not specified. Default=cross-validate ",
+    "Available for crux percolator",
+    "true"
+  );
+  set_double_parameter(
+    "c-neg",
+    0.0,0.0,0.90,
+    "Penalty for mistake made on negative examples. Set by cross "
+    "validation if not specified or --c-pos not specified.",
+    "Available for crux percolator",
+    "true"
+  );
+ 
+  set_double_parameter(
+    "trian-fdr",
+    0.01,0.0,0.90,
+    "False discovery rate thereshold to define positive examples in training. "
+    "Set by cross validation if 0. Default is 0.01",
+    "Available for crux percolatior",
+    "true"
+  );
 
+  set_double_parameter(
+    "test-fdr",
+    0.01,0.0,1.0,
+    "False discovery rate threshold for evaluating best cross validation result "
+    "and the reported end result. Default is 0.01.",
+    "Availble for crux percolator.",
+    "true"
+  );
+ 
+  set_int_parameter(
+    "maxiter",
+    10,0,100000000,
+    "Maximum number of iterations for training (default 10).",
+    "Available for crux percolator",
+    "false"
+  );
+  set_double_parameter(
+    "train-ratio",
+    0.6,0.0,1.0,
+    "Fraction of the negative data set to be used as train set when only providing"
+    " one negative set, remaining examples will be used as test set.Default 0.6",
+    "Available for crux percolator.",
+    "true"
+  );
+  set_boolean_parameter(
+    "output-weights",
+    false,
+    "Output final weights to percolator.target.weights.txt.Default=T.",
+    "Available for crux percolator",
+    "true"
+  );
+  set_string_parameter(
+    "input-weights",
+    NULL,
+    " Read initial weights from the given file (one per line). Default do not read " 
+    "initial weights. Default=F",
+    "Available for crux percolator ",
+    "true"
+  );
+/*
+  set_boolean_parameter(
+    "output-feature-file",
+    false,
+    " Output the computed features to the given file in tab-delimited format. " 
+    "A file with the features with the given file name will be created. Default=F",
+    "Available for crux percolator ",
+    "true"
+  );
+ */
+  set_int_parameter(
+    "default-direction",
+    0,0,10,
+    "The most informative feature given as feature number, can be negated to indicate "
+    "that a lower value is better",
+    "Available for crux percolator",
+    "true"
+  );
+  set_boolean_parameter(
+    "unitnorm",
+    false,
+    "Use unit normalization [0-1] instead of standard deviation normalization",
+    "Available for crux percolator.",
+    "true"
+  );
+ 
+  set_double_parameter(
+    "train-fdr",
+    0.01,0,BILLION,
+    "False discovery rate threshold to define positive examples in training. "
+    "Set by cross validation if 0. Default is 0.01.",
+    "Available for crux percolator",
+    "true"
+  );
+
+  set_double_parameter(
+    "alpha",
+    0.0,0.0,1.0,
+    "Probability with which a present protein emits an associated peptide (--protein T "
+    "must be set). Set by grid search if not specified.",
+    "Available for crux percolator if --protein T is set.",
+    "true"
+  );
+  set_double_parameter(
+    "beta",
+    0.0,0.0,10.0,
+    "Probability of the creation of a peptide from noise (--protein T "
+    "must be set). Set by grid search if not specified.",
+    "Available for crux percolator if --protein T is set.",
+    "true"
+  );
+ 
+  set_double_parameter(
+    "gamma",
+    0.0,0.0,10.0,
+    "Prior probability of that a protein is present in the sample (--protein T "
+    "must be set). Set by grid search if not specified.",
+    "Available for crux percolator if --protein T is set.",
+    "true"
+  );
+  set_boolean_parameter(
+    "test-each-iteration",
+    false,
+    "Measure performance on test set each iteration",
+    "Available for crux percolator.",
+    "true"
+  );
+ 
+  set_boolean_parameter(
+    "static-override",
+    false,
+    "Override error check and do not fall back on default score vector in case of suspect score vector.",
+    "Available for crux percolator.",
+    "true"
+  );
+ 
+  set_boolean_parameter(
+    "klammer",
+    false,
+    "Using retention time features calculated as in Klammer et al.",
+    "Available for crux percolator",
+    "true"
+  );
+
+
+  set_int_parameter(
+    "doc",
+    -1,0,15,
+    "Include description of correct features.",
+    "Avilable for crux percolator",
+    "true"
+  );
+ 
+  set_boolean_parameter(
+    "only-psms",
+    false,
+    "Do not remove redundant peptides, keep all PSMs and exclude peptide level probability.",
+    "Available for crux percolator",
+    "true"
+  );
+
+  set_boolean_parameter(
+    "allow-protein-group",
+    false,
+    "Treat ties as if it were one protein ",
+    "Available for crux percolator.",
+    "true"
+  );
+  set_boolean_parameter(
+    "protein-level-pi0",
+    false,
+    "Use pi_0 value when calculating empirical q-values (--protein T must be set).",
+    "Available for crux percolator if --protein T is set.",
+    "true"
+  );
+ 
+  set_int_parameter(
+    "default-direction",
+    1,1,4,
+    "The most informative feature given as feature number, can be negtaed to indicate that "
+    "a lower value is better.",
+    "Available for crux-percolator.",
+    "true"
+  );
+  set_boolean_parameter(
+    "group-proteins",
+    false,
+    "Proteins with same probabilities will be grouped (--protein T must be set).",
+    "Available for crux percolator if --protein T is set.",
+    "true"
+  );
+
+  set_boolean_parameter(
+    "empirical-protein-q",
+    false,
+    "Output empirical q-values from target-decoy analysis (--protein T must be set).",
+    "Available for crux percolator if --protein T is set.",
+    "true"
+  );
+ 
+  set_boolean_parameter(
+    "no-prune-proteins",
+    false,
+    "Peptides with low score will not be pruned before calculating protein probabilities "
+    "(--protein T must be set).",
+    "Available for crux percolator if --protein T is set.",
+    "true"
+  );
+
+  set_int_parameter(
+    "deepness",
+    3,0,3,
+    "Setting deepness 0 or 1 or 2 or 3 from high deepness to low deepness(less computational time) "
+    "for the grid search for Alpha,Beta and Gamma estimation(--protein T must be set). "
+    "Default value is 3.",
+    "Available for crux percolator if --protein T is set.",
+    "true"
+  );
+
+  // **** tide arguments ****
+  set_string_parameter("spectrum records file", NULL,
+    "A spectrum records file generated by a previous run of crux tide-search "
+    "using the store-spectra parameter.",
+    "Available for read-spectrumrecords",
+    "true"
+  );
+
+  set_string_parameter("tide spectra file", NULL,
+    "The name of the file from which to parse the fragmentation spectra, in any "
+    "of the file formats supported by ProteoWizard. Alternatively, the argument "
+    "may be a binary spectrum file produced by a previous run of crux "
+    "tide-search using the store-spectra parameter.",
+    "Available for tide-search",
+    "true"
+  );
+
+  set_string_parameter("tide database index", NULL,
+    "A directory containing a database index created by a previous run of crux "
+    "tide-index.",
+    "Available for tide-search",
+    "true"
+  );
+
+  // **** tide options ****
+  set_boolean_parameter("monoisotopic-precursor", false,
+    "Use monoisotopic precursor masses rather than average mass for precursor. "
+    "Default F",
+    "Available for tide-index",
+    "true"
+  );
+  set_string_parameter("mods-spec", "",
+    "Expression for static and variable mass modifications to include. "
+    "Specify a comma-separated list of modification sequences of the form: "
+    "C+57.02146,2M+15.9949,1STY+79.966331,...",
+    "Available for tide-index",
+    "true"
+  );
+  set_string_parameter("store-spectra", "",
+    "Specify the name of the file where the binarized fragmentation spectra "
+    "will be stored.",
+    "Available for tide-search",
+    "true"
+  );
+ 
   // **** q-ranker-barista arguments ****
   set_string_parameter("database", NULL,
      "The program requires the FASTA format protein database files against "
@@ -851,8 +1212,8 @@ void initialize_parameters(void){
     "Search result can be as a file or a list of files. This option"
     " allows users to specify the search results are provided as a list of files by " 
     "setting the --list-of-files option to T."
-    " Defualt= false.", 
-    "Availabe for barista.","true");
+    " Default= false.", 
+    "Available for barista.","true");
 
   set_string_parameter("optimization", "protein",
      "Specifies whether to do optimization at the protein, peptide or psm level. "
@@ -1123,17 +1484,17 @@ void initialize_parameters(void){
                                       xlink code is implemented */
                         );
 
-  set_double_parameter("precursor-window-decoy", 20.0, 0, 1e6, 
+  set_double_parameter("precursor-window-weibull", 20.0, 0, 1e6, 
       "Search decoy-peptides within +/- "
       " 'mass-window-decoy' of the spectrum mass.  Default=20.0.",
       "Available for crux search-for-xlinks. ",
       "true");
 
-  set_window_type_parameter("precursor-window-type-decoy", WINDOW_MASS,
+  set_window_type_parameter("precursor-window-type-weibull", WINDOW_MASS,
       "Window type to use for selecting "
       "decoy peptides from precursor mz. <string>=mass|mz|ppm. "
       "Default=mass.",
-      "Available for crux search-for-matches",
+      "Available for crux search-for-xlinks",
       "true");
 
   set_string_parameter("link sites", NULL, 
@@ -1436,8 +1797,7 @@ bool select_cmd_line(  //remove options from name
   /* for each option name in list */
   int i;
   for( i=0; i< num_options; i++){
-    carp(CARP_DETAILED_DEBUG, "Option is: %s", option_names[i]);
-
+    //carp(CARP_INFO, "%i Option is: %s", i, option_names[i]);
     /* get value, usage, types */
     void* value_ptr = get_hash_value(parameters, option_names[i]);
     void* usage_ptr = get_hash_value(usages, option_names[i]);
@@ -2526,7 +2886,7 @@ double get_double_parameter(
   
   /* there is a parameter with the right name.  Now 
      try to convert it to a double*/
-  value = strtod(double_value, &endptr);
+  value = strtod(double_value, NULL);
  
   return(value);
   
@@ -3307,6 +3667,7 @@ bool set_hardklor_algorithm_type_parameter(
   result = add_or_update_hash(file_notes, name, filenotes);
   result = add_or_update_hash(for_users, name, foruser);
   result = add_or_update_hash(types, name, (void*)"HARDKLOR_ALGORITHM_TYPE_T");
+  free(value_str);
   return result;
   
 }
@@ -3319,6 +3680,7 @@ bool set_spectrum_parser_parameter(
   const char* foruser) {
 
   bool result = true;
+  char value_str[SMALL_BUFFER];
 
   // check if parameters can be changed
   if (!parameter_plasticity) {
@@ -3326,7 +3688,7 @@ bool set_spectrum_parser_parameter(
     return false;
   }
   /* stringify value */
-  char* value_str = spectrum_parser_type_to_string(set_value);
+  strcpy(value_str, spectrum_parser_type_to_string(set_value));
   carp(CARP_DETAILED_DEBUG, "setting spectrum_parser type to %s", value_str);
 
   result = add_or_update_hash(parameters, name, value_str);

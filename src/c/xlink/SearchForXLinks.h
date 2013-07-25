@@ -38,7 +38,7 @@ class SearchForXLinks: public CruxApplication {
   /**
    * Destructor
    */
-  ~SearchForXLinks();
+  virtual ~SearchForXLinks();
 
   /**
    * main method for SearchForXLinks

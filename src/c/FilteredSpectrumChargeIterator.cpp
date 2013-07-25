@@ -9,6 +9,7 @@
 #include "parameter.h"
 
 using namespace std;
+using namespace Crux;
 
 /**
  * \brief Sets up an iterator with the next spectrum that complies
@@ -80,7 +81,7 @@ void FilteredSpectrumChargeIterator::queueNextSpectrum() {
  * \returns a SPECTRUM_ITERATOR_T object.
  */
 FilteredSpectrumChargeIterator::FilteredSpectrumChargeIterator(
-  SpectrumCollection* spectrum_collection
+  Crux::SpectrumCollection* spectrum_collection
 ) {
 
   spectrum_collection_ = spectrum_collection;  

@@ -27,7 +27,6 @@
 #include "objects.h"
 #include "parameter.h"
 #include "Peak.h"
-#include "Index.h"
 
 #include "CruxApplication.h"
 
@@ -430,7 +429,7 @@ char* hardklor_algorithm_type_to_string(HARDKLOR_ALGORITHM_T type);
 char* hardklor_hardklor_algorithm_type_to_string(HARDKLOR_ALGORITHM_T type);
 
 SPECTRUM_PARSER_T string_to_spectrum_parser_type(char* name);
-char* spectrum_parser_type_to_string(SPECTRUM_PARSER_T type);
+const char* spectrum_parser_type_to_string(SPECTRUM_PARSER_T type);
 
 
 /**
@@ -470,7 +469,7 @@ static bool get_range_from_string(
   TValue& last ///< the last value
   ) {
 
-  if (const_range_string == NULL) {
+  if (const_range_string == NULL || strcmp(const_range_string, "__NULL_STR") == 0) {
     first = (TValue)0;
     last = std::numeric_limits<TValue>::max();
     return true;

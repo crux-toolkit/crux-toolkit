@@ -21,7 +21,7 @@
 #include <fstream>
 
 
-
+using namespace Crux;
 
 void print_spectrum(Spectrum* spectrum, LinkedIonSeries& ion_series);
 int main(int argc, char** argv){
@@ -93,7 +93,7 @@ int main(int argc, char** argv){
   }
 
   // read ms2 file
-  SpectrumCollection* collection = SpectrumCollectionFactory::create(ms2_file);
+  Crux::SpectrumCollection* collection = SpectrumCollectionFactory::create(ms2_file);
   collection->parse();
 
   

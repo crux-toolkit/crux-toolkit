@@ -10,129 +10,171 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 </p>
 <table border="1" align="center" width="90%">
 <!-- table headers-->
-   <col align="center"/>
-   <col width="12%"/>
-   <col align="left"/>
-   <col align="center"/>
-   <col align="center"/>
-   <col align="center"/>
+
+   
+
 <tr>
 <th rowspan="2"></th>
 <th rowspan="2">Name</th>
 <th rowspan="2">Description</th>
 <th rowspan="2">search-for-matches</th>
+<th rowspan="2">comet</th>
+<th rowspan="2">tide</th>
+<th rowspan="2">search-for-xlinks</th>
 <th colspan="4">barista</th>
 <th rowspan="2">q-ranker</th>
+<th colspan="3">percolator</th>
+<th rowspan="2">spectral-counts</th>
 </tr>
+
 <tr>
+<!--barista-->
 <th>PSM</th>
 <th>peptides</th>
 <th>proteins</th>
 <th>sub-proteins</th>
-<tr>
+<!--percolator-->
+<th>PSM</th>
+<th>peptides</th>
+<th>proteins</th>
 </tr>
-<!--1.scan -->
 
-<!--"✓"= "&#10003" or "&#10004"-->
+<!--"✓"= "&#10003;" or "&#10004"-->
 <!--"✕"= "&#10005" or "&#10006"-->
 <!--"–"=&#8211-->
+
 <tr bgcolor="#DEDEDE">
 <td>1</td>
 <td>scan</td>
 <td>The identifying number of each scan</td>
-<td>&#10003</td>
-<td>&#10003</td>
-<td>&#10003</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-
-<td>&#10003</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
 
-<!--2.charge-->
 <tr>
 <td>2</td>
 <td>charge</td>
 <td>The charge state for this spectrum in this PSM.</td>
-<td>&#10003</td>
-<!--td>&#10003</td-->
-<td>&#10003</td>
-<td>&#10003</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-<td>&#10003</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
-<!--3.spectrum precursor m/z-->
 
 <tr bgcolor="#DEDEDE">
 <td>3</td>
 <td>spectrum precursor m/z</td>
 <td>The observed m/z of the spectrum precursor ion.</td>
-<td>&#10003</td>
-<!--td>&#10003</td-->
-<td>&#10003</td>
-<td>&#10003</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-<td>&#10003</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
-<!--4.spectrum neutral mass-->
 
 <tr>
-   <td>4</td>
-   <td>spectrum neutral mass</td>
-   <td>The computed mass of the spectrum precursor at the given charge   state. This is equal to the precursor m/z minus the mass of a proton (1.00727646677 Da), all multiplied by the charge.</td>
-   <td>&#10003</td>
-   <!--td>&#10003</td-->
-<td>&#10003</td>
-<td>&#10003</td>
+<td>4</td>
+<td>spectrum neutral mass</td>
+<td>The computed mass of the spectrum precursor at the given charge   state. This is equal to the precursor m/z minus the mass of a proton (1.00727646677 Da), all multiplied by the charge.</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-   <td>&#10003</td>
+   <td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
-<!--5.peptide mass-->
 
 <tr bgcolor="#DEDEDE">
-   <td>5</td>
-   <td>peptide mass</td>
-   <td>The mass of the peptide sequence, computed as the sum of the the amino acid masses plus the mass of water (18.010564684 Da or 18.0153 Da, depending on whether we are using monoisotopic or average mass).</td>
-   <td>&#10003</td>
-   <!--td>&#10003</td-->
-   <td>&#10003</td>
-   <td>&#10003</td>
-   <td>&nbsp;</td>
-   <td>&nbsp;</td>
-   <td>&#10003</td>
+<td>5</td>
+<td>peptide mass</td>
+<td>The mass of the peptide sequence, computed as the sum of the the amino acid masses plus the mass of water (18.010564684 Da or 18.0153 Da, depending on whether we are using monoisotopic or average mass).</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
-<!--6.delta cn-->
 
 <tr>
-   <td>6</td>
-   <td>delta_cn</td>
-   <td>The normalized difference in xcorr for this PSM relative to other PSMs for this spectrum at this charge state.</td>
-   <td>&#10003</td>
-   <!--td>&#10003</td-->
-<td>&#10003</td>
-<td>&#10003</td>
+<td>6</td>
+<td>delta_cn</td>
+<td>The normalized difference in xcorr for this PSM relative to other PSMs for this spectrum at this charge state.</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-   <td>&#10003</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
-<!--7.sp score-->
 
 <tr bgcolor="#DEDEDE">
 <td>7</td>
 <td>sp score</td>
 <td>The SEQUEST-type preliminary score.</td>
-<td>&#10003</td>
-<!--td>&#10003</td-->
-<td>&#10003</td>
-<td>&#10003</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-<td>&#10003</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
-<!--8.sp rank-->
 
 <tr>
 <td>8</td>
@@ -142,593 +184,1087 @@ Various programs in Crux report their output and read inputs in tab-delimited te
   that are reported to the user.  Hence, the rank of the Sp score
   will be in the range from 1 to <i>n</i>, where the value
   of <i>n</i> is determined by the <code>--top-match</code> parameter.</td>
-<td>&#10003</td>
-<!--td>&#10003</td-->
-<td>&#10003</td>
-<td>&#10003</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-<td>&#10003</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
-<!--9.xcorr score-->
 
+<!--9.xcorr score-->
 <tr bgcolor="#DEDEDE">
 <td>9</td>
 <td>xcorr score</td>
 <td>The SEQUEST-type cross correlation score.</td>
-<td>&#10003</td>
-<!--td>&#10003</td-->
-<td>&#10003</td>
-<td>&#10003</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-<td>&#10003</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
-<!--10.xcorr rank-->
 
 <tr>
 <td>10</td>
 <td>xcorr rank</td>
 <td>The rank of this PSM when sorted by xcorr.</td>
-<td>&#10003</td>
-<!--td>&#10003</td-->
-<td>&#10003</td>
-<td>&#10003</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-<td>&#10003</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
-<!--11.p-value-->
 
 <tr bgcolor="#DEDEDE">
 <td>11</td>
 <td>p-value</td>
 <td>The p-value computed from the estimated Weibull parameters of the score distribution for this spectrum.</td>
-<td>&#10003</td>
-<!--td>&#10003</td-->
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-<td>&#10003</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
-<!--12. weibull est. q_value-->
 
 <tr>
 <td>12</td>
 <td>Weibull est. q-value</td>
 <td>The q-value computed from the p-value.</td>
-<td>&#10003</td>
-<!--td>&nbsp;</td-->
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 </tr>
-
-<!--13.Weibull est. PEP-->
 
 <tr bgcolor="#DEDEDE">
 <td>13</td>
 <td>Weibull est. PEP</td>
 <td>The PEP computed from the p-value.</td>
-<td>&#10003</td>
-<!--td>&nbsp;</td-->
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 </tr>
-<!--14.decoy q_value (xcorr)-->
 
 <tr>
 <td>14</td>
 <td>decoy q-value (xcorr)</td>
 <td> The empirical q-value computed by ranking target and decoy PSMs for this spectrum by xcorr.</td>
-<td>&#10003</td>
-<!--td>&nbsp;</td-->
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 </tr>
-<!--15.decoy PEP (xcorr)-->
 
 <tr bgcolor="#DEDEDE">
 <td>15</td>
 <td>decoy PEP (xcorr)</td>
 <td>The PEP computed by ranking target and decoy PSMs for this spectrum by xcorr.</td>
-<td>&#10003</td>
-<!--td>&nbsp;</td-->
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 </tr>
-<!--16.precolator score-->
 
 <tr>
 <td>16</td>
 <td>percolator score</td>
-<td>he discriminant score assigned by percolator.</td>
-<td>&#10003</td>
-<!--td>&nbsp;</td-->
+<td>The discriminant score assigned by percolator.</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
 <td>&nbsp;</td>
 </tr>
-<!--17.precolator rank-->
 
 <tr bgcolor="#DEDEDE">
 <td>17</td>
 <td>percolator rank</td>
-<td>The rank of this PSM when sorted by percolator score.</td>
-<td>&#10003</td>
-<!--td>&nbsp;</td-->
+<td>The rank of this PSM, peptide or protein when sorted by percolator score.</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
 <td>&nbsp;</td>
 </tr>
-<!--18.precolator q-value-->
 
 <tr>
 <td>18</td>
 <td>percolator q-value</td>
 <td>The q-value assigned by percolator.</td>
-<td>&#10003</td>
-<!--td>&nbsp;</td-->
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
 <td>&nbsp;</td>
 </tr>
-<!--19.percolator PEP-->
 
 <tr bgcolor="#DEDEDE">
 <td>19</td>
 <td>percolator PEP</td>
 <td> The PEP assigned by percolator.</td>
-<td>&#10003</td>
-<!---td>&nbsp;</td-->
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 </tr>
-<!--20. q-ranker score-->
 
 <tr>
 <td>20</td>
 <td>q-ranker score</td>
 <td>The discriminant score assigned by q-ranker.</td>
 <td>&nbsp;</td>
-<!--td>&nbsp;</td-->
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-<td>&#10003</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
-<!--21.q-ranker q-value-->
 
 <tr bgcolor="#DEDEDE">
 <td>21</td>
 <td>q-ranker q-value</td>
 <td>The q-value assigned by q-ranker. The q-value is the minimal PSM-level false discovery rate at which this PSM is deemed significant. This q-value is computed based on the ranking of the PSMs induced by the Barista score.</td>
 <td>&nbsp;</td>
-<!--td>&nbsp;</td-->
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-<td>&#10003</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
-<!--22.q-ranker PEP-->
 
+<!--22.q-ranker PEP-->
 <tr>
 <td>22</td>
 <td>q-ranker PEP</td>
 <td>The posterior error probability estimated from the q-ranker score</td>
 <td>&nbsp;</td>
-<!--td>&nbsp;</td-->
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-<td>&#10003</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
-<!--23.barista score-->
 
 <tr bgcolor="#DEDEDE">
 <td>23</td>
 <td>barista score</td>
 <td>The discriminant score assigned by barista.</td>
 <td>&nbsp;</td>
-<!--td>&#10003</td-->
-<td>&#10003</td>
-<td>&#10003</td>
-<td>&#10003</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-</tr><!--24.barista q-value-->
+<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
 
 <tr>
 <td>24</td>
 <td>barista q-value</td>
 <td>The q-value assigned by barista.</td>
 <td>&nbsp;</td>
-<!--td>&#10003</td-->
-<td>&#10003</td>
-<td>&#10003</td>
-<td>&#10003</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-</tr><!--25.barista PEP-->
+<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
 
 <tr bgcolor="#DEDEDE">
 <td>25</td>
 <td>barista PEP</td>
 <td>The PEP assigned by barista</td>
 <td>&nbsp;</td>
-<!--td>&#10003</td-->
-<td>&#10003</td>
-<td>&#10003</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 </tr>
-<!--26.b/y ions matched-->
 
 <tr>
 <td>26</td>
 <td>b/y ions matched</td>
 <td>The number of b-ions and y-ions in the peptide that have a corresponding peak in the spectrum.</td>
-<td>&#10003</td>
-<!--td>&#10003</td-->
-<td>&#10003</td>
-<td>&#10003</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-<td>&#10003</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
-<!--27.b/y ions total-->
 
 <tr bgcolor="#DEDEDE">
 <td>27</td>
 <td>b/y ions total</td>
 <td>The total number of b- and y-ions predicted for this peptide.</td>
-<td>&#10003</td>
-<!--td>&#10003</td-->
-<td>&#10003</td>
-<td>&#10003</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-<td>&#10003</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
-<!--28. matche/spectrum-->
 
 <tr>
 <td>28</td>
 <td>matches/spectrum</td>
 <td>The number of candidate peptides in the database found for this spectrum.</td>
-<td>&#10003</td>
-<!--td>&#10003</td-->
-<td>&#10003</td>
-<td>&#10003</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-<td>&#10003</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
-<!--29.sequence-->
 
 <tr bgcolor="#DEDEDE">
 <td>29</td>
 <td>sequence</td>
 <td> The peptide sequence.</td>
-<td>&#10003</td>
-<!--td>&#10003</td-->
-<td>&#10003</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-<td>&#10003</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
-<!--30.cleavage type-->
 
 <tr>
 <td>30</td>
 <td>cleavage type</td>
 <td>The cleavage rules for generating this peptide based on the user-specified enzyme specificity.</td>
-<td>&#10003</td>
-<!--td>&#10003</td-->
-<td>&#10003</td>
-<td>&#10003</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-<td>&#10003</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
-<!--31. protein id-->
 
 <tr bgcolor="#DEDEDE">
 <td>31</td>
 <td>protein id</td>
 <td>A comma-separated list of proteins in which this peptide appears. Following the protein name is a number in parentheses giving the start position of the peptide in the protein.</td>
-<td>&#10003</td>
-<!--td>&#10003</td-->
-<td>&#10003</td>
-<td>&#10003</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-<td>&#10003</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
 </tr>
-<!--32. falnking aa-->
 
 <tr>
 <td>32</td>
 <td>flanking aa</td>
 <td>The amino acids that precede and follow this peptide in the parent protein ID.</td>
-<td>&#10003</td>
-<!--td>&#10003</td-->
-<td>&#10003</td>
-<td>&#10003</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-<td>&#10003</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
-<!--33. unshuffled sequence-->
 
 <tr bgcolor="#DEDEDE">
 <td>33</td>
 <td>unshuffled sequence</td>
 <td>The target sequence from which a decoy was generated.</td>
-<td>&#10003</td>
-<!--td>&nbsp;</td-->
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 </tr>
-<!--34. eta-->
 
 <tr>
 <td>34</td>
 <td>eta</td>
 <td>Estimated Weibull scale parameter.</td>
-<td>&#10003</td>
-<!--td>&nbsp;</td-->
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 </tr>
-<!--35.beta-->
 
 <tr bgcolor="#DEDEDE">
 <td>35</td>
 <td>beta</td>
 <td>Estimated Weibull shape parameter.</td>
-<td>&#10003</td>
-<!--td>&nbsp;</td-->
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 </tr>
-<!--36.shift-->
 
 <tr>
 <td>36</td>
 <td>shift</td>
 <td>Estimated Weibull shift parameter.</td>
-<td>&#10003</td>
-<!--td>&nbsp;</td-->
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 </tr>
-<!--37.corr-->
 
 <tr bgcolor="#DEDEDE">
 <td>37</td>
 <td>corr</td>
 <td>The correlation of the scores with the estimated Weibull distribution.</td>
-<td>&#10003</td>
-<!--td>&nbsp;</td-->
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 </tr>
-<!--38.RAW-->
 
 <tr>
 <td>38</td>
 <td>RAW</td>
-<td>The raw (unnormalized) count of spectra per peptide computed by spectral-counts.</td>
-<td>&#10003</td>
-<!--td>&nbsp;</td-->
+<td>The raw (unnormalized) count of spectra per peptide</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-</tr><!--39.SIN: A protein quantification score computed by spectral-counts. -->
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+</tr>
 
 <tr bgcolor="#DEDEDE">
 <td>39</td>
 <td>SIN</td>
-<td>A protein quantification score computed by spectral-counts.</td>
-<td>&#10003</td>
-<!--td>&nbsp;</td-->
+<td>A protein quantification score</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-</tr><!--40.NSAF-->
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+</tr>
 
 <tr>
 <td>40</td>
 <td>NSAF</td>
-<td>The normalized spectral abundace factor computed by spectral-counts.</td>
-<td>&#10003</td>
-<!--td>&#10003</td-->
-<td>&#10003</td>
-<td>&#10003</td>
+<td>The normalized spectral abundace factor</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
 </tr>
 
 <!--41.dNSAF-->
 <tr bgcolor="#DEDEDE">
 <td>41</td>
 <td>dNSAF</td>
-<td>The distributed normalized spectral abundace factor computed by spectral-counts.</td>
-<td>&#10003</td>
-<!--td>&nbsp;</td-->
+<td>The distributed normalized spectral abundace factor</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-</tr><!--42.EMPAI-->
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+</tr>
 
 <tr>
 <td>42</td>
 <td>EMPAI</td>
-<td>The exponentially modified protein abundance index computed by spectral-counts.</td>
-<td>&#10003</td>
-<!--td>&nbsp;</td-->
+<td>The exponentially modified protein abundance index</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-</tr><!--43.parsimony rank-->
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+</tr>
 
 <tr bgcolor="#DEDEDE">
 <td>43</td>
 <td> parsimony rank</td>
 <td>The protein rank based on its spectral-counts score.</td>
-<td>&#10003</td>
-<!--td>&nbsp;</td-->
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-</tr><!--44.decoy matches/spectrum-->
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+</tr>
 
 <tr>
 <td>44</td>
 <td>decoy matches/spectrum</td>
 <td>The number of decoy peptides that were compared to this spectrum. May be different than the number of target peptides, depending on how the decoys were generated.</td>
-<td>&#10003</td>
-<!--td>&nbsp;</td-->
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 </tr>
-<!--45.filename-->
 
 <tr bgcolor="#DEDEDE">
 <td>45</td>
 <td>filename</td>
 <td>The name of the file in which the PSM appears.</td>
 <td>&nbsp;</td>
-<!--td>&#10003</td-->
-<td>&#10003</td>
-<td>&#10003</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-<td>&#10003</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
-<!--46. psm-id-->
+
 <tr>
 <td>46</td>
 <td>psm_id</td>
 <td>PSM identifier.</td>
 <td>&nbsp;</td>
-<!--td>&nbsp;</td-->
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-<td>&#10003</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
 
-<!--47.protein group number-->
 <tr bgcolor="#DEDEDE">
 <td>47</td>
 <td>protein group number</td>
-<td>A number that identifies a group.</td>
-<td>&nbsp;</td>
-<!--td>&nbsp;</td-->
+<td>Protein group index</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-<td>&#10003</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 <td>&nbsp;</td>
 </tr>
 
-<!--48. peptides-scan.charge-->
 <tr>
 <td>48</td>
 <td>peptides-scan.charge</td>
-<td>Peptides belonging to each protein in the group, with scan and charge (for example, EAMPK-001285.2).</td>
-<td>&nbsp;</td>
-<!--td>&nbsp;</td-->
+<td>Peptides belonging to each protein in the group, with scan and charge (for example, EAMPK-001285.2)</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-<td>&#10003</td>
-<td>&#10003</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
 <td>&nbsp;</td>
 </tr>
-<!--49. proteins-->
+
 <tr bgcolor="#DEDEDE">
 <td>49</td>
 <td>proteins</td>
 <td>Proteins in the protein group. Each protein can be followed by peptides in parenthesis, if they belong only to this particular protein in the group. Since peptides are considered indistinguishable if they have identical amino acid sequences or they differ only by I/L or T/S in the same position in the peptide, the peptides shared by the group may not all be identical.</td>
 <td>&nbsp;</td>
-<!--td>&nbsp;</td-->
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-<td>&#10003</td>
-<td>&#10003</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 <td>&nbsp;</td>
 </tr>
-<!--50. parent group numbers-->
+
 <tr>
 <td>50</td>
 <td>parent group numbers</td>
 <td>The numbers of the protein groups in the barista.target.proteins.txt that are supersets of this group in terms of peptides.</td>
 <td>&nbsp;</td>
-<!--td>&nbsp;</td-->
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-<td>&#10003</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 <td>&nbsp;</td>
 </tr>
+
+<tr bgcolor="#DEDEDE">
+<td>51</td>
+<td>peptide mass mono</td>
+<td>Monoisotopic peptide mass</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+
+<tr>
+<td>52</td>
+<td>peptide mass average</td>
+<td>Average peptide mass</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+
+<tr bgcolor="#DEDEDE">
+<td>53</td>
+<td>mass error(ppm)</td>
+<td>FIXME[Sean]</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+
+<tr>
+<td>54</td>
+<td>protein id(loc) 1</td>
+<td>FIXME[Sean]</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+
+<tr bgcolor="#DEDEDE">
+<td>55</td>
+<td>protein id(loc) 2</td>
+<td>FIXME[Sean]</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+
+<tr>
+<td>56</td>
+<td>by total</td>
+<td>FIXME[Sean]</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+
+<tr bgcolor="#DEDEDE">
+<td>57</td>
+<td>by observable (0-1200)</td>
+<td>FIXME[Sean]</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+
+<tr>
+<td>58</td>
+<td>by observable bin (0-1200)</td>
+<td>FIXME[Sean]</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+
+<tr bgcolor="#DEDEDE">
+<td>59</td>
+<td>by observable (0-max)</td>
+<td>FIXME[Sean]</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+
+<tr>
+<td>60</td>
+<td>by observable bin (0-max)</td>
+<td>FIXME[Sean]</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+
+<tr bgcolor="#DEDEDE">
+<td>61</td>
+<td>by observed bin</td>
+<td>FIXME[Sean]</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+
+<tr>
+<td>62</td>
+<td>ion current total</td>
+<td>FIXME[Sean]</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+
+<tr bgcolor="#DEDEDE">
+<td>63</td>
+<td>ion current observed</td>
+<td>FIXME[Sean]</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+
+<tr>
+<td>64</td>
+<td>ions observable bin (0-1200)</td>
+<td>FIXME[Sean]</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+
 </table> 
 
 </html>

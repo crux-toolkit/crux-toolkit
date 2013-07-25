@@ -20,7 +20,7 @@
 
 
 /* Limits on the number of arguments */
-static const int MAX_OPT_ARGS = 25;
+static const int MAX_OPT_ARGS = 50;
 static const int MAX_REQ_ARGS = 25;
 
 /* Make the error message bufer large enough

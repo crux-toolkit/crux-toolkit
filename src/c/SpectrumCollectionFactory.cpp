@@ -18,8 +18,8 @@
  * Instantiates a SpectrumCollection based on the extension of the
  * given file and the use-mstoolkit and msgf options.
  */
-SpectrumCollection* SpectrumCollectionFactory::create(const char* filename){
-  SpectrumCollection* collection = NULL;
+Crux::SpectrumCollection* SpectrumCollectionFactory::create(const char* filename){
+  Crux::SpectrumCollection* collection = NULL;
   struct stat stat_buff ; 
   stat(filename, &stat_buff);
   if(stat(filename, &stat_buff)!=0){

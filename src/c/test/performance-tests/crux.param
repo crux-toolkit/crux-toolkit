@@ -1,3 +1,4 @@
 print-search-progress=200
 compute-p-values=T
 compute-sp=T
+pinxml-output=T

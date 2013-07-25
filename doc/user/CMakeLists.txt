@@ -1,6 +1,29 @@
 cmake_minimum_required(VERSION 2.8.1)
 cmake_policy(VERSION 2.8.1)
 
+# Only create webpage directory if in svn workspace
+if (EXISTS /noble/www/htdocs/proj/crux)
+  set(WEBDIR /noble/www/htdocs/proj/crux)
+  add_custom_target(
+    webpage
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/doc/user
+    COMMAND cp crux.html ${WEBDIR}/index.html
+    COMMAND cp -f *.html ${WEBDIR}/
+    COMMAND cp -f *.png ${WEBDIR}/
+    COMMAND cp -f *.gif ${WEBDIR}/
+    COMMAND cp *.css ${WEBDIR}/
+    COMMAND cp default.params ${WEBDIR}/
+    COMMAND rm -fr ${WEBDIR}/data/
+    COMMAND mkdir ${WEBDIR}/data
+    COMMAND cp data/demo.ms2 ${WEBDIR}/data
+    COMMAND cp data/search.target.txt ${WEBDIR}/data
+    COMMAND cp data/small-yeast.fasta ${WEBDIR}/data
+    COMMAND cp data/target.sqt ${WEBDIR}/data
+    COMMAND mkdir -p ${WEBDIR}/download
+    COMMAND cp download/index.html ${WEBDIR}/download
+  )
+endif (EXISTS /noble/www/htdocs/proj/crux)
+
 set (
   crux_documentation
 	broken-link.html

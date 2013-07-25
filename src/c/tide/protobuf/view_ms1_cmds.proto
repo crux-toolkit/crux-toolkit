@@ -1,0 +1,12 @@
+option optimize_for = SPEED;
+package pb;
+
+message ViewMS1Command {
+  optional string load = 1;
+  optional double bucket = 2;
+  optional double min_mz = 3;
+  optional double max_mz = 4;
+  optional double min_rtime = 5;
+  optional double max_rtime = 6;
+  optional string write_matrix = 7;
+}

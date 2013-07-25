@@ -5,7 +5,7 @@
  *****************************************************************************/
 
 #include "DatabaseProteinIterator.h"
-
+using namespace Crux;
 
 /**
  * Instantiates a new database_protein_iterator from a database.

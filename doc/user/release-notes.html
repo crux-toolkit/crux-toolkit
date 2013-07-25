@@ -7,9 +7,42 @@
 <blockquote> 
 <h1>Release notes for Crux</h1>
 
-<h2>Version 1.XX</h2> 
+<h2>Version 1.XX</h2>
+<h3>Major enhancements</h3>
+<ul>
+</ul>
+
+<h3>Minor changes</h3>
+<ul>
+<li>
+Previously, the PinXML file produced
+by <code>search-for-matches</code> always contained a single PSM per
+charge/spectrum combination.  Now the <code>top-match</code> parameter
+controls how many PSMs are written to the PinXML file.</li>
+<li>Percolator outputs decoy files in addition to target files.</li>
+<li>Percolator tab-delimited peptides output now contains PEP column.</li>
+<li>Percolator tab-delimited peptides output has been corrected to show the PSM
+with the best score.</li>
+<li>Percolator tab-delimited PSMs output "matches/spectrum" value has been
+corrected.</li>
+<li>The hidden <code>make-pin</code> command (automatically invoked by
+Percolator when given a non-PinXML format as input) now marks matches from decoy
+files as decoys.</li>
+<li><code>make-pin</code> command now uses the <code>top-match</code> parameter
+to determine how many PSMs per spectrum will be written, rather than only
+writing the top ranked PSM.</li>
+</ul>
+
+<hr />
+
+<h2>Version 1.40</h2> 
 <h3>Major enchancements</h3>
 <ul>
+
+<li>
+Crux Percolator was updated from version 1.05 to the latest release,
+version 2.04.</li>
+
 </ul>
 <h3>Minor changes</h3>
 <ul>
@@ -46,28 +79,59 @@ translation of mz-bin-offset into bin edge locations.</p></li>
 
 <li>
 The <code>seed</code> parameter is now available to control the
-seeding of random number generator.  The default is to seed from the
-current value of the system clock; however, the seed can be set to a
-user specified unsigned integer.
+seeding of random number generator.  The default value is 1.
+<code>seed</code> is available as a parameter from all applications.
+It can be set as a command line option for 
+<code>crux search-for-matches</code>
+and 
+<code>crux percolator</code>.
 </li>
 
 <li>
-Fixed the default value of the <code>decoys</code> parameter.  The
-default had been <code>peptide-shuffle</code> though the documentation
-said the default was <code>protein-shuffle</code>.  The code has been
-corrected so the default is <code>protein-shuffle</code>.
+The default value of the <code>decoys</code> parameter for <code>crux
+search-for-matches</code> was incorrectly documented.  The default is
+actually <code>peptide-shuffle</code>, but the documentation said the
+default was <code>protein-shuffle</code>.  The documentation has been
+corrected.</li>
+
+<li>
+The incorrectly labeled column header <code>xcorr rank</code> in barista and
+q-ranker feature files has been corrected to <code>xcorr score</code>.
 </li>
 
 <li>
-The incorrectly labeled column header <code>xcorr rank</code> in the
-barista and q-ranker feature files has been corrected to <code>xcorr
-score</code>.
+The q-ranker output file <code>qranker_output.xml</code> has been renamed to
+<code>qranker.xml</code>.
 </li>
 
 <li>
-The q-ranker and Barista output files <code>qranker_output.xml</code>
-and <code>barista_output.xml</code> have been renamed, respectively,
-to <code>qranker.xml</code> and <code>barista.xml</code>.
+The deltaCn computation has been modified to be consistent with
+Percolator. Rather than using
+<pre>
+     deltaCn<sub>i</sub> = (xcorr<sub>1</sub> - xcorr<sub>i+1</sub>) / xcorr<sub>1</sub>
+</pre>
+it is now computed using
+<pre>
+     deltaCn<sub>i</sub> = (xcorr<sub>i</sub> - xcorr<sub>i+1</sub>) / max(xcorr<sub>i</sub>, 1.0)
+</pre>
+</li>
+
+<li>
+Percolator now accepts inputs in SQT, PepXML, and tab-delimited formats in addition to 
+the PinXML format.
+</li>
+
+<li>
+Flags were added to several commands allowing the user to control
+whether various results files are created in the output directory:
+<ul>
+  <li><code>--sqt-output &lt;T|F&gt;</code> (search-for-matches)</li>
+  <li><code>--mzid-output &lt;T|F&gt;</code> (search-for-matches, percolator)</li>
+  <li><code>--pinxml-output &lt;T|F&gt;</code> (search-for-matches)</li>
+  <li><code>--pepxml-output &lt;T|F&gt;</code> (search-for-matches, q-ranker, barista, percolator)</li>
+  <li><code>--txt-output &lt;T|F&gt;</code> (search-for-matches, q-ranker, barista, percolator)</li>
+</ul>
+By default, all of these flags are set to false except <code>txt-output</code>.
 </li>
 
 </ul>
@@ -103,6 +167,18 @@ Crux now uses <code>cmake</code> for the build process rather than
 The Tide database search software is no longer distributed as part of Crux because its license is not compatible with the new Crux license.
 </li>
 
+<li>
+Support for PIN XML output was added to <code>crux
+search-for-matches</code>.
+</li>
+<li>
+Fixed a bug in <code>crux create-index</code> on Windows and Cygin
+that caused the program to fail with the message:
+<pre>
+WARNING: Cannot rename directory
+FATAL: Failed to create index
+</pre>
+</li>
 <li>
 The parameter <code>protein database</code> is now an option rather than a required argument for <code>crux spectral-counts</code>.
 </li>

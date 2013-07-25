@@ -4,6 +4,8 @@
  ****************************************************************************/
 #include "ProteinIndexIterator.h"
 
+using namespace Crux;
+
 /**
  *
  *\returns TRUE if successfully sets the protein_index_iterator, else FALSE

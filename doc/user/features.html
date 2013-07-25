@@ -1,5 +1,5 @@
 <html>
-<title>Features used by percolator and q-ranker</title>
+<title>Features used by percolator, q-ranker and Barista</title>
 <link href="./crux.css" rel="styleSheet" type="text/css">
 </head>
 <body>
@@ -12,66 +12,290 @@ Following is a list of the features used by the <code>crux
 percolator</code> and <code>crux q-ranker</code> commands to represent
 each peptide-spectrum match (PSM).</p>
 
-<ol>
 
-<li>
-<code>XCorr</code>:  The SEQUEST<sup>&reg;</sup> cross-correlation score.</li>
+<table border="1" align="center">
+<tr>
+<!--table header-->
+<th>Number</th>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Percolator</th>
+<th>q-ranker</th>
+<th>barista</th>
+</tr>
+<!--tr backgoud(grey)"#DEDEDE"-->
+<!--check mark : "&#10003" or "&#10004, not supported use:&nbsp; -->
 
-<li>
-<code>DeltCN</code>: The difference between this PSM's XCorr and the
-XCorr of the <i>second-ranked</i> PSM for this spectrum, divided by
-this PSM's XCorr.  Note that this definition differs from that of the
-standard delta Cn reported by SEQUEST<sup>&reg;</sup>.</li>
+<tr bgcolor="#DEDEDE" >
+<td>1</td>
+<td><code>lnrSp</code></td>
+<td>Float</td>
+<td>The natural logarithm of the rank of the match
+based on the Sp score</td>
+<td>&#10003</td>
+<td></td>
+<td></td>
+</tr>
 
-<li>
-<code>Sp</code>:  The preliminary SEQUEST<sup>&reg;</sup> score.</li>
+<tr>
+<td>2</td>
+<td><code>deltLCn</code></td>
+<td>Float</td>
+<td>The difference between this PSM's XCorr and the
+XCorr of the <i>last-ranked</i> PSM for this spectrum, divided by
+this PSM's XCorr or 1, whichever is larger.</td>
+<td>&#10003</td>
+<td></td>
+<td></td>
+</tr>
 
-<li>
-<code>lnrSp</code>: The natural logarithm of the rank of the match
-based on the Sp score</li>
+<tr bgcolor="#DEDEDE" >
+<td>3</td>
+<td><code>deltCn</code></td>
+<td>Float</td>
+<td>The difference between this PSM's XCorr and the
+XCorr of the <i>next-ranked</i> PSM for this spectrum, divided by
+this PSM's XCorr or 1, whichever is larger.
+Note that this definition differs from that of the
+standard delta Cn reported by SEQUEST<sup>&reg;</sup>.</td>
+<td>&#10003</td>
+<td>&#10003</td>
+<td>&#10003</td>
+</tr>
 
-<li>
-<code>Mass</code>: The observed mass [M+H]<sup>+</sup></li>
+<tr>
+<td>4</td>
+<td><code>Xcorr / XCorr Score</code></td>
+<td>Float</td>
+<td>The SEQUEST cross-correlation score</td>
+<td>&#10003</td>
+<td>&#10003</td>
+<td>&#10003</td>
+</tr>
 
-<li>
-<code>dM</code>: The difference in calculated and observed mass</li>
+<tr bgcolor="#DEDEDE">
+<td>5</td>
+<td><code>Sp / Sp score</code></td>
+<td>Float</td>
+<td>The preliminary SEQUEST score.</td>
+<td>&#10003</td>
+<td>&#10003</td>
+<td>&#10003</td>
+</tr>
 
-<li>
-<code>absdM</code>: The absolute value of the difference in calculated
-and observed mass.</li>
+<tr>
+<td>6</td>
+<td><code>IonFrac</code></td>
+<td>Float</td>
+<td>The fraction of b and y ions theoretical ions matched to the spectrum</td>
+<td>&#10003</td>
+<td></td>
+<td></td>
+</tr>
 
-<li>
-<code>ionFrac</code>: The fraction of matched b and y ions.</li>
+<tr bgcolor="#DEDEDE">
+<td>7</td>
+<td><code>Mass</code></td>
+<td>Float</td>
+<td>The observed mass [M+H]<sup>+</sup></td>
+<td>&#10003</td>
+<td>&#10003</td>
+<td>&#10003</td>
+</tr>
 
-<li>
-<code>lnSM</code>: The natural logarithm of the number of database
-peptides within the specified m/z range</li>
+<tr>
+<td>8</td>
+<td><code>PepLen</code></td>
+<td>Integer</td>
+<td>The length of the matched peptide, in residues</td>
+<td>&#10003</td>
+<td>&#10003</td>
+<td>&#10003</td>
+</tr>
 
-<li>
-<code>enzN</code>: Boolean: Is the peptide preceded by an enzymatic
-(tryptic) site?</li>
+<tr bgcolor="#DEDEDE">
+<td>9-11</td>
+<td><code>Charge[n]</code></td>
+<td>Boolean</td>
+<td>Is this a 1+/2+/3+ charged spectrum?</td>
+<td>&#10003</td>
+<td>&#10003</td>
+<td>&#10003</td>
+</tr>
 
-<li>
-<code>enzC</code>: Boolean: Does the peptide have an enzymatic
-(tryptic) C-terminus?</li>
+<tr>
+<td>12</td>
+<td><code>enzN</code></td>
+<td>Boolean</td>
+<td>Is the peptide preceded by an enzymatic (tryptic) site?</td>
+<td>&#10003</td>
+<td>&#10003</td>
+<td>&#10003</td>
+</tr>
 
-<li>
-<code>enzInt</code>: Number of missed internal enzymatic (tryptic)
-sites.</li>
+<tr bgcolor="#DEDEDE">
+<td>13</td>
+<td><code>enzC</code></td>
+<td>Boolean</td>
+<td>Does the peptide have an enzymatic (tryptic) C-terminus?</td>
+<td>&#10003</td>
+<td>&#10003</td>
+<td>&#10003</td>
+</tr>
 
-<li>
-<code>pepLen</code>: The length of the matched peptide, in residues.</li>
+<tr>
+<td>14</td>
+<td><code>enzInt</code></td>
+<td>Integer</td>
+<td>Number of missed internal enzymatic (tryptic) sites</td>
+<td>&#10003</td>
+<td></td>
+<td></td>
+</tr>
 
-<li>
-<code>charge1</code>: Boolean: Is this a 1+ charged spectrum?</li>
+<tr bgcolor="#DEDEDE">
+<td>15</td>
+<td><code>lnNumSP</code></td>
+<td>Float</td>
+<td>The natural logarithm of the number of database
+peptides within the specified precursor range</td>
+<td>&#10003</td>
+<td></td>
+<td></td>
+</tr>
 
-<li>
-<code>charge2</code>: Boolean: Is this a 2+ charged spectrum?</li>
+<tr>
+<td>16</td>
+<td><code>dM</code></td>
+<td>Float</td>
+<td>The difference between the calculated and observed mass</td>
+<td>&#10003</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
 
-<li>
-<code>charge3</code>: Boolean: Is this a 3+ charged spectrum?</li>
+<tr bgcolor="#DEDEDE">
+<td>17</td>
+<td><code>absdM</code></td>
+<td>Float</td>
+<td>The absolute value of the difference between the calculated and observed mass</td>
+<td>&#10003</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
 
-</ol>
+<tr>
+<td>18</td>
+<td><code>label</code></td>
+<td>Boolean</td>
+<td>Is this decoy or target?</td>
+<td>&nbsp;</td>
+<td>&#10003</td>
+<td>&#10003</td>
+</tr>
+
+
+<tr bgcolor="#DEDEDE">
+<td>19</td>
+<td><code>xcorr rank</code></td>
+<td>Integer</td>
+<td>The rank of this PSM when sorted by xcorr</td>
+<td>&nbsp;</td>
+<td>&#10003</td>
+<td>&#10003</td>
+</tr>
+
+<tr>
+<td>20</td>
+<td><code>Sp rank</code></td>
+<td>Integer</td>
+<td>The rank of this PSM when sorted by sp score.</td>
+<td>&nbsp;</td>
+<td>&#10003</td>
+<td>&#10003</td>
+</tr>
+
+<tr bgcolor="#DEDEDE" >
+<td>21</td>
+<td><code>missed cleavage</code></td>
+<td>Boolean</td>
+<td>Does the peptide contain one or more missed cleavage sites?</td>
+<td>&nbsp;</td>
+<td>&#10003</td>
+<td>&#10003</td>
+</tr>
+
+<tr>
+<td>22</td>
+<td><code>number of sequence comparisons</code></td>
+<td>Integer</td>
+<td>The number of sequence comparisons</td>
+<td>&nbsp;</td>
+<td>&#10003</td>
+<td>&#10003</td>
+</tr>
+
+<tr bgcolor="#DEDEDE">
+<td>23</td>
+<td><code>delta mass</code></td>
+<td>Float</td>
+<td>Difference between measured and calculated mass</td>
+<td>&nbsp;</td>
+<td>&#10003</td>
+<td>&#10003</td>
+</tr-->
+
+<tr>
+<td>24</td>
+<td><code>abs(delta mass)</code></td>
+<td>Float</td>
+<td>Absolute value of delta mass</td>
+<td>&nbsp;</td>
+<td>&#10003</td>
+<td>&#10003</td>
+</tr>
+
+<tr bgcolor="#DEDEDE">
+<td>25</td>
+<td><code>b ions</code></td>
+<td>Float</td>
+<td>The XCorr from the theoretical b-ions.</td>
+<td>&nbsp;</td>
+<td>&#10003</td>
+<td>&#10003</td>
+</tr>
+
+<tr>
+<td>26</td>
+<td><code>y ions</code></td>
+<td>Float</td>
+<td>The XCorr from the theoretical y-ions.</td>
+<td>&nbsp;</td>
+<td>&#10003</td>
+<td>&#10003</td>
+</tr>
+
+<tr bgcolor="#DEDEDE">
+<td>27</td>
+<td><code>flanking</code></td>
+<td>Float</td>
+<td>The XCorr from the flanking peaks</td>
+<td>&nbsp;</td>
+<td>&#10003</td>
+<td>&#10003</td>
+</tr>
+
+<tr>
+<td><b>Total</b></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td></td>
+<td><b>17</td>
+<td><b>20</td>
+<td><b>20</b></td>
+</tr>
+</table>
 
 <hr></hr>
 

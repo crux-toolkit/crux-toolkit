@@ -17,7 +17,6 @@
 #include "SequestSearch.h"
 #include "ComputeQValues.h"
 #include "ComputeQValuesLegacy.h"
-#include "Percolator.h"
 #include "QRanker.h"
 #include "Barista.h"
 #include "PrintProcessedSpectra.h"
@@ -33,6 +32,12 @@
 #include "SortColumn.h"
 #include "CruxHardklorApplication.h"
 #include "CruxBullseyeApplication.h"
+#include "GenerateDecoys.h"
+#include "PercolatorApplication.h"
+#include "MakePinApplication.h"
+#include "TideIndexApplication.h"
+#include "ReadSpectrumRecordsApplication.h"
+#include "TideSearchApplication.h"
 
 /**
  * The starting point for crux.  Prints a general usage statement when
@@ -50,23 +55,27 @@ int main(int argc, char** argv){
   CruxApplicationList applications("crux");
 
   applications.add(new CreateIndex());
+  applications.add(new TideIndexApplication());
 
   // search
   applications.add(new MatchSearch());
+  applications.add(new TideSearchApplication());
   applications.add(new SequestSearch());
   applications.add(new SearchForXLinks());
 
   // post-search
   applications.add(new ComputeQValues());
   applications.add(new ComputeQValuesLegacy()); // depricated name
-  applications.add(new Percolator());
+  applications.add(new PercolatorApplication());
   applications.add(new QRanker());
   applications.add(new Barista());
   applications.add(new SpectralCounts());
+  applications.add(new ReadSpectrumRecordsApplication());
 
   // fasta/ms2 utilities
   applications.add(new PrintProcessedSpectra());
   applications.add(new GeneratePeptides());
+  applications.add(new GenerateDecoys());
   applications.add(new PredictPeptideIons());
   applications.add(new GetMs2Spectrum());
 
@@ -81,8 +90,8 @@ int main(int argc, char** argv){
   applications.add(new PrintVersion());
   
 
-
-
+  // make pin file 
+  applications.add(new MakePinApplication());
   int ret = applications.main(argc, argv);
   return ret;
 
