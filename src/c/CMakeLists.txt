@@ -70,7 +70,7 @@ set (
   ExtractColumns.cpp
   ExtractRows.cpp
   FilteredSpectrumChargeIterator.cpp
-  GenerateDecoysApplication.cpp
+  GenerateDecoys.cpp
   GeneratePeptidesIterator.cpp
   GetMs2Spectrum.cpp
   hash.cpp
