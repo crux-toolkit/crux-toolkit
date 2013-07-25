@@ -1,12 +1,12 @@
-#ifndef GENERATE_DECOYS_APPLICATION_H
-#define GENERATE_DECOYS_APPLICATION_H
+#ifndef GENERATE_DECOYS_H
+#define GENERATE_DECOYS_H
 
 #include <fstream>
 
 #include "CruxApplication.h"
 #include "Peptide.h"
 
-class GenerateDecoysApplication : public CruxApplication {
+class GenerateDecoys : public CruxApplication {
 
 protected:
   struct massCompare {
@@ -23,12 +23,12 @@ public:
   /**
    * Constructor
    */
-  GenerateDecoysApplication();
+  GenerateDecoys();
 
   /**
    * Destructor
    */
-  ~GenerateDecoysApplication();
+  ~GenerateDecoys();
 
   /**
    * Main method

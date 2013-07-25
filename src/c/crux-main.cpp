@@ -32,7 +32,7 @@
 #include "SortColumn.h"
 #include "CruxHardklorApplication.h"
 #include "CruxBullseyeApplication.h"
-#include "GenerateDecoysApplication.h"
+#include "GenerateDecoys.h"
 #include "PercolatorApplication.h"
 #include "MakePinApplication.h"
 #include "TideIndexApplication.h"
@@ -75,7 +75,7 @@ int main(int argc, char** argv){
   // fasta/ms2 utilities
   applications.add(new PrintProcessedSpectra());
   applications.add(new GeneratePeptides());
-  applications.add(new GenerateDecoysApplication());
+  applications.add(new GenerateDecoys());
   applications.add(new PredictPeptideIons());
   applications.add(new GetMs2Spectrum());
 

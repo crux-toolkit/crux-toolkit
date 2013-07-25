@@ -1,18 +1,18 @@
-#include "GenerateDecoysApplication.h"
+#include "GenerateDecoys.h"
 #include "parameter.h"
 #include "ProteinPeptideIterator.h"
 
 using namespace std;
 
-MASS_TYPE_T GenerateDecoysApplication::massType_ = AVERAGE;
+MASS_TYPE_T GenerateDecoys::massType_ = AVERAGE;
 
-GenerateDecoysApplication::GenerateDecoysApplication() {
+GenerateDecoys::GenerateDecoys() {
 }
 
-GenerateDecoysApplication::~GenerateDecoysApplication() {
+GenerateDecoys::~GenerateDecoys() {
 }
 
-int GenerateDecoysApplication::main(int argc, char** argv) {
+int GenerateDecoys::main(int argc, char** argv) {
 
   const char* option_list[] = {
     "min-mass",
@@ -150,7 +150,7 @@ int GenerateDecoysApplication::main(int argc, char** argv) {
  * Given a FASTA file, read in all protein IDs/sequences and cleave them.
  * Return a map of protein IDs to digested peptides from that protein
  */
-void GenerateDecoysApplication::readFasta(
+void GenerateDecoys::readFasta(
   const string& fastaName,  ///< FASTA file name
   map< string, vector<string> >& outProteins, ///< map to store proteins
   set<string>& outPeptides  ///< set of unique peptides
@@ -187,7 +187,7 @@ void GenerateDecoysApplication::readFasta(
  * Reads the next protein ID and corresponding sequence from the FASTA stream
  * Returns false if no more proteins in stream
  */
-bool GenerateDecoysApplication::getNextProtein(
+bool GenerateDecoys::getNextProtein(
   ifstream& fasta,  ///< FASTA stream
   string& outId,  ///< string to store protein ID
   string& outSequence ///< string to store sequence
@@ -239,7 +239,7 @@ bool GenerateDecoysApplication::getNextProtein(
 /**
  * Cleave protein sequence using specified enzyme and store results in vector
  */
-void GenerateDecoysApplication::cleaveProtein(
+void GenerateDecoys::cleaveProtein(
   const string& sequence, ///< Protein sequence to cleave
   ENZYME_T enzyme,  ///< Enzyme to use for cleavage
   vector<string>& outPeptides ///< vector to store peptides
@@ -319,7 +319,7 @@ void GenerateDecoysApplication::cleaveProtein(
  * Makes a decoy from the sequence.
  * Returns false on failure, and decoyOut will be the same as seq.
  */
-bool GenerateDecoysApplication::makeDecoy(
+bool GenerateDecoys::makeDecoy(
   const string& seq,  ///< sequence to make decoy from
   const set<string>& targetSeqs,  ///< targtes to check against
   const set<string>& decoySeqs,  ///< decoys to check against
@@ -374,7 +374,7 @@ bool GenerateDecoysApplication::makeDecoy(
  * Shuffles the peptide randomly.
  * Returns false if no different sequence was generated
  */
-bool GenerateDecoysApplication::shufflePeptide(
+bool GenerateDecoys::shufflePeptide(
   string& seq ///< Peptide sequence to shuffle
 ) {
   // Special case, length 2
@@ -394,7 +394,7 @@ bool GenerateDecoysApplication::shufflePeptide(
  * Reverses the peptide sequence.
  * Returns false if no different sequence was generated
  */
-bool GenerateDecoysApplication::reversePeptide(
+bool GenerateDecoys::reversePeptide(
   string& seq ///< Peptide sequence to reverse
 ) {
   string originalSeq(seq);
@@ -402,20 +402,20 @@ bool GenerateDecoysApplication::reversePeptide(
   return seq != originalSeq;
 }
 
-string GenerateDecoysApplication::getName() {
+string GenerateDecoys::getName() {
   return "generate-decoys";
 }
 
-string GenerateDecoysApplication::getDescription() {
+string GenerateDecoys::getDescription() {
   return "Generates a corresponding list of peptides, as well as a matched "
          "list of decoy peptides and decoy proteins from a FASTA file";
 }
 
-bool GenerateDecoysApplication::needsOutputDirectory() {
+bool GenerateDecoys::needsOutputDirectory() {
   return true;
 }
 
-COMMAND_T GenerateDecoysApplication::getCommand() {
+COMMAND_T GenerateDecoys::getCommand() {
   return GENERATE_DECOYS_COMMAND;
 }
 
