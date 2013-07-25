@@ -427,7 +427,7 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <tr bgcolor="#DEDEDE">
 <td>21</td>
 <td>q-ranker q-value</td>
-<td>The q-value assigned by q-ranker. The q-value is the minimal PSM-level false discovery rate at which this PSM is deemed significant. This q-value is computed based on the ranking of the PSMs induced by the Barista score.</td>
+<td>The q-value assigned by q-ranker.</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
@@ -560,7 +560,9 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <tr>
 <td>28</td>
 <td>matches/spectrum</td>
-<td>The number of candidate peptides in the database found for this spectrum.</td>
+<td>The number of candidate peptides in the database found for this
+  spectrum.  Note that this is always the number of target candidate
+  peptides, even if the PSM involves a decoy peptide.</td>
 <td>&#10003;</td>
 <td>&#10003;</td>
 <td>&#10003;</td>
