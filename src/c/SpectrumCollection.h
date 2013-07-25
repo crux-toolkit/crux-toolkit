@@ -4,8 +4,8 @@
  * CREATE DATE: 14 April 2011
  * \brief An abstract class for accessing spectra from a file.
  */
-#ifndef SPECTRUM_COLLECTION_H
-#define SPECTRUM_COLLECTION_H
+#ifndef CRUX_SPECTRUM_COLLECTION_H
+#define CRUX_SPECTRUM_COLLECTION_H
 
 #include <stdio.h>
 #include "objects.h"
@@ -13,18 +13,18 @@
 
 #include <vector>
 
-using namespace Crux;
-
 /**
  * \class SpectrumCollection
  * \brief An abstract class for accessing spectra from a file.
  */
+namespace Crux {
+
 class SpectrumCollection {
 
- friend class FilteredSpectrumChargeIterator;
+ friend class ::FilteredSpectrumChargeIterator;
 
  protected:
-  std::vector<Spectrum*> spectra_;  ///< spectra from the file
+  std::vector<Crux::Spectrum*> spectra_;  ///< spectra from the file
   std::string filename_;                  ///< filename
   bool is_parsed_;      ///< file has been read and spectra_ populated 
   int num_charged_spectra_;  ///< sum of all charge states from all spectra
@@ -44,7 +44,7 @@ class SpectrumCollection {
    *\returns TRUE if succeed to add, else FALSE 
    */
   void addSpectrum(
-    Spectrum* spectrum ///< spectrum to add to spectrum_collection -in
+    Crux::Spectrum* spectrum ///< spectrum to add to spectrum_collection -in
   ); 
 
   /**
@@ -56,14 +56,14 @@ class SpectrumCollection {
    *\returns TRUE if succeed to add, else FALSE 
    */
   void addSpectrumToEnd(
-    Spectrum* spectrum ///< spectrum to add to spectrum_collection -in
+    Crux::Spectrum* spectrum ///< spectrum to add to spectrum_collection -in
   );
 
   /**
    * Removes a spectrum from the spectrum_collection.
    */
   void removeSpectrum(
-    Spectrum* spectrum ///< spectrum to be removed from spectrum_collection -in
+    Crux::Spectrum* spectrum ///< spectrum to be removed from spectrum_collection -in
   ); 
 
  public:
@@ -94,7 +94,7 @@ class SpectrumCollection {
    * number equal to first_scan.
    * \returns The newly allocated Spectrum or NULL if scan number not found.
    */
-  virtual Spectrum* getSpectrum(
+  virtual Crux::Spectrum* getSpectrum(
     int first_scan      ///< The first scan of the spectrum to retrieve -in
   );
 
@@ -106,7 +106,7 @@ class SpectrumCollection {
    */
   virtual bool getSpectrum(
     int first_scan,      ///< The first scan of the spectrum to retrieve -in
-    Spectrum* spectrum   ///< Put the spectrum info here
+    Crux::Spectrum* spectrum   ///< Put the spectrum info here
   );
 
   /**
@@ -133,6 +133,8 @@ class SpectrumCollection {
    */
   bool getIsParsed();
 };
+
+}  // namespace Crux
 
 /*
  * Local Variables:

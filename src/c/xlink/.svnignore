@@ -1,0 +1,7 @@
+*.cmake
+*.gz
+*.swp
+cscope.out
+CMakeCache.txt
+CMakeFiles
+Makefile

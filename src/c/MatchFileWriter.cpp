@@ -201,7 +201,7 @@ void MatchFileWriter::addColumnNames(CruxApplication* application,
       addColumnName(SHIFT_COL);
       addColumnName(CORR_COL);
     }
-    if( get_boolean_parameter("compute-sp") 
+    if( (get_boolean_parameter("compute-sp") || get_boolean_parameter("sqt-output"))
         && get_int_parameter("max-rank-preliminary") > 0 ){
       addColumnName(SP_SCORE_COL);
       addColumnName(SP_RANK_COL);
@@ -210,6 +210,15 @@ void MatchFileWriter::addColumnNames(CruxApplication* application,
     }
     if( has_decoys ){
       addColumnName(DECOY_MATCHES_SPECTRUM_COL);
+    }
+    break;
+
+  case TIDE_SEARCH_COMMAND: ///< tide-search
+    if (get_boolean_parameter("compute-sp") || get_boolean_parameter("sqt-output")) {
+      addColumnName(SP_SCORE_COL);
+      addColumnName(SP_RANK_COL);
+      addColumnName(BY_IONS_MATCHED_COL);
+      addColumnName(BY_IONS_TOTAL_COL);
     }
     break;
 

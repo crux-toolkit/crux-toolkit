@@ -1,0 +1,6 @@
+scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	xcorr score	xcorr rank	matches/spectrum	sequence	cleavage type	protein id	flanking aa
+2	3	471.9493	1412.8260	1413.7998	0	0.31733781	1	1	LHMLTNSLLMLK	trypsin-full-digest	gi|6381999|ref|NP_009311.2|(307)	KE
+3	3	471.9494	1412.8264	1413.7998	0	0.12784368	1	1	LHMLTNSLLMLK	trypsin-full-digest	gi|6381999|ref|NP_009311.2|(307)	KE
+43	3	642.9849	1925.9330	1925.0844	0	-0.61430591	1	1	GYYLSGLFEGDGNIYTR	trypsin-full-digest	gi|6381999|ref|NP_009311.2|(89)	KC
+44	3	642.9850	1925.9331	1925.0844	0	-0.54182243	1	1	GYYLSGLFEGDGNIYTR	trypsin-full-digest	gi|6381999|ref|NP_009311.2|(89)	KC
+45	3	642.9857	1925.9353	1925.0844	0	-0.54774117	1	1	GYYLSGLFEGDGNIYTR	trypsin-full-digest	gi|6381999|ref|NP_009311.2|(89)	KC

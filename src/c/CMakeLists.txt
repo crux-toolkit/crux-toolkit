@@ -1,27 +1,39 @@
 cmake_minimum_required(VERSION 2.8.4)
 cmake_policy(VERSION 2.8.4)
 
+configure_file (
+ "CruxConfig.h.in"
+ "${CMAKE_CURRENT_BINARY_DIR}/CruxConfig.h"
+ )
+
 add_subdirectory(ArrayLibrary)
 add_subdirectory(bullseye)
 add_subdirectory(hardklor)
-add_subdirectory(percolator)
 add_subdirectory(posterior-error)
 add_subdirectory(qranker-barista)
 add_subdirectory(xlink)
+add_subdirectory(tide)
 
+include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 include_directories(.)
 include_directories(ArrayLibrary)
 include_directories(bullseye)
 include_directories(hardklor)
-include_directories(percolator)
 include_directories(qranker-barista)
 include_directories(posterior-error)
 include_directories(xlink)
+include_directories(tide/protoobj)
+include_directories(../..)
 include_directories(../external)
 include_directories(../external/include)
 include_directories(../external/build/src/ProteoWizard/libraries/boost_1_43_0)
 include_directories(../external/build/src/ProteoWizard/libraries/boost_aux)
 include_directories(../external/MSToolkit/include)
+include_directories(../external/build/src/percolator/src/)
+include_directories(../external/build/src/percolator/src/fido)
+include_directories(../external/build/src/percolator-build/src/)
+include_directories(../external/build/src/percolator-build/src/fido)
+
 
 link_directories(../external/lib)
 link_directories(../external/MSToolkit)
@@ -29,10 +41,12 @@ link_directories(.)
 link_directories(./ArrayLibrary)
 link_directories(./bullseye)
 link_directories(./hardklor)
-link_directories(./percolator)
 link_directories(./posterior-error)
 link_directories(./qranker-barista)
 link_directories(./xlink)
+link_directories(../external/build/src/percolator-build/src) 
+link_directories(../external/lib)
+link_directories(../external/build/src/percolator-build/src/fido)
 
 set (
   crux_lib_files
@@ -40,8 +54,10 @@ set (
   Alphabet.cpp
   analyze_psms.cpp
   carp.cpp
+  CarpStreamBuf.cpp
   ComputeQValues.cpp
   CreateIndex.cpp
+  crux-file-utils.cpp
   crux-utils.cpp
   Database.cpp
   DatabaseProteinIterator.cpp
@@ -54,6 +70,7 @@ set (
   ExtractColumns.cpp
   ExtractRows.cpp
   FilteredSpectrumChargeIterator.cpp
+  GenerateDecoys.cpp
   GeneratePeptidesIterator.cpp
   GetMs2Spectrum.cpp
   hash.cpp
@@ -67,6 +84,8 @@ set (
   IonFilteredIterator.cpp
   IonSeries.cpp
   linked_list.cpp
+  LineFileReader.cpp
+  MakePinApplication.cpp
   mass.cpp
   Match.cpp
   MatchColumns.cpp
@@ -94,8 +113,10 @@ set (
   PeptideSrc.cpp
   PepXMLReader.cpp
   PepXMLWriter.cpp
-  Percolator.cpp
+  PercolatorAdapter.cpp
+  PercolatorApplication.cpp
   GeneratePeptides.cpp
+  PinXMLWriter.cpp
   PostProcessProtein.cpp
   PredictPeptideIons.cpp
   PrintProcessedSpectra.cpp
@@ -104,8 +125,17 @@ set (
   ProteinPeptideIterator.cpp
   ProteinIndex.cpp
   ProteinIndexIterator.cpp
+  ProteinMatchCollection.cpp
+  AbstractMatch.cpp
+  ProteinMatch.cpp
+  PeptideMatch.cpp
+  PMCDelimitedFileWriter.cpp
+  PMCPepXMLWriter.cpp
+  PMCSQTWriter.cpp
+  SpectrumMatch.cpp
   PWIZSpectrumCollection.cpp
   q-value.cpp
+  ReadSpectrumRecordsApplication.cpp
   SequestSearch.cpp
   SortColumn.cpp
   Scorer.cpp
@@ -114,8 +144,14 @@ set (
   SpectrumCollection.cpp
   SpectrumCollectionFactory.cpp
   Spectrum.cpp
+  SpectrumRecordWriter.cpp
   SpectrumZState.cpp
   StatColumn.cpp
+  SQTReader.cpp
+  SQTWriter.cpp
+  TideIndexApplication.cpp
+  TideMatchSet.cpp
+  TideSearchApplication.cpp
   utils.cpp
 )
 
@@ -132,6 +168,7 @@ add_library(
   STATIC
   ${crux_lib_files}
 )
+add_dependencies(crux-support tide-support)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     set_property(
@@ -226,7 +263,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     crux-support
     hardklor
     MSToolkit
-    percolator
+    perclibrary
     posterior_error
     xlink
     ws2_32
@@ -259,15 +296,22 @@ else(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     barista
     bullseye
     crux-support
+    tide-support
+    protobuf
+    gflags
     dl
     hardklor
     m
     MSToolkit
-    percolator
     posterior_error
+    perclibrary
     pthread
     xlink
     ArrayLibrary
+    xerces-c
+    boost_filesystem
+    boost_system
+    fido
     pwiz_data_identdata
     pwiz_data_identdata_version
     pwiz_data_misc

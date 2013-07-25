@@ -72,10 +72,12 @@ with. For example A:K,A:D which means that the cross linker can attach A to
 K or A to D.  Also, the n-terminus of a protein can be specified as a link
 site by using nterm.  For example  nterm:K means that a cross-linker can
 attach between a protein's n-terminus and lysine.
+</li>
 
 <LI>
 &lt;link mass&gt; &ndash; 
   The mass modification of the linker when attached to a peptide.
+</li>
 </UL>
 
 <B>Output:</B>
@@ -112,6 +114,7 @@ See <a href="xlink-txt-format.html">xlink txt file format</a> for a list of the 
 <li>
 <b>search-for-xlinks.log.txt</b>: a log file containing a copy of all messages that were
 printed to stderr.
+</li>
 
 </ul>
 
@@ -200,10 +203,16 @@ spectrum mass / (1.0 + (<code>precursor-window</code> / 1000000)) and the upper 
 is defined as spectrum mass / (1.0 - (<code>precursor-window</code> / 1000000)).  
 Default = mass.</li>
 
-<li><code>--precursor-window-decoy &lt;0-1e6&gt;</code> &ndash; Search
-decoy peptides within +/- '<code>precursor-window-decoy</code>' of the precursor mass.
-Default = 20.
-</li>
+<li>
+<code>--precursor-window-weibull &lt;0-1e6&gt;</code> &ndash; Score
+decoy peptides within +/- <code>precursor-window-weibull</code> of the
+precursor mass.  The resulting scores are used <i>only</i> for fitting
+the Weibull distribution.  Default = 20.</li>
+
+<li>
+<code>--precursor-window-type-weibull mass|mz|ppm</code> &ndash; Window
+type to use in conjunction with
+the <code>precursor-window-weibull</code> parameter.  Default=mass.</li>
 
 <li><code>--min-weibull-points &lt;int&gt;</code> &ndash;
 Keep reshuffling and collecting XCorr scores until the minimum number 
@@ -216,6 +225,7 @@ Predict ions for the theoretical spectra up to max charge state
 (1,2,...,6) or up to the charge state of the peptide (peptide).  
 If the max-ion-charge is greater than the charge state of the 
 peptide, then the max is the peptide charge.  Default='peptide'.
+</li>
 
 <LI>
 <code>--scan-number &lt;int&gt;|&lt;int&gt;-&lt;int&gt;</code> &ndash;
@@ -306,30 +316,29 @@ spectrum written to the output files. Default = 5.
 <li>
 <code>fragment-mass average|mono</code> &ndash; Which isotopes to use
 in calcuating fragment ion mass (average, mono). Default = average.
-
-
-<li>
-<code>use-mstoolkit T|F</code> &ndash;
-Use MSToolkit to parse the spectra. Default = F.
 </li>
 
 <LI>
 <code>min-mass &lt;float&gt;</code> &ndash; 
 The minimum neutral mass of the peptides to place in the
 index. Default = 200.
+</li>
 
 <LI>
 <code>max-mass &lt;float&gt;</code> &ndash; 
 The maximum neutral mass of the peptides to place in
 index. Default = 7200.
+</li>
 	
 <LI>
 <code>min-length &lt;int&gt;</code> &ndash; 
 The minimum length of the peptides to place in the index. Default = 4.
+</li>
 	
 <LI>
 <code>max-length &lt;int&gt;</code> &ndash; 
 The maximum length of the peptides to place in the index. Default = 50.
+</li>
 
 <LI>
 <code>enzyme trypsin|chymotrypsin|elastase|clostripain|cyanogen-bromide|idosobenzoate|proline-endopeptidase|staph-protease|modified-chymotrypsin|elastase-trypsin-chymotrypsin|no-enzyme
@@ -344,6 +353,7 @@ iodosobenzoate [W]|[], proline-endopeptidase [P]|[], staph-protease
 [E]|[], modified-chymotrypsin [FWYL]|{P},
 elastase-trypsin-chymotrypsin [ALIVKRWFY]|{P},aspn []|[D] (cuts before
 D). Default = trypsin.
+</li>
 
 <li>
 <code>custom-enzyme &lt;residues before cleavage&gt;|&lt;residues after cleavage
@@ -359,6 +369,7 @@ are enclosed in curly braces, '{' and '}'.  Use X to indicate all
 residues.  For example, trypsin cuts after R or K but not before P
 which is represented as <code>[RK]|{P}</code>.  AspN cuts after any
 residue but only before D which is represented as <code>[X]|[D]</code>.
+</li>
 
 <LI>
 <code>digestion full-digest|partial-digest</code> &ndash;
@@ -367,6 +378,7 @@ partial-digest). Either both ends or one end of a peptide must
 conform to enzyme specificity rules. Default full-digest., Used in
 conjunction with enzyme option when enzyme is not set to to
 'no-enzyme'.  
+</li>
 
 <LI>
 <code>missed-cleavages &lt;int&gt;</code> &ndash; 
@@ -379,11 +391,13 @@ potential cleavage sites. Default = 0.
 <code>unique-peptides T|F</code> &ndash; 
 For peptides appearing in multiple proteins, store a reference to only
 one of those proteins.  Default = F.
+</li>
 
 <LI>
 <code>isotopic-mass average|mono</code> &ndash; 
 Specify the type of isotopic masses to use when calculating the
 peptide mass. Default = average.
+</li>
    
 <li>
 <code>&lt;A-Z&gt &lt;float&gt;</code> &ndash;

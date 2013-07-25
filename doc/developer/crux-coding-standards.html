@@ -414,6 +414,26 @@ The usage message should list the default value for every option.
 
 </ul>
 
+<h3>SVN standards</h3>
+<ul>
+<li>
+During development many files will be generated that won't be
+tracked in version control. SVN will recognize the files that aren't being
+tracked and alert you to their presence by showing a status of '?'.
+In many cases the files are completely innocuous and will never be added to
+version control.
+In fact, it would be better not to have them cluttering up your SVN output.
+SVN can track a list of file names or regular expressions that should be
+ignored via the <code>propset svn:ignore</code> command.
+To avoid clobbering each other's list of ignorable files we will record the
+names and patterns to be ignored in a .svnignore file for each directory.
+To add or remove a name or pattern just edit the .svnignore file and run:
+<pre>
+svn propset svn:ignore -F .svnignore .
+svn commit -m "Updated list of files ignored by SVN" .svnignore .
+</pre>
+</li>
+</ul>
 </blockquote>
 </body>
 </html>

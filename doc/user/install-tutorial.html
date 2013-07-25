@@ -16,12 +16,12 @@
 <p>This page will walk you through the steps of installing <span
 class=prog>crux</span> on your computer.  It assumes you are working
 in a command-line shell (readily available for Linux and Mac systems,
-<a href="http://www.cygwin.com/">cygwin</a> is the preferred choice for
+<a href="http://www.cygwin.com">cygwin</a> is the preferred choice for
 Windows).  The installation requires that you have <span
 class=prog>gcc</span> and <span class=prog>make</span> on your
 computer. <!-- precompiled binaries may be  available?-->
 All commands (words that you should type) are enclosed in
-boxes.  (Do not type the leading <code>$</code>, it indicates the
+boxes.  (Do not type the leading <code>$</code>; it indicates the
 prompt). These instructions will refer to your home directory as
 <code>$HOME</code>.  You can type <code>$HOME</code>  in the commands
 or you can use the fully qualified path to your home directory which
@@ -68,7 +68,7 @@ should be named something like
 to a convenient location and unpack the file with this command.
 
 <div class=code><code>
-$ unzip crux-1.xx-i686-GNU-Linux.zip</code>
+$ unzip crux-x.xx-i686-GNU-Linux.zip</code>
 </div>
 You should now have a new directory, <span class=file>bdist</span>,
 with two subdirectories <span class=file>bin</span>, and <span
@@ -88,27 +88,39 @@ installed a C++ compiler,
 and
 <a href="http://subversion.apache.org"><span class=prog>svn</span></a>.
 Building <span class=prog>crux</span> also requires the
-<a href=""><span class=prog>Proteowizard</span></a>
+<a href="http://proteowizard.sourceforge.net"><span class=prog>Proteowizard</span></a>
+and 
+<a href="http://per-colator.com"><span class=prog>Percolator</span></a>
 libraries. 
 These will automatically be copied from the <span class=prog>Proteowizard</span>
-SVN repository and staticlly linked into <span class=prog>crux</span>.
+and <span class=prog>Percolator</span></a> 
+repositories and statically linked into <span class=prog>crux</span>.
+<p />
+If you are building on Mac OS X you may need to download an older C++ compiler
+from a repository such as <a href="http://www.macports.org">MacPorts</a>.
+Recent versions of the C++ compiler provided by Apple are much stricter than previous
+versions and will classify some language constructs used in the 
+<a href="http://per-colator.com"><span class=prog>Percolator</span></a> library
+as invalid C++ syntax.
+We have used version 4.7 of the GNU <span class=prog>g++</span> compiler
+downloaded from <a href="http://www.macports.org">MacPorts</a>.
 <p />
 The file you downloaded should be named something like <span
-class=file>crux-1.xx.Source.tar.gz</span>, where <span class=file>1.xx</span>
-is replaced with the most current release version, such as 1.37.
+class=file>crux-1.xx.source.tar.gz</span>, where <span class=file>x.xx</span>
+is replaced with the most current release version.
 <ol>
 <li><b>Unpack</b> Move the downloaded file to a
 convenient location and unpack it with this command.
 
 <div class=code><code>
-$ tar -zxvf crux-1.xx.Source.tar.gz
+$ tar -zxvf crux-x.xx.Source.tar.gz
 </div>
-A new directory named <span class=file>crux-1.xx.Source</span> will be
+A new directory named <span class=file>crux-x.xx.Source</span> will be
 created and a long list of files will stream by as they are being put
 into the new directory.
 </li>
 
-<li><b>Configure</b>  Move into the <span class=file>crux-1.xx.Source</span>
+<li><b>Configure</b>  Move into the <span class=file>crux-x.xx.Source</span>
 directory from step 1.
 Run the command
 <div class=code><code>

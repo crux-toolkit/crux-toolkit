@@ -26,7 +26,7 @@
 #include "carp.h"
 #include "hash.h"
 #include "objects.h"
-#include "Peptide.h"
+
 #include "parse_arguments.h"
 #include "modifications.h"
 

@@ -1,0 +1,211 @@
+# List of commands to be run by crux-test.pl
+# Format is these fields separated by an equals sign ('=').
+#    darwin                (0 or 1, depending on whether the test should be
+#                           be run on a darwin OS)
+#    test name             (printed to the output as a label for the command)
+#    standard filename     (path to file with the expected output)
+#    command               (command with options and args to be run)
+#    ignore string         (regex to ignore for diff command, 're 1' 're 2'
+
+# TESTS WITH NO INDEX
+ 
+# Generate Peptides
+1 = generate_peptides_no_ops = good_results/standard_generate_peptides_no_ops.out = crux generate-peptides test.fasta =
+
+1 = generate_peptides_default = good_results/standard_generate_peptides_default.out = crux generate-peptides  --output-sequence T test.fasta =
+
+1 = generate_peptides_specifying_miss_cleavages = good_results/standard_generate_peptides_specifying_missed_cleavages.out = crux generate-peptides --parameter-file params/params_uniq --output-sequence T --enzyme trypsin --digestion partial-digest --missed-cleavages 3 test.fasta =
+
+1 = generate_peptides_change_minmax = good_results/standard_generate_peptides_change_minmax = crux generate-peptides --parameter-file params/many_changes --output-sequence T --max-length 20 test.fasta =
+
+1 = generate_peptides_mods = good_results/standard_generate_peptides_mods = crux generate-peptides --parameter-file params/mods --output-sequence T --max-length 20 test.fasta =
+
+1 = generate_peptides_fixed_mods = good_results/standard_generate_peptides_fixed_mods = crux generate-peptides --parameter-file params/fixed-mods --output-sequence T --max-length 20 test.fasta =
+
+1 = generate_peptides_chymo = good_results/standard_generate_peptides_chymo = crux generate-peptides --parameter-file params/chymo --output-sequence T test.fasta = 
+
+1 = generate-peptides-ambiguous-residues = good_results/generate-peptides-ambiguous.target.txt = crux generate-peptides --min-mass 1464 --max-mass 1496 --output-sequence T ambiguous.fasta > a  2>&1; cat a =  'time'
+
+# Get spectrum
+1 = get_ms2_spectrum = good_results/standard_get_ms2_spectrum.out = crux get-ms2-spectrum 2 test.ms2 =
+
+1 = get_ms2_spectrum_stats = good_results/standard_get_ms2_spectrum_stats.out = crux get-ms2-spectrum --stats T 2 test.ms2 =
+
+#Generate Zline  
+1= get_ms2_spectrum_without_zlines= good_results/standard_get_ms2_spectrum_without_zlines.out = crux get-ms2-spectrum 2-16 test-no-z1.ms2 =
+
+# Print processed spectrum
+1 = print_processed_spectrum = good_results/processed-test.ms2 = crux print-processed-spectra test.ms2 processed-test.ms2 ; cat crux-output/processed-test.ms2
+
+# Predict ion series
+1 = predict_ions_no_ops = good_results/standard_predict_ions_no_ops.out = crux predict-peptide-ions IAMASEQ 2=
+
+1 = predict_ions_b_h2o = good_results/standard_predict_ions_b_h2o.out = crux predict-peptide-ions --primary-ions b --precursor-ions T --h2o 1 IAMASEQ 2 =
+
+1 = predict_ions_y_nh3 = good_results/standard_predict_ions_y_nh3.out = crux predict-peptide-ions --primary-ions y  --nh3 1 IAMASEQ 2=
+
+1 = predict_ions_by_flank_max_z1 = good_results/standard_predict_ions_by_flank_max_z1.out = crux predict-peptide-ions --primary-ions by --max-ion-charge 1 --flanking T IAMASEQ 3=
+
+# Search for matches and test txt file
+1 = search_for_matches_default = good_results/search_for_matches_default.target.txt = crux search-for-matches --decoys peptide-shuffle --parameter-file params/set_rand_seed test.ms2 test.fasta; cat crux-output/search.target.txt = 'Time' 'atabase'
+
+# Analyze existing search results
+#1 = analyze_matches_existing = good_results/analyze_matches_existing.percolator.target.txt = crux percolator --no-schema-validation T  --feature-file T --overwrite T pin.xml; cat existing_search/percolator.target.txt = 'Time' 'Database'
+
+# Search fasta with duplicate peptides, return one copy of each
+1 = search_duplicates = good_results/search_for_matches_duplicates.target.txt = crux search-for-matches --decoys peptide-shuffle --parameter-file params/set_rand_seed --fileroot duplicates test.ms2 duplicates.fasta; cat crux-output/duplicates.search.target.txt
+
+# Search for matches with Sp
+1 = search_sp = good_results/sp.search.target.txt = rm -rf crux-output-sp; crux search-for-matches --decoys peptide-shuffle --parameter-file params/sp --output-dir crux-output-sp test.ms2 test.fasta; cat crux-output-sp/search.target.txt
+
+# Percolate search-for-matches results with sp
+#1 = percolator = good_results/sp.percolator.target.txt =  crux percolator --parameter-file params/sp --output-dir crux-output-sp test.fasta crux-output-sp; cat crux-output-sp/percolator.target.txt = 'Time'
+
+# Search and estimate p-values
+1 = search_pvalues = good_results/search_pvalues.target.txt = rm -rf crux-output; crux search-for-matches --parameter-file params/pval demo.ms2 small-yeast.fasta; cat crux-output/search.target.txt = 'Time'
+
+# Get q-values from above search
+1 = compute-q-values = good_results/qvalues.txt = crux compute-q-values --parameter-file params/pval small-yeast.fasta crux-output; cat crux-output/qvalues.target.txt 
+
+# Search for matches with modifications
+1 = search_mods_fasta = good_results/search_mods_fasta.target.txt = rm -rf crux-output; crux search-for-matches --decoys peptide-shuffle --parameter-file params/mods test.ms2 test.fasta; cat crux-output/search.target.txt = 'Time' 'Database'
+
+# Analyze matches with modifications
+0 = reverse_sequence = good_results/reverse.decoy.txt = crux search-for-matches --parameter-file params/reverse test.ms2 test-plus-palindrome.fasta; cat crux-output/reverse.search.decoy.txt
+
+# Search for matches and estimate p-values with modifications
+# TODO
+
+# Search with elastase
+1 = search_elastase = good_results/search_elastase.target.txt = rm -rf crux-output;crux search-for-matches --parameter-file params/elastase  test.ms2 test.fasta; cat crux-output/search.target.txt = 'Time'
+
+# Search with custom enzyme set to elastase rules
+1 = search_custom_like_elastase = good_results/search_custom_like_elastase.target.txt = rm -rf crux-output;crux search-for-matches --parameter-file params/custom-enzyme  test.ms2 test.fasta; cat crux-output/search.target.txt = 'Time' 'EnzymeSpec'
+
+# Print decoys to target file (previously the --tdc option)
+1 = search_tdc = good_results/search_tdc.target.txt = rm -rf tdc; crux search-for-matches --parameter-file params/tdc test.ms2 test.fasta;  cat tdc/search.target.txt = 'Time'
+
+# Search 3 decoys per target but print all decoys to one file
+1 = decoys_one_file = good_results/decoys_one_file.decoy.txt = rm -rf one-decoy-file; crux search-for-matches --parameter-file params/one-decoy-file test.ms2 test.fasta; cat one-decoy-file/search.decoy.txt = 'Time'
+
+# Confirm that no decoy files were created for tdc and that only one decoy file created for one-decoy-file
+0 = list_files = good_results/list-files-tdc-one-decoy-file = ls one-decoy-file tdc  
+
+# Search using the two other window types
+1 = mz_window = good_results/mz-window.target.txt = crux search-for-matches --parameter-file params/mz_window --fileroot mzwin demo.ms2 small-yeast.fasta; cat crux-output/mzwin.search.target.txt = 
+
+1 = ppm_window = good_results/ppmwin.search.target.txt = crux search-for-matches --parameter-file params/ppm_window --fileroot ppmwin demo.ms2 small-yeast.fasta; cat crux-output/ppmwin.search.target.txt =
+
+# TESTS WITH INDEX
+
+# See that crux generate-peptides works with an existing index
+1 = generate_peptides_use_existing_index = good_results/standard_generate_peptides_use_exisiting_index.out = crux generate-peptides --output-sequence T  --enzyme trypsin existing_crux_index = '# PROTEIN DATABASE'
+
+# See that crux-search-for-matches works with existing index
+1 = search_for_matches_default_existing_index = good_results/search_for_matches_default_existing_index.target.txt = rm -rf crux-output; crux search-for-matches --decoys peptide-shuffle --parameter-file params/set_rand_seed test.ms2 existing_crux_index; cat crux-output/search.target.txt = 'Time' 'Database'
+
+# See that match_analysis works with an existing index and existing results
+#1 = analyze_matches_existing_index_and_results = good_results/analyze_matches_existing.percolator.target.txt =  rm -f existing_search/percolator*; crux percolator --output-dir existing_search existing_crux_index existing_search; cat existing_search/percolator.target.txt = 'StartTime' 'Database'
+
+# See that match_analysis works with an existing index and new results
+#1 = analyze_matches_existing_index = good_results/analyze_matches_existing_index.percolator.target.txt =  crux percolator --parameter-file params/set_rand_seed existing_crux_index crux-output; cat crux-output/percolator.target.txt = 'StartTime'
+
+# Create index. Use crux generate-peptides to test that it worked
+
+1 = create_index_no_decoy = good_results/standard_create_index_no_decoy.out = rm -rf test_crux_index; crux create-index --decoys none test.fasta test_crux_index; cat test_crux_index/README test_crux_index/crux_index_map = 'time'
+
+1 = generate_peptides_test_index = good_results/standard_generate_peptides_use_index.out = crux generate-peptides --output-sequence T test_crux_index = '# PROTEIN DATABASE'
+
+# test that mods work with the index
+1 = generate_peptides_mods_index = good_results/standard_generate_peptides_mods_index = crux generate-peptides --parameter-file params/mods --output-sequence T --max-length 20  test_crux_index =
+
+# create an index with all defaults (including decoys, but do set the random seed)
+1 = create_index_default = good_results/standard_create_index_default.out = rm -rf test_crux_index; crux create-index --decoys peptide-shuffle --parameter-file params/set_rand_seed test.fasta test_crux_index; cat test_crux_index/README test_crux_index/crux_index_map = 'time'
+1 = generate_peptides_test_index = good_results/standard_generate_peptides_use_index.out = crux generate-peptides --output-sequence T test_crux_index = '# PROTEIN DATABASE'
+
+# Search for matches and test txt file
+1 = search_for_matches_default_index = good_results/search_for_matches_default_index.target.txt = rm -f crux-output/search.target.txt; crux search-for-matches --overwrite T --decoys peptide-shuffle --parameter-file params/params_uniq test.ms2 test_crux_index; cat crux-output/search.target.txt = 'Time' 'Database'
+
+# Analyze matches using above index
+#1 = analyze_matches_index = good_results/analyze_matches_index.percolator.target.txt =  crux percolator --overwrite T --parameter-file params/set_rand_seed test_crux_index crux-output; cat crux-output/percolator.target.txt = 'StartTime'
+
+# Test sequest-search with an index
+1 = sequest_search_default = good_results/sequest_search.target.txt = rm -rf ss; crux sequest-search --decoys peptide-shuffle --output-dir ss test.ms2 test_crux_index; cat ss/sequest.target.txt  ss/sequest.decoy.txt
+
+# confirm that the decoys from an index search are the same as searching the index's decoy fasta file
+# compare to previous search results
+1 = index_decoys = good_results/index_decoy.target.txt = cut -f1-17 ss/sequest.decoy.txt > good_results/index_decoy.target.txt; crux sequest-search --output-dir ss --fileroot fasta --decoys none test.ms2 test_crux_index/test-random.fasta; cat ss/fasta.sequest.target.txt
+
+# compare a concatinated fasta seach with an indexed target-decoy-competition search
+# the concatinated test can't use the same matches per spectrum value for targets and decoys so remove that column
+# those results also do not have the unshuffled peptide or decoy matches/spectrum columns
+1 = competition = good_results/competition.target.txt = rm -rf comp; cat test.fasta test_crux_index/test-random.fasta > concat.fasta; crux sequest-search --decoys peptide-shuffle --output-dir comp --fileroot concat test.ms2 concat.fasta; cut -f1-12,14-19 comp/concat.sequest.target.txt > good_results/competition.target.txt; crux sequest-search --decoys peptide-shuffle --output-dir comp --decoy-location target-file test.ms2 test_crux_index; cut -f1-12,14-17 comp/sequest.target.txt 
+
+# Search for matches with modifications from index
+1 = search_mods_index = good_results/search_mods_index.target.txt = crux search-for-matches --decoys peptide-shuffle --parameter-file params/mods-high-precision test.ms2 existing_crux_index; cat crux-output/search.target.txt = 'Time' 'Database'
+
+# Analyze matches with modifications from index
+#1 = analyze_mods_index = good_results/analyze_mods_index.percolator.target.txt = crux percolator --feature-file TRUE --overwrite T --parameter-file params/mods-high-precision existing_crux_index crux-output; cat crux-output/percolator.target.txt = 'Time' 'Database'
+
+# Test the feature file
+#1 = perc-feature-file = good_results/percolator.features.txt = cat crux-output/percolator.features.txt = 
+
+#Run make-pin with tab-delimited file  
+1=make-pin-txt = good_results/make-pin_txt.pin.xml = rm -rf crux-output; crux search-for-matches --parameter-file params/sp demo.ms2 yeast-index; crux make-pin --overwrite T --output-file make-pin_txt.pin.xml crux-output/search.target.txt crux-output/search.decoy.txt; cat crux-output/make-pin_txt.pin.xml = 'command_line'
+
+#Run make-pin with pep.xml file  
+1=make-pin-pep = good_results/make-pin_pep.pin.xml = rm -rf crux-output; crux search-for-matches --pepxml-output T --parameter-file params/sp demo.ms2 yeast-index; crux make-pin --overwrite T --output-file make-pin_pep.pin.xml crux-output/search.target.pep.xml crux-output/search.decoy.pep.xml; cat crux-output/make-pin_pep.pin.xml = 'command_line'
+
+# Run q-ranker with separate searches
+0 = qranker-separate = good_results/qranker-sep.target.txt=rm -rf crux-output; crux search-for-matches --decoys peptide-shuffle --parameter-file params/set_rand_seed_only demo.ms2 yeast-index/;crux q-ranker --parameter-file params/set_rand_seed_only --separate-searches ./crux-output/search.decoy.txt demo.ms2 ./crux-output/search.target.txt; cat crux-output/q-ranker.target.psms.txt
+
+# Test the q-values generated from decoys
+1 = decoy_qval = good_results/decoy-qval.txt = rm -rf decoy-qval-pval; crux search-for-matches --decoys peptide-shuffle --parameter-file params/decoy-qval-pval demo.ms2 small-yeast.fasta; crux compute-q-values --parameter-file params/decoy-qval-pval small-yeast.fasta decoy-qval-pval; cat decoy-qval-pval/qvalues.target.txt
+
+# search only a select number of spectra with the --scan option
+1 = search_select_scans = good_results/search_select_scans.target.txt = crux search-for-matches --scan-number 150-153 --parameter-file params/minimal demo.ms2 small-yeast.fasta; cat crux-output/search.target.txt
+
+# Test mzXML files
+1 = mzxml = good_results/mzxml.search.target.txt = crux search-for-matches --fileroot mzxml --parameter-file params/mstk small.raw2xml.mzXML small-yeast.fasta; cat crux-output/mzxml.search.target.txt 
+
+# Test .mgf file
+1 = mgf = good_results/mgf.search.target.txt = crux search-for-matches --fileroot mgf --parameter-file params/minimal test.mgf test.fasta; cat crux-output/mgf.search.target.txt
+
+# Test .mgf file with pwiz parser
+1 = mgf_pwiz = good_results/mgfpwiz.search.target.txt = crux search-for-matches --fileroot mgfpwiz --parameter-file params/minimal --spectrum-parser pwiz test.mgf test.fasta; cat crux-output/mgfpwiz.search.target.txt
+
+# xlink candidate generation
+1 = xlink-db = good_results/xlink_peptides.txt = crux search-for-xlinks --parameter-file params/xlink.db xlink.ms2 xlink.db.fasta K:K 222; cat crux-output/xlink_peptides.txt
+
+# xlink ion generation
+1 = xlink-ion = good_results/xlink_ions.txt = xlink-predict-peptide-ions KVIKNVAEVK LYMAED 4 6 2 -18.01
+
+#spectral-counts RAW
+1 = spectral-counts-raw = good_results/spectral-counts.raw.txt = crux spectral-counts --protein-database test.fasta --parameter-file params/raw test.target.txt; cat crux-output/spectral-counts.target.txt
+
+#spectral-counts SIN
+1 = spectral-counts-sin = good_results/spectral-counts.sin.txt = crux spectral-counts --protein-database test.fasta --parameter-file params/sin test.target.txt; cat crux-output/spectral-counts.target.txt
+
+#spectral-counts NSAF
+1 = spectral-counts-nsaf = good_results/spectral-counts.nsaf.txt = crux spectral-counts --protein-database test.fasta --parameter-file params/nsaf test.target.txt; cat crux-output/spectral-counts.target.txt
+
+#spectra-counts EMPAI
+1 = spectral-counts-empai = good_results/spectral-counts.empai.txt = crux spectral-counts --protein-database test.fasta --parameter-file params/empai test.target.txt; cat crux-output/spectral-counts.target.txt
+
+#spectra-counts dNSAF
+1 = spectral-counts-dnsaf = good_results/spectral-counts.dnsaf.txt = crux spectral-counts --protein-database test.fasta --parameter-file params/dnsaf test.target.txt; cat crux-output/spectral-counts.target.txt
+
+#hardklor
+0 = hardklor-default = good_results/hardklor.mono.txt = crux hardklor hardklor.test.ms1; cat crux-output/hardklor.mono.txt
+#bullseye
+1 = bullseye-default = good_results/bullseye.pid.ms2 = crux bullseye --parameter-file params/default-bullseye hardklor.test.ms1 bullseye.test.ms2; cat crux-output/bullseye.pid.ms2
+
+
+
+# MORE TESTS TODO
+
+# generate tryptic peptides from non-tryptic index
+# analyze matches using qvalue
+# use ms2/fasta combos that do and do not find at least one peptide for each spec
+# named sqt and decoys
+# search with 0, 1 decoys

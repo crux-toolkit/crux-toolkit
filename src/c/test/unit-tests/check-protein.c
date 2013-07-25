@@ -14,6 +14,7 @@
 #include "carp.h"
 #include "crux-utils.h"
 #include "parameter.h"
+using namespace Crux; 
 // also in parameter.c
 void parse_custom_enzyme(const char* rule_str);
 

@@ -58,7 +58,7 @@ class LinkedIonSeries {
   /**
    * Default destructor
    */
-  ~LinkedIonSeries();
+  virtual ~LinkedIonSeries();
 
   /**
    * \returns charge for this linked ion series

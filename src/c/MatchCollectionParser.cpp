@@ -9,11 +9,14 @@
 #include "MatchCollectionParser.h"
 #include "MatchFileReader.h"
 #include "PepXMLReader.h"
+#include "SQTReader.h"
 #include "MzIdentMLReader.h"
 #include "Protein.h"
 #include "PostProcessProtein.h"
 #include <sys/types.h>
 #include <sys/stat.h>
+
+using namespace Crux;
 
 /**
    * Creates database object(s) from fasta or index file
@@ -167,13 +170,15 @@ MatchCollection* MatchCollectionParser::create(
   loadDatabase(fasta_path, database, decoy_database);
 
   MatchCollection* collection = NULL;
-
+  
   if (S_ISDIR(stat_buff.st_mode)){
     carp(CARP_FATAL, "Internal error");
   }else if( has_extension(match_path, ".txt")){
     collection = MatchFileReader::parse(match_path, database, decoy_database);
   } else if( has_extension(match_path, ".xml")) {
     collection = PepXMLReader::parse(match_path, database, decoy_database);
+  } else if (has_extension(match_path, ".sqt")) {
+    collection = SQTReader::parse(match_path, database, decoy_database);
   } else if( has_extension(match_path, ".mzid")) {
     collection = MzIdentMLReader::parse(match_path, database, decoy_database);
   } else {

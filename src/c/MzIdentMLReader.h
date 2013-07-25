@@ -50,7 +50,7 @@ class MzIdentMLReader {
    */
   void addScores(
     const pwiz::identdata::SpectrumIdentificationItem& item, ///<proteowizard psm
-    Match* match ///<our psm
+    Crux::Match* match ///<our psm
   );
 
  public:  

@@ -39,14 +39,14 @@ class MatchCollectionParser {
     Database*& decoy_database ///< resulting decoy database -out
   );
 
-  static Protein* getProtein(
+  static Crux::Protein* getProtein(
     Database* database,
     Database* decoy_database,
     std::string& protein_id,
     bool& is_decoy
   );
 
-  static Protein* getProtein(
+  static Crux::Protein* getProtein(
     Database* database,
     Database* decoy_database,
     std::string& protein_id,

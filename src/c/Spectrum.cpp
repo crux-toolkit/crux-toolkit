@@ -25,6 +25,7 @@
 #include "MSToolkit/include/Spectrum.h"
 
 using namespace std;
+using namespace Crux;
 namespace pzd = pwiz::msdata;
 
 /**
@@ -37,6 +38,7 @@ Spectrum::Spectrum() :
    min_peak_mz_(0),
    max_peak_mz_(0),
    total_energy_(0),
+   lowest_sp_(0),
    has_peaks_(false),
    sorted_by_mz_(false),
    sorted_by_intensity_(false),
@@ -213,10 +215,10 @@ void Spectrum::printSqt(
           0.0, // FIXME dummy <process time>
           "server", // FIXME dummy <server>
           get_int_parameter("mass-precision"),
-          zstate.getNeutralMass(), //this is used in search
-          0.0, // FIXME dummy <total intensity>
+          zstate.getSinglyChargedMass(), //this is used in search
+          total_energy_,
           get_int_parameter("precision"),
-          0.0, // FIXME dummy <lowest sp>
+          lowest_sp_,
           num_matches);
 }
 
@@ -370,14 +372,37 @@ bool Spectrum::parseMgf
       
       carp(CARP_DETAILED_DEBUG, "parsing scans:%s",scans_str.c_str());
       vector<string> tokens;
-      DelimitedFile::tokenize(scans_str, tokens, '-');
-      from_string(first_scan_, tokens[0]);
-
-      if (tokens.size() > 1) {
-        from_string(last_scan_,tokens[1]);
-      } else {
-        last_scan_ = first_scan_;
+      DelimitedFile::tokenize(scans_str, tokens, ',');
+      if (scans_str.size() > 1) {
+        carp_once(CARP_WARNING, "Disjoint scan range detected: '%s'",
+                                scans_str.c_str());
       }
+      for (vector<string>::iterator token_iter = tokens.begin();
+           token_iter != tokens.end();
+           ++token_iter) {
+        vector<string> range_tokens;
+        DelimitedFile::tokenize(*token_iter, range_tokens, '-');
+        for (vector<string>::iterator range_token_iter = range_tokens.begin();
+             range_token_iter != range_tokens.end();
+             ++range_token_iter) {
+          int scan_number;
+          if (!from_string(scan_number, *range_token_iter)) {
+            // skip, could not convert to number
+            carp(CARP_ERROR, "Unknown format for scan number '%s'",
+                             range_token_iter->c_str());
+            continue;
+          }
+          if (first_scan_ < 1 ||
+              scan_number < first_scan_) {
+            first_scan_ = scan_number;
+          }
+          if (last_scan_ < 1 ||
+              scan_number > last_scan_) {
+            last_scan_ = scan_number;
+          }
+        }
+      }
+
       carp(CARP_DETAILED_DEBUG,
         "first scan:%i last scan:%i",
         first_scan_,last_scan_);
@@ -699,7 +724,7 @@ bool Spectrum::parseSLine
    int buf_length ///< line length -in
    )
 {
-  char *spliced_line = new char[buf_length];
+  char spliced_line[buf_length];
   int line_index = 0;
   int spliced_line_index = 0;
   int read_first_scan;
@@ -957,7 +982,10 @@ bool Spectrum::parseMstoolkitSpectrum
  * Transfer values from a proteowizard SpectrumInfo object to the
  * crux spectrum.
  */
-bool Spectrum::parsePwizSpecInfo(const pzd::SpectrumPtr& pwiz_spectrum){
+bool Spectrum::parsePwizSpecInfo(
+  const pzd::SpectrumPtr& pwiz_spectrum,
+  int assigned_scan ///< forced scan number
+){
   // clear any existing values
   zstates_.clear();
   ezstates_.clear();
@@ -967,7 +995,8 @@ bool Spectrum::parsePwizSpecInfo(const pzd::SpectrumPtr& pwiz_spectrum){
   if( mz_peak_array_ ){ free(mz_peak_array_); }
 
   // assign new values
-  first_scan_ = pzd::id::valueAs<int>(pwiz_spectrum->id, "scan");
+  first_scan_ = (assigned_scan == 0) ?
+    pzd::id::valueAs<int>(pwiz_spectrum->id, "scan") : assigned_scan;
   last_scan_ = first_scan_;
 
   // get peaks
@@ -1272,6 +1301,22 @@ int Spectrum::getNumPeaks()
 double Spectrum::getTotalEnergy()
 {
   return total_energy_;
+}
+
+/**
+ * Sets the total ion current.
+ */
+void Spectrum::setTotalEnergy(FLOAT_T tic)
+{
+  total_energy_ = tic;
+}
+
+/**
+ * Sets the lowest Sp score.
+ */
+void Spectrum::setLowestSp(FLOAT_T sp)
+{
+  lowest_sp_ = sp;
 }
 
 /**

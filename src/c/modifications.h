@@ -163,6 +163,21 @@ int convert_to_mod_aa_seq(const char* sequence, MODIFIED_AA_T** mod_sequence,
 MODIFIED_AA_T* copy_mod_aa_seq(MODIFIED_AA_T* source, int length);
 
 /**
+ * \brief Allocate a new MODIFIED_AA_T array and copy values into it.
+ */
+MODIFIED_AA_T* copy_mod_aa_seq(
+  MODIFIED_AA_T* source ///< Sequence to copy
+  );
+
+/**
+ * \returns whether the two modified sequences are equal or not
+ */
+bool equal_seq(
+  const MODIFIED_AA_T* seq1, ///< Sequence 1
+  const MODIFIED_AA_T* seq2 ///< Sequence 2
+  );
+
+/**
  * \brief Remove any characters not A-Z from a peptide sequence.
  * \returns A newly allocated string with the given sequence less any
  * modififcation symbols or masses.

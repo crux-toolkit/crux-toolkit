@@ -64,7 +64,7 @@ bool MSToolkitSpectrumCollection::parse() {
     if( mst_spectrum->getScanNumber() > last_scan ){
       break;
     }
-    Spectrum* parsed_spectrum = new Spectrum();
+    Crux::Spectrum* parsed_spectrum = new Crux::Spectrum();
     parsed_spectrum->parseMstoolkitSpectrum(mst_spectrum, filename_.c_str());
     
     this->addSpectrumToEnd(parsed_spectrum);
@@ -85,7 +85,7 @@ bool MSToolkitSpectrumCollection::parse() {
  */
 bool MSToolkitSpectrumCollection::getSpectrum(
   int first_scan,      ///< The first scan of the spectrum to retrieve -in
-  Spectrum* spectrum   ///< Put the spectrum info here
+  Crux::Spectrum* spectrum   ///< Put the spectrum info here
   )
 {
   carp(CARP_DEBUG, "Using mstoolkit to parse spectrum");
@@ -113,19 +113,19 @@ bool MSToolkitSpectrumCollection::getSpectrum(
  * number equal to first_scan.
  * \returns The spectrum data from file or NULL.
  */
-Spectrum* MSToolkitSpectrumCollection::getSpectrum(
+Crux::Spectrum* MSToolkitSpectrumCollection::getSpectrum(
   int first_scan      ///< The first scan of the spectrum to retrieve -in
   )
 {
   carp(CARP_DEBUG, "Using mstoolkit to parse spectrum");
   MSToolkit::MSReader* mst_reader = new MSToolkit::MSReader();
   MSToolkit::Spectrum* mst_spectrum = new MSToolkit::Spectrum();
-  Spectrum* return_spec = NULL;  
+  Crux::Spectrum* return_spec = NULL;  
 
   mst_reader->readFile(filename_.c_str(), *mst_spectrum, first_scan);
 
   if(mst_spectrum->getScanNumber() != 0) {
-    return_spec = new Spectrum();
+    return_spec = new Crux::Spectrum();
     return_spec->parseMstoolkitSpectrum(mst_spectrum,
                                         filename_.c_str()); 
   } else {

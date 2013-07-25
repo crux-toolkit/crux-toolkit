@@ -17,7 +17,7 @@
  * \class SpectrumCollection
  * \brief An abstract class for accessing spectra from a file.
  */
-class MGFSpectrumCollection : public SpectrumCollection {
+class MGFSpectrumCollection : public Crux::SpectrumCollection {
 
  protected:
   int cur_spec_number_;  ///< number spec sequentially in lieu of scan numbers
@@ -42,7 +42,7 @@ class MGFSpectrumCollection : public SpectrumCollection {
    * number equal to first_scan.
    * \returns The newly allocated Spectrum or NULL if scan number not found.
    */
-  virtual Spectrum* getSpectrum(
+  virtual Crux::Spectrum* getSpectrum(
     int first_scan      ///< The first scan of the spectrum to retrieve -in
   );
 
@@ -54,7 +54,7 @@ class MGFSpectrumCollection : public SpectrumCollection {
    */
   virtual bool getSpectrum(
     int first_scan,      ///< The first scan of the spectrum to retrieve -in
-    Spectrum* spectrum   ///< Put the spectrum info here
+    Crux::Spectrum* spectrum   ///< Put the spectrum info here
   );
 
 };

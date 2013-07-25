@@ -127,12 +127,7 @@ class DelimitedFileWriter {
    */
   template<typename TValue>
   static std::string to_string(TValue value) {
-
-    std::ostringstream oss;
-    oss << std::setprecision(get_int_parameter("precision")) << std::fixed;
-    oss << value;
-    std::string out_string = oss.str();
-    return out_string;
+    return to_string(value, get_int_parameter("precision"));
   }
 
   /**
@@ -154,7 +149,7 @@ class DelimitedFileWriter {
     }
     oss << value;
     std::string out_string = oss.str();
-    return out_string;
+    return (out_string != "-0") ? out_string : "0";
   }
 
 };

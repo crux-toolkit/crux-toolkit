@@ -19,7 +19,9 @@
 #include <iostream>
 
 using namespace std;
+using namespace Crux;
 
+namespace Crux {
 
 /**
  * Instantiates a new spectrum_collection object from a filename. 
@@ -254,6 +256,8 @@ bool SpectrumCollection::getIsParsed()
 {
   return is_parsed_;
 }
+
+} // namespace Crux
 
 /*
  * Local Variables:

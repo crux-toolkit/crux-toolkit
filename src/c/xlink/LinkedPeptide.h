@@ -25,6 +25,11 @@ class LinkedPeptide {
  public:
   
   /**
+   * Initializes the object
+   */
+  void init();
+
+  /**
    * \returns a blank LinkedPeptide object
    */
   LinkedPeptide(); 
