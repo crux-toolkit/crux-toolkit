@@ -26,23 +26,25 @@ endif (EXISTS /noble/www/htdocs/proj/crux)
 
 set (
   crux_documentation
+	UWlogo150p.gif 
 	broken-link.html
 	compute-q-values.html 
 	crux-analyze-matches.html 
 	crux-create-index.html 
-	crux-generate-peptides.html 
 	crux-get-ms2-spectrum.html 
-	crux.css 
-	crux.html 
 	crux-predict-peptide-ions.html 
 	crux-search-for-matches.html 
 	crux-sequest-search.html 
-        crux-search-for-xlinks.html 
-        spectral-counts.html
-        spectral-counts-tutorial.html
-	default.params 
+	crux.css 
+	crux.html 
 	customize-tutorial.html 
+	data/demo.ms2 
+	data/search.target.txt 
+	data/small-yeast.fasta 
+	data/target.sqt
+	default.params 
 	fasta-format.html 
+	generate-peptides.html 
 	index-tutorial.html 
 	install-tutorial.html 
 	ms2-format.html 
@@ -58,10 +60,8 @@ set (
 	start-tutorial.html 
 	txt-format.html 
 	xlink-txt-format.html 
-	UWlogo150p.gif 
-	data/demo.ms2 
-	data/small-yeast.fasta 
-	data/search.target.txt 
-	data/target.sqt
+        crux-search-for-xlinks.html 
+        spectral-counts-tutorial.html
+        spectral-counts.html
 )
 install (FILES ${crux_documentation} DESTINATION doc)
