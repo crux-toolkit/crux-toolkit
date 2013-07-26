@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-Strict.dtd"
+>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>tide-search</title>
+  <link href="./crux.css" rel="styleSheet" type="text/css">
+</head>
+<body>
+<blockquote>
+
+<h1 align=center>tide-search</h1>
+
+<b>Usage:</b>
+
+<blockquote>
+<code>./tide-search [options] --peptides=&lt;filename&gt; --proteins=&lt;filename&gt;
+--spectra=&lt;filename&gt; &gt; results</code>
+</blockquote>
+
+<b>Description:</b>
+<blockquote>
+The <code>tide-search</code> program searches for matches between observed
+tandem mass spectra and peptides from the given peptide and protein
+databases.
+</blockquote>
+
+<b>Input:</b>
+<ul>
+<li>
+  A protein index, created using
+  <a href="tide-index.html"><code>tide-index</code></a>.  The protein index
+  file name is set using
+  <code>--proteins=&lt;filename&gt;</code>.
+</li>
+<li>
+  A peptide index, created using
+  <a href="tide-index.html"><code>tide-index</code></a>.  The peptide index
+  file name is set using
+  <code>--peptides=&lt;filename&gt;</code>.
+</li>
+<li>
+  A file of spectra, created using
+  <a href="msconvert.html"><code>msconvert</code></a>.
+  The spectra file name is set using
+  <code>--spectra=&lt;filename&gt;</code>.
+</li>
+</ul>
+
+<b>Output:</b>
+<p>A list of peptide-spectrum matches is generated.
+<ul>
+  <li>
+  If the <code>--results=text</code> option is specified (default), the matches
+  are written to standard output.
+
+  If the <code>--results=protobuf</code> option is specified, the matches
+  are written to a binary file to be viewed later using 
+  <code><a href="tide-results.html">tide-results</a></code>.
+  </li>
+</ul>
+
+<b>Options:</b>
+<ul>
+<li>
+<code>--mass_window=&lt;float&gt;</code> &nbsp; Specify the precursor
+mass tolerance in Daltons.  Default=3.</li>
+
+<li>
+<code>--top_matches=&lt;integer&gt;</code> &nbsp; Specify the number of
+matches to report for each spectrum.  Default=5.</li>
+
+<li>
+<code>--results=text|protobuf</code> &nbsp; Specify whether output should be in
+<code>text</code> format or binary (<code>protobuf</code>) format. The protobuf
+format is readable by the included
+<code><a href="tide-results.html">tide-results</a></code> program, which can
+display results in several formats.</li>
+</ul>
+
+<b>Example</b>
+
+<blockquote>
+<code>./tide-search --peptides=yeast.fasta.pepix --proteins=yeast.fasta.protix
+--spectra=yeast-02-10000.spectrumrecords &gt; results</code>
+</blockquote>
+
+</blockquote>
+</body>
+</html>

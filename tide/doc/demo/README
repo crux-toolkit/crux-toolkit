@@ -1,0 +1,102 @@
+Hi Bill and Charles,
+
+  Thanks for all your help on getting some documentation and a web
+page set up. I've put together a simplified one-binary indexer, and
+tested the following command lines on an x86-64. This directory has
+the 5 files listed below. Here are a bunch of TO-DOs that I hope you
+can help with:
+
+1. Check that the binaries work with (at least a few) different options.
+2. Check that the 32-bit versions give identical results to the 64-bit versions.
+3. Better binary names (at least for test_read_ms2).
+4. Some documentation. The command-line options are decently documented already (see below), but general intros are not written.
+5. Plenty of caveats within docs: No work has been done on UI. Going beyond demos is for experts only. etc.
+6. Download permission
+7. Platform info. Ensuring that binaries are available statically-linked and standalone.
+8. General intro to Tide.
+
+  I'd also like to collect (and post) good survey questions. These
+should help guide which way Tide gets developed. My biggest questions
+are,
+
+1. Are you using SEQUEST? Why?
+   Give importance-ranking to each of these:
+     1. I'm familiar with it and disinclined to learn a new product without good reason.
+     2. I've tried others, but I like the results best for SEQUEST.
+     3. You mean there's a choice?
+     4. It's what's available at my lab (though I'd try something else if I could).
+     5. Cost -- we have a deal in place.
+     6. etc...
+   What version are you using?
+   Do you run SEQUEST on a cluster? How many machines?
+
+2. Have you tried Crux?
+3. Are you comfortable with a command-line interface on linux? (gradual scale from "sure" to "no way -- must have nice GUI on windows").
+4. What spectrometer(s) do you use?
+5. What computer(s) do you use?
+6. What organisms/databases do you use?
+7. What type of MODs do you expect (especially variable mods).
+
+
+
+===================================
+Standalone files for running Tide.
+===================================
+
+STARTING FILES:
+  BINARIES:
+    index
+    test_read_ms2
+    search
+  DATA:
+    yeast.fasta
+    yeast-02-10000.ms2
+
+
+SAMPLE COMMAND LINES:
+
+./index --fasta=yeast.fasta --enzyme=trypsin --digestion=full-digest
+./test_read_ms2 --in=yeast-02-10000.ms2 --out=yeast-02-10000.spectrumrecords
+./search --peptides=yeast.fasta.pepix --proteins=yeast.fasta.protix --spectra=yeast-02-10000.spectrumrecords >results
+
+OPTIONS:
+
+
+index:
+
+    -digestion (Digestion completeness. May be full-digest or partial-digest)
+      type: string default: "full-digest"
+    -enzyme (Digestion enzyme. May be none, trypsin, chymotrypsin, elastase,
+      clostripain, cyanogen-bromide, idosobenzoate, proline-endopeptidase,
+      staph-protease, modified-chymotrypsin, elastase-trypsin-chymotrypsin,
+      aspn.) type: string default: "none"
+    -fasta (Input FASTA file) type: string default: ""
+    -max_length (Peptide length inclusion threshold) type: int32 default: 50
+    -max_mass (Peptide mass inclusion threshold) type: double default: 7200
+    -min_length (Peptide length inclusion threshold) type: int32 default: 6
+    -min_mass (Peptide mass inclusion threshold) type: double default: 200
+    -missed_cleavages (Allow missed cleavages in enzymatic digestion)
+      type: bool default: false
+    -peptides (File of peptides to create) type: string default: ""
+    -proteins (File of raw proteins to create, as raw_proteins.proto)
+      type: string default: ""
+
+test_read_ms2:
+
+    -in (MS2 File of spectra to read) type: string default: ""
+    -out (Protocol Buffer file of spectra to write) type: string default: ""
+
+search: ./search [ settings ]
+settings must include at least the following:
+  --proteins=<filename>
+  --peptides=<filename>
+  --spectra=<filename>
+
+    -mass_window (Precursor mass tolerance in Daltons) type: double default: 3
+    -peptides (File of unfragmented peptides, as peptides.proto) type: string
+      default: ""
+    -proteins (File of proteins corresponding to peptides, as
+      raw_proteins.proto) type: string default: ""
+    -spectra (Spectrum input file) type: string default: ""
+    -top_matches (Number of matches to report for each spectrum) type: int32
+      default: 5

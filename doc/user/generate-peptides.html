@@ -1,0 +1,208 @@
+<html>
+<head>
+<title>crux generate-peptides</title>
+<link href="./crux.css" rel="styleSheet" type="text/css">
+</head>
+<body>
+<blockquote>
+
+<h1 align=center>crux generate-peptides</h1>
+
+<h2>Usage:</h2>
+
+<blockquote>
+<code>crux generate-peptides [options]  &lt;protein&nbsp;input&nbsp;file&gt;</code>
+</blockquote>
+
+<h2>Description:</h2>
+
+<blockquote>
+
+<p>
+This command takes as input a protein FASTA file and outputs the
+corresponding list of peptides, as well as a matched list of decoy
+peptides and decoy proteins.  Decoys are generated either by reversing
+or shuffling the non-terminal amino acids of each peptide.  The
+program will shuffle each peptide multiple times to attempt to ensure
+that there is no overlap between the target and decoy peptides.  For
+homopolymers, this is not possible.  In this case, the occurrence of
+these target/decoy overlaps is recorded in the log file.</p>
+
+<p>
+The program considers only the standard set of 20 amino acids.
+Peptides containing non-amino acid alphanumeric characters (BJOUXZ)
+are skipped.  Non-alphanumeric characters are ignored completely.</p>
+
+</blockquote>
+
+<h2>Input:</h2>
+
+<ul>
+
+<li>
+&lt;protein&nbsp;input&nbsp;file&gt; &ndash; A file in FASTA format
+containing proteins.</li>
+
+</ul>
+
+<h2>Output:</h2>
+
+<ul>
+<p>
+The program writes files to the folder <code>crux-output</code> by
+default.  The name of the output folder can be set by the user using
+the <code>--output-dir</code> option.  The following files will be
+created:</p>
+
+<li>
+<b>peptides.target.txt</b>: a text file containing the target
+peptides, one per line.</li>
+
+<li>
+<b>peptides.decoy.txt</b>: a text file containing the decoy peptides,
+one per line.  There is a one-to-one correspondence between targets
+and decoys.</li>
+
+<li>
+<b>proteins.decoy.txt</b>: a FASTA format file containing decoy
+proteins, in which all of the peptides have been replaced with their
+shuffled or reversed counterparts.  Note that this file will only be
+created if the enzyme specificity is "full-digest" and no missed
+cleavages are allowed.</li>
+
+<li>
+<b>generate-decoys.params.txt</b>: a file containing the name and value of all
+parameters/options for the current operation.  Not all parameters in
+the file may have been used in the operation.  The resulting file can
+be used with the <code>--parameter-file</code> option for other crux
+programs.</li>
+
+<li>
+<b>tide-search.log.txt</b>: a log file containing a copy of all messages
+that were printed to the screen during execution.</li>
+
+</ul>
+
+<h2>Options:</h2>
+
+<ul>
+
+<h3>Peptide properties</h3>
+
+<ul>
+
+<li>
+<code>--max-length &lt;integer&gt;</code> &ndash; Specify the maximum
+length of the peptides included in the index.  Default=50.</li>
+
+<li>
+<code>--min-length &lt;integer&gt;</code> &ndash; Specify the minimum
+length of the peptides included in the index.  Default=6.</li>
+
+<li>
+<code>--max-mass &lt;integer&gt;</code> &ndash; Specify the maximum
+monoisotopic mass (in Da) of the peptides included in the index.
+Default=7200.</li>
+
+<li>
+<code>--min-mass &lt;integer&gt;</code> &ndash; Specify the minimum
+monoisotopic mass (in Da) of the peptides included in the index.
+Default=200.</li>
+
+<li>
+<red><code>--monoisotopic-precursor &lt;T|F&gt;</code> &ndash; When
+computing the mass of a peptide, use monoisotopic masses rather than
+average mass values.  Default = F.</red>
+</li>
+
+</ul>
+
+<h3>Decoy database generation</h3>
+
+<ul>
+
+<li>
+<code>--decoys none|shuffle|reverse</code> &ndash; Include a decoy
+version of every peptide by shuffling or reversing the target
+sequence.  Each peptide is either or reversed or shuffled, leaving the
+N-terminal and C-terminal amino acids in place. Note that peptides
+that appear multiple times in the target database are only shuffled
+once.  In <code>reverse</code> mode, palindromic peptides are
+shuffled.  Also, if a shuffled peptide produces an overlap with the
+target or decoy database, then the peptide is re-shuffled up to 5
+times.  Note that, despite this repeated shuffling, homopolymers will
+appear in both the target and decoy database.  Default=shuffle.</li>
+
+</ul>
+
+<h3>Enyzmatic digestion</h3>
+
+<ul>
+
+<li>
+<code>--enzyme &lt;string&gt;</code> &ndash; Specify the enzyme used
+to digest the proteins <i>in silico</i>.  Available enzymes include
+trypsin, chymotrypsin, elastase, clostripain, cyanogen-bromide,
+idosobenzoate, proline-endopeptidase, staph-protease,
+modified-chymotrypsin, elastase-trypsin-chymotrypsin and aspn.
+Specifying <code>--enzyme no-enzyme</code> yields a non-enzymatic
+digest.  <b>Warning:</b> the resulting index may be quite large.
+Default=<code>trypsin</code>.</li>
+
+<li>
+<code>--digestion &lt;full-digest|partial-digest&gt;</code> &ndash; Specify
+whether every peptide in the database must have two enzymatic termini
+(<code>full-digest</code>) or if peptides with only one enzymatic
+terminus are also included (<code>partial-digest</code>).
+Default=<code>full-digest</code></li>
+
+<li>
+<code>--missed-cleavages &lt;integer&gt;</code> &ndash; Maximum number of missed
+cleavages per peptide to allow in enzymatic digestion.  If this option is not
+specified, then missed cleavages are not allowed.</li>
+
+</ul>
+
+
+<h3>Input and output</h3>
+
+<ul>
+
+<li>
+<code>--output-dir &lt;filename&gt;</code> &ndash; 
+The name of the directory where output files will be created.
+Default = crux-output.</li>
+
+<li>
+<code>--overwrite &lt;T|F&gt;</code> &ndash;
+Replace existing files if true (T) or fail when trying to overwrite a
+file if false (F). Default =  F.</li>
+
+<LI><code>--parameter-file &lt;filename&gt;</code> &ndash; 
+A file containing command-line or additional parameters.  See
+the <a href="parameter-file.html">parameter documentation</a> page
+for details.  Default = no parameter file.</li>
+
+<LI>
+<code>--verbosity &lt;0-100&gt;</code> &ndash; 
+Specify the verbosity of the current processes. Each level prints the
+following messages, including all those at lower verbosity levels:
+0-fatal errors, 10-non-fatal errors, 20-warnings, 30-information on
+the progress of execution, 40-more progress information, 50-debug
+info, 60-detailed debug info. Default = 30.</li>
+
+</ul>
+
+</ul>
+</ul>
+
+<hr></hr>
+
+<p>
+<a href="crux.html">Home</a></p>
+
+</blockquote>
+</body>
+</html>
+
+

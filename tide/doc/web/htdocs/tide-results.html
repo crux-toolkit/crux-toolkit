@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-Strict.dtd"
+>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>tide-results</title>
+  <link href="./crux.css" rel="styleSheet" type="text/css">
+</head>
+<body>
+<blockquote>
+
+<h1 align=center>tide-results</h1>
+
+<b>Usage:</b>
+
+<blockquote>
+<code>./tide-results [options] --results_file=&lt;filename&gt;
+			       --proteins=&lt;filename&gt;
+			       --spectra=&lt;filename&gt; &gt;</code>
+</blockquote>
+
+<b>Description:</b>
+<blockquote>
+The <code>tide-results</code> program displays
+Tide search results as computed
+by <a href="tide-search.html"><code>tide-search</code></a>. Several display
+formats are available.
+
+The search step is to have been previously performed
+by <a href="tide-search.html"><code>tide-search</code></a>, and the result file
+is to have been saved in protobuf format using
+the <code>--results=protobuf</code> command-line switch.  The spectrum file
+(<code>.spectrumrecords</code> file suffix) and the protein index
+(<code>.protix</code> file suffix) used during the search must also be
+available.
+
+</blockquote>
+
+<b>Input:</b>
+<ul>
+<li>
+  A results file generated during tide-search. This are the search results to
+  display. The file name is set using:
+  <code>--results_file=&lt;filename&gt;</code>.
+</li>
+<li>
+  The protein index used during tide-search. The protein index
+  file name is set using
+  <code>--proteins=&lt;filename&gt;</code>.
+</li>
+<li>
+  The file of spectra used during tide-search.
+  The spectra file name is set using
+  <code>--spectra=&lt;filename&gt;</code>.
+</li>
+<li>
+  <code>--aux_locations=&lt;filename&gt;</code>. File of auxiliary locations
+      created by <code>tide-index</code> during the indexing process. This file
+      is required only if the <code>--show_all_proteins</code> option (described
+      below) is specified, and may be omitted otherwise.
+</li>
+
+</ul>
+
+<b>Output:</b>
+<ul>
+  <li>
+  A list of peptide-spectrum matches is written to a specifiable output file in
+  one of three formats.
+  </li>
+</ul>
+
+<b>Options:</b>
+<ul>
+    <li><code>--out_filename=&lt;filename&gt;</code> &ndash; Name of the output
+      file to generate. If omitted, a default output filename will be generated
+      using the specified input file name and output format.
+    <li><code>--show_all_proteins=&lt;string&gt;</code> &ndash; Display all the
+    proteins the peptide was found in. Requires the <code>--aux_locations</code>
+    flag to be set (see above).
+    <li><code>--show_mods=&lt;string&gt;</code> &ndash; Display modifications in the peptide sequence.
+    <li><code>--out_format=&lt;string&gt;</code> &ndash; The output format to be generated. Can be text, pep.xml or
+      sqt. Default is text.
+</ul>
+
+<p>Detailed output formatting options. The following options allow detailed
+  specification of what information to display for each search result.
+
+<ul>
+    <li><code>--spectrum_fields=&lt;string&gt;</code> &ndash; A comma delimited set of fields to show for an
+      experimental spectrum in the order listed. Available options are:
+      spectrum_num,mz,charge. Default: <code>spectrum_num,mz,charge</code>
+    <li><code>--match_fields=&lt;string&gt;</code> &ndash; A comma delimited set of fields to show for a matching
+      peptide in the order listed. Available options are: xcorr,sequence. Default: <code>xcorr,sequence</code>
+    <li><code>--protein_fields=&lt;string&gt;</code> &ndash; (A comma delimited set of fields to show for a protein
+      associated with a matching peptide. Available options are:
+      protein_name,pos,aa_before,aa_after.
+      Default: <code>protein_name,pos,aa_before,aa_after</code>
+</ul>
+
+<b>Example</b>
+
+<blockquote>
+<code>./tide-results --results_file=yeast.results --proteins=yeast.fasta.protix
+  --spectra=yeast-02-10000.spectrumrecords --out_filename=yeast.results.text --out_format=text</code>
+</blockquote>
+
+</blockquote>
+</body>
+</html>

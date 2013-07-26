@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-Strict.dtd"
+>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>msconvert</title>
+  <link href="./crux.css" rel="styleSheet" type="text/css">
+</head>
+<body>
+<blockquote>
+
+<h1 align=center>msconvert</h1>
+
+<b>Usage with Tide:</b>
+
+<blockquote>
+<code>msconvert --spectrumrecords &lt;file [file...]&gt;</code>
+</blockquote>
+
+<b>Description:</b>
+
+<blockquote>
+<p>This program is an extension
+of <a href="http://proteowizard.sourceforge.net/">ProteoWizard</a>'s
+<a href="http://proteowizard.sourceforge.net/technical/tools/msconvert.html"><code>msconvert</code></a>
+program, including support for writing Tide's
+<code>spectrumrecords</code> output format. In general,
+use <a href="http://proteowizard.sourceforge.net/technical/tools/msconvert.html"><code>msconvert</code>
+as documented in the corresponding version at ProteoWizard</a>, but
+use <code>--spectrumrecords</code> to convert files to the format used
+by Tide.
+
+The <code>msconvert</code> program distributed with Tide converts one
+or more files of tandem mass spectra from
+any <a href="http://proteowizard.sourceforge.net/technical/formats/index.html">ProteoWizard-supported
+format</a> into a binary format that can be read
+by <code><a href="tide-search.html">tide-search</code></a>.
+</blockquote>
+
+
+
+<b>Input:</b>
+<ul>
+<li>
+  A file of tandem mass spectra in any of the <a href="http://proteowizard.sourceforge.net/technical/formats/index.html">formats
+  supported by ProteoWizard</a>. The input file names are given on
+  the command line.
+</li>
+</ul>
+
+<b>Output:</b>
+<ul>
+  <li>
+    A binary file of spectra.  The output file name is set
+    automatically by <code>msconvert</code> by combining the input
+    file name with the appropriate filename extension, which, for
+    Tide-compatible files, is <code>.spectrumrecords</code>
+  </li>
+</ul>
+
+<b>Options:</b>
+
+<blockquote>
+Run <code>./msconvert</code> for usage, options, and examples or see
+<a href="http://proteowizard.sourceforge.net/technical/tools/msconvert.html">here</a> for more.
+</blockquote>
+
+<b>Example for use with Tide:</b>
+<blockquote>
+<code>./msconvert --spectrumrecords my-spectrum-file.mzML</code>
+</blockquote>
+
+</blockquote>
+</body>
+</html>

@@ -1,0 +1,281 @@
+<html>
+<head>
+<title>crux tide-search</title>
+<link href="./crux.css" rel="styleSheet" type="text/css">
+</head>
+<body>
+<blockquote>
+
+<h1 align=center>crux tide-search</h1>
+
+<h2>Usage:</h2>
+
+<blockquote>
+<code>crux tide-search [options]  &lt;mass&nbsp;spectra&gt; 
+  &lt;protein&nbsp;database&gt;</code>
+</blockquote>
+
+<h2>Description:</h2>
+
+<blockquote>
+
+<p>
+Tide is a tool for identifying peptides from tandem mass spectra.  It
+is an independent reimplementation of the SEQUEST<sup>&reg;</sup>
+algorithm, which assigns peptides to spectra by comparing the observed
+spectra to a catalog of theoretical spectra derived from a database of
+known proteins.  Tide's primary advantage is its speed.
+Our published paper provides more detail on how Tide works. If
+you use Tide in your research, please cite:
+
+  <blockquote>
+  Benjamin J. Diament and William Stafford
+  Noble. &ldquo;<a href="http://dx.doi.org/10.1021/pr101196n">Faster
+  SEQUEST Searching for Peptide Identification from Tandem Mass
+  Spectra.</a>&rdquo;
+  <i>Journal of Proteome Research</i>. 10(9):3871-9, 2011.
+  </blockquote>
+
+<p>
+To use <code>crux tide-search</code>, you must first create a database
+index using the <code>crux tide-index</code> command.</p>
+
+<p>
+When <code>tide-search</code> runs, it performs several intermediate
+steps, as follows:</p>
+<ol>
+<li>
+Convert the given fragmentation spectra to a binary format.</li>
+<li>
+Search the spectra against the database and store the results in
+binary format.</li>
+<li>
+Convert the results to one or more requested output formats.</li>
+</ol>
+By default, the intermediate binary files are stored in the output
+directory and deleted when Tide finishes execution.  If you plan to
+search a given set of spectra more than once, then you can direct Tide
+to save the binary spectrum files.  Subsequent runs of the program
+will go faster if provided with inputs in binary format.</p>
+
+</blockquote>
+
+<h2>Input:</h2>
+
+<ul>
+
+<li>
+&lt;spectra&gt; &ndash; The name of the file from which to parse the
+fragmentation spectra, in any of
+the <a href="http://proteowizard.sourceforge.net/tools.shtml">file
+formats supported by ProteoWizard</a>.  Alternatively, the argument
+may be a binary spectrum file produced by a previous run of <code>crux
+tide-search</code> using the <code>store-spectra</code>
+parameter.</li>
+
+<li>
+&lt;protein&nbsp;database&gt; &ndash; A database index created by a
+previous run of <code>crux tide-index</code>.</li>
+
+</ul>
+
+<h2>Output:</h2>
+
+<ul>
+<p>
+The program writes files to the folder <code>crux-output</code> by
+default.  The name of the output folder can be set by the user using
+the <code>--output-dir</code> option.  The following files will be
+created:</p>
+
+<li>
+<b>tide-search.target.txt</b>: a tab-delimited text file containing the
+target PSMs.  See <a href="txt-format.html">txt file format</a> for a list of
+the fields.</li>
+
+<li>
+<b>tide-search.decoy.txt</b>: a tab-delimited text file containing the
+decoy PSMs.  This file will only be created if the index was created
+with decoys.</li>
+
+<li>
+<b>tide-search.params.txt</b>: a file containing the name and value of all
+parameters/options for the current operation.  Not all parameters in
+the file may have been used in the operation.  The resulting file can
+be used with the <code>--parameter-file</code> option for other Crux
+programs.
+</li>
+
+<li>
+<b>tide-search.log.txt</b>: a log file containing a copy of all messages
+that were printed to the screen during execution.</li>
+
+</ul>
+
+<h2>Options:</h2>
+
+<ul>
+
+<h3>Search parameters</h3>
+
+<ul>
+
+<li>
+<code>--precursor-window &lt;float&gt;</code> &ndash; Tolerance used for
+matching peptides to spectra.  Peptides must be within +/-
+'<code>precursor-window</code>' of the spectrum value.  The precursor
+window units depend upon <code>precursor-window-type</code>. Default
+= 3.0.</li>
+
+<li>
+<code>--precursor-window-type mass|mz|ppm</code> &ndash; Specify
+the units for the window that is used to select peptides around the
+precursor mass location (mass, mz, ppm).  The magnitude of the window
+is defined by the <code>precursor-window</code> option, and candidate
+peptides must fall within this window.  For the <code>mass</code>
+window-type, the spectrum precursor m+h value is converted to mass,
+and the window is defined as that mass
+&plusmn; <code>precursor-window</code>. If the m+h value is not
+available, then the mass is calculated from the precursor m/z and
+provided charge. The peptide mass is computed as the sum of the
+average amino acid masses plus 18 Da for the terminal OH group.
+The <code>mz</code> window-type calculates the window as spectrum
+precursor m/z &plusmn; <code>precursor-window</code> and then converts
+the resulting m/z range to the peptide mass range using the precursor
+charge.  For the parts-per-million (<code>ppm</code>) window-type, the
+spectrum mass is calculated as in the <code>mass</code> type.  The
+lower bound of the mass window is then defined as the spectrum mass /
+(1.0 + (<code>precursor-window</code> / 1000000)) and the upper bound
+is defined as spectrum mass / (1.0 - (<code>precursor-window</code> /
+1000000)).  Default = mass.</li>
+
+<li>
+<code>--compute-sp &lt;T|F&gt;</code> &ndash; Compute the preliminary
+score Sp for all candidate peptides. This option is recommended if
+results are to be analyzed by <code>percolator</code>
+or <code>q-ranker</code>. If <code> sqt-output</code> is enabled,
+then <code>compute-sp</code> is automatically enabled and cannot be
+overridden. Note that the Sp computation requires re-processing each
+observed spectrum, so turning on this switch involves significant
+computational overhead. Default = F.</li>
+
+<li>
+<red><code>--spectrum-min-mz &lt;float&gt;</code> &ndash; The lowest
+spectrum m/z to search in the ms2 file. Default = 0.0</red></li>
+
+<li>
+<red><code>--spectrum-max-mz &lt;float&gt;</code> &ndash; The highest
+spectrum m/z to search in the ms2 file. Default = no maximum.</red></li>
+
+<li>
+<red><code>--min-peaks &lt;int&gt;</code> &ndash; The minimum number of peaks
+a spectrum must have in order to be searched.  Default = 20.</red></li>
+
+<li> 
+<red><code>--spectrum-charge 1|2|3|all</code> &ndash; The spectrum charges
+to search. With 'all' every spectrum will be searched and spectra with
+multiple charge states will be searched once at each charge state.
+With 1, 2, or 3 only spectra with that charge will be
+searched. Default = all.</red></li>
+
+<li>
+<red>
+<code>--scan-number &lt;int&gt;|&lt;int&gt;-&lt;int&gt;</code> &ndash;
+A single scan number or a range of numbers to be searched. Range
+should be specified as 'first-last' which will include scans 'first'
+and 'last'.  Default = search all spectra.</red></li>
+
+<!--
+N.B.  Benjamin claims that implementing these will be non-trivial, so --
+  --let's postpone this till the next release.  --WSN 27 June 2014.
+
+<li>
+<code>--mz-bin-width &lt;float&gt;</code> &ndash; Before calculation of the
+XCorr score, the m/z axes of the observed and theoretical spectra are
+discretized.  This parameter specifies the size of each bin.  The
+exact formula is <i>floor((x/mz-bin-width) + 1.0 - mz-bin-offset)</i>,
+where <i>x</i> is the observed m/z value.  By default, the
+mz-bin-width is 1.0005079 Da when searching using monoisotopic mass
+and 1.0011413 Da with average mass.</li>
+
+<li>
+<code>--mz-bin-offset &lt;float&gt;</code> &ndash; 
+In the discretization of the m/z axes of the observed and theoretical
+spectra, this parameter specifies the location of the left edge of the
+first bin, relative to mass = 0 (i.e., mz-bin-offset = 0.xx means the
+left edge of the first bin will be located at +0.xx Da). The parameter
+must lie in the range 0 &le; mz-bin-offset &le; 1.  Default=0.68.</li>
+-->
+
+</ul>
+
+<h3>Input and output</h3>
+
+<ul>
+
+<li>
+<code>--top-match &lt;integer&gt;</code> &nbsp; Specify the number of
+matches to report for each spectrum.  Default=5.</li>
+
+<li>
+<code>--fileroot &lt;string&gt;</code> &ndash; 
+The <code>fileroot</code> string will be added as a prefix to all
+output file names. Default = none.</li>
+
+<li>
+<code>--store-spectra &lt;filename&gt;</code> &ndash; Specify the name
+of the file where the binarized fragmentation spectra will be stored.
+Subsequent runs of <code>crux tide-search</code> will execute more
+quickly if provided with the spectra in binary format.  The filename
+is specified relative to the current working directory, not the Crux
+output directory (as specified by <code>--output-dir</code>).</li>
+
+<li>
+<code>--output-dir &lt;filename&gt;</code> &ndash; 
+The name of the directory where output files will be created.
+Default = crux-output.</li>
+
+<li>
+<code>--overwrite &lt;T|F&gt;</code> &ndash;
+Replace existing files if true (T) or fail when trying to overwrite a
+file if false (F). Default =  F.</li>
+
+<li>
+<code>--txt-output &lt;T|F&gt;</code> &ndash; Output a tab-delimited
+results file to the output directory. Default = T.</li>
+
+<li>
+<code>--sqt-output &lt;T|F&gt;</code> &ndash; Output an SQT
+results file to the output directory. Default = F.</li>
+
+<li>
+<code>--pepxml-output &lt;T|F&gt;</code> &ndash; Output a pepXML
+results file to the output directory. Default = F.</li>
+
+<li><code>--parameter-file &lt;filename&gt;</code> &ndash; 
+A file containing command-line or additional parameters.  See
+the <a href="parameter-file.html">parameter documentation</a> page
+for details.  Default = no parameter file.</li>
+
+<li>
+<code>--verbosity &lt;0-100&gt;</code> &ndash; 
+Specify the verbosity of the current processes. Each level prints the
+following messages, including all those at lower verbosity levels:
+0-fatal errors, 10-non-fatal errors, 20-warnings, 30-information on
+the progress of execution, 40-more progress information, 50-debug
+info, 60-detailed debug info. Default = 30.</li>
+
+</ul>
+
+</ul>
+
+<hr></hr>
+
+<p>
+<a href="crux.html">Home</a></p>
+
+</blockquote>
+</body>
+</html>
+
+

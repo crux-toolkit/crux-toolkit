@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-Strict.dtd"
+>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>read-spectrumrecords</title>
+  <link href="./crux.css" rel="styleSheet" type="text/css">
+</head>
+<body>
+<blockquote>
+
+<h1 align=center>read-spectrumrecords</h1>
+
+<b>Usage:</b>
+
+<blockquote>
+<code>read-spectrumrecords &lt;filename&gt;</code>
+</blockquote>
+
+<b>Description:</b>
+
+<blockquote>
+
+The <code>read-spectrumrecords</code> program reads a binary file of
+spectra in the format used by Tide and displays the contents in a
+human-readable format. This program stands alone and is not a required
+part of processing files for use with Tide. It is intended for viewing
+or sanity-checking Tide-formatted (<code>spectrumrecords</code>)
+files, as generated, for example,
+by <a href="msconvert.html"><code>msconvert</code></a>
+
+</blockquote>
+
+<b>Input</b>
+<ul>
+<li>
+  A file of spectra in the <code>spectrumrecords</code> format.  The
+  input file name is given on the command line.
+</li>
+</ul>
+
+<b>Output</b>
+<ul>
+<li>
+  A sequential display of each spectrum in the input file. Shown are a
+  scan number for each spectrum, a precursor <i>m</i>/<i>z</i>, a list
+  of charge states to consider, followed by a list of peak locations
+  and the corresponding intensity for each. Output is written to stdout.
+</li>
+</ul>
+
+<b>Options</b>
+
+<blockquote>
+None.
+</blockquote>
+
+<b>Example:</b>
+
+<blockquote>
+<code>./read-spectrumrecords yeast-02-10000.spectrumrecords</code>
+</blockquote>
+
+</body>
