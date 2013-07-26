@@ -1,0 +1,24 @@
+# nonenzymatic results from index
+# Fully-tryptic results from index
+# Fully-tryptic results from filter
+# Semi-tryptic results from index
+# Semi-tryptic results from filter
+
+# Result: diff of filtered results with semi-tryptic results
+# Result: diff of filtered results with fully-tryptic results
+
+
+DIR=/net/noble/vol1/home/bdiament/tide/test2
+
+$DIR/index_no_enzyme --flagfile=$DIR/params
+$DIR/index_partial_digest --flagfile=$DIR/params
+$DIR/index_full_digest --flagfile=$DIR/params
+
+$DIR/filter_peptides_full_digest --flagfile=$DIR/params
+$DIR/filter_peptides_partial_digest --flagfile=$DIR/params
+
+for i in full partial
+do
+  ~/tide/read_peptides.py --proteins=$DIR/protix --peptides=$DIR/pepix.$i\_digest >$DIR/peptides.$i\_digest.text
+  ~/tide/read_peptides.py --proteins=$DIR/protix --peptides=$DIR/pepix.filtered_$i >$DIR/peptides.filtered_$i.text
+done

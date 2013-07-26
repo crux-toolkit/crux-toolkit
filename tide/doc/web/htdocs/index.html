@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-Strict.dtd"
+>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>Tide</title>
+  <link href="./crux.css" rel="styleSheet" type="text/css">
+  <script type="text/javascript">
+    //<![CDATA[
+      function download(filename) {
+        var email
+        prompt("Enter your email address (optional)", email)
+        window.location.href="http://noble.gs.washington.edu/cgi-bin/countdown.cgi?" + filename
+      }
+    //]]>
+  </script>
+</head>
+<body>
+<blockquote>
+
+  <h1 ALIGN=CENTER>Tide: Faster Database Searching for Peptide Identification
+  From Tandem Mass Spectra</h1>
+
+  <h2>Introduction</h2>
+
+<blockquote>
+  <p>
+  Tide is a tool for identifying peptides from tandem mass spectra.
+  It is an independent reimplementation of the 
+  <a href="http://proteomicsresource.washington.edu/sequest.php">SEQUEST</a>
+  algorithm, which identifies peptides by comparing the observed
+  spectra to a catalog of theoretical spectra derived <i>in silico</i>
+  from a database of known proteins.  The immediate ancestor of Tide
+  is <a href="http://noble.gs.washington.edu/proj/crux">Crux</a>, but
+  Tide has been completely re-engineered to achieve a thousandfold
+  improvement in speed while exactly replicating SEQUEST <i>XCorr</i> scores.
+  </p>
+
+  <center><img width="600"
+  src="images/tide-performance.png"/></center>
+
+  <p>
+  Our published paper provides more detail on how Tide works. If
+  you use Tide in your research, please cite:
+  <blockquote>
+
+  Benjamin J. Diament and William Stafford
+  Noble. &ldquo;<a href="http://dx.doi.org/10.1021/pr101196n">Faster
+  SEQUEST Searching for Peptide Identification from Tandem Mass
+  Spectra.</a>&rdquo;
+  <i>J. Proteome Res</i>. DOI: 10.1021/pr101196n. 2011.
+
+  </blockquote>
+  <p>
+  Please note that Tide is a research project, and not currently
+  commercial-quality software.  Accordingly, no graphical user
+  interface is provided, binaries are only distributed for a few
+  platforms and many user options that are available in SEQUEST and
+  Crux are not yet implemented.  If there are specific features that
+  you would like included in future releases of Tide, we would love to
+  hear from you. Please contact
+  <a href="mailto:bdiament@cs.washington.edu">Benjamin Diament</a>.
+  </blockquote>
+
+<h2>Tide Components</h2>
+
+<blockquote>
+<table>
+
+<tr>
+<td><code><a href="tide-index.html">tide-index</a></code></td>
+<td>Convert a 
+<a href="http://noble.gs.washington.edu/proj/crux/fasta-format.html">FASTA</a>
+format file of protein sequences into a format that can be
+read efficiently
+by <code><a href="tide-search.html">tide-search</a></code>.</td>
+</tr>
+
+<tr>
+<td>
+<code><a href="tide-search.html">tide-search</a></code></td>
+<td>Match the given set of observed spectra with the peptides from the protein database.</td>
+</tr>
+
+<tr>
+<td><code><a href="msconvert.html">msconvert</code></td>
+<td>Standalone conversion utility based on the <a
+href="http://proteowizard.sourceforge.net/">ProteoWizard</a>
+project. Converts a file of tandem mass spectra into the format used
+by <code><a href="tide-search.html">tide-search</a></code>.</td>
+</tr>
+
+<tr>
+<td><code><a
+href="tide-results.html">tide-results</a></code></td>
+<td>Utility to display binary Tide output in one of several display
+formats.</td>
+</tr>
+
+<tr>
+<td><code><a
+href="read-spectrumrecords.html">read-spectrumrecords</a></code></td>
+<td>Standalone utility to display in human-readable form the contents
+of a file of spectra as used by Tide.</td>
+</tr>
+
+</table>
+</blockquote>
+
+<h2>Demonstration Scripts and Sample Data</h2>
+
+<blockquote>  
+The Tide distribution includes scripts and sample data demonstrating
+the use of the Tide.
+<table>
+<tr>
+<td><code>yeast.fasta</code></td>
+<td>Sample S. cerevisiae protein sequence database</td>
+</tr>
+<tr>
+<td><code>yeast-02-10000.spectrumrecords</code></td>
+<td>Sample S. cerevisiae MSMS spectra</td>
+</tr>
+<tr>
+<td><code>yeast-demo-index.sh</code></td>
+<td>Short shell script for generating an index based on yeast.fasta for use with <code>tide-search</code></td>
+</tr>
+<tr>
+<td><code>yeast-demo-search.sh</code></td>
+<td>Short shell script for searching sample S. cerevisiae spectrum data</td>
+</tr>
+<tr>
+<td><code>worm.fasta</code></td>
+<td>Sample C. elegans protein sequence database</td>
+</tr>
+<tr>
+<td><code>worm-06-10000.spectrumrecords</code></td>
+<td>Sample C. elegans MSMS spectra</td>
+</tr>
+<tr>
+<td><code>worm-demo-index.sh</code></td>
+<td>Short shell script for generating an index based on worm.fasta for use with <code>tide-search</code></td>
+</tr>
+<tr>
+<td><code>worm-demo-search.sh</code></td>
+<td>Short shell script for searching sample C. elegans spectrum data</td>
+</tr>
+</table>
+To execute the demonstration scripts, from the tide directory run:
+<pre>
+./yeast-demo-index.sh
+./yeast-demo-search.sh
+./worm-demo-index.sh
+./worm-demo-search.sh
+</pre>
+The output of <code>yeast-demo-search.sh</code> will be in <code>yeast.results</code>.
+The output of <code>worm-demo-search.sh</code> will be in <code>worm.results</code>.
+</blockquote>
+
+  <h2>Download Tide</h2>
+
+  <blockquote>
+  <p>Precompiled Tide binaries are available for 32-bit and 64-bit Linux.
+  You can download Tide 
+  <a href="http://noble.gs.washington.edu/proj/crux/download/index.html">here</a>
+  once you agree to the license agreement and obtain a
+  password <a href="http://depts.washington.edu/ventures/UW_Technology/Express_Licenses/crux.php">here</a>.
+  Tide is available as part of
+  the <a href="http://noble.gs.washington.edu/proj/crux">Crux software toolkit</a>.  
+  Crux and Tide are freely available for academic use. Crux can be
+  licensed for commercial use.</p>
+  </blockquote>
+
+  <h2>More information</h2>
+
+<blockquote>
+To receive announcements of new versions of Tide, sign up for the Crux
+users
+<a href="https://mailman1.u.washington.edu/mailman/listinfo/crux-users">mailing
+  list.</a>  For support, and to discuss Tide with other users and the
+  developers, sign up for the Crux users
+<a href="http://groups.google.com/group/crux-users">Google group.</a>
+Tide is in active developement, and we welcome your suggestions for
+features and improvements.
+</blockquote>
+
+<hr></hr>
+
+<center>
+<p>
+Tide was written by Benjamin Diament, with contributions from Eva
+Baker and input from Charles Grant, under the supervision
+of <a href="http://noble.gs.washington.edu/~noble">Prof. William
+Stafford Noble</a> in the Department of Genome Sciences at the
+University of Washington, Seattle.</p>
+
+<table>
+<tr>
+<td><img src="images/nibib.gif"></td>
+<td>
+<p>
+Maintenance and development of Tide is funded by the National
+Institute of Biomedical Imaging and Bioengineering grant NIH/NIBIB R01
+EB007057.</p></td>
+<td><img src="images/UWlogo150p.gif"></td>
+</tr>
+</table>
+</center>
+
+<hr></hr>
+
+<p>
+Please send comments and questions
+to <a href="mailto:bdiament@cs.washington.edu">Benjamin
+Diament</a>.</p>
+
+</blockquote>
+</body>
+</html>

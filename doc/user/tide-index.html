@@ -1,0 +1,283 @@
+<html>
+<head>
+<title>crux tide-index</title>
+<link href="./crux.css" rel="styleSheet" type="text/css">
+</head>
+<body>
+<blockquote>
+
+<h1 align=center>crux tide-index</h1>
+
+<h2>Usage:</h2>
+
+<blockquote>
+<code>crux tide-index [options]
+  &lt;protein&nbsp;input&nbsp;file&gt;
+  &lt;index&nbsp;name&gt;
+</code>
+</blockquote>
+
+<h2>Description:</h2>
+
+<blockquote>
+
+<p>
+Tide is a tool for identifying peptides from tandem mass spectra.  It
+is an independent reimplementation of the SEQUEST<sup>&reg;</sup>
+algorithm, which assigns peptides to spectra by comparing the observed
+spectra to a catalog of theoretical spectra derived from a database of
+known proteins.  Tide's primary advantage is its speed.
+Our published paper provides more detail on how Tide works. If
+you use Tide in your research, please cite:
+
+  <blockquote>
+  Benjamin J. Diament and William Stafford
+  Noble. &ldquo;<a href="http://dx.doi.org/10.1021/pr101196n">Faster
+  SEQUEST Searching for Peptide Identification from Tandem Mass
+  Spectra.</a>&rdquo;
+  <i>Journal of Proteome Research</i>. 10(9):3871-9, 2011.
+  </blockquote>
+
+<p>
+The <code>tide-index</code> command performs a required pre-processing
+step on the protein database, converting it to a binary format
+suitable for input to the <code>tide-search</code> command.</p>
+
+<p>
+Tide considers only the standard set of 20 amino acids.  Peptides
+containing non-amino acid alphanumeric characters (BJOUXZ) are
+skipped.  Non-alphanumeric characters are ignored completely.</p>
+
+</blockquote>
+
+<h2>Input:</h2>
+
+<ul>
+
+<li>
+&lt;protein&nbsp;input&nbsp;file&gt; &ndash; The name of the file in
+FASTA format from which to retrieve proteins.</li>
+
+<li>
+&lt;index&nbsp;name&gt; &ndash; The desired name of the binary
+index.</li>
+
+</ul>
+
+<h2>Output:</h2>
+
+<ul>
+
+<p>
+The program creates a binary index, using the name specified on the
+command line.</p>
+
+<p>
+In addition, the program writes the following files to the
+folder <code>crux-output</code>.  The name of the output folder can be
+set by the user using the <code>--output-dir</code> option.  The
+following files will be created:</p>
+
+<ul>
+
+<li>
+<b>tide-index.params.txt</b>: a file containing the name and value of all
+parameters/options for the current operation.  Not all parameters in
+the file may have been used in the operation.  The resulting file can
+be used with the <code>--parameter-file</code> option for other crux
+programs.
+</li>
+
+<li>
+<b>tide-index.log.txt</b>: a log file containing a copy of all messages
+that were printed to the screen during execution.</li>
+
+</ul>
+
+</ul>
+
+<h2>Options:</h2>
+
+<ul>
+
+<h3>Peptide properties</h3>
+
+<ul>
+
+<li>
+<code>--max-length &lt;integer&gt;</code> &ndash; Specify the maximum
+length of the peptides included in the index.  Default=50.</li>
+
+<li>
+<code>--min-length &lt;integer&gt;</code> &ndash; Specify the minimum
+length of the peptides included in the index.  Default=6.</li>
+
+<li>
+<code>--max-mass &lt;integer&gt;</code> &ndash; Specify the maximum
+mass (in Da) of the peptides included in the index.
+Default=7200.</li>
+
+<li>
+<code>--min-mass &lt;integer&gt;</code> &ndash; Specify the minimum
+mass (in Da) of the peptides included in the index.  Default=200.</li>
+
+<li>
+<red><code>--monoisotopic-precursor &lt;T|F&gt;</code> &ndash; When
+computing the mass of a peptide, use monoisotopic masses rather than
+average mass values.  Default = F.</red>
+</li>
+
+</ul>
+
+<h3>Theoretical peptide generation</h3>
+
+<ul>
+
+<li>
+<code>--use-flanking-peaks T|F</code> &ndash; Turn on or off the peaks
+flanking the b/y ions.  Default = F.</li>
+
+<li>
+<red><code>--max-ion-charge 1|2|3|peptide</code> &ndash; Predict fragment
+ions up to this charge-state. The integer options ('1', '2', and '3')
+specify a fixed maximum charge-state. The 'peptide' option indicates
+that the ions should range up to the maximum charge-state of the
+peptide itself minus 1. Thus, a 3+ charge state peptide would have
+fragment ions of 1+ and 2+. One exception: 1+ charge state peptide
+always have ions of 1+. Default = peptide.</red></li>
+
+</ul>
+
+<h3>Amino acid modifications</h3>
+
+<ul>
+
+<li>
+<code>--mods-spec C+57.02146,2M+15.9949,1STY+79.966331</code>,...
+
+<p>The general form of a modification specification has 3
+components, as exemplified
+by <code><red>1</red><green>STY</green>+<blue>79.966331</blue></code>.
+
+<p>The three components are:
+
+<p><code>[<red>max_per_peptide</red>]<green>residues</green>+<blue>added_mass</blue></code>.
+
+<p>In the example, <code><red>max_per_peptide</red></code>
+is <code><red>1</red></code>, <code><green>residues</green></code>
+are <code><green>STY</green></code>,
+and <code><blue>added_mass</blue></code>
+is <code><blue>79.966331</blue></code>.  To specify a static
+modification, the number preceding the amino acid can be omitted;
+i.e., <code><green>C</green>+<blue>57.02146</blue></code> specifies a
+static modification of 57.02146 Da to cysteine.  By default, the
+static C+57.02146 modification is turned on.</li>
+
+<li>
+<code>--max-mods &lt;int&gt;</code> &ndash; The maximum number of
+modifications that can be applied to a single peptide. Default = no
+limit.</li>
+
+<li>
+<code>--max-aas-modified &lt;int&gt;</code> &ndash; The maximum number
+of modified amino acids that can appear in one peptide.  Each amino
+acid can be modified multiple times. Default = no limit.</li>
+
+</ul>
+
+<h3>Decoy database generation</h3>
+
+<ul>
+
+<li>
+<code>--decoys none|shuffle|reverse</code> &ndash; Include a decoy
+version of every peptide by shuffling or reversing the target
+sequence.  Each peptide is either or reversed or shuffled, leaving the
+N-terminal and C-terminal amino acids in place. Note that peptides
+that appear multiple times in the target database are only shuffled
+once.  In <code>reverse</code> mode, palindromic peptides are
+shuffled.  Also, if a shuffled peptide produces an overlap with the
+target or decoy database, then the peptide is re-shuffled up to 5
+times.  Note that, despite this repeated shuffling, homopolymers will
+appear in both the target and decoy database.  Default=shuffle.</li>
+
+</ul>
+
+<h3>Enyzmatic digestion</h3>
+
+<ul>
+
+<li>
+<code>--enzyme &lt;string&gt;</code> &ndash; Specify the enzyme used
+to digest the proteins <i>in silico</i>.  Available enzymes include
+trypsin, chymotrypsin, elastase, clostripain, cyanogen-bromide,
+idosobenzoate, proline-endopeptidase, staph-protease,
+modified-chymotrypsin, elastase-trypsin-chymotrypsin and aspn.
+Specifying <code>--enzyme no-enzyme</code> yields a non-enzymatic
+digest.  <b>Warning:</b> the resulting index may be quite large.
+Default=<code>trypsin</code>.</li>
+
+<li>
+<code>--digestion &lt;full-digest|partial-digest&gt;</code> &ndash; Specify
+whether every peptide in the database must have two enzymatic termini
+(<code>full-digest</code>) or if peptides with only one enzymatic
+terminus are also included (<code>partial-digest</code>).
+Default=<code>full-digest</code></li>
+
+<li>
+<code>--missed-cleavages &lt;integer&gt;</code> &ndash; Maximum number of missed
+cleavages per peptide to allow in enzymatic digestion.  If this option is not
+specified, then missed cleavages are not allowed.</li>
+
+</ul>
+
+
+<h3>Input and output</h3>
+
+<ul>
+
+<li>
+<code>--output-dir &lt;filename&gt;</code> &ndash; 
+The name of the directory where output files will be created.
+Default = crux-output.</li>
+
+<li>
+<code>--overwrite &lt;T|F&gt;</code> &ndash;
+Replace existing files if true (T) or fail when trying to overwrite a
+file if false (F). Default =  F.</li>
+
+<li>
+<code>--peptide-list T|F</code> &ndash; Create in the output directory
+a text file listing all of the peptides in the database, along with
+their neutral masses, one per line.  If decoys are generated, then a
+second file will be created containing the decoy peptides.  Decoys
+that also appear in the target database are marked with an asterisk in
+a third column.  Default = T.</li>
+
+<LI><code>--parameter-file &lt;filename&gt;</code> &ndash; 
+A file containing command-line or additional parameters.  See
+the <a href="parameter-file.html">parameter documentation</a> page
+for details.  Default = no parameter file.</li>
+
+<LI>
+<code>--verbosity &lt;0-100&gt;</code> &ndash; 
+Specify the verbosity of the current processes. Each level prints the
+following messages, including all those at lower verbosity levels:
+0-fatal errors, 10-non-fatal errors, 20-warnings, 30-information on
+the progress of execution, 40-more progress information, 50-debug
+info, 60-detailed debug info. Default = 30.</li>
+
+</ul>
+
+</ul>
+
+<hr></hr>
+
+<p>
+<a href="crux.html">Home</a></p>
+
+</blockquote>
+</body>
+</html>
+
+

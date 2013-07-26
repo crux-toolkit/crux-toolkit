@@ -1,0 +1,30 @@
+option optimize_for = SPEED;
+package pb;
+
+import "peptides.proto";
+import "spectrum.proto";
+
+
+// The Results message consists of an experimental spectrum and a repeated
+// field corresponding to the top n matching peptides, each represented by
+// the Match message. Each Match message contains a reference to the Peptide,
+// the charge and the xcorr score for the match.
+
+message Match {
+  optional double xcorr = 1;
+  optional Peptide peptide = 2;
+}
+
+message Stats {
+  optional int32 count = 1;
+  optional double sum = 2;
+  optional double sum_squares = 3;
+}
+
+message Results {
+  optional Spectrum spectrum = 1;
+  optional int32 charge = 2;
+  repeated Match matches = 3;
+  optional int32 spectrum_index = 4;
+  optional Stats stats = 5;
+}
