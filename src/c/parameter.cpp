@@ -474,7 +474,8 @@ void initialize_parameters(void){
   set_int_parameter("min-peaks", 20, 0, BILLION,
       "The minimum number of peaks a spectrum must have for it to be searched."
       " Default=20.", 
-      "Parameter file only for search-for-matches and sequest-search.", "true");
+      "Available from command line for tide-search or parameter file for "
+      "search-for-matches and sequest-search.", "true");
   set_digest_type_parameter("digestion", FULL_DIGEST,
       "Degree of digestion used to generate peptides. "
       "<string>=full-digest|partial-digest. Either both ends or one end "
@@ -627,17 +628,17 @@ void initialize_parameters(void){
       "default=F.",
       "Available in the paramter file for all search commands.",
       "true");
-  set_double_parameter("spectrum-min-mass", 0.0, 0, BILLION, 
-      "Minimum mass of spectra to be searched. Default=0.",
-      "Available for crux-search-for-matches.", "true");
-  set_double_parameter("spectrum-max-mass", BILLION, 1, BILLION, 
-      "Maximum mass of spectra to search. Default no maximum.",
-      "Available for crux-search-for-matches.", "true");
+  set_double_parameter("spectrum-min-mz", 0.0, 0, BILLION, 
+      "The lowest spectrum m/z to search. Default=0.0.",
+      "Available for crux-search-for-matches and tide-search.", "true");
+  set_double_parameter("spectrum-max-mz", BILLION, 1, BILLION, 
+      "The highest spectrum m/z to search. Default=no maximum.",
+      "Available for crux-search-for-matches and tide-search.", "true");
   set_string_parameter("spectrum-charge", "all", 
       "Spectrum charge states to search. "
       "<string>=1|2|3|all. Default=all.",
-      "Used by crux-search-for-matches to limit the charge states "
-      "considered in the search.  With 'all' every spectrum will be "
+      "Used by tide-search and crux-search-for-matches to limit the charge "
+      "states considered in the search.  With 'all' every spectrum will be "
       "searched and spectra with multiple charge states will be searched "
       "once at each charge state.  With 1, 2 ,or 3 only spectra with that "
       "that charge will be searched.", "true");
@@ -1106,10 +1107,10 @@ void initialize_parameters(void){
     "true"
   );
 
-  // **** tide options ****
+  // **** Tide options ****
   set_boolean_parameter("monoisotopic-precursor", false,
     "Use monoisotopic precursor masses rather than average mass for precursor. "
-    "Default F",
+    "Default=F.",
     "Available for tide-index",
     "true"
   );
@@ -2267,12 +2268,12 @@ void check_parameter_consistency(){
          " must be less than max (%.2f).", min_mass, max_mass);
   }
 
-  double min_spec_mass = get_double_parameter("spectrum-min-mass");
-  double max_spec_mass = get_double_parameter("spectrum-max-mass");
+  double min_spec_mz = get_double_parameter("spectrum-min-mz");
+  double max_spec_mz = get_double_parameter("spectrum-max-mz");
 
-  if( min_spec_mass > max_spec_mass){
-    carp(CARP_FATAL, "Parameter inconsistency. Minimum spectrum mass (%.2f)"
-         " must be less than max (%.2f).", min_spec_mass, max_spec_mass);
+  if( min_spec_mz > max_spec_mz){
+    carp(CARP_FATAL, "Parameter inconsistency. Minimum spectrum mz (%.2f)"
+         " must be less than max (%.2f).", min_spec_mz, max_spec_mz);
   }
 
   /* If no-enzyme, set digestion to non-specific and missed to true */

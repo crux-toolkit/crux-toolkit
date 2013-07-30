@@ -75,7 +75,7 @@ void FilteredSpectrumChargeIterator::queueNextSpectrum() {
  * pairs (e.g.a spectrum to be searched as +2 and +3 is returned once
  * as +2 and once as +3).  The charge is returned by setting the int
  * pointer in the argument list.  The iterator also filters spectra by
- * mass so that none outside the spectrum-min-mass--spectrum-max-mass
+ * m/z so that none outside the spectrum-min-mz--spectrum-max-mz
  * range (as defined in parameter.c).  The iterator also filters by
  * minimum number of peaks.
  * \returns a SPECTRUM_ITERATOR_T object.
@@ -88,8 +88,8 @@ FilteredSpectrumChargeIterator::FilteredSpectrumChargeIterator(
   has_next_ = false;
   spectrum_index_ = -1;
   zstate_index_ = -1;
-  min_mz_ = get_double_parameter("spectrum-min-mass");
-  max_mz_ = get_double_parameter("spectrum-max-mass");
+  min_mz_ = get_double_parameter("spectrum-min-mz");
+  max_mz_ = get_double_parameter("spectrum-max-mz");
   min_peaks_ = get_int_parameter("min-peaks");
 
   const char* charge_str = get_string_parameter_pointer("spectrum-charge");
