@@ -96,7 +96,8 @@ These will automatically be copied from the <span class=prog>Proteowizard</span>
 and <span class=prog>Percolator</span></a> 
 repositories and statically linked into <span class=prog>crux</span>.
 <p />
-If you are building on Mac OS X you may need to download an older C++ compiler
+If you are building on Mac OS X Lion or Mountain Lion
+you will need to install a copy of the GNU C and C++ compilers
 from a repository such as <a href="http://www.macports.org">MacPorts</a>.
 Recent versions of the C++ compiler provided by Apple are much stricter than previous
 versions and will classify some language constructs used in the 
@@ -104,6 +105,21 @@ versions and will classify some language constructs used in the
 as invalid C++ syntax.
 We have used version 4.7 of the GNU <span class=prog>g++</span> compiler
 downloaded from <a href="http://www.macports.org">MacPorts</a>.
+You will also have to configure the build to use the MacPorts compiler.
+This is done using the environment variables
+<span class=prog>CC</span>, which identifies the C compiler,
+and
+<span class=prog>CXX</span>, which identifies the C++ compiler.
+Before staring your build set these environment variables to point
+to the the MacPorts compilers.
+For example:
+<div class=code>
+<code>
+$ export CC=/opt/local/bin/gcc-mp-4.7 
+<br/>
+$ export CXX=/opt/local/bin/g++-mp-4.7
+</code>
+</div>
 <p />
 The file you downloaded should be named something like <span
 class=file>crux-1.xx.source.tar.gz</span>, where <span class=file>x.xx</span>
