@@ -30,6 +30,12 @@ protected:
     const ProteinVec& proteins,
     double precursor_window,
     WINDOW_TYPE_T window_type,
+    double spectrum_min_mz,
+    double spectrum_max_mz,
+    int min_scan,
+    int max_scan,
+    int min_peaks,
+    int search_charge,
     int top_matches,
     double highest_mz,
     bool compute_sp

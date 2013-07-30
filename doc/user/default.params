@@ -599,7 +599,7 @@ list-of-files=false
 
 # Minimum mass of spectra to be searched. Default=0.
 # Available for crux-search-for-matches.
-spectrum-min-mass=0.000000
+spectrum-min-mz=0.000000
 
 # Proteins with same probabilities will be grouped (--protein T must be
 # set).
@@ -853,7 +853,7 @@ txt-output=true
 
 # Maximum mass of spectra to search. Default no maximum.
 # Available for crux-search-for-matches.
-spectrum-max-mass=1000000000.000000
+spectrum-max-mz=1000000000.000000
 
 # Penalty for mistake made on negative examples. Set by cross validation
 # if not specified or --c-pos not specified.

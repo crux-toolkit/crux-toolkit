@@ -38,7 +38,7 @@ class FilteredSpectrumChargeIterator {
  * pairs (e.g.a spectrum to be searched as +2 and +3 is returned once
  * as +2 and once as +3).  The charge is returned by setting the int
  * pointer in the argument list.  The iterator also filters spectra by
- * mass so that none outside the spectrum-min-mass--spectrum-max-mass
+ * mass so that none outside the spectrum-min-mz--spectrum-max-mz
  * range (as defined in parameter.c).  The iterator also filters by
  * minimum number of peaks.
  * \returns a SPECTRUM_ITERATOR_T object.

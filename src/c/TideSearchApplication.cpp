@@ -21,6 +21,11 @@ int TideSearchApplication::main(int argc, char** argv) {
   const char* option_list[] = {
     "precursor-window",
     "precursor-window-type",
+    "spectrum-min-mz",
+    "spectrum-max-mz",
+    "min-peaks",
+    "spectrum-charge",
+    "scan-number",
     "top-match",
     "store-spectra",
     "compute-sp",
@@ -56,8 +61,50 @@ int TideSearchApplication::main(int argc, char** argv) {
 
   double window = get_double_parameter("precursor-window");
   WINDOW_TYPE_T window_type = get_window_type_parameter("precursor-window-type");
-  int top_matches = get_int_parameter("top-match");
 
+  // Check spectrum-charge parameter
+  string charge_string = get_string_parameter_pointer("spectrum-charge");
+  int charge_to_search;
+  if (charge_string == "all") {
+    carp(CARP_DEBUG, "Searching all charge states");
+    charge_to_search = 0;
+  } else {
+    charge_to_search = atoi(charge_string.c_str());
+    if (charge_to_search < 1 || charge_to_search > 6) {
+      carp(CARP_FATAL, "Invalid spectrum-charge value %s",
+           charge_string.c_str());
+    }
+    carp(CARP_DEBUG, "Searching charge state %d", charge_to_search);
+  }
+
+  // Check scan-number parameter
+  string scan_range = get_string_parameter_pointer("scan-number");
+  int min_scan, max_scan;
+  if (scan_range == "__NULL_STR") {
+    min_scan = 0;
+    max_scan = BILLION;
+    carp(CARP_DEBUG, "Searching all scans");
+  }
+  else if (scan_range.find('-') == string::npos) {
+    // Single scan
+    min_scan = max_scan = atoi(scan_range.c_str());
+    carp(CARP_DEBUG, "Searching single scan %d", min_scan);
+  } else {
+    if (!get_range_from_string(scan_range.c_str(), min_scan, max_scan)) {
+      carp(CARP_FATAL, "The scan number range '%s' is invalid. "
+           "Must be of the form <first>-<last>", scan_range.c_str());
+    } else {
+      if (min_scan > max_scan) {
+        int tmp_scan = min_scan;
+        min_scan = max_scan;
+        max_scan = tmp_scan;
+        carp(CARP_DEBUG, "Switched scan range min and max");
+      }
+      carp(CARP_DEBUG, "Searching scan range %d-%d", min_scan, max_scan);
+    }
+  }
+
+  // Check compute-sp parameter
   bool compute_sp = get_boolean_parameter("compute-sp");
   if (get_boolean_parameter("sqt-output") && !compute_sp){
     compute_sp = true;
@@ -134,7 +181,10 @@ int TideSearchApplication::main(int argc, char** argv) {
   carp(CARP_INFO, "Running search");
   cleanMods();
   search(spectra.SpecCharges(), active_peptide_queue, proteins, window,
-         window_type, top_matches, spectra.FindHighestMZ(), compute_sp);
+         window_type, get_double_parameter("spectrum-min-mz"),
+         get_double_parameter("spectrum-max-mz"), min_scan, max_scan,
+         get_int_parameter("min-peaks"), charge_to_search,
+         get_int_parameter("top-match"), spectra.FindHighestMZ(), compute_sp);
 
   // Delete temporary spectrumrecords file
   if (!delete_spectra_file.empty()) {
@@ -168,6 +218,12 @@ void TideSearchApplication::search(
   const ProteinVec& proteins,
   double precursor_window,
   WINDOW_TYPE_T window_type,
+  double spectrum_min_mz,
+  double spectrum_max_mz,
+  int min_scan,
+  int max_scan,
+  int min_peaks,
+  int search_charge,
   int top_matches,
   double highest_mz,
   bool compute_sp
@@ -181,7 +237,18 @@ void TideSearchApplication::search(
        sc != spec_charges->end();
        ++sc) {
     const Spectrum* spectrum = sc->spectrum;
+
+    double precursor_mz = spectrum->PrecursorMZ();
     int charge = sc->charge;
+    int scan_num = spectrum->SpectrumNumber();
+
+    if (precursor_mz < spectrum_min_mz || precursor_mz > spectrum_max_mz ||
+        scan_num < min_scan || scan_num > max_scan ||
+        spectrum->Size() < min_peaks ||
+        (search_charge != 0 && charge != search_charge)) {
+      continue;
+    }
+
     double pre_mass = sc->neutral_mass;
     int spectrum_index = sc->spectrum_index;
 
