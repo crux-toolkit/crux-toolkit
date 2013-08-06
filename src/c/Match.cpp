@@ -648,8 +648,9 @@ void Match::printSqt(
                protein_id = protein->getId();
 
                // only prepend "rand_" if we are doing a fasta search
+               Database* database = protein->getDatabase();
                if( null_peptide_ 
-                   && (protein->getDatabase()->getDecoyType() == NO_DECOYS) ){
+                   && (database != NULL && database->getDecoyType() == NO_DECOYS) ){
                     rand = "rand_";
                   }
     

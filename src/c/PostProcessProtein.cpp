@@ -115,3 +115,8 @@ unsigned int PostProcessProtein::getLength() {
   return length_;
 
 }
+
+Database* PostProcessProtein::getDatabase() {
+  return NULL;
+}
+

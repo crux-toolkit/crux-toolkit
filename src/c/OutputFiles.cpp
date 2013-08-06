@@ -45,7 +45,9 @@ OutputFiles::OutputFiles(CruxApplication* program_name)
 
   // TODO (BF oct-21-09): consider moving this logic to parameter.c
   COMMAND_T command = application_->getCommand();
-  if( command != SEARCH_COMMAND && command != SEQUEST_COMMAND ){
+  if( command != SEARCH_COMMAND &&
+      command != SEQUEST_COMMAND &&
+      command != TIDE_SEARCH_COMMAND ){
     num_files_ = 1;
   }
 
@@ -89,7 +91,9 @@ OutputFiles::OutputFiles(CruxApplication* program_name)
   }
 
   //pin xml 
-  if( (command==SEARCH_COMMAND || command == SEQUEST_COMMAND) &&
+  if( (command==SEARCH_COMMAND ||
+       command == SEQUEST_COMMAND ||
+       command == TIDE_SEARCH_COMMAND ) &&
       get_boolean_parameter("pinxml-output") ){
    string filename=makeFileName(
     fileroot, 
@@ -105,7 +109,9 @@ OutputFiles::OutputFiles(CruxApplication* program_name)
     );
   }
 
-  if( (command == SEARCH_COMMAND || command == SEQUEST_COMMAND) && 
+  if( (command==SEARCH_COMMAND ||
+       command == SEQUEST_COMMAND ||
+       command == TIDE_SEARCH_COMMAND ) &&
       get_boolean_parameter("mzid-output") ){
     createFile(&mzid_file_,
                output_directory,

@@ -39,7 +39,7 @@ public:
    * Given a FASTA file, read in all protein IDs/sequences and cleave them.
    * Return a map of protein IDs to digested peptides from that protein
    */
-  void readFasta(
+  static void readFasta(
     const std::string& fastaName,  ///< FASTA file name
     std::map< std::string, std::vector<std::string> >& outProteins, ///< map to store proteins
     std::set<std::string>& outPeptides  ///< set of unique peptides
@@ -49,7 +49,7 @@ public:
    * Reads the next protein ID and corresponding sequence from the FASTA stream
    * Returns false if no more proteins in stream
    */
-  bool getNextProtein(
+  static bool getNextProtein(
     std::ifstream& fasta,  ///< FASTA stream
     std::string& outId,  ///< string to store protein ID
     std::string& outSequence ///< string to store sequence
@@ -58,19 +58,37 @@ public:
   /**
    * Cleave protein sequence using specified enzyme and store results in vector
    */
-  void cleaveProtein(
+  static void cleaveProtein(
     const std::string& sequence, ///< Protein sequence to cleave
     ENZYME_T enzyme,  ///< Enzyme to use for cleavage
+    DIGEST_T digest,  ///< Digestion to use for cleavage
+    int missedCleavages,  ///< Maximum allowed missed cleavages
+    int minLength,  //< Min length of peptides to return
+    int maxLength,  //< Max length of peptides to return
     std::vector<std::string>& outPeptides ///< vector to store peptides
+  );
+
+  /**
+   * Cleave protein sequence using specified enzyme and store results in vector
+   * Vector also contains start location of each peptide within the protein
+   */
+  static void cleaveProtein(
+    const std::string& sequence, ///< Protein sequence to cleave
+    ENZYME_T enzyme,  ///< Enzyme to use for cleavage
+    DIGEST_T digest,  ///< Digestion to use for cleavage
+    int missedCleavages,  ///< Maximum allowed missed cleavages
+    int minLength,  //< Min length of peptides to return
+    int maxLength,  //< Max length of peptides to return
+    std::vector< std::pair<std::string, int> >& outPeptides ///< vector to store peptides
   );
 
   /**
    * Makes a decoy from the sequence.
    * Returns false on failure, and decoyOut will be the same as seq.
    */
-  bool makeDecoy(
+  static bool makeDecoy(
     const std::string& seq, ///< sequence to make decoy from
-    const std::set<std::string>& targetSeqs,  ///< targtes to check against
+    const std::set<std::string>& targetSeqs,  ///< targets to check against
     const std::set<std::string>& decoySeqs,  ///< decoys to check against
     bool shuffle, ///< shuffle (if false, reverse)
     std::string& decoyOut ///< string to store decoy
@@ -80,7 +98,7 @@ public:
    * Shuffles the peptide sequence.
    * Returns false if no different sequence was generated
    */
-  bool shufflePeptide(
+  static bool shufflePeptide(
     std::string& seq  ///< Peptide sequence to shuffle
   );
 
@@ -88,7 +106,7 @@ public:
    * Reverses the peptide sequence.
    * Returns false if no different sequence was generated
    */
-  bool reversePeptide(
+  static bool reversePeptide(
     std::string& seq ///< Peptide sequence to reverse
   );
 

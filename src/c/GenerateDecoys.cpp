@@ -51,8 +51,6 @@ int GenerateDecoys::main(int argc, char** argv) {
   }
 
   // Get options
-  int minLength = get_int_parameter("min-length");
-  int maxLength = get_int_parameter("max-length");
   double minMass = get_double_parameter("min-mass");
   double maxMass = get_double_parameter("max-mass");
   massType_ = get_mass_type_parameter("isotopic-mass");
@@ -91,14 +89,9 @@ int GenerateDecoys::main(int argc, char** argv) {
        i != targetSeqs.end();
        ++i) {
     const string& targetSeq = *i;
-    // Check peptide length
-    int pepLen = targetSeq.length();
-    if (pepLen < minLength || pepLen > maxLength) {
-      carp(CARP_DETAILED_DEBUG, "Skipping peptide with length %d", pepLen);
-      continue;
-    }
+    // Don't need to check peptide length, it is done in cleaveProtein
     // Check peptide mass
-    FLOAT_T pepMass = Crux::Peptide::calcSequenceMass(targetSeq.c_str(), massType_);
+    FLOAT_T pepMass = Crux::Peptide::calcSequenceMass(i->c_str(), massType_);
     if (pepMass < minMass || pepMass > maxMass) {
       carp(CARP_DETAILED_DEBUG, "Skipping peptide with mass %f", pepMass);
       continue;
@@ -163,6 +156,10 @@ void GenerateDecoys::readFasta(
   outPeptides.clear();
   string id, sequence;
   ENZYME_T enzyme = get_enzyme_type_parameter("enzyme");
+  DIGEST_T digest = get_digest_type_parameter("digestion");
+  int missedCleavages = get_int_parameter("missed-cleavages");
+  int minLength = get_int_parameter("min-length");
+  int maxLength = get_int_parameter("max-length");
   if (string(get_string_parameter_pointer("custom-enzyme")) != "__NULL_STR") {
     enzyme = CUSTOM_ENZYME;
   }
@@ -172,7 +169,8 @@ void GenerateDecoys::readFasta(
   while (getNextProtein(fasta, id, sequence)) {
     ++proteinTotal;
     carp(CARP_DEBUG, "Read %s", id.c_str());
-    cleaveProtein(sequence, enzyme, trypticPeptides);
+    cleaveProtein(sequence, enzyme, digest, missedCleavages,
+                  minLength, maxLength, trypticPeptides);
     peptideTotal += trypticPeptides.size();
     copy(trypticPeptides.begin(), trypticPeptides.end(),
          inserter(outPeptides, outPeptides.end()));
@@ -242,13 +240,15 @@ bool GenerateDecoys::getNextProtein(
 void GenerateDecoys::cleaveProtein(
   const string& sequence, ///< Protein sequence to cleave
   ENZYME_T enzyme,  ///< Enzyme to use for cleavage
+  DIGEST_T digest,  ///< Digestion to use for cleavage
+  int missedCleavages,  ///< Maximum allowed missed cleavages
+  int minLength,  //< Min length of peptides to return
+  int maxLength,  //< Max length of peptides to return
   vector<string>& outPeptides ///< vector to store peptides
 ) {
   outPeptides.clear();
   if (enzyme != NO_ENZYME) {
     // Enzyme
-    DIGEST_T digest = get_digest_type_parameter("digestion");
-    int missedCleavages = get_int_parameter("missed-cleavages");
     size_t pepStart = 0, nextPepStart = 0;
     int cleaveSites = 0;
     for (int i = 0; i < sequence.length(); ++i) {
@@ -302,14 +302,110 @@ void GenerateDecoys::cleaveProtein(
         outPeptides.push_back(sequence.substr(j));
       }
     }
+    // Erase peptides that don't meet length requirement
+    for (vector<string>::reverse_iterator i = outPeptides.rbegin();
+         i != outPeptides.rend();
+         ++i) {
+      if (i->length() < minLength || i->length() > maxLength) {
+        outPeptides.erase((i + 1).base());
+      }
+    }
   } else {
     // No enzyme
-    int minLength = get_int_parameter("min-length");
-    int maxLength = get_int_parameter("max-length");
     // Get all substrings min <= length <= max
     for (int i = 0; i < sequence.length(); ++i) {
       for (int j = minLength; i + j <= sequence.length() && j <= maxLength; ++j) {
         outPeptides.push_back(sequence.substr(i, j));
+      }
+    }
+  }
+}
+
+/**
+ * Cleave protein sequence using specified enzyme and store results in vector
+ * Vector also contains start location of each peptide within the protein
+ */
+void GenerateDecoys::cleaveProtein(
+  const string& sequence, ///< Protein sequence to cleave
+  ENZYME_T enzyme,  ///< Enzyme to use for cleavage
+  DIGEST_T digest,  ///< Digestion to use for cleavage
+  int missedCleavages,  ///< Maximum allowed missed cleavages
+  int minLength,  //< Min length of peptides to return
+  int maxLength,  //< Max length of peptides to return
+  vector< pair<string, int> >& outPeptides ///< vector to store peptides
+) {
+  outPeptides.clear();
+  if (enzyme != NO_ENZYME) {
+    // Enzyme
+    size_t pepStart = 0, nextPepStart = 0;
+    int cleaveSites = 0;
+    for (int i = 0; i < sequence.length(); ++i) {
+      // Determine if this is a valid cleavage position
+      bool cleavePos =
+        ProteinPeptideIterator::validCleavagePosition(sequence.c_str() + i, enzyme);
+      if (i != sequence.length() - 1 && !cleavePos && digest == PARTIAL_DIGEST) {
+        // Partial digestion (not last AA or cleavage position), add this peptide
+        outPeptides.push_back(
+          make_pair(sequence.substr(pepStart, i + 1 - pepStart), pepStart));
+      } else if (cleavePos) {
+        // Cleavage position, add this peptide
+        outPeptides.push_back(
+          make_pair(sequence.substr(pepStart, i + 1 - pepStart), pepStart));
+        if (++cleaveSites == 1) {
+          // This is the first cleavage position, remember it
+          nextPepStart = i + 1;
+        }
+        if (digest == PARTIAL_DIGEST) {
+          // For partial digest, add peptides ending at this cleavage position
+          for (int j = pepStart + 1; j < nextPepStart; ++j) {
+            outPeptides.push_back(make_pair(sequence.substr(j, i - j + 1), j));
+          }
+        }
+        if (cleaveSites > missedCleavages) {
+          // We have missed the allowed amount of cleavages
+          // Move iterator+pepStart to the first cleavage position
+          pepStart = nextPepStart;
+          i = pepStart - 1;
+          cleaveSites = 0;
+        }
+      } else if (i == sequence.length() - 1 &&
+                 cleaveSites > 0 && cleaveSites <= missedCleavages) {
+        // Last AA in sequence and we haven't missed the allowed amount yet
+        // Add this peptide and move iterator+pepStart to first cleavage position
+        outPeptides.push_back(make_pair(sequence.substr(pepStart), pepStart));
+        if (digest == PARTIAL_DIGEST) {
+          // For partial digest, add peptides ending at last AA
+          for (int j = pepStart + 1; j < nextPepStart; ++j) {
+            outPeptides.push_back(make_pair(sequence.substr(j, i - j + 1), j));
+          }
+        }
+        pepStart = nextPepStart;
+        i = pepStart - 1;
+        cleaveSites = 0;
+      }
+    }
+    // Add the last peptide
+    outPeptides.push_back(make_pair(sequence.substr(nextPepStart), nextPepStart));
+    if (digest == PARTIAL_DIGEST) {
+      // For partial digest, add peptides ending at last AA
+      for (int j = pepStart + 1; j < sequence.length(); ++j) {
+        outPeptides.push_back(make_pair(sequence.substr(j), j));
+      }
+    }
+    // Erase peptides that don't meet length requirement
+    for (vector< pair<string, int> >::reverse_iterator i = outPeptides.rbegin();
+         i != outPeptides.rend();
+         ++i) {
+      if (i->first.length() < minLength || i->first.length() > maxLength) {
+        outPeptides.erase((i + 1).base());
+      }
+    }
+  } else {
+    // No enzyme
+    // Get all substrings min <= length <= max
+    for (int i = 0; i < sequence.length(); ++i) {
+      for (int j = minLength; i + j <= sequence.length() && j <= maxLength; ++j) {
+        outPeptides.push_back(make_pair(sequence.substr(i, j), i));
       }
     }
   }
