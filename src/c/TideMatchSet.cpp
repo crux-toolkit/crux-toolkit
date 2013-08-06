@@ -30,14 +30,19 @@ void MatchSet::report(
 ) {
   if (matches_->size() == 0) {
     return;
-  } else if (top_n > matches_->size()) {
-    top_n = matches_->size();
   }
-  carp(CARP_DETAILED_DEBUG, "Tide MatchSet reporting %d matches", top_n);
-  getTop(top_n);
+  carp(CARP_DETAILED_DEBUG, "Tide MatchSet reporting top %d matches", top_n);
+  make_heap(matches_->begin(), matches_->end(), less_score());
+  sort_heap(matches_->begin(), matches_->end(), less_score());
 
   MatchCollection* crux_collection = new MatchCollection();
+  MatchCollection* crux_decoy_collection = new MatchCollection();
+  int targetsToWrite = top_n;
+  int decoysToWrite = top_n;
   vector<PostProcessProtein*> proteins_made;
+
+  // lnNumSp
+  FLOAT_T lnNumSp = log(matches_->size());
 
   // For Sp scoring
   FLOAT_T* lowest_sp = NULL;
@@ -52,22 +57,49 @@ void MatchSet::report(
   z_state.setMZ(crux_spectrum->getPrecursorMz(), charge);
 
   // Create a Crux match for each match
-  for (Arr::iterator i = matches_->end() - 1; top_n != 0; --i, --top_n) {
+  for (Arr::iterator i = matches_->end() - 1; i != matches_->begin() - 1; --i) {
     // i->second is counter as it was during scoring and corresponds to the
     // index of the peptide in the ActivePeptideQueue, counting from the back.
     // GetPeptide() retrieves the corresponding Peptide.
     const Peptide* peptide = peptides->GetPeptide(i->second);
     const pb::Protein* protein = proteins[peptide->FirstLocProteinId()];
 
+    bool isDecoy = (protein->name().find("rand_") == 0 ||
+                    protein->name().find("rev_") == 0);
+    if (!isDecoy) {
+      if (targetsToWrite == 0) {
+        if (decoysToWrite == 0) {
+          break;
+        }
+        continue;
+      }
+      --targetsToWrite;
+    } else {
+      if (decoysToWrite == 0) {
+        if (targetsToWrite == 0) {
+          break;
+        }
+        continue;
+      }
+      --decoysToWrite;
+    }
+
     PostProcessProtein* new_protein;
     Crux::Match* match = getCruxMatch(peptide, protein, crux_spectrum, z_state,
-                                      &new_protein);
+                                      isDecoy, &new_protein);
     proteins_made.push_back(new_protein);
-    crux_collection->addMatch(match);
+    if (!isDecoy) {
+      crux_collection->addMatch(match);
+    } else {
+      match->setNullPeptide(true);
+      crux_decoy_collection->addMatch(match);
+    }
     Crux::Match::freeMatch(match); // so match gets deleted when collection does
 
     // Set Xcorr score in match
     match->setScore(XCORR, i->first / 100000000.0);
+    // Set lnNumSp in match
+    match->setLnExperimentSize(lnNumSp);
 
     if (compute_sp) {
       pb::Peptide* pb_peptide = getPbPeptide(*peptide);
@@ -96,6 +128,10 @@ void MatchSet::report(
   crux_collection->setExperimentSize(matches_->size());
   crux_collection->populateMatchRank(XCORR);
   crux_collection->forceScoredBy(XCORR);
+  crux_decoy_collection->setZState(z_state);
+  crux_decoy_collection->setExperimentSize(matches_->size());
+  crux_decoy_collection->populateMatchRank(XCORR);
+  crux_decoy_collection->forceScoredBy(XCORR);
 
   if (compute_sp) {
     crux_spectrum->setTotalEnergy(sp_scorer->TotalIonIntensity());
@@ -107,31 +143,23 @@ void MatchSet::report(
 
     crux_collection->populateMatchRank(SP);
     crux_collection->forceScoredBy(SP);
+    crux_decoy_collection->populateMatchRank(SP);
+    crux_decoy_collection->forceScoredBy(SP);
   }
 
   // Write matches
-  vector<MatchCollection*> dummy;
-  output_files->writeMatches(crux_collection, dummy, XCORR, crux_spectrum);
+  vector<MatchCollection*> decoy_vector(1, crux_decoy_collection);
+  output_files->writeMatches(crux_collection, decoy_vector, XCORR, crux_spectrum);
 
   // Clean up
   delete crux_collection;
+  delete crux_decoy_collection;
   for (vector<PostProcessProtein*>::iterator i = proteins_made.begin();
        i != proteins_made.end();
        ++i) {
     delete *i;
   }
   delete crux_spectrum;
-}
-
-void MatchSet::getTop(
-  int top_n
-) {
-  assert(top_n <= matches_->size());
-  // move top n elements to end of array, with largest element last
-  make_heap(matches_->begin(), matches_->end(), less_score());
-  for (int i = 0; i < top_n; ++i) {
-    pop_heap(matches_->begin(), matches_->end() - i, less_score());
-  }
 }
 
 /**
@@ -142,6 +170,7 @@ Crux::Match* MatchSet::getCruxMatch(
   const pb::Protein* protein, ///< Tide protein for match
   Crux::Spectrum* crux_spectrum,  ///< Crux spectrum for match
   SpectrumZState& crux_z_state, ///< Crux z state for match
+  bool is_decoy,  /// Is the peptide a decoy
   PostProcessProtein** protein_made ///< out parameter for new protein
 ) {
   // Get flanking AAs
@@ -152,8 +181,9 @@ Crux::Match* MatchSet::getCruxMatch(
   PostProcessProtein* parent_protein = new PostProcessProtein();
   *protein_made = parent_protein;
   parent_protein->setId(protein->name().c_str());
-  string seq = peptide->Seq();
-  int start_idx = parent_protein->findStart(seq, n_term, c_term);
+  string unshuffledSeq = (!is_decoy) ? peptide->Seq() :
+    protein->residues().substr(protein->residues().length() - peptide->Len());
+  int start_idx = parent_protein->findStart(unshuffledSeq, n_term, c_term);
 
   // Create peptide
   Crux::Peptide* crux_peptide = new Crux::Peptide(
@@ -163,7 +193,7 @@ Crux::Match* MatchSet::getCruxMatch(
   const ModCoder::Mod* mods;
   int pep_mods = peptide->Mods(&mods);
   MODIFIED_AA_T* mod_seq;
-  convert_to_mod_aa_seq(seq.c_str(), &mod_seq);
+  convert_to_mod_aa_seq(peptide->Seq().c_str(), &mod_seq);
   for (int i = 0; i < pep_mods; ++i) {
     int mod_index; // 0 based
     double mod_delta;
@@ -172,7 +202,6 @@ Crux::Match* MatchSet::getCruxMatch(
     const AA_MOD_T* mod = lookUpMod(mod_delta);
     modify_aa(mod_seq + mod_index, mod);
   }
-  bool is_decoy = false;
   crux_peptide->setModifiedAASequence(mod_seq, is_decoy);
   free(mod_seq);
 

@@ -90,6 +90,8 @@ class PostProcessProtein : public Crux::Protein {
    * post process protein object
    */
   virtual unsigned int getLength();
+
+  virtual Database* getDatabase();
  
 };
 

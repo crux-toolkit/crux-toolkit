@@ -301,7 +301,7 @@ class Protein {
   /**
    *\returns Which database is this protein part of
    */
-  Database* getDatabase();
+  virtual Database* getDatabase();
 
   /**
    * prints a binary representation of the protein

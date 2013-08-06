@@ -56,10 +56,6 @@ protected:
     bool operator()(Pair x, Pair y) { return x.first < y.first; }
   };
 
-  void getTop(
-    int top_n
-  );
-
   /**
    * Create a Crux match from Tide data structures
    */
@@ -68,6 +64,7 @@ protected:
     const pb::Protein* protein, ///< Tide protein for match
     Crux::Spectrum* crux_spectrum,  ///< Crux spectrum for match
     SpectrumZState& crux_z_state, ///< Crux z state for match
+    bool is_decoy,  /// Is the peptide a decoy
     PostProcessProtein** protein_made ///< out parameter for new protein
   );
 

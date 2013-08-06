@@ -32,6 +32,8 @@ int TideSearchApplication::main(int argc, char** argv) {
     "txt-output",
     "sqt-output",
     "pepxml-output",
+    "mzid-output",
+    "pinxml-output",
     "fileroot",
     "output-dir",
     "overwrite",
