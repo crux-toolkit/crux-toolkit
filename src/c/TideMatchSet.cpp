@@ -64,8 +64,8 @@ void MatchSet::report(
     const Peptide* peptide = peptides->GetPeptide(i->second);
     const pb::Protein* protein = proteins[peptide->FirstLocProteinId()];
 
-    bool isDecoy = (protein->name().find("rand_") == 0 ||
-                    protein->name().find("rev_") == 0);
+    bool isDecoy = (protein->name().compare(0, 5, "rand_") == 0 ||
+                    protein->name().compare(0, 4, "rev_") == 0);
     if (!isDecoy) {
       if (targetsToWrite == 0) {
         if (decoysToWrite == 0) {
