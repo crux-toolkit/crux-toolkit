@@ -37,6 +37,7 @@ int TideIndexApplication::main(int argc, char** argv) {
     "mods-spec",
     "output-dir",
     "overwrite",
+    "peptide-list",
     "parameter-file",
     "verbosity"
   };
@@ -94,6 +95,21 @@ int TideIndexApplication::main(int argc, char** argv) {
     carp(CARP_FATAL, "Error in MassConstants::Init");
   }
 
+  string decoy_format = get_string_parameter_pointer("decoy-format");
+  DECOY_TYPE decoy_type;
+  if (decoy_format == "shuffle") {
+    decoy_type = SHUFFLE;
+    carp(CARP_DEBUG, "Using shuffled decoys");
+  } else if (decoy_format == "reverse") {
+    decoy_type = REVERSE;
+    carp(CARP_DEBUG, "Using reversed decoys");
+  } else if (decoy_format == "none") {
+    decoy_type = NONE;
+    carp(CARP_DEBUG, "Not using decoys");
+  } else {
+    carp(CARP_FATAL, "Invalid decoy type %s", decoy_format.c_str());
+  }
+
   // Set up output paths
   string fasta = get_string_parameter_pointer("protein fasta file");
   string index = get_string_parameter_pointer("index name");
@@ -108,6 +124,16 @@ int TideIndexApplication::main(int argc, char** argv) {
   string out_aux = index + "/" + "auxlocs";
   string modless_peptides = out_peptides + ".nomods.tmp";
   string peakless_peptides = out_peptides + ".nopeaks.tmp";
+  ofstream* out_target_list = NULL;
+  ofstream* out_decoy_list = NULL;
+  if (get_boolean_parameter("peptide-list")) {
+    out_target_list = create_stream_in_path(make_file_path(
+      "tide-index.peptides.target.txt").c_str(), NULL, overwrite);
+    if (decoy_type != NONE) {
+      out_decoy_list = create_stream_in_path(make_file_path(
+        "tide-index.peptides.decoy.txt").c_str(), NULL, overwrite);
+    }
+  }
 
   if (create_output_directory(index.c_str(), overwrite) != 0) {
     carp(CARP_FATAL, "Error creating index directory");
@@ -125,21 +151,6 @@ int TideIndexApplication::main(int argc, char** argv) {
       carp(CARP_FATAL, "Index file(s) already exist, use --overwrite T or a "
                        "different index name");
     }
-  }
-
-  string decoy_format = get_string_parameter_pointer("decoy-format");
-  DECOY_TYPE decoy_type;
-  if (decoy_format == "shuffle") {
-    decoy_type = SHUFFLE;
-    carp(CARP_DEBUG, "Using shuffled decoys");
-  } else if (decoy_format == "reverse") {
-    decoy_type = REVERSE;
-    carp(CARP_DEBUG, "Using reversed decoys");
-  } else if (decoy_format == "none") {
-    decoy_type = NONE;
-    carp(CARP_DEBUG, "Not using decoys");
-  } else {
-    carp(CARP_FATAL, "Invalid decoy type %s", decoy_format.c_str());
   }
 
   // Reroute stderr
@@ -208,6 +219,91 @@ int TideIndexApplication::main(int argc, char** argv) {
     carp(CARP_INFO, "Computing modified peptides...");
     HeadedRecordReader reader(modless_peptides, NULL, 1024 << 10); // 1024kb buffer
     AddMods(&reader, peakless_peptides, header_with_mods, proteins);
+  }
+
+  if (out_target_list) {
+    // Write peptide lists
+    carp(CARP_INFO, "Writing peptide lists...");
+    // Initialize modification variables
+    stringstream mod_stream;
+    mod_stream.precision(get_int_parameter("mod-precision"));
+    int mod_index;
+    double mod_delta;
+    // Initialize decoy variables
+    string decoyPrefix = (decoy_type == SHUFFLE) ? "rand_" : "rev_";
+    size_t decoyPrefixLen = decoyPrefix.size();
+    // This set holds target peptide strings
+    set<string> targetPepStrs;
+    // This vector holds decoy peptide strings and masses
+    vector< pair<string, double> > decoyPepStrs;
+    // Read peptides pb file
+    vector<const pb::Peptide*> peptides;
+    if (!ReadRecordsToVector<pb::Peptide>(&peptides, peakless_peptides)) {
+      carp(CARP_FATAL, "Error reading peptides file");
+    }
+    // Iterate over all pb peptides
+    while (!peptides.empty()) {
+      const pb::Peptide* peptide = peptides.back();
+      const pb::Location& location = peptide->first_location();
+      const pb::Protein* protein = proteins[location.protein_id()];
+      // Get peptide sequence without mods
+      string pep_str = protein->residues().substr(
+        location.pos(), peptide->length());
+      // Store all mod indices/deltas
+      map<int, double> mod_map;
+      set<int> mod_indices;
+      for (int j = 0; j < peptide->modifications_size(); ++j) {
+        MassConstants::DecodeMod(ModCoder::Mod(peptide->modifications(j)),
+                                 &mod_index, &mod_delta);
+        mod_indices.insert(mod_index);
+        mod_map[mod_index] = mod_delta;
+      }
+      // Iterate over mod indices in reverse order
+      for (set<int>::const_reverse_iterator j = mod_indices.rbegin();
+           j != mod_indices.rend();
+           ++j) {
+        // Insert the modification string into the peptide sequence
+        mod_stream << '[' << mod_map[*j] << ']';
+        pep_str.insert(*j + 1, mod_stream.str());
+        mod_stream.str("");
+      }
+      // Write the modified sequence to the appropriate file stream
+      if (!out_decoy_list ||
+          !protein->name().compare(0, decoyPrefixLen, decoyPrefix) == 0) {
+        // This is a target, output it
+        targetPepStrs.insert(pep_str);
+        *out_target_list << pep_str << '\t' << peptide->mass() << endl;
+      } else {
+        // This is a decoy, save it to output later
+        decoyPepStrs.push_back(make_pair(pep_str, peptide->mass()));
+      }
+      peptides.pop_back();
+    }
+    // Iterate over saved decoys and output them
+    for (vector< pair<string, double> >::iterator i = decoyPepStrs.begin();
+         i != decoyPepStrs.end();
+         ++i) {
+      *out_decoy_list << i->first << '\t' << i->second;
+      if (targetPepStrs.find(i->first) != targetPepStrs.end()) {
+        *out_decoy_list << "\t*";
+      }
+      *out_decoy_list << endl;
+    }
+
+    // Clean up peptides
+    for (vector<const pb::Peptide*>::iterator i = peptides.begin();
+         i != peptides.end();
+         ++i) {
+      delete *i;
+    }
+
+    // Close and clean up streams
+    if (out_decoy_list) {
+      out_decoy_list->close();
+      delete out_decoy_list;
+    }
+    out_target_list->close();
+    delete out_target_list;
   }
 
   carp(CARP_INFO, "Precomputing theoretical spectra...");
@@ -303,8 +399,7 @@ void TideIndexApplication::fastaToPb(
          ++i) {
       const string& cleavedSequence = i->first;
       const int startLoc = i->second;
-      FLOAT_T pepMass = Crux::Peptide::calcSequenceMass(
-        cleavedSequence.c_str(), massType);
+      FLOAT_T pepMass = calcPepMassTide(cleavedSequence, massType);
       int pepLen = cleavedSequence.length();
       // Add target to heap
       TideIndexPeptide pepTarget(
@@ -344,6 +439,8 @@ void TideIndexApplication::fastaToPb(
         push_heap(outPeptideHeap.begin(), outPeptideHeap.end(),
           greater<TideIndexPeptide>());
       } else {
+        carp(CARP_WARNING, "Failed to generate decoy for sequence %s",
+             cleavedSequence.c_str());
         delete decoySequence;
       }
     }
@@ -396,8 +493,6 @@ void TideIndexApplication::writePeptidesAndAuxLocs(
   //  carp(CARP_FATAL, "Error setting min/max mass/length");
   if (!settings.has_enzyme() || settings.enzyme().empty()) {
     carp(CARP_FATAL, "Enzyme settings error");
-  } else if (!MassConstants::Init(&settings.mods())) {
-    carp(CARP_FATAL, "MassConstants::Init error");
   }
 
   pbHeader.set_file_type(pb::Header::PEPTIDES);
@@ -439,6 +534,27 @@ void TideIndexApplication::writePeptidesAndAuxLocs(
     if (++count % 100000 == 0) {
       carp(CARP_INFO, "Wrote %d peptides", count);
     }
+  }
+}
+
+FLOAT_T TideIndexApplication::calcPepMassTide(
+  const string& sequence,
+  MASS_TYPE_T massType
+) {
+  if (massType == AVERAGE) {
+    FixPt mass = MassConstants::fixp_avg_h2o;
+    for (size_t i = 0; i < sequence.length(); ++i) {
+      mass += MassConstants::fixp_avg_table[sequence[i]];
+    }
+    return MassConstants::ToDouble(mass);
+  } else if (massType == MONO) {
+    FixPt mass = MassConstants::fixp_mono_h2o;
+    for (size_t i = 0; i < sequence.length(); ++i) {
+      mass += MassConstants::fixp_mono_table[sequence[i]];
+    }
+    return MassConstants::ToDouble(mass);
+  } else {
+    carp(CARP_FATAL, "Invalid mass type");
   }
 }
 

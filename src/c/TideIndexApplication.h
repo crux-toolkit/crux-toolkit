@@ -136,6 +136,11 @@ protected:
     pb::Header& pbHeader
   );
 
+  static FLOAT_T calcPepMassTide(
+    const std::string& sequence,
+    MASS_TYPE_T massType
+  );
+
   static void getPbProtein(
     int id,
     const std::string& name,
