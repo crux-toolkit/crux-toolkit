@@ -93,7 +93,7 @@ void PercolatorAdapter::psmScoresToMatchCollection(
   *decoy_match_collection = new MatchCollection();
   match_collections_made_.push_back(*decoy_match_collection);
 
-  // Find out which feature is lnNumSP
+  // Find out which feature is lnNumSP and get indices of charge state features
   Normalizer* normalizer = Normalizer::getNormalizer();
   double* normSubAll = normalizer->getSub();
   double* normDivAll = normalizer->getDiv();
@@ -103,12 +103,18 @@ void PercolatorAdapter::psmScoresToMatchCollection(
   vector<string> featureTokens;
   DelimitedFile::tokenize(featureNames, featureTokens);
   int lnNumSPIndex = -1;
+  map<int, int> chargeStates; // index of feature -> charge
   for (int i = 0; i < featureTokens.size(); ++i) {
-    if (featureTokens[i] == "lnNumSP") {
+    string& featureName = featureTokens[i];
+    transform(featureName.begin(), featureName.end(),
+              featureName.begin(), ::tolower);
+    if (featureName == "lnnumsp") {
       lnNumSPIndex = i;
       normSub = normSubAll[i];
       normDiv = normDivAll[i];
-      break;
+    } else if (featureName.find("charge") == 0) {
+      size_t chargeNum = atoi(featureName.substr(6).c_str());
+      chargeStates[i] = chargeNum;
     }
   }
 
@@ -122,7 +128,23 @@ void PercolatorAdapter::psmScoresToMatchCollection(
     bool is_decoy = score_itr->isDecoy();
 
     PSMDescription* psm = score_itr->pPSM;
-    int charge_state = parseChargeState(psm->id);
+    // Try to look up charge state in map
+    int charge_state = -1;
+    for (map<int, int>::const_iterator i = chargeStates.begin();
+         i != chargeStates.end();
+         ++i) {
+      if (psm->features[i->first] > 0) {
+        charge_state = i->second;
+        break;
+      }
+    }
+    if (charge_state == -1) {
+      // Failed, try to parse charge state from id
+      charge_state = parseChargeState(psm->id);
+      if (charge_state == -1) {
+        carp_once(CARP_WARNING, "Could not determine charge state of PSM");
+      }
+    }
     Crux::Peptide* peptide = extractPeptide(psm, charge_state, is_decoy);
 
     SpectrumZState zState;
@@ -262,7 +284,7 @@ void PercolatorAdapter::addPeptideScores() {
     }
     if (peptide_match == NULL) {
       carp(CARP_FATAL, "Cannot find peptide %s %i",
-                       psm->getPeptideSequence().c_str(), score_itr->isDecoy());
+                       psm->getPeptide().c_str(), score_itr->isDecoy());
     }
     peptide_match->setScore(PERCOLATOR_SCORE, score_itr->score);
     peptide_match->setScore(PERCOLATOR_QVALUE, psm->q);
@@ -298,14 +320,12 @@ int PercolatorAdapter::parseChargeState(
   size_t charge_begin, charge_end;
 
   charge_end = psm_id.rfind("_");
-  if (charge_end < 0)
-  {
+  if (charge_end < 0) {
     return -1;
   }
 
   charge_begin = psm_id.rfind("_", charge_end - 1) + 1;
-  if (charge_begin < 0)
-  {
+  if (charge_begin < 0) {
     return -1;
   }
 
@@ -390,7 +410,14 @@ MODIFIED_AA_T* PercolatorAdapter::getModifiedAASequence(
   ) {
 
   std::stringstream ss_seq;
-  string perc_seq = psm->getPeptideSequence();
+  string perc_seq = psm->getPeptide();
+  size_t perc_seq_len = perc_seq.length();
+  if (perc_seq_len >= 5 &&
+      perc_seq[1] == '.' && perc_seq[perc_seq_len - 2] == '.') {
+    // Trim off flanking AA if they exist
+    perc_seq = perc_seq.substr(2, perc_seq_len - 4);
+    perc_seq_len -= 4;
+  }
   peptide_mass = 0.0;
   
   if (perc_seq.find("UNIMOD") != string::npos) {
@@ -402,7 +429,7 @@ MODIFIED_AA_T* PercolatorAdapter::getModifiedAASequence(
 
   vector<pair<int, const AA_MOD_T*> > mod_locations_types;
   size_t count = 0;
-  for (size_t seq_idx = 0; seq_idx < perc_seq.length(); seq_idx++) {
+  for (size_t seq_idx = 0; seq_idx < perc_seq_len; seq_idx++) {
     if (perc_seq.at(seq_idx) == '[') {
       //modification found.
       size_t begin_idx = seq_idx+1;
