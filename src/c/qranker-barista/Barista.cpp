@@ -533,11 +533,11 @@ void Barista :: get_pep_seq(string &pep, string &seq, string &n, string &c)
 {
   string tmp;
   int pos;
-  pos = pep.find(".");
+  pos = pep.find('.');
   n = pep.at(pos-1); 
   tmp = pep.substr(pos+1, pep.size());
 
-  pos = tmp.find(".");
+  pos = tmp.rfind('.');
   c = tmp.at(pos+1);
   seq = tmp.substr(0, pos);
 }
@@ -2655,7 +2655,8 @@ int Barista :: crux_set_command_line_options(int argc, char *argv[])
     "verbosity",
     "list-of-files",
     "feature-file",
-    "optimization"
+    "optimization",
+    "spectrum-parser"
   };
   int num_options = sizeof(option_list)/sizeof(char*);
 
@@ -2911,7 +2912,7 @@ COMMAND_T Barista::getCommand(){
 
 // returns file extension 
 string Barista:: file_extension (string str){ 
-  return str.substr(str.find_last_of(".")+1);
+  return str.substr(str.rfind('.')+1);
 }
 
 

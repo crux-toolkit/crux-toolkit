@@ -75,7 +75,8 @@ class SQTParser{
   inline void set_num_hits_per_spectrum(int hits_per_spectrum){fhps = hits_per_spectrum;}
   inline vector<string> get_final_features_header(){return final_features_header_;}
   void set_enzyme(string &enz);
-  int is_ending(string &name, string &ext);
+  int is_ending(string &name, const string &ext);
+  int is_spectrum_file(string &fname);
   int is_fasta(string &fname);
   int set_database_source(string &db_source);
   virtual int match_file_to_ms2(string &sqt_source, string &prefix);
@@ -238,6 +239,8 @@ class SQTParser{
   
   virtual bool read_search_results(string& cur_fname, bool decoy); 
   virtual string get_parser_extension();
+
+  vector<string> spectrumExts_; // spectrum file extensions
   
 };
 

@@ -234,10 +234,10 @@ int ProtScores::calcOverFDR(double fdr) {
 void ProtScores :: get_pep_seq(string &pep, string &seq)
 {
   string tmp;
-  size_t pos = pep.find(".");
+  size_t pos = pep.find('.');
   if(pos > 0 && pos != string::npos)
     tmp = pep.substr(pos+1,pep.size());
-  pos = tmp.find('.');
+  pos = tmp.rfind('.');
   if(pos > 0 && pos != string::npos)
     tmp = tmp.substr(0,pos);
   seq = tmp;

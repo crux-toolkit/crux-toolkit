@@ -9,6 +9,7 @@
 
 #include <stdio.h>
 #include <vector>
+#include <deque>
 #include <set>
 #include <map>
 #include "utils.h"
@@ -77,7 +78,7 @@ enum SPECTRUM_PARSER_T {
  * \typedef SpectrumIterator
  * \brief An object to iterate over the spectra in a SpectrumCollection
  */
-typedef std::vector<Crux::Spectrum*>::iterator SpectrumIterator;
+typedef std::deque<Crux::Spectrum*>::iterator SpectrumIterator;
 
 /**
  * \class FilteredSpectrumChargeIterator 

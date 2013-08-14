@@ -11,7 +11,7 @@
 #include "objects.h"
 #include "Spectrum.h"
 
-#include <vector>
+#include <deque>
 
 /**
  * \class SpectrumCollection
@@ -24,7 +24,7 @@ class SpectrumCollection {
  friend class ::FilteredSpectrumChargeIterator;
 
  protected:
-  std::vector<Crux::Spectrum*> spectra_;  ///< spectra from the file
+  std::deque<Crux::Spectrum*> spectra_;  ///< spectra from the file
   std::string filename_;                  ///< filename
   bool is_parsed_;      ///< file has been read and spectra_ populated 
   int num_charged_spectra_;  ///< sum of all charge states from all spectra

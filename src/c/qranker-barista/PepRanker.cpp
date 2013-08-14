@@ -475,11 +475,11 @@ void PepRanker :: get_pep_seq(string &pep, string &seq, string &n, string &c)
 {
   string tmp;
   int pos;
-  pos = pep.find(".");
+  pos = pep.find('.');
   n = pep.at(pos-1); 
   tmp = pep.substr(pos+1, pep.size());
 
-  pos = tmp.find(".");
+  pos = tmp.find('.');
   c = tmp.at(pos+1);
   seq = tmp.substr(0, pos);
 }
@@ -904,7 +904,7 @@ void PepRanker :: print_description()
 
 }
 string PepRanker:: file_extension (string str){
-  string file_exten= str.substr(str.find_last_of(".")+1);
+  string file_exten= str.substr(str.rfind('.')+1);
   return file_exten; 
 }
 
