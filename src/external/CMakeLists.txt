@@ -21,15 +21,6 @@ set(protwiz_args ${protwiz_args} --layout=system)
 set(protwiz_args ${protwiz_args} --prefix=${CMAKE_CURRENT_SOURCE_DIR})
 set(protwiz_args ${protwiz_args} runtime-link=shared)
 set(protwiz_args ${protwiz_args} libraries)
-set(protwiz_args ${protwiz_args} pwiz/data/common//pwiz_data_common)
-set(protwiz_args ${protwiz_args} pwiz/data/identdata//pwiz_data_identdata)
-set(protwiz_args ${protwiz_args} pwiz/data/identdata//pwiz_data_identdata_version)
-set(protwiz_args ${protwiz_args} pwiz/data/msdata//pwiz_data_msdata)
-set(protwiz_args ${protwiz_args} pwiz/data/msdata//pwiz_data_msdata_version)
-set(protwiz_args ${protwiz_args} pwiz/data/proteome//pwiz_data_proteome)
-set(protwiz_args ${protwiz_args} pwiz/utility/chemistry//pwiz_utility_chemistry)
-set(protwiz_args ${protwiz_args} pwiz/utility/minimxml//pwiz_utility_minimxml)
-set(protwiz_args ${protwiz_args} pwiz/utility/misc//pwiz_utility_misc)
 
 add_custom_target(
   deep-clean-external
@@ -37,12 +28,12 @@ add_custom_target(
   COMMENT "Deleting all files for external tools."
 )
 
-# Download a partial distribution of pwiz r3950 stored
+# Download a partial distribution of pwiz r4837 stored
 # as a tar ball on the Noble Lab server.
 ExternalProject_Add(
   ProteoWizard
-  URL http://noble.gs.washington.edu/proj/crux/download/pwiz-3950.tar.gz
-  URL_MD5 da8f48ec2731d2d70b435b09072870c8
+  URL http://noble.gs.washington.edu/proj/crux/download/pwiz-4837.tar.gz
+  URL_MD5 b59e972e193d8d78e89f2a74d2fc94ba
   DOWNLOAD_DIR downloads
   PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
   CONFIGURE_COMMAND ""
