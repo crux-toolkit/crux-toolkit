@@ -34,6 +34,13 @@ writing the top ranked PSM.</li>
 <li>The <code>spectrum-min-mass</code> and <code>spectrum-max-mass</code>
 options have been renamed to <code>spectrum-min-mz</code> and
 <code>spectrum-max-mz</code>, respectively.</li>
+<li>Added <code>--spectrum-parser</code> option to <code>q-ranker</code> and
+<code>barista</code>.</li>
+<li>Bugfix for <code>q-ranker</code> and <code>barista</code> when reading
+peptides with modifications</li>
+<li>Fixed <code>q-ranker</code> tab delimited output to contain a set of
+flanking amino acids for each protein, rather than always having a single
+set.</li>
 <li>Bugfix for the <code>percolator</code> command, the first and last two
 characters were being truncated from peptide sequences when the input was
 missing flanking amino acids or when the charge state was not indicated in PSM

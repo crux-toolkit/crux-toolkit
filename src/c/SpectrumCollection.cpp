@@ -88,14 +88,14 @@ SpectrumCollection::~SpectrumCollection() {
 }  
 
 /**
- * \returns the begining of the spectra vector
+ * \returns the begining of the spectra deque
  */
 SpectrumIterator SpectrumCollection::begin() {
   return spectra_.begin();
 }
 
 /**
- * \returns the end of the spectra vector
+ * \returns the end of the spectra deque
  */
 SpectrumIterator SpectrumCollection::end() {
   return spectra_.end();

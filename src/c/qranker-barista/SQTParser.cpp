@@ -93,6 +93,11 @@ SQTParser :: SQTParser()
   spec_features_header_7_.push_back("CO2-nl");
   spec_features_header_7_.push_back("NH3-nl");
   spec_features_header_7_.push_back("NH3-nl-y");
+
+  // set specturm file extensions
+  spectrumExts_.push_back(".ms2");
+  spectrumExts_.push_back(".mzXML");
+  spectrumExts_.push_back(".mgf");
 }
 
 
@@ -668,15 +673,12 @@ void SQTParser :: extract_features(sqt_match &m, int hits_read, int final_hits,e
            
       if (num_spec_features > 0){
 	  
-	  ostringstream scan_stream;
-	  scan_stream << m.scan << "." << m.charge;
-	  string scan_str = scan_stream.str();
 	  if(num_cur_psm % 5000 == 0)
 	    carp(CARP_INFO, "PSM number %d", num_cur_psm);
 	  string peptide = m.peptides[i];
-	  int pos = peptide.find(".");
+	  int pos = peptide.find('.');
 	  string pept = peptide.substr(pos+1,peptide.size());
-	  pos = pept.find(".");
+	  pos = pept.rfind('.');
 	  pept = pept.substr(0,pos);
 	  
 	  if(num_spec_features == 3)
@@ -1531,15 +1533,8 @@ int SQTParser :: run()
 	    {
 	      //prepare to generate spectrum features
 	      sfg.clear();
-	      if(!sfg.open_ms2_file_for_reading(ms2_fn))
-		{
-		  carp(CARP_WARNING, "could not open ms2 file %s for reading", ms2_fn.c_str());
-		  return 0;
-		}
 	      carp(CARP_INFO, "reading file %s", ms2_fn.c_str());
-	      sfg.read_ms2_file();
-	      //sfg.save_spec_positions(out_dir);
-	      //sfg.load_spec_positions(out_dir);
+	      sfg.read_ms2_file(ms2_fn);
 	    }
 	  last_ms2 = ms2_fn;
 	}
@@ -1651,14 +1646,33 @@ int SQTParser :: set_output_dir(string &output_dir, int overwrite_flag)
   return 1;
 }
 
-int SQTParser :: is_ending(string &name, string &ext)
+int SQTParser :: is_ending(string &name, const string &ext)
 {
   int len = ext.size();
   int pos = name.size()-len-1;
-  if(name.find(ext,pos) != string::npos)
+  string lowerName(name);
+  string lowerExt(ext);
+  transform(lowerName.begin() + pos, lowerName.end(),
+            lowerName.begin() + pos, ::tolower);
+  transform(lowerExt.begin(), lowerExt.end(),
+            lowerExt.begin(), ::tolower);
+  if(lowerName.find(lowerExt,pos) != string::npos)
     return pos;
   else
     return 0;
+}
+
+int SQTParser :: is_spectrum_file(string &fname)
+{
+  for (vector<string>::const_iterator i = spectrumExts_.begin();
+       i != spectrumExts_.end();
+       ++i) {
+    int pos = is_ending(fname, *i);
+    if (pos != 0) {
+      return pos;
+    }
+  }
+  return 0;
 }
 
 int SQTParser :: is_fasta(string &fname)
@@ -1785,8 +1799,7 @@ int SQTParser :: collect_ms2_files(string &ms2_source, string & sqt_source)
   while ((dirp = readdir(dp)) != NULL) 
     {
       string fname = string(dirp->d_name);
-      string ext_ms2 = ".ms2";
-      int pos = is_ending(fname, ext_ms2);
+      int pos = is_spectrum_file(fname);
       if(pos != 0)
 	{
 	  string prefix = fname.substr(0,pos+1);
@@ -1846,9 +1859,8 @@ int SQTParser :: set_input_sources(string &ms2_source, string &sqt_source)
     }
   else
     {
-      string ext_ms2 = ".ms2";
       string ext_sqt = get_parser_extension();
-      if(is_ending(ms2_source, ext_ms2))
+      if(is_spectrum_file(ms2_source))
 	{
 	  if(!is_ending(sqt_source, ext_sqt))
 	    {
@@ -1961,11 +1973,10 @@ int SQTParser :: collect_ms2_files(string &ms2_source, string &sqt_target_source
     }
   int cn = 0;
   //read ms2 files in the directory
-  string ext_ms2 = ".ms2";
   while ((dirp = readdir(dp)) != NULL) 
     {
       string fname = string(dirp->d_name);
-      int pos = is_ending(fname, ext_ms2);
+      int pos = is_spectrum_file(fname);
       if(pos != 0)
 	{
 	  string prefix = fname.substr(0,pos+1);
@@ -2025,10 +2036,9 @@ int SQTParser :: set_input_sources(string &ms2_source, string &sqt_target_source
     }
   else
     {
-      string ext_ms2 = ".ms2";
       string ext_sqt = get_parser_extension();
       
-      if(is_ending(ms2_source, ext_ms2))
+      if(is_spectrum_file(ms2_source))
       	{
 	  if(!is_ending(sqt_target_source, ext_sqt))
 	    {

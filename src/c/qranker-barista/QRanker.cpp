@@ -239,7 +239,11 @@ void QRanker :: write_results_psm_tab(ofstream &os)
         }
        }
       //Flanking_aa 
-      os<<n<<c<<"\t";   
+      os<<n<<c;
+      //TODO temp fix to write a set of flanking AAs per protein
+      for(unsigned int j=1;j<prots.size();j++)
+        os<<','<<n<<c;
+      os<<'\t';
       os<< d.psmind2fname(psmind) << endl;
     }
   }
@@ -250,11 +254,11 @@ void QRanker :: get_pep_seq(string &pep, string &seq, string &n, string &c)
 {
   string tmp;
   int pos;
-  pos = pep.find(".");
+  pos = pep.find('.');
   n = pep.at(pos-1); 
   tmp = pep.substr(pos+1, pep.size());
 
-  pos = tmp.find(".");
+  pos = tmp.rfind('.');
   c = tmp.at(pos+1);
   seq = tmp.substr(0, pos);
 }
@@ -896,7 +900,7 @@ void QRanker :: print_description()
 
 }
 string QRanker:: file_extension (string str){
-  string file_exten= str.substr(str.find_last_of(".")+1);
+  string file_exten= str.substr(str.rfind('.')+1);
   return file_exten; 
 }
 
@@ -928,7 +932,8 @@ int QRanker :: crux_set_command_line_options(int argc, char *argv[])
     "parameter-file",
     "verbosity",
      "list-of-files",
-    "feature-file"
+    "feature-file",
+    "spectrum-parser"
   };
   int num_options = sizeof(option_list)/sizeof(char*);
 

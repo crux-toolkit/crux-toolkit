@@ -10,6 +10,7 @@
 #include <cstring>
 #include <math.h>
 #include "carp.h"
+#include "SpectrumCollectionFactory.h"
 
 using namespace std;
 
@@ -29,70 +30,49 @@ class SpecFeaturesGenerator
   SpecFeaturesGenerator();
   ~SpecFeaturesGenerator();
   void clear();
-  int open_ms2_file_for_reading(string &ms2_filename);
-
-  void read_ms2_file();
-  void read_spectrum(string &tempstr);
-  void process_observed_spectrum();
-  void normalize_each_region(double max_intensity_overall, vector<double> &max_intensity_per_region,
-			     int region_selector);
-  void shift_peaks();
-
-  void read_processed_ms2_file();
-  void read_processed_spectrum(string &tempstr);
-  void save_spec_positions(string &out_dir);
-  void save_retention_times(string &out_dir);
-  void load_spec_positions(string &in_dir);
+  void read_ms2_file(const string& filename);
   void initialize_aa_tables();
 
-  void get_observed_spectrum(string &spec);
-  void get_processed_observed_spectrum(string &spec);
-  void clear_tspec(double **tspec,int num_features);
-  void allocate_tspec(double ***tspec, int num_features, int max_mz);
-  void zero_out_tspec(double **tspec, int num_features, int max_mz);
-  void add_intensity(double *tspec, int bin, double intensity);
-  double sproduct(double *tspec, vector<double> &ospec);
-  
   /*
    * model m3 consists of 3 features:
    * by-ions
    * all flanking peaks
    * all neutral losses
    */
-  //void get_spec_features_m3(string &spec, string &peptide, double *features);
   void get_spec_features_m3(int scan, int ch, string &peptide, double *features);
-  void get_spec_features_m6(int scan, int ch, string &peptide, double *features);
   void get_spec_features_m7(int scan, int ch, string &peptide, double *features);
 
-  void get_spec_features_aa_end(int scan, int ch, string &peptide, double *features);
-  void get_spec_features_aa_mid(int scan, int ch, string &peptide, double *features);
-
  protected:
-  ifstream f_ms2;
-  streamoff pos_in_file;
+  void read_spectrum();
+  void process_observed_spectrum();
+  void normalize_each_region(
+    double max_intensity_overall,
+    vector<double> &max_intensity_per_region,
+		int region_selector
+  );
+  void shift_peaks();
+  void get_observed_spectrum(int scan);
+  void clear_tspec(double **tspec,int num_features);
+  void allocate_tspec(double ***tspec, int num_features);
+  void zero_out_tspec(double **tspec, int num_features);
+  void add_intensity(double *tspec, int bin, double intensity);
+  double sproduct(double *tspec);
 
-  int first_scan;
-  int last_scan;
-  double precursor_mz;
-  int charge;
-  vector<int> all_charges_of_spec;
-  double rtime;
+  Crux::SpectrumCollection* spectra_;
+  Crux::Spectrum* spectrum_;
 
-  //map<string,unsigned long> spec_to_pos_in_file;
-  map<string,streamoff> spec_to_pos_in_file;
-  map <int, double> scan_to_rtime;
+  double precursor_mz_;
+  int charge_;
 
   //for the processed spectrum
-  int max_mz;
-  vector<double>peaks;
+  int max_mz_;
+  vector<double> peaks_;
   //for the raw spectrum
-  vector<double> mz_values;
-  vector<double> intens_values;
+  vector<double> mz_values_;
+  vector<double> intens_values_;
 
-  double **ts_main_ion;
-  double **ts_m3;
-  double **ts_m6;
-  double **ts_m7;
+  double **ts_m3_;
+  double **ts_m7_;
  
   //mass info for neutral losses
   // While GNU g++ implements an extension that
@@ -110,7 +90,7 @@ class SpecFeaturesGenerator
   static const int max_xcorr_offset = 75;
 
   vector<double> aa_masses_mono;
-  vector <double> nl_masses_mono;
+  vector<double> nl_masses_mono;
 
 };
 

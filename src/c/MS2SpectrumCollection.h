@@ -10,9 +10,6 @@
 
 #include "SpectrumCollection.h"
 
-
-typedef std::vector<Crux::Spectrum*>::iterator SpectrumIterator; 
-
 /**
  * \class spectrum_collection 
  * \brief A object to group together one or more spectrum objects.

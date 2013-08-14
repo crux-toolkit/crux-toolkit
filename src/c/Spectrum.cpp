@@ -1004,8 +1004,7 @@ bool Spectrum::parsePwizSpecInfo(
   vector<double>& mzs = pwiz_spectrum->getMZArray()->data;
   vector<double>& intensities = pwiz_spectrum->getIntensityArray()->data;
   for(int peak_idx = 0; peak_idx < num_peaks; peak_idx++){
-    Peak* peak = new Peak(intensities[peak_idx], mzs[peak_idx]);
-    peaks_.push_back(peak);
+    addPeak(intensities[peak_idx], mzs[peak_idx]);
   }
   has_peaks_ = true;
 
