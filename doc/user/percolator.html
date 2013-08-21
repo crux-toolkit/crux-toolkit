@@ -5,17 +5,15 @@
 <body>
 <blockquote>
 
-<H1 ALIGN=CENTER>crux percolator</H1>
+<h1 align=center>crux percolator</H1>
 
-<p>
-<b>Usage:</b></p>
+<h2>Usage:</h2>
 
 <blockquote>
 <code>crux percolator [options] &lt;search results&gt; </code>
 </blockquote>
 
-<p>
-<b>Description:</b></p>
+<h2>Description:</h2>
 
 <p>
 Percolator is a semi-supervised learning algorithm that dynamically
@@ -58,10 +56,6 @@ Research</i>. 9(10):5346-5357, 2010.</li>
 </blockquote>
 
 <p>
-Options related to Fido are described under the heading "Protein-level
-inference options," below.</p>
-
-<p>
 Crux includes code from
 <a href="http://per-colator.com/"><span class=prog>Percolator
 2.04b</span></a>.  Crux Percolator differs from the stand-alone version
@@ -82,10 +76,10 @@ to an output directory, logs all standard error messages to a log
 file, and is capable of reading parameters from a parameter file.</li>
 </ul>
 
-<p>
-<b>Input:</b></p>
+<h2>Input:</h2>
 
 <ul>
+
 <LI>
 <b>&lt;search&nbsp;results&gt;</b> &ndash; A collection of target and
 decoy peptide-spectrum matches (PSMs) in pin.xml format, defined
@@ -105,7 +99,7 @@ feature file, see <code>feature-in-file</code> option below.
 
 </ul>
 
-<B>Output:</B>
+<h2>Output:</h2>
 
 <p> Percolator produces the following files in
 the <code>crux-output</code> directory:</p>
@@ -162,62 +156,13 @@ messages that were printed to standard error.
 </li>
 </ul>
 
-<b>Percolator options:</b>
+<h2>Options:</h2>
 
 <ul>
 
-<li>
-<code>--fileroot &lt;string&gt;</code> &ndash;
-The <code>fileroot</code> string will be added as a prefix to all
-output file names. Default = none.</li>
+<h3>Percolator options:</h3>
 
-<li>
-<code>--output-dir &lt;filename&gt;</code> &ndash; The name of the
-directory where output files will be created.  Default =
-crux-output.</li>
-
-<li>
-<code>--overwrite &lt;T|F&gt;</code> Replace existing files if true (T) or
-fail when trying to overwrite a file if false (F). Default =  F.
-
-<li>
-<code>--txt-output &lt;T|F&gt;</code> &ndash; Output tab-delimited
-results files to the output directory. Default = T.</li>
-
-<li>
-<code>--mzid-output &lt;T|F&gt;</code> &ndash; Output an mzIdentML
-results file to the output directory. Default = F.</li>
-
-<li>
-<code>--pepxml-output &lt;T|F&gt;</code> &ndash; Output a pepXML
-results file to the output directory. Default = F.</li>
-
-<li>
-<code>--feature-file &lt;T|F&gt;</code> &ndash; Output the
-computed features in tab-delimited text format to a file
-named "percolator.feature.txt." Default = F.</li>
-
-<li>
-<code>--feature-in-file &lt;T|F&gt;</code> &ndash; When set
-to <code>T</code>, the <code>&lt;search&nbsp;results&gt;</code>
-argument should be a tab-delimited file, in which the first row is a
-header, and each subsequent row is a PSM.  The fields should be
-identifier, label (1 = target, -1 = decoy), feature1, ..., featureN,
-peptide, proteins.  Default = F.</li>
-
-<LI>
-<code>--parameter-file &lt;filename&gt;</code> &ndash;
-A file containing command-line or additional parameters.  See the <a
-href=parameter-file.html>parameter documentation</a> page for details.</li>
-
-<li>
-<code>--decoy-xml-output &lt;T|F&gt;</code> &ndash; Include decoys
-(PSMs, peptides and/or proteins) in the XML output. Default = F.</li>
-
-<li>
-<code>--decoy-prefix &lt;string&gt;</code> &ndash;
-Specifies the prefix of the protein names that indicates a decoy.
-Default = "rand_".</li>
+<ul>
 
 <li>
 <code>--c-pos &lt;float&gt;</code> &ndash; Penalty for mistakes made
@@ -253,14 +198,6 @@ iterations for training.  Default = 10.</li>
 negative data set to be used as train set when only providing one
 negative set.  The remaining examples will be used as test set.
 Default = 0.6.</li>
-
-<li>
-<code>--output-weights &lt;T|F&gt; </code>&ndash; Output final weights
-to a file named "percolator.weights.txt."  Default = F.</li>
-
-<li>
-<code>--input-weights &lt;string&gt;</code> &ndash; Read initial
-weights from the given file (one per line). Default = F.</li>
 
 <li>
 <code>--default-direction &lt;int&gt;</code> &ndash; In its initial
@@ -328,17 +265,9 @@ redundant peptides; keep all PSMs and exclude peptide level
 probabilities.
 </li>
 
-<LI>
-<code>--verbosity &lt;0-100&gt;</code> &ndash; Specify the verbosity of the
-current processes. Each level prints the following messages, including
-all those at lower verbosity levels: 0-fatal errors, 10-non-fatal
-errors, 20-warnings, 30-information on the progress of execution,
-40-more progress information, 50-debug info, 60-detailed debug info.
-Default = 30.</li>
-
 </ul>
 
-<b>Protein-level inference options:</b>
+<h3>Fido options:</h3>
 
 <ul>
 
@@ -404,6 +333,83 @@ follows:
 </ul>
 Default = 3.
 </li>
+
+</ul>
+
+<h3>Input and output</h3>
+
+<ul>
+
+<li>
+<code>--feature-file &lt;T|F&gt;</code> &ndash; Output the
+computed features in tab-delimited text format to a file
+named "percolator.feature.txt." Default = F.</li>
+
+<li>
+<code>--feature-in-file &lt;T|F&gt;</code> &ndash; When set
+to <code>T</code>, the <code>&lt;search&nbsp;results&gt;</code>
+argument should be a tab-delimited file, in which the first row is a
+header, and each subsequent row is a PSM.  The fields should be
+identifier, label (1 = target, -1 = decoy), feature1, ..., featureN,
+peptide, proteins.  Default = F.</li>
+
+<li>
+<code>--decoy-xml-output &lt;T|F&gt;</code> &ndash; Include decoys
+(PSMs, peptides and/or proteins) in the XML output. Default = F.</li>
+
+<li>
+<code>--decoy-prefix &lt;string&gt;</code> &ndash;
+Specifies the prefix of the protein names that indicates a decoy.
+Default = "rand_".</li>
+
+<li>
+<code>--output-weights &lt;T|F&gt; </code>&ndash; Output final weights
+to a file named "percolator.weights.txt."  Default = F.</li>
+
+<li>
+<code>--input-weights &lt;string&gt;</code> &ndash; Read initial
+weights from the given file (one per line). Default = F.</li>
+
+<li>
+<code>--fileroot &lt;string&gt;</code> &ndash;
+The <code>fileroot</code> string will be added as a prefix to all
+output file names. Default = none.</li>
+
+<li>
+<code>--output-dir &lt;filename&gt;</code> &ndash; The name of the
+directory where output files will be created.  Default =
+crux-output.</li>
+
+<li>
+<code>--overwrite &lt;T|F&gt;</code> Replace existing files if true (T) or
+fail when trying to overwrite a file if false (F). Default =  F.
+
+<li>
+<code>--txt-output &lt;T|F&gt;</code> &ndash; Output tab-delimited
+results files to the output directory. Default = T.</li>
+
+<li>
+<code>--mzid-output &lt;T|F&gt;</code> &ndash; Output an mzIdentML
+results file to the output directory. Default = F.</li>
+
+<li>
+<code>--pepxml-output &lt;T|F&gt;</code> &ndash; Output a pepXML
+results file to the output directory. Default = F.</li>
+
+<LI>
+<code>--parameter-file &lt;filename&gt;</code> &ndash;
+A file containing command-line or additional parameters.  See the <a
+href=parameter-file.html>parameter documentation</a> page for details.</li>
+
+<LI>
+<code>--verbosity &lt;0-100&gt;</code> &ndash; Specify the verbosity of the
+current processes. Each level prints the following messages, including
+all those at lower verbosity levels: 0-fatal errors, 10-non-fatal
+errors, 20-warnings, 30-information on the progress of execution,
+40-more progress information, 50-debug info, 60-detailed debug info.
+Default = 30.</li>
+
+</ul>
 
 </ul>
 
