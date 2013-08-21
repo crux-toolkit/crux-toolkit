@@ -1,0 +1,14 @@
+INFO: CPU: tyrosine.gs.washington.edu
+INFO: Fri Aug 16 15:16:45 PDT 2013
+COMMAND LINE: ./crux tide-index --overwrite T --decoy-format none --enzyme chymotrypsin --digestion partial-digest --missed-cleavages 2 small-yeast.fasta myindex
+WARNING: The file 'crux-output/tide-index.params.txt' already exists and will be overwritten.
+INFO: Running tide-index...
+WARNING: The output directory 'myindex' already exists.
+Existing files will be overwritten.
+INFO: Reading small-yeast.fasta and computing unmodified peptides...
+INFO: Reading proteins
+INFO: Wrote 100000 peptides
+INFO: Precomputing theoretical spectra...
+INFO: Elapsed time: 24.3 s
+INFO: Finished crux tide-index.
+INFO: Return Code:0

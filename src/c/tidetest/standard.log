@@ -1,0 +1,11 @@
+INFO: CPU: tyrosine.gs.washington.edu
+INFO: Wed Aug 21 14:40:41 PDT 2013
+COMMAND LINE: ./crux tide-index --decoy-format none --min-length 6 --max-length 50 --min-mass 200 --max-mass 7200 --monoisotopic-precursor F --enzyme trypsin --digestion full-digest --missed-cleavages 0 small-yeast.fasta myindex
+INFO: Running tide-index...
+INFO: Writing results to output directory 'myindex'.
+INFO: Reading small-yeast.fasta and computing unmodified peptides...
+INFO: Reading proteins
+INFO: Precomputing theoretical spectra...
+INFO: Elapsed time: 0.305 s
+INFO: Finished crux tide-index.
+INFO: Return Code:0
