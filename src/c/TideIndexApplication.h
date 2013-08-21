@@ -118,6 +118,8 @@ protected:
     const ENZYME_T enzyme,
     const DIGEST_T digestion,
     int missedCleavages,
+    FLOAT_T minMass,
+    FLOAT_T maxMass,
     int minLength,
     int maxLength,
     MASS_TYPE_T massType,

@@ -164,8 +164,8 @@ int TideIndexApplication::main(int argc, char** argv) {
   pb::Header proteinPbHeader;
   vector<TideIndexPeptide> peptideHeap;
   vector<string*> proteinSequences;
-  fastaToPb(cmd_line, enzyme_t, digestion, missed_cleavages, min_length,
-            max_length, mass_type, decoy_type, fasta, out_proteins,
+  fastaToPb(cmd_line, enzyme_t, digestion, missed_cleavages, min_mass, max_mass,
+            min_length, max_length, mass_type, decoy_type, fasta, out_proteins,
             proteinPbHeader, peptideHeap, proteinSequences);
 
   pb::Header header_with_mods;
@@ -343,6 +343,8 @@ void TideIndexApplication::fastaToPb(
   const ENZYME_T enzyme,
   const DIGEST_T digestion,
   int missedCleavages,
+  FLOAT_T minMass,
+  FLOAT_T maxMass,
   int minLength,
   int maxLength,
   MASS_TYPE_T massType,
@@ -390,16 +392,25 @@ void TideIndexApplication::fastaToPb(
     // Write pb::Protein
     getPbProtein(curTargetProtein, proteinName, *proteinSequence, pbProtein);
     proteinWriter.Write(&pbProtein);
-    GenerateDecoys::cleaveProtein(
-      *proteinSequence, enzyme, digestion, missedCleavages,
-      minLength, maxLength, cleavedPeptides);
+    GenerateDecoys::cleaveProtein(*proteinSequence, enzyme, digestion,
+      missedCleavages, minLength, maxLength, cleavedPeptides);
     // Iterate over all generated peptides for this protein
     for (vector< pair<string, int> >::iterator i = cleavedPeptides.begin();
          i != cleavedPeptides.end();
          ++i) {
       const string& cleavedSequence = i->first;
-      const int startLoc = i->second;
       FLOAT_T pepMass = calcPepMassTide(cleavedSequence, massType);
+      if (pepMass < 0.0) {
+        // Sequence contained some invalid character
+        carp(CARP_WARNING, "Ignoring invalid sequence %s",
+             cleavedSequence.c_str());
+        continue;
+      }
+      else if (pepMass < minMass || pepMass > maxMass) {
+        // Skip to next peptide if not in mass range
+        continue;
+      }
+      const int startLoc = i->second;
       int pepLen = cleavedSequence.length();
       // Add target to heap
       TideIndexPeptide pepTarget(
@@ -407,7 +418,7 @@ void TideIndexApplication::fastaToPb(
       outPeptideHeap.push_back(pepTarget);
       push_heap(outPeptideHeap.begin(), outPeptideHeap.end(),
         greater<TideIndexPeptide>());
-      // Skip to next protein if not generating decoys
+      // Skip to next peptide if not generating decoys
       if (decoyType == NONE) {
         continue;
       }
@@ -508,23 +519,32 @@ void TideIndexApplication::writePeptidesAndAuxLocs(
   HeadedRecordWriter auxLocWriter(auxLocsPbFile, auxLocsHeader);
 
   pb::Peptide pbPeptide;
-  pb::AuxLocation pbAuxLoc;
+  pb::AuxLocation* pbAuxLoc = new pb::AuxLocation();
   int auxLocIdx = 0;
   carp(CARP_DEBUG, "%d peptides in heap", peptideHeap.size());
   int count = 0;
+  sort_heap(peptideHeap.begin(), peptideHeap.end(),
+            greater<TideIndexPeptide>());
   while (!peptideHeap.empty()) {
-    pop_heap(peptideHeap.begin(), peptideHeap.end(),
-             greater<TideIndexPeptide>());
-    getPbPeptide(count, peptideHeap.back(), pbPeptide);
+    TideIndexPeptide curPeptide(peptideHeap.back());
     peptideHeap.pop_back();
-    // TODO add aux location if necessary
+    // For duplicate peptides we only record the location
+    while (!peptideHeap.empty() && peptideHeap.back() == curPeptide) {
+      pb::Location* location = pbAuxLoc->add_location();
+      location->set_protein_id(peptideHeap.back().getProteinId());
+      location->set_pos(peptideHeap.back().getProteinPos());
+      peptideHeap.pop_back();
+    }
+    getPbPeptide(count, curPeptide, pbPeptide);
 
     // Not all peptides have aux locations associated with them. Check to see
     // if GetGroup added any locations to aux_location. If yes, only then
     // assign the corresponding array index to the peptide and write it out.
-    if (pbAuxLoc.location_size() > 0) {
+    if (pbAuxLoc->location_size() > 0) {
       pbPeptide.set_aux_locations_index(auxLocIdx++);
-      auxLocWriter.Write(&pbAuxLoc);
+      auxLocWriter.Write(pbAuxLoc);
+      delete pbAuxLoc;
+      pbAuxLoc = new pb::AuxLocation();
     }
 
     // Write the peptide AFTER the aux_locations check, in case we added an
@@ -535,27 +555,37 @@ void TideIndexApplication::writePeptidesAndAuxLocs(
       carp(CARP_INFO, "Wrote %d peptides", count);
     }
   }
+  delete pbAuxLoc;
 }
 
 FLOAT_T TideIndexApplication::calcPepMassTide(
   const string& sequence,
   MASS_TYPE_T massType
 ) {
+  FixPt mass;
+  FixPt aaMass;
   if (massType == AVERAGE) {
-    FixPt mass = MassConstants::fixp_avg_h2o;
+    mass = MassConstants::fixp_avg_h2o;
     for (size_t i = 0; i < sequence.length(); ++i) {
-      mass += MassConstants::fixp_avg_table[sequence[i]];
+      aaMass = MassConstants::fixp_avg_table[sequence[i]];
+      if (aaMass == 0) {
+        return -1;
+      }
+      mass += aaMass;
     }
-    return MassConstants::ToDouble(mass);
   } else if (massType == MONO) {
-    FixPt mass = MassConstants::fixp_mono_h2o;
+    mass = MassConstants::fixp_mono_h2o;
     for (size_t i = 0; i < sequence.length(); ++i) {
-      mass += MassConstants::fixp_mono_table[sequence[i]];
+      aaMass = MassConstants::fixp_avg_table[sequence[i]];
+      if (aaMass == 0) {
+        return numeric_limits<double>::signaling_NaN();
+      }
+      mass += aaMass;
     }
-    return MassConstants::ToDouble(mass);
   } else {
     carp(CARP_FATAL, "Invalid mass type");
   }
+  return MassConstants::ToDouble(mass);
 }
 
 void TideIndexApplication::getPbProtein(
