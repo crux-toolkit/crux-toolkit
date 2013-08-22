@@ -165,11 +165,6 @@ messages that were printed to standard error.
 <ul>
 
 <li>
-<red><code>--top-match &lt;integer&gt;</code> &nbsp; Specify the maximum
-number of matches to consider for each spectrum.  By default,
-Percolator will consider all of the matches in the input file.</red></li>
-
-<li>
 <code>--c-pos &lt;float&gt;</code> &ndash; Penalty for mistakes made
 on positive examples. If this value is not specified, then it is set
 via cross validation over the values {0.1, 1, 10}, selecting the value
@@ -269,6 +264,12 @@ numbers are used as proxies for retention time.  Default = 0.</li>-->
 redundant peptides; keep all PSMs and exclude peptide level
 probabilities.
 </li>
+
+<li>
+<red><code>--top-match &lt;integer&gt;</code> &nbsp; Specify the
+maximum number of matches to consider for each spectrum.  Note that
+this option will be ignored in conjunction with input in pin.xml
+format.  Default = 5.</red></li>
 
 </ul>
 
