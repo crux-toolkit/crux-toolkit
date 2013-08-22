@@ -40,30 +40,33 @@ set(CPACK_SOURCE_PACKAGE_FILE_NAME
   "${CMAKE_PROJECT_NAME}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.Source")
 set (
  CPACK_SOURCE_IGNORE_FILES 
-   /_CPack_Packages/;
-   /CMakeCache.txt/;
-   /CMakeFiles/;
-   /\\\\.svn/;
-   /\\\\.svnignore/;
-   /\\\\.swp/;
-   /abstract/;
-   /asms2007/;
+   /\\\\..*$;
+   \\\\./_CPack_Packages/;
    /benchmark/;
    /bin/;
-   /build/;
-   /crux.sln/;
-   /developer/;
-   /download/;
-   /guispec/;
-   /mods/;
-   /open_source_download/;
-   /paper/;
    /results/;
-   /test/;
-   /windows/;
-   /*\\\\.cmake$/;
-   /*\\\\.gz$/
-   /*\\\\.zip$/
+   [^c]/tide/;
+   /doc/developer/;
+   /doc/guispec/;
+   /doc/mods/;
+   /doc/user/download/;
+   /doc/user/open_source_download/;
+   /src/c/test/;
+   /src/CruxGui/;
+   /src/external/bin/;
+   /src/external/build/;
+   /src/external/downloads/;
+   /src/external/include/;
+   /src/external/lib/;
+   /src/external/share/;
+   /src/python/;
+   /CMakeCache.txt$;
+   /CMakeFiles/;
+   \\\\.cmake$;
+   \\\\.gz$;
+   \\\\.swp$;
+   \\\\.zip$;
+   ${CPACK_SOURCE_IGNORE_FILES}
 )
 
 # Generate checksum files for binary and source packages.
