@@ -1,0 +1,126 @@
+<html>
+<title>make-pin</title>
+<link href="./crux.css" rel="styleSheet" type="text/css">
+</head>
+<body>
+<blockquote>
+
+<h1 align=center>make-pin</H1>
+
+<h2>Usage:</h2>
+
+<blockquote>
+<code>crux make-pin [options] &lt;target input&gt; &lt;decoy input&gt; </code>
+</blockquote>
+
+<h2>Description:</h2>
+
+<p>
+Make-pin is a utility program that generates a collection of target and
+decoy peptide-spectrum matches (PSMs) in pin.xml format, defined
+according to <a href="https://github.com/percolator/percolator/blob/master/src/xml/percolator_in.xsd">
+this schema</a>. This <code>pin.xml</code> file is for input into the
+<code><a href="percolator.html">crux percolator</a></code> algorithm.
+
+<p>
+<code>make-pin</code> requires as input two collections of PSMs, one set derived
+from matching observed spectra against real ("target") peptides, and a
+second derived from matching the same spectra against "decoy"
+peptides.  The output is of <code>pin.xml</code>, where the <a href="">format</a>
+contains pre-calculated features for the percolator algorithm.
+The features used by Percolator to represent each PSM are summarized
+<a href="features.html">here</a>.</p>
+<h2>Input:</h2>
+<ul>
+
+<LI>
+<b>&lt;target&nbsp;input&gt;</b> &ndash;  Input Target PSMs in either
+SQT, PepXML, or tab-delimited text.</li>
+
+<li>
+<b>&lt;decoy&nbsp;input&gt;</b> &ndash; Input Decoy PSMs in either
+SQT, PepXML, or tab-delimited text.</li>
+
+The file formats must be the same for both the <code>target&nbsp;input</code> and the <code>decoy&nbsp;input</code> files.
+
+
+</ul>
+
+<h2>Output:</h2>
+
+<p> make-pin Percolator produces the following files in
+the <code>crux-output</code> directory:</p>
+
+<ul>
+
+<li>
+<b>make-pin.pin.xml</b>: an XML file containing the input target and decoy PSMs in pin.xml format.
+This file can be changed to an absolute path (see <code>--output-file</code> option).
+</li>
+
+<li>
+<b>make-pin.params.txt</b>: a file containing the name and value of
+all parameters for the current operation.  Not all parameters in the
+file may have been used in the operation.  The resulting file can be
+used with the <code>--parameter-file</code> option for other crux
+programs.
+</li>
+
+<li>
+<b>make-pin.log.txt</b>: a log file containing a copy of all
+messages that were printed to standard error.
+</li>
+</ul>
+
+<h2>Options:</h2>
+
+<ul>
+
+<li>
+<red><code>--top-match &lt;integer&gt;</code> &nbsp; Specify the maximum
+number of matches to consider for each spectrum.  By default,
+Percolator will consider all of the matches in the input file. (TODO, not implemented yet?)</red></li>
+
+
+<li>
+<code>--fileroot &lt;string&gt;</code> &ndash;
+The <code>fileroot</code> string will be added as a prefix to all
+output file names. Default = none.</li>
+
+<li>
+<code>--output-dir &lt;filename&gt;</code> &ndash; The name of the
+directory where output files will be created.  Default =
+crux-output.</li>
+
+<li>
+    <code>--output-file &lt;file&gt;</code> &ndash; Absolute path where pin.xml will be written to.
+    This overrides the crux's <code>output-dir</code> and <code>fileroot</code>, file naming convention.
+    This option is only used when it is set by the user.
+</li>
+
+<li>
+<code>--overwrite &lt;T|F&gt;</code> Replace existing files if true (T) or
+fail when trying to overwrite a file if false (F). Default =  F.
+
+<LI>
+<code>--parameter-file &lt;filename&gt;</code> &ndash;
+A file containing command-line or additional parameters.  See the <a
+href=parameter-file.html>parameter documentation</a> page for details.</li>
+
+<LI>
+<code>--verbosity &lt;0-100&gt;</code> &ndash; Specify the verbosity of the
+current processes. Each level prints the following messages, including
+all those at lower verbosity levels: 0-fatal errors, 10-non-fatal
+errors, 20-warnings, 30-information on the progress of execution,
+40-more progress information, 50-debug info, 60-detailed debug info.
+Default = 30.</li>
+
+</ul>
+
+<hr></hr>
+
+<a href="crux.html">Crux home</a>
+
+</blockquote>
+</body>
+</html>
