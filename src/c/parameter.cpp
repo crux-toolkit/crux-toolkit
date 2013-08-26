@@ -704,7 +704,8 @@ void initialize_parameters(void){
   set_int_parameter("top-match", 5, 1, BILLION, 
       "The number of PSMs per spectrum writen to the output " 
       " file(s).  Default=5.",
-      "Available for tide-search and from parameter file for crux-search-for-matches.",
+      "Available for tide-search, crux percolator, and from parameter file for "
+      "crux-search-for-matches.",
       "true");
   set_int_parameter("psms-per-spectrum-reported", 0, 0, BILLION,
                    "place holder", "this may be replaced by top-match","false");
