@@ -116,7 +116,8 @@ int PercolatorApplication::main(int argc, char** argv) {
     "group-proteins",
     "no-prune-proteins",
     "deepness",
-    "verbosity"
+    "verbosity",
+    "top-match"
   };
 
   int num_options = sizeof(option_list) / sizeof(char*);
@@ -136,6 +137,11 @@ int PercolatorApplication::main(int argc, char** argv) {
   ;
 
   string input_pinxml(get_string_parameter_pointer("pin.xml"));
+
+  if (has_extension(input_pinxml.c_str(), "pin.xml") &&
+      get_int_parameter("top-match") != 5) {
+    carp(CARP_WARNING, "top-match is being ignored since input is a pin.xml file");
+  }
   
   if (!get_boolean_parameter("feature-in-file")) {
     // Check if we need to run make-pin first
