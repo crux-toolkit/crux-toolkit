@@ -6,6 +6,11 @@ set (CRUX_VERSION_MAJOR "1")
 set (CRUX_VERSION_MINOR "40")
 set (CRUX_VERSION ${CRUX_VERSION_MAJOR}.${CRUX_VERSION_MINOR})
 
+message(
+  "-- Creating build files for Crux ${CRUX_VERSION} for system ${CMAKE_SYSTEM} " 
+  "(short name ${CMAKE_SYSTEM_NAME})"
+)
+
 add_subdirectory(doc/user)
 add_subdirectory(src/external)
 add_subdirectory(src/c)
@@ -17,6 +22,7 @@ endif (EXISTS "${CMAKE_SOURCE_DIR}/src/c/test/smoke-tests/runall")
 
 install(FILES license.txt DESTINATION .)
 
+if (UNIX)
 add_custom_target(
   deep-clean
   COMMAND ${CMAKE_MAKE_PROGRAM} clean
@@ -24,6 +30,7 @@ add_custom_target(
   COMMAND find ${CMAKE_BINARY_DIR} -name CMakeCache.txt -exec rm "{}" "\;"
   COMMENT "Cleaning project tree."
 )
+endif (UNIX)
 
 # build a CPack driven installer package
 include (InstallRequiredSystemLibraries)
