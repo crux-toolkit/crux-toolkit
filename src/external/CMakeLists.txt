@@ -15,21 +15,43 @@ SET(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR})
 # quickbuild.sh is the script provided by proteowizard 
 # to bootstrap bjam and to run bjam for building the external
 # libraries and Proteowizard components..
-set(protwiz_args ./quickbuild.sh)
-set(protwiz_args ${protwiz_args} --without-binary-msdata)
-set(protwiz_args ${protwiz_args} --layout=system)
-set(protwiz_args ${protwiz_args} --prefix=${CMAKE_CURRENT_SOURCE_DIR})
-set(protwiz_args ${protwiz_args} runtime-link=shared)
-set(protwiz_args ${protwiz_args} libraries)
+if (WIN32 AND NOT CYGWIN)
+  set(protwiz_args ./quickbuild.bat)
+  set(protwiz_args ${protwiz_args} --without-binary-msdata)
+  set(protwiz_args ${protwiz_args} --prefix=${CMAKE_CURRENT_SOURCE_DIR})
+  set(protwiz_args ${protwiz_args} libraries)
+else(WIN32 AND NOT CYGWIN)
+  set(protwiz_args ./quickbuild.sh)
+  set(protwiz_args ${protwiz_args} --without-binary-msdata)
+  set(protwiz_args ${protwiz_args} --layout=system)
+  set(protwiz_args ${protwiz_args} --prefix=${CMAKE_CURRENT_SOURCE_DIR})
+  set(protwiz_args ${protwiz_args} runtime-link=shared)
+  set(protwiz_args ${protwiz_args} libraries)
+endif (WIN32 AND NOT CYGWIN)
 
+if (UNIX)
 add_custom_target(
   deep-clean-external
   COMMAND rm -rf build lib/* include/* bin/*
   COMMENT "Deleting all files for external tools."
 )
+endif (UNIX)
 
 # Download a partial distribution of pwiz r4837 stored
 # as a tar ball on the Noble Lab server.
+if (WIN32 AND NOT CYGWIN)
+ExternalProject_Add(
+  ProteoWizard
+  URL http://noble.gs.washington.edu/proj/crux/download/pwiz-4837.tar.gz
+  URL_MD5 b59e972e193d8d78e89f2a74d2fc94ba
+  DOWNLOAD_DIR downloads
+  PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND ${protwiz_args}
+  INSTALL_COMMAND ""
+  BUILD_IN_SOURCE 1
+)
+else (WIN32 AND NOT CYGWIN)
 ExternalProject_Add(
   ProteoWizard
   URL http://noble.gs.washington.edu/proj/crux/download/pwiz-4837.tar.gz
@@ -41,6 +63,7 @@ ExternalProject_Add(
   INSTALL_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/create_links.sh --prefix=${CMAKE_CURRENT_SOURCE_DIR}
   BUILD_IN_SOURCE 1
 )
+endif (WIN32 AND NOT CYGWIN)
 
 ExternalProject_Add(
   XercesC
@@ -107,6 +130,7 @@ ExternalProject_Add(
 )
 endif(APPLE)
 
+if (UNIX) 
 ExternalProject_Add(
   ProtocolBuffers
   PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
@@ -121,7 +145,9 @@ ExternalProject_Add(
   INSTALL_COMMAND make install
   BUILD_IN_SOURCE 1
 )
+endif (UNIX)
 
+if (UNIX) 
 ExternalProject_Add(
   google-gflags
   PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
@@ -136,6 +162,7 @@ ExternalProject_Add(
   INSTALL_COMMAND make install
   BUILD_IN_SOURCE 1
 )
+endif (UNIX)
 
 add_dependencies(XSD Proteowizard)
 add_dependencies(XSD XercesC)
