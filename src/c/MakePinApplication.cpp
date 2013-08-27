@@ -64,6 +64,7 @@ int MakePinApplication::main(int argc, char** argv) {
    /* Define optional command line arguments */
 
   const char* option_list[] = {
+    "top-match",
     "fileroot",
     "output-dir",
     "overwrite",
