@@ -948,7 +948,8 @@ string SpectralCounts::getName() {
  */
 string SpectralCounts::getDescription() {
   return 
-    "Rank proteins or peptides according to one of two quantification methods.";
+    "Rank proteins or peptides according to a specified spectral counting "
+    "method.";
 }
 
 COMMAND_T SpectralCounts::getCommand() {

@@ -170,7 +170,8 @@ string CruxBullseyeApplication::getName() {
  */
 string CruxBullseyeApplication::getDescription() {
 
-  return "Runs Bullseye";
+  return "Assign high resolution precursor m/z values to MS/MS data "
+    "using the Hardklör algorithm.";
 }
 
 /**

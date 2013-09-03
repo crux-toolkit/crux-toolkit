@@ -132,8 +132,7 @@ string PrintProcessedSpectra::getName() {
  */
 string PrintProcessedSpectra::getDescription() {
   return 
-    "Write a new ms2 file with all of the same spectra "
-    "with only the peaks used for computing xcorr.";
+    "Process spectra as for scoring XCorr and print the results to a file.";
 }
 
 /**

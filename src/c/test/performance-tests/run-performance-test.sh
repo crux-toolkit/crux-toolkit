@@ -20,7 +20,7 @@ echo set terminal png >> $gnuplot
 echo set xlabel \"q-value threshold\" >> $gnuplot
 echo set ylabel \"Number of accepted PSMs\" >> $gnuplot
 echo set xrange \[0:0.1\] >> $gnuplot
-echo set yrange \[0:5000\] >> $gnuplot
+echo set yrange \[0:3000\] >> $gnuplot
 echo set key center right >> $gnuplot
 # Insert dummy plot so we can use "replot" consistently below.
 echo plot 0 notitle with dots >> $gnuplot 
