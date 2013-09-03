@@ -100,7 +100,7 @@ void CruxApplicationList::usage() {
 
   cerr <<" Usage: " << list_name_ << " <command> [options] <argument>" << endl;
   cerr << endl;
-  cerr << list_name_ << " supports the following commands:"<<endl;
+  cerr << list_name_ << " supports the following commands:"<<endl<<endl;
 
   for (iter = applications_.begin();
     iter != applications_.end();
@@ -111,20 +111,24 @@ void CruxApplicationList::usage() {
     }
     string name = (*iter)->getName();
     string description = (*iter)->getDescription();
-    int name_length = name.length();
+    int padding = max_name_length - name.length();
 
-    int padding = max_name_length - name_length;
-
-    cerr<<"  "<<name<<"  ";
+    cerr<<"  "<<name<<" ";
     for (int idx=0;idx<padding;idx++) {
       cerr<<" ";
     }
 
-    unsigned int max_descr_line = 80-max_name_length-4;
+    const int LINE_WIDTH = 80;
+    unsigned int max_descr_line = LINE_WIDTH - (max_name_length+4);
 
+
+    // If the description is short enough, just print.
     if (description.length() < max_descr_line) {
-      cerr<<description<<endl;
-    } else {
+      cerr<<" "<<description<<endl;
+    }
+
+    // Otherwise, insert EOLs.
+    else {
       
       vector<string> words;
       DelimitedFile::tokenize(description, words, ' ');
@@ -132,23 +136,27 @@ void CruxApplicationList::usage() {
       unsigned int word_index = 0;
       unsigned int line_length = 0;
 
-      //print the first line.
-      while(line_length < max_descr_line) {
-        cerr << words[word_index];
+      // Print the first line.
+      while(line_length + words[word_index].length() + 1 
+	    < max_descr_line) {
         cerr << " ";
+        cerr << words[word_index];
         line_length += words[word_index].length() + 1;
         word_index++;
       }
 
+      // Print subsequent lines.
       while (word_index < words.size()) {
         line_length = 0;
         cerr << endl;
-        for (unsigned int idx =0;idx < max_name_length + 4; idx++) {
+        for (unsigned int idx =0;idx < max_name_length + 3; idx++) {
           cerr<<" ";
         }
-        while ((word_index < words.size()) && (line_length < max_descr_line)) {
-          cerr << words[word_index];
+        while ((word_index < words.size()) && 
+	       (line_length + words[word_index].length() + 1 
+		< max_descr_line)) {
           cerr << " ";
+          cerr << words[word_index];
           line_length += words[word_index].length() + 1;
           word_index++;
         }
@@ -156,8 +164,8 @@ void CruxApplicationList::usage() {
       cerr<<endl;
     }
   }
-  cerr << endl;
-  cerr << "Options and arguments are specific to each command.";
+  cerr << endl << endl;
+  cerr << "Options and arguments are specific to each command."<< endl;
   cerr << "Type '"<< list_name_ <<" <command>' for details."<<endl;
 
 }
