@@ -97,8 +97,8 @@ string SearchForXLinks::getName() {
 string SearchForXLinks::getDescription() {
   return 
     "Search a collection of spectra against a sequence "
-    "database returning a collection of matches "
-    "corresponding to linear and cross-lnked peptides "
+    "database, returning a collection of matches "
+    "corresponding to linear and cross-linked peptides "
     "scored by XCorr.";
 }
 

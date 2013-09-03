@@ -243,7 +243,7 @@ string CruxHardklorApplication::getName() {
  */
 string CruxHardklorApplication::getDescription() {
 
-  return "Runs hardklor";
+  return "Identify isotopic distributions from high-resolution mass spectra.";
 }
 
 /**
