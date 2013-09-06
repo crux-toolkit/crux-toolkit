@@ -90,6 +90,37 @@ protected:
   };
 
   /**
+   * Helper function for tab delimited report function
+   */
+  void writeToFile(
+    ofstream* file,
+    const vector<Arr::iterator>& vec,
+    bool decoyVec,
+    const Spectrum* spectrum,
+    int charge,
+    const ActivePeptideQueue* peptides,
+    const ProteinVec& proteins,
+    const map<Arr::iterator, FLOAT_T>& delta_cn_map,
+    const map<Arr::iterator, pair<const SpScorer::SpScoreData, int> >* sp_map
+  );
+
+  /**
+   * Helper function for normal report function
+   */
+  void addCruxMatches(
+    MatchCollection* match_collection,
+    vector<PostProcessProtein*>* proteins_made,
+    const vector<Arr::iterator>& vec,
+    bool decoyVec,
+    Crux::Spectrum& spectrum,
+    const ActivePeptideQueue* peptides,
+    const ProteinVec& proteins,
+    SpectrumZState& z_state,
+    SpScorer* sp_scorer,
+    FLOAT_T* lowest_sp_out
+  );
+
+  /**
    * Create a Crux match from Tide data structures
    */
   Crux::Match* getCruxMatch(
@@ -101,11 +132,19 @@ protected:
   );
 
   /**
-   * Returns a poitner to the modification in the list of mods, adding it if it
+   * Returns a pointer to the modification in the list of mods, adding it if it
    * doesn't exist
    */
   const AA_MOD_T* lookUpMod(
     double delta_mass ///< mass of the mod to look up
+  );
+
+  void gatherTargetsAndDecoys(
+    const ActivePeptideQueue* peptides,
+    const ProteinVec& proteins,
+    vector<Arr::iterator>& targetsOut,
+    vector<Arr::iterator>& decoysOut,
+    int top_n
   );
 
   /**
@@ -136,13 +175,15 @@ protected:
   );
 
   static void computeDeltaCns(
-    const vector< pair<Arr::iterator, int> >& scores,  // xcorr*100000000.0, high to low
+    const vector<Arr::iterator>& vec, // xcorr*100000000.0, high to low
     map<Arr::iterator, FLOAT_T>* delta_cn_map // map to add delta cn scores to
   );
 
   static void computeSpData(
-    vector< pair<Arr::iterator, SpScorer::SpScoreData> > scores,
-    map<Arr::iterator, pair<const SpScorer::SpScoreData, int> >* sp_rank_map
+    const vector<Arr::iterator>& vec,
+    map<Arr::iterator, pair<const SpScorer::SpScoreData, int> >* sp_rank_map,
+    SpScorer* sp_scorer,
+    const ActivePeptideQueue* peptides
   );
 
   struct spGreater {

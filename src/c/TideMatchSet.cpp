@@ -51,113 +51,53 @@ void MatchSet::report(
     return;
   }
 
-  carp(CARP_DETAILED_DEBUG, "Tide MatchSet reporting top %d matches", top_n);
-  make_heap(matches_->begin(), matches_->end(), less_score());
-  sort_heap(matches_->begin(), matches_->end(), less_score());
+  carp(CARP_DETAILED_DEBUG, "Tide MatchSet reporting top %d of %d matches",
+       top_n, matches_->size());
 
-  SpScorer* sp_scorer = (compute_sp) ?
-    new SpScorer(proteins, *spectrum, charge, max_mz_) : NULL;
-
-  bool has_decoys = TideSearchApplication::hasDecoys();
-
-  // Iterate over matches before writing to get deltacn values
-  // (and sp ranks if necessary)
-  vector< pair<Arr::iterator, SpScorer::SpScoreData> > spTargets;
-  vector< pair<Arr::iterator, SpScorer::SpScoreData> > spDecoys;
-  vector< pair<Arr::iterator, int> > xcorrTargets, xcorrDecoys;
-  if (compute_sp) {
-    spTargets.reserve(top_n);
-    spDecoys.reserve(top_n);
-  }
-  xcorrTargets.reserve(top_n);
-  xcorrDecoys.reserve(top_n);
-  for (Arr::iterator i = matches_->end() - 1; i != matches_->begin() - 1; --i) {
-    const Peptide& peptide = *(peptides->GetPeptide(i->second));
-    const pb::Protein& protein = *(proteins[peptide.FirstLocProteinId()]);
-    vector< pair<Arr::iterator, SpScorer::SpScoreData> >* spVector;
-    vector< pair<Arr::iterator, int> >* xcorrVector;
-    if (has_decoys) {
-      if (!isDecoy(protein.name())) {
-        if (xcorrTargets.size() == top_n) {
-          if (xcorrDecoys.size() == top_n) {
-            break;
-          }
-          continue;
-        }
-        spVector = &spTargets;
-        xcorrVector = &xcorrTargets;
-      } else {
-        if (xcorrDecoys.size() == top_n) {
-          if (xcorrTargets.size() == top_n) {
-            break;
-          }
-          continue;
-        }
-        spVector = &spDecoys;
-        xcorrVector = &xcorrDecoys;
-      }
-    } else {
-      if (xcorrTargets.size() == top_n) {
-        break;
-      }
-      spVector = &spTargets;
-      xcorrVector = &xcorrTargets;
-    }
-    xcorrVector->push_back(make_pair(i, i->first));
-    if (compute_sp) {
-      spVector->push_back(make_pair(i, SpScorer::SpScoreData()));
-      pb::Peptide* pb_peptide = getPbPeptide(peptide);
-      sp_scorer->Score(*pb_peptide, spVector->back().second);
-      delete pb_peptide;
-    }
-  }
-  if (sp_scorer) {
-    delete sp_scorer;
-  }
+  vector<Arr::iterator> targets, decoys;
+  gatherTargetsAndDecoys(peptides, proteins, targets, decoys, top_n);
 
   map<Arr::iterator, FLOAT_T> delta_cn_map;
-  computeDeltaCns(xcorrTargets, &delta_cn_map);
-  computeDeltaCns(xcorrDecoys, &delta_cn_map);
+  computeDeltaCns(targets, &delta_cn_map);
+  computeDeltaCns(decoys, &delta_cn_map);
 
   map<Arr::iterator, pair<const SpScorer::SpScoreData, int> > sp_map;
   if (compute_sp) {
-    computeSpData(spTargets, &sp_map);
-    computeSpData(spDecoys, &sp_map);
+    SpScorer sp_scorer(proteins, *spectrum, charge, max_mz_);
+    computeSpData(targets, &sp_map, &sp_scorer, peptides);
+    computeSpData(decoys, &sp_map, &sp_scorer, peptides);
   }
 
-  int cur_target = 0;
-  int cur_decoy = has_decoys ? 0 : top_n + 1;
-  for (Arr::iterator i = matches_->end() - 1; i != matches_->begin() - 1; --i) {
-    // i->second is counter as it was during scoring and corresponds to the
-    // index of the peptide in the ActivePeptideQueue, counting from the back.
-    // GetPeptide() retrieves the corresponding Peptide.
-    const Peptide& peptide = *(peptides->GetPeptide(i->second));
+  writeToFile(target_file, targets, false, spectrum, charge,
+              peptides, proteins, delta_cn_map, compute_sp ? &sp_map : NULL);
+  writeToFile(decoy_file, decoys, true, spectrum, charge,
+              peptides, proteins, delta_cn_map, compute_sp ? &sp_map : NULL);
+}
+
+/**
+ * Helper function for tab delimited report function
+ */
+void MatchSet::writeToFile(
+  ofstream* file,
+  const vector<Arr::iterator>& vec,
+  bool decoyVec,
+  const Spectrum* spectrum,
+  int charge,
+  const ActivePeptideQueue* peptides,
+  const ProteinVec& proteins,
+  const map<Arr::iterator, FLOAT_T>& delta_cn_map,
+  const map<Arr::iterator, pair<const SpScorer::SpScoreData, int> >* sp_map
+) {
+  if (!file) {
+    return;
+  }
+
+  int cur = 0;
+  for (vector<Arr::iterator>::const_iterator i = vec.begin(); i != vec.end(); ++i) {
+    const Peptide& peptide = *(peptides->GetPeptide((*i)->second));
     const pb::Protein& protein = *(proteins[peptide.FirstLocProteinId()]);
 
-    bool is_decoy;
-    string proteinName = getProteinName(protein, peptide, &is_decoy);
-    ofstream* file = NULL;
-
-    if (!is_decoy) {
-      if (++cur_target > top_n) {
-        if (cur_decoy > top_n) {
-          break;
-        }
-        continue;
-      }
-      file = target_file;
-    } else {
-      if (++cur_decoy > top_n) {
-        if (cur_target > top_n) {
-          break;
-        }
-        continue;
-      }
-      file = decoy_file;
-    }
-    if (!file) {
-      continue;
-    }
+    string proteinName = getProteinName(protein, peptide, NULL);
 
     map<size_t, double> modMap; // AA index -> mod delta
     const ModCoder::Mod* mods;
@@ -187,35 +127,34 @@ void MatchSet::report(
 
     string n_term, c_term;
     getFlankingAAs(&peptide, &protein, &n_term, &c_term);
-    const SpScorer::SpScoreData* sp_data = compute_sp ?
-      &((sp_map)[i].first) : NULL;
+    const SpScorer::SpScoreData* sp_data = sp_map ? &(sp_map->at(*i).first) : NULL;
 
     *file << spectrum->SpectrumNumber() << '\t'
           << charge << '\t'
           << spectrum->PrecursorMZ() << '\t'
           << (spectrum->PrecursorMZ() - MASS_PROTON) * charge << '\t'
           << peptide.Mass() << '\t'
-          << delta_cn_map[i] << '\t';
-    if (compute_sp) {
+          << delta_cn_map.at(*i) << '\t';
+    if (sp_map) {
       *file << sp_data->sp_score << '\t'
-            << (sp_map)[i].second << '\t';
+            << sp_map->at(*i).second << '\t';
     }
-    *file << (i->first / 100000000.0) << '\t'
-          << (!is_decoy ? cur_target : cur_decoy) << '\t';
-    if (compute_sp) {
+    *file << ((*i)->first / 100000000.0) << '\t'
+          << ++cur << '\t';
+    if (sp_map) {
       *file << sp_data->matched_ions << '\t'
             << sp_data->total_ions << '\t';
     }
+    const string& residues = protein.residues();
     *file << matches_->size() << '\t'
           << seq << '\t'
           << cleavage_type_ << '\t'
           << proteinName << '\t'
           << n_term << c_term;
-    if (is_decoy) {
-      const string& residues = protein.residues();
-      *file << '\t' << residues.substr(residues.length() - peptide.Len());
+    if (decoyVec) {
+      *file << '\t'
+            << residues.substr(residues.length() - peptide.Len());
     }
-
     *file << endl;
   }
 }
@@ -236,23 +175,20 @@ void MatchSet::report(
     return;
   }
 
-  carp(CARP_DETAILED_DEBUG, "Tide MatchSet reporting top %d matches", top_n);
-  make_heap(matches_->begin(), matches_->end(), less_score());
-  sort_heap(matches_->begin(), matches_->end(), less_score());
+  carp(CARP_DETAILED_DEBUG, "Tide MatchSet reporting top %d of %d matches",
+       top_n, matches_->size());
+
+  vector<Arr::iterator> targets, decoys;
+  gatherTargetsAndDecoys(peptides, proteins, targets, decoys, top_n);
 
   MatchCollection* crux_collection =
     new(match_collection_loc_) MatchCollection();
   MatchCollection* crux_decoy_collection =
     new(decoy_match_collection_loc_) MatchCollection();
-  int targetsToWrite = top_n;
-  int decoysToWrite = TideSearchApplication::hasDecoys() ? top_n : 0;
   vector<PostProcessProtein*> proteins_made;
 
-  // lnNumSp
-  FLOAT_T lnNumSp = log(matches_->size());
-
   // For Sp scoring
-  FLOAT_T* lowest_sp = NULL;
+  FLOAT_T lowest_sp = BILLION;
   SpScorer* sp_scorer = (compute_sp) ?
     new SpScorer(proteins, *spectrum, charge, max_mz_) : NULL;
 
@@ -263,94 +199,15 @@ void MatchSet::report(
   SpectrumZState z_state;
   z_state.setMZ(crux_spectrum.getPrecursorMz(), charge);
 
-  // Create a Crux match for each match
-  for (Arr::iterator i = matches_->end() - 1; i != matches_->begin() - 1; --i) {
-    // i->second is counter as it was during scoring and corresponds to the
-    // index of the peptide in the ActivePeptideQueue, counting from the back.
-    // GetPeptide() retrieves the corresponding Peptide.
-    const Peptide* peptide = peptides->GetPeptide(i->second);
-    const pb::Protein* protein = proteins[peptide->FirstLocProteinId()];
+  addCruxMatches(crux_collection, &proteins_made, targets, false,
+                 crux_spectrum, peptides, proteins, z_state, sp_scorer, &lowest_sp);
+  addCruxMatches(crux_decoy_collection, &proteins_made, decoys, true,
+                 crux_spectrum, peptides, proteins, z_state, sp_scorer, &lowest_sp);
 
-    bool is_decoy = isDecoy(protein->name());
-    if (!is_decoy) {
-      if (targetsToWrite == 0) {
-        if (decoysToWrite == 0) {
-          break;
-        }
-        continue;
-      }
-      --targetsToWrite;
-    } else {
-      if (decoysToWrite == 0) {
-        if (targetsToWrite == 0) {
-          break;
-        }
-        continue;
-      }
-      --decoysToWrite;
-    }
-
-    PostProcessProtein* new_protein;
-    Crux::Match* match = getCruxMatch(peptide, protein, &crux_spectrum, z_state,
-                                      &new_protein);
-    proteins_made.push_back(new_protein);
-    if (!is_decoy) {
-      crux_collection->addMatch(match);
-    } else {
-      match->setNullPeptide(true);
-      crux_decoy_collection->addMatch(match);
-    }
-    Crux::Match::freeMatch(match); // so match gets deleted when collection does
-
-    // Set Xcorr score in match
-    match->setScore(XCORR, i->first / 100000000.0);
-    // Set lnNumSp in match
-    match->setLnExperimentSize(lnNumSp);
-
-    if (compute_sp) {
-      pb::Peptide* pb_peptide = getPbPeptide(*peptide);
-
-      // Score for Sp
-      SpScorer::SpScoreData sp_score_data;
-      sp_scorer->Score(*pb_peptide, sp_score_data);
-      delete pb_peptide;
-
-      FLOAT_T sp = sp_score_data.sp_score;
-      if (!lowest_sp) {
-        lowest_sp = new FLOAT_T(sp);
-      } else if (sp < *lowest_sp) {
-        *lowest_sp = sp;
-      }
-
-      // Set Sp, B/Y scores in match
-      match->setScore(SP, sp);
-      match->setBYIonMatched(sp_score_data.matched_ions);
-      match->setBYIonPossible(sp_score_data.total_ions);
-    }
-  }
-
-  // Set MatchCollection variables
-  crux_collection->setZState(z_state);
-  crux_collection->setExperimentSize(matches_->size());
-  crux_collection->populateMatchRank(XCORR);
-  crux_collection->forceScoredBy(XCORR);
-  crux_decoy_collection->setZState(z_state);
-  crux_decoy_collection->setExperimentSize(matches_->size());
-  crux_decoy_collection->populateMatchRank(XCORR);
-  crux_decoy_collection->forceScoredBy(XCORR);
-
-  if (compute_sp) {
+  if (sp_scorer) {
     crux_spectrum.setTotalEnergy(sp_scorer->TotalIonIntensity());
-    if (lowest_sp) {
-      crux_spectrum.setLowestSp(*lowest_sp);
-      delete lowest_sp;
-    }
+    crux_spectrum.setLowestSp(lowest_sp);
     delete sp_scorer;
-
-    crux_collection->populateMatchRank(SP);
-    crux_collection->forceScoredBy(SP);
-    crux_decoy_collection->populateMatchRank(SP);
-    crux_decoy_collection->forceScoredBy(SP);
   }
 
   // Write matches
@@ -364,6 +221,73 @@ void MatchSet::report(
        i != proteins_made.end();
        ++i) {
     delete *i;
+  }
+}
+
+/**
+ * Helper function for normal report function
+ */
+void MatchSet::addCruxMatches(
+  MatchCollection* match_collection,
+  vector<PostProcessProtein*>* proteins_made,
+  const vector<Arr::iterator>& vec,
+  bool decoyVec,
+  Crux::Spectrum& crux_spectrum,
+  const ActivePeptideQueue* peptides,
+  const ProteinVec& proteins,
+  SpectrumZState& z_state,
+  SpScorer* sp_scorer,
+  FLOAT_T* lowest_sp_out
+) {
+
+  FLOAT_T lnNumSp = log(matches_->size());
+  
+  // Create a Crux match for each match
+  for (vector<Arr::iterator>::const_iterator i = vec.begin(); i != vec.end(); ++i) {
+    const Peptide* peptide = peptides->GetPeptide((*i)->second);
+    const pb::Protein* protein = proteins[peptide->FirstLocProteinId()];
+
+    PostProcessProtein* new_protein;
+    Crux::Match* match = getCruxMatch(peptide, protein, &crux_spectrum, z_state,
+                                      &new_protein);
+    proteins_made->push_back(new_protein);
+    match_collection->addMatch(match);
+    if (decoyVec) {
+      match->setNullPeptide(true);
+    }
+    Crux::Match::freeMatch(match); // so match gets deleted when collection does
+
+    // Set Xcorr score in match
+    match->setScore(XCORR, (*i)->first / 100000000.0);
+    // Set lnNumSp in match
+    match->setLnExperimentSize(lnNumSp);
+
+    if (sp_scorer) {
+      pb::Peptide* pb_peptide = getPbPeptide(*peptide);
+
+      // Score for Sp
+      SpScorer::SpScoreData sp_score_data;
+      sp_scorer->Score(*pb_peptide, sp_score_data);
+      delete pb_peptide;
+
+      FLOAT_T sp = sp_score_data.sp_score;
+      if (sp < *lowest_sp_out) {
+        *lowest_sp_out = sp;
+      }
+
+      // Set Sp, B/Y scores in match
+      match->setScore(SP, sp);
+      match->setBYIonMatched(sp_score_data.matched_ions);
+      match->setBYIonPossible(sp_score_data.total_ions);
+    }
+  }
+  match_collection->setZState(z_state);
+  match_collection->setExperimentSize(matches_->size());
+  match_collection->populateMatchRank(XCORR);
+  match_collection->forceScoredBy(XCORR);
+  if (sp_scorer) {
+    match_collection->populateMatchRank(SP);
+    match_collection->forceScoredBy(SP);
   }
 }
 
@@ -479,6 +403,37 @@ const AA_MOD_T* MatchSet::lookUpMod(double delta_mass) {
   return new_mod;
 }
 
+void MatchSet::gatherTargetsAndDecoys(
+  const ActivePeptideQueue* peptides,
+  const ProteinVec& proteins,
+  vector<Arr::iterator>& targetsOut,
+  vector<Arr::iterator>& decoysOut,
+  int top_n
+) {
+  make_heap(matches_->begin(), matches_->end(), less_score());
+  targetsOut.reserve(top_n);
+  if (TideSearchApplication::hasDecoys()) {
+    decoysOut.reserve(top_n);
+    int popped = 0;
+    do {
+      pop_heap(matches_->begin(), matches_->end() - (popped++), less_score());
+      Arr::iterator i = matches_->end() - popped;
+      const Peptide& peptide = *(peptides->GetPeptide(i->second));
+      const pb::Protein& protein = *(proteins[peptide.FirstLocProteinId()]);
+      vector<Arr::iterator>* vec_ptr = !isDecoy(protein.name()) ? &targetsOut : &decoysOut;
+      if (vec_ptr->size() < top_n) {
+        vec_ptr->push_back(i);
+      }
+    } while (targetsOut.size() != top_n && decoysOut.size() != top_n &&
+             popped < matches_->size());
+  } else {
+    for (int i = 0; i < min(top_n, matches_->size()); ++i) {
+      pop_heap(matches_->begin(), matches_->end() - i, less_score());
+      targetsOut.push_back(matches_->end() - i - 1);
+    }
+  }
+}
+
 /**
  * Create a pb peptide from Tide peptide
  */
@@ -569,28 +524,39 @@ void MatchSet::getFlankingAAs(
 }
 
 void MatchSet::computeDeltaCns(
-  const vector< pair<Arr::iterator, int> >& scores,  // xcorr*100000000.0, high to low
+  const vector<Arr::iterator>& vec, // xcorr*100000000.0, high to low
   map<Arr::iterator, FLOAT_T>* delta_cn_map // map to add delta cn scores to
 ) {
   FLOAT_T lastXcorr = BILLION;
-  for (vector< pair<Arr::iterator, int> >::const_reverse_iterator i = scores.rbegin();
-       i != scores.rend();
+  for (vector<Arr::iterator>::const_reverse_iterator i = vec.rbegin();
+       i != vec.rend();
        ++i) {
-    const FLOAT_T xcorr = i->second / 100000000.0;
-    delta_cn_map->insert(make_pair(i->first, (lastXcorr == BILLION) ?
+    const FLOAT_T xcorr = (*i)->first / 100000000.0;
+    delta_cn_map->insert(make_pair(*i, (lastXcorr == BILLION) ?
       0 : (xcorr - lastXcorr) / max(xcorr, FLOAT_T(1))));
     lastXcorr = xcorr;
   }
 }
 
 void MatchSet::computeSpData(
-  vector< pair<Arr::iterator, SpScorer::SpScoreData> > scores,
-  map<Arr::iterator, pair<const SpScorer::SpScoreData, int> >* sp_rank_map
+  const vector<Arr::iterator>& vec,
+  map<Arr::iterator, pair<const SpScorer::SpScoreData, int> >* sp_rank_map,
+  SpScorer* sp_scorer,
+  const ActivePeptideQueue* peptides
 ) {
-  sort(scores.begin(), scores.end(), spGreater());
-  for (size_t i = 0; i < scores.size(); ++i) {
+  vector< pair<Arr::iterator, SpScorer::SpScoreData> > spData;
+  spData.reserve(vec.size());
+  for (vector<Arr::iterator>::const_iterator i = vec.begin(); i != vec.end(); ++i) {
+    spData.push_back(make_pair(*i, SpScorer::SpScoreData()));
+    const Peptide& peptide = *(peptides->GetPeptide((*i)->second));
+    pb::Peptide* pb_peptide = getPbPeptide(peptide);
+    sp_scorer->Score(*pb_peptide, spData.back().second);
+    delete pb_peptide;
+  }
+  sort(spData.begin(), spData.end(), spGreater());
+  for (size_t i = 0; i < spData.size(); ++i) {
     sp_rank_map->insert(make_pair(
-      scores[i].first, make_pair(scores[i].second, i + 1)));
+      spData[i].first, make_pair(spData[i].second, i + 1)));
   }
 }
 

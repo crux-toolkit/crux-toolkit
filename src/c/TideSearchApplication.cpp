@@ -199,8 +199,10 @@ int TideSearchApplication::main(int argc, char** argv) {
   ofstream* target_file = NULL;
   ofstream* decoy_file = NULL;
   if (!txt_only) {
+    carp(CARP_DEBUG, "Using OutputFiles to write matches");
     output_files = new OutputFiles(this);
   } else {
+    carp(CARP_DEBUG, "Using TideMatchSet to write matches");
     bool overwrite = get_boolean_parameter("overwrite");
     string target_file_name = make_file_path("tide-search.target.txt");
     target_file = create_stream_in_path(target_file_name.c_str(), NULL, overwrite);
