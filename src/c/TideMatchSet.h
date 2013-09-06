@@ -38,6 +38,20 @@ public:
    * Write matches to output files
    */
   void report(
+    ofstream* target_file,  ///< target file to write to
+    ofstream* decoy_file, ///< decoy file to write to
+    int top_n,  ///< number of matches to report
+    const Spectrum* spectrum, ///< spectrum for matches
+    int charge, ///< charge for matches
+    const ActivePeptideQueue* peptides, ///< peptide queue
+    const ProteinVec& proteins, ///< proteins corresponding with peptides
+    bool compute_sp ///< whether to compute sp or not
+  );
+
+  /**
+   * Write matches to output files
+   */
+  void report(
     OutputFiles* output_files,  ///< pointer to output handler
     int top_n,  ///< number of matches to report
     const Spectrum* spectrum, ///< spectrum for matches
@@ -47,9 +61,28 @@ public:
     bool compute_sp ///< whether to compute sp or not
   );
 
+  static void writeHeaders(
+    ofstream* file,
+    bool decoyFile,
+    bool sp
+  );
+
+  /**
+   * Determine if the protein is a decoy protein.
+   */
+  static bool isDecoy(
+    const string& proteinName
+  );
+
+
 protected:
   Arr* matches_;
   double max_mz_;
+  static string cleavage_type_;
+
+  // For allocation
+  static char match_collection_loc_[sizeof(MatchCollection)];
+  static char decoy_match_collection_loc_[sizeof(MatchCollection)];
 
   struct less_score : public binary_function<Pair, Pair, bool> {
     // Compare scores, ignore counters.
@@ -64,7 +97,6 @@ protected:
     const pb::Protein* protein, ///< Tide protein for match
     Crux::Spectrum* crux_spectrum,  ///< Crux spectrum for match
     SpectrumZState& crux_z_state, ///< Crux z state for match
-    bool is_decoy,  /// Is the peptide a decoy
     PostProcessProtein** protein_made ///< out parameter for new protein
   );
 
@@ -79,20 +111,46 @@ protected:
   /**
    * Create a pb peptide from Tide peptide
    */
-  pb::Peptide* getPbPeptide(
+  static pb::Peptide* getPbPeptide(
     const Peptide& peptide
+  );
+
+  /**
+   * Gets the protein name with the index appended.
+   * Optionally, can pass in a boolean pointer to be set to whether decoy or not
+   */
+  static string getProteinName(
+    const pb::Protein& protein,
+    const Peptide& peptide,
+    bool* is_decoy = NULL
   );
 
   /**
    * Gets the flanking AAs for a Tide peptide sequence
    */
-  void getFlankingAAs(
+  static void getFlankingAAs(
     const Peptide* peptide, ///< Tide peptide to get flanking AAs for
     const pb::Protein* protein, ///< Tide protein for the peptide
     string* out_n,  ///< out parameter for n flank
     string* out_c ///< out parameter for c flank
   );
 
+  static void computeDeltaCns(
+    const vector< pair<Arr::iterator, int> >& scores,  // xcorr*100000000.0, high to low
+    map<Arr::iterator, FLOAT_T>* delta_cn_map // map to add delta cn scores to
+  );
+
+  static void computeSpData(
+    vector< pair<Arr::iterator, SpScorer::SpScoreData> > scores,
+    map<Arr::iterator, pair<const SpScorer::SpScoreData, int> >* sp_rank_map
+  );
+
+  struct spGreater {
+    inline bool operator() (const pair<Arr::iterator, SpScorer::SpScoreData>& lhs,
+                            const pair<Arr::iterator, SpScorer::SpScoreData>& rhs) {
+      return lhs.second.sp_score > rhs.second.sp_score;
+    }
+  };
 };
 
 #endif

@@ -10,6 +10,8 @@
 extern AA_MOD_T* list_of_mods[MAX_AA_MODS];
 extern int num_mods;
 
+bool TideSearchApplication::HAS_DECOYS = false;
+
 TideSearchApplication::TideSearchApplication() {
 }
 
@@ -127,6 +129,16 @@ int TideSearchApplication::main(int argc, char** argv) {
   }
   carp(CARP_DEBUG, "Read %d proteins", proteins.size());
 
+  // Check for decoys and set static variable if found
+  for (vector<const pb::Protein*>::const_iterator i = proteins.begin();
+       i != proteins.end();
+       ++i) {
+    if (MatchSet::isDecoy((*i)->name())) {
+      HAS_DECOYS = true;
+      break;
+    }
+  }
+
   // Read peptides index file
   pb::Header peptides_header;
   HeadedRecordReader peptide_reader(peptides_file, &peptides_header);
@@ -179,6 +191,25 @@ int TideSearchApplication::main(int argc, char** argv) {
     MaxMZ::SetGlobalMaxFromFlag();
   }
 
+  bool txt_only = !get_boolean_parameter("sqt-output") &&
+                  !get_boolean_parameter("pepxml-output") &&
+                  !get_boolean_parameter("mzid-output") &&
+                  !get_boolean_parameter("pinxml-output");
+  OutputFiles* output_files = NULL;
+  ofstream* target_file = NULL;
+  ofstream* decoy_file = NULL;
+  if (!txt_only) {
+    output_files = new OutputFiles(this);
+  } else {
+    bool overwrite = get_boolean_parameter("overwrite");
+    string target_file_name = make_file_path("tide-search.target.txt");
+    target_file = create_stream_in_path(target_file_name.c_str(), NULL, overwrite);
+    if (HAS_DECOYS) {
+      string decoy_file_name = make_file_path("tide-search.decoy.txt");
+      decoy_file = create_stream_in_path(decoy_file_name.c_str(), NULL, overwrite);
+    }
+  }
+
   // Do the search
   carp(CARP_INFO, "Running search");
   cleanMods();
@@ -186,7 +217,8 @@ int TideSearchApplication::main(int argc, char** argv) {
          window_type, get_double_parameter("spectrum-min-mz"),
          get_double_parameter("spectrum-max-mz"), min_scan, max_scan,
          get_int_parameter("min-peaks"), charge_to_search,
-         get_int_parameter("top-match"), spectra.FindHighestMZ(), compute_sp);
+         get_int_parameter("top-match"), spectra.FindHighestMZ(),
+         output_files, target_file, decoy_file, compute_sp);
 
   // Delete temporary spectrumrecords file
   if (!delete_spectra_file.empty()) {
@@ -198,6 +230,17 @@ int TideSearchApplication::main(int argc, char** argv) {
   delete active_peptide_queue;
   for (ProteinVec::const_iterator i = proteins.begin(); i != proteins.end(); ++i) {
     delete const_cast<pb::Protein*>(*i);
+  }
+  if (output_files) {
+    delete output_files;
+  }
+  if (target_file) {
+    target_file->close();
+    delete target_file;
+    if (decoy_file) {
+      decoy_file->close();
+      delete decoy_file;
+    }
   }
 
   return 0;
@@ -228,10 +271,19 @@ void TideSearchApplication::search(
   int search_charge,
   int top_matches,
   double highest_mz,
+  OutputFiles* output_files,
+  ofstream* target_file,
+  ofstream* decoy_file,
   bool compute_sp
 ) {
-  OutputFiles output_files(this);
-  output_files.writeHeaders();
+
+  if (output_files) {
+    output_files->writeHeaders();
+  } else if (target_file) {
+    MatchSet::writeHeaders(target_file, false, compute_sp);
+    MatchSet::writeHeaders(decoy_file, true, compute_sp);
+  }
+
   // This is the main search loop.
   ObservedPeakSet observed;
   // cycle through spectrum-charge pairs, sorted by neutral mass
@@ -301,10 +353,18 @@ void TideSearchApplication::search(
     // few, and recover the association between counter and peptide. We output
     // the top matches.
     MatchSet matches(&match_arr, highest_mz);
-    matches.report(&output_files, top_matches, spectrum, charge,
-                   active_peptide_queue, proteins, compute_sp);
+    if (output_files) {
+      matches.report(output_files, top_matches, spectrum, charge,
+                     active_peptide_queue, proteins, compute_sp);
+    } else {
+      matches.report(target_file, decoy_file, top_matches, spectrum, charge,
+                     active_peptide_queue, proteins, compute_sp);
+    }
   }
-  output_files.writeFooters();
+
+  if (output_files) {
+    output_files->writeFooters();
+  }
 }
 
 void TideSearchApplication::collectScoresCompiled(
@@ -368,6 +428,10 @@ void TideSearchApplication::collectScoresCompiled(
   // match_arr is filled by the compiled programs, not by calls to
   // push_back(). We have to set the final size explicitly.
   match_arr->set_size(queue_size);
+}
+
+bool TideSearchApplication::hasDecoys() {
+  return HAS_DECOYS;
 }
 
 string TideSearchApplication::getName() {

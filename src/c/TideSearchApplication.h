@@ -19,6 +19,8 @@ class TideSearchApplication : public CruxApplication {
 
 protected:
 
+  static bool HAS_DECOYS;
+
   /**
    * Free all existing mods
    */
@@ -38,6 +40,9 @@ protected:
     int search_charge,
     int top_matches,
     double highest_mz,
+    OutputFiles* output_files,
+    ofstream* target_file,
+    ofstream* decoy_file,
     bool compute_sp
   );
 
@@ -66,6 +71,8 @@ public:
    * Main method
    */
   virtual int main(int argc, char** argv);
+
+  static bool hasDecoys();
 
   /**
    * Returns the command name
