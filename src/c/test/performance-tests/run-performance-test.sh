@@ -30,7 +30,7 @@ db=worm+contaminants
 if [[ -e $db ]]; then
   echo Skipping create-index.
 else
-  $CRUX tide-index --decoy-format shuffle $db.fa $db
+  $CRUX tide-index --output-dir tide-index --decoy-format shuffle $db.fa $db
 fi
 
 ms2=051708-worm-ASMS-10.ms2
@@ -60,36 +60,36 @@ for searchtool in tide-search; do
   fi
 
   $CRUX extract-columns $searchtool/percolator.target.psms.txt "percolator q-value" > $searchtool/qvalues.percolator.txt
-  echo replot \"$searchtool/qvalues.percolator.txt\" using 1:0 title \"percolator\" with lines >> $gnuplot
+  echo replot \"$searchtool/qvalues.percolator.txt\" using 1:0 title \"$searchtool percolator\" with lines >> $gnuplot
 
   # Run q-ranker.
-  # if [[ -e $searchtool/q-ranker.target.psms.txt ]]; then
-  #   echo Skipping q-ranker.
-  # else
-  #   $CRUX q-ranker \
-  #     --output-dir $searchtool \
-  #     --feature-file T \
-  #     --separate-searches $searchtool/tide-search.decoy.txt \
-  #     $ms2 $searchtool/tide-search.target.txt
-  # fi
+  if [[ -e $searchtool/q-ranker.target.psms.txt ]]; then
+    echo Skipping q-ranker.
+  else
+    $CRUX q-ranker \
+      --output-dir $searchtool \
+      --feature-file T \
+      --separate-searches $searchtool/tide-search.decoy.txt \
+      $ms2 $searchtool/tide-search.target.txt
+  fi
 
-  # $CRUX extract-columns $searchtool/q-ranker.target.psms.txt "q-ranker q-value" > $searchtool/qvalues.qranker.txt
-  # echo replot \"$searchtool/qvalues.qranker.txt\" using 1:0 title \"q-ranker\" with lines >> $gnuplot
+  $CRUX extract-columns $searchtool/q-ranker.target.psms.txt "q-ranker q-value" > $searchtool/qvalues.qranker.txt
+  echo replot \"$searchtool/qvalues.qranker.txt\" using 1:0 title \"$searchtool q-ranker\" with lines >> $gnuplot
 
   # Run Barista.
-  # if [[ -e $searchtool/barista.target.psms.txt ]]; then
-  #   echo Skipping barista.
-  # else
-  #   $CRUX barista \
-  #     --output-dir $searchtool \
-  #     --feature-file T \
-  #     --overwrite T \
-  #     --separate-searches $searchtool/tide-search.decoy.txt \
-  #     $db.fa $ms2 $searchtool/tide-search.target.txt
-  # fi
+  if [[ -e $searchtool/barista.target.psms.txt ]]; then
+    echo Skipping barista.
+  else
+    $CRUX barista \
+      --output-dir $searchtool \
+      --feature-file T \
+      --overwrite T \
+      --separate-searches $searchtool/tide-search.decoy.txt \
+      $db.fa $ms2 $searchtool/tide-search.target.txt
+  fi
 
-  # $CRUX extract-columns $searchtool/barista.target.psms.txt "barista q-value" > $searchtool/qvalues.barista.txt
-  # echo replot \"$searchtool/qvalues.barista.txt\" using 1:0 title \"barista\" with lines >> $gnuplot
+  $CRUX extract-columns $searchtool/barista.target.psms.txt "barista q-value" > $searchtool/qvalues.barista.txt
+  echo replot \"$searchtool/qvalues.barista.txt\" using 1:0 title \"$searchtool barista\" with lines >> $gnuplot
   
 done
 
