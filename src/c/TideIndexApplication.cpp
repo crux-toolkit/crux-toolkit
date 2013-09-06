@@ -579,9 +579,9 @@ FLOAT_T TideIndexApplication::calcPepMassTide(
   } else if (massType == MONO) {
     mass = MassConstants::fixp_mono_h2o;
     for (size_t i = 0; i < sequence.length(); ++i) {
-      aaMass = MassConstants::fixp_avg_table[sequence[i]];
+      aaMass = MassConstants::fixp_mono_table[sequence[i]];
       if (aaMass == 0) {
-        return numeric_limits<double>::signaling_NaN();
+        return -1;
       }
       mass += aaMass;
     }
