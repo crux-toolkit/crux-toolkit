@@ -417,7 +417,7 @@ void GenerateDecoys::cleaveProtein(
  */
 bool GenerateDecoys::makeDecoy(
   const string& seq,  ///< sequence to make decoy from
-  const set<string>& targetSeqs,  ///< targtes to check against
+  const set<string>& targetSeqs,  ///< targets to check against
   const set<string>& decoySeqs,  ///< decoys to check against
   bool shuffle, ///< shuffle (if false, reverse)
   string& decoyOut  ///< string to store decoy

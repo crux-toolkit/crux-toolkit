@@ -269,7 +269,7 @@ int TideIndexApplication::main(int argc, char** argv) {
       }
       // Write the modified sequence to the appropriate file stream
       if (!out_decoy_list ||
-          !protein->name().compare(0, decoyPrefixLen, decoyPrefix) == 0) {
+          (!protein->name().empty() && protein->name()[0] != DecoyMagicByte)) {
         // This is a target, output it
         targetPepStrs.insert(pep_str);
         *out_target_list << pep_str << '\t' << peptide->mass() << endl;
@@ -434,14 +434,17 @@ void TideIndexApplication::fastaToPb(
           decoySequence->insert(0, 1, nTerm);
         }
         // Add C term to decoySequence, if it exists
-        if (startLoc + pepLen < proteinSequence->length()) {
-          decoySequence->append(1, proteinSequence->at(startLoc + pepLen));
+        size_t cTermLoc = startLoc + pepLen;
+        if (cTermLoc < proteinSequence->length()) {
+          decoySequence->push_back(proteinSequence->at(cTermLoc));
         }
         // Append unshuffled sequence
         decoySequence->append(cleavedSequence);
         // Write pb::Protein
-        getPbProtein(++curProtein, decoyPrefix + proteinName,
-                     *decoySequence, pbProtein);
+        stringstream decoyStream;
+        decoyStream << DecoyMagicByte << (startLoc + 1) << '.'
+                    << decoyPrefix << proteinName;
+        getPbProtein(++curProtein, decoyStream.str(), *decoySequence, pbProtein);
         proteinWriter.Write(&pbProtein);
         // Add decoy to heap
         TideIndexPeptide pepDecoy(

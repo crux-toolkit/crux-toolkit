@@ -20,6 +20,8 @@ class TideIndexApplication : public CruxApplication {
 
 public:
 
+  static const char DecoyMagicByte = 9;
+
   /**
    * Constructor
    */
