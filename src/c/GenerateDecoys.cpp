@@ -206,6 +206,8 @@ bool GenerateDecoys::getNextProtein(
       line.erase(0, first);
       size_t last = line.find_last_not_of(whitespace);
       line.erase(last + 1);
+    } else {
+      line.clear();
     }
     if (outId.empty()) {
       // Reading id
