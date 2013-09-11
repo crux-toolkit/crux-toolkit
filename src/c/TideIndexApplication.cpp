@@ -402,7 +402,7 @@ void TideIndexApplication::fastaToPb(
       FLOAT_T pepMass = calcPepMassTide(cleavedSequence, massType);
       if (pepMass < 0.0) {
         // Sequence contained some invalid character
-        carp(CARP_WARNING, "Ignoring invalid sequence %s",
+        carp(CARP_WARNING, "Ignoring invalid sequence <%s>",
              cleavedSequence.c_str());
         continue;
       }
