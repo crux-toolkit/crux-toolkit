@@ -937,7 +937,7 @@ void initialize_parameters(void){
  */
   set_int_parameter(
     "default-direction",
-    0,0,10,
+    0,-BILLION,BILLION,
     "The most informative feature given as feature number, can be negated to indicate "
     "that a lower value is better",
     "Available for crux percolator",
@@ -1033,6 +1033,7 @@ void initialize_parameters(void){
     "Available for crux percolator.",
     "true"
   );
+
   set_boolean_parameter(
     "protein-level-pi0",
     false,
@@ -1040,15 +1041,7 @@ void initialize_parameters(void){
     "Available for crux percolator if --protein T is set.",
     "true"
   );
- 
-  set_int_parameter(
-    "default-direction",
-    1,1,4,
-    "The most informative feature given as feature number, can be negtaed to indicate that "
-    "a lower value is better.",
-    "Available for crux-percolator.",
-    "true"
-  );
+
   set_boolean_parameter(
     "group-proteins",
     false,
