@@ -1,0 +1,343 @@
+<html>
+<head>
+<title>crux comet</title>
+<link href="./crux.css" rel="styleSheet" type="text/css">
+</head>
+<body>
+<blockquote>
+
+<H1 ALIGN=CENTER>crux comet</H1>
+
+<h2>Usage:</h2>
+
+<blockquote>
+<code>crux comet [options]
+&lt;spectra&gt; &lt;protein&nbsp;input&gt;
+</code>
+</blockquote>
+
+<h2>Description:</h2>
+
+<blockquote>
+<p>
+This command searches a protein database with a set of spectra,
+assigning peptide sequences to the observed spectra.  This search
+engine was developed by Jimmy Eng at the University of Washington
+Proteomics Resource.</p>
+
+<p>
+Although its history goes back two decades, the Comet search engine
+was first made publicly available in August 2012 on SourceForge under
+the Apache License, version 2.0. Comet is multithreaded and supports
+multiple input and output formats.  The current Comet version in
+Crux is 2013.01.rev.0.</p>
+
+<blockquote>
+<a href="http://onlinelibrary.wiley.com/doi/10.1002/pmic.201200439/abstract">"Comet: an open source tandem mass spectrometry sequence database
+search tool."</a>  Eng JK, Jahan TA, Hoopmann MR.
+<i>Proteomics</i>. 2012 Nov 12. doi: 10.1002/pmic.201200439
+</blockquote>
+
+</blockquote>
+
+<p>
+<h2>Input:</h2>
+
+<ul>
+
+<li>
+&lt;spectra&gt; &ndash; The name of the file from which to parse the
+  spectra.  File formats are supported by 
+  <a href="http://proteowizard.sourceforge.net/">proteowizard</a>, 
+  with the exception of the vendor's formats.</li>
+
+<LI>
+&lt;database_name&gt; &ndash; The name of the file in fasta format
+  from which to retrieve proteins and peptides.  The database can
+  contain amino acid sequences or nucleic acid sequences.  If the
+  sequences are nucleic acid sequences, then you must instruct Comet
+  to translate these to amino acid sequences by setting
+  <code>nucleotide_reading_frame</code> to a value between 1 and
+  9.</li>
+
+</UL>
+
+<h2>Output:</h2>
+
+<p>
+The program writes files to the folder <code>crux-output</code> by
+default.  The name of the output folder can be set by the user using
+the <code>--output-dir</code> option.  The following files will be
+created:</p>
+<ul>
+
+<li>
+<b>comet.params.txt</b>: a file containing the name and value of all
+parameters/options for the current operation.  Not all parameters in
+the file may have been used in the operation.  The resulting file can
+be used with the <code>--parameter-file</code> option for other crux
+programs.
+</li>
+
+<li>
+<b>comet.target.pep.xml</b>: a file in pep.xml format containing the
+PSMs.  See 
+<a href="http://tools.proteomecenter.org/wiki/index.php?title=Formats:pepXML">
+pep xml file format</a> for further reference. This file can be used as input 
+to some of the tools in the 
+<a href="http://tools.proteomecenter.org/wiki/index.php?title=Software:TPP">
+Transproteomic Pipeline</a>.</li>
+
+<li>
+<b>comet.log.txt</b>: a log file containing a copy of all messages
+that were printed to standard error.</li>
+
+</ul>
+
+<h2>Options:</h2>
+
+<p>
+Because Comet was developed externally to Crux, the names of various
+command line parameters are somewhat different.  For example, Comet
+uses underscores ("_") within parameter names, whereas other Crux
+commands use hyphens ("-").  The <code>crux comet</code>
+command will accept parameters using either convention.</p>
+
+<ul>
+
+<h3>Database</h3>
+<ul>
+<li><a href="comet-options/decoy_search.html">decoy_search</a></li>
+</ul>
+
+<h3>CPU threads</h3>
+<ul>
+<li><a href="comet-options/num_threads.html">num_threads</a></li>
+</ul>
+
+<h3>Masses</h3>
+<ul>
+<li><a href="comet-options/peptide_mass_tolerance.html">peptide_mass_tolerance</a></li>
+<li><a href="comet-options/peptide_mass_units.html">peptide_mass_units</a></li>
+<li><a href="comet-options/mass_type_parent.html">mass_type_parent</a></li>
+<li><a href="comet-options/mass_type_fragment.html">mass_type_fragment</a></li>
+<li><a href="comet-options/precursor_tolerance_type.html">precursor_tolerance_type</a></li>
+<li><a href="comet-options/isotope_error.html">isotope_error</a></li>
+</ul>
+
+<h3>Search enzyme</h3>
+<ul>
+<li><a href="comet-options/search_enzyme_number.html">search_enzyme_number</a></li>
+<li><a href="comet-options/num_enzyme_termini.html">num_enzyme_termini</a></li>
+<li><a href="comet-options/allowed_missed_cleavage.html">allowed_missed_cleavage</a></li>
+</ul>
+
+<h3>Fragment ions</h3>
+<ul>
+<li><a href="comet-options/fragment_bin_tol.html">fragment_bin_tol</a></li>
+<li><a href="comet-options/fragment_bin_offset.html">fragment_bin_offset</a></li>
+<li><a href="comet-options/theoretical_fragment_ions.html">theoretical_fragment_ions</a></li>
+<li><a href="comet-options/use_A_ions.html">use_A_ions</a></li>
+<li><a href="comet-options/use_B_ions.html">use_B_ions</a></li>
+<li><a href="comet-options/use_C_ions.html">use_C_ions</a></li>
+<li><a href="comet-options/use_X_ions.html">use_X_ions</a></li>
+<li><a href="comet-options/use_Y_ions.html">use_Y_ions</a></li>
+<li><a href="comet-options/use_Z_ions.html">use_Z_ions</a></li>
+<li><a href="comet-options/use_NL_ions.html">use_NL_ions</a></li>
+<li><a href="comet-options/use_sparse_matrix.html">use_sparse_matrix</a></li>
+</ul>
+
+<h3>Output</h3>
+<ul>
+<li>
+<code>--fileroot &lt;string&gt;</code> &ndash; 
+The <code>fileroot</code> string will be added as a prefix to all
+output file names. Default = none.</li>
+
+<li>
+<code>--output-dir &lt;filename&gt;</code> &ndash; 
+The name of the directory where output files will be created.
+Default = crux-output.</li>
+
+<li>
+<code>--overwrite &lt;T|F&gt;</code> &ndash;
+Replace existing files if true (T) or fail when trying to overwrite a
+file if false (F). Default =  F.</li>
+
+<li>
+<code>--decoy-prefix &lt;string&gt;</code> &ndash; Specifies the
+prefix of the protein names that indicates a decoy. Default = rand_.
+</li>
+
+<li>
+<code>--output-txtfile &lt;T|F&gt;</code> &ndash; Create a
+tab-delimited output file.  Default=T.</li>
+
+<li><a href="comet-options/output_sqtfile.html">output_sqtfile</a></li>
+<li><a href="comet-options/output_pepxmlfile.html">output_pepxmlfile</a></li>
+<li><a href="comet-options/output_outfiles.html">output_outfiles</a></li>
+<li><a href="comet-options/print_expect_score.html">print_expect_score</a></li>
+<li><a href="comet-options/num_output_lines.html">num_output_lines</a></li>
+<li><a href="comet-options/show_fragment_ions.html">show_fragment_ions</a></li>
+<li><a href="comet-options/sample_enzyme_number.html">sample_enzyme_number</a></li>
+</ul>
+               
+<h3>mzXML/mzML parameters</h3>
+<ul>
+<li><a href="comet-options/scan_range.html">scan_range</a></li>
+<li><a href="comet-options/precursor_charge.html">precursor_charge</a></li>
+<li><a href="comet-options/ms_level.html">ms_level</a></li>
+<li><a href="comet-options/activation_method.html">activation_method</a></li>
+</ul>
+
+<h3>Miscellaneous parameters</h3>
+<ul>
+<LI><code>--parameter-file &lt;filename&gt;</code> &ndash; 
+A file containing command-line or additional parameters.  See
+the <a href="parameter-file.html">parameter documentation</a> page
+for details.  Default = no parameter file.</li>
+
+<LI>
+<code>--verbosity &lt;0-100&gt;</code> &ndash; 
+Specify the verbosity of the current processes. Each level prints the
+following messages, including all those at lower verbosity levels:
+0-fatal errors, 10-non-fatal errors, 20-warnings, 30-information on
+the progress of execution, 40-more progress information, 50-debug
+info, 60-detailed debug info. Default = 30.</li>
+
+<li><a href="comet-options/digest_mass_range.html">digest_mass_range</a></li>
+<li><a href="comet-options/num_results.html">num_results</a></li>
+<li><a href="comet-options/skip_researching.html">skip_researching</a></li>
+<li><a href="comet-options/max_fragment_charge.html">max_fragment_charge</a></li>
+<li><a href="comet-options/max_precursor_charge.html">max_precursor_charge</a></li>
+<li><a href="comet-options/nucleotide_reading_frame.html">nucleotide_reading_frame</a></li>
+<li><a href="comet-options/clip_nterm_methionine.html">clip_nterm_methionine</a></li>
+<li><a href="comet-options/spectrum_batch_size.html">spectrum_batch_size</a>
+</ul>
+
+<h3>Spectral processing</h3>
+<ul>
+<li><a href="comet-options/minimum_peaks.html">minimum_peaks</a></li>
+<li><a href="comet-options/minimum_intensity.html">minimum_intensity</a></li>
+<li><a href="comet-options/remove_precursor_peak.html">remove_precursor_peak</a></li>
+<li><a href="comet-options/remove_precursor_tolerance.html">remove_precursor_tolerance</a></li>
+<li><a href="comet-options/clear_mz_range.html">clear_mz_range</a></li>
+
+</ul>
+               
+<h3>Variable modifications</h3>
+<ul>
+<li><a href="comet-options/variable_mod1.html">variable_mod1</a></li>
+<li><a href="comet-options/variable_mod2.html">variable_mod2</a></li>
+<li><a href="comet-options/variable_mod3.html">variable_mod3</a></li>
+<li><a href="comet-options/variable_mod4.html">variable_mod4</a></li>
+<li><a href="comet-options/variable_mod5.html">variable_mod5</a></li>
+<li><a href="comet-options/variable_mod6.html">variable_mod6</a></li>
+<li><a href="comet-options/max_variable_mods_in_peptide.html">max_variable_mods_in_peptide</a></li>
+<li><a href="comet-options/variable_C_terminus.html">variable_C_terminus</a></li>
+<li><a href="comet-options/variable_N_terminus.html">variable_N_terminus</a></li>
+<li><a href="comet-options/variable_C_terminus_distance.html">variable_C_terminus_distance</a></li>
+<li><a href="comet-options/variable_N_terminus_distance.html">variable_N_terminus_distance</a></li>
+</ul>
+
+<h3>Static modifications</h3>
+<ul>
+<li><a href="comet-options/add_Cterm_peptide.html">add_Cterm_peptide</a></li>
+<li><a href="comet-options/add_Nterm_peptide.html">add_Nterm_peptide</a></li>
+<li><a href="comet-options/add_Cterm_protein.html">add_Cterm_protein</a></li>
+<li><a href="comet-options/add_Nterm_protein.html">add_Nterm_protein</a></li>
+<li><a href="comet-options/add_G_glycine.html">add_G_glycine</a></li>
+<li><a href="comet-options/add_A_alanine.html">add_A_alanine</a></li>
+<li><a href="comet-options/add_S_serine.html">add_S_serine</a></li>
+<li><a href="comet-options/add_P_proline.html">add_P_proline</a></li>
+<li><a href="comet-options/add_V_valine.html">add_V_valine</a></li>
+<li><a href="comet-options/add_T_threonine.html">add_T_threonine</a></li>
+<li><a href="comet-options/add_C_cysteine.html">add_C_cysteine</a></li>
+<li><a href="comet-options/add_L_leucine.html">add_L_leucine</a></li>
+<li><a href="comet-options/add_I_isoleucine.html">add_I_isoleucine</a></li>
+<li><a href="comet-options/add_N_asparagine.html">add_N_asparagine</a></li>
+<li><a href="comet-options/add_D_aspartic_acid.html">add_D_aspartic_acid</a></li>
+<li><a href="comet-options/add_Q_glutamine.html">add_Q_glutamine</a></li>
+<li><a href="comet-options/add_K_lysine.html">add_K_lysine</a></li>
+<li><a href="comet-options/add_E_glutamic_acid.html">add_E_glutamic_acid</a></li>
+<li><a href="comet-options/add_M_methionine.html">add_M_methionine</a></li>
+<li><a href="comet-options/add_O_ornithine.html">add_O_ornithine</a></li>
+<li><a href="comet-options/add_H_histidine.html">add_H_histidine</a></li>
+<li><a href="comet-options/add_F_phenylalanine.html">add_F_phenylalanine</a></li>
+<li><a href="comet-options/add_R_arginine.html">add_R_arginine</a></li>
+<li><a href="comet-options/add_Y_tyrosine.html">add_Y_tyrosine</a></li>
+<li><a href="comet-options/add_W_tryptophan.html">add_W_tryptophan</a></li>
+<li><a href="comet-options/add_B_user_amino_acid.html">add_B_user_amino_acid</a></li>
+<li><a href="comet-options/add_J_user_amino_acid.html">add_J_user_amino_acid</a></li>
+<li><a href="comet-options/add_U_user_amino_acid.html">add_U_user_amino_acid</a></li>
+<li><a href="comet-options/add_X_user_amino_acid.html">add_X_user_amino_acid</a></li>
+<li><a href="comet-options/add_Z_user_amino_acid.html">add_Z_user_amino_acid</a></li>
+</ul>
+
+<h3>Enzyme handling</h3>
+
+<p>
+Enzymatic digestion rules are specified
+using <code>search_enzyme_number</code> and the following lines at the
+end of the parameter file:</p>
+
+<code>
+#<br>
+# COMET_ENZYME_INFO _must_ be at the end of this parameters file<br>
+#<br>
+[COMET_ENZYME_INFO]<br>
+0.  No_enzyme              0      -           -<br>
+1.  Trypsin                1      KR          P<br>
+2.  Trypsin/P              1      KR          -<br>
+3.  Lys_C                  1      K           P<br>
+4.  Lys_N                  0      K           -<br>
+5.  Arg_C                  1      R           P<br>
+6.  Asp_N                  0      D           -<br>
+7.  CNBr                   1      M           -<br>
+8.  Glu_C                  1      DE          P<br>
+9.  PepsinA                1      FL          P<br>
+10. Chymotrypsin           1      FWYL        P<br>
+</code>
+
+<p>
+The <code>search_enzyme_number</code> keys into this list of enzymes.
+This list can be further modified to support other enzymes.</p>
+
+</ul>
+
+<h2>Differences between the Crux and standalone versions of Comet</h2>
+
+<p>
+Unlike the standalone version of Comet, the <code>comet</code> command
+in Crux
+<ul>
+<li>
+reads input spectra in any format supported by Proteowizard,</li>
+<li>
+offers a variety of additional options (--fileroot, --output-dir,
+--overwrite, --decoy-prefix, --output-txtfile, --parameter-file,
+--verbosity),</li>
+<li>
+prints all messages both to the screen and to a log file, and</li>
+<li>
+uses hyphens, rather than underscores, within parameter names.</li>
+</ul>
+
+<h3>To do list</h3>
+
+<p>
+<ul>
+<li>Change parameters to use hyphens.</li>
+<li>Map the modifications to actual mass changes instead of using
+  special characters.</li>
+</ul>
+
+<hr></hr>
+
+
+<p>
+<a href="crux.html">Crux home</a></p>
+
+</blockquote>
+</body>
+</html>

@@ -1,0 +1,184 @@
+Index: CometSearch/CometPreprocess.h
+===================================================================
+--- CometSearch/CometPreprocess.h	(revision 147)
++++ CometSearch/CometPreprocess.h	(working copy)
+@@ -22,7 +22,7 @@
+ 
+ struct PreprocessThreadData
+ {
+-   Spectrum mstSpectrum;
++   MSToolkit::Spectrum mstSpectrum;
+    int iAnalysisType;
+    int iFileLastScan;
+ 
+@@ -30,7 +30,7 @@
+    {
+    }
+ 
+-   PreprocessThreadData(Spectrum &spec_in,
++   PreprocessThreadData(MSToolkit::Spectrum &spec_in,
+                         int iAnalysisType_in,
+                         int iFileLastScan_in)
+    {
+@@ -60,7 +60,7 @@
+ private:
+    
+    // Private static methods
+-   static void PreprocessSpectrum(Spectrum &spec, 
++   static void PreprocessSpectrum(MSToolkit::Spectrum &spec, 
+                                   int iAnalysisType, 
+                                   int iFileLastScan);
+    static bool CheckExistOutFile(int iCharge,
+@@ -67,7 +67,7 @@
+                                  int iScanNum);
+    static void AdjustMassTol(struct Query *pScoring);
+    static void PreloadIons(MSReader &mstReader,
+-                           Spectrum &spec,
++                           MSToolkit::Spectrum &spec,
+                            bool bNext=false,
+                            int scNum=0);
+    static bool CheckActivationMethodFilter(MSActivation act);
+@@ -78,9 +78,9 @@
+                          int iReaderLastScan,
+                          int iNumSpectraLoaded);
+    static void Preprocess(struct Query *pScoring,
+-                          Spectrum mstSpectrum);
++                          MSToolkit::Spectrum mstSpectrum);
+    static void LoadIons(struct Query *pScoring,
+-                        Spectrum mstSpectrum,
++                        MSToolkit::Spectrum mstSpectrum,
+                         struct PreprocessStruct *pPre);
+    static void MakeCorrData(double *pdTempRawData,
+                             struct Query *pScoring,
+Index: CometSearch/Common.h
+===================================================================
+--- CometSearch/Common.h	(revision 147)
++++ CometSearch/Common.h	(working copy)
+@@ -55,11 +55,28 @@
+ 
+ using namespace MSToolkit;
+ #ifdef CRUX
+-#define logout(...) {char sbuf[1000]; snprintf(sbuf, 1000, __VA_ARGS__); cerr << sbuf;}
+-#define logerr(...) {char sbuf[1000]; snprintf(sbuf, 1000, __VA_ARGS__); cerr << sbuf;}
++inline int print_out(const char *format, ...)
++{
++  char sbuf[1000];
++  va_list arg;
++  int done;
++
++  va_start (arg, format);
++
++  done = vsprintf (sbuf, format, arg);
++  va_end (arg);
++
++  cerr << sbuf;
++
++  return done;
++}
++#define logout(...) print_out(__VA_ARGS__)
++#define logerr(...) print_out(__VA_ARGS__)
+ #else
+ #define logout(...) printf(__VA_ARGS__)
+ #define logerr(...) fprintf(stderr, __VA_ARGS__)
+ #endif
+ 
++
++
+ #endif // _COMMON_H_
+Index: CometSearch/Makefile
+===================================================================
+--- CometSearch/Makefile	(revision 147)
++++ CometSearch/Makefile	(working copy)
+@@ -1,7 +1,7 @@
+ CXX = g++
+ GCC = gcc
+ MSTOOLKIT = ../MSToolkit
+-CXXFLAGS = -O3 -static -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DGCC -I. -I$(MSTOOLKIT)/include
++CXXFLAGS = -O3 -static -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DGCC -I. -I$(MSTOOLKIT)/include -DCRUX
+ 
+ COMETSEARCH = Threading.o CometSearch.o CometPreprocess.o CometPostAnalysis.o CometMassSpecUtils.o CometWriteOut.o CometWriteSqt.o CometWritePepXML.o CometWritePinXML.o CometWriteTxt.o CometSearchManager.o
+ 
+Index: MSToolkit/Makefile
+===================================================================
+--- MSToolkit/Makefile	(revision 147)
++++ MSToolkit/Makefile	(working copy)
+@@ -11,7 +11,7 @@
+ MZPARSER = mzp.mzp_base64.o mzp.BasicSpectrum.o mzp.mzParser.o mzp.RAMPface.o mzp.saxhandler.o mzp.saxmzmlhandler.o \
+ 	mzp.saxmzxmlhandler.o mzp.Czran.o mzp.mz5handler.o mzp.mzpMz5Config.o mzp.mzpMz5Structs.o mzp.BasicChromatogram.o mzp.PWIZface.o
+ MZPARSERLITE = mzp.mzp_base64_lite.o mzp.BasicSpectrum_lite.o mzp.mzParser_lite.o mzp.RAMPface_lite.o mzp.saxhandler_lite.o mzp.saxmzmlhandler_lite.o \
+-	mzp.saxmzxmlhandler_lite.o mzp.Czran_lite.o mzp.mz5handler_lite.o mzp.mzpMz5Config_lite.o mzp.mzpMz5Structs_lite.o mzp.BasicChromatogram_lite.o mzp.PWIZface_lite.o
++  mzp.saxmzxmlhandler_lite.o mzp.Czran_lite.o mzp.mz5handler_lite.o mzp.mzpMz5Config_lite.o mzp.mzpMz5Structs_lite.o mzp.BasicChromatogram_lite.o mzp.PWIZface_lite.o
+ EXPAT = xmlparse.o xmlrole.o xmltok.o
+ ZLIB = adler32.o compress.o crc32.o deflate.o inffast.o inflate.o infback.o inftrees.o trees.o uncompr.o zutil.o
+ MSTOOLKIT = Spectrum.o MSObject.o
+@@ -41,15 +41,15 @@
+ CC = g++
+ GCC = gcc
+ NOSQLITE = -D_NOSQLITE
+-MZ5 = -DMST_MZ5 -DMZP_MZ5
+-
++#MZ5 = -DMST_MZ5 -DMZP_MZ5
++MZ5 = 
+ H5_CPPFLAGS = -O3 -static -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_BSD_SOURCE  -D_POSIX_C_SOURCE=199506L   -DNDEBUG -UH5_DEBUG_API
+-CFLAGS = -O3 -static -I. -I$(HEADER_PATH) -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DGCC -DHAVE_EXPAT_CONFIG_H
++CFLAGS = -O3 -I. -I$(HEADER_PATH) -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DGCC -DHAVE_EXPAT_CONFIG_H
+ LIBS = -lm -lpthread -ldl
+ 
+-all:  $(ZLIB) $(MZPARSER) $(MZPARSERLITE) $(MSTOOLKIT) $(READER) $(READERLITE) $(EXPAT) $(SQLITE) $(HDF5)
++all:  $(ZLIB) $(MZPARSER) $(MZPARSERLITE) $(MSTOOLKIT) $(READER) $(READERLITE) $(EXPAT) $(SQLITE) #$(HDF5)
+ 	ar rcs libmstoolkitlite.a $(ZLIB) $(EXPAT) $(MZPARSERLITE) $(MSTOOLKIT) $(READERLITE)
+-	ar rcs libmstoolkit.a $(ZLIB) $(EXPAT) $(MZPARSER) $(MSTOOLKIT) $(READER) $(SQLITE) $(HDF5)
++	ar rcs libmstoolkit.a $(ZLIB) $(EXPAT) $(MZPARSER) $(MSTOOLKIT) $(READER) $(SQLITE) #$(HDF5)
+ #	$(CC) $(CFLAGS) MSTDemo.cpp -L. -lmstoolkitlite -o MSTDemo
+ #	$(CC) $(CFLAGS) -I./include MSSingleScan/MSSingleScan.cpp -L. -lmstoolkitlite -o msSingleScan
+ #	$(CC) $(CFLAGS) MSConvertFile.cpp -L. -lmstoolkitlite -o MSConvertFile
+Index: MSToolkit/include/H5public.h
+===================================================================
+--- MSToolkit/include/H5public.h	(revision 147)
++++ MSToolkit/include/H5public.h	(working copy)
+@@ -28,11 +28,7 @@
+  * it via H5public.h.  The #ifndef _H5public_H guard above would
+  * prevent repeated include.
+  */
+-#ifdef _MSC_VER
+-#include "H5pubconf_win.h"
+-#else
+ #include "H5pubconf.h"		/*from configure                             */
+-#endif
+ 
+ /* API Version macro wrapper definitions */
+ #include "H5version.h"
+Index: MSToolkit/include/mzParser.h
+===================================================================
+--- MSToolkit/include/mzParser.h	(revision 147)
++++ MSToolkit/include/mzParser.h	(working copy)
+@@ -47,14 +47,10 @@
+ 
+ //#define OSX				// to compile with cc on Macintosh OSX
+ //#define OSX_TIGER // use with OSX if OSX Tiger is being used
++//#define OSX_INTEL // compile with cc on Macintosh OSX on Intel-style processors
++//#define GCC				// to compile with gcc (or g++) on LINUX
+ //#define __LINUX__				// to compile with gcc (or g++) on LINUX
+ //#define _MSC_VER	// to compile with Microsoft Studio
+-//#define OSX_INTEL // compile with cc on Macintosh OSX on Intel-style processors
+-//#define GCC				// to compile with gcc (or g++) on LINUX
+-#define __LINUX__    // Comet project currently only cares about Linux/Windows
+-#ifdef _MSC_VER
+-#undef __LINUX__
+-#endif
+ 
+ #define XMLCLASS		
+ #ifndef XML_STATIC
+Index: Makefile
+===================================================================
+--- Makefile	(revision 147)
++++ Makefile	(working copy)
+@@ -1,7 +1,7 @@
+ CXX = g++
+ MSTOOLKIT = MSToolkit
+ COMETSEARCH = CometSearch
+-CXXFLAGS = -O3 -Wall -Wno-char-subscripts -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -I$(MSTOOLKIT)/include -I$(COMETSEARCH)
++CXXFLAGS = -O3 -Wall -Wno-char-subscripts -DGCC -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -I$(MSTOOLKIT)/include -I$(COMETSEARCH) -DCRUX
+ EXECNAME = comet.exe
+ OBJS = Comet.o
+ DEPS = CometSearch/CometData.h CometSearch/CometPreprocess.h CometSearch/CometWriteOut.h CometSearch/CometWriteSqt.h CometSearch/OSSpecificThreading.h CometSearch/CometMassSpecUtils.h CometSearch/CometSearch.h CometSearch/CometWritePepXML.h CometSearch/CometWriteTxt.h CometSearch/Threading.h CometSearch/CometPostAnalysis.h CometSearch/CometSearchManager.h CometSearch/CometWritePinXML.h CometSearch/Common.h CometSearch/ThreadPool.h CometSearch/CometMassSpecUtils.cpp CometSearch/CometSearch.cpp CometSearch/CometWritePepXML.cpp CometSearch/CometWriteTxt.cpp CometSearch/CometPostAnalysis.cpp CometSearch/CometSearchManager.cpp CometSearch/CometWritePinXML.cpp CometSearch/Threading.cpp CometSearch/CometPreprocess.cpp CometSearch/CometWriteOut.cpp CometSearch/CometWriteSqt.cpp
