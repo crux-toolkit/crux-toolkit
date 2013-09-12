@@ -14,7 +14,7 @@
 #include "Peak.h"
 
 #include "Spectrum.h"
-#include "../external/MSToolkit/include/Spectrum.h"
+#include "../external/build/src/comet/src/comet/MSToolkit/include/Spectrum.h"
 #include "pwiz/data/msdata/SpectrumInfo.hpp"
 #include "SpectrumZState.h"
 

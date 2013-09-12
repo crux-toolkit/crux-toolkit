@@ -1,7 +1,7 @@
 #ifndef _SMOOTH_H
 #define _SMOOTH_H
 
-#include "../external/MSToolkit/include/Spectrum.h"
+#include "../external/build/src/comet/src/comet/MSToolkit/include/Spectrum.h"
 
 using namespace std;
 using namespace MSToolkit;

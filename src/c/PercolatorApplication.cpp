@@ -167,7 +167,8 @@ int PercolatorApplication::main(int argc, char** argv) {
       if (!file_exists(input_pinxml)) {
         carp(CARP_FATAL, "Target file %s not found", input_pinxml.c_str());
       } else if (!file_exists(input_decoy)) {
-        carp(CARP_FATAL, "Decoy file %s not found", input_decoy.c_str());
+        carp(CARP_DEBUG, "Decoy file %s not found", input_decoy.c_str());
+	input_decoy = "";
       }
   
       string pin_location = string(get_string_parameter_pointer("output-dir")) +

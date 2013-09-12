@@ -109,8 +109,13 @@ int MakePinApplication::main(string target_path, string decoy_path) {
   vector<MatchCollection*> decoys;
   MatchCollection* target_collection =
     MatchCollectionParser::create(target_path.c_str(), "__NULL_STR"); 
-  MatchCollection* decoy_collection =
-    MatchCollectionParser::create(decoy_path.c_str(), "__NULL_STR");
+  MatchCollection* decoy_collection = NULL;
+  if (decoy_path != "") {
+    carp(CARP_DEBUG, "Loading decoy file: %s",decoy_path.c_str());
+    decoy_collection =
+      MatchCollectionParser::create(decoy_path.c_str(), "__NULL_STR");
+    decoys.push_back(decoy_collection);
+  }
 
   // Mark decoy matches
   MatchIterator* decoy_iter = new MatchIterator(decoy_collection);
@@ -121,7 +126,7 @@ int MakePinApplication::main(string target_path, string decoy_path) {
   delete decoy_iter;
 
   PinXMLWriter* writer=new PinXMLWriter();
-  decoys.push_back(decoy_collection);
+
 
   bool overwrite = false; 
   if(get_boolean_parameter("overwrite"))

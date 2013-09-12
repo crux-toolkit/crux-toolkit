@@ -38,7 +38,7 @@
 #include "TideIndexApplication.h"
 #include "ReadSpectrumRecordsApplication.h"
 #include "TideSearchApplication.h"
-
+#include "CometApplication.h"
 /**
  * The starting point for crux.  Prints a general usage statement when
  * given no arguments.  Runs one of the crux commands, including
@@ -61,6 +61,7 @@ int main(int argc, char** argv){
   applications.add(new MatchSearch());
   applications.add(new TideSearchApplication());
   applications.add(new SequestSearch());
+  applications.add(new CometApplication());
   applications.add(new SearchForXLinks());
 
   // post-search

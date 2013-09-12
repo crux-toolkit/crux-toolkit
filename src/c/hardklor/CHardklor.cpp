@@ -299,7 +299,7 @@ void CHardklor::Analyze() {
 				} else {
 					//Read next spectrum from file.
           switch(cs.sna){
-            case 0: r.readFile(NULL,cs.fileFormat,curSpec); break;
+            case 0: r.readFile(NULL,curSpec); break;
             case 1: nr.DeNoise(curSpec); break;
             case 2: nr.DeNoiseD(curSpec); break;
             case 3: nr.DeNoiseC(curSpec); break;
