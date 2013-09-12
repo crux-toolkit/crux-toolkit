@@ -28,7 +28,9 @@ include_directories(../external)
 include_directories(../external/include)
 include_directories(../external/build/src/ProteoWizard/libraries/boost_1_43_0)
 include_directories(../external/build/src/ProteoWizard/libraries/boost_aux)
-include_directories(../external/MSToolkit/include)
+include_directories(../external/build/src/comet/src/comet/MSToolkit/include)
+include_directories(../external/build/src/comet/src/comet)
+include_directories(../external/build/src/comet/src/comet/CometSearch)
 include_directories(../external/build/src/percolator/src/)
 include_directories(../external/build/src/percolator/src/fido)
 include_directories(../external/build/src/percolator-build/src/)
@@ -36,7 +38,8 @@ include_directories(../external/build/src/percolator-build/src/fido)
 
 
 link_directories(../external/lib)
-link_directories(../external/MSToolkit)
+link_directories(../external/build/src/comet/src/comet/CometSearch)
+link_directories(../external/build/src/comet/src/comet/MSToolkit)
 link_directories(.)
 link_directories(./ArrayLibrary)
 link_directories(./bullseye)
@@ -55,6 +58,7 @@ set (
   analyze_psms.cpp
   carp.cpp
   CarpStreamBuf.cpp
+  CometApplication.cpp
   ComputeQValues.cpp
   CreateIndex.cpp
   crux-file-utils.cpp
@@ -185,9 +189,14 @@ else (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	  PROPERTY
 	  COMPILE_DEFINITIONS
 	  _LARGEFILE_SOURCE
+	  _LARGEFILE64_SOURCE
+	  _BSD_SOURCE
+	  _POSIX_C_SOURCE=199506L
+	  NDEBUG
 	  _FILE_OFFSET_BITS=64
 	  _GNU_SOURCE
 	  GCC
+	  CRUX
 	  HAVE_EXPAT_CONFIG_H
 	)
 	if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -197,6 +206,7 @@ else (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
       PROPERTY
       COMPILE_DEFINITIONS
       DARWIN
+      _DARWIN_C_SOURCE
 	  )
 	  if (${CMAKE_SYSTEM_VERSION} VERSION_LESS "12")
       set_property(
@@ -262,7 +272,8 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     bullseye
     crux-support
     hardklor
-    MSToolkit
+    cometsearch
+    mstoolkitlite
     perclibrary
     posterior_error
     xlink
@@ -273,21 +284,22 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     xlink-predict-peptide-ions
     xlink
     crux-support
-    MSToolkit
+    cometsearch
+    mstoolkitlite
     ws2_32
   )
   target_link_libraries(
     xlink-score-spectrum
     xlink
     crux-support
-    MSToolkit
+    mstoolkitlite
     ws2_32
   )
   target_link_libraries(
     xlink-assign-ions
     xlink
     crux-support
-    MSToolkit
+    mstoolkitlite
     ws2_32
   )
 else(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
@@ -299,10 +311,11 @@ else(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     tide-support
     protobuf
     gflags
+    cometsearch
     dl
     hardklor
     m
-    MSToolkit
+    mstoolkitlite
     posterior_error
     perclibrary
     pthread
@@ -330,6 +343,7 @@ else(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     boost_filesystem-mt-s
     boost_regex-mt-s
     boost_thread-mt-s
+
   )
     
   target_link_libraries(
@@ -339,7 +353,7 @@ else(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     pthread
     xlink
     crux-support
-    MSToolkit
+    mstoolkitlite
     pwiz_data_msdata
     pwiz_data_common
     pwiz_data_identdata
@@ -367,7 +381,7 @@ else(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     pthread
     xlink
     crux-support
-    MSToolkit
+    mstoolkitlite
     pwiz_data_msdata
     pwiz_data_common
     pwiz_data_identdata
@@ -395,7 +409,7 @@ else(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     pthread
     xlink
     crux-support
-    MSToolkit
+    mstoolkitlite
     pwiz_data_msdata
     pwiz_data_common
     pwiz_data_identdata

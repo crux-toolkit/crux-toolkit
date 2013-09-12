@@ -3,6 +3,9 @@
  * \brief General-use functions for crux
  */
 
+#include <sys/types.h>
+#include <sys/dir.h>
+#include <dirent.h>
 #include <fstream>
 #include <errno.h>
 #include <sys/stat.h>
@@ -141,9 +144,10 @@ char* digest_type_to_string(DIGEST_T type){
  * The string version of enzyme types
  */
 static const char* enzyme_type_strings[NUMBER_ENZYME_TYPES] = 
-  {"invalid", "no-enzyme", "trypsin", "chymotrypsin", "elastase",
-   "clostripain", "cyanogen-bromide", "iodosobenzoate", 
-   "proline-endopeptidase", "staph-protease", "aspn", 
+  {"invalid", "no-enzyme", "trypsin","trypsin/p", "chymotrypsin", 
+   "elastase","clostripain", "cyanogen-bromide", "iodosobenzoate", 
+   "proline-endopeptidase", "staph-protease", "aspn", "lysc",
+   "lysn" , "arg_c" , "glue_c" ,"pepsin_a",
    "modified-chymotrypsin", "elastase-trypsin-chymotrypsin",
    "custom-enzyme"};
 
@@ -1130,7 +1134,7 @@ bool delete_dir(char* dir) {
   }
 
   // collect all files in dir
-  num_file = scandir(".", &namelist, 0, alphasort);
+  num_file = scandir(".", &namelist, NULL, alphasort);
 
   // delete all files in temp dir
   while(num_file--){

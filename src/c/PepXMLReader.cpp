@@ -421,17 +421,17 @@ void PepXMLReader::searchScoreOpen(
     }
   }
 
-  if (name == "xcorr_score") {
+  if (name == "xcorr_score" || name == "xcorr") {
     current_match_collection_->setScoredType(XCORR, true);
     current_match_->setScore(XCORR, value);
   } else if (name == "xcorr_rank") {
     current_match_->setRank(XCORR, value);
-  } else if (name == "delta_cn") {
+  } else if (name == "delta_cn" || name == "deltacn") {
     current_match_->setDeltaCn(value);
-  } else if (name == "sp") {
+  } else if (name == "sp" || name == "spscore") {
     current_match_collection_->setScoredType(SP, true);
     current_match_->setScore(SP, value);
-  } else if (name == "sp_rank") {
+  } else if (name == "sp_rank" || name == "sprank") {
     current_match_->setRank(SP, value);
   } else if (name == "percolator_score") {
     current_match_collection_->setScoredType(PERCOLATOR_SCORE, true);

@@ -232,6 +232,9 @@ MatchCollection* run_percolator(
   char* input_directory, 
   char* fasta_file, // actually fasta or index
   OutputFiles& output){ 
+  input_directory= NULL; 
+  fasta_file=NULL; 
+  output= NULL; 
 
 /*
   double* features = NULL;    

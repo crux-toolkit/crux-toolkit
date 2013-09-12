@@ -82,7 +82,13 @@ bool ProteinPeptideIterator::validCleavagePosition(
       return false;
     }
     break;
-    
+  //trypsin/p k or r 
+  case TRYPSINP:
+    if ((sequence[0] == 'K') || sequence[0] == 'R')
+      return true; 
+    else 
+      return false;
+    break; 
   case CHYMOTRYPSIN:
     if ((sequence[0] == 'F' || sequence[0] == 'W' || sequence[0] == 'Y') 
         && (sequence[1] != 'P')){
@@ -150,6 +156,51 @@ bool ProteinPeptideIterator::validCleavagePosition(
       return false;
     }
     break;
+ 
+  case LYSC:
+  if(sequence[0] == 'K'
+    && sequence[1]!='P')
+    return true;
+  else 
+    return false;
+  break;
+
+ 
+  case LYSN:
+    if(sequence[0]== 'K')
+      return true;
+    else 
+      return false; 
+    break; 
+
+
+  case ARGC:
+    if(sequence[0] == 'R' 
+      && sequence [1] != 'P'){
+      return true; 
+    }else{
+      return false;
+    }
+    break; 
+
+
+  case GLUC:
+    if(sequence[0]=='D' || (sequence[0] == 'E'
+			    && sequence[1] != 'P')){
+      return true;
+    }else{
+      return false; 
+    }
+    break; 
+
+
+  case PEPSINA:
+    if(sequence[0] == 'F' || (sequence[0] == 'L'
+			      && sequence[1] != 'P'))
+      return true;
+    else 
+      return false;
+    break; 
 
   case MODIFIED_CHYMOTRYPSIN:
     if ((sequence[0] == 'F' || sequence[0] == 'L' ||

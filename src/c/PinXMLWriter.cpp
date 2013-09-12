@@ -461,8 +461,9 @@ void PinXMLWriter::printFeatures(
  
   FLOAT_T ln_num_sp=match->getLnExperimentSize();
   FLOAT_T lnrSp=0.0; 
-  if(match->getRank(SP)>0)  
+  if(match->getRank(SP)>0) {  
     lnrSp=log(match->getRank(SP));
+  }
   FLOAT_T delta_cn = match->getDeltaCn() ; 
   FLOAT_T delta_lcn= match->getDeltaLCn();
  
@@ -638,12 +639,20 @@ bool PinXMLWriter::setProcessInfo(
   const char* target_file, 
   const char* decoy_file
 ){
-  if (decoy_file ==NULL || target_file==NULL)
-   return false; 
-  decoy_file_path_=absolutPath(decoy_file);
-  target_file_path_=absolutPath(target_file);
-  //output_file_path_=absolutPath(output_file);
-  return true; 
+
+  if (decoy_file == NULL || strlen(decoy_file) == 0) {
+    decoy_file_path_ = "";
+  } else {
+    decoy_file_path_ = absolutPath(decoy_file);
+  }
+
+  if (target_file == NULL || strlen(target_file) == 0) {
+    return false;
+  } else {
+    target_file_path_ = absolutPath(target_file);
+    return true;
+  }
+
 }
 
 
