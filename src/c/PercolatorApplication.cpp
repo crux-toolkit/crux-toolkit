@@ -140,7 +140,7 @@ int PercolatorApplication::main(int argc, char** argv) {
 
   if (has_extension(input_pinxml.c_str(), "pin.xml") &&
       get_int_parameter("top-match") != 5) {
-    carp(CARP_WARNING, "top-match is being ignored since input is a pin.xml file");
+    carp(CARP_FATAL, "top-match parameter cannot be used in conjunction with a pin.xml file!");
   }
   
   if (!get_boolean_parameter("feature-in-file")) {
@@ -219,7 +219,26 @@ int PercolatorApplication::main(
   perc_args_vec.push_back("-B");
   perc_args_vec.push_back(output_decoy_tab);
 
-
+  //add verbosity
+  perc_args_vec.push_back("-v");
+  int verbosity = get_verbosity_level();
+  if (verbosity <= CARP_FATAL) {
+    perc_args_vec.push_back("0");
+  } else if (verbosity <= CARP_ERROR) {
+    perc_args_vec.push_back("1");
+  } else if (verbosity <= CARP_WARNING) {
+    perc_args_vec.push_back("1");
+  } else if (verbosity <= CARP_INFO) {
+    perc_args_vec.push_back("2");
+  } else if (verbosity <= CARP_DETAILED_INFO) {
+    perc_args_vec.push_back("3");
+  } else if (verbosity <= CARP_DEBUG) {
+    perc_args_vec.push_back("4");
+  } else if (verbosity <= CARP_DETAILED_DEBUG) {
+    perc_args_vec.push_back("5");
+  } else if (verbosity <= CARP_MAX) {
+    perc_args_vec.push_back("5");
+  }
   //Add options
 
   //TODO remove this dependency.
@@ -298,9 +317,10 @@ int PercolatorApplication::main(
     perc_args_vec.push_back(get_string_parameter_pointer("input-weights"));
   }
 
-  perc_args_vec.push_back("--default-direction");
-  perc_args_vec.push_back(to_string(get_int_parameter("default-direction")));
-
+  if (get_int_parameter("default-direction") != 0) {  
+    perc_args_vec.push_back("--default-direction");
+    perc_args_vec.push_back(to_string(get_int_parameter("default-direction")));
+  }
 
   if(get_boolean_parameter("unitnorm"))
     perc_args_vec.push_back("-u");
@@ -325,6 +345,8 @@ int PercolatorApplication::main(
     perc_args_vec.push_back("--override");
   }
 
+  
+  
  
   if(get_boolean_parameter("klammer"))
       perc_args_vec.push_back("--klammer");
