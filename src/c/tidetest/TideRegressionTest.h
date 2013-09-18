@@ -10,6 +10,8 @@ static std::map<std::string, TideRegressionSettings> settings_;
 static std::string tideIndex_;
 static std::string tideSearch_;
 static std::string crux_;
+static std::string fasta_;
+static std::string spectrumRecords_;
 
 static void initSettings();
 static void addTest(const std::string& name, const TideRegressionSettings& settings);
