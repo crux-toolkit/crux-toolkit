@@ -9,35 +9,23 @@ using namespace std;
 
 void initSettings() {
   addTest("standard", TideRegressionSettings(
-    "/net/maccoss/vol1/home/kaipot/svn/trunk/src/c/small-yeast.fasta",
-    "trypsin", "full-digest", 0, 6, 50, 200.0, 7200.0, false, "C+57.02146",
-    "/net/maccoss/vol1/home/kaipot/svn/trunk/src/c/demo.spectrumrecords",
-    3.0, 5));
+    fasta_, "trypsin", "full-digest", 0, 6, 50, 200.0, 7200.0, false,
+    "C+57.02146", spectrumRecords_, 3.0, 5));
   addTest("enzymatic digestion", TideRegressionSettings(
-    "/net/maccoss/vol1/home/kaipot/svn/trunk/src/c/small-yeast.fasta",
-    "chymotrypsin", "partial-digest", 2, 6, 50, 200.0, 7200.0, false, "C+57.02146",
-    "/net/maccoss/vol1/home/kaipot/svn/trunk/src/c/demo.spectrumrecords",
-    3.0, 5));
+    fasta_, "chymotrypsin", "partial-digest", 2, 6, 50, 200.0, 7200.0, false,
+    "C+57.02146", spectrumRecords_, 3.0, 5));
   addTest("peptide length", TideRegressionSettings(
-    "/net/maccoss/vol1/home/kaipot/svn/trunk/src/c/small-yeast.fasta",
-    "trypsin", "full-digest", 0, 10, 12, 200.0, 7200.0, false, "C+57.02146",
-    "/net/maccoss/vol1/home/kaipot/svn/trunk/src/c/demo.spectrumrecords",
-    3.0, 5));
+    fasta_, "trypsin", "full-digest", 0, 10, 12, 200.0, 7200.0, false,
+    "C+57.02146", spectrumRecords_, 3.0, 5));
   addTest("peptide mass", TideRegressionSettings(
-    "/net/maccoss/vol1/home/kaipot/svn/trunk/src/c/small-yeast.fasta",
-    "trypsin", "full-digest", 0, 6, 50, 1200.0, 1300.0, false, "C+57.02146",
-    "/net/maccoss/vol1/home/kaipot/svn/trunk/src/c/demo.spectrumrecords",
-    3.0, 5));
+    fasta_, "trypsin", "full-digest", 0, 6, 50, 1200.0, 1300.0, false,
+    "C+57.02146", spectrumRecords_, 3.0, 5));
   addTest("monoisotopic precursor", TideRegressionSettings(
-    "/net/maccoss/vol1/home/kaipot/svn/trunk/src/c/small-yeast.fasta",
-    "trypsin", "full-digest", 0, 6, 50, 200.0, 7200.0, true, "C+57.02146",
-    "/net/maccoss/vol1/home/kaipot/svn/trunk/src/c/demo.spectrumrecords",
-    3.0, 5));
+    fasta_, "trypsin", "full-digest", 0, 6, 50, 200.0, 7200.0, true,
+    "C+57.02146", spectrumRecords_, 3.0, 5));
   addTest("variable mods", TideRegressionSettings(
-    "/net/maccoss/vol1/home/kaipot/svn/trunk/src/c/small-yeast.fasta",
-    "trypsin", "full-digest", 0, 6, 50, 200.0, 7200.0, false, "C+57.02146,2M+15.9949",
-    "/net/maccoss/vol1/home/kaipot/svn/trunk/src/c/demo.spectrumrecords",
-    3.0, 5));
+    fasta_, "trypsin", "full-digest", 0, 6, 50, 200.0, 7200.0, false,
+    "C+57.02146,2M+15.9949", spectrumRecords_, 3.0, 5));
 }
 
 void addTest(const string& name, const TideRegressionSettings& settings) {
@@ -45,8 +33,6 @@ void addTest(const string& name, const TideRegressionSettings& settings) {
 }
 
 int main(int argc, char** argv) {
-
-  initSettings();
 
   if (argc < 2 || argc > 3) {
     printUsage(argv[0]);
@@ -57,6 +43,7 @@ int main(int argc, char** argv) {
   }
 
   setPaths(argv[1]);
+  initSettings();
 
   if (argc == 2) {
     for (map<string, TideRegressionSettings>::const_iterator i = settings_.begin();
@@ -84,6 +71,8 @@ void setPaths(const char* cruxPath) {
   tideIndex_ = cruxDir + "/tide/tide-index";
   tideSearch_ = cruxDir + "/tide/tide-search";
   crux_ = cruxPath;
+  fasta_ = cruxDir + "/test/smoke-tests/small-yeast.fasta";
+  spectrumRecords_ = cruxDir + "/test/smoke-tests/demo.spectrumrecords";
 }
 
 void runTest(map<string, TideRegressionSettings>::const_iterator i) {
