@@ -1,4 +1,3 @@
-print-search-progress=200
-compute-p-values=T
+decoy_search=2
 compute-sp=T
-pinxml-output=T
+
