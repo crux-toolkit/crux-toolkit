@@ -1,3 +1,4 @@
 decoy_search=2
 compute-sp=T
+output_pepxmlfile=0
 
