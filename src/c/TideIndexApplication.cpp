@@ -15,6 +15,7 @@ extern void AddMods(HeadedRecordReader* reader,
                     string out_file,
             		    const pb::Header& header,
             		    const vector<const pb::Protein*>& proteins);
+extern bool FLAGS_flanks;
 
 TideIndexApplication::TideIndexApplication() {
 }
@@ -34,6 +35,7 @@ int TideIndexApplication::main(int argc, char** argv) {
     "min-length",
     "min-mass",
     "monoisotopic-precursor",
+    "use-flanking-peaks",
     "mods-spec",
     "output-dir",
     "overwrite",
@@ -68,6 +70,8 @@ int TideIndexApplication::main(int argc, char** argv) {
   int min_length = get_int_parameter("min-length");
   int max_length = get_int_parameter("max-length");
   bool monoisotopic_precursor = get_boolean_parameter("monoisotopic-precursor");
+  FLAGS_flanks = get_boolean_parameter("use-flanking-peaks");
+  carp(CARP_DEBUG, "use-flanking-peaks is %s", FLAGS_flanks ? "ON" : "OFF");
   MASS_TYPE_T mass_type = (monoisotopic_precursor) ? MONO : AVERAGE;
   int missed_cleavages = get_int_parameter("missed-cleavages");
   DIGEST_T digestion = get_digest_type_parameter("digestion");

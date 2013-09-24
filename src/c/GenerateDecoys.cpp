@@ -217,10 +217,15 @@ bool GenerateDecoys::getNextProtein(
     } else {
       // Reading sequence
       outSequence += line;
-      if (fasta.peek() == '>') {
+      if (fasta.eof() || fasta.peek() == '>') {
         break;
       }
     }
+  }
+
+  if (!outSequence.empty() && outSequence[outSequence.length() - 1] == '*') {
+    // Remove the last character of the sequence if it is an asterisk
+    outSequence.erase(outSequence.length() - 1);
   }
 
   if (outSequence.empty()) {
