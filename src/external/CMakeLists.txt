@@ -43,7 +43,6 @@ if (WIN32 AND NOT CYGWIN)
 ExternalProject_Add(
   ProteoWizard
   URL http://noble.gs.washington.edu/proj/crux/download/pwiz-4837.tar.gz
-  URL_MD5 b59e972e193d8d78e89f2a74d2fc94ba
   DOWNLOAD_DIR downloads
   PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
   CONFIGURE_COMMAND ""
@@ -82,32 +81,6 @@ ExternalProject_Add(
   BUILD_IN_SOURCE 1
 )
 
-if (APPLE OR CYGWIN)
-  ExternalProject_Add(
-    XSD
-    PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
-    URL http://www.codesynthesis.com/download/xsd/3.3/xsd-3.3.0-2+dep.tar.bz2
-    URL_MD5 7ecee5029c119ef678bbe5ca4ef8a288
-    DOWNLOAD_DIR downloads
-    PATCH_COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/patches/XSD/mac_xdr_fix/xdr-stream-insertion.hxx ${CMAKE_CURRENT_SOURCE_DIR}/patches/XSD/mac_xdr_fix/xdr-stream-extraction.hxx ${CMAKE_CURRENT_SOURCE_DIR}/build/src/XSD/xsd/libxsd/xsd/cxx/tree/
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND make CPPFLAGS=${CPP_ARGS} LDFLAGS=${LD_ARGS} verbose=1 .LIBPATTERNS=lib%.a 
-    INSTALL_COMMAND make CPPFLAGS="${CPP_ARGS}" LDFLAGS="${LD_ARGS}" install_prefix=${CMAKE_CURRENT_SOURCE_DIR} install
-    BUILD_IN_SOURCE 1
-  )
-else(APPLE OR CYGWIN)
-  ExternalProject_Add(
-    XSD
-    PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
-    URL http://www.codesynthesis.com/download/xsd/3.3/xsd-3.3.0-2+dep.tar.bz2
-    URL_MD5 7ecee5029c119ef678bbe5ca4ef8a288
-    DOWNLOAD_DIR downloads 
-    CONFIGURE_COMMAND "" 
-    BUILD_COMMAND make CPPFLAGS=${CPP_ARGS} LDFLAGS=${LD_ARGS} verbose=1 .LIBPATTERNS=lib%.a 
-    INSTALL_COMMAND make CPPFLAGS="${CPP_ARGS}" LDFLAGS="${LD_ARGS}" install_prefix=${CMAKE_CURRENT_SOURCE_DIR} install
-    BUILD_IN_SOURCE 1
-  )
-endif(APPLE OR CYGWIN)
 
 
 if (APPLE)
@@ -116,8 +89,19 @@ ExternalProject_Add(
   PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
   URL http://noble.gs.washington.edu/proj/crux/download/percolator_2_04_full_src.tar.gz
   URL_MD5 5c328688493d57c5b41d413338dfcb66
-  CMAKE_ARGS -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_SOURCE_DIR} -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_SOURCE_DIR}
-  PATCH_COMMAND cp  ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_xml_write/Caller.h ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_var_mods/DataSet.cpp ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_m_pi_def/EludeModel.cpp ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_find_boost/CMakeLists.txt ${CMAKE_CURRENT_SOURCE_DIR}/build/src/percolator/src
+  CMAKE_ARGS -DCMAKE_VERBOSE_MAKEFILE=ON 
+  -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_SOURCE_DIR} 
+  -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_SOURCE_DIR}
+  -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+  PATCH_COMMAND cp  ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_xml_write/Caller.h 
+    ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_var_mods/DataSet.cpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_m_pi_def/EludeModel.cpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_find_boost/CMakeLists.txt 
+    ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/eliminate_xsd/percolator_in.hxx
+    ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/eliminate_xsd/percolator_out.hxx
+    ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/eliminate_xsd/percolator_in.cxx
+    ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/eliminate_xsd/percolator_out.cxx
+    ${CMAKE_CURRENT_SOURCE_DIR}/build/src/percolator/src
 )
 else(APPLE)
 ExternalProject_Add(
@@ -125,10 +109,41 @@ ExternalProject_Add(
   PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
   URL http://noble.gs.washington.edu/proj/crux/download/percolator_2_04_full_src.tar.gz
   URL_MD5 5c328688493d57c5b41d413338dfcb66
-  CMAKE_ARGS -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_SOURCE_DIR} -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_SOURCE_DIR}
-  PATCH_COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_xml_write/Caller.h ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_var_mods/DataSet.cpp ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_find_boost/CMakeLists.txt ${CMAKE_CURRENT_SOURCE_DIR}/build/src/percolator/src
+  CMAKE_ARGS -DCMAKE_VERBOSE_MAKEFILE=ON
+  -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_SOURCE_DIR}
+  -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_SOURCE_DIR}
+  -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+  PATCH_COMMAND 
+  cp ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_xml_write/Caller.h 
+  ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_var_mods/DataSet.cpp 
+  ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_find_boost/CMakeLists.txt 
+  ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/eliminate_xsd/percolator_in.hxx
+  ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/eliminate_xsd/percolator_out.hxx
+  ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/eliminate_xsd/percolator_in.cxx
+  ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/eliminate_xsd/percolator_out.cxx
+  ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/eliminate_xsd/percolator_in.xsd
+  ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/eliminate_xsd/percolator_out.xsd
+  ${CMAKE_CURRENT_SOURCE_DIR}/build/src/percolator/src
 )
 endif(APPLE)
+
+ExternalProject_Add_Step(
+  percolator
+  install_xsd_runtime
+  COMMAND cp -r ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/eliminate_xsd/xsd ${CMAKE_CURRENT_SOURCE_DIR}/include
+  DEPENDEES patch
+  DEPENDERS update
+)
+
+if (APPLE)
+ExternalProject_Add_Step(
+  percolator
+  patch_xsd_runtime
+  COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/patches/XSD/mac_xdr_fix/xdr-stream-insertion.hxx ${CMAKE_CURRENT_SOURCE_DIR}/patches/XSD/mac_xdr_fix/xdr-stream-extraction.hxx ${CMAKE_CURRENT_SOURCE_DIR}/include/xsd/cxx/tree/
+  DEPENDEES update
+  DEPENDERS configure
+)
+endif (APPLE)
 
 if (UNIX) 
 ExternalProject_Add(
@@ -177,8 +192,5 @@ ExternalProject_Add(
 )  
 
 
-add_dependencies(XSD Proteowizard)
-add_dependencies(XSD XercesC)
 add_dependencies(percolator Proteowizard)
 add_dependencies(percolator XercesC)
-add_dependencies(percolator XSD)

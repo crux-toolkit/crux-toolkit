@@ -94,10 +94,10 @@ void Spectrum::SortIfNecessary() {
 
   // TODO: eliminate copy operations
   int size = Size();
-  pair<double, double> pairs[size];
+  vector< pair<double, double> > pairs;
   for (int i = 0; i < size; ++i)
     pairs[i] = make_pair(peak_m_z_[i], peak_intensity_[i]);
-  sort(pairs, pairs+size);
+  sort(pairs.begin(), pairs.begin() + size);
   for (int i = 0; i < size; ++i) {
     peak_m_z_[i] = pairs[i].first;
     peak_intensity_[i] = pairs[i].second;
