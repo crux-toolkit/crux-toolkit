@@ -6,7 +6,6 @@ configure_file (
  "${CMAKE_CURRENT_BINARY_DIR}/CruxConfig.h"
  )
 
-add_subdirectory(ArrayLibrary)
 add_subdirectory(bullseye)
 add_subdirectory(hardklor)
 add_subdirectory(posterior-error)
@@ -16,7 +15,6 @@ add_subdirectory(tide)
 
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 include_directories(.)
-include_directories(ArrayLibrary)
 include_directories(bullseye)
 include_directories(hardklor)
 include_directories(qranker-barista)
@@ -41,7 +39,6 @@ link_directories(../external/lib)
 link_directories(../external/build/src/comet/src/comet/CometSearch)
 link_directories(../external/build/src/comet/src/comet/MSToolkit)
 link_directories(.)
-link_directories(./ArrayLibrary)
 link_directories(./bullseye)
 link_directories(./hardklor)
 link_directories(./posterior-error)
@@ -278,7 +275,6 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     posterior_error
     xlink
     ws2_32
-    ArrayLibrary
   )
   target_link_libraries(
     xlink-predict-peptide-ions
@@ -320,7 +316,6 @@ else(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     perclibrary
     pthread
     xlink
-    ArrayLibrary
     xerces-c
     boost_filesystem
     boost_system
