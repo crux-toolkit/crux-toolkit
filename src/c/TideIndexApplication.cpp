@@ -15,7 +15,6 @@ extern void AddMods(HeadedRecordReader* reader,
                     string out_file,
             		    const pb::Header& header,
             		    const vector<const pb::Protein*>& proteins);
-extern bool FLAGS_flanks;
 
 TideIndexApplication::TideIndexApplication() {
 }
