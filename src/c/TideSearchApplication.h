@@ -50,7 +50,7 @@ protected:
     ActivePeptideQueue* active_peptide_queue,
     const Spectrum* spectrum,
     const ObservedPeakSet& observed,
-    MatchSet::Arr* match_arr,
+    TideMatchSet::Arr* match_arr,
     int queue_size,
     int charge
   );

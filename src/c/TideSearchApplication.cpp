@@ -133,7 +133,7 @@ int TideSearchApplication::main(int argc, char** argv) {
   for (vector<const pb::Protein*>::const_iterator i = proteins.begin();
        i != proteins.end();
        ++i) {
-    if (MatchSet::isDecoy((*i)->name())) {
+    if (TideMatchSet::isDecoy((*i)->name())) {
       HAS_DECOYS = true;
       break;
     }
@@ -282,8 +282,8 @@ void TideSearchApplication::search(
   if (output_files) {
     output_files->writeHeaders();
   } else if (target_file) {
-    MatchSet::writeHeaders(target_file, false, compute_sp);
-    MatchSet::writeHeaders(decoy_file, true, compute_sp);
+    TideMatchSet::writeHeaders(target_file, false, compute_sp);
+    TideMatchSet::writeHeaders(decoy_file, true, compute_sp);
   }
 
   // This is the main search loop.
@@ -342,7 +342,7 @@ void TideSearchApplication::search(
          min_mass, max_mass);
 
     int size = active_peptide_queue->SetActiveRange(min_mass, max_mass);
-    MatchSet::Arr match_arr(size); // Scored peptides will go here.
+    TideMatchSet::Arr match_arr(size); // Scored peptides will go here.
 
     // Programs for taking the dot-product with the observed spectrum are laid
     // out in memory managed by the active_peptide_queue, one program for each
@@ -354,7 +354,7 @@ void TideSearchApplication::search(
     // matches will arrange the results in a heap by score, return the top
     // few, and recover the association between counter and peptide. We output
     // the top matches.
-    MatchSet matches(&match_arr, highest_mz);
+    TideMatchSet matches(&match_arr, highest_mz);
     if (output_files) {
       matches.report(output_files, top_matches, spectrum, charge,
                      active_peptide_queue, proteins, compute_sp);
@@ -373,7 +373,7 @@ void TideSearchApplication::collectScoresCompiled(
   ActivePeptideQueue* active_peptide_queue,
   const Spectrum* spectrum,
   const ObservedPeakSet& observed,
-  MatchSet::Arr* match_arr,
+  TideMatchSet::Arr* match_arr,
   int queue_size,
   int charge
 ) {

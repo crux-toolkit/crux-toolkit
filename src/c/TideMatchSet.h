@@ -17,7 +17,7 @@ using namespace std;
 
 typedef vector<const pb::Protein*> ProteinVec;
 
-class MatchSet {
+class TideMatchSet {
 
 public:
   typedef pair<int, int> Pair;
@@ -27,12 +27,12 @@ public:
   // to the index within the ActivePeptideQueue, counting from the back.  This
   // slight complication is due to the way the generated machine code fills the
   // counter in the matches buffer by decrementing the counter.
-  MatchSet(
+  TideMatchSet(
     Arr* matches,
     double max_mz
   );
 
-  ~MatchSet();
+  ~TideMatchSet();
 
   /**
    * Write matches to output files

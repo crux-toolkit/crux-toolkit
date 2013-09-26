@@ -8,11 +8,11 @@
 extern AA_MOD_T* list_of_mods[MAX_AA_MODS]; // list containing all aa mods
 extern int num_mods;  // ANY_POSITION mods
 
-string MatchSet::cleavage_type_ = "";
-char MatchSet::match_collection_loc_[] = {0};
-char MatchSet::decoy_match_collection_loc_[] = {0};
+string TideMatchSet::cleavage_type_ = "";
+char TideMatchSet::match_collection_loc_[] = {0};
+char TideMatchSet::decoy_match_collection_loc_[] = {0};
 
-MatchSet::MatchSet(
+TideMatchSet::TideMatchSet(
   Arr* matches,
   double max_mz
 ) :
@@ -30,14 +30,14 @@ MatchSet::MatchSet(
   }
 }
 
-MatchSet::~MatchSet() {
+TideMatchSet::~TideMatchSet() {
 }
 
 /**
  * Write matches to output files
  * This is for writing tab-delimited only
  */
-void MatchSet::report(
+void TideMatchSet::report(
   ofstream* target_file,  ///< target file to write to
   ofstream* decoy_file, ///< decoy file to write to
   int top_n,  ///< number of matches to report
@@ -77,7 +77,7 @@ void MatchSet::report(
 /**
  * Helper function for tab delimited report function
  */
-void MatchSet::writeToFile(
+void TideMatchSet::writeToFile(
   ofstream* file,
   const vector<Arr::iterator>& vec,
   bool decoyVec,
@@ -162,7 +162,7 @@ void MatchSet::writeToFile(
 /**
  * Write matches to output files
  */
-void MatchSet::report(
+void TideMatchSet::report(
   OutputFiles* output_files,  ///< pointer to output handler
   int top_n,  ///< number of matches to report
   const Spectrum* spectrum, ///< spectrum for matches
@@ -227,7 +227,7 @@ void MatchSet::report(
 /**
  * Helper function for normal report function
  */
-void MatchSet::addCruxMatches(
+void TideMatchSet::addCruxMatches(
   MatchCollection* match_collection,
   vector<PostProcessProtein*>* proteins_made,
   const vector<Arr::iterator>& vec,
@@ -294,7 +294,7 @@ void MatchSet::addCruxMatches(
 /**
  * Write headers for tab delimited file
  */
-void MatchSet::writeHeaders(
+void TideMatchSet::writeHeaders(
   ofstream* file,
   bool decoyFile,
   bool sp
@@ -330,7 +330,7 @@ void MatchSet::writeHeaders(
 /**
  * Create a Crux match from Tide data structures
  */
-Crux::Match* MatchSet::getCruxMatch(
+Crux::Match* TideMatchSet::getCruxMatch(
   const Peptide* peptide, ///< Tide peptide for match
   const pb::Protein* protein, ///< Tide protein for match
   Crux::Spectrum* crux_spectrum,  ///< Crux spectrum for match
@@ -384,7 +384,7 @@ Crux::Match* MatchSet::getCruxMatch(
  * Returns a pointer to the modification in the list of mods, adding it if it
  * doesn't exist
  */
-const AA_MOD_T* MatchSet::lookUpMod(double delta_mass) {
+const AA_MOD_T* TideMatchSet::lookUpMod(double delta_mass) {
   for (int i = 0; i < num_mods; ++i) {
     const AA_MOD_T* mod = list_of_mods[i];
     if (aa_mod_get_mass_change(mod) == delta_mass) {
@@ -403,7 +403,7 @@ const AA_MOD_T* MatchSet::lookUpMod(double delta_mass) {
   return new_mod;
 }
 
-void MatchSet::gatherTargetsAndDecoys(
+void TideMatchSet::gatherTargetsAndDecoys(
   const ActivePeptideQueue* peptides,
   const ProteinVec& proteins,
   vector<Arr::iterator>& targetsOut,
@@ -437,7 +437,7 @@ void MatchSet::gatherTargetsAndDecoys(
 /**
  * Create a pb peptide from Tide peptide
  */
-pb::Peptide* MatchSet::getPbPeptide(
+pb::Peptide* TideMatchSet::getPbPeptide(
   const Peptide& peptide
 ) {
 
@@ -468,7 +468,7 @@ pb::Peptide* MatchSet::getPbPeptide(
  * Gets the protein name with the index appended.
  * Optionally, can pass in a boolean pointer to be set to whether decoy or not
  */
-string MatchSet::getProteinName(
+string TideMatchSet::getProteinName(
   const pb::Protein& protein,
   const Peptide& peptide,
   bool* is_decoy
@@ -497,7 +497,7 @@ string MatchSet::getProteinName(
 /**
  * Determine if the protein is a decoy protein.
  */
-bool MatchSet::isDecoy(
+bool TideMatchSet::isDecoy(
   const string& proteinName
 ) {
   return !proteinName.empty() &&
@@ -507,7 +507,7 @@ bool MatchSet::isDecoy(
 /**
  * Gets the flanking AAs for a Tide peptide sequence
  */
-void MatchSet::getFlankingAAs(
+void TideMatchSet::getFlankingAAs(
   const Peptide* peptide, ///< Tide peptide to get flanking AAs for
   const pb::Protein* protein, ///< Tide protein for the peptide
   string* out_n,  ///< out parameter for n flank
@@ -523,7 +523,7 @@ void MatchSet::getFlankingAAs(
     seq.substr(idx_c, 1) : "-";
 }
 
-void MatchSet::computeDeltaCns(
+void TideMatchSet::computeDeltaCns(
   const vector<Arr::iterator>& vec, // xcorr*100000000.0, high to low
   map<Arr::iterator, FLOAT_T>* delta_cn_map // map to add delta cn scores to
 ) {
@@ -538,7 +538,7 @@ void MatchSet::computeDeltaCns(
   }
 }
 
-void MatchSet::computeSpData(
+void TideMatchSet::computeSpData(
   const vector<Arr::iterator>& vec,
   map<Arr::iterator, pair<const SpScorer::SpScoreData, int> >* sp_rank_map,
   SpScorer* sp_scorer,
