@@ -47,7 +47,7 @@ for searchtool in tide-search comet; do
     proteins=$fasta
   else
     params=""
-    protein=$db
+    proteins=$db
   fi
 
   # Run the search.
