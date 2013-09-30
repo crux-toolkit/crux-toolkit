@@ -115,6 +115,12 @@ protected:
     }
   };
 
+  struct TargetInfo {
+    string* proteinSequence;
+    int start;
+    FLOAT_T mass;
+  };
+
   static void fastaToPb(
     const std::string& commandLine,
     const ENZYME_T enzyme,
