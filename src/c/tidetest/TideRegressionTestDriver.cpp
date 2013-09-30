@@ -120,6 +120,7 @@ bool TideRegressionTestDriver::runTest(
              "--min-mass " << settings_.minMass << " "
              "--monoisotopic-precursor " << (settings_.monoisotopicPrecursor ?
                                              'T' : 'F') << " "
+             "--use-flanking-peaks T "
              "--mods-spec " << settings_.modsSpec << " "
              "--decoy-format none "
              "--overwrite T "
