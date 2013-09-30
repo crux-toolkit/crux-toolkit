@@ -4,8 +4,10 @@
 #include "spectrum.pb.h"
 #include "tide/records.h"
 
+#include "Peak.h"
 #include "SpectrumRecordWriter.h"
 #include "carp.h"
+#include "crux-utils.h"
 
 // For printing uint64_t values
 #define __STDC_FORMAT_MACROS
@@ -51,6 +53,8 @@ bool SpectrumRecordWriter::convert(
     return false;
   }
 
+  vector<Peak*> peaks;
+
   // Go through the spectrum list and write each spectrum
   pwiz::msdata::SpectrumList& sl = *(msd->run.spectrumListPtr);
   for (size_t i = 0; i < sl.size(); ++i) {
@@ -81,6 +85,7 @@ bool SpectrumRecordWriter::convert(
     pb_spectrum.set_precursor_m_z(mz);
     // Get charge states
     pwiz::msdata::CVParam chargeParam = si.cvParam(pwiz::cv::MS_charge_state);
+    bool calcCharge = false;
     if (!chargeParam.empty()) {
       pb_spectrum.mutable_charge_state()->Add(chargeParam.valueAs<int>());
     } else {
@@ -94,7 +99,9 @@ bool SpectrumRecordWriter::convert(
         }
       }
       if (!possibleCharge) {
-        carp(CARP_FATAL, "Scan %s has no charge state", scan_num.c_str());
+        carp(CARP_WARNING, "Scan %s has no charge state, it will be assigned",
+             scan_num.c_str());
+        calcCharge = true;
       }
     }
     // Get each m/z, intensity pair
@@ -108,6 +115,9 @@ bool SpectrumRecordWriter::convert(
     int last_index = -1;
     uint64_t intensity_sum = 0;
     for (size_t i = 0; i < s->defaultArrayLength; ++i) {
+      if (calcCharge) {
+        peaks.push_back(new Peak(intensities.data[i], mzs.data[i]));
+      }
       uint64_t mz = mzs.data[i] * mz_denom + 0.5;
       uint64_t intensity = intensities.data[i] * intensity_denom + 0.5;
       if (mz < last) {
@@ -124,6 +134,24 @@ bool SpectrumRecordWriter::convert(
         intensity_sum = intensity;
         ++last_index;
       }
+    }
+    if (!peaks.empty()) {
+      switch (choose_charge(mz, peaks)) {
+      case SINGLE_CHARGE_STATE:
+        pb_spectrum.mutable_charge_state()->Add(1);
+        break;
+      case MULTIPLE_CHARGE_STATE:
+        pb_spectrum.mutable_charge_state()->Add(2);
+        pb_spectrum.mutable_charge_state()->Add(3);
+        break;
+      default:
+        carp(CARP_FATAL, "Could not determine charge state for scan %d",
+             scan_num.c_str());
+      }
+      for (vector<Peak*>::iterator i = peaks.begin(); i != peaks.end(); ++i) {
+        delete *i;
+      }
+      peaks.clear();
     }
     // Write spectrum
     writer.Write(&pb_spectrum);
