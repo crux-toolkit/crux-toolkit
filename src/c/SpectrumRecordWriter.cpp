@@ -54,73 +54,79 @@ bool SpectrumRecordWriter::convert(
   // Go through the spectrum list and write each spectrum
   pwiz::msdata::SpectrumList& sl = *(msd->run.spectrumListPtr);
   for (size_t i = 0; i < sl.size(); ++i) {
-    pwiz::msdata::SpectrumPtr s = sl.spectrum(i, true);
-    if (s->cvParam(pwiz::cv::MS_ms_level).valueAs<int>() > 1 &&
-        !s->precursors.empty() &&
-        !s->precursors[0].selectedIons.empty() &&
-        s->defaultArrayLength > 0) {
-      // Get scan number
-      pb::Spectrum pb_spectrum;
-      string scan_num = pwiz::msdata::id::translateNativeIDToScanNumber(
-        pwiz::cv::MS_scan_number_only_nativeID_format, s->id);
-      if (scan_num.empty()) {
-        scan_num = "0";
-      }
-      pb_spectrum.set_spectrum_number(atoi(scan_num.c_str()));
-      // Get precursor m/z
-      pwiz::msdata::Precursor& precur = s->precursors[0];
-      pwiz::msdata::SelectedIon& si = precur.selectedIons[0];
-      double mz = si.cvParam(pwiz::cv::MS_selected_ion_m_z).valueAs<double>();
-      pb_spectrum.set_precursor_m_z(mz);
-      // Get charge states
-      pwiz::msdata::CVParam chargeParam = si.cvParam(pwiz::cv::MS_charge_state);
-      if (!chargeParam.empty()) {
-        pb_spectrum.mutable_charge_state()->Add(chargeParam.valueAs<int>());
-      } else {
-        bool possibleCharge = false;
-        for (vector<pwiz::msdata::CVParam>::const_iterator param = si.cvParams.begin();
-             param != si.cvParams.end();
-             ++param) {
-          if (param->cvid == pwiz::cv::MS_possible_charge_state) {
-            possibleCharge = true;
-            pb_spectrum.mutable_charge_state()->Add(param->valueAs<int>());
-          }
-        }
-        if (!possibleCharge) {
-          carp(CARP_FATAL, "Scan %s has no charge state", scan_num.c_str());
-        }
-      }
-      // Get each m/z, intensity pair
-      const pwiz::msdata::BinaryDataArray& mzs = *(s->getMZArray());
-      const pwiz::msdata::BinaryDataArray& intensities = *(s->getIntensityArray());
-      int mz_denom = getDenom(mzs.data);
-      int intensity_denom = getDenom(intensities.data);
-      pb_spectrum.set_peak_m_z_denominator(mz_denom);
-      pb_spectrum.set_peak_intensity_denominator(intensity_denom);
-      uint64_t last = 0;
-      int last_index = -1;
-      uint64_t intensity_sum = 0;
-      for (size_t i = 0; i < s->defaultArrayLength; ++i) {
-        uint64_t mz = mzs.data[i] * mz_denom + 0.5;
-        uint64_t intensity = intensities.data[i] * intensity_denom + 0.5;
-        if (mz < last) {
-          carp(CARP_FATAL, "In scan %d, m/z %" PRIu64 " came after %" PRIu64,
-               pb_spectrum.spectrum_number(), mz, last);
-        }
-        if (mz == last) {
-          intensity_sum += intensity;
-          pb_spectrum.set_peak_intensity(last_index, intensity_sum);
-        } else {
-          pb_spectrum.add_peak_m_z(mz - last);
-          pb_spectrum.add_peak_intensity(intensity);
-          last = mz;
-          intensity_sum = intensity;
-          ++last_index;
-        }
-      }
-      // Write spectrum
-      writer.Write(&pb_spectrum);
+    pwiz::msdata::SpectrumPtr s;
+    try {
+      s = sl.spectrum(i, true);
+    } catch (...) {
+      carp(CARP_FATAL, "Could not parse %s. Error occurred on spectrum %d "
+           "of the spectrum list.", infile.c_str(), i);
     }
+    if (s->cvParam(pwiz::cv::MS_ms_level).valueAs<int>() == 1 ||
+        s->precursors.empty() || s->precursors[0].selectedIons.empty() ||
+        s->defaultArrayLength == 0) {
+      continue;
+    }
+    // Get scan number
+    pb::Spectrum pb_spectrum;
+    string scan_num = pwiz::msdata::id::translateNativeIDToScanNumber(
+      pwiz::cv::MS_scan_number_only_nativeID_format, s->id);
+    if (scan_num.empty()) {
+      scan_num = "0";
+    }
+    pb_spectrum.set_spectrum_number(atoi(scan_num.c_str()));
+    // Get precursor m/z
+    pwiz::msdata::Precursor& precur = s->precursors[0];
+    pwiz::msdata::SelectedIon& si = precur.selectedIons[0];
+    double mz = si.cvParam(pwiz::cv::MS_selected_ion_m_z).valueAs<double>();
+    pb_spectrum.set_precursor_m_z(mz);
+    // Get charge states
+    pwiz::msdata::CVParam chargeParam = si.cvParam(pwiz::cv::MS_charge_state);
+    if (!chargeParam.empty()) {
+      pb_spectrum.mutable_charge_state()->Add(chargeParam.valueAs<int>());
+    } else {
+      bool possibleCharge = false;
+      for (vector<pwiz::msdata::CVParam>::const_iterator param = si.cvParams.begin();
+           param != si.cvParams.end();
+           ++param) {
+        if (param->cvid == pwiz::cv::MS_possible_charge_state) {
+          possibleCharge = true;
+          pb_spectrum.mutable_charge_state()->Add(param->valueAs<int>());
+        }
+      }
+      if (!possibleCharge) {
+        carp(CARP_FATAL, "Scan %s has no charge state", scan_num.c_str());
+      }
+    }
+    // Get each m/z, intensity pair
+    const pwiz::msdata::BinaryDataArray& mzs = *(s->getMZArray());
+    const pwiz::msdata::BinaryDataArray& intensities = *(s->getIntensityArray());
+    int mz_denom = getDenom(mzs.data);
+    int intensity_denom = getDenom(intensities.data);
+    pb_spectrum.set_peak_m_z_denominator(mz_denom);
+    pb_spectrum.set_peak_intensity_denominator(intensity_denom);
+    uint64_t last = 0;
+    int last_index = -1;
+    uint64_t intensity_sum = 0;
+    for (size_t i = 0; i < s->defaultArrayLength; ++i) {
+      uint64_t mz = mzs.data[i] * mz_denom + 0.5;
+      uint64_t intensity = intensities.data[i] * intensity_denom + 0.5;
+      if (mz < last) {
+        carp(CARP_FATAL, "In scan %d, m/z %" PRIu64 " came after %" PRIu64,
+             pb_spectrum.spectrum_number(), mz, last);
+      }
+      if (mz == last) {
+        intensity_sum += intensity;
+        pb_spectrum.set_peak_intensity(last_index, intensity_sum);
+      } else {
+        pb_spectrum.add_peak_m_z(mz - last);
+        pb_spectrum.add_peak_intensity(intensity);
+        last = mz;
+        intensity_sum = intensity;
+        ++last_index;
+      }
+    }
+    // Write spectrum
+    writer.Write(&pb_spectrum);
   }
 
   delete msd;
