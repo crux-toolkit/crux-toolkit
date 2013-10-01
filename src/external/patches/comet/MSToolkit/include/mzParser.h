@@ -47,14 +47,10 @@ using namespace H5;
 
 //#define OSX				// to compile with cc on Macintosh OSX
 //#define OSX_TIGER // use with OSX if OSX Tiger is being used
-//#define __LINUX__				// to compile with gcc (or g++) on LINUX
-//#define _MSC_VER	// to compile with Microsoft Studio
 //#define OSX_INTEL // compile with cc on Macintosh OSX on Intel-style processors
 //#define GCC				// to compile with gcc (or g++) on LINUX
-#define __LINUX__    // Comet project currently only cares about Linux/Windows
-#ifdef _MSC_VER
-#undef __LINUX__
-#endif
+//#define __LINUX__				// to compile with gcc (or g++) on LINUX
+//#define _MSC_VER	// to compile with Microsoft Studio
 
 #define XMLCLASS		
 #ifndef XML_STATIC
