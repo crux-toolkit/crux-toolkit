@@ -22,7 +22,7 @@
 
 struct PreprocessThreadData
 {
-   Spectrum mstSpectrum;
+   MSToolkit::Spectrum mstSpectrum;
    int iAnalysisType;
    int iFileLastScan;
 
@@ -30,7 +30,7 @@ struct PreprocessThreadData
    {
    }
 
-   PreprocessThreadData(Spectrum &spec_in,
+   PreprocessThreadData(MSToolkit::Spectrum &spec_in,
                         int iAnalysisType_in,
                         int iFileLastScan_in)
    {
@@ -60,14 +60,14 @@ public:
 private:
    
    // Private static methods
-   static void PreprocessSpectrum(Spectrum &spec, 
+   static void PreprocessSpectrum(MSToolkit::Spectrum &spec, 
                                   int iAnalysisType, 
                                   int iFileLastScan);
    static bool CheckExistOutFile(int iCharge,
                                  int iScanNum);
    static void AdjustMassTol(struct Query *pScoring);
    static void PreloadIons(MSReader &mstReader,
-                           Spectrum &spec,
+                           MSToolkit::Spectrum &spec,
                            bool bNext=false,
                            int scNum=0);
    static bool CheckActivationMethodFilter(MSActivation act);
@@ -78,9 +78,9 @@ private:
                          int iReaderLastScan,
                          int iNumSpectraLoaded);
    static void Preprocess(struct Query *pScoring,
-                          Spectrum mstSpectrum);
+                          MSToolkit::Spectrum mstSpectrum);
    static void LoadIons(struct Query *pScoring,
-                        Spectrum mstSpectrum,
+                        MSToolkit::Spectrum mstSpectrum,
                         struct PreprocessStruct *pPre);
    static void MakeCorrData(double *pdTempRawData,
                             struct Query *pScoring,
