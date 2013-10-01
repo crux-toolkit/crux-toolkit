@@ -116,6 +116,7 @@ protected:
   };
 
   struct TargetInfo {
+    string proteinName;
     string* proteinSequence;
     int start;
     FLOAT_T mass;

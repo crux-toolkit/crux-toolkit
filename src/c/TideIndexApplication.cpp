@@ -435,11 +435,12 @@ void TideIndexApplication::fastaToPb(
         greater<TideIndexPeptide>());
       if (decoyType != NONE) {
         const string* setTarget = &*(setTargets.insert(cleavedSequence).first);
-        map<const string*, TargetInfo>::iterator i =
-          targetInfo.insert(make_pair(setTarget, TargetInfo())).first;
-        i->second.proteinSequence = proteinSequence;
-        i->second.start = startLoc;
-        i->second.mass = pepMass;
+        TargetInfo& info =
+          targetInfo.insert(make_pair(setTarget, TargetInfo())).first->second;
+        info.proteinName = proteinName;
+        info.proteinSequence = proteinSequence;
+        info.start = startLoc;
+        info.mass = pepMass;
       }
       ++targetsGenerated;
     }
@@ -459,6 +460,7 @@ void TideIndexApplication::fastaToPb(
     const string* setTarget = &*i;
     const map<const string*, TargetInfo>::iterator targetLookup =
       targetInfo.find(setTarget);
+    proteinName = targetLookup->second.proteinName;
     proteinSequence = targetLookup->second.proteinSequence;
     const int startLoc = targetLookup->second.start;
     const map<const string*, const string*>::const_iterator decoyCheck =
