@@ -249,8 +249,9 @@ void PepXMLWriter::printPeptideElement(int *ranks,
   // get values
   char flanking_aas_prev = flanking_aas[0];
   char flanking_aas_next = flanking_aas[1];
-  string& protein_id = protein_names.front();
-  string& protein_annotation = protein_descriptions.front();
+  string protein_id = (!protein_names.empty()) ? protein_names.front() : "";
+  string protein_annotation = (!protein_descriptions.empty()) ?
+    protein_descriptions.front() : "";
   int num_tol_term = get_num_terminal_cleavage(peptide_sequence,
                                                flanking_aas_prev,
                                                flanking_aas_next,
