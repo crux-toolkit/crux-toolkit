@@ -2081,6 +2081,7 @@ char* Peptide::getFlankingAAs() {
       flanking_string += (start_idx > 1) ? protein_seq[start_idx - 2] : '-';
       flanking_string += (end_idx < protein_length) ? protein_seq[end_idx] : '-';
     } else {
+
       // post process, get flanking AAs from the protein object
       PostProcessProtein* post_process_protein = (PostProcessProtein*)protein;
       flanking_string += post_process_protein->getNTermFlankingAA(start_idx - 1);
