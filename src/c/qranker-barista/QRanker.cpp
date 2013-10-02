@@ -126,126 +126,136 @@ void QRanker :: write_results()
   ostringstream fname;
   if (get_boolean_parameter("txt-output")) {
     fname << out_dir << "/" << fileroot << "q-ranker.target.psms.txt";
-
     ofstream f1(fname.str().c_str()); 
-    write_results_psm_tab(f1);
+    fname.str("");
+    fname << out_dir << "/" << fileroot << "q-ranker.decoy.psms.txt";
+    ofstream f2(fname.str().c_str());
+    write_results_psm_tab(f1, f2);
     f1.close();
+    f2.close();
     fname.str("");
   }
 
   if (get_boolean_parameter("pepxml-output")) {
-    fname << out_dir << "/" << fileroot << "q-ranker.xml";
-    PepXMLWriter xmlfile;
-    xmlfile.openFile(fname.str().c_str(), overwrite_flag);
-    write_results_psm_xml(xmlfile);
-    xmlfile.closeFile();
+    fname << out_dir << "/" << fileroot << "q-ranker.target.pep.xml";
+    PepXMLWriter xmlfile1;
+    xmlfile1.openFile(fname.str().c_str(), overwrite_flag);
+    fname.str("");
+    fname << out_dir << "/" << fileroot << "q-ranker.decoy.pep.xml";
+    PepXMLWriter xmlfile2;
+    xmlfile2.openFile(fname.str().c_str(), overwrite_flag);
+    write_results_psm_xml(xmlfile1, xmlfile2);
+    xmlfile1.closeFile();
+    xmlfile2.closeFile();
   }
   d.clear_data_psm_results();
 }
 
-void QRanker :: write_results_psm_tab(ofstream &os)
+void QRanker :: write_results_psm_tab(ofstream &osTarget, ofstream &osDecoy)
 {
   int ps =fullset[0].psmind; 
-  os << "scan" << "\t" << "charge" << "\t" << "q-ranker q-value" << "\t" ;
-  os<< "q-ranker score" << "\t" << "q-ranker PEP\t"; 
-  os<<"spectrum precursor m/z"<<"\t";
-  os<<"spectrum neutral mass"<<"\t"; 
-  os<<"peptide mass"<<"\t";
-  os<< "delta_cn"<< "\t";
-  if(d.psmind2spscore(ps)!=-1){
-    os<<"sp score"<<"\t";
-    os<<"sp rank\t";
-  }
-  os<<"xcorr score"<<"\t";
-  os<<"xcorr rank"<<"\t";
-  if(d.psmind2spscore(ps)!=-1){
-    os<<"b/y ions matched"<<"\t";
-    os<<"b/y ions total"<<"\t";
-  }
-  os<<"matches/spectrum"<<"\t";
-  os<<"sequence"<<"\t";
-  os<<"cleavage type"<<"\t"; 
-  os<<"protein id"<<"\t";
-  os<<"flanking aa"<<"\t";
-  os<< "filename" << endl;
-  for(int i = 0; i < fullset.size(); i++){
-    if( fullset[i].label == 1 ){ 
-      // only print target psms
-      int psmind = fullset[i].psmind;
-      int pepind = d.psmind2pepind(psmind);
-      string pep = d.ind2pep(pepind);
-      string seq, n,c;
-      os << d.psmind2scan(psmind) << "\t" ;
-      os<< d.psmind2charge(psmind) << "\t"; 
-      os<< fullset[i].q << "\t" ;
-      os<< fullset[i].score << "\t"; 
-      os<< fullset[i].PEP << "\t"; 
-      //mass-to-charge ratio 
-      os<<(d.psmind2precursor_mass(psmind)+
-      d.psmind2charge(psmind)*MASS_PROTON)/
-      d.psmind2charge(psmind)<<"\t";
-      //Spectrum Neutral Mass 
-      os<<d.psmind2precursor_mass(psmind)<<"\t";
-      //Peptide Mass
-      os<<d.psmind2peptide_mass(psmind)<<"\t";
-      //DELTA CN
-      os <<d.psmind2deltaCn(psmind)<< "\t";
-      if(d.psmind2spscore(ps)!=-1){
-        //Sp Score
-        os<<d.psmind2spscore(psmind)<<"\t";
-        //Sp Rank 
-        os<<d.psmind2sp_rank(psmind)<<"\t";
-      }
-      //xcorr Score
-      os<<d.psmind2xcorr(psmind)<<"\t";
-      //xcorr rank
-      os<<d.psmind2xcorr_rank(psmind)<<"\t";
-      if(d.psmind2spscore(ps)!=-1){
-        //by ions match 
-        os<<d.psmind2by_ions_matched(psmind)<<"\t"; 
-        //by ions total 
-        os<<d.psmind2by_ions_total(psmind)<<"\t";
-      }
-      //Matches/Spectrum 
-      os<<d.psmind2matches_spectrum(psmind)<<"\t";
-      get_pep_seq(pep,seq,n,c);
-      //Sequence 
-      os<<seq<<"\t";
-      //cleavage type
-      os<<cleavage_type<<"\t";
-      //protein id
-      vector<string> prots;  
-      get_protein_id(pepind,prots);
-
-       // TODO: find peptide position in SQT files 
-      //sqt files do not return peptide position in the protein.
-      //if the search result file is txt we can find file peptide_pos and print it 
-      // in front of protein, else do not print anything
-      if(file_format_=="txt"){
-        for (unsigned int j=0;j<prots.size();j++){ 
-          if(j==prots.size()-1)
-            os<<prots[j]<<"("<<d.psmind2peptide_position(psmind)<<")\t";
-          else 
-           os<<prots[j]<<"("<<d.psmind2peptide_position(psmind)<<")"<<",";
-       
-        }
-      }else if(file_format_=="sqt"){ 
-       
-        for (unsigned int j=0;j<prots.size();j++){
-          if(j==prots.size()-1)
-            os<<prots[j]<<"\t"; 
-          else 
-            os<<prots[j]<<",";
-        }
-       }
-      //Flanking_aa 
-      os<<n<<c;
-      //TODO temp fix to write a set of flanking AAs per protein
-      for(unsigned int j=1;j<prots.size();j++)
-        os<<','<<n<<c;
-      os<<'\t';
-      os<< d.psmind2fname(psmind) << endl;
+  ofstream* streams[2] = {&osTarget, &osDecoy};
+  for (size_t i = 0; i < 2; ++i) {
+    ofstream& os = *streams[i];
+    os << "scan" << "\t" << "charge" << "\t" << "q-ranker q-value" << "\t" ;
+    os<< "q-ranker score" << "\t" << "q-ranker PEP\t"; 
+    os<<"spectrum precursor m/z"<<"\t";
+    os<<"spectrum neutral mass"<<"\t"; 
+    os<<"peptide mass"<<"\t";
+    os<< "delta_cn"<< "\t";
+    if(d.psmind2spscore(ps)!=-1){
+      os<<"sp score"<<"\t";
+      os<<"sp rank\t";
     }
+    os<<"xcorr score"<<"\t";
+    os<<"xcorr rank"<<"\t";
+    if(d.psmind2spscore(ps)!=-1){
+      os<<"b/y ions matched"<<"\t";
+      os<<"b/y ions total"<<"\t";
+    }
+    os<<"matches/spectrum"<<"\t";
+    os<<"sequence"<<"\t";
+    os<<"cleavage type"<<"\t"; 
+    os<<"protein id"<<"\t";
+    os<<"flanking aa"<<"\t";
+    os<< "filename" << endl;
+  }
+  for(int i = 0; i < fullset.size(); i++){
+    ofstream& os = (fullset[i].label == 1) ? osTarget : osDecoy;
+    int psmind = fullset[i].psmind;
+    int pepind = d.psmind2pepind(psmind);
+    string pep = d.ind2pep(pepind);
+    string seq, n,c;
+    os << d.psmind2scan(psmind) << "\t" ;
+    os<< d.psmind2charge(psmind) << "\t"; 
+    os<< fullset[i].q << "\t" ;
+    os<< fullset[i].score << "\t"; 
+    os<< fullset[i].PEP << "\t"; 
+    //mass-to-charge ratio 
+    os<<(d.psmind2precursor_mass(psmind)+
+    d.psmind2charge(psmind)*MASS_PROTON)/
+    d.psmind2charge(psmind)<<"\t";
+    //Spectrum Neutral Mass 
+    os<<d.psmind2precursor_mass(psmind)<<"\t";
+    //Peptide Mass
+    os<<d.psmind2peptide_mass(psmind)<<"\t";
+    //DELTA CN
+    os <<d.psmind2deltaCn(psmind)<< "\t";
+    if(d.psmind2spscore(ps)!=-1){
+      //Sp Score
+      os<<d.psmind2spscore(psmind)<<"\t";
+      //Sp Rank 
+      os<<d.psmind2sp_rank(psmind)<<"\t";
+    }
+    //xcorr Score
+    os<<d.psmind2xcorr(psmind)<<"\t";
+    //xcorr rank
+    os<<d.psmind2xcorr_rank(psmind)<<"\t";
+    if(d.psmind2spscore(ps)!=-1){
+      //by ions match 
+      os<<d.psmind2by_ions_matched(psmind)<<"\t"; 
+      //by ions total 
+      os<<d.psmind2by_ions_total(psmind)<<"\t";
+    }
+    //Matches/Spectrum 
+    os<<d.psmind2matches_spectrum(psmind)<<"\t";
+    get_pep_seq(pep,seq,n,c);
+    //Sequence 
+    os<<seq<<"\t";
+    //cleavage type
+    os<<cleavage_type<<"\t";
+    //protein id
+    vector<string> prots;  
+    get_protein_id(pepind,prots);
+
+     // TODO: find peptide position in SQT files 
+    //sqt files do not return peptide position in the protein.
+    //if the search result file is txt we can find file peptide_pos and print it 
+    // in front of protein, else do not print anything
+    if(file_format_=="txt"){
+      for (unsigned int j=0;j<prots.size();j++){ 
+        if(j==prots.size()-1)
+          os<<prots[j]<<"("<<d.psmind2peptide_position(psmind)<<")\t";
+        else 
+         os<<prots[j]<<"("<<d.psmind2peptide_position(psmind)<<")"<<",";
+     
+      }
+    }else if(file_format_=="sqt"){ 
+     
+      for (unsigned int j=0;j<prots.size();j++){
+        if(j==prots.size()-1)
+          os<<prots[j]<<"\t"; 
+        else 
+          os<<prots[j]<<",";
+      }
+     }
+    //Flanking_aa 
+    os<<n<<c;
+    //TODO temp fix to write a set of flanking AAs per protein
+    for(unsigned int j=1;j<prots.size();j++)
+      os<<','<<n<<c;
+    os<<'\t';
+    os<< d.psmind2fname(psmind) << endl;
   }
 }
 
@@ -264,9 +274,12 @@ void QRanker :: get_pep_seq(string &pep, string &seq, string &n, string &c)
 }
 
 
-void QRanker ::write_results_psm_xml(PepXMLWriter& xmlfile)
+void QRanker ::write_results_psm_xml(
+  PepXMLWriter& xmlfileTarget,
+  PepXMLWriter& xmlfileDecoy)
 {
-  xmlfile.writeHeader();
+  xmlfileTarget.writeHeader();
+  xmlfileDecoy.writeHeader();
 
   bool* scores_to_print = new bool[NUMBER_SCORER_TYPES];
   for(int score_idx = 0; score_idx < NUMBER_SCORER_TYPES; score_idx++){
@@ -278,17 +291,13 @@ void QRanker ::write_results_psm_xml(PepXMLWriter& xmlfile)
   scores_to_print[QRANKER_QVALUE] = true;
   scores_to_print[QRANKER_PEP] = true;
 
-  xmlfile.SetScoresComputed(scores_to_print);
+  xmlfileTarget.SetScoresComputed(scores_to_print);
+  xmlfileDecoy.SetScoresComputed(scores_to_print);
 
   double* scores = new double[NUMBER_SCORER_TYPES];
 
   for(int i = 0; i < fullset.size(); i++)
     {
-      // only print target psms
-      if( fullset[i].label == -1 ){
-        continue;
-      }
-
       int psmind = fullset[i].psmind;
 
       // spectrum info
@@ -337,6 +346,8 @@ void QRanker ::write_results_psm_xml(PepXMLWriter& xmlfile)
       double by_ions_matched=d.psmind2by_ions_matched(psmind);
       
       psm_ranks[XCORR]=d.psmind2xcorr_rank(psmind);
+
+      PepXMLWriter& xmlfile = (fullset[i].label == 1) ? xmlfileTarget : xmlfileDecoy;
       xmlfile.writePSM(scan, filename, spectrum_mass, charge, psm_ranks,
                        sequence, modified_sequence.c_str(),
                        peptide_mass, num_proteins,
@@ -355,7 +366,8 @@ void QRanker ::write_results_psm_xml(PepXMLWriter& xmlfile)
 
     }
 
-  xmlfile.writeFooter();
+  xmlfileTarget.writeFooter();
+  xmlfileDecoy.writeFooter();
 }
 
 
