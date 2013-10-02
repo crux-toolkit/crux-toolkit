@@ -561,7 +561,6 @@ void PinXMLWriter::printOccurence(
     protein_description
   );
   
-   
   //string decoy_prefix="rand_";
 
   char* flanking_ptr = peptide->getFlankingAAs();
@@ -571,7 +570,9 @@ void PinXMLWriter::printOccurence(
   DelimitedFile::tokenize(flanking_str, flanking_aas, ',');
   if (flanking_aas.size() != num_protein) {
     carp(CARP_FATAL, "PinXMLWriter has only %d sets of flanking AAs "
-                     "for %d proteins", flanking_aas.size(), num_protein);
+                     "for %d proteins "
+	             "flanking str:%s",
+	 flanking_aas.size(), num_protein, flanking_ptr);
   }
 
   for(unsigned prot_idx=0;prot_idx<num_protein;prot_idx++){
