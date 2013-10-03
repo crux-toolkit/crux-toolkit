@@ -1662,7 +1662,6 @@ Peptide* Peptide::parseTabDelimited(
 
   //populate peptide struct.
   string string_sequence = file.getString(SEQUENCE_COL);
-
   if (string_sequence.length() > 0) {
     //In cases where the sequence is in X.seq.X format, parse out
     //the seq part.
@@ -1685,8 +1684,10 @@ Peptide* Peptide::parseTabDelimited(
       delete peptide;
       return NULL;
     };
+  } else {
+  
+    carp(CARP_ERROR, "No sequence found...");
   }
-  carp(CARP_DETAILED_DEBUG, "Finished parsing peptide.");
 
   return peptide;
 }
@@ -2047,7 +2048,7 @@ char* Peptide::getProteinIds() {
       delete protein_id;
     }
   }
-
+  carp(CARP_DEBUG, "Peptide::getProteinIds(): %s", protein_field);
   return protein_field;
 }
 

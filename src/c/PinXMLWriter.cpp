@@ -77,6 +77,7 @@ void PinXMLWriter::write(
   MatchIterator* iterator,
   Spectrum* spectrum,
   int top_rank) {
+
   vector<Match*> matches; 
   
   while (iterator -> hasNext()) {
@@ -91,7 +92,6 @@ void PinXMLWriter::write(
     else 
      return;
   }
-
 }
 
 
@@ -106,7 +106,6 @@ void PinXMLWriter::calculateDeltaCN(map<pair<int, int>, vector<Match*> >& scan_c
 }
 
 void PinXMLWriter::calculateDeltaCN(vector<Match*>& collection) {
-
   // We have to use an explicit 'new' here because
   // the MatchCollection includes a couple of huge 'C' style
   // arrays, which are guaranteed to blow the stack.
@@ -121,7 +120,6 @@ void PinXMLWriter::calculateDeltaCN(vector<Match*>& collection) {
   tmp_matches->calculateDeltaCn();
   
   delete tmp_matches;
-
 }
 
 void PinXMLWriter::calculateDeltaCN(
@@ -181,7 +179,6 @@ void PinXMLWriter::write(
   Spectrum* spectrum,
   int top_rank
  ){
-  carp(CARP_DEBUG,"Start writing PIN xml file!");
 
   calculateDeltaCN(target_collection, decoys);
 
@@ -216,7 +213,6 @@ void PinXMLWriter::write(
   vector<MatchCollection*>& decoys,
   int top_rank
  ){
-  carp(CARP_DEBUG,"Start writing PIN xml file!");
   
   calculateDeltaCN(target_collection, decoys);
   
@@ -289,15 +285,16 @@ void PinXMLWriter::write(
 
 bool PinXMLWriter:: isDecoy(Match* match){
   string protein_id=match->getPeptide()->getProteinIds(); 
-  if(protein_id.find(decoy_prefix_)!=string::npos)
+  if(protein_id.find(decoy_prefix_)!=string::npos) {
     return true;
-  else if(match->getNullPeptide())
+  } else if(match->getNullPeptide()) {
     return true;
-  return false; 
+  } else {
+    return false; 
+  }
 }
 
-void PinXMLWriter::printHeader(
-){
+void PinXMLWriter::printHeader(){
   fprintf(
     output_file_, 
     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" 
@@ -372,7 +369,6 @@ void PinXMLWriter:: printFeatureDescription(){
 }
 
 void PinXMLWriter:: printHeaderFragSpectrumMatch(int scan_number){
-  
   fprintf(
     output_file_, 
     "\n<fragSpectrumScan xmlns=\"http://per-colator.com/percolator_in/12\""
@@ -386,7 +382,6 @@ void PinXMLWriter:: printPSM(
   Spectrum* spectrum, 
   bool is_decoy 
 ){ 
-   
   int scan_number= spectrum->getFirstScan();
   Peptide* peptide= match->getPeptide();
   string decoy; 
@@ -553,7 +548,6 @@ void PinXMLWriter:: printPeptideSequence(Peptide* peptide){
 void PinXMLWriter::printOccurence(
   Peptide* peptide
 ){
-  
   vector<string> protein_ids;
   vector<string> protein_description; 
   unsigned num_protein=peptide->getProteinInfo(
@@ -585,6 +579,7 @@ void PinXMLWriter::printOccurence(
       protein_id.c_str()
    );
   }
+  
  
 }
 

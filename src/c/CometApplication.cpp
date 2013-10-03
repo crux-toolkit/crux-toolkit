@@ -79,10 +79,15 @@ void CometApplication::calcVarMods(
     VarMods& varmods ///< Variable modification structure to set
     ) {
   
+  varmods.bBinaryMod = 0;
+  varmods.iMaxNumVarModAAPerMod = 0;
+  varmods.dVarModMass = 0.0;
+  memset(varmods.szVarModChar,0,MAX_VARMOD_AA);
+
+
   string temp = var_str;
   vector<string> tokens;
   DelimitedFile::tokenize(temp, tokens, ' ');
-  
   from_string<double>(varmods.dVarModMass, tokens[0]);
   strcpy(varmods.szVarModChar, tokens[1].c_str());
   from_string<int>(varmods.bBinaryMod, tokens[2]);
@@ -369,7 +374,7 @@ void CometApplication::setCometParameters(
   searchMgr.SetParam("output_txtfile", get_string_parameter_pointer("output_txtfile"), get_int_parameter("output_txtfile"));
   searchMgr.SetParam("output_pepxmlfile", get_string_parameter_pointer("output_pepxmlfile"), get_int_parameter("output_pepxmlfile"));
   searchMgr.SetParam("output_pinxmlfile", get_string_parameter_pointer("output_pinxmlfile"), get_int_parameter("output_pinxmlfile"));
-  searchMgr.SetParam("output_outfiles", "0", "0");
+  searchMgr.SetParam("output_outfiles", "0", 0);
   searchMgr.SetParam("skip_researching", get_string_parameter_pointer("skip_researching"), get_int_parameter("skip_researching"));
   searchMgr.SetParam("variable_C_terminus", get_string_parameter_pointer("variable_C_terminus"), get_double_parameter("variable_C_terminus"));
   searchMgr.SetParam("variable_N_terminus", get_string_parameter_pointer("variable_N_terminus"), get_double_parameter("variable_N_terminus"));
