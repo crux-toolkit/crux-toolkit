@@ -472,14 +472,13 @@ int convert_to_mod_aa_seq(const char* sequence,
 
     // apply the modification
     if( aa_mod == NULL ){
-      carp(CARP_ERROR, "There is an unidentifiable modification in sequence "
+      carp(CARP_WARNING, "There is an unidentifiable modification in sequence "
            "<%s> at position %d.", sequence, seq_idx - 1);
-      return 0;
+    } else {
+
+      // apply modification 
+      modify_aa(&new_sequence[mod_idx-1], aa_mod);
     }
-
-    // apply modification 
-    modify_aa(&new_sequence[mod_idx-1], aa_mod);
-
   } // next character in given sequence
 
   // null terminate

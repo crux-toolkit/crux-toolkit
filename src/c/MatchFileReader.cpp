@@ -150,7 +150,6 @@ string BLANK_STRING="";
 const std::string& MatchFileReader::getString(
   MATCH_COLUMNS_T col_type ///<the column type
 ) {
-
   int idx = match_indices_[col_type];
   if (idx == -1) {
 
@@ -159,7 +158,6 @@ const std::string& MatchFileReader::getString(
          get_column_header(col_type));
     return BLANK_STRING;
   } else {
-
     return DelimitedFileReader::getString(idx);
   }
 }

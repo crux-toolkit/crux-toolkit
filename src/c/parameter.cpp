@@ -1290,7 +1290,7 @@ void initialize_parameters(void){
 		    "true");
 
   set_int_parameter("output_pinxmlfile",
-		    1, 0, 1,
+		    0, 0, 1,
 		    "0=no, 1=yes  write pin.xml file",
 		    "option for Comet only",
 		    "true");
@@ -1498,7 +1498,7 @@ void initialize_parameters(void){
 		       "false"
 		       );
 
-  set_double_parameter("variable_N_terminus", -1, -1, BILLION,
+  set_double_parameter("variable_N_terminus", 0, 0, BILLION,
 		       "Specifiy a variable modification to peptide's c-terminus"
                        "Works in conjunction with variable_c_terminus_distance",
 		       "option for Comet",
