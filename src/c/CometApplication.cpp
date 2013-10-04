@@ -2,8 +2,8 @@
  * \file CometApplication.cpp 
  * \brief Runs hardklor
  *****************************************************************************/
-#include "Common.h"
-#include "CometSearchManager.h"
+#include "CometSearch/Common.h"
+#include "CometSearch/CometSearchManager.h"
 #include "ModifiedPeptidesIterator.h"
 #include "CarpStreamBuf.h"
 #include "CometApplication.h"

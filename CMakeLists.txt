@@ -22,15 +22,13 @@ endif (EXISTS "${CMAKE_SOURCE_DIR}/src/c/test/smoke-tests/runall")
 
 install(FILES license.txt DESTINATION .)
 
-if (UNIX)
 add_custom_target(
   deep-clean
   COMMAND ${CMAKE_MAKE_PROGRAM} clean
   COMMAND ${CMAKE_MAKE_PROGRAM} deep-clean-external
-  COMMAND find ${CMAKE_BINARY_DIR} -name CMakeCache.txt -exec rm "{}" "\;"
+  COMMAND ${CMAKE_COMMAND} -E remove CMakeCache.txt
   COMMENT "Cleaning project tree."
 )
-endif (UNIX)
 
 # build a CPack driven installer package
 include (InstallRequiredSystemLibraries)

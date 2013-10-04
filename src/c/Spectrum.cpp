@@ -22,7 +22,7 @@
 #include <string>
 #include "DelimitedFile.h"
 #include "MatchFileReader.h"
-#include "MSToolkit/include/Spectrum.h"
+#include "MSToolkit/Spectrum.h"
 
 using namespace std;
 using namespace Crux;

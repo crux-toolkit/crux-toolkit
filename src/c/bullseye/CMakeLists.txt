@@ -6,9 +6,9 @@ cmake_policy(VERSION 2.8.1)
 include_directories(..)
 include_directories(../hardklor)
 include_directories(../../external/include)
+include_directories(../../external/include/MSToolkit)
 include_directories(../../external/build/src/ProteoWizard/libraries/boost_1_43_0)
 include_directories(../../external/build/src/ProteoWizard/libraries/boost_aux)
-include_directories(../../external/build/src/comet/src/comet/MSToolkit/include)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     set_property(
