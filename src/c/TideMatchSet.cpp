@@ -424,7 +424,7 @@ void TideMatchSet::gatherTargetsAndDecoys(
       if (vec_ptr->size() < top_n) {
         vec_ptr->push_back(i);
       }
-    } while (targetsOut.size() != top_n && decoysOut.size() != top_n &&
+    } while ((targetsOut.size() != top_n || decoysOut.size() != top_n) &&
              popped < matches_->size());
   } else {
     for (int i = 0; i < min(top_n, matches_->size()); ++i) {
