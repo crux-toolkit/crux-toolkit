@@ -183,7 +183,10 @@ int PercolatorApplication::main(int argc, char** argv) {
       }
       carp(CARP_INFO, "Finished make-pin.");
       input_pinxml = string(make_pin_file);
-    }
+    } else if (!has_extension(input_pinxml.c_str(), "pin.xml")) {
+        carp(CARP_FATAL, "input file %s is not recognized.", input_pinxml.c_str() );
+	}
+
   }
   return main(input_pinxml);
 
