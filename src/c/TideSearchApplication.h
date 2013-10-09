@@ -30,6 +30,7 @@ protected:
     const vector<SpectrumCollection::SpecCharge>* spec_charges,
     ActivePeptideQueue* active_peptide_queue,
     const ProteinVec& proteins,
+    const vector<const pb::AuxLocation*>& locations,
     double precursor_window,
     WINDOW_TYPE_T window_type,
     double spectrum_min_mz,

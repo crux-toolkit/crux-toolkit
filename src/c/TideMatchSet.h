@@ -45,6 +45,7 @@ public:
     int charge, ///< charge for matches
     const ActivePeptideQueue* peptides, ///< peptide queue
     const ProteinVec& proteins, ///< proteins corresponding with peptides
+    const vector<const pb::AuxLocation*>& locations,  ///< auxiliary locations
     bool compute_sp ///< whether to compute sp or not
   );
 
@@ -58,6 +59,7 @@ public:
     int charge, ///< charge for matches
     const ActivePeptideQueue* peptides, ///< peptide queue
     const ProteinVec& proteins, ///< proteins corresponding with peptides
+    const vector<const pb::AuxLocation*>& locations,  ///< auxiliary locations
     bool compute_sp ///< whether to compute sp or not
   );
 
@@ -95,11 +97,11 @@ protected:
   void writeToFile(
     ofstream* file,
     const vector<Arr::iterator>& vec,
-    bool decoyVec,
     const Spectrum* spectrum,
     int charge,
     const ActivePeptideQueue* peptides,
     const ProteinVec& proteins,
+    const vector<const pb::AuxLocation*>& locations,
     const map<Arr::iterator, FLOAT_T>& delta_cn_map,
     const map<Arr::iterator, pair<const SpScorer::SpScoreData, int> >* sp_map
   );
@@ -115,6 +117,7 @@ protected:
     Crux::Spectrum& spectrum,
     const ActivePeptideQueue* peptides,
     const ProteinVec& proteins,
+    const vector<const pb::AuxLocation*>& locations,
     SpectrumZState& z_state,
     SpScorer* sp_scorer,
     FLOAT_T* lowest_sp_out
@@ -125,10 +128,11 @@ protected:
    */
   Crux::Match* getCruxMatch(
     const Peptide* peptide, ///< Tide peptide for match
-    const pb::Protein* protein, ///< Tide protein for match
+    const ProteinVec& proteins, ///< Tide proteins
+    const vector<const pb::AuxLocation*>& locations, /// auxiliary locations
     Crux::Spectrum* crux_spectrum,  ///< Crux spectrum for match
     SpectrumZState& crux_z_state, ///< Crux z state for match
-    PostProcessProtein** protein_made ///< out parameter for new protein
+    vector<PostProcessProtein*>* proteins_made ///< out parameter for new proteins
   );
 
   /**
@@ -160,7 +164,7 @@ protected:
    */
   static string getProteinName(
     const pb::Protein& protein,
-    const Peptide& peptide,
+    int pos,
     bool* is_decoy = NULL
   );
 
@@ -170,6 +174,7 @@ protected:
   static void getFlankingAAs(
     const Peptide* peptide, ///< Tide peptide to get flanking AAs for
     const pb::Protein* protein, ///< Tide protein for the peptide
+    int pos,  ///< location of peptide within protein
     string* out_n,  ///< out parameter for n flank
     string* out_c ///< out parameter for c flank
   );

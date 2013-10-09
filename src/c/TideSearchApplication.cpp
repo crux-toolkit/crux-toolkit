@@ -61,6 +61,7 @@ int TideSearchApplication::main(int argc, char** argv) {
   string index_dir = get_string_parameter_pointer("tide database index");
   string peptides_file = index_dir + "/pepix";
   string proteins_file = index_dir + "/protix";
+  string auxlocs_file = index_dir + "/auxlocs";
   string spectra_file = get_string_parameter_pointer("tide spectra file");
 
   double window = get_double_parameter("precursor-window");
@@ -128,6 +129,13 @@ int TideSearchApplication::main(int argc, char** argv) {
     carp(CARP_FATAL, "Error reading index (%s)", proteins_file.c_str());
   }
   carp(CARP_DEBUG, "Read %d proteins", proteins.size());
+
+  // Read auxlocs index file
+  vector<const pb::AuxLocation*> locations;
+  if (!ReadRecordsToVector<pb::AuxLocation>(&locations, auxlocs_file)) {
+    carp(CARP_FATAL, "Error reading index (%s)", auxlocs_file.c_str());
+  }
+  carp(CARP_DEBUG, "Read %d auxlocs", locations.size());
 
   // Check for decoys and set static variable if found
   for (vector<const pb::Protein*>::const_iterator i = proteins.begin();
@@ -215,8 +223,8 @@ int TideSearchApplication::main(int argc, char** argv) {
   // Do the search
   carp(CARP_INFO, "Running search");
   cleanMods();
-  search(spectra.SpecCharges(), active_peptide_queue, proteins, window,
-         window_type, get_double_parameter("spectrum-min-mz"),
+  search(spectra.SpecCharges(), active_peptide_queue, proteins, locations,
+         window, window_type, get_double_parameter("spectrum-min-mz"),
          get_double_parameter("spectrum-max-mz"), min_scan, max_scan,
          get_int_parameter("min-peaks"), charge_to_search,
          get_int_parameter("top-match"), spectra.FindHighestMZ(),
@@ -263,6 +271,7 @@ void TideSearchApplication::search(
   const vector<SpectrumCollection::SpecCharge>* spec_charges,
   ActivePeptideQueue* active_peptide_queue,
   const ProteinVec& proteins,
+  const vector<const pb::AuxLocation*>& locations,
   double precursor_window,
   WINDOW_TYPE_T window_type,
   double spectrum_min_mz,
@@ -357,10 +366,10 @@ void TideSearchApplication::search(
     TideMatchSet matches(&match_arr, highest_mz);
     if (output_files) {
       matches.report(output_files, top_matches, spectrum, charge,
-                     active_peptide_queue, proteins, compute_sp);
+                     active_peptide_queue, proteins, locations, compute_sp);
     } else {
       matches.report(target_file, decoy_file, top_matches, spectrum, charge,
-                     active_peptide_queue, proteins, compute_sp);
+                     active_peptide_queue, proteins, locations, compute_sp);
     }
   }
 
