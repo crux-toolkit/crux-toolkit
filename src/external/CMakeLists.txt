@@ -247,15 +247,14 @@ if (UNIX)
   # Get Comet source from SVN and buld using it's own makefile
   ExternalProject_Add(
     comet
-    SVN_REPOSITORY http://svn.code.sf.net/p/comet-ms/code/trunk/comet-ms
-    SVN_REVISION -r 147
+    SVN_REPOSITORY svn://svn.code.sf.net/p/comet-ms/code/branches/release_2013020
     PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
     UPDATE_COMMAND ""
     PATCH_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/patch_comet.sh 
       ${CMAKE_CURRENT_SOURCE_DIR}
       ${CMAKE_CURRENT_BINARY_DIR}
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND make 
+    BUILD_COMMAND make CXXFLAGS=-DCRUX 
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE 1
   )  
@@ -268,10 +267,6 @@ if (UNIX)
       ${CMAKE_COMMAND} -E copy_directory 
       ${CMAKE_CURRENT_SOURCE_DIR}/build/src/comet/MSToolkit/include
       ${CMAKE_CURRENT_SOURCE_DIR}/include/MSToolkit/
-    COMMAND 
-      ${CMAKE_COMMAND} -E copy
-      ${CMAKE_CURRENT_SOURCE_DIR}/build/src/comet/MSToolkit/libmstoolkit.a
-      ${CMAKE_CURRENT_SOURCE_DIR}/lib
     COMMAND 
       ${CMAKE_COMMAND} -E copy
       ${CMAKE_CURRENT_SOURCE_DIR}/build/src/comet/MSToolkit/libmstoolkitlite.a
