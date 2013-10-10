@@ -214,8 +214,16 @@ must lie in the range 0 &le; mz-bin-offset &le; 1.  Default=0.68.</li>
 <ul>
 
 <li>
-<code>--top-match &lt;integer&gt;</code> &nbsp; Specify the number of
+<code>--top-match &lt;integer&gt;</code> &ndash; Specify the number of
 matches to report for each spectrum.  Default=5.</li>
+
+<li>
+<code>--concat T|F</doe> &ndash; When set to T, target and decoy
+search results are reported in a single file, and only the
+top-scoring <i>N</i> matches (as specified
+via <code>--top-match</code>) are reported for each spectrum,
+irrespective of whether the matches involve target or decoy
+peptides.  Default = F.</li>
 
 <li>
 <code>--fileroot &lt;string&gt;</code> &ndash; 
