@@ -42,16 +42,16 @@ documentaion for <a href=calibrate-scores.html>calibrate-scores</a>.
 
 <li>
 <b>spectra</b> &ndash; The fragmentation spectra must be provided
-in <a href="ms2-format.html">MS2 format</a>. Like the database, the
-spectra can be specified in three different ways: (1) as a single file
-with suffix ".ms2", (2) as a text file containing a list of MS2 files
-or (3) as a directory in which all the MS2 files can be found.</li>
+in <a href="ms2-format.html">MS2</a>, mzXML or MGF format. Like the
+database, the spectra can be specified in three different ways: (1) as
+a single file with suffix ".ms2", ".mzXML", or ".mgf" (2) as a text
+file containing a list of MS2 files or (3) as a directory in which all
+the spectrum files can be found.</li>
 
 
 <li>
-<b>search results</b> &ndash; QRanker recognizes search results
-in <!--a href="sqt-format.html">SQT format</a> and in-->
-the <a href="txt-format.html">tab-delimited text format</a> produced
+<b>search results</b> &ndash; q-ranker recognizes search results
+in the <a href="txt-format.html">tab-delimited text format</a> produced
 by Crux.</li>
 
 <p>
@@ -59,8 +59,8 @@ Each of the three required arguments can be provided in three
 different ways: (1) as a a single file, (2) as a text file containing
 a list of filenames, one per line, or (3) as a directory containing
 multiple files.  File types are identified based on the filename
-extension: ".fa", ".fasta" or ".fsa" for FASTA files, ".ms2" for MS2
-files, <!--".sqt" for SQT files, -->and ".txt" for tab-delimited text files
+extension: ".fa", ".fasta" or ".fsa" for FASTA files, ".ms2", ".mzXML"
+or ".mgf" for spectum files, and ".txt" for tab-delimited text files
 or lists of filenames.  Note that the input mode for spectra and for
 search results must be the same; i.e., if you provide a list of files
 for the spectra, then you must also provide a list of files containing
@@ -89,8 +89,8 @@ created:</p>
 <li> psm_id: PSM identifier. </li>
 <li>q-value: The minimal PSM-level false discovery rate at which this
   PSM is deemed significant.  This q-value is computed based on the
-  ranking of the PSMs induced by the QRanker score.</li>
-<li>score: The score assigned to the PSM by QRanker.  Higher
+  ranking of the PSMs induced by the q-ranker score.</li>
+<li>score: The score assigned to the PSM by q-ranker.  Higher
   values correspond to more confident identifications.</code>
 <li> precursor_mass: precrusor mass as recorded during the MS1 scan </li>
 <li>peptide: the peptide sequence</li>
@@ -214,12 +214,13 @@ Parser to use for reading in MS/MS spectra.  Default = crux.</li>
 <code>--list-of-files &lt;T|F&gt;</code> &ndash; Specify that the
 spectra and search results are provided as lists of files, rather than
 as individual files.  When the spectrum files and the database search
-results files are provided via a file listing, QRanker assumes that
+results files are provided via a file listing, q-ranker assumes that
 the order of the spectrum files matches the order of the search result
 files. Alternatively, when the spectrum files and search results files
-are provided via directories, QRanker will search for pairs of files
-with the same root name but different extensions (".ms2" and
-".txt").  Default = F.</li>
+are provided via directories, q-ranker will search for pairs of files
+with the same root name but different extensions (".ms2", ".mzXML" or
+".mgf" for the spectrum file and ".txt" for the search results).
+Default = F.</li>
 
 <LI>
 <code>--verbosity &lt;0-100&gt;</code> &ndash; 
