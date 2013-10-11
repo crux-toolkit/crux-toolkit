@@ -30,9 +30,6 @@ FLOAT_T aa_mod_masses[(int)NUM_MOD_MASSES];
  */
 bool initialized_amino_masses = false;
 
-/* Private functions */
-void initialize_aa_mod_combinations_array();
-
 // FIXME need to find the monoisotopic mass for some AA -chris
 /**
  * initializes the mass array
@@ -254,7 +251,8 @@ MODIFIED_AA_T get_mod_identifier(FLOAT_T mass_shift){
   }
 
   // if we got to here, no mod found
-  carp(CARP_WARNING, "No modification identifier found for mass shift %.*f.",
+  carp_once(CARP_WARNING, "No modification identifier found for mass shift %.*f."
+                          "\nWarning Suppressed, others may exist",
        precision, mass_shift);
 
   return 0;

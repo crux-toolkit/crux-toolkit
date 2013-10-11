@@ -39,7 +39,7 @@ ms2=051708-worm-ASMS-10.ms2
 # Do the whole test twice, once for each search tool.  (N.B. This loop
 # is temporarily not doing anything useful.  Once we get comet and tide
 # integrated into Crux, then this loop will be useful again.)
-for searchtool in tide-search comet; do
+for searchtool in comet tide-search; do
 
   # Do we use an index or the fasta?
   if [[ $searchtool == "comet" ]]; then

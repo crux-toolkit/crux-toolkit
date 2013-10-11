@@ -4476,6 +4476,8 @@ int get_all_aa_mod_list
   *mods = list_of_mods;
   return num_mods + num_c_mods + num_n_mods + num_fixed_mods;
 }
+
+
  
 /**
  * \returns The index of the C_TERM or N_TERM fixed modification in
@@ -4875,6 +4877,10 @@ void read_mods_from_file(char* param_filename){
   // close file
   fclose(param_file);
   carp(CARP_DEBUG, "Finished reading mods file");
+}
+
+void incrementNumMods() {
+    num_mods++;
 }
 
 // Secret functions used in testing

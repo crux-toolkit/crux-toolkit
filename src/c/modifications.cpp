@@ -791,16 +791,28 @@ const AA_MOD_T* get_aa_mod_from_mass(FLOAT_T mass){
   MODIFIED_AA_T id = get_mod_identifier(mass);
 
   if( id == 0 ){ // get_mod_id already warned
-    return NULL;
+    //here we are creating a modification.  Hopefully
+    //this will only get used when post-processing search
+    //results, maybe we will need to check that at some point
+    //SJM 2013_10_10.
+    carp(CARP_INFO, "Creating modification for %f", mass);
+    AA_MOD_T** mods = NULL;
+    int num_mods = get_all_aa_mod_list(&mods);
+    mods[num_mods]->mass_change = mass;
+    incrementNumMods(); 
+    initialize_aa_mod_combinations_array();
+    return get_aa_mod_from_mass(mass);
+  } else {
+    // set multi_mod_identifier to that id and mass
+    multi_mod.identifier = id;
+    
+    
+    
   }
-
-  // set multi_mod_identifier to that id and mass
-  multi_mod.identifier = id;
   multi_mod.mass_change = mass;
-
+  carp(CARP_DETAILED_DEBUG, "Returning %i %f", multi_mod.identifier, multi_mod.mass_change);
   return &multi_mod;
 }
-
 
 /**
  * print all fields in aa mod.  For debugging

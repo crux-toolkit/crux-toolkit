@@ -118,6 +118,14 @@ void increase_amino_acid_mass(
   FLOAT_T update_mass ///< the mass amount to update for the amino acid -in
   );
 
+/**
+ * \brief Populates the array aa_mod_masses with the mass change of
+ * all possible combinations of aa_mods.  Gets the list of aa_mods
+ * from parameter.c.  For example, if mod1 and a mass change of 50 and
+ * mod5 has a mass change of 10, then the entry at index 
+ * (binary 00010001 =) 17 is (50 + 10=) 60.
+ */
+void initialize_aa_mod_combinations_array();
 
 
 #endif
