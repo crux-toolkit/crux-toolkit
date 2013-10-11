@@ -51,7 +51,7 @@ echo -e "\e[1;31mRunning tide-search (Tide)...\e[0m"
 $timecmd -f "[%U/%S]" "$tidesearch" --peptides="$tideindexpep" --proteins="$tideindexprot" --spectra="$spectra" 1>/dev/null
 
 echo -e "\e[1;31mRunning tide-index (Crux)...\e[0m"
-$timecmd -f "[%U/%S]" "$crux" tide-index --max-length 50 --min-length 6 --max-mass 7200 --min-mass 200 --monoisotopic-precursor F --mods-spec C+57.0214637206 --decoy-format none --output-dir "$cruxoutput" "$fasta" "$cruxindexdir"
+$timecmd -f "[%U/%S]" "$crux" tide-index --max-length 50 --min-length 6 --max-mass 7200 --min-mass 200 --monoisotopic-precursor F --use-flanking-peaks T --mods-spec C+57.0214637206 --decoy-format none --output-dir "$cruxoutput" "$fasta" "$cruxindexdir"
 
 echo -e "\e[1;31mRunning tide-search (Crux)...\e[0m"
 $timecmd -f "[%U/%S]" "$crux" tide-search --precursor-window 3 --precursor-window-type mass --compute-sp F --min-peaks 0 --top-match 5 --txt-output F --output-dir "$cruxoutput" "$spectra" "$cruxindexdir"
