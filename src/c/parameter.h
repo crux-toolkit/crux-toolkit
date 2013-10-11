@@ -306,6 +306,12 @@ void print_parameters(
 int get_aa_mod_list(AA_MOD_T*** mods);
 
 /**
+ * Adds 1 to the number of variable modifications in the
+ * parameters
+ */
+void incrementNumMods();
+
+/**
  * \brief Get the pointer to the list of AA_MODs for the peptide
  * c-terminus.  Argument is a reference to an array of
  * pointers. Return 0 and set mods==NULL if there are no c-term 
