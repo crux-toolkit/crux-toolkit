@@ -9,6 +9,7 @@ extern AA_MOD_T* list_of_mods[MAX_AA_MODS]; // list containing all aa mods
 extern int num_mods;  // ANY_POSITION mods
 
 string TideMatchSet::cleavage_type_ = "";
+bool TideMatchSet::concat_ = false;
 char TideMatchSet::match_collection_loc_[] = {0};
 char TideMatchSet::decoy_match_collection_loc_[] = {0};
 
@@ -217,9 +218,9 @@ void TideMatchSet::report(
   SpectrumZState z_state;
   z_state.setMZ(crux_spectrum.getPrecursorMz(), charge);
 
-  addCruxMatches(crux_collection, &proteins_made, targets, false, crux_spectrum,
+  addCruxMatches(crux_collection, &proteins_made, targets, crux_spectrum,
                  peptides, proteins, locations, z_state, sp_scorer, &lowest_sp);
-  addCruxMatches(crux_decoy_collection, &proteins_made, decoys, true, crux_spectrum,
+  addCruxMatches(crux_decoy_collection, &proteins_made, decoys, crux_spectrum,
                  peptides, proteins, locations, z_state, sp_scorer, &lowest_sp);
 
   if (sp_scorer) {
@@ -229,7 +230,10 @@ void TideMatchSet::report(
   }
 
   // Write matches
-  vector<MatchCollection*> decoy_vector(1, crux_decoy_collection);
+  vector<MatchCollection*> decoy_vector;
+  if (!concat_) {
+    decoy_vector.push_back(crux_decoy_collection);
+  }
   output_files->writeMatches(crux_collection, decoy_vector, XCORR, &crux_spectrum);
 
   // Clean up
@@ -249,7 +253,6 @@ void TideMatchSet::addCruxMatches(
   MatchCollection* match_collection,
   vector<PostProcessProtein*>* proteins_made,
   const vector<Arr::iterator>& vec,
-  bool decoyVec,
   Crux::Spectrum& crux_spectrum,
   const ActivePeptideQueue* peptides,
   const ProteinVec& proteins,
@@ -265,11 +268,11 @@ void TideMatchSet::addCruxMatches(
   for (vector<Arr::iterator>::const_iterator i = vec.begin(); i != vec.end(); ++i) {
     const Peptide* peptide = peptides->GetPeptide((*i)->second);
 
-    vector<PostProcessProtein*> new_proteins;
-    Crux::Match* match = getCruxMatch(peptide, proteins, locations,
-                                      &crux_spectrum, z_state, proteins_made);
+    bool decoyMatch;
+    Crux::Match* match = getCruxMatch(peptide, proteins, locations, &crux_spectrum,
+                                      z_state, proteins_made, &decoyMatch);
     match_collection->addMatch(match);
-    if (decoyVec) {
+    if (decoyMatch) {
       match->setNullPeptide(true);
     }
     Crux::Match::freeMatch(match); // so match gets deleted when collection does
@@ -353,7 +356,8 @@ Crux::Match* TideMatchSet::getCruxMatch(
   const vector<const pb::AuxLocation*>& locations, /// auxiliary locations
   Crux::Spectrum* crux_spectrum,  ///< Crux spectrum for match
   SpectrumZState& crux_z_state, ///< Crux z state for match
-  vector<PostProcessProtein*>* proteins_made ///< out parameter for new proteins
+  vector<PostProcessProtein*>* proteins_made, ///< out parameter for new proteins
+  bool* decoy  ///< out parameter for whether this match is a decoy
 ) {
   const pb::Protein* protein = proteins[peptide->FirstLocProteinId()];
   int pos = peptide->FirstLocPos();
@@ -366,7 +370,8 @@ Crux::Match* TideMatchSet::getCruxMatch(
   PostProcessProtein* crux_protein = new PostProcessProtein();
   proteins_made->push_back(crux_protein);
 
-  bool is_decoy;
+  bool is_decoy_tmp;
+  bool& is_decoy = (decoy) ? *decoy : is_decoy_tmp;
   string proteinName = getProteinName(*protein, pos, &is_decoy);
 
   crux_protein->setId(proteinName.c_str());
@@ -451,7 +456,7 @@ void TideMatchSet::gatherTargetsAndDecoys(
 ) {
   make_heap(matches_->begin(), matches_->end(), less_score());
   targetsOut.reserve(top_n);
-  if (TideSearchApplication::hasDecoys()) {
+  if (!concat_ && TideSearchApplication::hasDecoys()) {
     decoysOut.reserve(top_n);
     int popped = 0;
     do {
@@ -541,6 +546,15 @@ bool TideMatchSet::isDecoy(
 ) {
   return !proteinName.empty() &&
          proteinName[0] == TideIndexApplication::DecoyMagicByte;
+}
+
+/**
+ * Enable or disable concatenated output.
+ */
+void TideMatchSet::setConcat(
+  bool enable
+) {
+  concat_ = enable;
 }
 
 /**

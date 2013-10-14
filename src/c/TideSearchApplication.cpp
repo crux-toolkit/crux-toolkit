@@ -30,6 +30,7 @@ int TideSearchApplication::main(int argc, char** argv) {
     "scan-number",
     "top-match",
     "store-spectra",
+    "concat",
     "compute-sp",
     "txt-output",
     "sqt-output",
@@ -107,6 +108,13 @@ int TideSearchApplication::main(int argc, char** argv) {
       }
       carp(CARP_DEBUG, "Searching scan range %d-%d", min_scan, max_scan);
     }
+  }
+
+  // Check concat parameter
+  bool concat = get_boolean_parameter("concat");
+  if (concat) {
+    TideMatchSet::setConcat();
+    OutputFiles::setConcat();
   }
 
   // Check compute-sp parameter
@@ -212,11 +220,16 @@ int TideSearchApplication::main(int argc, char** argv) {
   } else {
     carp(CARP_DEBUG, "Using TideMatchSet to write matches");
     bool overwrite = get_boolean_parameter("overwrite");
-    string target_file_name = make_file_path("tide-search.target.txt");
-    target_file = create_stream_in_path(target_file_name.c_str(), NULL, overwrite);
-    if (HAS_DECOYS) {
-      string decoy_file_name = make_file_path("tide-search.decoy.txt");
-      decoy_file = create_stream_in_path(decoy_file_name.c_str(), NULL, overwrite);
+    if (!concat) {
+      string target_file_name = make_file_path("tide-search.target.txt");
+      target_file = create_stream_in_path(target_file_name.c_str(), NULL, overwrite);
+      if (HAS_DECOYS) {
+        string decoy_file_name = make_file_path("tide-search.decoy.txt");
+        decoy_file = create_stream_in_path(decoy_file_name.c_str(), NULL, overwrite);
+      }
+    } else {
+      string concat_file_name = make_file_path("tide-search.txt");
+      target_file = create_stream_in_path(concat_file_name.c_str(), NULL, overwrite);
     }
   }
 
