@@ -1446,7 +1446,7 @@ void initialize_parameters(void){
                        "format:  <mass> <residues> <0=variable/1=binary> <max mods per a peptide>\n"
                        "    e.g. 79.966331 STY 0 3",
 		       "option for Comet",
-		       "false"
+		       "true"
 		       );
   
   set_string_parameter("variable_mod2", "0.0 X 0 3",
@@ -1454,7 +1454,7 @@ void initialize_parameters(void){
                        "format:  <mass> <residues> <0=variable/1=binary> <max mods per a peptide>\n"
                        "    e.g. 79.966331 STY 0 3",
 		       "option for Comet",
-		       "false"
+		       "true"
 		       );
   
   set_string_parameter("variable_mod3", "0.0 X 0 3",
@@ -1462,7 +1462,7 @@ void initialize_parameters(void){
                        "format:  <mass> <residues> <0=variable/1=binary> <max mods per a peptide>\n"
                        "    e.g. 79.966331 STY 0 3",
 		       "option for Comet",
-		       "false"
+		       "true"
 		       );
   
   set_string_parameter("variable_mod4", "0.0 X 0 3",
@@ -1470,7 +1470,7 @@ void initialize_parameters(void){
                        "format:  <mass> <residues> <0=variable/1=binary> <max mods per a peptide>\n"
                        "    e.g. 79.966331 STY 0 3",
 		       "option for Comet",
-		       "false"
+		       "true"
 		       );
   
   set_string_parameter("variable_mod5", "0.0 X 0 3",
@@ -1478,7 +1478,7 @@ void initialize_parameters(void){
                        "format:  <mass> <residues> <0=variable/1=binary> <max mods per a peptide>\n"
                        "    e.g. 79.966331 STY 0 3",
 		       "option for Comet",
-		       "false"
+		       "true"
 		       );
   
   set_string_parameter("variable_mod6", "0.0 X 0 3",
@@ -1486,7 +1486,7 @@ void initialize_parameters(void){
                        "format:  <mass> <residues> <0=variable/1=binary> <max mods per a peptide>\n"
                        "    e.g. 79.966331 STY 0 3",
 		       "option for Comet",
-		       "false"
+		       "true"
 		       );
   
   set_int_parameter("max_variable_mods_in_peptide", 5, 0, BILLION,

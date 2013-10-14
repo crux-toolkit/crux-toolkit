@@ -334,7 +334,7 @@ void CometApplication::setCometParameters(
   searchMgr.SetParam("use_B_ions", get_string_parameter_pointer("use_B_ions"), get_int_parameter("use_B_ions"));
   searchMgr.SetParam("use_C_ions", get_string_parameter_pointer("use_C_ions"), get_int_parameter("use_C_ions"));
   searchMgr.SetParam("use_X_ions", get_string_parameter_pointer("use_X_ions"), get_int_parameter("use_X_ions"));
-  searchMgr.SetParam("use_Y_ions", get_string_parameter_pointer("use_Y_ions"), get_int_parameter("use_Z_ions"));
+  searchMgr.SetParam("use_Y_ions", get_string_parameter_pointer("use_Y_ions"), get_int_parameter("use_Y_ions"));
   searchMgr.SetParam("use_Z_ions", get_string_parameter_pointer("use_Z_ions"), get_int_parameter("use_Z_ions"));
   searchMgr.SetParam("use_NL_ions", get_string_parameter_pointer("use_NL_ions"), get_int_parameter("use_NL_ions"));
   searchMgr.SetParam("use_sparse_matrix", get_string_parameter_pointer("use_sparse_matrix"), get_int_parameter("use_sparse_matrix"));

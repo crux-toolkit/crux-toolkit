@@ -1,5 +1,7 @@
 decoy_search=2
 compute-sp=T
-output_pepxmlfile=0
+output_pepxmlfile=1
 num_threads=1
-
+variable_mod1=0.0 X 0 3
+mass_type_parent=0
+allowed_missed_cleavage=0
