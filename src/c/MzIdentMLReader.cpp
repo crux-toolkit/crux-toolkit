@@ -114,29 +114,29 @@ void MzIdentMLReader::addScores(
 
   for (; iter != item.cvParams.end(); ++iter) {
     switch (iter->cvid) {
-      case MS_Sequest_xcorr:
+      case MS_SEQUEST_xcorr:
         from_string(fvalue, iter->value);
         match->setScore(XCORR, fvalue);
         match_collection_->setScoredType(XCORR, true);
         break;
-      case MS_Sequest_PeptideSp:
+      case MS_SEQUEST_PeptideSp:
         from_string(fvalue, iter->value);
         match->setScore(SP, fvalue);
         match_collection_->setScoredType(SP, true);
         break;
-      case MS_Sequest_PeptideRankSp:
+      case MS_SEQUEST_PeptideRankSp:
         from_string(ivalue, iter->value);
         match->setRank(SP, ivalue);
         break;
-      case MS_Sequest_deltacn:
+      case MS_SEQUEST_deltacn:
         from_string(fvalue, iter->value);
         match->setDeltaCn(fvalue);
         break;
-      case MS_Sequest_matched_ions:
+      case MS_SEQUEST_matched_ions:
         from_string(ivalue, iter->value);
         match->setBYIonMatched(ivalue);
         break;
-      case MS_Sequest_total_ions:
+      case MS_SEQUEST_total_ions:
         from_string(ivalue, iter->value);
         match->setBYIonPossible(ivalue);
         break;
