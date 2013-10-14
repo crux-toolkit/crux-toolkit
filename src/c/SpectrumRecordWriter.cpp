@@ -54,6 +54,7 @@ bool SpectrumRecordWriter::convert(
   }
 
   vector<Peak*> peaks;
+  int scan_counter = 0;
 
   // Go through the spectrum list and write each spectrum
   pwiz::msdata::SpectrumList& sl = *(msd->run.spectrumListPtr);
@@ -74,10 +75,13 @@ bool SpectrumRecordWriter::convert(
     pb::Spectrum pb_spectrum;
     string scan_num = pwiz::msdata::id::translateNativeIDToScanNumber(
       pwiz::cv::MS_scan_number_only_nativeID_format, s->id);
-    if (scan_num.empty()) {
-      scan_num = "0";
+    if (scan_counter > 0 || scan_num.empty()) {
+      carp_once(CARP_INFO, "Parser could not determine scan numbers for this "
+                           "file, using ordinal numbers as scan numbers.");
+      pb_spectrum.set_spectrum_number(++scan_counter);
+    } else {
+      pb_spectrum.set_spectrum_number(atoi(scan_num.c_str()));
     }
-    pb_spectrum.set_spectrum_number(atoi(scan_num.c_str()));
     // Get precursor m/z
     pwiz::msdata::Precursor& precur = s->precursors[0];
     pwiz::msdata::SelectedIon& si = precur.selectedIons[0];
