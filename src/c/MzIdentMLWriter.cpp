@@ -563,9 +563,9 @@ CVID MzIdentMLWriter::getScoreCVID(
 
   switch(type) {
     case XCORR:
-      return MS_Sequest_xcorr;
+      return MS_SEQUEST_xcorr;
     case SP:
-      return MS_Sequest_PeptideSp;
+      return MS_SEQUEST_PeptideSp;
     case PERCOLATOR_SCORE:
       return MS_percolator_score;
     case PERCOLATOR_QVALUE:
@@ -586,7 +586,7 @@ CVID MzIdentMLWriter::getRankCVID(
 
   switch(type) {
     case SP:
-      return MS_Sequest_PeptideRankSp;
+      return MS_SEQUEST_PeptideRankSp;
     default:
       return CVID_Unknown;
   }
@@ -616,13 +616,13 @@ void MzIdentMLWriter::addScores(
 
   if (match_collection->getScoredType(XCORR)) {
 
-    CVParam delta_cn(MS_Sequest_deltacn, match->getDeltaCn());
+    CVParam delta_cn(MS_SEQUEST_deltacn, match->getDeltaCn());
     item->cvParams.push_back(delta_cn);
   }
   if (match_collection->getScoredType(SP)) {
-    CVParam matched_ions(MS_Sequest_matched_ions, match->getBYIonMatched());
+    CVParam matched_ions(MS_SEQUEST_matched_ions, match->getBYIonMatched());
     item->cvParams.push_back(matched_ions);
-    CVParam total_ions(MS_Sequest_total_ions, match->getBYIonPossible()); 
+    CVParam total_ions(MS_SEQUEST_total_ions, match->getBYIonPossible()); 
   }
 
 

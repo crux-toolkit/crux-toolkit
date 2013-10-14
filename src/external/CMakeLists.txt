@@ -40,12 +40,12 @@ add_custom_target(
    COMMENT "Deleting all files for external tools."
 )
 
-# Download a partial distribution of pwiz r4837 stored
+# Download a partial distribution of pwiz stored
 # as a tar ball on the Noble Lab server.
 if (WIN32 AND NOT CYGWIN)
   ExternalProject_Add(
     ProteoWizard
-    URL http://noble.gs.washington.edu/proj/crux/download/pwiz-4837.tar.gz
+    URL http://noble.gs.washington.edu/proj/crux/download/pwiz.tar.gz
     DOWNLOAD_DIR downloads
     PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
     CONFIGURE_COMMAND ""
@@ -56,8 +56,8 @@ if (WIN32 AND NOT CYGWIN)
 else (WIN32 AND NOT CYGWIN)
   ExternalProject_Add(
     ProteoWizard
-    URL http://noble.gs.washington.edu/proj/crux/download/pwiz-4837.tar.gz
-    URL_MD5 b59e972e193d8d78e89f2a74d2fc94ba
+    URL http://noble.gs.washington.edu/proj/crux/download/pwiz.tar.gz
+    URL_MD5 960c9080419778e67142f05f45879bc8
     DOWNLOAD_DIR downloads
     PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
     CONFIGURE_COMMAND ""
