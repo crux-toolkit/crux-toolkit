@@ -1127,6 +1127,11 @@ void initialize_parameters(void){
     "Available for tide-search",
     "true"
   );
+  set_boolean_parameter("concat", false,
+    "Output target and decoy PSMs into a single file.",
+    "Available for tide-search",
+    "true"
+  );
 
   /*
    * Comet parameters

@@ -14,6 +14,8 @@
 using namespace std;
 using namespace Crux;
 
+bool OutputFiles::concat_ = false;
+
 /**
  * Default constructor for OutputFiles.  Opens all of the needed
  * files, naming them based on the values of the parameters output-dir
@@ -45,9 +47,10 @@ OutputFiles::OutputFiles(CruxApplication* program_name)
 
   // TODO (BF oct-21-09): consider moving this logic to parameter.c
   COMMAND_T command = application_->getCommand();
-  if( command != SEARCH_COMMAND &&
-      command != SEQUEST_COMMAND &&
-      command != TIDE_SEARCH_COMMAND ){
+  if (concat_ ||
+      (command != SEARCH_COMMAND &&
+       command != SEQUEST_COMMAND &&
+       command != TIDE_SEARCH_COMMAND)) {
     num_files_ = 1;
   }
 
@@ -241,9 +244,10 @@ bool OutputFiles::createFiles(FILE*** file_array_ptr,
 
   // create each file
   for(int file_idx = 0; file_idx < num_files_; file_idx++ ){
-    string filename = makeFileName( fileroot, application,
-                                    target_decoy_list_[file_idx].c_str(),
-                                    extension);
+    string filename =
+      makeFileName(fileroot, application,
+                   concat_ ? NULL : target_decoy_list_[file_idx].c_str(),
+                   extension);
     createFile(&(*file_array_ptr)[file_idx], 
                output_dir, 
                filename.c_str(), 
@@ -281,9 +285,10 @@ bool OutputFiles::createFiles(PepXMLWriter*** xml_writer_array_ptr,
 
   // create each file
   for(int file_idx = 0; file_idx < num_files_; file_idx++ ){
-    string filename = makeFileName( fileroot, application,
-                                    target_decoy_list_[file_idx].c_str(),
-                                    extension, output_dir);
+    string filename =
+      makeFileName(fileroot, application,
+                   concat_ ? NULL : target_decoy_list_[file_idx].c_str(),
+                   extension, output_dir);
     (*xml_writer_array_ptr)[file_idx] = new PepXMLWriter();
     (*xml_writer_array_ptr)[file_idx]->openFile(filename.c_str(), overwrite);
 
@@ -319,9 +324,10 @@ bool OutputFiles::createFiles(MatchFileWriter*** file_array_ptr,
 
   // create each file writer
   for(int file_idx = 0; file_idx < num_files_; file_idx++ ){
-    string filename = makeFileName(fileroot, application,
-                                   target_decoy_list_[file_idx].c_str(),
-                                   extension, output_dir);
+    string filename =
+      makeFileName(fileroot, application,
+                   concat_ ? NULL : target_decoy_list_[file_idx].c_str(),
+                   extension, output_dir);
     (*file_array_ptr)[file_idx] = new MatchFileWriter(filename.c_str());
   }
   
@@ -855,6 +861,10 @@ void OutputFiles::writeRankedProteins(ProteinToScore& proteinToScore,
     }
     file->writeRow();
   }
+}
+
+void OutputFiles::setConcat(bool enable) {
+  concat_ = enable;
 }
 
 

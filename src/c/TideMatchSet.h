@@ -76,11 +76,19 @@ public:
     const string& proteinName
   );
 
+  /**
+   * Enable or disable concatenated output.
+   */
+  static void setConcat(
+    bool enable = true
+  );
+
 
 protected:
   Arr* matches_;
   double max_mz_;
   static string cleavage_type_;
+  static bool concat_;
 
   // For allocation
   static char match_collection_loc_[sizeof(MatchCollection)];
@@ -113,7 +121,6 @@ protected:
     MatchCollection* match_collection,
     vector<PostProcessProtein*>* proteins_made,
     const vector<Arr::iterator>& vec,
-    bool decoyVec,
     Crux::Spectrum& spectrum,
     const ActivePeptideQueue* peptides,
     const ProteinVec& proteins,
@@ -132,7 +139,8 @@ protected:
     const vector<const pb::AuxLocation*>& locations, /// auxiliary locations
     Crux::Spectrum* crux_spectrum,  ///< Crux spectrum for match
     SpectrumZState& crux_z_state, ///< Crux z state for match
-    vector<PostProcessProtein*>* proteins_made ///< out parameter for new proteins
+    vector<PostProcessProtein*>* proteins_made, ///< out parameter for new proteins
+    bool* decoy  ///< out parameter for whether this match is a decoy
   );
 
   /**
