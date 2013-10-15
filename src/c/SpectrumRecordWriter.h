@@ -1,6 +1,8 @@
 #ifndef SPECTRUM_RECORD_WRITER_H
 #define SPECTRUM_RECORD_WRITER_H
 
+#include "pwiz/data/msdata/MSData.hpp"
+
 using namespace std;
 
 /**
@@ -36,6 +38,13 @@ protected:
   static int getDenom(
     const vector<double>& vals  ///< values to check
   );
+
+  static bool comparePeaks(
+    const pwiz::msdata::MZIntensityPair& x,
+    const pwiz::msdata::MZIntensityPair& y
+  ) {
+    return x.mz < y.mz;
+  }
 
 };
 
