@@ -118,15 +118,32 @@ bool SpectrumRecordWriter::convert(
     uint64_t last = 0;
     int last_index = -1;
     uint64_t intensity_sum = 0;
-    for (size_t i = 0; i < s->defaultArrayLength; ++i) {
+    for (size_t j = 0; j < s->defaultArrayLength; ++j) {
       if (calcCharge) {
-        peaks.push_back(new Peak(intensities.data[i], mzs.data[i]));
+        peaks.push_back(new Peak(intensities.data[j], mzs.data[j]));
       }
-      uint64_t mz = mzs.data[i] * mz_denom + 0.5;
-      uint64_t intensity = intensities.data[i] * intensity_denom + 0.5;
+      uint64_t mz = mzs.data[j] * mz_denom + 0.5;
+      uint64_t intensity = intensities.data[j] * intensity_denom + 0.5;
       if (mz < last) {
-        carp(CARP_FATAL, "In scan %d, m/z %" PRIu64 " came after %" PRIu64,
-             pb_spectrum.spectrum_number(), mz, last);
+        // Unsorted peaks, sort and restart loop
+        carp_once(CARP_WARNING, "Spectrum with unsorted peaks found. "
+                                "All unsorted peaks will be sorted.");
+        vector<pwiz::msdata::MZIntensityPair> sortedPeaks;
+        for (size_t k = 0; k < s->defaultArrayLength; ++k) {
+          sortedPeaks.push_back(pwiz::msdata::MZIntensityPair(
+            mzs.data[k], intensities.data[k]));
+        }
+        sort(sortedPeaks.begin(), sortedPeaks.end(), comparePeaks);
+        s->setMZIntensityPairs(sortedPeaks, pwiz::cv::MS_number_of_detector_counts);
+
+        peaks.clear();
+        pb_spectrum.clear_peak_m_z();
+        pb_spectrum.clear_peak_intensity();
+        last = 0;
+        last_index = -1;
+        intensity_sum = 0;
+        j = -1;
+        continue;
       }
       if (mz == last) {
         intensity_sum += intensity;
@@ -152,8 +169,8 @@ bool SpectrumRecordWriter::convert(
         carp(CARP_FATAL, "Could not determine charge state for scan %d",
              scan_num.c_str());
       }
-      for (vector<Peak*>::iterator i = peaks.begin(); i != peaks.end(); ++i) {
-        delete *i;
+      for (vector<Peak*>::iterator j = peaks.begin(); j != peaks.end(); ++j) {
+        delete *j;
       }
       peaks.clear();
     }
