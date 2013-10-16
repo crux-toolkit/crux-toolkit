@@ -133,18 +133,25 @@ average mass values.  Default = F.</li>
 <ul>
 
 <li>
-<red>
 <code>--use-flanking-peaks T|F</code> &ndash; Turn on or off the peaks
-flanking the b/y ions.  Default = F.</red></li>
+flanking the b/y ions.  Default = F.</li>
 
+<!--
 <li>
-<red><code>--max-ion-charge 1|2|3|peptide</code> &ndash; Predict fragment
+<code>--max-ion-charge 1|2|3|peptide</code> &ndash; Predict fragment
 ions up to this charge-state. The integer options ('1', '2', and '3')
 specify a fixed maximum charge-state. The 'peptide' option indicates
 that the ions should range up to the maximum charge-state of the
 peptide itself minus 1. Thus, a 3+ charge state peptide would have
 fragment ions of 1+ and 2+. One exception: 1+ charge state peptide
-always have ions of 1+. Default = peptide.</red></li>
+always have ions of 1+. Default = peptide.</li>
+
+"I'm not sure that max-ion-charge is feasible to implement at the
+moment because the value is hardcoded throughout tide (including some
+of the asm related code which I do not understand yet)."
+ -- Kaipo, October 16, 2013
+
+-->
 
 </ul>
 
@@ -174,9 +181,9 @@ static modification of 57.02146 Da to cysteine.  By default, the
 static C+57.02146 modification is turned on.</li>
 
 <li>
-<red><code>--max-mods &lt;int&gt;</code> &ndash; The maximum number of
+<code>--max-mods &lt;int&gt;</code> &ndash; The maximum number of
 modifications that can be applied to a single peptide. Default = no
-limit.</red></li>
+limit.</li>
 
 <li>
 <red><code>--max-aas-modified &lt;int&gt;</code> &ndash; The maximum number
