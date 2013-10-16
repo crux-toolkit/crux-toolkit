@@ -863,6 +863,10 @@ void OutputFiles::writeRankedProteins(ProteinToScore& proteinToScore,
   }
 }
 
+bool OutputFiles::isConcat() {
+  return concat_;
+}
+
 void OutputFiles::setConcat(bool enable) {
   concat_ = enable;
 }

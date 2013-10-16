@@ -24,6 +24,7 @@
 #include "IonSeries.h"
 #include "crux-utils.h"
 #include "objects.h"
+#include "OutputFiles.h"
 #include "parameter.h"
 #include "Scorer.h" 
 #include "Match.h" 
@@ -877,8 +878,8 @@ void Match::printOneMatchField(
       free(flanking_aas);
     }
     break;
-  case UNSHUFFLED_SEQUENCE_COL:
-    if(null_peptide_ == true){
+  case ORIGINAL_TARGET_SEQUENCE_COL:
+    if (null_peptide_ == true || OutputFiles::isConcat()) {
       char* seq = peptide_->getUnshuffledSequence();
       output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, seq);
       free(seq);
@@ -1225,7 +1226,7 @@ Match* Match::parseTabDelimited(
   //Parse if match is it null_peptide?
   //We could check if unshuffled sequence is "", since that field is not
   //set for not null peptides.
-  match -> null_peptide_ = !result_file.empty(UNSHUFFLED_SEQUENCE_COL);
+  match -> null_peptide_ = !result_file.empty(ORIGINAL_TARGET_SEQUENCE_COL);
 
   if (!result_file.empty(PROTEIN_ID_COL) && 
     result_file.getString(PROTEIN_ID_COL).find(decoy_prefix) != string::npos) {

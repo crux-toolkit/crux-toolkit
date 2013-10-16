@@ -1,4 +1,4 @@
-scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	xcorr score	xcorr rank	matches/spectrum	sequence	cleavage type	protein id	flanking aa	unshuffled sequence	decoy matches/spectrum
+scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	xcorr score	xcorr rank	matches/spectrum	sequence	cleavage type	protein id	flanking aa	original target sequence	decoy matches/spectrum
 14	2	500.4100	998.8027	1001.1503	0	0.54	1	9	FQSLELHK	trypsin-full-digest	gi|6381999|ref|NP_009311.2|(226)	KD	FHLELSQK	9
 14	2	500.4100	998.8027	1001.6503	0	0.54	1	9	F[0.50]QSLELHK	trypsin-full-digest	gi|6381999|ref|NP_009311.2|(226)	KD	FHLELSQK	9
 14	2	500.4100	998.8027	1001.6503	0	0.54	1	9	FQ[0.50]SLELHK	trypsin-full-digest	gi|6381999|ref|NP_009311.2|(226)	KD	FHLELSQK	9

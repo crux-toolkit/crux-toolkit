@@ -1848,7 +1848,7 @@ M	4	4	1490.6510	0.31	0.63629514	61.56905	5	24	K.EEGFMNSDHVVVK.N	U
 L	rand_YOR168W
 M	5	1	1486.6195	0.43	0.52100825	153.98383	7	26	K.SNMNPLQPGNETGK.L	U
 L	rand_YNL166C
-scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	sp score	sp rank	xcorr score	xcorr rank	b/y ions matched	b/y ions total	matches/spectrum	sequence	cleavage type	protein id	flanking aa	unshuffled sequence	decoy matches/spectrum
+scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	sp score	sp rank	xcorr score	xcorr rank	b/y ions matched	b/y ions total	matches/spectrum	sequence	cleavage type	protein id	flanking aa	original target sequence	decoy matches/spectrum
 10	2	636.3400	1270.6627	1272.5227	0	16.106853	4	0.70848471	1	3	22	12	MPEVDVVISGVK	trypsin-full-digest	YIL133C(1)	-G	MSVEPVVVIDGK	12
 10	2	636.3400	1270.6627	1270.3618	0.7558471	4.7546892	8	0.17297858	2	2	20	12	TLKDEPEPEGR	trypsin-full-digest	YPL106C(187)	KI	TDLPEGEEKPR	12
 10	2	636.3400	1270.6627	1272.3778	0.76478398	7.8136168	6	0.16664696	3	2	22	12	VVTEGAEVPESR	trypsin-full-digest	YGL008C(458)	KI	VTAVVESPEGER	12

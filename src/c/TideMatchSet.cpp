@@ -9,7 +9,6 @@ extern AA_MOD_T* list_of_mods[MAX_AA_MODS]; // list containing all aa mods
 extern int num_mods;  // ANY_POSITION mods
 
 string TideMatchSet::cleavage_type_ = "";
-bool TideMatchSet::concat_ = false;
 char TideMatchSet::match_collection_loc_[] = {0};
 char TideMatchSet::decoy_match_collection_loc_[] = {0};
 
@@ -172,6 +171,9 @@ void TideMatchSet::writeToFile(
       const string& residues = protein->residues();
       *file << '\t'
             << residues.substr(residues.length() - peptide->Len());
+    } else if (OutputFiles::isConcat()) {
+      *file << '\t'
+            << seq;
     }
     *file << endl;
   }
@@ -231,7 +233,7 @@ void TideMatchSet::report(
 
   // Write matches
   vector<MatchCollection*> decoy_vector;
-  if (!concat_) {
+  if (!OutputFiles::isConcat()) {
     decoy_vector.push_back(crux_decoy_collection);
   }
   output_files->writeMatches(crux_collection, decoy_vector, XCORR, &crux_spectrum);
@@ -327,7 +329,7 @@ void TideMatchSet::writeHeaders(
     PEPTIDE_MASS_COL, DELTA_CN_COL, SP_SCORE_COL, SP_RANK_COL, XCORR_SCORE_COL,
     XCORR_RANK_COL, BY_IONS_MATCHED_COL, BY_IONS_TOTAL_COL,
     MATCHES_SPECTRUM_COL, SEQUENCE_COL, CLEAVAGE_TYPE_COL, PROTEIN_ID_COL,
-    FLANKING_AA_COL, UNSHUFFLED_SEQUENCE_COL
+    FLANKING_AA_COL, ORIGINAL_TARGET_SEQUENCE_COL
   };
   size_t numHeaders = sizeof(headers) / sizeof(int);
   for (size_t i = 0; i < numHeaders; ++i) {
@@ -336,7 +338,8 @@ void TideMatchSet::writeHeaders(
         (header == SP_SCORE_COL || header == SP_RANK_COL ||
          header == BY_IONS_MATCHED_COL || header == BY_IONS_TOTAL_COL)) {
       continue;
-    } else if (!decoyFile && header == UNSHUFFLED_SEQUENCE_COL) {
+    } else if (!(decoyFile || OutputFiles::isConcat()) &&
+               header == ORIGINAL_TARGET_SEQUENCE_COL) {
       continue;
     }
     if (i > 0) {
@@ -375,9 +378,9 @@ Crux::Match* TideMatchSet::getCruxMatch(
   string proteinName = getProteinName(*protein, pos, &is_decoy);
 
   crux_protein->setId(proteinName.c_str());
-  string unshuffledSeq = (!is_decoy) ? peptide->Seq() :
+  string originalTargetSeq = (!is_decoy) ? peptide->Seq() :
     protein->residues().substr(protein->residues().length() - peptide->Len());
-  int start_idx = crux_protein->findStart(unshuffledSeq, n_term, c_term);
+  int start_idx = crux_protein->findStart(originalTargetSeq, n_term, c_term);
 
   // Create peptide
   Crux::Peptide* crux_peptide = new Crux::Peptide(
@@ -395,7 +398,7 @@ Crux::Match* TideMatchSet::getCruxMatch(
       crux_protein = new PostProcessProtein();
       proteins_made->push_back(crux_protein);
       crux_protein->setId(getProteinName(*protein, pos, NULL).c_str());
-      start_idx = crux_protein->findStart(unshuffledSeq, n_term, c_term);
+      start_idx = crux_protein->findStart(originalTargetSeq, n_term, c_term);
       crux_peptide->addPeptideSrc(
         new PeptideSrc(NON_SPECIFIC_DIGEST, crux_protein, start_idx));
     }
@@ -456,7 +459,7 @@ void TideMatchSet::gatherTargetsAndDecoys(
 ) {
   make_heap(matches_->begin(), matches_->end(), less_score());
   targetsOut.reserve(top_n);
-  if (!concat_ && TideSearchApplication::hasDecoys()) {
+  if (!OutputFiles::isConcat() && TideSearchApplication::hasDecoys()) {
     decoysOut.reserve(top_n);
     int popped = 0;
     do {
@@ -546,15 +549,6 @@ bool TideMatchSet::isDecoy(
 ) {
   return !proteinName.empty() &&
          proteinName[0] == TideIndexApplication::DecoyMagicByte;
-}
-
-/**
- * Enable or disable concatenated output.
- */
-void TideMatchSet::setConcat(
-  bool enable
-) {
-  concat_ = enable;
 }
 
 /**

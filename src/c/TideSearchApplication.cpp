@@ -113,7 +113,6 @@ int TideSearchApplication::main(int argc, char** argv) {
   // Check concat parameter
   bool concat = get_boolean_parameter("concat");
   if (concat) {
-    TideMatchSet::setConcat();
     OutputFiles::setConcat();
   }
 
