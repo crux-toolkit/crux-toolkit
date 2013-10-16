@@ -4,5 +4,5 @@ output-dir=decoy-qval-tdc
 top-match=1
 num-decoys-per-target=1
 compute-q-values=T
-seed=7
+seed=5
 print-search-progress=100
