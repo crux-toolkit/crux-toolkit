@@ -41,6 +41,7 @@ int TideIndexApplication::main(int argc, char** argv) {
     "overwrite",
     "peptide-list",
     "parameter-file",
+    "seed",
     "verbosity"
   };
 
