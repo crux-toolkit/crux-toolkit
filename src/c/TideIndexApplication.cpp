@@ -494,7 +494,7 @@ void TideIndexApplication::fastaToPb(
     if (cTermLoc < proteinSequence->length()) {
       decoySequence->push_back(proteinSequence->at(cTermLoc));
     }
-    // Append unshuffled sequence
+    // Append original target sequence
     decoySequence->append(*i);
     // Write pb::Protein
     stringstream decoyStream;

@@ -76,19 +76,10 @@ public:
     const string& proteinName
   );
 
-  /**
-   * Enable or disable concatenated output.
-   */
-  static void setConcat(
-    bool enable = true
-  );
-
-
 protected:
   Arr* matches_;
   double max_mz_;
   static string cleavage_type_;
-  static bool concat_;
 
   // For allocation
   static char match_collection_loc_[sizeof(MatchCollection)];

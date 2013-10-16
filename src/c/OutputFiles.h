@@ -49,6 +49,7 @@ class OutputFiles{
                            MetaToRank& metaToRank,
                            ProteinToMetaProtein& proteinToMeta);
   void writeRankedPeptides(PeptideToScore& peptideToScore);
+  static bool isConcat();
   static void setConcat(bool enable = true);
 
 
