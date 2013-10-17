@@ -640,7 +640,8 @@ int assign_value_from_option_to_hash(/*const*/ argument * option,
 
   if (*index < argument_count -1) {
      more_args = 1;
-     if (arguments[(*index) + 1][0] == '-') {
+     std::string arg_value = arguments[(*index) + 1];
+     if (arg_value.compare(0, 2, "--") == 0) {
        next_arg_is_not_option = 0;
      }
   }
