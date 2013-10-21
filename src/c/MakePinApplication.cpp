@@ -107,13 +107,14 @@ int MakePinApplication::main(int argc, char** argv) {
 int MakePinApplication::main(string target_path, string decoy_path) {
   //create MatchColletion 
   vector<MatchCollection*> decoys;
+  MatchCollectionParser parser;
   MatchCollection* target_collection =
-    MatchCollectionParser::create(target_path.c_str(), "__NULL_STR"); 
+    parser.create(target_path.c_str(), "__NULL_STR"); 
   MatchCollection* decoy_collection = NULL;
   if (decoy_path != "") {
     carp(CARP_DEBUG, "Loading decoy file: %s",decoy_path.c_str());
     decoy_collection =
-      MatchCollectionParser::create(decoy_path.c_str(), "__NULL_STR");
+      parser.create(decoy_path.c_str(), "__NULL_STR");
     decoys.push_back(decoy_collection);
   
 

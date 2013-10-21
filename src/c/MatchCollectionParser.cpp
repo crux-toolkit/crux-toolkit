@@ -18,6 +18,17 @@
 
 using namespace Crux;
 
+MatchCollectionParser::MatchCollectionParser() {
+    database_ = NULL;
+    decoy_database_= NULL;
+}
+
+MatchCollectionParser::~MatchCollectionParser() {
+    Database::freeDatabase(database_);
+    Database::freeDatabase(decoy_database_);
+}
+
+
 /**
    * Creates database object(s) from fasta or index file
    */
@@ -30,7 +41,9 @@ void MatchCollectionParser::loadDatabase(
   if (fasta_file == NULL || string(fasta_file) == string("__NULL_STR")) {
     carp(CARP_DEBUG, "no database provided");
     database = new Database();
+    database -> setIsParsed(true);
     decoy_database = new Database();
+    database -> setIsParsed(true);
   } else {
     bool use_index = is_directory(fasta_file);
     // get binary fasta file name with path to crux directory 
@@ -163,26 +176,24 @@ MatchCollection* MatchCollectionParser::create(
   if(stat(match_path, &stat_buff)!=0){
     carp(CARP_FATAL, "The file %s does not exist. \n", match_path);
   }
-
-  Database* database;
-  Database* decoy_database;
   
-  loadDatabase(fasta_path, database, decoy_database);
-
+  if (database_ == NULL || decoy_database_ == NULL) {
+    loadDatabase(fasta_path, database_, decoy_database_);
+  }
   MatchCollection* collection = NULL;
   
   if (S_ISDIR(stat_buff.st_mode)){
     carp(CARP_FATAL, "Internal error");
   }else if( has_extension(match_path, ".txt")){
-    collection = MatchFileReader::parse(match_path, database, decoy_database);
+    collection = MatchFileReader::parse(match_path, database_, decoy_database_);
   } else if( has_extension(match_path, ".xml")) {
-    collection = PepXMLReader::parse(match_path, database, decoy_database);
+    collection = PepXMLReader::parse(match_path, database_, decoy_database_);
   } else if (has_extension(match_path, ".sqt")) {
-    collection = SQTReader::parse(match_path, database, decoy_database);
+    collection = SQTReader::parse(match_path, database_, decoy_database_);
   } else if( has_extension(match_path, ".mzid")) {
-    collection = MzIdentMLReader::parse(match_path, database, decoy_database);
+    collection = MzIdentMLReader::parse(match_path, database_, decoy_database_);
   } else {
-    collection = MatchFileReader::parse(match_path, database, decoy_database);
+    collection = MatchFileReader::parse(match_path, database_, decoy_database_);
   }
    
   return collection;

@@ -2435,6 +2435,7 @@ bool MatchCollection::extendTabDelimited(
     zstate_.setNeutralMass(
       result_file.getFloat(SPECTRUM_NEUTRAL_MASS_COL),
       result_file.getInteger(CHARGE_COL));
+    scored_type_[DELTA_CN] = scored_type_[DELTA_CN] || !result_file.empty(DELTA_CN_COL);
     delta_cn = result_file.getFloat(DELTA_CN_COL);
     if (delta_cn <= 0.0) {
       ln_delta_cn = 0;

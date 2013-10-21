@@ -15,7 +15,7 @@
  * the same ms2 file. 
  ****************************************************************************/
 #include "q-value.h"
-#include "MatchCollectionIterator.h"
+#include "MatchCollectionParser.h"
 #include "analyze_psms.h"
 #include "posterior-error/PosteriorEstimator.h"
 
@@ -276,9 +276,9 @@ FLOAT_T* compute_PEP_local(FLOAT_T* targets,
     PEPs[val_idx] = PEPs_d[val_idx];
   }
 
-  delete targets_d;
-  delete decoys_d;
-
+  delete []targets_d;
+  delete []decoys_d;
+  delete []PEPs_d;
   return PEPs;
 }
 
@@ -357,64 +357,113 @@ FLOAT_T* compute_PEP_from_pvalues(FLOAT_T* pvalues, int num_pvals){
  * in each match.
  */
 MatchCollection* run_qvalue(
-  char* input_directory, 
-  char* fasta_file,
+  const char* input_file, 
+  const char* fasta_file,
   OutputFiles& output 
   ){
 
-  int num_decoys = 0; // to be set by match_collection_iterator
-  MatchCollectionIterator* match_collection_iterator =
-    new MatchCollectionIterator(input_directory, fasta_file, &num_decoys);
-  if( num_decoys > 1 ){
-    carp(CARP_FATAL, "Only one decoy file per target can be processed "
-         "but %d were found.  Please move extra decoy files.", num_decoys);
+
+  string target_path = string(input_file);
+  string decoy_path = string(input_file);
+  
+  size_t target_pos = target_path.find("target");
+  size_t decoy_pos = decoy_path.find("decoy");
+  
+  if (target_pos == string::npos) {
+    if (decoy_pos != string::npos) {
+      //decoy was given
+      target_path.replace(decoy_pos, 5, "target");
+    } else {
+      carp(CARP_FATAL, "Need target or decoy in file extension!");
+    }
+  } else {
+    decoy_path.replace(target_pos, 6, "decoy");  
+  }
+  
+  if (!file_exists(target_path)) {
+    carp(CARP_FATAL, "Target file %s not found", target_path.c_str());
+  }
+  
+  if (!file_exists(decoy_path)) {
+    carp(CARP_DEBUG, "Decoy file %s not found", decoy_path.c_str());
+    decoy_path = "";
   }
 
+  bool have_decoys = false;
+  MatchCollectionParser parser;
+  MatchCollection* match_collection =
+    parser.create(target_path.c_str(), get_string_parameter_pointer("protein-database"));
+  MatchCollection* decoy_matches = NULL;
   // Create two match collections, for targets and decoys.
   MatchCollection* target_matches = new MatchCollection(false);
-  MatchCollection* decoy_matches = new MatchCollection(true);
+  
+  if (decoy_path != "") {
+    decoy_matches = parser.create(decoy_path.c_str(), get_string_parameter_pointer("protein-database"));
+   // Mark decoy matches
+    MatchIterator* decoy_iter = new MatchIterator(decoy_matches);
+    while (decoy_iter->hasNext()) {
+      Crux::Match* decoy_match = decoy_iter->next();
+      decoy_match->setNullPeptide(true);
+    }
+    delete decoy_iter;
+    have_decoys = true;
+  } else {
+    decoy_matches = new MatchCollection(true);
+  }
   target_matches->setScoredType(XCORR, true);
   decoy_matches->setScoredType(XCORR, true);
 
   // Did we find something from which to get q-values?
-  bool have_pvalues = false;
-  bool have_decoys = false;
+  bool have_pvalues = match_collection->getScoredType(LOGP_BONF_WEIBULL_XCORR);
 
-  // Iterate over all match collections in this directory.
-  while(match_collection_iterator->hasNext()){
-    MatchCollection* match_collection = 
-      match_collection_iterator->next();
-
-    // Keep track of whether we got p-values.
-    // N.B. Assumes that if one collection has p-values, they all do.
-    have_pvalues = match_collection->getScoredType(LOGP_BONF_WEIBULL_XCORR); 
-    
-    // Iterate, gathering matches into one or two collections.
-    MatchIterator* match_iterator =
-      new MatchIterator(match_collection, XCORR, false);
-    while(match_iterator->hasNext()){
-      Match* match = match_iterator->next();
+  // Iterate, gathering matches into one or two collections.
+  MatchIterator* match_iterator =
+    new MatchIterator(match_collection, XCORR, false);
+  while(match_iterator->hasNext()){
+    Match* match = match_iterator->next();
       
-      // Only use top-ranked matches.
-      if( match->getRank(XCORR) != 1 ){
-        continue;
-      }
-      
-      if (match->getNullPeptide() == true) {
-        decoy_matches->addMatch(match);
-        have_decoys = true;
-      } else {
-        target_matches->addMatch(match);
-      }
-      Match::freeMatch(match);
+    // Only use top-ranked matches.
+    if( match->getRank(XCORR) != 1 ){
+      continue;
     }
-    delete match_iterator;
-    delete match_collection;
+      
+    if (match->getNullPeptide() == true) {
+      decoy_matches->addMatch(match);
+      have_decoys = true;
+    } else {
+      target_matches->addMatch(match);
+    }
+    Match::freeMatch(match);
   }
-
+  delete match_iterator;
+   
   // get from the input files which columns to print in the output files
-  const vector<bool>& cols_to_print =
-    match_collection_iterator->getColsInFile();
+  vector<bool> cols_to_print(NUMBER_MATCH_COLUMNS);
+  cols_to_print[SCAN_COL] = true;
+  cols_to_print[CHARGE_COL] = true;
+  cols_to_print[SPECTRUM_PRECURSOR_MZ_COL] = true;
+  cols_to_print[SPECTRUM_NEUTRAL_MASS_COL] = true;
+  cols_to_print[PEPTIDE_MASS_COL] = true;
+  cols_to_print[DELTA_CN_COL] = match_collection->getScoredType(DELTA_CN);
+  cols_to_print[SP_SCORE_COL] = match_collection->getScoredType(SP);
+  cols_to_print[SP_RANK_COL] = match_collection->getScoredType(SP);
+  cols_to_print[XCORR_SCORE_COL] = true;
+  cols_to_print[XCORR_RANK_COL] = true;
+  cols_to_print[PVALUE_COL] = have_pvalues;
+  cols_to_print[BY_IONS_MATCHED_COL] = match_collection->getScoredType(BY_IONS_MATCHED);
+  cols_to_print[BY_IONS_TOTAL_COL] = match_collection->getScoredType(BY_IONS_TOTAL);
+  cols_to_print[MATCHES_SPECTRUM_COL] = true;
+  cols_to_print[SEQUENCE_COL] = true;
+  cols_to_print[CLEAVAGE_TYPE_COL] = true;
+  cols_to_print[PROTEIN_ID_COL] = true;
+  cols_to_print[FLANKING_AA_COL] = true;
+  cols_to_print[ETA_COL] = have_pvalues;
+  cols_to_print[BETA_COL] = have_pvalues;
+  cols_to_print[SHIFT_COL] = have_pvalues;
+  cols_to_print[CORR_COL] = have_pvalues;
+  delete match_collection;
+
+
   output.writeHeaders(cols_to_print);
 
   // Compute q-values from p-values.
@@ -437,7 +486,7 @@ MatchCollection* run_qvalue(
   // Compute q-values from the XCorr decoy distribution.
   else if (have_decoys == true) {
     int num_decoys = decoy_matches->getMatchTotal();
-    carp(CARP_DEBUG,
+    carp(CARP_INFO,
          "There are %d target and %d decoy PSMs for q-value computation.",
          num_pvals, num_decoys);
     pvalues = target_matches->extractScores(XCORR);
@@ -488,7 +537,6 @@ MatchCollection* run_qvalue(
   output.writeMatches(target_matches);
 
   delete decoy_matches;
-  delete match_collection_iterator;
 
   return(target_matches);
 }

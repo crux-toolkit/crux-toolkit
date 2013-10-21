@@ -65,7 +65,7 @@
 1 = search_pvalues = good_results/search_pvalues.target.txt = rm -rf crux-output; crux search-for-matches --parameter-file params/pval demo.ms2 small-yeast.fasta; cat crux-output/search.target.txt = 'Time'
 
 # Get q-values from above search
-1 = compute-q-values = good_results/qvalues.txt = crux compute-q-values --parameter-file params/pval small-yeast.fasta crux-output; cat crux-output/qvalues.target.txt 
+1 = compute-q-values = good_results/qvalues.txt = crux compute-q-values --parameter-file params/pval crux-output/search.target.txt; cat crux-output/qvalues.target.txt 
 
 # Search for matches with modifications
 1 = search_mods_fasta = good_results/search_mods_fasta.target.txt = rm -rf crux-output; crux search-for-matches --decoys peptide-shuffle --parameter-file params/mods test.ms2 test.fasta; cat crux-output/search.target.txt = 'Time' 'Database'
@@ -160,7 +160,7 @@
 0 = qranker-separate = good_results/qranker-sep.target.txt=rm -rf crux-output; crux search-for-matches --decoys peptide-shuffle --parameter-file params/set_rand_seed_only demo.ms2 yeast-index/;crux q-ranker --parameter-file params/set_rand_seed_only --separate-searches ./crux-output/search.decoy.txt demo.ms2 ./crux-output/search.target.txt; cat crux-output/q-ranker.target.psms.txt
 
 # Test the q-values generated from decoys
-1 = decoy_qval = good_results/decoy-qval.txt = rm -rf decoy-qval-pval; crux search-for-matches --decoys peptide-shuffle --parameter-file params/decoy-qval-pval demo.ms2 small-yeast.fasta; crux compute-q-values --parameter-file params/decoy-qval-pval small-yeast.fasta decoy-qval-pval; cat decoy-qval-pval/qvalues.target.txt
+1 = decoy_qval = good_results/decoy-qval.txt = rm -rf decoy-qval-pval; crux search-for-matches --decoys peptide-shuffle --parameter-file params/decoy-qval-pval demo.ms2 small-yeast.fasta; crux compute-q-values --parameter-file params/decoy-qval-pval decoy-qval-pval/search.target.txt; cat decoy-qval-pval/qvalues.target.txt
 
 # search only a select number of spectra with the --scan option
 1 = search_select_scans = good_results/search_select_scans.target.txt = crux search-for-matches --scan-number 150-153 --parameter-file params/minimal demo.ms2 small-yeast.fasta; cat crux-output/search.target.txt
