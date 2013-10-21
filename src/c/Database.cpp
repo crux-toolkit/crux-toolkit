@@ -699,6 +699,12 @@ bool Database::getIsParsed()
   return is_parsed_;
 }
 
+void Database::setIsParsed(
+  bool is_parsed
+  ) {
+  is_parsed_ = is_parsed;
+}
+
 /**
  * \returns The type of shuffling used on the proteins in this database
  */

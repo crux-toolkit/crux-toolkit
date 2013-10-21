@@ -400,10 +400,9 @@ void initialize_parameters(void){
   /*make-pin arguments*/
   set_string_parameter(
     "target input", NULL,
-    "make-pin can convert any file format in sqt, tab-delimited and pep.xml file "
-    "to pin.xml file "
-    "Also, this argument can be  which indicates the pin file will come from standard input",
-    "Argument, not option for make-pin",
+    "search results file in sqt, tab-delimited or pep.xml format.  "
+    "Also, this argument can be - which indicates the result file will come from standard input",
+    "Argument for make-pin and calibrate-scores",
     "false"
   );
   set_string_parameter(

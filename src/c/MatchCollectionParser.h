@@ -18,13 +18,17 @@
 class MatchCollectionParser {
 
  protected:
-
+   Database* database_;
+   Database* decoy_database_;
  public:
 
+   MatchCollectionParser();
+   ~MatchCollectionParser();
+ 
   /**
    * \returns a MatchCollection object using the file and protein database
    */
-  static MatchCollection* create(
+  MatchCollection* create(
     const char* match_path, ///< path to the file of matches
     const char* fasta_path  ///< path to the protein database
   );
