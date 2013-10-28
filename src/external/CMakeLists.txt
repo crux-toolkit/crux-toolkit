@@ -314,47 +314,14 @@ if (UNIX)
 elseif (WIN32 AND NOT CYGWIN)
   ExternalProject_Add(
     comet
-    SVN_REPOSITORY svn://svn.code.sf.net/p/comet-ms/code/trunk/comet-ms
-    SVN_REVISION -r 147
-    PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build/src/comet/
+    SVN_REPOSITORY svn://svn.code.sf.net/p/comet-ms/code/branches/release_2013020
+    PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
     UPDATE_COMMAND ""
     CONFIGURE_COMMAND ""
     BUILD_COMMAND msbuild comet.sln
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE 1
   )  
-  add_custom_command(
-    TARGET comet
-    PRE_BUILD
-    COMMAND 
-      ${CMAKE_COMMAND} -E copy
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/Comet.sln
-      ${CMAKE_CURRENT_SOURCE_DIR}/build/src/comet/Comet.sln
-    COMMAND 
-      ${CMAKE_COMMAND} -E copy
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/Comet.vcxproj
-      ${CMAKE_CURRENT_SOURCE_DIR}/build/src/comet/Comet.vcxproj
-    COMMAND 
-      ${CMAKE_COMMAND} -E copy
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CometSearch/CometSearch.vcxproj
-      ${CMAKE_CURRENT_SOURCE_DIR}/build/src/comet/CometSearch/CometSearch.vcxproj
-    COMMAND 
-      ${CMAKE_COMMAND} -E copy
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CometSearch/Common.h
-      ${CMAKE_CURRENT_SOURCE_DIR}/build/src/comet/CometSearch/Common.h
-    COMMAND 
-      ${CMAKE_COMMAND} -E copy
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/MSToolkit/MSToolkitLite.vcxproj
-      ${CMAKE_CURRENT_SOURCE_DIR}/build/src/comet/MSToolkit/MSToolkitLite.vcxproj
-    COMMAND 
-      ${CMAKE_COMMAND} -E copy
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/MSToolkit/include/H5public.h
-      ${CMAKE_CURRENT_SOURCE_DIR}/build/src/comet/MSToolkit/include/H5public.h
-    COMMAND 
-      ${CMAKE_COMMAND} -E copy
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/MSToolkit/include/mzParser.h
-      ${CMAKE_CURRENT_SOURCE_DIR}/build/src/comet/MSToolkit/include/mzParser.h
-  )
 endif (UNIX)
 
 add_dependencies(percolator Proteowizard)
