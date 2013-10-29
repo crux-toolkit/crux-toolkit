@@ -19,6 +19,7 @@ SET(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR})
 # libraries and Proteowizard components..
 if (WIN32 AND NOT CYGWIN)
   set(protwiz_args ./quickbuild.bat)
+  set(protwiz_args ${protwiz_args} --toolset=msvc-10.0)
   set(protwiz_args ${protwiz_args} --i-agree-to-the-vendor-licenses)
   set(protwiz_args ${protwiz_args} --without-mz5)
   set(protwiz_args ${protwiz_args} --prefix=${CMAKE_CURRENT_SOURCE_DIR})
@@ -317,7 +318,12 @@ elseif (WIN32 AND NOT CYGWIN)
     SVN_REPOSITORY svn://svn.code.sf.net/p/comet-ms/code/branches/release_2013020
     PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
     UPDATE_COMMAND ""
-    CONFIGURE_COMMAND ""
+    # Copy the Comet and MSToolkit include files and libraries to
+    # the desired directories.
+    CONFIGURE_COMMAND 
+      ${CMAKE_COMMAND} -E copy_directory 
+      ${CMAKE_CURRENT_SOURCE_DIR}/build/src/comet/MSToolkit/include
+      ${CMAKE_CURRENT_SOURCE_DIR}/include/MSToolkit/
     BUILD_COMMAND msbuild comet.sln
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE 1
