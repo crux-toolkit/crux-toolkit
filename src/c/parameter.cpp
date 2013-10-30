@@ -760,7 +760,8 @@ void initialize_parameters(void){
   set_int_parameter("max-mods", MAX_PEPTIDE_LENGTH, 0, MAX_PEPTIDE_LENGTH,
       "The maximum number of modifications that can be applied to a single " 
       "peptide.  Default=no limit.",
-      "Available from parameter file for crux-search-for-matches.", "true");
+      "Available for tide-index and from parameter file for "
+      "crux-search-for-matches.", "true");
   set_int_parameter("max-aas-modified", MAX_PEPTIDE_LENGTH, 0,
       MAX_PEPTIDE_LENGTH,
       "The maximum number of modified amino acids that can appear in one "

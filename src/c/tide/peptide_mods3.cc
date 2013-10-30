@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <numeric>
 #include <gflags/gflags.h>
 #include "abspath.h"
 #include "records.h"
@@ -22,6 +23,8 @@ using namespace std;
 
 DEFINE_string(tmpfile_prefix, "/tmp/modified_peptides_partial_", "Temporary filename prefix.");
 DEFINE_int32(buf_size, 1024, "Buffer size for files, in KBytes.");
+DEFINE_int32(max_mods, 255, "Maximum number of modifications that can be applied "
+                            "to a single peptide.");
 
 static string GetTempName(int filenum) {
   char buf[10];
@@ -115,6 +118,9 @@ class ModsOutputter {
 };
 
 void ModsOutputter::OutputMods(int pos, vector<int>& counts) {
+  if (accumulate(counts.begin(), counts.end(), 0) > FLAGS_max_mods) {
+    return;
+  }
   if (pos == peptide_->length()) {
     peptide_->set_id(count_++);
     Write(counts);
