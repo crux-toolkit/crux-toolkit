@@ -51,7 +51,7 @@ bool PWIZSpectrumCollection::parse() {
 
   // TODO add first/last scan to base class
   // get a list of scans to include if requested
-  const char* range_string = get_string_parameter("scan-number");
+  const char* range_string = get_string_parameter_pointer("scan-number");
   int first_scan = -1;
   int last_scan = -1;
 
@@ -68,7 +68,6 @@ bool PWIZSpectrumCollection::parse() {
   // get info for translating identifiers into scan numbers
   pwiz::msdata::CVID native_id_format = 
     pwiz::msdata::id::getDefaultNativeIDFormat(*reader_);
-  native_id_format = native_id_format;
 
   // look at all spectra in file
   pwiz::msdata::SpectrumListPtr all_spectra = reader_->run.spectrumListPtr;
@@ -89,27 +88,30 @@ bool PWIZSpectrumCollection::parse() {
     }
 
     // check that scan number is in range
-    int scan_number;
+    int scan_number_begin, scan_number_end;
     if (!assign_new_scans) {
-      scan_number = pwiz::msdata::id::valueAs<int>(spectrum->id, "scan");
-      if (scan_number == 0) {
+      string scan_value = pwiz::msdata::id::translateNativeIDToScanNumber(
+        native_id_format, spectrum->id);
+      if (scan_value.empty() || !get_range_from_string<int>(
+          scan_value.c_str(), scan_number_begin, scan_number_end)) {
         assign_new_scans = true;
         carp(CARP_ERROR, "Pwiz parser could not determine scan numbers "
                          "for this file, assigning new scan numbers.");
       }
     }
     if (assign_new_scans) {
-      scan_number = ++scan_counter;
+      scan_number_begin = ++scan_counter;
+      scan_number_end = scan_number_begin;
     }
-    carp(CARP_DEBUG, "found scan:%i %i-%i", scan_number, first_scan, last_scan);
-    if( scan_number < first_scan ){
+    carp(CARP_DEBUG, "found scan:%i %i-%i", scan_number_begin, first_scan, last_scan);
+    if( scan_number_end < first_scan ){
       continue;
-    } else if( scan_number > last_scan ){
+    } else if( scan_number_begin > last_scan ){
       break;
     }
 
     Crux::Spectrum* crux_spectrum = new Crux::Spectrum();
-    crux_spectrum->parsePwizSpecInfo(spectrum, scan_number);
+    crux_spectrum->parsePwizSpecInfo(spectrum, scan_number_begin, scan_number_end);
 
     this->addSpectrumToEnd(crux_spectrum);
     //?delete spectrum?;

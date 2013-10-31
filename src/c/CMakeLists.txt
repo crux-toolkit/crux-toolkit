@@ -94,10 +94,8 @@ set (
   MatchCollectionIterator.cpp
   MatchCollectionParser.cpp
   MatchIterator.cpp
-  MGFSpectrumCollection.cpp
   modifications.cpp
   ModifiedPeptidesIterator.cpp
-  MS2SpectrumCollection.cpp
   MSToolkitSpectrumCollection.cpp
   MzIdentMLReader.cpp
   MzIdentMLWriter.cpp

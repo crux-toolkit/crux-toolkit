@@ -208,9 +208,6 @@
 # Test mzXML files
 1 = mzxml = good_results/mzxml.search.target.txt = crux search-for-matches --fileroot mzxml --parameter-file params/mstk small.raw2xml.mzXML small-yeast.fasta; cat crux-output/mzxml.search.target.txt 
 
-# Test .mgf file
-1 = mgf = good_results/mgf.search.target.txt = crux search-for-matches --fileroot mgf --parameter-file params/minimal test.mgf test.fasta; cat crux-output/mgf.search.target.txt
-
 # Test .mgf file with pwiz parser
 1 = mgf_pwiz = good_results/mgfpwiz.search.target.txt = crux search-for-matches --fileroot mgfpwiz --parameter-file params/minimal --spectrum-parser pwiz test.mgf test.fasta; cat crux-output/mgfpwiz.search.target.txt
 

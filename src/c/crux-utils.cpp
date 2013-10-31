@@ -462,7 +462,7 @@ char* hardklor_hardklor_algorithm_type_to_string(
 }
 
 static const char* spectrum_parser_type_strings[NUMBER_SPECTRUM_PARSERS] = 
-  {"invalid", "pwiz", "mstoolkit", "crux"};
+  {"invalid", "pwiz", "mstoolkit"};
 
 SPECTRUM_PARSER_T string_to_spectrum_parser_type(char* name) {
 

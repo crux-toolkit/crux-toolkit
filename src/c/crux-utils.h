@@ -483,18 +483,17 @@ static bool get_range_from_string(
     ret = from_string(first, range_string);
     last=first;
   } else {
-
-    *dash = '\0';
-    ret = from_string(first,range_string);
-    *dash = '-';
-    dash++;
-    ret &= from_string(last,dash);
-  }
-
-  //invalid if more than one dash
-  dash = strchr(dash + 1, '-');
-  if (dash != NULL) {
-    ret = false;
+    //invalid if more than one dash
+    const char* dash_check = strchr(dash + 1, '-');
+    if (dash_check) {
+      ret = false;
+    } else {
+      *dash = '\0';
+      ret = from_string(first,range_string);
+      *dash = '-';
+      dash++;
+      ret &= from_string(last,dash);
+    }
   }
 
   free(range_string);
