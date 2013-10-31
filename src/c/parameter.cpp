@@ -515,9 +515,9 @@ void initialize_parameters(void){
       "and tide-search.",
       "true");
 
-  set_spectrum_parser_parameter("spectrum-parser", CRUX_SPECTRUM_PARSER,
+  set_spectrum_parser_parameter("spectrum-parser", PROTEOWIZARD_SPECTRUM_PARSER,
     "Parser to use for reading in spectra "
-    "<string>=pwiz|mstoolkit|crux. Default=crux.",
+    "<string>=pwiz|mstoolkit. Default=pwiz.",
     "Available for search-for-matches, search-for-xlinks.",
     "true");
 
@@ -2962,7 +2962,7 @@ bool check_option_type_and_bounds(const char* name){
     if (string_to_spectrum_parser_type(value_str) == INVALID_SPECTRUM_PARSER) {
       success = false;
       sprintf(die_str, "Illegal value '%s' for option '%s'.   "
-                       "Must be pwiz, mstoolkit, or crux",
+                       "Must be pwiz or mstoolkit",
                        value_str, name);
     }
     break;
