@@ -12,4 +12,5 @@ echo "Copying from " $1 "to" $2
 
 cp  $SRC_PREFIX/patches/comet/Makefile  $BIN_PREFIX/build/src/comet/Makefile
 cp  $SRC_PREFIX/patches/comet/CometSearch/Makefile $BIN_PREFIX/build/src/comet/CometSearch/Makefile
+cp  $SRC_PREFIX/patches/comet/CometSearch/CometWriteTxt.cpp $BIN_PREFIX/build/src/comet/CometSearch/CometWriteTxt.cpp
 

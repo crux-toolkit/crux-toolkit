@@ -120,6 +120,7 @@ int MakePinApplication::main(string target_path, string decoy_path) {
 
     // Mark decoy matches
     MatchIterator* decoy_iter = new MatchIterator(decoy_collection);
+    carp(CARP_DEBUG, "Marking all decoys");
     while (decoy_iter->hasNext()) {
       Crux::Match* decoy_match = decoy_iter->next();
       decoy_match->setNullPeptide(true);

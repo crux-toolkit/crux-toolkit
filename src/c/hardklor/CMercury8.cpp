@@ -607,7 +607,7 @@ int CMercury8::ParseMF(char MF[], int *elementcount) {
 /*    Could be done with less code, but this     */
 /*    saves a few operations.                    */
 /*************************************************/
-void CMercury8::CalcFreq(complex* FreqData, int Ecount, int NumPoints, int MassRange, int MassShift) {
+void CMercury8::CalcFreq(Hardklor::complex* FreqData, int Ecount, int NumPoints, int MassRange, int MassShift) {
   
   int    i, j, k, Z;
   double real, imag, freq, X, theta, r, tempr;
@@ -777,7 +777,7 @@ void CMercury8::AccurateMass(int NumElements, int Charge){
   int	  MassRange;
   int   PtsPerAmu;
   int   NumPoints;			/* Working # of datapoints (real:imag) */
-  complex *FreqData;              /* Array of real:imaginary frequency values for FFT */
+  Hardklor::complex *FreqData;              /* Array of real:imaginary frequency values for FFT */
   double MW;
   double MIMW, tempMW, MolVar, IntMolVar;
   int intMW, MIintMW;
@@ -785,8 +785,8 @@ void CMercury8::AccurateMass(int NumElements, int Charge){
   int dummyInt;
 
 
-  complex *AltData;
-  complex *AltData2;
+  Hardklor::complex *AltData;
+  Hardklor::complex *AltData2;
   int MaxIntMW;
   int PMIintMW;
   int IsoShift;
@@ -820,14 +820,14 @@ void CMercury8::AccurateMass(int NumElements, int Charge){
   
   //Allocate memory for Axis arrays
   NumPoints = MassRange * PtsPerAmu;
-  FreqData = new complex[NumPoints];
+  FreqData = new Hardklor::complex[NumPoints];
   
   //Start isotope distribution calculation
   //MH notes: How is this different from using -MW instead of -intMW?
   CalcFreq(FreqData,NumElements,NumPoints,MassRange,-intMW);
   FFT(FreqData,NumPoints,false);
 
-  //Converts complex numbers back to masses
+  //Converts Hardklor::complex numbers back to masses
   ConvertMass(FreqData,NumPoints,PtsPerAmu,MW,tempMW,intMW,MIintMW,1,MolVar,IntMolVar);
 
   //Put our data in the global array
@@ -876,8 +876,8 @@ void CMercury8::AccurateMass(int NumElements, int Charge){
     CalcVariances(&MolVar,&IntMolVar,NumElements);
 
     //Allocate memory for Axis arrays
-    AltData = new complex[NumPoints];
-    AltData2 = new complex[NumPoints];
+    AltData = new Hardklor::complex[NumPoints];
+    AltData2 = new Hardklor::complex[NumPoints];
     
     //Start isotope distribution calculation
     CalcFreq(AltData,NumElements,NumPoints,MassRange,-intMW);
@@ -931,7 +931,7 @@ void CMercury8::AccurateMass(int NumElements, int Charge){
 }
 
 
-void CMercury8::ConvertMass(complex* Data, int NumPoints, int PtsPerAmu,
+void CMercury8::ConvertMass(Hardklor::complex* Data, int NumPoints, int PtsPerAmu,
 		double MW, double tempMW, int intMW, int MIintMW, int charge,
 		double MolVar, double IntMolVar) {
 
@@ -964,7 +964,7 @@ void CMercury8::ConvertMass(complex* Data, int NumPoints, int PtsPerAmu,
 
 };
 
-void CMercury8::MassToInt(complex* Data, int NumPoints) {
+void CMercury8::MassToInt(Hardklor::complex* Data, int NumPoints) {
 
   int i, mass;
 
@@ -996,7 +996,7 @@ void CMercury8::MassToInt(complex* Data, int NumPoints) {
 };
 
 
-void CMercury8::GetPeaks(complex* Data, int NumPoints, vector<Result>& v, 
+void CMercury8::GetPeaks(Hardklor::complex* Data, int NumPoints, vector<Result>& v, 
 			 int lower, int upper){
   int i;
   Result r;
@@ -1087,7 +1087,7 @@ void CMercury8::Mercury(int NumElements, int Charge) {
   int	  MassRange;
   int     PtsPerAmu;
   int    NumPoints;		       // Working # of datapoints (real:imag) 
-  complex *FreqData;              // Array of real:imaginary frequency values for FFT 
+  Hardklor::complex *FreqData;              // Array of real:imaginary frequency values for FFT 
   double   MW;
   double  MIMW, tempMW, MolVar, IntMolVar;
   int    intMW, MIintMW, MaxIntMW;
@@ -1121,7 +1121,7 @@ void CMercury8::Mercury(int NumElements, int Charge) {
 
   //Allocate memory for Axis arrays
   NumPoints = MassRange * PtsPerAmu;
-  FreqData = new complex[NumPoints];
+  FreqData = new Hardklor::complex[NumPoints];
   
   //Start isotope distribution calculation
   //MH notes: How is this different from using -MW instead of -intMW?
@@ -1141,7 +1141,7 @@ void CMercury8::Mercury(int NumElements, int Charge) {
   //Not sure why we do this...
   if (Charge == 0) Charge = 1;
 
-  //Convert complex numbers to masses
+  //Convert Hardklor::complex numbers to masses
   ConvertMass(FreqData,NumPoints,PtsPerAmu,MW,tempMW,intMW,MIintMW,(int)fabs((double)Charge),MolVar,IntMolVar);
 
   //Put our data in the global array

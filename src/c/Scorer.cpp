@@ -44,11 +44,11 @@ static const int MAX_XCORR_OFFSET = 75;
 /**
 * Constant for EVD p_value calculation
 */
-static const FLOAT_T DBL_EPSILON = 2.2204460492503131e-16;
+static const FLOAT_T DBL_EPSILON_ = 2.2204460492503131e-16;
 /**
 * Constant for EVD p_value calculation
 */
-static const int DBL_MAX_10_EXP = 308;
+static const int DBL_MAX_10_EXP_ = 308;
 #endif
 
 /**
@@ -1679,12 +1679,12 @@ double compute_evd_pvalue(
   double p_value = 0;
   
   // avoid exceptions near P=1.0
-  if((evd_lambda * (score - evd_mu)) <= -1.0 * log(-1.0 * log(DBL_EPSILON))){
+  if((evd_lambda * (score - evd_mu)) <= -1.0 * log(-1.0 * log(DBL_EPSILON_))){
     return 1.0;
   }
   
   // avoid underflow fp exceptions near P=0.0
-  if((evd_lambda * (score - evd_mu)) >= 2.3 * DBL_MAX_10_EXP){
+  if((evd_lambda * (score - evd_mu)) >= 2.3 * DBL_MAX_10_EXP_){
     return 0.0;
   }
   
