@@ -59,6 +59,18 @@ for searchtool in comet tide-search; do
       $ms2 $proteins
   fi
 
+  # Run Calibrate scores
+  if [[ -e $searchtool/qvalues.target.txt ]]; then
+    echo Skipping crux calibrate-scores.
+  else
+    $CRUX calibrate-scores \
+      --output-dir $searchtool \
+      $searchtool/$searchtool.target.txt
+  fi
+
+  $CRUX extract-columns $searchtool/qvalues.target.txt "decoy q-value (xcorr)" > $searchtool/qvalues.xcorr.txt
+  echo replot \"$searchtool/qvalues.xcorr.txt\" using 1:0 title \"$searchtool decoy \(xcorr\)\" with lines >> $gnuplot
+
   # Run Crux percolator
   if [[ -e $searchtool/percolator.target.psms.txt ]]; then
     echo Skipping crux percolator.

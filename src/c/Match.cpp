@@ -1223,15 +1223,11 @@ Match* Match::parseTabDelimited(
   //parse match overall digestion
   match -> digest_ = string_to_digest_type((char*)result_file.getString(CLEAVAGE_TYPE_COL).c_str()); 
 
-  //Parse if match is it null_peptide?
-  //We could check if unshuffled sequence is "", since that field is not
-  //set for not null peptides.
-  match -> null_peptide_ = !result_file.empty(ORIGINAL_TARGET_SEQUENCE_COL);
-
   if (!result_file.empty(PROTEIN_ID_COL) && 
     result_file.getString(PROTEIN_ID_COL).find(decoy_prefix) != string::npos) {
     match -> null_peptide_ = true;
   }
+  carp(CARP_DEBUG, "null:%d", match->null_peptide_);
 
 
   //assign fields

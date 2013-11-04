@@ -140,7 +140,7 @@ Database::~Database() {
 #endif
     }
     // not memory mapped
-    else{
+    else if (file_ != NULL) {
       // close file handle
       carp(CARP_DEBUG, "Closing database filehandle");
       fclose(file_);

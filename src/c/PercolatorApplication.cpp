@@ -147,7 +147,8 @@ int PercolatorApplication::main(int argc, char** argv) {
     // Check if we need to run make-pin first
     if (has_extension(input_pinxml.c_str(), "txt") ||
         has_extension(input_pinxml.c_str(), "sqt") ||
-        has_extension(input_pinxml.c_str(), "pep.xml")) {
+        has_extension(input_pinxml.c_str(), "pep.xml") ||
+        has_extension(input_pinxml.c_str(), "mzid")) {
       string input_decoy(input_pinxml);
       int target_pos = input_pinxml.find("target");
       if (target_pos < 0) {
