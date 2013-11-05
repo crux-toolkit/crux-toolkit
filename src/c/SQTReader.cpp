@@ -153,7 +153,7 @@ void SQTReader::parseSpectrum(string& line) {
 
   vector<string> tokens;
 
-  DelimitedFile::tokenize(line, tokens, '\t');
+  tokenize(line, tokens, '\t');
 
   int low_scan;
   from_string(low_scan, tokens[spectrum_low_scan_idx]);
@@ -196,7 +196,7 @@ void SQTReader::parseSpectrum(string& line) {
 void SQTReader::parseMatch(string& line) {
 
   vector<string> tokens;
-  DelimitedFile::tokenize(line, tokens, '\t');
+  tokenize(line, tokens, '\t');
 
   int xcorr_rank;
   from_string(xcorr_rank, tokens[match_xcorr_rank_idx]);
@@ -224,7 +224,7 @@ void SQTReader::parseMatch(string& line) {
 
   string sqt_sequence = tokens[match_sequence_idx];
   vector<string> sequence_tokens;
-  DelimitedFile::tokenize(sqt_sequence, sequence_tokens, '.');
+  tokenize(sqt_sequence, sequence_tokens, '.');
 
   current_prev_aa_ = sequence_tokens.front();
   current_next_aa_ = sequence_tokens.back();
@@ -281,7 +281,7 @@ void SQTReader::parseMatch(string& line) {
 void SQTReader::parseLocus(string& line) {
 
   vector<string> tokens;
-  DelimitedFile::tokenize(line, tokens, '\t');
+  tokenize(line, tokens, '\t');
 
   string protein_id = tokens[locus_protein_id_idx];
   string protein_desc = "";

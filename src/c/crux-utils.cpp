@@ -1429,6 +1429,97 @@ char** generate_feature_name_array()
   return name_array;
 }
 
+void tokenize(
+	 const string& str,
+	 vector<string>& tokens,
+  char delimiter
+	 ) {
+
+  tokens.clear();
+  string::size_type lastPos = 0;
+  string::size_type pos = str.find(delimiter, lastPos);
+
+  while (string::npos != pos || string::npos != lastPos) {
+    //found a token, add to the vector.                                                                                                                                                                     
+    string token = str.substr(lastPos, pos - lastPos);
+    tokens.push_back(token);
+    lastPos = pos+1;
+    if (lastPos >= str.size() || pos >= str.size()) {
+      break;
+    }
+    pos = str.find(delimiter,lastPos);
+  }
+}
+
+bool get_first_last_scan_from_string(
+  const std::string& const_scans_string,
+  int& first_scan,
+  int& last_scan
+  ) {
+
+  set<int> scans;
+
+  if (get_scans_from_string(const_scans_string, scans)) {
+    first_scan = *(scans.begin()++);
+    last_scan = *(scans.rbegin()++);
+    carp(CARP_DEBUG, "scan string:%s %i %i", const_scans_string.c_str(), first_scan, last_scan);
+    return true;
+  } else {
+    return false;
+  }
+}
+
+bool get_scans_from_string(
+  const string& const_scans_string,
+  set<int>& scans) {
+
+  bool success;
+
+  scans.clear();
+
+  //first tokenize by comma.
+  vector<string> tokens_comma;
+  tokenize(const_scans_string, tokens_comma, ',');
+  if (tokens_comma.size() > 1) {
+    carp_once(CARP_WARNING, "Multiple scans detected in line %s. "
+      "Crux currently only handles "
+      "first_scan - last_scan properly", const_scans_string.c_str());
+  }
+  int temp_scan;
+
+  for (size_t idx1=0;idx1<tokens_comma.size();idx1++) {
+    string current = tokens_comma[idx1];
+    if (current.find("-") == string::npos) {
+      success = from_string<int>(temp_scan, current);
+      if (success) {
+        scans.insert(temp_scan);
+      } else {
+        carp(CARP_ERROR, "Error parsing scans line:%s", const_scans_string.c_str());
+        return false;
+      }
+    } else {
+      vector<string> tokens_dash;
+      tokenize(tokens_comma[idx1], tokens_dash, '-');
+      if (tokens_dash.size() != 2) {
+        carp(CARP_ERROR, "Error parsing scans line:%s here:%s",
+          const_scans_string.c_str(), tokens_comma[idx1].c_str());
+        return false;
+      }
+      int temp_scan2;
+      success = from_string<int>(temp_scan, tokens_dash[0]);
+      success &= from_string<int>(temp_scan2, tokens_dash[1]);
+      if (!success || temp_scan > temp_scan2) {
+        carp(CARP_ERROR, "Error parsing scans line:%s here: %s", 
+          const_scans_string.c_str(), tokens_comma[idx1].c_str());
+      }
+      for (int idx3 = temp_scan;idx3 <= temp_scan2 ; idx3++) {
+        scans.insert(idx3);
+      }
+    }
+  }
+  return true;
+}
+
 /**
  * User define our upper and our lower bounds.
  * The random number will always be 

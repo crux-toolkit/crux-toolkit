@@ -5,8 +5,8 @@
  * \brief Maintains a list of executable applications
  *****************************************************************************/
 #include "CruxApplicationList.h"
-#include "DelimitedFile.h"
 #include "carp.h"
+#include "crux-utils.h"
 
 #include <iostream>
 
@@ -131,7 +131,7 @@ void CruxApplicationList::usage() {
     else {
       
       vector<string> words;
-      DelimitedFile::tokenize(description, words, ' ');
+      tokenize(description, words, ' ');
 
       unsigned int word_index = 0;
       unsigned int line_length = 0;

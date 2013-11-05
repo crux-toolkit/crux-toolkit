@@ -6,7 +6,6 @@
  ****************************************************************************/
 
 #include "XLinkBondMap.h"
-#include "DelimitedFile.h"
 
 using namespace std;
 using namespace Crux;
@@ -41,12 +40,12 @@ void XLinkBondMap::init(
 
   vector<string> bond_strings;
 
-  DelimitedFile::tokenize(links_string, bond_strings, ',');
+  tokenize(links_string, bond_strings, ',');
 
   for (unsigned int bond_idx = 0; bond_idx < bond_strings.size(); bond_idx++) {
     vector<string> link_site_strings;
 
-    DelimitedFile::tokenize(bond_strings[bond_idx], link_site_strings, ':');
+    tokenize(bond_strings[bond_idx], link_site_strings, ':');
 
     if (link_site_strings.size() == 2) {
       XLinkSite site1(link_site_strings[0]);

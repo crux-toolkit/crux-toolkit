@@ -198,7 +198,7 @@ void MatchFileReader::getStringVectorFromCell(
 
   //get the list of strings separated by delimiter
   string_vector.clear();
-  DelimitedFile::tokenize(string_ans, string_vector, delimiter);
+  tokenize(string_ans, string_vector, delimiter);
 }
 
 /**

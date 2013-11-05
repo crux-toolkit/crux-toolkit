@@ -87,7 +87,7 @@ void CometApplication::calcVarMods(
 
   string temp = var_str;
   vector<string> tokens;
-  DelimitedFile::tokenize(temp, tokens, ' ');
+  tokenize(temp, tokens, ' ');
   from_string<double>(varmods.dVarModMass, tokens[0]);
   strcpy(varmods.szVarModChar, tokens[1].c_str());
   from_string<int>(varmods.bBinaryMod, tokens[2]);
@@ -104,7 +104,7 @@ void CometApplication::getDoubleRange(
   
   string temp = str;
   vector<string> tokens;
-  DelimitedFile::tokenize(temp, tokens, ' ');
+  tokenize(temp, tokens, ' ');
   
   from_string<double>(doubleRangeParam.dStart, tokens[0]);
   from_string<double>(doubleRangeParam.dEnd, tokens[1]);
@@ -120,7 +120,7 @@ void CometApplication::getIntRange(
   
   string temp = str;
   vector<string> tokens;
-  DelimitedFile::tokenize(temp, tokens, ' ');
+  tokenize(temp, tokens, ' ');
   
   from_string<int>(intRangeParam.iStart, tokens[0]);
   from_string<int>(intRangeParam.iEnd, tokens[1]);
@@ -311,7 +311,7 @@ void CometApplication::setCometParameters(
   } else {
     pInputFile->iAnalysisType = AnalysisType_SpecificScanRange;
     vector<string> tokens;
-    DelimitedFile::tokenize(scan_range_str, tokens, ' ');
+    tokenize(scan_range_str, tokens, ' ');
     from_string<int>(pInputFile->iFirstScan, tokens[0]);
     from_string<int>(pInputFile->iLastScan, tokens[1]);
   }
