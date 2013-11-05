@@ -26,7 +26,7 @@ include_directories(../external)
 include_directories(../external/include)
 include_directories(../external/include/CometSearch)
 include_directories(../external/include/MSToolkit)
-include_directories(../external/build/src/ProteoWizard/libraries/boost_1_43_0)
+include_directories(../external/build/src/ProteoWizard/libraries/boost_1_54_0)
 include_directories(../external/build/src/ProteoWizard/libraries/boost_aux)
 include_directories(../external/build/src/percolator/src/)
 include_directories(../external/build/src/percolator/src/fido)
@@ -306,6 +306,7 @@ else(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     dl
     hardklor
     m
+    rt
     mstoolkitlite
     posterior_error
     perclibrary
@@ -340,6 +341,7 @@ else(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     xlink-predict-peptide-ions
     dl
     m
+    rt
     pthread
     xlink
     crux-support
@@ -368,6 +370,7 @@ else(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     xlink-score-spectrum
     dl
     m
+    rt
     pthread
     xlink
     crux-support
@@ -396,6 +399,7 @@ else(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     xlink-assign-ions
     dl
     m
+    rt
     pthread
     xlink
     crux-support
