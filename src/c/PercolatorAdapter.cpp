@@ -5,7 +5,7 @@
  */
 
 #include "PercolatorAdapter.h"
-#include "DelimitedFile.h"
+
 
 #include<map>
 #include<string>
@@ -101,7 +101,7 @@ void PercolatorAdapter::psmScoresToMatchCollection(
   FeatureNames& features = DataSet::getFeatureNames();
   string featureNames = features.getFeatureNames();
   vector<string> featureTokens;
-  DelimitedFile::tokenize(featureNames, featureTokens);
+  tokenize(featureNames, featureTokens);
   int lnNumSPIndex = -1;
   map<int, int> chargeStates; // index of feature -> charge
   for (int i = 0; i < featureTokens.size(); ++i) {

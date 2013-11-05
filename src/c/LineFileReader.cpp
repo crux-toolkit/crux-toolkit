@@ -160,27 +160,3 @@ bool LineFileReader::hasNext() {
 }
 
 
-/**
- * tokenize a string by delimiter
- */
-void LineFileReader::tokenize(
-  const string& str,
-  vector<string>& tokens,
-  char delimiter
-  ) {
-
-  tokens.clear();
-  string::size_type lastPos = 0;
-  string::size_type pos = str.find(delimiter, lastPos);
-
-  while (string::npos != pos || string::npos != lastPos) {
-    //found a token, add to the vector.
-    string token = str.substr(lastPos, pos - lastPos);
-    tokens.push_back(token);
-    lastPos = pos+1;
-    if (lastPos >= str.size() || pos >= str.size()) { 
-      break;
-    }
-    pos = str.find(delimiter,lastPos);
-  }
-}

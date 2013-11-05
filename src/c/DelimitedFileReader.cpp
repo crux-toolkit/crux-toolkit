@@ -187,7 +187,7 @@ void DelimitedFileReader::loadData() {
   
   if (has_header_) {
     if (has_next_) {
-      DelimitedFile::tokenize(next_data_string_, column_names_, delimiter_);
+      tokenize(next_data_string_, column_names_, delimiter_);
       has_next_ = getline(*istream_ptr_, next_data_string_) != NULL;
     }
     else {
@@ -472,7 +472,7 @@ void DelimitedFileReader::getStringVectorFromCell(
 
   //get the list of strings separated by delimiter
   string_vector.clear();
-  DelimitedFile::tokenize(string_ans, string_vector, delimiter);
+  tokenize(string_ans, string_vector, delimiter);
 }
 
 /**
@@ -561,7 +561,7 @@ void DelimitedFileReader::next() {
     current_row_++;
     current_data_string_ = next_data_string_;
     //parse next_data_string_ into data_
-    DelimitedFile::tokenize(current_data_string_, data_, delimiter_);
+    tokenize(current_data_string_, data_, delimiter_);
     //make sure data has the right number of columns for the header.
     if (data_.size() < column_names_.size()) {
       if (!column_mismatch_warned_) {

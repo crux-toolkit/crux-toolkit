@@ -15,7 +15,6 @@
 #include <sstream>
 #include <vector>
 #include "Spectrum.h"
-#include "DelimitedFile.h"
 #include "SQTReader.h"
 #include "SpectrumZState.h"
 #include <fstream>
@@ -561,7 +560,7 @@ void PinXMLWriter::printOccurence(
   string flanking_str(flanking_ptr);
   free(flanking_ptr);
   vector<string> flanking_aas;
-  DelimitedFile::tokenize(flanking_str, flanking_aas, ',');
+  tokenize(flanking_str, flanking_aas, ',');
   if (flanking_aas.size() != num_protein) {
     carp(CARP_FATAL, "PinXMLWriter has only %d sets of flanking AAs "
                      "for %d proteins "

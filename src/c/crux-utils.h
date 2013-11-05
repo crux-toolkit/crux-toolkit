@@ -30,7 +30,7 @@
 
 #include "CruxApplication.h"
 
-
+#include <set>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -461,6 +461,29 @@ static bool from_string(
  * a first and last variable
  * \returns whether the extraction was successful or not
  */
+
+
+/**                                                                                                                                                                                                       
+ * tokenize a string by delimiter                                                                                                                                                                         
+ */
+void tokenize(
+  const std::string& str,
+  std::vector<std::string>& tokens,
+  char delimiter = '\t'
+  );
+
+
+bool get_first_last_scan_from_string(
+  const std::string& const_scans_string,
+  int& first_scan,
+  int& last_scan
+  );
+
+bool get_scans_from_string(
+  const std::string& const_scans_string,
+  std::set<int>& scans
+);
+
 
 template<typename TValue>
 static bool get_range_from_string(

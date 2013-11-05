@@ -4,8 +4,7 @@
  * print out a tab delimied file with only those columns
  *****************************************************************************/
 #include "ExtractColumns.h"
-
-#include "DelimitedFile.h"
+#include "crux-utils.h"
 
 using namespace std;
 
@@ -53,7 +52,7 @@ int ExtractColumns::main(int argc, char** argv) {
   DelimitedFileReader delimited_file(delimited_filename, true, delimiter);
   
   vector<string> column_name_list;
-  DelimitedFile::tokenize(column_names_string, column_name_list, ',');
+  tokenize(column_names_string, column_name_list, ',');
 
   vector<int> column_indices;
   for (unsigned int i=0;i<column_name_list.size();i++) {

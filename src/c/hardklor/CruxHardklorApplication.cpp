@@ -4,7 +4,7 @@
  *****************************************************************************/
 #include "CruxHardklorApplication.h"
 #include "DelimitedFileWriter.h"
-#include "DelimitedFile.h"
+
 using namespace std;
 
 /**
@@ -131,14 +131,14 @@ int CruxHardklorApplication::main(
 
   if (string(get_string_parameter_pointer("averagine-mod")) !=  "__NULL_STR") {
     string par_value = get_string_parameter_pointer("averagine-mod");
-    cerr <<"averagine-mod="<<par_value<<endl;
+    carp(CARP_DEBUG,"averagine-mod=%s",par_value.c_str());
     vector<string> tokens1;
-    DelimitedFile::tokenize(par_value, tokens1, ';');
+    tokenize(par_value, tokens1, ';');
 
     for (unsigned int idx1 = 0; idx1 < tokens1.size();idx1++) {
       hk_args_vec.push_back("-m");
       vector<string> tokens2;
-      DelimitedFile::tokenize(tokens1[idx1], tokens2, ':');
+      tokenize(tokens1[idx1], tokens2, ':');
       ostringstream oss;
       oss << tokens2[0];
       for (unsigned int idx2 = 1;idx2 < tokens2.size(); idx2++) {
@@ -206,7 +206,7 @@ int CruxHardklorApplication::main(
   if (string(get_string_parameter_pointer("hardklor-options")) != "__NULL_STR") {
     string hardklor_options = get_string_parameter_pointer("hardklor-options");
     vector<string> tokens;
-    DelimitedFile::tokenize(hardklor_options, tokens, ',');
+    tokenize(hardklor_options, tokens, ',');
     for (size_t idx=0;idx < tokens.size();idx++) {
       hk_args_vec.push_back(tokens.at(idx));
     }
