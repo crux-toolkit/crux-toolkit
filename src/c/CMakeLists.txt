@@ -257,6 +257,13 @@ set_property(
   MAIN
 )
 
+# The rt library is not needed for OS X
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  set(RT_LIBRARY "")
+else(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  set(RT_LIBRARY "rt")
+endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   target_link_libraries(
     crux
@@ -306,7 +313,7 @@ else(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     dl
     hardklor
     m
-    rt
+    ${RT_LIBRARY}
     mstoolkitlite
     posterior_error
     perclibrary
@@ -341,7 +348,7 @@ else(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     xlink-predict-peptide-ions
     dl
     m
-    rt
+    ${RT_LIBRARY}
     pthread
     xlink
     crux-support
@@ -370,7 +377,7 @@ else(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     xlink-score-spectrum
     dl
     m
-    rt
+    ${RT_LIBRARY}
     pthread
     xlink
     crux-support
@@ -399,7 +406,7 @@ else(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     xlink-assign-ions
     dl
     m
-    rt
+    ${RT_LIBRARY}
     pthread
     xlink
     crux-support
