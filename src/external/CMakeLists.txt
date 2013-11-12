@@ -61,7 +61,6 @@ else (WIN32 AND NOT CYGWIN)
   ExternalProject_Add(
     ProteoWizard
     URL http://noble.gs.washington.edu/proj/crux/download/pwiz.tar.gz
-    URL_MD5 e8f4a5f9b4e71559713a5986378d641c
     DOWNLOAD_DIR downloads
     PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
     CONFIGURE_COMMAND ""
