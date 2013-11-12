@@ -204,10 +204,10 @@ elseif (WIN32 AND NOT CYGWIN)
     URL_MD5 a72001a9067a4c2c4e0e836d0f92ece4
     DOWNLOAD_DIR downloads
     PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory 
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/protobuf/ 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/protobuf/vs2010/ 
       ${CMAKE_CURRENT_SOURCE_DIR}/build/src/ProtocolBuffers/vsprojects/
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND msbuild ${CMAKE_CURRENT_SOURCE_DIR}/build/src/ProtocolBuffers/vsprojects/protobuf.sln
+    BUILD_COMMAND msbuild /p:Configuration=Debug /p:Platform=Win32 ${CMAKE_CURRENT_SOURCE_DIR}/build/src/ProtocolBuffers/vsprojects/protobuf.sln
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE 1
   )
