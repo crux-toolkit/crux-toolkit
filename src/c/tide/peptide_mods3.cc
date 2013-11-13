@@ -72,8 +72,15 @@ class ModsOutputter {
     }
 
     writers_.resize(prod);
-    for (int i = 0; i < prod; ++i)
+    for (int i = 0; i < prod; ++i) {
       writers_[i] = new RecordWriter(GetTempName(i), FLAGS_buf_size << 10);
+      if (!writers_[i]->OK()) {
+        // delete temporary files
+        for (int j = 0; j < i; ++j)
+          unlink(GetTempName(j).c_str());
+        CHECK(writers_[i]->OK());
+      }
+    }
 
     const vector<double>& deltas = *mod_table_->OriginalDeltas();
     delta_by_file_.resize(prod);
