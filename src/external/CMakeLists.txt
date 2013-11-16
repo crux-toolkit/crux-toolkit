@@ -97,7 +97,10 @@ elseif (WIN32 AND NOT CYGWIN)
     URL_MD5 6a8ec45d83c8cfb1584c5a5345cb51ae
     DOWNLOAD_DIR downloads
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND msbuild
+    BUILD_COMMAND msbuild 
+      /p:Configuration=Debug 
+      /p:Platform=Win32 
+      ${CMAKE_CURRENT_SOURCE_DIR}/build/src/XercesC/projects/Win32/VC10/xerces-all/xerces-all.sln 
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE 1
   )
