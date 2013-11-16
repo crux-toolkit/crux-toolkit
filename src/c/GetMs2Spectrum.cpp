@@ -45,39 +45,13 @@ GetMs2Spectrum::~GetMs2Spectrum() {
 }
 
 /****************************************************************************
- * Read a string into either a single positive integer or a range of
- * positive integers, depending on whether it contains a hyphen.
- ****************************************************************************/
-static void parse_scan_numbers
-  (char* my_string,
-   int*  min_scan,
-   int*  max_scan)
-{
-  // Does the string contain a hyphen?
-  int string_index = 0;
-  while (my_string[string_index] != '\0') {
-    if (my_string[string_index] == '-') {
-      my_string[string_index] = '\0';
-      *min_scan = atoi(my_string);
-      *max_scan = atoi(my_string + string_index + 1);
-      assert((*min_scan > 0) && (*max_scan > 0)); 
-      assert(*min_scan < *max_scan);
-      return;
-    }
-    string_index++;
-  }
-
-  // If no hyphen, then the range is just a single integer.
-  *min_scan = *max_scan = atoi(my_string);
-}
-
-/****************************************************************************
  * MAIN
  ****************************************************************************/
 int GetMs2Spectrum :: main(int argc, char** argv){
 
 
-  const char* option_list[] = { 
+  const char* option_list[] = {
+    "scan-number",
     "version", 
     "stats", 
     "verbosity",
@@ -87,7 +61,6 @@ int GetMs2Spectrum :: main(int argc, char** argv){
 
   
   const char* argument_list[] = {
-    "scan number",
     "ms2 file"
   };
   int num_arguments = sizeof(argument_list) / sizeof(char*);
@@ -99,9 +72,15 @@ int GetMs2Spectrum :: main(int argc, char** argv){
 
   
   /* Get arguments */
-  int min_scan;
-  int max_scan;
-  parse_scan_numbers(get_string_parameter("scan number"), &min_scan, &max_scan);
+  int min_scan = -1;
+  int max_scan = -1;
+  const char* range_string = get_string_parameter_pointer("scan-number");
+
+  get_range_from_string(
+    range_string,
+    min_scan,
+    max_scan);
+  
   fprintf(stderr, "Scanning from %d to %d.\n", min_scan, max_scan);
 
   const char* ms2_filename = get_string_parameter_pointer("ms2 file");
@@ -116,51 +95,48 @@ int GetMs2Spectrum :: main(int argc, char** argv){
   }
   carp(CARP_DETAILED_DEBUG, "Creating spectrum collection.");
   Crux::SpectrumCollection* collection = SpectrumCollectionFactory::create(ms2_filename);
-
+  collection->parse();
   int num_found = 0;
-  for (int scan_number = min_scan; scan_number <= max_scan; scan_number++) {
-
-    /* search for spectrum with the correct scan number */
-    Spectrum* spectrum = collection->getSpectrum(scan_number);
-
-    if( spectrum == NULL ){
-      carp(CARP_WARNING, "Could not find scan number %i", scan_number);
-      continue;
-    }
-
-    /* Print either the spectrum or stats. */
-    if (!options){
-      spectrum->print(stdout);
-
-    } else {
-
-      int charge_state_index = 0; 
-      int charge_state_num = spectrum->getNumZStates();
-      std::vector<SpectrumZState> zstates_array = spectrum->getZStates();
   
-      printf("Scan number: %i\n", scan_number);
-      printf("Precursor m/z:%.2f\n", spectrum->getPrecursorMz());
-      printf("Total Ion Current:%.2f\n", spectrum->getTotalEnergy());
-      printf("Base Peak Intensity:%.1f\n", 
+  for (SpectrumIterator iter = collection->begin(); iter != collection->end(); ++iter) {
+  
+    Spectrum* spectrum = *iter;
+    carp(CARP_DETAILED_DEBUG, "spectrum number:%d", spectrum->getFirstScan());
+    if (spectrum->getFirstScan() >= min_scan && spectrum->getFirstScan() <= max_scan) {
+
+      /* Print either the spectrum or stats. */
+      if (!options){
+        spectrum->print(stdout);
+
+      } else {
+
+        int charge_state_index = 0; 
+        int charge_state_num = spectrum->getNumZStates();
+        std::vector<SpectrumZState> zstates_array = spectrum->getZStates();
+  
+        printf("Scan number: %i\n", spectrum->getFirstScan());
+        printf("Precursor m/z:%.2f\n", spectrum->getPrecursorMz());
+        printf("Total Ion Current:%.2f\n", spectrum->getTotalEnergy());
+        printf("Base Peak Intensity:%.1f\n", 
              spectrum->getMaxPeakIntensity()); // base is max
-      printf("Number of peaks:%d\n", spectrum->getNumPeaks());
-      printf("Minimum m/z:%.1f\n", spectrum->getMinPeakMz());
-      printf("Maximum m/z:%.1f\n", spectrum->getMaxPeakMz());
+        printf("Number of peaks:%d\n", spectrum->getNumPeaks());
+        printf("Minimum m/z:%.1f\n", spectrum->getMinPeakMz());
+        printf("Maximum m/z:%.1f\n", spectrum->getMaxPeakMz());
     
-      for(charge_state_index=0; charge_state_index < charge_state_num; 
-          ++charge_state_index){
+        for(charge_state_index=0; charge_state_index < charge_state_num; 
+            ++charge_state_index){
 
-        SpectrumZState& zstate = zstates_array[charge_state_index];
-        FLOAT_T charged_mass = spectrum->getPrecursorMz() * (FLOAT_T)zstate.getCharge();
+          SpectrumZState& zstate = zstates_array[charge_state_index];
+          FLOAT_T charged_mass = spectrum->getPrecursorMz() * (FLOAT_T)zstate.getCharge();
 
-        printf("Charge state:%d\n", zstate.getCharge());
-        printf("Neutral mass:%.2f\n", zstate.getNeutralMass());
-        printf("Charged mass:%.2f\n", charged_mass);
-        printf("M+H+ mass:%.2f\n", zstate.getSinglyChargedMass());
+          printf("Charge state:%d\n", zstate.getCharge());
+          printf("Neutral mass:%.2f\n", zstate.getNeutralMass());
+          printf("Charged mass:%.2f\n", charged_mass);
+          printf("M+H+ mass:%.2f\n", zstate.getSinglyChargedMass());
+        }
       }
+      num_found++;
     }
-    delete spectrum;
-    num_found++;
   }
   delete collection;
 
