@@ -42,7 +42,8 @@ static const int INVALID_ENUM_STRING = -10;
  * The string version of the decoy types
  */
 static const char* decoy_type_strings[NUMBER_DECOY_TYPES] = 
-  { "invalid", "none", "reverse", "protein-shuffle", "peptide-shuffle" };
+  { "invalid", "none", "reverse", "protein-shuffle",
+    "peptide-shuffle", "protein-reverse" };
 
 DECOY_TYPE_T string_to_decoy_type(const char* name){
   int decoy_int = convert_enum_type_str(name, INVALID_ENUM_STRING, 
@@ -53,6 +54,20 @@ DECOY_TYPE_T string_to_decoy_type(const char* name){
   }
 
   return (DECOY_TYPE_T)decoy_int;
+}
+
+DECOY_TYPE_T string_to_tide_decoy_type(const char* name) {
+  const string decoy_format(name);
+  if (decoy_format == "none") {
+    return NO_DECOYS;
+  } else if (decoy_format == "shuffle") {
+    return PEPTIDE_SHUFFLE_DECOYS;
+  } else if (decoy_format == "peptide-reverse") {
+    return REVERSE_DECOYS;
+  } else if (decoy_format == "protein-reverse") {
+    return PROTEIN_REVERSE_DECOYS;
+  }
+  carp(CARP_FATAL, "Invalid decoy type %s", decoy_format.c_str());
 }
 
 char* decoy_type_to_string(DECOY_TYPE_T type){

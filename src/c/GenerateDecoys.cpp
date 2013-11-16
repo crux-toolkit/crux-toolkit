@@ -24,7 +24,7 @@ int GenerateDecoys::main(int argc, char** argv) {
     "digestion",
     "missed-cleavages",
     "isotopic-mass",
-    "decoys",
+    "decoy-format",
     "overwrite",
     "fileroot",
     "output-dir",
@@ -42,18 +42,24 @@ int GenerateDecoys::main(int argc, char** argv) {
   const int MAX_SHUFFLE_ATTEMPTS = 10;
 
   // Get decoy type
-  string decoyType = get_string_parameter_pointer("decoys");
-  bool shuffle = true;
-  if (decoyType != "reverse" && decoyType != "peptide-shuffle") {
-    carp(CARP_FATAL, "Value for decoys option was not reverse or peptide-shuffle");
-  } else if (decoyType == "reverse") {
-    shuffle = false;
-  }
+  const DECOY_TYPE_T decoyType = get_tide_decoy_type_parameter("decoy-format");
+  bool proteinReverse = decoyType == PROTEIN_REVERSE_DECOYS;
 
   // Get options
   double minMass = get_double_parameter("min-mass");
   double maxMass = get_double_parameter("max-mass");
   massType_ = get_mass_type_parameter("isotopic-mass");
+
+  bool overwrite = get_boolean_parameter("overwrite");
+
+  string targetsFile = make_file_path("peptides.target.txt");
+  string decoysFile = make_file_path("peptides.decoy.txt");
+  string proteinDecoysFile = make_file_path("proteins.decoy.txt");
+  ofstream* targetsStream = create_stream_in_path(targetsFile.c_str(), NULL, overwrite);
+  ofstream* decoysStream = decoyType != NO_DECOYS ?
+    create_stream_in_path(decoysFile.c_str(), NULL, overwrite) : NULL;
+  ofstream* proteinDecoysStream = canGenerateDecoyProteins() ?
+    create_stream_in_path(proteinDecoysFile.c_str(), NULL, overwrite) : NULL;
 
   // Read fasta
   string fastaFile = get_string_parameter_pointer("protein fasta file");
@@ -61,29 +67,16 @@ int GenerateDecoys::main(int argc, char** argv) {
   map< string, vector<string> > proteins;
   set<string> targetSeqs;
   set<string> decoySeqs;
-  readFasta(fastaFile, proteins, targetSeqs);
-
-  string targetsFile = make_file_path("peptides.target.txt");
-  string decoysFile = make_file_path("peptides.decoy.txt");
-  string proteinDecoysFile = make_file_path("proteins.decoy.txt");
-
-  // Don't write protein decoys if:
-  // No-enzyme, not full digestion, or missed cleavages are allowed
-  bool customEnzyme =
-    string(get_string_parameter_pointer("custom-enzyme")) == "__NULL_STR";
-  bool fullDigest = get_digest_type_parameter("digestion") == FULL_DIGEST;
-  bool useEnzyme = get_enzyme_type_parameter("enzyme") != NO_ENZYME;
-  bool noMissedCleavages = get_int_parameter("missed-cleavages") == 0;
-
-  bool overwrite = get_boolean_parameter("overwrite");
-  ofstream* targetsStream = create_stream_in_path(targetsFile.c_str(), NULL, overwrite);
-  ofstream* decoysStream = create_stream_in_path(decoysFile.c_str(), NULL, overwrite);
-  ofstream* proteinDecoysStream =
-    ((customEnzyme || useEnzyme) && fullDigest && noMissedCleavages) ?
-    create_stream_in_path(proteinDecoysFile.c_str(), NULL, overwrite) : NULL;
+  readFasta(fastaFile, proteins, targetSeqs,
+            proteinReverse ? proteinDecoysStream : NULL,
+            proteinReverse ? &decoySeqs : NULL);
 
   // Make decoys from targets and write to peptides files
-  carp(CARP_INFO, "Making decoys and writing peptides files");
+  if (decoysStream) {
+    carp(CARP_INFO, "Making decoys and writing peptides files");
+  } else {
+    carp(CARP_INFO, "Writing peptides file");
+  }
   map<string, const string*> targetToDecoy;
   for (set<string>::const_iterator i = targetSeqs.begin();
        i != targetSeqs.end();
@@ -96,47 +89,89 @@ int GenerateDecoys::main(int argc, char** argv) {
       carp(CARP_DETAILED_DEBUG, "Skipping peptide with mass %f", pepMass);
       continue;
     }
-    // Try to make decoy
-    string decoySeq;
-    if (makeDecoy(targetSeq, targetSeqs, decoySeqs, shuffle, decoySeq)) {
-      // Success
-      pair<set<string>::iterator, bool> decoyInsert = decoySeqs.insert(decoySeq);
-      targetToDecoy[targetSeq] = &(*(decoyInsert.first));
-    } else {
-      carp(CARP_WARNING, "Could not make decoy from %s", targetSeq.c_str());
-    }
-    // Write to target and decoy files
     (*targetsStream) << *i << endl;
-    (*decoysStream) << decoySeq << endl;
+    if (decoysStream && !proteinReverse) {
+      // Try to make decoy
+      string decoySeq;
+      if (makeDecoy(targetSeq, targetSeqs, decoySeqs,
+                    decoyType == PEPTIDE_SHUFFLE_DECOYS, decoySeq)) {
+        // Success
+        pair<set<string>::iterator, bool> decoyInsert = decoySeqs.insert(decoySeq);
+        targetToDecoy[targetSeq] = &(*(decoyInsert.first));
+      } else {
+        carp(CARP_WARNING, "Could not make decoy from %s", targetSeq.c_str());
+      }
+      (*decoysStream) << decoySeq << endl;
+    }
   }
+
+  // Write decoy peptides for protein shuffle
+  if (proteinReverse) {
+    for (set<string>::const_iterator i = decoySeqs.begin();
+         i != decoySeqs.end();
+         ++i) {
+      FLOAT_T pepMass = Crux::Peptide::calcSequenceMass(i->c_str(), massType_);
+      if (pepMass < minMass || pepMass > maxMass) {
+        carp(CARP_DETAILED_DEBUG, "Skipping peptide with mass %f", pepMass);
+        continue;
+      }
+      (*decoysStream) << *i << endl;
+    }
+  }
+
   targetsStream->close();
   delete targetsStream;
-  decoysStream->close();
-  delete decoysStream;
-
-  // Write decoy proteins
-  if (proteinDecoysStream) {
-    carp(CARP_INFO, "Writing decoy proteins");
-    for (map< string, vector<string> >::iterator proteinIter = proteins.begin();
-         proteinIter != proteins.end();
-         ++proteinIter) {
-      (*proteinDecoysStream) << '>' << proteinIter->first << endl;
-      for (vector<string>::iterator pepIter = proteinIter->second.begin();
-           pepIter != proteinIter->second.end();
-           ++pepIter) {
-        map<string, const string*>::const_iterator lookup = targetToDecoy.find(*pepIter);
-        const string* toOutput = (lookup != targetToDecoy.end()) ?
-          lookup->second : &(*pepIter);
-        (*proteinDecoysStream) << *toOutput;
+  if (decoysStream) {
+    decoysStream->close();
+    delete decoysStream;
+    // Write decoy proteins (unless protein-shuffle, because we already did)
+    if (proteinDecoysStream && !proteinReverse) {
+      carp(CARP_INFO, "Writing decoy proteins");
+      for (map< string, vector<string> >::iterator proteinIter = proteins.begin();
+           proteinIter != proteins.end();
+           ++proteinIter) {
+        (*proteinDecoysStream) << ">decoy_" << proteinIter->first << endl;
+        for (vector<string>::iterator pepIter = proteinIter->second.begin();
+             pepIter != proteinIter->second.end();
+             ++pepIter) {
+          map<string, const string*>::const_iterator lookup = targetToDecoy.find(*pepIter);
+          const string* toOutput = (lookup != targetToDecoy.end()) ?
+            lookup->second : &(*pepIter);
+          (*proteinDecoysStream) << *toOutput;
+        }
+        (*proteinDecoysStream) << endl;
       }
-      (*proteinDecoysStream) << endl;
+      carp(CARP_DEBUG, "Printed %d decoy proteins", proteins.size());
+      proteinDecoysStream->close();
+      delete proteinDecoysStream;
     }
-    carp(CARP_DEBUG, "Printed %d decoy proteins", proteins.size());
-    proteinDecoysStream->close();
-    delete proteinDecoysStream;
   }
 
   return 0;
+}
+
+bool GenerateDecoys::canGenerateDecoyProteins() {
+  const string decoyFormat = get_string_parameter_pointer("decoy-format");
+
+  // Can never write decoy proteins if not making decoys
+  if (decoyFormat == "none") {
+    return false;
+  }
+
+  // Can always write decoy proteins if making protein-level decoys
+  if (decoyFormat == "protein-reverse") {
+    return true;
+  }
+
+  // If making peptide-level decoys, we can only write decoy proteins if:
+  // Using an enzyme, full digestion, no missed cleavages
+  bool customEnzyme =
+    string(get_string_parameter_pointer("custom-enzyme")) == "__NULL_STR";
+  bool useEnzyme = get_enzyme_type_parameter("enzyme") != NO_ENZYME;
+  bool fullDigest = get_digest_type_parameter("digestion") == FULL_DIGEST;
+  bool noMissedCleavages = get_int_parameter("missed-cleavages") == 0;
+
+  return (customEnzyme || useEnzyme) && fullDigest && noMissedCleavages;
 }
 
 /**
@@ -146,7 +181,9 @@ int GenerateDecoys::main(int argc, char** argv) {
 void GenerateDecoys::readFasta(
   const string& fastaName,  ///< FASTA file name
   map< string, vector<string> >& outProteins, ///< map to store proteins
-  set<string>& outPeptides  ///< set of unique peptides
+  set<string>& outPeptides,  ///< set of unique peptides
+  ofstream* reversedFasta, ///< optional stream to write reversed proteins
+  set<string>* outReversedPeptides  ///< optional set of peptides from rev fasta
 ) {
   // Open FASTA
   ifstream fasta(fastaName.c_str(), ifstream::in);
@@ -164,6 +201,7 @@ void GenerateDecoys::readFasta(
     enzyme = CUSTOM_ENZYME;
   }
   vector<string> trypticPeptides;
+  vector<string> reversedFastaPeptides;
   int proteinTotal = 0;
   int peptideTotal = 0;
   while (getNextProtein(fasta, id, sequence)) {
@@ -175,6 +213,16 @@ void GenerateDecoys::readFasta(
     copy(trypticPeptides.begin(), trypticPeptides.end(),
          inserter(outPeptides, outPeptides.end()));
     outProteins[id] = trypticPeptides;
+    if (reversedFasta) {
+      reverse(sequence.begin(), sequence.end());
+      (*reversedFasta) << ">decoy_" << id << '\n' << sequence << endl;
+      if (outReversedPeptides) {
+        cleaveProtein(sequence, enzyme, digest, missedCleavages,
+                      minLength, maxLength, reversedFastaPeptides);
+        copy(reversedFastaPeptides.begin(), reversedFastaPeptides.end(),
+             inserter(*outReversedPeptides, outReversedPeptides->end()));
+      }
+    }
   }
   fasta.close();
 

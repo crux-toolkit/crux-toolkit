@@ -166,12 +166,12 @@ void TideMatchSet::writeToFile(
           << cleavage_type_ << '\t'
           << proteinNames << '\t'
           << flankingAAs;
-    if (is_decoy) {
+    if (is_decoy && !OutputFiles::isProteinLevelDecoys()) {
       // write target sequence
       const string& residues = protein->residues();
       *file << '\t'
             << residues.substr(residues.length() - peptide->Len());
-    } else if (OutputFiles::isConcat()) {
+    } else if (OutputFiles::isConcat() && !OutputFiles::isProteinLevelDecoys()) {
       *file << '\t'
             << seq;
     }
@@ -338,8 +338,9 @@ void TideMatchSet::writeHeaders(
         (header == SP_SCORE_COL || header == SP_RANK_COL ||
          header == BY_IONS_MATCHED_COL || header == BY_IONS_TOTAL_COL)) {
       continue;
-    } else if (!(decoyFile || OutputFiles::isConcat()) &&
-               header == ORIGINAL_TARGET_SEQUENCE_COL) {
+    } else if (header == ORIGINAL_TARGET_SEQUENCE_COL &&
+               (OutputFiles::isProteinLevelDecoys() ||
+                (!decoyFile && !OutputFiles::isConcat()))) {
       continue;
     }
     if (i > 0) {

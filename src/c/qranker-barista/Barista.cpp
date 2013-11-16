@@ -1906,9 +1906,9 @@ void Barista :: computePEP(){
     } // else, skip decoys
   }
 
-  delete target_scores;
-  delete decoy_scores;
-  delete PEPs;
+  delete[] target_scores;
+  delete[] decoy_scores;
+  delete[] PEPs;
 
   /** 
    * Calculate Peptide PEPs
@@ -1944,9 +1944,9 @@ void Barista :: computePEP(){
     } // else, skip decoys
   }
 
-  delete target_scores;
-  delete decoy_scores;
-  delete PEPs;
+  delete[] target_scores;
+  delete[] decoy_scores;
+  delete[] PEPs;
 
 
   /** 
@@ -1983,9 +1983,9 @@ void Barista :: computePEP(){
     } // else, skip decoys
   }
 
-  delete target_scores;
-  delete decoy_scores;
-  delete PEPs;
+  delete[] target_scores;
+  delete[] decoy_scores;
+  delete[] PEPs;
 
 
 }

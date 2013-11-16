@@ -15,6 +15,7 @@ using namespace std;
 using namespace Crux;
 
 bool OutputFiles::concat_ = false;
+bool OutputFiles::proteinLevelDecoys_ = false;
 
 /**
  * Default constructor for OutputFiles.  Opens all of the needed
@@ -871,12 +872,13 @@ void OutputFiles::setConcat(bool enable) {
   concat_ = enable;
 }
 
+bool OutputFiles::isProteinLevelDecoys() {
+  return proteinLevelDecoys_;
+}
 
-
-
-
-
-
+void OutputFiles::setProteinLevelDecoys(bool enable) {
+  proteinLevelDecoys_ = enable;
+}
 
 /*
  * Local Variables:

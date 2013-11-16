@@ -5,6 +5,7 @@
 #include "carp.h"
 #include "parameter.h"
 #include "SpectrumRecordWriter.h"
+#include "TideIndexApplication.h"
 #include "TideSearchApplication.h"
 
 extern AA_MOD_T* list_of_mods[MAX_AA_MODS];
@@ -150,6 +151,11 @@ int TideSearchApplication::main(int argc, char** argv) {
        ++i) {
     if (TideMatchSet::isDecoy((*i)->name())) {
       HAS_DECOYS = true;
+      const string& residues = (*i)->residues();
+      if (residues[residues.length() - 1] ==
+          TideIndexApplication::ProteinLevelDecoysMagicByte) {
+        OutputFiles::setProteinLevelDecoys();
+      }
       break;
     }
   }

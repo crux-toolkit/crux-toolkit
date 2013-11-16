@@ -21,6 +21,7 @@ class TideIndexApplication : public CruxApplication {
 public:
 
   static const char DecoyMagicByte = 9;
+  static const char ProteinLevelDecoysMagicByte = 21;
 
   /**
    * Constructor
@@ -55,12 +56,6 @@ public:
   virtual COMMAND_T getCommand();
 
 protected:
-
-  enum DECOY_TYPE {
-    NONE,
-    SHUFFLE,
-    REVERSE
-  };
 
   class TideIndexPeptide {
   private:
@@ -115,11 +110,21 @@ protected:
     }
   };
 
+  typedef pair<string, int> PeptideInfo;  // sequence, start location
+
+  struct ProteinInfo {
+    string name;
+    const string* sequence;
+    ProteinInfo(const string& proteinName, const string* proteinSequence)
+      : name(proteinName), sequence(proteinSequence) {}
+  };
+
   struct TargetInfo {
-    string proteinName;
-    string* proteinSequence;
+    ProteinInfo proteinInfo;
     int start;
     FLOAT_T mass;
+    TargetInfo(const ProteinInfo& protein, int startLoc, FLOAT_T pepMass)
+      : proteinInfo(protein), start(startLoc), mass(pepMass) {}
   };
 
   static void fastaToPb(
@@ -132,12 +137,13 @@ protected:
     int minLength,
     int maxLength,
     MASS_TYPE_T massType,
-    DECOY_TYPE decoyType,
+    DECOY_TYPE_T decoyType,
     const std::string& fasta,
     const std::string& proteinPbFile,
     pb::Header& outProteinPbHeader,
     std::vector<TideIndexPeptide>& outPeptideHeap,
-    std::vector<string*>& outProteinSequences
+    std::vector<string*>& outProteinSequences,
+    std::ofstream* decoyFasta
   );
 
   static void writePeptidesAndAuxLocs(
@@ -157,6 +163,19 @@ protected:
     const std::string& name,
     const std::string& residues,
     pb::Protein& outPbProtein
+  );
+
+  static void getDecoyPbProtein(
+    int id,
+    const ProteinInfo& targetProteinInfo,
+    std::string decoyPeptideSequence,
+    int startLoc,
+    pb::Protein& outPbProtein
+  );
+
+  static std::string getDecoyProteinName(
+    int startLoc,
+    const std::string& targetProteinName
   );
 
   static void getPbPeptide(
