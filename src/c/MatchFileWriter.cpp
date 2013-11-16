@@ -289,7 +289,8 @@ void MatchFileWriter::addColumnNames(CruxApplication* application,
   addColumnName(CLEAVAGE_TYPE_COL);
   addColumnName(PROTEIN_ID_COL);
   addColumnName(FLANKING_AA_COL);
-  if( has_decoys || OutputFiles::isConcat() ){
+  if ((has_decoys || OutputFiles::isConcat()) &&
+      !OutputFiles::isProteinLevelDecoys()) {
     addColumnName(ORIGINAL_TARGET_SEQUENCE_COL);
   }
 

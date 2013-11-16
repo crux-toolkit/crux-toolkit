@@ -1104,7 +1104,8 @@ void initialize_parameters(void){
   // **** Tide options ****
   set_string_parameter("decoy-format", "shuffle",
     "Include a decoy version of every peptide by shuffling or reversing the "
-    "target sequence. <string>=none|shuffle|reverse. Default=shuffle.",
+    "target sequence or protein. <string>=none|shuffle|peptide-reverse|"
+    "protein-reverse. Default=shuffle.",
     "Available for tide-index",
     "true"
   );
@@ -3720,6 +3721,13 @@ DECOY_TYPE_T get_decoy_type_parameter(
     string_to_decoy_type(param_value_str);
   
   return param_value;
+}
+
+DECOY_TYPE_T get_tide_decoy_type_parameter(
+  const char* name
+) {
+  char* param_value_str = (char*)get_hash_value(parameters, name);
+  return string_to_tide_decoy_type(param_value_str);
 }
 
 MASS_FORMAT_T get_mass_format_type_parameter(

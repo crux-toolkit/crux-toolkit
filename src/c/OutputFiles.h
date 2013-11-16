@@ -51,6 +51,8 @@ class OutputFiles{
   void writeRankedPeptides(PeptideToScore& peptideToScore);
   static bool isConcat();
   static void setConcat(bool enable = true);
+  static bool isProteinLevelDecoys();
+  static void setProteinLevelDecoys(bool enable = true);
 
 
 
@@ -137,6 +139,7 @@ class OutputFiles{
 
   int num_files_;         ///< num files in each array
   static bool concat_;
+  static bool proteinLevelDecoys_;
   std::string* target_decoy_list_; ///< target or decoy[-n] string of each file
   MatchFileWriter** delim_file_array_; ///< array of .txt files
   FILE** sqt_file_array_; ///< array of .sqt files

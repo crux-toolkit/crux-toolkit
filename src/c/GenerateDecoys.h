@@ -36,13 +36,20 @@ public:
   virtual int main(int argc, char** argv);
 
   /**
+   * Check if we can generate decoy proteins with the current settings.
+   */
+  static bool canGenerateDecoyProteins();
+
+  /**
    * Given a FASTA file, read in all protein IDs/sequences and cleave them.
    * Return a map of protein IDs to digested peptides from that protein
    */
   static void readFasta(
     const std::string& fastaName,  ///< FASTA file name
     std::map< std::string, std::vector<std::string> >& outProteins, ///< map to store proteins
-    std::set<std::string>& outPeptides  ///< set of unique peptides
+    std::set<std::string>& outPeptides,  ///< set of unique peptides
+    std::ofstream* reversedFasta, ///< optional stream to write reversed proteins
+    std::set<std::string>* outReversedPeptides  ///< optional set of peptides from rev fasta
   );
 
   /**

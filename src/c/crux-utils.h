@@ -420,6 +420,7 @@ char * quant_level_type_to_string(QUANT_LEVEL_TYPE_T type);
 COLTYPE_T string_to_column_type(char* name);
 COMPARISON_T string_to_comparison(char* name);
 DECOY_TYPE_T string_to_decoy_type(const char* name);
+DECOY_TYPE_T string_to_tide_decoy_type(const char* name);
 char* decoy_type_to_string(DECOY_TYPE_T type);
 MASS_FORMAT_T string_to_mass_format(const char* name);
 char* mass_format_type_to_string(MASS_FORMAT_T type);
