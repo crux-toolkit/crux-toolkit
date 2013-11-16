@@ -207,7 +207,10 @@ elseif (WIN32 AND NOT CYGWIN)
       ${CMAKE_CURRENT_SOURCE_DIR}/patches/protobuf/vs2010/ 
       ${CMAKE_CURRENT_SOURCE_DIR}/build/src/ProtocolBuffers/vsprojects/
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND msbuild /p:Configuration=Debug /p:Platform=Win32 ${CMAKE_CURRENT_SOURCE_DIR}/build/src/ProtocolBuffers/vsprojects/protobuf.sln
+    BUILD_COMMAND msbuild 
+      /p:Configuration=Debug 
+      /p:Platform=Win32 
+      ${CMAKE_CURRENT_SOURCE_DIR}/build/src/ProtocolBuffers/vsprojects/protobuf.sln
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE 1
   )
@@ -237,10 +240,12 @@ elseif (WIN32 AND NOT CYGWIN)
     URL_MD5 e02268c1e90876c809ec0ffa095da864
     DOWNLOAD_DIR downloads
     PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory 
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/google-gflags/ 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/google-gflags/vs2010/ 
       ${CMAKE_CURRENT_SOURCE_DIR}/build/src/google-gflags/vsprojects/libgflags/
     CONFIGURE_COMMAND ""
     BUILD_COMMAND msbuild 
+      /p:Configuration=Debug 
+      /p:Platform=Win32 
       ${CMAKE_CURRENT_SOURCE_DIR}/build/src/google-gflags/vsprojects/libgflags/libgflags.vcxproj
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE 1
