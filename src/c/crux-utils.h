@@ -524,7 +524,45 @@ static bool get_range_from_string(
   return ret;    
 }
 
+//These string trimming utilities are from:
+//http://stackoverflow.com/questions/216823/whats-the-best-way-to-trim-stdstring
+/**
+ * \brief trim whitespace from start of string
+ */
+static inline std::string &ltrim(
+  std::string &str ///< string to trim -in
+  ) {
 
+  str.erase(
+    str.begin(),
+    std::find_if(str.begin(), str.end(),
+    std::not1(std::ptr_fun<int, int>(std::isspace))));
+  return str;
+}
+
+/**
+ * \brief trim whitespace from the end of string
+ */
+static inline std::string &rtrim(
+  std::string &str ///< string to trim -in
+  ) {
+
+  str.erase(
+    std::find_if(str.rbegin(), str.rend(),
+    std::not1(std::ptr_fun<int, int>(std::isspace))).base(),
+    str.end());
+  return str;
+}
+
+/**
+ * \brief trim from both ends
+ */
+static inline std::string &trim(
+  std::string &str //< string to trim -in
+  ) {
+
+  return ltrim(rtrim(str));
+}
 
 /**
  * \brief  Decide if a spectrum has precursor charge of +1 or more (+2
