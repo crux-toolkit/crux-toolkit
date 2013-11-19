@@ -8,6 +8,7 @@
  ****************************************************************************/
 
 #include "crux-utils.h"
+#include "LineFileReader.h"
 #include "parameter.h"
 #include "WinCrux.h"
 #include "Peptide.h"
@@ -3320,59 +3321,49 @@ void parse_parameter_file(
 
   /* check if parameter file exists, if not die */
   if(access(parameter_filename, F_OK)){
-    carp(CARP_FATAL, "Could not open parameter file.");
+    carp(CARP_FATAL, "Could not open parameter file '%s'", parameter_filename);
   }
 
-  file = fopen(parameter_filename, "rb");
-  if(file == NULL){
-    carp(CARP_FATAL, "Couldn't open parameter file '%s'", parameter_filename);
-  }
+  LineFileReader line_reader(parameter_filename);
+  
+  while(line_reader.hasNext()) {
+    string line = line_reader.next();
+    string option_name = "";
+    string option_value = "";
+    bool found_equal = false;
+    for (string::iterator iter = line.begin(); iter != line.end(); ++iter) {
 
-  line = (char*)mycalloc(MAX_LINE_LENGTH, sizeof(char));
-
-  while(fgets(line, MAX_LINE_LENGTH, file)==line){
-
-    idx = 0;
-    
-    /* Change the newline to a '\0' ignoring trailing whitespace */
-    for(idx = MAX_LINE_LENGTH - 1; idx >= 0; idx--){
-      if(line[idx] == '\n' || line[idx] == '\r' || 
-         line[idx] == '\f' || line[idx] == '\t')
-        line[idx] = '\0';
+      //ignore everything after commet
+      if (*iter == '#') {
+        break;
+      } else if (!found_equal) {
+        if (*iter != '=') {
+          option_name += *iter;
+        } else {
+          //okay we found an equal sign, rest of text should be the parameter value.
+          found_equal = true;
+        }
+      } else {
+        option_value += *iter;
+      }
     }
-    /* empty lines and those beginning with '#' are ignored */
-    if(line[0] != '#' && line[0] != '\0' && line[0] != '[' && !isdigit(line[0])){
 
-      /* find the '=' in the line.  Exit with error if the line 
-         has no equals sign. */
-      idx = 0;
-      while(idx < (int)strlen(line) && line[idx] != '='){
-        idx++;
+    if (found_equal) {
+      //trim the spaces on both sides of the name and parameter and update the hash.
+      option_name = trim(option_name);
+      option_value = trim(option_value);
+      if(! update_hash_value(parameters, option_name.c_str(), option_value.c_str()) ){
+        carp(CARP_WARNING, "Unexpected parameter file option '%s'", option_name.c_str());
+      } else {
+        check_option_type_and_bounds(option_name.c_str());
       }
-      if(idx == 0 || idx >= (int)(strlen(line)-1)){
-        carp(CARP_FATAL, "Lines in a parameter file must have the form: "
-             "\n\tname=value\n "
-             "In file %s, the line '%s' does not have this format",
-             parameter_filename, line);
-      }
-
-      line[idx] = '\0';
-      char* option_name = line;
-      char* option_value = &(line[idx+1]);
-      carp(CARP_DETAILED_DEBUG, "Found option '%s' and value '%s'", 
-           option_name, option_value);
-
-      if(! update_hash_value(parameters, option_name, option_value) ){
-        carp(CARP_FATAL, "Unexpected parameter file option '%s'", option_name);
-      }
-
-      check_option_type_and_bounds(option_name);
-
+    } else {
+      //This may be a commet with whitespace or the [COMET ENZYME INFO] information.
+      //TODO include [COMET ENZYME INFO] parsing.
+      carp(CARP_DEBUG, "equal not found:", line.c_str());
     }
   }
-
-  fclose(file);
-  myfree(line);
+  
 
 }
 

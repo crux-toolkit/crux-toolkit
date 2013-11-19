@@ -7,7 +7,7 @@
 
 #include <fstream>
 
-//#include "carp.h"
+#include "carp.h"
 
 using namespace std;
 
@@ -73,19 +73,14 @@ void LineFileReader::loadData(
 
 
   if (!file_ptr_ -> is_open()) {
-    //carp(CARP_ERROR, "Opening %s or reading failed", file_name);
+    carp(CARP_ERROR, "Opening %s or reading failed", file_name);
     return;
-  }
-
-  has_next_ = getline(*file_ptr_, next_data_string_) != NULL;
-
-  if (!has_next_) {
-    //carp(CARP_WARNING,"No data found!");
-      return;
-  }
-
-  if (has_next_) {
-    next();
+  } else {
+    has_next_ = getline(*file_ptr_, next_data_string_) != NULL;
+    carp(CARP_DEBUG, "first line:%s",next_data_string_.c_str());
+    if (!has_next_) {
+      carp(CARP_WARNING,"No data found!");
+    } 
   }
 }
 
@@ -129,11 +124,10 @@ void LineFileReader::reset() {
  * parses the next line in the file. 
  */
 const string& LineFileReader::next() {
-
+  //Do we already have a next line ready?
   if (has_next_) {
     current_row_++;
     current_data_string_ = next_data_string_;
-
     //read next line
     has_next_ = getline(*file_ptr_, next_data_string_) != NULL;
     has_current_ = true;
