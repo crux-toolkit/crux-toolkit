@@ -49,7 +49,7 @@ add_custom_target(
 if (WIN32 AND NOT CYGWIN)
   ExternalProject_Add(
     ProteoWizard
-    URL http://noble.gs.washington.edu/proj/crux/download/pwiz.tar.gz
+    URL http://noble.gs.washington.edu/proj/crux/download/pwiz-5100-2.tar.gz
     DOWNLOAD_DIR downloads
     PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
     CONFIGURE_COMMAND ""
@@ -60,8 +60,8 @@ if (WIN32 AND NOT CYGWIN)
 else (WIN32 AND NOT CYGWIN)
   ExternalProject_Add(
     ProteoWizard
-    URL http://noble.gs.washington.edu/proj/crux/download/pwiz.tar.gz
-    URL_MD5 4d43f74687e1d45fc33b4d73ed7377ed
+    URL http://noble.gs.washington.edu/proj/crux/download/pwiz-5100-2.tar.gz
+    URL_MD5 85dbbc99fa7568627bdec6c69c6ec6af
     DOWNLOAD_DIR downloads
     PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
     CONFIGURE_COMMAND ""
