@@ -79,6 +79,7 @@ class PinXMLWriter{
   value == std::numeric_limits<T>::infinity();
  } 
  */ 
+  bool exact_pval_search;
  protected:
 
   FILE* output_file_;

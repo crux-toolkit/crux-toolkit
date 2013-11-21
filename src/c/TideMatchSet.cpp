@@ -28,8 +28,27 @@ TideMatchSet::TideMatchSet(
     free(enzyme_string);
     free(digestion_string);
   }
+  exact_pval_search = false;
 }
-
+/*
+TideMatchSet::TideMatchSet(
+  Arr2* matches,
+  double max_mz
+) :
+  matches2_(matches), max_mz_(max_mz) {
+  if (cleavage_type_.empty()) {
+    ENZYME_T enzyme = get_enzyme_type_parameter("enzyme");
+    char* enzyme_string = enzyme_type_to_string(enzyme);
+    DIGEST_T digestion = get_digest_type_parameter("digestion");
+    char* digestion_string = digest_type_to_string(digestion);
+    cleavage_type_ = enzyme_string;
+    cleavage_type_ += '-';
+    cleavage_type_ += digestion_string;
+    free(enzyme_string);
+    free(digestion_string);
+  }
+}
+*/
 TideMatchSet::~TideMatchSet() {
 }
 
@@ -139,8 +158,10 @@ void TideMatchSet::writeToFile(
       *file << sp_data->sp_score << '\t'
             << sp_map->at(*i).second << '\t';
     }
-    *file << ((*i)->first / 100000000.0) << '\t'
-          << ++cur << '\t';
+    *file << ((*i)->first.first) << '\t';
+      if (exact_pval_search)
+	    *file << ((*i)->first.second) << '\t';
+     *file << ++cur << '\t';
     if (sp_map) {
       *file << sp_data->matched_ions << '\t'
             << sp_data->total_ions << '\t';
@@ -198,6 +219,9 @@ void TideMatchSet::report(
     spectrum->PrecursorMZ(), vector<int>(1, charge), "");
   SpectrumZState z_state;
   z_state.setMZ(crux_spectrum.getPrecursorMz(), charge);
+
+  crux_collection->exact_pval_search = exact_pval_search;
+  crux_decoy_collection->exact_pval_search = exact_pval_search;
 
   addCruxMatches(crux_collection, &proteins_made, targets, false,
                  crux_spectrum, peptides, proteins, z_state, sp_scorer, &lowest_sp);
@@ -258,7 +282,10 @@ void TideMatchSet::addCruxMatches(
     Crux::Match::freeMatch(match); // so match gets deleted when collection does
 
     // Set Xcorr score in match
-    match->setScore(XCORR, (*i)->first / 100000000.0);
+    match->setScore(XCORR, (*i)->first.first);
+    match->setScore(TIDE_SEARCH_EXACT_PVAL, (*i)->first.first);
+    match->setScore(TIDE_SEARCH_REFACTORED_XCORR, (*i)->first.second);
+
     // Set lnNumSp in match
     match->setLnExperimentSize(lnNumSp);
 
@@ -297,7 +324,8 @@ void TideMatchSet::addCruxMatches(
 void TideMatchSet::writeHeaders(
   ofstream* file,
   bool decoyFile,
-  bool sp
+  bool sp,
+  bool exact_pval_search
 ) {
   if (!file) {
     return;
@@ -322,7 +350,10 @@ void TideMatchSet::writeHeaders(
     if (i > 0) {
       *file << '\t';
     }
-    *file << get_column_header(header);
+    if (exact_pval_search && header == XCORR_SCORE_COL)
+     *file << get_column_header(EXACT_PVALUE_COL) << '\t' << get_column_header(REFACTORED_SCORE_COL);
+    else 
+     *file << get_column_header(header);
   }
   *file << endl;
 }
@@ -531,7 +562,7 @@ void TideMatchSet::computeDeltaCns(
   for (vector<Arr::iterator>::const_reverse_iterator i = vec.rbegin();
        i != vec.rend();
        ++i) {
-    const FLOAT_T xcorr = (*i)->first / 100000000.0;
+    const FLOAT_T xcorr = (*i)->first.first;
     delta_cn_map->insert(make_pair(*i, (lastXcorr == BILLION) ?
       0 : (xcorr - lastXcorr) / max(xcorr, FLOAT_T(1))));
     lastXcorr = xcorr;

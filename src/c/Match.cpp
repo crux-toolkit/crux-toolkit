@@ -71,6 +71,7 @@ void Match::init() {
 Match::Match(){
   init();
   ++pointer_count_;
+  exact_pval_search = false;
 }
 
 /**
@@ -619,20 +620,39 @@ void Match::printSqt(
   int precision = get_int_parameter("precision");
 
   // print match info
-  fprintf(file, "M\t%i\t%i\t%.*f\t%.2f\t%.*g\t%.*g\t%i\t%i\t%s\tU\n",
-          getRank(XCORR),
-          getRank(SP),
-          get_int_parameter("mass-precision"),
-          peptide->getPeptideMass() + MASS_PROTON,
-          delta_cn,
-          precision,
-          score_main,
-          precision,
-          getScore(SP),
-          b_y_matched,
-          b_y_total,
-          sequence
-          );
+  if (exact_pval_search) {
+    fprintf(file, "M\t%i\t%i\t%.*f\t%.2f\t%.*g\t%.*g\t%.*g\t%i\t%i\t%s\tU\n",
+            getRank(XCORR),
+            getRank(SP),
+            get_int_parameter("mass-precision"),
+            peptide->getPeptideMass() + MASS_PROTON,
+            delta_cn,
+            precision,
+            getScore(TIDE_SEARCH_EXACT_PVAL),
+            precision,
+            getScore(TIDE_SEARCH_REFACTORED_XCORR),
+            precision,
+            getScore(SP),
+            b_y_matched,
+            b_y_total,
+            sequence
+            );
+  } else {
+    fprintf(file, "M\t%i\t%i\t%.*f\t%.2f\t%.*g\t%.*g\t%i\t%i\t%s\tU\n",
+            getRank(XCORR),
+            getRank(SP),
+            get_int_parameter("mass-precision"),
+            peptide->getPeptideMass() + MASS_PROTON,
+            delta_cn,
+            precision,
+            score_main,
+            precision,
+            getScore(SP),
+            b_y_matched,
+            b_y_total,
+            sequence
+            );
+  }
   free(sequence);
   
   PeptideSrc* peptide_src = NULL;
@@ -722,6 +742,14 @@ void Match::printOneMatchField(
   case XCORR_SCORE_COL:
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
                                      getScore(XCORR));
+    break;
+  case EXACT_PVALUE_COL:
+    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
+                                     getScore(TIDE_SEARCH_EXACT_PVAL));
+    break;
+  case REFACTORED_SCORE_COL:
+    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
+                                     getScore(TIDE_SEARCH_REFACTORED_XCORR));
     break;
   case XCORR_RANK_COL:
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
@@ -942,15 +970,16 @@ void Match::printTab(
   int column_idx;
   for (column_idx = 0; column_idx < NUMBER_MATCH_COLUMNS; column_idx++) {
     carp(CARP_DETAILED_DEBUG,"print col:%i",column_idx);
-    printOneMatchField(column_idx, 
-                       collection,
-                       output_file,
-                       scan_num,
-                       spectrum_precursor_mz,
-                       num_target_matches,
-                       num_decoy_matches,
-                       b_y_total,
-                       b_y_matched);
+      printOneMatchField(column_idx, 
+                         collection,
+                         output_file,
+                         scan_num,
+                         spectrum_precursor_mz,
+                         num_target_matches,
+                         num_decoy_matches,
+                         b_y_total,
+                         b_y_matched);
+    }
   }
   output_file->writeRow();
   carp(CARP_DETAILED_DEBUG, "Match::printTab done.");

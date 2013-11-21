@@ -13,6 +13,8 @@
 #include "OutputFiles.h"
 #include "PostProcessProtein.h"
 
+#include "boost/tuple/tuple.hpp"
+
 using namespace std;
 
 typedef vector<const pb::Protein*> ProteinVec;
@@ -20,7 +22,10 @@ typedef vector<const pb::Protein*> ProteinVec;
 class TideMatchSet {
 
 public:
-  typedef pair<int, int> Pair;
+  typedef pair<int, int> Pair2;
+  typedef FixedCapacityArray<Pair2> Arr2;
+
+  typedef pair<pair<double, double>, int> Pair;   //store results for exact_pval calculations
   typedef FixedCapacityArray<Pair> Arr;
 
   // Matches will be an array of pairs, (score, counter), where counter refers
@@ -31,7 +36,12 @@ public:
     Arr* matches,
     double max_mz
   );
-
+/*  TideMatchSet(
+    Arr2* matches,
+    double max_mz
+  );
+*/
+  bool exact_pval_search;
   ~TideMatchSet();
 
   /**
@@ -64,7 +74,8 @@ public:
   static void writeHeaders(
     ofstream* file,
     bool decoyFile,
-    bool sp
+    bool sp,
+    bool exact_pval_search
   );
 
   /**
@@ -77,6 +88,7 @@ public:
 
 protected:
   Arr* matches_;
+  Arr2* matches2_;
   double max_mz_;
   static string cleavage_type_;
 
@@ -86,7 +98,7 @@ protected:
 
   struct less_score : public binary_function<Pair, Pair, bool> {
     // Compare scores, ignore counters.
-    bool operator()(Pair x, Pair y) { return x.first < y.first; }
+    bool operator()(Pair x, Pair y) { return x.first.first < y.first.first; }
   };
 
   /**
