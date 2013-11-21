@@ -58,6 +58,7 @@ void MatchCollection::init() {
   post_process_collection_ = false;
   post_scored_type_set_ = false;
   top_scoring_sp_ = NULL;
+  exact_pval_search = false;
 
 }
 
@@ -1728,7 +1729,8 @@ void MatchCollection::printSqtHeader(
  FILE* output, 
  const char* type, 
  string database,
- int num_proteins){  
+ int num_proteins,
+ bool exact_pval_search){  
   if( output == NULL ){
     return;
   }
@@ -1855,15 +1857,19 @@ void MatchCollection::printSqtHeader(
   fprintf(output, "H\tEnzymeSpec\t%s-%s%s\n", enz_str, dig_str, custom_str);
   free(enz_str);
   free(dig_str);
-
   // write a comment that says what the scores are
   fprintf(output, "H\tLine fields: S, scan number, scan number, "
           "charge, 0, server, experimental mass, total ion intensity, "
           "lowest Sp, number of matches\n");
-
-  fprintf(output, "H\tLine fields: M, rank by xcorr score, rank by sp score, "
-          "peptide mass, deltaCn, xcorr score, sp score, number ions matched, "
-          "total ions compared, sequence, validation status\n");
+  if (exact_pval_search) {
+    fprintf(output, "H\tLine fields: M, rank by xcorr score, rank by sp score, "
+            "peptide mass, deltaCn, exact P-value, recalibrated xcorr, sp score, number ions matched, "
+            "total ions compared, sequence, validation status\n");
+  } else {
+    fprintf(output, "H\tLine fields: M, rank by xcorr score, rank by sp score, "
+            "peptide mass, deltaCn, xcorr score, sp score, number ions matched, "
+            "total ions compared, sequence, validation status\n");
+  }
 }
 
 /**
@@ -2014,6 +2020,20 @@ bool MatchCollection::printXml(
   scores_computed[main_score] = true;
   if( scored_type_[SP])
     scores_computed[SP] = true;
+  if (exact_pval_search){
+    scores_computed[TIDE_SEARCH_EXACT_PVAL] = true;
+    scores_computed[TIDE_SEARCH_REFACTORED_XCORR] = true;
+    scored_type_[TIDE_SEARCH_EXACT_PVAL] = true;
+    scored_type_[TIDE_SEARCH_REFACTORED_XCORR] = true;
+    scores_computed[main_score] = false;
+  } else {
+    scores_computed[TIDE_SEARCH_EXACT_PVAL] = false;
+    scores_computed[TIDE_SEARCH_REFACTORED_XCORR] = false;
+    scored_type_[TIDE_SEARCH_EXACT_PVAL] = false;
+    scored_type_[TIDE_SEARCH_REFACTORED_XCORR] = false;
+    scores_computed[main_score] = true;
+ }
+    
   double* scores = new double[NUMBER_SCORER_TYPES];
   int* ranks=new int[NUMBER_SCORER_TYPES];
 

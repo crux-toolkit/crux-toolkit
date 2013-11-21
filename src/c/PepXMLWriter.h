@@ -103,7 +103,7 @@ class PepXMLWriter{
     unsigned tot_matched_ions,
     unsigned current_num_matches
   );
-  
+   bool exact_pval_search;
  protected:
   void initScoreNames();
   void printSpectrumElement(int spectrum_scan_number, 

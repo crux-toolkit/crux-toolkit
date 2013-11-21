@@ -132,7 +132,7 @@ OutputFiles::OutputFiles(CruxApplication* program_name)
                filename.c_str(), 
                overwrite);
   }
-
+  exact_pval_search = false;
 }
 
 OutputFiles::~OutputFiles(){
@@ -427,10 +427,11 @@ void OutputFiles::writeHeaders(int num_proteins, bool isMixedTargetDecoy){
         database = get_string_parameter_pointer("tide database index");
       }
       MatchCollection::printSqtHeader(sqt_file_array_[file_idx],
-                       tag, database, num_proteins); 
+                       tag, database, num_proteins, exact_pval_search); 
     }
     
     if ( xml_file_array_){
+      xml_file_array_[file_idx]->exact_pval_search = exact_pval_search;
       xml_file_array_[file_idx]->writeHeader();
     }
 
@@ -438,6 +439,7 @@ void OutputFiles::writeHeaders(int num_proteins, bool isMixedTargetDecoy){
   }
   //write header at a time for pin.xml file
   if(pin_xml_file_){
+    pin_xml_file_->exact_pval_search = exact_pval_search;
     pin_xml_file_->printHeader();
   }
 }

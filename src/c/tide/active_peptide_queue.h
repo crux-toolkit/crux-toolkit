@@ -31,19 +31,29 @@ class ActivePeptideQueue {
 
   // See above for usage and .cc for implmentation details.
   int SetActiveRange(double min_mass, double max_mass);
+  int SetActiveRangeBIons(double min_mass, double max_mass);
 
   bool HasNext() const { return iter_ != end_; }
   Peptide* NextPeptide() { return *iter_++; }
   const Peptide* GetPeptide(int back_index) const { return *(end_ - back_index); }
+  void SetBinSize(double binWidth, double binOffset){
+    theoretical_b_peak_set_.binWidth  = binWidth;
+    theoretical_b_peak_set_.binOffset = binOffset;
+  }
 
+  deque<TheoreticalPeakSetBIons> b_ion_queue_;
+  deque<TheoreticalPeakSetBIons>::const_iterator iter1_, end1_;
  // IMPLEMENTATION DETAILS
  
  private:
   // See .cc file.
   void ComputeTheoreticalPeaksBack();
+  void ComputeBTheoreticalPeaksBack();
 
   RecordReader* reader_;
   pb::Peptide current_pb_peptide_;
+
+//  typedef vector<unsigned int> b_ion_spectrum;
   
   // All amino acid sequences from which the peptides are drawn.
   const vector<const pb::Protein*>& proteins_; 
@@ -51,6 +61,7 @@ class ActivePeptideQueue {
   // Workspace for computing theoretical peaks for a single peptide.
   // Gets reused for each new peptide.
   ST_TheoreticalPeakSet theoretical_peak_set_;
+  TheoreticalPeakSetBIons theoretical_b_peak_set_;
   
   // The active peptides. Lighter peptides are enqueued before heavy ones.
   // queue_ maintains only the peptides that fall within the range specified

@@ -616,11 +616,11 @@ void initialize_parameters(void){
       "discretize the m/z axis.  Also used as tolerance for assigning "
       "ions.  Default=1.0005079 for monoisotopic mass "
       "or 1.0011413 for average mass.",
-      "Available for crux-search-for-matches and xlink-assign-ions.", "true");
+      "Available for crux-search-for-matches tide-search and xlink-assign-ions.", "true");
   set_double_parameter("mz-bin-offset", SMART_MZ_OFFSET, 0.0, 1.0,
       "Specify the location of the left edge of the "
       "first bin used to discretize the m/z axis. Default=0.68",
-      "Available for crux-search-for-matches.", "true");
+      "Available for crux-search-for-matches and tide-search.", "true");
   // initialize as "unset", then set as bool after cmdline parsed
   set_string_parameter("use-flanking-peaks", "unset",
       "Include peaks +/- 1da around b/y ions in theoretical spectrum.  "
@@ -1124,6 +1124,12 @@ void initialize_parameters(void){
   set_string_parameter("store-spectra", "",
     "Specify the name of the file where the binarized fragmentation spectra "
     "will be stored.",
+    "Available for tide-search",
+    "true"
+  );
+  set_boolean_parameter("exact-p-value", false,
+    "Uses exact P-value calculation for peptide-spectrum-matching. "
+    "Default=F.",
     "Available for tide-search",
     "true"
   );

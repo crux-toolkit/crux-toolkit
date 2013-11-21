@@ -50,12 +50,14 @@ protected:
     ActivePeptideQueue* active_peptide_queue,
     const Spectrum* spectrum,
     const ObservedPeakSet& observed,
-    TideMatchSet::Arr* match_arr,
+    TideMatchSet::Arr2* match_arr,
     int queue_size,
     int charge
   );
 
 public:
+
+  bool exact_pvalue;
 
   /**
    * Constructor
@@ -90,6 +92,8 @@ public:
   virtual bool needsOutputDirectory();
 
   virtual COMMAND_T getCommand();
+
+  bool exact_pval_search;
   
 };
 

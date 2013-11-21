@@ -50,7 +50,7 @@ class OutputFiles{
                            ProteinToMetaProtein& proteinToMeta);
   void writeRankedPeptides(PeptideToScore& peptideToScore);
 
-
+  bool exact_pval_search;
 
  private:
   bool createFiles(FILE*** file_array_ptr,

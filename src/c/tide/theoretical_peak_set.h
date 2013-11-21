@@ -93,6 +93,7 @@
 #include "peptides.pb.h"
 #include "max_mz.h"
 #include "theoretical_peak_pair.h"
+#include "math.h"
 
 using namespace std;
 
@@ -768,5 +769,59 @@ class TheoreticalPeakSetSparse : public TheoreticalPeakSet {
   TheoreticalPeakSetDiff diff_;
 };
 
+//This class is used to store only the theoretical b-ions for 
+//exact p-pvalue calculation purposes.
+class TheoreticalPeakSetBIons : public TheoreticalPeakSet {
+ public:
+  TheoreticalPeakSetBIons(int capacity) {
+//    ordered_peak_sets_.Init(capacity);
+  }
 
+  virtual ~TheoreticalPeakSetBIons() {}
+
+  void Clear() { unordered_peak_list_.clear(); }
+
+  void AddYIon(double mass, int charge) {
+  }
+
+  void AddBIon(double mass, int charge) {
+    if (charge == 1)
+      AddBIon(mass);
+  }
+
+  void GetPeaks(TheoreticalPeakArr* peaks_charge_1,
+		TheoreticalPeakArr* negs_charge_1,
+		TheoreticalPeakArr* peaks_charge_2,
+		TheoreticalPeakArr* negs_charge_2,
+		const pb::Peptide* peptide = NULL) {
+    assert(peptide == NULL);
+//    ordered_peak_sets_.Merge();
+ //   if (false /*FLAGS_dups_ok*/) {
+ //     CopyUnordered(ordered_peak_sets_.temp1_, peaks_charge_1);
+ //     CopyUnordered(ordered_peak_sets_.temp3_, peaks_charge_2);
+ //   } else {
+ //     RemoveDups(ordered_peak_sets_.temp1_, peaks_charge_1);
+ //     RemoveDups(ordered_peak_sets_.temp3_, peaks_charge_2);
+ //   }
+ //   // no negs
+  }
+  vector<unsigned int> unordered_peak_list_;
+  double binWidth;
+  double binOffset;
+
+ private:
+  void AddYIon(double mass, int charge, TheoreticalPeakArr* dest) {
+  }
+
+  void AddBIon(double mass) {
+//    int index = int(mass + IonOffsets::B[1]);
+//    double binWidth, binOffset;
+//    binWidth = 1.0005079;
+//    binOffset = 0.40;
+    unsigned int index = (unsigned int)floor( mass / binWidth + 1.0 - binOffset );
+    unordered_peak_list_.push_back(index);
+  }
+
+};
 #endif // THEORETICAL_PEAK_SET_H
+

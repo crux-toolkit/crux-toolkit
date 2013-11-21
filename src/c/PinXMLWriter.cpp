@@ -43,6 +43,7 @@ void PinXMLWriter::init() {
 
 PinXMLWriter::PinXMLWriter(){
   init();
+  exact_pval_search = false;
 }
 
 PinXMLWriter::~PinXMLWriter(){ 
@@ -345,7 +346,12 @@ void PinXMLWriter:: printFeatureDescription(){
 
   fprintf(output_file_,"\n  <featureDescription name=\"deltLCn\"/>");
   fprintf(output_file_,"\n  <featureDescription name=\"deltCn\"/>");
-  fprintf(output_file_,"\n  <featureDescription name=\"Xcorr\"/>");
+  if (exact_pval_search){
+    fprintf(output_file_,"\n  <featureDescription name=\"exact P-value\"/>");
+    fprintf(output_file_,"\n  <featureDescription name=\"refactored XCORR\"/>");
+  } else {
+    fprintf(output_file_,"\n  <featureDescription name=\"Xcorr\"/>");
+  }
   if (is_sp_) {
     fprintf(output_file_,"\n  <featureDescription name=\"Sp\"/>");
     fprintf(output_file_,"\n  <featureDescription name=\"IonFrac\"/>");
@@ -478,8 +484,16 @@ void PinXMLWriter::printFeatures(
     "      <feature>%.*f</feature>\n", precision_,delta_lcn);
   fprintf(output_file_, 
     "      <feature>%.*f</feature>\n", precision_, delta_cn);
-  fprintf(output_file_, 
-    "      <feature>%.*f</feature>\n", precision_, match->getScore(XCORR));
+  if (exact_pval_search){
+    fprintf(output_file_, 
+      "      <feature>%.*f</feature>\n", precision_, match->getScore(TIDE_SEARCH_EXACT_PVAL));
+    fprintf(output_file_, 
+      "      <feature>%.*f</feature>\n", precision_, match->getScore(TIDE_SEARCH_REFACTORED_XCORR));
+  
+  } else {
+    fprintf(output_file_, 
+      "      <feature>%.*f</feature>\n", precision_, match->getScore(XCORR));
+  }
   if (is_sp_) {
     fprintf(output_file_,
       "      <feature>%.*f</feature>\n",  precision_, match->getScore(SP));

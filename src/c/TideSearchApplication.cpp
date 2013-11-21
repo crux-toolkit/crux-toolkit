@@ -13,6 +13,7 @@ extern int num_mods;
 bool TideSearchApplication::HAS_DECOYS = false;
 
 TideSearchApplication::TideSearchApplication() {
+  exact_pval_search = false;
 }
 
 TideSearchApplication::~TideSearchApplication() {
@@ -40,6 +41,9 @@ int TideSearchApplication::main(int argc, char** argv) {
     "output-dir",
     "overwrite",
     "parameter-file",
+    "exact-p-value",
+    "mz-bin-width",
+    "mz-bin-offset",
     "verbosity"
   };
   int num_options = sizeof(option_list) / sizeof(char*);
@@ -107,6 +111,10 @@ int TideSearchApplication::main(int argc, char** argv) {
       carp(CARP_DEBUG, "Searching scan range %d-%d", min_scan, max_scan);
     }
   }
+  //check to compute exact P-value 
+  exact_pval_search = get_boolean_parameter("exact-p-value");
+  double binWidth   = get_double_parameter("mz-bin-width");
+  double binOffset  = get_double_parameter("mz-bin-offset");
 
   // Check compute-sp parameter
   bool compute_sp = get_boolean_parameter("compute-sp");
@@ -148,6 +156,8 @@ int TideSearchApplication::main(int argc, char** argv) {
   }
   MassConstants::Init(&peptides_header.peptides_header().mods());
   active_peptide_queue = new ActivePeptideQueue(peptide_reader.Reader(), proteins);
+
+  active_peptide_queue->SetBinSize(binWidth, binOffset);
 
   carp(CARP_INFO, "Reading spectra file %s", spectra_file.c_str());
   // Try to read file as spectrumrecords file
@@ -280,10 +290,11 @@ void TideSearchApplication::search(
 ) {
 
   if (output_files) {
+    output_files->exact_pval_search = exact_pval_search;
     output_files->writeHeaders();
   } else if (target_file) {
-    TideMatchSet::writeHeaders(target_file, false, compute_sp);
-    TideMatchSet::writeHeaders(decoy_file, true, compute_sp);
+    TideMatchSet::writeHeaders(target_file, false, compute_sp, exact_pval_search);
+    TideMatchSet::writeHeaders(decoy_file, true, compute_sp, exact_pval_search);
   }
 
   // This is the main search loop.
@@ -340,28 +351,67 @@ void TideSearchApplication::search(
          "mass window is [%f, %f]",
          spectrum->SpectrumNumber(), spectrum->PrecursorMZ(), pre_mass, charge,
          min_mass, max_mass);
+    if (exact_pval_search == false) {  //execute original tide-search program
 
-    int size = active_peptide_queue->SetActiveRange(min_mass, max_mass);
-    TideMatchSet::Arr match_arr(size); // Scored peptides will go here.
+      int size = active_peptide_queue->SetActiveRange(min_mass, max_mass);
+      TideMatchSet::Arr2 match_arr2(size); // Scored peptides will go here.
 
-    // Programs for taking the dot-product with the observed spectrum are laid
-    // out in memory managed by the active_peptide_queue, one program for each
-    // candidate peptide. The programs will store the results directly into
-    // match_arr. We now pass control to those programs.
-    collectScoresCompiled(active_peptide_queue, spectrum, observed, &match_arr,
-                          size, charge);
+      // Programs for taking the dot-product with the observed spectrum are laid
+      // out in memory managed by the active_peptide_queue, one program for each
+      // candidate peptide. The programs will store the results directly into
+      // match_arr. We now pass control to those programs.
+      collectScoresCompiled(active_peptide_queue, spectrum, observed, &match_arr2,
+                            size, charge);
 
-    // matches will arrange the results in a heap by score, return the top
-    // few, and recover the association between counter and peptide. We output
-    // the top matches.
-    TideMatchSet matches(&match_arr, highest_mz);
-    if (output_files) {
-      matches.report(output_files, top_matches, spectrum, charge,
-                     active_peptide_queue, proteins, compute_sp);
-    } else {
-      matches.report(target_file, decoy_file, top_matches, spectrum, charge,
-                     active_peptide_queue, proteins, compute_sp);
+      // matches will arrange the results in a heap by score, return the top
+      // few, and recover the association between counter and peptide. We output
+      // the top matches.
+
+      TideMatchSet::Arr match_arr(size);
+      for (TideMatchSet::Arr2::iterator it = match_arr2.begin(); it != match_arr2.end(); ++it){
+          TideMatchSet::Pair pair;
+          pair.first.first = (double)(it->first/100000000.0);
+	  pair.first.second = 0.0;
+	  pair.second = it->second;
+	  match_arr.push_back(pair);
+      }
+
+      TideMatchSet matches(&match_arr, highest_mz);
+      matches.exact_pval_search = exact_pval_search;
+      if (output_files) {
+        matches.report(output_files, top_matches, spectrum, charge,
+                       active_peptide_queue, proteins, compute_sp);
+      } else {
+        matches.report(target_file, decoy_file, top_matches, spectrum, charge,
+                       active_peptide_queue, proteins, compute_sp);
+      }
+     } else {  //execute exact-pval-search 
+      int size = active_peptide_queue->SetActiveRangeBIons(min_mass, max_mass);
+      TideMatchSet::Arr match_arr(size); // Scored peptides will go here.
+      deque<TheoreticalPeakSetBIons>::const_iterator iter1_;
+      //here comes Jeff's exactPvalue calculation
+/*      for (iter1_ = active_peptide_queue->b_ion_queue_.begin(); iter1_ != active_peptide_queue->b_ion_queue_.end(); ++iter1_){
+         vector<unsigned int>::const_iterator it;
+	 it = iter1_->unordered_peak_list_.begin();
+ 	 for (; it != iter1_->unordered_peak_list_.end(); ++it) {
+		cout << *it << "\t";
+	 } 
+         cout << endl;
+      }
+*/
+      //report matches
+
+      TideMatchSet matches(&match_arr, highest_mz);
+      matches.exact_pval_search = exact_pval_search;
+      if (output_files) {
+        matches.report(output_files, top_matches, spectrum, charge,
+	               active_peptide_queue, proteins, compute_sp);
+      } else {
+        matches.report(target_file, decoy_file, top_matches, spectrum, charge,
+	               active_peptide_queue, proteins, compute_sp);
+      } 
     }
+
   }
 
   if (output_files) {
@@ -373,7 +423,7 @@ void TideSearchApplication::collectScoresCompiled(
   ActivePeptideQueue* active_peptide_queue,
   const Spectrum* spectrum,
   const ObservedPeakSet& observed,
-  TideMatchSet::Arr* match_arr,
+  TideMatchSet::Arr2* match_arr,
   int queue_size,
   int charge
 ) {
