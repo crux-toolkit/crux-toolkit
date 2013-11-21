@@ -970,16 +970,15 @@ void Match::printTab(
   int column_idx;
   for (column_idx = 0; column_idx < NUMBER_MATCH_COLUMNS; column_idx++) {
     carp(CARP_DETAILED_DEBUG,"print col:%i",column_idx);
-      printOneMatchField(column_idx, 
-                         collection,
-                         output_file,
-                         scan_num,
-                         spectrum_precursor_mz,
-                         num_target_matches,
-                         num_decoy_matches,
-                         b_y_total,
-                         b_y_matched);
-    }
+    printOneMatchField(column_idx, 
+                       collection,
+                       output_file,
+                       scan_num,
+                       spectrum_precursor_mz,
+                       num_target_matches,
+                       num_decoy_matches,
+                       b_y_total,
+                       b_y_matched);
   }
   output_file->writeRow();
   carp(CARP_DETAILED_DEBUG, "Match::printTab done.");
