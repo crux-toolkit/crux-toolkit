@@ -242,8 +242,10 @@ int TideIndexApplication::main(int argc, char** argv) {
     }
     // Iterate over all pb peptides
     unsigned int writeCountTargets = 0, writeCountDecoys = 0;
-    while (!peptides.empty()) {
-      const pb::Peptide* peptide = peptides.back();
+    for (vector<const pb::Peptide*>::const_iterator i = peptides.begin();
+         i != peptides.end();
+         ++i) {
+      const pb::Peptide* peptide = *i;
       const pb::Location& location = peptide->first_location();
       const pb::Protein* protein = proteins[location.protein_id()];
       bool writeTarget = true;
@@ -285,7 +287,6 @@ int TideIndexApplication::main(int argc, char** argv) {
         decoyPepStrs.push_back(make_pair(pep_str, peptide->mass()));
         ++writeCountDecoys;
       }
-      peptides.pop_back();
     }
 
     // Iterate over saved decoys and output them
