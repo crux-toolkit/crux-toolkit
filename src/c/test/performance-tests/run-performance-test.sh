@@ -36,9 +36,7 @@ fi
 
 ms2=051708-worm-ASMS-10.ms2
 
-# Do the whole test twice, once for each search tool.  (N.B. This loop
-# is temporarily not doing anything useful.  Once we get comet and tide
-# integrated into Crux, then this loop will be useful again.)
+# Do the whole test twice, once for each search tool.
 for searchtool in comet tide-search; do
 
   # Do we use an index or the fasta?
@@ -59,7 +57,7 @@ for searchtool in comet tide-search; do
       $ms2 $proteins
   fi
 
-  # Run Calibrate scores
+  # Run calibrate-scores
   if [[ -e $searchtool/qvalues.target.txt ]]; then
     echo Skipping crux calibrate-scores.
   else
@@ -122,5 +120,36 @@ echo replot >> $gnuplot
 # Make the plot.
 gnuplot $gnuplot > performance.png
 
-# Run compareXCorr.R
-./compareXCorr.R
+# Extract a subset of columns for use in comparing XCorr scores.
+for searchtool in tide-search comet; do
+  searchFile=$searchtool/$searchtool.target.txt
+  reducedFile=$searchtool/$searchtool.target.reduced.txt
+  $CRUX extract-columns $searchFile \
+     "scan,charge,sequence,xcorr score" \
+     | awk 'NR > 1' \
+     | awk '{print $1 "~" $2 "~" $3 "\t" $4}' \
+     | sort -k 1b,1 \
+     > $reducedFile
+done
+
+# Join the two sets of scores.
+echo -e "scan\tcharge\tpeptide\ttide-search xcorr\tcomet xcorr" > xcorr.txt
+join \
+    tide-search/tide-search.target.reduced.txt \
+    comet/comet.target.reduced.txt \
+  | awk -F "~" '{print $1 " " $2 " " $3}' \
+  | awk '{print $1 "\t" $2 "\t" $3 "\t" $4 "\t" $5}' \
+  | sort -n \
+  >> xcorr.txt
+
+# Create a scatter plot of XCorr scores.
+gnuplot=xcorr.gnuplot
+echo set output \"/dev/null\" > $gnuplot
+echo set terminal png >> $gnuplot
+echo set xlabel \"Tide XCorr\" >> $gnuplot
+echo set ylabel \"Comet XCorr\" >> $gnuplot
+echo plot x notitle with lines >> $gnuplot
+echo replot \"xcorr.txt\" using 4\:5 notitle >> $gnuplot
+echo set output >> $gnuplot
+echo replot >> $gnuplot
+gnuplot $gnuplot > xcorr.png
