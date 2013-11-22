@@ -31,7 +31,7 @@ fasta=$db.fa
 if [[ -e $db ]]; then
   echo Skipping create-index.
 else
-  $CRUX tide-index --output-dir tide-index --decoy-format reverse $fasta $db
+  $CRUX tide-index --output-dir tide-index --decoy-format peptide-reverse $fasta $db
 fi
 
 ms2=051708-worm-ASMS-10.ms2
