@@ -28,6 +28,7 @@ int TideIndexApplication::main(int argc, char** argv) {
 
   const char* option_list[] = {
     "decoy-format",
+    "decoy-prefix",
     "enzyme",
     "digestion",
     "missed-cleavages",
@@ -104,6 +105,7 @@ int TideIndexApplication::main(int argc, char** argv) {
   }
 
   DECOY_TYPE_T decoy_type = get_tide_decoy_type_parameter("decoy-format");
+  string decoyPrefix = get_string_parameter_pointer("decoy-prefix");
 
   // Set up output paths
   string fasta = get_string_parameter_pointer("protein fasta file");
@@ -369,6 +371,7 @@ void TideIndexApplication::fastaToPb(
   vector<string*>& outProteinSequences,
   ofstream* decoyFasta
 ) {
+  string decoyPrefix = get_string_parameter_pointer("decoy-prefix");
   outProteinPbHeader.Clear();
   outProteinPbHeader.set_file_type(pb::Header::RAW_PROTEINS);
   outProteinPbHeader.set_command_line(commandLine);
@@ -453,7 +456,7 @@ void TideIndexApplication::fastaToPb(
       string decoyProtein = *(i->first.sequence);
       reverse(decoyProtein.begin(), decoyProtein.end());
       if (decoyFasta) {
-        (*decoyFasta) << ">decoy_" << i->first.name << endl
+        (*decoyFasta) << ">"<< decoyPrefix << i->first.name << endl
                       << decoyProtein << endl;
       }
       GenerateDecoys::cleaveProtein(decoyProtein, enzyme, digestion,
@@ -564,7 +567,7 @@ void TideIndexApplication::fastaToPb(
         }
       }
       // Write out the final protein
-      (*decoyFasta) << ">decoy_" << i->first.name << endl
+      (*decoyFasta) << ">" << decoyPrefix << i->first.name << endl
                     << decoyProtein << endl;
     }
   }
@@ -747,7 +750,7 @@ string TideIndexApplication::getDecoyProteinName(
   // Set name as:
   // <DecoyMagicByte><StartWithinTargetProtein>.decoy_<TargetProteinName>
   stringstream ss;
-  ss << DecoyMagicByte << (startLoc + 1) << ".decoy_" << targetProteinName;
+  ss << DecoyMagicByte << (startLoc + 1) << "." << get_string_parameter_pointer("decoy-prefix") << targetProteinName;
   return ss.str();
 }
 
