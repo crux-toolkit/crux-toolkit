@@ -1973,6 +1973,54 @@ int get_num_decoys(bool have_index){
   return 0;
 }
 
+/**
+ * \brief Checks if the given input file contains target, decoy PSMs or 
+ * concatenated search results.
+ *
+ *\returns corrected file names. It does not check if files are exist.
+ */
+void check_target_decoy_files(
+  string &target,   //filename of the target PSMs
+  string &decoy     //filename of the decoy PSMs
+)
+{
+ int target_pos = target.find("target");
+ if (target_pos < 0) {
+   int decoy_pos = decoy.find("decoy");
+   if (decoy_pos < 0) {
+     // user gave concatenated result file
+     decoy = "";
+   } else {
+     // user gave decoy results file
+     target.replace(decoy_pos, 5, "target");
+   }
+  } else {
+    // user gave target results file
+    decoy.replace(target_pos, 6, "decoy"); 
+  }
+}
+
+void check_target_decoy_files(
+  string &target,   //filename of the target PSMs
+  string &decoy     //filename of the decoy PSMs
+)
+{
+ int target_pos = target.find("target");
+ if (target_pos < 0) {
+   int decoy_pos = decoy.find("decoy");
+   if (decoy_pos < 0) {
+     // user gave concatenated result file
+     decoy = "";
+   } else {
+     // user gave decoy results file
+     target.replace(decoy_pos, 5, "target");
+   }
+  } else {
+    // user gave target results file
+    decoy.replace(target_pos, 6, "decoy"); 
+  }
+}
+
 
 /*
  * Local Variables:
