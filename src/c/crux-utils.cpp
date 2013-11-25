@@ -35,6 +35,10 @@ static const FLOAT_T PRECISION = 0.000000005;
  */
 static const int MAX_ULPS = 2;
 
+static const unsigned int TARGET_STRING_LENGTH = 6; //The length of string "target"
+static const unsigned int DECOY_STRING_LENGTH = 5; // The length of string "decoy"                                                                                                                                                                                             
+
+
 /* Functions for converting custom types to and from strings */
 
 static const int INVALID_ENUM_STRING = -10;
@@ -1992,32 +1996,11 @@ void check_target_decoy_files(
      decoy = "";
    } else {
      // user gave decoy results file
-     target.replace(decoy_pos, 5, "target");
+     target.replace(decoy_pos, DECOY_STRING_LENGTH, "target");
    }
   } else {
     // user gave target results file
-    decoy.replace(target_pos, 6, "decoy"); 
-  }
-}
-
-void check_target_decoy_files(
-  string &target,   //filename of the target PSMs
-  string &decoy     //filename of the decoy PSMs
-)
-{
- int target_pos = target.find("target");
- if (target_pos < 0) {
-   int decoy_pos = decoy.find("decoy");
-   if (decoy_pos < 0) {
-     // user gave concatenated result file
-     decoy = "";
-   } else {
-     // user gave decoy results file
-     target.replace(decoy_pos, 5, "target");
-   }
-  } else {
-    // user gave target results file
-    decoy.replace(target_pos, 6, "decoy"); 
+    decoy.replace(target_pos, TARGET_STRING_LENGTH, "decoy"); 
   }
 }
 
