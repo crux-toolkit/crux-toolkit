@@ -193,16 +193,20 @@ limit.</li>
 <ul>
 
 <li>
-<code>--decoy-format none|shuffle|reverse</code> &ndash; Include a decoy
-version of every peptide by shuffling or reversing the target
-sequence.  Each peptide is either or reversed or shuffled, leaving the
+<code>--decoy-format
+none|shuffle|peptide-reverse|protein-reverse</code> &ndash; Include a
+decoy version of every peptide by shuffling or reversing the target
+sequence.  In <code>shuffle</code> or <code>peptide-reverse</code>
+mode, each peptide is either or reversed or shuffled, leaving the
 N-terminal and C-terminal amino acids in place. Note that peptides
 that appear multiple times in the target database are only shuffled
-once.  In <code>reverse</code> mode, palindromic peptides are
+once.  In <code>peptide-reverse</code> mode, palindromic peptides are
 shuffled.  Also, if a shuffled peptide produces an overlap with the
 target or decoy database, then the peptide is re-shuffled up to 5
 times.  Note that, despite this repeated shuffling, homopolymers will
-appear in both the target and decoy database.  Default=shuffle.</li>
+appear in both the target and decoy database.
+The <code>protein-reverse</code mode reverses the entire protein
+sequence, irrespective of the composite peptides.  Default=shuffle.</li>
 
 <li>
 <code>--seed &lt;integer&gt</code> &ndash; Set the seeed of the random
