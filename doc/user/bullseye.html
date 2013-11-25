@@ -89,7 +89,14 @@ programs.
 fragmentation spectra for which accurate masses were successfully
 inferred.  Unless otherwise specified (with
 the <code>--spectrum-format</code> option), the output file format is
-the same as the input MS2 file format.</li>
+the same as the input MS2 file format.  If the output format is
+".ms2," then a single spectrum may have multiple "Z" lines, eaching
+indicating a charge state and accurate mass.  In addition, Bullseye
+inserts on "I" line (for charge-dependent analysis) corresponding to
+each "Z" line.  The "I" line contains "EZ" in the second column, the
+charge and mass from the associated "Z" line in the third and fourth
+colummns, followed by the chromatographic apex and the intensity at
+the chromatographic apex.</li>
 
 <li>
 <b>bullseye.no-pid.&lt;format&gt</b>: a file containing the
@@ -102,9 +109,17 @@ that were printed to standard error.</li>
 
 </ul>
 
-<B>Options:</B><br>
-<i>Identifying PPIDs in MS1 Spectra:</i>
+<h2>Options:</h2>
+
+<p>
+Bullseye uses Hardkl&ouml;r, so all of
+the <a href="hardklor.html">hardkl&ouml;r parameters</a> may also be
+used with Bullseye.</p>
+
 <ul>
+
+<h3>Identifying PPIDs in MS1 spectra</h3>
+
 <li>
 <code>--max-persist &lt;float&gt;</code> &ndash; Ignore PPIDs that
 persist for longer than this length of time in the MS1 spectra. The
@@ -134,11 +149,8 @@ below this maximum mass in daltons.  Default = 8000.0.</li>
 <li>
 <code>--bullseye-min-mass &lt;float&gt;</code> &ndash; Only consider PPIDs
 above this minimum mass in daltons.  Default = 600.0.</li>
-</ul>
 
-<i>Matching PPIDs to MS2 Spectra:</i>
-
-<ul>
+<h3>Matching PPIDs to MS2 spectra</h3>
 
 <li>
 <code>--exact-match &lt;T|F&gt;</code> &ndash; When true, require an
@@ -160,9 +172,8 @@ tolerance (&plusmn;units) around the retention time over which a PPID
 can be matched to the MS2 spectrum.  The unit of time is whatever unit is 
 used in your data file (usually minutes).  Default = 0.5.</li>
 
-</ul>
-<i>Other:</i>
-<ul>
+<h3>Output</h3>
+
 <li>
 <code>--spectrum-format &lt;ms2|bms2|cms2|mgf&gt;</code>
 &ndash; The format to write the output spectra to.  By default, the
@@ -196,19 +207,12 @@ following messages, including all those at lower verbosity levels:
 0-fatal errors, 10-non-fatal errors, 20-warnings, 30-information on
 the progress of execution, 40-more progress information, 50-debug
 info, 60-detailed debug info. Default = 30.</li>
+
 </ul>
 
-<b>Notes:</b>
-<ul>
-
-<li>Bullseye uses Hardkl&ouml;r, so all of
-  the <a href="hardklor.html">hardkl&ouml;r parameters</a> may also be
-  used with Bullseye.</li>
-
-<li>
+<p>
 For users familiar with the standalone version of Bullseye, the parameter mappings are 
-<a href="bullseye_standalone_to_crux.html">here</a>.
-</li>
+<a href="bullseye_standalone_to_crux.html">here</a>.</p>
 
 </ul>
 
