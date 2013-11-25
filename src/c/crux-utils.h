@@ -592,5 +592,27 @@ void strcat_formatted
  */
 int get_num_decoys(bool have_index);
 
+/**
+ * \brief Checks if the given input file contains target, decoy PSMs or 
+ * concatenated search results.
+ *
+ *\returns corrected file names. It does not check if files are exist.
+ */
+void check_target_decoy_files(
+  std::string &target,   //filename of the target PSMs
+  std::string &decoy     //filename of the decoy PSMs
+);
+
+/**
+ * \brief Checks if the given input file contains target, decoy PSMs or 
+ * concatenated search results.
+ *
+ *\returns corrercted file names. It does not check if files are exist.
+ */
+void check_target_decoy_files(
+  std::string &target,   //filename of the target PSMs
+  std::string &decoy     //filename of the decoy PSMs
+);
+
 
 #endif

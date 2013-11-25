@@ -854,9 +854,9 @@ void initialize_parameters(void){
   );
   set_string_parameter(
     "decoy-prefix",
-    "random_",
+    "decoy_",
     "Option for single SQT file mode defining the name pattern "
-    "used for shuffled database. Default=random_.",
+    "used for decoy database. Default=decoy_.",
     "Available for percolator",
     "true"
   );
@@ -1726,9 +1726,9 @@ void initialize_parameters(void){
      "--use-spec-features option to F. Default T.", 
      "Available for q-ranker and barista.", "true");
 
-  set_string_parameter("decoy_prefix", "rand_",
+  set_string_parameter("decoy_prefix", "random_",
      "Specifies the prefix of the protein names that indicates a decoy. "
-     "Default = rand_.",
+     "Default = random_.",
      " Available for q-ranker and barista.", "true");
 
   set_string_parameter("re-run", "__NULL_STR",

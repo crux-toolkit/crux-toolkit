@@ -366,20 +366,8 @@ MatchCollection* run_qvalue(
   string target_path = string(input_file);
   string decoy_path = string(input_file);
   
-  size_t target_pos = target_path.find("target");
-  size_t decoy_pos = decoy_path.find("decoy");
-  
-  if (target_pos == string::npos) {
-    if (decoy_pos != string::npos) {
-      //decoy was given
-      target_path.replace(decoy_pos, 5, "target");
-    } else {
-      carp(CARP_FATAL, "Need target or decoy in file extension!");
-    }
-  } else {
-    decoy_path.replace(target_pos, 6, "decoy");  
-  }
-  
+  check_target_decoy_files(target_path, decoy_path);
+
   if (!file_exists(target_path)) {
     carp(CARP_FATAL, "Target file %s not found", target_path.c_str());
   }

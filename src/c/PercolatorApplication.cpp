@@ -149,21 +149,10 @@ int PercolatorApplication::main(int argc, char** argv) {
         has_extension(input_pinxml.c_str(), "sqt") ||
         has_extension(input_pinxml.c_str(), "pep.xml") ||
         has_extension(input_pinxml.c_str(), "mzid")) {
-      string input_decoy(input_pinxml);
-      int target_pos = input_pinxml.find("target");
-      if (target_pos < 0) {
-        int decoy_pos = input_pinxml.find("decoy");
-        if (decoy_pos < 0) {
-          carp(CARP_FATAL, "Not a PIN, target, or decoy file: %s",
-                           input_pinxml.c_str());
-        }
-        // user gave decoy results file
-        input_pinxml.replace(decoy_pos, 5, "target");
-      } else {
-        // user gave target results file
-        input_decoy.replace(target_pos, 6, "decoy");
-      }
-  
+
+        string input_decoy = input_pinxml;
+        check_target_decoy_files(input_pinxml, input_decoy);
+
       // check that files exist
       if (!file_exists(input_pinxml)) {
         carp(CARP_FATAL, "Target file %s not found", input_pinxml.c_str());
@@ -171,11 +160,10 @@ int PercolatorApplication::main(int argc, char** argv) {
         carp(CARP_DEBUG, "Decoy file %s not found", input_decoy.c_str());
 	input_decoy = "";
       }
-  
+
       string pin_location = string(get_string_parameter_pointer("output-dir")) +
                             "/make-pin.pin.xml";
       const char* make_pin_file = pin_location.c_str();
-  
       carp(CARP_INFO, "Running make-pin with '%s' and decoy file '%s'.",
            input_pinxml.c_str(), input_decoy.c_str());
       int ret = MakePinApplication::main(input_pinxml, input_decoy);
@@ -187,7 +175,6 @@ int PercolatorApplication::main(int argc, char** argv) {
     } else if (!has_extension(input_pinxml.c_str(), "pin.xml")) {
         carp(CARP_FATAL, "input file %s is not recognized.", input_pinxml.c_str() );
 	}
-
   }
   return main(input_pinxml);
 
@@ -263,7 +250,7 @@ int PercolatorApplication::main(
   string decoy_pre=get_string_parameter_pointer("decoy-prefix");
   if(decoy_pre.length()){
      perc_args_vec.push_back(decoy_pre);
-  }else{
+  } else {
      perc_args_vec.push_back("random_");
   }
 
