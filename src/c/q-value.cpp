@@ -385,19 +385,23 @@ MatchCollection* run_qvalue(
   // Create two match collections, for targets and decoys.
   MatchCollection* target_matches = new MatchCollection(false);
   
+  decoy_matches = new MatchCollection(true);
   if (decoy_path != "") {
-    decoy_matches = parser.create(decoy_path.c_str(), get_string_parameter_pointer("protein-database"));
-   // Mark decoy matches
-    MatchIterator* decoy_iter = new MatchIterator(decoy_matches);
-    while (decoy_iter->hasNext()) {
-      Crux::Match* decoy_match = decoy_iter->next();
-      decoy_match->setNullPeptide(true);
+    MatchCollection* temp_collection = parser.create(decoy_path.c_str(), get_string_parameter_pointer("protein-database"));
+       // Mark decoy matches
+    MatchIterator* temp_iter = new MatchIterator(temp_collection);
+    while (temp_iter->hasNext()) {
+      Crux::Match* decoy_match = temp_iter->next();
+      if (decoy_match->getRank(XCORR) == 1) {
+        decoy_match->setNullPeptide(true);
+        decoy_matches->addMatch(decoy_match);
+        have_decoys = true;
+      }
     }
-    delete decoy_iter;
-    have_decoys = true;
-  } else {
-    decoy_matches = new MatchCollection(true);
+    delete temp_iter;
+    delete temp_collection;
   }
+  
   target_matches->setScoredType(XCORR, true);
   decoy_matches->setScoredType(XCORR, true);
 
