@@ -606,6 +606,17 @@ void MzIdentMLWriter::addScores(
       score_idx++) {
     SCORER_TYPE_T score_type = (SCORER_TYPE_T)score_idx;
     if (match_collection->getScoredType(score_type)) {
+      if (score_type == XCORR){  
+        if (match_collection->exact_pval_search){
+         CVParam exactPval(MS_peptide_identification_confidence_metric, match->getScore(TIDE_SEARCH_EXACT_PVAL));
+         item->cvParams.push_back(exactPval);
+         CVParam refactXCORR(MS_Sequest_xcorr, match->getScore(TIDE_SEARCH_REFACTORED_XCORR));
+         item->cvParams.push_back(refactXCORR);
+         continue;
+        }
+      }
+
+
       CVID cvparam_type = getScoreCVID(score_type);
       if (cvparam_type != CVID_Unknown) {
         CVParam cvparam(cvparam_type, match->getScore(score_type));
@@ -614,8 +625,8 @@ void MzIdentMLWriter::addScores(
     }
   }
 
-  if (match_collection->getScoredType(XCORR)) {
 
+  if (match_collection->getScoredType(XCORR)) {
     CVParam delta_cn(MS_Sequest_deltacn, match->getDeltaCn());
     item->cvParams.push_back(delta_cn);
   }
