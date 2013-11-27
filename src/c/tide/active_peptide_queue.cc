@@ -174,9 +174,9 @@ int ActivePeptideQueue::SetActiveRangeBIons(double min_mass, double max_mass) {
       Peptide* peptide = new(&fifo_alloc_peptides_)
         Peptide(current_pb_peptide_, proteins_, &fifo_alloc_peptides_);
       queue_.push_back(peptide);
+      ComputeBTheoreticalPeaksBack();
       if (peptide->Mass() > max_mass)
         break;
-      ComputeBTheoreticalPeaksBack();
     }
   }
   // by now, if not EOF, then the last (and only the last) enqueued

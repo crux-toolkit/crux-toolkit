@@ -390,7 +390,7 @@ void TideSearchApplication::search(
       TideMatchSet::Arr match_arr(size); // Scored peptides will go here.
       deque<TheoreticalPeakSetBIons>::const_iterator iter1_;
       //here comes Jeff's exactPvalue calculation
-/*      for (iter1_ = active_peptide_queue->b_ion_queue_.begin(); iter1_ != active_peptide_queue->b_ion_queue_.end(); ++iter1_){
+      for (iter1_ = active_peptide_queue->b_ion_queue_.begin(); iter1_ != active_peptide_queue->b_ion_queue_.end(); ++iter1_){
          vector<unsigned int>::const_iterator it;
 	 it = iter1_->unordered_peak_list_.begin();
  	 for (; it != iter1_->unordered_peak_list_.end(); ++it) {
@@ -398,7 +398,7 @@ void TideSearchApplication::search(
 	 } 
          cout << endl;
       }
-*/
+
       //report matches
 
       TideMatchSet matches(&match_arr, highest_mz);

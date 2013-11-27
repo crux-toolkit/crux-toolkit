@@ -105,6 +105,9 @@ void MatchFileWriter::setPrecision(){
     case NSAF_SCORE_COL:
     case DNSAF_SCORE_COL:
     case EMPAI_SCORE_COL:
+    case EXACT_PVALUE_COL:
+    case REFACTORED_SCORE_COL:
+
 #ifdef NEW_COLUMNS
     case WEIBULL_PEPTIDE_QVALUE_COL:      // NEW
     case DECOY_XCORR_PEPTIDE_QVALUE_COL:  // NEW
@@ -215,13 +218,17 @@ void MatchFileWriter::addColumnNames(CruxApplication* application,
 
   case TIDE_SEARCH_COMMAND: ///< tide-search
     if (get_boolean_parameter("compute-sp") || get_boolean_parameter("sqt-output")) {
-      addColumnName(SP_SCORE_COL);
+      if (get_boolean_parameter("exact-p-value")) {
+        addColumnName(EXACT_PVALUE_COL);
+        addColumnName(REFACTORED_SCORE_COL);
+      } else {
+        addColumnName(SP_SCORE_COL);
+      }
       addColumnName(SP_RANK_COL);
       addColumnName(BY_IONS_MATCHED_COL);
       addColumnName(BY_IONS_TOTAL_COL);
     }
     break;
-
   case SEQUEST_COMMAND:      ///< sequest-search
     if( get_int_parameter("max-rank-preliminary") > 0 ){
       addColumnName(SP_SCORE_COL);
@@ -281,7 +288,13 @@ void MatchFileWriter::addColumnNames(CruxApplication* application,
   addColumnName(SPECTRUM_NEUTRAL_MASS_COL);
   addColumnName(PEPTIDE_MASS_COL);
   addColumnName(DELTA_CN_COL);
-  addColumnName(XCORR_SCORE_COL);
+  if (get_boolean_parameter("exact-p-value")) {
+    addColumnName(EXACT_PVALUE_COL);
+    addColumnName(REFACTORED_SCORE_COL);
+  } else {
+    addColumnName(XCORR_SCORE_COL);
+  }
+//  addColumnName(XCORR_SCORE_COL);
   addColumnName(XCORR_RANK_COL);
   addColumnName(MATCHES_SPECTRUM_COL);
   addColumnName(SEQUENCE_COL);
