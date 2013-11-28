@@ -55,6 +55,10 @@ protected:
     int charge
   );
 
+  // small functions
+  bool sortAscInt( int i, int j ) { return i < j; }
+  bool sortDescInt( int i, int j ) { return i > j; }
+
 public:
 
   bool exact_pvalue;
@@ -94,6 +98,8 @@ public:
   virtual COMMAND_T getCommand();
 
   bool exact_pval_search;
+  
+  int calcScoreCount( int numelEvidenceObs, int* evidenceObs, double binWidth, double binOffset, int pepMassInt, int maxEvidence, int minEvidence, int maxScore, int minScore, double* aaProb1, double* aaProb2, double* pValueScoreObs );
   
 };
 
