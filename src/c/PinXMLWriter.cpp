@@ -445,7 +445,7 @@ void PinXMLWriter::printFeatures(
   char* sequence = peptide->getSequence();
   char sequence_first = sequence[0];
   char sequence_last = sequence[strlen(sequence) - 1];
-  delete[] sequence;
+  free(sequence);
   if (n_flank == '-' ||
       ((n_flank == 'K' || n_flank == 'R') && sequence_first != 'P'))
     enz_n =true;
