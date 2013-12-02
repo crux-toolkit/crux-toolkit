@@ -30,6 +30,7 @@ int TideIndexApplication::main(int argc, char** argv) {
     "decoy-format",
     "decoy-prefix",
     "enzyme",
+    "custom-enzyme",
     "digestion",
     "missed-cleavages",
     "max-length",
