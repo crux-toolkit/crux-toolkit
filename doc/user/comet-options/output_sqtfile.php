@@ -13,6 +13,7 @@
          <ul>
          <li>Controls whether to output search results into an SQT file (.sqt).
          <li>Valid values are 0 (do not output) or 1 (output).
+         <li>The default value is "0" if this parameter is missing.
          </ul>
 
          <p>Example:

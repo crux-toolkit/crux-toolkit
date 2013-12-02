@@ -17,6 +17,7 @@
          sequences, set the parameter "nucleotide_reading_frame = 0".  If the sequences are nucleic acid
          sequences, you must instruct Comet to translate these to amino acid sequences.  Do this by setting
          "nucleotide_reading_frame" to a value between 1 and 9.
+         <li>There is no default value if this parameter is missing.
          </ul>
 
          <p>Example:

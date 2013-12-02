@@ -19,13 +19,12 @@
          <a href="num_output_lines.php">num_output_lines</a>, it allows
          the SpRank value to span a larger range which may be helpful for
          tools like PeptideProphet or Percolator (not likely though).
-         <li>The maximum num_results value possible is hardcoded into Comet and
-         is currently 100.
-         <li>Valid values are any integer greater than zero.
+         <li>Valid values are any integer between 1 and 100.
+         <li>The default value is "100" if this parameter is missing.
          </ul>
 
          <p>Example:
-         <br><tt>num_results = 10</tt>
+         <br><tt>num_results = 50</tt>
 
       </div>
    </div>

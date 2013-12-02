@@ -15,6 +15,9 @@
              encode the letter 'Z' in the input FASTA file and specify its mass here.
          <li>The letter 'Z' has no default mass.  So the mass entered here will
              be its residue mass.
+         <li>The default value is "0.0" if this parameter is missing.  If any peptide
+             contains the letter 'Z' while this parameter value is set to 0.0, that
+             peptide will not be analyzed.
          </ul>
 
          <p>Example:

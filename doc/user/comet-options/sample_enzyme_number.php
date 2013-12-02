@@ -19,6 +19,7 @@
          the sample enzyme is "trypsin" yet the search enzyme is "No-enzyme"
          for a non-specific search.  Hence the need for this separate parameter.
          <li>Valid values are any integer represented in the enzyme list.
+         <li>The default value is "0" if this parameter is missing.
          </ul>
 
          <p>Example:

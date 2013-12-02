@@ -17,12 +17,20 @@
          fully tryptic peptides would be analyzed if "num_enzyme_termini = 2"
          whereas semi-tryptic peptides would be analyzed if "num_enzyme_termini = 1".
          <li>This parameter is unused if a no-enzyme search is specified.
-         <li>Valid values are 1 and 2.
+         <li>Valid values are 1, 2, 8, 9.
+         <li>Set this parameter to 1 for a semi-enzyme search.
+         <li>Set this parameter to 2 for a full-enzyme search.
+         <li>Set this parameter to 8 for a semi-enzyme search, unspecific cleavage on peptide's N-terminus.
+         <li>Set this parameter to 9 for a semi-enzyme search, unspecific cleavage on peptide's C-terminus.
+         <li>The default value is "2" if this parameter is missing.
+         </ul>
 
 
          <p>Example:
          <br><tt>num_enzyme_termini = 1</tt>
          <br><tt>num_enzyme_termini = 2</tt> 
+         <br><tt>num_enzyme_termini = 8</tt> 
+         <br><tt>num_enzyme_termini = 9</tt> 
 
       </div>
    </div>

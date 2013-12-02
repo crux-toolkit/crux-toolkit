@@ -18,10 +18,13 @@
          <li>The maximum possible number of reported hits is hardcoded
          into each binary and that value is currently set to 100.
          <li>Valid values are any positive integer 1 or greater.
+         <li>If a value less than 1 is entered, this parameter is set to 1.
+         <li>The default value is "10" if this parameter is missing.
          </ul>
 
          <p>Example:
          <br><tt>num_output_lines = 1</tt>
+         <br><tt>num_output_lines = 5</tt>
          <br><tt>num_output_lines = 10</tt>
 
       </div>

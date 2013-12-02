@@ -1,9 +1,9 @@
 <div id="page">
    <div id="content_full">
       <div class="post hr">
-         <h1>Search parameters (2013.01)</h1>
+         <h1>Search parameters (2013.02)</h1>
          <p><strong>Comet</strong> search parameters are defined here.  These are valid for
-         Comet version 2013.01.x.</p>
+         Comet version 2013.02.x.</p>
          
          <p>Parameters for all versions of Comet <a href="http://comet-ms.sourceforge.net/parameters">can be found here</a>.
          <br>Entries marked with an <font color="red">*</font> are new parameters.
@@ -44,7 +44,7 @@
          <h3>Fragment ions</h3>
          <ul>
          <li><a href="fragment_bin_tol.php">fragment_bin_tol</a></li>
-         <li><a href="fragment_bin_offset.php">fragment_bin_offset</a> <font color="red">**</font></li>
+         <li><a href="fragment_bin_offset.php">fragment_bin_offset</a></li>
          <li><a href="theoretical_fragment_ions.php">theoretical_fragment_ions</a></li>
          <li><a href="use_A_ions.php">use_A_ions</a></li>
          <li><a href="use_B_ions.php">use_B_ions</a></li>
@@ -53,14 +53,16 @@
          <li><a href="use_Y_ions.php">use_Y_ions</a></li>
          <li><a href="use_Z_ions.php">use_Z_ions</a></li>
          <li><a href="use_NL_ions.php">use_NL_ions</a></li>
-         <li><a href="use_sparse_matrix.php">use_sparse_matrix</a> <font color="red">*</font></li>
+         <li><a href="use_sparse_matrix.php">use_sparse_matrix</a>
          </ul>
 
          <h3>Output</h3>
          <ul>
          <li><a href="output_sqtstream.php">output_sqtstream</a></li>
          <li><a href="output_sqtfile.php">output_sqtfile</a></li>
+         <li><a href="output_txtfile.php">output_txtfile</a> <font color="red">**</font></li>
          <li><a href="output_pepxmlfile.php">output_pepxmlfile</a></li>
+         <li><a href="output_pinxmlfile.php">output_pinxmlfile</a> <font color="red">*</font></li>
          <li><a href="output_outfiles.php">output_outfiles</a></li>
          <li><a href="print_expect_score.php">print_expect_score</a></li>
          <li><a href="num_output_lines.php">num_output_lines</a></li>
@@ -85,6 +87,8 @@
          <li><a href="max_precursor_charge.php">max_precursor_charge</a></li>
          <li><a href="nucleotide_reading_frame.php">nucleotide_reading_frame</a></li>
          <li><a href="clip_nterm_methionine.php">clip_nterm_methionine</a></li>
+         <li><a href="spectrum_batch_size.php">spectrum_batch_size</a></li>
+         <li><a href="decoy_prefix.php">decoy_prefix</a> <font color="red">*</font></li>
          </ul>
 
          <h3>Spectral processing</h3>
@@ -93,7 +97,7 @@
          <li><a href="minimum_intensity.php">minimum_intensity</a></li>
          <li><a href="remove_precursor_peak.php">remove_precursor_peak</a></li>
          <li><a href="remove_precursor_tolerance.php">remove_precursor_tolerance</a></li>
-         <li><a href="clear_mz_range.php">clear_mz_range</a> <font color="red">*</font></li>
+         <li><a href="clear_mz_range.php">clear_mz_range</a></li>
          </ul>
                         
          <h3>Variable modifications</h3>

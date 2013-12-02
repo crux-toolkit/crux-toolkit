@@ -17,6 +17,7 @@
          fragment ion masses for the top peptide hit are calculated
          and dislayed at the end of an .out file.
          <li>Valid values are 0 and 1.
+         <li>The default value is "0" if this parameter is missing.
          </ul>
 
          <p>Example:

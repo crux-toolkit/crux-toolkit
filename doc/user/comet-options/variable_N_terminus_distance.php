@@ -20,6 +20,7 @@
             <li>any positive integer <i>N</i> will have the program consider modifications on the n-terminus and the next <i>N</i> residues
                 (effectively the first N+1 residues).
             </ul>
+         <li>The default value is "-1" if this parameter is missing.
          </ul>
 
          <p>Example:

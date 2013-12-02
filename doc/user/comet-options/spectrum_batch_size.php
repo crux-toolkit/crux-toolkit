@@ -20,14 +20,11 @@
          value (i.e. 5014 spectra loaded when the parameter is set to 5000) due to both
          threading and potential charge state considerations when precursor charge state
          is not known.
-         <li>Valid values are 0 or any positive integer:
-            <ul>
-            <li>0 to load and search all spectra at once
-            <li>any other positive integer will loop through searching this number of
-            spectra at a time until all spectra have been analyzed
-            </ul>
-
-
+         <li>Valid values are 0 or any positive integer.
+         <li>Set this parameter to 0 to load and search all spectra at once.
+         <li>Set this parameter to any other positive integer to loop through searching
+         this number of spectra at a time until all spectra have been analyzed.
+         <li>The default value is "0" if this parameter is missing.
          </ul>
 
          <p>Example:

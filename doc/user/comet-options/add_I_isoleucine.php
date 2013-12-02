@@ -13,6 +13,7 @@
          <ul>
          <li>Specify a static modification to the residue I.
          <li>The specified mass is added to the unmodified mass of I.
+         <li>The default value is "0.0" if this parameter is missing.
          </ul>
 
          <p>Example:

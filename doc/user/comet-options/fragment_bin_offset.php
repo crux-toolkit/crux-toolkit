@@ -28,6 +28,7 @@
          scaled by the <a href="fragment_bin_tol.php">fragment_bin_tol</a> value.
          <li>I know this is esoteric and any normal user should not give this
          parameter any thought beyond using the recommended settings.
+         <li>The default value is "0.4" if this parameter is missing.
          </ul>
 
          <p>Example:
