@@ -600,7 +600,7 @@ void Protein::shuffle(
   case NO_DECOYS:
     return;
 
-  case REVERSE_DECOYS:
+  case PROTEIN_REVERSE_DECOYS:
     reverse(sequence_, sequence_ + strlen(sequence_));
     break;
 
@@ -621,7 +621,7 @@ void Protein::shuffle(
 
   // change the protein name
   const char* prefix = "rand_";
-  if( decoy_type == REVERSE_DECOYS ){
+  if( decoy_type == PROTEIN_REVERSE_DECOYS ){
     prefix = "reverse_";
   }
   char* new_name = cat_string(prefix, id_);
