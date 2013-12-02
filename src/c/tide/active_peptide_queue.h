@@ -67,12 +67,12 @@ class ActivePeptideQueue {
   // queue_ maintains only the peptides that fall within the range specified
   // by the last call to SetActiveRange().
   deque<Peptide*> queue_;
-
+ public:
   // iter_ points to the current peptide. Client access is by HasNext(),
   // GetPeptide(), and NextPeptide(). end_ points just beyond the last active
   // peptide.
   deque<Peptide*>::const_iterator iter_, end_;
-
+ private:
   // Set by most recent call to SetActiveRange()
   double min_mass_, max_mass_;
 
