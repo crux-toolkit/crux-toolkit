@@ -161,7 +161,7 @@ int ActivePeptideQueue::SetActiveRangeBIons(double min_mass, double max_mass) {
   bool done;
   if (queue_.empty() || queue_.back()->Mass() <= max_mass) {
     if (!queue_.empty()){
-      ComputeBTheoreticalPeaksBack();
+//      ComputeBTheoreticalPeaksBack();
     }
       
     while (!(done = reader_->Done())) {
