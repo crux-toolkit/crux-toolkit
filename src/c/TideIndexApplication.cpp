@@ -729,9 +729,8 @@ void TideIndexApplication::getDecoyPbProtein(
   }
   // Add C term to decoySequence, if it exists
   size_t cTermLoc = startLoc + pepLen;
-  if (cTermLoc < proteinSequence->length()) {
-    decoyPeptideSequence.push_back(proteinSequence->at(cTermLoc));
-  }
+  decoyPeptideSequence.push_back((cTermLoc < proteinSequence->length()) ?
+    proteinSequence->at(cTermLoc) : '-');
   // Append original target sequence, unless using protein level decoys
   if (get_tide_decoy_type_parameter("decoy-format") != PROTEIN_REVERSE_DECOYS) {
     decoyPeptideSequence.append(targetProteinInfo.sequence->substr(startLoc, pepLen));

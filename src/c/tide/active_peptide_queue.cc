@@ -107,8 +107,11 @@ int ActivePeptideQueue::SetActiveRange(double min_mass, double max_mass) {
   if (queue_.empty())
     return 0;
 
-  --end_;
-  return queue_.size() - 1;
+  if (!done) {
+    --end_;
+    return queue_.size() - 1;
+  }
+  return queue_.size();
 
   /*
   cerr << (end_ - iter_) << " candidates.";
