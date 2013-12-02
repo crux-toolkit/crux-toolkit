@@ -19,6 +19,7 @@
          <a href="clear_mz_range.php">clear_mz_range</a> is applied but before
          any other spectral processing occurs (i.e.  <a href="remove_precursor_peak.php">remove_precursor_peak</a>).
          <li>Valid values are any integer number.
+         <li>The default value is "10" if this parameter is missing.
          </ul>
 
          <p>Example:

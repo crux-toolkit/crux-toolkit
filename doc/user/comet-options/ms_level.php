@@ -13,9 +13,11 @@
          <ul>
          <li>This parameter specifies which scans are searched.
          <li>An input value of 2 will search MS/MS scans.
-         <li>An input value of 3 will search MS^3 scans.
+         <li>An input value of 3 will search MS3 scans.
          <li>This parameter is only valid for mzXML, mzML, and mz5 input files.
          <li>Allowed values are 2 or 3.
+         <li>The default value is "2" if this parameter is missing or any value
+         other than 2 or 3 is entered.
          </ul>
 
          <p>Example:

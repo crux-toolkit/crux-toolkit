@@ -13,6 +13,7 @@
          <ul>
          <li>Specify a static modification to the c-terminus of all peptides.
          <li>The specified mass is added to the unmodified c-terminal mass (mass of OH or 17.00274).
+         <li>The default value is "0.0" if this parameter is missing.
          </ul>
 
          <p>Example:

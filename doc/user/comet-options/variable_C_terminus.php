@@ -14,6 +14,7 @@
          <li>Specify a variable modification to peptide's c-terminus.
          <li>Works in conjunction with <a href="variable_C_terminus_distance.php">variable_C_terminus_distance</a>
              to specify scope of which peptides this parameter is applied to.
+         <li>The default value is "0.0" if this parameter is missing.
          </ul>
 
          <p>Example:

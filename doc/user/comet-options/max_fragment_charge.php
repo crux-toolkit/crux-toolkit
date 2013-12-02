@@ -25,6 +25,8 @@
          1+ fragments considered.  And similarly 3+ precursors will still only
          have 1+ and 2+ fragments considered.
          <li>Valid values are any non-zero integer.
+         <li>The default value is "3" if this parameter is missing.  A maximum
+         allowed value of "5" is enforced for this parameter.
          </ul>
 
          <p>Example:

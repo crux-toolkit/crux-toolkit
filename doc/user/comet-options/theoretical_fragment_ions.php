@@ -29,6 +29,7 @@
          high-res MS/MS spectra, a value of 0 is optimal to incorporate
          intensities from the flanking bins.
          <li>Allowed values are 0 or 1.
+         <li>The default value is "1" if this parameter is missing.
          </ul>
 
          <p>Example:

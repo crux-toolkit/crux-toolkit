@@ -19,6 +19,7 @@
          that any N-terminal modifications will also apply (if appropriate)
          to the peptide that is generated after the removal of the methionine.
          <li>Valid values are 0 and 1.
+         <li>The default value is "0" if this parameter is missing.
          </ul>
 
          <p>Example:

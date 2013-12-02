@@ -13,11 +13,12 @@
          <ul>
          <li>Controls whether to output search results in a pepXML file.
          <li>Valid values are 0 (do not output) or 1 (output).
+         <li>The default value is "1" if this parameter is missing.
          </ul>
 
          <p>Example:
-         <br><tt>output_pepxmlfile= 0</tt>
-         <br><tt>output_pepxmlfile= 1</tt>
+         <br><tt>output_pepxmlfile = 0</tt>
+         <br><tt>output_pepxmlfile = 1</tt>
 
       </div>
    </div>

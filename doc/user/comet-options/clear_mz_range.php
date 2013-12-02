@@ -20,6 +20,7 @@
          <li>Valid values are two decimal numbers where the first number must
          be less or equal to the second number.
          <li>All peaks between the two decimal values are cleared out.
+         <li>The default value is "0.0 0.0" if this parameter is missing.
          </ul>
 
          <p>Example:

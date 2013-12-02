@@ -14,6 +14,7 @@
          <li>This parameter controls the mass tolerance value.
          <li>The mass tolerance is set at +/- the specified number i.e. an entered value of "1.0" applies a -1.0 to +1.0 tolerance.
          <li>The units of the mass tolerance is controlled by the parameter "<a href="peptide_mass_units.php">peptide_mass_units</a>".
+         <li>The default value is "1.0" if this parameter is missing.
          </ul>
 
          <p>Example:

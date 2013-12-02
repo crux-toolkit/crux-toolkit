@@ -19,6 +19,7 @@
          <li>When the start scan is set to 0, this parameter setting is ignored irrespective of what
          the end scan is set to.
          <li>When the end scan is less than the start scan, this parameter setting is ignored.
+         <li>The default value is "0 0" if this parameter is missing.
          </ul>
 
          <p>Example:

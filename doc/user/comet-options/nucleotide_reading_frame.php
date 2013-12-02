@@ -14,6 +14,7 @@
          <li>This parameter is used to search nucleotide sequence databases.
          <li>It controls how the nucleotides are translated specifically
          which sets of reading frames are translated.
+         <li>Valid values are 0 through 9.
          <li>Set this parameter to 0 for a protein sequence database.
          <li>Set this parameter to 1 to search the 1st forward reading frame.
          <li>Set this parameter to 2 to search the 2nd forward reading frame.
@@ -24,7 +25,7 @@
          <li>Set this parameter to 7 to search all 3 forward reading frames.
          <li>Set this parameter to 8 to search all 3 reverse reading frames.
          <li>Set this parameter to 9 to search all 6 reading frames.
-         <li>Valid values are 0 through 9.
+         <li>The default value is "0" if this parameter is missing.
          </ul>
 
          <p>Example:

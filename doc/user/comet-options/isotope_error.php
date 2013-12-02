@@ -24,6 +24,7 @@
             <li>1 searches -1, 0, +1, +2, and +3 isotope offsets
             <li>2 searches -8, -4, 0, +4, +8 isotope offsets (for +4/+8 stable isotope labeling)
             </ul>
+         <li>The default value is "0" if this parameter is missing.
          </ul>
 
          <p>Example:

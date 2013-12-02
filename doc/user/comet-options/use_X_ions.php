@@ -15,6 +15,7 @@
          <li>Valid values are 0 and 1.
          <li>To not use X-ions, set the value to 0.
          <li>To use X-ions, set the value to 1.
+         <li>The default value is "0" if this parameter is missing.
          </ul>
 
          <p>Example:

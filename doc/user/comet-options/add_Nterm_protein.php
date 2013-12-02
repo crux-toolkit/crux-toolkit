@@ -13,6 +13,7 @@
          <ul>
          <li>Specify a static modification to the n-terminal peptide of each protein entry.
          <li>The specified mass is added to the unmodified n-terminal mass (mass of H or 1.007825).
+         <li>The default value is "0.0" if this parameter is missing.
          </ul>
 
          <p>Example:

@@ -15,6 +15,8 @@
          will be analyzed.
          <li>Only spectra with this number of precursor charges or less will be searched.
          <li>Valid values are any integer greater than 1.
+         <li>The default value is "6" if this parameter is missing.  A maximum
+         allowed value of "9" is enforced for this parameter.
          </ul>
 
          <p>Example:

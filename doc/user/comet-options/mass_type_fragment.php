@@ -17,8 +17,7 @@
             <li>0 for average masses
             <li>1 for monoisotopic masses
             </ul>
-
-
+         <li>The default value is "1" if this parameter is missing.
          </ul>
 
          <p>Example:
