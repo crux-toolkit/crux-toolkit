@@ -223,12 +223,26 @@ Default=1.</code></li>
 <li>
 <code>--enzyme &lt;string&gt;</code> &ndash; Specify the enzyme used
 to digest the proteins <i>in silico</i>.  Available enzymes include
-trypsin, chymotrypsin, elastase, clostripain, cyanogen-bromide,
-idosobenzoate, proline-endopeptidase, staph-protease,
-modified-chymotrypsin, elastase-trypsin-chymotrypsin and aspn.
+no-enzyme, trypsin, trypsin/p, chymotrypsin, elastase, clostripain, 
+cyanogen-bromide, iodosobenzoate, proline-endopeptidase, staph-protease, aspn, lysc,
+lysn, arg_c, glue_c, pepsin_a, modified-chymotrypsin, elastase-trypsin-chymotrypsin.
 Specifying <code>--enzyme no-enzyme</code> yields a non-enzymatic
 digest.  <b>Warning:</b> the resulting index may be quite large.
 Default=<code>trypsin</code>.</li>
+
+<li>
+<code>--custom-enzyme &lt;residues before cleavage&gt;|&lt;residues after cleavage&gt;</code> &ndash;
+Specify rules for <i>in silico</i> digestion of protein sequences.
+Overrides the <code>enzyme</code> option.  Two lists of residues are
+given enclosed in square brackets or curly braces and separated by a
+|. The first list contains residues required/prohibited before the
+cleavage site and the second list is residues after the cleavage site.
+If the residues are required for digestion, they are in square
+brackets, '[' and ']'.  If the residues prevent digestion, then they
+are enclosed in curly braces, '{' and '}'.  Use X to indicate all
+residues.  For example, trypsin cuts after R or K but not before P
+which is represented as <code>[RK]|{P}</code>.  AspN cuts after any
+residue but only before D which is represented as <code>[X]|[D]</code>.
 
 <li>
 <code>--digestion &lt;full-digest|partial-digest&gt;</code> &ndash; Specify

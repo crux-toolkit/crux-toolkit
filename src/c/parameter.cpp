@@ -492,9 +492,11 @@ void initialize_parameters(void){
       "true");
   set_enzyme_type_parameter("enzyme", TRYPSIN,
       "Enzyme to use for in silico digestion of proteins. "
-      "<string>=trypsin|chymotrypsin|elastase|clostripain| "
-      "cyanogen-bromide|iodosobenzoate|proline-endopeptidase| "
-      "staph-protease|aspn|modified-chymotrypsin|no-enzyme. "
+      "<string>=no-enzyme|trypsin|trypsin/p|chymotrypsin| " 
+      "elastase|clostripain|cyanogen-bromide|iodosobenzoate| " 
+      "proline-endopeptidase|staph-protease|aspn|lysc "
+      "lysn|arg_c|glue_c|pepsin_a|modified-chymotrypsin| "
+      "|elastase-trypsin-chymotrypsin|custom-enzyme. "
       "Default=trypsin.", 
       "Used in conjunction with the options digestion and missed-cleavages. "
       "Use 'no-enzyme' for non-specific digestion.  Available "
@@ -1726,9 +1728,9 @@ void initialize_parameters(void){
      "--use-spec-features option to F. Default T.", 
      "Available for q-ranker and barista.", "true");
 
-  set_string_parameter("decoy_prefix", "random_",
+  set_string_parameter("decoy_prefix", "decoy_",
      "Specifies the prefix of the protein names that indicates a decoy. "
-     "Default = random_.",
+     "Default = decoy_.",
      " Available for q-ranker and barista.", "true");
 
   set_string_parameter("re-run", "__NULL_STR",
