@@ -640,7 +640,7 @@ void Match::printSqt(
   char* protein_id = NULL;
   Protein* protein = NULL;
   const char* rand = "";
-
+  
   for(PeptideSrcIterator iter = peptide->getPeptideSrcBegin();
       iter != peptide->getPeptideSrcEnd();
       ++iter){
@@ -648,14 +648,14 @@ void Match::printSqt(
                protein = peptide_src->getParentProtein();
                protein_id = protein->getId();
 
-               // only prepend "rand_" if we are doing a fasta search
+               // only prepend "decoy-prefix" if we are doing a fasta search
                Database* database = protein->getDatabase();
                if( null_peptide_ 
                    && (database != NULL && database->getDecoyType() == NO_DECOYS) ){
-                    rand = "rand_";
-                  }
+		 rand = get_string_parameter_pointer("decoy-prefix"); 
+               }
     
-      // print match info (locus line), add rand_ to locus name for decoys
+      // print match info (locus line), add "decoy-prefix" to locus name for decoys
       fprintf(file, "L\t%s%s\n", rand, protein_id);      
       free(protein_id);
      }

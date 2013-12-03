@@ -135,7 +135,7 @@ bool PWIZSpectrumCollection::parse() {
       string ms_peak_list_scans = spectrum->cvParam(pwiz::msdata::MS_peak_list_scans).value;
       string ms_spectrum_title = spectrum->cvParam(pwiz::msdata::MS_spectrum_title).value;
       carp(CARP_DEBUG, "ms_peak_list_scans:%s", ms_peak_list_scans.c_str());
-      carp(CARP_INFO, "ms_spectrum_title:%s", ms_spectrum_title.c_str());
+      carp(CARP_DEBUG, "ms_spectrum_title:%s", ms_spectrum_title.c_str());
       if (ms_peak_list_scans.empty() || !get_first_last_scan_from_string(ms_peak_list_scans, scan_number_begin, scan_number_end)) {
         if (ms_spectrum_title.empty() || !parseFirstLastScanFromTitle(ms_spectrum_title, scan_number_begin, scan_number_end)) {
           string scan_value = pwiz::msdata::id::translateNativeIDToScanNumber(

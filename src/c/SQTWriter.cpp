@@ -256,7 +256,7 @@ void SQTWriter::writePSM(
     string protein_id_str(protein_id);
     free(protein_id);
     if (is_decoy && protein->getDatabase()->getDecoyType() == NO_DECOYS) {
-      protein_id_str = "rand_" + protein_id_str;
+      protein_id_str = get_string_parameter_pointer("decoy-prefix") + protein_id_str;
     }
     *file_ << "L"
            << "\t" << protein_id_str

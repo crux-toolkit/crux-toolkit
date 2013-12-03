@@ -109,6 +109,7 @@ Protein* MatchCollectionParser::getProtein(
     decoy_database->addProtein(protein);
     
   } else {
+    carp(CARP_DEBUG, "adding to target database");
     is_decoy = false;
     database->addProtein(protein);
   }

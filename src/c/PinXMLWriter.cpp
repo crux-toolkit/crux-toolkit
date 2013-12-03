@@ -553,8 +553,6 @@ void PinXMLWriter::printOccurence(
     protein_ids,
     protein_description
   );
-  
-  //string decoy_prefix="rand_";
 
   char* flanking_ptr = peptide->getFlankingAAs();
   string flanking_str(flanking_ptr);
