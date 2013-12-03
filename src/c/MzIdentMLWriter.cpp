@@ -449,7 +449,10 @@ SpectrumIdentificationResultPtr MzIdentMLWriter::getSpectrumIdentificationResult
   Crux::Spectrum* spectrum ///< Crux spectrum object -in
   ) {
 
-  string spectrum_idStr = DelimitedFileWriter::to_string(spectrum->getFirstScan());
+  string spectrum_idStr = 
+    DelimitedFileWriter::to_string(spectrum->getFirstScan()) + 
+    "-" +
+    DelimitedFileWriter::to_string(spectrum->getLastScan());
 
   SpectrumIdentificationListPtr silp = getSpectrumIdentificationList();
 
@@ -615,19 +618,17 @@ void MzIdentMLWriter::addScores(
   }
 
   if (match_collection->getScoredType(XCORR)) {
-
     CVParam delta_cn(MS_SEQUEST_deltacn, match->getDeltaCn());
     item->cvParams.push_back(delta_cn);
   }
+
   if (match_collection->getScoredType(SP)) {
     CVParam matched_ions(MS_SEQUEST_matched_ions, match->getBYIonMatched());
     item->cvParams.push_back(matched_ions);
     CVParam total_ions(MS_SEQUEST_total_ions, match->getBYIonPossible()); 
+    item->cvParams.push_back(total_ions);
   }
-
-
 }
-
 
 /**
  * Adds the match ranks to the SpectrumIdentificationItem

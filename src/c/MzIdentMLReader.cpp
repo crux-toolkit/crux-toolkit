@@ -256,10 +256,27 @@ void MzIdentMLReader::parsePSMs() {
     for (sir_iter = (**sil_iter).spectrumIdentificationResult.begin();
       sir_iter != (**sil_iter).spectrumIdentificationResult.end();
       ++sir_iter) {
+
       SpectrumIdentificationResult& result = **sir_iter;
       string idStr = result.spectrumID;
-      string filename = result.spectraDataPtr->location;
+      carp(CARP_DEBUG, "idStr:%s", idStr.c_str());
+      //TODO crux requires scan numbers to be integer, where mzid can have
+      //them be strings. I don't know what the appropiate thing to do here.
+      //For now, lets parse as a first_scan-last_scan string, since our
+      //writer outputs it in that format.  SJM. 
+      int first_scan;
+      int last_scan;
+      if (!get_first_last_scan_from_string(idStr, first_scan, last_scan)) {
+        carp(CARP_ERROR, "Cannot find first,last scan from spectrumID:%s",
+	     idStr.c_str());    
+      }
 
+      //We are not using this yet, but we might.
+      string filename = "";
+      if (result.spectraDataPtr != NULL) {
+        string filename = result.spectraDataPtr->location;
+        carp(CARP_DEBUG, "filename:%s", filename.c_str());
+      }
       for (sii_iter = result.spectrumIdentificationItem.begin();
         sii_iter != result.spectrumIdentificationItem.end();
         ++sii_iter) {
@@ -267,16 +284,15 @@ void MzIdentMLReader::parsePSMs() {
         if (!use_pass_threshold_ || item.passThreshold) {
           int charge = item.chargeState;
           FLOAT_T obs_mz = item.experimentalMassToCharge;
-
+	  
           SpectrumZState zstate;
           zstate.setMZ(obs_mz, charge);
           vector<int> charge_vec;
           charge_vec.push_back(charge);
 
-          //TODO crux requires scan numbers to be integer, where mzid can have
-          //them be strings. Update crux to handle string type scan numbers.  
 
-          Spectrum* spectrum = new Spectrum(0,0,obs_mz, charge_vec, "");
+          Spectrum* spectrum = 
+            new Spectrum(first_scan,last_scan,obs_mz, charge_vec, "");
 
           FLOAT_T calc_mz = item.calculatedMassToCharge;
           FLOAT_T calc_mass = (calc_mz - MASS_PROTON ) * (FLOAT_T)charge;
@@ -290,18 +306,25 @@ void MzIdentMLReader::parsePSMs() {
           PeptideEvidencePtr peptide_evidence_ptr = peptide_evidences.front();
           string protein_id = peptide_evidence_ptr->dbSequencePtr->accession;
           int start_idx = peptide_evidence_ptr->start;
-          bool is_decoy = peptide_evidence_ptr->isDecoy;
+
+	  bool is_decoy = false;
           bool is_decoy_test;
 
           carp(CARP_DEBUG,"getting protein %s",protein_id.c_str());
 
           Protein* protein = MatchCollectionParser::getProtein(
             database_, decoy_database_, protein_id, is_decoy_test);
-
-          if (is_decoy != is_decoy_test) {
-            carp(CARP_WARNING, "mzid says %d, but database says %d", is_decoy, is_decoy_test);
+       
+          if (peptide_evidence_ptr->isDecoy != is_decoy_test) {
+            carp_once(CARP_WARNING, "Protein 0) %s : mzid says isdecoy: %d, "
+              "but database says isdecoy: %d, did you set decoy-prefix?", 
+              protein_id.c_str(), 
+	      peptide_evidence_ptr->isDecoy, is_decoy_test);
           }
-  
+	  //If there is one PeptideEvidence object that is a decoy
+	  //then mark the match as a decoy.
+	  is_decoy = is_decoy || peptide_evidence_ptr->isDecoy || is_decoy_test;
+
           start_idx = protein->findStart(sequence, "", "");
           if (start_idx == -1) {
             carp(CARP_FATAL, "can't find sequence %s in first protein %s",sequence.c_str(), protein->getIdPointer());
@@ -318,19 +341,24 @@ void MzIdentMLReader::parsePSMs() {
             int start = peptide_evidence_ptr->start;
             int end = peptide_evidence_ptr->end;
             protein_id = peptide_evidence_ptr->dbSequencePtr->accession; 
-            bool decoy = peptide_evidence_ptr->isDecoy;
             carp(CARP_DEBUG, "id: %s start:%i end: %i decoy: %i", protein_id.c_str(),
-             start, end, decoy);
+             start, end, is_decoy);
 
             protein = MatchCollectionParser::getProtein(
               database_, decoy_database_, protein_id, is_decoy_test);
+            
+	    if (peptide_evidence_ptr->isDecoy != is_decoy_test) {
+	      carp_once(CARP_WARNING, "Protein %i) %s: mzid says isdecoy: %i, "
+	        "but database says isdecoy: %i, did you set \"decoy-prefix\"?", 
+		pe_idx, protein_id.c_str(), peptide_evidence_ptr->isDecoy, is_decoy_test);
+	    }
+            is_decoy = is_decoy || peptide_evidence_ptr->isDecoy || is_decoy_test;
             start_idx = protein->findStart(sequence, "", "");
             if (start_idx != -1) {
               PeptideSrc* src = new PeptideSrc((DIGEST_T)0, protein, start_idx);
               peptide->addPeptideSrc(src);
             }
           }
-
           Match* match = new Match(peptide, spectrum, zstate, is_decoy);  
           match_collection_->addMatchToPostMatchCollection(match);
 
