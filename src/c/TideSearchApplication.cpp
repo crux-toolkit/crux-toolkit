@@ -204,6 +204,10 @@ int TideSearchApplication::main(int argc, char** argv) {
   spectra.Sort();
   if (max_mz == 0) {
     double highest_mz = spectra.FindHighestMZ();
+    unsigned int spectrum_num = (*spectra.SpecCharges()).size();
+    if (spectrum_num > 0 && exact_pval_search == true)
+      highest_mz = (*spectra.SpecCharges()).at(spectrum_num-1).neutral_mass;
+
     carp(CARP_DEBUG, "Max m/z %f", highest_mz);
     MaxMZ::SetGlobalMax(highest_mz);
   } else {
@@ -395,12 +399,26 @@ void TideSearchApplication::search(
                        active_peptide_queue, proteins, compute_sp);
       }
     } else {  //execute exact-pval-search 
+      cout << MaxMZ::BinInvert(MaxMZ::Global().CacheBinEnd()) <<endl;
+      int id = 0;
       int size = active_peptide_queue -> SetActiveRangeBIons( min_mass, max_mass );
+      cout << size <<endl;
       TideMatchSet::Arr match_arr( size ); // Scored peptides will go here.
       deque< TheoreticalPeakSetBIons >::const_iterator iter1_;
       vector< unsigned int >::const_iterator it;
       //here comes Jeff's exactPvalue calculation
-	  int count = 0;
+      for (iter1_ = active_peptide_queue->b_ion_queue_.begin(); iter1_ != active_peptide_queue->b_ion_queue_.end(); ++iter1_){
+         cout << id++ << '\t' << (*active_peptide_queue->iter_)->Mass() << '\t' << (*active_peptide_queue->iter_)->Id() << '\t' << (*active_peptide_queue->iter_)->Len() << '\t' << (*active_peptide_queue->iter_)->Seq() <<endl;
+         vector<unsigned int>::const_iterator it;
+	 it = iter1_->unordered_peak_list_.begin();
+ 	 for (; it != iter1_->unordered_peak_list_.end(); ++it) {
+		cout << *it << "\t";
+	 } 
+         cout << endl;
+         ++(active_peptide_queue->iter_);
+      }
+
+/*	  int count = 0;
       for ( iter1_ = active_peptide_queue->b_ion_queue_.begin(); iter1_ != active_peptide_queue->b_ion_queue_.end(); ++iter1_ ) {
 		cout << count << "   ***   ";
 		count += 1;
@@ -409,7 +427,7 @@ void TideSearchApplication::search(
 	    } 
         cout << endl;
       }
-
+*/
       //&& for test only
       for ( TideMatchSet::Arr::iterator it = match_arr.begin(); it != match_arr.end(); it++ ) {
         it -> first.first = 1.0;
