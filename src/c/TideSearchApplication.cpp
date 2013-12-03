@@ -382,11 +382,11 @@ void TideSearchApplication::search(
 
       TideMatchSet::Arr match_arr(size);
       for (TideMatchSet::Arr2::iterator it = match_arr2.begin(); it != match_arr2.end(); ++it){
-          TideMatchSet::Pair pair;
-          pair.first.first = (double)(it->first/100000000.0);
-	  pair.first.second = 0.0;
-	  pair.second = it->second;
-	  match_arr.push_back(pair);
+        TideMatchSet::Pair pair;
+        pair.first.first = (double)(it->first/100000000.0);
+	    pair.first.second = 0.0;
+	    pair.second = it->second;
+	    match_arr.push_back(pair);
       }
 
       TideMatchSet matches(&match_arr, highest_mz);
@@ -398,7 +398,8 @@ void TideSearchApplication::search(
         matches.report(target_file, decoy_file, top_matches, spectrum, charge,
                        active_peptide_queue, proteins, compute_sp);
       }
-    } else {  //execute exact-pval-search 
+	  
+    } else {  // execute exact-pval-search 
       cout << MaxMZ::BinInvert(MaxMZ::Global().CacheBinEnd()) <<endl;
       int id = 0;
       int size = active_peptide_queue -> SetActiveRangeBIons( min_mass, max_mass );
@@ -417,9 +418,10 @@ void TideSearchApplication::search(
          cout << endl;
          ++(active_peptide_queue->iter_);
       }
-
-/*	  int count = 0;
-      for ( iter1_ = active_peptide_queue->b_ion_queue_.begin(); iter1_ != active_peptide_queue->b_ion_queue_.end(); ++iter1_ ) {
+	  
+      //&& for test only
+	  int count = 0;
+      for ( iter1_ = active_peptide_queue -> iter1_; iter1_ != active_peptide_queue -> end1_; ++iter1_ ) {
 		cout << count << "   ***   ";
 		count += 1;
  	    for ( it = iter1_ -> unordered_peak_list_.begin(); it != iter1_ -> unordered_peak_list_.end(); it++ ) {
@@ -427,12 +429,13 @@ void TideSearchApplication::search(
 	    } 
         cout << endl;
       }
-*/
-      //&& for test only
-      for ( TideMatchSet::Arr::iterator it = match_arr.begin(); it != match_arr.end(); it++ ) {
-        it -> first.first = 1.0;
-	    it -> first.second = 2.0;
-	    it -> second = 10;
+
+      for ( int i = 1; i <= 10; i++ ) {
+        TideMatchSet::Pair pair;
+        pair.first.first = 1.0 * i;
+	    pair.first.second = 2.0 * i;
+	    pair.second = 10 * i;
+        match_arr.push_back( pair );
       }
       for ( TideMatchSet::Arr::iterator it = match_arr.begin(); it != match_arr.end(); it++ ) {
         cout << it -> first.first << "\t";
@@ -440,7 +443,7 @@ void TideSearchApplication::search(
 	    cout << it -> second << "\t";
 		cout << endl;
       }
-	  //&& for test only
+	  //&& end for test only
 	  
 //************************************************************************************	  
 /* For one observed spectrum, calculates:
@@ -498,22 +501,26 @@ void TideSearchApplication::search(
     // double* pValueTarget = new double[ nPepIdxTarget ];
     // double* pValueDecoy = new double[ nPepIdxDecoy ];
 
-    // std::vector< int > pepMassIntUnique;
-    // pepMassIntUnique.reserve( nPepIdxTarget + nPepIdxDecoy );
-    // for ( pe = 0; pe < nPepIdxTarget; pe++ ) {
-        // pepMass = pepMassMonoTarget[ pepIdxTarget[ pe ] - 1 ];     //&& take account of MATLAB base-one indexing
-        // pepMassInt = ( int )floor( pepMass / binWidth + 1.0 - binOffset );
-        // pepMassIntUnique.push_back( pepMassInt );
-    // }
-    // for ( pe = 0; pe < nPepIdxDecoy; pe++ ) {
-        // pepMass = pepMassMonoDecoy[ pepIdxDecoy[ pe ] - 1 ];     //&& take account of MATLAB base-one indexing
-        // pepMassInt = ( int )floor( pepMass / binWidth + 1.0 - binOffset );
-        // pepMassIntUnique.push_back( pepMassInt );
-    // }
+    std::vector< int > pepMassIntUnique;
+    pepMassIntUnique.reserve( size );
+    deque< Peptide* >::const_iterator iter_;
+    for ( iter_ = active_peptide_queue -> iter_; iter_ != active_peptide_queue -> end_; ++iter_ ) {
+		Peptide* pPeptide = *iter_;
+        double pepMass = pPeptide -> Mass();
+        int pepMassInt = ( int )floor( pepMass / binWidth + 1.0 - binOffset );
+        pepMassIntUnique.push_back( pepMassInt );
+    }
     // std::sort( pepMassIntUnique.begin(), pepMassIntUnique.end(), sortAscInt );
     // std::vector< int >::iterator last = std::unique( pepMassIntUnique.begin(), pepMassIntUnique.end() );
     // pepMassIntUnique.erase( last, pepMassIntUnique.end() );
     // int nPepMassIntUniq = ( int )pepMassIntUnique.size();
+	
+	//&& for test only
+	for ( vector< int >::const_iterator iter = pepMassIntUnique.begin(); iter != pepMassIntUnique.end(); iter++ ) {
+      cout << *iter << "\t";
+	}
+	cout << endl;
+    //&& end for test only	
 
     // int** evidenceObs = new int* [ nPepMassIntUniq ];
     // int* scoreOffsetObs = new int [ nPepMassIntUniq ];

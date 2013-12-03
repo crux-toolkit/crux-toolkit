@@ -183,6 +183,11 @@ int ActivePeptideQueue::SetActiveRangeBIons(double min_mass, double max_mass) {
   // peptide is too heavy
   assert(!queue_.empty() || done);
   
+  // Set up iterators for use with b_ion_queue_
+  iter1_ = b_ion_queue_.begin();
+  end1_ = b_ion_queue_.end();
+  --end1_;
+
   // Set up iterator for use with HasNext(),
   // GetPeptide(), and NextPeptide(). Return the number of enqueued peptides.
   iter_ = queue_.begin();
