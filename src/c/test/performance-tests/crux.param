@@ -1,5 +1,6 @@
-decoy_search=2
 compute-sp=T
+decoy-format=peptide-reverse
+decoy_search=2
 output_pepxmlfile=1
 num_threads=1
 variable_mod1=0.0 X 0 3
@@ -7,4 +8,4 @@ mass_type_parent=0
 allowed_missed_cleavage=0
 fragment_bin_offset=0.68
 fragment_bin_tol=1.000508
-
+add_C_cysteine=57.021464

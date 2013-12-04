@@ -20,10 +20,23 @@ echo set terminal png >> $gnuplot
 echo set xlabel \"q-value threshold\" >> $gnuplot
 echo set ylabel \"Number of accepted PSMs\" >> $gnuplot
 echo set xrange \[0:0.1\] >> $gnuplot
-echo set yrange \[0:3000\] >> $gnuplot
 echo set key center right >> $gnuplot
 # Insert dummy plot so we can use "replot" consistently below.
 echo plot 0 notitle with dots >> $gnuplot 
+
+# Create the parameter file.
+parameters=crux.param
+echo compute-sp=T > $parameters
+echo decoy-format=peptide-reverse >> $parameters
+echo decoy_search=2 >> $parameters
+echo output_pepxmlfile=1 >> $parameters
+echo num_threads=1 >> $parameters
+echo variable_mod1=0.0 X 0 3 >> $parameters
+echo mass_type_parent=0 >> $parameters
+echo allowed_missed_cleavage=0 >> $parameters
+echo fragment_bin_offset=0.68 >> $parameters
+echo fragment_bin_tol=1.000508 >> $parameters
+echo add_C_cysteine=57.021464 >> $parameters
 
 # Create the index.
 db=worm+contaminants
@@ -31,7 +44,8 @@ fasta=$db.fa
 if [[ -e $db ]]; then
   echo Skipping create-index.
 else
-  $CRUX tide-index --output-dir tide-index --decoy-format peptide-reverse $fasta $db
+  $CRUX tide-index --output-dir tide-index --parameter-file $parameters \
+     $fasta $db
 fi
 
 ms2=051708-worm-ASMS-10.ms2
@@ -41,10 +55,8 @@ for searchtool in comet tide-search; do
 
   # Do we use an index or the fasta?
   if [[ $searchtool == "comet" ]]; then
-    params="--parameter-file crux.param"
     proteins=$fasta
   else
-    params=""
     proteins=$db
   fi
 
@@ -53,7 +65,7 @@ for searchtool in comet tide-search; do
     echo Skipping search-for-matches.
   else  
     $CRUX $searchtool \
-      $params --output-dir $searchtool \
+      --parameter-file crux.param --output-dir $searchtool \
       $ms2 $proteins
   fi
 
@@ -67,7 +79,7 @@ for searchtool in comet tide-search; do
   fi
 
   $CRUX extract-columns $searchtool/qvalues.target.txt "decoy q-value (xcorr)" > $searchtool/qvalues.xcorr.txt
-  echo replot \"$searchtool/qvalues.xcorr.txt\" using 1:0 title \"$searchtool decoy \(xcorr\)\" with lines >> $gnuplot
+  echo replot \"$searchtool/qvalues.xcorr.txt\" using 1:0 title \"$searchtool xcorr\" with lines >> $gnuplot
 
   # Run Crux percolator
   if [[ -e $searchtool/percolator.target.psms.txt ]]; then
