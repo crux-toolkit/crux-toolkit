@@ -138,10 +138,17 @@ void Spectrum::print(FILE* file) ///< output file to print at -out
   
   // print 'EZ' line
   for (size_t ez_idx = 0; ez_idx < ezstates_.size(); ez_idx++) {
-    fprintf(file, "EZ\t%d\t%.4f\t%.4f\t%.4f\n", ezstates_[ez_idx].getCharge(),
+    fprintf(file, "I\tEZ\t%d\t%.4f\t%.4f\t%.4f\n", ezstates_[ez_idx].getCharge(),
       ezstates_[ez_idx].getSinglyChargedMass(),
       ezstates_[ez_idx].getRTime(),
       ezstates_[ez_idx].getArea());
+  }
+
+  if (zstates_.size() == 0 && ezstates_.size() != 0) {
+    for (size_t ez_idx = 0; ez_idx < ezstates_.size(); ez_idx++) {
+      fprintf(file, "Z\t%d\t%.*f\n", ezstates_[ez_idx].getCharge(), mass_precision,
+	      ezstates_[ez_idx].getSinglyChargedMass());
+    }
   }
 
   // print peaks
