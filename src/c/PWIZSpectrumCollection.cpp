@@ -121,9 +121,13 @@ bool PWIZSpectrumCollection::parse() {
   int scan_counter = 0;
   for(int spec_idx = 0; spec_idx < num_spec; spec_idx++){
     carp(CARP_DETAILED_DEBUG, "Parsing spectrum index %d.", spec_idx);
-    pwiz::msdata::SpectrumPtr spectrum = all_spectra->spectrum(spec_idx, 
-                                                               get_peaks);
-
+    pwiz::msdata::SpectrumPtr spectrum;
+    
+    try {
+      spectrum = all_spectra->spectrum(spec_idx, get_peaks);
+    } catch (boost::bad_lexical_cast) {
+      carp(CARP_FATAL, "boost::bad_lexical_cast occured while parsing spectrum.\nDoes your spectra contain z-lines?");
+    }
     // skip if not ms2
     if( spectrum->cvParam(pwiz::msdata::MS_ms_level).valueAs<int>() != 2 ){
       continue;
