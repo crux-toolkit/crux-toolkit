@@ -59,8 +59,8 @@ void TideMatchSet::report(
   gatherTargetsAndDecoys(peptides, proteins, targets, decoys, top_n);
 
   map<Arr::iterator, FLOAT_T> delta_cn_map;
-  computeDeltaCns(targets, &delta_cn_map);
-  computeDeltaCns(decoys, &delta_cn_map);
+  computeDeltaCns(targets, &delta_cn_map, top_n);
+  computeDeltaCns(decoys, &delta_cn_map, top_n);
 
   map<Arr::iterator, pair<const SpScorer::SpScoreData, int> > sp_map;
   if (compute_sp) {
@@ -69,9 +69,9 @@ void TideMatchSet::report(
     computeSpData(decoys, &sp_map, &sp_scorer, peptides);
   }
 
-  writeToFile(target_file, targets, spectrum, charge, peptides, proteins,
+  writeToFile(target_file, top_n, targets, spectrum, charge, peptides, proteins,
               locations, delta_cn_map, compute_sp ? &sp_map : NULL);
-  writeToFile(decoy_file, decoys, spectrum, charge, peptides, proteins,
+  writeToFile(decoy_file, top_n, decoys, spectrum, charge, peptides, proteins,
               locations, delta_cn_map, compute_sp ? &sp_map : NULL);
 }
 
@@ -80,6 +80,7 @@ void TideMatchSet::report(
  */
 void TideMatchSet::writeToFile(
   ofstream* file,
+  int top_n,
   const vector<Arr::iterator>& vec,
   const Spectrum* spectrum,
   int charge,
@@ -95,7 +96,9 @@ void TideMatchSet::writeToFile(
 
   bool is_decoy;
   int cur = 0;
-  for (vector<Arr::iterator>::const_iterator i = vec.begin(); i != vec.end(); ++i) {
+  const vector<Arr::iterator>::const_iterator cutoff =
+    (vec.size() >= top_n) ? vec.begin() + top_n : vec.end();
+  for (vector<Arr::iterator>::const_iterator i = vec.begin(); i != cutoff; ++i) {
     const Peptide* peptide = peptides->GetPeptide((*i)->second);
     const pb::Protein* protein = proteins[peptide->FirstLocProteinId()];
     int pos = peptide->FirstLocPos();
@@ -459,25 +462,22 @@ void TideMatchSet::gatherTargetsAndDecoys(
   int top_n
 ) {
   make_heap(matches_->begin(), matches_->end(), less_score());
-  targetsOut.reserve(top_n);
   if (!OutputFiles::isConcat() && TideSearchApplication::hasDecoys()) {
-    decoysOut.reserve(top_n);
-    int popped = 0;
-    do {
-      pop_heap(matches_->begin(), matches_->end() - (popped++), less_score());
-      Arr::iterator i = matches_->end() - popped;
+    for (Arr::iterator i = matches_->end(); i != matches_->begin(); ) {
+      pop_heap(matches_->begin(), i--, less_score());
       const Peptide& peptide = *(peptides->GetPeptide(i->second));
       const pb::Protein& protein = *(proteins[peptide.FirstLocProteinId()]);
-      vector<Arr::iterator>* vec_ptr = !isDecoy(protein.name()) ? &targetsOut : &decoysOut;
-      if (vec_ptr->size() < top_n) {
+      bool decoy = isDecoy(protein.name());
+      vector<Arr::iterator>* vec_ptr = !decoy ? &targetsOut : &decoysOut;
+      if (vec_ptr->size() < top_n + 1) {
         vec_ptr->push_back(i);
       }
-    } while ((targetsOut.size() != top_n || decoysOut.size() != top_n) &&
-             popped < matches_->size());
+    }
   } else {
-    for (int i = 0; i < min(top_n, matches_->size()); ++i) {
+    int toAdd = min(top_n + 1, matches_->size());
+    for (int i = 0; i < toAdd; ) {
       pop_heap(matches_->begin(), matches_->end() - i, less_score());
-      targetsOut.push_back(matches_->end() - i - 1);
+      targetsOut.push_back(matches_->end() - (++i));
     }
   }
 }
@@ -574,12 +574,13 @@ void TideMatchSet::getFlankingAAs(
 
 void TideMatchSet::computeDeltaCns(
   const vector<Arr::iterator>& vec, // xcorr*100000000.0, high to low
-  map<Arr::iterator, FLOAT_T>* delta_cn_map // map to add delta cn scores to
+  map<Arr::iterator, FLOAT_T>* delta_cn_map, // map to add delta cn scores to
+  int top_n // number of top matches we will be reporting
 ) {
   FLOAT_T lastXcorr = BILLION;
-  for (vector<Arr::iterator>::const_reverse_iterator i = vec.rbegin();
-       i != vec.rend();
-       ++i) {
+  vector<Arr::iterator>::const_reverse_iterator i = (vec.size() > top_n) ?
+    vec.rend() - (top_n + 1) : vec.rbegin();
+  for (; i != vec.rend(); ++i) {
     const FLOAT_T xcorr = (*i)->first / 100000000.0;
     delta_cn_map->insert(make_pair(*i, (lastXcorr == BILLION) ?
       0 : (xcorr - lastXcorr) / max(xcorr, FLOAT_T(1))));
