@@ -259,7 +259,7 @@ if (UNIX)
   # Get Comet source from SVN and buld using it's own makefile
   ExternalProject_Add(
     comet
-    SVN_REPOSITORY svn://svn.code.sf.net/p/comet-ms/code/branches/release_2013020
+    SVN_REPOSITORY svn://svn.code.sf.net/p/comet-ms/code/branches/release_2013022
     PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
     UPDATE_COMMAND ""
     PATCH_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/patch_comet.sh 
@@ -323,7 +323,7 @@ if (UNIX)
 elseif (WIN32 AND NOT CYGWIN)
   ExternalProject_Add(
     comet
-    SVN_REPOSITORY svn://svn.code.sf.net/p/comet-ms/code/branches/release_2013020
+    SVN_REPOSITORY svn://svn.code.sf.net/p/comet-ms/code/branches/release_2013022
     PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
     UPDATE_COMMAND ""
     # Copy the Comet and MSToolkit include files and libraries to
