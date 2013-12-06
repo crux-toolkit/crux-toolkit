@@ -123,6 +123,16 @@ of charge state greater than +1 can generate fragment ions of lower
 charge whose m/z is greater than the precursor m/z, thus indicating a
 multiply charged precursor.</p>
 
+<p>
+Note that, in addition, <code>comet</code> includes
+a <code>precursor_charge</code> parameter.  If the first number in
+this parameter is set to 0, i.e., <code>precursor_charge = 0 0</code>,
+then the charge state rule above is applied.  However, if a user
+specifies a precursor charge range, i.e., <code>precursor_charge = 1
+5</code>, then Comet will search every spectrum through this range of
+assumed charge states for every those spectra whose precursor charge
+is unknown.</p>
+
 <li>
 <b>How does Crux create peptides from the given set of proteins in the
   database?</b></li>
