@@ -19,7 +19,6 @@
 #include "CometMassSpecUtils.h"
 #include "CometWriteTxt.h"
 
-bool CometWriteTxt::_bWroteHeader = false;
 
 CometWriteTxt::CometWriteTxt()
 {
@@ -35,15 +34,6 @@ void CometWriteTxt::WriteTxt(FILE *fpout,
                              FILE *fpoutd)
 {
    int i;
-
-   if (!_bWroteHeader)
-   {
-      _bWroteHeader = true;
-      PrintTxtHeader(fpout);
-
-      if (g_staticParams.options.iDecoySearch == 2)
-         PrintTxtHeader(fpoutd);
-   }
 
    // Print results.
    for (i=0; i<(int)g_pvQuery.size(); i++)
@@ -78,25 +68,6 @@ void CometWriteTxt::PrintTxtHeader(FILE *fpout)
    fprintf(fpout, "cleavage type\t");
    fprintf(fpout, "protein id\t");
    fprintf(fpout, "flanking aa\n");
-   /*
-   fprintf(fpout, "scan\t");
-   fprintf(fpout, "charge\t");
-   fprintf(fpout, "spectrum precursor m/z\t");
-   fprintf(fpout, "spectrum neutral mass\t");
-   fprintf(fpout, "matches/spectrum\t");
-   fprintf(fpout, "peptide mass\t");
-   fprintf(fpout, "e-value\t");
-   fprintf(fpout, "xcorr score\t");
-   fprintf(fpout, "xcorr rank\t");
-   fprintf(fpout, "delta_cn\t");
-   fprintf(fpout, "sp score\t");
-   fprintf(fpout, "sp rank\t");
-   fprintf(fpout, "b/y ions matched\t");
-   fprintf(fpout, "b/y ions total\t");
-   fprintf(fpout, "sequence\t");
-   fprintf(fpout, "flanking aa\t");
-   fprintf(fpout, "protein id\n");
-   */
 #else
    fprintf(fpout, "CometVersion %s\t", comet_version);
    fprintf(fpout, "%s\t", g_staticParams.inputFile.szBaseName);
@@ -138,7 +109,7 @@ void CometWriteTxt::PrintResults(int iWhichQuery,
       double spectrum_neutral_mass = pQuery->_pepMassInfo.dExpPepMass - PROTON_MASS;
       double spectrum_mz = (spectrum_neutral_mass + charge*PROTON_MASS) / (double)charge;
 
-      sprintf(szBuf, "%d\t%d\t%0.4f\t%0.4f\t",
+      sprintf(szBuf, "%d\t%d\t%0.6f\t%0.6f\t",
             pQuery->_spectrumInfoInternal.iScanNumber, 
             pQuery->_spectrumInfoInternal.iChargeState,
             spectrum_mz,
@@ -157,8 +128,11 @@ void CometWriteTxt::PrintResults(int iWhichQuery,
       
       for (size_t i=0; i<min((unsigned long)g_staticParams.options.iNumPeptideOutputLines, num_matches); i++)
       {
+        if (pOutput[0].fXcorr <= 0) {
+          continue;
+         }
          fprintf(fpout, "%s", szBuf);
-         
+
          double delta_cn;
          if (pOutput[0].fXcorr <=0) {
             delta_cn = 0;
@@ -232,7 +206,7 @@ void CometWriteTxt::PrintResults(int iWhichQuery,
 
    Query* pQuery = g_pvQuery.at(iWhichQuery);
 
-   sprintf(szBuf, "%d\t%d\t%0.4f\t",
+   sprintf(szBuf, "%d\t%d\t%0.6f\t",
          pQuery->_spectrumInfoInternal.iScanNumber, 
          pQuery->_spectrumInfoInternal.iChargeState, 
          pQuery->_pepMassInfo.dExpPepMass - PROTON_MASS);
@@ -267,7 +241,7 @@ void CometWriteTxt::PrintTxtLine( int iWhichResult,
    int  i;
    char szBuf[SIZE_BUF];
 
-   sprintf(szBuf, "%0.4f\t%0.2E\t%0.4f\t%0.4f\t%0.1f\t%d\t%d\t",
+   sprintf(szBuf, "%0.6f\t%0.2E\t%0.4f\t%0.4f\t%0.1f\t%d\t%d\t",
          pOutput[iWhichResult].dPepMass - PROTON_MASS,
          pOutput[iWhichResult].dExpect,
          pOutput[iWhichResult].fXcorr,
