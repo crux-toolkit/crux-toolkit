@@ -8,30 +8,23 @@
 
 <H1 ALIGN=CENTER>crux calibrate-scores</H1>
 
-<p>
-<B>Usage:</B></p>
+<h2>Usage:</h2>
 
 <blockquote>
-<code>crux calibrate-scores [options] &lt;protein&nbsp;database&gt;
-  &lt;search results directory&gt;</code>
+<code>crux calibrate-scores [options] &lt;search&nbsp;results&gt;
+&lt;column&nbsp;name&gt;</code>
 </blockquote>
 
-<p>
-<B>Description:</B></p>
+<h2>Description:</h2>
 
 <blockquote>
 
 <p>
-Given a collection of scored peptide-spectrum matches (PSMs), estimate
-two statistical confidence measures for each: a q-value and a
-posterior error probability (PEP).  To compute these
-measures, <code>calibrate-scores</code> relies either on decoy PSM
-scores or p-values estimated by <code>search-for-matches</code>.  If
-neither decoys nor p-values were included in the initial search,
-then <code>calibrate-scores</code> will exit with an error.</p>
+Given a collection of scored target and decoy peptide-spectrum matches
+(PSMs), estimate two statistical confidence measures for each: a
+q-value and a posterior error probability (PEP).</p>
 
-<p>
-<b>q-value</b></p>
+<h3>q-value</h3>
 
 <p>
 The q-value is analogous to a p-value but incorporates false discovery
@@ -88,8 +81,7 @@ current FDR and all of the FDRs below it in the ranked list.  The two
 types of q-values are reported, respectively, in columns with headers
 "Weibull q-value" or "decoy q-value".</p>
 
-<p>
-<b>Posterior error probability</b></p>
+<h3>Posterior error probability</h3>
 
 <p>
 Unlike the q-value, which is calculated with respect to the collection
@@ -100,7 +92,7 @@ incorrect.  Crux's PEPs are estimated using the methodology described
 in this article:</p>
 
 <blockquote>
-Lukas Käll, John Storey and William Stafford
+Lukas K&auml;ll, John Storey and William Stafford
 Noble. <a href="http://noble.gs.washington.edu/papers/kall2008nonparametric.html">"Non-parametric
 estimation of posterior error probabilities associated with peptides
 identified by tandem mass spectrometry."</a> <i>Bioinformatics
@@ -120,74 +112,80 @@ A discussion of q-values versus posterior error probabilities is
 provided in this article:</p>
 
 <blockquote>
-Lukas Käll, John D. Storey, Michael J. MacCoss and William Stafford
+Lukas K&auml;ll, John D. Storey, Michael J. MacCoss and William Stafford
 Noble. <a href="http://noble.gs.washington.edu/papers/kall2008posterior.html">"Posterior
 error probabilities and false discovery rates: two sides of the same
 coin."</a> <i>Journal of Proteome Research.</i> 7(1):40-44,
 2008.</blockquote>
 
-<p>
-Note that, in Crux v1.37 and below, this command did not estimate
-posterior error probabilities and therefore was simply
-called <code>compute-q-values</code>.
-The <code>compute-q-values</code> command is now an alias
-for <code>calibrate-scores</code>, retained for backward
-compatibility.</p>
-
 </blockquote>
 
-<p>
-<B>Input:</B></p>
+<h2>Input:</h2>
 
 <UL>
 
-<LI>
-&lt;protein-database&gt; &ndash; 
-The name of the file in fasta format or the directory containing the
-protein index from which to retrieve proteins and peptides.</li>
+<li>
+<b>&lt;search&nbsp;results&gt;</b> &ndash; A collection of target and
+decoy peptide-spectrum matches (PSMs)
+in <a href="txt-format.html">Crux tab-delimited text</a>.  Decoy PSMs
+can be provided in two ways: either as a separate file or embedded
+within the same file as the target PSMs.  Crux will first search for
+target PSMs in a separate file.  The decoy file name is constructed
+from the target name by replacing "target" with "decoy."  For example,
+if <code>search.target.txt</code> is provided as input, then Crux will
+search for a corresponding file named <code>search.decoy.txt</code>.
+If no decoy file is found, then Crux will assume that the given input
+file contains a mix of target and decoy PSMs.  Within this file,
+decoys are identified using a prefix (specified
+via <code>--decoy-prefix</code>) on the protein name.</p></li>
 
 <li>
-&lt;search results directory&gt; &ndash; A folder in which all the PSM
-result files are located.  The program looks for files produced by 
-<code>crux search-for-matches</code> (ending in
-'<code>.search.target.txt</code>' or '<code>.search.decoy.txt</code>').  All such files in the given
-directory are analyzed jointly.  Note that the directory should not
-contain results from both types of search algorithms.</li>
+<b>&lt;column&nbsp;name&gt;</b> &ndash; The name of the column from
+which to extract the score.</li>
 
 </UL>
 
-<B>Output:</B>
+<h2>Output:</h2>
 
-<UL>
+<ul>
+
 <p>
-The program writes files to the folder <code>crux-output</code> by default.
-The name of the output folder can be set by the user using the <code>--output-dir</code> option.
-The following files will be created:</p>
+The program writes files to the folder <code>crux-output</code> by
+default.  The name of the output folder can be set by the user using
+the <code>--output-dir</code> option.  The following files will be
+created:</p>
 
 <li>
-<b>qvalues.target.txt</b>: a tab-delimited text file containing the PSMs.
-See <a href="txt-format.html">txt file format</a> for a list of the fields.</li>
+<b>calibrate-scores.target.txt</b>: a tab-delimited text file
+containing the PSMs. See <a href="txt-format.html">txt file format</a>
+for a list of the fields.  The file will contain two additional columns, named "&lt;column name&gt; q-value" and "&lt;column name&gt; PEP" where "&lt;column name&gt;" is provided on the command line.</li>
+
 <li>
-<b>qvalues.log.txt</b>: a log file containing a copy of all messages that were
-printed to stderr.
-</li>
+<b>calibrate-scores.log.txt</b>: a log file containing a copy of all
+messages that were printed to stderr.</li>
+
 <li>
-<b>qvalues.params.txt</b>:
-a file containing the name and value of all parameters/options for the
-current operation. 
-Not all parameters in the file may have been used in the operation.  
-The resulting file can be used with the <code>--parameter-file</code>
-option for other crux programs.
-</li>
+<b>calibrate-scores.params.txt</b>: a file containing the name and
+value of all parameters/options for the current operation.  Not all
+parameters in the file may have been used in the operation.  The
+resulting file can be used with the <code>--parameter-file</code>
+option for other crux programs.</li>
 
 </ul>
 
-<B>Options:</B>
+<h2>Options:</h2>
 
 <UL>
 
+<h3>Miscellaneous</h3>
+
 <li>
-<code>-pi-zero &lt;value&gt;</code> &ndash;
+<code>--decoy-prefix &lt;string&gt;</code> &ndash;
+Specifies the prefix of the protein names that indicates a decoy.
+Default = "decoy_".</li>
+
+<li>
+<code>--pi-zero &lt;value&gt;</code> &ndash;
 The estimated proportion of target scores that are drawn according to
 the null distribution.  Default=1.0.</li>
 
@@ -196,6 +194,8 @@ the null distribution.  Default=1.0.</li>
 Specify how sequence modifications are reported in various ouptut
 files and, consequently, how they should be read in by
 calibrate-scores.  Use the same value as was used in the search. </li>
+
+<h3>Input and output</h3>
 
 <li>
 <code>--fileroot &lt;string&gt;</code> &ndash; 
@@ -226,6 +226,18 @@ the progress of execution, 40-more progress information, 50-debug
 info, 60-detailed debug info. Default = 30.
 
 </UL>
+
+<hr></hr>
+
+<p>
+Currently, this specification differs from the implementation in Crux in the following ways:</p>
+
+<ul>
+<li>
+The program outputs files named qvalue.* rather than calibrate-scores.*.</li>
+<li>
+Rather than allowing the user to specify a column name, the program has built-in column names that it searches for (first for XCorr p-value and then for XCorr).</li>
+</ul>
 
 <hr></hr>
 
