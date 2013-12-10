@@ -18,8 +18,8 @@ ActivePeptideQueue::ActivePeptideQueue(RecordReader* reader,
                                        proteins)
   : reader_(reader),
     proteins_(proteins),
-    theoretical_peak_set_(2000), // probably overkill, but no harm
-    theoretical_b_peak_set_(2000), // probably overkill, but no harm
+    theoretical_peak_set_( 2000 ),   // probably overkill, but no harm
+    theoretical_b_peak_set_( 200 ),  // probably overkill, but no harm
     fifo_alloc_peptides_(FLAGS_fifo_page_size << 20),
     fifo_alloc_prog1_(FLAGS_fifo_page_size << 20),
     fifo_alloc_prog2_(FLAGS_fifo_page_size << 20) {
@@ -119,13 +119,13 @@ int ActivePeptideQueue::SetActiveRange(double min_mass, double max_mass) {
   */
 }
 
-// Compute the theoretical peaks of the peptide in the "back" of the queue
+// Compute the b ion only theoretical peaks of the peptide in the "back" of the queue
 // (i.e. the one most recently read from disk -- the heaviest).
 void ActivePeptideQueue::ComputeBTheoreticalPeaksBack() {
   theoretical_b_peak_set_.Clear();
   Peptide* peptide = queue_.back();
-  peptide->ComputeTheoreticalPeaks(&theoretical_b_peak_set_);
-  b_ion_queue_.push_back(theoretical_b_peak_set_);
+  peptide->ComputeBTheoreticalPeaks( &theoretical_b_peak_set_ );
+  b_ion_queue_.push_back( theoretical_b_peak_set_ );
 }
 
 int ActivePeptideQueue::SetActiveRangeBIons(double min_mass, double max_mass) {
