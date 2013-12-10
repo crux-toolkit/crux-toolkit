@@ -1,17 +1,17 @@
 include(ExternalProject)
 
-INCLUDE_DIRECTORIES(BEFORE SYSTEM ${CMAKE_CURRENT_SOURCE_DIR}/include)
+INCLUDE_DIRECTORIES(BEFORE SYSTEM ${CMAKE_CURRENT_BINARY_DIR}/include)
 
 if (UNIX)
-  SET(ENV{BOOSTROOT} ${CMAKE_CURRENT_SOURCE_DIR})
-  SET(ENV{LIBPATH} ${CMAKE_CURRENT_SOURCE_DIR}/lib:$ENV{LIBPATH})
-  SET(ENV{LD_LIBRARY_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/lib:$ENV{LD_LIBRARY_PATH})
-  SET(ENV{PATH} ${CMAKE_CURRENT_SOURCE_DIR}/bin:$ENV{PATH})
+  SET(ENV{BOOSTROOT} ${CMAKE_CURRENT_BINARY_DIR})
+  SET(ENV{LIBPATH} ${CMAKE_CURRENT_BINARY_DIR}/lib:$ENV{LIBPATH})
+  SET(ENV{LD_LIBRARY_PATH} ${CMAKE_CURRENT_BINARY_DIR}/lib:$ENV{LD_LIBRARY_PATH})
+  SET(ENV{PATH} ${CMAKE_CURRENT_BINARY_DIR}/bin:$ENV{PATH})
+  SET(CPP_ARGS "-I${CMAKE_CURRENT_BINARY_DIR}/include")
+  SET(LD_ARGS "-L${CMAKE_CURRENT_BINARY_DIR}/lib")
 endif (UNIX)
-SET(ENV{CMAKE_PREFIX_PATH} ${CMAKE_CURRENT_SOURCE_DIR})
-SET(CPP_ARGS "-I${CMAKE_CURRENT_SOURCE_DIR}/include")
-SET(LD_ARGS "-L${CMAKE_CURRENT_SOURCE_DIR}/lib")
-SET(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR})
+SET(ENV{CMAKE_PREFIX_PATH} ${CMAKE_CURRENT_BINARY_DIR})
+SET(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR})
 
 # Set up quickbuild arguments used by pwiz build.
 # quickbuild.sh is the script provided by proteowizard 
@@ -22,24 +22,21 @@ if (WIN32 AND NOT CYGWIN)
   set(protwiz_args ${protwiz_args} --toolset=msvc-10.0)
   set(protwiz_args ${protwiz_args} --i-agree-to-the-vendor-licenses)
   set(protwiz_args ${protwiz_args} --without-mz5)
-  set(protwiz_args ${protwiz_args} --prefix=${CMAKE_CURRENT_SOURCE_DIR})
+  set(protwiz_args ${protwiz_args} --prefix=${CMAKE_CURRENT_BINARY_DIR})
   set(protwiz_args ${protwiz_args} libraries)
 else(WIN32 AND NOT CYGWIN)
   set(protwiz_args ./quickbuild.sh)
   set(protwiz_args ${protwiz_args} --without-binary-msdata)
   set(protwiz_args ${protwiz_args} --layout=system)
-  set(protwiz_args ${protwiz_args} --prefix=${CMAKE_CURRENT_SOURCE_DIR})
+  set(protwiz_args ${protwiz_args} --prefix=${CMAKE_CURRENT_BINARY_DIR})
   set(protwiz_args ${protwiz_args} runtime-link=shared)
   set(protwiz_args ${protwiz_args} libraries)
 endif (WIN32 AND NOT CYGWIN)
 
 add_custom_target(
   deep-clean-external
-   COMMAND ${CMAKE_COMMAND} -E remove_directory bin
    COMMAND ${CMAKE_COMMAND} -E remove_directory build
    COMMAND ${CMAKE_COMMAND} -E remove_directory downloads
-   COMMAND ${CMAKE_COMMAND} -E remove_directory include
-   COMMAND ${CMAKE_COMMAND} -E remove_directory lib
    COMMAND ${CMAKE_COMMAND} -E remove_directory share
    COMMENT "Deleting all files for external tools."
 )
@@ -51,7 +48,7 @@ if (WIN32 AND NOT CYGWIN)
     ProteoWizard
     URL http://noble.gs.washington.edu/proj/crux/download/pwiz-5100-2.tar.gz
     DOWNLOAD_DIR downloads
-    PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
+    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ${protwiz_args}
     INSTALL_COMMAND ""
@@ -63,11 +60,11 @@ else (WIN32 AND NOT CYGWIN)
     URL http://noble.gs.washington.edu/proj/crux/download/pwiz-5100-2.tar.gz
     URL_MD5 85dbbc99fa7568627bdec6c69c6ec6af
     DOWNLOAD_DIR downloads
-    PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
+    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ${protwiz_args}
     INSTALL_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/create_links.sh 
-      --prefix=${CMAKE_CURRENT_SOURCE_DIR}
+      --prefix=${CMAKE_CURRENT_BINARY_DIR}
     BUILD_IN_SOURCE 1
   )
 endif (WIN32 AND NOT CYGWIN)
@@ -75,24 +72,24 @@ endif (WIN32 AND NOT CYGWIN)
 if (UNIX) 
   ExternalProject_Add(
     XercesC
-    PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
+    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     URL http://www.motorlogy.com/apache//xerces/c/3/sources/xerces-c-3.1.1.tar.gz
     URL_MD5 6a8ec45d83c8cfb1584c5a5345cb51ae
     DOWNLOAD_DIR downloads
-    CONFIGURE_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/build/src/XercesC/configure 
-      --prefix=${CMAKE_CURRENT_SOURCE_DIR}
+    CONFIGURE_COMMAND ${CMAKE_CURRENT_BINARY_DIR}/build/src/XercesC/configure 
+      --prefix=${CMAKE_CURRENT_BINARY_DIR}
       --enable-transcoder-iconv
       --disable-network 
       --disable-threads
       --disable-shared
     BUILD_COMMAND make 
-      LD_ARGS="-L${CMAKE_CURRENT_SOURCE_DIR}/lib -framework CoreServices"
+      LD_ARGS="-L${CMAKE_CURRENT_BINARY_DIR}/lib -framework CoreServices"
     BUILD_IN_SOURCE 1
   )
 elseif (WIN32 AND NOT CYGWIN)
   ExternalProject_Add(
     XercesC
-    PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
+    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     URL http://www.motorlogy.com/apache//xerces/c/3/sources/xerces-c-3.1.1.tar.gz
     URL_MD5 6a8ec45d83c8cfb1584c5a5345cb51ae
     DOWNLOAD_DIR downloads
@@ -100,21 +97,78 @@ elseif (WIN32 AND NOT CYGWIN)
     BUILD_COMMAND msbuild 
       /p:Configuration=Debug 
       /p:Platform=Win32 
-      ${CMAKE_CURRENT_SOURCE_DIR}/build/src/XercesC/projects/Win32/VC10/xerces-all/xerces-all.sln 
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/XercesC/projects/Win32/VC10/xerces-all/xerces-all.sln 
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE 1
   )
+  add_custom_command(
+    TARGET XercesC
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/XercesC/src/xercesc
+      ${CMAKE_CURRENT_BINARY_DIR}/include/xercesc
+  )
 endif (UNIX) 
 
-if (APPLE)
+if (WIN32 AND NOT CYGWIN)
   ExternalProject_Add(
     percolator
-    PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
+    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
+    URL http://noble.gs.washington.edu/proj/crux/download/percolator_2_04_full_src.tar.gz
+    URL_MD5 5c328688493d57c5b41d413338dfcb66
+    CMAKE_ARGS -DCMAKE_VERBOSE_MAKEFILE=ON
+      -DXERCESC_INCLUDE_DIR=${CMAKE_INCLUDE_PATH}
+      -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}
+      -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}
+      -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+    PATCH_COMMAND ""
+  )
+  # On Windows we use this to patch percolator
+  ExternalProject_Add_Step(
+    percolator
+    windows_patch
+    COMMAND ${CMAKE_COMMAND} -E copy 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_xml_write/Caller.h 
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
+    COMMAND ${CMAKE_COMMAND} -E copy 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_var_mods/DataSet.cpp 
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
+    COMMAND ${CMAKE_COMMAND} -E copy 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_find_boost/CMakeLists.txt 
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
+    COMMAND ${CMAKE_COMMAND} -E copy 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/eliminate_xsd/percolator_in.hxx
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
+    COMMAND ${CMAKE_COMMAND} -E copy 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/eliminate_xsd/percolator_out.hxx
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
+    COMMAND ${CMAKE_COMMAND} -E copy 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/eliminate_xsd/percolator_in.cxx
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
+    COMMAND ${CMAKE_COMMAND} -E copy 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/eliminate_xsd/percolator_out.cxx
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
+    COMMAND ${CMAKE_COMMAND} -E copy 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/eliminate_xsd/percolator_in.xsd
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
+    COMMAND ${CMAKE_COMMAND} -E copy 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/eliminate_xsd/percolator_in.xsd
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
+    COMMAND ${CMAKE_COMMAND} -E copy 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/eliminate_xsd/percolator_out.xsd
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
+    DEPENDEES patch
+    DEPENDERS configure
+  )
+elseif (APPLE)
+  ExternalProject_Add(
+    percolator
+    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     URL http://noble.gs.washington.edu/proj/crux/download/percolator_2_04_full_src.tar.gz
     URL_MD5 5c328688493d57c5b41d413338dfcb66
     CMAKE_ARGS -DCMAKE_VERBOSE_MAKEFILE=ON 
-      -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_SOURCE_DIR} 
-      -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_SOURCE_DIR}
+      -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR} 
+      -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}
       -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
     PATCH_COMMAND cp  
       ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_xml_write/Caller.h 
@@ -128,39 +182,37 @@ if (APPLE)
       ${CMAKE_CURRENT_SOURCE_DIR}/build/src/percolator/src
   )
 else(APPLE)
-ExternalProject_Add(
-  percolator
-  PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
-  URL http://noble.gs.washington.edu/proj/crux/download/percolator_2_04_full_src.tar.gz
-  URL_MD5 5c328688493d57c5b41d413338dfcb66
-  CMAKE_ARGS -DCMAKE_VERBOSE_MAKEFILE=ON
-    -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_SOURCE_DIR}
-    -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_SOURCE_DIR}
-    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-  PATCH_COMMAND cp 
-    ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_xml_write/Caller.h 
-    ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_var_mods/DataSet.cpp 
-    ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_find_boost/CMakeLists.txt 
-    ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/eliminate_xsd/percolator_in.hxx
-    ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/eliminate_xsd/percolator_out.hxx
-    ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/eliminate_xsd/percolator_in.cxx
-    ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/eliminate_xsd/percolator_out.cxx
-    ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/eliminate_xsd/percolator_in.xsd
-    ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/eliminate_xsd/percolator_out.xsd
-    ${CMAKE_CURRENT_SOURCE_DIR}/build/src/percolator/src
-)
-endif(APPLE)
+  ExternalProject_Add(
+    percolator
+    PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
+    URL http://noble.gs.washington.edu/proj/crux/download/percolator_2_04_full_src.tar.gz
+    URL_MD5 5c328688493d57c5b41d413338dfcb66
+    CMAKE_ARGS -DCMAKE_VERBOSE_MAKEFILE=ON
+      -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}
+      -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}
+      -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+    PATCH_COMMAND cp 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_xml_write/Caller.h 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_var_mods/DataSet.cpp 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_find_boost/CMakeLists.txt 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/eliminate_xsd/percolator_in.hxx
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/eliminate_xsd/percolator_out.hxx
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/eliminate_xsd/percolator_in.cxx
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/eliminate_xsd/percolator_out.cxx
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/eliminate_xsd/percolator_in.xsd
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/eliminate_xsd/percolator_out.xsd
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
+  )
+endif (WIN32 AND NOT CYGWIN)
 
 ExternalProject_Add_Step(
   percolator
   install_xsd_runtime
-  COMMAND echo "Installing XSD runtime"
   COMMAND ${CMAKE_COMMAND} -E copy_directory
     ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/eliminate_xsd/xsd/ 
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/xsd
-  COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_CURRENT_SOURCE_DIR}/include/xsd/.svn
-  COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_CURRENT_SOURCE_DIR}/include/xsd/cxx/.svn
-  COMMAND echo "Done installing XSD runtime"
+    ${CMAKE_CURRENT_BINARY_DIR}/include/xsd
+  COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_CURRENT_BINARY_DIR}/include/xsd/.svn
+  COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_CURRENT_BINARY_DIR}/include/xsd/cxx/.svn
   DEPENDEES update
   DEPENDERS configure
 )
@@ -169,14 +221,15 @@ if (APPLE)
 ExternalProject_Add_Step(
   percolator
   patch_xsd_runtime
-  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/eliminate_xsd/xsd/ ${CMAKE_CURRENT_SOURCE_DIR}/include/
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+  ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/eliminate_xsd/xsd/ ${CMAKE_CURRENT_BINARY_DIR}/include/
   COMMAND echo "Modifying XSD runtime"
   COMMAND ${CMAKE_COMMAND} -E copy 
     ${CMAKE_CURRENT_SOURCE_DIR}/patches/XSD/mac_xdr_fix/xdr-stream-insertion.hxx 
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/xsd/cxx/tree/xdr-stream-insertion.hxx
+    ${CMAKE_CURRENT_BINARY_DIR}/include/xsd/cxx/tree/xdr-stream-insertion.hxx
   COMMAND ${CMAKE_COMMAND} -E copy 
     ${CMAKE_CURRENT_SOURCE_DIR}/patches/XSD/mac_xdr_fix/xdr-stream-extraction.hxx 
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/xsd/cxx/tree/xdr-stream-extraction.hxx
+    ${CMAKE_CURRENT_BINARY_DIR}/include/xsd/cxx/tree/xdr-stream-extraction.hxx
   COMMAND echo "Done modifying XSD runtime"
   DEPENDEES configure
   DEPENDERS build
@@ -186,13 +239,13 @@ endif (APPLE)
 if (UNIX) 
   ExternalProject_Add(
     ProtocolBuffers
-    PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
+    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     URL http://protobuf.googlecode.com/files/protobuf-2.5.0.tar.bz2
     URL_MD5 a72001a9067a4c2c4e0e836d0f92ece4
     DOWNLOAD_DIR downloads
     CONFIGURE_COMMAND
-      ${CMAKE_CURRENT_SOURCE_DIR}/build/src/ProtocolBuffers/configure
-      --prefix=${CMAKE_CURRENT_SOURCE_DIR}
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProtocolBuffers/configure
+      --prefix=${CMAKE_CURRENT_BINARY_DIR}
       --enable-shared=no
     BUILD_COMMAND make
     INSTALL_COMMAND make install
@@ -202,18 +255,18 @@ elseif (WIN32 AND NOT CYGWIN)
   # Update Microsoft VS project files and build ProtocolBuffers using MSBuild
   ExternalProject_Add(
     ProtocolBuffers
-    PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
+    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     URL http://protobuf.googlecode.com/files/protobuf-2.5.0.tar.bz2
     URL_MD5 a72001a9067a4c2c4e0e836d0f92ece4
     DOWNLOAD_DIR downloads
     PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory 
       ${CMAKE_CURRENT_SOURCE_DIR}/patches/protobuf/vs2010/ 
-      ${CMAKE_CURRENT_SOURCE_DIR}/build/src/ProtocolBuffers/vsprojects/
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProtocolBuffers/vsprojects/
     CONFIGURE_COMMAND ""
     BUILD_COMMAND msbuild 
       /p:Configuration=Debug 
       /p:Platform=Win32 
-      ${CMAKE_CURRENT_SOURCE_DIR}/build/src/ProtocolBuffers/vsprojects/protobuf.sln
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProtocolBuffers/vsprojects/protobuf.sln
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE 1
   )
@@ -222,13 +275,13 @@ endif (UNIX)
 if (UNIX) 
 ExternalProject_Add(
   google-gflags
-  PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
+  PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
   URL http://gflags.googlecode.com/files/gflags-2.0.tar.gz
   URL_MD5 e02268c1e90876c809ec0ffa095da864
   DOWNLOAD_DIR downloads
   CONFIGURE_COMMAND
-    ${CMAKE_CURRENT_SOURCE_DIR}/build/src/google-gflags/configure
-    --prefix=${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR}/build/src/google-gflags/configure
+    --prefix=${CMAKE_CURRENT_BINARY_DIR}
     --enable-shared=no
   BUILD_COMMAND make
   INSTALL_COMMAND make install
@@ -238,18 +291,18 @@ elseif (WIN32 AND NOT CYGWIN)
   # Update Microsoft VS project files and build ProtocolBuffers using MSBuild
   ExternalProject_Add(
     google-gflags
-    PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
+    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     URL http://gflags.googlecode.com/files/gflags-2.0.tar.gz
     URL_MD5 e02268c1e90876c809ec0ffa095da864
     DOWNLOAD_DIR downloads
     PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory 
       ${CMAKE_CURRENT_SOURCE_DIR}/patches/google-gflags/vs2010/ 
-      ${CMAKE_CURRENT_SOURCE_DIR}/build/src/google-gflags/vsprojects/libgflags/
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/google-gflags/vsprojects/libgflags/
     CONFIGURE_COMMAND ""
     BUILD_COMMAND msbuild 
       /p:Configuration=Debug 
       /p:Platform=Win32 
-      ${CMAKE_CURRENT_SOURCE_DIR}/build/src/google-gflags/vsprojects/libgflags/libgflags.vcxproj
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/google-gflags/vsprojects/libgflags/libgflags.vcxproj
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE 1
   )
@@ -260,7 +313,7 @@ if (UNIX)
   ExternalProject_Add(
     comet
     SVN_REPOSITORY svn://svn.code.sf.net/p/comet-ms/code/branches/release_2013022
-    PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
+    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     UPDATE_COMMAND ""
     PATCH_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/patch_comet.sh 
       ${CMAKE_CURRENT_SOURCE_DIR}
@@ -277,62 +330,68 @@ if (UNIX)
     POST_BUILD
     COMMAND 
       ${CMAKE_COMMAND} -E copy_directory 
-      ${CMAKE_CURRENT_SOURCE_DIR}/build/src/comet/MSToolkit/include
-      ${CMAKE_CURRENT_SOURCE_DIR}/include/MSToolkit/
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/MSToolkit/include
+      ${CMAKE_CURRENT_BINARY_DIR}/include/MSToolkit/
     COMMAND 
       ${CMAKE_COMMAND} -E copy
-      ${CMAKE_CURRENT_SOURCE_DIR}/build/src/comet/MSToolkit/libmstoolkitlite.a
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/MSToolkit/libmstoolkitlite.a
       ${CMAKE_CURRENT_SOURCE_DIR}/lib
     COMMAND 
       ${CMAKE_COMMAND} -E copy
-      ${CMAKE_CURRENT_SOURCE_DIR}/build/src/comet/CometSearch/Common.h
-      ${CMAKE_CURRENT_SOURCE_DIR}/include/CometSearch/Common.h
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/Common.h
+      ${CMAKE_CURRENT_BINARY_DIR}/include/CometSearch/Common.h
     COMMAND 
       ${CMAKE_COMMAND} -E copy
-      ${CMAKE_CURRENT_SOURCE_DIR}/build/src/comet/CometSearch/CometData.h
-      ${CMAKE_CURRENT_SOURCE_DIR}/include/CometSearch/CometData.h
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/CometData.h
+      ${CMAKE_CURRENT_BINARY_DIR}/include/CometSearch/CometData.h
     COMMAND 
       ${CMAKE_COMMAND} -E copy
-      ${CMAKE_CURRENT_SOURCE_DIR}/build/src/comet/CometSearch/CometSearch.h
-      ${CMAKE_CURRENT_SOURCE_DIR}/include/CometSearch/CometSearch.h
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/CometSearch.h
+      ${CMAKE_CURRENT_BINARY_DIR}/include/CometSearch/CometSearch.h
     COMMAND 
       ${CMAKE_COMMAND} -E copy
-      ${CMAKE_CURRENT_SOURCE_DIR}/build/src/comet/CometSearch/CometSearchManager.h
-      ${CMAKE_CURRENT_SOURCE_DIR}/include/CometSearch/CometSearchManager.h
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/CometSearchManager.h
+      ${CMAKE_CURRENT_BINARY_DIR}/include/CometSearch/CometSearchManager.h
     COMMAND 
       ${CMAKE_COMMAND} -E copy
-      ${CMAKE_CURRENT_SOURCE_DIR}/build/src/comet/CometSearch/CometPreprocess.h
-      ${CMAKE_CURRENT_SOURCE_DIR}/include/CometSearch/CometPreprocess.h
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/CometPreprocess.h
+      ${CMAKE_CURRENT_BINARY_DIR}/include/CometSearch/CometPreprocess.h
     COMMAND 
       ${CMAKE_COMMAND} -E copy
-      ${CMAKE_CURRENT_SOURCE_DIR}/build/src/comet/CometSearch/ThreadPool.h
-      ${CMAKE_CURRENT_SOURCE_DIR}/include/CometSearch/ThreadPool.h
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/ThreadPool.h
+      ${CMAKE_CURRENT_BINARY_DIR}/include/CometSearch/ThreadPool.h
     COMMAND 
       ${CMAKE_COMMAND} -E copy
-      ${CMAKE_CURRENT_SOURCE_DIR}/build/src/comet/CometSearch/Threading.h
-      ${CMAKE_CURRENT_SOURCE_DIR}/include/CometSearch/Threading.h
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/Threading.h
+      ${CMAKE_CURRENT_BINARY_DIR}/include/CometSearch/Threading.h
     COMMAND 
       ${CMAKE_COMMAND} -E copy
-      ${CMAKE_CURRENT_SOURCE_DIR}/build/src/comet/CometSearch/OSSpecificThreading.h
-      ${CMAKE_CURRENT_SOURCE_DIR}/include/CometSearch/OSSpecificThreading.h
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/OSSpecificThreading.h
+      ${CMAKE_CURRENT_BINARY_DIR}/include/CometSearch/OSSpecificThreading.h
     COMMAND 
       ${CMAKE_COMMAND} -E copy
-      ${CMAKE_CURRENT_SOURCE_DIR}/build/src/comet/CometSearch/libcometsearch.a
-      ${CMAKE_CURRENT_SOURCE_DIR}/lib
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/libcometsearch.a
+      ${CMAKE_CURRENT_BINARY_DIR}/lib
   )
 elseif (WIN32 AND NOT CYGWIN)
+  set(LIBPATH "${CMAKE_CURRENT_BINARY_DIR}/lib;")
   ExternalProject_Add(
     comet
     SVN_REPOSITORY svn://svn.code.sf.net/p/comet-ms/code/branches/release_2013022
-    PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
+    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     UPDATE_COMMAND ""
     # Copy the Comet and MSToolkit include files and libraries to
     # the desired directories.
     CONFIGURE_COMMAND 
       ${CMAKE_COMMAND} -E copy_directory 
-      ${CMAKE_CURRENT_SOURCE_DIR}/build/src/comet/MSToolkit/include
-      ${CMAKE_CURRENT_SOURCE_DIR}/include/MSToolkit/
-    BUILD_COMMAND msbuild comet.sln
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/MSToolkit/include
+      ${CMAKE_CURRENT_BINARY_DIR}/include/MSToolkit/
+    BUILD_COMMAND 
+      ${CMAKE_COMMAND} 
+        -DLIBPATH:STRING="${LIBPATH}"
+        -DMSBUILD_ARGS:STRING=/p:Configuration=Release
+        -DPROJ_FILE:STRING=comet.sln
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/build-comet.cmake
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE 1
   )  

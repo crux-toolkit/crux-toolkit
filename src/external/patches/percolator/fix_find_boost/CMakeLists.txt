@@ -27,25 +27,50 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 MESSAGE( STATUS "Checking packages:" )
 
-find_package(XercesC REQUIRED) # XSD DEPENDS ON ${XERCESC_FOUND}
-if(XERCESC_FOUND)
-  message(STATUS "Package Xerces-C++ found: ${XERCESC_INCLUDE_DIR}")
-else(XERCESC_FOUND)
-  message(FATAL_ERROR "The package Apache Xerces-C++ has not been found")
-endif(XERCESC_FOUND)
-include_directories(${XERCESC_INCLUDE_DIR})
+#find_package(XercesC REQUIRED) # XSD DEPENDS ON ${XERCESC_FOUND}
+#if(XERCESC_FOUND)
+#  message(STATUS "Package Xerces-C++ found: ${XERCESC_INCLUDE_DIR}")
+#else(XERCESC_FOUND)
+#  message(FATAL_ERROR "The package Apache Xerces-C++ has not been found")
+#endif(XERCESC_FOUND)
+#include_directories(${XERCESC_INCLUDE_DIR})
 
-# Set Boost variables
+# Set Boost and Xerces variables
 include_directories(${CMAKE_PREFIX_PATH}/include)
 link_directories(${CMAKE_PREFIX_PATH}/lib)
-set(Boost_LIBRARIES ${CMAKE_PREFIX_PATH}/lib/libboost_filesystem.a ${CMAKE_PREFIX_PATH}/lib/libboost_system.a)
+if (WIN32 AND NOT CYGWIN)
+  set(
+    Boost_LIBRARIES 
+    ${CMAKE_PREFIX_PATH}/lib/libboost_filesystem-vc100-mt.lib
+    ${CMAKE_PREFIX_PATH}/lib/libboost_system.-vc100-mt.lib
+  )
+  set(
+    XERCESC_LIBRARIES 
+    ${CMAKE_PREFIX_PATH}/lib/xerces-c_3D.lib 
+  )
+else (WIN32 AND NOT CYGWIN)
+  set(
+    Boost_LIBRARIES 
+    ${CMAKE_PREFIX_PATH}/lib/libboost_filesystem.a 
+    ${CMAKE_PREFIX_PATH}/lib/libboost_system.a
+  )
+  set(
+    XERCESC_LIBRARIES 
+    ${CMAKE_PREFIX_PATH}/lib/libxerces-c.a
+  )
+endif (WIN32 AND NOT CYGWIN)
 
-find_package(Pthreads)
-if(PTHREADS_FOUND)
-  message(STATUS  "Pthreads found")
-else(PTHREADS_FOUND)
-  message(FATAL_ERROR "The package Pthreads has not been found")
-endif()
+set(Boost_LIBRARIES ${CMAKE_PREFIX_PATH}/lib/libboost_filesystem.a ${CMAKE_PREFIX_PATH}/lib/libboost_system.a)
+set(XERCES_LIBRARIES ${CMAKE_PREFIX_PATH}/lib/ ${CMAKE_PREFIX_PATH}/lib/libboost_system.a)
+
+if (UNIX)
+  find_package(Pthreads)
+  if(PTHREADS_FOUND)
+    message(STATUS  "Pthreads found")
+  else(PTHREADS_FOUND)
+    message(FATAL_ERROR "The package Pthreads has not been found")
+  endif()
+endif (UNIX)
 
 ###############################################################################
 # RUN CODESYNTHESIS
@@ -123,8 +148,28 @@ endif()
 
  
 # SET LIBRARIES FOR PERCOLATOR
-target_link_libraries(percolator perclibrary fido pthread ${PTHREADS_LIBRARIES} ${XERCESC_LIBRARIES} ${Boost_LIBRARIES})
+if (UNIX)
+  target_link_libraries(
+    percolator 
+    perclibrary 
+    fido 
+    pthread 
+    ${PTHREADS_LIBRARIES} 
+    ${XERCESC_LIBRARIES} 
+    ${Boost_LIBRARIES}
+  )
+else (UNIX)
+  target_link_libraries(
+    percolator 
+    perclibrary 
+    fido 
+    ${XERCESC_LIBRARIES} 
+    ${Boost_LIBRARIES}
+  )
+endif (UNIX)
+  
  
+
 # INSTALL PERCOLATOR
 IF(NOT MINGW AND NOT WIN32)
   install(TARGETS percolator EXPORT PERCOLATOR DESTINATION ./bin) # Important to use relative path here (used by CPack)!
