@@ -117,6 +117,37 @@ void Peptide::AddIons(W* workspace) const {
   }
 }
 
+template< class W >
+void Peptide::AddBIonsTrueMass( W* workspace ) const {
+  // Use workspace to assemble b ions only, with true monoisotopic masses.
+  // Intended primarily to support XCorr p-value calculations.
+  double max_possible_peak = numeric_limits<double>::infinity();
+  if (MaxMZ::Global().MaxBin() > 0)
+    max_possible_peak = MaxMZ::BinInvert(MaxMZ::Global().CacheBinEnd());
+  double masses_charge_1[Len()];
+  const char* residue = residues_;
+  // Collect m/z values for each residue, for z = 1.
+  for ( int i = 0; i < Len(); ++i, ++residue ) {
+    masses_charge_1[i] = MassConstants::mono_table[ *residue ];
+  }
+
+  //&& for possible implementation later
+  // for (int i = 0; i < num_mods_; ++i) {
+    // int index;
+    // double delta;
+    // MassConstants::DecodeMod(mods_[i], &index, &delta);
+    // masses_charge_1[index] += delta;
+    // masses_charge_2[index] += delta/2;
+  // }
+
+  // Add all charge 1 B ions.
+  double total = MassConstants::proton + masses_charge_1[ 0 ];
+  for ( int i = 1; i < Len() && total <= max_possible_peak; ++i ) {
+    workspace -> AddBIon( total );
+    total += masses_charge_1[ i ];
+  }
+}
+
 #ifdef DEBUG
 void DisAsm(const void* prog) {
   unsigned char* pos = (unsigned char*) prog;
@@ -156,6 +187,13 @@ void Peptide::Compile(const TheoreticalPeakArr* peaks,
 
 void Peptide::ComputeTheoreticalPeaks(TheoreticalPeakSet* workspace) const {
   AddIons<TheoreticalPeakSet>(workspace);   // Generic workspace
+#ifdef DEBUG
+  Show();
+#endif
+}
+
+void Peptide::ComputeBTheoreticalPeaks( TheoreticalPeakSetBIons* workspace ) const {
+  AddBIonsTrueMass< TheoreticalPeakSetBIons >( workspace );   // workspace for b ion only peak set, with true monoisotopic masses
 #ifdef DEBUG
   Show();
 #endif

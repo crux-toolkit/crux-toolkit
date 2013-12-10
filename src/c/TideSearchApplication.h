@@ -55,10 +55,6 @@ protected:
     int charge
   );
 
-  // small functions
-  bool sortAscInt( int i, int j ) { return i < j; }
-  bool sortDescInt( int i, int j ) { return i > j; }
-
 public:
 
   bool exact_pvalue;
