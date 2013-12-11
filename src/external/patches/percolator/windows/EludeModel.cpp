@@ -16,6 +16,7 @@
  *****************************************************************************/
 
 #ifdef _MSC_VER
+// Needed to get M_PI definition when using Microsoft Compiler
 #define _USE_MATH_DEFINES
 #endif
 
@@ -1619,7 +1620,14 @@ void RTModel::computeHydrophobicityIndex(vector<PSMDescription> & psms) {
   // train retention
   trainIndexSVR(psms);
   // calculate the weights of each aa
+#ifndef _MSC_VER
   double a[noFeat + 1][noFeat];
+#else
+  // The Microsoft compiler doesn't support variable length arrays
+  double **a = (double **) alloca((noFeat + 1) * sizeof(double *));
+  for (int i = 0; i < noFeat + 1; ++i)
+    a[i] = (double *) alloca(noFeat * sizeof(double));
+#endif
   for (int i = 0; i < noFeat + 1; ++i)
     for (int j = 0; j < noFeat; ++j)
       if (j == (i - 1)) {

@@ -28,6 +28,9 @@
  #define __stdcall
 #endif
 #endif
+#ifdef _MSC_VER
+#include <io.h>
+#endif
 #ifdef _WIN32
 #include <fcntl.h>
 char *mkstemp(char *tmpl)
@@ -85,7 +88,11 @@ Caller::~Caller() {
   }
   protEstimator = NULL;
   if(readStdIn) {
+#ifdef _MSC_VER
+    // FIXME CEG Can we replace this with Boost.FileSystem call?
+#else
     rmdir(xmlInputDir);
+#endif
     delete xmlInputDir;
   }
 }
