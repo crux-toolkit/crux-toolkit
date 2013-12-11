@@ -107,7 +107,14 @@ ProteinProbEstimator::~ProteinProbEstimator(){
 }
 
 
+#ifdef _MSC_VER
+// FIXME CEG This function has the wrong return type.
+// Apparently GCC tolerates this but Microsoft does not.
+// Should it actually be fixed?
+void ProteinProbEstimator::initialize(Scores* fullset){
+#else
 bool ProteinProbEstimator::initialize(Scores* fullset){
+#endif
   // percolator's peptide level statistics
   peptideScores = fullset;
   setTargetandDecoysNames();
@@ -650,7 +657,10 @@ double ProteinProbEstimator::getFDR_divergence(std::vector<double> estFDR, std::
       if ( estFDR[k] >= THRESH )
 	{
 	  if ( k == 0 )
+#ifndef _MSC_VER
+      // CEG FIXME - understand why gcc alows this
 	    tot = 1.0 / 0.0;
+#endif
 
 	  break;
 	}

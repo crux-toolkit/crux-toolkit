@@ -214,7 +214,11 @@ class Protein {
 	double x;
     };
 
+#ifdef _MSC_VER
+    inline std::map<double,std::vector<std::string> >::const_iterator 
+#else
     inline std::map<const double,std::vector<std::string> >::const_iterator 
+#endif
     MapSearchByValue(const std::map<double,std::vector<std::string> > & SearchMap, 
 		     const std::string & SearchVal)
     {
@@ -271,7 +275,11 @@ class ProteinProbEstimator {
     
     ~ProteinProbEstimator();
     
+#ifdef _MSC_VER
+    void initialize(Scores* fullset);
+#else
     bool initialize(Scores* fullset);
+#endif
     void run();
     void writeOutputToXML(string xmlOutputFN);
     static string printCopyright();
