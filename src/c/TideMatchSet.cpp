@@ -94,7 +94,6 @@ void TideMatchSet::writeToFile(
     return;
   }
 
-  bool is_decoy;
   int cur = 0;
   const vector<Arr::iterator>::const_iterator cutoff =
     (vec.size() >= top_n) ? vec.begin() + top_n : vec.end();
@@ -102,7 +101,8 @@ void TideMatchSet::writeToFile(
     const Peptide* peptide = peptides->GetPeptide((*i)->second);
     const pb::Protein* protein = proteins[peptide->FirstLocProteinId()];
     int pos = peptide->FirstLocPos();
-    string proteinNames = getProteinName(*protein, pos, &is_decoy);
+    string proteinNames = getProteinName(*protein,
+      (!protein->has_target_pos()) ? pos : protein->target_pos());
     string flankingAAs, n_term, c_term;
     getFlankingAAs(peptide, protein, pos, &n_term, &c_term);
     flankingAAs = n_term + c_term;
@@ -114,7 +114,8 @@ void TideMatchSet::writeToFile(
         const pb::Location& location = aux->location(i);
         protein = proteins[location.protein_id()];
         pos = location.pos();
-        proteinNames += "," + getProteinName(*protein, pos, NULL);
+        proteinNames += "," + getProteinName(*protein,
+          (!protein->has_target_pos()) ? pos : protein->target_pos());
         getFlankingAAs(peptide, protein, pos, &n_term, &c_term);
         flankingAAs += "," + n_term + c_term;
       }
@@ -164,12 +165,12 @@ void TideMatchSet::writeToFile(
       *file << sp_data->matched_ions << '\t'
             << sp_data->total_ions << '\t';
     }
-    *file << matches_->size() << '\t'
+    *file << (!peptide->IsDecoy() ? peptides->ActiveTargets() : peptides->ActiveDecoys()) << '\t'
           << seq << '\t'
           << cleavage_type_ << '\t'
           << proteinNames << '\t'
           << flankingAAs;
-    if (is_decoy && !OutputFiles::isProteinLevelDecoys()) {
+    if (peptide->IsDecoy() && !OutputFiles::isProteinLevelDecoys()) {
       // write target sequence
       const string& residues = protein->residues();
       *file << '\t'
@@ -223,9 +224,9 @@ void TideMatchSet::report(
   SpectrumZState z_state;
   z_state.setMZ(crux_spectrum.getPrecursorMz(), charge);
 
-  addCruxMatches(crux_collection, &proteins_made, targets, crux_spectrum,
+  addCruxMatches(crux_collection, false, &proteins_made, targets, crux_spectrum,
                  peptides, proteins, locations, z_state, sp_scorer, &lowest_sp);
-  addCruxMatches(crux_decoy_collection, &proteins_made, decoys, crux_spectrum,
+  addCruxMatches(crux_decoy_collection, true, &proteins_made, decoys, crux_spectrum,
                  peptides, proteins, locations, z_state, sp_scorer, &lowest_sp);
 
   if (sp_scorer) {
@@ -256,6 +257,7 @@ void TideMatchSet::report(
  */
 void TideMatchSet::addCruxMatches(
   MatchCollection* match_collection,
+  bool decoys,
   vector<PostProcessProtein*>* proteins_made,
   const vector<Arr::iterator>& vec,
   Crux::Spectrum& crux_spectrum,
@@ -273,11 +275,10 @@ void TideMatchSet::addCruxMatches(
   for (vector<Arr::iterator>::const_iterator i = vec.begin(); i != vec.end(); ++i) {
     const Peptide* peptide = peptides->GetPeptide((*i)->second);
 
-    bool decoyMatch;
     Crux::Match* match = getCruxMatch(peptide, proteins, locations, &crux_spectrum,
-                                      z_state, proteins_made, &decoyMatch);
+                                      z_state, proteins_made);
     match_collection->addMatch(match);
-    if (decoyMatch) {
+    if (decoys) {
       match->setNullPeptide(true);
     }
     Crux::Match::freeMatch(match); // so match gets deleted when collection does
@@ -307,7 +308,7 @@ void TideMatchSet::addCruxMatches(
     }
   }
   match_collection->setZState(z_state);
-  match_collection->setExperimentSize(matches_->size());
+  match_collection->setExperimentSize(!decoys ? peptides->ActiveTargets() : peptides->ActiveDecoys());
   match_collection->populateMatchRank(XCORR);
   match_collection->forceScoredBy(XCORR);
   if (sp_scorer) {
@@ -363,8 +364,7 @@ Crux::Match* TideMatchSet::getCruxMatch(
   const vector<const pb::AuxLocation*>& locations, /// auxiliary locations
   Crux::Spectrum* crux_spectrum,  ///< Crux spectrum for match
   SpectrumZState& crux_z_state, ///< Crux z state for match
-  vector<PostProcessProtein*>* proteins_made, ///< out parameter for new proteins
-  bool* decoy  ///< out parameter for whether this match is a decoy
+  vector<PostProcessProtein*>* proteins_made ///< out parameter for new proteins
 ) {
   const pb::Protein* protein = proteins[peptide->FirstLocProteinId()];
   int pos = peptide->FirstLocPos();
@@ -377,12 +377,10 @@ Crux::Match* TideMatchSet::getCruxMatch(
   PostProcessProtein* crux_protein = new PostProcessProtein();
   proteins_made->push_back(crux_protein);
 
-  bool is_decoy_tmp;
-  bool& is_decoy = (decoy) ? *decoy : is_decoy_tmp;
-  string proteinName = getProteinName(*protein, pos, &is_decoy);
+  string proteinName = getProteinName(*protein, pos);
 
   crux_protein->setId(proteinName.c_str());
-  string originalTargetSeq = (!is_decoy) ? peptide->Seq() :
+  string originalTargetSeq = !peptide->IsDecoy() ? peptide->Seq() :
     protein->residues().substr(protein->residues().length() - peptide->Len());
   int start_idx = crux_protein->findStart(originalTargetSeq, n_term, c_term);
 
@@ -401,7 +399,7 @@ Crux::Match* TideMatchSet::getCruxMatch(
 
       crux_protein = new PostProcessProtein();
       proteins_made->push_back(crux_protein);
-      crux_protein->setId(getProteinName(*protein, pos, NULL).c_str());
+      crux_protein->setId(getProteinName(*protein, pos).c_str());
       start_idx = crux_protein->findStart(originalTargetSeq, n_term, c_term);
       crux_peptide->addPeptideSrc(
         new PeptideSrc(NON_SPECIFIC_DIGEST, crux_protein, start_idx));
@@ -421,7 +419,7 @@ Crux::Match* TideMatchSet::getCruxMatch(
     const AA_MOD_T* mod = lookUpMod(mod_delta);
     modify_aa(mod_seq + mod_index, mod);
   }
-  crux_peptide->setModifiedAASequence(mod_seq, is_decoy);
+  crux_peptide->setModifiedAASequence(mod_seq, peptide->IsDecoy());
   free(mod_seq);
 
   // Create match and return
@@ -467,8 +465,7 @@ void TideMatchSet::gatherTargetsAndDecoys(
       pop_heap(matches_->begin(), i--, less_score());
       const Peptide& peptide = *(peptides->GetPeptide(i->second));
       const pb::Protein& protein = *(proteins[peptide.FirstLocProteinId()]);
-      bool decoy = isDecoy(protein.name());
-      vector<Arr::iterator>* vec_ptr = !decoy ? &targetsOut : &decoysOut;
+      vector<Arr::iterator>* vec_ptr = !peptide.IsDecoy() ? &targetsOut : &decoysOut;
       if (vec_ptr->size() < top_n + 1) {
         vec_ptr->push_back(i);
       }
@@ -488,7 +485,6 @@ void TideMatchSet::gatherTargetsAndDecoys(
 pb::Peptide* TideMatchSet::getPbPeptide(
   const Peptide& peptide
 ) {
-
   pb::Peptide* pb_peptide = new pb::Peptide();
   pb_peptide->set_id(peptide.Id());
   pb_peptide->set_mass(peptide.Mass());
@@ -514,42 +510,15 @@ pb::Peptide* TideMatchSet::getPbPeptide(
 
 /**
  * Gets the protein name with the index appended.
- * Optionally, can pass in a boolean pointer to be set to whether decoy or not
  */
 string TideMatchSet::getProteinName(
   const pb::Protein& protein,
-  int pos,
-  bool* is_decoy
+  int pos
 ) {
-  bool decoy = isDecoy(protein.name());
-  if (is_decoy != NULL) {
-    *is_decoy = decoy;
-  }
-
-  string proteinName;
-  if (decoy) {
-    // DecoyMagicByte + index + '.' + protein name
-    proteinName = protein.name();
-    size_t dot = proteinName.find('.');
-    proteinName += '(' + proteinName.substr(1, dot - 1) + ')';
-    proteinName.erase(0, dot + 1);
-  } else {
-    stringstream proteinNameStream;
-    proteinNameStream << protein.name()
-                      << '(' << pos + 1 << ')';
-    proteinName = proteinNameStream.str();
-  }
-  return proteinName;
-}
-
-/**
- * Determine if the protein is a decoy protein.
- */
-bool TideMatchSet::isDecoy(
-  const string& proteinName
-) {
-  return !proteinName.empty() &&
-         proteinName[0] == TideIndexApplication::DecoyMagicByte;
+  stringstream proteinNameStream;
+  proteinNameStream << protein.name()
+                    << '(' << pos + 1 << ')';
+  return proteinNameStream.str();
 }
 
 /**
@@ -566,10 +535,8 @@ void TideMatchSet::getFlankingAAs(
   int idx_c = pos + peptide->Len();
   const string& seq = protein->residues();
 
-  *out_n = (idx_n >= 0) ?
-    seq.substr(idx_n, 1) : "-";
-  *out_c = (idx_c < seq.length()) ?
-    seq.substr(idx_c, 1) : "-";
+  *out_n = (idx_n >= 0) ? seq.substr(idx_n, 1) : "-";
+  *out_c = (idx_c < seq.length()) ? seq.substr(idx_c, 1) : "-";
 }
 
 void TideMatchSet::computeDeltaCns(

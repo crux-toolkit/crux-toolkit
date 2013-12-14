@@ -19,6 +19,7 @@ ActivePeptideQueue::ActivePeptideQueue(RecordReader* reader,
   : reader_(reader),
     proteins_(proteins),
     theoretical_peak_set_(2000), // probably overkill, but no harm
+    active_targets_(0), active_decoys_(0),
     fifo_alloc_peptides_(FLAGS_fifo_page_size << 20),
     fifo_alloc_prog1_(FLAGS_fifo_page_size << 20),
     fifo_alloc_prog2_(FLAGS_fifo_page_size << 20) {
@@ -77,7 +78,7 @@ int ActivePeptideQueue::SetActiveRange(double min_mass, double max_mass) {
   // max_mass. For each new enqueued peptide compute the corresponding
   // theoretical peaks. Data associated with each peptide is allocated by
   // fifo_alloc_peptides_.
-  bool done;
+  bool done = false;
   if (queue_.empty() || queue_.back()->Mass() <= max_mass) {
     if (!queue_.empty())
       ComputeTheoreticalPeaksBack();
@@ -107,11 +108,21 @@ int ActivePeptideQueue::SetActiveRange(double min_mass, double max_mass) {
   if (queue_.empty())
     return 0;
 
+  int active = queue_.size();
   if (!done) {
     --end_;
-    return queue_.size() - 1;
+    --active;
   }
-  return queue_.size();
+  // Count active targets and decoys
+  active_targets_ = active_decoys_ = 0;
+  for (deque<Peptide*>::const_iterator i = iter_; i != end_; ++i) {
+    if (!(*i)->IsDecoy()) {
+      ++active_targets_;
+    } else {
+      ++active_decoys_;
+    }
+  }
+  return active;
 
   /*
   cerr << (end_ - iter_) << " candidates.";

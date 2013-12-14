@@ -255,7 +255,7 @@ int TideIndexApplication::main(int argc, char** argv) {
       bool writeDecoy = false;
 
       if (out_decoy_list) {
-        writeDecoy = TideMatchSet::isDecoy(protein->name());
+        writeDecoy = peptide->is_decoy();
         writeTarget = !writeDecoy;
       }
       // Get peptide sequence without mods
@@ -430,7 +430,7 @@ void TideIndexApplication::fastaToPb(
       const int pepLen = cleavedSequence.length();
       // Add target to heap
       TideIndexPeptide pepTarget(
-        pepMass, pepLen, proteinSequence, curProtein, startLoc);
+        pepMass, pepLen, proteinSequence, curProtein, startLoc, false);
       outPeptideHeap.push_back(pepTarget);
       push_heap(outPeptideHeap.begin(), outPeptideHeap.end(),
         greater<TideIndexPeptide>());
@@ -486,13 +486,13 @@ void TideIndexApplication::fastaToPb(
         outProteinSequences.push_back(decoySequence);
 
         // Write pb::Protein
-        getDecoyPbProtein(++curProtein, i->first, *decoySequence,
-                          startLoc, pbProtein);
+        getDecoyPbProtein(++curProtein, ProteinInfo(i->first.name, &decoyProtein),
+                          *decoySequence, startLoc, pbProtein);
         proteinWriter.Write(&pbProtein);
         // Add decoy to heap
         TideIndexPeptide pepDecoy(
           pepMass, cleavedSequence.length(), decoySequence,
-          curProtein, (startLoc > 0) ? 1 : 0);
+          curProtein, (startLoc > 0) ? 1 : 0, true);
         outPeptideHeap.push_back(pepDecoy);
         push_heap(outPeptideHeap.begin(), outPeptideHeap.end(),
           greater<TideIndexPeptide>());
@@ -536,7 +536,7 @@ void TideIndexApplication::fastaToPb(
       // Add decoy to heap
       FLOAT_T pepMass = targetLookup->second.mass;
       TideIndexPeptide pepDecoy(
-        pepMass, i->length(), decoySequence, curProtein, (startLoc > 0) ? 1 : 0);
+        pepMass, i->length(), decoySequence, curProtein, (startLoc > 0) ? 1 : 0, true);
       outPeptideHeap.push_back(pepDecoy);
       push_heap(outPeptideHeap.begin(), outPeptideHeap.end(),
         greater<TideIndexPeptide>());
@@ -622,6 +622,8 @@ void TideIndexApplication::writePeptidesAndAuxLocs(
 
   pbHeader.set_file_type(pb::Header::PEPTIDES);
   pbHeader.mutable_peptides_header()->set_has_peaks(false);
+  pbHeader.mutable_peptides_header()->set_decoys(
+    get_tide_decoy_type_parameter("decoy-format"));
   HeadedRecordWriter peptideWriter(peptidePbFile, pbHeader); // put header in outfile
 
   // Create the auxiliary locations header and writer
@@ -723,9 +725,8 @@ void TideIndexApplication::getDecoyPbProtein(
   const int pepLen = decoyPeptideSequence.length();
 
   // Add N term to decoySequence, if it exists
-  char nTerm = (startLoc > 0) ? proteinSequence->at(startLoc - 1) : '\0';
-  if (nTerm != '\0') {
-    decoyPeptideSequence.insert(0, 1, nTerm);
+  if (startLoc > 0) {
+    decoyPeptideSequence.insert(0, 1, proteinSequence->at(startLoc - 1));
   }
   // Add C term to decoySequence, if it exists
   size_t cTermLoc = startLoc + pepLen;
@@ -734,24 +735,11 @@ void TideIndexApplication::getDecoyPbProtein(
   // Append original target sequence, unless using protein level decoys
   if (get_tide_decoy_type_parameter("decoy-format") != PROTEIN_REVERSE_DECOYS) {
     decoyPeptideSequence.append(targetProteinInfo.sequence->substr(startLoc, pepLen));
-  } else {
-    // Protein level decoys have a special byte at the end of the sequence
-    decoyPeptideSequence.push_back(ProteinLevelDecoysMagicByte);
   }
 
-  getPbProtein(id, getDecoyProteinName(startLoc, targetProteinInfo.name),
+  getPbProtein(id, get_string_parameter_pointer("decoy-prefix") + targetProteinInfo.name,
                decoyPeptideSequence, outPbProtein);
-}
-
-string TideIndexApplication::getDecoyProteinName(
-  int startLoc,
-  const string& targetProteinName
-) {
-  // Set name as:
-  // <DecoyMagicByte><StartWithinTargetProtein>.decoy_<TargetProteinName>
-  stringstream ss;
-  ss << DecoyMagicByte << (startLoc + 1) << "." << get_string_parameter_pointer("decoy-prefix") << targetProteinName;
-  return ss.str();
+  outPbProtein.set_target_pos(startLoc);
 }
 
 void TideIndexApplication::getPbPeptide(
@@ -765,6 +753,7 @@ void TideIndexApplication::getPbPeptide(
   outPbPeptide.set_length(peptide.getLength());
   outPbPeptide.mutable_first_location()->set_protein_id(peptide.getProteinId());
   outPbPeptide.mutable_first_location()->set_pos(peptide.getProteinPos());;
+  outPbPeptide.set_is_decoy(peptide.isDecoy());
 }
 
 void TideIndexApplication::addAuxLoc(

@@ -36,6 +36,9 @@ class ActivePeptideQueue {
   Peptide* NextPeptide() { return *iter_++; }
   const Peptide* GetPeptide(int back_index) const { return *(end_ - back_index); }
 
+  int ActiveTargets() const { return active_targets_; }
+  int ActiveDecoys() const { return active_decoys_; }
+
  // IMPLEMENTATION DETAILS
  
  private:
@@ -80,6 +83,9 @@ class ActivePeptideQueue {
   FifoAllocator fifo_alloc_prog2_;
   TheoreticalPeakCompiler* compiler_prog1_;
   TheoreticalPeakCompiler* compiler_prog2_;
+
+  // Number of targets and decoys in active range
+  int active_targets_, active_decoys_;
 };
 
 /*

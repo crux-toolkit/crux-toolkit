@@ -69,13 +69,6 @@ public:
     bool sp
   );
 
-  /**
-   * Determine if the protein is a decoy protein.
-   */
-  static bool isDecoy(
-    const string& proteinName
-  );
-
 protected:
   Arr* matches_;
   double max_mz_;
@@ -111,6 +104,7 @@ protected:
    */
   void addCruxMatches(
     MatchCollection* match_collection,
+    bool decoys,
     vector<PostProcessProtein*>* proteins_made,
     const vector<Arr::iterator>& vec,
     Crux::Spectrum& spectrum,
@@ -131,8 +125,7 @@ protected:
     const vector<const pb::AuxLocation*>& locations, /// auxiliary locations
     Crux::Spectrum* crux_spectrum,  ///< Crux spectrum for match
     SpectrumZState& crux_z_state, ///< Crux z state for match
-    vector<PostProcessProtein*>* proteins_made, ///< out parameter for new proteins
-    bool* decoy  ///< out parameter for whether this match is a decoy
+    vector<PostProcessProtein*>* proteins_made ///< out parameter for new proteins
   );
 
   /**
@@ -160,12 +153,10 @@ protected:
 
   /**
    * Gets the protein name with the index appended.
-   * Optionally, can pass in a boolean pointer to be set to whether decoy or not
    */
   static string getProteinName(
     const pb::Protein& protein,
-    int pos,
-    bool* is_decoy = NULL
+    int pos
   );
 
   /**
