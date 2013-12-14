@@ -20,9 +20,6 @@ class TideIndexApplication : public CruxApplication {
 
 public:
 
-  static const char DecoyMagicByte = 9;
-  static const char ProteinLevelDecoysMagicByte = 21;
-
   /**
    * Constructor
    */
@@ -64,15 +61,17 @@ protected:
     int proteinId_;
     int proteinPos_;
     const char* residues_;  // points at protein sequence
+    bool decoy_;
   public:
     TideIndexPeptide() {}
-    TideIndexPeptide(double mass, int length,
-                     string* proteinSeq, int proteinId, int proteinPos) {
+    TideIndexPeptide(double mass, int length, string* proteinSeq,
+                     int proteinId, int proteinPos, bool decoy) {
       mass_ = mass;
       length_ = length;
       proteinId_ = proteinId;
       proteinPos_ = proteinPos;
       residues_ = proteinSeq->data() + proteinPos;
+      decoy_ = decoy;
     }
     TideIndexPeptide(const TideIndexPeptide& other) {
       mass_ = other.mass_;
@@ -80,12 +79,14 @@ protected:
       proteinId_ = other.proteinId_;
       proteinPos_ = other.proteinPos_;
       residues_ = other.residues_;
+      decoy_ = other.decoy_;
     }
     double getMass() const { return mass_; }
     int getLength() const { return length_; }
     int getProteinId() const { return proteinId_; }
     int getProteinPos() const { return proteinPos_; }
     string getSequence() const { return string(residues_, length_); }
+    bool isDecoy() const { return decoy_; }
 
     friend bool operator >(
       const TideIndexPeptide& lhs, const TideIndexPeptide& rhs) {
@@ -171,11 +172,6 @@ protected:
     std::string decoyPeptideSequence,
     int startLoc,
     pb::Protein& outPbProtein
-  );
-
-  static std::string getDecoyProteinName(
-    int startLoc,
-    const std::string& targetProteinName
   );
 
   static void getPbPeptide(

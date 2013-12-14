@@ -145,27 +145,20 @@ int TideSearchApplication::main(int argc, char** argv) {
   }
   carp(CARP_DEBUG, "Read %d auxlocs", locations.size());
 
-  // Check for decoys and set static variable if found
-  for (vector<const pb::Protein*>::const_iterator i = proteins.begin();
-       i != proteins.end();
-       ++i) {
-    if (TideMatchSet::isDecoy((*i)->name())) {
-      HAS_DECOYS = true;
-      const string& residues = (*i)->residues();
-      if (residues[residues.length() - 1] ==
-          TideIndexApplication::ProteinLevelDecoysMagicByte) {
-        OutputFiles::setProteinLevelDecoys();
-      }
-      break;
-    }
-  }
-
   // Read peptides index file
   pb::Header peptides_header;
   HeadedRecordReader peptide_reader(peptides_file, &peptides_header);
   if (!peptides_header.file_type() == pb::Header::PEPTIDES ||
       !peptides_header.has_peptides_header()) {
     carp(CARP_FATAL, "Error reading index (%s)", peptides_file.c_str());
+  }
+  // Check for decoys
+  DECOY_TYPE_T headerDecoyType = (DECOY_TYPE_T)peptides_header.peptides_header().decoys();
+  if (headerDecoyType != NO_DECOYS) {
+    HAS_DECOYS = true;
+    if (headerDecoyType == PROTEIN_REVERSE_DECOYS) {
+      OutputFiles::setProteinLevelDecoys();
+    }
   }
   MassConstants::Init(&peptides_header.peptides_header().mods());
   active_peptide_queue = new ActivePeptideQueue(peptide_reader.Reader(), proteins);

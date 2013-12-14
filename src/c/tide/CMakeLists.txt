@@ -18,6 +18,15 @@ set(
 )
 set(
   proto_files
+  protobuf/header.proto
+  protobuf/peptides.proto
+  protobuf/raw_proteins.proto
+  protobuf/results.proto
+  protobuf/spectrum.proto
+  protobuf/view_ms1_cmds.proto
+)
+set(
+  proto_file_names
   header.proto
   peptides.proto
   raw_proteins.proto
@@ -27,8 +36,10 @@ set(
 )
 add_custom_command(
   OUTPUT ${proto_files_compiled}
+  DEPENDS ${proto_files}
   COMMAND mkdir -p ../protoobj &&
-    ../../../external/bin/protoc --cpp_out=../protoobj --python_out=../protoobj ${proto_files}
+    ../../../external/bin/protoc --cpp_out=../protoobj
+                                 --python_out=../protoobj ${proto_file_names}
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/protobuf
 )
 
