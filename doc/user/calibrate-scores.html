@@ -20,9 +20,9 @@
 <blockquote>
 
 <p>
-Given a collection of scored target and decoy peptide-spectrum matches
-(PSMs), estimate two statistical confidence measures for each: a
-q-value and a posterior error probability (PEP).</p>
+Given a collection of scored peptide-spectrum matches (PSMs), estimate
+two statistical confidence measures for each: a q-value and a
+posterior error probability (PEP).</p>
 
 <h3>q-value</h3>
 
@@ -36,13 +36,13 @@ PSMs.</p>
 
 <p>
 The q-values may be estimated in two different ways, depending on
-how <code>search-for-matches</code> was executed:</p>
+how the search was executed:</p>
 
 <ol>
 
 <li>
 If the collection of PSMs has p-values assigned
-by <code>search-for-matches</code> by using the
+by <code>tide-search</code> by using the
 <code>--compute-p-values</code> option, then the false discovery rate
 associated with a given score is computed using the Benjamini-Hochberg
 algorithm (<i>Journal of the Royal Statistical Society B</i>,
@@ -55,7 +55,7 @@ estimated as <i>p<sub>j</sub> * (m/j)</i>.</li>
 Alternatively, if the collection of PSMs does not have p-values
 assigned, then <code>calibrate-scores</code> searches the input
 directory for a corresponding set of decoy PSMs.  The
-false discovery rate associated with a given xcorr score is estimated
+false discovery rate associated with a given score is estimated
 as the number of decoy scores above the threshold divided by the
 number of target scores above the threshold, multiplied by the ratio
 of the total number of targets to total number of decoys.  This
@@ -132,8 +132,8 @@ can be provided in two ways: either as a separate file or embedded
 within the same file as the target PSMs.  Crux will first search for
 target PSMs in a separate file.  The decoy file name is constructed
 from the target name by replacing "target" with "decoy."  For example,
-if <code>search.target.txt</code> is provided as input, then Crux will
-search for a corresponding file named <code>search.decoy.txt</code>.
+if <code>tide-search.target.txt</code> is provided as input, then Crux will
+search for a corresponding file named <code>tide-search.decoy.txt</code>.
 If no decoy file is found, then Crux will assume that the given input
 file contains a mix of target and decoy PSMs.  Within this file,
 decoys are identified using a prefix (specified
@@ -181,7 +181,7 @@ option for other crux programs.</li>
 
 <li>
 <code>--decoy-prefix &lt;string&gt;</code> &ndash;
-Specifies the prefix of the protein names that indicates a decoy.
+Specifies what protein name prefix is used to indicate a decoy.
 Default = "decoy_".</li>
 
 <li>
@@ -189,11 +189,13 @@ Default = "decoy_".</li>
 The estimated proportion of target scores that are drawn according to
 the null distribution.  Default=1.0.</li>
 
+<!--
 <li>
 <code>--mod-mass-format &lt;mod-only|total|separate&gt;</code> &ndash;
 Specify how sequence modifications are reported in various ouptut
 files and, consequently, how they should be read in by
 calibrate-scores.  Use the same value as was used in the search. </li>
+-->
 
 <h3>Input and output</h3>
 
