@@ -45,7 +45,6 @@ set (
 	default.params 
 	fasta-format.html 
 	generate-peptides.html 
-	index-tutorial.html 
 	install-tutorial.html 
 	ms2-format.html 
 	nibib.gif 
