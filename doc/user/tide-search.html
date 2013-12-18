@@ -185,18 +185,15 @@ should be specified as 'first-last' which will include scans 'first'
 and 'last'.  Default = search all spectra.</li>
 
 <li>
-<code>--remove-precursor-peak 0|1|2</code> &ndash; An input value of 0
-will not perform any precursor removal.  An input value of 1 will
-remove all peaks around the precursor m/z, within a range specified by
-the <code>---remove-precursor-tolerance</code> options.  An input
-value of 2 will remove all charge-reduced precursor peaks, as expected
-to be present for ETD/ECD spectra.  Default = 0.</li>
+<code>--remove-precursor-peak &lt;T|F&gt;</code> &ndash; If true,
+all peaks around the precursor m/z will be removed, within a range specified by
+the <code>--remove-precursor-tolerance</code> option. Default = F.</li>
 
 <li>
 <code>--remove-precursor-tolerance &lt;float&gt;</code> &ndash; This
 parameter specifies the tolerance (in Th) around each precursor m/z that
 is removed when the <code>--remove_precursor_peak</code> option is invoked.
-Default=2.0.</li>
+Default=1.5.</li>
 <!-- N.B. See sourceforge Issue #86 for an explanation from Jimmy Eng --
   -- re: option 2.  --WSN 18 Dec 2013. -->
 

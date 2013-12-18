@@ -1136,6 +1136,17 @@ void initialize_parameters(void){
     "Available for tide-search",
     "true"
   );
+  // Same as remove_precursor_peak and remove_precursor tolerance in Comet
+  set_boolean_parameter("remove-precursor-peak", false,
+    "Remove peaks around the precursor m/z.",
+    "Available for tide-search.",
+    "true"
+  );
+  set_double_parameter("remove-precursor-tolerance", 1.5, 0, BILLION,
+    "+- Da tolerance for precursor peak removal. Default = 1.5.",
+    "Available for tide-search.",
+    "true"
+  );
 
   /*
    * Comet parameters

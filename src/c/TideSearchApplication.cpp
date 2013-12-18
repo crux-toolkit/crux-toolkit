@@ -33,6 +33,8 @@ int TideSearchApplication::main(int argc, char** argv) {
     "store-spectra",
     "concat",
     "compute-sp",
+    "remove-precursor-peak",
+    "remove-precursor-tolerance",
     "txt-output",
     "sqt-output",
     "pepxml-output",
@@ -192,6 +194,12 @@ int TideSearchApplication::main(int argc, char** argv) {
       remove(converted_spectra_file.c_str());
       carp(CARP_FATAL, "Error reading spectra file %s",
                        converted_spectra_file.c_str());
+    }
+  } else {
+    // Successfully read file as spectrumrecords format
+    if (get_int_parameter("remove_precursor_peak") != 0) {
+      carp(CARP_FATAL, "remove_precursor_peak can only be used during conversion "
+                       "to spectrumrecords format.");
     }
   }
 
