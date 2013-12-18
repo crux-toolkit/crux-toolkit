@@ -150,7 +150,7 @@ is defined as spectrum mass / (1.0 - (<code>precursor-window</code> /
 1000000)).  Default = mass.</li>
 
 <li>
-<code>--compute-sp &lt;T|F&gt;</code> &ndash; Compute the preliminary
+<code>--compute-sp T|F</code> &ndash; Compute the preliminary
 score Sp for all candidate peptides. This option is recommended if
 results are to be analyzed by <code>percolator</code>
 or <code>q-ranker</code>. If <code> sqt-output</code> is enabled,
@@ -185,7 +185,7 @@ should be specified as 'first-last' which will include scans 'first'
 and 'last'.  Default = search all spectra.</li>
 
 <li>
-<code>--remove-precursor-peak &lt;T|F&gt;</code> &ndash; If true,
+<code>--remove-precursor-peak T|F</code> &ndash; If true,
 all peaks around the precursor m/z will be removed, within a range specified by
 the <code>--remove-precursor-tolerance</code> option. Default = F.</li>
 
@@ -256,29 +256,29 @@ The name of the directory where output files will be created.
 Default = crux-output.</li>
 
 <li>
-<code>--overwrite &lt;T|F&gt;</code> &ndash;
+<code>--overwrite T|F</code> &ndash;
 Replace existing files if true (T) or fail when trying to overwrite a
 file if false (F). Default =  F.</li>
 
 <li>
-<code>--txt-output &lt;T|F&gt;</code> &ndash; Output a tab-delimited
+<code>--txt-output T|F</code> &ndash; Output a tab-delimited
 results file to the output directory. Default = T.</li>
 
 <li>
-<code>--sqt-output &lt;T|F&gt;</code> &ndash; Output an SQT
+<code>--sqt-output T|F</code> &ndash; Output an SQT
 results file to the output directory. Default = F.</li>
 
 <li>
-<code>--pepxml-output &lt;T|F&gt;</code> &ndash; Output a pepXML
+<code>--pepxml-output T|F</code> &ndash; Output a pepXML
 results file to the output directory. Default = F.</li>
 
 <li>
-<code>--mzid-output &lt;T|F&gt;</code> &ndash; Output an mzIdentML
+<code>--mzid-output T|F</code> &ndash; Output an mzIdentML
 results file to the output directory. Default = F.</li>
 
 <li>
 
-<code>--pinxml-output &lt;T|F&gt;</code> &ndash; Output a PIN XML
+<code>--pinxml-output T|F</code> &ndash; Output a PIN XML
 results file to the output directory. Default = F.</li>
 
 <li><code>--parameter-file &lt;filename&gt;</code> &ndash; 
