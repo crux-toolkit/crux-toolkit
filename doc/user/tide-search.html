@@ -179,15 +179,30 @@ With 1, 2, or 3 only spectra with that charge will be
 searched. Default = all.</li>
 
 <li>
-
 <code>--scan-number &lt;int&gt;|&lt;int&gt;-&lt;int&gt;</code> &ndash;
 A single scan number or a range of numbers to be searched. Range
 should be specified as 'first-last' which will include scans 'first'
 and 'last'.  Default = search all spectra.</li>
 
-<!--
-N.B.  Benjamin claims that implementing these will be non-trivial, so --
-  --let's postpone this till the next release.  --WSN 27 June 2014.
+<li>
+<code>--remove-precursor-peak 0|1|2</code> &ndash; An input value of 0
+will not perform any precursor removal.  An input value of 1 will
+remove all peaks around the precursor m/z, within a range specified by
+the <code>---remove-precursor-tolerance</code> options.  An input
+value of 2 will remove all charge-reduced precursor peaks, as expected
+to be present for ETD/ECD spectra.  Default = 0.</li>
+
+<li>
+<code>--remove-precursor-tolerance &lt;float&gt;</code> &ndash; This
+parameter specifies the tolerance (in Th) around each precursor m/z that
+is removed when the <code>--remove_precursor_peak</code> option is invoked.
+Default=2.0.</li>
+<!-- N.B. See sourceforge Issue #86 for an explanation from Jimmy Eng --
+  -- re: option 2.  --WSN 18 Dec 2013. -->
+
+<!-- N.B.  Benjamin claims that implementing the following options
+     will be non-trivial, so let's postpone this till the next
+     release.  --WSN 27 June 2013.
 
 <li>
 <code>--mz-bin-width &lt;float&gt;</code> &ndash; Before calculation of the
