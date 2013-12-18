@@ -1143,7 +1143,7 @@ void initialize_parameters(void){
     "true"
   );
   set_double_parameter("remove-precursor-tolerance", 1.5, 0, BILLION,
-    "+- Da tolerance for precursor peak removal. Default = 1.5.",
+    "+- m/z tolerance for precursor peak removal. Default = 1.5.",
     "Available for tide-search.",
     "true"
   );
