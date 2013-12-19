@@ -1,3 +1,4 @@
+project(xdr)
 cmake_minimum_required(VERSION 2.8.4)
 cmake_policy(VERSION 2.8.4)
 
@@ -31,4 +32,5 @@ set_property(
   _CRT_SECURE_NO_WARNINGS
 )
 
+install(TARGETS xdr DESTINATION ${CMAKE_PREFIX_PATH}/lib) # Important to use relative path here (used by CPack)!
 endif (WIN32 AND NOT CYGWIN)
