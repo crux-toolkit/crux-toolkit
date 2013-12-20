@@ -63,9 +63,8 @@ void CometWriteTxt::PrintTxtHeader(FILE *fpout)
    fprintf(fpout, "xcorr rank\t");
    fprintf(fpout, "b/y ions matched\t");
    fprintf(fpout, "b/y ions total\t");
-   fprintf(fpout, "matches/spectrum\t");
+   fprintf(fpout, "total matches/spectrum\t");
    fprintf(fpout, "sequence\t");
-   fprintf(fpout, "cleavage type\t");
    fprintf(fpout, "protein id\t");
    fprintf(fpout, "flanking aa\n");
 #else
@@ -188,7 +187,6 @@ void CometWriteTxt::PrintResults(int iWhichQuery,
          }
 
          fprintf(fpout, "%s\t", szBuf2);
-         fprintf(fpout, "NA\t"); //What should we do here for cleavage type?
          // Print protein reference/accession.
          fprintf(fpout, "%s\t", pOutput[i].szProtein);
          // Cleavage type
