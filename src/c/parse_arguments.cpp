@@ -954,11 +954,9 @@ char * parse_arguments_get_usage(const char * name) {
     /* Add the required argument usage comments */
     strcat(usage, "REQUIRED ARGUMENTS:\n\n");
     for (i = 0; i < required_count; i++) {
-      strcat(usage, "  <");
-      strcat(usage, required[i].name);
-      strcat(usage, "> ");
-      strcat(usage, required[i].usage);
-      strcat(usage, "\n");
+      std::stringstream ss;
+      ss << "<" << required[i].name << "> " << required[i].usage << '\n';
+      strcat_formatted(usage, "   ", ss.str().c_str());
     }
     strcat(usage, "\n");
 
