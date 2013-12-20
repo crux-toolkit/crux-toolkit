@@ -1,4 +1,4 @@
-scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	xcorr score	xcorr rank	matches/spectrum	sequence	cleavage type	protein id	flanking aa
+scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	xcorr score	xcorr rank	distinct matches/spectrum	sequence	cleavage type	protein id	flanking aa
 2	3	576.5400	1726.5981	1726.6747	0.03872	-0.1709	1	7	SISVVVNNDDAT[79.90]TGVR	trypsin-full-digest	gi|16127996|ref|NP_414543.1|(438)	RV
 2	3	576.5400	1726.5981	1726.6747	0.02971	-0.2096	2	7	SISVVVNNDDATT[79.90]GVR	trypsin-full-digest	gi|16127996|ref|NP_414543.1|(438)	RV
 2	3	576.5400	1726.5981	1727.4849	0.02185	-0.2393	3	7	NGS[79.90]DYS[79.90]AAVLAACLR	trypsin-full-digest	gi|16127996|ref|NP_414543.1|(205)	RA

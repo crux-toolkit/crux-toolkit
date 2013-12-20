@@ -1,4 +1,4 @@
-scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	xcorr score	xcorr rank	matches/spectrum	sequence	cleavage type	protein id	flanking aa
+scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	xcorr score	xcorr rank	distinct matches/spectrum	sequence	cleavage type	protein id	flanking aa
 2	3	576.5400	1726.5981	1725.9773	0	-0.26	1	1	MSPFGVPVPGPAPETKD	elastase-partial-digest	gi|6381999|ref|NP_009311.2|(30)	LI
 3	1	518.9500	517.9427	519.5119	0	0.18	1	1	TTGNGA	elastase-partial-digest	gi|16127995|ref|NP_414542.1|(15)	IG
 10	2	419.5800	837.1454	839.9005	0	-0.11	1	1	SQKDSYI	elastase-partial-digest	gi|6381999|ref|NP_009311.2|(231)	LL
