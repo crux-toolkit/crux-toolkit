@@ -1,4 +1,4 @@
-scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	xcorr score	xcorr rank	p-value	matches/spectrum	sequence	cleavage type	protein id	flanking aa	eta	beta	shift	corr
+scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	xcorr score	xcorr rank	p-value	distinct matches/spectrum	sequence	cleavage type	protein id	flanking aa	eta	beta	shift	corr
 10	2	636.3400	1270.6655	1272.3217	0.12	0.71	1	0.67	79	EHIECEQAEK	trypsin-partial-digest	YKL127W(441)	YV	0.488533	1.76076	0.399999	0.98886
 10	2	636.3400	1270.6655	1272.3979	0.014	0.59	2	0.92	79	GAVYSGMGPDYR	trypsin-partial-digest	YML092C(72)	IV	0.488533	1.76076	0.399999	0.98886
 10	2	636.3400	1270.6655	1273.3698	0.0098	0.57	3	0.94	79	EFDPWFNYR	trypsin-partial-digest	YGL022W(45)	HA	0.488533	1.76076	0.399999	0.98886

@@ -1,4 +1,4 @@
-scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	xcorr score	xcorr rank	p-value	Weibull est. q-value	Weibull est. PEP	matches/spectrum	sequence	cleavage type	protein id	flanking aa	eta	beta	shift	corr
+scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	xcorr score	xcorr rank	p-value	Weibull est. q-value	Weibull est. PEP	distinct matches/spectrum	sequence	cleavage type	protein id	flanking aa	eta	beta	shift	corr
 121	2	651.5800	1301.1455	1301.4161	0.69	3.4	1	0.024	0.61	0.54	91	LDVDELGDVAQK	trypsin-partial-digest	YLR043C	KN	0	0	0	0
 140	1	717.0600	716.0527	716.8326	0.54	1.2	1	0.025	0.61	0.54	184	ELGSIAK	trypsin-partial-digest	YNL166C	SL	0	0	0	0
 23	1	805.0000	803.9927	804.8090	0.44	0.95	1	0.033	0.61	0.54	181	DDTPTEK	trypsin-partial-digest	YGL245W	CM	0	0	0	0

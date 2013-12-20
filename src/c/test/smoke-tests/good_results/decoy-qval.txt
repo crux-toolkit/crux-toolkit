@@ -1,4 +1,4 @@
-scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	xcorr score	xcorr rank	decoy q-value (xcorr)	decoy PEP (xcorr)	matches/spectrum	sequence	cleavage type	protein id	flanking aa
+scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	xcorr score	xcorr rank	decoy q-value (xcorr)	decoy PEP (xcorr)	distinct matches/spectrum	sequence	cleavage type	protein id	flanking aa
 85	3	497.6200	1489.8381	1489.7319	0.81277835	4.9836555	1	0	0.0031538124	70	NFLETVELQVGLK	trypsin-partial-digest	YGL135W	RN
 118	3	1031.9399	3092.7981	3095.2366	0.88238478	4.4896221	1	0	0.0051049162	16	ELESAAYDHAEPVQPEDAPQDIANDELK	trypsin-partial-digest	YGL009C	KD
 92	3	497.2800	1488.8181	1489.7319	0.69758147	4.4782357	1	0	0.0051650689	70	NFLETVELQVGLK	trypsin-partial-digest	YGL135W	RN
