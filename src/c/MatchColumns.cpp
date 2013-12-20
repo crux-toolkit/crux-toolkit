@@ -47,7 +47,7 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
 #endif
   "b/y ions matched",
   "b/y ions total",
-  "matches/spectrum",
+  "distinct matches/spectrum",
   "sequence",
   "cleavage type",
   "protein id",
