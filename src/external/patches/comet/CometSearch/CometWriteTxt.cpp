@@ -125,7 +125,7 @@ void CometWriteTxt::PrintResults(int iWhichQuery,
          num_matches = pQuery->_uliNumMatchedPeptides;
       }
       
-      for (size_t i=0; i<min((unsigned long)g_staticParams.options.iNumPeptideOutputLines, num_matches); i++)
+      for (size_t iWhichResult=0; iWhichResult<min((unsigned long)g_staticParams.options.iNumPeptideOutputLines, num_matches); iWhichResult++)
       {
         if (pOutput[0].fXcorr <= 0) {
           continue;
@@ -136,7 +136,7 @@ void CometWriteTxt::PrintResults(int iWhichQuery,
          if (pOutput[0].fXcorr <=0) {
             delta_cn = 0;
          } else {
-            delta_cn = 1.000000 - pOutput[i+1].fXcorr/pOutput[0].fXcorr;   // pOutput[0].fXcorr is >0 to enter this fn 
+            delta_cn = 1.000000 - pOutput[iWhichResult+1].fXcorr/pOutput[0].fXcorr;   // pOutput[0].fXcorr is >0 to enter this fn 
          }
 
          fprintf(fpout,
@@ -149,48 +149,50 @@ void CometWriteTxt::PrintResults(int iWhichQuery,
                  "%d\t"
                  "%d\t"
                  "%lu\t",
-            pOutput[i].dPepMass - PROTON_MASS,
+            pOutput[iWhichResult].dPepMass - PROTON_MASS,
 	    delta_cn,
-            pOutput[i].fScoreSp,
-            pOutput[i].iRankSp,
-            pOutput[i].fXcorr,
-            i + 1,                  // assuming want index starting at 1
-            pOutput[i].iMatchedIons, 
-            pOutput[i].iTotalIons,
+            pOutput[iWhichResult].fScoreSp,
+            pOutput[iWhichResult].iRankSp,
+            pOutput[iWhichResult].fXcorr,
+            iWhichResult + 1,                  // assuming want index starting at 1
+            pOutput[iWhichResult].iMatchedIons, 
+            pOutput[iWhichResult].iTotalIons,
             num_matches);
          char szBuf2[SIZE_BUF];
          szBuf2[0] = '\0';
             
          //Print out peptide and give mass for variable mods.
          if (g_staticParams.variableModParameters.bVarModSearch
-               && pOutput[i].pcVarModSites[pOutput[i].iLenPeptide] == 1)
+               && pOutput[iWhichResult].pcVarModSites[pOutput[iWhichResult].iLenPeptide] == 1)
          {
              sprintf(szBuf2, "[%0.4f]",  g_staticParams.variableModParameters.dVarModMassN);
+             //sprintf(szBuf+strlen(szBuf), "]");
+
          }
 
-         for (int j=0; j<pOutput[i].iLenPeptide; j++)
+         for (int i=0; i<pOutput[iWhichResult].iLenPeptide; i++)
          {
-            sprintf(szBuf2+strlen(szBuf2), "%c", pOutput[i].szPeptide[j]);
+            sprintf(szBuf2+strlen(szBuf2), "%c", pOutput[iWhichResult].szPeptide[i]);
 
-            if (g_staticParams.variableModParameters.bVarModSearch
-                  && !isEqual(g_staticParams.variableModParameters.varModList[pOutput[i].pcVarModSites[j]-1].dVarModMass, 0.0))
+            if (pOutput[iWhichResult].pcVarModSites[i] > 0)
             {
-               sprintf(szBuf2+strlen(szBuf2), "[%0.4f]",
-                  g_staticParams.variableModParameters.varModList[pOutput[i].pcVarModSites[j]-1].dVarModMass);
+              sprintf(szBuf2+strlen(szBuf2), "[%0.4f]",
+                  g_staticParams.variableModParameters.varModList[pOutput[iWhichResult].pcVarModSites[i]-1].dVarModMass);
             }
          }
-   
+
          if (g_staticParams.variableModParameters.bVarModSearch
-               && pOutput[i].pcVarModSites[pOutput[i].iLenPeptide+1] == 1)
+            && pOutput[iWhichResult].pcVarModSites[pOutput[iWhichResult].iLenPeptide+1] == 1)
          {
             sprintf(szBuf2+strlen(szBuf2), "[0.4%f]", g_staticParams.variableModParameters.dVarModMassC);
+            //sprintf(szBuf2+strlen(szBuf2), "[");
          }
 
          fprintf(fpout, "%s\t", szBuf2);
          // Print protein reference/accession.
-         fprintf(fpout, "%s\t", pOutput[i].szProtein);
+         fprintf(fpout, "%s\t", pOutput[iWhichResult].szProtein);
          // Cleavage type
-         fprintf(fpout, "%c%c\n", pOutput[i].szPrevNextAA[0], pOutput[i].szPrevNextAA[1]);
+         fprintf(fpout, "%c%c\n", pOutput[iWhichResult].szPrevNextAA[0], pOutput[iWhichResult].szPrevNextAA[1]);
       }
    }
 }
