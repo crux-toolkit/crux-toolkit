@@ -469,20 +469,30 @@ int convert_to_mod_aa_seq(const char* sequence,
       // translate character into aa_mod
       aa_mod = get_aa_mod_from_symbol(sequence[seq_idx]);
     }
-
+    if (mod_idx == 0) {
+      //This can happen with nterminal modifications from comet.
+      seq_idx++;
+      if (seq_idx < strlen(sequence) && sequence[seq_idx] >= 'A'  && sequence[seq_idx] <= 'Z') {
+        new_sequence[mod_idx] = char_aa_to_modified( sequence[seq_idx] );
+        mod_idx++;
+      } else {
+        carp(CARP_FATAL, "Cannot parse sequence %s", sequence);
+      }
+      
+      
+    }
     // apply the modification
     if( aa_mod == NULL ){
       carp(CARP_WARNING, "There is an unidentifiable modification in sequence "
            "<%s> at position %d.", sequence, seq_idx - 1);
     } else {
-
-      // apply modification 
+      // apply modification
       modify_aa(&new_sequence[mod_idx-1], aa_mod);
     }
   } // next character in given sequence
 
   // null terminate
-  new_sequence[seq_idx] = MOD_SEQ_NULL;
+  new_sequence[mod_idx] = MOD_SEQ_NULL;
 
   //  return new_sequence;
   *mod_sequence = new_sequence;
@@ -1046,3 +1056,47 @@ int count_modified_aas(MODIFIED_AA_T* seq){
   return count;
 
 }
+
+/**
+ * /returns the mass of the modified sequence
+ */
+FLOAT_T get_mod_aa_seq_mass(
+  MODIFIED_AA_T* seq, ///< The modified sequence
+  MASS_TYPE_T mass_type ///<  mono or average?
+  ) {
+  
+  // get access to the mods
+  AA_MOD_T** global_mod_list = NULL;
+  int mod_list_length = get_all_aa_mod_list(&global_mod_list);
+  
+  if (seq == NULL) {
+    return 0.0;
+  }
+  
+  FLOAT_T ans = 0;
+  int aa_idx = 0;
+  while(seq[aa_idx] != MOD_SEQ_NULL) {
+    ans += get_mass_amino_acid(modified_aa_to_char(seq[aa_idx]), mass_type);
+    if ( GET_MOD_MASK & seq[aa_idx]) {
+      for(int global_idx = 0; global_idx < mod_list_length; global_idx++){
+        if( is_aa_modified(seq[aa_idx], 
+                     global_mod_list[global_idx]) ){
+          ans += aa_mod_get_mass_change(global_mod_list[global_idx]);
+        }
+      }
+    }
+    aa_idx++;
+  }
+  if (mass_type == AVERAGE) {
+    return ans + MASS_H2O_AVERAGE;
+  } else {
+    return ans + MASS_H2O_MONO;
+  }
+}
+
+/*
+ * Local Variables:
+ * mode: c
+ * c-basic-offset: 2
+ * End:
+ */
