@@ -360,7 +360,14 @@ Crux::Peptide* PercolatorAdapter::extractPeptide(
   
   MODIFIED_AA_T* mod_seq = getModifiedAASequence(psm, seq, peptide_mass);
 
+  carp(CARP_DEBUG, "seq:%s",seq.c_str());
+  char* mod_seq_str = modified_aa_string_to_string_with_masses(mod_seq, seq.length(), MOD_MASS_ONLY);
+  carp(CARP_DEBUG, "mod seq:%s", mod_seq_str);
+  free(mod_seq_str);
+  
   string full_peptide(psm->getFullPeptide());
+  carp(CARP_DEBUG, "full peptide:%s", full_peptide.c_str());
+  carp(CARP_DEBUG, "=======================");
   string n_term = "";
   string c_term = "";
   if (!full_peptide.empty()) {
@@ -426,44 +433,16 @@ MODIFIED_AA_T* PercolatorAdapter::getModifiedAASequence(
 	 perc_seq.c_str());
   }
 
-
-  vector<pair<int, const AA_MOD_T*> > mod_locations_types;
-  size_t count = 0;
-  for (size_t seq_idx = 0; seq_idx < perc_seq_len; seq_idx++) {
-    if (perc_seq.at(seq_idx) == '[') {
-      //modification found.
-      size_t begin_idx = seq_idx+1;
-      size_t end_idx = perc_seq.find(']', begin_idx);
-      int mod_location = count-1;
-      FLOAT_T delta_mass;
-
-      from_string(delta_mass, perc_seq.substr(begin_idx, end_idx - begin_idx));
-      carp(CARP_DEBUG,"seq:%s, i:%i m:%f", perc_seq.c_str(), seq_idx, delta_mass);
-      peptide_mass += delta_mass;
-      const AA_MOD_T* mod = get_aa_mod_from_mass(delta_mass);
-      if (mod == NULL) {
-	carp(CARP_FATAL, "Mod not found!");
-      }
-
-      mod_locations_types.push_back(pair<int, const AA_MOD_T*>(mod_location, mod));
-      seq_idx = end_idx;
-    } else {
-      ss_seq << perc_seq.at(seq_idx);
-      count++;
-    }
-  }
-  seq = ss_seq.str();
-  peptide_mass += Crux::Peptide::calcSequenceMass(seq.c_str(),
-                  get_mass_type_parameter("isotopic-mass"));
-
-  MODIFIED_AA_T* mod_seq;
-  convert_to_mod_aa_seq(seq.c_str(), &mod_seq);
-  for (size_t mod_idx = 0 ; mod_idx < mod_locations_types.size(); mod_idx++) {
-    size_t seq_idx = mod_locations_types[mod_idx].first;
-    const AA_MOD_T* mod = mod_locations_types[mod_idx].second;
-
-    modify_aa(mod_seq+seq_idx, (AA_MOD_T*)mod);
-  }
+  MODIFIED_AA_T* mod_seq = NULL;
+  carp(CARP_DEBUG, "PercolatorAdapter::getModifiedAASequence(): seq:%s", perc_seq.c_str());
+  int mod_len = convert_to_mod_aa_seq(perc_seq.c_str(), &mod_seq, MOD_MASS_ONLY);
+  peptide_mass = get_mod_aa_seq_mass(mod_seq, get_mass_type_parameter("isotopic-mass"));
+  char* cseq = modified_aa_to_unmodified_string(mod_seq, mod_len);
+  seq = cseq;
+  free(cseq);
+  
+  carp(CARP_DEBUG, "Peptide mass:%lf", peptide_mass);
+  
   return mod_seq;
 }
 

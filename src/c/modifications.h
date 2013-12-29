@@ -418,5 +418,21 @@ char* aa_mod_get_aa_list_string(AA_MOD_T* mod);
  */
 int count_modified_aas(MODIFIED_AA_T* seq);
 
+/**
+ * /returns the mass of the modified sequence
+ */
+FLOAT_T get_mod_aa_seq_mass(
+  MODIFIED_AA_T* seq, ///< The modified sequence
+  MASS_TYPE_T mass_type ///<  mono or average?
+  );
+
 #endif //MODIFICATION_FILE_H
+
+
+/*
+ * Local Variables:
+ * mode: c
+ * c-basic-offset: 2
+ * End:
+ */
 
