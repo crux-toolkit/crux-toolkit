@@ -881,15 +881,6 @@ void initialize_parameters(void){
   );
  
   set_double_parameter(
-    "trian-fdr",
-    0.01,0.0,0.90,
-    "False discovery rate thereshold to define positive examples in training. "
-    "Set by cross validation if 0. Default is 0.01",
-    "Available for crux percolatior",
-    "true"
-  );
-
-  set_double_parameter(
     "test-fdr",
     0.01,0.0,1.0,
     "False discovery rate threshold for evaluating best cross validation result "
