@@ -1967,6 +1967,8 @@ string Peptide::getProteinIdsLocations() {
         int peptide_loc = peptide_src->getStartIdx();
         
         protein_loc_stream << "(" << peptide_loc << ")";
+      } else if (peptide_src->getStartIdxOriginal() > 0) {
+        protein_loc_stream << "(" << peptide_src->getStartIdxOriginal() << ")";
       }
       free(protein_id);
       protein_ids_locations.insert(protein_loc_stream.str());

@@ -21,7 +21,14 @@ class PeptideSrc {
  protected:
   DIGEST_T digestion_; ///< how specific the ends are relative to the enzyme
   Crux::Protein* parent_protein_; ///< the parent of this preptide
+
+  /*
+   * start_idx_ tracks the index of the peptide within the corresponding protein
+   * start_idx_original_ is for keeping track of the index of the peptide within
+   * the original protein, which we may not have the full sequence of
+   */
   int start_idx_; ///< start index of the peptide in the protein sequence, first residue is 1 
+  int start_idx_original_;  ///< start index of the peptide in the original protein sequence
   static std::map<std::string, Crux::Peptide* > sequence_to_peptide_; ///< Maps a sequence to a peptide object
   static std::map<std::string, Crux::Peptide* > decoy_sequence_to_peptide_; ///< Maps a decoy sequence to a peptide object
 
@@ -118,6 +125,18 @@ class PeptideSrc {
    * \returns the start index of the peptide in the protein sequence
    */
   int getStartIdx();
+
+  /**
+   * sets the original start index of the peptide in the protein sequence
+   */
+  void setStartIdxOriginal(
+    int start_idx ///< start index of the peptide in the original protein sequence -in
+  );
+
+  /**
+   * \returns the original start index of the peptide in the protein sequence
+   */
+  int getStartIdxOriginal();
 
   /**
    * \returns a pointer to the start of the peptide with in it's parent protein sequence
