@@ -69,6 +69,10 @@ public:
     bool sp
   );
 
+  static void setCleavageType(
+    const string& cleavageType
+  );
+
 protected:
   Arr* matches_;
   double max_mz_;

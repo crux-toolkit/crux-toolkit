@@ -170,7 +170,7 @@ static const char* enzyme_type_strings[NUMBER_ENZYME_TYPES] =
    "modified-chymotrypsin", "elastase-trypsin-chymotrypsin",
    "custom-enzyme"};
 
-ENZYME_T string_to_enzyme_type(char* name){
+ENZYME_T string_to_enzyme_type(const char* name){
   int enz_int = convert_enum_type_str(name, INVALID_ENUM_STRING, 
                                       enzyme_type_strings, 
                                       NUMBER_ENZYME_TYPES);

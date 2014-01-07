@@ -8,6 +8,7 @@
 #include "TideIndexApplication.h"
 #include "TideSearchApplication.h"
 
+extern HASH_T* parameters;
 extern AA_MOD_T* list_of_mods[MAX_AA_MODS];
 extern int num_mods;
 
@@ -154,15 +155,16 @@ int TideSearchApplication::main(int argc, char** argv) {
       !peptides_header.has_peptides_header()) {
     carp(CARP_FATAL, "Error reading index (%s)", peptides_file.c_str());
   }
+  const pb::Header::PeptidesHeader& pepHeader = peptides_header.peptides_header();
   // Check for decoys
-  DECOY_TYPE_T headerDecoyType = (DECOY_TYPE_T)peptides_header.peptides_header().decoys();
+  DECOY_TYPE_T headerDecoyType = (DECOY_TYPE_T)pepHeader.decoys();
   if (headerDecoyType != NO_DECOYS) {
     HAS_DECOYS = true;
     if (headerDecoyType == PROTEIN_REVERSE_DECOYS) {
       OutputFiles::setProteinLevelDecoys();
     }
   }
-  MassConstants::Init(&peptides_header.peptides_header().mods());
+  MassConstants::Init(&pepHeader.mods());
   active_peptide_queue = new ActivePeptideQueue(peptide_reader.Reader(), proteins);
 
   carp(CARP_INFO, "Reading spectra file %s", spectra_file.c_str());
@@ -213,6 +215,9 @@ int TideSearchApplication::main(int argc, char** argv) {
     MaxMZ::SetGlobalMaxFromFlag();
   }
 
+  char* digestString =
+    digest_type_to_string(pepHeader.full_digestion() ? FULL_DIGEST : PARTIAL_DIGEST);
+
   bool txt_only = !get_boolean_parameter("sqt-output") &&
                   !get_boolean_parameter("pepxml-output") &&
                   !get_boolean_parameter("mzid-output") &&
@@ -222,10 +227,18 @@ int TideSearchApplication::main(int argc, char** argv) {
   ofstream* decoy_file = NULL;
   if (!txt_only) {
     carp(CARP_DEBUG, "Using OutputFiles to write matches");
+    // Overwrite enzyme/digestion parameters in the hash
+    // TODO Find a better way to do this?
+    add_or_update_hash(parameters, "enzyme", pepHeader.enzyme().c_str());
+    add_or_update_hash(parameters, "digestion", digestString);
+    free(digestString);
     output_files = new OutputFiles(this);
   } else {
     carp(CARP_DEBUG, "Using TideMatchSet to write matches");
     bool overwrite = get_boolean_parameter("overwrite");
+    stringstream ss;
+    ss << pepHeader.enzyme() << '-' << digestString;
+    free(digestString);
     if (!concat) {
       string target_file_name = make_file_path("tide-search.target.txt");
       target_file = create_stream_in_path(target_file_name.c_str(), NULL, overwrite);
