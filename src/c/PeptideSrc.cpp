@@ -43,6 +43,7 @@ PeptideSrc::PeptideSrc() {
   digestion_ = (DIGEST_T)0;
   parent_protein_ = NULL;
   start_idx_ = 0;
+  start_idx_original_ = 0;
 }
 
 /**
@@ -190,6 +191,22 @@ void PeptideSrc::setStartIdx(
 int PeptideSrc::getStartIdx() {
 
   return start_idx_;
+}
+
+/**
+ * \sets the original start index of the peptide in the protein sequence
+ */
+void PeptideSrc::setStartIdxOriginal(
+  int start_idx ///< start index of the peptide in the original protein sequence -in
+) {
+  start_idx_original_ = start_idx;
+}
+
+/**
+ * \returns the original start index of the peptide in the protein sequence
+ */
+int PeptideSrc::getStartIdxOriginal() {
+  return start_idx_original_;
 }
 
 /**

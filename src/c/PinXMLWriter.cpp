@@ -85,9 +85,10 @@ void PinXMLWriter::write(
 
   calculateDeltaCN(matches);
   for(unsigned idx=0; idx<matches.size(); idx++){
-   
-    if(matches[idx]->getRank(XCORR)<=top_rank)
-      printPSM(matches[idx],spectrum,matches[idx]->getNullPeptide());
+ 
+    int xcorrRank = matches[idx]->getRank(XCORR);
+    if(xcorrRank<=top_rank)
+      printPSM(matches[idx],spectrum,matches[idx]->getNullPeptide(),xcorrRank);
     else 
      return;
   }
@@ -275,8 +276,9 @@ void PinXMLWriter::write(
     }
     for (unsigned idx = 0;idx < matches.size();idx++) {   
       bool is_decoy=isDecoy(matches[idx]);
-      if (matches[idx]->getRank(XCORR) <= top_rank){
-        printPSM(matches[idx],matches[idx]->getSpectrum(),is_decoy);
+      int xcorrRank = matches[idx]->getRank(XCORR);
+      if (xcorrRank <= top_rank){
+        printPSM(matches[idx],matches[idx]->getSpectrum(),is_decoy,xcorrRank);
       }
     }
   } 
@@ -379,7 +381,8 @@ void PinXMLWriter:: printHeaderFragSpectrumMatch(int scan_number){
 void PinXMLWriter:: printPSM(
   Match* match,
   Spectrum* spectrum, 
-  bool is_decoy 
+  bool is_decoy,
+  int rank
 ){ 
   int scan_number= spectrum->getFirstScan();
   Peptide* peptide= match->getPeptide();
@@ -395,7 +398,7 @@ void PinXMLWriter:: printPSM(
   else 
     decoy="false";
 
-  string id = getId(charge,is_decoy,scan_number,1); 
+  string id = getId(charge,is_decoy,scan_number,rank); 
     
   FLOAT_T calculated_mph =
     peptide->calcMass(get_mass_type_parameter("isotopic-mass")) + MASS_PROTON

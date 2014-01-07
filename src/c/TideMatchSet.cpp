@@ -213,9 +213,9 @@ void TideMatchSet::report(
   SpectrumZState z_state;
   z_state.setMZ(crux_spectrum.getPrecursorMz(), charge);
 
-  addCruxMatches(crux_collection, false, &proteins_made, targets, crux_spectrum,
+  addCruxMatches(crux_collection, false, top_n, &proteins_made, targets, crux_spectrum,
                  peptides, proteins, locations, z_state, sp_scorer, &lowest_sp);
-  addCruxMatches(crux_decoy_collection, true, &proteins_made, decoys, crux_spectrum,
+  addCruxMatches(crux_decoy_collection, true, top_n, &proteins_made, decoys, crux_spectrum,
                  peptides, proteins, locations, z_state, sp_scorer, &lowest_sp);
 
   if (sp_scorer) {
@@ -247,6 +247,7 @@ void TideMatchSet::report(
 void TideMatchSet::addCruxMatches(
   MatchCollection* match_collection,
   bool decoys,
+  int top_n,
   vector<PostProcessProtein*>* proteins_made,
   const vector<Arr::iterator>& vec,
   Crux::Spectrum& crux_spectrum,
@@ -258,10 +259,12 @@ void TideMatchSet::addCruxMatches(
   FLOAT_T* lowest_sp_out
 ) {
 
-  FLOAT_T lnNumSp = log(matches_->size());
+  FLOAT_T lnNumSp = log(!decoys ? peptides->ActiveTargets()
+                                : peptides->ActiveDecoys());
   
   // Create a Crux match for each match
-  for (vector<Arr::iterator>::const_iterator i = vec.begin(); i != vec.end(); ++i) {
+  vector<Arr::iterator>::const_iterator endIter = min(vec.begin() + top_n, vec.end());
+  for (vector<Arr::iterator>::const_iterator i = vec.begin(); i != endIter; ++i) {
     const Peptide* peptide = peptides->GetPeptide((*i)->second);
 
     Crux::Match* match = getCruxMatch(peptide, proteins, locations, &crux_spectrum,
@@ -372,16 +375,15 @@ Crux::Match* TideMatchSet::getCruxMatch(
   PostProcessProtein* crux_protein = new PostProcessProtein();
   proteins_made->push_back(crux_protein);
 
-  string proteinName = getProteinName(*protein, pos);
-
-  crux_protein->setId(proteinName.c_str());
+  crux_protein->setId(protein->name().c_str());
   string originalTargetSeq = !peptide->IsDecoy() ? peptide->Seq() :
-    protein->residues().substr(protein->residues().length() - peptide->Len());
+    protein->residues().substr(protein->residues().length() - peptide->Len() - 1);
   int start_idx = crux_protein->findStart(originalTargetSeq, n_term, c_term);
 
   // Create peptide
   Crux::Peptide* crux_peptide = new Crux::Peptide(
     peptide->Len(), peptide->Mass(), crux_protein, start_idx);
+  crux_peptide->getPeptideSrc()->setStartIdxOriginal(pos + 1);
 
   // Add other proteins if any
   if (peptide->HasAuxLocationsIndex()) {
@@ -394,10 +396,11 @@ Crux::Match* TideMatchSet::getCruxMatch(
 
       crux_protein = new PostProcessProtein();
       proteins_made->push_back(crux_protein);
-      crux_protein->setId(getProteinName(*protein, pos).c_str());
+      crux_protein->setId(protein->name().c_str());
       start_idx = crux_protein->findStart(originalTargetSeq, n_term, c_term);
-      crux_peptide->addPeptideSrc(
-        new PeptideSrc(NON_SPECIFIC_DIGEST, crux_protein, start_idx));
+      PeptideSrc* src = new PeptideSrc(NON_SPECIFIC_DIGEST, crux_protein, start_idx);
+      src->setStartIdxOriginal(pos + 1);
+      crux_peptide->addPeptideSrc(src);
     }
   }
 

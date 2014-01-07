@@ -109,7 +109,8 @@ class PinXMLWriter{
   void printPSM(
     Crux::Match* match, 
     Crux::Spectrum* spectrum, 
-    bool is_decoy 
+    bool is_decoy,
+    int rank
   );
 
   //write Peptide sequence 

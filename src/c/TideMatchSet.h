@@ -109,6 +109,7 @@ protected:
   void addCruxMatches(
     MatchCollection* match_collection,
     bool decoys,
+    int top_n,
     vector<PostProcessProtein*>* proteins_made,
     const vector<Arr::iterator>& vec,
     Crux::Spectrum& spectrum,
