@@ -17,17 +17,6 @@ TideMatchSet::TideMatchSet(
   double max_mz
 ) :
   matches_(matches), max_mz_(max_mz) {
-  if (cleavage_type_.empty()) {
-    ENZYME_T enzyme = get_enzyme_type_parameter("enzyme");
-    char* enzyme_string = enzyme_type_to_string(enzyme);
-    DIGEST_T digestion = get_digest_type_parameter("digestion");
-    char* digestion_string = digest_type_to_string(digestion);
-    cleavage_type_ = enzyme_string;
-    cleavage_type_ += '-';
-    cleavage_type_ += digestion_string;
-    free(enzyme_string);
-    free(digestion_string);
-  }
 }
 
 TideMatchSet::~TideMatchSet() {
@@ -353,6 +342,12 @@ void TideMatchSet::writeHeaders(
     *file << get_column_header(header);
   }
   *file << endl;
+}
+
+void TideMatchSet::setCleavageType(
+  const string& cleavageType
+) {
+  cleavage_type_ = cleavageType;
 }
 
 /**
