@@ -155,9 +155,16 @@ int TideSearchApplication::main(int argc, char** argv) {
       !peptides_header.has_peptides_header()) {
     carp(CARP_FATAL, "Error reading index (%s)", peptides_file.c_str());
   }
-
-  if (!MassConstants::Init(&peptides_header.peptides_header().mods()))
-	return 2;
+  
+  const pb::Header::PeptidesHeader& pepHeader = peptides_header.peptides_header();
+  DECOY_TYPE_T headerDecoyType = (DECOY_TYPE_T)pepHeader.decoys();
+  if (headerDecoyType != NO_DECOYS) {
+    HAS_DECOYS = true;
+    if (headerDecoyType == PROTEIN_REVERSE_DECOYS) {
+      OutputFiles::setProteinLevelDecoys();
+    }
+  }
+  MassConstants::Init(&pepHeader.mods());
 
   active_peptide_queue = new ActivePeptideQueue(peptide_reader.Reader(), proteins);
 
