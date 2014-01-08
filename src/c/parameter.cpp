@@ -1116,6 +1116,34 @@ void initialize_parameters(void){
     "Available for tide-index",
     "true"
   );
+  set_string_parameter("cterm-peptide-mods-spec", "",
+    "Specifies C-terminal static and variable mass modifications on peptides. "
+    "Specify a comma-separated list of C-terminal modification sequences of the form: "
+    "X+21.9819",
+    "Available for tide-index",
+    "true"
+  );
+  set_string_parameter("nterm-peptide-mods-spec", "",
+    "Specifies N-terminal static and variable mass modifications on peptides. "
+    "Specify a comma-separated list of N-terminal modification sequences of the form: "
+    "1E-18.0106,C-17.0265",
+    "Available for tide-index",
+    "true"
+  );
+  set_string_parameter("cterm-protein-mods-spec", "",
+    "Specifies C-terminal static and variable mass modifications on proteins. "
+    "Specify a comma-separated list of C-terminal protein modification sequences of the form: "
+    ",...",
+    "Available for tide-index",
+    "true"
+  );
+  set_string_parameter("nterm-protein-mods-spec", "",
+    "Specifies N-terminal static and variable mass modifications on proteins. "
+    "Specify a comma-separated list of N-terminal protein modification sequences of the form: "
+    ",...",
+    "Available for tide-index",
+    "true"
+  );
   set_string_parameter("store-spectra", "",
     "Specify the name of the file where the binarized fragmentation spectra "
     "will be stored.",
@@ -1125,6 +1153,11 @@ void initialize_parameters(void){
   set_boolean_parameter("concat", false,
     "Output target and decoy PSMs into a single file.",
     "Available for tide-search",
+    "true"
+  );
+  set_string_parameter("PTMDB", "",
+    "Specify the name of the file where the PTMs are stored.",
+    "Available for tide-index",
     "true"
   );
   // Same as remove_precursor_peak and remove_precursor tolerance in Comet

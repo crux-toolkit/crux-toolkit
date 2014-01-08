@@ -1,6 +1,8 @@
 #include <limits>
+#include "../carp.h"
 #include "mass_constants.h"
 #include "header.pb.h"
+#include "stdio.h"
 
 using namespace std;
 
@@ -102,6 +104,7 @@ bool MassConstants::Init(const pb::ModTable* mod_table) {
       mono_table[aa] += delta;
       avg_table[aa] += delta;
     }
+    carp(CARP_DEBUG, "Number of unique modification masses: %d\n", mod_table->unique_deltas_size());
 
     mod_coder_.Init(mod_table->unique_deltas_size());
     unique_deltas_ = new double[mod_table->unique_deltas_size()];
@@ -144,8 +147,6 @@ static bool CheckModification(const pb::Modification& mod,
       return false;
     repeats[aa] = true;
   }
-  if (mod.delta() <= 0)
-    return false;
   return true;
 }
 

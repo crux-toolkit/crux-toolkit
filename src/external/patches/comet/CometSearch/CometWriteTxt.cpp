@@ -174,10 +174,9 @@ void CometWriteTxt::PrintResults(int iWhichQuery,
          {
             sprintf(szBuf2+strlen(szBuf2), "%c", pOutput[iWhichResult].szPeptide[i]);
 
-            if (pOutput[iWhichResult].pcVarModSites[i] > 0)
-            {
+            if (pOutput[iWhichResult].pcVarModSites[i] > 0) {
               sprintf(szBuf2+strlen(szBuf2), "[%0.4f]",
-                  g_staticParams.variableModParameters.varModList[pOutput[iWhichResult].pcVarModSites[i]-1].dVarModMass);
+                 g_staticParams.variableModParameters.varModList[pOutput[iWhichResult].pcVarModSites[i]-1].dVarModMass);
             }
          }
 

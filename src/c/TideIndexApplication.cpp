@@ -5,17 +5,20 @@
 #include "GenerateDecoys.h"
 #include "TideIndexApplication.h"
 #include "TideMatchSet.h"
-
 #include "tide/modifications.h"
 #include "tide/records_to_vector-inl.h"
 
 extern void AddTheoreticalPeaks(const vector<const pb::Protein*>& proteins,
                         				const string& input_filename,
                         				const string& output_filename);
+//extern void AddMods(HeadedRecordReader* reader,
+//                    string out_file,
+//           		    const pb::Header& header,
+//         		    const vector<const pb::Protein*>& proteins);
 extern void AddMods(HeadedRecordReader* reader,
                     string out_file,
-            		    const pb::Header& header,
-            		    const vector<const pb::Protein*>& proteins);
+           		    const pb::Header& header,
+         		    const vector<const pb::Protein*>& proteins, VariableModTable& var_mod_table);
 DECLARE_int32(max_mods);
 
 TideIndexApplication::TideIndexApplication() {
@@ -40,12 +43,17 @@ int TideIndexApplication::main(int argc, char** argv) {
     "monoisotopic-precursor",
     "use-flanking-peaks",
     "mods-spec",
+    "cterm-peptide-mods-spec",
+    "nterm-peptide-mods-spec",
+    "cterm-protein-mods-spec",
+    "nterm-protein-mods-spec",
     "max-mods",
     "output-dir",
     "overwrite",
     "peptide-list",
     "parameter-file",
     "seed",
+//    "PTMDB",
     "verbosity"
   };
 
@@ -90,17 +98,45 @@ int TideIndexApplication::main(int argc, char** argv) {
   } else if (digestion != FULL_DIGEST && digestion != PARTIAL_DIGEST) {
     carp(CARP_FATAL, "'digestion' must be 'full-digest' or 'partial-digest'");
   }
-  string mods_spec = get_string_parameter_pointer("mods-spec");
+
+  VariableModTable var_mod_table;
+  string mods_spec;
+  var_mod_table.ClearTables();
+  //parse regular amino acid modifications
+  mods_spec = get_string_parameter_pointer("mods-spec");
   if (mods_spec.find('C') == string::npos) {
     mods_spec = (mods_spec.empty()) ?
       default_cysteine : default_cysteine + ',' + mods_spec;
     carp(CARP_DEBUG, "Using default cysteine mod '%s' ('%s')",
          default_cysteine.c_str(), mods_spec.c_str());
   }
-  VariableModTable var_mod_table;
   if (!var_mod_table.Parse(mods_spec.c_str())) {
     carp(CARP_FATAL, "Error parsing mods");
   }
+  //parse terminal modifications
+  mods_spec = get_string_parameter_pointer("cterm-peptide-mods-spec");
+  if (!mods_spec.empty())
+   if (!var_mod_table.Parse(mods_spec.c_str(), CTPEP)) {
+    carp(CARP_FATAL, "Error parsing c-terminal peptide mods");
+  }
+  mods_spec = get_string_parameter_pointer("nterm-peptide-mods-spec");
+  if (!mods_spec.empty())
+   if (!var_mod_table.Parse(mods_spec.c_str(), NTPEP)) {
+    carp(CARP_FATAL, "Error parsing n-terminal peptide mods");
+  }
+  mods_spec = get_string_parameter_pointer("cterm-protein-mods-spec");
+  if (!mods_spec.empty())
+   if (!var_mod_table.Parse(mods_spec.c_str(), CTPRO)) {
+    carp(CARP_FATAL, "Error parsing c-terminal protein mods");
+  }
+  mods_spec = get_string_parameter_pointer("nterm-protein-mods-spec");
+  if (!mods_spec.empty())
+   if (!var_mod_table.Parse(mods_spec.c_str(), NTPRO)) {
+    carp(CARP_FATAL, "Error parsing n-terminal protein mods");
+  }
+
+  var_mod_table.SerializeUniqueDeltas();
+
   if (!MassConstants::Init(var_mod_table.ParsedModTable())) {
     carp(CARP_FATAL, "Error in MassConstants::Init");
   }
@@ -198,7 +234,8 @@ int TideIndexApplication::main(int argc, char** argv) {
   del->mutable_variable_mod()->Clear();
   del->mutable_unique_deltas()->Clear();
 
-  bool need_mods = header_with_mods.peptides_header().mods().variable_mod_size() > 0;
+  bool need_mods = var_mod_table.Unique_delta_size()>0;
+
   string basic_peptides = need_mods ? modless_peptides : peakless_peptides;
   carp(CARP_DETAILED_DEBUG, "basic_peptides=%s", basic_peptides.c_str());
 
@@ -219,7 +256,7 @@ int TideIndexApplication::main(int argc, char** argv) {
   if (need_mods) {
     carp(CARP_INFO, "Computing modified peptides...");
     HeadedRecordReader reader(modless_peptides, NULL, 1024 << 10); // 1024kb buffer
-    AddMods(&reader, peakless_peptides, header_with_mods, proteins);
+    AddMods(&reader, peakless_peptides, header_with_mods, proteins, var_mod_table);
   }
 
   if (out_target_list) {
@@ -236,19 +273,28 @@ int TideIndexApplication::main(int argc, char** argv) {
     vector< pair<string, double> > decoyPepStrs;
     // Read peptides pb file
     vector<const pb::Peptide*> peptides;
-    if (!ReadRecordsToVector<pb::Peptide>(&peptides, peakless_peptides)) {
-      carp(CARP_FATAL, "Error reading peptides file");
-    }
+//    if (!ReadRecordsToVector<pb::Peptide>(&peptides, peakless_peptides)) {
+//      carp(CARP_FATAL, "Error reading peptides file");
+//    }
     vector<const pb::AuxLocation*> locations;
     if (!ReadRecordsToVector<pb::AuxLocation>(&locations, out_aux)) {
       carp(CARP_FATAL, "Error reading auxlocs file");
     }
+    cout << "read all peptides with location" << endl;
     // Iterate over all pb peptides
     unsigned int writeCountTargets = 0, writeCountDecoys = 0;
-    for (vector<const pb::Peptide*>::const_iterator i = peptides.begin();
-         i != peptides.end();
-         ++i) {
-      const pb::Peptide* peptide = *i;
+
+    HeadedRecordReader reader(peakless_peptides, NULL);
+    while (!reader.Done()) {
+      pb::Peptide* protobuf = new pb::Peptide;
+      reader.Read(protobuf);
+//      vec->push_back(protobuf);
+//    }
+//    for (vector<const pb::Peptide*>::const_iterator i = peptides.begin();
+//         i != peptides.end();
+//         ++i) {
+//      const pb::Peptide* peptide = *i;
+      pb::Peptide* peptide = protobuf;
       const pb::Location& location = peptide->first_location();
       const pb::Protein* protein = proteins[location.protein_id()];
       bool writeTarget = true;
@@ -265,6 +311,7 @@ int TideIndexApplication::main(int argc, char** argv) {
       map<int, double> mod_map;
       set<int> mod_indices;
       for (int j = 0; j < peptide->modifications_size(); ++j) {
+//        var_mod_table.DecodeMod(ModCoder::Mod(peptide->modifications(j)), &mod_index, &mod_delta);
         MassConstants::DecodeMod(ModCoder::Mod(peptide->modifications(j)),
                                  &mod_index, &mod_delta);
         mod_indices.insert(mod_index);
@@ -290,6 +337,7 @@ int TideIndexApplication::main(int argc, char** argv) {
         decoyPepStrs.push_back(make_pair(pep_str, peptide->mass()));
         ++writeCountDecoys;
       }
+      delete peptide;
     }
 
     // Iterate over saved decoys and output them
