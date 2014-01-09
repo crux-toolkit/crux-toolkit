@@ -184,16 +184,32 @@ C+57.02146 modification is turned on.</li>
 <li>
 <code>--nterm-peptide-mods-spec 1E-18.0106,C-17.0265</code>,..., <br>
 <code>--cterm-peptide-mods-spec X+21.9819</code>,..., <br>
+<!--
 <code>--nterm-protein-mods-spec 1Q-18.02</code>,...,<br>
 <code>--cterm-protein-mods-spec X+206.02146</code>,... <br>
-<p>These parameters specify peptide-, protein-, n-terminal, c-terminal modifications (respectively). Here, these specifications have three components too, however with a sighlty different syntacs and semantics.
-<code><red>Max_per_peptide</red></code> can be one (1) if specified and in this case it defines a variable terminal modification. Otherwise static terminal modification is specified.
-When <code><green>residues</green></code> is specified then the terminal modification is applied only in that particular amino acid residue. The residue <code><green>X</green></code> (the amino acid ambiguity code) stands for any amino acid. Finally, <code><blue>added_mass</blue></code> mass is defined as before.
+-->
 
-<p>The first example i specifies a loss of 18 Da residue (n-term Pyro-glu from E (Artefact)) on the c-terminal amino acid E on peptides. The second example here specifies a 
-21.9819 Da c-Terminus Sodium adduct (Artefact) (on any c-terminal amino acid).
+<p>
+These parameters specify peptide n-terminal, c-terminal modifications,
+respectively. Like <code>--mods-spec</code>, these specifications have
+three components, but with a sightly different syntax.
+The <code><red>max_per_peptide</red></code> can be either be "1", in
+which case it defines a variable terminal modification, or missing, in
+which case the modification is static.
+The <code><green>residues</green></code> field indicates which amino
+acids are subject to the modification, with the
+residue <code><green>X</green></code> corresponding to any amino
+acid. Finally, <code><blue>added_mass</blue></code> is defined as
+before.</p>
 
-<p>Note that: 1) Currently tail amino acids (at terminus) cannot be modified by a terminal modification and an amino acid modification at the same time. 2)protein terminal modificatinos are not implemented yet. 3)when static terminal modification is used the amino acid located at tails cannot be modified by variable modifications. 4) static amino acid modifications may conflicts with variable modificatinos.
+<p>
+The first example above specifies a loss of 18 Da on the c-terminal
+amino acid. The second example specifies a 21.9819 Da c-terminal
+modification on any c-terminal amino acid.</p>
+
+<p>
+Note that, in general, each amino acid can include at most one
+variable modification.</p>
 
 </li>
 <li>
