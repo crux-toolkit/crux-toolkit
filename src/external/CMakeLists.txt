@@ -46,7 +46,7 @@ add_custom_target(
 if (WIN32 AND NOT CYGWIN)
   ExternalProject_Add(
     ProteoWizard
-    URL http://teamcity.labkey.org:8080/guestAuth/repository/download/bt81/.lastSuccessful/pwiz-src-3_0_5437.tar.bz2
+    URL http://noble.gs.washington.edu/proj/crux/download/pwiz-5245.tar.gz
     DOWNLOAD_DIR downloads
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     CONFIGURE_COMMAND ""
@@ -57,7 +57,8 @@ if (WIN32 AND NOT CYGWIN)
 else (WIN32 AND NOT CYGWIN)
   ExternalProject_Add(
     ProteoWizard
-    URL http://teamcity.labkey.org:8080/guestAuth/repository/download/bt81/.lastSuccessful/pwiz-src-3_0_5437.tar.bz2
+    URL http://noble.gs.washington.edu/proj/crux/download/pwiz-5245.tar.gz
+    URL_MD5 fead9a73298e6cc59cfd789914600356
     DOWNLOAD_DIR downloads
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     CONFIGURE_COMMAND ""
