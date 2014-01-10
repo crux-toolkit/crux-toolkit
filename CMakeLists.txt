@@ -25,9 +25,38 @@ install(FILES license.txt DESTINATION .)
 add_custom_target(
   deep-clean
   COMMAND ${CMAKE_MAKE_PROGRAM} clean
-  COMMAND ${CMAKE_MAKE_PROGRAM} deep-clean-external
   COMMAND ${CMAKE_COMMAND} -E remove CMakeCache.txt
+  COMMAND ${CMAKE_COMMAND} -E remove_directory src/external/build
+  COMMAND ${CMAKE_COMMAND} -E remove_directory src/external/downloads
+  COMMAND ${CMAKE_COMMAND} -E remove_directory src/external/include/CometSearch
+  COMMAND ${CMAKE_COMMAND} -E remove_directory src/external/include/MSToolkit
+  COMMAND ${CMAKE_COMMAND} -E remove_directory src/external/include/boost
+  COMMAND ${CMAKE_COMMAND} -E remove_directory src/external/include/gflags
+  COMMAND ${CMAKE_COMMAND} -E remove_directory src/external/include/google
+  COMMAND ${CMAKE_COMMAND} -E remove_directory src/external/include/pwiz
+  COMMAND ${CMAKE_COMMAND} -E remove_directory src/external/include/xercesc
+  COMMAND ${CMAKE_COMMAND} -E remove_directory src/external/include/xsd
+  COMMAND ${CMAKE_COMMAND} -E remove_directory src/external/lib/pkgconfig
+  COMMAND ${CMAKE_COMMAND} -E remove src/external/lib/*.a
+  COMMAND ${CMAKE_COMMAND} -E remove src/external/lib/*.la
+  COMMAND ${CMAKE_COMMAND} -E remove src/external/lib/*.lib
+  COMMAND ${CMAKE_COMMAND} -E remove_directory src/external/share
   COMMENT "Cleaning project tree."
+  COMMENT "Deleting all files for external tools."
+)
+
+add_custom_target(
+  externals-only 
+  COMMAND ${CMAKE_MAKE_PROGRAM}
+  WORKING_DIRECTORY src/external
+  COMMENT "Building only external dependendcies."
+)
+
+add_custom_target(
+  no-externals 
+  COMMAND ${CMAKE_MAKE_PROGRAM} crux xlink-predict-peptide-ions  xlink-score-spectrum xlink-assign-ions xlink-predict-peptide-ions
+  WORKING_DIRECTORY src/c
+  COMMENT "Not building external dependendcies."
 )
 
 # build a CPack driven installer package

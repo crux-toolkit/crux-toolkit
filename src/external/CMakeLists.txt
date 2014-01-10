@@ -33,14 +33,6 @@ else(WIN32 AND NOT CYGWIN)
   set(protwiz_args ${protwiz_args} libraries)
 endif (WIN32 AND NOT CYGWIN)
 
-add_custom_target(
-  deep-clean-external
-   COMMAND ${CMAKE_COMMAND} -E remove_directory build
-   COMMAND ${CMAKE_COMMAND} -E remove_directory downloads
-   COMMAND ${CMAKE_COMMAND} -E remove_directory share
-   COMMENT "Deleting all files for external tools."
-)
-
 # Download a partial distribution of pwiz stored
 # as a tar ball on the Noble Lab server.
 if (WIN32 AND NOT CYGWIN)
