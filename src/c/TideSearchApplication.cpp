@@ -207,7 +207,11 @@ int TideSearchApplication::main(int argc, char** argv) {
   }
 
   carp(CARP_INFO, "Sorting spectra");
-  spectra.Sort();
+  if (window_type != WINDOW_MZ) {
+    spectra.Sort();
+  } else {
+    spectra.Sort<ScSortByMz>(ScSortByMz(window));
+  }
   if (max_mz == 0) {
     double highest_mz = spectra.FindHighestMZ();
     carp(CARP_DEBUG, "Max m/z %f", highest_mz);
@@ -347,9 +351,6 @@ void TideSearchApplication::search(
       continue;
     }
 
-    double pre_mass = sc->neutral_mass;
-    int spectrum_index = sc->spectrum_index;
-
     // Normalize the observed spectrum and compute the cache of
     // frequently-needed values for taking dot products with theoretical
     // spectra.
@@ -358,30 +359,7 @@ void TideSearchApplication::search(
     // The active peptide queue holds the candidate peptides for spectrum.
     // Calculate and set the window, depending on the window type.
     double min_mass, max_mass;
-    switch (window_type) {
-    case WINDOW_MASS:
-      min_mass = pre_mass - precursor_window;
-      max_mass = pre_mass + precursor_window;
-      break;
-    case WINDOW_MZ: {
-      double mz_minus_proton = spectrum->PrecursorMZ() - MASS_PROTON;
-      min_mass = (mz_minus_proton - precursor_window) * charge;
-      max_mass = (mz_minus_proton + precursor_window) * charge;
-      break;
-      }
-    case WINDOW_PPM: {
-      double tiny_precursor = precursor_window * 1e-6;
-      min_mass = pre_mass / (1.0 + tiny_precursor);
-      max_mass = pre_mass / (1.0 - tiny_precursor);
-      break;
-      }
-    default:
-      carp(CARP_FATAL, "Invalid window type");
-    }
-    carp(CARP_DETAILED_DEBUG, "Scan %d (%f m/z, %f neutral mass, charge %d) "
-         "mass window is [%f, %f]",
-         spectrum->SpectrumNumber(), spectrum->PrecursorMZ(), pre_mass, charge,
-         min_mass, max_mass);
+    computeWindow(*sc, window_type, precursor_window, &min_mass, &max_mass);
 
     int size = active_peptide_queue->SetActiveRange(min_mass, max_mass);
     TideMatchSet::Arr match_arr(size); // Scored peptides will go here.
@@ -472,6 +450,37 @@ void TideSearchApplication::collectScoresCompiled(
   // match_arr is filled by the compiled programs, not by calls to
   // push_back(). We have to set the final size explicitly.
   match_arr->set_size(queue_size);
+}
+
+void TideSearchApplication::computeWindow(
+  const SpectrumCollection::SpecCharge& sc,
+  WINDOW_TYPE_T window_type,
+  double precursor_window,
+  double* out_min,
+  double* out_max
+) {
+  switch (window_type) {
+  case WINDOW_MASS:
+    *out_min = sc.neutral_mass - precursor_window;
+    *out_max = sc.neutral_mass + precursor_window;
+    break;
+  case WINDOW_MZ: {
+    double mz_minus_proton = sc.spectrum->PrecursorMZ() - MASS_PROTON;
+    *out_min = (mz_minus_proton - precursor_window) * sc.charge;
+    *out_max = (mz_minus_proton + precursor_window) * sc.charge;
+    break;
+    }
+  case WINDOW_PPM: {
+    double tiny_precursor = precursor_window * 1e-6;
+    *out_min = sc.neutral_mass / (1.0 + tiny_precursor);
+    *out_max = sc.neutral_mass / (1.0 - tiny_precursor);
+    break;
+    }
+  default:
+    carp(CARP_FATAL, "Invalid window type");
+  }
+  carp(CARP_DETAILED_DEBUG, "Scan %d.%d mass window is [%f, %f]",
+       sc.spectrum->SpectrumNumber(), sc.charge, *out_min, *out_max);
 }
 
 bool TideSearchApplication::hasDecoys() {

@@ -83,6 +83,13 @@ class SpectrumCollection {
   void ReadMS(istream& in, bool ms1);
   bool ReadSpectrumRecords(const string& filename, pb::Header* header = NULL);
   void Sort();
+
+  template<typename BinaryPredicate>
+  void Sort(BinaryPredicate Predicate) {
+    MakeSpecCharges();
+    sort(spec_charges_.begin(), spec_charges_.end(), Predicate);
+  }
+
   double FindHighestMZ() const;
 
   struct SpecCharge {
