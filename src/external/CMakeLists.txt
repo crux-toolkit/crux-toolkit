@@ -33,13 +33,17 @@ else(WIN32 AND NOT CYGWIN)
   set(protwiz_args ${protwiz_args} libraries)
 endif (WIN32 AND NOT CYGWIN)
 
-# Download a partial distribution of pwiz stored
-# as a tar ball on the Noble Lab server.
+# Download and build a partial distribution of the pwiz source
+# from the ProteoWizard TeamCity repository.
 if (WIN32 AND NOT CYGWIN)
   ExternalProject_Add(
     ProteoWizard
-    URL http://noble.gs.washington.edu/proj/crux/download/pwiz-5245.tar.gz
-    DOWNLOAD_DIR downloads
+    DOWNLOAD_COMMAND 
+      ${CMAKE_COMMAND} 
+        -DDOWNLOAD_DIR:STRING=${CMAKE_CURRENT_BINARY_DIR}/downloads
+        -DWORKING_DIR:STRING=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
+        -P  ${CMAKE_CURRENT_SOURCE_DIR}/download_pwiz.cmake
+    DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/downloads
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ${protwiz_args}
@@ -49,9 +53,12 @@ if (WIN32 AND NOT CYGWIN)
 else (WIN32 AND NOT CYGWIN)
   ExternalProject_Add(
     ProteoWizard
-    URL http://noble.gs.washington.edu/proj/crux/download/pwiz-5245.tar.gz
-    URL_MD5 fead9a73298e6cc59cfd789914600356
-    DOWNLOAD_DIR downloads
+    DOWNLOAD_COMMAND 
+      ${CMAKE_COMMAND} 
+        -DDOWNLOAD_DIR:STRING=${CMAKE_CURRENT_BINARY_DIR}/downloads
+        -DWORKING_DIR:STRING=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
+        -P  ${CMAKE_CURRENT_SOURCE_DIR}/download_pwiz.cmake
+    DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/downloads
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ${protwiz_args}
@@ -171,12 +178,12 @@ elseif (APPLE)
       ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/eliminate_xsd/percolator_out.hxx
       ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/eliminate_xsd/percolator_in.cxx
       ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/eliminate_xsd/percolator_out.cxx
-      ${CMAKE_CURRENT_SOURCE_DIR}/build/src/percolator/src
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
   )
 else(APPLE)
   ExternalProject_Add(
     percolator
-    PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
+    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     URL http://noble.gs.washington.edu/proj/crux/download/percolator_2_04_full_src.tar.gz
     URL_MD5 5c328688493d57c5b41d413338dfcb66
     CMAKE_ARGS -DCMAKE_VERBOSE_MAKEFILE=ON
@@ -329,7 +336,7 @@ if (UNIX)
     COMMAND 
       ${CMAKE_COMMAND} -E copy
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/MSToolkit/libmstoolkitlite.a
-      ${CMAKE_CURRENT_SOURCE_DIR}/lib
+      ${CMAKE_CURRENT_BINARY_DIR}/lib
     COMMAND 
       ${CMAKE_COMMAND} -E copy
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/Common.h
