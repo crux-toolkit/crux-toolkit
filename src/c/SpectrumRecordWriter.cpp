@@ -298,7 +298,7 @@ bool SpectrumRecordWriter::checkDenom(
   double d_denom = denom;
   for (int i = 0; i < vals.size(); ++i) {
     double x = vals[i] * d_denom;
-    if (fabs(x - google::protobuf::uint64(x+0.5)) < 0.001)
+    if (fabs(x - google::protobuf::uint64(x+0.5)) >= 0.001)
       return false;
   }
   return true;
@@ -310,7 +310,7 @@ bool SpectrumRecordWriter::checkDenom(
 int SpectrumRecordWriter::getDenom(
   const vector<double>& vals  ///< values to check
 ) {
-  const int kMaxPrecision = 10000; // store at most 3 digits of precision
+  const int kMaxPrecision = 10000; // store at most 4 digits of precision
   for (int precision = 1; precision < kMaxPrecision; precision *= 10)
     if (checkDenom(vals, precision))
       return precision;
