@@ -26,7 +26,6 @@ def main():
         datadir=args[0]
         filenames = os.listdir(datadir)
         ms2_filename = args[1]
-        mass_h = 1.00782503207
         mass_p = 1.00727646688
         dta_numbers = {}
         for filename in filenames:
@@ -47,7 +46,8 @@ def main():
                 dta_file = open(datadir + dta_numbers[key][0], "r")
                 first_line = dta_file.readline().split()
                 charge1 = int(first_line[1])
-                mass1 = float(first_line[0]) - mass_h #mass line is M+H
+                mph1 = float(first_line[0]) #mass line is M+H
+		mass1 = mph1 - mass_p
                 if (len(dta_numbers[key]) == 1):
                         mz = (mass1 + (mass_p * charge1)) / charge1
                 else:
@@ -55,14 +55,15 @@ def main():
                         dta_file2 = open(datadir + dta_numbers[key][1], "r")
                         first_line2 = dta_file2.readline().split()
                         charge2 = int(first_line2[1])
-                        mass2 = float(first_line2[0]) - mass_h
+			mph2 = float(first_line2[0])
+                        mass2 = mph2 - mass_p
                         mz2 = (mass2 + (mass_p * charge2)) / charge2
                         mz = (mz1 + mz2) / 2
                         dta_file2.close()
                 ms2_file.write("S\t" + str(key) + "\t" + str(key) + "\t" + str(mz) + "\n")
-                ms2_file.write("Z\t" + str(charge1) + "\t" + str(mass1) + "\n")
+                ms2_file.write("Z\t" + str(charge1) + "\t" + str(mph1) + "\n")
                 if (len(dta_numbers[key]) == 2):
-                        ms2_file.write("Z\t" + str(charge2) + "\t" + str(mass2) + "\n")
+                        ms2_file.write("Z\t" + str(charge2) + "\t" + str(mph2) + "\n")
                 for line in dta_file:
                         ms2_file.write(line)
                 dta_file.close()
