@@ -8,6 +8,8 @@
 extern AA_MOD_T* list_of_mods[MAX_AA_MODS]; // list containing all aa mods
 extern int num_mods;  // ANY_POSITION mods
 
+map<int, double> TideMatchSet::mod_map_;
+ModCoder TideMatchSet::mod_coder_;
 string TideMatchSet::cleavage_type_ = "";
 char TideMatchSet::match_collection_loc_[] = {0};
 char TideMatchSet::decoy_match_collection_loc_[] = {0};
@@ -114,9 +116,10 @@ void TideMatchSet::writeToFile(
     const ModCoder::Mod* mods;
     int pep_mods = peptide->Mods(&mods);
     for (int j = 0; j < pep_mods; ++j) {
-      int mod_index; // 0 based
-      double mod_delta;
-      MassConstants::DecodeMod(mods[j], &mod_index, &mod_delta);
+      int mod_index, mod_delta_index;
+      mod_coder_.DecodeMod(mods[j], &mod_index, &mod_delta_index);
+      double mod_delta = mod_map_[mod_delta_index];
+
       map<size_t, double>::iterator lookup = modMap.find(mod_index);
       if (lookup == modMap.end()) {
         modMap[mod_index] = mod_delta;
@@ -347,6 +350,17 @@ void TideMatchSet::writeHeaders(
   *file << endl;
 }
 
+void TideMatchSet::initModMap(
+  const pb::ModTable& modTable
+) {
+  mod_map_.clear();
+  int numDeltas = modTable.unique_deltas_size();
+  for (int i = 0; i < numDeltas; ++i) {
+    mod_map_[i] = modTable.unique_deltas(i);
+  }
+  mod_coder_.Init(numDeltas);
+}
+
 void TideMatchSet::setCleavageType(
   const string& cleavageType
 ) {
@@ -410,9 +424,9 @@ Crux::Match* TideMatchSet::getCruxMatch(
   MODIFIED_AA_T* mod_seq;
   convert_to_mod_aa_seq(peptide->Seq().c_str(), &mod_seq);
   for (int i = 0; i < pep_mods; ++i) {
-    int mod_index; // 0 based
-    double mod_delta;
-    MassConstants::DecodeMod(mods[i], &mod_index, &mod_delta);
+    int mod_index, mod_delta_index;
+    mod_coder_.DecodeMod(mods[i], &mod_index, &mod_delta_index);
+    double mod_delta = mod_map_[mod_delta_index];
     // Look up mod and apply it to AA
     const AA_MOD_T* mod = lookUpMod(mod_delta);
     modify_aa(mod_seq + mod_index, mod);
