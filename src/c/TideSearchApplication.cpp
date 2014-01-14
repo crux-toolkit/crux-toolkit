@@ -165,6 +165,7 @@ int TideSearchApplication::main(int argc, char** argv) {
     }
   }
   MassConstants::Init(&pepHeader.mods());
+  TideMatchSet::initModMap(pepHeader.mods());
 
   active_peptide_queue = new ActivePeptideQueue(peptide_reader.Reader(), proteins);
 

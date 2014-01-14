@@ -69,6 +69,10 @@ public:
     bool sp
   );
 
+  static void initModMap(
+    const pb::ModTable& modTable
+  );
+
   static void setCleavageType(
     const string& cleavageType
   );
@@ -76,6 +80,8 @@ public:
 protected:
   Arr* matches_;
   double max_mz_;
+  static map<int, double> mod_map_; // unique delta index -> delta
+  static ModCoder mod_coder_;
   static string cleavage_type_;
 
   // For allocation
