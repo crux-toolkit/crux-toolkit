@@ -26,17 +26,79 @@ echo plot 0 notitle with dots >> $gnuplot
 
 # Create the parameter file.
 parameters=crux.param
-echo compute-sp=T > $parameters
-echo decoy-format=peptide-reverse >> $parameters
-echo decoy_search=2 >> $parameters
-echo output_pepxmlfile=1 >> $parameters
-echo num_threads=1 >> $parameters
-echo variable_mod1=0.0 X 0 3 >> $parameters
-echo mass_type_parent=0 >> $parameters
+
+# Enzymatic digestion rules.
+echo enzyme=trypsin >> $parameters
+echo search_enzyme_number=1 >> $parameters 
+echo digestion=full-digest > $parameters
+echo num_enzyme_termini=2 >> $parameters
+echo missed-cleavages=0 >> $parameters
 echo allowed_missed_cleavage=0 >> $parameters
-echo fragment_bin_offset=0.68 >> $parameters
+
+# Precursor selection rules.
+echo precursor-window=3 >> $parameters
+echo precursor-window-type=mass >> $parameters
+echo peptide_mass_tolerance=3 >> $parameters
+echo peptide_mass_units=0 >> $parameters # 0=amu, 1=mmu, 2=ppm
+echo precursor_tolerance_type=0 >> $parameters # 0=MH+ (default), 1=precursor m/z
+
+# Precursor mass type.
+echo isotopic-mass=mono >> $parameters
+echo monoisotopic-precursor=T >> $parameters
+echo mass_type_parent=1 >> $parameters # 1=monoisotopic
+
+# Fragment mass type.  Tides uses only monoisotopic.
+echo fragment-mass=mono >> $parameters
+echo mass_type_fragment=1 >> $parameters # 1=monoisotopic
+
+# Decoys.
+echo decoy-format=peptide-reverse >> $parameters
+echo num-decoys-per-target=1 >> $parameters
+echo decoy_search=2 >> $parameters  # 2 = separate decoy search
+
+# Report the top 5 matches.
+echo num_results=6 >> $parameters
+echo num_output_lines=5 >> $parameters
+echo top-match=5 >> $parameters
+
+# Precursor removal.
+echo remove_precursor_peak=1 >> $parameters
+echo remove_precursor_tolerance=15 >> $parameters
+echo remove-precursor-peak=T >> $parameters
+echo remove-precursor-tolerance=15 >> $parameters
+
+# Flanking peaks.
+echo use-flanking-peaks=F >> $parameters
+echo theoretical_fragment_ions=1 >> $parameters # 0 = flanks; 1 = no flanks
+
+# Fragment m/z discretization.  This is fixed in Tide.
+echo fragment_bin_offset=0.5 >> $parameters
 echo fragment_bin_tol=1.000508 >> $parameters
+
+# Other Crux parameters.
+echo compute-sp=T >> $parameters
+echo verbosity=40 >> $parameters
+echo overwrite=T >> $parameters
+echo peptide-list=T >> $parameters
+
+# Comet parameters
 echo add_C_cysteine=57.021464 >> $parameters
+echo num_threads=1 >> $parameters # Multithreaded sometimes dumps core.
+echo digest_mass_range=200 7200 >> $parameters
+echo max_fragment_charge=2 >> $parameters
+echo isotope_error=0 >> $parameters
+echo use_A_ions=0 >> $parameters
+echo use_B_ions=1 >> $parameters
+echo use_C_ions=0 >> $parameters
+echo use_X_ions=0 >> $parameters
+echo use_Y_ions=1 >> $parameters
+echo use_Z_ions=0 >> $parameters
+echo use_NL_ions=1 >> $parameters
+echo variable_mod1=0.0 X 0 3 >> $parameters
+echo variable_mod2=0.0 X 0 3 >> $parameters
+echo "[COMET_ENZYME_INFO]" >> $parameters
+echo "0.  No_enzyme              0      -           -" >> $parameters
+echo "1.  Trypsin                1      KR          P" >> $parameters
 
 # Create the index.
 db=worm+contaminants
