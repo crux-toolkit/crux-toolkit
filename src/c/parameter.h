@@ -70,7 +70,7 @@ enum parameter_type {
   STRING_P,          ///< parameters of type char*
   MASS_TYPE_P,       ///< parameters of type MASS_TYPE_T
   DIGEST_TYPE_P,   ///< parameters of type DIGEST_T
-  ENZYME_TYPE_P,     ///< parameters of type ENZUME_T
+  ENZYME_TYPE_P,     ///< parameters of type ENZYME_T
   //PEPTIDE_TYPE_P,    ///< parameters of type PEPTIDE_TYPE_T
   BOOLEAN_P,         ///< parameters of type bool
   SCORER_TYPE_P,     ///< parameters of type SCORER_TYPE_T
