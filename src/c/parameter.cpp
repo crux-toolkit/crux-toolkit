@@ -494,8 +494,8 @@ void initialize_parameters(void){
       "Enzyme to use for in silico digestion of proteins. "
       "<string>=no-enzyme|trypsin|trypsin/p|chymotrypsin| " 
       "elastase|clostripain|cyanogen-bromide|iodosobenzoate| " 
-      "proline-endopeptidase|staph-protease|aspn|lysc "
-      "lysn|arg_c|glue_c|pepsin_a|modified-chymotrypsin| "
+      "proline-endopeptidase|staph-protease|aspn|lys-c "
+      "lys-n|arg-c|glue-c|pepsin-a|modified-chymotrypsin| "
       "|elastase-trypsin-chymotrypsin|custom-enzyme. "
       "Default=trypsin.", 
       "Used in conjunction with the options digestion and missed-cleavages. "
