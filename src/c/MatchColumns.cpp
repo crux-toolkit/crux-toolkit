@@ -17,6 +17,7 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "sp rank",
   "xcorr score",
   "xcorr rank",
+  "e-value",
   "p-value",
 #ifdef NEW_COLUMNS
   "Weibull PSM q-value",
@@ -35,6 +36,8 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "Weibull est. PEP",
   "decoy q-value (xcorr)",
   "decoy PEP (xcorr)",
+  "decoy q-value (e-value)",
+  "decoy PEP (e-value)",
   "percolator score",
   "percolator rank",
   "percolator q-value",

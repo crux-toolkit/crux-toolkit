@@ -337,15 +337,6 @@ void shuffle_array(T* array, int size){
 }
 
 /**
- * \brief Comparison function for reverse sorting floats.
- * \returns -1,0,1 if a is <,=,> b
- */
-struct compareDescending {
-  bool operator() (double i,double j) { return (i>j);}
-  bool operator() (float i,float j) { return (i>j);}
-}; 
-
-/**
  *\returns a heap allocated feature name array for the algorithm type
  */
 char** generate_feature_name_array();

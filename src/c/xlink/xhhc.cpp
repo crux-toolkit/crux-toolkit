@@ -248,7 +248,7 @@ bool hhc_estimate_weibull_parameters_from_xcorrs(
   }
 
   // reverse sort the first num_samples of them
-  sort(scores, scores + num_scores, compareDescending());
+  sort(scores, scores + num_scores, greater<FLOAT_T>());
 
   // use only a fraction of the samples, the high-scoring tail
   // this parameter is hidden from the user

@@ -518,11 +518,16 @@ char* ion_type_to_string(ION_TYPE_T type) {
 static const char* scorer_type_strings[NUMBER_SCORER_TYPES] = 
   {"sp",
    "xcorr_score",
-
+   "evalue_score",
+   
    "decoy_xcorr_qvalue",
    "decoy_xcorr_peptide_qvalue",
    "decoy_xcorr_PEP",
 
+   "decoy_evalue_qvalue",
+   "decoy_evalue_peptide_qvalue",
+   "decoy_evalue_pep",
+   
    "logp_weibull_xcorr",
    "logp_bonf_weibull_xcorr",
    "logp_qvalue_weibull_xcorr",

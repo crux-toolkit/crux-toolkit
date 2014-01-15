@@ -535,6 +535,15 @@ int compareXcorr(
 
 /**
  * compare two matches, used for qsort
+ * \returns the difference between e-value in match_a and match_b
+ */
+int compareEValue(
+  Crux::Match** match_a, ///< the first match -in
+  Crux::Match** match_b ///< the second match -in
+);
+
+/**
+ * compare two matches, used for qsort
  * \returns the difference between p_value (LOGP_BONF_WEIBULL_XCORR)
  * score in match_a and match_b 
  */

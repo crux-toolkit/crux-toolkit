@@ -378,7 +378,8 @@ FLOAT_T DelimitedFileReader::getFloat(
 FLOAT_T DelimitedFileReader::getFloat(
     const char* column_name ///<the column name
 ) {
-  
+
+  carp(CARP_DETAILED_DEBUG, "getFloat for %s", column_name);
   int col_idx = findColumn(column_name);
   if (col_idx == -1) {
     carp(CARP_FATAL, "Cannot find column %s\n" 

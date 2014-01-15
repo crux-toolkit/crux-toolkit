@@ -44,8 +44,8 @@ MatchCollection* run_percolator(
 double* compute_PEP(double* target_scores, ///< scores for target matches
                     int num_targets,       ///< size of target_scores
                     double* decoy_scores,  ///< scores for decoy matches
-                    int num_decoys);       ///< size of decoy_scores
-
+                    int num_decoys,       ///< size of decoy_scores
+                    bool ascending = false); ///< are the scores ascending/descending?
 
 #endif //ANALYZE_PSMS_H
 
