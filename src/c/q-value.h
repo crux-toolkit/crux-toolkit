@@ -29,6 +29,7 @@ FLOAT_T* compute_decoy_qvalues(
   int      num_targets,
   FLOAT_T* decoy_scores,
   int      num_decoys,
+  bool     reverse,
   FLOAT_T  pi_zero);
 
 FLOAT_T* compute_qvalues_from_pvalues(

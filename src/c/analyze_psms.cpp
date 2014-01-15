@@ -136,7 +136,8 @@ pair<double,bool> make_pair(double db, bool b) {
 double* compute_PEP(double* target_scores, ///< scores for target matches
                     int num_targets,       ///< size of target_scores
                     double* decoy_scores,  ///< scores for decoy matches
-                    int num_decoys         ///< size of decoy_scores
+                    int num_decoys,         ///< size of decoy_scores
+                    bool ascending ///< are the scores ascending or descending
 ){
   if( target_scores == NULL || decoy_scores == NULL 
       || num_targets == 0 || num_decoys == 0 ){
@@ -167,10 +168,14 @@ double* compute_PEP(double* target_scores, ///< scores for target matches
             bind2nd(ptr_fun(make_pair<double, bool>), false));
 #endif
 
-  // sort them in descending order
-  sort(score_labels.begin(), score_labels.end(),
-       greater<pair<double, bool> >());
-
+  // sort them 
+  if (ascending) {
+    sort(score_labels.begin(), score_labels.end());
+    PosteriorEstimator::setReversed(true);
+  } else {
+    sort(score_labels.begin(), score_labels.end(),
+       greater<pair<double, bool> > ());  
+  }
   // get p-values
   vector<double> pvals;
   PosteriorEstimator::getPValues(score_labels, pvals);
@@ -194,11 +199,17 @@ double* compute_PEP(double* target_scores, ///< scores for target matches
     double curr_target_score = target_scores[target_idx];
 
     // find its position in score_labels
-    vector< pair<double, bool> >::iterator found_score_pos 
-      = lower_bound(score_labels.begin(), score_labels.end(), 
+    vector< pair<double, bool> >::iterator found_score_pos;
+    if (ascending) {
+      found_score_pos 
+        = lower_bound(score_labels.begin(), score_labels.end(), 
+                      make_pair(curr_target_score, true));
+    } else {
+      found_score_pos 
+        = lower_bound(score_labels.begin(), score_labels.end(), 
                     make_pair(curr_target_score, true),
                     greater<pair<double, bool> >()); 
-
+    }
 
     size_t found_index = distance(score_labels.begin(), found_score_pos);
 

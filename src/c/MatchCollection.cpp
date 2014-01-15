@@ -534,7 +534,10 @@ void MatchCollection::sort(
     sort_by = SP;
     compare_match_function = (QSORT_COMPARE_METHOD)compareSp;
     break;
-
+  case EVALUE:
+    sort_by = EVALUE;
+    compare_match_function = (QSORT_COMPARE_METHOD)compareEValue;
+    break;
   case XCORR:
   case DECOY_XCORR_QVALUE:
   case LOGP_WEIBULL_XCORR: 
@@ -1014,7 +1017,7 @@ bool MatchCollection::estimateWeibullParametersFromXcorrs(
   }
 
   // reverse sort the scores
-  std::sort(scores, scores + num_scores, compareDescending());
+  std::sort(scores, scores + num_scores, greater<FLOAT_T>());
 
   // use only a fraction of the samples, the high-scoring tail
   // this parameter is hidden from the user
@@ -2449,7 +2452,9 @@ bool MatchCollection::extendTabDelimited(
     scored_type_[SP] = !result_file.empty(SP_SCORE_COL);
 
     scored_type_[XCORR] = !result_file.empty(XCORR_SCORE_COL);
-
+    
+    scored_type_[EVALUE] = !result_file.empty(EVALUE_COL);
+    
     scored_type_[DECOY_XCORR_QVALUE] = !result_file.empty(DECOY_XCORR_QVALUE_COL);
 
 /* TODO
@@ -2852,6 +2857,12 @@ void MatchCollection::assignQValues(
     case DECOY_XCORR_QVALUE:
       derived_score_type = DECOY_XCORR_PEPTIDE_QVALUE;
       break;
+    case EVALUE:
+      derived_score_type = DECOY_EVALUE_QVALUE;
+      break;
+    case DECOY_EVALUE_QVALUE:
+      derived_score_type = DECOY_EVALUE_PEPTIDE_QVALUE;
+      break;
     case LOGP_BONF_WEIBULL_XCORR: 
       derived_score_type = LOGP_QVALUE_WEIBULL_XCORR;
       break;
@@ -2933,6 +2944,9 @@ void MatchCollection::assignPEPs(
     switch (score_type) {
     case XCORR:
       derived_score_type = DECOY_XCORR_PEP;
+      break;
+    case EVALUE:
+      derived_score_type = DECOY_EVALUE_PEP;
       break;
     case LOGP_BONF_WEIBULL_XCORR: 
       derived_score_type = LOGP_WEIBULL_PEP;

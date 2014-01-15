@@ -481,11 +481,16 @@ class Scorer;
 enum _scorer_type { 
   SP,                  ///< SEQUEST preliminary score
   XCORR,               ///< SEQUEST primary score
-
+  EVALUE,              ///< Comet e-value
+  
   DECOY_XCORR_QVALUE,  ///< q-value derived from empirical null (decoys)
   DECOY_XCORR_PEPTIDE_QVALUE,
   DECOY_XCORR_PEP,     ///< posterior error prob for xcorrs (target/decoy)
 
+  DECOY_EVALUE_QVALUE, ///< q-value derived from empirical null (decoy)
+  DECOY_EVALUE_PEPTIDE_QVALUE,
+  DECOY_EVALUE_PEP, ///< posterior error prob for e-value (target/decoy)
+  
   LOGP_WEIBULL_XCORR,
   LOGP_BONF_WEIBULL_XCORR,
   LOGP_QVALUE_WEIBULL_XCORR,

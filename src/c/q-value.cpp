@@ -158,7 +158,7 @@ FLOAT_T* compute_qvalues_from_pvalues(
 ){
 
   // sort the - log p-values in descending order
-  sort(pvalues, pvalues + num_pvals, compareDescending());
+  sort(pvalues, pvalues + num_pvals, greater<FLOAT_T>());
 
   // convert the p-values into FDRs using Benjamini-Hochberg
   FLOAT_T* qvalues = (FLOAT_T*)mycalloc(num_pvals, sizeof(FLOAT_T));
@@ -189,6 +189,7 @@ FLOAT_T* compute_decoy_qvalues(
   int      num_targets,
   FLOAT_T* decoy_scores,
   int      num_decoys,
+  bool     forward,
   FLOAT_T  pi_zero
 ){
   if ((num_targets == 0) || (num_decoys == 0)) {
@@ -205,9 +206,13 @@ FLOAT_T* compute_decoy_qvalues(
   }
 
   // Sort both sets of scores.
-  sort(target_scores, target_scores + num_targets, compareDescending());
-  sort(decoy_scores, decoy_scores + num_decoys, compareDescending());
-
+  if (forward) {
+    sort(target_scores, target_scores + num_targets);
+    sort(decoy_scores, decoy_scores + num_decoys);    
+  } else {
+    sort(target_scores, target_scores + num_targets, greater<FLOAT_T>());
+    sort(decoy_scores, decoy_scores + num_decoys, greater<FLOAT_T>());
+  }
   for (target_idx = 0; target_idx < num_targets; target_idx++) {
     carp(CARP_DEBUG, "target_scores[%d]=%g decoy_scores[%d]=%g",
          target_idx, target_scores[target_idx],
@@ -224,9 +229,16 @@ FLOAT_T* compute_decoy_qvalues(
     FLOAT_T target_score = target_scores[target_idx];
 
     // Find the index of the first decoy score greater than this target score.
-    while ((decoy_idx < num_decoys) &&
-           (decoy_scores[decoy_idx] > target_score)) {
-      decoy_idx++;
+    if (forward) {
+      while ((decoy_idx < num_decoys) &&
+             (decoy_scores[decoy_idx] < target_score)) {
+        decoy_idx++;
+      }
+    } else {   
+      while ((decoy_idx < num_decoys) &&
+             (decoy_scores[decoy_idx] > target_score)) {
+        decoy_idx++;
+      }
     }
 
     // FDR = #decoys / #targets
@@ -257,7 +269,8 @@ FLOAT_T* compute_decoy_qvalues(
 FLOAT_T* compute_PEP_local(FLOAT_T* targets,
                           int num_targets, 
                           FLOAT_T* decoys, 
-                          int num_decoys){
+                          int num_decoys,
+                          bool forward){
 
   double* targets_d = new double[num_targets];
   for(int val_idx = 0; val_idx < num_targets; val_idx++){
@@ -407,7 +420,10 @@ MatchCollection* run_qvalue(
 
   // Did we find something from which to get q-values?
   bool have_pvalues = match_collection->getScoredType(LOGP_BONF_WEIBULL_XCORR);
-
+  bool have_evalues = match_collection->getScoredType(EVALUE);
+  
+  target_matches->setScoredType(EVALUE, have_evalues);
+  
   // Iterate, gathering matches into one or two collections.
   MatchIterator* match_iterator =
     new MatchIterator(match_collection, XCORR, false);
@@ -441,6 +457,7 @@ MatchCollection* run_qvalue(
   cols_to_print[SP_RANK_COL] = match_collection->getScoredType(SP);
   cols_to_print[XCORR_SCORE_COL] = true;
   cols_to_print[XCORR_RANK_COL] = true;
+  cols_to_print[EVALUE_COL] = have_evalues;
   cols_to_print[PVALUE_COL] = have_pvalues;
   cols_to_print[BY_IONS_MATCHED_COL] = match_collection->getScoredType(BY_IONS_MATCHED);
   cols_to_print[BY_IONS_TOTAL_COL] = match_collection->getScoredType(BY_IONS_TOTAL);
@@ -478,38 +495,41 @@ MatchCollection* run_qvalue(
   // Compute q-values from the XCorr decoy distribution.
   else if (have_decoys == true) {
     int num_decoys = decoy_matches->getMatchTotal();
-    carp(CARP_INFO,
+    carp(CARP_DEBUG,
          "There are %d target and %d decoy PSMs for q-value computation.",
          num_pvals, num_decoys);
+    FLOAT_T* decoy_scores = NULL;
+
     pvalues = target_matches->extractScores(XCORR);
-    FLOAT_T* decoy_xcorrs 
-      = decoy_matches->extractScores(XCORR);
+    decoy_scores = decoy_matches->extractScores(XCORR);
+    score_type = XCORR;
+
     qvalues = compute_decoy_qvalues(pvalues, num_pvals, 
-                                    decoy_xcorrs, num_decoys,
+                                    decoy_scores, num_decoys, false, 
                                     get_double_parameter("pi-zero"));
 
-    PEPs = compute_PEP_local(pvalues, num_pvals, decoy_xcorrs, num_decoys);
 
-    free(decoy_xcorrs);
-    score_type = XCORR;
+    PEPs = compute_PEP_local(pvalues, num_pvals, decoy_scores, num_decoys, false);
+
+    free(decoy_scores);
   }
-
   // Fatal: Cannot compute q-values.
   else {
     carp(CARP_FATAL, "Cannot compute q-values without decoy PSMs or p-values.");
   }
 
+  
+  
   // Store p-values to q-values as a hash, and then assign them.
   map<FLOAT_T, FLOAT_T>* qvalue_hash 
     = store_arrays_as_hash(pvalues, qvalues, num_pvals);
+
   target_matches->assignQValues(qvalue_hash, score_type);
 
   // Store p-values to PEP as a has and then assign them
   map<FLOAT_T, FLOAT_T>* PEP_hash 
-    = store_arrays_as_hash(pvalues, PEPs, num_pvals);
+        = store_arrays_as_hash(pvalues, PEPs, num_pvals);
   target_matches->assignPEPs(PEP_hash, score_type);
-
-
 
   free(pvalues);
   free(qvalues);
@@ -517,6 +537,29 @@ MatchCollection* run_qvalue(
   delete qvalue_hash;
   delete PEP_hash;
 
+  if (have_evalues) {
+    pvalues = target_matches->extractScores(EVALUE);
+    FLOAT_T* decoy_scores = decoy_matches->extractScores(EVALUE);
+    int num_decoys = decoy_matches->getMatchTotal();
+
+    score_type = EVALUE;
+    qvalues = compute_decoy_qvalues(pvalues, num_pvals, 
+                                    decoy_scores, num_decoys, true, 
+                                    get_double_parameter("pi-zero"));
+    PEPs = compute_PEP_local(pvalues, num_pvals, decoy_scores, num_decoys, true);
+    free(decoy_scores);
+    qvalue_hash = store_arrays_as_hash(pvalues, qvalues, num_pvals);
+    target_matches->assignQValues(qvalue_hash, score_type);
+    PEP_hash = store_arrays_as_hash(pvalues, PEPs, num_pvals);
+    target_matches->assignPEPs(PEP_hash, score_type);
+    
+    free(pvalues);
+    free(qvalues);
+    delete PEPs;
+    delete qvalue_hash;
+    delete PEP_hash;
+  }
+  
   // Identify PSMs that are top-scoring per peptide.
   identify_best_psm_per_peptide(target_matches, score_type);
 

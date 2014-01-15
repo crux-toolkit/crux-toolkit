@@ -66,7 +66,8 @@ void CometWriteTxt::PrintTxtHeader(FILE *fpout)
    fprintf(fpout, "total matches/spectrum\t");
    fprintf(fpout, "sequence\t");
    fprintf(fpout, "protein id\t");
-   fprintf(fpout, "flanking aa\n");
+   fprintf(fpout, "flanking aa\t");
+   fprintf(fpout, "e-value\n");
 #else
    fprintf(fpout, "CometVersion %s\t", comet_version);
    fprintf(fpout, "%s\t", g_staticParams.inputFile.szBaseName);
@@ -191,7 +192,9 @@ void CometWriteTxt::PrintResults(int iWhichQuery,
          // Print protein reference/accession.
          fprintf(fpout, "%s\t", pOutput[iWhichResult].szProtein);
          // Cleavage type
-         fprintf(fpout, "%c%c\n", pOutput[iWhichResult].szPrevNextAA[0], pOutput[iWhichResult].szPrevNextAA[1]);
+         fprintf(fpout, "%c%c\t", pOutput[iWhichResult].szPrevNextAA[0], pOutput[iWhichResult].szPrevNextAA[1]);
+         // e-value
+         fprintf(fpout, "%0.2E\n", pOutput[iWhichResult].dExpect);
       }
    }
 }

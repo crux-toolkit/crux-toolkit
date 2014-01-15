@@ -243,6 +243,25 @@ int compareSpectrumXcorr(
 
 /**
  * compare two matches, used for qsort
+ * \returns the difference between e-value in match_a and match_b
+ */
+int compareEValue(
+  Match** match_a, ///< the first match -in
+  Match** match_b ///< the second match -in
+) {
+
+  if((*match_b)->getScore(EVALUE) < (*match_a)->getScore(EVALUE)){
+    return 1;
+  }
+  else if((*match_b)->getScore(EVALUE) > (*match_a)->getScore(EVALUE)){
+    return -1;
+  }
+  return 0;
+
+}
+
+/**
+ * compare two matches, used for qsort
  * \returns the difference between p_value (LOGP_BONF_WEIBULL_XCORR)
  * score in match_a and match_b 
  */
@@ -769,6 +788,19 @@ void Match::printOneMatchField(
                                        getScore(DECOY_XCORR_PEP));
     }
     break;
+  case DECOY_EVALUE_QVALUE_COL:
+    if (null_peptide_ == false) {
+      output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
+              getScore(DECOY_EVALUE_QVALUE));
+    }
+    break;
+  case DECOY_EVALUE_PEP_COL:
+    if (null_peptide_ == false) {
+      output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx,
+                                       getScore(DECOY_EVALUE_PEP));
+    }
+    break;
+  
 #ifdef NEW_COLUMNS
   case DECOY_XCORR_PEPTIDE_QVALUE_COL:
     if ( (null_peptide_ == false) && (best_per_peptide_ == true)) {
@@ -1172,6 +1204,9 @@ Match* Match::parseTabDelimited(
   */
   if (!result_file.empty(PVALUE_COL)){
     match->match_scores_[LOGP_BONF_WEIBULL_XCORR] = -log(result_file.getFloat(PVALUE_COL));
+  }
+  if (!result_file.empty(EVALUE_COL)){
+    match->match_scores_[EVALUE]  = result_file.getFloat(EVALUE_COL);
   }
   if (!result_file.empty(PERCOLATOR_QVALUE_COL)){
     match->match_scores_[PERCOLATOR_QVALUE] = result_file.getFloat(PERCOLATOR_QVALUE_COL);

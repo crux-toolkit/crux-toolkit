@@ -338,6 +338,10 @@ void MatchFileWriter::addColumnNames
       addColumnName(WEIBULL_PEP_COL);
       //addColumnName(WEIBULL_PEPTIDE_QVALUE_COL);
     } else {
+      if ( cols_to_print[EVALUE_COL]) {
+        addColumnName(DECOY_EVALUE_QVALUE_COL);
+        addColumnName(DECOY_EVALUE_PEP_COL);
+      }
       addColumnName(DECOY_XCORR_QVALUE_COL);
       addColumnName(DECOY_XCORR_PEP_COL);
       //addColumnName(DECOY_XCORR_PEPTIDE_QVALUE_COL);
