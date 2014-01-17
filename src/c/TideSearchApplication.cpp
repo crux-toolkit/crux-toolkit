@@ -245,6 +245,7 @@ int TideSearchApplication::main(int argc, char** argv) {
     stringstream ss;
     ss << pepHeader.enzyme() << '-' << digestString;
     free(digestString);
+    TideMatchSet::setCleavageType(ss.str());
     if (!concat) {
       string target_file_name = make_file_path("tide-search.target.txt");
       target_file = create_stream_in_path(target_file_name.c_str(), NULL, overwrite);

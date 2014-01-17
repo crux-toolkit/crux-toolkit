@@ -140,7 +140,7 @@ for searchtool in comet tide-search; do
       $searchtool/$searchtool.target.txt
   fi
 
-  $CRUX sort-by-column --column-type real --ascending true $searchtool/qvalues.target.txt "decoy q-value (xcorr)" | crux extract-columns - "decoy q-value (xcorr)" > $searchtool/qvalues.xcorr.txt
+  $CRUX sort-by-column --column-type real --ascending true $searchtool/qvalues.target.txt "decoy q-value (xcorr)" | $CRUX extract-columns - "decoy q-value (xcorr)" > $searchtool/qvalues.xcorr.txt
   echo replot \"$searchtool/qvalues.xcorr.txt\" using 1:0 title \"$searchtool xcorr\" with lines >> $gnuplot
 
   if [[ $searchtool == "comet" ]]; then
