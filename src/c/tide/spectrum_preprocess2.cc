@@ -101,29 +101,41 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum,
 
   double intensity_cutoff = highest_intensity * 0.05;
 
+  double normalizer = 0.0;
   int region_size = largest_mz / NUM_SPECTRUM_REGIONS;
   for (int i = 0; i < NUM_SPECTRUM_REGIONS; ++i) {
     highest_intensity = 0;
     for (int j = 0; j < region_size; ++j) {
       int index = i * region_size + j;
-      if (peaks_[index] <= intensity_cutoff)
-	peaks_[index] = 0;
-      if (peaks_[index] > highest_intensity)
-	highest_intensity = peaks_[index];
+      if (peaks_[index] <= intensity_cutoff) {
+        peaks_[index] = 0;
+      }
+      if (peaks_[index] > highest_intensity) {
+        highest_intensity = peaks_[index];
+      }
     }
-    if (highest_intensity == 0)
+    if (highest_intensity == 0) {
       continue;
-    double normalizer = 50.0/highest_intensity;
+    }
+    normalizer = 50.0 / highest_intensity;
     for (int j = 0; j < region_size; ++j) {
       int index = i * region_size + j;
-      if (peaks_[index] != 0)
-	peaks_[index] *= normalizer;
-    }    
+      if (peaks_[index] != 0) {
+        peaks_[index] *= normalizer;
+      }
+    }
   }
 
-  // Obvious bug from SEQUEST: highest peaks are ignored:
-  for (int i = NUM_SPECTRUM_REGIONS * region_size; i <= largest_mz; ++i)
-    peaks_[i] = 0;
+  // make sure highest mass peak(s) aren't ignored
+  if (highest_intensity > 0) {
+    for (int i = NUM_SPECTRUM_REGIONS * region_size; i <= largest_mz; ++i) {
+      if (peaks_[i] > intensity_cutoff) {
+        peaks_[i] *= normalizer;
+      } else {
+        peaks_[i] = 0;
+      }
+    }
+  }
 
 #ifdef DEBUG
   if (debug) {
