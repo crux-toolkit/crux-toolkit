@@ -91,11 +91,14 @@ void MatchFileWriter::setPrecision(){
     case DELTA_CN_COL:
     case SP_SCORE_COL:
     case XCORR_SCORE_COL:
+    case EVALUE_COL:
     case PVALUE_COL:
     case WEIBULL_QVALUE_COL:
     case WEIBULL_PEP_COL:
     case DECOY_XCORR_QVALUE_COL:
     case DECOY_XCORR_PEP_COL:
+    case DECOY_EVALUE_QVALUE_COL:
+    case DECOY_EVALUE_PEP_COL:
     case PERCOLATOR_SCORE_COL:
     case PERCOLATOR_QVALUE_COL:
     case PERCOLATOR_PEP_COL:
