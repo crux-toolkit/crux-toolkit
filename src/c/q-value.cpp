@@ -495,7 +495,7 @@ MatchCollection* run_qvalue(
   // Compute q-values from the XCorr decoy distribution.
   else if (have_decoys == true) {
     int num_decoys = decoy_matches->getMatchTotal();
-    carp(CARP_DEBUG,
+    carp(CARP_INFO,
          "There are %d target and %d decoy PSMs for q-value computation.",
          num_pvals, num_decoys);
     FLOAT_T* decoy_scores = NULL;
@@ -541,7 +541,7 @@ MatchCollection* run_qvalue(
     pvalues = target_matches->extractScores(EVALUE);
     FLOAT_T* decoy_scores = decoy_matches->extractScores(EVALUE);
     int num_decoys = decoy_matches->getMatchTotal();
-
+    
     score_type = EVALUE;
     qvalues = compute_decoy_qvalues(pvalues, num_pvals, 
                                     decoy_scores, num_decoys, true, 

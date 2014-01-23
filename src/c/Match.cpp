@@ -747,6 +747,10 @@ void Match::printOneMatchField(
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
                                      getRank(XCORR));
     break;
+  case EVALUE_COL:
+    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx,
+                                     getScore(EVALUE));
+    break;
   case PVALUE_COL:
     {
       double log_pvalue = getScore(LOGP_BONF_WEIBULL_XCORR);
