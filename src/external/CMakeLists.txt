@@ -313,7 +313,7 @@ if (UNIX)
   # Get Comet source from SVN and buld using it's own makefile
   ExternalProject_Add(
     comet
-    SVN_REPOSITORY svn://svn.code.sf.net/p/comet-ms/code/branches/release_2013022@232
+    SVN_REPOSITORY http://svn.code.sf.net/p/comet-ms/code/tags/release_2013022
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     UPDATE_COMMAND ""
     PATCH_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/patch_comet.sh 
@@ -371,6 +371,10 @@ if (UNIX)
       ${CMAKE_CURRENT_BINARY_DIR}/include/CometSearch/OSSpecificThreading.h
     COMMAND 
       ${CMAKE_COMMAND} -E copy
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/CometInterfaces.h
+      ${CMAKE_CURRENT_BINARY_DIR}/include/CometSearch/CometInterfaces.h
+    COMMAND 
+      ${CMAKE_COMMAND} -E copy
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/libcometsearch.a
       ${CMAKE_CURRENT_BINARY_DIR}/lib
   )
@@ -378,7 +382,7 @@ elseif (WIN32 AND NOT CYGWIN)
   set(LIBPATH "${CMAKE_CURRENT_BINARY_DIR}/lib;")
   ExternalProject_Add(
     comet
-    SVN_REPOSITORY svn://svn.code.sf.net/p/comet-ms/code/branches/release_2013022@232
+    SVN_REPOSITORY http://svn.code.sf.net/p/comet-ms/code/tags/release_2013022@232
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     UPDATE_COMMAND ""
     # Copy the Comet and MSToolkit include files and libraries to
