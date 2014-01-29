@@ -27,11 +27,12 @@ provided as input to the
 algorithm.</p>
 
 <p>
-<code>make-pin</code> requires as input collections of PSMs, derived 
-from matching observed spectra against real ("target") peptides, and 
-derived from matching the same spectra against "decoy" peptides.  
-The output file contains, for each PSM, a set of  features for use by 
-the Percolator algorithm.  These features are summarized <a href="features.html">here</a>.</p>
+<code>make-pin</code> requires as input two sets of PSMs, one set
+derived from matching observed spectra against real ("target")
+peptides, and a second set derived from matching the same spectra
+against "decoy" peptides.  The output file contains, for each PSM, a
+set of features for use by the Percolator algorithm.  These features
+are summarized <a href="features.html">here</a>.</p>
 
 <p>
 Note that, in the stand-alone version of Percolator, the functionality
@@ -105,20 +106,18 @@ messages that were printed to standard error.
 
 <ul>
 
-
-
 <li>
-<red><code>--top-match &lt;integer&gt;</code> &nbsp; The number of
-psms per spectrum written to the pin.xml file. Default = 5.</red></li>
+<code>--top-match &lt;integer&gt;</code> &nbsp; The number of
+psms per spectrum written to the pin.xml file. Default = 5.</li>
 
 <li> 
 <code>--list-of-files &lt;T|F&gt;</code> &ndash; Specify that the
-search results are provided as lists of files, rather than
-as individual files.  Default = F.</li>
+search results are provided as lists of files, rather than as
+individual files.  Default = F.</li>
 
 <li>
 <code>--decoy-prefix &lt;string&gt;</code> &ndash;
-Specifies the prefix of the protein names that indicates a decoy.
+Specifies the protein name prefix that indicates a decoy.
 Default = "decoy_".</li>
 
 <li>
