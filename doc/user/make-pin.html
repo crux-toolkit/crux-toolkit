@@ -10,7 +10,7 @@
 <h2>Usage:</h2>
 
 <blockquote>
-<code>crux make-pin [options] &lt;target input&gt; &lt;decoy input&gt; </code>
+<code>crux make-pin [options] &lt;search&nbsp;results&gt; </code>
 </blockquote>
 
 <h2>Description:</h2>
@@ -18,8 +18,8 @@
 <ul>
 
 <p>
-Make-pin is a utility program that generates a collection of target and
-decoy peptide-spectrum matches (PSMs) in pin.xml format, defined
+Make-pin is a utility program that combines a collection of target and
+decoy peptide-spectrum matches (PSMs) into a single file in pin.xml format, 
 according to <a href="https://github.com/percolator/percolator/blob/master/src/xml/percolator_in.xsd">
 this schema</a>. The resulting <code>pin.xml</code> file can be
 provided as input to the
@@ -27,12 +27,11 @@ provided as input to the
 algorithm.</p>
 
 <p>
-<code>make-pin</code> requires as input two collections of PSMs, one
-set derived from matching observed spectra against real ("target")
-peptides, and a second derived from matching the same spectra against
-"decoy" peptides.  The output file contains, for each PSM, a set of
-features for use by the Percolator algorithm.  These features are
-summarized <a href="features.html">here</a>.</p>
+<code>make-pin</code> requires as input collections of PSMs, derived 
+from matching observed spectra against real ("target") peptides, and 
+derived from matching the same spectra against "decoy" peptides.  
+The output file contains, for each PSM, a set of  features for use by 
+the Percolator algorithm.  These features are summarized <a href="features.html">here</a>.</p>
 
 <p>
 Note that, in the stand-alone version of Percolator, the functionality
@@ -50,17 +49,27 @@ will be automatically converted to <code>pin.xml</code> format.</p>
 <ul>
 
 <LI>
-<b>&lt;target&nbsp;input&gt;</b> &ndash; Target PSMs in SQT, PepXML,
-or tab-delimited text.</li>
-
-<li>
-<b>&lt;decoy&nbsp;input&gt;</b> &ndash; Decoy PSMs in SQT, PepXML, or
-tab-delimited text.</li>
+<p><b>&lt;search&nbsp;results&gt;</b> &ndash; A collection of target
+and decoy peptide-spectrum matches (PSMs).  Input may be in one of five
+formats: 
+SQT, PepXML (obtained from SEQUEST), <a href="txt-format.html">Crux
+tab-delimited text</a>, list of files (when <code>list-of-files=T</code>,
+or a tab-delimited table of features (when <code>feature-in-file=T</code>
+(see below for details). </p>
 
 <p>
-The file formats must be the same for both
-the <code>target&nbsp;input</code> and
-the <code>decoy&nbsp;input</code> files.</p>
+Decoy PSMs can be provided to <code>make-pin</code> in two ways: either as a
+separate file or embedded within the same file as the target PSMs.
+Percolator will first search for target PSMs in a separate file.  The
+decoy file name is constructed from the target name by replacing
+"target" with "decoy."  For example, if <code>search.target.txt</code>
+is provided as input, then <code>make-pin</code> will search for a corresponding
+file named <code>search.decoy.txt</code>.  If no decoy file is found,
+then Percolator will assume that the given input file contains a mix
+of target and decoy PSMs.  Within this file, decoys are identified
+using a prefix (specified via <code>--decoy-prefix</code>) on the
+protein name.</p>
+</li>
 
 </ul>
 
@@ -96,9 +105,21 @@ messages that were printed to standard error.
 
 <ul>
 
+
+
 <li>
 <red><code>--top-match &lt;integer&gt;</code> &nbsp; The number of
 psms per spectrum written to the pin.xml file. Default = 5.</red></li>
+
+<li> 
+<code>--list-of-files &lt;T|F&gt;</code> &ndash; Specify that the
+search results are provided as lists of files, rather than
+as individual files.  Default = F.</li>
+
+<li>
+<code>--decoy-prefix &lt;string&gt;</code> &ndash;
+Specifies the prefix of the protein names that indicates a decoy.
+Default = "decoy_".</li>
 
 <li>
 <code>--fileroot &lt;string&gt;</code> &ndash;

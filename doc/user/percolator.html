@@ -82,13 +82,11 @@ file, and is capable of reading parameters from a parameter file.</li>
 
 <LI>
 <p><b>&lt;search&nbsp;results&gt;</b> &ndash; A collection of target
-and decoy peptide-spectrum matches (PSMs).  Note that this argument
-can be "-", which indicates that the PSMs should be read from standard
-input. Input may be in one of five
+and decoy peptide-spectrum matches (PSMs).  Input may be in one of six
 formats: <a href="https://github.com/percolator/percolator/blob/master/src/xml/percolator_in.xsd">pin.xml</a>,
 SQT, PepXML (obtained from SEQUEST), <a href="txt-format.html">Crux
-tab-delimited text</a>, or a tab-delimited table of features.  Using
-the latter format requires specififying <code>feature-in-file=T</code>
+tab-delimited text</a>, list of files (when <code>list-of-files=T</code>,
+or a tab-delimited table of features (when <code>feature-in-file=T</code>
 (see below for details).  Note that if the input is provided as SQT,
 PepXML or Crux tab-delimited text, then a pin.xml file will be
 generated in the Percolator output directory prior to execution.</p>
@@ -247,6 +245,13 @@ calculated as in "Improving tandem mass spectrum identification using
 peptide retention time prediction across diverse chromatography
 conditions" by Klammer AA, Yi X, MacCoss MJ and Noble WS.
 (<i>Analytical Chemistry</i>. 2007 Aug 15;79(16):6111-8.)</li>
+
+<li> 
+<code>--list-of-files &lt;T|F&gt;</code> &ndash; Specify that the
+search results are provided as lists of files, rather than
+as individual files.  Default = F.</li>
+
+
 
 <!--<li>
 <code>--doc &lt;integer&gt;</code> &ndash; With this option, Percolator
