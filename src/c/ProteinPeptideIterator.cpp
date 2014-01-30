@@ -76,155 +76,47 @@ bool ProteinPeptideIterator::validCleavagePosition(
   switch(enzyme){
 
   case TRYPSIN:
-    if ((sequence[0] == 'K' || sequence[0] == 'R') && (sequence[1] != 'P')){
-      return true;
-    } else {
-      return false;
-    }
-    break;
+    return (sequence[0] == 'K' || sequence[0] == 'R') && sequence[1] != 'P';
   //trypsin/p k or r 
   case TRYPSINP:
-    if ((sequence[0] == 'K') || sequence[0] == 'R')
-      return true; 
-    else 
-      return false;
-    break; 
+    return sequence[0] == 'K' || sequence[0] == 'R';
   case CHYMOTRYPSIN:
-    if ((sequence[0] == 'F' || sequence[0] == 'W' || sequence[0] == 'Y') 
-        && (sequence[1] != 'P')){
-      return true;
-    } else {
-      return false;
-    }
-    break;
-    break;
-
+    return (sequence[0] == 'F' || sequence[0] == 'W' ||
+            sequence[0] == 'Y') && sequence[1] != 'P';
   case ELASTASE:
-    if ((sequence[0] == 'A' || sequence[0] == 'L' ||
-         sequence[0] == 'I' || sequence[0] == 'V') 
-        && (sequence[1] != 'P')){
-      return true;
-    } else {
-      return false;
-    }
-    break;
-
+    return (sequence[0] == 'A' || sequence[0] == 'L' ||
+            sequence[0] == 'I' || sequence[0] == 'V') && sequence[1] != 'P';
   case CLOSTRIPAIN:
-    if (sequence[0] == 'R'){
-      return true;
-    } else {
-      return false;
-    }
-    break;
-
+    return sequence[0] == 'R';
   case CYANOGEN_BROMIDE:
-    if (sequence[0] == 'M'){
-      return true;
-    } else {
-      return false;
-    }
-    break;
-
+    return sequence[0] == 'M';
   case IODOSOBENZOATE:
-    if (sequence[0] == 'W'){
-      return true;
-    } else {
-      return false;
-    }
-    break;
-
+    return sequence[0] == 'W';
   case PROLINE_ENDOPEPTIDASE:
-    if (sequence[0] == 'P'){
-      return true;
-    } else {
-      return false;
-    }
-    break;
-
+    return sequence[0] == 'P';
   case STAPH_PROTEASE:
-    if (sequence[0] == 'E'){
-      return true;
-    } else {
-      return false;
-    }
-    break;
-
+    return sequence[0] == 'E';
   case ASPN:
-    if (sequence[1] == 'D'){
-      return true;
-    } else {
-      return false;
-    }
-    break;
- 
+    return sequence[1] == 'D';
   case LYSC:
-  if(sequence[0] == 'K'
-    && sequence[1]!='P')
-    return true;
-  else 
-    return false;
-  break;
-
- 
+    return sequence[0] == 'K' && sequence[1] != 'P';
   case LYSN:
-    if(sequence[0]== 'K')
-      return true;
-    else 
-      return false; 
-    break; 
-
-
+    return sequence[1] == 'K';
   case ARGC:
-    if(sequence[0] == 'R' 
-      && sequence [1] != 'P'){
-      return true; 
-    }else{
-      return false;
-    }
-    break; 
-
-
+    return sequence[0] == 'R' && sequence [1] != 'P';
   case GLUC:
-    if(sequence[0]=='D' || (sequence[0] == 'E'
-			    && sequence[1] != 'P')){
-      return true;
-    }else{
-      return false; 
-    }
-    break; 
-
-
+    return (sequence[0] == 'D' || sequence[0] == 'E') && sequence[1] != 'P';
   case PEPSINA:
-    if(sequence[0] == 'F' || (sequence[0] == 'L'
-			      && sequence[1] != 'P'))
-      return true;
-    else 
-      return false;
-    break; 
-
+    return (sequence[0] == 'F' || sequence[0] == 'L') && sequence[1] != 'P';
   case MODIFIED_CHYMOTRYPSIN:
-    if ((sequence[0] == 'F' || sequence[0] == 'L' ||
-         sequence[0] == 'W' || sequence[0] == 'Y') 
-        && (sequence[1] != 'P')){
-      return true;
-    } else {
-      return false;
-    }
-    break;
-
+    return (sequence[0] == 'F' || sequence[0] == 'L' ||
+            sequence[0] == 'W' || sequence[0] == 'Y') && sequence[1] != 'P';
   case ELASTASE_TRYPSIN_CHYMOTRYPSIN:
-    if ((sequence[0] == 'A' || sequence[0] == 'L' ||
-         sequence[0] == 'I' || sequence[0] == 'V' ||
-         sequence[0] == 'K' || sequence[0] == 'R' ||
-         sequence[0] == 'W' || sequence[0] == 'F' ||
-         sequence[0] == 'Y' ) 
-        && (sequence[1] != 'P')){
-      return true;
-    } else {
-      return false;
-    }
-    break;
-
+    return (sequence[0] == 'A' || sequence[0] == 'L' ||
+            sequence[0] == 'I' || sequence[0] == 'V' ||
+            sequence[0] == 'K' || sequence[0] == 'R' ||
+            sequence[0] == 'W' || sequence[0] == 'F' ||
+            sequence[0] == 'Y' ) && sequence[1] != 'P';
   case CUSTOM_ENZYME:
     //carp(CARP_FATAL, "The custom enzyme is not yet implmented.");
 
