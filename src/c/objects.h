@@ -146,8 +146,8 @@ enum _enzyme_type {
   STAPH_PROTEASE,        ///< cleave after E
   ASPN,                  ///< cleave before D
   LYSC,                  ///< cleave after K , not befor P 
-  LYSN,                  ///< cleave after K 
-  ARGC,			 ///< cleave after R, not before P
+  LYSN,                  ///< cleave before K 
+  ARGC,                  ///< cleave after R, not before P
   GLUC,                  ///< cleave after D or E, not before P
   PEPSINA,               ///< cleave after FL, not before P 
   MODIFIED_CHYMOTRYPSIN, ///< cleave after FWYL, not before P

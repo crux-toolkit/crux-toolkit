@@ -509,7 +509,8 @@ void initialize_parameters(void){
       "cyanogen-bromide [M]|[], iodosobenzoate [W]|[], proline-endopeptidase "
       "[P]|[], staph-protease [E]|[], modified-chymotrypsin [FWYL]|{P}, "
       "elastase-trypsin-chymotrypsin [ALIVKRWFY]|{P},aspn []|[D] (cuts before "
-      "D), lys-c [K]|{P}, lys-n [K]|[].", "true");
+      "D), lys-c [K]|{P}, lys-n []|[K] (cuts before K), arg-c [R]|{P}, glue-c "
+      "[DE]|{P}, pepsin-a [FL]|{P}.", "true");
 
   set_window_type_parameter("precursor-window-type", WINDOW_MASS,
       "Window type to use for selecting candidate "
