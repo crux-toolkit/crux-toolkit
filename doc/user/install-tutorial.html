@@ -83,7 +83,7 @@ installation!  Skip ahead to
 <b>Option 2: build from source.</b> 
 
 Building <span class=prog>crux</span> from source requires that you have previously
-installed a C++ compiler,
+installed C and C++ compilers,
 <a href="http://www.cmake.org"><span class=prog>cmake</span></a>
 and
 <a href="http://subversion.apache.org"><span class=prog>svn</span></a>.
@@ -96,17 +96,39 @@ These will automatically be copied from the <span class=prog>Proteowizard</span>
 and <span class=prog>Percolator</span></a> 
 repositories and statically linked into <span class=prog>crux</span>.
 <p />
-If you are building on Mac OS X Lion or Mountain Lion
+If you are building on Windows you will need Visual C++ 2010.
+The free version of Visual C++ 2010 is available
+<a href="http://www.visualstudio.com/en-us/downloads#d-2010-express">here</a>.
+<p />
+Apple's C++ compilers are partially incompatible with the GNU compilers
+and won't compile some parts of <span class=prog>crux</span> and the supporting libraries.
+If you are building on Apple's OS X 
 you will need to install a copy of the GNU C and C++ compilers
 from a repository such as <a href="http://www.macports.org">MacPorts</a>.
-Recent versions of the C++ compiler provided by Apple are much stricter than previous
-versions and will classify some language constructs used in the 
-<a href="http://per-colator.com"><span class=prog>Percolator</span></a> library
-as invalid C++ syntax.
 We have used version 4.7 of the GNU <span class=prog>g++</span> compiler
 downloaded from <a href="http://www.macports.org">MacPorts</a>.
+Once you've installed 
+<a href="http://www.macports.org">MacPorts</a>
+the commands to install the GNU C and C++ compilers is
+<div class=code>
+<code>
+$ sudo port install gcc47
+</code>
+</div>
+<p />
+<a href="http://www.macports.org">MacPorts</a>
+allows you to install multiple versions of the GNU compilers.
+You'll want to set your prefered version as the default for MacPorts:
+<div class=code>
+<code>
+$ sudo port select --set gcc mp-gcc47
+</code>
+</div>
+<p />
 You will also have to configure the build to use the MacPorts compiler.
 This is done using the environment variables
+<span class=prog>PATH</span>, which sets the list of directories
+that are searched for exectuables,
 <span class=prog>CC</span>, which identifies the C compiler,
 and
 <span class=prog>CXX</span>, which identifies the C++ compiler.
@@ -115,15 +137,19 @@ to the the MacPorts compilers.
 For example:
 <div class=code>
 <code>
-$ export CC=/opt/local/bin/gcc-mp-4.7 
+$ export PATH=/opt/local/bin:$PATH
 <br/>
-$ export CXX=/opt/local/bin/g++-mp-4.7
+$ export CC=/opt/local/bin/gcc
+<br/>
+$ export CXX=/opt/local/bin/g++
 </code>
 </div>
 <p />
-The file you downloaded should be named something like <span
-class=file>crux-1.xx.source.tar.gz</span>, where <span class=file>x.xx</span>
+The file you downloaded should be named something like <span class=file>crux-1.xx.source.tar.gz</span>, where <span class=file>x.xx</span>
 is replaced with the most current release version.
+<p />
+On UNIX systems (including OS X), the steps to build
+<span class=prog>crux</span> are:
 <ol>
 <li><b>Unpack</b> Move the downloaded file to a
 convenient location and unpack it with this command.
@@ -164,7 +190,44 @@ You should now see several executable files in <span
 class=file>&lt;install directory&gt;/bin</span> beginning with <span
 class=prog>crux</span>.  You will also find documentation and example
 files in <span class=file>&lt;install directory&gt;/doc</span>.  
+<p />
+On Windows the steps are slightly different.
 
+<ol>
+<li>
+<b>Obtain command line development environment</b>
+Under the "Start" button
+open the "Visual Studio 2010" folder, then open the "Vistual Studio Tools"
+folder, and double-click on "Visual Studio x64 Win64 Command Prompt".
+This will launch a 
+<span class=file>cmd</span> shell configured to use the 
+Microsoft development tools.
+</li>
+<li><b>Configure</b> In the 
+<span class=file>cmd</span> shell  you just opened,
+move into the <span class=file>crux-x.xx.Source</span>
+directory from step 1.
+Run the command
+<div class=code><code>
+cmake -DCMAKE_INSTALL_PREFIX:PATH=&lt;install directory&gt; -G "Visual Studio 10".
+</code>
+</div>
+where <span class=file>&lt;install directory&gt;</span> is
+the location where you wish to install the <span class=prog>crux</span> programs. 
+If you want <span class=prog>crux</span> to go in <span class=file>$HOME/bin</span>,
+then <span class=file>&lt;install directory&gt;</span> would be <span class=file>$HOME</span>.
+The installation process will automatically put the programs in a directory called
+<span class=file>bin</span>.
+
+<li><b>Make</b> To complete the process, run these two commands.</li>
+<div class=code><code>
+$ msbuild /p:Configuration=Release /p:Platform=Win32 crux.sln
+<br />
+$ msbuild /p:Configuration=Release /p:Platform=Win32 /t install crux.sln
+</code>
+</div>
+
+</ol>
 <a name="path">
 <h2>Changing $PATH</h2>
 </a>
