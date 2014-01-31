@@ -150,7 +150,7 @@ int LineFileReader::getCurrentRow() {
  * iterate through
  */
 bool LineFileReader::hasNext() {
-  return has_next_ || has_current_;
+  return has_next_;
 }
 
 

@@ -70,7 +70,8 @@ int MakePinApplication::main(int argc, char** argv) {
     "overwrite",
     "output-file",
     "verbosity",
-    "parameter-file"
+    "parameter-file",
+    "list-of-files"
 
   };
 
@@ -79,7 +80,6 @@ int MakePinApplication::main(int argc, char** argv) {
   /* Define required command line arguments */
   const char* argument_list[] = {
     "target input", 
-    "decoy input",
   };
   int num_arguments = sizeof(argument_list) / sizeof(char*);
 
@@ -93,48 +93,61 @@ int MakePinApplication::main(int argc, char** argv) {
     argv)
   ;
 
-  //Get input: target
   string target_path = string(get_string_parameter_pointer("target input"));
-  //Get input : decoy 
-  string decoy_path = string(get_string_parameter_pointer("decoy input"));
 
-  return main(target_path, decoy_path);
+  vector<string> search_result_files;
+  get_search_result_paths(target_path, search_result_files);
+
+  return main(search_result_files);
 }
 
 /**
  * \runs make-pin application
  */
-int MakePinApplication::main(string target_path, string decoy_path) {
+int MakePinApplication::main(vector<string>& paths) {
   //create MatchColletion 
-  vector<MatchCollection*> decoys;
   MatchCollectionParser parser;
-  MatchCollection* target_collection =
-    parser.create(target_path.c_str(), "__NULL_STR"); 
-  MatchCollection* decoy_collection = NULL;
-  if (decoy_path != "") {
-    carp(CARP_DEBUG, "Loading decoy file: %s",decoy_path.c_str());
-    decoy_collection =
-      parser.create(decoy_path.c_str(), "__NULL_STR");
-    decoys.push_back(decoy_collection);
-  
 
-    // Mark decoy matches
-    MatchIterator* decoy_iter = new MatchIterator(decoy_collection);
-    carp(CARP_DEBUG, "Marking all decoys");
-    while (decoy_iter->hasNext()) {
-      Crux::Match* decoy_match = decoy_iter->next();
-      decoy_match->setNullPeptide(true);
-    }
-    delete decoy_iter;
+  if (paths.size() == 0) {
+    carp(CARP_FATAL, "No search paths found!");
   }
-  PinXMLWriter* writer=new PinXMLWriter();
 
+  MatchCollection* target_collection = new MatchCollection();
+  MatchCollection* decoy_collection = new MatchCollection();
 
-  bool overwrite = false; 
-  if(get_boolean_parameter("overwrite"))
-    overwrite=true; 
+  for (vector<string>::iterator iter = paths.begin(); iter != paths.end(); ++iter) {
+    carp(CARP_INFO, "Parsing %s", iter->c_str());
+    MatchCollection* current_collection = parser.create(iter->c_str(), "__NULL_STR");
+    for (int scorer_idx = (int)SP; scorer_idx < (int)NUMBER_SCORER_TYPES; scorer_idx++) {
+      target_collection->setScoredType((SCORER_TYPE_T)scorer_idx, 
+        current_collection->getScoredType((SCORER_TYPE_T)scorer_idx));
+      decoy_collection->setScoredType((SCORER_TYPE_T)scorer_idx,
+        current_collection->getScoredType((SCORER_TYPE_T)scorer_idx));
+    } 
+    MatchIterator* match_iter = new MatchIterator(current_collection);
+    while(match_iter->hasNext()) {
+      Crux::Match* match = match_iter->next();
+      if (match->getNullPeptide()) {
+        decoy_collection->addMatch(match);
+      } else {
+        target_collection->addMatch(match);
+      }
+    }
+    delete match_iter;
+    delete current_collection;
+  }
 
-  string output_dir=get_string_parameter("output-dir");
+  carp(CARP_INFO, "There are %d target matches and %d decoys",target_collection->getMatchTotal(), decoy_collection->getMatchTotal());
+  if (target_collection->getMatchTotal() == 0) {
+    carp(CARP_FATAL, "No target matches found!");
+  }
+  if (decoy_collection->getMatchTotal() == 0) {
+    carp(CARP_FATAL, "No decoy matches found!  Did you set 'decoy-prefix' properly?");
+  }
+
+  PinXMLWriter* writer = new PinXMLWriter();
+
+  string output_dir=get_string_parameter_pointer("output-dir");
  
   //perpare output file 
   string output_filename = get_string_parameter_pointer("output-file");
@@ -146,11 +159,13 @@ int MakePinApplication::main(string target_path, string decoy_path) {
       fileroot += ".";
     output_filename = fileroot + "make-pin.pin.xml";
   }
-  writer->openFile(output_filename.c_str(),output_dir.c_str(),overwrite);
+  writer->openFile(output_filename.c_str(),output_dir.c_str(), get_boolean_parameter("overwrite"));
 
   //set process information 
-  writer->setProcessInfo(target_path.c_str(), decoy_path.c_str());
+  writer->setProcessInfo(paths[0].c_str(), paths[paths.size()-1].c_str());
  //write .pin.xml file 
+  vector<MatchCollection*> decoys;
+  decoys.push_back(decoy_collection);
   writer->write(target_collection, decoys, get_int_parameter("top-match"));
   writer->printFooter();
 

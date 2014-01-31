@@ -128,7 +128,7 @@ void CometWriteTxt::PrintResults(int iWhichQuery,
       
       for (size_t iWhichResult=0; iWhichResult<min((unsigned long)g_staticParams.options.iNumPeptideOutputLines, num_matches); iWhichResult++)
       {
-        if (pOutput[0].fXcorr <= 0) {
+        if (pOutput[iWhichResult].fXcorr <= 0) {
           continue;
          }
          fprintf(fpout, "%s", szBuf);

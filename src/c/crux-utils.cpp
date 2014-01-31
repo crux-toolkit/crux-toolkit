@@ -17,6 +17,7 @@
 #include "parameter.h"
 #include "Index.h"
 #include "WinCrux.h"
+#include "LineFileReader.h"
 
 using namespace std;
 
@@ -1454,10 +1455,10 @@ char** generate_feature_name_array()
 }
 
 void tokenize(
-	 const string& str,
-	 vector<string>& tokens,
+  const string& str,
+  vector<string>& tokens,
   char delimiter
-	 ) {
+  ) {
 
   tokens.clear();
   string::size_type lastPos = 0;
@@ -2009,6 +2010,45 @@ void check_target_decoy_files(
   }
 }
 
+void get_search_result_paths(
+  const string &infile, ///< path of the first file.
+  std::vector<std::string> &outpaths ///< paths of all search results -out                                                                                                         
+  ) {
+  
+  outpaths.clear();
+  if (get_boolean_parameter("list-of-files")) {
+    LineFileReader reader(infile);
+    while(reader.hasNext()) {
+      string current = reader.next();
+      carp(CARP_INFO, "current is:%s", current.c_str());
+      if (file_exists(current)) {
+        outpaths.push_back(current);
+      } else {
+        carp(CARP_ERROR, "Search file '%s' doesn't exist", current.c_str());
+      }
+    }
+  } else {
+    string target = infile;
+    string decoy = infile;
+    check_target_decoy_files(target, decoy);
+    if (target.length() > 0) {
+      if (file_exists(target)) {
+        outpaths.push_back(target);
+      } else {
+        carp(CARP_ERROR, "Target file '%s' doesn't exist", target.c_str());
+      }
+    }
+    if (decoy.length() > 0) {
+      if (file_exists(decoy)) {
+        outpaths.push_back(decoy);
+      } else {
+        carp(CARP_ERROR, "Decoy file '%s' doesn't exist", decoy.c_str());
+      }
+    }
+  }
+
+  
+}
 
 /*
  * Local Variables:
