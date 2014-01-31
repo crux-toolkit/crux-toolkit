@@ -86,6 +86,7 @@ int PercolatorApplication::main(int argc, char** argv) {
     "mzid-output",
     "pepxml-output",
     "feature-file",
+    "list-of-files",
     "feature-in-file",
     "parameter-file",
     "protein",
@@ -145,28 +146,23 @@ int PercolatorApplication::main(int argc, char** argv) {
   
   if (!get_boolean_parameter("feature-in-file")) {
     // Check if we need to run make-pin first
-    if (has_extension(input_pinxml.c_str(), "txt") ||
+    if (get_boolean_parameter("list-of-files") || 
+        has_extension(input_pinxml.c_str(), "txt") ||
         has_extension(input_pinxml.c_str(), "sqt") ||
         has_extension(input_pinxml.c_str(), "pep.xml") ||
         has_extension(input_pinxml.c_str(), "mzid")) {
 
-        string input_decoy = input_pinxml;
-        check_target_decoy_files(input_pinxml, input_decoy);
-
-      // check that files exist
-      if (!file_exists(input_pinxml)) {
-        carp(CARP_FATAL, "Target file %s not found", input_pinxml.c_str());
-      } else if (!file_exists(input_decoy)) {
-        carp(CARP_DEBUG, "Decoy file %s not found", input_decoy.c_str());
-	input_decoy = "";
-      }
+      vector<string> result_files;
+      get_search_result_paths(input_pinxml, result_files);
 
       string pin_location = string(get_string_parameter_pointer("output-dir")) +
                             "/make-pin.pin.xml";
+
       const char* make_pin_file = pin_location.c_str();
-      carp(CARP_INFO, "Running make-pin with '%s' and decoy file '%s'.",
-           input_pinxml.c_str(), input_decoy.c_str());
-      int ret = MakePinApplication::main(input_pinxml, input_decoy);
+
+      carp(CARP_INFO, "Running make-pin");
+      int ret = MakePinApplication::main(result_files);
+
       if (ret != 0 || !file_exists(make_pin_file)) {
         carp(CARP_FATAL, "make-pin failed. Not running Percolator.");
       }
@@ -174,7 +170,7 @@ int PercolatorApplication::main(int argc, char** argv) {
       input_pinxml = string(make_pin_file);
     } else if (!has_extension(input_pinxml.c_str(), "pin.xml")) {
         carp(CARP_FATAL, "input file %s is not recognized.", input_pinxml.c_str() );
-	}
+    }
   }
   return main(input_pinxml);
 

@@ -562,7 +562,7 @@ static inline std::string &trim(
  * MULTIPLE_CHARGE_STATE if multiply charged.
  */
 CHARGE_STATE_T choose_charge(FLOAT_T precursor_mz,         ///< m/z of spectrum precursor ion
-		  std::vector<Peak*>& peaks); ///< array of spectrum peaks
+  std::vector<Peak*>& peaks); ///< array of spectrum peaks
 
 /**
  *\brief Extend a given string with lines not exceeding a specified width, 
@@ -593,6 +593,12 @@ void check_target_decoy_files(
   std::string &target,   //filename of the target PSMs
   std::string &decoy     //filename of the decoy PSMs
 );
+
+void get_search_result_paths(
+  const std::string& infile,
+  std::vector<std::string> &outpaths ///< paths of all search results -out
+);
+
 
 /**
  * \brief Checks if the given input file contains target, decoy PSMs or 
