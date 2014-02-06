@@ -13,23 +13,23 @@
 
 <h1>Crux Installation Instructions</h1>
 
-<p>This page will walk you through the steps of installing <span
-class=prog>crux</span> on your computer.  It assumes you are working
-in a command-line shell (readily available for Linux and Mac systems,
+<p>
+This page will walk you through the steps of
+installing <code>crux</code> on your computer.  It assumes you are
+working in a command-line shell (readily available for Linux and Mac
+systems,
 <a href="http://www.cygwin.com">cygwin</a> is the preferred choice for
-Windows).  The installation requires that you have <span
-class=prog>gcc</span> and <span class=prog>make</span> on your
-computer. <!-- precompiled binaries may be  available?-->
-All commands (words that you should type) are enclosed in
-boxes.  (Do not type the leading <code>$</code>; it indicates the
-prompt). These instructions will refer to your home directory as
-<code>$HOME</code>.  You can type <code>$HOME</code>  in the commands
+Windows).  The installation requires that you have <code>gcc</code>
+and <code>make</code> on your computer.  Do not type the
+leading <code>$</code> before each command; it indicates the
+prompt. These instructions will refer to your home directory as
+<code>$HOME</code>.  You can type <code>$HOME</code> in the commands
 or you can use the fully qualified path to your home directory which
-may be something like <code>/home/yourname/</code>.  
+may be something like <code>/home/yourname/</code>.  Note that you can
+find out the location of your home directory by logging in and
+typing <code>pwd</code> or <code>echo $HOME</code>.
 
-<div class=note><em>NOTE:</em> You can find out the location of your
-home directory by logging in and typing <code>pwd</code> or <code>echo
-$HOME</code>
+
 </div> 
 
 
@@ -37,21 +37,21 @@ $HOME</code>
 <h2>Installation</h2>
 
 <ol>
-<li><b>Download the files</b>  <span class=prog>Crux</span> is freely
-available for download under an 
-<a href=""http://www.apache.org/licenses/LICENSE-2.0>Apache 2.0 license</a>.
-On the download page you will be offered two types of files.
-One is a set of compiled binaries (programs that are ready to run) and 
-documentation zipped together and the other is a tarball containing
-the source code and documentation.  If you are working on a Linux i686
-or x86_64 system, the compiled binaries offer the easiest installation option.
-Click on the link "Linux [architecture] Build (zipped)" to download
-them to your computer.  If a window pops up, select the "Save" button.
-If you are on any other system or if the binaries do not work on your
-computer, you will need to download the source files.  Click on the
-link "Source (tarred, gzipped)", again choosing to save to disk if
-prompted. To check that the files were transfered correctly, run this
-command
+<li><b>Download the files</b> <span class=prog>Crux</span> is freely
+available for download under an
+<a href=""http://www.apache.org/licenses/LICENSE-2.0>Apache 2.0
+license</a>.  On the download page you will be offered two types of
+files.  One is a set of compiled binaries (programs that are ready to
+run) and documentation zipped together, and the other is a tar file
+containing the source code and documentation.  If you are working on a
+Linux i686 or x86_64 system, then the compiled binaries offer the
+easiest installation option.  Click on the link "Linux [architecture]
+Build (zipped)" to download them to your computer.  If a window pops
+up, select the "Save" button.  If you are on any other system or if
+the binaries do not work on your computer, you will need to download
+the source files.  Click on the link "Source (tarred, gzipped)", again
+choosing to save to disk if prompted. To check that the files were
+transfered correctly, run this command
 
 <div class=code><code>
 $ md5sum <i>[downloaded file]</i></code>
@@ -61,7 +61,7 @@ and compare the output to the "MD5 checksum" link next to the file you
 downloaded.  
 
 <li><b>Unpack and install the files</b>
-<p />
+<p/>
 <b>Option 1: pre-compiled binaries.</b>  The file you downloaded
 should be named something like 
 <span class=file>crux-1.xx-i686-GNU-Linux.zip</span>.  Move it
@@ -184,7 +184,6 @@ $ make install
 </div>
 
 </ol>
-</ol>
 
 You should now see several executable files in <span
 class=file>&lt;install directory&gt;/bin</span> beginning with <span
@@ -228,9 +227,13 @@ $ msbuild /p:Configuration=Release /p:Platform=Win32 /t install crux.sln
 </div>
 
 </ol>
+</ol>
+
 <a name="path">
 <h2>Changing $PATH</h2>
 </a>
+<ul>
+
 <p>You can always run any of the programs by specifying its full
 path.  For example,</p>
 
@@ -282,6 +285,8 @@ make the change every time you log on, add the line <span
 class=code>export PATH=$PATH:&lt;install directory&gt;/bin</span> to the file <span
 class=out>.bashrc</span> located in your home directory.  You will
 have to log on again for the change to take effect.
+
+</ul>
 
 </div><!--end main-->
 
