@@ -124,7 +124,7 @@ int TideSearchApplication::main(int argc, char** argv) {
       carp(CARP_DEBUG, "Searching scan range %d-%d", min_scan, max_scan);
     }
   }
-  //check to compute exact P-value 
+  //check to compute exact p-value 
   exact_pval_search = get_boolean_parameter("exact-p-value");
   double binWidth   = get_double_parameter("mz-bin-width");
   double binOffset  = get_double_parameter("mz-bin-offset");
@@ -172,6 +172,9 @@ int TideSearchApplication::main(int argc, char** argv) {
 
   active_peptide_queue->SetBinSize(binWidth, binOffset);
 
+  printf( "active_peptide_queue binWidth = %10.8f\n", binWidth );    //&& for test only
+  printf( "active_peptide_queue binOffset = %4.2f\n", binOffset );   //&& for test only
+  
   carp(CARP_INFO, "Reading spectra file %s", spectra_file.c_str());
   // Try to read file as spectrumrecords file
   SpectrumCollection spectra;
@@ -424,12 +427,15 @@ void TideSearchApplication::search(
 	  //%% end for test only
 	
 	  //&& need to decide which of these constants to move to parameter file
-      const double evidenceIntScale = 500.0;   // make score bins 10 times larger than with usual value = 50.0;
-      const double binWidth = 1.0005079;       // monoisotopic
-      const double binOffset = 0.40;           // changed from previous standard value 0.68
       const int minDeltaMass = 57;
       const int maxDeltaMass = 186;
       //&& end need to decide
+
+      double binWidth   = get_double_parameter( "mz-bin-width" );
+      double binOffset  = get_double_parameter( "mz-bin-offset" );
+
+      printf( "exact-pval-search binWidth = %10.8f\n", binWidth );    //&& for test only
+      printf( "exact-pval-search binOffset = %4.2f\n", binOffset );   //&& for test only
 
       int maxPrecurMass = floor( MaxMZ::BinInvert( MaxMZ::Global().CacheBinEnd() ) + 50.0 );	//&& works, but is this the best way to get?
       int nCandPeptide = active_peptide_queue -> SetActiveRangeBIons( min_mass, max_mass );
@@ -489,7 +495,7 @@ void TideSearchApplication::search(
         pepMaInt = pepMassIntUnique[ pe ];		//&& should be accessed with an iterator
         // preprocess to create one integerized evidence vector for each cluster of masses among selected peptides
         double pepMassMonoMean = ( pepMaInt - 1.0 + binOffset ) * binWidth + 0.5;
-		observed.CreateEvidenceVector( *spectrum, charge, pepMassMonoMean, maxPrecurMass, evidenceObs[ pe ] );
+		observed.CreateEvidenceVector( *spectrum, binWidth, binOffset, charge, pepMassMonoMean, maxPrecurMass, evidenceObs[ pe ] );
 
         //&& original: createEvidenceArrayObserved( nIon, ionSeriesMass, ionSeriesIntens, evidenceIntScale, binWidth, binOffset, precurMz, precurCharge, pepMassMonoMean, maxPrecurMass, evidenceObs[ pe ] );
 
@@ -557,7 +563,15 @@ void TideSearchApplication::search(
 	    pair.first.second = ( double )scoreRefactInt;
 	    pair.second = nCandPeptide - pe;	//&& ugly hack to conform with the way these indices are generated in standard tide-search
         match_arr.push_back( pair );
-
+		
+		// //&& for test only
+		// if ( pair.first.first > 4.3 ) {
+			// for ( ma = 0; ma < maxPrecurMass; ma++ ) {
+				// printf( "%5d   %5d   %3d   %3d\n", pepMassIntIdx, ma, evidenceObs[ pepMassIntIdx ][ ma ], intensArrayTheor[ ma ] );
+			// }
+		// }
+		// //&& end for test only
+ 
 // //         nSpecTarget( pepIdxTar ) = nSpecTarget( pepIdxTar ) + 1;
 // //         if ( pValueTar < pValuePeptideBestMatchTarget( pepIdxTar ) )
 // //             pValuePeptideBestMatchTarget( pepIdxTar ) = pValueTar;

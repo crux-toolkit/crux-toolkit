@@ -152,8 +152,9 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum,
 #endif
 }
 
-void ObservedPeakSet::CreateEvidenceVector( const Spectrum& spectrum, int charge,
-		double pepMassMonoMean, int maxPrecurMass, int* evidenceInt ) {
+void ObservedPeakSet::CreateEvidenceVector( const Spectrum& spectrum,
+		double binWidth, double binOffset, int charge, double pepMassMonoMean,
+		int maxPrecurMass, int* evidenceInt ) {
 /* Calculates vector of cleavage evidence for an observed spectrum, using XCorr
  * b/y/neutral peak sets and heights.
  *
@@ -181,7 +182,6 @@ void ObservedPeakSet::CreateEvidenceVector( const Spectrum& spectrum, int charge
 //&& end preserved
 
   //&& need to review these constants, decide which can be moved to parameter file
-  const double binOffset = 0.40;
   const double evidenceIntScale = 500.0;
   const int nRegion = NUM_SPECTRUM_REGIONS;
   const double maxIntensPerRegion = 50.0;
@@ -207,18 +207,17 @@ void ObservedPeakSet::CreateEvidenceVector( const Spectrum& spectrum, int charge
   double ionMassCOLoss;
   double ionMassH2OLoss;
 	
-	double* evidence = new double[ maxPrecurMass ];
-    double* intensArrayObs = new double[ maxPrecurMass ];
-    int* intensRegion = new int[ maxPrecurMass ];
+  double* evidence = new double[ maxPrecurMass ];
+  double* intensArrayObs = new double[ maxPrecurMass ];
+  int* intensRegion = new int[ maxPrecurMass ];
 
-    for ( ma = 0; ma < maxPrecurMass; ma++ ) {
-		evidence[ ma ] = 0.0;
-        evidenceInt[ ma ] = 0;
-        intensArrayObs[ ma ] = 0.0;
-        intensRegion[ ma ] = -1;
-	}
+  for ( ma = 0; ma < maxPrecurMass; ma++ ) {
+	evidence[ ma ] = 0.0;
+    evidenceInt[ ma ] = 0;
+    intensArrayObs[ ma ] = 0.0;
+    intensRegion[ ma ] = -1;
+  }
 
-  double binWidth = bin_width_mono;
   double precurMz = spectrum.PrecursorMZ();
   int nIon = spectrum.Size();
   int precurCharge = charge;
@@ -303,8 +302,16 @@ void ObservedPeakSet::CreateEvidenceVector( const Spectrum& spectrum, int charge
         if ( intensArrayObs[ ionBin ] < ionIntens ) {
             intensArrayObs[ ionBin ] = ionIntens;
         }
+		
+		// //&& for test only
+		// printf( "%d   %10.6f   %10.6f   %d\n", ion, ionMass, ionIntens, ionBin );
     }
 
+	// //&& for test only
+    // for ( ma = 0; ma < maxPrecurMass; ma++ ) {
+		// printf( "%5d   %10.6f\n", ma, intensArrayObs[ ma ] );
+	// }
+	
     maxIonIntens = sqrt( maxIonIntens );
     for ( ma = 0; ma < maxPrecurMass; ma++ ) {
         intensArrayObs[ ma ] = sqrt( intensArrayObs[ ma ] );

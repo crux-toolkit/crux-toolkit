@@ -171,7 +171,7 @@ bool SpectrumRecordWriter::checkDenom(
   double d_denom = denom;
   for (int i = 0; i < vals.size(); ++ i) {
     double x = vals[i] * d_denom;
-    if (fabs(x - google::protobuf::uint64(x+0.5)) < 0.001)
+    if (fabs(x - google::protobuf::uint64(x+0.5)) >= 0.001)
       return false;
   }
   return true;
