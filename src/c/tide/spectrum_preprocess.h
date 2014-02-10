@@ -129,8 +129,9 @@ class ObservedPeakSet {
 #endif
 
   void PreprocessSpectrum(const Spectrum& spectrum, int charge);
-  void CreateEvidenceVector( const Spectrum& spectrum, int charge,
-		double pepMassMonoMean, int maxPrecurMass, int* evidenceInt );
+  void CreateEvidenceVector( const Spectrum& spectrum, double binWidth,
+		double binOffset, int charge, double pepMassMonoMean,
+		int maxPrecurMass, int* evidenceInt );
 
   // For debugging
   void Show(const string& name, TheoreticalPeakType peak_type, bool cache_end) {
