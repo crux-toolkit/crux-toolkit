@@ -1765,7 +1765,7 @@ void print_modifications_xml(
 ){
   map<int, double> var_mods;
   map<int, double> static_mods;
-
+  carp(CARP_INFO,"print_modifications_xml:%s %s", mod_seq, pep_seq);
   // variable modifications
   int mod_precision = get_int_parameter("mod-precision");
   find_variable_modifications(var_mods, mod_seq);
@@ -1773,11 +1773,17 @@ void print_modifications_xml(
     fprintf(output_file, 
             "<modification_info modified_peptide=\"%s\">\n",
             mod_seq);
-    for (map<int, double>::iterator it = var_mods.begin()
+   carp(CARP_INFO,
+            "<modification_info modified_peptide=\"%s\">\n",
+            mod_seq);
+        for (map<int, double>::iterator it = var_mods.begin()
            ; it != var_mods.end(); ++it){
       fprintf(output_file, "<mod_aminoacid_mass position=\"%i\" mass=\"%.*f\"/>\n",
               (*it).first,   //index
               mod_precision, (*it).second); //mass
+      carp(CARP_INFO, "<mod_aminoacid_mass position=\"%i\" mass=\"%.*f\"/>\n",
+              (*it).first,   //index                                                                                                                                                                                                            
+              mod_precision, (*it).second); //mass           
     }
     fprintf(output_file, "</modification_info>\n");
   }
@@ -1785,6 +1791,8 @@ void print_modifications_xml(
   // static modifications
   find_static_modifications(static_mods, var_mods, pep_seq);
   if (!static_mods.empty()){
+    carp(CARP_INFO, "<modification_info modified_peptide=\"%s\">\n",
+            pep_seq);
     fprintf(output_file, "<modification_info modified_peptide=\"%s\">\n",
             pep_seq);
     for (map<int, double>::iterator it = static_mods.begin(); 
@@ -1792,6 +1800,9 @@ void print_modifications_xml(
       fprintf(output_file, "<mod_aminoacid_mass position=\"%i\" mass=\"%.*f\"/>\n",
               (*it).first,   //index
               mod_precision, (*it).second); //mass
+      carp(CARP_INFO, "<mod_aminoacid_mass position=\"%i\" mass=\"%.*f\"/>\n",
+              (*it).first,   //index                                                                                                                                                                                                            
+              mod_precision, (*it).second); //mass 
     }
     fprintf(output_file, "</modification_info>\n");
   }
@@ -1869,8 +1880,8 @@ void find_static_modifications(
     if (get_double_parameter( (const char *)aa)!= 0 && 
         var_mods.find(seq_index) == var_mods.end()){
 
-      double mass = get_mass_amino_acid(*seq_iter, isotopic_type);
-      static_mods[seq_index] = mass;
+      //double mass = get_mass_amino_acid(*seq_iter, isotopic_type);
+      static_mods[seq_index] = get_double_parameter( (const char*)aa);
     }
     seq_iter++;
     seq_index++;

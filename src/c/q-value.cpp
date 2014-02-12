@@ -394,11 +394,11 @@ MatchCollection* run_qvalue(
   MatchCollectionParser parser;
   MatchCollection* match_collection =
     parser.create(target_path.c_str(), get_string_parameter_pointer("protein-database"));
-  MatchCollection* decoy_matches = NULL;
+  MatchCollection* decoy_matches = new MatchCollection();
   // Create two match collections, for targets and decoys.
-  MatchCollection* target_matches = new MatchCollection(false);
+  MatchCollection* target_matches = new MatchCollection();
   
-  decoy_matches = new MatchCollection(true);
+
   if (decoy_path != "") {
     MatchCollection* temp_collection = parser.create(decoy_path.c_str(), get_string_parameter_pointer("protein-database"));
        // Mark decoy matches
@@ -434,7 +434,6 @@ MatchCollection* run_qvalue(
     if( match->getRank(XCORR) != 1 ){
       continue;
     }
-      
     if (match->getNullPeptide() == true) {
       decoy_matches->addMatch(match);
       have_decoys = true;

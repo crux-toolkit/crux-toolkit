@@ -315,14 +315,18 @@ int PercolatorApplication::main(
   
 
   if(set_protein){
-    perc_args_vec.push_back("--alpha");
-    perc_args_vec.push_back(to_string(get_double_parameter("alpha")));
- 
-    perc_args_vec.push_back("--beta");
-    perc_args_vec.push_back(to_string(get_double_parameter("beta")));
-
-    perc_args_vec.push_back("--gamma");
-    perc_args_vec.push_back(to_string(get_double_parameter("gamma")));
+    if (get_double_parameter("alpha") > 0) {
+      perc_args_vec.push_back("--alpha");
+      perc_args_vec.push_back(to_string(get_double_parameter("alpha")));
+    }
+    if (get_double_parameter("beta") > 0) {
+      perc_args_vec.push_back("--beta");
+      perc_args_vec.push_back(to_string(get_double_parameter("beta")));
+    }
+    if (get_double_parameter("gamma") > 0) {
+      perc_args_vec.push_back("--gamma");
+      perc_args_vec.push_back(to_string(get_double_parameter("gamma")));
+    }
   }
   
   
