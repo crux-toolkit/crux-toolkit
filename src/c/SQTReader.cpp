@@ -303,8 +303,12 @@ void SQTReader::parseLocus(string& line) {
   int start_idx = protein->findStart(current_peptide_sequence_, current_prev_aa_, current_next_aa_);
 
   PeptideSrc* peptide_src = new PeptideSrc((DIGEST_T)0, protein, start_idx);
-
+  
   current_match_->getPeptide()->addPeptideSrc(peptide_src);
+
+  if (is_decoy) {
+    current_match_->setNullPeptide(true);
+  }
 
   last_parsed_ = SQT_LINE_LOCUS;
 }

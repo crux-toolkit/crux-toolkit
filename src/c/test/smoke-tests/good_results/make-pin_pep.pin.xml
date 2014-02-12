@@ -3,7 +3,7 @@
 
 <enzyme>trypsin</enzyme>
 <process_info>
-  <command_line>/scratch/percolator-convertersBuild/sqt2pin -o  /net/maccoss/vol1/home/kaipot/svn/working2/src/c/test/smoke-tests/crux-output/search.target.pep.xml /net/maccoss/vol1/home/kaipot/svn/working2/src/c/test/smoke-tests/crux-output/search.decoy.pep.xml</command_line>
+  <command_line>/scratch/percolator-convertersBuild/sqt2pin -o  /net/noble/vol4/noble/user/mcilwain/svn/noble/crux-trunk/src/c/test/smoke-tests/crux-output/search.target.pep.xml /net/noble/vol4/noble/user/mcilwain/svn/noble/crux-trunk/src/c/test/smoke-tests/crux-output/search.decoy.pep.xml</command_line>
 </process_info>
 <featureDescriptions xmlns="http://per-colator.com/percolator_in/12">
   <featureDescription name="lnrSp"/>
@@ -1061,7 +1061,7 @@
 <occurence flankC="K" flankN="G" proteinId="decoy_YBR115C"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="717.9139" chargeState="1" experimentalMassToCharge="717.0599" id="decoy_13_1_4" isDecoy="true">
+  <peptideSpectrumMatch calculatedMassToCharge="774.9139" chargeState="1" experimentalMassToCharge="717.0599" id="decoy_13_1_4" isDecoy="true">
     <features>
       <feature>2.39789534</feature>
       <feature>0.11174576</feature>
@@ -1078,11 +1078,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>2.70805025</feature>
-      <feature>0.15325928</feature>
-      <feature>0.15325928</feature>
+      <feature>-56.84674072</feature>
+      <feature>56.84674072</feature>
     </features>
     <peptide>
       <peptideSequence>ALCILK</peptideSequence>
+      <modification location="3" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="K" flankN="G" proteinId="decoy_YDR093W"/>
@@ -1119,7 +1122,7 @@
 
 
 <fragSpectrumScan xmlns="http://per-colator.com/percolator_in/12" scanNumber="14">
-  <peptideSpectrumMatch calculatedMassToCharge="1117.1903" chargeState="2" experimentalMassToCharge="1117.1927" id="target_14_2_1" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="1174.1903" chargeState="2" experimentalMassToCharge="1117.1927" id="target_14_2_1" isDecoy="false">
     <features>
       <feature>1.79175949</feature>
       <feature>0.28849548</feature>
@@ -1136,11 +1139,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>2.39789534</feature>
-      <feature>0.50488281</feature>
-      <feature>0.50488281</feature>
+      <feature>-27.99511719</feature>
+      <feature>27.99511719</feature>
     </features>
     <peptide>
       <peptideSequence>YDGAFDCLR</peptideSequence>
+      <modification location="7" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="K" flankN="K" proteinId="YBL030C"/>
@@ -1200,7 +1206,7 @@
 <occurence flankC="R" flankN="F" proteinId="YMR073C"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1119.2925" chargeState="2" experimentalMassToCharge="1117.1927" id="target_14_2_4" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="1176.2925" chargeState="2" experimentalMassToCharge="1117.1927" id="target_14_2_4" isDecoy="false">
     <features>
       <feature>0.69314718</feature>
       <feature>0.00401289</feature>
@@ -1217,11 +1223,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>2.39789534</feature>
-      <feature>-0.54620361</feature>
-      <feature>0.54620361</feature>
+      <feature>-29.04620361</feature>
+      <feature>29.04620361</feature>
     </features>
     <peptide>
       <peptideSequence>FFCALFDAK</peptideSequence>
+      <modification location="3" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="K" flankN="K" proteinId="YKL127W"/>
@@ -1416,7 +1425,7 @@
 <occurence flankC="K" flankN="K" proteinId="decoy_YBL076C"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1115.2183" chargeState="2" experimentalMassToCharge="1117.1927" id="decoy_14_2_2" isDecoy="true">
+  <peptideSpectrumMatch calculatedMassToCharge="1172.2183" chargeState="2" experimentalMassToCharge="1117.1927" id="decoy_14_2_2" isDecoy="true">
     <features>
       <feature>2.19722462</feature>
       <feature>0.19335489</feature>
@@ -1433,17 +1442,20 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>2.30258512</feature>
-      <feature>1.49090576</feature>
-      <feature>1.49090576</feature>
+      <feature>-27.00909424</feature>
+      <feature>27.00909424</feature>
     </features>
     <peptide>
       <peptideSequence>TPPLQCENR</peptideSequence>
+      <modification location="6" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="F" proteinId="decoy_YDR093W"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1119.2924" chargeState="2" experimentalMassToCharge="1117.1927" id="decoy_14_2_3" isDecoy="true">
+  <peptideSpectrumMatch calculatedMassToCharge="1176.2924" chargeState="2" experimentalMassToCharge="1117.1927" id="decoy_14_2_3" isDecoy="true">
     <features>
       <feature>0.69314718</feature>
       <feature>0.11700466</feature>
@@ -1460,11 +1472,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>2.30258512</feature>
-      <feature>-0.54614258</feature>
-      <feature>0.54614258</feature>
+      <feature>-29.04614258</feature>
+      <feature>29.04614258</feature>
     </features>
     <peptide>
       <peptideSequence>FDFALCAFK</peptideSequence>
+      <modification location="6" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="K" flankN="K" proteinId="decoy_YKL127W"/>
@@ -1716,7 +1731,7 @@
 <occurence flankC="K" flankN="I" proteinId="YLL024C"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1464.5997" chargeState="2" experimentalMassToCharge="1463.2528" id="target_15_2_3" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="1521.5997" chargeState="2" experimentalMassToCharge="1463.2528" id="target_15_2_3" isDecoy="false">
     <features>
       <feature>1.60943794</feature>
       <feature>0.22595769</feature>
@@ -1733,11 +1748,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.60943794</feature>
-      <feature>-0.16979980</feature>
-      <feature>0.16979980</feature>
+      <feature>-28.66979980</feature>
+      <feature>28.66979980</feature>
     </features>
     <peptide>
       <peptideSequence>TCVVETPTLNSDK</peptideSequence>
+      <modification location="2" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="S" proteinId="YBR115C"/>
@@ -1878,7 +1896,7 @@
 <occurence flankC="R" flankN="F" proteinId="decoy_YHR183W"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1464.5997" chargeState="2" experimentalMassToCharge="1463.2528" id="decoy_15_2_4" isDecoy="true">
+  <peptideSpectrumMatch calculatedMassToCharge="1521.5997" chargeState="2" experimentalMassToCharge="1463.2528" id="decoy_15_2_4" isDecoy="true">
     <features>
       <feature>1.60943794</feature>
       <feature>0.30108950</feature>
@@ -1895,11 +1913,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.60943794</feature>
-      <feature>-0.16979980</feature>
-      <feature>0.16979980</feature>
+      <feature>-28.66979980</feature>
+      <feature>28.66979980</feature>
     </features>
     <peptide>
       <peptideSequence>TPVLTTSVNECDK</peptideSequence>
+      <modification location="11" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="S" proteinId="decoy_YBR115C"/>
@@ -2700,7 +2721,7 @@
 <occurence flankC="K" flankN="S" proteinId="YOR136W"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1209.4150" chargeState="2" experimentalMassToCharge="1207.5728" id="decoy_19_2_1" isDecoy="true">
+  <peptideSpectrumMatch calculatedMassToCharge="1266.4150" chargeState="2" experimentalMassToCharge="1207.5728" id="decoy_19_2_1" isDecoy="true">
     <features>
       <feature>0.00000000</feature>
       <feature>0.33318633</feature>
@@ -2717,11 +2738,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.09861231</feature>
-      <feature>-0.41748047</feature>
-      <feature>0.41748047</feature>
+      <feature>-28.91748047</feature>
+      <feature>28.91748047</feature>
     </features>
     <peptide>
       <peptideSequence>GPLGCTLLYSK</peptideSequence>
+      <modification location="5" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="G" proteinId="decoy_YBL030C"/>
@@ -4587,7 +4611,7 @@
 <occurence flankC="R" flankN="F" proteinId="YHR183W"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1464.5997" chargeState="2" experimentalMassToCharge="1464.0928" id="target_27_2_3" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="1521.5997" chargeState="2" experimentalMassToCharge="1464.0928" id="target_27_2_3" isDecoy="false">
     <features>
       <feature>1.38629436</feature>
       <feature>0.20040201</feature>
@@ -4604,11 +4628,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.38629436</feature>
-      <feature>0.25018311</feature>
-      <feature>0.25018311</feature>
+      <feature>-28.24981689</feature>
+      <feature>28.24981689</feature>
     </features>
     <peptide>
       <peptideSequence>TCVVETPTLNSDK</peptideSequence>
+      <modification location="2" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="S" proteinId="YBR115C"/>
@@ -4722,7 +4749,7 @@
 <occurence flankC="K" flankN="-" proteinId="decoy_YLR249W"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1464.5997" chargeState="2" experimentalMassToCharge="1464.0928" id="decoy_27_2_4" isDecoy="true">
+  <peptideSpectrumMatch calculatedMassToCharge="1521.5997" chargeState="2" experimentalMassToCharge="1464.0928" id="decoy_27_2_4" isDecoy="true">
     <features>
       <feature>1.38629436</feature>
       <feature>0.00000000</feature>
@@ -4739,11 +4766,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.38629436</feature>
-      <feature>0.25018311</feature>
-      <feature>0.25018311</feature>
+      <feature>-28.24981689</feature>
+      <feature>28.24981689</feature>
     </features>
     <peptide>
       <peptideSequence>TPVLTTSVNECDK</peptideSequence>
+      <modification location="11" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="S" proteinId="decoy_YBR115C"/>
@@ -5298,7 +5328,7 @@
 <occurence flankC="K" flankN="I" proteinId="YKL145W"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="717.9139" chargeState="1" experimentalMassToCharge="715.0699" id="target_30_1_5" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="774.9139" chargeState="1" experimentalMassToCharge="715.0699" id="target_30_1_5" isDecoy="false">
     <features>
       <feature>2.07944155</feature>
       <feature>0.00000000</feature>
@@ -5315,11 +5345,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>2.48490667</feature>
-      <feature>-1.83673096</feature>
-      <feature>1.83673096</feature>
+      <feature>-58.83673096</feature>
+      <feature>58.83673096</feature>
     </features>
     <peptide>
       <peptideSequence>ALLICK</peptideSequence>
+      <modification location="5" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="K" flankN="G" proteinId="YDR093W"/>
@@ -5463,7 +5496,7 @@
 
 
 <fragSpectrumScan xmlns="http://per-colator.com/percolator_in/12" scanNumber="31">
-  <peptideSpectrumMatch calculatedMassToCharge="1501.5547" chargeState="3" experimentalMassToCharge="1501.6455" id="target_31_3_1" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="1672.5547" chargeState="3" experimentalMassToCharge="1501.6455" id="target_31_3_1" isDecoy="false">
     <features>
       <feature>0.00000000</feature>
       <feature>0.49776787</feature>
@@ -5480,11 +5513,20 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.09861231</feature>
-      <feature>0.36604819</feature>
-      <feature>0.36604819</feature>
+      <feature>-56.63395309</feature>
+      <feature>56.63395309</feature>
     </features>
     <peptide>
       <peptideSequence>YLPNGDCECCGR</peptideSequence>
+      <modification location="7" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
+      <modification location="9" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
+      <modification location="10" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="A" proteinId="YBR115C"/>
@@ -5571,7 +5613,7 @@
 <occurence flankC="K" flankN="R" proteinId="decoy_YBR115C"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1501.5547" chargeState="3" experimentalMassToCharge="1501.6455" id="decoy_31_3_2" isDecoy="true">
+  <peptideSpectrumMatch calculatedMassToCharge="1672.5547" chargeState="3" experimentalMassToCharge="1501.6455" id="decoy_31_3_2" isDecoy="true">
     <features>
       <feature>1.09861231</feature>
       <feature>0.21146049</feature>
@@ -5588,11 +5630,20 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.09861231</feature>
-      <feature>0.36604819</feature>
-      <feature>0.36604819</feature>
+      <feature>-56.63395309</feature>
+      <feature>56.63395309</feature>
     </features>
     <peptide>
       <peptideSequence>YDPNGGCLECCR</peptideSequence>
+      <modification location="7" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
+      <modification location="10" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
+      <modification location="11" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="A" proteinId="decoy_YBR115C"/>
@@ -5928,7 +5979,7 @@
 <occurence flankC="R" flankN="E" proteinId="YGL022W"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1300.4408" chargeState="3" experimentalMassToCharge="1299.3555" id="target_33_3_3" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="1357.4408" chargeState="3" experimentalMassToCharge="1299.3555" id="target_33_3_3" isDecoy="false">
     <features>
       <feature>1.38629436</feature>
       <feature>0.13262546</feature>
@@ -5945,11 +5996,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.60943794</feature>
-      <feature>-0.02600098</feature>
-      <feature>0.02600098</feature>
+      <feature>-19.02600098</feature>
+      <feature>19.02600098</feature>
     </features>
     <peptide>
       <peptideSequence>FEELCADLFR</peptideSequence>
+      <modification location="5" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="S" proteinId="YLL024C"/>
@@ -6198,7 +6252,7 @@
 <occurence flankC="K" flankN="G" proteinId="decoy_YHR183W"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1300.4408" chargeState="3" experimentalMassToCharge="1299.3555" id="decoy_33_3_3" isDecoy="true">
+  <peptideSpectrumMatch calculatedMassToCharge="1357.4408" chargeState="3" experimentalMassToCharge="1299.3555" id="decoy_33_3_3" isDecoy="true">
     <features>
       <feature>1.60943794</feature>
       <feature>0.47393480</feature>
@@ -6215,11 +6269,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.60943794</feature>
-      <feature>-0.02600098</feature>
-      <feature>0.02600098</feature>
+      <feature>-19.02600098</feature>
+      <feature>19.02600098</feature>
     </features>
     <peptide>
       <peptideSequence>FLLEEDCAFR</peptideSequence>
+      <modification location="7" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="S" proteinId="decoy_YLL024C"/>
@@ -6282,7 +6339,7 @@
 
 
 <fragSpectrumScan xmlns="http://per-colator.com/percolator_in/12" scanNumber="34">
-  <peptideSpectrumMatch calculatedMassToCharge="1501.5547" chargeState="2" experimentalMassToCharge="1500.8328" id="target_34_2_1" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="1672.5547" chargeState="2" experimentalMassToCharge="1500.8328" id="target_34_2_1" isDecoy="false">
     <features>
       <feature>0.00000000</feature>
       <feature>0.14750528</feature>
@@ -6299,11 +6356,20 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.09861231</feature>
-      <feature>0.14270020</feature>
-      <feature>0.14270020</feature>
+      <feature>-85.35729980</feature>
+      <feature>85.35729980</feature>
     </features>
     <peptide>
       <peptideSequence>YLPNGDCECCGR</peptideSequence>
+      <modification location="7" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
+      <modification location="9" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
+      <modification location="10" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="A" proteinId="YBR115C"/>
@@ -6363,7 +6429,7 @@
 <occurence flankC="K" flankN="R" proteinId="YBR115C"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1501.5547" chargeState="2" experimentalMassToCharge="1500.8328" id="decoy_34_2_1" isDecoy="true">
+  <peptideSpectrumMatch calculatedMassToCharge="1672.5547" chargeState="2" experimentalMassToCharge="1500.8328" id="decoy_34_2_1" isDecoy="true">
     <features>
       <feature>0.69314718</feature>
       <feature>0.21651477</feature>
@@ -6380,11 +6446,20 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.09861231</feature>
-      <feature>0.14270020</feature>
-      <feature>0.14270020</feature>
+      <feature>-85.35729980</feature>
+      <feature>85.35729980</feature>
     </features>
     <peptide>
       <peptideSequence>YDPNGGCLECCR</peptideSequence>
+      <modification location="7" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
+      <modification location="10" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
+      <modification location="11" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="A" proteinId="decoy_YBR115C"/>
@@ -7047,7 +7122,7 @@
 <occurence flankC="R" flankN="E" proteinId="YGL022W"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1304.5470" chargeState="2" experimentalMassToCharge="1303.6729" id="target_37_2_3" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="1418.5470" chargeState="2" experimentalMassToCharge="1303.6729" id="target_37_2_3" isDecoy="false">
     <features>
       <feature>0.69314718</feature>
       <feature>0.21493147</feature>
@@ -7064,11 +7139,17 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>2.07944155</feature>
-      <feature>0.06658936</feature>
-      <feature>0.06658936</feature>
+      <feature>-56.93341064</feature>
+      <feature>56.93341064</feature>
     </features>
     <peptide>
       <peptideSequence>LAVCGIAAICQK</peptideSequence>
+      <modification location="4" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
+      <modification location="10" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="R" proteinId="YFR053C"/>
@@ -7923,7 +8004,7 @@
 
 
 <fragSpectrumScan xmlns="http://per-colator.com/percolator_in/12" scanNumber="41">
-  <peptideSpectrumMatch calculatedMassToCharge="2007.3555" chargeState="2" experimentalMassToCharge="2006.6729" id="target_41_2_1" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="2121.3555" chargeState="2" experimentalMassToCharge="2006.6729" id="target_41_2_1" isDecoy="false">
     <features>
       <feature>0.00000000</feature>
       <feature>1.02752554</feature>
@@ -7940,11 +8021,17 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.09861231</feature>
-      <feature>0.16235352</feature>
-      <feature>0.16235352</feature>
+      <feature>-56.83764648</feature>
+      <feature>56.83764648</feature>
     </features>
     <peptide>
       <peptideSequence>SGVGICATCVLRPDLLFK</peptideSequence>
+      <modification location="6" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
+      <modification location="9" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="K" flankN="N" proteinId="YEL027W"/>
@@ -8115,7 +8202,7 @@
 <occurence flankC="R" flankN="S" proteinId="YOR267C"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="3091.7932" chargeState="3" experimentalMassToCharge="3094.7656" id="target_42_3_3" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="3148.7932" chargeState="3" experimentalMassToCharge="3094.7656" id="target_42_3_3" isDecoy="false">
     <features>
       <feature>1.09861231</feature>
       <feature>0.00000000</feature>
@@ -8132,17 +8219,20 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.09861231</feature>
-      <feature>1.32657874</feature>
-      <feature>1.32657874</feature>
+      <feature>-17.67342186</feature>
+      <feature>17.67342186</feature>
     </features>
     <peptide>
       <peptideSequence>NIVPVIMAGIIAIYGLVVSVLVCYSLGQK</peptideSequence>
+      <modification location="23" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="K" flankN="Q" proteinId="YEL027W"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="3091.7935" chargeState="3" experimentalMassToCharge="3094.7656" id="decoy_42_3_1" isDecoy="true">
+  <peptideSpectrumMatch calculatedMassToCharge="3148.7935" chargeState="3" experimentalMassToCharge="3094.7656" id="decoy_42_3_1" isDecoy="true">
     <features>
       <feature>0.00000000</feature>
       <feature>0.93842119</feature>
@@ -8159,11 +8249,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.09861231</feature>
-      <feature>1.32649744</feature>
-      <feature>1.32649744</feature>
+      <feature>-17.67350197</feature>
+      <feature>17.67350197</feature>
     </features>
     <peptide>
       <peptideSequence>NLPGIIIGYAVLVCGIVQSIAVLSMVYVK</peptideSequence>
+      <modification location="14" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="K" flankN="Q" proteinId="decoy_YEL027W"/>
@@ -9318,7 +9411,7 @@
 <occurence flankC="K" flankN="-" proteinId="YLR249W"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1464.5997" chargeState="2" experimentalMassToCharge="1462.5328" id="target_47_2_5" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="1521.5997" chargeState="2" experimentalMassToCharge="1462.5328" id="target_47_2_5" isDecoy="false">
     <features>
       <feature>1.09861231</feature>
       <feature>0.00000000</feature>
@@ -9335,11 +9428,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.60943794</feature>
-      <feature>-0.52978516</feature>
-      <feature>0.52978516</feature>
+      <feature>-29.02978516</feature>
+      <feature>29.02978516</feature>
     </features>
     <peptide>
       <peptideSequence>TCVVETPTLNSDK</peptideSequence>
+      <modification location="2" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="S" proteinId="YBR115C"/>
@@ -9453,7 +9549,7 @@
 <occurence flankC="K" flankN="-" proteinId="decoy_YLR249W"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1464.5997" chargeState="2" experimentalMassToCharge="1462.5328" id="decoy_47_2_5" isDecoy="true">
+  <peptideSpectrumMatch calculatedMassToCharge="1521.5997" chargeState="2" experimentalMassToCharge="1462.5328" id="decoy_47_2_5" isDecoy="true">
     <features>
       <feature>1.60943794</feature>
       <feature>0.00000000</feature>
@@ -9470,11 +9566,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.60943794</feature>
-      <feature>-0.52978516</feature>
-      <feature>0.52978516</feature>
+      <feature>-29.02978516</feature>
+      <feature>29.02978516</feature>
     </features>
     <peptide>
       <peptideSequence>TPVLTTSVNECDK</peptideSequence>
+      <modification location="11" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="S" proteinId="decoy_YBR115C"/>
@@ -9864,7 +9963,7 @@
 <occurence flankC="-" flankN="L" proteinId="YLR058C"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1304.5470" chargeState="2" experimentalMassToCharge="1303.4327" id="target_49_2_5" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="1418.5470" chargeState="2" experimentalMassToCharge="1303.4327" id="target_49_2_5" isDecoy="false">
     <features>
       <feature>1.38629436</feature>
       <feature>0.00000000</feature>
@@ -9881,11 +9980,17 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>2.30258512</feature>
-      <feature>-0.05346680</feature>
-      <feature>0.05346680</feature>
+      <feature>-57.05346680</feature>
+      <feature>57.05346680</feature>
     </features>
     <peptide>
       <peptideSequence>LAVCGIAAICQK</peptideSequence>
+      <modification location="4" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
+      <modification location="10" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="R" proteinId="YFR053C"/>
@@ -10083,7 +10188,7 @@
 <occurence flankC="K" flankN="S" proteinId="YPL215W"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1304.5470" chargeState="2" experimentalMassToCharge="1301.5728" id="target_50_2_3" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="1418.5470" chargeState="2" experimentalMassToCharge="1301.5728" id="target_50_2_3" isDecoy="false">
     <features>
       <feature>0.69314718</feature>
       <feature>0.25777388</feature>
@@ -10100,11 +10205,17 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>2.30258512</feature>
-      <feature>-0.98345947</feature>
-      <feature>0.98345947</feature>
+      <feature>-57.98345947</feature>
+      <feature>57.98345947</feature>
     </features>
     <peptide>
       <peptideSequence>LAVCGIAAICQK</peptideSequence>
+      <modification location="4" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
+      <modification location="10" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="R" proteinId="YFR053C"/>
@@ -10329,7 +10440,7 @@
 <occurence flankC="K" flankN="A" proteinId="YLR185W"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="994.1072" chargeState="2" experimentalMassToCharge="996.3928" id="target_51_2_2" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="1108.1072" chargeState="2" experimentalMassToCharge="996.3928" id="target_51_2_2" isDecoy="false">
     <features>
       <feature>2.48490667</feature>
       <feature>0.11236373</feature>
@@ -10346,11 +10457,17 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>2.63905740</feature>
-      <feature>1.64642334</feature>
-      <feature>1.64642334</feature>
+      <feature>-55.35354614</feature>
+      <feature>55.35354614</feature>
     </features>
     <peptide>
       <peptideSequence>GEINCCLK</peptideSequence>
+      <modification location="5" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
+      <modification location="6" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="Q" proteinId="YOR267C"/>
@@ -10518,7 +10635,7 @@
 <occurence flankC="K" flankN="K" proteinId="decoy_YKL127W"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="994.1072" chargeState="2" experimentalMassToCharge="996.3928" id="decoy_51_2_4" isDecoy="true">
+  <peptideSpectrumMatch calculatedMassToCharge="1108.1072" chargeState="2" experimentalMassToCharge="996.3928" id="decoy_51_2_4" isDecoy="true">
     <features>
       <feature>1.38629436</feature>
       <feature>0.02058797</feature>
@@ -10535,11 +10652,17 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>2.63905740</feature>
-      <feature>1.64642334</feature>
-      <feature>1.64642334</feature>
+      <feature>-55.35354614</feature>
+      <feature>55.35354614</feature>
     </features>
     <peptide>
       <peptideSequence>GNCILCEK</peptideSequence>
+      <modification location="3" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
+      <modification location="6" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="Q" proteinId="decoy_YOR267C"/>
@@ -10737,7 +10860,7 @@
 <occurence flankC="K" flankN="G" proteinId="YGL245W"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1501.5547" chargeState="3" experimentalMassToCharge="1501.3755" id="target_52_3_2" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="1672.5547" chargeState="3" experimentalMassToCharge="1501.3755" id="target_52_3_2" isDecoy="false">
     <features>
       <feature>0.69314718</feature>
       <feature>0.43078521</feature>
@@ -10754,11 +10877,20 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.09861231</feature>
-      <feature>0.27604166</feature>
-      <feature>0.27604166</feature>
+      <feature>-56.72395706</feature>
+      <feature>56.72395706</feature>
     </features>
     <peptide>
       <peptideSequence>YLPNGDCECCGR</peptideSequence>
+      <modification location="7" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
+      <modification location="9" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
+      <modification location="10" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="A" proteinId="YBR115C"/>
@@ -10953,7 +11085,7 @@
 <occurence flankC="K" flankN="G" proteinId="decoy_YGL245W"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1501.5547" chargeState="3" experimentalMassToCharge="1501.3755" id="decoy_52_3_2" isDecoy="true">
+  <peptideSpectrumMatch calculatedMassToCharge="1672.5547" chargeState="3" experimentalMassToCharge="1501.3755" id="decoy_52_3_2" isDecoy="true">
     <features>
       <feature>1.09861231</feature>
       <feature>0.37274271</feature>
@@ -10970,11 +11102,20 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.09861231</feature>
-      <feature>0.27604166</feature>
-      <feature>0.27604166</feature>
+      <feature>-56.72395706</feature>
+      <feature>56.72395706</feature>
     </features>
     <peptide>
       <peptideSequence>YDPNGGCLECCR</peptideSequence>
+      <modification location="7" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
+      <modification location="10" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
+      <modification location="11" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="A" proteinId="decoy_YBR115C"/>
@@ -11640,7 +11781,7 @@
 <occurence flankC="R" flankN="S" proteinId="YGR086C"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1806.0503" chargeState="2" experimentalMassToCharge="1804.9128" id="target_56_2_2" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="1863.0503" chargeState="2" experimentalMassToCharge="1804.9128" id="target_56_2_2" isDecoy="false">
     <features>
       <feature>0.69314718</feature>
       <feature>0.00000000</feature>
@@ -11657,11 +11798,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>0.69314718</feature>
-      <feature>-0.06506348</feature>
-      <feature>0.06506348</feature>
+      <feature>-28.56506348</feature>
+      <feature>28.56506348</feature>
     </features>
     <peptide>
       <peptideSequence>LSAIESLAGVEILCSDK</peptideSequence>
+      <modification location="14" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="K" flankN="T" proteinId="YGL008C"/>
@@ -11694,7 +11838,7 @@
 <occurence flankC="R" flankN="S" proteinId="decoy_YGR086C"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1806.0503" chargeState="2" experimentalMassToCharge="1804.9128" id="decoy_56_2_2" isDecoy="true">
+  <peptideSpectrumMatch calculatedMassToCharge="1863.0503" chargeState="2" experimentalMassToCharge="1804.9128" id="decoy_56_2_2" isDecoy="true">
     <features>
       <feature>0.69314718</feature>
       <feature>0.00000000</feature>
@@ -11711,11 +11855,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>0.69314718</feature>
-      <feature>-0.06506348</feature>
-      <feature>0.06506348</feature>
+      <feature>-28.56506348</feature>
+      <feature>28.56506348</feature>
     </features>
     <peptide>
       <peptideSequence>LALSIVGSAIECDLESK</peptideSequence>
+      <modification location="12" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="K" flankN="T" proteinId="decoy_YGL008C"/>
@@ -11751,7 +11898,7 @@
 <occurence flankC="R" flankN="G" proteinId="YBR115C"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1127.2291" chargeState="2" experimentalMassToCharge="1128.3528" id="target_57_2_2" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="1184.2291" chargeState="2" experimentalMassToCharge="1128.3528" id="target_57_2_2" isDecoy="false">
     <features>
       <feature>1.79175949</feature>
       <feature>0.14740553</feature>
@@ -11768,11 +11915,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>2.19722462</feature>
-      <feature>1.06549072</feature>
-      <feature>1.06549072</feature>
+      <feature>-27.43450928</feature>
+      <feature>27.43450928</feature>
     </features>
     <peptide>
       <peptideSequence>CTINGVSYGR</peptideSequence>
+      <modification location="1" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="K" flankN="A" proteinId="YDR093W"/>
@@ -12459,7 +12609,7 @@
 <occurence flankC="K" flankN="R" proteinId="YDR037W"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1421.6262" chargeState="3" experimentalMassToCharge="1420.8855" id="target_59_3_3" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="1478.6262" chargeState="3" experimentalMassToCharge="1420.8855" id="target_59_3_3" isDecoy="false">
     <features>
       <feature>1.60943794</feature>
       <feature>0.09462183</feature>
@@ -12476,17 +12626,20 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.94591022</feature>
-      <feature>0.08886719</feature>
-      <feature>0.08886719</feature>
+      <feature>-18.91113281</feature>
+      <feature>18.91113281</feature>
     </features>
     <peptide>
       <peptideSequence>LLARPGDSLYCR</peptideSequence>
+      <modification location="11" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="L" proteinId="YPL266W"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1420.5487" chargeState="3" experimentalMassToCharge="1420.8855" id="target_59_3_4" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="1477.5487" chargeState="3" experimentalMassToCharge="1420.8855" id="target_59_3_4" isDecoy="false">
     <features>
       <feature>1.09861231</feature>
       <feature>0.04488582</feature>
@@ -12503,17 +12656,20 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.94591022</feature>
-      <feature>0.44803873</feature>
-      <feature>0.44803873</feature>
+      <feature>-18.55196190</feature>
+      <feature>18.55196190</feature>
     </features>
     <peptide>
       <peptideSequence>GEDELWCVINGK</peptideSequence>
+      <modification location="7" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="K" flankN="V" proteinId="YMR073C"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1421.7837" chargeState="3" experimentalMassToCharge="1420.8855" id="target_59_3_5" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="1478.7837" chargeState="3" experimentalMassToCharge="1420.8855" id="target_59_3_5" isDecoy="false">
     <features>
       <feature>0.69314718</feature>
       <feature>0.00000000</feature>
@@ -12530,11 +12686,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.94591022</feature>
-      <feature>0.03637695</feature>
-      <feature>0.03637695</feature>
+      <feature>-18.96362305</feature>
+      <feature>18.96362305</feature>
     </features>
     <peptide>
       <peptideSequence>GVDLMVCVMGVLK</peptideSequence>
+      <modification location="7" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="A" proteinId="YBR115C"/>
@@ -12702,7 +12861,7 @@
 <occurence flankC="K" flankN="S" proteinId="decoy_YGL008C"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1420.5487" chargeState="3" experimentalMassToCharge="1420.8855" id="decoy_59_3_2" isDecoy="true">
+  <peptideSpectrumMatch calculatedMassToCharge="1477.5487" chargeState="3" experimentalMassToCharge="1420.8855" id="decoy_59_3_2" isDecoy="true">
     <features>
       <feature>1.38629436</feature>
       <feature>0.48957443</feature>
@@ -12719,11 +12878,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.60943794</feature>
-      <feature>0.44803873</feature>
-      <feature>0.44803873</feature>
+      <feature>-18.55196190</feature>
+      <feature>18.55196190</feature>
     </features>
     <peptide>
       <peptideSequence>GIDWGELCEVNK</peptideSequence>
+      <modification location="8" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="K" flankN="V" proteinId="decoy_YMR073C"/>
@@ -12756,7 +12918,7 @@
 <occurence flankC="K" flankN="E" proteinId="decoy_YDR093W"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1421.7837" chargeState="3" experimentalMassToCharge="1420.8855" id="decoy_59_3_4" isDecoy="true">
+  <peptideSpectrumMatch calculatedMassToCharge="1478.7837" chargeState="3" experimentalMassToCharge="1420.8855" id="decoy_59_3_4" isDecoy="true">
     <features>
       <feature>1.60943794</feature>
       <feature>0.10136715</feature>
@@ -12773,11 +12935,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.60943794</feature>
-      <feature>0.03637695</feature>
-      <feature>0.03637695</feature>
+      <feature>-18.96362305</feature>
+      <feature>18.96362305</feature>
     </features>
     <peptide>
       <peptideSequence>GDVCVGVVLLMMK</peptideSequence>
+      <modification location="4" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="A" proteinId="decoy_YBR115C"/>
@@ -13086,7 +13251,7 @@
 
 
 <fragSpectrumScan xmlns="http://per-colator.com/percolator_in/12" scanNumber="61">
-  <peptideSpectrumMatch calculatedMassToCharge="2007.3555" chargeState="2" experimentalMassToCharge="2007.8528" id="target_61_2_1" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="2121.3555" chargeState="2" experimentalMassToCharge="2007.8528" id="target_61_2_1" isDecoy="false">
     <features>
       <feature>0.00000000</feature>
       <feature>1.09442365</feature>
@@ -13103,11 +13268,17 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.38629436</feature>
-      <feature>0.75231934</feature>
-      <feature>0.75231934</feature>
+      <feature>-56.24768066</feature>
+      <feature>56.24768066</feature>
     </features>
     <peptide>
       <peptideSequence>SGVGICATCVLRPDLLFK</peptideSequence>
+      <modification location="6" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
+      <modification location="9" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="K" flankN="N" proteinId="YEL027W"/>
@@ -13470,7 +13641,7 @@
 <occurence flankC="R" flankN="F" proteinId="YOR063W"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="887.9579" chargeState="2" experimentalMassToCharge="887.8127" id="target_63_2_2" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="944.9579" chargeState="2" experimentalMassToCharge="887.8127" id="target_63_2_2" isDecoy="false">
     <features>
       <feature>1.38629436</feature>
       <feature>0.32967708</feature>
@@ -13487,11 +13658,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>2.07944155</feature>
-      <feature>0.43103027</feature>
-      <feature>0.43103027</feature>
+      <feature>-28.06896973</feature>
+      <feature>28.06896973</feature>
     </features>
     <peptide>
       <peptideSequence>SHTLCNR</peptideSequence>
+      <modification location="5" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="K" flankN="C" proteinId="YLR185W"/>
@@ -13578,7 +13752,7 @@
 <occurence flankC="R" flankN="V" proteinId="YLL024C"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="887.9580" chargeState="2" experimentalMassToCharge="887.8127" id="decoy_63_2_1" isDecoy="true">
+  <peptideSpectrumMatch calculatedMassToCharge="944.9580" chargeState="2" experimentalMassToCharge="887.8127" id="decoy_63_2_1" isDecoy="true">
     <features>
       <feature>1.09861231</feature>
       <feature>0.67180461</feature>
@@ -13595,11 +13769,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.94591022</feature>
-      <feature>0.43099976</feature>
-      <feature>0.43099976</feature>
+      <feature>-28.06900024</feature>
+      <feature>28.06900024</feature>
     </features>
     <peptide>
       <peptideSequence>STLHCNR</peptideSequence>
+      <modification location="5" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="K" flankN="C" proteinId="decoy_YLR185W"/>
@@ -13716,7 +13893,7 @@
 
 
 <fragSpectrumScan xmlns="http://per-colator.com/percolator_in/12" scanNumber="64">
-  <peptideSpectrumMatch calculatedMassToCharge="1352.3871" chargeState="2" experimentalMassToCharge="1351.1927" id="target_64_2_1" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="1409.3871" chargeState="2" experimentalMassToCharge="1351.1927" id="target_64_2_1" isDecoy="false">
     <features>
       <feature>0.69314718</feature>
       <feature>0.00785887</feature>
@@ -13733,11 +13910,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>0.69314718</feature>
-      <feature>-0.09350586</feature>
-      <feature>0.09350586</feature>
+      <feature>-28.59350586</feature>
+      <feature>28.59350586</feature>
     </features>
     <peptide>
       <peptideSequence>DETCESNPFPR</peptideSequence>
+      <modification location="4" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="L" proteinId="YLR298C"/>
@@ -13770,7 +13950,7 @@
 <occurence flankC="K" flankN="E" proteinId="YBR115C"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="2028.2162" chargeState="3" experimentalMassToCharge="2026.2854" id="target_64_3_1" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="2085.2161" chargeState="3" experimentalMassToCharge="2026.2854" id="target_64_3_1" isDecoy="false">
     <features>
       <feature>0.00000000</feature>
       <feature>0.00000000</feature>
@@ -13787,17 +13967,20 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>0.00000000</feature>
-      <feature>-0.30782065</feature>
-      <feature>0.30782065</feature>
+      <feature>-19.30786133</feature>
+      <feature>19.30786133</feature>
     </features>
     <peptide>
       <peptideSequence>NVIAETGAGQHGVATATACAK</peptideSequence>
+      <modification location="19" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="K" flankN="F" proteinId="YGL026C"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1352.3871" chargeState="2" experimentalMassToCharge="1351.1927" id="decoy_64_2_1" isDecoy="true">
+  <peptideSpectrumMatch calculatedMassToCharge="1409.3871" chargeState="2" experimentalMassToCharge="1351.1927" id="decoy_64_2_1" isDecoy="true">
     <features>
       <feature>0.69314718</feature>
       <feature>0.20727417</feature>
@@ -13814,11 +13997,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.09861231</feature>
-      <feature>-0.09350586</feature>
-      <feature>0.09350586</feature>
+      <feature>-28.59350586</feature>
+      <feature>28.59350586</feature>
     </features>
     <peptide>
       <peptideSequence>DFTPSNPCEER</peptideSequence>
+      <modification location="8" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="L" proteinId="decoy_YLR298C"/>
@@ -13878,7 +14064,7 @@
 <occurence flankC="K" flankN="T" proteinId="decoy_YMR235C"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="2028.2166" chargeState="3" experimentalMassToCharge="2026.2854" id="decoy_64_3_1" isDecoy="true">
+  <peptideSpectrumMatch calculatedMassToCharge="2085.2166" chargeState="3" experimentalMassToCharge="2026.2854" id="decoy_64_3_1" isDecoy="true">
     <features>
       <feature>0.00000000</feature>
       <feature>0.00000000</feature>
@@ -13895,11 +14081,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>0.00000000</feature>
-      <feature>-0.30794272</feature>
-      <feature>0.30794272</feature>
+      <feature>-19.30794334</feature>
+      <feature>19.30794334</feature>
     </features>
     <peptide>
       <peptideSequence>NAAEVTTACHAGTAGVIGAQK</peptideSequence>
+      <modification location="9" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="K" flankN="F" proteinId="decoy_YGL026C"/>
@@ -14289,7 +14478,7 @@
 <occurence flankC="K" flankN="R" proteinId="YLR371W"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="853.8481" chargeState="2" experimentalMassToCharge="853.7527" id="target_66_2_5" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="910.8481" chargeState="2" experimentalMassToCharge="853.7527" id="target_66_2_5" isDecoy="false">
     <features>
       <feature>1.60943794</feature>
       <feature>0.00000000</feature>
@@ -14306,11 +14495,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>2.56494927</feature>
-      <feature>0.45593262</feature>
-      <feature>0.45593262</feature>
+      <feature>-28.04406738</feature>
+      <feature>28.04406738</feature>
     </features>
     <peptide>
       <peptideSequence>DSCTENK</peptideSequence>
+      <modification location="3" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="K" flankN="E" proteinId="YNL166C"/>
@@ -15351,7 +15543,7 @@
 <occurence flankC="K" flankN="S" proteinId="YPL215W"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1304.5470" chargeState="2" experimentalMassToCharge="1303.9528" id="target_69_2_4" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="1418.5470" chargeState="2" experimentalMassToCharge="1303.9528" id="target_69_2_4" isDecoy="false">
     <features>
       <feature>1.38629436</feature>
       <feature>0.03054678</feature>
@@ -15368,11 +15560,17 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>2.07944155</feature>
-      <feature>0.20654297</feature>
-      <feature>0.20654297</feature>
+      <feature>-56.79345703</feature>
+      <feature>56.79345703</feature>
     </features>
     <peptide>
       <peptideSequence>LAVCGIAAICQK</peptideSequence>
+      <modification location="4" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
+      <modification location="10" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="R" proteinId="YFR053C"/>
@@ -15843,7 +16041,7 @@
 <occurence flankC="K" flankN="L" proteinId="YDR205W"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="975.0331" chargeState="2" experimentalMassToCharge="976.5128" id="target_71_2_2" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="1032.0332" chargeState="2" experimentalMassToCharge="976.5128" id="target_71_2_2" isDecoy="false">
     <features>
       <feature>0.00000000</feature>
       <feature>0.17949978</feature>
@@ -15860,11 +16058,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>2.30258512</feature>
-      <feature>1.24343872</feature>
-      <feature>1.24343872</feature>
+      <feature>-27.25656128</feature>
+      <feature>27.25656128</feature>
     </features>
     <peptide>
       <peptideSequence>DQPGLCER</peptideSequence>
+      <modification location="6" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="F" proteinId="YDR037W"/>
@@ -15951,7 +16152,7 @@
 <occurence flankC="K" flankN="L" proteinId="YPL215W"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="975.0332" chargeState="2" experimentalMassToCharge="976.5128" id="decoy_71_2_1" isDecoy="true">
+  <peptideSpectrumMatch calculatedMassToCharge="1032.0332" chargeState="2" experimentalMassToCharge="976.5128" id="decoy_71_2_1" isDecoy="true">
     <features>
       <feature>0.00000000</feature>
       <feature>0.26707542</feature>
@@ -15968,11 +16169,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>2.48490667</feature>
-      <feature>1.24340820</feature>
-      <feature>1.24340820</feature>
+      <feature>-27.25656128</feature>
+      <feature>27.25656128</feature>
     </features>
     <peptide>
       <peptideSequence>DCEQPLGR</peptideSequence>
+      <modification location="2" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="F" proteinId="decoy_YDR037W"/>
@@ -16143,7 +16347,7 @@
 <occurence flankC="K" flankN="S" proteinId="YPL215W"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1304.5470" chargeState="2" experimentalMassToCharge="1302.2528" id="target_72_2_3" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="1418.5470" chargeState="2" experimentalMassToCharge="1302.2528" id="target_72_2_3" isDecoy="false">
     <features>
       <feature>1.09861231</feature>
       <feature>0.41963288</feature>
@@ -16160,11 +16364,17 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>2.30258512</feature>
-      <feature>-0.64343262</feature>
-      <feature>0.64343262</feature>
+      <feature>-57.64343262</feature>
+      <feature>57.64343262</feature>
     </features>
     <peptide>
       <peptideSequence>LAVCGIAAICQK</peptideSequence>
+      <modification location="4" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
+      <modification location="10" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="R" proteinId="YFR053C"/>
@@ -16251,7 +16461,7 @@
 <occurence flankC="K" flankN="N" proteinId="decoy_YLR043C"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1300.4408" chargeState="2" experimentalMassToCharge="1302.2528" id="decoy_72_2_2" isDecoy="true">
+  <peptideSpectrumMatch calculatedMassToCharge="1357.4408" chargeState="2" experimentalMassToCharge="1302.2528" id="decoy_72_2_2" isDecoy="true">
     <features>
       <feature>0.69314718</feature>
       <feature>0.35504517</feature>
@@ -16268,11 +16478,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>2.30258512</feature>
-      <feature>1.40966797</feature>
-      <feature>1.40966797</feature>
+      <feature>-27.09033203</feature>
+      <feature>27.09033203</feature>
     </features>
     <peptide>
       <peptideSequence>FLLEEDCAFR</peptideSequence>
+      <modification location="7" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="S" proteinId="decoy_YLL024C"/>
@@ -17205,7 +17418,7 @@
 <occurence flankC="K" flankN="V" proteinId="YGR192C"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1754.9674" chargeState="2" experimentalMassToCharge="1753.5328" id="target_75_2_2" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="1811.9674" chargeState="2" experimentalMassToCharge="1753.5328" id="target_75_2_2" isDecoy="false">
     <features>
       <feature>0.69314718</feature>
       <feature>0.39368105</feature>
@@ -17222,11 +17435,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.38629436</feature>
-      <feature>-0.21362305</feature>
-      <feature>0.21362305</feature>
+      <feature>-28.71362305</feature>
+      <feature>28.71362305</feature>
     </features>
     <peptide>
       <peptideSequence>ACIIFFDEIDAVGGAR</peptideSequence>
+      <modification location="2" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="K" flankN="F" proteinId="YKL145W"/>
@@ -17394,7 +17610,7 @@
 <occurence flankC="K" flankN="E" proteinId="decoy_YCR012W"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1754.9673" chargeState="2" experimentalMassToCharge="1753.5328" id="decoy_75_2_5" isDecoy="true">
+  <peptideSpectrumMatch calculatedMassToCharge="1811.9673" chargeState="2" experimentalMassToCharge="1753.5328" id="decoy_75_2_5" isDecoy="true">
     <features>
       <feature>1.60943794</feature>
       <feature>0.00000000</feature>
@@ -17411,11 +17627,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.60943794</feature>
-      <feature>-0.21356201</feature>
-      <feature>0.21356201</feature>
+      <feature>-28.71356201</feature>
+      <feature>28.71356201</feature>
     </features>
     <peptide>
       <peptideSequence>AAFEDIIIGVAFDGCR</peptideSequence>
+      <modification location="15" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="K" flankN="F" proteinId="decoy_YKL145W"/>
@@ -17451,7 +17670,7 @@
 <occurence flankC="K" flankN="N" proteinId="YLR043C"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1464.5997" chargeState="2" experimentalMassToCharge="1462.6128" id="target_76_2_2" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="1521.5997" chargeState="2" experimentalMassToCharge="1462.6128" id="target_76_2_2" isDecoy="false">
     <features>
       <feature>0.69314718</feature>
       <feature>0.38505265</feature>
@@ -17468,11 +17687,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.60943794</feature>
-      <feature>-0.48980713</feature>
-      <feature>0.48980713</feature>
+      <feature>-28.98980713</feature>
+      <feature>28.98980713</feature>
     </features>
     <peptide>
       <peptideSequence>TCVVETPTLNSDK</peptideSequence>
+      <modification location="2" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="S" proteinId="YBR115C"/>
@@ -17613,7 +17835,7 @@
 <occurence flankC="K" flankN="I" proteinId="decoy_YLL024C"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1464.5997" chargeState="2" experimentalMassToCharge="1462.6128" id="decoy_76_2_3" isDecoy="true">
+  <peptideSpectrumMatch calculatedMassToCharge="1521.5997" chargeState="2" experimentalMassToCharge="1462.6128" id="decoy_76_2_3" isDecoy="true">
     <features>
       <feature>1.60943794</feature>
       <feature>0.13928241</feature>
@@ -17630,11 +17852,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.60943794</feature>
-      <feature>-0.48980713</feature>
-      <feature>0.48980713</feature>
+      <feature>-28.98980713</feature>
+      <feature>28.98980713</feature>
     </features>
     <peptide>
       <peptideSequence>TPVLTTSVNECDK</peptideSequence>
+      <modification location="11" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="S" proteinId="decoy_YBR115C"/>
@@ -18567,7 +18792,7 @@
 <occurence flankC="K" flankN="Y" proteinId="YOR168W"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1117.1903" chargeState="2" experimentalMassToCharge="1117.1927" id="target_79_2_5" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="1174.1903" chargeState="2" experimentalMassToCharge="1117.1927" id="target_79_2_5" isDecoy="false">
     <features>
       <feature>1.79175949</feature>
       <feature>0.00000000</feature>
@@ -18584,11 +18809,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>2.39789534</feature>
-      <feature>0.50488281</feature>
-      <feature>0.50488281</feature>
+      <feature>-27.99511719</feature>
+      <feature>27.99511719</feature>
     </features>
     <peptide>
       <peptideSequence>YDGAFDCLR</peptideSequence>
+      <modification location="7" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="K" flankN="K" proteinId="YBL030C"/>
@@ -18621,7 +18849,7 @@
 <occurence flankC="R" flankN="F" proteinId="decoy_YMR235C"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1115.2183" chargeState="2" experimentalMassToCharge="1117.1927" id="decoy_79_2_2" isDecoy="true">
+  <peptideSpectrumMatch calculatedMassToCharge="1172.2183" chargeState="2" experimentalMassToCharge="1117.1927" id="decoy_79_2_2" isDecoy="true">
     <features>
       <feature>2.19722462</feature>
       <feature>0.06656996</feature>
@@ -18638,11 +18866,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>2.30258512</feature>
-      <feature>1.49090576</feature>
-      <feature>1.49090576</feature>
+      <feature>-27.00909424</feature>
+      <feature>27.00909424</feature>
     </features>
     <peptide>
       <peptideSequence>TPPLQCENR</peptideSequence>
+      <modification location="6" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="F" proteinId="decoy_YDR093W"/>
@@ -20145,7 +20376,7 @@
 <occurence flankC="R" flankN="L" proteinId="decoy_YLR371W"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="936.0706" chargeState="2" experimentalMassToCharge="936.5927" id="decoy_83_2_3" isDecoy="true">
+  <peptideSpectrumMatch calculatedMassToCharge="1050.0706" chargeState="2" experimentalMassToCharge="936.5927" id="decoy_83_2_3" isDecoy="true">
     <features>
       <feature>0.69314718</feature>
       <feature>0.15993899</feature>
@@ -20162,11 +20393,17 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>2.56494927</feature>
-      <feature>0.76467896</feature>
-      <feature>0.76467896</feature>
+      <feature>-56.23529053</feature>
+      <feature>56.23529053</feature>
     </features>
     <peptide>
       <peptideSequence>AGNCCLIK</peptideSequence>
+      <modification location="4" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
+      <modification location="5" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="K" flankN="K" proteinId="decoy_YLR371W"/>
@@ -21210,7 +21447,7 @@
 <occurence flankC="R" flankN="V" proteinId="YOR168W"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1501.5547" chargeState="3" experimentalMassToCharge="1501.3755" id="target_87_3_1" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="1672.5547" chargeState="3" experimentalMassToCharge="1501.3755" id="target_87_3_1" isDecoy="false">
     <features>
       <feature>0.69314718</feature>
       <feature>0.15650298</feature>
@@ -21227,11 +21464,20 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.09861231</feature>
-      <feature>0.27604166</feature>
-      <feature>0.27604166</feature>
+      <feature>-56.72395706</feature>
+      <feature>56.72395706</feature>
     </features>
     <peptide>
       <peptideSequence>YLPNGDCECCGR</peptideSequence>
+      <modification location="7" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
+      <modification location="9" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
+      <modification location="10" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="A" proteinId="YBR115C"/>
@@ -21480,7 +21726,7 @@
 <occurence flankC="K" flankN="R" proteinId="decoy_YBR115C"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1501.5547" chargeState="3" experimentalMassToCharge="1501.3755" id="decoy_87_3_3" isDecoy="true">
+  <peptideSpectrumMatch calculatedMassToCharge="1672.5547" chargeState="3" experimentalMassToCharge="1501.3755" id="decoy_87_3_3" isDecoy="true">
     <features>
       <feature>1.09861231</feature>
       <feature>0.00000000</feature>
@@ -21497,11 +21743,20 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.09861231</feature>
-      <feature>0.27604166</feature>
-      <feature>0.27604166</feature>
+      <feature>-56.72395706</feature>
+      <feature>56.72395706</feature>
     </features>
     <peptide>
       <peptideSequence>YDPNGGCLECCR</peptideSequence>
+      <modification location="7" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
+      <modification location="10" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
+      <modification location="11" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="A" proteinId="decoy_YBR115C"/>
@@ -22380,7 +22635,7 @@
 <occurence flankC="R" flankN="S" proteinId="YOR267C"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="3091.7932" chargeState="3" experimentalMassToCharge="3093.9856" id="target_90_3_3" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="3148.7932" chargeState="3" experimentalMassToCharge="3093.9856" id="target_90_3_3" isDecoy="false">
     <features>
       <feature>1.09861231</feature>
       <feature>0.00000000</feature>
@@ -22397,17 +22652,20 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.09861231</feature>
-      <feature>1.06656897</feature>
-      <feature>1.06656897</feature>
+      <feature>-17.93343163</feature>
+      <feature>17.93343163</feature>
     </features>
     <peptide>
       <peptideSequence>NIVPVIMAGIIAIYGLVVSVLVCYSLGQK</peptideSequence>
+      <modification location="23" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="K" flankN="Q" proteinId="YEL027W"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="3091.7935" chargeState="3" experimentalMassToCharge="3093.9856" id="decoy_90_3_1" isDecoy="true">
+  <peptideSpectrumMatch calculatedMassToCharge="3148.7935" chargeState="3" experimentalMassToCharge="3093.9856" id="decoy_90_3_1" isDecoy="true">
     <features>
       <feature>0.00000000</feature>
       <feature>1.12453771</feature>
@@ -22424,11 +22682,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.09861231</feature>
-      <feature>1.06648767</feature>
-      <feature>1.06648767</feature>
+      <feature>-17.93351173</feature>
+      <feature>17.93351173</feature>
     </features>
     <peptide>
       <peptideSequence>NLPGIIIGYAVLVCGIVQSIAVLSMVYVK</peptideSequence>
+      <modification location="14" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="K" flankN="Q" proteinId="decoy_YEL027W"/>
@@ -23256,7 +23517,7 @@
 
 
 <fragSpectrumScan xmlns="http://per-colator.com/percolator_in/12" scanNumber="94">
-  <peptideSpectrumMatch calculatedMassToCharge="2007.3555" chargeState="3" experimentalMassToCharge="2006.3055" id="target_94_3_1" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="2121.3555" chargeState="3" experimentalMassToCharge="2006.3055" id="target_94_3_1" isDecoy="false">
     <features>
       <feature>0.00000000</feature>
       <feature>1.11965489</feature>
@@ -23273,11 +23534,17 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.09861231</feature>
-      <feature>-0.01420085</feature>
-      <feature>0.01420085</feature>
+      <feature>-38.01420212</feature>
+      <feature>38.01420212</feature>
     </features>
     <peptide>
       <peptideSequence>SGVGICATCVLRPDLLFK</peptideSequence>
+      <modification location="6" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
+      <modification location="9" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="K" flankN="N" proteinId="YEL027W"/>
@@ -23394,7 +23661,7 @@
 
 
 <fragSpectrumScan xmlns="http://per-colator.com/percolator_in/12" scanNumber="95">
-  <peptideSpectrumMatch calculatedMassToCharge="2007.3555" chargeState="2" experimentalMassToCharge="2007.9128" id="target_95_2_1" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="2121.3555" chargeState="2" experimentalMassToCharge="2007.9128" id="target_95_2_1" isDecoy="false">
     <features>
       <feature>0.00000000</feature>
       <feature>0.95766962</feature>
@@ -23411,11 +23678,17 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.38629436</feature>
-      <feature>0.78234863</feature>
-      <feature>0.78234863</feature>
+      <feature>-56.21765137</feature>
+      <feature>56.21765137</feature>
     </features>
     <peptide>
       <peptideSequence>SGVGICATCVLRPDLLFK</peptideSequence>
+      <modification location="6" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
+      <modification location="9" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="K" flankN="N" proteinId="YEL027W"/>
@@ -23613,7 +23886,7 @@
 <occurence flankC="K" flankN="N" proteinId="YLR043C"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1304.5470" chargeState="2" experimentalMassToCharge="1303.4728" id="target_96_2_2" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="1418.5470" chargeState="2" experimentalMassToCharge="1303.4728" id="target_96_2_2" isDecoy="false">
     <features>
       <feature>0.69314718</feature>
       <feature>0.31504542</feature>
@@ -23630,11 +23903,17 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>2.19722462</feature>
-      <feature>-0.03344727</feature>
-      <feature>0.03344727</feature>
+      <feature>-57.03344727</feature>
+      <feature>57.03344727</feature>
     </features>
     <peptide>
       <peptideSequence>LAVCGIAAICQK</peptideSequence>
+      <modification location="4" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
+      <modification location="10" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="R" proteinId="YFR053C"/>
@@ -24102,7 +24381,7 @@
 <occurence flankC="K" flankN="G" proteinId="YHR183W"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1300.4408" chargeState="3" experimentalMassToCharge="1299.3254" id="target_97_3_5" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="1357.4408" chargeState="3" experimentalMassToCharge="1299.3254" id="target_97_3_5" isDecoy="false">
     <features>
       <feature>1.38629436</feature>
       <feature>0.00000000</feature>
@@ -24119,11 +24398,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.60943794</feature>
-      <feature>-0.03601074</feature>
-      <feature>0.03601074</feature>
+      <feature>-19.03601074</feature>
+      <feature>19.03601074</feature>
     </features>
     <peptide>
       <peptideSequence>FEELCADLFR</peptideSequence>
+      <modification location="5" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="S" proteinId="YLL024C"/>
@@ -24291,7 +24573,7 @@
 <occurence flankC="K" flankN="G" proteinId="decoy_YHR183W"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1300.4408" chargeState="3" experimentalMassToCharge="1299.3254" id="decoy_97_3_2" isDecoy="true">
+  <peptideSpectrumMatch calculatedMassToCharge="1357.4408" chargeState="3" experimentalMassToCharge="1299.3254" id="decoy_97_3_2" isDecoy="true">
     <features>
       <feature>1.09861231</feature>
       <feature>0.52799159</feature>
@@ -24308,11 +24590,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.60943794</feature>
-      <feature>-0.03601074</feature>
-      <feature>0.03601074</feature>
+      <feature>-19.03601074</feature>
+      <feature>19.03601074</feature>
     </features>
     <peptide>
       <peptideSequence>FLLEEDCAFR</peptideSequence>
+      <modification location="7" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="S" proteinId="decoy_YLL024C"/>
@@ -24402,7 +24687,7 @@
 
 
 <fragSpectrumScan xmlns="http://per-colator.com/percolator_in/12" scanNumber="98">
-  <peptideSpectrumMatch calculatedMassToCharge="1501.5547" chargeState="2" experimentalMassToCharge="1501.5529" id="target_98_2_1" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="1672.5547" chargeState="2" experimentalMassToCharge="1501.5529" id="target_98_2_1" isDecoy="false">
     <features>
       <feature>0.00000000</feature>
       <feature>0.63080668</feature>
@@ -24419,11 +24704,20 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.09861231</feature>
-      <feature>0.50274658</feature>
-      <feature>0.50274658</feature>
+      <feature>-84.99725342</feature>
+      <feature>84.99725342</feature>
     </features>
     <peptide>
       <peptideSequence>YLPNGDCECCGR</peptideSequence>
+      <modification location="7" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
+      <modification location="9" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
+      <modification location="10" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="A" proteinId="YBR115C"/>
@@ -24483,7 +24777,7 @@
 <occurence flankC="K" flankN="G" proteinId="YGL245W"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1501.5547" chargeState="2" experimentalMassToCharge="1501.5529" id="decoy_98_2_1" isDecoy="true">
+  <peptideSpectrumMatch calculatedMassToCharge="1672.5547" chargeState="2" experimentalMassToCharge="1501.5529" id="decoy_98_2_1" isDecoy="true">
     <features>
       <feature>0.69314718</feature>
       <feature>0.21550773</feature>
@@ -24500,11 +24794,20 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.09861231</feature>
-      <feature>0.50274658</feature>
-      <feature>0.50274658</feature>
+      <feature>-84.99725342</feature>
+      <feature>84.99725342</feature>
     </features>
     <peptide>
       <peptideSequence>YDPNGGCLECCR</peptideSequence>
+      <modification location="7" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
+      <modification location="10" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
+      <modification location="11" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="A" proteinId="decoy_YBR115C"/>
@@ -25305,7 +25608,7 @@
 <occurence flankC="K" flankN="N" proteinId="YLR043C"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1464.5997" chargeState="2" experimentalMassToCharge="1465.4327" id="target_102_2_2" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="1521.5997" chargeState="2" experimentalMassToCharge="1465.4327" id="target_102_2_2" isDecoy="false">
     <features>
       <feature>1.09861231</feature>
       <feature>0.01920636</feature>
@@ -25322,11 +25625,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.09861231</feature>
-      <feature>0.92016602</feature>
-      <feature>0.92016602</feature>
+      <feature>-27.57983398</feature>
+      <feature>27.57983398</feature>
     </features>
     <peptide>
       <peptideSequence>TCVVETPTLNSDK</peptideSequence>
+      <modification location="2" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="S" proteinId="YBR115C"/>
@@ -25386,7 +25692,7 @@
 <occurence flankC="K" flankN="D" proteinId="decoy_YFR053C"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1464.5997" chargeState="2" experimentalMassToCharge="1465.4327" id="decoy_102_2_2" isDecoy="true">
+  <peptideSpectrumMatch calculatedMassToCharge="1521.5997" chargeState="2" experimentalMassToCharge="1465.4327" id="decoy_102_2_2" isDecoy="true">
     <features>
       <feature>1.09861231</feature>
       <feature>0.11468786</feature>
@@ -25403,11 +25709,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.09861231</feature>
-      <feature>0.92016602</feature>
-      <feature>0.92016602</feature>
+      <feature>-27.57983398</feature>
+      <feature>27.57983398</feature>
     </features>
     <peptide>
       <peptideSequence>TPVLTTSVNECDK</peptideSequence>
+      <modification location="11" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="S" proteinId="decoy_YBR115C"/>
@@ -25443,7 +25752,7 @@
 
 
 <fragSpectrumScan xmlns="http://per-colator.com/percolator_in/12" scanNumber="103">
-  <peptideSpectrumMatch calculatedMassToCharge="1115.2183" chargeState="2" experimentalMassToCharge="1117.1927" id="target_103_2_1" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="1172.2183" chargeState="2" experimentalMassToCharge="1117.1927" id="target_103_2_1" isDecoy="false">
     <features>
       <feature>0.00000000</feature>
       <feature>0.32234472</feature>
@@ -25460,11 +25769,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>2.39789534</feature>
-      <feature>1.49090576</feature>
-      <feature>1.49090576</feature>
+      <feature>-27.00909424</feature>
+      <feature>27.00909424</feature>
     </features>
     <peptide>
       <peptideSequence>TLQPNPECR</peptideSequence>
+      <modification location="8" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="F" proteinId="YDR093W"/>
@@ -25497,7 +25809,7 @@
 <occurence flankC="R" flankN="K" proteinId="YCR012W"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1117.1903" chargeState="2" experimentalMassToCharge="1117.1927" id="target_103_2_3" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="1174.1903" chargeState="2" experimentalMassToCharge="1117.1927" id="target_103_2_3" isDecoy="false">
     <features>
       <feature>2.07944155</feature>
       <feature>0.13158596</feature>
@@ -25514,11 +25826,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>2.39789534</feature>
-      <feature>0.50488281</feature>
-      <feature>0.50488281</feature>
+      <feature>-27.99511719</feature>
+      <feature>27.99511719</feature>
     </features>
     <peptide>
       <peptideSequence>YDGAFDCLR</peptideSequence>
+      <modification location="7" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="K" flankN="K" proteinId="YBL030C"/>
@@ -25824,7 +26139,7 @@
 <occurence flankC="R" flankN="H" proteinId="YLR371W"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1127.2291" chargeState="2" experimentalMassToCharge="1129.4327" id="target_104_2_5" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="1184.2291" chargeState="2" experimentalMassToCharge="1129.4327" id="target_104_2_5" isDecoy="false">
     <features>
       <feature>1.60943794</feature>
       <feature>0.00000000</feature>
@@ -25841,11 +26156,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.94591022</feature>
-      <feature>1.60546875</feature>
-      <feature>1.60546875</feature>
+      <feature>-26.89453125</feature>
+      <feature>26.89453125</feature>
     </features>
     <peptide>
       <peptideSequence>CTINGVSYGR</peptideSequence>
+      <modification location="1" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="K" flankN="A" proteinId="YDR093W"/>
@@ -26724,7 +27042,7 @@
 <occurence flankC="-" flankN="L" proteinId="YLR058C"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1300.4408" chargeState="3" experimentalMassToCharge="1299.3254" id="target_107_3_3" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="1357.4408" chargeState="3" experimentalMassToCharge="1299.3254" id="target_107_3_3" isDecoy="false">
     <features>
       <feature>1.38629436</feature>
       <feature>0.37327123</feature>
@@ -26741,11 +27059,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.60943794</feature>
-      <feature>-0.03601074</feature>
-      <feature>0.03601074</feature>
+      <feature>-19.03601074</feature>
+      <feature>19.03601074</feature>
     </features>
     <peptide>
       <peptideSequence>FEELCADLFR</peptideSequence>
+      <modification location="5" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="S" proteinId="YLL024C"/>
@@ -26886,7 +27207,7 @@
 <occurence flankC="-" flankN="T" proteinId="decoy_YBL030C"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="863.9734" chargeState="2" experimentalMassToCharge="866.5527" id="decoy_107_2_4" isDecoy="true">
+  <peptideSpectrumMatch calculatedMassToCharge="920.9734" chargeState="2" experimentalMassToCharge="866.5527" id="decoy_107_2_4" isDecoy="true">
     <features>
       <feature>2.07944155</feature>
       <feature>0.01451294</feature>
@@ -26903,11 +27224,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>2.56494927</feature>
-      <feature>1.79330444</feature>
-      <feature>1.79330444</feature>
+      <feature>-26.70669556</feature>
+      <feature>26.70669556</feature>
     </features>
     <peptide>
       <peptideSequence>VTADLGCK</peptideSequence>
+      <modification location="7" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="K" flankN="H" proteinId="decoy_YPL106C"/>
@@ -26940,7 +27264,7 @@
 <occurence flankC="K" flankN="G" proteinId="decoy_YHR183W"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1300.4408" chargeState="3" experimentalMassToCharge="1299.3254" id="decoy_107_3_1" isDecoy="true">
+  <peptideSpectrumMatch calculatedMassToCharge="1357.4408" chargeState="3" experimentalMassToCharge="1299.3254" id="decoy_107_3_1" isDecoy="true">
     <features>
       <feature>1.09861231</feature>
       <feature>0.98660755</feature>
@@ -26957,11 +27281,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.60943794</feature>
-      <feature>-0.03601074</feature>
-      <feature>0.03601074</feature>
+      <feature>-19.03601074</feature>
+      <feature>19.03601074</feature>
     </features>
     <peptide>
       <peptideSequence>FLLEEDCAFR</peptideSequence>
+      <modification location="7" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="S" proteinId="decoy_YLL024C"/>
@@ -28170,7 +28497,7 @@
 <occurence flankC="R" flankN="A" proteinId="decoy_YGR157W"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1209.4150" chargeState="3" experimentalMassToCharge="1207.8855" id="decoy_112_3_3" isDecoy="true">
+  <peptideSpectrumMatch calculatedMassToCharge="1266.4150" chargeState="3" experimentalMassToCharge="1207.8855" id="decoy_112_3_3" isDecoy="true">
     <features>
       <feature>1.09861231</feature>
       <feature>0.00000000</feature>
@@ -28187,11 +28514,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.09861231</feature>
-      <feature>-0.17407227</feature>
-      <feature>0.17407227</feature>
+      <feature>-19.17407227</feature>
+      <feature>19.17407227</feature>
     </features>
     <peptide>
       <peptideSequence>GPLGCTLLYSK</peptideSequence>
+      <modification location="5" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="G" proteinId="decoy_YBL030C"/>
@@ -28227,7 +28557,7 @@
 <occurence flankC="K" flankN="G" proteinId="YGL245W"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1501.5547" chargeState="2" experimentalMassToCharge="1501.8328" id="target_113_2_2" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="1672.5547" chargeState="2" experimentalMassToCharge="1501.8328" id="target_113_2_2" isDecoy="false">
     <features>
       <feature>0.69314718</feature>
       <feature>0.00000000</feature>
@@ -28244,17 +28574,26 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>0.69314718</feature>
-      <feature>0.64270020</feature>
-      <feature>0.64270020</feature>
+      <feature>-84.85729980</feature>
+      <feature>84.85729980</feature>
     </features>
     <peptide>
       <peptideSequence>YLPNGDCECCGR</peptideSequence>
+      <modification location="7" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
+      <modification location="9" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
+      <modification location="10" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="A" proteinId="YBR115C"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1501.5547" chargeState="2" experimentalMassToCharge="1501.8328" id="decoy_113_2_1" isDecoy="true">
+  <peptideSpectrumMatch calculatedMassToCharge="1672.5547" chargeState="2" experimentalMassToCharge="1501.8328" id="decoy_113_2_1" isDecoy="true">
     <features>
       <feature>0.69314718</feature>
       <feature>0.10200046</feature>
@@ -28271,11 +28610,20 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>0.69314718</feature>
-      <feature>0.64270020</feature>
-      <feature>0.64270020</feature>
+      <feature>-84.85729980</feature>
+      <feature>84.85729980</feature>
     </features>
     <peptide>
       <peptideSequence>YDPNGGCLECCR</peptideSequence>
+      <modification location="7" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
+      <modification location="10" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
+      <modification location="11" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="A" proteinId="decoy_YBR115C"/>
@@ -28311,7 +28659,7 @@
 
 
 <fragSpectrumScan xmlns="http://per-colator.com/percolator_in/12" scanNumber="114">
-  <peptideSpectrumMatch calculatedMassToCharge="2007.3555" chargeState="3" experimentalMassToCharge="2009.6355" id="target_114_3_1" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="2121.3555" chargeState="3" experimentalMassToCharge="2009.6355" id="target_114_3_1" isDecoy="false">
     <features>
       <feature>0.00000000</feature>
       <feature>0.63691729</feature>
@@ -28328,11 +28676,17 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>0.69314718</feature>
-      <feature>1.09578454</feature>
-      <feature>1.09578454</feature>
+      <feature>-36.90421677</feature>
+      <feature>36.90421677</feature>
     </features>
     <peptide>
       <peptideSequence>SGVGICATCVLRPDLLFK</peptideSequence>
+      <modification location="6" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
+      <modification location="9" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="K" flankN="N" proteinId="YEL027W"/>
@@ -29268,7 +29622,7 @@
 <occurence flankC="R" flankN="S" proteinId="YOR267C"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="3091.7932" chargeState="3" experimentalMassToCharge="3093.8054" id="target_118_3_3" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="3148.7932" chargeState="3" experimentalMassToCharge="3093.8054" id="target_118_3_3" isDecoy="false">
     <features>
       <feature>1.09861231</feature>
       <feature>0.00000000</feature>
@@ -29285,17 +29639,20 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.09861231</feature>
-      <feature>1.00651038</feature>
-      <feature>1.00651038</feature>
+      <feature>-17.99349022</feature>
+      <feature>17.99349022</feature>
     </features>
     <peptide>
       <peptideSequence>NIVPVIMAGIIAIYGLVVSVLVCYSLGQK</peptideSequence>
+      <modification location="23" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="K" flankN="Q" proteinId="YEL027W"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="3091.7935" chargeState="3" experimentalMassToCharge="3093.8054" id="decoy_118_3_1" isDecoy="true">
+  <peptideSpectrumMatch calculatedMassToCharge="3148.7935" chargeState="3" experimentalMassToCharge="3093.8054" id="decoy_118_3_1" isDecoy="true">
     <features>
       <feature>0.69314718</feature>
       <feature>1.34650803</feature>
@@ -29312,11 +29669,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.09861231</feature>
-      <feature>1.00642908</feature>
-      <feature>1.00642908</feature>
+      <feature>-17.99357033</feature>
+      <feature>17.99357033</feature>
     </features>
     <peptide>
       <peptideSequence>NLPGIIIGYAVLVCGIVQSIAVLSMVYVK</peptideSequence>
+      <modification location="14" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="K" flankN="Q" proteinId="decoy_YEL027W"/>
@@ -29406,7 +29766,7 @@
 <occurence flankC="K" flankN="N" proteinId="YLR043C"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1304.5470" chargeState="2" experimentalMassToCharge="1302.5328" id="target_119_2_2" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="1418.5470" chargeState="2" experimentalMassToCharge="1302.5328" id="target_119_2_2" isDecoy="false">
     <features>
       <feature>1.09861231</feature>
       <feature>0.09390253</feature>
@@ -29423,11 +29783,17 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>2.39789534</feature>
-      <feature>-0.50341797</feature>
-      <feature>0.50341797</feature>
+      <feature>-57.50341797</feature>
+      <feature>57.50341797</feature>
     </features>
     <peptide>
       <peptideSequence>LAVCGIAAICQK</peptideSequence>
+      <modification location="4" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
+      <modification location="10" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="R" proteinId="YFR053C"/>
@@ -29952,7 +30318,7 @@
 <occurence flankC="K" flankN="N" proteinId="YLR043C"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1304.5470" chargeState="2" experimentalMassToCharge="1302.1528" id="target_121_2_2" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="1418.5470" chargeState="2" experimentalMassToCharge="1302.1528" id="target_121_2_2" isDecoy="false">
     <features>
       <feature>1.09861231</feature>
       <feature>0.37879908</feature>
@@ -29969,11 +30335,17 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>2.30258512</feature>
-      <feature>-0.69342041</feature>
-      <feature>0.69342041</feature>
+      <feature>-57.69342041</feature>
+      <feature>57.69342041</feature>
     </features>
     <peptide>
       <peptideSequence>LAVCGIAAICQK</peptideSequence>
+      <modification location="4" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
+      <modification location="10" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="R" proteinId="YFR053C"/>
@@ -30579,7 +30951,7 @@
 <occurence flankC="K" flankN="N" proteinId="YOR168W"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1127.2291" chargeState="2" experimentalMassToCharge="1129.0529" id="target_123_2_5" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="1184.2291" chargeState="2" experimentalMassToCharge="1129.0529" id="target_123_2_5" isDecoy="false">
     <features>
       <feature>1.60943794</feature>
       <feature>0.00000000</feature>
@@ -30596,11 +30968,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.94591022</feature>
-      <feature>1.41552734</feature>
-      <feature>1.41552734</feature>
+      <feature>-27.08447266</feature>
+      <feature>27.08447266</feature>
     </features>
     <peptide>
       <peptideSequence>CTINGVSYGR</peptideSequence>
+      <modification location="1" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="K" flankN="A" proteinId="YDR093W"/>
@@ -30660,7 +31035,7 @@
 <occurence flankC="K" flankN="-" proteinId="decoy_YDR064W"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1127.2292" chargeState="2" experimentalMassToCharge="1129.0529" id="decoy_123_2_3" isDecoy="true">
+  <peptideSpectrumMatch calculatedMassToCharge="1184.2292" chargeState="2" experimentalMassToCharge="1129.0529" id="decoy_123_2_3" isDecoy="true">
     <features>
       <feature>1.38629436</feature>
       <feature>0.10521654</feature>
@@ -30677,11 +31052,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.94591022</feature>
-      <feature>1.41546631</feature>
-      <feature>1.41546631</feature>
+      <feature>-27.08453369</feature>
+      <feature>27.08453369</feature>
     </features>
     <peptide>
       <peptideSequence>CGGVTINSYR</peptideSequence>
+      <modification location="1" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="K" flankN="A" proteinId="decoy_YDR093W"/>
@@ -32355,7 +32733,7 @@
 <occurence flankC="K" flankN="N" proteinId="YLR043C"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1464.5997" chargeState="2" experimentalMassToCharge="1465.0529" id="target_130_2_2" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="1521.5997" chargeState="2" experimentalMassToCharge="1465.0529" id="target_130_2_2" isDecoy="false">
     <features>
       <feature>1.09861231</feature>
       <feature>0.14398327</feature>
@@ -32372,11 +32750,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.09861231</feature>
-      <feature>0.73022461</feature>
-      <feature>0.73022461</feature>
+      <feature>-27.76977539</feature>
+      <feature>27.76977539</feature>
     </features>
     <peptide>
       <peptideSequence>TCVVETPTLNSDK</peptideSequence>
+      <modification location="2" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="S" proteinId="YBR115C"/>
@@ -32463,7 +32844,7 @@
 <occurence flankC="K" flankN="D" proteinId="decoy_YFR053C"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1464.5997" chargeState="2" experimentalMassToCharge="1465.0529" id="decoy_130_2_3" isDecoy="true">
+  <peptideSpectrumMatch calculatedMassToCharge="1521.5997" chargeState="2" experimentalMassToCharge="1465.0529" id="decoy_130_2_3" isDecoy="true">
     <features>
       <feature>1.09861231</feature>
       <feature>0.00000000</feature>
@@ -32480,11 +32861,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.09861231</feature>
-      <feature>0.73022461</feature>
-      <feature>0.73022461</feature>
+      <feature>-27.76977539</feature>
+      <feature>27.76977539</feature>
     </features>
     <peptide>
       <peptideSequence>TPVLTTSVNECDK</peptideSequence>
+      <modification location="11" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="S" proteinId="decoy_YBR115C"/>
@@ -33477,7 +33861,7 @@
 
 
 <fragSpectrumScan xmlns="http://per-colator.com/percolator_in/12" scanNumber="135">
-  <peptideSpectrumMatch calculatedMassToCharge="2007.3555" chargeState="2" experimentalMassToCharge="2008.9728" id="target_135_2_1" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="2121.3555" chargeState="2" experimentalMassToCharge="2008.9728" id="target_135_2_1" isDecoy="false">
     <features>
       <feature>0.00000000</feature>
       <feature>1.07869267</feature>
@@ -33494,11 +33878,17 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.09861231</feature>
-      <feature>1.31231689</feature>
-      <feature>1.31231689</feature>
+      <feature>-55.68768311</feature>
+      <feature>55.68768311</feature>
     </features>
     <peptide>
       <peptideSequence>SGVGICATCVLRPDLLFK</peptideSequence>
+      <modification location="6" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
+      <modification location="9" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="K" flankN="N" proteinId="YEL027W"/>
@@ -34296,7 +34686,7 @@
 <occurence flankC="K" flankN="I" proteinId="decoy_YCR012W"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="717.9139" chargeState="1" experimentalMassToCharge="719.0599" id="decoy_138_1_3" isDecoy="true">
+  <peptideSpectrumMatch calculatedMassToCharge="774.9139" chargeState="1" experimentalMassToCharge="719.0599" id="decoy_138_1_3" isDecoy="true">
     <features>
       <feature>1.60943794</feature>
       <feature>0.22927278</feature>
@@ -34313,11 +34703,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>2.48490667</feature>
-      <feature>2.15325928</feature>
-      <feature>2.15325928</feature>
+      <feature>-54.84674072</feature>
+      <feature>54.84674072</feature>
     </features>
     <peptide>
       <peptideSequence>ALCILK</peptideSequence>
+      <modification location="3" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="K" flankN="G" proteinId="decoy_YDR093W"/>
@@ -34435,7 +34828,7 @@
 <occurence flankC="R" flankN="S" proteinId="YOR267C"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="3091.7932" chargeState="3" experimentalMassToCharge="3094.2554" id="target_139_3_3" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="3148.7932" chargeState="3" experimentalMassToCharge="3094.2554" id="target_139_3_3" isDecoy="false">
     <features>
       <feature>1.09861231</feature>
       <feature>0.00000000</feature>
@@ -34452,17 +34845,20 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.09861231</feature>
-      <feature>1.15649414</feature>
-      <feature>1.15649414</feature>
+      <feature>-17.84350586</feature>
+      <feature>17.84350586</feature>
     </features>
     <peptide>
       <peptideSequence>NIVPVIMAGIIAIYGLVVSVLVCYSLGQK</peptideSequence>
+      <modification location="23" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="K" flankN="Q" proteinId="YEL027W"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="3091.7935" chargeState="3" experimentalMassToCharge="3094.2554" id="decoy_139_3_1" isDecoy="true">
+  <peptideSpectrumMatch calculatedMassToCharge="3148.7935" chargeState="3" experimentalMassToCharge="3094.2554" id="decoy_139_3_1" isDecoy="true">
     <features>
       <feature>0.69314718</feature>
       <feature>1.19622564</feature>
@@ -34479,11 +34875,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.09861231</feature>
-      <feature>1.15641272</feature>
-      <feature>1.15641272</feature>
+      <feature>-17.84358788</feature>
+      <feature>17.84358788</feature>
     </features>
     <peptide>
       <peptideSequence>NLPGIIIGYAVLVCGIVQSIAVLSMVYVK</peptideSequence>
+      <modification location="14" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="K" flankN="Q" proteinId="decoy_YEL027W"/>
@@ -36814,7 +37213,7 @@
 <occurence flankC="K" flankN="N" proteinId="YLR043C"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1464.5997" chargeState="2" experimentalMassToCharge="1466.5328" id="target_149_2_2" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="1521.5997" chargeState="2" experimentalMassToCharge="1466.5328" id="target_149_2_2" isDecoy="false">
     <features>
       <feature>1.09861231</feature>
       <feature>0.12744772</feature>
@@ -36831,11 +37230,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.09861231</feature>
-      <feature>1.47021484</feature>
-      <feature>1.47021484</feature>
+      <feature>-27.02978516</feature>
+      <feature>27.02978516</feature>
     </features>
     <peptide>
       <peptideSequence>TCVVETPTLNSDK</peptideSequence>
+      <modification location="2" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="S" proteinId="YBR115C"/>
@@ -36922,7 +37324,7 @@
 <occurence flankC="K" flankN="D" proteinId="decoy_YFR053C"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1464.5997" chargeState="2" experimentalMassToCharge="1466.5328" id="decoy_149_2_3" isDecoy="true">
+  <peptideSpectrumMatch calculatedMassToCharge="1521.5997" chargeState="2" experimentalMassToCharge="1466.5328" id="decoy_149_2_3" isDecoy="true">
     <features>
       <feature>1.09861231</feature>
       <feature>0.00000000</feature>
@@ -36939,11 +37341,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>1.09861231</feature>
-      <feature>1.47021484</feature>
-      <feature>1.47021484</feature>
+      <feature>-27.02978516</feature>
+      <feature>27.02978516</feature>
     </features>
     <peptide>
       <peptideSequence>TPVLTTSVNECDK</peptideSequence>
+      <modification location="11" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="S" proteinId="decoy_YBR115C"/>
@@ -37279,7 +37684,7 @@
 <occurence flankC="K" flankN="E" proteinId="YBL076C"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="1304.5470" chargeState="2" experimentalMassToCharge="1302.2328" id="target_151_2_3" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="1418.5470" chargeState="2" experimentalMassToCharge="1302.2328" id="target_151_2_3" isDecoy="false">
     <features>
       <feature>0.69314718</feature>
       <feature>0.41320398</feature>
@@ -37296,11 +37701,17 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>2.30258512</feature>
-      <feature>-0.65344238</feature>
-      <feature>0.65344238</feature>
+      <feature>-57.65344238</feature>
+      <feature>57.65344238</feature>
     </features>
     <peptide>
       <peptideSequence>LAVCGIAAICQK</peptideSequence>
+      <modification location="4" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
+      <modification location="10" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="R" flankN="R" proteinId="YFR053C"/>
@@ -38152,7 +38563,7 @@
 <occurence flankC="K" flankN="G" proteinId="decoy_YBR118W"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="717.9139" chargeState="1" experimentalMassToCharge="717.0599" id="decoy_154_1_2" isDecoy="true">
+  <peptideSpectrumMatch calculatedMassToCharge="774.9139" chargeState="1" experimentalMassToCharge="717.0599" id="decoy_154_1_2" isDecoy="true">
     <features>
       <feature>1.38629436</feature>
       <feature>0.16542645</feature>
@@ -38169,11 +38580,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>2.70805025</feature>
-      <feature>0.15325928</feature>
-      <feature>0.15325928</feature>
+      <feature>-56.84674072</feature>
+      <feature>56.84674072</feature>
     </features>
     <peptide>
       <peptideSequence>ALCILK</peptideSequence>
+      <modification location="3" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="K" flankN="G" proteinId="decoy_YDR093W"/>
@@ -38974,7 +39388,7 @@
 <occurence flankC="R" flankN="D" proteinId="YPL215W"/>
   </peptideSpectrumMatch>
 
-  <peptideSpectrumMatch calculatedMassToCharge="853.8481" chargeState="2" experimentalMassToCharge="853.7527" id="target_158_2_3" isDecoy="false">
+  <peptideSpectrumMatch calculatedMassToCharge="910.8481" chargeState="2" experimentalMassToCharge="853.7527" id="target_158_2_3" isDecoy="false">
     <features>
       <feature>1.94591010</feature>
       <feature>0.21491948</feature>
@@ -38991,11 +39405,14 @@
       <feature>1</feature>
       <feature>0</feature>
       <feature>2.56494927</feature>
-      <feature>0.45593262</feature>
-      <feature>0.45593262</feature>
+      <feature>-28.04406738</feature>
+      <feature>28.04406738</feature>
     </features>
     <peptide>
       <peptideSequence>DSCTENK</peptideSequence>
+      <modification location="3" monoisotopicMassDelta="57.00">
+        <uniMod accession="0"/>
+      </modification>
     </peptide>
     
 <occurence flankC="K" flankN="E" proteinId="YNL166C"/>
