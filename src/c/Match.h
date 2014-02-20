@@ -748,6 +748,17 @@ int compareSpectrumDecoyPValueQValue(
 /************************************************
  * TODO: Why are these here?
  ************************************************/
+/**
+ * \brief Returns whether the nterm and cterm of a peptide are proper cleavages
+ */
+void get_terminal_cleavages(
+  const char* peptide_sequence, ///< peptide sequence
+  const char flanking_aas_prev, ///< amino acid before cleavage (n-term)
+  const char flanking_aas_next, ///< amino acid after cleavage (c-term)
+  ENZYME_T enzyme, ///< Enzyme used in cleavage
+  bool& nterm, ///< -out is nterminus from a proper cleavage?
+  bool& cterm ///< -out is cterminus from a proper cleavage?
+);
 
 /**
  * \brief Counts the number of internal cleavages

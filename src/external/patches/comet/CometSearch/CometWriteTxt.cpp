@@ -63,7 +63,7 @@ void CometWriteTxt::PrintTxtHeader(FILE *fpout)
    fprintf(fpout, "xcorr rank\t");
    fprintf(fpout, "b/y ions matched\t");
    fprintf(fpout, "b/y ions total\t");
-   fprintf(fpout, "total matches/spectrum\t");
+   fprintf(fpout, "distinct matches/spectrum\t");
    fprintf(fpout, "sequence\t");
    fprintf(fpout, "protein id\t");
    fprintf(fpout, "flanking aa\t");
