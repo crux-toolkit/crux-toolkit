@@ -1233,8 +1233,13 @@ Match* Match::parseTabDelimited(
   }
 
   // get experiment size
-  match->ln_experiment_size_ = log((FLOAT_T) result_file.getInteger(MATCHES_SPECTRUM_COL));
   match->num_target_matches_ = result_file.getInteger(MATCHES_SPECTRUM_COL);
+  if (match->num_target_matches_ == 0) {
+    carp_once(CARP_WARNING, "num target matches=0, suppressing warning");
+    match->ln_experiment_size_ = 0;
+  } else {
+    match->ln_experiment_size_ = log((FLOAT_T) result_file.getInteger(MATCHES_SPECTRUM_COL));
+  }
   if (!result_file.empty(DECOY_MATCHES_SPECTRUM_COL)){
         match->num_decoy_matches_ = result_file.getInteger(DECOY_MATCHES_SPECTRUM_COL);
   }
@@ -1765,7 +1770,7 @@ void print_modifications_xml(
 ){
   map<int, double> var_mods;
   map<int, double> static_mods;
-  carp(CARP_INFO,"print_modifications_xml:%s %s", mod_seq, pep_seq);
+  carp(CARP_DEBUG,"print_modifications_xml:%s %s", mod_seq, pep_seq);
   // variable modifications
   int mod_precision = get_int_parameter("mod-precision");
   find_variable_modifications(var_mods, mod_seq);
@@ -1773,7 +1778,7 @@ void print_modifications_xml(
     fprintf(output_file, 
             "<modification_info modified_peptide=\"%s\">\n",
             mod_seq);
-   carp(CARP_INFO,
+   carp(CARP_DEBUG,
             "<modification_info modified_peptide=\"%s\">\n",
             mod_seq);
         for (map<int, double>::iterator it = var_mods.begin()
@@ -1781,7 +1786,7 @@ void print_modifications_xml(
       fprintf(output_file, "<mod_aminoacid_mass position=\"%i\" mass=\"%.*f\"/>\n",
               (*it).first,   //index
               mod_precision, (*it).second); //mass
-      carp(CARP_INFO, "<mod_aminoacid_mass position=\"%i\" mass=\"%.*f\"/>\n",
+      carp(CARP_DEBUG, "<mod_aminoacid_mass position=\"%i\" mass=\"%.*f\"/>\n",
               (*it).first,   //index                                                                                                                                                                                                            
               mod_precision, (*it).second); //mass           
     }
@@ -1791,7 +1796,7 @@ void print_modifications_xml(
   // static modifications
   find_static_modifications(static_mods, var_mods, pep_seq);
   if (!static_mods.empty()){
-    carp(CARP_INFO, "<modification_info modified_peptide=\"%s\">\n",
+    carp(CARP_DEBUG, "<modification_info modified_peptide=\"%s\">\n",
             pep_seq);
     fprintf(output_file, "<modification_info modified_peptide=\"%s\">\n",
             pep_seq);
@@ -1800,7 +1805,7 @@ void print_modifications_xml(
       fprintf(output_file, "<mod_aminoacid_mass position=\"%i\" mass=\"%.*f\"/>\n",
               (*it).first,   //index
               mod_precision, (*it).second); //mass
-      carp(CARP_INFO, "<mod_aminoacid_mass position=\"%i\" mass=\"%.*f\"/>\n",
+      carp(CARP_DEBUG, "<mod_aminoacid_mass position=\"%i\" mass=\"%.*f\"/>\n",
               (*it).first,   //index                                                                                                                                                                                                            
               mod_precision, (*it).second); //mass 
     }
@@ -1908,6 +1913,33 @@ int get_num_internal_cleavage(const char* peptide_sequence, ENZYME_T enzyme){
   return num_missed_cleavages;
 }
 
+/**
+ * \brief Returns whether the nterm and cterm of a peptide are proper cleavages
+ */
+void get_terminal_cleavages(
+  const char* peptide_sequence, ///< peptide sequenc
+  const char flanking_aas_prev, ///< amino acid before cleavage (n-term)
+  const char flanking_aas_next, ///< amino acid after cleavage (c-term)
+  ENZYME_T enzyme, ///< Enzyme used in cleavage
+  bool& nterm, ///< -out is nterminus from a proper cleavage
+  bool& cterm ///< -out is cterminus from a proper cleavage?
+  ) {
+
+  carp(CARP_DEBUG, "seq:%s", peptide_sequence);
+  carp(CARP_DEBUG, "prev:%c", flanking_aas_prev);
+  carp(CARP_DEBUG, "next:%c", flanking_aas_next);
+
+  int num_tol_term = 0;
+  char cleavage[3];
+  cleavage[2] = '\0';
+  cleavage[0] = flanking_aas_prev;
+  cleavage[1] = peptide_sequence[0];
+  nterm = flanking_aas_prev == '-' || ProteinPeptideIterator::validCleavagePosition(cleavage, enzyme);
+
+  cleavage[0] = peptide_sequence[strlen(peptide_sequence)-1];
+  cleavage[1] = flanking_aas_next;
+  cterm = flanking_aas_next == '-' || ProteinPeptideIterator::validCleavagePosition(cleavage, enzyme);
+}
 
 /**
  * \brief Counts the number of terminal cleavage. Either 0, 1, or 2
@@ -1920,19 +1952,19 @@ int get_num_terminal_cleavage(
   ENZYME_T enzyme
   ){
 
+  bool cterm, nterm;
+
+  get_terminal_cleavages(peptide_sequence, 
+    flanking_aas_prev, 
+    flanking_aas_next, 
+    enzyme,
+    nterm, cterm);
+
   int num_tol_term = 0;
-  char cleavage[3];
-  cleavage[2] = '\0';
-  cleavage[0] = flanking_aas_prev;
-  cleavage[1] = peptide_sequence[0];
-  if (flanking_aas_prev == '-' ||
-      ProteinPeptideIterator::validCleavagePosition(cleavage, enzyme)){
-      num_tol_term++;
+  if (nterm) { 
+    num_tol_term++;
   }
-  cleavage[0] = peptide_sequence[strlen(peptide_sequence)-1];
-  cleavage[1] = flanking_aas_next;
-  if (flanking_aas_next == '-' ||
-      ProteinPeptideIterator::validCleavagePosition(cleavage, enzyme)){
+  if (cterm) { 
     num_tol_term++;
   }
   return num_tol_term;

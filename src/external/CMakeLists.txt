@@ -170,6 +170,8 @@ elseif (APPLE)
       -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}
       -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
     PATCH_COMMAND cp  
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_enzyme/Enzyme.h
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_enzyme/Enzyme.cpp
       ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_xml_write/Caller.h 
       ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_var_mods/DataSet.cpp 
       ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_m_pi_def/EludeModel.cpp 

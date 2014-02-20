@@ -446,15 +446,9 @@ void PinXMLWriter::printFeatures(
   char c_flank = peptide->getCTermFlankingAA();
   char n_flank = peptide->getNTermFlankingAA();
   char* sequence = peptide->getSequence();
-  char sequence_first = sequence[0];
-  char sequence_last = sequence[strlen(sequence) - 1];
+  int missed_cleavages = get_num_internal_cleavage(sequence, get_enzyme_type_parameter("enzyme"));
+  get_terminal_cleavages(sequence, n_flank, c_flank, get_enzyme_type_parameter("enzyme"), enz_n, enz_c);
   free(sequence);
-  if (n_flank == '-' ||
-      ((n_flank == 'K' || n_flank == 'R') && sequence_first != 'P'))
-    enz_n =true;
-  if (c_flank == '-' ||
-      ((sequence_last == 'K' || sequence_last == 'R') && c_flank != 'P'))
-    enz_c =true; 
  
   FLOAT_T ln_num_sp=match->getLnExperimentSize();
   FLOAT_T lnrSp=0.0; 
@@ -503,7 +497,7 @@ void PinXMLWriter::printFeatures(
   fprintf(output_file_, "      <feature>%u</feature>\n", enz_n);
   fprintf(output_file_, "      <feature>%u</feature>\n", enz_c);
   fprintf(output_file_, 
-    "      <feature>%u</feature>\n", peptide-> getMissedCleavageSites());
+	  "      <feature>%u</feature>\n", missed_cleavages);
   fprintf(output_file_, "      <feature>%.*f</feature>\n", precision_, ln_num_sp);
   fprintf(output_file_, "      <feature>%.*f</feature>\n", precision_, dM);
   fprintf(output_file_, "      <feature>%.*f</feature>\n", precision_, fabs(dM));
