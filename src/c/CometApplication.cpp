@@ -339,19 +339,32 @@ void CometApplication::setCometParameters(
   searchMgr.SetParam("use_NL_ions", get_string_parameter_pointer("use_NL_ions"), get_int_parameter("use_NL_ions"));
   searchMgr.SetParam("use_sparse_matrix", get_string_parameter_pointer("use_sparse_matrix"), get_int_parameter("use_sparse_matrix"));
   
-  calcVarMods(get_string_parameter_pointer("variable_mod1"), varModsParam);
-  searchMgr.SetParam("variable_mod1", get_string_parameter_pointer("variable_mod1"), varModsParam );
-  calcVarMods(get_string_parameter_pointer("variable_mod2"), varModsParam);
-  searchMgr.SetParam("variable_mod2", get_string_parameter_pointer("variable_mod2"), varModsParam );
-  calcVarMods(get_string_parameter_pointer("variable_mod3"), varModsParam);
-  searchMgr.SetParam("variable_mod3", get_string_parameter_pointer("variable_mod3"), varModsParam );
-  calcVarMods(get_string_parameter_pointer("variable_mod4"), varModsParam);
-  searchMgr.SetParam("variable_mod4", get_string_parameter_pointer("variable_mod4"), varModsParam );
-  calcVarMods(get_string_parameter_pointer("variable_mod5"), varModsParam);
-  searchMgr.SetParam("variable_mod5", get_string_parameter_pointer("variable_mod5"), varModsParam );
-  calcVarMods(get_string_parameter_pointer("variable_mod6"), varModsParam);
-  searchMgr.SetParam("variable_mod6", get_string_parameter_pointer("variable_mod6"), varModsParam );
-  
+  if (get_string_parameter_pointer("variable_mod1") !=  "__NULL_STR") {
+
+    calcVarMods(get_string_parameter_pointer("variable_mod1"), varModsParam);
+    searchMgr.SetParam("variable_mod1", get_string_parameter_pointer("variable_mod1"), varModsParam );
+  }
+  if (get_string_parameter_pointer("variable_mod2") != "__NULL_STR") {
+    calcVarMods(get_string_parameter_pointer("variable_mod2"), varModsParam);
+    searchMgr.SetParam("variable_mod2", get_string_parameter_pointer("variable_mod2"), varModsParam );
+  }
+  if (get_string_parameter_pointer("variable_mod3") != "__NULL_STR") {
+    calcVarMods(get_string_parameter_pointer("variable_mod3"), varModsParam);
+    searchMgr.SetParam("variable_mod3", get_string_parameter_pointer("variable_mod3"), varModsParam );
+  }
+  if (get_string_parameter_pointer("variable_mod4") !=  "__NULL_STR") {
+    calcVarMods(get_string_parameter_pointer("variable_mod4"), varModsParam);
+    searchMgr.SetParam("variable_mod4", get_string_parameter_pointer("variable_mod4"), varModsParam );
+  }
+  if (get_string_parameter_pointer("variable_mod5") !=  "__NULL_STR") {
+    calcVarMods(get_string_parameter_pointer("variable_mod5"), varModsParam);
+    searchMgr.SetParam("variable_mod5", get_string_parameter_pointer("variable_mod5"), varModsParam );
+  }
+  if (get_string_parameter_pointer("variable_mod6") !=  "__NULL_STR") {
+    calcVarMods(get_string_parameter_pointer("variable_mod6"), varModsParam);
+    searchMgr.SetParam("variable_mod6", get_string_parameter_pointer("variable_mod6"), varModsParam );
+  }
+
   searchMgr.SetParam("max_variable_mods_in_peptide", get_string_parameter_pointer("max_variable_mods_in_peptide"), get_int_parameter("max_variable_mods_in_peptide"));
   searchMgr.SetParam("fragment_bin_tol", get_string_parameter_pointer("fragment_bin_tol"), get_double_parameter("fragment_bin_tol"));
   searchMgr.SetParam("fragment_bin_offset", get_string_parameter_pointer("fragment_bin_offset"), get_double_parameter("fragment_bin_offset"));
