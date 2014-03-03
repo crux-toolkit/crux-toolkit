@@ -397,7 +397,7 @@ void PMCDelimitedFileWriter::setUpPSMsColumns(
     addColumnName(PERCOLATOR_QVALUE_COL);
     break;
   }
-
+  addColumnName(FILE_COL);
   addColumnName(SCAN_COL);
   addColumnName(CHARGE_COL);
   addColumnName(SPECTRUM_PRECURSOR_MZ_COL);

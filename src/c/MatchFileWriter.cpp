@@ -60,6 +60,7 @@ void MatchFileWriter::setPrecision(){
   for(int col_idx = 0; col_idx < NUMBER_MATCH_COLUMNS; col_idx++){
     switch(col_idx){
       // integer and string fields
+    case FILE_COL:
     case SCAN_COL:
     case CHARGE_COL:
     case SP_RANK_COL:

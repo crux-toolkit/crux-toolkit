@@ -7,6 +7,7 @@
 #include "carp.h"
 
 static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
+  "file",
   "scan",
   "charge",
   "spectrum precursor m/z",

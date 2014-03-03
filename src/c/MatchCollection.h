@@ -328,7 +328,15 @@ class MatchCollection {
    * Different than getExperimentSize() for decoy match collections.
    */
   int getTargetExperimentSize();
-    
+
+  /**
+   * Set the filepath for all matches in the collection
+   * \returns the associated file idx
+   */
+  int setFilePath(
+    const std::string& file_path  ///< File path to set
+  );
+
   /**
    * \returns true if the match_collection only contains decoy matches,
    * else (all target or mixed) returns false.
