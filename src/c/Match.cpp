@@ -38,6 +38,8 @@
 using namespace std;
 using namespace Crux;
 
+vector<string> Match::file_paths_;
+
 void Match::init() {
 
   spectrum_=NULL;
@@ -63,6 +65,7 @@ void Match::init() {
   num_target_matches_ = 0;
   num_decoy_matches_ = 0;
   best_per_peptide_ = false;
+  file_idx_ = -1;
 }
 
 
@@ -699,6 +702,9 @@ void Match::printOneMatchField(
 ) {
 
   switch ((MATCH_COLUMNS_T)column_idx) {
+  case FILE_COL:
+    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, getFilePath());
+    break;
   case SCAN_COL:
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, scan_num);
     break;
@@ -1495,6 +1501,53 @@ void Match::getCustomScoreNames(
   }
 
 }
+
+/**
+ * sets the file index for this match
+ */
+void Match::setFileIndex(
+  int file_idx ///< file index to set
+  ) {
+
+  file_idx_ = file_idx;
+}
+
+/**
+ * sets the file path for this match
+ * \returns the associated file index
+ */
+int Match::setFilePath(
+  const string& file_path ///< file path to set
+  ) {
+
+  file_idx_ = -1;
+  
+  for (size_t idx = 0;idx < file_paths_.size(); idx++) {
+    if (file_path == file_paths_[idx]) {
+      file_idx_ = idx;
+      break;
+    }
+  }
+
+  if (file_idx_ == -1) {
+    file_idx_ = file_paths_.size();
+    file_paths_.push_back(file_path);
+  }
+  return file_idx_;
+}
+
+/**
+ * \returns the file path for this match
+ */ 
+string Match::getFilePath() {
+  if (file_idx_ == -1) {
+    return string("");
+  } else {
+    return(file_paths_[file_idx_]);
+  }
+}
+
+
 
 
 bool Match::isDecoy() {

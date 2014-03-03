@@ -196,7 +196,8 @@ MatchCollection* MatchCollectionParser::create(
   } else {
     collection = MatchFileReader::parse(match_path, database_, decoy_database_);
   }
-   
+  collection->setFilePath(match_path);
+
   return collection;
 }
 

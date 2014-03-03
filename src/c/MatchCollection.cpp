@@ -1386,6 +1386,26 @@ void MatchCollection::getCustomScoreNames(
 
 }
 
+/**                                                                                                    
+ * Set the filepath for all matches in the collection                                                  
+ *\returns the associated file idx                                                                    
+ */
+int MatchCollection::setFilePath(
+  const string& file_path  ///< File path to set                                                  
+  ) {
+
+  if (match_total_ > 0) {
+    int file_idx = match_[0]->setFilePath(file_path);
+    for (int match_idx = 1;match_idx < match_total_;match_idx++) {
+      match_[match_idx]->setFileIndex(file_idx);
+    }
+    return file_idx;
+  } else {
+    carp(CARP_WARNING, "MatchCollection::setFilePath(): No matches in %s",file_path.c_str());
+    return -1;
+  }
+}
+
 /**
  *\returns true, if there is a  match_iterators instantiated by match collection 
  */

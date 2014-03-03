@@ -446,6 +446,7 @@ MatchCollection* run_qvalue(
    
   // get from the input files which columns to print in the output files
   vector<bool> cols_to_print(NUMBER_MATCH_COLUMNS);
+  cols_to_print[FILE_COL] = true;
   cols_to_print[SCAN_COL] = true;
   cols_to_print[CHARGE_COL] = true;
   cols_to_print[SPECTRUM_PRECURSOR_MZ_COL] = true;

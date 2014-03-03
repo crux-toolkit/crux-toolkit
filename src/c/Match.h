@@ -94,7 +94,8 @@ class Match {
   int num_target_matches_; ///< total target candidates for this spectrum
   int num_decoy_matches_;///< decoy candidates for this spectrum if decoy match
   bool best_per_peptide_; ///< Is this the best scoring PSM for this peptide?
-
+  int file_idx_; ///< index of where this match came from 
+  static std::vector<std::string> file_paths_;
   /**
    * Print one field in the tab-delimited output file, based on column index.
    */
@@ -303,6 +304,28 @@ class Match {
   void getCustomScoreNames(
     std::vector<std::string>& custom_score_names
   );
+
+
+  /**                                                                                                      
+   * sets the file index for this match                                                                    
+   */
+  void setFileIndex(
+    int file_idx ///< file index to set
+  );
+
+  /**                                                                                                      
+   * sets the file path for this match                                                                     
+   * \returns the associated file index                                                                    
+   */
+  int setFilePath(
+    const std::string& file_path ///< file path to set
+  );
+
+  /**                                                                                                      
+   * \returns the file path for this match                                                                 
+   */
+  std::string getFilePath();
+
 
   bool isDecoy();
 
