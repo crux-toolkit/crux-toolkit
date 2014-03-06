@@ -48,9 +48,11 @@ enum argument_error { NO_ERROR, UNKNOWN_OPTION, MISSING_VALUE,
 
 
 int parse_arguments_set_opt(const char * name, const char * usage, 
-                                void * container, enum argument_type type);
+                                void * container, enum argument_type type,
+                                bool print=true);
 int parse_arguments_set_req(const char * name, const char * usage, 
-                              void * container, enum argument_type type);
+                              void * container, enum argument_type type,
+                              bool print=true);
 int parse_arguments(int argc, char * argv[], int die_on_error);
 int parse_arguments_into_hash(int argc, char * argv[], HASH_T* h, 
                               int die_on_error);
