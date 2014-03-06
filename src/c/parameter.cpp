@@ -265,7 +265,7 @@ bool set_mass_format_type_parameter(
 bool select_cmd_line(  
   const char** option_names, ///< list of options to be allowed for main -in
   int    num_options,  ///< number of optons in that list -in
-  int (*parse_argument_set)(const char*, const char*, void*, enum argument_type) ///< function point to choose arguments or options 
+  int (*parse_argument_set)(const char*, const char*, void*, enum argument_type, bool print) ///< function point to choose arguments or options 
   );
 
 bool update_aa_masses();
@@ -2352,9 +2352,80 @@ bool select_cmd_line_options(  //remove options from name
   const char** option_names,
   int    num_options 
   ){
-  select_cmd_line( option_names, num_options, 
-                   &parse_arguments_set_opt);
-  return true;
+
+  vector<bool> option_found(num_options, false);
+  bool success = false;  
+
+  HASH_ITERATOR_T* hash_iter = new_hash_iterator(parameters);
+  while(hash_iterator_has_next(hash_iter)) {
+    char* option_name = hash_iterator_next(hash_iter);
+    if (strstr(option_name, " ") == NULL) {
+      void* value_ptr = get_hash_value(parameters, option_name);
+      void* usage_ptr = get_hash_value(usages, option_name);
+      void* type_ptr =  get_hash_value(types, option_name);
+
+      /* check that the option is in the params hash */
+      if( value_ptr == NULL || usage_ptr == NULL || type_ptr == NULL ){
+        carp(CARP_FATAL, 
+           "Cannot select parameter '%s'. Value, usage or type not found. "
+           "Found value: %s, usage: %s, type: %s", 
+           option_name,
+           value_ptr,
+           usage_ptr,
+           type_ptr);
+      
+      }
+
+      if( //strcmp(type_ptr, "PEPTIDE_TYPE_T") == 0 ||
+          strcmp((char*)type_ptr, "MASS_TYPE_T") == 0 ||
+          strcmp((char*)type_ptr, "bool") == 0 ||
+          strcmp((char*)type_ptr, "SCORER_TYPE_T") == 0 ){
+        type_ptr = (void*)"STRING_ARG";
+      }
+      carp(CARP_DETAILED_DEBUG, 
+           "Found value: %s, usage: %s, type(to be passed to parse_args): %s", 
+           (char*)value_ptr, (char*)usage_ptr, (char*)type_ptr);
+      /* is it in the list of options to print?
+       */
+      bool print = false;
+      for (size_t idx=0;idx < num_options;idx++) {
+        if (strcmp(option_name, option_names[idx]) == 0) {
+          print = true;
+          option_found[idx] = true;
+          break;
+        }
+      }
+    
+      /* add the option via parse_arguments.c. pointer decides opt or req */
+      success &= parse_arguments_set_opt(option_name,
+                                      (const char*)usage_ptr,
+                                      value_ptr, 
+                                      string_to_argument_type((char*)type_ptr),
+                                      print); 
+    }
+  }
+  
+  if (success) {
+    /* Check to see if all options to print are in the entire list of options*/
+    for (size_t idx = 0;idx < num_options;idx++) {
+      if (!option_found[idx]) {
+        void* value_ptr = get_hash_value(parameters, option_names[idx]);
+        void* usage_ptr = get_hash_value(usages, option_names[idx]);
+        void* type_ptr =  get_hash_value(types, option_names[idx]);
+        carp(CARP_ERROR, 
+           "Cannot select parameter '%s'. Value, usage or type not found. "
+           "Found value: %s, usage: %s, type: %s", 
+           option_names[idx],
+           value_ptr,
+           usage_ptr,
+           type_ptr);
+      }
+      success = false;
+    }
+  }
+  
+  carp(CARP_DETAILED_DEBUG, "Did setting the arguments work? %i", success);
+  return success;
 }
 /*
  * Private function for doing the work of select_cmd_line_options
@@ -2365,7 +2436,7 @@ bool select_cmd_line_options(  //remove options from name
 bool select_cmd_line(  //remove options from name
   const char** option_names,
   int    num_options, 
-  int (*parse_arguments_set_ptr)(const char*, const char*, void*, enum argument_type) 
+  int (*parse_arguments_set_ptr)(const char*, const char*, void*, enum argument_type, bool print) 
   ){
 
   carp(CARP_DETAILED_DEBUG, "Selecting options");
@@ -2411,7 +2482,7 @@ bool select_cmd_line(  //remove options from name
     success = parse_arguments_set_ptr(option_names[i],
                                       (const char*)usage_ptr,
                                       value_ptr, 
-                                      string_to_argument_type((char*)type_ptr)); 
+                                      string_to_argument_type((char*)type_ptr), true); 
   }
 
   carp(CARP_DETAILED_DEBUG, "Did setting the arguments work? %i", success);
