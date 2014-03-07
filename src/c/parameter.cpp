@@ -628,8 +628,8 @@ void initialize_parameters(void){
   set_string_parameter("use-flanking-peaks", "unset",
       "Include peaks +/- 1da around b/y ions in theoretical spectrum.  "
       "sequest-search and search-for-xlinks default=T. search-for-matches "
-      "and tide-index default=F.",
-      "Available in the paramter file for all search commands and tide-index.",
+      "default=F.",
+      "Available in the parameter file for all search commands.",
       "true");
   set_double_parameter("spectrum-min-mz", 0.0, 0, BILLION, 
       "The lowest spectrum m/z to search. Default=0.0.",
@@ -2646,8 +2646,7 @@ void set_flanking_peaks(const char* exe_name){
   const char* value = get_string_parameter_pointer("use-flanking-peaks");
   // if it is the default value, it was not set by the user
   if( strcmp(value, "unset") == 0 ){
-    if( strcmp(exe_name, "search-for-matches") == 0 ||
-        strcmp(exe_name, "tide-index") == 0 ){
+    if( strcmp(exe_name, "search-for-matches") == 0 ){
       value = "false";
     } else {
       value = "true";
