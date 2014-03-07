@@ -15,8 +15,8 @@
 DEFINE_int32(debug_peptide_id, -1, "Peptide id to debug.");
 #endif
 
-DEFINE_bool(flanks, true, "Include flanking peaks.");
 #if 0
+DEFINE_bool(flanks, true, "Include flanking peaks.");
 DEFINE_bool(dups_ok, false, "Don't remove duplicate peaks");
 #endif
 

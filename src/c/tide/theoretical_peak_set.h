@@ -372,8 +372,8 @@ class OrderedPeakSets {
   }
 };
 
-DECLARE_bool(flanks);
 #if 0
+DECLARE_bool(flanks);
 DECLARE_bool(dups_ok);
 #endif
 
@@ -426,9 +426,9 @@ class TheoreticalPeakSetMakeAll : public TheoreticalPeakSet {
     index = int(mass + IonOffsets::Y_NH3[charge]);
     AddPeak(dest, index, LossPeak);
     index = int(mass + IonOffsets::Y[charge]);
-    if (FLAGS_flanks) AddPeak(dest, index-1, FlankingPeak);
+    if (true /*FLAGS_flanks*/) AddPeak(dest, index-1, FlankingPeak);
     AddPeak(dest, index, PrimaryPeak);
-    if (FLAGS_flanks) AddPeak(dest, index+1, FlankingPeak);
+    if (true /*FLAGS_flanks*/) AddPeak(dest, index+1, FlankingPeak);
   }
 
   void AddBIon(double mass, int charge, TheoreticalPeakArr* dest) {
@@ -443,9 +443,9 @@ class TheoreticalPeakSetMakeAll : public TheoreticalPeakSet {
     index = int(mass + IonOffsets::B_NH3[charge]);
     AddPeak(dest, index, LossPeak);
     index = int(mass + IonOffsets::B[charge]);
-    if (FLAGS_flanks) AddPeak(dest, index-1, FlankingPeak);
+    if (true /*FLAGS_flanks*/) AddPeak(dest, index-1, FlankingPeak);
     AddPeak(dest, index, PrimaryPeak);
-    if (FLAGS_flanks) AddPeak(dest, index+1, FlankingPeak);
+    if (true /*FLAGS_flanks*/) AddPeak(dest, index+1, FlankingPeak);
   }
 
   OrderedPeakSets ordered_peak_sets_;
@@ -640,9 +640,9 @@ class TheoreticalPeakSetBYAll : public TheoreticalPeakSet {
           == BIN_SHIFT_NH3_CHG_2_CASE_B)
         AddPeak(dest, index_y - BIN_SHIFT_NH3_CHG_2_CASE_B, LossPeak);
     }
-    if (FLAGS_flanks) AddPeak(dest, index_y-1, FlankingPeak);
+    AddPeak(dest, index_y-1, FlankingPeak);
     AddPeak(dest, index_y, PrimaryPeak);
-    if (FLAGS_flanks) AddPeak(dest, index_y+1, FlankingPeak);
+    AddPeak(dest, index_y+1, FlankingPeak);
   }
 
   void AddBIon(double mass, int charge, TheoreticalPeakArr* dest) {
@@ -661,9 +661,9 @@ class TheoreticalPeakSetBYAll : public TheoreticalPeakSet {
           == BIN_SHIFT_NH3_CHG_2_CASE_B)
         AddPeak(dest, index_b - BIN_SHIFT_NH3_CHG_2_CASE_B, LossPeak);
     }
-    if (FLAGS_flanks) AddPeak(dest, index_b-1, FlankingPeak);
+    AddPeak(dest, index_b-1, FlankingPeak);
     AddPeak(dest, index_b, PrimaryPeak);
-    if (FLAGS_flanks) AddPeak(dest, index_b+1, FlankingPeak);
+    AddPeak(dest, index_b+1, FlankingPeak);
   }
 
   OrderedPeakSets ordered_peak_sets_;

@@ -41,7 +41,6 @@ int TideIndexApplication::main(int argc, char** argv) {
     "min-length",
     "min-mass",
     "monoisotopic-precursor",
-    "use-flanking-peaks",
     "mods-spec",
     "cterm-peptide-mods-spec",
     "nterm-peptide-mods-spec",
@@ -83,8 +82,6 @@ int TideIndexApplication::main(int argc, char** argv) {
   int min_length = get_int_parameter("min-length");
   int max_length = get_int_parameter("max-length");
   bool monoisotopic_precursor = get_boolean_parameter("monoisotopic-precursor");
-  FLAGS_flanks = get_boolean_parameter("use-flanking-peaks");
-  carp(CARP_DEBUG, "use-flanking-peaks is %s", FLAGS_flanks ? "ON" : "OFF");
   FLAGS_max_mods = get_int_parameter("max-mods");
   MASS_TYPE_T mass_type = (monoisotopic_precursor) ? MONO : AVERAGE;
   int missed_cleavages = get_int_parameter("missed-cleavages");
