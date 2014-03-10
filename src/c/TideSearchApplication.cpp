@@ -474,8 +474,8 @@ void TideSearchApplication::computeWindow(
     }
   case WINDOW_PPM: {
     double tiny_precursor = precursor_window * 1e-6;
-    *out_min = sc.neutral_mass / (1.0 + tiny_precursor);
-    *out_max = sc.neutral_mass / (1.0 - tiny_precursor);
+    *out_min = sc.neutral_mass * (1.0 - tiny_precursor);
+    *out_max = sc.neutral_mass * (1.0 + tiny_precursor);
     break;
     }
   default:
