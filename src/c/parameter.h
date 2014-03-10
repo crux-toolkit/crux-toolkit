@@ -279,6 +279,12 @@ COMPARISON_T get_comparison_parameter(
   );
 
 /**
+ * \returns the comet enzyme info lines parsed from the file
+ * or generated defaults
+ */
+const std::vector<std::string>& get_comet_enzyme_info_lines();
+
+/**
  * \brief prints all parameters except mods into the output stream
  * in xml format. 
  *

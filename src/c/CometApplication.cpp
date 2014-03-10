@@ -126,161 +126,6 @@ void CometApplication::getIntRange(
   from_string<int>(intRangeParam.iEnd, tokens[1]);
 }
 
-/*
- * Sets the EnzymeInfo based upon the search_enzyme_number and the sample_enzyme_number
- * Will be replaced later
- */
-void CometApplication::getEnzymeInfo(
-    int search_enzyme_number,
-    int sample_enzyme_number,
-    EnzymeInfo& enzymeInformation) {
-  
-  switch(search_enzyme_number) {
-      case 0:
-        strcpy(enzymeInformation.szSearchEnzymeName, "No_enzyme");
-        enzymeInformation.iSearchEnzymeOffSet = 0;
-        strcpy(enzymeInformation.szSearchEnzymeBreakAA, "-");
-        strcpy(enzymeInformation.szSearchEnzymeNoBreakAA, "-");
-        break;
-      case 1:
-        strcpy(enzymeInformation.szSearchEnzymeName, "Trypsin");
-        enzymeInformation.iSearchEnzymeOffSet = 1;
-        strcpy(enzymeInformation.szSearchEnzymeBreakAA, "KR");
-        strcpy(enzymeInformation.szSearchEnzymeNoBreakAA, "P");
-        break;
-      case 2:
-        strcpy(enzymeInformation.szSearchEnzymeName, "Trypsin/P");
-        enzymeInformation.iSearchEnzymeOffSet = 1;
-        strcpy(enzymeInformation.szSearchEnzymeBreakAA, "KR");
-        strcpy(enzymeInformation.szSearchEnzymeNoBreakAA, "-");
-        break;
-      case 3:
-        strcpy(enzymeInformation.szSearchEnzymeName, "Lys_C");
-        enzymeInformation.iSearchEnzymeOffSet = 1;
-        strcpy(enzymeInformation.szSearchEnzymeBreakAA, "K");
-        strcpy(enzymeInformation.szSearchEnzymeNoBreakAA, "P");
-        break;
-      case 4:
-        strcpy(enzymeInformation.szSearchEnzymeName, "Lys_N");
-        enzymeInformation.iSearchEnzymeOffSet = 0;
-        strcpy(enzymeInformation.szSearchEnzymeBreakAA, "K");
-        strcpy(enzymeInformation.szSearchEnzymeNoBreakAA, "-");
-        break;
-      case 5:
-        strcpy(enzymeInformation.szSearchEnzymeName, "Arg_C");
-        enzymeInformation.iSearchEnzymeOffSet = 1;
-        strcpy(enzymeInformation.szSearchEnzymeBreakAA, "R");
-        strcpy(enzymeInformation.szSearchEnzymeNoBreakAA, "P");
-        break;
-      case 6:
-        strcpy(enzymeInformation.szSearchEnzymeName, "Asp_N");
-        enzymeInformation.iSearchEnzymeOffSet = 0;
-        strcpy(enzymeInformation.szSearchEnzymeBreakAA, "D");
-        strcpy(enzymeInformation.szSearchEnzymeNoBreakAA, "-");
-        break;
-      case 7:
-        strcpy(enzymeInformation.szSearchEnzymeName, "CNBr");
-        enzymeInformation.iSearchEnzymeOffSet = 1;
-        strcpy(enzymeInformation.szSearchEnzymeBreakAA, "M");
-        strcpy(enzymeInformation.szSearchEnzymeNoBreakAA, "-");
-        break;
-      case 8:
-        strcpy(enzymeInformation.szSearchEnzymeName, "Glu_C");
-        enzymeInformation.iSearchEnzymeOffSet = 1;
-        strcpy(enzymeInformation.szSearchEnzymeBreakAA, "DE");
-        strcpy(enzymeInformation.szSearchEnzymeNoBreakAA, "P");
-        break;
-      case 9:
-        strcpy(enzymeInformation.szSearchEnzymeName, "PepsinA");
-        enzymeInformation.iSearchEnzymeOffSet = 1;
-        strcpy(enzymeInformation.szSearchEnzymeBreakAA, "FL");
-        strcpy(enzymeInformation.szSearchEnzymeNoBreakAA, "P");
-        break;
-      case 10:
-        strcpy(enzymeInformation.szSearchEnzymeName, "Chymotrypsin");
-        enzymeInformation.iSearchEnzymeOffSet = 1;
-        strcpy(enzymeInformation.szSearchEnzymeBreakAA, "FWYL");
-        strcpy(enzymeInformation.szSearchEnzymeNoBreakAA, "P");
-        break;
-      default:
-        carp(CARP_FATAL, "Unknown enzyme number!");
-  }
-
-    
-  switch(sample_enzyme_number) {
-      case 0:
-        strcpy(enzymeInformation.szSampleEnzymeName, "No_enzyme");
-        enzymeInformation.iSampleEnzymeOffSet = 0;
-        strcpy(enzymeInformation.szSampleEnzymeBreakAA, "-");
-        strcpy(enzymeInformation.szSampleEnzymeNoBreakAA, "-");
-        break;
-      case 1:
-        strcpy(enzymeInformation.szSampleEnzymeName, "Trypsin");
-        enzymeInformation.iSampleEnzymeOffSet = 1;
-        strcpy(enzymeInformation.szSampleEnzymeBreakAA, "KR");
-        strcpy(enzymeInformation.szSampleEnzymeNoBreakAA, "P");
-        break;
-      case 2:
-        strcpy(enzymeInformation.szSampleEnzymeName, "Trypsin/P");
-        enzymeInformation.iSampleEnzymeOffSet = 1;
-        strcpy(enzymeInformation.szSampleEnzymeBreakAA, "KR");
-        strcpy(enzymeInformation.szSampleEnzymeNoBreakAA, "-");
-        break;
-      case 3:
-        strcpy(enzymeInformation.szSampleEnzymeName, "Lys_C");
-        enzymeInformation.iSampleEnzymeOffSet = 1;
-        strcpy(enzymeInformation.szSampleEnzymeBreakAA, "K");
-        strcpy(enzymeInformation.szSampleEnzymeNoBreakAA, "P");
-        break;
-      case 4:
-        strcpy(enzymeInformation.szSampleEnzymeName, "Lys_N");
-        enzymeInformation.iSampleEnzymeOffSet = 0;
-        strcpy(enzymeInformation.szSampleEnzymeBreakAA, "K");
-        strcpy(enzymeInformation.szSampleEnzymeNoBreakAA, "-");
-        break;
-      case 5:
-        strcpy(enzymeInformation.szSampleEnzymeName, "Arg_C");
-        enzymeInformation.iSampleEnzymeOffSet = 1;
-        strcpy(enzymeInformation.szSampleEnzymeBreakAA, "R");
-        strcpy(enzymeInformation.szSampleEnzymeNoBreakAA, "P");
-        break;
-      case 6:
-        strcpy(enzymeInformation.szSampleEnzymeName, "Asp_N");
-        enzymeInformation.iSampleEnzymeOffSet = 0;
-        strcpy(enzymeInformation.szSampleEnzymeBreakAA, "D");
-        strcpy(enzymeInformation.szSampleEnzymeNoBreakAA, "-");
-        break;
-      case 7:
-        strcpy(enzymeInformation.szSampleEnzymeName, "CNBr");
-        enzymeInformation.iSampleEnzymeOffSet = 1;
-        strcpy(enzymeInformation.szSampleEnzymeBreakAA, "M");
-        strcpy(enzymeInformation.szSampleEnzymeNoBreakAA, "-");
-        break;
-      case 8:
-        strcpy(enzymeInformation.szSampleEnzymeName, "Glu_C");
-        enzymeInformation.iSampleEnzymeOffSet = 1;
-        strcpy(enzymeInformation.szSampleEnzymeBreakAA, "DE");
-        strcpy(enzymeInformation.szSampleEnzymeNoBreakAA, "P");
-        break;
-      case 9:
-        strcpy(enzymeInformation.szSampleEnzymeName, "PepsinA");
-        enzymeInformation.iSampleEnzymeOffSet = 1;
-        strcpy(enzymeInformation.szSampleEnzymeBreakAA, "FL");
-        strcpy(enzymeInformation.szSampleEnzymeNoBreakAA, "P");
-        break;
-      case 10:
-        strcpy(enzymeInformation.szSampleEnzymeName, "Chymotrypsin");
-        enzymeInformation.iSampleEnzymeOffSet = 1;
-        strcpy(enzymeInformation.szSampleEnzymeBreakAA, "FWYL");
-        strcpy(enzymeInformation.szSampleEnzymeNoBreakAA, "P");
-        break;
-      default:
-        carp(CARP_FATAL, "Unknown enzyme number!");
-  }
-
-
-}
-
 /**
  * Sets the parameters for the Comet application using the crux parameters
  */
@@ -448,8 +293,33 @@ void CometApplication::setCometParameters(
   searchMgr.SetParam("decoy_search", get_string_parameter_pointer("decoy_search"), get_int_parameter("decoy_search"));
   
   EnzymeInfo enzymeInformation;
-  
-  getEnzymeInfo(get_int_parameter("search_enzyme_number"), get_int_parameter("sample_enzyme_number"), enzymeInformation);
+  double temp;
+  int search_enzyme_number = get_int_parameter("search_enzyme_number");
+  if (search_enzyme_number >=0 && search_enzyme_number <= get_comet_enzyme_info_lines().size()) {
+    const char* szParamBuf = get_comet_enzyme_info_lines()[search_enzyme_number].c_str();
+    sscanf(szParamBuf, "%lf %48s %d %20s %20s\n",
+      &temp, 
+      enzymeInformation.szSearchEnzymeName, 
+      &enzymeInformation.iSearchEnzymeOffSet, 
+      enzymeInformation.szSearchEnzymeBreakAA, 
+      enzymeInformation.szSearchEnzymeNoBreakAA);
+  } else {
+    carp(CARP_FATAL, "search_enzyme_number=%d out of range", search_enzyme_number);
+  }
+
+  int sample_enzyme_number = get_int_parameter("sample_enzyme_number");
+  if (sample_enzyme_number >= 0 && sample_enzyme_number <= get_comet_enzyme_info_lines().size()) {
+    const char* szParamBuf = get_comet_enzyme_info_lines()[sample_enzyme_number].c_str();
+    sscanf(szParamBuf, "%lf %48s %d %20s %20s\n",
+      &temp, 
+      enzymeInformation.szSampleEnzymeName, 
+      &enzymeInformation.iSampleEnzymeOffSet, 
+      enzymeInformation.szSampleEnzymeBreakAA, 
+      enzymeInformation.szSampleEnzymeNoBreakAA);
+  } else {
+    carp(CARP_FATAL, "sample_enzyme_number=%d out of range", sample_enzyme_number);
+  }
+  enzymeInformation.iAllowedMissedCleavage = get_int_parameter("allowed_missed_cleavage");
   searchMgr.SetParam("[COMET_ENZYME_INFO]", "TODO", enzymeInformation);
   
 }

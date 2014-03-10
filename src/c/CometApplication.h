@@ -80,16 +80,7 @@ class CometApplication: public CruxApplication {
     const char* str, ///< range string to set -in
     IntRange& intRangeParam ///< IntRange parameter -out
     );
-  
-  /*
-   * Sets the EnzymeInfo based upon the search_enzyme_number and the sample_enzyme_number
-   * Will be replaced later
-   */
-  void getEnzymeInfo(
-    int search_enzyme_number,
-    int sample_enzyme_number,
-    EnzymeInfo& enzymeInformation
-    );
+
 };
 
 
