@@ -25,7 +25,7 @@ class MassConstants {
   static const double elts_mono[];
   static const double elts_avg[];
 
-  static const double proton = 1.007276467;
+  static const double proton = 1.00727646688;
   static const double bin_width = 1.0005079;
 
   static bool Init(const pb::ModTable* mod_table);
