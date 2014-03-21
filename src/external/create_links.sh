@@ -31,8 +31,9 @@ ln -s -f libboost_thread-*-mt.a libboost_thread-mt-s.a
 ln -s -f libboost_thread-*-mt.a libboost_thread.a 
 ln -s -f libgd-*-mt-2_1.a libgd-mt-s-2_1.a   
 ln -s -f libgd-*-mt-2_1.a libgd.a   
-ln -s -f libz-*-mt-1_2.a libz-mt-s-1_2.a
-ln -s -f libz-*-mt-1_2.a libz.a
+[ -f libzlib.a ] &&
+  { ln -s -f libzlib.a libz-mt-s-1_2.a; ln -s -f libzlib.a libz.a; } ||
+  { ln -s -f libz-*-mt-1_2.a libz-mt-s-1_2.a; ln -s -f libz-*-mt-1_2.a libz.a; }
 ln -s -f libboost_filesystem-*-mt.a libboost_filesystem-mt-s.a 
 ln -s -f libboost_filesystem-*-mt.a libboost_filesystem.a 
 ln -s -f libboost_regex-*-mt.a  libboost_regex-mt-s.a     
