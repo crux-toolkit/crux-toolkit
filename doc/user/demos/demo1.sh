@@ -13,4 +13,5 @@ $CRUX tide-index small-yeast.fasta yeast-index
 $CRUX tide-search --compute-sp T demo.ms2 yeast-index
 $CRUX percolator crux-output/tide-search.target.txt 
 
-~/proj/utilities/rdb2html -noformatline crux-output/percolator.target.psms.txt > crux-output/percolator.target.psms.html
+rdb2html -noformatline crux-output/percolator.target.psms.txt \
+  > crux-output/percolator.target.psms.html
