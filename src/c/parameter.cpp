@@ -1213,6 +1213,12 @@ void initialize_parameters(void){
     "true"
   );
 
+  set_string_parameter("output_suffix","",
+          "specifies the suffix string that is appended to the base output name "
+          "for the pep.xml, pin.xml, txt and sqt output files."
+          "Default = \"\"",
+          "Available for comet.","true");
+
   set_double_parameter("peptide_mass_tolerance", 3.0, 0, BILLION,
                        "Controls the mass tolerance value.  The mass tolerance "
                        "is set at +/- the specified number i.e. an entered value "
@@ -3263,7 +3269,7 @@ void print_parameter_file(char** filename){
                                          overwrite);
 
   // Add header to file for comet parsing
-  fprintf(param_file, "# comet_version 2013.01 rev. 0"
+  fprintf(param_file, "# comet_version 2014.01 rev. 0"
           "\n# Comet MS/MS search engine parameters file."
           "\n# Everything following the \'#\' symbol is treated as a comment.\n");
 
