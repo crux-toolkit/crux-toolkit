@@ -168,6 +168,7 @@ void CometApplication::setCometParameters(
   
   searchMgr.SetParam("database_name", get_string_parameter_pointer("database_name"), get_string_parameter_pointer("database_name"));
   searchMgr.SetParam("decoy_prefix", get_string_parameter_pointer("decoy_prefix"), get_string_parameter_pointer("decoy_prefix"));
+  searchMgr.SetParam("output_suffix", get_string_parameter_pointer("output_suffix"), get_string_parameter_pointer("output_suffix"));
   searchMgr.SetParam("nucleotide_reading_frame", get_string_parameter_pointer("nucleotide_reading_frame"), get_int_parameter("nucleotide_reading_frame"));
   searchMgr.SetParam("mass_type_parent", get_string_parameter_pointer("mass_type_parent"), get_int_parameter("mass_type_parent"));
   searchMgr.SetParam("mass_type_fragment", get_string_parameter_pointer("mass_type_fragment"), get_int_parameter("mass_type_fragment"));
