@@ -6,10 +6,13 @@
          <ul>
          <li>This parameter controls the number of search result
          hits (peptides) that are reported for each spectrum query.
-         <li>If you are only interested in seeing one top each per
-         query, set this value to 1.
-         <li>The maximum possible number of reported hits is hardcoded
-         into each binary and that value is currently set to 100.
+         <li>If you are only interested in seeing one top hit each
+         per query, set this value to 1.
+         <li>This parameter value cannot be larger than the value
+         entered for "<a href="num_results.php">num_results</a>"
+         which itself is limited to a maximum value of 100.
+         <li>This parameter does not apply to the text output as
+         defined by "<a href="output_txtfile.php">output_txtfile</a>".
          <li>Valid values are any positive integer 1 or greater.
          <li>If a value less than 1 is entered, this parameter is set to 1.
          <li>The default value is "10" if this parameter is missing.
