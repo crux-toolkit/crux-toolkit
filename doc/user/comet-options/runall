@@ -1,10 +1,12 @@
-#!/bin/bash -x
+#!/bin/bash
 
 # The parameters files are in the binary release of comet, in a file
 # called paramters_<release>.zip.
 
-for file in *.php; do
-  ./convertCometPHPs.py $file > ${file%.php}.html
+for file in ~wnoble/software/comet-params_201401/*.php; do
+  if [[ -e $file ]]; then # Some symlinks point to missing files.
+    echo Converting $file
+    basename=`basename $file`
+    ./convertCometPHPs.py $file > ${basename%.php}.html
+  fi
 done
-
-rm sidebar.html imgbar.html
