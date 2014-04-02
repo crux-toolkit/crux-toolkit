@@ -61,7 +61,7 @@ installed.</p>
 
 <li>
 Each amino acid can be characterized either by its monoisotopic mass,
-which is the mass of the most common isotopic form of that amino acid,
+which is the mass of the most abundant isotopic form of that amino acid,
 or the average mass, which is a weighted average of the masses of all
 the isotopic forms.  By default, Crux uses average mass to calculate
 peptide masses, though this behavior can be controlled by the
@@ -73,16 +73,20 @@ via <code>mass_type_fragment</code>.</li>
 
 <li>
 The neutral mass of a peptide is not the sum of the masses of its
-amino acids.  The C-terminus of the peptide has an additional water
-group, whose mass is either 18.010564684 Da (monoisotopic) or 18.0153
-Da (average).  Note that, for cleavage ions, this additional mass
-should be added to the mass of a y-ion, but not to a b-ion.</li>
+amino acids.  The N-terminus and C-terminus of the peptide together
+contribute an additional water molecule, whose mass is either
+18.010564684 Da (monoisotopic) or 18.0153 Da (average).  When a peptide
+fragments, each b-ion will have a mass equal to the sum of its amino
+acids plus the mass of a hydrogen (1.007825035 monoisotopic, 1.00794
+average), while each y-ion will have a mass equal to the sum of its
+amino acids plus water plus a hydrogen (19.018389719 monoisotopic,
+19.02324 average).</li>
 
 <li>
 By default, both Tide and Comet add a static modification of
 57.021464 Da to all cysteines.  This is because in most protein
-preparation protocols the peptides are alkylated with iodoacetamise,
-resulting in carbidomethylation of cysteine. The alkylation step
+preparation protocols the peptides are alkylated with iodoacetamide,
+resulting in carbamidomethylation of cysteine. The alkylation step
 prevents the reformation of disulfide bonds.  Other alykylation
 reagents may be used, in which case the appropriate mass shift can be
 specified with the <code>C=[mass]</code> option
@@ -92,10 +96,28 @@ to <code>comet</code>.</li>
 <li>
 A charged peptide has an additional approximately 1 Da mass for each
 charge, corresponding to the mass of a hydrogen atom.  The exact mass
-to be added depend on whether we are using the monoisotopic mass
-(1.0078246) or average mass (1.00794).</li>
+to be added depends on whether we are using the monoisotopic mass
+(1.007825035) or average mass (1.00794).</li>
 
 </ul>
+</p>
+
+<li>
+<b>How does Crux assign fragment masses to bins prior to computing
+the XCorr score?</b>
+</li>
+
+<p>The XCorr score is essentially a dot product between a preprocessed
+form of the observed spectrum and the theoretical spectrum derived
+from the candidate peptide. In order to compute this dot product, the
+masses of the fragments in both spectra are assigned to discrete mass
+bins. This can be viewed as a form of rounding, but with more control
+over the discrete masses. Two parameters, <code>bin-width</code> and
+<code>bin-offset</code>, control the size and location of the bins,
+and are used to convert fragment masses according to this formula:</p>
+<p align=center>binned mass = floor( ( original mass / <code>bin-width</code> ) + 1.0 - <code>bin-offset</code> )</p>
+<p>The default values <code>bin-width</code>=1.0005079 and <code>bin-offset</code>=0.40
+are suitable for most low-resolution datasets.
 </p>
 
 <li>
