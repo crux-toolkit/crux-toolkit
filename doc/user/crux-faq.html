@@ -75,12 +75,18 @@ via <code>mass_type_fragment</code>.</li>
 The neutral mass of a peptide is not the sum of the masses of its
 amino acids.  The N-terminus and C-terminus of the peptide together
 contribute an additional water molecule, whose mass is either
-18.010564684 Da (monoisotopic) or 18.0153 Da (average).  When a peptide
-fragments, each b-ion will have a mass equal to the sum of its amino
-acids plus the mass of a hydrogen (1.007825035 monoisotopic, 1.00794
-average), while each y-ion will have a mass equal to the sum of its
-amino acids plus water plus a hydrogen (19.018389719 monoisotopic,
-19.02324 average).</li>
+18.010564684 Da (monoisotopic) or 18.0153 Da (average).</li>
+<li>
+A charged peptide has an additional approximately 1 Da mass for each
+charge, corresponding to the mass of a hydrogen atom.  The exact mass
+to be added depends on whether we are using the monoisotopic mass
+(1.007825035) or average mass (1.00794).</li>
+
+<li>When a peptide fragments, each b-ion will have a mass equal to
+the sum of its amino acids plus one hydrogen for each charge on the
+fragment, while each y-ion will have a mass equal to the sum of its
+amino acids plus water plus one hydrogen for each charge on the
+fragment.</li>
 
 <li>
 By default, both Tide and Comet add a static modification of
@@ -92,12 +98,6 @@ reagents may be used, in which case the appropriate mass shift can be
 specified with the <code>C=[mass]</code> option
 to <code>tide-index</code> or the <code>add_C_cysteine</code> option
 to <code>comet</code>.</li>
-
-<li>
-A charged peptide has an additional approximately 1 Da mass for each
-charge, corresponding to the mass of a hydrogen atom.  The exact mass
-to be added depends on whether we are using the monoisotopic mass
-(1.007825035) or average mass (1.00794).</li>
 
 </ul>
 </p>
