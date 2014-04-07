@@ -271,7 +271,7 @@ results file to the output directory. Default = F.</li>
 <li><b>Concatenated Search (Using Comet and/or Tide):</b><br>
   <br>
   1) Generate a decoy protein fasta:<br>
-  <code>crux create-index decoys=protein-shuffle proteins.fasta temp-index</code><br>
+  <code>crux create-index decoys protein-shuffle proteins.fasta temp-index</code><br>
   <br>
   2) Create concatenated fasta:<br>
   <code>cat proteins.fasta ./temp-index/proteins-random.fasta > target-decoy.fasta</code><br>
@@ -283,7 +283,7 @@ results file to the output directory. Default = F.</li>
   <code>crux tide-index --decoy-format none target-decoy.fasta tide-index</code><br>
   <code>crux tide-search spectra.mzXML.gz tide-index</code><br>
   <br>
-  5) Convert spectra to ms2:<br>
+  5) If needed, convert spectra to ms2:<br>
   crux get-ms2-spectrum spectra.mzXML.gz > spectra.ms2<br>
   <br>
   6) Run barista:<br>
@@ -295,7 +295,7 @@ results file to the output directory. Default = F.</li>
 <li><b>Separate Search:</b><br>
 <br>
 <b>Using Comet:</b><br>
-<code>crux create-index decoys=protein-shuffle proteins.fasta temp-index<br>
+<code>crux create-index decoys protein-shuffle proteins.fasta temp-index<br>
 cat proteins.fasta ./temp-index/proteins-random.fasta > target-decoy.fasta<br>
 crux comet --output-dir target-search --decoy_search 0 spectra.mzXML.gz proteins.fasta<br>
 crux comet --output-dir decoy-search --decoy_search 0 spectra.mzXML.gz ./temp-index/proteins-random.fasta<br>
@@ -304,7 +304,7 @@ crux barista --separate-searches decoy-search/comet.target.txt target-decoy.fast
 <br>
 <b>Using Tide-Search:</b><br>
 <code>
-crux create-index decoys=protein-shuffle proteins.fasta temp-index<br>
+crux create-index decoys protein-shuffle proteins.fasta temp-index<br>
 cat proteins.fasta ./temp-index/proteins-random.fasta > target-decoy.fasta<br>
 crux tide-index --decoy-format none proteins.fasta target-index<br>
 crux tide-index --decoy-format none ./temp-index/proteins-random.fasta decoy-index<br>
