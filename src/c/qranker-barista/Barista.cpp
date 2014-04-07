@@ -1611,10 +1611,9 @@ void Barista :: report_all_results_xml()
     xml_file_name << out_dir << "/" << fileroot << "barista.target.pep.xml";
     PepXMLWriter xmlfile;
     xmlfile.openFile(xml_file_name.str().c_str(), overwrite_flag);
-
-    //...
-    xmlfile.closeFile();
     write_results_pep_xml(xmlfile);
+
+    xmlfile.closeFile();
   }
 
   

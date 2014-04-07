@@ -2329,7 +2329,21 @@ void initialize_parameters(void){
     "Available for crux extract-rows",
     "true");
 
-  
+  // Default comet enzyme lines
+  comet_enzyme_info_lines_.push_back("0.  No_enzyme\t\t\t\t0       -           -");
+  comet_enzyme_info_lines_.push_back("1.  Trypsin\t\t\t\t1      KR           P");
+  comet_enzyme_info_lines_.push_back("2.  Trypsin/P\t\t\t\t1      KR           -");
+  comet_enzyme_info_lines_.push_back("3.  Lys_C\t\t\t\t1      K            P");
+  comet_enzyme_info_lines_.push_back("4.  Lys_N\t\t\t\t0      K            -");
+  comet_enzyme_info_lines_.push_back("5.  Arg_C\t\t\t\t1      R            P");
+  comet_enzyme_info_lines_.push_back("6.  Asp_N\t\t\t\t0      D            -");
+  comet_enzyme_info_lines_.push_back("7.  CNBr\t\t\t\t1      M            -");
+  comet_enzyme_info_lines_.push_back("8.  Glu_C\t\t\t\t1      DE           P");
+  comet_enzyme_info_lines_.push_back("9.  PepsinA\t\t\t\t1      FL           P");
+  comet_enzyme_info_lines_.push_back("10. Chymotrypsin\t\t\t1      FWYL         P");
+ 
+
+ 
   // now we have initialized the parameters
   parameter_initialized = true;
   usage_initialized = true;
@@ -3490,7 +3504,8 @@ void parse_parameter_file(
       comet_enzyme_info_lines_.push_back(line);
     } else {
       if (line.find("[COMET_ENZYME_INFO]") != string::npos) {
-        found_comet = true;
+        comet_enzyme_info_lines_.clear();
+	found_comet = true;
       } else {
         for (string::iterator iter = line.begin(); iter != line.end(); ++iter) {
 
@@ -3524,8 +3539,8 @@ void parse_parameter_file(
       }
     }
   }
-
   if (comet_enzyme_info_lines_.size() == 0) {
+    carp(CARP_WARNING, "putting in default comet enzyme lines");
     comet_enzyme_info_lines_.push_back("0.  No_enzyme\t\t\t\t0       -           -");
     comet_enzyme_info_lines_.push_back("1.  Trypsin\t\t\t\t1      KR           P");
     comet_enzyme_info_lines_.push_back("2.  Trypsin/P\t\t\t\t1      KR           -");

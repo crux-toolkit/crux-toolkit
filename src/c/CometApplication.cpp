@@ -305,7 +305,7 @@ void CometApplication::setCometParameters(
       enzymeInformation.szSearchEnzymeBreakAA, 
       enzymeInformation.szSearchEnzymeNoBreakAA);
   } else {
-    carp(CARP_FATAL, "search_enzyme_number=%d out of range", search_enzyme_number);
+    carp(CARP_FATAL, "search_enzyme_number=%d out of range (%d)", search_enzyme_number, get_comet_enzyme_info_lines().size());
   }
 
   int sample_enzyme_number = get_int_parameter("sample_enzyme_number");
