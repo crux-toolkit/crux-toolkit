@@ -1,6 +1,6 @@
 /**
  * \file PercolatorApplication.cpp 
- * \brief Runs hardklor
+ * \brief Runs Percolator
  *****************************************************************************/
 #include "MakePinApplication.h"
 #include "PercolatorApplication.h"
@@ -87,7 +87,6 @@ int PercolatorApplication::main(int argc, char** argv) {
     "pepxml-output",
     "feature-file",
     "list-of-files",
-    "feature-in-file",
     "parameter-file",
     "protein",
     "decoy-xml-output",
@@ -110,7 +109,6 @@ int PercolatorApplication::main(int argc, char** argv) {
     "seed",
     "klammer",
     //"doc",
-    "only-psms",
     "allow-protein-group",
     "protein-level-pi0",
     "empirical-protein-q",
@@ -124,7 +122,7 @@ int PercolatorApplication::main(int argc, char** argv) {
   int num_options = sizeof(option_list) / sizeof(char*);
   
   /* Define required command line arguments */
-  const char* argument_list[] = {"pin.xml"};
+  const char* argument_list[] = {"pin"};
   int num_arguments = sizeof(argument_list) / sizeof(char*);
 
   /* Initialize the application */
@@ -137,51 +135,44 @@ int PercolatorApplication::main(int argc, char** argv) {
     argv)
   ;
 
-  string input_pinxml(get_string_parameter_pointer("pin.xml"));
+  string input_pin(get_string_parameter_pointer("pin"));
 
-  if (has_extension(input_pinxml.c_str(), "pin.xml") &&
-      get_int_parameter("top-match") != 5) {
-    carp(CARP_FATAL, "top-match parameter cannot be used in conjunction with a pin.xml file!");
-  }
-  
-  if (!get_boolean_parameter("feature-in-file")) {
-    // Check if we need to run make-pin first
-    if (get_boolean_parameter("list-of-files") || 
-        has_extension(input_pinxml.c_str(), "txt") ||
-        has_extension(input_pinxml.c_str(), "sqt") ||
-        has_extension(input_pinxml.c_str(), "pep.xml") ||
-        has_extension(input_pinxml.c_str(), "mzid")) {
+  // Check if we need to run make-pin first
+  if (get_boolean_parameter("list-of-files") || 
+      has_extension(input_pin.c_str(), "txt") ||
+      has_extension(input_pin.c_str(), "sqt") ||
+      has_extension(input_pin.c_str(), "pep.xml") ||
+      has_extension(input_pin.c_str(), "mzid")) {
 
-      vector<string> result_files;
-      get_search_result_paths(input_pinxml, result_files);
+    vector<string> result_files;
+    get_search_result_paths(input_pin, result_files);
 
-      string pin_location = string(get_string_parameter_pointer("output-dir")) +
-                            "/make-pin.pin.xml";
+    string pin_location = string(get_string_parameter_pointer("output-dir")) +
+                          "/make-pin.pin";
 
-      const char* make_pin_file = pin_location.c_str();
+    const char* make_pin_file = pin_location.c_str();
 
-      carp(CARP_INFO, "Running make-pin");
-      int ret = MakePinApplication::main(result_files);
+    carp(CARP_INFO, "Running make-pin");
+    int ret = MakePinApplication::main(result_files);
 
-      if (ret != 0 || !file_exists(make_pin_file)) {
-        carp(CARP_FATAL, "make-pin failed. Not running Percolator.");
-      }
-      carp(CARP_INFO, "Finished make-pin.");
-      input_pinxml = string(make_pin_file);
-    } else if (!has_extension(input_pinxml.c_str(), "pin.xml")) {
-        carp(CARP_FATAL, "input file %s is not recognized.", input_pinxml.c_str() );
+    if (ret != 0 || !file_exists(make_pin_file)) {
+      carp(CARP_FATAL, "make-pin failed. Not running Percolator.");
     }
+    carp(CARP_INFO, "Finished make-pin.");
+    input_pin = string(make_pin_file);
+  } else if (!has_extension(input_pin.c_str(), "pin")) {
+      carp(CARP_FATAL, "input file %s is not recognized.", input_pin.c_str() );
   }
-  return main(input_pinxml);
+  return main(input_pin);
 
 }
 
 /**
- * \brief runs percolator on the input pin.xml
+ * \brief runs percolator on the input pin
  * \returns whether percolator was successful or not
  */
 int PercolatorApplication::main(
-  const string& input_pinxml ///< file path of pin.xml to process.
+  const string& input_pin ///< file path of pin to process.
   ) {
 
   /* Write the data files */
@@ -190,15 +181,9 @@ int PercolatorApplication::main(
   string output_target_tab = make_file_path("percolator.target.txt");
   string output_decoy_tab = make_file_path("percolator.decoy.txt");
 
-
-
   /* build argument list */
   vector<string> perc_args_vec;
   perc_args_vec.push_back("percolator");
-
-
-  perc_args_vec.push_back("-X");
-  perc_args_vec.push_back(output_xml);
 
   // These files will be removed later
   // They are only set so that the tab-delimited info is not written to stdout
@@ -234,7 +219,7 @@ int PercolatorApplication::main(
     
   bool set_protein = get_boolean_parameter("protein");
 
-  if(get_boolean_parameter("protein")){
+  if(set_protein){
      perc_args_vec.push_back("-A");
   }
   
@@ -312,19 +297,18 @@ int PercolatorApplication::main(
 
   if(get_boolean_parameter("unitnorm"))
     perc_args_vec.push_back("-u");
-  
 
   if(set_protein){
     if (get_double_parameter("alpha") > 0) {
-      perc_args_vec.push_back("--alpha");
+      perc_args_vec.push_back("--fido-alpha");
       perc_args_vec.push_back(to_string(get_double_parameter("alpha")));
     }
     if (get_double_parameter("beta") > 0) {
-      perc_args_vec.push_back("--beta");
+      perc_args_vec.push_back("--fido-beta");
       perc_args_vec.push_back(to_string(get_double_parameter("beta")));
     }
     if (get_double_parameter("gamma") > 0) {
-      perc_args_vec.push_back("--gamma");
+      perc_args_vec.push_back("--fido-gamma");
       perc_args_vec.push_back(to_string(get_double_parameter("gamma")));
     }
   }
@@ -336,15 +320,11 @@ int PercolatorApplication::main(
   if(get_boolean_parameter("static-override")){
     perc_args_vec.push_back("--override");
   }
-
-  
-  
  
   if(get_boolean_parameter("klammer"))
       perc_args_vec.push_back("--klammer");
 
-
-  /* --doc option disabled, need retention times in pinxml file
+  /* --doc option disabled, need retention times in pin file
   int doc_parameter = get_int_parameter("doc");
   if(doc_parameter >= 0) {
     perc_args_vec.push_back("--doc");
@@ -352,13 +332,9 @@ int PercolatorApplication::main(
   }
   */
 
-  if (get_boolean_parameter("only-psms") && !set_protein) { 
-    perc_args_vec.push_back("--unique-peptides");
-  }
-  
   // FIXME include schema as part of distribution and add option to turn on validation
-    perc_args_vec.push_back("-s");
-  
+  perc_args_vec.push_back("-s");
+
   if(get_boolean_parameter("allow-protein-group"))
     perc_args_vec.push_back("allow-protein-group");
  
@@ -369,25 +345,18 @@ int PercolatorApplication::main(
     if(get_boolean_parameter("empirical-protein-q"))
        perc_args_vec.push_back("--empirical-protein-q");
 
-    if(get_boolean_parameter("group-proteins"))
-       perc_args_vec.push_back("--group-proteins");
+    if(!get_boolean_parameter("group-proteins"))
+       perc_args_vec.push_back("--fido-no-group-proteins");
     
     if(get_boolean_parameter("no-prune-proteins"))
-      perc_args_vec.push_back("--no-prune-proteins"); 
-   
-    perc_args_vec.push_back("--deepness");
+      perc_args_vec.push_back("--fido-no-prune-proteins"); 
+
+    perc_args_vec.push_back("--fido-gridsearch-depth");
     perc_args_vec.push_back(to_string(get_int_parameter("deepness")));
   }
   
-  //This has to be a the end in order for it to work.
-  if(get_boolean_parameter("feature-in-file")) {
-    perc_args_vec.push_back("-j");
-  }
+   perc_args_vec.push_back(input_pin);
 
-  
-   perc_args_vec.push_back(input_pinxml);
-
-   
   /* build argv line */
   int perc_argc = perc_args_vec.size();
 
@@ -414,12 +383,18 @@ int PercolatorApplication::main(
   }
 
   // remove tab files
-  remove(output_target_tab.c_str());
-  remove(output_decoy_tab.c_str());
+  remove(string(output_target_tab + ".peptides").c_str());
+  remove(string(output_target_tab + ".psms").c_str());
+  remove(string(output_decoy_tab + ".peptides").c_str());
+  remove(string(output_decoy_tab + ".psms").c_str());
+  if (set_protein) {
+    remove(string(output_target_tab + ".proteins").c_str());
+    remove(string(output_decoy_tab + ".proteins").c_str());
+  }
 
   // get percolator score information into crux objects
-  
-  ProteinMatchCollection* protein_match_collection = pCaller->getProteinMatchCollection();
+  ProteinMatchCollection* protein_match_collection =
+    pCaller->getProteinMatchCollection();
   ProteinMatchCollection* decoy_protein_match_collection =
     pCaller->getDecoyProteinMatchCollection();
   string output_dir = string(get_string_parameter_pointer("output-dir"));

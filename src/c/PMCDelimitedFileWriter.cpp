@@ -501,7 +501,7 @@ void PMCDelimitedFileWriter::addScoreIfExists(
   if (match->hasScore(scoreType)) {
     setColumnCurrentRow(column, match->getScore(scoreType));
   } else {
-    setColumnCurrentRow(column, 0);
+    setColumnCurrentRow(column, -1);
   }
 }
 
@@ -516,7 +516,7 @@ void PMCDelimitedFileWriter::addRankIfExists(
   if (match->hasRank(scoreType)) {
     setColumnCurrentRow(column, match->getRank(scoreType));
   } else {
-    setColumnCurrentRow(column, 0);
+    setColumnCurrentRow(column, -1);
   }
 }
 

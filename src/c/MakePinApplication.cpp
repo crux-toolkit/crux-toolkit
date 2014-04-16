@@ -2,7 +2,7 @@
  *\file MakePinApplication.cpp 
  *****************************************************************************/
 #include "MakePinApplication.h"
-#include "PinXMLWriter.h"
+#include "PinWriter.h"
 #include "parameter.h"
 #include "MatchCollectionParser.h"
 #include <sstream>
@@ -145,7 +145,7 @@ int MakePinApplication::main(vector<string>& paths) {
     carp(CARP_FATAL, "No decoy matches found!  Did you set 'decoy-prefix' properly?");
   }
 
-  PinXMLWriter* writer = new PinXMLWriter();
+  PinWriter* writer = new PinWriter();
 
   string output_dir=get_string_parameter_pointer("output-dir");
  
@@ -157,17 +157,14 @@ int MakePinApplication::main(vector<string>& paths) {
       fileroot = "";
     else
       fileroot += ".";
-    output_filename = fileroot + "make-pin.pin.xml";
+    output_filename = fileroot + "make-pin.pin";
   }
   writer->openFile(output_filename.c_str(),output_dir.c_str(), get_boolean_parameter("overwrite"));
 
-  //set process information 
-  writer->setProcessInfo(paths[0].c_str(), paths[paths.size()-1].c_str());
- //write .pin.xml file 
+ //write .pin file 
   vector<MatchCollection*> decoys;
   decoys.push_back(decoy_collection);
   writer->write(target_collection, decoys, get_int_parameter("top-match"));
-  writer->printFooter();
 
   //close file 
   writer->closeFile();
