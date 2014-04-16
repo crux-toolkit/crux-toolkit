@@ -40,7 +40,7 @@ int TideSearchApplication::main(int argc, char** argv) {
     "sqt-output",
     "pepxml-output",
     "mzid-output",
-    "pinxml-output",
+    "pin-output",
     "fileroot",
     "output-dir",
     "overwrite",
@@ -227,7 +227,7 @@ int TideSearchApplication::main(int argc, char** argv) {
   bool txt_only = !get_boolean_parameter("sqt-output") &&
                   !get_boolean_parameter("pepxml-output") &&
                   !get_boolean_parameter("mzid-output") &&
-                  !get_boolean_parameter("pinxml-output");
+                  !get_boolean_parameter("pin-output");
   OutputFiles* output_files = NULL;
   ofstream* target_file = NULL;
   ofstream* decoy_file = NULL;

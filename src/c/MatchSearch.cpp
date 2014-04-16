@@ -277,7 +277,6 @@ int MatchSearch::main(int argc, char** argv){
     "overwrite",
     "sqt-output",
     "mzid-output",
-    "pinxml-output",
     "pepxml-output",
     "txt-output",
     "num-decoys-per-target",

@@ -553,8 +553,7 @@ int compareSpectrumBaristaScore(
 
 
 /**
- * Compare two matches by spectrum scan number,
- * used for PinXMLWriter. 
+ * Compare two matches by spectrum scan number
  * \returns -1 if match a spectrum number is less than that of match b
  * or if scan number is same, if score of match a is less than
  * match b.  1 if scan number and score are equal, else 0.
