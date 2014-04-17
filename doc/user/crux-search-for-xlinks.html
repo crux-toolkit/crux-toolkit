@@ -341,18 +341,17 @@ The maximum length of the peptides to place in the index. Default = 50.
 </li>
 
 <LI>
-<code>enzyme trypsin|chymotrypsin|elastase|clostripain|cyanogen-bromide|idosobenzoate|proline-endopeptidase|staph-protease|modified-chymotrypsin|elastase-trypsin-chymotrypsin|no-enzyme
-</code> &ndash; 
+<code>--enzyme trypsin|trypsin/p|chymotrypsin|elastase|clostripain|cyanogen-bromide|idosobenzoate|proline-endopeptidase|staph-protease|asp-n|lys-c|lys-n|arg-c|glu-c|pepsin-a|elastase-trypsin-chymotrypsin|no-enzyme</code> &ndash;
 Enzyme to use for <i>in silico</i> digestion of protein sequences. Used
 in conjunction with the options digestion and missed-cleavages. Use
 'no-enzyme' for non-specific digestion.  Digestion rules are as
 follows: enzyme name [cuts after one of these residues]|{but not before
-one of these residues}.  trypsin [RK]|{P}, elastase [ALIV]|{P},
-chymotrypsin [FWY]|{P}, clostripain [R]|[], cyanogen-bromide [M]|[],
-iodosobenzoate [W]|[], proline-endopeptidase [P]|[], staph-protease
-[E]|[], modified-chymotrypsin [FWYL]|{P},
-elastase-trypsin-chymotrypsin [ALIVKRWFY]|{P},aspn []|[D] (cuts before
-D). Default = trypsin.
+one of these residues}. trypsin [RK]|{P}, trypsin/p [RK]|[], elastase [ALIV]|{P},
+chymotrypsin [FWYL]|{P}, clostripain [R]|[], cyanogen-bromide [M]|[],
+iodosobenzoate [W]|[], proline-endopeptidase [P]|[], staph-protease [E]|[],
+elastase-trypsin-chymotrypsin [ALIVKRWFY]|{P}, asp-n []|[D], lys-c [K]|{P},
+lys-n []|[K], arg-c [R]|{P}, glu-c [DE]|{P}, pepsin-a [FL]|{P}.
+Default = trypsin.
 </li>
 
 <li>

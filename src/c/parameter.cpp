@@ -497,14 +497,14 @@ void initialize_parameters(void){
       "search-for-matches. Digestion rules are as "
       "follows: enzyme name [cuts after one of these residues][but not before "
       "one of these residues].  trypsin [RK][P], elastase [ALIV][P], "
-      "chymotrypsin [FWY][P].",
+      "chymotrypsin [FWYL][P].",
       "true");
   set_enzyme_type_parameter("enzyme", TRYPSIN,
       "Enzyme to use for in silico digestion of proteins. "
       "<string>=no-enzyme|trypsin|trypsin/p|chymotrypsin| " 
       "elastase|clostripain|cyanogen-bromide|iodosobenzoate| " 
-      "proline-endopeptidase|staph-protease|aspn|lys-c "
-      "lys-n|arg-c|glue-c|pepsin-a|modified-chymotrypsin| "
+      "proline-endopeptidase|staph-protease|asp-n|lys-c "
+      "lys-n|arg-c|glu-c|pepsin-a| "
       "|elastase-trypsin-chymotrypsin|custom-enzyme. "
       "Default=trypsin.", 
       "Used in conjunction with the options digestion and missed-cleavages. "
@@ -513,13 +513,13 @@ void initialize_parameters(void){
       "crux create-index, crux tide-index, and crux generate-decoys.  "
       "Available from parameter file for crux search-for-matches. "
       "Digestion rules: enzyme name [cuts after one of these residues]|{but "
-      "not before one of these residues}. trypsin [RK]|{P}, elastase "
-      "[ALIV]|{P}, chymotrypsin [FWY]|{P}, clostripain [R]|[], "
+      "not before one of these residues}. trypsin [RK]|{P}, trypsin/p [RK]|[], "
+      "elastase [ALIV]|{P}, chymotrypsin [FWYL]|{P}, clostripain [R]|[], "
       "cyanogen-bromide [M]|[], iodosobenzoate [W]|[], proline-endopeptidase "
-      "[P]|[], staph-protease [E]|[], modified-chymotrypsin [FWYL]|{P}, "
-      "elastase-trypsin-chymotrypsin [ALIVKRWFY]|{P},aspn []|[D] (cuts before "
-      "D), lys-c [K]|{P}, lys-n []|[K] (cuts before K), arg-c [R]|{P}, glue-c "
-      "[DE]|{P}, pepsin-a [FL]|{P}.", "true");
+      "[P]|[], staph-protease [E]|[], elastase-trypsin-chymotrypsin "
+      "[ALIVKRWFY]|{P},asp-n []|[D] (cuts before D), lys-c [K]|{P}, lys-n "
+      "[]|[K] (cuts before K), arg-c [R]|{P}, glu-c [DE]|{P}, pepsin-a "
+      "[FL]|{P}.", "true");
 
   set_window_type_parameter("precursor-window-type", WINDOW_MASS,
       "Window type to use for selecting candidate "
