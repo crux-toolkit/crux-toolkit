@@ -137,7 +137,7 @@ enum _enzyme_type {
   NO_ENZYME,             ///< cleave anywhere
   TRYPSIN,               ///< cleave after K or R, not before P
   TRYPSINP,               ///< cleave after K or R
-  CHYMOTRYPSIN,          ///< cleave after FWY, not before P
+  CHYMOTRYPSIN,          ///< cleave after FWYL, not before P
   ELASTASE,              ///< cleave after ALIV, not before P
   CLOSTRIPAIN,           ///< cleave after R
   CYANOGEN_BROMIDE,      ///< cleave after M
@@ -150,7 +150,6 @@ enum _enzyme_type {
   ARGC,                  ///< cleave after R, not before P
   GLUC,                  ///< cleave after D or E, not before P
   PEPSINA,               ///< cleave after FL, not before P 
-  MODIFIED_CHYMOTRYPSIN, ///< cleave after FWYL, not before P
   ELASTASE_TRYPSIN_CHYMOTRYPSIN, ///< cleave after ALIVKRWFY, not before P
   CUSTOM_ENZYME,         ///< cleave after/before user-defined residues
   NUMBER_ENZYME_TYPES    ///< leave last, number of types

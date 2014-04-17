@@ -288,7 +288,7 @@ precursor-ions=false
 # generate-decoys. Available from parameter file for crux
 # search-for-matches. Digestion rules are as follows: enzyme name [cuts
 # after one of these residues][but not before one of these residues]. 
-# trypsin [RK][P], elastase [ALIV][P], chymotrypsin [FWY][P].
+# trypsin [RK][P], elastase [ALIV][P], chymotrypsin [FWYL][P].
 digestion=full-digest
 
 # Replace existing files (T) or exit if attempting to overwrite (F).
@@ -851,8 +851,8 @@ sn-window=250.000000
 # Enzyme to use for in silico digestion of proteins.
 # <string>=no-enzyme|trypsin|trypsin/p|chymotrypsin|
 # elastase|clostripain|cyanogen-bromide|iodosobenzoate|
-# proline-endopeptidase|staph-protease|aspn|lys-c
-# lys-n|arg-c|glue-c|pepsin-a|modified-chymotrypsin|
+# proline-endopeptidase|staph-protease|asp-n|lys-c
+# lys-n|arg-c|glue-c|pepsin-a|
 # |elastase-trypsin-chymotrypsin|custom-enzyme. Default=trypsin.
 # Used in conjunction with the options digestion and missed-cleavages.
 # Use 'no-enzyme' for non-specific digestion.  Available from command
@@ -860,13 +860,12 @@ sn-window=250.000000
 # crux tide-index, and crux generate-decoys.  Available from parameter
 # file for crux search-for-matches. Digestion rules: enzyme name [cuts
 # after one of these residues]|{but not before one of these residues}.
-# trypsin [RK]|{P}, elastase [ALIV]|{P}, chymotrypsin [FWY]|{P},
+# trypsin [RK]|{P}, elastase [ALIV]|{P}, chymotrypsin [FWYL]|{P},
 # clostripain [R]|[], cyanogen-bromide [M]|[], iodosobenzoate [W]|[],
 # proline-endopeptidase [P]|[], staph-protease [E]|[],
-# modified-chymotrypsin [FWYL]|{P}, elastase-trypsin-chymotrypsin
-# [ALIVKRWFY]|{P},aspn []|[D] (cuts before D), lys-c [K]|{P}, lys-n
-# []|[K] (cuts before K), arg-c [R]|{P}, glue-c [DE]|{P}, pepsin-a
-# [FL]|{P}.
+# elastase-trypsin-chymotrypsin [ALIVKRWFY]|{P},asp-n []|[D] (cuts before
+# D), lys-c [K]|{P}, lys-n []|[K] (cuts before K), arg-c [R]|{P}, glue-c
+# [DE]|{P}, pepsin-a [FL]|{P}.
 enzyme=trypsin
 
 # Specifies the data type the column contains (int|real|string) Default:

@@ -80,9 +80,6 @@ bool ProteinPeptideIterator::validCleavagePosition(
   //trypsin/p k or r 
   case TRYPSINP:
     return sequence[0] == 'K' || sequence[0] == 'R';
-  case CHYMOTRYPSIN:
-    return (sequence[0] == 'F' || sequence[0] == 'W' ||
-            sequence[0] == 'Y') && sequence[1] != 'P';
   case ELASTASE:
     return (sequence[0] == 'A' || sequence[0] == 'L' ||
             sequence[0] == 'I' || sequence[0] == 'V') && sequence[1] != 'P';
@@ -108,7 +105,7 @@ bool ProteinPeptideIterator::validCleavagePosition(
     return (sequence[0] == 'D' || sequence[0] == 'E') && sequence[1] != 'P';
   case PEPSINA:
     return (sequence[0] == 'F' || sequence[0] == 'L') && sequence[1] != 'P';
-  case MODIFIED_CHYMOTRYPSIN:
+  case CHYMOTRYPSIN:
     return (sequence[0] == 'F' || sequence[0] == 'L' ||
             sequence[0] == 'W' || sequence[0] == 'Y') && sequence[1] != 'P';
   case ELASTASE_TRYPSIN_CHYMOTRYPSIN:
