@@ -1094,9 +1094,9 @@ void initialize_parameters(void){
     "Available for tide-index",
     "true"
   );
-  set_boolean_parameter("monoisotopic-precursor", false,
+  set_boolean_parameter("monoisotopic-precursor", true,
     "Use monoisotopic precursor masses rather than average mass for precursor. "
-    "Default=F.",
+    "Default=T.",
     "Available for tide-index",
     "true"
   );
