@@ -1,17 +1,19 @@
-<HTML>
-<HEAD>
-<TITLE>crux print-processed-spectra</TITLE>
-</HEAD>
-<BODY>
+<html>
+<head>
+<title>crux print-processed-spectra</title>
+<link href="./crux.css" rel="styleSheet" type="text/css">
+</head>
+<body>
 <blockquote>
 <H1 ALIGN=CENTER>crux print-processed-spectra</H1>
-<B>Usage:</B>
+
+<h2>Usage:</h2>
 
 <blockquote>
-<code>crux print-processed-spectra &lt;ms2 file&gt; &lt;output file&gt;</code>
+<code>crux print-processed-spectra &lt;spectra&gt; &lt;output file&gt;</code>
 </blockquote>
 
-<B>Description:</B>
+<h2>Description:</h2>
 
 <p>
 Pre-process each spectrum in a given file in preparation for computing
@@ -31,27 +33,27 @@ The output of this program is equivalent to the spectrum shown in
 Figure 1D of the above paper.</p>
 
 <p>
-<B>Input:</b>
+<h2>Input:</h2>
 
 <ul>
-  <li>&lt;ms2 file&gt; &ndash;
-  The name of the ms2 file containing spectra to process
+  <li>&lt;spectra&gt; &ndash; The name of the file containing spectra to process
 </ul>
 
-<B>Output:</b>
+<h2>Output:</h2>
 
 <ul>
   <li>&lt;output file&gt; &ndash;
-  The name of the ms2 file in which the processed spectra will be printed.
+  The name of the file in which the processed spectra will be printed
+  in MS2 format.
 </ul>
 
-<b>Options:</b>
+<h2>Options:</h2>
 
 <ul>
+
 <li>
-<code>--spectrum-parser &lt;pwiz|mstoolkit|crux&gt;</code> &ndash;
-Parser to use for reading in MS/MS spectra.  Default = crux.</li>
-</ul>
+<code>--spectrum-parser &lt;pwiz|mstoolkit&gt;</code> &ndash;
+Parser to use for reading in MS/MS spectra.  Default = pwiz.</li>
 
 <LI>
 <code>--verbosity &lt;0-100&gt;</code> &ndash; Specify the verbosity of the
@@ -70,6 +72,8 @@ for details.  Default = no parameter file.</li>
 <code>--overwrite &lt;T|F&gt;</code> &ndash;
 Replace existing files if true (T) or fail when trying to overwrite a
 file if false (F). Default =  F.</li>
+
+</ul>
 
 <hr></hr>
 
