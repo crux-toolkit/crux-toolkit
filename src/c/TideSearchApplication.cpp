@@ -434,8 +434,8 @@ void TideSearchApplication::search(
       double binWidth   = get_double_parameter( "mz-bin-width" );
       double binOffset  = get_double_parameter( "mz-bin-offset" );
 
-      printf( "exact-pval-search binWidth = %10.8f\n", binWidth );    //&& for test only
-      printf( "exact-pval-search binOffset = %4.2f\n", binOffset );   //&& for test only
+      // printf( "exact-pval-search binWidth = %10.8f\n", binWidth );    //&& for test only
+      // printf( "exact-pval-search binOffset = %4.2f\n", binOffset );   //&& for test only
 
       int maxPrecurMass = floor( MaxMZ::BinInvert( MaxMZ::Global().CacheBinEnd() ) + 50.0 );	//&& works, but is this the best way to get?
       int nCandPeptide = active_peptide_queue -> SetActiveRangeBIons( min_mass, max_mass );
