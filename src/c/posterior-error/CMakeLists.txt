@@ -5,6 +5,7 @@ cmake_policy(VERSION 2.8.1)
 
 include_directories(..)
 include_directories(../ArrayLibrary)
+include_directories(${CMAKE_BINARY_DIR}/src/external/build/src/ProteoWizard/libraries/boost_1_54_0)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   set_property(

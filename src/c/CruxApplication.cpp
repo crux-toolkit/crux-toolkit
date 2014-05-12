@@ -76,13 +76,10 @@ void CruxApplication::initialize(
   if(strcmp(get_string_parameter_pointer("seed"), "time")== 0){
     time_t seconds; // use current time to seed
     time(&seconds); // Get value from sys clock and set seconds variable.
-    srandom((unsigned int) seconds); // Convert seconds to a unsigned int
+    mysrandom((unsigned)seconds); // Convert seconds to a unsigned int
   }
   else{
-    // Add 2 to seed due to seeds 0 and 1 behaving identically.
-    // In C++, a seed of 1 is a special value that resets the random generator
-    // to its initial value (usually 0).
-    srandom((unsigned int)atoi(get_string_parameter_pointer("seed")) + 2);
+    mysrandom((unsigned)atoi(get_string_parameter_pointer("seed")));
   }
   
   // Start the timer.

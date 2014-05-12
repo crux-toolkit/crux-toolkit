@@ -39,6 +39,7 @@ add_custom_command(
 
 ###### Set up include and link directories  ######
 include_directories(
+  ${CMAKE_SOURCE_DIR}/src/c
   ${CMAKE_BINARY_DIR}/src/external/include
   ${CMAKE_CURRENT_BINARY_DIR}/protoobj
 )

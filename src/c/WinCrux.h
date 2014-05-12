@@ -18,13 +18,10 @@
 
 // Rename some functions to the windows version
 #define access _access
-#define drand48 rand
 #define isfinite _finite
 #define isnan _isnan
 #define pclose _pclose
 #define popen _popen
-#define random rand
-#define srandom srand
 #define chdir _chdir
 #define getcwd _getcwd
 #define mkdir(a, b) _mkdir(a)

@@ -866,7 +866,7 @@ MatchCollection* MatchCollection::randomSample(
   int score_type_idx = 0;
   
   MatchCollection* sample_collection = new MatchCollection();
-  srandom(time(NULL));
+  mysrandom(time(NULL));
 
   // make sure we don't sample more than the matches in the match collection
   if (count_max >= match_total_){
@@ -876,8 +876,10 @@ MatchCollection* MatchCollection::randomSample(
 
   // ranomly select matches upto count_max
   for(; count_idx < count_max; ++count_idx){
-    match_idx = (int)((double)random()/((double)RAND_MAX + (double)1)) 
-      * match_total_;
+    match_idx =
+      (int)(
+        (double)myrandom()/((double)UNIFORM_INT_DISTRIBUTION_MAX + (double)1)
+      ) * match_total_;
     
     // match_idx = random() % match_collection->match_total;
     sample_collection->match_[count_idx] = match_[match_idx];

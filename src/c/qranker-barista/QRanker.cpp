@@ -514,7 +514,7 @@ void QRanker :: train_net_sigmoid(PSMScores &set, int interval)
   for(int i = 0; i < set.size(); i++)
     { 
       unsigned int ind;
-      ind = rand()%(interval);
+      ind = myrandom_limit(interval);
       //pass both through the net
       r = net.fprop(d.psmind2features(set[ind].psmind));
       label = set[ind].label;
@@ -536,7 +536,7 @@ void QRanker :: train_net_hinge(PSMScores &set, int interval)
   for(int i = 0; i < set.size(); i++)
     { 
       unsigned int ind;
-      ind = rand()%(interval);
+      ind = myrandom_limit(interval);
       //pass both through the net
       r = net.fprop(d.psmind2features(set[ind].psmind));
       label = set[ind].label;
@@ -569,7 +569,7 @@ void QRanker :: train_net_ranking(PSMScores &set, int interval)
       if(interval == 0)
 	ind1 = 0;
       else
-	ind1 = rand()%(interval);
+	ind1 = myrandom_limit(interval);
       if(ind1>set.size()-1) continue;
       if(set[ind1].label == 1)
 	label_flag = -1;
@@ -579,12 +579,12 @@ void QRanker :: train_net_ranking(PSMScores &set, int interval)
       int cn = 0;
       while(1)
 	{
-	  ind2 = rand()%(interval);
+	  ind2 = myrandom_limit(interval);
 	  if(ind2>set.size()-1) continue;
 	  if(set[ind2].label == label_flag) break;
 	  if(cn > 1000)
 	    {
-	      ind2 = rand()%set.size();
+	      ind2 = myrandom_limit(set.size());
 	      break;
 	    }
 	  cn++;
@@ -637,7 +637,7 @@ void QRanker :: count_pairs(PSMScores &set, int interval)
       if(interval == 0)
 	ind1 = 0;
       else
-	ind1 = rand()%(interval);
+	ind1 = myrandom_limit(interval);
       if(ind1>set.size()-1) continue;
       if(set[ind1].label == 1)
 	label_flag = -1;
@@ -647,12 +647,12 @@ void QRanker :: count_pairs(PSMScores &set, int interval)
       int cn = 0;
       while(1)
 	{
-	  ind2 = rand()%(interval);
+	  ind2 = myrandom_limit(interval);
 	  if(ind2>set.size()-1) continue;
 	  if(set[ind2].label == label_flag) break;
 	  if(cn > 1000)
 	    {
-	      ind2 = rand()%set.size();
+	      ind2 = myrandom_limit(set.size());
 	      break;
 	    }
 	  cn++;
@@ -868,7 +868,7 @@ void QRanker::train_many_nets()
 }
 
 int QRanker::run( ) {
-  srand(seed);
+  //mysrandom(seed); This is set by CruxApplication::initialize()
   carp(CARP_INFO, "reading data");
   
   ostringstream res;

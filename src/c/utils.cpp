@@ -545,6 +545,31 @@ char** parse_file(
   return lines;
 }
 
+boost::mt19937& get_mt19937() {
+  static boost::mt19937 mt19937_;
+  return mt19937_;
+}
+
+/**
+ * Returns an integer in the range between 0 and UNIFORM_INT_DISTRIBUTION_MAX
+ */
+int myrandom() {
+  static boost::random::uniform_int_distribution<>
+    uniform_int_distribution_(0, UNIFORM_INT_DISTRIBUTION_MAX);
+  return uniform_int_distribution_(get_mt19937());
+}
+
+/**
+ * Returns an integer in the range [0, max)
+ */
+int myrandom_limit(int max) {
+  return myrandom() % max;
+}
+
+void mysrandom(unsigned seed) {
+  get_mt19937().seed(seed);
+}
+
 #ifdef MAIN
 
 

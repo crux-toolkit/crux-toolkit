@@ -212,7 +212,7 @@ void PepRanker :: train_net_ranking(PepScores &set, int interval)
       if(interval == 0)
 	ind1 = 0;
       else
-	ind1 = rand()%(interval);
+	ind1 = myrandom_limit(interval);
       if(ind1>set.size()-1) continue;
       if(set[ind1].label == 1)
 	label_flag = -1;
@@ -222,12 +222,12 @@ void PepRanker :: train_net_ranking(PepScores &set, int interval)
       int cn = 0;
       while(1)
 	{
-	  ind2 = rand()%(interval);
+	  ind2 = myrandom_limit(interval);
 	  if(ind2>set.size()-1) continue;
 	  if(set[ind2].label == label_flag) break;
 	  if(cn > 1000)
 	    {
-	      ind2 = rand()%set.size();
+	      ind2 = myrandom_limit(set.size());
 	      break;
 	    }
 	  cn++;
@@ -391,7 +391,7 @@ void PepRanker::train_many_nets()
 
 void PepRanker :: setup_for_training()
 {
-  srand(seed);
+  //mysrandom(seed); This is set by CruxApplication::initialize()
   carp(CARP_INFO, "reading data");
   
   ostringstream res;
