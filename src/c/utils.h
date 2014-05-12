@@ -12,6 +12,8 @@
 #include <stdlib.h>
 #include <math.h>
 
+#include "boost/random/mersenne_twister.hpp"
+#include "boost/random/uniform_int_distribution.hpp"
 
 /*#ifndef linux
 #include <ieeefp.h>
@@ -39,6 +41,8 @@ static const int PEPTIDELENGTH = 80;
 static const int LINELENGTH = 4096;
 
 extern int verbosity;
+
+#define UNIFORM_INT_DISTRIBUTION_MAX 2147483647 // Max value of int32
 
 #ifdef DARWIN
 #ifdef PRE_LION
@@ -300,6 +304,11 @@ char** parse_file(
   int* num_lines
   );
 
+
+boost::mt19937& get_mt19937();
+int myrandom();
+int myrandom_limit(int max);
+void mysrandom(unsigned seed);
 
 #endif
 

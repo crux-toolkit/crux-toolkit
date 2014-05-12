@@ -1556,7 +1556,7 @@ int get_random_number_interval(
   int high ///< the number for higher bound -in
   )
 {  
-  return (random() % (high - low + 1) + low);
+  return (myrandom_limit(high - low + 1) + low);
 }
 
 /**
@@ -1587,7 +1587,7 @@ void swap_quick(
 }
  
 long Random(int i, int j) {
-  return i + random() % (j-i+1);
+  return i + myrandom_limit(j-i+1);
 }
 
 void quick_sort(FLOAT_T a[], int left, int right) {

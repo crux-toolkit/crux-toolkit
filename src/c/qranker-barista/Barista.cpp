@@ -2267,7 +2267,7 @@ void Barista :: train_net(double selectionfdr)
       double err_sum = 0.0;
       for(int i = 0; i < trainset.size(); i++)
 	{
-	  int ind = rand()%trainset.size();
+	  int ind = myrandom_limit(trainset.size());
 	  int protind = trainset[ind].protind;
 	  int label = trainset[ind].label;
 	  err_sum += train_hinge(protind,label);
@@ -2352,12 +2352,12 @@ void Barista :: train_net_multi_task(double selectionfdr, int interval)
       double err_sum = 0.0;
       for(int i = 0; i < trainset.size(); i++)
 	{
-	  int ind = rand()%trainset.size();
+	  int ind = myrandom_limit(trainset.size());
 	  int protind = trainset[ind].protind;
 	  int label = trainset[ind].label;
 	  err_sum += train_hinge(protind,label);
 
-	  ind = rand()%interval;
+	  ind = myrandom_limit(interval);
 	  int psmind = psmtrainset[ind].psmind;
 	  label = psmtrainset[ind].label;
 	  train_hinge_psm(psmind,label);	
@@ -2530,7 +2530,7 @@ void Barista :: setup_for_training(int trn_to_tst)
 
 int Barista :: run()
 {
-  srand(seed);
+  //mysrandom(seed); This is set by CruxApplication::initialize()
   setup_for_training(0);
   
   train_net(selectionfdr);
@@ -2542,7 +2542,6 @@ int Barista :: run()
 
 int Barista :: run_tries()
 {
-  srand(seed);
   setup_for_training(0);
     
   int tries = 3;
@@ -2566,7 +2565,6 @@ int Barista :: run_tries()
 
 int Barista :: run_tries_multi_task()
 {
-  srand(seed);
   setup_for_training(0);
     
   //fdebug.open("debug.txt");

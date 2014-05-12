@@ -1,4 +1,5 @@
 #include "NeuralNet.h"
+#include "utils.h"
 
 /*****************Sigmoid**********************/
 
@@ -40,9 +41,9 @@ void Linear :: make_random()
       for(int k = 0; k < num_neurons; k++)
 	{
 	  for(int j = 0; j < num_features; j++)
-	    w[k*num_features+j] = ((double)rand()/RAND_MAX - 0.5)/(num_features*num_neurons);
+	    w[k*num_features+j] = ((double)myrandom()/UNIFORM_INT_DISTRIBUTION_MAX - 0.5)/(num_features*num_neurons);
 	  if(has_bias)
-	    bias[k] = ((double)rand()/RAND_MAX - 0.5)/(num_features*num_neurons);;
+	    bias[k] = ((double)myrandom()/UNIFORM_INT_DISTRIBUTION_MAX - 0.5)/(num_features*num_neurons);;
 	}
     }
 }
@@ -65,9 +66,9 @@ void Linear :: resize(int m, int n, int has_b)
   for(int k = 0; k < num_neurons; k++)
     {
       for(int j = 0; j < num_features; j++)
-	w[k*num_features+j] = ((double)rand()/RAND_MAX - 0.5)/(num_features*num_neurons);
+	w[k*num_features+j] = ((double)myrandom()/UNIFORM_INT_DISTRIBUTION_MAX - 0.5)/(num_features*num_neurons);
       if(has_bias)
-	bias[k] = ((double)rand()/RAND_MAX - 0.5)/(num_features*num_neurons);;
+	bias[k] = ((double)myrandom()/UNIFORM_INT_DISTRIBUTION_MAX - 0.5)/(num_features*num_neurons);;
     }
   memset(dw,0,sizeof(double)*num_neurons*num_features);
   if(has_bias)

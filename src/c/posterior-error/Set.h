@@ -5,6 +5,7 @@
 #define _Set_H
 
 #include "Array.h"
+#include "utils.h"
 
 namespace pep {
 
@@ -66,7 +67,7 @@ class Set : public Array<int>
   
   int randomElement() const
   {
-    return (*this)[ rand() % size() ];
+    return (*this)[ myrandom_limit(size()) ];
   }
 
  private:

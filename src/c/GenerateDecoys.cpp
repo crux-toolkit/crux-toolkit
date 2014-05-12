@@ -537,7 +537,7 @@ bool GenerateDecoys::shufflePeptide(
   }
 
   string originalSeq(seq);
-  random_shuffle(seq.begin(), seq.end());
+  random_shuffle(seq.begin(), seq.end(), myrandom_limit);
   return seq != originalSeq;
 }
 

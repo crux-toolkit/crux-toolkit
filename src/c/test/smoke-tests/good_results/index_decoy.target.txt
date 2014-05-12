@@ -1,5 +1,5 @@
 scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	sp score	sp rank	xcorr score	xcorr rank	b/y ions matched	b/y ions total	distinct matches/spectrum	sequence	cleavage type	protein id	flanking aa
-14	2	500.4100	998.8055	1001.1503	0	18.77655	1	0.088464543	1	3	14	1	FQHSLLEK	trypsin-full-digest	decoy_gi|6381999|ref|NP_009311.2|(226)	KD
-14	3	500.4100	1498.2081	1495.8149	0	9.776268	1	-0.033651296	1	4	44	1	VYFTMTTIMFNK	trypsin-full-digest	decoy_gi|6382000|ref|NP_009314.2|(29)	RY
-15	2	488.8200	975.6255	973.0936	0	0.44468683	1	-0.13302602	1	1	16	1	SAYATGYIK	trypsin-full-digest	decoy_gi|6381999|ref|NP_009311.2|(257)	KA
-15	3	488.8200	1463.4382	1464.8112	0	9.0311584	1	-0.051158972	1	4	44	1	QILYLALYNLLK	trypsin-full-digest	decoy_gi|6381999|ref|NP_009311.2|(292)	KL
+14	2	500.4100	998.8055	1001.1503	0	32.181541	1	0.24331386	1	4	14	1	FQLLHESK	trypsin-full-digest	decoy_gi|6381999|ref|NP_009311.2|(226)	KD
+14	3	500.4100	1498.2081	1495.8149	0	25.554787	1	0.020905925	1	6	44	1	VTMNMFTIFTYK	trypsin-full-digest	decoy_gi|6382000|ref|NP_009314.2|(29)	RY
+15	2	488.8200	975.6255	973.0936	0	0	1	-0.24399617	1	0	16	1	SYGAIAYTK	trypsin-full-digest	decoy_gi|6381999|ref|NP_009311.2|(257)	KA
+15	3	488.8200	1463.4382	1464.8112	0	25.696455	1	0.043121085	1	6	44	1	QLNLYLLAIYLK	trypsin-full-digest	decoy_gi|6381999|ref|NP_009311.2|(292)	KL

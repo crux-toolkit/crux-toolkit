@@ -9,6 +9,7 @@
 #include <math.h>
 using namespace std;
 #include "PepScores.h"
+#include "utils.h"
 
 inline bool operator>(const PepScoreHolder &one, const PepScoreHolder &other) 
     {return (one.score>other.score);}
@@ -172,8 +173,8 @@ void PepScores::fillFeaturesSplit(PepScores& train,PepScores& test, Dataset& d, 
   //mix up the examples
   for(int i = 0; i < n; i++)
     {
-      int p1 = (int)((double)rand()/RAND_MAX*(n-1)); 
-      int p2 = (int)((double)rand()/RAND_MAX*(n-1)); 
+      int p1 = (int)((double)myrandom()/UNIFORM_INT_DISTRIBUTION_MAX*(n-1)); 
+      int p2 = (int)((double)myrandom()/UNIFORM_INT_DISTRIBUTION_MAX*(n-1)); 
       s = all_examples[p1];
       all_examples[p1] = all_examples[p2];
       all_examples[p2] = s;
