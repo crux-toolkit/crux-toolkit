@@ -41,7 +41,7 @@ class ProteinMatchCollection {
   std::deque<SpectrumMatch*> spectrum_matches_; ///< All spectrum matches
 
   std::map<std::pair<int, int>, int> spectrum_counts_; ///< matches/spectrum
-
+  bool distinct_matches_; ///< are matches distinct?
  public:
 
   /**
@@ -143,6 +143,11 @@ class ProteinMatchCollection {
    * Get the matches/spectrum as a map, where the key is <scan, charge>
    */
   const std::map<std::pair<int, int>, int>& getMatchesSpectrum();
+  
+  /**
+   * \returns whether matches are distinct are not
+   */
+  bool hasDistinctMatches();
 
 };
 

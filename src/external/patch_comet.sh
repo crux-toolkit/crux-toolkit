@@ -11,6 +11,5 @@ BIN_PREFIX=$2
 echo "Copying from " $1 "to" $2
 
 cp $SRC_PREFIX/patches/comet/MSToolkit/Makefile $BIN_PREFIX/build/src/comet/MSToolkit/Makefile
-cp $SRC_PREFIX/patches/comet/CometSearch/CometWriteTxt.cpp $BIN_PREFIX/build/src/comet/CometSearch/CometWriteTxt.cpp
 cp $SRC_PREFIX/patches/comet/CometSearch/CometWritePepXML.cpp $BIN_PREFIX/build/src/comet/CometSearch/CometWritePepXML.cpp
 

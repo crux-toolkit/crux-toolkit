@@ -394,6 +394,8 @@ MatchCollection* run_qvalue(
   MatchCollectionParser parser;
   MatchCollection* match_collection =
     parser.create(target_path.c_str(), get_string_parameter_pointer("protein-database"));
+  bool distinct_matches = match_collection->getHasDistinctMatches();
+
   MatchCollection* decoy_matches = new MatchCollection();
   // Create two match collections, for targets and decoys.
   MatchCollection* target_matches = new MatchCollection();
@@ -443,7 +445,7 @@ MatchCollection* run_qvalue(
     Match::freeMatch(match);
   }
   delete match_iterator;
-   
+
   // get from the input files which columns to print in the output files
   vector<bool> cols_to_print(NUMBER_MATCH_COLUMNS);
   cols_to_print[FILE_COL] = true;
@@ -461,7 +463,13 @@ MatchCollection* run_qvalue(
   cols_to_print[PVALUE_COL] = have_pvalues;
   cols_to_print[BY_IONS_MATCHED_COL] = match_collection->getScoredType(BY_IONS_MATCHED);
   cols_to_print[BY_IONS_TOTAL_COL] = match_collection->getScoredType(BY_IONS_TOTAL);
-  cols_to_print[MATCHES_SPECTRUM_COL] = true;
+
+  if (distinct_matches) {
+    cols_to_print[DISTINCT_MATCHES_SPECTRUM_COL] = true;
+  } else {
+    cols_to_print[MATCHES_SPECTRUM_COL] = true;
+  }
+
   cols_to_print[SEQUENCE_COL] = true;
   cols_to_print[CLEAVAGE_TYPE_COL] = true;
   cols_to_print[PROTEIN_ID_COL] = true;

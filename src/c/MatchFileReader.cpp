@@ -234,7 +234,6 @@ MatchCollection* MatchFileReader::parse(
   match_collection->preparePostProcess();
 
   match_collection->extendTabDelimited(database, delimited_result_file, decoy_database);
-
   return match_collection;
 
 

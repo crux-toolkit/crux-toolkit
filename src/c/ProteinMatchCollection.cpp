@@ -26,7 +26,7 @@ ProteinMatchCollection::ProteinMatchCollection() {
 ProteinMatchCollection::ProteinMatchCollection(
   MatchCollection* match_collection ///< matches to add
   ) {
-
+  
   addMatches(match_collection);
 
 }
@@ -151,7 +151,7 @@ PeptideMatch* ProteinMatchCollection::getPeptideMatch(
     } else {
       free(mod_seq);
       carp(CARP_FATAL, "Could not find peptidematch for sequence %s",
-  	       peptide->getSequence());
+        peptide->getSequence());
     }
   } else {
     free(mod_seq);
@@ -248,6 +248,7 @@ void ProteinMatchCollection::addMatches(
 
   carp(CARP_DEBUG, "Adding %d matches to ProteinMatchCollection",
        match_collection->getMatchTotal());
+  distinct_matches_ = match_collection->getHasDistinctMatches();
 
   MatchIterator match_iter(match_collection);
   while(match_iter.hasNext()) {
@@ -261,6 +262,14 @@ void ProteinMatchCollection::addMatches(
  */
 const map<pair<int, int>, int>& ProteinMatchCollection::getMatchesSpectrum() {
   return spectrum_counts_;
+}
+
+
+/**                                                                                                                                                                                                      
+ * \returns whether matches are distinct are not                                                                                                                                                         
+ */
+bool ProteinMatchCollection::hasDistinctMatches() {
+  return distinct_matches_;
 }
 
 /*

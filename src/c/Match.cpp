@@ -673,7 +673,7 @@ void Match::printSqt(
                Database* database = protein->getDatabase();
                if( null_peptide_ 
                    && (database != NULL && database->getDecoyType() == NO_DECOYS) ){
-		 rand = get_string_parameter_pointer("decoy-prefix"); 
+                 rand = get_string_parameter_pointer("decoy-prefix"); 
                }
     
       // print match info (locus line), add "decoy-prefix" to locus name for decoys
@@ -699,7 +699,6 @@ void Match::printOneMatchField(
   int      b_y_total,              ///< total b/y ions -in
   int      b_y_matched             ///< Number of b/y ions matched. -in
 ) {
-
   switch ((MATCH_COLUMNS_T)column_idx) {
   case FILE_COL:
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, getFilePath());
@@ -868,9 +867,13 @@ void Match::printOneMatchField(
   case BY_IONS_TOTAL_COL:
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, b_y_total);
     break;
+  case DISTINCT_MATCHES_SPECTRUM_COL:
+      output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
+                                       num_target_matches);
+    break;
   case MATCHES_SPECTRUM_COL:
-    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
-                                     num_target_matches);
+    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx,
+      num_target_matches);
     break;
   case DECOY_MATCHES_SPECTRUM_COL:
     if( null_peptide_ ){
@@ -1238,12 +1241,18 @@ Match* Match::parseTabDelimited(
   }
 
   // get experiment size
-  match->num_target_matches_ = result_file.getInteger(MATCHES_SPECTRUM_COL);
+  match->num_target_matches_ = 0;
+  if (!result_file.empty(DISTINCT_MATCHES_SPECTRUM_COL)) {
+
+    match->num_target_matches_ = result_file.getInteger(DISTINCT_MATCHES_SPECTRUM_COL);
+  } else if (!result_file.empty(MATCHES_SPECTRUM_COL)) {
+    match->num_target_matches_ = result_file.getInteger(MATCHES_SPECTRUM_COL);
+  }
   if (match->num_target_matches_ == 0) {
     carp_once(CARP_WARNING, "num target matches=0, suppressing warning");
     match->ln_experiment_size_ = 0;
   } else {
-    match->ln_experiment_size_ = log((FLOAT_T) result_file.getInteger(MATCHES_SPECTRUM_COL));
+    match->ln_experiment_size_ = log((FLOAT_T) match->num_target_matches_);
   }
   if (!result_file.empty(DECOY_MATCHES_SPECTRUM_COL)){
         match->num_decoy_matches_ = result_file.getInteger(DECOY_MATCHES_SPECTRUM_COL);
