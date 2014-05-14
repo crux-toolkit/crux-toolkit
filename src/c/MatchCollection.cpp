@@ -58,7 +58,7 @@ void MatchCollection::init() {
   post_process_collection_ = false;
   post_scored_type_set_ = false;
   top_scoring_sp_ = NULL;
-
+  has_distinct_matches_ = false;
 }
 
 /**
@@ -1424,6 +1424,15 @@ int MatchCollection::getMatchTotal()
   return match_total_;
 }
 
+bool MatchCollection::getHasDistinctMatches() {
+  return has_distinct_matches_;
+}
+
+void MatchCollection::setHasDistinctMatches(bool distinct) {
+  has_distinct_matches_ = distinct;
+}
+
+
 void MatchCollection::setExperimentSize(int size)
 {
   experiment_size_ = size;
@@ -2467,8 +2476,14 @@ bool MatchCollection::extendTabDelimited(
     } else {
       ln_delta_cn = logf(delta_cn);
     }
-    ln_experiment_size = log(result_file.getFloat(MATCHES_SPECTRUM_COL));
-    
+    if (!result_file.empty(DISTINCT_MATCHES_SPECTRUM_COL)) {
+      has_distinct_matches_ = true;
+      ln_experiment_size = log(result_file.getFloat(DISTINCT_MATCHES_SPECTRUM_COL));
+    } else if (!result_file.empty(MATCHES_SPECTRUM_COL)) {
+      ln_experiment_size = log(result_file.getFloat(MATCHES_SPECTRUM_COL));
+    } else {
+      ln_experiment_size = 0;
+    }
 
     //TODO: Parse all boolean indicators for scores
     scored_type_[SP] = !result_file.empty(SP_SCORE_COL);

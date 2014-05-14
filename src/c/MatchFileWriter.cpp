@@ -68,6 +68,7 @@ void MatchFileWriter::setPrecision(){
     case PERCOLATOR_RANK_COL:
     case BY_IONS_MATCHED_COL:
     case BY_IONS_TOTAL_COL:
+    case DISTINCT_MATCHES_SPECTRUM_COL:
     case MATCHES_SPECTRUM_COL:
     case SEQUENCE_COL:
     case CLEAVAGE_TYPE_COL:
@@ -288,7 +289,7 @@ void MatchFileWriter::addColumnNames(CruxApplication* application,
   addColumnName(DELTA_CN_COL);
   addColumnName(XCORR_SCORE_COL);
   addColumnName(XCORR_RANK_COL);
-  addColumnName(MATCHES_SPECTRUM_COL);
+  addColumnName(DISTINCT_MATCHES_SPECTRUM_COL);
   addColumnName(SEQUENCE_COL);
   addColumnName(CLEAVAGE_TYPE_COL);
   addColumnName(PROTEIN_ID_COL);
@@ -401,6 +402,9 @@ void MatchFileWriter::writeHeader(){
   column_names_.assign(num_columns_, "");
   for(unsigned int col_type = 0; col_type < NUMBER_MATCH_COLUMNS; col_type++){
     if( match_indices_[col_type] > -1 ){
+      if (get_column_header(col_type) == NULL) {
+        carp(CARP_FATAL, "Error col type: %d doesn't exist!", col_type);
+      }
       DelimitedFileWriter::setColumnName(get_column_header(col_type), 
                                          match_indices_[col_type]);
     }
