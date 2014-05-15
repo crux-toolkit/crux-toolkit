@@ -139,7 +139,8 @@ class RecordReader {
     if (coded_input_)
       delete coded_input_;
     delete raw_input_;
-    close(fd_);
+    if (fd_ >= 0)
+      close(fd_);
   }
 
   bool OK() const { return valid_; }
