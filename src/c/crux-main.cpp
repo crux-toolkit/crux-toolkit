@@ -45,56 +45,62 @@
  * printing the current version number.
  */
 int main(int argc, char** argv){
-
+  try {
 #ifdef _MSC_VER
-  // Turn off auto-tranlation of line-feed to 
-  // carriage-return/line-feed
-  _set_fmode(_O_BINARY);
+    // Turn off auto-tranlation of line-feed to 
+    // carriage-return/line-feed
+    _set_fmode(_O_BINARY);
 #endif 
 
-  CruxApplicationList applications("crux");
+    CruxApplicationList applications("crux");
 
-  applications.add(new CreateIndex());
-  applications.add(new TideIndexApplication());
+    applications.add(new CreateIndex());
+    applications.add(new TideIndexApplication());
 
-  // search
-  applications.add(new MatchSearch());
-  applications.add(new TideSearchApplication());
-  applications.add(new SequestSearch());
-  applications.add(new CometApplication());
-  applications.add(new SearchForXLinks());
+    // search
+    applications.add(new MatchSearch());
+    applications.add(new TideSearchApplication());
+    applications.add(new SequestSearch());
+    applications.add(new CometApplication());
+    applications.add(new SearchForXLinks());
 
-  // post-search
-  applications.add(new ComputeQValues());
-  applications.add(new ComputeQValuesLegacy()); // depricated name
-  applications.add(new PercolatorApplication());
-  applications.add(new QRanker());
-  applications.add(new Barista());
-  applications.add(new SpectralCounts());
-  applications.add(new ReadSpectrumRecordsApplication());
+    // post-search
+    applications.add(new ComputeQValues());
+    applications.add(new ComputeQValuesLegacy()); // depricated name
+    applications.add(new PercolatorApplication());
+    applications.add(new QRanker());
+    applications.add(new Barista());
+    applications.add(new SpectralCounts());
+    applications.add(new ReadSpectrumRecordsApplication());
 
-  // fasta/ms2 utilities
-  applications.add(new PrintProcessedSpectra());
-  applications.add(new GeneratePeptides());
-  applications.add(new GenerateDecoys());
-  applications.add(new PredictPeptideIons());
-  applications.add(new GetMs2Spectrum());
+    // fasta/ms2 utilities
+    applications.add(new PrintProcessedSpectra());
+    applications.add(new GeneratePeptides());
+    applications.add(new GenerateDecoys());
+    applications.add(new PredictPeptideIons());
+    applications.add(new GetMs2Spectrum());
 
-  // delimited file utilities
-  applications.add(new ExtractColumns());
-  applications.add(new ExtractRows());
-  applications.add(new StatColumn());
-  applications.add(new SortColumn());
+    // delimited file utilities
+    applications.add(new ExtractColumns());
+    applications.add(new ExtractRows());
+    applications.add(new StatColumn());
+    applications.add(new SortColumn());
 
-  applications.add(new CruxHardklorApplication());
-  applications.add(new CruxBullseyeApplication());
-  applications.add(new PrintVersion());
-  
+    applications.add(new CruxHardklorApplication());
+    applications.add(new CruxBullseyeApplication());
+    applications.add(new PrintVersion());
 
-  // make pin file 
-  applications.add(new MakePinApplication());
-  int ret = applications.main(argc, argv);
-  return ret;
+    // make pin file 
+    applications.add(new MakePinApplication());
+    int ret = applications.main(argc, argv);
+    return ret;
+  } catch (const std::exception& e) {
+    carp(CARP_FATAL, "An exception occurred: %s", e.what());
+    return 1;
+  } catch (...) {
+    carp(CARP_FATAL, "An unknown exception occurred.");
+    return 2;
+  }
 
 }// end main
 
