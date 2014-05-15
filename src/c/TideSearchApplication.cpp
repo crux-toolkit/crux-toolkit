@@ -180,9 +180,9 @@ int TideSearchApplication::main(int argc, char** argv) {
                     spectra_file.c_str());
     string converted_spectra_file = get_string_parameter_pointer("store-spectra");
     if (converted_spectra_file.empty()) {
-      char tmpnam_buffer[L_tmpnam];
-      tmpnam(tmpnam_buffer);
-      delete_spectra_file = converted_spectra_file = tmpnam_buffer;
+      
+      delete_spectra_file = converted_spectra_file =
+        make_file_path("spectrumrecords.tmp");
     }
     carp(CARP_DEBUG, "New spectrumrecords filename: %s",
                      converted_spectra_file.c_str());
