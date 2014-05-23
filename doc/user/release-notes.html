@@ -7,13 +7,14 @@
 <blockquote> 
 <h1>Release notes for Crux</h1>
 
-<h2>Version 1.XX</h2>
+<h2>Version 2.0</h2>
 <h3>Major enhancements</h3>
 <ul>
 
 <li>
 Two new search engines are now included in Crux: Comet and Tide.  The
 old search engine, search-for-matches, has been retired.</li>
+<li>Percolator has been updated to version 2.07.</li>
 
 </ul>
 
@@ -21,24 +22,15 @@ old search engine, search-for-matches, has been retired.</li>
 
 <ul>
 <li>Enzyme parameter has been extended with further <i>in-silico</i> digestion rules as well as 
-the "lysc", "lysn", "arg_c", "glue_c", "pepsin_a" parameter names were renamed to "lys-c", "lys-n", "arg-c", "glue-c", "pepsin-a".
-<li>
-Previously, the PinXML file produced
-by <code>search-for-matches</code> always contained a single PSM per
-charge/spectrum combination.  Now the <code>top-match</code> parameter
-controls how many PSMs are written to the PinXML file.</li>
+the "lysc", "lysn", "arg_c", "glue_c", "pepsin_a" parameter names were renamed to "lys-c", "lys-n", "arg-c", "glu-c", "pepsin-a".
 <li>Percolator outputs decoy files in addition to target files.</li>
 <li>Percolator tab-delimited peptides output now contains PEP column.</li>
 <li>Percolator tab-delimited peptides output has been corrected to show the PSM
 with the best score.</li>
 <li>Percolator tab-delimited PSMs output "matches/spectrum" value has been
 corrected.</li>
-<li>The hidden <code>make-pin</code> command (automatically invoked by
-Percolator when given a non-PinXML format as input) now marks matches from decoy
-files as decoys.</li>
-<li><code>make-pin</code> command now uses the <code>top-match</code> parameter
-to determine how many PSMs per spectrum will be written, rather than only
-writing the top ranked PSM.</li>
+<li>A new utility command, <code>make-pin</code>, is provided to
+create <code>pin</code> files for use by Percolator.</li>
 <li>The <code>spectrum-min-mass</code> and <code>spectrum-max-mass</code>
 options have been renamed to <code>spectrum-min-mz</code> and
 <code>spectrum-max-mz</code>, respectively.</li>
@@ -53,18 +45,22 @@ set.</li>
 characters were being truncated from peptide sequences when the input was
 missing flanking amino acids or when the charge state was not indicated in PSM
 IDs.</li>
-<li>The crux MS2 parser now accepts spectra that don't have any
-  peaks.</li>
-<li>A new utility command, <code>make-pin</code>, is provided to
-create <code>pin.xml</code> files for use by Percolator.</li>
+<li>The crux spectrum parser has been removed.</li>
 <li>Q-ranker now outputs decoy files.</li>
 <li>The <code>unshuffled sequence</code> column in tab-delimited files has been
 renamed to <code>original target sequence</code>.</li>
+<li>The Boost.Random library is now being used for random number generation.
+</li>
+<li><code>calibrate-scores</code> no longer requires a protein input.</li>
+<li><code>calibrate-scores</code> now only takes the top match per spectrum and
+charge.</li>
+<li><code>get-ms2-spectrum</code> now prints z-lines with Bullseye files.</li>
+<li>Various performance and error handling improvements.</li>
 </ul>
 
 <hr></hr>
 
-<h2>Version 1.40</h2> 
+<h2>Version 1.40</h2> May 22, 2013
 <h3>Major enchancements</h3>
 <ul>
 

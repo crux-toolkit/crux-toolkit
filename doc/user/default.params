@@ -684,9 +684,9 @@ instrument=fticr
 max-length=50
 
 # Use monoisotopic precursor masses rather than average mass for
-# precursor. Default=F.
+# precursor. Default=T.
 # Available for tide-index
-monoisotopic-precursor=false
+monoisotopic-precursor=true
 
 # Set a filter for mzXML files. Default=none
 # Available for crux hardklor
