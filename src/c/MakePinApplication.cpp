@@ -189,7 +189,7 @@ string MakePinApplication::getName() {
  */
 string MakePinApplication::getDescription() {
 
-  return "Runs make-pin";
+  return "Generates a Percolator input (PIN) file.";
 }
 
 /**
@@ -200,12 +200,8 @@ bool MakePinApplication::needsOutputDirectory() {
 }
 
 
-/**
- * hide sequest search 
-*/
-
 bool MakePinApplication:: hidden(){
-  return true; 
+  return false;
 }
 
 
