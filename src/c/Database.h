@@ -215,6 +215,10 @@ class Database {
    */
   bool getIsParsed();
 
+  void setIsParsed(
+    bool is_parsed
+  );
+  
   /**
    * \returns The type of shuffling used on the proteins in this database
    */

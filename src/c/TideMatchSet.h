@@ -55,6 +55,7 @@ public:
     int charge, ///< charge for matches
     const ActivePeptideQueue* peptides, ///< peptide queue
     const ProteinVec& proteins, ///< proteins corresponding with peptides
+    const vector<const pb::AuxLocation*>& locations,  ///< auxiliary locations
     bool compute_sp ///< whether to compute sp or not
   );
 
@@ -68,6 +69,7 @@ public:
     int charge, ///< charge for matches
     const ActivePeptideQueue* peptides, ///< peptide queue
     const ProteinVec& proteins, ///< proteins corresponding with peptides
+    const vector<const pb::AuxLocation*>& locations,  ///< auxiliary locations
     bool compute_sp ///< whether to compute sp or not
   );
 
@@ -78,18 +80,20 @@ public:
     bool exact_pval_search
   );
 
-  /**
-   * Determine if the protein is a decoy protein.
-   */
-  static bool isDecoy(
-    const string& proteinName
+  static void initModMap(
+    const pb::ModTable& modTable
   );
 
+  static void setCleavageType(
+    const string& cleavageType
+  );
 
 protected:
   Arr* matches_;
   Arr2* matches2_;
   double max_mz_;
+  static map<int, double> mod_map_; // unique delta index -> delta
+  static ModCoder mod_coder_;
   static string cleavage_type_;
 
   // For allocation
@@ -106,12 +110,13 @@ protected:
    */
   void writeToFile(
     ofstream* file,
+    int top_n,
     const vector<Arr::iterator>& vec,
-    bool decoyVec,
     const Spectrum* spectrum,
     int charge,
     const ActivePeptideQueue* peptides,
     const ProteinVec& proteins,
+    const vector<const pb::AuxLocation*>& locations,
     const map<Arr::iterator, FLOAT_T>& delta_cn_map,
     const map<Arr::iterator, pair<const SpScorer::SpScoreData, int> >* sp_map
   );
@@ -121,12 +126,14 @@ protected:
    */
   void addCruxMatches(
     MatchCollection* match_collection,
+    bool decoys,
+    int top_n,
     vector<PostProcessProtein*>* proteins_made,
     const vector<Arr::iterator>& vec,
-    bool decoyVec,
     Crux::Spectrum& spectrum,
     const ActivePeptideQueue* peptides,
     const ProteinVec& proteins,
+    const vector<const pb::AuxLocation*>& locations,
     SpectrumZState& z_state,
     SpScorer* sp_scorer,
     FLOAT_T* lowest_sp_out
@@ -137,10 +144,11 @@ protected:
    */
   Crux::Match* getCruxMatch(
     const Peptide* peptide, ///< Tide peptide for match
-    const pb::Protein* protein, ///< Tide protein for match
+    const ProteinVec& proteins, ///< Tide proteins
+    const vector<const pb::AuxLocation*>& locations, /// auxiliary locations
     Crux::Spectrum* crux_spectrum,  ///< Crux spectrum for match
     SpectrumZState& crux_z_state, ///< Crux z state for match
-    PostProcessProtein** protein_made ///< out parameter for new protein
+    vector<PostProcessProtein*>* proteins_made ///< out parameter for new proteins
   );
 
   /**
@@ -168,12 +176,10 @@ protected:
 
   /**
    * Gets the protein name with the index appended.
-   * Optionally, can pass in a boolean pointer to be set to whether decoy or not
    */
   static string getProteinName(
     const pb::Protein& protein,
-    const Peptide& peptide,
-    bool* is_decoy = NULL
+    int pos
   );
 
   /**
@@ -182,13 +188,15 @@ protected:
   static void getFlankingAAs(
     const Peptide* peptide, ///< Tide peptide to get flanking AAs for
     const pb::Protein* protein, ///< Tide protein for the peptide
+    int pos,  ///< location of peptide within protein
     string* out_n,  ///< out parameter for n flank
     string* out_c ///< out parameter for c flank
   );
 
   static void computeDeltaCns(
     const vector<Arr::iterator>& vec, // xcorr*100000000.0, high to low
-    map<Arr::iterator, FLOAT_T>* delta_cn_map // map to add delta cn scores to
+    map<Arr::iterator, FLOAT_T>* delta_cn_map, // map to add delta cn scores to
+    int top_n // number of top matches we will be reporting
   );
 
   static void computeSpData(

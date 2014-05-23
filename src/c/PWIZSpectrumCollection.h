@@ -19,6 +19,18 @@ class PWIZSpectrumCollection : public Crux::SpectrumCollection {
 
  protected:
   pwiz::msdata::MSDataFile* reader_;
+  
+  /**
+   * Parses the first/last scan from the title
+   * \returns whether parse was successful.
+   * For MGF files that place their scan numbers in the title string
+   */
+  bool parseFirstLastScanFromTitle(
+    std::string& scan_title_str, ///< title string to parse -in
+    int& first_scan, ///< first scan -out
+    int& last_scan ///< last scan -out
+  );
+  
  public:
   /**
    * Constructor sets filename and initializes member variables.

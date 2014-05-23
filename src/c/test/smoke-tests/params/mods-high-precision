@@ -1,6 +1,6 @@
 mod=79.90:STY:2
 cmod=33.3:10
 overwrite=T
-seed=7
+seed=5
 precision=4
 top-match=5

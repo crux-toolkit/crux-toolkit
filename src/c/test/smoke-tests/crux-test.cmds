@@ -27,12 +27,12 @@
 1 = generate-peptides-ambiguous-residues = good_results/generate-peptides-ambiguous.target.txt = crux generate-peptides --min-mass 1464 --max-mass 1496 --output-sequence T ambiguous.fasta > a  2>&1; cat a =  'time'
 
 # Get spectrum
-1 = get_ms2_spectrum = good_results/standard_get_ms2_spectrum.out = crux get-ms2-spectrum 2 test.ms2 =
+1 = get_ms2_spectrum = good_results/standard_get_ms2_spectrum.out = crux get-ms2-spectrum --scan-number 2 test.ms2 =
 
-1 = get_ms2_spectrum_stats = good_results/standard_get_ms2_spectrum_stats.out = crux get-ms2-spectrum --stats T 2 test.ms2 =
+1 = get_ms2_spectrum_stats = good_results/standard_get_ms2_spectrum_stats.out = crux get-ms2-spectrum --stats T --scan-number 2 test.ms2 =
 
 #Generate Zline  
-1= get_ms2_spectrum_without_zlines= good_results/standard_get_ms2_spectrum_without_zlines.out = crux get-ms2-spectrum 2-16 test-no-z1.ms2 =
+1= get_ms2_spectrum_without_zlines= good_results/standard_get_ms2_spectrum_without_zlines.out = crux get-ms2-spectrum --scan-number 2-16 test-no-z1.ms2 =
 
 # Print processed spectrum
 1 = print_processed_spectrum = good_results/processed-test.ms2 = crux print-processed-spectra test.ms2 processed-test.ms2 ; cat crux-output/processed-test.ms2
@@ -207,9 +207,6 @@
 
 # Test mzXML files
 1 = mzxml = good_results/mzxml.search.target.txt = crux search-for-matches --fileroot mzxml --parameter-file params/mstk small.raw2xml.mzXML small-yeast.fasta; cat crux-output/mzxml.search.target.txt 
-
-# Test .mgf file
-1 = mgf = good_results/mgf.search.target.txt = crux search-for-matches --fileroot mgf --parameter-file params/minimal test.mgf test.fasta; cat crux-output/mgf.search.target.txt
 
 # Test .mgf file with pwiz parser
 1 = mgf_pwiz = good_results/mgfpwiz.search.target.txt = crux search-for-matches --fileroot mgfpwiz --parameter-file params/minimal --spectrum-parser pwiz test.mgf test.fasta; cat crux-output/mgfpwiz.search.target.txt

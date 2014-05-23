@@ -4,4 +4,4 @@ overwrite=T
 decoys=reverse
 precision=2
 mod=0.50:ABCDEFGHIJKLMNOPQRSTUVWXYZ:1
-seed=7
+seed=5

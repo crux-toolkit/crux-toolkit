@@ -1397,10 +1397,15 @@ void PepRanker :: print_protein_ids(vector<string> &prots, ofstream &os, int psm
 
   if(file_format_=="txt"){
     for (unsigned int j=0;j<prots.size();j++){
-       if(j==prots.size()-1)
-      	 os<<prots[j]<<"("<<d.psmind2peptide_position(psmind)<<")\t";
-       else
-         os<<prots[j]<<"("<<d.psmind2peptide_position(psmind)<<")"<<",";
+      os << prots[j];
+      if (d.psmind2peptide_position(psmind) > -1) {
+	os << "("<<d.psmind2peptide_position(psmind)<<")";
+      }
+      if (j == prots.size() - 1) {
+	os << "\t";
+      } else {
+	os << ",";
+      }
     }
   }else if(file_format_=="sqt"){
     for (unsigned int j=0;j<prots.size();j++){

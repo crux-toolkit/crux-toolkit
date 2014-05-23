@@ -445,6 +445,7 @@ bool CKronik2::processHK(char*  in, char* out) {
 
 
 bool CKronik2::findMax(vector<sScan>& v, int& s, int& p){
+  bool found = false;
   float max=0;
   unsigned int i;
   p=0;
@@ -453,9 +454,10 @@ bool CKronik2::findMax(vector<sScan>& v, int& s, int& p){
     if(v[i].vPep->at(0).intensity>max){
       max=v[i].vPep->at(0).intensity;
       s=i;
+      found = true;
     }
   }
-  return true;
+  return found;
 }
 
 

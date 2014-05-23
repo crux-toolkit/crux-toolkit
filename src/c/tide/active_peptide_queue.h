@@ -43,7 +43,10 @@ class ActivePeptideQueue {
 
   deque<TheoreticalPeakSetBIons> b_ion_queue_;
   deque<TheoreticalPeakSetBIons>::const_iterator iter1_, end1_;
- // IMPLEMENTATION DETAILS
+  int ActiveTargets() const { return active_targets_; }
+  int ActiveDecoys() const { return active_decoys_; }
+
+  // IMPLEMENTATION DETAILS
  
  private:
   // See .cc file.
@@ -91,6 +94,9 @@ class ActivePeptideQueue {
   FifoAllocator fifo_alloc_prog2_;
   TheoreticalPeakCompiler* compiler_prog1_;
   TheoreticalPeakCompiler* compiler_prog2_;
+
+  // Number of targets and decoys in active range
+  int active_targets_, active_decoys_;
 };
 
 /*

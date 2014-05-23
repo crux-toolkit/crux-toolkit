@@ -46,8 +46,10 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <iostream>
 #include <string>
 #include <google/protobuf/message.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
@@ -65,9 +67,11 @@ class RecordWriter {
  public:
   RecordWriter(const string& filename, int buf_size = -1)
     : raw_output_(NULL), coded_output_(NULL) {
-    fd_ = open(filename.c_str(), O_CREAT | O_TRUNC | O_WRONLY, 0644);
-    if (fd_ < 0)
+    if ((fd_ = open(filename.c_str(), O_CREAT | O_TRUNC | O_WRONLY, 0644)) < 0) {
+      cerr << "couldn't open file for write "
+              "(errno " << errno << ": " << strerror(errno) << ")" << endl;
       return;
+    }
     raw_output_ = new google::protobuf::io::FileOutputStream(fd_, buf_size);
     Init();
   }

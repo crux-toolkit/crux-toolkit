@@ -7,6 +7,7 @@
 #include "carp.h"
 
 static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
+  "file",
   "scan",
   "charge",
   "spectrum precursor m/z",
@@ -19,6 +20,7 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "xcorr rank",
   "exact p-value",
   "refactored XCORR",
+  "e-value",
   "p-value",
 #ifdef NEW_COLUMNS
   "Weibull PSM q-value",
@@ -37,6 +39,8 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "Weibull est. PEP",
   "decoy q-value (xcorr)",
   "decoy PEP (xcorr)",
+  "decoy q-value (e-value)",
+  "decoy PEP (e-value)",
   "percolator score",
   "percolator rank",
   "percolator q-value",
@@ -49,13 +53,13 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
 #endif
   "b/y ions matched",
   "b/y ions total",
-  "matches/spectrum",
+  "distinct matches/spectrum",
   "sequence",
   "cleavage type",
   "protein id",
   "peptides",
   "flanking aa",
-  "unshuffled sequence",
+  "original target sequence",
   "eta",
   "beta",
   "shift",

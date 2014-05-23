@@ -92,6 +92,10 @@ int main(int argc, char* argv[]){
 	}
 
 	p1.processHK(argv[argc-4]);
+	if (p1.size() == 0) {
+		cout << "No analysis results, exiting..." << endl;
+		exit(0);
+	}
 
 	//Remove contaminants
 	CKronik2 tKro;

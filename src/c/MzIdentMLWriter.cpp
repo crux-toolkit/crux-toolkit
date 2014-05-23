@@ -449,7 +449,10 @@ SpectrumIdentificationResultPtr MzIdentMLWriter::getSpectrumIdentificationResult
   Crux::Spectrum* spectrum ///< Crux spectrum object -in
   ) {
 
-  string spectrum_idStr = DelimitedFileWriter::to_string(spectrum->getFirstScan());
+  string spectrum_idStr = 
+    DelimitedFileWriter::to_string(spectrum->getFirstScan()) + 
+    "-" +
+    DelimitedFileWriter::to_string(spectrum->getLastScan());
 
   SpectrumIdentificationListPtr silp = getSpectrumIdentificationList();
 
@@ -563,9 +566,9 @@ CVID MzIdentMLWriter::getScoreCVID(
 
   switch(type) {
     case XCORR:
-      return MS_Sequest_xcorr;
+      return MS_SEQUEST_xcorr;
     case SP:
-      return MS_Sequest_PeptideSp;
+      return MS_SEQUEST_PeptideSp;
     case PERCOLATOR_SCORE:
       return MS_percolator_score;
     case PERCOLATOR_QVALUE:
@@ -586,7 +589,7 @@ CVID MzIdentMLWriter::getRankCVID(
 
   switch(type) {
     case SP:
-      return MS_Sequest_PeptideRankSp;
+      return MS_SEQUEST_PeptideRankSp;
     default:
       return CVID_Unknown;
   }
@@ -610,7 +613,7 @@ void MzIdentMLWriter::addScores(
         if (match_collection->exact_pval_search){
          CVParam exactPval(MS_peptide_identification_confidence_metric, match->getScore(TIDE_SEARCH_EXACT_PVAL));
          item->cvParams.push_back(exactPval);
-         CVParam refactXCORR(MS_Sequest_xcorr, match->getScore(TIDE_SEARCH_REFACTORED_XCORR));
+         CVParam refactXCORR(MS_SEQUEST_xcorr, match->getScore(TIDE_SEARCH_REFACTORED_XCORR));
          item->cvParams.push_back(refactXCORR);
          continue;
         }
@@ -627,18 +630,17 @@ void MzIdentMLWriter::addScores(
 
 
   if (match_collection->getScoredType(XCORR)) {
-    CVParam delta_cn(MS_Sequest_deltacn, match->getDeltaCn());
+    CVParam delta_cn(MS_SEQUEST_deltacn, match->getDeltaCn());
     item->cvParams.push_back(delta_cn);
   }
+
   if (match_collection->getScoredType(SP)) {
-    CVParam matched_ions(MS_Sequest_matched_ions, match->getBYIonMatched());
+    CVParam matched_ions(MS_SEQUEST_matched_ions, match->getBYIonMatched());
     item->cvParams.push_back(matched_ions);
-    CVParam total_ions(MS_Sequest_total_ions, match->getBYIonPossible()); 
+    CVParam total_ions(MS_SEQUEST_total_ions, match->getBYIonPossible()); 
+    item->cvParams.push_back(total_ions);
   }
-
-
 }
-
 
 /**
  * Adds the match ranks to the SpectrumIdentificationItem

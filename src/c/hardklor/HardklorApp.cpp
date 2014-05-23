@@ -22,7 +22,6 @@ int main(int argc, char* argv[]) {
 	unsigned int j;
   bool bConf;
   char tstr[512]="\0";
-  fstream fptr;
 
 	CAveragine *averagine;
 	CMercury8 *mercury;
@@ -58,8 +57,8 @@ int main(int argc, char* argv[]) {
 
   //Create all the output files that will be used
   for(i=0;i<hp.size();i++){
+    fstream fptr(&hp.queue(i).outFile[0],fstream::out);
     fptr.clear();
-    fptr.open(&hp.queue(i).outFile[0],ios::out);
     fptr.close();
   }
 

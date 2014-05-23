@@ -20,6 +20,7 @@ ActivePeptideQueue::ActivePeptideQueue(RecordReader* reader,
     proteins_(proteins),
     theoretical_peak_set_( 2000 ),   // probably overkill, but no harm
     theoretical_b_peak_set_( 200 ),  // probably overkill, but no harm
+    active_targets_(0), active_decoys_(0),
     fifo_alloc_peptides_(FLAGS_fifo_page_size << 20),
     fifo_alloc_prog1_(FLAGS_fifo_page_size << 20),
     fifo_alloc_prog2_(FLAGS_fifo_page_size << 20) {
@@ -78,7 +79,7 @@ int ActivePeptideQueue::SetActiveRange(double min_mass, double max_mass) {
   // max_mass. For each new enqueued peptide compute the corresponding
   // theoretical peaks. Data associated with each peptide is allocated by
   // fifo_alloc_peptides_.
-  bool done;
+  bool done = false;
   if (queue_.empty() || queue_.back()->Mass() <= max_mass) {
     if (!queue_.empty())
       ComputeTheoreticalPeaksBack();
@@ -108,8 +109,21 @@ int ActivePeptideQueue::SetActiveRange(double min_mass, double max_mass) {
   if (queue_.empty())
     return 0;
 
-  --end_;
-  return queue_.size() - 1;
+  int active = queue_.size();
+  if (!done) {
+    --end_;
+    --active;
+  }
+  // Count active targets and decoys
+  active_targets_ = active_decoys_ = 0;
+  for (deque<Peptide*>::const_iterator i = iter_; i != end_; ++i) {
+    if (!(*i)->IsDecoy()) {
+      ++active_targets_;
+    } else {
+      ++active_decoys_;
+    }
+  }
+  return active;
 
   /*
   cerr << (end_ - iter_) << " candidates.";
@@ -161,9 +175,8 @@ int ActivePeptideQueue::SetActiveRangeBIons(double min_mass, double max_mass) {
   bool done;
   if (queue_.empty() || queue_.back()->Mass() <= max_mass) {
     if (!queue_.empty()){
-//      ComputeBTheoreticalPeaksBack();
+      // ComputeBTheoreticalPeaksBack();
     }
-      
     while (!(done = reader_->Done())) {
       // read all peptides lighter than max_mass
       reader_->Read(&current_pb_peptide_);
@@ -194,9 +207,21 @@ int ActivePeptideQueue::SetActiveRangeBIons(double min_mass, double max_mass) {
   end_ = queue_.end();
   if (queue_.empty())
     return 0;
-
   --end_;
-  return queue_.size() - 1;
+
+  // Count active targets and decoys
+  active_targets_ = active_decoys_ = 0;
+  for (deque<Peptide*>::const_iterator i = iter_; i != end_; ++i) {
+    if (!(*i)->IsDecoy()) {
+      ++active_targets_;
+    } else {
+      ++active_decoys_;
+    }
+  }
+
+  int active = queue_.size();
+  --active;
+  return active;
 
   /*
   cerr << (end_ - iter_) << " candidates.";

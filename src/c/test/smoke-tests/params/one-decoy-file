@@ -3,4 +3,4 @@ decoys=peptide-shuffle
 num-decoys-per-target=3
 decoy-location=one-decoy-file
 overwrite=T
-seed=7
+seed=5

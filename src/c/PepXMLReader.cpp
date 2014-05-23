@@ -38,12 +38,18 @@ void open_handler(void *data, const char *el, const char **attr) {
     reader->searchResultOpen();
   } else if (strcmp(el, "search_hit") == 0) {
     reader->searchHitOpen(attr);
+  } else if (strcmp(el, "modification_info") == 0) {
+    reader->modificationInfoOpen(attr);
+  } else if (strcmp(el, "mod_aminoacid_mass") == 0) {
+    reader->modAminoAcidMassOpen(attr);
   } else if (strcmp(el, "alternative_protein") == 0) {
     reader->alternativeProteinOpen(attr);
   } else if (strcmp(el, "search_score") == 0) {
     reader->searchScoreOpen(attr);
   } else if (strcmp(el, "peptideprophet_result") == 0) {
     reader->peptideProphetResultOpen(attr);
+  } else {
+    carp(CARP_DEBUG, "Unsupported open tag:%s", el);
   }
 }
 
@@ -56,12 +62,18 @@ void close_handler(void *data, const char *el) {
     reader->searchResultClose();
   } else if (strcmp(el, "search_hit") == 0) {
     reader->searchHitClose();
+  } else if (strcmp(el, "modification_info") == 0) {
+    reader->modificationInfoClose();
+  } else if (strcmp(el, "mod_aminoacid_mass") == 0) {
+    reader->modAminoAcidMassClose();
   } else if (strcmp(el, "alternative_protein") == 0) {
     reader->alternativeProteinClose();
   } else if (strcmp(el, "search_score") == 0) {
     reader->searchScoreClose();
   } else if (strcmp(el, "peptideprophet_result") == 0) {
     reader->peptideProphetResultClose();
+  } else {
+    carp(CARP_DEBUG, "Unsupported close tag:%s", el);
   }
 }  /* End of end handler */
 
@@ -260,7 +272,7 @@ int PepXMLReader::findStart(
       seq = peptide_sequence;
       pos = protein_seq.find(seq);
       if (pos == string::npos) {
-        carp(CARP_FATAL, "could not %s in protein %s\n%s", seq.c_str(), protein->getIdPointer(), protein_seq.c_str());
+        carp(CARP_FATAL, "could not find %s in protein %s\n%s", seq.c_str(), protein->getIdPointer(), protein_seq.c_str());
       }
       case_ = 2;
       ans = (pos+1);
@@ -330,10 +342,15 @@ void PepXMLReader::searchHitOpen(
     MatchCollectionParser::getProtein(database_, decoy_database_, protein_string, is_decoy);
   int start_idx = protein->findStart(current_peptide_sequence_, prev_aa, next_aa);
   Peptide* peptide = new Peptide(length, peptide_mass, protein, start_idx);
-  
 
   current_match_ = new Match(peptide, current_spectrum_, current_zstate_, is_decoy);
-  //current_match_->setRank(XCORR, hit_rank);
+  if (is_decoy) {
+    current_match_->setNullPeptide(true);
+  }
+
+  if ((hit_rank > 0) && (current_match_->getRank(XCORR) == 0)) {
+    current_match_->setRank(XCORR, hit_rank);
+  }
   if(by_ions_total>0){
     current_match_->setBYIonMatched(by_ions_matched);
     current_match_->setBYIonPossible(by_ions_total);
@@ -353,8 +370,77 @@ void PepXMLReader::searchHitClose() {
   search_hit_open_ = false;
   
   //We should have all the information needed to add the match object.
-  current_match_collection_->addMatchToPostMatchCollection(current_match_);
+  current_match_collection_->addMatch(current_match_);
 
+}
+
+/**
+ * Handles the modification_info open tag event
+ */
+void PepXMLReader::modificationInfoOpen(
+  const char** attr ///< attribute array for element
+  ) {
+  
+  modification_info_open_ = true;
+  for (int idx = 0; attr[idx]; idx += 2) {
+    if (strcmp(attr[idx], "mod_nterm_mass") == 0) {
+
+      FLOAT_T mod_nterm_mass = atof(attr[idx+1]);
+      //set nterm mod mass
+      const AA_MOD_T* aa_mod = get_aa_mod_from_mass(mod_nterm_mass);
+      MODIFIED_AA_T* mod_seq = current_match_->getPeptide()->getModifiedAASequence();
+      modify_aa(&mod_seq[0], aa_mod);
+      current_match_->getPeptide()->setModifiedAASequence(mod_seq, true);
+      free(mod_seq);
+    } 
+  }
+}
+
+/**
+ * Handles the modification_info close tag event
+ */
+void PepXMLReader::modificationInfoClose() {
+  modification_info_open_ = false;
+}
+
+/**
+ * Handles the mod_aminoacid_mass open tag event
+ */
+void PepXMLReader::modAminoAcidMassOpen(
+  const char** attr ///< attribute array for element
+  ) {
+  
+  mod_aminoacid_mass_open_ = true;
+  int position = -1;
+  FLOAT_T mod_mass = 0;
+  bool have_mod_mass = false;
+  
+  for (int idx = 0; attr[idx]; idx += 2) {
+    if (strcmp(attr[idx], "position") == 0) {
+      position = atoi(attr[idx+1]);
+    } else if (strcmp(attr[idx],"mass") == 0) {
+      mod_mass = atof(attr[idx+1]);
+      have_mod_mass = true;
+    }
+  }
+  
+  if (position > 0 && have_mod_mass) {
+    //set aminoacid modification.
+    const AA_MOD_T* aa_mod = get_aa_mod_from_mass(mod_mass);
+    MODIFIED_AA_T* mod_seq = current_match_->getPeptide()->getModifiedAASequence();
+    modify_aa(&mod_seq[position-1], aa_mod);
+    current_match_->getPeptide()->setModifiedAASequence(mod_seq, true);
+    free(mod_seq);
+  } else {
+    carp(CARP_WARNING, "mod_aminoacid_mass error");
+  }
+}
+
+/**
+ * Handles the mod_aminoacid_mass close tag event
+ */
+void PepXMLReader::modAminoAcidMassClose() {
+  mod_aminoacid_mass_open_ = false;
 }
 
 /**
@@ -385,7 +471,9 @@ void PepXMLReader::alternativeProteinOpen(
 
   Protein* protein = 
     MatchCollectionParser::getProtein(database_, decoy_database_, protein_string, is_decoy);
-
+  if (is_decoy) {
+    current_match_->setNullPeptide(true);
+  }
   int start_idx = protein->findStart(current_peptide_sequence_, prev_aa, next_aa);
 
   PeptideSrc* src = new PeptideSrc((DIGEST_T)0, protein, start_idx);
@@ -426,6 +514,8 @@ void PepXMLReader::searchScoreOpen(
     current_match_->setScore(XCORR, value);
   } else if (name == "xcorr_rank") {
     current_match_->setRank(XCORR, value);
+  } else if (name == "expect") {
+    current_match_->setScore(EVALUE, value);
   } else if (name == "delta_cn" || name == "deltacn") {
     current_match_->setDeltaCn(value);
   } else if (name == "sp" || name == "spscore") {

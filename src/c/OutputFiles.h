@@ -23,7 +23,7 @@
 #include "MatchCollection.h"
 #include "MatchFileWriter.h"
 #include "PepXMLWriter.h"
-#include "PinXMLWriter.h"
+#include "PinWriter.h"
 #include "MzIdentMLWriter.h"
 
 class OutputFiles{
@@ -49,6 +49,10 @@ class OutputFiles{
                            MetaToRank& metaToRank,
                            ProteinToMetaProtein& proteinToMeta);
   void writeRankedPeptides(PeptideToScore& peptideToScore);
+  static bool isConcat();
+  static void setConcat(bool enable = true);
+  static bool isProteinLevelDecoys();
+  static void setProteinLevelDecoys(bool enable = true);
 
   bool exact_pval_search;
 
@@ -83,7 +87,7 @@ class OutputFiles{
                   bool overwrite);
 
   bool createFile(
-    PinXMLWriter** pin_file_ptr,
+    PinWriter** pin_file_ptr,
     const char* output_dir, 
     const char* filename, 
     bool overwrite
@@ -115,7 +119,7 @@ class OutputFiles{
                            ///< array of collections from shuffled peptides
     Crux::Spectrum* spectrum = NULL);
 
-  void printMatchesPinXml(
+  void printMatchesPin(
     MatchCollection* target_matches, ///< form real peptides 
     std::vector<MatchCollection*>& decoy_maches_array, 
                           ///< array of collection from shuffled peptides  
@@ -134,6 +138,8 @@ class OutputFiles{
   );
 
   int num_files_;         ///< num files in each array
+  static bool concat_;
+  static bool proteinLevelDecoys_;
   std::string* target_decoy_list_; ///< target or decoy[-n] string of each file
   MatchFileWriter** delim_file_array_; ///< array of .txt files
   FILE** sqt_file_array_; ///< array of .sqt files
@@ -143,7 +149,7 @@ class OutputFiles{
   FILE*  feature_file_;   ///< file for percolator/q-ranker to write features to 
   int matches_per_spec_;  ///< print this many matches per spec
   CruxApplication* application_;///< crux application writing these files
-  PinXMLWriter* pin_xml_file_;///< file for inpupt of percolator
+  PinWriter* pin_file_;///< file for inpupt of percolator
  
 };
 

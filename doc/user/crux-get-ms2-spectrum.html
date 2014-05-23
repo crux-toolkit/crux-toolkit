@@ -1,59 +1,60 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <HTML>
 <HEAD>
-<TITLE>crux-get-ms2-spectrum</TITLE>
+<TITLE>crux get-ms2-spectrum</TITLE>
 </HEAD>
 <BODY>
 <blockquote>
-<H1 ALIGN=CENTER>crux-get-ms2-spectrum</H1>
+<H1 ALIGN=CENTER>crux get-ms2-spectrum</H1>
 
 <B>Usage:</B>
 
 <blockquote>
-<code>crux-get-ms2-spectrum [options] &nbsp;&lt;scan number&gt; 
-  &nbsp;&lt;input&nbsp;filename&gt; </code>
+<code>crux get-ms2-spectrum [options] &nbsp;&lt;input&nbsp;filename&gt;</code>
 </blockquote>
 
 <B>Description:</B>
 
-<p>
-Using a binary search, extract one or more MS-MS spectra from an MS2
-file by scan number. Optionally output some summary statistics for
-each spectrum.</p>
+<blockquote>
+Extract one or more MS-MS spectra from an MS2 file by scan
+number. Optionally output summary statistics for each spectrum.
+</blockquote>
 
 <B>Input:</B>
 <UL>
 
 <li>
-&lt;scan number&gt; &ndash; The scan number for the MS-MS spectrum to
-extract from the MS2 file. This is an integer in the range [1,
-100000], and uniquely identifies a particular MS-MS spectrum within an
-MS2 file.  Optionally, this argument may be provided as a range of
-scan numbers of the form &lt;mix&gt;-&lt;max&gt;.  In this case, all
-scans within the specified range (inclusive) will be output.</li>
-	
-<li>
-&lt;input filename&gt; &ndash; A file containing multiple MS-MS
-spectra in <a href="ms2-format.html">MS2</a> format.</li>
+&lt;input filename&gt; &ndash; A file containing multiple
+fragmentation spectra in <a href="ms2-format.html">MS2</a>
+format.</li>
 
 </UL>
 
 <B>Output:</B>
 
 <ul>
-The program prints the requested spectrum to standard output in MS2
-format.
+The program prints the requested spectrum or spectra to standard
+output in MS2 format.
 </ul>
 
 <B>Options:</B>
 
 <UL>
 
+<li>
+<code>--scan-number &lt;int&gt;|&lt;int&gt;-&lt;int&gt;</code> &ndash;
+The scan number for the MS-MS spectrum to extract from the MS2
+file. This is an integer in the range [1, 100000] that uniquely
+identifies a particular spectrum within an MS2 file.  Optionally, this
+argument may be provided as a range of scan numbers of the form
+&lt;min&gt;-&lt;max&gt;.  In this case, all scans within the specified
+range (inclusive) will be output.</li>
+	
 <LI>
-<code>--stats &lt;T|F&gt;</code> &ndash; Rather than the spectrum,
+<code>--stats T|F</code> &ndash; Rather than the spectrum,
 output summary statistics to standard output.  Each statistic is
 placed on a separate line, in the format &lt;name&gt;:&lt;value&gt;
-(e.g.  "TIC:1000.0\n").  The following statistics are reported for the
+(e.g.  "TIC:1000.0").  The following statistics are reported for the
 entire spectrum:
   <UL>
   <LI>Precursor m/z</li>
@@ -63,20 +64,25 @@ entire spectrum:
   <LI>Minimum m/z</li>
   <LI>Maximum m/z</li>
   </UL>
-For each possible spectrum charge state, the statistics are as follows:
+In addition, for each possible spectrum charge state, the following
+statistics are reported:
   <UL>
   <LI>Charge state</li>
   <LI>Neutral mass</li>
   <LI>Charged mass</li>
   <LI>M+H+ mass</li>
   </UL>
+Default=F.
 </li>
 
 <li>
-<code>--spectrum-parser &lt;pwiz|mstoolkit|crux&gt;</code> &ndash;
-Parser to use for reading in MS/MS spectra.  Default = crux.</li>
-<LI>
-<code>--verbosity &lt;0-100&gt;</code> &ndash; Specify the verbosity of the
+<code>--spectrum-parser pwiz|mstoolkit</code> &ndash; Specify
+which parsing code to use for reading in MS/MS spectra.  If the
+program has problems parsing the file using one parser, then the other
+parser may be tried instead.  Default = pwiz.</li>
+
+<li>
+<code>--verbosity 0-100</code> &ndash; Specify the verbosity of the
 current processes. Each level prints the following messages, including
 all those at lower verbosity levels: 0-fatal errors, 10-non-fatal
 errors, 20-warnings, 30-information on the progress of execution,

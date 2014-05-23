@@ -13,37 +13,36 @@ add_subdirectory(qranker-barista)
 add_subdirectory(xlink)
 add_subdirectory(tide)
 
-include_directories("${CMAKE_CURRENT_BINARY_DIR}")
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(.)
 include_directories(bullseye)
 include_directories(hardklor)
 include_directories(qranker-barista)
 include_directories(posterior-error)
 include_directories(xlink)
-include_directories(tide/protoobj)
-include_directories(../..)
-include_directories(../external)
-include_directories(../external/include)
-include_directories(../external/include/CometSearch)
-include_directories(../external/include/MSToolkit)
-include_directories(../external/build/src/ProteoWizard/libraries/boost_1_43_0)
-include_directories(../external/build/src/ProteoWizard/libraries/boost_aux)
-include_directories(../external/build/src/percolator/src/)
-include_directories(../external/build/src/percolator/src/fido)
-include_directories(../external/build/src/percolator-build/src/)
-include_directories(../external/build/src/percolator-build/src/fido)
+include_directories(${CMAKE_SOURCE_DIR}/src/external)
+include_directories(${CMAKE_BINARY_DIR}/src/external)
+include_directories(${CMAKE_BINARY_DIR}/src/external/include)
+include_directories(${CMAKE_BINARY_DIR}/src/external/include/CometSearch)
+include_directories(${CMAKE_BINARY_DIR}/src/external/include/MSToolkit)
+include_directories(${CMAKE_BINARY_DIR}/src/external/build/src/ProteoWizard/libraries/boost_1_54_0)
+include_directories(${CMAKE_BINARY_DIR}/src/external/build/src/ProteoWizard/libraries/boost_aux)
+include_directories(${CMAKE_BINARY_DIR}/src/external/build/src/percolator/src/)
+include_directories(${CMAKE_BINARY_DIR}/src/external/build/src/percolator/src/fido)
+include_directories(${CMAKE_BINARY_DIR}/src/external/build/src/percolator-build/src/)
+include_directories(${CMAKE_BINARY_DIR}/src/external/build/src/percolator-build/src/fido)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/tide/protoobj)
 
 
-link_directories(../external/lib)
 link_directories(.)
 link_directories(./bullseye)
 link_directories(./hardklor)
 link_directories(./posterior-error)
 link_directories(./qranker-barista)
 link_directories(./xlink)
-link_directories(../external/build/src/percolator-build/src) 
-link_directories(../external/lib)
-link_directories(../external/build/src/percolator-build/src/fido)
+link_directories(${CMAKE_BINARY_DIR}/src/external/lib)
+link_directories(${CMAKE_BINARY_DIR}/src/external/build/src/percolator-build/src) 
+link_directories(${CMAKE_BINARY_DIR}/src/external/build/src/percolator-build/src/fido)
 
 set (
   crux_lib_files
@@ -83,8 +82,8 @@ set (
   IonSeries.cpp
   linked_list.cpp
   LineFileReader.cpp
-  MakePinApplication.cpp
   mass.cpp
+  MakePinApplication.cpp
   Match.cpp
   MatchColumns.cpp
   MatchFileReader.cpp
@@ -94,10 +93,8 @@ set (
   MatchCollectionIterator.cpp
   MatchCollectionParser.cpp
   MatchIterator.cpp
-  MGFSpectrumCollection.cpp
   modifications.cpp
   ModifiedPeptidesIterator.cpp
-  MS2SpectrumCollection.cpp
   MSToolkitSpectrumCollection.cpp
   MzIdentMLReader.cpp
   MzIdentMLWriter.cpp
@@ -113,8 +110,8 @@ set (
   PepXMLWriter.cpp
   PercolatorAdapter.cpp
   PercolatorApplication.cpp
+  PinWriter.cpp
   GeneratePeptides.cpp
-  PinXMLWriter.cpp
   PostProcessProtein.cpp
   PredictPeptideIons.cpp
   PrintProcessedSpectra.cpp
@@ -259,6 +256,13 @@ set_property(
   MAIN
 )
 
+# The rt library is not needed for OS X
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  set(RT_LIBRARY "")
+else(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  set(RT_LIBRARY "rt")
+endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   target_link_libraries(
     crux
@@ -308,12 +312,11 @@ else(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     dl
     hardklor
     m
+    ${RT_LIBRARY}
     mstoolkitlite
     posterior_error
     perclibrary
-    pthread
     xlink
-    xerces-c
     boost_filesystem
     boost_system
     fido
@@ -335,6 +338,7 @@ else(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     boost_filesystem-mt-s
     boost_regex-mt-s
     boost_thread-mt-s
+    pthread
 
   )
     
@@ -342,7 +346,7 @@ else(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     xlink-predict-peptide-ions
     dl
     m
-    pthread
+    ${RT_LIBRARY}
     xlink
     crux-support
     mstoolkitlite
@@ -365,12 +369,13 @@ else(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     boost_filesystem-mt-s
     boost_regex-mt-s
     boost_thread-mt-s
+    pthread
   )
   target_link_libraries(
     xlink-score-spectrum
     dl
     m
-    pthread
+    ${RT_LIBRARY}
     xlink
     crux-support
     mstoolkitlite
@@ -393,12 +398,13 @@ else(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     boost_filesystem-mt-s
     boost_regex-mt-s
     boost_thread-mt-s
+    pthread
   )
   target_link_libraries(
     xlink-assign-ions
     dl
     m
-    pthread
+    ${RT_LIBRARY}
     xlink
     crux-support
     mstoolkitlite
@@ -421,6 +427,7 @@ else(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     boost_filesystem-mt-s
     boost_regex-mt-s
     boost_thread-mt-s
+    pthread
   )
 endif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 

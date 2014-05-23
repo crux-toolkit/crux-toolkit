@@ -20,8 +20,6 @@ class TideIndexApplication : public CruxApplication {
 
 public:
 
-  static const char DecoyMagicByte = 9;
-
   /**
    * Constructor
    */
@@ -56,12 +54,6 @@ public:
 
 protected:
 
-  enum DECOY_TYPE {
-    NONE,
-    SHUFFLE,
-    REVERSE
-  };
-
   class TideIndexPeptide {
   private:
     double mass_;
@@ -69,15 +61,17 @@ protected:
     int proteinId_;
     int proteinPos_;
     const char* residues_;  // points at protein sequence
+    bool decoy_;
   public:
     TideIndexPeptide() {}
-    TideIndexPeptide(double mass, int length,
-                     string* proteinSeq, int proteinId, int proteinPos) {
+    TideIndexPeptide(double mass, int length, string* proteinSeq,
+                     int proteinId, int proteinPos, bool decoy) {
       mass_ = mass;
       length_ = length;
       proteinId_ = proteinId;
       proteinPos_ = proteinPos;
       residues_ = proteinSeq->data() + proteinPos;
+      decoy_ = decoy;
     }
     TideIndexPeptide(const TideIndexPeptide& other) {
       mass_ = other.mass_;
@@ -85,12 +79,14 @@ protected:
       proteinId_ = other.proteinId_;
       proteinPos_ = other.proteinPos_;
       residues_ = other.residues_;
+      decoy_ = other.decoy_;
     }
     double getMass() const { return mass_; }
     int getLength() const { return length_; }
     int getProteinId() const { return proteinId_; }
     int getProteinPos() const { return proteinPos_; }
     string getSequence() const { return string(residues_, length_); }
+    bool isDecoy() const { return decoy_; }
 
     friend bool operator >(
       const TideIndexPeptide& lhs, const TideIndexPeptide& rhs) {
@@ -115,11 +111,21 @@ protected:
     }
   };
 
+  typedef pair<string, int> PeptideInfo;  // sequence, start location
+
+  struct ProteinInfo {
+    string name;
+    const string* sequence;
+    ProteinInfo(const string& proteinName, const string* proteinSequence)
+      : name(proteinName), sequence(proteinSequence) {}
+  };
+
   struct TargetInfo {
-    string proteinName;
-    string* proteinSequence;
+    ProteinInfo proteinInfo;
     int start;
     FLOAT_T mass;
+    TargetInfo(const ProteinInfo& protein, int startLoc, FLOAT_T pepMass)
+      : proteinInfo(protein), start(startLoc), mass(pepMass) {}
   };
 
   static void fastaToPb(
@@ -132,12 +138,13 @@ protected:
     int minLength,
     int maxLength,
     MASS_TYPE_T massType,
-    DECOY_TYPE decoyType,
+    DECOY_TYPE_T decoyType,
     const std::string& fasta,
     const std::string& proteinPbFile,
     pb::Header& outProteinPbHeader,
     std::vector<TideIndexPeptide>& outPeptideHeap,
-    std::vector<string*>& outProteinSequences
+    std::vector<string*>& outProteinSequences,
+    std::ofstream* decoyFasta
   );
 
   static void writePeptidesAndAuxLocs(
@@ -156,6 +163,14 @@ protected:
     int id,
     const std::string& name,
     const std::string& residues,
+    pb::Protein& outPbProtein
+  );
+
+  static void getDecoyPbProtein(
+    int id,
+    const ProteinInfo& targetProteinInfo,
+    std::string decoyPeptideSequence,
+    int startLoc,
     pb::Protein& outPbProtein
   );
 

@@ -4,7 +4,6 @@
 #include "OutputFiles.h"
 #include "Peptide.h"
 #include "ProteinPeptideIterator.h"
-#include "MatchCollectionParser.h"
 #include "SpectrumCollectionFactory.h"
 
 #include "MatchCollectionIterator.h"
@@ -591,7 +590,7 @@ void SpectralCounts::getPeptideScores()
  */
 void SpectralCounts::filterMatches() {
 
-  match_collection_ = MatchCollectionParser::create(
+  match_collection_ = parser_.create(
     psm_file_.c_str(),
     database_name_.c_str());
   carp(CARP_INFO, "Number of matches:%d", match_collection_->getMatchTotal());

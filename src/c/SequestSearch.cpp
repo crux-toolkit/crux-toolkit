@@ -57,7 +57,7 @@ int SequestSearch::main(int argc,   ///< number of cmd line tokens
     "parameter-file",
     "overwrite",
     "mzid-output",
-    "pinxml-output",
+    "pin-output",
     "pepxml-output",
     "txt-output",
     "spectrum-parser",

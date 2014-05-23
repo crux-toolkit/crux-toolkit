@@ -94,7 +94,8 @@ class Match {
   int num_target_matches_; ///< total target candidates for this spectrum
   int num_decoy_matches_;///< decoy candidates for this spectrum if decoy match
   bool best_per_peptide_; ///< Is this the best scoring PSM for this peptide?
-
+  int file_idx_; ///< index of where this match came from 
+  static std::vector<std::string> file_paths_;
   /**
    * Print one field in the tab-delimited output file, based on column index.
    */
@@ -303,6 +304,28 @@ class Match {
   void getCustomScoreNames(
     std::vector<std::string>& custom_score_names
   );
+
+
+  /**                                                                                                      
+   * sets the file index for this match                                                                    
+   */
+  void setFileIndex(
+    int file_idx ///< file index to set
+  );
+
+  /**                                                                                                      
+   * sets the file path for this match                                                                     
+   * \returns the associated file index                                                                    
+   */
+  int setFilePath(
+    const std::string& file_path ///< file path to set
+  );
+
+  /**                                                                                                      
+   * \returns the file path for this match                                                                 
+   */
+  std::string getFilePath();
+
 
   bool isDecoy();
 
@@ -535,6 +558,15 @@ int compareXcorr(
 
 /**
  * compare two matches, used for qsort
+ * \returns the difference between e-value in match_a and match_b
+ */
+int compareEValue(
+  Crux::Match** match_a, ///< the first match -in
+  Crux::Match** match_b ///< the second match -in
+);
+
+/**
+ * compare two matches, used for qsort
  * \returns the difference between p_value (LOGP_BONF_WEIBULL_XCORR)
  * score in match_a and match_b 
  */
@@ -739,6 +771,17 @@ int compareSpectrumDecoyPValueQValue(
 /************************************************
  * TODO: Why are these here?
  ************************************************/
+/**
+ * \brief Returns whether the nterm and cterm of a peptide are proper cleavages
+ */
+void get_terminal_cleavages(
+  const char* peptide_sequence, ///< peptide sequence
+  const char flanking_aas_prev, ///< amino acid before cleavage (n-term)
+  const char flanking_aas_next, ///< amino acid after cleavage (c-term)
+  ENZYME_T enzyme, ///< Enzyme used in cleavage
+  bool& nterm, ///< -out is nterminus from a proper cleavage?
+  bool& cterm ///< -out is cterminus from a proper cleavage?
+);
 
 /**
  * \brief Counts the number of internal cleavages

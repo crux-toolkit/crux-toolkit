@@ -34,9 +34,12 @@ class PepXMLReader {
   bool spectrum_query_open_; ///< are we within a spectrum_query?
   bool search_result_open_; ///< are we within a search_result element
   bool search_hit_open_;  ///< are we within a search 
+  bool modification_info_open_; ///< are we within a modification_info element?
+  bool mod_aminoacid_mass_open_; ///< are we within a mod_aminoacid_mass element?
   bool alternative_protein_open_; ///< are we within a alternative_protein element
   bool search_score_open_; ///< are we within a search_score element
   bool peptideprophet_result_open_; ///< are we within a peptideprophet_result element?
+  
   /**
    * /returns the start position of the peptide sequence within the protein
    */
@@ -83,6 +86,30 @@ class PepXMLReader {
    */
   void searchHitClose();
 
+  /**
+   * Handles the modification_info open tag event
+   */
+  void modificationInfoOpen(
+    const char** attr ///< attribute array for element
+  );
+  
+  /**
+   * Handles the modification_info close tag event
+   */
+  void modificationInfoClose();
+  
+  /**
+   * Handles the mod_aminoacid_mass open tag event
+   */
+  void modAminoAcidMassOpen(
+    const char** attr ///< attribute array for element
+  );
+  
+  /**
+   * Handles the mod_aminoacid_mass close tag event
+   */
+  void modAminoAcidMassClose();
+  
   /**
    * Handles the alternative_protein open tag event
    */

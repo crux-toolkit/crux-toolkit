@@ -1,6 +1,6 @@
 print-search-progress=100
 overwrite=F
-seed=7
+seed=5
 decoy-location=target-file
 decoys=peptide-shuffle
 num-decoys-per-target=1

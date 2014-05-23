@@ -9,36 +9,41 @@ set_directory_properties(PROPERTIES
 ########### For compiling proto files  ###########
 set(
   proto_files_compiled
-  protoobj/header.pb.cc
-  protoobj/peptides.pb.cc
-  protoobj/raw_proteins.pb.cc
-  protoobj/results.pb.cc
-  protoobj/spectrum.pb.cc
-  protoobj/view_ms1_cmds.pb.cc
+  ${CMAKE_CURRENT_BINARY_DIR}/protoobj/header.pb.cc
+  ${CMAKE_CURRENT_BINARY_DIR}/protoobj/peptides.pb.cc
+  ${CMAKE_CURRENT_BINARY_DIR}/protoobj/raw_proteins.pb.cc
+  ${CMAKE_CURRENT_BINARY_DIR}/protoobj/results.pb.cc
+  ${CMAKE_CURRENT_BINARY_DIR}/protoobj/spectrum.pb.cc
+  ${CMAKE_CURRENT_BINARY_DIR}/protoobj/view_ms1_cmds.pb.cc
 )
 set(
   proto_files
-  header.proto
-  peptides.proto
-  raw_proteins.proto
-  results.proto
-  spectrum.proto
-  view_ms1_cmds.proto
+  ${CMAKE_CURRENT_SOURCE_DIR}/protobuf/header.proto
+  ${CMAKE_CURRENT_SOURCE_DIR}/protobuf/peptides.proto
+  ${CMAKE_CURRENT_SOURCE_DIR}/protobuf/raw_proteins.proto
+  ${CMAKE_CURRENT_SOURCE_DIR}/protobuf/results.proto
+  ${CMAKE_CURRENT_SOURCE_DIR}/protobuf/spectrum.proto
+  ${CMAKE_CURRENT_SOURCE_DIR}/protobuf/view_ms1_cmds.proto
 )
 add_custom_command(
   OUTPUT ${proto_files_compiled}
-  COMMAND mkdir -p ../protoobj &&
-    ../../../external/bin/protoc --cpp_out=../protoobj --python_out=../protoobj ${proto_files}
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/protobuf
+  DEPENDS ${proto_files}
+  COMMAND mkdir -p protoobj &&
+    ${CMAKE_BINARY_DIR}/src/external/bin/protoc 
+      --proto_path=${CMAKE_CURRENT_SOURCE_DIR}/protobuf/ 
+      --cpp_out=${CMAKE_CURRENT_BINARY_DIR}/protoobj
+      --python_out=${CMAKE_CURRENT_BINARY_DIR}/protoobj 
+      ${proto_files}
+  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )
 
 ###### Set up include and link directories  ######
 include_directories(
-  ../../external/include
-  protoobj
+  ${CMAKE_BINARY_DIR}/src/external/include
+  ${CMAKE_CURRENT_BINARY_DIR}/protoobj
 )
 link_directories(
-  ../../external/lib
+  ${CMAKE_BINARY_DIR}/src/external/lib
 )
 
 ########## Set up tide-support library  ##########

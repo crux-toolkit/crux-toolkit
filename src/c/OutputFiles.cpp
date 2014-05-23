@@ -14,6 +14,9 @@
 using namespace std;
 using namespace Crux;
 
+bool OutputFiles::concat_ = false;
+bool OutputFiles::proteinLevelDecoys_ = false;
+
 /**
  * Default constructor for OutputFiles.  Opens all of the needed
  * files, naming them based on the values of the parameters output-dir
@@ -30,7 +33,7 @@ OutputFiles::OutputFiles(CruxApplication* program_name)
   sqt_file_array_ = NULL;
   mzid_file_ = NULL;
   feature_file_ = NULL;
-  pin_xml_file_=NULL;
+  pin_file_=NULL;
 
   // parameters for all three file types
   bool overwrite = get_boolean_parameter("overwrite");
@@ -45,9 +48,10 @@ OutputFiles::OutputFiles(CruxApplication* program_name)
 
   // TODO (BF oct-21-09): consider moving this logic to parameter.c
   COMMAND_T command = application_->getCommand();
-  if( command != SEARCH_COMMAND &&
-      command != SEQUEST_COMMAND &&
-      command != TIDE_SEARCH_COMMAND ){
+  if (concat_ ||
+      (command != SEARCH_COMMAND &&
+       command != SEQUEST_COMMAND &&
+       command != TIDE_SEARCH_COMMAND)) {
     num_files_ = 1;
   }
 
@@ -90,19 +94,19 @@ OutputFiles::OutputFiles(CruxApplication* program_name)
                  overwrite);
   }
 
-  //pin xml 
+  //pin
   if( (command==SEARCH_COMMAND ||
        command == SEQUEST_COMMAND ||
        command == TIDE_SEARCH_COMMAND ) &&
-      get_boolean_parameter("pinxml-output") ){
+      get_boolean_parameter("pin-output") ){
    string filename=makeFileName(
     fileroot, 
     application_,
     NULL,// not trget and decoy file 
-    "pin.xml"
+    "pin"
    );
     createFile(
-      &pin_xml_file_,
+      &pin_file_,
       output_directory, 
       filename.c_str(), 
       overwrite
@@ -140,7 +144,7 @@ OutputFiles::~OutputFiles(){
     if( delim_file_array_ ){ delete delim_file_array_[file_idx]; }
     if( sqt_file_array_ ){ fclose(sqt_file_array_[file_idx]); }
     if( xml_file_array_ ){ xml_file_array_[file_idx]->closeFile(); }
-    if(pin_xml_file_){pin_xml_file_->closeFile();}
+    if(pin_file_){pin_file_->closeFile();}
   }
 
   if (mzid_file_) { 
@@ -154,7 +158,7 @@ OutputFiles::~OutputFiles(){
   delete [] sqt_file_array_;
   delete [] xml_file_array_;
   delete [] target_decoy_list_;
-  delete  pin_xml_file_;
+  delete  pin_file_;
 }
 
 /**
@@ -241,9 +245,9 @@ bool OutputFiles::createFiles(FILE*** file_array_ptr,
 
   // create each file
   for(int file_idx = 0; file_idx < num_files_; file_idx++ ){
-    string filename = makeFileName( fileroot, application,
-                                    target_decoy_list_[file_idx].c_str(),
-                                    extension);
+    string filename = makeFileName(fileroot, application,
+                   concat_ ? NULL : target_decoy_list_[file_idx].c_str(),
+                   extension);
     createFile(&(*file_array_ptr)[file_idx], 
                output_dir, 
                filename.c_str(), 
@@ -281,9 +285,9 @@ bool OutputFiles::createFiles(PepXMLWriter*** xml_writer_array_ptr,
 
   // create each file
   for(int file_idx = 0; file_idx < num_files_; file_idx++ ){
-    string filename = makeFileName( fileroot, application,
-                                    target_decoy_list_[file_idx].c_str(),
-                                    extension, output_dir);
+    string filename = makeFileName(fileroot, application,
+                   concat_ ? NULL : target_decoy_list_[file_idx].c_str(),
+                   extension, output_dir);
     (*xml_writer_array_ptr)[file_idx] = new PepXMLWriter();
     (*xml_writer_array_ptr)[file_idx]->openFile(filename.c_str(), overwrite);
 
@@ -320,8 +324,8 @@ bool OutputFiles::createFiles(MatchFileWriter*** file_array_ptr,
   // create each file writer
   for(int file_idx = 0; file_idx < num_files_; file_idx++ ){
     string filename = makeFileName(fileroot, application,
-                                   target_decoy_list_[file_idx].c_str(),
-                                   extension, output_dir);
+                   concat_ ? NULL : target_decoy_list_[file_idx].c_str(),
+                   extension, output_dir);
     (*file_array_ptr)[file_idx] = new MatchFileWriter(filename.c_str());
   }
   
@@ -373,19 +377,19 @@ bool OutputFiles::createFile(MzIdentMLWriter** file_ptr,
  * arguments.
  *
  * New file is returned via the file_ptr argument.  File is named
- * output-dir/fileroot.pin.xml.  Requires that the
+ * output-dir/fileroot.pin.  Requires that the
  * output-dir already exist and have write permissions.
  * \returns true if the file is created, else false.
  */
 bool OutputFiles::createFile(
-  PinXMLWriter** pin_file_ptr,
+  PinWriter** pin_file_ptr,
   const char* output_dir,
   const char* filename,
   bool overwrite
 ){
   // open the file
   
-  *pin_file_ptr= new PinXMLWriter();
+  *pin_file_ptr= new PinWriter();
   (*pin_file_ptr)->openFile(filename,output_dir,overwrite);  
 
   if( pin_file_ptr == NULL ){ return false; }
@@ -395,7 +399,7 @@ bool OutputFiles::createFile(
 
 
 /**
- * \brief Write header lines to the .txt, .sqt files, .pep.xml, and pin.xml
+ * \brief Write header lines to the .txt, .sqt files, .pep.xml, and .pin
  * files.  Optional num_proteins argument for .sqt files.  Use this
  * for search commands, not post-search.
  */
@@ -437,10 +441,9 @@ void OutputFiles::writeHeaders(int num_proteins, bool isMixedTargetDecoy){
 
     tag = "decoy";
   }
-  //write header at a time for pin.xml file
-  if(pin_xml_file_){
-    pin_xml_file_->exact_pval_search = exact_pval_search;
-    pin_xml_file_->printHeader();
+  //write header at a time for pin file
+  if(pin_file_){
+    pin_file_->printHeader();
   }
 }
 
@@ -482,7 +485,7 @@ void OutputFiles::writeFeatureHeader(char** feature_names,
 }
 
 /**
- * \brief Write footer lines to .pep.xml and .pin.xml files
+ * \brief Write footer lines to .pep.xml files
  */
 void OutputFiles::writeFooters(){
   if (xml_file_array_){
@@ -490,9 +493,6 @@ void OutputFiles::writeFooters(){
       xml_file_array_[file_idx]->writeFooter();
     }
   }
-  //just for .pin.xml file
-  if(pin_xml_file_)
-    pin_xml_file_->printFooter();
 }
 
 /**
@@ -526,7 +526,7 @@ void OutputFiles::writeMatches(
 
   printMatchesXml(target_matches, decoy_matches_array, spectrum, rank_type);
   
-  printMatchesPinXml(target_matches,decoy_matches_array,spectrum);
+  printMatchesPin(target_matches,decoy_matches_array,spectrum);
 
   printMatchesMzid(target_matches, decoy_matches_array, rank_type);
 
@@ -571,23 +571,23 @@ void OutputFiles::printMatchesTab(
 
 }
 
-void OutputFiles::printMatchesPinXml(
+void OutputFiles::printMatchesPin(
   MatchCollection* target_matches,
   vector<MatchCollection*>& decoy_matches_array,
   Spectrum* spectrum
   ) {
 
-  if (pin_xml_file_ == NULL) {
+  if (pin_file_ == NULL) {
     return;
   }
   
   if( spectrum ){
     
-    pin_xml_file_->write(target_matches, decoy_matches_array,
+    pin_file_->write(target_matches, decoy_matches_array,
                          spectrum, matches_per_spec_);
   }
   else 
-    pin_xml_file_->write(target_matches, decoy_matches_array,
+    pin_file_->write(target_matches, decoy_matches_array,
                          matches_per_spec_);
    
 }
@@ -859,12 +859,21 @@ void OutputFiles::writeRankedProteins(ProteinToScore& proteinToScore,
   }
 }
 
+bool OutputFiles::isConcat() {
+  return concat_;
+}
 
+void OutputFiles::setConcat(bool enable) {
+  concat_ = enable;
+}
 
+bool OutputFiles::isProteinLevelDecoys() {
+  return proteinLevelDecoys_;
+}
 
-
-
-
+void OutputFiles::setProteinLevelDecoys(bool enable) {
+  proteinLevelDecoys_ = enable;
+}
 
 /*
  * Local Variables:

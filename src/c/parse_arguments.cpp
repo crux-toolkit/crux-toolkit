@@ -20,7 +20,7 @@
 
 
 /* Limits on the number of arguments */
-static const int MAX_OPT_ARGS = 50;
+static const int MAX_OPT_ARGS = 500;
 static const int MAX_REQ_ARGS = 25;
 
 /* Make the error message bufer large enough
@@ -38,6 +38,7 @@ static const int MAX_MESSAGE_BUFFER = 510;
  */
 typedef struct {
   bool command_line; ///<  the value come from the command line
+  bool print; ///< print this option?
   const char *name;  ///< the name of arguemt
   const char *usage; ///< the type of argument
   void *container;  ///< A pointer to storage for the parsed value of the option. 
@@ -97,7 +98,7 @@ int is_numeric(/*const*/ char * s);
  * 
  ***********************************************************************/
 int parse_arguments_set_opt(const char * name, const char * usage, void * container, 
-                enum argument_type type) {
+                enum argument_type type, bool print) {
         
   int result = 0;
 
@@ -106,6 +107,7 @@ int parse_arguments_set_opt(const char * name, const char * usage, void * contai
     optional[optional_count].usage = usage;
     optional[optional_count].container = container;
     optional[optional_count].type = type;
+    optional[optional_count].print = print;
     optional[optional_count].command_line = false;
     optional_count++;
     result = 1;
@@ -139,7 +141,7 @@ int parse_arguments_set_opt(const char * name, const char * usage, void * contai
  * 
  ***********************************************************************/
 int parse_arguments_set_req(const char * name, const char * usage, void * container, 
-                enum argument_type type) {
+                enum argument_type type, bool print) {
 
   int result = 0;
   
@@ -149,6 +151,7 @@ int parse_arguments_set_req(const char * name, const char * usage, void * contai
     required[required_count].container = container;
     required[required_count].type = type;
     required[required_count].command_line = false;
+    required[required_count].print = true;
     required_count++;
     result = 1;
   } else {
@@ -640,7 +643,8 @@ int assign_value_from_option_to_hash(/*const*/ argument * option,
 
   if (*index < argument_count -1) {
      more_args = 1;
-     if (arguments[(*index) + 1][0] == '-') {
+     std::string arg_value = arguments[(*index) + 1];
+     if (arg_value.compare(0, 2, "--") == 0) {
        next_arg_is_not_option = 0;
      }
   }
@@ -953,26 +957,26 @@ char * parse_arguments_get_usage(const char * name) {
     /* Add the required argument usage comments */
     strcat(usage, "REQUIRED ARGUMENTS:\n\n");
     for (i = 0; i < required_count; i++) {
-      strcat(usage, "  <");
-      strcat(usage, required[i].name);
-      strcat(usage, "> ");
-      strcat(usage, required[i].usage);
-      strcat(usage, "\n");
+      std::stringstream ss;
+      ss << "<" << required[i].name << "> " << required[i].usage << '\n';
+      strcat_formatted(usage, "   ", ss.str().c_str());
     }
     strcat(usage, "\n");
 
     /* Add the optional argument usage comments */
     strcat(usage, "OPTIONAL ARGUMENTS:\n\n");
     for (i = 0; i < optional_count; i++) {
-      strcat(usage, "  [--");
-      strcat(usage, optional[i].name);
-      if (optional[i].type != FLAG_ARG) {
-        strcat(usage, " <");
-        strcat(usage, get_option_value_type(&optional[i]));
-        strcat(usage, ">");
+      if (optional[i].print) {
+        strcat(usage, "  [--");
+        strcat(usage, optional[i].name);
+        if (optional[i].type != FLAG_ARG) {
+          strcat(usage, " <");
+          strcat(usage, get_option_value_type(&optional[i]));
+          strcat(usage, ">");
+        }
+        strcat(usage, "]\n");
+        strcat_formatted(usage, "     ", optional[i].usage);
       }
-      strcat(usage, "]\n");
-      strcat_formatted(usage, "     ", optional[i].usage);
     }
     strcat(usage, "\n");
 

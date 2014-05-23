@@ -6,20 +6,32 @@
 <body>
 <blockquote>
 
-<H1 ALIGN=CENTER>Crux tandem mass spectrometry analysis software</H1>
+<!--
+  N.B. I created this image in PowerPoint, exported to PDF and then
+  created the PNG using the following command:
+
+  convert -density 300 -resize 1125x1125 schematic.pdf schematic.png
+
+  WSN 6 May 2014
+-->
+
+<!--
+ Updated map
+ SJM 8 May 2014
+-->
+
 <center>
 <img  src="schematic.png" usemap="#commands-files">
 <map name="commands-files">
-<area shape="rect" coords="169,92,304,123"  alt="create-index" href="crux-create-index.html" />
-<area shape="rect" coords="169,188,297,218" alt="bullseye" href="bullseye.html " />
-<area shape="rect" coords="498,104,634,133" alt="search-for-matches" href="crux-search-for-matches.html" />
-<area shape="rect" coords="498,158,634,186" alt="search-for-xlinks" href="crux-search-for-xlinks.html" />
-<area shape="rect" coords="822,71,954,100"  alt="barista" href="barista.html " >
-<area shape="rect" coords="822,108,950,133" alt="percolator" href="percolator.html " />
-<area shape="rect" coords="822,144,952,171" alt="q-ranker" href="q-ranker.html" />
-<area shape="rect" coords="822,181,952,206" alt="calibrate-scores" href="calibrate-scores.html " />
-<area shape="rect" coords="822,216,953,242" alt="spectral-counts" href="spectral-counts.html" />
-
+  <area shape="rect" coords="253,135,349,169" alt="tide-index" href="tide-index.html"/>
+  <area shape="rect" coords="260,247,342,278" alt="bullseye" href="bullseye.html"/>
+  <area shape="rect" coords="510,100,612,132" alt="tide-search" href="tide-search.html"/>
+  <area shape="rect" coords="528,191,595,222" alt="comet" href="comet.html"/>
+  <area shape="rect" coords="512,281,613,335" alt="search-for-xlinks" href="crux-search-for-xlinks.html"/>
+  <area shape="rect" coords="776,100,873,132" alt="percolator" href="percolator.html"/>
+  <area shape="rect" coords="791,160,861,192" alt="barista" href="barista.html"/>
+  <area shape="rect" coords="783,222,866,252" alt="q-ranker" href="q-ranker.html"/>
+  <area shape="rect" coords="784,281,867,334" alt="spectral-counts" href="spectral-counts.html"/>
 </map>
 
 </center>
@@ -84,8 +96,8 @@ search engines in Crux.</td>
 <td>
 Search a collection of spectra against a sequence database, returning
 a collection of peptide-spectrum matches (PSMs).  This is the
-original Crux search engine.  It offers some features not available
-in the other two search engines.</td>
+original Crux search engine.  It will be eliminated in a future
+version of Crux.</td>
 </tr>
 
 <tr>
@@ -93,15 +105,9 @@ in the other two search engines.</td>
 <a href="tide-search.html">tide-search</a></td>
 <td>
 Search a collection of spectra against a sequence database, returning
-a collection of peptide-spectrum matches (PSMs).</td>
+a collection of peptide-spectrum matches (PSMs).  This is the fastest
+of the three search engines in Crux.</td>
 </tr>
-
-<tr>
-<td>
-<a href="calibrate-scores.html">calibrate-scores</a></td>
-<td>
-Assign two types of statistical confidence measures (q-values and
-posterior error probabilities) to each PSM in a given set.</td></tr>
 
 <tr>
 <td>
@@ -122,7 +128,6 @@ Re-rank a collection of PSMs using the Q-ranker algorithm.</td></tr>
 Rank proteins and assign a confidence measure to each
 protein identification.</td></tr> 
 
-
 <tr>
 <td>
 <a href="crux-search-for-xlinks.html">search-for-xlinks</a></td>
@@ -139,6 +144,13 @@ Quantify peptides or proteins using one of three spectral counting methods.</td>
 <tr>
 <td colspan="2"><b>Utilities</b></td>
 </tr>
+
+<tr>
+<td>
+<a href="calibrate-scores.html">calibrate-scores</a></td>
+<td>
+Assign two types of statistical confidence measures (q-values and
+posterior error probabilities) to each PSM in a given set.</td></tr>
 
 <tr>
 <td><a href="make-pin.html">make-pin</a></td>
@@ -450,13 +462,11 @@ Percolator XML<br> (<a href="https://github.com/percolator/percolator/blob/maste
 <a href="start-tutorial.html">Getting started with Crux</a></li>
 
 <li>
-<a href="search-tutorial.html">Searching a protein database</a></li>
+<a href="search-tutorial.html">Running a simple search using Tide and
+Percolator</a></li>
 
 <li>
-<a href="index-tutorial.html">Creating a peptide index</a></li>
-
-<li>
-<a href="customize-tutorial.html">Customizing a search</a></li>
+<a href="customize-tutorial.html">Customization and search options</a></li>
 
 <li>
 <a href="spectral-counts-tutorial.html">Using spectral-counts</a></li>
