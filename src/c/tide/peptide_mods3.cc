@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <numeric>
 #include <gflags/gflags.h>
 #include "abspath.h"
 #include "records.h"
@@ -22,6 +23,8 @@ using namespace std;
 
 DEFINE_string(tmpfile_prefix, "/tmp/modified_peptides_partial_", "Temporary filename prefix.");
 DEFINE_int32(buf_size, 1024, "Buffer size for files, in KBytes.");
+DEFINE_int32(max_mods, 255, "Maximum number of modifications that can be applied "
+                            "to a single peptide.");
 
 static string GetTempName(int filenum) {
   char buf[10];
@@ -31,6 +34,7 @@ static string GetTempName(int filenum) {
 
 class ModsOutputter {
  public:
+  unsigned long modpeptidecnt_;
   ModsOutputter(const vector<const pb::Protein*>& proteins,
 		VariableModTable* var_mod_table,
 		HeadedRecordWriter* final_writer)
@@ -54,23 +58,36 @@ class ModsOutputter {
     const pb::Location& loc = peptide->first_location();
     residues_ = proteins_[loc.protein_id()]->residues().data() + loc.pos();
     vector<int> counts(max_counts_.size(), 0);
-    OutputMods(0, counts);
+    OutputNtermMods(0, counts);
+//    OutputMods(0, counts);
   }
 
  private:
   void OutputMods(int pos, vector<int>& counts);
+  void OutputNtermMods(int pos, vector<int>& counts);
+  void OutputCtermMods(int pos, vector<int>& counts);
   void Merge();
 
   void InitCountsMapper() {
     int prod = 1;
     for (int i = 0; i < max_counts_.size(); ++i) {
       counts_mapper_vec_[i] = prod;
-      prod *= (max_counts_[i]+1);
+      if (max_counts_[i] == 0)
+        prod *= (max_counts_[i]+2);
+      else
+        prod *= (max_counts_[i]+1);
     }
 
     writers_.resize(prod);
-    for (int i = 0; i < prod; ++i)
+    for (int i = 0; i < prod; ++i) {
       writers_[i] = new RecordWriter(GetTempName(i), FLAGS_buf_size << 10);
+      if (!writers_[i]->OK()) {
+        // delete temporary files
+        for (int j = 0; j < i; ++j)
+          unlink(GetTempName(j).c_str());
+        CHECK(writers_[i]->OK());
+      }
+    }
 
     const vector<double>& deltas = *mod_table_->OriginalDeltas();
     delta_by_file_.resize(prod);
@@ -94,11 +111,13 @@ class ModsOutputter {
   }
 
   RecordWriter* Write(const vector<int>& counts) {
+    ++modpeptidecnt_;
     int index = DotProd(counts);
     double mass = peptide_->mass();
     peptide_->set_mass(delta_by_file_[index] + mass);
     writers_[index]->Write(peptide_);
     peptide_->set_mass(mass);
+
   }
 
   const vector<const pb::Protein*>& proteins_;
@@ -114,30 +133,221 @@ class ModsOutputter {
   const char* residues_;
 };
 
+//terminal modifications count as a modification and hence 
+//it is taken into account the modification limit.
 void ModsOutputter::OutputMods(int pos, vector<int>& counts) {
+  if (accumulate(counts.begin(), counts.end(), 0) > FLAGS_max_mods) {
+    return;
+  }
   if (pos == peptide_->length()) {
+//    peptide_->set_id(count_++);
+//    Write(counts);
+    OutputCtermMods(pos-1, counts);
+  } else {
+    if (pos == peptide_->length()-1){
+      OutputCtermMods(pos, counts);
+    } else {
+      char aa = residues_[pos];
+      int num_poss = mod_table_->NumPoss(aa);
+      for (int i = 0; i < num_poss; ++i) {
+        int poss_max_ct = mod_table_->PossMaxCt(aa, i);
+        if (counts[poss_max_ct] < max_counts_[poss_max_ct]) {
+	  ++counts[poss_max_ct];
+	  int delta_index = mod_table_->PossDeltIx(aa, i);
+	  peptide_->add_modifications(mod_table_->EncodeMod(pos, delta_index));
+	  OutputMods(pos+1, counts);
+  	  peptide_->mutable_modifications()->RemoveLast();
+	  --counts[poss_max_ct];
+        }
+      }
+      // Having this call to OutputMods come last is, in fact, correct, but it's
+      // tricky to see why. When modified peptides have equal mass, we want
+      // modified positions toward the front of the peptide to appear before those
+      // that come toward the end of the peptide. Having this call at the end
+      // achieves that.
+      OutputMods(pos+1, counts); // without further mods
+    }
+  }
+}
+
+void ModsOutputter::OutputNtermMods(int pos, vector<int>& counts) {
+  if (accumulate(counts.begin(), counts.end(), 0) > FLAGS_max_mods) {
+    return;
+  }
+  bool any_term_modification = false;
+
+  //add static N-terminal modifications
+  char aa = residues_[0];
+  int num_poss = mod_table_->NumPoss(aa, NTPEP);
+  for (int i = 0; i < num_poss; ++i) {
+    int poss_max_ct = mod_table_->PossMaxCt(aa, i, NTPEP);
+    if (max_counts_[poss_max_ct] == 0) {
+      ++counts[poss_max_ct];
+      int delta_index = mod_table_->PossDeltIx(aa, i, NTPEP);
+      peptide_->add_modifications(mod_table_->EncodeMod(pos, delta_index));
+      OutputMods(1, counts);
+      peptide_->mutable_modifications()->RemoveLast();
+      --counts[poss_max_ct];
+      any_term_modification = true;
+    }
+  }
+  aa = 'X';
+  num_poss = mod_table_->NumPoss(aa, NTPEP);
+  for (int i = 0; i < num_poss; ++i) {
+    int poss_max_ct = mod_table_->PossMaxCt(aa, i, NTPEP);
+    if (max_counts_[poss_max_ct] == 0) {
+      ++counts[poss_max_ct];
+      int delta_index = mod_table_->PossDeltIx(aa, i, NTPEP);
+      peptide_->add_modifications(mod_table_->EncodeMod(pos, delta_index));
+      OutputMods(1, counts);
+      peptide_->mutable_modifications()->RemoveLast();
+      --counts[poss_max_ct];
+      any_term_modification = true;
+    }
+  }
+  if (any_term_modification == false){
+    //if there were no static modificatinos add variable terminal modifications
+	  aa = residues_[0];
+	  num_poss = mod_table_->NumPoss(aa, NTPEP);
+	  for (int i = 0; i < num_poss; ++i) {
+	    int poss_max_ct = mod_table_->PossMaxCt(aa, i, NTPEP);
+	    if (max_counts_[poss_max_ct] == 1) {
+	      ++counts[poss_max_ct];
+	      int delta_index = mod_table_->PossDeltIx(aa, i, NTPEP);
+	      peptide_->add_modifications(mod_table_->EncodeMod(pos, delta_index));
+	      OutputMods(1, counts);
+	      peptide_->mutable_modifications()->RemoveLast();
+	      --counts[poss_max_ct];
+	      any_term_modification = true;
+	    }
+	  }
+	  aa = 'X';
+	  num_poss = mod_table_->NumPoss(aa, NTPEP);
+	  for (int i = 0; i < num_poss; ++i) {
+	    int poss_max_ct = mod_table_->PossMaxCt(aa, i, NTPEP);
+	    if (max_counts_[poss_max_ct] == 1) {
+	      ++counts[poss_max_ct];
+	      int delta_index = mod_table_->PossDeltIx(aa, i, NTPEP);
+	      peptide_->add_modifications(mod_table_->EncodeMod(pos, delta_index));
+	      OutputMods(1, counts);
+	      peptide_->mutable_modifications()->RemoveLast();
+	      --counts[poss_max_ct];
+	      any_term_modification = true;
+	    }
+	  }
+    OutputMods(0, counts);
+  }
+}
+
+void ModsOutputter::OutputCtermMods(int pos, vector<int>& counts) {
+  if (accumulate(counts.begin(), counts.end(), 0) > FLAGS_max_mods) {
+    return;
+  }
+  if (accumulate(counts.begin(), counts.end(), 0) == FLAGS_max_mods) {
     peptide_->set_id(count_++);
     Write(counts);
-  } else {
-    char aa = residues_[pos];
-    int num_poss = mod_table_->NumPoss(aa);
-    for (int i = 0; i < num_poss; ++i) {
-      int poss_max_ct = mod_table_->PossMaxCt(aa, i);
-      if (counts[poss_max_ct] < max_counts_[poss_max_ct]) {
-	++counts[poss_max_ct];
-	int delta_index = mod_table_->PossDeltIx(aa, i);
-	peptide_->add_modifications(mod_table_->EncodeMod(pos, delta_index));
-	OutputMods(pos+1, counts);
-	peptide_->mutable_modifications()->RemoveLast();
-	--counts[poss_max_ct];
-      }
+    return;
+  }
+
+  bool any_term_modification = false;
+  char aa = residues_[pos];
+  int num_poss = mod_table_->NumPoss(aa, CTPEP);
+  for (int i = 0; i < num_poss; ++i) {
+    int poss_max_ct = mod_table_->PossMaxCt(aa, i, CTPEP);
+    if (max_counts_[poss_max_ct] == 0) {
+      ++counts[poss_max_ct];
+      int delta_index = mod_table_->PossDeltIx(aa, i, CTPEP);
+      peptide_->add_modifications(mod_table_->EncodeMod(pos, delta_index));
+      
+      peptide_->set_id(count_++);
+      Write(counts);
+      
+      peptide_->mutable_modifications()->RemoveLast();
+      --counts[poss_max_ct];
+      any_term_modification = true;
     }
-    // Having this call to OutputMods come last is, in fact, correct, but it's
-    // tricky to see why. When modified peptides have equal mass, we want
-    // modified positions toward the front of the peptide to appear before those
-    // that come toward the end of the peptide. Having this call at the end
-    // achieves that.
-    OutputMods(pos+1, counts); // without further mods
+  }
+  aa = 'X';
+  num_poss = mod_table_->NumPoss(aa, CTPEP);
+  for (int i = 0; i < num_poss; ++i) {
+    int poss_max_ct = mod_table_->PossMaxCt(aa, i, CTPEP);
+    if (max_counts_[poss_max_ct] == 0) {
+      ++counts[poss_max_ct];
+      int delta_index = mod_table_->PossDeltIx(aa, i, CTPEP);
+      peptide_->add_modifications(mod_table_->EncodeMod(pos, delta_index));
+      
+      peptide_->set_id(count_++);
+      Write(counts);
+      
+      peptide_->mutable_modifications()->RemoveLast();
+      --counts[poss_max_ct];
+      any_term_modification = true;
+    }
+  }
+  if (any_term_modification == false){
+  //if there were no static modifications add amino acid mods
+          char aa = residues_[pos];
+          int num_poss = mod_table_->NumPoss(aa);
+          for (int i = 0; i < num_poss; ++i) {
+            int poss_max_ct = mod_table_->PossMaxCt(aa, i);
+            if (counts[poss_max_ct] < max_counts_[poss_max_ct]) {
+	      ++counts[poss_max_ct];
+	      int delta_index = mod_table_->PossDeltIx(aa, i);
+	      peptide_->add_modifications(mod_table_->EncodeMod(pos, delta_index));
+          
+	      peptide_->set_id(count_++);
+              Write(counts);    
+  	  
+   	      peptide_->mutable_modifications()->RemoveLast();
+	      --counts[poss_max_ct];
+            }
+          }
+          // Having this call to OutputMods come last is, in fact, correct, but it's
+          // tricky to see why. When modified peptides have equal mass, we want
+          // modified positions toward the front of the peptide to appear before those
+          // that come toward the end of the peptide. Having this call at the end
+          // achieves that.
+//	  peptide_->set_id(count_++);
+//          Write(counts);    
+
+   //add variable c-terminal mods
+	  aa = residues_[pos];
+	  num_poss = mod_table_->NumPoss(aa, CTPEP);
+	  for (int i = 0; i < num_poss; ++i) {
+	    int poss_max_ct = mod_table_->PossMaxCt(aa, i, CTPEP);
+	    if (max_counts_[poss_max_ct] == 1) {
+	      ++counts[poss_max_ct];
+	      int delta_index = mod_table_->PossDeltIx(aa, i, CTPEP);
+	      peptide_->add_modifications(mod_table_->EncodeMod(pos, delta_index));
+	      
+	      peptide_->set_id(count_++);
+	      Write(counts);
+	      
+	      peptide_->mutable_modifications()->RemoveLast();
+	      --counts[poss_max_ct];
+	      any_term_modification = true;
+	    }
+	  }
+	  aa = 'X';
+	  num_poss = mod_table_->NumPoss(aa, CTPEP);
+	  for (int i = 0; i < num_poss; ++i) {
+	    int poss_max_ct = mod_table_->PossMaxCt(aa, i, CTPEP);
+	    if (max_counts_[poss_max_ct] == 1) {
+	      ++counts[poss_max_ct];
+	      int delta_index = mod_table_->PossDeltIx(aa, i, CTPEP);
+	      peptide_->add_modifications(mod_table_->EncodeMod(pos, delta_index));
+	      
+	      peptide_->set_id(count_++);
+	      Write(counts);
+	      
+	      peptide_->mutable_modifications()->RemoveLast();
+	      --counts[poss_max_ct];
+	      any_term_modification = true;
+	    }
+	  }
+      peptide_->set_id(count_++);
+      Write(counts);    
+
   }
 }
 
@@ -222,6 +432,25 @@ void ModsOutputter::Merge() {
     delete readers[i];
     unlink(GetTempName(i).c_str());
   }
+}
+
+void AddMods(HeadedRecordReader* reader, string out_file,
+	     const pb::Header& header,
+	     const vector<const pb::Protein*>& proteins, VariableModTable& var_mod_table) {
+//  VariableModTable var_mod_table;
+//  var_mod_table.Init(header.peptides_header().mods());
+  CHECK(reader->OK());
+  HeadedRecordWriter writer(out_file, header, FLAGS_buf_size << 10);
+  CHECK(writer.OK());
+  ModsOutputter outputter(proteins, &var_mod_table, &writer);
+  outputter.modpeptidecnt_ = 0; 
+  pb::Peptide peptide;
+  while (!reader->Done()) {
+    CHECK(reader->Read(&peptide));
+    outputter.Output(&peptide);
+  } 
+//  cout << "no of modified peptides:\t" << outputter.modpeptidecnt_ << endl<<endl;
+  CHECK(reader->OK());
 }
 
 void AddMods(HeadedRecordReader* reader, string out_file,

@@ -70,7 +70,6 @@ enum SPECTRUM_PARSER_T {
   INVALID_SPECTRUM_PARSER,
   PROTEOWIZARD_SPECTRUM_PARSER,
   MSTOOLKIT_SPECTRUM_PARSER,
-  CRUX_SPECTRUM_PARSER,
   NUMBER_SPECTRUM_PARSERS
 };
 
@@ -138,7 +137,7 @@ enum _enzyme_type {
   NO_ENZYME,             ///< cleave anywhere
   TRYPSIN,               ///< cleave after K or R, not before P
   TRYPSINP,               ///< cleave after K or R
-  CHYMOTRYPSIN,          ///< cleave after FWY, not before P
+  CHYMOTRYPSIN,          ///< cleave after FWYL, not before P
   ELASTASE,              ///< cleave after ALIV, not before P
   CLOSTRIPAIN,           ///< cleave after R
   CYANOGEN_BROMIDE,      ///< cleave after M
@@ -147,11 +146,10 @@ enum _enzyme_type {
   STAPH_PROTEASE,        ///< cleave after E
   ASPN,                  ///< cleave before D
   LYSC,                  ///< cleave after K , not befor P 
-  LYSN,                  ///< cleave after K 
-  ARGC,			 ///< cleave after R, not before P
+  LYSN,                  ///< cleave before K 
+  ARGC,                  ///< cleave after R, not before P
   GLUC,                  ///< cleave after D or E, not before P
   PEPSINA,               ///< cleave after FL, not before P 
-  MODIFIED_CHYMOTRYPSIN, ///< cleave after FWYL, not before P
   ELASTASE_TRYPSIN_CHYMOTRYPSIN, ///< cleave after ALIVKRWFY, not before P
   CUSTOM_ENZYME,         ///< cleave after/before user-defined residues
   NUMBER_ENZYME_TYPES    ///< leave last, number of types
@@ -258,9 +256,10 @@ typedef enum _parsimony_type PARSIMONY_TYPE_T;
 enum DECOY_TYPE_T {
   INVALID_DECOY_TYPE,
   NO_DECOYS,
-  REVERSE_DECOYS,
+  PROTEIN_REVERSE_DECOYS,
   PROTEIN_SHUFFLE_DECOYS,
   PEPTIDE_SHUFFLE_DECOYS,
+  PEPTIDE_REVERSE_DECOYS,
   NUMBER_DECOY_TYPES
 };
 
@@ -481,11 +480,16 @@ class Scorer;
 enum _scorer_type { 
   SP,                  ///< SEQUEST preliminary score
   XCORR,               ///< SEQUEST primary score
-
+  EVALUE,              ///< Comet e-value
+  
   DECOY_XCORR_QVALUE,  ///< q-value derived from empirical null (decoys)
   DECOY_XCORR_PEPTIDE_QVALUE,
   DECOY_XCORR_PEP,     ///< posterior error prob for xcorrs (target/decoy)
 
+  DECOY_EVALUE_QVALUE, ///< q-value derived from empirical null (decoy)
+  DECOY_EVALUE_PEPTIDE_QVALUE,
+  DECOY_EVALUE_PEP, ///< posterior error prob for e-value (target/decoy)
+  
   LOGP_WEIBULL_XCORR,
   LOGP_BONF_WEIBULL_XCORR,
   LOGP_QVALUE_WEIBULL_XCORR,

@@ -7,7 +7,7 @@
 
 #include <fstream>
 
-//#include "carp.h"
+#include "carp.h"
 
 using namespace std;
 
@@ -73,19 +73,14 @@ void LineFileReader::loadData(
 
 
   if (!file_ptr_ -> is_open()) {
-    //carp(CARP_ERROR, "Opening %s or reading failed", file_name);
+    carp(CARP_ERROR, "Opening %s or reading failed", file_name);
     return;
-  }
-
-  has_next_ = getline(*file_ptr_, next_data_string_) != NULL;
-
-  if (!has_next_) {
-    //carp(CARP_WARNING,"No data found!");
-      return;
-  }
-
-  if (has_next_) {
-    next();
+  } else {
+    has_next_ = getline(*file_ptr_, next_data_string_) != NULL;
+    carp(CARP_DEBUG, "first line:%s",next_data_string_.c_str());
+    if (!has_next_) {
+      carp(CARP_WARNING,"No data found!");
+    } 
   }
 }
 
@@ -129,11 +124,10 @@ void LineFileReader::reset() {
  * parses the next line in the file. 
  */
 const string& LineFileReader::next() {
-
+  //Do we already have a next line ready?
   if (has_next_) {
     current_row_++;
     current_data_string_ = next_data_string_;
-
     //read next line
     has_next_ = getline(*file_ptr_, next_data_string_) != NULL;
     has_current_ = true;
@@ -156,31 +150,7 @@ int LineFileReader::getCurrentRow() {
  * iterate through
  */
 bool LineFileReader::hasNext() {
-  return has_next_ || has_current_;
+  return has_next_;
 }
 
 
-/**
- * tokenize a string by delimiter
- */
-void LineFileReader::tokenize(
-  const string& str,
-  vector<string>& tokens,
-  char delimiter
-  ) {
-
-  tokens.clear();
-  string::size_type lastPos = 0;
-  string::size_type pos = str.find(delimiter, lastPos);
-
-  while (string::npos != pos || string::npos != lastPos) {
-    //found a token, add to the vector.
-    string token = str.substr(lastPos, pos - lastPos);
-    tokens.push_back(token);
-    lastPos = pos+1;
-    if (lastPos >= str.size() || pos >= str.size()) { 
-      break;
-    }
-    pos = str.find(delimiter,lastPos);
-  }
-}

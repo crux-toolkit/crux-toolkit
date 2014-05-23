@@ -140,7 +140,7 @@ Database::~Database() {
 #endif
     }
     // not memory mapped
-    else{
+    else if (file_ != NULL) {
       // close file handle
       carp(CARP_DEBUG, "Closing database filehandle");
       fclose(file_);
@@ -697,6 +697,12 @@ const char* Database::getFilenamePointer()
 bool Database::getIsParsed()
 {
   return is_parsed_;
+}
+
+void Database::setIsParsed(
+  bool is_parsed
+  ) {
+  is_parsed_ = is_parsed;
 }
 
 /**

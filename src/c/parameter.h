@@ -70,7 +70,7 @@ enum parameter_type {
   STRING_P,          ///< parameters of type char*
   MASS_TYPE_P,       ///< parameters of type MASS_TYPE_T
   DIGEST_TYPE_P,   ///< parameters of type DIGEST_T
-  ENZYME_TYPE_P,     ///< parameters of type ENZUME_T
+  ENZYME_TYPE_P,     ///< parameters of type ENZYME_T
   //PEPTIDE_TYPE_P,    ///< parameters of type PEPTIDE_TYPE_T
   BOOLEAN_P,         ///< parameters of type bool
   SCORER_TYPE_P,     ///< parameters of type SCORER_TYPE_T
@@ -245,6 +245,10 @@ DECOY_TYPE_T get_decoy_type_parameter(
   const char* name
   );
 
+DECOY_TYPE_T get_tide_decoy_type_parameter(
+  const char* name
+  );
+
 MASS_FORMAT_T get_mass_format_type_parameter(
   const char* name
   );
@@ -273,6 +277,12 @@ COLTYPE_T get_column_type_parameter(
 COMPARISON_T get_comparison_parameter(
   const char* name
   );
+
+/**
+ * \returns the comet enzyme info lines parsed from the file
+ * or generated defaults
+ */
+const std::vector<std::string>& get_comet_enzyme_info_lines();
 
 /**
  * \brief prints all parameters except mods into the output stream
@@ -304,6 +314,12 @@ void print_parameters(
  * \returns The number of items pointed to by mods
  */
 int get_aa_mod_list(AA_MOD_T*** mods);
+
+/**
+ * Adds 1 to the number of variable modifications in the
+ * parameters
+ */
+void incrementNumMods();
 
 /**
  * \brief Get the pointer to the list of AA_MODs for the peptide

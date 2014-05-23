@@ -71,8 +71,10 @@ void setPaths(const char* cruxPath) {
   tideIndex_ = cruxDir + "/tide/tide-index";
   tideSearch_ = cruxDir + "/tide/tide-search";
   crux_ = cruxPath;
-  fasta_ = cruxDir + "/test/smoke-tests/small-yeast.fasta";
-  spectrumRecords_ = cruxDir + "/test/smoke-tests/demo.spectrumrecords";
+  //fasta_ = cruxDir + "/test/smoke-tests/small-yeast.fasta";
+  //spectrumRecords_ = cruxDir + "/test/smoke-tests/demo.spectrumrecords";
+  fasta_ = cruxDir + "/tidetest/worm.fasta";
+  spectrumRecords_ = cruxDir + "/tidetest/worm-06-10000.spectrumrecords";
 }
 
 void runTest(map<string, TideRegressionSettings>::const_iterator i) {

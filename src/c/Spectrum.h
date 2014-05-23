@@ -74,45 +74,6 @@ class Spectrum{
   
   // private methods
   /**
-   * Parse a spectrum from a file in mgf format.
-   * \returns True if successfully parsed or false on error or EOF.
-   */
-  bool parseMgf(FILE* file, int scan_num, const char* filename = NULL); 
-
-  /**
-   * Parses the 'S' line of a spectrum
-   * \returns TRUE if success. FALSE is failure.
-   */
-  bool parseSLine
-    (char* line, ///< 'S' line to parse -in
-     int buf_length ///< line length -in
-     );
-
-  /**
-   * Parses the 'Z' line of the a spectrum
-   * \returns TRUE if success. FALSE is failure.
-   */
-  bool parseZLine(char* line);  ///< 'Z' line to parse -in
-
-  /**
-   * Parses the 'EZ' line of a spectrum
-   * \returns true if success. false is failure.
-   */
-  bool parseEZLine(std::string line_str);
-
-  /**
-   * Parses the 'D' line of the a spectrum
-   * \returns TRUE if success. FALSE is failure.
-   */
-  bool parseDLine(char* line);  ///< 'D' line to parse -in
-
-  /**
-   * Parses the 'I' line of the a spectrum
-   * \returns TRUE if success. FALSE is failure.
-   */
-  bool parseILine(char* line);  ///< 'I' line to parse -in
-
-  /**
    * Updates num_peaks, min_peak_mz, max_peak_mz, total_energy fields.
    */
   void updateFields
@@ -188,30 +149,6 @@ class Spectrum{
      );
 
   /**
-   * Parses a spectrum from file, deleting any existing values in the
-   * object.
-   * Skips Header line "H"
-   * \returns The newly allocated spectrum or NULL on error or EOF.
-   */
-  static Spectrum* newSpectrumMs2(FILE* file, const char* filename = NULL); 
-  
-
-  /**
-   * Parse a spectrum from a file in mgf format.
-   * \returns A newly allocated spectrum or NULL on error or EOF.
-   */
-  static Spectrum* newSpectrumMgf(FILE* file, int scan_num, 
-                                  const char* filename = NULL); 
-  
-  /**
-   * Parses a spectrum from file, deleting any existing values in the
-   * object.
-   * Skips Header line "H"
-   * \returns The newly allocated spectrum or NULL on error or EOF.
-   */
-  bool parseMs2(FILE* file, const char* filename = NULL); 
-
-  /**
    * Transfer values from an MSToolkit spectrum to the crux Spectrum.
    */
   bool parseMstoolkitSpectrum(MSToolkit::Spectrum* mst_spectrum, 
@@ -223,7 +160,8 @@ class Spectrum{
    */
   bool parsePwizSpecInfo(
     const pwiz::msdata::SpectrumPtr& pwiz_spectrum,
-    int assigned_scan = 0 ///< forced scan number
+    int firstScan,
+    int lastScan
   );
 
   /**

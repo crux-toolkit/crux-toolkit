@@ -17,6 +17,7 @@
 #include "parameter.h"
 #include "Index.h"
 #include "WinCrux.h"
+#include "LineFileReader.h"
 
 using namespace std;
 
@@ -35,6 +36,10 @@ static const FLOAT_T PRECISION = 0.000000005;
  */
 static const int MAX_ULPS = 2;
 
+static const unsigned int TARGET_STRING_LENGTH = 6; //The length of string "target"
+static const unsigned int DECOY_STRING_LENGTH = 5; // The length of string "decoy"                                                                                                                                                                                             
+
+
 /* Functions for converting custom types to and from strings */
 
 static const int INVALID_ENUM_STRING = -10;
@@ -42,7 +47,8 @@ static const int INVALID_ENUM_STRING = -10;
  * The string version of the decoy types
  */
 static const char* decoy_type_strings[NUMBER_DECOY_TYPES] = 
-  { "invalid", "none", "reverse", "protein-shuffle", "peptide-shuffle" };
+  { "invalid", "none", "reverse", "protein-shuffle",
+    "peptide-shuffle", "peptide-reverse" };
 
 DECOY_TYPE_T string_to_decoy_type(const char* name){
   int decoy_int = convert_enum_type_str(name, INVALID_ENUM_STRING, 
@@ -53,6 +59,20 @@ DECOY_TYPE_T string_to_decoy_type(const char* name){
   }
 
   return (DECOY_TYPE_T)decoy_int;
+}
+
+DECOY_TYPE_T string_to_tide_decoy_type(const char* name) {
+  const string decoy_format(name);
+  if (decoy_format == "none") {
+    return NO_DECOYS;
+  } else if (decoy_format == "shuffle") {
+    return PEPTIDE_SHUFFLE_DECOYS;
+  } else if (decoy_format == "peptide-reverse") {
+    return PEPTIDE_REVERSE_DECOYS;
+  } else if (decoy_format == "protein-reverse") {
+    return PROTEIN_REVERSE_DECOYS;
+  }
+  carp(CARP_FATAL, "Invalid decoy type %s", decoy_format.c_str());
 }
 
 char* decoy_type_to_string(DECOY_TYPE_T type){
@@ -146,12 +166,11 @@ char* digest_type_to_string(DIGEST_T type){
 static const char* enzyme_type_strings[NUMBER_ENZYME_TYPES] = 
   {"invalid", "no-enzyme", "trypsin","trypsin/p", "chymotrypsin", 
    "elastase","clostripain", "cyanogen-bromide", "iodosobenzoate", 
-   "proline-endopeptidase", "staph-protease", "aspn", "lysc",
-   "lysn" , "arg_c" , "glue_c" ,"pepsin_a",
-   "modified-chymotrypsin", "elastase-trypsin-chymotrypsin",
+   "proline-endopeptidase", "staph-protease", "asp-n", "lys-c",
+   "lys-n" , "arg-c" , "glu-c" ,"pepsin-a", "elastase-trypsin-chymotrypsin",
    "custom-enzyme"};
 
-ENZYME_T string_to_enzyme_type(char* name){
+ENZYME_T string_to_enzyme_type(const char* name){
   int enz_int = convert_enum_type_str(name, INVALID_ENUM_STRING, 
                                       enzyme_type_strings, 
                                       NUMBER_ENZYME_TYPES);
@@ -462,7 +481,7 @@ char* hardklor_hardklor_algorithm_type_to_string(
 }
 
 static const char* spectrum_parser_type_strings[NUMBER_SPECTRUM_PARSERS] = 
-  {"invalid", "pwiz", "mstoolkit", "crux"};
+  {"invalid", "pwiz", "mstoolkit"};
 
 SPECTRUM_PARSER_T string_to_spectrum_parser_type(char* name) {
 
@@ -499,11 +518,16 @@ char* ion_type_to_string(ION_TYPE_T type) {
 static const char* scorer_type_strings[NUMBER_SCORER_TYPES] = 
   {"sp",
    "xcorr_score",
-
+   "evalue_score",
+   
    "decoy_xcorr_qvalue",
    "decoy_xcorr_peptide_qvalue",
    "decoy_xcorr_PEP",
 
+   "decoy_evalue_qvalue",
+   "decoy_evalue_peptide_qvalue",
+   "decoy_evalue_pep",
+   
    "logp_weibull_xcorr",
    "logp_bonf_weibull_xcorr",
    "logp_qvalue_weibull_xcorr",
@@ -1432,6 +1456,97 @@ char** generate_feature_name_array()
   return name_array;
 }
 
+void tokenize(
+  const string& str,
+  vector<string>& tokens,
+  char delimiter
+  ) {
+
+  tokens.clear();
+  string::size_type lastPos = 0;
+  string::size_type pos = str.find(delimiter, lastPos);
+
+  while (string::npos != pos || string::npos != lastPos) {
+    //found a token, add to the vector.                                                                                                                                                                     
+    string token = str.substr(lastPos, pos - lastPos);
+    tokens.push_back(token);
+    lastPos = pos+1;
+    if (lastPos >= str.size() || pos >= str.size()) {
+      break;
+    }
+    pos = str.find(delimiter,lastPos);
+  }
+}
+
+bool get_first_last_scan_from_string(
+  const std::string& const_scans_string,
+  int& first_scan,
+  int& last_scan
+  ) {
+
+  set<int> scans;
+
+  if (get_scans_from_string(const_scans_string, scans)) {
+    first_scan = *(scans.begin()++);
+    last_scan = *(scans.rbegin()++);
+    carp(CARP_DEBUG, "scan string:%s %i %i", const_scans_string.c_str(), first_scan, last_scan);
+    return true;
+  } else {
+    return false;
+  }
+}
+
+bool get_scans_from_string(
+  const string& const_scans_string,
+  set<int>& scans) {
+
+  bool success;
+
+  scans.clear();
+
+  //first tokenize by comma.
+  vector<string> tokens_comma;
+  tokenize(const_scans_string, tokens_comma, ',');
+  if (tokens_comma.size() > 1) {
+    carp_once(CARP_WARNING, "Multiple scans detected in line %s. "
+      "Crux currently only handles "
+      "first_scan - last_scan properly", const_scans_string.c_str());
+  }
+  int temp_scan;
+
+  for (size_t idx1=0;idx1<tokens_comma.size();idx1++) {
+    string current = tokens_comma[idx1];
+    if (current.find("-") == string::npos) {
+      success = from_string<int>(temp_scan, current);
+      if (success) {
+        scans.insert(temp_scan);
+      } else {
+        carp(CARP_ERROR, "Error parsing scans line:%s", const_scans_string.c_str());
+        return false;
+      }
+    } else {
+      vector<string> tokens_dash;
+      tokenize(tokens_comma[idx1], tokens_dash, '-');
+      if (tokens_dash.size() != 2) {
+        carp(CARP_ERROR, "Error parsing scans line:%s here:%s",
+          const_scans_string.c_str(), tokens_comma[idx1].c_str());
+        return false;
+      }
+      int temp_scan2;
+      success = from_string<int>(temp_scan, tokens_dash[0]);
+      success &= from_string<int>(temp_scan2, tokens_dash[1]);
+      if (!success || temp_scan > temp_scan2) {
+        carp(CARP_ERROR, "Error parsing scans line:%s here: %s", 
+          const_scans_string.c_str(), tokens_comma[idx1].c_str());
+      }
+      for (int idx3 = temp_scan;idx3 <= temp_scan2 ; idx3++) {
+        scans.insert(idx3);
+      }
+    }
+  }
+  return true;
+}
+
 /**
  * User define our upper and our lower bounds.
  * The random number will always be 
@@ -1843,7 +1958,7 @@ int get_num_decoys(bool have_index){
     return 0;
 
     // valid for index or database
-  case REVERSE_DECOYS: 
+  case PROTEIN_REVERSE_DECOYS: 
   case PEPTIDE_SHUFFLE_DECOYS:
     if( have_index ){
       return 1;
@@ -1870,6 +1985,72 @@ int get_num_decoys(bool have_index){
   return 0;
 }
 
+/**
+ * \brief Checks if the given input file contains target, decoy PSMs or 
+ * concatenated search results.
+ *
+ *\returns corrected file names. It does not check if files are exist.
+ */
+void check_target_decoy_files(
+  string &target,   //filename of the target PSMs
+  string &decoy     //filename of the decoy PSMs
+)
+{
+ int target_pos = target.find("target");
+ if (target_pos < 0) {
+   int decoy_pos = decoy.find("decoy");
+   if (decoy_pos < 0) {
+     // user gave concatenated result file
+     decoy = "";
+   } else {
+     // user gave decoy results file
+     target.replace(decoy_pos, DECOY_STRING_LENGTH, "target");
+   }
+  } else {
+    // user gave target results file
+    decoy.replace(target_pos, TARGET_STRING_LENGTH, "decoy"); 
+  }
+}
+
+void get_search_result_paths(
+  const string &infile, ///< path of the first file.
+  std::vector<std::string> &outpaths ///< paths of all search results -out                                                                                                         
+  ) {
+  
+  outpaths.clear();
+  if (get_boolean_parameter("list-of-files")) {
+    LineFileReader reader(infile);
+    while(reader.hasNext()) {
+      string current = reader.next();
+      carp(CARP_INFO, "current is:%s", current.c_str());
+      if (file_exists(current)) {
+        outpaths.push_back(current);
+      } else {
+        carp(CARP_ERROR, "Search file '%s' doesn't exist", current.c_str());
+      }
+    }
+  } else {
+    string target = infile;
+    string decoy = infile;
+    check_target_decoy_files(target, decoy);
+    if (target.length() > 0) {
+      if (file_exists(target)) {
+        outpaths.push_back(target);
+      } else {
+        carp(CARP_ERROR, "Target file '%s' doesn't exist", target.c_str());
+      }
+    }
+    if (decoy.length() > 0) {
+      if (file_exists(decoy)) {
+        outpaths.push_back(decoy);
+      } else {
+        carp(CARP_ERROR, "Decoy file '%s' doesn't exist", decoy.c_str());
+      }
+    }
+  }
+
+  
+}
 
 /*
  * Local Variables:

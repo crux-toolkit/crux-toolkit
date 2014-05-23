@@ -268,141 +268,52 @@ results file to the output directory. Default = F.</li>
 
 <ul>
 
-<li> 
-<b> Search was done against concatenated target-decoy database. </b>
-
-<ol>
-  <li> To analyse single files, with decoy prefix random_ (the default
-  for the decoy prefix is set to decoy_). The output is in the
-  directory crux-output by default:
-    <br> <br>
-    <code> crux barista --decoy-prefix random_ concatenated-database.fasta spectra.ms2 matches.<!--sqt-->txt </code>
-    <br><br>
-  </li>
-
-  <li> Assume that directory spectra-dir contains 10 ms2 files, and
-  directory matches-dir constains the 10 <!--sqt-->tabd-delimited files, corresponding to
-  searches against a single target-decoy database, with decoy prefix
-  reverse_. To analyse lists of ms2 and search files in the directores,
-  overwriting previous results:
-    <br> <br>
-    <code> crux barista --decoy-prefix reverse_ --overwrite T concatenated-database.fasta spectra-list.txt matches-list.txt </code>
-    <br><br>
-  </li>
-
-  <li> Assume that the search in 2. was against 10 different
-  target-decoy databases, all located in the directory database-dir:
-    <br> <br>
-    <code> crux barista --decoy-prefix reverse_ --overwrite T database-dir spectra-dir matches-dir </code>
-    <br><br>
-  </li>
-  
-  <li>
-    If the databases are listed in the file database-list.txt, and the
-    output directory should be results-dir:
-    <br> <br>
-    <code> crux barista --decoy-prefix reverse_ --output-dir results-dir database-list.txt spectra-dir matches-dir </code>
-    <br><br>
-  </li>
-
-  <li> Barista uses reach feature set by default. When analyzing
-  larger datasets, it may be desirable to speed up feature extraction
-  step and to revert to minimal feature set:
-    <br> <br>
-    <code> crux barista --decoy-prefix reverse_ --output-dir results --overwrite T --use-spec-features F database-dir spectra-list.txt matches-list.txt </code>
-    <br><br>
-  </li>
-  
-</ol>
+<li><b>Concatenated Search (Using Comet and/or Tide):</b><br>
+  <br>
+  1) Generate a decoy protein fasta:<br>
+  <code>crux create-index decoys protein-shuffle proteins.fasta temp-index</code><br>
+  <br>
+  2) Create concatenated fasta:<br>
+  <code>cat proteins.fasta ./temp-index/proteins-random.fasta > target-decoy.fasta</code><br>
+  <br>
+  3) run comet using fasta with no decoys generated:<br>
+  <code>crux comet --decoy_search 0 spectra.mzXML.gz target-decoy.fasta</code><br>
+  <br>
+  4) run tide-search using fasta with no decoys generated:<br>
+  <code>crux tide-index --decoy-format none target-decoy.fasta tide-index</code><br>
+  <code>crux tide-search spectra.mzXML.gz tide-index</code><br>
+  <br>
+  5) If needed, convert spectra to ms2:<br>
+  crux get-ms2-spectrum spectra.mzXML.gz > spectra.ms2<br>
+  <br>
+  6) Run barista:<br>
+  <code>crux barista target-decoy.fasta spectra.ms2 crux-output/comet.target.txt</code><br>
+  <br>
+  <code>crux barista target-decoy.fasta spectra.ms2 crux-output/tide-search.txt</code><br>
 </li>
 
-<li> <b> Separate searches were done against target and decoy databases. </b>
+<li><b>Separate Search:</b><br>
 <br>
-Both target and decoy databases should be provided to Barista for
-analysis. Therefore, the database input can be specified as a list of
-database files (database-list.txt, for example) or as a directory containing the
-databases (database-dir, for example). 
-<br> The searches against the target database are provided as the
-required &lt search results &gt argument. To specify the searches
-against the decoy database, use --separate-searches option.
+<b>Using Comet:</b><br>
+<code>crux create-index decoys protein-shuffle proteins.fasta temp-index<br>
+cat proteins.fasta ./temp-index/proteins-random.fasta > target-decoy.fasta<br>
+crux comet --output-dir target-search --decoy_search 0 spectra.mzXML.gz proteins.fasta<br>
+crux comet --output-dir decoy-search --decoy_search 0 spectra.mzXML.gz ./temp-index/proteins-random.fasta<br>
+crux get-ms2-spectrum spectra.mzXML.gz > spectra.ms2<br>
+crux barista --separate-searches decoy-search/comet.target.txt target-decoy.fasta spectra.ms2 target-search/comet.target.txt<br></code>
+<br>
+<b>Using Tide-Search:</b><br>
+<code>
+crux create-index decoys protein-shuffle proteins.fasta temp-index<br>
+cat proteins.fasta ./temp-index/proteins-random.fasta > target-decoy.fasta<br>
+crux tide-index --decoy-format none proteins.fasta target-index<br>
+crux tide-index --decoy-format none ./temp-index/proteins-random.fasta decoy-index<br>
+crux tide-search --output-dir target-search spectra.mzXML.gz target-index<br>
+crux tide-search --output-dir decoy-search spectra.mzXML.gz decoy-index<br>
+crux get-ms2-spectrum spectra.mzXML.gz > spectra.ms2<br>
+crux barista --separate-searches decoy-search/tide-search.txt target-decoy.fasta spectra.ms2 target-search/tide-search.txt<br>
+</code>
 
-<ol>
-<!--li> To analyse a single ms2 file and sqt files matches-target.sqt and
-matches-decoy.sqt:
-    <br> <br>
-    <code> crux barista --decoy-prefix random_ --separate-searches matches-decoy.sqt database-dir spectra.ms2 matches-target.sqt </code>
-    <br><br>
-</li-->
-<li>To analyse a single ms2 file and txt files matches-target.txtt and
-matches-decoy.txt:
-    <br> <br>
-    <code> crux barista --decoy-prefix random_ --separate-searches matches-decoy.txt database-dir spectra.ms2 matches-target.txt </code>
-    <br><br>
-</li>
-<!--li> If ms2 files are in spectra-dir directory, sqt files are in
-matches-target-dir and matches-decoy-dir, and databases are specified
-in database-list.txt:
-    <br> <br>
-    <code> crux barista --decoy-prefix random_ --separate-searches matches-decoy-dir database-list.txt spectra-dir matches-target-dir </code>
-    <br><br>
-</li-->
-<li> If ms2 files are in spectra-dir directory, tab-delimited files are in
-matches-target-dir and matches-decoy-dir, and databases are specified
-in database-list.txt:
-    <br> <br>
-    <code> crux barista --decoy-prefix random_ --separate-searches matches-decoy-dir database-list.txt spectra-dir matches-target-dir </code>
-    <br><br>
-</li>
-
-<!--li> If ms2 files are listed in spectra-list.txt, sqt files are listed
-in matches-target-list.txt and matches-decoy-list.txt, and database
-are located in database-dir:
-    <br> <br>
-    <code> crux barista --decoy-prefix random_ --separate-searches matches-decoy-list.txt database-dir spectra-list.txt matches-target-list.txt </code>
-    <br><br>
-</li-->
-<li> If ms2 files are listed in spectra-list.txt, txt files are listed
-in matches-target-list.txt and matches-decoy-list.txt, and database
-are located in database-dir:
-    <br> <br>
-    <code> crux barista --decoy-prefix random_ --separate-searches matches-decoy-list.txt database-dir spectra-list.txt matches-target-list.txt </code>
-    <br><br>
-</li>
-</ol>
-</li>
-
-<li> <b> Running Barista with Crux database search </b>
-
-<ol>
-<li>
-You can use crux search-for-matches which produces database search results in the tab-delimited format. (see
-<a href="crux-search-for-matches.html">search-for-matches</a>).
-</li>
-<li>
-Crux database search requires only the target database for input and
-generates the decoy database. The crux command create-index creates
-the decoy database sequences used during the search and stores it in
-the <code>&lt;index name&gt;</code> directory specified by the second required
-argument to the create-index command
-(See <a href="crux-create-index.html">create-index</a>). This decoy
-database is then available for Barista analysis, in addition to the
-target database specified for the create-index command.
-</li>
-
-<li>
-Crux create-index generates decoy sequences either at the protein
-level (see the <code>--decoys reverse</code> or <code>--decoys
-protein-shuffle</code> options
-for <a href="crux-create-index.html">create-index</a>) or at the
-peptide level (using <code>--decoys peptide-shuffle</code>). Please
-use the default protein-level shuffling option for Barista
-analysis. The peptide-level shuffling is incompatible with the Barista
-protein-level analysis because it does not allow for a fixed
-full-length decoy protein sequence.
-</li>
-
-</ol>
-</li>
 
 </ul>
 

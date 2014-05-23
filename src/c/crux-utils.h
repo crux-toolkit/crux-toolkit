@@ -30,7 +30,7 @@
 
 #include "CruxApplication.h"
 
-
+#include <set>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -337,15 +337,6 @@ void shuffle_array(T* array, int size){
 }
 
 /**
- * \brief Comparison function for reverse sorting floats.
- * \returns -1,0,1 if a is <,=,> b
- */
-struct compareDescending {
-  bool operator() (double i,double j) { return (i>j);}
-  bool operator() (float i,float j) { return (i>j);}
-}; 
-
-/**
  *\returns a heap allocated feature name array for the algorithm type
  */
 char** generate_feature_name_array();
@@ -405,7 +396,7 @@ char* ion_type_to_string(ION_TYPE_T type);
 // requires an invalid value for each enum
 DIGEST_T string_to_digest_type(char*);
 char* digest_type_to_string(DIGEST_T);
-ENZYME_T string_to_enzyme_type(char*);
+ENZYME_T string_to_enzyme_type(const char*);
 char* enzyme_type_to_string(ENZYME_T);
 WINDOW_TYPE_T string_to_window_type(char*);
 char* window_type_to_string(WINDOW_TYPE_T);
@@ -420,6 +411,7 @@ char * quant_level_type_to_string(QUANT_LEVEL_TYPE_T type);
 COLTYPE_T string_to_column_type(char* name);
 COMPARISON_T string_to_comparison(char* name);
 DECOY_TYPE_T string_to_decoy_type(const char* name);
+DECOY_TYPE_T string_to_tide_decoy_type(const char* name);
 char* decoy_type_to_string(DECOY_TYPE_T type);
 MASS_FORMAT_T string_to_mass_format(const char* name);
 char* mass_format_type_to_string(MASS_FORMAT_T type);
@@ -462,6 +454,29 @@ static bool from_string(
  * \returns whether the extraction was successful or not
  */
 
+
+/**                                                                                                                                                                                                       
+ * tokenize a string by delimiter                                                                                                                                                                         
+ */
+void tokenize(
+  const std::string& str,
+  std::vector<std::string>& tokens,
+  char delimiter = '\t'
+  );
+
+
+bool get_first_last_scan_from_string(
+  const std::string& const_scans_string,
+  int& first_scan,
+  int& last_scan
+  );
+
+bool get_scans_from_string(
+  const std::string& const_scans_string,
+  std::set<int>& scans
+);
+
+
 template<typename TValue>
 static bool get_range_from_string(
   const char* const_range_string, ///< the string to extract 
@@ -483,25 +498,62 @@ static bool get_range_from_string(
     ret = from_string(first, range_string);
     last=first;
   } else {
-
-    *dash = '\0';
-    ret = from_string(first,range_string);
-    *dash = '-';
-    dash++;
-    ret &= from_string(last,dash);
-  }
-
-  //invalid if more than one dash
-  dash = strchr(dash + 1, '-');
-  if (dash != NULL) {
-    ret = false;
+    //invalid if more than one dash
+    const char* dash_check = strchr(dash + 1, '-');
+    if (dash_check) {
+      ret = false;
+    } else {
+      *dash = '\0';
+      ret = from_string(first,range_string);
+      *dash = '-';
+      dash++;
+      ret &= from_string(last,dash);
+    }
   }
 
   free(range_string);
   return ret;    
 }
 
+//These string trimming utilities are from:
+//http://stackoverflow.com/questions/216823/whats-the-best-way-to-trim-stdstring
+/**
+ * \brief trim whitespace from start of string
+ */
+static inline std::string &ltrim(
+  std::string &str ///< string to trim -in
+  ) {
 
+  str.erase(
+    str.begin(),
+    std::find_if(str.begin(), str.end(),
+    std::not1(std::ptr_fun<int, int>(std::isspace))));
+  return str;
+}
+
+/**
+ * \brief trim whitespace from the end of string
+ */
+static inline std::string &rtrim(
+  std::string &str ///< string to trim -in
+  ) {
+
+  str.erase(
+    std::find_if(str.rbegin(), str.rend(),
+    std::not1(std::ptr_fun<int, int>(std::isspace))).base(),
+    str.end());
+  return str;
+}
+
+/**
+ * \brief trim from both ends
+ */
+static inline std::string &trim(
+  std::string &str //< string to trim -in
+  ) {
+
+  return ltrim(rtrim(str));
+}
 
 /**
  * \brief  Decide if a spectrum has precursor charge of +1 or more (+2
@@ -510,7 +562,7 @@ static bool get_range_from_string(
  * MULTIPLE_CHARGE_STATE if multiply charged.
  */
 CHARGE_STATE_T choose_charge(FLOAT_T precursor_mz,         ///< m/z of spectrum precursor ion
-		  std::vector<Peak*>& peaks); ///< array of spectrum peaks
+  std::vector<Peak*>& peaks); ///< array of spectrum peaks
 
 /**
  *\brief Extend a given string with lines not exceeding a specified width, 
@@ -530,6 +582,34 @@ void strcat_formatted
  * with an index search, or num-decoys-per-target for a fasta search.
  */
 int get_num_decoys(bool have_index);
+
+/**
+ * \brief Checks if the given input file contains target, decoy PSMs or 
+ * concatenated search results.
+ *
+ *\returns corrected file names. It does not check if files are exist.
+ */
+void check_target_decoy_files(
+  std::string &target,   //filename of the target PSMs
+  std::string &decoy     //filename of the decoy PSMs
+);
+
+void get_search_result_paths(
+  const std::string& infile,
+  std::vector<std::string> &outpaths ///< paths of all search results -out
+);
+
+
+/**
+ * \brief Checks if the given input file contains target, decoy PSMs or 
+ * concatenated search results.
+ *
+ *\returns corrercted file names. It does not check if files are exist.
+ */
+void check_target_decoy_files(
+  std::string &target,   //filename of the target PSMs
+  std::string &decoy     //filename of the decoy PSMs
+);
 
 
 #endif

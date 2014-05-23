@@ -20,6 +20,8 @@ old search engine, search-for-matches, has been retired.</li>
 <h3>Minor changes</h3>
 
 <ul>
+<li>Enzyme parameter has been extended with further <i>in-silico</i> digestion rules as well as 
+the "lysc", "lysn", "arg_c", "glue_c", "pepsin_a" parameter names were renamed to "lys-c", "lys-n", "arg-c", "glue-c", "pepsin-a".
 <li>
 Previously, the PinXML file produced
 by <code>search-for-matches</code> always contained a single PSM per
@@ -53,11 +55,11 @@ missing flanking amino acids or when the charge state was not indicated in PSM
 IDs.</li>
 <li>The crux MS2 parser now accepts spectra that don't have any
   peaks.</li>
-<li>
-A new utility command, <code>make-pin</code>, is provided to
+<li>A new utility command, <code>make-pin</code>, is provided to
 create <code>pin.xml</code> files for use by Percolator.</li>
-<li>
-Q-ranker now outputs decoy files.</li>
+<li>Q-ranker now outputs decoy files.</li>
+<li>The <code>unshuffled sequence</code> column in tab-delimited files has been
+renamed to <code>original target sequence</code>.</li>
 </ul>
 
 <hr></hr>

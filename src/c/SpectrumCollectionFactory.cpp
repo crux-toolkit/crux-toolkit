@@ -7,9 +7,7 @@
  */
 #include "parameter.h"
 #include "SpectrumCollectionFactory.h"
-#include "MS2SpectrumCollection.h"
 #include "MSToolkitSpectrumCollection.h"
-#include "MGFSpectrumCollection.h"
 #include "PWIZSpectrumCollection.h"
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -39,14 +37,6 @@ Crux::SpectrumCollection* SpectrumCollectionFactory::create(const char* filename
     case MSTOOLKIT_SPECTRUM_PARSER:
       carp(CARP_DEBUG, "Using mstoolkit to parse spectra");
       collection = new MSToolkitSpectrumCollection(filename);
-      break;
-    case CRUX_SPECTRUM_PARSER:
-      carp(CARP_DEBUG, "Using crux to parse spectra");
-      if ( has_extension(filename, ".mgf") ) {
-        collection = new MGFSpectrumCollection(filename);
-      } else {
-        collection = new MS2SpectrumCollection(filename);
-      }
       break;
     case INVALID_SPECTRUM_PARSER:
     case NUMBER_SPECTRUM_PARSERS:

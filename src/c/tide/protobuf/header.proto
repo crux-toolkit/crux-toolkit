@@ -49,6 +49,7 @@ message Header {
     optional bool has_peaks = 10;
     optional double downselect_fraction = 11;
     optional ModTable mods = 12;
+    optional int32 decoys = 9;
   }
 
   message SpectraHeader {

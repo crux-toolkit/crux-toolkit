@@ -1611,10 +1611,9 @@ void Barista :: report_all_results_xml()
     xml_file_name << out_dir << "/" << fileroot << "barista.target.pep.xml";
     PepXMLWriter xmlfile;
     xmlfile.openFile(xml_file_name.str().c_str(), overwrite_flag);
-
-    //...
-    xmlfile.closeFile();
     write_results_pep_xml(xmlfile);
+
+    xmlfile.closeFile();
   }
 
   
@@ -1906,9 +1905,9 @@ void Barista :: computePEP(){
     } // else, skip decoys
   }
 
-  delete target_scores;
-  delete decoy_scores;
-  delete PEPs;
+  delete[] target_scores;
+  delete[] decoy_scores;
+  delete[] PEPs;
 
   /** 
    * Calculate Peptide PEPs
@@ -1944,9 +1943,9 @@ void Barista :: computePEP(){
     } // else, skip decoys
   }
 
-  delete target_scores;
-  delete decoy_scores;
-  delete PEPs;
+  delete[] target_scores;
+  delete[] decoy_scores;
+  delete[] PEPs;
 
 
   /** 
@@ -1983,9 +1982,9 @@ void Barista :: computePEP(){
     } // else, skip decoys
   }
 
-  delete target_scores;
-  delete decoy_scores;
-  delete PEPs;
+  delete[] target_scores;
+  delete[] decoy_scores;
+  delete[] PEPs;
 
 
 }

@@ -11,6 +11,7 @@
  */
 
 #include "MatchFileWriter.h"
+#include "OutputFiles.h"
 #include "parameter.h"
 #include <iostream>
 
@@ -59,6 +60,7 @@ void MatchFileWriter::setPrecision(){
   for(int col_idx = 0; col_idx < NUMBER_MATCH_COLUMNS; col_idx++){
     switch(col_idx){
       // integer and string fields
+    case FILE_COL:
     case SCAN_COL:
     case CHARGE_COL:
     case SP_RANK_COL:
@@ -71,7 +73,7 @@ void MatchFileWriter::setPrecision(){
     case CLEAVAGE_TYPE_COL:
     case PROTEIN_ID_COL:
     case FLANKING_AA_COL:
-    case UNSHUFFLED_SEQUENCE_COL:
+    case ORIGINAL_TARGET_SEQUENCE_COL:
     case PARSIMONY_RANK_COL:
     case RAW_SCORE_COL:  //Raw counts should be integral
       match_precision_[col_idx] = 0;
@@ -90,11 +92,14 @@ void MatchFileWriter::setPrecision(){
     case DELTA_CN_COL:
     case SP_SCORE_COL:
     case XCORR_SCORE_COL:
+    case EVALUE_COL:
     case PVALUE_COL:
     case WEIBULL_QVALUE_COL:
     case WEIBULL_PEP_COL:
     case DECOY_XCORR_QVALUE_COL:
     case DECOY_XCORR_PEP_COL:
+    case DECOY_EVALUE_QVALUE_COL:
+    case DECOY_EVALUE_PEP_COL:
     case PERCOLATOR_SCORE_COL:
     case PERCOLATOR_QVALUE_COL:
     case PERCOLATOR_PEP_COL:
@@ -301,8 +306,9 @@ void MatchFileWriter::addColumnNames(CruxApplication* application,
   addColumnName(CLEAVAGE_TYPE_COL);
   addColumnName(PROTEIN_ID_COL);
   addColumnName(FLANKING_AA_COL);
-  if( has_decoys ){
-    addColumnName(UNSHUFFLED_SEQUENCE_COL);
+  if ((has_decoys || OutputFiles::isConcat()) &&
+      !OutputFiles::isProteinLevelDecoys()) {
+    addColumnName(ORIGINAL_TARGET_SEQUENCE_COL);
   }
 
 }
@@ -349,6 +355,10 @@ void MatchFileWriter::addColumnNames
       addColumnName(WEIBULL_PEP_COL);
       //addColumnName(WEIBULL_PEPTIDE_QVALUE_COL);
     } else {
+      if ( cols_to_print[EVALUE_COL]) {
+        addColumnName(DECOY_EVALUE_QVALUE_COL);
+        addColumnName(DECOY_EVALUE_PEP_COL);
+      }
       addColumnName(DECOY_XCORR_QVALUE_COL);
       addColumnName(DECOY_XCORR_PEP_COL);
       //addColumnName(DECOY_XCORR_PEPTIDE_QVALUE_COL);
@@ -374,7 +384,7 @@ void MatchFileWriter::addColumnNames
   }
 
   if( has_decoys ){
-    addColumnName(UNSHUFFLED_SEQUENCE_COL);
+    addColumnName(ORIGINAL_TARGET_SEQUENCE_COL);
   }
 
   // now add remaining columns from the input file

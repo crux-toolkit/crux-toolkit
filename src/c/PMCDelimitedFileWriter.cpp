@@ -397,7 +397,7 @@ void PMCDelimitedFileWriter::setUpPSMsColumns(
     addColumnName(PERCOLATOR_QVALUE_COL);
     break;
   }
-
+  addColumnName(FILE_COL);
   addColumnName(SCAN_COL);
   addColumnName(CHARGE_COL);
   addColumnName(SPECTRUM_PRECURSOR_MZ_COL);
@@ -501,7 +501,7 @@ void PMCDelimitedFileWriter::addScoreIfExists(
   if (match->hasScore(scoreType)) {
     setColumnCurrentRow(column, match->getScore(scoreType));
   } else {
-    setColumnCurrentRow(column, 0);
+    setColumnCurrentRow(column, -1);
   }
 }
 
@@ -516,7 +516,7 @@ void PMCDelimitedFileWriter::addRankIfExists(
   if (match->hasRank(scoreType)) {
     setColumnCurrentRow(column, match->getRank(scoreType));
   } else {
-    setColumnCurrentRow(column, 0);
+    setColumnCurrentRow(column, -1);
   }
 }
 

@@ -12,6 +12,7 @@
 #include "QRanker.h"
 //#include "Percolator.h"
 #include "MatchCollectionIterator.h"
+#include "MatchCollectionParser.h"
 #include "MatchIterator.h"
 //#include "PercolatorCInterface.h"
 #include "posterior-error/PosteriorEstimator.h"
@@ -33,6 +34,7 @@ void analyze_matches_main(
     "pi-zero",
     "verbosity",
     "parameter-file",
+    "protein-database",
     "overwrite",
     "output-dir",
     "fileroot"
@@ -52,8 +54,7 @@ void analyze_matches_main(
 */
   // Define required command line arguments.
   const char* argument_list[] = {
-    "protein-database",
-    "search results directory"
+    "target input"
   };
   int num_arguments = sizeof(argument_list) / sizeof(char*);
 
@@ -83,18 +84,17 @@ void analyze_matches_main(
   }
 
   // Get required arguments
-  char* protein_database_name = get_string_parameter("protein-database");
-  char* input_directory = get_string_parameter("search results directory");
-
+  const char* protein_database_name = get_string_parameter_pointer("protein-database");
+  const char* target_input = get_string_parameter_pointer("target input");
   // Prepare the output files.
   OutputFiles output(application);
-
+  
   // Perform the analysis.
   MatchCollection* match_collection = NULL;
   switch(command) {
   case QVALUE_COMMAND:
-    match_collection = run_qvalue(input_directory,
-                                  protein_database_name,
+    match_collection = run_qvalue(target_input,
+      protein_database_name,
                                   output);
     break;
 /*
@@ -108,17 +108,8 @@ void analyze_matches_main(
     carp(CARP_FATAL, "Unknown command type.");
     break;
   }
-
-  // NOTE: return this step once the db/index is created and freed here
-  //carp(CARP_INFO, "Outputting matches.");
-  //output.writeMatches(match_collection);
-
   delete match_collection;
   output.writeFooters();
-  // clean up
-  free(input_directory);
-  free(protein_database_name);
-
   carp(CARP_INFO, "Elapsed time: %.3g s", wall_clock() / 1e6);
   string name = application->getName();
 
@@ -145,7 +136,8 @@ pair<double,bool> make_pair(double db, bool b) {
 double* compute_PEP(double* target_scores, ///< scores for target matches
                     int num_targets,       ///< size of target_scores
                     double* decoy_scores,  ///< scores for decoy matches
-                    int num_decoys         ///< size of decoy_scores
+                    int num_decoys,         ///< size of decoy_scores
+                    bool ascending ///< are the scores ascending or descending
 ){
   if( target_scores == NULL || decoy_scores == NULL 
       || num_targets == 0 || num_decoys == 0 ){
@@ -176,10 +168,14 @@ double* compute_PEP(double* target_scores, ///< scores for target matches
             bind2nd(ptr_fun(make_pair<double, bool>), false));
 #endif
 
-  // sort them in descending order
-  sort(score_labels.begin(), score_labels.end(),
-       greater<pair<double, bool> >());
-
+  // sort them 
+  if (ascending) {
+    sort(score_labels.begin(), score_labels.end());
+    PosteriorEstimator::setReversed(true);
+  } else {
+    sort(score_labels.begin(), score_labels.end(),
+       greater<pair<double, bool> > ());  
+  }
   // get p-values
   vector<double> pvals;
   PosteriorEstimator::getPValues(score_labels, pvals);
@@ -203,11 +199,17 @@ double* compute_PEP(double* target_scores, ///< scores for target matches
     double curr_target_score = target_scores[target_idx];
 
     // find its position in score_labels
-    vector< pair<double, bool> >::iterator found_score_pos 
-      = lower_bound(score_labels.begin(), score_labels.end(), 
+    vector< pair<double, bool> >::iterator found_score_pos;
+    if (ascending) {
+      found_score_pos 
+        = lower_bound(score_labels.begin(), score_labels.end(), 
+                      make_pair(curr_target_score, true));
+    } else {
+      found_score_pos 
+        = lower_bound(score_labels.begin(), score_labels.end(), 
                     make_pair(curr_target_score, true),
                     greater<pair<double, bool> >()); 
-
+    }
 
     size_t found_index = distance(score_labels.begin(), found_score_pos);
 

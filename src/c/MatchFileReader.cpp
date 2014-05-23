@@ -106,7 +106,8 @@ FLOAT_T MatchFileReader::getFloat(
 double MatchFileReader::getDouble(
   MATCH_COLUMNS_T col_type ///<the column type
 ) {
-
+  carp(CARP_DETAILED_DEBUG, "reading double from column %s", 
+    get_column_header(col_type));
   int idx = match_indices_[col_type];
   if (idx == -1) {
 
@@ -126,7 +127,8 @@ double MatchFileReader::getDouble(
 int MatchFileReader::getInteger(
   MATCH_COLUMNS_T col_type ///< the column name
 ) {
-
+  carp(CARP_DETAILED_DEBUG, "Reading integer from column %s",
+    get_column_header(col_type));
   int idx = match_indices_[col_type];
   if (idx == -1) {
 
@@ -150,6 +152,8 @@ string BLANK_STRING="";
 const std::string& MatchFileReader::getString(
   MATCH_COLUMNS_T col_type ///<the column type
 ) {
+  carp(CARP_DEBUG, "Getting string from column %s",get_column_header(col_type));
+
   int idx = match_indices_[col_type];
   if (idx == -1) {
 
@@ -194,7 +198,7 @@ void MatchFileReader::getStringVectorFromCell(
 
   //get the list of strings separated by delimiter
   string_vector.clear();
-  DelimitedFile::tokenize(string_ans, string_vector, delimiter);
+  tokenize(string_ans, string_vector, delimiter);
 }
 
 /**

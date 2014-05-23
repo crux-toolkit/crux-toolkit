@@ -6,4 +6,5 @@ message Protein {
   optional int32 id = 2; // In a file of records of type Protein ids will
                          // usually be numbered sequentially.
   optional string residues = 3;
+  optional int32 target_pos = 5;  // Index in target protein that this decoy protein is from
 }

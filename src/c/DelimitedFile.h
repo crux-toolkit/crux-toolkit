@@ -472,15 +472,6 @@ class DelimitedFile {
   bool hasNext();
 
   /**
-   * tokenize a string by delimiter
-   */
-  static void tokenize(
-    const std::string& str,
-    std::vector<std::string>& tokens,
-    char delimiter = '\t'
-  );
-
-  /**
    * \returns a delimited string from the vector of elements 
    */
   template<typename T>

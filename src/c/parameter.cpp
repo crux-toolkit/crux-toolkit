@@ -8,6 +8,7 @@
  ****************************************************************************/
 
 #include "crux-utils.h"
+#include "LineFileReader.h"
 #include "parameter.h"
 #include "WinCrux.h"
 #include "Peptide.h"
@@ -71,6 +72,17 @@ int pre_list_size;
 int post_list_size;
 bool pre_for_inclusion;
 bool post_for_inclusion;
+
+vector<string> comet_enzyme_info_lines_;
+
+
+/**
+ * \returns the comet enzyme info lines parsed from the file
+ * or generated defaults
+ */
+const std::vector<std::string>& get_comet_enzyme_info_lines() {
+  return comet_enzyme_info_lines_;
+}
 
 /************************************
  * Private function declarations
@@ -264,7 +276,7 @@ bool set_mass_format_type_parameter(
 bool select_cmd_line(  
   const char** option_names, ///< list of options to be allowed for main -in
   int    num_options,  ///< number of optons in that list -in
-  int (*parse_argument_set)(const char*, const char*, void*, enum argument_type) ///< function point to choose arguments or options 
+  int (*parse_argument_set)(const char*, const char*, void*, enum argument_type, bool print) ///< function point to choose arguments or options 
   );
 
 bool update_aa_masses();
@@ -387,12 +399,11 @@ void initialize_parameters(void){
 
   /*Percolator arguments*/
   set_string_parameter(
-    "pin.xml", NULL,
-    "PIN files are XML files for PIN format whose structure is defined by "
-    "the schema percolator_in.xml. <code>crux search-for-matches</code> generates this file. "
+    "pin", NULL,
+    "PIN files are tab-delimited files for PIN format. "
     "Also, this argument can be \"-\" which indicates the pin file will come from standard input. "
     "Alternately, a SQT, PepXML, or tab-delimited file may be given (a corresponding decoy"
-    "file must also exist in the same directory), in which case a pin.xml file will be "
+    "file must also exist in the same directory), in which case a pin file will be "
     "generated in the output directory prior to execution.",
     "Argument, not option for percolator",
     "false"
@@ -400,23 +411,21 @@ void initialize_parameters(void){
   /*make-pin arguments*/
   set_string_parameter(
     "target input", NULL,
-    "make-pin can convert any file format in sqt, tab-delimited and pep.xml file "
-    "to pin.xml file "
-    "Also, this argument can be  which indicates the pin file will come from standard input",
-    "Argument, not option for make-pin",
+    "search results file in sqt, tab-delimited or pep.xml format.  "
+    "Also, this argument can be - which indicates the result file will come from standard input",
+    "Argument for make-pin and calibrate-scores",
     "false"
   );
   set_string_parameter(
     "decoy input", NULL,
     "make-pin can convert any file format in sqt, tab-delimited and pep.xml file "
-    "to pin.xml file ",
+    "to pin file ",
     "Argument, not option for make-pin",
     "false"
   );
   set_string_parameter(
     "output-file", NULL,
-    "File where pin.xml will be written"
-    "to pin.xml file ",
+    "Path where pin file will be written",
     "It is optional for make-pin",
     "false"
   );
@@ -488,13 +497,15 @@ void initialize_parameters(void){
       "search-for-matches. Digestion rules are as "
       "follows: enzyme name [cuts after one of these residues][but not before "
       "one of these residues].  trypsin [RK][P], elastase [ALIV][P], "
-      "chymotrypsin [FWY][P].",
+      "chymotrypsin [FWYL][P].",
       "true");
   set_enzyme_type_parameter("enzyme", TRYPSIN,
       "Enzyme to use for in silico digestion of proteins. "
-      "<string>=trypsin|chymotrypsin|elastase|clostripain| "
-      "cyanogen-bromide|iodosobenzoate|proline-endopeptidase| "
-      "staph-protease|aspn|modified-chymotrypsin|no-enzyme. "
+      "<string>=no-enzyme|trypsin|trypsin/p|chymotrypsin| " 
+      "elastase|clostripain|cyanogen-bromide|iodosobenzoate| " 
+      "proline-endopeptidase|staph-protease|asp-n|lys-c "
+      "lys-n|arg-c|glu-c|pepsin-a| "
+      "|elastase-trypsin-chymotrypsin|custom-enzyme. "
       "Default=trypsin.", 
       "Used in conjunction with the options digestion and missed-cleavages. "
       "Use 'no-enzyme' for non-specific digestion.  Available "
@@ -502,12 +513,13 @@ void initialize_parameters(void){
       "crux create-index, crux tide-index, and crux generate-decoys.  "
       "Available from parameter file for crux search-for-matches. "
       "Digestion rules: enzyme name [cuts after one of these residues]|{but "
-      "not before one of these residues}. trypsin [RK]|{P}, elastase "
-      "[ALIV]|{P}, chymotrypsin [FWY]|{P}, clostripain [R]|[], "
+      "not before one of these residues}. trypsin [RK]|{P}, trypsin/p [RK]|[], "
+      "elastase [ALIV]|{P}, chymotrypsin [FWYL]|{P}, clostripain [R]|[], "
       "cyanogen-bromide [M]|[], iodosobenzoate [W]|[], proline-endopeptidase "
-      "[P]|[], staph-protease [E]|[], modified-chymotrypsin [FWYL]|{P}, "
-      "elastase-trypsin-chymotrypsin [ALIVKRWFY]|{P},aspn []|[D] (cuts before "
-      "D).", "true");
+      "[P]|[], staph-protease [E]|[], elastase-trypsin-chymotrypsin "
+      "[ALIVKRWFY]|{P},asp-n []|[D] (cuts before D), lys-c [K]|{P}, lys-n "
+      "[]|[K] (cuts before K), arg-c [R]|{P}, glu-c [DE]|{P}, pepsin-a "
+      "[FL]|{P}.", "true");
 
   set_window_type_parameter("precursor-window-type", WINDOW_MASS,
       "Window type to use for selecting candidate "
@@ -516,9 +528,9 @@ void initialize_parameters(void){
       "and tide-search.",
       "true");
 
-  set_spectrum_parser_parameter("spectrum-parser", CRUX_SPECTRUM_PARSER,
+  set_spectrum_parser_parameter("spectrum-parser", PROTEOWIZARD_SPECTRUM_PARSER,
     "Parser to use for reading in spectra "
-    "<string>=pwiz|mstoolkit|crux. Default=crux.",
+    "<string>=pwiz|mstoolkit. Default=pwiz.",
     "Available for search-for-matches, search-for-xlinks.",
     "true");
 
@@ -572,7 +584,7 @@ void initialize_parameters(void){
   set_boolean_parameter("mzid-output", false,
       "Output MZID in the output directory.  Default=F",
       "Available for search-for-matches, percolator.", "true");
-  set_boolean_parameter("pinxml-output", false,
+  set_boolean_parameter("pin-output", false,
       "Output PIN XML in the output directory.  Default=F",
       "Available for search-for-matches.", "true");
   set_boolean_parameter("pepxml-output", false,
@@ -625,8 +637,8 @@ void initialize_parameters(void){
   set_string_parameter("use-flanking-peaks", "unset",
       "Include peaks +/- 1da around b/y ions in theoretical spectrum.  "
       "sequest-search and search-for-xlinks default=T. search-for-matches "
-      "and tide-index default=F.",
-      "Available in the paramter file for all search commands and tide-index.",
+      "default=F.",
+      "Available in the parameter file for all search commands.",
       "true");
   set_double_parameter("spectrum-min-mz", 0.0, 0, BILLION, 
       "The lowest spectrum m/z to search. Default=0.0.",
@@ -761,7 +773,8 @@ void initialize_parameters(void){
   set_int_parameter("max-mods", MAX_PEPTIDE_LENGTH, 0, MAX_PEPTIDE_LENGTH,
       "The maximum number of modifications that can be applied to a single " 
       "peptide.  Default=no limit.",
-      "Available from parameter file for crux-search-for-matches.", "true");
+      "Available for tide-index and from parameter file for "
+      "crux-search-for-matches.", "true");
   set_int_parameter("max-aas-modified", MAX_PEPTIDE_LENGTH, 0,
       MAX_PEPTIDE_LENGTH,
       "The maximum number of modified amino acids that can appear in one "
@@ -826,15 +839,6 @@ void initialize_parameters(void){
      "<fileroot>.percolator.features.txt or <fileroot>.qranker.features.txt.",
      "true");
   
-  set_boolean_parameter("feature-in-file", false,
-      "Input files are given as a tab delimited file. In this case the only argument should be a file name "
-      "of the data file. The tab delimited fields should be id <tab> label <tab> feature1 "
-      "<tab> ... <tab> featureN <tab> peptide <tab> proteinId1 <tab> .. <tab> proteinIdM "
-      "Labels are interpreted as 1 -- positive set "
-      "and test set, -1 -- negative set.",
-      "Available for percolator",
-      "true");
-  
   set_boolean_parameter(
     "protein",
     false,
@@ -853,9 +857,9 @@ void initialize_parameters(void){
   );
   set_string_parameter(
     "decoy-prefix",
-    "random_",
+    "decoy_",
     "Option for single SQT file mode defining the name pattern "
-    "used for shuffled database. Default=random_.",
+    "used for decoy database. Default=decoy_.",
     "Available for percolator",
     "true"
   );
@@ -877,15 +881,6 @@ void initialize_parameters(void){
     "true"
   );
  
-  set_double_parameter(
-    "trian-fdr",
-    0.01,0.0,0.90,
-    "False discovery rate thereshold to define positive examples in training. "
-    "Set by cross validation if 0. Default is 0.01",
-    "Available for crux percolatior",
-    "true"
-  );
-
   set_double_parameter(
     "test-fdr",
     0.01,0.0,1.0,
@@ -925,16 +920,6 @@ void initialize_parameters(void){
     "Available for crux percolator ",
     "true"
   );
-/*
-  set_boolean_parameter(
-    "output-feature-file",
-    false,
-    " Output the computed features to the given file in tab-delimited format. " 
-    "A file with the features with the given file name will be created. Default=F",
-    "Available for crux percolator ",
-    "true"
-  );
- */
   set_int_parameter(
     "default-direction",
     0,-BILLION,BILLION,
@@ -1017,7 +1002,7 @@ void initialize_parameters(void){
     "Avilable for crux percolator",
     "true"
   );
- 
+
   set_boolean_parameter(
     "only-psms",
     false,
@@ -1025,7 +1010,7 @@ void initialize_parameters(void){
     "Available for crux percolator",
     "true"
   );
-
+ 
   set_boolean_parameter(
     "allow-protein-group",
     false,
@@ -1069,10 +1054,10 @@ void initialize_parameters(void){
 
   set_int_parameter(
     "deepness",
-    3,0,3,
-    "Setting deepness 0 or 1 or 2 or 3 from high deepness to low deepness(less computational time) "
-    "for the grid search for Alpha,Beta and Gamma estimation(--protein T must be set). "
-    "Default value is 3.",
+    0,0,2,
+    "Setting deepness 0, 1, or 2 from low depth to high depth (less computational time) "
+    "of the grid search for estimation Alpha,Beta and Gamma parameters for fido "
+    "(--protein T must be set). Default value is 0.",
     "Available for crux percolator if --protein T is set.",
     "true"
   );
@@ -1104,13 +1089,14 @@ void initialize_parameters(void){
   // **** Tide options ****
   set_string_parameter("decoy-format", "shuffle",
     "Include a decoy version of every peptide by shuffling or reversing the "
-    "target sequence. <string>=none|shuffle|reverse. Default=shuffle.",
+    "target sequence or protein. <string>=none|shuffle|peptide-reverse|"
+    "protein-reverse. Default=shuffle.",
     "Available for tide-index",
     "true"
   );
-  set_boolean_parameter("monoisotopic-precursor", false,
+  set_boolean_parameter("monoisotopic-precursor", true,
     "Use monoisotopic precursor masses rather than average mass for precursor. "
-    "Default=F.",
+    "Default=T.",
     "Available for tide-index",
     "true"
   );
@@ -1118,6 +1104,34 @@ void initialize_parameters(void){
     "Expression for static and variable mass modifications to include. "
     "Specify a comma-separated list of modification sequences of the form: "
     "C+57.02146,2M+15.9949,1STY+79.966331,...",
+    "Available for tide-index",
+    "true"
+  );
+  set_string_parameter("cterm-peptide-mods-spec", "",
+    "Specifies C-terminal static and variable mass modifications on peptides. "
+    "Specify a comma-separated list of C-terminal modification sequences of the form: "
+    "X+21.9819",
+    "Available for tide-index",
+    "true"
+  );
+  set_string_parameter("nterm-peptide-mods-spec", "",
+    "Specifies N-terminal static and variable mass modifications on peptides. "
+    "Specify a comma-separated list of N-terminal modification sequences of the form: "
+    "1E-18.0106,C-17.0265",
+    "Available for tide-index",
+    "true"
+  );
+  set_string_parameter("cterm-protein-mods-spec", "",
+    "Specifies C-terminal static and variable mass modifications on proteins. "
+    "Specify a comma-separated list of C-terminal protein modification sequences of the form: "
+    ",...",
+    "Available for tide-index",
+    "true"
+  );
+  set_string_parameter("nterm-protein-mods-spec", "",
+    "Specifies N-terminal static and variable mass modifications on proteins. "
+    "Specify a comma-separated list of N-terminal protein modification sequences of the form: "
+    ",...",
     "Available for tide-index",
     "true"
   );
@@ -1133,6 +1147,27 @@ void initialize_parameters(void){
     "Available for tide-search",
     "true"
   );
+  set_boolean_parameter("concat", false,
+    "Output target and decoy PSMs into a single file.",
+    "Available for tide-search",
+    "true"
+  );
+  set_string_parameter("PTMDB", "",
+    "Specify the name of the file where the PTMs are stored.",
+    "Available for tide-index",
+    "true"
+  );
+  // Same as remove_precursor_peak and remove_precursor tolerance in Comet
+  set_boolean_parameter("remove-precursor-peak", false,
+    "Remove peaks around the precursor m/z.",
+    "Available for tide-search.",
+    "true"
+  );
+  set_double_parameter("remove-precursor-tolerance", 1.5, 0, BILLION,
+    "+- m/z tolerance for precursor peak removal. Default = 1.5.",
+    "Available for tide-search.",
+    "true"
+  );
 
   /*
    * Comet parameters
@@ -1143,19 +1178,19 @@ void initialize_parameters(void){
      "false");
 
   set_string_parameter("database_name", NULL,
-		       "A full or relative path to the sequence database, "
-                       "in FASTA format, to search. Example databases include "
-                       "RefSeq or UniProt.  Database can contain amino acid "
-                       "sequences or nucleic acid sequences. If sequences are "
-                       "amino acid sequences, set the parameter \"nucleotide_reading_frame = 0\". "
-                       "If the sequences are nucleic acid sequences, you must instruct Comet to "
-                       "translate these to amino acid sequences. Do this by setting "
-                       "nucleotide_reading_frame\" to a value between 1 and 9. ",
-		       "Comet only", "true");
+                      "A full or relative path to the sequence database, "
+                      "in FASTA format, to search. Example databases include "
+                      "RefSeq or UniProt.  Database can contain amino acid "
+                      "sequences or nucleic acid sequences. If sequences are "
+                      "amino acid sequences, set the parameter \"nucleotide_reading_frame = 0\". "
+                      "If the sequences are nucleic acid sequences, you must instruct Comet to "
+                      "translate these to amino acid sequences. Do this by setting "
+                      "nucleotide_reading_frame\" to a value between 1 and 9. ",
+                      "Comet only", "true");
 
   set_int_parameter("decoy_search", 0, 0, 2,
-		    "0=no (default), 1=concatenated search, 2=separate search",
-		    "option for Comet only", "true");
+                    "0=no (default), 1=concatenated search, 2=separate search",
+                    "option for Comet only", "true");
 
   set_int_parameter("num_threads",0,0,32, 
     "0=poll CPU to set num threads; else specify num threads directly (max 32)",
@@ -1163,25 +1198,31 @@ void initialize_parameters(void){
     "true"
   );
 
+  set_string_parameter("output_suffix","",
+          "specifies the suffix string that is appended to the base output name "
+          "for the pep.xml, pin.xml, txt and sqt output files."
+          "Default = \"\"",
+          "Available for comet.","true");
+
   set_double_parameter("peptide_mass_tolerance", 3.0, 0, BILLION,
-		       "Controls the mass tolerance value.  The mass tolerance "
+                       "Controls the mass tolerance value.  The mass tolerance "
                        "is set at +/- the specified number i.e. an entered value "
                        "of \"1.0\" applies a -1.0 to +1.0 tolerance. "
                        "The units of the mass tolerance is controlled by the parameter "
                        "\"peptide_mass_units\". ", 
-		       "option for Comet only","true");
+                       "option for Comet only","true");
 
   set_int_parameter("peptide_mass_units", 0,0,2,
-		    "0=amu, 1=mmu, 2=ppm",
-		    "option for Comet only", "true");
+                    "0=amu, 1=mmu, 2=ppm",
+                    "option for Comet only", "true");
 
   set_int_parameter("mass_type_parent", 1,0,1,
-		    "0=average masses, 1=monoisotopic masses","option for Comet only", "true");
+                    "0=average masses, 1=monoisotopic masses","option for Comet only", "true");
   set_int_parameter("mass_type_fragment", 1,0,1,
-		    "0=average masses, 1=monoisotopic masses","option for Comet only", "true");
+                    "0=average masses, 1=monoisotopic masses","option for Comet only", "true");
   
   set_int_parameter("precursor_tolerance_type", 0, 0, 1,
-		    "0=MH+ (default), 1=precursor m/z","option for Comet only", "true");
+                    "0=MH+ (default), 1=precursor m/z","option for Comet only", "true");
 
   set_int_parameter("isotope_error",0,0,2, 
     "0=off, 1=on -1/0/1/2/3 (standard C13 error), 2= -8/-4/0/4/8 (for +4/+8 labeling)",
@@ -1190,148 +1231,140 @@ void initialize_parameters(void){
   );
 
   set_int_parameter("search_enzyme_number", 1, 1, BILLION,
-		    "choose from list at end of this params file",
-		    "option for Comet only",
-		    "true");
+                    "choose from list at end of this params file",
+                    "option for Comet only",
+                    "true");
 
   set_int_parameter("num_enzyme_termini", 2,1,2,
-		    "valid values are 1 (semi-digested), "
+                    "valid values are 1 (semi-digested), "
                     "2 (fully digested, default), 8 N-term, 9 C-term",
-		    "option for Comet only",
-		    "true");
+                    "option for Comet only",
+                    "true");
 
   set_int_parameter("allowed_missed_cleavage", 2, 0, 5,
-		    "maximum value is 5; for enzyme search",
-		    "option for Comet only",
-		    "true");
+                    "maximum value is 5; for enzyme search",
+                    "option for Comet only",
+                    "true");
 
   set_double_parameter("fragment_bin_tol", 1.0005, 0, BILLION,
-		       "binning to use on fragment ions",
-		       "option for Comet only",
-		       "true");
+                       "binning to use on fragment ions",
+                       "option for Comet only",
+                       "true");
 
   set_double_parameter("fragment_bin_offset", 0.4, 0, 1.0,
-		       "offset position to start the binning (0.0 to 1.0)",
-		       "option for Comet only",
-		       "true");
+                       "offset position to start the binning (0.0 to 1.0)",
+                       "option for Comet only",
+                       "true");
 
   set_int_parameter("theoretical_fragment_ions", 1, 0, 1,
-		    "0=default peak shape, 1=M peak only",
-		    "option for Comet only",
-		    "true");
+                    "0=default peak shape, 1=M peak only",
+                    "option for Comet only",
+                    "true");
   
   set_int_parameter("use_A_ions",
-		    0, 0, 1, 
-		    "Controls whether or not A-ions are considered in the "
+                    0, 0, 1, 
+                    "Controls whether or not A-ions are considered in the "
                     "search (0 - no, 1 - yes)",
-		    "option for Comet only",
-		    "true"
-		    );
+                    "option for Comet only",
+                    "true");
 
   set_int_parameter("use_B_ions",
-		    1, 0, 1, 
-		    "Controls whether or not B-ions are considered in the "
+                    1, 0, 1, 
+                    "Controls whether or not B-ions are considered in the "
                     "search (0 - no, 1 - yes)",
-		    "option for Comet only",
-		    "true"
-		    );
+                    "option for Comet only",
+                    "true");
 
   set_int_parameter("use_C_ions",
-		    0,0, 1, 
-		    "Controls whether or not C-ions are considered in the "
+                    0, 0, 1, 
+                    "Controls whether or not C-ions are considered in the "
                     "search (0 - no, 1 - yes)",
-		    "option for Comet only",
-		    "true"
-  );
+                    "option for Comet only",
+                    "true");
 
   set_int_parameter("use_X_ions",
-		    0, 0, 1, 
-		    "Controls whether or not X-ions are considered in the "
+                    0, 0, 1, 
+                    "Controls whether or not X-ions are considered in the "
                     "search (0 - no, 1 - yes)",
-		    "option for Comet only",
-		    "true"
-  );
+                    "option for Comet only",
+                    "true");
 
   set_int_parameter("use_Y_ions",
-		      1, 0, 1,
-		      "Controls whether or not Y-ions are considered in the "
-                      "search (0 - no, 1 - yes)",
-			"option for Comet only",
-			"true"
-  );
+                    1, 0, 1,
+                    "Controls whether or not Y-ions are considered in the "
+                    "search (0 - no, 1 - yes)",
+                    "option for Comet only",
+                    "true");
 
   set_int_parameter("use_Z_ions",
-		    0, 0, 1, 
-		    "Controls whether or not Z-ions are considered in the "
+                    0, 0, 1, 
+                    "Controls whether or not Z-ions are considered in the "
                     "search (0 - no, 1 - yes)",
-		    "option for Comet only",
-		    "true"
-  );
+                    "option for Comet only",
+                    "true");
 
   set_int_parameter("use_NL_ions",
-		    1, 0, 1,
-		    "0=no, 1= yes to consider NH3/H2O neutral loss peak",
-		    "option for Comet only",
-		    "true"
-  );
+                    1, 0, 1,
+                    "0=no, 1= yes to consider NH3/H2O neutral loss peak",
+                    "option for Comet only",
+                    "true");
 
   set_int_parameter("use_sparse_matrix",
-		    0, 0, 1,
-		    "Controls whether or not internal sparse matrix data "
+                    0, 0, 1,
+                    "Controls whether or not internal sparse matrix data "
                     "representation is used.",
-		    "option for Comet only",
-		    "true"
-		    );
+                    "option for Comet only",
+                    "true");
 
   set_int_parameter("output_sqtfile",
-		    0, 0, 1,
-		    "0=no, 1=yes  write sqt file",
-		    "option for Comet only",
-		    "true");
+                    0, 0, 1,
+                    "0=no, 1=yes  write sqt file",
+                    "option for Comet only",
+                    "true");
 
   set_int_parameter("output_pepxmlfile",
-		    1, 0, 1,
-		    "0=no, 1=yes  write pep.xml file",
-		    "option for Comet only",
-		    "true");
+        1, 0, 1,
+        "0=no, 1=yes  write pep.xml file",
+        "option for Comet only",
+        "true");
 
   set_int_parameter("output_pinxmlfile",
-		    0, 0, 1,
-		    "0=no, 1=yes  write pin.xml file",
-		    "option for Comet only",
-		    "true");
+        0, 0, 1,
+        "0=no, 1=yes  write pin.xml file",
+        "option for Comet only",
+        "true");
   
   set_int_parameter("output_txtfile",
-		    1, 0, 1,
-		    "0=no, 1=yes  write tab-delimited text file",
-		    "option for Comet only",
-		    "true");
+        1, 0, 1,
+        "0=no, 1=yes  write tab-delimited text file",
+        "option for Comet only (default 1)",
+        "true");
                     
   set_int_parameter("output_outfiles",
-		    0, 0, 1,
-		    "0=no, 1=yes  write .out files",
-		    "option for Comet only",
-		    "true");
+        0, 0, 1,
+        "0=no, 1=yes  write .out files",
+        "option for Comet only",
+        "true");
 
   set_int_parameter("print_expect_score",
-		    1, 0, 1,
-		    "0=no, 1=yes to replace Sp with expect in out & sqt",
-		    "option for Comet.",
-		    "false"
+        1, 0, 1,
+        "0=no, 1=yes to replace Sp with expect in out & sqt",
+        "option for Comet.",
+        "true"
   );
 
   set_int_parameter("num_output_lines",
-		    5, 1, BILLION,
-		    "num peptide results to show",
-		    "option for Comet.",
-		    "false"
+        5, 1, BILLION,
+        "num peptide results to show",
+        "option for Comet.",
+        "true"
   );
 
   set_int_parameter("show_fragment_ions",
-		    0, 0, 1,
-		    "0=no, 1=yes for out files only",
-		    "option for Comet.",
-		    "false"
+        0, 0, 1,
+        "0=no, 1=yes for out files only",
+        "option for Comet.",
+        "true"
   );
 
   set_int_parameter("sample_enzyme_number",
@@ -1339,336 +1372,336 @@ void initialize_parameters(void){
     "Sample enzyme which is possibly different than the one applied to the search."
     "Used to calculate NTT & NMC in pepXML output (default=1 for trypsin).",
     "option for Comet. ",
-    "false"
+    "true"
   );
 
   set_string_parameter("scan_range", "0 0",
-		       "start and scan scan range to search; 0 as 1st entry "
-                       "ignores parameter",
-		       "option for Comet",
-		       "false"
-		       );
+           "start and scan scan range to search; 0 as 1st entry "
+           "ignores parameter",
+           "option for Comet",
+           "true"
+           );
   
 
   set_string_parameter("precursor_charge", "0 0",
-		       "precursor charge range to analyze; does not override "
-                       "mzXML charge; 0 as 1st entry ignores parameter",
-		       "option for Comet.",
-		       "false"
-		       );
+           "precursor charge range to analyze; does not override "
+           "mzXML charge; 0 as 1st entry ignores parameter",
+           "option for Comet.",
+           "true"
+           );
   
   set_int_parameter("ms_level",
     2,2,3, 
     "MS level to analyze, valid are levels 2 (default) or 3",
     "option for Comet. ",
-    "false"
+    "true"
   );
 
   set_string_parameter("activation_method",
     "ALL" ,
     "<string>= ALL|CID|ECD|ETD|PQD|HCD|IRMPD. Default=All",
     "option for Comet. ",
-    "false"
+    "true"
   );
 
   set_string_parameter("digest_mass_range", "600.0 5000.0",
-		       "MH+ peptide mass range to analyze",
-		       "option for Comet.",
-		       "false"
-		       );
+           "MH+ peptide mass range to analyze",
+           "option for Comet.",
+           "true"
+           );
   set_int_parameter("num_results", 50,0,BILLION,
-		    "number of search hits to store internally",
-		    "option for Comet.",
-		    "false");
+        "number of search hits to store internally",
+        "option for Comet.",
+        "true");
 
   set_int_parameter("skip_researching", 1, 0, 1,
-		    "for '.out' file output only, 0=search everything again "
-                    "(default), 1=don't search if .out exists",
-		    "option for Comet",
-		    "false");
+        "for '.out' file output only, 0=search everything again "
+        "(default), 1=don't search if .out exists",
+        "option for Comet",
+        "true");
 
   set_int_parameter("max_fragment_charge", 3, 1, 5,
-		    "set maximum fragment charge state to analyze (allowed max 5)",
-		    "option for Comet",
-		    "false");
+        "set maximum fragment charge state to analyze (allowed max 5)",
+        "option for Comet",
+        "true");
   
   set_int_parameter("max_precursor_charge", 6, 1, 9,
-		    "set maximum precursor charge state to analyze (allowed max 9)",
-		    "option for Comet",
-		    "false");
+        "set maximum precursor charge state to analyze (allowed max 9)",
+        "option for Comet",
+        "true");
   
   set_int_parameter("nucleotide_reading_frame", 0, 0, 9,
-		    "0=proteinDB, 1-6, 7=forward three, 8=reverse three, 9=all six",
-		    "option for Comet",
-		    "false");
+        "0=proteinDB, 1-6, 7=forward three, 8=reverse three, 9=all six",
+        "option for Comet",
+        "true");
 
   set_int_parameter("clip_nterm_methionine", 0, 0, 1,
-		    "0=leave sequences as-is; 1=also consider sequence w/o N-term methionine",
-		    "option for Comet",
-		    "false");
+        "0=leave sequences as-is; 1=also consider sequence w/o N-term methionine",
+        "option for Comet",
+        "true");
 
   set_int_parameter("spectrum_batch_size", 0, 0, BILLION,
-		    "max. # of spectra to search at a time; 0 to search the "
-                    "entire scan range in one loop",
-		    "option for Comet",
-		    "false");
+        "max. # of spectra to search at a time; 0 to search the "
+        "entire scan range in one loop",
+        "option for Comet",
+        "true");
 
   set_int_parameter("minimum_peaks", 10, 1, BILLION,
-		    "minimum num. of peaks in spectrum to search (default 10)",
-		    "option for Comet",
-		    "false");
+        "minimum num. of peaks in spectrum to search (default 10)",
+        "option for Comet",
+        "true");
 
   set_double_parameter("minimum_intensity", 0, 0, BILLION,
     "minimum intensity value to read in",
     "option for comet. ",
-    "false"
+    "true"
   );
 
   set_int_parameter("remove_precursor_peak", 0, 0, 2, 
     "0=no, 1=yes, 2=all charge reduced precursor peaks (for ETD)",
     "option for Comet. ",
-    "false"
+    "true"
   );
 
   set_double_parameter("remove_precursor_tolerance", 1.5, -BILLION, BILLION, 
     "+- Da tolerance for precursor removal",
     "option for Comet. ",
-    "false"
+    "true"
   );
 
   set_string_parameter("clear_mz_range", "0.0 0.0",
-		       "for iTRAQ/TMT type data; will clear out all peaks in the specified m/z range",
-		       "option for Comet",
-		       "false"
-		       );
+           "for iTRAQ/TMT type data; will clear out all peaks in the specified m/z range",
+           "option for Comet",
+           "true"
+           );
 
-  set_string_parameter("variable_mod1", "15.9949 M 0 3",
-		       "Up to 6 variable modifications are supported\n"
-                       "format:  <mass> <residues> <0=variable/1=binary> <max mods per a peptide>\n"
-                       "    e.g. 79.966331 STY 0 3",
-		       "option for Comet",
-		       "false"
-		       );
+  set_string_parameter("variable_mod1", "__NULL_STR",
+           "Up to 6 variable modifications are supported\n"
+           "format:  <mass> <residues> <0=variable/1=binary> <max mods per a peptide>\n"
+           "    e.g. 79.966331 STY 0 3",
+           "option for Comet",
+           "true"
+           );
   
-  set_string_parameter("variable_mod2", "0.0 X 0 3",
-		       "Up to 6 variable modifications are supported\n"
-                       "format:  <mass> <residues> <0=variable/1=binary> <max mods per a peptide>\n"
-                       "    e.g. 79.966331 STY 0 3",
-		       "option for Comet",
-		       "false"
-		       );
+  set_string_parameter("variable_mod2", "__NULL_STR",
+           "Up to 6 variable modifications are supported\n"
+           "format:  <mass> <residues> <0=variable/1=binary> <max mods per a peptide>\n"
+           "    e.g. 79.966331 STY 0 3",
+           "option for Comet",
+           "true"
+           );
   
-  set_string_parameter("variable_mod3", "0.0 X 0 3",
-		       "Up to 6 variable modifications are supported\n"
-                       "format:  <mass> <residues> <0=variable/1=binary> <max mods per a peptide>\n"
-                       "    e.g. 79.966331 STY 0 3",
-		       "option for Comet",
-		       "false"
-		       );
+  set_string_parameter("variable_mod3",  "__NULL_STR",
+           "Up to 6 variable modifications are supported\n"
+           "format:  <mass> <residues> <0=variable/1=binary> <max mods per a peptide>\n"
+           "    e.g. 79.966331 STY 0 3",
+           "option for Comet",
+           "true"
+           );
   
-  set_string_parameter("variable_mod4", "0.0 X 0 3",
-		       "Up to 6 variable modifications are supported\n"
-                       "format:  <mass> <residues> <0=variable/1=binary> <max mods per a peptide>\n"
-                       "    e.g. 79.966331 STY 0 3",
-		       "option for Comet",
-		       "false"
-		       );
+  set_string_parameter("variable_mod4",  "__NULL_STR",
+           "Up to 6 variable modifications are supported\n"
+           "format:  <mass> <residues> <0=variable/1=binary> <max mods per a peptide>\n"
+           "    e.g. 79.966331 STY 0 3",
+           "option for Comet",
+           "true"
+           );
   
-  set_string_parameter("variable_mod5", "0.0 X 0 3",
-		       "Up to 6 variable modifications are supported\n"
-                       "format:  <mass> <residues> <0=variable/1=binary> <max mods per a peptide>\n"
-                       "    e.g. 79.966331 STY 0 3",
-		       "option for Comet",
-		       "false"
-		       );
+  set_string_parameter("variable_mod5",  "__NULL_STR",
+           "Up to 6 variable modifications are supported\n"
+           "format:  <mass> <residues> <0=variable/1=binary> <max mods per a peptide>\n"
+           "    e.g. 79.966331 STY 0 3",
+           "option for Comet",
+           "true"
+           );
   
-  set_string_parameter("variable_mod6", "0.0 X 0 3",
-		       "Up to 6 variable modifications are supported\n"
-                       "format:  <mass> <residues> <0=variable/1=binary> <max mods per a peptide>\n"
-                       "    e.g. 79.966331 STY 0 3",
-		       "option for Comet",
-		       "false"
-		       );
+  set_string_parameter("variable_mod6",  "__NULL_STR",
+           "Up to 6 variable modifications are supported\n"
+           "format:  <mass> <residues> <0=variable/1=binary> <max mods per a peptide>\n"
+           "    e.g. 79.966331 STY 0 3",
+           "option for Comet",
+           "true"
+           );
   
   set_int_parameter("max_variable_mods_in_peptide", 5, 0, BILLION,
-		    "Specifies the total/maximum number of residues that can "
-                    "be modified in a peptide",
-		    "option for Comet",
-		    "false"
-		    );
+        "Specifies the total/maximum number of residues that can "
+        "be modified in a peptide",
+        "option for Comet",
+        "true"
+        );
 
   set_double_parameter("variable_C_terminus", 0, 0, BILLION,
-		       "Specifiy a variable modification to peptide's c-terminus"
-                       "Works in conjunction with variable_c_terminus_distance",
-		       "option for Comet",
-		       "false"
-		       );
+           "Specifiy a variable modification to peptide's c-terminus"
+           "Works in conjunction with variable_c_terminus_distance",
+           "option for Comet",
+           "true"
+           );
 
   set_double_parameter("variable_N_terminus", 0, 0, BILLION,
-		       "Specifiy a variable modification to peptide's c-terminus"
-                       "Works in conjunction with variable_c_terminus_distance",
-		       "option for Comet",
-		       "false");
+           "Specifiy a variable modification to peptide's c-terminus"
+           "Works in conjunction with variable_c_terminus_distance",
+           "option for Comet",
+           "true");
 
   set_int_parameter("variable_C_terminus_distance", -1, -1, BILLION,
-		    "-1=all peptides, 0=protein terminus, 1-N = maximum offset from C-terminus",
-		    "option for Comet",
-		    "false");
+        "-1=all peptides, 0=protein terminus, 1-N = maximum offset from C-terminus",
+        "option for Comet",
+        "true");
 
   set_int_parameter("variable_N_terminus_distance", -1, -1, BILLION,
-		    "-1=all peptides, 0=protein terminus, 1-N = maximum offset from N-terminus",
-		    "option for Comet",
-		    "false");
+        "-1=all peptides, 0=protein terminus, 1-N = maximum offset from N-terminus",
+        "option for Comet",
+        "true");
 
   set_double_parameter("add_Cterm_peptide", 0, 0, BILLION,
-		       "Specifiy a static modification to the c-terminus of all peptides",
-		       "option for Comet",
-		       "false");
+           "Specifiy a static modification to the c-terminus of all peptides",
+           "option for Comet",
+           "true");
 
   set_double_parameter("add_Nterm_peptide", 0, 0, BILLION,
-		       "Specify a static modification to the n-terminus of all peptides",
-		       "option for Comet",
-		       "false");
+           "Specify a static modification to the n-terminus of all peptides",
+           "option for Comet",
+           "true");
   
   set_double_parameter("add_Cterm_protein", 0, 0, BILLION,
-		       "Specify a static modification to the c-terminal peptide of each protein",
-		       "option for Comet",
-		       "false");
+           "Specify a static modification to the c-terminal peptide of each protein",
+           "option for Comet",
+           "true");
 
   set_double_parameter("add_Nterm_protein", 0, 0, BILLION,
-		       "Specify a static modification to the n-terminal peptide of each protein",
-		       "option for Comet",
-		       "false");
+           "Specify a static modification to the n-terminal peptide of each protein",
+           "option for Comet",
+           "true");
 
   set_double_parameter("add_G_glycine", 0, 0, BILLION,
-		       "added to G - avg.  57.0513, mono.  57.02146",
-		       "option for Comet",
-		       "false");
+           "added to G - avg.  57.0513, mono.  57.02146",
+           "option for Comet",
+           "true");
 
   set_double_parameter("add_A_alanine", 0, 0, BILLION,
-		       "added to A - avg.  71.0779, mono.  71.03711",
-		       "option for Comet",
-		       "false");
+           "added to A - avg.  71.0779, mono.  71.03711",
+           "option for Comet",
+           "true");
 
   set_double_parameter("add_S_serine", 0, 0, BILLION,
-		       "added to S - avg.  87.0773, mono.  87.03203",
-		       "option for Comet",
-		       "false");
+           "added to S - avg.  87.0773, mono.  87.03203",
+           "option for Comet",
+           "true");
 
   set_double_parameter("add_P_proline", 0, 0, BILLION,
-		       "added to P - avg.  97.1152, mono.  97.05276",
-		       "option for Comet",
-		       "false");
+           "added to P - avg.  97.1152, mono.  97.05276",
+           "option for Comet",
+           "true");
   
   set_double_parameter("add_V_valine", 0, 0, BILLION,
-		       "added to V - avg.  99.1311, mono.  99.06841",
-		       "option for Comet",
-		       "false");
+           "added to V - avg.  99.1311, mono.  99.06841",
+           "option for Comet",
+           "true");
 
   set_double_parameter("add_T_threonine", 0, 0, BILLION,
-		       "added to T - avg. 101.1038, mono. 101.04768",
-		       "option for Comet",
-		       "false");
+           "added to T - avg. 101.1038, mono. 101.04768",
+           "option for Comet",
+           "true");
 
   set_double_parameter("add_C_cysteine", 57.021464, 0, BILLION,
-		       "added to C - avg. 103.1429, mono. 103.00918",
-		       "option for Comet",
-		       "false");
+           "added to C - avg. 103.1429, mono. 103.00918",
+           "option for Comet",
+           "true");
 
   set_double_parameter("add_L_leucine", 0, 0, BILLION,
-		       "added to L - avg. 113.1576, mono. 113.08406",
-		       "option for Comet",
-		       "false");
+           "added to L - avg. 113.1576, mono. 113.08406",
+           "option for Comet",
+           "true");
 
   set_double_parameter("add_I_isoleucine", 0, 0, BILLION,
-		       "added to I - avg. 113.1576, mono. 113.08406",
-		       "option for Comet",
-		       "false");
+           "added to I - avg. 113.1576, mono. 113.08406",
+           "option for Comet",
+           "true");
 
   set_double_parameter("add_N_asparagine", 0, 0, BILLION,
-		       "added to N - avg. 114.1026, mono. 114.04293",
-		       "option for Comet",
-		       "false");
+           "added to N - avg. 114.1026, mono. 114.04293",
+           "option for Comet",
+           "true");
 
   set_double_parameter("add_D_aspartic_acid", 0, 0, BILLION,
-		       "added to D - avg. 115.0874, mono. 115.02694",
-		       "option for Comet",
-		       "false");
+           "added to D - avg. 115.0874, mono. 115.02694",
+           "option for Comet",
+           "true");
 
   set_double_parameter("add_Q_glutamine", 0, 0, BILLION,
-		       "added to Q - avg. 128.1292, mono. 128.05858",
-		       "option for Comet",
-		       "false");
+           "added to Q - avg. 128.1292, mono. 128.05858",
+           "option for Comet",
+           "true");
 
   set_double_parameter("add_K_lysine", 0, 0, BILLION,
-		       "added to K - avg. 128.1723, mono. 128.09496",
-		       "option for Comet",
-		       "false");
+           "added to K - avg. 128.1723, mono. 128.09496",
+           "option for Comet",
+           "true");
 
   set_double_parameter("add_E_glutamic_acid", 0, 0, BILLION,
-		       "added to E - avg. 129.1140, mono. 129.04259",
-		       "option for Comet",
-		       "false");
+           "added to E - avg. 129.1140, mono. 129.04259",
+           "option for Comet",
+           "true");
 
   set_double_parameter("add_M_methionine", 0, 0, BILLION,
-		       "added to M - avg. 131.1961, mono. 131.04048",
-		       "option for Comet",
-		       "false");
+           "added to M - avg. 131.1961, mono. 131.04048",
+           "option for Comet",
+           "true");
 
   set_double_parameter("add_O_ornithine", 0, 0, BILLION,
-		       "added to O - avg. 132.1610, mono  132.08988",
-		       "option for Comet",
-		       "false");
+           "added to O - avg. 132.1610, mono  132.08988",
+           "option for Comet",
+           "true");
 
   set_double_parameter("add_H_histidine", 0, 0, BILLION,
-		       "added to H - avg. 137.1393, mono. 137.05891",
-		       "option for Comet",
-		       "false");
+           "added to H - avg. 137.1393, mono. 137.05891",
+           "option for Comet",
+           "true");
 
   set_double_parameter("add_F_phenylalanine", 0, 0, BILLION,
-		       "added to F - avg. 147.1739, mono. 147.06841",
-		       "option for Comet",
-		       "false");
+           "added to F - avg. 147.1739, mono. 147.06841",
+           "option for Comet",
+           "true");
 
   set_double_parameter("add_R_arginine", 0, 0, BILLION,
-		       "added to R - avg. 156.1857, mono. 156.10111",
-		       "option for Comet",
-		       "false");
+           "added to R - avg. 156.1857, mono. 156.10111",
+           "option for Comet",
+           "true");
 
   set_double_parameter("add_Y_tyrosine", 0, 0, BILLION,
-		       "added to Y - avg. 163.0633, mono. 163.06333",
-		       "option for Comet",
-		       "false");
+           "added to Y - avg. 163.0633, mono. 163.06333",
+           "option for Comet",
+           "true");
 
   set_double_parameter("add_W_tryptophan", 0, 0, BILLION,
-		       "added to W - avg. 186.0793, mono. 186.07931",
-		       "option for Comet",
-		       "false");
+           "added to W - avg. 186.0793, mono. 186.07931",
+           "option for Comet",
+           "true");
 
   set_double_parameter("add_B_user_amino_acid", 0, 0, BILLION,
-		       "added to B - avg.   0.0000, mono.   0.00000",
-		       "option for Comet",
-		       "false");
+           "added to B - avg.   0.0000, mono.   0.00000",
+           "option for Comet",
+           "true");
 
   set_double_parameter("add_J_user_amino_acid", 0, 0, BILLION,
-		       "added to J - avg.   0.0000, mono.   0.00000",
-		       "option for Comet",
-		       "false");
+           "added to J - avg.   0.0000, mono.   0.00000",
+           "option for Comet",
+           "true");
 
   set_double_parameter("add_U_user_amino_acid", 0, 0, BILLION,
-		       "added to U - avg.   0.0000, mono.   0.00000",
-		       "option for Comet",
-		       "false");
+           "added to U - avg.   0.0000, mono.   0.00000",
+           "option for Comet",
+           "true");
 
   set_double_parameter("add_X_user_amino_acid", 0, 0, BILLION,
-		       "added to X - avg.   0.0000, mono.   0.00000",
-		       "option for Comet",
-		       "false");
+           "added to X - avg.   0.0000, mono.   0.00000",
+           "option for Comet",
+           "true");
 
   set_double_parameter("add_Z_user_amino_acid", 0, 0, BILLION,
-		       "added to Z - avg.   0.0000, mono.   0.00000",
-		       "option for Comet",
-		       "false");
+           "added to Z - avg.   0.0000, mono.   0.00000",
+           "option for Comet",
+           "true");
 
   // **** q-ranker-barista arguments ****
   set_string_parameter("database", NULL,
@@ -1725,9 +1758,9 @@ void initialize_parameters(void){
      "--use-spec-features option to F. Default T.", 
      "Available for q-ranker and barista.", "true");
 
-  set_string_parameter("decoy_prefix", "rand_",
+  set_string_parameter("decoy_prefix", "decoy_",
      "Specifies the prefix of the protein names that indicates a decoy. "
-     "Default = rand_.",
+     "Default = decoy_.",
      " Available for q-ranker and barista.", "true");
 
   set_string_parameter("re-run", "__NULL_STR",
@@ -2281,7 +2314,21 @@ void initialize_parameters(void){
     "Available for crux extract-rows",
     "true");
 
-  
+  // Default comet enzyme lines
+  comet_enzyme_info_lines_.push_back("0.  No_enzyme\t\t\t\t0       -           -");
+  comet_enzyme_info_lines_.push_back("1.  Trypsin\t\t\t\t1      KR           P");
+  comet_enzyme_info_lines_.push_back("2.  Trypsin/P\t\t\t\t1      KR           -");
+  comet_enzyme_info_lines_.push_back("3.  Lys_C\t\t\t\t1      K            P");
+  comet_enzyme_info_lines_.push_back("4.  Lys_N\t\t\t\t0      K            -");
+  comet_enzyme_info_lines_.push_back("5.  Arg_C\t\t\t\t1      R            P");
+  comet_enzyme_info_lines_.push_back("6.  Asp_N\t\t\t\t0      D            -");
+  comet_enzyme_info_lines_.push_back("7.  CNBr\t\t\t\t1      M            -");
+  comet_enzyme_info_lines_.push_back("8.  Glu_C\t\t\t\t1      DE           P");
+  comet_enzyme_info_lines_.push_back("9.  PepsinA\t\t\t\t1      FL           P");
+  comet_enzyme_info_lines_.push_back("10. Chymotrypsin\t\t\t1      FWYL         P");
+ 
+
+ 
   // now we have initialized the parameters
   parameter_initialized = true;
   usage_initialized = true;
@@ -2313,9 +2360,80 @@ bool select_cmd_line_options(  //remove options from name
   const char** option_names,
   int    num_options 
   ){
-  select_cmd_line( option_names, num_options, 
-                   &parse_arguments_set_opt);
-  return true;
+
+  vector<bool> option_found(num_options, false);
+  bool success = false;  
+
+  HASH_ITERATOR_T* hash_iter = new_hash_iterator(parameters);
+  while(hash_iterator_has_next(hash_iter)) {
+    char* option_name = hash_iterator_next(hash_iter);
+    if (strstr(option_name, " ") == NULL) {
+      void* value_ptr = get_hash_value(parameters, option_name);
+      void* usage_ptr = get_hash_value(usages, option_name);
+      void* type_ptr =  get_hash_value(types, option_name);
+
+      /* check that the option is in the params hash */
+      if( value_ptr == NULL || usage_ptr == NULL || type_ptr == NULL ){
+        carp(CARP_FATAL, 
+           "Cannot select parameter '%s'. Value, usage or type not found. "
+           "Found value: %s, usage: %s, type: %s", 
+           option_name,
+           value_ptr,
+           usage_ptr,
+           type_ptr);
+      
+      }
+
+      if( //strcmp(type_ptr, "PEPTIDE_TYPE_T") == 0 ||
+          strcmp((char*)type_ptr, "MASS_TYPE_T") == 0 ||
+          strcmp((char*)type_ptr, "bool") == 0 ||
+          strcmp((char*)type_ptr, "SCORER_TYPE_T") == 0 ){
+        type_ptr = (void*)"STRING_ARG";
+      }
+      carp(CARP_DETAILED_DEBUG, 
+           "Found value: %s, usage: %s, type(to be passed to parse_args): %s", 
+           (char*)value_ptr, (char*)usage_ptr, (char*)type_ptr);
+      /* is it in the list of options to print?
+       */
+      bool print = false;
+      for (size_t idx=0;idx < num_options;idx++) {
+        if (strcmp(option_name, option_names[idx]) == 0) {
+          print = true;
+          option_found[idx] = true;
+          break;
+        }
+      }
+    
+      /* add the option via parse_arguments.c. pointer decides opt or req */
+      success &= parse_arguments_set_opt(option_name,
+                                      (const char*)usage_ptr,
+                                      value_ptr, 
+                                      string_to_argument_type((char*)type_ptr),
+                                      print); 
+    }
+  }
+  
+  if (success) {
+    /* Check to see if all options to print are in the entire list of options*/
+    for (size_t idx = 0;idx < num_options;idx++) {
+      if (!option_found[idx]) {
+        void* value_ptr = get_hash_value(parameters, option_names[idx]);
+        void* usage_ptr = get_hash_value(usages, option_names[idx]);
+        void* type_ptr =  get_hash_value(types, option_names[idx]);
+        carp(CARP_ERROR, 
+           "Cannot select parameter '%s'. Value, usage or type not found. "
+           "Found value: %s, usage: %s, type: %s", 
+           option_names[idx],
+           value_ptr,
+           usage_ptr,
+           type_ptr);
+      }
+      success = false;
+    }
+  }
+  
+  carp(CARP_DETAILED_DEBUG, "Did setting the arguments work? %i", success);
+  return success;
 }
 /*
  * Private function for doing the work of select_cmd_line_options
@@ -2326,7 +2444,7 @@ bool select_cmd_line_options(  //remove options from name
 bool select_cmd_line(  //remove options from name
   const char** option_names,
   int    num_options, 
-  int (*parse_arguments_set_ptr)(const char*, const char*, void*, enum argument_type) 
+  int (*parse_arguments_set_ptr)(const char*, const char*, void*, enum argument_type, bool print) 
   ){
 
   carp(CARP_DETAILED_DEBUG, "Selecting options");
@@ -2372,7 +2490,7 @@ bool select_cmd_line(  //remove options from name
     success = parse_arguments_set_ptr(option_names[i],
                                       (const char*)usage_ptr,
                                       value_ptr, 
-                                      string_to_argument_type((char*)type_ptr)); 
+                                      string_to_argument_type((char*)type_ptr), true); 
   }
 
   carp(CARP_DETAILED_DEBUG, "Did setting the arguments work? %i", success);
@@ -2536,8 +2654,7 @@ void set_flanking_peaks(const char* exe_name){
   const char* value = get_string_parameter_pointer("use-flanking-peaks");
   // if it is the default value, it was not set by the user
   if( strcmp(value, "unset") == 0 ){
-    if( strcmp(exe_name, "search-for-matches") == 0 ||
-        strcmp(exe_name, "tide-index") == 0 ){
+    if( strcmp(exe_name, "search-for-matches") == 0 ){
       value = "false";
     } else {
       value = "true";
@@ -2963,7 +3080,7 @@ bool check_option_type_and_bounds(const char* name){
     if (string_to_spectrum_parser_type(value_str) == INVALID_SPECTRUM_PARSER) {
       success = false;
       sprintf(die_str, "Illegal value '%s' for option '%s'.   "
-                       "Must be pwiz, mstoolkit, or crux",
+                       "Must be pwiz or mstoolkit",
                        value_str, name);
     }
     break;
@@ -3151,26 +3268,28 @@ void print_parameter_file(char** filename){
                                          overwrite);
 
   // Add header to file for comet parsing
-  fprintf(param_file, "# comet_version 2013.01 rev. 0"
-	  "\n# Comet MS/MS search engine parameters file."
-	  "\n# Everything following the \'#\' symbol is treated as a comment.\n");
+  fprintf(param_file, "# comet_version 2014.01 rev. 0"
+          "\n# Comet MS/MS search engine parameters file."
+          "\n# Everything following the \'#\' symbol is treated as a comment.\n");
 
   // iterate over all parameters and print to file
   HASH_ITERATOR_T* iterator = new_hash_iterator(parameters);
   while(hash_iterator_has_next(iterator)){
-    char* key = hash_iterator_next(iterator);
-    char* show_users = (char*)get_hash_value(for_users, key);
-    if( strcmp(show_users, "true") == 0 ){
+    string key = hash_iterator_next(iterator);
+    string show_users = (char*)get_hash_value(for_users, key.c_str());
+    if( show_users == "true") {
       // print mods separately at the end
-      if( strcmp(key, "mod") == 0 || strcmp(key, "cmod") == 0
-          || strcmp(key, "nmod") == 0 ){ 
+      if( key == "mod"  || key == "cmod" || key == "nmod"){ 
         continue;
       }
-      char buffer[PARAMETER_BUFFER] = "";
-      strcat_formatted(buffer, "# ", (char*)get_hash_value(usages, key));
-      strcat_formatted(buffer, "# ", (char*)get_hash_value(file_notes, key));
-      fprintf(param_file, "%s%s=%s\n\n", buffer, key, 
-              (char*)get_hash_value(parameters, key));
+      // print comet parameters after these.
+      if (key.find("_") == string::npos) {
+        char buffer[PARAMETER_BUFFER] = "";
+        strcat_formatted(buffer, "# ", (char*)get_hash_value(usages, key.c_str()));
+        strcat_formatted(buffer, "# ", (char*)get_hash_value(file_notes, key.c_str()));
+        fprintf(param_file, "%s%s=%s\n\n", buffer, key.c_str(), 
+          (char*)get_hash_value(parameters, key.c_str()));
+      }
     }
   }
 
@@ -3181,6 +3300,33 @@ void print_parameter_file(char** filename){
   
   free_hash_iterator(iterator);
 
+  //now print out Comet parameters
+  fprintf(param_file, "#################\n");
+  fprintf(param_file, "#Comet Parameters\n");
+  fprintf(param_file, "#################\n");
+
+  iterator = new_hash_iterator(parameters);
+  while(hash_iterator_has_next(iterator)){
+    string key = hash_iterator_next(iterator);
+    string show_users = (char*)get_hash_value(for_users, key.c_str());
+    if( show_users == "true") {
+      // print mods separately at the end                                                                                                                                                                                                                                       
+      if( key == "mod"  || key == "cmod" || key == "nmod"){
+        continue;
+      }
+      // print comet parameters after these.                                                                                                                                                                                                                                    
+      if (key.find("_") != string::npos) {
+        char buffer[PARAMETER_BUFFER] = "";
+        strcat_formatted(buffer, "# ", (char*)get_hash_value(usages, key.c_str()));
+        strcat_formatted(buffer, "# ", (char*)get_hash_value(file_notes, key.c_str()));
+        fprintf(param_file, "%s%s=%s\n\n", buffer, key.c_str(),
+          (char*)get_hash_value(parameters, key.c_str()));
+      } 
+    }
+  }
+  free_hash_iterator(iterator);
+
+
   // now print out Comet enzyme information
       
   fprintf(param_file, "#\n");
@@ -3188,83 +3334,90 @@ void print_parameter_file(char** filename){
   fprintf(param_file, "#\n");
   fprintf(param_file, "[COMET_ENZYME_INFO]\n");
   
-  fprintf(param_file, "0.  No_enzyme\t\t\t\t");
-  fprintf(param_file, "0");
-  fprintf(param_file, "       -           -\n");
+  if (comet_enzyme_info_lines_.size() == 0) {
+    fprintf(param_file, "0.  No_enzyme\t\t\t\t");
+    fprintf(param_file, "0");
+    fprintf(param_file, "       -           -\n");
   
-  fprintf(param_file, "1.  Trypsin\t\t\t\t");
-  fprintf(param_file, "1");
-  fprintf(param_file, "      KR           P\n");
+    fprintf(param_file, "1.  Trypsin\t\t\t\t");
+    fprintf(param_file, "1");
+    fprintf(param_file, "      KR           P\n");
   
-  fprintf(param_file, "2.  Trypsin/P\t\t\t\t");
-  fprintf(param_file, "1");
-  fprintf(param_file, "      KR           -\n");
+    fprintf(param_file, "2.  Trypsin/P\t\t\t\t");
+    fprintf(param_file, "1");
+    fprintf(param_file, "      KR           -\n");
   
-  fprintf(param_file, "3.  Lys_C\t\t\t\t");
-  fprintf(param_file, "1");
-  fprintf(param_file, "      K            P\n");
+    fprintf(param_file, "3.  Lys_C\t\t\t\t");
+    fprintf(param_file, "1");
+    fprintf(param_file, "      K            P\n");
   
-  fprintf(param_file, "4.  Lys_N\t\t\t\t");
-  fprintf(param_file, "0");
-  fprintf(param_file, "      K            -\n");
-
-  fprintf(param_file, "5.  Arg_C\t\t\t\t");
-  fprintf(param_file, "1");
-  fprintf(param_file, "      R            P\n");
+    fprintf(param_file, "4.  Lys_N\t\t\t\t");
+    fprintf(param_file, "0");
+    fprintf(param_file, "      K            -\n");
+    
+    fprintf(param_file, "5.  Arg_C\t\t\t\t");
+    fprintf(param_file, "1");
+    fprintf(param_file, "      R            P\n");
+    
+    fprintf(param_file, "6.  Asp_N\t\t\t\t");
+    fprintf(param_file, "0");
+    fprintf(param_file, "      D            -\n");
+    
+    fprintf(param_file, "7.  CNBr\t\t\t\t");
+    fprintf(param_file, "1");
+    fprintf(param_file, "      M            -\n");
+    
+    fprintf(param_file, "8.  Glu_C\t\t\t\t");
+    fprintf(param_file, "1");
+    fprintf(param_file, "      DE           P\n");
+    
+    fprintf(param_file, "9.  PepsinA\t\t\t\t");
+    fprintf(param_file, "1");
+    fprintf(param_file, "      FL           P\n");
+    
+    fprintf(param_file, "10. Chymotrypsin\t\t\t");
+    fprintf(param_file, "1");
+    fprintf(param_file, "      FWYL         P\n");
   
-  fprintf(param_file, "6.  Asp_N\t\t\t\t");
-  fprintf(param_file, "0");
-  fprintf(param_file, "      D            -\n");
-  
-  fprintf(param_file, "7.  CNBr\t\t\t\t");
-  fprintf(param_file, "1");
-  fprintf(param_file, "      M            -\n");
+  /*
+    TODO: Put these back in after we figure out what to do
+    with enzyme info.
+    fprintf(param_file, "11. Elastase \t\t\t\t");
+    fprintf(param_file, "1");
+    fprintf(param_file, "      ALIV         P\n");
+    
+    fprintf(param_file, "12. Clostripai\t\t\t\t");
+    fprintf(param_file, "1");
+    fprintf(param_file, "      R            -\n");
+    
+    fprintf(param_file, "13. Iodosobenzoate\t\t\t");
+    fprintf(param_file, "1");
+    fprintf(param_file, "      W            -\n");
+    
+    fprintf(param_file, "14. Proline_Endopeptidase\t\t");
+    fprintf(param_file, "1");
+    fprintf(param_file, "      P            -\n");
+    
+    fprintf(param_file, "15. Staph_Protease\t\t\t");
+    fprintf(param_file, "1");
+    fprintf(param_file, "      E            -\n");
+    
+    fprintf(param_file, "16. Modified_Chymotrypsin\t\t");
+    fprintf(param_file, "1");
+    fprintf(param_file, "      FWYL         P\n");
+    
+    
+    fprintf(param_file, "17. Elastase_Trypisn_Chymotrypsin\t");
+    fprintf(param_file, "1");
+    fprintf(param_file, "      ALIVKRWFY    P\n");
+    
+  */
 
-  fprintf(param_file, "8.  Glu_C\t\t\t\t");
-  fprintf(param_file, "1");
-  fprintf(param_file, "      DE           P\n");
-  
-  fprintf(param_file, "9.  PepsinA\t\t\t\t");
-  fprintf(param_file, "1");
-  fprintf(param_file, "      FL           P\n");
-
-  fprintf(param_file, "10. Chymotrypsin\t\t\t");
-  fprintf(param_file, "1");
-  fprintf(param_file, "      FWYL         P\n");
-/*
- TODO: Put these back in after we figure out what to do
- with enzyme info.
-  fprintf(param_file, "11. Elastase \t\t\t\t");
-  fprintf(param_file, "1");
-  fprintf(param_file, "      ALIV         P\n");
-
-  fprintf(param_file, "12. Clostripai\t\t\t\t");
-  fprintf(param_file, "1");
-  fprintf(param_file, "      R            -\n");
-
-  fprintf(param_file, "13. Iodosobenzoate\t\t\t");
-  fprintf(param_file, "1");
-  fprintf(param_file, "      W            -\n");
-
-  fprintf(param_file, "14. Proline_Endopeptidase\t\t");
-  fprintf(param_file, "1");
-  fprintf(param_file, "      P            -\n");
-
-  fprintf(param_file, "15. Staph_Protease\t\t\t");
-  fprintf(param_file, "1");
-  fprintf(param_file, "      E            -\n");
-
-  fprintf(param_file, "16. Modified_Chymotrypsin\t\t");
-  fprintf(param_file, "1");
-  fprintf(param_file, "      FWYL         P\n");
-
-  
-  fprintf(param_file, "17. Elastase_Trypisn_Chymotrypsin\t");
-  fprintf(param_file, "1");
-  fprintf(param_file, "      ALIVKRWFY    P\n");
-
-*/
-
+  } else {
+    for (int idx=0;idx < comet_enzyme_info_lines_.size();idx++) {
+      fprintf(param_file, "%s\n", comet_enzyme_info_lines_[idx].c_str());
+    }
+  }
 
   fclose(param_file);
   free(output_dir);
@@ -3320,61 +3473,107 @@ void parse_parameter_file(
 
   /* check if parameter file exists, if not die */
   if(access(parameter_filename, F_OK)){
-    carp(CARP_FATAL, "Could not open parameter file.");
+    carp(CARP_FATAL, "Could not open parameter file '%s'", parameter_filename);
   }
 
-  file = fopen(parameter_filename, "rb");
-  if(file == NULL){
-    carp(CARP_FATAL, "Couldn't open parameter file '%s'", parameter_filename);
+  LineFileReader line_reader(parameter_filename);
+  
+  bool found_comet = false;
+
+  while(line_reader.hasNext()) {
+    string line = line_reader.next();
+    string option_name = "";
+    string option_value = "";
+    bool found_equal = false;
+    if (found_comet) {
+      comet_enzyme_info_lines_.push_back(line);
+    } else {
+      if (line.find("[COMET_ENZYME_INFO]") != string::npos) {
+        comet_enzyme_info_lines_.clear();
+	found_comet = true;
+      } else {
+        for (string::iterator iter = line.begin(); iter != line.end(); ++iter) {
+
+          //ignore everything after commet
+          if (*iter == '#') {
+            break;
+          } else if (!found_equal) {
+            if (*iter != '=') {
+              option_name += *iter;
+            } else {
+              //okay we found an equal sign, rest of text should be the parameter value.
+              found_equal = true;
+            }
+          } else {
+            option_value += *iter;
+          }
+        }
+
+        if (found_equal) {
+          //trim the spaces on both sides of the name and parameter and update the hash.
+          option_name = trim(option_name);
+          option_value = trim(option_value);
+          if(! update_hash_value(parameters, option_name.c_str(), option_value.c_str()) ){
+            carp(CARP_WARNING, "Unexpected parameter file option '%s'", option_name.c_str());
+          } else {
+            check_option_type_and_bounds(option_name.c_str());
+          }
+        } else {
+          carp(CARP_DEBUG, "equal not found:", line.c_str());
+        }
+      }
+    }
   }
-
-  line = (char*)mycalloc(MAX_LINE_LENGTH, sizeof(char));
-
-  while(fgets(line, MAX_LINE_LENGTH, file)==line){
-
-    idx = 0;
+  if (comet_enzyme_info_lines_.size() == 0) {
+    carp(CARP_WARNING, "putting in default comet enzyme lines");
+    comet_enzyme_info_lines_.push_back("0.  No_enzyme\t\t\t\t0       -           -");
+    comet_enzyme_info_lines_.push_back("1.  Trypsin\t\t\t\t1      KR           P");
+    comet_enzyme_info_lines_.push_back("2.  Trypsin/P\t\t\t\t1      KR           -");
+    comet_enzyme_info_lines_.push_back("3.  Lys_C\t\t\t\t1      K            P");
+    comet_enzyme_info_lines_.push_back("4.  Lys_N\t\t\t\t0      K            -");
+    comet_enzyme_info_lines_.push_back("5.  Arg_C\t\t\t\t1      R            P");
+    comet_enzyme_info_lines_.push_back("6.  Asp_N\t\t\t\t0      D            -");
+    comet_enzyme_info_lines_.push_back("7.  CNBr\t\t\t\t1      M            -");
+    comet_enzyme_info_lines_.push_back("8.  Glu_C\t\t\t\t1      DE           P");
+    comet_enzyme_info_lines_.push_back("9.  PepsinA\t\t\t\t1      FL           P");
+    comet_enzyme_info_lines_.push_back("10. Chymotrypsin\t\t\t1      FWYL         P");
+  }
+  /*
+    TODO: Put these back in after we figure out what to do
+    with enzyme info.
+    fprintf(param_file, "11. Elastase \t\t\t\t");
+    fprintf(param_file, "1");
+    fprintf(param_file, "      ALIV         P\n");
     
-    /* Change the newline to a '\0' ignoring trailing whitespace */
-    for(idx = MAX_LINE_LENGTH - 1; idx >= 0; idx--){
-      if(line[idx] == '\n' || line[idx] == '\r' || 
-         line[idx] == '\f' || line[idx] == '\t')
-        line[idx] = '\0';
-    }
-    /* empty lines and those beginning with '#' are ignored */
-    if(line[0] != '#' && line[0] != '\0' && line[0] != '[' && !isdigit(line[0])){
-
-      /* find the '=' in the line.  Exit with error if the line 
-         has no equals sign. */
-      idx = 0;
-      while(idx < (int)strlen(line) && line[idx] != '='){
-        idx++;
-      }
-      if(idx == 0 || idx >= (int)(strlen(line)-1)){
-        carp(CARP_FATAL, "Lines in a parameter file must have the form: "
-             "\n\tname=value\n "
-             "In file %s, the line '%s' does not have this format",
-             parameter_filename, line);
-      }
-
-      line[idx] = '\0';
-      char* option_name = line;
-      char* option_value = &(line[idx+1]);
-      carp(CARP_DETAILED_DEBUG, "Found option '%s' and value '%s'", 
-           option_name, option_value);
-
-      if(! update_hash_value(parameters, option_name, option_value) ){
-        carp(CARP_FATAL, "Unexpected parameter file option '%s'", option_name);
-      }
-
-      check_option_type_and_bounds(option_name);
-
-    }
-  }
-
-  fclose(file);
-  myfree(line);
+    fprintf(param_file, "12. Clostripai\t\t\t\t");
+    fprintf(param_file, "1");
+    fprintf(param_file, "      R            -\n");
+    
+    fprintf(param_file, "13. Iodosobenzoate\t\t\t");
+    fprintf(param_file, "1");
+    fprintf(param_file, "      W            -\n");
+    
+    fprintf(param_file, "14. Proline_Endopeptidase\t\t");
+    fprintf(param_file, "1");
+    fprintf(param_file, "      P            -\n");
+    
+    fprintf(param_file, "15. Staph_Protease\t\t\t");
+    fprintf(param_file, "1");
+    fprintf(param_file, "      E            -\n");
+    
+    fprintf(param_file, "16. Modified_Chymotrypsin\t\t");
+    fprintf(param_file, "1");
+    fprintf(param_file, "      FWYL         P\n");
+    
+    
+    fprintf(param_file, "17. Elastase_Trypisn_Chymotrypsin\t");
+    fprintf(param_file, "1");
+    fprintf(param_file, "      ALIVKRWFY    P\n");
+    
+  */
 
 }
+
 
 /**************************************************
  *   GETTERS (public)
@@ -3429,7 +3628,7 @@ bool get_boolean_parameter(
   } 
   else if ((strncmp(buffer,"FALSE", 5) == 0) || 
            (strncmp(buffer, "false", 5) == 0) || 
-	   (strncmp(buffer, "F", 1) == 0)){
+           (strncmp(buffer, "F", 1) == 0)){
 
     return(false);
   } 
@@ -3721,6 +3920,13 @@ DECOY_TYPE_T get_decoy_type_parameter(
     string_to_decoy_type(param_value_str);
   
   return param_value;
+}
+
+DECOY_TYPE_T get_tide_decoy_type_parameter(
+  const char* name
+) {
+  char* param_value_str = (char*)get_hash_value(parameters, name);
+  return string_to_tide_decoy_type(param_value_str);
 }
 
 MASS_FORMAT_T get_mass_format_type_parameter(
@@ -4482,6 +4688,8 @@ int get_all_aa_mod_list
   *mods = list_of_mods;
   return num_mods + num_c_mods + num_n_mods + num_fixed_mods;
 }
+
+
  
 /**
  * \returns The index of the C_TERM or N_TERM fixed modification in
@@ -4881,6 +5089,10 @@ void read_mods_from_file(char* param_filename){
   // close file
   fclose(param_file);
   carp(CARP_DEBUG, "Finished reading mods file");
+}
+
+void incrementNumMods() {
+    num_mods++;
 }
 
 // Secret functions used in testing

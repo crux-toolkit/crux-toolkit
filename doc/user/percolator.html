@@ -81,20 +81,28 @@ file, and is capable of reading parameters from a parameter file.</li>
 <ul>
 
 <LI>
-<b>&lt;search&nbsp;results&gt;</b> &ndash; A collection of target and
-decoy peptide-spectrum matches (PSMs) in pin.xml format, defined
-according to <a href="https://github.com/percolator/percolator/blob/master/src/xml/percolator_in.xsd">
-this schema</a>.  The command <code>crux search-for-matches</code>
-generates results in this format.  Note that this argument can be "-",
-which indicates the pin.xml file should be read from standard input. Input
-may also be given as SQT, PepXML, or tab-delimited text, in which case a
-pin.xml file will be generated in the output directory prior to execution.
-Any SQT, PepXML, or tab-delimited file given as input is required to have a
-corresponding decoy file (or corresponding target file, if it is a decoy
-file). For example, if <code>search.target.txt</code> is to be used,
-then the file <code>search.decoy.txt</code> must also exist.
-When <code>feature-in-file=T</code>, then the input file will be a tab-delimited
-feature file, see <code>feature-in-file</code> option below.
+<p><b>&lt;search&nbsp;results&gt;</b> &ndash; A collection of target
+and decoy peptide-spectrum matches (PSMs).  Input may be in one of six
+formats: <a href="https://github.com/percolator/percolator/blob/master/src/xml/percolator_in.xsd">pin.xml</a>,
+SQT, PepXML, <a href="txt-format.html">Crux
+tab-delimited text</a>, a list of files (when <code>list-of-files=T</code>,
+or a tab-delimited table of features (when <code>feature-in-file=T</code>
+(see below for details).  Note that if the input is provided as SQT,
+PepXML or Crux tab-delimited text, then a pin.xml file will be
+generated in the Percolator output directory prior to execution.</p>
+
+<p>
+Decoy PSMs can be provided to Percolator in two ways: either as a
+separate file or embedded within the same file as the target PSMs.
+Percolator will first search for target PSMs in a separate file.  The
+decoy file name is constructed from the target name by replacing
+"target" with "decoy."  For example, if <code>search.target.txt</code>
+is provided as input, then Percolator will search for a corresponding
+file named <code>search.decoy.txt</code>.  If no decoy file is found,
+then Percolator will assume that the given input file contains a mix
+of target and decoy PSMs.  Within this file, decoys are identified
+using a prefix (specified via <code>--decoy-prefix</code>) on the
+protein name.</p>
 </li>
 
 </ul>
@@ -180,11 +188,11 @@ specified, then this value is set by cross validation over {0.1, 1,
 10}.</li>
 
 <li>
-<code>--train-fdr &lt;value&gt;</code> &ndash; False discovery rate
+<code>--train-fdr &lt;float&gt;</code> &ndash; False discovery rate
 threshold to define positive examples in training. Default = 0.01.</li>
 
 <li>
-<code>--test-fdr &lt;value&gt;</code> &ndash; False discovery rate
+<code>--test-fdr &lt;float&gt;</code> &ndash; False discovery rate
 threshold used in selecting hyperparameters during internal
 cross-validation and for reporting the final results. Default =
 0.01.</li>
@@ -210,17 +218,17 @@ indices from <a href="features.html">this table</a>.  The feature
 index can be negated to indicate that a lower value is better.</li>
 
 <li>
-<code>--unitnorm &lt;T|F&gt;</code> &ndash; Use unit normalization
+<code>--unitnorm T|F</code> &ndash; Use unit normalization
 (i.e., linearly rescale each PSM's feature vector to have a Euclidean
 length of 1), instead of standard deviation normalization.  Default =
 F.</li>
 
 <li>
-<code>--test-each-iteration &lt;T|F&gt;</code> &ndash; Measure
+<code>--test-each-iteration T|F</code> &ndash; Measure
 performance on the test set at each iteration.  Default = F.</li>
 
 <li>
-<code>--static-override &lt;T|F&gt;</code> &ndash; By default,
+<code>--static-override T|F</code> &ndash; By default,
 Percolator will examine the learned weights for each feature, and if
 the weights appear to be problematic, then Percolator will discard the
 learned weights and instead employ a previously trained, static score
@@ -232,11 +240,18 @@ Default = F.</li>
 number generator. Default = 1.</li>
 
 <li>
-<code>--klammer &lt;T|F&gt;</code> &ndash; Use retention time features
+<code>--klammer T|F</code> &ndash; Use retention time features
 calculated as in "Improving tandem mass spectrum identification using
 peptide retention time prediction across diverse chromatography
 conditions" by Klammer AA, Yi X, MacCoss MJ and Noble WS.
 (<i>Analytical Chemistry</i>. 2007 Aug 15;79(16):6111-8.)</li>
+
+<li> 
+<code>--list-of-files &lt;T|F&gt;</code> &ndash; Specify that the
+search results are provided as lists of files, rather than
+as individual files.  Default = F.</li>
+
+
 
 <!--<li>
 <code>--doc &lt;integer&gt;</code> &ndash; With this option, Percolator
@@ -260,16 +275,16 @@ input a file does not contain observed retention times, then scan
 numbers are used as proxies for retention time.  Default = 0.</li>-->
 
 <li>
-<code>--only-psms &lt;T|F&gt;</code> &ndash; Do not remove
+<code>--only-psms T|F</code> &ndash; Do not remove
 redundant peptides; keep all PSMs and exclude peptide level
 probabilities.
 </li>
 
 <li>
-<red><code>--top-match &lt;integer&gt;</code> &nbsp; Specify the
+<code>--top-match &lt;int&gt;</code> &nbsp; Specify the
 maximum number of matches to consider for each spectrum.  Note that
 this option will be ignored in conjunction with input in pin.xml
-format.  Default = 5.</red></li>
+format.  Default = 5.</li>
 
 </ul>
 
@@ -278,7 +293,7 @@ format.  Default = 5.</red></li>
 <ul>
 
 <li>
-<code>--protein &lt;T|F&gt;</code> &ndash; Output protein level
+<code>--protein T|F</code> &ndash; Output protein level
 probabilities. If this option is not set, then none of the options
 below may be used.  Default = F.</li>
 
@@ -298,23 +313,23 @@ probability that a protein is present in the sample. Set by grid
 search (see <code>--depth</code> parameter) if not specified.</li>
 
 <li>
-<code>--allow-protein-group &lt;T|F&gt;</code> &ndash; Treat ties as
+<code>--allow-protein-group T|F</code> &ndash; Treat ties as
 if it were one protein.  Default = F.</li>
 
 <li>
-<code>--protein-level-pi0 &lt;T|F&gt;</code> &ndash; Use pi_0 value
+<code>--protein-level-pi0 T|F</code> &ndash; Use pi_0 value
 when calculating empirical q-values.  Default = F.</li>
 
 <li>
-<code>--empirical-protein-q &lt;T|F&gt;</code> &ndash; Output
+<code>--empirical-protein-q T|F</code> &ndash; Output
 empirical q-values (from target-decoy analysis). Default = F.</li>
 
 <li>
-<code>--group-proteins &lt;T|F&gt;</code> &ndash; Proteins with same
+<code>--group-proteins T|F</code> &ndash; Proteins with same
 probabilities will be grouped.  Default = F.</li>
 
 <li>
-<code>--no-prune-proteins &lt;T|F&gt;</code> &ndash; Peptides with low
+<code>--no-prune-proteins T|F</code> &ndash; Peptides with low
 score will not be pruned before calculating protein probabilities.
 Default = F.</li>
 
@@ -347,12 +362,12 @@ Default = 3.
 <ul>
 
 <li>
-<code>--feature-file &lt;T|F&gt;</code> &ndash; Output the
-computed features in tab-delimited text format to a file
-named "percolator.feature.txt." Default = F.</li>
+<code>--feature-file T|F</code> &ndash; Output the computed
+features in <a href="features.html">tab-delimited text format</a> to a
+file named "percolator.feature.txt." Default = F.</li>
 
 <li>
-<code>--feature-in-file &lt;T|F&gt;</code> &ndash; When set
+<code>--feature-in-file T|F</code> &ndash; When set
 to <code>T</code>, the <code>&lt;search&nbsp;results&gt;</code>
 argument should be a tab-delimited file, in which the first row is a
 header, and each subsequent row is a PSM.  The fields should be
@@ -360,16 +375,16 @@ identifier, label (1 = target, -1 = decoy), feature1, ..., featureN,
 peptide, proteins.  Default = F.</li>
 
 <li>
-<code>--decoy-xml-output &lt;T|F&gt;</code> &ndash; Include decoys
+<code>--decoy-xml-output T|F</code> &ndash; Include decoys
 (PSMs, peptides and/or proteins) in the XML output. Default = F.</li>
 
 <li>
 <code>--decoy-prefix &lt;string&gt;</code> &ndash;
 Specifies the prefix of the protein names that indicates a decoy.
-Default = "rand_".</li>
+Default = "decoy_".</li>
 
 <li>
-<code>--output-weights &lt;T|F&gt; </code>&ndash; Output final weights
+<code>--output-weights T|F </code>&ndash; Output final weights
 to a file named "percolator.weights.txt."  Default = F.</li>
 
 <li>
@@ -387,19 +402,19 @@ directory where output files will be created.  Default =
 crux-output.</li>
 
 <li>
-<code>--overwrite &lt;T|F&gt;</code> Replace existing files if true (T) or
+<code>--overwrite T|F</code> Replace existing files if true (T) or
 fail when trying to overwrite a file if false (F). Default =  F.
 
 <li>
-<code>--txt-output &lt;T|F&gt;</code> &ndash; Output tab-delimited
+<code>--txt-output T|F</code> &ndash; Output tab-delimited
 results files to the output directory. Default = T.</li>
 
 <li>
-<code>--mzid-output &lt;T|F&gt;</code> &ndash; Output an mzIdentML
+<code>--mzid-output T|F</code> &ndash; Output an mzIdentML
 results file to the output directory. Default = F.</li>
 
 <li>
-<code>--pepxml-output &lt;T|F&gt;</code> &ndash; Output a pepXML
+<code>--pepxml-output T|F</code> &ndash; Output a pepXML
 results file to the output directory. Default = F.</li>
 
 <LI>
@@ -408,7 +423,7 @@ A file containing command-line or additional parameters.  See the <a
 href=parameter-file.html>parameter documentation</a> page for details.</li>
 
 <LI>
-<code>--verbosity &lt;0-100&gt;</code> &ndash; Specify the verbosity of the
+<code>--verbosity &lt;int&gt;</code> &ndash; Specify the verbosity of the
 current processes. Each level prints the following messages, including
 all those at lower verbosity levels: 0-fatal errors, 10-non-fatal
 errors, 20-warnings, 30-information on the progress of execution,

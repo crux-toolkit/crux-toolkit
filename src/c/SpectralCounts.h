@@ -13,6 +13,7 @@
 #include <map>
 #include <set>
 #include "utils.h"
+#include "MatchCollectionParser.h"
 #include "objects.h"
 #include "Peptide.h"
 #include "SpectrumCollection.h"
@@ -148,7 +149,7 @@ class SpectralCounts: public CruxApplication {
   // For custom thresholding fields
   bool threshold_min_; 
   std::string custom_threshold_name_;
-  
+  MatchCollectionParser parser_;
 
   PeptideToScore peptide_scores_;
   PeptideToScore peptide_scores_unique_;

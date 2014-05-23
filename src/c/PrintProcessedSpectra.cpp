@@ -10,7 +10,7 @@
  */
 
 #include "PrintProcessedSpectra.h"
-#include "MS2SpectrumCollection.h"
+#include "SpectrumCollectionFactory.h"
 
 using namespace std;
 
@@ -64,7 +64,8 @@ int PrintProcessedSpectra::main(int argc, char** argv) {
                                          output_dir,
                                          overwrite);
   // open input file
-  MS2SpectrumCollection* spectra = new MS2SpectrumCollection(input_ms2_name);
+  Crux::SpectrumCollection* spectra =
+    SpectrumCollectionFactory::create(input_ms2_name);
   if( spectra == NULL ){
     carp(CARP_FATAL, "Could not read spectra from %s.", input_ms2_name);
   }
@@ -74,8 +75,8 @@ int PrintProcessedSpectra::main(int argc, char** argv) {
        spectra->getNumSpectra());
 
   // write header to output file
-  const char* header = spectra->getComment();
-  fprintf(output_ms2, "%s", header);
+  //const char* header = spectra->getComment();
+  //fprintf(output_ms2, "%s", header);
   fprintf(output_ms2, "H\tComment\tSpectra processed as for Xcorr\n");
 
   // create iterator for getting spectra

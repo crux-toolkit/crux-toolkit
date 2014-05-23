@@ -87,16 +87,6 @@ class LineFileReader {
   void reset();
 
   /**
-   * tokenize a string by delimiter
-   */
-  static void tokenize(
-    const std::string& str,
-    std::vector<std::string>& tokens,
-    char delimiter = '\t'
-  );
-  
-
-  /**
    * convert string to data type
    */
   template<typename TValue>  

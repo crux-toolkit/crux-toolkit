@@ -535,7 +535,10 @@ void MatchCollection::sort(
     sort_by = SP;
     compare_match_function = (QSORT_COMPARE_METHOD)compareSp;
     break;
-
+  case EVALUE:
+    sort_by = EVALUE;
+    compare_match_function = (QSORT_COMPARE_METHOD)compareEValue;
+    break;
   case XCORR:
   case DECOY_XCORR_QVALUE:
   case LOGP_WEIBULL_XCORR: 
@@ -1015,7 +1018,7 @@ bool MatchCollection::estimateWeibullParametersFromXcorrs(
   }
 
   // reverse sort the scores
-  std::sort(scores, scores + num_scores, compareDescending());
+  std::sort(scores, scores + num_scores, greater<FLOAT_T>());
 
   // use only a fraction of the samples, the high-scoring tail
   // this parameter is hidden from the user
@@ -1382,6 +1385,26 @@ void MatchCollection::getCustomScoreNames(
 
   }
 
+}
+
+/**                                                                                                    
+ * Set the filepath for all matches in the collection                                                  
+ *\returns the associated file idx                                                                    
+ */
+int MatchCollection::setFilePath(
+  const string& file_path  ///< File path to set                                                  
+  ) {
+
+  if (match_total_ > 0) {
+    int file_idx = match_[0]->setFilePath(file_path);
+    for (int match_idx = 1;match_idx < match_total_;match_idx++) {
+      match_[match_idx]->setFileIndex(file_idx);
+    }
+    return file_idx;
+  } else {
+    carp(CARP_WARNING, "MatchCollection::setFilePath(): No matches in %s",file_path.c_str());
+    return -1;
+  }
 }
 
 /**
@@ -2455,6 +2478,7 @@ bool MatchCollection::extendTabDelimited(
     zstate_.setNeutralMass(
       result_file.getFloat(SPECTRUM_NEUTRAL_MASS_COL),
       result_file.getInteger(CHARGE_COL));
+    scored_type_[DELTA_CN] = scored_type_[DELTA_CN] || !result_file.empty(DELTA_CN_COL);
     delta_cn = result_file.getFloat(DELTA_CN_COL);
     if (delta_cn <= 0.0) {
       ln_delta_cn = 0;
@@ -2468,7 +2492,9 @@ bool MatchCollection::extendTabDelimited(
     scored_type_[SP] = !result_file.empty(SP_SCORE_COL);
 
     scored_type_[XCORR] = !result_file.empty(XCORR_SCORE_COL);
-
+    
+    scored_type_[EVALUE] = !result_file.empty(EVALUE_COL);
+    
     scored_type_[DECOY_XCORR_QVALUE] = !result_file.empty(DECOY_XCORR_QVALUE_COL);
 
 /* TODO
@@ -2871,6 +2897,12 @@ void MatchCollection::assignQValues(
     case DECOY_XCORR_QVALUE:
       derived_score_type = DECOY_XCORR_PEPTIDE_QVALUE;
       break;
+    case EVALUE:
+      derived_score_type = DECOY_EVALUE_QVALUE;
+      break;
+    case DECOY_EVALUE_QVALUE:
+      derived_score_type = DECOY_EVALUE_PEPTIDE_QVALUE;
+      break;
     case LOGP_BONF_WEIBULL_XCORR: 
       derived_score_type = LOGP_QVALUE_WEIBULL_XCORR;
       break;
@@ -2952,6 +2984,9 @@ void MatchCollection::assignPEPs(
     switch (score_type) {
     case XCORR:
       derived_score_type = DECOY_XCORR_PEP;
+      break;
+    case EVALUE:
+      derived_score_type = DECOY_EVALUE_PEP;
       break;
     case LOGP_BONF_WEIBULL_XCORR: 
       derived_score_type = LOGP_WEIBULL_PEP;

@@ -3,11 +3,10 @@ project(xlink)
 cmake_minimum_required(VERSION 2.8.4)
 cmake_policy(VERSION 2.8.4)
 
-include_directories(..)
-include_directories(../../external/include)
-include_directories(../../external/build/src/ProteoWizard/libraries/boost_1_43_0)
-include_directories(../../external/build/src/ProteoWizard/libraries/boost_aux)
-include_directories(../external/MSToolkit/include)
+include_directories(${CMAKE_SOURCE_DIR}/src/c)
+include_directories(${CMAKE_BINARY_DIR}/src/external/build/src/ProteoWizard/libraries/boost_1_54_0)
+include_directories(${CMAKE_BINARY_DIR}/src/external/build/src/ProteoWizard/libraries/boost_aux)
+include_directories(${CMAKE_BINARY_DIR}/src/external/include)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   set_property(

@@ -24,6 +24,7 @@
 #include "IonSeries.h"
 #include "crux-utils.h"
 #include "objects.h"
+#include "OutputFiles.h"
 #include "parameter.h"
 #include "Scorer.h" 
 #include "Match.h" 
@@ -36,6 +37,8 @@
 
 using namespace std;
 using namespace Crux;
+
+vector<string> Match::file_paths_;
 
 void Match::init() {
 
@@ -62,6 +65,7 @@ void Match::init() {
   num_target_matches_ = 0;
   num_decoy_matches_ = 0;
   best_per_peptide_ = false;
+  file_idx_ = -1;
 }
 
 
@@ -239,6 +243,25 @@ int compareSpectrumXcorr(
   }
 
   return return_me;
+}
+
+/**
+ * compare two matches, used for qsort
+ * \returns the difference between e-value in match_a and match_b
+ */
+int compareEValue(
+  Match** match_a, ///< the first match -in
+  Match** match_b ///< the second match -in
+) {
+
+  if((*match_b)->getScore(EVALUE) < (*match_a)->getScore(EVALUE)){
+    return 1;
+  }
+  else if((*match_b)->getScore(EVALUE) > (*match_a)->getScore(EVALUE)){
+    return -1;
+  }
+  return 0;
+
 }
 
 /**
@@ -531,8 +554,7 @@ int compareSpectrumBaristaScore(
 
 
 /**
- * Compare two matches by spectrum scan number,
- * used for PinXMLWriter. 
+ * Compare two matches by spectrum scan number
  * \returns -1 if match a spectrum number is less than that of match b
  * or if scan number is same, if score of match a is less than
  * match b.  1 if scan number and score are equal, else 0.
@@ -659,7 +681,7 @@ void Match::printSqt(
   char* protein_id = NULL;
   Protein* protein = NULL;
   const char* rand = "";
-
+  
   for(PeptideSrcIterator iter = peptide->getPeptideSrcBegin();
       iter != peptide->getPeptideSrcEnd();
       ++iter){
@@ -667,14 +689,14 @@ void Match::printSqt(
                protein = peptide_src->getParentProtein();
                protein_id = protein->getId();
 
-               // only prepend "rand_" if we are doing a fasta search
+               // only prepend "decoy-prefix" if we are doing a fasta search
                Database* database = protein->getDatabase();
                if( null_peptide_ 
                    && (database != NULL && database->getDecoyType() == NO_DECOYS) ){
-                    rand = "rand_";
-                  }
+		 rand = get_string_parameter_pointer("decoy-prefix"); 
+               }
     
-      // print match info (locus line), add rand_ to locus name for decoys
+      // print match info (locus line), add "decoy-prefix" to locus name for decoys
       fprintf(file, "L\t%s%s\n", rand, protein_id);      
       free(protein_id);
      }
@@ -699,6 +721,9 @@ void Match::printOneMatchField(
 ) {
 
   switch ((MATCH_COLUMNS_T)column_idx) {
+  case FILE_COL:
+    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, getFilePath());
+    break;
   case SCAN_COL:
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, scan_num);
     break;
@@ -755,6 +780,10 @@ void Match::printOneMatchField(
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
                                      getRank(XCORR));
     break;
+  case EVALUE_COL:
+    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx,
+                                     getScore(EVALUE));
+    break;
   case PVALUE_COL:
     {
       double log_pvalue = getScore(LOGP_BONF_WEIBULL_XCORR);
@@ -796,6 +825,19 @@ void Match::printOneMatchField(
                                        getScore(DECOY_XCORR_PEP));
     }
     break;
+  case DECOY_EVALUE_QVALUE_COL:
+    if (null_peptide_ == false) {
+      output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
+              getScore(DECOY_EVALUE_QVALUE));
+    }
+    break;
+  case DECOY_EVALUE_PEP_COL:
+    if (null_peptide_ == false) {
+      output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx,
+                                       getScore(DECOY_EVALUE_PEP));
+    }
+    break;
+  
 #ifdef NEW_COLUMNS
   case DECOY_XCORR_PEPTIDE_QVALUE_COL:
     if ( (null_peptide_ == false) && (best_per_peptide_ == true)) {
@@ -905,8 +947,8 @@ void Match::printOneMatchField(
       free(flanking_aas);
     }
     break;
-  case UNSHUFFLED_SEQUENCE_COL:
-    if(null_peptide_ == true){
+  case ORIGINAL_TARGET_SEQUENCE_COL:
+    if (null_peptide_ == true || OutputFiles::isConcat()) {
       char* seq = peptide_->getUnshuffledSequence();
       output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, seq);
       free(seq);
@@ -1200,6 +1242,9 @@ Match* Match::parseTabDelimited(
   if (!result_file.empty(PVALUE_COL)){
     match->match_scores_[LOGP_BONF_WEIBULL_XCORR] = -log(result_file.getFloat(PVALUE_COL));
   }
+  if (!result_file.empty(EVALUE_COL)){
+    match->match_scores_[EVALUE]  = result_file.getFloat(EVALUE_COL);
+  }
   if (!result_file.empty(PERCOLATOR_QVALUE_COL)){
     match->match_scores_[PERCOLATOR_QVALUE] = result_file.getFloat(PERCOLATOR_QVALUE_COL);
   }
@@ -1221,8 +1266,13 @@ Match* Match::parseTabDelimited(
   }
 
   // get experiment size
-  match->ln_experiment_size_ = log((FLOAT_T) result_file.getInteger(MATCHES_SPECTRUM_COL));
   match->num_target_matches_ = result_file.getInteger(MATCHES_SPECTRUM_COL);
+  if (match->num_target_matches_ == 0) {
+    carp_once(CARP_WARNING, "num target matches=0, suppressing warning");
+    match->ln_experiment_size_ = 0;
+  } else {
+    match->ln_experiment_size_ = log((FLOAT_T) result_file.getInteger(MATCHES_SPECTRUM_COL));
+  }
   if (!result_file.empty(DECOY_MATCHES_SPECTRUM_COL)){
         match->num_decoy_matches_ = result_file.getInteger(DECOY_MATCHES_SPECTRUM_COL);
   }
@@ -1250,15 +1300,11 @@ Match* Match::parseTabDelimited(
   //parse match overall digestion
   match -> digest_ = string_to_digest_type((char*)result_file.getString(CLEAVAGE_TYPE_COL).c_str()); 
 
-  //Parse if match is it null_peptide?
-  //We could check if unshuffled sequence is "", since that field is not
-  //set for not null peptides.
-  match -> null_peptide_ = !result_file.empty(UNSHUFFLED_SEQUENCE_COL);
-
   if (!result_file.empty(PROTEIN_ID_COL) && 
     result_file.getString(PROTEIN_ID_COL).find(decoy_prefix) != string::npos) {
     match -> null_peptide_ = true;
   }
+  carp(CARP_DEBUG, "null:%d", match->null_peptide_);
 
 
   //assign fields
@@ -1482,6 +1528,53 @@ void Match::getCustomScoreNames(
   }
 
 }
+
+/**
+ * sets the file index for this match
+ */
+void Match::setFileIndex(
+  int file_idx ///< file index to set
+  ) {
+
+  file_idx_ = file_idx;
+}
+
+/**
+ * sets the file path for this match
+ * \returns the associated file index
+ */
+int Match::setFilePath(
+  const string& file_path ///< file path to set
+  ) {
+
+  file_idx_ = -1;
+  
+  for (size_t idx = 0;idx < file_paths_.size(); idx++) {
+    if (file_path == file_paths_[idx]) {
+      file_idx_ = idx;
+      break;
+    }
+  }
+
+  if (file_idx_ == -1) {
+    file_idx_ = file_paths_.size();
+    file_paths_.push_back(file_path);
+  }
+  return file_idx_;
+}
+
+/**
+ * \returns the file path for this match
+ */ 
+string Match::getFilePath() {
+  if (file_idx_ == -1) {
+    return string("");
+  } else {
+    return(file_paths_[file_idx_]);
+  }
+}
+
+
 
 
 bool Match::isDecoy() {
@@ -1757,7 +1850,7 @@ void print_modifications_xml(
 ){
   map<int, double> var_mods;
   map<int, double> static_mods;
-
+  carp(CARP_DEBUG,"print_modifications_xml:%s %s", mod_seq, pep_seq);
   // variable modifications
   int mod_precision = get_int_parameter("mod-precision");
   find_variable_modifications(var_mods, mod_seq);
@@ -1765,11 +1858,17 @@ void print_modifications_xml(
     fprintf(output_file, 
             "<modification_info modified_peptide=\"%s\">\n",
             mod_seq);
-    for (map<int, double>::iterator it = var_mods.begin()
+   carp(CARP_DEBUG,
+            "<modification_info modified_peptide=\"%s\">\n",
+            mod_seq);
+        for (map<int, double>::iterator it = var_mods.begin()
            ; it != var_mods.end(); ++it){
       fprintf(output_file, "<mod_aminoacid_mass position=\"%i\" mass=\"%.*f\"/>\n",
               (*it).first,   //index
               mod_precision, (*it).second); //mass
+      carp(CARP_DEBUG, "<mod_aminoacid_mass position=\"%i\" mass=\"%.*f\"/>\n",
+              (*it).first,   //index                                                                                                                                                                                                            
+              mod_precision, (*it).second); //mass           
     }
     fprintf(output_file, "</modification_info>\n");
   }
@@ -1777,6 +1876,8 @@ void print_modifications_xml(
   // static modifications
   find_static_modifications(static_mods, var_mods, pep_seq);
   if (!static_mods.empty()){
+    carp(CARP_DEBUG, "<modification_info modified_peptide=\"%s\">\n",
+            pep_seq);
     fprintf(output_file, "<modification_info modified_peptide=\"%s\">\n",
             pep_seq);
     for (map<int, double>::iterator it = static_mods.begin(); 
@@ -1784,6 +1885,9 @@ void print_modifications_xml(
       fprintf(output_file, "<mod_aminoacid_mass position=\"%i\" mass=\"%.*f\"/>\n",
               (*it).first,   //index
               mod_precision, (*it).second); //mass
+      carp(CARP_DEBUG, "<mod_aminoacid_mass position=\"%i\" mass=\"%.*f\"/>\n",
+              (*it).first,   //index                                                                                                                                                                                                            
+              mod_precision, (*it).second); //mass 
     }
     fprintf(output_file, "</modification_info>\n");
   }
@@ -1861,8 +1965,8 @@ void find_static_modifications(
     if (get_double_parameter( (const char *)aa)!= 0 && 
         var_mods.find(seq_index) == var_mods.end()){
 
-      double mass = get_mass_amino_acid(*seq_iter, isotopic_type);
-      static_mods[seq_index] = mass;
+      //double mass = get_mass_amino_acid(*seq_iter, isotopic_type);
+      static_mods[seq_index] = get_double_parameter( (const char*)aa);
     }
     seq_iter++;
     seq_index++;
@@ -1889,6 +1993,33 @@ int get_num_internal_cleavage(const char* peptide_sequence, ENZYME_T enzyme){
   return num_missed_cleavages;
 }
 
+/**
+ * \brief Returns whether the nterm and cterm of a peptide are proper cleavages
+ */
+void get_terminal_cleavages(
+  const char* peptide_sequence, ///< peptide sequenc
+  const char flanking_aas_prev, ///< amino acid before cleavage (n-term)
+  const char flanking_aas_next, ///< amino acid after cleavage (c-term)
+  ENZYME_T enzyme, ///< Enzyme used in cleavage
+  bool& nterm, ///< -out is nterminus from a proper cleavage
+  bool& cterm ///< -out is cterminus from a proper cleavage?
+  ) {
+
+  carp(CARP_DEBUG, "seq:%s", peptide_sequence);
+  carp(CARP_DEBUG, "prev:%c", flanking_aas_prev);
+  carp(CARP_DEBUG, "next:%c", flanking_aas_next);
+
+  int num_tol_term = 0;
+  char cleavage[3];
+  cleavage[2] = '\0';
+  cleavage[0] = flanking_aas_prev;
+  cleavage[1] = peptide_sequence[0];
+  nterm = flanking_aas_prev == '-' || ProteinPeptideIterator::validCleavagePosition(cleavage, enzyme);
+
+  cleavage[0] = peptide_sequence[strlen(peptide_sequence)-1];
+  cleavage[1] = flanking_aas_next;
+  cterm = flanking_aas_next == '-' || ProteinPeptideIterator::validCleavagePosition(cleavage, enzyme);
+}
 
 /**
  * \brief Counts the number of terminal cleavage. Either 0, 1, or 2
@@ -1901,19 +2032,19 @@ int get_num_terminal_cleavage(
   ENZYME_T enzyme
   ){
 
+  bool cterm, nterm;
+
+  get_terminal_cleavages(peptide_sequence, 
+    flanking_aas_prev, 
+    flanking_aas_next, 
+    enzyme,
+    nterm, cterm);
+
   int num_tol_term = 0;
-  char cleavage[3];
-  cleavage[2] = '\0';
-  cleavage[0] = flanking_aas_prev;
-  cleavage[1] = peptide_sequence[0];
-  if (flanking_aas_prev == '-' ||
-      ProteinPeptideIterator::validCleavagePosition(cleavage, enzyme)){
-      num_tol_term++;
+  if (nterm) { 
+    num_tol_term++;
   }
-  cleavage[0] = peptide_sequence[strlen(peptide_sequence)-1];
-  cleavage[1] = flanking_aas_next;
-  if (flanking_aas_next == '-' ||
-      ProteinPeptideIterator::validCleavagePosition(cleavage, enzyme)){
+  if (cterm) { 
     num_tol_term++;
   }
   return num_tol_term;

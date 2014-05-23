@@ -79,7 +79,10 @@ void CruxApplication::initialize(
     srandom((unsigned int) seconds); // Convert seconds to a unsigned int
   }
   else{
-    srandom((unsigned int)atoi(get_string_parameter_pointer("seed")));
+    // Add 2 to seed due to seeds 0 and 1 behaving identically.
+    // In C++, a seed of 1 is a special value that resets the random generator
+    // to its initial value (usually 0).
+    srandom((unsigned int)atoi(get_string_parameter_pointer("seed")) + 2);
   }
   
   // Start the timer.

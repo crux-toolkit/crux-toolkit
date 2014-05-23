@@ -5,10 +5,10 @@
  */
 
 #include "PercolatorAdapter.h"
-#include "DelimitedFile.h"
+#include "build/src/percolator/src/DataSet.h"
+#include "FeatureNames.h"
 
-#include<map>
-#include<string>
+#include <map>
 
 using namespace std;
 
@@ -50,36 +50,6 @@ PercolatorAdapter::~PercolatorAdapter() {
 }
 
 /**
-  * Calls Percolator's overridden Caller::writeXML_PSMs() and then
-  * Collects all of the psm results
-  */
-void PercolatorAdapter::writeXML_PSMs() {
-  carp(CARP_DEBUG, "PercolatorAdapter::writeXML_PSMs");
-  Caller::writeXML_PSMs();
-  addPsmScores();  
-}
-
-/**
- * Calls Percolator's overridden Caller::writeXML_Peptides() and then
- * Collects all of the peptide results from the fullset
- */
-void PercolatorAdapter::writeXML_Peptides() {
-  carp(CARP_DEBUG, "PercolatorAdapter::writeXML_Peptides");
-  Caller::writeXML_Peptides();
-  addPeptideScores();
-}
-
-/**
- * Calls Percolator's overriden Caller::writeXMLProteins() and then
- * Collects all of the protein results from fido
- */  
-void PercolatorAdapter::writeXML_Proteins() {
-  carp(CARP_DEBUG, "PercolatorAdapter::writeXML_Proteins");
-  Caller::writeXML_Proteins();
-  addProteinScores();
-}
-
-/**
  * Converts a set of Percolator scores into a Crux MatchCollection
  */
 void PercolatorAdapter::psmScoresToMatchCollection(
@@ -95,35 +65,32 @@ void PercolatorAdapter::psmScoresToMatchCollection(
 
   // Find out which feature is lnNumSP and get indices of charge state features
   Normalizer* normalizer = Normalizer::getNormalizer();
-  double* normSubAll = normalizer->getSub();
-  double* normDivAll = normalizer->getDiv();
-  double normSub, normDiv;
+  double* normSub = normalizer->getSub();
+  double* normDiv = normalizer->getDiv();
   FeatureNames& features = DataSet::getFeatureNames();
   string featureNames = features.getFeatureNames();
   vector<string> featureTokens;
-  DelimitedFile::tokenize(featureNames, featureTokens);
-  int lnNumSPIndex = -1;
+  tokenize(featureNames, featureTokens);
+  int lnNumSPIndex = -1, massIndex = -1;
   map<int, int> chargeStates; // index of feature -> charge
   for (int i = 0; i < featureTokens.size(); ++i) {
-    string& featureName = featureTokens[i];
+    string featureName = featureTokens[i];
     transform(featureName.begin(), featureName.end(),
               featureName.begin(), ::tolower);
     if (featureName == "lnnumsp") {
       lnNumSPIndex = i;
-      normSub = normSubAll[i];
-      normDiv = normDivAll[i];
     } else if (featureName.find("charge") == 0) {
       size_t chargeNum = atoi(featureName.substr(6).c_str());
       chargeStates[i] = chargeNum;
+    } else if (featureName == "mass") {
+      massIndex = i;
     }
   }
 
   // Iterate over each ScoreHolder in Scores object
-  for (
-    vector<ScoreHolder>::iterator score_itr = fullset.begin();
-    score_itr != fullset.end();
-    score_itr++
-    ) {
+  for (vector<ScoreHolder>::iterator score_itr = fullset.begin();
+       score_itr != fullset.end();
+       score_itr++) {
 
     bool is_decoy = score_itr->isDecoy();
 
@@ -147,8 +114,10 @@ void PercolatorAdapter::psmScoresToMatchCollection(
     }
     Crux::Peptide* peptide = extractPeptide(psm, charge_state, is_decoy);
 
+    FLOAT_T obsMass = (massIndex < 0) ?
+      0 : psm->getFeatures()[massIndex] * normDiv[massIndex] + normSub[massIndex];
     SpectrumZState zState;
-    zState.setSinglyChargedMass(psm->expMass, charge_state);
+    zState.setSinglyChargedMass(obsMass, charge_state);
     // calcMass/expMass = singly charged mass
     Crux::Spectrum* spectrum = new Crux::Spectrum(
       psm->scan, psm->scan, zState.getMZ(), vector<int>(1, charge_state), ""
@@ -163,10 +132,8 @@ void PercolatorAdapter::psmScoresToMatchCollection(
     if (lnNumSPIndex < 0) {
       match->setLnExperimentSize(-1);
     } else {
-      // Normalized lnNumSP
-      double lnNumSP = psm->getFeatures()[lnNumSPIndex];
-      // Unnormalize
-      lnNumSP = lnNumSP * normDiv + normSub;
+      double lnNumSP = psm->getFeatures()[lnNumSPIndex]
+        * normDiv[lnNumSPIndex] + normSub[lnNumSPIndex];
       match->setLnExperimentSize(lnNumSP);
     }
 
@@ -213,25 +180,26 @@ void PercolatorAdapter::addProteinScores() {
 
   vector<ProteinMatch*> matches;
   vector<ProteinMatch*> decoy_matches;
-  map<const string,Protein> protein_scores = protEstimator->getProteins();
+  map<const string,Protein*> protein_scores = protEstimator->getProteins();
   
-  for (
-    map<const string,Protein>::iterator score_iter = protein_scores.begin();
-    score_iter != protein_scores.end();
-    score_iter++) {
-    
+  for (map<const string,Protein*>::iterator score_iter = protein_scores.begin();
+       score_iter != protein_scores.end();
+       score_iter++) {
+    if (score_iter->second == NULL) {
+      continue;
+    }
     // Set scores
     ProteinMatch* protein_match;
-    if (!score_iter->second.getIsDecoy()) {
-      protein_match = collection_->getProteinMatch(score_iter->second.getName());
+    if (!score_iter->second->getIsDecoy()) {
+      protein_match = collection_->getProteinMatch(score_iter->second->getName());
       matches.push_back(protein_match);
     } else {
-      protein_match = decoy_collection_->getProteinMatch(score_iter->second.getName());
+      protein_match = decoy_collection_->getProteinMatch(score_iter->second->getName());
       decoy_matches.push_back(protein_match);
     }
-      protein_match->setScore(PERCOLATOR_SCORE, -log(score_iter->second.getP()));
-      protein_match->setScore(PERCOLATOR_QVALUE, score_iter->second.getQ());
-      protein_match->setScore(PERCOLATOR_PEP, score_iter->second.getPEP());
+      protein_match->setScore(PERCOLATOR_SCORE, -log(score_iter->second->getP()));
+      protein_match->setScore(PERCOLATOR_QVALUE, score_iter->second->getQ());
+      protein_match->setScore(PERCOLATOR_PEP, score_iter->second->getPEP());
   }
 
   // set percolator score ranks
@@ -264,11 +232,9 @@ void PercolatorAdapter::addPeptideScores() {
   carp(CARP_DEBUG, "Setting peptide scores");
 
   // Iterate over each ScoreHolder in Scores object
-  for (
-    vector<ScoreHolder>::iterator score_itr = fullset.begin();
-    score_itr != fullset.end();
-    score_itr++
-    ) {
+  for (vector<ScoreHolder>::iterator score_itr = fullset.begin();
+       score_itr != fullset.end();
+       score_itr++) {
 
     PSMDescription* psm = score_itr->pPSM;
     string sequence;
@@ -284,7 +250,7 @@ void PercolatorAdapter::addPeptideScores() {
     }
     if (peptide_match == NULL) {
       carp(CARP_FATAL, "Cannot find peptide %s %i",
-                       psm->getPeptide().c_str(), score_itr->isDecoy());
+                       psm->getFullPeptideSequence().c_str(), score_itr->isDecoy());
     }
     peptide_match->setScore(PERCOLATOR_SCORE, score_itr->score);
     peptide_match->setScore(PERCOLATOR_QVALUE, psm->q);
@@ -315,7 +281,7 @@ ProteinMatchCollection* PercolatorAdapter::getDecoyProteinMatchCollection() {
  * find the charge state (matching group)
  */
 int PercolatorAdapter::parseChargeState(
-  string psm_id ///< psm to parse charge state from
+  const string& psm_id ///< psm to parse charge state from
 ) {
   size_t charge_begin, charge_end;
 
@@ -360,7 +326,14 @@ Crux::Peptide* PercolatorAdapter::extractPeptide(
   
   MODIFIED_AA_T* mod_seq = getModifiedAASequence(psm, seq, peptide_mass);
 
+  carp(CARP_DEBUG, "seq:%s",seq.c_str());
+  char* mod_seq_str = modified_aa_string_to_string_with_masses(mod_seq, seq.length(), MOD_MASS_ONLY);
+  carp(CARP_DEBUG, "mod seq:%s", mod_seq_str);
+  free(mod_seq_str);
+  
   string full_peptide(psm->getFullPeptide());
+  carp(CARP_DEBUG, "full peptide:%s", full_peptide.c_str());
+  carp(CARP_DEBUG, "=======================");
   string n_term = "";
   string c_term = "";
   if (!full_peptide.empty()) {
@@ -410,7 +383,7 @@ MODIFIED_AA_T* PercolatorAdapter::getModifiedAASequence(
   ) {
 
   std::stringstream ss_seq;
-  string perc_seq = psm->getPeptide();
+  string perc_seq = psm->getFullPeptideSequence();
   size_t perc_seq_len = perc_seq.length();
   if (perc_seq_len >= 5 &&
       perc_seq[1] == '.' && perc_seq[perc_seq_len - 2] == '.') {
@@ -426,45 +399,103 @@ MODIFIED_AA_T* PercolatorAdapter::getModifiedAASequence(
 	 perc_seq.c_str());
   }
 
+  MODIFIED_AA_T* mod_seq = NULL;
+  carp(CARP_DEBUG, "PercolatorAdapter::getModifiedAASequence(): seq:%s", perc_seq.c_str());
+  int mod_len = convert_to_mod_aa_seq(perc_seq.c_str(), &mod_seq, MOD_MASS_ONLY);
+  peptide_mass = get_mod_aa_seq_mass(mod_seq, get_mass_type_parameter("isotopic-mass"));
+  char* cseq = modified_aa_to_unmodified_string(mod_seq, mod_len);
+  seq = cseq;
+  free(cseq);
+  
+  carp(CARP_DEBUG, "Peptide mass:%lf", peptide_mass);
+  
+  return mod_seq;
+}
 
-  vector<pair<int, const AA_MOD_T*> > mod_locations_types;
-  size_t count = 0;
-  for (size_t seq_idx = 0; seq_idx < perc_seq_len; seq_idx++) {
-    if (perc_seq.at(seq_idx) == '[') {
-      //modification found.
-      size_t begin_idx = seq_idx+1;
-      size_t end_idx = perc_seq.find(']', begin_idx);
-      int mod_location = count-1;
-      FLOAT_T delta_mass;
+/** 
+ * Executes the flow of the percolator process:
+ * 1. reads in the input file
+ * 2. trains the SVM
+ * 3. calculate PSM probabilities
+ * 4. (optional) calculate peptide probabilities
+ * 5. (optional) calculate protein probabilities
+ */
+int PercolatorAdapter::run() {  
 
-      from_string(delta_mass, perc_seq.substr(begin_idx, end_idx - begin_idx));
-      carp(CARP_DEBUG,"seq:%s, i:%i m:%f", perc_seq.c_str(), seq_idx, delta_mass);
-      peptide_mass += delta_mass;
-      const AA_MOD_T* mod = get_aa_mod_from_mass(delta_mass);
-      if (mod == NULL) {
-	carp(CARP_FATAL, "Mod not found!");
-      }
-
-      mod_locations_types.push_back(pair<int, const AA_MOD_T*>(mod_location, mod));
-      seq_idx = end_idx;
-    } else {
-      ss_seq << perc_seq.at(seq_idx);
-      count++;
+  time(&startTime);
+  startClock = clock();
+  if (VERB > 0) {
+    cerr << extendedGreeter();
+  }
+  // populate tmp input file with cin information if option is enabled
+  if(readStdIn){
+    ofstream tmpInputFile;
+    tmpInputFile.open(xmlInterface.getXmlInputFN().c_str());
+    while(cin) {
+      char buffer[1000];
+      cin.getline(buffer, 1000);
+      tmpInputFile << buffer << endl;
+    }
+    tmpInputFile.close();
+  }
+  
+  // Reading input files (pin or temporary file)
+  if(!readFiles()) {
+    throw MyException("ERROR: Failed to read in file, check if the correct file-format was used.");
+  }
+  // Copy feature data to Scores object
+  fillFeatureSets();
+  
+  // delete temporary file if reading from stdin
+  if(readStdIn) {
+    remove(xmlInterface.getXmlInputFN().c_str());
+  }
+  if(VERB > 2){
+    std::cerr << "FeatureNames::getNumFeatures(): "<< FeatureNames::getNumFeatures() << endl;
+  }
+  int firstNumberOfPositives = crossValidation.preIterationSetup(fullset, pCheck, pNorm);
+  if (VERB > 0) {
+    cerr << "Estimating " << firstNumberOfPositives << " over q="
+        << test_fdr << " in initial direction" << endl;
+  }
+  
+  time_t procStart;
+  clock_t procStartClock = clock();
+  time(&procStart);
+  double diff = difftime(procStart, startTime);
+  if (VERB > 1) cerr << "Reading in data and feature calculation took "
+      << ((double)(procStartClock - startClock)) / (double)CLOCKS_PER_SEC
+      << " cpu seconds or " << diff << " seconds wall time" << endl;
+  
+  // Do the SVM training
+  crossValidation.train(pNorm);
+  crossValidation.postIterationProcessing(fullset, pCheck);
+  // calculate psms level probabilities
+  
+  //PSM probabilities TDA or TDC
+  calculatePSMProb(false, &fullset, procStart, procStartClock, diff, target_decoy_competition);
+  addPsmScores();
+  if (xmlInterface.getXmlOutputFN().size() > 0){
+    xmlInterface.writeXML_PSMs(fullset);
+  }
+  
+  // calculate unique peptides level probabilities WOTE
+  if(reportUniquePeptides){
+    calculatePSMProb(true, &fullset, procStart, procStartClock, diff, target_decoy_competition);
+    addPeptideScores();
+    if (xmlInterface.getXmlOutputFN().size() > 0){
+      xmlInterface.writeXML_Peptides(fullset);
     }
   }
-  seq = ss_seq.str();
-  peptide_mass += Crux::Peptide::calcSequenceMass(seq.c_str(),
-                  get_mass_type_parameter("isotopic-mass"));
-
-  MODIFIED_AA_T* mod_seq;
-  convert_to_mod_aa_seq(seq.c_str(), &mod_seq);
-  for (size_t mod_idx = 0 ; mod_idx < mod_locations_types.size(); mod_idx++) {
-    size_t seq_idx = mod_locations_types[mod_idx].first;
-    const AA_MOD_T* mod = mod_locations_types[mod_idx].second;
-
-    modify_aa(mod_seq+seq_idx, (AA_MOD_T*)mod);
+  // calculate protein level probabilities with FIDO
+  if(ProteinProbEstimator::getCalcProteinLevelProb()){
+    calculateProteinProbabilitiesFido();
+    addProteinScores();
   }
-  return mod_seq;
+  // write output to file
+  xmlInterface.writeXML(fullset, protEstimator, call);  
+  //return 1; don't know why percolator returns 1 here, but we'll return 0
+  return 0;
 }
 
 /*

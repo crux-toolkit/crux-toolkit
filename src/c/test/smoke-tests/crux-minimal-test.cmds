@@ -27,12 +27,12 @@
 1 = generate-peptides-ambiguous-residues = good_results/generate-peptides-ambiguous.target.txt = crux generate-peptides --min-mass 1464 --max-mass 1496 --output-sequence T ambiguous.fasta > a  2>&1; cat a =  'time'
 
 # Get spectrum
-1 = get_ms2_spectrum = good_results/standard_get_ms2_spectrum.out = crux get-ms2-spectrum 2 test.ms2 =
+1 = get_ms2_spectrum = good_results/standard_get_ms2_spectrum.out = crux get-ms2-spectrum --scan-number 2 test.ms2 =
 
-1 = get_ms2_spectrum_stats = good_results/standard_get_ms2_spectrum_stats.out = crux get-ms2-spectrum --stats T 2 test.ms2 =
+1 = get_ms2_spectrum_stats = good_results/standard_get_ms2_spectrum_stats.out = crux get-ms2-spectrum --stats T --scan-number 2 test.ms2 =
 
 #Generate Zline  
-1= get_ms2_spectrum_without_zlines= good_results/standard_get_ms2_spectrum_without_zlines.out = crux get-ms2-spectrum 2-16 test-no-z1.ms2 =
+1= get_ms2_spectrum_without_zlines= good_results/standard_get_ms2_spectrum_without_zlines.out = crux get-ms2-spectrum --scan-number 2-16 test-no-z1.ms2 =
 
 # Print processed spectrum
 1 = print_processed_spectrum = good_results/processed-test.ms2 = crux print-processed-spectra test.ms2 processed-test.ms2 ; cat crux-output/processed-test.ms2
@@ -65,7 +65,7 @@
 1 = search_pvalues = good_results/search_pvalues.target.txt = rm -rf crux-output; crux search-for-matches --parameter-file params/pval demo.ms2 small-yeast.fasta; cat crux-output/search.target.txt = 'Time'
 
 # Get q-values from above search
-1 = compute-q-values = good_results/qvalues.txt = crux compute-q-values --parameter-file params/pval small-yeast.fasta crux-output; cat crux-output/qvalues.target.txt 
+1 = compute-q-values = good_results/qvalues.txt = crux compute-q-values --parameter-file params/pval crux-output/search.target.txt; cat crux-output/qvalues.target.txt 
 
 # Search for matches with modifications
 1 = search_mods_fasta = good_results/search_mods_fasta.target.txt = rm -rf crux-output; crux search-for-matches --decoys peptide-shuffle --parameter-file params/mods test.ms2 test.fasta; cat crux-output/search.target.txt = 'Time' 'Database'
@@ -151,16 +151,16 @@
 #1 = perc-feature-file = good_results/percolator.features.txt = cat crux-output/percolator.features.txt = 
 
 #Run make-pin with tab-delimited file  
-1=make-pin-txt = good_results/make-pin_txt.pin.xml = rm -rf crux-output; crux search-for-matches --parameter-file params/sp demo.ms2 yeast-index; crux make-pin --overwrite T --output-file make-pin_txt.pin.xml crux-output/search.target.txt crux-output/search.decoy.txt; cat crux-output/make-pin_txt.pin.xml = 'command_line'
+1=make-pin-txt = good_results/make-pin_txt.pin.xml = rm -rf crux-output; crux search-for-matches --parameter-file params/sp demo.ms2 yeast-index; crux make-pin --overwrite T --output-file make-pin_txt.pin.xml crux-output/search.target.txt; cat crux-output/make-pin_txt.pin.xml = 'command_line'
 
 #Run make-pin with pep.xml file  
-1=make-pin-pep = good_results/make-pin_pep.pin.xml = rm -rf crux-output; crux search-for-matches --pepxml-output T --parameter-file params/sp demo.ms2 yeast-index; crux make-pin --overwrite T --output-file make-pin_pep.pin.xml crux-output/search.target.pep.xml crux-output/search.decoy.pep.xml; cat crux-output/make-pin_pep.pin.xml = 'command_line'
+1=make-pin-pep = good_results/make-pin_pep.pin.xml = rm -rf crux-output; crux search-for-matches --pepxml-output T --parameter-file params/sp demo.ms2 yeast-index; crux make-pin --overwrite T --output-file make-pin_pep.pin.xml crux-output/search.target.pep.xml; cat crux-output/make-pin_pep.pin.xml = 'command_line'
 
 # Run q-ranker with separate searches
 0 = qranker-separate = good_results/qranker-sep.target.txt=rm -rf crux-output; crux search-for-matches --decoys peptide-shuffle --parameter-file params/set_rand_seed_only demo.ms2 yeast-index/;crux q-ranker --parameter-file params/set_rand_seed_only --separate-searches ./crux-output/search.decoy.txt demo.ms2 ./crux-output/search.target.txt; cat crux-output/q-ranker.target.psms.txt
 
 # Test the q-values generated from decoys
-1 = decoy_qval = good_results/decoy-qval.txt = rm -rf decoy-qval-pval; crux search-for-matches --decoys peptide-shuffle --parameter-file params/decoy-qval-pval demo.ms2 small-yeast.fasta; crux compute-q-values --parameter-file params/decoy-qval-pval small-yeast.fasta decoy-qval-pval; cat decoy-qval-pval/qvalues.target.txt
+1 = decoy_qval = good_results/decoy-qval.txt = rm -rf decoy-qval-pval; crux search-for-matches --decoys peptide-shuffle --parameter-file params/decoy-qval-pval demo.ms2 small-yeast.fasta; crux compute-q-values --parameter-file params/decoy-qval-pval decoy-qval-pval/search.target.txt; cat decoy-qval-pval/qvalues.target.txt
 
 # search only a select number of spectra with the --scan option
 1 = search_select_scans = good_results/search_select_scans.target.txt = crux search-for-matches --scan-number 150-153 --parameter-file params/minimal demo.ms2 small-yeast.fasta; cat crux-output/search.target.txt

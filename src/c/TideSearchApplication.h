@@ -30,6 +30,7 @@ protected:
     const vector<SpectrumCollection::SpecCharge>* spec_charges,
     ActivePeptideQueue* active_peptide_queue,
     const ProteinVec& proteins,
+    const vector<const pb::AuxLocation*>& locations,
     double precursor_window,
     WINDOW_TYPE_T window_type,
     double spectrum_min_mz,
@@ -54,6 +55,24 @@ protected:
     int queue_size,
     int charge
   );
+
+  void computeWindow(
+    const SpectrumCollection::SpecCharge& sc,
+    WINDOW_TYPE_T window_type,
+    double precursor_window,
+    double* out_min,
+    double* out_max
+  );
+
+  struct ScSortByMz {
+    ScSortByMz(double precursor_window) { precursor_window_ = precursor_window; }
+    bool operator() (const SpectrumCollection::SpecCharge x,
+                     const SpectrumCollection::SpecCharge y) {
+      return (x.spectrum->PrecursorMZ() - MASS_PROTON - precursor_window_) * x.charge <
+             (y.spectrum->PrecursorMZ() - MASS_PROTON - precursor_window_) * y.charge;
+    }
+    double precursor_window_;
+  };
 
 public:
 

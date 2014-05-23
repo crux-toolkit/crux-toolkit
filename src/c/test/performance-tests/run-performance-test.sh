@@ -20,10 +20,85 @@ echo set terminal png >> $gnuplot
 echo set xlabel \"q-value threshold\" >> $gnuplot
 echo set ylabel \"Number of accepted PSMs\" >> $gnuplot
 echo set xrange \[0:0.1\] >> $gnuplot
-echo set yrange \[0:3000\] >> $gnuplot
 echo set key center right >> $gnuplot
 # Insert dummy plot so we can use "replot" consistently below.
 echo plot 0 notitle with dots >> $gnuplot 
+
+# Create the parameter file.
+parameters=crux.param
+
+# Enzymatic digestion rules.
+echo enzyme=trypsin >> $parameters
+echo search_enzyme_number=1 >> $parameters 
+echo digestion=full-digest > $parameters
+echo num_enzyme_termini=2 >> $parameters
+echo missed-cleavages=0 >> $parameters
+echo allowed_missed_cleavage=0 >> $parameters
+
+# Precursor selection rules.
+echo precursor-window=3 >> $parameters
+echo precursor-window-type=mass >> $parameters
+echo peptide_mass_tolerance=3 >> $parameters
+echo peptide_mass_units=0 >> $parameters # 0=amu, 1=mmu, 2=ppm
+echo precursor_tolerance_type=0 >> $parameters # 0=MH+ (default), 1=precursor m/z
+
+# Precursor mass type.
+echo isotopic-mass=mono >> $parameters
+echo monoisotopic-precursor=T >> $parameters
+echo mass_type_parent=1 >> $parameters # 1=monoisotopic
+
+# Fragment mass type.  Tides uses only monoisotopic.
+echo fragment-mass=mono >> $parameters
+echo mass_type_fragment=1 >> $parameters # 1=monoisotopic
+
+# Decoys.
+echo decoy-format=peptide-reverse >> $parameters
+echo num-decoys-per-target=1 >> $parameters
+echo decoy_search=2 >> $parameters  # 2 = separate decoy search
+
+# Report the top 5 matches.
+echo num_results=6 >> $parameters
+echo num_output_lines=5 >> $parameters
+echo top-match=5 >> $parameters
+
+# Precursor removal.
+echo remove_precursor_peak=1 >> $parameters
+echo remove_precursor_tolerance=15 >> $parameters
+echo remove-precursor-peak=T >> $parameters
+echo remove-precursor-tolerance=15 >> $parameters
+
+# Flanking peaks.
+echo use-flanking-peaks=F >> $parameters
+echo theoretical_fragment_ions=1 >> $parameters # 0 = flanks; 1 = no flanks
+
+# Fragment m/z discretization.  This is fixed in Tide.
+echo fragment_bin_offset=0.5 >> $parameters
+echo fragment_bin_tol=1.000508 >> $parameters
+
+# Other Crux parameters.
+echo compute-sp=T >> $parameters
+echo verbosity=40 >> $parameters
+echo overwrite=T >> $parameters
+echo peptide-list=T >> $parameters
+
+# Comet parameters
+echo add_C_cysteine=57.021464 >> $parameters
+echo num_threads=1 >> $parameters # Multithreaded sometimes dumps core.
+echo digest_mass_range=200 7200 >> $parameters
+echo max_fragment_charge=2 >> $parameters
+echo isotope_error=0 >> $parameters
+echo use_A_ions=0 >> $parameters
+echo use_B_ions=1 >> $parameters
+echo use_C_ions=0 >> $parameters
+echo use_X_ions=0 >> $parameters
+echo use_Y_ions=1 >> $parameters
+echo use_Z_ions=0 >> $parameters
+echo use_NL_ions=1 >> $parameters
+echo variable_mod1=0.0 X 0 3 >> $parameters
+echo variable_mod2=0.0 X 0 3 >> $parameters
+echo "[COMET_ENZYME_INFO]" >> $parameters
+echo "0.  No_enzyme              0      -           -" >> $parameters
+echo "1.  Trypsin                1      KR          P" >> $parameters
 
 # Create the index.
 db=worm+contaminants
@@ -31,22 +106,19 @@ fasta=$db.fa
 if [[ -e $db ]]; then
   echo Skipping create-index.
 else
-  $CRUX tide-index --output-dir tide-index --decoy-format shuffle $fasta $db
+  $CRUX tide-index --output-dir tide-index --parameter-file $parameters \
+     $fasta $db
 fi
 
 ms2=051708-worm-ASMS-10.ms2
 
-# Do the whole test twice, once for each search tool.  (N.B. This loop
-# is temporarily not doing anything useful.  Once we get comet and tide
-# integrated into Crux, then this loop will be useful again.)
-for searchtool in tide-search comet; do
+# Do the whole test twice, once for each search tool.
+for searchtool in comet tide-search; do
 
   # Do we use an index or the fasta?
   if [[ $searchtool == "comet" ]]; then
-    params="--parameter-file crux.param"
     proteins=$fasta
   else
-    params=""
     proteins=$db
   fi
 
@@ -55,8 +127,25 @@ for searchtool in tide-search comet; do
     echo Skipping search-for-matches.
   else  
     $CRUX $searchtool \
-      $params --output-dir $searchtool \
+      --parameter-file crux.param --output-dir $searchtool \
       $ms2 $proteins
+  fi
+
+  # Run calibrate-scores
+  if [[ -e $searchtool/qvalues.target.txt ]]; then
+    echo Skipping crux calibrate-scores.
+  else
+    $CRUX calibrate-scores \
+      --output-dir $searchtool \
+      $searchtool/$searchtool.target.txt
+  fi
+
+  $CRUX sort-by-column --column-type real --ascending true $searchtool/qvalues.target.txt "decoy q-value (xcorr)" | $CRUX extract-columns - "decoy q-value (xcorr)" > $searchtool/qvalues.xcorr.txt
+  echo replot \"$searchtool/qvalues.xcorr.txt\" using 1:0 title \"$searchtool xcorr\" with lines >> $gnuplot
+
+  if [[ $searchtool == "comet" ]]; then
+    $CRUX extract-columns $searchtool/qvalues.target.txt "decoy q-value (e-value)" > $searchtool/qvalues.evalue.txt 
+    echo replot \"$searchtool/qvalues.evalue.txt\" using 1:0 title \"$searchtool e-value\" with lines >> $gnuplot
   fi
 
   # Run Crux percolator
@@ -109,3 +198,37 @@ echo replot >> $gnuplot
 
 # Make the plot.
 gnuplot $gnuplot > performance.png
+
+# Extract a subset of columns for use in comparing XCorr scores.
+for searchtool in tide-search comet; do
+  searchFile=$searchtool/$searchtool.target.txt
+  reducedFile=$searchtool/$searchtool.target.reduced.txt
+  $CRUX extract-columns $searchFile \
+     "scan,charge,sequence,xcorr score" \
+     | awk 'NR > 1' \
+     | awk '{print $1 "~" $2 "~" $3 "\t" $4}' \
+     | sort -k 1b,1 \
+     > $reducedFile
+done
+
+# Join the two sets of scores.
+echo -e "scan\tcharge\tpeptide\ttide-search xcorr\tcomet xcorr" > xcorr.txt
+join \
+    tide-search/tide-search.target.reduced.txt \
+    comet/comet.target.reduced.txt \
+  | awk -F "~" '{print $1 " " $2 " " $3}' \
+  | awk '{print $1 "\t" $2 "\t" $3 "\t" $4 "\t" $5}' \
+  | sort -n \
+  >> xcorr.txt
+
+# Create a scatter plot of XCorr scores.
+gnuplot=xcorr.gnuplot
+echo set output \"/dev/null\" > $gnuplot
+echo set terminal png >> $gnuplot
+echo set xlabel \"Tide XCorr\" >> $gnuplot
+echo set ylabel \"Comet XCorr\" >> $gnuplot
+echo plot x notitle with lines >> $gnuplot
+echo replot \"xcorr.txt\" using 4\:5 notitle >> $gnuplot
+echo set output >> $gnuplot
+echo replot >> $gnuplot
+gnuplot $gnuplot > xcorr.png
