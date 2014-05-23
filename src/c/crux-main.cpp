@@ -88,10 +88,12 @@ int main(int argc, char** argv){
 
     applications.add(new CruxHardklorApplication());
     applications.add(new CruxBullseyeApplication());
-    applications.add(new PrintVersion());
 
     // make pin file 
     applications.add(new MakePinApplication());
+
+    applications.add(new PrintVersion());
+
     int ret = applications.main(argc, argv);
     return ret;
   } catch (const std::exception& e) {

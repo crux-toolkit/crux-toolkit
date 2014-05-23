@@ -52,6 +52,7 @@ class CreateIndex: public CruxApplication {
    */
   virtual COMMAND_T getCommand();
 
+  virtual bool hidden();
 
 };
 

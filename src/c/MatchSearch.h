@@ -134,6 +134,8 @@ class MatchSearch : public CruxApplication {
    */
   virtual bool needsOutputDirectory();
 
+  virtual bool hidden();
+
 };
 
 

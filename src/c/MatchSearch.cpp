@@ -540,6 +540,10 @@ bool MatchSearch::needsOutputDirectory() {
   return true;
 }
 
+bool MatchSearch::hidden() {
+  return true;
+}
+
 /*
  * Local Variables:
  * mode: c
