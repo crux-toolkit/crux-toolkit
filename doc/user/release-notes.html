@@ -14,15 +14,12 @@
 <li>
 Two new search engines are now included in Crux: Comet and Tide.  The
 old search engine, search-for-matches, has been retired.</li>
+
 <li>Percolator has been updated to version 2.07.</li>
 
 <li>
 Crux now compiles in native Windows, rather than requiring
 Cygwin.</li>
-
-<li>
-Percolator has been updated to version 2.06</li>
-<!-- Is this version number accurate? -->
 
 </ul>
 
@@ -45,8 +42,8 @@ Previously, the PinXML file produced
 by <code>search-for-matches</code> always contained a single PSM per
 charge/spectrum combination.  Now the <code>top-match</code> parameter
 controls how many PSMs are written to the PinXML file.</li>
-<!-- Are we producing pinXML at all?  Also, if we deprecate --
-  -- search-for-matches, maybe we don't need to mention this. --Bill -->
+<!-- Since we have deprecated search-for-matches and eliminated --
+  -- PinXML, maybe we don't need to mention this. --Bill -->
 
 <li>
 Percolator outputs decoy files in addition to target files.</li>
@@ -65,18 +62,8 @@ The Percolator tab-delimited PSMs output "matches/spectrum" value has
 been corrected.</li>
 
 <li>
-A new utility command, <code>make-pin</code>, is provided to
-create <code>pin.xml</code> files for use by Percolator.</li>
-
-<li>
-The <code>make-pin</code> command (automatically invoked by Percolator
-when given a non-PinXML format as input) now marks matches from decoy
-files as decoys.</li>
-
-<li>
-The <code>make-pin</code> command now uses the <code>top-match</code>
-parameter to determine how many PSMs per spectrum will be written,
-rather than only writing the top ranked PSM.</li>
+A new utility command, <code>make-pin</code>, is provided to create
+input files for use by Percolator.</li>
 
 <li>
 The <code>spectrum-min-mass</code> and <code>spectrum-max-mass</code>
@@ -84,7 +71,7 @@ options have been renamed to <code>spectrum-min-mz</code> and
 <code>spectrum-max-mz</code>, respectively.</li>
 
 <li>
-A <code>--spectrum-parser</code> option was added to <code>q-ranker</code> and
+A <code>spectrum-parser</code> option was added to <code>q-ranker</code> and
 <code>barista</code>.</li>
 
 <li>
