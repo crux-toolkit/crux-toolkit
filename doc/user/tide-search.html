@@ -261,8 +261,11 @@ Replace existing files if true (T) or fail when trying to overwrite a
 file if false (F). Default =  F.</li>
 
 <li>
-<code>--txt-output T|F</code> &ndash; Output a tab-delimited
-results file to the output directory. Default = T.</li>
+<code>--txt-output T|F</code> &ndash; Output a tab-delimited results
+file to the output directory. Note that printing only tab-delimited
+output will give the fastest performance. Enabling other output
+formats (SQT, PepXML, mzIdentML, or PIN) requires a conversion step
+that takes additional time.  Default = T.</li>
 
 <li>
 <code>--sqt-output T|F</code> &ndash; Output an SQT
@@ -277,7 +280,6 @@ results file to the output directory. Default = F.</li>
 results file to the output directory. Default = F.</li>
 
 <li>
-
 <code>--pin-output T|F</code> &ndash; Output a Percolator input (PIN)
 file to the output directory. Default = F.</li>
 
