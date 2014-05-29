@@ -28,22 +28,9 @@ Cygwin.</li>
 <ul>
 
 <li>
-The "enzyme" parameter of tide-search has been modified to
-include further <i>in-silico</i> digestion rules.</li>
-<!-- Please give the specific changes, if possible. --Bill-->
-
-<li>
 The "enyzme" parameters "lysc", "lysn", "arg_c", "glue_c", and
 "pepsin_a" were renamed to "lys-c", "lys-n", "arg-c", "glue-c", and
 "pepsin-a".</li>
-
-<li>
-Previously, the PinXML file produced
-by <code>search-for-matches</code> always contained a single PSM per
-charge/spectrum combination.  Now the <code>top-match</code> parameter
-controls how many PSMs are written to the PinXML file.</li>
-<!-- Since we have deprecated search-for-matches and eliminated --
-  -- PinXML, maybe we don't need to mention this. --Bill -->
 
 <li>
 Percolator outputs decoy files in addition to target files.</li>
@@ -54,8 +41,7 @@ probability (PEP) column.</li>
 
 <li>
 The Percolator tab-delimited peptide output has been corrected to show
-the PSM with the best score.</li>
-<!-- What did it do previously?  --Bill -->
+the PSM with the best score, rather than the worst.</li>
 
 <li>
 The Percolator tab-delimited PSMs output "matches/spectrum" value has
