@@ -19,17 +19,16 @@
 
 <p>
 Make-pin is a utility program that combines a collection of target and
-decoy peptide-spectrum matches (PSMs) into a single file in pin format, 
-according to <a href="https://github.com/percolator/percolator/wiki/Interface">
-this format</a>. The resulting <code>pin</code> file can be
-provided as input to the
-<code><a href="percolator.html">crux percolator</a></code>
-algorithm.</p>
+decoy peptide-spectrum matches (PSMs) into a single file in pin
+format, according
+to <a href="https://github.com/percolator/percolator/wiki/Interface">
+this format</a>. The resulting file can be provided as input to
+<code><a href="percolator.html">crux percolator</a></code>.</p>
 
 <p>
 <code>make-pin</code> requires as input two sets of PSMs, one set
 derived from matching observed spectra against real ("target")
-peptides, and a second set derived from matching the same spectra
+peptides and a second set derived from matching the same spectra
 against "decoy" peptides.  The output file contains, for each PSM, a
 set of features for use by the Percolator algorithm.  These features
 are summarized <a href="features.html">here</a>.</p>
@@ -42,7 +41,7 @@ between <code>crux percolator</code> and the stand-alone version of
 the program is that <code>crux percolator</code> does not require an
 explicit call to <code>crux make-pin</code>: if input is provided
 to <code>crux percolator</code> in a non-SQT format, then the input
-will be automatically converted to <code>pin</code> format.</p>
+will be automatically converted to pin format.</p>
 
 </ul>
 
@@ -55,8 +54,8 @@ and decoy peptide-spectrum matches (PSMs).  Input may be in one of five
 formats: 
 SQT, PepXML (obtained from SEQUEST), <a href="txt-format.html">Crux
 tab-delimited text</a>, list of files (when <code>list-of-files=T</code>,
-or a tab-delimited table of features (when <code>feature-in-file=T</code>
-(see below for details). </p>
+or a tab-delimited table of features (when <code>feature-in-file=T</code>,
+see below for details). </p>
 
 <p>
 Decoy PSMs can be provided to <code>make-pin</code> in two ways: either as a
@@ -141,9 +140,10 @@ convention.  Default = no absolute pathname.</li>
 fail when trying to overwrite a file if false (F). Default =  F.
 
 <LI>
-<code>--parameter-file &lt;filename&gt;</code> &ndash;
-A file containing command-line or additional parameters.  See the <a
-href=parameter-file.html>parameter documentation</a> page for details.</li>
+<code>--parameter-file &lt;filename&gt;</code> &ndash; A file
+containing command-line or additional parameters.  See
+the <a href="parameter-file.html">parameter documentation</a> for
+details.</li>
 
 <LI>
 <code>--verbosity &lt;0-100&gt;</code> &ndash; Specify the verbosity of the

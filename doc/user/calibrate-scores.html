@@ -34,6 +34,7 @@ score of T is deemed significant.  In this setting, the q-value
 accounts for the fact that we are analyzing a large collection of
 PSMs.</p>
 
+<!--
 <p>
 The q-values may be estimated in two different ways, depending on
 how the search was executed:</p>
@@ -53,13 +54,17 @@ estimated as <i>p<sub>j</sub> * (m/j)</i>.</li>
 
 <li>
 Alternatively, if the collection of PSMs does not have p-values
-assigned, then <code>calibrate-scores</code> searches the input
-directory for a corresponding set of decoy PSMs.  The
-false discovery rate associated with a given score is estimated
-as the number of decoy scores above the threshold divided by the
-number of target scores above the threshold, multiplied by the ratio
-of the total number of targets to total number of decoys.  This
-methodology is described in the following article:
+assigned, 
+-->
+
+<p>
+To estimate q-values, <code>calibrate-scores</code> searches the input
+directory for a corresponding set of decoy PSMs.  The false discovery
+rate associated with a given score is estimated as the number of decoy
+scores above the threshold divided by the number of target scores
+above the threshold, multiplied by the ratio of the total number of
+targets to total number of decoys.  This methodology is described in
+the following article:
 <blockquote>
 Lukas K&auml;ll, John D. Storey, Michael J. MacCoss and William
 Stafford
@@ -77,9 +82,13 @@ method implemented here as "decoy q-values" is analogous to the
 <p>
 In each case, the estimated FDRs are converted to q-values by ranking
 the PSMs by score and then taking, for each PSM, the minimum of the
-current FDR and all of the FDRs below it in the ranked list.  The two
+current FDR and all of the FDRs below it in the ranked list.
+<!--
+ The two
 types of q-values are reported, respectively, in columns with headers
-"Weibull q-value" or "decoy q-value".</p>
+"Weibull q-value" or "decoy q-value".
+-->
+</p>
 
 <h3>Posterior error probability</h3>
 
@@ -231,6 +240,7 @@ info, 60-detailed debug info. Default = 30.
 
 <hr></hr>
 
+<!--
 <p>
 Currently, this specification differs from the implementation in Crux in the following ways:</p>
 
@@ -242,6 +252,7 @@ Rather than allowing the user to specify a column name, the program has built-in
 </ul>
 
 <hr></hr>
+-->
 
 <P>
 <A HREF="crux.html">Crux home</A></P>
