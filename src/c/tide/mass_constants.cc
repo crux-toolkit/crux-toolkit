@@ -6,6 +6,14 @@
 
 using namespace std;
 
+#ifdef _MSC_VER
+  // The windows compiler only allows intialization
+  // of static constant integer types within a class
+  double const MassConstants::proton = 1.00727646688;
+  double const MassConstants::bin_width = 1.0005079;
+  double const MassConstants::kFixedPointScalar = 1e5;
+#endif
+
 const double MassConstants::elts_mono[] = {
   1.007825035, // H
   12.0,        // C

@@ -29,7 +29,7 @@ install(FILES license.txt DESTINATION .)
 
 add_custom_target(
   deep-clean
-  COMMAND ${CMAKE_MAKE_PROGRAM} clean
+  COMMAND ${CMAKE_COMMAND} --build . --target clean
   COMMAND ${CMAKE_COMMAND} -E remove CMakeCache.txt
   COMMAND ${CMAKE_COMMAND} -E remove_directory src/external/build
   COMMAND ${CMAKE_COMMAND} -E remove_directory src/external/downloads
@@ -59,10 +59,34 @@ add_custom_target(
 
 add_custom_target(
   no-externals 
-  COMMAND ${CMAKE_MAKE_PROGRAM} crux xlink-predict-peptide-ions  xlink-score-spectrum xlink-assign-ions xlink-predict-peptide-ions
+  COMMAND ${CMAKE_MAKE_PROGRAM} crux  xlink-score-spectrum xlink-assign-ions 
   WORKING_DIRECTORY src/c
   COMMENT "Not building external dependendcies."
 )
+
+add_dependencies(barista comet)
+add_dependencies(bullseye hardklor)
+add_dependencies(comet ProteoWizard)
+add_dependencies(crux barista)
+add_dependencies(crux bullseye)
+add_dependencies(crux crux-support)
+add_dependencies(crux hardklor)
+add_dependencies(crux percolator)
+add_dependencies(crux posterior-error)
+add_dependencies(crux tide-support)
+add_dependencies(crux xlink)
+add_dependencies(crux-support percolator)
+add_dependencies(hardklor comet)
+add_dependencies(percolator ProteoWizard)
+add_dependencies(tide-index tide-support)
+add_dependencies(tide-search tide-support)
+add_dependencies(tide-support ProtocolBuffers)
+add_dependencies(tide-support google-gflags)
+add_dependencies(xlink comet)
+add_dependencies(xlink percolator)
+add_dependencies(xlink ProteoWizard)
+add_dependencies(xlink-assign-ions crux)
+add_dependencies(xlink-score-spectrum crux)
 
 # build a CPack driven installer package
 include (InstallRequiredSystemLibraries)

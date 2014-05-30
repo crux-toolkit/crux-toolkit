@@ -4,7 +4,11 @@
 #include<algorithm>
 #include<iostream>
 #include<stdio.h>
+#ifdef _MSC_VER
+#include<unordered_map>
+#else
 #include<tr1/unordered_map>
+#endif
 #include "mod_coder.h"
 
 using namespace std;
@@ -132,17 +136,17 @@ class VariableModTable {
       pos += next_pos - 1;
       unsigned int limit = 0;
       if (c >= '1' && c <= '9') {
-	sscanf(spec_text + pos, "%u %n", &limit, &next_pos);
+	sscanf(spec_text + pos, "%u%n", &limit, &next_pos);
 	if (limit == UINT_MAX)
 	  return Error(spec_text, pos, "Limit too big.");
 	pos += next_pos;
       }
       int aa_len = -1, plus_pos = -1, delta_pos = -1, end_pos = -1;
       if (mod_table == MOD_SPEC)
-        sscanf(spec_text + pos, "%*[ACDEFGHIKLMNPQRSTVWY]%n %n%*[+-] %n%*[0-9.] %n",
+        sscanf(spec_text + pos, "%*[ACDEFGHIKLMNPQRSTVWY]%n%n%*[+-]%n%*[0-9.]%n",
   	     &aa_len, &plus_pos, &delta_pos, &end_pos);
       else 
-        sscanf(spec_text + pos, "%*[ACDEFGHIKLMNPQRSTVWYX]%n %n%*[+-] %n%*[0-9.] %n",
+        sscanf(spec_text + pos, "%*[ACDEFGHIKLMNPQRSTVWYX]%n%n%*[+-]%n%*[0-9.]%n",
   	     &aa_len, &plus_pos, &delta_pos, &end_pos);
 
       if (aa_len == -1)
@@ -159,7 +163,7 @@ class VariableModTable {
 		     "for one amino acid at a time.");
       int confirm_end_pos = -1;
       double delta;
-      sscanf(spec_text + pos + delta_pos, "%lg %n", &delta, &confirm_end_pos);
+      sscanf(spec_text + pos + delta_pos, "%lg%n", &delta, &confirm_end_pos);
       if (delta_pos + confirm_end_pos != end_pos)
 	return Error(spec_text, pos + delta_pos, "Cannot parse modification "
 		     "amount.");

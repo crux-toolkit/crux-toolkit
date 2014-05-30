@@ -262,8 +262,8 @@ void TideMatchSet::addCruxMatches(
   FLOAT_T* lowest_sp_out
 ) {
 
-  FLOAT_T lnNumSp = log(!decoys ? peptides->ActiveTargets()
-                                : peptides->ActiveDecoys());
+  FLOAT_T lnNumSp = log((FLOAT_T) (!decoys ? peptides->ActiveTargets()
+                                : peptides->ActiveDecoys()));
   
   // Create a Crux match for each match
   vector<Arr::iterator>::const_iterator endIter = min(vec.begin() + top_n, vec.end());

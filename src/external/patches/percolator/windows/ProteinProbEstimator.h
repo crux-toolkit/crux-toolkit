@@ -257,13 +257,7 @@ class Protein {
 class ProteinProbEstimator {
   public:
 
-#ifdef _MSC_VER
-    // Microsoft complier only allows constant integer types
-    // to be set in class definition
-    const static double default_gamma;
-    const static double default_alpha;
-    const static double default_beta;
-#else
+#ifndef _MSC_VER
     const static double default_gamma = 0.5; //0.01;
     const static double default_alpha = 0.1; //0.01;
     const static double default_beta = 0.01;

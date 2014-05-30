@@ -280,7 +280,7 @@ void PinWriter::printPSM(
   );
   if (is_sp_) {
     fprintf(output_file_, "%.*f\t",
-      precision_, match->getRank(SP) > 0 ? log(match->getRank(SP)) : 0 // lnrSp
+      precision_, match->getRank(SP) > 0 ? log((double) match->getRank(SP)) : 0 // lnrSp
     );
   }
   fprintf(output_file_, "%.*f\t%.*f\t%.*f\t",

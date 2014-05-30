@@ -2,7 +2,9 @@
 //
 
 #include <stdio.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 #include <string>
 #include <vector>
 #include <algorithm>
@@ -118,6 +120,7 @@ class ModsOutputter {
     writers_[index]->Write(peptide_);
     peptide_->set_mass(mass);
 
+    return writers_[index];
   }
 
   const vector<const pb::Protein*>& proteins_;
@@ -394,24 +397,24 @@ struct greater_pepreader
 
 void ModsOutputter::Merge() {
   int num_files = writers_.size();
-  PepReader* readers[num_files];
+  vector<PepReader*> readers(num_files);
   for (int i = 0; i < num_files; ++i)
     readers[i] = new PepReader(GetTempName(i));
 
   // initialize heap
-  PepReader** heap_end = readers + num_files;
-  for (PepReader** reader = readers; reader < heap_end; ++reader)
+  PepReader** heap_end = &(readers[0]) + num_files;
+  for (PepReader** reader = &(readers[0]); reader < heap_end; ++reader)
     if (!(*reader)->Advance())
       swap(*reader--, *--heap_end);
-  make_heap(readers, heap_end, greater_pepreader());
+  make_heap(&(readers[0]), heap_end, greater_pepreader());
   
   // do heap merge
   int id = 0;
 #ifndef NDEBUG
   double last_mass = 0.0;
 #endif
-  while (heap_end > readers) {
-    pop_heap(readers, heap_end, greater_pepreader());
+  while (heap_end > &(readers[0])) {
+    pop_heap(&(readers[0]), heap_end, greater_pepreader());
     pb::Peptide* current = (*(heap_end-1))->Current();
     current->set_id(id++);
 #ifndef NDEBUG
@@ -421,7 +424,7 @@ void ModsOutputter::Merge() {
     final_writer_->Write(current);
     CHECK(final_writer_->OK());
     if ((*(heap_end-1))->Advance()) {
-      push_heap(readers, heap_end, greater_pepreader());
+      push_heap(&(readers[0]), heap_end, greater_pepreader());
     } else {
       --heap_end;
     }

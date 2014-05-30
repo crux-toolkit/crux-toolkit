@@ -447,14 +447,17 @@ void GenerateDecoys::cleaveProtein(
         outPeptides.push_back(make_pair(sequence.substr(j), j));
       }
     }
-    // Erase peptides that don't meet length requirement
-    for (vector< pair<string, int> >::reverse_iterator i = outPeptides.rbegin();
-         i != outPeptides.rend();
-         ++i) {
+	// Erase peptides that don't meet length requirement
+    for (vector< pair<string, int> >::iterator i = outPeptides.begin();
+		i != outPeptides.end();
+		) {
       if (i->first.length() < minLength || i->first.length() > maxLength) {
-        outPeptides.erase((i + 1).base());
+        i = outPeptides.erase(i);
       }
-    }
+	  else {
+		  ++i;
+	  }
+	}
   } else {
     // No enzyme
     // Get all substrings min <= length <= max

@@ -527,7 +527,7 @@ static inline std::string &ltrim(
   str.erase(
     str.begin(),
     std::find_if(str.begin(), str.end(),
-    std::not1(std::ptr_fun<int, int>(std::isspace))));
+    std::not1(std::ptr_fun<int, int>(isspace))));
   return str;
 }
 
@@ -540,7 +540,7 @@ static inline std::string &rtrim(
 
   str.erase(
     std::find_if(str.rbegin(), str.rend(),
-    std::not1(std::ptr_fun<int, int>(std::isspace))).base(),
+    std::not1(std::ptr_fun<int, int>(isspace))).base(),
     str.end());
   return str;
 }

@@ -31,6 +31,18 @@ include_directories(${CMAKE_BINARY_DIR}/src/external/build/src/percolator/src/)
 include_directories(${CMAKE_BINARY_DIR}/src/external/build/src/percolator/src/fido)
 include_directories(${CMAKE_BINARY_DIR}/src/external/build/src/percolator-build/src/)
 include_directories(${CMAKE_BINARY_DIR}/src/external/build/src/percolator-build/src/fido)
+if (WIN32 AND NOT Cygwin)
+  # Needed to put DLL containing type libraries
+  # in include path for Windows
+  include_directories(${CMAKE_BINARY_DIR}/src/external/lib)
+  # Needed to include gflags/gflags.h on Windows
+  include_directories(${CMAKE_BINARY_DIR}/src/external/build/src/google-gflags/src/windows)
+  # Needed to include google/protobuf on Windows
+  include_directories(${CMAKE_BINARY_DIR}/src/external/build/src/ProtocolBuffers/src)
+  SET(CMAKE_EXE_LINKER_FLAGS_DEBUG  "${CMAKE_EXE_LINKER_FLAGS} /VERBOSE:LIB /NODEFAULTLIB:MSVCRT" )
+  #  Need Comet base directory for Windows
+  include_directories(${CMAKE_BINARY_DIR}/src/external/build/src/comet/)
+endif (WIN32 AND NOT Cygwin)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/tide/protoobj)
 
 
@@ -221,22 +233,34 @@ else (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 endif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
 add_executable(crux crux-main.cpp)
-set_property(
-  TARGET
-  crux
-  PROPERTY
-  COMPILE_DEFINITIONS
-  MAIN
-)
+if (WIN32 AND NOT CYGWIN)
+  set_property(
+    TARGET crux 
+    PROPERTY 
+      COMPILE_DEFINITIONS 
+      MAIN
+      GFLAGS_DLL_DECL= 
+      GFLAGS_DLL_DECLARE_FLAG= 
+      GFLAGS_DLL_DEFINE_FLAG=
+  )
+else (WIN32 AND NOT CYGWIN)
+  set_property(
+    TARGET
+    crux
+    PROPERTY
+    COMPILE_DEFINITIONS
+    MAIN
+  )
+endif (WIN32 AND NOT CYGWIN)
 
-add_executable(xlink-predict-peptide-ions xlink/xhhc_predict_peptide_ions.cpp)
-set_property(
-  TARGET
-  xlink-predict-peptide-ions
-  PROPERTY
-  COMPILE_DEFINITIONS
-  MAIN
-)
+if (WIN32 AND NOT CYGWIN)
+  # These definititions are needed to set the
+  # the proper calling conventions (static lib)
+  # for Boost and expat. Expat is used in the
+  # MSToolkit library.
+  add_definitions(-DBOOST_ALL_NO_LIB)
+  add_definitions(-DXML_STATIC)
+endif (WIN32 AND NOT CYGWIN)
 
 add_executable(xlink-score-spectrum xlink/xhhc_score_peptide_spectrum.cpp)
 set_property(
@@ -263,43 +287,124 @@ else(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set(RT_LIBRARY "rt")
 endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
-if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+if (WIN32 AND NOT CYGWIN)
   target_link_libraries(
     crux
     barista
     bullseye
-    crux-support
     hardklor
-    cometsearch
-    mstoolkitlite
-    perclibrary
+    CometSearch
     posterior_error
+    perclibrary
+    fido
     xlink
+    gflags
+    crux-support
+    tide-support
+    mstoolkitlite
+    protobuf
+    libpwiz_data_identdata
+    libpwiz_data_identdata_version
+    libpwiz_data_misc
+    libpwiz_data_msdata
+    libpwiz_data_msdata_version
+    libpwiz_data_proteome
+    libpwiz_data_common
+    libpwiz_utility_chemistry
+    libpwiz_utility_minimxml
+    libpwiz_utility_misc
+    libpwiz_version
+    libSHA1
+    libzlib.lib 
     ws2_32
+    optimized libboost_regex-vc100-mt
+    optimized libboost_system-vc100-mt
+    optimized libboost_iostreams-vc100-mt
+    optimized libboost_nowide-vc100-mt
+    optimized libboost_filesystem-vc100-mt
+    optimized libboost_thread-vc100-mt
+    debug libboost_nowide-vc100-mt-gd
+    debug libboost_regex-vc100-mt-gd
+    debug libboost_system-vc100-mt-gd
+    debug libboost_iostreams-vc100-mt-gd
+    debug libboost_filesystem-vc100-mt-gd
+    debug libboost_thread-vc100-mt-gd
   )
   target_link_libraries(
-    xlink-predict-peptide-ions
-    xlink
+    xlink-score-spectrum
     crux-support
-    cometsearch
+    xlink
     mstoolkitlite
+    libpwiz_data_common
+    libpwiz_data_identdata
+    libpwiz_data_identdata_version
+    libpwiz_data_misc
+    libpwiz_data_msdata
+    libpwiz_data_msdata_version
+    libpwiz_data_proteome
+    libpwiz_utility_chemistry
+    libpwiz_utility_minimxml
+    libpwiz_utility_misc
+    libSHA1
+    libzlib.lib 
     ws2_32
   )
   target_link_libraries(
     xlink-score-spectrum
-    xlink
+    optimized libboost_system-vc100-mt
+    optimized libboost_iostreams-vc100-mt
+    optimized libboost_filesystem-vc100-mt
+    optimized libboost_nowide-vc100-mt
+    optimized libboost_regex-vc100-mt
+    optimized libboost_thread-vc100-mt
+  )
+  target_link_libraries(
+    xlink-score-spectrum
+    debug libboost_system-vc100-mt-gd
+    debug libboost_iostreams-vc100-mt-gd
+    debug libboost_filesystem-vc100-mt-gd
+    debug libboost_nowide-vc100-mt-gd
+    debug libboost_regex-vc100-mt-gd
+    debug libboost_thread-vc100-mt-gd
+  )
+  target_link_libraries(
+    xlink-assign-ions
     crux-support
+    xlink
     mstoolkitlite
+    libpwiz_data_common
+    libpwiz_data_identdata
+    libpwiz_data_identdata_version
+    libpwiz_data_misc
+    libpwiz_data_msdata
+    libpwiz_data_msdata_version
+    libpwiz_data_proteome
+    libpwiz_utility_chemistry
+    libpwiz_utility_minimxml
+    libpwiz_utility_misc
+    libSHA1
+    libzlib.lib 
     ws2_32
   )
   target_link_libraries(
     xlink-assign-ions
-    xlink
-    crux-support
-    mstoolkitlite
-    ws2_32
+    optimized libboost_system-vc100-mt
+    optimized libboost_iostreams-vc100-mt
+    optimized libboost_filesystem-vc100-mt
+    optimized libboost_nowide-vc100-mt
+    optimized libboost_regex-vc100-mt
+    optimized libboost_thread-vc100-mt
   )
-else(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  target_link_libraries(
+    xlink-assign-ions
+    debug libboost_system-vc100-mt-gd
+    debug libboost_iostreams-vc100-mt-gd
+    debug libboost_filesystem-vc100-mt-gd
+    debug libboost_nowide-vc100-mt-gd
+    debug libboost_regex-vc100-mt-gd
+    debug libboost_thread-vc100-mt-gd
+  )
+else()
   target_link_libraries(
     crux
     barista
@@ -339,38 +444,8 @@ else(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     boost_regex-mt-s
     boost_thread-mt-s
     pthread
-
   )
     
-  target_link_libraries(
-    xlink-predict-peptide-ions
-    dl
-    m
-    ${RT_LIBRARY}
-    xlink
-    crux-support
-    mstoolkitlite
-    pwiz_data_msdata
-    pwiz_data_common
-    pwiz_data_identdata
-    pwiz_data_msdata_version
-    pwiz_data_misc
-    pwiz_utility_chemistry
-    pwiz_utility_misc
-    pwiz_utility_minimxml
-    pwiz_data_common
-    pwiz_data_identdata
-    pwiz_data_identdata_version
-    pwiz_data_proteome
-    SHA1
-    boost_system-mt-s
-    boost_iostreams-mt-s
-    z-mt-s-1_2
-    boost_filesystem-mt-s
-    boost_regex-mt-s
-    boost_thread-mt-s
-    pthread
-  )
   target_link_libraries(
     xlink-score-spectrum
     dl
@@ -429,12 +504,11 @@ else(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     boost_thread-mt-s
     pthread
   )
-endif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+endif(WIN32 AND NOT CYGWIN)
 
 install (
   TARGETS
   crux
-  xlink-predict-peptide-ions
   xlink-score-spectrum
   xlink-assign-ions
   DESTINATION

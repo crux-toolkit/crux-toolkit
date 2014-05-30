@@ -11,7 +11,9 @@
 
 // For printing uint64_t values
 #define __STDC_FORMAT_MACROS
+#ifndef _MSC_VER
 #include <inttypes.h>
+#endif
 
 int SpectrumRecordWriter::scanCounter_ = 0;
 int SpectrumRecordWriter::removePrecursorPeak_ = 0;

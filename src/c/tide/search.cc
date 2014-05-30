@@ -142,6 +142,8 @@ void CollectScoresCompiled(ActivePeptideQueue* active_peptide_queue,
   // doesn't understand that %ecx and %edi (or %rcx and %rdi) get
   // clobbered. Since they're already input registers, they can't be
   // included in the clobber list.
+#ifdef _MSC_VER
+#else
   __asm__ __volatile__("cld\n" // stos operations increment edi
 #ifdef __x86_64__
                        "push %%rcx\n"
@@ -162,6 +164,7 @@ void CollectScoresCompiled(ActivePeptideQueue* active_peptide_queue,
                          "c" (queue_size),
                          "D" (results)
 		       );
+#endif
 
   // match_arr is filled by the compiled programs, not by calls to
   // push_back(). We have to set the final size explicitly.

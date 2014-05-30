@@ -21,9 +21,9 @@ DEFINE_bool(dups_ok, false, "Don't remove duplicate peaks");
 #endif
 
 string Peptide::SeqWithMods() const {
-  char buf[Len() + num_mods_ * 30 + 1];
+  vector<char> buf(Len() + num_mods_ * 30 + 1);
   int residue_pos = 0;
-  char* buf_pos = buf;
+  char* buf_pos = &(buf[0]);
   for (int i = 0; i < num_mods_; ++i) {
     int index;
     double delta;
@@ -35,7 +35,7 @@ string Peptide::SeqWithMods() const {
   while (residue_pos < Len())
     *buf_pos++ = residues_[residue_pos++];
   *buf_pos = '\0';
-  return buf;
+  return &(buf[0]);
 }
 
 void Peptide::Show() {
@@ -71,8 +71,8 @@ void Peptide::AddIons(W* workspace) const {
   if (MaxMZ::Global().MaxBin() > 0)
     max_possible_peak = MaxMZ::BinInvert(MaxMZ::Global().CacheBinEnd());
 
-  double masses_charge_1[Len()];
-  double masses_charge_2[Len()];
+  vector<double> masses_charge_1(Len());
+  vector<double> masses_charge_2(Len());
   const char* residue = residues_;
   // Collect m/z values for each residue, for z = 1, 2.
   for (int i = 0; i < Len(); ++i, ++residue) {
@@ -192,8 +192,12 @@ void Peptide::ComputeTheoreticalPeaks(ST_TheoreticalPeakSet* workspace,
 int NoInlineDotProd(Peptide* peptide, const int* cache, int charge) {
   const void* prog = peptide->Prog(charge);
   int result;
+#ifdef _MSC_VER
+  // FIXME CEG add Windows compatible inline assembly
+#else
   __asm__ __volatile__("call *%[prog]\n"
                        : "=a" (result)
                        : "d" (cache), [prog] "abcSD" (prog));
+#endif
   return result;
 }
