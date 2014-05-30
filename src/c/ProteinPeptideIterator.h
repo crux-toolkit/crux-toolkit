@@ -11,6 +11,7 @@
 #include "Protein.h"
 #include "Peptide.h"
 
+#include <iterator>
 #include <vector>
 
 class ProteinPeptideIterator {

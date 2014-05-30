@@ -40,7 +40,7 @@ static void SubtractBackground(double* observed, int end) {
   static const double multiplier = 1.0 / (MAX_XCORR_OFFSET * 2);
 
   double total = 0;
-  double partial_sums[end+1];
+  vector<double> partial_sums(end+1);
   for (int i = 0; i < end; ++i)
     partial_sums[i] = (total += observed[i]);
   partial_sums[end] = total;

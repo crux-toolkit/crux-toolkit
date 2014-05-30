@@ -8,6 +8,10 @@
 #include "tide/modifications.h"
 #include "tide/records_to_vector-inl.h"
 
+#ifdef _MSC_VER
+#include <io.h>
+#endif
+
 extern void AddTheoreticalPeaks(const vector<const pb::Protein*>& proteins,
                         				const string& input_filename,
                         				const string& output_filename);
@@ -458,17 +462,18 @@ void TideIndexApplication::fastaToPb(
       missedCleavages, minLength, maxLength, cleavedPeptides);
     // Iterate over all generated peptides for this protein
     for (vector<PeptideInfo>::iterator i = cleavedPeptides.begin();
-         i != cleavedPeptides.end();
-         ++i) {
+         i != cleavedPeptides.end(); ) {
       const string& cleavedSequence = i->first;
       FLOAT_T pepMass = calcPepMassTide(cleavedSequence, massType);
       if (pepMass < 0.0) {
         // Sequence contained some invalid character
         carp(CARP_WARNING, "Ignoring invalid sequence <%s>",
              cleavedSequence.c_str());
+        i = cleavedPeptides.erase(i);
         continue;
       } else if (pepMass < minMass || pepMass > maxMass) {
         // Skip to next peptide if not in mass range
+        ++i;
         continue;
       }
       const int startLoc = i->second;
@@ -485,6 +490,7 @@ void TideIndexApplication::fastaToPb(
           setTarget, TargetInfo(proteinInfo, startLoc, pepMass))).first->second;
       }
       ++targetsGenerated;
+      ++i;
     }
     proteinSequence = new string;
   }

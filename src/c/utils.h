@@ -12,9 +12,6 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "boost/random/mersenne_twister.hpp"
-#include "boost/random/uniform_int_distribution.hpp"
-
 /*#ifndef linux
 #include <ieeefp.h>
 #endif*/
@@ -305,7 +302,6 @@ char** parse_file(
   );
 
 
-boost::mt19937& get_mt19937();
 int myrandom();
 int myrandom_limit(int max);
 void mysrandom(unsigned seed);

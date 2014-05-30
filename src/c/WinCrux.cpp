@@ -4,23 +4,20 @@
  */
 
 #include <stdlib.h>
+#include <time.h>
+#include <Winsock2.h>
 #include "carp.h"
 #include "utils.h"
 #include "WinCrux.h"
-#include <time.h>
-#include <windows.h>
 #include <iostream>
 #include <vector>
+
 
 using namespace std;
 
 // Windows GetTimeOfDay() code from http://www.suacommunity.com/dictionary/index.php
 
-#if defined(_MSC_VER) || defined(_MSC_EXTENSIONS)
-  #define DELTA_EPOCH_IN_MICROSECS  11644473600000000Ui64
-#else
-  #define DELTA_EPOCH_IN_MICROSECS  11644473600000000ULL
-#endif
+#define DELTA_EPOCH_IN_MICROSECS  11644473600000000Ui64
  
 struct timezone
 {
@@ -118,9 +115,6 @@ Sean Barrett, in November 2007. Do with it as you will.
 (Seee the page for stb_vorbis or the mollyrocket source 
 page for a longer description of the public domain non-license). 
 */ 
-
-#define WIN32_LEAN_AND_MEAN 
-#include <windows.h> 
 
 // Public domain code from https://mollyrocket.com/forums/viewtopic.php?p=2529
 // map 'filename' and return a pointer to it. fill out *length and *un if not-NULL 

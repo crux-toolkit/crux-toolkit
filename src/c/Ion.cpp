@@ -17,8 +17,10 @@
 #ifndef _MSC_VER
 #include <netinet/in.h>
 #include <inttypes.h>
-#endif
+#else
+#include <Winsock2.h>
 #include "WinCrux.h"
+#endif
 
 using namespace Crux;
 

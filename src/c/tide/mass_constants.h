@@ -25,8 +25,15 @@ class MassConstants {
   static const double elts_mono[];
   static const double elts_avg[];
 
+#ifdef _MSC_VER
+  // The windows compiler only allows intialization
+  // of static constant integer types within a class
+  static const double proton;
+  static const double bin_width;
+#else
   static const double proton = 1.00727646688;
   static const double bin_width = 1.0005079;
+#endif
 
   static bool Init(const pb::ModTable* mod_table);
 
@@ -41,7 +48,13 @@ class MassConstants {
   static const double mono_co;
 
   // Fixed-Point Versions
+#ifdef _MSC_VER
+  // The windows compiler only allows intialization
+  // of static constant integer types within a class
+  static const double kFixedPointScalar;
+#else
   static const double kFixedPointScalar = 1e5;
+#endif
   static FixPt ToFixPt(double x) {
     return FixPt(x * kFixedPointScalar + 0.5);
   }

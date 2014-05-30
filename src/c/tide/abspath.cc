@@ -1,4 +1,9 @@
+#ifdef _MSC_VER
+#include <direct.h>
+#define getcwd _getcwd
+#else
 #include <unistd.h>
+#endif
 #include <stdlib.h>
 #include <string>
 #include "abspath.h"

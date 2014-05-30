@@ -428,6 +428,21 @@ void TideSearchApplication::collectScoresCompiled(
   // doesn't understand that %ecx and %edi (or %rcx and %rdi) get
   // clobbered. Since they're already input registers, they can't be
   // included in the clobber list.
+
+#ifdef _MSC_VER
+  __asm {
+    cld
+    push ecx
+    push edi
+    mov edx, cache
+    mov eax, prog
+    mov ecx, queue_size
+    mov edi, results
+    call eax
+    pop edi
+    pop ecx
+  }
+#else
   __asm__ __volatile__("cld\n" // stos operations increment edi
 #ifdef __x86_64__
                        "push %%rcx\n"
@@ -448,6 +463,7 @@ void TideSearchApplication::collectScoresCompiled(
                          "c" (queue_size),
                          "D" (results)
   );
+#endif
 
   // match_arr is filled by the compiled programs, not by calls to
   // push_back(). We have to set the final size explicitly.

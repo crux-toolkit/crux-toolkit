@@ -6,17 +6,18 @@
  * COPYRIGHT: 1997-2001 Columbia University
  * DESCRIPTION: Various useful generic utilities.
  ********************************************************************/
-#include <stdio.h>
-#include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
-#ifndef _MSC_VER
+#ifdef _MSC_VER
+#include <Winsock2.h>
+#else
 #include <sys/time.h>
 #include <unistd.h> 
 #endif
-#include <math.h>
 #include <assert.h>
 #include <errno.h>
+#include "boost/random/mersenne_twister.hpp"
+#include "boost/random/uniform_int_distribution.hpp"
 #include "utils.h"
 #include "carp.h"
 #include "WinCrux.h"
@@ -102,10 +103,10 @@ double NaN
  * Return elapsed time in microseconds since the last call.
  ***********************************************************************/
 double wall_clock(){
-  struct timeval tp;
+  static int first_call = 1;
   static double first_time;
   double t;
-  static int first_call = 1;
+  struct timeval tp;
 
   gettimeofday(&tp, NULL);
   if(first_call == 1){
@@ -119,7 +120,6 @@ double wall_clock(){
     t = t - first_time;
   }
   return (double) t;
-
 }
 
 /************************************************************************
@@ -439,13 +439,17 @@ static const int MAX_HOST_NAME = 100;
 const char* hostname
  ()
 {
-   static char the_hostname[MAX_HOST_NAME];
-   int result = gethostname(the_hostname, MAX_HOST_NAME);
-   if (result != 0) {
-     snprintf(the_hostname, MAX_HOST_NAME, "unknown");
-   }
+  static char the_hostname[MAX_HOST_NAME];
+#ifdef _MSC_VER
+  WSADATA wsaData;
+  WSAStartup(MAKEWORD(2, 2), &wsaData);
+#endif
+  int result = gethostname(the_hostname, MAX_HOST_NAME);
+  if (result != 0) {
+    snprintf(the_hostname, MAX_HOST_NAME, "unknown");
+  }
 
-   return(the_hostname);
+  return(the_hostname);
 }
 
 /************************************************************************//**

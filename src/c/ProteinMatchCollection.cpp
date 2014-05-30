@@ -45,7 +45,7 @@ ProteinMatchCollection::~ProteinMatchCollection() {
   }
 
   // delete modified aa strings + peptide matches
-  for (map<MODIFIED_AA_T*, PeptideMatch*>::iterator iter = peptide_match_map_.begin();
+  for (map<MODIFIED_AA_T*, PeptideMatch*, cmpSeq>::iterator iter = peptide_match_map_.begin();
        iter != peptide_match_map_.end();
        ++iter) {
       free(iter->first);
@@ -176,7 +176,7 @@ ProteinMatch* ProteinMatchCollection::getProteinMatch(
 PeptideMatch* ProteinMatchCollection::getPeptideMatch(
   MODIFIED_AA_T* mod_seq ///< Modified Sequence to find
   ) {
-  map<MODIFIED_AA_T*, PeptideMatch*>::iterator iter = peptide_match_map_.find(mod_seq);
+  map<MODIFIED_AA_T*, PeptideMatch*, cmpSeq>::iterator iter = peptide_match_map_.find(mod_seq);
   return (iter != peptide_match_map_.end()) ? iter->second : NULL;
 }
 

@@ -4,15 +4,15 @@
  */
 
 #include <sys/types.h>
-#include <sys/dir.h>
-#include <dirent.h>
 #include <fstream>
 #include <errno.h>
 #include <sys/stat.h>
 #ifndef _MSC_VER
 #include <unistd.h>
-#include <iostream>
+#include <sys/dir.h>
+#include <dirent.h>
 #endif
+#include <iostream>
 #include "crux-utils.h"
 #include "parameter.h"
 #include "Index.h"
@@ -633,8 +633,8 @@ char* copy_string_part(const char* src, int length){
  * E.g. is_equal(0.10, 0.14, 1) -> true. is_equal(0.10, 0.15, 1) -> false
  */
 bool is_equal(FLOAT_T a, FLOAT_T b, int precision){
-  a = (a * pow(10.0, (FLOAT_T) precision)) + 0.5;
-  b = (b * pow(10.0, (FLOAT_T) precision)) + 0.5;
+  a = (a * pow((FLOAT_T) 10.0, (FLOAT_T) precision)) + 0.5;
+  b = (b * pow((FLOAT_T) 10.0, (FLOAT_T) precision)) + 0.5;
 
   if( (int)a == (int)b ){
     return true;

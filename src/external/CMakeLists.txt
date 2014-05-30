@@ -13,26 +13,6 @@ endif (UNIX)
 SET(ENV{CMAKE_PREFIX_PATH} ${CMAKE_CURRENT_BINARY_DIR})
 SET(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR})
 
-# Set up quickbuild arguments used by pwiz build.
-# quickbuild.sh is the script provided by proteowizard 
-# to bootstrap bjam and to run bjam for building the external
-# libraries and Proteowizard components..
-if (WIN32 AND NOT CYGWIN)
-  set(protwiz_args ./quickbuild.bat)
-  set(protwiz_args ${protwiz_args} --toolset=msvc-10.0)
-  set(protwiz_args ${protwiz_args} --i-agree-to-the-vendor-licenses)
-  set(protwiz_args ${protwiz_args} --without-mz5)
-  set(protwiz_args ${protwiz_args} --prefix=${CMAKE_CURRENT_BINARY_DIR})
-  set(protwiz_args ${protwiz_args} libraries)
-else(WIN32 AND NOT CYGWIN)
-  set(protwiz_args ./quickbuild.sh)
-  set(protwiz_args ${protwiz_args} --without-binary-msdata)
-  set(protwiz_args ${protwiz_args} --layout=system)
-  set(protwiz_args ${protwiz_args} --prefix=${CMAKE_CURRENT_BINARY_DIR})
-  set(protwiz_args ${protwiz_args} runtime-link=shared)
-  set(protwiz_args ${protwiz_args} libraries)
-endif (WIN32 AND NOT CYGWIN)
-
 # Download and build a partial distribution of the pwiz source
 # from the ProteoWizard TeamCity repository.
 if (WIN32 AND NOT CYGWIN)
@@ -40,30 +20,52 @@ if (WIN32 AND NOT CYGWIN)
     ProteoWizard
     DOWNLOAD_COMMAND 
       ${CMAKE_COMMAND} 
-        -DDOWNLOAD_DIR:STRING=${CMAKE_CURRENT_BINARY_DIR}/downloads
-        -DWORKING_DIR:STRING=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
+        -DDOWNLOAD_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/downloads
+        -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
         -P  ${CMAKE_CURRENT_SOURCE_DIR}/download_pwiz.cmake
     DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/downloads
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${protwiz_args}
+    BUILD_COMMAND 
+      ${CMAKE_COMMAND} 
+      	-DBUILD_TYPE:STRING=${CMAKE_CFG_INTDIR}
+        -DPREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
+        -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
+        -P  ${CMAKE_CURRENT_SOURCE_DIR}/build_pwiz.cmake
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE 1
+  )
+  # On Windows we have to do some extra house keeping
+  ExternalProject_Add_Step(
+    ProteoWizard
+    windows_post_install
+    COMMAND
+      ${CMAKE_COMMAND} 
+        -DBUILD_TYPE:STRING=${CMAKE_CFG_INTDIR}
+        -DPREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
+        -P  ${CMAKE_CURRENT_SOURCE_DIR}/post_install_pwiz.cmake
+    DEPENDEES install
   )
 else (WIN32 AND NOT CYGWIN)
   ExternalProject_Add(
     ProteoWizard
     DOWNLOAD_COMMAND 
       ${CMAKE_COMMAND} 
-        -DDOWNLOAD_DIR:STRING=${CMAKE_CURRENT_BINARY_DIR}/downloads
-        -DWORKING_DIR:STRING=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
+        -DDOWNLOAD_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/downloads
+        -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
         -P  ${CMAKE_CURRENT_SOURCE_DIR}/download_pwiz.cmake
     DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/downloads
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${protwiz_args}
+    BUILD_COMMAND 
+      ${CMAKE_COMMAND} 
+      	-DBUILD_TYPE:STRING=${CMAKE_CFG_INTDIR}
+        -DPREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
+        -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
+        -P  ${CMAKE_CURRENT_SOURCE_DIR}/build_pwiz.cmake
     INSTALL_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/create_links.sh 
       --prefix=${CMAKE_CURRENT_BINARY_DIR}
+    INSTALL_COMMAND ""
     BUILD_IN_SOURCE 1
   )
 endif (WIN32 AND NOT CYGWIN)
@@ -77,7 +79,7 @@ if (WIN32 AND NOT CYGWIN)
     CMAKE_ARGS -DCMAKE_VERBOSE_MAKEFILE=ON
       -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}
       -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}
-      -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+      -DCMAKE_BUILD_TYPE=${CMAKE_CFG_INTDIR}
     PATCH_COMMAND ""
   )
   # On Windows we use this to patch percolator
@@ -85,8 +87,26 @@ if (WIN32 AND NOT CYGWIN)
     percolator
     windows_patch
     COMMAND ${CMAKE_COMMAND} -E copy 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/windows/FidoInterface.cpp
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/FidoInterface.cpp
+    COMMAND ${CMAKE_COMMAND} -E copy 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/windows/ProteinFDRestimator.cpp
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/ProteinFDRestimator.cpp
+    COMMAND ${CMAKE_COMMAND} -E copy 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/windows/ProteinProbEstimator.cpp
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/ProteinProbEstimator.cpp
+    COMMAND ${CMAKE_COMMAND} -E copy 
       ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_find_boost/CMakeLists.txt 
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
+    COMMAND ${CMAKE_COMMAND} -E copy 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/windows/fido/Numerical.h
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/fido/Numerical.h
+    COMMAND ${CMAKE_COMMAND} -E copy 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/windows/fido/Numerical.cpp
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/fido/Numerical.cpp
+    COMMAND ${CMAKE_COMMAND} -E copy 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/windows/fido/GroupPowerBigraph.cpp
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/fido/GroupPowerBigraph.cpp
     DEPENDEES patch
     DEPENDERS configure
   )
@@ -159,11 +179,22 @@ elseif (WIN32 AND NOT CYGWIN)
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProtocolBuffers/vsprojects/
     CONFIGURE_COMMAND ""
     BUILD_COMMAND msbuild 
-      /p:Configuration=Debug 
+      /p:Configuration=${CMAKE_CFG_INTDIR}
       /p:Platform=Win32 
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProtocolBuffers/vsprojects/protobuf.sln
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE 1
+  )
+  ExternalProject_Add_Step(
+    ProtocolBuffers
+    copy_binaries
+    COMMAND ${CMAKE_COMMAND} -E copy 
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProtocolBuffers/vsprojects/${CMAKE_CFG_INTDIR}/protoc.exe
+      ${CMAKE_CURRENT_BINARY_DIR}/bin/protoc.exe
+    COMMAND ${CMAKE_COMMAND} -E copy 
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProtocolBuffers/vsprojects/${CMAKE_CFG_INTDIR}/libprotobuf.lib
+      ${CMAKE_CURRENT_BINARY_DIR}/lib/protobuf.lib
+    DEPENDEES install
   )
 endif (UNIX)
 
@@ -195,11 +226,19 @@ elseif (WIN32 AND NOT CYGWIN)
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/google-gflags/vsprojects/libgflags/
     CONFIGURE_COMMAND ""
     BUILD_COMMAND msbuild 
-      /p:Configuration=Debug 
+      /p:Configuration=${CMAKE_CFG_INTDIR} 
       /p:Platform=Win32 
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/google-gflags/vsprojects/libgflags/libgflags.vcxproj
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE 1
+  )
+  ExternalProject_Add_Step(
+    google-gflags
+    copy_gflags_library
+    COMMAND ${CMAKE_COMMAND} -E copy 
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/google-gflags/vsprojects/libgflags/${CMAKE_CFG_INTDIR}/libgflags.lib
+      ${CMAKE_CURRENT_BINARY_DIR}/lib/gflags.lib
+    DEPENDEES install
   )
 endif (UNIX)
 
@@ -276,7 +315,7 @@ elseif (WIN32 AND NOT CYGWIN)
   set(LIBPATH "${CMAKE_CURRENT_BINARY_DIR}/lib;")
   ExternalProject_Add(
     comet
-    SVN_REPOSITORY http://svn.code.sf.net/p/comet-ms/code/tags/release_2013022@232
+    SVN_REPOSITORY http://svn.code.sf.net/p/comet-ms/code/tags/release_2013022
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     UPDATE_COMMAND ""
     # Copy the Comet and MSToolkit include files and libraries to
@@ -285,15 +324,30 @@ elseif (WIN32 AND NOT CYGWIN)
       ${CMAKE_COMMAND} -E copy_directory 
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/MSToolkit/include
       ${CMAKE_CURRENT_BINARY_DIR}/include/MSToolkit/
+    PATCH_COMMAND 
+      ${CMAKE_COMMAND} -E copy 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/Comet.rc
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/
     BUILD_COMMAND 
       ${CMAKE_COMMAND} 
         -DLIBPATH:STRING="${LIBPATH}"
-        -DMSBUILD_ARGS:STRING=/p:Configuration=Release
+        -DMSBUILD_ARGS:STRING=/p:Configuration=${CMAKE_CFG_INTDIR}
         -DPROJ_FILE:STRING=comet.sln
         -P ${CMAKE_CURRENT_SOURCE_DIR}/build-comet.cmake
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE 1
   )  
+  ExternalProject_Add_Step(
+    comet
+    copy_comet_library
+    COMMAND ${CMAKE_COMMAND} -E copy 
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/Win32/${CMAKE_CFG_INTDIR}/CometSearch.lib
+      ${CMAKE_CURRENT_BINARY_DIR}/lib/CometSearch.lib
+    COMMAND ${CMAKE_COMMAND} -E copy 
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/Win32/${CMAKE_CFG_INTDIR}/MSToolkitLite.lib
+      ${CMAKE_CURRENT_BINARY_DIR}/lib/MSToolkitLite.lib
+    DEPENDEES install
+  )
 endif (UNIX)
 
 add_dependencies(percolator Proteowizard)

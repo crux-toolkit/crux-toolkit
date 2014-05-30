@@ -2,12 +2,11 @@
 #define WINCRUX_H
 
 #ifdef _MSC_VER
+#define WIN32_LEAN_AND_MEAN
 #include <direct.h>
 #include <fcntl.h>
 #include <io.h>
 #include <string.h>
-#include <time.h>
-#include <WinSock2.h>
 #include <windows.h>
 #include "utils.h"
 #include "windirent.h"

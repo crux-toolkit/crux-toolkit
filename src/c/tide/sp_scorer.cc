@@ -36,7 +36,7 @@ bool SpScorer::IonLookup(double mass, int charge, bool previous_ion_matched,
 
 void SpScorer::Score(const pb::Peptide& pb_peptide, SpScoreData& sp_score_data) {
   Peptide peptide(pb_peptide, proteins_);
-  double m_z[peptide.Len()];
+  vector<double> m_z(peptide.Len());
   string sequence = peptide.Seq();
 
   // Collect m/z values for each residue
