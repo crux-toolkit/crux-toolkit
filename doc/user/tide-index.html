@@ -128,11 +128,11 @@ average mass values.  Default = T.</li>
 
 </ul>
 
+<!--
 <h3>Theoretical peptide generation</h3>
 
 <ul>
 
-<!--
 <li>
 <code>--max-ion-charge 1|2|3|peptide</code> &ndash; Predict fragment
 ions up to this charge-state. The integer options ('1', '2', and '3')
@@ -147,9 +147,9 @@ moment because the value is hardcoded throughout tide (including some
 of the asm related code which I do not understand yet)."
  -- Kaipo, October 16, 2013
 
--->
 
 </ul>
+-->
 
 <h3>Amino acid modifications</h3>
 
@@ -186,12 +186,12 @@ C+57.02146 modification is turned on.</li>
 -->
 
 <p>
-These parameters specify peptide n-terminal, c-terminal modifications,
-respectively. Like <code>--mods-spec</code>, these specifications have
-three components, but with a sightly different syntax.
-The <code><red>max_per_peptide</red></code> can be either be "1", in
-which case it defines a variable terminal modification, or missing, in
-which case the modification is static.
+These parameters specify peptide n-terminal and c-terminal
+modifications, respectively. Like <code>--mods-spec</code>, these
+specifications have three components, but with a sightly different
+syntax.  The <code><red>max_per_peptide</red></code> can be either
+"1", in which case it defines a variable terminal modification, or
+missing, in which case the modification is static.
 The <code><green>residues</green></code> field indicates which amino
 acids are subject to the modification, with the
 residue <code><green>X</green></code> corresponding to any amino

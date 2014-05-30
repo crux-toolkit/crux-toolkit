@@ -49,8 +49,7 @@ etc.).</li>
 <p>
 Crux is written in C++, so in principle it should work on virtually
 any modern operating system.  We provide pre-compiled binaries for
-Linux, MacOS and Windows.  The latter requires that you have Cygwin
-installed.</p>
+Linux, MacOS and Windows.</p>
 
 <li>
 <b>How does Crux compute the masses of peptides and peptide
@@ -102,6 +101,10 @@ to <code>comet</code>.</li>
 </ul>
 </p>
 
+<!-- Temporarily commenting out the next entry till we get this --
+  -- implemented in Tide. WSN 5/29/14 -->
+
+<!--
 <li>
 <b>How does Crux assign fragment masses to bins prior to computing
 the XCorr score?</b>
@@ -119,6 +122,7 @@ and are used to convert fragment masses according to this formula:</p>
 <p>The default values <code>bin-width</code>=1.0005079 and <code>bin-offset</code>=0.40
 are suitable for most low-resolution datasets.
 </p>
+-->
 
 <li>
 <b>How does Crux estimate the possible charge states of the peptides when the
@@ -260,34 +264,12 @@ the <code>precursor-window</code> and
 <code>precursor-window-type</code> options.</p>
 
 <li>
-<b>What enhancements to Crux are planned?</b></li>
-
-<p>
-<ul>
-
-<li>
-Support for searching for post-translational modifications in 
-<code>search-for-xlinks</code>.</li>
-
-<li>
-Allow users to specify variable modifications of specific N-term or
-C-term residues.</li>
-
-<li>
-Add threading to <code>tide-search</code>.</li>
-
-</ul>
-</p>
-
-<li>
 <b>How can I contribute to Crux?</b></li>
 
 <p>
-Please email crux-support@uw.edu to obtain read-only access to our
-Subversion repository, along with access to our development team web
-pages.  Patches implementing new features can then be emailed to the
-development team for review and inclusion in subsequent releases of
-Crux.</p>
+Patches implementing new features can be emailed to the development
+team at crux-support@uw.edu for review and inclusion in subsequent
+releases of Crux.</p>
 
 <li>
 <b>Where does the name "Crux" come from?</b></li>
