@@ -291,7 +291,7 @@ void PinWriter::printPSM(
   if (is_sp_) {
     fprintf(output_file_, "%.*f\t%.*f\t",
       precision_, match->getScore(SP), // Sp
-      precision_, match->getBYIonFractionMatched() // IonFrac
+      precision_, isnan(match->getBYIonFractionMatched()) ? 0 : match->getBYIonFractionMatched() // IonFrac
     );
   }
   fprintf(output_file_, "%.*f\t%u\t",
