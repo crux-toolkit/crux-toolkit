@@ -319,7 +319,12 @@ FLOAT_T* compute_PEP_from_pvalues(FLOAT_T* pvalues, int num_pvals){
   // make_pair<> that keeps this code from working.
   // They promise to fix it in VC 11
   // https://connect.microsoft.com/VisualStudio/feedback/details/606746/incorrect-overload-resolution
-  // FIXME: find workaround until then
+  score_label.reserve(pvalues_vector.size());
+  for (vector<double>::const_iterator i = pvalues_vector.begin();
+       i != pvalues_vector.end();
+       i++) {
+    score_label.push_back(make_pair(*i, true));
+  }
 #else
   transform(pvalues_vector.begin(),
             pvalues_vector.end(),

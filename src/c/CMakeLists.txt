@@ -55,6 +55,10 @@ link_directories(./xlink)
 link_directories(${CMAKE_BINARY_DIR}/src/external/lib)
 link_directories(${CMAKE_BINARY_DIR}/src/external/build/src/percolator-build/src) 
 link_directories(${CMAKE_BINARY_DIR}/src/external/build/src/percolator-build/src/fido)
+if (WIN32 AND NOT Cygwin)
+ # Needed for 32-bit windows build of vendor libraries
+  link_directories(${CMAKE_BINARY_DIR}/src/external/build/src/ProteoWizard/pwiz_aux/msrc/utility/vendor_api/Waters/vc10_x86_scl-0)
+endif (WIN32 AND NOT Cygwin)
 
 set (
   crux_lib_files
@@ -293,7 +297,7 @@ if (WIN32 AND NOT CYGWIN)
     barista
     bullseye
     hardklor
-    CometSearch
+    cometsearch
     posterior_error
     perclibrary
     fido
@@ -310,12 +314,23 @@ if (WIN32 AND NOT CYGWIN)
     libpwiz_data_msdata_version
     libpwiz_data_proteome
     libpwiz_data_common
+    libpwiz_data_vendor_readers
+    libpwiz_reader_agilent
+    libpwiz_reader_bruker
+    libpwiz_reader_shimadzu
+    libpwiz_reader_thermo
+    libpwiz_reader_waters
+    libpwiz_vendor_api_agilent
+    libpwiz_vendor_api_bruker
+    libpwiz_vendor_api_thermo
     libpwiz_utility_chemistry
     libpwiz_utility_minimxml
     libpwiz_utility_misc
     libpwiz_version
     libSHA1
     libzlib.lib 
+    MassLynxRaw
+    cdt
     ws2_32
     optimized libboost_regex-vc100-mt
     optimized libboost_system-vc100-mt
@@ -342,11 +357,22 @@ if (WIN32 AND NOT CYGWIN)
     libpwiz_data_msdata
     libpwiz_data_msdata_version
     libpwiz_data_proteome
+    libpwiz_data_vendor_readers
+    libpwiz_reader_agilent
+    libpwiz_reader_bruker
+    libpwiz_reader_shimadzu
+    libpwiz_reader_thermo
+    libpwiz_reader_waters
+    libpwiz_vendor_api_agilent
+    libpwiz_vendor_api_bruker
+    libpwiz_vendor_api_thermo
     libpwiz_utility_chemistry
     libpwiz_utility_minimxml
     libpwiz_utility_misc
     libSHA1
     libzlib.lib 
+    MassLynxRaw
+    cdt
     ws2_32
   )
   target_link_libraries(
@@ -379,11 +405,22 @@ if (WIN32 AND NOT CYGWIN)
     libpwiz_data_msdata
     libpwiz_data_msdata_version
     libpwiz_data_proteome
+    libpwiz_data_vendor_readers
+    libpwiz_reader_agilent
+    libpwiz_reader_bruker
+    libpwiz_reader_shimadzu
+    libpwiz_reader_thermo
+    libpwiz_reader_waters
+    libpwiz_vendor_api_agilent
+    libpwiz_vendor_api_bruker
+    libpwiz_vendor_api_thermo
     libpwiz_utility_chemistry
     libpwiz_utility_minimxml
     libpwiz_utility_misc
     libSHA1
     libzlib.lib 
+    MassLynxRaw
+    cdt
     ws2_32
   )
   target_link_libraries(
