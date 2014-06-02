@@ -315,7 +315,7 @@ elseif (WIN32 AND NOT CYGWIN)
   set(LIBPATH "${CMAKE_CURRENT_BINARY_DIR}/lib;")
   ExternalProject_Add(
     comet
-    SVN_REPOSITORY http://svn.code.sf.net/p/comet-ms/code/tags/release_2013022
+    SVN_REPOSITORY http://svn.code.sf.net/p/comet-ms/code/branches/release_2014010
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     UPDATE_COMMAND ""
     # Copy the Comet and MSToolkit include files and libraries to
