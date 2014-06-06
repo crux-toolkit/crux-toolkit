@@ -95,6 +95,13 @@ void Peptide::AddIons(W* workspace) const {
     total += masses_charge_1[i];
   }
 
+  // Add all charge 1 Y ions.
+  total = masses_charge_1[Len() - 1];
+  for (int i = Len()-2; i >= 0 && total <= max_possible_peak; --i) {
+    workspace->AddYIon(total, 1);
+    total += masses_charge_1[i];
+  }
+
   // Add all charge 2 B ions.
   total = masses_charge_2[0];
   for (int i = 1; i < Len() && total <= max_possible_peak; ++i) {
@@ -102,12 +109,6 @@ void Peptide::AddIons(W* workspace) const {
     total += masses_charge_2[i];
   }
 
-  // Add all charge 1 Y ions.
-  total = masses_charge_1[Len() - 1];
-  for (int i = Len()-2; i >= 0 && total <= max_possible_peak; --i) {
-    workspace->AddYIon(total, 1);
-    total += masses_charge_1[i];
-  }
 
   // Add all charge 2 Y ions.
   total = masses_charge_2[Len() - 1];
@@ -138,7 +139,7 @@ void Peptide::Compile(const TheoreticalPeakArr* peaks,
 		      const pb::Peptide& pb_peptide,
                       TheoreticalPeakCompiler* compiler_prog1,
                       TheoreticalPeakCompiler* compiler_prog2) {
-  int pos_size = peaks[0].size() + pb_peptide.peak1_size();
+/*  int pos_size = peaks[0].size() + pb_peptide.peak1_size();
   prog1_ = compiler_prog1->Init(pos_size, pb_peptide.neg_peak1_size());
   compiler_prog1->AddPositive(peaks[0]);
   compiler_prog1->AddPositive(pb_peptide.peak1());
@@ -151,6 +152,17 @@ void Peptide::Compile(const TheoreticalPeakArr* peaks,
   compiler_prog2->AddPositive(peaks[1]);
   compiler_prog2->AddPositive(pb_peptide.peak2());
   compiler_prog2->AddNegative(pb_peptide.neg_peak2());
+  compiler_prog2->Done();
+*/
+  int pos_size = peaks[0].size();
+  prog1_ = compiler_prog1->Init(pos_size, 0);
+  compiler_prog1->AddPositive(peaks[0]);
+  compiler_prog1->Done();
+
+  pos_size = peaks[0].size() + peaks[1].size();
+  prog2_ = compiler_prog2->Init(pos_size, 0);
+  compiler_prog2->AddPositive(peaks[0]);
+  compiler_prog2->AddPositive(peaks[1]);
   compiler_prog2->Done();
 }
 

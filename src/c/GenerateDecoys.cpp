@@ -24,6 +24,7 @@ int GenerateDecoys::main(int argc, char** argv) {
     "digestion",
     "missed-cleavages",
     "isotopic-mass",
+	"clip-nterm-methionine",
     "decoy-format",
     "overwrite",
     "fileroot",
@@ -292,7 +293,7 @@ bool GenerateDecoys::getNextProtein(
 /**
  * Cleave protein sequence using specified enzyme and store results in vector
  */
-void GenerateDecoys::cleaveProtein(
+  void GenerateDecoys::cleaveProtein(
   const string& sequence, ///< Protein sequence to cleave
   ENZYME_T enzyme,  ///< Enzyme to use for cleavage
   DIGEST_T digest,  ///< Digestion to use for cleavage
@@ -302,6 +303,7 @@ void GenerateDecoys::cleaveProtein(
   vector<string>& outPeptides ///< vector to store peptides
 ) {
   outPeptides.clear();
+  bool clip_nterm_methionine = get_boolean_parameter("clip-nterm-methionine");
   if (enzyme != NO_ENZYME) {
     // Enzyme
     size_t pepStart = 0, nextPepStart = 0;
@@ -316,6 +318,9 @@ void GenerateDecoys::cleaveProtein(
       } else if (cleavePos) {
         // Cleavage position, add this peptide
         outPeptides.push_back(sequence.substr(pepStart, i + 1 - pepStart));
+        if (clip_nterm_methionine && sequence[0] == 'M' && pepStart == 0 && digest != PARTIAL_DIGEST) {
+          outPeptides.push_back(sequence.substr(pepStart + 1, i + 1 - pepStart - 1));
+        }
         if (++cleaveSites == 1) {
           // This is the first cleavage position, remember it
           nextPepStart = i + 1;
@@ -390,6 +395,7 @@ void GenerateDecoys::cleaveProtein(
   vector< pair<string, int> >& outPeptides ///< vector to store peptides
 ) {
   outPeptides.clear();
+  bool clip_nterm_methionine = get_boolean_parameter("clip-nterm-methionine");
   if (enzyme != NO_ENZYME) {
     // Enzyme
     size_t pepStart = 0, nextPepStart = 0;
@@ -406,6 +412,10 @@ void GenerateDecoys::cleaveProtein(
         // Cleavage position, add this peptide
         outPeptides.push_back(
           make_pair(sequence.substr(pepStart, i + 1 - pepStart), pepStart));
+        if (clip_nterm_methionine && sequence[0] == 'M' && pepStart == 0 && digest != PARTIAL_DIGEST) {
+          outPeptides.push_back(
+            make_pair(sequence.substr(pepStart + 1, i + 1 - pepStart - 1), pepStart + 1));
+        }
         if (++cleaveSites == 1) {
           // This is the first cleavage position, remember it
           nextPepStart = i + 1;
@@ -503,7 +513,7 @@ bool GenerateDecoys::makeDecoy(
         return true;
       }
     }
-    carp(CARP_WARNING, "Failed reversing %s, shuffling", seq.c_str());
+    carp(CARP_DEBUG, "Failed reversing %s, shuffling", seq.c_str());
   }
 
   // Shuffle

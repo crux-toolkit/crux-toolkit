@@ -45,6 +45,8 @@ int TideSearchApplication::main(int argc, char** argv) {
     "output-dir",
     "overwrite",
     "parameter-file",
+    "use-neutral-loss-peaks",
+    "use-flanking-peaks",
     "verbosity"
   };
   int num_options = sizeof(option_list) / sizeof(char*);
@@ -180,9 +182,8 @@ int TideSearchApplication::main(int argc, char** argv) {
                     spectra_file.c_str());
     string converted_spectra_file = get_string_parameter_pointer("store-spectra");
     if (converted_spectra_file.empty()) {
-      
       delete_spectra_file = converted_spectra_file =
-        make_file_path("spectrumrecords.tmp");
+      make_file_path("spectrumrecords.tmp");
     }
     carp(CARP_DEBUG, "New spectrumrecords filename: %s",
                      converted_spectra_file.c_str());
@@ -237,6 +238,7 @@ int TideSearchApplication::main(int argc, char** argv) {
     // TODO Find a better way to do this?
     add_or_update_hash(parameters, "enzyme", pepHeader.enzyme().c_str());
     add_or_update_hash(parameters, "digestion", digestString);
+    add_or_update_hash(parameters, "monoisotopic-precursor", pepHeader.monoisotopic_precursor()?"T":"F");
     free(digestString);
     output_files = new OutputFiles(this);
   } else {
@@ -335,7 +337,8 @@ void TideSearchApplication::search(
   }
 
   // This is the main search loop.
-  ObservedPeakSet observed;
+  ObservedPeakSet observed(get_boolean_parameter("use-neutral-loss-peaks"), 
+       get_boolean_parameter("use-flanking-peaks"));
   // cycle through spectrum-charge pairs, sorted by neutral mass
   for (vector<SpectrumCollection::SpecCharge>::const_iterator sc = spec_charges->begin();
        sc != spec_charges->end();

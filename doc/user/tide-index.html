@@ -126,6 +126,12 @@ mass (in Da) of the peptides included in the index.  Default=200.</li>
 computing the mass of a peptide, use monoisotopic masses rather than
 average mass values.  Default = T.</li>
 
+<li>
+<code>--clip-nterm-methionine &lt;T|F&gt;</code> &ndash; When set to
+T, for each protein that begins with
+methionine, <code>tide-index</code> will put two copies of the leading
+peptide into the index, with and without the N-terminal methionine.
+Default = F.</li>
 </ul>
 
 <!--

@@ -29,7 +29,7 @@
 using namespace std;
 
 #define CHECK(x) GOOGLE_CHECK(x)
-
+/*
 static void AddPeaksToPB(pb::Peptide* peptide, const TheoreticalPeakArr* peaks,
 			 int charge, bool neg) {
   int last_code = 0;
@@ -52,7 +52,7 @@ static void AddPeaksToPB(pb::Peptide* peptide, const TheoreticalPeakArr* peaks,
     }
   }
 }
-
+*/
 void AddTheoreticalPeaks(const vector<const pb::Protein*>& proteins,
 			 const string& input_filename,
 			 const string& output_filename) {
@@ -77,7 +77,7 @@ void AddTheoreticalPeaks(const vector<const pb::Protein*>& proteins,
   TheoreticalPeakSetDiff workspace(workspace_size);
   while (!reader.Done()) {
     reader.Read(&pb_peptide);
-    Peptide peptide(pb_peptide, proteins);
+/*    Peptide peptide(pb_peptide, proteins);
     workspace.Clear();
     peptide.ComputeTheoreticalPeaks(&workspace);
     TheoreticalPeakArr peaks_charge_1(2000);
@@ -90,7 +90,7 @@ void AddTheoreticalPeaks(const vector<const pb::Protein*>& proteins,
     AddPeaksToPB(&pb_peptide, &peaks_charge_2, 2, false);
     AddPeaksToPB(&pb_peptide, &negs_charge_1, 1, true);
     AddPeaksToPB(&pb_peptide, &negs_charge_2, 2, true);
-    CHECK(writer.Write(&pb_peptide));
+*/    CHECK(writer.Write(&pb_peptide));
   }
   CHECK(reader.OK());
 }

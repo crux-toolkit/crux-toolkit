@@ -113,9 +113,12 @@ class Spectrum;
 
 class ObservedPeakSet {
  public:
-  ObservedPeakSet()
+  
+  ObservedPeakSet(bool NL = false, bool FP = false)
     : peaks_(new double[MaxMZ::Global().BackgroundBinEnd()]),
     cache_(new int[MaxMZ::Global().CacheBinEnd()*NUM_PEAK_TYPES]) {
+    NL_ = NL;
+    FP_ = FP;
   }
 
   ~ObservedPeakSet() { delete[] peaks_; delete[] cache_; }
@@ -127,7 +130,6 @@ class ObservedPeakSet {
 #ifdef DEBUG
   int DebugDotProd(const TheoreticalPeakArr& theoretical);
 #endif
-
   void PreprocessSpectrum(const Spectrum& spectrum, int charge);
 
   // For debugging
@@ -175,6 +177,9 @@ class ObservedPeakSet {
 
   double* peaks_;
   int* cache_;
+  
+  bool NL_;	//NL means neutral loss
+  bool FP_;	//FP means flanking peaks
 
   MaxMZ max_mz_;
   int cache_end_;

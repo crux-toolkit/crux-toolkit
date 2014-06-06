@@ -189,12 +189,33 @@ class TheoreticalPeakSet {
     dest->push_back(peak);
   }
 
-  static void AddPeakUnordered(TheoreticalPeakArr* dest, int index,
+/*  static void AddPeakUnordered(TheoreticalPeakArr* dest, int index,
                                TheoreticalPeakType intensity) {
     TheoreticalPeakPair peak(index, intensity);
     dest->push_back(peak);
   }
+*/  static void AddPeakUnordered(TheoreticalPeakArr* dest, int index,
+                               TheoreticalPeakType intensity, TheoreticalPeakArr* otherset) {
+    TheoreticalPeakPair peak(index, intensity);
+    bool found = false;
+    for (TheoreticalPeakArr::iterator itr = dest->begin(); itr < dest->end(); itr++){
+      if (itr->Bin() == peak.Bin()){
+        found = true;
+        break;
+	  }
+    }
 
+    for (TheoreticalPeakArr::iterator itr2 = otherset->begin(); itr2 < otherset->end(); itr2++){
+      if (itr2->Bin() == peak.Bin()){
+        found = true;
+        break;
+	  }
+    }
+    if (!found){
+      dest->push_back(peak);
+    }
+  }
+  
   // Append src to dest.
   static void Copy(const TheoreticalPeakArr& src,
                    TheoreticalPeakArr* dest) {
@@ -226,7 +247,33 @@ class TheoreticalPeakSet {
         dest->push_back(*i);
     }
   }
-
+  
+/*  static void CopyUniqueUnordered(const TheoreticalPeakArr& src,
+                            TheoreticalPeakArr* dest) {
+    TheoreticalPeakArr::const_iterator i = src.begin();
+    bool found;
+//    if (MaxMZ::Global().MaxBin() > 0) {
+      int end = MaxMZ::Global().CacheBinEnd() * NUM_PEAK_TYPES;
+      for (; i != src.end(); ++i) {
+        if (i->Code() < end){
+           found = false;
+           for (TheoreticalPeakArr::iterator itr = dest->begin(); itr < dest->end(); itr++){
+               if (itr->Bin() == (*i).Bin()){
+                   found = true;
+                   break;
+		}
+ 	   }
+           if (!found){
+	          dest->push_back(*i);
+	   }
+         }
+      }
+//    } else {
+//      for (; i != src.end(); ++i)
+//        dest->push_back(*i);
+//    }
+  }
+  */
   // Compute x - y as a vector difference. Store positive peaks in pos, 
   // negative peaks in neg. TODO 262: can simply be expressed as symmetric set
   // difference between x and y.
@@ -486,7 +533,12 @@ class TheoreticalPeakSetBYSparse : public TheoreticalPeakSet {
       series = nh3_diff == BIN_SHIFT_NH3_CHG_2_CASE_A ? PeakCombinedY2a 
                                                       : PeakCombinedY2b;
     }
-    AddPeakUnordered(&peaks_[charge-1], index_y, series);
+//    AddPeakUnordered(&peaks_[charge-1], index_y, series);
+    if (charge == 1)
+      AddPeakUnordered(&peaks_[charge-1], index_y, series, &peaks_[charge]);
+    else
+      AddPeakUnordered(&peaks_[charge-1], index_y, series, &peaks_[charge-2]);
+	
   }
 
   void AddBIon(double mass, int charge) {
@@ -502,7 +554,11 @@ class TheoreticalPeakSetBYSparse : public TheoreticalPeakSet {
       series = nh3_diff == BIN_SHIFT_NH3_CHG_2_CASE_A ? PeakCombinedB2a 
                                                       : PeakCombinedB2b;
     }
-    AddPeakUnordered(&peaks_[charge-1], index_b, series);
+//    AddPeakUnordered(&peaks_[charge-1], index_b, series);
+    if (charge == 1)
+      AddPeakUnordered(&peaks_[charge-1], index_b, series, &peaks_[charge]);
+    else 
+      AddPeakUnordered(&peaks_[charge-1], index_b, series, &peaks_[charge-2]);
   }
 
   // Faster interface needing no copying at all.
@@ -513,6 +569,9 @@ class TheoreticalPeakSetBYSparse : public TheoreticalPeakSet {
 		TheoreticalPeakArr* peaks_charge_2,
 		TheoreticalPeakArr* negs_charge_2,
 		const pb::Peptide* peptide = NULL) {
+//    CopyUniqueUnordered(peaks_[0], peaks_charge_1);
+//    CopyUniqueUnordered(peaks_[0], peaks_charge_2);
+//    CopyUniqueUnordered(peaks_[1], peaks_charge_2);
     CopyUnordered(peaks_[0], peaks_charge_1);
     CopyUnordered(peaks_[0], peaks_charge_2);
     CopyUnordered(peaks_[1], peaks_charge_2);
