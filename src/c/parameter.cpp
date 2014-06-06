@@ -1162,7 +1162,18 @@ void initialize_parameters(void){
     "Available for tide-search.",
     "true"
   );
-
+  set_boolean_parameter("clip-nterm-methionine", false,
+    "This parameter controls whether Tide will automatically "
+	"remove the N-terminal methionine from a sequence entry.",
+    "Available for tide-index.",
+    "true"
+  );
+  set_boolean_parameter("use-neutral-loss-peaks", false,
+    "Controls whether or not neutral loss ions (-NH3 and -H2O from "
+	"b- and y-ions) are considered in the search.",
+    "Available for tide-search.",
+    "true"
+  );
   /*
    * Comet parameters
    */
@@ -3015,8 +3026,11 @@ bool check_option_type_and_bounds(const char* name){
            value_str);
     if( string_to_enzyme_type(value_str) == INVALID_ENZYME){
       success = false;
-      sprintf(die_str, "Illegal enzyme. Must be trypsin, chymotrypsin, "
-              ", elastase, or no-enzyme.");
+      sprintf(die_str, "Illegal enzyme. Must be no-enzyme, trypsin,trypsin/p, chymotrypsin, " 
+      "elastase,clostripain, cyanogen-bromide, iodosobenzoate, " 
+      "proline-endopeptidase, staph-protease, aspn, lys-c, "
+      "lys-n, arg-c , glue-c, pepsin-a, modified-chymotrypsin, elastase-trypsin-chymotrypsin, "
+      "custom-enzyme trypsin, chymotrypsin, elastase, or no-enzyme.");
     }
     break;
   case BOOLEAN_P:

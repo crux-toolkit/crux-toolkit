@@ -57,7 +57,7 @@ int TideIndexApplication::main(int argc, char** argv) {
     "peptide-list",
     "parameter-file",
     "seed",
-//    "PTMDB",
+    "clip-nterm-methionine",
     "verbosity"
   };
 
@@ -431,6 +431,8 @@ void TideIndexApplication::fastaToPb(
   pb::Header_Source* headerSource = outProteinPbHeader.add_source();
   headerSource->set_filename(AbsPath(fasta));
   headerSource->set_filetype("fasta");
+  unsigned int invalidPepCnt = 0;
+  unsigned int failedDecoyCnt = 0;
 
   outPeptideHeap.clear();
   outProteinSequences.clear();
@@ -470,8 +472,9 @@ void TideIndexApplication::fastaToPb(
       FLOAT_T pepMass = calcPepMassTide(cleavedSequence, massType);
       if (pepMass < 0.0) {
         // Sequence contained some invalid character
-        carp(CARP_WARNING, "Ignoring invalid sequence <%s>",
+        carp(CARP_DEBUG, "Ignoring invalid sequence <%s>",
              cleavedSequence.c_str());
+        ++invalidPepCnt;
         i = cleavedPeptides.erase(i);
         continue;
       } else if (pepMass < minMass || pepMass > maxMass) {
@@ -524,8 +527,9 @@ void TideIndexApplication::fastaToPb(
         FLOAT_T pepMass = calcPepMassTide(cleavedSequence, massType);
         if (pepMass < 0.0) {
           // Sequence contained some invalid character
-          carp(CARP_WARNING, "Ignoring invalid sequence in decoy fasta <%s>",
+          carp(CARP_DEBUG, "Ignoring invalid sequence in decoy fasta <%s>",
                cleavedSequence.c_str());
+          ++invalidPepCnt;
           continue;
         } else if (pepMass < minMass || pepMass > maxMass) {
           // Skip to next peptide if not in mass range
@@ -573,8 +577,9 @@ void TideIndexApplication::fastaToPb(
         if (!GenerateDecoys::makeDecoy(*i, setTargets, setDecoys,
                                        decoyType == PEPTIDE_SHUFFLE_DECOYS,
                                        *decoySequence)) {
-        carp(CARP_WARNING, "Failed to generate decoy for sequence %s",
+        carp(CARP_DEBUG, "Failed to generate decoy for sequence %s",
              i->c_str());
+        ++failedDecoyCnt;
         delete decoySequence;
         continue;
         } else {
@@ -596,6 +601,12 @@ void TideIndexApplication::fastaToPb(
         greater<TideIndexPeptide>());
       ++decoysGenerated;
     }
+  }
+  if (invalidPepCnt > 0) {
+    carp(CARP_INFO, "Ignoring %d peptide sequences containing unrecognized characters", invalidPepCnt);
+  }
+  if (failedDecoyCnt > 0) {
+    carp(CARP_INFO, "Failed to generate decoys for %d low complexity peptides", failedDecoyCnt);
   }
   carp(CARP_DEBUG, "FASTA produced %d targets and %d decoys",
        targetsGenerated, decoysGenerated);

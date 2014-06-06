@@ -192,10 +192,26 @@ the <code>--remove-precursor-tolerance</code> option. Default = F.</li>
 <li>
 <code>--remove-precursor-tolerance &lt;float&gt;</code> &ndash; This
 parameter specifies the tolerance (in Th) around each precursor m/z that
-is removed when the <code>--remove_precursor_peak</code> option is invoked.
+is removed when the <code>--remove-precursor-peak</code> option is invoked.
 Default=1.5.</li>
+
 <!-- N.B. See sourceforge Issue #86 for an explanation from Jimmy Eng --
   -- re: option 2.  --WSN 18 Dec 2013. -->
+
+<li>
+<code>--use-flanking-peaks T|F</code> &ndash; When set to T, 
+<code>tide-search</code> includes flanking peaks around singly
+charged b and y theoretical ions.  Each flanking peak occurs in the
+adjacent m/z bin (which currently is fixed to a width of 1.005079 Th)
+and has half the intensity of the primary peak.  Default=F.</li>
+
+<li>
+<code>--use-neutral-loss-peaks T|F</code> &ndash; Controls whether
+neutral loss ions are considered in the search.  Two types of neutral
+losses are included and are applied only to singly charged b- and
+y-ions: loss of ammonia (NH3, 17.0086343 Da) and H2O
+(18.0091422). Each neutral loss peak has intensity 1/5 of the primary
+peak.  Default=F.</li>
 
 <!-- N.B.  Benjamin claims that implementing the following options
      will be non-trivial, so let's postpone this till the next

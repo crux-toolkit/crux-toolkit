@@ -266,7 +266,8 @@ void TideMatchSet::addCruxMatches(
                                 : peptides->ActiveDecoys()));
   
   // Create a Crux match for each match
-  vector<Arr::iterator>::const_iterator endIter = min(vec.begin() + top_n, vec.end());
+  vector<Arr::iterator>::const_iterator endIter = 
+    (vec.size() >= top_n) ? vec.begin() + top_n : vec.end();
   for (vector<Arr::iterator>::const_iterator i = vec.begin(); i != endIter; ++i) {
     const Peptide* peptide = peptides->GetPeptide((*i)->second);
 

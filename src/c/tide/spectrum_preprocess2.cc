@@ -54,7 +54,7 @@ static void SubtractBackground(double* observed, int end) {
 
 
 void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum,
-					 int charge) {
+					 int charge ) {
 #ifdef DEBUG
   bool debug = (FLAGS_debug_spectrum_id == spectrum.SpectrumNumber()
                 && (FLAGS_debug_charge == 0 || FLAGS_debug_charge == charge));
@@ -102,7 +102,7 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum,
   double intensity_cutoff = highest_intensity * 0.05;
 
   double normalizer = 0.0;
-  int region_size = largest_mz / NUM_SPECTRUM_REGIONS;
+  int region_size = largest_mz / NUM_SPECTRUM_REGIONS +1;
   for (int i = 0; i < NUM_SPECTRUM_REGIONS; ++i) {
     highest_intensity = 0;
     for (int j = 0; j < region_size; ++j) {
@@ -127,7 +127,7 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum,
   }
 
   // make sure highest mass peak(s) aren't ignored
-  if (highest_intensity > 0) {
+/*  if (highest_intensity > 0) {
     for (int i = NUM_SPECTRUM_REGIONS * region_size; i <= largest_mz; ++i) {
       if (peaks_[i] > intensity_cutoff) {
         peaks_[i] *= normalizer;
@@ -136,7 +136,7 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum,
       }
     }
   }
-
+*/
 #ifdef DEBUG
   if (debug) {
     cout << "GLOBAL MAX MZ: " << MaxMZ::Global().MaxBin() << ", " << MaxMZ::Global().BackgroundBinEnd()
@@ -195,41 +195,44 @@ void ObservedPeakSet::ComputeCache() {
 
   for (int i = 0; i < max_mz_.CacheBinEnd(); ++i) {
     int flanks = Peak(PrimaryPeak, i);
-    if (i > 0)
-      flanks += Peak(FlankingPeak, i-1);
-    if (i < max_mz_.CacheBinEnd() - 1)
-      flanks += Peak(FlankingPeak, i+1);
-
+	if ( FP_ == true) {
+		if (i > 0)
+		  flanks += Peak(FlankingPeak, i-1);
+		if (i < max_mz_.CacheBinEnd() - 1)
+		  flanks += Peak(FlankingPeak, i+1);
+	}
     int Y1 = flanks;
-    if (i > 16)
-      Y1 += Peak(LossPeak, i-17);
-    if (i > 17)
-      Y1 += Peak(LossPeak, i-18);
-    Peak(PeakCombinedY1, i) = Y1;
+	if ( NL_ == true) {
+		if (i > 16)
+		  Y1 += Peak(LossPeak, i-17);
+		if (i > 17)
+		  Y1 += Peak(LossPeak, i-18);
+	}
+	Peak(PeakCombinedY1, i) = Y1;
 
     int B1 = Y1;
-    if (i > 27)
-      B1 += Peak(LossPeak, i-28);
-    Peak(PeakCombinedB1, i) = B1;
+//    if (i > 27 && NL == true)
+//      B1 += Peak(LossPeak, i-28);
+	Peak(PeakCombinedB1, i) = B1;
 
     int Y2a = flanks;
-    if (i > 8)
-      Y2a += Peak(LossPeak, i-9);
+//    if (i > 8  && NL == true)
+//      Y2a += Peak(LossPeak, i-9);
     Peak(PeakCombinedY2a, i) = Y2a;
 
     int Y2b = Y2a;
-    if (i > 7)
-      Y2b += Peak(LossPeak, i-8);
+//    if (i > 7  && NL == true)
+//      Y2b += Peak(LossPeak, i-8);
     Peak(PeakCombinedY2b, i) = Y2b;
 
     int B2a = Y2a;
-    if (i > 13)
-      B2a += Peak(LossPeak, i-14);
+//    if (i > 13  && NL == true)
+//      B2a += Peak(LossPeak, i-14);
     Peak(PeakCombinedB2a, i) = B2a;
 
     int B2b = Y2b;
-    if (i > 13)
-      B2b += Peak(LossPeak, i-14);
+//    if (i > 13  && NL == true)
+//      B2b += Peak(LossPeak, i-14);
     Peak(PeakCombinedB2b, i) = B2b;
   }
 }
