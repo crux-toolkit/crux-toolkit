@@ -404,10 +404,10 @@ input-ms2=__NULL_STR
 train-fdr=0.010000
 
 # Show search progress by printing every n spectra searched. 
-# Default=10.
+# Default=1000.
 # Set to 0 to show no search progress.  Available for crux
-# search-for-matches from parameter file.
-print-search-progress=10
+# search-for-matches and tide-search from parameter file.
+print-search-progress=1000
 
 # Restrict analysis to only a small window in each segment ( (min-max)
 # in m/z). The user must specify the starting and ending m/z values
@@ -708,6 +708,11 @@ unique-peptides=true
 # Available for q-ranker and barista.
 skip-cleanup=false
 
+# This parameter controls whether Tide will automatically remove the
+# N-terminal methionine from a sequence entry.
+# Available for tide-index.
+clip-nterm-methionine=false
+
 # Predict theoretical ions up to max charge state (1,2,...,6) or up to
 # the charge state of the peptide (peptide).  If the max-ion-charge is
 # greater than the charge state of the peptide, then the max is the
@@ -828,6 +833,11 @@ cmod-fixed=NO MODS
 # modification sequences of the form: ,...
 # Available for tide-index
 cterm-protein-mods-spec=
+
+# Controls whether or not neutral loss ions (-NH3 and -H2O from b- and
+# y-ions) are considered in the search.
+# Available for tide-search.
+use-neutral-loss-peaks=false
 
 # Setting deepness 0, 1, or 2 from low depth to high depth (less
 # computational time) of the grid search for estimation Alpha,Beta and
@@ -1027,10 +1037,6 @@ activation_method=ALL
 # added to E - avg. 129.1140, mono. 129.04259
 # option for Comet
 add_E_glutamic_acid=0.000000
-
-# 0=no, 1=yes  write pin.xml file
-# option for Comet only
-output_pinxmlfile=0
 
 # Specifies the prefix of the protein names that indicates a decoy.
 # Default = decoy_.
