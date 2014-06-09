@@ -79,6 +79,23 @@ crux programs.
 
 <ul>
 
+<b>
+  <li>
+    <code>--input-format &lt;auto|tsv|html|sqt|pin|pepxml|mzidentml|barista-xml&gt;
+    </code> &ndash;
+    The format of the input psms.  Legal values are auto, tsv, html, sqt, pin,
+    pepxml, mzidentml and barista-xml.  Auto will determine the format based
+    upon the file extension.  Default = auto.
+  </li>
+          
+   <li><code>--protein-database &lt;string&gt;</code>&ndash; 
+      The name of the file in fasta format or the directory containing the
+      protein index from which to retrieve proteins and peptides.  
+      The database of protein may be provided in an mzIdentML (.mzid) file.
+    </li>
+
+</b>
+
 <li>
 <code>--output-dir &lt;filename&gt;</code> &ndash; 
 The name of the directory where output files will be created.
@@ -107,6 +124,38 @@ info, 60-detailed debug info. Default = 30.</li>
 </ul>
 
 <hr></hr>
+
+<h3>Implementation suggestions:</h3>
+1) Subclass CruxApplication to create a PSMConvertApplication class.<br>
+2) Looking at MzIdentMLWriter, PMCPepXMLWriter, PepXMLWriter, SQTWriter,
+   and MatchFileWriter, etc., derive an abstract class "PSMWriter" with virtual
+   methods for writing out a MatchCollection or ProteinMatchCollection.  Make
+   all writers a subclass of this abstract class.  You will need to standardize
+   the abstract method calls over all of the writers e.g. virtual writePSM(Match*),
+   writeCollection(MatchCollection*), etc.<br> 
+3) Similiarly to step #2, look at the MzIdentMLReader, PepXMLReader,
+   SQTReader, and MatchFileReader class and derive an abstract class
+   "PSMReader" that returns a MatchCollection or
+   ProteinMatchCollection after parsing the inputed data file.<br>
+4) Implement PSMConvertApplication, that parses the (&lt;input&nbsp;PSM&nbsp;file&gt;)
+   using the correct file format parser (either determined by file extension or
+   <code>--input-format</code> parameter ) and then write out the psms in the
+   (&lt;output&nbsp;format&gt;)<br>
+<br>   
+Notes:<br>
+&ndash; OutputFiles.h,cpp gives many examples of how to write out PSMs from the
+  internal data objects.<br>
+&ndash; MatchCollectionParser.h,cpp gives an example of parsing a psm file to
+  create a MatchCollection object.<br>
+&ndash; Some file formats (e.g. mzid) will need the protein-database in order
+  to fully parse/write the file formats.<br>
+&ndash; There is a PMCMatchCollection object that handles the associations between
+  proteins, peptides, and psms.  It might be better to use this object and phase out
+  MatchCollection in the future.  This might need some discussion.<br>
+
+
+
+
 
 <p>
 <a href="crux.html">Home</a></p>
