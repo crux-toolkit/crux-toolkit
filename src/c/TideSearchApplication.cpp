@@ -36,6 +36,7 @@ int TideSearchApplication::main(int argc, char** argv) {
     "compute-sp",
     "remove-precursor-peak",
     "remove-precursor-tolerance",
+    "print-search-progress",
     "txt-output",
     "sqt-output",
     "pepxml-output",
@@ -340,6 +341,9 @@ void TideSearchApplication::search(
   ObservedPeakSet observed(get_boolean_parameter("use-neutral-loss-peaks"), 
        get_boolean_parameter("use-flanking-peaks"));
   // cycle through spectrum-charge pairs, sorted by neutral mass
+  unsigned sc_index = 0;
+  FLOAT_T sc_total = (FLOAT_T)spec_charges->size();
+  int print_interval = get_int_parameter("print-search-progress");
   for (vector<SpectrumCollection::SpecCharge>::const_iterator sc = spec_charges->begin();
        sc != spec_charges->end();
        ++sc) {
@@ -348,7 +352,6 @@ void TideSearchApplication::search(
     double precursor_mz = spectrum->PrecursorMZ();
     int charge = sc->charge;
     int scan_num = spectrum->SpectrumNumber();
-
     if (precursor_mz < spectrum_min_mz || precursor_mz > spectrum_max_mz ||
         scan_num < min_scan || scan_num > max_scan ||
         spectrum->Size() < min_peaks ||
@@ -386,6 +389,12 @@ void TideSearchApplication::search(
     } else {
       matches.report(target_file, decoy_file, top_matches, spectrum, charge,
                      active_peptide_queue, proteins, locations, compute_sp);
+    }
+
+    ++sc_index;
+    if (print_interval > 0 && sc_index % print_interval == 0) {
+      carp(CARP_INFO, "%d spectra searched, %.0f%% complete",
+           sc_index, sc_index / sc_total * 100);
     }
   }
 

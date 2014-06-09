@@ -801,10 +801,10 @@ void initialize_parameters(void){
       "Set the precision for masses and m/z written to sqt and .txt files.  "
       "Default=4",
       "Available from parameter file for all commands.", "true");
-  set_int_parameter("print-search-progress", 10, 0, BILLION,
+  set_int_parameter("print-search-progress", 1000, 0, BILLION,
       "Show search progress by printing every n spectra searched.  Default="
-      "10.", "Set to 0 to show no search progress.  Available for crux "
-      "search-for-matches from parameter file.",
+      "1000.", "Set to 0 to show no search progress.  Available for crux "
+      "search-for-matches and tide-search from parameter file.",
       "true");
 
   // Sp scoring params
