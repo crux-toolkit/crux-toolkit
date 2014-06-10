@@ -125,7 +125,6 @@ set (
    /src/python/;
    /CMakeCache.txt$;
    /CMakeFiles/;
-   \\\\.cmake$;
    \\\\.gz$;
    \\\\.swp$;
    \\\\.zip$;
