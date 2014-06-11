@@ -8,6 +8,7 @@
 
 static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "file",
+  "file_idx",
   "scan",
   "charge",
   "spectrum precursor m/z",

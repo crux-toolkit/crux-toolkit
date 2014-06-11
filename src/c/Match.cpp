@@ -1521,6 +1521,13 @@ void Match::setFileIndex(
 }
 
 /**
+ * \returns the file index for this match
+ */
+int Match::getFileIndex() {
+  return(file_idx_);
+}
+
+/**
  * sets the file path for this match
  * \returns the associated file index
  */
@@ -1548,13 +1555,16 @@ int Match::setFilePath(
  * \returns the file path for this match
  */ 
 string Match::getFilePath() {
-  if (file_idx_ == -1) {
-    return string("");
-  } else {
-    return(file_paths_[file_idx_]);
-  }
+  return(getFilePath(file_idx_));
 }
 
+string Match::getFilePath(int file_idx) {
+  if (file_idx == -1) {
+    return string("");
+  } else {
+    return(file_paths_[file_idx]);
+  }
+}
 
 
 
