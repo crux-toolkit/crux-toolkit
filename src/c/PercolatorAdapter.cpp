@@ -105,9 +105,20 @@ void PercolatorAdapter::psmScoresToMatchCollection(
         break;
       }
     }
+    bool psm_decoy;
+    int psm_file_idx;
+    int psm_scan;
+    int psm_charge;
+    int psm_rank;
+    parsePSMId(psm->id, 
+      psm_decoy, 
+      psm_file_idx,
+      psm_scan,
+      psm_charge,
+      psm_rank);
     if (charge_state == -1) {
       // Failed, try to parse charge state from id
-      charge_state = parseChargeState(psm->id);
+      charge_state = psm_charge;
       if (charge_state == -1) {
         carp_once(CARP_WARNING, "Could not determine charge state of PSM");
       }
@@ -127,6 +138,8 @@ void PercolatorAdapter::psmScoresToMatchCollection(
     match->setScore(PERCOLATOR_SCORE, score_itr->score);
     match->setScore(PERCOLATOR_QVALUE, psm->q);
     match->setScore(PERCOLATOR_PEP, psm->pep);
+
+    match->setFileIndex(psm_file_idx);
 
     // Get matches/spectrum
     if (lnNumSPIndex < 0) {
@@ -276,27 +289,26 @@ ProteinMatchCollection* PercolatorAdapter::getDecoyProteinMatchCollection() {
   return decoy_collection_;
 }
 
-/**
- * Given a Percolator psm_id in the form ".*_([0-9]+)_[^_]*",
- * find the charge state (matching group)
- */
-int PercolatorAdapter::parseChargeState(
-  const string& psm_id ///< psm to parse charge state from
+void PercolatorAdapter::parsePSMId(
+  const string& psm_id, ///< psm id to parse information from
+  bool &decoy, ///< Is the psm a decoy
+  int& file_idx, ///< file index of psm
+  int& scan, ///< scan number of psm
+  int& charge, ///< charge of psm
+  int& rank ///< rank of psm
 ) {
-  size_t charge_begin, charge_end;
 
-  charge_end = psm_id.rfind("_");
-  if (charge_end < 0) {
-    return -1;
+  vector<string> tokens;
+  tokenize(psm_id, tokens, '_');
+  if (tokens.size() != 5) {
+    carp(CARP_FATAL, "PSMID should be target_fileidx_scan_charge_rank");
   }
-
-  charge_begin = psm_id.rfind("_", charge_end - 1) + 1;
-  if (charge_begin < 0) {
-    return -1;
-  }
-
-  string charge_str = psm_id.substr(charge_begin, charge_end - charge_begin);
-  return atoi(charge_str.c_str());
+  decoy = tokens[0] == "decoy";
+  from_string<int>(file_idx, tokens[1]);
+  from_string<int>(scan, tokens[2]);
+  from_string<int>(charge, tokens[3]);
+  from_string<int>(rank, tokens[4]);
+  
 }
 
 /**
@@ -395,8 +407,8 @@ MODIFIED_AA_T* PercolatorAdapter::getModifiedAASequence(
   
   if (perc_seq.find("UNIMOD") != string::npos) {
     carp(CARP_FATAL, 
-	 "UNIMOD modifications currently not supported:%s", 
-	 perc_seq.c_str());
+      "UNIMOD modifications currently not supported:%s", 
+      perc_seq.c_str());
   }
 
   MODIFIED_AA_T* mod_seq = NULL;
