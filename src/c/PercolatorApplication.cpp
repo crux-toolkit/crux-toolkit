@@ -336,7 +336,7 @@ int PercolatorApplication::main(
   perc_args_vec.push_back("-s");
 
   if(get_boolean_parameter("allow-protein-group"))
-    perc_args_vec.push_back("allow-protein-group");
+    perc_args_vec.push_back("--allow-protein-group");
  
   if(set_protein){ 
     if(get_boolean_parameter("protein-level-pi0"))
@@ -360,16 +360,21 @@ int PercolatorApplication::main(
   /* build argv line */
   int perc_argc = perc_args_vec.size();
 
+  string perc_cmd = perc_args_vec[0];
+  
   char** perc_argv = new char*[perc_argc];
 
   perc_argv[0] = (char*)perc_args_vec[0].c_str();
   //cerr<<"perc_argv["<<0<<"]= "<<perc_argv[0]<<endl;
   for (int idx = 1;idx < perc_argc ; idx++) {
     perc_argv[idx] = (char*)perc_args_vec[idx].c_str();
+    perc_cmd = perc_cmd + " " + perc_argv[idx];
     carp(CARP_DEBUG, "perc_argv[%d]=%s", idx, perc_argv[idx]);
     //cerr<<"perc_argv["<<idx<<"]= "<<perc_argv[idx]<<endl;
   }
 
+  carp(CARP_DEBUG, "cmd:%s", perc_cmd.c_str());
+  
   /* Re-route stdeer to log file. */
   CarpStreamBuf buffer;
   streambuf* old = std::cerr.rdbuf();
@@ -380,6 +385,11 @@ int PercolatorApplication::main(
   int retVal = -1;
   if (pCaller->parseOptions(perc_argc, perc_argv)) {
     retVal = pCaller->run();
+  } 
+  
+  carp(CARP_DEBUG, "Percolator retval:%d", retVal);
+  if (retVal != 0) {
+    carp(CARP_FATAL, "Error running percolator:%d", retVal);
   }
 
   // remove tab files
