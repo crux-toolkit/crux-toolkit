@@ -73,8 +73,10 @@ protected:
     }
     double precursor_window_;
   };
+  double bin_width_;
+  double bin_offset_;
 
-public:
+  public:
 
   /**
    * Constructor

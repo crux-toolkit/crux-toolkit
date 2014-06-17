@@ -13,6 +13,8 @@
 
 #include "mod_coder.h"
 
+#define BIN_WIDTH 1.0005079
+#define BIN_OFFSET 0.68
 typedef unsigned int FixPt; // 32-bit fixed-point arithmetic
    // ALTERNATIVE unsigned long long int; // 64 bits
    // ALTERNATIVE unsigned long int; // machine register size
@@ -29,25 +31,35 @@ class MassConstants {
   // The windows compiler only allows intialization
   // of static constant integer types within a class
   static const double proton;
-  static const double bin_width;
 #else
   static const double proton = 1.00727646688;
-  static const double bin_width = 1.0005079;
 #endif
 
-  static bool Init(const pb::ModTable* mod_table);
-
+  static bool Init(const pb::ModTable* mod_table, const double bin_width, const double bin_offset);
+  
   static double mono_table[];
   static double avg_table[];
-  static double aa_bin_1[];
-  static double aa_bin_2[];
-
   static const double mono_h2o;
   static const double avg_h2o;
   static const double mono_nh3;
   static const double mono_co;
-
-  // Fixed-Point Versions
+  static const double A;
+//  static const double B_H2O;
+//  static const double B_NH3;
+  static const double B;
+//  static const double Y_H2O;
+//  static const double Y_NH3;
+  static const double Y;
+  static double BIN_H2O;
+  static double BIN_NH3;
+/*  static const double BIN_SHIFT_A_ION_CHG_1;
+  static const double BIN_SHIFT_A_ION_CHG_2;
+  static const double BIN_SHIFT_H2O_CHG_1;
+  static const double BIN_SHIFT_H2O_CHG_2;
+  static const double BIN_SHIFT_NH3_CHG_1;
+  static const double BIN_SHIFT_NH3_CHG_2_CASE_A;
+  static const double BIN_SHIFT_NH3_CHG_2_CASE_B;
+*/  // Fixed-Point Versions
 #ifdef _MSC_VER
   // The windows compiler only allows intialization
   // of static constant integer types within a class
@@ -76,15 +88,20 @@ class MassConstants {
   static void DecodeMod(int code, int* aa_index, double* delta) {
     int unique_delta_index;
     mod_coder_.DecodeMod(code, aa_index, &unique_delta_index);
-    *delta = unique_deltas_bin_[unique_delta_index];
+    *delta = unique_deltas_[unique_delta_index];
+  }
+  static unsigned int mass2bin(double mass, double charge = 1){
+    return (unsigned int)((mass + (charge - 1)*proton)/(charge*bin_width_) + 1.0 - bin_offset_);
   }
 
+  static double bin_width_;
+  static double bin_offset_;
  private:
   static void FillMassTable(const double* elements, double* table);
 
   static ModCoder mod_coder_;
   static double* unique_deltas_;
-  static double* unique_deltas_bin_;
+
 };
 
 #endif

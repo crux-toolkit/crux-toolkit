@@ -207,8 +207,8 @@ Show search progress by printing every n spectra searched. Set to
 <code>--use-flanking-peaks T|F</code> &ndash; When set to T, 
 <code>tide-search</code> includes flanking peaks around singly
 charged b and y theoretical ions.  Each flanking peak occurs in the
-adjacent m/z bin (which currently is fixed to a width of 1.005079 Th)
-and has half the intensity of the primary peak.  Default=F.</li>
+adjacent m/z bin and has half the intensity of the primary peak.
+Default=F.</li>
 
 <li>
 <code>--use-neutral-loss-peaks T|F</code> &ndash; Controls whether
@@ -218,18 +218,15 @@ y-ions: loss of ammonia (NH3, 17.0086343 Da) and H2O
 (18.0091422). Each neutral loss peak has intensity 1/5 of the primary
 peak.  Default=F.</li>
 
-<!-- N.B.  Benjamin claims that implementing the following options
-     will be non-trivial, so let's postpone this till the next
-     release.  --WSN 27 June 2013.
 
 <li>
 <code>--mz-bin-width &lt;float&gt;</code> &ndash; Before calculation of the
 XCorr score, the m/z axes of the observed and theoretical spectra are
 discretized.  This parameter specifies the size of each bin.  The
 exact formula is <i>floor((x/mz-bin-width) + 1.0 - mz-bin-offset)</i>,
-where <i>x</i> is the observed m/z value.  By default, the
-mz-bin-width is 1.0005079 Da when searching using monoisotopic mass
-and 1.0011413 Da with average mass.</li>
+where <i>x</i> is the observed m/z value. For low resolution ion trap 
+ms/ms data 1.0005079 and for high resolution ms/ms 0.02 is recommended. 
+By default, the mz-bin-width is 1.0005079 Da.</li>
 
 <li>
 <code>--mz-bin-offset &lt;float&gt;</code> &ndash; 
@@ -238,8 +235,6 @@ spectra, this parameter specifies the location of the left edge of the
 first bin, relative to mass = 0 (i.e., mz-bin-offset = 0.xx means the
 left edge of the first bin will be located at +0.xx Da). The parameter
 must lie in the range 0 &le; mz-bin-offset &le; 1.  Default=0.68.</li>
--->
-
 </ul>
 
 <h3>Input and output</h3>

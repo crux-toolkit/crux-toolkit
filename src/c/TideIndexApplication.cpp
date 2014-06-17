@@ -141,7 +141,7 @@ int TideIndexApplication::main(int argc, char** argv) {
 
   var_mod_table.SerializeUniqueDeltas();
 
-  if (!MassConstants::Init(var_mod_table.ParsedModTable())) {
+  if (!MassConstants::Init(var_mod_table.ParsedModTable(), 0, 0)) {
     carp(CARP_FATAL, "Error in MassConstants::Init");
   }
 

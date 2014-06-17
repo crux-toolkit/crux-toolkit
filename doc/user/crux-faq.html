@@ -37,10 +37,8 @@ Comet provides an option to report an E-value (a kind of statistical
 confidence measure) in addition to the raw XCorr score.</li>
 <li>
 Comet supports a variety of options that are not implemented in Tide
-(num_results, fragment_bin_tol, fragment_bin_offset, various options
-related to different types of theoretical fragment ions,
-max_fragment_charge, nucleotide_reading_frame, clip_nterm_methionine,
-etc.).</li>
+(various options related to different types of theoretical fragment
+ions, max_fragment_charge, nucleotide_reading_frame, etc.).</li>
 </ul></p>
 
 <li>
@@ -101,10 +99,6 @@ to <code>comet</code>.</li>
 </ul>
 </p>
 
-<!-- Temporarily commenting out the next entry till we get this --
-  -- implemented in Tide. WSN 5/29/14 -->
-
-<!--
 <li>
 <b>How does Crux assign fragment masses to bins prior to computing
 the XCorr score?</b>
@@ -115,14 +109,17 @@ form of the observed spectrum and the theoretical spectrum derived
 from the candidate peptide. In order to compute this dot product, the
 masses of the fragments in both spectra are assigned to discrete mass
 bins. This can be viewed as a form of rounding, but with more control
-over the discrete masses. Two parameters, <code>bin-width</code> and
-<code>bin-offset</code>, control the size and location of the bins,
+over the discrete masses. Two parameters, <code>mz-bin-width</code> and
+<code>mz-bin-offset</code>, control the size and location of the bins,
 and are used to convert fragment masses according to this formula:</p>
+
 <p align=center>binned mass = floor( ( original mass / <code>bin-width</code> ) + 1.0 - <code>bin-offset</code> )</p>
-<p>The default values <code>bin-width</code>=1.0005079 and <code>bin-offset</code>=0.40
-are suitable for most low-resolution datasets.
+
+<p>
+The default values <code>bin-width</code>=1.0005079
+and <code>bin-offset</code>=0.68 are suitable for most low-resolution
+datasets.
 </p>
--->
 
 <li>
 <b>How does Crux estimate the possible charge states of the peptides when the

@@ -24,10 +24,10 @@ enum TheoreticalPeakType {
   // Each of the charge 2 peak types below includes an 'a' version and a 'b'
   // version. In the 'a' version the loss of ammonia is 9 Da. per charge.
   // In the 'b' version the loss of ammonia is 8 Da. per charge.
-  PeakCombinedB2a = 6, // Represents charge 2 B ion, its flanks and neutral losses.
-  PeakCombinedY2a = 7, // Represents charge 2 Y ion, its flanks and neutral losses.
-  PeakCombinedB2b = 8, // Represents charge 2 B ion, its flanks and neutral losses.
-  PeakCombinedY2b = 9, // Represents charge 2 Y ion, its flanks and neutral losses.
+  PeakCombinedB2 = 6, // Represents charge 2 B ion, its flanks and neutral losses.
+  PeakCombinedY2 = 7, // Represents charge 2 Y ion, its flanks and neutral losses.
+//  PeakCombinedB2b = 8, // Represents charge 2 B ion, its flanks and neutral losses.
+//  PeakCombinedY2b = 9, // Represents charge 2 Y ion, its flanks and neutral losses.
 
   NUM_PEAK_TYPES = 10 // Total number of peak types.
 };
