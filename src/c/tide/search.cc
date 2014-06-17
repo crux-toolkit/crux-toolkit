@@ -23,7 +23,7 @@
 #include "report.h"
 
 using namespace std;
-
+/*
 typedef vector<const pb::Protein*> ProteinVec;
 
 DEFINE_string(proteins, "", "File of proteins corresponding to peptides, as "
@@ -256,9 +256,9 @@ string UsageMessage(string prog_name) {
     "  --spectra=<filename>\n"
     "\n";
 }
-
+*/
 int main(int argc, char* argv[]) {
-  string command_line;
+/*  string command_line;
   for (int i = 0; i < argc; i++) {
     command_line += argv[i];
     command_line += " ";
@@ -321,6 +321,6 @@ int main(int argc, char* argv[]) {
 #ifdef MEM_STATS
   cerr << "Total Fifo Allocations: " << FifoAllocator::Total() << endl;
 #endif
-
+*/
   return 0;
 }

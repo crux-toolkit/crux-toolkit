@@ -35,6 +35,11 @@ echo num_enzyme_termini=2 >> $parameters
 echo missed-cleavages=0 >> $parameters
 echo allowed_missed_cleavage=0 >> $parameters
 
+# Minimums
+echo minimum_peaks=10 >> $parameters
+echo min-peaks=10 >> $parameters
+echo min_length=2 >> $parameters
+
 # Precursor selection rules.
 echo precursor-window=3 >> $parameters
 echo precursor-window-type=mass >> $parameters
@@ -70,13 +75,15 @@ echo remove-precursor-tolerance=15 >> $parameters
 # Flanking peaks.
 echo use-flanking-peaks=F >> $parameters
 echo theoretical_fragment_ions=1 >> $parameters # 0 = flanks; 1 = no flanks
-
+echo use-neutral-loss-peaks=F >> $parameters 
 # Fragment m/z discretization.  This is fixed in Tide.
-echo fragment_bin_offset=0.5 >> $parameters
-echo fragment_bin_tol=1.000508 >> $parameters
+echo fragment_bin_offset=0.0 >> $parameters
+echo fragment_bin_tol=0.5 >> $parameters
+echo mz-bin-width=0.5 >>$parameters
+echo mz-bin-offset=0.00 >>$parameters
 
 # Other Crux parameters.
-echo compute-sp=T >> $parameters
+echo compute-sp=F >> $parameters
 echo verbosity=40 >> $parameters
 echo overwrite=T >> $parameters
 echo peptide-list=T >> $parameters
@@ -93,7 +100,7 @@ echo use_C_ions=0 >> $parameters
 echo use_X_ions=0 >> $parameters
 echo use_Y_ions=1 >> $parameters
 echo use_Z_ions=0 >> $parameters
-echo use_NL_ions=1 >> $parameters
+echo use_NL_ions=0 >> $parameters
 echo variable_mod1=0.0 X 0 3 >> $parameters
 echo variable_mod2=0.0 X 0 3 >> $parameters
 echo "[COMET_ENZYME_INFO]" >> $parameters

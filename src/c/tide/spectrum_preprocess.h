@@ -106,6 +106,7 @@
 #include <vector>
 #include "theoretical_peak_pair.h"
 #include "max_mz.h"
+#include "mass_constants.h"
 
 using namespace std;
 
@@ -113,12 +114,17 @@ class Spectrum;
 
 class ObservedPeakSet {
  public:
-  
-  ObservedPeakSet(bool NL = false, bool FP = false)
-    : peaks_(new double[MaxMZ::Global().BackgroundBinEnd()]),
-    cache_(new int[MaxMZ::Global().CacheBinEnd()*NUM_PEAK_TYPES]) {
-    NL_ = NL;
-    FP_ = FP;
+    
+	ObservedPeakSet(double bin_width = MassConstants::bin_width_, 
+		 double bin_offset = MassConstants::bin_width_, 
+		 bool NL = false, bool FP = false)
+    : peaks_(new double[MaxBin::Global().BackgroundBinEnd()]),
+    cache_(new int[MaxBin::Global().CacheBinEnd()*NUM_PEAK_TYPES]) {
+    
+	bin_width_  = bin_width;
+	bin_offset_ = bin_offset;
+	NL_ = NL;	//NL means neutral loss
+    FP_ = FP;	//FP means flanking peaks
   }
 
   ~ObservedPeakSet() { delete[] peaks_; delete[] cache_; }
@@ -152,10 +158,10 @@ class ObservedPeakSet {
     SHOW(PrimaryPeak, false);
     SHOW(PeakCombinedB1, true);
     SHOW(PeakCombinedY1, true);
-    SHOW(PeakCombinedB2a, true);
-    SHOW(PeakCombinedY2a, true);
-    SHOW(PeakCombinedB2b, true);
-    SHOW(PeakCombinedY2b, true);
+    SHOW(PeakCombinedB2, true);
+    SHOW(PeakCombinedY2, true);
+//    SHOW(PeakCombinedB2b, true);
+//    SHOW(PeakCombinedY2b, true);
   }
 
   // For debugging
@@ -164,7 +170,6 @@ class ObservedPeakSet {
       if (peaks_[i] != 0)
         cout << "peaks_[" << i << "] = " << peaks_[i] << endl;
   }
-
 
  private:
   int& Peak(TheoreticalPeakType peak_type, int index) {
@@ -177,11 +182,13 @@ class ObservedPeakSet {
 
   double* peaks_;
   int* cache_;
-  
-  bool NL_;	//NL means neutral loss
-  bool FP_;	//FP means flanking peaks
 
-  MaxMZ max_mz_;
+  bool NL_;
+  bool FP_;
+  double bin_width_;
+  double bin_offset_;
+
+  MaxBin max_mz_;
   int cache_end_;
 
   friend class ObservedPeakTester;

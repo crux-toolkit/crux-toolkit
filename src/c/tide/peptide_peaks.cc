@@ -53,6 +53,7 @@ static void AddPeaksToPB(pb::Peptide* peptide, const TheoreticalPeakArr* peaks,
   }
 }
 */
+
 void AddTheoreticalPeaks(const vector<const pb::Protein*>& proteins,
 			 const string& input_filename,
 			 const string& output_filename) {
@@ -60,7 +61,7 @@ void AddTheoreticalPeaks(const vector<const pb::Protein*>& proteins,
   HeadedRecordReader reader(input_filename, &orig_header);
   CHECK(orig_header.file_type() == pb::Header::PEPTIDES);
   CHECK(orig_header.has_peptides_header());
-  MassConstants::Init(&orig_header.peptides_header().mods());
+//  MassConstants::Init(&orig_header.peptides_header().mods());
   new_header.set_file_type(pb::Header::PEPTIDES);
   pb::Header_PeptidesHeader* subheader = new_header.mutable_peptides_header();
   subheader->CopyFrom(orig_header.peptides_header());
@@ -73,8 +74,8 @@ void AddTheoreticalPeaks(const vector<const pb::Protein*>& proteins,
   CHECK(writer.OK());
 
   pb::Peptide pb_peptide;
-  const int workspace_size = 2000; // More than sufficient for theor. peaks.
-  TheoreticalPeakSetDiff workspace(workspace_size);
+//  const int workspace_size = 2000; // More than sufficient for theor. peaks.
+//  TheoreticalPeakSetDiff workspace(workspace_size);
   while (!reader.Done()) {
     reader.Read(&pb_peptide);
 /*    Peptide peptide(pb_peptide, proteins);

@@ -119,7 +119,7 @@ class TheoreticalPeakCompiler {
     
   void AddPositive(const TheoreticalPeakArr& peaks) {
     // Write an add instruction for each entry in peaks.
-    int end = MaxMZ::Global().CacheBinEnd() * NUM_PEAK_TYPES;
+    int end = MaxBin::Global().CacheBinEnd() * NUM_PEAK_TYPES;
     for (int i = 0; i < peaks.size(); ++i)
       if (peaks[i].Code() < end)
         AddPositive(peaks[i].Code());
@@ -127,7 +127,7 @@ class TheoreticalPeakCompiler {
 
   void AddPositive(const google::protobuf::RepeatedField<int>& peaks) {
     // Write an add instruction for each entry in peaks.
-    int end = MaxMZ::Global().CacheBinEnd() * NUM_PEAK_TYPES;
+    int end = MaxBin::Global().CacheBinEnd() * NUM_PEAK_TYPES;
     int total = 0;
     google::protobuf::RepeatedField<int>::const_iterator i = peaks.begin();
     for (; i != peaks.end(); ++i) {
@@ -139,7 +139,7 @@ class TheoreticalPeakCompiler {
 
   void AddNegative(const google::protobuf::RepeatedField<int>& peaks) {
     // Write a sub instruction for each entry in peaks.
-    int end = MaxMZ::Global().CacheBinEnd() * NUM_PEAK_TYPES;
+    int end = MaxBin::Global().CacheBinEnd() * NUM_PEAK_TYPES;
     int total = 0;
     google::protobuf::RepeatedField<int>::const_iterator i = peaks.begin();
     for (; i != peaks.end(); ++i) {

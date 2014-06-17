@@ -623,7 +623,7 @@ void initialize_parameters(void){
   /* N.B. Use NaN to indicate that no user preference was specified.
    * In this case, the default value depends on the mass type.
    * S.M. Also prevent a width of 0.                                */
-  set_double_parameter("mz-bin-width", NaN(), 1e-4, BILLION,
+  set_double_parameter("mz-bin-width", 1.0005079, 1e-4, BILLION,
       "Specify the width of the bins used to "
       "discretize the m/z axis.  Also used as tolerance for assigning "
       "ions.  Default=1.0005079 for monoisotopic mass "
@@ -631,12 +631,12 @@ void initialize_parameters(void){
       "Available for crux-search-for-matches and xlink-assign-ions.", "true");
   set_double_parameter("mz-bin-offset", SMART_MZ_OFFSET, 0.0, 1.0,
       "Specify the location of the left edge of the "
-      "first bin used to discretize the m/z axis. Default=0.68",
+      "first bin used to discretize the m/z axis. Default=0.40",
       "Available for crux-search-for-matches.", "true");
   // initialize as "unset", then set as bool after cmdline parsed
   set_string_parameter("use-flanking-peaks", "unset",
       "Include peaks +/- 1da around b/y ions in theoretical spectrum.  "
-      "sequest-search and search-for-xlinks default=T. search-for-matches "
+      "sequest-search and search-for-xlinks default=T. "
       "default=F.",
       "Available in the parameter file for all search commands.",
       "true");
@@ -1146,11 +1146,6 @@ void initialize_parameters(void){
     "Available for tide-search",
     "true"
   );
-  set_string_parameter("PTMDB", "",
-    "Specify the name of the file where the PTMs are stored.",
-    "Available for tide-index",
-    "true"
-  );
   // Same as remove_precursor_peak and remove_precursor tolerance in Comet
   set_boolean_parameter("remove-precursor-peak", false,
     "Remove peaks around the precursor m/z.",
@@ -1169,8 +1164,11 @@ void initialize_parameters(void){
     "true"
   );
   set_boolean_parameter("use-neutral-loss-peaks", false,
-    "Controls whether or not neutral loss ions (-NH3 and -H2O from "
-	"b- and y-ions) are considered in the search.",
+    "Controls whether neutral loss ions are considered in the search. "
+    "Two types of	neutral losses are included and are applied only to "
+    "singly charged b- and y-ions: loss of ammonia (NH3, 17.0086343 Da) "
+	"and H2O (18.0091422). Each neutral loss peak has intensity 1/5 of "
+	"the primary peak",
     "Available for tide-search.",
     "true"
   );

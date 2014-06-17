@@ -61,22 +61,18 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum,
   if (debug)
     debug = true; // allows a breakpoint
 #endif
-  double bin_width = bin_width_mono;
+//  double bin_width = bin_width_mono;
   double precursor_mz = spectrum.PrecursorMZ();
   double proton = MassConstants::proton;
   double experimental_mass_cut_off = (precursor_mz-proton)*charge+proton + 50;
   double max_peak_mz = spectrum.M_Z(spectrum.Size()-1);
 
-  assert(MaxMZ::Global().MaxBin() > 0);
-  // if (experimental_mass_cut_off > FLAGS_max_mz)
-  //   experimental_mass_cut_off = FLAGS_max_mz;
+  assert(MaxBin::Global().MaxBinEnd() > 0);
 
-  max_mz_.Init(min(experimental_mass_cut_off, max_peak_mz));
-  // cache_end_ = max_mz_.CacheBinEnd() * NUM_PEAK_TYPES;
-  cache_end_ = MaxMZ::Global().CacheBinEnd() * NUM_PEAK_TYPES;
+  max_mz_.InitBin(min(experimental_mass_cut_off, max_peak_mz));
+  cache_end_ = MaxBin::Global().CacheBinEnd() * NUM_PEAK_TYPES;
 
-  //memset(peaks_, 0, sizeof(double) * max_mz_.BackgroundBinEnd());
-  memset(peaks_, 0, sizeof(double) * MaxMZ::Global().BackgroundBinEnd());
+  memset(peaks_, 0, sizeof(double) * MaxBin::Global().BackgroundBinEnd());
 
 
   // Fill peaks
@@ -88,7 +84,7 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum,
       continue;
 
     double intensity = spectrum.Intensity(i);
-    int mz = (int)(peak_location / bin_width + 0.5);
+    int mz = MassConstants::mass2bin(peak_location);
     if ((mz > largest_mz) && (intensity > 0))
       largest_mz = mz;
 
@@ -102,7 +98,7 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum,
   double intensity_cutoff = highest_intensity * 0.05;
 
   double normalizer = 0.0;
-  int region_size = largest_mz / NUM_SPECTRUM_REGIONS +1;
+  int region_size = largest_mz / NUM_SPECTRUM_REGIONS + 1;
   for (int i = 0; i < NUM_SPECTRUM_REGIONS; ++i) {
     highest_intensity = 0;
     for (int j = 0; j < region_size; ++j) {
@@ -203,37 +199,37 @@ void ObservedPeakSet::ComputeCache() {
 	}
     int Y1 = flanks;
 	if ( NL_ == true) {
-		if (i > 16)
-		  Y1 += Peak(LossPeak, i-17);
-		if (i > 17)
-		  Y1 += Peak(LossPeak, i-18);
+		if (i > MassConstants::BIN_NH3)
+		  Y1 += Peak(LossPeak, i-MassConstants::BIN_NH3);
+		if (i > MassConstants::BIN_H2O)
+		  Y1 += Peak(LossPeak, i-MassConstants::BIN_H2O);
 	}
 	Peak(PeakCombinedY1, i) = Y1;
 
     int B1 = Y1;
-//    if (i > 27 && NL == true)
+//    if (i > 27 && NL_ == true)
 //      B1 += Peak(LossPeak, i-28);
 	Peak(PeakCombinedB1, i) = B1;
 
-    int Y2a = flanks;
-//    if (i > 8  && NL == true)
+//    int Y2a = flanks;
+//    if (i > 8  && NL_ == true)
 //      Y2a += Peak(LossPeak, i-9);
-    Peak(PeakCombinedY2a, i) = Y2a;
+    Peak(PeakCombinedY2, i) = flanks;
 
-    int Y2b = Y2a;
-//    if (i > 7  && NL == true)
+//    int Y2b = Y2a;
+//    if (i > 7  && NL_ == true)
 //      Y2b += Peak(LossPeak, i-8);
-    Peak(PeakCombinedY2b, i) = Y2b;
+//    Peak(PeakCombinedY2, i) = Y2b;
 
-    int B2a = Y2a;
-//    if (i > 13  && NL == true)
+//    int B2a = Y2a;
+//    if (i > 13  && NL_ == true)
 //      B2a += Peak(LossPeak, i-14);
-    Peak(PeakCombinedB2a, i) = B2a;
+    Peak(PeakCombinedB2, i) = flanks;
 
-    int B2b = Y2b;
-//    if (i > 13  && NL == true)
+//    int B2b = Y2b;
+//    if (i > 13  && NL_ == true)
 //      B2b += Peak(LossPeak, i-14);
-    Peak(PeakCombinedB2b, i) = B2b;
+//    Peak(PeakCombinedB2b, i) = B2b;
   }
 }
 

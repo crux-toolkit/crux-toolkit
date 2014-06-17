@@ -48,6 +48,8 @@ int TideSearchApplication::main(int argc, char** argv) {
     "parameter-file",
     "use-neutral-loss-peaks",
     "use-flanking-peaks",
+    "mz-bin-width",
+    "mz-bin-offset",	
     "verbosity"
   };
   int num_options = sizeof(option_list) / sizeof(char*);
@@ -167,7 +169,10 @@ int TideSearchApplication::main(int argc, char** argv) {
       OutputFiles::setProteinLevelDecoys();
     }
   }
-  MassConstants::Init(&pepHeader.mods());
+  bin_width_  = get_double_parameter("mz-bin-width");
+  bin_offset_ = get_double_parameter("mz-bin-offset");
+
+  MassConstants::Init(&pepHeader.mods(), bin_width_, bin_offset_);
   TideMatchSet::initModMap(pepHeader.mods());
 
   active_peptide_queue = new ActivePeptideQueue(peptide_reader.Reader(), proteins);
@@ -218,9 +223,9 @@ int TideSearchApplication::main(int argc, char** argv) {
   if (max_mz == 0) {
     double highest_mz = spectra.FindHighestMZ();
     carp(CARP_DEBUG, "Max m/z %f", highest_mz);
-    MaxMZ::SetGlobalMax(highest_mz);
+    MaxBin::SetGlobalMax(highest_mz);
   } else {
-    MaxMZ::SetGlobalMaxFromFlag();
+    MaxBin::SetGlobalMaxFromFlag();
   }
 
   char* digestString =
@@ -338,8 +343,10 @@ void TideSearchApplication::search(
   }
 
   // This is the main search loop.
-  ObservedPeakSet observed(get_boolean_parameter("use-neutral-loss-peaks"), 
-       get_boolean_parameter("use-flanking-peaks"));
+  //NOTE to JEFF: bin_width and bin_offset are local members of this class
+  ObservedPeakSet observed(bin_width_, bin_offset_,
+	  get_boolean_parameter("use-neutral-loss-peaks"), 
+	  get_boolean_parameter("use-flanking-peaks"));
   // cycle through spectrum-charge pairs, sorted by neutral mass
   unsigned sc_index = 0;
   FLOAT_T sc_total = (FLOAT_T)spec_charges->size();
