@@ -12,6 +12,7 @@
 #include <io.h>
 #endif
 
+extern HASH_T* parameters;
 extern void AddTheoreticalPeaks(const vector<const pb::Protein*>& proteins,
                         				const string& input_filename,
                         				const string& output_filename);
@@ -61,8 +62,6 @@ int TideIndexApplication::main(int argc, char** argv) {
     "verbosity"
   };
 
-  const string default_cysteine = "C+57.0214637206";
-
   // Crux command line parsing
   int num_options = sizeof(option_list) / sizeof(char*);
   const char* arg_list[] = {
@@ -73,6 +72,11 @@ int TideIndexApplication::main(int argc, char** argv) {
   initialize(arg_list, num_args, option_list, num_options, argc, argv);
 
   carp(CARP_INFO, "Running tide-index...");
+
+  // Reroute stderr
+  CarpStreamBuf buffer;
+  streambuf* old = cerr.rdbuf();
+  cerr.rdbuf(&buffer);
 
   // Build command line string
   string cmd_line = "crux tide-index";
@@ -104,16 +108,10 @@ int TideIndexApplication::main(int argc, char** argv) {
   }
 
   VariableModTable var_mod_table;
-  string mods_spec;
   var_mod_table.ClearTables();
   //parse regular amino acid modifications
-  mods_spec = get_string_parameter_pointer("mods-spec");
-  if (mods_spec.find('C') == string::npos) {
-    mods_spec = (mods_spec.empty()) ?
-      default_cysteine : default_cysteine + ',' + mods_spec;
-    carp(CARP_DEBUG, "Using default cysteine mod '%s' ('%s')",
-         default_cysteine.c_str(), mods_spec.c_str());
-  }
+  string mods_spec = get_string_parameter_pointer("mods-spec");
+  carp(CARP_DEBUG, "mods_spec='%s'", mods_spec.c_str());
   if (!var_mod_table.Parse(mods_spec.c_str())) {
     carp(CARP_FATAL, "Error parsing mods");
   }
@@ -193,11 +191,6 @@ int TideIndexApplication::main(int argc, char** argv) {
                        "different index name");
     }
   }
-
-  // Reroute stderr
-  CarpStreamBuf buffer;
-  streambuf* old = cerr.rdbuf();
-  cerr.rdbuf(&buffer);
 
   // Start tide-index
   carp(CARP_INFO, "Reading %s and computing unmodified peptides...",
@@ -829,6 +822,24 @@ void TideIndexApplication::addAuxLoc(
   pb::Location* location = outAuxLoc.add_location();
   location->set_protein_id(proteinId);
   location->set_pos(proteinPos);
+}
+
+void TideIndexApplication::writeParamFile() {
+  char* param_file_name = cat_string(getFileStem().c_str(), ".params.txt");
+
+  // Update mods-spec parameter for default cysteine mod
+  const string default_cysteine = "C+57.02146";
+  string mods_spec = get_string_parameter_pointer("mods-spec");
+  if (mods_spec.find('C') == string::npos) {
+    mods_spec = mods_spec.empty() ?
+      default_cysteine : default_cysteine + ',' + mods_spec;
+    carp(CARP_DEBUG, "Using default cysteine mod '%s' ('%s')",
+         default_cysteine.c_str(), mods_spec.c_str());
+  }
+  add_or_update_hash(parameters, "mods-spec", mods_spec.c_str());
+
+  print_parameter_file(&param_file_name);
+  free(param_file_name);
 }
 
 /*
