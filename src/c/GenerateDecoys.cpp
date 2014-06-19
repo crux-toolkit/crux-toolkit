@@ -24,8 +24,9 @@ int GenerateDecoys::main(int argc, char** argv) {
     "digestion",
     "missed-cleavages",
     "isotopic-mass",
-	"clip-nterm-methionine",
+    "clip-nterm-methionine",
     "decoy-format",
+    "keep-terminal-aminos",
     "overwrite",
     "fileroot",
     "output-dir",
@@ -492,20 +493,43 @@ bool GenerateDecoys::makeDecoy(
 ) {
   const int MAX_SHUFFLE_ATTEMPTS = 6;
 
-  if (seq.length() <= 3) {
+  const string keepTerminal = get_string_parameter_pointer("keep-terminal-aminos");
+  string decoyPre;
+  string decoyPost;
+  if (keepTerminal == "N") {
+    if (seq.length() <= 2) {
+      decoyOut = seq;
+      return false;
+    }
+    decoyPre = seq[0];
+    decoyOut = seq.substr(1);
+  } else if (keepTerminal == "C") {
+    if (seq.length() <= 2) {
+      decoyOut = seq;
+      return false;
+    }
+    decoyPost = seq[seq.length() - 1];
+    decoyOut = seq.substr(0, seq.length() - 1);
+  } else if (keepTerminal == "NC") {
+    if (seq.length() <= 3) {
+      decoyOut = seq;
+      return false;
+    }
+    decoyPre = seq[0];
+    decoyPost = seq[seq.length() - 1];
+    decoyOut = seq.substr(1, seq.length() - 2);
+  } else {
     decoyOut = seq;
-    return false;
+    if (seq.length() <= 1) {
+      return false;
+    }
   }
-
-  decoyOut = seq.substr(1, seq.length() - 2);
-  char seqN = seq[0];
-  char seqC = seq[seq.length() - 1];
 
   if (!shuffle) {
     // Reverse
     if (reversePeptide(decoyOut)) {
       // Re-add n/c
-      string decoyCheck = seqN + decoyOut + seqC;
+      string decoyCheck = decoyPre + decoyOut + decoyPost;
       // Check in sets
       if (targetSeqs.find(decoyCheck) == targetSeqs.end() &&
           decoySeqs.find(decoyCheck) == decoySeqs.end()) {
@@ -520,7 +544,7 @@ bool GenerateDecoys::makeDecoy(
   for (int i = 0; i < MAX_SHUFFLE_ATTEMPTS; ++i) {
     if (shufflePeptide(decoyOut)) {
       // Re-add n/c
-      string decoyCheck = seqN + decoyOut + seqC;
+      string decoyCheck = decoyPre + decoyOut + decoyPost;
       // Check in sets
       if (targetSeqs.find(decoyCheck) == targetSeqs.end() &&
           decoySeqs.find(decoyCheck) == decoySeqs.end()) {

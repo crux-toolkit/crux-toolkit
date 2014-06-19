@@ -37,6 +37,7 @@ int TideIndexApplication::main(int argc, char** argv) {
 
   const char* option_list[] = {
     "decoy-format",
+    "keep-terminal-aminos",
     "decoy-prefix",
     "enzyme",
     "custom-enzyme",
