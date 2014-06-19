@@ -557,6 +557,12 @@ void initialize_parameters(void){
       "for crux-search-for-matches.  When used with enzyme=<trypsin|elastase|"
       "chymotrpysin> includes peptides containing one or more potential "
       "cleavage sites.", "true");   
+  set_string_parameter("keep-terminal-aminos", "NC", 
+      "When creating decoy peptides using decoy-format=shuffle or decoy-format="
+      "peptide-reverse, this option specifies whether the N-terminal and "
+      "C-terminal amino acids are kept in place or allowed to be shuffled or "
+      "reversed. Default = NC.",
+      "Available for tide-index and generate-decoys.", "true");
 
   set_boolean_parameter("unique-peptides", true,
       "Generate peptides only once, even if they appear in more "
