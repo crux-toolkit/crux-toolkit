@@ -1,3 +1,12 @@
+/*
+ * There are two versions of the report function, which writes matches to output
+ * files. The first version, which takes ofstreams as arguments, is used when
+ * only tab-delimited output is required. It does not perform any object
+ * conversions. The second version takes an OutputFiles object as an argument
+ * and is used when any non-tab-delimited output is required. It must convert
+ * the data from Tide into Crux objects, which increases runtime.
+ */
+
 #include <fstream>
 #include <iomanip>
 
