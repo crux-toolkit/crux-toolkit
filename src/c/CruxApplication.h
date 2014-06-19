@@ -74,6 +74,10 @@ class CruxApplication{
    */
   virtual bool hidden();
 
+  /**
+   * Writes the parameter file
+   */
+  virtual void writeParamFile();
 };
 
 

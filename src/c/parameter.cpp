@@ -1100,7 +1100,7 @@ void initialize_parameters(void){
     "Available for tide-index",
     "true"
   );
-  set_string_parameter("mods-spec", "",
+  set_string_parameter("mods-spec", "C+57.02146",
     "Expression for static and variable mass modifications to include. "
     "Specify a comma-separated list of modification sequences of the form: "
     "C+57.02146,2M+15.9949,1STY+79.966331,...",
