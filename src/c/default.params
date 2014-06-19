@@ -153,8 +153,7 @@ custom-enzyme=__NULL_STR
 flanking=false
 
 # Include peaks +/- 1da around b/y ions in theoretical spectrum. 
-# sequest-search and search-for-xlinks default=T. search-for-matches
-# default=F.
+# sequest-search and search-for-xlinks default=T. default=F.
 # Available in the parameter file for all search commands.
 use-flanking-peaks=false
 
@@ -196,9 +195,12 @@ H=0.000000
 # For parameter file only.  Default=no mass change.
 I=0.000000
 
-# Change the mass of all amino acids 'K' by the given amount.
-# For parameter file only.  Default=no mass change.
-K=0.000000
+# When creating decoy peptides using decoy-format=shuffle or
+# decoy-format=peptide-reverse, this option specifies whether the
+# N-terminal and C-terminal amino acids are kept in place or allowed to
+# be shuffled or reversed. Default = NC.
+# Available for generate-decoys.
+keep-terminal-aminos=NC
 
 # Change the mass of all amino acids 'L' by the given amount.
 # For parameter file only.  Default=no mass change.
@@ -208,17 +210,17 @@ L=0.000000
 # For parameter file only.  Default=no mass change.
 M=0.000000
 
-# Change the mass of all amino acids 'N' by the given amount.
+# Change the mass of all amino acids 'K' by the given amount.
 # For parameter file only.  Default=no mass change.
-N=0.000000
+K=0.000000
 
 # Change the mass of all amino acids 'P' by the given amount.
 # For parameter file only.  Default=no mass change.
 P=0.000000
 
-# Change the mass of all amino acids 'Q' by the given amount.
+# Change the mass of all amino acids 'N' by the given amount.
 # For parameter file only.  Default=no mass change.
-Q=0.000000
+N=0.000000
 
 # Change the mass of all amino acids 'R' by the given amount.
 # For parameter file only.  Default=no mass change.
@@ -228,21 +230,25 @@ R=0.000000
 # For parameter file only.  Default=no mass change.
 S=0.000000
 
-# Change the mass of all amino acids 'T' by the given amount.
+# Change the mass of all amino acids 'Q' by the given amount.
 # For parameter file only.  Default=no mass change.
-T=0.000000
+Q=0.000000
 
 # Change the mass of all amino acids 'V' by the given amount.
 # For parameter file only.  Default=no mass change.
 V=0.000000
 
-# Change the mass of all amino acids 'W' by the given amount.
+# Change the mass of all amino acids 'T' by the given amount.
 # For parameter file only.  Default=no mass change.
-W=0.000000
+T=0.000000
 
 # Change the mass of all amino acids 'Y' by the given amount.
 # For parameter file only.  Default=no mass change.
 Y=0.000000
+
+# Change the mass of all amino acids 'W' by the given amount.
+# For parameter file only.  Default=no mass change.
+W=0.000000
 
 # Print version number and quit.
 # Available for all crux programs.  On command line use '--version T'.
@@ -313,10 +319,6 @@ spectrum-parser=pwiz
 # Available for all crux programs. Any options specified on the command
 # line will override values in the parameter file.
 parameter-file=__NULL_STR
-
-# Specify the name of the file where the PTMs are stored.
-# Available for tide-index
-PTMDB=
 
 # Output MZID in the output directory.  Default=F
 # Available for search-for-matches, percolator.
@@ -499,7 +501,7 @@ separate-searches=__NULL_STR
 verbosity=30
 
 # Specify the location of the left edge of the first bin used to
-# discretize the m/z axis. Default=0.68
+# discretize the m/z axis. Default=0.40
 # Available for crux-search-for-matches.
 mz-bin-offset=0.680000
 
@@ -834,8 +836,11 @@ cmod-fixed=NO MODS
 # Available for tide-index
 cterm-protein-mods-spec=
 
-# Controls whether or not neutral loss ions (-NH3 and -H2O from b- and
-# y-ions) are considered in the search.
+# Controls whether neutral loss ions are considered in the search. Two
+# types of	neutral losses are included and are applied only to singly
+# charged b- and y-ions: loss of ammonia (NH3, 17.0086343 Da) and H2O
+# (18.0091422). Each neutral loss peak has intensity 1/5 of the primary
+# peak
 # Available for tide-search.
 use-neutral-loss-peaks=false
 
