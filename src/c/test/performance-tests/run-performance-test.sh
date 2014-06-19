@@ -7,6 +7,13 @@
 # documentation of this particular data set is available from
 # crux-projects/panda-data.
 
+if [[ -e /etc/profile.d/modules.sh ]]; then
+  source /etc/profile.d/modules.sh
+  module load modules modules-init modules-gs modules-noble
+  module load mpc/0.8.2 mpfr/3.0.0 gmp/5.0.2 gcc/4.8.1
+  module load protobuf/2.5.0
+fi
+
 # The location of the crux binary.
 CRUX=../../crux
 
