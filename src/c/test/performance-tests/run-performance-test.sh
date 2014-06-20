@@ -66,6 +66,7 @@ echo mass_type_fragment=1 >> $parameters # 1=monoisotopic
 # Decoys.
 echo decoy-format=peptide-reverse >> $parameters
 echo num-decoys-per-target=1 >> $parameters
+echo keep-terminal-aminos=C >> $parameters
 echo decoy_search=2 >> $parameters  # 2 = separate decoy search
 
 # Report the top 5 matches.
@@ -84,10 +85,10 @@ echo use-flanking-peaks=F >> $parameters
 echo theoretical_fragment_ions=1 >> $parameters # 0 = flanks; 1 = no flanks
 echo use-neutral-loss-peaks=F >> $parameters 
 # Fragment m/z discretization.  This is fixed in Tide.
-echo fragment_bin_offset=0.0 >> $parameters
-echo fragment_bin_tol=0.5 >> $parameters
-echo mz-bin-width=0.5 >>$parameters
-echo mz-bin-offset=0.00 >>$parameters
+echo fragment_bin_offset=0.4 >> $parameters
+echo fragment_bin_tol=1.0005079 >> $parameters
+echo mz-bin-offset=0.4 >>$parameters
+echo mz-bin-width=1.0005079 >>$parameters
 
 # Other Crux parameters.
 echo compute-sp=F >> $parameters
