@@ -424,6 +424,15 @@ void ObservedPeakSet::CreateEvidenceVector( const Spectrum& spectrum,
 			ionBin = ( int )floor( ionMZMultiCharge / binWidth + 1.0 - binOffset );
 			evidence[ ma ] = evidence[ ma ] + intensArrayObs[ ionBin ] * H2OLossHeight;
 		}
+		// H2O loss from y ion
+		ionMassH2OLoss = yIonMass - massH2OMono;
+		ionBin = ( int )floor( ionMassH2OLoss / binWidth + 1.0 - binOffset );
+		evidence[ ma ] = evidence[ ma ] + intensArrayObs[ ionBin ] * H2OLossHeight;
+		for ( pc = 3; pc <= precurCharge; pc++ ) {
+			ionMZMultiCharge = ( ionMassH2OLoss + ( pc - 2 ) * massHMono ) / ( pc - 1 );
+			ionBin = ( int )floor( ionMZMultiCharge / binWidth + 1.0 - binOffset );
+			evidence[ ma ] = evidence[ ma ] + intensArrayObs[ ionBin ] * H2OLossHeight;
+		}
 	}
     // discretize evidence array
     for ( ma = 0; ma < maxPrecurMass; ma++ ) {

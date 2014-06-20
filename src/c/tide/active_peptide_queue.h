@@ -43,6 +43,9 @@ class ActivePeptideQueue {
 
   deque<TheoreticalPeakSetBIons> b_ion_queue_;
   deque<TheoreticalPeakSetBIons>::const_iterator iter1_, end1_;
+ 
+  int CountAAFrequency( double binWidth, double binOffset, double** dAAFreqN, double** dAAFreqI, double** dAAFreqC, int** dAAMass );  
+  
   int ActiveTargets() const { return active_targets_; }
   int ActiveDecoys() const { return active_decoys_; }
 
