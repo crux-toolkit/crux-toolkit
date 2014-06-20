@@ -155,6 +155,7 @@ class Peptide {
   }
   ModCoder::Mod* Mods() const { return mods_; }
   bool IsDecoy() const { return decoy_; }
+  double* getAAMasses();
 
  private:
   template< class W > void AddIons( W* workspace ) const;

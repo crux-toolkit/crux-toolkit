@@ -162,6 +162,27 @@ int TideSearchApplication::main(int argc, char** argv) {
   }
   carp(CARP_DEBUG, "Read %d proteins", proteins.size());
 
+  //open a copy of peptide buffer for Amino Acid Frequency (AAF) calculation.
+  double* AAFreqN = NULL;
+  double* AAFreqI = NULL;
+  double* AAFreqC = NULL;
+  int* AAMass = NULL;
+  int nAA;
+  int i;
+  
+  if (exact_pval_search == true){
+    pb::Header aaf_peptides_header;
+    HeadedRecordReader aaf_peptide_reader(peptides_file, &aaf_peptides_header);
+
+    if (!aaf_peptides_header.file_type() == pb::Header::PEPTIDES || !aaf_peptides_header.has_peptides_header()) {
+      carp(CARP_FATAL, "Error reading index (%s)", peptides_file.c_str());
+    }
+    MassConstants::Init(&aaf_peptides_header.peptides_header().mods());
+    active_peptide_queue = new ActivePeptideQueue(aaf_peptide_reader.Reader(), proteins);
+    nAA = active_peptide_queue->CountAAFrequency(binWidth, binOffset, &AAFreqN, &AAFreqI, &AAFreqC, &AAMass);
+    delete active_peptide_queue;
+  } // End calculation AA frequencies
+
   // Read auxlocs index file
   vector<const pb::AuxLocation*> locations;
   if (!ReadRecordsToVector<pb::AuxLocation>(&locations, auxlocs_file)) {
@@ -192,7 +213,7 @@ int TideSearchApplication::main(int argc, char** argv) {
 
   active_peptide_queue->SetBinSize(binWidth, binOffset);
 
-  printf( "active_peptide_queue binWidth = %10.8f\n", binWidth );    //&& for test only
+  printf( "active_peptide_queue binWidth  = %10.8f\n", binWidth );    //&& for test only
   printf( "active_peptide_queue binOffset = %4.2f\n", binOffset );   //&& for test only
   
   carp(CARP_INFO, "Reading spectra file %s", spectra_file.c_str());
@@ -297,8 +318,7 @@ int TideSearchApplication::main(int argc, char** argv) {
          get_double_parameter("spectrum-max-mz"), min_scan, max_scan,
          get_int_parameter("min-peaks"), charge_to_search,
          get_int_parameter("top-match"), spectra.FindHighestMZ(),
-         output_files, target_file, decoy_file, compute_sp);
-
+         output_files, target_file, decoy_file, compute_sp, nAA, AAFreqN, AAFreqI, AAFreqC, AAMass );
   // Delete temporary spectrumrecords file
   if (!delete_spectra_file.empty()) {
     carp(CARP_DEBUG, "Deleting %s", delete_spectra_file.c_str());
@@ -321,6 +341,10 @@ int TideSearchApplication::main(int argc, char** argv) {
       delete decoy_file;
     }
   }
+  if ( AAFreqN != NULL) delete AAFreqN;
+  if ( AAFreqI != NULL) delete AAFreqI;
+  if ( AAFreqC != NULL) delete AAFreqC;
+  if ( AAMass != NULL) delete AAMass;
 
   return 0;
 }
@@ -354,9 +378,14 @@ void TideSearchApplication::search(
   OutputFiles* output_files,
   ofstream* target_file,
   ofstream* decoy_file,
-  bool compute_sp
+  bool compute_sp,
+  int nAA, 
+  double* AAFreqN,
+  double* AAFreqI,
+  double* AAFreqC,
+  int* AAMass
 ) {
-
+  bool highScoreBest = true;
   if (output_files) {
     output_files->exact_pval_search = exact_pval_search;
     output_files->writeHeaders();
@@ -367,17 +396,6 @@ void TideSearchApplication::search(
 
   // This is the main search loop.
   ObservedPeakSet observed;
-
-  //&& for test only
-  // double aaProb1[ 18 ] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
-  // double aaProb2[ 18 ] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
-  double aaProb1[ 18 ] = { 0.0563, 0.0614, 0.1019, 0.0493, 0.0638, 0.0657,
-						   0.1839, 0.0694, 0.0669, 0.0435, 0.0739, 0.0229,
-						   0.0245, 0.0517, 0.0000, 0.0154, 0.0379, 0.0117 };
-  double aaProb2[ 18 ] = { 0.0005, 0.0010, 0.0015, 0.0005, 0.0010, 0.0007,
-                           0.0035, 0.0013, 0.0009, 0.6142, 0.0011, 0.0005,
-						   0.0004, 0.0011, 0.3706, 0.0003, 0.0006, 0.0004 };
-  //&& end for test only
 
   // cycle through spectrum-charge pairs, sorted by neutral mass
   for (vector<SpectrumCollection::SpecCharge>::const_iterator sc = spec_charges->begin();
@@ -440,10 +458,10 @@ void TideSearchApplication::search(
       matches.exact_pval_search = exact_pval_search;
       if (output_files) {
         matches.report(output_files, top_matches, spectrum, charge,
-                       active_peptide_queue, proteins, locations, compute_sp);
+                       active_peptide_queue, proteins, locations, compute_sp, highScoreBest);
       } else {
         matches.report(target_file, decoy_file, top_matches, spectrum, charge,
-                       active_peptide_queue, proteins, locations, compute_sp);
+                       active_peptide_queue, proteins, locations, compute_sp, highScoreBest);
       }
 
     } else {  // execute exact-pval-search
@@ -451,11 +469,8 @@ void TideSearchApplication::search(
 	  printf( "scan %d   m/z %f   charge %d   neutral mass %f\n", spectrum->SpectrumNumber(), spectrum->PrecursorMZ(), charge, pre_mass );
 	  //%% end for test only
 	
-	  //&& need to decide which of these constants to move to parameter file
-      const int minDeltaMass = 57;
-      const int maxDeltaMass = 186;
-      //&& end need to decide
-
+      const int minDeltaMass = AAMass[ 0 ];
+      const int maxDeltaMass = AAMass[ nAA - 1 ];
       double binWidth   = get_double_parameter( "mz-bin-width" );
       double binOffset  = get_double_parameter( "mz-bin-offset" );
 
@@ -511,19 +526,16 @@ void TideSearchApplication::search(
       int* scoreOffsetObs = new int [ nPepMassIntUniq ];
       double** pValueScoreObs = new double* [ nPepMassIntUniq ];
       int* intensArrayTheor = new int [ maxPrecurMass ];       // initialized later in loop
-      for ( pe = 0; pe < nPepMassIntUniq; pe++ ) {
+      for ( pe = 0; pe < nPepMassIntUniq; pe++ ) {      //&& should probably instead use iterator over pepMassIntUnique
         evidenceObs[ pe ] = new int[ maxPrecurMass ];
         for ( ma = 0; ma < maxPrecurMass; ma++ ) {
           evidenceObs[ pe ][ ma ] = 0;
         }
         scoreOffsetObs[ pe ] = 0;
-        pepMaInt = pepMassIntUnique[ pe ];		//&& should be accessed with an iterator
+        pepMaInt = pepMassIntUnique[ pe ];		        //&& should be accessed with an iterator
         // preprocess to create one integerized evidence vector for each cluster of masses among selected peptides
         double pepMassMonoMean = ( pepMaInt - 1.0 + binOffset ) * binWidth + 0.5;
 		observed.CreateEvidenceVector( *spectrum, binWidth, binOffset, charge, pepMassMonoMean, maxPrecurMass, evidenceObs[ pe ] );
-
-        //&& original: createEvidenceArrayObserved( nIon, ionSeriesMass, ionSeriesIntens, evidenceIntScale, binWidth, binOffset, precurMz, precurCharge, pepMassMonoMean, maxPrecurMass, evidenceObs[ pe ] );
-
         // NOTE: will have to go back to separate dynamic programming for target and decoy if they have different probNI and probC
         int maxEvidence = *std::max_element( evidenceObs[ pe ], evidenceObs[ pe ] + maxPrecurMass );
         int minEvidence = *std::min_element( evidenceObs[ pe ], evidenceObs[ pe ] + maxPrecurMass );
@@ -543,24 +555,25 @@ void TideSearchApplication::search(
         int topRowBuffer = -minEvidence;
         int nRowDynProg = bottomRowBuffer - minScore + 1 + maxScore + topRowBuffer;
         pValueScoreObs[ pe ] = new double[ nRowDynProg ];
-        scoreOffsetObs[ pe ] = calcScoreCount( maxPrecurMass, evidenceObs[ pe ], binWidth, binOffset, pepMaInt, maxEvidence, minEvidence, maxScore, minScore, aaProb1, aaProb2, pValueScoreObs[ pe ] );
+        scoreOffsetObs[ pe ] = calcScoreCount( maxPrecurMass, evidenceObs[ pe ], binWidth, binOffset, pepMaInt, maxEvidence, minEvidence, maxScore, minScore, 
+								nAA, AAFreqN, AAFreqI, AAFreqC, AAMass, pValueScoreObs[ pe ] );
       }
-
+ 
       // ***** calculate p-values for peptide-spectrum matches ***********************************
 	  iter_ = active_peptide_queue -> iter_;
 	  iter1_ = active_peptide_queue -> iter1_;
-      for ( pe = 0; pe < nCandPeptide; pe++ ) {
+      for ( pe = 0; pe < nCandPeptide; pe++ ) {     //&& should probably use iterator instead
 	  
-	    //&& for test only
+	    // //&& for test only
         // cout << pe << "\t" << ( *iter_ ) -> Mass() << "\t" << ( *iter_ )-> Id() << "\t" << ( *iter_ ) -> Len() << "\t" << ( *iter_ ) -> Seq() << endl;
  	    // for ( iter_uint = iter1_ -> unordered_peak_list_.begin(); iter_uint != iter1_ -> unordered_peak_list_.end(); iter_uint++ ) {
 		   // cout << *iter_uint << "\t";
 	    // }
         // cout << endl;
-		//&& end for test only
+		// //&& end for test only
 
         int pepMassIntIdx = 0;
-        for ( ma = 0; ma < nPepMassIntUniq; ma++ ) {
+        for ( ma = 0; ma < nPepMassIntUniq; ma++ ) {    //&& should probably use iterator instead
           if ( pepMassIntUnique[ ma ] == pepMassInt[ pe ] ) { 	//&& pepMassIntUnique should be accessed with an iterator
             pepMassIntIdx = ma;
             break;
@@ -584,19 +597,11 @@ void TideSearchApplication::search(
         // cout << pe << "    " << pepMassIntIdx << "    " << pValue << endl; 	//&& for test only
 
         TideMatchSet::Pair pair;
-        pair.first.first = -1.0 * log10( pValue );
+        pair.first.first = pValue;
 	    pair.first.second = ( double )scoreRefactInt;
 	    pair.second = nCandPeptide - pe;	//&& ugly hack to conform with the way these indices are generated in standard tide-search
         match_arr.push_back( pair );
 		
-		// //&& for test only
-		// if ( pair.first.first > 4.3 ) {
-			// for ( ma = 0; ma < maxPrecurMass; ma++ ) {
-				// printf( "%5d   %5d   %3d   %3d\n", pepMassIntIdx, ma, evidenceObs[ pepMassIntIdx ][ ma ], intensArrayTheor[ ma ] );
-			// }
-		// }
-		// //&& end for test only
- 
 // //         nSpecTarget( pepIdxTar ) = nSpecTarget( pepIdxTar ) + 1;
 // //         if ( pValueTar < pValuePeptideBestMatchTarget( pepIdxTar ) )
 // //             pValuePeptideBestMatchTarget( pepIdxTar ) = pValueTar;
@@ -625,12 +630,13 @@ void TideSearchApplication::search(
       // the top matches.
       TideMatchSet matches(&match_arr, highest_mz);
       matches.exact_pval_search = exact_pval_search;
+      highScoreBest = false;
       if (output_files) {
         matches.report(output_files, top_matches, spectrum, charge,
-                     active_peptide_queue, proteins, locations, compute_sp);
+                     active_peptide_queue, proteins, locations, compute_sp, highScoreBest);
       } else {
         matches.report(target_file, decoy_file, top_matches, spectrum, charge,
-                     active_peptide_queue, proteins, locations, compute_sp);
+                     active_peptide_queue, proteins, locations, compute_sp, highScoreBest);
       }
     }
   }
@@ -756,42 +762,16 @@ COMMAND_T TideSearchApplication::getCommand() {
   return TIDE_SEARCH_COMMAND;
 }
 
-int TideSearchApplication::calcScoreCount( int numelEvidenceObs, int* evidenceObs, double binWidth, double binOffset, int pepMassInt, int maxEvidence, int minEvidence, int maxScore, int minScore, double* aaProb1, double* aaProb2, double* pValueScoreObs ) {
-/* Calculates counts of peptides with various XCorr scores, given a preprocessed
- * MS2 spectrum, using dynamic programming.
+int TideSearchApplication::calcScoreCount( int numelEvidenceObs, int* evidenceObs, double binWidth, double binOffset, int pepMassInt, int maxEvidence, int minEvidence, int maxScore, int minScore,
+                                            int nAA, double* AAFreqN, double* AAFreqI, double* AAFreqC, int* AAMass, double* pValueScoreObs ) {
+/* Calculates counts of peptides with various XCorr scores, given a preprocessed MS2 spectrum, using dynamic programming.
  * Written by Jeff Howbert, October, 2012 (as function calcScoreCount).
  * Ported to and integrated with Tide by Jeff Howbert, November, 2013.
  */
-
-// int calcScoreCount( int numelEvidenceObs, int* evidenceObs, double binWidth, double binOffset,
-//		int pepMassInt, int maxEvidence, int minEvidence, int maxScore, int minScore,
-//		double* aaProb1, double* aaProb2, double* pValueScoreObs ) {
-
-    const int nDeltaMass = 18;
-    // expected delta masses in b/y ion ladders, single amino acid residues only
-    int deltaMass[ nDeltaMass ] = {  
-                       57, // G
-                       71, // A
-                       87, // S
-                       97, // P
-                       99, // V
-                      101, // T
-                      113, // I, L
-                      114, // N
-                      115, // D
-                      128, // K, Q
-                      129, // E
-                      131, // M
-                      137, // H
-                      147, // F
-                      156, // R
-                      160, // C with acetamide mod
-                      163, // Y
-                      186  // W
-                    };
-    int minDeltaMass = deltaMass[ 0 ];
-    int maxDeltaMass = deltaMass[ nDeltaMass - 1 ];
-
+    const int nDeltaMass = nAA;
+    int minDeltaMass = AAMass[ 0 ];
+    int maxDeltaMass = AAMass[ nDeltaMass - 1 ];
+     
     // internal variables
     int row;
     int col;
@@ -832,32 +812,45 @@ int TideSearchApplication::calcScoreCount( int numelEvidenceObs, int* evidenceOb
  
     dynProgArray[ initCountRow ][ initCountCol ] = 1.0;    // initial count of peptides with mass = 1
     int deltaMassCol[ nDeltaMass ];
+    // populate matrix with scores for first (i.e. N-terminal) amino acid in sequence
+    for ( de = 0; de < nDeltaMass; de++ ) {
+        ma = AAMass[ de ];
+        row = initCountRow + evidenceObs[ ma ];
+        col = initCountCol + ma;
+        if ( col <= colLast ) {
+            dynProgArray[ row ][ col ] += dynProgArray[ initCountRow ][ initCountCol ] * AAFreqN[ de ];
+        }
+    }
+    dynProgArray[ initCountRow ][ initCountCol ] = 0.0;    // set to zero now that scores for first amino acid are in matrix
+    // populate matrix with scores for non-terminal amino acids in sequence 
     for ( ma = colFirst; ma < colLast; ma++ ) {
         col = maxDeltaMass + ma;
         evidence = evidenceObs[ ma ];
         for ( de = 0; de < nDeltaMass; de++ ) {
-            deltaMassCol[ de ] = col - deltaMass[ de ];
+            deltaMassCol[ de ] = col - AAMass[ de ];
         }
         for ( row = rowFirst; row <= rowLast; row++ ) {
             evidenceRow = row - evidence;
-            sumScore = 0.0;
+            sumScore = dynProgArray[ row ][ col ];
             for ( de = 0; de < nDeltaMass; de++ ) {
-                sumScore += dynProgArray[ evidenceRow ][ deltaMassCol[ de ] ] * aaProb1[ de ];
+                sumScore += dynProgArray[ evidenceRow ][ deltaMassCol[ de ] ] * AAFreqI[ de ];
             }
             dynProgArray[ row ][ col ] = sumScore;
         }
     }
+    // populate matrix with scores for last (i.e. C-terminal) amino acid in sequence
     ma = colLast;
     col = maxDeltaMass + ma;
-    evidence = evidenceObs[ ma ];
+    // evidence = evidenceObs[ ma ];    //&& wrong
+    evidence = 0;                       // no evidence should be added for last amino acid in sequence
     for ( de = 0; de < nDeltaMass; de++ ) {
-        deltaMassCol[ de ] = col - deltaMass[ de ];
+        deltaMassCol[ de ] = col - AAMass[ de ];
     }
     for ( row = rowFirst; row <= rowLast; row++ ) {
         evidenceRow = row - evidence;
         sumScore = 0.0;
         for ( de = 0; de < nDeltaMass; de++ ) {
-            sumScore += dynProgArray[ evidenceRow ][ deltaMassCol[ de ] ] * aaProb2[ de ];
+            sumScore += dynProgArray[ evidenceRow ][ deltaMassCol[ de ] ] * AAFreqC[ de ];  // C-terminal residue
         }
         dynProgArray[ row ][ col ] = sumScore;
     }
@@ -891,10 +884,3 @@ int TideSearchApplication::calcScoreCount( int numelEvidenceObs, int* evidenceOb
     
     return scoreOffsetObs;
 }
-
-/*
- * Local Variables:
- * mode: c
- * c-basic-offset: 2
- * End:
- */

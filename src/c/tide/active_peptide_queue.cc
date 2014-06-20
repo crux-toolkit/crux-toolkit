@@ -1,4 +1,5 @@
-// Benjamin Diament
+// original author: Benjamin Diament
+// subsequently modified by Attila Kertesz-Farkas, Jeff Howbert
 #include <deque>
 #include <gflags/gflags.h>
 #include "records.h"
@@ -229,4 +230,76 @@ int ActivePeptideQueue::SetActiveRangeBIons(double min_mass, double max_mass) {
     cerr << " Range: (" << (*iter_)->PB()->id() << ", " << (*end_)->PB()->id() << ")";
   cerr << endl;
   */
+}
+
+int ActivePeptideQueue::CountAAFrequency( double binWidth, double binOffset, double** dAAFreqN, double** dAAFreqI, double** dAAFreqC, int** dAAMass ) {
+
+    unsigned int i = 0;
+    unsigned int cntTerm = 0;
+    unsigned int cntInside = 0;
+    const unsigned int MaxModifiedAAMassBin = ( unsigned int )( 2000 / binWidth );   //2000 is the maximum size of a modified amino acid 
+    unsigned int* nvAAMassCounterN = new unsigned int[ MaxModifiedAAMassBin ];   //N-terminal amino acids
+    unsigned int* nvAAMassCounterC = new unsigned int[ MaxModifiedAAMassBin ];   //C-terminal amino acids
+    unsigned int* nvAAMassCounterI = new unsigned int[ MaxModifiedAAMassBin ];   //inner amino acids in the peptides
+    memset(nvAAMassCounterN, 0, MaxModifiedAAMassBin*sizeof(unsigned int));
+    memset(nvAAMassCounterC, 0, MaxModifiedAAMassBin*sizeof(unsigned int));
+    memset(nvAAMassCounterI, 0, MaxModifiedAAMassBin*sizeof(unsigned int));
+
+    int nPeptide = 0;   //&& for test only
+    
+    while (!(reader_->Done())) {                    // read all peptides in index
+      reader_->Read(&current_pb_peptide_);
+      Peptide* peptide = new(&fifo_alloc_peptides_) Peptide(current_pb_peptide_, proteins_, &fifo_alloc_peptides_);
+
+      double* dAAResidueMass = peptide->getAAMasses();   //retrieves the amino acid masses, modifications included
+
+      int nLen = peptide->Len();    //peptide length
+      ++nvAAMassCounterN[(unsigned int)(dAAResidueMass[0]/binWidth + 1.0 -binOffset)];
+      for (i = 1; i < nLen-1; ++i) {  
+         ++nvAAMassCounterI[(unsigned int)(dAAResidueMass[i]/binWidth + 1.0 -binOffset)];
+         ++cntInside;
+      } 
+      ++nvAAMassCounterC[(unsigned int)(dAAResidueMass[nLen-1]/binWidth + 1.0 -binOffset)];
+      ++cntTerm;
+
+      delete dAAResidueMass;
+      fifo_alloc_peptides_.ReleaseAll();
+      ++nPeptide;
+    }
+
+  //calculate the unique masses
+  unsigned int uiUniqueMasses = 0;
+  for ( i = 0; i < MaxModifiedAAMassBin; ++i ) {
+    if ( nvAAMassCounterN[ i ] || nvAAMassCounterI[ i ] ||  nvAAMassCounterC[ i ] )
+	++uiUniqueMasses;
+  }
+
+  //calculate the unique amino acid masses
+  *dAAMass = new int[ uiUniqueMasses ];     //a vector for the unique (integerized) amino acid masses present in the sample
+  *dAAFreqN = new double[ uiUniqueMasses ]; //a vector for the amino acid frequencies at the N-terminus
+  *dAAFreqI = new double[ uiUniqueMasses ]; //a vector for the amino acid frequencies inside the peptide
+  *dAAFreqC = new double[ uiUniqueMasses ]; //a vector for the amino acid frequencies at the C-terminus
+  unsigned int cnt = 0;
+  for ( i = 0; i < MaxModifiedAAMassBin; ++i ) {
+    if ( nvAAMassCounterN[ i ] || nvAAMassCounterI[ i ] ||  nvAAMassCounterC[ i ]  ) {
+       ( *dAAFreqN )[ cnt ] = ( double )nvAAMassCounterN[ i ] / cntTerm;
+       ( *dAAFreqI )[ cnt ] = ( double )nvAAMassCounterI[ i ] / cntInside;
+       ( *dAAFreqC )[ cnt ] = ( double )nvAAMassCounterC[ i ] / cntTerm;
+       ( *dAAMass )[ cnt ] = i;
+       cnt++;
+    }
+  }
+  
+  // //&& for test only
+  // printf( "number of peptides                 = %d\n", nPeptide );
+  // printf( "number of unique amino acid masses = %d\n", uiUniqueMasses );
+  // for ( i = 0; i < uiUniqueMasses; ++i ) {
+    // printf( "%3d   %7.5f   %7.5f   % 7.5f\n", ( *dAAMass )[ i ], ( *dAAFreqN )[ i ], ( *dAAFreqI )[ i ], ( *dAAFreqC )[ i ] );
+  // }
+  // //&& end for test only
+  
+  delete nvAAMassCounterN;
+  delete nvAAMassCounterI;
+  delete nvAAMassCounterC;
+  return uiUniqueMasses;
 }

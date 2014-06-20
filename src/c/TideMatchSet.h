@@ -56,7 +56,8 @@ public:
     const ActivePeptideQueue* peptides, ///< peptide queue
     const ProteinVec& proteins, ///< proteins corresponding with peptides
     const vector<const pb::AuxLocation*>& locations,  ///< auxiliary locations
-    bool compute_sp ///< whether to compute sp or not
+    bool compute_sp, ///< whether to compute sp or not
+    bool highScoreBest    // indicates semantics of score magnitude; true = high scores are best
   );
 
   /**
@@ -70,7 +71,8 @@ public:
     const ActivePeptideQueue* peptides, ///< peptide queue
     const ProteinVec& proteins, ///< proteins corresponding with peptides
     const vector<const pb::AuxLocation*>& locations,  ///< auxiliary locations
-    bool compute_sp ///< whether to compute sp or not
+    bool compute_sp, ///< whether to compute sp or not
+    bool highScoreBest    // indicates semantics of score magnitude; true = high scores are best
   );
 
   static void writeHeaders(
@@ -103,6 +105,10 @@ protected:
   struct less_score : public binary_function<Pair, Pair, bool> {
     // Compare scores, ignore counters.
     bool operator()(Pair x, Pair y) { return x.first.first < y.first.first; }
+  };
+  struct more_score : public binary_function<Pair, Pair, bool> {
+    // Compare scores, ignore counters.
+    bool operator()(Pair x, Pair y) { return x.first.first > y.first.first; }
   };
 
   /**
@@ -164,7 +170,8 @@ protected:
     const ProteinVec& proteins,
     vector<Arr::iterator>& targetsOut,
     vector<Arr::iterator>& decoysOut,
-    int top_n
+    int top_n,
+    bool highScoreBest    // indicates semantics of score magnitude; true = high scores are best
   );
 
   /**

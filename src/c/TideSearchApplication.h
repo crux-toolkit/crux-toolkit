@@ -44,7 +44,12 @@ protected:
     OutputFiles* output_files,
     ofstream* target_file,
     ofstream* decoy_file,
-    bool compute_sp
+    bool compute_sp,
+    int AASize, 
+    double* AAFreqN,
+    double* AAFreqI,
+    double* AAFreqC,
+    int* AAMass
   );
 
   void collectScoresCompiled(
@@ -114,8 +119,8 @@ public:
 
   bool exact_pval_search;
   
-  int calcScoreCount( int numelEvidenceObs, int* evidenceObs, double binWidth, double binOffset, int pepMassInt, int maxEvidence, int minEvidence, int maxScore, int minScore, double* aaProb1, double* aaProb2, double* pValueScoreObs );
-  
+  int calcScoreCount( int numelEvidenceObs, int* evidenceObs, double binWidth, double binOffset, int pepMassInt, int maxEvidence, int minEvidence, int maxScore, 
+                        int minScore, int nAA, double* AAFreqN, double* AAFreqI, double* AAFreqC, int* AAMass, double* pValueScoreObs );
 };
 
 #endif

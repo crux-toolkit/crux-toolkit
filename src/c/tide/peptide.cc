@@ -131,14 +131,14 @@ void Peptide::AddBIonsTrueMass( W* workspace ) const {
     masses_charge_1[i] = MassConstants::mono_table[ *residue ];
   }
 
-  //&& for possible implementation later
-  // for (int i = 0; i < num_mods_; ++i) {
-    // int index;
-    // double delta;
-    // MassConstants::DecodeMod(mods_[i], &index, &delta);
-    // masses_charge_1[index] += delta;
-    // masses_charge_2[index] += delta/2;
-  // }
+  //Add modifications to amino acids
+  for (int i = 0; i < num_mods_; ++i) {
+    int index;
+    double delta;
+    MassConstants::DecodeMod(mods_[i], &index, &delta);
+    masses_charge_1[index] += delta*MassConstants::bin_width;   //&& may need recoding for variable bin widths
+ //   masses_charge_2[index] += delta/2;
+  }
 
   // Add all charge 1 B ions.
   double total = MassConstants::proton + masses_charge_1[ 0 ];
@@ -163,7 +163,6 @@ void DisAsm(const void* prog) {
   return;
 }
 #endif
-
 
 void Peptide::Compile(const TheoreticalPeakArr* peaks,
 		      const pb::Peptide& pb_peptide,
@@ -225,13 +224,28 @@ void Peptide::ComputeTheoreticalPeaks(ST_TheoreticalPeakSet* workspace,
 #endif
 }
 
-
-// Probably defunct, uses old calling format.
-int NoInlineDotProd(Peptide* peptide, const int* cache, int charge) {
-  const void* prog = peptide->Prog(charge);
-  int result;
-  __asm__ __volatile__("call *%[prog]\n"
-                       : "=a" (result)
-                       : "d" (cache), [prog] "abcSD" (prog));
-  return result;
+// return the amino acid masses in the current peptide
+double* Peptide::getAAMasses(){
+  double* masses_charge = new double[Len()];
+  const char* residue = residues_;
+  for (int i = 0; i < Len(); ++i, ++residue) {
+    masses_charge[i] = MassConstants::mono_table[*residue];
+  }
+  for (int i = 0; i < num_mods_; ++i) {
+    int index;
+    double delta;
+    MassConstants::DecodeMod(mods_[i], &index, &delta);
+    masses_charge[index] += (delta*MassConstants::bin_width);   //&& may need recoding for variable bin widths
+  }
+  return masses_charge;
 }
+
+// // Probably defunct, uses old calling format.
+// int NoInlineDotProd(Peptide* peptide, const int* cache, int charge) {
+  // const void* prog = peptide->Prog(charge);
+  // int result;
+  // __asm__ __volatile__("call *%[prog]\n"
+                       // : "=a" (result)
+                       // : "d" (cache), [prog] "abcSD" (prog));
+  // return result;
+// }
