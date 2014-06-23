@@ -2897,7 +2897,8 @@ string Barista::getName() {
 }
 
 string Barista::getDescription() {
-  return "Protein identification algorithm that combines two different tasks — peptide-spectrum match (PSM) verification and protein inference — into a single learning algorithm.";
+  return "Rank PSMs, peptides and proteins, assigning a confidence measure to "
+         "each identification.";
 }
 
 

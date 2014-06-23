@@ -530,9 +530,9 @@ string TideSearchApplication::getName() {
 
 string TideSearchApplication::getDescription() {
   return
-  "Search a collection of spectra against a sequence "
-  "database, returning a collection of peptide-spectrum "
-  "matches (PSMs) scored by XCorr.";
+  "Search a collection of spectra against a sequence database, returning a "
+  "collection of peptide-spectrum matches (PSMs). This is a fast search engine "
+  "but requires that you first build an index with tide-index.";
 }
 
 bool TideSearchApplication::needsOutputDirectory() {

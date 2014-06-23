@@ -42,11 +42,8 @@ string ComputeQValues::getName() {
  * \returns the description for ComputeQValues
  */
 string ComputeQValues::getDescription() {
-  return 
-  "Assign a q-value, which is a statistical confidence "
-  "measure that accounts for multiple testing, to each "
-  "PSM in a given set.";
-
+  return "Assign two types of statistical confidence measures (q-values and "
+         "posterior error probabilities) to each PSM in a given set.";
 }
 
 /**
