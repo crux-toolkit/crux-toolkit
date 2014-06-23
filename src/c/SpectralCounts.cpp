@@ -946,9 +946,8 @@ string SpectralCounts::getName() {
  * \returns The help string to be included in the crux usage statement.
  */
 string SpectralCounts::getDescription() {
-  return 
-    "Rank proteins or peptides according to a specified spectral counting "
-    "method.";
+  return "Quantify peptides or proteins using one of three spectral counting "
+         "methods.";
 }
 
 COMMAND_T SpectralCounts::getCommand() {

@@ -489,10 +489,8 @@ string PercolatorApplication::getName() {
  */
 string PercolatorApplication::getDescription() {
 
-  return "Apply the Percolator algorithm to a collection of "
-    "target and decoy peptide-spectrum matches, learning "
-    "to discriminate between correct and incorrect "
-    "identifications.";
+  return "Re-rank a collection of PSMs using the Percolator algorithm. "
+         "Optionally, also produce protein rankings using the Fido algorithm.";
 }
 
 /**

@@ -389,7 +389,8 @@ string TideIndexApplication::getName() {
 }
 
 string TideIndexApplication::getDescription() {
-  return "Create an index for all peptides in a fasta file.";
+  return "Create an index for all peptides in a fasta file, for use in "
+         "subsequent calls to tide-search.";
 }
 
 bool TideIndexApplication::needsOutputDirectory() {
