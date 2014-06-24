@@ -214,8 +214,9 @@ PSMs.  By default, Percolator will select the feature that produces
 the largest set of target PSMs at a specified FDR threshold
 (cf. <code>--train-fdr</code>).  This option allows the user to
 specify which feature is used for the initial ranking, using the
-indices from <a href="features.html">this table</a>.  The feature
-index can be negated to indicate that a lower value is better.</li>
+name as a string from <a href="features.html">this table</a>.  The
+name can be preceded by a hyphen (e.g., "-XCorr") to indicate that a
+lower value is better.</li>
 
 <li>
 <code>--unitnorm T|F</code> &ndash; Use unit normalization

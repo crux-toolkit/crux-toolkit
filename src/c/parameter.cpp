@@ -642,9 +642,9 @@ void initialize_parameters(void){
   // initialize as "unset", then set as bool after cmdline parsed
   set_string_parameter("use-flanking-peaks", "unset",
       "Include peaks +/- 1da around b/y ions in theoretical spectrum.  "
-      "sequest-search and search-for-xlinks default=T. "
       "default=F.",
-      "Available in the parameter file for all search commands.",
+      "Available in the parameter file for the tide-search and "
+      "search-for-xlinks commands.",
       "true");
   set_double_parameter("spectrum-min-mz", 0.0, 0, BILLION, 
       "The lowest spectrum m/z to search. Default=0.0.",
@@ -926,11 +926,14 @@ void initialize_parameters(void){
     "Available for crux percolator ",
     "true"
   );
-  set_int_parameter(
+  set_string_parameter(
     "default-direction",
-    0,-BILLION,BILLION,
-    "The most informative feature given as feature number, can be negated to indicate "
-    "that a lower value is better",
+    NULL,
+    "The most informative feature given as the feature name.  The name can be "
+    "preceded by a hyphen (e.g., \"-XCorr\") to indicate that a lower value is better."
+    " By default, Percolator will select the feature that produces"
+    " the largest set of target PSMs at a specified FDR threshold"
+    " (cf. --train-fdr).",
     "Available for crux percolator",
     "true"
   );
