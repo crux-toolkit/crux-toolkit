@@ -153,8 +153,9 @@ custom-enzyme=__NULL_STR
 flanking=false
 
 # Include peaks +/- 1da around b/y ions in theoretical spectrum. 
-# sequest-search and search-for-xlinks default=T. default=F.
-# Available in the parameter file for all search commands.
+# default=F.
+# Available in the parameter file for the tide-search and
+# search-for-xlinks commands.
 use-flanking-peaks=false
 
 # Change the mass of all amino acids 'A' by the given amount.
@@ -199,7 +200,7 @@ I=0.000000
 # decoy-format=peptide-reverse, this option specifies whether the
 # N-terminal and C-terminal amino acids are kept in place or allowed to
 # be shuffled or reversed. Default = NC.
-# Available for generate-decoys.
+# Available for tide-index and generate-decoys.
 keep-terminal-aminos=NC
 
 # Change the mass of all amino acids 'L' by the given amount.
@@ -422,7 +423,7 @@ mz-window=__NULL_STR
 # Specify a comma-separated list of modification sequences of the form:
 # C+57.02146,2M+15.9949,1STY+79.966331,...
 # Available for tide-index
-mods-spec=
+mods-spec=C+57.02146
 
 # Set the signal-to-noise threshold. Any integer or decimal value
 # greater than or equal to 0.0 is valid. The default value is 1.0.
@@ -629,10 +630,13 @@ alpha=0.000000
 # Available for crux extract-columns and extract-rows
 header=true
 
-# The most informative feature given as feature number, can be negated
-# to indicate that a lower value is better
+# The most informative feature given as the feature name.  The name can
+# be preceded by a hypen (e.g., "-XCorr") to indicate that a lower value
+# is better. By default, Percolator will select the feature that
+# produces the largest set of target PSMs at a specified FDR threshold
+# (cf. --train-fdr).
 # Available for crux percolator
-default-direction=0
+default-direction=__NULL_STR
 
 # Penalty for mistakes made on positive examples. Set by cross
 # validation if not specified. Default=cross-validate 

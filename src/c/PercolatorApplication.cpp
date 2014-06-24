@@ -290,9 +290,9 @@ int PercolatorApplication::main(
     perc_args_vec.push_back(get_string_parameter_pointer("input-weights"));
   }
 
-  if (get_int_parameter("default-direction") != 0) {  
+  if (string(get_string_parameter_pointer("default-direction")) != "__NULL_STR") {  
     perc_args_vec.push_back("--default-direction");
-    perc_args_vec.push_back(to_string(get_int_parameter("default-direction")));
+    perc_args_vec.push_back(get_string_parameter_pointer("default-direction"));
   }
 
   if(get_boolean_parameter("unitnorm"))
