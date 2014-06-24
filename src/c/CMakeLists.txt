@@ -8,7 +8,6 @@ configure_file (
 
 add_subdirectory(bullseye)
 add_subdirectory(hardklor)
-add_subdirectory(posterior-error)
 add_subdirectory(qranker-barista)
 add_subdirectory(xlink)
 add_subdirectory(tide)
@@ -18,7 +17,6 @@ include_directories(.)
 include_directories(bullseye)
 include_directories(hardklor)
 include_directories(qranker-barista)
-include_directories(posterior-error)
 include_directories(xlink)
 include_directories(${CMAKE_SOURCE_DIR}/src/external)
 include_directories(${CMAKE_BINARY_DIR}/src/external)
@@ -49,7 +47,6 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}/tide/protoobj)
 link_directories(.)
 link_directories(./bullseye)
 link_directories(./hardklor)
-link_directories(./posterior-error)
 link_directories(./qranker-barista)
 link_directories(./xlink)
 link_directories(${CMAKE_BINARY_DIR}/src/external/lib)
@@ -298,7 +295,6 @@ if (WIN32 AND NOT CYGWIN)
     bullseye
     hardklor
     cometsearch
-    posterior_error
     perclibrary
     fido
     xlink
@@ -456,7 +452,6 @@ else()
     m
     ${RT_LIBRARY}
     mstoolkitlite
-    posterior_error
     perclibrary
     xlink
     boost_filesystem

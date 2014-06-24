@@ -17,7 +17,7 @@
 #include "q-value.h"
 #include "MatchCollectionParser.h"
 #include "analyze_psms.h"
-#include "posterior-error/PosteriorEstimator.h"
+#include "PosteriorEstimator.h"
 
 #include <map>
 #include <utility>
@@ -341,12 +341,12 @@ FLOAT_T* compute_PEP_from_pvalues(FLOAT_T* pvalues, int num_pvals){
 
   // sort ascending order
   sort(score_label.begin(), score_label.end());
-  pep::PosteriorEstimator::setReversed(true);
+  PosteriorEstimator::setReversed(true);
 
   // estimate PEPs 
-  double pi0 = pep::PosteriorEstimator::estimatePi0(pvalues_vector);
+  double pi0 = PosteriorEstimator::estimatePi0(pvalues_vector);
   vector<double> PEP_vector;
-  pep::PosteriorEstimator::estimatePEP(score_label, pi0, PEP_vector );
+  PosteriorEstimator::estimatePEP(score_label, pi0, PEP_vector );
 
   // return values
   FLOAT_T* PEPs = new FLOAT_T[PEP_vector.size()];
