@@ -15,9 +15,7 @@
 #include "MatchCollectionParser.h"
 #include "MatchIterator.h"
 //#include "PercolatorCInterface.h"
-#include "posterior-error/PosteriorEstimator.h"
-
-using namespace pep;
+#include "PosteriorEstimator.h"
 
 /**
  * \brief Takes a directory containing PSM files and a protein index
