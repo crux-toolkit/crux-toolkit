@@ -402,11 +402,10 @@ void TideSearchApplication::search(
        sc != spec_charges->end();
        ++sc) {
     const Spectrum* spectrum = sc->spectrum;
-
+    
     double precursor_mz = spectrum->PrecursorMZ();
     int charge = sc->charge;
     int scan_num = spectrum->SpectrumNumber();
-
     if (precursor_mz < spectrum_min_mz || precursor_mz > spectrum_max_mz ||
         scan_num < min_scan || scan_num > max_scan ||
         spectrum->Size() < min_peaks ||
@@ -593,8 +592,6 @@ void TideSearchApplication::search(
         }
         int scoreCountIdx = scoreRefactInt + scoreOffsetObs[ pepMassIntIdx ];
         double pValue = pValueScoreObs[ pepMassIntIdx ][ scoreCountIdx ];
-		
-        // cout << pe << "    " << pepMassIntIdx << "    " << pValue << endl; 	//&& for test only
 
         TideMatchSet::Pair pair;
         pair.first.first = pValue;
@@ -815,14 +812,14 @@ int TideSearchApplication::calcScoreCount( int numelEvidenceObs, int* evidenceOb
     // populate matrix with scores for first (i.e. N-terminal) amino acid in sequence
     for ( de = 0; de < nDeltaMass; de++ ) {
         ma = AAMass[ de ];
-        row = initCountRow + evidenceObs[ ma ];
+        row = initCountRow + evidenceObs[ ma + colStart ];
         col = initCountCol + ma;
-        if ( col <= colLast ) {
+        if ( col <= maxDeltaMass + colLast ) {
             dynProgArray[ row ][ col ] += dynProgArray[ initCountRow ][ initCountCol ] * AAFreqN[ de ];
         }
     }
-    dynProgArray[ initCountRow ][ initCountCol ] = 0.0;    // set to zero now that scores for first amino acid are in matrix
-    // populate matrix with scores for non-terminal amino acids in sequence 
+    dynProgArray[ initCountRow ][ initCountCol ] = 0.0;    // set to zero now that score counts for first amino acid are in matrix
+    // populate matrix with score counts for non-terminal amino acids in sequence 
     for ( ma = colFirst; ma < colLast; ma++ ) {
         col = maxDeltaMass + ma;
         evidence = evidenceObs[ ma ];
@@ -838,7 +835,7 @@ int TideSearchApplication::calcScoreCount( int numelEvidenceObs, int* evidenceOb
             dynProgArray[ row ][ col ] = sumScore;
         }
     }
-    // populate matrix with scores for last (i.e. C-terminal) amino acid in sequence
+    // populate matrix with score counts for last (i.e. C-terminal) amino acid in sequence
     ma = colLast;
     col = maxDeltaMass + ma;
     // evidence = evidenceObs[ ma ];    //&& wrong
@@ -867,11 +864,11 @@ int TideSearchApplication::calcScoreCount( int numelEvidenceObs, int* evidenceOb
     for ( row = nRow - 2; row >= 0; row-- ) {
         pValueScoreObs[ row ] += pValueScoreObs[ row + 1 ];
     }
+    double logTotalCount = log( totalCount );
     for ( row = 0; row < nRow; row++ ) {
         // adjust counts to reflect center of bin, not edge
         pValueScoreObs[ row ] -= scoreCountBinAdjust[ row ];
         // normalize distribution; use exp( log ) to avoid potential underflow
-        double logTotalCount = log( totalCount );
         pValueScoreObs[ row ] = exp( log( pValueScoreObs[ row ] ) - logTotalCount );
     }
     
