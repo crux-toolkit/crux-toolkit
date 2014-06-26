@@ -1242,7 +1242,7 @@ void initialize_parameters(void){
     "true"
   );
 
-  set_int_parameter("search_enzyme_number", 1, 1, BILLION,
+  set_int_parameter("search_enzyme_number", 1, 0, BILLION,
                     "choose from list at end of this params file",
                     "option for Comet only",
                     "true");
