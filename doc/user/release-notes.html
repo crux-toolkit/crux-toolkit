@@ -14,10 +14,18 @@
 <ul>
 
 <li>
+The <code>protein-database</code> parameter
+to <code>spectral-counts</code> now only accepts fasta files.  Parsing
+of a protein index is no longer supported.</li>
+
+<li>
+A bug was fixed in the <code>spectral-counts</code> that prevented 
+<code>tide-search</code> output files from being parsed correctly.</li>   
+
+<li>
 The <code>default-direction</code> parameter now takes a string value of the feature
 name rather than an integer
 </li>
-
 
 <li>
 The parameters <code>mz-bin-width</code> and <code>mz-bin-offset</code> have been added
