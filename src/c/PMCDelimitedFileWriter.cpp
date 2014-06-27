@@ -478,7 +478,7 @@ void PMCDelimitedFileWriter::writePSMs(
     setAndFree(SEQUENCE_COL, seq_with_masses);
 
     setColumnCurrentRow(CLEAVAGE_TYPE_COL, cleavage);
-    setColumnCurrentRow(PROTEIN_ID_COL, peptide->getProteinIdsLocations());
+    setColumnCurrentRow(PROTEIN_ID_COL, peptide->getProteinIds());
     setAndFree(FLANKING_AA_COL, peptide->getFlankingAAs());
 
     writeRow();
