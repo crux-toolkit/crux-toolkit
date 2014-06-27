@@ -78,6 +78,7 @@ SQTReader::SQTReader(
   Database* decoy_database ///< the decoy protein database (can be null)
   ) {
 
+  init();
   file_path_ = file_path;
   database_ = database;
   decoy_database_ = decoy_database;
