@@ -19,15 +19,17 @@ endmacro (check_status)
 
 # This macro checks download status codes for errors
 if (WIN32 AND NOT CYGWIN)
-    message(${SOURCE_DIR}/patches/comet/Comet.rc)
-    message(${BINARY_DIR}/build/src/comet/Comet.rc)
+    message(${SOURCE_DIR}/patches/comet/CometSearch/CometSearch.vcxproj)
+    message(${BINARY_DIR}/build/src/comet/CometSearch/CometSearch.vcxproj)
     execute_process(
       COMMAND ${CMAKE_COMMAND} -E copy 
-        ${SOURCE_DIR}/patches/comet/Comet.rc
-        ${BINARY_DIR}/build/src/comet/Comet.rc
+        ${SOURCE_DIR}/patches/comet/CometSearch/CometSearch.vcxproj
+        ${BINARY_DIR}/build/src/comet/CometSearch/CometSearch.vcxproj
         RESULT_VARIABLE status
     )
     check_status(status)
+    message(${SOURCE_DIR}/patches/comet/Comet.sln)
+    message(${BINARY_DIR}/build/src/comet/Comet.sln)
     execute_process(
       COMMAND ${CMAKE_COMMAND} -E copy 
         ${SOURCE_DIR}/patches/comet/Comet.sln
