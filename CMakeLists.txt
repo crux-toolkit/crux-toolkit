@@ -64,6 +64,20 @@ add_custom_target(
   COMMENT "Not building external dependendcies."
 )
 
+# a custom target for obtaining the SVN revision number
+add_custom_target(crux_version ALL DEPENDS crux_version_header )
+
+# creates crux_version.h using cmake script
+add_custom_command(
+    OUTPUT crux_version_header 
+    ${CMAKE_CURRENT_BINARY_DIR}/crux_version.h
+    COMMAND 
+      ${CMAKE_COMMAND} 
+        -DSOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+        -DCRUX_VERSION=${CRUX_VERSION}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/make-version-header.cmake
+)
+
 add_dependencies(barista comet)
 add_dependencies(bullseye hardklor)
 add_dependencies(comet ProteoWizard)

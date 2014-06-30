@@ -1,11 +1,6 @@
 cmake_minimum_required(VERSION 2.8.4)
 cmake_policy(VERSION 2.8.4)
 
-configure_file (
- "CruxConfig.h.in"
- "${CMAKE_CURRENT_BINARY_DIR}/CruxConfig.h"
- )
-
 add_subdirectory(bullseye)
 add_subdirectory(hardklor)
 add_subdirectory(qranker-barista)
@@ -19,6 +14,7 @@ include_directories(hardklor)
 include_directories(qranker-barista)
 include_directories(xlink)
 include_directories(${CMAKE_SOURCE_DIR}/src/external)
+include_directories(${CMAKE_BINARY_DIR})
 include_directories(${CMAKE_BINARY_DIR}/src/external)
 include_directories(${CMAKE_BINARY_DIR}/src/external/include)
 include_directories(${CMAKE_BINARY_DIR}/src/external/include/CometSearch)
@@ -59,7 +55,6 @@ endif (WIN32 AND NOT Cygwin)
 
 set (
   crux_lib_files
-  CruxConfig.h
   Alphabet.cpp
   analyze_psms.cpp
   carp.cpp
