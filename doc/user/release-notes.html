@@ -7,7 +7,60 @@
 <blockquote> 
 <h1>Release notes for Crux</h1>
 
-<h2>Version 2.0</h2>
+<h2>Changes since last release</h2>
+
+<h3>Minor changes</h3>
+
+<ul>
+
+<li>
+The <code>protein-database</code> parameter
+to <code>spectral-counts</code> now only accepts fasta files.  Parsing
+of a protein index is no longer supported.</li>
+
+<li>
+A bug was fixed in the <code>spectral-counts</code> that prevented 
+<code>tide-search</code> output files from being parsed correctly.</li>   
+
+<li>
+The <code>default-direction</code> parameter now takes a string value of the feature
+name rather than an integer
+</li>
+
+<li>
+The parameters <code>mz-bin-width</code> and <code>mz-bin-offset</code> have been added
+to <code>tide-search</code>.</li>
+
+<li>
+Percolator output now includes, for each PSM, the name of the filename
+in which the spectrum resides.
+</li>
+
+<li>
+The parameters <code>clip-nterm-methionine</code> and <code>keep-terminal-aminos
+</code> have been added to <code>tide-index</code>.</li>
+
+<li>
+The parameters <code>use-flanking-peaks</code>
+and <code>use-neutral-loss-peaks</code> have been added to
+<code>tide-search</code>.</li>
+
+<li>
+The calculation of XCorr was simplified in Tide.  In the new version, 
+<code>tide-index</code> only generates peptides and sorts them,
+leaving the generation of theoretical peaks to be done on-the-fly
+by <code>tide-search</code>.</li>
+
+<li>
+The <code>tide-search</code> command now prints search progress reports both to
+the screen and to the log file. The interval at which progress is printed can
+be controlled using the <code>print-search-progress</code> parameter.</li>
+
+</ul>
+
+<hr></hr>
+
+<h2>Version 2.0</h2> June 6, 2014
 <h3>Major enhancements</h3>
 <ul>
 
@@ -19,7 +72,8 @@ old search engine, search-for-matches, has been retired.</li>
 
 <li>
 Crux now compiles in native Windows, rather than requiring
-Cygwin.</li>
+Cygwin.  Consequently, Crux running under Windows can parse vendor
+proprietary formats using the appropriate Proteowizard libraries.</li>
 
 </ul>
 

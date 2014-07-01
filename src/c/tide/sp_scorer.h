@@ -87,8 +87,8 @@ class SpScorer {
   }
 
   int GetBin(double mass, int charge) {
-    double mz = (mass + (charge - 1)*MassConstants::proton)/charge;
-    return (int)(mz/bin_width_mono + 0.5);
+//    double mz = (mass + (charge - 1)*MassConstants::proton)/charge;
+    return MassConstants::mass2bin(mass, charge);
   }
 
   bool IonLookup(double mass, int charge, bool previous_ion_matched,

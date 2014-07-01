@@ -706,7 +706,7 @@ bool MakePeptides(pb::Header* header, const string& peptides_file,
 
   CHECK_SETTINGS(settings.has_enzyme() && !settings.enzyme().empty());
 
-  CHECK_SETTINGS(MassConstants::Init(&settings.mods()));
+//  CHECK_SETTINGS(MassConstants::Init(&settings.mods()));
 
   // Determine what type of PeptideHeap to create from settings indicated 
   // in header->

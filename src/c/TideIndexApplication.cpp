@@ -12,6 +12,7 @@
 #include <io.h>
 #endif
 
+extern HASH_T* parameters;
 extern void AddTheoreticalPeaks(const vector<const pb::Protein*>& proteins,
                         				const string& input_filename,
                         				const string& output_filename);
@@ -36,6 +37,7 @@ int TideIndexApplication::main(int argc, char** argv) {
 
   const char* option_list[] = {
     "decoy-format",
+    "keep-terminal-aminos",
     "decoy-prefix",
     "enzyme",
     "custom-enzyme",
@@ -57,11 +59,9 @@ int TideIndexApplication::main(int argc, char** argv) {
     "peptide-list",
     "parameter-file",
     "seed",
-//    "PTMDB",
+    "clip-nterm-methionine",
     "verbosity"
   };
-
-  const string default_cysteine = "C+57.0214637206";
 
   // Crux command line parsing
   int num_options = sizeof(option_list) / sizeof(char*);
@@ -73,6 +73,11 @@ int TideIndexApplication::main(int argc, char** argv) {
   initialize(arg_list, num_args, option_list, num_options, argc, argv);
 
   carp(CARP_INFO, "Running tide-index...");
+
+  // Reroute stderr
+  CarpStreamBuf buffer;
+  streambuf* old = cerr.rdbuf();
+  cerr.rdbuf(&buffer);
 
   // Build command line string
   string cmd_line = "crux tide-index";
@@ -104,16 +109,10 @@ int TideIndexApplication::main(int argc, char** argv) {
   }
 
   VariableModTable var_mod_table;
-  string mods_spec;
   var_mod_table.ClearTables();
   //parse regular amino acid modifications
-  mods_spec = get_string_parameter_pointer("mods-spec");
-  if (mods_spec.find('C') == string::npos) {
-    mods_spec = (mods_spec.empty()) ?
-      default_cysteine : default_cysteine + ',' + mods_spec;
-    carp(CARP_DEBUG, "Using default cysteine mod '%s' ('%s')",
-         default_cysteine.c_str(), mods_spec.c_str());
-  }
+  string mods_spec = get_string_parameter_pointer("mods-spec");
+  carp(CARP_DEBUG, "mods_spec='%s'", mods_spec.c_str());
   if (!var_mod_table.Parse(mods_spec.c_str())) {
     carp(CARP_FATAL, "Error parsing mods");
   }
@@ -141,7 +140,7 @@ int TideIndexApplication::main(int argc, char** argv) {
 
   var_mod_table.SerializeUniqueDeltas();
 
-  if (!MassConstants::Init(var_mod_table.ParsedModTable())) {
+  if (!MassConstants::Init(var_mod_table.ParsedModTable(), 0, 0)) {
     carp(CARP_FATAL, "Error in MassConstants::Init");
   }
 
@@ -193,11 +192,6 @@ int TideIndexApplication::main(int argc, char** argv) {
                        "different index name");
     }
   }
-
-  // Reroute stderr
-  CarpStreamBuf buffer;
-  streambuf* old = cerr.rdbuf();
-  cerr.rdbuf(&buffer);
 
   // Start tide-index
   carp(CARP_INFO, "Reading %s and computing unmodified peptides...",
@@ -395,7 +389,8 @@ string TideIndexApplication::getName() {
 }
 
 string TideIndexApplication::getDescription() {
-  return "Create an index for all peptides in a fasta file.";
+  return "Create an index for all peptides in a fasta file, for use in "
+         "subsequent calls to tide-search.";
 }
 
 bool TideIndexApplication::needsOutputDirectory() {
@@ -431,6 +426,8 @@ void TideIndexApplication::fastaToPb(
   pb::Header_Source* headerSource = outProteinPbHeader.add_source();
   headerSource->set_filename(AbsPath(fasta));
   headerSource->set_filetype("fasta");
+  unsigned int invalidPepCnt = 0;
+  unsigned int failedDecoyCnt = 0;
 
   outPeptideHeap.clear();
   outProteinSequences.clear();
@@ -470,8 +467,9 @@ void TideIndexApplication::fastaToPb(
       FLOAT_T pepMass = calcPepMassTide(cleavedSequence, massType);
       if (pepMass < 0.0) {
         // Sequence contained some invalid character
-        carp(CARP_WARNING, "Ignoring invalid sequence <%s>",
+        carp(CARP_DEBUG, "Ignoring invalid sequence <%s>",
              cleavedSequence.c_str());
+        ++invalidPepCnt;
         i = cleavedPeptides.erase(i);
         continue;
       } else if (pepMass < minMass || pepMass > maxMass) {
@@ -524,8 +522,9 @@ void TideIndexApplication::fastaToPb(
         FLOAT_T pepMass = calcPepMassTide(cleavedSequence, massType);
         if (pepMass < 0.0) {
           // Sequence contained some invalid character
-          carp(CARP_WARNING, "Ignoring invalid sequence in decoy fasta <%s>",
+          carp(CARP_DEBUG, "Ignoring invalid sequence in decoy fasta <%s>",
                cleavedSequence.c_str());
+          ++invalidPepCnt;
           continue;
         } else if (pepMass < minMass || pepMass > maxMass) {
           // Skip to next peptide if not in mass range
@@ -573,8 +572,9 @@ void TideIndexApplication::fastaToPb(
         if (!GenerateDecoys::makeDecoy(*i, setTargets, setDecoys,
                                        decoyType == PEPTIDE_SHUFFLE_DECOYS,
                                        *decoySequence)) {
-        carp(CARP_WARNING, "Failed to generate decoy for sequence %s",
+        carp(CARP_DEBUG, "Failed to generate decoy for sequence %s",
              i->c_str());
+        ++failedDecoyCnt;
         delete decoySequence;
         continue;
         } else {
@@ -596,6 +596,12 @@ void TideIndexApplication::fastaToPb(
         greater<TideIndexPeptide>());
       ++decoysGenerated;
     }
+  }
+  if (invalidPepCnt > 0) {
+    carp(CARP_INFO, "Ignoring %d peptide sequences containing unrecognized characters", invalidPepCnt);
+  }
+  if (failedDecoyCnt > 0) {
+    carp(CARP_INFO, "Failed to generate decoys for %d low complexity peptides", failedDecoyCnt);
   }
   carp(CARP_DEBUG, "FASTA produced %d targets and %d decoys",
        targetsGenerated, decoysGenerated);
@@ -818,6 +824,24 @@ void TideIndexApplication::addAuxLoc(
   pb::Location* location = outAuxLoc.add_location();
   location->set_protein_id(proteinId);
   location->set_pos(proteinPos);
+}
+
+void TideIndexApplication::writeParamFile() {
+  char* param_file_name = cat_string(getFileStem().c_str(), ".params.txt");
+
+  // Update mods-spec parameter for default cysteine mod
+  const string default_cysteine = "C+57.02146";
+  string mods_spec = get_string_parameter_pointer("mods-spec");
+  if (mods_spec.find('C') == string::npos) {
+    mods_spec = mods_spec.empty() ?
+      default_cysteine : default_cysteine + ',' + mods_spec;
+    carp(CARP_DEBUG, "Using default cysteine mod '%s' ('%s')",
+         default_cysteine.c_str(), mods_spec.c_str());
+  }
+  add_or_update_hash(parameters, "mods-spec", mods_spec.c_str());
+
+  print_parameter_file(&param_file_name);
+  free(param_file_name);
 }
 
 /*

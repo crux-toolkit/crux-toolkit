@@ -36,6 +36,7 @@ class CandPeptTest
 	end
 
 	def runCommand()
+		mtype = 0;
 		for mass in @mass_list do
 			for mass_type in @mass_type_list do
 				for fasta in @fasta_list do
@@ -50,8 +51,10 @@ class CandPeptTest
 								file.puts("precursor-window-type="+mass_type);
 								if (mass_type.eql? "ppm")
 									file.puts("peptide_mass_units=2");
+									mtype = 0;
 								elsif (mass_type.eql? "mass")
 									file.puts("peptide_mass_units=0");
+									mtype = 1;
 								end		
 								file.puts("missed-cleavages="+mc);
 								file.puts("allowed_missed_cleavage="+mc);
@@ -71,7 +74,7 @@ class CandPeptTest
 												" --parameter-file crux.prm --overwrite T";
 							#cmd = @comet_path + " -Pcrux.prm " + msms;						
 							system(cmd);
-							return false if compareCandidatePeptideSets() == false;
+							return false if compareCandidatePeptideSets(mass, mtype) == false;
 						end
 					end
 				end
@@ -80,18 +83,23 @@ class CandPeptTest
 		return true;
 	end
 
-	def compareCandidatePeptideSets()
+	def compareCandidatePeptideSets(mass, type)
+		mass = mass.to_f;
 		@Table1 = Hash.new();
 		#Open and parse the first (TIDE-SEARCH) output file
 		file = File.new("crux-output/tide-search.target.txt", "r");
 		line = file.gets;  # drop the first header line
 		while (row = file.gets)
 			record = row.split("\t");
-			if (record.length() < 10)
-				next;
-			end
+			next if (record.length() < 10);
 			@PSM = record[0]+record[1]+record[9]; 
 			@Table1[@PSM] = 1;
+			if (type == 0 && ( ((record[4].to_f-record[3].to_f)/record[4].to_f).abs > mass*0.9 ) ) #mass tolerance type is ppm
+				@Table1[@PSM] = 2;
+			end
+			if (type == 1 && ( (record[4].to_f-record[3].to_f).abs > mass*0.9 ) ) #mass tolerance type is 'mass'
+				@Table1[@PSM] = 2;
+			end			
 		end
 		file.close;
 
@@ -101,12 +109,15 @@ class CandPeptTest
 #		line = file.gets;  # drop the first header line
 		while (row = file.gets)
 			record = row.split("\t"); 
-			if (record.length() < 10)
-				next;
-			end
+			next if (record.length() < 10);
 			@PSM = record[0]+record[1]+record[13]; 
 			if (@Table1[@PSM] == nil)
-				return false;
+				if (type == 0 && ( ((record[3].to_f - record[2].to_f)/record[3].to_f).abs > mass*0.9 )  )  #mass tolerance type is ppm
+					return false;
+				end
+				if (type == 1 && ( (record[4].to_f - record[3].to_f).abs > mass*0.9 ) ) #mass tolerance type is 'mass'
+					return false;
+				end
 			else
 				@Table1[@PSM] += 1;
 			end
@@ -119,4 +130,3 @@ class CandPeptTest
 		return true;
 	end
 end
-

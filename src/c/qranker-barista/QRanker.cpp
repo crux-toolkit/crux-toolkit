@@ -1189,10 +1189,7 @@ string QRanker::getName() {
   return "q-ranker";
 }
 string QRanker::getDescription() {
-  return 
-    "Analyze a collection of PSMs to target and decoy "
-    "sequences using the new q-ranker algorithm.";
-
+  return "Re-rank a collection of PSMs using the Q-ranker algorithm.";
 }
 
 COMMAND_T QRanker::getCommand(){

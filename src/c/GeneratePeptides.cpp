@@ -172,8 +172,8 @@ string GeneratePeptides::getName() {
  * \returns The description for GeneratePeptides.
  */
 string GeneratePeptides::getDescription() {
-  return "Print all peptides in the given fasta file that meet the "
-    "constraints for length, mass, etc.";
+  return "Extract from a given set of protein sequences a list of target and "
+         "decoy peptides fitting the specified criteria.";
 }
 
 /**

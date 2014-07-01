@@ -3,7 +3,7 @@
  * \brief Object for printing the crux version number.
  *****************************************************************************/
 #include "PrintVersion.h"
-#include "CruxConfig.h"
+#include "crux_version.h"
 #include "pwiz/Version.hpp"
 
 using namespace std;

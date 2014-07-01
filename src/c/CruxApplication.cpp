@@ -111,13 +111,9 @@ void CruxApplication::initialize(
     carp(CARP_INFO, "CPU: %s", hostname());
     carp(CARP_INFO, date_and_time());
     log_command_line(argc, argv);
-  
  
-  
     // Write the parameter file
-    char* param_file_name = cat_string(cmd_file_name.c_str(), ".params.txt");
-    print_parameter_file(&param_file_name);
-    free(param_file_name);
+    writeParamFile();
   }
 }
 
@@ -127,5 +123,14 @@ void CruxApplication::initialize(
  */
 bool CruxApplication::hidden(){
   return false;
+}
+
+/**
+ * Writes the parameter file
+ */
+void CruxApplication::writeParamFile() {
+  char* param_file_name = cat_string(getFileStem().c_str(), ".params.txt");
+  print_parameter_file(&param_file_name);
+  free(param_file_name);
 }
 

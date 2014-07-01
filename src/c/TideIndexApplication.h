@@ -189,6 +189,8 @@ protected:
     pb::AuxLocation& outAuxLoc
   );
 
+  virtual void writeParamFile();
+
 };
 
 #endif

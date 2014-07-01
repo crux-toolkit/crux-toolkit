@@ -36,6 +36,7 @@ int TideSearchApplication::main(int argc, char** argv) {
     "compute-sp",
     "remove-precursor-peak",
     "remove-precursor-tolerance",
+    "print-search-progress",
     "txt-output",
     "sqt-output",
     "pepxml-output",
@@ -45,6 +46,10 @@ int TideSearchApplication::main(int argc, char** argv) {
     "output-dir",
     "overwrite",
     "parameter-file",
+    "use-neutral-loss-peaks",
+    "use-flanking-peaks",
+    "mz-bin-width",
+    "mz-bin-offset",	
     "verbosity"
   };
   int num_options = sizeof(option_list) / sizeof(char*);
@@ -164,7 +169,10 @@ int TideSearchApplication::main(int argc, char** argv) {
       OutputFiles::setProteinLevelDecoys();
     }
   }
-  MassConstants::Init(&pepHeader.mods());
+  bin_width_  = get_double_parameter("mz-bin-width");
+  bin_offset_ = get_double_parameter("mz-bin-offset");
+
+  MassConstants::Init(&pepHeader.mods(), bin_width_, bin_offset_);
   TideMatchSet::initModMap(pepHeader.mods());
 
   active_peptide_queue = new ActivePeptideQueue(peptide_reader.Reader(), proteins);
@@ -180,9 +188,8 @@ int TideSearchApplication::main(int argc, char** argv) {
                     spectra_file.c_str());
     string converted_spectra_file = get_string_parameter_pointer("store-spectra");
     if (converted_spectra_file.empty()) {
-      
       delete_spectra_file = converted_spectra_file =
-        make_file_path("spectrumrecords.tmp");
+      make_file_path("spectrumrecords.tmp");
     }
     carp(CARP_DEBUG, "New spectrumrecords filename: %s",
                      converted_spectra_file.c_str());
@@ -216,9 +223,9 @@ int TideSearchApplication::main(int argc, char** argv) {
   if (max_mz == 0) {
     double highest_mz = spectra.FindHighestMZ();
     carp(CARP_DEBUG, "Max m/z %f", highest_mz);
-    MaxMZ::SetGlobalMax(highest_mz);
+    MaxBin::SetGlobalMax(highest_mz);
   } else {
-    MaxMZ::SetGlobalMaxFromFlag();
+    MaxBin::SetGlobalMaxFromFlag();
   }
 
   char* digestString =
@@ -237,6 +244,7 @@ int TideSearchApplication::main(int argc, char** argv) {
     // TODO Find a better way to do this?
     add_or_update_hash(parameters, "enzyme", pepHeader.enzyme().c_str());
     add_or_update_hash(parameters, "digestion", digestString);
+    add_or_update_hash(parameters, "monoisotopic-precursor", pepHeader.monoisotopic_precursor()?"T":"F");
     free(digestString);
     output_files = new OutputFiles(this);
   } else {
@@ -335,8 +343,14 @@ void TideSearchApplication::search(
   }
 
   // This is the main search loop.
-  ObservedPeakSet observed;
+  //NOTE to JEFF: bin_width and bin_offset are local members of this class
+  ObservedPeakSet observed(bin_width_, bin_offset_,
+	  get_boolean_parameter("use-neutral-loss-peaks"), 
+	  get_boolean_parameter("use-flanking-peaks"));
   // cycle through spectrum-charge pairs, sorted by neutral mass
+  unsigned sc_index = 0;
+  FLOAT_T sc_total = (FLOAT_T)spec_charges->size();
+  int print_interval = get_int_parameter("print-search-progress");
   for (vector<SpectrumCollection::SpecCharge>::const_iterator sc = spec_charges->begin();
        sc != spec_charges->end();
        ++sc) {
@@ -345,7 +359,6 @@ void TideSearchApplication::search(
     double precursor_mz = spectrum->PrecursorMZ();
     int charge = sc->charge;
     int scan_num = spectrum->SpectrumNumber();
-
     if (precursor_mz < spectrum_min_mz || precursor_mz > spectrum_max_mz ||
         scan_num < min_scan || scan_num > max_scan ||
         spectrum->Size() < min_peaks ||
@@ -383,6 +396,12 @@ void TideSearchApplication::search(
     } else {
       matches.report(target_file, decoy_file, top_matches, spectrum, charge,
                      active_peptide_queue, proteins, locations, compute_sp);
+    }
+
+    ++sc_index;
+    if (print_interval > 0 && sc_index % print_interval == 0) {
+      carp(CARP_INFO, "%d spectra searched, %.0f%% complete",
+           sc_index, sc_index / sc_total * 100);
     }
   }
 
@@ -511,9 +530,9 @@ string TideSearchApplication::getName() {
 
 string TideSearchApplication::getDescription() {
   return
-  "Search a collection of spectra against a sequence "
-  "database, returning a collection of peptide-spectrum "
-  "matches (PSMs) scored by XCorr.";
+  "Search a collection of spectra against a sequence database, returning a "
+  "collection of peptide-spectrum matches (PSMs). This is a fast search engine "
+  "but requires that you first build an index with tide-index.";
 }
 
 bool TideSearchApplication::needsOutputDirectory() {

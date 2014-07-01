@@ -1,14 +1,8 @@
 cmake_minimum_required(VERSION 2.8.4)
 cmake_policy(VERSION 2.8.4)
 
-configure_file (
- "CruxConfig.h.in"
- "${CMAKE_CURRENT_BINARY_DIR}/CruxConfig.h"
- )
-
 add_subdirectory(bullseye)
 add_subdirectory(hardklor)
-add_subdirectory(posterior-error)
 add_subdirectory(qranker-barista)
 add_subdirectory(xlink)
 add_subdirectory(tide)
@@ -18,9 +12,9 @@ include_directories(.)
 include_directories(bullseye)
 include_directories(hardklor)
 include_directories(qranker-barista)
-include_directories(posterior-error)
 include_directories(xlink)
 include_directories(${CMAKE_SOURCE_DIR}/src/external)
+include_directories(${CMAKE_BINARY_DIR})
 include_directories(${CMAKE_BINARY_DIR}/src/external)
 include_directories(${CMAKE_BINARY_DIR}/src/external/include)
 include_directories(${CMAKE_BINARY_DIR}/src/external/include/CometSearch)
@@ -49,7 +43,6 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}/tide/protoobj)
 link_directories(.)
 link_directories(./bullseye)
 link_directories(./hardklor)
-link_directories(./posterior-error)
 link_directories(./qranker-barista)
 link_directories(./xlink)
 link_directories(${CMAKE_BINARY_DIR}/src/external/lib)
@@ -62,7 +55,6 @@ endif (WIN32 AND NOT Cygwin)
 
 set (
   crux_lib_files
-  CruxConfig.h
   Alphabet.cpp
   analyze_psms.cpp
   carp.cpp
@@ -298,7 +290,6 @@ if (WIN32 AND NOT CYGWIN)
     bullseye
     hardklor
     cometsearch
-    posterior_error
     perclibrary
     fido
     xlink
@@ -456,7 +447,6 @@ else()
     m
     ${RT_LIBRARY}
     mstoolkitlite
-    posterior_error
     perclibrary
     xlink
     boost_filesystem

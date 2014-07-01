@@ -337,8 +337,9 @@ string CometApplication::getName() {
  * \returns the description for CometApplication
  */
 string CometApplication::getDescription() {
-
-  return "Runs comet";
+  return "Search a collection of spectra against a sequence database, "
+         "returning a collection of PSMs. This search engine runs directly on "
+         "a protein database in FASTA format.";
 }
 
 /**

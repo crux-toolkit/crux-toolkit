@@ -18,12 +18,13 @@
 
 <blockquote>
 <p>
-Bullseye assigns high resolution precursor m/z values to MS2
-data. Bullseye uses the Hardkl&ouml;r algorithm to identify persistent
-peptide isotope distributions (PPIDs) in MS1 scans. For each PPID, MS2
-scans that occur within a specified time and m/z range are assigned
-the average monoisotopic m/z from the PPID assigned as the precursor
-m/z.  A detailed description of the Bullseye algorithm is given in</p>
+Bullseye assigns high resolution precursor m/z values to fragmentation
+(MS2) spectra. Bullseye uses the Hardkl&ouml;r algorithm to identify
+persistent peptide isotope distributions (PPIDs) in precursor (MS1)
+scans. For each PPID, MS2 scans that occur within a specified time and
+m/z range are assigned the average monoisotopic m/z from the PPID
+assigned as the precursor m/z.  A detailed description of the Bullseye
+algorithm is given in</p>
 
 <quote>
 Hsieh EJ, Hoopmann MR, Maclean B, MacCoss
@@ -62,7 +63,16 @@ Bullseye will search for PPIDs in these spectra.
 &lt;MS2 spectra&gt; &ndash; The name of a file from which to parse
 peptide fragmentation spectra.  The file may be in MS2 (.ms2), 
 binary MS2 (.bms2), compressed MS2 (.cms2) or mzXML (.mzXML) format.
+Bullseye will assign high-resolution precursor masses to these spectra.
 </li>
+
+<p>
+Note that some file formats (e.g., mzXML) can contain a mixture of
+precursor (MS1) and fragmentation (MS2) spectra.  In this case, it is
+permissible to provide Bullseye with the same filename twice.  The
+program will then extract MS1 and MS2 spectra from the same file.
+Note that, in this case, the output file will still only contain the
+MS2 spectra.</p>
 
 </UL>
 
@@ -89,9 +99,9 @@ fragmentation spectra for which accurate masses were successfully
 inferred.  Unless otherwise specified (with
 the <code>--spectrum-format</code> option), the output file format is
 the same as the input MS2 file format.  If the output format is
-".ms2," then a single spectrum may have multiple "Z" lines, eaching
+".ms2," then a single spectrum may have multiple "Z" lines, each
 indicating a charge state and accurate mass.  In addition, Bullseye
-inserts on "I" line (for charge-dependent analysis) corresponding to
+inserts an "I" line (for charge-dependent analysis) corresponding to
 each "Z" line.  The "I" line contains "EZ" in the second column, the
 charge and mass from the associated "Z" line in the third and fourth
 colummns, followed by the chromatographic apex and the intensity at

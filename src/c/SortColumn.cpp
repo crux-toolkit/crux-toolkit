@@ -213,8 +213,7 @@ string SortColumn::getName() {
  * \returns the description for SortColumn
  */
 string SortColumn::getDescription() {
-
-  return "Sorts a delimited file by a column.";
+  return "Sorts a tab-delimited file by a column.";
 }
 
 /**

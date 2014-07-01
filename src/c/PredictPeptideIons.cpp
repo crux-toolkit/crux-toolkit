@@ -171,8 +171,8 @@ string PredictPeptideIons::getName() {
  * \returns The description for PredictPeptideIons.
  */
 string PredictPeptideIons::getDescription() {
-  return "Given a peptide sequence, and a charge state, predict "
-    "the fragmentation ions.";
+  return "Given a peptide and a charge state, predict the m/z values of the "
+         "resulting fragment ions.";
 }
 
 /**

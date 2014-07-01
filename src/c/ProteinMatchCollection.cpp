@@ -195,12 +195,13 @@ void ProteinMatchCollection::addMatch(
   Spectrum* spectrum = match->getSpectrum();
   SpectrumZState z_state = match->getZState();
   SpectrumMatch* spectrum_match = new SpectrumMatch(spectrum);
+  spectrum_match->setFileIndex(match->getFileIndex());
   spectrum_match->setZState(z_state);
   spectrum_match->setScore(DELTA_CN, match->getDeltaCn());
   spectrum_match->setScore(BY_IONS_MATCHED, match->getBYIonMatched());
   spectrum_match->setScore(BY_IONS_TOTAL, match->getBYIonPossible());
   spectrum_matches_.push_back(spectrum_match);
-
+  
   pair<int, int> scan_charge = make_pair(spectrum->getFirstScan(), z_state.getCharge());
 
   if (match->getLnExperimentSize() >= 0 &&

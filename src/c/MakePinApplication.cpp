@@ -188,8 +188,8 @@ string MakePinApplication::getName() {
  * \returns the description for PercolatorApplication
  */
 string MakePinApplication::getDescription() {
-
-  return "Generates a Percolator input (PIN) file.";
+  return "Given a set of search results files, generate a pin file for input "
+         "to crux percolator";
 }
 
 /**

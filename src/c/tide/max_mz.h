@@ -14,52 +14,40 @@
 // BackgroundBinEnd() : one bin beyond where background subtraction should end.
 // CacheBinEnd() : one bin beyond where the cache lookups can extend.
 
-#ifndef MAX_MZ_H
-#define MAX_MZ_H
+
+// This new class called MZX_BIN is to replace the old MAX_MZ class.
+//written by Attila Kertesz-Farkas
+
+#ifndef MAX_BIN_H
+#define MAX_BIN_H
 
 #include <assert.h>
 #include <gflags/gflags.h>
+#include "mass_constants.h"
 
-DECLARE_double(max_mz);
-
-// Bin width for integerizing m/z axis.  This value was taken directly
-// from SEQUEST.
-const double bin_width_mono = 1.0005079;
+DECLARE_double(max_bin);
 
 // Maximum offset in the denominator of the XCorr function.
 const int MAX_XCORR_OFFSET = 75;
 
-class MaxMZ {
+class MaxBin {
  public:
-  MaxMZ() : max_bin_(0), background_bin_end_(0), cache_bin_end_(0) {}
+  MaxBin() : max_bin_(0), background_bin_end_(0), cache_bin_end_(0) {}
 
-  static int Bin(double mz) {
-    return int(mz/bin_width_mono + 0.5);
-  }
-
-  static double BinInvert(int bin) {
-    // returns highest m/z that would be binned (by Bin() above) into bin.
-    // result should err on the side of being too large, hence extra 0.005
-    return (double(bin) + 0.505) * bin_width_mono;
-  }
-
-  void Init(double highest_mz) {
-    InitBin(Bin(highest_mz));
-  }
-
-  void InitBin(int highest_bin) {
-    max_bin_ = highest_bin;
-    background_bin_end_ = max_bin_ + MAX_XCORR_OFFSET + 1;
+  //MassConstants has to be initialized before this call.
+  void InitBin(int highest_mz) {
+    max_bin_ = MassConstants::mass2bin(highest_mz, 1);
+    background_bin_end_ = MassConstants::mass2bin(highest_mz + MAX_XCORR_OFFSET + 1, 1);
     // room for diff between main ion and losses, A ion being most
     // distant, and 29 bins being as far away as an A-ion can be
-    cache_bin_end_ = background_bin_end_ + 29;
+    cache_bin_end_ = MassConstants::mass2bin(highest_mz + MAX_XCORR_OFFSET + 30, 1);
   }
 
-  int MaxBin() const { return max_bin_; }
+  int MaxBinEnd() const { return max_bin_; }
   int BackgroundBinEnd() const { return background_bin_end_; }
   int CacheBinEnd() const { return cache_bin_end_; }
 
-  static const MaxMZ& Global() {
+  static const MaxBin& Global() {
     // during indexing (as opposed to searching), Global().MaxBin() may be 0,
     // which indicates we should index all theoretical peaks, regardless of
     // m/z
@@ -68,13 +56,13 @@ class MaxMZ {
 
   static void SetGlobalMax(double highest_mz) {
     assert(global.max_bin_ == 0); // this should be done only once
-    FLAGS_max_mz = highest_mz;
-    global.Init(highest_mz);
+    global.InitBin(highest_mz);
+    FLAGS_max_bin = global.MaxBinEnd();
   }
 
   static void SetGlobalMaxFromFlag() {
-    if (FLAGS_max_mz > 0);
-    SetGlobalMax(FLAGS_max_mz);
+    if (FLAGS_max_bin > 0)
+    SetGlobalMax(FLAGS_max_bin);
   }
 
  private:
@@ -82,7 +70,7 @@ class MaxMZ {
   int background_bin_end_;
   int cache_bin_end_;
 
-  static MaxMZ global;
+  static MaxBin global;
 };
 
-#endif // MAX_MZ_H
+#endif // MAX_BIN_H

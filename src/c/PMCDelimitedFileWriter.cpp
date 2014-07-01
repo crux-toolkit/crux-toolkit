@@ -397,6 +397,7 @@ void PMCDelimitedFileWriter::setUpPSMsColumns(
     addColumnName(PERCOLATOR_QVALUE_COL);
     break;
   }
+  addColumnName(FILE_IDX_COL);
   addColumnName(FILE_COL);
   addColumnName(SCAN_COL);
   addColumnName(CHARGE_COL);
@@ -438,6 +439,9 @@ void PMCDelimitedFileWriter::writePSMs(
        iter != collection->spectrumMatchEnd();
        ++iter) {
     SpectrumMatch* match = *iter;
+    setColumnCurrentRow(FILE_IDX_COL, match->getFileIndex());
+    setColumnCurrentRow(FILE_COL, match->getFilePath());
+
     Spectrum* spectrum = match->getSpectrum();
     SpectrumZState& zstate = match->getZState();
     PeptideMatch* pep_match = match->getPeptideMatch();
@@ -474,7 +478,7 @@ void PMCDelimitedFileWriter::writePSMs(
     setAndFree(SEQUENCE_COL, seq_with_masses);
 
     setColumnCurrentRow(CLEAVAGE_TYPE_COL, cleavage);
-    setColumnCurrentRow(PROTEIN_ID_COL, peptide->getProteinIdsLocations());
+    setColumnCurrentRow(PROTEIN_ID_COL, peptide->getProteinIds());
     setAndFree(FLANKING_AA_COL, peptide->getFlankingAAs());
 
     writeRow();
