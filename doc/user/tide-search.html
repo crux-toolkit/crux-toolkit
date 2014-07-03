@@ -150,14 +150,16 @@ is defined as spectrum mass / (1.0 - (<code>precursor-window</code> /
 1000000)).  Default = mass.</li>
 
 <li>
-<code>--compute-sp T|F</code> &ndash; Compute the preliminary
-score Sp for all candidate peptides. This option is recommended if
-results are to be analyzed by <code>percolator</code>
-or <code>q-ranker</code>. If <code> sqt-output</code> is enabled,
-then <code>compute-sp</code> is automatically enabled and cannot be
-overridden. Note that the Sp computation requires re-processing each
-observed spectrum, so turning on this switch involves significant
-computational overhead. Default = F.</li>
+<code>--compute-sp T|F</code> &ndash; Compute the preliminary score Sp
+for all candidate peptides. Report this score in the output, along
+with the corresponding rank, the number of matched ions and the total
+number of ions.  This option is recommended if results are to be
+analyzed by <code>percolator</code> or <code>Barista</code>.
+If <code>sqt-output</code> is enabled, then <code>compute-sp</code> is
+automatically enabled and cannot be overridden. Note that the Sp
+computation requires re-processing each observed spectrum, so turning
+on this switch involves significant computational overhead.  Default =
+F.</li>
 
 <li>
 <code>--spectrum-min-mz &lt;float&gt;</code> &ndash; The lowest
@@ -284,8 +286,10 @@ formats (SQT, PepXML, mzIdentML, or PIN) requires a conversion step
 that takes additional time.  Default = T.</li>
 
 <li>
-<code>--sqt-output T|F</code> &ndash; Output an SQT
-results file to the output directory. Default = F.</li>
+<code>--sqt-output T|F</code> &ndash; Output an SQT results file to
+the output directory. Note that if <code> sqt-output</code> is
+enabled, then <code>compute-sp</code> is automatically enabled and
+cannot be overridden. Default = F.</li>
 
 <li>
 <code>--pepxml-output T|F</code> &ndash; Output a pepXML
