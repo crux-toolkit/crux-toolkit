@@ -213,8 +213,8 @@ int TideSearchApplication::main(int argc, char** argv) {
 
   active_peptide_queue->SetBinSize(binWidth, binOffset);
 
-  printf( "active_peptide_queue binWidth  = %10.8f\n", binWidth );    //&& for test only
-  printf( "active_peptide_queue binOffset = %4.2f\n", binOffset );   //&& for test only
+  // printf( "active_peptide_queue binWidth  = %10.8f\n", binWidth );    //&& for test only
+  // printf( "active_peptide_queue binOffset = %4.2f\n", binOffset );   //&& for test only
   
   carp(CARP_INFO, "Reading spectra file %s", spectra_file.c_str());
   // Try to read file as spectrumrecords file

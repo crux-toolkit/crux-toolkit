@@ -290,13 +290,13 @@ int ActivePeptideQueue::CountAAFrequency( double binWidth, double binOffset, dou
     }
   }
   
-  //&& for test only
-  printf( "number of peptides                 = %d\n", nPeptide );
-  printf( "number of unique amino acid masses = %d\n", uiUniqueMasses );
-  for ( i = 0; i < uiUniqueMasses; ++i ) {
-    printf( "%3d   %7.5f   %7.5f   % 7.5f\n", ( *dAAMass )[ i ], ( *dAAFreqN )[ i ], ( *dAAFreqI )[ i ], ( *dAAFreqC )[ i ] );
-  }
-  //&& end for test only
+  // //&& for test only
+  // printf( "number of peptides                 = %d\n", nPeptide );
+  // printf( "number of unique amino acid masses = %d\n", uiUniqueMasses );
+  // for ( i = 0; i < uiUniqueMasses; ++i ) {
+    // printf( "%3d   %7.5f   %7.5f   % 7.5f\n", ( *dAAMass )[ i ], ( *dAAFreqN )[ i ], ( *dAAFreqI )[ i ], ( *dAAFreqC )[ i ] );
+  // }
+  // //&& end for test only
   
   delete nvAAMassCounterN;
   delete nvAAMassCounterI;
