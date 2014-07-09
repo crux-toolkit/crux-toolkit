@@ -73,7 +73,7 @@ void SpectrumZState::setMZ(
 
 }
 
-FLOAT_T SpectrumZState::getMZ() {
+FLOAT_T SpectrumZState::getMZ() const {
 
   return (neutral_mass_ > 0) ?
     (neutral_mass_ + (FLOAT_T)charge_*MASS_PROTON) / (FLOAT_T)charge_ :

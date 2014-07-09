@@ -96,7 +96,7 @@ Spectrum::~Spectrum()
  * \returns the peak iterator that signifies the start of the peaks 
  * in the spectrum
  */
-PeakIterator Spectrum::begin() {
+PeakIterator Spectrum::begin() const {
 
   return peaks_.begin();
 }
@@ -105,7 +105,7 @@ PeakIterator Spectrum::begin() {
  * \returns the peak iterator that signifies the end of the peaks 
  * in the spectrum
  */
-PeakIterator Spectrum::end() {
+PeakIterator Spectrum::end() const {
   return peaks_.end();
 }
 
@@ -623,7 +623,7 @@ void Spectrum::updateFields(
 /**
  * \returns The number of the first scan.
  */
-int Spectrum::getFirstScan()
+int Spectrum::getFirstScan() const
 {
   return first_scan_;
 }
@@ -631,7 +631,7 @@ int Spectrum::getFirstScan()
 /**
  * \returns The number of the last scan.
  */
-int Spectrum::getLastScan()
+int Spectrum::getLastScan() const
 {
   return last_scan_;
 }
@@ -639,7 +639,7 @@ int Spectrum::getLastScan()
 /**
  * \returns The m/z of the precursor.
  */
-FLOAT_T Spectrum::getPrecursorMz()
+FLOAT_T Spectrum::getPrecursorMz() const
 {
   return precursor_mz_;
 }
@@ -663,7 +663,7 @@ FLOAT_T Spectrum::getMaxPeakMz()
 /**
  * \returns The number of peaks.
  */
-int Spectrum::getNumPeaks()
+int Spectrum::getNumPeaks() const
 {
   return (int)peaks_.size();
 }
@@ -697,7 +697,7 @@ void Spectrum::setLowestSp(FLOAT_T sp)
  * \returns A read-only reference to the vector of possible chare
  * states for this spectrum.  If EZ states are available, return those.
  */
-const vector<SpectrumZState>& Spectrum::getZStates() {
+const vector<SpectrumZState>& Spectrum::getZStates() const {
   if (ezstates_.size() != 0) {
     return ezstates_;
   } else {
@@ -753,7 +753,7 @@ const SpectrumZState& Spectrum::getZState(
 /**
  * \returns The number of possible charge states of this spectrum.
  */
-unsigned int Spectrum::getNumZStates() {
+unsigned int Spectrum::getNumZStates() const {
   return getZStates().size();
 }
 
@@ -823,6 +823,20 @@ void Spectrum::sumNormalize()
     FLOAT_T new_intensity = peak->getIntensity() / total_energy_;
     peak->setIntensity(new_intensity);
   }
+}
+
+/**
+ * Sort peaks
+ */
+void Spectrum::sortPeaks(PEAK_SORT_TYPE_T type)
+{
+  if ((type == _PEAK_LOCATION && sorted_by_mz_) ||
+      (type == _PEAK_INTENSITY && sorted_by_intensity_)) {
+    return;
+  }
+  sort_peaks(peaks_, type);
+  sorted_by_mz_ = (type == _PEAK_LOCATION);
+  sorted_by_intensity_ = (type == _PEAK_INTENSITY);
 }
 
 /**
