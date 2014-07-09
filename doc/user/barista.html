@@ -165,8 +165,13 @@ prefix of the protein names that indicates a decoy. Default = rand_.
 </li>
 
 <li>
-<code>--spectrum-parser pwiz|mstoolkit|crux</code> &ndash;
-Parser to use for reading in MS/MS spectra.  Default = crux.</li>
+<code>--spectrum-parser pwiz|mstoolkit</code> &ndash;
+Specify the parser to use for reading in MS/MS spectra. The default,
+ProteoWizard parser should be able to read the MS/MS file formats listed
+<a href="http://proteowizard.sourceforge.net/formats.shtml">here</a>. The
+alternative is <a href="mstoolkit.html">MSToolkit parser</a>. If the
+ProteoWizard parser fails to read your files properly, you may want to try the
+MSToolkit parser instead. Default = pwiz.</li>
 
 <li>
 <code>--separate-searches &lt;search&nbsp;results&gt;</code> &ndash; This option

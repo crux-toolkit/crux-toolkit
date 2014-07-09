@@ -115,13 +115,13 @@ class Spectrum{
    * \returns the peak iterator that signifies the start of the peaks 
    * in the spectrum
    */
-  PeakIterator begin();
+  PeakIterator begin() const;
 
   /**
    * \returns the peak iterator that signifies the end of the peaks 
    * in the spectrum
    */
-  PeakIterator end();
+  PeakIterator end() const;
 
   /**
    * Prints a spectrum object to file.
@@ -176,6 +176,11 @@ class Spectrum{
   void sumNormalize();
 
   /**
+   * Sort peaks
+   */
+  void sortPeaks(PEAK_SORT_TYPE_T type);
+
+  /**
    * Populate peaks with rank information.
    */
   void rankPeaks();
@@ -183,23 +188,23 @@ class Spectrum{
   /**
    * \returns The number of the first scan.
    */
-  int getFirstScan();
+  int getFirstScan() const;
 
   /**
    * \returns The number of the last scan.
    */
-  int getLastScan();
+  int getLastScan() const;
 
   /**
    * \returns The m/z of the precursor.
    */
-  FLOAT_T getPrecursorMz();
+  FLOAT_T getPrecursorMz() const;
 
   /**
    * \returns The a const reference to a vector of the possible charge
    * states of this spectrum. If EZ states are available, return those.
    */
-  const std::vector<SpectrumZState>& getZStates();
+  const std::vector<SpectrumZState>& getZStates() const;
 
   /**
    * \returns the ZState at the requested index
@@ -220,7 +225,7 @@ class Spectrum{
   /**
    * \returns The number of possible charge states of this spectrum.
    */
-  unsigned int getNumZStates();
+  unsigned int getNumZStates() const;
 
   /**
    * \returns The minimum m/z of all peaks.
@@ -235,7 +240,7 @@ class Spectrum{
   /**
    * \returns The number of peaks.
    */
-  int getNumPeaks();
+  int getNumPeaks() const;
 
   /**
    * \returns The closest PEAK_T within 'max' of 'mz' in 'spectrum'
