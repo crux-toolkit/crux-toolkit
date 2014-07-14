@@ -155,9 +155,10 @@ Move into the <span class=file>crux-x.xx.Source</span>
 directory from step 1.
 Run the command
 <div class=code><code>
-cmake -DCMAKE_INSTALL_PREFIX:PATH=&lt;install directory&gt; .
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:PATH=&lt;install directory&gt; .
 </code>
 </div>
+<p/>
 where <span class=file>&lt;install directory&gt;</span> is
 the location where you wish to install the <span class=prog>crux</span> programs. 
 If you want <span class=prog>crux</span> to go in <span class=file>$HOME/bin</span>,
@@ -165,8 +166,17 @@ then <span class=file>&lt;install directory&gt;</span> would be <span class=file
 The installation process will automatically put the programs in a directory called
 <span class=file>bin</span>.
 <p/>
+Note, this configuration will build with optimizations turned on,
+and will not include debug symbols.
+To build with optimizations turned off,
+and debug symbols included,
+use the command:
+<div class=code><code>
+cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX:PATH=&lt;install directory&gt; .
+</code>
+</div>
 </li>
-
+<p/>
 <li><b>Build and install</b>
 <p/>
 To complete the process, run these two commands.</li>
@@ -378,9 +388,10 @@ Move into the <span class=file>crux-x.xx.Source</span>
 directory from step 1.
 Run the command
 <div class=code><code>
-cmake -DCMAKE_INSTALL_PREFIX:PATH=&lt;install directory&gt; .
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:PATH=&lt;install directory&gt; .
 </code>
 </div>
+<p/>
 where <span class=file>&lt;install directory&gt;</span> is
 the location where you wish to install the <span class=prog>crux</span> programs. 
 If you want <span class=prog>crux</span> to go in <span class=file>$HOME/bin</span>,
@@ -388,8 +399,17 @@ then <span class=file>&lt;install directory&gt;</span> would be <span class=file
 The installation process will automatically put the programs in a directory called
 <span class=file>bin</span>.
 <p/>
+Note, this configuration will build with optimizations turned on,
+and will not include debug symbols.
+To build with optimizations turned off,
+and debug symbols included,
+use the command:
+<div class=code><code>
+cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX:PATH=&lt;install directory&gt; .
+</code>
+</div>
 </li>
-
+<p/>
 <li><b>Build and install</b>
 <p/>
 To complete the process, run these two commands.</li>
