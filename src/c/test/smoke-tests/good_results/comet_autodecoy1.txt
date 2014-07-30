@@ -1,0 +1,6 @@
+scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	sp score	sp rank	xcorr score	xcorr rank	b/y ions matched	b/y ions total	total matches/spectrum	sequence	protein id	flanking aa	e-value
+1	2	795.887024	1589.759495	1589.7647	0.2655	1931.3260	1	4.0435	1	21	26	6	YVVESTGVFTTMEK	DECOY_tmp2	--	3.90E-08
+1	2	795.887024	1589.759495	1589.7647	0.7472	914.6248	2	2.9699	2	17	26	6	YVVESTGTVTFMEK	tmp3	--	1.74E-05
+1	2	795.887024	1589.759495	1589.7647	0.7850	179.6472	4	1.0222	3	9	26	6	EMTTFVGTSEVVYK	tmp2	--	1.11E+00
+1	2	795.887024	1589.759495	1589.7647	0.8153	92.2405	5	0.8695	4	7	26	6	KEMTTFVGTSEVVY	tmp1	--	2.63E+00
+1	2	795.887024	1589.759495	1589.7647	1.0000	244.0670	3	0.7466	5	10	26	6	EMFTVTGTSEVVYK	DECOY_tmp3	--	5.29E+00
