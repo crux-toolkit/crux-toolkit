@@ -17,7 +17,12 @@ Given /^I pass the arguments? (.*)$/ do | arg |
   @tester.add_arg(arg)
 end
 
-When /^I run (.*)$/ do | cmd |
+When /^I run ([^\s]+)$/ do | cmd |
+  @last_ret = @tester.exec(cmd)
+  @tester.test_done()
+end
+
+When /^I run ([^\s]+) as an intermediate step$/ do | cmd |
   @last_ret = @tester.exec(cmd)
 end
 
@@ -25,11 +30,15 @@ Then /^the return value should be (-?[0-9]+)$/ do | ret |
   expect(@last_ret).to eq(ret.to_i)
 end
 
-Then /(.*) should match (.*)/ do | actual, expected |
+Then /^(.*) should match (.*)$/ do | actual, expected |
   unless actual == "stdout"
     expect(CruxTester.cmp(expected, actual)).to be true
   else
     expect(@tester.instance_variable_get("@last_stdout")).to eq(File.read(expected))
   end
+end
+
+Then /^(.*) should contain the same lines as (.*)$/ do | actual, expected |
+  expect(CruxTester.cmpUnordered(expected, actual)).to be true
 end
 
