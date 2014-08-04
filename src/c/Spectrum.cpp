@@ -96,7 +96,7 @@ Spectrum::~Spectrum()
  * \returns the peak iterator that signifies the start of the peaks 
  * in the spectrum
  */
-PeakIterator Spectrum::begin() {
+PeakIterator Spectrum::begin() const {
 
   return peaks_.begin();
 }
@@ -105,7 +105,7 @@ PeakIterator Spectrum::begin() {
  * \returns the peak iterator that signifies the end of the peaks 
  * in the spectrum
  */
-PeakIterator Spectrum::end() {
+PeakIterator Spectrum::end() const {
   return peaks_.end();
 }
 
@@ -403,27 +403,29 @@ bool Spectrum::parsePwizSpecInfo(
     carp(CARP_FATAL, "No selected ions in spectrum %d.", first_scan_);
   }
 
-  // possible charge states will all be stored in the first selected ion
-  if( ions[0].hasCVParam(pzd::MS_possible_charge_state) ){
-    carp(CARP_DEBUG, "charges stored ion");
-    vector<pzd::CVParam> charges = 
-      ions[0].cvParamChildren(pzd::MS_possible_charge_state);
-
-    for(size_t charge_idx = 0; charge_idx < charges.size(); charge_idx++){
-      SpectrumZState zstate;
-      zstate.setMZ(precursor_mz_, charges[charge_idx].valueAs<int>());
-      zstates_.push_back(zstate);
+  bool knownCharge = ions[0].hasCVParam(pzd::MS_charge_state);
+  bool hasZLine = false;
+  const vector<pwiz::data::UserParam>& specUserParams = pwiz_spectrum->userParams;
+  if (!knownCharge) {
+    for (vector<pwiz::data::UserParam>::const_iterator i = specUserParams.begin();
+         i != specUserParams.end();
+         ++i) {
+      if (i->name == "ms2 file charge state") {
+        hasZLine = true;
+        break;
+      }
     }
   }
+
   // determined charge states will be stored
   // one per selected ion
-  else if( ions[0].hasCVParam(pzd::MS_charge_state) ){
+  if (knownCharge) {
     carp(CARP_DEBUG, "MS_charge_state");
     // get each charge state and possibly the associated mass
     for(size_t ion_idx = 0; ion_idx < ions.size(); ion_idx++){
       int charge = ions[ion_idx].cvParam(pzd::MS_charge_state).valueAs<int>();
       carp(CARP_DEBUG, "Charge:%d", charge);
-      if ( ions[ion_idx].hasCVParam(pzd::MS_accurate_mass)) {
+      if (ions[ion_idx].hasCVParam(pzd::MS_accurate_mass)) {
         //bullseye-determined charge states
         FLOAT_T accurate_mass = 
           ions[ion_idx].cvParam(pzd::MS_accurate_mass).valueAs<FLOAT_T>();
@@ -438,25 +440,46 @@ bool Spectrum::parsePwizSpecInfo(
         //if we don't have a precursor set yet, set it now.
         if (!have_precursor_mz) {
           precursor_mz_ = mz;
-	}
+        }
         SpectrumZState zstate;
-        
         zstate.setMZ(mz, charge);
         zstates_.push_back(zstate);
       } else {
-
-	ostringstream oss;
+        ostringstream oss;
         oss << "Cannot find precursor mass! CVParams:"<<endl;
 
-	for (vector<pwiz::data::CVParam>::iterator iter = ions[0].cvParams.begin();
-	     iter != ions[0].cvParams.end();
-	     ++iter) {
-	  oss<<"id:"<<(int)iter->cvid<<" value:"<<iter->value;
-	}
+        for (vector<pwiz::data::CVParam>::iterator iter = ions[0].cvParams.begin();
+             iter != ions[0].cvParams.end();
+             ++iter) {
+          oss<<"id:"<<(int)iter->cvid<<" value:"<<iter->value;
+        }
         string err_string = oss.str();
         carp(CARP_FATAL, err_string);
       }
-    }   
+    }
+  } else if (hasZLine) {
+    for (vector<pwiz::data::UserParam>::const_iterator i = specUserParams.begin();
+         i != specUserParams.end();
+         ++i) {
+      if (i->name == "ms2 file charge state") {
+        const string& zLine = i->value; // "<charge> <m/z>"
+        size_t separator = zLine.find(" ");
+        SpectrumZState zstate;
+        zstate.setMZ(boost::lexical_cast<double>(zLine.substr(separator + 1)),
+                     boost::lexical_cast<int>(zLine.substr(0, separator)));
+        zstates_.push_back(zstate);
+      }
+    }
+  } else if (ions[0].hasCVParam(pzd::MS_possible_charge_state)) {
+    // possible charge states will all be stored in the first selected ion
+    carp(CARP_DEBUG, "charges stored ion");
+    vector<pzd::CVParam> charges = 
+      ions[0].cvParamChildren(pzd::MS_possible_charge_state);
+    for (size_t charge_idx = 0; charge_idx < charges.size(); charge_idx++) {
+      SpectrumZState zstate;
+      zstate.setMZ(precursor_mz_, charges[charge_idx].valueAs<int>());
+      zstates_.push_back(zstate);
+    }
   } else { // we have no charge information
     assignZState(); //do choose charge and add +1 or +2,+3
   }
@@ -623,7 +646,7 @@ void Spectrum::updateFields(
 /**
  * \returns The number of the first scan.
  */
-int Spectrum::getFirstScan()
+int Spectrum::getFirstScan() const
 {
   return first_scan_;
 }
@@ -631,7 +654,7 @@ int Spectrum::getFirstScan()
 /**
  * \returns The number of the last scan.
  */
-int Spectrum::getLastScan()
+int Spectrum::getLastScan() const
 {
   return last_scan_;
 }
@@ -639,7 +662,7 @@ int Spectrum::getLastScan()
 /**
  * \returns The m/z of the precursor.
  */
-FLOAT_T Spectrum::getPrecursorMz()
+FLOAT_T Spectrum::getPrecursorMz() const
 {
   return precursor_mz_;
 }
@@ -663,7 +686,7 @@ FLOAT_T Spectrum::getMaxPeakMz()
 /**
  * \returns The number of peaks.
  */
-int Spectrum::getNumPeaks()
+int Spectrum::getNumPeaks() const
 {
   return (int)peaks_.size();
 }
@@ -697,7 +720,7 @@ void Spectrum::setLowestSp(FLOAT_T sp)
  * \returns A read-only reference to the vector of possible chare
  * states for this spectrum.  If EZ states are available, return those.
  */
-const vector<SpectrumZState>& Spectrum::getZStates() {
+const vector<SpectrumZState>& Spectrum::getZStates() const {
   if (ezstates_.size() != 0) {
     return ezstates_;
   } else {
@@ -753,7 +776,7 @@ const SpectrumZState& Spectrum::getZState(
 /**
  * \returns The number of possible charge states of this spectrum.
  */
-unsigned int Spectrum::getNumZStates() {
+unsigned int Spectrum::getNumZStates() const {
   return getZStates().size();
 }
 
@@ -823,6 +846,20 @@ void Spectrum::sumNormalize()
     FLOAT_T new_intensity = peak->getIntensity() / total_energy_;
     peak->setIntensity(new_intensity);
   }
+}
+
+/**
+ * Sort peaks
+ */
+void Spectrum::sortPeaks(PEAK_SORT_TYPE_T type)
+{
+  if ((type == _PEAK_LOCATION && sorted_by_mz_) ||
+      (type == _PEAK_INTENSITY && sorted_by_intensity_)) {
+    return;
+  }
+  sort_peaks(peaks_, type);
+  sorted_by_mz_ = (type == _PEAK_LOCATION);
+  sorted_by_intensity_ = (type == _PEAK_INTENSITY);
 }
 
 /**

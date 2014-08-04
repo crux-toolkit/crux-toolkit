@@ -1,0 +1,89 @@
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <title>Using Sourceforge</title>
+  <style type="text/css" media="screen">
+    body {margin: 72px;
+  </style>
+</head>
+<body>
+<h2>Crux and TeamCity</h2>
+We use
+<a href="http://www.jetbrains.com/teamcity/">TeamCity</a>
+to provide continuous integration services for Crux.
+Kaipo Tamura, Charles Grant, Sean McIlwain, and Bill Noble are the 
+administrators for our server.
+<h2>Accessing the TeamCity Server</h2>
+Our TeamCity server runs on a virtual machine running RHEL6, created by GSIT.
+The name of the virtual machine is <code>nrhel6-x64</code>
+and it is only accessible from machines behind the Genome Sciences' firewall.
+A local user account named <code>teamcity</code> is used to control the
+TeamCity server.
+<h3>Accessing the TeamCity Server Using the Command Line</h3>
+To log on to nrhel6-x64:
+<ol>
+<li>Log on to a computer beind the GSIT firewall.</li>
+<li>Run <code>ssh nrhel6-x64</code>.</li>
+<li>Run <code>sudo su - teamcity</code></li>
+</ol>
+The binaries and supporting scripts for TeamCity will be found in the
+<code>bin</code> subdirectory in the TeamCity home directory:
+<code>/data/TeamCity</code>.
+<h4>Controlling the TeamCity Server</h4>
+The main reason to access TeamCity using the command line 
+is to start or stop the server.
+To start the TeamCity Server run the command:
+<pre>
+bin/runAll.sh start
+</pre>
+To stop the TeamCity Server run the command:
+<pre>
+bin/runAll.sh stop
+</pre>
+<h3>Accessing the TeamCity Server Using the Web Interface</h3>
+Most administrative chores for the TeamCity server are more easily
+accomplished using the TeamCity web interface.
+If you are on a computer behind the GSIT firewall:
+<ol>
+<li>Have a TeamCity administrator create a TeamCity account for you.</li>
+<li>
+Open the URL <code><a
+href="http://nhrel6-x64.gs.washington.edu:8111">http://nhrel6-x64.gs.washington.edu:8111</a></code>
+in your browser.
+</li>
+<li>
+Log in using the credentials for your TeamCity account.
+</li>
+</ol>
+If you are not on a computer behind the GSIT firewall the process is a little
+more complex.
+You have to establish a TCP/IP tunnel from your computer, through the firewall,
+and on to nhrel6-x64.
+If your system supports the <code>ssh</code> command:
+<ol>
+<li>
+Establish a tunnel using the command:
+<pre>
+ssh -f -N -L 8111:nrhel6-x64.gs.washington.edu:8111 cegrant@nexus2.gs.washington.edu
+</pre>
+</li>
+<li>
+Open the URL <code><a
+href="http://localhost:8111">http://localhost:8111</a></code>
+in your browser.
+</li>
+<li>
+Log in using the credentials for your TeamCity account.
+</li>
+</ol>
+<h2>The TeamCity Build Agents</h2>
+TeamCity uses build agents to build Crux on multiple platforms.
+We currently run build agents on the following machines:
+<ul>
+<li>nrhel6-x64 64-bit Linux (user teamcity)</li>
+<li>nrhel6-i386 32-bit Linux (user cegrant)</li>
+<li>nwin7-x64 32-bit Windows (user cegrant)</li>
+<li>Charles's Mac laptop OS X (user cegrant)</li>
+</ul>
+</body>
+</html>

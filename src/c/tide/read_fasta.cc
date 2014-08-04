@@ -33,12 +33,12 @@ class FASTAReader {
     *(current_protein_.mutable_name()) += string(buffer, size);
   }
   void AddToResidues(const char* buffer, int size) {
-    char dest_buf[size];
+    vector<char> dest_buf(size);
     int total = 0;
     for (int i = 0; i < size; ++i, ++buffer)
       if (is_residue[*buffer])
         dest_buf[total++] = *buffer;
-    *(current_protein_.mutable_residues()) += string(dest_buf, total);
+    *(current_protein_.mutable_residues()) += string(&(dest_buf[0]), total);
   }
 
   static bool is_residue[];

@@ -8,7 +8,7 @@
 #define COMETAPPLICATION_H
 
 #include "CruxApplication.h"
-#include "CometSearchManager.h"
+#include "CometSearch/CometSearchManager.h"
 #include <string>
 #include <fstream>
 #include <iostream>

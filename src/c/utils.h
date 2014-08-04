@@ -12,7 +12,6 @@
 #include <stdlib.h>
 #include <math.h>
 
-
 /*#ifndef linux
 #include <ieeefp.h>
 #endif*/
@@ -39,6 +38,8 @@ static const int PEPTIDELENGTH = 80;
 static const int LINELENGTH = 4096;
 
 extern int verbosity;
+
+#define UNIFORM_INT_DISTRIBUTION_MAX 2147483647 // Max value of int32
 
 #ifdef DARWIN
 #ifdef PRE_LION
@@ -300,6 +301,10 @@ char** parse_file(
   int* num_lines
   );
 
+
+int myrandom();
+int myrandom_limit(int max);
+void mysrandom(unsigned seed);
 
 #endif
 

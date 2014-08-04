@@ -24,7 +24,9 @@ int GenerateDecoys::main(int argc, char** argv) {
     "digestion",
     "missed-cleavages",
     "isotopic-mass",
+    "clip-nterm-methionine",
     "decoy-format",
+    "keep-terminal-aminos",
     "overwrite",
     "fileroot",
     "output-dir",
@@ -292,7 +294,7 @@ bool GenerateDecoys::getNextProtein(
 /**
  * Cleave protein sequence using specified enzyme and store results in vector
  */
-void GenerateDecoys::cleaveProtein(
+  void GenerateDecoys::cleaveProtein(
   const string& sequence, ///< Protein sequence to cleave
   ENZYME_T enzyme,  ///< Enzyme to use for cleavage
   DIGEST_T digest,  ///< Digestion to use for cleavage
@@ -302,6 +304,7 @@ void GenerateDecoys::cleaveProtein(
   vector<string>& outPeptides ///< vector to store peptides
 ) {
   outPeptides.clear();
+  bool clip_nterm_methionine = get_boolean_parameter("clip-nterm-methionine");
   if (enzyme != NO_ENZYME) {
     // Enzyme
     size_t pepStart = 0, nextPepStart = 0;
@@ -316,6 +319,9 @@ void GenerateDecoys::cleaveProtein(
       } else if (cleavePos) {
         // Cleavage position, add this peptide
         outPeptides.push_back(sequence.substr(pepStart, i + 1 - pepStart));
+        if (clip_nterm_methionine && sequence[0] == 'M' && pepStart == 0 && digest != PARTIAL_DIGEST) {
+          outPeptides.push_back(sequence.substr(pepStart + 1, i + 1 - pepStart - 1));
+        }
         if (++cleaveSites == 1) {
           // This is the first cleavage position, remember it
           nextPepStart = i + 1;
@@ -390,6 +396,7 @@ void GenerateDecoys::cleaveProtein(
   vector< pair<string, int> >& outPeptides ///< vector to store peptides
 ) {
   outPeptides.clear();
+  bool clip_nterm_methionine = get_boolean_parameter("clip-nterm-methionine");
   if (enzyme != NO_ENZYME) {
     // Enzyme
     size_t pepStart = 0, nextPepStart = 0;
@@ -406,6 +413,10 @@ void GenerateDecoys::cleaveProtein(
         // Cleavage position, add this peptide
         outPeptides.push_back(
           make_pair(sequence.substr(pepStart, i + 1 - pepStart), pepStart));
+        if (clip_nterm_methionine && sequence[0] == 'M' && pepStart == 0 && digest != PARTIAL_DIGEST) {
+          outPeptides.push_back(
+            make_pair(sequence.substr(pepStart + 1, i + 1 - pepStart - 1), pepStart + 1));
+        }
         if (++cleaveSites == 1) {
           // This is the first cleavage position, remember it
           nextPepStart = i + 1;
@@ -447,14 +458,17 @@ void GenerateDecoys::cleaveProtein(
         outPeptides.push_back(make_pair(sequence.substr(j), j));
       }
     }
-    // Erase peptides that don't meet length requirement
-    for (vector< pair<string, int> >::reverse_iterator i = outPeptides.rbegin();
-         i != outPeptides.rend();
-         ++i) {
+	// Erase peptides that don't meet length requirement
+    for (vector< pair<string, int> >::iterator i = outPeptides.begin();
+		i != outPeptides.end();
+		) {
       if (i->first.length() < minLength || i->first.length() > maxLength) {
-        outPeptides.erase((i + 1).base());
+        i = outPeptides.erase(i);
       }
-    }
+	  else {
+		  ++i;
+	  }
+	}
   } else {
     // No enzyme
     // Get all substrings min <= length <= max
@@ -479,20 +493,43 @@ bool GenerateDecoys::makeDecoy(
 ) {
   const int MAX_SHUFFLE_ATTEMPTS = 6;
 
-  if (seq.length() <= 3) {
+  const string keepTerminal = get_string_parameter_pointer("keep-terminal-aminos");
+  string decoyPre;
+  string decoyPost;
+  if (keepTerminal == "N") {
+    if (seq.length() <= 2) {
+      decoyOut = seq;
+      return false;
+    }
+    decoyPre = seq[0];
+    decoyOut = seq.substr(1);
+  } else if (keepTerminal == "C") {
+    if (seq.length() <= 2) {
+      decoyOut = seq;
+      return false;
+    }
+    decoyPost = seq[seq.length() - 1];
+    decoyOut = seq.substr(0, seq.length() - 1);
+  } else if (keepTerminal == "NC") {
+    if (seq.length() <= 3) {
+      decoyOut = seq;
+      return false;
+    }
+    decoyPre = seq[0];
+    decoyPost = seq[seq.length() - 1];
+    decoyOut = seq.substr(1, seq.length() - 2);
+  } else {
     decoyOut = seq;
-    return false;
+    if (seq.length() <= 1) {
+      return false;
+    }
   }
-
-  decoyOut = seq.substr(1, seq.length() - 2);
-  char seqN = seq[0];
-  char seqC = seq[seq.length() - 1];
 
   if (!shuffle) {
     // Reverse
     if (reversePeptide(decoyOut)) {
       // Re-add n/c
-      string decoyCheck = seqN + decoyOut + seqC;
+      string decoyCheck = decoyPre + decoyOut + decoyPost;
       // Check in sets
       if (targetSeqs.find(decoyCheck) == targetSeqs.end() &&
           decoySeqs.find(decoyCheck) == decoySeqs.end()) {
@@ -500,14 +537,14 @@ bool GenerateDecoys::makeDecoy(
         return true;
       }
     }
-    carp(CARP_WARNING, "Failed reversing %s, shuffling", seq.c_str());
+    carp(CARP_DEBUG, "Failed reversing %s, shuffling", seq.c_str());
   }
 
   // Shuffle
   for (int i = 0; i < MAX_SHUFFLE_ATTEMPTS; ++i) {
     if (shufflePeptide(decoyOut)) {
       // Re-add n/c
-      string decoyCheck = seqN + decoyOut + seqC;
+      string decoyCheck = decoyPre + decoyOut + decoyPost;
       // Check in sets
       if (targetSeqs.find(decoyCheck) == targetSeqs.end() &&
           decoySeqs.find(decoyCheck) == decoySeqs.end()) {
@@ -537,7 +574,7 @@ bool GenerateDecoys::shufflePeptide(
   }
 
   string originalSeq(seq);
-  random_shuffle(seq.begin(), seq.end());
+  random_shuffle(seq.begin(), seq.end(), myrandom_limit);
   return seq != originalSeq;
 }
 

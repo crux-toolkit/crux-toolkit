@@ -23,7 +23,7 @@
 #include "report.h"
 
 using namespace std;
-
+/*
 typedef vector<const pb::Protein*> ProteinVec;
 
 DEFINE_string(proteins, "", "File of proteins corresponding to peptides, as "
@@ -142,6 +142,8 @@ void CollectScoresCompiled(ActivePeptideQueue* active_peptide_queue,
   // doesn't understand that %ecx and %edi (or %rcx and %rdi) get
   // clobbered. Since they're already input registers, they can't be
   // included in the clobber list.
+#ifdef _MSC_VER
+#else
   __asm__ __volatile__("cld\n" // stos operations increment edi
 #ifdef __x86_64__
                        "push %%rcx\n"
@@ -162,6 +164,7 @@ void CollectScoresCompiled(ActivePeptideQueue* active_peptide_queue,
                          "c" (queue_size),
                          "D" (results)
 		       );
+#endif
 
   // match_arr is filled by the compiled programs, not by calls to
   // push_back(). We have to set the final size explicitly.
@@ -253,9 +256,9 @@ string UsageMessage(string prog_name) {
     "  --spectra=<filename>\n"
     "\n";
 }
-
+*/
 int main(int argc, char* argv[]) {
-  string command_line;
+/*  string command_line;
   for (int i = 0; i < argc; i++) {
     command_line += argv[i];
     command_line += " ";
@@ -318,6 +321,6 @@ int main(int argc, char* argv[]) {
 #ifdef MEM_STATS
   cerr << "Total Fifo Allocations: " << FifoAllocator::Total() << endl;
 #endif
-
+*/
   return 0;
 }

@@ -21,9 +21,9 @@ DEFINE_bool(dups_ok, false, "Don't remove duplicate peaks");
 #endif
 
 string Peptide::SeqWithMods() const {
-  char buf[Len() + num_mods_ * 30 + 1];
+  vector<char> buf(Len() + num_mods_ * 30 + 1);
   int residue_pos = 0;
-  char* buf_pos = buf;
+  char* buf_pos = &(buf[0]);
   for (int i = 0; i < num_mods_; ++i) {
     int index;
     double delta;
@@ -35,7 +35,7 @@ string Peptide::SeqWithMods() const {
   while (residue_pos < Len())
     *buf_pos++ = residues_[residue_pos++];
   *buf_pos = '\0';
-  return buf;
+  return &(buf[0]);
 }
 
 void Peptide::Show() {
@@ -68,67 +68,66 @@ void Peptide::AddIons(W* workspace) const {
   // Use workspace to assemble all B and Y ions. workspace will determine
   // which, if any, associated ions will be represented.
   double max_possible_peak = numeric_limits<double>::infinity();
-  if (MaxMZ::Global().MaxBin() > 0)
-    max_possible_peak = MaxMZ::BinInvert(MaxMZ::Global().CacheBinEnd());
+  if (MaxBin::Global().MaxBinEnd() > 0)
+    max_possible_peak = MaxBin::Global().CacheBinEnd();
 
-  double masses_charge_1[Len()];
-  double masses_charge_2[Len()];
+  vector<double> aa_masses(Len());
   const char* residue = residues_;
   // Collect m/z values for each residue, for z = 1, 2.
   for (int i = 0; i < Len(); ++i, ++residue) {
-    masses_charge_1[i] = MassConstants::aa_bin_1[*residue];
-    masses_charge_2[i] = MassConstants::aa_bin_2[*residue];
+    aa_masses[i] = MassConstants::mono_table[*residue];
   }
 
   for (int i = 0; i < num_mods_; ++i) {
     int index;
     double delta;
     MassConstants::DecodeMod(mods_[i], &index, &delta);
-    masses_charge_1[index] += delta;
-    masses_charge_2[index] += delta/2;
+    aa_masses[index] += delta;
   }
 
   // Add all charge 1 B ions.
-  double total = masses_charge_1[0];
+  double total = aa_masses[0];
   for (int i = 1; i < Len() && total <= max_possible_peak; ++i) {
     workspace->AddBIon(total, 1);
-    total += masses_charge_1[i];
-  }
-
-  // Add all charge 2 B ions.
-  total = masses_charge_2[0];
-  for (int i = 1; i < Len() && total <= max_possible_peak; ++i) {
-    workspace->AddBIon(total, 2);
-    total += masses_charge_2[i];
+    total += aa_masses[i];
   }
 
   // Add all charge 1 Y ions.
-  total = masses_charge_1[Len() - 1];
+  total = aa_masses[Len() - 1];
   for (int i = Len()-2; i >= 0 && total <= max_possible_peak; --i) {
     workspace->AddYIon(total, 1);
-    total += masses_charge_1[i];
+    total += aa_masses[i];
+  }
+
+  // Add all charge 2 B ions.
+  max_possible_peak = max_possible_peak*2 + 2;  //adjust for larger charge
+  total = aa_masses[0];
+  for (int i = 1; i < Len() && total <= max_possible_peak; ++i) {
+    workspace->AddBIon(total, 2);
+    total += aa_masses[i];
   }
 
   // Add all charge 2 Y ions.
-  total = masses_charge_2[Len() - 1];
+  total = aa_masses[Len() - 1];
   for (int i = Len()-2; i >= 0 && total <= max_possible_peak; --i) {
     workspace->AddYIon(total, 2);
-    total += masses_charge_2[i];
+    total += aa_masses[i];
   }
 }
 
 template< class W >
-void Peptide::AddBIonsTrueMass( W* workspace ) const {
-  // Use workspace to assemble b ions only, with true monoisotopic masses.
+void Peptide::AddBIonsOnly( W* workspace ) const {
+  // Use workspace to assemble b ions only.
   // Intended primarily to support XCorr p-value calculations.
   double max_possible_peak = numeric_limits<double>::infinity();
-  if (MaxMZ::Global().MaxBin() > 0)
-    max_possible_peak = MaxMZ::BinInvert(MaxMZ::Global().CacheBinEnd());
-  double masses_charge_1[Len()];
+  if (MaxBin::Global().MaxBinEnd() > 0)
+    max_possible_peak = MaxBin::Global().CacheBinEnd();
+  
+  vector<double> aa_masses(Len());
   const char* residue = residues_;
   // Collect m/z values for each residue, for z = 1.
   for ( int i = 0; i < Len(); ++i, ++residue ) {
-    masses_charge_1[i] = MassConstants::mono_table[ *residue ];
+    aa_masses[i] = MassConstants::mono_table[ *residue ];
   }
 
   //Add modifications to amino acids
@@ -136,15 +135,14 @@ void Peptide::AddBIonsTrueMass( W* workspace ) const {
     int index;
     double delta;
     MassConstants::DecodeMod(mods_[i], &index, &delta);
-    masses_charge_1[index] += delta*MassConstants::bin_width;   //&& may need recoding for variable bin widths
- //   masses_charge_2[index] += delta/2;
+    aa_masses[index] += delta;
   }
 
   // Add all charge 1 B ions.
-  double total = MassConstants::proton + masses_charge_1[ 0 ];
+  double total = MassConstants::proton + aa_masses[ 0 ];
   for ( int i = 1; i < Len() && total <= max_possible_peak; ++i ) {
     workspace -> AddBIon( total );
-    total += masses_charge_1[ i ];
+    total += aa_masses[ i ];
   }
 }
 
@@ -168,19 +166,19 @@ void Peptide::Compile(const TheoreticalPeakArr* peaks,
 		      const pb::Peptide& pb_peptide,
                       TheoreticalPeakCompiler* compiler_prog1,
                       TheoreticalPeakCompiler* compiler_prog2) {
-  int pos_size = peaks[0].size() + pb_peptide.peak1_size();
-  prog1_ = compiler_prog1->Init(pos_size, pb_peptide.neg_peak1_size());
+  int pos_size = peaks[0].size();
+  prog1_ = compiler_prog1->Init(pos_size, 0);
   compiler_prog1->AddPositive(peaks[0]);
-  compiler_prog1->AddPositive(pb_peptide.peak1());
-  compiler_prog1->AddNegative(pb_peptide.neg_peak1());
+//  compiler_prog1->AddPositive(pb_peptide.peak1());
+//  compiler_prog1->AddNegative(pb_peptide.neg_peak1());
   compiler_prog1->Done();
 
-  pos_size = peaks[0].size() + peaks[1].size() + pb_peptide.peak2_size();
-  prog2_ = compiler_prog2->Init(pos_size, pb_peptide.neg_peak2_size());
+  pos_size = peaks[0].size() + peaks[1].size();
+  prog2_ = compiler_prog2->Init(pos_size, 0);
   compiler_prog2->AddPositive(peaks[0]);
   compiler_prog2->AddPositive(peaks[1]);
-  compiler_prog2->AddPositive(pb_peptide.peak2());
-  compiler_prog2->AddNegative(pb_peptide.neg_peak2());
+//  compiler_prog2->AddPositive(pb_peptide.peak2());
+//  compiler_prog2->AddNegative(pb_peptide.neg_peak2());
   compiler_prog2->Done();
 }
 
@@ -192,7 +190,7 @@ void Peptide::ComputeTheoreticalPeaks(TheoreticalPeakSet* workspace) const {
 }
 
 void Peptide::ComputeBTheoreticalPeaks( TheoreticalPeakSetBIons* workspace ) const {
-  AddBIonsTrueMass< TheoreticalPeakSetBIons >( workspace );   // workspace for b ion only peak set, with true monoisotopic masses
+  AddBIonsOnly< TheoreticalPeakSetBIons >( workspace );   // workspace for b ion only peak set
 #ifdef DEBUG
   Show();
 #endif
@@ -235,17 +233,21 @@ double* Peptide::getAAMasses(){
     int index;
     double delta;
     MassConstants::DecodeMod(mods_[i], &index, &delta);
-    masses_charge[index] += (delta*MassConstants::bin_width);   //&& may need recoding for variable bin widths
+    masses_charge[index] += delta;
   }
   return masses_charge;
 }
 
-// // Probably defunct, uses old calling format.
-// int NoInlineDotProd(Peptide* peptide, const int* cache, int charge) {
-  // const void* prog = peptide->Prog(charge);
-  // int result;
-  // __asm__ __volatile__("call *%[prog]\n"
-                       // : "=a" (result)
-                       // : "d" (cache), [prog] "abcSD" (prog));
-  // return result;
-// }
+// Probably defunct, uses old calling format.
+int NoInlineDotProd(Peptide* peptide, const int* cache, int charge) {
+  const void* prog = peptide->Prog(charge);
+  int result;
+#ifdef _MSC_VER
+  // FIXME CEG add Windows compatible inline assembly
+#else
+  __asm__ __volatile__("call *%[prog]\n"
+                       : "=a" (result)
+                       : "d" (cache), [prog] "abcSD" (prog));
+#endif
+  return result;
+}

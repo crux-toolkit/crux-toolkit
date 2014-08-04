@@ -6,7 +6,9 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 #include <errno.h>
 
 #include <gflags/gflags.h>
@@ -47,6 +49,9 @@ extern void AddMods(HeadedRecordReader* reader, string out_file,
 		    const vector<const pb::Protein*>& proteins);
 
 bool FileExists(const string& filename) {
+#ifdef _MSC_VER
+  // FIXME CEG Add code to check for file existance on Windows
+#else
   struct stat dummy;
   if (stat(filename.c_str(), &dummy) == 0) {
     CHECK(S_ISREG(dummy.st_mode));
@@ -54,6 +59,7 @@ bool FileExists(const string& filename) {
     return true;
   }
   CHECK(errno == ENOENT);
+#endif
   return false;
 }
 

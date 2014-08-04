@@ -312,6 +312,12 @@ class Match {
   void setFileIndex(
     int file_idx ///< file index to set
   );
+  
+  /**
+   *\returns the file index for this match
+   */
+  int getFileIndex();
+  
 
   /**                                                                                                      
    * sets the file path for this match                                                                     
@@ -325,7 +331,8 @@ class Match {
    * \returns the file path for this match                                                                 
    */
   std::string getFilePath();
-
+  
+  static std::string getFilePath(int file_idx);
 
   bool isDecoy();
 

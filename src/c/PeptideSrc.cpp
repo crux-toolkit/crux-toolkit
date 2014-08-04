@@ -313,8 +313,8 @@ bool PeptideSrc::parseTabDelimited(
     vector<PeptideSrc*>& src_peptide_srcs = src_peptide->getPeptideSrcVector();
 
     for (vector<PeptideSrc*>::iterator iter = src_peptide_srcs.begin();
-	 iter != src_peptide_srcs.end();
-	 ++iter) {
+      iter != src_peptide_srcs.end();
+      ++iter) {
       PeptideSrc* new_src = *iter;
       peptide->addPeptideSrc(new_src);
     }
@@ -336,8 +336,15 @@ bool PeptideSrc::parseTabDelimited(
     file.getStringVectorFromCell(FLANKING_AA_COL, flanking_aas);
 
     if (protein_ids.size() != flanking_aas.size()) {
-      carp(CARP_ERROR, "Flanking AA count did not match protein count!");
-      return false;
+      carp_once(CARP_DEBUG, 
+                "Flanking amino acid count (%d) did not match protein count (%d) for protein %s.", 
+                flanking_aas.size(), 
+                protein_ids.size(),
+                file.getString(PROTEIN_ID_COL).c_str());
+      carp_once(CARP_DEBUG, "Only reporting error once; others may exist")
+      while(flanking_aas.size() < protein_ids.size()) {
+        flanking_aas.push_back("");
+      }
     }
 
     //For every protein id source, create the object and add it to the list.
@@ -345,7 +352,7 @@ bool PeptideSrc::parseTabDelimited(
     
       PeptideSrc* peptide_src = new PeptideSrc();
       DIGEST_T digestion = 
-	string_to_digest_type((char*)file.getString(CLEAVAGE_TYPE_COL).c_str()); 
+        string_to_digest_type((char*)file.getString(CLEAVAGE_TYPE_COL).c_str()); 
   
 
       Protein* parent_protein = NULL;
@@ -364,56 +371,52 @@ bool PeptideSrc::parseTabDelimited(
       size_t left_paren_index = protein_id.find('(');
 
       if (left_paren_index == string::npos) {
-	//protein id is the string.
+        //protein id is the string.
         bool is_decoy;
 
         parent_protein=MatchCollectionParser::getProtein(
           database, decoy_database, protein_id, is_decoy);
         if (parent_protein == NULL) {
-	    carp(CARP_WARNING, "Can't find protein %s",protein_id.c_str());
-	    continue;
-	}
-	
-	
-	//find the start index
-	MODIFIED_AA_T* mod_seq;
-	int seq_length = convert_to_mod_aa_seq(file.getString(SEQUENCE_COL).c_str(), &mod_seq);
-	char* unmodified_sequence = modified_aa_to_unmodified_string(mod_seq, seq_length);
-	string sequence = unmodified_sequence;
-	std::free(unmodified_sequence);
-	std::free(mod_seq);
+          carp(CARP_WARNING, "Can't find protein %s",protein_id.c_str());
+          continue;
+        }
+
+
+        //find the start index
+        MODIFIED_AA_T* mod_seq;
+        int seq_length = convert_to_mod_aa_seq(file.getString(SEQUENCE_COL).c_str(), &mod_seq);
+        char* unmodified_sequence = modified_aa_to_unmodified_string(mod_seq, seq_length);
+        string sequence = unmodified_sequence;
+        std::free(unmodified_sequence);
+        std::free(mod_seq);
 
         start_index = parent_protein->findStart(sequence, prev_aa, next_aa);
-	if (start_index == -1) {
-	  carp(CARP_FATAL, "Can't find sequence %s in %s:%s",
-	       sequence.c_str(),
-	       protein_id.c_str());
-	}
+        if (start_index == -1) {
+          carp(CARP_FATAL, "Can't find sequence %s in %s:%s",
+            sequence.c_str(),
+            protein_id.c_str());
+        }
       } else {
-	string protein_id_string = protein_id.substr(0, left_paren_index);
-	string peptide_start_index_string = protein_id.substr(left_paren_index+1, 
-							   protein_id.length() - 1);
+        string protein_id_string = protein_id.substr(0, left_paren_index);
+        string peptide_start_index_string = protein_id.substr(left_paren_index+1, 
+          protein_id.length() - 1);
 
         bool is_decoy;    
-	//  set fields in new peptide src
+        //  set fields in new peptide src
         parent_protein = MatchCollectionParser::getProtein(
           database, decoy_database, protein_id_string, is_decoy);
 
-	from_string<int>(start_index, peptide_start_index_string); 
+        MODIFIED_AA_T* mod_seq;
+        int seq_length = convert_to_mod_aa_seq(file.getString(SEQUENCE_COL).c_str(), &mod_seq);
+        char* unmodified_sequence = modified_aa_to_unmodified_string(mod_seq, seq_length);
+        string sequence = unmodified_sequence;
+        std::free(unmodified_sequence);
+        std::free(mod_seq);
 
-        if (parent_protein -> isPostProcess()) {
-          //TODO - Find some way to keep the original start index.
-	  MODIFIED_AA_T* mod_seq;
-	  int seq_length = convert_to_mod_aa_seq(file.getString(SEQUENCE_COL).c_str(), &mod_seq);
-	  char* unmodified_sequence = modified_aa_to_unmodified_string(mod_seq, seq_length);
-	  string sequence = unmodified_sequence;
-	  std::free(unmodified_sequence);
-	  std::free(mod_seq);
-
-          //string sequence = file.getString(SEQUENCE_COL);
-          start_index = parent_protein->findStart(sequence, prev_aa, next_aa);
-        }
+        //string sequence = file.getString(SEQUENCE_COL);
+        start_index = parent_protein->findStart(sequence, prev_aa, next_aa);
       }
+
       // set parent protein of the peptide src
       peptide_src->setParentProtein(parent_protein);
 

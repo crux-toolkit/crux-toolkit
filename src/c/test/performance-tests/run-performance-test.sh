@@ -7,6 +7,13 @@
 # documentation of this particular data set is available from
 # crux-projects/panda-data.
 
+if [[ -e /etc/profile.d/modules.sh ]]; then
+  source /etc/profile.d/modules.sh
+  module load modules modules-init modules-gs modules-noble
+  module load mpc/0.8.2 mpfr/3.0.0 gmp/5.0.2 gcc/4.8.1
+  module load protobuf/2.5.0
+fi
+
 # The location of the crux binary.
 CRUX=../../crux
 
@@ -35,6 +42,11 @@ echo num_enzyme_termini=2 >> $parameters
 echo missed-cleavages=0 >> $parameters
 echo allowed_missed_cleavage=0 >> $parameters
 
+# Minimums
+echo minimum_peaks=10 >> $parameters
+echo min-peaks=10 >> $parameters
+echo min_length=2 >> $parameters
+
 # Precursor selection rules.
 echo precursor-window=3 >> $parameters
 echo precursor-window-type=mass >> $parameters
@@ -54,6 +66,7 @@ echo mass_type_fragment=1 >> $parameters # 1=monoisotopic
 # Decoys.
 echo decoy-format=peptide-reverse >> $parameters
 echo num-decoys-per-target=1 >> $parameters
+echo keep-terminal-aminos=C >> $parameters
 echo decoy_search=2 >> $parameters  # 2 = separate decoy search
 
 # Report the top 5 matches.
@@ -70,13 +83,15 @@ echo remove-precursor-tolerance=15 >> $parameters
 # Flanking peaks.
 echo use-flanking-peaks=F >> $parameters
 echo theoretical_fragment_ions=1 >> $parameters # 0 = flanks; 1 = no flanks
-
+echo use-neutral-loss-peaks=F >> $parameters 
 # Fragment m/z discretization.  This is fixed in Tide.
-echo fragment_bin_offset=0.5 >> $parameters
-echo fragment_bin_tol=1.000508 >> $parameters
+echo fragment_bin_offset=0.4 >> $parameters
+echo fragment_bin_tol=1.0005079 >> $parameters
+echo mz-bin-offset=0.4 >>$parameters
+echo mz-bin-width=1.0005079 >>$parameters
 
 # Other Crux parameters.
-echo compute-sp=T >> $parameters
+echo compute-sp=F >> $parameters
 echo verbosity=40 >> $parameters
 echo overwrite=T >> $parameters
 echo peptide-list=T >> $parameters
@@ -93,7 +108,7 @@ echo use_C_ions=0 >> $parameters
 echo use_X_ions=0 >> $parameters
 echo use_Y_ions=1 >> $parameters
 echo use_Z_ions=0 >> $parameters
-echo use_NL_ions=1 >> $parameters
+echo use_NL_ions=0 >> $parameters
 echo variable_mod1=0.0 X 0 3 >> $parameters
 echo variable_mod2=0.0 X 0 3 >> $parameters
 echo "[COMET_ENZYME_INFO]" >> $parameters

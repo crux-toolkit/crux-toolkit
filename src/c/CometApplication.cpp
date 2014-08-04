@@ -231,7 +231,7 @@ void CometApplication::setCometParameters(
   searchMgr.SetParam("output_sqtfile", get_string_parameter_pointer("output_sqtfile"), get_int_parameter("output_sqtfile"));
   searchMgr.SetParam("output_txtfile", get_string_parameter_pointer("output_txtfile"), get_int_parameter("output_txtfile"));
   searchMgr.SetParam("output_pepxmlfile", get_string_parameter_pointer("output_pepxmlfile"), get_int_parameter("output_pepxmlfile"));
-  searchMgr.SetParam("output_pinxmlfile", get_string_parameter_pointer("output_pinxmlfile"), get_int_parameter("output_pinxmlfile"));
+  searchMgr.SetParam("output_pinxmlfile", "0", 0); //hardcode to 0
   searchMgr.SetParam("output_outfiles", "0", 0);
   searchMgr.SetParam("skip_researching", get_string_parameter_pointer("skip_researching"), get_int_parameter("skip_researching"));
   searchMgr.SetParam("variable_C_terminus", get_string_parameter_pointer("variable_C_terminus"), get_double_parameter("variable_C_terminus"));
@@ -337,8 +337,9 @@ string CometApplication::getName() {
  * \returns the description for CometApplication
  */
 string CometApplication::getDescription() {
-
-  return "Runs comet";
+  return "Search a collection of spectra against a sequence database, "
+         "returning a collection of PSMs. This search engine runs directly on "
+         "a protein database in FASTA format.";
 }
 
 /**

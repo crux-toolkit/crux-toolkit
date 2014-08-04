@@ -7,13 +7,14 @@
 #include <iostream>
 #include <math.h>
 #include <limits>
-#include "WinCrux.h"
 
 using namespace std;
 
-namespace pep {
-
 const double Pi = 3.14159;
+
+// Needed on windows beause of Microsoft non-standard names
+bool isinf(double x);
+double log2(double x);
 
 class Numerical
 {
@@ -61,7 +62,8 @@ class Numerical
     return log2( 1 + pow(2, logB-logA) ) + logA;
   }
 };
-} // namespace
 
 #endif
 
+// Written by Oliver Serang 2009
+// see license for more information

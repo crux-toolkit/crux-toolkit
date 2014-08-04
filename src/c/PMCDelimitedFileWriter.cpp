@@ -397,6 +397,7 @@ void PMCDelimitedFileWriter::setUpPSMsColumns(
     addColumnName(PERCOLATOR_QVALUE_COL);
     break;
   }
+  addColumnName(FILE_IDX_COL);
   addColumnName(FILE_COL);
   addColumnName(SCAN_COL);
   addColumnName(CHARGE_COL);
@@ -432,10 +433,15 @@ void PMCDelimitedFileWriter::writePSMs(
 
   const map<pair<int, int>, int>& spectrum_counts = collection->getMatchesSpectrum();
 
+  bool distinct_matches = collection->hasDistinctMatches();
+
   for (SpectrumMatchIterator iter = collection->spectrumMatchBegin();
        iter != collection->spectrumMatchEnd();
        ++iter) {
     SpectrumMatch* match = *iter;
+    setColumnCurrentRow(FILE_IDX_COL, match->getFileIndex());
+    setColumnCurrentRow(FILE_COL, match->getFilePath());
+
     Spectrum* spectrum = match->getSpectrum();
     SpectrumZState& zstate = match->getZState();
     PeptideMatch* pep_match = match->getPeptideMatch();
@@ -458,8 +464,13 @@ void PMCDelimitedFileWriter::writePSMs(
     addScoreIfExists(pep_match, BY_IONS_TOTAL, BY_IONS_TOTAL_COL);
     pair<int, int> scan_charge = make_pair(spectrum->getFirstScan(), zstate.getCharge());
     map<pair<int, int>, int>::const_iterator lookup = spectrum_counts.find(scan_charge);
-    setColumnCurrentRow(MATCHES_SPECTRUM_COL,
-                        (lookup != spectrum_counts.end()) ? lookup->second : 0);
+    if (distinct_matches) {
+      setColumnCurrentRow(DISTINCT_MATCHES_SPECTRUM_COL,
+        (lookup != spectrum_counts.end()) ? lookup->second : 0);
+      } else {
+      setColumnCurrentRow(MATCHES_SPECTRUM_COL,
+        (lookup != spectrum_counts.end()) ? lookup->second : 0);
+    }
     MODIFIED_AA_T* mod_seq = peptide->getModifiedAASequence();
     char* seq_with_masses = modified_aa_string_to_string_with_masses(
       mod_seq, peptide->getLength(), mass_format_type);
@@ -467,7 +478,7 @@ void PMCDelimitedFileWriter::writePSMs(
     setAndFree(SEQUENCE_COL, seq_with_masses);
 
     setColumnCurrentRow(CLEAVAGE_TYPE_COL, cleavage);
-    setColumnCurrentRow(PROTEIN_ID_COL, peptide->getProteinIdsLocations());
+    setColumnCurrentRow(PROTEIN_ID_COL, peptide->getProteinIds());
     setAndFree(FLANKING_AA_COL, peptide->getFlankingAAs());
 
     writeRow();

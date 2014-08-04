@@ -29,7 +29,7 @@
 using namespace std;
 
 #define CHECK(x) GOOGLE_CHECK(x)
-
+/*
 static void AddPeaksToPB(pb::Peptide* peptide, const TheoreticalPeakArr* peaks,
 			 int charge, bool neg) {
   int last_code = 0;
@@ -52,6 +52,7 @@ static void AddPeaksToPB(pb::Peptide* peptide, const TheoreticalPeakArr* peaks,
     }
   }
 }
+*/
 
 void AddTheoreticalPeaks(const vector<const pb::Protein*>& proteins,
 			 const string& input_filename,
@@ -60,7 +61,7 @@ void AddTheoreticalPeaks(const vector<const pb::Protein*>& proteins,
   HeadedRecordReader reader(input_filename, &orig_header);
   CHECK(orig_header.file_type() == pb::Header::PEPTIDES);
   CHECK(orig_header.has_peptides_header());
-  MassConstants::Init(&orig_header.peptides_header().mods());
+//  MassConstants::Init(&orig_header.peptides_header().mods());
   new_header.set_file_type(pb::Header::PEPTIDES);
   pb::Header_PeptidesHeader* subheader = new_header.mutable_peptides_header();
   subheader->CopyFrom(orig_header.peptides_header());
@@ -73,11 +74,11 @@ void AddTheoreticalPeaks(const vector<const pb::Protein*>& proteins,
   CHECK(writer.OK());
 
   pb::Peptide pb_peptide;
-  const int workspace_size = 2000; // More than sufficient for theor. peaks.
-  TheoreticalPeakSetDiff workspace(workspace_size);
+//  const int workspace_size = 2000; // More than sufficient for theor. peaks.
+//  TheoreticalPeakSetDiff workspace(workspace_size);
   while (!reader.Done()) {
     reader.Read(&pb_peptide);
-    Peptide peptide(pb_peptide, proteins);
+/*    Peptide peptide(pb_peptide, proteins);
     workspace.Clear();
     peptide.ComputeTheoreticalPeaks(&workspace);
     TheoreticalPeakArr peaks_charge_1(2000);
@@ -90,7 +91,7 @@ void AddTheoreticalPeaks(const vector<const pb::Protein*>& proteins,
     AddPeaksToPB(&pb_peptide, &peaks_charge_2, 2, false);
     AddPeaksToPB(&pb_peptide, &negs_charge_1, 1, true);
     AddPeaksToPB(&pb_peptide, &negs_charge_2, 2, true);
-    CHECK(writer.Write(&pb_peptide));
+*/    CHECK(writer.Write(&pb_peptide));
   }
   CHECK(reader.OK());
 }

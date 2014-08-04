@@ -188,8 +188,8 @@ string MakePinApplication::getName() {
  * \returns the description for PercolatorApplication
  */
 string MakePinApplication::getDescription() {
-
-  return "Runs make-pin";
+  return "Given a set of search results files, generate a pin file for input "
+         "to crux percolator";
 }
 
 /**
@@ -200,12 +200,8 @@ bool MakePinApplication::needsOutputDirectory() {
 }
 
 
-/**
- * hide sequest search 
-*/
-
 bool MakePinApplication:: hidden(){
-  return true; 
+  return false;
 }
 
 

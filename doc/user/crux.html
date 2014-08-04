@@ -37,9 +37,8 @@
 </center>
 
 <p>
-Crux is a software toolkit for tandem mass spectrometry analysis, with
-a focus on peptide identification.  If you use Crux in your research,
-please cite</p>
+Crux is a software toolkit for tandem mass spectrometry analysis.  If
+you use Crux in your research, please cite</p>
 
 <blockquote>
 Christopher Y. Park, Aaron A. Klammer, Lukas K&auml;ll, Michael
@@ -49,7 +48,14 @@ and accurate peptide identification from tandem mass spectra."</a>
 <i>Journal of Proteome Research.</i> 7(7):3022-3027, 2008.</li>
 </blockquote>
 
-<p>
+<p />
+<a href="download" title="Download Crux Toolkit" class="sfdl">
+    <span>
+        <b>Download Crux Toolkit</b>
+    </span>
+</a>
+<div style="clear:both;"></div>
+<p/>
 Crux is provided as a single executable that supports the following
 commands:</p>
 
@@ -66,38 +72,10 @@ commands:</p>
 
 <tr>
 <td>
-<a href="crux-create-index.html">create-index</a></td>
-<td>
-Speed up subsequent calls to <code>search-for-matches</code> by
-creating an index for all peptides in a fasta file.</td>
-</tr>
-
-<tr>
-<td>
 <a href="tide-index.html">tide-index</a></td>
 <td>
-Speed up subsequent calls to <code>tide-search</code> by creating an
-index for all peptides in a fasta file.</td>
-</tr>
-
-<tr>
-<td>
-<a href="comet.html">comet</a></td>
-<td>
-Search a collection of spectra against a sequence database, returning
-a collection of peptide-spectrum matches (PSMs).  This is Jimmy Eng's
-search engine.  It is the most robust and easiest to use of the three
-search engines in Crux.</td>
-</tr>
-
-<tr>
-<td>
-<a href="crux-search-for-matches.html">search-for-matches</a></td>
-<td>
-Search a collection of spectra against a sequence database, returning
-a collection of peptide-spectrum matches (PSMs).  This is the
-original Crux search engine.  It will be eliminated in a future
-version of Crux.</td>
+Create an index of all peptides in a fasta file, for use in subsequent
+calls to <code>tide-search</code>.</td>
 </tr>
 
 <tr>
@@ -105,15 +83,26 @@ version of Crux.</td>
 <a href="tide-search.html">tide-search</a></td>
 <td>
 Search a collection of spectra against a sequence database, returning
-a collection of peptide-spectrum matches (PSMs).  This is the fastest
-of the three search engines in Crux.</td>
+a collection of peptide-spectrum matches (PSMs).  This is a fast
+search engine but requires that you first build an index
+with <code>tide-index</code>.</td>
+</tr>
+
+<tr>
+<td>
+<a href="comet.html">comet</a></td>
+<td>
+Search a collection of spectra against a sequence database, returning
+a collection of PSMs.  This search engine runs directly on a protein
+database in FASTA format.</td>
 </tr>
 
 <tr>
 <td>
 <a href="percolator.html">percolator</a></td>
 <td>
-Re-rank a collection of PSMs using the Percolator algorithm.</td></tr>
+Re-rank a collection of PSMs using the Percolator algorithm.
+Optionally, also produce protein rankings using the Fido algorithm.</td></tr>
 
 <tr>
 <td>
@@ -125,8 +114,8 @@ Re-rank a collection of PSMs using the Q-ranker algorithm.</td></tr>
 <td>
 <a href="barista.html">barista</a></td>
 <td>
-Rank proteins and assign a confidence measure to each
-protein identification.</td></tr> 
+Rank PSMs, peptides and proteins, assigning a confidence measure to each
+identification.</td></tr> 
 
 <tr>
 <td>
@@ -154,7 +143,7 @@ posterior error probabilities) to each PSM in a given set.</td></tr>
 
 <tr>
 <td><a href="make-pin.html">make-pin</a></td>
-<td>Given a set of search results files, generate a pin.xml file for input to
+<td>Given a set of search results files, generate a pin file for input to
 <code>crux percolator</code></td>
 </tr>
 
@@ -189,7 +178,7 @@ decoy peptides fitting the specified criteria.</td>
 <td>
 <a href="crux-get-ms2-spectrum.html">get-ms2-spectrum</a></td>
 <td>
-Extract one or more MS/MS spectra, specified by scan number, from
+Extract one or more fragmentation spectra, specified by scan number, from
 an <code>MS2</code> file.</td>
 </tr>
 
@@ -230,10 +219,8 @@ Print the Crux version number to standard output, then exit.</td>
 
 </table>
 
-<p>
-<b>File formats</b></p>
+<h2>File formats</h2>
 
-<ul>
 <table border="1">
 <tr>
 
@@ -264,7 +251,7 @@ database index</td>
 pepXML</td>
 
 <td>
-Percolator XML<br> (<a href="https://github.com/percolator/percolator/blob/master/src/xml/percolator_in.xsd">PIN</a> / <a href="https://github.com/percolator/percolator/blob/master/src/xml/percolator_out.xsd">POUT</a>)
+<a href="https://github.com/percolator/percolator/wiki/Interface">PIN</a>
 </td>
 
 <td>mzIdentML</td>
@@ -287,13 +274,29 @@ Percolator XML<br> (<a href="https://github.com/percolator/percolator/blob/maste
 (<a href="default.params">sample</a>)</td>
 </tr>
 
-<tr bgcolor="#DEDEDE">
+<tr>
 <td>bullseye</td>
 <td>in</td>
-<td>in</td>
+<td>in/out</td>
 <td>in</td>
 <td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>in/out</td>
+</tr>
+
+<tr bgcolor="#DEDEDE">
+<td>tide-index</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>in</td>
 <td>out</td>
+<td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
@@ -304,16 +307,16 @@ Percolator XML<br> (<a href="https://github.com/percolator/percolator/blob/maste
 </tr>
 
 <tr>
-<td>create-index</td>
-<td>&nbsp;</td>
+<td>tide-search</td>
 <td>&nbsp;</td>
 <td>in</td>
+<td></td>
+<td>in</td>
 <td>out</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
+<td>out</td>
+<td>out</td>
+<td>out</td>
+<td>out</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>in/out</td>
@@ -326,24 +329,8 @@ Percolator XML<br> (<a href="https://github.com/percolator/percolator/blob/maste
 <td>in</td>
 <td>&nbsp;</td>
 <td>out</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>out</td>
 <td>out</td>
 <td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>in/out</td>
-</tr>
-
-<tr bgcolor="#DEDEDE">
-<td>search-for-matches</td>
-<td>&nbsp;</td>
-<td>in</td>
-<td>in</td>
-<td>in</td>
-<td>out</td>
-<td>out</td>
-<td>out</td>
 <td>out</td>
 <td>out</td>
 <td>&nbsp;</td>
@@ -352,22 +339,6 @@ Percolator XML<br> (<a href="https://github.com/percolator/percolator/blob/maste
 </tr>
 
 <tr>
-<td>calibrate-scores</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>in</td>
-<td>&nbsp;</td>
-<td>in/out</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>in/out</td>
-</tr>
-
-<tr bgcolor="#DEDEDE">
 <td>percolator</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
@@ -375,7 +346,7 @@ Percolator XML<br> (<a href="https://github.com/percolator/percolator/blob/maste
 <td>&nbsp;</td>
 <td>in/out</td>
 <td>in/out</td>
-<td>in/out</td>
+<td>in</td>
 <td>out</td>
 <td>in</td>
 <td>in/out</td>
@@ -383,7 +354,7 @@ Percolator XML<br> (<a href="https://github.com/percolator/percolator/blob/maste
 <td>in/out</td>
 </tr>
 
-<tr>
+<tr bgcolor="#DEDEDE">
 <td>q-ranker</td>
 <td>&nbsp;</td>
 <td>in</td>
@@ -399,7 +370,7 @@ Percolator XML<br> (<a href="https://github.com/percolator/percolator/blob/maste
 <td>in/out</td>
 </tr>
 
-<tr bgcolor="#DEDEDE">
+<tr>
 <td>barista</td>
 <td>&nbsp;</td>
 <td>in</td>
@@ -415,7 +386,7 @@ Percolator XML<br> (<a href="https://github.com/percolator/percolator/blob/maste
 <td>in/out</td>
 </tr>
 
-<tr>
+<tr bgcolor="#DEDEDE">
 <td>search-for-xlinks</td>
 <td>&nbsp;</td>
 <td>in</td>
@@ -431,10 +402,10 @@ Percolator XML<br> (<a href="https://github.com/percolator/percolator/blob/maste
 <td>in/out</td>
 </tr>
 
-<tr bgcolor="#DEDEDE">
+<tr>
 <td>spectral-counts</td>
 <td>&nbsp;</td>
-<td>&nbsp;</td>
+<td>in</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>in/out</td>
@@ -448,10 +419,8 @@ Percolator XML<br> (<a href="https://github.com/percolator/percolator/blob/maste
 </tr>
 
 </table>
-</ul>
 
-<p>
-<b>Tutorials</b>
+<h2>Tutorials</h2>
 
 <ul>
 
@@ -474,36 +443,49 @@ Percolator</a></li>
 </ul>
 
 
-<p>
-<b>Download</b>
+<h2>Important links</h2>
 
 <ul>
-Crux source code and binaries can be
-downloaded <a href="download/index.html">here</a>. 
+ 
+<li>
+<a href="crux-faq.html">Crux frequently asked questions</a></li>
+
+<li>
+<a href="http://scholar.google.com/citations?hl=en&user=Rw9S1HIAAAAJ">Crux
+Google Scholar profile</a></li>
+
+<li>
+To receive announcements of new versions, sign up for the Crux users 
+<a href="https://mailman1.u.washington.edu/mailman/listinfo/crux-users">mailing
+list.</a></li>
+
+<li>
+For support, and to discuss Crux with other users and the developers,
+sign up for the Crux users
+<a href="http://groups.google.com/group/crux-users">Google
+  group.</a></li>
+
+<li>
+Follow the Crux project
+on <a href="https://sourceforge.net/projects/cruxtoolkit/">Sourceforge</a>.</li>
+
+<li>
+Access the most recent source code from the Crux main development
+trunk using the following Subversion command:<br>
+<code>&nbsp;&nbsp;&nbsp;svn checkout svn://svn.code.sf.net/p/cruxtoolkit/code/crux/trunk crux-trunk</code></li>
+
+<li>
+<a href="release-notes.html">Release notes.</a></li>
+
+<li>
+<a href="known-issues.html">Known issues.</a></li>
+
+<li>
 Crux is covered by an <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache
-license</a>.
+license</a>.</li>
+
 </ul>
 
-
-<p>
-<b><a href="crux-faq.html">Crux frequently asked questions</a></b></p>
-
-<p>
-<a href="http://scholar.google.com/citations?hl=en&user=Rw9S1HIAAAAJ">Crux Google Scholar profile</a></p>
-
-<p>
-To receive announcements of new versions, sign up for the Crux users 
-<a href="https://mailman1.u.washington.edu/mailman/listinfo/crux-users">mailing list.</a></p>
-<p>For support, and to discuss Crux with other users and the developers, 
-sign up for the Crux users 
-<a href="http://groups.google.com/group/crux-users">Google group.</a></p>
-</p>
-
-<p>
-<a href="release-notes.html">Release notes.</a></p>
-
-<p>
-<a href="known-issues.html">Known issues.</a></p>
 <hr></hr>
 
 <center>

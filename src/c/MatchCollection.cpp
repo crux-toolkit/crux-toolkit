@@ -59,7 +59,7 @@ void MatchCollection::init() {
   post_scored_type_set_ = false;
   top_scoring_sp_ = NULL;
   exact_pval_search = false;
-
+  has_distinct_matches_ = false;
 }
 
 /**
@@ -867,7 +867,7 @@ MatchCollection* MatchCollection::randomSample(
   int score_type_idx = 0;
   
   MatchCollection* sample_collection = new MatchCollection();
-  srandom(time(NULL));
+  mysrandom(time(NULL));
 
   // make sure we don't sample more than the matches in the match collection
   if (count_max >= match_total_){
@@ -877,8 +877,10 @@ MatchCollection* MatchCollection::randomSample(
 
   // ranomly select matches upto count_max
   for(; count_idx < count_max; ++count_idx){
-    match_idx = (int)((double)random()/((double)RAND_MAX + (double)1)) 
-      * match_total_;
+    match_idx =
+      (int)(
+        (double)myrandom()/((double)UNIFORM_INT_DISTRIBUTION_MAX + (double)1)
+      ) * match_total_;
     
     // match_idx = random() % match_collection->match_total;
     sample_collection->match_[count_idx] = match_[match_idx];
@@ -1422,6 +1424,15 @@ int MatchCollection::getMatchTotal()
 {
   return match_total_;
 }
+
+bool MatchCollection::getHasDistinctMatches() {
+  return has_distinct_matches_;
+}
+
+void MatchCollection::setHasDistinctMatches(bool distinct) {
+  has_distinct_matches_ = distinct;
+}
+
 
 void MatchCollection::setExperimentSize(int size)
 {
@@ -2485,8 +2496,14 @@ bool MatchCollection::extendTabDelimited(
     } else {
       ln_delta_cn = logf(delta_cn);
     }
-    ln_experiment_size = log(result_file.getFloat(MATCHES_SPECTRUM_COL));
-    
+    if (!result_file.empty(DISTINCT_MATCHES_SPECTRUM_COL)) {
+      has_distinct_matches_ = true;
+      ln_experiment_size = log(result_file.getFloat(DISTINCT_MATCHES_SPECTRUM_COL));
+    } else if (!result_file.empty(MATCHES_SPECTRUM_COL)) {
+      ln_experiment_size = log(result_file.getFloat(MATCHES_SPECTRUM_COL));
+    } else {
+      ln_experiment_size = 0;
+    }
 
     //TODO: Parse all boolean indicators for scores
     scored_type_[SP] = !result_file.empty(SP_SCORE_COL);

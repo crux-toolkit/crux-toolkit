@@ -133,7 +133,7 @@ string PrintProcessedSpectra::getName() {
  */
 string PrintProcessedSpectra::getDescription() {
   return 
-    "Process spectra as for scoring XCorr and print the results to a file.";
+    "Process spectra as for scoring xcorr and print the results to a file.";
 }
 
 /**

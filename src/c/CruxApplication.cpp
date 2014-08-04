@@ -76,13 +76,10 @@ void CruxApplication::initialize(
   if(strcmp(get_string_parameter_pointer("seed"), "time")== 0){
     time_t seconds; // use current time to seed
     time(&seconds); // Get value from sys clock and set seconds variable.
-    srandom((unsigned int) seconds); // Convert seconds to a unsigned int
+    mysrandom((unsigned)seconds); // Convert seconds to a unsigned int
   }
   else{
-    // Add 2 to seed due to seeds 0 and 1 behaving identically.
-    // In C++, a seed of 1 is a special value that resets the random generator
-    // to its initial value (usually 0).
-    srandom((unsigned int)atoi(get_string_parameter_pointer("seed")) + 2);
+    mysrandom((unsigned)atoi(get_string_parameter_pointer("seed")));
   }
   
   // Start the timer.
@@ -114,13 +111,9 @@ void CruxApplication::initialize(
     carp(CARP_INFO, "CPU: %s", hostname());
     carp(CARP_INFO, date_and_time());
     log_command_line(argc, argv);
-  
  
-  
     // Write the parameter file
-    char* param_file_name = cat_string(cmd_file_name.c_str(), ".params.txt");
-    print_parameter_file(&param_file_name);
-    free(param_file_name);
+    writeParamFile();
   }
 }
 
@@ -130,5 +123,14 @@ void CruxApplication::initialize(
  */
 bool CruxApplication::hidden(){
   return false;
+}
+
+/**
+ * Writes the parameter file
+ */
+void CruxApplication::writeParamFile() {
+  char* param_file_name = cat_string(getFileStem().c_str(), ".params.txt");
+  print_parameter_file(&param_file_name);
+  free(param_file_name);
 }
 

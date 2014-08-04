@@ -2,8 +2,8 @@ project(crux)
 cmake_minimum_required(VERSION 2.8.4)
 cmake_policy(VERSION 2.8.4)
 
-set (CRUX_VERSION_MAJOR "1")
-set (CRUX_VERSION_MINOR "40")
+set (CRUX_VERSION_MAJOR "2")
+set (CRUX_VERSION_MINOR "0")
 set (CRUX_VERSION ${CRUX_VERSION_MAJOR}.${CRUX_VERSION_MINOR})
 
 message(
@@ -29,7 +29,7 @@ install(FILES license.txt DESTINATION .)
 
 add_custom_target(
   deep-clean
-  COMMAND ${CMAKE_MAKE_PROGRAM} clean
+  COMMAND ${CMAKE_COMMAND} --build . --target clean
   COMMAND ${CMAKE_COMMAND} -E remove CMakeCache.txt
   COMMAND ${CMAKE_COMMAND} -E remove_directory src/external/build
   COMMAND ${CMAKE_COMMAND} -E remove_directory src/external/downloads
@@ -59,10 +59,49 @@ add_custom_target(
 
 add_custom_target(
   no-externals 
-  COMMAND ${CMAKE_MAKE_PROGRAM} crux xlink-predict-peptide-ions  xlink-score-spectrum xlink-assign-ions xlink-predict-peptide-ions
+  COMMAND ${CMAKE_MAKE_PROGRAM} crux  xlink-score-spectrum xlink-assign-ions 
   WORKING_DIRECTORY src/c
   COMMENT "Not building external dependendcies."
 )
+
+# a custom target for obtaining the SVN revision number
+add_custom_target(crux_version ALL DEPENDS crux_version_header )
+
+# creates crux_version.h using cmake script
+add_custom_command(
+    OUTPUT crux_version_header 
+    ${CMAKE_CURRENT_BINARY_DIR}/crux_version.h
+    COMMAND 
+      ${CMAKE_COMMAND} 
+        -DSOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+        -DCRUX_VERSION=${CRUX_VERSION}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/make-version-header.cmake
+)
+
+add_dependencies(barista comet)
+add_dependencies(bullseye hardklor)
+add_dependencies(comet ProteoWizard)
+add_dependencies(crux barista)
+add_dependencies(crux bullseye)
+add_dependencies(crux crux-support)
+add_dependencies(crux hardklor)
+add_dependencies(crux percolator)
+add_dependencies(crux posterior-error)
+add_dependencies(crux tide-support)
+add_dependencies(crux xlink)
+add_dependencies(crux-support crux_version)
+add_dependencies(crux-support percolator)
+add_dependencies(hardklor comet)
+add_dependencies(percolator ProteoWizard)
+add_dependencies(tide-index tide-support)
+add_dependencies(tide-search tide-support)
+add_dependencies(tide-support ProtocolBuffers)
+add_dependencies(tide-support google-gflags)
+add_dependencies(xlink comet)
+add_dependencies(xlink percolator)
+add_dependencies(xlink ProteoWizard)
+add_dependencies(xlink-assign-ions crux)
+add_dependencies(xlink-score-spectrum crux)
 
 # build a CPack driven installer package
 include (InstallRequiredSystemLibraries)
@@ -101,7 +140,6 @@ set (
    /src/python/;
    /CMakeCache.txt$;
    /CMakeFiles/;
-   \\\\.cmake$;
    \\\\.gz$;
    \\\\.swp$;
    \\\\.zip$;

@@ -155,8 +155,7 @@
       <ul>
         
         <li><code>--protein-database &lt;string&gt;</code>&ndash; 
-          The name of the file in fasta format or the directory containing the
-          protein index from which to retrieve proteins and peptides.  In order
+          The name of the file in fasta format.  In order
           to calculate NSAF, dNSAF, or SIN, the protein database is needed.
           The database of protein may be provided in the mzIdentML (.mzid) file.
         </li>
@@ -166,7 +165,6 @@
           EMPAI). With exception of the RAW metric, the database of sequences need
           to be provided using <code>--protein-database</code>.  Default = NSAF. 
         </li>
-        
         <li>
           <code>--quant-level &lt;protein|peptide&gt;</code> &ndash; 
           Quantification at protein or peptide level. Methods described under 
@@ -235,8 +233,13 @@
           except for the vendor formats.  Ignored for NSAF, dNSAF and EMPAI.
         </li>
         
-        <li><code>--spectrum-parser &lt;pwiz|mstoolkit|crux&gt;</code> &ndash;
-          Parser to use for reading in MS/MS spectra.  Default = crux.
+        <li><code>--spectrum-parser pwiz|mstoolkit</code> &ndash;
+          Specify the parser to use for reading in MS/MS spectra. The default,
+          ProteoWizard parser should be able to read the MS/MS file formats listed
+          <a href="http://proteowizard.sourceforge.net/formats.shtml">here</a>. The
+          alternative is <a href="mstoolkit.html">MSToolkit parser</a>. If the
+          ProteoWizard parser fails to read your files properly, you may want to try the
+          MSToolkit parser instead. Default = pwiz.
         </li>
         
         <li>

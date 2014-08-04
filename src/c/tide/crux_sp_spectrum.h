@@ -44,6 +44,7 @@
 #include "mass_constants.h"
 #include "spectrum_collection.h"
 #include "spectrum_preprocess.h"
+#include "utils.h"
 
 
 class SpSpectrum {
@@ -108,7 +109,7 @@ class SpSpectrum {
   }
    
   int Random(int i, int j) {
-    return i + rand() % (j-i+1);
+    return i + myrandom_limit(j-i+1);
   }
 
   void QuickSort(double a[], int left, int right) {

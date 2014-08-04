@@ -66,10 +66,10 @@ void SettingsFromFlags(pb::Header* header) {
     CHECK(var_mod_table.Init(mod_table));
     CHECK(var_mod_table.SerializeUniqueDeltas(&mod_table));
     pep_header.mutable_mods()->CopyFrom(mod_table);
-    CHECK(MassConstants::Init(&mod_table));
+//    CHECK(MassConstants::Init(&mod_table));
   } else {
     CHECK(var_mod_table.Parse(FLAGS_mods_spec.c_str()));
     pep_header.mutable_mods()->CopyFrom(*var_mod_table.ParsedModTable());
-    CHECK(MassConstants::Init(var_mod_table.ParsedModTable()));
+//    CHECK(MassConstants::Init(var_mod_table.ParsedModTable()));
   }
 }

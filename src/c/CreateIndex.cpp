@@ -172,7 +172,9 @@ COMMAND_T CreateIndex::getCommand() {
   return INDEX_COMMAND;
 }
 
-
+bool CreateIndex::hidden() {
+  return true;
+}
 
 /*
  * Local Variables:

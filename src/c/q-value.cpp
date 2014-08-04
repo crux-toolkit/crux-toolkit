@@ -17,7 +17,7 @@
 #include "q-value.h"
 #include "MatchCollectionParser.h"
 #include "analyze_psms.h"
-#include "posterior-error/PosteriorEstimator.h"
+#include "PosteriorEstimator.h"
 
 #include <map>
 #include <utility>
@@ -319,7 +319,12 @@ FLOAT_T* compute_PEP_from_pvalues(FLOAT_T* pvalues, int num_pvals){
   // make_pair<> that keeps this code from working.
   // They promise to fix it in VC 11
   // https://connect.microsoft.com/VisualStudio/feedback/details/606746/incorrect-overload-resolution
-  // FIXME: find workaround until then
+  score_label.reserve(pvalues_vector.size());
+  for (vector<double>::const_iterator i = pvalues_vector.begin();
+       i != pvalues_vector.end();
+       i++) {
+    score_label.push_back(make_pair(*i, true));
+  }
 #else
   transform(pvalues_vector.begin(),
             pvalues_vector.end(),
@@ -336,12 +341,12 @@ FLOAT_T* compute_PEP_from_pvalues(FLOAT_T* pvalues, int num_pvals){
 
   // sort ascending order
   sort(score_label.begin(), score_label.end());
-  pep::PosteriorEstimator::setReversed(true);
+  PosteriorEstimator::setReversed(true);
 
   // estimate PEPs 
-  double pi0 = pep::PosteriorEstimator::estimatePi0(pvalues_vector);
+  double pi0 = PosteriorEstimator::estimatePi0(pvalues_vector);
   vector<double> PEP_vector;
-  pep::PosteriorEstimator::estimatePEP(score_label, pi0, PEP_vector );
+  PosteriorEstimator::estimatePEP(score_label, pi0, PEP_vector );
 
   // return values
   FLOAT_T* PEPs = new FLOAT_T[PEP_vector.size()];
@@ -394,6 +399,8 @@ MatchCollection* run_qvalue(
   MatchCollectionParser parser;
   MatchCollection* match_collection =
     parser.create(target_path.c_str(), get_string_parameter_pointer("protein-database"));
+  bool distinct_matches = match_collection->getHasDistinctMatches();
+
   MatchCollection* decoy_matches = new MatchCollection();
   // Create two match collections, for targets and decoys.
   MatchCollection* target_matches = new MatchCollection();
@@ -443,7 +450,7 @@ MatchCollection* run_qvalue(
     Match::freeMatch(match);
   }
   delete match_iterator;
-   
+
   // get from the input files which columns to print in the output files
   vector<bool> cols_to_print(NUMBER_MATCH_COLUMNS);
   cols_to_print[FILE_COL] = true;
@@ -461,7 +468,13 @@ MatchCollection* run_qvalue(
   cols_to_print[PVALUE_COL] = have_pvalues;
   cols_to_print[BY_IONS_MATCHED_COL] = match_collection->getScoredType(BY_IONS_MATCHED);
   cols_to_print[BY_IONS_TOTAL_COL] = match_collection->getScoredType(BY_IONS_TOTAL);
-  cols_to_print[MATCHES_SPECTRUM_COL] = true;
+
+  if (distinct_matches) {
+    cols_to_print[DISTINCT_MATCHES_SPECTRUM_COL] = true;
+  } else {
+    cols_to_print[MATCHES_SPECTRUM_COL] = true;
+  }
+
   cols_to_print[SEQUENCE_COL] = true;
   cols_to_print[CLEAVAGE_TYPE_COL] = true;
   cols_to_print[PROTEIN_ID_COL] = true;

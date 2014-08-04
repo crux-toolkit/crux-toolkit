@@ -48,15 +48,12 @@ void MatchCollectionParser::loadDatabase(
     bool use_index = is_directory(fasta_file);
     // get binary fasta file name with path to crux directory 
     if (use_index == true){ 
-      char* binary_fasta = Index::getBinaryFastaName(fasta_file);
-      database = new Database(binary_fasta, true);// is memmapped
-      free(binary_fasta);
-      binary_fasta = Index::getDecoyBinaryFastaName(fasta_file);
-      if( binary_fasta != NULL ){
-        decoy_database = new Database(binary_fasta, true);// is memmapped
-        decoy_database->parse();
-        free(binary_fasta);
-      }
+      //We aren't supporting search-for-matches anymore, so we won't be
+      //building any indices.  We could use tide-indices for this, but
+      //comet doesn't use an index.  In the future we can support tide
+      //indices in the post-processing tools if users want that.
+      carp(CARP_FATAL, "Parsing binary index from tide-index is not"
+        " supported.\nPlease use the original fasta file instead.");
     } else {
       database = new Database(fasta_file, false);// not memmapped
       database->transformTextToMemmap(".", true);// is temp

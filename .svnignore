@@ -1,6 +1,7 @@
-*.cmake
 *.gz
 *.swp
+crux_version.h
+crux_version.h.txt
 CMakeCache.txt
 CMakeFiles
 Makefile

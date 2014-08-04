@@ -8,6 +8,7 @@
 
 static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "file",
+  "file_idx",
   "scan",
   "charge",
   "spectrum precursor m/z",
@@ -53,6 +54,7 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
 #endif
   "b/y ions matched",
   "b/y ions total",
+  "total matches/spectrum",
   "distinct matches/spectrum",
   "sequence",
   "cleavage type",
@@ -82,5 +84,7 @@ const char* get_column_header(
   if ((columnIndex < 0) || (columnIndex >= NUMBER_MATCH_COLUMNS)) {
     carp(CARP_FATAL, "Cannot access output column %d.\n", columnIndex);
   }
+  carp(CARP_DETAILED_DEBUG, "get_column_header: %d/%d %s", columnIndex, 
+    NUMBER_MATCH_COLUMNS, match_column_strings[columnIndex]);
   return(match_column_strings[columnIndex]);
 }

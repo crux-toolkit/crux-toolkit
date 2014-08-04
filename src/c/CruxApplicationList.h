@@ -10,6 +10,7 @@
 
 #include "CruxApplication.h"
 
+#include <map>
 #include <vector>
 #include <string>
 
@@ -18,6 +19,7 @@ class CruxApplicationList {
 
  protected:
   std::vector<CruxApplication*> applications_; ///< list of applications
+  std::map<int, std::string> messages_; ///< messages and their indexes
   std::string list_name_; ///<Name of this list
 
  public:
@@ -37,6 +39,13 @@ class CruxApplicationList {
    */
   void add(
     CruxApplication* application ///< application to add
+  );
+
+  /**
+   * Adds a message to be printed in the usage statement
+   */
+  void addMessage(
+    const std::string& message ///< message to add
   );
 
   /**
@@ -60,6 +69,11 @@ class CruxApplicationList {
    * Each applications name is printed along with its description
    */
   void usage();
+
+  /**
+   * Gets the name of the list
+   */
+  std::string getListName() const;
 
   /**
    * the main method for CruxApplicationList.  Attempts to find

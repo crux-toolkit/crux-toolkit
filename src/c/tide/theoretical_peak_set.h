@@ -96,50 +96,6 @@
 #include "math.h"
 
 using namespace std;
-
-#define ION_OFFSET(offset, charge) \
-  (0.5 + ((charge)*MassConstants::proton + (offset))/((charge)*MassConstants::bin_width))
-#define ION_OFFSET_ARR(name, offset) \
-  const double name[] = {0, ION_OFFSET((offset),1), ION_OFFSET((offset),2)}
-
-#if 0
-namespace IonOffsets {
-  ION_OFFSET_ARR(A,      0 - MassConstants::mono_co);
-  ION_OFFSET_ARR(B_H2O,  0 - MassConstants::mono_h2o);
-  ION_OFFSET_ARR(B_NH3,  0 - MassConstants::mono_nh3);
-  ION_OFFSET_ARR(B,      0);
-  ION_OFFSET_ARR(Y_H2O,  0);
-  ION_OFFSET_ARR(Y_NH3,  MassConstants::mono_h2o - MassConstants::mono_nh3);
-  ION_OFFSET_ARR(Y,      MassConstants::mono_h2o);
-};
-#endif
-
-namespace IonOffsets {
-  ION_OFFSET_ARR(A,      0 - 28);
-  ION_OFFSET_ARR(B_H2O,  0 - 18);
-  ION_OFFSET_ARR(B_NH3,  0 - 17);
-  ION_OFFSET_ARR(B,      0);
-  // DANGER: We used to initialize with MassConstants::mono_h2o as in the
-  // commented-out lines here, but that's not safe: we cannot guarantee that
-  // MassConstants global initialization happens first. As a stopgap, we're
-  // putting in a value for H2O, but this section should be rewritten.
-  //  ION_OFFSET_ARR(Y_H2O,  MassConstants::mono_h2o - 18);
-  //  ION_OFFSET_ARR(Y_NH3,  MassConstants::mono_h2o - 17);
-  //  ION_OFFSET_ARR(Y,      MassConstants::mono_h2o);
-#define MONO_H2O 18.01056470
-  ION_OFFSET_ARR(Y_H2O,  MONO_H2O - 18);
-  ION_OFFSET_ARR(Y_NH3,  MONO_H2O - 17);
-  ION_OFFSET_ARR(Y,      MONO_H2O);
-};
-
-#define BIN_SHIFT_A_ION_CHG_1 28
-#define BIN_SHIFT_A_ION_CHG_2 14
-#define BIN_SHIFT_H2O_CHG_1 18
-#define BIN_SHIFT_H2O_CHG_2 9
-#define BIN_SHIFT_NH3_CHG_1 17
-#define BIN_SHIFT_NH3_CHG_2_CASE_A 9
-#define BIN_SHIFT_NH3_CHG_2_CASE_B 8
-
 typedef google::protobuf::RepeatedField<int>::const_iterator FieldIter;
 
 class TheoreticalPeakSet {
@@ -173,8 +129,8 @@ class TheoreticalPeakSet {
       // find last element with current index, that one being the
       // largest intensity
       int index = i->Bin();
-      if (MaxMZ::Global().MaxBin() > 0 
-          && index >= MaxMZ::Global().CacheBinEnd())
+      if (MaxBin::Global().MaxBinEnd() > 0 
+          && index >= MaxBin::Global().CacheBinEnd())
         break;
       for (++i; i != src.end() && i->Bin() == index; ++i);
       --i;
@@ -190,12 +146,33 @@ class TheoreticalPeakSet {
     dest->push_back(peak);
   }
 
-  static void AddPeakUnordered(TheoreticalPeakArr* dest, int index,
+/*  static void AddPeakUnordered(TheoreticalPeakArr* dest, int index,
                                TheoreticalPeakType intensity) {
     TheoreticalPeakPair peak(index, intensity);
     dest->push_back(peak);
   }
+*/  static void AddPeakUnordered(TheoreticalPeakArr* dest, int index,
+                               TheoreticalPeakType intensity, TheoreticalPeakArr* otherset) {
+    TheoreticalPeakPair peak(index, intensity);
+    bool found = false;
+    for (TheoreticalPeakArr::iterator itr = dest->begin(); itr < dest->end(); itr++){
+      if (itr->Bin() == peak.Bin()){
+        found = true;
+        break;
+	  }
+    }
 
+    for (TheoreticalPeakArr::iterator itr2 = otherset->begin(); itr2 < otherset->end(); itr2++){
+      if (itr2->Bin() == peak.Bin()){
+        found = true;
+        break;
+	  }
+    }
+    if (!found){
+      dest->push_back(peak);
+    }
+  }
+  
   // Append src to dest.
   static void Copy(const TheoreticalPeakArr& src,
                    TheoreticalPeakArr* dest) {
@@ -203,8 +180,8 @@ class TheoreticalPeakSet {
     assert(adjacent_find(src.begin(), src.end(), 
                          greater<TheoreticalPeakPair>()) == src.end());
     TheoreticalPeakArr::const_iterator i = src.begin();
-    if (MaxMZ::Global().MaxBin() > 0) {
-      int end = MaxMZ::Global().CacheBinEnd() * NUM_PEAK_TYPES;
+    if (MaxBin::Global().MaxBinEnd() > 0) {
+      int end = MaxBin::Global().CacheBinEnd() * NUM_PEAK_TYPES;
       for (; (i != src.end()) && (i->Code() < end); ++i)
         dest->push_back(*i);
     } else {
@@ -216,8 +193,8 @@ class TheoreticalPeakSet {
   static void CopyUnordered(const TheoreticalPeakArr& src,
                             TheoreticalPeakArr* dest) {
     TheoreticalPeakArr::const_iterator i = src.begin();
-    if (MaxMZ::Global().MaxBin() > 0) {
-      int end = MaxMZ::Global().CacheBinEnd() * NUM_PEAK_TYPES;
+    if (MaxBin::Global().MaxBinEnd() > 0) {
+      int end = MaxBin::Global().CacheBinEnd() * NUM_PEAK_TYPES;
       for (; i != src.end(); ++i) {
         if (i->Code() < end)
           dest->push_back(*i);
@@ -260,7 +237,7 @@ class TheoreticalPeakSet {
     // The protocol buffer stores deltas between peak values, so we need
     // to track the total:
     int total = 0;
-    int end = MaxMZ::Global().CacheBinEnd() * NUM_PEAK_TYPES;
+    int end = MaxBin::Global().CacheBinEnd() * NUM_PEAK_TYPES;
     FieldIter i = src.begin();
     for (; i != src.end(); ++i) {
       if ((total += *i) >= end)
@@ -329,7 +306,7 @@ class OrderedPeakSets {
     // The protocol buffer stores deltas between peak values, so we need
     // to track the total:
     int total = 0;
-    int end = MaxMZ::Global().CacheBinEnd() * NUM_PEAK_TYPES;
+    int end = MaxBin::Global().CacheBinEnd() * NUM_PEAK_TYPES;
     FieldIter exc_iter = exc.begin();
     TheoreticalPeakArr::const_iterator src_iter = src.begin();
 
@@ -381,7 +358,7 @@ DECLARE_bool(dups_ok);
 // Subclass of TheoreticalPeakSet that generates all ions individually and
 // explicitly.  The peaks generated will all have type LossPeak, FlankingPeak, or
 // PrimaryPeak. 
-class TheoreticalPeakSetMakeAll : public TheoreticalPeakSet {
+/*class TheoreticalPeakSetMakeAll : public TheoreticalPeakSet {
  public:
   TheoreticalPeakSetMakeAll(int capacity) {
     ordered_peak_sets_.Init(capacity);
@@ -408,7 +385,7 @@ class TheoreticalPeakSetMakeAll : public TheoreticalPeakSet {
 		const pb::Peptide* peptide = NULL) {
     assert(peptide == NULL);
     ordered_peak_sets_.Merge();
-    if (false /*FLAGS_dups_ok*/) {
+    if (false ) {
       CopyUnordered(ordered_peak_sets_.temp1_, peaks_charge_1);
       CopyUnordered(ordered_peak_sets_.temp3_, peaks_charge_2);
     } else {
@@ -421,37 +398,40 @@ class TheoreticalPeakSetMakeAll : public TheoreticalPeakSet {
  private:
   void AddYIon(double mass, int charge, TheoreticalPeakArr* dest) {
     // H2O
-    int index = int(mass + IonOffsets::Y_H2O[charge]);
+    int index = MassConstants::mass2bin(mass + MassConstants::Y_H2O, charge);
     AddPeak(dest, index, LossPeak);
     // NH3
-    index = int(mass + IonOffsets::Y_NH3[charge]);
+    index = MassConstants::mass2bin(mass + MassConstants::Y_NH3, charge);
     AddPeak(dest, index, LossPeak);
-    index = int(mass + IonOffsets::Y[charge]);
-    if (true /*FLAGS_flanks*/) AddPeak(dest, index-1, FlankingPeak);
+    index = MassConstants::mass2bin(mass + MassConstants::Y, charge);
+
+    if (true ) AddPeak(dest, index-1, FlankingPeak);
     AddPeak(dest, index, PrimaryPeak);
-    if (true /*FLAGS_flanks*/) AddPeak(dest, index+1, FlankingPeak);
+    if (true ) AddPeak(dest, index+1, FlankingPeak);
   }
 
   void AddBIon(double mass, int charge, TheoreticalPeakArr* dest) {
     // A-Ion
-    int index = int(mass + IonOffsets::A[charge]);
+    int index = MassConstants::mass2bin(mass + MassConstants::A, charge);
+
     AddPeak(dest, index, LossPeak);
     // H2O
-    index = int(mass + IonOffsets::B_H2O[charge]);
+    index = MassConstants::mass2bin(mass + MassConstants::B_H2O, charge);
     AddPeak(dest, index, LossPeak);
     // Rest of peaks are as for Y ion
     // NH3
-    index = int(mass + IonOffsets::B_NH3[charge]);
+    index = MassConstants::mass2bin(mass + MassConstants::B_NH3, charge);
     AddPeak(dest, index, LossPeak);
-    index = int(mass + IonOffsets::B[charge]);
-    if (true /*FLAGS_flanks*/) AddPeak(dest, index-1, FlankingPeak);
+    index = MassConstants::mass2bin(mass + MassConstants::B, charge);
+
+    if (true ) AddPeak(dest, index-1, FlankingPeak);
     AddPeak(dest, index, PrimaryPeak);
-    if (true /*FLAGS_flanks*/) AddPeak(dest, index+1, FlankingPeak);
+    if (true) AddPeak(dest, index+1, FlankingPeak);
   }
 
   OrderedPeakSets ordered_peak_sets_;
 };
-
+*/
 // A subclass of TheoreticalPeakSet that generates a theoretical peak
 // for each B and Y ion at each charge state, 1 and 2. Peak generated
 // will be of type PeakCombinedB1 and PeakCombinedY1 for charge 1
@@ -475,35 +455,47 @@ class TheoreticalPeakSetBYSparse : public TheoreticalPeakSet {
   }
 
   void AddYIon(double mass, int charge) {
-    assert(charge <= 2);
-    int index_y = int(mass + IonOffsets::Y[charge]);
+     assert(charge <= 2);
+    int index_y = MassConstants::mass2bin(mass + MassConstants::Y + MassConstants::proton, charge);
     TheoreticalPeakType series;
     if (charge == 1) {
       series = PeakCombinedY1;
     } else {
-      int nh3_diff = index_y - int(mass + IonOffsets::Y_NH3[charge]);
-      assert(nh3_diff == BIN_SHIFT_NH3_CHG_2_CASE_A ||
-             nh3_diff == BIN_SHIFT_NH3_CHG_2_CASE_B);
-      series = nh3_diff == BIN_SHIFT_NH3_CHG_2_CASE_A ? PeakCombinedY2a 
-                                                      : PeakCombinedY2b;
+//	  int nh3_diff = index_y - MassConstants::mass2bin(mass + MassConstants::Y_NH3, charge);
+//      assert(nh3_diff == MassConstants::BIN_SHIFT_NH3_CHG_2_CASE_A ||
+//             nh3_diff == MassConstants::BIN_SHIFT_NH3_CHG_2_CASE_B);
+//      series = nh3_diff == MassConstants::BIN_SHIFT_NH3_CHG_2_CASE_A ? PeakCombinedY2a 
+//                                                      : PeakCombinedY2b;
+      series = PeakCombinedY2;
     }
-    AddPeakUnordered(&peaks_[charge-1], index_y, series);
+//    AddPeakUnordered(&peaks_[charge-1], index_y, series);
+    if (charge == 1)
+      AddPeakUnordered(&peaks_[charge-1], index_y, series, &peaks_[charge]);
+    else
+      AddPeakUnordered(&peaks_[charge-1], index_y, series, &peaks_[charge-2]);
+	
   }
 
   void AddBIon(double mass, int charge) {
-    assert(charge <= 2);
-    int index_b = int(mass + IonOffsets::B[charge]);
+     assert(charge <= 2);
+	int index_b = MassConstants::mass2bin(mass + MassConstants::B + MassConstants::proton, charge);
     TheoreticalPeakType series;
     if (charge == 1) {
       series = PeakCombinedB1;
     } else {
-      int nh3_diff = index_b - int(mass + IonOffsets::B_NH3[charge]);
-      assert(nh3_diff == BIN_SHIFT_NH3_CHG_2_CASE_A ||
-             nh3_diff == BIN_SHIFT_NH3_CHG_2_CASE_B);
-      series = nh3_diff == BIN_SHIFT_NH3_CHG_2_CASE_A ? PeakCombinedB2a 
-                                                      : PeakCombinedB2b;
+//	  int nh3_diff = index_b - MassConstants::mass2bin(mass + MassConstants::B_NH3, charge);
+//      assert(nh3_diff == MassConstants::BIN_SHIFT_NH3_CHG_2_CASE_A ||
+//             nh3_diff == MassConstants::BIN_SHIFT_NH3_CHG_2_CASE_B);
+//      series = nh3_diff == MassConstants::BIN_SHIFT_NH3_CHG_2_CASE_A ? PeakCombinedB2a 
+//                                                      : PeakCombinedB2b;
+      series = PeakCombinedB2;
+
     }
-    AddPeakUnordered(&peaks_[charge-1], index_b, series);
+//    AddPeakUnordered(&peaks_[charge-1], index_b, series);
+    if (charge == 1)
+      AddPeakUnordered(&peaks_[charge-1], index_b, series, &peaks_[charge]);
+    else 
+      AddPeakUnordered(&peaks_[charge-1], index_b, series, &peaks_[charge-2]);
   }
 
   // Faster interface needing no copying at all.
@@ -514,6 +506,9 @@ class TheoreticalPeakSetBYSparse : public TheoreticalPeakSet {
 		TheoreticalPeakArr* peaks_charge_2,
 		TheoreticalPeakArr* negs_charge_2,
 		const pb::Peptide* peptide = NULL) {
+//    CopyUniqueUnordered(peaks_[0], peaks_charge_1);
+//    CopyUniqueUnordered(peaks_[0], peaks_charge_2);
+//    CopyUniqueUnordered(peaks_[1], peaks_charge_2);
     CopyUnordered(peaks_[0], peaks_charge_1);
     CopyUnordered(peaks_[0], peaks_charge_2);
     CopyUnordered(peaks_[1], peaks_charge_2);
@@ -532,7 +527,7 @@ class TheoreticalPeakSetBYSparse : public TheoreticalPeakSet {
 // Subclass of TheoreticalPeakSet similar to TheoreticalPeakSetBYSparse 
 // (above), but guarantees that peaks will be in increasing order by m/z
 // at the expense of a couple of extra merge operations.
-class TheoreticalPeakSetBYSparseOrdered : public TheoreticalPeakSet {
+/*class TheoreticalPeakSetBYSparseOrdered : public TheoreticalPeakSet {
  public:
   TheoreticalPeakSetBYSparseOrdered(int capacity) {
     ordered_peak_sets_.Init(capacity);
@@ -544,15 +539,15 @@ class TheoreticalPeakSetBYSparseOrdered : public TheoreticalPeakSet {
 
   void AddYIon(double mass, int charge) {
     assert(charge <= 2);
-    int index_y = int(mass + IonOffsets::Y[charge]);
+	int index_y = MassConstants::mass2bin(mass + MassConstants::Y, charge);
     TheoreticalPeakType series;
     if (charge == 1) {
       series = PeakCombinedY1;
     } else {
-      int nh3_diff = index_y - int(mass + IonOffsets::Y_NH3[charge]);
-      assert(nh3_diff == BIN_SHIFT_NH3_CHG_2_CASE_A ||
-             nh3_diff == BIN_SHIFT_NH3_CHG_2_CASE_B);
-      series = nh3_diff == BIN_SHIFT_NH3_CHG_2_CASE_A ? PeakCombinedY2a 
+	  int nh3_diff = index_y - MassConstants::mass2bin(mass + MassConstants::Y_NH3, charge);
+      assert(nh3_diff == MassConstants::BIN_SHIFT_NH3_CHG_2_CASE_A ||
+             nh3_diff == MassConstants::BIN_SHIFT_NH3_CHG_2_CASE_B);
+      series = nh3_diff == MassConstants::BIN_SHIFT_NH3_CHG_2_CASE_A ? PeakCombinedY2a 
                                                       : PeakCombinedY2b;
     }
     AddPeak(&ordered_peak_sets_.y_series_[charge-1], index_y, series);
@@ -560,15 +555,15 @@ class TheoreticalPeakSetBYSparseOrdered : public TheoreticalPeakSet {
 
   void AddBIon(double mass, int charge) {
     assert(charge <= 2);
-    int index_b = int(mass + IonOffsets::B[charge]);
+    int index_b = MassConstants::mass2bin(mass + MassConstants::B, charge);
     TheoreticalPeakType series;
     if (charge == 1) {
       series = PeakCombinedB1;
     } else {
-      int nh3_diff = index_b - int(mass + IonOffsets::B_NH3[charge]);
-      assert(nh3_diff == BIN_SHIFT_NH3_CHG_2_CASE_A ||
-             nh3_diff == BIN_SHIFT_NH3_CHG_2_CASE_B);
-      series = nh3_diff == BIN_SHIFT_NH3_CHG_2_CASE_A ? PeakCombinedB2a 
+      int nh3_diff = index_b - MassConstants::mass2bin(mass + MassConstants::B_NH3, charge);
+      assert(nh3_diff == MassConstants::BIN_SHIFT_NH3_CHG_2_CASE_A ||
+             nh3_diff == MassConstants::BIN_SHIFT_NH3_CHG_2_CASE_B);
+      series = nh3_diff == MassConstants::BIN_SHIFT_NH3_CHG_2_CASE_A ? PeakCombinedB2a 
                                                       : PeakCombinedB2b;
     }
     AddPeak(&ordered_peak_sets_.b_series_[charge-1], index_b, series);
@@ -628,18 +623,18 @@ class TheoreticalPeakSetBYAll : public TheoreticalPeakSet {
 
  private:
   void AddYIon(double mass, int charge, TheoreticalPeakArr* dest) {
-    int index_y = int(mass + IonOffsets::Y[charge]);
+	int index_y = MassConstants::mass2bin(mass + MassConstants::Y, charge);
     if (charge == 1) {
-      AddPeak(dest, index_y - BIN_SHIFT_H2O_CHG_1, LossPeak);
-      AddPeak(dest, index_y - BIN_SHIFT_NH3_CHG_1, LossPeak);
+      AddPeak(dest, index_y - MassConstants::BIN_SHIFT_H2O_CHG_1, LossPeak);
+      AddPeak(dest, index_y - MassConstants::BIN_SHIFT_NH3_CHG_1, LossPeak);
     } else {
-      AddPeak(dest, index_y - BIN_SHIFT_H2O_CHG_2, LossPeak);
+      AddPeak(dest, index_y - MassConstants::BIN_SHIFT_H2O_CHG_2, LossPeak);
       // In case A the NH3 peak will have been added already...
-      assert(BIN_SHIFT_H2O_CHG_2 == BIN_SHIFT_NH3_CHG_2_CASE_A);
+      assert(MassConstants::BIN_SHIFT_H2O_CHG_2 == MassConstants::BIN_SHIFT_NH3_CHG_2_CASE_A);
       // Otherwise (case B), a separate NH3 peak is needed. 
-      if (index_y - int(mass + IonOffsets::Y_NH3[charge]) 
-          == BIN_SHIFT_NH3_CHG_2_CASE_B)
-        AddPeak(dest, index_y - BIN_SHIFT_NH3_CHG_2_CASE_B, LossPeak);
+	  if (index_y - MassConstants::mass2bin(mass + MassConstants::Y_NH3, charge) 
+          == MassConstants::BIN_SHIFT_NH3_CHG_2_CASE_B)
+        AddPeak(dest, index_y - MassConstants::BIN_SHIFT_NH3_CHG_2_CASE_B, LossPeak);
     }
     AddPeak(dest, index_y-1, FlankingPeak);
     AddPeak(dest, index_y, PrimaryPeak);
@@ -647,20 +642,20 @@ class TheoreticalPeakSetBYAll : public TheoreticalPeakSet {
   }
 
   void AddBIon(double mass, int charge, TheoreticalPeakArr* dest) {
-    int index_b = int(mass + IonOffsets::B[charge]);
+    int index_b = MassConstants::mass2bin(mass + MassConstants::B, charge);
     if (charge == 1) {
-      AddPeak(dest, index_b - BIN_SHIFT_A_ION_CHG_1, LossPeak);
-      AddPeak(dest, index_b - BIN_SHIFT_H2O_CHG_1, LossPeak);
-      AddPeak(dest, index_b - BIN_SHIFT_NH3_CHG_1, LossPeak);
+      AddPeak(dest, index_b - MassConstants::BIN_SHIFT_A_ION_CHG_1, LossPeak);
+      AddPeak(dest, index_b - MassConstants::BIN_SHIFT_H2O_CHG_1, LossPeak);
+      AddPeak(dest, index_b - MassConstants::BIN_SHIFT_NH3_CHG_1, LossPeak);
     } else {
-      AddPeak(dest, index_b - BIN_SHIFT_A_ION_CHG_2, LossPeak);
-      AddPeak(dest, index_b - BIN_SHIFT_H2O_CHG_2, LossPeak);
+      AddPeak(dest, index_b - MassConstants::BIN_SHIFT_A_ION_CHG_2, LossPeak);
+      AddPeak(dest, index_b - MassConstants::BIN_SHIFT_H2O_CHG_2, LossPeak);
       // In case A the NH3 peak will have been added already...
-      assert(BIN_SHIFT_H2O_CHG_2 == BIN_SHIFT_NH3_CHG_2_CASE_A);
+      assert(MassConstants::BIN_SHIFT_H2O_CHG_2 == MassConstants::BIN_SHIFT_NH3_CHG_2_CASE_A);
       // Otherwise (case B), a separate NH3 peak is needed. 
-      if (index_b - int(mass + IonOffsets::B_NH3[charge]) 
-          == BIN_SHIFT_NH3_CHG_2_CASE_B)
-        AddPeak(dest, index_b - BIN_SHIFT_NH3_CHG_2_CASE_B, LossPeak);
+	  if (index_b - MassConstants::mass2bin(mass + MassConstants::B_NH3, charge) 
+          == MassConstants::BIN_SHIFT_NH3_CHG_2_CASE_B)
+        AddPeak(dest, index_b - MassConstants::BIN_SHIFT_NH3_CHG_2_CASE_B, LossPeak);
     }
     AddPeak(dest, index_b-1, FlankingPeak);
     AddPeak(dest, index_b, PrimaryPeak);
@@ -768,6 +763,8 @@ class TheoreticalPeakSetSparse : public TheoreticalPeakSet {
   TheoreticalPeakSetBYSparse BY_sparse_;
   TheoreticalPeakSetDiff diff_;
 };
+
+*/
 
 // This class is used to store theoretical b ions only, with true monoisotopic mass,
 //		for use in exact p-value calculations.

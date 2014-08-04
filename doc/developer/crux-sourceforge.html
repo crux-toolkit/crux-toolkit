@@ -1,0 +1,118 @@
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <title>Using Sourceforge</title>
+  <style type="text/css" media="screen">
+    body {margin: 72px;
+  </style>
+</head>
+<body>
+<h2>Crux and Sourceforge</h2>
+We use
+<a href="http://sourceforge.net">Sourceforge</a>
+to host the
+<a href="http://sourceforge.net/projects/cruxtoolkit">Crux SVN repository</a>
+and the 
+<a href="http://cruxtoolkit.sourceforge.net">Crux website</a>.
+Kaipo Tamura, Charles Grant, and Bill Noble are the administrators for the project.
+We also have a utility account with the user name <code>crux-toolkit</code>.
+The utility account is used by our 
+<a href="crux-team-city.html">TeamCity server</a>
+to upload files to the web site.
+Contact Charles for the password for this account.
+
+<h2>Granting Shell Access Permisions to a User for a Project</h2>
+
+It can occasionally be useful to open an interactive shell session 
+with access to the Crux files on the Sourceforge servers.
+Only users listed as 'Release Technicians' for the project are
+allowed shell access to the project files.
+<p/>
+To add a user to the list of 'Release Technicians',
+<ol>
+<li>
+Go to the Sourceforge page for the project:
+<a href="http://sourceforge.net/projects/cruxtoolkit">Crux Sourceforge</a>,
+</li>
+<li>
+Click on the "Admin" link, in the menu bar under the project title.
+</li>
+<li>
+Click on the "Tools" button on the left side of the page.
+</li>
+<li>
+Click on the "Release Technicians" link
+ under the "File" button in the "Tools" section.
+</li>
+<li>
+Check the accounts that should be made "Release Technicians".
+Notice that accounts with administrative privileges are always "Release
+Technicians"
+</li>
+</ol>
+<h2>Starting an SSH connection to a shell on Sourceforge</h2>
+The general syntax for starting a Sourceforge shell with access to the project
+files is:
+<pre>
+ssh -t USER,PROJECT@shell.sourceforge.net create
+</pre>
+In the case of user <code>charlesegrant</code> connecting to project <code>Crux-Toolkit</code>
+this becomes:
+<pre>
+ssh -t charlesegrant,cruxtoolkit@shell.sourceforge.net create
+</pre>
+Sourceforge only uses lower case letters,
+and doesn't allow the character '-' in project directory names,
+so although the official name of the project is <code>Crux-Toolkit</code>,
+the project directory name is <code>cruxtoolkit</code>.
+The character '-' <b>is</b> allowed in user names,
+so the command to start a shell session for the user <code>crux-toolkit</code>
+with permission to access the project files for <code>Crux-Toolkit</code> is
+<pre>
+ssh -t crux-toolkit,cruxtoolkit@shell.sourceforge.net create
+</pre>
+After you've logged on, you'll be in your home directory.
+<h2>Crux-Toolkit Web Site</h2>
+The Sourceforge web services for projects are described
+<a
+href="https://sourceforge.net/p/forge/documentation/Project%20Web%20and%20Developer%20Web/#php-script-support">here</a>.
+The directory containing the Crux-Toolkit project files is:
+<code>/home/project-web/cruxtoolkit/htdocs/</code>.
+<p/>
+The directory containing the log files for the Crux-Toolkit web site
+is <code> /home/logs-project-web/cruxtoolkit</code>
+<p/>
+The web directories for Crux-Toolkit can be accessed by a shell session as
+described above.
+They can also be via <code>scp</code> and <code>sftp</code>,
+but these use a different server name: <code>web.sourceforge.net</code>.
+<p/>
+For example, to download all the web log files for Crux-Toolkit, use
+the command:
+<pre>
+scp -r crux-toolkit@web.sourceforge.net:/home/logs-project-web/cruxtoolkit crux-toolkit-logs
+</pre>
+<h2>Interactions Between Crux-Toolkit Site on Sourceforge and Our TeamCity Server</h2>
+Our TeamCity server runs two scripts that interact with the Crux-Toolkit on Sourceforge.
+<ul>
+<li>
+The "Deploy documentation to website" script uses the <code>crux-toolkit</code>
+account to copy files from <code>src/user</code> in the source tree to the root
+of the Crux-Tookit web site on Sourceforge.
+This script runs early every morning when there has been a change to the SVN
+repository.
+</li>
+<li>
+The "Deploy successful build to website" script uses the <code>crux-toolkit</code>
+account to copy the binary and source packages generated as TeamCity artifacts
+in a succesful build to the <code>download/daily</code> subdirectory of the
+Crux-Toolkit website.
+This script runs early every morning when there has been a change to the SVN repository,
+but it will only update the distribution files if Crux has built successfully
+on 64-bit Linux, 32-bit Linux, OS X, and Windows.
+</li>
+</ul>
+For more information about the Crux TeamCity server,
+see 
+<a href="crux-team-city.html"> here </a>.  </body>
+</html>

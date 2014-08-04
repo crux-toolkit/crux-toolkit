@@ -48,7 +48,11 @@
 #include <sys/stat.h>
 #include <errno.h>
 #include <fcntl.h>
+#ifdef _MSC_VER
+#include <io.h>
+#else
 #include <unistd.h>
+#endif
 #include <iostream>
 #include <string>
 #include <google/protobuf/message.h>
@@ -139,7 +143,8 @@ class RecordReader {
     if (coded_input_)
       delete coded_input_;
     delete raw_input_;
-    close(fd_);
+    if (fd_ >= 0)
+      close(fd_);
   }
 
   bool OK() const { return valid_; }

@@ -1,6 +1,27 @@
 cmake_minimum_required(VERSION 2.8.4)
 cmake_policy(VERSION 2.8.4)
 
+###### Set up include and link directories  ######
+if (WIN32 AND NOT CYGWIN)
+include_directories(
+  ${CMAKE_SOURCE_DIR}/src/c
+  ${CMAKE_BINARY_DIR}/src/external/include
+  ${CMAKE_BINARY_DIR}/src/external/build/src/ProtocolBuffers/src
+  ${CMAKE_BINARY_DIR}/src/external/build/src/google-gflags/src/windows
+  ${CMAKE_CURRENT_BINARY_DIR}/protoobj
+)
+else (WIN32 AND NOT CYGWIN)
+include_directories(
+  ${CMAKE_SOURCE_DIR}/src/c
+  ${CMAKE_BINARY_DIR}/src/external/include
+  ${CMAKE_BINARY_DIR}/src/external/build/src/ProtocolBuffers/src
+  ${CMAKE_CURRENT_BINARY_DIR}/protoobj
+)
+endif (WIN32 AND NOT CYGWIN)
+link_directories(
+  ${CMAKE_BINARY_DIR}/src/external/lib
+)
+
 set_directory_properties(PROPERTIES
   ADDITIONAL_MAKE_CLEAN_FILES
   protoobj
@@ -28,7 +49,8 @@ set(
 add_custom_command(
   OUTPUT ${proto_files_compiled}
   DEPENDS ${proto_files}
-  COMMAND mkdir -p protoobj &&
+  COMMAND ${CMAKE_COMMAND} -E make_directory protoobj
+  COMMAND
     ${CMAKE_BINARY_DIR}/src/external/bin/protoc 
       --proto_path=${CMAKE_CURRENT_SOURCE_DIR}/protobuf/ 
       --cpp_out=${CMAKE_CURRENT_BINARY_DIR}/protoobj
@@ -37,38 +59,64 @@ add_custom_command(
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )
 
-###### Set up include and link directories  ######
-include_directories(
-  ${CMAKE_BINARY_DIR}/src/external/include
-  ${CMAKE_CURRENT_BINARY_DIR}/protoobj
-)
-link_directories(
-  ${CMAKE_BINARY_DIR}/src/external/lib
-)
-
 ########## Set up tide-support library  ##########
-set(tide_lib_files
-  ${proto_files_compiled}
-  abspath.cc
-  active_peptide_queue.cc
-  crux_sp_spectrum.cc
-  fifo_alloc.cc
-  index_settings.cc
-  make_peptides.cc
-  mass_constants.cc
-  max_mz.cc
-  peptide.cc
-  peptide_mods3.cc
-  peptide_peaks.cc
-  read_fasta.cc
-  report.cc
-  results_writer.cc
-  sp_scorer.cc
-  spectrum_collection.cc
-  spectrum_preprocess2.cc
-  weibull.cc
-)
+if (WIN32 AND NOT CYGWIN)
+  set(tide_lib_files
+    ${proto_files_compiled}
+    abspath.cc
+    active_peptide_queue.cc
+    crux_sp_spectrum.cc
+    fifo_alloc.cc
+    index_settings.cc
+    make_peptides.cc
+    mass_constants.cc
+    max_mz.cc
+    mman.c
+    peptide.cc
+    peptide_mods3.cc
+    peptide_peaks.cc
+    read_fasta.cc
+    report.cc
+    results_writer.cc
+    sp_scorer.cc
+    spectrum_collection.cc
+    spectrum_preprocess2.cc
+    weibull.cc
+  )
+else (WIN32 AND NOT CYGWIN)
+  set(tide_lib_files
+    ${proto_files_compiled}
+    abspath.cc
+    active_peptide_queue.cc
+    crux_sp_spectrum.cc
+    fifo_alloc.cc
+    index_settings.cc
+    make_peptides.cc
+    mass_constants.cc
+    max_mz.cc
+    peptide.cc
+    peptide_mods3.cc
+    peptide_peaks.cc
+    read_fasta.cc
+    report.cc
+    results_writer.cc
+    sp_scorer.cc
+    spectrum_collection.cc
+    spectrum_preprocess2.cc
+    weibull.cc
+  )
+endif (WIN32 AND NOT CYGWIN)
 add_library(tide-support STATIC ${tide_lib_files})
+if (WIN32 AND NOT CYGWIN)
+  set_property(
+    TARGET tide-support 
+    PROPERTY 
+      COMPILE_DEFINITIONS 
+      GFLAGS_DLL_DECL= 
+      GFLAGS_DLL_DECLARE_FLAG= 
+      GFLAGS_DLL_DEFINE_FLAG=
+  )
+endif (WIN32 AND NOT CYGWIN)
 
 ###### Build tide-test-spectrum-preprocess  ######
 #add_executable(tide-test-spectrum-preprocess test_spectrum_preprocess.cc)
@@ -102,7 +150,19 @@ add_library(tide-support STATIC ${tide_lib_files})
 
 ############### Build tide-search  ###############
 add_executable(tide-search search.cc)
-set_property(TARGET tide-search PROPERTY COMPILE_DEFINITIONS MAIN)
+if (WIN32 AND NOT CYGWIN)
+  set_property(
+    TARGET tide-search 
+    PROPERTY 
+      COMPILE_DEFINITIONS 
+      MAIN
+      GFLAGS_DLL_DECL= 
+      GFLAGS_DLL_DECLARE_FLAG= 
+      GFLAGS_DLL_DEFINE_FLAG=
+  )
+else (WIN32 AND NOT CYGWIN)
+  set_property(TARGET tide-search PROPERTY COMPILE_DEFINITIONS MAIN)
+endif (WIN32 AND NOT CYGWIN)
 target_link_libraries(tide-search tide-support gflags protobuf)
 
 ############ Build tide-test-read-ms2 ############
