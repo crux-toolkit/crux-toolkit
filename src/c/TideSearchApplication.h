@@ -78,8 +78,10 @@ protected:
     }
     double precursor_window_;
   };
+  double bin_width_;
+  double bin_offset_;
 
-public:
+  public:
 
   bool exact_pvalue;
 
@@ -119,7 +121,7 @@ public:
 
   bool exact_pval_search;
   
-  int calcScoreCount( int numelEvidenceObs, int* evidenceObs, double binWidth, double binOffset, int pepMassInt, int maxEvidence, int minEvidence, int maxScore, 
+  int calcScoreCount( int numelEvidenceObs, int* evidenceObs, int pepMassInt, int maxEvidence, int minEvidence, int maxScore, 
                         int minScore, int nAA, double* AAFreqN, double* AAFreqI, double* AAFreqC, int* AAMass, double* pValueScoreObs );
 };
 

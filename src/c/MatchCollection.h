@@ -67,6 +67,8 @@ class MatchCollection {
   bool iterator_lock_; 
     ///< has an itterator been created? if TRUE can't manipulate matches
 
+  bool has_distinct_matches_; ///< does the match collection have distinct matches?
+
   // values used for various scoring functions.
   // TODO this should be moved to match
   FLOAT_T delta_cn_; ///< the difference in top and second Xcorr scores
@@ -526,6 +528,8 @@ class MatchCollection {
    */
   FLOAT_T getCalibrationCorr();
 
+  bool getHasDistinctMatches();
+  void setHasDistinctMatches(bool distinct_matches);
   /**
    * Print the calibration parameters eta, beta, shift and correlation
    * with tabs between.

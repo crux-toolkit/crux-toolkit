@@ -54,7 +54,15 @@ void CruxParser ::readMatches(
     matches.scan = current_scan;
     matches.charge = current_charge;
     matches.precursor_mass = reader.getDouble(SPECTRUM_NEUTRAL_MASS_COL);
-    matches.num_sequence_comparisons = reader.getInteger(MATCHES_SPECTRUM_COL);
+    
+    if (!reader.empty(DISTINCT_MATCHES_SPECTRUM_COL)) {
+      matches.num_sequence_comparisons = reader.getInteger(DISTINCT_MATCHES_SPECTRUM_COL);
+    } else if (!reader.empty(MATCHES_SPECTRUM_COL)) {
+      matches.num_sequence_comparisons = reader.getInteger(MATCHES_SPECTRUM_COL);
+    } else {
+      carp_once(CARP_WARNING, "Empty Matches/Spectrum col");
+      matches.num_sequence_comparisons = 0;
+    }
     hits_read = 0;
 
     //iterate over all rows in delimited file, fill-in sqt match structure.
@@ -102,14 +110,14 @@ void CruxParser ::readMatches(
         string protein_id = protein_ids.at(idx);
         //change the format of protein_id to be same as SQTParser
         size_t protein_idx_pos = protein_id.rfind('(');
-	if (protein_idx_pos != string::npos) {
+        if (protein_idx_pos != string::npos) {
           string pep_pos= protein_id.substr(protein_idx_pos);
           pep_pos=pep_pos.substr(1,pep_pos.size()-2);
           matches.peptide_pos.push_back(atoi(pep_pos.c_str()));
           protein_id.erase(protein_idx_pos);
-	} else {
-	  matches.peptide_pos.push_back(-1);
-	}
+        } else {
+          matches.peptide_pos.push_back(-1);
+        }
         matches.proteins.push_back(protein_id);
       }       
       hits_read++;

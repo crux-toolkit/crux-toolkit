@@ -155,7 +155,8 @@ string GetMs2Spectrum::getName() {
  * \returns The description for GetMs2Spectrum.
  */
 string GetMs2Spectrum::getDescription() {
-  return "brief searches a given ms2 file for the spectrum with the given scan number.";
+  return "Extract one or more fragmentation spectra, specified by scan number, "
+         "from an MS2 file.";
 }
 
 /**

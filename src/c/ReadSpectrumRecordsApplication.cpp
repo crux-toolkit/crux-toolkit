@@ -11,9 +11,8 @@ ReadSpectrumRecordsApplication::~ReadSpectrumRecordsApplication() {
 
 int ReadSpectrumRecordsApplication::main(int argc, char** argv) {
 
-  const char* option_list[] = {
-  };
-  int num_options = sizeof(option_list) / sizeof(char*);
+  const char* option_list[1];
+  int num_options = 0;
   const char* arg_list[] = {
     "spectrum records file"
   };

@@ -103,9 +103,7 @@ string ExtractColumns::getName() {
  * \returns the description for ExtractColumns
  */
 string ExtractColumns::getDescription() {
-
-  return "Prints a delimited file using only the columns specified from "
-         "the original delimited file.";
+  return "Print specified columns from a tab-delimited file.";
 }
 
 /*

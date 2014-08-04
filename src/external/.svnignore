@@ -3,7 +3,6 @@ Makefile
 Makefile.in
 bin
 build
-*.cmake
 downloads
 include
 lib

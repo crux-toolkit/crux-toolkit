@@ -91,8 +91,7 @@ class MatchFileWriter : public DelimitedFileWriter {
     if( file_column == -1 ){
       return;
     }
-
-    current_row_[file_column] = 
+    current_row_.at(file_column) = 
       DelimitedFileWriter::to_string(value, match_precision_[col_type], match_fixed_float_[col_type]);
   }
 

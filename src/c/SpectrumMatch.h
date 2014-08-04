@@ -16,7 +16,7 @@ class SpectrumMatch : public AbstractMatch {
   PeptideMatch* peptide_match_; ///< PeptideMatch which this SpectrumMatch matches to
   Crux::Spectrum* spectrum_; ///< Spectrum object
   SpectrumZState zstate_; ///< Current zstate
-
+  int file_idx_; /// file index
  public:
 
   /**
@@ -72,6 +72,23 @@ class SpectrumMatch : public AbstractMatch {
    */
   SpectrumZState& getZState();
 
+  /**
+   * sets the file index for this spectrum match
+   */
+  void setFileIndex(int file_idx);
+  
+  /**
+   * \returns the file index for this spectrum match
+   */
+  int getFileIndex();
+
+  /**
+   *\returns the file path for this spectrum match
+   */
+  std::string getFilePath();
+  
+  
+  
 };
 
 #endif //SPECTRUMMATCH_H

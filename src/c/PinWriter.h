@@ -90,7 +90,8 @@ class PinWriter{
     int charge,  
     bool is_decoy,
     int scan_number,
-    int rank
+    int rank,
+    int file_idx
   ); 
 
   FLOAT_T calcMassOfMods(Crux::Peptide* peptide);

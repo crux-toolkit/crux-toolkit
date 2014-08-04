@@ -159,7 +159,7 @@ class Peptide {
 
  private:
   template< class W > void AddIons( W* workspace ) const;
-  template< class W > void AddBIonsTrueMass( W* workspace ) const;
+  template< class W > void AddBIonsOnly( W* workspace ) const;
 
   void Compile(const TheoreticalPeakArr* peaks,
 	       const pb::Peptide& pb_peptide,

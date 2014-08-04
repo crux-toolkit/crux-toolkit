@@ -64,7 +64,7 @@ class SpectrumZState {
     FLOAT_T mz,
     int charge);
 
-  FLOAT_T getMZ();
+  FLOAT_T getMZ() const;
 
 
   /**

@@ -6,6 +6,14 @@
 
 using namespace std;
 
+#ifdef _MSC_VER
+  // The windows compiler only allows intialization
+  // of static constant integer types within a class
+  double const MassConstants::proton = 1.00727646688;
+//  double const MassConstants::bin_width = 1.0005079;
+  double const MassConstants::kFixedPointScalar = 1e5;
+#endif
+
 const double MassConstants::elts_mono[] = {
   1.007825035, // H
   12.0,        // C
@@ -26,13 +34,36 @@ const double MassConstants::elts_avg[] = {
 
 double MassConstants::mono_table[256];
 double MassConstants::avg_table[256];
-double MassConstants::aa_bin_1[256];
-double MassConstants::aa_bin_2[256];
+//double* MassConstants::aa_mass_table = NULL;
+//double MassConstants::aa_bin_1[256];
+//double MassConstants::aa_bin_2[256];
 
 const double MassConstants::mono_h2o = 2*MassConstants::elts_mono[0] + MassConstants::elts_mono[3];
 const double MassConstants::avg_h2o = 2*MassConstants::elts_avg[0] + MassConstants::elts_avg[3];
 const double MassConstants::mono_nh3 = 3*MassConstants::elts_mono[0] + MassConstants::elts_mono[2];
 const double MassConstants::mono_co = MassConstants::elts_mono[1] + MassConstants::elts_mono[3];
+const double MassConstants::A = 0 - 28.0;
+//const double MassConstants::B_H2O = 0 - MassConstants::mono_h2o;
+//const double MassConstants::B_NH3 = 0 - MassConstants::mono_nh3;
+const double MassConstants::B = 0.0;
+//const double MassConstants::Y_H2O = MassConstants::mono_h2o - 18.0;
+//const double MassConstants::Y_NH3 = MassConstants::mono_h2o - 17.0;
+const double MassConstants::Y = MassConstants::mono_h2o;
+/*const double MassConstants::BIN_SHIFT_A_ION_CHG_1 = 28;
+const double MassConstants::BIN_SHIFT_A_ION_CHG_2 = 14;
+const double MassConstants::BIN_SHIFT_H2O_CHG_1 = 18;
+const double MassConstants::BIN_SHIFT_H2O_CHG_2 = 9;
+const double MassConstants::BIN_SHIFT_NH3_CHG_1 = 17;
+const double MassConstants::BIN_SHIFT_NH3_CHG_2_CASE_A = 9;
+const double MassConstants::BIN_SHIFT_NH3_CHG_2_CASE_B = 8;
+*/
+double MassConstants::BIN_H2O = 18;
+double MassConstants::BIN_NH3 = 17;
+
+
+//default parameter settings, will be changed during parameter parsing
+double MassConstants::bin_width_ = BIN_WIDTH; // 1.0005079;
+double MassConstants::bin_offset_ = BIN_OFFSET; //0.40;
 
 FixPt MassConstants::fixp_mono_table[256];
 FixPt MassConstants::fixp_avg_table[256];
@@ -45,7 +76,7 @@ const FixPt MassConstants::fixp_proton   = ToFixPt(MassConstants::proton);
 
 ModCoder MassConstants::mod_coder_;
 double* MassConstants::unique_deltas_;
-double* MassConstants::unique_deltas_bin_;
+//double* MassConstants::unique_deltas_bin_;
 
 static bool CheckModTable(const pb::ModTable& mod_table);
 
@@ -83,7 +114,7 @@ void MassConstants::FillMassTable(const double* elements, double* table) {
 }
 
 
-bool MassConstants::Init(const pb::ModTable* mod_table) {
+bool MassConstants::Init(const pb::ModTable* mod_table, const double bin_width, const double bin_offset) {
   if (mod_table && !CheckModTable(*mod_table))
     return false;
 
@@ -108,26 +139,25 @@ bool MassConstants::Init(const pb::ModTable* mod_table) {
 
     mod_coder_.Init(mod_table->unique_deltas_size());
     unique_deltas_ = new double[mod_table->unique_deltas_size()];
-    unique_deltas_bin_ = new double[mod_table->unique_deltas_size()];
     for (int i = 0; i < mod_table->unique_deltas_size(); ++i) {
       unique_deltas_[i] = mod_table->unique_deltas(i);
-      unique_deltas_bin_[i] = unique_deltas_[i]/bin_width;
     }
   }
 
   for (int i = 0; i < 256; ++i) {
     if (mono_table[i] == 0) {
-      mono_table[i] = avg_table[i] = aa_bin_1[i] = aa_bin_2[i]
+      mono_table[i] = avg_table[i]/* = aa_bin_1[i] = aa_bin_2[i]*/
 	= numeric_limits<double>::signaling_NaN();
       fixp_mono_table[i] = fixp_avg_table[i] = 0;
     } else {
-      double bin = mono_table[i]/bin_width;
-      aa_bin_1[i] = bin;
-      aa_bin_2[i] = bin/2;
       fixp_mono_table[i] = ToFixPt(mono_table[i]);
       fixp_avg_table[i] = ToFixPt(avg_table[i]);
     }
   }
+  bin_width_ = bin_width;
+  bin_offset_ = bin_offset;
+  BIN_H2O = mass2bin(mono_h2o,1);
+  BIN_NH3 = mass2bin(mono_nh3,1);
 
   return true;
 }

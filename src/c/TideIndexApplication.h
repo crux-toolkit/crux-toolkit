@@ -4,7 +4,10 @@
 #include "CruxApplication.h"
 
 #include <sys/stat.h>
+
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 #include <errno.h>
 #include <gflags/gflags.h>
 #include "header.pb.h"
@@ -185,6 +188,8 @@ protected:
     int proteinPos,
     pb::AuxLocation& outAuxLoc
   );
+
+  virtual void writeParamFile();
 
 };
 

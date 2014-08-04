@@ -42,7 +42,12 @@ if (WIN32 AND NOT CYGWIN)
   set(
     Boost_LIBRARIES 
     ${CMAKE_PREFIX_PATH}/lib/libboost_filesystem-vc100-mt.lib
-    ${CMAKE_PREFIX_PATH}/lib/libboost_system.-vc100-mt.lib
+    ${CMAKE_PREFIX_PATH}/lib/libboost_system-vc100-mt.lib
+  )
+  set(
+    Boost_DEBUG_LIBRARIES 
+    ${CMAKE_PREFIX_PATH}/lib/libboost_filesystem-vc100-mt-gd.lib
+    ${CMAKE_PREFIX_PATH}/lib/libboost_system-vc100-mt-gd.lib
   )
 else (WIN32 AND NOT CYGWIN)
   set(
@@ -51,8 +56,6 @@ else (WIN32 AND NOT CYGWIN)
     ${CMAKE_PREFIX_PATH}/lib/libboost_system.a
   )
 endif (WIN32 AND NOT CYGWIN)
-
-set(Boost_LIBRARIES ${CMAKE_PREFIX_PATH}/lib/libboost_filesystem.a ${CMAKE_PREFIX_PATH}/lib/libboost_system.a)
 
 
 ###############################################################################
@@ -86,6 +89,14 @@ if(XML_SUPPORT)
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
   )
 endif(XML_SUPPORT)
+
+
+
+if (WIN32 AND NOT CYGWIN)
+  add_definitions(-D_CRT_SECURE_NO_WARNINGS -DBOOST_ALL_NO_LIB -D_NO_CEPHES -D_NOSQLITE)
+else (WIN32 AND NOT CYGWIN)
+  add_definitions(-D_NO_CEPHES -DOLD_BOOST -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_POSIX_SOURCE -D_POSIX_C_SOURCE -D_NOSQLITE )
+endif (WIN32 AND NOT CYGWIN)
 
 
 #############################################################################
@@ -146,10 +157,29 @@ if(PROFILING AND UNIX)
 endif()
  
 # SET LIBRARIES FOR PERCOLATOR
-if(MSVC)
-  target_link_libraries(percolator perclibrary fido ${XERCESC_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES} ${CURL_LIBRARIES})
-else(MSVC)
-  target_link_libraries(percolator perclibrary fido ${XERCESC_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES} ${CURL_LIBRARIES})
+if(WIN32 AND NOT CYGWIN)
+  target_link_libraries(
+    percolator 
+    general 
+    perclibrary fido 
+    ${XERCESC_LIBRARIES}
+    ${CMAKE_THREAD_LIBS_INIT}
+    ${CURL_LIBRARIES}
+  )
+  target_link_libraries(percolator optimized libboost_filesystem-vc100-mt.lib )
+  target_link_libraries(percolator optimized libboost_system-vc100-mt.lib )
+  target_link_libraries(percolator debug libboost_filesystem-vc100-mt-gd.lib)
+  target_link_libraries(percolator debug libboost_system-vc100-mt-gd.lib)
+else()
+  target_link_libraries(
+    percolator 
+    perclibrary 
+    fido 
+    ${XERCESC_LIBRARIES} 
+    ${CMAKE_THREAD_LIBS_INIT} 
+    ${Boost_LIBRARIES} 
+    ${CURL_LIBRARIES}
+  )
 endif()
  
 # INSTALL PERCOLATOR

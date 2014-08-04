@@ -173,9 +173,7 @@ string ExtractRows::getName() {
  * \returns the description for ExtractRows
  */
 string ExtractRows::getDescription() {
-
-  return "Prints out rows that match a particular column value.";
-
+  return "Print specified rows from a tab-delimited file.";
 }
 
 /*

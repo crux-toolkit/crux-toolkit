@@ -2,12 +2,11 @@
 #define WINCRUX_H
 
 #ifdef _MSC_VER
+#define WIN32_LEAN_AND_MEAN
 #include <direct.h>
 #include <fcntl.h>
 #include <io.h>
 #include <string.h>
-#include <time.h>
-#include <WinSock2.h>
 #include <windows.h>
 #include "utils.h"
 #include "windirent.h"
@@ -18,13 +17,10 @@
 
 // Rename some functions to the windows version
 #define access _access
-#define drand48 rand
 #define isfinite _finite
 #define isnan _isnan
 #define pclose _pclose
 #define popen _popen
-#define random rand
-#define srandom srand
 #define chdir _chdir
 #define getcwd _getcwd
 #define mkdir(a, b) _mkdir(a)

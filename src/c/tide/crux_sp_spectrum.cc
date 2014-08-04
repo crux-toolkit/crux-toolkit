@@ -7,8 +7,8 @@
 #include "crux_sp_spectrum.h"
 
 SpSpectrum::SpSpectrum(const Spectrum& spectrum, int charge, double max_mz) 
-  : beta_(0.075), max_mz_(max_mz), max_intensity_(0.0), last_idx_(0) {
-  
+  : beta_(0.075), max_intensity_(0.0), last_idx_(0) {
+  max_mz_ = MassConstants::mass2bin(max_mz);  
   intensity_array_ = new double[IntensityArraySize()];
   memset(intensity_array_, 0, sizeof(double)*IntensityArraySize());
 
@@ -22,7 +22,6 @@ SpSpectrum::~SpSpectrum() {
 void SpSpectrum::PreprocessSpectrum(const Spectrum& spectrum, int charge) {
   double precursor_mz = spectrum.PrecursorMZ();
   double experimental_mass_cut_off = precursor_mz*charge + 50;
-  double bin_width = bin_width_mono;
   double max_intensity = 0;
 
   for (int i = 0; i < spectrum.Size(); ++i) {
@@ -38,8 +37,7 @@ void SpSpectrum::PreprocessSpectrum(const Spectrum& spectrum, int charge) {
       continue;
     
     // map peak location to bin
-    int bin = (int)(peak_location/bin_width + 0.5);
-
+    int bin = MassConstants::mass2bin(peak_location);
     double intensity = sqrt(spectrum.Intensity(i));
 
     // set intensity in array with correct mz, only if max peak in the bin

@@ -147,9 +147,7 @@ string StatColumn::getName() {
  * \returns the description for StatColumn
  */
 string StatColumn::getDescription() {
-
-  return "Collects statistics from a column of data in "
-         "a delimited file.";
+  return "Collect summary statistics from a column in a tab-delimited file.";
 }
 
 /*

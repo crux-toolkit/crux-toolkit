@@ -50,6 +50,7 @@ int TideSearchApplication::main(int argc, char** argv) {
     "compute-sp",
     "remove-precursor-peak",
     "remove-precursor-tolerance",
+    "print-search-progress",
     "txt-output",
     "sqt-output",
     "pepxml-output",
@@ -60,8 +61,10 @@ int TideSearchApplication::main(int argc, char** argv) {
     "overwrite",
     "parameter-file",
     "exact-p-value",
+    "use-neutral-loss-peaks",
+    "use-flanking-peaks",
     "mz-bin-width",
-    "mz-bin-offset",
+    "mz-bin-offset",	
     "verbosity"
   };
   int num_options = sizeof(option_list) / sizeof(char*);
@@ -132,8 +135,12 @@ int TideSearchApplication::main(int argc, char** argv) {
   }
   //check to compute exact p-value 
   exact_pval_search = get_boolean_parameter("exact-p-value");
-  double binWidth   = get_double_parameter("mz-bin-width");
-  double binOffset  = get_double_parameter("mz-bin-offset");
+  bin_width_  = get_double_parameter("mz-bin-width");
+  bin_offset_ = get_double_parameter("mz-bin-offset");
+  // for now don't allow XCorr p-value searches with variable bin width
+  if ( exact_pval_search == true && abs( bin_width_ - BIN_WIDTH_MONO ) > 0.000001 ) {
+    carp( CARP_FATAL, "tide-search with XCorr p-values and variable bin width is not allowed in this version of Crux. Exiting ..." );
+  }
 
   // Check concat parameter
   bool concat = get_boolean_parameter("concat");
@@ -177,9 +184,9 @@ int TideSearchApplication::main(int argc, char** argv) {
     if (!aaf_peptides_header.file_type() == pb::Header::PEPTIDES || !aaf_peptides_header.has_peptides_header()) {
       carp(CARP_FATAL, "Error reading index (%s)", peptides_file.c_str());
     }
-    MassConstants::Init(&aaf_peptides_header.peptides_header().mods());
+    MassConstants::Init( &aaf_peptides_header.peptides_header().mods(), bin_width_, bin_offset_ );
     active_peptide_queue = new ActivePeptideQueue(aaf_peptide_reader.Reader(), proteins);
-    nAA = active_peptide_queue->CountAAFrequency(binWidth, binOffset, &AAFreqN, &AAFreqI, &AAFreqC, &AAMass);
+    nAA = active_peptide_queue->CountAAFrequency(bin_width_, bin_offset_, &AAFreqN, &AAFreqI, &AAFreqC, &AAMass);
     delete active_peptide_queue;
   } // End calculation AA frequencies
 
@@ -206,16 +213,14 @@ int TideSearchApplication::main(int argc, char** argv) {
       OutputFiles::setProteinLevelDecoys();
     }
   }
-  MassConstants::Init(&pepHeader.mods());
+
+  MassConstants::Init(&pepHeader.mods(), bin_width_, bin_offset_);
   TideMatchSet::initModMap(pepHeader.mods());
 
   active_peptide_queue = new ActivePeptideQueue(peptide_reader.Reader(), proteins);
 
-  active_peptide_queue->SetBinSize(binWidth, binOffset);
+  active_peptide_queue->SetBinSize(bin_width_, bin_offset_);
 
-  // printf( "active_peptide_queue binWidth  = %10.8f\n", binWidth );    //&& for test only
-  // printf( "active_peptide_queue binOffset = %4.2f\n", binOffset );   //&& for test only
-  
   carp(CARP_INFO, "Reading spectra file %s", spectra_file.c_str());
   // Try to read file as spectrumrecords file
   SpectrumCollection spectra;
@@ -227,9 +232,8 @@ int TideSearchApplication::main(int argc, char** argv) {
                     spectra_file.c_str());
     string converted_spectra_file = get_string_parameter_pointer("store-spectra");
     if (converted_spectra_file.empty()) {
-      char tmpnam_buffer[L_tmpnam];
-      tmpnam(tmpnam_buffer);
-      delete_spectra_file = converted_spectra_file = tmpnam_buffer;
+      delete_spectra_file = converted_spectra_file =
+      make_file_path("spectrumrecords.tmp");
     }
     carp(CARP_DEBUG, "New spectrumrecords filename: %s",
                      converted_spectra_file.c_str());
@@ -267,9 +271,9 @@ int TideSearchApplication::main(int argc, char** argv) {
       highest_mz = (*spectra.SpecCharges()).at(spectrum_num-1).neutral_mass;
 
     carp(CARP_DEBUG, "Max m/z %f", highest_mz);
-    MaxMZ::SetGlobalMax(highest_mz);
+    MaxBin::SetGlobalMax(highest_mz);
   } else {
-    MaxMZ::SetGlobalMaxFromFlag();
+    MaxBin::SetGlobalMaxFromFlag();
   }
 
   char* digestString =
@@ -288,6 +292,7 @@ int TideSearchApplication::main(int argc, char** argv) {
     // TODO Find a better way to do this?
     add_or_update_hash(parameters, "enzyme", pepHeader.enzyme().c_str());
     add_or_update_hash(parameters, "digestion", digestString);
+    add_or_update_hash(parameters, "monoisotopic-precursor", pepHeader.monoisotopic_precursor()?"T":"F");
     free(digestString);
     output_files = new OutputFiles(this);
   } else {
@@ -395,9 +400,14 @@ void TideSearchApplication::search(
   }
 
   // This is the main search loop.
-  ObservedPeakSet observed;
+  ObservedPeakSet observed(bin_width_, bin_offset_,
+	  get_boolean_parameter("use-neutral-loss-peaks"), 
+	  get_boolean_parameter("use-flanking-peaks"));
 
   // cycle through spectrum-charge pairs, sorted by neutral mass
+  unsigned sc_index = 0;
+  FLOAT_T sc_total = (FLOAT_T)spec_charges->size();
+  int print_interval = get_int_parameter("print-search-progress");
   for (vector<SpectrumCollection::SpecCharge>::const_iterator sc = spec_charges->begin();
        sc != spec_charges->end();
        ++sc) {
@@ -465,18 +475,13 @@ void TideSearchApplication::search(
 
     } else {  // execute exact-pval-search
 	  //&& for test only
-	  printf( "scan %d   m/z %f   charge %d   neutral mass %f\n", spectrum->SpectrumNumber(), spectrum->PrecursorMZ(), charge, pre_mass );
+	  // printf( "scan %d   m/z %f   charge %d   neutral mass %f\n", spectrum->SpectrumNumber(), spectrum->PrecursorMZ(), charge, pre_mass );
 	  //%% end for test only
 	
       const int minDeltaMass = AAMass[ 0 ];
       const int maxDeltaMass = AAMass[ nAA - 1 ];
-      double binWidth   = get_double_parameter( "mz-bin-width" );
-      double binOffset  = get_double_parameter( "mz-bin-offset" );
 
-      // printf( "exact-pval-search binWidth = %10.8f\n", binWidth );    //&& for test only
-      // printf( "exact-pval-search binOffset = %4.2f\n", binOffset );   //&& for test only
-
-      int maxPrecurMass = floor( MaxMZ::BinInvert( MaxMZ::Global().CacheBinEnd() ) + 50.0 );	//&& works, but is this the best way to get?
+      int maxPrecurMass = floor( MaxBin::Global().CacheBinEnd() + 50.0 );	//&& works, but is this the best way to get?
       int nCandPeptide = active_peptide_queue -> SetActiveRangeBIons( min_mass, max_mass );
       TideMatchSet::Arr match_arr( nCandPeptide ); 	// scored peptides will go here.
 	  
@@ -504,7 +509,7 @@ void TideSearchApplication::search(
 	  pe = 0;
       for ( iter_ = active_peptide_queue -> iter_; iter_ != active_peptide_queue -> end_; ++iter_ ) {
         double pepMass = ( *iter_ ) -> Mass();
-        pepMaInt = ( int )floor( pepMass / binWidth + 1.0 - binOffset );
+        pepMaInt = ( int )floor( pepMass / bin_width_ + 1.0 - bin_offset_ );
         pepMassInt[ pe ] = pepMaInt;
         pepMassIntUnique.push_back( pepMaInt );
 		pe++;
@@ -533,8 +538,8 @@ void TideSearchApplication::search(
         scoreOffsetObs[ pe ] = 0;
         pepMaInt = pepMassIntUnique[ pe ];		        //&& should be accessed with an iterator
         // preprocess to create one integerized evidence vector for each cluster of masses among selected peptides
-        double pepMassMonoMean = ( pepMaInt - 1.0 + binOffset ) * binWidth + 0.5;
-		observed.CreateEvidenceVector( *spectrum, binWidth, binOffset, charge, pepMassMonoMean, maxPrecurMass, evidenceObs[ pe ] );
+        double pepMassMonoMean = ( pepMaInt - 1.0 + bin_offset_ ) * bin_width_ + 0.5;
+		observed.CreateEvidenceVector( *spectrum, bin_width_, bin_offset_, charge, pepMassMonoMean, maxPrecurMass, evidenceObs[ pe ] );
         // NOTE: will have to go back to separate dynamic programming for target and decoy if they have different probNI and probC
         int maxEvidence = *std::max_element( evidenceObs[ pe ], evidenceObs[ pe ] + maxPrecurMass );
         int minEvidence = *std::min_element( evidenceObs[ pe ], evidenceObs[ pe ] + maxPrecurMass );
@@ -554,7 +559,7 @@ void TideSearchApplication::search(
         int topRowBuffer = -minEvidence;
         int nRowDynProg = bottomRowBuffer - minScore + 1 + maxScore + topRowBuffer;
         pValueScoreObs[ pe ] = new double[ nRowDynProg ];
-        scoreOffsetObs[ pe ] = calcScoreCount( maxPrecurMass, evidenceObs[ pe ], binWidth, binOffset, pepMaInt, maxEvidence, minEvidence, maxScore, minScore, 
+        scoreOffsetObs[ pe ] = calcScoreCount( maxPrecurMass, evidenceObs[ pe ], pepMaInt, maxEvidence, minEvidence, maxScore, minScore, 
 								nAA, AAFreqN, AAFreqI, AAFreqC, AAMass, pValueScoreObs[ pe ] );
       }
  
@@ -636,6 +641,12 @@ void TideSearchApplication::search(
                      active_peptide_queue, proteins, locations, compute_sp, highScoreBest);
       }
     }
+
+    ++sc_index;
+    if (print_interval > 0 && sc_index % print_interval == 0) {
+      carp(CARP_INFO, "%d spectra searched, %.0f%% complete",
+           sc_index, sc_index / sc_total * 100);
+    }
   }
   if (output_files) {
     output_files->writeFooters();
@@ -679,6 +690,21 @@ void TideSearchApplication::collectScoresCompiled(
   // doesn't understand that %ecx and %edi (or %rcx and %rdi) get
   // clobbered. Since they're already input registers, they can't be
   // included in the clobber list.
+
+#ifdef _MSC_VER
+  __asm {
+    cld
+    push ecx
+    push edi
+    mov edx, cache
+    mov eax, prog
+    mov ecx, queue_size
+    mov edi, results
+    call eax
+    pop edi
+    pop ecx
+  }
+#else
   __asm__ __volatile__("cld\n" // stos operations increment edi
 #ifdef __x86_64__
                        "push %%rcx\n"
@@ -699,6 +725,7 @@ void TideSearchApplication::collectScoresCompiled(
                          "c" (queue_size),
                          "D" (results)
   );
+#endif
 
   // match_arr is filled by the compiled programs, not by calls to
   // push_back(). We have to set the final size explicitly.
@@ -746,9 +773,9 @@ string TideSearchApplication::getName() {
 
 string TideSearchApplication::getDescription() {
   return
-  "Search a collection of spectra against a sequence "
-  "database, returning a collection of peptide-spectrum "
-  "matches (PSMs) scored by XCorr.";
+  "Search a collection of spectra against a sequence database, returning a "
+  "collection of peptide-spectrum matches (PSMs). This is a fast search engine "
+  "but requires that you first build an index with tide-index.";
 }
 
 bool TideSearchApplication::needsOutputDirectory() {
@@ -759,7 +786,7 @@ COMMAND_T TideSearchApplication::getCommand() {
   return TIDE_SEARCH_COMMAND;
 }
 
-int TideSearchApplication::calcScoreCount( int numelEvidenceObs, int* evidenceObs, double binWidth, double binOffset, int pepMassInt, int maxEvidence, int minEvidence, int maxScore, int minScore,
+int TideSearchApplication::calcScoreCount( int numelEvidenceObs, int* evidenceObs, int pepMassInt, int maxEvidence, int minEvidence, int maxScore, int minScore,
                                             int nAA, double* AAFreqN, double* AAFreqI, double* AAFreqC, int* AAMass, double* pValueScoreObs ) {
 /* Calculates counts of peptides with various XCorr scores, given a preprocessed MS2 spectrum, using dynamic programming.
  * Written by Jeff Howbert, October, 2012 (as function calcScoreCount).
@@ -781,7 +808,7 @@ int TideSearchApplication::calcScoreCount( int numelEvidenceObs, int* evidenceOb
     int bottomRowBuffer = maxEvidence + 1;
     int topRowBuffer = -minEvidence;
     int colBuffer = maxDeltaMass;
-    int colStart = ( int )floor( 1.0 / binWidth + 1.0 - binOffset );
+    int colStart = ( int )floor( 1.0 / bin_width_ + 1.0 - bin_offset_ );
     int scoreOffsetObs = bottomRowBuffer - minScore;
 
     int nRow = bottomRowBuffer - minScore + 1 + maxScore + topRowBuffer;

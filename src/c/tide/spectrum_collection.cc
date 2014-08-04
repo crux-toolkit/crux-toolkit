@@ -119,7 +119,7 @@ void SpectrumCollection::ReadMS(istream& in, bool ms1) {
 	double precursor_m_z = 0;
 	int ok1 = 0;
 	int ok2 = 0;
-	sscanf(line, "S %d %d %n%lf%n", &specnum1, &specnum2, &ok1,
+	sscanf(line, "S %d %d%n%lf%n", &specnum1, &specnum2, &ok1,
 	       &precursor_m_z, &ok2);
 	CHECK((ok1 > 0) && (ms1 != (ok2 > 0)));
 	CHECK(specnum1 == specnum2);

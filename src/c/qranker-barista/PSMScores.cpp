@@ -9,6 +9,7 @@
 #include <math.h>
 using namespace std;
 #include "PSMScores.h"
+#include "utils.h"
 
 inline bool operator>(const PSMScoreHolder &one, const PSMScoreHolder &other) 
     {return (one.score>other.score);}
@@ -147,8 +148,8 @@ void PSMScores::fillFeaturesSplit(PSMScores& train,PSMScores& test, Dataset& d, 
   //mix up the examples
   for(int i = 0; i < n; i++)
     {
-      int p1 = (int)((double)rand()/RAND_MAX*(n-1)); 
-      int p2 = (int)((double)rand()/RAND_MAX*(n-1)); 
+      int p1 = (int)((double)myrandom()/UNIFORM_INT_DISTRIBUTION_MAX*(n-1)); 
+      int p2 = (int)((double)myrandom()/UNIFORM_INT_DISTRIBUTION_MAX*(n-1)); 
       s = all_examples[p1];
       all_examples[p1] = all_examples[p2];
       all_examples[p2] = s;

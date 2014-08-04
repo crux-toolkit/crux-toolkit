@@ -287,19 +287,6 @@ void read_mods_from_file(char* param_file);
  ************************************
  */
 
-
-/**
- * The size of the bins for discretizing the m/z axis of the
- * observed spectrum.  For use with monoisotopic mass.
- */
-static const FLOAT_T BIN_WIDTH_MONO = 1.0005079;
-
-/**
- * The size of the bins for discretizing the m/z axis of the
- * observed spectrum.  For use with average mass.
- */
-static const FLOAT_T  BIN_WIDTH_AVERAGE = 1.0011413;
-
 /**
  * initialize parameters
  * ONLY add optional parameters here!!!
@@ -557,6 +544,12 @@ void initialize_parameters(void){
       "for crux-search-for-matches.  When used with enzyme=<trypsin|elastase|"
       "chymotrpysin> includes peptides containing one or more potential "
       "cleavage sites.", "true");   
+  set_string_parameter("keep-terminal-aminos", "NC", 
+      "When creating decoy peptides using decoy-format=shuffle or decoy-format="
+      "peptide-reverse, this option specifies whether the N-terminal and "
+      "C-terminal amino acids are kept in place or allowed to be shuffled or "
+      "reversed. Default = NC.",
+      "Available for tide-index and generate-decoys.", "true");
 
   set_boolean_parameter("unique-peptides", true,
       "Generate peptides only once, even if they appear in more "
@@ -623,22 +616,22 @@ void initialize_parameters(void){
   /* N.B. Use NaN to indicate that no user preference was specified.
    * In this case, the default value depends on the mass type.
    * S.M. Also prevent a width of 0.                                */
-  set_double_parameter("mz-bin-width", NaN(), 1e-4, BILLION,
+  set_double_parameter("mz-bin-width", 1.0005079, 1e-4, BILLION,
       "Specify the width of the bins used to "
       "discretize the m/z axis.  Also used as tolerance for assigning "
       "ions.  Default=1.0005079 for monoisotopic mass "
       "or 1.0011413 for average mass.",
-      "Available for crux-search-for-matches tide-search and xlink-assign-ions.", "true");
+      "Available for crux-search-for-matches, tide-search, and xlink-assign-ions.", "true");
   set_double_parameter("mz-bin-offset", SMART_MZ_OFFSET, 0.0, 1.0,
       "Specify the location of the left edge of the "
-      "first bin used to discretize the m/z axis. Default=0.68",
+      "first bin used to discretize the m/z axis. Default=0.40",
       "Available for crux-search-for-matches and tide-search.", "true");
   // initialize as "unset", then set as bool after cmdline parsed
   set_string_parameter("use-flanking-peaks", "unset",
       "Include peaks +/- 1da around b/y ions in theoretical spectrum.  "
-      "sequest-search and search-for-xlinks default=T. search-for-matches "
       "default=F.",
-      "Available in the parameter file for all search commands.",
+      "Available in the parameter file for the tide-search and "
+      "search-for-xlinks commands.",
       "true");
   set_double_parameter("spectrum-min-mz", 0.0, 0, BILLION, 
       "The lowest spectrum m/z to search. Default=0.0.",
@@ -801,10 +794,10 @@ void initialize_parameters(void){
       "Set the precision for masses and m/z written to sqt and .txt files.  "
       "Default=4",
       "Available from parameter file for all commands.", "true");
-  set_int_parameter("print-search-progress", 10, 0, BILLION,
+  set_int_parameter("print-search-progress", 1000, 0, BILLION,
       "Show search progress by printing every n spectra searched.  Default="
-      "10.", "Set to 0 to show no search progress.  Available for crux "
-      "search-for-matches from parameter file.",
+      "1000.", "Set to 0 to show no search progress.  Available for crux "
+      "search-for-matches and tide-search from parameter file.",
       "true");
 
   // Sp scoring params
@@ -920,11 +913,14 @@ void initialize_parameters(void){
     "Available for crux percolator ",
     "true"
   );
-  set_int_parameter(
+  set_string_parameter(
     "default-direction",
-    0,-BILLION,BILLION,
-    "The most informative feature given as feature number, can be negated to indicate "
-    "that a lower value is better",
+    NULL,
+    "The most informative feature given as the feature name.  The name can be "
+    "preceded by a hyphen (e.g., \"-XCorr\") to indicate that a lower value is better."
+    " By default, Percolator will select the feature that produces"
+    " the largest set of target PSMs at a specified FDR threshold"
+    " (cf. --train-fdr).",
     "Available for crux percolator",
     "true"
   );
@@ -1100,7 +1096,7 @@ void initialize_parameters(void){
     "Available for tide-index",
     "true"
   );
-  set_string_parameter("mods-spec", "",
+  set_string_parameter("mods-spec", "C+57.02146",
     "Expression for static and variable mass modifications to include. "
     "Specify a comma-separated list of modification sequences of the form: "
     "C+57.02146,2M+15.9949,1STY+79.966331,...",
@@ -1168,7 +1164,21 @@ void initialize_parameters(void){
     "Available for tide-search.",
     "true"
   );
-
+  set_boolean_parameter("clip-nterm-methionine", false,
+    "This parameter controls whether Tide will automatically "
+	"remove the N-terminal methionine from a sequence entry.",
+    "Available for tide-index.",
+    "true"
+  );
+  set_boolean_parameter("use-neutral-loss-peaks", false,
+    "Controls whether neutral loss ions are considered in the search. "
+    "Two types of	neutral losses are included and are applied only to "
+    "singly charged b- and y-ions: loss of ammonia (NH3, 17.0086343 Da) "
+	"and H2O (18.0091422). Each neutral loss peak has intensity 1/5 of "
+	"the primary peak",
+    "Available for tide-search.",
+    "true"
+  );
   /*
    * Comet parameters
    */
@@ -1230,7 +1240,7 @@ void initialize_parameters(void){
     "true"
   );
 
-  set_int_parameter("search_enzyme_number", 1, 1, BILLION,
+  set_int_parameter("search_enzyme_number", 1, 0, BILLION,
                     "choose from list at end of this params file",
                     "option for Comet only",
                     "true");
@@ -1328,12 +1338,6 @@ void initialize_parameters(void){
         "option for Comet only",
         "true");
 
-  set_int_parameter("output_pinxmlfile",
-        0, 0, 1,
-        "0=no, 1=yes  write pin.xml file",
-        "option for Comet only",
-        "true");
-  
   set_int_parameter("output_txtfile",
         1, 0, 1,
         "0=no, 1=yes  write tab-delimited text file",
@@ -3027,8 +3031,11 @@ bool check_option_type_and_bounds(const char* name){
            value_str);
     if( string_to_enzyme_type(value_str) == INVALID_ENZYME){
       success = false;
-      sprintf(die_str, "Illegal enzyme. Must be trypsin, chymotrypsin, "
-              ", elastase, or no-enzyme.");
+      sprintf(die_str, "Illegal enzyme. Must be no-enzyme, trypsin,trypsin/p, chymotrypsin, " 
+      "elastase,clostripain, cyanogen-bromide, iodosobenzoate, " 
+      "proline-endopeptidase, staph-protease, aspn, lys-c, "
+      "lys-n, arg-c , glue-c, pepsin-a, modified-chymotrypsin, elastase-trypsin-chymotrypsin, "
+      "custom-enzyme trypsin, chymotrypsin, elastase, or no-enzyme.");
     }
     break;
   case BOOLEAN_P:

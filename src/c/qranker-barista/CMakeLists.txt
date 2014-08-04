@@ -8,6 +8,10 @@ include_directories(${CMAKE_BINARY_DIR}/src/external/build/src/ProteoWizard/libr
 include_directories(${CMAKE_BINARY_DIR}/src/external/build/src/ProteoWizard/libraries/boost_aux)
 include_directories(${CMAKE_BINARY_DIR}/src/external/include)
 
+if (WIN32 AND NOT CYGWIN)
+  add_definitions(-DBOOST_ALL_NO_LIB)
+endif (WIN32 AND NOT CYGWIN)
+
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   set_property(
     DIRECTORY

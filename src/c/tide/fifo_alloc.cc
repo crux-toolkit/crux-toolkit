@@ -20,7 +20,11 @@
 // to provide run-time compilation of dot product calculations.
 
 #include <sys/types.h>
+#ifdef _MSC_VER
+#include "mman.h"
+#else
 #include <sys/mman.h>
+#endif
 #include<stdlib.h>
 #include<assert.h>
 #include<iostream>

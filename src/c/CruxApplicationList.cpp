@@ -49,6 +49,15 @@ void CruxApplicationList::add(
 }
 
 /**
+ * Adds a message to be printed in the usage statement
+ */
+void CruxApplicationList::addMessage(
+  const string& message ///< message to add
+) {
+  messages_[applications_.size()] = message;
+}
+
+/**
  * \returns an application by a name,
  * returns NULL if not found
  */
@@ -98,19 +107,18 @@ void CruxApplicationList::usage() {
 
   }
 
-  cerr <<" Usage: " << list_name_ << " <command> [options] <argument>" << endl;
-  cerr << endl;
-  cerr << list_name_ << " supports the following commands:"<<endl<<endl;
+  cerr << " Usage: " << list_name_ << " <command> [options] <argument>" << endl;
 
-  for (iter = applications_.begin();
-    iter != applications_.end();
-    ++iter) {
-  
-    if( (*iter)->hidden() ){ // skip deprecated commands
+  for (unsigned int i = 0; i < applications_.size(); ++i) {
+    map<int, string>::const_iterator msg = messages_.find(i);
+    if (msg != messages_.end()) {
+      cerr << endl << msg->second << endl << endl;
+    }
+    if ((applications_[i])->hidden()) { // skip deprecated commands
       continue;
     }
-    string name = (*iter)->getName();
-    string description = (*iter)->getDescription();
+    string name = applications_[i]->getName();
+    string description = applications_[i]->getDescription();
     int padding = max_name_length - name.length();
 
     cerr<<"  "<<name<<" ";
@@ -168,6 +176,13 @@ void CruxApplicationList::usage() {
   cerr << "Options and arguments are specific to each command."<< endl;
   cerr << "Type '"<< list_name_ <<" <command>' for details."<<endl;
 
+}
+
+/**
+ * Gets the name of the list
+ */
+string CruxApplicationList::getListName() const {
+  return list_name_;
 }
 
 /**

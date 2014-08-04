@@ -105,7 +105,7 @@ int SpectralCounts::main(int argc, char** argv) {
   if( unique_mapping_ ){
     makeUniqueMapping();
   }
-  carp(CARP_INFO, "Number of Peptides %i", peptide_scores_.size());
+  carp(CARP_INFO, "Number of peptides %i", peptide_scores_.size());
 
   // quantify at either the peptide or protein level
   if( quantitation_ == PEPTIDE_QUANT_LEVEL ){ // peptide level
@@ -121,7 +121,7 @@ int SpectralCounts::main(int argc, char** argv) {
       normalizeProteinScores();
       checkProteinNormalization();
     }
-    carp(CARP_INFO, "Number of Proteins %i", protein_scores_.size());
+    carp(CARP_INFO, "Number of proteins %i", protein_scores_.size());
         
     if( parsimony_ != PARSIMONY_NONE ){ //if parsimony is not none
       getProteinToPeptides();
@@ -738,11 +738,11 @@ void SpectralCounts::filterMatchesQValue() {
   if( qval_type == INVALID_SCORER_TYPE ){
     carp(CARP_FATAL, "The matches in %s do not have q-values from percolator,"
                      " q-ranker, or compute-q-values.\n"
-                     " please provide file with q-values or "
+                     " Please provide file with q-values or "
                      "use threshold-type=none, custom", psm_file_.c_str());
   }
 
-  carp(CARP_INFO,
+  carp(CARP_DETAILED_DEBUG,
     "filterMatches(): Getting match iterator for %s", 
     scorer_type_to_string(qval_type));
 
@@ -946,9 +946,8 @@ string SpectralCounts::getName() {
  * \returns The help string to be included in the crux usage statement.
  */
 string SpectralCounts::getDescription() {
-  return 
-    "Rank proteins or peptides according to a specified spectral counting "
-    "method.";
+  return "Quantify peptides or proteins using one of three spectral counting "
+         "methods.";
 }
 
 COMMAND_T SpectralCounts::getCommand() {

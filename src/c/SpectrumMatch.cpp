@@ -5,6 +5,7 @@
 #include "SpectrumMatch.h"
 #include "SpectrumZState.h"
 
+#include "Match.h"
 using namespace Crux;
 
 /**
@@ -79,6 +80,18 @@ void SpectrumMatch::setZState(
 SpectrumZState& SpectrumMatch::getZState() {
 
   return zstate_;
+}
+
+void SpectrumMatch::setFileIndex(int file_idx) {
+  file_idx_ = file_idx;
+}
+
+int SpectrumMatch::getFileIndex() {
+  return(file_idx_);
+}
+
+std::string SpectrumMatch::getFilePath() {
+  return(Match::getFilePath(file_idx_));
 }
 
 /*

@@ -38,6 +38,13 @@ static const int BILLION = 1000000000;
 static const int SMALL_BUFFER = 256;
 static const int MAX_SET_PARAMS = 256;
 
+// The size of the bins for discretizing the m/z axis of the
+// observed spectrum.  For use with monoisotopic mass.
+static const FLOAT_T BIN_WIDTH_MONO = 1.0005079;
+// The size of the bins for discretizing the m/z axis of the
+// observed spectrum.  For use with average mass.
+static const FLOAT_T BIN_WIDTH_AVERAGE = 1.0011413;
+
 // Global variables
 // NOTE (BF mar-10-09): Could be like mod lists, but will require a
 // get_parameter call for each...residue? protein?

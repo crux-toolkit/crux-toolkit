@@ -3,7 +3,13 @@
 
 #include "Numerical.h"
 
-namespace pep {
+// Needed on windows beause of Microsoft non-standard names
+bool isinf(double x) {
+  return !_finite(x);
+}
+double log2(double x) {
+  return log(x) / log(2.0);
+}
 
 bool Numerical::isPos(double d)
 {
@@ -49,4 +55,5 @@ bool Numerical::isDifferentSign(double a, double b)
 {
   return isPos(a) && isNeg(b) || isNeg(a) && isPos(b);
 }
-} // namespace
+// Written by Oliver Serang 2009
+// see license for more information

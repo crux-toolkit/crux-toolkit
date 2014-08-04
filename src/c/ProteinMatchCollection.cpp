@@ -26,7 +26,7 @@ ProteinMatchCollection::ProteinMatchCollection() {
 ProteinMatchCollection::ProteinMatchCollection(
   MatchCollection* match_collection ///< matches to add
   ) {
-
+  
   addMatches(match_collection);
 
 }
@@ -45,7 +45,7 @@ ProteinMatchCollection::~ProteinMatchCollection() {
   }
 
   // delete modified aa strings + peptide matches
-  for (map<MODIFIED_AA_T*, PeptideMatch*>::iterator iter = peptide_match_map_.begin();
+  for (map<MODIFIED_AA_T*, PeptideMatch*, cmpSeq>::iterator iter = peptide_match_map_.begin();
        iter != peptide_match_map_.end();
        ++iter) {
       free(iter->first);
@@ -151,7 +151,7 @@ PeptideMatch* ProteinMatchCollection::getPeptideMatch(
     } else {
       free(mod_seq);
       carp(CARP_FATAL, "Could not find peptidematch for sequence %s",
-  	       peptide->getSequence());
+        peptide->getSequence());
     }
   } else {
     free(mod_seq);
@@ -176,7 +176,7 @@ ProteinMatch* ProteinMatchCollection::getProteinMatch(
 PeptideMatch* ProteinMatchCollection::getPeptideMatch(
   MODIFIED_AA_T* mod_seq ///< Modified Sequence to find
   ) {
-  map<MODIFIED_AA_T*, PeptideMatch*>::iterator iter = peptide_match_map_.find(mod_seq);
+  map<MODIFIED_AA_T*, PeptideMatch*, cmpSeq>::iterator iter = peptide_match_map_.find(mod_seq);
   return (iter != peptide_match_map_.end()) ? iter->second : NULL;
 }
 
@@ -195,12 +195,13 @@ void ProteinMatchCollection::addMatch(
   Spectrum* spectrum = match->getSpectrum();
   SpectrumZState z_state = match->getZState();
   SpectrumMatch* spectrum_match = new SpectrumMatch(spectrum);
+  spectrum_match->setFileIndex(match->getFileIndex());
   spectrum_match->setZState(z_state);
   spectrum_match->setScore(DELTA_CN, match->getDeltaCn());
   spectrum_match->setScore(BY_IONS_MATCHED, match->getBYIonMatched());
   spectrum_match->setScore(BY_IONS_TOTAL, match->getBYIonPossible());
   spectrum_matches_.push_back(spectrum_match);
-
+  
   pair<int, int> scan_charge = make_pair(spectrum->getFirstScan(), z_state.getCharge());
 
   if (match->getLnExperimentSize() >= 0 &&
@@ -248,6 +249,7 @@ void ProteinMatchCollection::addMatches(
 
   carp(CARP_DEBUG, "Adding %d matches to ProteinMatchCollection",
        match_collection->getMatchTotal());
+  distinct_matches_ = match_collection->getHasDistinctMatches();
 
   MatchIterator match_iter(match_collection);
   while(match_iter.hasNext()) {
@@ -261,6 +263,14 @@ void ProteinMatchCollection::addMatches(
  */
 const map<pair<int, int>, int>& ProteinMatchCollection::getMatchesSpectrum() {
   return spectrum_counts_;
+}
+
+
+/**                                                                                                                                                                                                      
+ * \returns whether matches are distinct are not                                                                                                                                                         
+ */
+bool ProteinMatchCollection::hasDistinctMatches() {
+  return distinct_matches_;
 }
 
 /*

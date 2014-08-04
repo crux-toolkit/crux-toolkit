@@ -79,18 +79,28 @@ The <code>-DCMAKE_INSTALL_PREFIX:PATH=$HOME/crux</code> option will direct
 <code>make install</code>
 to install Crux in a subdirectory of your home directory.
 <h2>Setting the build type</h2>
-On UNIX platforms CMake will default to a release build with
-optimization turned on and no debugging symbols.
-If you'd like a debug build use the command:
+On UNIX platforms CMake will default to a build with
+optimization turned off and no debugging symbols.
+This is not the most useful configuration.
+To turn optimizations on, you must explicitly request 
+a <code>Release</code> build:
 <pre>
-make clean
-cmake -DCMAKE_BUILD_TYPE=Debug .
+cmake -DCMAKE_BUILD_TYPE=Release . # Build with optimizations turned on, and debug symbols off
+make clean # remove any existing object files
 make
 </pre>
-To return to a release build
+If you'd like a debug build with optimization turned off
+but debug symbols included, use the command:
 <pre>
-make clean
-cmake -DCMAKE_BUILD_TYPE=Release .
+cmake -DCMAKE_BUILD_TYPE=Debug . # Build with optimizations turned off, and debug symbols on
+make clean # remove any existing object files
+make
+</pre>
+If you'd like a debug build with optimizations turned on but debug symbols included,
+use
+<pre>
+cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo . # Build with optimizations turned on, and debug symbols on
+make clean # remove any existing object files
 make
 </pre>
 <h2>Turning on verbose build mode</h2>

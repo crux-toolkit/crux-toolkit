@@ -274,13 +274,13 @@ void PinWriter::printPSM(
   free(sequence);
  
   fprintf(output_file_, "%s\t%d\t%d\t",
-    getId(charge, is_decoy, spectrum->getFirstScan(), rank).c_str(), // SpecId
+	  getId(charge, is_decoy, spectrum->getFirstScan(), rank, match->getFileIndex()).c_str(), // SpecId
     is_decoy ? -1 : 1, // Label
     spectrum->getFirstScan() // ScanNr
   );
   if (is_sp_) {
     fprintf(output_file_, "%.*f\t",
-      precision_, match->getRank(SP) > 0 ? log(match->getRank(SP)) : 0 // lnrSp
+      precision_, match->getRank(SP) > 0 ? log((double) match->getRank(SP)) : 0 // lnrSp
     );
   }
   fprintf(output_file_, "%.*f\t%.*f\t%.*f\t",
@@ -291,7 +291,7 @@ void PinWriter::printPSM(
   if (is_sp_) {
     fprintf(output_file_, "%.*f\t%.*f\t",
       precision_, match->getScore(SP), // Sp
-      precision_, match->getBYIonFractionMatched() // IonFrac
+      precision_, isnan(match->getBYIonFractionMatched()) ? 0 : match->getBYIonFractionMatched() // IonFrac
     );
   }
   fprintf(output_file_, "%.*f\t%u\t",
@@ -352,11 +352,14 @@ string PinWriter::getId(
   int charge,
   bool is_decoy, 
   int scan_number, 
-  int rank
+  int rank,
+  int file_idx
 ){
   ostringstream psm_id; 
-  psm_id << (is_decoy ? "decoy" : "target") << '_' << scan_number << '_'
-         << charge << '_' << rank;
+  psm_id << (is_decoy ? "decoy" : "target") << '_' << 
+    file_idx << '_' << 
+    scan_number << '_' << charge << '_' << 
+    rank;
   return psm_id.str();   
 }
 

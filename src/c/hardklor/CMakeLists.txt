@@ -8,6 +8,11 @@ include_directories(${CMAKE_BINARY_DIR}/src/external/build/src/ProteoWizard/libr
 include_directories(${CMAKE_BINARY_DIR}/src/external/build/src/ProteoWizard/libraries/boost_aux)
 include_directories(${CMAKE_BINARY_DIR}/src/external/include)
 include_directories(${CMAKE_BINARY_DIR}/src/external/include/MSToolkit)
+if (WIN32 AND NOT Cygwin)
+  # Needed to put DLL containing type libraries
+  # in include path for Windows
+  include_directories(${CMAKE_BINARY_DIR}/src/external/lib)
+endif (WIN32 AND NOT Cygwin)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     set_property(

@@ -52,8 +52,13 @@ Figure 1D of the above paper.</p>
 <ul>
 
 <li>
-<code>--spectrum-parser &lt;pwiz|mstoolkit&gt;</code> &ndash;
-Parser to use for reading in MS/MS spectra.  Default = pwiz.</li>
+<code>--spectrum-parser pwiz|mstoolkit</code> &ndash;
+Specify the parser to use for reading in MS/MS spectra. The default,
+ProteoWizard parser should be able to read the MS/MS file formats listed
+<a href="http://proteowizard.sourceforge.net/formats.shtml">here</a>. The
+alternative is <a href="mstoolkit.html">MSToolkit parser</a>. If the
+ProteoWizard parser fails to read your files properly, you may want to try the
+MSToolkit parser instead. Default = pwiz.</li>
 
 <LI>
 <code>--verbosity &lt;0-100&gt;</code> &ndash; Specify the verbosity of the

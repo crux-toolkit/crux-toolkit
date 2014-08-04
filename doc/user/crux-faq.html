@@ -37,10 +37,8 @@ Comet provides an option to report an E-value (a kind of statistical
 confidence measure) in addition to the raw XCorr score.</li>
 <li>
 Comet supports a variety of options that are not implemented in Tide
-(num_results, fragment_bin_tol, fragment_bin_offset, various options
-related to different types of theoretical fragment ions,
-max_fragment_charge, nucleotide_reading_frame, clip_nterm_methionine,
-etc.).</li>
+(various options related to different types of theoretical fragment
+ions, max_fragment_charge, nucleotide_reading_frame, etc.).</li>
 </ul></p>
 
 <li>
@@ -49,8 +47,7 @@ etc.).</li>
 <p>
 Crux is written in C++, so in principle it should work on virtually
 any modern operating system.  We provide pre-compiled binaries for
-Linux, MacOS and Windows.  The latter requires that you have Cygwin
-installed.</p>
+Linux, MacOS and Windows.</p>
 
 <li>
 <b>How does Crux compute the masses of peptides and peptide
@@ -112,12 +109,16 @@ form of the observed spectrum and the theoretical spectrum derived
 from the candidate peptide. In order to compute this dot product, the
 masses of the fragments in both spectra are assigned to discrete mass
 bins. This can be viewed as a form of rounding, but with more control
-over the discrete masses. Two parameters, <code>bin-width</code> and
-<code>bin-offset</code>, control the size and location of the bins,
+over the discrete masses. Two parameters, <code>mz-bin-width</code> and
+<code>mz-bin-offset</code>, control the size and location of the bins,
 and are used to convert fragment masses according to this formula:</p>
+
 <p align=center>binned mass = floor( ( original mass / <code>bin-width</code> ) + 1.0 - <code>bin-offset</code> )</p>
-<p>The default values <code>bin-width</code>=1.0005079 and <code>bin-offset</code>=0.40
-are suitable for most low-resolution datasets.
+
+<p>
+The default values <code>bin-width</code>=1.0005079
+and <code>bin-offset</code>=0.68 are suitable for most low-resolution
+datasets.
 </p>
 
 <li>
@@ -147,7 +148,7 @@ this parameter is set to 0, i.e., <code>precursor_charge = 0 0</code>,
 then the charge state rule above is applied.  However, if a user
 specifies a precursor charge range, i.e., <code>precursor_charge = 1
 5</code>, then Comet will search every spectrum through this range of
-assumed charge states for every those spectra whose precursor charge
+assumed charge states for every spectrum whose precursor charge
 is unknown.</p>
 
 <li>
@@ -260,34 +261,12 @@ the <code>precursor-window</code> and
 <code>precursor-window-type</code> options.</p>
 
 <li>
-<b>What enhancements to Crux are planned?</b></li>
-
-<p>
-<ul>
-
-<li>
-Support for searching for post-translational modifications in 
-<code>search-for-xlinks</code>.</li>
-
-<li>
-Allow users to specify variable modifications of specific N-term or
-C-term residues.</li>
-
-<li>
-Add threading to <code>tide-search</code>.</li>
-
-</ul>
-</p>
-
-<li>
 <b>How can I contribute to Crux?</b></li>
 
 <p>
-Please email crux-support@uw.edu to obtain read-only access to our
-Subversion repository, along with access to our development team web
-pages.  Patches implementing new features can then be emailed to the
-development team for review and inclusion in subsequent releases of
-Crux.</p>
+Patches implementing new features can be emailed to the development
+team at crux-support@uw.edu for review and inclusion in subsequent
+releases of Crux.</p>
 
 <li>
 <b>Where does the name "Crux" come from?</b></li>
