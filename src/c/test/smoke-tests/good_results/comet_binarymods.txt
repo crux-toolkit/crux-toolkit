@@ -1,0 +1,3 @@
+scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	sp score	sp rank	xcorr score	xcorr rank	b/y ions matched	b/y ions total	total matches/spectrum	sequence	protein id	flanking aa	e-value
+1938	2	1377.038819	2752.063085	2752.0478	0.0000	1140.2567	1	3.9218	1	22	46	2	EPGC[57.0215]GC[57.0215]C[57.0215]MTC[57.0215]ALAEGQSC[57.0215]GVYTER	tmp	KS	1.67E-10
+1938	2	1377.038819	2752.063085	2752.0478	1.0000	1140.2567	1	3.9218	2	22	46	2	EPGC[57.0215]GC[57.0215]C[57.0215]MTC[57.0215]ALAEGQSC[57.0215]GVYTER	tmp	KS	1.67E-10
