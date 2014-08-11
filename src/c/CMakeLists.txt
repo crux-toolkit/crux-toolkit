@@ -449,6 +449,7 @@ else()
     mstoolkitlite
     perclibrary
     xlink
+    boost_chrono
     boost_filesystem
     boost_system
     fido
@@ -494,9 +495,11 @@ else()
     pwiz_data_identdata_version
     pwiz_data_proteome
     SHA1
+    boost_chrono
     boost_system-mt-s
     boost_iostreams-mt-s
     z-mt-s-1_2
+    boost_chrono
     boost_filesystem-mt-s
     boost_regex-mt-s
     boost_thread-mt-s
@@ -526,6 +529,7 @@ else()
     boost_system-mt-s
     boost_iostreams-mt-s
     z-mt-s-1_2
+    boost_chrono
     boost_filesystem-mt-s
     boost_regex-mt-s
     boost_thread-mt-s
