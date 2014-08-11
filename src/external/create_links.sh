@@ -21,6 +21,7 @@ echo "path:$install_path"
 
 cd $install_path/lib
 
+ln -s -f libboost_chrono*-mt.a libboost_chrono.a
 ln -s -f libboost_date_time-*-mt.a libboost_date_time-mt-s.a
 ln -s -f libboost_date_time-*-mt.a libboost_date_time.a
 ln -s -f libboost_iostreams-*-mt.a libboost_iostreams-mt-s.a 
