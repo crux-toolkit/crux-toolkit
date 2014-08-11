@@ -127,21 +127,6 @@ that were printed to stderr.
 <UL>
 
 <li>
-<code>--fileroot &lt;string&gt;</code> &ndash; 
-The <code>fileroot</code> string will be added as a prefix to all
-output file names. Default = none.</li>
-
-<li>
-<code>--output-dir &lt;filename&gt;</code> &ndash; 
-The name of the directory where output files will be created.
-Default = crux-output.</li>
-
-<li>
-<code>--overwrite &lt;T|F&gt;</code> &ndash;
-Replace existing files if true (T) or fail when trying to overwrite a
-file if false (F). Default =  F.</li>
-
-<li>
 <code>--hardklor-algorithm &lt;name&gt;</code> &ndash; Choose the algorithm for
 analyzing combinations of multiple peptide or protein isotope
 distributions. There are five algorithms to choose from:
@@ -216,8 +201,8 @@ peptide distributions that can be combined to estimate the observed
 data at any given spectrum segment. The default value is 3.</li>
 
 <li>
-<code>--distribution-area &lt;T|F&gt;</code> &ndash; Reports peptide intensities
-as the distribution area. Default false.</li>
+<code>--distribution-area &lt;T|F&gt;</code> &ndash; Report peptide
+intensities as the distribution area. Default false.</li>
 
 <li>
 <code>--averagine-mod &lt;string&gt;</code> &ndash; Include alternative
@@ -285,10 +270,10 @@ spectra, this value adjusts the segment size considered when
 calculating a signal-over-noise ratio. The default value is 250.0.</li>
 
 <li>
-<code>--static-sn &lt;T|F&gt;</code> &ndash; If true, Hardklor will calculate
-the local noise levels across the spectrum using <code>--sn-window</code>, 
-then select a floor of this set
-of noise levels to apply to the whole spectrum.  Default is true.</li>
+<code>--static-sn &lt;T|F&gt;</code> &ndash; If true, Hardklor will
+calculate the local noise levels across the spectrum
+using <code>--sn-window</code>, then select a floor of this set of
+noise levels to apply to the whole spectrum.  Default is true.</li>
 
 <li>
 <code>--mz-window &lt;double&gt;-&lt;double&gt;</code> &ndash; Restrict
@@ -303,6 +288,24 @@ of any set of peaks in a spectrum when computing the results (in
 m/z). Thus, if the value was 5.0, then sets of peaks greater than 5
 m/z are divided into smaller sets prior to analysis. The default value
 is 4.0.</li>
+
+<h3>Output</h3>
+
+<li>
+<code>--fileroot &lt;string&gt;</code> &ndash; 
+The <code>fileroot</code> string will be added as a prefix to all
+output file names. Default = none.</li>
+
+<li>
+<code>--output-dir &lt;filename&gt;</code> &ndash; 
+The name of the directory where output files will be created.
+Default = crux-output.</li>
+
+<li>
+<code>--overwrite &lt;T|F&gt;</code> &ndash;
+Replace existing files if true (T) or fail when trying to overwrite a
+file if false (F). Default =  F.</li>
+
 
 <li>
 <code>--parameter-file &lt;filename&gt;</code> &ndash; A file
