@@ -62,9 +62,17 @@ int CruxBullseyeApplication::main(int argc, char** argv) {
   string hardklor_output;
   string input_ms1 = get_string_parameter("MS1 spectra");
   string input_ms2 = get_string_parameter("MS2 spectra");
-  
-  string match_ms2 = make_file_path("bullseye.pid.ms2");
-  string nomatch_ms2 = make_file_path("bullseye.no-pid.ms2");
+
+  string out_format = get_string_parameter_pointer("spectrum-format");
+  if (out_format.empty() || out_format == "__NULL_STR") {
+    out_format = "ms2";
+  } else if (out_format != "ms2" && out_format != "bms2" &&
+             out_format != "cms2" && out_format != "mgf") {
+    carp(CARP_FATAL, "spectrum-format must be ms2, bms2, cms2, or mgf, but was %s",
+         out_format.c_str());
+  }
+  string match_ms2 = make_file_path("bullseye.pid." + out_format);
+  string nomatch_ms2 = make_file_path("bullseye.no-pid." + out_format);
   bool overwrite = get_boolean_parameter("overwrite");
 
   hardklor_output = string(get_string_parameter_pointer("hardklor-file"));
