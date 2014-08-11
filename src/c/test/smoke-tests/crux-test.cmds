@@ -18,9 +18,6 @@
 # Search for matches and estimate p-values with modifications
 # TODO
 
-# Confirm that no decoy files were created for tdc and that only one decoy file created for one-decoy-file
-0 = list_files = good_results/list-files-tdc-one-decoy-file = ls one-decoy-file tdc  
-
 # search with mods and produce output complient with the TPP
 1 = tpp = good_results/tpp.pep.xml = crux search-for-matches --pepxml-output T --decoys peptide-shuffle --parameter-file params/mods-tpp --fileroot tpp test.ms2 small-yeast.fasta; cat crux-output/tpp.search.target.pep.xml = 'date' 'base_name' 'local_path'
 
@@ -62,9 +59,6 @@
 # the concatinated test can't use the same matches per spectrum value for targets and decoys so remove that column
 # those results also do not have the unshuffled peptide or decoy matches/spectrum columns
 1 = competition = good_results/competition.target.txt = rm -rf comp; cat test.fasta test_crux_index/test-random.fasta > concat.fasta; crux sequest-search --decoys peptide-shuffle --output-dir comp --fileroot concat test.ms2 concat.fasta; cut -f1-12,14-19 comp/concat.sequest.target.txt > good_results/competition.target.txt; crux sequest-search --decoys peptide-shuffle --output-dir comp --decoy-location target-file test.ms2 test_crux_index; cut -f1-12,14-17 comp/sequest.target.txt 
-
-# Search for matches with modifications from index
-1 = search_mods_index = good_results/search_mods_index.target.txt = crux search-for-matches --decoys peptide-shuffle --parameter-file params/mods-high-precision test.ms2 existing_crux_index; cat crux-output/search.target.txt = 'Time' 'Database'
 
 # Analyze matches with modifications from index
 #1 = analyze_mods_index = good_results/analyze_mods_index.percolator.target.txt = crux percolator --feature-file TRUE --overwrite T --parameter-file params/mods-high-precision existing_crux_index crux-output; cat crux-output/percolator.target.txt = 'Time' 'Database'
@@ -109,38 +103,8 @@
 # No decoys; create an index with decoys for this test
 1 = no-decoys-ss = good_results/no-decoys-ss = rm -f ss/no-decoys*; crux create-index --decoys peptide-shuffle --overwrite T small-yeast.fasta small-yeast-index; crux sequest-search  --output-dir ss --fileroot no-decoys --parameter-file params/no-decoys-ss demo.ms2 small-yeast-index; cat ss/no-decoys*t = 'StartTime' 'Elapsed time' 'INFO:'
 
-# xlink search
-1 = search-for-xlinks = good_results/search-xlink.target.txt =  crux search-for-xlinks --parameter-file params/xlink xlink.ms2 xlink.fasta E:K,D:K -18.01; cat crux-output/search.target.txt
-
 # xlink ion generation
 #1 = xlink-ion = good_results/xlink_ions.txt = xlink-predict-peptide-ions KVIKNVAEVK LYMAED 4 6 2 -18.01
-
-#spectral-counts pepXML
-1 = spectral-counts-pepxml = good_results/spectral-counts.pepxml.txt = rm -rf crux-output; crux sequest-search --parameter-file params/set_rand_seed_only --decoy-location target-file --decoys peptide-shuffle demo.ms2 yeast-index/; crux q-ranker --parameter-file params/set_rand_seed_only --pepxml-output T --feature-file T demo.ms2 crux-output/sequest.target.txt; crux spectral-counts --protein-database small-yeast.fasta --parameter-file params/nsaf ./crux-output/q-ranker.target.pep.xml; cat crux-output/spectral-counts.target.txt
-
-#spectral-counts custom
-1 = spectral-counts-custom = good_results/spectral-counts.pepxml.custom.txt = crux spectral-counts --protein-database small-yeast.fasta --parameter-file params/spc-custom ./crux-output/q-ranker.target.pep.xml; cat crux-output/spectral-counts.target.txt
-
-#spectral-counts simple
-1 = spectral-counts-simple = good_results/spectral-counts.simple.txt = crux spectral-counts --protein-database small-yeast.fasta --parameter-file params/spc-simple ./crux-output/q-ranker.target.pep.xml; cat crux-output/spectral-counts.target.txt
-
-#spectral-counts none
-1 = spectral-counts-none = good_results/spectral-counts.none.txt = crux spectral-counts --protein-database small-yeast.fasta --parameter-file params/spc-none ./crux-output/q-ranker.target.pep.xml; cat crux-output/spectral-counts.target.txt
-
-#spectral-counts peptideprophet
-1 = spectral-counts-peptideprophet = good_results/spectral-counts.peptideprophet.txt = crux spectral-counts --protein-database small-yeast.fasta --parameter-file params/spc-pp ./crux-output/q-ranker.target.pep.xml; cat crux-output/spectral-counts.target.txt
-
-#spectral-counts pepXML-nodb
-1 = spectral-counts-pepxml-nodb = good_results/spectral-counts.pepxml.nodb.txt = crux spectral-counts --parameter-file params/raw ./crux-output/q-ranker.target.pep.xml; cat crux-output/spectral-counts.target.txt
-
-#spectral-counts tsv-nodb
-1 = spectral-counts-tsv-nodb = good_results/spectral-counts.raw.nodb.txt = crux spectral-counts --parameter-file params/raw ./crux-output/q-ranker.target.psms.txt ; cat crux-output/spectral-counts.target.txt
-
-#spectral-counts mzid
-1 = spectral-counts-mzid = good_results/spectral-counts.mzid.txt = crux spectral-counts --overwrite T --threshold-type none --measure RAW Sequest_example_ver1.1.mzid ; cat crux-output/spectral-counts.target.txt
-
-#spectral-counts barista
-1 = spectral-counts-barista = good_results/spectral-counts.barista.txt = crux barista --parameter-file params/set_rand_seed_only small-yeast.fasta demo.ms2 ./crux-output/sequest.target.txt; crux spectral-counts --protein-database small-yeast.fasta --parameter-file params/nsaf ./crux-output/barista.target.psms.txt; cat crux-output/spectral-counts.target.txt
 
 # MORE TESTS TODO
 
