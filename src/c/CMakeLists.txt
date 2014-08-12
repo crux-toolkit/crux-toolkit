@@ -329,12 +329,14 @@ if (WIN32 AND NOT CYGWIN)
     optimized libboost_nowide-vc100-mt
     optimized libboost_filesystem-vc100-mt
     optimized libboost_thread-vc100-mt
+    optimized libboost_chrono-vc100-mt
     debug libboost_nowide-vc100-mt-gd
     debug libboost_regex-vc100-mt-gd
     debug libboost_system-vc100-mt-gd
     debug libboost_iostreams-vc100-mt-gd
     debug libboost_filesystem-vc100-mt-gd
     debug libboost_thread-vc100-mt-gd
+    debug libboost_chrono-vc100-mt-gd
   )
   target_link_libraries(
     xlink-score-spectrum
@@ -365,24 +367,20 @@ if (WIN32 AND NOT CYGWIN)
     MassLynxRaw
     cdt
     ws2_32
-  )
-  target_link_libraries(
-    xlink-score-spectrum
     optimized libboost_system-vc100-mt
     optimized libboost_iostreams-vc100-mt
     optimized libboost_filesystem-vc100-mt
     optimized libboost_nowide-vc100-mt
     optimized libboost_regex-vc100-mt
     optimized libboost_thread-vc100-mt
-  )
-  target_link_libraries(
-    xlink-score-spectrum
+    optimized libboost_chrono-vc100-mt
     debug libboost_system-vc100-mt-gd
     debug libboost_iostreams-vc100-mt-gd
     debug libboost_filesystem-vc100-mt-gd
     debug libboost_nowide-vc100-mt-gd
     debug libboost_regex-vc100-mt-gd
     debug libboost_thread-vc100-mt-gd
+    debug libboost_chrono-vc100-mt-gd
   )
   target_link_libraries(
     xlink-assign-ions
@@ -413,24 +411,20 @@ if (WIN32 AND NOT CYGWIN)
     MassLynxRaw
     cdt
     ws2_32
-  )
-  target_link_libraries(
-    xlink-assign-ions
     optimized libboost_system-vc100-mt
     optimized libboost_iostreams-vc100-mt
     optimized libboost_filesystem-vc100-mt
     optimized libboost_nowide-vc100-mt
     optimized libboost_regex-vc100-mt
     optimized libboost_thread-vc100-mt
-  )
-  target_link_libraries(
-    xlink-assign-ions
+    optimized libboost_chrono-vc100-mt
     debug libboost_system-vc100-mt-gd
     debug libboost_iostreams-vc100-mt-gd
     debug libboost_filesystem-vc100-mt-gd
     debug libboost_nowide-vc100-mt-gd
     debug libboost_regex-vc100-mt-gd
     debug libboost_thread-vc100-mt-gd
+    debug libboost_chrono-vc100-mt-gd
   )
 else()
   target_link_libraries(
@@ -449,8 +443,6 @@ else()
     mstoolkitlite
     perclibrary
     xlink
-    boost_filesystem
-    boost_system
     fido
     pwiz_data_identdata
     pwiz_data_identdata_version
@@ -470,6 +462,9 @@ else()
     boost_filesystem-mt-s
     boost_regex-mt-s
     boost_thread-mt-s
+    boost_chrono
+    boost_filesystem
+    boost_system
     pthread
   )
     
@@ -494,9 +489,11 @@ else()
     pwiz_data_identdata_version
     pwiz_data_proteome
     SHA1
+    boost_chrono
     boost_system-mt-s
     boost_iostreams-mt-s
     z-mt-s-1_2
+    boost_chrono
     boost_filesystem-mt-s
     boost_regex-mt-s
     boost_thread-mt-s
@@ -526,6 +523,7 @@ else()
     boost_system-mt-s
     boost_iostreams-mt-s
     z-mt-s-1_2
+    boost_chrono
     boost_filesystem-mt-s
     boost_regex-mt-s
     boost_thread-mt-s
