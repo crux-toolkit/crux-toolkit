@@ -329,12 +329,14 @@ if (WIN32 AND NOT CYGWIN)
     optimized libboost_nowide-vc100-mt
     optimized libboost_filesystem-vc100-mt
     optimized libboost_thread-vc100-mt
+    optimized libboost_chrono-vc100-mt
     debug libboost_nowide-vc100-mt-gd
     debug libboost_regex-vc100-mt-gd
     debug libboost_system-vc100-mt-gd
     debug libboost_iostreams-vc100-mt-gd
     debug libboost_filesystem-vc100-mt-gd
     debug libboost_thread-vc100-mt-gd
+    debug libboost_chrono-vc100-mt-gd
   )
   target_link_libraries(
     xlink-score-spectrum
@@ -365,24 +367,20 @@ if (WIN32 AND NOT CYGWIN)
     MassLynxRaw
     cdt
     ws2_32
-  )
-  target_link_libraries(
-    xlink-score-spectrum
     optimized libboost_system-vc100-mt
     optimized libboost_iostreams-vc100-mt
     optimized libboost_filesystem-vc100-mt
     optimized libboost_nowide-vc100-mt
     optimized libboost_regex-vc100-mt
     optimized libboost_thread-vc100-mt
-  )
-  target_link_libraries(
-    xlink-score-spectrum
+    optimized libboost_chrono-vc100-mt
     debug libboost_system-vc100-mt-gd
     debug libboost_iostreams-vc100-mt-gd
     debug libboost_filesystem-vc100-mt-gd
     debug libboost_nowide-vc100-mt-gd
     debug libboost_regex-vc100-mt-gd
     debug libboost_thread-vc100-mt-gd
+    debug libboost_chrono-vc100-mt-gd
   )
   target_link_libraries(
     xlink-assign-ions
@@ -413,24 +411,20 @@ if (WIN32 AND NOT CYGWIN)
     MassLynxRaw
     cdt
     ws2_32
-  )
-  target_link_libraries(
-    xlink-assign-ions
     optimized libboost_system-vc100-mt
     optimized libboost_iostreams-vc100-mt
     optimized libboost_filesystem-vc100-mt
     optimized libboost_nowide-vc100-mt
     optimized libboost_regex-vc100-mt
     optimized libboost_thread-vc100-mt
-  )
-  target_link_libraries(
-    xlink-assign-ions
+    optimized libboost_chrono-vc100-mt
     debug libboost_system-vc100-mt-gd
     debug libboost_iostreams-vc100-mt-gd
     debug libboost_filesystem-vc100-mt-gd
     debug libboost_nowide-vc100-mt-gd
     debug libboost_regex-vc100-mt-gd
     debug libboost_thread-vc100-mt-gd
+    debug libboost_chrono-vc100-mt-gd
   )
 else()
   target_link_libraries(
