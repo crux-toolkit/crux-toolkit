@@ -12,6 +12,7 @@ Scenario Outline: User runs search-for-xlinks
   And crux-output/<actual_output> should match good_results/<expected_output>
 
 Examples:
-  |test_name|args                            |spectra  |fasta         |sites|mass|actual_output     |expected_output   |
-  |xlink-db |--parameter-file params/xlink.db|xlink.ms2|xlink.db.fasta|K:K  |222 |xlink_peptides.txt|xlink_peptides.txt|
+  |test_name        |args                            |spectra  |fasta         |sites  |mass  |actual_output     |expected_output        |
+  |xlink-db         |--parameter-file params/xlink.db|xlink.ms2|xlink.db.fasta|K:K    |222   |xlink_peptides.txt|xlink_peptides.txt     |
+  |search-for-xlinks|--parameter-file params/xlink   |xlink.ms2|xlink.fasta   |E:K,D:K|-18.01|search.target.txt |search-xlink.target.txt|
 
