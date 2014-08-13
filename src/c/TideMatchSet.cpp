@@ -28,8 +28,9 @@ TideMatchSet::TideMatchSet(
   double max_mz
 ) :
   matches_(matches), max_mz_(max_mz) {
-  exact_pval_search = false;
+  exact_pval_search_ = false;
 }
+
 /*
 TideMatchSet::TideMatchSet(
   Arr2* matches,
@@ -49,6 +50,7 @@ TideMatchSet::TideMatchSet(
   }
 }
 */
+
 TideMatchSet::~TideMatchSet() {
 }
 
@@ -66,7 +68,7 @@ void TideMatchSet::report(
   const ProteinVec& proteins,  ///< proteins corresponding with peptides
   const vector<const pb::AuxLocation*>& locations,  ///< auxiliary locations
   bool compute_sp, ///< whether to compute sp or not
-  bool highScoreBest    // indicates semantics of score magnitude; true = high scores are best
+  bool highScoreBest //< indicates semantics of score magnitude
 ) {
   if (matches_->size() == 0) {
     return;
@@ -181,11 +183,11 @@ void TideMatchSet::writeToFile(
             << sp_map->at(*i).second << '\t';
     }
     std::ios_base::fmtflags original_flags = file->flags();
-    file->setf( std::ios_base::floatfield );
-    *file << ( ( *i ) -> first.first ) << '\t';
-    file->flags( original_flags );
-    if ( exact_pval_search == true ) {
-	  *file << ( (*i ) -> first.second ) << '\t';
+    file->setf(std::ios_base::floatfield);
+    *file << (*i)->first.first << '\t';
+    file->flags(original_flags);
+    if (exact_pval_search_) {
+      *file << (*i)->first.second << '\t';
     }
     *file << ++cur << '\t';
     if (sp_map) {
@@ -222,7 +224,7 @@ void TideMatchSet::report(
   const ProteinVec& proteins,  ///< proteins corresponding with peptides
   const vector<const pb::AuxLocation*>& locations,  ///< auxiliary locations
   bool compute_sp, ///< whether to compute sp or not
-  bool highScoreBest    // indicates semantics of score magnitude; true = high scores are best
+  bool highScoreBest // indicates semantics of score magnitude
 ) {
   if (matches_->size() == 0) {
     return;
@@ -252,8 +254,8 @@ void TideMatchSet::report(
   SpectrumZState z_state;
   z_state.setMZ(crux_spectrum.getPrecursorMz(), charge);
 
-  crux_collection->exact_pval_search = exact_pval_search;
-  crux_decoy_collection->exact_pval_search = exact_pval_search;
+  crux_collection->exact_pval_search_ = exact_pval_search_;
+  crux_decoy_collection->exact_pval_search_ = exact_pval_search_;
 
   addCruxMatches(crux_collection, false, top_n, &proteins_made, targets, crux_spectrum,
                  peptides, proteins, locations, z_state, sp_scorer, &lowest_sp);
@@ -389,10 +391,12 @@ void TideMatchSet::writeHeaders(
     if (i > 0) {
       *file << '\t';
     }
-    if (exact_pval_search && header == XCORR_SCORE_COL)
-     *file << get_column_header(EXACT_PVALUE_COL) << '\t' << get_column_header(REFACTORED_SCORE_COL);
-    else 
-     *file << get_column_header(header);
+    if (exact_pval_search && header == XCORR_SCORE_COL) {
+      *file << get_column_header(EXACT_PVALUE_COL) << '\t'
+            << get_column_header(REFACTORED_SCORE_COL);
+    } else {
+      *file << get_column_header(header);
+    }
   }
   *file << endl;
 }
@@ -517,46 +521,24 @@ void TideMatchSet::gatherTargetsAndDecoys(
   vector<Arr::iterator>& targetsOut,
   vector<Arr::iterator>& decoysOut,
   int top_n,
-  bool highScoreBest    // indicates semantics of score magnitude; true = high scores are best
+  bool highScoreBest // indicates semantics of score magnitude
 ) {
-  if ( highScoreBest ) {
-    make_heap(matches_->begin(), matches_->end(), less_score());
-    if (!OutputFiles::isConcat() && TideSearchApplication::hasDecoys()) {
-      for (Arr::iterator i = matches_->end(); i != matches_->begin(); ) {
-        pop_heap(matches_->begin(), i--, less_score());
-        const Peptide& peptide = *(peptides->GetPeptide(i->second));
-        const pb::Protein& protein = *(proteins[peptide.FirstLocProteinId()]);
-        vector<Arr::iterator>* vec_ptr = !peptide.IsDecoy() ? &targetsOut : &decoysOut;
-        if (vec_ptr->size() < top_n + 1) {
-          vec_ptr->push_back(i);
-        }
-      }
-    } else {
-      int toAdd = min(top_n + 1, matches_->size());
-      for (int i = 0; i < toAdd; ) {
-        pop_heap(matches_->begin(), matches_->end() - i, less_score());
-        targetsOut.push_back(matches_->end() - (++i));
+  make_heap(matches_->begin(), matches_->end(), highScoreBest ? lessScore : moreScore);
+  if (!OutputFiles::isConcat() && TideSearchApplication::hasDecoys()) {
+    for (Arr::iterator i = matches_->end(); i != matches_->begin(); ) {
+      pop_heap(matches_->begin(), i--, highScoreBest ? lessScore : moreScore);
+      const Peptide& peptide = *(peptides->GetPeptide(i->second));
+      const pb::Protein& protein = *(proteins[peptide.FirstLocProteinId()]);
+      vector<Arr::iterator>* vec_ptr = !peptide.IsDecoy() ? &targetsOut : &decoysOut;
+      if (vec_ptr->size() < top_n + 1) {
+        vec_ptr->push_back(i);
       }
     }
-  }
-  else {
-    make_heap(matches_->begin(), matches_->end(), more_score());
-    if (!OutputFiles::isConcat() && TideSearchApplication::hasDecoys()) {
-      for (Arr::iterator i = matches_->end(); i != matches_->begin(); ) {
-        pop_heap(matches_->begin(), i--, more_score());
-        const Peptide& peptide = *(peptides->GetPeptide(i->second));
-        const pb::Protein& protein = *(proteins[peptide.FirstLocProteinId()]);
-        vector<Arr::iterator>* vec_ptr = !peptide.IsDecoy() ? &targetsOut : &decoysOut;
-        if (vec_ptr->size() < top_n + 1) {
-          vec_ptr->push_back(i);
-        }
-      }
-    } else {
-      int toAdd = min(top_n + 1, matches_->size());
-      for (int i = 0; i < toAdd; ) {
-        pop_heap(matches_->begin(), matches_->end() - i, more_score());
-        targetsOut.push_back(matches_->end() - (++i));
-      }
+  } else {
+    int toAdd = min(top_n + 1, matches_->size());
+    for (int i = 0; i < toAdd; ) {
+      pop_heap(matches_->begin(), matches_->end() - i, highScoreBest ? lessScore : moreScore);
+      targetsOut.push_back(matches_->end() - (++i));
     }
   }
 }

@@ -114,7 +114,7 @@ class Match {
   void init();
 
  public:
-  bool exact_pval_search;
+  bool exact_pval_search_;
   /**
    * \returns a new memory allocated match
    */

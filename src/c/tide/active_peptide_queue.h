@@ -36,7 +36,7 @@ class ActivePeptideQueue {
   bool HasNext() const { return iter_ != end_; }
   Peptide* NextPeptide() { return *iter_++; }
   const Peptide* GetPeptide(int back_index) const { return *(end_ - back_index); }
-  void SetBinSize(double binWidth, double binOffset){
+  void SetBinSize(double binWidth, double binOffset) {
     theoretical_b_peak_set_.binWidth  = binWidth;
     theoretical_b_peak_set_.binOffset = binOffset;
   }
@@ -44,7 +44,8 @@ class ActivePeptideQueue {
   deque<TheoreticalPeakSetBIons> b_ion_queue_;
   deque<TheoreticalPeakSetBIons>::const_iterator iter1_, end1_;
  
-  int CountAAFrequency( double binWidth, double binOffset, double** dAAFreqN, double** dAAFreqI, double** dAAFreqC, int** dAAMass );  
+  int CountAAFrequency(double binWidth, double binOffset, double** dAAFreqN,
+                       double** dAAFreqI, double** dAAFreqC, int** dAAMass);
   
   int ActiveTargets() const { return active_targets_; }
   int ActiveDecoys() const { return active_decoys_; }
@@ -59,8 +60,6 @@ class ActivePeptideQueue {
   RecordReader* reader_;
   pb::Peptide current_pb_peptide_;
 
-//  typedef vector<unsigned int> b_ion_spectrum;
-  
   // All amino acid sequences from which the peptides are drawn.
   const vector<const pb::Protein*>& proteins_; 
 

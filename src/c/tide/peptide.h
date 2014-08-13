@@ -119,7 +119,7 @@ class Peptide {
 			       const pb::Peptide& pb_peptide,
                                TheoreticalPeakCompiler* compiler_prog1,
                                TheoreticalPeakCompiler* compiler_prog2);
-  void ComputeBTheoreticalPeaks( TheoreticalPeakSetBIons* workspace ) const;
+  void ComputeBTheoreticalPeaks(TheoreticalPeakSetBIons* workspace) const;
 
   // Return the appropriate program depending on the precursor charge.
   // TODO 257: fix the unfortunate use of max_charge.
@@ -158,8 +158,8 @@ class Peptide {
   double* getAAMasses();
 
  private:
-  template< class W > void AddIons( W* workspace ) const;
-  template< class W > void AddBIonsOnly( W* workspace ) const;
+  template<class W> void AddIons(W* workspace) const;
+  template<class W> void AddBIonsOnly(W* workspace) const;
 
   void Compile(const TheoreticalPeakArr* peaks,
 	       const pb::Peptide& pb_peptide,

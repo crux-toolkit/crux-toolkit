@@ -75,7 +75,7 @@ void Match::init() {
 Match::Match(){
   init();
   ++pointer_count_;
-  exact_pval_search = false;
+  exact_pval_search_ = false;
 }
 
 /**
@@ -642,7 +642,7 @@ void Match::printSqt(
   int precision = get_int_parameter("precision");
 
   // print match info
-  if (exact_pval_search) {
+  if (exact_pval_search_) {
     fprintf(file, "M\t%i\t%i\t%.*f\t%.2f\t%.*g\t%.*g\t%.*g\t%i\t%i\t%s\tU\n",
             getRank(XCORR),
             getRank(SP),
