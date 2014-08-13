@@ -92,35 +92,35 @@ PeptidePtr MzIdentMLWriter::getPeptide(
       if (peptide_p -> modification.size() == mod_count) {
         if (mod_count == 0) { // no modifications
           return (peptide_p);
-	} else {
-	  MODIFIED_AA_T* mod_seq = peptide->getModifiedAASequence();
-	  AA_MOD_T** mod_list = NULL;
-	  int total_mods = get_all_aa_mod_list(&mod_list);
-	  bool match = true;
+        } else {
+          MODIFIED_AA_T* mod_seq = peptide->getModifiedAASequence();
+          AA_MOD_T** mod_list = NULL;
+          int total_mods = get_all_aa_mod_list(&mod_list);
+          bool match = true;
           for (mod_iter = peptide_p->modification.begin();
                mod_iter != peptide_p->modification.end();
                ++mod_iter) {
-	    ModificationPtr current_mod = *mod_iter;
-	    int mod_location = current_mod -> location;
-	    //Crux only supports one mass for modifications.
-	    double mono_mass = current_mod ->monoisotopicMassDelta;
+            ModificationPtr current_mod = *mod_iter;
+            int mod_location = current_mod -> location;
+            //Crux only supports one mass for modifications.
+            double mono_mass = current_mod ->monoisotopicMassDelta;
             for (int mod_idx = 0 ; mod_idx < total_mods; mod_idx++) {
               match = false;
-	      if (is_aa_modified(mod_seq[mod_location], mod_list[mod_idx])) {
-		if (aa_mod_get_mass_change(mod_list[mod_idx]) == mono_mass) {
-		  match = true; //we found a match, keep searching
-		  break;
-		}
-	      }
-	    }
-	    if (!match) {break;}
-	  }
+              if (is_aa_modified(mod_seq[mod_location], mod_list[mod_idx])) {
+                if (aa_mod_get_mass_change(mod_list[mod_idx]) == mono_mass) {
+                  match = true; //we found a match, keep searching
+                  break;
+                }
+              }
+            }
+            if (!match) {break;}
+          }
           free(mod_seq);
-	  //all modifications match, return peptide.
-	  if (match) {
-	    return peptide_p;
-	  }
-	}
+          //all modifications match, return peptide.
+          if (match) {
+            return peptide_p;
+          }
+        }
       }
     }
   }
@@ -139,14 +139,14 @@ PeptidePtr MzIdentMLWriter::getPeptide(
     
     for (int mod_seq_idx = 0;mod_seq_idx < peptide->getLength();mod_seq_idx++) {
       for (int mod_idx =0 ; mod_idx < total_mods; mod_idx++) {
-	if (is_aa_modified(mod_seq[mod_seq_idx], mod_list[mod_idx])) {
-	  ModificationPtr mod_p(new pwiz::identdata::Modification());
-	  mod_p->location = mod_seq_idx;
-	  mod_p->monoisotopicMassDelta = aa_mod_get_mass_change(mod_list[mod_idx]);
-	  mod_p->residues.push_back(sequence_str.at(mod_seq_idx));
-	  mod_p->set(MS_unknown_modification);
-	  peptide_p->modification.push_back(mod_p);
-	}
+        if (is_aa_modified(mod_seq[mod_seq_idx], mod_list[mod_idx])) {
+          ModificationPtr mod_p(new pwiz::identdata::Modification());
+          mod_p->location = mod_seq_idx;
+          mod_p->monoisotopicMassDelta = aa_mod_get_mass_change(mod_list[mod_idx]);
+          mod_p->residues.push_back(sequence_str.at(mod_seq_idx));
+          mod_p->set(MS_unknown_modification);
+          peptide_p->modification.push_back(mod_p);
+        }
       }
     }
 
@@ -211,9 +211,9 @@ DBSequencePtr MzIdentMLWriter::getDBSequence(
     if (protein_id == dbs_ptr->accession) {
       if (is_post_process) {
         //sequence str should be the peptide
-	if (sequence_str == dbs_ptr->seq) {
+        if (sequence_str == dbs_ptr->seq) {
           return dbs_ptr;
-	}
+        }
       } else {
         //we have the full sequence.
         return dbs_ptr;
@@ -251,7 +251,7 @@ PeptideEvidencePtr MzIdentMLWriter::getPeptideEvidence(
 
   for (pe_iter = mzid_->sequenceCollection.peptideEvidence.begin();
        pe_iter != mzid_->sequenceCollection.peptideEvidence.end();
-	 ++pe_iter) {
+         ++pe_iter) {
     PeptideEvidencePtr pe_ptr = *pe_iter;
     if ((pe_ptr->peptidePtr->peptideSequence == sequence_str) && (pe_ptr->dbSequencePtr->accession==protein_id)) {
       return pe_ptr;
@@ -285,7 +285,7 @@ PeptideEvidencePtr MzIdentMLWriter::getPeptideEvidence(
 
   for (pe_iter = mzid_->sequenceCollection.peptideEvidence.begin();
        pe_iter != mzid_->sequenceCollection.peptideEvidence.end();
-	 ++pe_iter) {
+         ++pe_iter) {
     PeptideEvidencePtr pe_ptr = *pe_iter;
     if ((pe_ptr->peptidePtr->peptideSequence == sequence_str) && (pe_ptr->dbSequencePtr->accession==protein_id)) {
       return pe_ptr;

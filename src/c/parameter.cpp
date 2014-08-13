@@ -1166,16 +1166,16 @@ void initialize_parameters(void){
   );
   set_boolean_parameter("clip-nterm-methionine", false,
     "This parameter controls whether Tide will automatically "
-	"remove the N-terminal methionine from a sequence entry.",
+    "remove the N-terminal methionine from a sequence entry.",
     "Available for tide-index.",
     "true"
   );
   set_boolean_parameter("use-neutral-loss-peaks", false,
     "Controls whether neutral loss ions are considered in the search. "
-    "Two types of	neutral losses are included and are applied only to "
+    "Two types of neutral losses are included and are applied only to "
     "singly charged b- and y-ions: loss of ammonia (NH3, 17.0086343 Da) "
-	"and H2O (18.0091422). Each neutral loss peak has intensity 1/5 of "
-	"the primary peak",
+    "and H2O (18.0091422). Each neutral loss peak has intensity 1/5 of "
+    "the primary peak",
     "Available for tide-search.",
     "true"
   );
@@ -3497,7 +3497,7 @@ void parse_parameter_file(
     } else {
       if (line.find("[COMET_ENZYME_INFO]") != string::npos) {
         comet_enzyme_info_lines_.clear();
-	found_comet = true;
+        found_comet = true;
       } else {
         for (string::iterator iter = line.begin(); iter != line.end(); ++iter) {
 
