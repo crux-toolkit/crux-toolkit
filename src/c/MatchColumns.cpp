@@ -20,7 +20,7 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "xcorr score",
   "xcorr rank",
   "exact p-value",
-  "refactored XCORR",
+  "refactored xcorr",
   "e-value",
   "p-value",
 #ifdef NEW_COLUMNS

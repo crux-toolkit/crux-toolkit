@@ -115,19 +115,20 @@ void Peptide::AddIons(W* workspace) const {
   }
 }
 
-template< class W >
-void Peptide::AddBIonsOnly( W* workspace ) const {
+template<class W>
+void Peptide::AddBIonsOnly(W* workspace) const {
   // Use workspace to assemble b ions only.
   // Intended primarily to support XCorr p-value calculations.
   double max_possible_peak = numeric_limits<double>::infinity();
-  if (MaxBin::Global().MaxBinEnd() > 0)
+  if (MaxBin::Global().MaxBinEnd() > 0) {
     max_possible_peak = MaxBin::Global().CacheBinEnd();
+  }
   
   vector<double> aa_masses(Len());
   const char* residue = residues_;
   // Collect m/z values for each residue, for z = 1.
-  for ( int i = 0; i < Len(); ++i, ++residue ) {
-    aa_masses[i] = MassConstants::mono_table[ *residue ];
+  for (int i = 0; i < Len(); ++i, ++residue) {
+    aa_masses[i] = MassConstants::mono_table[*residue];
   }
 
   //Add modifications to amino acids
@@ -139,10 +140,10 @@ void Peptide::AddBIonsOnly( W* workspace ) const {
   }
 
   // Add all charge 1 B ions.
-  double total = MassConstants::proton + aa_masses[ 0 ];
-  for ( int i = 1; i < Len() && total <= max_possible_peak; ++i ) {
-    workspace -> AddBIon( total );
-    total += aa_masses[ i ];
+  double total = MassConstants::proton + aa_masses[0];
+  for (int i = 1; i < Len() && total <= max_possible_peak; ++i) {
+    workspace -> AddBIon(total);
+    total += aa_masses[i];
   }
 }
 
@@ -189,8 +190,8 @@ void Peptide::ComputeTheoreticalPeaks(TheoreticalPeakSet* workspace) const {
 #endif
 }
 
-void Peptide::ComputeBTheoreticalPeaks( TheoreticalPeakSetBIons* workspace ) const {
-  AddBIonsOnly< TheoreticalPeakSetBIons >( workspace );   // workspace for b ion only peak set
+void Peptide::ComputeBTheoreticalPeaks(TheoreticalPeakSetBIons* workspace) const {
+  AddBIonsOnly<TheoreticalPeakSetBIons>(workspace);   // workspace for b ion only peak set
 #ifdef DEBUG
   Show();
 #endif

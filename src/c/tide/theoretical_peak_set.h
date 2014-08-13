@@ -771,17 +771,17 @@ class TheoreticalPeakSetSparse : public TheoreticalPeakSet {
 class TheoreticalPeakSetBIons {
  public:
   TheoreticalPeakSetBIons() {}
-  TheoreticalPeakSetBIons( int capacity ) {
-    unordered_peak_list_.reserve( capacity );
+  TheoreticalPeakSetBIons(int capacity) {
+    unordered_peak_list_.reserve(capacity);
   }
   virtual ~TheoreticalPeakSetBIons() {}
 
   void Clear() { unordered_peak_list_.clear(); }
-  void AddBIon( double mass ) {
-    unsigned int index = ( unsigned int )floor( mass / binWidth + 1.0 - binOffset );
-    unordered_peak_list_.push_back( index );
+  void AddBIon(double mass) {
+    unsigned int index = (unsigned int)floor(mass / binWidth + 1.0 - binOffset);
+    unordered_peak_list_.push_back(index);
   }
-  vector< unsigned int > unordered_peak_list_;
+  vector<unsigned int> unordered_peak_list_;
   double binWidth;
   double binOffset;
 };

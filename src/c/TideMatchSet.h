@@ -13,8 +13,6 @@
 #include "OutputFiles.h"
 #include "PostProcessProtein.h"
 
-#include "boost/tuple/tuple.hpp"
-
 using namespace std;
 
 typedef vector<const pb::Protein*> ProteinVec;
@@ -22,6 +20,8 @@ typedef vector<const pb::Protein*> ProteinVec;
 class TideMatchSet {
 
 public:
+  bool exact_pval_search_;
+
   typedef pair<int, int> Pair2;
   typedef FixedCapacityArray<Pair2> Arr2;
 
@@ -36,12 +36,7 @@ public:
     Arr* matches,
     double max_mz
   );
-/*  TideMatchSet(
-    Arr2* matches,
-    double max_mz
-  );
-*/
-  bool exact_pval_search;
+
   ~TideMatchSet();
 
   /**
@@ -57,7 +52,7 @@ public:
     const ProteinVec& proteins, ///< proteins corresponding with peptides
     const vector<const pb::AuxLocation*>& locations,  ///< auxiliary locations
     bool compute_sp, ///< whether to compute sp or not
-    bool highScoreBest    // indicates semantics of score magnitude; true = high scores are best
+    bool highScoreBest //< indicates semantics of score magnitude
   );
 
   /**
@@ -72,7 +67,7 @@ public:
     const ProteinVec& proteins, ///< proteins corresponding with peptides
     const vector<const pb::AuxLocation*>& locations,  ///< auxiliary locations
     bool compute_sp, ///< whether to compute sp or not
-    bool highScoreBest    // indicates semantics of score magnitude; true = high scores are best
+    bool highScoreBest // indicates semantics of score magnitude
   );
 
   static void writeHeaders(
@@ -102,14 +97,14 @@ protected:
   static char match_collection_loc_[sizeof(MatchCollection)];
   static char decoy_match_collection_loc_[sizeof(MatchCollection)];
 
-  struct less_score : public binary_function<Pair, Pair, bool> {
+  static bool lessScore(Pair x, Pair y) {
     // Compare scores, ignore counters.
-    bool operator()(Pair x, Pair y) { return x.first.first < y.first.first; }
-  };
-  struct more_score : public binary_function<Pair, Pair, bool> {
+    return x.first.first < y.first.first;
+  }
+  static bool moreScore(Pair x, Pair y) {
     // Compare scores, ignore counters.
-    bool operator()(Pair x, Pair y) { return x.first.first > y.first.first; }
-  };
+    return x.first.first > y.first.first;
+  }
 
   /**
    * Helper function for tab delimited report function
@@ -171,7 +166,7 @@ protected:
     vector<Arr::iterator>& targetsOut,
     vector<Arr::iterator>& decoysOut,
     int top_n,
-    bool highScoreBest    // indicates semantics of score magnitude; true = high scores are best
+    bool highScoreBest // indicates semantics of score magnitude
   );
 
   /**

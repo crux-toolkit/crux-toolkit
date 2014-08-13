@@ -58,7 +58,7 @@ void MatchCollection::init() {
   post_process_collection_ = false;
   post_scored_type_set_ = false;
   top_scoring_sp_ = NULL;
-  exact_pval_search = false;
+  exact_pval_search_ = false;
   has_distinct_matches_ = false;
 }
 
@@ -2054,7 +2054,7 @@ bool MatchCollection::printXml(
   scores_computed[main_score] = true;
   if( scored_type_[SP])
     scores_computed[SP] = true;
-  if (exact_pval_search){
+  if (exact_pval_search_) {
     scores_computed[TIDE_SEARCH_EXACT_PVAL] = true;
     scores_computed[TIDE_SEARCH_REFACTORED_XCORR] = true;
     scored_type_[TIDE_SEARCH_EXACT_PVAL] = true;

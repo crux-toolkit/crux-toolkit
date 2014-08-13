@@ -81,9 +81,9 @@ protected:
   double bin_width_;
   double bin_offset_;
 
-  public:
+public:
 
-  bool exact_pvalue;
+  bool exact_pval_search_;
 
   /**
    * Constructor
@@ -119,10 +119,21 @@ protected:
 
   virtual COMMAND_T getCommand();
 
-  bool exact_pval_search;
-  
-  int calcScoreCount( int numelEvidenceObs, int* evidenceObs, int pepMassInt, int maxEvidence, int minEvidence, int maxScore, 
-                        int minScore, int nAA, double* AAFreqN, double* AAFreqI, double* AAFreqC, int* AAMass, double* pValueScoreObs );
+  int calcScoreCount(
+    int numelEvidenceObs,
+    int* evidenceObs,
+    int pepMassInt,
+    int maxEvidence,
+    int minEvidence,
+    int maxScore,
+    int minScore,
+    int nAA,
+    double* AAFreqN,
+    double* AAFreqI,
+    double* AAFreqC,
+    int* AAMass,
+    double* pValueScoreObs
+  );
 };
 
 #endif

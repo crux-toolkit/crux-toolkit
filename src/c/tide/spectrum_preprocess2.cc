@@ -160,9 +160,6 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum,
 #endif
 }
 
-void ObservedPeakSet::CreateEvidenceVector( const Spectrum& spectrum,
-		double binWidth, double binOffset, int charge, double pepMassMonoMean,
-		int maxPrecurMass, int* evidenceInt ) {
 /* Calculates vector of cleavage evidence for an observed spectrum, using XCorr
  * b/y/neutral peak sets and heights.
  *
@@ -170,13 +167,17 @@ void ObservedPeakSet::CreateEvidenceVector( const Spectrum& spectrum,
  * Extended and modified by Jeff Howbert, October, 2013.
  * Ported to and integrated with Tide by Jeff Howbert, November, 2013.
  */
+void ObservedPeakSet::CreateEvidenceVector(
+  const Spectrum& spectrum,
+  double binWidth,
+  double binOffset,
+  int charge,
+  double pepMassMonoMean,
+  int maxPrecurMass,
+  int* evidenceInt
+) {
 
-// void createEvidenceArrayObserved( int nIon, const double* const ionSeriesMass,
-//		const double* const ionSeriesIntens, double evidenceIntScale, double binWidth,
-//		double binOffset, double precurMz, int precurCharge, double pepMassMonoMean,
-//		int maxPrecurMass, int* evidenceInt ) {
-
-//&& preserved from PreprocessSpectrum; may delete in future
+  // TODO preserved from PreprocessSpectrum; may delete in future
 #ifdef DEBUG
   bool debug = (FLAGS_debug_spectrum_id == spectrum.SpectrumNumber()
                 && (FLAGS_debug_charge == 0 || FLAGS_debug_charge == charge));
@@ -187,9 +188,9 @@ void ObservedPeakSet::CreateEvidenceVector( const Spectrum& spectrum,
   // double max_peak_mz = spectrum.M_Z(spectrum.Size()-1);
   assert(MaxBin::Global().MaxBinEnd() > 0);
   // max_mz_.Init(min(experimental_mass_cut_off, max_peak_mz));
-//&& end preserved
+  // TODO end preserved
 
-  //&& need to review these constants, decide which can be moved to parameter file
+  // TODO need to review these constants, decide which can be moved to parameter file
   const double evidenceIntScale = 500.0;
   const int nRegion = NUM_SPECTRUM_REGIONS;
   const double maxIntensPerRegion = 50.0;
@@ -203,7 +204,7 @@ void ObservedPeakSet::CreateEvidenceVector( const Spectrum& spectrum,
   const double NH3LossHeight = 10.0;    
   const double COLossHeight = 10.0;    // for creating a ions on the fly from b ions
   const double H2OLossHeight = 10.0;
-  //&& end need to review
+  // TODO end need to review
 
   int ma;
   int pc;
@@ -215,15 +216,15 @@ void ObservedPeakSet::CreateEvidenceVector( const Spectrum& spectrum,
   double ionMassCOLoss;
   double ionMassH2OLoss;
 	
-  double* evidence = new double[ maxPrecurMass ];
-  double* intensArrayObs = new double[ maxPrecurMass ];
-  int* intensRegion = new int[ maxPrecurMass ];
+  double* evidence = new double[maxPrecurMass];
+  double* intensArrayObs = new double[maxPrecurMass];
+  int* intensRegion = new int[maxPrecurMass];
 
-  for ( ma = 0; ma < maxPrecurMass; ma++ ) {
-	evidence[ ma ] = 0.0;
-    evidenceInt[ ma ] = 0;
-    intensArrayObs[ ma ] = 0.0;
-    intensRegion[ ma ] = -1;
+  for (ma = 0; ma < maxPrecurMass; ma++) {
+    evidence[ma] = 0.0;
+    evidenceInt[ma] = 0;
+    intensArrayObs[ma] = 0.0;
+    intensRegion[ma] = -1;
   }
 
   double precurMz = spectrum.PrecursorMZ();
@@ -232,7 +233,7 @@ void ObservedPeakSet::CreateEvidenceVector( const Spectrum& spectrum,
   double experimentalMassCutoff = precurMz * precurCharge + 50.0;
   double proton = MassConstants::proton;
 
-//&& preserved from PreprocessSpectrum only for historical reference; get rid of eventually  
+  // TODO preserved from PreprocessSpectrum only for historical reference; get rid of eventually  
   // // Fill peaks
   // int largest_mz = 0;
   // double highest_intensity = 0;
@@ -274,173 +275,166 @@ void ObservedPeakSet::CreateEvidenceVector( const Spectrum& spectrum,
 	// peaks_[index] *= normalizer;
     // }    
   // }
-//&& end preserved
+  // TODO end preserved
 
-    double maxIonMass = 0.0;
-    double maxIonIntens = 0.0;
-    for ( int ion = 0; ion < nIon; ion++ ) {
-        double ionMass = spectrum.M_Z( ion );
-        double ionIntens = spectrum.Intensity( ion );
-        if ( ionMass >= experimentalMassCutoff ) {
-            continue;
-        }
-        if ( maxIonMass < ionMass ) {
-            maxIonMass = ionMass;
-        }
-        if ( maxIonIntens < ionIntens ) {
-            maxIonIntens = ionIntens;
-        }
+  double maxIonMass = 0.0;
+  double maxIonIntens = 0.0;
+  for (int ion = 0; ion < nIon; ion++) {
+    double ionMass = spectrum.M_Z(ion);
+    double ionIntens = spectrum.Intensity(ion);
+    if (ionMass >= experimentalMassCutoff) {
+      continue;
     }
-    int regionSelector = ( int )floor( ( int )floor( ( ( double )maxIonMass / binWidth ) + 1.0 - binOffset ) / ( double )nRegion );
-    for ( int ion = 0; ion < nIon; ion++ ) {
-        double ionMass = spectrum.M_Z( ion );
-        double ionIntens = spectrum.Intensity( ion );
-        if ( ionMass >= experimentalMassCutoff ) {
-            continue;
-        }
-        if ( ionMass > precurMz - precursorMZExclude && ionMass < precurMz + precursorMZExclude ) {
-            continue;
-        }
-        ionBin = ( int )floor( ( ionMass / binWidth ) + 1.0 - binOffset );
-        int region = ( int )floor( ( double )( ionBin ) / ( double )regionSelector );
-        if ( region >= nRegion ) {
-            region = nRegion - 1;
-        }
-        intensRegion[ ionBin ] = region;
-        if ( intensArrayObs[ ionBin ] < ionIntens ) {
-            intensArrayObs[ ionBin ] = ionIntens;
-        }
-		
-		// //&& for test only
-		// printf( "%d   %10.6f   %10.6f   %d\n", ion, ionMass, ionIntens, ionBin );
+    if (maxIonMass < ionMass) {
+      maxIonMass = ionMass;
     }
+    if (maxIonIntens < ionIntens) {
+      maxIonIntens = ionIntens;
+    }
+  }
+  int regionSelector = (int)floor(
+    (int)floor(((double)maxIonMass / binWidth) + 1.0 - binOffset ) / (double)nRegion
+  );
+  for (int ion = 0; ion < nIon; ion++) {
+    double ionMass = spectrum.M_Z(ion);
+    double ionIntens = spectrum.Intensity(ion);
+    if (ionMass >= experimentalMassCutoff) {
+      continue;
+    }
+    if (ionMass > precurMz - precursorMZExclude && ionMass < precurMz + precursorMZExclude) {
+      continue;
+    }
+    ionBin = (int)floor((ionMass / binWidth) + 1.0 - binOffset);
+    int region = (int)floor((double)(ionBin) / (double)regionSelector);
+    if (region >= nRegion) {
+      region = nRegion - 1;
+    }
+    intensRegion[ionBin] = region;
+    if (intensArrayObs[ionBin] < ionIntens) {
+      intensArrayObs[ionBin] = ionIntens;
+    }
+  }
 
-	// //&& for test only
-    // for ( ma = 0; ma < maxPrecurMass; ma++ ) {
-		// printf( "%5d   %10.6f\n", ma, intensArrayObs[ ma ] );
-	// }
-	
-    maxIonIntens = sqrt( maxIonIntens );
-    for ( ma = 0; ma < maxPrecurMass; ma++ ) {
-        intensArrayObs[ ma ] = sqrt( intensArrayObs[ ma ] );
-        if ( intensArrayObs[ ma ] <= 0.05 * maxIonIntens ) {
-            intensArrayObs[ ma ] = 0.0;
-        }
+  maxIonIntens = sqrt(maxIonIntens);
+  for (ma = 0; ma < maxPrecurMass; ma++) {
+    intensArrayObs[ma] = sqrt(intensArrayObs[ma]);
+    if (intensArrayObs[ma] <= 0.05 * maxIonIntens) {
+      intensArrayObs[ma] = 0.0;
     }
+  }
 
-    double* maxRegion = new double[ nRegion ];
-    for ( int re = 0; re < nRegion; re++ ) {
-        maxRegion[ re ] = 0.0;
+  double* maxRegion = new double[nRegion];
+  for (int re = 0; re < nRegion; re++) {
+    maxRegion[re] = 0.0;
+  }
+  for (ma = 0; ma < maxPrecurMass; ma++) {
+    int reg = intensRegion[ma];
+    if (reg >= 0 && maxRegion[reg] < intensArrayObs[ma]) {
+      maxRegion[reg] = intensArrayObs[ma];
     }
-    for ( ma = 0; ma < maxPrecurMass; ma++ ) {
-        int reg = intensRegion[ ma ];
-        if ( reg >= 0 ) {
-            if ( maxRegion[ reg ] < intensArrayObs[ ma ] ) {
-                maxRegion[ reg ] = intensArrayObs[ ma ];
-            }
-        }
+  }
+  for (ma = 0; ma < maxPrecurMass; ma++) {
+    int reg = intensRegion[ma];
+    if (reg >= 0 && maxRegion[reg] > 0.0) {
+      intensArrayObs[ma] *= (maxIntensPerRegion / maxRegion[reg]);
     }
-    for ( ma = 0; ma < maxPrecurMass; ma++ ) {
-        int reg = intensRegion[ ma ];
-        if ( reg >= 0 && maxRegion[ reg ] > 0.0 ) {
-            intensArrayObs[ ma ] *= ( maxIntensPerRegion / maxRegion[ reg ] );
-        }
-    }
-    delete [] maxRegion;
+  }
+  delete [] maxRegion;
 
-    // ***** Adapted from tide/spectrum_preprocess2.cc.
-    // ***** To be replaced, if possible, with call to 
-    // ***** static void SubtractBackground(double* observed, int end).
-    // ***** Note numerous small changes  from Tide code.
-    double multiplier = 1.0 / ( MAX_XCORR_OFFSET * 2.0 + 1.0 );
-    double total = 0.0;
-    double* partial_sums = new double[ maxPrecurMass ];
-    for ( int i = 0; i < maxPrecurMass; ++i )
-        partial_sums[ i ] = ( total += intensArrayObs[ i ] );
-    for ( int i = 0; i < maxPrecurMass; ++i ) {
-        int right_index = std::min( maxPrecurMass - 1, i + MAX_XCORR_OFFSET );
-        int left_index = std::max( 0, i - MAX_XCORR_OFFSET - 1 );
-        intensArrayObs[ i ] -= multiplier * ( partial_sums[ right_index ] - partial_sums[ left_index ] );
-    }
-    delete [] partial_sums;
-    // *****
-    
-    int binFirst = 30;
-    int binLast = ( int )floor( pepMassMonoMean ) - 47;
+  // ***** Adapted from tide/spectrum_preprocess2.cc.
+  // TODO replace, if possible, with call to 
+  // static void SubtractBackground(double* observed, int end).
+  // Note numerous small changes from Tide code.
+  double multiplier = 1.0 / (MAX_XCORR_OFFSET * 2.0 + 1.0);
+  double total = 0.0;
+  double* partial_sums = new double[maxPrecurMass];
+  for (int i = 0; i < maxPrecurMass; ++i) {
+    partial_sums[ i ] = ( total += intensArrayObs[i]);
+  }
+  for (int i = 0; i < maxPrecurMass; ++i) {
+    int right_index = std::min(maxPrecurMass - 1, i + MAX_XCORR_OFFSET);
+    int left_index = std::max(0, i - MAX_XCORR_OFFSET - 1);
+    intensArrayObs[i] -= multiplier * (partial_sums[right_index] - partial_sums[left_index]);
+  }
+  delete [] partial_sums;
+  // *****
+  
+  int binFirst = 30;
+  int binLast = (int)floor(pepMassMonoMean) - 47;
 
-	for ( ma = binFirst; ma <= binLast; ma++ ) {
-		// b ion
-		bIonMass = ma * binWidth;
-		ionBin = ( int )floor( bIonMass / binWidth + 1.0 - binOffset );
-		evidence[ ma ] = evidence[ ma ] + intensArrayObs[ ionBin ] * BYHeight;
-		for ( pc = 3; pc <= precurCharge; pc++ ) {
-			ionMZMultiCharge = ( bIonMass + ( pc - 2 ) * massHMono ) / ( pc - 1 );
-			ionBin = ( int )floor( ionMZMultiCharge / binWidth + 1.0 - binOffset );
-			evidence[ ma ] = evidence[ ma ] + intensArrayObs[ ionBin ] * BYHeight;
-		}
-		// y ion
-		yIonMass = pepMassMonoMean + 2 * massHMono - bIonMass;
-		ionBin = ( int )floor( yIonMass / binWidth + 1.0 - binOffset );
-		evidence[ ma ] = evidence[ ma ] + intensArrayObs[ ionBin ] * BYHeight;
-		for ( pc = 3; pc <= precurCharge; pc++ ) {
-		    ionMZMultiCharge = ( yIonMass + ( pc - 2 ) * massHMono ) / ( pc - 1 );
-			ionBin = ( int )floor( ionMZMultiCharge / binWidth + 1.0 - binOffset );
-			evidence[ ma ] = evidence[ ma ] + intensArrayObs[ ionBin ] * BYHeight;
-		}
-		// NH3 loss from b ion
-		ionMassNH3Loss = bIonMass - massNH3Mono;
-		ionBin = ( int )floor( ionMassNH3Loss / binWidth + 1.0 - binOffset );
-		evidence[ ma ] = evidence[ ma ] + intensArrayObs[ ionBin ] * NH3LossHeight;
-		for ( pc = 3; pc <= precurCharge; pc++ ) {
-			ionMZMultiCharge = ( ionMassNH3Loss + ( pc - 2 ) * massHMono ) / ( pc - 1 );
-			ionBin = ( int )floor( ionMZMultiCharge / binWidth + 1.0 - binOffset );
-			evidence[ ma ] = evidence[ ma ] + intensArrayObs[ ionBin ] * NH3LossHeight;
-		}
-		// NH3 loss from y ion
-		ionMassNH3Loss = yIonMass - massNH3Mono;
-		ionBin = ( int )floor( ionMassNH3Loss / binWidth + 1.0 - binOffset );
-		evidence[ ma ] = evidence[ ma ] + intensArrayObs[ ionBin ] * NH3LossHeight;
-		for ( pc = 3; pc <= precurCharge; pc++ ) {
-			ionMZMultiCharge = ( ionMassNH3Loss + ( pc - 2 ) * massHMono ) / ( pc - 1 );
-			ionBin = ( int )floor( ionMZMultiCharge / binWidth + 1.0 - binOffset );
-			evidence[ ma ] = evidence[ ma ] + intensArrayObs[ ionBin ] * NH3LossHeight;
-		}
-		// CO and H2O loss from b ion
-		ionMassCOLoss = bIonMass - massCOMono;
-		ionMassH2OLoss = bIonMass - massH2OMono;
-		ionBin = ( int )floor( ionMassCOLoss / binWidth + 1.0 - binOffset );
-		evidence[ ma ] = evidence[ ma ] + intensArrayObs[ ionBin ] * COLossHeight;
-		ionBin = ( int )floor( ionMassH2OLoss / binWidth + 1.0 - binOffset );
-		evidence[ ma ] = evidence[ ma ] + intensArrayObs[ ionBin ] * H2OLossHeight;
-		for ( pc = 3; pc <= precurCharge; pc++ ) {
-			ionMZMultiCharge = ( ionMassCOLoss + ( pc - 2 ) * massHMono ) / ( pc - 1 );
-			ionBin = ( int )floor( ionMZMultiCharge / binWidth + 1.0 - binOffset );
-			evidence[ ma ] = evidence[ ma ] + intensArrayObs[ ionBin ] * COLossHeight;
-			ionMZMultiCharge = ( ionMassH2OLoss + ( pc - 2 ) * massHMono ) / ( pc - 1 );
-			ionBin = ( int )floor( ionMZMultiCharge / binWidth + 1.0 - binOffset );
-			evidence[ ma ] = evidence[ ma ] + intensArrayObs[ ionBin ] * H2OLossHeight;
-		}
-		// H2O loss from y ion
-		ionMassH2OLoss = yIonMass - massH2OMono;
-		ionBin = ( int )floor( ionMassH2OLoss / binWidth + 1.0 - binOffset );
-		evidence[ ma ] = evidence[ ma ] + intensArrayObs[ ionBin ] * H2OLossHeight;
-		for ( pc = 3; pc <= precurCharge; pc++ ) {
-			ionMZMultiCharge = ( ionMassH2OLoss + ( pc - 2 ) * massHMono ) / ( pc - 1 );
-			ionBin = ( int )floor( ionMZMultiCharge / binWidth + 1.0 - binOffset );
-			evidence[ ma ] = evidence[ ma ] + intensArrayObs[ ionBin ] * H2OLossHeight;
-		}
-	}
-    // discretize evidence array
-    for ( ma = 0; ma < maxPrecurMass; ma++ ) {
-        evidenceInt[ ma ] = ( int )floor( evidence[ ma ] / evidenceIntScale + 0.5 );
+  for (ma = binFirst; ma <= binLast; ma++) {
+    // b ion
+    bIonMass = ma * binWidth;
+    ionBin = (int)floor(bIonMass / binWidth + 1.0 - binOffset);
+    evidence[ma] = evidence[ma] + intensArrayObs[ionBin] * BYHeight;
+    for (pc = 3; pc <= precurCharge; pc++) {
+      ionMZMultiCharge = (bIonMass + (pc - 2) * massHMono) / (pc - 1);
+      ionBin = (int)floor(ionMZMultiCharge / binWidth + 1.0 - binOffset);
+      evidence[ma] = evidence[ma] + intensArrayObs[ionBin] * BYHeight;
     }
-    
-    // clean up
-    delete [] evidence;
-    delete [] intensArrayObs;
-    delete [] intensRegion;
+    // y ion
+    yIonMass = pepMassMonoMean + 2 * massHMono - bIonMass;
+    ionBin = (int)floor(yIonMass / binWidth + 1.0 - binOffset);
+    evidence[ma] = evidence[ma] + intensArrayObs[ionBin] * BYHeight;
+    for (pc = 3; pc <= precurCharge; pc++) {
+      ionMZMultiCharge = (yIonMass + (pc - 2) * massHMono) / (pc - 1);
+      ionBin = (int)floor(ionMZMultiCharge / binWidth + 1.0 - binOffset);
+      evidence[ma] = evidence[ma] + intensArrayObs[ionBin] * BYHeight;
+    }
+    // NH3 loss from b ion
+    ionMassNH3Loss = bIonMass - massNH3Mono;
+    ionBin = (int)floor(ionMassNH3Loss / binWidth + 1.0 - binOffset);
+    evidence[ma] = evidence[ma] + intensArrayObs[ionBin] * NH3LossHeight;
+    for (pc = 3; pc <= precurCharge; pc++) {
+      ionMZMultiCharge = (ionMassNH3Loss + (pc - 2) * massHMono) / (pc - 1);
+      ionBin = (int)floor(ionMZMultiCharge / binWidth + 1.0 - binOffset);
+      evidence[ma] = evidence[ma] + intensArrayObs[ionBin] * NH3LossHeight;
+    }
+    // NH3 loss from y ion
+    ionMassNH3Loss = yIonMass - massNH3Mono;
+    ionBin = (int)floor(ionMassNH3Loss / binWidth + 1.0 - binOffset);
+    evidence[ma] = evidence[ma] + intensArrayObs[ionBin] * NH3LossHeight;
+    for (pc = 3; pc <= precurCharge; pc++) {
+      ionMZMultiCharge = (ionMassNH3Loss + (pc - 2) * massHMono) / (pc - 1);
+      ionBin = (int)floor(ionMZMultiCharge / binWidth + 1.0 - binOffset);
+      evidence[ma] = evidence[ma] + intensArrayObs[ionBin] * NH3LossHeight;
+    }
+    // CO and H2O loss from b ion
+    ionMassCOLoss = bIonMass - massCOMono;
+    ionMassH2OLoss = bIonMass - massH2OMono;
+    ionBin = (int)floor(ionMassCOLoss / binWidth + 1.0 - binOffset);
+    evidence[ma] = evidence[ma] + intensArrayObs[ionBin] * COLossHeight;
+    ionBin = (int)floor(ionMassH2OLoss / binWidth + 1.0 - binOffset);
+    evidence[ma] = evidence[ma] + intensArrayObs[ionBin] * H2OLossHeight;
+    for (pc = 3; pc <= precurCharge; pc++) {
+      ionMZMultiCharge = (ionMassCOLoss + (pc - 2) * massHMono) / (pc - 1);
+      ionBin = (int)floor(ionMZMultiCharge / binWidth + 1.0 - binOffset);
+      evidence[ma] = evidence[ma] + intensArrayObs[ionBin] * COLossHeight;
+      ionMZMultiCharge = (ionMassH2OLoss + (pc - 2) * massHMono) / (pc - 1);
+      ionBin = (int)floor(ionMZMultiCharge / binWidth + 1.0 - binOffset);
+      evidence[ma] = evidence[ma] + intensArrayObs[ionBin] * H2OLossHeight;
+    }
+    // H2O loss from y ion
+    ionMassH2OLoss = yIonMass - massH2OMono;
+    ionBin = (int)floor(ionMassH2OLoss / binWidth + 1.0 - binOffset);
+    evidence[ma] = evidence[ma] + intensArrayObs[ionBin] * H2OLossHeight;
+    for (pc = 3; pc <= precurCharge; pc++) {
+      ionMZMultiCharge = (ionMassH2OLoss + (pc - 2) * massHMono) / (pc - 1);
+      ionBin = (int)floor(ionMZMultiCharge / binWidth + 1.0 - binOffset);
+      evidence[ma] = evidence[ma] + intensArrayObs[ionBin] * H2OLossHeight;
+    }
+  }
+  // discretize evidence array
+  for (ma = 0; ma < maxPrecurMass; ma++) {
+    evidenceInt[ma] = (int)floor(evidence[ma] / evidenceIntScale + 0.5);
+  }
+  
+  // clean up
+  delete [] evidence;
+  delete [] intensArrayObs;
+  delete [] intensRegion;
 
-//&& preserved from PreprocessSpectrum; may delete in future
+  // TODO preserved from PreprocessSpectrum; may delete in future
 #ifdef DEBUG
   if (debug) {
     cout << "GLOBAL MAX MZ: " << MaxMZ::Global().MaxBin() << ", " << MaxMZ::Global().BackgroundBinEnd()
@@ -455,7 +449,7 @@ void ObservedPeakSet::CreateEvidenceVector( const Spectrum& spectrum,
   if (debug)
     ShowPeaks();
 #endif
-//&& end preserved
+  // TODO end preserved
 }
 
 inline int round_to_int(double x) {

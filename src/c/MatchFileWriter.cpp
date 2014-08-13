@@ -113,7 +113,6 @@ void MatchFileWriter::setPrecision(){
     case EMPAI_SCORE_COL:
     case EXACT_PVALUE_COL:
     case REFACTORED_SCORE_COL:
-
 #ifdef NEW_COLUMNS
     case WEIBULL_PEPTIDE_QVALUE_COL:      // NEW
     case DECOY_XCORR_PEPTIDE_QVALUE_COL:  // NEW
@@ -235,6 +234,7 @@ void MatchFileWriter::addColumnNames(CruxApplication* application,
       addColumnName(BY_IONS_TOTAL_COL);
     }
     break;
+
   case SEQUEST_COMMAND:      ///< sequest-search
     if( get_int_parameter("max-rank-preliminary") > 0 ){
       addColumnName(SP_SCORE_COL);
@@ -300,7 +300,6 @@ void MatchFileWriter::addColumnNames(CruxApplication* application,
   } else {
     addColumnName(XCORR_SCORE_COL);
   }
-//  addColumnName(XCORR_SCORE_COL);
   addColumnName(XCORR_RANK_COL);
   addColumnName(DISTINCT_MATCHES_SPECTRUM_COL);
   addColumnName(SEQUENCE_COL);

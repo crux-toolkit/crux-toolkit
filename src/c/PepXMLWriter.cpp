@@ -17,7 +17,7 @@ PepXMLWriter::PepXMLWriter()
   mass_precision_ = get_int_parameter("mass-precision");
   enzyme_ = get_enzyme_type_parameter("enzyme");
   precision_ = get_int_parameter("precision");
-  exact_pval_search = false;
+  exact_pval_search_ = false;
 }
 
 PepXMLWriter::~PepXMLWriter()
@@ -341,10 +341,10 @@ void PepXMLWriter::printScores(
       continue;
     }
     if(scores_computed[score_idx]){
-       fprintf(file_, 
-          "        <search_score name=\"%s\" value=\"%.*f\" />\n",
-          scorer_type_to_string((SCORER_TYPE_T)score_idx),
-          precision_, scores[score_idx]);
+      fprintf(file_, 
+        "        <search_score name=\"%s\" value=\"%.*f\" />\n",
+        scorer_type_to_string((SCORER_TYPE_T)score_idx),
+        precision_, scores[score_idx]);
 
      if(score_idx<2)
        fprintf(file_, 
