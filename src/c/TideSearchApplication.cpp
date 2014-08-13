@@ -51,7 +51,7 @@ int TideSearchApplication::main(int argc, char** argv) {
     "use-neutral-loss-peaks",
     "use-flanking-peaks",
     "mz-bin-width",
-    "mz-bin-offset",	
+    "mz-bin-offset",
     "verbosity"
   };
   int num_options = sizeof(option_list) / sizeof(char*);
@@ -394,8 +394,8 @@ void TideSearchApplication::search(
 
   // This is the main search loop.
   ObservedPeakSet observed(bin_width_, bin_offset_,
-	  get_boolean_parameter("use-neutral-loss-peaks"), 
-	  get_boolean_parameter("use-flanking-peaks"));
+  get_boolean_parameter("use-neutral-loss-peaks"), 
+  get_boolean_parameter("use-flanking-peaks"));
 
   // cycle through spectrum-charge pairs, sorted by neutral mass
   unsigned sc_index = 0;
@@ -465,17 +465,17 @@ void TideSearchApplication::search(
       const int minDeltaMass = aaMass[0];
       const int maxDeltaMass = aaMass[nAA - 1];
 
-      int maxPrecurMass = floor(MaxBin::Global().CacheBinEnd() + 50.0);	// TODO works, but is this the best way to get?
+      int maxPrecurMass = floor(MaxBin::Global().CacheBinEnd() + 50.0); // TODO works, but is this the best way to get?
       int nCandPeptide = active_peptide_queue->SetActiveRangeBIons(min_mass, max_mass);
-      TideMatchSet::Arr match_arr(nCandPeptide); 	// scored peptides will go here.
-	  
+      TideMatchSet::Arr match_arr(nCandPeptide); // scored peptides will go here.
+  
       // iterators needed at multiple places in following code
       deque<Peptide*>::const_iterator iter_ = active_peptide_queue->iter_;
       deque<TheoreticalPeakSetBIons>::const_iterator iter1_ = active_peptide_queue->iter1_;
       vector<int>::const_iterator iter_int;
       vector<unsigned int>::const_iterator iter_uint;
 
-      //************************************************************************************	  
+      //************************************************************************
       /* For one observed spectrum, calculates:
        *  - vector of cleavage evidence
        *  - score count vectors for a range of integer masses
@@ -581,8 +581,8 @@ void TideSearchApplication::search(
         match_arr.push_back(pair);
 
         // move to next peptide and b ion queue
-        ++iter_;	// TODO need to add test to make sure haven't gone past available peptides
-        ++iter1_;	// TODO need to add test to make sure haven't gone past available b ion queues
+        ++iter_; // TODO need to add test to make sure haven't gone past available peptides
+        ++iter1_; // TODO need to add test to make sure haven't gone past available b ion queues
       }
 
       // clean up

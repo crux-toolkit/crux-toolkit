@@ -268,7 +268,7 @@ void MzIdentMLReader::parsePSMs() {
       int last_scan;
       if (!get_first_last_scan_from_string(idStr, first_scan, last_scan)) {
         carp(CARP_ERROR, "Cannot find first,last scan from spectrumID:%s",
-	     idStr.c_str());    
+             idStr.c_str());    
       }
 
       //We are not using this yet, but we might.
@@ -284,7 +284,7 @@ void MzIdentMLReader::parsePSMs() {
         if (!use_pass_threshold_ || item.passThreshold) {
           int charge = item.chargeState;
           FLOAT_T obs_mz = item.experimentalMassToCharge;
-	  
+          
           SpectrumZState zstate;
           zstate.setMZ(obs_mz, charge);
           vector<int> charge_vec;
@@ -307,7 +307,7 @@ void MzIdentMLReader::parsePSMs() {
           string protein_id = peptide_evidence_ptr->dbSequencePtr->accession;
           int start_idx = peptide_evidence_ptr->start;
 
-	  bool is_decoy = false;
+          bool is_decoy = false;
           bool is_decoy_test;
 
           carp(CARP_DEBUG,"getting protein %s",protein_id.c_str());
@@ -319,11 +319,11 @@ void MzIdentMLReader::parsePSMs() {
             carp_once(CARP_WARNING, "Protein 0) %s : mzid says isdecoy: %d, "
               "but database says isdecoy: %d, did you set decoy-prefix?", 
               protein_id.c_str(), 
-	      peptide_evidence_ptr->isDecoy, is_decoy_test);
+              peptide_evidence_ptr->isDecoy, is_decoy_test);
           }
-	  //If there is one PeptideEvidence object that is a decoy
-	  //then mark the match as a decoy.
-	  is_decoy = is_decoy || peptide_evidence_ptr->isDecoy || is_decoy_test;
+          //If there is one PeptideEvidence object that is a decoy
+          //then mark the match as a decoy.
+          is_decoy = is_decoy || peptide_evidence_ptr->isDecoy || is_decoy_test;
 
           start_idx = protein->findStart(sequence, "", "");
           if (start_idx == -1) {
@@ -347,11 +347,11 @@ void MzIdentMLReader::parsePSMs() {
             protein = MatchCollectionParser::getProtein(
               database_, decoy_database_, protein_id, is_decoy_test);
             
-	    if (peptide_evidence_ptr->isDecoy != is_decoy_test) {
-	      carp_once(CARP_WARNING, "Protein %i) %s: mzid says isdecoy: %i, "
-	        "but database says isdecoy: %i, did you set \"decoy-prefix\"?", 
-		pe_idx, protein_id.c_str(), peptide_evidence_ptr->isDecoy, is_decoy_test);
-	    }
+            if (peptide_evidence_ptr->isDecoy != is_decoy_test) {
+              carp_once(CARP_WARNING, "Protein %i) %s: mzid says isdecoy: %i, "
+                "but database says isdecoy: %i, did you set \"decoy-prefix\"?", 
+                pe_idx, protein_id.c_str(), peptide_evidence_ptr->isDecoy, is_decoy_test);
+            }
             is_decoy = is_decoy || peptide_evidence_ptr->isDecoy || is_decoy_test;
             start_idx = protein->findStart(sequence, "", "");
             if (start_idx != -1) {

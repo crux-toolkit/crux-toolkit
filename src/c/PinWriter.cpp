@@ -274,7 +274,7 @@ void PinWriter::printPSM(
   free(sequence);
  
   fprintf(output_file_, "%s\t%d\t%d\t",
-	  getId(charge, is_decoy, spectrum->getFirstScan(), rank, match->getFileIndex()).c_str(), // SpecId
+    getId(charge, is_decoy, spectrum->getFirstScan(), rank, match->getFileIndex()).c_str(), // SpecId
     is_decoy ? -1 : 1, // Label
     spectrum->getFirstScan() // ScanNr
   );
