@@ -45,11 +45,11 @@ protected:
     ofstream* target_file,
     ofstream* decoy_file,
     bool compute_sp,
-    int AASize, 
-    double* AAFreqN,
-    double* AAFreqI,
-    double* AAFreqC,
-    int* AAMass
+    int aaSize, 
+    double* aaFreqN,
+    double* aaFreqI,
+    double* aaFreqC,
+    int* aaMass
   );
 
   void collectScoresCompiled(
@@ -128,10 +128,10 @@ public:
     int maxScore,
     int minScore,
     int nAA,
-    double* AAFreqN,
-    double* AAFreqI,
-    double* AAFreqC,
-    int* AAMass,
+    double* aaFreqN,
+    double* aaFreqI,
+    double* aaFreqC,
+    int* aaMass,
     double* pValueScoreObs
   );
 };
