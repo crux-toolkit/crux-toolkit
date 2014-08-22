@@ -1559,7 +1559,7 @@ string Match::getFilePath() {
 }
 
 string Match::getFilePath(int file_idx) {
-  if (file_idx == -1) {
+  if (file_idx == -1 || file_paths_.empty()) {
     return string("");
   } else {
     return(file_paths_[file_idx]);
