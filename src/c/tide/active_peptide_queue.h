@@ -37,8 +37,8 @@ class ActivePeptideQueue {
   Peptide* NextPeptide() { return *iter_++; }
   const Peptide* GetPeptide(int back_index) const { return *(end_ - back_index); }
   void SetBinSize(double binWidth, double binOffset) {
-    theoretical_b_peak_set_.binWidth  = binWidth;
-    theoretical_b_peak_set_.binOffset = binOffset;
+    theoretical_b_peak_set_.binWidth_ = binWidth;
+    theoretical_b_peak_set_.binOffset_ = binOffset;
   }
 
   deque<TheoreticalPeakSetBIons> b_ion_queue_;

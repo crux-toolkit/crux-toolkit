@@ -163,7 +163,6 @@ int TideSearchApplication::main(int argc, char** argv) {
   double* aaFreqC = NULL;
   int* aaMass = NULL;
   int nAA;
-  int i;
   
   if (exact_pval_search_) {
     pb::Header aaf_peptides_header;
@@ -383,7 +382,6 @@ void TideSearchApplication::search(
   double* aaFreqC,
   int* aaMass
 ) {
-  bool highScoreBest = true;
   if (output_files) {
     output_files->exact_pval_search_ = exact_pval_search_;
     output_files->writeHeaders();
@@ -416,17 +414,15 @@ void TideSearchApplication::search(
       continue;
     }
 
-    // Normalize the observed spectrum and compute the cache of
-    // frequently-needed values for taking dot products with theoretical
-    // spectra.
-
     // The active peptide queue holds the candidate peptides for spectrum.
     // Calculate and set the window, depending on the window type.
     double min_mass, max_mass;
     computeWindow(*sc, window_type, precursor_window, &min_mass, &max_mass);
     if (!exact_pval_search_) {  //execute original tide-search program
 
-      // Normalize the observed spectrum and compute the cache of frequently-needed values for taking dot products with theoretical spectra.
+      // Normalize the observed spectrum and compute the cache of
+      // frequently-needed values for taking dot products with theoretical
+      // spectra.
       observed.PreprocessSpectrum(*spectrum, charge);
       int nCandPeptide = active_peptide_queue->SetActiveRange(min_mass, max_mass);
       TideMatchSet::Arr2 match_arr2(nCandPeptide); // Scored peptides will go here.
@@ -441,7 +437,7 @@ void TideSearchApplication::search(
       // matches will arrange the results in a heap by score, return the top
       // few, and recover the association between counter and peptide. We output
       // the top matches.
-      TideMatchSet::Arr match_arr( nCandPeptide );
+      TideMatchSet::Arr match_arr(nCandPeptide);
       for (TideMatchSet::Arr2::iterator it = match_arr2.begin();
            it != match_arr2.end();
            ++it) {
@@ -456,10 +452,10 @@ void TideSearchApplication::search(
       matches.exact_pval_search_ = exact_pval_search_;
       if (output_files) {
         matches.report(output_files, top_matches, spectrum, charge,
-                       active_peptide_queue, proteins, locations, compute_sp, highScoreBest);
+                       active_peptide_queue, proteins, locations, compute_sp, true);
       } else {
         matches.report(target_file, decoy_file, top_matches, spectrum, charge,
-                       active_peptide_queue, proteins, locations, compute_sp, highScoreBest);
+                       active_peptide_queue, proteins, locations, compute_sp, true);
       }
     } else {  // execute exact-pval-search
       const int minDeltaMass = aaMass[0];
@@ -601,13 +597,12 @@ void TideSearchApplication::search(
       // the top matches.
       TideMatchSet matches(&match_arr, highest_mz);
       matches.exact_pval_search_ = exact_pval_search_;
-      highScoreBest = false;
       if (output_files) {
         matches.report(output_files, top_matches, spectrum, charge,
-                     active_peptide_queue, proteins, locations, compute_sp, highScoreBest);
+                     active_peptide_queue, proteins, locations, compute_sp, false);
       } else {
         matches.report(target_file, decoy_file, top_matches, spectrum, charge,
-                     active_peptide_queue, proteins, locations, compute_sp, highScoreBest);
+                     active_peptide_queue, proteins, locations, compute_sp, false);
       }
     }
 
