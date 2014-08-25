@@ -778,11 +778,11 @@ class TheoreticalPeakSetBIons {
 
   void Clear() { unordered_peak_list_.clear(); }
   void AddBIon(double mass) {
-    unsigned int index = (unsigned int)floor(mass / binWidth + 1.0 - binOffset);
+    unsigned int index = (unsigned int)floor(mass / binWidth_ + 1.0 - binOffset_);
     unordered_peak_list_.push_back(index);
   }
   vector<unsigned int> unordered_peak_list_;
-  double binWidth;
-  double binOffset;
+  double binWidth_;
+  double binOffset_;
 };
 #endif // THEORETICAL_PEAK_SET_H

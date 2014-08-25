@@ -2052,22 +2052,15 @@ bool MatchCollection::printXml(
     scores_computed[score_idx] = false;
   }
   scores_computed[main_score] = true;
-  if( scored_type_[SP])
+  if( scored_type_[SP]) {
     scores_computed[SP] = true;
-  if (exact_pval_search_) {
-    scores_computed[TIDE_SEARCH_EXACT_PVAL] = true;
-    scores_computed[TIDE_SEARCH_REFACTORED_XCORR] = true;
-    scored_type_[TIDE_SEARCH_EXACT_PVAL] = true;
-    scored_type_[TIDE_SEARCH_REFACTORED_XCORR] = true;
-    scores_computed[main_score] = false;
-  } else {
-    scores_computed[TIDE_SEARCH_EXACT_PVAL] = false;
-    scores_computed[TIDE_SEARCH_REFACTORED_XCORR] = false;
-    scored_type_[TIDE_SEARCH_EXACT_PVAL] = false;
-    scored_type_[TIDE_SEARCH_REFACTORED_XCORR] = false;
-    scores_computed[main_score] = true;
- }
-    
+  }
+  scores_computed[TIDE_SEARCH_EXACT_PVAL] = exact_pval_search_;
+  scores_computed[TIDE_SEARCH_REFACTORED_XCORR] = exact_pval_search_;
+  scored_type_[TIDE_SEARCH_EXACT_PVAL] = exact_pval_search_;
+  scored_type_[TIDE_SEARCH_REFACTORED_XCORR] = exact_pval_search_;
+  scores_computed[main_score] = !exact_pval_search_;
+
   double* scores = new double[NUMBER_SCORER_TYPES];
   int* ranks=new int[NUMBER_SCORER_TYPES];
 
