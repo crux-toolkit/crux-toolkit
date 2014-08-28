@@ -1,13 +1,13 @@
 <html>
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
-  <title>Using Sourceforge</title>
+  <title>Managing the Crux Sourceforge Project</title>
   <style type="text/css" media="screen">
     body {margin: 72px;
   </style>
 </head>
 <body>
-<h2>Crux and Sourceforge</h2>
+<h2>Managing the Crux Sourceforge Project</h2>
 We use
 <a href="http://sourceforge.net">Sourceforge</a>
 to host the
@@ -136,14 +136,26 @@ repository.
 <li>
 The "Deploy successful build to website" script uses the <code>crux-toolkit</code>
 account to copy the binary and source packages generated as TeamCity artifacts
-in a succesful build to the <code>download/daily</code> subdirectory of the
+in a successful build to the <code>download/daily</code> subdirectory of the
 Crux-Toolkit website.
 This script runs early every morning when there has been a change to the SVN repository,
 but it will only update the distribution files if Crux has built successfully
 on 64-bit Linux, 32-bit Linux, OS X, and Windows.
 </li>
+<li>
+The "Generate crux-toolkit website statistics" script uses the <code>crux-toolkit</code>
+account to download and analyze
+<a href="http://cruxtoolkit.sourceforge.net">Crux Toolkit website</a>
+access logs, as described above.
+A
+<a href="http://cruxtoolkit.sourceforge.net/crux-web-report.html">
+static page with the summary of the analysis
+</a>
+is uploaded back to the web side.
+</li>
 </ul>
 For more information about the Crux TeamCity server,
 see 
-<a href="crux-team-city.html"> here </a>.  </body>
+<a href="crux-teamcity.html">here</a>.
+</body>
 </html>
