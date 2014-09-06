@@ -2,7 +2,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Fri Aug  8 13:35:45 2014
+H	StartTime	Fri Sep  5 16:05:25 2014
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	Comment	Database shuffled; these are decoy matches
@@ -2365,7 +2365,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Fri Aug  8 13:35:45 2014
+H	StartTime	Fri Sep  5 16:05:25 2014
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	Comment	Database shuffled; these are decoy matches
@@ -4724,16 +4724,16 @@ scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	s
 159	2	745.7500	1489.4835	1489.7319	0.12708378	72.608925	2	0.3299894	2	6	24	4	NLETLQEFVLVGK	trypsin-full-digest	YGL135W(27)	RN	NFLETVELQVGLK	4
 159	2	745.7500	1489.4835	1490.6510	0.40518922	8.7934952	3	0.20290563	3	2	24	4	EHFVNEDVMGVSK	trypsin-full-digest	YOR168W(736)	KN	ESVMEHNFGDVVK	4
 159	2	745.7500	1489.4835	1488.7063	0	8.2436419	4	-0.20228361	4	2	24	4	FFISSANHELPVK	trypsin-full-digest	YDR037W(97)	KY	FHVSISNPEFLAK	4
-INFO: CPU: helios
-INFO: Fri Aug  8 13:35:45 PDT 2014
+INFO: CPU: arginine.gs.washington.edu
+INFO: Fri Sep  5 16:05:25 PDT 2014
 COMMAND LINE: crux sequest-search --decoys peptide-shuffle --output-dir ss --fileroot separate --parameter-file params/separate-ss demo.ms2 small-yeast.fasta
 INFO: Preparing protein fasta file small-yeast.fasta
 INFO: Reading in ms2 file demo.ms2
 INFO: Created 1 peptide mods, keeping 1 with 255 or fewer aa mods
 INFO: Searching spectrum 96 (2+), search 100
-INFO: Elapsed time: 1.64 s
+INFO: Elapsed time: 8.24 s
 INFO: Finished crux sequest-search
-INFO: Elapsed time: 1.64 s
+INFO: Elapsed time: 8.75 s
 INFO: Finished crux sequest-search.
 INFO: Return Code:0
 # comet_version 2014.01 rev. 0
@@ -5358,6 +5358,10 @@ alpha=0.000000
 # Available for crux extract-columns and extract-rows
 header=true
 
+# Are spectra centroided?  Default false.
+# Available for crux hardklor
+centroided=false
+
 # The most informative feature given as the feature name.  The name can
 # be preceded by a hyphen (e.g., "-XCorr") to indicate that a lower
 # value is better. By default, Percolator will select the feature that
@@ -5569,7 +5573,7 @@ cmod-fixed=NO MODS
 cterm-protein-mods-spec=
 
 # Controls whether neutral loss ions are considered in the search. Two
-# types of	neutral losses are included and are applied only to singly
+# types of neutral losses are included and are applied only to singly
 # charged b- and y-ions: loss of ammonia (NH3, 17.0086343 Da) and H2O
 # (18.0091422). Each neutral loss peak has intensity 1/5 of the primary
 # peak
@@ -6195,7 +6199,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Fri Aug  8 13:35:45 2014
+H	StartTime	Fri Sep  5 16:05:25 2014
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	DBSeqLength	?
