@@ -2,7 +2,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Fri Aug  8 13:35:47 2014
+H	StartTime	Fri Sep  5 16:05:35 2014
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	Comment	Database shuffled; these are decoy matches
@@ -2660,16 +2660,16 @@ scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	s
 159	2	745.7500	1489.4835	1486.6195	0.1215902	111.1035	3	0.67621213	3	7	26	8	SMLEPGGPNNQTNK	trypsin-full-digest	YNL166C(201)	KL	SPMPQNNTLGGENK	8
 159	2	745.7500	1489.4835	1486.6195	0.22463253	96.467148	4	0.55462193	4	6	26	8	SEQPNNLPGMTGNK	trypsin-full-digest	YNL166C(201)	KL	SPMPQNNTLGGENK	8
 159	2	745.7500	1489.4835	1489.7319	0.12708378	72.608925	5	0.3299894	5	6	24	8	NLETLQEFVLVGK	trypsin-full-digest	YGL135W(27)	RN	NFLETVELQVGLK	8
-INFO: CPU: helios
-INFO: Fri Aug  8 13:35:47 PDT 2014
+INFO: CPU: arginine.gs.washington.edu
+INFO: Fri Sep  5 16:05:34 PDT 2014
 COMMAND LINE: crux sequest-search --decoys peptide-shuffle --output-dir ss --fileroot one-decoy-file --parameter-file params/one-decoy-file-ss demo.ms2 small-yeast.fasta
 INFO: Preparing protein fasta file small-yeast.fasta
 INFO: Reading in ms2 file demo.ms2
 INFO: Created 1 peptide mods, keeping 1 with 255 or fewer aa mods
 INFO: Searching spectrum 96 (2+), search 100
-INFO: Elapsed time: 1.63 s
+INFO: Elapsed time: 8.2 s
 INFO: Finished crux sequest-search
-INFO: Elapsed time: 1.63 s
+INFO: Elapsed time: 8.25 s
 INFO: Finished crux sequest-search.
 INFO: Return Code:0
 # comet_version 2014.01 rev. 0
@@ -3294,6 +3294,10 @@ alpha=0.000000
 # Available for crux extract-columns and extract-rows
 header=true
 
+# Are spectra centroided?  Default false.
+# Available for crux hardklor
+centroided=false
+
 # The most informative feature given as the feature name.  The name can
 # be preceded by a hyphen (e.g., "-XCorr") to indicate that a lower
 # value is better. By default, Percolator will select the feature that
@@ -3505,7 +3509,7 @@ cmod-fixed=NO MODS
 cterm-protein-mods-spec=
 
 # Controls whether neutral loss ions are considered in the search. Two
-# types of	neutral losses are included and are applied only to singly
+# types of neutral losses are included and are applied only to singly
 # charged b- and y-ions: loss of ammonia (NH3, 17.0086343 Da) and H2O
 # (18.0091422). Each neutral loss peak has intensity 1/5 of the primary
 # peak
@@ -4131,7 +4135,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Fri Aug  8 13:35:47 2014
+H	StartTime	Fri Sep  5 16:05:35 2014
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	DBSeqLength	?
