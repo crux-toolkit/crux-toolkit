@@ -1696,6 +1696,7 @@ void MSReader::writeTextSpec(FILE* fileOut, Spectrum& s) {
         fprintf(fileOut,"BEGIN IONS\n");
         fprintf(fileOut,"PEPMASS=%.*f\n",6,s.atZ(i).mz);
         fprintf(fileOut,"CHARGE=%d+\n",s.atZ(i).z);
+        fprintf(fileOut,"RTINSECONDS=%d\n",(int)(s.getRTime()*60));
         fprintf(fileOut,"TITLE=%s.%d.%d.%d %d %.4f\n","test",s.getScanNumber(),s.getScanNumber(true),s.atZ(i).z,i,s.getRTime());
         for(j=0;j<s.size();j++){
 		      sprintf(t,"%.*f",iIntensityPrecision,s.at(j).intensity);
@@ -1718,13 +1719,12 @@ void MSReader::writeTextSpec(FILE* fileOut, Spectrum& s) {
     } else {
       fprintf(fileOut,"BEGIN IONS\n");
       fprintf(fileOut,"PEPMASS=%.*f\n",6,s.getMZ());
+      fprintf(fileOut,"RTINSECONDS=%d\n",(int)(s.getRTime()*60));
       if(s.sizeZ()==1){
         if(s.atZ(0).z==1) fprintf(fileOut,"CHARGE=1+\n");
-      }
-      if (s.sizeZ() > 0) {
         fprintf(fileOut,"TITLE=%s.%d.%d.%d %d %.4f\n","test",s.getScanNumber(),s.getScanNumber(true),s.atZ(0).z,0,s.getRTime());
       } else {
-        fprintf(fileOut,"TITLE=%s.%d.%d %d %.4f\n","test",s.getScanNumber(),s.getScanNumber(true),0,s.getRTime());
+        fprintf(fileOut,"TITLE=%s.%d.%d.%d %d %.4f\n","test",s.getScanNumber(),s.getScanNumber(true),0,0,s.getRTime());
       }
       for(j=0;j<s.size();j++){
 		    sprintf(t,"%.*f",iIntensityPrecision,s.at(j).intensity);
@@ -1908,7 +1908,10 @@ void MSReader::readSpecHeader(FILE *fileIn, MSScanInfo &ms){
 			ms.mz[i]=d;
 		}
 	} else {
-		fread(&ms.mz,8,1,fileIn);
+    if(ms.mz!=NULL) delete [] ms.mz;
+    ms.mzCount=1;
+    ms.mz = new double[ms.mzCount];
+		fread(&ms.mz[0],8,1,fileIn);
 	}
   fread(&ms.rTime,4,1,fileIn);
 
@@ -1962,12 +1965,8 @@ MSFileFormat MSReader::checkFileFormat(const char *fn){
   if(strcmp(ext,".RAW")==0 ) return raw;
   if(strcmp(ext,".MZXML")==0 ) return mzXML;
   if(strcmp(ext,".MZ5")==0 ) {
-#ifdef MST_MZ5
-    return mz5;
-#else
-    cerr << "MZ5 format not supported. Recompile with MZ5 support to use this format." << endl;
+    cerr << "MZ5 format is no longer supported." << endl;
     return dunno;
-#endif
   }
 	if(strcmp(ext,".MZML")==0 ) return mzML;
   if(strcmp(ext,".MGF")==0 ) return mgf;
