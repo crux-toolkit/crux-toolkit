@@ -175,3 +175,6 @@ note{
   vertical-align:middle;
   text-align:center;
 }
+#fileFormatsTable tr:nth-child(even) {
+  background: #DEDEDE;
+}
