@@ -296,7 +296,8 @@ void CometApplication::setCometParameters(
   EnzymeInfo enzymeInformation;
   double temp;
   int search_enzyme_number = get_int_parameter("search_enzyme_number");
-  if (search_enzyme_number >=0 && search_enzyme_number <= get_comet_enzyme_info_lines().size()) {
+
+  if (search_enzyme_number >=0 && search_enzyme_number < get_comet_enzyme_info_lines().size()) {
     const char* szParamBuf = get_comet_enzyme_info_lines()[search_enzyme_number].c_str();
     sscanf(szParamBuf, "%lf %48s %d %20s %20s\n",
       &temp, 
@@ -305,11 +306,12 @@ void CometApplication::setCometParameters(
       enzymeInformation.szSearchEnzymeBreakAA, 
       enzymeInformation.szSearchEnzymeNoBreakAA);
   } else {
-    carp(CARP_FATAL, "search_enzyme_number=%d out of range (%d)", search_enzyme_number, get_comet_enzyme_info_lines().size());
+    carp(CARP_FATAL, "search_enzyme_number=%d out of range (0-%d)", 
+      search_enzyme_number, (get_comet_enzyme_info_lines().size()-1));
   }
 
   int sample_enzyme_number = get_int_parameter("sample_enzyme_number");
-  if (sample_enzyme_number >= 0 && sample_enzyme_number <= get_comet_enzyme_info_lines().size()) {
+  if (sample_enzyme_number >= 0 && sample_enzyme_number < get_comet_enzyme_info_lines().size()) {
     const char* szParamBuf = get_comet_enzyme_info_lines()[sample_enzyme_number].c_str();
     sscanf(szParamBuf, "%lf %48s %d %20s %20s\n",
       &temp, 
@@ -318,7 +320,8 @@ void CometApplication::setCometParameters(
       enzymeInformation.szSampleEnzymeBreakAA, 
       enzymeInformation.szSampleEnzymeNoBreakAA);
   } else {
-    carp(CARP_FATAL, "sample_enzyme_number=%d out of range", sample_enzyme_number);
+    carp(CARP_FATAL, "sample_enzyme_number=%d out of range (0-%d)", 
+      sample_enzyme_number, (get_comet_enzyme_info_lines().size()-1));
   }
   enzymeInformation.iAllowedMissedCleavage = get_int_parameter("allowed_missed_cleavage");
   searchMgr.SetParam("[COMET_ENZYME_INFO]", "TODO", enzymeInformation);
