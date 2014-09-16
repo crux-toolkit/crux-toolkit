@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href=""?>
-<msms_pipeline_analysis date="Fri Sep  5 15:57:22 2014
+<msms_pipeline_analysis date="Tue Sep 16 10:30:38 2014
 " xmlns="http://regis-web.systemsbiology.net/pepXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://regis-web.systemsbiology.net/pepXML /usr/local/tpp/schema/pepXML_v110.xsd" summary_xml="">
-<msms_run_summary base_name="/net/noble/vol4/noble/user/mcilwain/svn/noble/crux-trunk/src/c/test/smoke-tests/test" msManufacturer="NA" msModel="NA" msIonization="NA" msAnalyzer="NA" msDectector="NA" raw_data_type="NA" raw_data="NA" >
+<msms_run_summary base_name="/home/kaipo/Documents/cruxrel/src/c/test/smoke-tests/test" msManufacturer="NA" msModel="NA" msIonization="NA" msAnalyzer="NA" msDectector="NA" raw_data_type="NA" raw_data="NA" >
 <sample_enzyme name="trypsin">
 </sample_enzyme>
-<search_summary base_name="/net/noble/vol4/noble/user/mcilwain/svn/noble/crux-trunk/src/c/test/smoke-tests/test" search_engine="Crux" precursor_mass_type="average" fragment_mass_type="monoisotopic" out_data_type="NA" out_data="NA" search_id="1" >
-<search_database local_path="/net/noble/vol4/noble/user/mcilwain/svn/noble/crux-trunk/src/c/test/smoke-tests/small-yeast.fasta" type="AA" />
+<search_summary base_name="/home/kaipo/Documents/cruxrel/src/c/test/smoke-tests/test" search_engine="Crux" precursor_mass_type="average" fragment_mass_type="monoisotopic" out_data_type="NA" out_data="NA" search_id="1" >
+<search_database local_path="/home/kaipo/Documents/cruxrel/src/c/test/smoke-tests/small-yeast.fasta" type="AA" />
 <enzymatic_search_constraint enzyme="trypsin" max_num_internal_cleavages="0" min_number_termini="2"/>
 <aminoacid_modification aminoacid="C" mass="217.181727" massdiff="57.021464" variable="N" />
 <aminoacid_modification aminoacid="S" mass="166.978210" massdiff="79.900002" variable="Y" />
@@ -102,6 +102,7 @@
 <parameter name="spectrum-charge" value="all"/>
 <parameter name="add_Nterm_peptide" value="0.000000"/>
 <parameter name="add_C_cysteine" value="57.021464"/>
+<parameter name="min-mods" value="0"/>
 <parameter name="input-ms2" value="__NULL_STR"/>
 <parameter name="train-fdr" value="0.010000"/>
 <parameter name="variable_C_terminus" value="0.000000"/>

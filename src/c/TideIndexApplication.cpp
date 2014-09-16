@@ -25,6 +25,7 @@ extern void AddMods(HeadedRecordReader* reader,
            		    const pb::Header& header,
          		    const vector<const pb::Protein*>& proteins, VariableModTable& var_mod_table);
 DECLARE_int32(max_mods);
+DECLARE_int32(min_mods);
 DECLARE_string(tmpfile_prefix);
 
 TideIndexApplication::TideIndexApplication() {
@@ -54,6 +55,7 @@ int TideIndexApplication::main(int argc, char** argv) {
     "cterm-protein-mods-spec",
     "nterm-protein-mods-spec",
     "max-mods",
+    "min-mods",
     "output-dir",
     "overwrite",
     "peptide-list",
@@ -95,6 +97,11 @@ int TideIndexApplication::main(int argc, char** argv) {
   int max_length = get_int_parameter("max-length");
   bool monoisotopic_precursor = get_boolean_parameter("monoisotopic-precursor");
   FLAGS_max_mods = get_int_parameter("max-mods");
+  FLAGS_min_mods = get_int_parameter("min-mods");
+  if (FLAGS_min_mods > FLAGS_max_mods) {
+		carp(CARP_FATAL, "The value for 'min-mods' cannot be greater than the value "
+                     "for 'max-mods'");
+	}
   MASS_TYPE_T mass_type = (monoisotopic_precursor) ? MONO : AVERAGE;
   int missed_cleavages = get_int_parameter("missed-cleavages");
   DIGEST_T digestion = get_digest_type_parameter("digestion");
