@@ -1,13 +1,13 @@
 INFO: CPU: helios
-INFO: Mon Sep 15 09:44:27 PDT 2014
+INFO: Tue Sep 16 10:31:14 PDT 2014
 COMMAND LINE: crux sequest-search --output-dir ss --fileroot no-decoys --parameter-file params/no-decoys-ss demo.ms2 small-yeast-index
 INFO: Preparing protein index small-yeast-index
 INFO: Reading in ms2 file demo.ms2
 INFO: Created 1 peptide mods, keeping 1 with 255 or fewer aa mods
 INFO: Searching spectrum 96 (2+), search 100
-INFO: Elapsed time: 0.489 s
+INFO: Elapsed time: 0.491 s
 INFO: Finished crux sequest-search
-INFO: Elapsed time: 0.489 s
+INFO: Elapsed time: 0.491 s
 INFO: Finished crux sequest-search.
 INFO: Return Code:0
 # comet_version 2014.01 rev. 0
@@ -381,8 +381,7 @@ tide database index=__NULL_STR
 
 # The maximum number of modifications that can be applied to a single
 # peptide.  Default=no limit.
-# Available for tide-index and from parameter file for
-# crux-search-for-matches.
+# Available for tide-index.
 max-mods=255
 
 # Set the tolerance (+/-ppm) for finding persistent peptides. Default =
@@ -397,6 +396,11 @@ persist-tolerance=10.000000
 # at each charge state.  With 1, 2 ,or 3 only spectra with that that
 # charge will be searched.
 spectrum-charge=all
+
+# The minimum number of modifications that can be applied to a single
+# peptide.  Default=0.
+# Available for tide-index.
+min-mods=0
 
 # MS2 file corresponding to the psm file. Required for SIN.
 # Available for spectral-counts with measure=SIN.
@@ -1472,7 +1476,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Mon Sep 15 09:44:27 2014
+H	StartTime	Tue Sep 16 10:31:14 2014
 H	EndTime                               
 H	Database	small-yeast-index/small-yeast-binary-fasta
 H	DBSeqLength	?

@@ -774,12 +774,14 @@ void initialize_parameters(void){
       "Specify a fixed modification to apply to the N-terminus of peptides.",
       "Available from parameter file for crux sequest-search and "
       "search-for-matches.", "true");
-
+  set_int_parameter("min-mods", 0, 0, MAX_PEPTIDE_LENGTH,
+      "The minimum number of modifications that can be applied to a single " 
+      "peptide.  Default=0.",
+      "Available for tide-index.", "true");
   set_int_parameter("max-mods", MAX_PEPTIDE_LENGTH, 0, MAX_PEPTIDE_LENGTH,
       "The maximum number of modifications that can be applied to a single " 
       "peptide.  Default=no limit.",
-      "Available for tide-index and from parameter file for "
-      "crux-search-for-matches.", "true");
+      "Available for tide-index.", "true");
   set_int_parameter("max-aas-modified", MAX_PEPTIDE_LENGTH, 0,
       MAX_PEPTIDE_LENGTH,
       "The maximum number of modified amino acids that can appear in one "
