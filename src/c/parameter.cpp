@@ -640,11 +640,10 @@ void initialize_parameters(void){
       "first bin used to discretize the m/z axis. Default=0.40",
       "Available for crux-search-for-matches.", "true");
   // initialize as "unset", then set as bool after cmdline parsed
-  set_string_parameter("use-flanking-peaks", "unset",
+  set_boolean_parameter("use-flanking-peaks", false,
       "Include peaks +/- 1da around b/y ions in theoretical spectrum.  "
       "default=F.",
-      "Available in the parameter file for the tide-search and "
-      "search-for-xlinks commands.",
+      "Available for the tide-search and search-for-xlinks commands.",
       "true");
   set_double_parameter("spectrum-min-mz", 0.0, 0, BILLION, 
       "The lowest spectrum m/z to search. Default=0.0.",
@@ -2655,35 +2654,6 @@ static void set_mz_bin_width()
 }
 
 /**
- * Set the use-flanking-peaks parameter.  If the value was set by
- * user, set to that value.  Otherwise, set according to what command
- * is being run.  Defaults are F for search-for-matches and T for
- * others (sequest-search, search-for-xlinks).
- */
-void set_flanking_peaks(const char* exe_name){
-
-  const char* value = get_string_parameter_pointer("use-flanking-peaks");
-  // if it is the default value, it was not set by the user
-  if( strcmp(value, "unset") == 0 ){
-    if( strcmp(exe_name, "search-for-matches") == 0 ){
-      value = "false";
-    } else {
-      value = "true";
-    }
-  } else { // use the value set by the user
-    if( value[0] == 'T' || value[0] == 't' ){
-      value = "true";
-    } else if( value[0] == 'F' || value[0] == 'f' ){
-      value = "false";
-    } //else don't change, let check find error
-  }
-  // set the new value and change type to bool
-  update_hash_value(parameters, "use-flanking-peaks", value);
-  update_hash_value(types, "use-flanking-peaks", (void*)"bool");
-  check_option_type_and_bounds("use-flanking-peaks");
-}
-
-/**
  * Take the command line string from main, find the parameter file 
  * option (if present), parse it's values into the hash, and parse
  * the command line options and arguments into the hash.
@@ -2795,9 +2765,6 @@ bool parse_cmd_line_into_params_hash(int argc,
   char value_str[SMALL_BUFFER];
   sprintf(value_str, "%i", max);
   update_hash_value(parameters, "psms-per-spectrum-reported", value_str);
-
-  set_flanking_peaks(exe_name);
-
 
   parameter_plasticity = false;
 
