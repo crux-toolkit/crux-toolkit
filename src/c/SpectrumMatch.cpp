@@ -11,7 +11,8 @@ using namespace Crux;
 /**
  * \returns an empty SpectrumMatch
  */
-SpectrumMatch::SpectrumMatch() {
+SpectrumMatch::SpectrumMatch():
+  file_idx_(-1) {
 }
 
 /**
@@ -19,7 +20,7 @@ SpectrumMatch::SpectrumMatch() {
  */
 SpectrumMatch::SpectrumMatch(
   Spectrum* spectrum /// < Spectrum object for this match
-  ) {
+): file_idx_(-1) {
 
   setSpectrum(spectrum);
 

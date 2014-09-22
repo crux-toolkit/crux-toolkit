@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href=""?>
-<msms_pipeline_analysis date="Fri Aug  8 13:35:08 2014
+<msms_pipeline_analysis date="Tue Sep 16 10:30:38 2014
 " xmlns="http://regis-web.systemsbiology.net/pepXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://regis-web.systemsbiology.net/pepXML /usr/local/tpp/schema/pepXML_v110.xsd" summary_xml="">
 <msms_run_summary base_name="/home/kaipo/Documents/cruxrel/src/c/test/smoke-tests/test" msManufacturer="NA" msModel="NA" msIonization="NA" msAnalyzer="NA" msDectector="NA" raw_data_type="NA" raw_data="NA" >
 <sample_enzyme name="trypsin">
@@ -102,6 +102,7 @@
 <parameter name="spectrum-charge" value="all"/>
 <parameter name="add_Nterm_peptide" value="0.000000"/>
 <parameter name="add_C_cysteine" value="57.021464"/>
+<parameter name="min-mods" value="0"/>
 <parameter name="input-ms2" value="__NULL_STR"/>
 <parameter name="train-fdr" value="0.010000"/>
 <parameter name="variable_C_terminus" value="0.000000"/>
@@ -171,6 +172,7 @@
 <parameter name="header" value="true"/>
 <parameter name="output_pepxmlfile" value="1"/>
 <parameter name="num_output_lines" value="5"/>
+<parameter name="centroided" value="false"/>
 <parameter name="default-direction" value="__NULL_STR"/>
 <parameter name="c-pos" value="0.010000"/>
 <parameter name="use_A_ions" value="0"/>

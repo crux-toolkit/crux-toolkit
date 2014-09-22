@@ -627,11 +627,10 @@ void initialize_parameters(void){
       "first bin used to discretize the m/z axis. Default=0.40",
       "Available for crux-search-for-matches and tide-search.", "true");
   // initialize as "unset", then set as bool after cmdline parsed
-  set_string_parameter("use-flanking-peaks", "unset",
+  set_boolean_parameter("use-flanking-peaks", false,
       "Include peaks +/- 1da around b/y ions in theoretical spectrum.  "
       "default=F.",
-      "Available in the parameter file for the tide-search and "
-      "search-for-xlinks commands.",
+      "Available for the tide-search and search-for-xlinks commands.",
       "true");
   set_double_parameter("spectrum-min-mz", 0.0, 0, BILLION, 
       "The lowest spectrum m/z to search. Default=0.0.",
@@ -762,12 +761,14 @@ void initialize_parameters(void){
       "Specify a fixed modification to apply to the N-terminus of peptides.",
       "Available from parameter file for crux sequest-search and "
       "search-for-matches.", "true");
-
+  set_int_parameter("min-mods", 0, 0, MAX_PEPTIDE_LENGTH,
+      "The minimum number of modifications that can be applied to a single " 
+      "peptide.  Default=0.",
+      "Available for tide-index.", "true");
   set_int_parameter("max-mods", MAX_PEPTIDE_LENGTH, 0, MAX_PEPTIDE_LENGTH,
       "The maximum number of modifications that can be applied to a single " 
       "peptide.  Default=no limit.",
-      "Available for tide-index and from parameter file for "
-      "crux-search-for-matches.", "true");
+      "Available for tide-index.", "true");
   set_int_parameter("max-aas-modified", MAX_PEPTIDE_LENGTH, 0,
       MAX_PEPTIDE_LENGTH,
       "The maximum number of modified amino acids that can appear in one "
@@ -2157,6 +2158,11 @@ void initialize_parameters(void){
     "Available for crux hardklor",
     "true");
 
+  set_boolean_parameter("centroided", false,
+    "Are spectra centroided?  Default false.",
+    "Available for crux hardklor",
+    "true");
+
   set_string_parameter("instrument", "fticr",
     "Type of instrument (fticr|orbi|tof|qit) on which the data was "
     "collected. Used in conjuction with --resolution. The default is fticr.",
@@ -2648,35 +2654,6 @@ static void set_mz_bin_width()
 }
 
 /**
- * Set the use-flanking-peaks parameter.  If the value was set by
- * user, set to that value.  Otherwise, set according to what command
- * is being run.  Defaults are F for search-for-matches and T for
- * others (sequest-search, search-for-xlinks).
- */
-void set_flanking_peaks(const char* exe_name){
-
-  const char* value = get_string_parameter_pointer("use-flanking-peaks");
-  // if it is the default value, it was not set by the user
-  if( strcmp(value, "unset") == 0 ){
-    if( strcmp(exe_name, "search-for-matches") == 0 ){
-      value = "false";
-    } else {
-      value = "true";
-    }
-  } else { // use the value set by the user
-    if( value[0] == 'T' || value[0] == 't' ){
-      value = "true";
-    } else if( value[0] == 'F' || value[0] == 'f' ){
-      value = "false";
-    } //else don't change, let check find error
-  }
-  // set the new value and change type to bool
-  update_hash_value(parameters, "use-flanking-peaks", value);
-  update_hash_value(types, "use-flanking-peaks", (void*)"bool");
-  check_option_type_and_bounds("use-flanking-peaks");
-}
-
-/**
  * Take the command line string from main, find the parameter file 
  * option (if present), parse it's values into the hash, and parse
  * the command line options and arguments into the hash.
@@ -2788,9 +2765,6 @@ bool parse_cmd_line_into_params_hash(int argc,
   char value_str[SMALL_BUFFER];
   sprintf(value_str, "%i", max);
   update_hash_value(parameters, "psms-per-spectrum-reported", value_str);
-
-  set_flanking_peaks(exe_name);
-
 
   parameter_plasticity = false;
 
