@@ -63,7 +63,6 @@ set (
   hardklor.html
   hardklor_standalone_to_crux.html
   install-tutorial.html 
-  known-issues.html
   make-pin.html
   ms2-format.html 
   ncrr.gif
