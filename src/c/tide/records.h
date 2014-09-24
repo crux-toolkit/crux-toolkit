@@ -59,6 +59,7 @@
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <google/protobuf/io/coded_stream.h>
 #include "header.pb.h"
+#include "carp.h"
 
 using namespace std;
 
@@ -192,7 +193,8 @@ class HeadedRecordWriter {
   HeadedRecordWriter(const string& filename, const pb::Header& header,
 		     int buf_size = -1) 
     : writer_(filename, buf_size) {
-    GOOGLE_CHECK(writer_.OK());
+    if (!writer_.OK())
+      carp(CARP_FATAL, "Error: Cannot create the file %s\n", filename.c_str());
     Write(&header);
   };
 
