@@ -27,6 +27,11 @@ USAGE = """USAGE: estimate-q-values.py [options] <file>
                            PSMs are considered good matches.
                            Default = low.
 
+    --rank-column <name>   Specify the name of the column containing
+                           the ranks.  The program will ignore all PSMs
+                           for which the value in this column is not 1.
+                           Default = no rank column.
+
 """
 
 #############################################################################
@@ -100,6 +105,9 @@ while (len(sys.argv) > 1):
                        sys.argv[0])
       sys.exit(1)
     sys.argv = sys.argv[1:]
+  elif (nextArg == "--rank-column"):
+    sys.stderr.write("--rank-column is not yet implemented.\n")
+    sys.exit(1)
   else:
     sys.stderr.write("Unrecognized option (%s).\n" % nextArg)
     sys.exit(1)
