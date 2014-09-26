@@ -51,7 +51,7 @@ void FilteredSpectrumChargeIterator::queueNextSpectrum() {
   // Warn if we skip due to too few peaks.
   if ( num_peaks < min_peaks_ ) {
     carp(CARP_INFO, "Skipping scan %d with %d (< %d) peaks.",
-	 spectrum_index_, num_peaks, min_peaks_);
+         spectrum_index_, num_peaks, min_peaks_);
   }
 
   if( search_charge_ == 0 || search_charge_ == this_charge ){

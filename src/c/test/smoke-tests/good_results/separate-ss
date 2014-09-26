@@ -2,7 +2,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Tue Sep 16 10:31:10 2014
+H	StartTime	Thu Sep 25 17:18:02 2014
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	Comment	Database shuffled; these are decoy matches
@@ -2377,7 +2377,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Tue Sep 16 10:31:10 2014
+H	StartTime	Thu Sep 25 17:18:02 2014
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	Comment	Database shuffled; these are decoy matches
@@ -4754,16 +4754,16 @@ scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	s
 159	2	745.7500	1489.4835	1486.6195	0.14640304	111.1035	1	0.26585975	2	7	26	4	SMLEPGGPNNQTNK	trypsin-full-digest	YNL166C(201)	KL	SPMPQNNTLGGENK	4
 159	2	745.7500	1489.4835	1490.6510	0.13997412	8.7934952	3	0.11945672	3	2	24	4	EHFVNEDVMGVSK	trypsin-full-digest	YOR168W(736)	KN	ESVMEHNFGDVVK	4
 159	2	745.7500	1489.4835	1488.7063	0	8.2436419	4	-0.020517401	4	2	24	4	FFISSANHELPVK	trypsin-full-digest	YDR037W(97)	KY	FHVSISNPEFLAK	4
-INFO: CPU: helios
-INFO: Tue Sep 16 10:31:10 PDT 2014
+INFO: CPU: arginine.gs.washington.edu
+INFO: Thu Sep 25 17:18:02 PDT 2014
 COMMAND LINE: crux sequest-search --decoys peptide-shuffle --output-dir ss --fileroot separate --parameter-file params/separate-ss demo.ms2 small-yeast.fasta
 INFO: Preparing protein fasta file small-yeast.fasta
 INFO: Reading in ms2 file demo.ms2
 INFO: Created 1 peptide mods, keeping 1 with 255 or fewer aa mods
 INFO: Searching spectrum 96 (2+), search 100
-INFO: Elapsed time: 1.65 s
+INFO: Elapsed time: 7.75 s
 INFO: Finished crux sequest-search
-INFO: Elapsed time: 1.65 s
+INFO: Elapsed time: 7.76 s
 INFO: Finished crux sequest-search.
 INFO: Return Code:0
 # comet_version 2014.01 rev. 0
@@ -4934,7 +4934,8 @@ E=0.000000
 # Specify the width of the bins used to discretize the m/z axis.  Also
 # used as tolerance for assigning ions.  Default=1.0005079 for
 # monoisotopic mass or 1.0011413 for average mass.
-# Available for crux-search-for-matches and xlink-assign-ions.
+# Available for crux-search-for-matches, tide-search, and
+# xlink-assign-ions.
 mz-bin-width=1.000508
 
 # Change the mass of all amino acids 'F' by the given amount.
@@ -5091,6 +5092,11 @@ min-peaks=20
 # Remove peaks around the precursor m/z.
 # Available for tide-search.
 remove-precursor-peak=false
+
+# Uses exact P-value calculation for peptide-spectrum-matching.
+# Default=F.
+# Available for tide-search
+exact-p-value=false
 
 # Predict peaks with the given maximum number of nh3 neutral loss
 # modifications. Default=0.
@@ -5264,7 +5270,7 @@ verbosity=30
 
 # Specify the location of the left edge of the first bin used to
 # discretize the m/z axis. Default=0.40
-# Available for crux-search-for-matches.
+# Available for crux-search-for-matches and tide-search.
 mz-bin-offset=0.680000
 
 # False discovery rate threshold for evaluating best cross validation
@@ -6232,7 +6238,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Tue Sep 16 10:31:10 2014
+H	StartTime	Thu Sep 25 17:18:02 2014
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	DBSeqLength	?

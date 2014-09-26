@@ -14,16 +14,16 @@
 
 extern HASH_T* parameters;
 extern void AddTheoreticalPeaks(const vector<const pb::Protein*>& proteins,
-                        				const string& input_filename,
-                        				const string& output_filename);
+                                const string& input_filename,
+                                const string& output_filename);
 //extern void AddMods(HeadedRecordReader* reader,
 //                    string out_file,
-//           		    const pb::Header& header,
-//         		    const vector<const pb::Protein*>& proteins);
+//                    const pb::Header& header,
+//                    const vector<const pb::Protein*>& proteins);
 extern void AddMods(HeadedRecordReader* reader,
                     string out_file,
-           		    const pb::Header& header,
-         		    const vector<const pb::Protein*>& proteins, VariableModTable& var_mod_table);
+                    const pb::Header& header,
+                    const vector<const pb::Protein*>& proteins, VariableModTable& var_mod_table);
 DECLARE_int32(max_mods);
 DECLARE_int32(min_mods);
 DECLARE_string(tmpfile_prefix);
@@ -88,7 +88,7 @@ int TideIndexApplication::main(int argc, char** argv) {
     cmd_line += argv[i];
   }
 
-	FLAGS_tmpfile_prefix = make_file_path("modified_peptides_partial_");
+  FLAGS_tmpfile_prefix = make_file_path("modified_peptides_partial_");
 
   // Get options
   double min_mass = get_double_parameter("min-mass");

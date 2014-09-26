@@ -1,13 +1,13 @@
-INFO: CPU: helios
-INFO: Tue Sep 16 10:31:14 PDT 2014
+INFO: CPU: arginine.gs.washington.edu
+INFO: Thu Sep 25 15:37:13 PDT 2014
 COMMAND LINE: crux sequest-search --output-dir ss --fileroot no-decoys --parameter-file params/no-decoys-ss demo.ms2 small-yeast-index
 INFO: Preparing protein index small-yeast-index
 INFO: Reading in ms2 file demo.ms2
 INFO: Created 1 peptide mods, keeping 1 with 255 or fewer aa mods
 INFO: Searching spectrum 96 (2+), search 100
-INFO: Elapsed time: 0.491 s
+INFO: Elapsed time: 2.37 s
 INFO: Finished crux sequest-search
-INFO: Elapsed time: 0.491 s
+INFO: Elapsed time: 2.38 s
 INFO: Finished crux sequest-search.
 INFO: Return Code:0
 # comet_version 2014.01 rev. 0
@@ -178,7 +178,8 @@ E=0.000000
 # Specify the width of the bins used to discretize the m/z axis.  Also
 # used as tolerance for assigning ions.  Default=1.0005079 for
 # monoisotopic mass or 1.0011413 for average mass.
-# Available for crux-search-for-matches and xlink-assign-ions.
+# Available for crux-search-for-matches, tide-search, and
+# xlink-assign-ions.
 mz-bin-width=1.000508
 
 # Change the mass of all amino acids 'F' by the given amount.
@@ -335,6 +336,11 @@ min-peaks=20
 # Remove peaks around the precursor m/z.
 # Available for tide-search.
 remove-precursor-peak=false
+
+# Uses exact P-value calculation for peptide-spectrum-matching.
+# Default=F.
+# Available for tide-search
+exact-p-value=false
 
 # Predict peaks with the given maximum number of nh3 neutral loss
 # modifications. Default=0.
@@ -508,7 +514,7 @@ verbosity=30
 
 # Specify the location of the left edge of the first bin used to
 # discretize the m/z axis. Default=0.40
-# Available for crux-search-for-matches.
+# Available for crux-search-for-matches and tide-search.
 mz-bin-offset=0.680000
 
 # False discovery rate threshold for evaluating best cross validation
@@ -1476,7 +1482,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Tue Sep 16 10:31:14 2014
+H	StartTime	Thu Sep 25 15:37:13 2014
 H	EndTime                               
 H	Database	small-yeast-index/small-yeast-binary-fasta
 H	DBSeqLength	?

@@ -553,6 +553,8 @@ static const char* scorer_type_strings[NUMBER_SCORER_TYPES] =
    "delta_lcn",
    "by_ions_matched",
    "by_ions_total",
+   "exact_pvalue",
+   "refactored_xcorr",
   };
 
 bool string_to_scorer_type(const char* name, SCORER_TYPE_T* result){

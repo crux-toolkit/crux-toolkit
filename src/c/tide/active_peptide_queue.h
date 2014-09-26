@@ -31,40 +31,53 @@ class ActivePeptideQueue {
 
   // See above for usage and .cc for implmentation details.
   int SetActiveRange(double min_mass, double max_mass);
+  int SetActiveRangeBIons(double min_mass, double max_mass);
 
   bool HasNext() const { return iter_ != end_; }
   Peptide* NextPeptide() { return *iter_++; }
   const Peptide* GetPeptide(int back_index) const { return *(end_ - back_index); }
+  void SetBinSize(double binWidth, double binOffset) {
+    theoretical_b_peak_set_.binWidth_ = binWidth;
+    theoretical_b_peak_set_.binOffset_ = binOffset;
+  }
 
+  deque<TheoreticalPeakSetBIons> b_ion_queue_;
+  deque<TheoreticalPeakSetBIons>::const_iterator iter1_, end1_;
+ 
+  int CountAAFrequency(double binWidth, double binOffset, double** dAAFreqN,
+                       double** dAAFreqI, double** dAAFreqC, int** dAAMass);
+  
   int ActiveTargets() const { return active_targets_; }
   int ActiveDecoys() const { return active_decoys_; }
 
- // IMPLEMENTATION DETAILS
+  // IMPLEMENTATION DETAILS
  
  private:
   // See .cc file.
   void ComputeTheoreticalPeaksBack();
+  void ComputeBTheoreticalPeaksBack();
 
   RecordReader* reader_;
   pb::Peptide current_pb_peptide_;
-  
+
   // All amino acid sequences from which the peptides are drawn.
   const vector<const pb::Protein*>& proteins_; 
 
   // Workspace for computing theoretical peaks for a single peptide.
   // Gets reused for each new peptide.
   ST_TheoreticalPeakSet theoretical_peak_set_;
+  TheoreticalPeakSetBIons theoretical_b_peak_set_;
   
   // The active peptides. Lighter peptides are enqueued before heavy ones.
   // queue_ maintains only the peptides that fall within the range specified
   // by the last call to SetActiveRange().
   deque<Peptide*> queue_;
-
+ public:
   // iter_ points to the current peptide. Client access is by HasNext(),
   // GetPeptide(), and NextPeptide(). end_ points just beyond the last active
   // peptide.
   deque<Peptide*>::const_iterator iter_, end_;
-
+ private:
   // Set by most recent call to SetActiveRange()
   double min_mass_, max_mass_;
 

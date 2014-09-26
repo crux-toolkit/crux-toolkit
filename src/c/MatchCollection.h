@@ -144,6 +144,7 @@ class MatchCollection {
 
 
  public:
+  bool exact_pval_search_;
 
   /**
    * \brief Creates a new match collection with no matches in it.  Sets
@@ -454,7 +455,8 @@ class MatchCollection {
     FILE* outfile, 
     const char* type, 
     string database,
-    int num_proteins 
+    int num_proteins,
+    bool exact_pval_search_ = false
     );
 
   /*

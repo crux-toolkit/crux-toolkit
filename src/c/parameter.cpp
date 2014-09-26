@@ -287,19 +287,6 @@ void read_mods_from_file(char* param_file);
  ************************************
  */
 
-
-/**
- * The size of the bins for discretizing the m/z axis of the
- * observed spectrum.  For use with monoisotopic mass.
- */
-static const FLOAT_T BIN_WIDTH_MONO = 1.0005079;
-
-/**
- * The size of the bins for discretizing the m/z axis of the
- * observed spectrum.  For use with average mass.
- */
-static const FLOAT_T  BIN_WIDTH_AVERAGE = 1.0011413;
-
 /**
  * initialize parameters
  * ONLY add optional parameters here!!!
@@ -634,11 +621,11 @@ void initialize_parameters(void){
       "discretize the m/z axis.  Also used as tolerance for assigning "
       "ions.  Default=1.0005079 for monoisotopic mass "
       "or 1.0011413 for average mass.",
-      "Available for crux-search-for-matches and xlink-assign-ions.", "true");
+      "Available for crux-search-for-matches, tide-search, and xlink-assign-ions.", "true");
   set_double_parameter("mz-bin-offset", SMART_MZ_OFFSET, 0.0, 1.0,
       "Specify the location of the left edge of the "
       "first bin used to discretize the m/z axis. Default=0.40",
-      "Available for crux-search-for-matches.", "true");
+      "Available for crux-search-for-matches and tide-search.", "true");
   // initialize as "unset", then set as bool after cmdline parsed
   set_boolean_parameter("use-flanking-peaks", false,
       "Include peaks +/- 1da around b/y ions in theoretical spectrum.  "
@@ -1151,6 +1138,12 @@ void initialize_parameters(void){
     "Available for tide-search",
     "true"
   );
+  set_boolean_parameter("exact-p-value", false,
+    "Uses exact P-value calculation for peptide-spectrum-matching. "
+    "Default=F.",
+    "Available for tide-search",
+    "true"
+  );
   set_boolean_parameter("concat", false,
     "Output target and decoy PSMs into a single file.",
     "Available for tide-search",
@@ -1340,7 +1333,7 @@ void initialize_parameters(void){
         "0=no, 1=yes  write pep.xml file",
         "option for Comet only",
         "true");
-  
+
   set_int_parameter("output_txtfile",
         1, 0, 1,
         "0=no, 1=yes  write tab-delimited text file",

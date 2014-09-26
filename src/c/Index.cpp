@@ -1121,10 +1121,10 @@ bool Index::create(
   
   // Create index directory if it doesn't already exist.
   if (!on_disk_) {
-	  if(mkdir(directory_, S_IRWXU+S_IRWXG+S_IROTH+S_IXOTH) != 0){
-        carp(CARP_WARNING, "Cannot create index directory %s", directory_);
-		return false;
-      }
+    if(mkdir(directory_, S_IRWXU+S_IRWXG+S_IROTH+S_IXOTH) != 0){
+      carp(CARP_WARNING, "Cannot create index directory %s", directory_);
+      return false;
+    }
   }
 
   // instantiate database(s)
@@ -1209,7 +1209,7 @@ void Index::index_database(
 
 #ifdef _MSC_VER
   if (num_bins > WIN_MAX_OPEN_FILES) {
-	  carp(CARP_FATAL, "Needed to open %ld index files. Windows allows a maximum of %ld open files\n", num_bins, WIN_MAX_OPEN_FILES); 
+    carp(CARP_FATAL, "Needed to open %ld index files. Windows allows a maximum of %ld open files\n", num_bins, WIN_MAX_OPEN_FILES); 
   }
 #endif
   
