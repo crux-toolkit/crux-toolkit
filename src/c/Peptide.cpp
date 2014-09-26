@@ -1599,8 +1599,8 @@ bool Peptide::serialize(
   p.modified_seq = modified_seq_;
   if (fwrite(&p, sizeof(PRINT_PEPTIDE_T), 1, file) != 1) {
     carp(CARP_ERROR, 
-	 "Failed to write peptide structure:%s", 
-	 strerror(ferror(file)));
+         "Failed to write peptide structure:%s", 
+         strerror(ferror(file)));
   }
 
   // write peptide src count

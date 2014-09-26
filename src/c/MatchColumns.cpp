@@ -19,6 +19,8 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "sp rank",
   "xcorr score",
   "xcorr rank",
+  "exact p-value",
+  "refactored xcorr",
   "e-value",
   "p-value",
 #ifdef NEW_COLUMNS

@@ -28,6 +28,7 @@ TideMatchSet::TideMatchSet(
   double max_mz
 ) :
   matches_(matches), max_mz_(max_mz) {
+  exact_pval_search_ = false;
 }
 
 TideMatchSet::~TideMatchSet() {
@@ -46,7 +47,8 @@ void TideMatchSet::report(
   const ActivePeptideQueue* peptides, ///< peptide queue
   const ProteinVec& proteins,  ///< proteins corresponding with peptides
   const vector<const pb::AuxLocation*>& locations,  ///< auxiliary locations
-  bool compute_sp ///< whether to compute sp or not
+  bool compute_sp, ///< whether to compute sp or not
+  bool highScoreBest //< indicates semantics of score magnitude
 ) {
   if (matches_->size() == 0) {
     return;
@@ -56,7 +58,7 @@ void TideMatchSet::report(
        top_n, matches_->size());
 
   vector<Arr::iterator> targets, decoys;
-  gatherTargetsAndDecoys(peptides, proteins, targets, decoys, top_n);
+  gatherTargetsAndDecoys(peptides, proteins, targets, decoys, top_n, highScoreBest);
 
   map<Arr::iterator, FLOAT_T> delta_cn_map;
   computeDeltaCns(targets, &delta_cn_map, top_n);
@@ -160,8 +162,14 @@ void TideMatchSet::writeToFile(
       *file << sp_data->sp_score << '\t'
             << sp_map->at(*i).second << '\t';
     }
-    *file << ((*i)->first / 100000000.0) << '\t'
-          << ++cur << '\t';
+    std::ios_base::fmtflags original_flags = file->flags();
+    file->setf(std::ios_base::floatfield);
+    *file << (*i)->first.first << '\t';
+    file->flags(original_flags);
+    if (exact_pval_search_) {
+      *file << (*i)->first.second << '\t';
+    }
+    *file << ++cur << '\t';
     if (sp_map) {
       *file << sp_data->matched_ions << '\t'
             << sp_data->total_ions << '\t';
@@ -195,7 +203,8 @@ void TideMatchSet::report(
   const ActivePeptideQueue* peptides, ///< peptide queue
   const ProteinVec& proteins,  ///< proteins corresponding with peptides
   const vector<const pb::AuxLocation*>& locations,  ///< auxiliary locations
-  bool compute_sp ///< whether to compute sp or not
+  bool compute_sp, ///< whether to compute sp or not
+  bool highScoreBest // indicates semantics of score magnitude
 ) {
   if (matches_->size() == 0) {
     return;
@@ -205,7 +214,7 @@ void TideMatchSet::report(
        top_n, matches_->size());
 
   vector<Arr::iterator> targets, decoys;
-  gatherTargetsAndDecoys(peptides, proteins, targets, decoys, top_n);
+  gatherTargetsAndDecoys(peptides, proteins, targets, decoys, top_n, highScoreBest);
 
   MatchCollection* crux_collection =
     new(match_collection_loc_) MatchCollection();
@@ -224,6 +233,9 @@ void TideMatchSet::report(
     spectrum->PrecursorMZ(), vector<int>(1, charge), "");
   SpectrumZState z_state;
   z_state.setMZ(crux_spectrum.getPrecursorMz(), charge);
+
+  crux_collection->exact_pval_search_ = exact_pval_search_;
+  crux_decoy_collection->exact_pval_search_ = exact_pval_search_;
 
   addCruxMatches(crux_collection, false, top_n, &proteins_made, targets, crux_spectrum,
                  peptides, proteins, locations, z_state, sp_scorer, &lowest_sp);
@@ -289,7 +301,10 @@ void TideMatchSet::addCruxMatches(
     Crux::Match::freeMatch(match); // so match gets deleted when collection does
 
     // Set Xcorr score in match
-    match->setScore(XCORR, (*i)->first / 100000000.0);
+    match->setScore(XCORR, (*i)->first.first);
+    match->setScore(TIDE_SEARCH_EXACT_PVAL, (*i)->first.first);
+    match->setScore(TIDE_SEARCH_REFACTORED_XCORR, (*i)->first.second);
+
     // Set lnNumSp in match
     match->setLnExperimentSize(lnNumSp);
 
@@ -328,7 +343,8 @@ void TideMatchSet::addCruxMatches(
 void TideMatchSet::writeHeaders(
   ofstream* file,
   bool decoyFile,
-  bool sp
+  bool sp,
+  bool exact_pval_search
 ) {
   if (!file) {
     return;
@@ -355,7 +371,12 @@ void TideMatchSet::writeHeaders(
     if (i > 0) {
       *file << '\t';
     }
-    *file << get_column_header(header);
+    if (exact_pval_search && header == XCORR_SCORE_COL) {
+      *file << get_column_header(EXACT_PVALUE_COL) << '\t'
+            << get_column_header(REFACTORED_SCORE_COL);
+    } else {
+      *file << get_column_header(header);
+    }
   }
   *file << endl;
 }
@@ -479,12 +500,13 @@ void TideMatchSet::gatherTargetsAndDecoys(
   const ProteinVec& proteins,
   vector<Arr::iterator>& targetsOut,
   vector<Arr::iterator>& decoysOut,
-  int top_n
+  int top_n,
+  bool highScoreBest // indicates semantics of score magnitude
 ) {
-  make_heap(matches_->begin(), matches_->end(), less_score());
+  make_heap(matches_->begin(), matches_->end(), highScoreBest ? lessScore : moreScore);
   if (!OutputFiles::isConcat() && TideSearchApplication::hasDecoys()) {
     for (Arr::iterator i = matches_->end(); i != matches_->begin(); ) {
-      pop_heap(matches_->begin(), i--, less_score());
+      pop_heap(matches_->begin(), i--, highScoreBest ? lessScore : moreScore);
       const Peptide& peptide = *(peptides->GetPeptide(i->second));
       const pb::Protein& protein = *(proteins[peptide.FirstLocProteinId()]);
       vector<Arr::iterator>* vec_ptr = !peptide.IsDecoy() ? &targetsOut : &decoysOut;
@@ -495,7 +517,7 @@ void TideMatchSet::gatherTargetsAndDecoys(
   } else {
     int toAdd = min(top_n + 1, matches_->size());
     for (int i = 0; i < toAdd; ) {
-      pop_heap(matches_->begin(), matches_->end() - i, less_score());
+      pop_heap(matches_->begin(), matches_->end() - i, highScoreBest ? lessScore : moreScore);
       targetsOut.push_back(matches_->end() - (++i));
     }
   }
@@ -570,7 +592,7 @@ void TideMatchSet::computeDeltaCns(
   vector<Arr::iterator>::const_reverse_iterator i = (vec.size() > top_n) ?
     vec.rend() - (top_n + 1) : vec.rbegin();
   for (; i != vec.rend(); ++i) {
-    const FLOAT_T xcorr = (*i)->first / 100000000.0;
+    const FLOAT_T xcorr = (*i)->first.first;
     delta_cn_map->insert(make_pair(*i, (lastXcorr == BILLION) ?
       0 : (xcorr - lastXcorr) / max(xcorr, FLOAT_T(1))));
     lastXcorr = xcorr;

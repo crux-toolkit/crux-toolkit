@@ -93,6 +93,7 @@
 #include "peptides.pb.h"
 #include "max_mz.h"
 #include "theoretical_peak_pair.h"
+#include "math.h"
 
 using namespace std;
 typedef google::protobuf::RepeatedField<int>::const_iterator FieldIter;
@@ -764,4 +765,24 @@ class TheoreticalPeakSetSparse : public TheoreticalPeakSet {
 };
 
 */
+
+// This class is used to store theoretical b ions only, with true monoisotopic mass,
+//		for use in exact p-value calculations.
+class TheoreticalPeakSetBIons {
+ public:
+  TheoreticalPeakSetBIons() {}
+  TheoreticalPeakSetBIons(int capacity) {
+    unordered_peak_list_.reserve(capacity);
+  }
+  virtual ~TheoreticalPeakSetBIons() {}
+
+  void Clear() { unordered_peak_list_.clear(); }
+  void AddBIon(double mass) {
+    unsigned int index = (unsigned int)floor(mass / binWidth_ + 1.0 - binOffset_);
+    unordered_peak_list_.push_back(index);
+  }
+  vector<unsigned int> unordered_peak_list_;
+  double binWidth_;
+  double binOffset_;
+};
 #endif // THEORETICAL_PEAK_SET_H

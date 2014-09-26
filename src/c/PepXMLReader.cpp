@@ -26,7 +26,7 @@ using namespace std;
 using namespace Crux;
 
 //Buffer for expat's xml reading routines
-#define BUFFSIZE	8192
+#define BUFFSIZE 8192
 char Buff[BUFFSIZE];
 
 void open_handler(void *data, const char *el, const char **attr) {
@@ -165,8 +165,8 @@ MatchCollection* PepXMLReader::parse() {
 
     if (! XML_Parse(xml_parser, Buff, len, done)) {
       carp(CARP_FATAL, "Parse error at line %d:\n%s\n",
-	      (int)XML_GetCurrentLineNumber(xml_parser),
-	      XML_ErrorString(XML_GetErrorCode(xml_parser)));
+           (int)XML_GetCurrentLineNumber(xml_parser),
+           XML_ErrorString(XML_GetErrorCode(xml_parser)));
       exit(-1);
     }
   }

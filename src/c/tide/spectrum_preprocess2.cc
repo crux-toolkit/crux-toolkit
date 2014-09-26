@@ -10,8 +10,13 @@
 // preserve the results from Crux exactly we retain this legacy for now.
 // TODO 251: revisit this.
 
-#include <math.h>
+#include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+#include <time.h>
+#include <math.h>
+#include <algorithm>
+#include <math.h>
 #include <gflags/gflags.h>
 #include "spectrum_collection.h"
 #include "spectrum_preprocess.h"
@@ -51,7 +56,6 @@ static void SubtractBackground(double* observed, int end) {
     observed[i] -= multiplier * (partial_sums[right_index] - partial_sums[left_index] - observed[i]);
   }
 }
-
 
 void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum,
 					 int charge ) {
@@ -154,6 +158,298 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum,
   if (debug)
     ShowCache();
 #endif
+}
+
+/* Calculates vector of cleavage evidence for an observed spectrum, using XCorr
+ * b/y/neutral peak sets and heights.
+ *
+ * Written by Jeff Howbert, May, 2013 (as function createEvidenceArrayObserved). 
+ * Extended and modified by Jeff Howbert, October, 2013.
+ * Ported to and integrated with Tide by Jeff Howbert, November, 2013.
+ */
+void ObservedPeakSet::CreateEvidenceVector(
+  const Spectrum& spectrum,
+  double binWidth,
+  double binOffset,
+  int charge,
+  double pepMassMonoMean,
+  int maxPrecurMass,
+  int* evidenceInt
+) {
+
+  // TODO preserved from PreprocessSpectrum; may delete in future
+#ifdef DEBUG
+  bool debug = (FLAGS_debug_spectrum_id == spectrum.SpectrumNumber()
+                && (FLAGS_debug_charge == 0 || FLAGS_debug_charge == charge));
+  if (debug)
+    debug = true; // allows a breakpoint
+#endif
+  // double experimental_mass_cut_off = (precursor_mz-proton)*charge+proton + 50;
+  // double max_peak_mz = spectrum.M_Z(spectrum.Size()-1);
+  assert(MaxBin::Global().MaxBinEnd() > 0);
+  // max_mz_.Init(min(experimental_mass_cut_off, max_peak_mz));
+  // TODO end preserved
+
+  // TODO need to review these constants, decide which can be moved to parameter file
+  const double evidenceIntScale = 500.0;
+  const int nRegion = NUM_SPECTRUM_REGIONS;
+  const double maxIntensPerRegion = 50.0;
+  const double precursorMZExclude = 15.0;
+  const int MAX_XCORR_OFFSET = 75;
+  const double massNH3Mono = 17.02655;     // mass of NH3 (monoisotopic)
+  const double massCOMono =  27.9949;      // mass of CO (monoisotopic)
+  const double massH2OMono = 18.010564684; // mass of water (monoisotopic)
+  const double massHMono = 1.0078246;      // mass of hydrogen (monoisotopic)
+  const double BYHeight = 50.0;
+  const double NH3LossHeight = 10.0;    
+  const double COLossHeight = 10.0;    // for creating a ions on the fly from b ions
+  const double H2OLossHeight = 10.0;
+  // TODO end need to review
+
+  int ma;
+  int pc;
+  int ionBin;
+  double bIonMass;
+  double yIonMass;
+  double ionMZMultiCharge;
+  double ionMassNH3Loss;
+  double ionMassCOLoss;
+  double ionMassH2OLoss;
+	
+  double* evidence = new double[maxPrecurMass];
+  double* intensArrayObs = new double[maxPrecurMass];
+  int* intensRegion = new int[maxPrecurMass];
+
+  for (ma = 0; ma < maxPrecurMass; ma++) {
+    evidence[ma] = 0.0;
+    evidenceInt[ma] = 0;
+    intensArrayObs[ma] = 0.0;
+    intensRegion[ma] = -1;
+  }
+
+  double precurMz = spectrum.PrecursorMZ();
+  int nIon = spectrum.Size();
+  int precurCharge = charge;
+  double experimentalMassCutoff = precurMz * precurCharge + 50.0;
+  double proton = MassConstants::proton;
+
+  // TODO preserved from PreprocessSpectrum only for historical reference; get rid of eventually  
+  // // Fill peaks
+  // int largest_mz = 0;
+  // double highest_intensity = 0;
+  // for (int i = 0; i < spectrum.Size(); ++i) {
+    // double peak_location = spectrum.M_Z(i);
+    // if(peak_location >= experimental_mass_cut_off)
+      // continue;
+
+    // double intensity = spectrum.Intensity(i);
+    // int mz = (int)(peak_location / bin_width + 0.5);
+    // if ((mz > largest_mz) && (intensity > 0))
+      // largest_mz = mz;
+
+    // intensity = sqrt(intensity);
+    // if (intensity > highest_intensity)
+      // highest_intensity = intensity;
+    // if (intensity > peaks_[mz])
+      // peaks_[mz] = intensity;
+  // }
+
+  // double intensity_cutoff = highest_intensity * 0.05;
+
+  // int region_size = largest_mz / NUM_SPECTRUM_REGIONS;
+  // for (int i = 0; i < NUM_SPECTRUM_REGIONS; ++i) {
+    // highest_intensity = 0;
+    // for (int j = 0; j < region_size; ++j) {
+      // int index = i * region_size + j;
+      // if (peaks_[index] <= intensity_cutoff)
+	// peaks_[index] = 0;
+      // if (peaks_[index] > highest_intensity)
+	// highest_intensity = peaks_[index];
+    // }
+    // if (highest_intensity == 0)
+      // continue;
+    // double normalizer = 50.0/highest_intensity;
+    // for (int j = 0; j < region_size; ++j) {
+      // int index = i * region_size + j;
+      // if (peaks_[index] != 0)
+	// peaks_[index] *= normalizer;
+    // }    
+  // }
+  // TODO end preserved
+
+  double maxIonMass = 0.0;
+  double maxIonIntens = 0.0;
+  for (int ion = 0; ion < nIon; ion++) {
+    double ionMass = spectrum.M_Z(ion);
+    double ionIntens = spectrum.Intensity(ion);
+    if (ionMass >= experimentalMassCutoff) {
+      continue;
+    }
+    if (maxIonMass < ionMass) {
+      maxIonMass = ionMass;
+    }
+    if (maxIonIntens < ionIntens) {
+      maxIonIntens = ionIntens;
+    }
+  }
+  int regionSelector = (int)floor(
+    (int)floor(((double)maxIonMass / binWidth) + 1.0 - binOffset ) / (double)nRegion
+  );
+  for (int ion = 0; ion < nIon; ion++) {
+    double ionMass = spectrum.M_Z(ion);
+    double ionIntens = spectrum.Intensity(ion);
+    if (ionMass >= experimentalMassCutoff) {
+      continue;
+    }
+    if (ionMass > precurMz - precursorMZExclude && ionMass < precurMz + precursorMZExclude) {
+      continue;
+    }
+    ionBin = (int)floor((ionMass / binWidth) + 1.0 - binOffset);
+    int region = (int)floor((double)(ionBin) / (double)regionSelector);
+    if (region >= nRegion) {
+      region = nRegion - 1;
+    }
+    intensRegion[ionBin] = region;
+    if (intensArrayObs[ionBin] < ionIntens) {
+      intensArrayObs[ionBin] = ionIntens;
+    }
+  }
+
+  maxIonIntens = sqrt(maxIonIntens);
+  for (ma = 0; ma < maxPrecurMass; ma++) {
+    intensArrayObs[ma] = sqrt(intensArrayObs[ma]);
+    if (intensArrayObs[ma] <= 0.05 * maxIonIntens) {
+      intensArrayObs[ma] = 0.0;
+    }
+  }
+
+  double* maxRegion = new double[nRegion];
+  for (int re = 0; re < nRegion; re++) {
+    maxRegion[re] = 0.0;
+  }
+  for (ma = 0; ma < maxPrecurMass; ma++) {
+    int reg = intensRegion[ma];
+    if (reg >= 0 && maxRegion[reg] < intensArrayObs[ma]) {
+      maxRegion[reg] = intensArrayObs[ma];
+    }
+  }
+  for (ma = 0; ma < maxPrecurMass; ma++) {
+    int reg = intensRegion[ma];
+    if (reg >= 0 && maxRegion[reg] > 0.0) {
+      intensArrayObs[ma] *= (maxIntensPerRegion / maxRegion[reg]);
+    }
+  }
+  delete [] maxRegion;
+
+  // ***** Adapted from tide/spectrum_preprocess2.cc.
+  // TODO replace, if possible, with call to 
+  // static void SubtractBackground(double* observed, int end).
+  // Note numerous small changes from Tide code.
+  double multiplier = 1.0 / (MAX_XCORR_OFFSET * 2.0 + 1.0);
+  double total = 0.0;
+  double* partial_sums = new double[maxPrecurMass];
+  for (int i = 0; i < maxPrecurMass; ++i) {
+    partial_sums[ i ] = ( total += intensArrayObs[i]);
+  }
+  for (int i = 0; i < maxPrecurMass; ++i) {
+    int right_index = std::min(maxPrecurMass - 1, i + MAX_XCORR_OFFSET);
+    int left_index = std::max(0, i - MAX_XCORR_OFFSET - 1);
+    intensArrayObs[i] -= multiplier * (partial_sums[right_index] - partial_sums[left_index]);
+  }
+  delete [] partial_sums;
+  // *****
+  
+  int binFirst = 30;
+  int binLast = (int)floor(pepMassMonoMean) - 47;
+
+  for (ma = binFirst; ma <= binLast; ma++) {
+    // b ion
+    bIonMass = ma * binWidth;
+    ionBin = (int)floor(bIonMass / binWidth + 1.0 - binOffset);
+    evidence[ma] = evidence[ma] + intensArrayObs[ionBin] * BYHeight;
+    for (pc = 3; pc <= precurCharge; pc++) {
+      ionMZMultiCharge = (bIonMass + (pc - 2) * massHMono) / (pc - 1);
+      ionBin = (int)floor(ionMZMultiCharge / binWidth + 1.0 - binOffset);
+      evidence[ma] = evidence[ma] + intensArrayObs[ionBin] * BYHeight;
+    }
+    // y ion
+    yIonMass = pepMassMonoMean + 2 * massHMono - bIonMass;
+    ionBin = (int)floor(yIonMass / binWidth + 1.0 - binOffset);
+    evidence[ma] = evidence[ma] + intensArrayObs[ionBin] * BYHeight;
+    for (pc = 3; pc <= precurCharge; pc++) {
+      ionMZMultiCharge = (yIonMass + (pc - 2) * massHMono) / (pc - 1);
+      ionBin = (int)floor(ionMZMultiCharge / binWidth + 1.0 - binOffset);
+      evidence[ma] = evidence[ma] + intensArrayObs[ionBin] * BYHeight;
+    }
+    // NH3 loss from b ion
+    ionMassNH3Loss = bIonMass - massNH3Mono;
+    ionBin = (int)floor(ionMassNH3Loss / binWidth + 1.0 - binOffset);
+    evidence[ma] = evidence[ma] + intensArrayObs[ionBin] * NH3LossHeight;
+    for (pc = 3; pc <= precurCharge; pc++) {
+      ionMZMultiCharge = (ionMassNH3Loss + (pc - 2) * massHMono) / (pc - 1);
+      ionBin = (int)floor(ionMZMultiCharge / binWidth + 1.0 - binOffset);
+      evidence[ma] = evidence[ma] + intensArrayObs[ionBin] * NH3LossHeight;
+    }
+    // NH3 loss from y ion
+    ionMassNH3Loss = yIonMass - massNH3Mono;
+    ionBin = (int)floor(ionMassNH3Loss / binWidth + 1.0 - binOffset);
+    evidence[ma] = evidence[ma] + intensArrayObs[ionBin] * NH3LossHeight;
+    for (pc = 3; pc <= precurCharge; pc++) {
+      ionMZMultiCharge = (ionMassNH3Loss + (pc - 2) * massHMono) / (pc - 1);
+      ionBin = (int)floor(ionMZMultiCharge / binWidth + 1.0 - binOffset);
+      evidence[ma] = evidence[ma] + intensArrayObs[ionBin] * NH3LossHeight;
+    }
+    // CO and H2O loss from b ion
+    ionMassCOLoss = bIonMass - massCOMono;
+    ionMassH2OLoss = bIonMass - massH2OMono;
+    ionBin = (int)floor(ionMassCOLoss / binWidth + 1.0 - binOffset);
+    evidence[ma] = evidence[ma] + intensArrayObs[ionBin] * COLossHeight;
+    ionBin = (int)floor(ionMassH2OLoss / binWidth + 1.0 - binOffset);
+    evidence[ma] = evidence[ma] + intensArrayObs[ionBin] * H2OLossHeight;
+    for (pc = 3; pc <= precurCharge; pc++) {
+      ionMZMultiCharge = (ionMassCOLoss + (pc - 2) * massHMono) / (pc - 1);
+      ionBin = (int)floor(ionMZMultiCharge / binWidth + 1.0 - binOffset);
+      evidence[ma] = evidence[ma] + intensArrayObs[ionBin] * COLossHeight;
+      ionMZMultiCharge = (ionMassH2OLoss + (pc - 2) * massHMono) / (pc - 1);
+      ionBin = (int)floor(ionMZMultiCharge / binWidth + 1.0 - binOffset);
+      evidence[ma] = evidence[ma] + intensArrayObs[ionBin] * H2OLossHeight;
+    }
+    // H2O loss from y ion
+    ionMassH2OLoss = yIonMass - massH2OMono;
+    ionBin = (int)floor(ionMassH2OLoss / binWidth + 1.0 - binOffset);
+    evidence[ma] = evidence[ma] + intensArrayObs[ionBin] * H2OLossHeight;
+    for (pc = 3; pc <= precurCharge; pc++) {
+      ionMZMultiCharge = (ionMassH2OLoss + (pc - 2) * massHMono) / (pc - 1);
+      ionBin = (int)floor(ionMZMultiCharge / binWidth + 1.0 - binOffset);
+      evidence[ma] = evidence[ma] + intensArrayObs[ionBin] * H2OLossHeight;
+    }
+  }
+  // discretize evidence array
+  for (ma = 0; ma < maxPrecurMass; ma++) {
+    evidenceInt[ma] = (int)floor(evidence[ma] / evidenceIntScale + 0.5);
+  }
+  
+  // clean up
+  delete [] evidence;
+  delete [] intensArrayObs;
+  delete [] intensRegion;
+
+  // TODO preserved from PreprocessSpectrum; may delete in future
+#ifdef DEBUG
+  if (debug) {
+    cout << "GLOBAL MAX MZ: " << MaxMZ::Global().MaxBin() << ", " << MaxMZ::Global().BackgroundBinEnd()
+         << ", " << MaxMZ::Global().CacheBinEnd() << endl;
+    cout << "MAX MZ: " << max_mz_.MaxBin() << ", " << max_mz_.BackgroundBinEnd()
+         << ", " << max_mz_.CacheBinEnd() << endl;
+    ShowPeaks();
+    cout << "====== SUBTRACTING BACKGROUND ======" << endl;
+  }
+#endif
+#ifdef DEBUG
+  if (debug)
+    ShowPeaks();
+#endif
+  // TODO end preserved
 }
 
 inline int round_to_int(double x) {

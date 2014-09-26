@@ -65,10 +65,10 @@ int GetMs2Spectrum :: main(int argc, char** argv){
   };
   int num_arguments = sizeof(argument_list) / sizeof(char*);
   initialize(argument_list,
-	     num_arguments,
-	     option_list,
-	     num_options,
-	     argc, argv);
+             num_arguments,
+             option_list,
+             num_options,
+             argc, argv);
 
   
   /* Get arguments */

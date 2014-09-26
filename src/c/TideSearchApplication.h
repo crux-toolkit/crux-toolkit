@@ -44,14 +44,19 @@ protected:
     OutputFiles* output_files,
     ofstream* target_file,
     ofstream* decoy_file,
-    bool compute_sp
+    bool compute_sp,
+    int aaSize, 
+    double* aaFreqN,
+    double* aaFreqI,
+    double* aaFreqC,
+    int* aaMass
   );
 
   void collectScoresCompiled(
     ActivePeptideQueue* active_peptide_queue,
     const Spectrum* spectrum,
     const ObservedPeakSet& observed,
-    TideMatchSet::Arr* match_arr,
+    TideMatchSet::Arr2* match_arr,
     int queue_size,
     int charge
   );
@@ -76,7 +81,9 @@ protected:
   double bin_width_;
   double bin_offset_;
 
-  public:
+public:
+
+  bool exact_pval_search_;
 
   /**
    * Constructor
@@ -111,7 +118,22 @@ protected:
   virtual bool needsOutputDirectory();
 
   virtual COMMAND_T getCommand();
-  
+
+  int calcScoreCount(
+    int numelEvidenceObs,
+    int* evidenceObs,
+    int pepMassInt,
+    int maxEvidence,
+    int minEvidence,
+    int maxScore,
+    int minScore,
+    int nAA,
+    double* aaFreqN,
+    double* aaFreqI,
+    double* aaFreqC,
+    int* aaMass,
+    double* pValueScoreObs
+  );
 };
 
 #endif
