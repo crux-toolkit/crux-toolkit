@@ -42,19 +42,22 @@ def estimateQvalues(estimationMethod, sortedPSMs):
   if (estimationMethod == "tdc"):
     numDecoys = 0
     numTargets = 0
-    for index in range(0, len(combinedPSMs)):
-      (score, isTarget, line) = combinedPSMs[index]
+    for index in range(0, len(sortedPSMs)):
+      (score, isTarget, line) = sortedPSMs[index]
   
       if isTarget:
         numTargets += 1
         fdr = float(numDecoys) / float(numTargets)
+        if (fdr > 1.0):
+          fdr = 1.0
         returnValue.append((score, line, fdr))
       else:
         numDecoys += 1
 
   # Estimate FDRs using target-decoy competition.
   else:
-    FIXME  
+    sys.stderr.write("Sorry! Benjamini-Hochberg is not yet implemented.\n")
+    sys.exit(1)
 
   # Compute q-values.
   minFDR = 1.0
@@ -62,7 +65,8 @@ def estimateQvalues(estimationMethod, sortedPSMs):
     (score, line, fdr) = returnValue[index]
     if (fdr < minFDR):
       minFDR = fdr
-    returnValue[index] = (score, line, fdr, minFDR)
+#      sys.stderr.write("%g->%g\n" % (fdr, minFDR))
+    returnValue[index] = (score, line, minFDR)
 
   return(returnValue)
 
@@ -125,7 +129,7 @@ if (decoyFileName != "") and (estimationMethod == "b-h"):
 if (decoyFileName == "") and (estimationMethod == "tdc"):
   sys.stderr.write("Error: You asked for target-decoy estimates but did not provide decoys.\n")
   sys.stderr.exit(1)
-if (highIsGood and (estimationMethod == "b-h"):
+if (highIsGood and (estimationMethod == "b-h")):
   sys.stderr.write("Benjamini-Hochberg is incompatible with --best-score high.\n")
   sys.exit(1)
 
@@ -156,6 +160,7 @@ if (decoyFileName != ""):
 # Read line by line.
 psms = [] # (score, isTargetScore, line)
 lineNumber = 0
+numDecoys = 0
 for line in psmFile:
   lineNumber += 1
   targetWords = line.rstrip().split("\t")
@@ -176,14 +181,18 @@ for line in psmFile:
 
     # Do the target-decoy competition.
     decoyScore = float(decoyWords[scoreColumnIndex])
+#    sys.stdout.write("%g versus %g\n" % (score, decoyScore))
     if ((not highIsGood and (decoyScore < score)) or
         (highIsGood and (decoyScore > score))):
       score = decoyScore
       isTargetScore = False
+      numDecoys += 1
 
   psms.append((score, isTargetScore, line.strip()))
 psmFile.close()
 sys.stderr.write("Read %d PSMs from %s.\n" % (len(psms), psmFileName))
+if (decoyFileName != ""):
+  sys.stderr.write("%d decoys won target-decoy competition.\n" % numDecoys)
 
 # Sort by score.
 sortedPSMs = sorted(psms, key=lambda tup: tup[0], reverse=highIsGood)
