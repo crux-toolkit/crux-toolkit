@@ -50,7 +50,7 @@ string ComputeQValues::getDescription() {
  * \returns the filestem for ComputeQValues
  */
 string ComputeQValues::getFileStem() {
-  return "qvalues";
+  return "calibrate-scores";
 }
 
 COMMAND_T ComputeQValues::getCommand() {
