@@ -812,7 +812,7 @@ int TideSearchApplication::calcScoreCount(
   }
 
   dynProgArray[initCountRow][initCountCol] = 1.0; // initial count of peptides with mass = 1
-  int deltaMassCol[nDeltaMass];
+  vector<int> deltaMassCol[nDeltaMass];
   // populate matrix with scores for first (i.e. N-terminal) amino acid in sequence
   for (de = 0; de < nDeltaMass; de++) {
     ma = aaMass[de];
