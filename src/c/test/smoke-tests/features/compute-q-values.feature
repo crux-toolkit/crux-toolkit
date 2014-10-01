@@ -11,7 +11,7 @@ Scenario Outline: User runs compute-q-values
   And <actual_output> should match good_results/<expected_output>
 
 Examples:
-  |test_name       |args                                   |target_input             |actual_output                     |expected_output|
-  |compute-q-values|--parameter-file params/pval           |sample.search.target.txt |crux-output/qvalues.target.txt    |qvalues.txt    |
-  |decoy_qval      |--parameter-file params/decoy-qval-pval|sample4.search.target.txt|decoy-qval-pval/qvalues.target.txt|decoy-qval.txt |
+  |test_name       |args                                   |target_input             |actual_output                              |expected_output|
+  |compute-q-values|--parameter-file params/pval           |sample.search.target.txt |crux-output/calibrate-scores.target.txt    |qvalues.txt    |
+  |decoy_qval      |--parameter-file params/decoy-qval-pval|sample4.search.target.txt|decoy-qval-pval/calibrate-scores.target.txt|decoy-qval.txt |
 
