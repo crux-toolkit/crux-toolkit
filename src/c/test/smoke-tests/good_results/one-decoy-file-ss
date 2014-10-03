@@ -2,7 +2,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Thu Sep 25 15:53:54 2014
+H	StartTime	Tue Sep 30 19:28:06 2014
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	Comment	Database shuffled; these are decoy matches
@@ -2681,15 +2681,15 @@ scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	s
 159	2	745.7500	1489.4835	1486.6195	0.14640304	111.1035	3	0.26585975	4	7	26	8	SMLEPGGPNNQTNK	trypsin-full-digest	YNL166C(201)	KL	SPMPQNNTLGGENK	8
 159	2	745.7500	1489.4835	1490.6510	0.012230985	8.7934952	6	0.11945672	5	2	24	8	EHFVNEDVMGVSK	trypsin-full-digest	YOR168W(736)	KN	ESVMEHNFGDVVK	8
 INFO: CPU: arginine.gs.washington.edu
-INFO: Thu Sep 25 15:53:53 PDT 2014
+INFO: Tue Sep 30 19:28:06 PDT 2014
 COMMAND LINE: crux sequest-search --decoys peptide-shuffle --output-dir ss --fileroot one-decoy-file --parameter-file params/one-decoy-file-ss demo.ms2 small-yeast.fasta
 INFO: Preparing protein fasta file small-yeast.fasta
 INFO: Reading in ms2 file demo.ms2
 INFO: Created 1 peptide mods, keeping 1 with 255 or fewer aa mods
 INFO: Searching spectrum 96 (2+), search 100
-INFO: Elapsed time: 7.86 s
+INFO: Elapsed time: 8 s
 INFO: Finished crux sequest-search
-INFO: Elapsed time: 7.86 s
+INFO: Elapsed time: 8.32 s
 INFO: Finished crux sequest-search.
 INFO: Return Code:0
 # comet_version 2014.01 rev. 0
@@ -3594,6 +3594,10 @@ column-type=string
 # Only available for crux-predict-peptide-ions.
 h2o=0
 
+# List of integers of isotopic masses to search
+# Used for crux search-for-xlinks
+isotope-windows=0
+
 # Use a name of custom threshold rather than (default NULL)
 # Available for spectral-counts.
 custom-threshold-name=__NULL_STR
@@ -3687,6 +3691,11 @@ min-charge=1
 # Print peptide sequence (T,F). Default=F.
 # Available only for crux-generate-peptides.
 output-sequence=false
+
+# Maximum number of modifications allowed on a crosslinked peptide 
+# Default=0.
+# Available for crux search-for-xlinks
+max-xlink-mods=0
 
 # Print the masses of modified sequences in one of three ways
 # 'mod-only', 'total' (residue mass plus modification), or 'separate'
@@ -4164,7 +4173,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Thu Sep 25 15:53:54 2014
+H	StartTime	Tue Sep 30 19:28:06 2014
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	DBSeqLength	?

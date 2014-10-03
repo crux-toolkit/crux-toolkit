@@ -1,13 +1,13 @@
 INFO: CPU: arginine.gs.washington.edu
-INFO: Thu Sep 25 14:58:30 PDT 2014
+INFO: Tue Sep 30 19:28:15 PDT 2014
 COMMAND LINE: crux sequest-search --decoys peptide-shuffle --output-dir ss --fileroot tdc --parameter-file params/tdc-ss demo.ms2 small-yeast.fasta
 INFO: Preparing protein fasta file small-yeast.fasta
 INFO: Reading in ms2 file demo.ms2
 INFO: Created 1 peptide mods, keeping 1 with 255 or fewer aa mods
 INFO: Searching spectrum 96 (2+), search 100
-INFO: Elapsed time: 5.25 s
+INFO: Elapsed time: 5.92 s
 INFO: Finished crux sequest-search
-INFO: Elapsed time: 5.25 s
+INFO: Elapsed time: 6.15 s
 INFO: Finished crux sequest-search.
 INFO: Return Code:0
 # comet_version 2014.01 rev. 0
@@ -912,6 +912,10 @@ column-type=string
 # Only available for crux-predict-peptide-ions.
 h2o=0
 
+# List of integers of isotopic masses to search
+# Used for crux search-for-xlinks
+isotope-windows=0
+
 # Use a name of custom threshold rather than (default NULL)
 # Available for spectral-counts.
 custom-threshold-name=__NULL_STR
@@ -1005,6 +1009,11 @@ min-charge=1
 # Print peptide sequence (T,F). Default=F.
 # Available only for crux-generate-peptides.
 output-sequence=false
+
+# Maximum number of modifications allowed on a crosslinked peptide 
+# Default=0.
+# Available for crux search-for-xlinks
+max-xlink-mods=0
 
 # Print the masses of modified sequences in one of three ways
 # 'mod-only', 'total' (residue mass plus modification), or 'separate'
@@ -1482,7 +1491,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Thu Sep 25 14:58:31 2014
+H	StartTime	Tue Sep 30 19:28:16 2014
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	DBSeqLength	?

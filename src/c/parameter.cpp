@@ -2020,8 +2020,8 @@ void initialize_parameters(void){
       "true");
 
   set_boolean_parameter("use-old-xlink", true /* Turn to false later */,
-      "Use old xlink searching algorihtm",
-      "Available for search-for-xlinks program (Default=F).",
+      "Use old xlink searching algorithm",
+      "Available for search-for-xlinks program (Default=T).",
       "false");
 
   // **** xlink-score-spectrum options ****
@@ -2030,6 +2030,9 @@ void initialize_parameters(void){
       "Argument for xlink-score-spectrum.", "false");
 
   // **** search-xlink options ****
+  set_string_parameter("isotope-windows", "0",
+    "List of integers of isotopic masses to search",
+    "Used for crux search-for-xlinks", "true");
 
   set_boolean_parameter("xlink-print-db", false,
     "Print the database in tab delimited format to xlink_peptides.txt",
@@ -2085,6 +2088,11 @@ void initialize_parameters(void){
       "Minimum number of points for estimating the "
       "Weibull parameters.  Default=4000.",
       "Available for crux search-for-xlinks", "true");
+
+  set_int_parameter("max-xlink-mods", 0, 0, BILLION,
+    "Maximum number of modifications allowed on a crosslinked peptide "
+    " Default=0.",
+    "Available for crux search-for-xlinks", "true");
 
   /* hardklor parameters */
   set_hardklor_algorithm_type_parameter(
@@ -3655,6 +3663,24 @@ int get_int_parameter(
   return value;
 }
 
+vector<int> get_int_vector_parameter(
+  const char* name
+  ) {
+
+  vector<int> ans;
+  
+  vector<string> sans = get_string_vector_parameter(name);
+
+  for (unsigned int idx=0;idx<sans.size();idx++) {
+
+    int ival;
+    from_string(ival,sans[idx]);
+    ans.push_back(ival);
+  }
+
+
+  return ans;
+}
 
 /**
  * Searches through the list of parameters, looking for one whose
@@ -3701,6 +3727,25 @@ double get_double_parameter(
   carp(CARP_FATAL, "parameter name: %s, doesn't exist", name);
 }
 
+vector<double> get_double_vector_parameter(
+  const char* name
+  ) {
+
+  vector<double> ans;
+  
+  vector<string> sans = get_string_vector_parameter(name);
+
+  for (unsigned int idx=0;idx<sans.size();idx++) {
+
+    double dval;
+    from_string(dval,sans[idx]);
+    ans.push_back(dval);
+  }
+
+
+  return ans;
+}
+
 /**
  * \brief Get the value of a parameter whose type is char*
  *
@@ -3732,6 +3777,19 @@ char* get_string_parameter(
   string_to_param_type(type_str, &type);
 
   return my_copy_string(string_value);
+}
+
+vector<string> get_string_vector_parameter(
+  const char* name
+  ) {
+
+  vector<string> ans;
+
+  string value(get_string_parameter_pointer(name));
+
+  tokenize(value, ans, ',');
+
+  return ans;
 }
 
 // TODO (BF 04-Feb-08): Should we delete this since it allows caller

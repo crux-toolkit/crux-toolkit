@@ -978,6 +978,8 @@ char * parse_arguments_get_usage(const char * name) {
         strcat_formatted(usage, "     ", optional[i].usage);
       }
     }
+    strcat(usage, "\nAdditional parameters are documented in "
+                 "the online documentation.");
     strcat(usage, "\n");
 
   }

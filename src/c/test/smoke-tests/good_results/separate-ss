@@ -2,7 +2,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Thu Sep 25 17:18:02 2014
+H	StartTime	Tue Sep 30 19:27:57 2014
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	Comment	Database shuffled; these are decoy matches
@@ -2377,7 +2377,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Thu Sep 25 17:18:02 2014
+H	StartTime	Tue Sep 30 19:27:57 2014
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	Comment	Database shuffled; these are decoy matches
@@ -4755,15 +4755,15 @@ scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	s
 159	2	745.7500	1489.4835	1490.6510	0.13997412	8.7934952	3	0.11945672	3	2	24	4	EHFVNEDVMGVSK	trypsin-full-digest	YOR168W(736)	KN	ESVMEHNFGDVVK	4
 159	2	745.7500	1489.4835	1488.7063	0	8.2436419	4	-0.020517401	4	2	24	4	FFISSANHELPVK	trypsin-full-digest	YDR037W(97)	KY	FHVSISNPEFLAK	4
 INFO: CPU: arginine.gs.washington.edu
-INFO: Thu Sep 25 17:18:02 PDT 2014
+INFO: Tue Sep 30 19:27:55 PDT 2014
 COMMAND LINE: crux sequest-search --decoys peptide-shuffle --output-dir ss --fileroot separate --parameter-file params/separate-ss demo.ms2 small-yeast.fasta
 INFO: Preparing protein fasta file small-yeast.fasta
 INFO: Reading in ms2 file demo.ms2
 INFO: Created 1 peptide mods, keeping 1 with 255 or fewer aa mods
 INFO: Searching spectrum 96 (2+), search 100
-INFO: Elapsed time: 7.75 s
+INFO: Elapsed time: 9.01 s
 INFO: Finished crux sequest-search
-INFO: Elapsed time: 7.76 s
+INFO: Elapsed time: 9.5 s
 INFO: Finished crux sequest-search.
 INFO: Return Code:0
 # comet_version 2014.01 rev. 0
@@ -5668,6 +5668,10 @@ column-type=string
 # Only available for crux-predict-peptide-ions.
 h2o=0
 
+# List of integers of isotopic masses to search
+# Used for crux search-for-xlinks
+isotope-windows=0
+
 # Use a name of custom threshold rather than (default NULL)
 # Available for spectral-counts.
 custom-threshold-name=__NULL_STR
@@ -5761,6 +5765,11 @@ min-charge=1
 # Print peptide sequence (T,F). Default=F.
 # Available only for crux-generate-peptides.
 output-sequence=false
+
+# Maximum number of modifications allowed on a crosslinked peptide 
+# Default=0.
+# Available for crux search-for-xlinks
+max-xlink-mods=0
 
 # Print the masses of modified sequences in one of three ways
 # 'mod-only', 'total' (residue mass plus modification), or 'separate'
@@ -6238,7 +6247,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Thu Sep 25 17:18:02 2014
+H	StartTime	Tue Sep 30 19:27:57 2014
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	DBSeqLength	?

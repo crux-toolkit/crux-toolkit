@@ -46,6 +46,8 @@ class Peptide {
    */
 
   /* Private data types */
+
+  int pointer_count_;
   unsigned char length_; ///< The length of the peptide
   FLOAT_T peptide_mass_;   ///< The peptide's mass.
   std:: vector<PeptideSrc*> peptide_srcs_; ///< a vector of peptide_srcs_
@@ -121,6 +123,9 @@ class Peptide {
    * This decision is made by global variable PEPTIDE_SRC_USE_LINK_LIST
    */
   ~Peptide();
+
+  static void free(Crux::Peptide* peptide);
+  Crux::Peptide* copyPtr();
 
   /*  Getters and Setters  */
   
@@ -304,6 +309,10 @@ class Peptide {
     PEPTIDE_MOD_T* pep_mod  ///< mod that made the seq
   );
 
+  bool isModified();
+
+  bool isDecoy();
+
   /**
    * \brief Get the modified aa sequence
    *
@@ -361,6 +370,11 @@ class Peptide {
    */
   char* getUnshuffledModifiedSequence();
 
+  void setDecoyModifiedSeq(
+    MODIFIED_AA_T* decoy_modified_seq
+  );
+
+
   /*  Getters requiring calculation */
   int countModifiedAAs();
 
@@ -380,6 +394,13 @@ class Peptide {
     );
 
   /**
+   * \returns the mass of the given peptide, with modifications
+   */
+  FLOAT_T calcModifiedMass(
+    MASS_TYPE_T mass_type ///< isotopic mass type (AVERAGE, MONO) -in
+  );
+
+  /**
    * \returns The hydrophobicity of the given peptide, as in Krokhin (2004).
    */
   FLOAT_T calcKrokhinHydrophobicity();
@@ -390,6 +411,10 @@ class Peptide {
    *\returns the number of missed cleavage sites in the peptide
    */
   int getMissedCleavageSites();
+
+  int getMissedCleavageSites(
+    std::set<int> skip //skip these amino acid indices.
+  );
 
   /**
    * \brief Find the distance from the n-terminus of the source protein

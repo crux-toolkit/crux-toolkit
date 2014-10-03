@@ -55,6 +55,31 @@ ModifiedPeptidesIterator::ModifiedPeptidesIterator(
 }
 
 /**
+ * Constructor for returnign all peptides in the index or database
+ * that fall within the mass range
+ */
+ModifiedPeptidesIterator::ModifiedPeptidesIterator(
+  double min_mass,    ///< min-mass of peptides
+  double max_mass,    ///< max-mass of peptides
+  PEPTIDE_MOD_T* pmod, ///< Peptide mod to apply
+  bool is_decoy, ///< generate decoy peptides
+  Index* index,     ///< Index from which to draw peptides OR
+  Database* dbase   ///< Database from which to draw peptides
+) {
+
+  peptide_source_ = new GeneratePeptidesIterator(
+    pair<FLOAT_T,FLOAT_T>(min_mass, max_mass),
+    is_decoy,
+    dbase, index);
+
+  peptide_modification_ = pmod;
+  temp_peptide_list_ = new_empty_list();
+  max_aas_modified_ = get_int_parameter("max-aas-modified");
+  initialize();
+}
+
+
+/**
  * Destructor that frees any peptides not yet returned via next().
  */
 ModifiedPeptidesIterator::~ModifiedPeptidesIterator(){

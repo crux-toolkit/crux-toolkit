@@ -99,7 +99,7 @@ class Match {
   /**
    * Print one field in the tab-delimited output file, based on column index.
    */
-  void printOneMatchField(
+  virtual void printOneMatchField(
     int      column_idx,             ///< Index of the column to print. -in
     MatchCollection* collection,  ///< collection holding this match -in 
     MatchFileWriter*    output_file,            ///< output stream -out

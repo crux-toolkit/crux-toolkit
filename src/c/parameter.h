@@ -21,6 +21,7 @@
 #include <string.h>
 #include <math.h>
 #include <limits.h>
+#include <string>
 #include "utils.h"
 #include "crux-utils.h"
 #include "carp.h"
@@ -159,6 +160,10 @@ int get_int_parameter(
   const char* name  ///< the name of the parameter looking for -in
   );
 
+std::vector<int> get_int_vector_parameter(
+  const char* name ///< the name of the parameter looking for -in
+  );
+
 /**
  * Searches through the list of parameters, looking for one whose
  * name matches the string.  This function returns the parameter value if the
@@ -168,6 +173,10 @@ int get_int_parameter(
  */
 double get_double_parameter(
   const char* name   ///< the name of the parameter looking for -in
+  );
+
+std::vector<double> get_double_vector_parameter(
+  const char* name
   );
 
 /**
@@ -181,6 +190,9 @@ char* get_string_parameter(
   const char* name  ///< the name of the parameter looking for -in
   );
 
+std::vector<std::string> get_string_vector_parameter(
+  const char* name
+  );
 /**
  * Searches through the list of parameters, looking for one whose
  * parameter_name matches the string. 

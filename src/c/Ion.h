@@ -33,6 +33,7 @@ class Ion {
   int modification_counts_[MAX_MODIFICATIONS]; ///< an array of the number of different ion modifications
   FLOAT_T ion_mass_z_;   ///< The mass/z of the ion. 
   Peak * peak_;  ///< The assigned peak. NULL if no peak // TODO add ptr count
+  int pointer_count_; ///< count of number of references to this ion.
 
   static const int MZ_INT_MAX = 10;
   static const int MZ_INT_MIN = 0;
@@ -165,6 +166,18 @@ class Ion {
    * frees A ION_T object
    */
   ~Ion();
+
+  /**
+   * decrements the pointer and free the ion
+   */
+  static void freeIon(
+    Ion* ion ///< ion to free
+  );
+
+  /**
+   * Increments the pointer count
+   */
+  void incrementPointerCount();
 
   /**
    * prints the location and fields of ION_T object to the file, in the
@@ -339,6 +352,13 @@ class Ion {
   void setMassZ(
     FLOAT_T mass_z ///< the m/z location -in
   );
+
+  FLOAT_T getMassFromMassZ();
+
+  void setMassZFromMass(
+    FLOAT_T mass
+  );
+
 
   /**
    * return the cleavage_idx of the ion object

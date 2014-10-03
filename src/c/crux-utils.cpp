@@ -519,7 +519,10 @@ static const char* scorer_type_strings[NUMBER_SCORER_TYPES] =
   {"sp",
    "xcorr_score",
    "evalue_score",
-   
+
+   "xcorr first",
+   "xcorr second",
+
    "decoy_xcorr_qvalue",
    "decoy_xcorr_peptide_qvalue",
    "decoy_xcorr_PEP",
