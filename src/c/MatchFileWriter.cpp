@@ -248,7 +248,13 @@ void MatchFileWriter::addColumnNames(CruxApplication* application,
     break;
 
   case XLINK_SEARCH_COMMAND:
-    // TODO: does search-for-xlinks use MatchFileWriter?
+    if (get_boolean_parameter("compute-p-values")) {
+      addColumnName(PVALUE_COL);
+      addColumnName(ETA_COL);
+      addColumnName(BETA_COL);
+      addColumnName(SHIFT_COL);
+      addColumnName(CORR_COL);
+    }
     break;
 
   case SPECTRAL_COUNTS_COMMAND:

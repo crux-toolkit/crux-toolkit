@@ -78,6 +78,7 @@ void Ion::init() {
   memset(modification_counts_,0,sizeof(int)*MAX_MODIFICATIONS);
   ion_mass_z_ = 0;
   peak_ = NULL;
+  pointer_count_ = 0;
 }
 
 /**
@@ -228,6 +229,28 @@ Ion::Ion(
  */
 Ion::~Ion() {
 }
+
+/**
+ * decrements the pointer and frees ion 
+ */
+void Ion::freeIon(
+  Ion* ion ///< the ion to free
+  ) {
+
+  ion->pointer_count_--;
+
+  if (ion->pointer_count_ <= 0) {
+    delete ion;
+  }
+}
+
+/**
+ * increments the pointer count for the ion
+ */
+void Ion::incrementPointerCount() {
+  pointer_count_++;
+}
+
 
 /**
  * prints the location and fields of ION_T object to the file, in the
@@ -914,6 +937,22 @@ void Ion::setMassZ(
 {
   ion_mass_z_ = mass_z;
 }
+
+FLOAT_T Ion::getMassFromMassZ() {
+  FLOAT_T ans = (ion_mass_z_ - MASS_PROTON) * (FLOAT_T)charge_;
+  return ans;
+  
+}
+
+void Ion::setMassZFromMass(
+  FLOAT_T mass
+  ) {
+
+  FLOAT_T charge = charge_;
+  ion_mass_z_ = (mass + MASS_PROTON * charge) / charge;
+
+}
+
 
 /**
  * return the cleavage_idx of the ion object

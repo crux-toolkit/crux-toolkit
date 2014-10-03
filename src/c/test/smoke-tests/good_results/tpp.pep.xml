@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href=""?>
-<msms_pipeline_analysis date="Thu Sep 25 17:12:02 2014
+<msms_pipeline_analysis date="Tue Sep 30 19:19:16 2014
 " xmlns="http://regis-web.systemsbiology.net/pepXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://regis-web.systemsbiology.net/pepXML /usr/local/tpp/schema/pepXML_v110.xsd" summary_xml="">
-<msms_run_summary base_name="/net/noble/vol1/home/peaklist/proj/crux-trunk/src/c/test/smoke-tests/test" msManufacturer="NA" msModel="NA" msIonization="NA" msAnalyzer="NA" msDectector="NA" raw_data_type="NA" raw_data="NA" >
+<msms_run_summary base_name="/net/noble/vol4/noble/user/mcilwain/svn/noble/crux-trunk-xlink-mod2/src/c/test/smoke-tests/test" msManufacturer="NA" msModel="NA" msIonization="NA" msAnalyzer="NA" msDectector="NA" raw_data_type="NA" raw_data="NA" >
 <sample_enzyme name="trypsin">
 </sample_enzyme>
-<search_summary base_name="/net/noble/vol1/home/peaklist/proj/crux-trunk/src/c/test/smoke-tests/test" search_engine="Crux" precursor_mass_type="average" fragment_mass_type="monoisotopic" out_data_type="NA" out_data="NA" search_id="1" >
-<search_database local_path="/net/noble/vol1/home/peaklist/proj/crux-trunk/src/c/test/smoke-tests/small-yeast.fasta" type="AA" />
+<search_summary base_name="/net/noble/vol4/noble/user/mcilwain/svn/noble/crux-trunk-xlink-mod2/src/c/test/smoke-tests/test" search_engine="Crux" precursor_mass_type="average" fragment_mass_type="monoisotopic" out_data_type="NA" out_data="NA" search_id="1" >
+<search_database local_path="/net/noble/vol4/noble/user/mcilwain/svn/noble/crux-trunk-xlink-mod2/src/c/test/smoke-tests/small-yeast.fasta" type="AA" />
 <enzymatic_search_constraint enzyme="trypsin" max_num_internal_cleavages="0" min_number_termini="2"/>
 <aminoacid_modification aminoacid="C" mass="217.181727" massdiff="57.021464" variable="N" />
 <aminoacid_modification aminoacid="S" mass="166.978210" massdiff="79.900002" variable="Y" />
@@ -250,6 +250,7 @@
 <parameter name="column-type" value="string"/>
 <parameter name="spectrum_batch_size" value="0"/>
 <parameter name="h2o" value="0"/>
+<parameter name="isotope-windows" value="0"/>
 <parameter name="variable_N_terminus" value="0.000000"/>
 <parameter name="custom-threshold-name" value="__NULL_STR"/>
 <parameter name="unique-mapping" value="false"/>
@@ -285,6 +286,7 @@
 <parameter name="add_Q_glutamine" value="0.000000"/>
 <parameter name="min-charge" value="1"/>
 <parameter name="output-sequence" value="false"/>
+<parameter name="max-xlink-mods" value="0"/>
 <parameter name="mod-mass-format" value="total"/>
 <parameter name="add_P_proline" value="0.000000"/>
 <parameter name="use_Y_ions" value="1"/>

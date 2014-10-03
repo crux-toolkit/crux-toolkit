@@ -22,6 +22,26 @@ class DelimitedFileReader;
 class MatchFileReader;
 class SpectrumZState;
 
+class MatchCandidate;
+/**
+ * Object for defining xlinkable peptides
+ */
+class XLinkablePeptide;
+
+/**
+ * Object for defining valid links
+ */
+class XLinkBondMap;
+
+/**
+ * Object for define a cross link peptide
+ */
+class XLinkPeptide;
+
+/**
+ * Object for defining the Xlinkable iterator
+ */
+class XLinkablePeptideIterator;
 
 /**
  * \class Peak 
@@ -481,6 +501,8 @@ enum _scorer_type {
   SP,                  ///< SEQUEST preliminary score
   XCORR,               ///< SEQUEST primary score
   EVALUE,              ///< Comet e-value
+  XCORR_FIRST,
+  XCORR_SECOND,
   
   DECOY_XCORR_QVALUE,  ///< q-value derived from empirical null (decoys)
   DECOY_XCORR_PEPTIDE_QVALUE,
@@ -727,11 +749,24 @@ typedef struct _linked_list_node LIST_POINTER_T;
  */
 enum XLINK_SITE_T{
   XLINKSITE_UNKNOWN,
+  XLINKSITE_CTERM,
   XLINKSITE_NTERM,
   XLINKSITE_ALL,
   XLINKSITE_AA,
   NUMBER_XLINKSITES
 };
+
+enum XLINKMATCH_TYPE_T {
+  INVALID_CANDIDATE,
+  LINEAR_CANDIDATE,
+  DEADLINK_CANDIDATE,
+  SELFLOOP_CANDIDATE, 
+  XLINK_INTER_CANDIDATE,
+  XLINK_INTRA_CANDIDATE,
+  XLINK_INTER_INTRA_CANDIDATE};
+
+
+
 
 /**
  * \class LinkedPeptide
@@ -827,7 +862,6 @@ enum FILE_FORMAT_T{
   XML_FORMAT,
   DELIMITED_FORMAT
 };
-								    
 
 #endif
 

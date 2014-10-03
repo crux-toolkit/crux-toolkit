@@ -33,7 +33,7 @@ bool MSToolkitSpectrumCollection::parse() {
   }
 
   // get a list of scans to include if requested
-  const char* range_string = get_string_parameter("scan-number");
+  const char* range_string = get_string_parameter_pointer("scan-number");
   int first_scan;
   int last_scan;
   

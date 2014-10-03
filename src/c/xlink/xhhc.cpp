@@ -101,8 +101,8 @@ void free_peptides() {
 void get_linkable_peptides(
         set<XLinkablePeptide>& peptides, 
         XLinkBondMap& bondmap,
-	DatabaseProteinIterator* protein_iterator,
-	PeptideConstraint* peptide_constraint) 
+  DatabaseProteinIterator* protein_iterator,
+  PeptideConstraint* peptide_constraint) 
 {
   ProteinPeptideIterator* peptide_iterator = NULL;
   Protein* protein;
@@ -177,10 +177,13 @@ void print_precursor_count(vector<LinkedPeptide>& all_ions) {
 
 // creates an index of all linked peptides from a fasta file
 void find_all_precursor_ions(
-  Database* db,
   vector<LinkedPeptide>& all_ions
   ) {
+
+  char* database_file = get_string_parameter("protein-database");
+  
   carp(CARP_DEBUG,"find_all_precursor_ions: start()");
+  Database* db = new Database(database_file, false);
   carp(CARP_DEBUG,"peptide constraint");
   PeptideConstraint* peptide_constraint = 
     PeptideConstraint::newFromParameters();
@@ -205,8 +208,9 @@ void find_all_precursor_ions(
     
     set<string>::iterator iter;
     for (iter = linear_peptides.begin();
-	 iter != linear_peptides.end();
-	 ++iter) {
+      iter != linear_peptides.end();
+      ++iter) {
+
       LinkedPeptide lp = LinkedPeptide(1);
       XHHC_Peptide p(*iter);
       lp.addPeptide(p);

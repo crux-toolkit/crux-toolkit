@@ -1016,6 +1016,7 @@ void Match::printTab(
   int column_idx;
   for (column_idx = 0; column_idx < NUMBER_MATCH_COLUMNS; column_idx++) {
     carp(CARP_DETAILED_DEBUG,"print col:%i",column_idx);
+    carp(CARP_DETAILED_DEBUG, "%s", get_column_header(column_idx));
     printOneMatchField(column_idx, 
                        collection,
                        output_file,

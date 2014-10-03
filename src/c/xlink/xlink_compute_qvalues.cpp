@@ -29,7 +29,7 @@ void getBestBonf(DelimitedFile& matches, int start, int stop,
   if (numScans == 1) {
     best_index = start;
     double pvalue = matches.getDouble("p-value", best_index);
-    int ntests = matches.getInteger("matches/spectrum", best_index);
+    int ntests = matches.getInteger("distinct matches/spectrum", best_index);
     best_bonf = bonferroni_correction(pvalue, ntests);
   } else {
     map<int, pair<int, double> > charge_best_score; 
@@ -45,7 +45,7 @@ void getBestBonf(DelimitedFile& matches, int start, int stop,
         charge_best_score[charge] = make_pair(match_idx, pvalue);
       }
       if (charge_ntests.find(charge) == charge_ntests.end()) {
-        int ntests = matches.getInteger("matches/spectrum", match_idx);
+        int ntests = matches.getInteger("distinct matches/spectrum", match_idx);
         charge_ntests[charge] = ntests;
       }
     }
@@ -157,7 +157,7 @@ int xlink_compute_qvalues(){
 
   carp(CARP_INFO,"reading targets");
   string output_dir = get_string_parameter_pointer("output-dir");
-  string target_filename = "search.target.txt";
+  string target_filename = "search-for-xlinks.target.txt";
 
   //Read in targets.
   string target_path = output_dir + "/" + target_filename;
@@ -169,7 +169,7 @@ int xlink_compute_qvalues(){
 
   carp(CARP_INFO,"reading decoys");
 
-  string decoy_filename = "search.decoy.txt";
+  string decoy_filename = "search-for-xlinks.decoy.txt";
   string decoy_path = output_dir + "/" + decoy_filename;
   DelimitedFile decoy_matches(decoy_path);
 
@@ -270,10 +270,10 @@ int xlink_compute_qvalues(){
   //sort back by scans? or q-value?
   //target_matches_bonf.sortByFloatColumn("q-value decoy");
 
-  string result_file = output_dir + "/qvalues.target.txt";
+  string result_file = output_dir + "/search-for-xlinks.qvalues..txt";
   target_matches_bonf.saveData(result_file);
 
-  result_file = output_dir + "/pvalues.decoy.txt";
+  result_file = output_dir + "/search-for-xlinks.pvalues.decoy.txt";
   decoy_matches_bonf.saveData(result_file);
 
   return 0;
