@@ -433,12 +433,12 @@ only available when <code>use-old-xlink=F.</code></li>
 maximum number of modifications allowed on a crosslinked peptide.
 This option is only available when <code>use-old-xlink=F.</code></li>
 
-
 <li>
-<code>--compute-p-values T|F</code> &ndash;
-Estimate the paramters of the score distribution for each spectrum and
-compute a p-value for each xlink product.   This option is available when
-<code>use-old-xlink=F</code>. Default = F.</li>
+<code>compute-p-values T|F</code> &ndash; Estimate the paramters of
+the score distribution for each spectrum by fitting to a Weibull
+distribution, and compute a p-value for each xlink product.   This
+option is only available when <code>use-old-xlink=F</code>. Default =
+F.</li>
 
 <li>
 <code>mod &lt;mass&nbsp;change&gt;:&lt;aa&nbsp;list&gt;:&lt;max&nbsp;per&nbsp;peptide&gt;:&lt;prevents&nbsp;cleavage&gt;:&lt;prevents&nbsp;cross-link&gt;
