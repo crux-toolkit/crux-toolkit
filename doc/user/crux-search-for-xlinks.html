@@ -118,28 +118,160 @@ printed to stderr.
 
 </ul>
 
-<B>Options:</B>
+<h2>Options:</h2>
 <UL>
 
-<li>
-<code>--output-dir &lt;filename&gt;</code> &ndash; 
-The name of the directory where output files will be created.
-Default = crux-output.</li>
+<h3>Cross-linking parameters</h3>
 
+<ul>
 
 <li>
-<code>--overwrite T|F</code> Replace existing files if true (T) or 
-fail when trying to overwrite a file if false (F). Default =  F.
+<code>--use-old-xlink T|F</code> &ndash; Use the old version of xlink
+searching algorithm. When False, a new version of the code is run.
+The new version supports variable modifications and can handle more
+complex databases.  This new code is still in development and should
+be considered a beta release.  Default=T.</li>
+
+<li><code>--xlink-include-linears T|F</code> &ndash;
+Include linear peptides in the search. Default = T.
+</li>
+
+<li><code>--xlink-include-deadends T|F</code> &ndash;
+Include deadend products in the search. Default = T.
+</li>
+
+<li><code>--xlink-include-selfloops T|F</code> &ndash;
+Include selfloops in the search. Default = T.
 </li>
 
 <li>
-<code>--spectrum-parser pwiz|mstoolkit</code> &ndash;
-Specify the parser to use for reading in MS/MS spectra. The default,
-ProteoWizard parser should be able to read the MS/MS file formats listed
-<a href="http://proteowizard.sourceforge.net/formats.shtml">here</a>. The
-alternative is the <a href="mstoolkit.html">MSToolkit parser</a>. If the
-ProteoWizard parser fails to read your files properly, you may want to try the
-MSToolkit parser instead. Default = pwiz.</li>
+<code>--xlink-prevents-cleavage &lt;string&gt;</code> &ndash;
+List of amino acids for which the cross-linker can prevent cleavage.</li>
+
+<li>
+<code>--max-xlink-mods &lt;integer&gt;</code> &ndash; Specify the
+maximum number of modifications allowed on a crosslinked peptide.
+This option is only available when <code>use-old-xlink=F.</code></li>
+
+</ul>
+
+<h3>Peptide properties</h3>
+
+<ul>
+
+<LI>
+<code>--min-mass &lt;float&gt;</code> &ndash; 
+The minimum neutral mass of the peptides to place in the
+index. Default = 200.
+</li>
+
+<LI>
+<code>--max-mass &lt;float&gt;</code> &ndash; 
+The maximum neutral mass of the peptides to place in
+index. Default = 7200.
+</li>
+	
+<LI>
+<code>--min-length &lt;int&gt;</code> &ndash; 
+The minimum length of the peptides to place in the index. Default = 4.
+</li>
+	
+<LI>
+<code>--max-length &lt;int&gt;</code> &ndash; 
+The maximum length of the peptides to place in the index. Default = 50.
+</li>
+
+</ul>
+
+<h3>Amino acid modifications</h3>
+
+<ul>
+
+<li>
+<code>--mod &lt;mass&nbsp;change&gt;:&lt;aa&nbsp;list&gt;:&lt;max&nbsp;per&nbsp;peptide&gt;:&lt;prevents&nbsp;cleavage&gt;:&lt;prevents&nbsp;cross-link&gt;
+</code> &ndash; 
+Consider modifications on any amino acid in <code>aa list</code> with at most
+<code>max-per-peptide</code> in one peptide.  This parameter may be included
+with different values multiple times so long as the total number of
+<code>mod</code>, <code>cmod</code>, and <code>nmod</code> parameters
+does not exceed 11.  The <code>prevents&nbsp;cleavage</code> and
+<code>prevents&nbsp;cross-link</code> are T/F optional arguments for
+describing whether the modification prevent enzymatic cleavage or
+cross-linking respectively.  Default = no variable modifications.
+This option is only available when <code>use-old-xlink=F.</code>
+</li>
+
+<li>
+<code>--max-mods &lt;int&gt;</code> &ndash; The maximum number of
+modifications that can be applied to a single peptide. Default = no
+limit.  This option is only available
+when <code>use-old-xlink=F.</code></li>
+
+<li>
+<code>--&lt;A-Z&gt &lt;float&gt;</code> &ndash;
+Specify static modifications.  This is a mass change applied to the
+given amino acid (in single-letter-code A thru Z) for every peptide in
+which it occurs.  Use the <code>mod</code> option for generating
+peptides both with and without the mass change.  Default
+C=57.0214637206.</li>
+
+</ul>
+
+<h3>Enzymatic digestion</h3>
+
+<ul>
+
+<LI>
+<code>--enzyme trypsin|trypsin/p|chymotrypsin|elastase|clostripain|cyanogen-bromide|idosobenzoate|proline-endopeptidase|staph-protease|asp-n|lys-c|lys-n|arg-c|glu-c|pepsin-a|elastase-trypsin-chymotrypsin|no-enzyme</code> &ndash;
+Enzyme to use for <i>in silico</i> digestion of protein sequences. Used
+in conjunction with the options digestion and missed-cleavages. Use
+'no-enzyme' for non-specific digestion.  Digestion rules are as
+follows: enzyme name [cuts after one of these residues]|{but not before
+one of these residues}. trypsin [RK]|{P}, trypsin/p [RK]|[], elastase [ALIV]|{P},
+chymotrypsin [FWYL]|{P}, clostripain [R]|[], cyanogen-bromide [M]|[],
+iodosobenzoate [W]|[], proline-endopeptidase [P]|[], staph-protease [E]|[],
+elastase-trypsin-chymotrypsin [ALIVKRWFY]|{P}, asp-n []|[D], lys-c [K]|{P},
+lys-n []|[K], arg-c [R]|{P}, glu-c [DE]|{P}, pepsin-a [FL]|{P}.
+Default = trypsin.
+</li>
+
+<li>
+<code>--custom-enzyme &lt;residues before cleavage&gt;|&lt;residues
+  after cleavage&gt;</code> &ndash;
+Specify rules for <i>in silico</i> digestion of protein sequences.
+Overrides the <code>enzyme</code> option.  Two lists of residues are
+given enclosed in square brackets or curly braces and separated by a
+|. The first list contains residues required/prohibited before the
+cleavage site and the second list is residues after the cleavage site.  
+If the residues are required for digestion, they are in square
+brackets, '[' and ']'.  If the residues prevent digestion, then they
+are enclosed in curly braces, '{' and '}'.  Use X to indicate all
+residues.  For example, trypsin cuts after R or K but not before P
+which is represented as <code>[RK]|{P}</code>.  AspN cuts after any
+residue but only before D which is represented as <code>[X]|[D]</code>.
+</li>
+
+<LI>
+<code>--digestion full-digest|partial-digest</code> &ndash;
+Degree of digestion used to generate peptides (full-digest,
+partial-digest). Either both ends or one end of a peptide must
+conform to enzyme specificity rules. Default full-digest., Used in
+conjunction with enzyme option when enzyme is not set to to
+'no-enzyme'.  
+</li>
+
+<LI>
+<code>--missed-cleavages &lt;int&gt;</code> &ndash; 
+Allow missed cleavage sites within a peptide.  When used with
+enzyme is specified; includes peptides containing one or more
+potential cleavage sites. Default = 0. 
+</LI>
+
+</ul>
+
+<h3>Search parameters</h3>
+
+<ul>
 
 <LI>
 <code>--spectrum-min-mz &lt;float&gt;</code> &ndash; The lowest spectrum 
@@ -164,21 +296,6 @@ searched. Default = all.
 Compute the preliminary Sp score for all
 candidate peptides.  This is recommended if results are to be analyzed
 by <code>percolator</code> or <code>q-ranker</code>.  Default = F.</li>
-
-<LI><code>--parameter-file &lt;filename&gt;</code> &ndash; A file containing
-parameter settings.  See the <a
-href="parameter-file.html">parameter documentation</a> page for
-details.
-</LI>
-
-<LI>
-<code>--verbosity &lt;0-100&gt;</code> &ndash; Specify the verbosity of the
-current processes. Each level prints the following messages, including
-all those at lower verbosity levels: 0-fatal errors, 10-non-fatal
-errors, 20-warnings, 30-information on the progress of execution,
-40-more progress information, 50-debug info, 60-detailed debug info.
-Default = 30.
-</LI>
 
 <li>
 <code>--precursor-window &lt;float&gt;</code> &ndash;
@@ -272,28 +389,6 @@ modifications of masses +14 and +2.  In this case, the amino acid
 would be reported as D[16] with 'mod-only', D[131] with 'total', and
 D[14,2] with 'separate'.</li>
 
-<!--
-<li><code>--missed-link-cleavage &lt;string&gt;</code> &ndash;
-Currently unused parameter. Default = K.
-</li>
--->
-
-<li><code>--xlink-include-linears T|F</code> &ndash;
-Include linear peptides in the search. Default = T.
-</li>
-
-<li><code>--xlink-include-deadends T|F</code> &ndash;
-Include deadend products in the search. Default = T.
-</li>
-
-<li><code>--xlink-include-selfloops T|F</code> &ndash;
-Include selfloops in the search. Default = T.
-</li>
-
-<li>
-<code>--xlink-prevents-cleavage &lt;string&gt;</code> &ndash;
-List of amino acids for which the cross-linker can prevent cleavage.</li>
-
 <li>
 <code>--use-flanking-peaks T|F</code> &ndash;
 Turn on or off the peaks flanking the b/y ions.  For <code>crux 
@@ -306,120 +401,25 @@ Use flanking ions in the theoretical spectrum.  These are placed +/- 1
 Default = T.
 </li>
 
-<li><code>--use-mgf T|F</code> &ndash;
-Use MGF file format for parsing spectra. Default = F.
-</li>
-
 <li>
-<code>--top-match &lt;int&gt;</code> &ndash; The number of PSMs per
-spectrum written to the output files. Default = 5.
-</li>
-
-</UL>
-<B>Parameter file options:</B>
-<ul>
-<li>
-<code>fragment-mass average|mono</code> &ndash; Which isotopes to use
+<code>--fragment-mass average|mono</code> &ndash; Which isotopes to use
 in calcuating fragment ion mass (average, mono). Default = average.
 </li>
 
-<LI>
-<code>min-mass &lt;float&gt;</code> &ndash; 
-The minimum neutral mass of the peptides to place in the
-index. Default = 200.
-</li>
-
-<LI>
-<code>max-mass &lt;float&gt;</code> &ndash; 
-The maximum neutral mass of the peptides to place in
-index. Default = 7200.
-</li>
-	
-<LI>
-<code>min-length &lt;int&gt;</code> &ndash; 
-The minimum length of the peptides to place in the index. Default = 4.
-</li>
-	
-<LI>
-<code>max-length &lt;int&gt;</code> &ndash; 
-The maximum length of the peptides to place in the index. Default = 50.
-</li>
-
-<LI>
-<code>enzyme trypsin|trypsin/p|chymotrypsin|elastase|clostripain|cyanogen-bromide|idosobenzoate|proline-endopeptidase|staph-protease|asp-n|lys-c|lys-n|arg-c|glu-c|pepsin-a|elastase-trypsin-chymotrypsin|no-enzyme</code> &ndash;
-Enzyme to use for <i>in silico</i> digestion of protein sequences. Used
-in conjunction with the options digestion and missed-cleavages. Use
-'no-enzyme' for non-specific digestion.  Digestion rules are as
-follows: enzyme name [cuts after one of these residues]|{but not before
-one of these residues}. trypsin [RK]|{P}, trypsin/p [RK]|[], elastase [ALIV]|{P},
-chymotrypsin [FWYL]|{P}, clostripain [R]|[], cyanogen-bromide [M]|[],
-iodosobenzoate [W]|[], proline-endopeptidase [P]|[], staph-protease [E]|[],
-elastase-trypsin-chymotrypsin [ALIVKRWFY]|{P}, asp-n []|[D], lys-c [K]|{P},
-lys-n []|[K], arg-c [R]|{P}, glu-c [DE]|{P}, pepsin-a [FL]|{P}.
-Default = trypsin.
-</li>
-
 <li>
-<code>custom-enzyme &lt;residues before cleavage&gt;|&lt;residues
-  after cleavage&gt;</code> &ndash;
-Specify rules for <i>in silico</i> digestion of protein sequences.
-Overrides the <code>enzyme</code> option.  Two lists of residues are
-given enclosed in square brackets or curly braces and separated by a
-|. The first list contains residues required/prohibited before the
-cleavage site and the second list is residues after the cleavage site.  
-If the residues are required for digestion, they are in square
-brackets, '[' and ']'.  If the residues prevent digestion, then they
-are enclosed in curly braces, '{' and '}'.  Use X to indicate all
-residues.  For example, trypsin cuts after R or K but not before P
-which is represented as <code>[RK]|{P}</code>.  AspN cuts after any
-residue but only before D which is represented as <code>[X]|[D]</code>.
-</li>
-
-<LI>
-<code>digestion full-digest|partial-digest</code> &ndash;
-Degree of digestion used to generate peptides (full-digest,
-partial-digest). Either both ends or one end of a peptide must
-conform to enzyme specificity rules. Default full-digest., Used in
-conjunction with enzyme option when enzyme is not set to to
-'no-enzyme'.  
-</li>
-
-<LI>
-<code>missed-cleavages &lt;int&gt;</code> &ndash; 
-Allow missed cleavage sites within a peptide.  When used with
-enzyme is specified; includes peptides containing one or more
-potential cleavage sites. Default = 0. 
-</LI>
-
-<li>
-<code>unique-peptides T|F</code> &ndash; 
+<code>--unique-peptides T|F</code> &ndash; 
 For peptides appearing in multiple proteins, store a reference to only
 one of those proteins.  Default = F.
 </li>
 
 <LI>
-<code>isotopic-mass average|mono</code> &ndash; 
+<code>--isotopic-mass average|mono</code> &ndash; 
 Specify the type of isotopic masses to use when calculating the
 peptide mass. Default = average.
 </li>
    
 <li>
-<code>&lt;A-Z&gt &lt;float&gt;</code> &ndash;
-Specify static modifications.  This is a mass change applied to the
-given amino acid (in single-letter-code A thru Z) for every peptide in
-which it occurs.  Use the <code>mod</code> option for generating
-peptides both with and without the mass change.  Default
-C=57.0214637206.</li>
-
-<li>
-<code>use-old-xlink T|F</code> &ndash; Use the old version of xlink
-searching algorithm. When False, a new version of the code is run.
-The new version supports variable modifications and can handle more
-complex databases.  This new code is still in development and should
-be considered a beta release.  Default=T.</li>
-
-<li>
-<code>isotope-windows &lt;-n,-n-1,0,1,n&gt;</code> &ndash; Provides a
+<code>--isotope-windows &lt;-n,-n-1,0,1,n&gt;</code> &ndash; Provides a
 list of isotopic windows to search. For example, -1,0,1 will search in
 three disjoint windows: (1) precursor_mass - neutron_mass &pm; window,
 (2) precursor_mass &pm; window, and (3) precursor_mass + neutron_mass
@@ -429,36 +429,62 @@ and </code>precursor-window-type</code> parameters.  This option is
 only available when <code>use-old-xlink=F.</code></li>
 
 <li>
-<code>max-xlink-mods &lt;integer&gt;</code> &ndash; Specify the
-maximum number of modifications allowed on a crosslinked peptide.
-This option is only available when <code>use-old-xlink=F.</code></li>
-
-<li>
-<code>compute-p-values T|F</code> &ndash; Estimate the paramters of
+<code>--compute-p-values T|F</code> &ndash; Estimate the paramters of
 the score distribution for each spectrum by fitting to a Weibull
 distribution, and compute a p-value for each xlink product.   This
 option is only available when <code>use-old-xlink=F</code>. Default =
 F.</li>
 
-<li>
-<code>mod &lt;mass&nbsp;change&gt;:&lt;aa&nbsp;list&gt;:&lt;max&nbsp;per&nbsp;peptide&gt;:&lt;prevents&nbsp;cleavage&gt;:&lt;prevents&nbsp;cross-link&gt;
-</code> &ndash; 
-Consider modifications on any amino acid in <code>aa list</code> with at most
-<code>max-per-peptide</code> in one peptide.  This parameter may be included
-with different values multiple times so long as the total number of
-<code>mod</code>, <code>cmod</code>, and <code>nmod</code> parameters
-does not exceed 11.  The <code>prevents&nbsp;cleavage</code> and
-<code>prevents&nbsp;cross-link</code> are T/F optional arguments for
-describing whether the modification prevent enzymatic cleavage or
-cross-linking respectively.  Default = no variable modifications.
-This option is only available when <code>use-old-xlink=F.</code>
+</ul>
+
+<h3>Input and output</h3>
+
+<ul>
+
+<li><code>--use-mgf T|F</code> &ndash;
+Use MGF file format for parsing spectra. Default = F.
 </li>
 
 <li>
-<code>max-mods &lt;int&gt;</code> &ndash; The maximum number of
-modifications that can be applied to a single peptide. Default = no
-limit.  This option is only available
-when <code>use-old-xlink=F.</code></li>
+<code>--spectrum-parser pwiz|mstoolkit</code> &ndash;
+Specify the parser to use for reading in MS/MS spectra. The default,
+ProteoWizard parser should be able to read the MS/MS file formats listed
+<a href="http://proteowizard.sourceforge.net/formats.shtml">here</a>. The
+alternative is the <a href="mstoolkit.html">MSToolkit parser</a>. If the
+ProteoWizard parser fails to read your files properly, you may want to try the
+MSToolkit parser instead. Default = pwiz.</li>
+
+<li>
+<code>--top-match &lt;int&gt;</code> &ndash; The number of PSMs per
+spectrum written to the output files. Default = 5.
+</li>
+
+<li>
+<code>--output-dir &lt;filename&gt;</code> &ndash; 
+The name of the directory where output files will be created.
+Default = crux-output.</li>
+
+<li>
+<code>--overwrite T|F</code> Replace existing files if true (T) or 
+fail when trying to overwrite a file if false (F). Default =  F.
+</li>
+
+<LI><code>--parameter-file &lt;filename&gt;</code> &ndash; A file containing
+parameter settings.  See the <a
+href="parameter-file.html">parameter documentation</a> page for
+details.
+</LI>
+
+<LI>
+<code>--verbosity &lt;0-100&gt;</code> &ndash; Specify the verbosity of the
+current processes. Each level prints the following messages, including
+all those at lower verbosity levels: 0-fatal errors, 10-non-fatal
+errors, 20-warnings, 30-information on the progress of execution,
+40-more progress information, 50-debug info, 60-detailed debug info.
+Default = 30.
+</LI>
+
+</ul>
 
 </ul>
 
