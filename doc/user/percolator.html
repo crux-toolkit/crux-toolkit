@@ -115,27 +115,36 @@ the <code>crux-output</code> directory:</p>
 <ul>
 
 <li>
-<b>percolator.target.pout.xml</b>: an XML file containing all of the
-Percolator results, defined according to <a href="https://github.com/percolator/percolator/blob/master/src/xml/percolator_out.xsd">
-this schema</a>.
-</li>
+<b>percolator.target.proteins.txt</b>: a tab-delimited file containing the
+target protein matches.  See <a href="txt-format.html">here</a> for a list of
+the fields.</li>
 
 <li>
-<b>percolator.proteins.txt</b>: a tab-delimited file containing the
-protein matches.  See <a href="txt-format.html">here</a> for a list of the
+<b>percolator.decoy.proteins.txt</b>: a tab-delimited file containing the
+decoy protein matches.  See <a href="txt-format.html">here</a> for a list of
+the fields.</li>
+
+<li>
+<b>percolator.target.peptides.txt</b>: a tab-delimited file containing the
+target peptide matches.  See <a href="txt-format.html">here</a> for a list of
+the fields.</li>
+
+<li>
+<b>percolator.decoy.peptides.txt</b>: a tab-delimited file containing the
+decoy peptide matches.  See <a href="txt-format.html">here</a> for a list of
+the fields.</li>
+
+<li>
+<b>percolator.target.psms.txt</b>: a tab-delimited file containing the
+target PSMs.  See <a href="txt-format.html">here</a> for a list of the
 fields.</li>
 
 <li>
-<b>percolator.peptides.txt</b>: a tab-delimited file containing the
-peptide matches.  See <a href="txt-format.html">here</a> for a list of the
+<b>percolator.decoy.psms.txt</b>: a tab-delimited file containing the
+decoy PSMs.  See <a href="txt-format.html">here</a> for a list of the
 fields.</li>
-
 <li>
-<b>percolator.psms.txt</b>: a tab-delimited file containing the
-PSMs.  See <a href="txt-format.html">here</a> for a list of the
-fields.</li>
 
-<li>
 <b>percolator.params.txt</b>: a file containing the name and value of
 all parameters for the current operation.  Not all parameters in the
 file may have been used in the operation.  The resulting file can be
@@ -301,17 +310,17 @@ below may be used.  Default = F.</li>
 <li>
 <code>--alpha &lt;float&gt;</code> &ndash; Specify the probability
 with which a present protein emits an associated peptide. Set by grid
-search (see <code>--depth</code> parameter) if not specified.</li>
+search (see <code>--deepness</code> parameter) if not specified.</li>
 
 <li>
 <code>--beta &lt;float&gt;</code> &ndash; Specify the probability of
 the creation of a peptide from noise. Set by grid search
-(see <code>--depth</code> parameter) if not specified.</li>
+(see <code>--deepness</code> parameter) if not specified.</li>
 
 <li>
 <code>--gamma &lt;float&gt;</code> &ndash; Specify the prior
 probability that a protein is present in the sample. Set by grid
-search (see <code>--depth</code> parameter) if not specified.</li>
+search (see <code>--deepness</code> parameter) if not specified.</li>
 
 <li>
 <code>--allow-protein-group T|F</code> &ndash; Treat ties as
@@ -337,7 +346,7 @@ Default = F.</li>
 <li>
 <code>--deepness &lt;0|1|2|3&gt;</code> &ndash; Set depth of the grid
 search for alpha, beta and gamma estimation. The values considered,
-for each possible value of the <code>--depth</code> parameter, are as
+for each possible value of the <code>--deepness</code> parameter, are as
 follows:
 <ul>
 <li>0: alpha = {0.01, 0.04, 0.09, 0.16, 0.25, 0.36, 0.5};
