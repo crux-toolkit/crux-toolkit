@@ -97,7 +97,6 @@ set (
   tide-search.html
   txt-format.html 
   UWlogo150p.gif 
-  xlink-txt-format.html 
 )
 set(
   comet_documentation
