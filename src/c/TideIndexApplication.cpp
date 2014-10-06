@@ -503,6 +503,10 @@ void TideIndexApplication::fastaToPb(
     proteinSequence = new string;
   }
   delete proteinSequence;
+  if (targetsGenerated == 0) {
+    carp(CARP_FATAL, "No target sequences generated.  Is \'%s\' a FASTA file?",
+         fasta.c_str());
+  }
 
   // Generate decoys
   map<const string*, const string*> targetToDecoy;

@@ -121,6 +121,19 @@ that were printed to the screen during execution.</li>
 <ul>
 
 <li>
+<code>--exact-p-value T|F</code> &ndash; Enable the calculation of
+exact p-values for the XCorr score, as described in
+<a href="http://www.ncbi.nlm.nih.gov/pubmed/24895379">this
+article</a>.  Calculation of p-values increases the running time but
+increases the number of correct identifications at a fixed confidence
+threshold.  The p-values will be reported in a new column with header
+"exact p-value," and the "xcorr score" column will be replaced with a
+"refactored xcorr" column.  Note that, currently, p-values can only be
+computed when the <code>mz-bin-width</code>
+and <code>mz-bin-offset</code> parameters are set to their default
+values.  Default = F.</li>
+
+<li>
 <code>--precursor-window &lt;float&gt;</code> &ndash; Tolerance used for
 matching peptides to spectra.  Peptides must be within +/-
 '<code>precursor-window</code>' of the spectrum value.  The precursor
