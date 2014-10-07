@@ -128,10 +128,11 @@ article</a>.  Calculation of p-values increases the running time but
 increases the number of correct identifications at a fixed confidence
 threshold.  The p-values will be reported in a new column with header
 "exact p-value," and the "xcorr score" column will be replaced with a
-"refactored xcorr" column.  Note that, currently, p-values can only be
-computed when the <code>mz-bin-width</code>
-and <code>mz-bin-offset</code> parameters are set to their default
-values.  Default = F.</li>
+"refactored xcorr" column. Note that, currently, p-values can only be
+computed when the <code>mz-bin-width</code> parameter is set to its default
+value. Variable and static mods are allowed on non-terminal residues in
+conjunction with p-value computation, but currently only static mods are
+allowed on the N-terminus, and no mods on the C-terminus. Default = F.</li>
 
 <li>
 <code>--precursor-window &lt;float&gt;</code> &ndash; Tolerance used for
