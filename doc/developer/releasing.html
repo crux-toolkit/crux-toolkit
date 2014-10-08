@@ -7,13 +7,18 @@
     this page</i>
 
 <h3>Before you begin</h3>
-<p>Confirm that a clean check out builds correctly and passes all the
-  smoke and unit tests. Update the release notes
+<p>Confirm that the TeamCity server successfully built Crux from the current
+  repository trunk on all platforms, and that the smoke and performance tests all 
+  passed on the 64-bit Linux build.
+  Update the release notes
   (crux/doc/user/release-notes.html).  At the very least, the date
-  will need to be added. Update index.html in doc/user/downloads
-  to point to the new version and to include links to the previous version.
+  will need to be added. 
   You can also make sure that the default.params file is up-to-date by running
   write-default-params.sh in crux/src/c.
+  <!--
+    This process needs to be updated! Should we have team-city automatically
+    update default.params in the repository?
+  -->
 
 <h3>Branching</h3>
 <p>The first release of crux, version 1.0, was given its own development
@@ -22,8 +27,16 @@ reported by users were fixed in this branch and builds from this
 branch were made available for download. Changes made to this branch
 are periodically merged into the trunk. The next release should
 be given its own branch at which point work in <code>rel-1-0</code>
-will cease and that directory can be deleted.</p>
-
+will cease.</p>
+<p/>
+For example:
+<pre>
+svn copy \ 
+  svn+ssh://charlesegrant@svn.code.sf.net/p/cruxtoolkit/code/crux/trunk \
+  svn+ssh://charlesegrant@svn.code.sf.net/p/cruxtoolkit/code/crux/tags/crux-X.Y \
+</pre>
+In SVN tags and branches are really the same, but tags are traditionally used
+for branches intended to be permanent, named, versions.
 <h3>Version numbers</h3>
 <p>Each time new files are made available for download, the version
 number should increment by 0.01 for minor releases or by 0.1 for major
@@ -36,7 +49,31 @@ set (CPACK_PACKAGE_VERSION_MINOR "XX")
 This controls the numbering of packages and what is reported by the 
 <code>--version</code> option.
 </p>
+Once you have updated the version number you'll also need
+to update the TeamCity tasks for building Crux on each of the platforms,
+and for copying the resulting artifacts to the website.
 
+<h3>Create a download directory for the new release</h3>
+<a href="crux-sourceforge.html" >Log on</a> to the <code>crux-toolkit</code> server.
+Create a subdirectory for the new release in 
+<code>/home/project-web/cruxtoolkit/htdocs/download</code>
+<h3>Prepare a static tarball of ProteoWizard</h3>
+The normal build of Crux pulls the latest version of ProteoWizard 
+from the SVN repository.
+This is a moving target, and may result in bugs or break
+the build as the ProteoWizard team makes changes. 
+For formal releases we download the current version of ProteoWizard
+and save it into as a fixed tarball on our website.
+When users build the release from source, this tarball is downloaded,
+and used to build the ProteoWizard libraries.
+<p/>
+The script <code>src/external/download-pwiz-tarball.sh</code>
+can be used to download a copy of the ProteoWizard source tarball
+into the current directory.
+It can then be 
+<a href="crux-sourceforge.html">copied</a> into the download directory for the new release on the
+<code>crux-toolkit</code> web site.
+<h3>Modify the Crux build to use the ProteoWizard tarball.</h3>
 <h3>Building packages</h3>
 <p>Avoid building packages in the root.
 Create a sub-directory in the root for the relase type (source, 32-bit
