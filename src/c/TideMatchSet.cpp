@@ -162,10 +162,7 @@ void TideMatchSet::writeToFile(
       *file << sp_data->sp_score << '\t'
             << sp_map->at(*i).second << '\t';
     }
-    ios_base::fmtflags original_flags = file->flags();
-    file->setf(ios::fixed, ios::floatfield);
     *file << (*i)->first.first << '\t';
-    file->flags(original_flags);
     if (exact_pval_search_) {
       *file << (*i)->first.second << '\t';
     }
