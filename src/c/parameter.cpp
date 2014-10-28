@@ -21,7 +21,7 @@ using namespace std;
 /**
  * Starting location for zeroth m/z bin.
  */
-static const FLOAT_T SMART_MZ_OFFSET = 0.68;
+static const FLOAT_T SMART_MZ_OFFSET = 0.40;
 
 /*
  * Global variables
@@ -1259,12 +1259,12 @@ void initialize_parameters(void){
                     "option for Comet only",
                     "true");
 
-  set_double_parameter("fragment_bin_tol", 1.0005, 0, BILLION,
+  set_double_parameter("fragment_bin_tol", 1.000507, 0, BILLION,
                        "binning to use on fragment ions",
                        "option for Comet only",
                        "true");
 
-  set_double_parameter("fragment_bin_offset", 0.4, 0, 1.0,
+  set_double_parameter("fragment_bin_offset", SMART_MZ_OFFSET, 0, 1.0,
                        "offset position to start the binning (0.0 to 1.0)",
                        "option for Comet only",
                        "true");

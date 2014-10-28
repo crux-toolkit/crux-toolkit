@@ -44,8 +44,10 @@ When /I run comet and tide/ do
   @Tester.add_args("enzyme=trypsin");
   @Tester.add_args("top-match=500");
   @Tester.add_args("exact-p-value=F");
-  @Tester.add_args("min-peaks=15");
-
+  @Tester.add_args("min-peaks=1");
+ # @Tester.add_args("mods-spec=1MW+15.9949,1QN+0.984");
+  @Tester.add_args("max-mods=2");  
+  @Tester.add_args("peptide-list=T");
 
 #  Specify the rest of the default parameters for CRUX COMET
   @Tester.add_args("decoy_search = 0");
@@ -63,16 +65,19 @@ When /I run comet and tide/ do
   @Tester.add_args("use_Y_ions = 1");
   @Tester.add_args("use_Z_ions = 0");
   @Tester.add_args("use_NL_ions = 1");
+ # @Tester.add_args("variable_mod1 = 15.9949 MW 0 1");
+ # @Tester.add_args("variable_mod2 = 0.984 NQ 0 1");
+  @Tester.add_args("max_variable_mods_in_peptide = 2");
   @Tester.add_args("use_sparse_matrix = 0");
-  
-  @Tester.add_args("minimum_peaks = 15");
+
+  @Tester.add_args("minimum_peaks = 1");
   @Tester.add_args("minimum_intensity = 0");
   @Tester.add_args("remove_precursor_peak = 0");
   @Tester.add_args("clip_nterm_methionine = 0");
   @Tester.add_args("max_fragment_charge = 2");
   @Tester.add_args("max_precursor_charge = 5");
 
-  @Tester.add_args("digest_mass_range = 10.0 5000.0");
+  @Tester.add_args("digest_mass_range = 100.0 5000.0");
   @Tester.add_args("num_results = 500");
   @Tester.add_args("output_sqtstream = 0");
   @Tester.add_args("output_sqtfile = 0");
