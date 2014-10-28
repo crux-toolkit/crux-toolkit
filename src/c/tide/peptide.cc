@@ -181,6 +181,15 @@ void Peptide::Compile(const TheoreticalPeakArr* peaks,
 //  compiler_prog2->AddPositive(pb_peptide.peak2());
 //  compiler_prog2->AddNegative(pb_peptide.neg_peak2());
   compiler_prog2->Done();
+/*    cout << Seq() << endl;
+    for (int i = 0; i < peaks[0].size(); ++i)
+      cout << "Theoretical Peak[" << peaks[0][i].Bin() << "] = "
+           << peaks[0][i].Type() << endl;
+    for (int i = 0; i < peaks[1].size(); ++i)
+      cout << "Theoretical Peak[" << peaks[1][i].Bin() << "] = "
+           << peaks[1][i].Type() << endl;
+*/
+//	exit(1);  
 }
 
 void Peptide::ComputeTheoreticalPeaks(TheoreticalPeakSet* workspace) const {

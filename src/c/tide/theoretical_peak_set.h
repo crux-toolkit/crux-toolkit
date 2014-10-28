@@ -159,14 +159,14 @@ class TheoreticalPeakSet {
       if (itr->Bin() == peak.Bin()){
         found = true;
         break;
-	  }
+     }
     }
 
     for (TheoreticalPeakArr::iterator itr2 = otherset->begin(); itr2 < otherset->end(); itr2++){
       if (itr2->Bin() == peak.Bin()){
         found = true;
         break;
-	  }
+      }
     }
     if (!found){
       dest->push_back(peak);
@@ -457,6 +457,7 @@ class TheoreticalPeakSetBYSparse : public TheoreticalPeakSet {
   void AddYIon(double mass, int charge) {
      assert(charge <= 2);
     int index_y = MassConstants::mass2bin(mass + MassConstants::Y + MassConstants::proton, charge);
+//	  cout << "index_y:  " << index_y << endl;
     TheoreticalPeakType series;
     if (charge == 1) {
       series = PeakCombinedY1;
@@ -473,12 +474,12 @@ class TheoreticalPeakSetBYSparse : public TheoreticalPeakSet {
       AddPeakUnordered(&peaks_[charge-1], index_y, series, &peaks_[charge]);
     else
       AddPeakUnordered(&peaks_[charge-1], index_y, series, &peaks_[charge-2]);
-	
   }
 
   void AddBIon(double mass, int charge) {
      assert(charge <= 2);
-	int index_b = MassConstants::mass2bin(mass + MassConstants::B + MassConstants::proton, charge);
+    int index_b = MassConstants::mass2bin(mass + MassConstants::B + MassConstants::proton, charge);
+//	  cout << "index_b:  " << index_b << endl;
     TheoreticalPeakType series;
     if (charge == 1) {
       series = PeakCombinedB1;
@@ -502,10 +503,10 @@ class TheoreticalPeakSetBYSparse : public TheoreticalPeakSet {
   const TheoreticalPeakArr* GetPeaks() const { return peaks_; }
 
   void GetPeaks(TheoreticalPeakArr* peaks_charge_1,
-		TheoreticalPeakArr* negs_charge_1,
-		TheoreticalPeakArr* peaks_charge_2,
-		TheoreticalPeakArr* negs_charge_2,
-		const pb::Peptide* peptide = NULL) {
+    TheoreticalPeakArr* negs_charge_1,
+    TheoreticalPeakArr* peaks_charge_2,
+    TheoreticalPeakArr* negs_charge_2,
+    const pb::Peptide* peptide = NULL) {
 //    CopyUniqueUnordered(peaks_[0], peaks_charge_1);
 //    CopyUniqueUnordered(peaks_[0], peaks_charge_2);
 //    CopyUniqueUnordered(peaks_[1], peaks_charge_2);
