@@ -147,8 +147,7 @@ int PercolatorApplication::main(int argc, char** argv) {
     vector<string> result_files;
     get_search_result_paths(input_pin, result_files);
 
-    string pin_location = string(get_string_parameter_pointer("output-dir")) +
-                          "/make-pin.pin";
+    string pin_location = make_file_path("make-pin.pin");
 
     const char* make_pin_file = pin_location.c_str();
 
