@@ -265,9 +265,12 @@ Default=1.</code></li>
 <li>
 <code>--enzyme &lt;string&gt;</code> &ndash; Specify the enzyme used
 to digest the proteins <i>in silico</i>.  Available enzymes include
-no-enzyme, trypsin, trypsin/p, chymotrypsin, elastase, clostripain, 
-cyanogen-bromide, iodosobenzoate, proline-endopeptidase, staph-protease, asp-n, lys-c,
-lys-n, arg-c, glu-c, pepsin-a, elastase-trypsin-chymotrypsin.
+no-enzyme ([X]|[X]), trypsin ([RK]|{P}), trypsin/p ([RK]|[]), chymotrypsin
+([FWYL]|{P}, elastase ([ALIV]|{P}), clostripain ([R]|[]), cyanogen-bromide
+([M]|[]), iodosobenzoate ([W]|[]), proline-endopeptidase ([P]|[]),
+staph-protease ([E]|[]), asp-n ([]|[D]), lys-c ([K]|{P}), lys-n ([]|[K]), arg-c
+([R]|{P}), glu-c ([DE]|{P}), pepsin-a ([FL]|{P}), elastase-trypsin-chymotrypsin
+([ALIVKRWFY]|{P}).
 Specifying <code>--enzyme no-enzyme</code> yields a non-enzymatic
 digest.  <b>Warning:</b> the resulting index may be quite large.
 Default=<code>trypsin</code>.</li>
