@@ -221,19 +221,19 @@ C=57.0214637206.</li>
 
 <ul>
 
-<LI>
-<code>--enzyme trypsin|trypsin/p|chymotrypsin|elastase|clostripain|cyanogen-bromide|idosobenzoate|proline-endopeptidase|staph-protease|asp-n|lys-c|lys-n|arg-c|glu-c|pepsin-a|elastase-trypsin-chymotrypsin|no-enzyme</code> &ndash;
-Enzyme to use for <i>in silico</i> digestion of protein sequences. Used
-in conjunction with the options digestion and missed-cleavages. Use
-'no-enzyme' for non-specific digestion.  Digestion rules are as
-follows: enzyme name [cuts after one of these residues]|{but not before
-one of these residues}. trypsin [RK]|{P}, trypsin/p [RK]|[], elastase [ALIV]|{P},
-chymotrypsin [FWYL]|{P}, clostripain [R]|[], cyanogen-bromide [M]|[],
-iodosobenzoate [W]|[], proline-endopeptidase [P]|[], staph-protease [E]|[],
-elastase-trypsin-chymotrypsin [ALIVKRWFY]|{P}, asp-n []|[D], lys-c [K]|{P},
-lys-n []|[K], arg-c [R]|{P}, glu-c [DE]|{P}, pepsin-a [FL]|{P}.
-Default = trypsin.
-</li>
+<li>
+<code>--enzyme &lt;string&gt;</code> &ndash; Specify the enzyme used
+to digest the proteins <i>in silico</i>.  Available enzymes (with the
+corresponding digestion rules indicated in parentheses) include
+no-enzyme ([X]|[X]), trypsin ([RK]|{P}), trypsin/p ([RK]|[]),
+chymotrypsin ([FWYL]|{P}, elastase ([ALIV]|{P}), clostripain ([R]|[]),
+cyanogen-bromide ([M]|[]), iodosobenzoate ([W]|[]),
+proline-endopeptidase ([P]|[]), staph-protease ([E]|[]), asp-n
+([]|[D]), lys-c ([K]|{P}), lys-n ([]|[K]), arg-c ([R]|{P}), glu-c
+([DE]|{P}), pepsin-a ([FL]|{P}), elastase-trypsin-chymotrypsin
+([ALIVKRWFY]|{P}).  Specifying <code>--enzyme no-enzyme</code> yields
+a non-enzymatic digest.  <b>Warning:</b> the resulting index may be
+quite large.  Default=<code>trypsin</code>.</li>
 
 <li>
 <code>--custom-enzyme &lt;residues before cleavage&gt;|&lt;residues
