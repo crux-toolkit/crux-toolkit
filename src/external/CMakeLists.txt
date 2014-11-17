@@ -18,12 +18,7 @@ SET(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR})
 if (WIN32 AND NOT CYGWIN)
   ExternalProject_Add(
     ProteoWizard
-    DOWNLOAD_COMMAND 
-      ${CMAKE_COMMAND} 
-        -DDOWNLOAD_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/downloads
-        -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
-        -P  ${CMAKE_CURRENT_SOURCE_DIR}/download_pwiz.cmake
-    DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/downloads
+    URL http://cruxtoolkit.sourceforge.net/download/crux-2.1/pwiz-src-3_0_6736.tar.bz2
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     CONFIGURE_COMMAND ""
     BUILD_COMMAND 
@@ -49,12 +44,7 @@ if (WIN32 AND NOT CYGWIN)
 else (WIN32 AND NOT CYGWIN)
   ExternalProject_Add(
     ProteoWizard
-    DOWNLOAD_COMMAND 
-      ${CMAKE_COMMAND} 
-        -DDOWNLOAD_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/downloads
-        -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
-        -P  ${CMAKE_CURRENT_SOURCE_DIR}/download_pwiz.cmake
-    DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/downloads
+    URL http://cruxtoolkit.sourceforge.net/download/crux-2.1/pwiz-src-3_0_6736.tar.bz2
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     CONFIGURE_COMMAND ""
     BUILD_COMMAND 
