@@ -54,7 +54,7 @@ PeptideSrc::PeptideSrc(
   Protein* parent_protein, ///< the parent of this peptide -in
   int start_idx ///< start index of the peptide in the protein sequence -in
   ) {
-
+  start_idx_original_ = 0;
   setDigest(digest);
   setParentProtein(parent_protein);
   setStartIdx(start_idx);
@@ -412,6 +412,17 @@ bool PeptideSrc::parseTabDelimited(
         string sequence = unmodified_sequence;
         std::free(unmodified_sequence);
         std::free(mod_seq);
+
+
+        if (parent_protein -> isPostProcess()) {
+          // Attempting to store protein_id location in start_idx_original of peptide src [Please check
+          // if this is valid usage, since PMCDelimitedFileWriter uses startidxoriginal to print protein
+          // id location] so I am making an assumption that this is the purpose of start_idx_original.
+          // Also, I'm not sure if I need this for all proteins or just post process ones.
+          int peptide_start_index_int;
+          from_string<int>(peptide_start_index_int, peptide_start_index_string);
+          peptide_src->setStartIdxOriginal(peptide_start_index_int);
+        }
 
         //string sequence = file.getString(SEQUENCE_COL);
         start_index = parent_protein->findStart(sequence, prev_aa, next_aa);

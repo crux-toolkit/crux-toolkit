@@ -39,6 +39,7 @@
 #include "ReadSpectrumRecordsApplication.h"
 #include "TideSearchApplication.h"
 #include "CometApplication.h"
+#include "PSMConvertApplication.h"
 /**
  * The starting point for crux.  Prints a general usage statement when
  * given no arguments.  Runs one of the crux commands, including
@@ -84,6 +85,7 @@ int main(int argc, char** argv){
     applications.add(new GenerateDecoys());
     applications.add(new GetMs2Spectrum());
     applications.add(new PrintVersion());
+    applications.add(new PSMConvertApplication());
 
     // Utilities for processing tab-delimited text files
     applications.add(new ExtractColumns());

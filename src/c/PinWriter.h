@@ -8,17 +8,23 @@
 #include <set>
 #include <string>
 #include <vector>
+#include "crux-file-utils.h"
+#include "crux-utils.h"
+#include "match_objects.h"
 #include "objects.h"
 #include "Spectrum.h"
 #include "mass.h"
+#include "DelimitedFile.h"
 #include "Match.h"
 #include "MatchCollection.h"
+#include "MatchFileWriter.h"
+#include "PSMWriter.h"
 #include "SpectrumZState.h"
 #include "Spectrum.h"
 #include "Peptide.h"
 #include <limits>
 
-class PinWriter{
+class PinWriter : public MatchFileWriter, public PSMWriter {
  public:
   PinWriter();
   ~PinWriter();
@@ -47,6 +53,20 @@ class PinWriter{
   void printHeader();
 
   void closeFile();
+
+  // PSMWriter openfile version
+  void openFile(
+    CruxApplication* application, ///< application writing the file
+    std::string filename, ///< name of the file to open
+    MATCH_FILE_TYPE type ///< type of file to be written
+  );
+
+  // PSMWriter write
+  void write(
+    MatchCollection* collection,
+    std::string database
+  );
+
   void openFile(
     const char* filename, 
     const char* ouput_directory,

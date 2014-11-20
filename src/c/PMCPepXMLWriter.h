@@ -8,14 +8,34 @@
 #include "Protein.h"
 #include "ProteinMatch.h"
 #include "ProteinMatchCollection.h"
+#include "PSMWriter.h"
 #include "Spectrum.h"
 #include "SpectrumMatch.h"
 
 using namespace std;
 
-class PMCPepXMLWriter : public PepXMLWriter {
+class PMCPepXMLWriter : public PepXMLWriter, public PSMWriter {
 
  public:
+
+  void openFile(
+    string filename,
+    bool overwrite
+  );
+
+  void openFile(
+    CruxApplication* application,
+    string filename,
+    MATCH_FILE_TYPE type
+  );
+
+  void write(
+    MatchCollection* collection,
+    string database
+  );
+
+  void closeFile();
+
   /**
    * Writes the data in a ProteinMatchCollection to the currently open file
    */

@@ -23,6 +23,8 @@ using namespace std;
 using namespace Crux; 
 
 PinWriter::PinWriter():
+  PSMWriter(),
+  MatchFileWriter(),
   output_file_(NULL),
   enzyme_(get_enzyme_type_parameter("enzyme")),
   isotopic_mass_(get_mass_type_parameter("isotopic-mass")),
@@ -38,25 +40,70 @@ PinWriter::~PinWriter(){
   closeFile(); 
 }
 
+void PinWriter::openFile(CruxApplication* application, string filename, MATCH_FILE_TYPE type) {
+  bool overwrite = get_boolean_parameter("overwrite");
+  closeFile();
+
+  file_ptr_ = create_file(filename.c_str(), overwrite);
+  if (!file_ptr_) {
+    carp(CARP_FATAL, "Error creating file '%s'.", filename);
+  }
+
+  // reset columns
+  num_columns_ = 0;
+  for (int i = 0; i < NUMBER_MATCH_COLUMNS; ++i) {
+    match_to_print_[i] = false;
+    match_precision_[i] = false;
+    match_fixed_float_[i] = true;
+  }
+}
+
+void PinWriter::write(MatchCollection* collection, string database) {
+  vector<MatchCollection*> decoyvec;
+  write(collection, decoyvec, 5); // TODO: When top match is not set to 5 ?
+}
+
 /**
  * Open a file of the given name.  Replace an existing file if
  * overwrite is true, else exit if an existing file is found.
  */
 void PinWriter::openFile(const char* filename, const char* output_dir, bool overwrite) {
-  output_file_ = create_file_in_path(filename, output_dir, overwrite);
+/*  output_file_ = create_file_in_path(filename, output_dir, overwrite);
   if (output_file_ == NULL) {
     carp(CARP_FATAL, "Can't open file '%s'", filename);
+  }*/
+
+  closeFile();
+
+  file_ptr_ = create_stream_in_path(filename, output_dir, get_boolean_parameter("overwrite"));
+  if (!file_ptr_) {
+    carp(CARP_FATAL, "Error creating file '%s'.", filename);
   }
+
+  // reset columns
+  num_columns_ = 0;
+  for (int i = 0; i < NUMBER_MATCH_COLUMNS; ++i) {
+    match_to_print_[i] = false;
+    match_precision_[i] = false;
+    match_fixed_float_[i] = true;
+  }
+
 }
 
 /**
  * Close the file, if open.
  */
 void PinWriter::closeFile() {
-  if (output_file_) {
+/*  if (output_file_) {
     fclose(output_file_);
     output_file_ = NULL;
+  }*/
+  if (file_ptr_) {
+    file_ptr_->close();
+    delete file_ptr_;
+    file_ptr_ = NULL;
   }
+
 }
 
 void PinWriter::write(
@@ -220,7 +267,7 @@ bool PinWriter::isInfinite(FLOAT_T x) {
 }
 
 void PinWriter::printHeader() {
-  stringstream features;
+/*  stringstream features;
   if (is_sp_) {
     features << "lnrSp\t";
   }
@@ -233,7 +280,7 @@ void PinWriter::printHeader() {
     features << "Charge" << *i << '\t';
   }
   features << "enzN\tenzC\tenzInt\tlnNumSP\tdm\tabsdM\t";
-
+*/
   /*if (po->calcPTMs) 
     push_backFeatureDescription("ptm");
   if (po->pngasef) 
@@ -244,12 +291,38 @@ void PinWriter::printHeader() {
       std::string temp = boost::lexical_cast<std::string>(*it)+"-Freq";
       push_backFeatureDescription(temp.c_str());
     }*/
-  fprintf(output_file_,
+/*  fprintf(output_file_,
     "SpecId\tLabel\tScanNr\t"
     "%s"
     "Peptide\tProteins\n",
     features.str().c_str()
-  );
+  );*/
+
+  if (is_sp_) {
+    addColumnName(LNR_SP_COL);
+    addColumnName(SP_COL);
+    addColumnName(ION_FRAC_COL);
+  }
+  addColumnName(DELT_L_CN_COL);
+  addColumnName(DELT_CN_COL);
+  addColumnName(XCORR_COL);
+  addColumnName(MASS_COL);
+  addColumnName(PEP_LEN_COL);
+  addColumnName(ENZ_N_COL);
+  addColumnName(ENZ_C_COL);
+  addColumnName(ENZ_INT_COL);
+  addColumnName(LN_NUM_SP_COL);
+  addColumnName(DM_COL);
+  addColumnName(ABS_DM_COL);
+  addColumnName(SPEC_ID_COL);
+  addColumnName(LABEL_COL);
+  addColumnName(SCAN_NR_COL);
+  addColumnName(PEPTIDE_COL);
+  addColumnName(PROTEINS_COL);
+  setPrecision();
+
+  writeHeader();
+
 }
 
 void PinWriter::printPSM(
@@ -273,7 +346,7 @@ void PinWriter::printPSM(
                          peptide->getCTermFlankingAA(), enzyme_, enzN, enzC);
   free(sequence);
  
-  fprintf(output_file_, "%s\t%d\t%d\t",
+/*  fprintf(output_file_, "%s\t%d\t%d\t",
 	  getId(charge, is_decoy, spectrum->getFirstScan(), rank, match->getFileIndex()).c_str(), // SpecId
     is_decoy ? -1 : 1, // Label
     spectrum->getFirstScan() // ScanNr
@@ -314,7 +387,37 @@ void PinWriter::printPSM(
     getProteins(peptide).c_str() // Proteins
   );
 
-  fprintf(output_file_, "\n");
+  fprintf(output_file_, "\n");*/
+
+
+  setColumnCurrentRow(SPEC_ID_COL, getId(charge, is_decoy, spectrum->getFirstScan(), rank, match->getFileIndex()).c_str()); // specId
+  setColumnCurrentRow(LABEL_COL, is_decoy ? -1 : 1); // label
+  setColumnCurrentRow(SCAN_NR_COL, spectrum->getFirstScan()); // scanNr
+
+  if (is_sp_) {
+    setColumnCurrentRow(LNR_SP_COL, match->getRank(SP) > 0 ? log((double) match->getRank(SP)) : 0); //lnrSp // TODO: precision ?
+    setColumnCurrentRow(SP_COL, match->getScore(SP)); // Sp
+    setColumnCurrentRow(ION_FRAC_COL, isnan(match->getBYIonFractionMatched()) ? 0 : match->getBYIonFractionMatched()); // IonFrac
+  }
+  setColumnCurrentRow(DELT_L_CN_COL, isInfinite(fabs(match->getDeltaLCn())) ? 0 : match->getDeltaLCn()); // deltLCn
+  setColumnCurrentRow(DELT_CN_COL, isInfinite(fabs(match->getDeltaCn())) ? 0 : match->getDeltaCn());  // deltCn
+  setColumnCurrentRow(XCORR_COL, match->getScore(XCORR)); // XCorr
+
+  int peplength = peptide->getLength(); // Trying to prevent printing unreadable symbols
+  setColumnCurrentRow(MASS_COL, obsMass); // Mass
+  setColumnCurrentRow(PEP_LEN_COL, peplength); // PepLen
+
+  setColumnCurrentRow(ENZ_N_COL, enzN ? 1 : 0); // enzN
+  setColumnCurrentRow(ENZ_C_COL, enzC ? 1 : 0); // enzC
+  setColumnCurrentRow(ENZ_INT_COL, missedCleavages); // enzInt
+  setColumnCurrentRow(LN_NUM_SP_COL, match->getLnExperimentSize()); // lnNumSP
+  setColumnCurrentRow(DM_COL, dM); // dM
+  setColumnCurrentRow(ABS_DM_COL, fabs(dM)); // absdM
+  setColumnCurrentRow(PEPTIDE_COL, getPeptide(peptide).c_str()); // Peptide
+  setColumnCurrentRow(PROTEINS_COL, getProteins(peptide).c_str()); // Proteins
+
+  writeRow();
+
 }
 
 string PinWriter::getPeptide(Peptide* peptide) {

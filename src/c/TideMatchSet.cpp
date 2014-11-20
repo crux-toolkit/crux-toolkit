@@ -97,6 +97,9 @@ void TideMatchSet::writeToFile(
   int cur = 0;
   const vector<Arr::iterator>::const_iterator cutoff =
     (vec.size() >= top_n) ? vec.begin() + top_n : vec.end();
+
+  int concatDistinctMatches = peptides->ActiveTargets() + peptides->ActiveDecoys();
+
   for (vector<Arr::iterator>::const_iterator i = vec.begin(); i != cutoff; ++i) {
     const Peptide* peptide = peptides->GetPeptide((*i)->second);
     const pb::Protein* protein = proteins[peptide->FirstLocProteinId()];
@@ -166,8 +169,12 @@ void TideMatchSet::writeToFile(
       *file << sp_data->matched_ions << '\t'
             << sp_data->total_ions << '\t';
     }
-    *file << (!peptide->IsDecoy() ? peptides->ActiveTargets() : peptides->ActiveDecoys()) << '\t'
-          << seq << '\t'
+    if (OutputFiles::isConcat()) {
+      *file << concatDistinctMatches << '\t';
+    } else {
+      *file << (!peptide->IsDecoy() ? peptides->ActiveTargets() : peptides->ActiveDecoys()) << '\t';
+    }
+    *file << seq << '\t'
           << cleavage_type_ << '\t'
           << proteinNames << '\t'
           << flankingAAs;
@@ -271,9 +278,19 @@ void TideMatchSet::addCruxMatches(
   FLOAT_T* lowest_sp_out
 ) {
 
-  FLOAT_T lnNumSp = log((FLOAT_T) (!decoys ? peptides->ActiveTargets()
+//  FLOAT_T lnNumSp = log((FLOAT_T) (!decoys ? peptides->ActiveTargets()
+//                                : peptides->ActiveDecoys()));
+
+// We want this number to be the sum in the concatenated case...
+  FLOAT_T lnNumSp;
+
+  if (OutputFiles::isConcat) {
+    lnNumSp = log((FLOAT_T) (peptides->ActiveTargets() + peptides->ActiveDecoys()));
+  } else {
+    lnNumSp = log((FLOAT_T) (!decoys ? peptides->ActiveTargets()
                                 : peptides->ActiveDecoys()));
-  
+  }
+
   // Create a Crux match for each match
   vector<Arr::iterator>::const_iterator endIter = 
     (vec.size() >= top_n) ? vec.begin() + top_n : vec.end();
@@ -283,7 +300,10 @@ void TideMatchSet::addCruxMatches(
     Crux::Match* match = getCruxMatch(peptide, proteins, locations, &crux_spectrum,
                                       z_state, proteins_made);
     match_collection->addMatch(match);
-    if (decoys) {
+    // if we just looking at "decoys" boolean, in concatenated case, both targets and
+    // decoys are set as targets. (null peptide == is decoy) This will give correct
+    // output in Mzid when printing whether match is target or decoy.
+    if (peptide->IsDecoy()) {
       match->setNullPeptide(true);
     }
     Crux::Match::freeMatch(match); // so match gets deleted when collection does
@@ -313,7 +333,11 @@ void TideMatchSet::addCruxMatches(
     }
   }
   match_collection->setZState(z_state);
-  match_collection->setExperimentSize(!decoys ? peptides->ActiveTargets() : peptides->ActiveDecoys());
+  if (!OutputFiles::isConcat()) {
+    match_collection->setExperimentSize(!decoys ? peptides->ActiveTargets() : peptides->ActiveDecoys());
+  } else {
+    match_collection->setExperimentSize(peptides->ActiveTargets() + peptides->ActiveDecoys());
+  }
   match_collection->populateMatchRank(XCORR);
   match_collection->forceScoredBy(XCORR);
   if (sp_scorer) {
@@ -400,14 +424,22 @@ Crux::Match* TideMatchSet::getCruxMatch(
   proteins_made->push_back(crux_protein);
 
   crux_protein->setId(protein->name().c_str());
+//  string originalTargetSeq = !peptide->IsDecoy() ? peptide->Seq() :
+//    protein->residues().substr(protein->residues().length() - peptide->Len() - 1);
+// NOTE: The original target sequence printed using OutputFiles is different than from regular output.
   string originalTargetSeq = !peptide->IsDecoy() ? peptide->Seq() :
-    protein->residues().substr(protein->residues().length() - peptide->Len() - 1);
+    protein->residues().substr(protein->residues().length() - peptide->Len());
+
   int start_idx = crux_protein->findStart(originalTargetSeq, n_term, c_term);
 
   // Create peptide
   Crux::Peptide* crux_peptide = new Crux::Peptide(
     peptide->Len(), peptide->Mass(), crux_protein, start_idx);
-  crux_peptide->getPeptideSrc()->setStartIdxOriginal(pos + 1);
+//  crux_peptide->getPeptideSrc()->setStartIdxOriginal(pos + 1);
+//    NOTE: pos seems to require whether target or decoy.. When we use OutputFiles to write, for all decoys,
+//    it says location of peptide in protein is 2 for all decoys.
+    crux_peptide->getPeptideSrc()->setStartIdxOriginal(((!protein->has_target_pos()) ? pos : protein->target_pos())+1);
+
 
   // Add other proteins if any
   if (peptide->HasAuxLocationsIndex()) {
@@ -423,6 +455,7 @@ Crux::Match* TideMatchSet::getCruxMatch(
       crux_protein->setId(protein->name().c_str());
       start_idx = crux_protein->findStart(originalTargetSeq, n_term, c_term);
       PeptideSrc* src = new PeptideSrc(NON_SPECIFIC_DIGEST, crux_protein, start_idx);
+      // NOTE : We modified this above, do we need to modify this here as well ?
       src->setStartIdxOriginal(pos + 1);
       crux_peptide->addPeptideSrc(src);
     }
