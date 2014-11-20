@@ -86,7 +86,8 @@ char PostProcessProtein::getNTermFlankingAA(
     carp_once(CARP_WARNING, "Missing nterm flanking for protein:%s offset:%d",
       getIdPointer(), offset); 
     //just return - for now.
-      ans = '-';
+//      ans = '-';
+      ans = 'X'; // X for unknown aa since - is incorrect usage.
   }
   carp(CARP_DETAILED_DEBUG, "protein:%s offset:%d pflank:%c(%d)", 
     getIdPointer(), offset, ans,(int)ans);
@@ -101,7 +102,8 @@ char PostProcessProtein::getCTermFlankingAA(
   char ans = next_aas_.at(offset)[0];
   if (ans == '\0') {
     carp_once(CARP_WARNING, "Missing cterm flanking aa for protein:%s offset:%d",getIdPointer(), offset);
-    ans = '-';
+//    ans = '-';
+      ans = 'X'; // X for unknown aa since - is incorrect usage.
   }
   carp(CARP_DETAILED_DEBUG, "protein:%s offset:%d nflank:%c(%d)", getIdPointer(), offset, ans,(int)ans);
 

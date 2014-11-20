@@ -372,6 +372,23 @@ void initialize_parameters(void){
     "Argument, not option, for create-psm-files, get-ms2-spec, and search",
     "false");
 
+  /* psm-convert arguments */
+  set_string_parameter("input PSM file", NULL,
+			"The name of a PSM file in tab-delimited text, SQT, PIN, pepXML or mzIdentML format",
+			"Argument, not option, for psm-convert", "true");
+
+  set_string_parameter("output format", NULL,
+	"The desired format of the output file. Legal values are tsv, html, sqt, pin, pepxml, mzidentml, barista-xml.",
+	"Argument, not option, for psm-convert", "true");
+
+  set_string_parameter("input-format", NULL,
+			"Legal values are auto, sqt, pin, pepxml or mzidentml format. Default=auto",
+			"option, for psm-convert", "true");
+
+  set_boolean_parameter("distinct-matches", true,
+       "Whether matches/ion are distinct (As apposed to total). Default=T",
+       "option, for psm-convert", "true");
+
   /* get-ms2-spectrum */
   set_int_parameter("scan number", 0, 1, BILLION, 
                     "Scan number identifying the spectrum.",

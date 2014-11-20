@@ -89,14 +89,14 @@ void PepXMLReader::init() {
   peptideprophet_result_open_ = false;
 
   current_spectrum_ = NULL;
-  database_ = NULL;
-  decoy_database_ = NULL;
+//  database_ = NULL;
+//  decoy_database_ = NULL;
 }
 
 /**
  * \returns an initialized object
  */
-PepXMLReader::PepXMLReader() {
+PepXMLReader::PepXMLReader() : PSMReader() {
   init();
 }
 
@@ -105,10 +105,10 @@ PepXMLReader::PepXMLReader() {
  */
 PepXMLReader::PepXMLReader(
   const string& file_path ///< the path of the pep.xml file
-  ) {
+  ) : PSMReader(file_path) {
   
   init();
-  file_path_ = file_path;
+//  file_path_ = file_path;
 }
 
 /**
@@ -118,11 +118,12 @@ PepXMLReader::PepXMLReader(
   const string& file_path, ///< the path of the pep.xml
   Database* database, ///< the protein database
   Database* decoy_database ///< the decoy protein database (can be null)
-  ) {
+  ) : PSMReader(file_path, database, decoy_database) {
 
-  file_path_ = file_path;
+  init();
+/*  file_path_ = file_path;
   database_ = database;
-  decoy_database_ = decoy_database;
+  decoy_database_ = decoy_database;*/
 
 }
 
@@ -138,6 +139,9 @@ PepXMLReader::~PepXMLReader() {
 MatchCollection* PepXMLReader::parse() {
 
   FILE* file_ptr = fopen(file_path_.c_str(), "r");
+  if (file_ptr == NULL) {
+    carp(CARP_FATAL, "Opening %s or reading failed", file_path_.c_str());
+  }
 
   XML_Parser xml_parser = XML_ParserCreate(NULL);
 
@@ -357,10 +361,14 @@ void PepXMLReader::searchHitOpen(
     current_match_-> setBYIonFractionMatched((FLOAT_T)by_ions_matched/(FLOAT_T)by_ions_total); 
   }else 
     current_match_->setBYIonFractionMatched(0);
-  if(current_num_matches>0)
+
+  if(current_num_matches>0) {
     current_match_->setLnExperimentSize(logf(current_num_matches));
-  else 
+    // is there a better way to check this ?
+    current_match_collection_->setHasDistinctMatches(true);
+  } else { 
     current_match_->setLnExperimentSize(0);
+  }
 }
 
 /**
@@ -600,21 +608,21 @@ void PepXMLReader::peptideProphetResultClose() {
 /**
  * sets the target protein database
  */
-void PepXMLReader::setDatabase(
+/*void PepXMLReader::setDatabase(
   Database* database ///< the target protein database
   ) {
 
   database_ = database;
-}
+}*/
 
 /**
  * sets the decoy protein database
  */
-void PepXMLReader::setDecoyDatabase(
+/*void PepXMLReader::setDecoyDatabase(
   Database* decoy_database ///< sets the decoy protein database
   ) {
   decoy_database_ = decoy_database;
-}
+}*/
 
 
 /**

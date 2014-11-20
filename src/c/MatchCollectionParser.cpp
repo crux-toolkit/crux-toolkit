@@ -103,8 +103,10 @@ Protein* MatchCollectionParser::getProtein(
   if (protein_id.find(decoy_prefix) != string::npos) {
     carp(CARP_DEBUG, "adding to decoy database");
     is_decoy = true;
-    decoy_database->addProtein(protein);
-    
+    // Fixes segfault in case of NULL decoy database
+    if (decoy_database != NULL) {
+      decoy_database->addProtein(protein);
+    }
   } else {
     carp(CARP_DEBUG, "adding to target database");
     is_decoy = false;
@@ -140,7 +142,15 @@ Protein* MatchCollectionParser::getProtein(
   //try creating it and adding it to the database as a postprocess protein
   carp(CARP_DEBUG, "Creating new protein for %s",protein_id.c_str());
   carp(CARP_DEBUG, "Sequence :%s",sequence.c_str());
-  protein = new Protein();
+
+  // Attempted Mzid Fix... Since above comment from some previous modifier says we are trying to
+  // make a postprocess protein.. will say protein = new PostProcessProtein()
+  // instead of protein = new Protein().. Although I am not sure whether this would be the
+  // correct useage of a PostProcessProtein.
+
+//  protein = new Protein();
+  protein = new PostProcessProtein();
+
   protein->setId(protein_id.c_str());
   protein->setSequence(sequence.c_str());
   protein->setLength(sequence.length());
@@ -149,7 +159,10 @@ Protein* MatchCollectionParser::getProtein(
   string decoy_prefix = get_string_parameter_pointer("decoy-prefix");
   if (protein_id.find(decoy_prefix) != string::npos) {
     is_decoy = true;
-    decoy_database->addProtein(protein);
+    // Fixes segfault in case of NULL database
+    if (decoy_database != NULL) {
+      decoy_database->addProtein(protein);
+    }
   } else {
     is_decoy = false;
     database->addProtein(protein);

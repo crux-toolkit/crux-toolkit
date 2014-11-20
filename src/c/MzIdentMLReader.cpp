@@ -40,7 +40,7 @@ void MzIdentMLReader::init() {
 /**
  * \returns an initialized object
  */
-MzIdentMLReader::MzIdentMLReader() {
+MzIdentMLReader::MzIdentMLReader() : PSMReader() {
   init();
 }
 
@@ -49,10 +49,10 @@ MzIdentMLReader::MzIdentMLReader() {
  */
 MzIdentMLReader::MzIdentMLReader(
   const string& file_path ///< the path of the pep.xml file
-  ) {
+  ) : PSMReader(file_path) {
   
   init();
-  file_path_ = file_path;
+//  file_path_ = file_path;
 }
 
 /**
@@ -62,35 +62,36 @@ MzIdentMLReader::MzIdentMLReader(
   const string& file_path, ///< the path of the pep.xml
   Database* database, ///< the protein database
   Database* decoy_database ///< the decoy protein database (can be null)
-  ) {
+  ) : PSMReader(file_path, database, decoy_database) {
 
-  file_path_ = file_path;
+  init();
+/*  file_path_ = file_path;
   database_ = database;
-  decoy_database_ = decoy_database;
+  decoy_database_ = decoy_database;*/
 
 }
 
 /**
  * sets the target database for the parser
  */
-void MzIdentMLReader::setDatabase(
+/*void MzIdentMLReader::setDatabase(
   Database* database ///< the target protein database
   ) {
 
   database_ = database;
 
-}
+}*/
 
 /**
  * sets the decoy protein database for the parser
  */
-void MzIdentMLReader::setDecoyDatabase(
+/*void MzIdentMLReader::setDecoyDatabase(
   Database* decoy_database ///<  the decoy protein database
   ) {
 
   decoy_database_ = decoy_database;
 
-}
+}*/
 
 /**
  * default destructor
@@ -300,10 +301,12 @@ void MzIdentMLReader::parsePSMs() {
 
 
           PeptidePtr peptide_ptr = item.peptidePtr;
+
           string sequence = peptide_ptr->peptideSequence;
         
           vector<PeptideEvidencePtr>& peptide_evidences = item.peptideEvidencePtr;
           PeptideEvidencePtr peptide_evidence_ptr = peptide_evidences.front();
+
           string protein_id = peptide_evidence_ptr->dbSequencePtr->accession;
           int start_idx = peptide_evidence_ptr->start;
 
@@ -326,9 +329,11 @@ void MzIdentMLReader::parsePSMs() {
 	  is_decoy = is_decoy || peptide_evidence_ptr->isDecoy || is_decoy_test;
 
           start_idx = protein->findStart(sequence, "", "");
+
           if (start_idx == -1) {
             carp(CARP_FATAL, "can't find sequence %s in first protein %s",sequence.c_str(), protein->getIdPointer());
           }
+
           int length = sequence.length();
         
           carp(CARP_DEBUG, "creating peptide %s %f %i",sequence.c_str(), calc_mass, start_idx);
@@ -359,7 +364,13 @@ void MzIdentMLReader::parsePSMs() {
               peptide->addPeptideSrc(src);
             }
           }
-          Match* match = new Match(peptide, spectrum, zstate, is_decoy);  
+
+
+
+          Match* match = new Match(peptide, spectrum, zstate, is_decoy);
+          // trying to set lnExperimentSize to -1 -> representing unavailable information on distinct matches/spectrum
+          match->setLnExperimentSize(-1);
+
           match_collection_->addMatchToPostMatchCollection(match);
 
           match->setRank(XCORR, rank); // Is it safe to assume this?

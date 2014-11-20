@@ -6,7 +6,7 @@ using namespace boost;
 /** 
  * Returns an empty PMCDelimitedFileWriter object
  */
-PMCDelimitedFileWriter::PMCDelimitedFileWriter() {
+PMCDelimitedFileWriter::PMCDelimitedFileWriter() : PSMWriter() {
 }
 
 /**
@@ -113,6 +113,14 @@ void PMCDelimitedFileWriter::writeAll(
 
 }
 
+void PMCDelimitedFileWriter::write(
+  MatchCollection* collection,
+  string database
+  ) {
+  ProteinMatchCollection protein_collection(collection);
+  write(&protein_collection);
+}
+
 /**
  * Writes the data in a ProteinMatchCollection to the currently open file
  */
@@ -123,8 +131,48 @@ void PMCDelimitedFileWriter::write(
     carp(CARP_FATAL, "No file open to write to.");
   }
 
+  // psm-convert: trying to detect whether additional columns are needed....
+  // Is there a better way to do this or move to setUpPSMSColumns? Seems messy...
+  SpectrumMatchIterator first_spec = collection->spectrumMatchBegin();
+  SpectrumMatch* match = *first_spec;
+  addScoreColumnIfExists(match, DELTA_CN, DELTA_CN_COL);
+  addScoreColumnIfExists(match, SP, SP_SCORE_COL);
+  addRankColumnIfExists(match, SP, SP_RANK_COL);
+  addScoreColumnIfExists(match, XCORR, XCORR_SCORE_COL);
+  addRankColumnIfExists(match, XCORR, XCORR_RANK_COL);
+  addScoreColumnIfExists(match, BY_IONS_MATCHED, BY_IONS_MATCHED_COL);
+  addScoreColumnIfExists(match, BY_IONS_TOTAL, BY_IONS_TOTAL_COL);
+  if (collection->hasDistinctMatches()) {
+    addColumnName(DISTINCT_MATCHES_SPECTRUM_COL);
+  } else {
+    addColumnName(MATCHES_SPECTRUM_COL);
+  }
+
+
   writeHeader();
   (this->*this->PMCDelimitedFileWriter::write_function_)(collection);
+}
+
+// adds score to header and columns if exists
+void PMCDelimitedFileWriter::addScoreColumnIfExists(
+  AbstractMatch* match, ///< match to get score from
+  SCORER_TYPE_T scoreType, ///< score type to get
+  MATCH_COLUMNS_T column ///< column to add the score to
+  ) {
+  if (match->hasScore(scoreType)) {
+    addColumnName(column);
+  }
+}
+
+// adds rank to header and columns if exists
+void PMCDelimitedFileWriter::addRankColumnIfExists(
+  AbstractMatch* match, ///< match to get rank from
+  SCORER_TYPE_T scoreType, ///< rank type to get
+  MATCH_COLUMNS_T column ///< column to add the rank to
+  ) {
+  if (match->hasRank(scoreType)) {
+    addColumnName(column);
+  }
 }
 
 /**
@@ -391,14 +439,19 @@ void PMCDelimitedFileWriter::setUpPSMsColumns(
     carp(CARP_FATAL, "Invalid command (%s) for writing tab delimited file.",
                      application->getName().c_str());
     return;
+  case PSM_CONVERT_COMMAND:
+    break;
   case PERCOLATOR_COMMAND:
+    addColumnName(FILE_IDX_COL); //moved file_idx_col, not required for psm-convert/tide-search
+    addColumnName(FILE_COL); // moved file_col, not required for psm-convert/tide-search
+    addColumnName(MATCHES_SPECTRUM_COL); // moved matches_spectrum_col, not required for psm-convert/tide-search
     addColumnName(PERCOLATOR_SCORE_COL);
     addColumnName(PERCOLATOR_RANK_COL);
     addColumnName(PERCOLATOR_QVALUE_COL);
     break;
   }
-  addColumnName(FILE_IDX_COL);
-  addColumnName(FILE_COL);
+//  addColumnName(FILE_IDX_COL);
+//  addColumnName(FILE_COL);
   addColumnName(SCAN_COL);
   addColumnName(CHARGE_COL);
   addColumnName(SPECTRUM_PRECURSOR_MZ_COL);
@@ -411,7 +464,7 @@ void PMCDelimitedFileWriter::setUpPSMsColumns(
   //addColumnName(XCORR_RANK_COL);
   //addColumnName(BY_IONS_MATCHED_COL);
   //addColumnName(BY_IONS_TOTAL_COL);
-  addColumnName(MATCHES_SPECTRUM_COL);
+//  addColumnName(MATCHES_SPECTRUM_COL);
   addColumnName(SEQUENCE_COL);
   addColumnName(CLEAVAGE_TYPE_COL);
   addColumnName(PROTEIN_ID_COL);
@@ -447,12 +500,17 @@ void PMCDelimitedFileWriter::writePSMs(
     PeptideMatch* pep_match = match->getPeptideMatch();
     Peptide* peptide = pep_match->getPeptide();
 
+    // psm-convert testing
+    addScoreIfExists(match, DELTA_CN, DELTA_CN_COL);                          // TODO: Figure out difference between match and pep_match,
+    addScoreIfExists(match, BY_IONS_MATCHED, BY_IONS_MATCHED_COL);            // since Percolator was using pep_match...
+    addScoreIfExists(match, BY_IONS_TOTAL, BY_IONS_TOTAL_COL);
+
     setColumnCurrentRow(SCAN_COL, spectrum->getFirstScan());
     setColumnCurrentRow(CHARGE_COL, zstate.getCharge());
     setColumnCurrentRow(SPECTRUM_PRECURSOR_MZ_COL, zstate.getMZ());
     setColumnCurrentRow(SPECTRUM_NEUTRAL_MASS_COL, zstate.getNeutralMass());
     setColumnCurrentRow(PEPTIDE_MASS_COL, peptide->getPeptideMass());
-    addScoreIfExists(pep_match, DELTA_CN, DELTA_CN_COL);
+//    addScoreIfExists(pep_match, DELTA_CN, DELTA_CN_COL);                    // Original, used by percolator
     addScoreIfExists(match, SP, SP_SCORE_COL);
     addRankIfExists(match, SP, SP_RANK_COL);
     addScoreIfExists(match, XCORR, XCORR_SCORE_COL);
@@ -460,8 +518,8 @@ void PMCDelimitedFileWriter::writePSMs(
     addScoreIfExists(match, PERCOLATOR_SCORE, PERCOLATOR_SCORE_COL);
     addRankIfExists(match, PERCOLATOR_SCORE, PERCOLATOR_RANK_COL);
     addScoreIfExists(match, PERCOLATOR_QVALUE, PERCOLATOR_QVALUE_COL);
-    addScoreIfExists(pep_match, BY_IONS_MATCHED, BY_IONS_MATCHED_COL);
-    addScoreIfExists(pep_match, BY_IONS_TOTAL, BY_IONS_TOTAL_COL);
+//    addScoreIfExists(pep_match, BY_IONS_MATCHED, BY_IONS_MATCHED_COL);      // Original, used by percolator
+//    addScoreIfExists(pep_match, BY_IONS_TOTAL, BY_IONS_TOTAL_COL);          // Original, used by percolator
     pair<int, int> scan_charge = make_pair(spectrum->getFirstScan(), zstate.getCharge());
     map<pair<int, int>, int>::const_iterator lookup = spectrum_counts.find(scan_charge);
     if (distinct_matches) {
@@ -478,7 +536,8 @@ void PMCDelimitedFileWriter::writePSMs(
     setAndFree(SEQUENCE_COL, seq_with_masses);
 
     setColumnCurrentRow(CLEAVAGE_TYPE_COL, cleavage);
-    setColumnCurrentRow(PROTEIN_ID_COL, peptide->getProteinIds());
+//    setColumnCurrentRow(PROTEIN_ID_COL, peptide->getProteinIds()); // TODO: Figure out why this was changed ??? For percolator ???
+    setColumnCurrentRow(PROTEIN_ID_COL, peptide->getProteinIdsLocations());
     setAndFree(FLANKING_AA_COL, peptide->getFlankingAAs());
 
     writeRow();

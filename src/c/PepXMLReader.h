@@ -13,18 +13,19 @@
 #include <string>
 #include <vector>
 
+#include "PSMReader.h"
 #include "Spectrum.h"
 #include "Match.h"
 #include "MatchCollection.h"
 
-class PepXMLReader {
+class PepXMLReader : public PSMReader {
 
  protected:
 
-  Database* database_; ///< target database of proteins
-  Database* decoy_database_; ///< decoy database of proteins
+//  Database* database_; ///< target database of proteins
+//  Database* decoy_database_; ///< decoy database of proteins
   SpectrumZState current_zstate_; ///< keeps track of the current zstate
-  std::string file_path_; ///< path of the xml file
+//  std::string file_path_; ///< path of the xml file
   Crux::Spectrum* current_spectrum_; ///< Keeps track of the current spectrum object
   Crux::Match* current_match_; ///< keeps track of the current match object
   std::string current_peptide_sequence_; ///< keeps track of the current peptide sequence
@@ -177,16 +178,16 @@ class PepXMLReader {
   /**
    * sets the target protein database
    */
-  void setDatabase(
-    Database* database ///< the target protein database
-  );
+//  void setDatabase(
+//    Database* database ///< the target protein database
+//  );
 
   /**
    * sets the decoy protein database
    */
-  void setDecoyDatabase(
-    Database* decoy_database ///< sets the decoy protein database
-  );
+//  void setDecoyDatabase(
+//    Database* decoy_database ///< sets the decoy protein database
+//  );
 
   /**
    * \returns the MatchCollection resulting from the parsed xml file

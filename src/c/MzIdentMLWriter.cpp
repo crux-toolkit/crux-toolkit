@@ -19,7 +19,7 @@ using namespace Crux;
 using namespace pwiz;
 using namespace identdata;
 
-MzIdentMLWriter::MzIdentMLWriter() {
+MzIdentMLWriter::MzIdentMLWriter() : PSMWriter() {
   //data_ = NULL;
   fout_ = NULL;
   sir_idx_ = 0;
@@ -52,6 +52,14 @@ void MzIdentMLWriter::openFile(
   bool overwrite) {
 
   openFile(filename.c_str(), overwrite);
+}
+
+void MzIdentMLWriter::openFile(
+  CruxApplication* application,
+  string filename,
+  MATCH_FILE_TYPE type) {
+
+  openFile(filename.c_str(), get_boolean_parameter("overwrite"));
 }
 
 /**
@@ -645,6 +653,12 @@ void MzIdentMLWriter::addRanks(
   }
 }
   
+void MzIdentMLWriter::write(
+  MatchCollection* collection,
+  string database) {
+
+  addMatches(collection);
+}
 
 /**
  * Adds the matches in the match collection to

@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 
+#include "PSMReader.h"
 #include "Spectrum.h"
 #include "Match.h"
 #include "MatchCollection.h"
@@ -27,17 +28,13 @@ enum SQT_LINE_T {
 };
 
 
-class SQTReader {
+class SQTReader : public PSMReader {
 
  protected:
-
-  Database* database_; ///< target database of proteins
-  Database* decoy_database_; ///< decoy database of proteins
 
   std::vector<std::string> headers_;
 
   SpectrumZState current_zstate_; ///< keeps track of the current zstate
-  std::string file_path_; ///< path of the xml file
   Crux::Spectrum* current_spectrum_; ///< Keeps track of the current spectrum object
   int current_num_matches_; ///< Keeps track of the number of matches assigned to the current spectrum.
   FLOAT_T current_ln_experiment_size_;
@@ -95,20 +92,6 @@ class SQTReader {
     Database* database, ///< the protein database
     Database* decoy_database=NULL ///< the decoy protein database (can be null)
     );
-
-  /**
-   * sets the target protein database
-   */
-  void setDatabase(
-    Database* database ///< the target protein database
-  );
-
-  /**
-   * sets the decoy protein database
-   */
-  void setDecoyDatabase(
-    Database* decoy_database ///< sets the decoy protein database
-  );
 
   /**
    * \returns the MatchCollection resulting from the parsed xml file

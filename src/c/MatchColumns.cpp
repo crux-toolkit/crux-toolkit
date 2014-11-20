@@ -70,7 +70,26 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "dNSAF",
   "EMPAI",
   "parsimony rank",
-  "decoy matches/spectrum"
+  "decoy matches/spectrum",
+  "SpecId",  // for PinWriter, many of these are repeats with slightly different names, is there better way to do this?
+  "Label",
+  "ScanNr",
+  "lnrSp",
+  "deltLCn",
+  "deltCn",
+  "Xcorr",
+  "Sp",
+  "IonFrac",
+  "Mass",
+  "PepLen",
+  "enzN",
+  "enzC",
+  "enzInt",
+  "lnNumSP",
+  "dm",
+  "absdM",
+  "Peptide",
+  "Proteins" // end for PinWriter.
 };
 
 /**

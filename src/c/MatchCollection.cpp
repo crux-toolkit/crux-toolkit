@@ -2536,6 +2536,10 @@ bool MatchCollection::extendTabDelimited(
     //set all spectrum specific features to parsed match
     match->setZState(zstate_);
     match->setDeltaCn(delta_cn);
+
+    // Attempted Fix
+    match->setScore(DELTA_CN, delta_cn);
+
     match->setDeltaLCn(ln_delta_cn);
     match->setLnExperimentSize(ln_experiment_size);    
     //add match to match collection.

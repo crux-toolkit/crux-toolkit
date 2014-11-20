@@ -18,18 +18,19 @@
 #include "PostProcessProtein.h"
 #include "ProteinMatch.h"
 #include "ProteinMatchCollection.h"
+#include "PSMWriter.h"
 #include "Spectrum.h"
 #include "SpectrumMatch.h"
 
 using namespace std;
 
-class PMCDelimitedFileWriter : public MatchFileWriter {
+class PMCDelimitedFileWriter: public MatchFileWriter, public PSMWriter {
 
 public:
   /**
    * Defines the type of match file being written
    */
-  enum MATCH_FILE_TYPE { NONE, PROTEINS, PEPTIDES, PSMS };
+//  enum MATCH_FILE_TYPE { NONE, PROTEINS, PEPTIDES, PSMS }; // Moved to PSMWriter
 
   /**
    * Returns an empty PMCDelimitedFileWriter object
@@ -74,6 +75,11 @@ public:
     string stem ///< filestem to be prepended to the filenames
   );
 
+  void write(
+    MatchCollection* collection,
+    string database
+  );
+
   /**
    * Writes the data in a ProteinMatchCollection to the currently open file
    */
@@ -81,7 +87,10 @@ public:
     ProteinMatchCollection* collection ///< collection to be written
   );
 
-private:
+// private: [would it be okay to switch this to protected ? If not, will need to copy/paste all private
+// functions into HTMLWriter...
+
+protected:
   // function pointer to the appropriate writing function for the current file type
   void (PMCDelimitedFileWriter::*write_function_)(ProteinMatchCollection*);
 
@@ -131,6 +140,24 @@ private:
    * Gets the cleavage type as a string
    */
   string getCleavageType();
+
+  /**
+   * Adds a column to the header if match has score
+   */
+  void addScoreColumnIfExists(
+    AbstractMatch* match, ///< match to get score from
+    SCORER_TYPE_T scoreType, ///< score type to get
+    MATCH_COLUMNS_T column ///< column to add the score to
+  );
+
+  /**
+   * Adds a column to the header if match has rank
+   */
+  void addRankColumnIfExists(
+    AbstractMatch* match, ///< match to get rank from
+    SCORER_TYPE_T scoreType, ///< rank type to get
+    MATCH_COLUMNS_T column ///< column to add the rank to
+  );
 
   /**
    * Adds the value of a score to the specified column, if it exists in the match

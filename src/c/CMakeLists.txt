@@ -79,6 +79,7 @@ set (
   GeneratePeptidesIterator.cpp
   GetMs2Spectrum.cpp
   hash.cpp
+  HTMLWriter.cpp
   Index.cpp
   IndexFile.cpp
   IndexMap.cpp
@@ -129,6 +130,9 @@ set (
   ProteinIndex.cpp
   ProteinIndexIterator.cpp
   ProteinMatchCollection.cpp
+  PSMConvertApplication.cpp
+  PSMReader.cpp
+  PSMWriter.cpp
   AbstractMatch.cpp
   ProteinMatch.cpp
   PeptideMatch.cpp

@@ -165,11 +165,20 @@ void SQTWriter::writeHeader(
   free(dig_str);
 
   // write a comment that says what the scores are
-  *file_ << "H\tLine fields: S, scan number, scan number,"
+/*  *file_ << "H\tLine fields: S, scan number, scan number,"
          << "charge, 0, server, precursor mass, 0, 0, number of matches" << endl
          << "H\tLine fields: M, rank by xcorr score, rank by sp score, "
          << "peptide mass, deltaCn, xcorr score, sp score, number ions matched, "
-         << "total ions compared, sequence" << endl;
+         << "total ions compared, sequence" << endl;*/
+
+  // modified to match TideSearch sqt output
+  *file_ << "H\tLine fields: S, scan number, scan number, "
+         << "charge, 0, server, experimental mass, total ion intensity, "
+	 << "lowest Sp, number of matches" << endl
+         << "H\tLine fields: M, rank by xcorr score, rank by sp score, "
+         << "peptide mass, deltaCn, xcorr score, sp score, number ions matched, "
+         << "total ions compared, sequence, validation status" << endl;
+
 }
 
 void SQTWriter::writeSpectrum(
@@ -180,7 +189,7 @@ void SQTWriter::writeSpectrum(
   if (!file_->is_open()) {
     return;
   }
-  
+/*  
   *file_ << "S"
          << "\t" << spectrum->getFirstScan()
          << "\t" << spectrum->getLastScan()
@@ -193,7 +202,37 @@ void SQTWriter::writeSpectrum(
          << "\t" << setprecision(get_int_parameter("precision"))
          << "0.0" // lowest sp
          << "\t" << num_matches
-         << endl;
+         << endl;*/
+
+  // trying to match tide-search output...
+  *file_ << "S"
+         << "\t" << spectrum->getFirstScan()
+         << "\t" << spectrum->getLastScan()
+         << "\t" << z_state.getCharge()
+         << "\t0.0" // process time
+         << "\tserver"
+         << "\t" << fixed << setprecision(get_int_parameter("mass-precision"))
+         << z_state.getSinglyChargedMass()
+         << resetiosflags(ios::fixed)
+         << "\t";
+
+  // print total ion intensity if exists...
+  if (spectrum->hasTotalEnergy()) {
+    *file_ << fixed << setprecision(2) << spectrum->getTotalEnergy() << resetiosflags(ios::fixed);
+  }
+  *file_ << "\t";
+
+  // print lowest sp if exists
+  if (spectrum->hasLowestSp()) {
+    *file_ << fixed << setprecision(get_int_parameter("precision")) << spectrum->getLowestSp() << resetiosflags(ios::fixed);
+  }
+  *file_ << "\t";
+
+  if (num_matches != 0) {
+    *file_ << num_matches;
+  }
+  *file_ << endl;
+
 }
 
 void SQTWriter::writePSM(
@@ -222,17 +261,19 @@ void SQTWriter::writePSM(
   Protein* protein = peptide->getPeptideSrc()->getParentProtein();
   string seq_str;
   if (protein->isPostProcess()) {
-    PostProcessProtein* post_process_protein = (PostProcessProtein*)protein;
-    seq_str =
-      post_process_protein->getNTermFlankingAA() + "." +
+//    PostProcessProtein* post_process_protein = (PostProcessProtein*)protein;
+
+    seq_str = string("") + peptide->getNTermFlankingAA() + "." + string(peptide->getSequence()) + "." + peptide->getCTermFlankingAA();
+/*      post_process_protein->getNTermFlankingAA() + "." +
       string(post_process_protein->getSequencePointer()) +
-      "." + post_process_protein->getCTermFlankingAA();
+      "." + post_process_protein->getCTermFlankingAA();*/
+
   } else {
     char* seq = peptide->getSequenceSqt();
     seq_str = seq;
     free(seq);
   }
-
+/*
   *file_ << "M"
          << "\t" << xcorr_rank
          << "\t" << sp_rank
@@ -245,6 +286,21 @@ void SQTWriter::writePSM(
          << "\t" << b_y_matched
          << "\t" << b_y_total
          << "\t" << seq_str
+         << endl;*/
+
+  *file_ << "M"
+         << "\t" << xcorr_rank
+         << "\t" << sp_rank
+         << "\t" << fixed << setprecision(get_int_parameter("mass-precision"))
+         << peptide->getPeptideMass() + MASS_PROTON
+         << "\t" << setprecision(2) << delta_cn
+         << "\t" << setprecision(get_int_parameter("precision"))
+         << xcorr_score
+         << "\t" << sp_score << resetiosflags(ios::fixed)
+         << "\t" << b_y_matched
+         << "\t" << b_y_total
+         << "\t" << seq_str
+	 << "\tU"
          << endl;
 
   for (PeptideSrcIterator iter = peptide->getPeptideSrcBegin();
