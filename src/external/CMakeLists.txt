@@ -270,47 +270,20 @@ if (UNIX)
     COMMAND 
       cp -p
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/MSToolkit/libmstoolkitlite.a
-      ${CMAKE_CURRENT_BINARY_DIR}/lib
-    COMMAND 
-      cp -p
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/Common.h
-      ${CMAKE_CURRENT_BINARY_DIR}/include/CometSearch/Common.h
-    COMMAND 
-      cp -p
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/CometData.h
-      ${CMAKE_CURRENT_BINARY_DIR}/include/CometSearch/CometData.h
-    COMMAND 
-      cp -p
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/CometSearch.h
-      ${CMAKE_CURRENT_BINARY_DIR}/include/CometSearch/CometSearch.h
-    COMMAND 
-      cp -p
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/CometSearchManager.h
-      ${CMAKE_CURRENT_BINARY_DIR}/include/CometSearch/CometSearchManager.h
-    COMMAND 
-      cp -p
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/CometPreprocess.h
-      ${CMAKE_CURRENT_BINARY_DIR}/include/CometSearch/CometPreprocess.h
-    COMMAND 
-      cp -p
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/ThreadPool.h
-      ${CMAKE_CURRENT_BINARY_DIR}/include/CometSearch/ThreadPool.h
-    COMMAND 
-      cp -p
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/Threading.h
-      ${CMAKE_CURRENT_BINARY_DIR}/include/CometSearch/Threading.h
-    COMMAND 
-      cp -p
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/OSSpecificThreading.h
-      ${CMAKE_CURRENT_BINARY_DIR}/include/CometSearch/OSSpecificThreading.h
-    COMMAND 
-      cp -p
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/CometInterfaces.h
-      ${CMAKE_CURRENT_BINARY_DIR}/include/CometSearch/CometInterfaces.h
-    COMMAND 
-      cp -p
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/libcometsearch.a
       ${CMAKE_CURRENT_BINARY_DIR}/lib
+    COMMAND 
+      mkdir ${CMAKE_CURRENT_BINARY_DIR}/include/CometSearch && cp -p
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/Common.h
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/CometData.h
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/CometSearch.h
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/CometSearchManager.h
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/CometPreprocess.h
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/ThreadPool.h
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/Threading.h
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/OSSpecificThreading.h
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/CometInterfaces.h
+      ${CMAKE_CURRENT_BINARY_DIR}/include/CometSearch
   )
 elseif (WIN32 AND NOT CYGWIN)
   set(LIBPATH "${CMAKE_CURRENT_BINARY_DIR}/lib;")
