@@ -273,7 +273,9 @@ if (UNIX)
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/libcometsearch.a
       ${CMAKE_CURRENT_BINARY_DIR}/lib
     COMMAND 
-      mkdir ${CMAKE_CURRENT_BINARY_DIR}/include/CometSearch && cp -p
+      [ -d ${CMAKE_CURRENT_BINARY_DIR}/include/CometSearch ] ||
+        mkdir ${CMAKE_CURRENT_BINARY_DIR}/include/CometSearch
+      cp -p
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/Common.h
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/CometData.h
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/CometSearch.h
