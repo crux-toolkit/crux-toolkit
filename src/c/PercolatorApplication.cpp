@@ -83,6 +83,7 @@ int PercolatorApplication::main(int argc, char** argv) {
     "output-dir",
     "overwrite",
     "txt-output",
+    "pout-output",
     "mzid-output",
     "pepxml-output",
     "feature-file",
@@ -254,8 +255,10 @@ int PercolatorApplication::main(
   perc_args_vec.push_back("--seed");
   perc_args_vec.push_back(seed_stream.str());
 
-  perc_args_vec.push_back("-X");
-  perc_args_vec.push_back(make_file_path("percolator.pout.xml"));
+  if (get_boolean_parameter("pout-output")) {
+    perc_args_vec.push_back("-X");
+    perc_args_vec.push_back(make_file_path("percolator.pout.xml"));
+  }
 
   perc_args_vec.push_back("-p");
   perc_args_vec.push_back(to_string(get_double_parameter("c-pos")));
