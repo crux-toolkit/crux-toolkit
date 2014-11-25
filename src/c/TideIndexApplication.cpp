@@ -387,6 +387,9 @@ int TideIndexApplication::main(int argc, char** argv) {
 
   // Recover stderr
   cerr.rdbuf(old);
+  remove(modless_peptides.c_str());
+  remove(peakless_peptides.c_str());
+
 
   return 0;
 }
