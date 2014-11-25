@@ -254,6 +254,9 @@ int PercolatorApplication::main(
   perc_args_vec.push_back("--seed");
   perc_args_vec.push_back(seed_stream.str());
 
+  perc_args_vec.push_back("-X");
+  perc_args_vec.push_back(make_file_path("percolator.pout.xml"));
+
   perc_args_vec.push_back("-p");
   perc_args_vec.push_back(to_string(get_double_parameter("c-pos")));
  
