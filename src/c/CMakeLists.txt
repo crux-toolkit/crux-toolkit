@@ -460,7 +460,6 @@ else()
     boost_iostreams-mt-s
     z-mt-s-1_2
     boost_filesystem-mt-s
-    boost_regex-mt-s
     boost_thread-mt-s
     boost_chrono
     boost_filesystem
@@ -495,7 +494,6 @@ else()
     z-mt-s-1_2
     boost_chrono
     boost_filesystem-mt-s
-    boost_regex-mt-s
     boost_thread-mt-s
     pthread
   )
@@ -525,7 +523,6 @@ else()
     z-mt-s-1_2
     boost_chrono
     boost_filesystem-mt-s
-    boost_regex-mt-s
     boost_thread-mt-s
     pthread
   )
