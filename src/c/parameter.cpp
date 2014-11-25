@@ -580,6 +580,9 @@ void initialize_parameters(void){
   set_boolean_parameter("pin-output", false,
       "Output PIN XML in the output directory.  Default=F",
       "Available for search-for-matches.", "true");
+  set_boolean_parameter("pout-output", false,
+      "Output POUT XML in the output directory.  Default=F",
+      "Available for percolator.", "true");
   set_boolean_parameter("pepxml-output", false,
       "Output pepXML in the output directory.  Default=F",
       "Available for search-for-matches, q-ranker, barista, percolator.",
