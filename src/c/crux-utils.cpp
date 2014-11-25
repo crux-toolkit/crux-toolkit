@@ -18,6 +18,7 @@
 #include "Index.h"
 #include "WinCrux.h"
 #include "LineFileReader.h"
+#include "boost/filesystem.hpp"
 
 using namespace std;
 
@@ -1100,7 +1101,7 @@ int create_output_directory(
     // Does this accomodate the case where one or more of the
     // parent directories doesn't exit?
     int dir_access = S_IRWXU + S_IRWXG + S_IRWXO;
-    if (mkdir(output_folder, dir_access)) {
+    if (!boost::filesystem::create_directories(output_folder)) {
       // mkdir failed
       carp(
         CARP_ERROR,
