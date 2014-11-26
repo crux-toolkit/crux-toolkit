@@ -264,9 +264,12 @@ if (UNIX)
     TARGET comet
     POST_BUILD
     COMMAND 
-      cp -Rp
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/MSToolkit/include
-      ${CMAKE_CURRENT_BINARY_DIR}/include/MSToolkit/
+      [ -d ${CMAKE_CURRENT_BINARY_DIR}/include/MSToolkit ] ||
+        mkdir ${CMAKE_CURRENT_BINARY_DIR}/include/MSToolkit
+    COMMAND 
+      cp -p
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/MSToolkit/include/*
+      ${CMAKE_CURRENT_BINARY_DIR}/include/MSToolkit
     COMMAND 
       cp -p
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/MSToolkit/libmstoolkitlite.a
@@ -275,6 +278,7 @@ if (UNIX)
     COMMAND 
       [ -d ${CMAKE_CURRENT_BINARY_DIR}/include/CometSearch ] ||
         mkdir ${CMAKE_CURRENT_BINARY_DIR}/include/CometSearch
+    COMMAND
       cp -p
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/Common.h
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/CometData.h
