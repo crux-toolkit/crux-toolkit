@@ -109,6 +109,9 @@ vector<pb::Spectrum> SpectrumRecordWriter::getPbSpectra(
     newSpectrum.set_precursor_m_z(i->getMZ());
     newSpectrum.mutable_charge_state()->Add(i->getCharge());
     addPeaks(&newSpectrum, s);
+    if (newSpectrum.peak_m_z_size() == 0) {
+      spectra.pop_back();
+    }
   }
 
   return spectra;
