@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href=""?>
-<msms_pipeline_analysis date="Thu Oct 23 12:58:57 2014
+<msms_pipeline_analysis date="Thu Dec  4 12:33:06 2014
 " xmlns="http://regis-web.systemsbiology.net/pepXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://regis-web.systemsbiology.net/pepXML /usr/local/tpp/schema/pepXML_v110.xsd" summary_xml="">
-<msms_run_summary base_name="/net/noble/vol2/home/kfattila/proj/crux-test/trunk/src/c/test/smoke-tests/test" msManufacturer="NA" msModel="NA" msIonization="NA" msAnalyzer="NA" msDectector="NA" raw_data_type="NA" raw_data="NA" >
+<msms_run_summary base_name="/net/maccoss/vol1/home/kaipot/svn/cruxrel/src/c/test/smoke-tests/test" msManufacturer="NA" msModel="NA" msIonization="NA" msAnalyzer="NA" msDectector="NA" raw_data_type="NA" raw_data="NA" >
 <sample_enzyme name="trypsin">
 </sample_enzyme>
-<search_summary base_name="/net/noble/vol2/home/kfattila/proj/crux-test/trunk/src/c/test/smoke-tests/test" search_engine="Crux" precursor_mass_type="average" fragment_mass_type="monoisotopic" out_data_type="NA" out_data="NA" search_id="1" >
-<search_database local_path="/net/noble/vol2/home/kfattila/proj/crux-test/trunk/src/c/test/smoke-tests/small-yeast.fasta" type="AA" />
+<search_summary base_name="/net/maccoss/vol1/home/kaipot/svn/cruxrel/src/c/test/smoke-tests/test" search_engine="Crux" precursor_mass_type="average" fragment_mass_type="monoisotopic" out_data_type="NA" out_data="NA" search_id="1" >
+<search_database local_path="/net/maccoss/vol1/home/kaipot/svn/cruxrel/src/c/test/smoke-tests/small-yeast.fasta" type="AA" />
 <enzymatic_search_constraint enzyme="trypsin" max_num_internal_cleavages="0" min_number_termini="2"/>
 <aminoacid_modification aminoacid="C" mass="217.181727" massdiff="57.021464" variable="N" />
 <aminoacid_modification aminoacid="S" mass="166.978210" massdiff="79.900002" variable="Y" />
@@ -26,6 +26,7 @@
 <parameter name="isotope" value="0"/>
 <parameter name="add_Cterm_protein" value="0.000000"/>
 <parameter name="activation_method" value="ALL"/>
+<parameter name="pout-output" value="false"/>
 <parameter name="nterm-peptide-mods-spec" value=""/>
 <parameter name="primary-ions" value="by"/>
 <parameter name="add_E_glutamic_acid" value="0.000000"/>

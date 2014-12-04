@@ -57,6 +57,10 @@ mzid-use-pass-threshold=false
 # for Sp scoring and 1 for xcorr scoring.
 isotope=0
 
+# Output POUT XML in the output directory.  Default=F
+# Available for percolator.
+pout-output=false
+
 # Specifies N-terminal static and variable mass modifications on
 # peptides. Specify a comma-separated list of N-terminal modification
 # sequences of the form: 1E-18.0106,C-17.0265
@@ -1208,7 +1212,7 @@ peptide_mass_units=0
 
 # binning to use on fragment ions
 # option for Comet only
-fragment_bin_tol=1.000500
+fragment_bin_tol=1.000507
 
 # added to G - avg.  57.0513, mono.  57.02146
 # option for Comet
