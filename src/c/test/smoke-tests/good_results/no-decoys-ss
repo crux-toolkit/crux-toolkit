@@ -1,13 +1,13 @@
-INFO: CPU: serine.gs.washington.edu
-INFO: Mon Oct 27 14:23:31 PDT 2014
+INFO: CPU: tyrosine.gs.washington.edu
+INFO: Thu Dec  4 12:35:21 PST 2014
 COMMAND LINE: crux sequest-search --output-dir ss --fileroot no-decoys --parameter-file params/no-decoys-ss demo.ms2 small-yeast-index
 INFO: Preparing protein index small-yeast-index
 INFO: Reading in ms2 file demo.ms2
 INFO: Created 1 peptide mods, keeping 1 with 255 or fewer aa mods
 INFO: Searching spectrum 96 (2+), search 100
-INFO: Elapsed time: 2.38 s
+INFO: Elapsed time: 1.45 s
 INFO: Finished crux sequest-search
-INFO: Elapsed time: 2.38 s
+INFO: Elapsed time: 1.46 s
 INFO: Finished crux sequest-search.
 INFO: Return Code:0
 # comet_version 2014.01 rev. 0
@@ -58,6 +58,10 @@ mzid-use-pass-threshold=false
 # Only available for crux-predict-peptide-ion.  Automatically set to 0
 # for Sp scoring and 1 for xcorr scoring.
 isotope=0
+
+# Output POUT XML in the output directory.  Default=F
+# Available for percolator.
+pout-output=false
 
 # Specifies N-terminal static and variable mass modifications on
 # peptides. Specify a comma-separated list of N-terminal modification
@@ -1491,7 +1495,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Mon Oct 27 14:23:31 2014
+H	StartTime	Thu Dec  4 12:35:21 2014
 H	EndTime                               
 H	Database	small-yeast-index/small-yeast-binary-fasta
 H	DBSeqLength	?
