@@ -105,13 +105,11 @@ void PercolatorAdapter::psmScoresToMatchCollection(
         break;
       }
     }
-    bool psm_decoy;
     int psm_file_idx;
     int psm_scan;
     int psm_charge;
     int psm_rank;
     parsePSMId(psm->id, 
-      psm_decoy, 
       psm_file_idx,
       psm_scan,
       psm_charge,
@@ -291,24 +289,43 @@ ProteinMatchCollection* PercolatorAdapter::getDecoyProteinMatchCollection() {
 
 void PercolatorAdapter::parsePSMId(
   const string& psm_id, ///< psm id to parse information from
-  bool &decoy, ///< Is the psm a decoy
   int& file_idx, ///< file index of psm
   int& scan, ///< scan number of psm
   int& charge, ///< charge of psm
   int& rank ///< rank of psm
 ) {
-
+  // <target|decoy>_<fileindex>_<scan>_<charge>_<rank> OR
+  // <filestem>_<scan>_<charge>_<rank>
   vector<string> tokens;
   tokenize(psm_id, tokens, '_');
-  if (tokens.size() != 5) {
-    carp(CARP_FATAL, "PSMID should be target_fileidx_scan_charge_rank");
+  if (tokens.size() < 4) {
+    carp(CARP_FATAL, "PSMID should be (((target|decoy)_fileidx)|filestem)_"
+                     "scan_charge_rank, but was %s", psm_id.c_str());
   }
-  decoy = tokens[0] == "decoy";
-  from_string<int>(file_idx, tokens[1]);
-  from_string<int>(scan, tokens[2]);
-  from_string<int>(charge, tokens[3]);
-  from_string<int>(rank, tokens[4]);
-  
+  if (tokens.size() == 5 && (tokens[0] == "target" || tokens[0] == "decoy")) {
+    // Parse as <target|decoy>_<fileindex>_<scan>_<charge>_<rank>
+    from_string<int>(file_idx, tokens[1]);
+    from_string<int>(scan, tokens[2]);
+    from_string<int>(charge, tokens[3]);
+    from_string<int>(rank, tokens[4]);
+  } else {
+    // Try to parse as <filestem>_<scan>_<charge>_<rank>
+    from_string<int>(rank, tokens.back());
+    tokens.pop_back();
+    from_string<int>(charge, tokens.back());
+    tokens.pop_back();
+    from_string<int>(scan, tokens.back());
+    tokens.pop_back();
+    stringstream ss;
+    for (vector<string>::const_iterator i = tokens.begin(); i != tokens.end(); i++) {
+      if (i != tokens.begin()) {
+        ss << '_' << *i;
+      } else {
+        ss << *i;
+      }
+    }
+    file_idx = Crux::Match::findFileIndex(ss.str(), true);
+  }
 }
 
 /**

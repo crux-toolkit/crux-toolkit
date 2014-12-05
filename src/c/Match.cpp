@@ -31,6 +31,7 @@
 #include "MatchCollection.h" 
 #include "Peptide.h"
 
+#include <boost/filesystem.hpp>
 #include <string>
 
 #include "MatchFileReader.h"
@@ -1557,6 +1558,23 @@ int Match::getFileIndex() {
   return(file_idx_);
 }
 
+int Match::findFileIndex(const string& file_path, bool match_stem) {
+  for (size_t idx = 0; idx < file_paths_.size(); idx++) {
+    if (file_path == file_paths_[idx]) {
+      return idx;
+    }
+  }
+  if (match_stem) {
+    for (size_t idx = 0; idx < file_paths_.size(); idx++) {
+      boost::filesystem::path boost_path(file_paths_[idx]);
+      if (file_path == boost_path.stem().string()) {
+        return idx;
+      }
+    }
+  }
+  return -1;
+}
+
 /**
  * sets the file path for this match
  * \returns the associated file index
@@ -1564,16 +1582,7 @@ int Match::getFileIndex() {
 int Match::setFilePath(
   const string& file_path ///< file path to set
   ) {
-
-  file_idx_ = -1;
-  
-  for (size_t idx = 0;idx < file_paths_.size(); idx++) {
-    if (file_path == file_paths_[idx]) {
-      file_idx_ = idx;
-      break;
-    }
-  }
-
+  file_idx_ = findFileIndex(file_path);
   if (file_idx_ == -1) {
     file_idx_ = file_paths_.size();
     file_paths_.push_back(file_path);

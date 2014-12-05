@@ -18,6 +18,7 @@
 #include "SpectrumZState.h"
 #include <fstream>
 #include <limits>
+#include <boost/filesystem.hpp>
 
 using namespace std;
 using namespace Crux; 
@@ -71,7 +72,7 @@ void PinWriter::write(
   for (vector<Match*>::const_iterator i = matches.begin(); i != matches.end(); ++i) {
     int xcorrRank = (*i)->getRank(XCORR);
     if (xcorrRank <= top_rank)
-      printPSM(*i, spectrum, (*i)->getNullPeptide(), xcorrRank);
+      printPSM(*i, spectrum);
     else 
       return;
   }
@@ -200,19 +201,12 @@ void PinWriter::write(
       scan_number_ = iter->first;
     }
     for (size_t i = 0; i < matches.size(); ++i) {   
-      bool is_decoy = isDecoy(matches[i]);
       int xcorrRank = matches[i]->getRank(XCORR);
       if (xcorrRank <= top_rank) {
-        printPSM(matches[i], matches[i]->getSpectrum(), is_decoy, xcorrRank);
+        printPSM(matches[i], matches[i]->getSpectrum());
       }
     }
   }
-}
-
-bool PinWriter::isDecoy(Match* match) {
-  string proteins = match->getPeptide()->getProteinIds();
-  return (proteins.find(decoy_prefix_) != string::npos) ?
-    true : match->getNullPeptide();
 }
 
 bool PinWriter::isInfinite(FLOAT_T x) {
@@ -254,9 +248,7 @@ void PinWriter::printHeader() {
 
 void PinWriter::printPSM(
   Match* match,
-  Spectrum* spectrum, 
-  bool is_decoy,
-  int rank
+  Spectrum* spectrum
 ){ 
   Peptide* peptide = match->getPeptide();
 
@@ -274,8 +266,8 @@ void PinWriter::printPSM(
   free(sequence);
  
   fprintf(output_file_, "%s\t%d\t%d\t",
-    getId(charge, is_decoy, spectrum->getFirstScan(), rank, match->getFileIndex()).c_str(), // SpecId
-    is_decoy ? -1 : 1, // Label
+    getId(match, spectrum->getFirstScan()).c_str(), // SpecId
+    match->getNullPeptide() ? -1 : 1, // Label
     spectrum->getFirstScan() // ScanNr
   );
   if (is_sp_) {
@@ -349,17 +341,27 @@ string PinWriter::getProteins(
 }
 
 string PinWriter::getId(
-  int charge,
-  bool is_decoy, 
-  int scan_number, 
-  int rank,
-  int file_idx
+  Match* match,
+  int scan_number
 ){
-  ostringstream psm_id; 
-  psm_id << (is_decoy ? "decoy" : "target") << '_' << 
-    file_idx << '_' << 
-    scan_number << '_' << charge << '_' << 
-    rank;
+  string prefix;
+  if (get_boolean_parameter("filestem-prefixes")) {
+    string filename = match->getFilePath();
+    if (!filename.empty()) {
+      boost::filesystem::path path(filename);
+      prefix = path.stem().string();
+    }
+  }
+
+  stringstream psm_id; 
+  if (prefix.empty()) {
+    psm_id << (match->getNullPeptide() ? "decoy" : "target")
+           << '_' << match->getFileIndex();
+  } else {
+    psm_id << prefix;
+  }
+  psm_id << '_' << scan_number << '_' << match->getCharge() << '_'
+         << match->getRank(XCORR);
   return psm_id.str();   
 }
 

@@ -76,9 +76,7 @@ class PinWriter{
 
   void printPSM(
     Crux::Match* match, 
-    Crux::Spectrum* spectrum, 
-    bool is_decoy,
-    int rank
+    Crux::Spectrum* spectrum
   );
 
   std::string getPeptide(Crux::Peptide* peptide);
@@ -87,11 +85,8 @@ class PinWriter{
   bool isInfinite(FLOAT_T x);
 
   std::string getId(
-    int charge,  
-    bool is_decoy,
-    int scan_number,
-    int rank,
-    int file_idx
+    Crux::Match* match,
+    int scan_number
   ); 
 
   FLOAT_T calcMassOfMods(Crux::Peptide* peptide);

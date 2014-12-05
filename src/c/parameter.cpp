@@ -416,6 +416,11 @@ void initialize_parameters(void){
     "It is optional for make-pin",
     "false"
   );
+  set_boolean_parameter(
+    "filestem-prefixes", false,
+    "Prefix PSM IDs with filestems instead of target or decoy and file index.",
+    "Available for make-pin",
+    "false");
   /* *** Initialize Options (command line and param file) *** */
 
   /* options for all executables */
