@@ -71,8 +71,8 @@ int MakePinApplication::main(int argc, char** argv) {
     "output-file",
     "verbosity",
     "parameter-file",
-    "list-of-files"
-
+    "list-of-files",
+    "filestem-prefixes"
   };
 
   int num_options = sizeof(option_list) / sizeof(char*);

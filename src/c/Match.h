@@ -317,7 +317,8 @@ class Match {
    *\returns the file index for this match
    */
   int getFileIndex();
-  
+
+  static int findFileIndex(const std::string& file_path, bool match_stem = false);
 
   /**                                                                                                      
    * sets the file path for this match                                                                     
