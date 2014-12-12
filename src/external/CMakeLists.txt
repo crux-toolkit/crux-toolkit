@@ -12,29 +12,47 @@ if (UNIX)
 endif (UNIX)
 SET(ENV{CMAKE_PREFIX_PATH} ${CMAKE_CURRENT_BINARY_DIR})
 SET(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR})
+SET(USE_LATEST_PWIZ ON CACHE BOOL "Use lastest version of ProteoWizard")
 
 # Download and build a partial distribution of the pwiz source
 # from the ProteoWizard TeamCity repository.
 if (WIN32 AND NOT CYGWIN)
-  ExternalProject_Add(
-    ProteoWizard
-    DOWNLOAD_COMMAND 
-      ${CMAKE_COMMAND} 
-        -DDOWNLOAD_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/downloads
-        -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
-        -P  ${CMAKE_CURRENT_SOURCE_DIR}/download_pwiz.cmake
-    DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/downloads
-    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND 
-      ${CMAKE_COMMAND} 
-      	-DBUILD_TYPE:STRING=${CMAKE_CFG_INTDIR}
-        -DPREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
-        -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
-        -P  ${CMAKE_CURRENT_SOURCE_DIR}/build_pwiz.cmake
-    INSTALL_COMMAND ""
-    BUILD_IN_SOURCE 1
-  )
+  if (USE_LATEST_PWIZ)
+    ExternalProject_Add(
+      ProteoWizard
+      DOWNLOAD_COMMAND 
+        ${CMAKE_COMMAND} 
+          -DDOWNLOAD_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/downloads
+          -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
+          -P  ${CMAKE_CURRENT_SOURCE_DIR}/download_pwiz.cmake
+      DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/downloads
+      PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
+      CONFIGURE_COMMAND ""
+      BUILD_COMMAND 
+        ${CMAKE_COMMAND} 
+          -DBUILD_TYPE:STRING=${CMAKE_CFG_INTDIR}
+          -DPREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
+          -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
+          -P  ${CMAKE_CURRENT_SOURCE_DIR}/build_pwiz.cmake
+      INSTALL_COMMAND ""
+      BUILD_IN_SOURCE 1
+    )
+  else (USE_LATEST_PWIZ)
+    ExternalProject_Add(
+      ProteoWizard
+      URL http://cruxtoolkit.sourceforge.net/download/crux-2.1/pwiz-src-3_0_6736.tar.bz2
+      PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
+      CONFIGURE_COMMAND ""
+      BUILD_COMMAND 
+        ${CMAKE_COMMAND} 
+          -DBUILD_TYPE:STRING=${CMAKE_CFG_INTDIR}
+          -DPREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
+          -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
+          -P  ${CMAKE_CURRENT_SOURCE_DIR}/build_pwiz.cmake
+      INSTALL_COMMAND ""
+      BUILD_IN_SOURCE 1
+    )
+  endif (USE_LATEST_PWIZ)
   # On Windows we have to do some extra house keeping
   ExternalProject_Add_Step(
     ProteoWizard
@@ -47,27 +65,46 @@ if (WIN32 AND NOT CYGWIN)
     DEPENDEES install
   )
 else (WIN32 AND NOT CYGWIN)
-  ExternalProject_Add(
-    ProteoWizard
-    DOWNLOAD_COMMAND 
-      ${CMAKE_COMMAND} 
-        -DDOWNLOAD_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/downloads
-        -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
-        -P  ${CMAKE_CURRENT_SOURCE_DIR}/download_pwiz.cmake
-    DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/downloads
-    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND 
-      ${CMAKE_COMMAND} 
-      	-DBUILD_TYPE:STRING=${CMAKE_CFG_INTDIR}
-        -DPREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
-        -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
-        -P  ${CMAKE_CURRENT_SOURCE_DIR}/build_pwiz.cmake
-    INSTALL_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/create_links.sh 
-      --prefix=${CMAKE_CURRENT_BINARY_DIR}
-    INSTALL_COMMAND ""
-    BUILD_IN_SOURCE 1
-  )
+  if (USE_LATEST_PWIZ)
+    ExternalProject_Add(
+      ProteoWizard
+      DOWNLOAD_COMMAND 
+        ${CMAKE_COMMAND} 
+          -DDOWNLOAD_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/downloads
+          -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
+          -P  ${CMAKE_CURRENT_SOURCE_DIR}/download_pwiz.cmake
+      DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/downloads
+      PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
+      CONFIGURE_COMMAND ""
+      BUILD_COMMAND 
+        ${CMAKE_COMMAND} 
+          -DBUILD_TYPE:STRING=${CMAKE_CFG_INTDIR}
+          -DPREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
+          -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
+          -P  ${CMAKE_CURRENT_SOURCE_DIR}/build_pwiz.cmake
+      INSTALL_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/create_links.sh 
+        --prefix=${CMAKE_CURRENT_BINARY_DIR}
+      INSTALL_COMMAND ""
+      BUILD_IN_SOURCE 1
+    )
+  else (USE_LATEST_PWIZ)
+    ExternalProject_Add(
+      ProteoWizard
+      URL http://cruxtoolkit.sourceforge.net/download/crux-2.1/pwiz-src-3_0_6736.tar.bz2
+      PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
+      CONFIGURE_COMMAND ""
+      BUILD_COMMAND 
+        ${CMAKE_COMMAND} 
+          -DBUILD_TYPE:STRING=${CMAKE_CFG_INTDIR}
+          -DPREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
+          -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
+          -P  ${CMAKE_CURRENT_SOURCE_DIR}/build_pwiz.cmake
+      INSTALL_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/create_links.sh 
+        --prefix=${CMAKE_CURRENT_BINARY_DIR}
+      INSTALL_COMMAND ""
+      BUILD_IN_SOURCE 1
+    )
+  endif (USE_LATEST_PWIZ)
 endif (WIN32 AND NOT CYGWIN)
 
 if (WIN32 AND NOT CYGWIN)
