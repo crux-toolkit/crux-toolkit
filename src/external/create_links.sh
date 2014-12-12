@@ -42,8 +42,3 @@ ln -s -f libboost_system-*-mt.a libboost_system.a
 ln -s -f libfreetype-*-mt-2_4.a  libfreetype-mt-s-2_4.a
 ln -s -f libfreetype-*-mt-2_4.a  libfreetype.a
 
-# Copy the file needed for Gregorian date time
-
-cd ..
-
-cp $install_path/build/src/ProteoWizard/libraries/boost_1_54_0/boost/date_time/gregorian_calendar.ipp include/boost/date_time
