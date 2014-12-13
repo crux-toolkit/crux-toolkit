@@ -222,7 +222,7 @@ void PinWriter::printHeader() {
   if (is_sp_) {
     features << "Sp\tIonFrac\t";
   }
-  features << "Mass\tPepLen\t";
+  features << "PepLen\t";
   for (set<int>::const_iterator i = charges_.begin(); i != charges_.end(); ++i) {
     features << "Charge" << *i << '\t';
   }
@@ -239,7 +239,7 @@ void PinWriter::printHeader() {
       push_backFeatureDescription(temp.c_str());
     }*/
   fprintf(output_file_,
-    "SpecId\tLabel\tScanNr\t"
+    "SpecId\tLabel\tScanNr\tExpMass\tCalcMass\t"
     "%s"
     "Peptide\tProteins\n",
     features.str().c_str()
@@ -256,7 +256,8 @@ void PinWriter::printPSM(
   bool enzC = false;
   bool enzN = false;
   FLOAT_T obsMass = match->getZState().getSinglyChargedMass();
-  FLOAT_T calcMass = peptide->calcMass(isotopic_mass_) + calcMassOfMods(peptide);
+  //FLOAT_T calcMass = peptide->calcMass(isotopic_mass_) + calcMassOfMods(peptide);
+  FLOAT_T calcMass = peptide->getPeptideMass() + MASS_PROTON;
   FLOAT_T dM = (obsMass - calcMass) / charge;
 
   char* sequence = peptide->getSequence();
@@ -265,10 +266,12 @@ void PinWriter::printPSM(
                          peptide->getCTermFlankingAA(), enzyme_, enzN, enzC);
   free(sequence);
  
-  fprintf(output_file_, "%s\t%d\t%d\t",
+  fprintf(output_file_, "%s\t%d\t%d\t%.*f\t%.*f\t",
     getId(match, spectrum->getFirstScan()).c_str(), // SpecId
     match->getNullPeptide() ? -1 : 1, // Label
-    spectrum->getFirstScan() // ScanNr
+    spectrum->getFirstScan(), // ScanNr
+    mass_precision_, obsMass, // ExpMass
+    mass_precision_, calcMass // CalcMass
   );
   if (is_sp_) {
     fprintf(output_file_, "%.*f\t",
@@ -286,8 +289,7 @@ void PinWriter::printPSM(
       precision_, isnan(match->getBYIonFractionMatched()) ? 0 : match->getBYIonFractionMatched() // IonFrac
     );
   }
-  fprintf(output_file_, "%.*f\t%u\t",
-    mass_precision_, obsMass, // Mass
+  fprintf(output_file_, "%u\t",
     peptide->getLength() // PepLen
   );
   for (set<int>::const_iterator i = charges_.begin(); i != charges_.end(); ++i) {
@@ -314,9 +316,12 @@ string PinWriter::getPeptide(Peptide* peptide) {
 
   sequence << peptide->getNTermFlankingAA() << '.';
 
-  char* unmodified_sequence = peptide->getModifiedSequenceWithMasses(MOD_MASS_ONLY);
-  sequence << unmodified_sequence;
-  free(unmodified_sequence);
+  char* modified_sequence = get_boolean_parameter("mod-symbols")
+    ? peptide->getModifiedSequenceWithSymbols()
+    : peptide->getModifiedSequenceWithMasses(
+        get_mass_format_type_parameter("mod-mass-format"));
+  sequence << modified_sequence;
+  free(modified_sequence);
 
   sequence << '.' << peptide->getCTermFlankingAA();
 

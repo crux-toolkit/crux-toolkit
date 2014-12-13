@@ -124,6 +124,11 @@ class SQTReader {
     Database* decoy_database ///< decoy protein database (can be null)
   );
 
+  /**
+   * \use the modification symbols in this SQT file
+   * looks for DiffMod <residues><symbol>=<delta mass.
+   */
+  static void readSymbols(const std::string& file, bool append = true);
 
   /*open/close handlers*/
   friend void open_handler(void* data, const char* element, const char** attr);

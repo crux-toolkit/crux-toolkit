@@ -144,6 +144,21 @@ if (WIN32 AND NOT CYGWIN)
     COMMAND ${CMAKE_COMMAND} -E copy 
       ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/windows/fido/GroupPowerBigraph.cpp
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/fido/GroupPowerBigraph.cpp
+    COMMAND ${CMAKE_COMMAND} -E copy 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_mass_cols/DataSet.cpp
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
+    COMMAND ${CMAKE_COMMAND} -E copy 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_mass_cols/DataSet.h
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
+    COMMAND ${CMAKE_COMMAND} -E copy 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_mass_cols/PSMDescription.cpp
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
+    COMMAND ${CMAKE_COMMAND} -E copy 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_mass_cols/SetHandler.h
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
+    COMMAND ${CMAKE_COMMAND} -E copy 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_mass_cols/SetHandler.cpp
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
     DEPENDEES patch
     DEPENDERS configure
   )
@@ -169,6 +184,21 @@ elseif (APPLE)
     COMMAND ${CMAKE_COMMAND} -E copy 
       ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_find_boost/CMakeLists.txt 
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
+    COMMAND ${CMAKE_COMMAND} -E copy 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_mass_cols/DataSet.cpp
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
+    COMMAND ${CMAKE_COMMAND} -E copy 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_mass_cols/DataSet.h
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
+    COMMAND ${CMAKE_COMMAND} -E copy 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_mass_cols/PSMDescription.cpp
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
+    COMMAND ${CMAKE_COMMAND} -E copy 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_mass_cols/SetHandler.h
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
+    COMMAND ${CMAKE_COMMAND} -E copy 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_mass_cols/SetHandler.cpp
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
     DEPENDEES patch
     DEPENDERS configure
   )
@@ -184,6 +214,11 @@ else(APPLE)
       -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
     PATCH_COMMAND cp 
       ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_find_boost/CMakeLists.txt 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_mass_cols/DataSet.cpp
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_mass_cols/DataSet.h
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_mass_cols/PSMDescription.cpp
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_mass_cols/SetHandler.h
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_mass_cols/SetHandler.cpp
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
   )
 endif (WIN32 AND NOT CYGWIN)

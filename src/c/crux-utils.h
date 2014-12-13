@@ -115,7 +115,7 @@ char* parse_filename(const char* file);
  * Examines filename to see if it ends in the given extension
  * \returns True if filename ends in the extension, else false.
  */
-bool has_extension(const char* filename, const char* extension);
+bool has_extension(std::string filename, std::string extension);
 
 /**
  * convert the integer into a string
