@@ -340,6 +340,8 @@ int get_aa_mod_list(AA_MOD_T*** mods);
  */
 void incrementNumMods();
 
+void resetMods();
+
 /**
  * \brief Get the pointer to the list of AA_MODs for the peptide
  * c-terminus.  Argument is a reference to an array of

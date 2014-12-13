@@ -795,26 +795,15 @@ char* parse_filename(const char* file){
  * Examines filename to see if it ends in the given extension
  * \returns True if filename ends in the extension, else false.
  */
-bool has_extension(const char* filename, const char* extension){
-
-  if( extension == NULL ){
-    return true;
-  }
-  if( filename == NULL ){
+bool has_extension(string filename, string extension){
+  size_t file_len = filename.length();
+  size_t ext_len = extension.length();
+  if (ext_len > file_len) {
     return false;
   }
-
-  int name_length = strlen(filename);
-  int extension_length = strlen(extension);
-  if( extension_length > name_length ){
-    return false;
-  }
-  // point to the last few characters of the name 
-  const char* look_here = filename + (name_length - extension_length);
-  if( strcmp(look_here, extension) == 0){
-    return true;
-  }
-  return false;
+  std::transform(filename.begin(), filename.end(), filename.begin(), ::tolower);
+  std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
+  return filename.compare(file_len - ext_len, ext_len, extension) == 0;
 }
 
 

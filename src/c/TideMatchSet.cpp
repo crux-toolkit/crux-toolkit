@@ -14,9 +14,6 @@
 #include "TideMatchSet.h"
 #include "TideSearchApplication.h"
 
-extern AA_MOD_T* list_of_mods[MAX_AA_MODS]; // list containing all aa mods
-extern int num_mods;  // ANY_POSITION mods
-
 map<int, double> TideMatchSet::mod_map_;
 ModCoder TideMatchSet::mod_coder_;
 string TideMatchSet::cleavage_type_ = "";
@@ -491,6 +488,9 @@ Crux::Match* TideMatchSet::getCruxMatch(
  * doesn't exist
  */
 const AA_MOD_T* TideMatchSet::lookUpMod(double delta_mass) {
+  AA_MOD_T** list_of_mods;
+  int num_mods = get_all_aa_mod_list(&list_of_mods);
+
   for (int i = 0; i < num_mods; ++i) {
     const AA_MOD_T* mod = list_of_mods[i];
     if (aa_mod_get_mass_change(mod) == delta_mass) {
@@ -504,7 +504,7 @@ const AA_MOD_T* TideMatchSet::lookUpMod(double delta_mass) {
   aa_mod_set_mass_change(new_mod, delta_mass);
   list_of_mods[num_mods] = new_mod;
 
-  ++num_mods;
+  incrementNumMods();
 
   return new_mod;
 }

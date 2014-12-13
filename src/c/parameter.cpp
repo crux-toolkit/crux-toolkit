@@ -421,6 +421,11 @@ void initialize_parameters(void){
     "Prefix PSM IDs with filestems instead of target or decoy and file index.",
     "Available for make-pin",
     "false");
+  set_boolean_parameter(
+    "mod-symbols", false,
+    "Print modification symbols instead of masses in peptide sequences.",
+    "Available for make-pin",
+    "false");
   /* *** Initialize Options (command line and param file) *** */
 
   /* options for all executables */
@@ -5142,6 +5147,14 @@ void read_mods_from_file(char* param_filename){
 
 void incrementNumMods() {
     num_mods++;
+}
+
+void resetMods() {
+  for (int i = 0; i < MAX_AA_MODS; i++) {
+    free_aa_mod(list_of_mods[i]);
+    list_of_mods[i] = new_aa_mod(i);
+  }
+  num_mods = 0;
 }
 
 // Secret functions used in testing
