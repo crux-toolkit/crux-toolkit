@@ -7,6 +7,7 @@ using namespace boost;
  * Returns an empty PMCDelimitedFileWriter object
  */
 PMCDelimitedFileWriter::PMCDelimitedFileWriter() : PSMWriter() {
+  write_html_ = false;
 }
 
 /**
@@ -148,8 +149,11 @@ void PMCDelimitedFileWriter::write(
     addColumnName(MATCHES_SPECTRUM_COL);
   }
 
-
-  writeHeader();
+  if (!write_html_) {
+    writeHeader();
+  } else {
+    writeHTMLHeader();
+  }
   (this->*this->PMCDelimitedFileWriter::write_function_)(collection);
 }
 
@@ -539,8 +543,17 @@ void PMCDelimitedFileWriter::writePSMs(
 //    setColumnCurrentRow(PROTEIN_ID_COL, peptide->getProteinIds()); // TODO: Figure out why this was changed ??? For percolator ???
     setColumnCurrentRow(PROTEIN_ID_COL, peptide->getProteinIdsLocations());
     setAndFree(FLANKING_AA_COL, peptide->getFlankingAAs());
+//    setColumnCurrentRow(ORIGINAL_TARGET_SEQUENCE_COL, peptide->getUnshuffledSequence());
 
-    writeRow();
+    if (!write_html_) {
+      writeRow();
+    } else {
+      writeHTMLRow();
+    }
+
+  }
+  if (write_html_) {
+      *file_ptr_ << "</table>" << endl;
   }
 }
 
@@ -603,4 +616,95 @@ void PMCDelimitedFileWriter::setAndFree(
   } else {
     carp(CARP_WARNING, "Cannot set value for column %d", column);
   }
+}
+
+/**
+  * Sets whether we should write our output in tab delimited or HTML format. Default = false (tab delimited)
+  */
+void PMCDelimitedFileWriter::setWriteHTML(bool write_html) {
+  write_html_ = write_html;
+};
+
+/**
+ * Writes the header in HTML format, this is used for HTMLWriter instead of
+ * DelimitedFileWriter's writeHeader()
+ */
+void PMCDelimitedFileWriter::writeHTMLHeader() {
+
+  num_columns_ = 0;
+  // set file position index for all columns being printed
+  for(unsigned int col_type = 0; col_type < NUMBER_MATCH_COLUMNS; col_type++){
+    if( match_to_print_[col_type] == true ){
+      match_indices_[col_type] = num_columns_++;
+    } else {
+      match_indices_[col_type] = -1;
+    }
+  }
+
+  // set all the names for which we have match_indices_
+  column_names_.assign(num_columns_, "");
+  for(unsigned int col_type = 0; col_type < NUMBER_MATCH_COLUMNS; col_type++){
+    if( match_indices_[col_type] > -1 ){
+      if (get_column_header(col_type) == NULL) {
+        carp(CARP_FATAL, "Error col type: %d doesn't exist!", col_type);
+      }
+      DelimitedFileWriter::setColumnName(get_column_header(col_type), 
+                                         match_indices_[col_type]);
+    }
+  }
+
+  if( column_names_.empty() ){
+    return;
+  }
+  
+  if( file_ptr_ == NULL || !file_ptr_->is_open() ){
+    carp(CARP_FATAL, "Cannot write to NULL delimited file.");
+  }
+  *file_ptr_ << "<table border=\"1\">" << "\t<tr>" << endl
+	     << "\t\t<td><b>" << column_names_[0] << "</b></td>" << endl;
+  for(size_t idx = 1; idx < column_names_.size(); idx++){
+    if( column_names_[idx].empty() ){
+//      *file_ptr_ << delimiter_ << "column_" << (idx+1); 
+    } else {
+//      *file_ptr_ << delimiter_ << column_names_[idx];
+      *file_ptr_ << "\t\t<td><b>" << column_names_[idx] << "</b></td>" << endl;
+    }
+
+  }
+  
+  *file_ptr_ << "\t</tr>" << endl;
+
+  // with a header, each line must be that length
+  current_row_.assign(column_names_.size(), "");
+}
+
+/**
+ * Writes a row in HTML format, this is used for HTMLWriter instead of
+ * DelimitedFileWriter's writeRow() 
+ */
+void PMCDelimitedFileWriter::writeHTMLRow() {
+  if( current_row_.empty() ){
+    return;
+  }
+
+  // make the row as long as the header
+  while( current_row_.size() < column_names_.size()){
+    current_row_.push_back("");
+  }
+  // TODO? warning if row is longer than non-empty header?
+
+  // print each value separated by delimiter
+  *file_ptr_ << "\t<tr>" << endl
+             << "\t\t<td>" << current_row_[0] << "</td>" << endl;
+  for(size_t idx = 1; idx < current_row_.size(); idx++){
+    *file_ptr_ << "\t\t<td>" << current_row_[idx] << "</td>" << endl;
+  }
+  // end with newline
+  *file_ptr_ << "\t</tr>" << endl;
+
+  // clear the current_row and refill with blanks
+  // if there is a header, that is the min length
+  // if not, each row can be a different length
+  current_row_.assign(column_names_.size(), "");
+
 }
