@@ -87,10 +87,15 @@ public:
     ProteinMatchCollection* collection ///< collection to be written
   );
 
-// private: [would it be okay to switch this to protected ? If not, will need to copy/paste all private
-// functions into HTMLWriter...
+  /**
+    * Sets whether we should write our output in tab delimited or HTML format. Default = false (tab delimited)
+    */
+  void setWriteHTML(bool write_html);
 
-protected:
+private:
+
+  bool write_html_; // this determines whether we want to write in html format. Default value = false;
+
   // function pointer to the appropriate writing function for the current file type
   void (PMCDelimitedFileWriter::*write_function_)(ProteinMatchCollection*);
 
@@ -184,6 +189,18 @@ protected:
     MATCH_COLUMNS_T column, ///< column to add the char* to
     char* value ///< char* to set the column value to
   );
+
+  /**
+   * Writes the header in HTML format, this is used for HTMLWriter instead of
+   * DelimitedFileWriter's writeHeader()
+   */
+  void writeHTMLHeader();
+
+  /**
+   * Writes a row in HTML format, this is used for HTMLWriter instead of
+   * DelimitedFileWriter's writeRow() 
+   */
+  void writeHTMLRow();
 
 };
 

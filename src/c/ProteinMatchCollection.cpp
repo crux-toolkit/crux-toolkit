@@ -17,6 +17,7 @@ using namespace Crux;
  * \returns a blank ProteinMatchCollection
  */
 ProteinMatchCollection::ProteinMatchCollection() {
+  distinct_matches_ = true;
 }
 
 /**
@@ -26,7 +27,7 @@ ProteinMatchCollection::ProteinMatchCollection() {
 ProteinMatchCollection::ProteinMatchCollection(
   MatchCollection* match_collection ///< matches to add
   ) {
-  
+  distinct_matches_ = true;
   addMatches(match_collection);
 
 }
