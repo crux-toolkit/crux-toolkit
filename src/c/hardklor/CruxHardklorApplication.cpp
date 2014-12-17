@@ -3,6 +3,7 @@
  * \brief Runs hardklor
  *****************************************************************************/
 #include "CruxHardklorApplication.h"
+#include "CarpStreamBuf.h"
 #include "DelimitedFileWriter.h"
 
 using namespace std;
@@ -230,8 +231,16 @@ int CruxHardklorApplication::main(
     carp(CARP_DEBUG, "hk_argv[%d]=%s", idx, hk_argv[idx]);
   }
 
+  // Re-route stream to log file
+  CarpStreamBuf buffer;
+  streambuf* old = cout.rdbuf();
+  cout.rdbuf(&buffer);
+
   /* Call hardklorMain */
   int ret = hardklorMain(hk_argc, hk_argv);
+
+  // Recover stream
+  cout.rdbuf(old);
 
   delete []hk_argv;
 
