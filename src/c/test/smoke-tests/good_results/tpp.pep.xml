@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href=""?>
-<msms_pipeline_analysis date="Thu Dec  4 12:33:06 2014
+<msms_pipeline_analysis date="Fri Dec 19 12:27:08 2014
 " xmlns="http://regis-web.systemsbiology.net/pepXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://regis-web.systemsbiology.net/pepXML /usr/local/tpp/schema/pepXML_v110.xsd" summary_xml="">
-<msms_run_summary base_name="/net/maccoss/vol1/home/kaipot/svn/cruxrel/src/c/test/smoke-tests/test" msManufacturer="NA" msModel="NA" msIonization="NA" msAnalyzer="NA" msDectector="NA" raw_data_type="NA" raw_data="NA" >
+<msms_run_summary base_name="/net/noble/vol1/home/cegrant/crux-clean/build/src/c/test/smoke-tests/test" msManufacturer="NA" msModel="NA" msIonization="NA" msAnalyzer="NA" msDectector="NA" raw_data_type="NA" raw_data="NA" >
 <sample_enzyme name="trypsin">
 </sample_enzyme>
-<search_summary base_name="/net/maccoss/vol1/home/kaipot/svn/cruxrel/src/c/test/smoke-tests/test" search_engine="Crux" precursor_mass_type="average" fragment_mass_type="monoisotopic" out_data_type="NA" out_data="NA" search_id="1" >
-<search_database local_path="/net/maccoss/vol1/home/kaipot/svn/cruxrel/src/c/test/smoke-tests/small-yeast.fasta" type="AA" />
+<search_summary base_name="/net/noble/vol1/home/cegrant/crux-clean/build/src/c/test/smoke-tests/test" search_engine="Crux" precursor_mass_type="average" fragment_mass_type="monoisotopic" out_data_type="NA" out_data="NA" search_id="1" >
+<search_database local_path="/net/noble/vol1/home/cegrant/crux-clean/build/src/c/test/smoke-tests/small-yeast.fasta" type="AA" />
 <enzymatic_search_constraint enzyme="trypsin" max_num_internal_cleavages="0" min_number_termini="2"/>
 <aminoacid_modification aminoacid="C" mass="217.181727" massdiff="57.021464" variable="N" />
 <aminoacid_modification aminoacid="S" mass="166.978210" massdiff="79.900002" variable="Y" />
@@ -240,6 +240,7 @@
 <parameter name="gamma" value="0.000000"/>
 <parameter name="cmod-fixed" value="NO MODS"/>
 <parameter name="cterm-protein-mods-spec" value=""/>
+<parameter name="max-precursor-charge" value="5"/>
 <parameter name="num_results" value="50"/>
 <parameter name="use-neutral-loss-peaks" value="false"/>
 <parameter name="num_threads" value="0"/>
