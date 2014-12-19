@@ -5,7 +5,7 @@ cmake_policy(VERSION 2.8.1)
 
 include_directories(${CMAKE_SOURCE_DIR}/src/c)
 include_directories(${CMAKE_SOURCE_DIR}/src/c/hardklor)
-include_directories(${CMAKE_BINARY_DIR}/src/external/build/src/ProteoWizard/libraries/boost_1_43_0)
+include_directories(${CMAKE_BINARY_DIR}/src/external/build/src/ProteoWizard/libraries/boost_1_56_0)
 include_directories(${CMAKE_BINARY_DIR}/src/external/build/src/ProteoWizard/libraries/boost_aux)
 include_directories(${CMAKE_BINARY_DIR}/src/external/include)
 include_directories(${CMAKE_BINARY_DIR}/src/external/include/MSToolkit)
