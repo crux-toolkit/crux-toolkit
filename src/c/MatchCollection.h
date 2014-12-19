@@ -47,15 +47,13 @@
 using namespace std;
 
 static const int _PSM_SAMPLE_SIZE = 500;
-static const int _MAX_NUMBER_PEPTIDES = 10000000;
 ///< max number of peptides a single match collection can hold
 
 
 class MatchCollection {
  friend class MatchIterator;
  protected:
-  Crux::Match* match_[_MAX_NUMBER_PEPTIDES]; ///< array of match object
-  int match_total_;      ///< size of match array, may vary w/truncation
+  std::vector<Crux::Match*> match_; ///< array of match object
   int experiment_size_;  ///< total matches before any truncation
   int target_experiment_size_; ///< total target matches for same spectrum
   SpectrumZState zstate_; ///< zstate of the associated spectrum
@@ -91,8 +89,7 @@ class MatchCollection {
   Crux::Match* sample_matches_[_PSM_SAMPLE_SIZE];
   int num_samples_;  // the number of items in the above array
   // ...with this
-  FLOAT_T xcorrs_[_MAX_NUMBER_PEPTIDES]; ///< xcorrs to be used for weibull
-  int num_xcorrs_;
+  vector<FLOAT_T> xcorrs_; ///< xcorrs to be used for weibull
 
   // The following features (post_*) are only valid when
   // post_process_collection boolean is true 
@@ -116,19 +113,6 @@ class MatchCollection {
     Crux::Spectrum* spectrum,
     int charge,
     bool store_scores
-    );
-
-  void storeNewXcorrs(
-    int start_index,
-    bool keep_matches
-    );
-
-  void collapseRedundantMatches();
-
-  void consolidateMatches(
-    Crux::Match** matches, 
-    int start_idx, 
-    int end_idx
     );
 
   void updateProteinCounters(
@@ -265,39 +249,6 @@ class MatchCollection {
     Database* database, ///< the database holding the peptides -in
     MatchFileReader& result_file,   ///< the result file to parse PSMs -in
     Database* decoy_database = NULL ///< optional database with decoy peptides
-    );
-
-  /**
-   * Samples count_max matches randomly from the match_collection
-   */
-  MatchCollection* randomSample(
-    int count_max ///< the number of matches to randomly select -in
-    );
-
-  /**
-   * This function is a transformation of the partial derivatives of
-   * the log likelihood of the data given an extreme value distribution
-   * with location parameter mu and scale parameter 1/L. The transformation 
-   * has eliminated the explicit dependence on the location parameter, mu, 
-   * leaving only the scale parameter, 1/L.
-   *
-   * The zero crossing of this function will correspond to the maximum of the 
-   * log likelihood for the data.
-   *
-   * See equations 10 and 11 of "Maximum Likelihood fitting of extreme value 
-   * distributions".
-   *
-   * The parameter values contains a list of the data values.
-   * The parameter L is the reciprocal of the scale parameters.
-   *
-   *\returns the final exponential values of the score and sets the value of the function and its derivative.
-   */
-  void constraintFunction(
-    SCORER_TYPE_T score_type, ///< score_type to estimate EVD distribution -in
-    FLOAT_T l_value,  ///< L value -in
-    FLOAT_T* function,  ///< the output function value -out
-    FLOAT_T* derivative,  ///< the output derivative value -out
-    FLOAT_T* exponential_sum ///< the final exponential array sum -out
     );
 
   /**

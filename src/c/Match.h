@@ -546,6 +546,11 @@ void qsortMatch(
   int (*compare_method)(const void*, const void*) ///< the compare method to use -in
   );
 
+void qsortMatch(
+  std::vector<Crux::Match*>& matches,
+  int (*compare_method)(const void*, const void*)
+  );
+
 /**
  * compare two matches, used for qsort
  * \returns the difference between sp score in match_a and match_b

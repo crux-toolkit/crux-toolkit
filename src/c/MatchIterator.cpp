@@ -41,7 +41,7 @@ MatchIterator::MatchIterator(
   // set items
   match_collection_ = match_collection;
   match_idx_ = 0;
-  match_total_ = match_collection->match_total_;
+  match_total_ = match_collection->match_.size();
 
 
 
@@ -87,7 +87,7 @@ MatchIterator::MatchIterator(
   match_collection_ = match_collection;
   match_mode_ = score_type;
   match_idx_ = 0;
-  match_total_ = match_collection->match_total_;
+  match_total_ = match_collection->match_.size();
 
   // only sort if requested and match collection is not already sorted
   if(sort_match){
