@@ -1,13 +1,13 @@
-INFO: CPU: tyrosine.gs.washington.edu
-INFO: Thu Dec  4 12:35:21 PST 2014
+INFO: CPU: proline.gs.washington.edu
+INFO: Fri Dec 19 12:34:43 PST 2014
 COMMAND LINE: crux sequest-search --output-dir ss --fileroot no-decoys --parameter-file params/no-decoys-ss demo.ms2 small-yeast-index
 INFO: Preparing protein index small-yeast-index
 INFO: Reading in ms2 file demo.ms2
 INFO: Created 1 peptide mods, keeping 1 with 255 or fewer aa mods
 INFO: Searching spectrum 96 (2+), search 100
-INFO: Elapsed time: 1.45 s
+INFO: Elapsed time: 4.1 s
 INFO: Finished crux sequest-search
-INFO: Elapsed time: 1.46 s
+INFO: Elapsed time: 4.1 s
 INFO: Finished crux sequest-search.
 INFO: Return Code:0
 # comet_version 2014.01 rev. 0
@@ -859,6 +859,11 @@ cmod-fixed=NO MODS
 # Available for tide-index
 cterm-protein-mods-spec=
 
+# Set the maximum charge state to look for when analyzing a spectrum.
+# Default=5.
+#  Available for tide-search.
+max-precursor-charge=5
+
 # Controls whether neutral loss ions are considered in the search. Two
 # types of neutral losses are included and are applied only to singly
 # charged b- and y-ions: loss of ammonia (NH3, 17.0086343 Da) and H2O
@@ -1495,7 +1500,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Thu Dec  4 12:35:21 2014
+H	StartTime	Fri Dec 19 12:34:44 2014
 H	EndTime                               
 H	Database	small-yeast-index/small-yeast-binary-fasta
 H	DBSeqLength	?
