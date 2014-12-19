@@ -464,7 +464,7 @@ void TideSearchApplication::search(
       const int maxDeltaMass = aaMass[nAA - 1];
 
       int maxPrecurMass = floor(MaxBin::Global().CacheBinEnd() + 50.0); // TODO works, but is this the best way to get?
-      int nCandPeptide = active_peptide_queue->SetActiveRangeBIons(min_mass, max_mass, max_range, min_range);
+      int nCandPeptide = active_peptide_queue->SetActiveRangeBIons(min_mass, max_mass, min_range, max_range);
       TideMatchSet::Arr match_arr(nCandPeptide); // scored peptides will go here.
   
       // iterators needed at multiple places in following code
