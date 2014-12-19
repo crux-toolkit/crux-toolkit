@@ -65,8 +65,11 @@ protected:
     const SpectrumCollection::SpecCharge& sc,
     WINDOW_TYPE_T window_type,
     double precursor_window,
+    int max_charge,
     double* out_min,
-    double* out_max
+    double* out_max,
+    double* min_range,
+    double* max_range
   );
 
   struct ScSortByMz {
@@ -80,7 +83,7 @@ protected:
   };
   double bin_width_;
   double bin_offset_;
-
+  
 public:
 
   bool exact_pval_search_;
