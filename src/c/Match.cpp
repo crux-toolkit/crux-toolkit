@@ -1102,6 +1102,15 @@ void qsortMatch(
   qsort(match_array, match_total, sizeof(Match*), compare_method);
 }
 
+void qsortMatch(
+  vector<Crux::Match*>& matches,
+  int (*compare_method)(const void*, const void*)
+  )
+{
+  if (!matches.empty()) {
+    qsortMatch(&matches[0], matches.size(), compare_method);
+  }
+}
 
 /*******************************************
  * match post_process extension

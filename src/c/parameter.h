@@ -35,6 +35,7 @@ static const int PARAMETER_LENGTH = 1024;
 ///< maximum length of parameter name and value in characters
 static const int NUM_PARAMS = 512; ///< maximum number of parameters allowed
 static const int MAX_LINE_LENGTH = 4096; ///< maximum line length in the parameter file
+static const int MILLION = 1000000;
 static const int BILLION = 1000000000;
 static const int SMALL_BUFFER = 256;
 static const int MAX_SET_PARAMS = 256;
