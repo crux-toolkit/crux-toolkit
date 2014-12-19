@@ -1195,6 +1195,12 @@ void initialize_parameters(void){
     "Available for tide-search.",
     "true"
   );
+  set_int_parameter("max-precursor-charge", 5, 1, BILLION,
+    "Set the maximum charge state to look for when analyzing a spectrum. "
+    "Default=5.",
+	" Available for tide-search.",
+	"true"
+  );
   /*
    * Comet parameters
    */

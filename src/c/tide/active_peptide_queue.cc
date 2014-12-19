@@ -51,11 +51,16 @@ void ActivePeptideQueue::ComputeTheoreticalPeaksBack() {
                                    compiler_prog1_, compiler_prog2_);
 }
 
-int ActivePeptideQueue::SetActiveRange(double min_mass, double max_mass) {
+int ActivePeptideQueue::SetActiveRange(double min_mass, double max_mass, double min_range, double max_range) {
+  //min_range and max_range have been introduced to fix a bug 
+  //introduced by m/z selection. see #222 in sourceforge
+  //this has to be true:
+  // min_range <= min_mass <= max_mass <= max_range
+
   // queue front() is lightest; back() is heaviest
   
-  // delete anything already loaded that falls below min_mass
-  while (!queue_.empty() && queue_.front()->Mass() < min_mass) {
+  // delete anything already loaded that falls below min_range
+  while (!queue_.empty() && queue_.front()->Mass() < min_range) {
     Peptide* peptide = queue_.front();
     // would delete peptide's underlying pb::Peptide;
     queue_.pop_front();
@@ -77,24 +82,24 @@ int ActivePeptideQueue::SetActiveRange(double min_mass, double max_mass) {
   }
   
   // Enqueue all peptides that are not yet queued but are lighter than
-  // max_mass. For each new enqueued peptide compute the corresponding
+  // max_rangw. For each new enqueued peptide compute the corresponding
   // theoretical peaks. Data associated with each peptide is allocated by
   // fifo_alloc_peptides_.
   bool done = false;
-  if (queue_.empty() || queue_.back()->Mass() <= max_mass) {
+  if (queue_.empty() || queue_.back()->Mass() <= max_range) {
     if (!queue_.empty())
       ComputeTheoreticalPeaksBack();
     while (!(done = reader_->Done())) {
-      // read all peptides lighter than max_mass
+      // read all peptides lighter than max_range
       reader_->Read(&current_pb_peptide_);
-      if (current_pb_peptide_.mass() < min_mass) {
+      if (current_pb_peptide_.mass() < min_range) {
         // we would delete current_pb_peptide_;
-        continue; // skip peptides that fall below min_mass
+        continue; // skip peptides that fall below min_range
       }
       Peptide* peptide = new(&fifo_alloc_peptides_)
         Peptide(current_pb_peptide_, proteins_, &fifo_alloc_peptides_);
       queue_.push_back(peptide);
-      if (peptide->Mass() > max_mass)
+      if (peptide->Mass() > max_range)
         break;
       ComputeTheoreticalPeaksBack();
     }
@@ -105,18 +110,29 @@ int ActivePeptideQueue::SetActiveRange(double min_mass, double max_mass) {
   
   // Set up iterator for use with HasNext(),
   // GetPeptide(), and NextPeptide(). Return the number of enqueued peptides.
-  iter_ = queue_.begin();
-  end_ = queue_.end();
   if (queue_.empty())
     return 0;
 
-  int active = queue_.size();
+  iter_ = queue_.begin();
+  while ((*iter_)->Mass() < min_mass && iter_ != queue_.end()){
+    ++iter_;
+  }
+
+  end_ = iter_;
+  int active = 0;
+  active_targets_ = active_decoys_ = 0;
+  while ((*end_)->Mass() < max_mass && end_ != queue_.end()){
+    ++end_;
+    ++active;
+  }
+  if (active == 0)
+	return 0;
+	
   if (!done) {
     --end_;
     --active;
   }
   // Count active targets and decoys
-  active_targets_ = active_decoys_ = 0;
   for (deque<Peptide*>::const_iterator i = iter_; i != end_; ++i) {
     if (!(*i)->IsDecoy()) {
       ++active_targets_;
@@ -125,13 +141,6 @@ int ActivePeptideQueue::SetActiveRange(double min_mass, double max_mass) {
     }
   }
   return active;
-
-  /*
-  cerr << (end_ - iter_) << " candidates.";
-  if (end_ != iter_)
-    cerr << " Range: (" << (*iter_)->PB()->id() << ", " << (*end_)->PB()->id() << ")";
-  cerr << endl;
-  */
 }
 
 // Compute the b ion only theoretical peaks of the peptide in the "back" of the queue
@@ -143,11 +152,11 @@ void ActivePeptideQueue::ComputeBTheoreticalPeaksBack() {
   b_ion_queue_.push_back(theoretical_b_peak_set_);
 }
 
-int ActivePeptideQueue::SetActiveRangeBIons(double min_mass, double max_mass) {
+int ActivePeptideQueue::SetActiveRangeBIons(double min_mass, double max_mass, double min_range, double max_range) {
   // queue front() is lightest; back() is heaviest
   
-  // delete anything already loaded that falls below min_mass
-  while (!queue_.empty() && queue_.front()->Mass() < min_mass) {
+  // delete anything already loaded that falls below min_range
+  while (!queue_.empty() && queue_.front()->Mass() < min_range) {
     Peptide* peptide = queue_.front();
     // would delete peptide's underlying pb::Peptide;
     queue_.pop_front();
@@ -166,41 +175,51 @@ int ActivePeptideQueue::SetActiveRangeBIons(double min_mass, double max_mass) {
   // theoretical peaks. Data associated with each peptide is allocated by
   // fifo_alloc_peptides_.
   bool done;
-  if (queue_.empty() || queue_.back()->Mass() <= max_mass) {
+  if (queue_.empty() || queue_.back()->Mass() <= max_range) {
     while (!(done = reader_->Done())) {
       // read all peptides lighter than max_mass
       reader_->Read(&current_pb_peptide_);
-      if (current_pb_peptide_.mass() < min_mass) {
+      if (current_pb_peptide_.mass() < min_range) {
         // we would delete current_pb_peptide_;
-        continue; // skip peptides that fall below min_mass
+        continue; // skip peptides that fall below min_range
       }
       Peptide* peptide = new(&fifo_alloc_peptides_)
         Peptide(current_pb_peptide_, proteins_, &fifo_alloc_peptides_);
       queue_.push_back(peptide);
       ComputeBTheoreticalPeaksBack();
-      if (peptide->Mass() > max_mass)
+      if (peptide->Mass() > max_range)
         break;
     }
   }
   // by now, if not EOF, then the last (and only the last) enqueued
   // peptide is too heavy
   assert(!queue_.empty() || done);
-  
-  // Set up iterators for use with b_ion_queue_
-  iter1_ = b_ion_queue_.begin();
-  end1_ = b_ion_queue_.end();
-  --end1_;
 
-  // Set up iterator for use with HasNext(),
-  // GetPeptide(), and NextPeptide(). Return the number of enqueued peptides.
+  iter1_ = b_ion_queue_.begin();
   iter_ = queue_.begin();
-  end_ = queue_.end();
-  if (queue_.empty())
-    return 0;
-  --end_;
+  while ((*iter_)->Mass() < min_mass && iter_ != queue_.end()){
+    ++iter_;
+	++iter1_;
+  }
+
+  end_ = iter_;
+  end1_ = iter1_;
+  int active = 0;
+  active_targets_ = active_decoys_ = 0;
+  while ((*end_)->Mass() < max_mass && end_ != queue_.end()){
+    ++end_;
+	++end1_;
+    ++active;
+  }
+  if (active == 0)
+	return 0;
+
+  if (!done) {  
+    --end1_;
+    --end_;
+  }
 
   // Count active targets and decoys
-  active_targets_ = active_decoys_ = 0;
   for (deque<Peptide*>::const_iterator i = iter_; i != end_; ++i) {
     if (!(*i)->IsDecoy()) {
       ++active_targets_;
@@ -208,18 +227,9 @@ int ActivePeptideQueue::SetActiveRangeBIons(double min_mass, double max_mass) {
       ++active_decoys_;
     }
   }
-
-  int active = queue_.size();
-  --active;
   return active;
-
-  /*
-  cerr << (end_ - iter_) << " candidates.";
-  if (end_ != iter_)
-    cerr << " Range: (" << (*iter_)->PB()->id() << ", " << (*end_)->PB()->id() << ")";
-  cerr << endl;
-  */
 }
+
 
 int ActivePeptideQueue::CountAAFrequency(
   double binWidth,

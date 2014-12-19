@@ -52,6 +52,7 @@ int TideSearchApplication::main(int argc, char** argv) {
     "use-flanking-peaks",
     "mz-bin-width",
     "mz-bin-offset",
+    "max-precursor-charge",	
     "verbosity"
   };
   int num_options = sizeof(option_list) / sizeof(char*);
@@ -394,6 +395,7 @@ void TideSearchApplication::search(
   ObservedPeakSet observed(bin_width_, bin_offset_,
   get_boolean_parameter("use-neutral-loss-peaks"), 
   get_boolean_parameter("use-flanking-peaks"));
+  int max_charge = get_int_parameter("max-precursor-charge");    
 
   // cycle through spectrum-charge pairs, sorted by neutral mass
   unsigned sc_index = 0;
@@ -410,21 +412,21 @@ void TideSearchApplication::search(
     if (precursor_mz < spectrum_min_mz || precursor_mz > spectrum_max_mz ||
         scan_num < min_scan || scan_num > max_scan ||
         spectrum->Size() < min_peaks ||
-        (search_charge != 0 && charge != search_charge)) {
+        (search_charge != 0 && charge != search_charge) || charge > max_charge) {
       continue;
     }
 
     // The active peptide queue holds the candidate peptides for spectrum.
     // Calculate and set the window, depending on the window type.
-    double min_mass, max_mass;
-    computeWindow(*sc, window_type, precursor_window, &min_mass, &max_mass);
+    double min_mass, max_mass, min_range, max_range;
+    computeWindow(*sc, window_type, precursor_window, max_charge, &min_mass, &max_mass, &min_range, &max_range);
     if (!exact_pval_search_) {  //execute original tide-search program
 
       // Normalize the observed spectrum and compute the cache of
       // frequently-needed values for taking dot products with theoretical
       // spectra.
       observed.PreprocessSpectrum(*spectrum, charge);
-      int nCandPeptide = active_peptide_queue->SetActiveRange(min_mass, max_mass);
+      int nCandPeptide = active_peptide_queue->SetActiveRange(min_mass, max_mass, min_range, max_range);
       TideMatchSet::Arr2 match_arr2(nCandPeptide); // Scored peptides will go here.
 
       // Programs for taking the dot-product with the observed spectrum are laid
@@ -462,7 +464,7 @@ void TideSearchApplication::search(
       const int maxDeltaMass = aaMass[nAA - 1];
 
       int maxPrecurMass = floor(MaxBin::Global().CacheBinEnd() + 50.0); // TODO works, but is this the best way to get?
-      int nCandPeptide = active_peptide_queue->SetActiveRangeBIons(min_mass, max_mass);
+      int nCandPeptide = active_peptide_queue->SetActiveRangeBIons(min_mass, max_mass, max_range, min_range);
       TideMatchSet::Arr match_arr(nCandPeptide); // scored peptides will go here.
   
       // iterators needed at multiple places in following code
@@ -700,25 +702,34 @@ void TideSearchApplication::computeWindow(
   const SpectrumCollection::SpecCharge& sc,
   WINDOW_TYPE_T window_type,
   double precursor_window,
+  int max_charge,
   double* out_min,
-  double* out_max
+  double* out_max,
+  double* min_range,
+  double* max_range
 ) {
   switch (window_type) {
   case WINDOW_MASS:
     *out_min = sc.neutral_mass - precursor_window;
     *out_max = sc.neutral_mass + precursor_window;
+    *min_range = *out_min;
+    *max_range = *out_max;
     break;
   case WINDOW_MZ: {
     double mz_minus_proton = sc.spectrum->PrecursorMZ() - MASS_PROTON;
     *out_min = (mz_minus_proton - precursor_window) * sc.charge;
     *out_max = (mz_minus_proton + precursor_window) * sc.charge;
+    *min_range = mz_minus_proton*sc.charge - precursor_window*max_charge;
+    *max_range = mz_minus_proton*sc.charge + precursor_window*max_charge;
     break;
     }
   case WINDOW_PPM: {
     double tiny_precursor = precursor_window * 1e-6;
     *out_min = sc.neutral_mass * (1.0 - tiny_precursor);
     *out_max = sc.neutral_mass * (1.0 + tiny_precursor);
-    break;
+    *min_range = *out_min;
+    *max_range = *out_max;
+   break;
     }
   default:
     carp(CARP_FATAL, "Invalid window type");

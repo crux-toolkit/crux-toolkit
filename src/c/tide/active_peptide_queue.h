@@ -29,9 +29,9 @@ class ActivePeptideQueue {
 
   ~ActivePeptideQueue();
 
-  // See above for usage and .cc for implmentation details.
-  int SetActiveRange(double min_mass, double max_mass);
-  int SetActiveRangeBIons(double min_mass, double max_mass);
+  // See above for usage and .cc for implementation details.
+  int SetActiveRange(double min_mass, double max_mass, double min_range, double max_range);
+  int SetActiveRangeBIons(double min_mass, double max_mass, double min_range, double max_range);
 
   bool HasNext() const { return iter_ != end_; }
   Peptide* NextPeptide() { return *iter_++; }
