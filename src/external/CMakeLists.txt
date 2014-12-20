@@ -40,7 +40,7 @@ if (WIN32 AND NOT CYGWIN)
   else (USE_LATEST_PWIZ)
     ExternalProject_Add(
       ProteoWizard
-      URL http://cruxtoolkit.sourceforge.net/download/crux-2.1/pwiz-src-3_0_6736.tar.bz2
+      URL http://cruxtoolkit.sourceforge.net/download/pwiz-src-3_0_7010.tar.bz2
       PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
       CONFIGURE_COMMAND ""
       BUILD_COMMAND 
@@ -90,7 +90,7 @@ else (WIN32 AND NOT CYGWIN)
   else (USE_LATEST_PWIZ)
     ExternalProject_Add(
       ProteoWizard
-      URL http://cruxtoolkit.sourceforge.net/download/crux-2.1/pwiz-src-3_0_6736.tar.bz2
+      URL http://cruxtoolkit.sourceforge.net/download/pwiz-src-3_0_7010.tar.bz2
       PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
       CONFIGURE_COMMAND ""
       BUILD_COMMAND 
