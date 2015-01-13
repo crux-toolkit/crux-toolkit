@@ -695,7 +695,7 @@ spectrum records file=__NULL_STR
 # Available for crux bullseye
 gap-tolerance=1
 
-# Type of instrument (fticr|orbi|tof|qit) on which the data was
+# Type of instrument (fticr|orbitrap|tof|qit) on which the data was
 # collected. Used in conjuction with --resolution. The default is fticr.
 # Available for crux hardklor
 instrument=fticr
@@ -856,6 +856,11 @@ cmod-fixed=NO MODS
 # modification sequences of the form: ,...
 # Available for tide-index
 cterm-protein-mods-spec=
+
+# Set the maximum charge state to look for when analyzing a spectrum.
+# Default=5.
+#  Available for tide-search.
+max-precursor-charge=5
 
 # Controls whether neutral loss ions are considered in the search. Two
 # types of neutral losses are included and are applied only to singly

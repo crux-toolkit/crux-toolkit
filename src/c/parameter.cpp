@@ -2193,7 +2193,7 @@ void initialize_parameters(void){
     "true");
 
   set_string_parameter("instrument", "fticr",
-    "Type of instrument (fticr|orbi|tof|qit) on which the data was "
+    "Type of instrument (fticr|orbitrap|tof|qit) on which the data was "
     "collected. Used in conjuction with --resolution. The default is fticr.",
     "Available for crux hardklor",
     "true");
