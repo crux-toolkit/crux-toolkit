@@ -30,12 +30,18 @@
 #include "theoretical_peak_pair.h"
 #include "fifo_alloc.h"
 #include "mod_coder.h"
+#include "sp_scorer.h"
+
+#include "spectrum_collection.h"
+//#include "TideMatchSet.h"
 
 using namespace std;
 
 class FifoAllocator;
 class TheoreticalPeakSet;
 class TheoreticalPeakSetBIons;
+class SpScorer;
+
 
 // This is the TheoreticalPeakSet we are using at search time.  We may use a
 // different subclass  of TheoreticalPeakSet in a final version, pending more
@@ -85,6 +91,56 @@ class Peptide {
         mods_[i] = ModCoder::Mod(peptide.modifications(i));
     }
   }
+  class spectrum_matches {
+  public:
+      spectrum_matches(Spectrum* spectrum, double score1, double score2,
+          int score3, int charge){
+          spectrum_ = spectrum;
+          score1_ = score1;
+          score2_ = score2;
+          score3_ = score3;
+          charge_ = charge;
+          d_cn_ = 0.0;
+          elution_score_ = 0.0;
+      }
+      spectrum_matches(){
+          spectrum_ = NULL;
+          score1_ = 0.0;
+          score2_ = 0.0;
+          score3_ = 0.0;
+          charge_ = 0;
+          d_cn_ = 0.0;
+          elution_score_ = 0.0;
+      }
+      Spectrum* spectrum_;
+      double score1_;
+      double score2_;
+      int score3_;
+      int charge_;
+      double d_cn_;
+      double elution_score_;
+      SpScorer::SpScoreData spData_;
+
+      static bool compPV(const spectrum_matches &a, const spectrum_matches &b) {
+          return a.score1_ < b.score1_;
+      }
+      static bool compSC(const spectrum_matches &a, const spectrum_matches &b) {
+          return a.score1_ > b.score1_;
+      }
+      static bool compRT(const spectrum_matches &a, const spectrum_matches &b) {
+        return a.spectrum_->RTime() < b.spectrum_->RTime();
+      }
+      static bool compES(const spectrum_matches &a, const spectrum_matches &b) {
+        return a.elution_score_ < b.elution_score_;
+      }
+  };
+  vector<spectrum_matches> spectrum_matches_array;
+  void AddHit(Spectrum* spectrum, double score1, double score2,
+          int score3, int charge){
+
+    spectrum_matches_array.push_back(spectrum_matches(spectrum,
+                                     score1, score2, score3, charge));
+  }
 
   // CAUTION: We do NOT expect this destructor to get called when FIFO 
   // allocation is used. It will get called only when normal system memory
@@ -116,7 +172,7 @@ class Peptide {
   // taking dot products.
   void ComputeTheoreticalPeaks(TheoreticalPeakSet* workspace) const;
   void ComputeTheoreticalPeaks(ST_TheoreticalPeakSet* workspace,
-			       const pb::Peptide& pb_peptide,
+                               const pb::Peptide& pb_peptide,
                                TheoreticalPeakCompiler* compiler_prog1,
                                TheoreticalPeakCompiler* compiler_prog2);
   void ComputeBTheoreticalPeaks(TheoreticalPeakSetBIons* workspace) const;
@@ -162,7 +218,7 @@ class Peptide {
   template<class W> void AddBIonsOnly(W* workspace) const;
 
   void Compile(const TheoreticalPeakArr* peaks,
-	       const pb::Peptide& pb_peptide,
+               const pb::Peptide& pb_peptide,
                TheoreticalPeakCompiler* compiler_prog1,
                TheoreticalPeakCompiler* compiler_prog2);
           

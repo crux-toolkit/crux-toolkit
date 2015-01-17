@@ -5,6 +5,7 @@
 
 #include <list>
 #include "sp_scorer.h"
+#include "peptide.h"
 
 SpScorer::SpScorer(const ProteinVec& proteins, const Spectrum& spectrum, 
                    int charge, double max_mz)

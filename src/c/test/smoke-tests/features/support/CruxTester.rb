@@ -65,6 +65,10 @@ class CruxTester
   def self.cmpUnordered(expected, actual)
 #    system("cp " + actual+ " " + expected);  #Comment these 2+2 lines to update output files with new
 #    return true;  
+    if not(File.exists?(expected)) && File.exists?(actual)
+      system("cp " + actual+ " " + expected);	
+      return true;
+    end 
     if File.directory?(expected) && File.directory?(actual)
       Dir.foreach(expected) do | dirent |
         next if dirent == "." or dirent == ".."

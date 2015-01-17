@@ -31,7 +31,7 @@ const double MassConstants::elts_avg[] = {
   30.973761,  // P
   32.065      // S
 };
-
+    
 double MassConstants::mono_table[256];
 double MassConstants::avg_table[256];
 //double* MassConstants::aa_mass_table = NULL;
@@ -42,6 +42,8 @@ const double MassConstants::mono_h2o = 2*MassConstants::elts_mono[0] + MassConst
 const double MassConstants::avg_h2o = 2*MassConstants::elts_avg[0] + MassConstants::elts_avg[3];
 const double MassConstants::mono_nh3 = 3*MassConstants::elts_mono[0] + MassConstants::elts_mono[2];
 const double MassConstants::mono_co = MassConstants::elts_mono[1] + MassConstants::elts_mono[3];
+const double MassConstants::mono_oh = MassConstants::elts_mono[0] + MassConstants::elts_mono[3];
+const double MassConstants::mono_h = MassConstants::elts_mono[0] ;
 const double MassConstants::A = 0 - 28.0;
 //const double MassConstants::B_H2O = 0 - MassConstants::mono_h2o;
 //const double MassConstants::B_NH3 = 0 - MassConstants::mono_nh3;

@@ -21,6 +21,7 @@
 #include "spectrum_collection.h"
 #include "spectrum_preprocess.h"
 #include "mass_constants.h"
+#include "max_mz.h"
 
 using namespace std;
 
@@ -58,7 +59,7 @@ static void SubtractBackground(double* observed, int end) {
 }
 
 void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum,
-					 int charge ) {
+                                       int charge ) {
 #ifdef DEBUG
   bool debug = (FLAGS_debug_spectrum_id == spectrum.SpectrumNumber()
                 && (FLAGS_debug_charge == 0 || FLAGS_debug_charge == charge));
@@ -84,19 +85,23 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum,
   double highest_intensity = 0;
   for (int i = 0; i < spectrum.Size(); ++i) {
     double peak_location = spectrum.M_Z(i);
-    if(peak_location >= experimental_mass_cut_off)
+    if (peak_location >= experimental_mass_cut_off) {
       continue;
+    }
 
     double intensity = spectrum.Intensity(i);
     int mz = MassConstants::mass2bin(peak_location);
-    if ((mz > largest_mz) && (intensity > 0))
+    if ((mz > largest_mz) && (intensity > 0)) {
       largest_mz = mz;
-
+    }
+    
     intensity = sqrt(intensity);
-    if (intensity > highest_intensity)
+    if (intensity > highest_intensity) {
       highest_intensity = intensity;
-    if (intensity > peaks_[mz])
+    }
+    if (intensity > peaks_[mz]) {
       peaks_[mz] = intensity;
+    }
   }
 
   double intensity_cutoff = highest_intensity * 0.05;
@@ -126,17 +131,6 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum,
     }
   }
 
-  // make sure highest mass peak(s) aren't ignored
-/*  if (highest_intensity > 0) {
-    for (int i = NUM_SPECTRUM_REGIONS * region_size; i <= largest_mz; ++i) {
-      if (peaks_[i] > intensity_cutoff) {
-        peaks_[i] *= normalizer;
-      } else {
-        peaks_[i] = 0;
-      }
-    }
-  }
-*/
 #ifdef DEBUG
   if (debug) {
     cout << "GLOBAL MAX MZ: " << MaxMZ::Global().MaxBin() << ", " << MaxMZ::Global().BackgroundBinEnd()
@@ -148,6 +142,7 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum,
   }
 #endif
   SubtractBackground(peaks_, max_mz_.BackgroundBinEnd());
+
 #ifdef DEBUG
   if (debug)
     ShowPeaks();
@@ -181,8 +176,9 @@ void ObservedPeakSet::CreateEvidenceVector(
 #ifdef DEBUG
   bool debug = (FLAGS_debug_spectrum_id == spectrum.SpectrumNumber()
                 && (FLAGS_debug_charge == 0 || FLAGS_debug_charge == charge));
-  if (debug)
+  if (debug) {
     debug = true; // allows a breakpoint
+  }
 #endif
   // double experimental_mass_cut_off = (precursor_mz-proton)*charge+proton + 50;
   // double max_peak_mz = spectrum.M_Z(spectrum.Size()-1);
@@ -195,7 +191,6 @@ void ObservedPeakSet::CreateEvidenceVector(
   const int nRegion = NUM_SPECTRUM_REGIONS;
   const double maxIntensPerRegion = 50.0;
   const double precursorMZExclude = 15.0;
-  const int MAX_XCORR_OFFSET = 75;
   const double massNH3Mono = 17.02655;     // mass of NH3 (monoisotopic)
   const double massCOMono =  27.9949;      // mass of CO (monoisotopic)
   const double massH2OMono = 18.010564684; // mass of water (monoisotopic)
@@ -215,7 +210,7 @@ void ObservedPeakSet::CreateEvidenceVector(
   double ionMassNH3Loss;
   double ionMassCOLoss;
   double ionMassH2OLoss;
-	
+
   double* evidence = new double[maxPrecurMass];
   double* intensArrayObs = new double[maxPrecurMass];
   int* intensRegion = new int[maxPrecurMass];
@@ -292,9 +287,7 @@ void ObservedPeakSet::CreateEvidenceVector(
       maxIonIntens = ionIntens;
     }
   }
-  int regionSelector = (int)floor(
-    (int)floor(((double)maxIonMass / binWidth) + 1.0 - binOffset ) / (double)nRegion
-  );
+  int regionSelector = (int)floor(MassConstants::mass2bin(maxIonMass) / (double)nRegion);
   for (int ion = 0; ion < nIon; ion++) {
     double ionMass = spectrum.M_Z(ion);
     double ionIntens = spectrum.Intensity(ion);
@@ -304,7 +297,7 @@ void ObservedPeakSet::CreateEvidenceVector(
     if (ionMass > precurMz - precursorMZExclude && ionMass < precurMz + precursorMZExclude) {
       continue;
     }
-    ionBin = (int)floor((ionMass / binWidth) + 1.0 - binOffset);
+    ionBin = MassConstants::mass2bin(ionMass);
     int region = (int)floor((double)(ionBin) / (double)regionSelector);
     if (region >= nRegion) {
       region = nRegion - 1;
@@ -357,78 +350,60 @@ void ObservedPeakSet::CreateEvidenceVector(
     intensArrayObs[i] -= multiplier * (partial_sums[right_index] - partial_sums[left_index]);
   }
   delete [] partial_sums;
-  // *****
   
-  int binFirst = 30;
-  int binLast = (int)floor(pepMassMonoMean) - 47;
+  int binFirst = MassConstants::mass2bin(30);
+  int binLast = MassConstants::mass2bin(pepMassMonoMean - 47);
 
   for (ma = binFirst; ma <= binLast; ma++) {
     // b ion
-    bIonMass = ma * binWidth;
+    bIonMass = (ma-0.5+binOffset) * binWidth ;
     ionBin = (int)floor(bIonMass / binWidth + 1.0 - binOffset);
     evidence[ma] = evidence[ma] + intensArrayObs[ionBin] * BYHeight;
-    for (pc = 3; pc <= precurCharge; pc++) {
-      ionMZMultiCharge = (bIonMass + (pc - 2) * massHMono) / (pc - 1);
-      ionBin = (int)floor(ionMZMultiCharge / binWidth + 1.0 - binOffset);
-      evidence[ma] = evidence[ma] + intensArrayObs[ionBin] * BYHeight;
+    for (pc = 2; pc < precurCharge; pc++) {
+      evidence[ma] = evidence[ma] + intensArrayObs[MassConstants::mass2bin(bIonMass, pc)] * BYHeight;
     }
     // y ion
     yIonMass = pepMassMonoMean + 2 * massHMono - bIonMass;
-    ionBin = (int)floor(yIonMass / binWidth + 1.0 - binOffset);
+    ionBin = MassConstants::mass2bin(yIonMass);
     evidence[ma] = evidence[ma] + intensArrayObs[ionBin] * BYHeight;
-    for (pc = 3; pc <= precurCharge; pc++) {
-      ionMZMultiCharge = (yIonMass + (pc - 2) * massHMono) / (pc - 1);
-      ionBin = (int)floor(ionMZMultiCharge / binWidth + 1.0 - binOffset);
-      evidence[ma] = evidence[ma] + intensArrayObs[ionBin] * BYHeight;
+    for (pc = 2; pc < precurCharge; pc++) {
+      evidence[ma] = evidence[ma] + intensArrayObs[MassConstants::mass2bin(yIonMass, pc)] * BYHeight;
     }
     // NH3 loss from b ion
     ionMassNH3Loss = bIonMass - massNH3Mono;
-    ionBin = (int)floor(ionMassNH3Loss / binWidth + 1.0 - binOffset);
+    ionBin = MassConstants::mass2bin(ionMassNH3Loss);
     evidence[ma] = evidence[ma] + intensArrayObs[ionBin] * NH3LossHeight;
-    for (pc = 3; pc <= precurCharge; pc++) {
-      ionMZMultiCharge = (ionMassNH3Loss + (pc - 2) * massHMono) / (pc - 1);
-      ionBin = (int)floor(ionMZMultiCharge / binWidth + 1.0 - binOffset);
-      evidence[ma] = evidence[ma] + intensArrayObs[ionBin] * NH3LossHeight;
+    for (pc = 2; pc < precurCharge; pc++) {
+      evidence[ma] = evidence[ma] + intensArrayObs[MassConstants::mass2bin(ionMassNH3Loss, pc)] * NH3LossHeight;
     }
     // NH3 loss from y ion
     ionMassNH3Loss = yIonMass - massNH3Mono;
-    ionBin = (int)floor(ionMassNH3Loss / binWidth + 1.0 - binOffset);
+    ionBin = MassConstants::mass2bin(ionMassNH3Loss);//(int)floor(ionMassNH3Loss / binWidth + 1.0 - binOffset);
     evidence[ma] = evidence[ma] + intensArrayObs[ionBin] * NH3LossHeight;
-    for (pc = 3; pc <= precurCharge; pc++) {
-      ionMZMultiCharge = (ionMassNH3Loss + (pc - 2) * massHMono) / (pc - 1);
-      ionBin = (int)floor(ionMZMultiCharge / binWidth + 1.0 - binOffset);
-      evidence[ma] = evidence[ma] + intensArrayObs[ionBin] * NH3LossHeight;
+    for (pc = 2; pc < precurCharge; pc++) {
+      evidence[ma] = evidence[ma] + intensArrayObs[MassConstants::mass2bin(ionMassNH3Loss, pc)] * NH3LossHeight;
     }
     // CO and H2O loss from b ion
     ionMassCOLoss = bIonMass - massCOMono;
     ionMassH2OLoss = bIonMass - massH2OMono;
-    ionBin = (int)floor(ionMassCOLoss / binWidth + 1.0 - binOffset);
-    evidence[ma] = evidence[ma] + intensArrayObs[ionBin] * COLossHeight;
-    ionBin = (int)floor(ionMassH2OLoss / binWidth + 1.0 - binOffset);
-    evidence[ma] = evidence[ma] + intensArrayObs[ionBin] * H2OLossHeight;
-    for (pc = 3; pc <= precurCharge; pc++) {
-      ionMZMultiCharge = (ionMassCOLoss + (pc - 2) * massHMono) / (pc - 1);
-      ionBin = (int)floor(ionMZMultiCharge / binWidth + 1.0 - binOffset);
-      evidence[ma] = evidence[ma] + intensArrayObs[ionBin] * COLossHeight;
-      ionMZMultiCharge = (ionMassH2OLoss + (pc - 2) * massHMono) / (pc - 1);
-      ionBin = (int)floor(ionMZMultiCharge / binWidth + 1.0 - binOffset);
-      evidence[ma] = evidence[ma] + intensArrayObs[ionBin] * H2OLossHeight;
+    evidence[ma] = evidence[ma] + intensArrayObs[MassConstants::mass2bin(ionMassCOLoss)] * COLossHeight;
+    evidence[ma] = evidence[ma] + intensArrayObs[MassConstants::mass2bin(ionMassH2OLoss)] * H2OLossHeight;
+    for (pc = 2; pc < precurCharge; pc++) {
+      evidence[ma] = evidence[ma] + intensArrayObs[MassConstants::mass2bin(ionMassCOLoss, pc)] * COLossHeight;
+      evidence[ma] = evidence[ma] + intensArrayObs[MassConstants::mass2bin(ionMassH2OLoss, pc)] * H2OLossHeight;
     }
     // H2O loss from y ion
     ionMassH2OLoss = yIonMass - massH2OMono;
-    ionBin = (int)floor(ionMassH2OLoss / binWidth + 1.0 - binOffset);
-    evidence[ma] = evidence[ma] + intensArrayObs[ionBin] * H2OLossHeight;
-    for (pc = 3; pc <= precurCharge; pc++) {
-      ionMZMultiCharge = (ionMassH2OLoss + (pc - 2) * massHMono) / (pc - 1);
-      ionBin = (int)floor(ionMZMultiCharge / binWidth + 1.0 - binOffset);
-      evidence[ma] = evidence[ma] + intensArrayObs[ionBin] * H2OLossHeight;
+    evidence[ma] = evidence[ma] + intensArrayObs[MassConstants::mass2bin(ionMassH2OLoss)] * H2OLossHeight;
+    for (pc = 2; pc < precurCharge; pc++) {
+      evidence[ma] = evidence[ma] + intensArrayObs[MassConstants::mass2bin(ionMassH2OLoss, pc)] * H2OLossHeight;
     }
   }
+
   // discretize evidence array
   for (ma = 0; ma < maxPrecurMass; ma++) {
     evidenceInt[ma] = (int)floor(evidence[ma] / evidenceIntScale + 0.5);
   }
-  
   // clean up
   delete [] evidence;
   delete [] intensArrayObs;
@@ -482,50 +457,34 @@ void ObservedPeakSet::ComputeCache() {
     Peak(PrimaryPeak, i) = z+z;
   }
 
-  for (int i = max_mz_.BackgroundBinEnd() * NUM_PEAK_TYPES; i < cache_end_; ++i)
+  for (int i = max_mz_.BackgroundBinEnd() * NUM_PEAK_TYPES; i < cache_end_; ++i) {
     cache_[i] = 0;
+  }
 
   for (int i = 0; i < max_mz_.CacheBinEnd(); ++i) {
     int flanks = Peak(PrimaryPeak, i);
-	if ( FP_ == true) {
-		if (i > 0)
-		  flanks += Peak(FlankingPeak, i-1);
-		if (i < max_mz_.CacheBinEnd() - 1)
-		  flanks += Peak(FlankingPeak, i+1);
-	}
+    if ( FP_ == true) {
+        if (i > 0) {
+          flanks += Peak(FlankingPeak, i-1);
+        }
+        if (i < max_mz_.CacheBinEnd() - 1) {
+          flanks += Peak(FlankingPeak, i+1);
+        }
+    }
     int Y1 = flanks;
-	if ( NL_ == true) {
-		if (i > MassConstants::BIN_NH3)
-		  Y1 += Peak(LossPeak, i-MassConstants::BIN_NH3);
-		if (i > MassConstants::BIN_H2O)
-		  Y1 += Peak(LossPeak, i-MassConstants::BIN_H2O);
-	}
-	Peak(PeakCombinedY1, i) = Y1;
-
+    if ( NL_ == true) {
+        if (i > MassConstants::BIN_NH3) {
+          Y1 += Peak(LossPeak, i-MassConstants::BIN_NH3);
+        }
+        if (i > MassConstants::BIN_H2O) {
+          Y1 += Peak(LossPeak, i-MassConstants::BIN_H2O);
+        }
+    }
+    Peak(PeakCombinedY1, i) = Y1;
     int B1 = Y1;
-//    if (i > 27 && NL_ == true)
-//      B1 += Peak(LossPeak, i-28);
-	Peak(PeakCombinedB1, i) = B1;
-
-//    int Y2a = flanks;
-//    if (i > 8  && NL_ == true)
-//      Y2a += Peak(LossPeak, i-9);
+    Peak(PeakCombinedB1, i) = B1;
     Peak(PeakCombinedY2, i) = flanks;
-
-//    int Y2b = Y2a;
-//    if (i > 7  && NL_ == true)
-//      Y2b += Peak(LossPeak, i-8);
-//    Peak(PeakCombinedY2, i) = Y2b;
-
-//    int B2a = Y2a;
-//    if (i > 13  && NL_ == true)
-//      B2a += Peak(LossPeak, i-14);
     Peak(PeakCombinedB2, i) = flanks;
-
-//    int B2b = Y2b;
-//    if (i > 13  && NL_ == true)
-//      B2b += Peak(LossPeak, i-14);
-//    Peak(PeakCombinedB2b, i) = B2b;
   }
 }
 

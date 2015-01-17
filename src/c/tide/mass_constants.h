@@ -43,6 +43,8 @@ class MassConstants {
   static const double avg_h2o;
   static const double mono_nh3;
   static const double mono_co;
+  static const double mono_oh;
+  static const double mono_h;
   static const double A;
 //  static const double B_H2O;
 //  static const double B_NH3;
@@ -90,8 +92,11 @@ class MassConstants {
     mod_coder_.DecodeMod(code, aa_index, &unique_delta_index);
     *delta = unique_deltas_[unique_delta_index];
   }
-  static unsigned int mass2bin(double mass, double charge = 1){
+  static unsigned int mass2bin(double mass, int charge = 1){
     return (unsigned int)((mass + (charge - 1)*proton)/(charge*bin_width_) + 1.0 - bin_offset_);
+  }
+  static double bin2mass(int bin, int charge = 1){
+    return (bin - 1.0 + bin_offset_) * charge*bin_width_ + (charge - 1)*proton;
   }
 
   static double bin_width_;

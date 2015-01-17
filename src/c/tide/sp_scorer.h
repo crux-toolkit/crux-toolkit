@@ -33,8 +33,10 @@
 #define SP_SCORER_H
 
 #include <vector>
-#include "peptide.h"
+//#include "peptide.h"
 #include "crux_sp_spectrum.h"
+#include "raw_proteins.pb.h"
+#include "peptides.pb.h"
 
 typedef vector<const pb::Protein*> ProteinVec;
 typedef vector<const pb::AuxLocation*> AuxLocVec;

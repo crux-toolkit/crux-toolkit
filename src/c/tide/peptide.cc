@@ -164,7 +164,7 @@ void DisAsm(const void* prog) {
 #endif
 
 void Peptide::Compile(const TheoreticalPeakArr* peaks,
-		      const pb::Peptide& pb_peptide,
+                      const pb::Peptide& pb_peptide,
                       TheoreticalPeakCompiler* compiler_prog1,
                       TheoreticalPeakCompiler* compiler_prog2) {
   int pos_size = peaks[0].size();
@@ -207,7 +207,7 @@ void Peptide::ComputeBTheoreticalPeaks(TheoreticalPeakSetBIons* workspace) const
 }
 
 void Peptide::ComputeTheoreticalPeaks(ST_TheoreticalPeakSet* workspace,
-				      const pb::Peptide& pb_peptide,
+                                      const pb::Peptide& pb_peptide,
                                       TheoreticalPeakCompiler* compiler_prog1,
                                       TheoreticalPeakCompiler* compiler_prog2) {
   // Search-time fast workspace

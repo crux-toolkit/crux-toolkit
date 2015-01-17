@@ -6,7 +6,7 @@
 
 #include <sstream>
 #include "results_writer.h"
-
+#include "peptide.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // ResultsWriterUtils methods.

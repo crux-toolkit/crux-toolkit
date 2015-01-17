@@ -2,7 +2,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Fri Dec 19 12:34:04 2014
+H	StartTime	Mon Dec 29 15:15:52 2014
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	Comment	Database shuffled; these are decoy matches
@@ -2375,7 +2375,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Fri Dec 19 12:34:04 2014
+H	StartTime	Mon Dec 29 15:15:52 2014
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	Comment	Database shuffled; these are decoy matches
@@ -4750,16 +4750,16 @@ scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	s
 159	2	745.7500	1489.4835	1486.6195	0.056766629	99.053558	1	0.24097621	2	7	26	4	SPMNQPLGTNEGNK	trypsin-full-digest	YNL166C(201)	KL	SPMPQNNTLGGENK	4
 159	2	745.7500	1489.4835	1489.7319	0.25975037	27.649096	2	0.18420959	3	3	24	4	NLVGLELVFQTEK	trypsin-full-digest	YGL135W(27)	RN	NFLETVELQVGLK	4
 159	2	745.7500	1489.4835	1488.7063	0	9.6938658	4	-0.075540788	4	2	24	4	FFELNIVSPASHK	trypsin-full-digest	YDR037W(97)	KY	FHVSISNPEFLAK	4
-INFO: CPU: proline.gs.washington.edu
-INFO: Fri Dec 19 12:34:04 PST 2014
+INFO: CPU: serine.gs.washington.edu
+INFO: Mon Dec 29 15:15:52 PST 2014
 COMMAND LINE: crux sequest-search --decoys peptide-shuffle --output-dir ss --fileroot separate --parameter-file params/separate-ss demo.ms2 small-yeast.fasta
 INFO: Preparing protein fasta file small-yeast.fasta
 INFO: Reading in ms2 file demo.ms2
 INFO: Created 1 peptide mods, keeping 1 with 255 or fewer aa mods
 INFO: Searching spectrum 96 (2+), search 100
-INFO: Elapsed time: 13.2 s
+INFO: Elapsed time: 3.22 s
 INFO: Finished crux sequest-search
-INFO: Elapsed time: 13.2 s
+INFO: Elapsed time: 3.23 s
 INFO: Finished crux sequest-search.
 INFO: Return Code:0
 # comet_version 2014.01 rev. 0
@@ -5728,6 +5728,12 @@ averagine-mod=__NULL_STR
 # for crux-search-for-matches.
 top-match=5
 
+# Carries out a peptide-centric search.  For each peptide the top N
+# scoring spectra are reported,in contrary to the standard spectrum
+# centric-search where top N scoring peptide are reported. Default = F.
+# Available for tide-search.
+peptide-centric-search=false
+
 # Output tab-delimited text in the output directory.  Default=T
 # Available for search-for-matches, percolator, q-ranker, barista.
 txt-output=true
@@ -6252,7 +6258,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Fri Dec 19 12:34:04 2014
+H	StartTime	Mon Dec 29 15:15:52 2014
 H	EndTime                               
 H	Database	small-yeast.fasta
 H	DBSeqLength	?
