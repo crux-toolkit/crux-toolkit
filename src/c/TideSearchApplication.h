@@ -13,7 +13,7 @@
 #include "tide/theoretical_peak_set.h"
 #include "tide/max_mz.h"
 
-using namespace std;
+using namespace std; 
 
 class TideSearchApplication : public CruxApplication {
 
@@ -83,7 +83,9 @@ protected:
   };
   double bin_width_;
   double bin_offset_;
-  
+
+//  int max_charge_;
+
 public:
 
   bool exact_pval_search_;

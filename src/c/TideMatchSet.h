@@ -21,7 +21,8 @@ class TideMatchSet {
 
 public:
   bool exact_pval_search_;
-
+  int elution_window_;
+  
   typedef pair<int, int> Pair2;
   typedef FixedCapacityArray<Pair2> Arr2;
 
@@ -36,11 +37,28 @@ public:
     Arr* matches,
     double max_mz
   );
-
+  TideMatchSet(
+    Peptide* peptide,
+    double max_mz
+  );
+  
   ~TideMatchSet();
 
+    /**
+   * Write peptide centric matches to output files
+   */
+  void report(
+    ofstream* target_file,  ///< target file to write to
+    ofstream* decoy_file, ///< decoy file to write to
+    int top_matches,
+    const ActivePeptideQueue* peptides, ///< peptide queue
+    const ProteinVec& proteins, ///< proteins corresponding with peptides
+    const vector<const pb::AuxLocation*>& locations,  ///< auxiliary locations
+    bool compute_sp ///< whether to compute sp or not
+  );
+
   /**
-   * Write matches to output files
+   * Write spectrum centric to output files
    */
   void report(
     ofstream* target_file,  ///< target file to write to
@@ -74,7 +92,9 @@ public:
     ofstream* file,
     bool decoyFile,
     bool sp,
-    bool exact_pval_search
+    bool exact_pval_search,
+    bool peptide_centric = false,
+    int elution_window = 0	
   );
 
   static void initModMap(
@@ -88,6 +108,7 @@ public:
 protected:
   Arr* matches_;
   Arr2* matches2_;
+  Peptide* peptide_;  
   double max_mz_;
   static map<int, double> mod_map_; // unique delta index -> delta
   static ModCoder mod_coder_;
@@ -105,7 +126,17 @@ protected:
     // Compare scores, ignore counters.
     return x.first.first > y.first.first;
   }
-
+/**
+   * Helper function for tab delimited report function for peptide centric
+   */
+  void writeToFile(
+    ofstream* file,
+    const ActivePeptideQueue* peptides,
+    const ProteinVec& proteins,
+    const vector<const pb::AuxLocation*>& locations,
+    bool compute_sp ///< whether to compute sp or not
+  );
+  
   /**
    * Helper function for tab delimited report function
    */

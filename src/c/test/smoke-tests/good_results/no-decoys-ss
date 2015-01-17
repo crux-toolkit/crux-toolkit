@@ -1,13 +1,13 @@
-INFO: CPU: proline.gs.washington.edu
-INFO: Fri Dec 19 12:34:43 PST 2014
+INFO: CPU: serine.gs.washington.edu
+INFO: Mon Dec 29 15:16:06 PST 2014
 COMMAND LINE: crux sequest-search --output-dir ss --fileroot no-decoys --parameter-file params/no-decoys-ss demo.ms2 small-yeast-index
 INFO: Preparing protein index small-yeast-index
 INFO: Reading in ms2 file demo.ms2
 INFO: Created 1 peptide mods, keeping 1 with 255 or fewer aa mods
 INFO: Searching spectrum 96 (2+), search 100
-INFO: Elapsed time: 4.1 s
+INFO: Elapsed time: 1.11 s
 INFO: Finished crux sequest-search
-INFO: Elapsed time: 4.1 s
+INFO: Elapsed time: 1.11 s
 INFO: Finished crux sequest-search.
 INFO: Return Code:0
 # comet_version 2014.01 rev. 0
@@ -976,6 +976,12 @@ averagine-mod=__NULL_STR
 # for crux-search-for-matches.
 top-match=5
 
+# Carries out a peptide-centric search.  For each peptide the top N
+# scoring spectra are reported,in contrary to the standard spectrum
+# centric-search where top N scoring peptide are reported. Default = F.
+# Available for tide-search.
+peptide-centric-search=false
+
 # Output tab-delimited text in the output directory.  Default=T
 # Available for search-for-matches, percolator, q-ranker, barista.
 txt-output=true
@@ -1500,7 +1506,7 @@ H	SQTGenerator Crux
 H	SQTGeneratorVersion 1.0
 H	Comment Crux was written by...
 H	Comment ref...
-H	StartTime	Fri Dec 19 12:34:44 2014
+H	StartTime	Mon Dec 29 15:16:06 2014
 H	EndTime                               
 H	Database	small-yeast-index/small-yeast-binary-fasta
 H	DBSeqLength	?

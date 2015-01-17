@@ -101,6 +101,8 @@
 // PeakCombinedY2b represents a charge 2 Y ion, its flanks and neutral losses.
 // The ith entry of this cache vector is:
 //   50*u[i] + 25*u[i-1] + 25*u[i+1] + 10*u[i-8]
+#ifndef SPECTRUM_PREPROCESS_H
+#define SPECTRUM_PREPROCESS_H
 
 #include <iostream>
 #include <vector>
@@ -197,5 +199,5 @@ class ObservedPeakSet {
   friend class ObservedPeakTester;
 };
 
-
+#endif
 

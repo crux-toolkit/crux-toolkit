@@ -1198,9 +1198,26 @@ void initialize_parameters(void){
   set_int_parameter("max-precursor-charge", 5, 1, BILLION,
     "Set the maximum charge state to look for when analyzing a spectrum. "
     "Default=5.",
-	" Available for tide-search.",
-	"true"
+    " Available for tide-search.",
+    "true"
   );
+  set_boolean_parameter("peptide-centric-search", false,
+    "Carries out a peptide-centric search.  "
+    "For each peptide the top N scoring spectra are reported,"
+    "in contrary to the standard spectrum centric-search where top N "
+    "scoring peptide are reported. Default = F.",
+    "Available for tide-search.",
+    "true"
+  );
+  set_int_parameter("elution-window-size", 0, 0, 10,
+    "Size of the elution window used in smoothing score in DIA mode. "
+    "Used only with peptide-centric-search if greater than 0. A score of a psms "
+    "centred in the window is substituted by the geometric mean of the scores "
+    "in the window. If windows size is even, then it is increased by 1. Default = 0.",
+    "Available for tide-search.",
+    "false"
+  );
+  
   /*
    * Comet parameters
    */

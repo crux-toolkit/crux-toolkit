@@ -19,13 +19,19 @@
 #include "peptide.h"
 #include "theoretical_peak_set.h"
 #include "fifo_alloc.h"
+#include "spectrum_collection.h"
+#include "OutputFiles.h"
+
+//#include "sp_scorer.h"
+#ifndef ACTIVE_PEPTIDE_QUEUE_H
+#define ACTIVE_PEPTIDE_QUEUE_H
 
 class TheoreticalPeakCompiler;
 
 class ActivePeptideQueue {
  public:
   ActivePeptideQueue(RecordReader* reader,
-		     const vector<const pb::Protein*>& proteins);
+            const vector<const pb::Protein*>& proteins);
 
   ~ActivePeptideQueue();
 
@@ -34,8 +40,13 @@ class ActivePeptideQueue {
   int SetActiveRangeBIons(double min_mass, double max_mass, double min_range, double max_range);
 
   bool HasNext() const { return iter_ != end_; }
-  Peptide* NextPeptide() { return *iter_++; }
-  const Peptide* GetPeptide(int back_index) const { return *(end_ - back_index); }
+  Peptide* NextPeptide() { return *iter_; }
+  const Peptide* GetPeptide(int back_index) const {
+      if (peptide_centric_ == true)
+          return current_peptide_;
+      else
+          return *(end_ - back_index);
+  }
   void SetBinSize(double binWidth, double binOffset) {
     theoretical_b_peak_set_.binWidth_ = binWidth;
     theoretical_b_peak_set_.binOffset_ = binOffset;
@@ -50,9 +61,47 @@ class ActivePeptideQueue {
   int ActiveTargets() const { return active_targets_; }
   int ActiveDecoys() const { return active_decoys_; }
 
+  void ReportPeptideHits(Peptide* peptide);
+  void SetOutputs(OutputFiles* output_files, const vector<const pb::AuxLocation*>* locations, int top_matches,
+                  bool compute_sp, ofstream* target_file, ofstream* decoy_file, double highest_mz){
+      locations_ = locations;
+      output_files_ = output_files;
+      top_matches_ = top_matches;
+      compute_sp_ = compute_sp;
+      target_file_ = target_file;
+      decoy_file_ = decoy_file;
+      highest_mz_ = highest_mz;
+  }
+  void setPeptideCentric(bool peptide_centric) {
+    peptide_centric_ = peptide_centric;
+  }
+  
+  void setElutionWindow(int elution_window){
+    elution_window_ = elution_window;
+  }
+  // iter_ points to the current peptide. Client access is by HasNext(),
+  // GetPeptide(), and NextPeptide(). end_ points just beyond the last active
+  // peptide.
+  deque<Peptide*>::const_iterator iter_, end_;
+  
+//  const ProteinVec& proteins_;
+private:
+  const vector<const pb::AuxLocation*>* locations_;
+  OutputFiles* output_files_;
+  int top_matches_;
+  bool compute_sp_;
+  ofstream* target_file_;
+  ofstream* decoy_file_;
+  double highest_mz_;
+  Peptide* current_peptide_;
+  bool exact_pval_search_;
+  bool peptide_centric_;
+  int elution_window_;
+
+
+//  Spectrum* spectrum_;
   // IMPLEMENTATION DETAILS
- 
- private:
+
   // See .cc file.
   void ComputeTheoreticalPeaksBack();
   void ComputeBTheoreticalPeaksBack();
@@ -72,12 +121,7 @@ class ActivePeptideQueue {
   // queue_ maintains only the peptides that fall within the range specified
   // by the last call to SetActiveRange().
   deque<Peptide*> queue_;
- public:
-  // iter_ points to the current peptide. Client access is by HasNext(),
-  // GetPeptide(), and NextPeptide(). end_ points just beyond the last active
-  // peptide.
-  deque<Peptide*>::const_iterator iter_, end_;
- private:
+
   // Set by most recent call to SetActiveRange()
   double min_mass_, max_mass_;
 
@@ -112,3 +156,4 @@ pb::Peptide* pb_peptide = new pb::Peptide;
 CHECK(reader_->Read(pb_peptide));
 !reader_->Done()
 */
+#endif //ACTIVE_PEPTIDE_QUEUE_H

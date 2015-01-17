@@ -23,6 +23,8 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "refactored xcorr",
   "e-value",
   "p-value",
+  "smoothed p-value",
+  "distinct matches/peptide",
 #ifdef NEW_COLUMNS
   "Weibull PSM q-value",
   "Weibull peptide q-value",    // NEW
