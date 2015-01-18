@@ -61,7 +61,6 @@ set (
   CarpStreamBuf.cpp
   CometApplication.cpp
   ComputeQValues.cpp
-  CreateIndex.cpp
   crux-file-utils.cpp
   crux-utils.cpp
   Database.cpp
@@ -79,11 +78,6 @@ set (
   GeneratePeptidesIterator.cpp
   GetMs2Spectrum.cpp
   hash.cpp
-  Index.cpp
-  IndexFile.cpp
-  IndexMap.cpp
-  IndexPeptideIterator.cpp
-  IndexFilteredPeptideIterator.cpp
   Ion.cpp
   IonConstraint.cpp
   IonFilteredIterator.cpp
@@ -96,7 +90,6 @@ set (
   MatchColumns.cpp
   MatchFileReader.cpp
   MatchFileWriter.cpp
-  MatchSearch.cpp
   MatchCollection.cpp
   MatchCollectionIterator.cpp
   MatchCollectionParser.cpp
@@ -139,10 +132,8 @@ set (
   PWIZSpectrumCollection.cpp
   q-value.cpp
   ReadSpectrumRecordsApplication.cpp
-  SequestSearch.cpp
   SortColumn.cpp
   Scorer.cpp
-  sorter.cpp
   SpectralCounts.cpp
   SpectrumCollection.cpp
   SpectrumCollectionFactory.cpp

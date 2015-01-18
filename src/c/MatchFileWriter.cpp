@@ -177,7 +177,6 @@ void MatchFileWriter::addColumnNames(CruxApplication* application,
   switch (command){
   // commands with no tab files
   case MISC_COMMAND:
-  case INDEX_COMMAND:        ///< create-index
   case PROCESS_SPEC_COMMAND: ///< print-processed-spectra
   case GENERATE_PEPTIDES_COMMAND: ///< generate-peptides
   case GET_MS2_SPECTRUM_COMMAND: ///< get-ms2-spectrum 
@@ -201,26 +200,6 @@ void MatchFileWriter::addColumnNames(CruxApplication* application,
     return;
 
   // valid commands
-  case SEARCH_COMMAND:       ///< search-for-matches
-    if( get_boolean_parameter("compute-p-values") ){
-      addColumnName(PVALUE_COL);
-      addColumnName(ETA_COL);
-      addColumnName(BETA_COL);
-      addColumnName(SHIFT_COL);
-      addColumnName(CORR_COL);
-    }
-    if( (get_boolean_parameter("compute-sp") || get_boolean_parameter("sqt-output"))
-        && get_int_parameter("max-rank-preliminary") > 0 ){
-      addColumnName(SP_SCORE_COL);
-      addColumnName(SP_RANK_COL);
-      addColumnName(BY_IONS_MATCHED_COL);
-      addColumnName(BY_IONS_TOTAL_COL);
-    }
-    if( has_decoys ){
-      addColumnName(DECOY_MATCHES_SPECTRUM_COL);
-    }
-    break;
-
   case TIDE_SEARCH_COMMAND: ///< tide-search
     if (get_boolean_parameter("compute-sp") || get_boolean_parameter("sqt-output")) {
       if (get_boolean_parameter("exact-p-value")) {
@@ -232,18 +211,6 @@ void MatchFileWriter::addColumnNames(CruxApplication* application,
       addColumnName(SP_RANK_COL);
       addColumnName(BY_IONS_MATCHED_COL);
       addColumnName(BY_IONS_TOTAL_COL);
-    }
-    break;
-
-  case SEQUEST_COMMAND:      ///< sequest-search
-    if( get_int_parameter("max-rank-preliminary") > 0 ){
-      addColumnName(SP_SCORE_COL);
-      addColumnName(SP_RANK_COL);
-      addColumnName(BY_IONS_MATCHED_COL);
-      addColumnName(BY_IONS_TOTAL_COL);
-    }
-    if( has_decoys ){
-      addColumnName(DECOY_MATCHES_SPECTRUM_COL);
     }
     break;
 
@@ -333,7 +300,6 @@ void MatchFileWriter::addColumnNames
   switch (command){
   // commands with no tab files
   case MISC_COMMAND:
-  case INDEX_COMMAND:        ///< create-index
   case PROCESS_SPEC_COMMAND: ///< print-processed-spectra
   case GENERATE_PEPTIDES_COMMAND: ///< generate-peptides
   case GET_MS2_SPECTRUM_COMMAND: ///< get-ms2-spectrum 
@@ -348,8 +314,6 @@ void MatchFileWriter::addColumnNames
     return;
 
   // search commands handled elsewhere
-  case SEARCH_COMMAND:       ///< search-for-matches
-  case SEQUEST_COMMAND:      ///< sequest-search
   case XLINK_SEARCH_COMMAND:
     addColumnNames(application, has_decoys);
     return;

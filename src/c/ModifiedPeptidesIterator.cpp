@@ -1,6 +1,6 @@
 /**
  * \file GenerateModifiedPeptidesIterator.h
- * \brief An object to return candidate peptides from a database or index.
+ * \brief An object to return candidate peptides from a database.
  */
 #include "ModifiedPeptidesIterator.h"
 #include "SpectrumZState.h"
@@ -18,13 +18,12 @@ ModifiedPeptidesIterator::ModifiedPeptidesIterator(
   SpectrumZState& zstate,  ///< Target mz of peptides
   PEPTIDE_MOD_T* pmod, ///< Peptide mod to apply
   bool is_decoy,  ///< generate decoy peptides
-  Index* index,      ///< Index from which to draw peptides OR
   Database* dbase    ///< Database from which to draw peptides
 )
 {
   peptide_source_ = new GeneratePeptidesIterator(getMinMaxMass(mz, zstate, 
                                                                pmod),
-                                                 is_decoy, dbase, index);
+                                                 is_decoy, dbase);
   peptide_modification_ = pmod;
   temp_peptide_list_ = new_empty_list();
   max_aas_modified_ = get_int_parameter("max-aas-modified");
@@ -36,17 +35,16 @@ ModifiedPeptidesIterator::ModifiedPeptidesIterator(
 }
 
 /**
- * Constructor for returning all peptides in the index or database
+ * Constructor for returning all peptides in the database
  * that fall within the constraints defined in parameter.cpp.
  */
 ModifiedPeptidesIterator::ModifiedPeptidesIterator(
   PEPTIDE_MOD_T* pmod, ///< Peptide mod to apply
-  Index* index,      ///< Index from which to draw peptides OR
   Database* dbase    ///< Database from which to draw peptides
 ){
   peptide_source_ = new GeneratePeptidesIterator(getMinMaxMass(), 
                                                  false, // not decoy
-                                                 dbase, index);
+                                                 dbase);
 
   peptide_modification_ = pmod;
   temp_peptide_list_ = new_empty_list();
@@ -55,7 +53,7 @@ ModifiedPeptidesIterator::ModifiedPeptidesIterator(
 }
 
 /**
- * Constructor for returnign all peptides in the index or database
+ * Constructor for returnign all peptides in the database
  * that fall within the mass range
  */
 ModifiedPeptidesIterator::ModifiedPeptidesIterator(
@@ -63,14 +61,13 @@ ModifiedPeptidesIterator::ModifiedPeptidesIterator(
   double max_mass,    ///< max-mass of peptides
   PEPTIDE_MOD_T* pmod, ///< Peptide mod to apply
   bool is_decoy, ///< generate decoy peptides
-  Index* index,     ///< Index from which to draw peptides OR
   Database* dbase   ///< Database from which to draw peptides
 ) {
 
   peptide_source_ = new GeneratePeptidesIterator(
     pair<FLOAT_T,FLOAT_T>(min_mass, max_mass),
     is_decoy,
-    dbase, index);
+    dbase);
 
   peptide_modification_ = pmod;
   temp_peptide_list_ = new_empty_list();

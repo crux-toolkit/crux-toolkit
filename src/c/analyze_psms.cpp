@@ -10,11 +10,9 @@
 #include "analyze_psms.h"
 #include "ComputeQValues.h"
 #include "QRanker.h"
-//#include "Percolator.h"
 #include "MatchCollectionIterator.h"
 #include "MatchCollectionParser.h"
 #include "MatchIterator.h"
-//#include "PercolatorCInterface.h"
 #include "PosteriorEstimator.h"
 
 /**

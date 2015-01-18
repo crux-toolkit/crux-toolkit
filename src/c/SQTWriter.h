@@ -3,7 +3,6 @@
 
 #include "carp.h"
 #include "crux-file-utils.h"
-#include "Index.h"
 #include "parameter.h"
 #include "PostProcessProtein.h"
 #include "Spectrum.h"

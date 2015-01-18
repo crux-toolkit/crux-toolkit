@@ -33,7 +33,6 @@
 #include "objects.h"
 #include "parameter.h"
 #include "Scorer.h" 
-#include "Index.h"
 #include "Match.h"
 #include "hash.h"
 #include "PeptideSrc.h"
@@ -100,27 +99,6 @@ class MatchCollection {
   // set after the first match collection is extended
   Crux::Match* top_scoring_sp_; ///< the match with Sp rank == 1
 
-  /******* Private function declarations ***/
-  int addUnscoredPeptides(
-    Crux::Spectrum* spectrum, 
-    SpectrumZState& charge, 
-    ModifiedPeptidesIterator* peptide_iterator,
-    bool is_decoy
-    );
-
-  bool scoreMatchesOneSpectrum(
-    SCORER_TYPE_T score_type, 
-    Crux::Spectrum* spectrum,
-    int charge,
-    bool store_scores
-    );
-
-  void updateProteinCounters(
-    Crux::Peptide* peptide  
-    );
-
-
-
   /**
    * initializes a MatchCollection object
    */
@@ -155,38 +133,6 @@ class MatchCollection {
   virtual ~MatchCollection();
 
   /**
-   * \brief The main search function.  All peptides in the peptide
-   * iterator are compared to the spectrum and the resulting score(s)
-   * are stored in a match.  All matches are stored in the
-   * match_collection.  Can be called on an empty match_collection or
-   * one already containing matches.  No checks to confirm that the same
-   * spectrum is being searched in subsiquent calls.
-   *
-   * First, the prelimiary score (as in parameter.c) is used to compare
-   * peptides and spectrum.  These results are then sorted and the final
-   * score (as in parameter.c) is calculated on the top-match
-   * (parameter.c) top matches as ranked by the preliminary score.  No
-   * matches are deleted after ranking.
-   *
-   * When called on a match collection already containing matches, the
-   * preliminary score is calculated for all new peptides.  All matches
-   * (from this peptide iterator and previous) are sorted by prelim
-   * score and only the top-match matches are scored for the final
-   * score.  Previously scored matches are not scored twice.
-   *
-   * \returns The number of matches added.
-   */
-  int addMatches(
-    Crux::Spectrum* spectrum,  ///< compare peptides to this spectrum
-    SpectrumZState& zstate,            ///< use this charge state for spectrum
-    ModifiedPeptidesIterator* peptide_iterator, ///< use these peptides
-    bool is_decoy,     ///< do we shuffle the peptides
-    bool store_scores, ///< true means save scores in xcorrs[]
-    bool do_sp_score,  ///< true means do Sp before xcorr
-    bool filter_by_sp  ///< true means keep only high sp scoring psms
-  );
-
-  /**
    * sort the match collection by score_type(SP, XCORR, ... )
    *\returns true, if successfully sorts the match_collection
    */
@@ -211,14 +157,6 @@ class MatchCollection {
   bool populateMatchRank(
     SCORER_TYPE_T score_type ///< the score type (SP, XCORR) -in
     );
-
-  /**
-   * \brief Use the matches collected from all spectra to compute FDR
-   * and q_values from the ranked list of target and decoy scores.
-   * Requires that matches have been scored for the given score type.
-   * \returns true if q-values successfully computed, else false.
-   */
-  bool computeDecoyQValues();
 
   /**
    * match_collection get, set method
@@ -298,17 +236,6 @@ class MatchCollection {
   bool isDecoy();
 
   /**
-   * Keeps track of the top scoring PSM by Sp.  To be run after
-   * re-ranking by Sp.
-   */
-  void saveTopSpMatch();
-
-  /**
-   *\returns the top peptide count used in the logp_exp_sp in match_collection
-   */
-  int getTopFitSp();
-
-  /**
    *\returns the charge of the spectrum that the match collection was created
    */
   int getCharge();
@@ -330,26 +257,6 @@ class MatchCollection {
     MatchCollection* from_collection,
     MatchCollection* to_collection
     );
-
-  /**
-   * \brief Remove matches from the collection so that only those of
-   * rank 'max_rank' and higher for the given score type remain.
-   */
-  void truncate(
-    int max_rank,     
-    SCORER_TYPE_T score_type 
-    );
-
-  /**
-   * \brief Put all the matches from the source match collection in the
-   * destination. Only copies the pointers of the matches so use with
-   * caution. 
-   * \returns The number of matches added.
-   */
-  static int merge(
-    MatchCollection* source, ///< matches to be moved
-    MatchCollection* destination ///< move matches to here
-  );
 
   /**
    * \brief Add a single match to a collection.
@@ -490,39 +397,6 @@ class MatchCollection {
     );
 
   /**
-   * \brief Check that a match collection has a sufficient number of
-   * matches for estimating Weibull parameters.
-   * \returns true if their are enough xcorrs for estimating Weibull
-   * parameters or false if not.
-   */
-  bool hasEnoughWeibullPoints();
-
-  bool estimateWeibullParameters(
-    SCORER_TYPE_T score_type,
-    int sample_count, 
-    Crux::Spectrum* spectrum,
-    int charge
-    );
-
-  /**
-   * \brief Use the xcorrs saved in the match_collection to estimate the
-   * weibull parameters to be used for computing p-values. 
-   *
-   * Requires that main score be XCORR, but with relativly few changes
-   * other scores could be accomodated.
-   * Implementation of Weibull distribution parameter estimation from 
-   * http:// www.chinarel.com/onlincebook/LifeDataWeb/rank_regression_on_y.htm
-   */
-  bool estimateWeibullParametersFromXcorrs(
-    Crux::Spectrum* spectrum,
-    int charge
-    );
-
-  bool computePValues(
-    FILE* output_pvalue_file
-    );
-
-  /**
    * Try setting the match collection's zstate.  Successful if the
    * current charge is 0 (i.e. hasn't yet been set) or if the current
    * charge is the same as the given value.  Otherwise, returns false
@@ -531,18 +405,6 @@ class MatchCollection {
    */
   bool setZState(
     SpectrumZState& zstate ///< new zstate
-  );
-
-  /**
-   * Search the given database or index using shuffled peptides and the
-   * spectrum/charge in the target psm match collection.  Add those
-   * scores to the target psm match collection for use in weibull
-   * parameter estimation but do not save the matches
-   */
-  void addDecoyScores(
-    Crux::Spectrum* spectrum, ///< search this spectrum
-    SpectrumZState& zstate, ///< search spectrum at this charge state
-    ModifiedPeptidesIterator* peptides ///< use these peptides to search
   );
 
   /**
@@ -587,11 +449,6 @@ class MatchCollection {
     SCORER_TYPE_T score_type,  ///< The score type of the results to fill -in
     bool preserve_order ///< preserve match order?
     );
-
-  /**
-   * Process run specific features from all the PSMs
-   */
-  void processRunSpecificFeatures();
 
 // cheater functions for testing
   void forceScoredBy(SCORER_TYPE_T type);

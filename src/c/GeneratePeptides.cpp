@@ -64,15 +64,7 @@ int GeneratePeptides::main(int argc, char** argv) {
   // Get arguments and options
   bool output_sequence = get_boolean_parameter("output-sequence");
   string filename = get_string_parameter("protein-database");
-  bool use_index = is_directory(filename.c_str());
-  Index* index = NULL;
-  Database* database = NULL;
-
-  if( use_index == true ){
-    index = new Index(filename.c_str()); 
-  }else{
-    database = new Database(filename.c_str(), false); // not memmapped
-  }
+  Database* database = new Database(filename.c_str(), false); // not memmapped
 
   // get list of mods
   PEPTIDE_MOD_T** peptide_mods = NULL;
@@ -89,9 +81,7 @@ int GeneratePeptides::main(int argc, char** argv) {
          mod_idx, peptide_mod_get_num_aa_mods(peptide_mods[mod_idx]));
     // create peptide iterator
     ModifiedPeptidesIterator* peptide_iterator = 
-      new ModifiedPeptidesIterator(peptide_mods[mod_idx],
-                                   index,
-                                   database);
+      new ModifiedPeptidesIterator(peptide_mods[mod_idx], database);
 
     // iterate over all peptides
     int orders_of_magnitude = 1000; // for counting when to print
@@ -118,7 +108,6 @@ int GeneratePeptides::main(int argc, char** argv) {
   // debug purpose
   carp(CARP_INFO, "total peptides: %d", total_peptides);
 
-  delete index;
   delete database;
 
   return(0);
@@ -145,9 +134,6 @@ void GeneratePeptides::printHeader(){
          get_string_parameter_pointer("isotopic-mass"));
   printf("#\tverbosity: %d\n", get_verbosity_level());
 
-  bool_val = is_directory(database_name);
-  printf("#\tuse index: %s\n", boolean_to_string(bool_val));
-  
   AA_MOD_T** aa_mod_list = NULL;
   int num_aa_mods = get_all_aa_mod_list(&aa_mod_list);
   int mod_idx = 0;

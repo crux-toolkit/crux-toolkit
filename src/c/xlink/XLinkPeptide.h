@@ -107,7 +107,6 @@ class XLinkPeptide : public XLinkMatch {
     FLOAT_T min_mass, ///< min mass of crosslinks
     FLOAT_T max_mass, ///< max mass of crosslinks
     XLinkBondMap& bondmap, ///< valid crosslink map
-    Index* index, ///< protein index
     Database* database, ///< protein database
     PEPTIDE_MOD_T* peptide_mod2, ///< modifications for the second peptide
     bool decoy2, ///< is the second peptide a decoy?
@@ -122,7 +121,6 @@ class XLinkPeptide : public XLinkMatch {
     FLOAT_T min_mass, ///< min mass of crosslinks
     FLOAT_T max_mass, ///< max mass of crosslinks
     XLinkBondMap& bondmap, ///< valid crosslink map
-    Index* index,  ///< protein index
     Database* database, ///< protein database
     PEPTIDE_MOD_T** peptide_mods, ///< available variable mods
     int num_peptide_mods, ///< number of available modifications
@@ -135,7 +133,6 @@ class XLinkPeptide : public XLinkMatch {
   static void addLinkablePeptides(
     double min_mass, ///< min mass of peptides
     double max_mass, ///< max mass of peptides
-    Index* index, ///< protein index
     Database* database, ///< protein database 
     PEPTIDE_MOD_T* peptide_mod, ///< modifications
     bool is_decoy, ///< are the peptides decoys

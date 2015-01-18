@@ -1,5 +1,7 @@
 #!/bin/bash -x
 
+exit
+
 # These three options make it harder to for some part of a script to
 # fail without you recognizing it. nounset means that references to an
 # unset variable result in an error. This means that you can no longer
@@ -26,11 +28,6 @@ ln -fs test.fasta existing.fasta
 
 # Remove any lingering output files.
 ./clean.sh
-
-# Create an index, if it doesn't already exist.
-ulimit -n 1024
-../../crux create-index  --parameter-file params/mods-sequest --verbosity 0 for-sequest-comparison.fasta index-for-sequest-comparison
-../../crux create-index --parameter-file params/set_rand_seed --verbosity 0 --decoys peptide-shuffle small-yeast.fasta yeast-index
 
 # Run the actual tests.
 # N.B. Add a "-u" option to this line to update all of the output files.

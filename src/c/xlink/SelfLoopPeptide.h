@@ -66,7 +66,6 @@ class SelfLoopPeptide : public XLinkMatch {
     FLOAT_T min_mass, ///< min mass
     FLOAT_T max_mass, ///< max mass
     XLinkBondMap& bondmap,  ///< valid link sites
-    Index* index, ///< protein index
     Database* database, ///< protein database
     PEPTIDE_MOD_T** peptide_mods, ///< allowable modifications
     int num_peptide_mods, ///< number of allowable modifications

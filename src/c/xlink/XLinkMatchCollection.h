@@ -10,7 +10,6 @@
 /* Crux Includes */
 #include "objects.h"
 #include "MatchCollection.h"
-#include "Index.h"
 #include "Database.h"
 #include "modifications.h"
 #include "SpectrumZState.h"
@@ -35,7 +34,6 @@ class XLinkMatchCollection : public MatchCollection {
     FLOAT_T min_mass, ///< minimum mass
     FLOAT_T max_mass, ///< maximum mass
     XLinkBondMap& bondmap, ///< map of valid links
-    Index* index, ///< protein index
     Database* database, ///< protein database
     PEPTIDE_MOD_T** peptide_mods, ///< list of possible mods
     int num_peptide_mods ///< number of possible mods
@@ -62,7 +60,6 @@ class XLinkMatchCollection : public MatchCollection {
     XLinkBondMap& bondmap, ///< allowable links
     PEPTIDE_MOD_T** peptide_mods, ///< list of allowable peptide mods
     int num_peptide_mods, ///< number of allowable peptide mods
-    Index* index, ///< protein index
     Database* database ///< protein database
     );
 
@@ -73,7 +70,6 @@ class XLinkMatchCollection : public MatchCollection {
     FLOAT_T precursor_mz, ///< precursor m/z
     SpectrumZState& zstate, ///< z-state
     XLinkBondMap& bondmap, ///< allowable links
-    Index* index, ///< protein index
     Database* database, ///protein database
     PEPTIDE_MOD_T** peptide_mods, ///< list of allowable peptide mods
     int num_peptide_mods, ///< number of allowable peptides

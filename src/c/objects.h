@@ -386,12 +386,6 @@ class IndexPeptideIterator;
 class IndexFilteredPeptideIterator;
 
 /**
- * \typedef SORTED_PEPTIDE_ITERATOR_T
- * \brief An object to iterate over the peptides in sorted order 
- */
-typedef struct sorted_peptide_iterator SORTED_PEPTIDE_ITERATOR_T;
-
-/**
  * \class Ion 
  * \brief An object to represent a (fragment) ion of a peptide
  */
@@ -443,19 +437,6 @@ enum _ion_modification {NH3, H2O, ISOTOPE, FLANK, ALL_MODIFICATION};
  * \brief The typedef for ion modification type (NH3, H2O etc.)
  */
 typedef enum _ion_modification ION_MODIFICATION_T;
-
-/**
- * \typedef BIN_PEPTIDE_ITERATOR_T
- * \brief An iterator to iterate over the peptides in a bin( one file handler)
- */
-typedef struct bin_peptide_iterator BIN_PEPTIDE_ITERATOR_T;
-
-/**
- * \typedef BIN_SORTED_PEPTIDE_ITERATOR_T
- * \brief Object to iterate over the peptides within a bin, in an
- * sort in mass
- */
-typedef struct bin_sorted_peptide_iterator BIN_SORTED_PEPTIDE_ITERATOR_T;
 
 /**
  * \class ProteinIndex
@@ -635,9 +616,6 @@ typedef enum _hardklor_algorithm HARDKLOR_ALGORITHM_T;
  */
 enum _command {
   INVALID_COMMAND,      ///< required by coding standards
-  INDEX_COMMAND,        ///< create-index
-  SEARCH_COMMAND,       ///< search-for-matches
-  SEQUEST_COMMAND,      ///< sequest-search
   QVALUE_COMMAND,       ///< compute-q-values
   GENERATE_DECOYS_COMMAND, ///< generate-decoys
   PERCOLATOR_COMMAND,   ///< percolator

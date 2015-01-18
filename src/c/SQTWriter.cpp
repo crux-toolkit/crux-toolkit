@@ -38,10 +38,6 @@ void SQTWriter::writeHeader(
 
   time_t hold_time = time(0);
 
-  if (file_exists(database.c_str()) && is_directory(database.c_str())) {
-    database = Index::getBinaryFastaName(database.c_str());
-  }
-
   MASS_TYPE_T mass_type = get_mass_type_parameter("isotopic-mass");
   char precursor_masses[64];
   mass_type_to_string(mass_type, precursor_masses);

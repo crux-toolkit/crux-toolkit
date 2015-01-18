@@ -425,13 +425,12 @@ const char* spectrum_parser_type_to_string(SPECTRUM_PARSER_T type);
 
 
 /**
- * \brief Open either the index or fasta file and prepare it for
+ * \brief Open the fasta file and prepare it for
  * searching.  Die if the input file cannot be found or read.
- * \returns The number of proteins in the file or index
+ * \returns The number of proteins in the file
  */
 int prepare_protein_input(
-  char* input_file,      ///< name of the fasta file or index directory
-  Index** index,       ///< return new index here OR
+  char* input_file,      ///< name of the fasta file
   Database** database);///< return new fasta database here
 
 /**
@@ -581,7 +580,7 @@ void strcat_formatted
  * \returns Zero if no decoys are searched, one if there are decoys
  * with an index search, or num-decoys-per-target for a fasta search.
  */
-int get_num_decoys(bool have_index);
+int get_num_decoys();
 
 /**
  * \brief Checks if the given input file contains target, decoy PSMs or 

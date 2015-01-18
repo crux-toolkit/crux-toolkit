@@ -20,6 +20,5 @@ file(COPY hardklor.test.ms1 DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY bullseye.test.ms2 DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY params DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY good_results DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY existing_crux_index DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 add_custom_target(smoke-tests COMMAND ./runall)

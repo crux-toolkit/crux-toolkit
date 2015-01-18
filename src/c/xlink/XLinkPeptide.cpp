@@ -235,7 +235,6 @@ bool XLinkPeptide::isIntra() {
 void XLinkPeptide::addLinkablePeptides(
   double min_mass, ///< min mass of peptides
   double max_mass, ///< max mass of peptides
-  Index* index, ///< protein index
   Database* database, ///< protein database
   PEPTIDE_MOD_T* peptide_mod, ///< modifications
   bool is_decoy,  ///< are the peptides decoys
@@ -249,7 +248,6 @@ void XLinkPeptide::addLinkablePeptides(
       max_mass,
       peptide_mod, 
       is_decoy,
-      index, 
       database);
 
   int max_mod_xlink = get_int_parameter("max-xlink-mods");
@@ -284,7 +282,6 @@ void XLinkPeptide::addCandidates(
   FLOAT_T min_mass, ///< min mass of crosslink
   FLOAT_T max_mass, ///< max mass of crosslinks
   XLinkBondMap& bondmap, ///< valid crosslink map
-  Index* index,  ///< protein index
   Database* database, ///< protein database
   PEPTIDE_MOD_T** peptide_mods, ///< modifications for the peptides
   int num_peptide_mods, ///< number of possible modifications
@@ -303,10 +300,10 @@ void XLinkPeptide::addCandidates(
 
   for (int mod_idx1 = 0; mod_idx1 < num_peptide_mods; mod_idx1++) {
     PEPTIDE_MOD_T* peptide_mod1 = peptide_mods[mod_idx1];
-    XLinkablePeptideIterator iter1_target(peptide1_min_mass, peptide1_max_mass, index, database, peptide_mod1, false, bondmap);
+    XLinkablePeptideIterator iter1_target(peptide1_min_mass, peptide1_max_mass, database, peptide_mod1, false, bondmap);
     for (int mod_idx2 = 0; mod_idx2 < num_peptide_mods; mod_idx2++) {
       PEPTIDE_MOD_T* peptide_mod2 = peptide_mods[mod_idx2];
-      addCandidates(min_mass, max_mass, bondmap, index, database, peptide_mod2, false, iter1_target, candidates);
+      addCandidates(min_mass, max_mass, bondmap, database, peptide_mod2, false, iter1_target, candidates);
     }
   } 
 
@@ -320,7 +317,6 @@ void XLinkPeptide::addCandidates(
   FLOAT_T min_mass, ///< min mass of crosslinks
   FLOAT_T max_mass, ///< max mass of crosslinks
   XLinkBondMap& bondmap, ///< valid crosslink map
-  Index* index, ///< protein index
   Database* database, ///< protein database
   PEPTIDE_MOD_T* peptide_mod2, ///<modification of the modified peptides
   bool decoy2, ///< are these going to be decoys?
@@ -346,7 +342,7 @@ void XLinkPeptide::addCandidates(
   
 
     if (peptide2_max_mass >= pmin_) {
-      XLinkablePeptideIterator iter2(peptide2_min_mass, peptide2_max_mass, index, database, peptide_mod2, decoy2, bondmap);
+      XLinkablePeptideIterator iter2(peptide2_min_mass, peptide2_max_mass, database, peptide_mod2, decoy2, bondmap);
       while (iter2.hasNext()) {
         XLinkablePeptide pep2 = iter2.next();
         if (visited.find(pep2) == visited.end()) {

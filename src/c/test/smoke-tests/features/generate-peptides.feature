@@ -20,5 +20,4 @@ Examples:
   |generate_peptides_fixed_mods               |--parameter-file params/fixed-mods --output-sequence T --max-length 20 test.fasta                                                  |standard_generate_peptides_fixed_mods                     |
   |generate_peptides_chymo                    |--parameter-file params/chymo --output-sequence T test.fasta                                                                       |standard_generate_peptides_chymo                          |
   #|generate-peptides-ambiguous-residues       |--min-mass 1464 --max-mass 1496 --output-sequence T ambiguous.fasta 2>&1                                                           |generate-peptides-ambiguous.target.txt                    |
-  |generate_peptides_use_existing_index       |--output-sequence T --enzyme trypsin existing_crux_index                                                                           |standard_generate_peptides_use_exisiting_index.out        |
 
