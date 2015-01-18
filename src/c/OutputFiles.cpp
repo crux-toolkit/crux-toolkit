@@ -48,10 +48,7 @@ OutputFiles::OutputFiles(CruxApplication* program_name)
 
   // TODO (BF oct-21-09): consider moving this logic to parameter.c
   COMMAND_T command = application_->getCommand();
-  if (concat_ ||
-      (command != SEARCH_COMMAND &&
-       command != SEQUEST_COMMAND &&
-       command != TIDE_SEARCH_COMMAND)) {
+  if (concat_ || command != TIDE_SEARCH_COMMAND) {
     num_files_ = 1;
   }
   
@@ -88,9 +85,7 @@ OutputFiles::OutputFiles(CruxApplication* program_name)
   }
   
   // sequest and search creates sqt files
-  if( command == SEQUEST_COMMAND ||
-      (command == SEARCH_COMMAND && get_boolean_parameter("sqt-output")) ||
-      (command == TIDE_SEARCH_COMMAND && get_boolean_parameter("sqt-output")) ){
+  if( command == TIDE_SEARCH_COMMAND && get_boolean_parameter("sqt-output") ) {
     createFiles(&sqt_file_array_, 
                  output_directory, 
                  fileroot, 
@@ -100,10 +95,7 @@ OutputFiles::OutputFiles(CruxApplication* program_name)
   }
 
   //pin
-  if( (command==SEARCH_COMMAND ||
-       command == SEQUEST_COMMAND ||
-       command == TIDE_SEARCH_COMMAND ) &&
-      get_boolean_parameter("pin-output") ){
+  if( command == TIDE_SEARCH_COMMAND && get_boolean_parameter("pin-output") ){
    string filename=makeFileName(
     fileroot, 
     application_,
@@ -118,10 +110,7 @@ OutputFiles::OutputFiles(CruxApplication* program_name)
     );
   }
 
-  if( (command==SEARCH_COMMAND ||
-       command == SEQUEST_COMMAND ||
-       command == TIDE_SEARCH_COMMAND ) &&
-      get_boolean_parameter("mzid-output") ){
+  if( get_boolean_parameter("mzid-output") ){
     createFile(&mzid_file_,
                output_directory,
                fileroot,
@@ -426,13 +415,7 @@ void OutputFiles::writeHeaders(int num_proteins, bool isMixedTargetDecoy){
 
     if( sqt_file_array_ ){
       string database = get_string_parameter_pointer("protein-database");
-      if (file_exists(database.c_str())) {
-        if (is_directory(database.c_str())) {
-          char* fasta_name  = Index::getBinaryFastaName(database.c_str());
-          database = fasta_name;
-          free(fasta_name);
-        }
-      } else {
+      if (!file_exists(database.c_str())) {
         database = get_string_parameter_pointer("tide database index");
       }
       MatchCollection::printSqtHeader(sqt_file_array_[file_idx],

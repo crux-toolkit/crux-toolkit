@@ -14,8 +14,8 @@
 #endif
 #include <iostream>
 #include "crux-utils.h"
+#include "Database.h"
 #include "parameter.h"
-#include "Index.h"
 #include "WinCrux.h"
 #include "LineFileReader.h"
 #include "boost/filesystem.hpp"
@@ -1787,51 +1787,27 @@ void fit_two_parameter_weibull(
 
 
 /**
- * \brief Open either the index or fasta file and prepare it for
+ * \brief Open the fasta file and prepare it for
  * searching.  Die if the input file cannot be found or read.
- * \returns The number of proteins in the file or index
+ * \returns The number of proteins in the file
  */
 int prepare_protein_input(
-  char* input_file,     ///< name of the fasta file or index directory
-  Index** index,      ///< return new index here OR
+  char* input_file,     ///< name of the fasta file
   Database** database)///< return new fasta database here
 {
 
   int num_proteins = 0;
-  bool use_index = is_directory(input_file);
 
-  if (use_index == true){
-    carp(CARP_INFO, "Preparing protein index %s", input_file);
-    *index = new Index(input_file);
+	carp(CARP_INFO, "Preparing protein fasta file %s", input_file);
+	*database = new Database(input_file, false);         
+	if( database == NULL ){
+		carp(CARP_FATAL, "Could not create protein database");
+	} 
 
-    if (index == NULL){
-      carp(CARP_FATAL, "Could not create index from disk for %s", input_file);
-    }
-    num_proteins = (*index)->getNumProteins();
-
-    // check that the index decoys are compatible with the search
-    DECOY_TYPE_T search_decoys = get_decoy_type_parameter("decoys");
-    DECOY_TYPE_T index_decoys = (*index)->getDecoyType();
-    if( search_decoys != NO_DECOYS && search_decoys != index_decoys ){
-      carp(CARP_FATAL, 
-           "Cannot search for %s decoys using an index with %s decoys",
-           decoy_type_to_string(search_decoys), 
-           decoy_type_to_string(index_decoys));
-    }
-
-  } else {
-    carp(CARP_INFO, "Preparing protein fasta file %s", input_file);
-    *database = new Database(input_file, false);         
-    if( database == NULL ){
-      carp(CARP_FATAL, "Could not create protein database");
-    } 
-
-    if(!(*database)->parse()){
-      carp(CARP_FATAL, "Error with protein database.");
-    } 
-    num_proteins = (*database)->getNumProteins();
-  }
-  return num_proteins;
+	if(!(*database)->parse()){
+		carp(CARP_FATAL, "Error with protein database.");
+	} 
+	return (*database)->getNumProteins();
 }
 
 /**
@@ -1932,15 +1908,11 @@ void strcat_formatted
  * \returns Zero if no decoys are searched, one if there are decoys
  * with an index search, or num-decoys-per-target for a fasta search.
  */
-int get_num_decoys(bool have_index){
+int get_num_decoys(){
 
   int requested_decoys_per_target = get_int_parameter("num-decoys-per-target");
   if( requested_decoys_per_target == 0 ){
     return 0;
-  }  else if( requested_decoys_per_target > 1 && have_index ){
-    carp(CARP_FATAL, 
-         "Cannot search %d decoys per target. The index contains only one.", 
-         requested_decoys_per_target);
   }
 
   DECOY_TYPE_T decoy_type = get_decoy_type_parameter("decoys");
@@ -1949,24 +1921,13 @@ int get_num_decoys(bool have_index){
   case NO_DECOYS:
     return 0;
 
-    // valid for index or database
   case PROTEIN_REVERSE_DECOYS: 
   case PEPTIDE_SHUFFLE_DECOYS:
-    if( have_index ){
-      return 1;
-    } else { // searching fasta
-      return  requested_decoys_per_target; 
-    }
-
-    //only valid for index
+		return  requested_decoys_per_target; 
   case PROTEIN_SHUFFLE_DECOYS:
-    if( have_index ){
-      return 1;
-    } else {
-      carp(CARP_FATAL, 
-           "Cannot generate shuffle whole proteins for fasta search.  Either "
-           "convert fasta to index or use reverse or peptide shuffling.");
-    }
+		carp(CARP_FATAL, 
+				 "Cannot generate shuffle whole proteins for fasta search. "
+				 "Use reverse or peptide shuffling.");
 
   case INVALID_DECOY_TYPE: // already checked in parameters...but
   case NUMBER_DECOY_TYPES:

@@ -63,7 +63,6 @@ MatchCollectionIterator::MatchCollectionIterator(
        output_file_directory, fasta_file);
 
   struct dirent* directory_entry = NULL;
-  bool use_index = is_directory(fasta_file);
 
   /*
     BF: I think that this step is to count how many decoys there are
@@ -141,21 +140,9 @@ MatchCollectionIterator::MatchCollectionIterator(
   }
 
   // get binary fasta file name with path to crux directory 
-  if (use_index == true){ 
-    char* binary_fasta = Index::getBinaryFastaName(fasta_file);
-    database_ = new Database(binary_fasta, true);// is memmapped
-    free(binary_fasta);
-    binary_fasta = Index::getDecoyBinaryFastaName(fasta_file);
-    if( binary_fasta != NULL ){
-      decoy_database_ = new Database(binary_fasta, true);// is memmapped
-      decoy_database_->parse();
-      free(binary_fasta);
-    }
-  } else {
-    database_ = new Database(fasta_file, false);// not memmapped
-    database_->transformTextToMemmap(".", true);// is temp
-    decoy_database_ = NULL;
-  }
+	database_ = new Database(fasta_file, false);// not memmapped
+	database_->transformTextToMemmap(".", true);// is temp
+	decoy_database_ = NULL;
   database_->parse();
 
   // reset directory

@@ -8,9 +8,9 @@
 
 # Create param file
 rm -rf crux-output 
-./crux search-for-matches smoke/test.ms2 smoke/test.fasta 1>/dev/null 2>&1
+./crux comet smoke/test.ms2 smoke/test.fasta 1>/dev/null 2>&1
 
-if [ ! -e crux-output/search.params.txt ]
+if [ ! -e crux-output/comet.params.txt ]
 then
   echo "Failed to write the param file.";
   exit;
@@ -27,7 +27,7 @@ echo "####################################################################
 #
 #####################################################################
 " > default.params
-cat crux-output/search.params.txt >> default.params
+cat crux-output/comet.params.txt >> default.params
 
 # Rename the value for parameter-file, and copy to doc directory.
 # N.B. Don't use the "-i" option to 'sed' because it has different

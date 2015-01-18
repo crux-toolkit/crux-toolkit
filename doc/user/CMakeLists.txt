@@ -37,14 +37,11 @@ set (
   compute-q-values.html 
   contributors.html
   crux-analyze-matches.html 
-  crux-create-index.html 
   crux-faq.html
   crux-get-ms2-spectrum.html 
   crux-predict-peptide-ions.html 
   crux-print-processed-spectra.html
-  crux-search-for-matches.html 
   crux-search-for-xlinks.html 
-  crux-sequest-search.html 
   crux.css 
   crux.html 
   customize-tutorial.html 

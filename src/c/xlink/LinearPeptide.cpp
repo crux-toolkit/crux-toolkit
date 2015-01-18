@@ -42,7 +42,6 @@ LinearPeptide::LinearPeptide(
 void LinearPeptide::addCandidates(
   FLOAT_T min_mass,  ///< min mass
   FLOAT_T max_mass,  ///< max mass
-  Index* index,  ///< protein index
   Database* database, ///< protein database
   PEPTIDE_MOD_T** peptide_mods, ///< modifications peptide can take
   int num_peptide_mods, ///< Number of possible peptide mods
@@ -57,7 +56,7 @@ void LinearPeptide::addCandidates(
     //
     ModifiedPeptidesIterator* peptide_iterator =
       new ModifiedPeptidesIterator(min_mass - delta_mass, max_mass - delta_mass, peptide_mod, 
-        false, index, database);
+        false, database);
 
     //add the targets
     while (peptide_iterator->hasNext()) {
@@ -78,7 +77,7 @@ void LinearPeptide::addCandidates(
     //add the decoys
     peptide_iterator = new
       ModifiedPeptidesIterator(min_mass - delta_mass, max_mass - delta_mass, peptide_mod,
-        true, index, database);
+        true, database);
 
     while (peptide_iterator->hasNext()) {
       Crux::Peptide* peptide = peptide_iterator->next();

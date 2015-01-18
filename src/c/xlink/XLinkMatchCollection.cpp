@@ -139,7 +139,6 @@ XLinkMatchCollection::XLinkMatchCollection(
   XLinkBondMap& bondmap, ///< allowable links
   PEPTIDE_MOD_T** peptide_mods, ///< list of possible modifications
   int num_peptide_mods, ///< number of possible modifications
-  Index* index, ///< protein index
   Database* database ///< protein database
   ) {
   
@@ -152,7 +151,6 @@ XLinkMatchCollection::XLinkMatchCollection(
     min_mass, 
     max_mass, 
     bondmap, 
-    index, 
     database, 
     peptide_mods, 
     num_peptide_mods);
@@ -166,7 +164,6 @@ void XLinkMatchCollection::addCandidates(
   FLOAT_T min_mass, ///< min mass
   FLOAT_T max_mass, ///< max mass
   XLinkBondMap& bondmap, ///< allowable links
-  Index* index, ///< protein index
   Database* database, ///< protein database
   PEPTIDE_MOD_T** peptide_mods, ///< list of possible modifications
   int num_peptide_mods ///< number of possible modifications
@@ -183,7 +180,6 @@ void XLinkMatchCollection::addCandidates(
     min_mass, 
     max_mass,
     bondmap,
-    index,
     database,
     peptide_mods,
     num_peptide_mods,
@@ -194,7 +190,6 @@ void XLinkMatchCollection::addCandidates(
     LinearPeptide::addCandidates(
       min_mass,
       max_mass,
-      index,
       database,
       peptide_mods,
       num_peptide_mods,
@@ -208,7 +203,6 @@ void XLinkMatchCollection::addCandidates(
       min_mass,
       max_mass,
       bondmap,
-      index,
       database,
       peptide_mods,
       num_peptide_mods,
@@ -224,7 +218,6 @@ XLinkMatchCollection::XLinkMatchCollection(
   FLOAT_T precursor_mz,  ///< precursor m/z
   SpectrumZState& zstate, ///< z-state
   XLinkBondMap& bondmap, ///< allowable links
-  Index* index,  ///< protein index
   Database* database,  ///< protein database
   PEPTIDE_MOD_T** peptide_mods,  ///< list of allowable peptide mods
   int num_peptide_mods,  ///< number of allowable peptides
@@ -243,7 +236,7 @@ XLinkMatchCollection::XLinkMatchCollection(
   for (int idx = 0; idx < isotopes.size();idx++) {
     get_min_max_mass(precursor_mz, zstate, isotopes[idx], use_decoy_window, min_mass, max_mass);
     carp(CARP_INFO, "isotope %i min:%g max:%g", isotopes[idx], min_mass, max_mass);
-    addCandidates(min_mass, max_mass, bondmap, index, database, peptide_mods, num_peptide_mods);
+    addCandidates(min_mass, max_mass, bondmap, database, peptide_mods, num_peptide_mods);
   }
 }
 

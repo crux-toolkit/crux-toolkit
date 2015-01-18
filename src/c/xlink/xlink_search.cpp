@@ -13,7 +13,6 @@
 //CRUX INCLUDES
 #include "objects.h"
 #include "FilteredSpectrumChargeIterator.h"
-#include "MatchSearch.h"
 #include "OutputFiles.h"
 #include "SpectrumCollectionFactory.h"
 
@@ -70,9 +69,8 @@ int SearchForXLinks::xlinkSearchMain() {
 
   /* Prepare input fasta  */
   carp(CARP_DEBUG, "Preparing database");
-  Index* index = NULL;
   Database* database = NULL;
-  int num_proteins = prepare_protein_input(input_file, &index, &database);
+  int num_proteins = prepare_protein_input(input_file, &database);
   carp(CARP_DEBUG, "Number of proteins:%d",num_proteins);
   free(input_file);
   PEPTIDE_MOD_T** peptide_mods = NULL;
@@ -91,7 +89,7 @@ int SearchForXLinks::xlinkSearchMain() {
     peptides_file << setprecision(8);
 
     XLinkMatchCollection* all_candidates = 
-      new XLinkMatchCollection(bondmap, peptide_mods, num_peptide_mods, index, database);
+      new XLinkMatchCollection(bondmap, peptide_mods, num_peptide_mods, database);
 
     
     peptides_file << "mass\tsequence\tprotein id"<<endl;
@@ -152,7 +150,6 @@ int SearchForXLinks::xlinkSearchMain() {
     XLinkMatchCollection* target_candidates = new XLinkMatchCollection(precursor_mz,
                        zstate,
                        bondmap,
-                       index,
                        database,
                        peptide_mods,
                        num_peptide_mods,
@@ -196,7 +193,6 @@ int SearchForXLinks::xlinkSearchMain() {
           new XLinkMatchCollection(precursor_mz,
             zstate,
             bondmap,
-            index,
             database,
             peptide_mods,
             num_peptide_mods,
@@ -306,7 +302,6 @@ int SearchForXLinks::xlinkSearchMain() {
     free_peptide_mod(peptide_mods[mod_idx]);
   }
   free(peptide_mods);
-  Index::free(index);
   Database::freeDatabase(database);
 
   //Calculate q-values via p-values from weibull fit.

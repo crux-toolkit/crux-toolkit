@@ -9,7 +9,6 @@
 #	number of allowed missed-cleavages: 0
 #	isotopic mass type: average
 #	verbosity: 30
-#	use index: false
 #	modification: mass change=79.90, symbol=*, max=2, position=any, apply to STY
 #	modification: mass change=33.30, symbol=#, max=1, position=C-term most 10 from end, apply to ABCDEFGHIJKLMNOPQRSTUVWXYZ
 2332.42	gi|16127996|ref|NP_414543.1|	220	19	ADCCEIWTDVDGVYTCDPR

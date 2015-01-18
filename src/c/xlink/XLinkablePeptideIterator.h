@@ -35,7 +35,6 @@ class XLinkablePeptideIterator {
   XLinkablePeptideIterator(
     double min_mass, ///< min mass of candidates
     double max_mass, ///< max mass of candidates
-    Index* index, ///< protein index
     Database* database, ///<peptide index
     PEPTIDE_MOD_T* peptide_mod, ///< current peptide mod
     bool is_decoy, ///< generate decoy candidates

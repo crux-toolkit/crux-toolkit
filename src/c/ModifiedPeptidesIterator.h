@@ -1,6 +1,6 @@
 /**
  * \file GenerateModifiedPeptidesIterator.h
- * \brief An object to return candidate peptides from a database or index.
+ * \brief An object to return candidate peptides from a database.
  */
 #ifndef MODIFIEDPEPTIDESITERATOR_H 
 #define MODIFIEDPEPTIDESITERATOR_H 
@@ -36,22 +36,20 @@ class ModifiedPeptidesIterator : public PeptideIterator
     SpectrumZState& zstate,  ///< Target mz of peptides
     PEPTIDE_MOD_T* pmod, ///< Peptide mod to apply
     bool is_decoy,  ///< generate decoy peptides
-    Index* index,      ///< Index from which to draw peptides OR
     Database* dbase    ///< Database from which to draw peptides
   );
 
   /**
-   * Constructor for returning all peptides in the index or database
+   * Constructor for returning all peptides in the database
    * that fall within the constraints defined in parameter.cpp.
    */
   ModifiedPeptidesIterator(
     PEPTIDE_MOD_T* pmod, ///< Peptide mod to apply
-    Index* index,      ///< Index from which to draw peptides OR
     Database* dbase    ///< Database from which to draw peptides
    );
 
   /**
-   * Constructor for returnign all peptides in the index or database
+   * Constructor for returnign all peptides in the database
    * that fall within the mass range
    */
   ModifiedPeptidesIterator(
@@ -59,7 +57,6 @@ class ModifiedPeptidesIterator : public PeptideIterator
     double max_mass,    ///< max-mass of peptides
     PEPTIDE_MOD_T* pmod, ///< Peptide mod to apply
     bool is_decoy, ///< generate decoy peptides
-    Index* index,     ///< Index from which to draw peptides OR
     Database* dbase   ///< Database from which to draw peptides
   );
 

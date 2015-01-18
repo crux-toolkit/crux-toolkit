@@ -12,9 +12,6 @@
 #include "crux-utils.h" // Need to get definition of NUM_FEATURES.
 
 #include "CruxApplicationList.h"
-#include "CreateIndex.h"
-#include "MatchSearch.h"
-#include "SequestSearch.h"
 #include "ComputeQValues.h"
 #include "ComputeQValuesLegacy.h"
 #include "QRanker.h"
@@ -58,10 +55,7 @@ int main(int argc, char** argv){
     applications.addMessage(applications.getListName() +
       " supports the following primary commands:");
     applications.add(new CruxBullseyeApplication());
-    applications.add(new CreateIndex());
     applications.add(new TideIndexApplication());
-    applications.add(new SequestSearch());
-    applications.add(new MatchSearch());
     applications.add(new TideSearchApplication());
     applications.add(new ReadSpectrumRecordsApplication());
     applications.add(new CometApplication());

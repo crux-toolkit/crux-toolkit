@@ -142,7 +142,6 @@ void PMCDelimitedFileWriter::setUpProteinsColumns(
                      "delimited files.", application->getName().c_str());
     return;
   case MISC_COMMAND:
-  case INDEX_COMMAND:
   case PROCESS_SPEC_COMMAND:
   case GENERATE_PEPTIDES_COMMAND:
   case GET_MS2_SPECTRUM_COMMAND:
@@ -237,7 +236,6 @@ void PMCDelimitedFileWriter::setUpPeptidesColumns(
                      "delimited files.", application->getName().c_str());
     return;
   case MISC_COMMAND:
-  case INDEX_COMMAND:
   case PROCESS_SPEC_COMMAND:
   case GENERATE_PEPTIDES_COMMAND:
   case GET_MS2_SPECTRUM_COMMAND:
@@ -380,7 +378,6 @@ void PMCDelimitedFileWriter::setUpPSMsColumns(
                      "delimited files.", application->getName().c_str());
     return;
   case MISC_COMMAND:
-  case INDEX_COMMAND:
   case PROCESS_SPEC_COMMAND:
   case GENERATE_PEPTIDES_COMMAND:
   case GET_MS2_SPECTRUM_COMMAND:
