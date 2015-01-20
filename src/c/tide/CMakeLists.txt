@@ -16,6 +16,8 @@ include_directories(
   ${CMAKE_BINARY_DIR}/src/external/include
   ${CMAKE_BINARY_DIR}/src/external/build/src/ProtocolBuffers/src
   ${CMAKE_CURRENT_BINARY_DIR}/protoobj
+  ${CMAKE_BINARY_DIR}/src/external/build/src/ProteoWizard/libraries/boost_1_56_0
+  ${CMAKE_BINARY_DIR}/src/external/build/src/ProteoWizard/libraries/boost_aux
 )
 endif (WIN32 AND NOT CYGWIN)
 link_directories(
@@ -163,7 +165,7 @@ if (WIN32 AND NOT CYGWIN)
 else (WIN32 AND NOT CYGWIN)
   set_property(TARGET tide-search PROPERTY COMPILE_DEFINITIONS MAIN)
 endif (WIN32 AND NOT CYGWIN)
-target_link_libraries(tide-search tide-support gflags protobuf)
+target_link_libraries(tide-search tide-support gflags protobuf boost_system)
 
 ############ Build tide-test-read-ms2 ############
 #add_executable(tide-test-read-ms2 test_read_ms2.cc)
