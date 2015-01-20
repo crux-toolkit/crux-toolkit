@@ -1163,7 +1163,7 @@ void initialize_parameters(void){
     "true"
   );
   set_int_parameter("max-precursor-charge", 5, 1, BILLION,
-    "Set the maximum charge state to look for when analyzing a spectrum. "
+    "he maximum charge state of a spectra to consider in search. "
     "Default=5.",
     " Available for tide-search.",
     "true"
