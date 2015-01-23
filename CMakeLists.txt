@@ -12,18 +12,18 @@ message(
 )
 
 add_subdirectory(doc/user)
-add_subdirectory(src/external)
-add_subdirectory(src/c)
+add_subdirectory(ext)
+add_subdirectory(src)
 
 # Only process smoke tests directory if it exiists
-if (EXISTS "${CMAKE_SOURCE_DIR}/src/c/test/smoke-tests/runall")
-  add_subdirectory(src/c/test/smoke-tests)
-endif (EXISTS "${CMAKE_SOURCE_DIR}/src/c/test/smoke-tests/runall")
+if (EXISTS "${CMAKE_SOURCE_DIR}/test/smoke-tests/runall")
+  add_subdirectory(test/smoke-tests)
+endif (EXISTS "${CMAKE_SOURCE_DIR}/test/smoke-tests/runall")
 
 # Only process performance tests directory if it exiists
-if (EXISTS "${CMAKE_SOURCE_DIR}/src/c/test/performance-tests/runall")
-  add_subdirectory(src/c/test/performance-tests)
-endif (EXISTS "${CMAKE_SOURCE_DIR}/src/c/test/performance-tests/runall")
+if (EXISTS "${CMAKE_SOURCE_DIR}/test/performance-tests/runall")
+  add_subdirectory(test/performance-tests)
+endif (EXISTS "${CMAKE_SOURCE_DIR}/test/performance-tests/runall")
 
 install(FILES license.txt DESTINATION .)
 
@@ -31,21 +31,21 @@ add_custom_target(
   deep-clean
   COMMAND ${CMAKE_COMMAND} --build . --target clean
   COMMAND ${CMAKE_COMMAND} -E remove CMakeCache.txt
-  COMMAND ${CMAKE_COMMAND} -E remove_directory src/external/build
-  COMMAND ${CMAKE_COMMAND} -E remove_directory src/external/downloads
-  COMMAND ${CMAKE_COMMAND} -E remove_directory src/external/include/CometSearch
-  COMMAND ${CMAKE_COMMAND} -E remove_directory src/external/include/MSToolkit
-  COMMAND ${CMAKE_COMMAND} -E remove_directory src/external/include/boost
-  COMMAND ${CMAKE_COMMAND} -E remove_directory src/external/include/gflags
-  COMMAND ${CMAKE_COMMAND} -E remove_directory src/external/include/google
-  COMMAND ${CMAKE_COMMAND} -E remove_directory src/external/include/pwiz
-  COMMAND ${CMAKE_COMMAND} -E remove_directory src/external/include/xercesc
-  COMMAND ${CMAKE_COMMAND} -E remove_directory src/external/include/xsd
-  COMMAND ${CMAKE_COMMAND} -E remove_directory src/external/lib/pkgconfig
-  COMMAND ${CMAKE_COMMAND} -E remove src/external/lib/*.a
-  COMMAND ${CMAKE_COMMAND} -E remove src/external/lib/*.la
-  COMMAND ${CMAKE_COMMAND} -E remove src/external/lib/*.lib
-  COMMAND ${CMAKE_COMMAND} -E remove_directory src/external/share
+  COMMAND ${CMAKE_COMMAND} -E remove_directory ext/build
+  COMMAND ${CMAKE_COMMAND} -E remove_directory ext/downloads
+  COMMAND ${CMAKE_COMMAND} -E remove_directory ext/include/CometSearch
+  COMMAND ${CMAKE_COMMAND} -E remove_directory ext/include/MSToolkit
+  COMMAND ${CMAKE_COMMAND} -E remove_directory ext/include/boost
+  COMMAND ${CMAKE_COMMAND} -E remove_directory ext/include/gflags
+  COMMAND ${CMAKE_COMMAND} -E remove_directory ext/include/google
+  COMMAND ${CMAKE_COMMAND} -E remove_directory ext/include/pwiz
+  COMMAND ${CMAKE_COMMAND} -E remove_directory ext/include/xercesc
+  COMMAND ${CMAKE_COMMAND} -E remove_directory ext/include/xsd
+  COMMAND ${CMAKE_COMMAND} -E remove_directory ext/lib/pkgconfig
+  COMMAND ${CMAKE_COMMAND} -E remove ext/lib/*.a
+  COMMAND ${CMAKE_COMMAND} -E remove ext/lib/*.la
+  COMMAND ${CMAKE_COMMAND} -E remove ext/lib/*.lib
+  COMMAND ${CMAKE_COMMAND} -E remove_directory ext/share
   COMMENT "Cleaning project tree."
   COMMENT "Deleting all files for external tools."
 )
@@ -53,14 +53,14 @@ add_custom_target(
 add_custom_target(
   externals-only 
   COMMAND ${CMAKE_MAKE_PROGRAM}
-  WORKING_DIRECTORY src/external
+  WORKING_DIRECTORY ext
   COMMENT "Building only external dependendcies."
 )
 
 add_custom_target(
   no-externals 
   COMMAND ${CMAKE_MAKE_PROGRAM} crux  xlink-score-spectrum xlink-assign-ions 
-  WORKING_DIRECTORY src/c
+  WORKING_DIRECTORY src
   COMMENT "Not building external dependendcies."
 )
 
@@ -129,14 +129,14 @@ set (
    /doc/mods/;
    /doc/user/download/;
    /doc/user/open_source_download/;
-   /src/c/test/;
+   /test/;
    /src/CruxGui/;
-   /src/external/bin/;
-   /src/external/build/;
-   /src/external/downloads/;
-   /src/external/include/;
-   /src/external/lib/;
-   /src/external/share/;
+   /ext/bin/;
+   /ext/build/;
+   /ext/downloads/;
+   /ext/include/;
+   /ext/lib/;
+   /ext/share/;
    /src/python/;
    /CMakeCache.txt$;
    /CMakeFiles/;
