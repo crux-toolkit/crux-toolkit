@@ -152,7 +152,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   set(
     crux_lib_files
     ${crux_lib_files}
-    WinCrux.cpp
+    util/WinCrux.cpp
   )
 endif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
