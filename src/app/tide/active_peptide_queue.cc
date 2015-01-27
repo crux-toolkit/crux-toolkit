@@ -277,7 +277,7 @@ int ActivePeptideQueue::CountAAFrequency(
       ++nvAAMassCounterC[(unsigned int)(dAAResidueMass[nLen - 1] / binWidth + 1.0 - binOffset)];
       ++cntTerm;
 
-      delete dAAResidueMass;
+      delete[] dAAResidueMass;
       fifo_alloc_peptides_.ReleaseAll();
     }
 
@@ -305,9 +305,9 @@ int ActivePeptideQueue::CountAAFrequency(
     }
   }
 
-  delete nvAAMassCounterN;
-  delete nvAAMassCounterI;
-  delete nvAAMassCounterC;
+  delete[] nvAAMassCounterN;
+  delete[] nvAAMassCounterI;
+  delete[] nvAAMassCounterC;
   return uiUniqueMasses;
 }
 

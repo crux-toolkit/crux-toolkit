@@ -343,10 +343,10 @@ int TideSearchApplication::main(int argc, char** argv) {
       delete decoy_file;
     }
   }
-  delete aaFreqN;
-  delete aaFreqI;
-  delete aaFreqC;
-  delete aaMass;
+  delete[] aaFreqN;
+  delete[] aaFreqI;
+  delete[] aaFreqC;
+  delete[] aaMass;
 
   return 0;
 }

@@ -77,7 +77,7 @@ const FixPt MassConstants::fixp_mono_co  = ToFixPt(MassConstants::mono_co);
 const FixPt MassConstants::fixp_proton   = ToFixPt(MassConstants::proton);
 
 ModCoder MassConstants::mod_coder_;
-double* MassConstants::unique_deltas_;
+vector<double> MassConstants::unique_deltas_;
 //double* MassConstants::unique_deltas_bin_;
 
 static bool CheckModTable(const pb::ModTable& mod_table);
@@ -140,9 +140,10 @@ bool MassConstants::Init(const pb::ModTable* mod_table, const double bin_width, 
     carp(CARP_DEBUG, "Number of unique modification masses: %d\n", mod_table->unique_deltas_size());
 
     mod_coder_.Init(mod_table->unique_deltas_size());
-    unique_deltas_ = new double[mod_table->unique_deltas_size()];
+    unique_deltas_.clear();
+    unique_deltas_.reserve(mod_table->unique_deltas_size());
     for (int i = 0; i < mod_table->unique_deltas_size(); ++i) {
-      unique_deltas_[i] = mod_table->unique_deltas(i);
+      unique_deltas_.push_back(mod_table->unique_deltas(i));
     }
   }
 
