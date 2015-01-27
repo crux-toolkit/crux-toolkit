@@ -12,6 +12,7 @@
 #define MASS_CONSTANTS_H
 
 #include "mod_coder.h"
+#include <vector>
 
 #define BIN_WIDTH 1.0005079
 #define BIN_OFFSET 0.68
@@ -105,7 +106,7 @@ class MassConstants {
   static void FillMassTable(const double* elements, double* table);
 
   static ModCoder mod_coder_;
-  static double* unique_deltas_;
+  static std::vector<double> unique_deltas_;
 
 };
 

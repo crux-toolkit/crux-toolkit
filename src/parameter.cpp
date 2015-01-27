@@ -2435,6 +2435,7 @@ bool select_cmd_line_options(  //remove options from name
                                       print); 
     }
   }
+  free_hash_iterator(hash_iter);
   
   if (success) {
     /* Check to see if all options to print are in the entire list of options*/
