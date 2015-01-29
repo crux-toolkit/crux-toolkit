@@ -1247,7 +1247,11 @@ Match* Match::parseTabDelimited(
 
   match -> match_scores_[XCORR] = result_file.getFloat(XCORR_SCORE_COL);
   match -> match_rank_[XCORR] = result_file.getInteger(XCORR_RANK_COL);
-
+  
+  if (!result_file.empty(EXACT_PVALUE_COL)){
+    match -> match_scores_[TIDE_SEARCH_EXACT_PVAL] = result_file.getFloat(EXACT_PVALUE_COL);
+    match -> match_scores_[TIDE_SEARCH_REFACTORED_XCORR] = result_file.getFloat(REFACTORED_SCORE_COL);
+  }
   if (!result_file.empty(DECOY_XCORR_QVALUE_COL)){
     match->match_scores_[DECOY_XCORR_QVALUE] = result_file.getFloat(DECOY_XCORR_QVALUE_COL);
   }

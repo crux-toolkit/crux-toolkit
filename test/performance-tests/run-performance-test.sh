@@ -146,21 +146,21 @@ for searchtool in comet tide-search; do
       $ms2 $proteins
   fi
 
-  # Run calibrate-scores
-  if [[ -e $searchtool/calibrate-scores.target.txt ]]; then
-    echo Skipping crux calibrate-scores.
+  # Run assign-confidence
+  if [[ -e $searchtool/assign-confidence.target.txt ]]; then
+    echo Skipping crux assign-confidence.
   else
-    $CRUX calibrate-scores \
+    $CRUX assign-confidence \
       --output-dir $searchtool \
       $searchtool/$searchtool.target.txt
   fi
 
-  $CRUX sort-by-column --column-type real --ascending true $searchtool/calibrate-scores.target.txt "decoy q-value (xcorr)" | $CRUX extract-columns - "decoy q-value (xcorr)" > $searchtool/calibrate-scores.xcorr.txt
-  echo replot \"$searchtool/calibrate-scores.xcorr.txt\" using 1:0 title \"$searchtool xcorr\" with lines >> $gnuplot
+  $CRUX sort-by-column --column-type real --ascending true $searchtool/assign-confidence.target.txt "decoy q-value (xcorr)" | $CRUX extract-columns - "decoy q-value (xcorr)" > $searchtool/assign-confidence.xcorr.txt
+  echo replot \"$searchtool/assign-confidence.xcorr.txt\" using 1:0 title \"$searchtool xcorr\" with lines >> $gnuplot
 
   if [[ $searchtool == "comet" ]]; then
-    $CRUX extract-columns $searchtool/calibrate-scores.target.txt "decoy q-value (e-value)" > $searchtool/calibrate-scores.evalue.txt 
-    echo replot \"$searchtool/calibrate-scores.evalue.txt\" using 1:0 title \"$searchtool e-value\" with lines >> $gnuplot
+    $CRUX extract-columns $searchtool/assign-confidence.target.txt "decoy q-value (e-value)" > $searchtool/assign-confidence.evalue.txt 
+    echo replot \"$searchtool/assign-confidence.evalue.txt\" using 1:0 title \"$searchtool e-value\" with lines >> $gnuplot
   fi
 
   # Run Crux percolator
@@ -173,8 +173,8 @@ for searchtool in comet tide-search; do
       $searchtool/$searchtool.target.txt
   fi
 
-  $CRUX extract-columns $searchtool/percolator.target.psms.txt "percolator q-value" > $searchtool/calibrate-scores.percolator.txt
-  echo replot \"$searchtool/calibrate-scores.percolator.txt\" using 1:0 title \"$searchtool percolator\" with lines >> $gnuplot
+  $CRUX extract-columns $searchtool/percolator.target.psms.txt "percolator q-value" > $searchtool/assign-confidence.percolator.txt
+  echo replot \"$searchtool/assign-confidence.percolator.txt\" using 1:0 title \"$searchtool percolator\" with lines >> $gnuplot
 
   # Run q-ranker.
   if [[ -e $searchtool/q-ranker.target.psms.txt ]]; then
@@ -187,8 +187,8 @@ for searchtool in comet tide-search; do
       $ms2 $searchtool/$searchtool.target.txt
   fi
 
-  $CRUX extract-columns $searchtool/q-ranker.target.psms.txt "q-ranker q-value" > $searchtool/calibrate-scores.qranker.txt
-  echo replot \"$searchtool/calibrate-scores.qranker.txt\" using 1:0 title \"$searchtool q-ranker\" with lines >> $gnuplot
+  $CRUX extract-columns $searchtool/q-ranker.target.psms.txt "q-ranker q-value" > $searchtool/assign-confidence.qranker.txt
+  echo replot \"$searchtool/assign-confidence.qranker.txt\" using 1:0 title \"$searchtool q-ranker\" with lines >> $gnuplot
 
   # Run Barista.
   # if [[ -e $searchtool/barista.target.psms.txt ]]; then
@@ -202,8 +202,8 @@ for searchtool in comet tide-search; do
   #     $fasta $ms2 $searchtool/$searchtool.target.txt
   # fi
 
-  # $CRUX extract-columns $searchtool/barista.target.psms.txt "barista q-value" > $searchtool/calibrate-scores.barista.txt
-  # echo replot \"$searchtool/calibrate-scores.barista.txt\" using 1:0 title \"$searchtool barista\" with lines >> $gnuplot
+  # $CRUX extract-columns $searchtool/barista.target.psms.txt "barista q-value" > $searchtool/assign-confidence.barista.txt
+  # echo replot \"$searchtool/assign-confidence.barista.txt\" using 1:0 title \"$searchtool barista\" with lines >> $gnuplot
   
 done
 

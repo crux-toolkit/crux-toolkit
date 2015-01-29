@@ -617,6 +617,8 @@ typedef enum _hardklor_algorithm HARDKLOR_ALGORITHM_T;
 enum _command {
   INVALID_COMMAND,      ///< required by coding standards
   QVALUE_COMMAND,       ///< compute-q-values
+  MIXMAX_COMMAND,       ///< compute q-values using mix-max (Uri Keich)
+  TDC_COMMAND,          ///< compute q-values using TDC (Elias-Gygi)  
   GENERATE_DECOYS_COMMAND, ///< generate-decoys
   PERCOLATOR_COMMAND,   ///< percolator
   TIDE_INDEX_COMMAND,   ///< tide-index

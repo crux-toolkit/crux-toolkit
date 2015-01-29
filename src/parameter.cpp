@@ -1806,12 +1806,23 @@ void initialize_parameters(void){
      "Default = protein.",
      "Available for barista.", "true");
 
-
   /* analyze-matches parameter options */
   set_double_parameter("pi-zero", 1.0, 0, 1, 
       "The estimated percent of target scores that are drawn from the "
       "null distribution.",
-      "Used by compute-q-values, percolator and q-ranker", "true");
+      "Used by assign-confidence, compute-q-values, percolator and q-ranker", "false");
+  set_boolean_parameter("smaller-is-better", false, 
+      "Specify the semantics of the score, i.e., whether a smaller value "
+      "implies a better match or vice versa.",
+      "Used by assign-confidence.", "true");
+  set_string_parameter("score", "xcorr score", 
+      "Specify the column (for tab-delimited input) or tag (for XML input) "
+      "used as input to the q-value estimation procedure.",
+      "Used by assign-confidence.", "true");
+  set_string_parameter("estimation-method", "tdc", 
+      "Specify the q-value calculation procedure to either "
+      "target-decoy competition (tcd) or mix-max (mix-max).",
+      "Used by assign-confidence.", "true");      
   set_string_parameter("percolator-intraset-features", "F",
       "Set a feature for percolator that in later versions is not an option.",
       "Shouldn't be variable; hide from user.", "false");

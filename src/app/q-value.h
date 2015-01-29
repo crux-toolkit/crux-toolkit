@@ -24,7 +24,7 @@
 
 
 
-FLOAT_T* compute_decoy_qvalues(
+FLOAT_T* compute_decoy_qvalues_tdc(
   FLOAT_T* target_scores,
   int      num_targets,
   FLOAT_T* decoy_scores,
@@ -37,10 +37,17 @@ FLOAT_T* compute_qvalues_from_pvalues(
   int      num_pvals,
   FLOAT_T  pi_zero);
 
+FLOAT_T estimate_pi0( FLOAT_T* target_scores,
+  int      num_targets,
+  FLOAT_T* decoy_scores,
+  int      num_decoys,
+  bool     ascending);
+  
 MatchCollection* run_qvalue(
   const char* psm_result_folder, 
   const char* fasta_file,
-  OutputFiles& output );
+  OutputFiles& output,
+  COMMAND_T command  );
 
 #endif //QVALUE_H
 
