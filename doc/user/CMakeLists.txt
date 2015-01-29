@@ -26,12 +26,12 @@ endif (EXISTS /noble/www/htdocs/proj/crux)
 
 set (
   crux_documentation
+  assign-confidence.html
   barista-xml-format.html
   barista.html
   broken-link.html
   bullseye.html
   bullseye_standalone_to_crux.html
-  calibrate-scores.html
   comet.html
   comet.params
   compute-q-values.html 
