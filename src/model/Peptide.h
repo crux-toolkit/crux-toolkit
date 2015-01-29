@@ -382,7 +382,7 @@ class Peptide {
    * \returns The mass of the given peptide.
    */
   static FLOAT_T calcSequenceMass(
-    const char* peptide, ///< the query peptide -in
+    const std::string& peptide, ///< the query peptide -in
     MASS_TYPE_T mass_type ///< isotopic mass type (AVERAGE, MONO) -in
     );
 

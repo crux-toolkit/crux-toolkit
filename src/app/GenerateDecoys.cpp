@@ -64,7 +64,7 @@ int GenerateDecoys::main(int argc, char** argv) {
     create_stream_in_path(proteinDecoysFile.c_str(), NULL, overwrite) : NULL;
 
   // Read fasta
-  string fastaFile = get_string_parameter_pointer("protein fasta file");
+  string fastaFile = get_string_parameter("protein fasta file");
   carp(CARP_INFO, "Reading %s", fastaFile.c_str());
   map< string, vector<string> > proteins;
   set<string> targetSeqs;
@@ -153,7 +153,7 @@ int GenerateDecoys::main(int argc, char** argv) {
 }
 
 bool GenerateDecoys::canGenerateDecoyProteins() {
-  const string decoyFormat = get_string_parameter_pointer("decoy-format");
+  const string decoyFormat = get_string_parameter("decoy-format");
 
   // Can never write decoy proteins if not making decoys
   if (decoyFormat == "none") {
@@ -167,8 +167,7 @@ bool GenerateDecoys::canGenerateDecoyProteins() {
 
   // If making peptide-level decoys, we can only write decoy proteins if:
   // Using an enzyme, full digestion, no missed cleavages
-  bool customEnzyme =
-    string(get_string_parameter_pointer("custom-enzyme")) == "__NULL_STR";
+  bool customEnzyme = !get_string_parameter("custom-enzyme").empty();
   bool useEnzyme = get_enzyme_type_parameter("enzyme") != NO_ENZYME;
   bool fullDigest = get_digest_type_parameter("digestion") == FULL_DIGEST;
   bool noMissedCleavages = get_int_parameter("missed-cleavages") == 0;
@@ -199,7 +198,7 @@ void GenerateDecoys::readFasta(
   int missedCleavages = get_int_parameter("missed-cleavages");
   int minLength = get_int_parameter("min-length");
   int maxLength = get_int_parameter("max-length");
-  if (string(get_string_parameter_pointer("custom-enzyme")) != "__NULL_STR") {
+  if (!get_string_parameter("custom-enzyme").empty()) {
     enzyme = CUSTOM_ENZYME;
   }
   vector<string> trypticPeptides;
@@ -492,7 +491,7 @@ bool GenerateDecoys::makeDecoy(
 ) {
   const int MAX_SHUFFLE_ATTEMPTS = 6;
 
-  const string keepTerminal = get_string_parameter_pointer("keep-terminal-aminos");
+  const string keepTerminal = get_string_parameter("keep-terminal-aminos");
   string decoyPre;
   string decoyPost;
   if (keepTerminal == "N") {

@@ -151,9 +151,9 @@ int SpectralCounts::main(int argc, char** argv) {
  * as member variables.
  */
 void SpectralCounts::getParameterValues(){
-  psm_file_ = get_string_parameter_pointer("input PSMs");
+  psm_file_ = get_string_parameter("input PSMs");
   threshold_ = get_double_parameter("threshold");
-  database_name_ = get_string_parameter_pointer("protein-database");
+  database_name_ = get_string_parameter("protein-database");
   unique_mapping_ = get_boolean_parameter("unique-mapping");
   quantitation_ = get_quant_level_type_parameter("quant-level");
   parsimony_ = get_parsimony_type_parameter("parsimony");
@@ -161,7 +161,7 @@ void SpectralCounts::getParameterValues(){
   bin_width_ = get_double_parameter("mz-bin-width");
   
   threshold_type_ = get_threshold_type_parameter("threshold-type");
-  custom_threshold_name_ = get_string_parameter_pointer("custom-threshold-name");
+  custom_threshold_name_ = get_string_parameter("custom-threshold-name");
   threshold_min_ = get_boolean_parameter("custom-threshold-min");
 }
 
@@ -530,7 +530,7 @@ void SpectralCounts::getPeptideScores()
 
   // for SIN, parse out spectrum collection from ms2 fiel
   if( measure_ == MEASURE_SIN ){
-    spectra = SpectrumCollectionFactory::create(get_string_parameter_pointer("input-ms2"));
+    spectra = SpectrumCollectionFactory::create(get_string_parameter("input-ms2"));
   }
 
   for(set<Match*>::iterator match_it = matches_.begin();
@@ -658,7 +658,7 @@ void SpectralCounts::invalidCustomScore() {
  */
 void SpectralCounts::filterMatchesCustom() {
 
-  if (custom_threshold_name_ == string("__NULL_STR")) {
+  if (custom_threshold_name_.empty()) {
     invalidCustomScore();
   }
 

@@ -847,16 +847,13 @@ int Peptide::countModifiedAAs(){
  * \returns The mass of the given peptide as determined by the aa sequence.
  */
 FLOAT_T Peptide::calcSequenceMass(
-  const char* peptide, ///< the query peptide -in
+  const string& peptide, ///< the query peptide -in
   MASS_TYPE_T mass_type ///< isotopic mass type (AVERAGE, MONO) -in
   ) {
 
   FLOAT_T peptide_mass = 0;
-  int idx = 0;
-  char amino;
-  while(peptide[idx] != '\0'){
-    amino = peptide[idx++];
-    peptide_mass += get_mass_amino_acid(amino, mass_type);
+  for (string::const_iterator i = peptide.begin(); i != peptide.end(); i++) {
+    peptide_mass += get_mass_amino_acid(*i, mass_type);
   }
   if(mass_type == AVERAGE){
     return peptide_mass + MASS_H2O_AVERAGE;

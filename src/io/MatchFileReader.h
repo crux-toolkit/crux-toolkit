@@ -138,7 +138,7 @@ class MatchFileReader: public DelimitedFileReader {
 
 
     static MatchCollection* parse(
-      const char* file_path,
+      const std::string& file_path,
       Database* database,
       Database* decoy_database
     );

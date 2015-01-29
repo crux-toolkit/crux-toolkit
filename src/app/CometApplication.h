@@ -61,7 +61,7 @@ class CometApplication: public CruxApplication {
    * Extracts the variable modification info from the string
    */
   void calcVarMods(
-    const char* var_str, ///< variable modification string
+    const std::string& var_str, ///< variable modification string
     VarMods& varmods ///< Variable modification structure to set
     );
 
@@ -69,7 +69,7 @@ class CometApplication: public CruxApplication {
    * Sets a double range from a string
    */
   void getDoubleRange(
-    const char* str, ///< range string to set -in
+    const std::string& str, ///< range string to set -in
     DoubleRange& doubleRangeParam ///< DoubleRange parameter -out
     );
 
@@ -77,7 +77,7 @@ class CometApplication: public CruxApplication {
    * sets the integer range from a string
    */
   void getIntRange(
-    const char* str, ///< range string to set -in
+    const std::string& str, ///< range string to set -in
     IntRange& intRangeParam ///< IntRange parameter -out
     );
 

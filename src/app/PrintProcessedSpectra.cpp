@@ -52,22 +52,20 @@ int PrintProcessedSpectra::main(int argc, char** argv) {
              argc, argv);
 
   // Get arguments and options
-  const char* input_ms2_name  = get_string_parameter_pointer("ms2 file");
-  char* output_ms2_name = get_string_parameter("output file");
-  prefix_fileroot_to_name(&output_ms2_name);
-  const char* output_dir = get_string_parameter_pointer("output-dir");
+  string input_ms2_name  = get_string_parameter("ms2 file");
+  string output_ms2_name = get_string_parameter("output file");
+  output_ms2_name = prefix_fileroot_to_name(output_ms2_name);
+  string output_dir = get_string_parameter("output-dir");
   bool overwrite = get_boolean_parameter("overwrite");
 
   // open output file
   create_output_directory(output_dir, overwrite);
-  FILE* output_ms2 = create_file_in_path(output_ms2_name,
-                                         output_dir,
-                                         overwrite);
+  FILE* output_ms2 = create_file_in_path(output_ms2_name, output_dir, overwrite);
   // open input file
   Crux::SpectrumCollection* spectra =
     SpectrumCollectionFactory::create(input_ms2_name);
-  if( spectra == NULL ){
-    carp(CARP_FATAL, "Could not read spectra from %s.", input_ms2_name);
+  if (spectra == NULL) {
+    carp(CARP_FATAL, "Could not read spectra from %s.", input_ms2_name.c_str());
   }
 
   spectra->parse();

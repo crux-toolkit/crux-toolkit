@@ -13,6 +13,7 @@
 #include "MzIdentMLReader.h"
 #include "model/Protein.h"
 #include "model/PostProcessProtein.h"
+#include "util/crux-file-utils.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -33,12 +34,12 @@ MatchCollectionParser::~MatchCollectionParser() {
    * Creates database object(s) from fasta or index file
    */
 void MatchCollectionParser::loadDatabase(
-  const char* fasta_file, ///< fasta or index path -in  
+  const string& fasta_file, ///< fasta or index path -in  
   Database*& database, ///< resulting database -out
   Database*& decoy_database ///< resulting decoy database -out
   ) {
 
-  if (fasta_file == NULL || string(fasta_file) == string("__NULL_STR")) {
+  if (fasta_file.empty()) {
     carp(CARP_DEBUG, "no database provided");
     database = new Database();
     database -> setIsParsed(true);
@@ -99,7 +100,7 @@ Protein* MatchCollectionParser::getProtein(
   carp(CARP_DEBUG, "Creating new protein for %s",protein_id.c_str());
   protein = new PostProcessProtein();
   protein->setId(protein_id.c_str());
-  string decoy_prefix = get_string_parameter_pointer("decoy-prefix");
+  string decoy_prefix = get_string_parameter("decoy-prefix");
   if (protein_id.find(decoy_prefix) != string::npos) {
     carp(CARP_DEBUG, "adding to decoy database");
     is_decoy = true;
@@ -146,7 +147,7 @@ Protein* MatchCollectionParser::getProtein(
   protein->setLength(sequence.length());
   
 
-  string decoy_prefix = get_string_parameter_pointer("decoy-prefix");
+  string decoy_prefix = get_string_parameter("decoy-prefix");
   if (protein_id.find(decoy_prefix) != string::npos) {
     is_decoy = true;
     decoy_database->addProtein(protein);
@@ -161,18 +162,16 @@ Protein* MatchCollectionParser::getProtein(
  * \returns a MatchCollection object using the file and protein database
  */
 MatchCollection* MatchCollectionParser::create(
-  const char* match_path, ///< path to the file of matches 
-  const char* fasta_path ///< path to the protein database
+  const string& match_path, ///< path to the file of matches 
+  const string& fasta_path ///< path to the protein database
   ) {
 
-  carp(CARP_DEBUG, "match path:%s", match_path);
-  if (fasta_path) {
-    carp(CARP_DEBUG, "fasta path:%s", fasta_path);
+  carp(CARP_DEBUG, "match path:%s", match_path.c_str());
+  if (!fasta_path.empty()) {
+    carp(CARP_DEBUG, "fasta path:%s", fasta_path.c_str());
   }
-  struct stat stat_buff ; 
-  stat(match_path, &stat_buff);
-  if(stat(match_path, &stat_buff)!=0){
-    carp(CARP_FATAL, "The file %s does not exist. \n", match_path);
+  if (!file_exists(match_path)) {
+    carp(CARP_FATAL, "The file %s does not exist. \n", match_path.c_str());
   }
   
   if (database_ == NULL || decoy_database_ == NULL) {
@@ -180,15 +179,13 @@ MatchCollection* MatchCollectionParser::create(
   }
   MatchCollection* collection = NULL;
   
-  if (S_ISDIR(stat_buff.st_mode)){
+  if (is_directory(match_path)) {
     carp(CARP_FATAL, "Internal error");
-  }else if( has_extension(match_path, ".txt")){
-    collection = MatchFileReader::parse(match_path, database_, decoy_database_);
-  } else if( has_extension(match_path, ".xml")) {
+  } else if (has_extension(match_path, ".xml")) {
     collection = PepXMLReader::parse(match_path, database_, decoy_database_);
   } else if (has_extension(match_path, ".sqt")) {
     collection = SQTReader::parse(match_path, database_, decoy_database_);
-  } else if( has_extension(match_path, ".mzid")) {
+  } else if (has_extension(match_path, ".mzid")) {
     collection = MzIdentMLReader::parse(match_path, database_, decoy_database_);
   } else {
     collection = MatchFileReader::parse(match_path, database_, decoy_database_);

@@ -34,7 +34,7 @@ class SpectrumCollection {
    * initializes member variables.
    */
   SpectrumCollection(
-    const char* filename///< The spectrum collection filename. -in
+    const std::string& filename///< The spectrum collection filename. -in
   );
 
    /**

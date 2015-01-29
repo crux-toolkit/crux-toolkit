@@ -118,26 +118,6 @@ bool myfwrite
    size_t nitems, 
    FILE *stream);
 
-/***************************************************************************
- * Dynamically create or grow an array; 
- * P = pointer, N = new size, T = type 
- **************************************************************************/
-typedef void *malloc_t;
-#define Resize(P,N,T) { \
-  void *new_P; \
-  new_P = (P) ? realloc((malloc_t)(P), (N)*sizeof(T)) : malloc((N)*sizeof(T)); \
-  if (!new_P) { \
-    fprintf(stderr, "Resize(" #P "," #N "," #T ") failed!\n"); \
-    exit(1); \
-  } \
-  (P) = (T *) new_P; \
-}
-
-/********************************************************************
- * Only free memory if the given pointer is non-null.
- ********************************************************************/
-#define myfree(x) if (x) std::free((char* ) (x))
-
 /********************************************************************
  * Math macros.
  ********************************************************************/
@@ -230,22 +210,6 @@ bool almost_equal
   (double value1,
    double value2,
    double slop);
-
-/*************************************************************************
- * Convert a boolean to and from a "true" or "false" string.
- *************************************************************************/
-char*  boolean_to_string
- (bool the_boolean);
-
-bool boolean_from_string
-  (char* true_or_false);
-
-/**************************************************************************
- * Does a given character appear in a given string?
- **************************************************************************/
-bool char_in_string
-  (const char* a_string,
-   char        a_char);
 
 /**************************************************************************
  * Generic functions for converting between integer and string

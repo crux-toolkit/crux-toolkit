@@ -94,7 +94,7 @@ int MakePinApplication::main(int argc, char** argv) {
     argv)
   ;
 
-  string target_path = string(get_string_parameter_pointer("target input"));
+  string target_path = get_string_parameter("target input");
 
   vector<string> search_result_files;
   get_search_result_paths(target_path, search_result_files);
@@ -122,7 +122,7 @@ int MakePinApplication::main(vector<string>& paths) {
       SQTReader::readSymbols(*iter);
     }
 
-    MatchCollection* current_collection = parser.create(iter->c_str(), "__NULL_STR");
+    MatchCollection* current_collection = parser.create(iter->c_str(), "");
     for (int scorer_idx = (int)SP; scorer_idx < (int)NUMBER_SCORER_TYPES; scorer_idx++) {
       target_collection->setScoredType((SCORER_TYPE_T)scorer_idx, 
         current_collection->getScoredType((SCORER_TYPE_T)scorer_idx));
@@ -152,16 +152,15 @@ int MakePinApplication::main(vector<string>& paths) {
 
   PinWriter* writer = new PinWriter();
 
-  string output_dir=get_string_parameter_pointer("output-dir");
+  string output_dir = get_string_parameter("output-dir");
  
   //perpare output file 
-  string output_filename = get_string_parameter_pointer("output-file");
-  if(output_filename=="" || output_filename=="__NULL_STR"){
-    string fileroot = get_string_parameter_pointer("fileroot");
-    if (fileroot == "" || fileroot == "__NULL_STR")
-      fileroot = "";
-    else
+  string output_filename = get_string_parameter("output-file");
+  if (output_filename.empty()) {
+    string fileroot = get_string_parameter("fileroot");
+    if (!fileroot.empty()) {
       fileroot += ".";
+    }
     output_filename = fileroot + "make-pin.pin";
   }
   writer->openFile(output_filename.c_str(),output_dir.c_str(), get_boolean_parameter("overwrite"));

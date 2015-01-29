@@ -21,7 +21,7 @@ int ReadSpectrumRecordsApplication::main(int argc, char** argv) {
 
   carp(CARP_INFO, "Running read-spectrumrecords...");
 
-  string records_file = get_string_parameter_pointer("spectrum records file");
+  string records_file = get_string_parameter("spectrum records file");
 
   pb::Header header;
   HeadedRecordReader reader(records_file, &header);

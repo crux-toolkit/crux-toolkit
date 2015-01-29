@@ -69,14 +69,14 @@ Database::Database() {
  * \returns A new database object.
  */
 Database::Database(
-  const char*         filename, ///< The file from which to parse the database. 
+  const string& filename, ///< The file from which to parse the database. 
   ///< either text fasta file or binary fasta file -in
   bool is_memmap, ///< are we using a memory mapped binary fasta file? 
   ///< If so, all proteins are memory mapped -in
   DECOY_TYPE_T decoys ///< is this a decoy database
   )         
 {
-  carp(CARP_DEBUG, "Creating new database from '%s'", filename);
+  carp(CARP_DEBUG, "Creating new database from '%s'", filename.c_str());
   init();
   is_memmap_ = is_memmap;
   if( is_memmap_ ){

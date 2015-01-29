@@ -329,64 +329,6 @@ bool almost_equal
   }
 }
 
-/*************************************************************************
- * Convert a boolean to and from a "true" or "false" string.
- *************************************************************************/
-char* boolean_to_string
- (bool the_boolean)
-{
-  static char * true_or_false;
-  static bool first_time = true;
-
-  if (first_time) {
-    true_or_false = (char *)mymalloc(sizeof(char) * 6);
-    first_time = false;
-  }
-
-  if (the_boolean) {
-    strcpy(true_or_false, "true");
-  } else {
-    strcpy(true_or_false, "false");
-  }
-  return(true_or_false);
-}
-
-bool boolean_from_string
-  (char* true_or_false)
-{
-  if (strcmp(true_or_false, "true") == 0) {
-    return(true);
-  } else if (strcmp(true_or_false, "false") == 0) {
-    return(false);
-  } else {
-    carp(CARP_FATAL, "Invalid input to boolean_from_string (%s)\n", true_or_false);
-  }
-  return(false); /* Unreachable. */
-}
-
-
-/**************************************************************************
- * Does a given character appear in a given string?
- **************************************************************************/
-bool char_in_string
-  (const char* a_string,
-   char        a_char)
-{
-  int  i_string;    /* Index into the string. */
-  char string_char; /* Character appearing at that index. */
-
-  i_string = 0;
-  string_char = a_string[i_string];
-  while (string_char != '\0') {
-    if (string_char == a_char) {
-      return(true);
-    }
-    i_string++;
-    string_char = a_string[i_string];
-  }
-  return(false);
-}
-
 /**************************************************************************
  * Generic functions for converting between integer and string
  * representations of an enumerated type.

@@ -15,7 +15,7 @@
  * Does not parse file. 
  */
 MSToolkitSpectrumCollection::MSToolkitSpectrumCollection(
-  const char* filename   ///< The spectrum collection filename.
+  const string& filename   ///< The spectrum collection filename.
  ) : SpectrumCollection(filename){
 
 }
@@ -33,7 +33,7 @@ bool MSToolkitSpectrumCollection::parse() {
   }
 
   // get a list of scans to include if requested
-  const char* range_string = get_string_parameter_pointer("scan-number");
+  string range_string = get_string_parameter("scan-number");
   int first_scan;
   int last_scan;
   
@@ -41,7 +41,7 @@ bool MSToolkitSpectrumCollection::parse() {
   
   if( !success ){
     carp(CARP_FATAL, "The scan number range '%s' is invalid. "
-         "Must be of the form <first>-<last>.", range_string);
+         "Must be of the form <first>-<last>.", range_string.c_str());
   }
   
   carp(CARP_DEBUG, "Using mstoolkit to parse spectra.");

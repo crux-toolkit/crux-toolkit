@@ -18,6 +18,7 @@
 #include "io/MatchCollectionParser.h"
 #include "analyze_psms.h"
 #include "PosteriorEstimator.h"
+#include "util/crux-file-utils.h"
 
 #include <map>
 #include <utility>
@@ -469,21 +470,19 @@ FLOAT_T* compute_PEP_from_pvalues(FLOAT_T* pvalues, int num_pvals){
  * in each match.
  */
 MatchCollection* run_qvalue(
-  const char* input_file, 
-  const char* fasta_file,
+  const string& input_file, 
+  const string& fasta_file,
   OutputFiles& output,
   COMMAND_T command  
   ){
-
-
-  string target_path = string(input_file);
-  string decoy_path = string(input_file);
+  string target_path = input_file;
+  string decoy_path = input_file;
   bool ascending = get_boolean_parameter("smaller-is-better");
   SCORER_TYPE_T score_type = INVALID_SCORER_TYPE;
   
-  if (strcmp(get_string_parameter_pointer("score"), "exact p-value") == 0) {
+  if (get_string_parameter("score") == "exact p-value") {
     score_type = TIDE_SEARCH_EXACT_PVAL;
-  } else if (strcmp(get_string_parameter_pointer("score"), "xcorr score") == 0) {        
+  } else if (get_string_parameter("score") == "xcorr score") {        
     score_type = XCORR;
   }
     
@@ -504,14 +503,14 @@ MatchCollection* run_qvalue(
   bool have_decoys = false;
   MatchCollectionParser parser;
   MatchCollection* match_collection =
-    parser.create(target_path.c_str(), get_string_parameter_pointer("protein-database"));
+    parser.create(target_path, get_string_parameter("protein-database"));
   bool distinct_matches = match_collection->getHasDistinctMatches();
 
   MatchCollection* decoy_matches = new MatchCollection();
   // Create two match collections, for targets and decoys.
   MatchCollection* target_matches = new MatchCollection();
   if (decoy_path != "") {
-    MatchCollection* temp_collection = parser.create(decoy_path.c_str(), get_string_parameter_pointer("protein-database"));
+    MatchCollection* temp_collection = parser.create(decoy_path, get_string_parameter("protein-database"));
        // Mark decoy matches
     MatchIterator* temp_iter = new MatchIterator(temp_collection);
     while (temp_iter->hasNext()) {
@@ -526,7 +525,6 @@ MatchCollection* run_qvalue(
     delete temp_collection;
     //carry out concatenated search.
     if (command == TDC_COMMAND) {
-      string score_name(get_string_parameter_pointer("score"));
       MatchCollection* tdc_collection = new MatchCollection();
       tdc_collection->setScoredType(score_type, true);      
       MatchIterator* target_iter = new MatchIterator(match_collection);

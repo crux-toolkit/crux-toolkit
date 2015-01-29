@@ -118,20 +118,20 @@ void GeneratePeptides::printHeader(){
   bool bool_val;
   int missed_cleavages;
 
-  char* database_name = get_string_parameter("protein-database");
-  printf("# PROTEIN DATABASE: %s\n", database_name);
+  string database_name = get_string_parameter("protein-database");
+  printf("# PROTEIN DATABASE: %s\n", database_name.c_str());
 
   printf("# OPTIONS:\n");
   printf("#\tmin-mass: %.2f\n", get_double_parameter("min-mass"));
   printf("#\tmax-mass: %.2f\n", get_double_parameter("max-mass"));
   printf("#\tmin-length: %d\n", get_int_parameter("min-length"));
   printf("#\tmax-length: %d\n", get_int_parameter("max-length"));
-  printf("#\tenzyme: %s\n", get_string_parameter_pointer("enzyme"));
-  printf("#\tdigestion: %s\n", get_string_parameter_pointer("digestion"));
+  printf("#\tenzyme: %s\n", get_string_parameter("enzyme").c_str());
+  printf("#\tdigestion: %s\n", get_string_parameter("digestion").c_str());
   missed_cleavages = get_int_parameter("missed-cleavages");
   printf("#\tnumber of allowed missed-cleavages: %d\n", missed_cleavages);
   printf("#\tisotopic mass type: %s\n", 
-         get_string_parameter_pointer("isotopic-mass"));
+         get_string_parameter("isotopic-mass").c_str());
   printf("#\tverbosity: %d\n", get_verbosity_level());
 
   AA_MOD_T** aa_mod_list = NULL;
@@ -143,7 +143,6 @@ void GeneratePeptides::printHeader(){
     printf("%s\n", mod_str);
     free(mod_str);
   }
-  free(database_name);
 }
 
 

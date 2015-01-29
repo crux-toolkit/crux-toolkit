@@ -43,9 +43,8 @@ int ExtractColumns::main(int argc, char** argv) {
   initialize(argument_list, num_arguments,
     option_list, num_options, argc, argv);
 
-  const char* delimited_filename = get_string_parameter_pointer("tsv file");
-
-  string column_names_string = string(get_string_parameter_pointer("column names"));
+  string delimited_filename = get_string_parameter("tsv file");
+  string column_names_string = get_string_parameter("column names");
 
   char delimiter = get_delimiter_parameter("delimiter");
 

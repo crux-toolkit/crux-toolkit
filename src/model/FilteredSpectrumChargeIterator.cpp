@@ -92,11 +92,11 @@ FilteredSpectrumChargeIterator::FilteredSpectrumChargeIterator(
   max_mz_ = get_double_parameter("spectrum-max-mz");
   min_peaks_ = get_int_parameter("min-peaks");
 
-  const char* charge_str = get_string_parameter_pointer("spectrum-charge");
-  if( strcmp( charge_str, "all") == 0){
+  string charge_str = get_string_parameter("spectrum-charge");
+  if (charge_str == "all") {
     search_charge_ = 0;
-  }else{
-    search_charge_ = atoi(charge_str);
+  } else {
+    search_charge_ = atoi(charge_str.c_str());
   }
 
   // queue next spectrum

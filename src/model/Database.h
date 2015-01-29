@@ -110,7 +110,7 @@ class Database {
    * \returns A new database object.
    */
   Database(
-    const char* filename, ///< The file from which to parse the database. either text fasta file or binary fasta file -in
+    const std::string& filename, ///< The file from which to parse the database. either text fasta file or binary fasta file -in
     bool is_memmap, ///< are we using a memory mapped binary fasta file, thus proteins are all memory mapped -in
     DECOY_TYPE_T decoys = NO_DECOYS ///< is this to be a decoy database
     );         

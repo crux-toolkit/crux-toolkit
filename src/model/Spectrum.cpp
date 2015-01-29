@@ -738,18 +738,16 @@ const vector<SpectrumZState>& Spectrum::getZStates() const {
 vector<SpectrumZState> Spectrum::getZStatesToSearch() {
 
   vector<SpectrumZState> select_zstates;
-  const char* charge_str = get_string_parameter_pointer("spectrum-charge");
+  string charge_str = get_string_parameter("spectrum-charge");
 
-  
-  if( strcmp( charge_str, "all") == 0){ // return full array of charges
+  if (charge_str == "all") { // return full array of charges
     select_zstates = getZStates();
   } else { // return a single charge state.
-
-    int param_charge = atoi(charge_str);
+    int param_charge = atoi(charge_str.c_str());
     
     if( (param_charge < 1) || (param_charge > MAX_CHARGE) ){
       carp(CARP_FATAL, "spectrum-charge option must be 1,2,3,.. %d or 'all'.  "
-           "'%s' is not valid", MAX_CHARGE, charge_str);
+           "'%s' is not valid", MAX_CHARGE, charge_str.c_str());
     }
 
     for (unsigned int zstate_idx=0;zstate_idx < getNumZStates();zstate_idx++) {

@@ -354,7 +354,7 @@ void XLinkMatchCollection::fitWeibull() {
             &shift_,
             &correlation_);
 
-  myfree(xcorrs);
+  free(xcorrs);
 
 }
 

@@ -619,9 +619,9 @@ void Protein::shuffle(
   }
 
   // change the protein name
-  const char* prefix = get_string_parameter_pointer("decoy-prefix");
+  string prefix = get_string_parameter("decoy-prefix");
 
-  char* new_name = cat_string(prefix, id_);
+  char* new_name = cat_string(prefix.c_str(), id_);
   free(id_);
   id_= new_name;
 

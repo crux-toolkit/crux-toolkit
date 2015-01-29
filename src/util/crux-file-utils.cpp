@@ -1,18 +1,14 @@
 #include "crux-file-utils.h"
 
+using namespace std;
 
 /**
  * \returns True if there already exists a file with the given name,
  * else false.
  */
-bool file_exists(const char* filename){
-  struct stat file_info;
-  int stat_return = stat(filename, &file_info);
-  if( stat_return == 0 ){
-    return true;
-  } // else, we could not get attributes.  It doesn't exist or we
-    // don't have permission for the directory
-  return false;
+bool file_exists(const string& filename){
+  ifstream file(filename.c_str());
+  return file.good();
 }
 
 /**

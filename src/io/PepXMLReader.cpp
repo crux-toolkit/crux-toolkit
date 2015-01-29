@@ -106,7 +106,6 @@ PepXMLReader::PepXMLReader() {
 PepXMLReader::PepXMLReader(
   const string& file_path ///< the path of the pep.xml file
   ) {
-  
   init();
   file_path_ = file_path;
 }
@@ -621,7 +620,7 @@ void PepXMLReader::setDecoyDatabase(
  * \returns the MatchCollection resulting from the parsed xml file
  */
 MatchCollection* PepXMLReader::parse(
-  const char* file_path, ///< path of the xml file
+  const string& file_path, ///< path of the xml file
   Database* database, ///< target protein database
   Database* decoy_database ///< decoy protein database (can be null)
   ) {

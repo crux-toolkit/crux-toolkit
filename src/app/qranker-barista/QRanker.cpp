@@ -979,29 +979,29 @@ int QRanker :: crux_set_command_line_options(int argc, char *argv[])
   bool list_of_files_flag; 
   overwrite_flag = get_boolean_parameter("overwrite");
   
-  fileroot = get_string_parameter_pointer("fileroot");
-  if(fileroot != "__NULL_STR")
+  fileroot = get_string_parameter("fileroot");
+  if (!fileroot.empty()) {
     fileroot.append(".");
-  else
-    fileroot = "";
+  }
 
-  decoy_prefix = get_string_parameter_pointer("decoy-prefix");
+  decoy_prefix = get_string_parameter("decoy-prefix");
 
 
-  enzyme = get_string_parameter_pointer("enzyme");
+  enzyme = get_string_parameter("enzyme");
 
   spec_features_flag = get_boolean_parameter("use-spec-features");
 
   skip_cleanup_flag = get_boolean_parameter("skip-cleanup");
   
 
-  dir_with_tables = get_string_parameter_pointer("re-run"); 
-  if(dir_with_tables != "__NULL_STR")
+  dir_with_tables = get_string_parameter("re-run"); 
+  if(!dir_with_tables.empty()) {
     found_dir_with_tables = 1;
-  else
+  } else {
     found_dir_with_tables = 0;
+  }
 
-  output_directory = get_string_parameter_pointer("output-dir");
+  output_directory = get_string_parameter("output-dir");
 
   feature_file_flag = get_boolean_parameter("feature-file");
   feature_file_name << output_directory << "/" << fileroot << "q-ranker.features.txt";
@@ -1017,8 +1017,8 @@ int QRanker :: crux_set_command_line_options(int argc, char *argv[])
       carp(CARP_INFO, "directory with tables: %s", dir_with_tables.c_str());
       carp(CARP_INFO, "output_directory: %s", output_directory.c_str());
     }else{
-      ms2_source = get_string_parameter_pointer("spectra");
-      sqt_source = get_string_parameter_pointer("search results");
+      ms2_source = get_string_parameter("spectra");
+      sqt_source = get_string_parameter("search results");
       list_of_files_flag=get_boolean_parameter("list-of-files");
       //check file format 
      
@@ -1074,11 +1074,12 @@ int QRanker :: crux_set_command_line_options(int argc, char *argv[])
         if(parser->get_use_quadratic_features())
           parser->add_quadratic_features_header(); 
         d.get_features_header(parser->get_final_features_header());
-        sqt_decoy_source = get_string_parameter_pointer("separate-searches"); 
-        if(sqt_decoy_source != "__NULL_STR")
+        sqt_decoy_source = get_string_parameter("separate-searches"); 
+        if(!sqt_decoy_source.empty()) {
 	  separate_search_flag = 1;
-        else
+        } else {
 	  separate_search_flag = 0;
+        }
       
         //set the output directory for the parser
         if(!parser->set_output_dir(output_directory))

@@ -153,7 +153,7 @@ void SQTWriter::writeHeader(
   char* dig_str = digest_type_to_string(digestion);
   string custom_str;
   if( enzyme == CUSTOM_ENZYME){
-    string rule = get_string_parameter_pointer("custom-enzyme");
+    string rule = get_string_parameter("custom-enzyme");
     custom_str = ", custom pattern: " + rule;
   }
   *file_ << "H\tEnzymeSpec\t" << enz_str << "-" << dig_str << custom_str << endl;
@@ -252,7 +252,7 @@ void SQTWriter::writePSM(
     string protein_id_str(protein_id);
     free(protein_id);
     if (is_decoy && protein->getDatabase()->getDecoyType() == NO_DECOYS) {
-      protein_id_str = get_string_parameter_pointer("decoy-prefix") + protein_id_str;
+      protein_id_str = get_string_parameter("decoy-prefix") + protein_id_str;
     }
     *file_ << "L"
            << "\t" << protein_id_str

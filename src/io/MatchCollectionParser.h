@@ -29,8 +29,8 @@ class MatchCollectionParser {
    * \returns a MatchCollection object using the file and protein database
    */
   MatchCollection* create(
-    const char* match_path, ///< path to the file of matches
-    const char* fasta_path  ///< path to the protein database
+    const std::string& match_path, ///< path to the file of matches
+    const std::string& fasta_path  ///< path to the protein database
   );
 
 
@@ -38,7 +38,7 @@ class MatchCollectionParser {
    * Creates database object(s) from fasta or index file
    */
   static void loadDatabase(
-    const char* fasta_file, ///< fasta or index path -in
+    const std::string& fasta_file, ///< fasta or index path -in
     Database*& database,  ///< resulting database -out
     Database*& decoy_database ///< resulting decoy database -out
   );

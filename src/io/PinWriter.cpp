@@ -43,10 +43,10 @@ PinWriter::~PinWriter(){
  * Open a file of the given name.  Replace an existing file if
  * overwrite is true, else exit if an existing file is found.
  */
-void PinWriter::openFile(const char* filename, const char* output_dir, bool overwrite) {
+void PinWriter::openFile(const string& filename, const string& output_dir, bool overwrite) {
   output_file_ = create_file_in_path(filename, output_dir, overwrite);
   if (output_file_ == NULL) {
-    carp(CARP_FATAL, "Can't open file '%s'", filename);
+    carp(CARP_FATAL, "Can't open file '%s'", filename.c_str());
   }
 }
 

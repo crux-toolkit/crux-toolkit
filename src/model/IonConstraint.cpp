@@ -59,11 +59,11 @@ IonConstraint::IonConstraint(
   // set all fields of constraint
   mass_type_ = mass_type;
 
-  string charge_str = get_string_parameter_pointer("max-ion-charge");
+  string charge_str = get_string_parameter("max-ion-charge");
 
   max_charge_ = max(1, max_charge - 1);
 
-  if (charge_str != string("peptide")) {
+  if (charge_str != "peptide") {
     int charge_val;
     bool success = from_string(charge_val, charge_str);
     if (success) {
