@@ -6,12 +6,12 @@ Scenario Outline: User runs compute-q-values
   Given the path to Crux is ../../src/crux
   And I want to run a test named <test_name>
   And I pass the arguments <args> <target_input>
-  When I run compute-q-values
+  When I run assign-confidence
   Then the return value should be 0
   And <actual_output> should match good_results/<expected_output>
 
 Examples:
   |test_name       |args                                   |target_input             |actual_output                              |expected_output|
-  |compute-q-values|--parameter-file params/pval           |sample.search.target.txt |crux-output/calibrate-scores.target.txt    |qvalues.txt    |
-  |decoy_qval      |--parameter-file params/decoy-qval-pval|sample4.search.target.txt|decoy-qval-pval/calibrate-scores.target.txt|decoy-qval.txt |
+  |compute-q-values|--parameter-file params/pval           |sample4.search.target.txt |crux-output/assign-confidence.target.txt    |qvalues.txt    |
+  |decoy_qval      |--parameter-file params/decoy-qval-pval|sample4.search.target.txt|decoy-qval-pval/assign-confidence.target.txt|decoy-qval.txt |
 
