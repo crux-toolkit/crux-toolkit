@@ -27,7 +27,7 @@ ComputeQValues::~ComputeQValues() {
  */
 int ComputeQValues::main(int argc, char** argv) {
   //TODO : Figure out how to do this.
-  analyze_matches_main(QVALUE_COMMAND, argc, argv);
+  analyze_matches_main(argc, argv);
   return 0;
 }
 
@@ -35,7 +35,7 @@ int ComputeQValues::main(int argc, char** argv) {
  * \returns the command name for ComputeQValues
  */
 string ComputeQValues::getName() {
-  return "calibrate-scores";
+  return "assign-confidence";
 }
 
 /**
@@ -50,7 +50,7 @@ string ComputeQValues::getDescription() {
  * \returns the filestem for ComputeQValues
  */
 string ComputeQValues::getFileStem() {
-  return "calibrate-scores";
+  return "assign-confidence";
 }
 
 COMMAND_T ComputeQValues::getCommand() {

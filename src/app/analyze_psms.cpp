@@ -20,7 +20,6 @@
  * and analyzes the PSMs using compute-q-values, percolator or q-ranker.
  */
 void analyze_matches_main(
-  COMMAND_T command,
   int argc,
   char** argv
 ){
@@ -28,6 +27,7 @@ void analyze_matches_main(
   // Define optional command line arguments.
   const char* qvalue_option_list[] = {
     "pi-zero",
+    "smaller-is-better",
     "verbosity",
     "parameter-file",
     "overwrite",
@@ -36,17 +36,7 @@ void analyze_matches_main(
   };
 
   int qvalue_num_options = sizeof(qvalue_option_list)/sizeof(char*);
-/*  const char* percolator_option_list[] = {
-    "pi-zero",
-    "verbosity",
-    "parameter-file",
-    "fileroot",
-    "feature-file",
-    "output-dir",
-    "overwrite"
-  };
-  int percolator_num_options = sizeof(percolator_option_list)/sizeof(char*);
-*/
+
   // Define required command line arguments.
   const char* argument_list[] = {
     "target input"
@@ -55,60 +45,30 @@ void analyze_matches_main(
 
   CruxApplication* application = NULL;
 
-  // Do some common initialization stuff.
-  switch(command) {
-  case QVALUE_COMMAND:
-  {
-    application = new ComputeQValues();
-    application->initialize(argument_list, num_arguments,
-      qvalue_option_list, qvalue_num_options, argc, argv);
-  }
-    break;
-/*
-  case PERCOLATOR_COMMAND:
-  {
-    application = new Percolator();
-    application->initialize(argument_list, num_arguments,
-      percolator_option_list, percolator_num_options, argc, argv);
-  }
-    break;
-*/
-  default:
-    carp(CARP_FATAL, "Unknown command type.");
-    break;
-  }
+  application = new ComputeQValues();
+  application->initialize(argument_list, num_arguments,
+    qvalue_option_list, qvalue_num_options, argc, argv);
 
   // Get required arguments
   const char* protein_database_name = get_string_parameter_pointer("protein-database");
   const char* target_input = get_string_parameter_pointer("target input");
   // Prepare the output files.
   OutputFiles output(application);
+  COMMAND_T command;
+  if (strcmp(get_string_parameter_pointer("estimation-method"), "tdc") == 0) {
+    command = TDC_COMMAND;
+  } else {
+    command = MIXMAX_COMMAND;
+  }
   
   // Perform the analysis.
   MatchCollection* match_collection = NULL;
-  switch(command) {
-  case QVALUE_COMMAND:
-    match_collection = run_qvalue(target_input,
-      protein_database_name,
-                                  output);
-    break;
-/*
-  case PERCOLATOR_COMMAND:
-    match_collection = run_percolator(input_directory,
-                                      protein_database_name,
-                                      output);
-    break;
-*/
-  default:
-    carp(CARP_FATAL, "Unknown command type.");
-    break;
-  }
+  match_collection = run_qvalue(target_input,
+    protein_database_name, output, command);
+
   delete match_collection;
   output.writeFooters();
-  carp(CARP_INFO, "Elapsed time: %.3g s", wall_clock() / 1e6);
-  string name = application->getName();
 
-  carp(CARP_INFO, "Finished crux %s.", name.c_str());
   delete application;
 }
 
@@ -138,30 +98,17 @@ double* compute_PEP(double* target_scores, ///< scores for target matches
       || num_targets == 0 || num_decoys == 0 ){
     carp(CARP_FATAL, "Cannot compute PEP without target or decoy scores.");
   }
+//  pi0 = estimate_pi0(target_scores, num_targets, decoy_scores, num_decoys, ascending);
 
   // put all of the scores in a single vector of pairs: score, is_target
   vector<pair<double, bool> > score_labels;
-#ifdef _MSC_VER
-  // There is a bug in Microsoft's implementation of
-  // make_pair<> that keeps this code from working.
-  // They promise to fix it in VC 11
-  // https://connect.microsoft.com/VisualStudio/feedback/details/606746/incorrect-overload-resolution
-  // FIXME: find workaround until then
+
   transform(target_scores, target_scores + num_targets,
             back_inserter(score_labels),
             bind2nd(ptr_fun<double,bool,pair<double, bool> >(make_pair), true));
   transform(decoy_scores, decoy_scores + num_decoys,
             back_inserter(score_labels),
             bind2nd(ptr_fun<double,bool,pair<double, bool> >(make_pair), false));
-
-#else
-  transform(target_scores, target_scores + num_targets,
-            back_inserter(score_labels),
-            bind2nd(ptr_fun(make_pair<double, bool>), true));
-  transform(decoy_scores, decoy_scores + num_decoys,
-            back_inserter(score_labels),
-            bind2nd(ptr_fun(make_pair<double, bool>), false));
-#endif
 
   // sort them 
   if (ascending) {

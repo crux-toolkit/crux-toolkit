@@ -15,7 +15,6 @@
  * and analyzes the PSMs using compute-q-values, percolator or q-ranker.
  */
 void analyze_matches_main(
-  COMMAND_T command,
   int argc,
   char** argv
 );

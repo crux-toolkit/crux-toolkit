@@ -143,48 +143,13 @@ map<FLOAT_T, FLOAT_T>* store_arrays_as_hash
 }
 
 /**
- * Use the Benjamini-Hochberg procedure to convert a given set of
- * p-values into q-values.  
- *
- * Assumes that the input is an array of negative log p-values.  The
- * output q-values are not log-transformed.
- *
- * This function uses the command line parameter "pi-zero".
- */
-FLOAT_T* compute_qvalues_from_pvalues(
-  FLOAT_T* pvalues, 
-  int      num_pvals,
-  FLOAT_T  pi_zero
-){
-
-  // sort the - log p-values in descending order
-  sort(pvalues, pvalues + num_pvals, greater<FLOAT_T>());
-
-  // convert the p-values into FDRs using Benjamini-Hochberg
-  FLOAT_T* qvalues = (FLOAT_T*)mycalloc(num_pvals, sizeof(FLOAT_T));
-  int idx;
-  for (idx=0; idx < num_pvals; idx++){
-    carp(CARP_DETAILED_DEBUG, "pvalue[%i] = %.10f", idx, exp(-pvalues[idx]));
-    double fdr = (exp(-pvalues[idx]) / (idx + 1)) 
-      * (FLOAT_T)num_pvals * pi_zero;
-    qvalues[idx] = fdr;
-    carp(CARP_DETAILED_DEBUG, "FDR[%i] = %.10f", idx, qvalues[idx]);
-  }
-
-  // convert the FDRs into q-values
-  convert_fdr_to_qvalue(qvalues, num_pvals);
-
-  return(qvalues);
-}
-
-/**
  * \brief Compute q-values from a given set of scores, using a second
  * set of scores as an empirical null.  Sorts the incoming target
  * scores and returns a corresponding list of q-values.
  *
  * This function is only exported to allow unit testing.
  */
-FLOAT_T* compute_decoy_qvalues(
+FLOAT_T* compute_decoy_qvalues_tdc(
   FLOAT_T* target_scores,
   int      num_targets,
   FLOAT_T* decoy_scores,
@@ -242,7 +207,7 @@ FLOAT_T* compute_decoy_qvalues(
     }
 
     // FDR = #decoys / #targets
-    FLOAT_T fdr = pi_zero * targets_to_decoys * 
+    FLOAT_T fdr = /*pi_zero * targets_to_decoys * */
       ((FLOAT_T)decoy_idx / (FLOAT_T)(target_idx + 1));
     carp(CARP_DEBUG, "target_idx=%d target_score=%g decoy_idx=%d fdr=%g",
          target_idx, target_score, decoy_idx, fdr);
@@ -257,43 +222,177 @@ FLOAT_T* compute_decoy_qvalues(
   // Convert the FDRs into q-values.
   convert_fdr_to_qvalue(qvalues, num_targets);
 
-  return(qvalues);
+  return (qvalues);
 }
+
+FLOAT_T estimate_pi0( FLOAT_T* target_scores,
+  int      num_targets,
+  FLOAT_T* decoy_scores,
+  int      num_decoys,
+  bool     ascending
+){
+  vector<pair<double, bool> > score_labels;
+  transform(target_scores, target_scores + num_targets,
+            back_inserter(score_labels),
+            bind2nd(ptr_fun<double,bool,pair<double, bool> >(make_pair), true));
+  transform(decoy_scores, decoy_scores + num_decoys,
+            back_inserter(score_labels),
+            bind2nd(ptr_fun<double,bool,pair<double, bool> >(make_pair), false));
+
+  // sort them 
+  if (ascending) {
+    sort(score_labels.begin(), score_labels.end());
+    PosteriorEstimator::setReversed(true);
+  } else {
+    sort(score_labels.begin(), score_labels.end(),
+       greater<pair<double, bool> > ());  
+  }
+  // get p-values
+  vector<double> pvals;
+  PosteriorEstimator::getPValues(score_labels, pvals);
+  
+  // estimate pi_zero
+  FLOAT_T pi_zero = PosteriorEstimator::estimatePi0(pvals);
+
+  carp(CARP_INFO, "Estimated pi_zero = %f", pi_zero);
+  return pi_zero;
+}
+
+#ifdef _MSC_VER
+// The Microsoft 10.0 C++ compiler has trouble resolving the proper virtual
+// function call when the STL make_pair is combined with the STL ptr_fun.
+// They promise to fix this in v11, but until then we create our own wrapper
+// for this use of make_pair. (See corresponding ifdef block in compute_PEP)
+pair<double,bool> make_pair(double db, bool b) {
+    return std::pair<double,bool>(db, b);
+}
+#endif
 
 /**
- * A wrapper to take care of the FLOAT_T to double conversion.  Calls
- * compute_PEP in analyse_psms.
- * \returns A newly allocated array of PEP values sorted in the same
- * order as the targets.
+ * \brief Compute q-values using mix-max procedure. This part is a
+ * reimplementation of Uri Keich's code written in R.
+ *
  */
-FLOAT_T* compute_PEP_local(FLOAT_T* targets,
-                          int num_targets, 
-                          FLOAT_T* decoys, 
-                          int num_decoys,
-                          bool forward){
+FLOAT_T* compute_decoy_qvalues_mixmax(
+  FLOAT_T* target_scores,
+  int      num_targets,
+  FLOAT_T* decoy_scores,
+  int      num_decoys,
+  bool     ascending,
+  FLOAT_T  pi_zero
+){
+  if ((num_targets == 0) || (num_decoys == 0)) {
+    carp(CARP_FATAL, "Cannot compute q-values (%d targets, %d decoys).",
+         num_targets, num_decoys);
+  }
+  if (num_targets != num_decoys) {
+    carp(CARP_FATAL, "Mix-Max requires equal number of decoy and target scores "
+                     "(%d targets, %d decoys) from separate target-decoy search.",
+         num_targets, num_decoys);
+  }
+  //estimate pi0 from data if it is not given.
+  if (pi_zero == 1.0) {
+//    pi_zeros = estimate_pi0(target_scores, num_targets, decoy_scores, num_decoys, ascending);
+    
+      // put all of the scores in a single vector of pairs: score, is_target
+      vector<pair<double, bool> > score_labels;
+      transform(target_scores, target_scores + num_targets,
+                back_inserter(score_labels),
+                bind2nd(ptr_fun<double,bool,pair<double, bool> >(make_pair), true));
+      transform(decoy_scores, decoy_scores + num_decoys,
+                back_inserter(score_labels),
+                bind2nd(ptr_fun<double,bool,pair<double, bool> >(make_pair), false));
 
-  double* targets_d = new double[num_targets];
-  for(int val_idx = 0; val_idx < num_targets; val_idx++){
-    targets_d[val_idx] = targets[val_idx];
+      // sort them 
+      if (ascending) {
+        sort(score_labels.begin(), score_labels.end());
+        PosteriorEstimator::setReversed(true);
+      } else {
+        sort(score_labels.begin(), score_labels.end(),
+           greater<pair<double, bool> > ());  
+      }
+      // get p-values
+      vector<double> pvals;
+      PosteriorEstimator::getPValues(score_labels, pvals);
+      
+      // estimate pi_zero
+      pi_zero = PosteriorEstimator::estimatePi0(pvals);
+
+      carp(CARP_INFO, "Estimated pi_zero = %f", pi_zero);
+ //     pi_zero =0.5302161;
+
+  }
+  // continue with mix-max procedure
+  int target_idx;
+  for (target_idx = 0; target_idx < num_targets; ++target_idx) {
+    carp(CARP_DEBUG, "target_scores[%d]=%lf decoy_scores[%d]=%lf",
+         target_idx, target_scores[target_idx],
+         target_idx, decoy_scores[target_idx]);
   }
 
-  double* decoys_d = new double[num_decoys];
-  for(int val_idx = 0; val_idx < num_decoys; val_idx++){
-    decoys_d[val_idx] = decoys[val_idx];
+  //Sort decoy and target stores
+  ascending = false;
+  if (ascending) {
+    sort(target_scores, target_scores + num_targets);
+    sort(decoy_scores, decoy_scores + num_decoys);    
+  } else {
+    sort(target_scores, target_scores + num_targets, greater<FLOAT_T>());
+    sort(decoy_scores, decoy_scores + num_decoys, greater<FLOAT_T>());
   }
 
-  double* PEPs_d = compute_PEP(targets_d, num_targets, decoys_d, num_decoys);
+  //histogram of the target scores.
 
-  FLOAT_T* PEPs = new FLOAT_T[num_targets];
-  for(int val_idx = 0; val_idx < num_targets; val_idx++){
-    PEPs[val_idx] = PEPs_d[val_idx];
+  vector<double> z_hist;  
+  z_hist.reserve(num_decoys+1);
+  int idx = 0;
+  int cnt;
+  int i;
+  for (i = 0; i < num_decoys; ++i) {
+    cnt = 0;
+    while (ascending ? 
+        target_scores[idx] < decoy_scores[i] : 
+        target_scores[idx] >= decoy_scores[i]) {
+      ++cnt;
+      ++idx;
+    }
+    z_hist[i] = (double)cnt;///(double)num_targets;
+  }
+  z_hist[num_decoys] = (double)(num_targets - idx);///num_targets;
+
+  for (i = 1; i <= num_decoys; ++i){
+    z_hist[i] += z_hist[i-1];
   }
 
-  delete []targets_d;
-  delete []decoys_d;
-  delete []PEPs_d;
-  return PEPs;
+  vector<double> p_T_and_X_lt_Y;
+  p_T_and_X_lt_Y.reserve(num_targets);
+  double estPx_lt_zj;
+
+  for (i = 0; i < num_targets; ++i){
+    estPx_lt_zj = (double)( z_hist[i+1] - pi_zero * ((double)i+0.5) ) / (double)(1.0-pi_zero) / (i+0.5);
+    estPx_lt_zj = estPx_lt_zj > 1 ? 1 : estPx_lt_zj;
+    estPx_lt_zj = estPx_lt_zj < 0 ? 0 : estPx_lt_zj;
+    p_T_and_X_lt_Y[i] = estPx_lt_zj * ((1.0-pi_zero));    
+  }
+  
+  FLOAT_T* fdrmod = new FLOAT_T[num_targets];
+  double E_f1_mod_run_tot = 0;
+  double n_z_gt_w = 0;
+  int j = num_targets-1;
+  double qvalue;
+  for (i = num_targets-1; i >= 0; --i){ 
+
+    while (j >= 0 && (ascending ? decoy_scores[j] < target_scores[i] : decoy_scores[j] < target_scores[i])) { 
+      E_f1_mod_run_tot  += p_T_and_X_lt_Y[j];
+      ++n_z_gt_w;
+      --j;
+    }
+    //when j < 0 the running sums remain frozen till the end of the loop
+    qvalue = (n_z_gt_w * pi_zero + E_f1_mod_run_tot) / (num_targets - i + 0.5-1);
+    fdrmod[i] = qvalue > 1 ? 1 : qvalue;  
+  }
+  return fdrmod;
 }
+
 
 /**
  * Use the given p-values to estimate PEP using the
@@ -354,13 +453,8 @@ FLOAT_T* compute_PEP_from_pvalues(FLOAT_T* pvalues, int num_pvals){
     PEPs[pep_idx] = PEP_vector[pep_idx];
     carp(CARP_DEBUG, "pep[%i]=%f", pep_idx, PEPs[pep_idx]);
   }
-
-  
-
   return PEPs;
 }
-
-
 
 /**
  * \brief Compute a q-values based on what is in the PSM files in the
@@ -377,13 +471,22 @@ FLOAT_T* compute_PEP_from_pvalues(FLOAT_T* pvalues, int num_pvals){
 MatchCollection* run_qvalue(
   const char* input_file, 
   const char* fasta_file,
-  OutputFiles& output 
+  OutputFiles& output,
+  COMMAND_T command  
   ){
 
 
   string target_path = string(input_file);
   string decoy_path = string(input_file);
+  bool ascending = get_boolean_parameter("smaller-is-better");
+  SCORER_TYPE_T score_type = INVALID_SCORER_TYPE;
   
+  if (strcmp(get_string_parameter_pointer("score"), "exact p-value") == 0) {
+    score_type = TIDE_SEARCH_EXACT_PVAL;
+  } else if (strcmp(get_string_parameter_pointer("score"), "xcorr score") == 0) {        
+    score_type = XCORR;
+  }
+    
   check_target_decoy_files(target_path, decoy_path);
 
   if (!file_exists(target_path)) {
@@ -391,8 +494,11 @@ MatchCollection* run_qvalue(
   }
   
   if (!file_exists(decoy_path)) {
+    if (command == MIXMAX_COMMAND) {
+      carp(CARP_FATAL, "Decoy file separate target-decoy search is required for q-value calculation");
+    }
     carp(CARP_DEBUG, "Decoy file %s not found", decoy_path.c_str());
-    decoy_path = "";
+    decoy_path = "";    
   }
 
   bool have_decoys = false;
@@ -404,36 +510,58 @@ MatchCollection* run_qvalue(
   MatchCollection* decoy_matches = new MatchCollection();
   // Create two match collections, for targets and decoys.
   MatchCollection* target_matches = new MatchCollection();
-  
-
   if (decoy_path != "") {
     MatchCollection* temp_collection = parser.create(decoy_path.c_str(), get_string_parameter_pointer("protein-database"));
        // Mark decoy matches
     MatchIterator* temp_iter = new MatchIterator(temp_collection);
     while (temp_iter->hasNext()) {
       Crux::Match* decoy_match = temp_iter->next();
-      if (decoy_match->getRank(XCORR) == 1) {
+//      if (decoy_match->getRank(XCORR) == 1) {
         decoy_match->setNullPeptide(true);
         decoy_matches->addMatch(decoy_match);
         have_decoys = true;
-      }
+//      }
     }
     delete temp_iter;
     delete temp_collection;
-  }
-  
-  target_matches->setScoredType(XCORR, true);
-  decoy_matches->setScoredType(XCORR, true);
+    //carry out concatenated search.
+    if (command == TDC_COMMAND) {
+      string score_name(get_string_parameter_pointer("score"));
+      MatchCollection* tdc_collection = new MatchCollection();
+      tdc_collection->setScoredType(score_type, true);      
+      MatchIterator* target_iter = new MatchIterator(match_collection);
+      MatchIterator* decoy_iter = new MatchIterator(decoy_matches);
+      while (target_iter->hasNext() ) {
+        Crux::Match* target_match = target_iter->next();
+        Crux::Match* decoy_match  = decoy_iter->next();
+        if (ascending) { 
+          tdc_collection->addMatch(target_match->getScore(score_type) < decoy_match->getScore(score_type) ? target_match : decoy_match);
+        } else {
+          tdc_collection->addMatch(target_match->getScore(score_type) > decoy_match->getScore(score_type) ? target_match : decoy_match);
+        }
+      }  
+      tdc_collection->setScoredType(DELTA_CN,match_collection->getScoredType(DELTA_CN));
+      tdc_collection->setScoredType(SP,match_collection->getScoredType(SP));
+      tdc_collection->setScoredType(BY_IONS_MATCHED,match_collection->getScoredType(BY_IONS_MATCHED));
+      tdc_collection->setScoredType(BY_IONS_TOTAL,match_collection->getScoredType(BY_IONS_TOTAL));
 
+      delete target_iter;
+      delete decoy_iter;
+      delete match_collection;
+      match_collection = tdc_collection;
+    }
+  }
+  bool have_pvalues = match_collection->getScoredType(TIDE_SEARCH_EXACT_PVAL);
+
+  target_matches->setScoredType(score_type, true);
+  decoy_matches->setScoredType(score_type, true);
   // Did we find something from which to get q-values?
-  bool have_pvalues = match_collection->getScoredType(LOGP_BONF_WEIBULL_XCORR);
   bool have_evalues = match_collection->getScoredType(EVALUE);
-  
-  target_matches->setScoredType(EVALUE, have_evalues);
-  
+    
   // Iterate, gathering matches into one or two collections.
   MatchIterator* match_iterator =
-    new MatchIterator(match_collection, XCORR, false);
+    new MatchIterator(match_collection, score_type, false);
+
   while(match_iterator->hasNext()){
     Match* match = match_iterator->next();
       
@@ -462,10 +590,13 @@ MatchCollection* run_qvalue(
   cols_to_print[DELTA_CN_COL] = match_collection->getScoredType(DELTA_CN);
   cols_to_print[SP_SCORE_COL] = match_collection->getScoredType(SP);
   cols_to_print[SP_RANK_COL] = match_collection->getScoredType(SP);
-  cols_to_print[XCORR_SCORE_COL] = true;
+  cols_to_print[XCORR_SCORE_COL] = !have_pvalues;
   cols_to_print[XCORR_RANK_COL] = true;
   cols_to_print[EVALUE_COL] = have_evalues;
-  cols_to_print[PVALUE_COL] = have_pvalues;
+  cols_to_print[EXACT_PVALUE_COL] = have_pvalues;
+  if (have_pvalues) {
+    cols_to_print[REFACTORED_SCORE_COL] = true;
+  }
   cols_to_print[BY_IONS_MATCHED_COL] = match_collection->getScoredType(BY_IONS_MATCHED);
   cols_to_print[BY_IONS_TOTAL_COL] = match_collection->getScoredType(BY_IONS_TOTAL);
 
@@ -485,101 +616,55 @@ MatchCollection* run_qvalue(
   cols_to_print[CORR_COL] = have_pvalues;
   delete match_collection;
 
-
   output.writeHeaders(cols_to_print);
 
   // Compute q-values from p-values.
   FLOAT_T* pvalues = NULL; // N.B. Misnamed for decoy calculation.
   int num_pvals = target_matches->getMatchTotal();
   FLOAT_T* qvalues = NULL;
-  FLOAT_T* PEPs = NULL;
-  SCORER_TYPE_T score_type = INVALID_SCORER_TYPE;
-  if (have_pvalues == true) {
-    carp(CARP_DEBUG, "There are %d PSMs for q-value computation.", num_pvals);
-    target_matches->setScoredType(LOGP_BONF_WEIBULL_XCORR, 
-                                     true);
-    pvalues = target_matches->extractScores(LOGP_BONF_WEIBULL_XCORR);
-    qvalues = compute_qvalues_from_pvalues(pvalues, num_pvals,
-                                           get_double_parameter("pi-zero"));
-    PEPs = compute_PEP_from_pvalues(pvalues, num_pvals);
-    score_type = LOGP_BONF_WEIBULL_XCORR;
-  }
+  FLOAT_T* decoy_scores;
+  have_decoys = true;
+  int num_decoys  ;
+  num_decoys = decoy_matches->getMatchTotal();
+  carp(CARP_INFO,
+       "There are %d target and %d decoy PSMs for q-value computation.",
+       num_pvals, num_decoys);
+  decoy_scores = NULL;
 
-  // Compute q-values from the XCorr decoy distribution.
-  else if (have_decoys == true) {
-    int num_decoys = decoy_matches->getMatchTotal();
-    carp(CARP_INFO,
-         "There are %d target and %d decoy PSMs for q-value computation.",
-         num_pvals, num_decoys);
-    FLOAT_T* decoy_scores = NULL;
+  pvalues = target_matches->extractScores(score_type);
+  decoy_scores = decoy_matches->extractScores(score_type);
+  switch (command){
+    case TDC_COMMAND:
 
-    pvalues = target_matches->extractScores(XCORR);
-    decoy_scores = decoy_matches->extractScores(XCORR);
-    score_type = XCORR;
+      qvalues = compute_decoy_qvalues_tdc(pvalues, num_pvals, 
+                                      decoy_scores, num_decoys, 
+                                      get_boolean_parameter("smaller-is-better"),
+                                      1.0);
 
-    qvalues = compute_decoy_qvalues(pvalues, num_pvals, 
-                                    decoy_scores, num_decoys, false, 
-                                    get_double_parameter("pi-zero"));
-
-
-    PEPs = compute_PEP_local(pvalues, num_pvals, decoy_scores, num_decoys, false);
-
-    free(decoy_scores);
-  }
-  // Fatal: Cannot compute q-values.
-  else {
-    carp(CARP_FATAL, "Cannot compute q-values without decoy PSMs or p-values.");
-  }
-
-  
-  
+      break;
+    case MIXMAX_COMMAND:
+ 
+      qvalues = compute_decoy_qvalues_mixmax(pvalues, num_pvals, 
+                                      decoy_scores, num_decoys,
+                                      get_boolean_parameter("smaller-is-better"), 
+                                      get_double_parameter("pi-zero"));
+    
+      break;
+   }
+   free(decoy_scores);
+    
   // Store p-values to q-values as a hash, and then assign them.
   map<FLOAT_T, FLOAT_T>* qvalue_hash 
     = store_arrays_as_hash(pvalues, qvalues, num_pvals);
 
   target_matches->assignQValues(qvalue_hash, score_type);
 
-  // Store p-values to PEP as a has and then assign them
-  map<FLOAT_T, FLOAT_T>* PEP_hash 
-        = store_arrays_as_hash(pvalues, PEPs, num_pvals);
-  target_matches->assignPEPs(PEP_hash, score_type);
-
   free(pvalues);
   free(qvalues);
-  delete PEPs;
   delete qvalue_hash;
-  delete PEP_hash;
-
-  if (have_evalues) {
-    pvalues = target_matches->extractScores(EVALUE);
-    FLOAT_T* decoy_scores = decoy_matches->extractScores(EVALUE);
-    int num_decoys = decoy_matches->getMatchTotal();
-    
-    score_type = EVALUE;
-    qvalues = compute_decoy_qvalues(pvalues, num_pvals, 
-                                    decoy_scores, num_decoys, true, 
-                                    get_double_parameter("pi-zero"));
-    PEPs = compute_PEP_local(pvalues, num_pvals, decoy_scores, num_decoys, true);
-    free(decoy_scores);
-    qvalue_hash = store_arrays_as_hash(pvalues, qvalues, num_pvals);
-    target_matches->assignQValues(qvalue_hash, score_type);
-    PEP_hash = store_arrays_as_hash(pvalues, PEPs, num_pvals);
-    target_matches->assignPEPs(PEP_hash, score_type);
-    
-    free(pvalues);
-    free(qvalues);
-    delete PEPs;
-    delete qvalue_hash;
-    delete PEP_hash;
-  }
-  
   // Identify PSMs that are top-scoring per peptide.
   identify_best_psm_per_peptide(target_matches, score_type);
-
-  // Compute peptide-level q-values.
-  //  compute_decoy_q_values(all_matches/
-  // true); // Do peptide-level scoring.
-
+  
   // Store targets by score.
   target_matches->sort(score_type);
   output.writeMatches(target_matches);

@@ -1567,6 +1567,10 @@ bool MatchCollection::extendTabDelimited(
     scored_type_[SP] = !result_file.empty(SP_SCORE_COL);
 
     scored_type_[XCORR] = !result_file.empty(XCORR_SCORE_COL);
+
+    scored_type_[TIDE_SEARCH_EXACT_PVAL] = !result_file.empty(EXACT_PVALUE_COL);
+
+    scored_type_[TIDE_SEARCH_REFACTORED_XCORR] = !result_file.empty(REFACTORED_SCORE_COL);
     
     scored_type_[EVALUE] = !result_file.empty(EVALUE_COL);
     
@@ -1841,7 +1845,7 @@ FLOAT_T* MatchCollection::extractScores(
                                              sizeof(FLOAT_T));
 
   MatchIterator* match_iterator =
-    new MatchIterator(this, XCORR, false);
+    new MatchIterator(this, score_type, false);
   int idx = 0;
   while(match_iterator->hasNext()){
     Match* match = match_iterator->next();
@@ -1885,6 +1889,7 @@ void MatchCollection::assignQValues(
     SCORER_TYPE_T derived_score_type = INVALID_SCORER_TYPE;
     switch (score_type) {
     case XCORR:
+    case TIDE_SEARCH_EXACT_PVAL:
       derived_score_type = DECOY_XCORR_QVALUE;
       break;
     case DECOY_XCORR_QVALUE:
