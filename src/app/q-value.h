@@ -44,8 +44,8 @@ FLOAT_T estimate_pi0( FLOAT_T* target_scores,
   bool     ascending);
   
 MatchCollection* run_qvalue(
-  const char* psm_result_folder, 
-  const char* fasta_file,
+  const std::string& psm_result_folder, 
+  const std::string& fasta_file,
   OutputFiles& output,
   COMMAND_T command  );
 

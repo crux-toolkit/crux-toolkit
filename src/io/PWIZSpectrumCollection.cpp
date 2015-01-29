@@ -27,7 +27,7 @@ using namespace std;
  * Does not parse file. 
  */
 PWIZSpectrumCollection::PWIZSpectrumCollection(
-  const char* filename   ///< The spectrum collection filename.
+  const string& filename   ///< The spectrum collection filename.
  ) : SpectrumCollection(filename){
 #ifdef _MSC_VER
   pwiz::msdata::DefaultReaderList readerList;
@@ -114,7 +114,7 @@ bool PWIZSpectrumCollection::parse() {
 
   // TODO add first/last scan to base class
   // get a list of scans to include if requested
-  const char* range_string = get_string_parameter_pointer("scan-number");
+  string range_string = get_string_parameter("scan-number");
   int first_scan = -1;
   int last_scan = -1;
 
@@ -123,9 +123,9 @@ bool PWIZSpectrumCollection::parse() {
     first_scan,
     last_scan);
 
-  if( first_scan == -1 || last_scan == -1 ){
+  if (first_scan == -1 || last_scan == -1) {
     carp(CARP_FATAL, "The scan number range '%s' is invalid. "
-         "Must be of the form <first>-<last>.", range_string);
+         "Must be of the form <first>-<last>.", range_string.c_str());
   }
 
   // get info for translating identifiers into scan numbers

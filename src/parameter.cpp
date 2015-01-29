@@ -104,7 +104,7 @@ void parse_parameter_file(
 bool check_option_type_and_bounds(const char* name);
 
 void check_parameter_consistency();
-void parse_custom_enzyme(const char* rule_str);
+void parse_custom_enzyme(const std::string& rule_str);
 
 /**
  *
@@ -1485,7 +1485,7 @@ void initialize_parameters(void){
            "true"
            );
 
-  set_string_parameter("variable_mod1", "__NULL_STR",
+  set_string_parameter("variable_mod1", "",
            "Up to 6 variable modifications are supported\n"
            "format:  <mass> <residues> <0=variable/1=binary> <max mods per a peptide>\n"
            "    e.g. 79.966331 STY 0 3",
@@ -1493,7 +1493,7 @@ void initialize_parameters(void){
            "true"
            );
   
-  set_string_parameter("variable_mod2", "__NULL_STR",
+  set_string_parameter("variable_mod2", "",
            "Up to 6 variable modifications are supported\n"
            "format:  <mass> <residues> <0=variable/1=binary> <max mods per a peptide>\n"
            "    e.g. 79.966331 STY 0 3",
@@ -1501,7 +1501,7 @@ void initialize_parameters(void){
            "true"
            );
   
-  set_string_parameter("variable_mod3",  "__NULL_STR",
+  set_string_parameter("variable_mod3",  "",
            "Up to 6 variable modifications are supported\n"
            "format:  <mass> <residues> <0=variable/1=binary> <max mods per a peptide>\n"
            "    e.g. 79.966331 STY 0 3",
@@ -1509,7 +1509,7 @@ void initialize_parameters(void){
            "true"
            );
   
-  set_string_parameter("variable_mod4",  "__NULL_STR",
+  set_string_parameter("variable_mod4",  "",
            "Up to 6 variable modifications are supported\n"
            "format:  <mass> <residues> <0=variable/1=binary> <max mods per a peptide>\n"
            "    e.g. 79.966331 STY 0 3",
@@ -1517,7 +1517,7 @@ void initialize_parameters(void){
            "true"
            );
   
-  set_string_parameter("variable_mod5",  "__NULL_STR",
+  set_string_parameter("variable_mod5",  "",
            "Up to 6 variable modifications are supported\n"
            "format:  <mass> <residues> <0=variable/1=binary> <max mods per a peptide>\n"
            "    e.g. 79.966331 STY 0 3",
@@ -1525,7 +1525,7 @@ void initialize_parameters(void){
            "true"
            );
   
-  set_string_parameter("variable_mod6",  "__NULL_STR",
+  set_string_parameter("variable_mod6",  "",
            "Up to 6 variable modifications are supported\n"
            "format:  <mass> <residues> <0=variable/1=binary> <max mods per a peptide>\n"
            "    e.g. 79.966331 STY 0 3",
@@ -1773,12 +1773,12 @@ void initialize_parameters(void){
      "Default = decoy_.",
      " Available for q-ranker and barista.", "true");
 
-  set_string_parameter("re-run", "__NULL_STR",
+  set_string_parameter("re-run", "",
      "Re-run a previous Q-ranker analysis using a previously computed set of"
      " lookup tables.",
      " Available for q-ranker and barista.", "true");
 
-  set_string_parameter("separate-searches", "__NULL_STR",
+  set_string_parameter("separate-searches", "",
      "If the target and decoy searches were run separately, rather than" 
      " using a concatenated database, then Q-ranker will assume that the"
      " database search results provided as a required argument are from the"
@@ -1895,7 +1895,7 @@ void initialize_parameters(void){
      "Available for spectral-counts.",
      "true");
 
-  set_string_parameter("custom-threshold-name", "__NULL_STR",
+  set_string_parameter("custom-threshold-name", "",
      "Use a name of custom threshold rather than (default NULL)",
      "Available for spectral-counts.", "true");
 
@@ -2153,7 +2153,7 @@ void initialize_parameters(void){
     "Available for crux hardklor",
     "true");
 
-  set_string_parameter("averagine-mod", "__NULL_STR",
+  set_string_parameter("averagine-mod", "",
     "Include alternative averagine models in the analysis that  "
     "incorporate additional atoms or isotopic enrichments.",
     "Available for crux hardklor",
@@ -2218,7 +2218,7 @@ void initialize_parameters(void){
     "levels to apply to the whole spectrum.",
     "Available for crux hardklor", "true");
 
-  set_string_parameter("mz-window", "__NULL_STR",
+  set_string_parameter("mz-window", "",
     "Restrict analysis to only a small window in each segment ( (min-max) in m/z). "
     "The user must specify the starting and ending m/z values between which "
     "the analysis will be performed. By default the whole spectrum is analyzed.",
@@ -2230,7 +2230,7 @@ void initialize_parameters(void){
     "than 5 m/z are divided into smaller sets prior to analysis. The default value is 4.0.",
     "Available for crux hardklor", "true");
 
-  set_string_parameter("hardklor-options", "__NULL_STR", 
+  set_string_parameter("hardklor-options", "", 
     "Directly set hardklor options",
     "Available for crux hardklor", "false");
 
@@ -2246,7 +2246,7 @@ void initialize_parameters(void){
     "be in MS2 (.ms2), binary MS2 (.bms2), compressed MS2 (.cms2) or mzXML (.mzXML) format. ",
     "Argument for crux bullseye.", "false");
 
-  set_string_parameter("hardklor-file", "__NULL_STR",
+  set_string_parameter("hardklor-file", "",
     "Input hardklor file into bullseye",
     "Hidden option for crux bullseye.", "false");
 
@@ -2297,7 +2297,7 @@ void initialize_parameters(void){
     "used in your data file (usually minutes). Default = 0.5.",
     "Available for crux bullseye", "true");
 
-  set_string_parameter("spectrum-format", "__NULL_STR",
+  set_string_parameter("spectrum-format", "",
     "The format to write the output spectra to. By default, the spectra will be "
     "output in the same format as the MS/MS input.",
     "Available for crux bullseye", "true");
@@ -2582,13 +2582,12 @@ bool find_param_filename(int argc,
  * is target and num-decoys-per-target > 1.
  */
 void translate_decoy_options(){
-
   // get user values
   int num_decoy_per_target = get_int_parameter("num-decoys-per-target");
-  string decoy_type_str = get_string_parameter_pointer("decoys");
+  string decoy_type_str = get_string_parameter("decoys");
   DECOY_TYPE_T decoy_type = string_to_decoy_type(decoy_type_str.c_str());
 
-  char* location = get_string_parameter("decoy-location");
+  string location = get_string_parameter("decoy-location");
   int max_rank_preliminary = get_int_parameter("max-rank-preliminary");
 
   // store new values here
@@ -2597,19 +2596,18 @@ void translate_decoy_options(){
   int new_max_rank_preliminary = max_rank_preliminary; 
 
   // user may not have set num-decoys-per-target and default is 1
-  if( decoy_type == NO_DECOYS ){
+  if (decoy_type == NO_DECOYS) {
     num_decoy_per_target = 0;
   } 
 
   // user may not have set target-location if no decoys requested
-  if( num_decoy_per_target == 0 ){
-    free(location);
-    location = my_copy_string("separate-decoy-files");
+  if (num_decoy_per_target == 0) {
+    location = "separate-decoy-files";
     new_num_decoy_files = 0;
   }
 
   // set new values
-  if( strcmp(location, "target-file") == 0 ){
+  if (location == "target-file") {
     tdc = true;
     new_num_decoy_files = 0;
 
@@ -2617,19 +2615,17 @@ void translate_decoy_options(){
       new_max_rank_preliminary = max_rank_preliminary * 
                                 (1 + num_decoy_per_target);
     }
-  }else if( strcmp(location, "one-decoy-file") == 0 ){
+  } else if (location == "one-decoy-file") {
     tdc = false;
     new_num_decoy_files = 1;
-  }else if( strcmp(location, "separate-decoy-files") == 0 ){
+  } else if (location == "separate-decoy-files") {
     tdc = false;
     new_num_decoy_files = num_decoy_per_target;
-  }else{
+  } else {
     carp(CARP_FATAL, "Unrecoginzed decoy location '%s'."
          "Must be target-file, one-decoy-file, or separate-decoy-files",
-         location);
+         location.c_str());
   }
-
-  free(location);
 
   // now update all values
   char buffer[PARAMETER_LENGTH];
@@ -2760,10 +2756,9 @@ bool parse_cmd_line_into_params_hash(int argc,
   }
 
   // if custom-enzyme used, set values
-  char* enzyme_rule_str = get_string_parameter("custom-enzyme");
-  if( enzyme_rule_str != NULL ){
+  string enzyme_rule_str = get_string_parameter("custom-enzyme");
+  if (!enzyme_rule_str.empty()){
     parse_custom_enzyme(enzyme_rule_str);
-    free(enzyme_rule_str);
 
     char* value_str = enzyme_type_to_string(CUSTOM_ENZYME);
     update_hash_value(parameters, "enzyme", value_str);
@@ -2810,10 +2805,10 @@ bool parse_cmd_line_into_params_hash(int argc,
  */
 // NOTE (BF mar-11-09): for testing would be nice if this returned
 // error code instead of dying
-void parse_custom_enzyme(const char* rule_str){
+void parse_custom_enzyme(const string& rule_str){
 
   bool success = true;
-  int len = strlen(rule_str);
+  int len = rule_str.length();
   int idx = 0;
   int pipe_idx = 0;
 
@@ -2878,7 +2873,7 @@ void parse_custom_enzyme(const char* rule_str){
          "Must be of the form [AZ]|[AZ] or with [] replaced by {}. "
          "AZ is a list of residues (letters A-Z) required [] or prohibited {}. "
          "Use [X] to indicate any reside is legal.",
-         rule_str);
+         rule_str.c_str());
   }
 
   // 4. allocate lists and fill
@@ -2896,14 +2891,14 @@ void parse_custom_enzyme(const char* rule_str){
 
 
   // 5. check special case of [X]
-  if(strncmp( rule_str, "[X]", pre_list_size+2) == 0){
+  if(strncmp( rule_str.c_str(), "[X]", pre_list_size+2) == 0){
     free(pre_cleavage_list);
     pre_cleavage_list = NULL;
     pre_list_size = 0;
     pre_for_inclusion = false;
   }
 
-  if(strncmp( rule_str+post_first_idx-1, "[X]", post_list_size+2) == 0){
+  if(strncmp( rule_str.c_str()+post_first_idx-1, "[X]", post_list_size+2) == 0){
     free(post_cleavage_list);
     post_cleavage_list = NULL;
     post_list_size = 0;
@@ -2949,7 +2944,7 @@ void check_parameter_consistency(){
 
   // spectral counts SIN requires an MS2 file
   if( get_measure_type_parameter("measure") == MEASURE_SIN ){
-    if( strcmp(get_string_parameter_pointer("input-ms2"), "__NULL_STR") == 0 ){
+    if (get_string_parameter("input-ms2").empty()) {
       carp(CARP_FATAL, "The SIN computation for spectral-counts requires "
            "that the --input-ms2 option specify a file.");
     }
@@ -2957,11 +2952,11 @@ void check_parameter_consistency(){
 
   // decoys must be one of "none", "protein-shuffle", "peptide-shuffle",
   // "reverse"
-  const char* decoys = get_string_parameter_pointer("decoys");
+  string decoys = get_string_parameter("decoys");
   DECOY_TYPE_T decoy_type = string_to_decoy_type(decoys);
   if( decoy_type == INVALID_DECOY_TYPE ){
     carp(CARP_FATAL, "The 'decoys' option must be 'none', 'reverse', "
-         "'protein-shuffle', or 'peptide-shuffle'.  '%s' is invalid.", decoys);
+         "'protein-shuffle', or 'peptide-shuffle'.  '%s' is invalid.", decoys.c_str());
   }
 }
 
@@ -3263,15 +3258,12 @@ void print_parameters_xml(FILE* output){
  * values in the parameter file format. Created in the output directory
  * named by the parameter "output-dir".
  */
-void print_parameter_file(char** filename){
-
+void print_parameter_file(string filename){
   carp(CARP_DEBUG, "Printing parameter file");
-  prefix_fileroot_to_name(filename);
-  char* output_dir = get_string_parameter("output-dir");
+  filename = prefix_fileroot_to_name(filename);
+  string output_dir = get_string_parameter("output-dir");
   bool overwrite = get_boolean_parameter("overwrite");
-  FILE* param_file = create_file_in_path(*filename, 
-                                         output_dir, 
-                                         overwrite);
+  FILE* param_file = create_file_in_path(filename, output_dir, overwrite);
 
   // Add header to file for comet parsing
   fprintf(param_file, "# comet_version 2014.01 rev. 0"
@@ -3426,7 +3418,6 @@ void print_parameter_file(char** filename){
   }
 
   fclose(param_file);
-  free(output_dir);
 }
 
 /**
@@ -3773,76 +3764,28 @@ vector<double> get_double_vector_parameter(
  *
  * Searches through the list of parameters, looking for one whose
  * parameter_name matches the given name string. 
- * The return value is allocated here and must be freed by the caller.
  * If the value is not found, abort.
  * \returns The hash-alllocated string value of the given parameter name
  */
-char* get_string_parameter(
-  const char* name  ///< the name of the parameter looking for -in
+string get_string_parameter(
+  const string& name  ///< the name of the parameter looking for -in
   )
 {
-  
-  char* string_value = (char*)get_hash_value(parameters, name);
-  
-  // can't find parameter
-  if(string_value == NULL){
-    carp(CARP_FATAL, "Parameter name: %s, doesn't exist", name);
+  char* string_value = (char*)get_hash_value(parameters, name.c_str());
+
+  if (string_value == NULL) {
+    carp(CARP_FATAL, "Parameter name: %s, doesn't exist", name.c_str());
   }
 
-  //change "__NULL_STR" to NULL
-  if( (strcmp(string_value, "__NULL_STR"))==0){
-    string_value = NULL;
-  }
-  //check type
-  char* type_str = (char*)get_hash_value(types, name);
-  PARAMETER_TYPE_T type;
-  string_to_param_type(type_str, &type);
-
-  return my_copy_string(string_value);
+  return string(string_value);
 }
 
 vector<string> get_string_vector_parameter(
   const char* name
   ) {
-
   vector<string> ans;
-
-  string value(get_string_parameter_pointer(name));
-
-  tokenize(value, ans, ',');
-
+  tokenize(get_string_parameter(name), ans, ',');
   return ans;
-}
-
-// TODO (BF 04-Feb-08): Should we delete this since it allows caller
-//      to change the value of a parameter?
-/**
- * \brief Get the value of a parameter whose type is char*
- * 
- * Searches through the list of parameters, looking for one whose
- * parameter_name matches the given name string. 
- * The return value is a pointer to the original string
- * Thus, user should not free, good for printing
- * \returns the string value to which matches the parameter name, else aborts
- */
-const char* get_string_parameter_pointer(
-  const char* name  ///< the name of the parameter looking for -in
-  )
-{
-  
-  char* string_value = (char*)get_hash_value(parameters, name);
-
-  // can't find parameter
-  if(string_value == NULL){
-    carp(CARP_FATAL, "parameter name: %s, doesn't exist", name);
-  }
-  //check type
-  char* type_str = (char*)get_hash_value(types, name);
-  PARAMETER_TYPE_T type;
-  string_to_param_type(type_str, &type);
-
-  return string_value;
-
 }
 
 DIGEST_T get_digest_type_parameter( const char* name ){
@@ -4215,7 +4158,7 @@ bool set_string_parameter(
   }
   
   if( set_value == NULL ){
-    set_value = "__NULL_STR";
+    set_value = "";
   }
 
   result = add_or_update_hash(parameters, name, set_value);

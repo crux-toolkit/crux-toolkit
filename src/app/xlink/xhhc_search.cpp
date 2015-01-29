@@ -77,7 +77,7 @@ int SearchForXLinks::xhhcSearchMain() {
   carp(CARP_INFO, "Beginning crux xlink-search (original)");
 
   //Get parameters
-  const char* ms2_file = get_string_parameter_pointer("ms2 file");
+  string ms2_file = get_string_parameter("ms2 file");
 
   FLOAT_T precursor_window = get_double_parameter("precursor-window");
   FLOAT_T precursor_window_weibull = get_double_parameter("precursor-window-weibull");
@@ -86,7 +86,7 @@ int SearchForXLinks::xhhcSearchMain() {
   WINDOW_TYPE_T window_type_weibull = 
     get_window_type_parameter("precursor-window-type-weibull");
 
-  const char* output_directory = get_string_parameter_pointer("output-dir");
+  string output_directory = get_string_parameter("output-dir");
 
   unsigned int min_weibull_points = 
     (unsigned int)get_int_parameter("min-weibull-points");
@@ -131,9 +131,7 @@ int SearchForXLinks::xhhcSearchMain() {
   FLOAT_T score;
  // best pvalues
 
-  const char* target_filename = "search-for-xlinks.target.txt";
-  
-  string target_path = string(output_directory) + "/" + string(target_filename);
+  string target_path = output_directory + "/search-for-xlinks.target.txt";
   ofstream search_target_file(target_path.c_str());
   //set precision
   search_target_file << setprecision(get_int_parameter("precision"));
@@ -162,8 +160,7 @@ int SearchForXLinks::xhhcSearchMain() {
   search_target_file << "ion current observed"<<"\t";
   search_target_file << "ions observable bin (0-1200)"<<endl;
 
-  const char *decoy_filename = "search-for-xlinks.decoy.txt";
-  string decoy_path = string(output_directory) + "/" + string(decoy_filename);
+  string decoy_path = output_directory + "/search-for-xlinks.decoy.txt";
 
   ofstream search_decoy_file (decoy_path.c_str());
   //set precision

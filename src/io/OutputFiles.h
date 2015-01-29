@@ -58,45 +58,45 @@ class OutputFiles{
 
  private:
   bool createFiles(FILE*** file_array_ptr,
-                   const char* output_dir,
-                   const char* fileroot,
+                   const std::string& output_dir,
+                   const std::string& fileroot,
                    CruxApplication* application,
                    const char* extension,
                    bool overwrite);
   bool createFiles(PepXMLWriter*** file_array_ptr,
-                   const char* output_dir,
-                   const char* fileroot,
+                   const std::string& output_dir,
+                   const std::string& fileroot,
                    CruxApplication* application,
                    const char* extension,
                    bool overwrite);
   bool createFiles(MatchFileWriter*** file_array_ptr,
-                   const char* output_dir,
-                   const char* fileroot,
+                   const std::string& output_dir,
+                   const std::string& fileroot,
                    CruxApplication* application,
                    const char* extension);
 
   bool createFile(MzIdentMLWriter** file_ptr,
-                  const char* output_dir,
-                  const char* fileroot,
+                  const std::string& output_dir,
+                  const std::string& fileroot,
                   CruxApplication* application,
                   const char* extension);
 
   bool createFile(FILE** file_ptr,
-                  const char* output_dir,
-                  const char* filename,
+                  const std::string& output_dir,
+                  const std::string& filename,
                   bool overwrite);
 
   bool createFile(
     PinWriter** pin_file_ptr,
-    const char* output_dir, 
-    const char* filename, 
+    const std::string& output_dir, 
+    const std::string& filename, 
     bool overwrite
   );
-  string makeFileName(const char* fileroot,
+  string makeFileName(const std::string& fileroot,
                       CruxApplication* application,
                       const char* target_decoy,
                       const char* extension,
-                      const char* directory = NULL );
+                      const std::string& directory = "");
   void makeTargetDecoyList();
 
   void printMatchesXml(

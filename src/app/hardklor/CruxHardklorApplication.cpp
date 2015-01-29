@@ -109,7 +109,7 @@ int CruxHardklorApplication::main(
   free(hk_algorithm_str);
 
   hk_args_vec.push_back("-cdm");
-  hk_args_vec.push_back(get_string_parameter_pointer("cdm"));
+  hk_args_vec.push_back(get_string_parameter("cdm"));
 
   hk_args_vec.push_back("-chMin");
   hk_args_vec.push_back(DelimitedFileWriter::to_string(get_int_parameter("min-charge")));
@@ -131,8 +131,8 @@ int CruxHardklorApplication::main(
     hk_args_vec.push_back("false");
   }
 
-  if (string(get_string_parameter_pointer("averagine-mod")) !=  "__NULL_STR") {
-    string par_value = get_string_parameter_pointer("averagine-mod");
+  if (!get_string_parameter("averagine-mod").empty()) {
+    string par_value = get_string_parameter("averagine-mod");
     carp(CARP_DEBUG,"averagine-mod=%s",par_value.c_str());
     vector<string> tokens1;
     tokenize(par_value, tokens1, ';');
@@ -150,9 +150,9 @@ int CruxHardklorApplication::main(
     }
   }
 
-  if (string(get_string_parameter_pointer("mzxml-filter")) != "none") { 
+  if (get_string_parameter("mzxml-filter") != "none") { 
     hk_args_vec.push_back("-mF");
-    hk_args_vec.push_back(get_string_parameter_pointer("mzxml-filter"));
+    hk_args_vec.push_back(get_string_parameter("mzxml-filter"));
   }
 
   if (get_boolean_parameter("no-base")) {
@@ -172,8 +172,8 @@ int CruxHardklorApplication::main(
     hk_args_vec.push_back("-c false");
   }
 
-  if (string(get_string_parameter_pointer("scan-number")) != "__NULL_STR") {
-    const char* scan_numbers=get_string_parameter_pointer("scan-number");
+  if (!get_string_parameter("scan-number").empty()) {
+    string scan_numbers=get_string_parameter("scan-number");
     int first_scan;
     int last_scan;
     get_range_from_string(scan_numbers, first_scan, last_scan);
@@ -198,10 +198,10 @@ int CruxHardklorApplication::main(
     hk_args_vec.push_back("false");
   }
 
-  if (string(get_string_parameter_pointer("mz-window")) != "__NULL_STR") {
+  if (!get_string_parameter("mz-window").empty()) {
     double first;
     double last;
-    if (get_range_from_string(get_string_parameter_pointer("mz-window"), first, last)) {
+    if (get_range_from_string(get_string_parameter("mz-window"), first, last)) {
       hk_args_vec.push_back("-w");
       hk_args_vec.push_back(DelimitedFileWriter::to_string(first));
       hk_args_vec.push_back(DelimitedFileWriter::to_string(last));
@@ -211,8 +211,8 @@ int CruxHardklorApplication::main(
   hk_args_vec.push_back("-win");
   hk_args_vec.push_back(DelimitedFileWriter::to_string(get_double_parameter("max-width")));
   
-  if (string(get_string_parameter_pointer("hardklor-options")) != "__NULL_STR") {
-    string hardklor_options = get_string_parameter_pointer("hardklor-options");
+  if (!get_string_parameter("hardklor-options").empty()) {
+    string hardklor_options = get_string_parameter("hardklor-options");
     vector<string> tokens;
     tokenize(hardklor_options, tokens, ',');
     for (size_t idx=0;idx < tokens.size();idx++) {

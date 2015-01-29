@@ -76,7 +76,7 @@ int PredictPeptideIons::main(int argc, char** argv) {
              argc, argv);
 
   /* Get Arguments */
-  const char* peptide_sequence = get_string_parameter_pointer("peptide sequence");
+  string peptide_sequence = get_string_parameter("peptide sequence");
   int charge_state = get_int_parameter("charge state");
 
   /* Get Options */
@@ -84,7 +84,7 @@ int PredictPeptideIons::main(int argc, char** argv) {
   bool use_precursor_ions = get_boolean_parameter("precursor-ions");
   int isotope_count = get_int_parameter("isotope");
   bool is_flanking = get_boolean_parameter("flanking");
-  const char* max_ion_charge = get_string_parameter_pointer("max-ion-charge");
+  string max_ion_charge = get_string_parameter("max-ion-charge");
 
   int nh3_count = get_int_parameter("nh3");
   int h2o_count = get_int_parameter("h2o");
@@ -95,7 +95,7 @@ int PredictPeptideIons::main(int argc, char** argv) {
   // check peptide sequence
   if(!valid_peptide_sequence(peptide_sequence)){
     carp(CARP_FATAL, "The peptide sequence '%s' is not valid", 
-         peptide_sequence);
+         peptide_sequence.c_str());
   }
 
    // neutral_losses
@@ -133,18 +133,18 @@ int PredictPeptideIons::main(int argc, char** argv) {
 
   // create ion_series
   IonSeries* ion_series = new IonSeries(peptide_sequence, 
-                                             charge_state, ion_constraint);
+                                        charge_state, ion_constraint);
    
   // now predict ions
   ion_series->predictIons();
 
   // print settings
-  printf("# PEPTIDE: %s\n",peptide_sequence);
+  printf("# PEPTIDE: %s\n",peptide_sequence.c_str());
   printf("# AVERAGE: %f MONO:%f\n",
     Peptide::calcSequenceMass(peptide_sequence, AVERAGE),
     Peptide::calcSequenceMass(peptide_sequence, MONO));
   printf("# CHARGE: %d\n", charge_state);
-  printf("# MAX-ION-CHARGE: %s\n", max_ion_charge);
+  printf("# MAX-ION-CHARGE: %s\n", max_ion_charge.c_str());
   printf("# NH3 modification: %d\n", neutral_loss_count[NH3]);
   printf("# H2O modification: %d\n", neutral_loss_count[H2O] );
   printf("# ISOTOPE modification: %d\n", neutral_loss_count[ISOTOPE] );

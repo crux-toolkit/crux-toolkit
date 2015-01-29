@@ -73,13 +73,13 @@ void CruxApplication::initialize(
 
   
   // Set seed for random number generation 
-  if(strcmp(get_string_parameter_pointer("seed"), "time")== 0){
+  if (get_string_parameter("seed") == "time") {
     time_t seconds; // use current time to seed
     time(&seconds); // Get value from sys clock and set seconds variable.
     mysrandom((unsigned)seconds); // Convert seconds to a unsigned int
   }
   else{
-    mysrandom((unsigned)atoi(get_string_parameter_pointer("seed")));
+    mysrandom((unsigned)atoi(get_string_parameter("seed").c_str()));
   }
   
   // Start the timer.
@@ -89,23 +89,17 @@ void CruxApplication::initialize(
   if (this->needsOutputDirectory()) {
 
     // Create output directory 
-    char* output_folder = get_string_parameter("output-dir");
+    string output_folder = get_string_parameter("output-dir");
     bool overwrite = get_boolean_parameter("overwrite");
-    int result = create_output_directory(
-    output_folder, 
-    overwrite
-    );
+    int result = create_output_directory(output_folder, overwrite);
     if( result == -1 ){
-      carp(CARP_FATAL, "Unable to create output directory %s.", output_folder);
+      carp(CARP_FATAL, "Unable to create output directory %s.", output_folder.c_str());
     }
-    free(output_folder);
   
     string cmd_file_name = this->getFileStem();
   
     // Open the log file to record carp messages 
-    char* log_file_name = cat_string(cmd_file_name.c_str(), ".log.txt");
-    open_log_file(&log_file_name);
-    free(log_file_name);
+    open_log_file(this->getFileStem() + ".log.txt");
   
     // Store the host name, start date and time, and command line.
     carp(CARP_INFO, "CPU: %s", hostname());
@@ -129,8 +123,6 @@ bool CruxApplication::hidden(){
  * Writes the parameter file
  */
 void CruxApplication::writeParamFile() {
-  char* param_file_name = cat_string(getFileStem().c_str(), ".params.txt");
-  print_parameter_file(&param_file_name);
-  free(param_file_name);
+  print_parameter_file(getFileStem() + ".params.txt");
 }
 

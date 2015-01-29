@@ -11,6 +11,8 @@
  */
 
 #include "OutputFiles.h"
+#include "util/crux-file-utils.h"
+
 using namespace std;
 using namespace Crux;
 
@@ -37,11 +39,8 @@ OutputFiles::OutputFiles(CruxApplication* program_name)
 
   // parameters for all three file types
   bool overwrite = get_boolean_parameter("overwrite");
-  const char* output_directory = get_string_parameter_pointer("output-dir");
-  const char* fileroot = get_string_parameter_pointer("fileroot");
-  if( strcmp(fileroot, "__NULL_STR") == 0 ){
-    fileroot = NULL;
-  }
+  const string output_directory = get_string_parameter("output-dir");
+  const string fileroot = get_string_parameter("fileroot");
 
   int num_decoy_files = get_int_parameter("num-decoy-files");
   num_files_ = num_decoy_files + 1; // plus target file
@@ -62,7 +61,7 @@ OutputFiles::OutputFiles(CruxApplication* program_name)
   carp(CARP_DEBUG, 
        "OutputFiles is opening %d files (%d decoys) in '%s' with root '%s'."
        " Overwrite: %d.", 
-       num_files_, num_decoy_files, output_directory, fileroot, overwrite);
+       num_files_, num_decoy_files, output_directory.c_str(), fileroot.c_str(), overwrite);
 
   // all operations create tab files
   if( get_boolean_parameter("txt-output") ){
@@ -182,24 +181,24 @@ void OutputFiles::makeTargetDecoyList(){
  * that extension includes a ".".  Either fileroot and/or target_decoy
  * may be NULL. Directory argument is optional.
  */
-string OutputFiles::makeFileName(const char* fileroot,
+string OutputFiles::makeFileName(const string& fileroot,
                                  CruxApplication* application,
                                  const char* target_decoy,
                                  const char* extension,
-                                 const char* directory ){
+                                 const string& directory ){
 
   // get command name
   string basename_str = application->getFileStem();
   const char* basename = basename_str.c_str();
 
   ostringstream name_builder;
-  if( directory ){
+  if (!directory.empty()) {
     name_builder << directory;
-    if( directory[strlen(directory) - 1] != '/' ){
+    if (directory[directory.length() - 1] != '/') {
       name_builder << "/";
     }
   }
-  if( fileroot ){
+  if (!fileroot.empty()) {
     name_builder << fileroot << ".";
   }
   name_builder << basename << "." ;
@@ -225,8 +224,8 @@ string OutputFiles::makeFileName(const char* fileroot,
  * \returns true if num_files new files are created, else false.
  */
 bool OutputFiles::createFiles(FILE*** file_array_ptr,
-                              const char* output_dir,
-                              const char* fileroot,
+                              const string& output_dir,
+                              const string& fileroot,
                               CruxApplication* application,
                               const char* extension,
                               bool overwrite){
@@ -265,8 +264,8 @@ bool OutputFiles::createFiles(FILE*** file_array_ptr,
  * \returns true if num_files new files are created, else false.
  */
 bool OutputFiles::createFiles(PepXMLWriter*** xml_writer_array_ptr,
-                              const char* output_dir,
-                              const char* fileroot,
+                              const string& output_dir,
+                              const string& fileroot,
                               CruxApplication* application,
                               const char* extension,
                               bool overwrite){
@@ -304,8 +303,8 @@ bool OutputFiles::createFiles(PepXMLWriter*** xml_writer_array_ptr,
  * \returns true if num_files new MatchFileWriters are created, else false.
  */
 bool OutputFiles::createFiles(MatchFileWriter*** file_array_ptr,
-                              const char* output_dir,
-                              const char* fileroot,
+                              const string& output_dir,
+                              const string& fileroot,
                               CruxApplication* application,
                               const char* extension ){
   if( num_files_ == 0 ){
@@ -337,29 +336,20 @@ bool OutputFiles::createFiles(MatchFileWriter*** file_array_ptr,
  * \returns true if the file is created, else false.
  */
 bool OutputFiles::createFile(FILE** file_ptr,
-                             const char* output_dir,
-                             const char* filename,
+                             const string& output_dir,
+                             const string& filename,
                              bool overwrite){
-
-  // open the file
-  *file_ptr = create_file_in_path(filename,
-                                  output_dir,
-                                  overwrite);
-
-  if( *file_ptr == NULL ){ return false; }
-
-  return true;
+  *file_ptr = create_file_in_path(filename, output_dir, overwrite);
+  return *file_ptr != NULL;
 }
 
 bool OutputFiles::createFile(MzIdentMLWriter** file_ptr,
-                             const char* output_dir,
-                             const char* fileroot,
+                             const string& output_dir,
+                             const string& fileroot,
                              CruxApplication* application,
                              const char* extension) {
 
-  string filename = makeFileName( fileroot, application,
-                                    "",
-                                    extension, output_dir);
+  string filename = makeFileName(fileroot, application, "", extension, output_dir);
   *file_ptr = new MzIdentMLWriter();
   (*file_ptr)->openFile(filename, true);
   return true;
@@ -377,18 +367,13 @@ bool OutputFiles::createFile(MzIdentMLWriter** file_ptr,
  */
 bool OutputFiles::createFile(
   PinWriter** pin_file_ptr,
-  const char* output_dir,
-  const char* filename,
+  const string& output_dir,
+  const string& filename,
   bool overwrite
 ){
-  // open the file
-  
   *pin_file_ptr= new PinWriter();
-  (*pin_file_ptr)->openFile(filename,output_dir,overwrite);  
-
-  if( pin_file_ptr == NULL ){ return false; }
-
-  return true;
+  (*pin_file_ptr)->openFile(filename, output_dir, overwrite);  
+  return pin_file_ptr != NULL;
 }
 
 
@@ -414,9 +399,9 @@ void OutputFiles::writeHeaders(int num_proteins, bool isMixedTargetDecoy){
     }
 
     if( sqt_file_array_ ){
-      string database = get_string_parameter_pointer("protein-database");
+      string database = get_string_parameter("protein-database");
       if (!file_exists(database.c_str())) {
-        database = get_string_parameter_pointer("tide database index");
+        database = get_string_parameter("tide database index");
       }
       MatchCollection::printSqtHeader(sqt_file_array_[file_idx],
                        tag, database, num_proteins, exact_pval_search_); 

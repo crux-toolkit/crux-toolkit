@@ -75,17 +75,17 @@ int TideSearchApplication::main(int argc, char** argv) {
     cmd_line += argv[i];
   }
 
-  string index_dir = get_string_parameter_pointer("tide database index");
+  string index_dir = get_string_parameter("tide database index");
   string peptides_file = index_dir + "/pepix";
   string proteins_file = index_dir + "/protix";
   string auxlocs_file = index_dir + "/auxlocs";
-  string spectra_file = get_string_parameter_pointer("tide spectra file");
+  string spectra_file = get_string_parameter("tide spectra file");
 
   double window = get_double_parameter("precursor-window");
   WINDOW_TYPE_T window_type = get_window_type_parameter("precursor-window-type");
 
   // Check spectrum-charge parameter
-  string charge_string = get_string_parameter_pointer("spectrum-charge");
+  string charge_string = get_string_parameter("spectrum-charge");
   int charge_to_search;
   if (charge_string == "all") {
     carp(CARP_DEBUG, "Searching all charge states");
@@ -100,9 +100,9 @@ int TideSearchApplication::main(int argc, char** argv) {
   }
 
   // Check scan-number parameter
-  string scan_range = get_string_parameter_pointer("scan-number");
+  string scan_range = get_string_parameter("scan-number");
   int min_scan, max_scan;
-  if (scan_range == "__NULL_STR") {
+  if (scan_range.empty()) {
     min_scan = 0;
     max_scan = BILLION;
     carp(CARP_DEBUG, "Searching all scans");
@@ -225,7 +225,7 @@ int TideSearchApplication::main(int argc, char** argv) {
     // Failed, try converting to spectrumrecords file
     carp(CARP_INFO, "Converting %s to spectrumrecords format",
                     spectra_file.c_str());
-    string converted_spectra_file = get_string_parameter_pointer("store-spectra");
+    string converted_spectra_file = get_string_parameter("store-spectra");
     if (converted_spectra_file.empty()) {
       delete_spectra_file = converted_spectra_file =
       make_file_path("spectrumrecords.tmp");

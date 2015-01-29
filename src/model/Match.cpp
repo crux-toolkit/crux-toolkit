@@ -682,26 +682,26 @@ void Match::printSqt(
   PeptideSrc* peptide_src = NULL;
   char* protein_id = NULL;
   Protein* protein = NULL;
-  const char* rand = "";
   
   for(PeptideSrcIterator iter = peptide->getPeptideSrcBegin();
       iter != peptide->getPeptideSrcEnd();
       ++iter){
-               peptide_src = *iter;
-               protein = peptide_src->getParentProtein();
-               protein_id = protein->getId();
+    string rand;
+    peptide_src = *iter;
+    protein = peptide_src->getParentProtein();
+    protein_id = protein->getId();
 
-               // only prepend "decoy-prefix" if we are doing a fasta search
-               Database* database = protein->getDatabase();
-               if( null_peptide_ 
-                   && (database != NULL && database->getDecoyType() == NO_DECOYS) ){
-                 rand = get_string_parameter_pointer("decoy-prefix"); 
-               }
-    
-      // print match info (locus line), add "decoy-prefix" to locus name for decoys
-      fprintf(file, "L\t%s%s\n", rand, protein_id);      
-      free(protein_id);
-     }
+    // only prepend "decoy-prefix" if we are doing a fasta search
+    Database* database = protein->getDatabase();
+    if( null_peptide_ 
+        && (database != NULL && database->getDecoyType() == NO_DECOYS) ){
+      rand = get_string_parameter("decoy-prefix"); 
+    }
+
+    // print match info (locus line), add "decoy-prefix" to locus name for decoys
+    fprintf(file, "L\t%s%s\n", rand.c_str(), protein_id);      
+    free(protein_id);
+  }
   
   return;
 }
@@ -1217,7 +1217,7 @@ Match* Match::parseTabDelimited(
   Database* decoy_database ///< database with decoy peptides
   ) {
 
-  string decoy_prefix = get_string_parameter_pointer("decoy-prefix");
+  string decoy_prefix = get_string_parameter("decoy-prefix");
 
   Match* match = new Match();
 

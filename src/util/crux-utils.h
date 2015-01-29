@@ -71,11 +71,6 @@ int compare_float(FLOAT_T float_a, FLOAT_T float_b);
 bool is_equal(FLOAT_T a, FLOAT_T b, int precision);
 
 /**
- * \returns whether the file exists
- */
-bool file_exists(const std::string& filename);
-
-/**
  * \brief Parses the filename and path of given string.
  *  
  * The array returned, A, contains the filename (A[0]) and the path
@@ -85,7 +80,7 @@ bool file_exists(const std::string& filename);
  *
  *\returns A heap allocated array of both filename and path
  */
-char** parse_filename_path(const char* file);
+char** parse_filename_path(const std::string& file);
 
 /**
  * \brief Parses the filename, path, and file extension of given string.
@@ -142,11 +137,8 @@ char* cat_string(const char* string_one, const char* string_two);
 
 /**
  * Adds the fileroot parameter to a string as a prefix.
- * Given a pointr to pointer to a string, if fileroot parameter is set
- * the memory for the string is reallocated, and the fileroot string
- * is added as a suffix.
  */
-void prefix_fileroot_to_name(char** name);
+std::string prefix_fileroot_to_name(const std::string& name);
 
 /**
  * \returns the filepath 'output_dir'/'fileroot'.'filename' 
@@ -183,7 +175,7 @@ long get_filesize(char *FileName);
  * \returns 0 if successful, -1 if an error occured.
 */
 int create_output_directory(
-  const char *output_folder, // Name of output folder.
+  const std::string& output_folder, // Name of output folder.
   bool overwrite  // Whether or not to overwrite an existing dir 
 ); 
 
@@ -192,7 +184,7 @@ int create_output_directory(
  * Returns TRUE if a directory, FALSE otherwise.
  * Terminates program if unable to determine status of file.
  */
-bool is_directory(const char *FileName);
+bool is_directory(const std::string& fileName);
 
 /**
  * deletes a given directory and it's files inside.
@@ -253,8 +245,8 @@ char* generate_name_path(
  *\returns A file handle to the newly created file.
  */
 FILE* create_file_in_path(
-  const char* filename,  ///< the filename to create & open -in
-  const char* directory,  ///< the directory to open the file in -in
+  const std::string& filename,  ///< the filename to create & open -in
+  const std::string& directory,  ///< the directory to open the file in -in
   bool overwrite  ///< replace the file (T) or die if exists (F)
   );
 
@@ -289,7 +281,7 @@ bool suffix_compare(
  * checks if each AA is an AA
  *\returns TRUE if sequence is valid else, FALSE
  */
-bool valid_peptide_sequence(const char* sequence);
+bool valid_peptide_sequence(const std::string& sequence);
 
 /**
  * quickSort for FLOAT_Ts
@@ -410,7 +402,7 @@ QUANT_LEVEL_TYPE_T string_to_quant_level_type(char* name);
 char * quant_level_type_to_string(QUANT_LEVEL_TYPE_T type);
 COLTYPE_T string_to_column_type(char* name);
 COMPARISON_T string_to_comparison(char* name);
-DECOY_TYPE_T string_to_decoy_type(const char* name);
+DECOY_TYPE_T string_to_decoy_type(const std::string& name);
 DECOY_TYPE_T string_to_tide_decoy_type(const char* name);
 char* decoy_type_to_string(DECOY_TYPE_T type);
 MASS_FORMAT_T string_to_mass_format(const char* name);
@@ -430,7 +422,7 @@ const char* spectrum_parser_type_to_string(SPECTRUM_PARSER_T type);
  * \returns The number of proteins in the file
  */
 int prepare_protein_input(
-  char* input_file,      ///< name of the fasta file
+  const std::string& input_file,      ///< name of the fasta file
   Database** database);///< return new fasta database here
 
 /**
@@ -478,17 +470,17 @@ bool get_scans_from_string(
 
 template<typename TValue>
 static bool get_range_from_string(
-  const char* const_range_string, ///< the string to extract 
+  const std::string& const_range_string, ///< the string to extract 
   TValue& first,  ///< the first value
   TValue& last ///< the last value
   ) {
 
-  if (const_range_string == NULL || strcmp(const_range_string, "__NULL_STR") == 0) {
+  if (const_range_string.empty()) {
     first = (TValue)0;
     last = std::numeric_limits<TValue>::max();
     return true;
   }
-  char* range_string = my_copy_string(const_range_string);
+  char* range_string = my_copy_string(const_range_string.c_str());
 
   bool ret;
 

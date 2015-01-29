@@ -57,9 +57,9 @@ int SearchForXLinks::xlinkSearchMain() {
 
   /* Get parameters */
   carp(CARP_INFO, "Getting parameters");
-  const char* ms2_file = get_string_parameter_pointer("ms2 file");
-  char* input_file = get_string_parameter("protein-database");
-  const char* output_directory = get_string_parameter_pointer("output-dir");
+  string ms2_file = get_string_parameter("ms2 file");
+  string input_file = get_string_parameter("protein-database");
+  string output_directory = get_string_parameter("output-dir");
   int top_match = get_int_parameter("top-match");
   XLinkPeptide::setLinkerMass(get_double_parameter("link mass"));
   int min_weibull_points = get_int_parameter("min-weibull-points");
@@ -72,7 +72,6 @@ int SearchForXLinks::xlinkSearchMain() {
   Database* database = NULL;
   int num_proteins = prepare_protein_input(input_file, &database);
   carp(CARP_DEBUG, "Number of proteins:%d",num_proteins);
-  free(input_file);
   PEPTIDE_MOD_T** peptide_mods = NULL;
   int num_peptide_mods = generate_peptide_mod_list( &peptide_mods );
 
@@ -80,7 +79,6 @@ int SearchForXLinks::xlinkSearchMain() {
   if (get_boolean_parameter("xlink-print-db"))
   {
     carp(CARP_INFO, "generating and printing xlink database");
-    char* output_directory = get_string_parameter("output-dir");
     ostringstream oss;
     oss << output_directory << "/" << "xlink_peptides.txt";
     string temp = oss.str();

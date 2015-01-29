@@ -89,13 +89,10 @@ int ExtractRows::main(int argc, char** argv) {
     option_list, num_options, argc, argv);
 
   /* Get parameters */
-  const char* delimited_filename = 
-    get_string_parameter_pointer("tsv file");
+  string delimited_filename = get_string_parameter("tsv file");
 
-  string column_name = 
-    string(get_string_parameter_pointer("column name"));
-  string column_value = 
-    string(get_string_parameter_pointer("column value"));
+  string column_name = get_string_parameter("column name");
+  string column_value = get_string_parameter("column value");
 
   COLTYPE_T column_type = get_column_type_parameter("column-type");
   COMPARISON_T comparison = get_comparison_parameter("comparison");
@@ -115,8 +112,7 @@ int ExtractRows::main(int argc, char** argv) {
     cout << delimited_file.getHeaderString() << endl;
   }
 
-  string column_value_str =
-    string(get_string_parameter_pointer("column value"));
+  string column_value_str = get_string_parameter("column value");
 
   int column_value_int = 0;
   from_string(column_value_int, column_value_str);

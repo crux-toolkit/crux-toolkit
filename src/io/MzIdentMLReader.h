@@ -100,7 +100,7 @@ class MzIdentMLReader {
    * \returns the MatchCollection resulting from the parsed xml file
    */
   static MatchCollection* parse(
-    const char* path, ///< path of the xml file
+    const std::string& path, ///< path of the xml file
     Database* database, ///< target protein database
     Database* decoy_database ///< decoy protein database (can be null)
   );

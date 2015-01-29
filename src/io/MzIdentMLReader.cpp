@@ -49,7 +49,6 @@ MzIdentMLReader::MzIdentMLReader() {
 MzIdentMLReader::MzIdentMLReader(
   const string& file_path ///< the path of the pep.xml file
   ) {
-  
   init();
   file_path_ = file_path;
 }
@@ -165,9 +164,9 @@ void MzIdentMLReader::addScores(
  * \returns the MatchCollection resulting from the parsed xml file
  */
 MatchCollection* MzIdentMLReader::parse(
-    const char* path, ///< path of the xml file
-    Database* database, ///< target protein database
-    Database* decoy_database ///< decoy protein database (can be null)
+  const string& path, ///< path of the xml file
+  Database* database, ///< target protein database
+  Database* decoy_database ///< decoy protein database (can be null)
   ) {
 
   MzIdentMLReader* reader = new MzIdentMLReader(path);

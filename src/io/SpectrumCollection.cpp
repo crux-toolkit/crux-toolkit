@@ -28,19 +28,19 @@ namespace Crux {
  * Resolves any relative paths.  Confirms that file exists.
  */
 SpectrumCollection::SpectrumCollection (
-  const char* filename ///< The spectrum collection filename. 
+  const string& filename ///< The spectrum collection filename. 
   ) 
 : filename_(filename), is_parsed_(false), num_charged_spectra_(0) 
 {
-  #if DARWIN
+#if DARWIN
   char path_buffer[PATH_MAX];
-  char* absolute_path_file =  realpath(filename, path_buffer);
-  #else
-  char* absolute_path_file =  realpath(filename, NULL);
-  #endif
+  char* absolute_path_file =  realpath(filename.c_str(), path_buffer);
+#else
+  char* absolute_path_file =  realpath(filename.c_str(), NULL);
+#endif
   if (absolute_path_file == NULL){
     carp(CARP_FATAL, "Error from spectrum file '%s'. (%s)",
-         filename, strerror(errno)); 
+         filename.c_str(), strerror(errno)); 
   }
   
   if(access(absolute_path_file, F_OK)){
@@ -48,9 +48,9 @@ SpectrumCollection::SpectrumCollection (
   }
   filename_ = absolute_path_file;
 
-  #ifndef DARWIN
+#ifndef DARWIN
   free(absolute_path_file);
-  #endif
+#endif
 }
 
 /**

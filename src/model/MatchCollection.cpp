@@ -604,20 +604,19 @@ void MatchCollection::printXmlHeader(
   time_t hold_time;
   ENZYME_T enzyme = get_enzyme_type_parameter("enzyme");
   char* enz_str = enzyme_type_to_string(enzyme);
-  char* database = get_string_parameter("protein-database");
-  char* msms_file = get_string_parameter("ms2 file");
+  string database = get_string_parameter("protein-database");
+  string msms_file = get_string_parameter("ms2 file");
   char* absolute_msms_path;
-  if (msms_file == NULL){
+  if (msms_file.empty()) {
     absolute_msms_path = (char*) malloc(sizeof(char)*3);
     strcpy(absolute_msms_path, "NA");
   } else {
-    #if DARWIN
+#if DARWIN
     char path_buffer[PATH_MAX];
-    absolute_msms_path =  realpath(msms_file, path_buffer);
-    #else
-    absolute_msms_path =  realpath(msms_file, NULL);
-    #endif
-    free(msms_file);
+    absolute_msms_path =  realpath(msms_file.c_str(), path_buffer);
+#else
+    absolute_msms_path =  realpath(msms_file.c_str(), NULL);
+#endif
   }
   // Removes the extension from ms2 file path
   char* extension = strstr(absolute_msms_path, ".ms2");
@@ -660,14 +659,13 @@ void MatchCollection::printXmlHeader(
   }
 
   char* absolute_database_path = NULL;
-  if( database != NULL ){
+  if (!database.empty()) {
 #if DARWIN
     char path_buffer[PATH_MAX];
-    absolute_database_path =  realpath(database, path_buffer);
+    absolute_database_path =  realpath(database.c_str(), path_buffer);
 #else
-    absolute_database_path =  realpath(database, NULL);
+    absolute_database_path =  realpath(database.c_str(), NULL);
 #endif
-    free(database);
   }
   
   hold_time = time(0);
@@ -952,8 +950,8 @@ void MatchCollection::printSqtHeader(
   char* dig_str = digest_type_to_string(digestion);
   char custom_str[SMALL_BUFFER];
   if( enzyme == CUSTOM_ENZYME){
-    char* rule = get_string_parameter("custom-enzyme");
-    sprintf(custom_str, ", custom pattern: %s", rule);
+    string rule = get_string_parameter("custom-enzyme");
+    sprintf(custom_str, ", custom pattern: %s", rule.c_str());
   }else{
     custom_str[0] = 0;
   }
@@ -1421,8 +1419,8 @@ void MatchCollection::printMultiSpectra(
 void set_possible_names(vector<string>& possible_names, SET_TYPE_T type){
 
   // if a specific file has been requested, return just that file name
-  const char* psm_filename = get_string_parameter_pointer("input PSMs");
-  if( psm_filename == NULL || strcmp(psm_filename, "__NULL_STR") != 0 ){
+  string psm_filename = get_string_parameter("input PSMs");
+  if (!psm_filename.empty()){
     possible_names.push_back(psm_filename);
     return;
   }
@@ -1464,8 +1462,8 @@ void get_target_decoy_filenames(vector<string>& target_decoy_names,
   }
 
   // first see if there is a specific file to open
-  const char* psm_file = get_string_parameter_pointer("input PSMs");
-  if( psm_file != NULL && strcmp(psm_file, "__NULL_STR") != 0 ){
+  string psm_file = get_string_parameter("input PSMs");
+  if (!psm_file.empty()) {
     // strip off the path
     char** name_path = parse_filename_path(psm_file);
     target_decoy_names.push_back(name_path[0]);

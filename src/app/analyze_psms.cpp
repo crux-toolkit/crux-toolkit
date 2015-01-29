@@ -50,21 +50,20 @@ void analyze_matches_main(
     qvalue_option_list, qvalue_num_options, argc, argv);
 
   // Get required arguments
-  const char* protein_database_name = get_string_parameter_pointer("protein-database");
-  const char* target_input = get_string_parameter_pointer("target input");
+  string protein_database_name = get_string_parameter("protein-database");
+  string target_input = get_string_parameter("target input");
   // Prepare the output files.
   OutputFiles output(application);
   COMMAND_T command;
-  if (strcmp(get_string_parameter_pointer("estimation-method"), "tdc") == 0) {
+  if (get_string_parameter("estimation-method") == "tdc") {
     command = TDC_COMMAND;
   } else {
     command = MIXMAX_COMMAND;
   }
   
   // Perform the analysis.
-  MatchCollection* match_collection = NULL;
-  match_collection = run_qvalue(target_input,
-    protein_database_name, output, command);
+  MatchCollection* match_collection =
+    run_qvalue(target_input, protein_database_name, output, command);
 
   delete match_collection;
   output.writeFooters();

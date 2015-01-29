@@ -9,14 +9,14 @@
  * \returns True if there already exists a file with the given name,
  * else false.
  */
-extern bool file_exists(const char* filename);
+bool file_exists(const std::string& filename);
 
 /**
  * Open a file of the given name if it either does not exist or if we
  * have permission to overwrite.
  * \returns A file stream for the open file or NULL on failure.
  */
-extern std::ofstream* create_file
+std::ofstream* create_file
 (const char* filename, ///< create file with this name
  bool overwrite ///< replace any existing files with this name.
  );

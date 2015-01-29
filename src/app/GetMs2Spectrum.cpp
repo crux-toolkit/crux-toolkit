@@ -74,7 +74,7 @@ int GetMs2Spectrum :: main(int argc, char** argv){
   /* Get arguments */
   int min_scan = -1;
   int max_scan = -1;
-  const char* range_string = get_string_parameter_pointer("scan-number");
+  string range_string = get_string_parameter("scan-number");
 
   get_range_from_string(
     range_string,
@@ -83,15 +83,15 @@ int GetMs2Spectrum :: main(int argc, char** argv){
   
   fprintf(stderr, "Scanning from %d to %d.\n", min_scan, max_scan);
 
-  const char* ms2_filename = get_string_parameter_pointer("ms2 file");
-  carp(CARP_DETAILED_DEBUG, "ms2_filename: %s", ms2_filename);
+  string ms2_filename = get_string_parameter("ms2 file");
+  carp(CARP_DETAILED_DEBUG, "ms2_filename: %s", ms2_filename.c_str());
 
   /* Get options */
   bool options = get_boolean_parameter("stats");
 
   /* read input file */
-  if( access(ms2_filename, F_OK)){
-    carp(CARP_FATAL, "Could not read from ms2 file '%s'", ms2_filename);
+  if( access(ms2_filename.c_str(), F_OK)){
+    carp(CARP_FATAL, "Could not read from ms2 file '%s'", ms2_filename.c_str());
   }
   carp(CARP_DETAILED_DEBUG, "Creating spectrum collection.");
   Crux::SpectrumCollection* collection = SpectrumCollectionFactory::create(ms2_filename);

@@ -136,7 +136,7 @@ int PercolatorApplication::main(int argc, char** argv) {
     argv)
   ;
 
-  string input_pin(get_string_parameter_pointer("pin"));
+  string input_pin = get_string_parameter("pin");
 
   // Check if we need to run make-pin first
   if (get_boolean_parameter("list-of-files") || 
@@ -228,14 +228,14 @@ int PercolatorApplication::main(
   }
 
   perc_args_vec.push_back("-P");
-  string decoy_pre=get_string_parameter_pointer("decoy-prefix");
+  string decoy_pre = get_string_parameter("decoy-prefix");
   if(decoy_pre.length()){
      perc_args_vec.push_back(decoy_pre);
   } else {
      perc_args_vec.push_back("random_");
   }
 
-  string seed_parameter = get_string_parameter_pointer("seed");
+  string seed_parameter = get_string_parameter("seed");
   unsigned int seed_value;
   if (seed_parameter == "time") {
     time_t seconds; // use current time to seed
@@ -290,14 +290,14 @@ int PercolatorApplication::main(
     perc_args_vec.push_back(output_wght);
   }
   
-  if(string(get_string_parameter_pointer("input-weights"))!="__NULL_STR"){
+  if (!get_string_parameter("input-weights").empty()) {
     perc_args_vec.push_back("--init-weights");
-    perc_args_vec.push_back(get_string_parameter_pointer("input-weights"));
+    perc_args_vec.push_back(get_string_parameter("input-weights"));
   }
 
-  if (string(get_string_parameter_pointer("default-direction")) != "__NULL_STR") {  
+  if (!get_string_parameter("default-direction").empty()) {  
     perc_args_vec.push_back("--default-direction");
-    perc_args_vec.push_back(get_string_parameter_pointer("default-direction"));
+    perc_args_vec.push_back(get_string_parameter("default-direction"));
   }
 
   if(get_boolean_parameter("unitnorm"))
@@ -411,7 +411,7 @@ int PercolatorApplication::main(
     pCaller->getProteinMatchCollection();
   ProteinMatchCollection* decoy_protein_match_collection =
     pCaller->getDecoyProteinMatchCollection();
-  string output_dir = string(get_string_parameter_pointer("output-dir"));
+  string output_dir = get_string_parameter("output-dir");
 
   // write txt
   if (get_boolean_parameter("txt-output")) {

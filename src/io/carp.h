@@ -97,7 +97,7 @@ int get_verbosity_level(void);
  *
  * Parameters must have been processed before calling this function.
  */
-void open_log_file(char **log_file_name);
+void open_log_file(std::string log_file_name);
 
 /**
  * Print command line to log file.

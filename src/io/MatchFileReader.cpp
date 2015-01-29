@@ -224,7 +224,7 @@ void MatchFileReader::getMatchColumnsPresent(
 }
 
 MatchCollection* MatchFileReader::parse(
-  const char* file_path,
+  const string& file_path,
   Database* database,
   Database* decoy_database
   ) {

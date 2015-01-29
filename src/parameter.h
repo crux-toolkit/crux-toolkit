@@ -183,26 +183,15 @@ std::vector<double> get_double_vector_parameter(
 /**
  * Searches through the list of parameters, looking for one whose
  * parameter_name matches the string. 
- * The return value is allocated here and must be freed by the caller.
  * If the value is not found, abort.
  * \returns the string value to which matches the parameter name, else aborts
  */
-char* get_string_parameter(
-  const char* name  ///< the name of the parameter looking for -in
+std::string get_string_parameter(
+  const std::string& name  ///< the name of the parameter looking for -in
   );
 
 std::vector<std::string> get_string_vector_parameter(
   const char* name
-  );
-/**
- * Searches through the list of parameters, looking for one whose
- * parameter_name matches the string. 
- * The return value is a pointer to the original string
- * Thus, user should not free, good for printing
- * \returns the string value to which matches the parameter name, else aborts
- */
-const char* get_string_parameter_pointer(
-  const char* name  ///< the name of the parameter looking for -in
   );
 
 MASS_TYPE_T get_mass_type_parameter(
@@ -388,6 +377,6 @@ int get_num_fixed_mods();
  * values in the parameter file format. Created in the output directory
  * named by the parameter "output-dir".
  */
-void print_parameter_file(char** filename);
+void print_parameter_file(std::string filename);
 
 #endif

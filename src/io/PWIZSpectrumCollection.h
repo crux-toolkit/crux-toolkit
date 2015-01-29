@@ -36,7 +36,7 @@ class PWIZSpectrumCollection : public Crux::SpectrumCollection {
    * Constructor sets filename and initializes member variables.
    */
   PWIZSpectrumCollection(
-    const char* filename ///< The spectrum collection filename. -in
+    const std::string& filename ///< The spectrum collection filename. -in
   );
 
   /**

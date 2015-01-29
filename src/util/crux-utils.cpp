@@ -14,6 +14,7 @@
 #endif
 #include <iostream>
 #include "crux-utils.h"
+#include "crux-file-utils.h"
 #include "model/Database.h"
 #include "parameter.h"
 #include "WinCrux.h"
@@ -51,9 +52,9 @@ static const char* decoy_type_strings[NUMBER_DECOY_TYPES] =
   { "invalid", "none", "reverse", "protein-shuffle",
     "peptide-shuffle", "peptide-reverse" };
 
-DECOY_TYPE_T string_to_decoy_type(const char* name){
-  int decoy_int = convert_enum_type_str(name, INVALID_ENUM_STRING, 
-                                        decoy_type_strings, 
+DECOY_TYPE_T string_to_decoy_type(const string& name){
+  int decoy_int = convert_enum_type_str(name.c_str(), INVALID_ENUM_STRING,
+                                        decoy_type_strings,
                                         NUMBER_DECOY_TYPES);
   if( decoy_int < 0 ){
     decoy_int = 0;
@@ -661,26 +662,6 @@ inline bool compare_float_three(FLOAT_T float_a, FLOAT_T min, FLOAT_T max){
 }
 
 /**
- * \returns whether the file exists
- */
-bool file_exists(const string& filename) {
-
-  bool exists = false;
-
-  ifstream test_stream;
-
-  test_stream.open(filename.c_str(), ios::in);
-
-  if (test_stream.is_open()) {
-    exists = true;
-  }
-
-  test_stream.close();
-
-  return exists;
-}
-
-/**
  * parses the filename and path  
  * returns an array A, with A[0] the filename and A[1] the path to the filename
  * returns A[1] NULL if only a filename was passed in
@@ -688,8 +669,8 @@ bool file_exists(const string& filename) {
  *     file_name => returns filename, NULL
  *\returns A heap allocated array of both filename and path
  */
-char** parse_filename_path(const char* file){
-  int len = strlen(file);
+char** parse_filename_path(const string& file){
+  int len = file.length();
   int end_idx = len;
   int end_path = -1;  // index of where the last "/" is located
   char* path = NULL;
@@ -697,17 +678,17 @@ char** parse_filename_path(const char* file){
   char** result = (char**)mycalloc(2, sizeof(char*));
 
   for(; end_idx > 0; --end_idx){
-    if(strncmp(&file[end_idx - 1], "/", 1) == 0){
+    if (file[end_idx - 1] == '/') {
       end_path = end_idx;
       break;
     }
   }
   // copy path, if there is a "/" in the file
   if(end_path != -1){
-    path = copy_string_part(file, end_path);
+    path = copy_string_part(file.c_str(), end_path);
   }
   // copy filename
-  filename = copy_string_part(&file[end_idx], len); 
+  filename = copy_string_part(&(file.c_str()[end_idx]), len); 
   
   // set result with filename and path
   result[0] = filename;
@@ -875,21 +856,10 @@ char* cat_string(const char* string_one, const char* string_two){
 
 /**
  * Adds the fileroot parameter to a string as a prefix.
- * Given a pointer to pointer to a string, if the fileroot parameter is set
- * the memory for the string is reallocated, and the fileroot string
- * is added as a prefix.
  */
-void prefix_fileroot_to_name(char** name) {
-  char* fileroot = get_string_parameter("fileroot");
-  if (fileroot != NULL) {
-    int len_name = strlen(*name);
-    int len_root = strlen(fileroot);
-    *name = (char*)myrealloc(*name, len_root + len_name + 2);
-    memmove(*name + len_root + 1, *name, len_name + 1);
-    strcpy(*name, fileroot);
-    (*name)[len_root] = '.';
-    free(fileroot);
-  };
+string prefix_fileroot_to_name(const string& name) {
+  string fileroot = get_string_parameter("fileroot");
+  return (fileroot.empty()) ? name : fileroot + '.' + name;
 }
 
 /**
@@ -898,20 +868,17 @@ void prefix_fileroot_to_name(char** name) {
 string make_file_path(
   const string& filename ///< the name of the file
   ) {
-
-  string output_directory = 
-    string(get_string_parameter_pointer("output-dir"));
-  string fileroot = 
-    string(get_string_parameter_pointer("fileroot"));
+  string output_directory = get_string_parameter("output-dir");
+  string fileroot = get_string_parameter("fileroot");
 
   ostringstream name_builder;
   name_builder << output_directory;
-  
-  if ( output_directory.at(output_directory.length()-1) != '/' ){
-        name_builder << "/";
+
+  if (output_directory[output_directory.length() - 1] != '/' ) {
+    name_builder << "/";
   }
 
-  if( fileroot != "__NULL_STR" ){
+  if (!fileroot.empty()) {
     name_builder << fileroot << ".";
   }
 
@@ -1021,7 +988,7 @@ long get_filesize(char *FileName){
  * \returns 0 if successful, -1 if an error occured.
 */
 int create_output_directory(
-  const char *output_folder, // Name of output folder.
+  const string& output_folder, // Name of output folder.
   bool overwrite  // Whether or not to overwrite an existing dir 
 ) 
 {
@@ -1032,7 +999,7 @@ int create_output_directory(
   struct stat stat_buffer;
 
   // Does the output directory alredy exist?
-  if (stat(output_folder, &stat_buffer)) {
+  if (stat(output_folder.c_str(), &stat_buffer)) {
     if (errno == ENOENT) {
       // stat failed because the path doesn't exist.
       path_exists = false;
@@ -1043,7 +1010,7 @@ int create_output_directory(
       carp(
         CARP_ERROR,
         "Unable to check for status of output directory '%s': %s.\n",
-        output_folder,
+        output_folder.c_str(),
         strerror(errno)
       );
       result = -1;
@@ -1060,7 +1027,7 @@ int create_output_directory(
         CARP_ERROR,
         "A non-directory file named '%s' already exists,\n"
         "so that name can't be used for an output directory.\n",
-        output_folder
+        output_folder.c_str()
       );
       result = -1;
     }
@@ -1070,7 +1037,7 @@ int create_output_directory(
           CARP_WARNING,
           "The output directory '%s' already exists.\nExisting files will not"
           " be overwritten.",
-          output_folder
+          output_folder.c_str()
         );
         result = 0;
       }
@@ -1079,7 +1046,7 @@ int create_output_directory(
           CARP_WARNING,
           "The output directory '%s' already exists.\nExisting files will"
           " be overwritten.",
-          output_folder
+          output_folder.c_str()
         );
         result = 0;
       }
@@ -1095,7 +1062,7 @@ int create_output_directory(
       carp(
         CARP_ERROR,
         "Unable to create output directory '%s': %s.\n",
-        output_folder,
+        output_folder.c_str(),
         strerror(errno)
       );
       result = -1;
@@ -1105,7 +1072,7 @@ int create_output_directory(
       carp(
         CARP_INFO,
         "Writing results to output directory '%s'.",
-        output_folder
+        output_folder.c_str()
       );
     }
   }
@@ -1117,22 +1084,16 @@ int create_output_directory(
  * Returns true if a directory, false otherwise.
  * Terminates program if unable to determine status of file.
  */
-bool is_directory(const char *FileName){
-    struct stat file;
-    if(stat(FileName,&file) == 0){
-      // return directory status
-      return S_ISDIR(file.st_mode);
-    }
-    else {
-      char *error = strerror(errno);
-      carp(
-        CARP_FATAL, 
-        "stat failed. Unable to determine status of %s. Error: %s.", 
-        FileName,
-        error
-      );
-      return false; // Avoid compiler warning
-    }
+bool is_directory(const string& fileName) {
+  struct stat file;
+  if (stat(fileName.c_str(), &file) == 0) {
+    return S_ISDIR(file.st_mode);
+  } else {
+    char *error = strerror(errno);
+    carp(CARP_FATAL, "stat failed. Unable to determine status of %s. Error: %s.",
+      fileName.c_str(), error);
+    return false; // Avoid compiler warning
+  }
 }
 
 /**
@@ -1314,13 +1275,11 @@ char* generate_name(
  * checks if each AA is an AA
  *\returns true if sequence is valid else, false
  */
-bool valid_peptide_sequence(const char* sequence){
-  // iterate over all AA and check if with in range
-  while(sequence[0] != '\0'){
-    if(sequence[0] < 65 || sequence[0] > 90 ){
+bool valid_peptide_sequence(const string& sequence){
+  for (string::const_iterator i = sequence.begin(); i != sequence.end(); i++) {
+    if (!isupper(*i)) {
       return false;
     }
-    ++sequence;
   }
   return true;
 }
@@ -1334,12 +1293,12 @@ bool valid_peptide_sequence(const char* sequence){
  *\returns A file handle to the newly created file.
  */
 FILE* create_file_in_path(
-  const char* filename,  ///< the filename to create & open -in
-  const char* directory,  ///< the directory to open the file in -in
+  const string& filename,  ///< the filename to create & open -in
+  const string& directory,  ///< the directory to open the file in -in
   bool overwrite  ///< replace file (T) or die if exists (F)
   )
 {
-  char* file_full_path = get_full_filename(directory, filename);
+  char* file_full_path = get_full_filename(directory.c_str(), filename.c_str());
   // FIXME CEG consider using stat instead
   FILE* file = fopen(file_full_path, "rb"); //to test if file exists
   if( file != NULL ){  
@@ -1792,13 +1751,13 @@ void fit_two_parameter_weibull(
  * \returns The number of proteins in the file
  */
 int prepare_protein_input(
-  char* input_file,     ///< name of the fasta file
+  const string& input_file,     ///< name of the fasta file
   Database** database)///< return new fasta database here
 {
 
   int num_proteins = 0;
 
-	carp(CARP_INFO, "Preparing protein fasta file %s", input_file);
+	carp(CARP_INFO, "Preparing protein fasta file %s", input_file.c_str());
 	*database = new Database(input_file, false);         
 	if( database == NULL ){
 		carp(CARP_FATAL, "Could not create protein database");

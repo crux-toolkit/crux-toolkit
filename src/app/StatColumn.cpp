@@ -45,12 +45,8 @@ int StatColumn::main(int argc, char** argv) {
   initialize(argument_list, num_arguments,
     option_list, num_options, argc, argv);
 
-  delimited_filename_ = 
-    string(get_string_parameter_pointer("tsv file"));
-
-  column_name_string_ = 
-    string(get_string_parameter_pointer("column name"));
-
+  delimited_filename_ = get_string_parameter("tsv file");
+  column_name_string_ = get_string_parameter("column name");
   delimiter_ = get_delimiter_parameter("delimiter");
 
   DelimitedFileReader delimited_file(delimited_filename_, true, delimiter_);

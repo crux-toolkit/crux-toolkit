@@ -2,6 +2,7 @@
 #include <fstream>
 #include "io/carp.h"
 #include "util/CarpStreamBuf.h"
+#include "util/crux-file-utils.h"
 #include "GenerateDecoys.h"
 #include "TideIndexApplication.h"
 #include "TideMatchSet.h"
@@ -118,28 +119,28 @@ int TideIndexApplication::main(int argc, char** argv) {
   VariableModTable var_mod_table;
   var_mod_table.ClearTables();
   //parse regular amino acid modifications
-  string mods_spec = get_string_parameter_pointer("mods-spec");
+  string mods_spec = get_string_parameter("mods-spec");
   carp(CARP_DEBUG, "mods_spec='%s'", mods_spec.c_str());
   if (!var_mod_table.Parse(mods_spec.c_str())) {
     carp(CARP_FATAL, "Error parsing mods");
   }
   //parse terminal modifications
-  mods_spec = get_string_parameter_pointer("cterm-peptide-mods-spec");
+  mods_spec = get_string_parameter("cterm-peptide-mods-spec");
   if (!mods_spec.empty())
    if (!var_mod_table.Parse(mods_spec.c_str(), CTPEP)) {
     carp(CARP_FATAL, "Error parsing c-terminal peptide mods");
   }
-  mods_spec = get_string_parameter_pointer("nterm-peptide-mods-spec");
+  mods_spec = get_string_parameter("nterm-peptide-mods-spec");
   if (!mods_spec.empty())
    if (!var_mod_table.Parse(mods_spec.c_str(), NTPEP)) {
     carp(CARP_FATAL, "Error parsing n-terminal peptide mods");
   }
-  mods_spec = get_string_parameter_pointer("cterm-protein-mods-spec");
+  mods_spec = get_string_parameter("cterm-protein-mods-spec");
   if (!mods_spec.empty())
    if (!var_mod_table.Parse(mods_spec.c_str(), CTPRO)) {
     carp(CARP_FATAL, "Error parsing c-terminal protein mods");
   }
-  mods_spec = get_string_parameter_pointer("nterm-protein-mods-spec");
+  mods_spec = get_string_parameter("nterm-protein-mods-spec");
   if (!mods_spec.empty())
    if (!var_mod_table.Parse(mods_spec.c_str(), NTPRO)) {
     carp(CARP_FATAL, "Error parsing n-terminal protein mods");
@@ -152,11 +153,11 @@ int TideIndexApplication::main(int argc, char** argv) {
   }
 
   DECOY_TYPE_T decoy_type = get_tide_decoy_type_parameter("decoy-format");
-  string decoyPrefix = get_string_parameter_pointer("decoy-prefix");
+  string decoyPrefix = get_string_parameter("decoy-prefix");
 
   // Set up output paths
-  string fasta = get_string_parameter_pointer("protein fasta file");
-  string index = get_string_parameter_pointer("index name");
+  string fasta = get_string_parameter("protein fasta file");
+  string index = get_string_parameter("index name");
   bool overwrite = get_boolean_parameter("overwrite");
 
   if (!file_exists(fasta)) {
@@ -429,7 +430,7 @@ void TideIndexApplication::fastaToPb(
   vector<string*>& outProteinSequences,
   ofstream* decoyFasta
 ) {
-  string decoyPrefix = get_string_parameter_pointer("decoy-prefix");
+  string decoyPrefix = get_string_parameter("decoy-prefix");
   outProteinPbHeader.Clear();
   outProteinPbHeader.set_file_type(pb::Header::RAW_PROTEINS);
   outProteinPbHeader.set_command_line(commandLine);
@@ -811,7 +812,7 @@ void TideIndexApplication::getDecoyPbProtein(
     decoyPeptideSequence.append(targetProteinInfo.sequence->substr(startLoc, pepLen));
   }
 
-  getPbProtein(id, get_string_parameter_pointer("decoy-prefix") + targetProteinInfo.name,
+  getPbProtein(id, get_string_parameter("decoy-prefix") + targetProteinInfo.name,
                decoyPeptideSequence, outPbProtein);
   outPbProtein.set_target_pos(startLoc);
 }
@@ -841,11 +842,9 @@ void TideIndexApplication::addAuxLoc(
 }
 
 void TideIndexApplication::writeParamFile() {
-  char* param_file_name = cat_string(getFileStem().c_str(), ".params.txt");
-
   // Update mods-spec parameter for default cysteine mod
   const string default_cysteine = "C+57.02146";
-  string mods_spec = get_string_parameter_pointer("mods-spec");
+  string mods_spec = get_string_parameter("mods-spec");
   if (mods_spec.find('C') == string::npos) {
     mods_spec = mods_spec.empty() ?
       default_cysteine : default_cysteine + ',' + mods_spec;
@@ -854,8 +853,7 @@ void TideIndexApplication::writeParamFile() {
   }
   add_or_update_hash(parameters, "mods-spec", mods_spec.c_str());
 
-  print_parameter_file(&param_file_name);
-  free(param_file_name);
+  print_parameter_file(getFileStem() + ".params.txt");
 }
 
 /*

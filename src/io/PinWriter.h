@@ -48,8 +48,8 @@ class PinWriter{
 
   void closeFile();
   void openFile(
-    const char* filename, 
-    const char* ouput_directory,
+    const std::string& filename, 
+    const std::string& ouput_directory,
     bool overwrite
   ); 
 

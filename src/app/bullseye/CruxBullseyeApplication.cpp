@@ -5,6 +5,7 @@
 #include "CruxBullseyeApplication.h"
 #include "CruxHardklorApplication.h"
 #include "util/CarpStreamBuf.h"
+#include "util/crux-file-utils.h"
 #include "io/DelimitedFileWriter.h"
 
 #include "util/crux-utils.h"
@@ -64,8 +65,8 @@ int CruxBullseyeApplication::main(int argc, char** argv) {
   string input_ms1 = get_string_parameter("MS1 spectra");
   string input_ms2 = get_string_parameter("MS2 spectra");
 
-  string out_format = get_string_parameter_pointer("spectrum-format");
-  if (out_format.empty() || out_format == "__NULL_STR") {
+  string out_format = get_string_parameter("spectrum-format");
+  if (out_format.empty()) {
     out_format = "ms2";
   } else if (out_format != "ms2" && out_format != "bms2" &&
              out_format != "cms2" && out_format != "mgf") {
@@ -76,9 +77,9 @@ int CruxBullseyeApplication::main(int argc, char** argv) {
   string nomatch_ms2 = make_file_path("bullseye.no-pid." + out_format);
   bool overwrite = get_boolean_parameter("overwrite");
 
-  hardklor_output = string(get_string_parameter_pointer("hardklor-file"));
+  hardklor_output = get_string_parameter("hardklor-file");
 
-  if (hardklor_output == "__NULL_STR") {
+  if (hardklor_output.empty()) {
     hardklor_output = make_file_path("hardklor.mono.txt");
     if ((overwrite) || (!file_exists(hardklor_output))) {
       carp(CARP_DEBUG,"Calling hardklor");

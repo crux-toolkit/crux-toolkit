@@ -82,7 +82,7 @@ IonSeries::IonSeries() {
  * peptide, charge, and constraint.
  */
 IonSeries::IonSeries(
-  const char* peptide, ///< The peptide for this ion series. -in
+  const string& peptide, ///< The peptide for this ion series. -in
   int charge, ///< The charge for this ion series -in
   IonConstraint* constraint ///< constraints which these ions obey.
   )
@@ -90,7 +90,7 @@ IonSeries::IonSeries(
 
   init();
   // copy the peptide sequence
-  peptide_ = my_copy_string(peptide);
+  peptide_ = my_copy_string(peptide.c_str());
   convert_to_mod_aa_seq(peptide_, &(modified_aa_seq_));
   peptide_mass_ = Peptide::calcSequenceMass(peptide_, MONO);
   charge_ = charge;
