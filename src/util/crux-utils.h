@@ -602,5 +602,9 @@ void check_target_decoy_files(
   std::string &decoy     //filename of the decoy PSMs
 );
 
+void get_files_from_list(
+  const std::string &infile, ///< path of the first file.
+  std::vector<std::string> &outpaths ///< paths of all search results -out                                                                                                         
+);
 
 #endif

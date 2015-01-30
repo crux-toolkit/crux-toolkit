@@ -29,8 +29,7 @@ FLOAT_T* compute_decoy_qvalues_tdc(
   int      num_targets,
   FLOAT_T* decoy_scores,
   int      num_decoys,
-  bool     reverse,
-  FLOAT_T  pi_zero);
+  bool     reverse);
 
 FLOAT_T* compute_qvalues_from_pvalues(
   FLOAT_T* pvalues, 
@@ -44,7 +43,7 @@ FLOAT_T estimate_pi0( FLOAT_T* target_scores,
   bool     ascending);
   
 MatchCollection* run_qvalue(
-  const std::string& psm_result_folder, 
+  vector<string>& input_files,
   const std::string& fasta_file,
   OutputFiles& output,
   COMMAND_T command  );

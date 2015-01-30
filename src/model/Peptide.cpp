@@ -2068,8 +2068,8 @@ char residue_iterator_next(
 string Peptide::getProteinIdsLocations() {
 
   set<string> protein_ids_locations;
+  string protein_field_string;  
 
- 
   std::ostringstream protein_field_stream;
   if (!peptide_srcs_.empty()) {
     for( PeptideSrcIterator iter = getPeptideSrcBegin();
@@ -2082,20 +2082,19 @@ string Peptide::getProteinIdsLocations() {
       protein_loc_stream << protein_id;
 
       if (!protein->isPostProcess()) {
-        int peptide_loc = peptide_src->getStartIdx();
-        
+       int peptide_loc = peptide_src->getStartIdx();      
         protein_loc_stream << "(" << peptide_loc << ")";
       } else if (peptide_src->getStartIdxOriginal() > 0) {
         protein_loc_stream << "(" << peptide_src->getStartIdxOriginal() << ")";
       }
+
       std::free(protein_id);
       protein_ids_locations.insert(protein_loc_stream.str());
     }
   }
 
-
   set<string>::iterator result_iter = protein_ids_locations.begin();
-  string protein_field_string = *result_iter;
+  protein_field_string = *result_iter;
 
   while(++result_iter != protein_ids_locations.end()) {
     protein_field_string += "," + *result_iter;

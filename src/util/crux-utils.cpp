@@ -1960,8 +1960,30 @@ void get_search_result_paths(
       }
     }
   }
+}
 
+void get_files_from_list(
+  const string &infile, ///< path of the first file.
+  std::vector<std::string> &outpaths ///< paths of all search results -out                                                                                                         
+  ) {
   
+  outpaths.clear();
+  if (get_boolean_parameter("list-of-files")) {
+    LineFileReader reader(infile);
+    while(reader.hasNext()) {
+      string current = reader.next();
+      carp(CARP_INFO, "current is:%s", current.c_str());
+      if (file_exists(current)) {
+        outpaths.push_back(current);
+      } else {
+        carp(CARP_ERROR, "Search file '%s' doesn't exist", current.c_str());
+      }
+    }
+  } else {
+    if (file_exists(infile)) {
+      outpaths.push_back(infile);
+    } 
+  }
 }
 
 /*

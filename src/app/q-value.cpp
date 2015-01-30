@@ -259,7 +259,7 @@ FLOAT_T estimate_pi0( FLOAT_T* target_scores,
   return pi_zero;
 }
 
-#ifdef _MSC_VER
+//#ifdef _MSC_VER
 // The Microsoft 10.0 C++ compiler has trouble resolving the proper virtual
 // function call when the STL make_pair is combined with the STL ptr_fun.
 // They promise to fix this in v11, but until then we create our own wrapper
@@ -267,7 +267,7 @@ FLOAT_T estimate_pi0( FLOAT_T* target_scores,
 pair<double,bool> make_pair(double db, bool b) {
     return std::pair<double,bool>(db, b);
 }
-#endif
+//#endif
 
 /**
  * \brief Compute q-values using mix-max procedure. This part is a
@@ -470,13 +470,16 @@ FLOAT_T* compute_PEP_from_pvalues(FLOAT_T* pvalues, int num_pvals){
  * in each match.
  */
 MatchCollection* run_qvalue(
-  const string& input_file, 
+  vector<string>& input_files,
   const string& fasta_file,
   OutputFiles& output,
   COMMAND_T command  
   ){
-  string target_path = input_file;
-  string decoy_path = input_file;
+  
+  if (input_files.size() == 0) {
+    carp(CARP_FATAL, "No search paths found!");
+  }
+  
   bool ascending = get_boolean_parameter("smaller-is-better");
   SCORER_TYPE_T score_type = INVALID_SCORER_TYPE;
   
@@ -485,97 +488,107 @@ MatchCollection* run_qvalue(
   } else if (get_string_parameter("score") == "xcorr score") {        
     score_type = XCORR;
   }
-    
-  check_target_decoy_files(target_path, decoy_path);
 
-  if (!file_exists(target_path)) {
-    carp(CARP_FATAL, "Target file %s not found", target_path.c_str());
-  }
-  
-  if (!file_exists(decoy_path)) {
-    if (command == MIXMAX_COMMAND) {
-      carp(CARP_FATAL, "Decoy file separate target-decoy search is required for q-value calculation");
-    }
-    carp(CARP_DEBUG, "Decoy file %s not found", decoy_path.c_str());
-    decoy_path = "";    
-  }
-
-  bool have_decoys = false;
-  MatchCollectionParser parser;
-  MatchCollection* match_collection =
-    parser.create(target_path, get_string_parameter("protein-database"));
-  bool distinct_matches = match_collection->getHasDistinctMatches();
-
-  MatchCollection* decoy_matches = new MatchCollection();
   // Create two match collections, for targets and decoys.
+  MatchCollection* decoy_matches = new MatchCollection();
   MatchCollection* target_matches = new MatchCollection();
-  if (decoy_path != "") {
-    MatchCollection* temp_collection = parser.create(decoy_path, get_string_parameter("protein-database"));
-       // Mark decoy matches
-    MatchIterator* temp_iter = new MatchIterator(temp_collection);
-    while (temp_iter->hasNext()) {
-      Crux::Match* decoy_match = temp_iter->next();
-//      if (decoy_match->getRank(XCORR) == 1) {
-        decoy_match->setNullPeptide(true);
-        decoy_matches->addMatch(decoy_match);
-        have_decoys = true;
-//      }
-    }
-    delete temp_iter;
-    delete temp_collection;
-    //carry out concatenated search.
-    if (command == TDC_COMMAND) {
-      MatchCollection* tdc_collection = new MatchCollection();
-      tdc_collection->setScoredType(score_type, true);      
-      MatchIterator* target_iter = new MatchIterator(match_collection);
-      MatchIterator* decoy_iter = new MatchIterator(decoy_matches);
-      while (target_iter->hasNext() ) {
-        Crux::Match* target_match = target_iter->next();
-        Crux::Match* decoy_match  = decoy_iter->next();
-        if (ascending) { 
-          tdc_collection->addMatch(target_match->getScore(score_type) < decoy_match->getScore(score_type) ? target_match : decoy_match);
-        } else {
-          tdc_collection->addMatch(target_match->getScore(score_type) > decoy_match->getScore(score_type) ? target_match : decoy_match);
-        }
-      }  
-      tdc_collection->setScoredType(DELTA_CN,match_collection->getScoredType(DELTA_CN));
-      tdc_collection->setScoredType(SP,match_collection->getScoredType(SP));
-      tdc_collection->setScoredType(BY_IONS_MATCHED,match_collection->getScoredType(BY_IONS_MATCHED));
-      tdc_collection->setScoredType(BY_IONS_TOTAL,match_collection->getScoredType(BY_IONS_TOTAL));
 
-      delete target_iter;
-      delete decoy_iter;
-      delete match_collection;
-      match_collection = tdc_collection;
-    }
-  }
-  bool have_pvalues = match_collection->getScoredType(TIDE_SEARCH_EXACT_PVAL);
+  bool distinct_matches = false; 
+//  for (vector<string>::iterator iter = input_files.begin(); iter != input_files.end(); ++iter) {
 
-  target_matches->setScoredType(score_type, true);
-  decoy_matches->setScoredType(score_type, true);
-  // Did we find something from which to get q-values?
-  bool have_evalues = match_collection->getScoredType(EVALUE);
+vector<string>::iterator iter = input_files.begin();
+    string target_path = *iter;
+    string decoy_path = *iter;
+  
+    check_target_decoy_files(target_path, decoy_path);
+
+    if (!file_exists(target_path)) {
+      carp(CARP_FATAL, "Target file %s not found", target_path.c_str());
+    }
     
-  // Iterate, gathering matches into one or two collections.
-  MatchIterator* match_iterator =
-    new MatchIterator(match_collection, score_type, false);
+    if (!file_exists(decoy_path)) {
+      if (command == MIXMAX_COMMAND) {
+        carp(CARP_FATAL, "Decoy file separate target-decoy search is required for q-value calculation");
+      }
+      carp(CARP_DEBUG, "Decoy file %s not found", decoy_path.c_str());
+      decoy_path = "";    
+    }
 
-  while(match_iterator->hasNext()){
-    Match* match = match_iterator->next();
-      
-    // Only use top-ranked matches.
-    if( match->getRank(XCORR) != 1 ){
-      continue;
+    MatchCollectionParser parser;
+    MatchCollection* match_collection =
+      parser.create(target_path, get_string_parameter("protein-database"));
+    distinct_matches  = true; target_matches->getHasDistinctMatches();
+   // MatchCollection* decoy_matches = new MatchCollection();
+    // Create two match collections, for targets and decoys.
+  //  MatchCollection* target_matches = new MatchCollection();
+    if (decoy_path != "") {
+      MatchCollection* temp_collection = parser.create(decoy_path, get_string_parameter("protein-database"));
+         // Mark decoy matches
+      MatchIterator* temp_iter = new MatchIterator(temp_collection);
+      while (temp_iter->hasNext()) {
+        Crux::Match* decoy_match = temp_iter->next();
+          decoy_match->setNullPeptide(true);
+          if (command != TDC_COMMAND) {
+            decoy_matches->addMatch(decoy_match);
+          }
+      }
+      delete temp_iter;
+      //carry out concatenated search.
+      if (command == TDC_COMMAND) {
+        MatchCollection* tdc_collection = new MatchCollection();
+        tdc_collection->setScoredType(score_type, true);      
+        MatchIterator* target_iter = new MatchIterator(match_collection);
+        MatchIterator* decoy_iter = new MatchIterator(temp_collection);
+        while (target_iter->hasNext() ) {
+          Crux::Match* target_match = target_iter->next();
+          Crux::Match* decoy_match  = decoy_iter->next();
+          decoy_match->setNullPeptide(true);          
+          if( target_match->getRank(XCORR) != 1 || decoy_match->getRank(XCORR) != 1 ) continue;
+          if (ascending) { 
+            tdc_collection->addMatch(target_match->getScore(score_type) < decoy_match->getScore(score_type) ? target_match : decoy_match);
+          } else {
+            tdc_collection->addMatch(target_match->getScore(score_type) > decoy_match->getScore(score_type) ? target_match : decoy_match);
+          }
+        }  
+        tdc_collection->setScoredType(DELTA_CN,match_collection->getScoredType(DELTA_CN));
+        tdc_collection->setScoredType(SP,match_collection->getScoredType(SP));
+        tdc_collection->setScoredType(BY_IONS_MATCHED,match_collection->getScoredType(BY_IONS_MATCHED));
+        tdc_collection->setScoredType(BY_IONS_TOTAL,match_collection->getScoredType(BY_IONS_TOTAL));
+
+        delete target_iter;
+        delete decoy_iter;
+        delete match_collection;
+        match_collection = tdc_collection;
+      }
     }
-    if (match->getNullPeptide() == true) {
-      decoy_matches->addMatch(match);
-      have_decoys = true;
-    } else {
-      target_matches->addMatch(match);
+     
+    // Iterate, gathering matches into one or two collections.
+    MatchIterator* match_iterator =
+      new MatchIterator(match_collection, score_type, false);
+
+    while(match_iterator->hasNext()){
+      Match* match = match_iterator->next();
+        
+      // Only use top-ranked matches.
+      if( match->getRank(XCORR) != 1 ){
+        continue;
+      }
+      if (match->getNullPeptide() == true) {
+        decoy_matches->addMatch(match);
+      } else {
+        target_matches->addMatch(match);
+      }
+      Match::freeMatch(match);
     }
-    Match::freeMatch(match);
-  }
-  delete match_iterator;
+    delete match_iterator;   
+    delete match_collection;   
+//    break;
+  
+  bool have_pvalues = true; target_matches->getScoredType(TIDE_SEARCH_EXACT_PVAL);
+  bool have_evalues = false; target_matches->getScoredType(EVALUE);
+  target_matches->setScoredType(score_type, true);
+  decoy_matches->setScoredType(score_type, true);   
+
 
   // get from the input files which columns to print in the output files
   vector<bool> cols_to_print(NUMBER_MATCH_COLUMNS);
@@ -585,9 +598,9 @@ MatchCollection* run_qvalue(
   cols_to_print[SPECTRUM_PRECURSOR_MZ_COL] = true;
   cols_to_print[SPECTRUM_NEUTRAL_MASS_COL] = true;
   cols_to_print[PEPTIDE_MASS_COL] = true;
-  cols_to_print[DELTA_CN_COL] = match_collection->getScoredType(DELTA_CN);
-  cols_to_print[SP_SCORE_COL] = match_collection->getScoredType(SP);
-  cols_to_print[SP_RANK_COL] = match_collection->getScoredType(SP);
+  cols_to_print[DELTA_CN_COL] = target_matches->getScoredType(DELTA_CN);
+  cols_to_print[SP_SCORE_COL] = target_matches->getScoredType(SP);
+  cols_to_print[SP_RANK_COL] = target_matches->getScoredType(SP);
   cols_to_print[XCORR_SCORE_COL] = !have_pvalues;
   cols_to_print[XCORR_RANK_COL] = true;
   cols_to_print[EVALUE_COL] = have_evalues;
@@ -595,8 +608,8 @@ MatchCollection* run_qvalue(
   if (have_pvalues) {
     cols_to_print[REFACTORED_SCORE_COL] = true;
   }
-  cols_to_print[BY_IONS_MATCHED_COL] = match_collection->getScoredType(BY_IONS_MATCHED);
-  cols_to_print[BY_IONS_TOTAL_COL] = match_collection->getScoredType(BY_IONS_TOTAL);
+  cols_to_print[BY_IONS_MATCHED_COL] = target_matches->getScoredType(BY_IONS_MATCHED);
+  cols_to_print[BY_IONS_TOTAL_COL] = target_matches->getScoredType(BY_IONS_TOTAL);
 
   if (distinct_matches) {
     cols_to_print[DISTINCT_MATCHES_SPECTRUM_COL] = true;
@@ -612,7 +625,6 @@ MatchCollection* run_qvalue(
   cols_to_print[BETA_COL] = have_pvalues;
   cols_to_print[SHIFT_COL] = have_pvalues;
   cols_to_print[CORR_COL] = have_pvalues;
-  delete match_collection;
 
   output.writeHeaders(cols_to_print);
 
@@ -621,7 +633,6 @@ MatchCollection* run_qvalue(
   int num_pvals = target_matches->getMatchTotal();
   FLOAT_T* qvalues = NULL;
   FLOAT_T* decoy_scores;
-  have_decoys = true;
   int num_decoys  ;
   num_decoys = decoy_matches->getMatchTotal();
   carp(CARP_INFO,
