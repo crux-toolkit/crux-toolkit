@@ -1184,6 +1184,10 @@ void initialize_parameters(void){
     "Available for tide-search.",
     "false"
   );
+  set_boolean_parameter("skip-decoys", true,
+    "Skips decoys when reading a Tide index. Default = true.",
+    "Available for read-tide-index", "false"
+  );
   
   /*
    * Comet parameters

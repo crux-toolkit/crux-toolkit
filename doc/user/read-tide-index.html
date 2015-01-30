@@ -1,0 +1,89 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<TITLE>read-tide-index</TITLE>
+</HEAD>
+<BODY>
+<blockquote>
+<H1 ALIGN=CENTER>read-tide-index</H1>
+
+<B>Usage:</B>
+
+<blockquote>
+<code>crux read-tide-index [options] &nbsp;&lt;tide-index directory&gt;</code>
+</blockquote>
+
+<B>Description:</B>
+<p>
+Given an index directory produced by tide-index, extract the peptides and
+their associated protein IDs.
+</p>
+
+<B>Input:</B>
+<UL>
+
+<li>
+&lt;tide-index directory&gt; &ndash; An index directory produced by tide-index.
+</li>
+	
+</UL>
+
+<B>Output:</B>
+
+<ul>
+<li>
+<b>read-tide-index.peptides.html</b>: a tab-delimited file containing
+two columns with headers: the peptide, and a semicolon-delimited list of IDs of
+the proteins that peptide occurs in.</li>
+
+<li>
+<b>read-tide-index.params.txt</b>: a file containing the name and value of all
+parameters/options for the current operation.  Not all parameters in
+the file may have been used in the operation.  The resulting file can
+be used with the <code>--parameter-file</code> option for other Crux
+programs.
+</li>
+
+<li>
+<b>read-tide-index.log.txt</b>: a log file containing a copy of all messages
+that were printed to the screen during execution.</li>
+</ul>
+
+<B>Options:</B>
+
+<UL>
+
+<li>
+<code>--skip-decoys &lt;T|F&gt;</code> &ndash; Specify whether to skip decoy
+peptides when processing the index or not. If this parameter is set to
+F, then the output file contains an additional column indicating
+whether the peptide is a decoy or not.  Default = T.</li>
+
+<li>
+<code>--fileroot &lt;string&gt;</code> &ndash; 
+The <code>fileroot</code> string will be added as a prefix to all
+output file names. Default = none.</li>
+
+<li>
+<code>--output-dir &lt;filename&gt;</code> &ndash; 
+The name of the directory where output files will be created.
+Default = crux-output.</li>
+
+<li>
+<code>--verbosity &lt;0-100&gt;</code> &ndash; Specify the verbosity of the
+current processes. Each level prints the following messages, including
+all those at lower verbosity levels: 0-fatal errors, 10-non-fatal
+errors, 20-warnings, 30-information on the progress of execution,
+40-more progress information, 50-debug info, 60-detailed debug info.
+Default = 30.</li>
+
+</ul>
+
+<hr></hr>
+
+<p>
+<a href="crux.html">Crux home</a></p>
+
+</blockquote>
+</body>
+</html>
