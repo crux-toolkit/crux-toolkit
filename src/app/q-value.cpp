@@ -517,10 +517,16 @@ vector<string>::iterator iter = input_files.begin();
     MatchCollectionParser parser;
     MatchCollection* match_collection =
       parser.create(target_path, get_string_parameter("protein-database"));
-    distinct_matches  = true; target_matches->getHasDistinctMatches();
-   // MatchCollection* decoy_matches = new MatchCollection();
-    // Create two match collections, for targets and decoys.
-  //  MatchCollection* target_matches = new MatchCollection();
+    distinct_matches  = match_collection->getHasDistinctMatches();
+
+    target_matches->setScoredType(TIDE_SEARCH_EXACT_PVAL,match_collection->getScoredType(TIDE_SEARCH_EXACT_PVAL));
+    target_matches->setScoredType(EVALUE,match_collection->getScoredType(EVALUE));
+    
+    target_matches->setScoredType(DELTA_CN,match_collection->getScoredType(DELTA_CN));
+    target_matches->setScoredType(SP,match_collection->getScoredType(SP));
+    target_matches->setScoredType(BY_IONS_MATCHED,match_collection->getScoredType(BY_IONS_MATCHED));
+    target_matches->setScoredType(BY_IONS_TOTAL,match_collection->getScoredType(BY_IONS_TOTAL));
+    
     if (decoy_path != "") {
       MatchCollection* temp_collection = parser.create(decoy_path, get_string_parameter("protein-database"));
          // Mark decoy matches
@@ -550,16 +556,13 @@ vector<string>::iterator iter = input_files.begin();
             tdc_collection->addMatch(target_match->getScore(score_type) > decoy_match->getScore(score_type) ? target_match : decoy_match);
           }
         }  
-        tdc_collection->setScoredType(DELTA_CN,match_collection->getScoredType(DELTA_CN));
-        tdc_collection->setScoredType(SP,match_collection->getScoredType(SP));
-        tdc_collection->setScoredType(BY_IONS_MATCHED,match_collection->getScoredType(BY_IONS_MATCHED));
-        tdc_collection->setScoredType(BY_IONS_TOTAL,match_collection->getScoredType(BY_IONS_TOTAL));
 
         delete target_iter;
         delete decoy_iter;
         delete match_collection;
         match_collection = tdc_collection;
       }
+      delete temp_collection;
     }
      
     // Iterate, gathering matches into one or two collections.
@@ -584,8 +587,8 @@ vector<string>::iterator iter = input_files.begin();
     delete match_collection;   
 //    break;
   
-  bool have_pvalues = true; target_matches->getScoredType(TIDE_SEARCH_EXACT_PVAL);
-  bool have_evalues = false; target_matches->getScoredType(EVALUE);
+  bool have_pvalues = target_matches->getScoredType(TIDE_SEARCH_EXACT_PVAL);
+  bool have_evalues = target_matches->getScoredType(EVALUE);
   target_matches->setScoredType(score_type, true);
   decoy_matches->setScoredType(score_type, true);   
 
