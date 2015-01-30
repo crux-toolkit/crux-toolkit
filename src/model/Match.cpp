@@ -946,10 +946,10 @@ void Match::printOneMatchField(
   case FLANKING_AA_COL:
     {
       Peptide* peptide = getPeptide();
-//      char* flanking_aas = peptide->getFlankingAAs();
-//      output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
-//                                       flanking_aas);
-//      free(flanking_aas);
+      char* flanking_aas = peptide->getFlankingAAs();
+      output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
+                                       flanking_aas);
+      free(flanking_aas);
     }
     break;
   case ORIGINAL_TARGET_SEQUENCE_COL:
