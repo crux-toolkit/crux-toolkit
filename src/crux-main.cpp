@@ -37,6 +37,7 @@
 #include "app/MakePinApplication.h"
 #include "app/TideIndexApplication.h"
 #include "app/ReadSpectrumRecordsApplication.h"
+#include "app/ReadTideIndex.h"
 #include "app/TideSearchApplication.h"
 #include "app/CometApplication.h"
 /**
@@ -61,6 +62,7 @@ int main(int argc, char** argv){
     applications.add(new TideIndexApplication());
     applications.add(new TideSearchApplication());
     applications.add(new ReadSpectrumRecordsApplication());
+    applications.add(new ReadTideIndex());
     applications.add(new CometApplication());
     applications.add(new PercolatorApplication());
     applications.add(new QRanker());

@@ -75,6 +75,7 @@ set (
   percolator_legacy.html
   q-ranker.html 
   quant_empai_1.gif
+  read-tide-index.html
   release-notes.html 
   sample.fasta 
   schematic.png 

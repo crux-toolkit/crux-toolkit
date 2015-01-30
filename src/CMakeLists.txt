@@ -131,6 +131,7 @@ set (
   io/PWIZSpectrumCollection.cpp
   app/q-value.cpp
   app/ReadSpectrumRecordsApplication.cpp
+  app/ReadTideIndex.cpp
   app/SortColumn.cpp
   model/Scorer.cpp
   app/SpectralCounts.cpp
