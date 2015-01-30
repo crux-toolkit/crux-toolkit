@@ -26,7 +26,9 @@ void analyze_matches_main(
 
   // Define optional command line arguments.
   const char* qvalue_option_list[] = {
-    "pi-zero",
+    "estimation-method",
+    "decoy-prefix",
+    "score",
     "smaller-is-better",
     "verbosity",
     "parameter-file",
@@ -34,7 +36,7 @@ void analyze_matches_main(
     "output-dir",
     "fileroot"
   };
-
+  
   int qvalue_num_options = sizeof(qvalue_option_list)/sizeof(char*);
 
   // Define required command line arguments.
@@ -51,7 +53,18 @@ void analyze_matches_main(
 
   // Get required arguments
   string protein_database_name = get_string_parameter("protein-database");
-  string target_input = get_string_parameter("target input");
+
+  string input = get_string_parameter("target input");
+  vector<string> input_files;  
+  // Prepare the output files.
+  if (get_boolean_parameter("list-of-files") ||
+      has_extension(input.c_str(), "txt") ||
+      has_extension(input.c_str(), "sqt") ||
+      has_extension(input.c_str(), "pep.xml") ||
+      has_extension(input.c_str(), "mzid")) {
+
+    get_files_from_list(input, input_files);
+  }
   // Prepare the output files.
   OutputFiles output(application);
   COMMAND_T command;
@@ -63,7 +76,7 @@ void analyze_matches_main(
   
   // Perform the analysis.
   MatchCollection* match_collection =
-    run_qvalue(target_input, protein_database_name, output, command);
+    run_qvalue(input_files, protein_database_name, output, command);
 
   delete match_collection;
   output.writeFooters();

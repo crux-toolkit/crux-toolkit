@@ -1817,15 +1817,15 @@ void initialize_parameters(void){
       "Used by assign-confidence, compute-q-values, percolator and q-ranker", "false");
   set_boolean_parameter("smaller-is-better", false, 
       "Specify the semantics of the score, i.e., whether a smaller value "
-      "implies a better match or vice versa.",
+      "implies a better match or vice versa. Default=T",
       "Used by assign-confidence.", "true");
   set_string_parameter("score", "xcorr score", 
       "Specify the column (for tab-delimited input) or tag (for XML input) "
-      "used as input to the q-value estimation procedure.",
+      "used as input to the q-value estimation procedure. Default \"xcorr score\".",
       "Used by assign-confidence.", "true");
   set_string_parameter("estimation-method", "tdc", 
       "Specify the q-value calculation procedure to either "
-      "target-decoy competition (tcd) or mix-max (mix-max).",
+      "target-decoy competition (tcd) or mix-max (mix-max). Default=tdc.",
       "Used by assign-confidence.", "true");      
   set_string_parameter("percolator-intraset-features", "F",
       "Set a feature for percolator that in later versions is not an option.",
