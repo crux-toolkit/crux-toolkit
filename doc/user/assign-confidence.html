@@ -19,16 +19,16 @@
 <blockquote>
 
 <p>
-Given a target and decoy scores, estimate two statistical a q-value
-for each target score.  The q-value is analogous to a p-value but
-incorporates false discovery rate multiple testing correction.  The
-q-value associated with a score threshold T is defined as the minimal
-false discovery rate (FDR) at which a score of T is deemed
-significant.  In this setting, the q-value accounts for the fact that
-we are analyzing a large collection of scores. For confidence
-estimation afficianodos, please note that this definition of "q-value"
-is independent of the notion of "positive FDR" as defined in
-(Storey <i>Annals of Statistics</i> 31:2013-2015, 2003).</p>
+Given a target and decoy scores, estimate a q-value for each target
+score.  The q-value is analogous to a p-value but incorporates false
+discovery rate multiple testing correction.  The q-value associated
+with a score threshold T is defined as the minimal false discovery
+rate (FDR) at which a score of T is deemed significant.  In this
+setting, the q-value accounts for the fact that we are analyzing a
+large collection of scores. For confidence estimation afficianodos,
+please note that this definition of "q-value" is independent of the
+notion of "positive FDR" as defined in (Storey <i>Annals of
+Statistics</i> 31:2013-2015, 2003).</p>
 
 <p>
 To estimate FDRs, <code>assign-confidence</code> uses one of two
