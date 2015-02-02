@@ -34,6 +34,7 @@ int PrintProcessedSpectra::main(int argc, char** argv) {
   
   // Define optional command line arguments
   const char* option_list[] = { 
+    "stop-after",
     "spectrum-parser",
     "verbosity",
     "parameter-file", 
@@ -57,6 +58,15 @@ int PrintProcessedSpectra::main(int argc, char** argv) {
   output_ms2_name = prefix_fileroot_to_name(output_ms2_name);
   string output_dir = get_string_parameter("output-dir");
   bool overwrite = get_boolean_parameter("overwrite");
+  string stop_after = get_string_parameter("stop-after");
+
+  if (stop_after != "discretize" && stop_after != "remove-precursor" &&
+      stop_after != "square-root" && stop_after != "remove-grass" &&
+      stop_after != "ten-bin" && stop_after != "xcorr") {
+    carp(CARP_FATAL, "Invalid value '%s' for stop-after. Must be discretize, "
+         "remove-precursor, square-root, remove-grass, ten-bin, or xcorr.",
+         stop_after.c_str());
+  }
 
   // open output file
   create_output_directory(output_dir, overwrite);
@@ -100,7 +110,7 @@ int PrintProcessedSpectra::main(int argc, char** argv) {
     FLOAT_T* intensities = NULL;
     int max_mz_bin = 0;
     Scorer::getProcessedPeaks(cur_spectrum, cur_charge, XCORR,
-                        &intensities, &max_mz_bin);
+                        &intensities, &max_mz_bin, stop_after);
 
     // print processed spectrum
     cur_spectrum->printProcessedPeaks(cur_zstate, 

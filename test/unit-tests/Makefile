@@ -2,12 +2,12 @@
 # want to set the environment variable CK_FORK to no. This keeps the
 # check library from running the tests on multiple threads which makes
 # them hard to debug.
-BINDIR  =../../../../bin/
-SRCDIR  =../../
-PERCOLATOR_DIR=../../../c/percolator
-PWIZ_DIR=../../../external/proteowizard/install/
+BINDIR  =../../bin/
+SRCDIR  =../../src/
+PERCOLATOR_DIR=../../src/percolator
+PWIZ_DIR=../../external/proteowizard/install/
 CC	= g++	
-INTERNAL_CXXFLAGS  = -g -Wall -I../../ -I$(PERCOLATOR_DIR) -I$(PWIZ_DIR)/include -Icheck -Lcheck $(CXXFLAGS)
+INTERNAL_CXXFLAGS  = -g -Wall -I../../src/ -I$(PERCOLATOR_DIR) -I$(PWIZ_DIR)/include -Icheck -Lcheck $(CXXFLAGS)
 DEBUG   = -DNDEBUG -DBOUNDS_CHECK 
 DEBUG   = -DDEBUG -g
 
@@ -34,8 +34,8 @@ TESTS = \
 	#check-qvalue.c \
 
 CRUX_LIBS = \
-  ../../.libs/libcrux.a \
-  ../../../external/MSToolkit/.libs/libmstoolkit.a
+  ../../src/.libs/libcrux.a \
+  ../../ext/MSToolkit/.libs/libmstoolkit.a
 
 PWIZ_LIBS = \
   -L$(PWIZ_DIR)/lib \

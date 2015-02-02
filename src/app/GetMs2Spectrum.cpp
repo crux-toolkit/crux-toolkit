@@ -52,6 +52,7 @@ int GetMs2Spectrum :: main(int argc, char** argv){
 
   const char* option_list[] = {
     "scan-number",
+		"remove-precursor-tolerance",
     "version", 
     "stats", 
     "verbosity",

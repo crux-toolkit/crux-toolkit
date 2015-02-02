@@ -11,6 +11,6 @@ Scenario Outline: User runs print-processed-spectra
   And crux-output/<output_spectra> should match good_results/<expected_output>
 
 Examples:
-  |test_name               |args         |input_spectra|output_spectra    |expected_output   |
-  |print_processed_spectrum|--overwrite T|test.ms2     |processed-test.ms2|processed-test.ms2|
+  |test_name               |args                                         |input_spectra|output_spectra    |expected_output   |
+  |print_processed_spectrum|--overwrite T --remove-precursor-tolerance 15|test.ms2     |processed-test.ms2|processed-test.ms2|
 

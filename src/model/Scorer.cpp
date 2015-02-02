@@ -766,39 +766,27 @@ FLOAT_T Scorer::genScoreSp(
  * .
  */
 void Scorer::normalizeEachRegion(
-  FLOAT_T* observed,  ///< intensities to normalize
-  FLOAT_T max_intensity_overall, /// the max intensity over entire spectrum
-  FLOAT_T* max_intensity_per_region, ///< the max intensity in each 10 regions -in
+  vector<FLOAT_T>& observed,  ///< intensities to normalize
+  const vector<FLOAT_T>& max_intensity_per_region, ///< the max intensity in each 10 regions -in
   int region_selector ///< the size of each regions -in
   )
 {
-  int bin_idx = 0;
   int region_idx = 0;
+  int next_region = region_selector;
   FLOAT_T max_intensity = max_intensity_per_region[region_idx];
 
   // normalize each region
-  for(; bin_idx < getMaxBin(); ++bin_idx){
+  for (int i = 0; i < observed.size(); ++i) {
     // increment the region index and update max_intensity if this
     // peak is in the next region
-    if(bin_idx >= region_selector*(region_idx+1) 
-       && region_idx < (NUM_REGIONS-1)){
-      ++region_idx;
-      max_intensity = max_intensity_per_region[region_idx];
+    if (i >= next_region && region_idx < (NUM_REGIONS - 1)) {
+      max_intensity = max_intensity_per_region[++region_idx];
+      next_region += region_selector;
     }
-
-    // Don't normalize if no peaks in region, and for compatibility 
-    // with SEQUEST drop peaks with intensity less than 1/20 of 
-    // the overall max intensity.
-    if((max_intensity != 0)
-       && (observed[bin_idx] > 0.05 * max_intensity_overall))
-      {
-      // normalize intensity to max 50
-      observed[bin_idx] = (observed[bin_idx] / max_intensity) * MAX_PER_REGION;
-    }
-    else {
-      observed[bin_idx] = 0.0;
-    }
-
+    // normalize intensity to max 50
+    observed[i] = (max_intensity != 0)
+      ? (observed[i] / max_intensity) * MAX_PER_REGION
+      : 0.0;
   }
 }
 
@@ -813,15 +801,32 @@ FLOAT_T* Scorer::getIntensityArrayObserved() {
  */
 bool Scorer::createIntensityArrayObserved(
   Spectrum* spectrum,    ///< the spectrum to score(observed) -in
-  int charge               ///< the peptide charge -in 
+  int charge,              ///< the peptide charge -in 
+  const string& stop_after ///< the preprocessing step to stop after -in
   ) {
+  const int STEP_DISCRETIZE = 1;
+  const int STEP_REMOVE_PRECURSOR = 2;
+  const int STEP_SQUARE_ROOT = 3;
+  const int STEP_REMOVE_GRASS = 4;
+  const int STEP_TEN_BIN = 5;
+  const int STEP_XCORR = 6;
+  int stop_step;
+  if (stop_after == "discretize") {
+    stop_step = STEP_DISCRETIZE;
+  } else if (stop_after == "remove-precursor") {
+    stop_step = STEP_REMOVE_PRECURSOR;
+  } else if (stop_after == "square-root") {
+    stop_step = STEP_SQUARE_ROOT;
+  } else if (stop_after == "remove-grass") {
+    stop_step = STEP_REMOVE_GRASS;
+  } else if (stop_after == "ten-bin") {
+    stop_step = STEP_TEN_BIN;
+  } else if (stop_after == "xcorr") {
+    stop_step = STEP_XCORR;
+  } else {
+    carp(CARP_FATAL, "Invalid stop-after value '%s'.", stop_after.c_str());
+  }
   
-  Peak * peak = NULL;
-  FLOAT_T peak_location = 0;
-  int mz = 0;
-  FLOAT_T intensity = 0;
-  FLOAT_T bin_width = bin_width_;
-  FLOAT_T bin_offset = bin_offset_;
   FLOAT_T precursor_mz = spectrum->getPrecursorMz();
   FLOAT_T experimental_mass_cut_off = precursor_mz*charge + 50;
 
@@ -840,16 +845,12 @@ bool Scorer::createIntensityArrayObserved(
 
   sp_max_mz_ = sp_max_mz;
 
-  // DEBUG
-  // carp(CARP_INFO, "experimental_mass_cut_off: %.2f sp_max_mz: %.3f", experimental_mass_cut_off, sp_max_mz);
-  FLOAT_T* observed = (FLOAT_T*)mycalloc(getMaxBin(), sizeof(FLOAT_T));
+  vector<FLOAT_T> observed(getMaxBin(), 0);
 
   // Store the max intensity in entire spectrum
   FLOAT_T max_intensity_overall = 0.0;
   // store the max intensity in each 10 regions to later normalize
-  FLOAT_T* max_intensity_per_region 
-    = (FLOAT_T*)mycalloc(NUM_REGIONS, sizeof(FLOAT_T));
-  int region_selector = 0;
+  vector<FLOAT_T> max_intensity_per_region(NUM_REGIONS, 0);
 
   // while there are more peaks to iterate over..
   // find the maximum peak m/z (location)
@@ -858,57 +859,51 @@ bool Scorer::createIntensityArrayObserved(
   for (PeakIterator peak_iterator = spectrum->begin();
     peak_iterator != spectrum->end();
     ++peak_iterator) {
-
-    peak = *peak_iterator;
-    peak_location = peak->getLocation();
+    Peak* peak = *peak_iterator;
+    FLOAT_T peak_location = peak->getLocation();
     if (peak_location < experimental_mass_cut_off && peak_location > max_peak) {
       max_peak = peak_location;
     }
   }
-  region_selector = INTEGERIZE(max_peak, bin_width, bin_offset) / NUM_REGIONS;
+  int region_selector = INTEGERIZE(max_peak, bin_width_, bin_offset_) / NUM_REGIONS;
+  carp(CARP_INFO, "region_selector %d  bins %d", region_selector, observed.size());
 
-  // DEBUG
-  // carp(CARP_INFO, "max_peak_mz: %.2f, region size: %d",get_spectrum_max_peak_mz(spectrum), region_selector);
-  
-  int region = 0;
-  
+  FLOAT_T tolerance = get_double_parameter("remove-precursor-tolerance");
+
   // while there are more peaks to iterate over..
   // bin peaks, adjust intensties, find max for each region
   for (PeakIterator peak_iterator = spectrum->begin();
-    peak_iterator != spectrum->end();
-    ++peak_iterator) {
-    peak = *peak_iterator;
-    peak_location = peak->getLocation();
-    
+       peak_iterator != spectrum->end();
+       ++peak_iterator) {
+    Peak* peak = *peak_iterator;
+    FLOAT_T peak_location = peak->getLocation();
+
     // skip all peaks larger than experimental mass
-    if(peak_location > experimental_mass_cut_off){
-      continue;
-    }
-    
     // skip all peaks within precursor ion mz +/- 15
-    if(peak_location < precursor_mz + 15 &&  peak_location > precursor_mz - 15){
+    if (peak_location > experimental_mass_cut_off ||
+        (stop_step >= STEP_REMOVE_PRECURSOR &&
+         peak_location < precursor_mz + tolerance &&
+         peak_location > precursor_mz - tolerance)) {
       continue;
     }
     
     // map peak location to bin
-    mz = INTEGERIZE(peak_location, bin_width, bin_offset);
-    region = mz / region_selector;
+    int mz = INTEGERIZE(peak_location, bin_width_, bin_offset_);
+    int region = mz / region_selector;
 
     // don't let index beyond array
-    if(region>= NUM_REGIONS) {
-      if (region == NUM_REGIONS&&  mz<  experimental_mass_cut_off) {
-        // Force peak into lower bin
-        region = NUM_REGIONS - 1;
-      }
-      else {
-        // Skip peak altogether
-        continue;
-      }
+    if (region == NUM_REGIONS && mz < experimental_mass_cut_off) {
+      // Force peak into lower bin
+      region = NUM_REGIONS - 1;
+    } else if (region >= NUM_REGIONS) {
+      // Skip peak altogether
+      continue;
     }
 
     // get intensity
     // sqrt the original intensity
-    intensity = sqrt(peak->getIntensity());
+    FLOAT_T intensity = (stop_step >= STEP_SQUARE_ROOT)
+      ? sqrt(peak->getIntensity()) : peak->getIntensity();
 
     // Record the max intensity in the full spectrum
     if (intensity > max_intensity_overall) {
@@ -916,59 +911,43 @@ bool Scorer::createIntensityArrayObserved(
     }
 
     // set intensity in array with correct mz, only if max peak in the bin
-    if(observed[mz] < intensity){
+    if (observed[mz] < intensity) {
       observed[mz] = intensity;
-            
       // check if this peak is max intensity in the region(one out of 10)
-      if(max_intensity_per_region[region] < intensity){
+      if (max_intensity_per_region[region] < intensity) {
         max_intensity_per_region[region] = intensity;
       }
-    }    
-  }
-
-  
-  // DEBUG
-  /*
-  int i = 0;
-  for(; i < 10; i++){
-    carp(CARP_INFO, "High intensity bin %d: %.2f", i, max_intensity_per_region[i]);
-  }
-  */
-
-  // normalize each 10 regions to max intensity of 50
-  normalizeEachRegion(observed, max_intensity_overall, 
-                        max_intensity_per_region, region_selector);
-  
-  // DEBUG
-  /*
-  i = 0;
-  for(; i < scorer->sp_max_mz; i++){
-    carp(CARP_INFO, "Intensity array[%d]: %.2f", i, scorer->observed[i]);
-  } */
-
-  // TODO maybe replace with a faster implementation that uses cum distribution
-  FLOAT_T* new_observed = (FLOAT_T*)mycalloc(getMaxBin(), sizeof(FLOAT_T));
-  int idx;
-  for(idx = 0; idx < getMaxBin(); idx++){
-    new_observed[idx] = observed[idx];
-    int sub_idx;
-    for(sub_idx = idx - MAX_XCORR_OFFSET; sub_idx <= idx + MAX_XCORR_OFFSET;
-        sub_idx++){
-
-      if (sub_idx <= 0 || sub_idx >= getMaxBin()){
-        continue;
-      }
-
-      new_observed[idx] -= (observed[sub_idx] / (MAX_XCORR_OFFSET * 2.0 + 1));
     }
   }
 
-  // set new values
-  observed_ = new_observed;
+  // For compatibility with SEQUEST drop peaks with intensity less than 1/20 of
+  // the overall max intensity.
+  if (stop_step >= STEP_REMOVE_GRASS) {
+    for (vector<FLOAT_T>::iterator i = observed.begin(); i != observed.end(); i++) {
+      if (*i <= 0.05 * max_intensity_overall) {
+        *i = 0.0;
+      }
+    }
+  }
 
-  // free heap
-  free(observed);
-  free(max_intensity_per_region);
+  // normalize each 10 regions to max intensity of 50
+  if (stop_step >= STEP_TEN_BIN) {
+    normalizeEachRegion(observed, max_intensity_per_region, region_selector);
+  }
+
+  observed_ = (FLOAT_T*)mycalloc(observed.size(), sizeof(FLOAT_T));
+  copy(observed.begin(), observed.end(), observed_);
+
+  if (stop_step == STEP_XCORR) {
+    // TODO maybe replace with a faster implementation that uses cum distribution
+    for (int i = 0; i < observed.size(); i++) {
+      for (int j = i - MAX_XCORR_OFFSET; j <= i + MAX_XCORR_OFFSET; j++) {
+        if (j > 0 && j < observed.size()) {
+          observed_[i] -= (observed[j] / (MAX_XCORR_OFFSET * 2.0 + 1));
+        }
+      }
+    }
+  }
 
   return true;
 }
@@ -984,19 +963,18 @@ void Scorer::getProcessedPeaks(
   int charge,
   SCORER_TYPE_T score_type,  // SP, XCORR
   FLOAT_T** intensities, ///< pointer to array of intensities
-  int* max_mz_bin){
+  int* max_mz_bin,
+  const string& stop_after){
 
   // create a scorer
-  Scorer* scorer = new Scorer(score_type);
+  Scorer scorer(score_type);
 
   // call create_intensity_array_observed
-  scorer->createIntensityArrayObserved(spectrum, charge);
+  scorer.createIntensityArrayObserved(spectrum, charge, stop_after);
 
   // return the observed array and the sp_max_mz
-  *intensities = scorer->observed_;
-  *max_mz_bin = scorer->getMaxBin();
-  
-  return;
+  *intensities = scorer.observed_;
+  *max_mz_bin = scorer.getMaxBin();
 }
 
 /**

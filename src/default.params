@@ -22,7 +22,7 @@ only-psms=false
 fragment-mass=mono
 
 # +- m/z tolerance for precursor peak removal. Default = 1.5.
-# Available for tide-search.
+# Available for print-processed-spectra and tide-search.
 remove-precursor-tolerance=1.500000
 
 # Print to stdout additional information about the spectrum.
@@ -903,6 +903,12 @@ unique-mapping=false
 # (moderate), 2 (high), and 3 (max). The default value is 2.
 # Available for crux hardklor
 sensitivity=2
+
+# Specify which preprocessing step to stop after. Value must be
+# discretize, remove-precursor, square-root, remove-grass, ten-bin, or
+# xcorr. Default = xcorr.
+# Available for print-processed-spectra.
+stop-after=xcorr
 
 # Compute p-values for the main score type. Default=F.
 # Currently only implemented for XCORR.
