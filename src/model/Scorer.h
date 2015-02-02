@@ -142,9 +142,8 @@ class Scorer {
    * normalize each 10 regions of the observed spectrum to max 50
    */
   void normalizeEachRegion(
-    FLOAT_T* observed,  ///< intensities to normalize
-    FLOAT_T max_intensity_overall, /// the max intensity over entire spectrum
-    FLOAT_T* max_intensity_per_region, ///< the max intensity in each 10 regions -in
+    vector<FLOAT_T>& observed,  ///< intensities to normalize
+    const vector<FLOAT_T>& max_intensity_per_region, ///< the max intensity in each 10 regions -in
     int region_selector ///< the size of each regions -in
     );
 
@@ -368,7 +367,8 @@ class Scorer {
     int charge,
     SCORER_TYPE_T score_type,
     FLOAT_T** intensities, ///< pointer to array of intensities
-    int* mz_bins);
+    int* mz_bins,
+    const std::string& stop_after);
 
   /**
    * create the intensity arrays for both observed and theoretical spectrum
@@ -394,7 +394,8 @@ class Scorer {
 
   bool createIntensityArrayObserved(
     Crux::Spectrum* spectrum,    ///< the spectrum to score(observed) -in
-    int charge               ///< the peptide charge -in 
+    int charge,              ///< the peptide charge -in 
+    const std::string& stop_after = "xcorr" ///< the preprocessing step to stop after -in
     );
 
   /**

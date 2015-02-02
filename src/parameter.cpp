@@ -566,6 +566,13 @@ void initialize_parameters(void){
                         "Creates an ASCII file in the output directory "
                         "containing one peptide per line.",
                         "true");
+
+  // print-processed-spectra option
+  set_string_parameter("stop-after", "xcorr",
+    "Specify which preprocessing step to stop after. Value must be discretize, "
+    "remove-precursor, square-root, remove-grass, ten-bin, or xcorr. Default = "
+    "xcorr.",
+    "Available for print-processed-spectra.", "true");
   
   /* more generate_peptide parameters */
   set_boolean_parameter("output-sequence", false, 
@@ -1144,7 +1151,7 @@ void initialize_parameters(void){
   );
   set_double_parameter("remove-precursor-tolerance", 1.5, 0, BILLION,
     "+- m/z tolerance for precursor peak removal. Default = 1.5.",
-    "Available for tide-search.",
+    "Available for print-processed-spectra and tide-search.",
     "true"
   );
   set_boolean_parameter("clip-nterm-methionine", false,
