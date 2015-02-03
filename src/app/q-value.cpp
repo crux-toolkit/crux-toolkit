@@ -490,7 +490,7 @@ MatchCollection* run_qvalue(
     score_type = XCORR;
   } else {
     string score_param = get_string_parameter("score");
-    carp(CARP_FATAL, "The PSM feature \"%s\" is not supported. ", score_param.c_str());
+    carp(CARP_FATAL, "The PSM feature \"%s\" is not supported.", score_param.c_str());
   }
 
   // Create two match collections, for targets and decoys.
@@ -525,7 +525,7 @@ MatchCollection* run_qvalue(
     
     if (match_collection->getScoredType(score_type) == false){
         const char* score_str = scorer_type_to_string(score_type);
-        carp(CARP_FATAL, "The PSM feature \"%s\" was not found. ", score_str);
+        carp(CARP_FATAL, "The PSM feature \"%s\" was not found in file \"%s\".", score_str, target_path.c_str() );
     }
  
     target_matches->setScoredType(TIDE_SEARCH_EXACT_PVAL,match_collection->getScoredType(TIDE_SEARCH_EXACT_PVAL));
