@@ -1824,7 +1824,8 @@ void initialize_parameters(void){
       "Used by assign-confidence, compute-q-values, percolator and q-ranker", "false");
   set_boolean_parameter("smaller-is-better", false, 
       "Specify the semantics of the score, i.e., whether a smaller value "
-      "implies a better match or vice versa. Default=T",
+      "implies a better match or vice versa.  Default is false. Specify this parameter "
+      "T for \"exact p-value\" and F for \"xcorr score\". The default is F. ",
       "Used by assign-confidence.", "true");
   set_string_parameter("score", "xcorr score", 
       "Specify the column (for tab-delimited input) or tag (for XML input) "

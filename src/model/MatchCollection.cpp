@@ -296,7 +296,10 @@ void MatchCollection::spectrumSort(
     qsortMatch(match_, (QSORT_COMPARE_METHOD)compareSpectrumSp);
     last_sorted_ = SP;
     break;
-
+  case TIDE_SEARCH_EXACT_PVAL:
+    qsortMatch(match_, (QSORT_COMPARE_METHOD)compareExactPValue);
+    last_sorted_ = TIDE_SEARCH_EXACT_PVAL;    
+    break;
   case XCORR:
   case LOGP_WEIBULL_XCORR: 
   case LOGP_BONF_WEIBULL_XCORR: 
@@ -1948,6 +1951,39 @@ void MatchCollection::assignQValues(
   delete match_iterator;
 }
 
+/**
+ * Given a hash table that maps from a score to its q-value, assign
+ * q-values to all of the matches in a given collection.
+ */
+void MatchCollection::assignQValues(
+  const map<FLOAT_T, FLOAT_T>* score_to_qvalue_hash,
+  SCORER_TYPE_T score_type,
+  SCORER_TYPE_T derived_score_type
+){
+
+  // Iterate over the matches filling in the q-values
+  MatchIterator* match_iterator = 
+    new MatchIterator(this, score_type, false);
+
+  while(match_iterator->hasNext()){
+    Match* match = match_iterator->next();
+    FLOAT_T score = match->getScore(score_type);
+
+    // Retrieve the corresponding q-value.
+    map<FLOAT_T, FLOAT_T>::const_iterator map_position 
+      = score_to_qvalue_hash->find(score);
+    if (map_position == score_to_qvalue_hash->end()) {
+      carp(CARP_FATAL,
+           "Cannot find q-value corresponding to score of %g.",
+           score);
+    }
+    FLOAT_T qvalue = map_position->second;
+
+    match->setScore(derived_score_type, qvalue);
+  }
+  scored_type_[derived_score_type] = true;
+  delete match_iterator;
+}
 /**
  * Given a hash table that maps from a score to its PEP, assign
  * PEPs to all of the matches in a given collection.

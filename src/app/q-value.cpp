@@ -482,11 +482,15 @@ MatchCollection* run_qvalue(
   
   bool ascending = get_boolean_parameter("smaller-is-better");
   SCORER_TYPE_T score_type = INVALID_SCORER_TYPE;
+  SCORER_TYPE_T derived_score_type = INVALID_SCORER_TYPE;
   
   if (get_string_parameter("score") == "exact p-value") {
     score_type = TIDE_SEARCH_EXACT_PVAL;
   } else if (get_string_parameter("score") == "xcorr score") {        
     score_type = XCORR;
+  } else {
+    string score_param = get_string_parameter("score");
+    carp(CARP_FATAL, "The PSM feature \"%s\" is not supported. ", score_param.c_str());
   }
 
   // Create two match collections, for targets and decoys.
@@ -494,9 +498,9 @@ MatchCollection* run_qvalue(
   MatchCollection* target_matches = new MatchCollection();
 
   bool distinct_matches = false; 
-//  for (vector<string>::iterator iter = input_files.begin(); iter != input_files.end(); ++iter) {
-
-vector<string>::iterator iter = input_files.begin();
+  MatchCollectionParser parser;  
+  for (vector<string>::iterator iter = input_files.begin(); iter != input_files.end(); ++iter) {
+ 
     string target_path = *iter;
     string decoy_path = *iter;
   
@@ -514,11 +518,16 @@ vector<string>::iterator iter = input_files.begin();
       decoy_path = "";    
     }
 
-    MatchCollectionParser parser;
+
     MatchCollection* match_collection =
       parser.create(target_path, get_string_parameter("protein-database"));
     distinct_matches  = match_collection->getHasDistinctMatches();
-
+    
+    if (match_collection->getScoredType(score_type) == false){
+        const char* score_str = scorer_type_to_string(score_type);
+        carp(CARP_FATAL, "The PSM feature \"%s\" was not found. ", score_str);
+    }
+ 
     target_matches->setScoredType(TIDE_SEARCH_EXACT_PVAL,match_collection->getScoredType(TIDE_SEARCH_EXACT_PVAL));
     target_matches->setScoredType(EVALUE,match_collection->getScoredType(EVALUE));
     
@@ -556,7 +565,6 @@ vector<string>::iterator iter = input_files.begin();
             tdc_collection->addMatch(target_match->getScore(score_type) > decoy_match->getScore(score_type) ? target_match : decoy_match);
           }
         }  
-
         delete target_iter;
         delete decoy_iter;
         delete match_collection;
@@ -583,10 +591,9 @@ vector<string>::iterator iter = input_files.begin();
       }
       Match::freeMatch(match);
     }
-    delete match_iterator;   
+    delete match_iterator;  
     delete match_collection;   
-//    break;
-  
+}  
   bool have_pvalues = target_matches->getScoredType(TIDE_SEARCH_EXACT_PVAL);
   bool have_evalues = target_matches->getScoredType(EVALUE);
   target_matches->setScoredType(score_type, true);
@@ -619,15 +626,20 @@ vector<string>::iterator iter = input_files.begin();
   } else {
     cols_to_print[MATCHES_SPECTRUM_COL] = true;
   }
-
+  switch (command){
+    case TDC_COMMAND:
+      derived_score_type = QVALUE_TDC;
+      cols_to_print[QVALUE_TDC_COL] = true;
+      break;
+    case MIXMAX_COMMAND:
+      derived_score_type = QVALUE_MIXMAX;
+      cols_to_print[QVALUE_MIXMAX_COL] = true;  
+      break;
+  }
   cols_to_print[SEQUENCE_COL] = true;
   cols_to_print[CLEAVAGE_TYPE_COL] = true;
   cols_to_print[PROTEIN_ID_COL] = true;
   cols_to_print[FLANKING_AA_COL] = true;
-  cols_to_print[ETA_COL] = have_pvalues;
-  cols_to_print[BETA_COL] = have_pvalues;
-  cols_to_print[SHIFT_COL] = have_pvalues;
-  cols_to_print[CORR_COL] = have_pvalues;
 
   output.writeHeaders(cols_to_print);
 
@@ -662,14 +674,14 @@ vector<string>::iterator iter = input_files.begin();
                                       get_double_parameter("pi-zero"));
     
       break;
-   }
-   free(decoy_scores);
+  }
+  free(decoy_scores);
     
   // Store p-values to q-values as a hash, and then assign them.
   map<FLOAT_T, FLOAT_T>* qvalue_hash 
     = store_arrays_as_hash(pvalues, qvalues, num_pvals);
 
-  target_matches->assignQValues(qvalue_hash, score_type);
+  target_matches->assignQValues(qvalue_hash, score_type, derived_score_type);
 
   free(pvalues);
   free(qvalues);

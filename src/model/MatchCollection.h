@@ -423,6 +423,16 @@ class MatchCollection {
     const map<FLOAT_T, FLOAT_T>* score_to_qvalue_hash,
     SCORER_TYPE_T score_type
     );
+    
+  /**
+   * Given a hash table that maps from a score to its q-value, assign
+   * q-values to all of the matches in a given collection.
+   */
+  void assignQValues(
+    const map<FLOAT_T, FLOAT_T>* score_to_qvalue_hash,
+    SCORER_TYPE_T score_type,
+    SCORER_TYPE_T derived_score_type
+    );
 
   /**
    * Given a hash table that maps from a score to its PEP, assign
