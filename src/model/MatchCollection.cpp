@@ -202,7 +202,11 @@ void MatchCollection::sort(
     sort_by = XCORR;
     compare_match_function = (QSORT_COMPARE_METHOD)compareXcorr;
     break;
-
+  case TIDE_SEARCH_EXACT_PVAL:
+    carp(CARP_DEBUG, "Sorting match collection by exact p-value.");
+    sort_by = TIDE_SEARCH_EXACT_PVAL;
+    compare_match_function = (QSORT_COMPARE_METHOD)compareExactPValue;
+    break;  
   case LOGP_BONF_WEIBULL_XCORR: 
   case LOGP_QVALUE_WEIBULL_XCORR:
   case LOGP_PEPTIDE_QVALUE_WEIBULL:
