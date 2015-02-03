@@ -587,6 +587,11 @@ int comparePValue(
   Crux::Match** match_a, ///< the first match -in  
   Crux::Match** match_b  ///< the scond match -in
   );
+  
+int compareExactPValue(
+  Crux::Match** match_a, ///< the first match -in  
+  Crux::Match** match_b  ///< the scond match -in
+  );
 
 int comparePercolatorQValue(
   Crux::Match** match_a, ///< the first match -in  

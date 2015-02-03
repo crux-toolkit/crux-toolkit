@@ -1,4 +1,4 @@
-file	scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	xcorr score	xcorr rank	decoy q-value (xcorr)	distinct matches/spectrum	sequence	cleavage type	protein id	flanking aa
+file	scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	xcorr score	xcorr rank	tdc q-value	distinct matches/spectrum	sequence	cleavage type	protein id	flanking aa
 sample4.search.target.txt	85	3	497.6200	1489.8322	1489.7319	0.81277835	4.9836555	1	0	70	NFLETVELQVGLK	trypsin-partial-digest	YGL135W	RN
 sample4.search.target.txt	118	3	1031.9399	3092.7981	3095.2366	0.88238478	4.4896221	1	0	16	ELESAAYDHAEPVQPEDAPQDIANDELK	trypsin-partial-digest	YGL009C	KD
 sample4.search.target.txt	92	3	497.2800	1488.8123	1489.7319	0.69758147	4.4782357	1	0	70	NFLETVELQVGLK	trypsin-partial-digest	YGL135W	RN

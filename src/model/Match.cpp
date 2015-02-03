@@ -288,7 +288,22 @@ int comparePValue(
 
 }
 
+int compareExactPValue(
+  Match** match_a, ///< the first match -in  
+  Match** match_b  ///< the scond match -in
+  ){
 
+  if((*match_b)->getScore(TIDE_SEARCH_EXACT_PVAL) 
+     > (*match_a)->getScore(TIDE_SEARCH_EXACT_PVAL)){
+    return 1;
+  }
+  else if((*match_b)->getScore(TIDE_SEARCH_EXACT_PVAL) 
+          < (*match_a)->getScore(TIDE_SEARCH_EXACT_PVAL)){
+    return -1;
+  }
+  return 0;
+
+}
 /**
  * Compare two matches; used for qsort.
  * Smaller q-values are better.  Break ties using the raw score.
@@ -814,6 +829,18 @@ void Match::printOneMatchField(
     }
     break;
 #endif
+  case QVALUE_TDC_COL:
+//    if (null_peptide_ == false) {
+      output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
+              getScore(QVALUE_TDC));
+//    }
+    break;
+  case QVALUE_MIXMAX_COL:
+//    if (null_peptide_ == false) {
+      output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
+              getScore(QVALUE_MIXMAX));
+//    }
+    break;
   case DECOY_XCORR_QVALUE_COL:
     if (null_peptide_ == false) {
       output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 

@@ -113,6 +113,8 @@ void MatchFileWriter::setPrecision(){
     case EMPAI_SCORE_COL:
     case EXACT_PVALUE_COL:
     case REFACTORED_SCORE_COL:
+    case QVALUE_MIXMAX_COL:
+    case QVALUE_TDC_COL:
 #ifdef NEW_COLUMNS
     case WEIBULL_PEPTIDE_QVALUE_COL:      // NEW
     case DECOY_XCORR_PEPTIDE_QVALUE_COL:  // NEW
@@ -329,7 +331,7 @@ void MatchFileWriter::addColumnNames
         addColumnName(DECOY_EVALUE_QVALUE_COL);
 //        addColumnName(DECOY_EVALUE_PEP_COL);
       }
-      addColumnName(DECOY_XCORR_QVALUE_COL);
+ //     addColumnName(DECOY_XCORR_QVALUE_COL);
  //     addColumnName(DECOY_XCORR_PEP_COL);
       //addColumnName(DECOY_XCORR_PEPTIDE_QVALUE_COL);
     }

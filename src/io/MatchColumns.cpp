@@ -54,6 +54,8 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "barista score",
   "barista q-value",
 #endif
+  "tdc q-value",
+  "mix-max q-value",
   "b/y ions matched",
   "b/y ions total",
   "total matches/spectrum",

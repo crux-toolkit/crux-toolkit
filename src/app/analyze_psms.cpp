@@ -34,6 +34,7 @@ void analyze_matches_main(
     "parameter-file",
     "overwrite",
     "output-dir",
+    "list-of-files",
     "fileroot"
   };
   

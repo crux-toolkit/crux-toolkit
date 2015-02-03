@@ -223,14 +223,18 @@ p-value" or, if that column/tag is absent, "xcorr score."</li>
 <li>
 <code>--smaller-is-better T|F</code> &ndash; Specify the semantics of
 the score, i.e., whether a smaller value implies a better match or
-vice versa.  Default = F.</li>
+vice versa. Default is F. Specify this parameter T for <code>exact p-value</code>
+and F for <code>xcorr score</code>.
+<!--By default, if the score is "exact p-value"
+then <code>smaller-is-better</code> is true, and if the score is
+"xcorr score" then <code>smaller-is-better</code> is false.  The
+default value for other scores (specified via <code>--score</code>) is
+false.--></li>
 
-<!--
 <li>
 <code>--list-of-files T|F</code> &ndash; Specify that the file given
 on the command line is a text file listing filenames of PSM
 files.</li>
--->
 
 <li>
 <code>--fileroot &lt;string&gt;</code> &ndash; 

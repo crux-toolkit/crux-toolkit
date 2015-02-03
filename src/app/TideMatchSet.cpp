@@ -636,12 +636,17 @@ void TideMatchSet::writeHeaders(
       if (elution_window > 0){
         *file << '\t' << get_column_header(ELUTION_WINDOW_COL);
       }
-    } if (peptide_centric > 0 && header == DISTINCT_MATCHES_SPECTRUM_COL){
-        *file << '\t' << get_column_header(DISTINCT_MATCHES_PEPTIDE_COL)
-            << '\t' << get_column_header(DISTINCT_MATCHES_SPECTRUM_COL);
-    } else {
-      *file << get_column_header(header);
+      continue;
+    } 
+    if (header == DISTINCT_MATCHES_SPECTRUM_COL){
+      if (peptide_centric == true ) {
+        *file << get_column_header(DISTINCT_MATCHES_PEPTIDE_COL);
+      } else {
+        *file << get_column_header(DISTINCT_MATCHES_SPECTRUM_COL);
+      }
+      continue;
     }
+    *file << get_column_header(header);
   }
   *file << endl;
 }
