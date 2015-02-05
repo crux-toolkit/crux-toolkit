@@ -139,7 +139,7 @@ Match::~Match() {
  */
 int compareSpectrum(
   Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the scond match -in
+  Match** match_b  ///< the second match -in
   ){
 
   Spectrum* spec_a = (*match_a)->getSpectrum();
@@ -170,7 +170,7 @@ int compareSpectrum(
  */
 int compareSp(
   Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the scond match -in
+  Match** match_b  ///< the second match -in
   )
 {
   // might have to worry about cases below 1 and -1
@@ -194,7 +194,7 @@ int compareSp(
  */
 int compareSpectrumSp(
   Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the scond match -in
+  Match** match_b  ///< the second match -in
   ){
 
   int return_me = compareSpectrum( match_a, match_b );
@@ -213,7 +213,7 @@ int compareSpectrumSp(
  */
 int compareXcorr(
   Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the scond match -in
+  Match** match_b  ///< the second match -in
 )
 {
 
@@ -235,7 +235,7 @@ int compareXcorr(
  */
 int compareSpectrumXcorr(
   Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the scond match -in
+  Match** match_b  ///< the second match -in
 ){
 
   int return_me = compareSpectrum( match_a, match_b );
@@ -273,7 +273,7 @@ int compareEValue(
  */
 int comparePValue(
   Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the scond match -in
+  Match** match_b  ///< the second match -in
   ){
 
   if((*match_b)->getScore(LOGP_BONF_WEIBULL_XCORR) 
@@ -290,15 +290,15 @@ int comparePValue(
 
 int compareExactPValue(
   Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the scond match -in
+  Match** match_b  ///< the second match -in
   ){
 
   if((*match_b)->getScore(TIDE_SEARCH_EXACT_PVAL) 
-     > (*match_a)->getScore(TIDE_SEARCH_EXACT_PVAL)){
+     < (*match_a)->getScore(TIDE_SEARCH_EXACT_PVAL)){
     return 1;
   }
   else if((*match_b)->getScore(TIDE_SEARCH_EXACT_PVAL) 
-          < (*match_a)->getScore(TIDE_SEARCH_EXACT_PVAL)){
+          > (*match_a)->getScore(TIDE_SEARCH_EXACT_PVAL)){
     return -1;
   }
   return 0;
@@ -312,7 +312,7 @@ int compareExactPValue(
  */
 int comparePercolatorQValue(
   Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the scond match -in
+  Match** match_b  ///< the second match -in
 )
 {
 
@@ -335,7 +335,7 @@ int comparePercolatorQValue(
  */
 int compareQRankerQValue(
   Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the scond match -in
+  Match** match_b  ///< the second match -in
 )
 {
 
@@ -358,7 +358,7 @@ int compareQRankerQValue(
  */
 int compareBaristaQValue(
   Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the scond match -in
+  Match** match_b  ///< the second match -in
 )
 {
 
@@ -382,7 +382,7 @@ int compareBaristaQValue(
  */
 int compareSpectrumPercolatorQValue(
   Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the scond match -in
+  Match** match_b  ///< the second match -in
 ){
 
   int return_me = compareSpectrum( match_a, match_b );
@@ -404,7 +404,7 @@ int compareSpectrumPercolatorQValue(
  */
 int compareSpectrumQRankerQValue(
   Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the scond match -in
+  Match** match_b  ///< the second match -in
 ){
 
   int return_me = compareSpectrum( match_a, match_b );
@@ -425,7 +425,7 @@ int compareSpectrumQRankerQValue(
  */
 int compareSpectrumBaristaQValue(
   Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the scond match -in
+  Match** match_b  ///< the second match -in
 ){
 
   int return_me = compareSpectrum( match_a, match_b );
@@ -445,7 +445,7 @@ int compareSpectrumBaristaQValue(
  */
 int comparePercolatorScore(
   Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the scond match -in
+  Match** match_b  ///< the second match -in
 )
 {
   if((*match_b)->getScore(PERCOLATOR_SCORE) > (*match_a)->getScore(PERCOLATOR_SCORE)){
@@ -468,7 +468,7 @@ int comparePercolatorScore(
  */
 int compareSpectrumPercolatorScore(
   Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the scond match -in
+  Match** match_b  ///< the second match -in
   )
 {
 
@@ -488,7 +488,7 @@ int compareSpectrumPercolatorScore(
  */
 int compareQRankerScore(
   Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the scond match -in
+  Match** match_b  ///< the second match -in
 )
 {
   if((*match_b)->getScore(QRANKER_SCORE) > (*match_a)->getScore(QRANKER_SCORE)){
@@ -508,7 +508,7 @@ int compareQRankerScore(
  */
 int compareBaristaScore(
   Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the scond match -in
+  Match** match_b  ///< the second match -in
 )
 {
   if((*match_b)->getScore(BARISTA_SCORE) 
@@ -534,7 +534,7 @@ int compareBaristaScore(
  */
 int compareSpectrumQRankerScore(
   Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the scond match -in
+  Match** match_b  ///< the second match -in
   )
 {
 
@@ -578,7 +578,7 @@ int compareSpectrumBaristaScore(
  */
 int compareSpectrumScan(
   Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the scond match -in
+  Match** match_b  ///< the second match -in
   )
 {
 
@@ -597,7 +597,7 @@ int compareSpectrumScan(
  */
 int compareMatchSpectrumDecoyXcorrQValue(
   Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the scond match -in
+  Match** match_b  ///< the second match -in
   )
 {
   // delete this, just for the compiler
@@ -617,7 +617,7 @@ int compareMatchSpectrumDecoyXcorrQValue(
  */
 int compareMatchSpectrumDecoyPValueQValue(
   Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the scond match -in
+  Match** match_b  ///< the second match -in
   )
 {
   // delete this, just for the compiler
