@@ -14,60 +14,48 @@ targets for compiling or running various tests.</p>
 <p>
 These tests should be run before any update is committed to SVN.  Note
 that you do have to run them on a 64-bit machine using 64-bit versions
-of crux. This is because the existing index files were built on a
-64-bit machine. You can also update the known good files to match the
-current output by using the command 
-<code>./crux-test.pl -up /path/to/crux/src/c/ crux-test.cmds</code>
-in the <code>src/c/test/smoke-tests</code> directory. This will
-replace all of the known good files with the current output, so it
-should be used with caution.</p> 
+of crux. This is because the existing test result files were built on a
+64-bit machine.
+</p> 
 
 <p>
-The testing is by no means complete, but there are some tests for each
-executable.  First are tests for <code>crux-generate-peptides</code>,
-<code>crux-get-ms2-spectrum</code>, and <code>crux-predict-ion
-series</code>.  Next are tests for <code>crux
-search-for-matches</code> and for <code>crux sequest-search</code>
-with fasta files and searches with an existing index.  Percolator is
-also tested with existing files.  Finally, the whole process is tested
-from creating an index, to searching, and running percolator and
-q-ranker.  Another search is done to test the Weibull p-values and
-q-values by running compute-q-values.  There are tests for
-modifications and enzymes other than trypsin.  At the end is 
-a large-ish test on spectra that exactly matched SEQUEST results.</p>
+To run the tests, <a href="https://cukes.info/">Cucumber</a> must be
+installed. GSIT has made it available as a module, so running "module load
+cucumber/latest" will work. Once Cucumber is available, the tests are run by
+executing the command "cucumber features/&lt;feature file&gt;" from the <code>
+test/smoke-tests</code> directory. This will run the set of tests in the
+specified feature file. If no feature file is specified (i.e. just running the
+command "cucumber"), all feature files in the <code>features</code> directory
+are used.
+</p>
 
 <p>
-The file structure of the smoke directory is as follows.  The test
-driver is a perl script called <code>crux-test.pl</code>.  The
-contents of the tests are in <code>crux-test.cmds</code>.  Each test
-consists of one line in the form</p>
-
-<pre>
-&lt;1|0 for do or do not run on MacOS&gt; = &lt;test name&gt; = &lt;compare file&gt; = &lt;command&gt; = [words to ignore in the diff]
-</pre>
+Test output for a scenario will show up in green if it passes. If the scenario
+fails to pass, the step that failed will show up in red and an error will be
+printed.
+</p>
 
 <p>
-For each test, the command is run and stdout is diffed with 'compare
-file'.  Any words in the last field are ignored in the diff with the
-option -I.  If diff finds no differences the test passes; otherwise,
-the test fails and the output from diff is put in the
-file <code>out</code>.  In addition, the output is saved as
-&lt;compare file&gt;.observed.  All stderr from the command is put in
-the file <code>error</code>.  The test name is used in <code>out</code>
-and <code>error</code> to identify output from each test.</p>
+The actual tests, located in the <code>test/smoke-tests/features</code>
+directory, are in feature files organized by application. For example, the
+<code>tide-search.feature</code> file contains tests for tide-search. Each
+feature file contains a set of scenarios in which parameters are specified and
+then the application's output is compared to a known good result.
+</p>
 
 <p>
-Sometimes the output from &lt;command&gt; is really a file, in which case I
-put <code>cat file</code> at the end of the command.  The compare
-files are all in <code>good_results/</code> and parameter files are in
-<code>params/</code>.  Input files (ms2s and fastas) are in the smoke
-directory.  There is also a script called <code>clean.sh</code> for
-removing intermediate files before a test.</p>
+Scenarios are written in plain English, which are parsed using regular
+expressions into testing instructions according to the definitions in <code>
+features/step_definitions/SmokeTestStepDefinitions.rb</code>. While the step
+definition file parses the scenarios, most of the actual testing code is in
+<code>features/support/CruxTester.rb</code>. Both of these files are written in
+Ruby.
+</p>
 
 <p>
-In order to add a test, add a line to <code>crux-test.cmds</code> as
-described above. To update a test when the output changes, change the
-file in good_results.</p>
+More information on Cucumber and its documentation are available on its website
+<a href="https://cukes.info/"> here</a>.
+</p>
 
 <h3>
 Unit Tests</h3>

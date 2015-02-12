@@ -866,7 +866,6 @@ bool Scorer::createIntensityArrayObserved(
     }
   }
   int region_selector = INTEGERIZE(max_peak, bin_width_, bin_offset_) / NUM_REGIONS;
-  carp(CARP_INFO, "region_selector %d  bins %d", region_selector, observed.size());
 
   FLOAT_T tolerance = get_double_parameter("remove-precursor-tolerance");
 
