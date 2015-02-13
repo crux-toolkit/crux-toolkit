@@ -410,6 +410,7 @@ if (WIN32 AND NOT CYGWIN)
   set(
     vendor_binaries
     ${CMAKE_CURRENT_BINARY_DIR}/lib/agtsampleinforw.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/baf2sql_c.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/BaseCommon.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/BaseDataAccess.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/BaseError.dll
@@ -425,7 +426,6 @@ if (WIN32 AND NOT CYGWIN)
     ${CMAKE_CURRENT_BINARY_DIR}/lib/BDal.CXt.Lc.Factory.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/BDal.CXt.Lc.Interfaces.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/BDal.CXt.Lc.UntU2.dll
-    ${CMAKE_CURRENT_BINARY_DIR}/lib/cdt.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.Compression.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.Data.AnalystDataProvider.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.Data.CommonInterfaces.dll
@@ -450,11 +450,12 @@ if (WIN32 AND NOT CYGWIN)
     ${CMAKE_CURRENT_BINARY_DIR}/lib/Interop.DataExplorer.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/Interop.EDAL.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/Interop.HSREADWRITELib.dll
-    ${CMAKE_CURRENT_BINARY_DIR}/lib/MassLynxRaw.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/MassSpecDataReader.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/MIDAC.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/mkl_sequential.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/MSFileReader.XRawfile2.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/pwiz_aux/msrc/utility/vendor_api/Waters/vc12_x86/cdt.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/pwiz_aux/msrc/utility/vendor_api/Waters/vc12_x86/MassLynxRaw.dll
   )
   install (FILES ${vendor_binaries} DESTINATION bin)
 endif (WIN32 AND NOT CYGWIN)

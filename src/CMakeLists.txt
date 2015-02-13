@@ -13,6 +13,7 @@ include_directories(app/bullseye)
 include_directories(app/hardklor)
 include_directories(app/qranker-barista)
 include_directories(app/xlink)
+include_directories(io)
 include_directories(${CMAKE_SOURCE_DIR}/ext)
 include_directories(${CMAKE_BINARY_DIR})
 include_directories(${CMAKE_BINARY_DIR}/ext)
@@ -25,6 +26,7 @@ include_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator/src/)
 include_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator/src/fido)
 include_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator-build/src/)
 include_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator-build/src/fido)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/app/tide/protoobj)
 if (WIN32 AND NOT Cygwin)
   # Needed to put DLL containing type libraries
   # in include path for Windows
@@ -37,7 +39,6 @@ if (WIN32 AND NOT Cygwin)
   #  Need Comet base directory for Windows
   include_directories(${CMAKE_BINARY_DIR}/ext/build/src/comet/)
 endif (WIN32 AND NOT Cygwin)
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/app/tide/protoobj)
 
 link_directories(.)
 link_directories(./app/bullseye)
@@ -49,7 +50,10 @@ link_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator-build/src)
 link_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator-build/src/fido)
 if (WIN32 AND NOT Cygwin)
  # Needed for 32-bit windows build of vendor libraries
-  link_directories(${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/pwiz_aux/msrc/utility/vendor_api/Waters/vc10_x86_scl-0)
+  link_directories(
+    ${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/pwiz_aux/msrc/utility/vendor_api/Waters/vc12_x86
+    ${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/pwiz_aux/msrc/utility/vendor_api/Bruker/x86
+  )
 endif (WIN32 AND NOT Cygwin)
 
 set (
@@ -303,14 +307,17 @@ if (WIN32 AND NOT CYGWIN)
     libpwiz_reader_thermo
     libpwiz_reader_waters
     libpwiz_vendor_api_agilent
-    libpwiz_vendor_api_bruker
+    optimized libpwiz_vendor_api_bruker
     libpwiz_vendor_api_thermo
     libpwiz_utility_chemistry
     libpwiz_utility_minimxml
     libpwiz_utility_misc
     libpwiz_version
     libSHA1
-    libzlib.lib 
+    libsqlite3
+    libsqlite3pp
+    baf2sql_c
+    libzlib
     MassLynxRaw
     cdt
     ws2_32
@@ -320,9 +327,9 @@ if (WIN32 AND NOT CYGWIN)
     optimized libboost_filesystem-vc100-mt
     optimized libboost_thread-vc100-mt
     optimized libboost_chrono-vc100-mt
-    debug libboost_nowide-vc100-mt-gd
     debug libboost_system-vc100-mt-gd
     debug libboost_iostreams-vc100-mt-gd
+    debug libboost_nowide-vc100-mt-gd
     debug libboost_filesystem-vc100-mt-gd
     debug libboost_thread-vc100-mt-gd
     debug libboost_chrono-vc100-mt-gd
@@ -346,13 +353,16 @@ if (WIN32 AND NOT CYGWIN)
     libpwiz_reader_thermo
     libpwiz_reader_waters
     libpwiz_vendor_api_agilent
-    libpwiz_vendor_api_bruker
+    optimized libpwiz_vendor_api_bruker
     libpwiz_vendor_api_thermo
     libpwiz_utility_chemistry
     libpwiz_utility_minimxml
     libpwiz_utility_misc
     libSHA1
-    libzlib.lib 
+    libsqlite3
+    libsqlite3pp
+    baf2sql_c
+    libzlib
     MassLynxRaw
     cdt
     ws2_32
@@ -388,13 +398,16 @@ if (WIN32 AND NOT CYGWIN)
     libpwiz_reader_thermo
     libpwiz_reader_waters
     libpwiz_vendor_api_agilent
-    libpwiz_vendor_api_bruker
+    optimized libpwiz_vendor_api_bruker
     libpwiz_vendor_api_thermo
     libpwiz_utility_chemistry
     libpwiz_utility_minimxml
     libpwiz_utility_misc
     libSHA1
-    libzlib.lib 
+    libsqlite3
+    libsqlite3pp
+    baf2sql_c
+    libzlib 
     MassLynxRaw
     cdt
     ws2_32
