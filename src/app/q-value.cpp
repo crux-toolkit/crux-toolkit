@@ -30,6 +30,17 @@ static const int MAX_PSMS = 10000000;
 // 14th decimal place
 static const double EPSILON = 0.00000000000001;
 
+#ifdef _MSC_VER
+// The Microsoft 10.0 C++ compiler has trouble resolving the proper virtual
+// function call when the STL make_pair is combined with the STL ptr_fun.
+// They promise to fix this in v11, but until then we create our own wrapper
+// for this use of make_pair. (See corresponding ifdef block in compute_PEP)
+pair<double,bool> make_pair(double db, bool b);
+// pair<double,bool> make_pair(double db, bool b) {
+//     return std::pair<double,bool>(db, b);
+// }
+#endif
+
 /**
 * Find the best-scoring match for each peptide in a given collection.
 * Only consider the top-ranked PSM per spectrum.
@@ -258,16 +269,6 @@ FLOAT_T estimate_pi0( FLOAT_T* target_scores,
   carp(CARP_INFO, "Estimated pi_zero = %f", pi_zero);
   return pi_zero;
 }
-
-//#ifdef _MSC_VER
-// The Microsoft 10.0 C++ compiler has trouble resolving the proper virtual
-// function call when the STL make_pair is combined with the STL ptr_fun.
-// They promise to fix this in v11, but until then we create our own wrapper
-// for this use of make_pair. (See corresponding ifdef block in compute_PEP)
-pair<double,bool> make_pair(double db, bool b) {
-    return std::pair<double,bool>(db, b);
-}
-//#endif
 
 /**
  * \brief Compute q-values using mix-max procedure. This part is a

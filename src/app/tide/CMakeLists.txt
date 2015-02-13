@@ -9,22 +9,26 @@ include_directories(
   ${CMAKE_CURRENT_BINARY_DIR}/protoobj
   ${CMAKE_BINARY_DIR}/ext/build/src/ProtocolBuffers/src
   ${CMAKE_BINARY_DIR}/ext/build/src/google-gflags/src/windows
+  ${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/libraries/boost_1_56_0
+  ${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/libraries/boost_aux
 )
 else (WIN32 AND NOT CYGWIN)
 include_directories(
   ${CMAKE_SOURCE_DIR}/src
   ${CMAKE_BINARY_DIR}/ext/include
-  ${CMAKE_BINARY_DIR}/ext/build/src/ProtocolBuffers/src
   ${CMAKE_CURRENT_BINARY_DIR}/protoobj
+  ${CMAKE_BINARY_DIR}/ext/build/src/ProtocolBuffers/src
   ${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/libraries/boost_1_56_0
   ${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/libraries/boost_aux
 )
 endif (WIN32 AND NOT CYGWIN)
+
 link_directories(
   ${CMAKE_BINARY_DIR}/ext/lib
 )
 
-set_directory_properties(PROPERTIES
+set_directory_properties(
+  PROPERTIES
   ADDITIONAL_MAKE_CLEAN_FILES
   protoobj
 )
@@ -63,7 +67,8 @@ add_custom_command(
 
 ########## Set up tide-support library  ##########
 if (WIN32 AND NOT CYGWIN)
-  set(tide_lib_files
+  set(
+    tide_lib_files
     ${proto_files_compiled}
     abspath.cc
     active_peptide_queue.cc
@@ -86,7 +91,8 @@ if (WIN32 AND NOT CYGWIN)
     weibull.cc
   )
 else (WIN32 AND NOT CYGWIN)
-  set(tide_lib_files
+  set(
+    tide_lib_files
     ${proto_files_compiled}
     abspath.cc
     active_peptide_queue.cc
@@ -109,6 +115,7 @@ else (WIN32 AND NOT CYGWIN)
   )
 endif (WIN32 AND NOT CYGWIN)
 add_library(tide-support STATIC ${tide_lib_files})
+
 if (WIN32 AND NOT CYGWIN)
   set_property(
     TARGET tide-support 
@@ -162,10 +169,17 @@ if (WIN32 AND NOT CYGWIN)
       GFLAGS_DLL_DECLARE_FLAG= 
       GFLAGS_DLL_DEFINE_FLAG=
   )
+  target_link_libraries(
+    tide-search tide-support
+    gflags
+    protobuf
+    optimized libboost_system-vc100-mt
+    debug libboost_system-vc100-mt-gd
+  )
 else (WIN32 AND NOT CYGWIN)
   set_property(TARGET tide-search PROPERTY COMPILE_DEFINITIONS MAIN)
+  target_link_libraries(tide-search tide-support gflags protobuf boost_system)
 endif (WIN32 AND NOT CYGWIN)
-target_link_libraries(tide-search tide-support gflags protobuf boost_system)
 
 ############ Build tide-test-read-ms2 ############
 #add_executable(tide-test-read-ms2 test_read_ms2.cc)
