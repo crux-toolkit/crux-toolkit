@@ -14,9 +14,10 @@ targets for compiling or running various tests.</p>
 <p>
 These tests should be run before any update is committed to SVN.  Note
 that you do have to run them on a 64-bit machine using 64-bit versions
-of crux. This is because the existing test result files were built on a
-64-bit machine.
-</p> 
+of crux. You also need to run the tests with a version of crux
+compiled in release mode (<code>cmake -DCMAKE_BUILD_TYPE=Release
+.</code>).  This is because the existing test result files were built
+on a 64-bit machine in release mode.</p> 
 
 <p>
 To run the tests, <a href="https://cukes.info/">Cucumber</a> must be
