@@ -33,13 +33,21 @@ When Tide creates decoy peptides, it keeps the N-terminal and
 C-terminal amino acids in place.  Comet keeps only the C-terminal
 amino acid in place.</li>
 <li>
-Comet provides an option to report an E-value (a kind of statistical
-confidence measure) in addition to the raw XCorr score.</li>
+Comet provides an option to report an E-value in addition to the raw
+XCorr score, whereas tide provides an option to report a p-value.  The
+methods for computing these two statistical confidence measures are
+quite different.</li>
 <li>
 Comet supports a variety of options that are not implemented in Tide
 (various options related to different types of theoretical fragment
 ions, max_fragment_charge, nucleotide_reading_frame, etc.).</li>
 </ul></p>
+
+<p>
+Overall, for a given set of spectra, the XCorr scores computed by
+Comet and by Tide should be quite similar to one another, assuming
+that the various search parameters are set similarly between the two
+algorithms.</p>
 
 <li>
 <b>What operating systems does Crux work with?</b></li>
