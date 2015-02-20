@@ -31,14 +31,10 @@ Then /^the return value should be (-?[0-9]+)$/ do | ret |
 end
 
 Then /^(.*) should match (.*)$/ do | actual, expected |
-  unless actual == "stdout"
-    expect(CruxTester.cmp(expected, actual)).to be true
-  else
-    expect(@tester.instance_variable_get("@last_stdout")).to eq(File.read(expected))
-  end
+  expect(@tester.cmp(expected, actual)).to be true
 end
 
 Then /^(.*) should contain the same lines as (.*)$/ do | actual, expected |
-  expect(CruxTester.cmpUnordered(expected, actual)).to be true
+  expect(@tester.cmpUnordered(expected, actual)).to be true
 end
 

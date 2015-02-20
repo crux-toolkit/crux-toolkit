@@ -41,7 +41,14 @@ The actual tests, located in the <code>test/smoke-tests/features</code>
 directory, are in feature files organized by application. For example, the
 <code>tide-search.feature</code> file contains tests for tide-search. Each
 feature file contains a set of scenarios in which parameters are specified and
-then the application's output is compared to a known good result.
+then the application's output is compared to a known good result (located in the
+<code>good_results</code> directory). If the output does not match, it is
+written to a file called <code>&lt;expected results&gt;.observed</code>.
+</p>
+
+<p>
+To update all test results, run the <code>update-cucumber-tests.sh</code> script
+from the smoke-tests directory.
 </p>
 
 <p>
