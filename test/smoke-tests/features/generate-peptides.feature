@@ -11,7 +11,7 @@ Scenario Outline: User runs generate-peptides
   And stdout should match good_results/<expected_output>
 
 Examples:
-  |test_name                                  |args                                                                                                                               |expected_output                                                        |
+  |test_name                                  |args                                                                                                                               |expected_output                                           |
   |generate_peptides_no_ops                   |test.fasta                                                                                                                         |standard_generate_peptides_no_ops.out                     |
   |generate_peptides_default                  |--output-sequence T test.fasta                                                                                                     |standard_generate_peptides_default.out                    |
   |generate_peptides_specifying_miss_cleavages|--parameter-file params/params_uniq --output-sequence T --enzyme trypsin --digestion partial-digest --missed-cleavages 3 test.fasta|standard_generate_peptides_specifying_missed_cleavages.out|

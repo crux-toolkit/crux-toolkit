@@ -39,9 +39,13 @@ class CruxTester
     @crux_test_name = nil
   end
 
-  def self.cmp(expected, actual)
-#    system("cp " + actual+ " " + expected); #Comment these 2+2 lines to update output files with new
-#    return true;  
+  def cmp(expected, actual, write_observed = 1)
+    if actual == "stdout"
+      same = @last_stdout == File.read(expected)
+      writeObserved(@last_stdout, expected, same, write_observed)
+      return same
+    end
+
     if File.directory?(expected) && File.directory?(actual)
       Dir.foreach(expected) do | dirent |
         next if dirent == "." or dirent == ".."
@@ -58,17 +62,13 @@ class CruxTester
     unless File.readable?(actual)
       raise("cannot read file '" + actual + "'")
     end
-    return FileUtils.cmp(expected, actual)
+    same = FileUtils.cmp(expected, actual)
+    copyObserved(actual, expected, same, write_observed)
+    return same
   end
 
   # Compare files where line order does not matter
-  def self.cmpUnordered(expected, actual)
-#    system("cp " + actual+ " " + expected);  #Comment these 2+2 lines to update output files with new
-#    return true;  
-    if not(File.exists?(expected)) && File.exists?(actual)
-      system("cp " + actual+ " " + expected);	
-      return true;
-    end 
+  def cmpUnordered(expected, actual, write_observed = 1)
     if File.directory?(expected) && File.directory?(actual)
       Dir.foreach(expected) do | dirent |
         next if dirent == "." or dirent == ".."
@@ -85,13 +85,21 @@ class CruxTester
     unless File.readable?(actual)
       raise("cannot read file '" + actual + "'")
     end
+    expected_lines = 0
+    actual_lines = 0
     only_expected = Set.new
     only_actual = Set.new
     file_expected = File.open(expected)
     file_actual = File.open(actual)
     file_expected.each.zip(file_actual.each).each do | line_expected, line_actual |
-      if line_expected == nil || line_actual == nil
-        return false
+      if not line_expected == nil
+        expected_lines += 1
+      end
+      if not line_actual == nil
+        actual_lines += 1
+      end
+      if not expected_lines == actual_lines
+        break
       elsif not line_expected == line_actual
         if only_expected.include?(line_actual)
           only_expected.delete(line_actual)
@@ -107,7 +115,31 @@ class CruxTester
     end
     file_expected.close
     file_actual.close
-    return only_expected.empty?() && only_actual.empty?()
+    same = only_expected.empty?() && only_actual.empty?() && expected_lines == actual_lines
+    copyObserved(actual, expected, same, write_observed)
+    return same
+  end
+
+  def writeObserved(actual_content, expected_filename, same, write_observed)
+    if write_observed == 1
+      observed = expected_filename + ".observed"
+      if not same
+        File.open(observed, "w") { |file| file.write(actual_content) }
+      elsif File.file?(observed)
+        FileUtils.rm(observed)
+      end
+    end
+  end
+
+  def copyObserved(actual_filename, expected_filename, same, write_observed)
+    if write_observed == 1
+      observed = expected_filename + ".observed"
+      if not same
+        FileUtils.cp(actual_filename, expected_filename + ".observed")
+      elsif File.file?(observed)
+        FileUtils.rm(observed)
+      end
+    end
   end
 end
 
