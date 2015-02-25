@@ -14,6 +14,8 @@ SET(ENV{CMAKE_PREFIX_PATH} ${CMAKE_CURRENT_BINARY_DIR})
 SET(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR})
 SET(USE_LATEST_PWIZ ON CACHE BOOL "Use lastest version of ProteoWizard")
 
+SET(MSBUILD_PLATFORM "x64")
+
 # Download and build a partial distribution of the pwiz source
 # from the ProteoWizard TeamCity repository.
 if (WIN32 AND NOT CYGWIN)
@@ -252,7 +254,7 @@ elseif (WIN32 AND NOT CYGWIN)
     CONFIGURE_COMMAND ""
     BUILD_COMMAND msbuild 
       /p:Configuration=${CMAKE_CFG_INTDIR}
-      /p:Platform=Win32 
+      /p:Platform=${MSBUILD_PLATFORM} 
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProtocolBuffers/vsprojects/protobuf.sln
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE 1
@@ -294,12 +296,12 @@ elseif (WIN32 AND NOT CYGWIN)
     URL_MD5 e02268c1e90876c809ec0ffa095da864
     DOWNLOAD_DIR downloads
     PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory 
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/google-gflags/vs2010/ 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/google-gflags/ 
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/google-gflags/vsprojects/libgflags/
     CONFIGURE_COMMAND ""
     BUILD_COMMAND msbuild 
       /p:Configuration=${CMAKE_CFG_INTDIR} 
-      /p:Platform=Win32 
+      /p:Platform=${MSBUILD_PLATFORM} 
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/google-gflags/vsprojects/libgflags/libgflags.vcxproj
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE 1
@@ -308,7 +310,7 @@ elseif (WIN32 AND NOT CYGWIN)
     google-gflags
     copy_gflags_library
     COMMAND ${CMAKE_COMMAND} -E copy 
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/google-gflags/vsprojects/libgflags/${CMAKE_CFG_INTDIR}/libgflags.lib
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/google-gflags/vsprojects/libgflags/${MSBUILD_PLATFORM}/${CMAKE_CFG_INTDIR}/libgflags.lib
       ${CMAKE_CURRENT_BINARY_DIR}/lib/gflags.lib
     DEPENDEES install
   )
@@ -385,6 +387,7 @@ elseif (WIN32 AND NOT CYGWIN)
       ${CMAKE_COMMAND} 
         -DLIBPATH:STRING="${LIBPATH}"
         -DMSBUILD_ARGS:STRING=/p:Configuration=${CMAKE_CFG_INTDIR}
+        -DMSBUILD_PLATFORM=${MSBUILD_PLATFORM}
         -DPROJ_FILE:STRING=comet.sln
         -P ${CMAKE_CURRENT_SOURCE_DIR}/build-comet.cmake
     INSTALL_COMMAND ""
@@ -394,10 +397,10 @@ elseif (WIN32 AND NOT CYGWIN)
     comet
     copy_comet_library
     COMMAND ${CMAKE_COMMAND} -E copy 
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/Win32/${CMAKE_CFG_INTDIR}/CometSearch.lib
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/${MSBUILD_PLATFORM}/${CMAKE_CFG_INTDIR}/CometSearch.lib
       ${CMAKE_CURRENT_BINARY_DIR}/lib/CometSearch.lib
     COMMAND ${CMAKE_COMMAND} -E copy 
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/Win32/${CMAKE_CFG_INTDIR}/MSToolkitLite.lib
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/${MSBUILD_PLATFORM}/${CMAKE_CFG_INTDIR}/MSToolkitLite.lib
       ${CMAKE_CURRENT_BINARY_DIR}/lib/MSToolkitLite.lib
     DEPENDEES install
   )

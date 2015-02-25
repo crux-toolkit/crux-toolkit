@@ -689,6 +689,38 @@ void TideSearchApplication::collectScoresCompiled(
   // included in the clobber list.
 
 #ifdef _MSC_VER
+#ifdef _WIN64
+  DWORD64 rcx;
+  DWORD64 rdi;
+
+  bool restored = false;
+  CONTEXT context;
+  RtlCaptureContext(&context);
+  if (!restored) {
+    rcx = context.Rcx;
+    rdi = context.Rdi;
+
+    context.Rdx = (DWORD64)cache;
+    context.Rax = (DWORD64)prog;
+    context.Rcx = (DWORD64)queue_size;
+    context.Rdi = (DWORD64)results;
+
+    restored = true;
+    RtlRestoreContext(&context, NULL);
+  } else {
+    ((void(*)(void))prog)();
+  }
+
+  restored = false;
+  RtlCaptureContext(&context);
+  if (!restored) {
+    context.Rcx = rcx;
+    context.Rdi = rdi;
+
+    restored = true;
+    RtlRestoreContext(&context, NULL);
+  }
+#else
   __asm {
     cld
     push ecx
@@ -701,6 +733,7 @@ void TideSearchApplication::collectScoresCompiled(
     pop edi
     pop ecx
   }
+#endif
 #else
   __asm__ __volatile__("cld\n" // stos operations increment edi
 #ifdef __x86_64__
