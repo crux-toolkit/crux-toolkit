@@ -640,7 +640,7 @@ void TideMatchSet::writeHeaders(
     } 
     if (header == DISTINCT_MATCHES_SPECTRUM_COL){
       if (peptide_centric == true ) {
-        *file << get_column_header(DISTINCT_MATCHES_PEPTIDE_COL);
+        *file << get_column_header(DISTINCT_MATCHES_PEPTIDE_COL) << '\t';
         *file << get_column_header(DISTINCT_MATCHES_SPECTRUM_COL);
       } else {
         *file << get_column_header(DISTINCT_MATCHES_SPECTRUM_COL);
