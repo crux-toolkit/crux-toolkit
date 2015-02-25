@@ -406,7 +406,7 @@ elseif (WIN32 AND NOT CYGWIN)
   )
 endif (UNIX)
 
-add_dependencies(percolator Proteowizard)
+add_dependencies(percolator ProteoWizard)
 
 # On Windows we have to include the vendor libraries in the package
 if (WIN32 AND NOT CYGWIN)
