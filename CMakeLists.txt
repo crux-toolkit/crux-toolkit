@@ -86,7 +86,6 @@ add_dependencies(crux bullseye)
 add_dependencies(crux crux-support)
 add_dependencies(crux hardklor)
 add_dependencies(crux percolator)
-add_dependencies(crux posterior-error)
 add_dependencies(crux tide-support)
 add_dependencies(crux xlink)
 add_dependencies(crux-support crux_version)
@@ -124,7 +123,6 @@ set (
    /benchmark/;
    /bin/;
    /results/;
-   [^c]/tide/;
    /doc/developer/;
    /doc/guispec/;
    /doc/mods/;
@@ -156,4 +154,3 @@ add_custom_target(
 )
 
 include (CPack)
-add_custom_command(TARGET package POST_BUILD COMMAND echo "post package" COMMENT "Done with post package")
