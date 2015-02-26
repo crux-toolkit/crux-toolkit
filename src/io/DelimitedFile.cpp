@@ -15,6 +15,7 @@
 #include <fstream>
 
 #include "carp.h"
+#include "util/StringUtils.h"
 
 using namespace std;
 
@@ -153,13 +154,11 @@ void DelimitedFile::loadData(
   string line;
   bool hasLine;
 
-  vector<string>tokens;
-
   if (hasHeader) {
 
     hasLine = getline(file, line) != NULL;
     if (hasLine) {
-      tokenize(line, tokens, getDelimiter());
+      vector<string> tokens = StringUtils::Split(line, getDelimiter());
       for (vector<string>::iterator iter = tokens.begin();
         iter != tokens.end();
         ++iter) {
@@ -174,8 +173,7 @@ void DelimitedFile::loadData(
   
   hasLine = getline(file, line) != NULL;
   while (hasLine) {
-
-    tokenize(line, tokens, getDelimiter());
+    vector<string> tokens = StringUtils::Split(line, getDelimiter());
     if (!hasHeader && numCols() == 0) {
       //initialize the number of columns so that addRow won't fail.
       while (numCols() < tokens.size()) {
@@ -672,28 +670,6 @@ int DelimitedFile::getInteger(
 }
 
 /**
- * gets an vector of strings from cell where the
- * string in the cell has delimiters that are
- * different than the column delimiter. The
- * default delimiter is a comma
- * uses the current_row_ as the row index.
- * clears the integer vector before 
- * populating it.
- */
-void DelimitedFile::getStringVectorFromCell(
-  const char* column_name, ///< the column name
-  std::vector<std::string>& string_vector, ///<the vector of integers
-  char delimiter ///<the delimiter to use
-  ) {
-
-  string& string_ans = getString(column_name);
-
-  //get the list of strings separated by delimiter
-  string_vector.clear();
-  tokenize(string_ans, string_vector, delimiter);
-}
-
-/**
  * gets an vector of integers from cell where the
  * string in the cell are integers which are separated
  * by a delimiter which is differnt than the column
@@ -709,9 +685,7 @@ void DelimitedFile::getIntegerVectorFromCell(
   ) {
   
   //get the list of strings separated by delimiter
-  vector<string> string_vector_ans;
-
-  getStringVectorFromCell(column_name, string_vector_ans, delimiter);
+  vector<string> string_vector_ans = StringUtils::Split(getString(column_name), delimiter);
 
   //convert each string into an integer.
   int_vector.clear();

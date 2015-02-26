@@ -108,7 +108,7 @@ pair<FLOAT_T,FLOAT_T> ModifiedPeptidesIterator::getMinMaxMass(
   PEPTIDE_MOD_T* pmod) ///< peptide mod with the delta mass for peptides
 {
   WINDOW_TYPE_T precursor_window_type = 
-    get_window_type_parameter("precursor-window-type");
+    string_to_window_type(get_string_parameter("precursor-window-type"));
   double window = get_double_parameter("precursor-window");
   double min_mass = 0;
   double max_mass = 0;

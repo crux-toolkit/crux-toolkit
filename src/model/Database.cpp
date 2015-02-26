@@ -18,7 +18,6 @@
 #include "Protein.h"
 #include "ProteinPeptideIterator.h"
 #include "Database.h"
-#include "util/hash.h"
 #include "io/carp.h"
 #include "objects.h"
 #include "PeptideConstraint.h"

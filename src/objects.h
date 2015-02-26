@@ -83,16 +83,6 @@ typedef std::vector<Peak*>::const_iterator PeakIterator;
  */
 class SpectrumCollection;
 
-/** 
- * the enum for SpectrumParsers
- */
-enum SPECTRUM_PARSER_T {
-  INVALID_SPECTRUM_PARSER,
-  PROTEOWIZARD_SPECTRUM_PARSER,
-  MSTOOLKIT_SPECTRUM_PARSER,
-  NUMBER_SPECTRUM_PARSERS
-};
-
 /**
  * \typedef SpectrumIterator
  * \brief An object to iterate over the spectra in a SpectrumCollection

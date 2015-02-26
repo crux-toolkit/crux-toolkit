@@ -10,7 +10,7 @@
 #include "model/PeptideSrc.h"
 #include "model/Match.h"
 #include "io/MatchColumns.h"
-
+#include "util/StringUtils.h"
 
 using namespace std; 
 /******************************/
@@ -99,12 +99,7 @@ void CruxParser ::readMatches(
       matches.peptides.push_back(sqt_sequence);
       
       //read protein Id from search result 
-      vector<string> protein_ids;
-      reader.getStringVectorFromCell(
-        PROTEIN_ID_COL, 
-        protein_ids, 
-        ','
-      ); 
+      vector<string> protein_ids = StringUtils::Split(reader.getString(PROTEIN_ID_COL), ',');
       matches.num_proteins_in_match.push_back(protein_ids.size());
       for (size_t idx = 0;idx < protein_ids.size(); idx++) {
         string protein_id = protein_ids.at(idx);

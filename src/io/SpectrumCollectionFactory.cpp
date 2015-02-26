@@ -18,8 +18,6 @@
  * given file and the use-mstoolkit and msgf options.
  */
 Crux::SpectrumCollection* SpectrumCollectionFactory::create(const string& filename){
-  Crux::SpectrumCollection* collection = NULL;
-  struct stat stat_buff ; 
   if (!file_exists(filename)) {
     carp(CARP_FATAL, "The file %s does not exist. \n", filename.c_str());
   }
@@ -28,23 +26,16 @@ Crux::SpectrumCollection* SpectrumCollectionFactory::create(const string& filena
 (.ms2,.mgf, or .mzXML)",filename.c_str());
   }
 
-
-  switch (get_spectrum_parser_parameter("spectrum-parser")) {
-    case PROTEOWIZARD_SPECTRUM_PARSER:
-      carp(CARP_DEBUG, "Using protewizard to parse spectra");
-      collection = new PWIZSpectrumCollection(filename);
-      break;
-    case MSTOOLKIT_SPECTRUM_PARSER:
-      carp(CARP_DEBUG, "Using mstoolkit to parse spectra");
-      collection = new MSToolkitSpectrumCollection(filename);
-      break;
-    case INVALID_SPECTRUM_PARSER:
-    case NUMBER_SPECTRUM_PARSERS:
-      carp(CARP_FATAL, "Unknown spectrum parser type");
-  
+  string parser = get_string_parameter("spectrum-parser");
+  if (parser == "pwiz") {
+    carp(CARP_DEBUG, "Using protewizard to parse spectra");
+    return new PWIZSpectrumCollection(filename);
+  } else if (parser == "mstoolkit") {
+    carp(CARP_DEBUG, "Using mstoolkit to parse spectra");
+    return new MSToolkitSpectrumCollection(filename);
   }
 
-  return collection;
+  carp(CARP_FATAL, "Unknown spectrum parser type");
 }
 
 /*

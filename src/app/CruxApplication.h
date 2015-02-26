@@ -75,9 +75,34 @@ class CruxApplication{
   virtual bool hidden();
 
   /**
-   * Writes the parameter file
+   * Read in all parameters from command line and parameter file
    */
-  virtual void writeParamFile();
+  static void initializeParams(
+    const std::string& appName,
+    const char** argument_list, ///< list of required arguments
+    int num_arguments,          ///< number of elements in arguments_list
+    const char** option_list,   ///< list of optional flags
+    int num_options,            ///< number of elements in options_list
+    int argc,                   ///< number of tokens on cmd line
+    char** argv                 ///< array of command line tokens
+  );
+
+  /**
+   * Process parameters after they have been set up, but before they have been
+   * finalized
+   */
+  virtual void processParams();
+
+  /**
+   * Get usage statement for the program.
+   */
+  static std::string getUsage(
+    const std::string& appName,
+    const char** argument_list, ///< list of required arguments
+    int num_arguments,          ///< number of elements in arguments_list
+    const char** option_list,   ///< list of optional flags
+    int num_options             ///< number of elements in options_list
+  );
 };
 
 

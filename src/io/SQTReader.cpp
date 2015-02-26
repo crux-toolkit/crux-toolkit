@@ -16,6 +16,7 @@
 #include "parameter.h"
 #include "MatchCollectionParser.h"
 #include "SQTReader.h"
+#include "util/StringUtils.h"
 
 using namespace std;
 using namespace Crux;
@@ -152,9 +153,7 @@ void SQTReader::parseHeader(string& line) {
 
 void SQTReader::parseSpectrum(string& line) {
 
-  vector<string> tokens;
-
-  tokenize(line, tokens, '\t');
+  vector<string> tokens = StringUtils::Split(line, '\t');
 
   int low_scan;
   from_string(low_scan, tokens[spectrum_low_scan_idx]);
@@ -196,8 +195,7 @@ void SQTReader::parseSpectrum(string& line) {
 
 void SQTReader::parseMatch(string& line) {
 
-  vector<string> tokens;
-  tokenize(line, tokens, '\t');
+  vector<string> tokens = StringUtils::Split(line, '\t');
 
   int xcorr_rank;
   from_string(xcorr_rank, tokens[match_xcorr_rank_idx]);
@@ -224,8 +222,7 @@ void SQTReader::parseMatch(string& line) {
   from_string(expected_ions, tokens[match_expected_ions_idx]);
 
   string sqt_sequence = tokens[match_sequence_idx];
-  vector<string> sequence_tokens;
-  tokenize(sqt_sequence, sequence_tokens, '.');
+  vector<string> sequence_tokens = StringUtils::Split(sqt_sequence, '.');
 
   current_prev_aa_ = sequence_tokens.front();
   current_next_aa_ = sequence_tokens.back();
@@ -281,8 +278,7 @@ void SQTReader::parseMatch(string& line) {
 
 void SQTReader::parseLocus(string& line) {
 
-  vector<string> tokens;
-  tokenize(line, tokens, '\t');
+  vector<string> tokens = StringUtils::Split(line, '\t');
 
   string protein_id = tokens[locus_protein_id_idx];
   string protein_desc = "";

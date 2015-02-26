@@ -8,12 +8,14 @@
 
 #include "io/carp.h"
 #include "parameter.h"
+#include "util/ArgParser.h"
+#include "util/crux-file-utils.h"
+#include "util/Params.h"
 #include "util/WinCrux.h"
 
 #include <iostream>
 
 using namespace std;
-
 
 /**
  * Frees an allocated CruxApplication
@@ -48,81 +50,147 @@ void CruxApplication::initialize(
   int argc,                   ///< number of tokens on cmd line
   char** argv                 ///< array of command line tokens
   ) {
+  initializeParams(getName(), argument_list, num_arguments,
+                   option_list, num_options, argc, argv);
+  processParams();
+  Params::Finalize();
 
-  // Verbosity level for set-up/command line reading 
-  set_verbosity_level(CARP_WARNING);
+  set_verbosity_level(Params::GetInt("verbosity"));
 
-  // Initialize parameter.c and set default values
-  initialize_parameters();
+  carp(CARP_INFO, "Beginning %s.", getName().c_str());
 
-  // Define optional and required arguments
-  select_cmd_line_options(option_list, num_options);
-  select_cmd_line_arguments(argument_list, num_arguments);
-
-  // Parse the command line, including optional params file
-  // Includes syntax, type, and bounds checking, dies on error 
-  string cmd_name = this->getName();
-  char* full_cmd = cat_string("crux ", cmd_name.c_str());
-
-  parse_cmd_line_into_params_hash(argc, argv, cmd_name.c_str());
-
-  free(full_cmd);
-
-  carp(CARP_INFO, "Beginning %s.", 
-       this->getName().c_str());
-
-  
   // Set seed for random number generation 
-  if (get_string_parameter("seed") == "time") {
+  if (Params::GetString("seed") == "time") {
     time_t seconds; // use current time to seed
     time(&seconds); // Get value from sys clock and set seconds variable.
     mysrandom((unsigned)seconds); // Convert seconds to a unsigned int
-  }
-  else{
-    mysrandom((unsigned)atoi(get_string_parameter("seed").c_str()));
+  } else {
+    mysrandom(StringUtils::FromString<unsigned>(Params::GetString("seed")));
   }
   
   // Start the timer.
   wall_clock();
 
   // Create output directory if appliation needs it.
-  if (this->needsOutputDirectory()) {
-
+  if (needsOutputDirectory()) {
     // Create output directory 
-    string output_folder = get_string_parameter("output-dir");
-    bool overwrite = get_boolean_parameter("overwrite");
-    int result = create_output_directory(output_folder, overwrite);
-    if( result == -1 ){
+    string output_folder = Params::GetString("output-dir");
+    if (create_output_directory(output_folder, Params::GetBool("overwrite")) == -1) {
       carp(CARP_FATAL, "Unable to create output directory %s.", output_folder.c_str());
     }
-  
-    string cmd_file_name = this->getFileStem();
-  
+
     // Open the log file to record carp messages 
-    open_log_file(this->getFileStem() + ".log.txt");
+    open_log_file(getFileStem() + ".log.txt");
   
     // Store the host name, start date and time, and command line.
     carp(CARP_INFO, "CPU: %s", hostname());
     carp(CARP_INFO, date_and_time());
     log_command_line(argc, argv);
- 
+
     // Write the parameter file
-    writeParamFile();
+    string paramFile = make_file_path(getFileStem() + ".params.txt");
+    ofstream* file = create_file(paramFile.c_str(), Params::GetBool("overwrite"));
+    if (file == NULL) {
+      throw runtime_error("Could not open " + paramFile + " for writing");
+    }
+    Params::Write(file);
+    delete file;
   }
 }
-
 
 /**
  * Should this application be kept from the usage statement?
  */
-bool CruxApplication::hidden(){
+bool CruxApplication::hidden() {
   return false;
 }
 
 /**
- * Writes the parameter file
+ * Read in all parameters from command line and parameter file
  */
-void CruxApplication::writeParamFile() {
-  print_parameter_file(getFileStem() + ".params.txt");
+void CruxApplication::initializeParams(
+  const string& appName,
+  const char** argument_list, ///< list of required arguments
+  int num_arguments,          ///< number of elements in arguments_list
+  const char** option_list,   ///< list of optional flags
+  int num_options,            ///< number of elements in options_list
+  int argc,                   ///< number of tokens on cmd line
+  char** argv                 ///< array of command line tokens
+) {
+  initialize_parameters();
+  set_verbosity_level(Params::GetInt("verbosity"));
+
+  // Parse command line
+  vector<string> argSpecs;
+  for (int i = 0; i < num_arguments; i++) {
+    argSpecs.push_back(argument_list[i]);
+  }
+  ArgParser argParser;
+  try {
+    argParser.Parse(argc, argv, argSpecs);
+
+    // Read parameter file if specified
+    string parameter_file = argParser.GetOption("parameter-file");
+    if (!parameter_file.empty()) {
+      parse_parameter_file(parameter_file.c_str());
+      read_mods_from_file(parameter_file.c_str());
+    }
+    // Process command line options
+    const map<string, string>& options = argParser.GetOptions();
+    for (map<string, string>::const_iterator i = options.begin(); i != options.end(); i++) {
+      Params::Set(i->first, i->second);
+    }
+    // Process command line arguments
+    const map< string, vector<string> >& args = argParser.GetArgs();
+    for (map< string, vector<string> >::const_iterator i = args.begin(); i != args.end(); i++) {
+      for (vector<string>::const_iterator j = i->second.begin(); j != i->second.end(); j++) {
+        Params::AddArgValue(i->first, *j);
+      }
+    }
+  } catch (const runtime_error& e) {
+    carp(CARP_FATAL, "%s\n\n%s\n", e.what(),
+         getUsage(appName, argument_list, num_arguments, option_list, num_options).c_str());
+  }
+}
+
+/**
+ * Process parameters after they have been set up, but before they have been
+ * finalized
+ */
+void CruxApplication::processParams() {
+}
+
+string CruxApplication::getUsage(
+  const string& appName,
+  const char** argument_list, ///< list of required arguments
+  int num_arguments,          ///< number of elements in arguments_list
+  const char** option_list,   ///< list of optional flags
+  int num_options             ///< number of elements in options_list
+) {
+  stringstream usage;
+  usage << "USAGE:" << endl
+        << endl
+        << "  crux " << appName << " [options]";
+  for (int i = 0; i < num_arguments; i++) {
+    usage << " <" << argument_list[i] << '>';
+  }
+  usage << endl << endl
+        << "REQUIRED ARGUMENTS:";
+  for (int i = 0; i < num_arguments; i++) {
+    stringstream line;
+    line << '<' << argument_list[i] << "> " << Params::GetUsage(argument_list[i]);
+    usage << endl << endl << StringUtils::LineFormat(line.str(), 80, 2);
+  }
+  usage << endl << endl
+        << "OPTIONAL ARGUMENTS:" << endl;
+  for (int i = 0; i < num_options; i++) {
+    usage << endl
+          << "  [--" << option_list[i] << " <" << Params::GetType(option_list[i])
+          << ">]" << endl
+          << StringUtils::LineFormat(Params::GetUsage(option_list[i]), 80, 5);
+  }
+  usage << endl << endl
+        << "Additional parameters are documented in the online documentation.";
+  return usage.str();
 }
 

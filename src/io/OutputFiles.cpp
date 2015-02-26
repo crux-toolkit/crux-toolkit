@@ -726,7 +726,7 @@ void OutputFiles::writeRankedPeptides(PeptideToScore& peptideToScore){
   MatchFileWriter* file = delim_file_array_[0];
   MATCH_COLUMNS_T score_col = SIN_SCORE_COL;
 
-  MEASURE_TYPE_T measure_type = get_measure_type_parameter("measure");
+  MEASURE_TYPE_T measure_type = string_to_measure_type(get_string_parameter("measure"));
   switch (measure_type) {
     case MEASURE_RAW:
       score_col = RAW_SCORE_COL;
@@ -790,7 +790,7 @@ void OutputFiles::writeRankedProteins(ProteinToScore& proteinToScore,
   MatchFileWriter* file = delim_file_array_[0];
   MATCH_COLUMNS_T score_col = SIN_SCORE_COL;
 
-  MEASURE_TYPE_T measure_type = get_measure_type_parameter("measure");
+  MEASURE_TYPE_T measure_type = string_to_measure_type(get_string_parameter("measure"));
   switch (measure_type) {
     case MEASURE_RAW:
       score_col = RAW_SCORE_COL;

@@ -25,10 +25,8 @@
 #include "util/utils.h"
 #include "util/crux-utils.h"
 #include "io/carp.h"
-#include "util/hash.h"
 #include "objects.h"
 
-#include "util/parse_arguments.h"
 #include "util/modifications.h"
 
 static const int PARAMETER_LENGTH = 1024; 
@@ -86,7 +84,6 @@ enum parameter_type {
   ION_TYPE_P,        ///< parameters of type ION_TYPE_T
   ALGORITHM_TYPE_P,  ///< parameters of type ALGORITHM_TYPE_T
   HARDKLOR_ALGORITHM_TYPE_P, ///< parameters of type HARDKLOR_ALGORITHM_T
-  SPECTRUM_PARSER_P, ///< parameters of type SPECTRUM_PARSER_T
   WINDOW_TYPE_P,     ///< parameters of type WINDOW_TYPE_T
   MEASURE_TYPE_P,    ///< parameters of type MEASURE_TYPE_T
   THRESHOLD_P,       ///< parameters of type THRESHOLD_TYPE_T
@@ -108,37 +105,18 @@ typedef enum parameter_type PARAMETER_TYPE_T;
  */
 void initialize_parameters(void);
 
-/**
- * free heap allocated parameters hash table
- */
-void free_parameters(void);
+void translate_decoy_options();
+void parse_custom_enzyme(const std::string& rule_str);
 
 /**
- * /brief Identify which of the parameters can be changed 
- * on the command line.  
- * /detail Provide a list of the parameter names
- * and the number of parameters in that list.
- * Requires that initialize_parameters() has been run.
- * /returns TRUE on success.
+ *
+ * parse the parameter file given the filename
  */
-bool select_cmd_line_options(const char**, int);
+void parse_parameter_file(
+  const char* parameter_filename ///< the parameter file to be parsed -in
+  );
 
-/**
- * /brief Identify the required command line arguments.
- * /detail  Provide a list of the argument names
- * and the number of arguments in that list.
- * Requires that initialize_parameters() has been run.
- * /returns TRUE on success.
- */
-bool select_cmd_line_arguments(const char**, int);
-
-/**
- * Take the command line string from main, find the parameter fil
- * option (if present), parse it's values into the hash, and parse
- * the command line options and arguments into the hash
- * main then retrieves the values through get_value
- */
-bool parse_cmd_line_into_params_hash(int, char**, const char*);
+void read_mods_from_file(const char* param_file);
 
 /**
  * Each of the following functions searches through the hash table of
@@ -161,10 +139,6 @@ int get_int_parameter(
   const char* name  ///< the name of the parameter looking for -in
   );
 
-std::vector<int> get_int_vector_parameter(
-  const char* name ///< the name of the parameter looking for -in
-  );
-
 /**
  * Searches through the list of parameters, looking for one whose
  * name matches the string.  This function returns the parameter value if the
@@ -174,10 +148,6 @@ std::vector<int> get_int_vector_parameter(
  */
 double get_double_parameter(
   const char* name   ///< the name of the parameter looking for -in
-  );
-
-std::vector<double> get_double_vector_parameter(
-  const char* name
   );
 
 /**
@@ -190,10 +160,6 @@ std::string get_string_parameter(
   const std::string& name  ///< the name of the parameter looking for -in
   );
 
-std::vector<std::string> get_string_vector_parameter(
-  const char* name
-  );
-
 MASS_TYPE_T get_mass_type_parameter(
  const char* name
  );
@@ -202,18 +168,6 @@ char get_delimiter_parameter(
   const char* name
   );
 
-ALGORITHM_TYPE_T get_algorithm_type_parameter(
- const char* name
- );
-
-SCORER_TYPE_T get_scorer_type_parameter(
- const char* name
- );
-
-ION_TYPE_T get_ion_type_parameter(
- const char* name
- );
-
 DIGEST_T get_digest_type_parameter(
   const char* name
   );
@@ -227,10 +181,6 @@ DIGEST_T get_digest_type_parameter(
   );
 
 ENZYME_T get_enzyme_type_parameter(
-  const char* name
-  );
-
-WINDOW_TYPE_T get_window_type_parameter(
   const char* name
   );
 
@@ -238,15 +188,7 @@ THRESHOLD_T get_threshold_type_parameter(
   const char* name
   );
 
-PARSIMONY_TYPE_T get_parsimony_type_parameter(
-  const char* name
-  );
-
 QUANT_LEVEL_TYPE_T get_quant_level_type_parameter(
-  const char* name
-  );
-
-MEASURE_TYPE_T get_measure_type_parameter(
   const char* name
   );
 
@@ -266,15 +208,6 @@ int get_max_ion_charge_parameter(
   const char* name
   );
 
-HARDKLOR_ALGORITHM_T get_hardklor_algorithm(
-  const char* name
-  );
-
-SPECTRUM_PARSER_T get_spectrum_parser_parameter(
-  const char* name
-  );
-
-
 double get_mz_bin_width();
  
 double get_mz_bin_offset();
@@ -292,16 +225,6 @@ COMPARISON_T get_comparison_parameter(
  * or generated defaults
  */
 const std::vector<std::string>& get_comet_enzyme_info_lines();
-
-/**
- * \brief prints all parameters except mods into the output stream
- * in xml format. 
- *
- * Each parameter has a self closing tag and has attributes name for 
- * parameter name and value for parameter value
- */
-void print_parameters_xml(FILE* output);
-
 
 /**
  * Prints the parameters.  If lead_string is not null, preprends it to
@@ -373,10 +296,14 @@ int get_fixed_mod_index(MOD_POSITION_T p);
 int get_num_fixed_mods();
 
 /**
- * \brief Creates a file containing all parameters and their current
- * values in the parameter file format. Created in the output directory
- * named by the parameter "output-dir".
+ *  Print modifications to the given file in the format used in the
+ *  parameter file.  Expected names are "mod", "cmod", "nmod".  The
+ *  function to get the list of modifications should correspond to the
+ *  mod name.  (i.e. for "mod", use get_aa_mod_list(), for "cmod" use
+ *  get_c_mod_list(), for "nmod" use get_n_mod_list())
  */
-void print_parameter_file(std::string filename);
+void print_mods_parameter_file(std::ofstream* param_file, 
+                               const char* name,
+                               int (*mod_getter)(AA_MOD_T***));
 
 #endif

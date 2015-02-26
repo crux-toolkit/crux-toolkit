@@ -64,16 +64,10 @@ int main(int argc, char** argv){
   /* for debugging of parameter processing */
   set_verbosity_level( CARP_ERROR );
   
-  /* Set default values for parameters in parameter.c */
-  initialize_parameters();
-
   /* Define optional and required command line arguments */
-  select_cmd_line_options( option_list, num_options );
-  select_cmd_line_arguments( argument_list, num_arguments);
-
-  /* Parse the command line, including the optional params file */
-  /* does sytnax, type, bounds checking and dies if neccessessary */
-  parse_cmd_line_into_params_hash(argc, argv, "xlink-score-peptide-spectrum");
+  CruxApplication::initializeParams(
+    "xlink-score-peptide-spectrum", argument_list, num_arguments,
+    option_list, num_options, argc, argv);
 
   /* Set verbosity */
   set_verbosity_level(get_int_parameter("verbosity"));

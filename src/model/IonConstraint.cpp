@@ -104,11 +104,11 @@ IonConstraint* IonConstraint::newIonConstraintSmart(
     break;
   default:
     // use default type for others
+    ION_TYPE_T ion_type;
+    string_to_ion_type(get_string_parameter("primary-ions"), &ion_type);
     new_constraint = new IonConstraint(
       get_mass_type_parameter("fragment-mass"),
-      charge,
-      get_ion_type_parameter("primary-ions"),
-       get_boolean_parameter("precursor-ions")); 
+      charge, ion_type, get_boolean_parameter("precursor-ions")); 
     break;
   }
   return new_constraint;

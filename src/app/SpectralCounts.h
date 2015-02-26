@@ -168,8 +168,10 @@ class SpectralCounts: public CruxApplication {
   // comparison function declarations
   static bool comparePeptideSets(PeptideSet, PeptideSet);
   static bool compareMetaProteins(MetaProtein, MetaProtein);
-  static bool setsAreEqualSize(std::pair<PeptideSet, MetaProtein>,
-                               std::pair<PeptideSet, MetaProtein>);
+  static bool setsAreEqualSize(const std::pair<PeptideSet, MetaProtein>&,
+                               const std::pair<PeptideSet, MetaProtein>&);
+  static bool compareMetaScorePair(const std::pair<FLOAT_T, MetaProtein>&,
+                                   const std::pair<FLOAT_T, MetaProtein>&);
  
 }; // class
 

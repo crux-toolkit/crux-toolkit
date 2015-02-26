@@ -12,6 +12,7 @@
 #include "XLinkScorer.h"
 
 #include "model/Spectrum.h"
+#include "util/StringUtils.h"
 
 #include <iostream>
 
@@ -72,7 +73,7 @@ void get_min_max_mass(
          zstate,
                      isotope,
          get_double_parameter("precursor-window-weibull"),
-         get_window_type_parameter("precursor-window-type-weibull"),
+         string_to_window_type(get_string_parameter("precursor-window-type-weibull")),
          min_mass,
          max_mass);
   } else {
@@ -80,7 +81,7 @@ void get_min_max_mass(
          zstate,
                      isotope,
          get_double_parameter("precursor-window"),
-         get_window_type_parameter("precursor-window-type"),
+         string_to_window_type(get_string_parameter("precursor-window-type")),
          min_mass,
          max_mass);
   }
@@ -232,7 +233,7 @@ XLinkMatchCollection::XLinkMatchCollection(
 
   FLOAT_T min_mass;
   FLOAT_T max_mass;
-  vector<int> isotopes = get_int_vector_parameter("isotope-windows");
+  vector<int> isotopes = StringUtils::Split<int>(get_string_parameter("isotope-windows"), ',');
   for (int idx = 0; idx < isotopes.size();idx++) {
     get_min_max_mass(precursor_mz, zstate, isotopes[idx], use_decoy_window, min_mass, max_mass);
     carp(CARP_INFO, "isotope %i min:%g max:%g", isotopes[idx], min_mass, max_mass);

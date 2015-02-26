@@ -6,6 +6,7 @@
 #include "CometSearch/CometSearchManager.h"
 #include "model/ModifiedPeptidesIterator.h"
 #include "util/CarpStreamBuf.h"
+#include "util/StringUtils.h"
 #include "CometApplication.h"
 #include "io/DelimitedFileWriter.h"
 #include "io/DelimitedFile.h"
@@ -84,8 +85,7 @@ void CometApplication::calcVarMods(
   varmods.dVarModMass = 0.0;
   memset(varmods.szVarModChar,0,MAX_VARMOD_AA);
 
-  vector<string> tokens;
-  tokenize(var_str, tokens, ' ');
+  vector<string> tokens = StringUtils::Split(var_str, ' ');
   from_string<double>(varmods.dVarModMass, tokens[0]);
   strcpy(varmods.szVarModChar, tokens[1].c_str());
   from_string<int>(varmods.bBinaryMod, tokens[2]);
@@ -99,8 +99,7 @@ void CometApplication::getDoubleRange(
     const string& str, ///< range string to set -in
     DoubleRange& doubleRangeParam ///< DoubleRange parameter -out
     ) {
-  vector<string> tokens;
-  tokenize(str, tokens, ' ');
+  vector<string> tokens = StringUtils::Split(str, ' ');
   
   from_string<double>(doubleRangeParam.dStart, tokens[0]);
   from_string<double>(doubleRangeParam.dEnd, tokens[1]);
@@ -113,8 +112,7 @@ void CometApplication::getIntRange(
     const string& str, ///< range string to set -in
     IntRange& intRangeParam ///< IntRange parameter -out
     ) {
-  vector<string> tokens;
-  tokenize(str, tokens, ' ');
+  vector<string> tokens = StringUtils::Split(str, ' ');
   
   from_string<int>(intRangeParam.iStart, tokens[0]);
   from_string<int>(intRangeParam.iEnd, tokens[1]);
@@ -149,8 +147,7 @@ void CometApplication::setCometParameters(
     pInputFile->iAnalysisType = AnalysisType_EntireFile;
   } else {
     pInputFile->iAnalysisType = AnalysisType_SpecificScanRange;
-    vector<string> tokens;
-    tokenize(scan_range_str, tokens, ' ');
+    vector<string> tokens = StringUtils::Split(scan_range_str, ' ');
     from_string<int>(pInputFile->iFirstScan, tokens[0]);
     from_string<int>(pInputFile->iLastScan, tokens[1]);
   }

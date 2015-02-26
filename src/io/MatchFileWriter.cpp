@@ -228,18 +228,18 @@ void MatchFileWriter::addColumnNames(CruxApplication* application,
 
   case SPECTRAL_COUNTS_COMMAND:
     // protein or peptide
-    if( get_quant_level_type_parameter("quant-level") == PEPTIDE_QUANT_LEVEL ){
+    if( string_to_quant_level_type(get_string_parameter("quant-level")) == PEPTIDE_QUANT_LEVEL ){
       addColumnName(SEQUENCE_COL);
     } else {
       addColumnName(PROTEIN_ID_COL);
       // parsimony?
-      if( get_parsimony_type_parameter("parsimony") != PARSIMONY_NONE ){
+      if( string_to_parsimony_type(get_string_parameter("parsimony")) != PARSIMONY_NONE ){
         addColumnName(PARSIMONY_RANK_COL);
       }
     }
 
     // SIN or NSAF score
-    switch (get_measure_type_parameter("measure")) {
+    switch (string_to_measure_type(get_string_parameter("measure"))) {
       case MEASURE_RAW:
         addColumnName(RAW_SCORE_COL);
         break;

@@ -7,6 +7,7 @@
 #include "CruxApplicationList.h"
 #include "io/carp.h"
 #include "util/crux-utils.h"
+#include "util/StringUtils.h"
 
 #include <iostream>
 
@@ -137,9 +138,7 @@ void CruxApplicationList::usage() {
 
     // Otherwise, insert EOLs.
     else {
-      
-      vector<string> words;
-      tokenize(description, words, ' ');
+      vector<string> words = StringUtils::Split(description, ' ');
 
       unsigned int word_index = 0;
       unsigned int line_length = 0;

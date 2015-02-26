@@ -5,6 +5,7 @@
  *****************************************************************************/
 #include "ExtractColumns.h"
 #include "util/crux-utils.h"
+#include "util/StringUtils.h"
 
 using namespace std;
 
@@ -50,8 +51,7 @@ int ExtractColumns::main(int argc, char** argv) {
 
   DelimitedFileReader delimited_file(delimited_filename, true, delimiter);
   
-  vector<string> column_name_list;
-  tokenize(column_names_string, column_name_list, ',');
+  vector<string> column_name_list = StringUtils::Split(column_names_string, ',');
 
   vector<int> column_indices;
   for (unsigned int i=0;i<column_name_list.size();i++) {

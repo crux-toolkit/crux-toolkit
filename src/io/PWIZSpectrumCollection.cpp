@@ -6,6 +6,7 @@
  */
 #include "PWIZSpectrumCollection.h" 
 #include "util/crux-utils.h"
+#include "util/StringUtils.h"
 #include "parameter.h"
 #include <iostream>
 #include "pwiz/data/msdata/SpectrumInfo.hpp"
@@ -65,8 +66,7 @@ bool PWIZSpectrumCollection::parseFirstLastScanFromTitle(
 
   first_scan = -1;
   last_scan = -1;
-  vector<string> scan_title_tokens;
-  tokenize(scan_title_str, scan_title_tokens, '.');
+  vector<string> scan_title_tokens = StringUtils::Split(scan_title_str, '.');
   bool success = false;
   //make sure we have enough tokens and that the last token is dta.
   if ((scan_title_tokens.size() >= 4) && (scan_title_tokens.back().find("dta") == 0)) {

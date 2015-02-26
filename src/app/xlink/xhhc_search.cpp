@@ -82,9 +82,9 @@ int SearchForXLinks::xhhcSearchMain() {
   FLOAT_T precursor_window = get_double_parameter("precursor-window");
   FLOAT_T precursor_window_weibull = get_double_parameter("precursor-window-weibull");
   WINDOW_TYPE_T precursor_window_type = 
-    get_window_type_parameter("precursor-window-type");
+    string_to_window_type(get_string_parameter("precursor-window-type"));
   WINDOW_TYPE_T window_type_weibull = 
-    get_window_type_parameter("precursor-window-type-weibull");
+    string_to_window_type(get_string_parameter("precursor-window-type-weibull"));
 
   string output_directory = get_string_parameter("output-dir");
 
@@ -457,7 +457,6 @@ int SearchForXLinks::xhhcSearchMain() {
   }
   free(peptide_mods);
 
-  free_parameters();
   carp(CARP_INFO, "Elapsed time: %.3g s", wall_clock() / 1e6);
   carp(CARP_INFO, "Finished crux search-for-xlinks.");
 

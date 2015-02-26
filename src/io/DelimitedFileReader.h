@@ -236,21 +236,6 @@ class DelimitedFileReader {
   );
 
   /**
-   * gets an vector of strings from cell where the
-   * string in the cell has delimiters that are
-   * different than the column delimiter. The
-   * default delimiter is a comma
-   * uses the current_row_ as the row index.
-   * clears the integer vector before 
-   * populating it.
-   */
-  void getStringVectorFromCell(
-    const char* column_name, ///< the column name
-    std::vector<std::string>& string_vector, ///<the vector of integers
-    char delimiter=',' ///<the delimiter to use
-  );
-
-  /**
    * gets an vector of integers from cell where the
    * string in the cell are integers which are separated
    * by a delimiter which is differnt than the column
