@@ -49,10 +49,8 @@ void SQTWriter::writeHeader(
   double tol = get_double_parameter("precursor-window");
   double frag_mass_tol = get_double_parameter("mz-bin-width") / 2.0;
 
-  SCORER_TYPE_T score = get_scorer_type_parameter("prelim-score-type");
-  string prelim_score_type(scorer_type_to_string(score));
-  score = get_scorer_type_parameter("score-type");
-  string score_type(scorer_type_to_string(score));
+  string prelim_score_type = get_string_parameter("prelim-score-type");
+  string score_type = get_string_parameter("score-type");
 
   *file_ << "H\tSQTGenerator Crux" << endl
          << "H\tSQTGeneratorVersion 1.0" << endl

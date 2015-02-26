@@ -17,6 +17,7 @@
 #include "crux-file-utils.h"
 #include "model/Database.h"
 #include "parameter.h"
+#include "StringUtils.h"
 #include "WinCrux.h"
 #include "io/LineFileReader.h"
 #include "boost/filesystem.hpp"
@@ -63,18 +64,17 @@ DECOY_TYPE_T string_to_decoy_type(const string& name){
   return (DECOY_TYPE_T)decoy_int;
 }
 
-DECOY_TYPE_T string_to_tide_decoy_type(const char* name) {
-  const string decoy_format(name);
-  if (decoy_format == "none") {
+DECOY_TYPE_T string_to_tide_decoy_type(const string& name) {
+  if (name == "none") {
     return NO_DECOYS;
-  } else if (decoy_format == "shuffle") {
+  } else if (name == "shuffle") {
     return PEPTIDE_SHUFFLE_DECOYS;
-  } else if (decoy_format == "peptide-reverse") {
+  } else if (name == "peptide-reverse") {
     return PEPTIDE_REVERSE_DECOYS;
-  } else if (decoy_format == "protein-reverse") {
+  } else if (name == "protein-reverse") {
     return PROTEIN_REVERSE_DECOYS;
   }
-  carp(CARP_FATAL, "Invalid decoy type %s", decoy_format.c_str());
+  carp(CARP_FATAL, "Invalid decoy type %s", name.c_str());
 }
 
 char* decoy_type_to_string(DECOY_TYPE_T type){
@@ -87,8 +87,8 @@ char* decoy_type_to_string(DECOY_TYPE_T type){
 static const char* mass_format_type_strings[NUMBER_MASS_FORMATS] = 
   { "invalid", "mod-only", "total", "separate" };
 
-MASS_FORMAT_T string_to_mass_format(const char* name){
-  int mass_format_int = convert_enum_type_str(name, INVALID_ENUM_STRING, 
+MASS_FORMAT_T string_to_mass_format(const string& name){
+  int mass_format_int = convert_enum_type_str(name.c_str(), INVALID_ENUM_STRING, 
                                               mass_format_type_strings, 
                                               NUMBER_MASS_FORMATS);
   if( mass_format_int < 0 ){
@@ -107,10 +107,10 @@ char* mass_format_type_to_string(MASS_FORMAT_T type){
  */
 static const char* mass_type_strings[NUMBER_MASS_TYPES] = {"average", "mono"};
 
-bool string_to_mass_type(char* name, MASS_TYPE_T* result){
+bool string_to_mass_type(const string& name, MASS_TYPE_T* result){
   bool success = true;
   //this is copied from parameter.c::get_peptide_mass_type
-  int mass_type = convert_enum_type_str(name, INVALID_ENUM_STRING, 
+  int mass_type = convert_enum_type_str(name.c_str(), INVALID_ENUM_STRING, 
                                         mass_type_strings, NUMBER_MASS_TYPES);
 
   (*result) = (MASS_TYPE_T)mass_type;
@@ -141,8 +141,8 @@ bool mass_type_to_string(MASS_TYPE_T type, char* type_str){
 static const char* digest_type_strings[NUMBER_DIGEST_TYPES] =
   {"invalid", "full-digest", "partial-digest", "non-specific-digest"};
 
-DIGEST_T string_to_digest_type(char* name){
-  int clev_int = convert_enum_type_str(name, INVALID_ENUM_STRING, 
+DIGEST_T string_to_digest_type(const string& name){
+  int clev_int = convert_enum_type_str(name.c_str(), INVALID_ENUM_STRING, 
                                        digest_type_strings, 
                                        NUMBER_DIGEST_TYPES);
   if( clev_int < 0 ){
@@ -172,8 +172,8 @@ static const char* enzyme_type_strings[NUMBER_ENZYME_TYPES] =
    "lys-n" , "arg-c" , "glu-c" ,"pepsin-a", "elastase-trypsin-chymotrypsin",
    "custom-enzyme"};
 
-ENZYME_T string_to_enzyme_type(const char* name){
-  int enz_int = convert_enum_type_str(name, INVALID_ENUM_STRING, 
+ENZYME_T string_to_enzyme_type(const string& name){
+  int enz_int = convert_enum_type_str(name.c_str(), INVALID_ENUM_STRING, 
                                       enzyme_type_strings, 
                                       NUMBER_ENZYME_TYPES);
   if( enz_int < 0 ){
@@ -199,8 +199,8 @@ char* enzyme_type_to_string(ENZYME_T type){
 static const char* window_type_strings[NUMBER_WINDOW_TYPES] = 
   {"invalid", "mass", "mz", "ppm"};
 
-WINDOW_TYPE_T string_to_window_type(char* name){
-  int window_int = convert_enum_type_str(name, INVALID_ENUM_STRING, 
+WINDOW_TYPE_T string_to_window_type(const string& name){
+  int window_int = convert_enum_type_str(name.c_str(), INVALID_ENUM_STRING, 
                                          window_type_strings, 
                                          NUMBER_WINDOW_TYPES);
   if( window_int < 0 ){
@@ -210,24 +210,14 @@ WINDOW_TYPE_T string_to_window_type(char* name){
   return (WINDOW_TYPE_T)window_int;
 }
 
-char* window_type_to_string(WINDOW_TYPE_T type){
-  if( (int)type > NUMBER_WINDOW_TYPES){
-    return NULL;
-  }
-
-  char* type_str = my_copy_string(window_type_strings[type]);
-
-  return type_str;
-}
-
 /**
  * The string version of parsimony types
  */
 static const char* parsimony_type_strings[NUMBER_PARSIMONY_TYPES] =
   {"invalid", "simple", "greedy", "none"};
 
-PARSIMONY_TYPE_T string_to_parsimony_type(char* name){
-  int parsimony_int = convert_enum_type_str(name, INVALID_ENUM_STRING,
+PARSIMONY_TYPE_T string_to_parsimony_type(const string& name){
+  int parsimony_int = convert_enum_type_str(name.c_str(), INVALID_ENUM_STRING,
                                             parsimony_type_strings,
                                             NUMBER_PARSIMONY_TYPES);
   if ( parsimony_int < 0 ){
@@ -237,27 +227,14 @@ PARSIMONY_TYPE_T string_to_parsimony_type(char* name){
   return (PARSIMONY_TYPE_T)parsimony_int;
 }
 
-
-char * parsimony_type_to_string(PARSIMONY_TYPE_T type){
-  if ( (int)type > NUMBER_PARSIMONY_TYPES){
-    return NULL;
-  }
-
-  char * type_str = my_copy_string(parsimony_type_strings[type]);
-  
-  return type_str;
-}
-
-
-
 /**
  * The string version of measure types
  */
 static const char* measure_type_strings[NUMBER_MEASURE_TYPES] =
   {"invalid", "RAW", "SIN", "NSAF", "dNSAF", "EMPAI"};
 
-MEASURE_TYPE_T string_to_measure_type(char* name){
-  int measure_int = convert_enum_type_str(name, INVALID_ENUM_STRING,
+MEASURE_TYPE_T string_to_measure_type(const string& name){
+  int measure_int = convert_enum_type_str(name.c_str(), INVALID_ENUM_STRING,
                                           measure_type_strings,
                                           NUMBER_MEASURE_TYPES);
   if ( measure_int < 0 ){
@@ -284,9 +261,9 @@ char * measure_type_to_string(MEASURE_TYPE_T type){
 static const char* threshold_type_strings[NUMBER_THRESHOLD_TYPES] =
   {"invalid","none","qvalue","custom"};
 
-THRESHOLD_T string_to_threshold_type(char* name) {
+THRESHOLD_T string_to_threshold_type(const string& name) {
 
-  int threshold_int = convert_enum_type_str(name, INVALID_ENUM_STRING,
+  int threshold_int = convert_enum_type_str(name.c_str(), INVALID_ENUM_STRING,
     threshold_type_strings,
     NUMBER_THRESHOLD_TYPES);
 
@@ -313,8 +290,8 @@ char* threshold_type_to_string(THRESHOLD_T type) {
 static const char* quant_level_type_strings[NUMBER_QUANT_LEVEL_TYPES] =
   {"invalid", "peptide", "protein"};
 
-QUANT_LEVEL_TYPE_T string_to_quant_level_type(char* name){
-  int quant_int = convert_enum_type_str(name, INVALID_ENUM_STRING,
+QUANT_LEVEL_TYPE_T string_to_quant_level_type(const string& name){
+  int quant_int = convert_enum_type_str(name.c_str(), INVALID_ENUM_STRING,
                                         quant_level_type_strings,
                                         NUMBER_QUANT_LEVEL_TYPES);
   if ( quant_int < 0 ){
@@ -324,26 +301,15 @@ QUANT_LEVEL_TYPE_T string_to_quant_level_type(char* name){
   return (QUANT_LEVEL_TYPE_T)quant_int;
 }
 
-
-char * quant_level_type_to_string(QUANT_LEVEL_TYPE_T type){
-  if ( (int)type > NUMBER_QUANT_LEVEL_TYPES){
-    return NULL;
-  }
-
-  char * type_str = my_copy_string(quant_level_type_strings[type]);
-  
-  return type_str;
-}
-
 /**
  * The string version of column types
  */ 
 static const char* column_type_strings[NUMBER_COLTYPES] =
   {"invalid", "int", "real", "string"};
 
-COLTYPE_T string_to_column_type(char* name) {
+COLTYPE_T string_to_column_type(const string& name) {
   int coltype_int = convert_enum_type_str(
-    name, 
+    name.c_str(),
     INVALID_ENUM_STRING,
     column_type_strings,
     NUMBER_COLTYPES);
@@ -362,9 +328,9 @@ COLTYPE_T string_to_column_type(char* name) {
 static const char* comparison_type_strings[NUMBER_COMPARISONS] =
   {"invalid", "lt", "lte", "eq", "gte", "gt", "neq"};
 
-COMPARISON_T string_to_comparison(char* name) {
+COMPARISON_T string_to_comparison(const string& name) {
   int comparison_int = convert_enum_type_str(
-    name,
+    name.c_str(),
     INVALID_ENUM_STRING,
     comparison_type_strings,
     NUMBER_COMPARISONS);
@@ -383,10 +349,10 @@ COMPARISON_T string_to_comparison(char* name) {
 static const char* ion_type_strings[NUMBER_ION_TYPES] = {
   "a", "b", "c", "x", "y", "z", "p", "by", "bya", "all" };
 
-bool string_to_ion_type(char* name, ION_TYPE_T* result){
+bool string_to_ion_type(const string& name, ION_TYPE_T* result){
   bool success = true;
 
-  int ion_type = convert_enum_type_str(name, INVALID_ENUM_STRING, 
+  int ion_type = convert_enum_type_str(name.c_str(), INVALID_ENUM_STRING, 
                                        ion_type_strings, NUMBER_ION_TYPES);
   (*result) = (ION_TYPE_T)ion_type;
 
@@ -449,11 +415,9 @@ static const char* hardklor_hardklor_algorithm_type_strings[NUMBER_HK_ALGORITHM_
   {"invalid", "Basic", "FewestPeptides", "FastFewestPeptides",
    "FewestPeptidesChoice", "FastFewestPeptidesChoice" };
 
-HARDKLOR_ALGORITHM_T string_to_hardklor_algorithm_type(
-  char* name
-  ) {
+HARDKLOR_ALGORITHM_T string_to_hardklor_algorithm_type(const string& name) {
 
-  int hk_algorithm = convert_enum_type_str(name, INVALID_ENUM_STRING,
+  int hk_algorithm = convert_enum_type_str(name.c_str(), INVALID_ENUM_STRING,
     hardklor_algorithm_type_strings, NUMBER_HK_ALGORITHM_TYPES);
 
   if (hk_algorithm < 0) {
@@ -464,47 +428,11 @@ HARDKLOR_ALGORITHM_T string_to_hardklor_algorithm_type(
 
 }
 
-char* hardklor_algorithm_type_to_string(
+string hardklor_hardklor_algorithm_type_to_string(
   HARDKLOR_ALGORITHM_T type
   ){
-
-  char* type_str = my_copy_string(hardklor_algorithm_type_strings[type]);
-
-  return type_str;
+  return string(hardklor_hardklor_algorithm_type_strings[type]);
 }
-
-char* hardklor_hardklor_algorithm_type_to_string(
-  HARDKLOR_ALGORITHM_T type
-  ){
-
-  char *type_str = my_copy_string(hardklor_hardklor_algorithm_type_strings[type]);
-
-  return type_str;
-}
-
-static const char* spectrum_parser_type_strings[NUMBER_SPECTRUM_PARSERS] = 
-  {"invalid", "pwiz", "mstoolkit"};
-
-SPECTRUM_PARSER_T string_to_spectrum_parser_type(char* name) {
-
-  int spectrum_parser = convert_enum_type_str(name, INVALID_ENUM_STRING,
-    spectrum_parser_type_strings, NUMBER_SPECTRUM_PARSERS);
-
-  if (spectrum_parser < 0) {
-    spectrum_parser = 0;
-  }
-
-  return (SPECTRUM_PARSER_T)spectrum_parser;
-
-}
-
-const char* spectrum_parser_type_to_string(
-  SPECTRUM_PARSER_T type
-  ) {
-
-  return spectrum_parser_type_strings[type];
-}
-
 
 char* ion_type_to_string(ION_TYPE_T type) {
 
@@ -562,10 +490,10 @@ static const char* scorer_type_strings[NUMBER_SCORER_TYPES] =
    "refactored_xcorr",
   };
 
-bool string_to_scorer_type(const char* name, SCORER_TYPE_T* result){
+bool string_to_scorer_type(const string& name, SCORER_TYPE_T* result){
   bool success = true;
 
-  int scorer_type = convert_enum_type_str(name, INVALID_ENUM_STRING, 
+  int scorer_type = convert_enum_type_str(name.c_str(), INVALID_ENUM_STRING, 
                                           scorer_type_strings,
                                           NUMBER_SCORER_TYPES);
   (*result) = (SCORER_TYPE_T)scorer_type;
@@ -1407,28 +1335,6 @@ char** generate_feature_name_array()
   return name_array;
 }
 
-void tokenize(
-  const string& str,
-  vector<string>& tokens,
-  char delimiter
-  ) {
-
-  tokens.clear();
-  string::size_type lastPos = 0;
-  string::size_type pos = str.find(delimiter, lastPos);
-
-  while (string::npos != pos || string::npos != lastPos) {
-    //found a token, add to the vector.                                                                                                                                                                     
-    string token = str.substr(lastPos, pos - lastPos);
-    tokens.push_back(token);
-    lastPos = pos+1;
-    if (lastPos >= str.size() || pos >= str.size()) {
-      break;
-    }
-    pos = str.find(delimiter,lastPos);
-  }
-}
-
 bool get_first_last_scan_from_string(
   const std::string& const_scans_string,
   int& first_scan,
@@ -1456,8 +1362,7 @@ bool get_scans_from_string(
   scans.clear();
 
   //first tokenize by comma.
-  vector<string> tokens_comma;
-  tokenize(const_scans_string, tokens_comma, ',');
+  vector<string> tokens_comma = StringUtils::Split(const_scans_string, ',');
   if (tokens_comma.size() > 1) {
     carp_once(CARP_WARNING, "Multiple scans detected in line %s. "
       "Crux currently only handles "
@@ -1476,8 +1381,7 @@ bool get_scans_from_string(
         return false;
       }
     } else {
-      vector<string> tokens_dash;
-      tokenize(tokens_comma[idx1], tokens_dash, '-');
+      vector<string> tokens_dash = StringUtils::Split(tokens_comma[idx1], '-');
       if (tokens_dash.size() != 2) {
         carp(CARP_ERROR, "Error parsing scans line:%s here:%s",
           const_scans_string.c_str(), tokens_comma[idx1].c_str());
@@ -1859,42 +1763,6 @@ void strcat_formatted
   strcat(string_to_extend, lead_string);
   strcat(string_to_extend, &(extension[i_string]));
   strcat(string_to_extend, "\n");
-}
-
-/**
- * Check parameter values for what kind of decoys are requested.  Make
- * sure it is compatible with other search parameters and fail if not.  
- * \returns Zero if no decoys are searched, one if there are decoys
- * with an index search, or num-decoys-per-target for a fasta search.
- */
-int get_num_decoys(){
-
-  int requested_decoys_per_target = get_int_parameter("num-decoys-per-target");
-  if( requested_decoys_per_target == 0 ){
-    return 0;
-  }
-
-  DECOY_TYPE_T decoy_type = get_decoy_type_parameter("decoys");
-
-  switch(decoy_type){
-  case NO_DECOYS:
-    return 0;
-
-  case PROTEIN_REVERSE_DECOYS: 
-  case PEPTIDE_SHUFFLE_DECOYS:
-		return  requested_decoys_per_target; 
-  case PROTEIN_SHUFFLE_DECOYS:
-		carp(CARP_FATAL, 
-				 "Cannot generate shuffle whole proteins for fasta search. "
-				 "Use reverse or peptide shuffling.");
-
-  case INVALID_DECOY_TYPE: // already checked in parameters...but
-  case NUMBER_DECOY_TYPES:
-    carp(CARP_FATAL, "Invalid decoy type.");
-  }
-
-  // shouldn't get here
-  return 0;
 }
 
 /**

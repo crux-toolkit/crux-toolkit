@@ -12,6 +12,7 @@
 
 #include "carp.h"
 #include "DelimitedFile.h"
+#include "util/StringUtils.h"
 
 using namespace std;
 
@@ -179,7 +180,6 @@ void DelimitedFileReader::loadData() {
   current_row_ = 0;
   num_rows_valid_ = false;
   has_current_ = false;
-  column_names_.clear();
   column_mismatch_warned_ = false;
   istream_begin_ = istream_ptr_->tellg(); 
 
@@ -187,7 +187,7 @@ void DelimitedFileReader::loadData() {
   
   if (has_header_) {
     if (has_next_) {
-      tokenize(next_data_string_, column_names_, delimiter_);
+      column_names_ = StringUtils::Split(next_data_string_, delimiter_);
       has_next_ = getline(*istream_ptr_, next_data_string_) != NULL;
     }
     else {
@@ -455,28 +455,6 @@ int DelimitedFileReader::getInteger(
 }
 
 /**
- * gets an vector of strings from cell where the
- * string in the cell has delimiters that are
- * different than the column delimiter. The
- * default delimiter is a comma
- * uses the current_row_ as the row index.
- * clears the integer vector before 
- * populating it.
- */
-void DelimitedFileReader::getStringVectorFromCell(
-  const char* column_name, ///< the column name
-  std::vector<std::string>& string_vector, ///<the vector of integers
-  char delimiter ///<the delimiter to use
-  ) {
-
-  const string& string_ans = getString(column_name);
-
-  //get the list of strings separated by delimiter
-  string_vector.clear();
-  tokenize(string_ans, string_vector, delimiter);
-}
-
-/**
  * gets an vector of integers from cell where the
  * string in the cell are integers which are separated
  * by a delimiter which is differnt than the column
@@ -492,9 +470,7 @@ void DelimitedFileReader::getIntegerVectorFromCell(
   ) {
   
   //get the list of strings separated by delimiter
-  vector<string> string_vector_ans;
-
-  getStringVectorFromCell(column_name, string_vector_ans, delimiter);
+  vector<string> string_vector_ans = StringUtils::Split(getString(column_name), delimiter);
 
   //convert each string into an integer.
   int_vector.clear();
@@ -525,9 +501,7 @@ void DelimitedFileReader::getDoubleVectorFromCell(
 ) {
   
   //get the list of strings separated by delimiter
-  vector<string> string_vector_ans;
-
-  getStringVectorFromCell(column_name, string_vector_ans, delimiter);
+  vector<string> string_vector_ans = StringUtils::Split(getString(column_name), delimiter);
 
   //convert each string into an integer.
   double_vector.clear();
@@ -562,7 +536,7 @@ void DelimitedFileReader::next() {
     current_row_++;
     current_data_string_ = next_data_string_;
     //parse next_data_string_ into data_
-    tokenize(current_data_string_, data_, delimiter_);
+    data_ = StringUtils::Split(current_data_string_, delimiter_);
     //make sure data has the right number of columns for the header.
     if (data_.size() < column_names_.size()) {
       if (!column_mismatch_warned_) {

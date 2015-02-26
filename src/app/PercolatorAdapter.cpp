@@ -6,6 +6,7 @@
 
 #include "PercolatorAdapter.h"
 #include "build/src/percolator/src/DataSet.h"
+#include "util/StringUtils.h"
 #include "FeatureNames.h"
 
 #include <map>
@@ -69,8 +70,7 @@ void PercolatorAdapter::psmScoresToMatchCollection(
   double* normDiv = normalizer->getDiv();
   FeatureNames& features = DataSet::getFeatureNames();
   string featureNames = features.getFeatureNames();
-  vector<string> featureTokens;
-  tokenize(featureNames, featureTokens);
+  vector<string> featureTokens = StringUtils::Split(featureNames, '\t');
   int lnNumSPIndex = -1, massIndex = -1;
   map<int, int> chargeStates; // index of feature -> charge
   for (int i = 0; i < featureTokens.size(); ++i) {
@@ -296,8 +296,7 @@ void PercolatorAdapter::parsePSMId(
 ) {
   // <target|decoy>_<fileindex>_<scan>_<charge>_<rank> OR
   // <filestem>_<scan>_<charge>_<rank>
-  vector<string> tokens;
-  tokenize(psm_id, tokens, '_');
+  vector<string> tokens = StringUtils::Split(psm_id, '_');
   if (tokens.size() < 4) {
     carp(CARP_FATAL, "PSMID should be (((target|decoy)_fileidx)|filestem)_"
                      "scan_charge_rank, but was %s", psm_id.c_str());

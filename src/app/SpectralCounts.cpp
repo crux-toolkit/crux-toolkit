@@ -76,7 +76,6 @@ int SpectralCounts::main(int argc, char** argv) {
   };
   const char* argument_list[] = {
     "input PSMs",
-    
   };
 
   int num_options = sizeof(option_list) / sizeof(char*);
@@ -128,7 +127,7 @@ int SpectralCounts::main(int argc, char** argv) {
       getMetaMapping();
       getProteinToMetaProtein();
       carp(CARP_INFO, "Number of meta proteins %i", meta_mapping_.size());
-      
+
       if( parsimony_ == PARSIMONY_GREEDY ){ //if parsimony is greedy
         performParsimonyAnalysis();
       }
@@ -155,9 +154,15 @@ void SpectralCounts::getParameterValues(){
   threshold_ = get_double_parameter("threshold");
   database_name_ = get_string_parameter("protein-database");
   unique_mapping_ = get_boolean_parameter("unique-mapping");
-  quantitation_ = get_quant_level_type_parameter("quant-level");
-  parsimony_ = get_parsimony_type_parameter("parsimony");
-  measure_ = get_measure_type_parameter("measure");
+  quantitation_ = string_to_quant_level_type(get_string_parameter("quant-level"));
+  parsimony_ = string_to_parsimony_type(get_string_parameter("parsimony"));
+  measure_ = string_to_measure_type(get_string_parameter("measure"));
+
+  if (measure_ == MEASURE_SIN && get_string_parameter("input-ms2").empty()) {
+    carp(CARP_FATAL, "The SIN computation for spectral-counts requires "
+                     "that the --input-ms2 option specify a file.");
+  }
+
   bin_width_ = get_double_parameter("mz-bin-width");
   
   threshold_type_ = get_threshold_type_parameter("threshold-type");
@@ -853,8 +858,7 @@ void SpectralCounts::getMetaRanks(){
     FLOAT_T score = (*meta_it).second;
     metaVector.push_back(make_pair(score, proteins));
   }
-  sort(metaVector.begin(), metaVector.end());
-  reverse(metaVector.begin(), metaVector.end());
+  sort(metaVector.begin(), metaVector.end(), compareMetaScorePair);
 
   int cur_rank = 1;
   for (vector< pair<FLOAT_T, MetaProtein> >::iterator
@@ -1035,7 +1039,14 @@ bool SpectralCounts::compareMetaProteins(MetaProtein set_one,
  * \returns True if the PeptideSets are the same size, else false.
  */
 bool SpectralCounts::setsAreEqualSize(
-  pair<PeptideSet, MetaProtein > peps_one ,
-  pair<PeptideSet, MetaProtein > peps_two){
+  const pair<PeptideSet, MetaProtein>& peps_one ,
+  const pair<PeptideSet, MetaProtein>& peps_two){
   return ((peps_one).first.size() < (peps_two).first.size());
 }
+
+bool SpectralCounts::compareMetaScorePair(
+  const std::pair<FLOAT_T, MetaProtein>& x,
+  const std::pair<FLOAT_T, MetaProtein>& y) {
+  return (x.first != y.first) ? x > y : !compareMetaProteins(x.second, y.second);
+}
+

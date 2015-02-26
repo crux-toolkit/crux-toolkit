@@ -6,6 +6,7 @@
  ****************************************************************************/
 
 #include "XLinkBondMap.h"
+#include "util/StringUtils.h"
 
 using namespace std;
 using namespace Crux;
@@ -38,14 +39,10 @@ void XLinkBondMap::init(
   string& links_string ///< links string
   ) {
 
-  vector<string> bond_strings;
+  vector<string> bond_strings = StringUtils::Split(links_string, ',');
 
-  tokenize(links_string, bond_strings, ',');
-
-  for (unsigned int bond_idx = 0; bond_idx < bond_strings.size(); bond_idx++) {
-    vector<string> link_site_strings;
-
-    tokenize(bond_strings[bond_idx], link_site_strings, ':');
+  for (vector<string>::const_iterator i = bond_strings.begin(); i != bond_strings.end(); i++) {
+    vector<string> link_site_strings = StringUtils::Split(*i, ':');
 
     if (link_site_strings.size() == 2) {
       XLinkSite site1(link_site_strings[0]);
@@ -56,7 +53,7 @@ void XLinkBondMap::init(
       carp(CARP_FATAL,
         "bad format in %s when parsing %s",
         links_string.c_str(),
-        bond_strings[bond_idx].c_str());
+        i->c_str());
     }
   }
 }

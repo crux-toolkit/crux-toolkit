@@ -59,7 +59,9 @@ endif (WIN32 AND NOT Cygwin)
 set (
   crux_lib_files
   util/Alphabet.cpp
+  util/AminoAcidUtil.cpp
   app/analyze_psms.cpp
+  util/ArgParser.cpp
   io/carp.cpp
   util/CarpStreamBuf.cpp
   app/CometApplication.cpp
@@ -80,7 +82,6 @@ set (
   app/GenerateDecoys.cpp
   model/GeneratePeptidesIterator.cpp
   app/GetMs2Spectrum.cpp
-  util/hash.cpp
   model/Ion.cpp
   model/IonConstraint.cpp
   model/IonFilteredIterator.cpp
@@ -104,7 +105,7 @@ set (
   io/MzIdentMLWriter.cpp
   io/OutputFiles.cpp
   parameter.cpp
-  util/parse_arguments.cpp
+  util/Params.cpp
   model/Peak.cpp
   model/Peptide.cpp
   model/PeptideConstraint.cpp
@@ -145,6 +146,7 @@ set (
   io/SpectrumRecordWriter.cpp
   model/SpectrumZState.cpp
   app/StatColumn.cpp
+  util/StringUtils.cpp
   io/SQTReader.cpp
   io/SQTWriter.cpp
   app/TideIndexApplication.cpp

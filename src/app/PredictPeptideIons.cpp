@@ -80,7 +80,8 @@ int PredictPeptideIons::main(int argc, char** argv) {
   int charge_state = get_int_parameter("charge state");
 
   /* Get Options */
-  ION_TYPE_T ion_type = get_ion_type_parameter("primary-ions");
+  ION_TYPE_T ion_type;
+  string_to_ion_type(get_string_parameter("primary-ions"), &ion_type);
   bool use_precursor_ions = get_boolean_parameter("precursor-ions");
   int isotope_count = get_int_parameter("isotope");
   bool is_flanking = get_boolean_parameter("flanking");

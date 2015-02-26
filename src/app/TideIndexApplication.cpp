@@ -3,6 +3,8 @@
 #include "io/carp.h"
 #include "util/CarpStreamBuf.h"
 #include "util/crux-file-utils.h"
+#include "util/AminoAcidUtil.h"
+#include "util/Params.h"
 #include "GenerateDecoys.h"
 #include "TideIndexApplication.h"
 #include "TideMatchSet.h"
@@ -841,9 +843,9 @@ void TideIndexApplication::addAuxLoc(
   location->set_pos(proteinPos);
 }
 
-void TideIndexApplication::writeParamFile() {
+void TideIndexApplication::processParams() {
   // Update mods-spec parameter for default cysteine mod
-  const string default_cysteine = "C+57.02146";
+  string default_cysteine = "C+" + StringUtils::ToString(CYSTEINE_DEFAULT);
   string mods_spec = get_string_parameter("mods-spec");
   if (mods_spec.find('C') == string::npos) {
     mods_spec = mods_spec.empty() ?
@@ -851,9 +853,7 @@ void TideIndexApplication::writeParamFile() {
     carp(CARP_DEBUG, "Using default cysteine mod '%s' ('%s')",
          default_cysteine.c_str(), mods_spec.c_str());
   }
-  add_or_update_hash(parameters, "mods-spec", mods_spec.c_str());
-
-  print_parameter_file(getFileStem() + ".params.txt");
+  Params::Set("mods-spec", mods_spec);
 }
 
 /*

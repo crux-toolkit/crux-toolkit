@@ -24,7 +24,6 @@
 #include <map>
 #include <time.h>
 #include "io/carp.h"
-#include "util/parse_arguments.h"
 #include "Spectrum.h"
 #include "io/SpectrumCollection.h"
 #include "Ion.h"
@@ -34,7 +33,6 @@
 #include "parameter.h"
 #include "Scorer.h" 
 #include "Match.h"
-#include "util/hash.h"
 #include "PeptideSrc.h"
 #include "ProteinIndex.h"
 #include "util/modifications.h"

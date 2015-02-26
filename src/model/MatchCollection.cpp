@@ -14,6 +14,7 @@
 #include <string>
 #include "io/MatchFileReader.h"
 #include "io/SQTReader.h"
+#include "util/Params.h"
 #include "util/WinCrux.h"
 
 using namespace std;
@@ -822,9 +823,15 @@ void MatchCollection::printXmlHeader(
 
   }
 
+  for (vector<const Param*>::const_iterator i = Params::Begin(); i != Params::End(); i++) {
+    string name = (*i)->GetName();
+    if ((*i)->IsVisible() &&
+        name != "mod" && name != "cmod" && name != "nmod") {
+      fprintf(output, "<parameter name\"%s\" value=\"%s\"/>\n",
+              name.c_str(), (*i)->GetString().c_str());
+    }
+  }
 
-  print_parameters_xml(output);
-  
   fprintf(output, "</search_summary>\n");
 
 }
@@ -881,13 +888,11 @@ void MatchCollection::printSqtHeader(
           get_double_parameter("mz-bin-width") / 2.0);
   fprintf(output, "H\tAlg-XCorrMode\t0\n");
 
-  SCORER_TYPE_T score = get_scorer_type_parameter("prelim-score-type");
   fprintf(output, "H\tComment\tpreliminary algorithm %s\n", 
-          scorer_type_to_string(score));
+          get_string_parameter("prelim-score-type").c_str());
 
-  score = get_scorer_type_parameter("score-type");
-  fprintf(output, "H\tComment\tfinal algorithm %s\n", 
-          scorer_type_to_string(score));
+  fprintf(output, "H\tComment\tfinal algorithm %s\n",
+          get_string_parameter("score-type").c_str());
 
   int aa = 0;
   char aa_str[2];

@@ -11,1005 +11,762 @@
 # comet_version 2014.01 rev. 0
 # Comet MS/MS search engine parameters file.
 # Everything following the '#' symbol is treated as a comment.
-# Do not remove redundant peptides, keep all PSMs and exclude peptide
-# level probability.
-# Available for crux percolator
-only-psms=false
-
-# Which isotopes to use in calculating fragment ion mass.
-# <string>=average|mono. Default=mono.
-# Parameter file only.  Used by crux-predict-peptide-ions.
-fragment-mass=mono
-
-# +- m/z tolerance for precursor peak removal. Default = 1.5.
-# Available for print-processed-spectra and tide-search.
-remove-precursor-tolerance=1.500000
-
-# Print to stdout additional information about the spectrum.
-# Avaliable only for crux-get-ms2-spectrum.  Does not affect contents of
-# the output file.
-stats=false
-
-# Specifies the operator that is used to compare an entry in the
-# specified column to the value given on the command line. 
-# (eq|gt|gte|lt|lte|neq). Default: eq.
-# Available for crux extract-rows
-comparison=eq
-
-# Minimum number of points for estimating the Weibull parameters. 
-# Default=4000.
-# Available for crux search-for-xlinks
-min-weibull-points=4000
-
-# Number of consecutive MS1 scans over which a peptide must be observed
-# to be considered real. Gaps in persistence are allowed when setting
-# --gap-tolerance. Default = 3.
-# Available for crux bullseye
-scan-tolerance=3
-
-# Use mzid's passThreshold attribute to filter matches. Default false.
-# Used when parsing mzIdentML files.
-mzid-use-pass-threshold=false
-
-# Predict the given number of isotope peaks (0|1|2). Default=0.
-# Only available for crux-predict-peptide-ion.  Automatically set to 0
-# for Sp scoring and 1 for xcorr scoring.
-isotope=0
-
-# Output POUT XML in the output directory.  Default=F
-# Available for percolator.
-pout-output=false
-
-# Specifies N-terminal static and variable mass modifications on
-# peptides. Specify a comma-separated list of N-terminal modification
-# sequences of the form: 1E-18.0106,C-17.0265
-# Available for tide-index
-nterm-peptide-mods-spec=
-
-# The ion series to predict (b,y,by,bya). Default='by' (both b and y
-# ions).
-# Only available for crux-predict-peptide-ions.  Set automatically to
-# 'by' for searching.
-primary-ions=by
-
-# Specifies C-terminal static and variable mass modifications on
-# peptides. Specify a comma-separated list of C-terminal modification
-# sequences of the form: X+21.9819
-# Available for tide-index
-cterm-peptide-mods-spec=
-
-# Specifies whether to do optimization at the protein, peptide or psm
-# level. Default = protein.
-# Available for barista.
-optimization=protein
-
-# Probability of the creation of a peptide from noise (--protein T must
-# be set). Set by grid search if not specified.
-# Available for crux percolator if --protein T is set.
-beta=0.000000
-
-#  Read initial weights from the given file (one per line). Default do
-# not read initial weights. Default=F
-# Available for crux percolator 
-input-weights=
-
-# Perform parsimony analysis on the proteins and report a parsimony rank
-# column in output file. Default=none. Can be
-# <string>=none|simple|greedy
-# Available for spectral-counts.
-parsimony=none
-
-# Which isotopes to use in calcuating peptide mass.
-# <string>=average|mono. Default=average.
-# Used from command line or parameter file by crux-generate-peptides and
-# crux generate-decoys.
-isotopic-mass=average
-
-# Include self-loop peptides in the database.  Default=T.
-# Available for crux search-for-xlinks program.
-xlink-include-selfloops=true
-
-# Quantification at protein or peptide level (PROTEIN,PEPTIDE).
-# Default=PROTEIN.
-# Available for spectral-counts and either NSAF and SIN.
-quant-level=protein
-
-# Window type to use for selecting candidate peptides. 
-# <string>=mass|mz|ppm. Default=mass.
-# Available for search-for-xlinks and tide-search.
-precursor-window-type=mass
-
-# Search peptides within +/- 'precursor-window' of the spectrum mass. 
-# Definition of precursor window depends upon precursor-window-type.
-# Default=3.0.
-# Available for tide-search and crux-generate-peptides.
-precursor-window=3.000000
-
-# What type of threshold to use when parsing matches none|qvalue|custom.
-# Default=qvalue.
-# used for crux spectral-counts
-threshold-type=qvalue
-
-# Set the precision for masses and m/z written to sqt and .txt files. 
-# Default=4
-# Available from parameter file for all commands.
-mass-precision=4
-
-# Specify rules for in silico digestion of proteins. See HTML
-# documentation for syntax. Default is trypsin.
-# Overrides the enzyme option.  Two lists of residues are given enclosed
-# in square brackets or curly braces and separated by a |. The first
-# list contains residues required/prohibited before the cleavage site
-# and the second list is residues after the cleavage site.  If the
-# residues are required for digestion, they are in square brackets, '['
-# and ']'.  If the residues prevent digestion, then they are enclosed in
-# curly braces, '{' and '}'.  Use X to indicate all residues.  For
-# example, trypsin cuts after R or K but not before P which is
-# represented as [RK]|{P}.  AspN cuts after any residue but only before
-# D which is represented as [X]|[D].
-custom-enzyme=
-
-# Predict flanking peaks for b and y ions (T,F). Default=F.
-# Only available for crux-predict-peptide-ion.
-flanking=false
-
-# Include peaks +/- 1da around b/y ions in theoretical spectrum. 
-# default=F.
-# Available for the tide-search and search-for-xlinks commands.
-use-flanking-peaks=false
-
-# Change the mass of all amino acids 'A' by the given amount.
-# For parameter file only.  Default=no mass change.
-A=0.000000
-
-# Change the mass of all amino acids 'C' by the given amount.
-# For parameter file only.  Default=+57.0214637206.
-C=57.021464
-
-# Change the mass of all amino acids 'D' by the given amount.
-# For parameter file only.  Default=no mass change.
-D=0.000000
-
-# Change the mass of all amino acids 'E' by the given amount.
-# For parameter file only.  Default=no mass change.
-E=0.000000
-
-# Specify the width of the bins used to discretize the m/z axis.  Also
-# used as tolerance for assigning ions.  Default=1.0005079 for
-# monoisotopic mass or 1.0011413 for average mass.
-# Available for tide-search and xlink-assign-ions.
-mz-bin-width=1.000508
-
-# Change the mass of all amino acids 'F' by the given amount.
-# For parameter file only.  Default=no mass change.
-F=0.000000
-
-# Change the mass of all amino acids 'G' by the given amount.
-# For parameter file only.  Default=no mass change.
-G=0.000000
-
-# Change the mass of all amino acids 'H' by the given amount.
-# For parameter file only.  Default=no mass change.
-H=0.000000
-
-# Change the mass of all amino acids 'I' by the given amount.
-# For parameter file only.  Default=no mass change.
-I=0.000000
-
-# When creating decoy peptides using decoy-format=shuffle or
-# decoy-format=peptide-reverse, this option specifies whether the
-# N-terminal and C-terminal amino acids are kept in place or allowed to
-# be shuffled or reversed. Default = NC.
-# Available for tide-index and generate-decoys.
-keep-terminal-aminos=NC
-
-# Change the mass of all amino acids 'L' by the given amount.
-# For parameter file only.  Default=no mass change.
-L=0.000000
-
-# Change the mass of all amino acids 'M' by the given amount.
-# For parameter file only.  Default=no mass change.
-M=0.000000
-
-# Change the mass of all amino acids 'K' by the given amount.
-# For parameter file only.  Default=no mass change.
-K=0.000000
-
-# Change the mass of all amino acids 'P' by the given amount.
-# For parameter file only.  Default=no mass change.
-P=0.000000
-
-# Change the mass of all amino acids 'N' by the given amount.
-# For parameter file only.  Default=no mass change.
-N=0.000000
-
-# Change the mass of all amino acids 'R' by the given amount.
-# For parameter file only.  Default=no mass change.
-R=0.000000
-
-# Change the mass of all amino acids 'S' by the given amount.
-# For parameter file only.  Default=no mass change.
-S=0.000000
-
-# Change the mass of all amino acids 'Q' by the given amount.
-# For parameter file only.  Default=no mass change.
-Q=0.000000
-
-# Change the mass of all amino acids 'V' by the given amount.
-# For parameter file only.  Default=no mass change.
-V=0.000000
-
-# Change the mass of all amino acids 'T' by the given amount.
-# For parameter file only.  Default=no mass change.
-T=0.000000
-
-# Change the mass of all amino acids 'Y' by the given amount.
-# For parameter file only.  Default=no mass change.
-Y=0.000000
-
-# Change the mass of all amino acids 'W' by the given amount.
-# For parameter file only.  Default=no mass change.
-W=0.000000
 
 # Print version number and quit.
 # Available for all crux programs.  On command line use '--version T'.
 version=false
 
-# The highest spectrum m/z to search. Default=no maximum.
-# Available for tide-search.
-spectrum-max-mz=1000000000.000000
-
-# Peptides with low score will not be pruned before calculating protein
-# probabilities (--protein T must be set).
-# Available for crux percolator if --protein T is set.
-no-prune-proteins=false
-
-# Set the resolution of the observed spectra at m/z 400. Used in
-# conjunction with --instrument The default is 100000.
-# Available for crux hardklor
-resolution=100000.000000
-
-# The format to write the output spectra to. By default, the spectra
-# will be output in the same format as the MS/MS input.
-# Available for crux bullseye
-spectrum-format=
-
-# The minimum length of peptides to consider. Default=6.
-# Used from the command line or parameter file by
-# crux-generate-peptides, crux tide-index, and crux generate-decoys.
-min-length=6
-
-# Predict the precursor ions, and all associated ions (neutral-losses,
-# multiple charge states) consistent with the other specified options.
-# (T,F) Default=F.
-# Only available for crux-predict-peptide-ions.
-precursor-ions=false
-
-# Degree of digestion used to generate peptides.
-# <string>=full-digest|partial-digest. Either both ends or one end of a
-# peptide must conform to enzyme specificity rules. Default=full-digest.
-# Used in conjunction with enzyme option when enzyme is not set to to
-# 'no-enzyme'.  Available from command line or parameter file for
-# crux-generate-peptides, crux tide-index, and crux generate-decoys.
-# Digestion rules are as follows: enzyme name [cuts after one of these
-# residues][but not before one of these residues].  trypsin [RK][P],
-# elastase [ALIV][P], chymotrypsin [FWYL][P].
-digestion=full-digest
-
-# Replace existing files (T) or exit if attempting to overwrite (F).
-# Default=F.
-# Available for all crux programs.  Applies to parameter file as well as
-# index, search, and analysis output files.
-overwrite=false
-
-# Choose the algorithm for analyzing combinations of multiple peptide or
-# protein isotope distributions. (basic | fewest-peptides |
-# fast-fewest-peptides | fewest-peptides-choice |
-# fast-fewest-peptides-choice) Default=fast-fewest-peptides.
-# Available for crux hardklor
-hardklor-algorithm=fast-fewest-peptides
-
-# Parser to use for reading in spectra <string>=pwiz|mstoolkit.
-# Default=pwiz.
-# Available for search-for-xlinks.
-spectrum-parser=pwiz
+# Set level of output to stderr (0-100).  Default=30.
+# Available for all crux programs.  Each level prints the following messages, including all those at lower verbosity levels: 0-fatal errors, 10-non-fatal errors, 20-warnings, 30-information on the progress of execution, 40-more progress information, 50-debug info, 60-detailed debug info.
+verbosity=30
 
 # Set additional options with values in the given file.
-# Available for all crux programs. Any options specified on the command
-# line will override values in the parameter file.
+# Available for all crux programs. Any options specified on the command line will override values in the parameter file.
 parameter-file=
 
-# Output MZID in the output directory.  Default=F
-# Available for tide-search, percolator.
-mzid-output=false
+# Replace existing files (T) or exit if attempting to overwrite (F). Default=F.
+# Available for all crux programs.  Applies to parameter file as well as index, search, and analysis output files.
+overwrite=false
 
-# The minimum number of peaks a spectrum must have for it to be
-# searched. Default=20.
+# The minimum length of peptides to consider. Default=6.
+# Used from the command line or parameter file by crux-generate-peptides, crux tide-index, and crux generate-decoys.
+min-length=6
+
+# The maximum length of peptides to consider. Default=50.
+# Available from command line or parameter file for crux-generate-peptides, crux tide-index, and crux generate-decoys. 
+max-length=50
+
+# The minimum mass of peptides to consider. Default=200.
+# Available from command line or parameter file for crux-generate-peptides, crux tide-index, and crux generate-decoys. 
+min-mass=200.000000
+
+# The maximum mass of peptides to consider. Default=7200.
+# Available from command line or parameter file for crux-generate-peptides, crux tide-index, and crux generate-decoys. 
+max-mass=7200.000000
+
+# Which isotopes to use in calcuating peptide mass. <string>=average|mono. Default=average.
+# Used from command line or parameter file by crux-generate-peptides and crux generate-decoys.
+isotopic-mass=average
+
+# The minimum number of peaks a spectrum must have for it to be searched. Default=20.
 # Available for tide-search.
 min-peaks=20
 
-# Remove peaks around the precursor m/z.
-# Available for tide-search.
-remove-precursor-peak=false
-
-# Uses exact P-value calculation for peptide-spectrum-matching.
-# Default=F.
-# Available for tide-search
-exact-p-value=false
-
-# Predict peaks with the given maximum number of nh3 neutral loss
-# modifications. Default=0.
-# Only available for crux-predict-peptide-ions.
-nh3=0
-
-# Type of analysis to make on the match results:
-# (RAW|NSAF|dNSAF|SIN|EMPAI). Default=NSAF. 
-# Available for spectral-counts.  RAW is raw counts, NSAF is Normalized
-# Spectral Abundance Factor, dNSAF is Distributed Spectral Abundance
-# Factor, SIN is Spectral Index Normalized and EMPAI is Exponentially
-# Modified Protein Abundance Index
-measure=NSAF
-
-# Override error check and do not fall back on default score vector in
-# case of suspect score vector.
-# Available for crux percolator.
-static-override=false
-
-# Direction of threshold for matches.  If true, then all matches whose
-# value is <= threshold will be accepted.  If false, then all matches >=
-# threshold will be accepted.  Used with custom-threshold parameter
-# (default True).
-# Available for spectral-counts.
-custom-threshold-min=true
-
-# Output empirical q-values from target-decoy analysis (--protein T must
-# be set).
-# Available for crux percolator if --protein T is set.
-empirical-protein-q=false
-
-# Number of psms per spectrum to score with xcorr after preliminary
-# scoring with Sp. Set to 0 to score all psms with xcorr. Default=500.
-# For positive values, the Sp (preliminary) score acts as a filter; only
-# high scoring psms go on to be scored with xcorr.  This saves some
-# time.  If set to 0, all psms are scored with both scores. 
-max-rank-preliminary=500
-
-# A directory containing a database index created by a previous run of
-# crux tide-index.
-# Available for tide-search
-tide database index=
-
-# The maximum number of modifications that can be applied to a single
-# peptide.  Default=no limit.
-# Available for tide-index.
-max-mods=255
-
-# Set the tolerance (+/-ppm) for finding persistent peptides. Default =
-# 10.0.
-# Available for crux bullseye
-persist-tolerance=10.000000
-
-# Spectrum charge states to search. <string>=1|2|3|all. Default=all.
-# Used by tide-search to limit the charge states considered in the
-# search.  With 'all' every spectrum will be searched and spectra with
-# multiple charge states will be searched once at each charge state. 
-# With 1, 2 ,or 3 only spectra with that that charge will be searched.
-spectrum-charge=all
-
-# The minimum number of modifications that can be applied to a single
-# peptide.  Default=0.
-# Available for tide-index.
-min-mods=0
-
-# MS2 file corresponding to the psm file. Required for SIN.
-# Available for spectral-counts with measure=SIN.
-input-ms2=
-
-# False discovery rate threshold to define positive examples in
-# training. Set by cross validation if 0. Default is 0.01.
-# Available for crux percolator
-train-fdr=0.010000
-
-# Show search progress by printing every n spectra searched. 
-# Default=1000.
-# Set to 0 to show no search progress.  Available for tide-search
-print-search-progress=1000
-
-# Restrict analysis to only a small window in each segment ( (min-max)
-# in m/z). The user must specify the starting and ending m/z values
-# between which the analysis will be performed. By default the whole
-# spectrum is analyzed.
-# Available for crux hardklor
-mz-window=
-
-# Expression for static and variable mass modifications to include.
-# Specify a comma-separated list of modification sequences of the form:
-# C+57.02146,2M+15.9949,1STY+79.966331,...
-# Available for tide-index
-mods-spec=C+57.02146
-
-# Set the signal-to-noise threshold. Any integer or decimal value
-# greater than or equal to 0.0 is valid. The default value is 1.0.
-# Available for crux hardklor
-signal-to-noise=1.000000
-
-# Reports peptide intensities as the distribution area. Default false.
-# Available for crux hardklor
-distribution-area=false
-
-# Include description of correct features.
-# Avilable for crux percolator
-doc=-1
-
-# Prefix added to output file names. Default=none. 
-# Used by crux percolator, crux compute-q-values, and crux q-ranker.
-fileroot=
-
-# Specify the name of the file where the binarized fragmentation spectra
-# will be stored.
-# Available for tide-search
-store-spectra=
-
-# If true, Hardklor will calculate the local noise levels across the
-# spectrum using --sn-window, then select a floor of this set of noise
-# levels to apply to the whole spectrum.
-# Available for crux hardklor
-static-sn=true
-
-# Sort in ascending order.  Otherwise, descending. Default: True.
-# Available for sort-by-column
-ascending=true
-
-# Compute the Sp score for all candidate peptides.  Default=F
-# Available for tide-search.
-compute-sp=false
-
-# Set the correlation threshold [0,1.0] to accept a predicted isotope
-# distribution.  Default=0.85
-# Available for crux hardklor
-corr=0.850000
-
-# The maximum mass of peptides to consider. Default=8000.
-# Available from command line or parameter file for crux bullseye
-bullseye-max-mass=8000.000000
-
-# If the target and decoy searches were run separately, rather than
-# using a concatenated database, then Q-ranker will assume that the
-# database search results provided as a required argument are from the
-# target database search. This option then allows the user to specify
-# the location of the decoy search results. Like the required arguments,
-# these search results can be provided as a single file, a list of files
-# or a directory. However, the choice (file, list or directory) must be
-# consistent for the MS2 files and the target and decoy tab-delimited
-# files. Also, if the MS2 and tab-delimited files are provided in
-# directories, then Q-ranker will use the MS2 filename (foo.ms2) to
-# identify corresponding target and decoy tab-delimited files with names
-# like foo*.target.txt and foo*.decoy.txt. This naming convention allows
-# the target and decoy txt files to reside in the same directory.
-#  Available for q-ranker and barista.
-separate-searches=
-
-# Set level of output to stderr (0-100).  Default=30.
-# Available for all crux programs.  Each level prints the following
-# messages, including all those at lower verbosity levels: 0-fatal
-# errors, 10-non-fatal errors, 20-warnings, 30-information on the
-# progress of execution, 40-more progress information, 50-debug info,
-# 60-detailed debug info.
-verbosity=30
-
-# Specify the location of the left edge of the first bin used to
-# discretize the m/z axis. Default=0.40
-# Available for tide-search.
-mz-bin-offset=0.400000
-
-# False discovery rate threshold for evaluating best cross validation
-# result and the reported end result. Default is 0.01.
-# Availble for crux percolator.
-test-fdr=0.010000
-
-# Create an ASCII version of the peptide list.  Default=F.
-# Creates an ASCII file in the output directory containing one peptide
-# per line.
-peptide-list=false
-
-# Choose the charge state determination method. (B|F|P|Q|S). Default=Q.
-# Available for crux hardklor
-cdm=Q
-
-# The minimum mass of peptides to consider. Default=600.
-# Available from command line or parameter file for crux bullseye
-bullseye-min-mass=600.000000
-
-# Print the theoretical spectrum
-# Available for xlink-predict-peptide-ions (Default=F).
-print-theoretical-spectrum=false
-
-# Set the tolerance (+/-units) around the retention time over which a
-# peptide can be matched to the MS/MS spectrum. The unit of time is
-# whatever unit is used in your data file (usually minutes). Default =
-# 0.5.
-# Available for crux bullseye
-retention-tolerance=0.500000
-
-# output protein level probability. Default=F
-# Available for crux percolator
-protein=false
-
-# Use unit normalization [0-1] instead of standard deviation
-# normalization
-# Available for crux percolator.
-unitnorm=false
-
-# Search decoy-peptides within +/-  'mass-window-decoy' of the spectrum
-# mass.  Default=20.0.
-# Available for crux search-for-xlinks. 
-precursor-window-weibull=20.000000
-
-# Set the maximum charge state to look for when analyzing a spectrum.
-# Default=5.
-# Available for crux hardklor
-max-charge=5
-
-# Treat ties as if it were one protein 
-# Available for crux percolator.
-allow-protein-group=false
-
-# Specifies N-terminal static and variable mass modifications on
-# proteins. Specify a comma-separated list of N-terminal protein
-# modification sequences of the form: ,...
-# Available for tide-index
-nterm-protein-mods-spec=
-
-# Number of decoy peptides to search for every target peptide
-# searched.Only valid for fasta searches when --decoys is not none.
-# Default=1.
-# Use --decoy-location to control where they are returned (which
-# file(s)) and --decoys to control how targets are randomized.
-num-decoys-per-target=1
-
-# Search only select spectra specified as a single scan number or as a
-# range as in x-y.  Default=search all.
-# The search range x-y is inclusive of x and y.
-scan-number=
-
-# The maximum number of modified amino acids that can appear in one
-# peptide.  Each aa can be modified multiple times.  Default=no limit.
-# 
-max-aas-modified=255
-
-# Window type to use for selecting decoy peptides from precursor mz.
-# <string>=mass|mz|ppm. Default=mass.
-# Available for crux search-for-xlinks
-precursor-window-type-weibull=mass
-
-# Include peptides with up to n missed cleavage sites. Default=0.
-# Available from command line or parameter file for
-# crux-generate-peptides and crux generate-decoys. When used with
-# enzyme=<trypsin|elastase|chymotrpysin> includes peptides containing
-# one or more potential cleavage sites.
-missed-cleavages=0
-
-# Set the depth of combinatorial analysis. Default 3.
-# Available for crux hardklor
-depth=3
-
-# Re-run a previous Q-ranker analysis using a previously computed set of
-# lookup tables.
-#  Available for q-ranker and barista.
-re-run=
-
-# Specify "no base" averagine. Only modified averagine models will be
-# used in the analysis. Default = F 
-# Available for crux hardklor
-no-base=false
-
-# Fraction of the negative data set to be used as train set when only
-# providing one negative set, remaining examples will be used as test
-# set.Default 0.6
-# Available for crux percolator.
-train-ratio=0.600000
-
-# Probability with which a present protein emits an associated peptide
-# (--protein T must be set). Set by grid search if not specified.
-# Available for crux percolator if --protein T is set.
-alpha=0.000000
-
-# Print the header line of the tsv file. Default=T.
-# Available for crux extract-columns and extract-rows
-header=true
-
-# Are spectra centroided?  Default false.
-# Available for crux hardklor
-centroided=false
-
-# The most informative feature given as the feature name.  The name can
-# be preceded by a hyphen (e.g., "-XCorr") to indicate that a lower
-# value is better. By default, Percolator will select the feature that
-# produces the largest set of target PSMs at a specified FDR threshold
-# (cf. --train-fdr).
-# Available for crux percolator
-default-direction=
-
-# Penalty for mistakes made on positive examples. Set by cross
-# validation if not specified. Default=cross-validate 
-# Available for crux percolator
-c-pos=0.010000
-
-# Search result can be as a file or a list of files. This option allows
-# users to specify the search results are provided as a list of files by
-# setting the --list-of-files option to T. Default= false.
-# Available for barista.
-list-of-files=false
-
-# Proteins with same probabilities will be grouped (--protein T must be
-# set).
-# Available for crux percolator if --protein T is set.
-group-proteins=false
-
-# Folder to which results will be written. Default='crux-output'.
-# Used by crux compute-q-values, and crux percolator.
-output-dir=crux-output
-
-# Include decoys (PSMs, peptides, and/or proteins) in the xml-output.
-# Only available if -X is used. Default=F
-# Available for crux percolator
-decoy-xml-output=false
-
-# Include dead-end peptides in the database.  Default=T.
-# Available for crux search-for-xlinks program.
-xlink-include-deadends=true
-
-# A spectrum records file generated by a previous run of crux
-# tide-search using the store-spectra parameter.
-# Available for read-spectrumrecords
-spectrum records file=
-
-# Gap size tolerance when checking for peptides across consecutive MS1
-# scans. Used in conjunction with --scan-tolerance. Default = 1.
-# Available for crux bullseye
-gap-tolerance=1
-
-# Type of instrument (fticr|orbitrap|tof|qit) on which the data was
-# collected. Used in conjuction with --resolution. The default is fticr.
-# Available for crux hardklor
-instrument=fticr
-
-# Specify the q-value calculation procedure to either target-decoy
-# competition (tcd) or mix-max (mix-max).
-# Used by assign-confidence.
-estimation-method=tdc
-
-# The maximum length of peptides to consider. Default=50.
-# Available from command line or parameter file for
-# crux-generate-peptides, crux tide-index, and crux generate-decoys. 
-max-length=50
-
-# Use monoisotopic precursor masses rather than average mass for
-# precursor. Default=T.
-# Available for tide-index
-monoisotopic-precursor=true
-
-# Set a filter for mzXML files. Default=none
-# Available for crux hardklor
-mzxml-filter=none
-
-# Generate peptides only once, even if they appear in more than one
-# protein (T,F).  Default=T.
-# Available from command line or parameter file for
-# crux-genereate-peptides. Returns one line per peptide when true or one
-# line per peptide per protein occurence when false.  
-unique-peptides=true
-
-# Q-ranker analysis begins with a pre-processsing step that creates a
-# set of lookup tables which are then used during training. Normally,
-# these lookup tables are deleted at the end of the Q-ranker analysis,
-# but setting this option to T prevents the deletion of these tables.
-# Subsequently, the Q-ranker analysis can be repeated more efficiently
-# by specifying the --re-run option. Default = F.
-# Available for q-ranker and barista.
-skip-cleanup=false
-
-# This parameter controls whether Tide will automatically remove the
-# N-terminal methionine from a sequence entry.
-# Available for tide-index.
-clip-nterm-methionine=false
-
-# Predict theoretical ions up to max charge state (1,2,...,6) or up to
-# the charge state of the peptide (peptide).  If the max-ion-charge is
-# greater than the charge state of the peptide, then the max is the
-# peptide charge. Default='peptide'.
-# Available for predict-peptide-ions and search-for-xlinks. Set to
-# 'peptide' for search.
-max-ion-charge=peptide
-
-# When given a unsigned integer value seeds the random number generator
-# with that value. When given the string "time" seeds the random number
-# generator with the system time. Default = 1.
-# Available for all Crux commands.
-seed=1
-
-# Output final weights to percolator.target.weights.txt.Default=T.
-# Available for crux percolator
-output-weights=false
-
-# The maximum mass of peptides to consider. Default=7200.
-# Available from command line or parameter file for
-# crux-generate-peptides, crux tide-index, and crux generate-decoys. 
-max-mass=7200.000000
-
-# Ignore peptides that persist for this length. The unit of time is
-# whatever unit is used in your data file (usually minutes). These
-# peptides are considered contaminants. Default = 2.0.
-# Available for crux bullseye
-max-persist=2.000000
-
-# Using retention time features calculated as in Klammer et al.
-# Available for crux percolator
-klammer=false
-
-# The minimum mass of peptides to consider. Default=200.
-# Available from command line or parameter file for
-# crux-generate-peptides, crux tide-index, and crux generate-decoys. 
-min-mass=200.000000
-
-# Output SQT in the output directory.  Default=F
-# Available for tide-search.
-sqt-output=false
-
-# Set the maximum number of peptides or proteins that are estimated from
-# the peaks found in a spectrum segment. The default value is 10.
-# Available for crux hardklor
-max-p=10
-
-# Set the precision for scores written to sqt and text files. Default=8.
-# Available from parameter file for percolator and compute-q-values.
-precision=8
-
-# Specify location of decoy search results.
-# <string>=target-file|one-decoy-file|separate-decoy-files.
-# Default=separate-decoy-files.
-# Applies when decoys is not none.  Use 'target-file' to mix target and
-# decoy search results in one file. 'one-decoy-file' will return target
-# results in one file and all decoys in another. 'separate-decoy-files'
-# will create as many decoy files as num-decoys-per-target.
-decoy-location=separate-decoy-files
-
-# Measure performance on test set each iteration
-# Available for crux percolator.
-test-each-iteration=false
-
-# The threshold to use for filtering matches. Default=0.01.
-# Available for spectral-counts.  All PSMs with higher (or lower) than
-# this will be ignored.
-threshold=0.010000
-
-# Set the tolerance (+/-ppm) for exact match searches. Default = 10.0.
-# Available for crux bullseye
-exact-tolerance=10.000000
-
-# The name of the file from which to parse the fragmentation spectra, in
-# any of the file formats supported by ProteoWizard. Alternatively, the
-# argument may be a binary spectrum file produced by a previous run of
-# crux tide-search using the store-spectra parameter.
-# Available for tide-search
-tide spectra file=
-
-# Q-ranker uses enriched feature set derived from the spectra in ms2
-# files. It can be forced to use minimal feature set by setting the
-# --use-spec-features option to F. Default T.
-# Available for q-ranker and barista.
-use-spec-features=true
-
-# Output target and decoy PSMs into a single file.
-# Available for tide-search
-concat=false
-
-# Set the maximum width of any set of peaks in a spectrum when computing
-# the results (in m/z). Thus, if the value was 5.0, then sets of peaks
-# greater than 5 m/z are divided into smaller sets prior to analysis.
-# The default value is 4.0.
-# Available for crux hardklor
-max-width=4.000000
-
-# Prior probability of that a protein is present in the sample
-# (--protein T must be set). Set by grid search if not specified.
-# Available for crux percolator if --protein T is set.
-gamma=0.000000
-
-# Specifies C-terminal static and variable mass modifications on
-# proteins. Specify a comma-separated list of C-terminal protein
-# modification sequences of the form: ,...
-# Available for tide-index
-cterm-protein-mods-spec=
-
-# he maximum charge state of a spectra to consider in search. Default=5.
-#  Available for tide-search.
-max-precursor-charge=5
-
-# Controls whether neutral loss ions are considered in the search. Two
-# types of neutral losses are included and are applied only to singly
-# charged b- and y-ions: loss of ammonia (NH3, 17.0086343 Da) and H2O
-# (18.0091422). Each neutral loss peak has intensity 1/5 of the primary
-# peak
-# Available for tide-search.
-use-neutral-loss-peaks=false
-
-# Setting deepness 0, 1, or 2 from low depth to high depth (less
-# computational time) of the grid search for estimation Alpha,Beta and
-# Gamma parameters for fido (--protein T must be set). Default value is
-# 0.
-# Available for crux percolator if --protein T is set.
-deepness=0
-
-# Optional file into which psm features are printed. Default=F.
-# Available for percolator and q-ranker.  File will be named
-# <fileroot>.percolator.features.txt or <fileroot>.qranker.features.txt.
-feature-file=false
-
-# Set the signal-to-noise window length (in m/z). Because noise may be
-# non-uniform across a spectra, this value adjusts the segment size
-# considered when calculating a signal-over-noise ratio. The default
-# value is 250.0.
-# Available for crux hardklor
-sn-window=250.000000
-
-# Enzyme to use for in silico digestion of proteins.
-# <string>=no-enzyme|trypsin|trypsin/p|chymotrypsin|
-# elastase|clostripain|cyanogen-bromide|iodosobenzoate|
-# proline-endopeptidase|staph-protease|asp-n|lys-c
-# lys-n|arg-c|glu-c|pepsin-a|
-# |elastase-trypsin-chymotrypsin|custom-enzyme. Default=trypsin.
-# Used in conjunction with the options digestion and missed-cleavages.
-# Use 'no-enzyme' for non-specific digestion.  Available from command
-# line or parameter file for crux-generate-peptides, crux tide-index,
-# and crux generate-decoys.  Digestion rules: enzyme name [cuts after
-# one of these residues]|{but not before one of these residues}. trypsin
-# [RK]|{P}, trypsin/p [RK]|[], elastase [ALIV]|{P}, chymotrypsin
-# [FWYL]|{P}, clostripain [R]|[], cyanogen-bromide [M]|[],
-# iodosobenzoate [W]|[], proline-endopeptidase [P]|[], staph-protease
-# [E]|[], elastase-trypsin-chymotrypsin [ALIVKRWFY]|{P},asp-n []|[D]
-# (cuts before D), lys-c [K]|{P}, lys-n []|[K] (cuts before K), arg-c
-# [R]|{P}, glu-c [DE]|{P}, pepsin-a [FL]|{P}.
+# Degree of digestion used to generate peptides. <string>=full-digest|partial-digest. Either both ends or one end of a peptide must conform to enzyme specificity rules. Default=full-digest.
+# Used in conjunction with enzyme option when enzyme is not set to to 'no-enzyme'.  Available from command line or parameter file for crux-generate-peptides, crux tide-index, and crux generate-decoys. Digestion rules are as follows: enzyme name [cuts after one of these residues][but not before one of these residues].  trypsin [RK][P], elastase [ALIV][P], chymotrypsin [FWYL][P].
+digestion=full-digest
+
+# Enzyme to use for in silico digestion of proteins. <string>=no-enzyme|trypsin|trypsin/p|chymotrypsin| elastase|clostripain|cyanogen-bromide|iodosobenzoate| proline-endopeptidase|staph-protease|asp-n|lys-c lys-n|arg-c|glu-c|pepsin-a| |elastase-trypsin-chymotrypsin|custom-enzyme. Default=trypsin.
+# Used in conjunction with the options digestion and missed-cleavages. Use 'no-enzyme' for non-specific digestion.  Available from command line or parameter file for crux-generate-peptides, crux tide-index, and crux generate-decoys.  Digestion rules: enzyme name [cuts after one of these residues]|{but not before one of these residues}. trypsin [RK]|{P}, trypsin/p [RK]|[], elastase [ALIV]|{P}, chymotrypsin [FWYL]|{P}, clostripain [R]|[], cyanogen-bromide [M]|[], iodosobenzoate [W]|[], proline-endopeptidase [P]|[], staph-protease [E]|[], elastase-trypsin-chymotrypsin [ALIVKRWFY]|{P},asp-n []|[D] (cuts before D), lys-c [K]|{P}, lys-n []|[K] (cuts before K), arg-c [R]|{P}, glu-c [DE]|{P}, pepsin-a [FL]|{P}.
 enzyme=trypsin
 
-# Specify the semantics of the score, i.e., whether a smaller value
-# implies a better match or vice versa.
-# Used by assign-confidence.
-smaller-is-better=false
+# Window type to use for selecting candidate peptides.  <string>=mass|mz|ppm. Default=mass.
+# Available for search-for-xlinks and tide-search.
+precursor-window-type=mass
 
-# Specifies the data type the column contains (int|real|string) Default:
-# string
-# Available for crux extract-rows
-column-type=string
+# Parser to use for reading in spectra <string>=pwiz|mstoolkit. Default=pwiz.
+# Available for search-for-xlinks.
+spectrum-parser=pwiz
 
-# Predict peaks with the given maximum number of h2o neutral loss
-# modifications. Default=0.
-# Only available for crux-predict-peptide-ions.
-h2o=0
+# Specify rules for in silico digestion of proteins. See HTML documentation for syntax. Default is trypsin.
+# Overrides the enzyme option.  Two lists of residues are given enclosed in square brackets or curly braces and separated by a |. The first list contains residues required/prohibited before the cleavage site and the second list is residues after the cleavage site.  If the residues are required for digestion, they are in square brackets, '[' and ']'.  If the residues prevent digestion, then they are enclosed in curly braces, '{' and '}'.  Use X to indicate all residues.  For example, trypsin cuts after R or K but not before P which is represented as [RK]|{P}.  AspN cuts after any residue but only before D which is represented as [X]|[D].
+custom-enzyme=
 
-# List of integers of isotopic masses to search
-# Used for crux search-for-xlinks
-isotope-windows=0
+# Include peptides with up to n missed cleavage sites. Default=0.
+# Available from command line or parameter file for crux-generate-peptides and crux generate-decoys. When used with enzyme=<trypsin|elastase|chymotrypsin> includes peptides containing one or more potential cleavage sites.
+missed-cleavages=0
 
-# Use a name of custom threshold rather than (default NULL)
-# Available for spectral-counts.
-custom-threshold-name=
+# When creating decoy peptides using decoy-format=shuffle or decoy-format=peptide-reverse, this option specifies whether the N-terminal and C-terminal amino acids are kept in place or allowed to be shuffled or reversed. Default = NC.
+# Available for tide-index and generate-decoys.
+keep-terminal-aminos=NC
 
-# Ignore peptides with multiple mappings to proteins (T,F). Default=F.
-# Available for spectral-counts.
-unique-mapping=false
+# Generate peptides only once, even if they appear in more than one protein (T,F).  Default=T.
+# Available from command line or parameter file for crux-genereate-peptides. Returns one line per peptide when true or one line per peptide per protein occurence when false.  
+unique-peptides=true
 
-# Set the sensitivity level. There are four levels, 0 (low), 1
-# (moderate), 2 (high), and 3 (max). The default value is 2.
-# Available for crux hardklor
-sensitivity=2
+# Create an ASCII version of the peptide list. Default=F.
+# Creates an ASCII file in the output directory containing one peptide per line.
+peptide-list=false
 
-# Specify which preprocessing step to stop after. Value must be
-# discretize, remove-precursor, square-root, remove-grass, ten-bin, or
-# xcorr. Default = xcorr.
+# Specify which preprocessing step to stop after. Value must be discretize, remove-precursor, square-root, remove-grass, ten-bin, or xcorr. Default = xcorr.
 # Available for print-processed-spectra.
 stop-after=xcorr
-
-# Compute p-values for the main score type. Default=F.
-# Currently only implemented for XCORR.
-compute-p-values=false
-
-# Require an exact match to the precursor ion. Rather than use wide
-# precursor boundaries, this flag forces Bullseye to match precursors to
-# the base isotope peak identified in Hardklor. The tolerance is set
-# with the --persist-tolerance flag. Default = F.
-# Available for crux bullseye
-exact-match=false
-
-# The lowest spectrum m/z to search. Default=0.0.
-# Available for tide-search.
-spectrum-min-mz=0.000000
-
-# Specify the column (for tab-delimited input) or tag (for XML input)
-# used as input to the q-value estimation procedure.
-# Used by assign-confidence.
-score=xcorr score
-
-# Use pi_0 value when calculating empirical q-values (--protein T must
-# be set).
-# Available for crux percolator if --protein T is set.
-protein-level-pi0=false
-
-# Include a decoy version of every peptide by shuffling or reversing the
-# target sequence or protein.
-# <string>=none|shuffle|peptide-reverse|protein-reverse.
-# Default=shuffle.
-# Available for tide-index
-decoy-format=shuffle
-
-# Include alternative averagine models in the analysis that  incorporate
-# additional atoms or isotopic enrichments.
-# Available for crux hardklor
-averagine-mod=
-
-# The number of PSMs per spectrum writen to the output  file(s). 
-# Default=5.
-# Available for tide-search and crux percolator
-top-match=5
-
-# Carries out a peptide-centric search.  For each peptide the top N
-# scoring spectra are reported,in contrary to the standard spectrum
-# centric-search where top N scoring peptide are reported. Default = F.
-# Available for tide-search.
-peptide-centric-search=false
-
-# Output tab-delimited text in the output directory.  Default=T
-# Available for tide-saerch, percolator, q-ranker, barista.
-txt-output=true
-
-# Penalty for mistake made on negative examples. Set by cross validation
-# if not specified or --c-pos not specified.
-# Available for crux percolator
-c-neg=0.000000
-
-# Output pepXML in the output directory.  Default=F
-# Available for tide-search, q-ranker, barista, percolator.
-pepxml-output=false
-
-# Include linear peptides in the database.  Default=T.
-# Available for crux search-for-xlinks program (Default=T).
-xlink-include-linears=true
-
-# Output PIN XML in the output directory.  Default=F
-# Available for tide-search.
-pin-output=false
-
-# Include a decoy version of every peptide by shuffling or reversing the
-# target sequence. 
-# <string>=none|reverse|protein-shuffle|peptide-shuffle. Use 'none' for
-# no decoys.  Default=peptide-shuffle.
-# 
-decoys=peptide-shuffle
-
-# Option for single SQT file mode defining the name pattern used for
-# decoy database. Default=decoy_.
-# Available for percolator
-decoy-prefix=decoy_
-
-# Set the minimum charge state to look for when analyzing a spectrum.
-# Default=1.
-# Available for crux hardklor
-min-charge=1
 
 # Print peptide sequence (T,F). Default=F.
 # Available only for crux-generate-peptides.
 output-sequence=false
 
-# Maximum number of modifications allowed on a crosslinked peptide 
+# Output SQT in the output directory.  Default=F
+# Available for tide-search.
+sqt-output=false
+
+# Output MZID in the output directory.  Default=F
+# Available for tide-search, percolator.
+mzid-output=false
+
+# Output PIN XML in the output directory.  Default=F
+# Available for tide-search.
+pin-output=false
+
+# Output POUT XML in the output directory.  Default=F
+# Available for percolator.
+pout-output=false
+
+# Output pepXML in the output directory.  Default=F
+# Available for tide-search, q-ranker, barista, percolator.
+pepxml-output=false
+
+# Output tab-delimited text in the output directory.  Default=T
+# Available for tide-saerch, percolator, q-ranker, barista.
+txt-output=true
+
+# Compute the Sp score for all candidate peptides.  Default=F
+# Available for tide-search.
+compute-sp=false
+
+# Compute p-values for the main score type. Default=F.
+# Currently only implemented for XCORR.
+compute-p-values=false
+
+# Search only select spectra specified as a single scan number or as a range as in x-y.  Default=search all.
+# The search range x-y is inclusive of x and y.
+scan-number=
+
+# Specify the width of the bins used to discretize the m/z axis.  Also used as tolerance for assigning ions.  Default=1.0005079 for monoisotopic mass or 1.0011413 for average mass.
+# Available for tide-search and xlink-assign-ions.
+mz-bin-width=1.000508
+
+# Specify the location of the left edge of the first bin used to discretize the m/z axis. Default=0.40
+# Available for tide-search.
+mz-bin-offset=0.400000
+
+# Include peaks +/- 1da around b/y ions in theoretical spectrum. default=F.
+# Available for the tide-search and search-for-xlinks commands.
+use-flanking-peaks=false
+
+# The lowest spectrum m/z to search. Default=0.0.
+# Available for tide-search.
+spectrum-min-mz=0.000000
+
+# The highest spectrum m/z to search. Default=no maximum.
+# Available for tide-search.
+spectrum-max-mz=1000000000.000000
+
+# Spectrum charge states to search. <string>=1|2|3|all. Default=all.
+# Used by tide-search to limit the charge states considered in the search.  With 'all' every spectrum will be searched and spectra with multiple charge states will be searched once at each charge state.  With 1, 2 ,or 3 only spectra with that that charge will be searched.
+spectrum-charge=all
+
+# Prefix added to output file names. Default=none. 
+# Used by crux percolator, crux compute-q-values, and crux q-ranker.
+fileroot=
+
+# Folder to which results will be written. Default='crux-output'.
+# Used by crux compute-q-values, and crux percolator.
+output-dir=crux-output
+
+# Include a decoy version of every peptide by shuffling or reversing the target sequence.  <string>=none|reverse|protein-shuffle|peptide-shuffle. Use 'none' for no decoys.  Default=peptide-shuffle.
+# 
+decoys=peptide-shuffle
+
+# Number of decoy peptides to search for every target peptide searched.Only valid for fasta searches when --decoys is not none. Default=1.
+# Use --decoy-location to control where they are returned (which file(s)) and --decoys to control how targets are randomized.
+num-decoys-per-target=1
+
+# Specify location of decoy search results. <string>=target-file|one-decoy-file|separate-decoy-files. Default=separate-decoy-files.
+# Applies when decoys is not none.  Use 'target-file' to mix target and decoy search results in one file. 'one-decoy-file' will return target results in one file and all decoys in another. 'separate-decoy-files' will create as many decoy files as num-decoys-per-target.
+decoy-location=separate-decoy-files
+
+# Number of psms per spectrum to score with xcorr after preliminary scoring with Sp. Set to 0 to score all psms with xcorr. Default=500.
+# For positive values, the Sp (preliminary) score acts as a filter; only high scoring psms go on to be scored with xcorr.  This saves some time.  If set to 0, all psms are scored with both scores. 
+max-rank-preliminary=500
+
+# The number of PSMs per spectrum writen to the output  file(s).  Default=5.
+# Available for tide-search and crux percolator
+top-match=5
+
+# When given a unsigned integer value seeds the random number generator with that value. When given the string "time" seeds the random number generator with the system time. Default = 1.
+# Available for all Crux commands.
+seed=1
+
+# Search peptides within +/- 'precursor-window' of the spectrum mass.  Definition of precursor window depends upon precursor-window-type. Default=3.0.
+# Available for tide-search and crux-generate-peptides.
+precursor-window=3.000000
+
+# Which isotopes to use in calculating fragment ion mass. <string>=average|mono. Default=mono.
+# Used by crux-predict-peptide-ions.
+fragment-mass=mono
+
+# The minimum number of modifications that can be applied to a single peptide.  Default=0.
+# Available for tide-index.
+min-mods=0
+
+# The maximum number of modifications that can be applied to a single peptide.  Default=no limit.
+# Available for tide-index.
+max-mods=255
+
+# The maximum number of modified amino acids that can appear in one peptide.  Each aa can be modified multiple times.  Default=no limit.
+# 
+max-aas-modified=255
+
+# Print the masses of modified sequences in one of three ways 'mod-only', 'total' (residue mass plus modification), or 'separate' (for multiple mods to one residue): Default 'mod-only'.
+# Available for generate-peptides.
+mod-mass-format=mod-only
+
+# Set the precision for scores written to sqt and text files. Default=8.
+# Available from parameter file for percolator and compute-q-values.
+precision=8
+
+# Set the precision for masses and m/z written to sqt and .txt files. Default=4
+# Available from parameter file for all commands.
+mass-precision=4
+
+# Show search progress by printing every n spectra searched.  Default=1000.
+# Set to 0 to show no search progress.  Available for tide-search
+print-search-progress=1000
+
+# Optional file into which psm features are printed. Default=F.
+# Available for percolator and q-ranker.  File will be named <fileroot>.percolator.features.txt or <fileroot>.qranker.features.txt.
+feature-file=false
+
+# output protein level probability. Default=F
+# Available for crux percolator
+protein=false
+
+# Include decoys (PSMs, peptides, and/or proteins) in the xml-output. Only available if -X is used. Default=F
+# Available for crux percolator
+decoy-xml-output=false
+
+# Option for single SQT file mode defining the name pattern used for decoy database. Default=decoy_.
+# Available for percolator
+decoy-prefix=decoy_
+
+# Penalty for mistakes made on positive examples. Set by cross validation if not specified. Default=cross-validate 
+# Available for crux percolator
+c-pos=0.010000
+
+# Penalty for mistake made on negative examples. Set by cross validation if not specified or --c-pos not specified.
+# Available for crux percolator
+c-neg=0.000000
+
+# False discovery rate threshold for evaluating best cross validation result and the reported end result. Default is 0.01.
+# Availble for crux percolator.
+test-fdr=0.010000
+
+# Fraction of the negative data set to be used as train set when only providing one negative set, remaining examples will be used as test set.Default 0.6
+# Available for crux percolator.
+train-ratio=0.600000
+
+# Output final weights to percolator.target.weights.txt.Default=T.
+# Available for crux percolator
+output-weights=false
+
+# Read initial weights from the given file (one per line). Default do not read initial weights. Default=F
+# Available for crux percolator 
+input-weights=
+
+# The most informative feature given as the feature name.  The name can be preceded by a hyphen (e.g., "-XCorr") to indicate that a lower value is better. By default, Percolator will select the feature that produces the largest set of target PSMs at a specified FDR threshold (cf. --train-fdr).
+# Available for crux percolator
+default-direction=
+
+# Use unit normalization [0-1] instead of standard deviation normalization
+# Available for crux percolator.
+unitnorm=false
+
+# False discovery rate threshold to define positive examples in training. Set by cross validation if 0. Default is 0.01.
+# Available for crux percolator
+train-fdr=0.010000
+
+# Probability with which a present protein emits an associated peptide (--protein T must be set). Set by grid search if not specified.
+# Available for crux percolator if --protein T is set.
+alpha=0.000000
+
+# Probability of the creation of a peptide from noise (--protein T must be set). Set by grid search if not specified.
+# Available for crux percolator if --protein T is set.
+beta=0.000000
+
+# Prior probability of that a protein is present in the sample (--protein T must be set). Set by grid search if not specified.
+# Available for crux percolator if --protein T is set.
+gamma=0.000000
+
+# Measure performance on test set each iteration
+# Available for crux percolator.
+test-each-iteration=false
+
+# Override error check and do not fall back on default score vector in case of suspect score vector.
+# Available for crux percolator.
+static-override=false
+
+# Using retention time features calculated as in Klammer et al.
+# Available for crux percolator
+klammer=false
+
+# Include description of correct features.
+# Avilable for crux percolator
+doc=-1
+
+# Do not remove redundant peptides, keep all PSMs and exclude peptide level probability.
+# Available for crux percolator
+only-psms=false
+
+# Treat ties as if it were one protein 
+# Available for crux percolator.
+allow-protein-group=false
+
+# Use pi_0 value when calculating empirical q-values (--protein T must be set).
+# Available for crux percolator if --protein T is set.
+protein-level-pi0=false
+
+# Proteins with same probabilities will be grouped (--protein T must be set).
+# Available for crux percolator if --protein T is set.
+group-proteins=false
+
+# Output empirical q-values from target-decoy analysis (--protein T must be set).
+# Available for crux percolator if --protein T is set.
+empirical-protein-q=false
+
+# Peptides with low score will not be pruned before calculating protein probabilities (--protein T must be set).
+# Available for crux percolator if --protein T is set.
+no-prune-proteins=false
+
+# Setting deepness 0, 1, or 2 from low depth to high depth (less computational time) of the grid search for estimation Alpha,Beta and Gamma parameters for fido (--protein T must be set). Default value is 0.
+# Available for crux percolator if --protein T is set.
+deepness=0
+
+# A spectrum records file generated by a previous run of crux tide-search using the store-spectra parameter.
+# Available for read-spectrumrecords
+spectrum records file=
+
+# The name of the file from which to parse the fragmentation spectra, in any of the file formats supported by ProteoWizard. Alternatively, the argument may be a binary spectrum file produced by a previous run of crux tide-search using the store-spectra parameter.
+# Available for tide-search
+tide spectra file=
+
+# A directory containing a database index created by a previous run of crux tide-index.
+# Available for tide-search
+tide database index=
+
+# Include a decoy version of every peptide by shuffling or reversing the target sequence or protein. <string>=none|shuffle|peptide-reverse|protein-reverse. Default=shuffle.
+# Available for tide-index
+decoy-format=shuffle
+
+# Use monoisotopic precursor masses rather than average mass for precursor. Default=T.
+# Available for tide-index
+monoisotopic-precursor=true
+
+# Expression for static and variable mass modifications to include. Specify a comma-separated list of modification sequences of the form: C+57.02146,2M+15.9949,1STY+79.966331,...
+# Available for tide-index
+mods-spec=C+57.02146
+
+# Specifies C-terminal static and variable mass modifications on peptides. Specify a comma-separated list of C-terminal modification sequences of the form: X+21.9819
+# Available for tide-index
+cterm-peptide-mods-spec=
+
+# Specifies N-terminal static and variable mass modifications on peptides. Specify a comma-separated list of N-terminal modification sequences of the form: 1E-18.0106,C-17.0265
+# Available for tide-index
+nterm-peptide-mods-spec=
+
+# Specifies C-terminal static and variable mass modifications on proteins. Specify a comma-separated list of C-terminal protein modification sequences of the form: ,...
+# Available for tide-index
+cterm-protein-mods-spec=
+
+# Specifies N-terminal static and variable mass modifications on proteins. Specify a comma-separated list of N-terminal protein modification sequences of the form: ,...
+# Available for tide-index
+nterm-protein-mods-spec=
+
+# Specify the name of the file where the binarized fragmentation spectra will be stored.
+# Available for tide-search
+store-spectra=
+
+# Uses exact P-value calculation for peptide-spectrum-matching. Default=F.
+# Available for tide-search
+exact-p-value=false
+
+# Output target and decoy PSMs into a single file.
+# Available for tide-search
+concat=false
+
+# Remove peaks around the precursor m/z.
+# Available for tide-search.
+remove-precursor-peak=false
+
+# +- m/z tolerance for precursor peak removal. Default = 1.5.
+# Available for print-processed spectra and tide-search.
+remove-precursor-tolerance=1.500000
+
+# This parameter controls whether Tide will automatically remove the N-terminal methionine from a sequence entry.
+# Available for tide-index.
+clip-nterm-methionine=false
+
+# Controls whether neutral loss ions are considered in the search. Two types of neutral losses are included and are applied only to singly charged b- and y-ions: loss of ammonia (NH3, 17.0086343 Da) and H2O (18.0091422). Each neutral loss peak has intensity 1/5 of the primary peak
+# Available for tide-search.
+use-neutral-loss-peaks=false
+
+# he maximum charge state of a spectra to consider in search. Default=5.
+#  Available for tide-search.
+max-precursor-charge=5
+
+# Carries out a peptide-centric search.  For each peptide the top N scoring spectra are reported,in contrary to the standard spectrum centric-search where top N scoring peptide are reported. Default = F.
+# Available for tide-search.
+peptide-centric-search=false
+
+# Q-ranker analysis begins with a pre-processsing step that creates a set of lookup tables which are then used during training. Normally, these lookup tables are deleted at the end of the Q-ranker analysis, but setting this option to T prevents the deletion of these tables. Subsequently, the Q-ranker analysis can be repeated more efficiently by specifying the --re-run option. Default = F.
+# Available for q-ranker and barista.
+skip-cleanup=false
+
+# Q-ranker uses enriched feature set derived from the spectra in ms2 files. It can be forced to use minimal feature set by setting the --use-spec-features option to F. Default T.
+# Available for q-ranker and barista.
+use-spec-features=true
+
+# Re-run a previous Q-ranker analysis using a previously computed set of lookup tables.
+# Available for q-ranker and barista.
+re-run=
+
+# If the target and decoy searches were run separately, rather than using a concatenated database, then Q-ranker will assume that the database search results provided as a required argument are from the target database search. This option then allows the user to specify the location of the decoy search results. Like the required arguments, these search results can be provided as a single file, a list of files or a directory. However, the choice (file, list or directory) must be consistent for the MS2 files and the target and decoy tab-delimited files. Also, if the MS2 and tab-delimited files are provided in directories, then Q-ranker will use the MS2 filename (foo.ms2) to identify corresponding target and decoy tab-delimited files with names like foo*.target.txt and foo*.decoy.txt. This naming convention allows the target and decoy txt files to reside in the same directory.
+# Available for q-ranker and barista.
+separate-searches=
+
+# Search result can be as a file or a list of files. This option allows users to specify the search results are provided as a list of files by setting the --list-of-files option to T. Default= false.
+# Available for barista.
+list-of-files=false
+
+# Specifies whether to do optimization at the protein, peptide or psm level. Default = protein.
+# Available for barista.
+optimization=protein
+
+# Specify the semantics of the score, i.e., whether a smaller value implies a better match or vice versa.  Default is false. Specify this parameter T for "exact p-value" and F for "xcorr score". The default is F. 
+# Used by assign-confidence.
+smaller-is-better=false
+
+# Specify the column (for tab-delimited input) or tag (for XML input) used as input to the q-value estimation procedure. Default "xcorr score".
+# Used by assign-confidence.
+score=xcorr score
+
+# Specify the q-value calculation procedure to either target-decoy competition (tcd) or mix-max (mix-max). Default=tdc.
+# Used by assign-confidence.
+estimation-method=tdc
+
+# The ion series to predict (b,y,by,bya). Default='by' (both b and y ions).
+# Only available for crux-predict-peptide-ions.  Set automatically to 'by' for searching.
+primary-ions=by
+
+# Predict the precursor ions, and all associated ions (neutral-losses, multiple charge states) consistent with the other specified options. (T,F) Default=F.
+# Only available for crux-predict-peptide-ions.
+precursor-ions=false
+
+# Predict the given number of isotope peaks (0|1|2). Default=0.
+# Only available for crux-predict-peptide-ion.  Automatically set to 0 for Sp scoring and 1 for xcorr scoring.
+isotope=0
+
+# Predict flanking peaks for b and y ions (T,F). Default=F.
+# Only available for crux-predict-peptide-ion.
+flanking=false
+
+# Predict theoretical ions up to max charge state (1,2,...,6) or up to the charge state of the peptide (peptide).  If the max-ion-charge is greater than the charge state of the peptide, then the max is the peptide charge. Default='peptide'.
+# Available for predict-peptide-ions and search-for-xlinks. Set to 'peptide' for search.
+max-ion-charge=peptide
+
+# Predict peaks with the given maximum number of nh3 neutral loss modifications. Default=0.
+# Only available for crux-predict-peptide-ions.
+nh3=0
+
+# Predict peaks with the given maximum number of h2o neutral loss modifications. Default=0.
+# Only available for crux-predict-peptide-ions.
+h2o=0
+
+# MS2 file corresponding to the psm file. Required for SIN.
+# Available for spectral-counts with measure=SIN.
+input-ms2=
+
+# What type of threshold to use when parsing matches none|qvalue|custom. Default=qvalue.
+# used for crux spectral-counts
+threshold-type=qvalue
+
+# The threshold to use for filtering matches. Default=0.01.
+# Available for spectral-counts.  All PSMs with higher (or lower) than this will be ignored.
+threshold=0.010000
+
+# Direction of threshold for matches.  If true, then all matches whose value is <= threshold will be accepted.  If false, then all matches >= threshold will be accepted.  Used with custom-threshold parameter (default True).
+# Available for spectral-counts.
+custom-threshold-min=true
+
+# Use a name of custom threshold rather than (default NULL)
+# Available for spectral-counts.
+custom-threshold-name=
+
+# Type of analysis to make on the match results: (RAW|NSAF|dNSAF|SIN|EMPAI). Default=NSAF. 
+# Available for spectral-counts.  RAW is raw counts, NSAF is Normalized Spectral Abundance Factor, dNSAF is Distributed Spectral Abundance Factor, SIN is Spectral Index Normalized and EMPAI is Exponentially Modified Protein Abundance Index
+measure=NSAF
+
+# Ignore peptides with multiple mappings to proteins (T,F). Default=F.
+# Available for spectral-counts.
+unique-mapping=false
+
+# Quantification at protein or peptide level (protein,peptide). Default=protein.
+# Available for spectral-counts and either NSAF and SIN.
+quant-level=protein
+
+# Perform parsimony analysis on the proteins and report a parsimony rank column in output file. Default=none. Can be <string>=none|simple|greedy
+# Available for spectral-counts.
+parsimony=none
+
+# Use mzid's passThreshold attribute to filter matches. Default false.
+# Used when parsing mzIdentML files.
+mzid-use-pass-threshold=false
+
+# Change the mass of all amino acids 'A' by the given amount.
 # Default=0.
+A=0.000000
+
+# Change the mass of all amino acids 'C' by the given amount.
+# Default=57.0215.
+C=57.021465
+
+# Change the mass of all amino acids 'D' by the given amount.
+# Default=0.
+D=0.000000
+
+# Change the mass of all amino acids 'E' by the given amount.
+# Default=0.
+E=0.000000
+
+# Change the mass of all amino acids 'F' by the given amount.
+# Default=0.
+F=0.000000
+
+# Change the mass of all amino acids 'G' by the given amount.
+# Default=0.
+G=0.000000
+
+# Change the mass of all amino acids 'H' by the given amount.
+# Default=0.
+H=0.000000
+
+# Change the mass of all amino acids 'I' by the given amount.
+# Default=0.
+I=0.000000
+
+# Change the mass of all amino acids 'K' by the given amount.
+# Default=0.
+K=0.000000
+
+# Change the mass of all amino acids 'L' by the given amount.
+# Default=0.
+L=0.000000
+
+# Change the mass of all amino acids 'M' by the given amount.
+# Default=0.
+M=0.000000
+
+# Change the mass of all amino acids 'N' by the given amount.
+# Default=0.
+N=0.000000
+
+# Change the mass of all amino acids 'P' by the given amount.
+# Default=0.
+P=0.000000
+
+# Change the mass of all amino acids 'Q' by the given amount.
+# Default=0.
+Q=0.000000
+
+# Change the mass of all amino acids 'R' by the given amount.
+# Default=0.
+R=0.000000
+
+# Change the mass of all amino acids 'S' by the given amount.
+# Default=0.
+S=0.000000
+
+# Change the mass of all amino acids 'T' by the given amount.
+# Default=0.
+T=0.000000
+
+# Change the mass of all amino acids 'V' by the given amount.
+# Default=0.
+V=0.000000
+
+# Change the mass of all amino acids 'W' by the given amount.
+# Default=0.
+W=0.000000
+
+# Change the mass of all amino acids 'Y' by the given amount.
+# Default=0.
+Y=0.000000
+
+# Print to stdout additional information about the spectrum.
+# Avaliable only for crux-get-ms2-spectrum.  Does not affect contents of the output file.
+stats=false
+
+# Print the theoretical spectrum
+# Available for xlink-predict-peptide-ions (Default=F).
+print-theoretical-spectrum=false
+
+# List of integers of isotopic masses to search
+# Used for crux search-for-xlinks
+isotope-windows=0
+
+# Include linear peptides in the database.  Default=T.
+# Available for crux search-for-xlinks program (Default=T).
+xlink-include-linears=true
+
+# Include dead-end peptides in the database.  Default=T.
+# Available for crux search-for-xlinks program.
+xlink-include-deadends=true
+
+# Include self-loop peptides in the database.  Default=T.
+# Available for crux search-for-xlinks program.
+xlink-include-selfloops=true
+
+# Search decoy-peptides within +/-  'mass-window-decoy' of the spectrum mass.  Default=20.0.
+# Available for crux search-for-xlinks. 
+precursor-window-weibull=20.000000
+
+# Window type to use for selecting decoy peptides from precursor mz. <string>=mass|mz|ppm. Default=mass.
+# Available for crux search-for-xlinks
+precursor-window-type-weibull=mass
+
+# Minimum number of points for estimating the Weibull parameters.  Default=4000.
+# Available for crux search-for-xlinks
+min-weibull-points=4000
+
+# Maximum number of modifications allowed on a crosslinked peptide. Default=0.
 # Available for crux search-for-xlinks
 max-xlink-mods=0
 
-# Print the masses of modified sequences in one of three ways
-# 'mod-only', 'total' (residue mass plus modification), or 'separate'
-# (for multiple mods to one residue): Default 'mod-only'.
-# Available for generate-peptides.
-mod-mass-format=mod-only
+# Choose the algorithm for analyzing combinations of multiple peptide or protein isotope distributions. (basic | fewest-peptides | fast-fewest-peptides | fewest-peptides-choice | fast-fewest-peptides-choice) Default=fast-fewest-peptides.
+# Available for crux hardklor
+hardklor-algorithm=fast-fewest-peptides
+
+# Choose the charge state determination method. (B|F|P|Q|S). Default=Q.
+# Available for crux hardklor
+cdm=Q
+
+# Set the minimum charge state to look for when analyzing a spectrum. Default=1.
+# Available for crux hardklor
+min-charge=1
+
+# Set the maximum charge state to look for when analyzing a spectrum. Default=5.
+# Available for crux hardklor
+max-charge=5
+
+# Set the correlation threshold [0,1.0] to accept a predicted isotope distribution.  Default=0.85
+# Available for crux hardklor
+corr=0.850000
+
+# Set the depth of combinatorial analysis. Default 3.
+# Available for crux hardklor
+depth=3
+
+# Reports peptide intensities as the distribution area. Default false.
+# Available for crux hardklor
+distribution-area=false
+
+# Include alternative averagine models in the analysis that  incorporate additional atoms or isotopic enrichments.
+# Available for crux hardklor
+averagine-mod=
+
+# Set a filter for mzXML files. Default=none
+# Available for crux hardklor
+mzxml-filter=none
+
+# Specify "no base" averagine. Only modified averagine models will be used in the analysis. Default = F 
+# Available for crux hardklor
+no-base=false
+
+# Set the maximum number of peptides or proteins that are estimated from the peaks found in a spectrum segment. The default value is 10.
+# Available for crux hardklor
+max-p=10
+
+# Set the resolution of the observed spectra at m/z 400. Used in conjunction with --instrument The default is 100000.
+# Available for crux hardklor
+resolution=100000.000000
+
+# Are spectra centroided?  Default false.
+# Available for crux hardklor
+centroided=false
+
+# Type of instrument (fticr|orbitrap|tof|qit) on which the data was collected. Used in conjuction with --resolution. The default is fticr.
+# Available for crux hardklor
+instrument=fticr
+
+# Set the sensitivity level. There are four levels, 0 (low), 1 (moderate), 2 (high), and 3 (max). The default value is 2.
+# Available for crux hardklor
+sensitivity=2
+
+# Set the signal-to-noise threshold. Any integer or decimal value greater than or equal to 0.0 is valid. The default value is 1.0.
+# Available for crux hardklor
+signal-to-noise=1.000000
+
+# Set the signal-to-noise window length (in m/z). Because noise may be non-uniform across a spectra, this value adjusts the segment size considered when calculating a signal-over-noise ratio. The default value is 250.0.
+# Available for crux hardklor
+sn-window=250.000000
+
+# If true, Hardklor will calculate the local noise levels across the spectrum using --sn-window, then select a floor of this set of noise levels to apply to the whole spectrum.
+# Available for crux hardklor
+static-sn=true
+
+# Restrict analysis to only a small window in each segment ( (min-max) in m/z). The user must specify the starting and ending m/z values between which the analysis will be performed. By default the whole spectrum is analyzed.
+# Available for crux hardklor
+mz-window=
+
+# Set the maximum width of any set of peaks in a spectrum when computing the results (in m/z). Thus, if the value was 5.0, then sets of peaks greater than 5 m/z are divided into smaller sets prior to analysis. The default value is 4.0.
+# Available for crux hardklor
+max-width=4.000000
+
+# Ignore peptides that persist for this length. The unit of time is whatever unit is used in your data file (usually minutes). These peptides are considered contaminants. Default = 2.0.
+# Available for crux bullseye
+max-persist=2.000000
+
+# Require an exact match to the precursor ion. Rather than use wide precursor boundaries, this flag forces Bullseye to match precursors to the base isotope peak identified in Hardklor. The tolerance is set with the --persist-tolerance flag. Default = F.
+# Available for crux bullseye
+exact-match=false
+
+# Gap size tolerance when checking for peptides across consecutive MS1 scans. Used in conjunction with --scan-tolerance. Default = 1.
+# Available for crux bullseye
+gap-tolerance=1
+
+# The minimum mass of peptides to consider. Default=600.
+# Available from command line or parameter file for crux bullseye
+bullseye-min-mass=600.000000
+
+# The maximum mass of peptides to consider. Default=8000.
+# Available from command line or parameter file for crux bullseye
+bullseye-max-mass=8000.000000
+
+# Set the tolerance (+/-ppm) for exact match searches. Default = 10.0.
+# Available for crux bullseye
+exact-tolerance=10.000000
+
+# Set the tolerance (+/-ppm) for finding persistent peptides. Default = 10.0.
+# Available for crux bullseye
+persist-tolerance=10.000000
+
+# Number of consecutive MS1 scans over which a peptide must be observed to be considered real. Gaps in persistence are allowed when setting --gap-tolerance. Default = 3.
+# Available for crux bullseye
+scan-tolerance=3
+
+# Set the tolerance (+/-units) around the retention time over which a peptide can be matched to the MS/MS spectrum. The unit of time is whatever unit is used in your data file (usually minutes). Default = 0.5.
+# Available for crux bullseye
+retention-tolerance=0.500000
+
+# The format to write the output spectra to. By default, the spectra will be output in the same format as the MS/MS input.
+# Available for crux bullseye
+spectrum-format=
+
+# Sort in ascending order.  Otherwise, descending. Default: True.
+# Available for sort-by-column
+ascending=true
+
+# Print the header line of the tsv file. Default=T.
+# Available for crux extract-columns and extract-rows
+header=true
+
+# Specifies the data type the column contains (int|real|string) Default: string
+# Available for crux extract-rows
+column-type=string
+
+# Specifies the operator that is used to compare an entry in the specified column to the value given on the command line.  (eq|gt|gte|lt|lte|neq). Default: eq.
+# Available for crux extract-rows
+comparison=eq
 
 # Specify a variable modification to apply to peptides.  <mass
 # change>:<aa list>:<max per peptide>:<prevents cleavage>:<prevents
@@ -1035,428 +792,377 @@ cmod=NO MODS
 #################
 #Comet Parameters
 #################
-# added to D - avg. 115.0874, mono. 115.02694
-# option for Comet
-add_D_aspartic_acid=0.000000
-
-# Specifies the total/maximum number of residues that can be modified in
-# a peptide
-# option for Comet
-max_variable_mods_in_peptide=5
-
-# Specify a static modification to the c-terminal peptide of each
-# protein
-# option for Comet
-add_Cterm_protein=0.000000
-
-# <string>= ALL|CID|ECD|ETD|PQD|HCD|IRMPD. Default=All
-# option for Comet. 
-activation_method=ALL
-
-# added to E - avg. 129.1140, mono. 129.04259
-# option for Comet
-add_E_glutamic_acid=0.000000
-
-# Specifies the prefix of the protein names that indicates a decoy.
-# Default = decoy_.
-#  Available for q-ranker and barista.
-decoy_prefix=decoy_
-
-# 0=no, 1= yes to consider NH3/H2O neutral loss peak
-# option for Comet only
-use_NL_ions=1
-
-# 0=no, 1=yes for out files only
-# option for Comet.
-show_fragment_ions=0
-
-# added to X - avg.   0.0000, mono.   0.00000
-# option for Comet
-add_X_user_amino_acid=0.000000
-
-# for iTRAQ/TMT type data; will clear out all peaks in the specified m/z
-# range
-# option for Comet
-clear_mz_range=0.0 0.0
-
-# Sample enzyme which is possibly different than the one applied to the
-# search.Used to calculate NTT & NMC in pepXML output (default=1 for
-# trypsin).
-# option for Comet. 
-sample_enzyme_number=1
-
-# added to U - avg.   0.0000, mono.   0.00000
-# option for Comet
-add_U_user_amino_acid=0.000000
-
-# -1=all peptides, 0=protein terminus, 1-N = maximum offset from
-# C-terminus
-# option for Comet
-variable_C_terminus_distance=-1
-
-# 0=no, 1=yes  write tab-delimited text file
-# option for Comet only (default 1)
-output_txtfile=1
-
-# Specify a static modification to the n-terminus of all peptides
-# option for Comet
-add_Nterm_peptide=0.000000
-
-# added to C - avg. 103.1429, mono. 103.00918
-# option for Comet
-add_C_cysteine=57.021464
-
-# Specifiy a variable modification to peptide's c-terminusWorks in
-# conjunction with variable_c_terminus_distance
-# option for Comet
-variable_C_terminus=0.000000
-
-# Specifiy a static modification to the c-terminus of all peptides
-# option for Comet
-add_Cterm_peptide=0.000000
-
-# set maximum fragment charge state to analyze (allowed max 5)
-# option for Comet
-max_fragment_charge=3
-
 # 0=no (default), 1=concatenated search, 2=separate search
 # option for Comet only
 decoy_search=0
 
-# 0=off, 1=on -1/0/1/2/3 (standard C13 error), 2= -8/-4/0/4/8 (for +4/+8
-# labeling)
+# 0=poll CPU to set num threads; else specify num threads directly (max 32)
 # option for Comet only
-isotope_error=0
+num_threads=0
 
-# 0=default peak shape, 1=M peak only
+# specifies the suffix string that is appended to the base output name for the pep.xml, pin.xml, txt and sqt output files.Default = ""
+# Available for comet.
+output_suffix=
+
+# Controls the mass tolerance value.  The mass tolerance is set at +/- the specified number i.e. an entered value of "1.0" applies a -1.0 to +1.0 tolerance. The units of the mass tolerance is controlled by the parameter "peptide_mass_units". 
 # option for Comet only
-theoretical_fragment_ions=1
-
-# Specify a static modification to the n-terminal peptide of each
-# protein
-# option for Comet
-add_Nterm_protein=0.000000
-
-# for '.out' file output only, 0=search everything again (default),
-# 1=don't search if .out exists
-# option for Comet
-skip_researching=1
-
-# added to H - avg. 137.1393, mono. 137.05891
-# option for Comet
-add_H_histidine=0.000000
-
-# added to J - avg.   0.0000, mono.   0.00000
-# option for Comet
-add_J_user_amino_acid=0.000000
-
-# choose from list at end of this params file
-# option for Comet only
-search_enzyme_number=1
-
-# minimum intensity value to read in
-# option for comet. 
-minimum_intensity=0.000000
-
-# MS level to analyze, valid are levels 2 (default) or 3
-# option for Comet. 
-ms_level=2
-
-# 0=proteinDB, 1-6, 7=forward three, 8=reverse three, 9=all six
-# option for Comet
-nucleotide_reading_frame=0
-
-# 0=average masses, 1=monoisotopic masses
-# option for Comet only
-mass_type_fragment=1
-
-# added to F - avg. 147.1739, mono. 147.06841
-# option for Comet
-add_F_phenylalanine=0.000000
-
-# 0=no, 1=yes  write .out files
-# option for Comet only
-output_outfiles=0
-
-# 0=MH+ (default), 1=precursor m/z
-# option for Comet only
-precursor_tolerance_type=0
-
-# 0=no, 1=yes, 2=all charge reduced precursor peaks (for ETD)
-# option for Comet. 
-remove_precursor_peak=0
-
-# added to S - avg.  87.0773, mono.  87.03203
-# option for Comet
-add_S_serine=0.000000
+peptide_mass_tolerance=3.000000
 
 # 0=amu, 1=mmu, 2=ppm
 # option for Comet only
 peptide_mass_units=0
 
-# binning to use on fragment ions
-# option for Comet only
-fragment_bin_tol=1.000507
-
-# added to G - avg.  57.0513, mono.  57.02146
-# option for Comet
-add_G_glycine=0.000000
-
-# offset position to start the binning (0.0 to 1.0)
-# option for Comet only
-fragment_bin_offset=0.400000
-
-# 0=no, 1=yes  write pep.xml file
-# option for Comet only
-output_pepxmlfile=1
-
-# num peptide results to show
-# option for Comet.
-num_output_lines=5
-
-# Controls whether or not A-ions are considered in the search (0 - no, 1
-# - yes)
-# option for Comet only
-use_A_ions=0
-
-# valid values are 1 (semi-digested), 2 (fully digested, default), 8
-# N-term, 9 C-term
-# option for Comet only
-num_enzyme_termini=2
-
 # 0=average masses, 1=monoisotopic masses
 # option for Comet only
 mass_type_parent=1
 
-# added to N - avg. 114.1026, mono. 114.04293
-# option for Comet
-add_N_asparagine=0.000000
-
-# added to Z - avg.   0.0000, mono.   0.00000
-# option for Comet
-add_Z_user_amino_acid=0.000000
-
-# MH+ peptide mass range to analyze
-# option for Comet.
-digest_mass_range=600.0 5000.0
-
-# 0=leave sequences as-is; 1=also consider sequence w/o N-term
-# methionine
-# option for Comet
-clip_nterm_methionine=0
-
-# start and scan scan range to search; 0 as 1st entry ignores parameter
-# option for Comet
-scan_range=0 0
-
-# Controls whether or not internal sparse matrix data representation is
-# used.
+# 0=average masses, 1=monoisotopic masses
 # option for Comet only
-use_sparse_matrix=0
+mass_type_fragment=1
 
-# specifies the suffix string that is appended to the base output name
-# for the pep.xml, pin.xml, txt and sqt output files.Default = ""
-# Available for comet.
-output_suffix=
+# 0=MH+ (default), 1=precursor m/z
+# option for Comet only
+precursor_tolerance_type=0
 
-# added to V - avg.  99.1311, mono.  99.06841
-# option for Comet
-add_V_valine=0.000000
+# 0=off, 1=on -1/0/1/2/3 (standard C13 error), 2= -8/-4/0/4/8 (for +4/+8 labeling)
+# option for Comet only
+isotope_error=0
 
-# added to T - avg. 101.1038, mono. 101.04768
-# option for Comet
-add_T_threonine=0.000000
+# choose from list at end of this params file
+# option for Comet only
+search_enzyme_number=1
 
-# added to Y - avg. 163.0633, mono. 163.06333
-# option for Comet
-add_Y_tyrosine=0.000000
-
-# added to W - avg. 186.0793, mono. 186.07931
-# option for Comet
-add_W_tryptophan=0.000000
-
-# added to O - avg. 132.1610, mono  132.08988
-# option for Comet
-add_O_ornithine=0.000000
-
-# 0=no, 1=yes to replace Sp with expect in out & sqt
-# option for Comet.
-print_expect_score=1
+# valid values are 1 (semi-digested), 2 (fully digested, default), 8 N-term, 9 C-term
+# option for Comet only
+num_enzyme_termini=2
 
 # maximum value is 5; for enzyme search
 # option for Comet only
 allowed_missed_cleavage=2
 
-# +- Da tolerance for precursor removal
-# option for Comet. 
-remove_precursor_tolerance=1.500000
+# binning to use on fragment ions
+# option for Comet only
+fragment_bin_tol=1.000507
 
-# Controls whether or not B-ions are considered in the search (0 - no, 1
-# - yes)
+# offset position to start the binning (0.0 to 1.0)
+# option for Comet only
+fragment_bin_offset=0.400000
+
+# 0=default peak shape, 1=M peak only
+# option for Comet only
+theoretical_fragment_ions=1
+
+# Controls whether or not A-ions are considered in the search (0 - no, 1 - yes)
+# option for Comet only
+use_A_ions=0
+
+# Controls whether or not B-ions are considered in the search (0 - no, 1 - yes)
 # option for Comet only
 use_B_ions=1
 
-# added to L - avg. 113.1576, mono. 113.08406
-# option for Comet
-add_L_leucine=0.000000
+# Controls whether or not C-ions are considered in the search (0 - no, 1 - yes)
+# option for Comet only
+use_C_ions=0
 
-# added to M - avg. 131.1961, mono. 131.04048
-# option for Comet
-add_M_methionine=0.000000
-
-# A full or relative path to the sequence database, in FASTA format, to
-# search. Example databases include RefSeq or UniProt.  Database can
-# contain amino acid sequences or nucleic acid sequences. If sequences
-# are amino acid sequences, set the parameter "nucleotide_reading_frame
-# = 0". If the sequences are nucleic acid sequences, you must instruct
-# Comet to translate these to amino acid sequences. Do this by setting
-# nucleotide_reading_frame" to a value between 1 and 9. 
-# Comet only
-database_name=./../test/smoke-tests/test.fasta
-
-# minimum num. of peaks in spectrum to search (default 10)
-# option for Comet
-minimum_peaks=10
-
-# Controls whether or not X-ions are considered in the search (0 - no, 1
-# - yes)
+# Controls whether or not X-ions are considered in the search (0 - no, 1 - yes)
 # option for Comet only
 use_X_ions=0
 
-# Controls whether or not Z-ions are considered in the search (0 - no, 1
-# - yes)
+# Controls whether or not Y-ions are considered in the search (0 - no, 1 - yes)
+# option for Comet only
+use_Y_ions=1
+
+# Controls whether or not Z-ions are considered in the search (0 - no, 1 - yes)
 # option for Comet only
 use_Z_ions=0
 
-# added to A - avg.  71.0779, mono.  71.03711
-# option for Comet
-add_A_alanine=0.000000
-
-# set maximum precursor charge state to analyze (allowed max 9)
-# option for Comet
-max_precursor_charge=6
-
-# number of search hits to store internally
-# option for Comet.
-num_results=50
-
-# 0=poll CPU to set num threads; else specify num threads directly (max
-# 32)
+# 0=no, 1= yes to consider NH3/H2O neutral loss peak
 # option for Comet only
-num_threads=0
+use_NL_ions=1
 
-# -1=all peptides, 0=protein terminus, 1-N = maximum offset from
-# N-terminus
-# option for Comet
-variable_N_terminus_distance=-1
-
-# max. # of spectra to search at a time; 0 to search the entire scan
-# range in one loop
-# option for Comet
-spectrum_batch_size=0
-
-# Specifiy a variable modification to peptide's c-terminusWorks in
-# conjunction with variable_c_terminus_distance
-# option for Comet
-variable_N_terminus=0.000000
+# Controls whether or not internal sparse matrix data representation is used.
+# option for Comet only
+use_sparse_matrix=0
 
 # 0=no, 1=yes  write sqt file
 # option for Comet only
 output_sqtfile=0
 
-# added to K - avg. 128.1723, mono. 128.09496
+# 0=no, 1=yes  write pep.xml file
+# option for Comet only
+output_pepxmlfile=1
+
+# 0=no, 1=yes  write tab-delimited text file
+# option for Comet only (default 1)
+output_txtfile=1
+
+# 0=no, 1=yes  write .out files
+# option for Comet only
+output_outfiles=0
+
+# 0=no, 1=yes to replace Sp with expect in out & sqt
+# option for Comet.
+print_expect_score=1
+
+# num peptide results to show
+# option for Comet.
+num_output_lines=5
+
+# 0=no, 1=yes for out files only
+# option for Comet.
+show_fragment_ions=0
+
+# Sample enzyme which is possibly different than the one applied to the search.Used to calculate NTT & NMC in pepXML output (default=1 for trypsin).
+# option for Comet. 
+sample_enzyme_number=1
+
+# start and scan scan range to search; 0 as 1st entry ignores parameter
 # option for Comet
-add_K_lysine=0.000000
+scan_range=0 0
+
+# precursor charge range to analyze; does not override mzXML charge; 0 as 1st entry ignores parameter
+# option for Comet.
+precursor_charge=0 0
+
+# MS level to analyze, valid are levels 2 (default) or 3
+# option for Comet. 
+ms_level=2
+
+# <string>= ALL|CID|ECD|ETD|PQD|HCD|IRMPD. Default=All
+# option for Comet. 
+activation_method=ALL
+
+# MH+ peptide mass range to analyze
+# option for Comet.
+digest_mass_range=600.0 5000.0
+
+# number of search hits to store internally
+# option for Comet.
+num_results=50
+
+# for '.out' file output only, 0=search everything again (default), 1=don't search if .out exists
+# option for Comet
+skip_researching=1
+
+# set maximum fragment charge state to analyze (allowed max 5)
+# option for Comet
+max_fragment_charge=3
+
+# set maximum precursor charge state to analyze (allowed max 9)
+# option for Comet
+max_precursor_charge=6
+
+# 0=proteinDB, 1-6, 7=forward three, 8=reverse three, 9=all six
+# option for Comet
+nucleotide_reading_frame=0
+
+# 0=leave sequences as-is; 1=also consider sequence w/o N-term methionine
+# option for Comet
+clip_nterm_methionine=0
+
+# max. # of spectra to search at a time; 0 to search the entire scan range in one loop
+# option for Comet
+spectrum_batch_size=0
+
+# minimum num. of peaks in spectrum to search (default 10)
+# option for Comet
+minimum_peaks=10
+
+# minimum intensity value to read in
+# option for comet. 
+minimum_intensity=0.000000
+
+# 0=no, 1=yes, 2=all charge reduced precursor peaks (for ETD)
+# option for Comet. 
+remove_precursor_peak=0
+
+# +- Da tolerance for precursor removal
+# option for Comet. 
+remove_precursor_tolerance=1.500000
+
+# for iTRAQ/TMT type data; will clear out all peaks in the specified m/z range
+# option for Comet
+clear_mz_range=0.0 0.0
 
 # Up to 6 variable modifications are supported
-format:  <mass>
-# <residues> <0=variable/1=binary> <max mods per a peptide>
-    e.g.
-# 79.966331 STY 0 3
+# format: <mass> <residues> <0=variable/1=binary> <max mods per a peptide>
+#     e.g. 79.966331 STY 0 3
 # option for Comet
 variable_mod1=
 
 # Up to 6 variable modifications are supported
-format:  <mass>
-# <residues> <0=variable/1=binary> <max mods per a peptide>
-    e.g.
-# 79.966331 STY 0 3
+# format: <mass> <residues> <0=variable/1=binary> <max mods per a peptide>
+#     e.g. 79.966331 STY 0 3
 # option for Comet
 variable_mod2=
 
 # Up to 6 variable modifications are supported
-format:  <mass>
-# <residues> <0=variable/1=binary> <max mods per a peptide>
-    e.g.
-# 79.966331 STY 0 3
+# format: <mass> <residues> <0=variable/1=binary> <max mods per a peptide>
+#     e.g. 79.966331 STY 0 3
 # option for Comet
 variable_mod3=
 
 # Up to 6 variable modifications are supported
-format:  <mass>
-# <residues> <0=variable/1=binary> <max mods per a peptide>
-    e.g.
-# 79.966331 STY 0 3
+# format: <mass> <residues> <0=variable/1=binary> <max mods per a peptide>
+#     e.g. 79.966331 STY 0 3
 # option for Comet
 variable_mod4=
 
 # Up to 6 variable modifications are supported
-format:  <mass>
-# <residues> <0=variable/1=binary> <max mods per a peptide>
-    e.g.
-# 79.966331 STY 0 3
+# format: <mass> <residues> <0=variable/1=binary> <max mods per a peptide>
+#     e.g. 79.966331 STY 0 3
 # option for Comet
 variable_mod5=
 
 # Up to 6 variable modifications are supported
-format:  <mass>
-# <residues> <0=variable/1=binary> <max mods per a peptide>
-    e.g.
-# 79.966331 STY 0 3
+# format: <mass> <residues> <0=variable/1=binary> <max mods per a peptide>
+#     e.g. 79.966331 STY 0 3
 # option for Comet
 variable_mod6=
 
-# Controls whether or not C-ions are considered in the search (0 - no, 1
-# - yes)
-# option for Comet only
-use_C_ions=0
+# Specifies the total/maximum number of residues that can be modified in a peptide
+# option for Comet
+max_variable_mods_in_peptide=5
 
-# Controls the mass tolerance value.  The mass tolerance is set at +/-
-# the specified number i.e. an entered value of "1.0" applies a -1.0 to
-# +1.0 tolerance. The units of the mass tolerance is controlled by the
-# parameter "peptide_mass_units". 
-# option for Comet only
-peptide_mass_tolerance=3.000000
+# Specifiy a variable modification to peptide's c-terminusWorks in conjunction with variable_c_terminus_distance
+# option for Comet
+variable_C_terminus=0.000000
 
-# precursor charge range to analyze; does not override mzXML charge; 0
-# as 1st entry ignores parameter
-# option for Comet.
-precursor_charge=0 0
+# Specifiy a variable modification to peptide's c-terminusWorks in conjunction with variable_c_terminus_distance
+# option for Comet
+variable_N_terminus=0.000000
 
-# added to B - avg.   0.0000, mono.   0.00000
+# -1=all peptides, 0=protein terminus, 1-N = maximum offset from C-terminus
+# option for Comet
+variable_C_terminus_distance=-1
+
+# -1=all peptides, 0=protein terminus, 1-N = maximum offset from N-terminus
+# option for Comet
+variable_N_terminus_distance=-1
+
+# Specifiy a static modification to the c-terminus of all peptides
+# option for Comet
+add_Cterm_peptide=0.000000
+
+# Specify a static modification to the n-terminus of all peptides
+# option for Comet
+add_Nterm_peptide=0.000000
+
+# Specify a static modification to the c-terminal peptide of each protein
+# option for Comet
+add_Cterm_protein=0.000000
+
+# Specify a static modification to the n-terminal peptide of each protein
+# option for Comet
+add_Nterm_protein=0.000000
+
+# Specify a static modification to the residue A
+# option for Comet
+add_A_alanine=0.000000
+
+# Specify a static modification to the residue B
 # option for Comet
 add_B_user_amino_acid=0.000000
 
-# added to R - avg. 156.1857, mono. 156.10111
+# Specify a static modification to the residue C
 # option for Comet
-add_R_arginine=0.000000
+add_C_cysteine=57.021465
 
-# added to I - avg. 113.1576, mono. 113.08406
+# Specify a static modification to the residue D
+# option for Comet
+add_D_aspartic_acid=0.000000
+
+# Specify a static modification to the residue E
+# option for Comet
+add_E_glutamic_acid=0.000000
+
+# Specify a static modification to the residue F
+# option for Comet
+add_F_phenylalanine=0.000000
+
+# Specify a static modification to the residue G
+# option for Comet
+add_G_glycine=0.000000
+
+# Specify a static modification to the residue H
+# option for Comet
+add_H_histidine=0.000000
+
+# Specify a static modification to the residue I
 # option for Comet
 add_I_isoleucine=0.000000
 
-# added to Q - avg. 128.1292, mono. 128.05858
+# Specify a static modification to the residue J
 # option for Comet
-add_Q_glutamine=0.000000
+add_J_user_amino_acid=0.000000
 
-# added to P - avg.  97.1152, mono.  97.05276
+# Specify a static modification to the residue K
+# option for Comet
+add_K_lysine=0.000000
+
+# Specify a static modification to the residue L
+# option for Comet
+add_L_leucine=0.000000
+
+# Specify a static modification to the residue M
+# option for Comet
+add_M_methionine=0.000000
+
+# Specify a static modification to the residue N
+# option for Comet
+add_N_asparagine=0.000000
+
+# Specify a static modification to the residue O
+# option for Comet
+add_O_ornithine=0.000000
+
+# Specify a static modification to the residue P
 # option for Comet
 add_P_proline=0.000000
 
-# Controls whether or not Y-ions are considered in the search (0 - no, 1
-# - yes)
-# option for Comet only
-use_Y_ions=1
+# Specify a static modification to the residue Q
+# option for Comet
+add_Q_glutamine=0.000000
+
+# Specify a static modification to the residue R
+# option for Comet
+add_R_arginine=0.000000
+
+# Specify a static modification to the residue S
+# option for Comet
+add_S_serine=0.000000
+
+# Specify a static modification to the residue T
+# option for Comet
+add_T_threonine=0.000000
+
+# Specify a static modification to the residue U
+# option for Comet
+add_U_user_amino_acid=0.000000
+
+# Specify a static modification to the residue V
+# option for Comet
+add_V_valine=0.000000
+
+# Specify a static modification to the residue W
+# option for Comet
+add_W_tryptophan=0.000000
+
+# Specify a static modification to the residue X
+# option for Comet
+add_X_user_amino_acid=0.000000
+
+# Specify a static modification to the residue Y
+# option for Comet
+add_Y_tyrosine=0.000000
+
+# Specify a static modification to the residue Z
+# option for Comet
+add_Z_user_amino_acid=0.000000
+
+# Specifies the prefix of the protein names that indicates a decoy. Default = decoy_.
+# Available for q-ranker and barista.
+decoy_prefix=decoy_
 
 #
 # COMET_ENZYME_INFO _must_ be at the end of this parameters file

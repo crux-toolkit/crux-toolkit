@@ -180,28 +180,6 @@ bool MatchFileReader::empty(
 }
 
 /**
- * Gets a vector of strings from cell where the
- * string in the cell has delimiters that are
- * different than the column delimiter. The
- * default delimiter is a comma.
- * Uses the current_row_ as the row index.
- * Clears the integer vector before 
- * populating it.
- */
-void MatchFileReader::getStringVectorFromCell(
-      MATCH_COLUMNS_T col_type, ///< the column name
-      std::vector<std::string>& string_vector, ///<the vector of integers
-      char delimiter ///<the delimiter to use
-) {
-
-  const string& string_ans = getString(col_type);
-
-  //get the list of strings separated by delimiter
-  string_vector.clear();
-  tokenize(string_ans, string_vector, delimiter);
-}
-
-/**
  * Fills in the given vector with a bool value indicating if each
  * MATCH_COLUMN_T type is present in the file being read.
  * \returns Argument vector has NUM_MATCH_COLUMN_T values if a

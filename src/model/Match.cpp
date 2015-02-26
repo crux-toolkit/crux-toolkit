@@ -17,7 +17,6 @@
 #include <set>
 #include <map>
 #include "io/carp.h"
-#include "util/parse_arguments.h"
 #include "ProteinPeptideIterator.h"
 #include "Spectrum.h"
 #include "Ion.h"

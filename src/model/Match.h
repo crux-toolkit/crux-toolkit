@@ -23,7 +23,6 @@
 #include <unistd.h>
 #endif
 #include "io/carp.h"
-#include "util/parse_arguments.h"
 #include "Spectrum.h"
 #include "io/SpectrumCollection.h"
 #include "Ion.h"

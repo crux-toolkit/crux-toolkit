@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 #include "objects.h"
-#include "match_objects.h"
+#include "model/match_objects.h"
 #include "pwiz/data/identdata/IdentData.hpp"
 
 class MzIdentMLWriter{

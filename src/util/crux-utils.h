@@ -374,47 +374,39 @@ void fit_two_parameter_weibull(
     FLOAT_T* correlation ///< the best correlation -out
     );
 
-bool string_to_mass_type(char*, MASS_TYPE_T*);
+bool string_to_mass_type(const std::string& name, MASS_TYPE_T*);
 bool mass_type_to_string(MASS_TYPE_T, char*);
 bool string_to_algorithm_type(char*, ALGORITHM_TYPE_T*);
 bool algorithm_type_to_string(ALGORITHM_TYPE_T, char*);
-bool string_to_scorer_type(const char*, SCORER_TYPE_T*);
+bool string_to_scorer_type(const std::string& name, SCORER_TYPE_T*);
 const char* scorer_type_to_string(SCORER_TYPE_T);
-bool string_to_ion_type(char* , ION_TYPE_T*);
+bool string_to_ion_type(const std::string& name, ION_TYPE_T*);
 bool ion_type_to_string(ION_TYPE_T, char*);
 char* ion_type_to_string(ION_TYPE_T type);
 
 // new style of type_to_string and string_to_type functions
 // requires an invalid value for each enum
-DIGEST_T string_to_digest_type(char*);
+DIGEST_T string_to_digest_type(const std::string& name);
 char* digest_type_to_string(DIGEST_T);
-ENZYME_T string_to_enzyme_type(const char*);
+ENZYME_T string_to_enzyme_type(const std::string& name);
 char* enzyme_type_to_string(ENZYME_T);
-WINDOW_TYPE_T string_to_window_type(char*);
-char* window_type_to_string(WINDOW_TYPE_T);
-PARSIMONY_TYPE_T string_to_parsimony_type(char* name);
-char * parsimony_type_to_string(PARSIMONY_TYPE_T type);
-MEASURE_TYPE_T string_to_measure_type(char* name);
+WINDOW_TYPE_T string_to_window_type(const std::string& name);
+PARSIMONY_TYPE_T string_to_parsimony_type(const std::string& name);
+MEASURE_TYPE_T string_to_measure_type(const std::string& name);
 char * measure_type_to_string(MEASURE_TYPE_T type);
-THRESHOLD_T string_to_threshold_type(char* name);
+THRESHOLD_T string_to_threshold_type(const std::string& name);
 char * threshold_type_to_string(THRESHOLD_T type);
-QUANT_LEVEL_TYPE_T string_to_quant_level_type(char* name);
-char * quant_level_type_to_string(QUANT_LEVEL_TYPE_T type);
-COLTYPE_T string_to_column_type(char* name);
-COMPARISON_T string_to_comparison(char* name);
+QUANT_LEVEL_TYPE_T string_to_quant_level_type(const std::string& name);
+COLTYPE_T string_to_column_type(const std::string& name);
+COMPARISON_T string_to_comparison(const std::string& name);
 DECOY_TYPE_T string_to_decoy_type(const std::string& name);
-DECOY_TYPE_T string_to_tide_decoy_type(const char* name);
+DECOY_TYPE_T string_to_tide_decoy_type(const std::string& name);
 char* decoy_type_to_string(DECOY_TYPE_T type);
-MASS_FORMAT_T string_to_mass_format(const char* name);
+MASS_FORMAT_T string_to_mass_format(const std::string& name);
 char* mass_format_type_to_string(MASS_FORMAT_T type);
 
-HARDKLOR_ALGORITHM_T string_to_hardklor_algorithm_type(char* name);
-char* hardklor_algorithm_type_to_string(HARDKLOR_ALGORITHM_T type);
-char* hardklor_hardklor_algorithm_type_to_string(HARDKLOR_ALGORITHM_T type);
-
-SPECTRUM_PARSER_T string_to_spectrum_parser_type(char* name);
-const char* spectrum_parser_type_to_string(SPECTRUM_PARSER_T type);
-
+HARDKLOR_ALGORITHM_T string_to_hardklor_algorithm_type(const std::string& name);
+std::string hardklor_hardklor_algorithm_type_to_string(HARDKLOR_ALGORITHM_T type);
 
 /**
  * \brief Open the fasta file and prepare it for
@@ -444,17 +436,6 @@ static bool from_string(
  * a first and last variable
  * \returns whether the extraction was successful or not
  */
-
-
-/**                                                                                                                                                                                                       
- * tokenize a string by delimiter                                                                                                                                                                         
- */
-void tokenize(
-  const std::string& str,
-  std::vector<std::string>& tokens,
-  char delimiter = '\t'
-  );
-
 
 bool get_first_last_scan_from_string(
   const std::string& const_scans_string,
@@ -506,46 +487,6 @@ static bool get_range_from_string(
   return ret;    
 }
 
-//These string trimming utilities are from:
-//http://stackoverflow.com/questions/216823/whats-the-best-way-to-trim-stdstring
-/**
- * \brief trim whitespace from start of string
- */
-static inline std::string &ltrim(
-  std::string &str ///< string to trim -in
-  ) {
-
-  str.erase(
-    str.begin(),
-    std::find_if(str.begin(), str.end(),
-    std::not1(std::ptr_fun<int, int>(isspace))));
-  return str;
-}
-
-/**
- * \brief trim whitespace from the end of string
- */
-static inline std::string &rtrim(
-  std::string &str ///< string to trim -in
-  ) {
-
-  str.erase(
-    std::find_if(str.rbegin(), str.rend(),
-    std::not1(std::ptr_fun<int, int>(isspace))).base(),
-    str.end());
-  return str;
-}
-
-/**
- * \brief trim from both ends
- */
-static inline std::string &trim(
-  std::string &str //< string to trim -in
-  ) {
-
-  return ltrim(rtrim(str));
-}
-
 /**
  * \brief  Decide if a spectrum has precursor charge of +1 or more (+2
  * or +3 or +4 etc). 
@@ -565,14 +506,6 @@ void strcat_formatted
  const char* lead_string,        // Appears at the start of each line.
  const char* extension           // Text to add.
  );
-
-/**
- * Check parameter values for what kind of decoys are requested.  Make
- * sure it is compatible with other search parameters and fail if not.  
- * \returns Zero if no decoys are searched, one if there are decoys
- * with an index search, or num-decoys-per-target for a fasta search.
- */
-int get_num_decoys();
 
 /**
  * \brief Checks if the given input file contains target, decoy PSMs or 

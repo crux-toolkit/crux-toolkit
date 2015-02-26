@@ -4,6 +4,7 @@
  *****************************************************************************/
 #include "CruxHardklorApplication.h"
 #include "util/CarpStreamBuf.h"
+#include "util/StringUtils.h"
 #include "io/DelimitedFileWriter.h"
 
 using namespace std;
@@ -101,12 +102,12 @@ int CruxHardklorApplication::main(
 
   hk_args_vec.push_back("-a");
 
-  HARDKLOR_ALGORITHM_T hk_algorithm = get_hardklor_algorithm("hardklor-algorithm");
-  char* hk_algorithm_str = 
+  HARDKLOR_ALGORITHM_T hk_algorithm =
+    string_to_hardklor_algorithm_type(get_string_parameter("hardklor-algorithm"));
+  string hk_algorithm_str = 
     hardklor_hardklor_algorithm_type_to_string(hk_algorithm);
 
   hk_args_vec.push_back(hk_algorithm_str);
-  free(hk_algorithm_str);
 
   hk_args_vec.push_back("-cdm");
   hk_args_vec.push_back(get_string_parameter("cdm"));
@@ -134,17 +135,15 @@ int CruxHardklorApplication::main(
   if (!get_string_parameter("averagine-mod").empty()) {
     string par_value = get_string_parameter("averagine-mod");
     carp(CARP_DEBUG,"averagine-mod=%s",par_value.c_str());
-    vector<string> tokens1;
-    tokenize(par_value, tokens1, ';');
+    vector<string> tokens1 = StringUtils::Split(par_value, ';');
 
-    for (unsigned int idx1 = 0; idx1 < tokens1.size();idx1++) {
+    for (vector<string>::const_iterator i = tokens1.begin(); i != tokens1.end(); i++) {
       hk_args_vec.push_back("-m");
-      vector<string> tokens2;
-      tokenize(tokens1[idx1], tokens2, ':');
+      vector<string> tokens2 = StringUtils::Split(*i, ':');
       ostringstream oss;
-      oss << tokens2[0];
-      for (unsigned int idx2 = 1;idx2 < tokens2.size(); idx2++) {
-        oss << " " << tokens2[idx2];
+      oss << tokens2.front();
+      for (vector<string>::const_iterator j = tokens2.begin() + 1; j != tokens2.end(); j++) {
+        oss << " " << *j;
       }
       hk_args_vec.push_back(oss.str());
     }
@@ -213,10 +212,9 @@ int CruxHardklorApplication::main(
   
   if (!get_string_parameter("hardklor-options").empty()) {
     string hardklor_options = get_string_parameter("hardklor-options");
-    vector<string> tokens;
-    tokenize(hardklor_options, tokens, ',');
-    for (size_t idx=0;idx < tokens.size();idx++) {
-      hk_args_vec.push_back(tokens.at(idx));
+    vector<string> tokens = StringUtils::Split(hardklor_options, ',');
+    for (vector<string>::const_iterator i = tokens.begin(); i != tokens.end(); i++) {
+      hk_args_vec.push_back(*i);
     }
   }
 

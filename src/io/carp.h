@@ -128,12 +128,6 @@ void carp(
   std::string& msg
 );
 
-void warn_once(
-               const char * msg1, 
-               const char * msg2_format, 
-               ...
-);
-
 /**
  * \def carp_once( verbosity, msg, ...)
  *

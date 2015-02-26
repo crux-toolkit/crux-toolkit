@@ -10,6 +10,7 @@
 #include "io/carp.h"
 #include "util/utils.h"
 #include "util/mass.h"
+#include "util/StringUtils.h"
 #include "objects.h"
 #include "DatabasePeptideIterator.h"
 #include "Peptide.h"
@@ -324,16 +325,14 @@ bool PeptideSrc::parseTabDelimited(
 
   } else {
 
-    vector<string> protein_ids;
-    file.getStringVectorFromCell(PROTEIN_ID_COL, protein_ids);
+    vector<string> protein_ids = StringUtils::Split(file.getString(PROTEIN_ID_COL), ',');
   
     if (protein_ids.size() == 0) {
       carp(CARP_ERROR, "No protein ids found!");
       return false;
     }
 
-    vector<string> flanking_aas;
-    file.getStringVectorFromCell(FLANKING_AA_COL, flanking_aas);
+    vector<string> flanking_aas = StringUtils::Split(file.getString(FLANKING_AA_COL), ',');
 
     if (protein_ids.size() != flanking_aas.size()) {
       carp_once(CARP_DEBUG, 

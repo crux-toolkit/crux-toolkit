@@ -62,7 +62,6 @@ int SearchForXLinks::main(int argc, char** argv) {
     ret = xlinkSearchMain();
   }
   
-  free_parameters();
   return ret;
 }
 

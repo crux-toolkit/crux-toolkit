@@ -9,8 +9,8 @@
 #include "TideSearchApplication.h"
 #include "app/tide/mass_constants.h"
 #include "TideMatchSet.h"
+#include "util/Params.h"
 
-extern HASH_T* parameters;
 extern AA_MOD_T* list_of_mods[MAX_AA_MODS];
 extern int num_mods;
 
@@ -56,7 +56,7 @@ int TideSearchApplication::main(int argc, char** argv) {
     "mz-bin-offset",
     "max-precursor-charge",
     "peptide-centric-search",
-    "elution_window",	
+    "elution-window-size",	
     "verbosity"
   };
   int num_options = sizeof(option_list) / sizeof(char*);
@@ -82,7 +82,7 @@ int TideSearchApplication::main(int argc, char** argv) {
   string spectra_file = get_string_parameter("tide spectra file");
 
   double window = get_double_parameter("precursor-window");
-  WINDOW_TYPE_T window_type = get_window_type_parameter("precursor-window-type");
+  WINDOW_TYPE_T window_type = string_to_window_type(get_string_parameter("precursor-window-type"));
 
   // Check spectrum-charge parameter
   string charge_string = get_string_parameter("spectrum-charge");
@@ -93,8 +93,7 @@ int TideSearchApplication::main(int argc, char** argv) {
   } else {
     charge_to_search = atoi(charge_string.c_str());
     if (charge_to_search < 1 || charge_to_search > 6) {
-      carp(CARP_FATAL, "Invalid spectrum-charge value %s",
-           charge_string.c_str());
+      carp(CARP_FATAL, "Invalid spectrum-charge value %s", charge_string.c_str());
     }
     carp(CARP_DEBUG, "Searching charge state %d", charge_to_search);
   }
@@ -286,9 +285,10 @@ int TideSearchApplication::main(int argc, char** argv) {
     carp(CARP_DEBUG, "Using OutputFiles to write matches");
     // Overwrite enzyme/digestion parameters in the hash
     // TODO Find a better way to do this?
-    add_or_update_hash(parameters, "enzyme", pepHeader.enzyme().c_str());
-    add_or_update_hash(parameters, "digestion", digestString);
-    add_or_update_hash(parameters, "monoisotopic-precursor", pepHeader.monoisotopic_precursor()?"T":"F");
+    Params::Set("enzyme", pepHeader.enzyme());
+    Params::Set("digestion", digestString);
+    Params::Set("monoisotopic-precursor", pepHeader.monoisotopic_precursor() ? true : false);
+    //add_or_update_hash(parameters, "monoisotopic-precursor", pepHeader.monoisotopic_precursor()?"T":"F");
     free(digestString);
     output_files = new OutputFiles(this);
   } else {

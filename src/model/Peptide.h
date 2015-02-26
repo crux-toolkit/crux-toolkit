@@ -13,7 +13,6 @@
 
 #include "util/utils.h"
 #include "util/crux-utils.h"
-#include "util/hash.h"
 #include "util/mass.h"
 #include "Protein.h"
 #include "objects.h"
