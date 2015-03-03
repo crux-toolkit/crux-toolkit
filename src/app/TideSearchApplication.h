@@ -139,6 +139,8 @@ public:
     int* aaMass,
     double* pValueScoreObs
   );
+
+  virtual void processParams();
 };
 
 #endif

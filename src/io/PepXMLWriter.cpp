@@ -30,7 +30,7 @@ PepXMLWriter::~PepXMLWriter()
  * overwrite is true, else exit if an existing file is found.
  */
 void PepXMLWriter::openFile(const char* filename, bool overwrite){
-  file_ = create_file_in_path(filename, NULL, overwrite);
+  file_ = create_file_in_path(filename, "", overwrite);
 }
 
 /**

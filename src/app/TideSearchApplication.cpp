@@ -271,9 +271,6 @@ int TideSearchApplication::main(int argc, char** argv) {
     MaxBin::SetGlobalMaxFromFlag();
   }
 
-  char* digestString =
-    digest_type_to_string(pepHeader.full_digestion() ? FULL_DIGEST : PARTIAL_DIGEST);
-
   bool txt_only = !get_boolean_parameter("sqt-output") &&
                   !get_boolean_parameter("pepxml-output") &&
                   !get_boolean_parameter("mzid-output") &&
@@ -283,18 +280,13 @@ int TideSearchApplication::main(int argc, char** argv) {
   ofstream* decoy_file = NULL;
   if (!txt_only) {
     carp(CARP_DEBUG, "Using OutputFiles to write matches");
-    // Overwrite enzyme/digestion parameters in the hash
-    // TODO Find a better way to do this?
-    Params::Set("enzyme", pepHeader.enzyme());
-    Params::Set("digestion", digestString);
-    Params::Set("monoisotopic-precursor", pepHeader.monoisotopic_precursor() ? true : false);
-    //add_or_update_hash(parameters, "monoisotopic-precursor", pepHeader.monoisotopic_precursor()?"T":"F");
-    free(digestString);
     output_files = new OutputFiles(this);
   } else {
     carp(CARP_DEBUG, "Using TideMatchSet to write matches");
     bool overwrite = get_boolean_parameter("overwrite");
     stringstream ss;
+    char* digestString =
+      digest_type_to_string(pepHeader.full_digestion() ? FULL_DIGEST : PARTIAL_DIGEST);
     ss << pepHeader.enzyme() << '-' << digestString;
     free(digestString);
     TideMatchSet::setCleavageType(ss.str());
@@ -310,7 +302,7 @@ int TideSearchApplication::main(int argc, char** argv) {
       target_file = create_stream_in_path(concat_file_name.c_str(), NULL, overwrite);
     }
   }
-	  
+
   // Do the search
   carp(CARP_INFO, "Running search");
   cleanMods();
@@ -961,6 +953,25 @@ int TideSearchApplication::calcScoreCount(
   delete [] scoreCountBinAdjust;
   
   return scoreOffsetObs;
+}
+
+void TideSearchApplication::processParams() {
+  pb::Header peptides_header;
+  string peptides_file = Params::GetString("tide database index") + "/pepix";
+  HeadedRecordReader peptide_reader(peptides_file, &peptides_header);
+  if (!peptides_header.file_type() == pb::Header::PEPTIDES ||
+      !peptides_header.has_peptides_header()) {
+    carp(CARP_FATAL, "Error reading index (%s)", peptides_file.c_str());
+  }
+
+  const pb::Header::PeptidesHeader& pepHeader = peptides_header.peptides_header();
+
+  Params::Set("enzyme", pepHeader.enzyme());
+  char* digestString =
+    digest_type_to_string(pepHeader.full_digestion() ? FULL_DIGEST : PARTIAL_DIGEST);
+  Params::Set("digestion", digestString);
+  free(digestString);
+  Params::Set("monoisotopic-precursor", pepHeader.monoisotopic_precursor() ? true : false);
 }
 
 /*
