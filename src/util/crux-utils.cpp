@@ -882,9 +882,9 @@ bool suffix_compare(
 char* get_full_filename(const char* path, const char* filename){
 
   char* result = NULL;
-  if( path == NULL ){
+  if (path == NULL || strlen(path) == 0) {
     result = my_copy_string(filename);
-  }else{
+  } else {
     // TODO (BF 26-Feb-08) don't add second / if path already ends in /
     char* ready_path = cat_string(path, "/");
     result = cat_string(ready_path, filename);
