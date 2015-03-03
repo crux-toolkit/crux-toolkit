@@ -124,14 +124,14 @@ int ActivePeptideQueue::SetActiveRange(double min_mass, double max_mass, double 
   }
 
   iter_ = queue_.begin();
-  while ((*iter_)->Mass() < min_mass && iter_ != queue_.end()){
+  while (iter_ != queue_.end() && (*iter_)->Mass() < min_mass ){
     ++iter_;
   }
 
   end_ = iter_;
   int active = 0;
   active_targets_ = active_decoys_ = 0;
-  while ((*end_)->Mass() < max_mass && end_ != queue_.end()){
+  while (end_ != queue_.end() && (*end_)->Mass() < max_mass ){
     ++end_;
     ++active;
   }
@@ -212,7 +212,7 @@ int ActivePeptideQueue::SetActiveRangeBIons(double min_mass, double max_mass, do
 
   iter1_ = b_ion_queue_.begin();
   iter_ = queue_.begin();
-  while ((*iter_)->Mass() < min_mass && iter_ != queue_.end()){
+  while (iter_ != queue_.end() && (*iter_)->Mass() < min_mass ){
     ++iter_;
     ++iter1_;
   }
@@ -221,7 +221,7 @@ int ActivePeptideQueue::SetActiveRangeBIons(double min_mass, double max_mass, do
   end1_ = iter1_;
   int active = 0;
   active_targets_ = active_decoys_ = 0;
-  while ((*end_)->Mass() < max_mass && end_ != queue_.end()){
+  while (end_ != queue_.end() && (*end_)->Mass() < max_mass ){
     ++end_;
     ++end1_;
     ++active;
