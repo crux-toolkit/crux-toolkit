@@ -154,6 +154,11 @@ Crux::Match* MatchIterator::next()
   return match_collection_->match_[match_idx_++];
 }
 
+
+Crux::Match* MatchIterator::getMatch(int match_idx){
+  return (match_idx_ < match_total_) ? match_collection_->match_[match_idx] : NULL;
+}
+
 /*
  * Local Variables:
  * mode: c

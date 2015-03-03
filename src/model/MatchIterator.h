@@ -69,6 +69,8 @@ class MatchIterator {
    */
   Crux::Match* next();
 
+  Crux::Match* getMatch(int match_idx);
+
 };
 
 #endif
