@@ -79,6 +79,7 @@ set (
   app/ExtractColumns.cpp
   app/ExtractRows.cpp
   model/FilteredSpectrumChargeIterator.cpp
+  util/FileUtils.cpp
   app/GenerateDecoys.cpp
   model/GeneratePeptidesIterator.cpp
   app/GetMs2Spectrum.cpp

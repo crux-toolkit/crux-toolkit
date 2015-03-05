@@ -10,6 +10,7 @@
 #include "app/tide/mass_constants.h"
 #include "TideMatchSet.h"
 #include "util/Params.h"
+#include "util/FileUtils.h"
 
 extern AA_MOD_T* list_of_mods[MAX_AA_MODS];
 extern int num_mods;
@@ -255,7 +256,7 @@ int TideSearchApplication::main(int argc, char** argv) {
       string newInput = Params::GetString("store-spectra");
       bool storeSpectra = !newInput.empty();
       if (!storeSpectra) {
-        newInput = make_file_path(*f + ".spectrumrecords.tmp");
+        newInput = make_file_path(FileUtils::BaseName(*f) + ".spectrumrecords.tmp");
       } else if (input_files.size() > 1) {
         carp(CARP_FATAL, "Cannot use store-spectra option with multiple input "
                          "spectrum files");
