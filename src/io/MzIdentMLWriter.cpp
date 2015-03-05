@@ -19,6 +19,8 @@ using namespace Crux;
 using namespace pwiz;
 using namespace identdata;
 
+#define calculateMassToCharge(peptide_mass, charge) (FLOAT_T) ((peptide_mass + (charge*MASS_PROTON))/charge)
+
 MzIdentMLWriter::MzIdentMLWriter() {
   //data_ = NULL;
   fout_ = NULL;
@@ -505,7 +507,8 @@ SpectrumIdentificationItemPtr MzIdentMLWriter::getSpectrumIdentificationItem(
     "SII_"+boost::lexical_cast<string>(sii_idx_++)));
   siip->chargeState = zstate.getCharge();
   siip->experimentalMassToCharge = zstate.getMZ();
-  siip->calculatedMassToCharge = FLOAT_T(crux_peptide->getPeptideMass()+MASS_PROTON)/(double)charge_state;
+
+  siip->calculatedMassToCharge = calculateMassToCharge(crux_peptide->getPeptideMass(), (FLOAT_T) zstate.getCharge());
 
   addSpectrumScores(spectrum_match, siip);
   siip->passThreshold = true;
@@ -688,7 +691,8 @@ void MzIdentMLWriter::addMatch(
 
   siip->chargeState = zstate.getCharge();
   siip->experimentalMassToCharge = zstate.getMZ();
-  siip->calculatedMassToCharge = FLOAT_T((peptide->getPeptideMass()+MASS_PROTON)/(double)zstate.getCharge());
+
+  siip->calculatedMassToCharge = calculateMassToCharge(peptide->getPeptideMass(), (FLOAT_T) zstate.getCharge());
 
   if (collection->getScoredType(PERCOLATOR_SCORE)) {
     siip->rank = match->getRank(PERCOLATOR_SCORE);
