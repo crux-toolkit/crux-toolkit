@@ -13,6 +13,7 @@
 #include "TideIndexApplication.h"
 #include "TideMatchSet.h"
 #include "TideSearchApplication.h"
+#include "util/Params.h"
 
 map<int, double> TideMatchSet::mod_map_;
 ModCoder TideMatchSet::mod_coder_;
@@ -44,14 +45,14 @@ TideMatchSet::~TideMatchSet() {
  * This is for writing tab-delimited only
  */
 void TideMatchSet::report(
-    ofstream* target_file,  ///< target file to write to
-    ofstream* decoy_file, ///< decoy file to write to
-    int top_matches,
-    const ActivePeptideQueue* peptides, ///< peptide queue
-    const ProteinVec& proteins, ///< proteins corresponding with peptides
-    const vector<const pb::AuxLocation*>& locations,  ///< auxiliary locations
-    bool compute_sp ///< whether to compute sp or not
-  ) {
+  ofstream* target_file,  ///< target file to write to
+  ofstream* decoy_file, ///< decoy file to write to
+  int top_matches,
+  const ActivePeptideQueue* peptides, ///< peptide queue
+  const ProteinVec& proteins, ///< proteins corresponding with peptides
+  const vector<const pb::AuxLocation*>& locations,  ///< auxiliary locations
+  bool compute_sp ///< whether to compute sp or not
+) {
   if (peptide_->spectrum_matches_array.size() == 0) {
     return;
   }
@@ -148,11 +149,9 @@ void TideMatchSet::report(
     }
   }  
   // target peptide or concat search
-  if (OutputFiles::isConcat() || !peptide_->IsDecoy()) {
-    writeToFile(target_file, peptides, proteins, locations, compute_sp);  
-  } else { //peptide is decoy
-    writeToFile(decoy_file, peptides, proteins, locations, compute_sp);
-  }
+  ofstream* file =
+    (OutputFiles::isConcat() || !peptide_->IsDecoy()) ? target_file : decoy_file;
+  writeToFile(file, peptides, proteins, locations, compute_sp);
 }
 
 /**
@@ -284,6 +283,7 @@ void TideMatchSet::report(
   ofstream* target_file,  ///< target file to write to
   ofstream* decoy_file, ///< decoy file to write to
   int top_n,  ///< number of matches to report
+  const string& spectrum_filename, ///< name of spectrum file
   const Spectrum* spectrum, ///< spectrum for matches
   int charge, ///< charge for matches
   const ActivePeptideQueue* peptides, ///< peptide queue
@@ -312,10 +312,10 @@ void TideMatchSet::report(
     computeSpData(targets, &sp_map, &sp_scorer, peptides);
     computeSpData(decoys, &sp_map, &sp_scorer, peptides);
   }
-  writeToFile(target_file, top_n, targets, spectrum, charge, peptides, proteins,
-              locations, delta_cn_map, compute_sp ? &sp_map : NULL);
-  writeToFile(decoy_file, top_n, decoys, spectrum, charge, peptides, proteins,
-              locations, delta_cn_map, compute_sp ? &sp_map : NULL);
+  writeToFile(target_file, top_n, targets, spectrum_filename, spectrum, charge,
+              peptides, proteins, locations, delta_cn_map, compute_sp ? &sp_map : NULL);
+  writeToFile(decoy_file, top_n, decoys, spectrum_filename, spectrum, charge,
+              peptides, proteins, locations, delta_cn_map, compute_sp ? &sp_map : NULL);
 }
 
 /**
@@ -325,6 +325,7 @@ void TideMatchSet::writeToFile(
   ofstream* file,
   int top_n,
   const vector<Arr::iterator>& vec,
+  const string& spectrum_filename,
   const Spectrum* spectrum,
   int charge,
   const ActivePeptideQueue* peptides,
@@ -396,6 +397,9 @@ void TideMatchSet::writeToFile(
 
     const SpScorer::SpScoreData* sp_data = sp_map ? &(sp_map->at(*i).first) : NULL;
 
+    if (Params::GetBool("file-column")) {
+      *file << spectrum_filename << '\t';
+    }
     *file << spectrum->SpectrumNumber() << '\t'
           << charge << '\t'
           << spectrum->PrecursorMZ() << '\t'
@@ -445,6 +449,7 @@ void TideMatchSet::writeToFile(
 void TideMatchSet::report(
   OutputFiles* output_files,  ///< pointer to output handler
   int top_n,  ///< number of matches to report
+  const string& spectrum_filename, ///< name of spectrum file
   const Spectrum* spectrum, ///< spectrum for matches
   int charge, ///< charge for matches
   const ActivePeptideQueue* peptides, ///< peptide queue
@@ -477,7 +482,7 @@ void TideMatchSet::report(
   // Create a Crux spectrum and z state
   Crux::Spectrum crux_spectrum(
     spectrum->SpectrumNumber(), spectrum->SpectrumNumber(),
-    spectrum->PrecursorMZ(), vector<int>(1, charge), "");
+    spectrum->PrecursorMZ(), vector<int>(1, charge), spectrum_filename);
   SpectrumZState z_state;
   z_state.setMZ(crux_spectrum.getPrecursorMz(), charge);
 
@@ -488,6 +493,8 @@ void TideMatchSet::report(
                  peptides, proteins, locations, z_state, sp_scorer, &lowest_sp);
   addCruxMatches(crux_decoy_collection, true, top_n, &proteins_made, decoys, crux_spectrum,
                  peptides, proteins, locations, z_state, sp_scorer, &lowest_sp);
+  crux_collection->setFilePath(spectrum_filename);
+  crux_decoy_collection->setFilePath(spectrum_filename);
 
   if (sp_scorer) {
     crux_spectrum.setTotalEnergy(sp_scorer->TotalIonIntensity());
@@ -600,22 +607,20 @@ void TideMatchSet::addCruxMatches(
 void TideMatchSet::writeHeaders(
   ofstream* file,
   bool decoyFile,
-  bool sp,
-  bool exact_pval_search,
-  bool peptide_centric,
-  int elution_window
+  bool sp
 ) {
   if (!file) {
     return;
   }
   const int headers[] = {
-    SCAN_COL, CHARGE_COL, SPECTRUM_PRECURSOR_MZ_COL, SPECTRUM_NEUTRAL_MASS_COL,
-    PEPTIDE_MASS_COL, DELTA_CN_COL, SP_SCORE_COL, SP_RANK_COL, XCORR_SCORE_COL,
-    XCORR_RANK_COL, BY_IONS_MATCHED_COL, BY_IONS_TOTAL_COL,
+    FILE_COL, SCAN_COL, CHARGE_COL, SPECTRUM_PRECURSOR_MZ_COL, SPECTRUM_NEUTRAL_MASS_COL,
+    PEPTIDE_MASS_COL, DELTA_CN_COL, SP_SCORE_COL, SP_RANK_COL,
+    XCORR_SCORE_COL, XCORR_RANK_COL, BY_IONS_MATCHED_COL, BY_IONS_TOTAL_COL,
     DISTINCT_MATCHES_SPECTRUM_COL, SEQUENCE_COL, CLEAVAGE_TYPE_COL, PROTEIN_ID_COL,
     FLANKING_AA_COL, ORIGINAL_TARGET_SEQUENCE_COL
   };
   size_t numHeaders = sizeof(headers) / sizeof(int);
+  bool writtenHeader = false;
   for (size_t i = 0; i < numHeaders; ++i) {
     int header = headers[i];
     if (!sp &&
@@ -627,27 +632,34 @@ void TideMatchSet::writeHeaders(
                 (!decoyFile && !OutputFiles::isConcat()))) {
       continue;
     }
-    if (i > 0) {
+    if (writtenHeader) {
       *file << '\t';
     }
-    if (exact_pval_search && header == XCORR_SCORE_COL) {
+    if (header == FILE_COL &&
+        (!Params::GetBool("file-column") || Params::GetBool("peptide-centric-search"))) {
+      continue;
+    }
+    if (header == XCORR_SCORE_COL && Params::GetBool("exact-p-value")) {
       *file << get_column_header(EXACT_PVALUE_COL) << '\t'
             << get_column_header(REFACTORED_SCORE_COL);
-      if (elution_window > 0){
+      if (Params::GetInt("elution-window-size") > 0) {
         *file << '\t' << get_column_header(ELUTION_WINDOW_COL);
       }
+      writtenHeader = true;
       continue;
-    } 
+    }
     if (header == DISTINCT_MATCHES_SPECTRUM_COL){
-      if (peptide_centric == true ) {
+      if (Params::GetBool("peptide-centric-search")) {
         *file << get_column_header(DISTINCT_MATCHES_PEPTIDE_COL) << '\t';
         *file << get_column_header(DISTINCT_MATCHES_SPECTRUM_COL);
       } else {
         *file << get_column_header(DISTINCT_MATCHES_SPECTRUM_COL);
       }
+      writtenHeader = true;
       continue;
     }
     *file << get_column_header(header);
+    writtenHeader = true;
   }
   *file << endl;
 }

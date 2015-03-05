@@ -91,23 +91,6 @@ class XLinkMatch : public Crux::Match {
    */
   virtual std::string getFlankingAAString();
 
-  
-  /**
-   * Print one field in the tab-delimited output file, based on column index.
-   * overridden from Match
-   */
-  virtual void printOneMatchField(
-    int      column_idx,             ///< Index of the column to print. -in
-    MatchCollection* collection,  ///< collection holding this match -in 
-    MatchFileWriter*    output_file,            ///< output stream -out
-    int      scan_num,               ///< starting scan number -in
-    FLOAT_T  spectrum_precursor_mz,  ///< m/z of spectrum precursor -in
-    int      num_target_matches,            ///< target matches in spectrum -in
-    int      num_decoy_matches,      ///< decoy matches (if any) for this spectrum -in
-    int      b_y_total,              ///< total b/y ions -in
-    int      b_y_matched             ///< Number of b/y ions matched. -in
-  );    
-
   /**
    *\returns the string value of the given candidate type
    */

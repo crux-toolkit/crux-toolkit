@@ -167,18 +167,32 @@ string CruxApplication::getUsage(
   const char** option_list,   ///< list of optional flags
   int num_options             ///< number of elements in options_list
 ) {
+  vector<string> argDisplay;
+  for (int i = 0; i < num_arguments; i++) {
+    string argName = argument_list[i];
+    if (StringUtils::EndsWith(argName, "+")) {
+      argName = argName.substr(0, argName.length() - 1);
+      argDisplay.push_back("<" + argName + ">+");
+    } else {
+      argDisplay.push_back("<" + argName + ">");
+    }
+  }
+
   stringstream usage;
   usage << "USAGE:" << endl
         << endl
         << "  crux " << appName << " [options]";
-  for (int i = 0; i < num_arguments; i++) {
-    usage << " <" << argument_list[i] << '>';
+  for (vector<string>::const_iterator i = argDisplay.begin(); i != argDisplay.end(); i++) {
+    usage << ' ' << *i;
   }
   usage << endl << endl
         << "REQUIRED ARGUMENTS:";
-  for (int i = 0; i < num_arguments; i++) {
+  for (vector<string>::const_iterator i = argDisplay.begin(); i != argDisplay.end(); i++) {
     stringstream line;
-    line << '<' << argument_list[i] << "> " << Params::GetUsage(argument_list[i]);
+    string argName = *i;
+    argName = argName.substr(
+      1, argName.length() - (StringUtils::EndsWith(argName, "+") ? 3 : 2));
+    line << *i << ' ' << Params::GetUsage(argName);
     usage << endl << endl << StringUtils::LineFormat(line.str(), 80, 2);
   }
   usage << endl << endl

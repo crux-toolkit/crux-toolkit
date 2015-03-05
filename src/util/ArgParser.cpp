@@ -108,10 +108,10 @@ vector<ArgParser::ArgSpec> ArgParser::ArgStringsToArgSpecs(const vector<string>&
   for (vector<string>::const_iterator i = args.begin(); i != args.end(); i++) {
     string arg = *i;
     size_t plus = arg.find('+');
-    if (plus == string::npos) {
-      specs.push_back(ArgSpec(arg, false));
-    } else {
+    if (plus == i->length() - 1) {
       specs.push_back(ArgSpec(arg.substr(0, plus), true));
+    } else {
+      specs.push_back(ArgSpec(arg, false));
     }
   }
   return specs;

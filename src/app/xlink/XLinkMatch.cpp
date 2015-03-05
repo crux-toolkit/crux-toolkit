@@ -206,89 +206,10 @@ void XLinkMatch::setParent(XLinkMatchCollection* parent) {
   parent_ = parent;
 }
 
-/**
- * Print one field in the tab-delimited output file, based on column index.
- */
-void XLinkMatch::printOneMatchField(
-  int      column_idx,             ///< Index of the column to print. -in
-  MatchCollection* collection,  ///< collection holding this match -in 
-  MatchFileWriter*    output_file,            ///< output stream -out
-  int      scan_num,               ///< starting scan number -in
-  FLOAT_T  spectrum_precursor_mz,  ///< m/z of spectrum precursor -in
-  int      num_target_matches,            ///< target matches for this spectrum -in
-  int      num_decoy_matches, ///< decoy matches for this spectrum -in
-  int      b_y_total,              ///< total b/y ions -in
-  int      b_y_matched             ///< Number of b/y ions matched. -in
-) {
-
-  carp(CARP_DETAILED_DEBUG, "XLinkMatch::printOneMatchField:%s", get_column_header(column_idx));
-
-  switch ((MATCH_COLUMNS_T)column_idx) {
-
-  case PEPTIDE_MASS_COL:
-    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, getMass(MONO));
-    break;
-  case PVALUE_COL:
-    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, pvalue_);
-    break;
-  case SEQUENCE_COL:
-    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
-      getSequenceString());
-    break;
-  case PROTEIN_ID_COL:
-    output_file->setColumnCurrentRow(
-      (MATCH_COLUMNS_T)column_idx, 
-      getProteinIdString()); 
-    break;
-  case FLANKING_AA_COL:
-    output_file->setColumnCurrentRow(
-      (MATCH_COLUMNS_T)column_idx,
-      getFlankingAAString());
-    break;
-  case XLINK_PRODUCT_TYPE_COL:
-    output_file->setColumnCurrentRow(
-      (MATCH_COLUMNS_T)column_idx,
-      getCandidateTypeString());
-    break;
-  case PPM_ERROR_COL:
-    output_file->setColumnCurrentRow(
-      (MATCH_COLUMNS_T)column_idx,
-      getPPMError());
-    break;
-  case XCORR_FIRST_COL:
-    output_file->setColumnCurrentRow(
-    (MATCH_COLUMNS_T)column_idx,
-    getScore(XCORR_FIRST));
-    break;
-  case XCORR_SECOND_COL:
-    output_file->setColumnCurrentRow(
-    (MATCH_COLUMNS_T)column_idx,
-    getScore(XCORR_SECOND));
-    break;
-  case PROTEIN_ID_X_COL:
-    output_file->setColumnCurrentRow(
-      (MATCH_COLUMNS_T)column_idx,
-      getProteinIdXString());
-    break;
-
-  default:
-    Match::printOneMatchField(column_idx,
-      collection,
-      output_file,
-      scan_num,
-      spectrum_precursor_mz,
-      num_target_matches,
-      num_decoy_matches,
-      b_y_total,
-      b_y_matched
-    );
-  }
-}
-
-/*                                                                                                                                                                                                                          
- * Local Variables:                                                                                                                                                                                                         
- * mode: c                                                                                                                                                                                                                  
- * c-basic-offset: 2                                                                                                                                                                                                        
- * End:                                                                                                                                                                                                                     
+/*
+ * Local Variables:
+ * mode: c
+ * c-basic-offset: 2
+ * End:
  */
 

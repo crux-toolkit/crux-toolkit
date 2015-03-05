@@ -95,7 +95,7 @@ class Spectrum{
      int               last_scan,          ///< number of the last scan -in
      FLOAT_T           precursor_mz,       ///< m/z of the precursor
      const std::vector<int>& possible_z,   ///< possible charge states
-     const char*       filename
+     const std::string& filename
      );
   
   /**

@@ -27,6 +27,7 @@ protected:
   void cleanMods();
 
   void search(
+    const string& spectrum_filename,
     const vector<SpectrumCollection::SpecCharge>* spec_charges,
     ActivePeptideQueue* active_peptide_queue,
     const ProteinVec& proteins,
@@ -84,7 +85,15 @@ protected:
   double bin_width_;
   double bin_offset_;
 
-//  int max_charge_;
+  struct InputFile {
+    std::string OriginalName;
+    std::string SpectrumRecords;
+    bool Keep;
+    InputFile(const std::string& name,
+              const std::string& spectrumrecords,
+              bool keep):
+      OriginalName(name), SpectrumRecords(spectrumrecords), Keep(keep) {}
+  };
 
 public:
 

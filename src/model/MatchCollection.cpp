@@ -1305,8 +1305,6 @@ bool MatchCollection::printTabDelimited(
   }
   int num_target_matches = getTargetExperimentSize();
   int num_decoy_matches = getExperimentSize();
-  int scan_num = spectrum->getFirstScan();
-  FLOAT_T spectrum_precursor_mz = spectrum->getPrecursorMz();
 
   Match* match = NULL;
   
@@ -1326,9 +1324,7 @@ bool MatchCollection::printTabDelimited(
     // or if we are at the limit but this match is a tie with the last
     if( count < top_match || last_rank == cur_rank ){
 
-      match->printTab(this, output, scan_num, 
-                      spectrum_precursor_mz, 
-                      num_target_matches, num_decoy_matches);
+      match->printTab(this, output, spectrum, num_target_matches, num_decoy_matches);
       count++;
       last_rank = cur_rank;
     } else if( count >= top_match && last_rank != cur_rank ) {
@@ -1387,8 +1383,7 @@ FLOAT_T MatchCollection::getCalibrationCorr()
 void MatchCollection::printMultiSpectra(
  MatchFileWriter* tab_file, 
  MatchFileWriter* decoy_tab_file
-  ){
-
+) {
   carp(CARP_DETAILED_DEBUG, "Writing matches to file");
 
   // if file location is target (i.e. tdc=T), print all to target
@@ -1401,24 +1396,14 @@ void MatchCollection::printMultiSpectra(
   for (vector<Crux::Match*>::iterator i = match_.begin(); i != match_.end(); i++) {
     Match* cur_match = *i;
     bool is_decoy = cur_match->getNullPeptide();
-    Spectrum* spectrum = cur_match->getSpectrum();
-    int scan_num = spectrum->getFirstScan();
-    FLOAT_T mz = spectrum->getPrecursorMz();
     FLOAT_T num_psm_per_spec = cur_match->getLnExperimentSize();
     num_psm_per_spec = expf(num_psm_per_spec) + 0.5; // round to nearest int
     int num_target_psm_per_spec = cur_match->getTargetExperimentSize();
 
-    if( is_decoy ){
-      cur_match->printTab(this, decoy_file, scan_num, mz, 
-                          (int)num_psm_per_spec, num_target_psm_per_spec);
-    }
-    else{
-      cur_match->printTab(this, tab_file, scan_num, mz,
-                          (int)num_psm_per_spec, num_target_psm_per_spec);
-    }
-
+    cur_match->printTab(this, (is_decoy ? decoy_file : tab_file),
+                        cur_match->getSpectrum(),
+                        (int)num_psm_per_spec, num_target_psm_per_spec);
   }
-
 }
 
 /*******************************************
