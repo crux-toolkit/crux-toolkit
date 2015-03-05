@@ -526,10 +526,7 @@ void OutputFiles::printMatchesTab(
     for(int file_idx = 0; file_idx < num_files_; file_idx++){
       cur_matches->calculateDeltaCn();
       cur_matches->printTabDelimited(delim_file_array_[file_idx],
-                                           matches_per_spec_,
-                                           spectrum,
-                                           rank_type);
-
+                                     matches_per_spec_, spectrum, rank_type);
       carp(CARP_DETAILED_DEBUG, "done writing file index %d", file_idx);
       if( decoy_matches_array.size() > (size_t)file_idx ){
         cur_matches = decoy_matches_array[file_idx];

@@ -312,7 +312,9 @@ int ActivePeptideQueue::CountAAFrequency(
 }
 
 void ActivePeptideQueue::ReportPeptideHits(Peptide* peptide) {
-    if (!peptide_centric_) return;
+    if (!peptide_centric_) {
+      return;
+    }
 
     current_peptide_ = peptide;
     TideMatchSet matches(peptide, highest_mz_);
@@ -321,6 +323,7 @@ void ActivePeptideQueue::ReportPeptideHits(Peptide* peptide) {
 
     if (!output_files_) { //only tab-delimited output is supported
         matches.report(target_file_, decoy_file_, top_matches_,
-                    this, proteins_, *locations_, compute_sp_);    
+                       this, proteins_, *locations_, compute_sp_);
     }
 }
+

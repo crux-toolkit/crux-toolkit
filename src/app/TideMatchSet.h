@@ -64,6 +64,7 @@ public:
     ofstream* target_file,  ///< target file to write to
     ofstream* decoy_file, ///< decoy file to write to
     int top_n,  ///< number of matches to report
+    const string& spectrum_filename, ///< name of spectrum file
     const Spectrum* spectrum, ///< spectrum for matches
     int charge, ///< charge for matches
     const ActivePeptideQueue* peptides, ///< peptide queue
@@ -79,6 +80,7 @@ public:
   void report(
     OutputFiles* output_files,  ///< pointer to output handler
     int top_n,  ///< number of matches to report
+    const string& spectrum_filename, ///< name of spectrum file
     const Spectrum* spectrum, ///< spectrum for matches
     int charge, ///< charge for matches
     const ActivePeptideQueue* peptides, ///< peptide queue
@@ -91,10 +93,7 @@ public:
   static void writeHeaders(
     ofstream* file,
     bool decoyFile,
-    bool sp,
-    bool exact_pval_search,
-    bool peptide_centric = false,
-    int elution_window = 0	
+    bool sp
   );
 
   static void initModMap(
@@ -144,6 +143,7 @@ protected:
     ofstream* file,
     int top_n,
     const vector<Arr::iterator>& vec,
+    const string& spectrum_filename,
     const Spectrum* spectrum,
     int charge,
     const ActivePeptideQueue* peptides,

@@ -13,6 +13,7 @@
 #include "MatchFileWriter.h"
 #include "OutputFiles.h"
 #include "parameter.h"
+#include "util/Params.h"
 #include <iostream>
 
 using namespace std;
@@ -203,6 +204,9 @@ void MatchFileWriter::addColumnNames(CruxApplication* application,
 
   // valid commands
   case TIDE_SEARCH_COMMAND: ///< tide-search
+    if (Params::GetBool("file-column")) {
+      addColumnName(FILE_COL);
+    }
     if (get_boolean_parameter("compute-sp") || get_boolean_parameter("sqt-output")) {
       if (get_boolean_parameter("exact-p-value")) {
         addColumnName(EXACT_PVALUE_COL);

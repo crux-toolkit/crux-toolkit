@@ -11,7 +11,7 @@
 <h2>Usage:</h2>
 
 <blockquote>
-<code>crux tide-search [options]  &lt;mass&nbsp;spectra&gt; 
+<code>crux tide-search [options]  &lt;mass&nbsp;spectra&gt;+
   &lt;peptide&nbsp;index&gt;</code>
 </blockquote>
 
@@ -65,11 +65,11 @@ will go faster if provided with inputs in binary format.</p>
 <ul>
 
 <li>
-&lt;spectra&gt; &ndash; The name of the file from which to parse the
+&lt;spectra&gt;+ &ndash; The name of the file(s) from which to parse the
 fragmentation spectra, in any of
 the <a href="http://proteowizard.sourceforge.net/tools.shtml">file
-formats supported by ProteoWizard</a>.  Alternatively, the argument
-may be a binary spectrum file produced by a previous run of <code>crux
+formats supported by ProteoWizard</a>.  Alternatively, these files
+may be binary spectrum files produced by a previous run of <code>crux
 tide-search</code> using the <code>store-spectra</code>
 parameter.</li>
 
@@ -302,7 +302,8 @@ of the file where the binarized fragmentation spectra will be stored.
 Subsequent runs of <code>crux tide-search</code> will execute more
 quickly if provided with the spectra in binary format.  The filename
 is specified relative to the current working directory, not the Crux
-output directory (as specified by <code>--output-dir</code>).</li>
+output directory (as specified by <code>--output-dir</code>). This option
+is not valid if multiple input spectrum files are given.</li>
 
 <li>
 <code>--output-dir &lt;filename&gt;</code> &ndash; 

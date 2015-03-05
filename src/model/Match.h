@@ -102,8 +102,7 @@ class Match {
     int      column_idx,             ///< Index of the column to print. -in
     MatchCollection* collection,  ///< collection holding this match -in 
     MatchFileWriter*    output_file,            ///< output stream -out
-    int     scan_num,               ///< starting scan number -in
-    FLOAT_T spectrum_precursor_mz,  ///< m/z of spectrum precursor -in
+    Spectrum* spectrum,
     int     num_target_matches,     ///< target matches for this spectrum -in
     int     num_decoy_matches, ///< decoy matches (if any) for this spectrum -in
     int     b_y_total,              ///< total b/y ions -in
@@ -175,10 +174,9 @@ class Match {
   void printTab(
     MatchCollection* collection,  ///< collection holding this match -in 
     MatchFileWriter*    file,                   ///< output stream -out
-    int      scan_num,               ///< starting scan number -in
-    FLOAT_T  spectrum_precursor_mz,  ///< m/z of spectrum precursor -in
-    int      num_targetmatches,      ///< target matches for this spectrum -in
-    int      num_decoy_matches ///< decoy matches (if any) for this spectrum -in
+    Spectrum* spectrum,
+    int num_target_matches,  ///< target matches for this spectrum -in
+    int num_decoy_matches ///< decoy matches (if any) for this spectrum -in
     );
 
   /*******************************************

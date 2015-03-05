@@ -593,6 +593,9 @@ void Params::Initialize() {
   InitBoolParam("concat", false,
     "Output target and decoy PSMs into a single file.",
     "Available for tide-search", true);
+  InitBoolParam("file-column", true,
+    "Include the file column in tab-delimited output.",
+    "Available for tide-search", true);
   // Same as remove_precursor_peak and remove_precursor tolerance in Comet
   InitBoolParam("remove-precursor-peak", false,
     "Remove peaks around the precursor m/z.",

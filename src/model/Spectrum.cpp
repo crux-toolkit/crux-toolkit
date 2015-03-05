@@ -55,7 +55,7 @@ Spectrum::Spectrum
  int               last_scan,    ///< The number of the last scan -in
  FLOAT_T           precursor_mz, ///< The m/z of the precursor 
  const vector<int>& possible_z,  ///< The possible charge states 
- const char*       filename      ///< Optional filename
+ const string&     filename      ///< Optional filename
  ) : 
    first_scan_(first_scan),
    last_scan_(last_scan),

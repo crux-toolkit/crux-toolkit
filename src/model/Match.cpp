@@ -728,8 +728,7 @@ void Match::printOneMatchField(
   int      column_idx,             ///< Index of the column to print. -in
   MatchCollection* collection,  ///< collection holding this match -in 
   MatchFileWriter*    output_file,            ///< output stream -out
-  int      scan_num,               ///< starting scan number -in
-  FLOAT_T  spectrum_precursor_mz,  ///< m/z of spectrum precursor -in
+  Spectrum* spectrum,
   int      num_target_matches,            ///< num matches per spectrum -in
   int      num_decoy_matches,     ///< target matches for same spectrum -in
   int      b_y_total,              ///< total b/y ions -in
@@ -740,7 +739,8 @@ void Match::printOneMatchField(
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, getFilePath());
     break;
   case SCAN_COL:
-    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, scan_num);
+    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx,
+                                     spectrum->getFirstScan());
     break;
   case CHARGE_COL:
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
@@ -748,7 +748,7 @@ void Match::printOneMatchField(
     break;
   case SPECTRUM_PRECURSOR_MZ_COL:
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
-                                     spectrum_precursor_mz);
+                                     spectrum->getPrecursorMz());
     break;
   case SPECTRUM_NEUTRAL_MASS_COL:
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
@@ -1022,10 +1022,9 @@ void Match::printOneMatchField(
  */
 void Match::printTab(
   MatchCollection* collection,  ///< collection holding this match -in 
-  MatchFileWriter*    output_file,            ///< output stream -out
-  int      scan_num,               ///< starting scan number -in
-  FLOAT_T  spectrum_precursor_mz,  ///< m/z of spectrum precursor -in
-  int      num_target_matches,     ///< num matches in spectrum -in
+  MatchFileWriter* output_file,            ///< output stream -out
+  Spectrum* spectrum,
+  int num_target_matches,     ///< num matches in spectrum -in
   int num_decoy_matches ///< target matches for same spectrum -in
   ){
 
@@ -1047,8 +1046,7 @@ void Match::printTab(
     printOneMatchField(column_idx, 
                        collection,
                        output_file,
-                       scan_num,
-                       spectrum_precursor_mz,
+                       spectrum,
                        num_target_matches,
                        num_decoy_matches,
                        b_y_total,

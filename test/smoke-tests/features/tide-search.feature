@@ -10,7 +10,7 @@ Scenario Outline: User runs tide-index / tide-search
   And I pass the arguments --overwrite T --seed 7 <index_args> <fasta> <index>
   When I run tide-index as an intermediate step
   Then the return value should be 0
-  And I pass the arguments --overwrite T <search_args> <spectra> <index>
+  And I pass the arguments --overwrite T --file-column F <search_args> <spectra> <index>
   When I run tide-search
   Then the return value should be 0
   And crux-output/<actual_output> should contain the same lines as good_results/<expected_output>
