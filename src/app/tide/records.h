@@ -194,7 +194,7 @@ class HeadedRecordWriter {
 		     int buf_size = -1) 
     : writer_(filename, buf_size) {
     if (!writer_.OK())
-      carp(CARP_FATAL, "Error: Cannot create the file %s\n", filename.c_str());
+      carp(CARP_FATAL, "Cannot create the file %s\n", filename.c_str());
     Write(&header);
   };
 
