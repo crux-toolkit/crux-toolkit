@@ -156,36 +156,47 @@ void CometApplication::setCometParameters(
   searchMgr.SetParam("use_NL_ions", get_string_parameter("use_NL_ions"), get_int_parameter("use_NL_ions"));
   searchMgr.SetParam("use_sparse_matrix", get_string_parameter("use_sparse_matrix"), get_int_parameter("use_sparse_matrix"));
   
-  if (!get_string_parameter("variable_mod1").empty()) {
-    calcVarMods(get_string_parameter("variable_mod1"), varModsParam);
-    searchMgr.SetParam("variable_mod1", get_string_parameter("variable_mod1"), varModsParam );
+  if (!get_string_parameter("variable_mod01").empty()) {
+    calcVarMods(get_string_parameter("variable_mod01"), varModsParam);
+    searchMgr.SetParam("variable_mod01", get_string_parameter("variable_mod01"), varModsParam );
   }
-  if (!get_string_parameter("variable_mod2").empty()) {
-    calcVarMods(get_string_parameter("variable_mod2"), varModsParam);
-    searchMgr.SetParam("variable_mod2", get_string_parameter("variable_mod2"), varModsParam );
+  if (!get_string_parameter("variable_mod02").empty()) {
+    calcVarMods(get_string_parameter("variable_mod02"), varModsParam);
+    searchMgr.SetParam("variable_mod02", get_string_parameter("variable_mod02"), varModsParam );
   }
-  if (!get_string_parameter("variable_mod3").empty()) {
-    calcVarMods(get_string_parameter("variable_mod3"), varModsParam);
-    searchMgr.SetParam("variable_mod3", get_string_parameter("variable_mod3"), varModsParam );
+  if (!get_string_parameter("variable_mod03").empty()) {
+    calcVarMods(get_string_parameter("variable_mod03"), varModsParam);
+    searchMgr.SetParam("variable_mod03", get_string_parameter("variable_mod03"), varModsParam );
   }
-  if (!get_string_parameter("variable_mod4").empty()) {
-    calcVarMods(get_string_parameter("variable_mod4"), varModsParam);
-    searchMgr.SetParam("variable_mod4", get_string_parameter("variable_mod4"), varModsParam );
+  if (!get_string_parameter("variable_mod04").empty()) {
+    calcVarMods(get_string_parameter("variable_mod04"), varModsParam);
+    searchMgr.SetParam("variable_mod04", get_string_parameter("variable_mod04"), varModsParam );
   }
-  if (!get_string_parameter("variable_mod5").empty()) {
-    calcVarMods(get_string_parameter("variable_mod5"), varModsParam);
-    searchMgr.SetParam("variable_mod5", get_string_parameter("variable_mod5"), varModsParam );
+  if (!get_string_parameter("variable_mod05").empty()) {
+    calcVarMods(get_string_parameter("variable_mod05"), varModsParam);
+    searchMgr.SetParam("variable_mod05", get_string_parameter("variable_mod05"), varModsParam );
   }
-  if (!get_string_parameter("variable_mod6").empty()) {
-    calcVarMods(get_string_parameter("variable_mod6"), varModsParam);
-    searchMgr.SetParam("variable_mod6", get_string_parameter("variable_mod6"), varModsParam );
+  if (!get_string_parameter("variable_mod06").empty()) {
+    calcVarMods(get_string_parameter("variable_mod06"), varModsParam);
+    searchMgr.SetParam("variable_mod06", get_string_parameter("variable_mod06"), varModsParam );
+  }
+  if (!get_string_parameter("variable_mod07").empty()) {
+    calcVarMods(get_string_parameter("variable_mod07"), varModsParam);
+    searchMgr.SetParam("variable_mod07", get_string_parameter("variable_mod07"), varModsParam );
+  }
+  if (!get_string_parameter("variable_mod08").empty()) {
+    calcVarMods(get_string_parameter("variable_mod08"), varModsParam);
+    searchMgr.SetParam("variable_mod08", get_string_parameter("variable_mod08"), varModsParam );
+  }
+  if (!get_string_parameter("variable_mod09").empty()) {
+    calcVarMods(get_string_parameter("variable_mod09"), varModsParam);
+    searchMgr.SetParam("variable_mod09", get_string_parameter("variable_mod09"), varModsParam );
   }
 
   searchMgr.SetParam("max_variable_mods_in_peptide", get_string_parameter("max_variable_mods_in_peptide"), get_int_parameter("max_variable_mods_in_peptide"));
   searchMgr.SetParam("fragment_bin_tol", get_string_parameter("fragment_bin_tol"), get_double_parameter("fragment_bin_tol"));
   searchMgr.SetParam("fragment_bin_offset", get_string_parameter("fragment_bin_offset"), get_double_parameter("fragment_bin_offset"));
   searchMgr.SetParam("peptide_mass_tolerance", get_string_parameter("peptide_mass_tolerance"), get_double_parameter("peptide_mass_tolerance"));
-  searchMgr.SetParam("precursor_tolerance_type", get_string_parameter("precursor_tolerance_type"), get_int_parameter("precursor_tolerance_type"));
   searchMgr.SetParam("peptide_mass_units", get_string_parameter("peptide_mass_units"), get_int_parameter("peptide_mass_units"));
   searchMgr.SetParam("isotope_error", get_string_parameter("isotope_error"), get_int_parameter("isotope_error"));
   searchMgr.SetParam("num_output_lines", get_string_parameter("num_output_lines"), get_int_parameter("num_output_lines"));
@@ -199,16 +210,16 @@ void CometApplication::setCometParameters(
   searchMgr.SetParam("print_expect_score", get_string_parameter("print_expect_score"), get_int_parameter("print_expect_score"));
   searchMgr.SetParam("output_sqtstream", "0", 0);
   
+  searchMgr.SetParam("override_charge", get_string_parameter("override_charge"), get_int_parameter("override_charge"));
+
+  searchMgr.SetParam("require_variable_mod", get_string_parameter("require_variable_mod"), get_int_parameter("require_variable_mod"));
+  
   searchMgr.SetParam("output_sqtfile", get_string_parameter("output_sqtfile"), get_int_parameter("output_sqtfile"));
   searchMgr.SetParam("output_txtfile", get_string_parameter("output_txtfile"), get_int_parameter("output_txtfile"));
   searchMgr.SetParam("output_pepxmlfile", get_string_parameter("output_pepxmlfile"), get_int_parameter("output_pepxmlfile"));
-  searchMgr.SetParam("output_pinxmlfile", "0", 0); //hardcode to 0
+  searchMgr.SetParam("output_percolatorfile", get_string_parameter("output_percolatorfile"), get_int_parameter("output_percolatorfile"));
   searchMgr.SetParam("output_outfiles", "0", 0);
   searchMgr.SetParam("skip_researching", get_string_parameter("skip_researching"), get_int_parameter("skip_researching"));
-  searchMgr.SetParam("variable_C_terminus", get_string_parameter("variable_C_terminus"), get_double_parameter("variable_C_terminus"));
-  searchMgr.SetParam("variable_N_terminus", get_string_parameter("variable_N_terminus"), get_double_parameter("variable_N_terminus"));
-  searchMgr.SetParam("variable_C_terminus_distance", get_string_parameter("variable_C_terminus_distance"), get_int_parameter("variable_C_terminus_distance"));
-  searchMgr.SetParam("variable_N_terminus_distance", get_string_parameter("variable_N_terminus_distance"), get_int_parameter("variable_N_terminus_distance"));
   searchMgr.SetParam("add_Cterm_peptide", get_string_parameter("add_Cterm_peptide"), get_double_parameter("add_Cterm_peptide"));
   searchMgr.SetParam("add_Nterm_peptide", get_string_parameter("add_Nterm_peptide"), get_double_parameter("add_Nterm_peptide"));
   searchMgr.SetParam("add_Cterm_protein", get_string_parameter("add_Cterm_protein"), get_double_parameter("add_Cterm_protein"));

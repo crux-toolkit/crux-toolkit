@@ -1,9 +1,21 @@
 #!/bin/bash
 
+
+
 # The parameters files are in the binary release of comet, in a file
 # called paramters_<release>.zip.
 
-for file in ~wnoble/software/comet-params_201401/*.php; do
+to_remove=`ls *.html | grep -v index.html | grep -v header.html | grep -v footer.html | grep -v topmenu.html | grep -v head.html` 
+
+rm $to_remove
+
+rm -rf ~/tmp
+mkdir ~/tmp
+svn checkout svn://svn.code.sf.net/p/comet-ms/code/www/parameters/parameters_201501 ~/tmp/comet-params
+
+files=`ls ~/tmp/comet-params/*.php`
+
+for file in $files; do
   if [[ -e $file ]]; then # Some symlinks point to missing files.
     echo Converting $file
     basename=`basename $file`

@@ -653,8 +653,6 @@ void Params::Initialize() {
     "0=average masses, 1=monoisotopic masses","option for Comet only", true);
   InitIntParam("mass_type_fragment", 1, 0, 1,
     "0=average masses, 1=monoisotopic masses","option for Comet only", true);
-  InitIntParam("precursor_tolerance_type", 0, 0, 1,
-    "0=MH+ (default), 1=precursor m/z","option for Comet only", true);
   InitIntParam("isotope_error", 0, 0, 2, 
     "0=off, 1=on -1/0/1/2/3 (standard C13 error), 2= -8/-4/0/4/8 (for +4/+8 labeling)",
     "option for Comet only", true);
@@ -707,6 +705,9 @@ void Params::Initialize() {
   InitIntParam("output_pepxmlfile", 1, 0, 1,
     "0=no, 1=yes  write pep.xml file",
     "option for Comet only", true);
+  InitIntParam("output_percolatorfile", 0, 0, 1,
+    "0=no, 1=yes write percolator file",
+     "option for Comet only", true);
   InitIntParam("output_txtfile", 1, 0, 1,
     "0=no, 1=yes  write tab-delimited text file",
     "option for Comet only (default 1)", true);
@@ -781,31 +782,24 @@ void Params::Initialize() {
   InitStringParam("clear_mz_range", "0.0 0.0",
     "for iTRAQ/TMT type data; will clear out all peaks in the specified m/z range",
     "option for Comet", true);
-  for (int i = 1; i <= 6; i++) {
-    InitStringParam("variable_mod" + StringUtils::ToString(i), "",
-                    "Up to 6 variable modifications are supported\n"
+  for (int i = 1; i <= 9; i++) {
+    InitStringParam("variable_mod0" + StringUtils::ToString(i), "",
+                    "Up to 9 variable modifications are supported\n"
                     "format: <mass> <residues> <0=variable/1=binary> <max mods per a peptide>\n"
                     "    e.g. 79.966331 STY 0 3",
                     "option for Comet", true);
   }
+  InitIntParam("require_variable_mod", 0, 0, 1,
+    "controls whether the analyzed peptides must contain at least one variable modification", 
+    "option for Comet", true);
   InitIntParam("max_variable_mods_in_peptide", 5, 0, BILLION,
     "Specifies the total/maximum number of residues that can "
     "be modified in a peptide",
     "option for Comet", true);
-  InitDoubleParam("variable_C_terminus", 0, 0, BILLION,
-    "Specifiy a variable modification to peptide's c-terminus"
-    "Works in conjunction with variable_c_terminus_distance",
-    "option for Comet", true);
-  InitDoubleParam("variable_N_terminus", 0, 0, BILLION,
-    "Specifiy a variable modification to peptide's c-terminus"
-    "Works in conjunction with variable_c_terminus_distance",
-    "option for Comet", true);
-  InitIntParam("variable_C_terminus_distance", -1, -1, BILLION,
-    "-1=all peptides, 0=protein terminus, 1-N = maximum offset from C-terminus",
-    "option for Comet", true);
-  InitIntParam("variable_N_terminus_distance", -1, -1, BILLION,
-    "-1=all peptides, 0=protein terminus, 1-N = maximum offset from N-terminus",
-    "option for Comet", true);
+  InitIntParam("override_charge", 0, 0, 1,
+    "specifies the whether to override existing precursor charge state information when present "
+    "in the files with the charge range specified by the \"precursor_charge\" parameter",
+    "option for Comet", true);  
   InitDoubleParam("add_Cterm_peptide", 0, 0, BILLION,
     "Specifiy a static modification to the c-terminus of all peptides",
     "option for Comet", true);
@@ -1539,7 +1533,7 @@ void Params::Write(ofstream* file) {
     throw runtime_error("Bad file stream for writing parameter file");
   }
 
-  *file << "# comet_version 2014.01 rev. 0" << endl
+  *file << "# comet_version 2015.01 rev. 0" << endl
         << "# Comet MS/MS search engine parameters file." << endl
         << "# Everything following the \'#\' symbol is treated as a comment." << endl
         << endl;
