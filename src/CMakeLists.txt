@@ -66,7 +66,7 @@ set (
   util/CarpStreamBuf.cpp
   app/CometApplication.cpp
   app/ComputeQValues.cpp
-  util/crux-file-utils.cpp
+  app/CreateDocs.cpp
   util/crux-utils.cpp
   model/Database.cpp
   model/DatabaseProteinIterator.cpp
@@ -78,6 +78,7 @@ set (
   io/DelimitedFileWriter.cpp
   app/ExtractColumns.cpp
   app/ExtractRows.cpp
+  util/FileUtils.cpp
   model/FilteredSpectrumChargeIterator.cpp
   util/FileUtils.cpp
   app/GenerateDecoys.cpp

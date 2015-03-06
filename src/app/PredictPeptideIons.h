@@ -36,17 +36,32 @@ class PredictPeptideIons: public CruxApplication {
   /**
    * \returns The command name for PredictPeptideIons.
    */
-  virtual std::string getName();
+  virtual std::string getName() const;
 
   /**
    * \returns The description for PredictPeptideIons.
    */
-  virtual std::string getDescription();
+  virtual std::string getDescription() const;
+
+  /**
+   * \returns The command arguments
+   */
+  virtual std::vector<std::string> getArgs() const;
+
+  /**
+   * \returns The command options
+   */
+  virtual std::vector<std::string> getOptions() const;
+
+  /**
+   * \returns The command outputs
+   */
+  virtual std::map<std::string, std::string> getOutputs() const;
 
   /**
    * \returns The enum of the application, PREDICT_PEPTIDE_IONS_COMMAND.
    */
-  virtual COMMAND_T getCommand();
+  virtual COMMAND_T getCommand() const;
 
 };
 

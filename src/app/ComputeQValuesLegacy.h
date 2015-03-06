@@ -22,13 +22,13 @@ class ComputeQValuesLegacy : public ComputeQValues {
   /**
    * \returns The command name for ComputeQValues.
    */
-  virtual std::string getName(){
+  virtual std::string getName() const {
     return "compute-q-values";
   };
   /**
    * Exclude this application from the usage statement.
    */
-  virtual bool hidden(){
+  virtual bool hidden() const {
     return true;
   };
 };

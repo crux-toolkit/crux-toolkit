@@ -37,17 +37,32 @@ class CometApplication: public CruxApplication {
   /**
    * \returns the command name for CometApplication
    */
-  virtual std::string getName();
+  virtual std::string getName() const;
 
   /**
    * \returns the description for CometApplication
    */
-  virtual std::string getDescription();
+  virtual std::string getDescription() const;
+
+  /**
+   * \returns the command arguments
+   */
+  virtual std::vector<std::string> getArgs() const;
+
+  /**
+   * \returns the command options
+   */
+  virtual std::vector<std::string> getOptions() const;
+
+  /**
+   * \returns the command outputs
+   */
+  virtual std::map<std::string, std::string> getOutputs() const;
 
   /**
    * \returns whether the application needs the output directory or not. (default false).
    */
-  virtual bool needsOutputDirectory();
+  virtual bool needsOutputDirectory() const;
 
   /**
    * Sets the parameters for the Comet application using the crux parameters

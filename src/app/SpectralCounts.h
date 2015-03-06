@@ -26,10 +26,13 @@ class SpectralCounts: public CruxApplication {
   SpectralCounts();
   ~SpectralCounts();
   virtual int main(int argc, char** argv);
-  virtual std::string getName();
-  virtual std::string getDescription();
-  virtual COMMAND_T getCommand();
-  virtual bool needsOutputDirectory();
+  virtual std::string getName() const;
+  virtual std::string getDescription() const;
+  virtual std::vector<std::string> getArgs() const;
+  virtual std::vector<std::string> getOptions() const;
+  virtual std::map<std::string, std::string> getOutputs() const;
+  virtual COMMAND_T getCommand() const;
+  virtual bool needsOutputDirectory() const;
 
  private:
   // internally-used types

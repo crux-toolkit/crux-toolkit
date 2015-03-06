@@ -39,17 +39,32 @@ class CruxBullseyeApplication: public CruxApplication {
   /**
    * \returns the command name for CruxBullseyeApplication
    */
-  virtual std::string getName();
+  virtual std::string getName() const;
 
   /**
    * \returns the description for CruxBullseyeApplication
    */
-  virtual std::string getDescription();
+  virtual std::string getDescription() const;
+
+  /**
+   * \returns the command arguments
+   */
+  virtual std::vector<std::string> getArgs() const;
+
+  /**
+   * \returns the command options
+   */
+  virtual std::vector<std::string> getOptions() const;
+
+  /**
+   * \returns the command outputs
+   */
+  virtual std::map<std::string, std::string> getOutputs() const;
 
   /**
    * \returns whether the application needs the output directory or not. (default false).
    */
-  virtual bool needsOutputDirectory();
+  virtual bool needsOutputDirectory() const;
 };
 
 

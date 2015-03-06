@@ -1,4 +1,5 @@
 #include "SQTWriter.h"
+#include "util/FileUtils.h"
 
 using namespace Crux;
 
@@ -11,7 +12,7 @@ SQTWriter::~SQTWriter() {
 }
 
 void SQTWriter::openFile(string filename) {
-  file_ = create_file(filename.c_str(), get_boolean_parameter("overwrite"));
+  file_ = FileUtils::GetWriteStream(filename, get_boolean_parameter("overwrite"));
   if (!file_) {
     carp(CARP_FATAL, "Error creating file '%s'.", filename.c_str());
   }

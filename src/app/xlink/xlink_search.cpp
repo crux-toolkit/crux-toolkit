@@ -58,7 +58,7 @@ int SearchForXLinks::xlinkSearchMain() {
   /* Get parameters */
   carp(CARP_INFO, "Getting parameters");
   string ms2_file = get_string_parameter("ms2 file");
-  string input_file = get_string_parameter("protein-database");
+  string input_file = get_string_parameter("protein fasta file");
   string output_directory = get_string_parameter("output-dir");
   int top_match = get_int_parameter("top-match");
   XLinkPeptide::setLinkerMass(get_double_parameter("link mass"));

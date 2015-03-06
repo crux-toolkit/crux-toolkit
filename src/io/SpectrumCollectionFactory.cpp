@@ -9,7 +9,7 @@
 #include "SpectrumCollectionFactory.h"
 #include "MSToolkitSpectrumCollection.h"
 #include "PWIZSpectrumCollection.h"
-#include "util/crux-file-utils.h"
+#include "util/FileUtils.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -18,7 +18,7 @@
  * given file and the use-mstoolkit and msgf options.
  */
 Crux::SpectrumCollection* SpectrumCollectionFactory::create(const string& filename){
-  if (!file_exists(filename)) {
+  if (!FileUtils::Exists(filename)) {
     carp(CARP_FATAL, "The file %s does not exist. \n", filename.c_str());
   }
   if (is_directory(filename)){

@@ -13,7 +13,7 @@
 #include "MzIdentMLReader.h"
 #include "model/Protein.h"
 #include "model/PostProcessProtein.h"
-#include "util/crux-file-utils.h"
+#include "util/FileUtils.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -170,7 +170,7 @@ MatchCollection* MatchCollectionParser::create(
   if (!fasta_path.empty()) {
     carp(CARP_DEBUG, "fasta path:%s", fasta_path.c_str());
   }
-  if (!file_exists(match_path)) {
+  if (!FileUtils::Exists(match_path)) {
     carp(CARP_FATAL, "The file %s does not exist. \n", match_path.c_str());
   }
   

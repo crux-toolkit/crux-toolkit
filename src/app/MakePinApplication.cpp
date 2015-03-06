@@ -61,38 +61,7 @@ MakePinApplication::~MakePinApplication() {}
  * main method for MakePinApplication
  */
 int MakePinApplication::main(int argc, char** argv) {
-
-   /* Define optional command line arguments */
-
-  const char* option_list[] = {
-    "top-match",
-    "fileroot",
-    "output-dir",
-    "overwrite",
-    "output-file",
-    "verbosity",
-    "parameter-file",
-    "list-of-files",
-    "filestem-prefixes"
-  };
-
-  int num_options = sizeof(option_list) / sizeof(char*);
-  
-  /* Define required command line arguments */
-  const char* argument_list[] = {
-    "target input", 
-  };
-  int num_arguments = sizeof(argument_list) / sizeof(char*);
-
-  /* Initialize the application */
-
-  initialize(argument_list, 
-    num_arguments,
-    option_list, 
-    num_options, 
-    argc, 
-    argv)
-  ;
+  initialize(argc, argv);
 
   string target_path = get_string_parameter("target input");
 
@@ -184,27 +153,93 @@ int MakePinApplication::main(vector<string>& paths) {
 /**
  * \returns the command name for PercolatorApplication
  */
-string MakePinApplication::getName() {
+string MakePinApplication::getName() const {
   return "make-pin";
 }
 
 /**
  * \returns the description for PercolatorApplication
  */
-string MakePinApplication::getDescription() {
-  return "Given a set of search results files, generate a pin file for input "
-         "to crux percolator";
+string MakePinApplication::getDescription() const {
+  return
+    "[[nohtml:Given a set of search results files, generate a pin file for "
+    "input to crux percolator]]"
+    "[[html:<p>Make-pin is a utility program that combines a collection of "
+    "target and decoy peptide-spectrum matches (PSMs) into a single file in "
+    "pin format, according to <a href=\"https://github.com/percolator/"
+    "percolator/wiki/Interface\">this format</a>. The resulting file can be "
+    "provided as input to <code>crux percolator<code>.</p><p><code>make-pin"
+    "</code> requires as input two sets of PSMs, one set derived from matching "
+    "observed spectra against real (&quot;target&quot;) peptides and a second "
+    "set derived from matching the same spectra against &quot;decoy&quot; "
+    "peptides. The output file contains, for each PSM, a set of features for "
+    "use by the Percolator algorithm. These features are summarized <a href=\""
+    "features.html\">here</a>.</p><p>Note that, in the stand-alone version of "
+    "Percolator, the functionality provided by <code>crux make-pin</code> is "
+    "incorporated into a program called <code>sqt2pin</code>. However, a "
+    "significant difference between <code>crux percolator</code> and the "
+    "stand-alone version of the program is that <code>crux percolator</code> "
+    "does not require an explicit call to <code>crux make-pin</code>: if input "
+    "is provided to <code>crux percolator</code> in a non-pin format, then the "
+    "input will be automatically converted to pin format.</p>]]";
+}
+
+/**
+ * \returns the command arguments
+ */
+vector<string> MakePinApplication::getArgs() const {
+  string arr[] = {
+    "target input"
+  };
+  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
+}
+
+/**
+ * \returns the command options
+ */
+vector<string> MakePinApplication::getOptions() const {
+  string arr[] = {
+    "top-match",
+    "fileroot",
+    "output-dir",
+    "overwrite",
+    "output-file",
+    "verbosity",
+    "parameter-file",
+    "list-of-files"
+  };
+  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
+}
+
+/**
+ * \returns the command outputs
+ */
+map<string, string> MakePinApplication::getOutputs() const {
+  map<string, string> outputs;
+  outputs["make-pin.pin"] =
+    "a tab-delimited file containing the input target and decoy PSMs in pin "
+    "format. This file can be changed to an absolute path (see --output-file "
+    "option).";
+  outputs["make-pin.params.txt"] =
+    "a file containing the name and value of all parameters for the current "
+    "operation. Not all parameters in the file may have been used in the "
+    "operation. The resulting file can be used with the --parameter-file "
+    "option for other crux programs.";
+  outputs["make-pin.log.txt"] =
+    "a log file containing a copy of all messages that were printed to "
+    "standard error.";
+  return outputs;
 }
 
 /**
  * \returns whether the application needs the output directory or not. (default false).
  */
-bool MakePinApplication::needsOutputDirectory() {
+bool MakePinApplication::needsOutputDirectory() const {
   return true;
 }
 
 
-bool MakePinApplication:: hidden(){
+bool MakePinApplication:: hidden() const {
   return false;
 }
 

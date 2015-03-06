@@ -12,6 +12,7 @@
 #include <math.h>
 using namespace std;
 #ifdef CRUX
+#include "app/CruxApplication.h"
 #include "io/carp.h"
 #include "util/crux-utils.h"
 #include "parameter.h"
@@ -68,10 +69,13 @@ public:
   
 
   virtual int main(int argc, char** argv);
-  virtual std::string getName();
-  virtual std::string getDescription();
-  virtual bool needsOutputDirectory();
-  virtual COMMAND_T getCommand(); 
+  virtual std::string getName() const;
+  virtual std::string getDescription() const;
+  virtual std::vector<std::string> getArgs() const;
+  virtual std::vector<std::string> getOptions() const;
+  virtual std::map<std::string, std::string> getOutputs() const;
+  virtual bool needsOutputDirectory() const;
+  virtual COMMAND_T getCommand() const;
   FILE_FORMAT_T check_file_format(string &filePath);
   string file_extension(string filename); 
   void get_protein_id(int pepind, vector<string> &prot); 

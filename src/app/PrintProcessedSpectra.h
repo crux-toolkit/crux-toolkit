@@ -43,24 +43,39 @@ class PrintProcessedSpectra: public CruxApplication {
   /**
    * \returns the command name for PrintProcessedSpectra
    */
-  virtual std::string getName();
+  virtual std::string getName() const;
 
   /**
    * \returns the description for PrintProcessedSpectra
    */
-  virtual std::string getDescription();
+  virtual std::string getDescription() const;
+
+  /**
+   * \returns the command arguments
+   */
+  virtual std::vector<std::string> getArgs() const;
+
+  /**
+   * \returns the command options
+   */
+  virtual std::vector<std::string> getOptions() const;
+
+  /**
+   * \returns the command outputs
+   */
+  virtual std::map<std::string, std::string> getOutputs() const;
 
   /**
    * \returns the file stem of the application, default getName.
    */
-  virtual std::string getFileStem();
+  virtual std::string getFileStem() const;
 
   /**
    * \returns the enum of the application, default MISC_COMMAND
    */
-  virtual COMMAND_T getCommand();
+  virtual COMMAND_T getCommand() const;
 
-  virtual bool needsOutputDirectory();
+  virtual bool needsOutputDirectory() const;
 
 
 };

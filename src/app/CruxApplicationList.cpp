@@ -7,6 +7,7 @@
 #include "CruxApplicationList.h"
 #include "io/carp.h"
 #include "util/crux-utils.h"
+#include "util/Params.h"
 #include "util/StringUtils.h"
 
 #include <iostream>
@@ -91,6 +92,20 @@ CruxApplication* CruxApplicationList::find(
 }
 
 /**
+ * \returns an iterator pointing to the beginning of the application list
+ */
+vector<CruxApplication*>::const_iterator CruxApplicationList::begin() const {
+  return applications_.begin();
+}
+
+/**
+ * \returns an iterator pointing to the end of the application list
+ */
+vector<CruxApplication*>::const_iterator CruxApplicationList::end() const {
+  return applications_.end();
+}
+
+/**
  * prints out the usage statement for this application list.
  * Each applications name is printed along with its description
  */
@@ -119,7 +134,7 @@ void CruxApplicationList::usage() {
       continue;
     }
     string name = applications_[i]->getName();
-    string description = applications_[i]->getDescription();
+    string description = Params::ProcessHtmlDocTags(applications_[i]->getDescription());
     int padding = max_name_length - name.length();
 
     cerr<<"  "<<name<<" ";

@@ -120,19 +120,22 @@ public:
   /**
    * Returns the command name
    */
-  virtual std::string getName();
+  virtual std::string getName() const;
 
   /**
    * Returns the command description
    */
-  virtual std::string getDescription();
+  virtual std::string getDescription() const;
+
+  virtual std::vector<std::string> getArgs() const;
+  virtual std::vector<std::string> getOptions() const;
 
   /**
    * Returns whether the application needs the output directory or not. (default false)
    */
-  virtual bool needsOutputDirectory();
+  virtual bool needsOutputDirectory() const;
 
-  virtual COMMAND_T getCommand();
+  virtual COMMAND_T getCommand() const;
   
 };
 

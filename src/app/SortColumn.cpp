@@ -32,24 +32,7 @@ SortColumn::~SortColumn() {
  * main method for SortColumn
  */
 int SortColumn::main(int argc, char** argv) {
-
-   /* Define optional command line arguments */
-  const char* option_list[] = {
-    "delimiter",
-    "header",
-    "column-type",
-    "ascending",
-    "verbosity"
-  };
-  int num_options = sizeof(option_list) / sizeof(char*);
-
-  /* Define required command line arguments */
-  const char* argument_list[] = {"tsv file", "column name"};
-  int num_arguments = sizeof(argument_list) / sizeof(char*);
-
-  /* Initialize the application */
-  initialize(argument_list, num_arguments,
-    option_list, num_options, argc, argv);
+  initialize(argc, argv);
 
   /* Get parameters */
   delimited_filename_ = get_string_parameter("tsv file");
@@ -199,15 +182,54 @@ int SortColumn::main(int argc, char** argv) {
 /**
  * \returns the command name for SortColumn
  */
-string SortColumn::getName() {
+string SortColumn::getName() const {
   return "sort-by-column";
 }
 
 /**
  * \returns the description for SortColumn
  */
-string SortColumn::getDescription() {
-  return "Sorts a tab-delimited file by a column.";
+string SortColumn::getDescription() const {
+  return
+    "[[nohtml:Sorts a tab-delimited file by a column.]]"
+    "[[html:<p>Sort the rows of a tab-delimited file according to the values "
+    "in a specified column.</p>]]";
+}
+
+/**
+ * \returns the command arguments
+ */
+vector<string> SortColumn::getArgs() const {
+  string arr[] = {
+    "tsv file",
+    "column name"
+  };
+  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
+}
+
+/**
+ * \returns the command options
+ */
+vector<string> SortColumn::getOptions() const {
+  string arr[] = {
+    "delimiter",
+    "header",
+    "column-type",
+    "ascending",
+    "verbosity"
+  };
+  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
+}
+
+/**
+ * \returns the command outputs
+ */
+map<string, string> SortColumn::getOutputs() const {
+  map<string, string> outputs;
+  outputs["stdout"] =
+    "a copy of the given file, with rows sorted according to the values in the "
+    "specified column.";
+  return outputs;
 }
 
 /**

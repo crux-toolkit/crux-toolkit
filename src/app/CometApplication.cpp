@@ -30,27 +30,7 @@ CometApplication::~CometApplication() {
  * main method for CometApplication
  */
 int CometApplication::main(int argc, char** argv) {
-
-   /* Define optional command line arguments */
-  const char* option_list[] = {
-    "fileroot",
-    "output-dir",
-    "overwrite",
-    "parameter-file",
-    "verbosity"
-  };
-
-  
-  int num_options = sizeof(option_list) / sizeof(char*);
-
-  /* Define required command line arguments */
-  const char* argument_list[] = {"input spectra","database_name"};
-  int num_arguments = sizeof(argument_list) / sizeof(char*);
-
-  /* Initialize the application */
-
-  initialize(argument_list, num_arguments,
-    option_list, num_options, argc, argv);
+  initialize(argc, argv);
 
   /* Re-route stderr to log file */
   CarpStreamBuf buffer;
@@ -323,23 +303,79 @@ void CometApplication::setCometParameters(
 /**
  * \returns the command name for CometApplication
  */
-string CometApplication::getName() {
+string CometApplication::getName() const {
   return "comet";
 }
 
 /**
  * \returns the description for CometApplication
  */
-string CometApplication::getDescription() {
-  return "Search a collection of spectra against a sequence database, "
-         "returning a collection of PSMs. This search engine runs directly on "
-         "a protein database in FASTA format.";
+string CometApplication::getDescription() const {
+  return
+    "[[nohtml:Search a collection of spectra against a sequence database, "
+    "returning a collection of PSMs. This search engine runs directly on a "
+    "protein database in FASTA format.]]"
+    "[[html:<p>This command searches a protein database with a set of spectra, "
+    "assigning peptide sequences to the observed spectra. This search engine "
+    "was developed by Jimmy Eng at the University of Washington Proteomics "
+    "Resource.</p><p>Although its history goes back two decades, the Comet "
+    "search engine was first made publicly available in August 2012 on "
+    "SourceForge. Comet is multithreaded and supports multiple input and "
+    "output formats.</p><blockquote><a href=\"http://onlinelibrary.wiley.com/"
+    "doi/10.1002/pmic.201200439/abstract\">&quot;Comet: an open source tandem "
+    "mass spectrometry sequence database search tool.&quot;</a> Eng JK, Jahan "
+    "TA, Hoopmann MR. <em>Proteomics</em>. 2012 Nov 12. doi: "
+    "10.1002/pmic201200439</blockquote>]]";
+}
+
+/**
+ * \returns the command arguments
+ */
+vector<string> CometApplication::getArgs() const {
+  string arr[] = {
+    "input spectra",
+    "database_name"
+  };
+  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
+}
+
+/**
+ * \returns the command options
+ */
+vector<string> CometApplication::getOptions() const {
+  string arr[] = {
+    "fileroot",
+    "output-dir",
+    "overwrite",
+    "parameter-file",
+    "verbosity"
+  };
+  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
+}
+
+/**
+ * \returns the command outputs
+ */
+map<string, string> CometApplication::getOutputs() const {
+  map<string, string> outputs;
+  outputs["comet.params.txt"] =
+    "a file containing the name and value of all parameters/options for the "
+    "current operation. Not all parameters in the file may have been used in "
+    "the operation. The resulting file can be used with the --parameter-file "
+    "option for other crux programs.";
+  outputs["comet.target.txt"] =
+    "a tab-delimited text file containing the target PSMs. See txt file format "
+    "for a list of the fields.";
+  outputs["comet.log.txt"] =
+    "a log file containing a copy of all messages that were printed to "
+    "standard error.";
+  return outputs;
 }
 
 /**
  * \returns whether the application needs the output directory or not. (default false).
  */
-bool CometApplication::needsOutputDirectory() {
+bool CometApplication::needsOutputDirectory() const {
   return true;
 }
 

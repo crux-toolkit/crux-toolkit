@@ -8,8 +8,9 @@
 #define CRUXAPPLICATION_H
 #include "objects.h"
 
-
 #include <string>
+#include <vector>
+#include <map>
 
 class CruxApplication{
  public:
@@ -18,51 +19,49 @@ class CruxApplication{
    * CruxApplication define this.
    * \returns exit code for the executed program.   
    */
-  virtual int main(int argc, char** argv)=0;
+  virtual int main(int argc, char** argv) = 0;
 
   /**
    * \returns the name of the subclassed application
    */ 
-  virtual std::string getName()=0;
+  virtual std::string getName() const = 0;
 
   /**
    * \returns the description of the subclassed application
    */
-  virtual std::string getDescription()=0;
+  virtual std::string getDescription() const = 0;
 
+  /**
+   * \returns the arguments of the application
+   */
+  virtual std::vector<std::string> getArgs() const;
+
+  /**
+   * \returns the options of the application
+   */
+  virtual std::vector<std::string> getOptions() const;
+
+  /**
+   * \returns the outputs of the application as name -> description
+   */
+  virtual std::map<std::string, std::string> getOutputs() const;
 
   /**
    * \returns the file stem of the application, default getName.
    */
-  virtual std::string getFileStem();
+  virtual std::string getFileStem() const;
 
   /**
    * \returns the enum of the application, default MISC_COMMAND
    */
-  virtual COMMAND_T getCommand();
+  virtual COMMAND_T getCommand() const;
 
   /**
    * \returns whether the application needs the output directory or not. (default false).
    */
-  virtual bool needsOutputDirectory();
+  virtual bool needsOutputDirectory() const;
 
-  /**
-   * \brief Perform the set-up steps common to all crux commands:
-   * initialize parameters, parse command line, set verbosity, open
-   * output directory, write params file. 
-   *
-   * Uses the given command name, arguments and options for parsing the
-   * command line.
-   */
-  virtual void initialize(
-    const char** argument_list, ///< list of required arguments
-    int num_arguments,          ///< number of elements in arguments_list
-    const char** option_list,   ///< list of optional flags
-    int num_options,            ///< number of elements in options_list
-    int argc,                   ///< number of tokens on cmd line
-    char** argv                 ///< array of command line tokens
-  );
-
+  virtual void initialize(int argc, char** argv);
 
   /**
    * Frees an allocated CruxApplication
@@ -72,19 +71,17 @@ class CruxApplication{
   /**
    * Should this application be kept from the usage statement?
    */
-  virtual bool hidden();
+  virtual bool hidden() const;
 
   /**
    * Read in all parameters from command line and parameter file
    */
   static void initializeParams(
     const std::string& appName,
-    const char** argument_list, ///< list of required arguments
-    int num_arguments,          ///< number of elements in arguments_list
-    const char** option_list,   ///< list of optional flags
-    int num_options,            ///< number of elements in options_list
-    int argc,                   ///< number of tokens on cmd line
-    char** argv                 ///< array of command line tokens
+    const std::vector<std::string>& appArgs,
+    const std::vector<std::string>& appOptions,
+    int argc,
+    char** argv
   );
 
   /**
@@ -98,10 +95,8 @@ class CruxApplication{
    */
   static std::string getUsage(
     const std::string& appName,
-    const char** argument_list, ///< list of required arguments
-    int num_arguments,          ///< number of elements in arguments_list
-    const char** option_list,   ///< list of optional flags
-    int num_options             ///< number of elements in options_list
+    const std::vector<std::string>& args,
+    const std::vector<std::string>& options
   );
 };
 

@@ -48,30 +48,8 @@ GetMs2Spectrum::~GetMs2Spectrum() {
  * MAIN
  ****************************************************************************/
 int GetMs2Spectrum :: main(int argc, char** argv){
+  initialize(argc, argv);
 
-
-  const char* option_list[] = {
-    "scan-number",
-		"remove-precursor-tolerance",
-    "version", 
-    "stats", 
-    "verbosity",
-    "spectrum-parser"};
-
- int num_options = sizeof(option_list) / sizeof(char*);
-
-  
-  const char* argument_list[] = {
-    "ms2 file"
-  };
-  int num_arguments = sizeof(argument_list) / sizeof(char*);
-  initialize(argument_list,
-             num_arguments,
-             option_list,
-             num_options,
-             argc, argv);
-
-  
   /* Get arguments */
   int min_scan = -1;
   int max_scan = -1;
@@ -148,22 +126,60 @@ int GetMs2Spectrum :: main(int argc, char** argv){
 /**
  * \returns The command name for GetMs2SPectrum. 
  */
-string GetMs2Spectrum::getName() {
+string GetMs2Spectrum::getName() const {
   return "get-ms2-spectrum";
 }
 
 /**
  * \returns The description for GetMs2Spectrum.
  */
-string GetMs2Spectrum::getDescription() {
-  return "Extract one or more fragmentation spectra, specified by scan number, "
-         "from an MS2 file.";
+string GetMs2Spectrum::getDescription() const {
+  return
+    "[[nohtml:Extract one or more fragmentation spectra, specified by scan "
+    "number, from an MS2 file.]]"
+    "[[html:<p>Extract one or more MS-MS spectra from an MS2 file by scan "
+    "number. Optionally output summary statistics for each spectrum.</p>]]";
+}
+
+/**
+ * \returns The command arguments
+ */
+vector<string> GetMs2Spectrum::getArgs() const {
+  string arr[] = {
+    "ms2 file"
+  };
+  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
+}
+
+/**
+ * \returns The command options
+ */
+vector<string> GetMs2Spectrum::getOptions() const {
+  string arr[] = {
+    "scan-number",
+    "remove-precursor-tolerance",
+    "version", 
+    "stats", 
+    "verbosity",
+    "spectrum-parser"
+  };
+  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
+}
+
+/**
+ * \returns The command outputs
+ */
+map<string, string> GetMs2Spectrum::getOutputs() const {
+  map<string, string> outputs;
+  outputs["stdout"] =
+    "the requested spectrum or spectra in MS2 format.";
+  return outputs;
 }
 
 /**
  * \returns The enum of the application, default GET_MS2_SPECTRUM_COMMAND.
  */
-COMMAND_T GetMs2Spectrum::getCommand() {
+COMMAND_T GetMs2Spectrum::getCommand() const {
   return GET_MS2_SPECTRUM_COMMAND;
 }
 

@@ -27,22 +27,7 @@ ExtractColumns::~ExtractColumns() {
  * main method for ExtractColumns
  */
 int ExtractColumns::main(int argc, char** argv) {
-
-   /* Define optional command line arguments */
-  const char* option_list[] = {
-    "delimiter",
-    "header",
-    "verbosity"
-  };
-  int num_options = sizeof(option_list) / sizeof(char*);
-
-  /* Define required command line arguments */
-  const char* argument_list[] = {"tsv file", "column names"};
-  int num_arguments = sizeof(argument_list) / sizeof(char*);
-
-  /* Initialize the application */
-  initialize(argument_list, num_arguments,
-    option_list, num_options, argc, argv);
+  initialize(argc, argv);
 
   string delimited_filename = get_string_parameter("tsv file");
   string column_names_string = get_string_parameter("column names");
@@ -94,15 +79,52 @@ int ExtractColumns::main(int argc, char** argv) {
 /**
  * \returns the command name for ExtractColumns
  */
-string ExtractColumns::getName() {
+string ExtractColumns::getName() const {
   return "extract-columns";
 }
 
 /**
  * \returns the description for ExtractColumns
  */
-string ExtractColumns::getDescription() {
-  return "Print specified columns from a tab-delimited file.";
+string ExtractColumns::getDescription() const {
+  return
+    "[[nohtml:Print specified columns from a tab-delimited file.]]"
+    "[[html:<p>Given a tab-delimited file and a comma-delimited list of column "
+    "names, extract the requested columns.</p>]]";
+}
+
+/**
+ * \returns the command arguments
+ */
+vector<string> ExtractColumns::getArgs() const {
+  string arr[] = {
+    "tsv file",
+    "column names"
+  };
+  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
+}
+
+/**
+ * \returns the command options
+ */
+vector<string> ExtractColumns::getOptions() const {
+  string arr[] = {
+    "delimiter",
+    "header",
+    "verbosity"
+  };
+  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
+}
+
+/**
+ * \returns the command outputs
+ */
+map<string, string> ExtractColumns::getOutputs() const {
+  map<string, string> outputs;
+  outputs["stdout"] =
+    "the requested columns in tab-delimited format. The columns are printed in "
+    "the same order that they appear in the input column list.";
+  return outputs;
 }
 
 /*

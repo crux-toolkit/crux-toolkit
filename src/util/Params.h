@@ -6,18 +6,22 @@
 #include <fstream>
 #include <limits>
 #include <map>
+#include <set>
 #include <vector>
 
+class ParamContainer;
 class Param;
 class BoolParam;
 class IntParam;
 class DoubleParam;
 class StringParam;
-class ParamContainer;
 
 class Params {
  public:
   static void Initialize();
+
+  // Group parameters by category
+  static void Categorize();
 
   // Get the value of the parameter
   static bool GetBool(const std::string& name);
@@ -36,6 +40,9 @@ class Params {
 
   // Get whether the parameter is visible to the user or not
   static bool IsVisible(const std::string& name);
+
+  // Get whether the parameter is an argument or an option
+  static bool IsArgument(const std::string& name);
 
   // Get the type of the parameter
   static std::string GetType(const std::string& name);
@@ -65,11 +72,28 @@ class Params {
   // Write all contents of the ordered parameter list to file
   static void Write(std::ofstream* file);
 
+  // Get iterators for the beginning and end of the entire parameter list
+  static std::map<std::string, Param*>::const_iterator BeginAll();
+  static std::map<std::string, Param*>::const_iterator EndAll();
+
   // Get iterators for the beginning and end of the ordered parameter list
   static std::vector<const Param*>::const_iterator Begin();
   static std::vector<const Param*>::const_iterator End();
 
+  // Process tags in a string
+  static std::string ProcessHtmlDocTags(std::string s, bool html = false);
+
+  // Group the given options by category - must call Categorize() first
+  static std::vector< std::pair< std::string, std::vector<std::string> > > GroupByCategory(
+    const std::vector<std::string>& options);
+
  private:
+  struct ParamCategory {
+    ParamCategory(std::string name): Name(name), Items(std::set<const Param*>()) {}
+    std::string Name;
+    std::set<const Param*> Items;
+  };
+
   // A class to store Params
   class ParamContainer {
    public:
@@ -90,6 +114,10 @@ class Params {
     // Get whether the parameters have been finalized or not
     bool Finalized() const;
 
+    // Get iterators for the beginning and end of the entire parameter list
+    std::map<std::string, Param*>::const_iterator BeginAll() const;
+    std::map<std::string, Param*>::const_iterator EndAll() const;
+
     // Get iterators for the beginning and end of the ordered parameter list
     std::vector<const Param*>::const_iterator Begin() const;
     std::vector<const Param*>::const_iterator End() const;
@@ -100,9 +128,16 @@ class Params {
     // Throw exception if the parameters have been finalized
     void CanModifyCheck() const;
 
+    // Add parameter category
+    void AddCategory(const std::string& name, const std::set<std::string>& params);
+
+    // Get all categories
+    const std::vector<ParamCategory>& GetCategories() const;
+
    private:
     std::map<std::string, Param*> params_;
     std::vector<const Param*> paramsOrdered_;
+    std::vector<ParamCategory> categories_;
     bool finalized_;
   };
 
@@ -160,6 +195,10 @@ class Params {
     const std::string& usage,
     const std::string& fileNotes,
     bool visible
+  );
+  static void InitArgParam(
+    const std::string& name,
+    const std::string& usage
   );
 
   // Get a parameter by name
@@ -322,7 +361,7 @@ class StringParam : public Param {
 
 class ArgParam : public Param {
  public:
-  ArgParam(const std::string& name, const std::string& value);
+  ArgParam(const std::string& name, const std::string& usage);
   bool IsArgument() const;
   std::string GetType() const;
   bool IsDefault() const;
