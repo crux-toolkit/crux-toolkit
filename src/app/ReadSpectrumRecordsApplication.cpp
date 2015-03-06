@@ -10,14 +10,7 @@ ReadSpectrumRecordsApplication::~ReadSpectrumRecordsApplication() {
 }
 
 int ReadSpectrumRecordsApplication::main(int argc, char** argv) {
-
-  const char* option_list[1];
-  int num_options = 0;
-  const char* arg_list[] = {
-    "spectrum records file"
-  };
-  int num_args = sizeof(arg_list) / sizeof(char*);
-  initialize(arg_list, num_args, option_list, num_options, argc, argv);
+  initialize(argc, argv);
 
   carp(CARP_INFO, "Running read-spectrumrecords...");
 
@@ -65,23 +58,30 @@ void ReadSpectrumRecordsApplication::show(
   }
 }
 
-string ReadSpectrumRecordsApplication::getName() {
+string ReadSpectrumRecordsApplication::getName() const {
   return "read-spectrumrecords";
 }
 
-string ReadSpectrumRecordsApplication::getDescription() {
+string ReadSpectrumRecordsApplication::getDescription() const {
   return "Runs read-spectrumrecords";
 }
 
-bool ReadSpectrumRecordsApplication::needsOutputDirectory() {
+vector<string> ReadSpectrumRecordsApplication::getArgs() const {
+  string arr[] = {
+    "spectrum records file"
+  };
+  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
+}
+
+bool ReadSpectrumRecordsApplication::needsOutputDirectory() const {
   return false;
 }
 
-COMMAND_T ReadSpectrumRecordsApplication::getCommand() {
+COMMAND_T ReadSpectrumRecordsApplication::getCommand() const {
   return READ_SPECTRUMRECORDS_COMMAND;
 }
 
-bool ReadSpectrumRecordsApplication::hidden() {
+bool ReadSpectrumRecordsApplication::hidden() const {
   return true; 
 }
 

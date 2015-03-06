@@ -124,10 +124,13 @@ class Barista : public CruxApplication
 
   /* CruxApplication Methods */
   virtual int main(int argc, char** argv);
-  virtual std::string getName();
-  virtual std::string getDescription();
-  virtual bool needsOutputDirectory();
-  virtual COMMAND_T getCommand();
+  virtual std::string getName() const;
+  virtual std::string getDescription() const;
+  virtual std::vector<std::string> getArgs() const;
+  virtual std::vector<std::string> getOptions() const;
+  virtual std::map<std::string, std::string> getOutputs() const;
+  virtual bool needsOutputDirectory() const;
+  virtual COMMAND_T getCommand() const;
 
 
   double check_gradients_hinge_one_net(int protind, int label);

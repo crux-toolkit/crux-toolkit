@@ -1,4 +1,5 @@
 #include "PMCDelimitedFileWriter.h"
+#include "util/FileUtils.h"
 
 using namespace Crux;
 using namespace boost;
@@ -40,7 +41,7 @@ void PMCDelimitedFileWriter::openFile(
   ) {
   closeFile();
 
-  file_ptr_ = create_file(filename.c_str(), get_boolean_parameter("overwrite"));
+  file_ptr_ = FileUtils::GetWriteStream(filename, get_boolean_parameter("overwrite"));
   if (!file_ptr_->is_open()) {
     carp(CARP_FATAL, "Error creating file '%s'.", filename.c_str());
   }

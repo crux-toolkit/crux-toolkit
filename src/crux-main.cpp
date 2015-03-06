@@ -17,6 +17,7 @@
 #include "app/CruxApplicationList.h"
 #include "app/ComputeQValues.h"
 #include "app/ComputeQValuesLegacy.h"
+#include "app/CreateDocs.h"
 #include "app/qranker-barista/QRanker.h"
 #include "app/qranker-barista/Barista.h"
 #include "app/PrintProcessedSpectra.h"
@@ -82,6 +83,7 @@ int main(int argc, char** argv){
     applications.add(new GeneratePeptides());
     applications.add(new GenerateDecoys());
     applications.add(new GetMs2Spectrum());
+    applications.add(new CreateDocs());
     applications.add(new PrintVersion());
 
     // Utilities for processing tab-delimited text files

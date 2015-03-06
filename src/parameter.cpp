@@ -400,6 +400,10 @@ void parse_parameter_file(
           carp(CARP_WARNING, "Read parameter '%s' from parameter file, but no "
                              "such parameter exists.", option_name.c_str());
           continue;
+        } else if (Params::IsArgument(option_name)) {
+          carp(CARP_WARNING, "Read parameter '%s' from parameter file, but is "
+                             "an argument, not an option.", option_name.c_str());
+          continue;
         }
         Params::Set(option_name, option_value);
       }

@@ -3,12 +3,12 @@
  * \brief Given a ms1 and ms2 file, run hardklor followed by the bullseye algorithm.
  *****************************************************************************/
 #include "CruxBullseyeApplication.h"
-#include "CruxHardklorApplication.h"
+#include "app/hardklor/CruxHardklorApplication.h"
 #include "util/CarpStreamBuf.h"
-#include "util/crux-file-utils.h"
 #include "io/DelimitedFileWriter.h"
 
 #include "util/crux-utils.h"
+#include "util/FileUtils.h"
 
 using namespace std;
 
@@ -29,36 +29,7 @@ CruxBullseyeApplication::~CruxBullseyeApplication() {
  * main method for CruxBullseyeApplication
  */
 int CruxBullseyeApplication::main(int argc, char** argv) {
-
-   /* Define optional command line arguments */
-  const char* option_list[] = {
-    "fileroot",
-    "output-dir",
-    "overwrite",
-    "max-persist",
-    "exact-match",
-    "exact-tolerance",
-    "persist-tolerance",
-    "gap-tolerance",
-    "scan-tolerance",
-    "bullseye-max-mass",
-    "bullseye-min-mass",
-    "retention-tolerance",
-    "spectrum-format",
-    "parameter-file",
-    "verbosity"
-  };
-
-  int num_options = sizeof(option_list) / sizeof(char*);
-
-  /* Define required command line arguments */
-  const char* argument_list[] = {"MS1 spectra", "MS2 spectra"};
-  int num_arguments = sizeof(argument_list) / sizeof(char*);
-
-  /* Initialize the application */
-
-  initialize(argument_list, num_arguments,
-    option_list, num_options, argc, argv);
+  initialize(argc, argv);
 
   /* Get parameters. */
   string hardklor_output;
@@ -81,7 +52,7 @@ int CruxBullseyeApplication::main(int argc, char** argv) {
 
   if (hardklor_output.empty()) {
     hardklor_output = make_file_path("hardklor.mono.txt");
-    if ((overwrite) || (!file_exists(hardklor_output))) {
+    if ((overwrite) || (!FileUtils::Exists(hardklor_output))) {
       carp(CARP_DEBUG,"Calling hardklor");
       bool ret = CruxHardklorApplication::main(input_ms1);
       if (ret != 0) {
@@ -179,23 +150,110 @@ int CruxBullseyeApplication::main(int argc, char** argv) {
 /**
  * \returns the command name for CruxBullseyeApplication
  */
-string CruxBullseyeApplication::getName() {
+string CruxBullseyeApplication::getName() const {
   return "bullseye";
 }
 
 /**
  * \returns the description for CruxBullseyeApplication
  */
-string CruxBullseyeApplication::getDescription() {
+string CruxBullseyeApplication::getDescription() const {
+  return
+    "[[nohtml:Assign high resolution precursor m/z values to MS/MS data using "
+    "the Hardklör algorithm.]]"
+    "[[html:<p>Bullseye assigns high resolution precursor m/z values to "
+    "fragmentation (MS2) spectra. Bullseye uses the Hardkl&ouml;r algorithm to "
+    "identify persistent isotope distributions (PPIDs) in precursor (MS1) "
+    "scans. For each PPID, MS2 scans that occur within a specified time and "
+    "m/z range are assigned the average monoisotopic m/z from the PPID "
+    "assigned as the precursor m/z. A detailed description of the Bullseye "
+    "algorithm is given in </p><quote>Hsieh EJ, Hoopmann MR, Maclean B, "
+    "MacCoss MJ. <a href=\"http://pubs.acs.org/doi/abs/10.1021/pr900816a\">"
+    "&quot;Comparison of Database Search Strategies for High Precursor Mass "
+    "Accuracy MS/MS Data&quot;</a>. <em>Journal of Proteome Research</em>. "
+    "9(2):1138-43, 2010.</quote><p>Note that, in complex samples, it is not "
+    "unusual for multiple PPIDs to be found near an MS2 spectrum. In those "
+    "cases, Bullseye will assign both mass measurements to the spectrum. In a "
+    ".ms2 file, multiple Z line entries will be made for the scan number.</p>"
+    "<p>It is possible to reduce the number of scans that receive multiple "
+    "PPIDs by adjusting Bullseye's parameters. For example, reducing the "
+    "retention time tolerance (&quot;--retention-tolerance&quot;) or reducing "
+    "the tolerance for persistent peptides (&quot;--persist-tolerance&quot;) "
+    "will reduce the chances of multiple PPIDs being assigned.</p>]]";
+}
 
-  return "Assign high resolution precursor m/z values to MS/MS data "
-    "using the Hardklör algorithm.";
+/**
+ * \returns the command arguments
+ */
+vector<string> CruxBullseyeApplication::getArgs() const {
+  string arr[] = {
+    "MS1 spectra",
+    "MS2 spectra"
+  };
+  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
+}
+
+/**
+ * \returns the command options
+ */
+vector<string> CruxBullseyeApplication::getOptions() const {
+  string arr[] = {
+    "fileroot",
+    "output-dir",
+    "overwrite",
+    "max-persist",
+    "exact-match",
+    "exact-tolerance",
+    "persist-tolerance",
+    "gap-tolerance",
+    "scan-tolerance",
+    "bullseye-max-mass",
+    "bullseye-min-mass",
+    "retention-tolerance",
+    "spectrum-format",
+    "parameter-file",
+    "verbosity"
+  };
+  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
+}
+
+/**
+ * \returns the command outputs
+ */
+map<string, string> CruxBullseyeApplication::getOutputs() const {
+  map<string, string> outputs;
+  outputs["bullseye.params.txt"] =
+    "a file containing the name and value of all parameters/options for the "
+    "current operation. Not all parameters in the file may have been used in "
+    "the operation. The resulting file can be used with the --parameter-file "
+    "option for other crux programs.";
+  outputs["bullseye.pid.<format>"] =
+    "a file containing the fragmentation spectra for which accurate masses "
+    "were successfully inferred. Unless otherwise specified (with the "
+    "--spectrum-format option), the output file format is \".ms2\". Note that "
+    "if the output format is \".ms2,\" then a single spectrum may have "
+    "multiple \"Z\" lines, each indicating a charge state and accurate mass. "
+    "In addition, Bullseye inserts an \"I\" line (for charge-dependent "
+    "analysis) corresponding to each \"Z\" line. The \"I\" line contains "
+    "\"EZ\" in the second column, the charge and mass from the associated "
+    "\"Z\" line in the third and fourth colummns, followed by the "
+    "chromatographic apex and the intensity at the chromatographic apex.";
+  outputs["bullseye.no-pid.<format>"] =
+    "a file containing the fragmentation spectra for which accurate masses "
+    "were not inferred.";
+  outputs["hardklor.mono.txt"] =
+    "a tab-delimited text file containing one line for each isotope "
+    "distribution, as described here.";
+  outputs["bullseye.log.txt"] =
+    "a log file containing a copy of all messages that were printed to "
+    "standard error.";
+  return outputs;
 }
 
 /**
  * \returns whether the application needs the output directory or not. (default false).
  */
-bool CruxBullseyeApplication::needsOutputDirectory() {
+bool CruxBullseyeApplication::needsOutputDirectory() const {
   return true;
 }
 

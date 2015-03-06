@@ -14,13 +14,13 @@
 #endif
 #include <iostream>
 #include "crux-utils.h"
-#include "crux-file-utils.h"
 #include "model/Database.h"
 #include "parameter.h"
 #include "StringUtils.h"
 #include "WinCrux.h"
 #include "io/LineFileReader.h"
 #include "boost/filesystem.hpp"
+#include "FileUtils.h"
 
 using namespace std;
 
@@ -1803,7 +1803,7 @@ void get_search_result_paths(
     while(reader.hasNext()) {
       string current = reader.next();
       carp(CARP_INFO, "current is:%s", current.c_str());
-      if (file_exists(current)) {
+      if (FileUtils::Exists(current)) {
         outpaths.push_back(current);
       } else {
         carp(CARP_ERROR, "Search file '%s' doesn't exist", current.c_str());
@@ -1814,14 +1814,14 @@ void get_search_result_paths(
     string decoy = infile;
     check_target_decoy_files(target, decoy);
     if (target.length() > 0) {
-      if (file_exists(target)) {
+      if (FileUtils::Exists(target)) {
         outpaths.push_back(target);
       } else {
         carp(CARP_ERROR, "Target file '%s' doesn't exist", target.c_str());
       }
     }
     if (decoy.length() > 0) {
-      if (file_exists(decoy)) {
+      if (FileUtils::Exists(decoy)) {
         outpaths.push_back(decoy);
       } else {
         carp(CARP_ERROR, "Decoy file '%s' doesn't exist", decoy.c_str());
@@ -1841,14 +1841,14 @@ void get_files_from_list(
     while(reader.hasNext()) {
       string current = reader.next();
       carp(CARP_INFO, "current is:%s", current.c_str());
-      if (file_exists(current)) {
+      if (FileUtils::Exists(current)) {
         outpaths.push_back(current);
       } else {
         carp(CARP_ERROR, "Search file '%s' doesn't exist", current.c_str());
       }
     }
   } else {
-    if (file_exists(infile)) {
+    if (FileUtils::Exists(infile)) {
       outpaths.push_back(infile);
     } 
   }

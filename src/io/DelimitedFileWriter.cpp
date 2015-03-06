@@ -14,7 +14,9 @@
  */
 
 #include "DelimitedFileWriter.h"
-#include "util/crux-file-utils.h"
+#include "util/FileUtils.h"
+
+#include <fstream>
 
 using namespace std;
 
@@ -62,7 +64,7 @@ void DelimitedFileWriter::openFile(const char* filename){
   }
 
   // open the file if either it doesn't exist or if we are allowed to overwrite
-  file_ptr_ = create_file(filename, get_boolean_parameter("overwrite"));
+  file_ptr_ = FileUtils::GetWriteStream(filename, get_boolean_parameter("overwrite"));
   if( file_ptr_ == NULL ){
     carp(CARP_FATAL, "Error creating file '%s'.", filename);
   }

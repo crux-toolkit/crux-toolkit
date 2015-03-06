@@ -2636,42 +2636,7 @@ void Barista :: print_description()
 
 int Barista :: crux_set_command_line_options(int argc, char *argv[])
 {
-  const char* option_list[] = {
-    "enzyme",
-    "decoy-prefix",
-    "separate-searches",
-    "fileroot",
-    "output-dir",
-    "overwrite",
-    "pepxml-output",
-    "txt-output",
-    "skip-cleanup",
-    "re-run",
-    "use-spec-features",
-    "parameter-file",
-    "verbosity",
-    "list-of-files",
-    "feature-file",
-    "optimization",
-    "spectrum-parser"
-  };
-  int num_options = sizeof(option_list)/sizeof(char*);
-
-  const char* argument_list[] = {
-    "database",
-    "spectra",
-    "search results"
-  };
-  int num_arguments = sizeof(argument_list)/sizeof(char*);
-
-  initialize(
-    argument_list, 
-    num_arguments, 
-    option_list,
-    num_options,
-    argc,
-    argv
-  );
+  initialize(argc, argv);
   
   string db_source;
   string sqt_source;
@@ -2886,25 +2851,102 @@ int Barista::main(int argc, char **argv) {
   return 0;
 }   
 
-bool Barista :: needsOutputDirectory()
+bool Barista :: needsOutputDirectory() const
 {
   return true;
 }
 
 
-string Barista::getName() {
+string Barista::getName() const {
   return "barista";
 }
 
-string Barista::getDescription() {
-  return "Rank PSMs, peptides and proteins, assigning a confidence measure to "
-         "each identification.";
+string Barista::getDescription() const {
+  return
+    "[[nohtml:Rank PSMs, peptides and proteins, assigning a confidence measure "
+    "to each identification.]]"
+    "[[html:<p>Barista is a protein identification algorithm that combines two "
+    "different tasks&ndash;peptide-spectrum match (PSM) verification and "
+    "protein inference&ndash;into a single learning algorithm. The program "
+    "requires three inputs: a set of MS2 spectra, a protein database, and the "
+    "results of searching the spectra against the database. Barista produces "
+    "as output three ranked lists of proteins, peptides and PSMs, based on how "
+    "likely the proteins and peptides are to be present in the sample and how "
+    "likely the PSMs are to be correct. Barista can jointly analyze the "
+    "results of multiple shotgun proteomics experiments, corresponding to "
+    "different experiments or replicate runs.</p><p>Barista uses a machine "
+    "learning strategy that requires that the database search be carried out "
+    "on target and decoy proteins. The searches may be carried out on a "
+    "concatenated database or, using the <code>--separate-searches</code> "
+    "option, separate target and decoy databases. The <code>crux create-index"
+    "</code> command can be used to generate a decoy database.</p><p>Barista "
+    "assigns two types of statistical confidence estimates, q-values and "
+    "posterior error probabilities, to identified PSMs, peptides and proteins. "
+    "For more information about these values, see the documentation for <a "
+    "href=\"calibrate-scores.html\">calibrate-scores</a>.</p>]]";
 }
 
+vector<string> Barista::getArgs() const {
+  string arr[] = {
+    "database",
+    "spectra",
+    "search results"
+  };
+  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
+}
 
+vector<string> Barista::getOptions() const {
+  string arr[] = {
+    "enzyme",
+    "decoy-prefix",
+    "separate-searches",
+    "fileroot",
+    "output-dir",
+    "overwrite",
+    "pepxml-output",
+    "txt-output",
+    "skip-cleanup",
+    "re-run",
+    "use-spec-features",
+    "parameter-file",
+    "verbosity",
+    "list-of-files",
+    "feature-file",
+    "optimization",
+    "spectrum-parser"
+  };
+  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
+}
 
+map<string, string> Barista::getOutputs() const {
+  map<string, string> outputs;
+  outputs["barista.xml"] =
+    "an XML file format that contains four main parts: Proteins, Subset "
+    "Proteins, Peptides, and PSMs.";
+  outputs["barista.target.proteins.txt"] =
+    "a tab-delimited file containing a ranked list of groups of "
+    "indistinguishable target proteins with associated Barista scores and "
+    "q-values and with peptides that contributed to the identification of the "
+    "protein group).";
+  outputs["barista.target.subset-proteins.txt"] =
+    "a tab-delimited file containing groups of indistinguishable proteins, "
+    "which constitute a subset of some group in the "
+    "barista.target.proteins.txt file in terms of the peptides identified in "
+    "these proteins.";
+  outputs["barista.target.peptides.txt"] =
+    "a tab-delimited file containing a ranked list of target peptides with the "
+    "associated Barista scores and q-values.";
+  outputs["barista.target.psm.txt"] =
+    "a tab-delimited file format containing a ranked list of target "
+    "peptide-spectrum matches with the associated Barista scores and q-values.";
+  outputs["barista.log.txt"] =
+    "a file where the program reports its progress.";
+  outputs["barista.params.txt"] =
+    "a file with the values of all the options given to the current run.";
+  return outputs;
+}
 
-COMMAND_T Barista::getCommand(){
+COMMAND_T Barista::getCommand() const {
   return BARISTA_COMMAND;
 }
 

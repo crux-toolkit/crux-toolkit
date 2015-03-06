@@ -180,7 +180,7 @@ void find_all_precursor_ions(
   vector<LinkedPeptide>& all_ions
   ) {
 
-  string database_file = get_string_parameter("protein-database");
+  string database_file = get_string_parameter("protein fasta file");
   
   carp(CARP_DEBUG,"find_all_precursor_ions: start()");
   Database* db = new Database(database_file, false);

@@ -18,7 +18,7 @@
 #include "io/MatchCollectionParser.h"
 #include "analyze_psms.h"
 #include "PosteriorEstimator.h"
-#include "util/crux-file-utils.h"
+#include "util/FileUtils.h"
 
 #include <map>
 #include <utility>
@@ -471,7 +471,6 @@ FLOAT_T* compute_PEP_from_pvalues(FLOAT_T* pvalues, int num_pvals){
  */
 MatchCollection* run_qvalue(
   vector<string>& input_files,
-  const string& fasta_file,
   OutputFiles& output,
   COMMAND_T command  
   ){
@@ -506,11 +505,11 @@ MatchCollection* run_qvalue(
   
     check_target_decoy_files(target_path, decoy_path);
 
-    if (!file_exists(target_path)) {
+    if (!FileUtils::Exists(target_path)) {
       carp(CARP_FATAL, "Target file %s not found", target_path.c_str());
     }
     
-    if (!file_exists(decoy_path)) {
+    if (!FileUtils::Exists(decoy_path)) {
       if (command == MIXMAX_COMMAND) {
         carp(CARP_FATAL, "Decoy file from separate target-decoy search is required "
           "for mix-max q-value calculation");

@@ -39,19 +39,19 @@ int PrintVersion::main(int argc, char** argv) {
 /**
  * \returns the command name for PrintVersion
  */
-string PrintVersion::getName() {
+string PrintVersion::getName() const {
   return "version";
 }
 
 /**
  * \returns the description for PrintVersion
  */
-string PrintVersion::getDescription() {
+string PrintVersion::getDescription() const {
   return 
     "Print the Crux version number to standard output, "
     "then exit.";
 }
 
-COMMAND_T PrintVersion::getCommand() {
+COMMAND_T PrintVersion::getCommand() const {
   return VERSION_COMMAND;
 }

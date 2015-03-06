@@ -11,7 +11,7 @@
  */
 
 #include "OutputFiles.h"
-#include "util/crux-file-utils.h"
+#include "util/FileUtils.h"
 
 using namespace std;
 using namespace Crux;
@@ -400,7 +400,7 @@ void OutputFiles::writeHeaders(int num_proteins, bool isMixedTargetDecoy){
 
     if( sqt_file_array_ ){
       string database = get_string_parameter("protein-database");
-      if (!file_exists(database.c_str())) {
+      if (!FileUtils::Exists(database.c_str())) {
         database = get_string_parameter("tide database index");
       }
       MatchCollection::printSqtHeader(sqt_file_array_[file_idx],

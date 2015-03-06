@@ -2,9 +2,9 @@
 #include <fstream>
 #include "io/carp.h"
 #include "util/CarpStreamBuf.h"
-#include "util/crux-file-utils.h"
 #include "util/AminoAcidUtil.h"
 #include "util/Params.h"
+#include "util/FileUtils.h"
 #include "GenerateDecoys.h"
 #include "TideIndexApplication.h"
 #include "TideMatchSet.h"
@@ -38,44 +38,7 @@ TideIndexApplication::~TideIndexApplication() {
 }
 
 int TideIndexApplication::main(int argc, char** argv) {
-
-  const char* option_list[] = {
-    "decoy-format",
-    "keep-terminal-aminos",
-    "decoy-prefix",
-    "enzyme",
-    "custom-enzyme",
-    "digestion",
-    "missed-cleavages",
-    "max-length",
-    "max-mass",
-    "min-length",
-    "min-mass",
-    "monoisotopic-precursor",
-    "mods-spec",
-    "cterm-peptide-mods-spec",
-    "nterm-peptide-mods-spec",
-    "cterm-protein-mods-spec",
-    "nterm-protein-mods-spec",
-    "max-mods",
-    "min-mods",
-    "output-dir",
-    "overwrite",
-    "peptide-list",
-    "parameter-file",
-    "seed",
-    "clip-nterm-methionine",
-    "verbosity"
-  };
-
-  // Crux command line parsing
-  int num_options = sizeof(option_list) / sizeof(char*);
-  const char* arg_list[] = {
-    "protein fasta file",
-    "index name"
-  };
-  int num_args = sizeof(arg_list) / sizeof(char*);
-  initialize(arg_list, num_args, option_list, num_options, argc, argv);
+  initialize(argc, argv);
 
   carp(CARP_INFO, "Running tide-index...");
 
@@ -162,7 +125,7 @@ int TideIndexApplication::main(int argc, char** argv) {
   string index = get_string_parameter("index name");
   bool overwrite = get_boolean_parameter("overwrite");
 
-  if (!file_exists(fasta)) {
+  if (!FileUtils::Exists(fasta)) {
     carp(CARP_FATAL, "Fasta file %s does not exist", fasta.c_str());
   }
 
@@ -187,9 +150,9 @@ int TideIndexApplication::main(int argc, char** argv) {
 
   if (create_output_directory(index.c_str(), overwrite) != 0) {
     carp(CARP_FATAL, "Error creating index directory");
-  } else if (file_exists(out_proteins) ||
-             file_exists(out_peptides) ||
-             file_exists(out_aux)) {
+  } else if (FileUtils::Exists(out_proteins) ||
+             FileUtils::Exists(out_peptides) ||
+             FileUtils::Exists(out_aux)) {
     if (overwrite) {
       carp(CARP_DEBUG, "Cleaning old index file(s)");
       remove(out_proteins.c_str());
@@ -397,20 +360,91 @@ int TideIndexApplication::main(int argc, char** argv) {
   return 0;
 }
 
-string TideIndexApplication::getName() {
+string TideIndexApplication::getName() const {
   return "tide-index";
 }
 
-string TideIndexApplication::getDescription() {
-  return "Create an index for all peptides in a fasta file, for use in "
-         "subsequent calls to tide-search.";
+string TideIndexApplication::getDescription() const {
+  return
+    "[[nohtml:Create an index for all peptides in a fasta file, for use in "
+    "subsequent calls to tide-search.]]"
+    "[[html:<p>Tide is a tool for identifying peptides from tandem mass "
+    "spectra. It is an independent reimplementation of the SEQUEST<sup>&reg;"
+    "</sup> algorithm, which assigns peptides to spectra by comparing the "
+    "observed spectra to a catalog of theoretical spectra derived from a "
+    "database of known proteins. Tide's primary advantage is its speed. Our "
+    "published paper provides more detail on how Tide works. If you use Tide "
+    "in your research, please cite:</p><blockquote>Benjamin J. Diament and "
+    "William Stafford Noble. &quot;<a href=\""
+    "http://dx.doi.org/10.1021/pr101196n\">Faster SEQUEST Searching for "
+    "Peptide Identification from Tandem Mass Spectra.</a>&quot; <em>Journal of "
+    "Proteome Research</em>. 10(9):3871-9, 2011.</blockquote><p>The <code>"
+    "tide-index</code> command performs a required pre-processing step on the "
+    "protein database, converting it to a binary format suitable for input to "
+    "the <code>tide-search</code> command.</p><p>Tide considers only the "
+    "standard set of 20 amino acids. Peptides containing non-amino acid "
+    "alphanumeric characters (BJOUXZ) are skipped. Non-alphanumeric characters "
+    "are ignored completely.</p>]]";
 }
 
-bool TideIndexApplication::needsOutputDirectory() {
+vector<string> TideIndexApplication::getArgs() const {
+  string arr[] = {
+    "protein fasta file",
+    "index name"
+  };
+  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
+}
+
+vector<string> TideIndexApplication::getOptions() const {
+  string arr[] = {
+    "decoy-format",
+    "keep-terminal-aminos",
+    "decoy-prefix",
+    "enzyme",
+    "custom-enzyme",
+    "digestion",
+    "missed-cleavages",
+    "max-length",
+    "max-mass",
+    "min-length",
+    "min-mass",
+    "monoisotopic-precursor",
+    "mods-spec",
+    "cterm-peptide-mods-spec",
+    "nterm-peptide-mods-spec",
+    "cterm-protein-mods-spec",
+    "nterm-protein-mods-spec",
+    "max-mods",
+    "min-mods",
+    "output-dir",
+    "overwrite",
+    "peptide-list",
+    "parameter-file",
+    "seed",
+    "clip-nterm-methionine",
+    "verbosity"
+  };
+  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
+}
+
+map<string, string> TideIndexApplication::getOutputs() const {
+  map<string, string> outputs;
+  outputs["tide-index.params.txt"] =
+    "a file containing the name and value of all parameters/options for the "
+    "current operation. Not all parameters in the file may have been used in "
+    "the operation. The resulting file can be used with the --parameter-file "
+    "option for other crux programs.";
+  outputs["tide-index.log.txt"] =
+    "a log file containing a copy of all messages that were printed to the "
+    "screen during execution.";
+  return outputs;
+}
+
+bool TideIndexApplication::needsOutputDirectory() const {
   return true;
 }
 
-COMMAND_T TideIndexApplication::getCommand() {
+COMMAND_T TideIndexApplication::getCommand() const {
   return TIDE_INDEX_COMMAND;
 }
 

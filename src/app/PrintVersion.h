@@ -32,17 +32,17 @@ class PrintVersion: public CruxApplication {
   /**
    * \returns the command name for PrintVersion
    */
-  virtual std::string getName();
+  virtual std::string getName() const;
 
   /**
    * \returns the description for PrintVersion
    */
-  virtual std::string getDescription();
+  virtual std::string getDescription() const;
 
   /**
    * \returns the enum of the application, default MISC_COMMAND
    */
-  virtual COMMAND_T getCommand();
+  virtual COMMAND_T getCommand() const;
 
 };
 

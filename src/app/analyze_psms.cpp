@@ -23,37 +23,12 @@ void analyze_matches_main(
   int argc,
   char** argv
 ){
-
-  // Define optional command line arguments.
-  const char* qvalue_option_list[] = {
-    "estimation-method",
-    "decoy-prefix",
-    "score",
-    "smaller-is-better",
-    "verbosity",
-    "parameter-file",
-    "overwrite",
-    "output-dir",
-    "list-of-files",
-    "fileroot"
-  };
-  
-  int qvalue_num_options = sizeof(qvalue_option_list)/sizeof(char*);
-
-  // Define required command line arguments.
-  const char* argument_list[] = {
-    "target input"
-  };
-  int num_arguments = sizeof(argument_list) / sizeof(char*);
-
   CruxApplication* application = NULL;
 
   application = new ComputeQValues();
-  application->initialize(argument_list, num_arguments,
-    qvalue_option_list, qvalue_num_options, argc, argv);
+  application->initialize(argc, argv);
 
   // Get required arguments
-  string protein_database_name = get_string_parameter("protein-database");
 
   string input = get_string_parameter("target input");
   vector<string> input_files;  
@@ -76,8 +51,7 @@ void analyze_matches_main(
   }
   
   // Perform the analysis.
-  MatchCollection* match_collection =
-    run_qvalue(input_files, protein_database_name, output, command);
+  MatchCollection* match_collection = run_qvalue(input_files, output, command);
 
   delete match_collection;
   output.writeFooters();

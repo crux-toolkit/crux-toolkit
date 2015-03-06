@@ -65,28 +65,7 @@ bool passesThreshold(
  * main method for ExtractRows
  */
 int ExtractRows::main(int argc, char** argv) {
-
-   /* Define optional command line arguments */
-  const char* option_list[] = {
-    "delimiter",
-    "header",
-    "comparison",
-    "column-type",
-    "verbosity"
-  };
-  int num_options = sizeof(option_list) / sizeof(char*);
-
-  /* Define required command line arguments */
-  const char* argument_list[] = {
-    "tsv file", 
-    "column name", 
-    "column value"
-  };
-  int num_arguments = sizeof(argument_list) / sizeof(char*);
-
-  /* Initialize the application */
-  initialize(argument_list, num_arguments,
-    option_list, num_options, argc, argv);
+  initialize(argc, argv);
 
   /* Get parameters */
   string delimited_filename = get_string_parameter("tsv file");
@@ -161,15 +140,55 @@ int ExtractRows::main(int argc, char** argv) {
 /**
  * \returns the command name for ExtractRows
  */
-string ExtractRows::getName() {
+string ExtractRows::getName() const {
   return "extract-rows";
 }
 
 /**
  * \returns the description for ExtractRows
  */
-string ExtractRows::getDescription() {
-  return "Print specified rows from a tab-delimited file.";
+string ExtractRows::getDescription() const {
+  return
+    "[[nohtml:Print specified rows from a tab-delimited file.]]"
+    "[[html:Given a tab-delimited file, a column name and a column cell value, "
+    "extract the rows that have the matching values for that column.]]";
+}
+
+/**
+ * \returns the command arguments
+ */
+vector<string> ExtractRows::getArgs() const {
+  string arr[] = {
+    "tsv file", 
+    "column name", 
+    "column value"
+  };
+  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
+}
+
+/**
+ * \returns the command options
+ */
+vector<string> ExtractRows::getOptions() const {
+  string arr[] = {
+    "delimiter",
+    "header",
+    "comparison",
+    "column-type",
+    "verbosity"
+  };
+  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
+}
+
+/**
+ * \returns the command outputs
+ */
+map<string, string> ExtractRows::getOutputs() const {
+  map<string, string> outputs;
+  outputs["stdout"] =
+    "the rows for which the value observed in the specified column of the input "
+    "file match the <column value> given on the command line.";
+  return outputs;
 }
 
 /*

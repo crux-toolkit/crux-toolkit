@@ -26,46 +26,7 @@ CruxHardklorApplication::~CruxHardklorApplication() {
  * main method for CruxHardklorApplication
  */
 int CruxHardklorApplication::main(int argc, char** argv) {
-
-   /* Define optional command line arguments */
-  const char* option_list[] = {
-    "fileroot",
-    "output-dir",
-    "overwrite",
-    "hardklor-algorithm",
-    "cdm",
-    "min-charge",
-    "max-charge",
-    "corr",
-    "depth",
-    "distribution-area",
-    "averagine-mod",
-    "mzxml-filter",
-    "no-base",
-    "max-p",
-    "resolution",
-    "instrument",
-    "centroided",
-    "scan-number",
-    "sensitivity",
-    "signal-to-noise",
-    "sn-window",
-    "mz-window",
-    "max-width",
-    "parameter-file",
-    "verbosity"
-  };
-
-  int num_options = sizeof(option_list) / sizeof(char*);
-
-  /* Define required command line arguments */
-  const char* argument_list[] = {"spectra"};
-  int num_arguments = sizeof(argument_list) / sizeof(char*);
-
-  /* Initialize the application */
-
-  initialize(argument_list, num_arguments,
-    option_list, num_options, argc, argv);
+  initialize(argc, argv);
 
   string input_spectra(get_string_parameter("spectra"));
 
@@ -248,22 +209,98 @@ int CruxHardklorApplication::main(
 /**
  * \returns the command name for CruxHardklorApplication
  */
-string CruxHardklorApplication::getName() {
+string CruxHardklorApplication::getName() const {
   return "hardklor";
 }
 
 /**
  * \returns the description for CruxHardklorApplication
  */
-string CruxHardklorApplication::getDescription() {
+string CruxHardklorApplication::getDescription() const {
+  return
+    "[[nohtml:Identify isotopic distributions from high-resolution mass "
+    "spectra.]]"
+    "[[html:<p>Hardkl&ouml;r analyzes high-resolution mass spectra, "
+    "identifying protein or peptide isotope distributions and determining the "
+    "corresponding monoisotopic masses and charge states. Hardkl&ouml;r is "
+    "specifically designed to handle overlapping isotope distributions in a "
+    "single spectrum. A detailed description of the Hardkl&ouml;r algorithm is "
+    "given in</p><blockquote>Hoopmann MR, Finney GL and MacCoss MJ. <a href=\""
+    "http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2556510/\">&quot;High speed "
+    "data reduction, feature selection, and MS/MS spectrum quality assessment "
+    "of shotgun proteomics datasets using high resolution mass spectrometry."
+    "&quot;</a> <em>Analytical Chemistry</em>. 79:5630-5632 (2007)."
+    "</blockquote>]]";
+}
 
-  return "Identify isotopic distributions from high-resolution mass spectra.";
+/**
+ * \returns the command arguments
+ */
+vector<string> CruxHardklorApplication::getArgs() const {
+  string arr[] = {
+    "spectra"
+  };
+  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
+}
+
+/**
+ * \returns the command options
+ */
+vector<string> CruxHardklorApplication::getOptions() const {
+  string arr[] = {
+    "fileroot",
+    "output-dir",
+    "overwrite",
+    "hardklor-algorithm",
+    "cdm",
+    "min-charge",
+    "max-charge",
+    "corr",
+    "depth",
+    "distribution-area",
+    "averagine-mod",
+    "mzxml-filter",
+    "no-base",
+    "max-p",
+    "resolution",
+    "instrument",
+    "centroided",
+    "scan-number",
+    "sensitivity",
+    "signal-to-noise",
+    "sn-window",
+    "mz-window",
+    "max-width",
+    "parameter-file",
+    "verbosity"
+  };
+  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
+}
+
+/**
+ * \returns the command outputs
+ */
+map<string, string> CruxHardklorApplication::getOutputs() const {
+  map<string, string> outputs;
+  outputs["hardklor.params.txt"] =
+    "a file containing the name and value of all parameters/options for the "
+    "current operation. Not all parameters in the file may have been used in "
+    "the operation. The resulting file can be used with the --parameter-file "
+    "option for other crux programs.";
+  outputs["hardklor.mono.txt"] =
+    "a tab-delimited text file containing one line for each isotope "
+    "distribution. The columns appear in the following order: scan, retention "
+    "time, mass, charge, intensity, m/z, s/n, modifications, dotp.";
+  outputs["hardklor.log.txt"] =
+    "a log file containing a copy of all messages that were printed to "
+    "stderr.";
+  return outputs;
 }
 
 /**
  * \returns whether the application needs the output directory or not. (default false).
  */
-bool CruxHardklorApplication::needsOutputDirectory() {
+bool CruxHardklorApplication::needsOutputDirectory() const {
   return true;
 }
 

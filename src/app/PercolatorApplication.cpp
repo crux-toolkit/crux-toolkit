@@ -13,6 +13,7 @@
 #include <iomanip>
 #include <ios>
 #include "util/CarpStreamBuf.h"
+#include "util/FileUtils.h"
 #include "io/MzIdentMLWriter.h"
 #include "model/ProteinMatchCollection.h"
 #include "io/PMCDelimitedFileWriter.h"
@@ -75,66 +76,7 @@ PercolatorApplication::~PercolatorApplication() {
  * main method for PercolatorApplication
  */
 int PercolatorApplication::main(int argc, char** argv) {
-
-   /* Define optional command line arguments */
-
-  const char* option_list[] = {
-    "fileroot",
-    "output-dir",
-    "overwrite",
-    "txt-output",
-    "pout-output",
-    "mzid-output",
-    "pepxml-output",
-    "feature-file",
-    "list-of-files",
-    "parameter-file",
-    "protein",
-    "decoy-xml-output",
-    "decoy-prefix",
-    "c-pos",
-    "c-neg",
-    "train-fdr",
-    "test-fdr",
-    "maxiter",
-    "train-ratio",
-    "output-weights",
-    "input-weights",
-    "default-direction",
-    "unitnorm",
-    "alpha",
-    "beta",
-    "gamma",
-    "test-each-iteration",
-    "static-override",
-    "seed",
-    "klammer",
-    //"doc",
-    "allow-protein-group",
-    "protein-level-pi0",
-    "empirical-protein-q",
-    "group-proteins",
-    "no-prune-proteins",
-    "deepness",
-    "verbosity",
-    "top-match"
-  };
-
-  int num_options = sizeof(option_list) / sizeof(char*);
-  
-  /* Define required command line arguments */
-  const char* argument_list[] = {"pin"};
-  int num_arguments = sizeof(argument_list) / sizeof(char*);
-
-  /* Initialize the application */
-
-  initialize(argument_list, 
-    num_arguments,
-    option_list, 
-    num_options, 
-    argc, 
-    argv)
-  ;
+  initialize(argc, argv);
 
   string input_pin = get_string_parameter("pin");
 
@@ -155,7 +97,7 @@ int PercolatorApplication::main(int argc, char** argv) {
     carp(CARP_INFO, "Running make-pin");
     int ret = MakePinApplication::main(result_files);
 
-    if (ret != 0 || !file_exists(make_pin_file)) {
+    if (ret != 0 || !FileUtils::Exists(make_pin_file)) {
       carp(CARP_FATAL, "make-pin failed. Not running Percolator.");
     }
     carp(CARP_INFO, "Finished make-pin.");
@@ -487,7 +429,7 @@ int PercolatorApplication::main(
   return retVal;
 }
 
-COMMAND_T PercolatorApplication::getCommand() {
+COMMAND_T PercolatorApplication::getCommand() const {
   return PERCOLATOR_COMMAND;
 
 }
@@ -495,23 +437,155 @@ COMMAND_T PercolatorApplication::getCommand() {
 /**
  * \returns the command name for PercolatorApplication
  */
-string PercolatorApplication::getName() {
+string PercolatorApplication::getName() const {
   return "percolator";
 }
 
 /**
  * \returns the description for PercolatorApplication
  */
-string PercolatorApplication::getDescription() {
+string PercolatorApplication::getDescription() const {
+  return
+    "[[nohtml:Re-rank a collection of PSMs using the Percolator algorithm. "
+    "Optionally, also produce protein rankings using the Fido algorithm.]]"
+    "[[html:<p>Percolator is a semi-supervised learning algorithm that "
+    "dynamically learns to separate target from decoy peptide-spectrum matches "
+    "(PSMs). The algorithm is described in this article:</p><blockquote> Lukas "
+    "K&auml;ll, Jesse Canterbury, Jason Weston, William Stafford Noble and "
+    "Michael J. MacCoss. <a href=\"http://noble.gs.washington.edu/papers/"
+    "kall2007semi-supervised.html\">&quot;Semi-supervised learning for peptide "
+    "identification from shotgun proteomics datasets.&quot;</a> <em>Nature "
+    "Methods</em>. 4(11):923-925, 2007.</blockquote><p>Percolator requires as "
+    "input two collections of PSMs, one set derived from matching observed "
+    "spectra against real (&quot;target&quot;) peptides, and a second derived "
+    "from matching the same spectra against &quot;decoy&quot; peptides. The "
+    "output consists of ranked lists of PSMs, peptides and proteins. Peptides "
+    "and proteins are assigned two types of statistical confidence estimates: "
+    "q-values and posterior error probabilities.</p><p>The features used by "
+    "Percolator to represent each PSM are summarized <a href=\"features.html\">"
+    "here</a>.</p><p>Percolator also includes code from <a href=\""
+    "http://noble.gs.washington.edu/proj/fido/\">Fido</a>, whch performs "
+    "protein-level inference. The Fido algorithm is described in this article:"
+    "</p><blockquote>Oliver Serang, Michael J. MacCoss and William Stafford "
+    "Noble. <a href=\"http://pubs.acs.org/doi/abs/10.1021/pr100594k\">"
+    "&quot;Efficient marginalization to compute protein posterior probabilities "
+    "from shotgun mass spectrometry data.&quot;</a> <em>Journal of Proteome "
+    "Research</em>. 9(10):5346-5357, 2010.</blockquote><p>Crux includes code "
+    "from <a href=\"http://per-colator.com/\">Percolator</a>. Crux Percolator "
+    "differs from the stand-alone version of Percolator in the following "
+    "respects:</p><ul><li>In addition to the native Percolator XML file "
+    "format, Crux Percolator supports additional input file formats (SQT, "
+    "PepXML, tab-delimited text) and output file formats (PepXML, mzIdentML, "
+    "tab-delimited text).</li><li>To maintain consistency with the rest of the "
+    "Crux commands, Crux Percolator uses different parameter syntax than the "
+    "stand-alone version of Percolator.</li><li>Like the rest of the Crux "
+    "commands, Crux Percolator writes its files to an output directory, logs "
+    "all standard error messages to a log file, and is capable of reading "
+    "parameters from a parameter file.</li></ul>]]";
+}
 
-  return "Re-rank a collection of PSMs using the Percolator algorithm. "
-         "Optionally, also produce protein rankings using the Fido algorithm.";
+/**
+ * \returns the command arguments
+ */
+vector<string> PercolatorApplication::getArgs() const {
+  string arr[] = {
+    "pin"
+  };
+  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
+}
+
+/**
+ * \returns the command options
+ */
+vector<string> PercolatorApplication::getOptions() const {
+  string arr[] = {
+    "fileroot",
+    "output-dir",
+    "overwrite",
+    "txt-output",
+    "pout-output",
+    "mzid-output",
+    "pepxml-output",
+    "feature-file",
+    "list-of-files",
+    "parameter-file",
+    "protein",
+    "decoy-xml-output",
+    "decoy-prefix",
+    "c-pos",
+    "c-neg",
+    "train-fdr",
+    "test-fdr",
+    "maxiter",
+    "train-ratio",
+    "output-weights",
+    "input-weights",
+    "default-direction",
+    "unitnorm",
+    "alpha",
+    "beta",
+    "gamma",
+    "test-each-iteration",
+    "static-override",
+    "seed",
+    "klammer",
+    //"doc",
+    "allow-protein-group",
+    "protein-level-pi0",
+    "empirical-protein-q",
+    "group-proteins",
+    "no-prune-proteins",
+    "deepness",
+    "verbosity",
+    "top-match"
+  };
+  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
+}
+
+/**
+ * \returns the command outputs
+ */
+map<string, string> PercolatorApplication::getOutputs() const {
+  map<string, string> outputs;
+  outputs["percolator.target.proteins.txt"] =
+    "a tab-delimited file containing the target protein matches. See here for "
+    "a list of the fields.";
+  outputs["percolator.decoy.proteins.txt"] =
+    "a tab-delimited file containing the decoy protein matches. See here for a "
+    "list of the fields.";
+  outputs["percolator.target.peptides.txt"] =
+    "a tab-delimited file containing the target peptide matches. See here for "
+    "a list of the fields.";
+  outputs["percolator.decoy.peptides.txt"] =
+    "a tab-delimited file containing the decoy peptide matches. See here for a "
+    "list of the fields.";
+  outputs["percolator.target.psms.txt"] =
+    "a tab-delimited file containing the target PSMs. See here for a list of "
+    "the fields.";
+  outputs["percolator.decoy.psms.txt"] =
+    "a tab-delimited file containing the decoy PSMs. See here for a list of "
+    "the fields.";
+  outputs["percolator.params.txt"] =
+    "a file containing the name and value of all parameters for the current "
+    "operation. Not all parameters in the file may have been used in the "
+    "operation. The resulting file can be used with the --parameter-file "
+    "option for other crux programs.";
+  outputs["percolator.pep.xml"] =
+    "a file containing the PSMs in pepXML format. This file can be used as "
+    "input to some of the tools in the Transproteomic Pipeline.";
+  outputs["percolator.mzid"] =
+    "a file containing the protein, peptide, and spectrum matches in mzIdentML "
+    "format.";
+  outputs["percolator.log.txt"] =
+    "a log file containing a copy of all messages that were printed to "
+    "standard error.";
+  return outputs;
 }
 
 /**
  * \returns whether the application needs the output directory or not. (default false).
  */
-bool PercolatorApplication::needsOutputDirectory() {
+bool PercolatorApplication::needsOutputDirectory() const {
   return true;
 }
 

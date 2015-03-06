@@ -9,7 +9,7 @@
 #include "io/carp.h"
 #include "parameter.h"
 #include "util/ArgParser.h"
-#include "util/crux-file-utils.h"
+#include "util/FileUtils.h"
 #include "util/Params.h"
 #include "util/WinCrux.h"
 
@@ -24,34 +24,47 @@ CruxApplication::~CruxApplication() {
 }
 
 /**
+ * \returns the arguments of the application
+ */
+vector<string> CruxApplication::getArgs() const {
+  return vector<string>();
+}
+
+/**
+ * \returns the options of the application
+ */
+vector<string> CruxApplication::getOptions() const {
+  return vector<string>();
+}
+
+/**
+ * \returns the outputs of the application as name -> description
+ */
+map<string, string> CruxApplication::getOutputs() const {
+  return map<string, string>();
+}
+
+/**
  * \returns the file stem of the application, default getName.
  */
-string CruxApplication::getFileStem() {
+string CruxApplication::getFileStem() const {
   return getName();
 }
 
 /**
  * \returns the enum of the application, default MISC_COMMAND
  */
-COMMAND_T CruxApplication::getCommand() {
+COMMAND_T CruxApplication::getCommand() const {
   return MISC_COMMAND;
 }
 
 
-bool CruxApplication::needsOutputDirectory() {
+bool CruxApplication::needsOutputDirectory() const {
   return false;
 }
 
-void CruxApplication::initialize(
-  const char** argument_list, ///< list of required arguments
-  int num_arguments,          ///< number of elements in arguments_list
-  const char** option_list,   ///< list of optional flags
-  int num_options,            ///< number of elements in options_list
-  int argc,                   ///< number of tokens on cmd line
-  char** argv                 ///< array of command line tokens
-  ) {
-  initializeParams(getName(), argument_list, num_arguments,
-                   option_list, num_options, argc, argv);
+void CruxApplication::initialize(int argc, char** argv) {
+  initializeParams(getName(), getArgs(), getOptions(), argc, argv);
   processParams();
   Params::Finalize();
 
@@ -89,7 +102,7 @@ void CruxApplication::initialize(
 
     // Write the parameter file
     string paramFile = make_file_path(getFileStem() + ".params.txt");
-    ofstream* file = create_file(paramFile.c_str(), Params::GetBool("overwrite"));
+    ofstream* file = FileUtils::GetWriteStream(paramFile, Params::GetBool("overwrite"));
     if (file == NULL) {
       throw runtime_error("Could not open " + paramFile + " for writing");
     }
@@ -101,7 +114,7 @@ void CruxApplication::initialize(
 /**
  * Should this application be kept from the usage statement?
  */
-bool CruxApplication::hidden() {
+bool CruxApplication::hidden() const {
   return false;
 }
 
@@ -110,24 +123,18 @@ bool CruxApplication::hidden() {
  */
 void CruxApplication::initializeParams(
   const string& appName,
-  const char** argument_list, ///< list of required arguments
-  int num_arguments,          ///< number of elements in arguments_list
-  const char** option_list,   ///< list of optional flags
-  int num_options,            ///< number of elements in options_list
-  int argc,                   ///< number of tokens on cmd line
-  char** argv                 ///< array of command line tokens
+  const vector<string>& appArgs,
+  const vector<string>& appOptions,
+  int argc,
+  char** argv
 ) {
   initialize_parameters();
   set_verbosity_level(Params::GetInt("verbosity"));
 
   // Parse command line
-  vector<string> argSpecs;
-  for (int i = 0; i < num_arguments; i++) {
-    argSpecs.push_back(argument_list[i]);
-  }
   ArgParser argParser;
   try {
-    argParser.Parse(argc, argv, argSpecs);
+    argParser.Parse(argc, argv, appArgs);
 
     // Read parameter file if specified
     string parameter_file = argParser.GetOption("parameter-file");
@@ -149,7 +156,7 @@ void CruxApplication::initializeParams(
     }
   } catch (const runtime_error& e) {
     carp(CARP_FATAL, "%s\n\n%s\n", e.what(),
-         getUsage(appName, argument_list, num_arguments, option_list, num_options).c_str());
+         getUsage(appName, appArgs, appOptions).c_str());
   }
 }
 
@@ -162,20 +169,13 @@ void CruxApplication::processParams() {
 
 string CruxApplication::getUsage(
   const string& appName,
-  const char** argument_list, ///< list of required arguments
-  int num_arguments,          ///< number of elements in arguments_list
-  const char** option_list,   ///< list of optional flags
-  int num_options             ///< number of elements in options_list
+  const vector<string>& args,
+  const vector<string>& options
 ) {
   vector<string> argDisplay;
-  for (int i = 0; i < num_arguments; i++) {
-    string argName = argument_list[i];
-    if (StringUtils::EndsWith(argName, "+")) {
-      argName = argName.substr(0, argName.length() - 1);
-      argDisplay.push_back("<" + argName + ">+");
-    } else {
-      argDisplay.push_back("<" + argName + ">");
-    }
+  for (vector<string>::const_iterator i = args.begin(); i != args.end(); i++) {
+    argDisplay.push_back(StringUtils::EndsWith(*i, "+") ?
+      "<" + i->substr(0, i->length() - 1) + ">+" :"<" + *i + ">");
   }
 
   stringstream usage;
@@ -189,19 +189,17 @@ string CruxApplication::getUsage(
         << "REQUIRED ARGUMENTS:";
   for (vector<string>::const_iterator i = argDisplay.begin(); i != argDisplay.end(); i++) {
     stringstream line;
-    string argName = *i;
-    argName = argName.substr(
-      1, argName.length() - (StringUtils::EndsWith(argName, "+") ? 3 : 2));
+    string argName = i->substr(1, i->length() - (StringUtils::EndsWith(*i, "+") ? 3 : 2));
     line << *i << ' ' << Params::GetUsage(argName);
     usage << endl << endl << StringUtils::LineFormat(line.str(), 80, 2);
   }
   usage << endl << endl
         << "OPTIONAL ARGUMENTS:" << endl;
-  for (int i = 0; i < num_options; i++) {
+  for (vector<string>::const_iterator i = options.begin(); i != options.end(); i++) {
     usage << endl
-          << "  [--" << option_list[i] << " <" << Params::GetType(option_list[i])
+          << "  [--" << *i << " <" << Params::GetType(*i)
           << ">]" << endl
-          << StringUtils::LineFormat(Params::GetUsage(option_list[i]), 80, 5);
+          << StringUtils::LineFormat(Params::ProcessHtmlDocTags(Params::GetUsage(*i)), 80, 5);
   }
   usage << endl << endl
         << "Additional parameters are documented in the online documentation.";

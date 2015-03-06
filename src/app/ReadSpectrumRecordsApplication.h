@@ -40,21 +40,23 @@ public:
   /**
    * Returns the command name
    */
-  virtual string getName();
+  virtual string getName() const;
 
   /**
    * Returns the command description
    */
-  virtual string getDescription();
+  virtual string getDescription() const;
+
+  virtual vector<string> getArgs() const;
 
   /**
    * Returns whether the application needs the output directory or not. (default false)
    */
-  virtual bool needsOutputDirectory();
+  virtual bool needsOutputDirectory() const;
 
-  virtual COMMAND_T getCommand();
+  virtual COMMAND_T getCommand() const;
 
-  virtual bool hidden();
+  virtual bool hidden() const;
   
 };
 

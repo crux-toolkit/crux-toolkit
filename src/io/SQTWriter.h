@@ -2,7 +2,6 @@
 #define SQTWRITER_H
 
 #include "carp.h"
-#include "util/crux-file-utils.h"
 #include "parameter.h"
 #include "model/PostProcessProtein.h"
 #include "model/Spectrum.h"

@@ -36,28 +36,43 @@ class GeneratePeptides: public CruxApplication {
   /**
    * \returns The command name for GeneratePeptides.
    */
-  virtual std::string getName();
+  virtual std::string getName() const;
 
   /**
    * \returns The description for GeneratePeptides.
    */
-  virtual std::string getDescription();
+  virtual std::string getDescription() const;
+
+  /**
+   * \returns The command arguments
+   */
+  virtual std::vector<std::string> getArgs() const;
+
+  /**
+   * \returns The command options
+   */
+  virtual std::vector<std::string> getOptions() const;
+
+  /**
+   * \returns The command outputs
+   */
+  virtual std::map<std::string, std::string> getOutputs() const;
 
   /**
    * \returns The file stem of the application, default getName.
    */
-  virtual std::string getFileStem();
+  virtual std::string getFileStem() const;
 
   /**
    * \returns The enum of the application, default MISC_COMMAND.
    */
-  virtual COMMAND_T getCommand();
+  virtual COMMAND_T getCommand() const;
 
   /**
    * \returns False, i.e. GeneratePeptides does not require an
    * output directory.
    */
-  virtual bool needsOutputDirectory();
+  virtual bool needsOutputDirectory() const;
 
  protected:
   /**

@@ -30,7 +30,7 @@ int main(int argc, char** argv){
   set_verbosity_level(CARP_ERROR);
   
   /* Define optional command line arguments */
-  const char* option_list[] = {
+  string options[] = {
     "verbosity",
     "version",
     "spectrum-parser",
@@ -39,11 +39,9 @@ int main(int argc, char** argv){
     "mz-bin-width",
     "precision"
   };
-  int num_options = sizeof(option_list) / sizeof(char*);
-  
 
   /* Define required command line arguments */
-  const char* argument_list[] = {
+  string args[] = {
     "peptide A",
     "peptide B",
     "pos A",
@@ -51,16 +49,18 @@ int main(int argc, char** argv){
     "link mass",
     "charge state",
     "scan number",
-    "ms2 file"};
-  int num_arguments = sizeof(argument_list) / sizeof(char*);
+    "ms2 file"
+  };
   
   /* for debugging of parameter processing */
   set_verbosity_level( CARP_ERROR );
   
   /* Define optional and required command line arguments */
   CruxApplication::initializeParams(
-    "xlink-assign-ions", argument_list, num_arguments,
-    option_list, num_options, argc, argv);
+    "xlink-assign-ions",
+    vector<string>(args, args + sizeof(args) / sizeof(string)),
+    vector<string>(options, options + sizeof(options) / sizeof(string)),
+    argc, argv);
 
   /* Set verbosity */
   set_verbosity_level(get_int_parameter("verbosity"));

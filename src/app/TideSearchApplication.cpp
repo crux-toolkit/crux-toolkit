@@ -25,48 +25,7 @@ TideSearchApplication::~TideSearchApplication() {
 }
 
 int TideSearchApplication::main(int argc, char** argv) {
-
-  const char* option_list[] = {
-    "precursor-window",
-    "precursor-window-type",
-    "spectrum-min-mz",
-    "spectrum-max-mz",
-    "min-peaks",
-    "spectrum-charge",
-    "scan-number",
-    "top-match",
-    "store-spectra",
-    "concat",
-    "compute-sp",
-    "remove-precursor-peak",
-    "remove-precursor-tolerance",
-    "print-search-progress",
-    "txt-output",
-    "sqt-output",
-    "pepxml-output",
-    "mzid-output",
-    "pin-output",
-    "fileroot",
-    "output-dir",
-    "overwrite",
-    "parameter-file",
-    "exact-p-value",
-    "use-neutral-loss-peaks",
-    "use-flanking-peaks",
-    "mz-bin-width",
-    "mz-bin-offset",
-    "max-precursor-charge",
-    "peptide-centric-search",
-    "elution-window-size",	
-    "verbosity"
-  };
-  int num_options = sizeof(option_list) / sizeof(char*);
-  const char* arg_list[] = {
-    "tide spectra file+",
-    "tide database index"
-  };
-  int num_args = sizeof(arg_list) / sizeof(char*);
-  initialize(arg_list, num_args, option_list, num_options, argc, argv);
+  initialize(argc, argv);
 
   carp(CARP_INFO, "Running tide-search...");
 
@@ -811,22 +770,109 @@ bool TideSearchApplication::hasDecoys() {
   return HAS_DECOYS;
 }
 
-string TideSearchApplication::getName() {
+string TideSearchApplication::getName() const {
   return "tide-search";
 }
 
-string TideSearchApplication::getDescription() {
+string TideSearchApplication::getDescription() const {
   return
-  "Search a collection of spectra against a sequence database, returning a "
-  "collection of peptide-spectrum matches (PSMs). This is a fast search engine "
-  "but requires that you first build an index with tide-index.";
+    "[[nohtml:Search a collection of spectra against a sequence database, "
+    "returning a collection of peptide-spectrum matches (PSMs). This is a "
+    "fast search engine but requires that you first build an index with "
+    "tide-index.]]"
+    "[[html:<p>Tide is a tool for identifying peptides from tandem mass "
+    "spectra. It is an independent reimplementation of the SEQUEST<sup>&reg;"
+    "</sup> algorithm, which assigns peptides to spectra by comparing the "
+    "observed spectra to a catalog of theoretical spectra derived from a "
+    "database of known proteins. Tide's primary advantage is its speed. Our "
+    "published paper provides more detail on how Tide works. If you use Tide "
+    "in your research, please cite:</p><blockquote>Benjamin J. Diament and "
+    "William Stafford Noble. <a href=\"http://dx.doi.org/10.1021/pr101196n\">"
+    "&quot;Faster SEQUEST Searching for Peptide Identification from Tandem "
+    "Mass Spectra&quot;</a>. <em>Journal of Proteome Research</em>. "
+    "10(9):3871-9, 2011.</blockquote><p>To use <code>crux tide-search</code>, "
+    "you must first create a database index using the <code>crux tide-index"
+    "</code> command.</p><p>When <code>tide-search</code> runs, it performs "
+    "several intermediate steps, as follows:</p><ol><li>Convert the given "
+    "fragmentation spectra to a binary format.</li><li>Search the spectra "
+    "against the database and store the results in binary format.</li><li>"
+    "Convert the results to one or more requested output formats.</li></ol><p>"
+    "By default, the intermediate binary files are stored in the output "
+    "directory and deleted when Tide finishes execution. If you plan to search "
+    "a given set of spectra more than once, then you can direct Tide to save "
+    "the binary spectrum files. Subsequent runs of the program will go faster "
+    "if provided with inputs in binary format.</p>]]";
 }
 
-bool TideSearchApplication::needsOutputDirectory() {
+vector<string> TideSearchApplication::getArgs() const {
+  string arr[] = {
+    "tide spectra file+",
+    "tide database index"
+  };
+  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
+}
+
+vector<string> TideSearchApplication::getOptions() const {
+  string arr[] = {
+    "precursor-window",
+    "precursor-window-type",
+    "spectrum-min-mz",
+    "spectrum-max-mz",
+    "min-peaks",
+    "spectrum-charge",
+    "scan-number",
+    "top-match",
+    "store-spectra",
+    "concat",
+    "compute-sp",
+    "remove-precursor-peak",
+    "remove-precursor-tolerance",
+    "print-search-progress",
+    "txt-output",
+    "sqt-output",
+    "pepxml-output",
+    "mzid-output",
+    "pin-output",
+    "fileroot",
+    "output-dir",
+    "overwrite",
+    "parameter-file",
+    "exact-p-value",
+    "use-neutral-loss-peaks",
+    "use-flanking-peaks",
+    "mz-bin-width",
+    "mz-bin-offset",
+    "max-precursor-charge",
+    "peptide-centric-search",
+    "elution-window-size",
+    "verbosity"
+  };
+  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
+}
+
+map<string, string> TideSearchApplication::getOutputs() const {
+  map<string, string> outputs;
+  outputs["tide-search.target.txt"] =
+    "a tab-delimited text file containing the target PSMs. See txt file format "
+    "for a list of the fields.";
+  outputs["tide-search.decoy.txt"] =
+    "a tab-delimited text file containing the decoy PSMs. This file will only "
+    "be created if the index was created with decoys.";
+  outputs["tide-search.params.txt"] =
+    "a file containing the name and value of all parameters/options for the "
+    "current operation. Not all parameters in the file may have been used in "
+    "the operation. The resulting file can be used with the --parameter-file "
+    "option for other Crux programs.";
+  outputs["tide-search.log.txt"] =
+    "a log file containing a copy of all messages that were printed to the "
+    "screen during execution.";
+  return outputs;
+}
+bool TideSearchApplication::needsOutputDirectory() const {
   return true;
 }
 
-COMMAND_T TideSearchApplication::getCommand() {
+COMMAND_T TideSearchApplication::getCommand() const {
   return TIDE_SEARCH_COMMAND;
 }
 

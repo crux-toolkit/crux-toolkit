@@ -65,6 +65,16 @@ class CruxApplicationList {
   );
 
   /**
+   * \returns an iterator pointing to the beginning of the application list
+   */
+  std::vector<CruxApplication*>::const_iterator begin() const;
+
+  /**
+   * \returns an iterator pointing to the end of the application list
+   */
+  std::vector<CruxApplication*>::const_iterator end() const;
+
+  /**
    * prints out the usage statement for this application list.
    * Each applications name is printed along with its description
    */

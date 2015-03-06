@@ -933,37 +933,8 @@ FILE_FORMAT_T QRanker::check_file_format(string& source) {
 
 int QRanker :: crux_set_command_line_options(int argc, char *argv[])
 {
-  const char* option_list[] = {
-    "enzyme",
-    "decoy-prefix",
-    "separate-searches",
-    "fileroot",
-    "output-dir",
-    "overwrite",
-    "pepxml-output",
-    "txt-output",
-    "skip-cleanup",
-    "re-run",
-    "use-spec-features",
-    "parameter-file",
-    "verbosity",
-     "list-of-files",
-    "feature-file",
-    "spectrum-parser"
-  };
-  int num_options = sizeof(option_list)/sizeof(char*);
+  initialize(argc, argv);
 
-  const char* argument_list[] = {
-    "spectra",
-    "search results"
-  };
-  int num_arguments = sizeof(argument_list)/sizeof(char*);
-
-  initialize(argument_list, num_arguments, 
-	     option_list, num_options,
-	     argc, argv);
-
-  
   string sqt_source;
   string ms2_source;
   string sqt_decoy_source;
@@ -1180,20 +1151,84 @@ int QRanker::main(int argc, char **argv) {
   return 0;
 }   
 
-bool QRanker :: needsOutputDirectory()
+bool QRanker :: needsOutputDirectory() const
 {
   return true;
 }
 
 
-string QRanker::getName() {
+string QRanker::getName() const {
   return "q-ranker";
 }
-string QRanker::getDescription() {
-  return "Re-rank a collection of PSMs using the Q-ranker algorithm.";
+string QRanker::getDescription() const {
+  return
+    "[[nohtml:Re-rank a collection of PSMs using the Q-ranker algorithm.]]"
+    "[[html:<p>Q-ranker dynamically learns to separate target from decoy PSMs. "
+    "The algorithm is described in this article:</p><blockquote>Marina Spivak, "
+    "Jason Weston, Leon Bottou and William Stafford Noble. <a href=\""
+    "http://noble.gs.washington.edu/papers/spivak2009improvements.html\">"
+    "&quot;Direct <em>q</em> value optimization methods for peptide "
+    "identification from shotgun proteomics data sets.&quot;</a> <em>Journal "
+    "of Proteome Research</em>. 8(7):3737-3745, 2009.</blockquote><p>For more "
+    "on q-values and posterior error probabilities (PEP), see the "
+    "documentation for <a href=\"calibrate-scores.html\">calibrate-scores</a>."
+    "</p>]]";
 }
 
-COMMAND_T QRanker::getCommand(){
+vector<string> QRanker::getArgs() const {
+  string arr[] = {
+    "spectra",
+    "search results"
+  };
+  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
+}
+
+vector<string> QRanker::getOptions() const {
+  string arr[] = {
+    "enzyme",
+    "decoy-prefix",
+    "separate-searches",
+    "fileroot",
+    "output-dir",
+    "overwrite",
+    "pepxml-output",
+    "txt-output",
+    "skip-cleanup",
+    "re-run",
+    "use-spec-features",
+    "parameter-file",
+    "verbosity",
+     "list-of-files",
+    "feature-file",
+    "spectrum-parser"
+  };
+  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
+}
+
+map<string, string> QRanker::getOutputs() const {
+  map<string, string> outputs;
+  outputs["qranker.target.pep.xml"] =
+    "An xml file containing ranked list of target peptide-spectrum matches. The"
+    "following entries are included: scan, charge, psm_id, q-value, score, "
+    "precursor_mass, peptide, filename.";
+  outputs["qranker.decoy.pep.xml"] =
+    "An xml file containing ranked list of decoy peptide-spectrum matches.";
+  outputs["qranker.target.psm.txt"] =
+    "a tab-delimited text format containing a ranked list of target "
+    "peptide-spectrum matches with the associated Q-ranker scores and "
+    "q-values.";
+  outputs["qranker.decoy.psm.txt"] =
+    "a tab-delimited text format containing a ranked list of decoy "
+    "peptide-spectrum matches with the associated Q-ranker scores and "
+    "q-values.";
+  outputs["qranker.log.txt"] =
+    "a file where the program reports its progress.";
+  outputs["qranker.params.txt"] =
+    "a file with the values of all the options given to the current run.";
+  return outputs;
+}
+
+COMMAND_T QRanker::getCommand() const {
   return QRANKER_COMMAND;
 }
 

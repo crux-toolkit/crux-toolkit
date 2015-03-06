@@ -31,26 +31,7 @@ PrintProcessedSpectra::~PrintProcessedSpectra() {
  * main method for PrintProcessedSpectra
  */
 int PrintProcessedSpectra::main(int argc, char** argv) {
-  
-  // Define optional command line arguments
-  const char* option_list[] = { 
-    "stop-after",
-    "spectrum-parser",
-    "verbosity",
-    "parameter-file", 
-    "overwrite"
-  };
-  int num_options = sizeof(option_list) / sizeof(char*);
-
-  // Define required command line arguments
-  const char* argument_list[] = { "ms2 file", "output file"}; 
-  int num_arguments = sizeof(argument_list) / sizeof(char*);
-  
-  initialize(argument_list, 
-             num_arguments,
-             option_list, 
-             num_options,
-             argc, argv);
+  initialize(argc, argv);
 
   // Get arguments and options
   string input_ms2_name  = get_string_parameter("ms2 file");
@@ -132,30 +113,75 @@ int PrintProcessedSpectra::main(int argc, char** argv) {
 /**
  * \returns the command name for PrintProcessedSpectra
  */
-string PrintProcessedSpectra::getName() {
+string PrintProcessedSpectra::getName() const {
   return "print-processed-spectra";
 }
 
 /**
  * \returns the description for PrintProcessedSpectra
  */
-string PrintProcessedSpectra::getDescription() {
+string PrintProcessedSpectra::getDescription() const {
   return 
-    "Process spectra as for scoring xcorr and print the results to a file.";
+    "[[nohtml:Process spectra as for scoring xcorr and print the results to a "
+    "file.]]"
+    "[[html:<p>Pre-process each spectrum in a given file in preparation for "
+    "computing XCorr. The pre-processing steps are described in detail in this "
+    "paper:</p><blockquote>J. K. Eng, B. Fischer, J. Grossman and M. J. "
+    "MacCoss. <a href=\"http://pubs.acs.org/doi/abs/10.1021/pr800420s\">&quot;A "
+    "fast SEQUEST cross correlation algorithm process the peaks as for "
+    "computing.&quot;</a> <em>Journal of Proteome Research</em>. "
+    "7(10):4598-4602, 2008.</blockquote><p>The output of this program is "
+    "equivalent to the spectrum shown in Figure 1D of the above paper.</p>]]";
+}
+
+/**
+ * \returns the command arguments
+ */
+vector<string> PrintProcessedSpectra::getArgs() const {
+  string arr[] = {
+    "ms2 file",
+    "output file"
+  };
+  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
+}
+
+/**
+ * \returns the command options
+ */
+vector<string> PrintProcessedSpectra::getOptions() const {
+  string arr[] = {
+    "stop-after",
+    "spectrum-parser",
+    "verbosity",
+    "parameter-file", 
+    "overwrite"
+  };
+  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
+}
+
+/**
+ * \returns the command outputs
+ */
+map<string, string> PrintProcessedSpectra::getOutputs() const {
+  map<string, string> outputs;
+  outputs["output file"] =
+    "The name of the file in which the processed spectra will be printed in "
+    "MS2 format.";
+  return outputs;
 }
 
 /**
  * \returns the file stem of the application, default getName.
  */
-string PrintProcessedSpectra::getFileStem() {
+string PrintProcessedSpectra::getFileStem() const {
   return "processed-spectra";
 }
 
-COMMAND_T PrintProcessedSpectra::getCommand() {
+COMMAND_T PrintProcessedSpectra::getCommand() const {
   return PROCESS_SPEC_COMMAND;
 }
 
-bool PrintProcessedSpectra::needsOutputDirectory() {
+bool PrintProcessedSpectra::needsOutputDirectory() const {
   return true;
 }
 

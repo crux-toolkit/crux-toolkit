@@ -4,13 +4,6 @@
 #include <fstream>
 #include <sys/stat.h>
 
-
-/**
- * \returns True if there already exists a file with the given name,
- * else false.
- */
-bool file_exists(const std::string& filename);
-
 /**
  * Open a file of the given name if it either does not exist or if we
  * have permission to overwrite.

@@ -25,11 +25,6 @@ using namespace Crux;
 
 #define bin_width_mono 1.0005079
 
-
-#define NUM_ARGUMENTS 8
-#define NUM_OPTIONS 4
-
-
 double get_concat_score(char* peptideA, char* peptideB, int link_site, 
                         int charge, Spectrum* spectrum);
 void print_spectrum(Spectrum* spectrum, LinkedIonSeries& ion_series);
@@ -39,35 +34,34 @@ int main(int argc, char** argv){
   set_verbosity_level(CARP_ERROR);
   
   /* Define optional command line arguments */
-  int num_options = NUM_OPTIONS;
-  const char* option_list[NUM_OPTIONS] = {
+  string options[] = {
     "verbosity",
     "version",
     "use-flanking-peaks",
     "xlink-score-method"
   };
 
-  
-
   /* Define required command line arguments */
-  int num_arguments = NUM_ARGUMENTS;
-  const char* argument_list[NUM_ARGUMENTS] = {"peptide A",
-                                              "peptide B",
-					      "pos A",
-					      "pos B",
-					      "link mass",
-					      "charge state",
-					      "scan number",
-					      "ms2 file"};
+  string args[] = {
+    "peptide A",
+    "peptide B",
+    "pos A",
+    "pos B",
+    "link mass",
+    "charge state",
+    "scan number",
+    "ms2 file"
+  };
 
-  
   /* for debugging of parameter processing */
   set_verbosity_level( CARP_ERROR );
   
   /* Define optional and required command line arguments */
   CruxApplication::initializeParams(
-    "xlink-score-peptide-spectrum", argument_list, num_arguments,
-    option_list, num_options, argc, argv);
+    "xlink-score-peptide-spectrum",
+    vector<string>(args, args + sizeof(args) / sizeof(string)),
+    vector<string>(options, options + sizeof(options) / sizeof(string)),
+    argc, argv);
 
   /* Set verbosity */
   set_verbosity_level(get_int_parameter("verbosity"));

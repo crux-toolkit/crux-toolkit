@@ -36,18 +36,33 @@ class GetMs2Spectrum: public CruxApplication {
   /**
    * \returns The command name for GetMs2Spectrum.
    */
-  virtual std::string getName();
+  virtual std::string getName() const;
 
   /**
    * \returns The description for GetMs2Spectrum.
    */
-  virtual std::string getDescription();
+  virtual std::string getDescription() const;
+
+  /**
+   * \returns The command arguments
+   */
+  virtual std::vector<std::string> getArgs() const;
+
+  /**
+   * \returns The command options
+   */
+  virtual std::vector<std::string> getOptions() const;
+
+  /**
+   * \returns The command outputs
+   */
+  virtual std::map<std::string, std::string> getOutputs() const;
 
   /**
    * \returns The file stem of the application, default getName.
    */
  
-  virtual COMMAND_T getCommand();
+  virtual COMMAND_T getCommand() const;
 
  
  protected:

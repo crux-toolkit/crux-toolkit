@@ -50,30 +50,7 @@ PredictPeptideIons::~PredictPeptideIons() {
  * Main method for PredictPeptideIons.
  */
 int PredictPeptideIons::main(int argc, char** argv) {
-
-  /* Define optional and required command line arguments */
-  const char* option_list[] = {
-    "primary-ions",
-    "precursor-ions",
-    "isotope",
-    "flanking",
-    "max-ion-charge",
-    "nh3",
-    "h2o"
-  };
-  int num_options = sizeof(option_list) / sizeof(char*);
-
-  const char* argument_list[] = {
-    "peptide sequence",
-    "charge state"
-  };
-  int num_arguments = sizeof(argument_list) / sizeof(char*);
-
-  initialize(argument_list,
-             num_arguments,
-             option_list,
-             num_options,
-             argc, argv);
+  initialize(argc, argv);
 
   /* Get Arguments */
   string peptide_sequence = get_string_parameter("peptide sequence");
@@ -164,22 +141,62 @@ int PredictPeptideIons::main(int argc, char** argv) {
 /**
  * \returns The command name for PredictPeptideIons.
  */
-string PredictPeptideIons::getName() {
+string PredictPeptideIons::getName() const {
   return "predict-peptide-ions";
 }
 
 /**
  * \returns The description for PredictPeptideIons.
  */
-string PredictPeptideIons::getDescription() {
-  return "Given a peptide and a charge state, predict the m/z values of the "
-         "resulting fragment ions.";
+string PredictPeptideIons::getDescription() const {
+  return
+    "[[nohtml:Given a peptide and a charge state, predict the m/z values of "
+    "the resulting fragment ions.]]"
+    "[[html:<p>Given a peptide and a charge state, predict the corresponding "
+    "fragment ions according to the provided options.</p>]]";
+}
+
+/**
+ * \returns The command arguments
+ */
+vector<string> PredictPeptideIons::getArgs() const {
+  string arr[] = {
+    "peptide sequence",
+    "charge state"
+  };
+  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
+}
+
+/**
+ * \returns The command options
+ */
+vector<string> PredictPeptideIons::getOptions() const {
+  string arr[] = {
+    "primary-ions",
+    "precursor-ions",
+    "isotope",
+    "flanking",
+    "max-ion-charge",
+    "nh3",
+    "h2o"
+  };
+  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
+}
+
+/**
+ * \returns The command outputs
+ */
+map<string, string> PredictPeptideIons::getOutputs() const {
+  map<string, string> outputs;
+  outputs["stdout"] =
+    "a series of lines, describing how the ions were predicted.";
+  return outputs;
 }
 
 /**
  * \returns The enum of the application, default PREDICT_PEPTIDE_IONS_COMMAND.
  */
-COMMAND_T PredictPeptideIons::getCommand() {
+COMMAND_T PredictPeptideIons::getCommand() const {
   return PREDICT_PEPTIDE_IONS_COMMAND;
 }
 

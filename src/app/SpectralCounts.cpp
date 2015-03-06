@@ -54,35 +54,7 @@ SpectralCounts::~SpectralCounts() {
  * \returns 0 on successful completion.
  */
 int SpectralCounts::main(int argc, char** argv) {
-
-  const char* option_list[] = {
-    "verbosity",
-    "parameter-file",
-    "parsimony",
-    "threshold",
-    "threshold-type",
-    "input-ms2",
-    "spectrum-parser",
-    "fileroot",
-    "output-dir",
-    "overwrite",
-    "unique-mapping",
-    "quant-level",
-    "measure",
-    "custom-threshold-name",
-    "custom-threshold-min",
-    "mzid-use-pass-threshold",
-    "protein-database"
-  };
-  const char* argument_list[] = {
-    "input PSMs",
-  };
-
-  int num_options = sizeof(option_list) / sizeof(char*);
-  int num_arguments = sizeof(argument_list) / sizeof(char*);
-
-  initialize(argument_list, num_arguments,
-             option_list, num_options, argc, argv);
+  initialize(argc, argv);
 
   getParameterValues(); // all the get_<type>_parameter calls here
 
@@ -942,23 +914,113 @@ void SpectralCounts::makeUniqueMapping(){
 /**
  * \returns The name of the command.
  */
-string SpectralCounts::getName() {
+string SpectralCounts::getName() const {
   return "spectral-counts";
 }
 
 /**
  * \returns The help string to be included in the crux usage statement.
  */
-string SpectralCounts::getDescription() {
-  return "Quantify peptides or proteins using one of three spectral counting "
-         "methods.";
+string SpectralCounts::getDescription() const {
+  return
+    "[[nohtml:Quantify peptides or proteins using one of three spectral "
+    "counting methods.]]"
+    "[[html:<p>Given a collection of scored PSMs, produce a list of proteins "
+    "or peptides ranked by a quantification score. Spectral-counts supports "
+    "four types of quantification: Normalized Spectral Abundance Factor "
+    "(NSAF), Distributed Normalized Spectral Abundance (dNSAF), Normalized "
+    "Spectral Index (SI<sub>N</sub>) and Exponentially Modified Protein "
+    "Abundance Index (emPAI). The NSAF method is from <a href=\""
+    "http://www.ncbi.nlm.nih.gov/pubmed/17138671\"> publication by Paoletti et "
+    "al. (2006)</a>. The SI<sub>N</sub> method is from the <a href=\""
+    "http://www.nature.com/nbt/journal/v28/n1/abs/nbt.1592.html\">Griffin et "
+    "al. (2010) paper</a>. The emPAI method was first described in <a href=\""
+    "http://www.mcponline.org/content/4/9/1265\">Ishihama et al (2005)</a>. "
+    "The quantification methods are defined below:</p><h3>Protein "
+    "Quantification</h3><ol><li>For each protein in a given database, the NSAF "
+    "score is:<br>$$NSAF_N=\\frac{S_N/L_N}{\\sum_{i=1}^ns_i/L_i}$$<br>where:"
+    "<ul><li>N is protein index</li><li>S<sub>N</sub> is the number of peptide "
+    "spectra matched to the protein</li><li>L<sub>N</sub> is the length of "
+    "protein N</li><li>n is the total number of proteins in the input "
+    "database</li></ul></li><li>For each protein in a given database, the dNSAF "
+    "score is:<br>$$NSAF_N=\\frac{\\frac{uSpc_N+(d)sSpc_N}{uL_N+sL_N}}{\\frac"
+    "{uSpc_i+(d)sSpc_i}{uL_i+sL_i}}$$<br>where:<ul><li>N is the protein "
+    "index</li>uSpc<sub>N</sub> is the unique number spectra matched to the "
+    "protein index</li><li>sSpc<sub>N</sub> is the shared number peptide "
+    "spectra matched to the protein index</li><li>L<sub>N</sub> is the length "
+    "of protein N</li><li>n is the total number of proteins in the input "
+    "database</li><li>d is the distribution factor of peptide K to protein N, "
+    "given by<br>$$d=\\frac{uSpc_N}{\\sum_{i=1}^nuSpc_i}$$</li></ul></li><li>"
+    "For each protein in a given database, the SI<sub>N</sub> score is:<br>"
+    "$$SI_N=\\frac{\\sum_{j=1}^{p_N}(\\sum_{k=1}^{s_j}i_k)}{L_N(\\sum_{j=1}^n"
+    "SI_j)}$$<br>where:<ul><li>N is protein index</li><li>p<sub>n</sub> is the "
+    "number of unique peptides in protein N</li><li>s<sub>j</sub> is the "
+    "number of spectra assigned to peptide j</li><li>i<sub>k</sub> is the "
+    "total fragment ion intensity of spectrum k</li><li>L<sub>N</sub> is the "
+    "length of protein N</li></ul></li><li>For each protein in a given database, "
+    "the emPAI score is:<br>$$emPAI=10^{\\frac{N_{observed}}{N_{observable}}}-1"
+    "$$<br>where:<ul><li>N<sub>observed</sub> is the number of experimentally "
+    "observed peptides with scores above a specified threshold.</li><li>N<sub>"
+    "observable</sub> is the calculated number of observable peptides for the "
+    "protein given the search constraints.</li></ul></li></ol><h3>Peptide "
+    "Quantification</h3><ol><li>For each peptide in a given database, the NSAF "
+    "score is:<br>$$NSAF_N=\\frac{S_N/L_N}{\\sum_{i=1}^ns_i/L_i}$$<br>where: "
+    "<ul><li>N is the peptide index</li><li>S<sub>N</sub> is the number "
+    "spectra matched to peptide N</li><li>L<sub>N</sub> is the length of "
+    "peptide N</li><li>n is the total number of peptides in the input "
+    "database</li></ul></li><li>For each peptide in a given database, the "
+    "SI<sub>N</sub> score is:<br>$$SI_N=\\frac{(\\sum_{k=1}^{S_N}i_k)}{L_N("
+    "\\sum_{j=1}^nSI_J)}$$<br>where:<ul><li>N is the peptide index</li><li>"
+    "S<sub>N</sub> is the number of spectra assigned to peptide N</li><li>"
+    "i<sub>k</sub> is the total fragment ion intensity of spectrum k</li><li>"
+    "L<sub>N</sub> is the length of peptide N</li></ul></li></ol>]]";
 }
 
-COMMAND_T SpectralCounts::getCommand() {
+vector<string> SpectralCounts::getArgs() const {
+  string arr[] = {
+    "input PSMs"
+  };
+  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
+}
+
+vector<string> SpectralCounts::getOptions() const {
+  string arr[] = {
+    "verbosity",
+    "parameter-file",
+    "parsimony",
+    "threshold",
+    "threshold-type",
+    "input-ms2",
+    "spectrum-parser",
+    "fileroot",
+    "output-dir",
+    "overwrite",
+    "unique-mapping",
+    "quant-level",
+    "measure",
+    "custom-threshold-name",
+    "custom-threshold-min",
+    "mzid-use-pass-threshold",
+    "protein-database"
+  };
+  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
+}
+
+map<string, string> SpectralCounts::getOutputs() const {
+  map<string, string> outputs;
+  outputs["spectral-counts.target.txt"] =
+    "a tab-delimited text file containing the protein IDs and their "
+    "corresponding scores, in sorted order.";
+  outputs["spectral-counts.log.txt"] =
+    "All messages written to standard error.";
+  return outputs;
+}
+
+COMMAND_T SpectralCounts::getCommand() const {
   return SPECTRAL_COUNTS_COMMAND;
 }
 
-bool SpectralCounts::needsOutputDirectory() {
+bool SpectralCounts::needsOutputDirectory() const {
   return true;
 }
 
@@ -979,24 +1041,16 @@ bool SpectralCounts::comparePeptideSets(PeptideSet set_one,
 
   while( iter1 != set_one.end() && iter2 != set_two.end() ){
     int diff = Peptide::triCompareSequence(*iter1, *iter2);
-    if( diff < 0 ){
-      return true;
-    } else if(diff > 0 ){
-      return false;
-    } // else they are equal, compare the next
-
+    if (diff != 0) {
+      return diff < 0;
+    }
+    // else they are equal, compare the next
     ++iter1;
     ++iter2;
   }
 
   // all peptides were the same; are the sets the same size?
-  if( set_one.size() == set_two.size() ){
-    return false;
-  } else if( set_one.size() > set_two.size() ){
-    return false;
-  } else { // one < two
-    return true;
-  }
+  return set_one.size() < set_two.size();
 }
 
 /**
@@ -1007,17 +1061,14 @@ bool SpectralCounts::comparePeptideSets(PeptideSet set_one,
  */
 bool SpectralCounts::compareMetaProteins(MetaProtein set_one, 
                                          MetaProtein set_two){
-
   // compare each protein in the two (sorted) sets
   MetaProtein::iterator iter1 = set_one.begin();
   MetaProtein::iterator iter2 = set_two.begin();
 
-  while( iter1 != set_one.end() && iter2 != set_two.end() ){
-    bool one_less_than_two = protein_id_less_than(*iter1, *iter2);
-    bool two_less_than_one = protein_id_less_than(*iter1, *iter2);
+  while (iter1 != set_one.end() && iter2 != set_two.end()){
     // different proteins one is less than the other
-    if( one_less_than_two || two_less_than_one ){
-      return one_less_than_two;
+    if (protein_id_less_than(*iter1, *iter2)) {
+      return true;
     }
     // else, they are the same, keep comparing
     ++iter1;
@@ -1025,13 +1076,7 @@ bool SpectralCounts::compareMetaProteins(MetaProtein set_one,
   }
 
   // all proteins were the same, are the sets the same size?
-  if( set_one.size() == set_two.size() ){
-    return false;
-  } else if( set_one.size() > set_two.size() ){
-    return false;
-  } else { // one < two
-    return true;
-  }
+  return set_one.size() < set_two.size();
 }
 
 /**
@@ -1047,6 +1092,6 @@ bool SpectralCounts::setsAreEqualSize(
 bool SpectralCounts::compareMetaScorePair(
   const std::pair<FLOAT_T, MetaProtein>& x,
   const std::pair<FLOAT_T, MetaProtein>& y) {
-  return (x.first != y.first) ? x > y : !compareMetaProteins(x.second, y.second);
+  return (x.first != y.first) ? x.first > y.first : !compareMetaProteins(x.second, y.second);
 }
 

@@ -32,38 +32,11 @@ GeneratePeptides::~GeneratePeptides() {
  * Main method for GeneratePeptides.
  */
 int GeneratePeptides::main(int argc, char** argv) {
-
-  // Define optional command line arguments
-  const char* option_list[] = { 
-    "min-length",
-    "max-length",
-    "min-mass",
-    "max-mass",
-    "isotopic-mass",
-    "enzyme",
-    "custom-enzyme",
-    "digestion",
-    "missed-cleavages",
-    "unique-peptides",
-    "output-sequence",
-    "verbosity",
-    "parameter-file" 
-  };
-  int num_options = sizeof(option_list) / sizeof(char*);
-
-  // Define required command line arguments
-  const char* argument_list[] = { "protein-database" }; 
-  int num_arguments = sizeof(argument_list) / sizeof(char*);
-  
-  initialize(argument_list, 
-             num_arguments,
-             option_list, 
-             num_options,
-             argc, argv);
+  initialize(argc, argv);
 
   // Get arguments and options
   bool output_sequence = get_boolean_parameter("output-sequence");
-  string filename = get_string_parameter("protein-database");
+  string filename = get_string_parameter("protein fasta file");
   Database* database = new Database(filename.c_str(), false); // not memmapped
 
   // get list of mods
@@ -118,7 +91,7 @@ void GeneratePeptides::printHeader(){
   bool bool_val;
   int missed_cleavages;
 
-  string database_name = get_string_parameter("protein-database");
+  string database_name = get_string_parameter("protein fasta file");
   printf("# PROTEIN DATABASE: %s\n", database_name.c_str());
 
   printf("# OPTIONS:\n");
@@ -149,30 +122,100 @@ void GeneratePeptides::printHeader(){
 /**
  * \returns The command name for GeneratePeptides.
  */
-string GeneratePeptides::getName() {
+string GeneratePeptides::getName() const {
   return "generate-peptides";
 }
 
 /**
  * \returns The description for GeneratePeptides.
  */
-string GeneratePeptides::getDescription() {
-  return "Extract from a given set of protein sequences a list of target and "
-         "decoy peptides fitting the specified criteria.";
+string GeneratePeptides::getDescription() const {
+  return
+    "[[nohtml:Extract from a given set of protein sequences a list of target "
+    "and decoy peptides fitting the specified criteria.]]"
+    "[[html:<p>This command takes as input a protein FASTA file and outputs "
+    "the corresponding list of peptides, as well as a matched list of decoy "
+    "peptides and decoy proteins. Decoys are generated either by reversing or "
+    "shuffling the non-terminal amino acids of each peptide. The program will "
+    "shuffle each peptide multiple times to attempt to ensure that there is no "
+    "overlap between the target and decoy peptides. For homopolymers, this is "
+    "not possible. In this case, the occurrence of these target/decoy overlaps "
+    "is recorded in the log file.</p><p>The program considers only the "
+    "standard set of 20 amino acids. Peptides containing non-amino acid "
+    "alphanumeric characters (BJOUXZ) are skipped. Non-alphanumeric characters "
+    "are ignored completely.</p>]]";
+}
+
+/**
+ * \returns The command arguments
+ */
+vector<string> GeneratePeptides::getArgs() const {
+  string arr[] = {
+    "protein fasta file"
+  };
+  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
+}
+
+/**
+ * \returns The command options
+ */
+vector<string> GeneratePeptides::getOptions() const {
+  string arr[] = {
+    "min-length",
+    "max-length",
+    "min-mass",
+    "max-mass",
+    "isotopic-mass",
+    "enzyme",
+    "custom-enzyme",
+    "digestion",
+    "missed-cleavages",
+    "unique-peptides",
+    "output-sequence",
+    "verbosity",
+    "parameter-file" 
+  };
+  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
+}
+
+/**
+ * \returns The command outputs
+ */
+map<string, string> GeneratePeptides::getOutputs() const {
+  map<string, string> outputs;
+  outputs["peptides.target.txt"] =
+    "a text file containing the target peptides, one per line.";
+  outputs["peptides.decoy.txt"] =
+    "a text file containing the decoy peptides, one per line. There is a "
+    "one-to-one correspondence between targets and decoys.";
+  outputs["proteins.decoy.txt"] =
+    "a FASTA format file containing decoy proteins, in which all of the "
+    "peptides have been replaced with their shuffled or reversed counterparts. "
+    "Note that this file will only be created if the enzyme specificity is "
+    "\"full-digest\" and no missed cleavages are allowed.";
+  outputs["generate-peptides.params.txt"] =
+    "a file containing the name and value of all parameters/options for the "
+    "current operation. Not all parameters in the file may have been used in "
+    "the operation. The resulting file can be used with the --parameter-file "
+    "option for other crux programs.";
+  outputs["generate-peptides.log.txt"] =
+    "a log file containing a copy of all messages that were printed to the "
+    "screen during execution.";
+  return outputs;
 }
 
 /**
  * \returns The file stem of the application.
  */
-string GeneratePeptides::getFileStem() {
+string GeneratePeptides::getFileStem() const {
   return "peptides";
 }
 
-COMMAND_T GeneratePeptides::getCommand() {
+COMMAND_T GeneratePeptides::getCommand() const {
   return GENERATE_PEPTIDES_COMMAND;
 }
 
-bool GeneratePeptides::needsOutputDirectory() {
+bool GeneratePeptides::needsOutputDirectory() const {
   return false;
 }
 

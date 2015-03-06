@@ -13,33 +13,7 @@ GenerateDecoys::~GenerateDecoys() {
 }
 
 int GenerateDecoys::main(int argc, char** argv) {
-
-  const char* option_list[] = {
-    "min-mass",
-    "max-mass",
-    "min-length",
-    "max-length",
-    "enzyme",
-    "custom-enzyme",
-    "digestion",
-    "missed-cleavages",
-    "isotopic-mass",
-    "clip-nterm-methionine",
-    "decoy-format",
-    "keep-terminal-aminos",
-    "overwrite",
-    "fileroot",
-    "output-dir",
-    "parameter-file",
-    "verbosity"
-  };
-
-  int num_options = sizeof(option_list) / sizeof(char*);
-
-  const char* argument_list[] = { "protein fasta file" };
-  int num_arguments = sizeof(argument_list) / sizeof(char*);
-
-  initialize(argument_list, num_arguments, option_list, num_options, argc, argv);
+  initialize(argc, argv);
 
   const int MAX_SHUFFLE_ATTEMPTS = 10;
 
@@ -588,20 +562,50 @@ bool GenerateDecoys::reversePeptide(
   return seq != originalSeq;
 }
 
-string GenerateDecoys::getName() {
+string GenerateDecoys::getName() const {
   return "generate-decoys";
 }
 
-string GenerateDecoys::getDescription() {
+string GenerateDecoys::getDescription() const {
   return "Generates a corresponding list of peptides, as well as a matched "
          "list of decoy peptides and decoy proteins from a FASTA file";
 }
 
-bool GenerateDecoys::needsOutputDirectory() {
+vector<string> GenerateDecoys::getArgs() const {
+  string arr[] = {
+    "protein fasta file"
+  };
+  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
+}
+
+vector<string> GenerateDecoys::getOptions() const {
+  string arr[] = {
+    "min-mass",
+    "max-mass",
+    "min-length",
+    "max-length",
+    "enzyme",
+    "custom-enzyme",
+    "digestion",
+    "missed-cleavages",
+    "isotopic-mass",
+    "clip-nterm-methionine",
+    "decoy-format",
+    "keep-terminal-aminos",
+    "overwrite",
+    "fileroot",
+    "output-dir",
+    "parameter-file",
+    "verbosity"
+  };
+  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
+}
+
+bool GenerateDecoys::needsOutputDirectory() const {
   return true;
 }
 
-COMMAND_T GenerateDecoys::getCommand() {
+COMMAND_T GenerateDecoys::getCommand() const {
   return GENERATE_DECOYS_COMMAND;
 }
 

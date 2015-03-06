@@ -36,21 +36,36 @@ public:
   /**
    * Returns the command name
    */
-  virtual string getName();
+  virtual string getName() const;
 
   /**
    * Returns the command description
    */
-  virtual string getDescription();
+  virtual string getDescription() const;
+
+  /**
+   * \returns the arguments of the application
+   */
+  virtual vector<string> getArgs() const;
+
+  /**
+   * \returns the options of the application
+   */
+  virtual vector<string> getOptions() const;
+
+  /**
+   * \returns the outputs of the application as name -> description
+   */
+  virtual map<string, string> getOutputs() const;
 
   /**
    * Returns whether the application needs the output directory or not.
    */
-  virtual bool needsOutputDirectory();
+  virtual bool needsOutputDirectory() const;
 
-  virtual COMMAND_T getCommand();
+  virtual COMMAND_T getCommand() const;
 
-  virtual bool hidden();
+  virtual bool hidden() const;
 
 protected:
 

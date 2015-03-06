@@ -9,7 +9,6 @@
 
 #include <vector>
 
-#include "util/crux-file-utils.h"
 #include "model/match_objects.h"
 #include "DelimitedFile.h"
 #include "MatchFileWriter.h"

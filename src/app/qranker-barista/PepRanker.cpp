@@ -921,34 +921,8 @@ FILE_FORMAT_T PepRanker::check_file_format(string& source) {
 
 int PepRanker :: crux_set_command_line_options(int argc, char *argv[])
 {
-  const char* option_list[] = {
-    "enzyme",
-    "decoy-prefix",
-    "separate-searches",
-    "fileroot",
-    "output-dir",
-    "overwrite",
-    "skip-cleanup",
-    "re-run",
-    "use-spec-features",
-    "parameter-file",
-    "verbosity",
-     "list-of-files",
-    "feature-file"
-  };
-  int num_options = sizeof(option_list)/sizeof(char*);
+  initialize(argc, argv);
 
-  const char* argument_list[] = {
-    "spectra",
-    "search results"
-  };
-  int num_arguments = sizeof(argument_list)/sizeof(char*);
-
-  initialize(argument_list, num_arguments, 
-	     option_list, num_options,
-	     argc, argv);
-
-  
   string sqt_source;
   string ms2_source;
   string sqt_decoy_source;
@@ -1358,23 +1332,49 @@ int PepRanker::main(int argc, char **argv) {
   return 0;
 }   
 
-bool PepRanker :: needsOutputDirectory()
+bool PepRanker :: needsOutputDirectory() const
 {
   return true;
 }
 
 
-string PepRanker::getName() {
+string PepRanker::getName() const {
   return "q-ranker";
 }
-string PepRanker::getDescription() {
-  return 
+string PepRanker::getDescription() const {
+  return
     "Analyze a collection of PSMs to target and decoy "
     "sequences using the new q-ranker algorithm.";
-
 }
 
-COMMAND_T PepRanker::getCommand(){
+vector<string> PepRanker::getArgs() const {
+  string arr[] = {
+    "spectra",
+    "search results"
+  };
+  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
+}
+
+vector<string> PepRanker::getOptions() const {
+  string arr[] = {
+    "enzyme",
+    "decoy-prefix",
+    "separate-searches",
+    "fileroot",
+    "output-dir",
+    "overwrite",
+    "skip-cleanup",
+    "re-run",
+    "use-spec-features",
+    "parameter-file",
+    "verbosity",
+     "list-of-files",
+    "feature-file"
+  };
+  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
+}
+
+COMMAND_T PepRanker::getCommand() const {
   return QRANKER_COMMAND;
 }
 

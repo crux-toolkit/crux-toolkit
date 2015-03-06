@@ -27,23 +27,7 @@ StatColumn::~StatColumn() {
  * main method for StatColumn
  */
 int StatColumn::main(int argc, char** argv) {
-
-   /* Define optional command line arguments */
-  const char* option_list[] = {
-    "delimiter",
-    "header",
-    "precision",
-    "verbosity"
-  };
-  int num_options = sizeof(option_list) / sizeof(char*);
-
-  /* Define required command line arguments */
-  const char* argument_list[] = {"tsv file", "column name"};
-  int num_arguments = sizeof(argument_list) / sizeof(char*);
-
-  /* Initialize the application */
-  initialize(argument_list, num_arguments,
-    option_list, num_options, argc, argv);
+  initialize(argc, argv);
 
   delimited_filename_ = get_string_parameter("tsv file");
   column_name_string_ = get_string_parameter("column name");
@@ -135,15 +119,55 @@ int StatColumn::main(int argc, char** argv) {
 /**
  * \returns the command name for StatColumn
  */
-string StatColumn::getName() {
+string StatColumn::getName() const {
   return "stat-column";
 }
 
 /**
  * \returns the description for StatColumn
  */
-string StatColumn::getDescription() {
-  return "Collect summary statistics from a column in a tab-delimited file.";
+string StatColumn::getDescription() const {
+  return
+    "[[nohtml:Collect summary statistics from a column in a tab-delimited "
+    "file.]]"
+    "[[html:<p>Given a tab-delimited file, collect summary statistics on the "
+    "values within a specified column. The specified column must contain "
+    "numeric values.</p>]]";
+}
+
+/**
+ * \returns the command arguments
+ */
+vector<string> StatColumn::getArgs() const {
+  string arr[] = {
+    "tsv file",
+    "column name"
+  };
+  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
+}
+
+/**
+ * \returns the command options
+ */
+vector<string> StatColumn::getOptions() const {
+  string arr[] = {
+    "delimiter",
+    "header",
+    "precision",
+    "verbosity"
+  };
+  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
+}
+
+/**
+ * \returns the command outputs
+ */
+map<string, string> StatColumn::getOutputs() const {
+  map<string, string> outputs;
+  outputs["stdout"] =
+    "the number of rows, the minimum, maximum, sum, average, and median of the "
+    "data values in the specified column.";
+  return outputs;
 }
 
 /*

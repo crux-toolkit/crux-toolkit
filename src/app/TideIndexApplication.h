@@ -41,19 +41,34 @@ public:
   /**
    * Returns the command name
    */
-  virtual string getName();
+  virtual string getName() const;
 
   /**
    * Returns the command description
    */
-  virtual string getDescription();
+  virtual string getDescription() const;
+
+  /**
+   * Returns the command arguments
+   */
+  virtual vector<string> getArgs() const;
+
+  /**
+   * Returns the command options
+   */
+  virtual vector<string> getOptions() const;
+
+  /**
+   * Returns the command outputs
+   */
+  virtual map<string, string> getOutputs() const;
 
   /**
    * Returns whether the application needs the output directory or not. (default false)
    */
-  virtual bool needsOutputDirectory();
+  virtual bool needsOutputDirectory() const;
 
-  virtual COMMAND_T getCommand();
+  virtual COMMAND_T getCommand() const;
 
 protected:
 
@@ -190,7 +205,6 @@ protected:
   );
 
   virtual void processParams();
-
 };
 
 #endif
