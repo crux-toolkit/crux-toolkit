@@ -1,6 +1,12 @@
 cmake_minimum_required(VERSION 2.8.4)
 cmake_policy(VERSION 2.8.4)
 
+# Aggressive optimization causes an error in tide-search on OS X
+# Reduce the optimization level until we figure out the cause.
+if (APPLE)
+  set(CMAKE_CXX_FLAGS_RELEASE " -O1 -DNDEBUG ")
+endif (APPLE)
+
 add_subdirectory(app/bullseye)
 add_subdirectory(app/hardklor)
 add_subdirectory(app/qranker-barista)
