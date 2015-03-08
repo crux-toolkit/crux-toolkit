@@ -18,7 +18,6 @@ Examples:
   |comet_binarymods  |params/comet_binarymods  |sh_1617_JX_070209p_KO410_run2.ms2  |comet_binarymods.fasta|comet_binarymods.txt  |
   |comet_commandline |params/comet_commandline |sh_1617_JX_070209p_KO410_run2.ms2  |comet_plain.fasta     |comet_commandline.txt |
   |comet_ctermmod    |params/comet_ctermmod    |sh_1617_JX_070209p_KO410_run1.ms2  |comet_term-mod.fasta  |comet_ctermmod.txt    |
-  |comet_multiplemods|params/comet_multiplemods|sh_1617_JX_070209p_KO410_run2.ms2  |comet_plain.fasta     |comet_multiplemods.txt|
   |comet_noenzyme    |params/comet_noenzyme    |sh_1617_JX_070209p_KO410_run1.ms2  |comet_noenzyme.fasta  |comet_noenzyme.txt    |
   |comet_plain       |params/comet_plain       |sh_1617_JX_070209p_KO410_run2.ms2  |comet_plain.fasta     |comet_plain.txt       |
   |comet_semi-tryptic|params/comet_semi-tryptic|sh_1617_JX_070209p_KO410_run1.ms2  |comet_tryptic.fasta   |comet_semi-tryptic.txt|
