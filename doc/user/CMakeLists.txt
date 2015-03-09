@@ -161,18 +161,19 @@ set(
   comet-options/num_threads.html
   comet-options/output_outfiles.html
   comet-options/output_pepxmlfile.html
-  comet-options/output_pinxmlfile.html
+  comet-options/output_percolatorfile.html
   comet-options/output_sqtfile.html
   comet-options/output_sqtstream.html
   comet-options/output_suffix.html
   comet-options/output_txtfile.html
+  comet-options/override_charge.html
   comet-options/peptide_mass_tolerance.html
   comet-options/peptide_mass_units.html
   comet-options/precursor_charge.html
-  comet-options/precursor_tolerance_type.html
   comet-options/print_expect_score.html
   comet-options/remove_precursor_peak.html
   comet-options/remove_precursor_tolerance.html
+  comet-options/require_variable_mod.html
   comet-options/runall
   comet-options/sample_enzyme_number.html
   comet-options/scan_range.html
@@ -190,16 +191,15 @@ set(
   comet-options/use_Y_ions.html
   comet-options/use_Z_ions.html
   comet-options/use_sparse_matrix.html
-  comet-options/variable_C_terminus.html
-  comet-options/variable_C_terminus_distance.html
-  comet-options/variable_N_terminus.html
-  comet-options/variable_N_terminus_distance.html
-  comet-options/variable_mod1.html
-  comet-options/variable_mod2.html
-  comet-options/variable_mod3.html
-  comet-options/variable_mod4.html
-  comet-options/variable_mod5.html
-  comet-options/variable_mod6.html
+  comet-options/variable_mod01.html
+  comet-options/variable_mod02.html
+  comet-options/variable_mod03.html
+  comet-options/variable_mod04.html
+  comet-options/variable_mod05.html
+  comet-options/variable_mod06.html
+  comet-options/variable_mod07.html
+  comet-options/variable_mod08.html
+  comet-options/variable_mod09.html
 )
 install (FILES ${crux_documentation} DESTINATION doc)
 install (FILES ${comet_documentation} DESTINATION doc/comet-options)
