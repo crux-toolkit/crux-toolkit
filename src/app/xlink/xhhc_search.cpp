@@ -146,7 +146,7 @@ int SearchForXLinks::xhhcSearchMain() {
   search_target_file << "xcorr score\t";
   search_target_file << "xcorr rank\t";
   search_target_file << "p-value\t";
-  search_target_file << "matches/spectrum\t";
+  search_target_file << "distinct matches/spectrum\t";
   search_target_file << "sequence\t";
   search_target_file << "protein id(loc) 1\t";
   search_target_file << "protein id(loc) 2\t";
@@ -176,7 +176,7 @@ int SearchForXLinks::xhhcSearchMain() {
   search_decoy_file << "xcorr score\t";
   search_decoy_file << "xcorr rank\t";
   search_decoy_file << "p-value\t";
-  search_decoy_file << "matches/spectrum\t";
+  search_decoy_file << "distinct matches/spectrum\t";
   search_decoy_file << "sequence"<<endl;
 
   XHHC_Scorer hhc_scorer;
