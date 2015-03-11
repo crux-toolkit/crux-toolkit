@@ -45,14 +45,12 @@ echo allowed_missed_cleavage=0 >> $parameters
 # Minimums
 echo minimum_peaks=10 >> $parameters
 echo min-peaks=10 >> $parameters
-echo min_length=2 >> $parameters
 
 # Precursor selection rules.
 echo precursor-window=3 >> $parameters
 echo precursor-window-type=mass >> $parameters
 echo peptide_mass_tolerance=3 >> $parameters
 echo peptide_mass_units=0 >> $parameters # 0=amu, 1=mmu, 2=ppm
-echo precursor_tolerance_type=0 >> $parameters # 0=MH+ (default), 1=precursor m/z
 
 # Precursor mass type.
 echo isotopic-mass=mono >> $parameters
@@ -84,14 +82,15 @@ echo remove-precursor-tolerance=15 >> $parameters
 echo use-flanking-peaks=F >> $parameters
 echo theoretical_fragment_ions=1 >> $parameters # 0 = flanks; 1 = no flanks
 echo use-neutral-loss-peaks=F >> $parameters 
-# Fragment m/z discretization.  This is fixed in Tide.
-echo fragment_bin_offset=0.4 >> $parameters
+# Fragment m/z discretization.  This is immutable in Tide.
+echo fragment_bin_offset=0.68 >> $parameters
 echo fragment_bin_tol=1.0005079 >> $parameters
-echo mz-bin-offset=0.4 >>$parameters
+echo mz-bin-offset=0.68 >>$parameters
 echo mz-bin-width=1.0005079 >>$parameters
 
 # Other Crux parameters.
-echo compute-sp=F >> $parameters
+echo compute-sp=T >> $parameters
+echo exact-p-value=T >> $parameters
 echo verbosity=40 >> $parameters
 echo overwrite=T >> $parameters
 echo peptide-list=T >> $parameters
@@ -109,8 +108,8 @@ echo use_X_ions=0 >> $parameters
 echo use_Y_ions=1 >> $parameters
 echo use_Z_ions=0 >> $parameters
 echo use_NL_ions=0 >> $parameters
-echo variable_mod1=0.0 X 0 3 >> $parameters
-echo variable_mod2=0.0 X 0 3 >> $parameters
+echo variable_mod01=0.0 X 0 3 >> $parameters
+echo variable_mod02=0.0 X 0 3 >> $parameters
 echo "[COMET_ENZYME_INFO]" >> $parameters
 echo "0.  No_enzyme              0      -           -" >> $parameters
 echo "1.  Trypsin                1      KR          P" >> $parameters
@@ -130,16 +129,19 @@ ms2=051708-worm-ASMS-10.ms2
 # Do the whole test twice, once for each search tool.
 for searchtool in comet tide-search; do
 
-  # Do we use an index or the fasta?
   if [[ $searchtool == "comet" ]]; then
     proteins=$fasta
+#    confidenceParams="--smaller-is-better F --score e-value"
+    # Assign-confidence has a bug.
+    confidenceParams="--smaller-is-better F"
   else
     proteins=$db
+    confidenceParams="--smaller-is-better T --score \"exact p-value\""
   fi
 
   # Run the search.
   if [[ -e $searchtool/$searchtool.target.txt ]]; then
-    echo Skipping search-for-matches.
+    echo Skipping $searchtool.
   else  
     $CRUX $searchtool \
       --parameter-file crux.param --output-dir $searchtool \
@@ -151,17 +153,15 @@ for searchtool in comet tide-search; do
     echo Skipping crux assign-confidence.
   else
     $CRUX assign-confidence \
-      --output-dir $searchtool \
+      --output-dir $searchtool $confidenceParams \
       $searchtool/$searchtool.target.txt
   fi
 
-  $CRUX sort-by-column --column-type real --ascending true $searchtool/assign-confidence.target.txt "decoy q-value (xcorr)" | $CRUX extract-columns - "decoy q-value (xcorr)" > $searchtool/assign-confidence.xcorr.txt
-  echo replot \"$searchtool/assign-confidence.xcorr.txt\" using 1:0 title \"$searchtool xcorr\" with lines >> $gnuplot
-
-  if [[ $searchtool == "comet" ]]; then
-    $CRUX extract-columns $searchtool/assign-confidence.target.txt "decoy q-value (e-value)" > $searchtool/assign-confidence.evalue.txt 
-    echo replot \"$searchtool/assign-confidence.evalue.txt\" using 1:0 title \"$searchtool e-value\" with lines >> $gnuplot
-  fi
+  # Add a line to the plot.
+  $CRUX extract-columns $searchtool/assign-confidence.target.txt "tdc q-value" \
+    > $searchtool/$searchtool.xcorr.txt
+  echo replot \"$searchtool/$searchtool.xcorr.txt\" using 1:0 \
+    title \"$searchtool\" with lines >> $gnuplot
 
   # Run Crux percolator
   if [[ -e $searchtool/percolator.target.psms.txt ]]; then
@@ -173,8 +173,11 @@ for searchtool in comet tide-search; do
       $searchtool/$searchtool.target.txt
   fi
 
-  $CRUX extract-columns $searchtool/percolator.target.psms.txt "percolator q-value" > $searchtool/assign-confidence.percolator.txt
-  echo replot \"$searchtool/assign-confidence.percolator.txt\" using 1:0 title \"$searchtool percolator\" with lines >> $gnuplot
+  # Add a line to the plot.
+  $CRUX extract-columns $searchtool/percolator.target.psms.txt \
+      "percolator q-value" > $searchtool/$searchtool.percolator.txt
+  echo replot \"$searchtool/$searchtool.percolator.txt\" \
+      using 1:0 title \"$searchtool percolator\" with lines >> $gnuplot
 
   # Run q-ranker.
   if [[ -e $searchtool/q-ranker.target.psms.txt ]]; then
@@ -187,8 +190,11 @@ for searchtool in comet tide-search; do
       $ms2 $searchtool/$searchtool.target.txt
   fi
 
-  $CRUX extract-columns $searchtool/q-ranker.target.psms.txt "q-ranker q-value" > $searchtool/assign-confidence.qranker.txt
-  echo replot \"$searchtool/assign-confidence.qranker.txt\" using 1:0 title \"$searchtool q-ranker\" with lines >> $gnuplot
+  # Add a line to the plot.
+  $CRUX extract-columns $searchtool/q-ranker.target.psms.txt "q-ranker q-value" \
+    > $searchtool/$searchtool.qranker.txt
+  echo replot \"$searchtool/$searchtool.qranker.txt\" using 1:0 \
+    title \"$searchtool q-ranker\" with lines >> $gnuplot
 
   # Run Barista.
   # if [[ -e $searchtool/barista.target.psms.txt ]]; then
@@ -218,8 +224,15 @@ gnuplot $gnuplot > performance.png
 for searchtool in tide-search comet; do
   searchFile=$searchtool/$searchtool.target.txt
   reducedFile=$searchtool/$searchtool.target.reduced.txt
+
+  if [[ $searchtool == "comet" ]]; then
+    scoreColumn="xcorr score"
+  else
+    scoreColumn="refactored xcorr"
+  fi
+
   $CRUX extract-columns $searchFile \
-     "scan,charge,sequence,xcorr score" \
+     "scan,charge,sequence,$scoreColumn" \
      | awk 'NR > 1' \
      | awk '{print $1 "~" $2 "~" $3 "\t" $4}' \
      | sort -k 1b,1 \
