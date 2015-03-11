@@ -1,2 +1,2 @@
 #!/bin/bash
-./run-performance-test.sh
+./run-performance-test.py
