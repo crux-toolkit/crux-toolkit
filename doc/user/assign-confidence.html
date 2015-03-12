@@ -139,6 +139,16 @@ containing a collection of peptide-spectrum matches (PSMs)
 in <a href="txt-format.html">tab-delimited text</a>,
 <a href="http://tools.proteomecenter.org/wiki/index.php?title=Formats:pepXML">PepXML</a>
 or <a href="http://www.psidev.info/mzidentml">mzIdentML</a> format.
+In tab-delimited text format, only the specified score column is
+required.  However, if <code>--estimation-method</code>
+is <code>tdc</code>, then the columns "scan" and "charge" are
+required, as well as "protein ID" if the search was run
+with <code>concat=F</code>.  Furthermore, if
+the <code>--peptide-level</code> option is set to T, then the column
+"peptide" must be included, and if <code>sidak</code> is T, then the
+"distinct matches/spectrum" column must be included.</p>
+
+<p>
 Note that multiple files can also be provided either on the command
 line or using the <code>--list-of-files</code> option.</p>
 
