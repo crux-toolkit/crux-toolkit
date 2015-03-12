@@ -6,6 +6,7 @@
 #include <iomanip>
 #include "report.h"
 #include "peptides.pb.h"
+#include "app/TideSearchApplication.h"
 
 using namespace std;
 using google::protobuf::int64;
@@ -23,7 +24,7 @@ void TextReporter::ReportMatch(int score, const Peptide& peptide) {
   cout << spectrum_->SpectrumNumber() << "\t"
        << fixed << setprecision(2) << spectrum_->PrecursorMZ() << "\t"
        << charge_ << "\t"
-       << setprecision(6) << (score/100000000.0) << "\t"
+       << setprecision(6) << (score/TideSearchApplication::XCORR_SCALING) << "\t"
 #ifdef DEBUG
        << peptide.PB()->id() << "\t"
 #endif
@@ -77,7 +78,7 @@ void PBReporter::ReportSpectrum(const Spectrum *spectrum, int charge,
 
 void PBReporter::ReportMatch(int score, const Peptide& peptide) {
   pb::Match* pb_match = pb_results_.add_matches();
-  pb_match->set_xcorr(score/100000000.0);
+  pb_match->set_xcorr(score/TideSearchApplication::XCORR_SCALING);
   
   // We need rebuild a pb::peptide from the Peptide object passed in
   pb::Peptide* matching_peptide = pb_match->mutable_peptide();

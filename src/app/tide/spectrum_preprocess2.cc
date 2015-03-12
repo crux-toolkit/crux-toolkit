@@ -25,9 +25,11 @@
 
 using namespace std;
 
+// Number of m/z regions in XCorr normalization.
 #define NUM_SPECTRUM_REGIONS 10
 
-// #define DEBUG 1
+// Integerization constant for the XCorr p-value calculation.
+#define EVIDENCE_INT_SCALE 500.0
 
 #ifdef DEBUG
 DEFINE_int32(debug_spectrum_id, -1, "Spectrum number to debug");
@@ -187,7 +189,6 @@ void ObservedPeakSet::CreateEvidenceVector(
   // TODO end preserved
 
   // TODO need to review these constants, decide which can be moved to parameter file
-  const double evidenceIntScale = 500.0;
   const int nRegion = NUM_SPECTRUM_REGIONS;
   const double maxIntensPerRegion = 50.0;
   const double precursorMZExclude = 15.0;
@@ -402,7 +403,7 @@ void ObservedPeakSet::CreateEvidenceVector(
 
   // discretize evidence array
   for (ma = 0; ma < maxPrecurMass; ma++) {
-    evidenceInt[ma] = (int)floor(evidence[ma] / evidenceIntScale + 0.5);
+    evidenceInt[ma] = (int)floor(evidence[ma] / EVIDENCE_INT_SCALE + 0.5);
   }
   // clean up
   delete [] evidence;

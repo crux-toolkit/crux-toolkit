@@ -44,4 +44,5 @@ Examples:
   |tide-useflank  |                                                             |--use-flanking-peaks T                                  |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-useflank.txt  |
   |tide-usenl     |                                                             |--use-neutral-loss-peaks T                              |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-usenl.txt     |
   |tide-mzbins    |                                                             |--mz-bin-width 0.02 --mz-bin-offset 0.34                |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-mzbins.txt    |
+  |tide-exact-pval|                                                             |--exact-p-value T                                       |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-exact-pval.txt|
 

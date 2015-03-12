@@ -432,7 +432,7 @@ void TideSearchApplication::search(
              it != match_arr2.end();
              ++it) {
           TideMatchSet::Pair pair;
-          pair.first.first = (double)(it->first / 100000000.0);
+          pair.first.first = (double)(it->first / XCORR_SCALING);
           pair.first.second = 0.0;
           pair.second = it->second;
           match_arr.push_back(pair);
@@ -567,7 +567,7 @@ void TideSearchApplication::search(
         } else {
           TideMatchSet::Pair pair;
           pair.first.first = pValue;
-          pair.first.second = (double)scoreRefactInt;
+          pair.first.second = (double)scoreRefactInt / RESCALE_FACTOR;
           pair.second = nCandPeptide - pe; // TODO ugly hack to conform with the way these indices are generated in standard tide-search
           match_arr.push_back(pair);
        }

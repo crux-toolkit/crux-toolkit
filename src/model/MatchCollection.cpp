@@ -1675,7 +1675,7 @@ bool MatchCollection::addMatchToPostMatchCollection(
   
   // DEBUG, print total peptided scored so far
   if(match_.size() % 1000 == 0){
-    carp(CARP_INFO, "parsed PSM: %d", match_.size());
+    carp(CARP_DEBUG, "parsed PSM: %d", match_.size());
   }
   
   return true;
