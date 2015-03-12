@@ -27,8 +27,6 @@ def runCommand(command, outputFileName):
   if (outputFileName != "") and (os.path.exists(outputFileName)):
     sys.stderr.write("%s exists.\n" % outputFileName)
     return
-  else:
-    sys.stderr.write("%s does not exist.\n" % outputFileName)
   
   sys.stderr.write("RUN: %s\n" % command)
   try:
@@ -169,7 +167,8 @@ runSearch("tide-p-value", "tide-search", "", database,
           "tide-p-value/tide-search.txt",
           "--smaller-is-better T --score \"exact p-value\"")
 runSearch("comet", "comet", "", "%s.fa" % database, 
-          "comet/comet.target.txt", "--score \"e-value\"")
+          "comet/comet.target.txt", "")
+# FIXME: The last option should be "--score \"e-value\""
 
 # Make the performance plot.
 gnuplotFileName = "performance.gnuplot"
