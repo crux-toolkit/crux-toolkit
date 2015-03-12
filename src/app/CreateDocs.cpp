@@ -74,22 +74,22 @@ int CreateDocs::main(int argc, char** argv) {
     for (vector<CruxApplication*>::const_iterator i = apps.begin(); i != apps.end(); i++) {
       cout << (*i)->getName() << endl;
     }
-    return 0;
+  } else if (targetApp == "default-params") {
+    Params::Write(&cout, true);
+  } else {
+    CruxApplication* app = apps.find(targetApp);
+    if (app == NULL) {
+      carp(CARP_FATAL, "Invalid application '%s'", targetApp.c_str());
+    }
+    readParams(&apps); // This is unnecessary, but checks for problems
+    generateToolHtml(&cout, app);
   }
-
-  CruxApplication* app = apps.find(targetApp);
-  if (app == NULL) {
-    carp(CARP_FATAL, "Invalid application '%s'", targetApp.c_str());
-  }
-
-  Params::Categorize();
-  readParams(&apps); // This is unnecessary, but checks for problems
-  cout << generateToolHtml(app) << endl;
 
   return 0;
 }
 
 void CreateDocs::readParams(const CruxApplicationList* apps) {
+  carp(CARP_INFO, "Running parameter validity checks...");
   for (map<string, Param*>::const_iterator i = Params::BeginAll();
        i != Params::EndAll();
        i++) {
@@ -104,8 +104,13 @@ void CreateDocs::readParams(const CruxApplicationList* apps) {
       for (vector<CruxApplication*>::const_iterator j = apps->begin();
            j != apps->end();
            j++) {
-        const vector<string>& appArgs = (*j)->getArgs();
-        const vector<string>& appOptions = (*j)->getOptions();
+        vector<string> appArgs = (*j)->getArgs();
+        for (vector<string>::iterator k = appArgs.begin(); k != appArgs.end(); k++) {
+          if (StringUtils::EndsWith(*k, "+")) {
+            *k = k->substr(k->length() - 1);
+          }
+        }
+        vector<string> appOptions = (*j)->getOptions();
         bool appArg =
           std::find(appArgs.begin(), appArgs.end(), name) != appArgs.end();
         bool appOption =
@@ -155,9 +160,11 @@ void CreateDocs::readParams(const CruxApplicationList* apps) {
   }
 }
 
-string CreateDocs::generateToolHtml(
+void CreateDocs::generateToolHtml(
+  ostream* outStream,
   const CruxApplication* application
 ) {
+  carp(CARP_INFO, "Generating documentation for '%s'", application->getName().c_str());
   string doc = getToolTemplate();
   string inputTemplate = getToolInputTemplate();
   string outputTemplate = getToolOutputTemplate();
@@ -174,18 +181,22 @@ string CreateDocs::generateToolHtml(
   string usage = "crux " + appName + " [options]";
   string inputs;
   for (vector<string>::const_iterator i = args.begin(); i != args.end(); i++) {
-    usage += " &lt;" + *i + "&gt;";
+    bool multiArg = StringUtils::EndsWith(*i, "+");
+    string argName = multiArg ? i->substr(0, i->length() - 1) : *i;
+    usage += " &lt;" + argName + "&gt;";
+    if (multiArg) {
+      usage += "+";
+    }
 
-    if (!Params::Exists(*i)) {
+    if (!Params::Exists(argName)) {
       carp(CARP_FATAL, "Invalid argument '%s' for application '%s'",
-           i->c_str(), appName.c_str());
+           argName.c_str(), appName.c_str());
     }
     string single = inputTemplate;
     map<string, string> replaceMap;
-    replaceMap["#INPUTNAME#"] = *i;
+    replaceMap["#INPUTNAME#"] = argName;
     replaceMap["#INPUTDESCRIPTION#"] =
-      Params::ProcessHtmlDocTags(htmlEscape(Params::GetUsage(*i)), true);
-    replaceMap["#INPUTTYPE#"] = Params::GetType(*i);
+      Params::ProcessHtmlDocTags(htmlEscape(Params::GetUsage(argName)), true);
     makeReplacements(&single, replaceMap);
     inputs += single;
   }
@@ -228,6 +239,7 @@ string CreateDocs::generateToolHtml(
       replaceMap["#OPTIONDESCRIPTION#"] =
         Params::ProcessHtmlDocTags(htmlEscape(Params::GetUsage(*j)), true);
       replaceMap["#OPTIONTYPE#"] = Params::GetType(*j);
+      replaceMap["#OPTIONDEFAULT#"] = Params::GetStringDefault(*j);
       makeReplacements(&single, replaceMap);
       optionSubset += single;
     }
@@ -248,7 +260,7 @@ string CreateDocs::generateToolHtml(
   replacements["#TOOLOUTPUTS#"] = outputs;
   replacements["#TOOLOPTIONS#"] = options;
   makeReplacements(&doc, replacements);
-  return doc;
+  *outStream << doc;
 }
 
 void CreateDocs::makeReplacements(

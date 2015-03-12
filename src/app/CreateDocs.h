@@ -2,6 +2,7 @@
 #define CREATEDOCS_H
 
 #include <map>
+#include <ostream>
 #include <string>
 #include <vector>
 
@@ -26,17 +27,7 @@ protected:
 
   void readParams(const CruxApplicationList* apps = NULL);
 
-  template<class T>
-  std::string generateToolHtml() {
-    T* tmpTool = new T();
-    std::string html = generateToolHtml(tmpTool);
-    delete tmpTool;
-    return html;
-  }
-
-  std::string generateToolHtml(
-    const CruxApplication* application
-  );
+  void generateToolHtml(std::ostream* outStream, const CruxApplication* application);
 
   void makeReplacements(
     std::string* templateStr,

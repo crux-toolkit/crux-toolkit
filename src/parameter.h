@@ -302,7 +302,7 @@ int get_num_fixed_mods();
  *  mod name.  (i.e. for "mod", use get_aa_mod_list(), for "cmod" use
  *  get_c_mod_list(), for "nmod" use get_n_mod_list())
  */
-void print_mods_parameter_file(std::ofstream* param_file, 
+void print_mods_parameter_file(std::ostream* param_file, 
                                const char* name,
                                int (*mod_getter)(AA_MOD_T***));
 
