@@ -3,7 +3,7 @@
 
 #include "StringUtils.h"
 
-#include <fstream>
+#include <ostream>
 #include <limits>
 #include <map>
 #include <set>
@@ -28,6 +28,12 @@ class Params {
   static int GetInt(const std::string& name);
   static double GetDouble(const std::string& name);
   static std::string GetString(const std::string& name);
+
+  // Get the default value of the parameter
+  static bool GetBoolDefault(const std::string& name);
+  static int GetIntDefault(const std::string& name);
+  static double GetDoubleDefault(const std::string& name);
+  static std::string GetStringDefault(const std::string& name);
 
   // Get the values of an argument that accepts multiple values
   static const std::vector<std::string>& GetStrings(const std::string& name);
@@ -70,7 +76,7 @@ class Params {
   static void Finalize();
 
   // Write all contents of the ordered parameter list to file
-  static void Write(std::ofstream* file);
+  static void Write(std::ostream* out, bool defaults = false);
 
   // Get iterators for the beginning and end of the entire parameter list
   static std::map<std::string, Param*>::const_iterator BeginAll();
@@ -83,7 +89,7 @@ class Params {
   // Process tags in a string
   static std::string ProcessHtmlDocTags(std::string s, bool html = false);
 
-  // Group the given options by category - must call Categorize() first
+  // Group the given options by category
   static std::vector< std::pair< std::string, std::vector<std::string> > > GroupByCategory(
     const std::vector<std::string>& options);
 
@@ -130,6 +136,9 @@ class Params {
 
     // Add parameter category
     void AddCategory(const std::string& name, const std::set<std::string>& params);
+
+    // Get whether any categories have been added or not
+    bool CategoriesEmpty() const;
 
     // Get all categories
     const std::vector<ParamCategory>& GetCategories() const;
@@ -250,6 +259,12 @@ class Param {
   virtual double GetDouble() const = 0;
   virtual std::string GetString() const = 0;
 
+  // Get the default value of the parameter
+  virtual bool GetBoolDefault() const = 0;
+  virtual int GetIntDefault() const = 0;
+  virtual double GetDoubleDefault() const = 0;
+  virtual std::string GetStringDefault() const = 0;
+
   // Set the value of the parameter
   virtual void Set(bool value);
   virtual void Set(int value);
@@ -258,7 +273,7 @@ class Param {
   virtual void Set(const std::string& value);
 
   // Get the parameter as a string to write to a parameter file
-  virtual std::string GetParamFileString() const;
+  virtual std::string GetParamFileString(bool defaultValue = false) const;
  protected:
   std::string name_, usage_, fileNotes_;
   bool visible_;
@@ -277,12 +292,18 @@ class BoolParam : public Param {
   int GetInt() const;
   double GetDouble() const;
   std::string GetString() const;
+  bool GetBoolDefault() const;
+  int GetIntDefault() const;
+  double GetDoubleDefault() const;
+  std::string GetStringDefault() const;
   void Set(bool value);
   void Set(int value);
   void Set(double value);
   void Set(const std::string& value);
 
-  static bool FromString(std::string s);
+  static bool From(int i);
+  static bool From(double d);
+  static bool From(std::string s);
  protected:
   bool value_, original_;
 };
@@ -303,10 +324,18 @@ class IntParam : public Param {
   int GetInt() const;
   double GetDouble() const;
   std::string GetString() const;
+  bool GetBoolDefault() const;
+  int GetIntDefault() const;
+  double GetDoubleDefault() const;
+  std::string GetStringDefault() const;
   void Set(bool value);
   void Set(int value);
   void Set(double value);
   void Set(const std::string& value);
+
+  static int From(bool b);
+  static int From(double d);
+  static int From(const std::string& s);
  protected:
   int value_, min_, max_, original_;
 };
@@ -327,10 +356,18 @@ class DoubleParam : public Param {
   int GetInt() const;
   double GetDouble() const;
   std::string GetString() const;
+  bool GetBoolDefault() const;
+  int GetIntDefault() const;
+  double GetDoubleDefault() const;
+  std::string GetStringDefault() const;
   void Set(bool value);
   void Set(int value);
   void Set(double value);
   void Set(const std::string& value);
+
+  static double From(bool b);
+  static double From(int i);
+  static double From(const std::string& s);
  protected:
   double value_, min_, max_, original_;
 };
@@ -350,10 +387,18 @@ class StringParam : public Param {
   int GetInt() const;
   double GetDouble() const;
   std::string GetString() const;
+  bool GetBoolDefault() const;
+  int GetIntDefault() const;
+  double GetDoubleDefault() const;
+  std::string GetStringDefault() const;
   void Set(bool value);
   void Set(int value);
   void Set(double value);
   void Set(const std::string& value);
+
+  static std::string From(bool b);
+  static std::string From(int i);
+  static std::string From(double d);
  protected:
   std::string value_, original_;
   std::vector<std::string> validValues_;
@@ -369,6 +414,10 @@ class ArgParam : public Param {
   int GetInt() const;
   double GetDouble() const;
   std::string GetString() const;
+  bool GetBoolDefault() const;
+  int GetIntDefault() const;
+  double GetDoubleDefault() const;
+  std::string GetStringDefault() const;
 
   const std::vector<std::string>& GetStrings() const;
   void AddValue(const std::string& value);

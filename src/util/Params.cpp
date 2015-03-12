@@ -1247,7 +1247,7 @@ void Params::Initialize() {
   // create-docs
   InitArgParam("tool name",
     "Specifies the tool to generate documentation for. If value is 'list', "
-    "a list of available tools will be given.");
+    "a list of available tools will be given. If value is 'default-params', "    "a default parameter file will be given.");
   InitStringParam("doc-template", "",
     "Specifies the main template to be used for generating documentation.",
     "Available for crux create-docs", false);
@@ -1397,6 +1397,22 @@ string Params::GetString(const string& name) {
   return GetParam(name)->GetString();
 }
 
+bool Params::GetBoolDefault(const string& name) {
+  return GetParam(name)->GetBoolDefault();
+}
+
+int Params::GetIntDefault(const string& name) {
+  return GetParam(name)->GetIntDefault();
+}
+
+double Params::GetDoubleDefault(const string& name) {
+  return GetParam(name)->GetDoubleDefault();
+}
+
+string Params::GetStringDefault(const string& name) {
+  return GetParam(name)->GetStringDefault();
+}
+
 const vector<string>& Params::GetStrings(const string& name) {
   Param* param = GetParam(name);
   if (!param->IsArgument()) {
@@ -1528,15 +1544,15 @@ void Params::Finalize() {
   container_.Finalize();
 }
 
-void Params::Write(ofstream* file) {
-  if (file == NULL || !file->good()) {
+void Params::Write(ostream* out, bool defaults) {
+  if (out == NULL || !out->good()) {
     throw runtime_error("Bad file stream for writing parameter file");
   }
 
-  *file << "# comet_version 2015.01 rev. 0" << endl
-        << "# Comet MS/MS search engine parameters file." << endl
-        << "# Everything following the \'#\' symbol is treated as a comment." << endl
-        << endl;
+  *out << "# comet_version 2015.01 rev. 0" << endl
+       << "# Comet MS/MS search engine parameters file." << endl
+       << "# Everything following the \'#\' symbol is treated as a comment." << endl
+       << endl;
 
   for (vector<const Param*>::const_iterator i = Begin(); i != End(); i++) {
     string name = (*i)->GetName();
@@ -1546,17 +1562,17 @@ void Params::Write(ofstream* file) {
         name.find('_') != string::npos) {
       continue;
     }
-    *file << (*i)->GetParamFileString() << endl;
+    *out << (*i)->GetParamFileString(defaults) << endl;
   }
 
-  print_mods_parameter_file(file, "mod", get_aa_mod_list);
-  print_mods_parameter_file(file, "nmod", get_n_mod_list);
-  print_mods_parameter_file(file, "cmod", get_c_mod_list);
+  print_mods_parameter_file(out, "mod", get_aa_mod_list);
+  print_mods_parameter_file(out, "nmod", get_n_mod_list);
+  print_mods_parameter_file(out, "cmod", get_c_mod_list);
 
   // Print Comet parameters
-  *file << "#################" << endl
-        << "#Comet Parameters" << endl
-        << "#################" << endl;
+  *out << "#################" << endl
+       << "#Comet Parameters" << endl
+       << "#################" << endl;
   for (vector<const Param*>::const_iterator i = Begin(); i != End(); i++) {
     string name = (*i)->GetName();
     // Print mods and Comet parameters later
@@ -1565,41 +1581,41 @@ void Params::Write(ofstream* file) {
         name.find('_') == string::npos) {
       continue;
     }
-    *file << (*i)->GetParamFileString() << endl;
+    *out << (*i)->GetParamFileString(defaults) << endl;
   }
 
-  *file << "#" << endl
-        << "# COMET_ENZYME_INFO _must_ be at the end of this parameters file" << endl
-        << "#" << endl
-        << "[COMET_ENZYME_INFO]" << endl;
+  *out << "#" << endl
+       << "# COMET_ENZYME_INFO _must_ be at the end of this parameters file" << endl
+       << "#" << endl
+       << "[COMET_ENZYME_INFO]" << endl;
 
   const vector<string>& cometEnzymes = get_comet_enzyme_info_lines();
-  if (cometEnzymes.empty()) {
-    *file << "0.  No_enzyme                      0  -          -" << endl
-          << "1.  Trypsin                        1  KR         P" << endl
-          << "2.  Trypsin/P                      1  KR         -" << endl
-          << "3.  Lys_C                          1  K          P" << endl
-          << "4.  Lys_N                          0  K          -" << endl
-          << "5.  Arg_C                          1  R          P" << endl
-          << "6.  Asp_N                          0  D          -" << endl
-          << "7.  CNBr                           1  M          -" << endl
-          << "8.  Glu_C                          1  DE         P" << endl
-          << "9.  PepsinA                        1  FL         P" << endl
-          << "10. Chymotrypsin                   1  FWYL       P" << endl;
+  if (cometEnzymes.empty() || defaults) {
+    *out << "0.  No_enzyme                      0  -          -" << endl
+         << "1.  Trypsin                        1  KR         P" << endl
+         << "2.  Trypsin/P                      1  KR         -" << endl
+         << "3.  Lys_C                          1  K          P" << endl
+         << "4.  Lys_N                          0  K          -" << endl
+         << "5.  Arg_C                          1  R          P" << endl
+         << "6.  Asp_N                          0  D          -" << endl
+         << "7.  CNBr                           1  M          -" << endl
+         << "8.  Glu_C                          1  DE         P" << endl
+         << "9.  PepsinA                        1  FL         P" << endl
+         << "10. Chymotrypsin                   1  FWYL       P" << endl;
     /*TODO: Put these back in after we figure out what to do with enzyme info
-    *file << "11. Elastase                       1  ALIV       P" << endl
-          << "12. Clostripain                    1  R          -" << endl
-          << "13. Iodosobenzoate                 1  W          -" << endl
-          << "14. Proline_Endopeptidase          1  P          -" << endl
-          << "15. Staph_Protease                 1  E          -" << endl
-          << "16. Modified_Chymotrypsin          1  FWYL       P" << endl
-          << "17. Elastase_Trypsin_Chymotrypsin  1  ALIVKRWFY  P" << endl;
+    *out << "11. Elastase                       1  ALIV       P" << endl
+         << "12. Clostripain                    1  R          -" << endl
+         << "13. Iodosobenzoate                 1  W          -" << endl
+         << "14. Proline_Endopeptidase          1  P          -" << endl
+         << "15. Staph_Protease                 1  E          -" << endl
+         << "16. Modified_Chymotrypsin          1  FWYL       P" << endl
+         << "17. Elastase_Trypsin_Chymotrypsin  1  ALIVKRWFY  P" << endl;
     */
   } else {
     for (vector<string>::const_iterator i = cometEnzymes.begin();
          i != cometEnzymes.end();
          i++) {
-      *file << *i << endl;
+      *out << *i << endl;
     }
   }
 }
@@ -1666,6 +1682,10 @@ string Params::ProcessHtmlDocTags(string s, bool html) {
 }
 
 vector< pair< string, vector<string> > > Params::GroupByCategory(const vector<string>& options) {
+  if (container_.CategoriesEmpty()) {
+    Categorize();
+  }
+
   vector< pair< string, vector<string> > > groups;
 
   pair< string, vector<string> > uncategorizedPair = make_pair("", vector<string>(options));
@@ -1907,6 +1927,10 @@ void Params::ParamContainer::AddCategory(const string& name, const set<string>& 
   }
 }
 
+bool Params::ParamContainer::CategoriesEmpty() const {
+  return categories_.empty();
+}
+
 const vector<Params::ParamCategory>& Params::ParamContainer::GetCategories() const {
   return categories_;
 }
@@ -1927,7 +1951,7 @@ string Param::GetFileNotes() const { return fileNotes_; }
 bool Param::IsVisible() const { return visible_; }
 bool Param::IsArgument() const { return false; }
 void Param::ThrowIfInvalid() const {}
-string Param::GetParamFileString() const {
+string Param::GetParamFileString(bool defaultValue) const {
   vector<string> lines =
     StringUtils::Split(Params::ProcessHtmlDocTags(usage_), '\n');
   vector<string> noteLines =
@@ -1940,7 +1964,7 @@ string Param::GetParamFileString() const {
       ss << "# " << *j << endl;
     }
   }
-  ss << name_ << '=' << GetString() << endl;
+  ss << name_ << '=' << (defaultValue ? GetStringDefault() : GetString()) << endl;
   return ss.str();
 }
 void Param::Set(bool value) {
@@ -1970,21 +1994,27 @@ BoolParam::BoolParam(const string& name,
 string BoolParam::GetType() const { return "boolean"; }
 bool BoolParam::IsDefault() const { return value_ == original_; }
 bool BoolParam::GetBool() const { return value_; }
-int BoolParam::GetInt() const { return value_ ? 1 : 0; }
-double BoolParam::GetDouble() const { return value_ ? 1 : 0; }
-string BoolParam::GetString() const { return value_ ? "true" : "false"; }
+int BoolParam::GetInt() const { return IntParam::From(value_); }
+double BoolParam::GetDouble() const { return DoubleParam::From(value_); }
+string BoolParam::GetString() const { return StringParam::From(value_); }
+bool BoolParam::GetBoolDefault() const { return original_; }
+int BoolParam::GetIntDefault() const { return IntParam::From(original_); }
+double BoolParam::GetDoubleDefault() const { return DoubleParam::From(original_); }
+string BoolParam::GetStringDefault() const { return StringParam::From(original_); }
 void BoolParam::Set(bool value) { value_ = value; }
-void BoolParam::Set(int value) { value_ = value != 0; }
-void BoolParam::Set(double value) { value_ = value != 0; }
+void BoolParam::Set(int value) { value_ = From(value); }
+void BoolParam::Set(double value) { value_ = From(value); }
 void BoolParam::Set(const string& value) {
   try {
-    value_ = FromString(value);
+    value_ = From(value);
   } catch (...) {
     throw runtime_error("Invalid value for '" + name_ + "': " + "'" + value + "' "
                         "(expected boolean)");
   }
 }
-bool BoolParam::FromString(string s) {
+bool BoolParam::From(int i) { return i != 0; }
+bool BoolParam::From(double d) { return d != 0; }
+bool BoolParam::From(string s) {
   s = StringUtils::ToLower(s);
   if (s == "t" || s == "true") {
     return true;
@@ -2014,21 +2044,28 @@ void IntParam::ThrowIfInvalid() const {
 }
 string IntParam::GetType() const { return "integer"; }
 bool IntParam::IsDefault() const { return value_ == original_; }
-bool IntParam::GetBool() const { return value_ != 0; }
+bool IntParam::GetBool() const { return BoolParam::From(value_); }
 int IntParam::GetInt() const { return value_; }
-double IntParam::GetDouble() const { return (double)value_; }
-string IntParam::GetString() const { return StringUtils::ToString(value_); }
-void IntParam::Set(bool value) { value_ = value ? 1 : 0; }
+double IntParam::GetDouble() const { return DoubleParam::From(value_); }
+string IntParam::GetString() const { return StringParam::From(value_); }
+bool IntParam::GetBoolDefault() const { return BoolParam::From(original_); }
+int IntParam::GetIntDefault() const { return original_; }
+double IntParam::GetDoubleDefault() const { return DoubleParam::From(original_); }
+string IntParam::GetStringDefault() const { return StringParam::From(original_); }
+void IntParam::Set(bool value) { value_ = From(value); }
 void IntParam::Set(int value) { value_ = value; }
-void IntParam::Set(double value) { value_ = (int)value; }
+void IntParam::Set(double value) { value_ = From(value); }
 void IntParam::Set(const string& value) {
   try {
-    value_ = StringUtils::FromString<int>(value);
+    value_ = From(value);
   } catch (...) {
     throw runtime_error("Invalid value for '" + name_ + "': " + "'" + value + "' "
                         "(expected int)");
   }
 }
+int IntParam::From(bool b) { return b ? 1 : 0; }
+int IntParam::From(double d) { return (int)d; }
+int IntParam::From(const string& s) { return StringUtils::FromString<int>(s); }
 //
 // DoubleParam
 //
@@ -2051,21 +2088,28 @@ void DoubleParam::ThrowIfInvalid() const {
 }
 string DoubleParam::GetType() const { return "float"; }
 bool DoubleParam::IsDefault() const { return value_ == original_; }
-bool DoubleParam::GetBool() const { return value_ != 0; }
-int DoubleParam::GetInt() const { return (int)value_; }
+bool DoubleParam::GetBool() const { return BoolParam::From(value_); }
+int DoubleParam::GetInt() const { return IntParam::From(value_); }
 double DoubleParam::GetDouble() const { return value_; }
-string DoubleParam::GetString() const { return StringUtils::ToString(value_, 6); }
-void DoubleParam::Set(bool value) { value_ = value ? 1 : 0; }
-void DoubleParam::Set(int value) { value_ = (double)value; }
+string DoubleParam::GetString() const { return StringParam::From(value_); }
+bool DoubleParam::GetBoolDefault() const { return BoolParam::From(original_); }
+int DoubleParam::GetIntDefault() const { return IntParam::From(original_); }
+double DoubleParam::GetDoubleDefault() const { return original_; }
+string DoubleParam::GetStringDefault() const { return StringParam::From(original_); }
+void DoubleParam::Set(bool value) { value_ = From(value); }
+void DoubleParam::Set(int value) { value_ = From(value); }
 void DoubleParam::Set(double value) { value_ = value; }
 void DoubleParam::Set(const string& value) {
   try {
-    value_ = StringUtils::FromString<double>(value);
+    value_ = From(value);
   } catch (...) {
     throw runtime_error("Invalid value for '" + name_ + "': " + "'" + value + "' "
                         "(expected float)");
   }
 }
+double DoubleParam::From(bool b) { return b ? 1 : 0; }
+double DoubleParam::From(int i) { return (double)i; }
+double DoubleParam::From(const string& s) { return StringUtils::FromString<double>(s); }
 //
 // StringParam
 //
@@ -2086,14 +2130,21 @@ void StringParam::ThrowIfInvalid() const {
 }
 string StringParam::GetType() const { return "string"; }
 bool StringParam::IsDefault() const { return value_ == original_; }
-bool StringParam::GetBool() const { return !value_.empty(); }
-int StringParam::GetInt() const { return StringUtils::FromString<int>(value_); }
-double StringParam::GetDouble() const { return StringUtils::FromString<double>(value_); }
+bool StringParam::GetBool() const { return BoolParam::From(value_); }
+int StringParam::GetInt() const { return IntParam::From(value_); }
+double StringParam::GetDouble() const { return DoubleParam::From(value_); }
 string StringParam::GetString() const { return value_; }
-void StringParam::Set(bool value) { value_ = value ? "true" : "false"; }
-void StringParam::Set(int value) { value_ = StringUtils::ToString(value); }
-void StringParam::Set(double value) { value_ = StringUtils::ToString(value); }
+bool StringParam::GetBoolDefault() const { return BoolParam::From(original_); }
+int StringParam::GetIntDefault() const { return IntParam::From(original_); }
+double StringParam::GetDoubleDefault() const { return DoubleParam::From(original_); }
+string StringParam::GetStringDefault() const { return original_; }
+void StringParam::Set(bool value) { value_ = From(value); }
+void StringParam::Set(int value) { value_ = From(value); }
+void StringParam::Set(double value) { value_ = From(value); }
 void StringParam::Set(const string& value) { value_ = value; }
+string StringParam::From(bool b) { return b ? "true" : "false"; }
+string StringParam::From(int i) { return StringUtils::ToString(i); }
+string StringParam::From(double d) { return StringUtils::ToString(d, 6); }
 //
 // ArgParam
 //
@@ -2102,7 +2153,7 @@ ArgParam::ArgParam(const string& name, const string& usage)
 string ArgParam::GetType() const { return "argument"; }
 bool ArgParam::IsArgument() const { return true; }
 bool ArgParam::IsDefault() const { return false; }
-bool ArgParam::GetBool() const { return BoolParam::FromString(GetString()); }
+bool ArgParam::GetBool() const { return BoolParam::From(GetString()); }
 int ArgParam::GetInt() const { return StringUtils::FromString<int>(GetString()); }
 double ArgParam::GetDouble() const { return StringUtils::FromString<double>(GetString()); }
 string ArgParam::GetString() const {
@@ -2111,6 +2162,10 @@ string ArgParam::GetString() const {
   }
   return values_.front();
 }
+bool ArgParam::GetBoolDefault() const { return false; }
+int ArgParam::GetIntDefault() const { return 0; }
+double ArgParam::GetDoubleDefault() const { return 0; }
+string ArgParam::GetStringDefault() const { return ""; }
 const vector<string>& ArgParam::GetStrings() const { return values_; }
 void ArgParam::AddValue(const string& value) { values_.push_back(value); }
 
