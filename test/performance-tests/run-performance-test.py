@@ -132,7 +132,7 @@ def extractData(inputFileName, columnName, outputFileName):
 
 #############################################################################
 def runSearch(outputDirectory, searchName, searchParam, database, 
-              psmFile, confidenceParam):
+              psmFile, scoreColumn, confidenceParam):
 
   runCommand("%s %s --output-dir %s --parameter-file %s %s %s %s"
              % (CRUX, searchName, outputDirectory, parameterFileName, 
@@ -145,6 +145,45 @@ def runSearch(outputDirectory, searchName, searchParam, database,
 
   qFile = "%s/%s.q.txt" % (outputDirectory, searchName)
   extractData(confidenceFile, "tdc q-value", qFile)
+
+  percolatorFile = "%s/percolator.target.psms.txt" % outputDirectory
+  runCommand("%s percolator --output-dir %s %s"
+             % (CRUX, outputDirectory, psmFile), percolatorFile)
+
+  qFile = "%s/%s.percolator.q.txt" % (outputDirectory, searchName)
+  extractData(percolatorFile, "percolator q-value", qFile)
+
+  qrankerFile = "%s/q-ranker.target.psms.txt" % outputDirectory
+  runCommand("%s q-ranker --decoy-prefix decoy_ --output-dir %s %s %s"
+             % (CRUX, outputDirectory, ms2, psmFile), qrankerFile)
+
+  qFile = "%s/%s.q-ranker.q.txt" % (outputDirectory, searchName)
+  extractData(qrankerFile, "q-ranker q-value", qFile)
+
+  reducedFile = "%s/%s.target.reduced.txt" % (outputDirectory, searchName)
+  runCommand("%s extract-columns %s \"scan,charge,sequence,%s\" | awk 'NR > 1' | awk '{print $1 \"~\" $2 \"~\" $3 \"\t\" $4}' | sort -k 1b,1 > %s"
+             % (CRUX, psmFile, scoreColumn, reducedFile), "")
+
+
+# Create a scatter plot of XCorr scores.
+def makeScatterPlot(xData, xLabel, yData, yLabel, outputRoot):
+
+  runCommand("join %s %s | awk -F \"~\" '{print $1 \" \" $2 \" \" $3}' | awk '{print $1 \"\t\" $2 \"\t\" $3 \"\t\" $4 \"\t\" $5}' | sort -n > %s.txt"
+             % (xData, yData, outputRoot), "")
+
+  gnuplotFileName = "%s.gnuplot" % outputRoot
+  gnuplotFile = open(gnuplotFileName, "w")
+  gnuplotFile.write("set output \"/dev/null\"\n")
+  gnuplotFile.write("set terminal png\n")
+  gnuplotFile.write("set xlabel \"%s\"\n" % xLabel)
+  gnuplotFile.write("set ylabel \"%s\"\n" % yLabel)
+  gnuplotFile.write("plot x notitle with lines\n")
+  gnuplotFile.write("replot \"%s.txt\" using 4:5 notitle\n" % outputRoot)
+  gnuplotFile.write("set output\n")
+  gnuplotFile.write("replot\n")
+  gnuplotFile.close()
+
+  runCommand("gnuplot %s > %s.png" % (gnuplotFileName, outputRoot), "")
 
 
 #############################################################################
@@ -162,12 +201,12 @@ runCommand("%s tide-index --output-dir %s --parameter-file %s %s.fa %s"
 
 # Run three searches (Comet, Tide XCorr, and Tide p-value).
 runSearch("tide-xcorr", "tide-search", "--exact-p-value T", database, 
-          "tide-xcorr/tide-search.txt", "")
+          "tide-xcorr/tide-search.txt", "xcorr score", "")
 runSearch("tide-p-value", "tide-search", "", database,
-          "tide-p-value/tide-search.txt",
+          "tide-p-value/tide-search.txt", "refactored xcorr",
           "--smaller-is-better T --score \"exact p-value\"")
 runSearch("comet", "comet", "", "%s.fa" % database, 
-          "comet/comet.target.txt", "")
+          "comet/comet.target.txt", "xcorr score", "")
 # FIXME: The last option should be "--score \"e-value\""
 
 # Make the performance plot.
@@ -182,6 +221,12 @@ gnuplotFile.write("set key center right\n")
 gnuplotFile.write("plot \"comet/comet.q.txt\" using 1:0 title \"Comet E-value\" with lines\n")
 gnuplotFile.write("replot \"tide-p-value/tide-search.q.txt\" using 1:0 title \"Tide p-value\" with lines\n")
 gnuplotFile.write("replot \"tide-xcorr/tide-search.q.txt\" using 1:0 title \"Tide XCorr\" with lines\n")
+gnuplotFile.write("replot \"comet/comet.percolator.q.txt\" using 1:0 title \"Comet Percolator\" with lines\n")
+gnuplotFile.write("replot \"tide-p-value/tide-search.percolator.q.txt\" using 1:0 title \"Tide p-value Percolator\" with lines\n")
+gnuplotFile.write("replot \"tide-xcorr/tide-search.percolator.q.txt\" using 1:0 title \"Tide XCorr Percolator\" with lines\n")
+gnuplotFile.write("replot \"comet/comet.q-ranker.q.txt\" using 1:0 title \"Comet q-ranker\" with lines\n")
+gnuplotFile.write("replot \"tide-p-value/tide-search.q-ranker.q.txt\" using 1:0 title \"Tide p-value q-ranker\" with lines\n")
+gnuplotFile.write("replot \"tide-xcorr/tide-search.q-ranker.q.txt\" using 1:0 title \"Tide XCorr q-ranker\" with lines\n")
 gnuplotFile.write("set output\n")
 gnuplotFile.write("replot\n")
 gnuplotFile.close() 
@@ -189,3 +234,15 @@ runCommand("gnuplot %s > performance.png" % gnuplotFileName, "")
 
 
 # Make the XCorr scatter plots.
+makeScatterPlot("tide-xcorr/tide-search.target.reduced.txt", 
+                "Tide XCorr",
+                "tide-p-value/tide-search.target.reduced.txt", 
+                "Refactored XCorr",
+                "xcorr.refactored")
+makeScatterPlot("tide-xcorr/tide-search.target.reduced.txt", 
+                "Tide XCorr",
+                "comet/comet.target.reduced.txt", 
+                "Comet XCorr",
+                "xcorr.comet")
+
+
