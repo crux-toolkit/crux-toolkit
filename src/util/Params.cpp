@@ -156,8 +156,10 @@ void Params::Initialize() {
     "<string>=pwiz|mstoolkit. Default=pwiz.",
     "Available for search-for-xlinks.", true);
   InitBoolParam("use-z-line", true,
-    "In ms2 files, use values from the Z lines rather than the S line.",
-    "Available when spectrum-parser = pwiz.", false);
+    "Specify whether, when parsing an MS2 spectrum file, Crux obtains the "
+    "precursor mass information from the \"S\" line or the \"Z\" line. "
+    "Default = T.",
+    "Available when spectrum-parser = pwiz.", true);
   InitStringParam("custom-enzyme", "", 
     "Specify rules for in silico digestion of proteins. "
     "See HTML documentation for syntax. Default is trypsin.",

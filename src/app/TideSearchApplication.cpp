@@ -828,6 +828,8 @@ vector<string> TideSearchApplication::getOptions() const {
     "remove-precursor-peak",
     "remove-precursor-tolerance",
     "print-search-progress",
+    "spectrum-parser",
+    "use-z-line",
     "txt-output",
     "sqt-output",
     "pepxml-output",
