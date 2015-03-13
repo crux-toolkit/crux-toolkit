@@ -16,6 +16,7 @@
 #include "util/utils.h"
 #include "util/mass.h"
 #include "parameter.h"
+#include "util/Params.h"
 #include "Scorer.h"
 #include "io/carp.h"
 #include <vector>
@@ -383,43 +384,27 @@ bool Spectrum::parsePwizSpecInfo(
   // get precursor m/z and charge
   // is there exactly one precursor?
   if( pwiz_spectrum->precursors.size() != 1 ){  
-    carp(CARP_FATAL, 
-         "Spectrum %d has more than one precursor.", first_scan_);
+    carp(CARP_FATAL, "Spectrum %d has more than one precursor.", first_scan_);
   }
   // get the isolation window as the precursor m/z
   pzd::IsolationWindow iso_window = 
                        pwiz_spectrum->precursors[0].isolationWindow;
-  bool have_precursor_mz = false;
-  if (iso_window.hasCVParam(pzd::MS_isolation_window_target_m_z)) {
+  bool have_precursor_mz = iso_window.hasCVParam(pzd::MS_isolation_window_target_m_z);
+  if (have_precursor_mz) {
     precursor_mz_ =
       iso_window.cvParam(pzd::MS_isolation_window_target_m_z).valueAs<double>();
-    have_precursor_mz = true;
   }
 
   // each charge state(s) stored in selectedIon(s)
   // is there at least one selected ion?
   vector<pzd::SelectedIon> ions = pwiz_spectrum->precursors[0].selectedIons;
-  if( ions.empty() ){
+  if (ions.empty()) {
     carp(CARP_FATAL, "No selected ions in spectrum %d.", first_scan_);
-  }
-
-  bool knownCharge = ions[0].hasCVParam(pzd::MS_charge_state);
-  bool hasZLine = false;
-  const vector<pwiz::data::UserParam>& specUserParams = pwiz_spectrum->userParams;
-  if (!knownCharge) {
-    for (vector<pwiz::data::UserParam>::const_iterator i = specUserParams.begin();
-         i != specUserParams.end();
-         ++i) {
-      if (i->name == "ms2 file charge state") {
-        hasZLine = true;
-        break;
-      }
-    }
   }
 
   // determined charge states will be stored
   // one per selected ion
-  if (knownCharge) {
+  if (ions[0].hasCVParam(pzd::MS_charge_state)) {
     carp(CARP_DEBUG, "MS_charge_state");
     // get each charge state and possibly the associated mass
     for(size_t ion_idx = 0; ion_idx < ions.size(); ion_idx++){
@@ -457,31 +442,38 @@ bool Spectrum::parsePwizSpecInfo(
         carp(CARP_FATAL, err_string);
       }
     }
-  } else if (hasZLine) {
-    for (vector<pwiz::data::UserParam>::const_iterator i = specUserParams.begin();
-         i != specUserParams.end();
-         ++i) {
-      if (i->name == "ms2 file charge state") {
-        const string& zLine = i->value; // "<charge> <m/z>"
-        size_t separator = zLine.find(" ");
-        SpectrumZState zstate;
-        zstate.setMZ(boost::lexical_cast<double>(zLine.substr(separator + 1)),
-                     boost::lexical_cast<int>(zLine.substr(0, separator)));
-        zstates_.push_back(zstate);
+  } else {
+    if (Params::GetBool("use-z-line")) {
+      const vector<pwiz::data::UserParam>& specUserParams = pwiz_spectrum->userParams;
+      for (vector<pwiz::data::UserParam>::const_iterator i = specUserParams.begin();
+           i != specUserParams.end();
+           ++i) {
+        if (i->name == "ms2 file charge state") {
+          const string& zLine = i->value; // "<charge> <m/z>"
+          size_t separator = zLine.find(" ");
+          SpectrumZState zstate;
+          zstate.setMZ(boost::lexical_cast<double>(zLine.substr(separator + 1)),
+                       boost::lexical_cast<int>(zLine.substr(0, separator)));
+          zstates_.push_back(zstate);
+        }
       }
     }
-  } else if (ions[0].hasCVParam(pzd::MS_possible_charge_state)) {
-    // possible charge states will all be stored in the first selected ion
-    carp(CARP_DEBUG, "charges stored ion");
-    vector<pzd::CVParam> charges = 
-      ions[0].cvParamChildren(pzd::MS_possible_charge_state);
-    for (size_t charge_idx = 0; charge_idx < charges.size(); charge_idx++) {
-      SpectrumZState zstate;
-      zstate.setMZ(precursor_mz_, charges[charge_idx].valueAs<int>());
-      zstates_.push_back(zstate);
+
+    if (zstates_.empty()) {
+      if (ions[0].hasCVParam(pzd::MS_possible_charge_state)) {
+        // possible charge states will all be stored in the first selected ion
+        carp(CARP_DEBUG, "charges stored ion");
+        vector<pzd::CVParam> charges = 
+          ions[0].cvParamChildren(pzd::MS_possible_charge_state);
+        for (size_t charge_idx = 0; charge_idx < charges.size(); charge_idx++) {
+          SpectrumZState zstate;
+          zstate.setMZ(precursor_mz_, charges[charge_idx].valueAs<int>());
+          zstates_.push_back(zstate);
+        }
+      } else { // we have no charge information
+        assignZState(); //do choose charge and add +1 or +2,+3
+      }
     }
-  } else { // we have no charge information
-    assignZState(); //do choose charge and add +1 or +2,+3
   }
 
   return true;
