@@ -155,6 +155,9 @@ void Params::Initialize() {
     "Parser to use for reading in spectra "
     "<string>=pwiz|mstoolkit. Default=pwiz.",
     "Available for search-for-xlinks.", true);
+  InitBoolParam("use-z-line", true,
+    "In ms2 files, use values from the Z lines rather than the S line.",
+    "Available when spectrum-parser = pwiz.", false);
   InitStringParam("custom-enzyme", "", 
     "Specify rules for in silico digestion of proteins. "
     "See HTML documentation for syntax. Default is trypsin.",
