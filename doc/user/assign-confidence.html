@@ -11,7 +11,7 @@
 <h2>Usage:</h2>
 
 <blockquote>
-<code>crux assign-confidence [options] &lt;search&nbsp;results&gt;</code>
+<code>crux assign-confidence [options] &lt;search&nbsp;results&gt;+</code>
 </blockquote>
 
 <h2>Description:</h2>
@@ -219,6 +219,20 @@ target-decoy competition.  Default = tdc.</li>
 <code>--decoy-prefix &lt;string&gt;</code> &ndash;
 Specifies what protein name prefix is used to indicate a decoy.
 Default = "decoy_".</li>
+
+<li>
+<code>--sidak T|F</code> &ndash;
+Adjust the score using the Sidak adjustment and reports them 
+in a new column in the output file. Note that this 
+adjustment only makes sense if the given scores are p-values,
+and that it requires the presence of the "distinct matches/spectrum"
+feature for each PSM. Default = F.</li>
+
+<li>
+<code>--peptide-level T|F</code> &ndash;
+Applied for spectrum-centirc search. Eliminates any PSMS for which there 
+exists a better scoring PSM involving the same peptide. This option is 
+incompatible with the mix-max procedure. Default = F. </li>
 
 <h3>Input and output</h3>
 

@@ -913,9 +913,20 @@ void Params::Initialize() {
     "Specify the column (for tab-delimited input) or tag (for XML input) "
     "used as input to the q-value estimation procedure. Default \"xcorr score\".",
     "Used by assign-confidence.", true);
+  InitBoolParam("peptide-level", false,
+      "Applied for spectrum-centirc search. Eliminates any PSMS for which there "
+      "exists a better scoring PSM involving the same peptide. This option is "
+      "incompatible with the mix-max procedure. Default is F.",
+      "Used by assign-confidence.", true);    
   InitStringParam("estimation-method", "tdc", 
     "Specify the q-value calculation procedure to either "
     "target-decoy competition (tcd) or mix-max (mix-max). Default=tdc.",
+    "Used by assign-confidence.", true);      
+  InitBoolParam("sidak", false, 
+    "Adjust the score using the Sidak adjustment. "
+    "Note that this adjustment only makes sense if the given scores are p-values, "
+    "and that it requires the presence of the \"distinct matches/spectrum\" "
+    "feature for each PSM. Default = F.",
     "Used by assign-confidence.", true);      
   InitStringParam("percolator-intraset-features", "F",
     "Set a feature for percolator that in later versions is not an option.",

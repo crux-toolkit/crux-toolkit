@@ -301,9 +301,23 @@ int compareExactPValue(
     return -1;
   }
   return 0;
-
 }
-/**
+
+int compareSidakPValue(
+  Match** match_a, ///< the first match -in  
+  Match** match_b  ///< the second match -in
+  ){
+
+  if((*match_b)->getScore(SIDAK_ADJUSTED) 
+     < (*match_a)->getScore(SIDAK_ADJUSTED)){
+    return 1;
+  }
+  else if((*match_b)->getScore(SIDAK_ADJUSTED) 
+          > (*match_a)->getScore(SIDAK_ADJUSTED)){
+    return -1;
+  }
+  return 0;
+}/**
  * Compare two matches; used for qsort.
  * Smaller q-values are better.  Break ties using the raw score.
  * \returns 0 if q-value scores are equal, -1 if a is less than b, 1 if a
@@ -790,6 +804,10 @@ void Match::printOneMatchField(
   case REFACTORED_SCORE_COL:
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
                                      getScore(TIDE_SEARCH_REFACTORED_XCORR));
+    break;
+  case SIDAK_ADJUSTED_COL:
+    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
+                                     getScore(SIDAK_ADJUSTED));
     break;
   case XCORR_RANK_COL:
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
@@ -1796,6 +1814,13 @@ void Match::setLnExperimentSize(
 FLOAT_T Match::getLnExperimentSize()
 {
   return ln_experiment_size_;
+}
+
+/**
+ * Sets the total number of target matches searched for this spectrum.
+ */
+void Match::setTargetExperimentSize(int num_matches){
+  num_target_matches_ = num_matches;
 }
 
 /**

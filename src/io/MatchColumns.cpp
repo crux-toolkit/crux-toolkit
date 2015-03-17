@@ -5,6 +5,7 @@
 
 #include "MatchColumns.h"
 #include "io/carp.h"
+#include <string.h>
 
 static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "file",
@@ -21,6 +22,7 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "xcorr rank",
   "exact p-value",
   "refactored xcorr",
+  "Sidak adjusted p-value",  
   "e-value",
   "p-value",
   "smoothed p-value",
@@ -96,4 +98,17 @@ const char* get_column_header(
   carp(CARP_DETAILED_DEBUG, "get_column_header: %d/%d %s", columnIndex, 
     NUMBER_MATCH_COLUMNS, match_column_strings[columnIndex]);
   return(match_column_strings[columnIndex]);
+}
+
+int get_column_idx(
+  const char* column_name
+) {
+  int i;
+  for (i = FILE_COL; i < NUMBER_MATCH_COLUMNS; ++i) {
+    if (strcmp(column_name, match_column_strings[i]) == 0) {
+      return i;
+    }
+  }
+  carp(CARP_FATAL, "Cannot find column %s.\n", column_name);
+  return i;
 }

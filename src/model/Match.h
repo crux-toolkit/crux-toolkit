@@ -423,6 +423,11 @@ class Match {
   int getTargetExperimentSize();
 
   /**
+   * sets the total number of target matches searched for this spectrum.
+   */
+  void setTargetExperimentSize(int num_matches);
+
+  /**
    * \returns The total number of decoy matches searched for this
    * spectrum if this is a match to a decoy spectrum.
    */
@@ -584,8 +589,12 @@ int comparePValue(
   Crux::Match** match_a, ///< the first match -in  
   Crux::Match** match_b  ///< the scond match -in
   );
-  
+
 int compareExactPValue(
+  Crux::Match** match_a, ///< the first match -in  
+  Crux::Match** match_b  ///< the scond match -in
+  );
+int compareSidakPValue  (
   Crux::Match** match_a, ///< the first match -in  
   Crux::Match** match_b  ///< the scond match -in
   );

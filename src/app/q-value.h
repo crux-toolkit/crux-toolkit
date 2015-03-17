@@ -39,12 +39,18 @@ FLOAT_T estimate_pi0( FLOAT_T* target_scores,
   int      num_targets,
   FLOAT_T* decoy_scores,
   int      num_decoys,
-  bool     ascending);
+  bool     ascending );
   
 MatchCollection* run_qvalue(
   vector<string>& input_files,
   OutputFiles& output,
   COMMAND_T command  );
+  
+void peptide_level_filtering(
+  MatchCollection* match_collection,
+  std::map<string, FLOAT_T>* BestPeptideScore, 
+  SCORER_TYPE_T score_type,
+  bool ascending);
 
 #endif //QVALUE_H
 
