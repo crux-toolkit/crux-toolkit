@@ -359,6 +359,9 @@ void TideSearchApplication::search(
 ) {
   int elution_window = Params::GetInt("elution-window-size");
   bool peptide_centric = Params::GetBool("peptide-centric-search");
+  if (peptide_centric == false) {
+    elution_window = 0;
+  }
   active_peptide_queue->setElutionWindow(elution_window);
   active_peptide_queue->setPeptideCentric(peptide_centric);
 
@@ -382,6 +385,7 @@ void TideSearchApplication::search(
   unsigned sc_index = 0;
   FLOAT_T sc_total = (FLOAT_T)spec_charges->size();
   int print_interval = Params::GetInt("print-search-progress");
+  int total_candidate_peptides = 0;
   for (vector<SpectrumCollection::SpecCharge>::const_iterator sc = spec_charges->begin();
        sc != spec_charges->end();
        ++sc) {
@@ -408,6 +412,7 @@ void TideSearchApplication::search(
       // spectra.
       observed.PreprocessSpectrum(*spectrum, charge);
       int nCandPeptide = active_peptide_queue->SetActiveRange(min_mass, max_mass, min_range, max_range);
+      total_candidate_peptides += nCandPeptide;
       TideMatchSet::Arr2 match_arr2(nCandPeptide); // Scored peptides will go here.
 
       // Programs for taking the dot-product with the observed spectrum are laid
@@ -455,6 +460,7 @@ void TideSearchApplication::search(
 
       int maxPrecurMass = floor(MaxBin::Global().CacheBinEnd() + 50.0); // TODO works, but is this the best way to get?
       int nCandPeptide = active_peptide_queue->SetActiveRangeBIons(min_mass, max_mass, min_range, max_range);
+      total_candidate_peptides += nCandPeptide;
       TideMatchSet::Arr match_arr(nCandPeptide); // scored peptides will go here.
   
       // iterators needed at multiple places in following code
@@ -609,6 +615,9 @@ void TideSearchApplication::search(
            sc_index, sc_index / sc_total * 100);
     }
   }
+  carp(CARP_INFO, "Time per spectrum-charge combination: %lf s.", wall_clock() / (1e6*sc_total));
+  carp(CARP_INFO, "Average number of candidates per spectrum-charge combination: %lf ",
+                  total_candidate_peptides / sc_total);  
   if (output_files) {
     output_files->writeFooters();
   }

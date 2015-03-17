@@ -23,6 +23,7 @@ enum MATCH_COLUMNS_T {
   XCORR_RANK_COL,
   EXACT_PVALUE_COL,
   REFACTORED_SCORE_COL,
+  SIDAK_ADJUSTED_COL,  
   EVALUE_COL,
   PVALUE_COL,
   ELUTION_WINDOW_COL,
@@ -84,6 +85,7 @@ enum MATCH_COLUMNS_T {
   XCORR_FIRST_COL,
   XCORR_SECOND_COL,
   PROTEIN_ID_X_COL,
+
   NUMBER_MATCH_COLUMNS,
   INVALID_COL
 };
@@ -93,6 +95,10 @@ enum MATCH_COLUMNS_T {
  */
 const char* get_column_header(
   int columnIndex
+);
+
+int get_column_idx(
+  const char* column_name
 );
 
 #endif // MATCHCOLUMNS_H

@@ -100,7 +100,7 @@ string ComputeQValues::getDescription() const {
  */
 vector<string> ComputeQValues::getArgs() const {
   string arr[] = {
-    "target input"
+    "target input+"
   };
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }
@@ -114,6 +114,8 @@ vector<string> ComputeQValues::getOptions() const {
     "decoy-prefix",
     "score",
     "smaller-is-better",
+    "sidak",
+    "peptide-level",
     "verbosity",
     "parameter-file",
     "overwrite",

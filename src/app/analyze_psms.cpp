@@ -14,6 +14,7 @@
 #include "io/MatchCollectionParser.h"
 #include "model/MatchIterator.h"
 #include "PosteriorEstimator.h"
+#include "util/Params.h"
 
 /**
  * \brief Takes a directory containing PSM files and a protein index
@@ -23,24 +24,19 @@ void analyze_matches_main(
   int argc,
   char** argv
 ){
+
   CruxApplication* application = NULL;
 
   application = new ComputeQValues();
   application->initialize(argc, argv);
 
   // Get required arguments
+  vector<string> input_files = Params::GetStrings("target input");  
 
-  string input = get_string_parameter("target input");
-  vector<string> input_files;  
-  // Prepare the output files.
-  if (get_boolean_parameter("list-of-files") ||
-      has_extension(input.c_str(), "txt") ||
-      has_extension(input.c_str(), "sqt") ||
-      has_extension(input.c_str(), "pep.xml") ||
-      has_extension(input.c_str(), "mzid")) {
-
-    get_files_from_list(input, input_files);
+  if (get_boolean_parameter("list-of-files")){
+    get_files_from_list(input_files[0], input_files);
   }
+  
   // Prepare the output files.
   OutputFiles output(application);
   COMMAND_T command;
@@ -167,166 +163,6 @@ MatchCollection* run_percolator(
   fasta_file=NULL; 
   output= NULL; 
 
-/*
-  double* features = NULL;    
-  double* results_q = NULL;
-  double* results_score = NULL;
-  double pi0 = get_double_parameter("pi-zero");
-  char** feature_names = generate_feature_name_array();
-  MatchIterator* match_iterator = NULL;
-  MatchCollection* match_collection = NULL;
-  MatchCollection* target_match_collection = NULL;
-  Match* match = NULL;
-  int set_idx = 0;
-  
-  output.writeFeatureHeader(feature_names, NUM_FEATURES);
-
-  // Create MATCH_COLLECTION_ITERATOR_T object
-  // which will read in the serialized output PSM results and return
-  // first the match_collection of TARGET followed by 
-  // the DECOY* match_collections.
-  int num_decoys = 0;
-  MatchCollectionIterator* match_collection_iterator =
-    new MatchCollectionIterator(input_directory, fasta_file, &num_decoys);
-  // Create an array with counts of spectra in each match collection.
-  int num_sets = match_collection_iterator->getNumberCollections();
-  int* num_spectra = (int*)mycalloc(num_sets, sizeof(int));
-  int iterations = 0;
-  while(match_collection_iterator->hasNext()){
-    match_collection = 
-      match_collection_iterator->next();
-    num_spectra[iterations] = 
-      match_collection->getMatchTotal();
-    iterations++;
-  }
-
-  // get from the match files the columns to print in the output files
-  const vector<bool>& cols_to_print = 
-    match_collection_iterator->getColsInFile();
-  output.writeHeaders(cols_to_print);
-
-  // Reset the iterator. (FIXME: There should be a function to do this!)
-  delete match_collection_iterator;
-  num_decoys = 0;
-  match_collection_iterator =
-    new MatchCollectionIterator(input_directory, fasta_file, &num_decoys);
-
-  int num_target_matches = 0;
-  int num_decoy_matches = 0;  // in first decoy set
-  // iterate over each, TARGET, DECOY 1..3 match_collection sets
-  iterations = 0;
-  while(match_collection_iterator->hasNext()){
-    
-    carp(CARP_DEBUG, "Match collection iteration: %i" , iterations++);
-
-    // get the next match_collection
-    match_collection = match_collection_iterator->next();
-    
-    // intialize percolator, using information from first match_collection
-    if (set_idx == 0) {
-      // the first match_collection is the target_match_collection
-      target_match_collection = match_collection;
-
-      // result array that stores the algorithm scores
-      results_q = (double*)mycalloc(
-          match_collection->getMatchTotal(), sizeof(double));
-      results_score = (double*)mycalloc(
-          match_collection->getMatchTotal(), sizeof(double));
-      num_target_matches = match_collection->getMatchTotal();
-      
-      // Call that initiates percolator.
-      pcInitiate(
-                 (NSet)match_collection_iterator->getNumberCollections(), 
-                 NUM_FEATURES, 
-                 num_spectra, 
-                 feature_names, 
-                 pi0);
-      
-      free(num_spectra);
-
-      // Call that sets verbosity level
-      // 0 is quiet, 2 is default, 5 is more than you want
-      if(verbosity < CARP_ERROR){
-        pcSetVerbosity(0);
-      }    
-      else if(verbosity < CARP_INFO){
-        pcSetVerbosity(1); // FIXME
-      }
-      else{
-        pcSetVerbosity(5); // FIXME
-      }
-      
-    } else if( set_idx == 1 ){
-      num_decoy_matches = match_collection->getMatchTotal();
-    }
-
-    // create iterator, to register each PSM feature.
-    carp(CARP_DETAILED_DEBUG, "Registering PSMs");
-    match_iterator = new MatchIterator(match_collection, XCORR, false);
-    
-    while(match_iterator->hasNext()){
-      match = match_iterator->next();
-      // Register PSM with features
-      features = match->getPercolatorFeatures(match_collection);
-
-      output.writeMatchFeatures(match, features, NUM_FEATURES);
-      pcRegisterPSM((SetType)set_idx, 
-                    NULL, // no sequence used
-                    features);
-      
-      free(features);
-    }
-
-    // ok free & update for next set
-    // MEMLEAK 
-    delete match_iterator;
-
-    // don't free the target_match_collection
-    if(set_idx != 0){
-      delete match_collection;
-    }
-
-    ++set_idx;
-  } // end iteratation over each, TARGET, DECOY 1..3 match_collection sets
-
-  double* decoy_scores = new double[num_decoy_matches]; //first decoy set
-  double* PEPs = NULL;
-
-  carp(CARP_DETAILED_DEBUG, "Processing PSMs targets:%i decoys:%i", num_target_matches, num_decoy_matches);
-  // Start processing
-  pcExecute(); 
-  pcGetScores(results_score, results_q); 
-  pcGetDecoyScores(decoy_scores);
-  PEPs = compute_PEP(results_score, num_target_matches,
-                     decoy_scores, num_decoy_matches);
-  target_match_collection->fillResult(results_q, PERCOLATOR_QVALUE, true);
-  target_match_collection->fillResult(PEPs, PERCOLATOR_PEP, true);
-  target_match_collection->fillResult(results_score, PERCOLATOR_SCORE, false);
-  pcCleanUp();
-  
-  carp(CARP_DETAILED_DEBUG, "Writing matches");
-  output.writeMatches(target_match_collection);
-  
-  carp(CARP_DETAILED_DEBUG, "analyze_psms: cleanup");
-  
-  // free names
-  unsigned int name_idx;
-  for(name_idx=0; name_idx < NUM_FEATURES; ++name_idx){
-    free(feature_names[name_idx]);
-  }
-  free(feature_names);
-  free(results_q);
-  free(results_score);
-  delete match_collection_iterator;
-  delete[] decoy_scores;
-  delete[] PEPs;
-
-  // TODO put free back in. took out because glibc claimed it was corrupted
-  // double linked list
-  // free_parameters();
-
-  return target_match_collection;
-*/
 return NULL;
 }
 

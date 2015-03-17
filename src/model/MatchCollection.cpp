@@ -203,6 +203,11 @@ void MatchCollection::sort(
     sort_by = XCORR;
     compare_match_function = (QSORT_COMPARE_METHOD)compareXcorr;
     break;
+  case SIDAK_ADJUSTED:
+    carp(CARP_DEBUG, "Sorting match collection by sidak corrected exact p-value.");
+    sort_by = SIDAK_ADJUSTED;
+    compare_match_function = (QSORT_COMPARE_METHOD)compareSidakPValue;
+  break;  
   case TIDE_SEARCH_EXACT_PVAL:
     carp(CARP_DEBUG, "Sorting match collection by exact p-value.");
     sort_by = TIDE_SEARCH_EXACT_PVAL;
