@@ -85,6 +85,12 @@ ProteoWizard parser fails to read your files properly, you may want to try the
 MSToolkit parser instead. Default = pwiz.</li>
 
 <li>
+<code>--use-z-line T|F</code> &ndash;
+Specify whether, when parsing an MS2 spectrum file with <code>
+spectrum-parser=pwiz</code>, Crux obtains the precursor mass information from
+the "S" line or the "Z" line. Default = T.</li>
+
+<li>
 <code>--verbosity 0-100</code> &ndash; Specify the verbosity of the
 current processes. Each level prints the following messages, including
 all those at lower verbosity levels: 0-fatal errors, 10-non-fatal
