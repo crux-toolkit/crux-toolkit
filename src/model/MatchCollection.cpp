@@ -42,7 +42,6 @@ void MatchCollection::init() {
   // set last score to -1, thus nothing has been done yet
   last_sorted_ = (SCORER_TYPE_T)-1;
   iterator_lock_ = false;
-  delta_cn_ = 0;
   sp_scores_sum_ = 0;
   sp_scores_mean_ = 0;
   mu_ = 0;
@@ -573,22 +572,6 @@ int MatchCollection::getCharge()
 }
 
 /**
- * Must have been scored by Xcorr, returns error if not scored by Xcorr
- *\returns the delta cn value(difference in top and second ranked Xcorr values)
- */
-FLOAT_T MatchCollection::getDeltaCn()
-{
-  // Check if xcorr value has been scored, thus delta cn value is valid
-  if(scored_type_[XCORR]){
-    return delta_cn_;
-  }
-  else{
-    carp(CARP_ERROR, "must score match_collection with XCORR to get delta cn value");
-    return 0.0;
-  }
-}
-
-/**
  * \brief Transfer the Weibull distribution parameters, including the
  * correlation from one match_collection to another.  No check to see
  * that the parameters have been estimated.
@@ -1085,7 +1068,7 @@ void MatchCollection::printMultiSpectraXml(
         flanking_aas,
         protein_ids,
         protein_descriptions,
-        cur_match->getDeltaCn(),
+        cur_match->getScore(DELTA_CN),
         scored_type_,
         scores,
         cur_match->getBYIonMatched(),
@@ -1194,7 +1177,7 @@ bool MatchCollection::printXml(
         flanking_aas,
         protein_ids,
         protein_descriptions,
-        match->getDeltaCn(),
+        match->getScore(DELTA_CN),
         scores_computed,
         scores,
         match->getBYIonMatched(),
@@ -1617,8 +1600,8 @@ bool MatchCollection::extendTabDelimited(
 
     //set all spectrum specific features to parsed match
     match->setZState(zstate_);
-    match->setDeltaCn(delta_cn);
-    match->setDeltaLCn(ln_delta_cn);
+    match->setScore(DELTA_CN, delta_cn);
+    match->setScore(DELTA_LCN, ln_delta_cn);
     match->setLnExperimentSize(ln_experiment_size);    
     //add match to match collection.
     addMatchToPostMatchCollection(match);
@@ -1783,8 +1766,8 @@ bool MatchCollection::calculateDeltaCn(){
       carp(CARP_DEBUG, "delta_lcn was %f and set to zero. XCorr score is %f", delta_lcn, current_xcorr);
       delta_lcn = 0.0;
     }   
-    match_[idx]->setDeltaCn(delta_cn);
-    match_[idx]->setDeltaLCn(delta_lcn);
+    match_[idx]->setScore(DELTA_CN, delta_cn);
+    match_[idx]->setScore(DELTA_LCN, delta_lcn);
   }   
 
   return true;

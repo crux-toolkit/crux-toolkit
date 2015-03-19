@@ -128,7 +128,7 @@ void MzIdentMLReader::addScores(
         break;
       case MS_SEQUEST_deltacn:
         from_string(fvalue, iter->value);
-        match->setDeltaCn(fvalue);
+        match->setScore(DELTA_CN, fvalue);
         break;
       case MS_SEQUEST_matched_ions:
         from_string(ivalue, iter->value);

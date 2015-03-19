@@ -278,9 +278,11 @@ void PinWriter::printPSM(
       precision_, match->getRank(SP) > 0 ? log((double) match->getRank(SP)) : 0 // lnrSp
     );
   }
+  FLOAT_T delta_cn = match->getScore(DELTA_CN);
+  FLOAT_T delta_lcn = match->getScore(DELTA_LCN);
   fprintf(output_file_, "%.*f\t%.*f\t%.*f\t",
-    precision_, isInfinite(fabs(match->getDeltaLCn())) ? 0 : match->getDeltaLCn(), // deltLCn
-    precision_, isInfinite(fabs(match->getDeltaCn())) ? 0 : match->getDeltaCn(), // deltCn
+    precision_, isInfinite(fabs(delta_lcn)) ? 0 : delta_lcn, // deltLCn
+    precision_, isInfinite(fabs(delta_cn)) ? 0 : delta_cn, // deltCn
     precision_, match->getScore(XCORR) // XCorr
   );
   if (is_sp_) {

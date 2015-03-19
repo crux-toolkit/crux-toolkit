@@ -516,7 +516,7 @@ void PepXMLReader::searchScoreOpen(
   } else if (name == "expect") {
     current_match_->setScore(EVALUE, value);
   } else if (name == "delta_cn" || name == "deltacn") {
-    current_match_->setDeltaCn(value);
+    current_match_->setScore(DELTA_CN, value);
   } else if (name == "sp" || name == "spscore") {
     current_match_collection_->setScoredType(SP, true);
     current_match_->setScore(SP, value);
