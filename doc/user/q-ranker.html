@@ -215,6 +215,12 @@ alternative is <a href="mstoolkit.html">MSToolkit parser</a>. If the
 ProteoWizard parser fails to read your files properly, you may want to try the
 MSToolkit parser instead. Default = pwiz.</li>
 
+<li>
+<code>--use-z-line T|F</code> &ndash;
+Specify whether, when parsing an MS2 spectrum file with <code>
+spectrum-parser=pwiz</code>, Crux obtains the precursor mass information from
+the "S" line or the "Z" line. Default = T.</li>
+
 <li> 
 <code>--list-of-files &lt;T|F&gt;</code> &ndash; Specify that the
 spectra and search results are provided as lists of files, rather than
