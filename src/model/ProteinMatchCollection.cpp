@@ -197,7 +197,7 @@ void ProteinMatchCollection::addMatch(
   SpectrumMatch* spectrum_match = new SpectrumMatch(spectrum);
   spectrum_match->setFileIndex(match->getFileIndex());
   spectrum_match->setZState(z_state);
-  spectrum_match->setScore(DELTA_CN, match->getDeltaCn());
+  spectrum_match->setScore(DELTA_CN, match->getScore(DELTA_CN));
   spectrum_match->setScore(BY_IONS_MATCHED, match->getBYIonMatched());
   spectrum_match->setScore(BY_IONS_TOTAL, match->getBYIonPossible());
   spectrum_matches_.push_back(spectrum_match);

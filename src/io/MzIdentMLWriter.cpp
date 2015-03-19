@@ -631,7 +631,7 @@ void MzIdentMLWriter::addScores(
 
 
   if (match_collection->getScoredType(XCORR)) {
-    CVParam delta_cn(MS_SEQUEST_deltacn, match->getDeltaCn());
+    CVParam delta_cn(MS_SEQUEST_deltacn, match->getScore(DELTA_CN));
     item->cvParams.push_back(delta_cn);
   }
 

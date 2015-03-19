@@ -59,8 +59,6 @@ void Match::init() {
   mod_sequence_ = NULL;
   digest_ = INVALID_DIGEST;
   post_process_match_ = 0;
-  delta_cn_ = 0;
-  delta_lcn_ = 0;
   ln_experiment_size_ = 0;
   num_target_matches_ = 0;
   num_decoy_matches_ = 0;
@@ -665,7 +663,7 @@ void Match::printSqt(
   int b_y_total = getBYIonPossible();
   int b_y_matched = getBYIonMatched();
   
-  FLOAT_T delta_cn = getDeltaCn();
+  FLOAT_T delta_cn = getScore(DELTA_CN);
   FLOAT_T score_main = getScore(XCORR);
 
   // write format string with variable precision
@@ -778,7 +776,7 @@ void Match::printOneMatchField(
     break;
   case DELTA_CN_COL:
     {
-      FLOAT_T delta_cn = getDeltaCn();
+      FLOAT_T delta_cn = getScore(DELTA_CN);
       if( delta_cn == 0 ){// I hate -0, this prevents it
         delta_cn = 0.0;
       }
@@ -1760,42 +1758,6 @@ int Match::getCharge()
 FLOAT_T Match::getNeutralMass()
 {
   return getZState().getNeutralMass();
-}
-
-/**
- * sets the match delta_cn
- */
-void Match::setDeltaCn(
-  FLOAT_T delta_cn  ///< the delta cn value of PSM -in
-  )
-{
-  delta_cn_ = delta_cn;
-}
-
-/**
- * gets the match delta_cn
- */
-FLOAT_T Match::getDeltaCn()
-{
-  return delta_cn_;
-}
-
-/**
- * sets the match ln_delta_cn
- */
-void Match::setDeltaLCn(
-  FLOAT_T delta_lcn  ///< the delta lcn value of PSM -in
-  )
-{
-  delta_lcn_ = delta_lcn;
-}
-
-/**
- * gets the match delta_lcn
- */
-FLOAT_T Match::getDeltaLCn()
-{
-  return delta_lcn_;
 }
 
 /**

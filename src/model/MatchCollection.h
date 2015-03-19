@@ -66,7 +66,6 @@ class MatchCollection {
 
   // values used for various scoring functions.
   // TODO this should be moved to match
-  FLOAT_T delta_cn_; ///< the difference in top and second Xcorr scores
   FLOAT_T sp_scores_sum_; ///< for getting mean, backward compatible
   FLOAT_T sp_scores_mean_;  ///< the mean value of the scored peptides sp score
   FLOAT_T mu_;// obsolete 
@@ -239,12 +238,6 @@ class MatchCollection {
   int getCharge();
 
   bool calculateDeltaCn();
-
-  /**
-   * Must have been scored by Xcorr, returns error if not scored by Xcorr
-   *\returns the delta cn value(difference in top and second ranked Xcorr values)
-   */
-  FLOAT_T getDeltaCn();
 
   /**
    * \brief Transfer the Weibull distribution parameters, including the

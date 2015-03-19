@@ -264,7 +264,7 @@ void SQTReader::parseMatch(string& line) {
   current_match_ = new Match(peptide, current_spectrum_, current_zstate_, false);
   current_match_->setScore(XCORR, xcorr);
   current_match_->setScore(SP, sp);
-  current_match_->setDeltaCn(delta_cn);
+  current_match_->setScore(DELTA_CN, delta_cn);
   current_match_->setRank(XCORR, xcorr_rank);
   current_match_->setRank(SP, sp_rank);
 
