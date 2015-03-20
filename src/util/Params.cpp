@@ -561,12 +561,12 @@ void Params::Initialize() {
     "Specifies C-terminal static and variable mass modifications on proteins. "
     "Specify a comma-separated list of C-terminal protein modification sequences of the form: "
     ",...",
-    "Available for tide-index", true);
+    "Available for tide-index", false);
   InitStringParam("nterm-protein-mods-spec", "",
     "Specifies N-terminal static and variable mass modifications on proteins. "
     "Specify a comma-separated list of N-terminal protein modification sequences of the form: "
     ",...",
-    "Available for tide-index", true);
+    "Available for tide-index", false);
   InitStringParam("store-spectra", "",
     "Specify the name of the file where the binarized fragmentation spectra "
     "will be stored.",

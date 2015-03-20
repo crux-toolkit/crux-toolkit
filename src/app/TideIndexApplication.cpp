@@ -412,8 +412,6 @@ vector<string> TideIndexApplication::getOptions() const {
     "mods-spec",
     "cterm-peptide-mods-spec",
     "nterm-peptide-mods-spec",
-    "cterm-protein-mods-spec",
-    "nterm-protein-mods-spec",
     "max-mods",
     "min-mods",
     "output-dir",
