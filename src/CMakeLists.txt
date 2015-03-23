@@ -185,6 +185,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
       PROPERTY
       COMPILE_DEFINITIONS
       _CRT_SECURE_NO_WARNINGS
+     NOMINMAX
     )
 else (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	set_property(
@@ -312,12 +313,10 @@ if (WIN32 AND NOT CYGWIN)
     libpwiz_data_common
     libpwiz_data_vendor_readers
     libpwiz_reader_agilent
-    libpwiz_reader_bruker
     libpwiz_reader_shimadzu
     libpwiz_reader_thermo
     libpwiz_reader_waters
     libpwiz_vendor_api_agilent
-    optimized libpwiz_vendor_api_bruker
     libpwiz_vendor_api_thermo
     libpwiz_utility_chemistry
     libpwiz_utility_minimxml
@@ -326,7 +325,6 @@ if (WIN32 AND NOT CYGWIN)
     libSHA1
     libsqlite3
     libsqlite3pp
-    baf2sql_c
     libzlib
     MassLynxRaw
     cdt
@@ -358,12 +356,10 @@ if (WIN32 AND NOT CYGWIN)
     libpwiz_data_proteome
     libpwiz_data_vendor_readers
     libpwiz_reader_agilent
-    libpwiz_reader_bruker
     libpwiz_reader_shimadzu
     libpwiz_reader_thermo
     libpwiz_reader_waters
     libpwiz_vendor_api_agilent
-    optimized libpwiz_vendor_api_bruker
     libpwiz_vendor_api_thermo
     libpwiz_utility_chemistry
     libpwiz_utility_minimxml
@@ -403,22 +399,15 @@ if (WIN32 AND NOT CYGWIN)
     libpwiz_data_proteome
     libpwiz_data_vendor_readers
     libpwiz_reader_agilent
-    libpwiz_reader_bruker
     libpwiz_reader_shimadzu
     libpwiz_reader_thermo
     libpwiz_reader_waters
     libpwiz_vendor_api_agilent
-    optimized libpwiz_vendor_api_bruker
     libpwiz_vendor_api_thermo
     libpwiz_utility_chemistry
     libpwiz_utility_minimxml
     libpwiz_utility_misc
     libSHA1
-    libsqlite3
-    libsqlite3pp
-    baf2sql_c
-    libzlib 
-    MassLynxRaw
     cdt
     ws2_32
     optimized libboost_system-vc100-mt

@@ -4,6 +4,8 @@
 #include <sys/stat.h>
 #ifndef _MSC_VER
 #include <dirent.h>
+#else
+#include "util/WinCrux.h"
 #endif
 #include <iostream>
 #include <fstream>

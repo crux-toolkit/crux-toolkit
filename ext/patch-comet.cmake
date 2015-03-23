@@ -19,30 +19,21 @@ endmacro (check_status)
 
 # This macro checks download status codes for errors
 if (WIN32 AND NOT CYGWIN)
-    message(${SOURCE_DIR}/patches/comet/CometSearch/CometSearch.vcxproj)
-    message(${BINARY_DIR}/build/src/comet/CometSearch/CometSearch.vcxproj)
+    message(${SOURCE_DIR}/patches/comet/MSToolkit/include/MSReader.h)
+    message(${BINARY_DIR}/build/src/comet/MSToolkit/include/MSReader.h)
     execute_process(
       COMMAND ${CMAKE_COMMAND} -E copy 
-        ${SOURCE_DIR}/patches/comet/CometSearch/CometSearch.vcxproj
-        ${BINARY_DIR}/build/src/comet/CometSearch/CometSearch.vcxproj
+        ${SOURCE_DIR}/patches/comet/MSToolkit/include/MSReader.h
+        ${BINARY_DIR}/build/src/comet/MSToolkit/include/MSReader.h
         RESULT_VARIABLE status
     )
     check_status(status)
-    message(${SOURCE_DIR}/patches/comet/Comet.sln)
-    message(${BINARY_DIR}/build/src/comet/Comet.sln)
+    message(${SOURCE_DIR}/patches/comet/MSToolkit/include/RAWReader.h)
+    message(${BINARY_DIR}/build/src/comet/MSToolkit/include/RAWReader.cpp)
     execute_process(
       COMMAND ${CMAKE_COMMAND} -E copy 
-        ${SOURCE_DIR}/patches/comet/Comet.sln
-        ${BINARY_DIR}/build/src/comet/Comet.sln
-        RESULT_VARIABLE status
-    )
-    check_status(status)
-    message(${SOURCE_DIR}/patches/comet/MSToolkit/src/MSToolkit/MSReader.cpp)
-    message(${BINARY_DIR}/build/src/comet/MSToolkit/src/MSToolkit/MSReader.cpp)
-    execute_process(
-      COMMAND ${CMAKE_COMMAND} -E copy 
-        ${SOURCE_DIR}/patches/comet/MSToolkit/src/MSToolkit/MSReader.cpp
-        ${BINARY_DIR}/build/src/comet/MSToolkit/src/MSToolkit/MSReader.cpp
+        ${SOURCE_DIR}/patches/comet/MSToolkit/include/RAWReader.h
+        ${BINARY_DIR}/build/src/comet/MSToolkit/include/RAWReader.h
         RESULT_VARIABLE status
     )
     check_status(status)
