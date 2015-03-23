@@ -17,6 +17,21 @@ extern int num_mods;
 
 bool TideSearchApplication::HAS_DECOYS = false;
 
+/* This constant is the product of the original "magic number" (10000,
+ * on line 4622 of search28.c) that was used to rescale the XCorr
+ * score, and the integerization constant used by Benjamin Diament in
+ * Tide.  In the Tide publication, that constant was reported as 10^7.
+ * However, here it appears to be only 10^4.
+ *
+ * --WSN, 10 March 2015 */
+const double TideSearchApplication::XCORR_SCALING = 100000000.0;
+
+/* This constant is used to put the refactored XCorr back into the
+ * same range as the original XCorr score.  It is the XCorr "magic
+ * number" (10000) divided by the EVIDENCE_SCALE_INT (defined in
+ * tide/spectrum_preprocess2.cc). */
+const double TideSearchApplication::RESCALE_FACTOR = 20.0;
+
 TideSearchApplication::TideSearchApplication() {
   exact_pval_search_ = false;
 }
@@ -123,7 +138,7 @@ int TideSearchApplication::main(int argc, char** argv) {
   double* aaFreqI = NULL;
   double* aaFreqC = NULL;
   int* aaMass = NULL;
-  int nAA;
+  int nAA = 0;
   
   if (exact_pval_search_) {
     pb::Header aaf_peptides_header;
@@ -666,7 +681,7 @@ void TideSearchApplication::collectScoresCompiled(
   DWORD64 rcx;
   DWORD64 rdi;
 
-  bool restored = false;
+  volatile bool restored = false;
   CONTEXT context;
   RtlCaptureContext(&context);
   if (!restored) {

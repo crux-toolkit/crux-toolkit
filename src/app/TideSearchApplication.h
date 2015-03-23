@@ -97,26 +97,9 @@ protected:
 
 public:
 
-  /* 
-   * This constant is the product of the original "magic number" (10000,
-   * on line 4622 of search28.c) that was used to rescale the XCorr
-   * score, and the integerization constant used by Benjamin Diament in
-   * Tide.  In the Tide publication, that constant was reported as 10^7.
-   * However, here it appears to be only 10^4.
-   *
-   * Note that this same constant is declared in report.cc.
-   * 
-   * --WSN, 10 March 2015
-   */
-  static const double XCORR_SCALING = 100000000.0;
-
-  /*
-   * This constant is used to put the refactored XCorr back into the
-   * same range as the original XCorr score.  It is the XCorr "magic
-   * number" (10000) divided by the EVIDENCE_SCALE_INT (defined in
-   * tide/spectrum_preprocess2.cc).
-   */
-  static const double RESCALE_FACTOR = 20.0;
+  // See TideSearchApplication.cpp for descriptions of these two constants
+  static const double XCORR_SCALING;
+  static const double RESCALE_FACTOR;
 
   bool exact_pval_search_;
 
