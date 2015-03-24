@@ -410,10 +410,10 @@ bool Spectrum::parsePwizSpecInfo(
     for(size_t ion_idx = 0; ion_idx < ions.size(); ion_idx++){
       int charge = ions[ion_idx].cvParam(pzd::MS_charge_state).valueAs<int>();
       carp(CARP_DEBUG, "Charge:%d", charge);
-      if (ions[ion_idx].hasCVParam(pzd::MS_accurate_mass)) {
+      if (ions[ion_idx].hasCVParam(pzd::MS_accurate_mass_OBSOLETE)) {
         //bullseye-determined charge states
         FLOAT_T accurate_mass = 
-          ions[ion_idx].cvParam(pzd::MS_accurate_mass).valueAs<FLOAT_T>();
+          ions[ion_idx].cvParam(pzd::MS_accurate_mass_OBSOLETE).valueAs<FLOAT_T>();
         carp(CARP_DEBUG, "accurate mass:%f charge:%i",accurate_mass, charge);
         SpectrumZState zstate;
         zstate.setSinglyChargedMass(accurate_mass, charge);
