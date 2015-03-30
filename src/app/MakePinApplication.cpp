@@ -168,20 +168,21 @@ string MakePinApplication::getDescription() const {
     "target and decoy peptide-spectrum matches (PSMs) into a single file in "
     "pin format, according to <a href=\"https://github.com/percolator/"
     "percolator/wiki/Interface\">this format</a>. The resulting file can be "
-    "provided as input to <code>crux percolator<code>.</p><p><code>make-pin"
-    "</code> requires as input two sets of PSMs, one set derived from matching "
-    "observed spectra against real (&quot;target&quot;) peptides and a second "
-    "set derived from matching the same spectra against &quot;decoy&quot; "
-    "peptides. The output file contains, for each PSM, a set of features for "
-    "use by the Percolator algorithm. These features are summarized <a href=\""
-    "features.html\">here</a>.</p><p>Note that, in the stand-alone version of "
-    "Percolator, the functionality provided by <code>crux make-pin</code> is "
-    "incorporated into a program called <code>sqt2pin</code>. However, a "
-    "significant difference between <code>crux percolator</code> and the "
-    "stand-alone version of the program is that <code>crux percolator</code> "
-    "does not require an explicit call to <code>crux make-pin</code>: if input "
-    "is provided to <code>crux percolator</code> in a non-pin format, then the "
-    "input will be automatically converted to pin format.</p>]]";
+    "provided as input to <code><a href=\"percolator.html\">crux percolator</a>"
+    "</code>.</p><p><code>make-pin</code> requires as input two sets of PSMs, "
+    "one set derived from matching observed spectra against real "
+    "(&quot;target&quot;) peptides and a second set derived from matching the "
+    "same spectra against &quot;decoy&quot; peptides. The output file contains, "
+    "for each PSM, a set of features for use by the Percolator algorithm. These "
+    "features are summarized <a href=\"features.html\">here</a>.</p><p>Note "
+    "that, in the stand-alone version of Percolator, the functionality provided "
+    "by <code>crux make-pin</code> is incorporated into a program called "
+    "<code>sqt2pin</code>. However, a significant difference between <code>crux "
+    "percolator</code> and the stand-alone version of the program is that "
+    "<code>crux percolator</code> does not require an explicit call to "
+    "<code>crux make-pin</code>: if input is provided to <code>crux percolator"
+    "</code> in a non-pin format, then the input will be automatically "
+    "converted to pin format.</p>]]";
 }
 
 /**
@@ -200,13 +201,14 @@ vector<string> MakePinApplication::getArgs() const {
 vector<string> MakePinApplication::getOptions() const {
   string arr[] = {
     "top-match",
+    "list-of-files",
+    "decoy-prefix",
     "fileroot",
     "output-dir",
-    "overwrite",
     "output-file",
-    "verbosity",
+    "overwrite",
     "parameter-file",
-    "list-of-files"
+    "verbosity"
   };
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }

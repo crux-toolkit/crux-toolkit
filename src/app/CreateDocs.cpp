@@ -17,6 +17,7 @@
 #include "ExtractRows.h"
 #include "GeneratePeptides.h"
 #include "GetMs2Spectrum.h"
+#include "MakePinApplication.h"
 #include "PercolatorApplication.h"
 #include "PredictPeptideIons.h"
 #include "PrintProcessedSpectra.h"
@@ -33,11 +34,6 @@
 using namespace std;
 
 CreateDocs::CreateDocs() {
-  htmlEntities_['&'] = "&amp;";
-  htmlEntities_['"'] = "&quot;";
-  htmlEntities_['\''] = "&#039;";
-  htmlEntities_['<'] = "&lt;";
-  htmlEntities_['>'] = "&gt;";
 }
 
 CreateDocs::~CreateDocs() {
@@ -57,6 +53,7 @@ int CreateDocs::main(int argc, char** argv) {
   apps.add(new ExtractRows());
   apps.add(new GeneratePeptides());
   apps.add(new GetMs2Spectrum());
+  apps.add(new MakePinApplication());
   apps.add(new PercolatorApplication());
   apps.add(new PredictPeptideIons());
   apps.add(new PrintProcessedSpectra());
@@ -71,24 +68,28 @@ int CreateDocs::main(int argc, char** argv) {
 
   string targetApp = Params::GetString("tool name");
   if (targetApp == "list") {
+    // List the applications available for create-docs
     for (vector<CruxApplication*>::const_iterator i = apps.begin(); i != apps.end(); i++) {
       cout << (*i)->getName() << endl;
     }
   } else if (targetApp == "default-params") {
+    // Write a default parameter file
     Params::Write(&cout, true);
+  } else if (targetApp == "check-params") {
+    // Check for issues with parameters
+    checkParams(&apps);
   } else {
     CruxApplication* app = apps.find(targetApp);
     if (app == NULL) {
       carp(CARP_FATAL, "Invalid application '%s'", targetApp.c_str());
     }
-    readParams(&apps); // This is unnecessary, but checks for problems
     generateToolHtml(&cout, app);
   }
 
   return 0;
 }
 
-void CreateDocs::readParams(const CruxApplicationList* apps) {
+void CreateDocs::checkParams(const CruxApplicationList* apps) {
   carp(CARP_INFO, "Running parameter validity checks...");
   for (map<string, Param*>::const_iterator i = Params::BeginAll();
        i != Params::EndAll();
@@ -164,12 +165,11 @@ void CreateDocs::generateToolHtml(
   ostream* outStream,
   const CruxApplication* application
 ) {
-  carp(CARP_INFO, "Generating documentation for '%s'", application->getName().c_str());
-  string doc = getToolTemplate();
-  string inputTemplate = getToolInputTemplate();
-  string outputTemplate = getToolOutputTemplate();
-  string categoryTemplate = getToolOptionCategoryTemplate();
-  string optionTemplate = getToolOptionTemplate();
+  string doc = TOOL_TEMPLATE;
+  string inputTemplate = TOOL_INPUT_TEMPLATE;
+  string outputTemplate = TOOL_OUTPUT_TEMPLATE;
+  string categoryTemplate = TOOL_OPTION_CATEGORY_TEMPLATE;
+  string optionTemplate = TOOL_OPTION_TEMPLATE;
 
   string appName = application->getName();
   string appDescription = application->getDescription();
@@ -194,19 +194,26 @@ void CreateDocs::generateToolHtml(
     }
     string single = inputTemplate;
     map<string, string> replaceMap;
-    replaceMap["#INPUTNAME#"] = argName;
-    replaceMap["#INPUTDESCRIPTION#"] =
-      Params::ProcessHtmlDocTags(htmlEscape(Params::GetUsage(argName)), true);
+    replaceMap["#NAME#"] = !multiArg ? "&lt;" + argName + "&gt;" : "&lt;" + argName + "&gt;+";
+    replaceMap["#DESCRIPTION#"] = Params::ProcessHtmlDocTags(Params::GetUsage(argName), true);
     makeReplacements(&single, replaceMap);
     inputs += single;
+  }
+  // Build outputs introductory string
+  string outputsIntro;
+  if (application->needsOutputDirectory()) {
+    outputsIntro = "<p>The program writes files to the folder <code>" +
+      Params::GetStringDefault("output-dir") + "</code> by default. The name "
+      "of the output folder can be set by the user using the <code>--output-dir"
+      "</code> option. The following files will be created:\n";
   }
   // Build outputs string
   string outputs;
   for (map<string, string>::const_iterator i = out.begin(); i != out.end(); i++) {
     string single = outputTemplate;
     map<string, string> replaceMap;
-    replaceMap["#OUTPUTNAME#"] = i->first;
-    replaceMap["#OUTPUTDESCRIPTION#"] = Params::ProcessHtmlDocTags(i->second, true);
+    replaceMap["#NAME#"] = i->first;
+    replaceMap["#DESCRIPTION#"] = Params::ProcessHtmlDocTags(i->second, true);
     makeReplacements(&single, replaceMap);
     outputs += single;
   }
@@ -235,30 +242,31 @@ void CreateDocs::generateToolHtml(
       }
       string single = optionTemplate;
       map<string, string> replaceMap;
-      replaceMap["#OPTIONNAME#"] = *j;
-      replaceMap["#OPTIONDESCRIPTION#"] =
-        Params::ProcessHtmlDocTags(htmlEscape(Params::GetUsage(*j)), true);
-      replaceMap["#OPTIONTYPE#"] = Params::GetType(*j);
-      replaceMap["#OPTIONDEFAULT#"] = Params::GetStringDefault(*j);
+      replaceMap["#NAME#"] = *j;
+      replaceMap["#DESCRIPTION#"] = Params::ProcessHtmlDocTags(Params::GetUsage(*j), true);
+      replaceMap["#VALUES#"] = Params::GetAcceptedValues(*j);
+      string defaultOutput = Params::GetStringDefault(*j);
+      replaceMap["#DEFAULT#"] = !defaultOutput.empty() ? defaultOutput : "&lt;empty&gt;";
       makeReplacements(&single, replaceMap);
       optionSubset += single;
     }
 
     string single = categoryTemplate;
     map<string, string> replaceMap;
-    replaceMap["#CATEGORYNAME#"] = categoryName;
-    replaceMap["#CATEGORYOPTIONS#"] = optionSubset;
+    replaceMap["#NAME#"] = categoryName;
+    replaceMap["#OPTIONS#"] = optionSubset;
     makeReplacements(&single, replaceMap);
     options += single;
   }
 
   map<string, string> replacements;
-  replacements["#TOOLNAME#"] = appName;
-  replacements["#TOOLDESCRIPTION#"] = Params::ProcessHtmlDocTags(appDescription, true);
-  replacements["#TOOLUSAGE#"] = usage;
-  replacements["#TOOLINPUTS#"] = inputs;
-  replacements["#TOOLOUTPUTS#"] = outputs;
-  replacements["#TOOLOPTIONS#"] = options;
+  replacements["#NAME#"] = appName;
+  replacements["#DESCRIPTION#"] = Params::ProcessHtmlDocTags(appDescription, true);
+  replacements["#USAGE#"] = usage;
+  replacements["#INPUTS#"] = inputs;
+  replacements["#OUTPUTSINTRODUCTION#"] = outputsIntro;
+  replacements["#OUTPUTS#"] = outputs;
+  replacements["#OPTIONS#"] = options;
   makeReplacements(&doc, replacements);
   *outStream << doc;
 }
@@ -297,21 +305,6 @@ void CreateDocs::makeReplacements(
   }
 }
 
-string CreateDocs::htmlEscape(string s) {
-  for (size_t i = 0; i < s.length(); i++) {
-    for (map<char, string>::const_iterator j = htmlEntities_.begin();
-         j != htmlEntities_.end();
-         j++) {
-      if (s[i] == j->first) {
-        s.replace(i, 1, j->second);
-        i += j->second.length() - 1;
-        break;
-      }
-    }
-  }
-  return s;
-}
-
 string CreateDocs::getName() const {
   return "create-docs";
 }
@@ -328,14 +321,7 @@ vector<string> CreateDocs::getArgs() const {
 }
 
 vector<string> CreateDocs::getOptions() const {
-  string arr[] = {
-    "doc-template",
-    "doc-input-template",
-    "doc-output-template",
-    "doc-option-category-template",
-    "doc-option-template"
-  };
-  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
+  return vector<string>();
 }
 
 map<string, string> CreateDocs::getOutputs() const {
@@ -353,17 +339,12 @@ bool CreateDocs::hidden() const {
   return true;
 }
 
-string CreateDocs::getToolTemplate() {
-  string path = Params::GetString("doc-template");
-  if (!path.empty()) {
-    return FileUtils::Read(path);
-  }
-  return
+const string CreateDocs::TOOL_TEMPLATE =
   "<!DOCTYPE HTML>\n"
   "<html>\n"
   "<head>\n"
   "<meta charset=\"UTF-8\">\n"
-  "<title>crux <!-- #TOOLNAME# --></title>\n"
+  "<title>crux <!-- #NAME# --></title>\n"
   "<script type=\"text/javascript\"\n"
   "  src=\"http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML\">\n"
   "</script>\n"
@@ -372,63 +353,41 @@ string CreateDocs::getToolTemplate() {
   "</script>\n"
   "</head>\n"
   "<body>\n"
-  "<h1><!-- #TOOLNAME# --></h1>\n"
+  "<h1><!-- #NAME# --></h1>\n"
   "<h2>Usage:</h2>\n"
-  "<p><code><!-- #TOOLUSAGE# --></code></p>\n"
+  "<p><code><!-- #USAGE# --></code></p>\n"
   "<h2>Description:</h2>\n"
-  "<!-- #TOOLDESCRIPTION# -->\n"
+  "<!-- #DESCRIPTION# -->\n"
   "<h2>Input:</h2>\n"
   "<ul>\n"
-  "<!-- #TOOLINPUTS# --></ul>\n"
+  "<!-- #INPUTS# --></ul>\n"
   "<h2>Output:</h2>\n"
+  "<!-- #OUTPUTSINTRODUCTION# -->"
   "<ul>\n"
-  "<!-- #TOOLOUTPUTS# --></ul>\n"
+  "<!-- #OUTPUTS# --></ul>\n"
   "<h2>Options:</h2>\n"
-  "<ul>\n"
-  "<!-- #TOOLOPTIONS# -->\n"
+  "<ul style=\"list-style-type: none;\">\n"
+  "<!-- #OPTIONS# -->\n"
   "</ul>\n"
   "<hr>\n"
   "<a href=\"/\">Home</a>\n"
   "</body>\n"
   "</html>\n";
-}
 
-string CreateDocs::getToolInputTemplate() {
-  string path = Params::GetString("doc-input-template");
-  if (!path.empty()) {
-    return FileUtils::Read(path);
-  }
-  return "  <li>&lt;<!-- #INPUTNAME# -->&gt; - <!-- #INPUTDESCRIPTION# --></li>\n";
-}
+const string CreateDocs::TOOL_INPUT_TEMPLATE =
+  "  <li><code><!-- #NAME# --></code> &ndash; <!-- #DESCRIPTION# --></li>\n";
 
-string CreateDocs::getToolOutputTemplate() {
-  string path = Params::GetString("doc-output-template");
-  if (!path.empty()) {
-    return FileUtils::Read(path);
-  }
-  return "  <li><!-- #OUTPUTNAME# --> - <!-- #OUTPUTDESCRIPTION# --></li>\n";
-}
+const string CreateDocs::TOOL_OUTPUT_TEMPLATE =
+  "  <li><code><!-- #NAME# --></code> &ndash; <!-- #DESCRIPTION# --></li>\n";
 
-string CreateDocs::getToolOptionCategoryTemplate() {
-  string path = Params::GetString("doc-option-category-template");
-  if (!path.empty()) {
-    return FileUtils::Read(path);
-  }
-  return
+const string CreateDocs::TOOL_OPTION_CATEGORY_TEMPLATE =
   "<li>\n"
-  "<h3><!-- #CATEGORYNAME# --></h3>\n"
+  "<h3><!-- #NAME# --></h3>\n"
   "<ul>\n"
-  "<!-- #CATEGORYOPTIONS# --></ul>\n"
+  "<!-- #OPTIONS# --></ul>\n"
   "</li>\n";
-}
 
-string CreateDocs::getToolOptionTemplate() {
-  string path = Params::GetString("doc-option-template");
-  if (!path.empty()) {
-    return FileUtils::Read(path);
-  }
-  return
-  "  <li><!-- #OPTIONNAME# --> &lt;<!-- #OPTIONTYPE# -->&gt; - "
-  "<!-- #OPTIONDESCRIPTION# --></li>\n";
-}
+const string CreateDocs::TOOL_OPTION_TEMPLATE =
+  "  <li><code>--<!-- #NAME# --> &lt;<!-- #VALUES# -->&gt;</code> &ndash; "
+  "<!-- #DESCRIPTION# --> Default = <code><!-- #DEFAULT# --></code>.</li>\n";
 

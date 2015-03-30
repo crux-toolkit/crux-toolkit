@@ -269,6 +269,7 @@ vector<string> CruxHardklorApplication::getOptions() const {
     "sensitivity",
     "signal-to-noise",
     "sn-window",
+    "static-sn",
     "mz-window",
     "max-width",
     "parameter-file",
@@ -289,8 +290,25 @@ map<string, string> CruxHardklorApplication::getOutputs() const {
     "option for other crux programs.";
   outputs["hardklor.mono.txt"] =
     "a tab-delimited text file containing one line for each isotope "
-    "distribution. The columns appear in the following order: scan, retention "
-    "time, mass, charge, intensity, m/z, s/n, modifications, dotp.";
+    "distribution. The columns appear in the following order:<ol><li><strong>"
+    "scan</strong>: The scan number assigned to this spectrum in the input file."
+    "</li><li><strong>retention time</strong>: The time (in seconds) at which the "
+    "spectrum was collected.</li><li><strong>mass</strong>: The uncharged "
+    "monoisotopic mass of the protein or peptide.</li><li><strong>charge</strong>: "
+    "The inferred charge state of the protein or peptide.</li><li><strong>intensity"
+    "</strong>: The intensity of the base isotope peak of the model used to predict "
+    "the protein or peptide.</li><li><strong>m/z</strong>: The m/z of the base peak."
+    "</li><li><strong>s/n</strong>The signal-to-noise threshold, i.e., the relative "
+    "abundance a peak must exceed in the spectrum window to be considered in the "
+    "scoring algorithm. Note that this is a local noise threshold for the area of "
+    "the spectrum that the peptide was identified in.</li><li><strong>modifications"
+    "</strong>: Deviations to the averagine model. Only modifications specified by "
+    "the user are considered. If no modifications are found in a particular PPID, "
+    "then the column is marked with an underscore.</li><li><strong>dotp</strong>: "
+    "The dot product score applies to all predictions in a given spectrum window. "
+    "Thus, if two protein or peptide predictions share the same spectrum window, "
+    "then they have a single dot product score that is the score of their combined "
+    "peaks.</li></ol>";
   outputs["hardklor.log.txt"] =
     "a log file containing a copy of all messages that were printed to "
     "stderr.";

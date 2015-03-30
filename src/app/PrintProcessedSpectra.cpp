@@ -152,6 +152,7 @@ vector<string> PrintProcessedSpectra::getOptions() const {
   string arr[] = {
     "stop-after",
     "spectrum-parser",
+    "use-z-line",
     "verbosity",
     "parameter-file", 
     "overwrite"

@@ -158,10 +158,10 @@ vector<string> GetMs2Spectrum::getOptions() const {
   string arr[] = {
     "scan-number",
     "remove-precursor-tolerance",
-    "version", 
     "stats", 
     "verbosity",
-    "spectrum-parser"
+    "spectrum-parser",
+    "use-z-line"
   };
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }

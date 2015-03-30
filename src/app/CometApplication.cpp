@@ -375,8 +375,8 @@ map<string, string> CometApplication::getOutputs() const {
     "the operation. The resulting file can be used with the --parameter-file "
     "option for other crux programs.";
   outputs["comet.target.txt"] =
-    "a tab-delimited text file containing the target PSMs. See txt file format "
-    "for a list of the fields.";
+    "a tab-delimited text file containing the target PSMs. See <a href=\"txt-format.html\">"
+    "txt file format</a> for a list of the fields.";
   outputs["comet.log.txt"] =
     "a log file containing a copy of all messages that were printed to "
     "standard error.";

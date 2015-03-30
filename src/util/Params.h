@@ -50,8 +50,8 @@ class Params {
   // Get whether the parameter is an argument or an option
   static bool IsArgument(const std::string& name);
 
-  // Get the type of the parameter
-  static std::string GetType(const std::string& name);
+  // Get the accepted values for the parameter
+  static std::string GetAcceptedValues(const std::string& name);
 
   // Get whether the parameter has been modified from its original value or not
   static bool IsDefault(const std::string& name);
@@ -248,7 +248,7 @@ class Param {
   virtual void ThrowIfInvalid() const;
 
   // Get the type of the parameter
-  virtual std::string GetType() const = 0;
+  virtual std::string GetAcceptedValues() const = 0;
 
   // Get whether the parameter has been modified from its original value or not
   virtual bool IsDefault() const = 0;
@@ -286,7 +286,7 @@ class BoolParam : public Param {
             const std::string& fileNotes,
             bool visible,
             bool value);
-  std::string GetType() const;
+  std::string GetAcceptedValues() const;
   bool IsDefault() const;
   bool GetBool() const;
   int GetInt() const;
@@ -317,7 +317,7 @@ class IntParam : public Param {
            int value,
            int min = -std::numeric_limits<int>::max(),
            int max = std::numeric_limits<int>::max());
-  std::string GetType() const;
+  std::string GetAcceptedValues() const;
   void ThrowIfInvalid() const;
   bool IsDefault() const;
   bool GetBool() const;
@@ -349,7 +349,7 @@ class DoubleParam : public Param {
               double value,
               double min = -std::numeric_limits<double>::max(),
               double max = std::numeric_limits<double>::max());
-  std::string GetType() const;
+  std::string GetAcceptedValues() const;
   void ThrowIfInvalid() const;
   bool IsDefault() const;
   bool GetBool() const;
@@ -380,7 +380,7 @@ class StringParam : public Param {
               bool visible,
               const std::string& value,
               const std::vector<std::string>& validvalues = std::vector<std::string>());
-  std::string GetType() const;
+  std::string GetAcceptedValues() const;
   void ThrowIfInvalid() const;
   bool IsDefault() const;
   bool GetBool() const;
@@ -408,7 +408,7 @@ class ArgParam : public Param {
  public:
   ArgParam(const std::string& name, const std::string& usage);
   bool IsArgument() const;
-  std::string GetType() const;
+  std::string GetAcceptedValues() const;
   bool IsDefault() const;
   bool GetBool() const;
   int GetInt() const;

@@ -17,9 +17,9 @@ void Params::Initialize() {
   }
   /* generate_peptide arguments */
   InitArgParam("protein fasta file",
-   "File containing protein sequences in fasta format.");
+   "The name of the file in FASTA format from which to retrieve proteins.");
   InitArgParam("index name",
-    "Name to give the new directory containing index files.");
+    "The desired name of the binary index.");
   InitArgParam("ms2 file",
     "File containing spectra to be searched.");
   /* get-ms2-spectrum */
@@ -30,7 +30,7 @@ void Params::Initialize() {
     "File where spectrum will be written.");
   /* predict-peptide-ions */
   InitArgParam("peptide sequence",
-    "The sequence of the peptide.");
+    "The peptide sequence.");
   InitArgParam("charge state",
     "The charge state of the peptide.");
   /* hardklor arguments */
@@ -40,265 +40,294 @@ void Params::Initialize() {
     "(.mzXML) format.");
   /*Percolator arguments*/
   InitArgParam("pin",
-    "PIN files are tab-delimited files for PIN format. "
-    "Also, this argument can be \"-\" which indicates the pin file will come "
-    "from standard input. Alternately, a SQT, PepXML, or tab-delimited file may "
-    "be given (a corresponding decoy file must also exist in the same directory), "
-    "in which case a pin file will be generated in the output directory prior "
-    "to execution.");
+    "A collection of target and decoy peptide-spectrum matches (PSMs). Input may "
+    "be in one of five formats: PIN, SQT, pepXML, [[html:<a href=\"txt-format.html\">]]"
+    "Crux tab-delimited text[[html:</a>]], or a list of files (when list-of-files=T). "
+    "Note that if the input is provided as SQT, pepXML, or Crux "
+    "tab-delimited text, then a PIN file will be generated in the output directory "
+    "prior to execution.[[html:<br>Decoy PSMs can be provided to Percolator in two "
+    "ways: either as a separate file or embedded within the same file as the target "
+    "PSMs. Percolator will first search for target PSMs in a separate file. The "
+    "decoy file name is constructed from the target name by replacing \"target\" with "
+    "\"decoy\". For example, if search.target.txt is provided as input, then "
+    "Percolator will search for a corresponding file named search.decoy.txt. If no "
+    "decoy file is found, then Percolator will assume that the given input file "
+    "contains a mix of target and decoy PSMs. Within this file, decoys are identified "
+    "using a prefix (specified via --decoy-prefix) on the protein name.]]");
   /*make-pin arguments*/
-  InitArgParam("target input",
-    "search results file in sqt, tab-delimited or pep.xml format.  "
-    "Also, this argument can be - which indicates the result file will come from "
-    "standard input");
+  InitArgParam("psm results",
+    "A collection of target and decoy peptide-spectrum matches (PSMs). Input may be in "
+    "one of four formats: SQT, PepXML (obtained from SEQUEST), [[html:<a href=\""
+    "txt-format.html\">]]Crux tab-delimited text[[html:</a>]], or list of files (when "
+    "list-of-files=T)."
+    "[[html:<br>Decoy PSMs can be provided to make-pin in two ways: either as a separate "
+    "file or embedded within the same file as the target PSMs. make-pin will first search "
+    "for the target PSMs in a separate file. The decoy file name is constructed from the "
+    "target name by replacing \"target\" with \"decoy\". For example, if search.target.txt "
+    "is provided as input, then make-pin will search for a corresponding file named "
+    "search.decoy.txt. If no decoy file is found, then make-pin will assume that the "
+    "given input file contains a mix of target and decoy PSMs. Within this file, decoys "
+    "are identified using a prefix (specified via --decoy-prefix) on the protein name.]]");
   InitStringParam("decoy input", "",
     "make-pin can convert any file format in sqt, tab-delimited and pep.xml file "
     "to pin file ",
     "Argument, not option for make-pin", false);
   InitStringParam("output-file", "",
-    "Path where pin file will be written",
-    "It is optional for make-pin", false);
+    "Path where pin file will be written instead of make-pin.pin.",
+    "It is optional for make-pin", true);
   InitBoolParam("filestem-prefixes", false,
     "Prefix PSM IDs with filestems instead of target or decoy and file index.",
     "Available for make-pin", false);
   InitBoolParam("mod-symbols", false,
     "Print modification symbols instead of masses in peptide sequences.",
     "Available for make-pin", false);
+  // q-ranker/barista arguments
+  InitArgParam("fragmentation spectra",
+    "The fragmentation spectra must be provided in [[html:<a href=\"ms2-format.html\">]]"
+    "MS2[[html:</a>]], mzXML, or MGF format.");
   /* *** Initialize Options (command line and param file) *** */
 
   /* options for all executables */
   InitBoolParam("version", false, "Print version number and quit.",
     "Available for all crux programs.  On command line use '--version T'.", true);
   InitIntParam("verbosity", 30, 0, 100,
-    "Set level of output to stderr (0-100).  Default=30.",
-    "Available for all crux programs.  Each level prints the following "
-    "messages, including all those at lower verbosity levels: 0-fatal "
-    "errors, 10-non-fatal errors, 20-warnings, 30-information on the "
-    "progress of execution, 40-more progress information, 50-debug info, "
-    "60-detailed debug info.", true);
+    "Specify the verbosity of the current processes. Each level prints the following "
+    "messages, including all those at lower verbosity levels: 0-fatal errors, 10-non-"
+    "fatal errors, 20-warnings, 30-information on the progress of execution, 40-more "
+    "progress information, 50-debug info, 60-detailed debug info.",
+    "Available for all crux programs.", true);
   InitStringParam("parameter-file", "", 
-    "Set additional options with values in the given file.",
+    "A file containing command-line or additional parameters.[[html: See the "
+    "<a href=\"parameter-file.html\">parameter documentation</a> page for details.]]",
     "Available for all crux programs. Any options specified on the "
     "command line will override values in the parameter file.", true);
   InitBoolParam("overwrite", false, 
-    "Replace existing files (T) or exit if attempting to "
-    "overwrite (F). Default=F.",
+    "Replace existing files if true or fail when trying to overwrite a file if false.",
     "Available for all crux programs.  Applies to parameter file "
     "as well as index, search, and analysis output files.", true);
   /* generate_peptide parameters  */
   InitIntParam("min-length", 6, 1, MAX_PEPTIDE_LENGTH,
-    "The minimum length of peptides to consider. Default=6.",
+    "The minimum length of peptides to consider.",
     "Used from the command line or parameter file by "
     "crux-generate-peptides, crux tide-index, and crux generate-decoys.", true);
   InitIntParam("max-length", 50, 1, MAX_PEPTIDE_LENGTH,
-    "The maximum length of peptides to consider. Default=50.",
+    "The maximum length of peptides to consider.",
     "Available from command line or parameter file for "
     "crux-generate-peptides, crux tide-index, and crux generate-decoys. ", true);
   InitDoubleParam("min-mass", 200, 0, BILLION,
-    "The minimum mass of peptides to consider. Default=200.",
+    "The minimum mass (in Da) of peptides to consider.",
     "Available from command line or parameter file for "
     "crux-generate-peptides, crux tide-index, and crux generate-decoys. ", true);
   InitDoubleParam("max-mass", 7200, 1, BILLION, 
-    "The maximum mass of peptides to consider. Default=7200.",
+    "The maximum mass (in Da) of peptides to consider.",
     "Available from command line or parameter file for "
     "crux-generate-peptides, crux tide-index, and crux generate-decoys. ", true);
-  InitStringParam("isotopic-mass", "average", "average|mono",
-    "Which isotopes to use in calcuating peptide mass. "
-    "<string>=average|mono. Default=average.", 
-    "Used from command line or parameter file by "
-    "crux-generate-peptides and crux generate-decoys.", true);
   InitIntParam("min-peaks", 20, 0, BILLION,
-    "The minimum number of peaks a spectrum must have for it to be searched."
-    " Default=20.", 
+    "The minimum number of peaks a spectrum must have for it to be searched.",
     "Available for tide-search.", true);
-  InitStringParam("digestion", "full-digest",
-    "full-digest|partial-digest|non-specific-digest",
-    "Degree of digestion used to generate peptides. "
-    "<string>=full-digest|partial-digest. Either both ends or one end "
-    "of a peptide must conform to enzyme specificity rules. "
-    "Default=full-digest.",
-    "Used in conjunction with enzyme option when enzyme is not set to "
-    "to 'no-enzyme'.  Available from command line or parameter file for "
-    "crux-generate-peptides, crux tide-index, and crux "
-    "generate-decoys. Digestion rules are as "
-    "follows: enzyme name [cuts after one of these residues][but not before "
-    "one of these residues].  trypsin [RK][P], elastase [ALIV][P], "
-    "chymotrypsin [FWYL][P].", true);
   InitStringParam("enzyme", "trypsin", "no-enzyme|trypsin|trypsin/p|chymotrypsin|"
     "elastase|clostripain|cyanogen-bromide|iodosobenzoate|proline-endopeptidase|"
     "staph-protease|asp-n|lys-c|lys-n|arg-c|glu-c|pepsin-a|"
     "elastase-trypsin-chymotrypsin|custom-enzyme",
-    "Enzyme to use for in silico digestion of proteins. "
-    "<string>=no-enzyme|trypsin|trypsin/p|chymotrypsin| " 
-    "elastase|clostripain|cyanogen-bromide|iodosobenzoate| " 
-    "proline-endopeptidase|staph-protease|asp-n|lys-c "
-    "lys-n|arg-c|glu-c|pepsin-a| "
-    "|elastase-trypsin-chymotrypsin|custom-enzyme. "
-    "Default=trypsin.", 
-    "Used in conjunction with the options digestion and missed-cleavages. "
-    "Use 'no-enzyme' for non-specific digestion.  Available "
-    "from command line or parameter file for crux-generate-peptides, "
-    "crux tide-index, and crux generate-decoys.  "
-    "Digestion rules: enzyme name [cuts after one of these residues]|{but "
-    "not before one of these residues}. trypsin [RK]|{P}, trypsin/p [RK]|[], "
-    "elastase [ALIV]|{P}, chymotrypsin [FWYL]|{P}, clostripain [R]|[], "
-    "cyanogen-bromide [M]|[], iodosobenzoate [W]|[], proline-endopeptidase "
-    "[P]|[], staph-protease [E]|[], elastase-trypsin-chymotrypsin "
-    "[ALIVKRWFY]|{P},asp-n []|[D] (cuts before D), lys-c [K]|{P}, lys-n "
-    "[]|[K] (cuts before K), arg-c [R]|{P}, glu-c [DE]|{P}, pepsin-a "
-    "[FL]|{P}.", true);
-  InitStringParam("precursor-window-type", "mass", "mass|mz|ppm",
-    "Window type to use for selecting candidate "
-    "peptides.  <string>=mass|mz|ppm. Default=mass.",
-    "Available for search-for-xlinks and tide-search.", true);
-  InitStringParam("spectrum-parser", "pwiz", "pwiz|mstoolkit",
-    "Parser to use for reading in spectra "
-    "<string>=pwiz|mstoolkit. Default=pwiz.",
-    "Available for search-for-xlinks.", true);
-  InitBoolParam("use-z-line", true,
-    "Specify whether, when parsing an MS2 spectrum file, Crux obtains the "
-    "precursor mass information from the \"S\" line or the \"Z\" line. "
-    "Default = T.",
-    "Available when spectrum-parser = pwiz.", true);
+    "Specify the enzyme used to digest the proteins in silico. Available enzymes "
+    "(with the corresponding digestion rules indicated in parentheses) include "
+    "no-enzyme ([X]|[X]), trypsin ([RK]|{P}), trypsin/p ([RK]|[]), chymotrypsin "
+    "([FWYL]|{P}), elastase ([ALIV]|{P}), clostripain ([R]|[]), cyanogen-bromide "
+    "([M]|[]), iodosobenzoate ([W]|[]), proline-endopeptidase ([P]|[]), staph-protease "
+    "([E]|[]), asp-n ([]|[D]), lys-c ([K]|{P}), lys-n ([]|[K]), arg-c ([R]|{P}), "
+    "glu-c ([DE]|{P}), pepsin-a ([FL]|{P}), elastase-trypsin-chymotrypsin "
+    "([ALIVKRWFY]|{P}). Specifying --enzyme no-enzyme yields a non-enzymatic digest. "
+    "[[html:<strong>]]Warning:[[html:</strong>]] the resulting index may be quite large.",
+    "Available for crux-generate-peptides, crux tide-index, and crux generate-decoys.", true);
   InitStringParam("custom-enzyme", "", 
-    "Specify rules for in silico digestion of proteins. "
-    "See HTML documentation for syntax. Default is trypsin.",
-    "Overrides the enzyme option.  Two lists of residues are given enclosed "
-    "in square brackets or curly braces and separated by a |. The first list "
-    "contains residues required/prohibited before the cleavage site and the "
-    "second list is residues after the cleavage site.  If the residues are "
-    "required for digestion, they are in square brackets, '[' and ']'.  "
-    "If the residues prevent digestion, then they are enclosed in curly "
-    "braces, '{' and '}'.  Use X to indicate all residues.  For example, "
-    "trypsin cuts after R or K but not before P which is represented as "
-    "[RK]|{P}.  AspN cuts after any residue but only before D which is "
-    "represented as [X]|[D].", true);
+    "Specify rules for in silico digestion of protein sequences. Overrides the enzyme "
+    "option. Two lists of residues are given enclosed in square brackets or curly "
+    "braces and separated by a |. The first list contains residues required/prohibited "
+    "before the cleavage site and the second list is residues after the cleavage site. "
+    "If the residues are required for digestion, they are in square brackets, '[' and "
+    "']'. If the residues prevent digestion, then they are enclosed in curly braces, "
+    "'{' and '}'. Use X to indicate all residues. For example, trypsin cuts after R or "
+    "K but not before P which is represented as [RK]|{P}. AspN cuts after any residue "
+    "but only before D which is represented as [X]|[D].",
+    "", true);
+  InitStringParam("digestion", "full-digest",
+    "full-digest|partial-digest|non-specific-digest",
+    "Specify whether every peptide in the database must have two enzymatic termini "
+    "(full-digest) or if peptides with only one enzymatic terminus are also included "
+    "(partial-digest).",
+    "Available for crux-generate-peptides, crux tide-index, and crux generate-decoys.", true);
   InitIntParam("missed-cleavages", 0, 0, 500,
-    "Include peptides with up to n missed cleavage sites. Default=0.",
+    "Maximum number of missed cleavages per peptide to allow in enzymatic digestion.",
     "Available from command line or parameter file for "
     "crux-generate-peptides and crux generate-decoys. "
     "When used with enzyme=<trypsin|elastase|chymotrypsin> "
     "includes peptides containing one or more potential cleavage sites.", true);
-  InitStringParam("keep-terminal-aminos", "NC", 
+  InitDoubleParam("precursor-window", 3.0, 0, 100, 
+    "Tolerance used for matching peptides to spectra. Peptides must be within +/- "
+    "'precursor-window' of the spectrum value. The precursor window units depend upon "
+    "precursor-window-type.",
+    "Available for tide-search and crux-generate-peptides.", true);
+  InitStringParam("precursor-window-type", "mass", "mass|mz|ppm",
+    "Specify the units for the window that is used to select peptides around the precursor "
+    "mass location (mass, mz, ppm). The magnitude of the window is defined by the precursor-"
+    "window option, and candidate peptides must fall within this window. For the mass window-"
+    "type, the spectrum precursor m+h value is converted to mass, and the window is defined "
+    "as that mass +/- precursor-window. If the m+h value is not available, then the mass is "
+    "calculated from the precursor m/z and provided charge. The peptide mass is computed as "
+    "the sum of the average amino acid masses plus 18 Da for the terminal OH group. The mz "
+    "window-type calculates the window as spectrum precursor m/z +/- precursor-window and "
+    "then converts the resulting m/z range to the peptide mass range using the precursor "
+    "charge. For the parts-per-million (ppm) window-type, the spectrum mass is calculated as "
+    "in the mass type. The lower bound of the mass window is then defined as the spectrum "
+    "mass / (1.0 + (precursor-window / 1000000)) and the upper bound is defined as spectrum "
+    "mass / (1.0 - (precursor-window / 1000000)).",
+    "Available for search-for-xlinks and tide-search.", true);
+  InitStringParam("spectrum-parser", "pwiz", "pwiz|mstoolkit",
+    "Specify the parser to use for reading in MS/MS spectra.[[html: The default, "
+    "ProteoWizard parser should be able to read the MS/MS file formats listed <a href=\""
+    "http://proteowizard.sourceforge.net/formats.shtml\">here</a>. The alternative is "
+    "<a href=\"http://cruxtoolkit.sourceforge.net/mstoolkit.html\">MSToolkit parser</a>. "
+    "If the ProteoWizard parser fails to read your files properly, you may want to try the "
+    "MSToolkit parser instead.]]",
+    "Available for search-for-xlinks.", true);
+  InitBoolParam("use-z-line", true,
+    "Specify whether, when parsing an MS2 spectrum file, Crux obtains the "
+    "precursor mass information from the \"S\" line or the \"Z\" line. ",
+    "Available when spectrum-parser = pwiz.", true);
+  InitStringParam("keep-terminal-aminos", "NC", "N|C|NC|none",
     "When creating decoy peptides using decoy-format=shuffle or decoy-format="
     "peptide-reverse, this option specifies whether the N-terminal and "
     "C-terminal amino acids are kept in place or allowed to be shuffled or "
-    "reversed. Default = NC.",
+    "reversed. For a target peptide \"EAMPK\" with decoy-format=peptide-reverse, setting "
+    "keep-terminal-aminos to \"NC\" will yield \"EPMAK\"; setting it to \"C\" will yield "
+    "\"PMAEK\"; setting it to \"N\" will yield \"EKPMA\"; and setting it to \"none\" will "
+    "yield \"KPMAE\".",
     "Available for tide-index and generate-decoys.", true);
   InitBoolParam("unique-peptides", true,
     "Generate peptides only once, even if they appear in more "
-    "than one protein (T,F).  Default=T.",
+    "than one protein.",
     "Available from command line or parameter file for "
     "crux-genereate-peptides. Returns one line per peptide "
-    "when true or one line per peptide per protein occurence when false.  ",
-    true);
+    "when true or one line per peptide per protein occurence when false.", true);
   InitBoolParam("peptide-list", false,
-    "Create an ASCII version of the peptide list. Default=F.",
-    "Creates an ASCII file in the output directory "
-    "containing one peptide per line.", true);
+    "Create in the output directory a text file listing of all the peptides in the "
+    "database, along with their neutral masses, one per line. If decoys are generated, "
+    "then a second file will be created containing the decoy peptides. Decoys that also "
+    "appear in the target database are marked with an asterisk in a third column.",
+    "Available for tide-index.", true);
    // print-processed-spectra option
   InitStringParam("stop-after", "xcorr", "remove-precursor|square-root|"
     "remove-grass|ten-bin|xcorr",
-    "Specify which preprocessing step to stop after. Value must be discretize, "
-    "remove-precursor, square-root, remove-grass, ten-bin, or xcorr. Default = "
-    "xcorr.",
+    "Stop after the specified pre-processing step.",
     "Available for print-processed-spectra.", true);
   /* more generate_peptide parameters */
   InitBoolParam("output-sequence", false, 
-    "Print peptide sequence (T,F). Default=F.",
+    "Print peptide sequence.",
     "Available only for crux-generate-peptides.", true);
   InitBoolParam("sqt-output", false,
-    "Output SQT in the output directory.  Default=F",
+    "Outputs an SQT results file to the output directory. Note that if sqt-output is "
+    "enabled, then compute-sp is automatically enabled and cannot be overridden.",
     "Available for tide-search.", true);
   InitBoolParam("mzid-output", false,
-    "Output MZID in the output directory.  Default=F",
+    "Output an mzIdentML results file to the output directory.",
     "Available for tide-search, percolator.", true);
   InitBoolParam("pin-output", false,
-    "Output PIN XML in the output directory.  Default=F",
+    "Output a Percolator input (PIN) file to the output directory.",
     "Available for tide-search.", true);
   InitBoolParam("pout-output", false,
-    "Output POUT XML in the output directory.  Default=F",
+    "Output a Percolator [[html:<a href=\""
+    "https://github.com/percolator/percolator/blob/master/src/xml/percolator_out.xsd\">]]"
+    "pout.xml[[html:</a>]] format results file to the output directory.",
     "Available for percolator.", true);
   InitBoolParam("pepxml-output", false,
-    "Output pepXML in the output directory.  Default=F",
+    "Output a pepXML results file to the output directory.",
     "Available for tide-search, q-ranker, barista, percolator.", true);
   InitBoolParam("txt-output", true,
-    "Output tab-delimited text in the output directory.  Default=T",
-    "Available for tide-saerch, percolator, q-ranker, barista.", true);
+    "Output a tab-delimited results file to the output directory.",
+    "Available for tide-search, percolator, q-ranker, barista.", true);
   InitStringParam("prelim-score-type", "sp", "sp|xcorr",
-    "Initial scoring (sp, xcorr). Default=sp,", 
+    "Initial scoring (sp, xcorr).", 
     "The score applied to all possible psms for a given spectrum. Typically "
     "used to filter out the most plausible for further scoring. See "
     "max-rank-preliminary and score-type.", false);
   InitStringParam("score-type", "xcorr", "xcorr|sp|xcorr-pvalue|sp-pvalue",
-    "The primary scoring method to use (xcorr, sp, xcorr-pvalue, sp-pvalue)."
-    " Default=xcorr.", 
-    "Primary scoring is "
-    "typically done on a subset (see max-rank-preliminary) of all "
-    "possible psms for each spectrum. Default is the SEQUEST-style xcorr."
-    " Crux also offers a p-value calculation for each psm based on xcorr "
+    "The primary scoring method to use (xcorr, sp, xcorr-pvalue, sp-pvalue).",
+    "Primary scoring is typically done on a subset (see max-rank-preliminary) of all "
+    "possible psms for each spectrum. Default is the SEQUEST-style xcorr. "
+    "Crux also offers a p-value calculation for each psm based on xcorr "
     "or sp (xcorr-pvalue, sp-pvalue).", false);
   InitBoolParam("compute-sp", false,
-    "Compute the Sp score for all candidate peptides.  Default=F",
+    "Compute the preliminary score Sp for all candidate peptides. Report this score in the "
+    "output, along with the corresponding rank, the number of matched ions and the total "
+    "number of ions. This option is recommended if results are to be analyzed by Percolator "
+    "or Barista. If sqt-output is enabled, then compute-sp is automatically enabled and "
+    "cannot be overridden. Note that the Sp computation requires re-processing each "
+    "observed spectrum, so turning on this switch involves significant computational overhead.",
     "Available for tide-search.", true);
   InitBoolParam("compute-p-values", false, 
-    "Compute p-values for the main score type. Default=F.",
+    "Estimate the parameters of the score distribution for each spectrum by fitting to a "
+    "Weibull distribution, and compute a p-value for each xlink product. This option is "
+    "only available when use-old-xlink=F.",
     "Currently only implemented for XCORR.", true);
   InitStringParam("scan-number", "",
-    "Search only select spectra specified as a single "
-    "scan number or as a range as in x-y.  Default=search all.",
+    "A single scan number or a range of numbers to be searched. Range should be "
+    "specified as 'first-last' which will include scans 'first' and 'last'.",
     "The search range x-y is inclusive of x and y.", true);
   /* N.B. Use NaN to indicate that no user preference was specified.
    * In this case, the default value depends on the mass type.
    * S.M. Also prevent a width of 0.                                */
   InitDoubleParam("mz-bin-width", 1.0005079, 1e-4, BILLION,
-    "Specify the width of the bins used to "
-    "discretize the m/z axis.  Also used as tolerance for assigning "
-    "ions.  Default=1.0005079 for monoisotopic mass "
-    "or 1.0011413 for average mass.",
+    "Before calculation of the XCorr score, the m/z axes of the observed and theoretical "
+    "spectra are discretized. This parameter specifies the size of each bin. The exact "
+    "formula is floor((x/mz-bin-width) + 1.0 - mz-bin-offset), where x is the observed m/z "
+    "value. For low resolution ion trap ms/ms data 1.0005079 and for high resolution ms/ms "
+    "0.02 is recommended.",
     "Available for tide-search and xlink-assign-ions.", true);
   InitDoubleParam("mz-bin-offset", 0.40, 0.0, 1.0,
-    "Specify the location of the left edge of the "
-    "first bin used to discretize the m/z axis. Default=0.40",
+    "In the discretization of the m/z axes of the observed and theoretical spectra, this "
+    "parameter specifies the location of the left edge of the first bin, relative to "
+    "mass = 0 (i.e., mz-bin-offset = 0.xx means the left edge of the first bin will be "
+    "located at +0.xx Da).",
     "Available for tide-search.", true);
-  // initialize as "unset", then set as bool after cmdline parsed
   InitBoolParam("use-flanking-peaks", false,
-    "Include peaks +/- 1da around b/y ions in theoretical spectrum. default=F.",
+    "Include flanking peaks around singly charged b and y theoretical ions. Each flanking "
+    "peak occurs in the adjacent m/z bin and has half the intensity of the primary peak.",
     "Available for the tide-search and search-for-xlinks commands.", true);
   InitDoubleParam("spectrum-min-mz", 0.0, 0, BILLION, 
-    "The lowest spectrum m/z to search. Default=0.0.",
+    "The lowest spectrum m/z to search in the ms2 file.",
     "Available for tide-search.", true);
   InitDoubleParam("spectrum-max-mz", BILLION, 1, BILLION, 
-    "The highest spectrum m/z to search. Default=no maximum.",
+    "The highest spectrum m/z to search in the ms2 file.",
     "Available for tide-search.", true);
   InitStringParam("spectrum-charge", "all", "1|2|3|all",
-    "Spectrum charge states to search. <string>=1|2|3|all. Default=all.",
-    "Used by tide-search to limit the charge "
-    "states considered in the search.  With 'all' every spectrum will be "
-    "searched and spectra with multiple charge states will be searched "
-    "once at each charge state.  With 1, 2 ,or 3 only spectra with that "
-    "that charge will be searched.", true);
+    "The spectrum charges to search. With 'all' every spectrum will be searched and "
+    "spectra with multiple charge states will be searched once at each charge state. "
+    "With 1, 2, or 3 only spectra with that charge state will be searched.",
+    "Used by tide-search.", true);
   InitStringParam("fileroot", "", 
-    "Prefix added to output file names. Default=none. ",
+    "The fileroot string will be added as a prefix to all output file names.",
     "Used by crux percolator, crux compute-q-values, and crux q-ranker.", true);
   InitStringParam("output-dir", "crux-output",
-    "Folder to which results will be written. Default='crux-output'.",
+    "The name of the directory where output files will be created.",
     "Used by crux compute-q-values, and crux percolator.", true);
   // user options regarding decoys
-  InitStringParam("decoys", "peptide-shuffle",
-    "Include a decoy version of every peptide by shuffling or reversing the "
-    "target sequence.  <string>=none|reverse|protein-shuffle|peptide-shuffle."
-    " Use 'none' for no decoys.  Default=peptide-shuffle.",
+  InitStringParam("decoys", "peptide-shuffle", "none|reverse|protein-shuffle|peptide-shuffle",
+    "Include a decoy version of every peptide by shuffling or reversing the target "
+    "sequence. Each peptide is either reversed or shuffled, leaving the N-terminal and C-"
+    "terminal amino acids in place. Note that peptides that appear multiple times in the "
+    "target database are only shuffled once. In reverse mode, palindromic peptides are "
+    "shuffled. Also, if a shuffled peptide produces an overlap with the target or decoy "
+    "database, then the peptide is re-shuffled up to 5 times. Note that, despite this "
+    "repeated shuffling, homopolymers will appear in both the target and decoy database.",
     "", true);
   InitIntParam("num-decoys-per-target", 1, 0, 10,
     "Number of decoy peptides to search for every target peptide searched."
-    "Only valid for fasta searches when --decoys is not none. Default=1.",
+    "Only valid for fasta searches when --decoys is not none.",
     "Use --decoy-location to control where they are returned (which "
     "file(s)) and --decoys to control how targets are randomized.", true);
   InitStringParam("decoy-location", "separate-decoy-files",
     "Specify location of decoy search results. "
-    "<string>=target-file|one-decoy-file|separate-decoy-files. "
-    "Default=separate-decoy-files.",
+    "<string>=target-file|one-decoy-file|separate-decoy-files.",
     "Applies when decoys is not none.  Use 'target-file' to mix "
     "target and decoy search results in one file. 'one-decoy-file' will "
     "return target results in one file and all decoys in another. "
@@ -318,41 +347,42 @@ void Params::Initialize() {
   InitIntParam("max-rank-preliminary", 500, 0, BILLION, 
     "Number of psms per spectrum to score with xcorr after preliminary "
     "scoring with Sp. "
-    "Set to 0 to score all psms with xcorr. Default=500.",
+    "Set to 0 to score all psms with xcorr.",
     "For positive values, the Sp "
     "(preliminary) score acts as a filter; only high scoring psms go "
     "on to be scored with xcorr.  This saves some time.  If set to 0, "
     "all psms are scored with both scores. ", true);
   InitIntParam("top-match", 5, 1, BILLION, 
-    "The number of PSMs per spectrum writen to the output " 
-    " file(s).  Default=5.",
-    "Available for tide-search and crux percolator",
-    true);
+    "Specify the number of matches to report for each spectrum.",
+    "Available for tide-search and crux percolator", true);
   InitStringParam("seed", "1",
     "When given a unsigned integer value seeds the random number generator with that value. "
-    "When given the string \"time\" seeds the random number generator with the system time. "
-    "Default = 1.",
+    "When given the string \"time\" seeds the random number generator with the system time.",
     "Available for all Crux commands.", true);
-  InitDoubleParam("precursor-window", 3.0, 0, 100, 
-    "Search peptides within +/- 'precursor-window' "
-    "of the spectrum mass.  Definition of precursor window depends "
-    "upon precursor-window-type. Default=3.0.",
-    "Available for tide-search and crux-generate-peptides.", true);
   InitStringParam("fragment-mass", "mono", "average|mono",
-    "Which isotopes to use in calculating fragment ion mass. "
-    "<string>=average|mono. Default=mono.", 
+    "Which isotopes to use in calculating fragment ion mass.",
     "Used by crux-predict-peptide-ions.", true);
+  InitStringParam("isotopic-mass", "average", "average|mono",
+    "Specify the type of isotopic masses to use when calculating the peptide mass.",
+    "Used from command line or parameter file by "
+    "crux-generate-peptides and crux generate-decoys.", true);
   InitStringParam("mod", "NO MODS",
-    "Specify a variable modification to apply to peptides.  " 
-    "<mass change>:<aa list>:<max per peptide>:<prevents cleavage>:<prevents cross-link>."
-    "  Sub-parameters prevents cleavage and prevents cross-link are optional (T|F)."
-    "Default=no mods.",
+    "[[nohtml:"
+    "<mass change>:<aa list>:<max per peptide>:<prevents cleavage>:<prevents cross-link>]]"
+    "[[html:"
+    "&lt;mass change&gt;:&lt;aa list&gt;:&lt;max per peptide&gt;:&lt;prevents cleavage&gt;:"
+    "&lt;prevents cross-link&gt;]]. "
+    "Consider modifications on any amino acid in aa list with at most max-per-peptide in one "
+    "peptide. This parameter may be included with different values multiple times so long as "
+    "the total number of mod, cmod, and nmod parameters does not exceed 11. The prevents "
+    "cleavage and prevents cross-link are T/F optional arguments for describing whether the "
+    "modification prevents enzymatic cleavage of cross-linking respectively. This option is "
+    "only available when use-old-xlink=F.",
     "Available from parameter file for crux-generate-peptides and "
     "the same must be used for crux compute-q-value.", true);
   InitStringParam("cmod", "NO MODS",
     "Specify a variable modification to apply to C-terminus of peptides. " 
-    "<mass change>:<max distance from protein c-term (-1 for no max)>. " 
-    "Default=no mods.",       
+    "<mass change>:<max distance from protein c-term (-1 for no max)>.",
     "Available from parameter file for crux-generate-peptides and "
     "the same must be used for crux compute-q-value.", true);
   InitStringParam("nmod", "NO MODS",
@@ -362,20 +392,28 @@ void Params::Initialize() {
     "the same must be used for crux compute-q-value.", true);
   InitIntParam("min-mods", 0, 0, MAX_PEPTIDE_LENGTH,
     "The minimum number of modifications that can be applied to a single " 
-    "peptide.  Default=0.",
+    "peptide.",
     "Available for tide-index.", true);
   InitIntParam("max-mods", MAX_PEPTIDE_LENGTH, 0, MAX_PEPTIDE_LENGTH,
     "The maximum number of modifications that can be applied to a single " 
-    "peptide.  Default=no limit.",
+    "peptide.",
     "Available for tide-index.", true);
   InitIntParam("max-aas-modified", MAX_PEPTIDE_LENGTH, 0, MAX_PEPTIDE_LENGTH,
     "The maximum number of modified amino acids that can appear in one "
-    "peptide.  Each aa can be modified multiple times.  Default=no limit.",
+    "peptide.  Each aa can be modified multiple times.",
     "", true);
   InitStringParam("mod-mass-format", "mod-only", "mod-only|total|separate",
-    "Print the masses of modified sequences in one of three ways 'mod-only', "
-    "'total' (residue mass plus modification), or 'separate' (for multiple "
-    "mods to one residue): Default 'mod-only'.",
+    "Specify how sequence modifications are reported in various output files. Each "
+    "modification is reported as a number enclosed in square braces following the "
+    "modified residue; however the number may correspond to one of three different "
+    "masses: (1) 'mod-only' reports the value of the mass shift induced by the "
+    "modification; (2) 'total' reports the mass of the residue with the modification "
+    "(residue mass plus modification mass); (3) 'separate' is the same as 'mod-only', "
+    "but multiple modifications to a single amino acid are reported as a "
+    "comma-separated list of values. For example, suppose amino acid D has an "
+    "unmodified mass of 115 as well as two moifications of masses +14 and +2. In this "
+    "case, the amino acid would be reported as D[16] with 'mod-only', D[131] with 'total', "
+    "and D[14,2] with 'separate'.",
     "Available for generate-peptides.", true);
   InitIntParam("mod-precision", 2, 0, 20,//arbitrary
     "Set the precision for modifications as written to .txt files.",
@@ -383,15 +421,15 @@ void Params::Initialize() {
     "the max mod precision in the param file.",
     false);
   InitIntParam("precision", 8, 1, 100, //max is arbitrary
-    "Set the precision for scores written to sqt and text files. Default=8.",
+    "Set the precision for scores written to sqt and text files.",
     "Available from parameter file for percolator and compute-q-values.", true);
   InitIntParam("mass-precision", 4, 1, 100, // max is arbitrary
-    "Set the precision for masses and m/z written to sqt and .txt files. Default=4",
+    "Set the precision for masses and m/z written to sqt and .txt files.",
     "Available from parameter file for all commands.", true);
   InitIntParam("print-search-progress", 1000, 0, BILLION,
-    "Show search progress by printing every n spectra searched.  Default="
-    "1000.", "Set to 0 to show no search progress.  Available for tide-search",
-    true);
+    "Show search progress by printing every n spectra searched. Set to 0 to show no "
+    "search progress.",
+    "Available for tide-search", true);
   // Sp scoring params
   InitDoubleParam("max-mz", 4000, 0, BILLION, 
     "Used in scoring sp.",
@@ -399,12 +437,11 @@ void Params::Initialize() {
   InitDoubleParam("fraction-top-scores-to-fit", 0.55, 0, 1, 
     "The fraction of psms per spectrum to use for estimating the "
     "score distribution for calculating p-values. "
-    "Not compatible with 'number-top-scores-to-fig'. Default=0.55.",
+    "Not compatible with 'number-top-scores-to-fig'.",
     "For developers/research only.", false);
   /* analyze-matches options */
   InitStringParam("algorithm", "percolator", "percolator|curve-fit|none",
-    "The analysis algorithm to use (percolator, curve-fit, none)."
-    " Default=percolator.",
+    "The analysis algorithm to use (percolator, curve-fit, none).",
     "Available only for crux-analyze-matches.  Using 'percolator' will "
     "assign a q-value to the top-ranking psm for each spectrum based on "
     "the decoy searches.  Using 'curve-fit' will assign a q-value to same "
@@ -414,109 +451,120 @@ void Params::Initialize() {
     "into text.", false);
   // **** percolator options. ****
   InitBoolParam("feature-file", false,
-    "Optional file into which psm features are printed. Default=F.",
-    "Available for percolator and q-ranker.  File will be named "
-    "<fileroot>.percolator.features.txt or <fileroot>.qranker.features.txt.", true);
-  InitBoolParam("protein", false,
-    "output protein level probability. Default=F",
-    "Available for crux percolator", true);
+    "Output the computed features in [[html:<a href=\"features.html\">]]tab-delimited "
+    "text format[[html:</a>]].",
+    "Available for percolator and q-ranker.", true);
   InitBoolParam("decoy-xml-output", false,
-    "Include decoys (PSMs, peptides, and/or proteins) in the "
-    "xml-output. Only available if -X is used. Default=F",
+    "Include decoys (PSMs, peptides, and/or proteins) in the XML output.",
     "Available for crux percolator", true);
   InitStringParam("decoy-prefix", "decoy_",
-    "Option for single SQT file mode defining the name pattern "
-    "used for decoy database. Default=decoy_.",
+    "Specifies the prefix of the protein names that indicate a decoy.",
     "Available for percolator", true);
-  InitDoubleParam("c-pos", 0.01,
-    "Penalty for mistakes made on positive examples. Set by "
-    "cross validation if not specified. Default=cross-validate ",
-    "Available for crux percolator", true);
-  InitDoubleParam("c-neg", 0.0, 0.0, 0.90,
-    "Penalty for mistake made on negative examples. Set by cross "
-    "validation if not specified or --c-pos not specified.",
-    "Available for crux percolator", true);
-  InitDoubleParam("test-fdr", 0.01, 0.0, 1.0,
-    "False discovery rate threshold for evaluating best cross validation result "
-    "and the reported end result. Default is 0.01.",
-    "Availble for crux percolator.", true);
-  InitIntParam("maxiter", 10, 0, 100000000,
-    "Maximum number of iterations for training (default 10).",
-    "Available for crux percolator", false);
-  InitDoubleParam("train-ratio", 0.6, 0.0, 1.0,
-    "Fraction of the negative data set to be used as train set when only providing"
-    " one negative set, remaining examples will be used as test set.Default 0.6",
-    "Available for crux percolator.", true);
   InitBoolParam("output-weights", false,
-    "Output final weights to percolator.target.weights.txt.Default=T.",
+    "Output final weights to a file named \"percolator.weights.txt\".",
     "Available for crux percolator", true);
   InitStringParam("input-weights", "",
-    "Read initial weights from the given file (one per line). Default=F",
+    "Read initial weights from the given file (one per line).",
     "Available for crux percolator ", true);
+  InitDoubleParam("c-pos", 0.01,
+    "Penalty for mistakes made on positive examples. If this value is not specified, "
+    "then it is set via cross validation over the values {0.1, 1, 10}, selecting the "
+    "value that yields the largest number of PSMs identified at the q-value threshold "
+    "set via the --test-fdr parameter.",
+    "Available for crux percolator", true);
+  InitDoubleParam("c-neg", 0.0, 0.0, 0.90,
+    "Penalty for mistake made on negative examples. This parameter requires the c-pos "
+    "is set explicitly; otherwise, --c-neg will have no effect. If not specified, then "
+    "this value is set by cross validation over {0.1, 1, 10}.",
+    "Available for crux percolator", true);
+  InitDoubleParam("train-fdr", 0.01, 0, BILLION,
+    "False discovery rate threshold to define positive examples in training.",
+    "Available for crux percolator", true);
+  InitDoubleParam("test-fdr", 0.01, 0.0, 1.0,
+    "False discovery rate threshold used in selecting hyperparameters during internal "
+    "cross-validation and for reporting the final results.",
+    "Availble for crux percolator.", true);
+  InitIntParam("maxiter", 10, 0, 100000000,
+    "Maximum number of iterations for training.",
+    "Available for crux percolator", true);
+  InitDoubleParam("train-ratio", 0.6, 0.0, 1.0,
+    "Fraction of the negative data set to be used as train set when only providing "
+    "one negative set. The remaining examples will be used as test set.",
+    "Available for crux percolator.", true);
   InitStringParam("default-direction", "",
-    "The most informative feature given as the feature name.  The name can be "
-    "preceded by a hyphen (e.g., \"-XCorr\") to indicate that a lower value is better."
-    " By default, Percolator will select the feature that produces"
-    " the largest set of target PSMs at a specified FDR threshold"
-    " (cf. --train-fdr).",
+    "In its initial round of training, Percolator uses one feature to induce a ranking "
+    "of PSMs. By default, Percolator will select the feature that produces the largest "
+    "set of target PSMs at a specified FDR threshold (cf. --train-fdr). This option "
+    "allows the user to specify which feature is used for the initial ranking, using the "
+    "name as a string[[html: from <a href=\"features.html\">this table</a>]]. The name "
+    "can be preceded by a hyphen (e.g. \"-XCorr\") to indicate that a lower value is "
+    "better.",
     "Available for crux percolator", true);
   InitBoolParam("unitnorm", false,
-    "Use unit normalization [0-1] instead of standard deviation normalization",
+    "Use unit normalization (i.e., linearly rescale each PSM's feature vector to have a "
+    "Euclidean length of 1), instead of standard deviation normalization.",
     "Available for crux percolator.", true);
-  InitDoubleParam("train-fdr", 0.01, 0, BILLION,
-    "False discovery rate threshold to define positive examples in training. "
-    "Set by cross validation if 0. Default is 0.01.",
-    "Available for crux percolator",
-    true);
+  InitBoolParam("test-each-iteration", false,
+    "Measure performance on test set each iteration.",
+    "Available for crux percolator.", true);
+  InitBoolParam("protein", false,
+    "Output protein level probability. Must be true to use any of the Fido options.",
+    "Available for crux percolator", true);
   InitDoubleParam("alpha", 0.0, 0.0, 1.0,
-    "Probability with which a present protein emits an associated peptide (--protein T "
-    "must be set). Set by grid search if not specified.",
+    "Specify the probability with which a present protein emits an associated peptide. "
+    "Set by grid search (see --deepness parameter) if not specified.",
     "Available for crux percolator if --protein T is set.", true);
   InitDoubleParam("beta", 0.0, 0.0, 10.0,
-    "Probability of the creation of a peptide from noise (--protein T "
-    "must be set). Set by grid search if not specified.",
+    "Specify the probability of the creation of a peptide from noise. Set by grid "
+    "search (see --deepness parameter) if not specified.",
     "Available for crux percolator if --protein T is set.", true);
   InitDoubleParam("gamma", 0.0, 0.0, 10.0,
-    "Prior probability of that a protein is present in the sample (--protein T "
-    "must be set). Set by grid search if not specified.",
+    "Specify the prior probability that a protein is present in the sample. Set by grid "
+    "search (see --deepness parameter) if not specified.",
     "Available for crux percolator if --protein T is set.", true);
-  InitBoolParam("test-each-iteration", false,
-    "Measure performance on test set each iteration",
+  InitBoolParam("allow-protein-group", false,
+    "Treate ties as if it were one protein.",
     "Available for crux percolator.", true);
+  InitBoolParam("protein-level-pi0", false,
+    "Use pi_0 value when calculating empirical q-values",
+    "Available for crux percolator if --protein T is set.", true);
+  InitBoolParam("empirical-protein-q", false,
+    "Output empirical q-values from target-decoy analysis.",
+    "Available for crux percolator if --protein T is set.", true);
+  InitBoolParam("group-proteins", false,
+    "Proteins with same probabilities will be grouped.",
+    "Available for crux percolator if --protein T is set.", true);
+  InitBoolParam("no-prune-proteins", false,
+    "Peptides with low score will not be pruned before calculating protein probabilities. ",
+    "Available for crux percolator if --protein T is set.", true);
+  InitIntParam("deepness", 0, 0, 2,
+    "Set depth of the grid search for alpha, beta and gamma estimation.[[html: The values "
+    "considered, for each possible value of the --deepness parameter, are as follows:<ul>"
+    "<li>0: alpha = {0.01, 0.04, 0.09, 0.16, 0.25, 0.36, 0.5}; beta = {0.0, 0.01, 0.15, "
+    "0.025, 0.035, 0.05, 0.1}; gamma = {0.1, 0.25, 0.5, 0.75}.</li><li>1: alpha = {0.01, "
+    "0.04, 0.09, 0.16, 0.25, 0.36}; beta = {0.0, 0.01, 0.15, 0.025, 0.035, 0.05}; gamma = "
+    "{0.1, 0.25, 0.5}.</li><li>2: alpha = {0.01, 0.04, 0.16, 0.25, 0.36}; beta = {0.0, "
+    "0.01, 0.15, 0.030, 0.05}; gamma = {0.1, 0.5}.</li><li>3: alpha = {0.01, 0.04, 0.16, "
+    "0.25, 0.36}; beta = {0.0, 0.01, 0.15, 0.030, 0.05}; gamma = {0.5}.</li></ul>]]",
+    "Available for crux percolator if --protein T is set.", true);
   InitBoolParam("static-override", false,
-    "Override error check and do not fall back on default score vector in case "
-    "of suspect score vector.",
+    "By default, Percolator will examine the learned weights for each feature, and if "
+    "the weight appears to be problematic, then percolator will discard the learned "
+    "weights and instead employ a previously trained, static score vector. This switch "
+    "allows this error checking to be overriden.",
     "Available for crux percolator.", true);
   InitBoolParam("klammer", false,
-    "Using retention time features calculated as in Klammer et al.",
+    "Use retention time features calculated as in \"Improving tandem mass spectrum "
+    "identification using peptide retention time prediction across diverse chromatography "
+    "conditions\" by Klammer AA, Yi X, MacCoss MJ and Noble WS. ([[html:<em>]]Analytical "
+    "Chemistry[[html:</em>]]. 2007 Aug 15;79(16):6111-8.).",
     "Available for crux percolator", true);
   InitIntParam("doc", -1, -1, 15,
     "Include description of correct features.",
     "Avilable for crux percolator", true);
   InitBoolParam("only-psms", false,
-    "Do not remove redundant peptides, keep all PSMs and exclude peptide level probability.",
+    "Do not remove redundant peptides; keep all PSMs and exclude peptide level probability.",
     "Available for crux percolator", true);
-  InitBoolParam("allow-protein-group", false,
-    "Treat ties as if it were one protein ",
-    "Available for crux percolator.", true);
-  InitBoolParam("protein-level-pi0", false,
-    "Use pi_0 value when calculating empirical q-values (--protein T must be set).",
-    "Available for crux percolator if --protein T is set.", true);
-  InitBoolParam("group-proteins", false,
-    "Proteins with same probabilities will be grouped (--protein T must be set).",
-    "Available for crux percolator if --protein T is set.", true);
-  InitBoolParam("empirical-protein-q", false,
-    "Output empirical q-values from target-decoy analysis (--protein T must be set).",
-    "Available for crux percolator if --protein T is set.", true);
-  InitBoolParam("no-prune-proteins", false,
-    "Peptides with low score will not be pruned before calculating protein probabilities "
-    "(--protein T must be set).",
-    "Available for crux percolator if --protein T is set.", true);
-  InitIntParam("deepness", 0, 0, 2,
-    "Setting deepness 0, 1, or 2 from low depth to high depth (less computational time) "
-    "of the grid search for estimation Alpha,Beta and Gamma parameters for fido "
-    "(--protein T must be set). Default value is 0.",
-    "Available for crux percolator if --protein T is set.", true);
   InitBoolParam("original-output", false,
     "Output the standalone Percolator tab-delimited output.",
     "Available for crux percolator.", false);
@@ -533,29 +581,55 @@ void Params::Initialize() {
     "A directory containing a database index created by a previous run of crux "
     "tide-index.");
   // **** Tide options ****
-  InitStringParam("decoy-format", "shuffle",
+  InitStringParam("decoy-format", "shuffle", "none|shuffle|peptide-reverse|protein-reverse",
     "Include a decoy version of every peptide by shuffling or reversing the "
-    "target sequence or protein. <string>=none|shuffle|peptide-reverse|"
-    "protein-reverse. Default=shuffle.",
+    "target sequence or protein. In shuffle or peptide-reverse mode, each peptide is "
+    "either reversed or shuffled, leaving the N-terminal and C-terminal amino acids in "
+    "place. Note that peptides appear multiple times in the target database are only "
+    "shuffled once. In peptide-reverse mode, palindromic peptides are shuffled. Also, if a "
+    "shuffled peptide produces an overlap with the target or decoy database, then the "
+    "peptide is re-shuffled up to 5 times. Note that, despite this repeated shuffling, "
+    "homopolymers will appear in both the target and decoy database. The protein-reverse "
+    "mode reverses the entire protein sequence, irrespective of the composite peptides.",
     "Available for tide-index", true);
   InitBoolParam("monoisotopic-precursor", true,
-    "Use monoisotopic precursor masses rather than average mass for precursor. "
-    "Default=T.",
+    "When computing the mass of a peptide, use monoisotopic masses rather than "
+    "average masses.",
     "Available for tide-index", true);
   InitStringParam("mods-spec", "C+57.02146",
-    "Expression for static and variable mass modifications to include. "
+    "[[nohtml:Expression for static and variable mass modifications to include. "
     "Specify a comma-separated list of modification sequences of the form: "
-    "C+57.02146,2M+15.9949,1STY+79.966331,...",
-    "Available for tide-index", true);
-  InitStringParam("cterm-peptide-mods-spec", "",
-    "Specifies C-terminal static and variable mass modifications on peptides. "
-    "Specify a comma-separated list of C-terminal modification sequences of the form: "
-    "X+21.9819",
+    "C+57.02146,2M+15.9949,1STY+79.966331,...]][[html:The general form of a modification "
+    "specification has three components, as exemplified by <span style=\"color: red;\">1"
+    "</span><span style=\"color: green;\">STY</span>+<span style=\"color: blue\">79.966331"
+    "</span>.<br>The three components are: [<span style=\"color: red;\">max_per_peptide"
+    "</span>]<span style=\"color: green;\">residues</span>[+/-]<span style-\"color: blue;\">"
+    "mass_change</span><br>In the example, <span style=\"color: red;\">max_per_peptide"
+    "</span> is <span style=\"color: red;\">1</span>, <span style=\"color: green;\">"
+    "residues</span> are <span style=\"color: green;\">STY</span>, and "
+    "<span style=\"color: blue;\">mass_change</span> is <span style=\"color: blue;\">"
+    "+79.966331</span>. To specify a static modification, the number preceding the amino "
+    "acid must be omitted; i.e., <span style=\"color: green;\">C</span>+<span "
+    "style=\"color: blue;\">57.02146</span> specifies a static modification of 57.02146 "
+    "Da to cysteine. Note that Tide allows at most one modification per amino acid.]]",
     "Available for tide-index", true);
   InitStringParam("nterm-peptide-mods-spec", "",
-    "Specifies N-terminal static and variable mass modifications on peptides. "
+    "[[nohtml:Specifies N-terminal static and variable mass modifications on peptides. "
     "Specify a comma-separated list of N-terminal modification sequences of the form: "
-    "1E-18.0106,C-17.0265",
+    "1E-18.0106,C-17.0265]][[html:Specify peptide n-terminal modifications. Like "
+    "--mods-spec, this specification has three components, but with a slightly different "
+    "syntax. The <span style=\"color: red;\">max_per_peptide</span> can be either \"1\", "
+    "in which case it defines a variable terminal modification, or missing, in which case "
+    "the modification is static. The <span style=\"color: green;\">residues</span> field "
+    "indicates which amino acids are subject to the modification, with the reside <span "
+    "style=\"color: green;\">X</span> corresponding to any amino acid. Finally, <span "
+    "style=\"color: blue;\">added_mass</span> is defined as before.]]",
+    "Available for tide-index", true);
+  InitStringParam("cterm-peptide-mods-spec", "",
+    "[[nohtml:Specifies C-terminal static and variable mass modifications on peptides. "
+    "Specify a comma-separated list of C-terminal modification sequences of the form: "
+    "X+21.9819]][[html:Specify peptide c-terminal modifications. See "
+    "nterm-peptide-mods-spec for syntax.]]",
     "Available for tide-index", true);
   InitStringParam("cterm-protein-mods-spec", "",
     "Specifies C-terminal static and variable mass modifications on proteins. "
@@ -569,28 +643,43 @@ void Params::Initialize() {
     "Available for tide-index", false);
   InitStringParam("store-spectra", "",
     "Specify the name of the file where the binarized fragmentation spectra "
-    "will be stored.",
+    "will be stored. Subsequent runs of crux tide-search will execute more quickly if "
+    "provided with the spectra in binary format. The filename is specified relative to "
+    "the current working directory, not the Crux output directory (as specified by "
+    "--output-dir). This option is not valid if multiple input spectrum files are given.",
     "Available for tide-search", true);
   InitBoolParam("exact-p-value", false,
-    "Uses exact P-value calculation for peptide-spectrum-matching. "
-    "Default=F.",
+    "Enable the calculation of exact p-values for the XCorr score[[html: as described in "
+    "<a href=\"http://www.ncbi.nlm.nih.gov/pubmed/24895379\">this article</a>]]. Calculation "
+    "of p-values increases the running time but increases the number of identifications at a "
+    "fixed confidence threshold. The p-values will be reported in a new column with header "
+    "\"exact p-value\", and the \"xcorr score\" column will be replaced with a \"refactored "
+    "xcorr\" column. Note that, currently, p-values can only be computed when the "
+    "mz-bin-width parameter is set to its default value. Variable and static mods are allowed "
+    "on non-terminal residues in conjunction with p-value computation, but currently only "
+    "static mods are allowed on the N-terminus, and no mods on the C-terminus.",
     "Available for tide-search", true);
   InitBoolParam("concat", false,
-    "Output target and decoy PSMs into a single file.",
+    "When set to T, target and decoy search results are reported in a single file, and only "
+    "the top-scoring N matches (as specified via --top-match) are reported for each spectrum, "
+    "irrespective of whether the matches involve target or decoy peptides.",
     "Available for tide-search", true);
   InitBoolParam("file-column", true,
     "Include the file column in tab-delimited output.",
     "Available for tide-search", true);
   // Same as remove_precursor_peak and remove_precursor tolerance in Comet
   InitBoolParam("remove-precursor-peak", false,
-    "Remove peaks around the precursor m/z.",
+    "If true, all peaks around the precursor m/z will be removed, within a range "
+    "specified by the --remove-precursor-tolerance option.",
     "Available for tide-search.", true);
   InitDoubleParam("remove-precursor-tolerance", 1.5, 0, BILLION,
-    "+- m/z tolerance for precursor peak removal. Default = 1.5.",
+    "This parameter specifies the tolerance (in Th) around each precursor m/z that is "
+    "removed when the --remove-precursor-peak option is invoked.",
     "Available for print-processed spectra and tide-search.", true);
   InitBoolParam("clip-nterm-methionine", false,
-    "This parameter controls whether Tide will automatically "
-    "remove the N-terminal methionine from a sequence entry.",
+    "When set to T, for each protein that begins with methionine, tide-index will "
+    "put two copies of the leading peptide into the index, with and without the N-terminal "
+    "methionine.",
     "Available for tide-index.", true);
   InitBoolParam("use-neutral-loss-peaks", false,
     "Controls whether neutral loss ions are considered in the search. "
@@ -600,23 +689,23 @@ void Params::Initialize() {
     "the primary peak",
     "Available for tide-search.", true);
   InitIntParam("max-precursor-charge", 5, 1, BILLION,
-    "he maximum charge state of a spectra to consider in search. "
-    "Default=5.",
-    " Available for tide-search.", true);
+    "The maximum charge state of a spectra to consider in search.",
+    "Available for tide-search.", true);
   InitBoolParam("peptide-centric-search", false,
-    "Carries out a peptide-centric search.  "
-    "For each peptide the top N scoring spectra are reported,"
-    "in contrary to the standard spectrum centric-search where top N "
-    "scoring peptide are reported. Default = F.",
+    "Carries out a peptide-centric search. For each peptide the top-scoring spectra "
+    "are reported, in contrast to the standard spectrum-centric search where the top-"
+    "scoring peptides are reported. Note that in this case the \"xcorr rank\" column "
+    "will contain the rank of the given spectrum with respect to the given candidate "
+    "peptide, rather than vice versa (which is the default).",
     "Available for tide-search.", true);
   InitIntParam("elution-window-size", 0, 0, 10,
     "Size of the elution window used in smoothing score in DIA mode. "
     "Used only with peptide-centric-search if greater than 0. A score of a psms "
     "centred in the window is substituted by the geometric mean of the scores "
-    "in the window. If windows size is even, then it is increased by 1. Default = 0.",
+    "in the window. If windows size is even, then it is increased by 1.",
     "Available for tide-search.", false);
   InitBoolParam("skip-decoys", true,
-    "Skips decoys when reading a Tide index. Default = true.",
+    "Skips decoys when reading a Tide index.",
     "Available for read-tide-index", false);
 
   /*
@@ -634,15 +723,14 @@ void Params::Initialize() {
     "translate these to amino acid sequences. Do this by setting "
     "nucleotide_reading_frame\" to a value between 1 and 9.");
   InitIntParam("decoy_search", 0, 0, 2,
-    "0=no (default), 1=concatenated search, 2=separate search",
+    "0=no, 1=concatenated search, 2=separate search",
     "option for Comet only", true);
   InitIntParam("num_threads", 0, 0, 32, 
     "0=poll CPU to set num threads; else specify num threads directly (max 32)",
     "option for Comet only", true);
   InitStringParam("output_suffix", "",
     "specifies the suffix string that is appended to the base output name "
-    "for the pep.xml, pin.xml, txt and sqt output files."
-    "Default = \"\"",
+    "for the pep.xml, pin.xml, txt and sqt output files.",
     "Available for comet.",true);
   InitDoubleParam("peptide_mass_tolerance", 3.0, 0, BILLION,
     "Controls the mass tolerance value.  The mass tolerance "
@@ -666,7 +754,7 @@ void Params::Initialize() {
     "option for Comet only", true);
   InitIntParam("num_enzyme_termini", 2, 1, 2,
     "valid values are 1 (semi-digested), "
-    "2 (fully digested, default), 8 N-term, 9 C-term",
+    "2 (fully digested), 8 N-term, 9 C-term",
     "option for Comet only", true);
   InitIntParam("allowed_missed_cleavage", 2, 0, 5,
     "maximum value is 5; for enzyme search",
@@ -715,7 +803,7 @@ void Params::Initialize() {
      "option for Comet only", true);
   InitIntParam("output_txtfile", 1, 0, 1,
     "0=no, 1=yes  write tab-delimited text file",
-    "option for Comet only (default 1)", true);
+    "option for Comet only", true);
   InitIntParam("output_outfiles", 0, 0, 1,
     "0=no, 1=yes  write .out files",
     "option for Comet only", true);
@@ -730,7 +818,7 @@ void Params::Initialize() {
     "option for Comet.", true);
   InitIntParam("sample_enzyme_number", 1,0,10, 
     "Sample enzyme which is possibly different than the one applied to the search."
-    "Used to calculate NTT & NMC in pepXML output (default=1 for trypsin).",
+    "Used to calculate NTT & NMC in pepXML output.",
     "option for Comet. ", true);
   InitStringParam("scan_range", "0 0",
     "start and scan scan range to search; 0 as 1st entry "
@@ -741,10 +829,10 @@ void Params::Initialize() {
     "mzXML charge; 0 as 1st entry ignores parameter",
     "option for Comet.", true);
   InitIntParam("ms_level", 2, 2, 3, 
-    "MS level to analyze, valid are levels 2 (default) or 3",
+    "MS level to analyze, valid are levels 2 or 3",
     "option for Comet. ", true);
   InitStringParam("activation_method", "ALL", "ALL|CID|ECD|ETD|PQD|HCD|IRMPD",
-    "<string>= ALL|CID|ECD|ETD|PQD|HCD|IRMPD. Default=All",
+    "<string>= ALL|CID|ECD|ETD|PQD|HCD|IRMPD.",
     "option for Comet. ", true);
   InitStringParam("digest_mass_range", "600.0 5000.0",
     "MH+ peptide mass range to analyze",
@@ -753,8 +841,7 @@ void Params::Initialize() {
     "number of search hits to store internally",
     "option for Comet.", true);
   InitIntParam("skip_researching", 1, 0, 1,
-    "for '.out' file output only, 0=search everything again "
-    "(default), 1=don't search if .out exists",
+    "for '.out' file output only, 0=search everything again, 1=don't search if .out exists",
     "option for Comet", true);
   InitIntParam("max_fragment_charge", 3, 1, 5,
     "set maximum fragment charge state to analyze (allowed max 5)",
@@ -773,7 +860,7 @@ void Params::Initialize() {
     "entire scan range in one loop",
     "option for Comet", true);
   InitIntParam("minimum_peaks", 10, 1, BILLION,
-    "minimum num. of peaks in spectrum to search (default 10)",
+    "minimum num. of peaks in spectrum to search",
     "option for Comet", true);
   InitDoubleParam("minimum_intensity", 0, 0, BILLION,
     "minimum intensity value to read in",
@@ -841,42 +928,39 @@ void Params::Initialize() {
     "containing multiple FASTA files (identified via the filename suffixes "
     "\".fa\", \".fsa\" or \".fasta\")."); 
   InitArgParam("search results",
-    "Q-ranker recognizes search results in tab-delimited format. Like the spectra, the "
-    "search results can be provided as a single file, a list of files or a "
-    "directory of files. Note, however, that the input mode for spectra and "
-    "for search results must be the same; i.e., if you provide a list of "
-    "files for the spectra, then you must also provide a list of files "
+    "Search results in the [[html:<a href=\"txt-format.html\">]]tab-delimited text format"
+    "[[html:</a>]] produced by Crux. Like the spectra, the search results can be provided "
+    "as a single file, a list of files or a directory of files. Note, however, that the "
+    "input mode for spectra and for search results must be the same; i.e., if you provide "
+    "a list of files for the spectra, then you must also provide a list of files "
     "containing your search results. When the MS2 files and tab-delimited text files are "
-    "provided via a file listing, Q-ranker assumes that the order of the MS2 "
-    "files matches the order of the tab-delimited files. Alternatively, when the MS2 "
-    "files and tab-delimited files are provided via directories, Q-ranker will search "
-    "for pairs of files with the same root name but different extensions "
-    "(\".ms2\" and \".txt\").");
+    "provided via a file listing, it is assumeed that the order of the MS2 files matches "
+    "the order of the tab-delimited files. Alternatively, when the MS2 files and "
+    "tab-delimited files are provided via directories, Q-ranker will search for pairs of "
+    "files with the same root name but different extensions (\".ms2\" and \".txt\").");
   // **** q-ranker options. ****
   InitBoolParam("skip-cleanup", false, 
-    "Q-ranker analysis begins with a pre-processsing step that creates a "
+    "Analysis begins with a pre-processsing step that creates a "
     "set of lookup tables which are then used during training. Normally, "
-    "these lookup tables are deleted at the end of the Q-ranker analysis, "
+    "these lookup tables are deleted at the end of the analysis, "
     "but setting this option to T prevents the deletion of these tables. "
-    "Subsequently, the Q-ranker analysis can be repeated more efficiently "
-    "by specifying the --re-run option. Default = F.", 
-    "Available for q-ranker and barista.", true);
-  InitBoolParam("use-spec-features", true, 
-    "Q-ranker uses enriched feature set derived from the spectra in ms2 "
-    "files. It can be forced to use minimal feature set by setting the "
-    "--use-spec-features option to F. Default T.", 
-    "Available for q-ranker and barista.", true);
-  InitStringParam("decoy_prefix", "decoy_",
-    "Specifies the prefix of the protein names that indicates a decoy. "
-    "Default = decoy_.",
+    "Subsequently, analyses can be repeated more efficiently "
+    "by specifying the --re-run option.", 
     "Available for q-ranker and barista.", true);
   InitStringParam("re-run", "",
-    "Re-run a previous Q-ranker analysis using a previously computed set of "
-    "lookup tables.",
+    "Re-run a previous analysis using a previously computed set of "
+    "lookup tables. For this option to work, the --skip-cleanup option must have "
+    "been set to true when the program was run the first time",
+    "Available for q-ranker and barista.", true);
+  InitBoolParam("use-spec-features", true, 
+    "Use enriched feature set derived from the spectra in ms2 files.",
+    "Available for q-ranker and barista.", true);
+  InitStringParam("decoy_prefix", "decoy_",
+    "Specifies the prefix of the protein names that indicates a decoy.",
     "Available for q-ranker and barista.", true);
   InitStringParam("separate-searches", "",
     "If the target and decoy searches were run separately, rather than "
-    "using a concatenated database, then Q-ranker will assume that the "
+    "using a concatenated database, then the program will assume that the "
     "database search results provided as a required argument are from the "
     "target database search. This option then allows the user to specify "
     "the location of the decoy search results. Like the required arguments, "
@@ -891,128 +975,164 @@ void Params::Initialize() {
     "Available for q-ranker and barista.", true);
   //**** Barista and QRanker options. ******
   InitBoolParam("list-of-files", false, 
-    "Search result can be as a file or a list of files. This option"
-    " allows users to specify the search results are provided as a list of files by " 
-    "setting the --list-of-files option to T. Default= false.", 
-    "Available for barista.",true);
-  InitStringParam("optimization", "protein",
-     "Specifies whether to do optimization at the protein, peptide or psm level. "
-     "Default = protein.",
+    "Specify that the search results are provided as lists of files, rather than as "
+    "individual files.",
+    "Available for barista and percolator.",true);
+  InitStringParam("optimization", "protein", "protein|peptide|psm",
+     "Specifies whether to do optimization at the protein, peptide or psm level.",
      "Available for barista.", true);
   /* analyze-matches parameter options */
+  InitArgParam("target input",
+    "One or more files, each containing a collection of peptide-spectrum matches (PSMs) "
+    "in [[html:<a href=\"txt-format.html\">]]tab-delimited text[[html:</a>]], [[html:<a "
+    "href=\"http://tools.proteomecenter.org/wiki/index.php?title=Formats:pepXML\">]]PepXML"
+    "[[html:</a>]], or [[html:<a href=\"http://www.psidev.info/mzidentml\">]]mzIdentML"
+    "[[html:</a>]] format. In tab-delimited text format, only the specified score column "
+    "is required. However if --estimation-method is tdc, then the columns \"scan\" and "
+    "\"charge\" are required, as well as \"protein ID\" if the search was run with "
+    "concat=F. Furthermore, if the --peptide-level option is set to T, then the column "
+    "\"peptide\" must be included, and if sidak is T, then the \"distinct "
+    "matches/spectrum\" column must be included.[[html:<br>Note that multiple files can "
+    "also be provided either on the command line or using the --list-of-files option.<br>"
+    "Decoys can be provided in two ways: either as a separate file or embedded within the "
+    "same file as the targets. Crux will first search the given file for decoys using a "
+    "prefix (specified via --decoy-prefix) on the protein name. If no decoys are found, "
+    "then Crux will search for decoys in a separate file. The decoy file name is constructed "
+    "from the target file name by replacing \"target\" with \"decoy\". For example, if "
+    "tide-search.target.txt is provided as input, then Crux will search for a corresponding "
+    "file named tide-search.decoy.txt.<br>Note that if decoys are provided in a separate "
+    "file, then assign-confidence will first carry out a target-decoy competition, "
+    "identifying corresponding pairs of targets and decoys and eliminating the one with "
+    "the worse score. In this case, the column/tag called \"delta_cn\" will be eliminated "
+    "from the output.]]");
   InitDoubleParam("pi-zero", 1.0, 0, 1, 
     "The estimated percent of target scores that are drawn from the "
     "null distribution.",
     "Used by assign-confidence, compute-q-values, percolator and q-ranker", false);
-  InitBoolParam("smaller-is-better", false, 
-    "Specify the semantics of the score, i.e., whether a smaller value "
-    "implies a better match or vice versa.  Default is false. Specify this parameter "
-    "T for \"exact p-value\" and F for \"xcorr score\". The default is F. ",
+  InitStringParam("estimation-method", "tdc", "mix-max|tdc",
+    "Specify the method used to estimate q-values: the mix-max procedure or target-decoy "
+    "competition.",
+    "Used by assign-confidence.", true);      
+  InitBoolParam("sidak", false, 
+    "Adjust the score using the Sidak adjustment and reports them in a new column in the "
+    "output file. Note that this adjustment only makes sense if the given scores are "
+    "p-values, and that it requires the presence of the \"distinct matches/spectrum\" "
+    "feature for each PSM.",
+    "Used by assign-confidence.", true);      
+  InitBoolParam("peptide-level", false,
+    "Applied for spectrum-centric search. Eliminates any PSMS for which there "
+    "exists a better scoring PSM involving the same peptide. This option is "
+    "incompatible with the mix-max procedure.",
     "Used by assign-confidence.", true);
   InitStringParam("score", "xcorr score", 
     "Specify the column (for tab-delimited input) or tag (for XML input) "
-    "used as input to the q-value estimation procedure. Default \"xcorr score\".",
+    "used as input to the q-value estimation procedure.",
     "Used by assign-confidence.", true);
-  InitBoolParam("peptide-level", false,
-      "Applied for spectrum-centirc search. Eliminates any PSMS for which there "
-      "exists a better scoring PSM involving the same peptide. This option is "
-      "incompatible with the mix-max procedure. Default is F.",
-      "Used by assign-confidence.", true);    
-  InitStringParam("estimation-method", "tdc", 
-    "Specify the q-value calculation procedure to either "
-    "target-decoy competition (tcd) or mix-max (mix-max). Default=tdc.",
-    "Used by assign-confidence.", true);      
-  InitBoolParam("sidak", false, 
-    "Adjust the score using the Sidak adjustment. "
-    "Note that this adjustment only makes sense if the given scores are p-values, "
-    "and that it requires the presence of the \"distinct matches/spectrum\" "
-    "feature for each PSM. Default = F.",
-    "Used by assign-confidence.", true);      
+  InitBoolParam("smaller-is-better", false, 
+    "Specify the semantics of the score, i.e., whether a smaller value implies a better "
+    "match or vice versa. Specify this parameter T for \"exact p-value\" and F for \""
+    "xcorr score\".",
+    "Used by assign-confidence.", true);
   InitStringParam("percolator-intraset-features", "F",
     "Set a feature for percolator that in later versions is not an option.",
     "Shouldn't be variable; hide from user.", false);
   // **** predict-peptide-ions options. ****
-  InitStringParam("primary-ions", "by", "b|y|by|bya",
-    "The ion series to predict (b,y,by,bya). Default='by' (both b and y ions).",
-    "Only available for crux-predict-peptide-ions.  Set automatically to "
+  InitStringParam("primary-ions", "by", "a|b|y|by|bya",
+    "Predict the specified primary ion series. 'a' indicates a-ions only, 'b' indicates "
+    "b-ions only, 'y' indicates y-ions only, 'by' indicates both b and y, 'bya' "
+    "indicates b, y, and a.",
+    "Only available for crux-predict-peptide-ions. Set automatically to "
     "'by' for searching.", true);
   InitBoolParam("precursor-ions", false,
-    "Predict the precursor ions, and all associated ions "
-    "(neutral-losses, multiple charge states) consistent with the "
-    "other specified options. (T,F) Default=F.",
+    "Predict the precursor ions, and all associated ions (neutral-losses, multiple "
+    "charge states) consistent with the other specified options.",
     "Only available for crux-predict-peptide-ions.", true);
   InitIntParam("isotope", 0, 0, 2,
-    "Predict the given number of isotope peaks (0|1|2). Default=0.",
+    "Predict the given number of isotope peaks (0|1|2).",
     "Only available for crux-predict-peptide-ion.  Automatically set to "
     "0 for Sp scoring and 1 for xcorr scoring.", true);
   InitBoolParam("flanking", false, 
-    "Predict flanking peaks for b and y ions (T,F). Default=F.",
+    "Predict flanking peaks for b- and y ions.",
     "Only available for crux-predict-peptide-ion.", true);
   InitStringParam("max-ion-charge", "peptide",
     "Predict theoretical ions up to max charge state (1,2,...,6) or up to the charge state "
-    "of the peptide (peptide).  If the max-ion-charge is greater than the "
-    "charge state of the peptide, then the max is the peptide charge. "
-    "Default='peptide'.",
+    "of the peptide (peptide). If the max-ion-charge is greater than the "
+    "charge state of the peptide, then the max is the peptide charge. ",
     "Available for predict-peptide-ions and search-for-xlinks. "
-    "Set to 'peptide' for search.",
-    true);
+    "Set to 'peptide' for search.", true);
   InitIntParam("nh3", 0, -100, BILLION, 
-    "Predict peaks with the given maximum number of nh3 neutral loss "
-    "modifications. Default=0.",
+    "Include among the predicted peaks b/y ions with up to n losses of nh3. For example, "
+    "for --nh3 2, predict a peak for each b- and y-ion with the loss of one nh3 group and "
+    "predict a second peak for each b- and y-ion with the loss of two nh3 groups. These "
+    "peaks will have 1 and 2, respectively, in the NH3 column of the output.",
     "Only available for crux-predict-peptide-ions.", true);
   InitIntParam("h2o", 0, -100, BILLION,
-    "Predict peaks with the given maximum number of h2o neutral loss "
-    "modifications. Default=0.",
+    "Include in the predicted peaks, b/y ions with the loss of 1 to n water molecules. See "
+    "--nh3 for an example.",
     "Only available for crux-predict-peptide-ions.", true);
   // ***** spectral-counts aguments *****
   InitArgParam("input PSMs",
-    "Name of file in text format which holds match results.");
+    "A PSM file in either tab delimited text format (as produced by percolator, "
+    "q-ranker, or barista) or pepXML format.");
   // also uses "protein-database"
   // ***** spectral-counts options *****
   InitStringParam("protein-database", "",
-    "Fasta file of proteins.",
+    "The name of the file in FASTA format.",
     "Option for spectral-counts", true);
-  InitStringParam("input-ms2", "",
-    "MS2 file corresponding to the psm file. Required for SIN.",
-    "Available for spectral-counts with measure=SIN.", true);
-  InitStringParam("threshold-type", "qvalue", "none|qvalue|custom",
-    "What type of threshold to use when parsing matches "
-    "none|qvalue|custom. Default=qvalue.",
-    "used for crux spectral-counts", true);
-  InitDoubleParam("threshold", 0.01,
-    "The threshold to use for filtering matches. Default=0.01.",
-    "Available for spectral-counts.  All PSMs with higher (or lower) than "
-    "this will be ignored.", true);
-  InitBoolParam("custom-threshold-min", true,
-    "Direction of threshold for matches.  If true, then all matches "
-    "whose value is <= threshold will be accepted.  If false, "
-    "then all matches >= threshold will be accepted.  Used with "
-    "custom-threshold parameter (default True).",
-    "Available for spectral-counts.", true);
-  InitStringParam("custom-threshold-name", "",
-    "Use a name of custom threshold rather than (default NULL)",
-    "Available for spectral-counts.", true);
   InitStringParam("measure", "NSAF", "RAW|NSAF|dNSAF|SIN|EMPAI",
     "Type of analysis to make on the match results: "
-    "(RAW|NSAF|dNSAF|SIN|EMPAI). Default=NSAF. ", 
+    "(RAW|NSAF|dNSAF|SIN|EMPAI). With exception of the RAW metric, the database of "
+    "sequences need to be provided using --protein-database.", 
     "Available for spectral-counts.  RAW is raw counts, "
     "NSAF is Normalized Spectral Abundance Factor, "
     "dNSAF is Distributed Spectral Abundance Factor, "
     "SIN is Spectral Index Normalized and EMPAI is "
     "Exponentially Modified Protein Abundance Index", true);
   InitBoolParam("unique-mapping", false,
-    "Ignore peptides with multiple mappings to proteins (T,F). Default=F.",
+    "Ignore peptides with multiple mappings to proteins (T,F).",
     "Available for spectral-counts.", true);
   InitStringParam("quant-level", "protein", "protein|peptide",
-    "Quantification at protein or peptide level (protein,peptide). Default=protein.",
+    "Quantification at protein or peptide level.",
     "Available for spectral-counts and either NSAF and SIN.", true);
   InitStringParam("parsimony", "none", "none|simple|greedy",
-    "Perform parsimony analysis on the proteins and report "
-    "a parsimony rank column in output file. "
-    "Default=none. Can be <string>=none|simple|greedy",
+    "Perform a parsimony analysis on the proteins, and report a \"parsimony rank\" column "
+    "in the output file. This column contains integers indicating the protein's rank in a "
+    "list sorted by spectral counts. If the parsimony analysis results in two proteins "
+    "being merged, then their parsimony rank is the same. In such a case, the rank is "
+    "assigned based on the largest spectral count of any protein in the merged meta-protein. "
+    "The \"simple\" parsimony algorithm only merges two proteins A and B if the peptides "
+    "identified in protein A are the same as or a subset of the peptides identified in "
+    "protein B. The \"greedy\" parsimony algorithm does additional merging, using the "
+    "peptide q-values to greedily assign each peptide to a single protein.",
     "Available for spectral-counts.", true);
+  InitStringParam("threshold-type", "qvalue", "none|qvalue|custom",
+    "Determines what type of threshold to use when filtering matches. none : read all "
+    "matches, qvalue : use calculated q-value from percolator or q-ranker, custom : use "
+    "--custom-threshold-name and --custom-threshold-min parameters.",
+    "used for crux spectral-counts", true);
+  InitDoubleParam("threshold", 0.01,
+    "Only consider PSMs with a threshold value. By default, a q-value from percolator, "
+    "q-ranker, or decoy q-value (xcorr) is thresholded by below or equal to the threshold "
+    "value. This behavior can be changed using the --custom-threshold and --threshold-min "
+    "parameters.",
+    "Available for spectral-counts. All PSMs with higher (or lower) than "
+    "this will be ignored.", true);
+  InitStringParam("custom-threshold-name", "",
+    "Specify which match field to threshold the PSMs. By default, the threshold filters "
+    "by q-value. Setting this parameter will specify a different threshold field to use. "
+    "The direction of the threshold (>= or <=) is governed by --custom-threshold-min.",
+    "Available for spectral-counts.", true);
+  InitBoolParam("custom-threshold-min", true,
+    "When selecting matches with a custom threshold, custom-threshold-min determines "
+    "whether to filter matches with custom-threshold-name values that are greater-than or "
+    "equal (F) or less-than or equal (T) than the threshold.",
+    "Available for spectral-counts.", true);
+  InitStringParam("input-ms2", "",
+    "MS2 file corresponding to the psm file. Required to measure the SIN. Ignored for "
+    "NSAF, dNSAF and EMPAI.",
+    "Available for spectral-counts with measure=SIN.", true);
   InitBoolParam("mzid-use-pass-threshold", false,
-    "Use mzid's passThreshold attribute to filter matches. Default false.",
+    "Use mzid's passThreshold attribute to filter matches.",
     "Used when parsing mzIdentML files.", true);
   // ***** static mods *****
   for (char c = 'A'; c <= 'Z'; c++) {
@@ -1020,12 +1140,17 @@ void Params::Initialize() {
     bool visible = (c != 'B' && c != 'J' && c != 'O' && c != 'U' && c != 'X' && c != 'Z');
     InitDoubleParam(string(1, c), deltaMass,
       "Change the mass of all amino acids '" + string(1, c) + "' by the "
-      "given amount.", "Default=" + StringUtils::ToString(deltaMass) + ".",
-      visible);
+      "given amount.", "", visible);
   }
   /* get-ms2-spectrum options */
   InitBoolParam("stats", false, 
-    "Print to stdout additional information about the spectrum.",
+    "Rather than the spectrum, output summary statistics to standard output. Each statistic "
+    "is placed on a separate line, in the format <name>:<value> (e.g. \"TIC:1000.0\")."
+    "[[html:<br>The following statistics are reported for the entire spectrum:<ul><li>"
+    "Precursor m/z</li><li>Total Ion Current</li><li>Base Peak Intensity</li><li>Number of "
+    "peaks</li><li>Minimum m/z</li><li>Maximum m/z</li></ul>In addition, for each possible "
+    "spectrum charge state, the following statistics are reported:<ul><li>Charge state</li>"
+    "<li>Neutral mass</li><li>Charged mass</li><li>M+H+ mass</li></ul>]]",
     "Avaliable only for crux-get-ms2-spectrum.  Does not affect contents "
     "of the output file.", true);
   // **** xlink-predict-peptide-ions options ****
@@ -1043,124 +1168,158 @@ void Params::Initialize() {
     "Available for xlink-predict-peptide-ions.", false);
   InitBoolParam("print-theoretical-spectrum", false,
     "Print the theoretical spectrum",
-    "Available for xlink-predict-peptide-ions (Default=F).", true);
+    "Available for xlink-predict-peptide-ions.", true);
   InitBoolParam("use-old-xlink", true /* Turn to false later */,
-    "Use old xlink searching algorithm",
-    "Available for search-for-xlinks program (Default=T).", false);
+    "Use the old version of xlink-searching algorithm. When false, a new version of the "
+    "code is run. The new version supports variable modifications and can handle more "
+    "complex databases. This new code is still in development and should be considered a "
+    "beta release",
+    "Available for search-for-xlinks program.", true);
   // **** xlink-score-spectrum options ****
   InitStringParam("xlink-score-method", "composite", "composite|modification|concatenated",
-    "Score method for xlink {composite, modification, concatenated}. Default=composite.",
+    "Score method for xlink {composite, modification, concatenated}.",
     "Argument for xlink-score-spectrum.", false);
   // **** search-xlink options ****
   InitStringParam("isotope-windows", "0",
-    "List of integers of isotopic masses to search",
+    "Provides a list of isotopic windows to search. For example, -1,0,1 will search in "
+    "three disjoint windows: (1) precursor_mass - neutron_mass +/- window, (2) precursor_mass "
+    "+/- window, and (3) precursor_mass + neutron_mass +/- window. The window size is defined "
+    "from the precursor-window and precursor-window-type parameters. This option is only "
+    "available when use-old-xlink=F.",
     "Used for crux search-for-xlinks", true);
   InitBoolParam("xlink-print-db", false,
-    "Print the database in tab delimited format to xlink_peptides.txt",
-    "Used for testing the candidate generatation (Default=F).", false);
+    "Prints out the generated database of xlink products to the file xlink_peptides.txt in "
+    "the output directory.",
+    "Used for testing the candidate generatation.", false);
   InitBoolParam("xlink-include-linears", true, 
-    "Include linear peptides in the "
-    "database.  Default=T.",
-    "Available for crux search-for-xlinks program (Default=T).", true);
+    "Include linear peptides in the search.",
+    "Available for crux search-for-xlinks program.", true);
   InitBoolParam("xlink-include-deadends", true, 
-    "Include dead-end peptides in the "
-    "database.  Default=T.",
+    "Include dead-end peptides in the search.",
     "Available for crux search-for-xlinks program.", true);
   InitBoolParam("xlink-include-selfloops", true, 
-    "Include self-loop peptides in the database.  Default=T.",
+    "Include self-loop peptides in the search.",
     "Available for crux search-for-xlinks program.", true);
   InitStringParam("xlink-prevents-cleavage", "K",
-    "List of amino acids that xlinker can prevent cleavage",
-    "Available for search-for-xlinks program (Default=K).",
-    false /*TODO - turn this to true after new xlink code is implemented */);
+    "List of amino acids for which the cross-linker can prevent cleavage. This option is "
+    "only available when use-old-xlink=F.",
+    "Available for search-for-xlinks program.", true);
+  InitIntParam("max-xlink-mods", 0, 0, BILLION,
+    "Specify the maximum number of modifications allowed on a crosslinked peptide. This "
+    "option is only available when use-old-xlink=F.",
+    "Available for crux search-for-xlinks", true);
   InitDoubleParam("precursor-window-weibull", 20.0, 0, 1e6, 
-    "Search decoy-peptides within +/- "
-    " 'mass-window-decoy' of the spectrum mass.  Default=20.0.",
-    "Available for crux search-for-xlinks. ",
-    true);
+    "Search decoy peptides within +/- precursor-window-weibull of the precursor mass. "
+    "The resulting scores are used only for fitting the Weibull distribution",
+    "Available for crux search-for-xlinks. ", true);
   InitStringParam("precursor-window-type-weibull", "mass", "mass|mz|ppm",
-    "Window type to use for selecting "
-    "decoy peptides from precursor mz. <string>=mass|mz|ppm. Default=mass.",
+    "Window type to use in conjunction with the precursor-window-weibull parameter.",
+    "Available for crux search-for-xlinks", true);
+  InitIntParam("min-weibull-points", 4000, 1, BILLION,
+    "Keep shuffling and collecting XCorr scores until the minimum number of points for "
+    "weibull fitting (using targets and decoys) is achieved.",
     "Available for crux search-for-xlinks", true);
   InitArgParam("link sites",
-    "Comma delimited pair of amino acid link sites, e.g., A:K,A:D.");
+    "A comma delimited list of the amino acids to allow cross-links with. For example, "
+    "\"A:K,A:D\" means that the cross linker can attach A to K or A to D. Cross-links "
+    "involving the N-terminus of a protein can be specified as a link site by using "
+    "\"nterm\". For example, \"nterm:K\" means that a cross-link can attach a protein's "
+    "N-terminus to a lysine.");
   InitArgParam("link mass",
-    "Mass modification of a cross link between two amino acids.");
-  InitIntParam("min-weibull-points", 4000, 1, BILLION, 
-    "Minimum number of points for estimating the "
-    "Weibull parameters.  Default=4000.",
-    "Available for crux search-for-xlinks", true);
-  InitIntParam("max-xlink-mods", 0, 0, BILLION,
-    "Maximum number of modifications allowed on a crosslinked peptide. Default=0.",
-    "Available for crux search-for-xlinks", true);
+    "The mass modification of the linker when attached to a peptide.");
   /* hardklor parameters */
   InitStringParam("hardklor-algorithm", "fast-fewest-peptides",
     "basic|fewest-peptides|fast-fewest-peptides|fewest-peptides-choice|"
     "fast-fewest-peptides-choice", 
-    "Choose the algorithm for analyzing combinations of "
-    "multiple peptide or protein isotope distributions. "
-    "(basic | fewest-peptides | fast-fewest-peptides | "
-    "fewest-peptides-choice | fast-fewest-peptides-choice) "
-    "Default=fast-fewest-peptides.", "Available for crux hardklor", true);
-  InitStringParam("cdm", "Q",
-    "Choose the charge state determination method. (B|F|P|Q|S). Default=Q.",
+    "Choose the algorithm for analyzing combinations of multiple peptide or protein "
+    "isotope distributions.[[html: There are five algorithms to choose from:<ul><li>"
+    "basic &ndash; Computes all combinatorial possibilities and returns the combination "
+    "with the highest score.</li><li>fewest-peptides &ndash; Computes increasing depths "
+    "of combinations until the score threshold is exceeded. The smallest combination "
+    "exceeding the threshold is returned, preventing over-fitting of the data.</li><li>"
+    "fast-fewest-peptides &ndash; Same as the fewest-peptides algorithm, but traeds memory "
+    "usage for speed. Use this method if there is sufficient memory on the system.</li><li>"
+    "fewest-peptides-choice &ndash; Same as the fewest-peptides algorithm, but adds a "
+    "heuristic to evalute if further combinatorial analysis would produce a better score. "
+    "This method can dramatically improve speed, but may not be as accurate.</li><li>"
+    "fast-fewest-peptides-choice &ndash; Same as the fewest-peptides-choice algorithm, "
+    "but trades memory usage for speed. Use this method if there is sufficient memory on "
+    "the system.</ul>]]",
+    "Available for crux hardklor", true);
+  InitStringParam("cdm", "Q", "B|F|P|Q|S",
+    "Choose the charge state determination method.[[html: There are five methods to "
+    "choose from:<ul><li>B &ndash; Basic method, assume all charge states are possible."
+    "</li><li>F &ndash; Fast Fourier transform.</li><li>P &ndash; Patterson algorithm.</li>"
+    "<li>Q &ndash; QuickCharge method, uses inverse peak distances.</li><li>S &ndash; "
+    "Senko method, or combined Fast Fourier Transform and Patterson algorithm.</li></ul>]]",
     "Available for crux hardklor", true);
   InitIntParam("min-charge", 1, 1, BILLION,
-    "Set the minimum charge state to look for when analyzing a spectrum. Default=1.",
+    "Set the minimum charge state to look for when analyzing a spectrum.",
     "Available for crux hardklor", true);
   InitIntParam("max-charge", 5, 1, BILLION,
-    "Set the maximum charge state to look for when analyzing a spectrum. Default=5.",
+    "Set the maximum charge state to look for when analyzing a spectrum.",
     "Available for crux hardklor", true);
   InitDoubleParam("corr", 0.85, 0, 1.0, 
-    "Set the correlation threshold [0,1.0] to accept a predicted "
-    "isotope distribution.  Default=0.85",
+    "Set the correlation threshold to accept a predicted isotope distribution. Valid values "
+    "are any decimal value between 0.0 and 1.0, inclusive.",
     "Available for crux hardklor", true);
   InitIntParam("depth", 3, 1, BILLION,
-    "Set the depth of combinatorial analysis. Default 3.",
+    "Set the depth of combinatorial analysis. This is the maximum number of protein or "
+    "peptide distributions that can be combined to estimate the observed data at any given "
+    "spectrum segment.",
     "Available for crux hardklor", true);
   InitBoolParam("distribution-area", false,
-    "Reports peptide intensities as the distribution area. Default false.",
+    "Report peptide intensities as the distribution area.",
     "Available for crux hardklor", true);
   InitStringParam("averagine-mod", "",
-    "Include alternative averagine models in the analysis that  "
-    "incorporate additional atoms or isotopic enrichments.",
+    "Include alternative averagine models in the analysis that incorporate additional "
+    "atoms or isotopic enrichments. Modifications are represented as text strings. Inclusion "
+    "of additional atoms in the model is done by entering an atomic formula such as \"PO2\" "
+    "or \"Cl\". Inclusion of isotopic enrichment to the model is done by specifying the "
+    "percent enrichment (as a decimal) followed by the atom being enriched and an index of "
+    "the isotope. For example, 0.75H1 specifies 75% enrichment of the first heavy isotope "
+    "of hydrogren. In other words, 75% deuterium enrichment. Two or more modifications can "
+    "be combined into the same model and separated by colons: \"B2:0.5B1\". Multiple "
+    "averagine models are supported in a single analysis by separating the models with a "
+    "semicolon: \"B2:0.5B1;C2:0.7C1\".",
     "Available for crux hardklor", true);
   InitStringParam("mzxml-filter", "none",
-    "Set a filter for mzXML files. Default=none",
+    "Set a filter for mzXML files. If you want to analyze only the MS2 scans in your mzXML "
+    "file, specify --mzxml-filter MS2.",
     "Available for crux hardklor", true);
   InitBoolParam("no-base", false,
-    "Specify \"no base\" averagine. Only modified averagine models "
-    "will be used in the analysis. Default = F ",
+    "Specify \"no base\" averagine. Only modified averagine models will be used in the "
+    "analysis.",
     "Available for crux hardklor", true);
   InitIntParam("max-p", 10, 1, BILLION,
-    "Set the maximum number of peptides or proteins that are "
-    "estimated from the peaks found in a spectrum segment. The "
-    "default value is 10.",
+    "Set the maximum number of peptides or proteins that are estimated from the peaks "
+    "found in a spectrum segment.",
     "Available for crux hardklor", true);  
   InitDoubleParam("resolution", 100000, 1, BILLION,
-    "Set the resolution of the observed spectra at m/z 400. "
-    "Used in conjunction with --instrument The default is 100000.",
-    "Available for crux hardklor", true);
-  InitBoolParam("centroided", false,
-    "Are spectra centroided?  Default false.",
+    "Set the resolution of the observed spectra at m/z 400. Resolution is a unitless "
+    "quantity defined as the mass of the peak divided by the associated width at half "
+    "maximum height (FWHM). Used in conjunction with --instrument.",
     "Available for crux hardklor", true);
   InitStringParam("instrument", "fticr", "fticr|orbitrap|tof|qit",
     "Type of instrument (fticr|orbitrap|tof|qit) on which the data was "
-    "collected. Used in conjuction with --resolution. The default is fticr.",
+    "collected. Used in conjuction with --resolution.",
+    "Available for crux hardklor", true);
+  InitBoolParam("centroided", false,
+    "Are spectra centroided?",
     "Available for crux hardklor", true);
   InitIntParam("sensitivity", 2, 0, 3,
     "Set the sensitivity level. There are four levels, 0 (low), 1 (moderate), "
-    "2 (high), and 3 (max). The default value is 2.",
+    "2 (high), and 3 (max). Increasing the sensitivity will increase computation time, "
+    "but will also yield more isotope distributions.",
     "Available for crux hardklor", true);
   InitDoubleParam("signal-to-noise", 1.0, 0.0, BILLION,
     "Set the signal-to-noise threshold. Any integer or decimal "
-    "value greater than or equal to 0.0 is valid. The default value is 1.0.",
+    "value greater than or equal to 0.0 is valid.",
     "Available for crux hardklor", true);
   InitDoubleParam("sn-window", 250.0, 0.0, BILLION,
     "Set the signal-to-noise window length (in m/z). Because noise may "
     "be non-uniform across a spectra, this value adjusts the segment size "
-    "considered when calculating a signal-over-noise ratio. The default "
-    "value is 250.0.",
+    "considered when calculating a signal-over-noise ratio.",
     "Available for crux hardklor", true);
   InitBoolParam("static-sn", true,
     "If true, Hardklor will calculate the local noise levels across the "
@@ -1168,14 +1327,14 @@ void Params::Initialize() {
     "levels to apply to the whole spectrum.",
     "Available for crux hardklor", true);
   InitStringParam("mz-window", "",
-    "Restrict analysis to only a small window in each segment ( (min-max) in m/z). "
+    "Restrict analysis to only a small window in each segment (in m/z). "
     "The user must specify the starting and ending m/z values between which "
-    "the analysis will be performed. By default the whole spectrum is analyzed.",
+    "the analysis will be performed. If unspecified, the whole spectrum is analyzed.",
     "Available for crux hardklor", true);
   InitDoubleParam("max-width", 4.0, 0.0, BILLION,
     "Set the maximum width of any set of peaks in a spectrum when computing the "
     "results (in m/z). Thus, if the value was 5.0, then sets of peaks greater "
-    "than 5 m/z are divided into smaller sets prior to analysis. The default value is 4.0.",
+    "than 5 m/z are divided into smaller sets prior to analysis.",
     "Available for crux hardklor", true);
   InitStringParam("hardklor-options", "", 
     "Directly set hardklor options",
@@ -1184,86 +1343,92 @@ void Params::Initialize() {
   InitArgParam("MS1 spectra",
     "The name of a file from which to parse high-resolution spectra of intact peptides. "
     "The file may be in MS1 (.ms1), binary MS1 (.bms1), compressed MS1 (.cms1), or "
-    "mzXML (.mzXML) format. ");
+    "mzXML (.mzXML) format. Bullseye will search for PPIDs in these spectra.");
   InitArgParam("MS2 spectra",
     "The name of a file from which to parse peptide fragmentation spectra. The file may "
-    "be in MS2 (.ms2), binary MS2 (.bms2), compressed MS2 (.cms2) or mzXML (.mzXML) format.");
+    "be in MS2 (.ms2), binary MS2 (.bms2), compressed MS2 (.cms2) or mzXML (.mzXML) format. "
+    "Bullseye will assign high-resolution precursor masses to these spectra.");
   InitStringParam("hardklor-file", "",
     "Input hardklor file into bullseye",
     "Hidden option for crux bullseye.", false);
   InitDoubleParam("max-persist", 2.0, 0, BILLION,
-    "Ignore peptides that persist for this length. The unit of time is whatever unit is "
-    "used in your data file (usually minutes). These peptides are considered contaminants." 
-    " Default = 2.0.",
+    "Ignore PPIDs that persist for longer than this length of time in the MS1 spectra. The "
+    "unit of time is whatever unit is used in your data file (usually minutes). These PPIDs "
+    "are considered contaminants.",
     "Available for crux bullseye", true);
   InitBoolParam("exact-match", false, 
-    "Require an exact match to the precursor ion. Rather than use wide precursor boundaries, "
-    "this flag forces Bullseye to match precursors to the base isotope peak identified in "
-    "Hardklor. The tolerance is set with the --persist-tolerance flag. Default = F.",
+    "When true, require an exact match (as defined by --exact-tolerance) between the "
+    "center of the precursor isolation window in the MS2 scan and the base isotopic "
+    "peak of the PPID. If this option is set to false and no exact match is observed, "
+    "then attempt to match using a wider m/z tolerance. This wider tolerance is calculated "
+    "using the PPID's monoisotopic mass and charge (the higher the charge, the smaller "
+    "the window).",
     "Available for crux bullseye", true);
   InitIntParam("gap-tolerance", 1, 0, BILLION,
-    "Gap size tolerance when checking for peptides across consecutive MS1 scans. Used in "
-    "conjunction with --scan-tolerance. Default = 1.",
+    "Allowed gap size when checking for PPIDs across consecutive MS1 scans.",
     "Available for crux bullseye", true);
   InitDoubleParam("bullseye-min-mass", 600, 0, BILLION,
-    "The minimum mass of peptides to consider. Default=600.",
-    "Available from command line or parameter file for crux bullseye", true);
+    "Only consider PPIDs above this minimum mass in daltons.",
+    "Available for crux bullseye", true);
   InitDoubleParam("bullseye-max-mass", 8000, 1, BILLION, 
-    "The maximum mass of peptides to consider. Default=8000.",
-    "Available from command line or parameter file for crux bullseye", true);
+    "Only consider PPIDs below this maximum mass in daltons.",
+    "Available for crux bullseye", true);
   InitDoubleParam("exact-tolerance", 10.0, 0, BILLION,
-    "Set the tolerance (+/-ppm) for exact match searches. Default = 10.0.",
+    "Set the tolerance (+/-ppm) for --exact-match.",
     "Available for crux bullseye", true);
   InitDoubleParam("persist-tolerance", 10.0, 0, BILLION,
-    "Set the tolerance (+/-ppm) for finding persistent peptides. Default = 10.0.",
+    "Set the mass tolerance (+/-ppm) for finding PPIDs in consecutive MS1 scans.",
     "Available for crux bullseye", true);
   InitIntParam("scan-tolerance", 3, 0, BILLION,
-    "Number of consecutive MS1 scans over which a peptide must be observed to "
-    "be considered real. Gaps in persistence are allowed when setting --gap-tolerance. "
-    "Default = 3.",
+    "Total number of MS1 scans over which a PPID must be observed to be considered real. "
+    "Gaps in persistence are allowed by setting --gap-tolerance.",
     "Available for crux bullseye", true);
   InitDoubleParam("retention-tolerance", 0.5, 0, BILLION,
-    "Set the tolerance (+/-units) around the retention time over which a peptide "
-    "can be matched to the MS/MS spectrum. The unit of time is whatever unit is "
-    "used in your data file (usually minutes). Default = 0.5.",
+    "Set the tolerance (+/-units) around the retention time over which a PPID can be "
+    "matches to the MS2 spectrum. The unit of time is whatever unit is used in your data "
+    "file (usually minutes).",
     "Available for crux bullseye", true);
-  InitStringParam("spectrum-format", "",
-    "The format to write the output spectra to. By default, the spectra will be "
-    "output in the same format as the MS/MS input.",
+  InitStringParam("spectrum-format", "", "|ms2|bms2|cms2|mgf",
+    "The format to write the output spectra to. If empty, the spectra will be "
+    "output in the same format as the MS2 input.",
     "Available for crux bullseye", true);
   /* crux-util parameters */
   InitBoolParam("ascending", true,
-    "Sort in ascending order.  Otherwise, descending. "
-    "Default: True.",
+    "Sort in ascending (T) or descending (F) order.",
     "Available for sort-by-column", true);
   InitArgParam("tsv file",
-    "Path to a delimited file (-) for standard input");
+    "A tab-delimited file, with column headers in the first row. Use \"-\" to read from "
+    "standard input.");
   InitStringParam("delimiter", "tab",
-    "Character delimiter to use when parsing a delimited file (Default tab).",
-    "Available for the delimited utility programs.", false);
+    "Specify the input and output delimiter to use when processing the delimited file.",
+    "Available for the delimited utility programs.", true);
   InitArgParam("column names",
-    "List of column names separated by a comma");
+    "A comma-delimited list of column names.");
   InitArgParam("column name",
-    "Name of the column to do the operation on");
+    "A column name.");
   InitArgParam("column value",
-    "value of the column");
+    "A cell value for a column.");
   InitBoolParam("header", true,
-    "Print the header line of the tsv file. Default=T.",
+    "Print the header line of the file, in addition to the columns that match.",
     "Available for crux extract-columns and extract-rows", true);
   InitStringParam("column-type", "string", "int|real|string",
-    "Specifies the data type the column contains "
-    "(int|real|string) Default: string",
+    "Specifies the data type of the column, either an integer (int), a floating point "
+    "number (real), or a string.",
     "Available for crux extract-rows", true);
   InitStringParam("comparison", "eq", "eq|gt|gte|lt|lte|neq",
-    "Specifies the operator that is used to compare an "
-    "entry in the specified column to the value given "
-    "on the command line.  (eq|gt|gte|lt|lte|neq). "
-    "Default: eq.",
+    "Specify the operator that is used to compare an entry in the specified column to the "
+    "value given on the command line.[[html: Legal values are as follows:<ul><li>eq &ndash; "
+    "The two values are equal</li><li>lt &ndash; The file value is less than the argument "
+    "value</li><li>lte &ndash; The file value is less than or equal to the argument value"
+    "</li><li>gt &ndash; The file value is greater than the argument value</li><li>gte "
+    "&ndash; The file value is greater than or equal to the argument value</li><li>neq "
+    "&ndash; The file value is not equal to the argument value</li></ul>]]",
     "Available for crux extract-rows", true);
   // create-docs
   InitArgParam("tool name",
     "Specifies the tool to generate documentation for. If value is 'list', "
-    "a list of available tools will be given. If value is 'default-params', "    "a default parameter file will be given.");
+    "a list of available tools will be given. If value is 'default-params', "
+    "a default parameter file will be given.");
   InitStringParam("doc-template", "",
     "Specifies the main template to be used for generating documentation.",
     "Available for crux create-docs", false);
@@ -1309,13 +1474,18 @@ void Params::Categorize() {
   items.insert("max-mass");
   items.insert("min-mass");
   items.insert("monoisotopic-precursor");
+  items.insert("isotopic-mass");
   items.insert("clip-nterm-methionine");
+  items.insert("unique-peptides");
   container_.AddCategory("Peptide properties", items);
 
   items.clear();
   items.insert("mods-spec");
   items.insert("nterm-peptide-mods-spec");
   items.insert("cterm-peptide-mods-spec");
+  items.insert("nterm-protein-mods-spec");
+  items.insert("cterm-protein-mods-spec");
+  items.insert("min-mods");
   items.insert("max-mods");
   items.insert("mod");
   for (char c = 'A'; c <= 'Z'; c++) {
@@ -1326,6 +1496,7 @@ void Params::Categorize() {
   items.clear();
   items.insert("decoy-format");
   items.insert("keep-terminal-aminos");
+  items.insert("seed");
   container_.AddCategory("Decoy database generation", items);
 
   items.clear();
@@ -1357,9 +1528,9 @@ void Params::Categorize() {
   items.insert("mz-bin-offset");
   items.insert("precursor-window-weibull");
   items.insert("precursor-window-type-weibull");
+  items.insert("min-weibull-points");
   items.insert("mod-mass-format");
   items.insert("fragment-mass");
-  items.insert("isotopic-mass");
   items.insert("isotope-windows");
   items.insert("compute-p-values");
   container_.AddCategory("Search parameters", items);
@@ -1378,13 +1549,26 @@ void Params::Categorize() {
   container_.AddCategory("Fido options", items);
 
   items.clear();
+  items.insert("use-old-xlink");
+  items.insert("xlink-include-linears");
+  items.insert("xlink-include-deadends");
+  items.insert("xlink-include-selfloops");
+  items.insert("xlink-prevents-cleavage");
+  items.insert("max-xlink-mods");
+  container_.AddCategory("Cross-linking parameters", items);
+
+  items.clear();
   items.insert("spectrum-format");
   items.insert("spectrum-parser");
+  items.insert("list-of-files");
+  items.insert("use-z-line");
   items.insert("top-match");
+  items.insert("concat");
   items.insert("store-spectra");
   items.insert("xlink-print-db");
   items.insert("fileroot");
   items.insert("output-dir");
+  items.insert("output-file");
   items.insert("overwrite");
   items.insert("txt-output");
   items.insert("sqt-output");
@@ -1392,8 +1576,21 @@ void Params::Categorize() {
   items.insert("mzid-output");
   items.insert("pin-output");
   items.insert("pout-output");
+  items.insert("feature-file");
+  items.insert("decoy-xml-output");
+  items.insert("output-weights");
+  items.insert("input-weights");
   items.insert("parameter-file");
   items.insert("verbosity");
+  items.insert("decoy-prefix");
+  items.insert("precision");
+  items.insert("peptide-list");
+  items.insert("output-sequence");
+  items.insert("comparison");
+  items.insert("header");
+  items.insert("column-type");
+  items.insert("ascending");
+  items.insert("delimiter");
   container_.AddCategory("Input and output", items);
 }
 
@@ -1453,8 +1650,8 @@ bool Params::IsArgument(const string& name) {
   return GetParam(name)->IsArgument();
 }
 
-string Params::GetType(const string& name) {
-  return GetParam(name)->GetType();
+string Params::GetAcceptedValues(const string& name) {
+  return GetParam(name)->GetAcceptedValues();
 }
 
 bool Params::IsDefault(const string& name) {
@@ -2007,7 +2204,7 @@ BoolParam::BoolParam(const string& name,
                      bool visible,
                      bool value)
   : Param(name, usage, fileNotes, visible), value_(value), original_(value) {}
-string BoolParam::GetType() const { return "boolean"; }
+string BoolParam::GetAcceptedValues() const { return "T|F"; }
 bool BoolParam::IsDefault() const { return value_ == original_; }
 bool BoolParam::GetBool() const { return value_; }
 int BoolParam::GetInt() const { return IntParam::From(value_); }
@@ -2058,7 +2255,7 @@ void IntParam::ThrowIfInvalid() const {
                         StringUtils::ToString(max_));
   }
 }
-string IntParam::GetType() const { return "integer"; }
+string IntParam::GetAcceptedValues() const { return "integer"; }
 bool IntParam::IsDefault() const { return value_ == original_; }
 bool IntParam::GetBool() const { return BoolParam::From(value_); }
 int IntParam::GetInt() const { return value_; }
@@ -2102,7 +2299,7 @@ void DoubleParam::ThrowIfInvalid() const {
                         StringUtils::ToString(max_));
   }
 }
-string DoubleParam::GetType() const { return "float"; }
+string DoubleParam::GetAcceptedValues() const { return "float"; }
 bool DoubleParam::IsDefault() const { return value_ == original_; }
 bool DoubleParam::GetBool() const { return BoolParam::From(value_); }
 int DoubleParam::GetInt() const { return IntParam::From(value_); }
@@ -2144,7 +2341,9 @@ void StringParam::ThrowIfInvalid() const {
                         StringUtils::Join(validValues_, '|') + ">");
   }
 }
-string StringParam::GetType() const { return "string"; }
+string StringParam::GetAcceptedValues() const {
+  return validValues_.empty() ? "string" : StringUtils::Join(validValues_, '|');
+}
 bool StringParam::IsDefault() const { return value_ == original_; }
 bool StringParam::GetBool() const { return BoolParam::From(value_); }
 int StringParam::GetInt() const { return IntParam::From(value_); }
@@ -2166,7 +2365,7 @@ string StringParam::From(double d) { return StringUtils::ToString(d, 6); }
 //
 ArgParam::ArgParam(const string& name, const string& usage)
   : Param(name, usage, "", false), values_(vector<string>()) {}
-string ArgParam::GetType() const { return "argument"; }
+string ArgParam::GetAcceptedValues() const { return "string"; }
 bool ArgParam::IsArgument() const { return true; }
 bool ArgParam::IsDefault() const { return false; }
 bool ArgParam::GetBool() const { return BoolParam::From(GetString()); }
