@@ -99,10 +99,49 @@ vector<string> SearchForXLinks::getArgs() const {
  */
 vector<string> SearchForXLinks::getOptions() const {
   string arr[] = {
-    "verbosity",
-    "parameter-file",
-    "overwrite",
+    "use-old-xlink",
+    "xlink-include-linears",
+    "xlink-include-deadends",
+    "xlink-include-selfloops",
+    "xlink-prevents-cleavage",
+    "max-xlink-mods",
+    "min-mass",
+    "max-mass",
+    "min-length",
+    "max-length",
+    "mod",
+    "max-mods",
+    "enzyme",
+    "custom-enzyme",
+    "digestion",
+    "missed-cleavages",
+    "spectrum-min-mz",
+    "spectrum-max-mz",
+    "spectrum-charge",
+    "compute-sp",
+    "precursor-window",
+    "precursor-window-type",
+    "precursor-window-weibull",
+    "min-weibull-points",
+    "max-ion-charge",
+    "scan-number",
+    "mz-bin-width",
+    "mz-bin-offset",
+    "mod-mass-format",
+    "use-flanking-peaks",
+    "fragment-mass",
+    "isotopic-mass",
+    "isotope-windows",
+    "compute-p-values",
+    "seed",
+    "xlink-print-db",
+    "spectrum-parser",
+    "use-z-line",
+    "top-match",
     "output-dir",
+    "overwrite",
+    "parameter-file",
+    "verbosity"
   };
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }
@@ -119,16 +158,15 @@ map<string, string> SearchForXLinks::getOutputs() const {
     "option for other crux programs.";
   outputs["search-for-xlinks.target.txt"] =
     "a tab-delimited text file containing the peptide-spectrum matches (PSMs). "
-    "See the txt file format for a list of the fields.";
+    "See the <a href=\"txt-format.html\">txt file format</a> for a list of the fields.";
   outputs["search-for-xlinks.decoy.txt"] =
-    "a tab-delimited text file containing the decoy PSMs. See the txt file "
-    "format for a list of the fields.";
+    "a tab-delimited text file containing the decoy PSMs. "
+    "See the <a href=\"txt-format.html\">txt file format</a> for a list of the fields.";
   outputs["search-for-xlinks.qvalues.txt"] =
-    "a tab-delimited text file containing the top ranked PSMs with calculated "
-    "q-values. See the txt file format for a list of the fields.";
+    "a tab-delimited text file containing the top ranked PSMs with calculated q-values. "
+    "See the <a href=\"txt-format.html\">txt file format</a> for a list of the fields.";
   outputs["search-for-xlinks.log.txt"] =
-    "a log file containing a copy of all messages that were printed to "
-    "stderr.";
+    "a log file containing a copy of all messages that were printed to stderr.";
   return outputs;
 }
 

@@ -19,7 +19,6 @@ using namespace Crux;
  * \returns A blank GeneratePeptides object.
  */
 GeneratePeptides::GeneratePeptides() {
-
 }
 
 /**
@@ -166,6 +165,7 @@ vector<string> GeneratePeptides::getOptions() const {
     "min-mass",
     "max-mass",
     "isotopic-mass",
+    "decoys",
     "enzyme",
     "custom-enzyme",
     "digestion",

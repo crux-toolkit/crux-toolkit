@@ -988,7 +988,7 @@ int QRanker :: crux_set_command_line_options(int argc, char *argv[])
       carp(CARP_INFO, "directory with tables: %s", dir_with_tables.c_str());
       carp(CARP_INFO, "output_directory: %s", output_directory.c_str());
     }else{
-      ms2_source = get_string_parameter("spectra");
+      ms2_source = get_string_parameter("fragmentation spectra");
       sqt_source = get_string_parameter("search results");
       list_of_files_flag=get_boolean_parameter("list-of-files");
       //check file format 
@@ -1177,7 +1177,7 @@ string QRanker::getDescription() const {
 
 vector<string> QRanker::getArgs() const {
   string arr[] = {
-    "spectra",
+    "fragmentation spectra",
     "search results"
   };
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
@@ -1214,13 +1214,13 @@ map<string, string> QRanker::getOutputs() const {
   outputs["qranker.decoy.pep.xml"] =
     "An xml file containing ranked list of decoy peptide-spectrum matches.";
   outputs["qranker.target.psm.txt"] =
-    "a tab-delimited text format containing a ranked list of target "
-    "peptide-spectrum matches with the associated Q-ranker scores and "
-    "q-values.";
+    "a <a href=\"txt-format.html\">tab-delimited text format</a> containing a "
+    "ranked list of target peptide-spectrum matches with the associated Q-ranker "
+    "scores and q-values.";
   outputs["qranker.decoy.psm.txt"] =
-    "a tab-delimited text format containing a ranked list of decoy "
-    "peptide-spectrum matches with the associated Q-ranker scores and "
-    "q-values.";
+    "a <a href=\"txt-format.html\">tab-delimited text format</a> containing a "
+    "ranked list of decoy peptide-spectrum matches with the associated Q-ranker "
+    "scores and q-values.";
   outputs["qranker.log.txt"] =
     "a file where the program reports its progress.";
   outputs["qranker.params.txt"] =

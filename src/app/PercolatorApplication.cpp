@@ -529,6 +529,7 @@ vector<string> PercolatorApplication::getOptions() const {
     "static-override",
     "seed",
     "klammer",
+    "only-psms",
     //"doc",
     "allow-protein-group",
     "protein-level-pi0",
@@ -548,34 +549,37 @@ vector<string> PercolatorApplication::getOptions() const {
 map<string, string> PercolatorApplication::getOutputs() const {
   map<string, string> outputs;
   outputs["percolator.target.proteins.txt"] =
-    "a tab-delimited file containing the target protein matches. See here for "
-    "a list of the fields.";
+    "a tab-delimited file containing the target protein matches. See "
+    "<a href=\"txt-format.html\">here</a> for a list of the fields.";
   outputs["percolator.decoy.proteins.txt"] =
-    "a tab-delimited file containing the decoy protein matches. See here for a "
-    "list of the fields.";
+    "a tab-delimited file containing the decoy protein matches. See "
+    "<a href=\"txt-format.html\">here</a> for a list of the fields.";
   outputs["percolator.target.peptides.txt"] =
-    "a tab-delimited file containing the target peptide matches. See here for "
-    "a list of the fields.";
+    "a tab-delimited file containing the target peptide matches. See "
+    "<a href=\"txt-format.html\">here</a> for a list of the fields.";
   outputs["percolator.decoy.peptides.txt"] =
-    "a tab-delimited file containing the decoy peptide matches. See here for a "
-    "list of the fields.";
+    "a tab-delimited file containing the decoy peptide matches. See "
+    "<a href=\"txt-format.html\">here</a> for a list of the fields.";
   outputs["percolator.target.psms.txt"] =
-    "a tab-delimited file containing the target PSMs. See here for a list of "
-    "the fields.";
+    "a tab-delimited file containing the target PSMs. See "
+    "<a href=\"txt-format.html\">here</a> for a list of the fields.";
   outputs["percolator.decoy.psms.txt"] =
-    "a tab-delimited file containing the decoy PSMs. See here for a list of "
-    "the fields.";
+    "a tab-delimited file containing the decoy PSMs. See "
+    "<a href=\"txt-format.html\">here</a> for a list of the fields.";
   outputs["percolator.params.txt"] =
     "a file containing the name and value of all parameters for the current "
     "operation. Not all parameters in the file may have been used in the "
     "operation. The resulting file can be used with the --parameter-file "
     "option for other crux programs.";
   outputs["percolator.pep.xml"] =
-    "a file containing the PSMs in pepXML format. This file can be used as "
-    "input to some of the tools in the Transproteomic Pipeline.";
+    "a file containing the PSMs in "
+    "<a href=\"http://tools.proteomecenter.org/wiki/index.php?title=Formats:pepXML\">"
+    "pepXML format</a>. This file can be used as input to some of the tools in the "
+    "<a href=\"http://tools.proteomecenter.org/wiki/index.php?title=Software:TPP\">"
+    "Transproteomic Pipeline</a>.";
   outputs["percolator.mzid"] =
-    "a file containing the protein, peptide, and spectrum matches in mzIdentML "
-    "format.";
+    "a file containing the protein, peptide, and spectrum matches in <a href=\""
+    "http://www.psidev.info/mzidentml\">mzIdentML format</a>.";
   outputs["percolator.log.txt"] =
     "a log file containing a copy of all messages that were printed to "
     "standard error.";

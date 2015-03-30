@@ -879,8 +879,8 @@ vector<string> TideSearchApplication::getOptions() const {
 map<string, string> TideSearchApplication::getOutputs() const {
   map<string, string> outputs;
   outputs["tide-search.target.txt"] =
-    "a tab-delimited text file containing the target PSMs. See txt file format "
-    "for a list of the fields.";
+    "a tab-delimited text file containing the target PSMs. See <a href=\""
+    "txt-format.html\">txt file format</a> for a list of the fields.";
   outputs["tide-search.decoy.txt"] =
     "a tab-delimited text file containing the decoy PSMs. This file will only "
     "be created if the index was created with decoys.";

@@ -179,7 +179,11 @@ string CruxBullseyeApplication::getDescription() const {
     "PPIDs by adjusting Bullseye's parameters. For example, reducing the "
     "retention time tolerance (&quot;--retention-tolerance&quot;) or reducing "
     "the tolerance for persistent peptides (&quot;--persist-tolerance&quot;) "
-    "will reduce the chances of multiple PPIDs being assigned.</p>]]";
+    "will reduce the chances of multiple PPIDs being assigned.</p><p>Bullseye "
+    "uses Hardklör, so all of the <a href=\"hardklor.html\">Hardklör "
+    "parameters</a> may also be used with Bullseye. For users familiar with "
+    "the standalone version of Bullseye, the parameter mapping are "
+    "<a href=\"bullseye_standalone_to_crux.html\">here</a>.</p>]]";
 }
 
 /**
@@ -243,7 +247,7 @@ map<string, string> CruxBullseyeApplication::getOutputs() const {
     "were not inferred.";
   outputs["hardklor.mono.txt"] =
     "a tab-delimited text file containing one line for each isotope "
-    "distribution, as described here.";
+    "distribution, as described <a href=\"hardklor.html\">here</a>.";
   outputs["bullseye.log.txt"] =
     "a log file containing a copy of all messages that were printed to "
     "standard error.";

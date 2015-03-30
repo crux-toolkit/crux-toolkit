@@ -427,6 +427,8 @@ vector<string> TideIndexApplication::getOptions() const {
 
 map<string, string> TideIndexApplication::getOutputs() const {
   map<string, string> outputs;
+  outputs["index"] =
+    "A binary index, using the name specified on the command line.";
   outputs["tide-index.params.txt"] =
     "a file containing the name and value of all parameters/options for the "
     "current operation. Not all parameters in the file may have been used in "

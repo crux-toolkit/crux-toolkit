@@ -2712,7 +2712,7 @@ int Barista :: crux_set_command_line_options(int argc, char *argv[])
       carp(CARP_INFO, "output_directory: %s", output_directory.c_str());
     }else{
       db_source = get_string_parameter("database");
-      ms2_source = get_string_parameter("spectra");
+      ms2_source = get_string_parameter("fragmentation spectra");
       sqt_source = get_string_parameter("search results");
       sqt_decoy_source = get_string_parameter("separate-searches"); 
       list_of_files_flag=get_boolean_parameter("list-of-files");
@@ -2889,7 +2889,7 @@ string Barista::getDescription() const {
 vector<string> Barista::getArgs() const {
   string arr[] = {
     "database",
-    "spectra",
+    "fragmentation spectra",
     "search results"
   };
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
@@ -2921,24 +2921,24 @@ vector<string> Barista::getOptions() const {
 map<string, string> Barista::getOutputs() const {
   map<string, string> outputs;
   outputs["barista.xml"] =
-    "an XML file format that contains four main parts: Proteins, Subset "
-    "Proteins, Peptides, and PSMs.";
+    "an <a href=\"barista-xml-format.html\">XML file format</a> that contains "
+    "four main parts: Proteins, Subset Proteins, Peptides, and PSMs.";
   outputs["barista.target.proteins.txt"] =
-    "a tab-delimited file containing a ranked list of groups of "
-    "indistinguishable target proteins with associated Barista scores and "
-    "q-values and with peptides that contributed to the identification of the "
+    "a <a href=\"txt-format.html\">tab-delimited file</a> containing a ranked "
+    "list of groups of indistinguishable target proteins with associated Barista scores "
+    "and q-values and with peptides that contributed to the identification of the "
     "protein group).";
   outputs["barista.target.subset-proteins.txt"] =
-    "a tab-delimited file containing groups of indistinguishable proteins, "
-    "which constitute a subset of some group in the "
+    "a <a href=\"txt-format.html\">tab-delimited file</a> containing groups of "
+    "indistinguishable proteins, which constitute a subset of some group in the "
     "barista.target.proteins.txt file in terms of the peptides identified in "
     "these proteins.";
   outputs["barista.target.peptides.txt"] =
-    "a tab-delimited file containing a ranked list of target peptides with the "
-    "associated Barista scores and q-values.";
+    "a <a href=\"txt-format.html\">tab-delimited file</a> containing a ranked list "
+    "of target peptides with the associated Barista scores and q-values.";
   outputs["barista.target.psm.txt"] =
-    "a tab-delimited file format containing a ranked list of target "
-    "peptide-spectrum matches with the associated Barista scores and q-values.";
+    "a <a href=\"txt-format.html\">tab-delimited file format</a> containing a ranked list "
+    "of target peptide-spectrum matches with the associated Barista scores and q-values.";
   outputs["barista.log.txt"] =
     "a file where the program reports its progress.";
   outputs["barista.params.txt"] =

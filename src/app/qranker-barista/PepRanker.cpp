@@ -976,7 +976,7 @@ int PepRanker :: crux_set_command_line_options(int argc, char *argv[])
       carp(CARP_INFO, "directory with tables: %s", dir_with_tables.c_str());
       carp(CARP_INFO, "output_directory: %s", output_directory.c_str());
     }else{
-      ms2_source = get_string_parameter("spectra");
+      ms2_source = get_string_parameter("fragmentation spectra");
       sqt_source = get_string_parameter("search results");
       list_of_files_flag=get_boolean_parameter("list-of-files");
       //check file format 
@@ -1349,7 +1349,7 @@ string PepRanker::getDescription() const {
 
 vector<string> PepRanker::getArgs() const {
   string arr[] = {
-    "spectra",
+    "fragmentation spectra",
     "search results"
   };
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));

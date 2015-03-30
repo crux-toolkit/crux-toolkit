@@ -177,6 +177,7 @@ vector<string> PredictPeptideIons::getOptions() const {
     "isotope",
     "flanking",
     "max-ion-charge",
+    "fragment-mass",
     "nh3",
     "h2o"
   };
@@ -189,7 +190,23 @@ vector<string> PredictPeptideIons::getOptions() const {
 map<string, string> PredictPeptideIons::getOutputs() const {
   map<string, string> outputs;
   outputs["stdout"] =
-    "a series of lines, describing how the ions were predicted.";
+    "a series of lines, describing how the ions were predicted. <blockquote "
+    "style=\"font-family: monospace;\"># PEPTIDE: &lt;peptide sequence&gt;<br>"
+    "# CHARGE: &lt;peptide charge&gt;</blockquote>The program then prints a one-"
+    "line header that labels the tab-delimited columns, followed by one line "
+    "per ion:<blockquote style=\"font-family: monospace;\">m/z &nbsp;mass &nbsp;"
+    "charge &nbsp;ion-series &nbsp;peptide-bond-index &nbsp;nh3 &nbsp;h2o &nbsp;"
+    "isotope &nbsp;flank</blockquote>The columns contain the following values:"
+    "<blockquote style=\"font-family: monospace;\">&lt;m/z&gt; is the ion's mass-to-"
+    "charge<br>&lt;mass&gt; is the ion's (charged) mass<br><charge> is the ion's charge "
+    "e.g. 1,2,3<br>&lt;ion-type&gt; is a string representing the series 'a', 'b', 'c', "
+    "'x', 'y', 'z', and 'p'<br>&lt;peptide-bond-index&gt; is in [1...n), where n is "
+    "peptide-length. Consistent with standard mass spec terminology, where a y-1 "
+    "and b-1 ions results from cleavage of completely different bonds.<br>&lt;nh3&gt; "
+    "is the number of NH3 modifications (lost neutral molecules)<br>&lt;h2o&gt; is the "
+    "number of H2O Modifications (lost neutral molecules)<br>&lt;isotope&gt; is the "
+    "number of adjacent isotopic peaks<br>&lt;flank&gt; is the number of flanking ions"
+    "</blockquote>";
   return outputs;
 }
 

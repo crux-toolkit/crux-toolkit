@@ -23,9 +23,7 @@ public:
   virtual bool hidden() const;
 
 protected:
-  std::map<char, std::string> htmlEntities_;
-
-  void readParams(const CruxApplicationList* apps = NULL);
+  void checkParams(const CruxApplicationList* apps = NULL);
 
   void generateToolHtml(std::ostream* outStream, const CruxApplication* application);
 
@@ -34,15 +32,11 @@ protected:
     const std::map<std::string, std::string>& replacements
   );
 
-  std::string readFile(const std::string& path);
-
-  std::string htmlEscape(std::string s);
-
-  static std::string getToolTemplate();
-  static std::string getToolInputTemplate();
-  static std::string getToolOutputTemplate();
-  static std::string getToolOptionCategoryTemplate();
-  static std::string getToolOptionTemplate();
+  const static std::string TOOL_TEMPLATE;
+  const static std::string TOOL_INPUT_TEMPLATE;
+  const static std::string TOOL_OUTPUT_TEMPLATE;
+  const static std::string TOOL_OPTION_CATEGORY_TEMPLATE;
+  const static std::string TOOL_OPTION_TEMPLATE;
 };
 
 #endif

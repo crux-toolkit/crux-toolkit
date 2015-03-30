@@ -190,16 +190,20 @@ string CruxApplication::getUsage(
   for (vector<string>::const_iterator i = argDisplay.begin(); i != argDisplay.end(); i++) {
     stringstream line;
     string argName = i->substr(1, i->length() - (StringUtils::EndsWith(*i, "+") ? 3 : 2));
-    line << *i << ' ' << Params::GetUsage(argName);
+    line << *i << ' ' << Params::ProcessHtmlDocTags(Params::GetUsage(argName));
     usage << endl << endl << StringUtils::LineFormat(line.str(), 80, 2);
   }
   usage << endl << endl
         << "OPTIONAL ARGUMENTS:" << endl;
   for (vector<string>::const_iterator i = options.begin(); i != options.end(); i++) {
+    string defaultString = Params::GetStringDefault(*i);
+    if (defaultString.empty()) {
+      defaultString = "<empty>";
+    }
     usage << endl
-          << "  [--" << *i << " <" << Params::GetType(*i)
-          << ">]" << endl
-          << StringUtils::LineFormat(Params::ProcessHtmlDocTags(Params::GetUsage(*i)), 80, 5);
+          << "  [--" << *i << " <" << Params::GetAcceptedValues(*i) << ">]" << endl
+          << StringUtils::LineFormat(Params::ProcessHtmlDocTags(Params::GetUsage(*i)) +
+                                     " Default = " + defaultString + ".", 80, 5);
   }
   usage << endl << endl
         << "Additional parameters are documented in the online documentation.";
