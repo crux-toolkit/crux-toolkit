@@ -421,17 +421,6 @@ if (WIN32 AND NOT CYGWIN)
     ${CMAKE_CURRENT_BINARY_DIR}/lib/BaseDataAccess.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/BaseError.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/BaseTof.dll
-    ${CMAKE_CURRENT_BINARY_DIR}/lib/BDal.BCO.dll
-    ${CMAKE_CURRENT_BINARY_DIR}/lib/BDal.BCO.Interfaces.dll
-    ${CMAKE_CURRENT_BINARY_DIR}/lib/BDal.CCO.Calibration.dll
-    ${CMAKE_CURRENT_BINARY_DIR}/lib/BDal.CCO.Interfaces.dll
-    ${CMAKE_CURRENT_BINARY_DIR}/lib/BDal.CCO.TemperatureCompensation.dll
-    ${CMAKE_CURRENT_BINARY_DIR}/lib/BDal.CCO.Transformation.dll
-    ${CMAKE_CURRENT_BINARY_DIR}/lib/BDal.CCO.Utilities.dll
-    ${CMAKE_CURRENT_BINARY_DIR}/lib/BDal.CXt.Lc.dll
-    ${CMAKE_CURRENT_BINARY_DIR}/lib/BDal.CXt.Lc.Factory.dll
-    ${CMAKE_CURRENT_BINARY_DIR}/lib/BDal.CXt.Lc.Interfaces.dll
-    ${CMAKE_CURRENT_BINARY_DIR}/lib/BDal.CXt.Lc.UntU2.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.Compression.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.Data.AnalystDataProvider.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.Data.CommonInterfaces.dll
@@ -443,22 +432,10 @@ if (WIN32 AND NOT CYGWIN)
     ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.RawXYProcessing.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.StructuredStorage.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.Utility.dll
-    ${CMAKE_CURRENT_BINARY_DIR}/lib/CompassXtractMS.dll
-    ${CMAKE_CURRENT_BINARY_DIR}/lib/Compressor_12451AC8-3BF1-48e1-8E66-DA05BF3852A0.dll
-    ${CMAKE_CURRENT_BINARY_DIR}/lib/Compressor_382D5134-9727-4be6-B6F8-754F577426D6.dll
-    ${CMAKE_CURRENT_BINARY_DIR}/lib/Compressor_4F1EA0CB-5A6A-43ED-9562-D6D873034577.dll
-    ${CMAKE_CURRENT_BINARY_DIR}/lib/Compressor_6BB2E64A-27A0-4575-A66A-4E312C8B9AD7.dll
-    ${CMAKE_CURRENT_BINARY_DIR}/lib/Compressor_6EEE649E-09AA-4332-8E82-8188652E8AB5.dll
-    ${CMAKE_CURRENT_BINARY_DIR}/lib/Compressor_7F88E97F-2038-40ba-8F3A-FCA9A9719569.dll
-    ${CMAKE_CURRENT_BINARY_DIR}/lib/fileio.dll
-    ${CMAKE_CURRENT_BINARY_DIR}/lib/fregistry.dll
-    ${CMAKE_CURRENT_BINARY_DIR}/lib/HSReadWrite.dll
-    ${CMAKE_CURRENT_BINARY_DIR}/lib/Interop.DataExplorer.dll
-    ${CMAKE_CURRENT_BINARY_DIR}/lib/Interop.EDAL.dll
-    ${CMAKE_CURRENT_BINARY_DIR}/lib/Interop.HSREADWRITELib.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/fileio_x64.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/fregistry_x64.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/MassSpecDataReader.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/MIDAC.dll
-    ${CMAKE_CURRENT_BINARY_DIR}/lib/mkl_sequential.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/MSFileReader.XRawfile2.dll
     ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/pwiz_aux/msrc/utility/vendor_api/Waters/vc12_x86/cdt.dll
     ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/pwiz_aux/msrc/utility/vendor_api/Waters/vc12_x86/MassLynxRaw.dll
