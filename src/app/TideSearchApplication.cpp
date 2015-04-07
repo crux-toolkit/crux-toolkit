@@ -224,37 +224,32 @@ int TideSearchApplication::main(int argc, char** argv) {
   for (vector<string>::const_iterator f = input_files.begin(); f != input_files.end(); f++) {
     SpectrumCollection spectra;
     pb::Header spectrum_header;
-    if (!spectra.ReadSpectrumRecords(*f, &spectrum_header)) {
+    string spectrumrecords = *f;
+    bool keepSpectrumrecords = true;
+    if (!spectra.ReadSpectrumRecords(spectrumrecords, &spectrum_header)) {
       // Failed, try converting to spectrumrecords file
       carp(CARP_INFO, "Converting %s to spectrumrecords format", f->c_str());
-      string newInput = Params::GetString("store-spectra");
-      bool storeSpectra = !newInput.empty();
-      if (!storeSpectra) {
-        newInput = make_file_path(FileUtils::BaseName(*f) + ".spectrumrecords.tmp");
+      spectrumrecords = Params::GetString("store-spectra");
+      keepSpectrumrecords = !spectrumrecords.empty();
+      if (!keepSpectrumrecords) {
+        spectrumrecords = make_file_path(FileUtils::BaseName(*f) + ".spectrumrecords.tmp");
       } else if (input_files.size() > 1) {
         carp(CARP_FATAL, "Cannot use store-spectra option with multiple input "
                          "spectrum files");
       }
-      carp(CARP_DEBUG, "New spectrumrecords filename: %s", newInput.c_str());
-      if (!SpectrumRecordWriter::convert(*f, newInput)) {
+      carp(CARP_DEBUG, "New spectrumrecords filename: %s", spectrumrecords.c_str());
+      if (!SpectrumRecordWriter::convert(*f, spectrumrecords)) {
         carp(CARP_FATAL, "Error converting %s to spectrumrecords format", f->c_str());
       }
-      carp(CARP_DEBUG, "Reading converted spectra file %s", f->c_str());
+      carp(CARP_DEBUG, "Reading converted spectra file %s", spectrumrecords.c_str());
       // Re-read converted file as spectrumrecords file
-      if (!spectra.ReadSpectrumRecords(newInput, &spectrum_header)) {
-        carp(CARP_DEBUG, "Deleting %s", newInput.c_str());
-        remove(newInput.c_str());
-        carp(CARP_FATAL, "Error reading spectra file %s", newInput.c_str());
+      if (!spectra.ReadSpectrumRecords(spectrumrecords, &spectrum_header)) {
+        carp(CARP_DEBUG, "Deleting %s", spectrumrecords.c_str());
+        remove(spectrumrecords.c_str());
+        carp(CARP_FATAL, "Error reading spectra file %s", spectrumrecords.c_str());
       }
-      input_sr.push_back(InputFile(*f, newInput, storeSpectra));
-    } else {
-      // Successfully read file as spectrumrecords format
-      if (Params::GetInt("remove_precursor_peak") != 0) {
-        carp(CARP_FATAL, "remove_precursor_peak can only be used during conversion "
-                         "to spectrumrecords format.");
-      }
-      input_sr.push_back(InputFile(*f, *f, true));
     }
+    input_sr.push_back(InputFile(*f, spectrumrecords, keepSpectrumrecords));
   }
 
   // Loop through spectrum files

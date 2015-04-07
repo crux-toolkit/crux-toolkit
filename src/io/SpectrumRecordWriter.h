@@ -26,8 +26,6 @@ public:
 protected:
 
   static int scanCounter_;
-  static int removePrecursorPeak_;
-  static FLOAT_T removePrecursorTolerance_;
 
   /**
    * Return a pb::Spectrum from a Crux::Spectrum
@@ -43,15 +41,6 @@ protected:
   static void addPeaks(
     pb::Spectrum* spectrum,
     const Crux::Spectrum* s
-  );
-
-  /**
-   * Check if this peak should be excluded
-   * Precursor m/z and charges must be set for pb_spectrum
-   */
-  static bool removePrecursorPeak(
-    const pb::Spectrum& pb_spectrum,
-    double peakMz
   );
 
   /**

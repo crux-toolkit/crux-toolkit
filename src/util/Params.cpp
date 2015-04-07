@@ -220,6 +220,9 @@ void Params::Initialize() {
     "remove-grass|ten-bin|xcorr",
     "Stop after the specified pre-processing step.",
     "Available for print-processed-spectra.", true);
+  InitStringParam("output-units", "bin", "mz|bin",
+    "Specify the output units for processed spectra. Default = bin.",
+    "Available for print-processed-spectra", true);
   /* more generate_peptide parameters */
   InitBoolParam("output-sequence", false, 
     "Print peptide sequence.",
@@ -707,7 +710,9 @@ void Params::Initialize() {
   InitBoolParam("skip-decoys", true,
     "Skips decoys when reading a Tide index.",
     "Available for read-tide-index", false);
-
+  InitBoolParam("skip-preprocessing", false,
+    "Skip preprocessing steps on spectra. Default = F.",
+    "Available for tide-search", false);
   /*
    * Comet parameters
    */

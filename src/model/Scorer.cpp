@@ -861,11 +861,12 @@ bool Scorer::createIntensityArrayObserved(
     ++peak_iterator) {
     Peak* peak = *peak_iterator;
     FLOAT_T peak_location = peak->getLocation();
-    if (peak_location < experimental_mass_cut_off && peak_location > max_peak) {
+    if (peak_location < experimental_mass_cut_off && peak_location > max_peak
+        && peak->getIntensity() > 0) {
       max_peak = peak_location;
     }
   }
-  int region_selector = INTEGERIZE(max_peak, bin_width_, bin_offset_) / NUM_REGIONS;
+  int region_selector = INTEGERIZE(max_peak, bin_width_, bin_offset_) / NUM_REGIONS + 1;
 
   FLOAT_T tolerance = get_double_parameter("remove-precursor-tolerance");
 

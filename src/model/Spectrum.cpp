@@ -15,8 +15,8 @@
 #include "Spectrum.h"
 #include "util/utils.h"
 #include "util/mass.h"
-#include "parameter.h"
 #include "util/Params.h"
+#include "parameter.h"
 #include "Scorer.h"
 #include "io/carp.h"
 #include <vector>
@@ -206,8 +206,15 @@ void Spectrum::printProcessedPeaks(
   // print peaks
   for(int bin_idx = 0; bin_idx < max_mz_bin; bin_idx++){
     if( intensities[bin_idx] != 0 ){
-      fprintf(file, "%d %.*f\n", bin_idx, mass_precision, 
-              intensities[bin_idx]); 
+      double intensity = intensities[bin_idx];
+      if (Params::GetString("output-units") == "mz") {
+        fprintf(file, "%f %.*f\n",
+          (bin_idx - 0.5 + Params::GetDouble("mz-bin-offset")) *
+          Params::GetDouble("mz-bin-width"),
+          mass_precision, intensity);
+      } else {
+        fprintf(file, "%d %.*f\n", bin_idx, mass_precision, intensity);
+      }
     }
   }
   return;
