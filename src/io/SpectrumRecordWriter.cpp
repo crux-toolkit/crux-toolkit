@@ -16,8 +16,6 @@
 #endif
 
 int SpectrumRecordWriter::scanCounter_ = 0;
-int SpectrumRecordWriter::removePrecursorPeak_ = 0;
-FLOAT_T SpectrumRecordWriter::removePrecursorTolerance_ = 0;
 
 /**
  * Converts a spectra file to spectrumrecords format for use with tide-search.
@@ -27,12 +25,6 @@ bool SpectrumRecordWriter::convert(
   const string& infile, ///< spectra file to convert
   string outfile  ///< spectrumrecords file to output
 ) {
-  // Check options to remove peaks around precursor
-  removePrecursorPeak_ = get_boolean_parameter("remove-precursor-peak");
-  removePrecursorTolerance_ = get_double_parameter("remove-precursor-tolerance");
-  /*if (removePrecursorPeak_ < 0 || removePrecursorPeak_ > 2) {
-    carp(CARP_FATAL, "remove_precursor_peak must be 0, 1, or 2.");
-  }*/
   auto_ptr<Crux::SpectrumCollection> spectra(SpectrumCollectionFactory::create(infile.c_str()));
 
   // Open infile
@@ -134,9 +126,6 @@ void SpectrumRecordWriter::addPeaks(
 
   for (PeakIterator i = s->begin(); i != s->end(); ++i) {
     FLOAT_T peakMz = (*i)->getLocation();
-    if (removePrecursorPeak(*spectrum, peakMz)) {
-      continue;
-    }
     uint64_t mz = peakMz * mz_denom + 0.5;
     uint64_t intensity = (*i)->getIntensity() * intensity_denom + 0.5;
     if (mz < last) {
@@ -152,37 +141,6 @@ void SpectrumRecordWriter::addPeaks(
       intensity_sum = intensity;
       ++last_index;
     }
-  }
-}
-
-/**
- * Check if this peak should be excluded
- * Charge states must be set for pb_spectrum
- */
-bool SpectrumRecordWriter::removePrecursorPeak(
-  const pb::Spectrum& pb_spectrum,
-  double peakMz
-) {
-  switch (removePrecursorPeak_) {
-  case 1:
-    return fabs(pb_spectrum.precursor_m_z() - peakMz) <= removePrecursorTolerance_;
-  /*case 2: {
-    // all charge reduced precursor peaks
-    for (int i = 0; i < pb_spectrum.charge_state_size(); ++i) {
-      int charge = pb_spectrum.charge_state(i);
-      double mass = pb_spectrum.precursor_m_z() * charge -
-        (charge - 1) - MassConstants::proton;
-      for (int j = 1; j < charge; ++j) {
-        double mz = (mass + (j - 1) * MassConstants::proton) / j;
-        if (fabs(mz - peakMz) <= removePrecursorTolerance_) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }*/
-  default:
-    return false;
   }
 }
 

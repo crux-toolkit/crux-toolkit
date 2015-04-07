@@ -94,20 +94,15 @@ int PrintProcessedSpectra::main(int argc, char** argv) {
                         &intensities, &max_mz_bin, stop_after);
 
     // print processed spectrum
-    cur_spectrum->printProcessedPeaks(cur_zstate, 
-                                        intensities, max_mz_bin,
-                                        output_ms2);
+    cur_spectrum->printProcessedPeaks(cur_zstate,
+                                      intensities, max_mz_bin, output_ms2);
   }
 
   // close output file
   delete spectra;
   fclose(output_ms2);
 
-  carp(CARP_INFO, "Elapsed time: %.3g s", wall_clock() / 1e6);
-  carp(CARP_INFO, "Finished crux print-processed-spectra.");
-
   return(0);
-
 }
 
 /**
@@ -151,6 +146,7 @@ vector<string> PrintProcessedSpectra::getArgs() const {
 vector<string> PrintProcessedSpectra::getOptions() const {
   string arr[] = {
     "stop-after",
+    "output-units",
     "spectrum-parser",
     "use-z-line",
     "verbosity",

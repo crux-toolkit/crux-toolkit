@@ -22,6 +22,7 @@
 #include "spectrum_preprocess.h"
 #include "mass_constants.h"
 #include "max_mz.h"
+#include "util/Params.h"
 
 using namespace std;
 
@@ -68,7 +69,6 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum,
   if (debug)
     debug = true; // allows a breakpoint
 #endif
-//  double bin_width = bin_width_mono;
   double precursor_mz = spectrum.PrecursorMZ();
   double proton = MassConstants::proton;
   double experimental_mass_cut_off = (precursor_mz-proton)*charge+proton + 50;
@@ -81,68 +81,87 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum,
 
   memset(peaks_, 0, sizeof(double) * MaxBin::Global().BackgroundBinEnd());
 
-
-  // Fill peaks
-  int largest_mz = 0;
-  double highest_intensity = 0;
-  for (int i = 0; i < spectrum.Size(); ++i) {
-    double peak_location = spectrum.M_Z(i);
-    if (peak_location >= experimental_mass_cut_off) {
-      continue;
-    }
-
-    double intensity = spectrum.Intensity(i);
-    int mz = MassConstants::mass2bin(peak_location);
-    if ((mz > largest_mz) && (intensity > 0)) {
-      largest_mz = mz;
-    }
-    
-    intensity = sqrt(intensity);
-    if (intensity > highest_intensity) {
-      highest_intensity = intensity;
-    }
-    if (intensity > peaks_[mz]) {
-      peaks_[mz] = intensity;
-    }
-  }
-
-  double intensity_cutoff = highest_intensity * 0.05;
-
-  double normalizer = 0.0;
-  int region_size = largest_mz / NUM_SPECTRUM_REGIONS + 1;
-  for (int i = 0; i < NUM_SPECTRUM_REGIONS; ++i) {
-    highest_intensity = 0;
-    for (int j = 0; j < region_size; ++j) {
-      int index = i * region_size + j;
-      if (peaks_[index] <= intensity_cutoff) {
-        peaks_[index] = 0;
+  if (Params::GetBool("skip-preprocessing")) {
+    for (int i = 0; i < spectrum.Size(); ++i) {
+      double peak_location = spectrum.M_Z(i);
+      if (peak_location >= experimental_mass_cut_off) {
+        continue;
       }
-      if (peaks_[index] > highest_intensity) {
-        highest_intensity = peaks_[index];
+      int mz = MassConstants::mass2bin(peak_location);
+      double intensity = spectrum.Intensity(i);
+      if (intensity > peaks_[mz]) {
+        peaks_[mz] = intensity;
       }
     }
-    if (highest_intensity == 0) {
-      continue;
-    }
-    normalizer = 50.0 / highest_intensity;
-    for (int j = 0; j < region_size; ++j) {
-      int index = i * region_size + j;
-      if (peaks_[index] != 0) {
-        peaks_[index] *= normalizer;
+  } else {
+    bool remove_precursor = Params::GetBool("remove-precursor-peak");
+    double precursor_tolerance = Params::GetDouble("remove-precursor-tolerance");
+
+    // Fill peaks
+    int largest_mz = 0;
+    double highest_intensity = 0;
+    for (int i = 0; i < spectrum.Size(); ++i) {
+      double peak_location = spectrum.M_Z(i);
+      if (peak_location >= experimental_mass_cut_off ||
+          (remove_precursor && fabs(peak_location - precursor_mz) <= precursor_tolerance)) {
+        continue;
+      }
+
+      double intensity = spectrum.Intensity(i);
+      int mz = MassConstants::mass2bin(peak_location);
+      if ((mz > largest_mz) && (intensity > 0)) {
+        largest_mz = mz;
+      }
+      
+      intensity = sqrt(intensity);
+      if (intensity > highest_intensity) {
+        highest_intensity = intensity;
+      }
+      if (intensity > peaks_[mz]) {
+        peaks_[mz] = intensity;
       }
     }
-  }
+
+    double intensity_cutoff = highest_intensity * 0.05;
+
+    double normalizer = 0.0;
+    int region_size = largest_mz / NUM_SPECTRUM_REGIONS + 1;
+    for (int i = 0; i < NUM_SPECTRUM_REGIONS; ++i) {
+      highest_intensity = 0;
+      int high_index = i;
+      for (int j = 0; j < region_size; ++j) {
+        int index = i * region_size + j;
+        if (peaks_[index] <= intensity_cutoff) {
+          peaks_[index] = 0;
+        }
+        if (peaks_[index] > highest_intensity) {
+          highest_intensity = peaks_[index];
+          high_index = index;
+        }
+      }
+      if (highest_intensity == 0) {
+        continue;
+      }
+      normalizer = 50.0 / highest_intensity;
+      for (int j = 0; j < region_size; ++j) {
+        int index = i * region_size + j;
+        if (peaks_[index] != 0) {
+          peaks_[index] *= normalizer;
+        }
+      }
+    }
 
 #ifdef DEBUG
-  if (debug) {
-    cout << "GLOBAL MAX MZ: " << MaxMZ::Global().MaxBin() << ", " << MaxMZ::Global().BackgroundBinEnd()
-         << ", " << MaxMZ::Global().CacheBinEnd() << endl;
-    cout << "MAX MZ: " << max_mz_.MaxBin() << ", " << max_mz_.BackgroundBinEnd()
-         << ", " << max_mz_.CacheBinEnd() << endl;
-    ShowPeaks();
-    cout << "====== SUBTRACTING BACKGROUND ======" << endl;
-  }
+    if (debug) {
+      cout << "GLOBAL MAX MZ: " << MaxMZ::Global().MaxBin() << ", " << MaxMZ::Global().BackgroundBinEnd()
+           << ", " << MaxMZ::Global().CacheBinEnd() << endl;
+      cout << "MAX MZ: " << max_mz_.MaxBin() << ", " << max_mz_.BackgroundBinEnd()
+           << ", " << max_mz_.CacheBinEnd() << endl;
+      ShowPeaks();
+      cout << "====== SUBTRACTING BACKGROUND ======" << endl;
+    }
 #endif
+  }
   SubtractBackground(peaks_, max_mz_.BackgroundBinEnd());
 
 #ifdef DEBUG
