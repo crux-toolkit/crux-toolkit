@@ -12,6 +12,7 @@
 
 #include "OutputFiles.h"
 #include "util/FileUtils.h"
+#include "util/Params.h"
 
 using namespace std;
 using namespace Crux;
@@ -705,21 +706,7 @@ void OutputFiles::writeMatchFeatures(
 /**
  * Print the given peptides and their scores in sorted order by score.
  */
-void OutputFiles::writeRankedPeptides(PeptideToScore& peptideToScore){
-
-  // rearrange pairs to sort by score
-  vector<pair<FLOAT_T, Peptide*> > scoreToPeptide;
-  for(PeptideToScore::iterator it = peptideToScore.begin();
-       it != peptideToScore.end(); ++it){
-    Peptide* peptide = it->first;
-    FLOAT_T score = it->second;
-    scoreToPeptide.push_back(make_pair(score, peptide));
-  }
-  
-  // sort by score
-  sort(scoreToPeptide.begin(), scoreToPeptide.end());
-  reverse(scoreToPeptide.begin(), scoreToPeptide.end());
-
+void OutputFiles::writeRankedPeptides(const vector<pair<FLOAT_T, Peptide*> >& scoreToPeptide){
   MatchFileWriter* file = delim_file_array_[0];
   MATCH_COLUMNS_T score_col = SIN_SCORE_COL;
 
@@ -745,7 +732,7 @@ void OutputFiles::writeRankedPeptides(PeptideToScore& peptideToScore){
   }
 
   // print each pair
-  for(vector<pair<FLOAT_T, Peptide*> >::iterator it = scoreToPeptide.begin();
+  for(vector<pair<FLOAT_T, Peptide*> >::const_iterator it = scoreToPeptide.begin();
       it != scoreToPeptide.end(); ++it){
     Peptide* peptide = it->second;
     FLOAT_T score = it->first;
@@ -765,30 +752,12 @@ void OutputFiles::writeRankedPeptides(PeptideToScore& peptideToScore){
  * order by score. If there is parsimony information, also print the
  * parsimony rank.
  */
-void OutputFiles::writeRankedProteins(ProteinToScore& proteinToScore,
-                                      MetaToRank& metaToRank,
-                                      ProteinToMetaProtein& proteinToMeta){
-
-  bool isParsimony = (proteinToMeta.size() != 0);
-
-  // reorganize the protein,score pairs to sort by score
-  vector<pair<FLOAT_T, Protein*> > scoreToProtein;
-  for (ProteinToScore::iterator it = proteinToScore.begin(); 
-       it != proteinToScore.end(); ++it){
-    Protein* protein = it->first;
-    FLOAT_T score = it->second;
-    scoreToProtein.push_back(make_pair(score, protein));
-  }
-  
-  // sort and reverse the list
-  sort(scoreToProtein.begin(), scoreToProtein.end());
-  reverse(scoreToProtein.begin(), scoreToProtein.end());
-
+void OutputFiles::writeRankedProteins(const vector<boost::tuple<FLOAT_T, Protein*, int> >& proteins,
+                                      bool isParsimony) {
   MatchFileWriter* file = delim_file_array_[0];
   MATCH_COLUMNS_T score_col = SIN_SCORE_COL;
 
-  MEASURE_TYPE_T measure_type = string_to_measure_type(get_string_parameter("measure"));
-  switch (measure_type) {
+  switch (string_to_measure_type(Params::GetString("measure"))) {
     case MEASURE_RAW:
       score_col = RAW_SCORE_COL;
       break;
@@ -809,21 +778,12 @@ void OutputFiles::writeRankedProteins(ProteinToScore& proteinToScore,
   }
 
   // print each protein
-  for(vector<pair<FLOAT_T, Protein*> >::iterator it = scoreToProtein.begin(); 
-      it != scoreToProtein.end(); ++it){
-    FLOAT_T score = it->first;
-    Protein* protein = it->second;
-
-    file->setColumnCurrentRow(PROTEIN_ID_COL, protein->getId());
-    file->setColumnCurrentRow(score_col, score);
-
-    if (isParsimony){
-      MetaProtein metaProtein = proteinToMeta[protein];
-      int rank = -1;
-      if (metaToRank.find(metaProtein) != metaToRank.end()){
-        rank = metaToRank[metaProtein];
-      } 
-      file->setColumnCurrentRow(PARSIMONY_RANK_COL, rank);
+  for(vector<boost::tuple<FLOAT_T, Protein*, int> >::const_iterator it = proteins.begin();
+      it != proteins.end(); ++it){
+    file->setColumnCurrentRow(score_col, it->get<0>());
+    file->setColumnCurrentRow(PROTEIN_ID_COL, it->get<1>()->getIdPointer());
+    if (isParsimony) {
+      file->setColumnCurrentRow(PARSIMONY_RANK_COL, it->get<2>());
     }
     file->writeRow();
   }

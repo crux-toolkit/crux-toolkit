@@ -5,7 +5,6 @@
 #include "model/Peptide.h"
 #include "model/ProteinPeptideIterator.h"
 #include "io/SpectrumCollectionFactory.h"
-
 #include "model/MatchCollectionIterator.h"
 
 using namespace std;
@@ -83,7 +82,7 @@ int SpectralCounts::main(int argc, char** argv) {
     if (measure_ != MEASURE_RAW) {
       normalizePeptideScores();
     }
-    output_->writeRankedPeptides(peptide_scores_);
+    writeRankedPeptides();
 
   } else if( quantitation_ == PROTEIN_QUANT_LEVEL ){ // protein level
     
@@ -106,10 +105,7 @@ int SpectralCounts::main(int argc, char** argv) {
       getMetaScores();
       getMetaRanks();
     }
-    
-    output_->writeRankedProteins(protein_scores_, meta_protein_ranks_, 
-                                 protein_meta_protein_);
-
+    writeRankedProteins();
   } else {
     carp(CARP_FATAL, "Invalid quantification level.");
   }
@@ -766,6 +762,61 @@ SCORER_TYPE_T SpectralCounts::get_qval_type(
   }
 
   return scored_type;
+}
+
+void SpectralCounts::writeRankedPeptides() {
+  // rearrange pairs to sort by score
+  vector<pair<FLOAT_T, Peptide*> > scoreToPeptide;
+  for (PeptideToScore::iterator it = peptide_scores_.begin();
+       it != peptide_scores_.end(); ++it){
+    scoreToPeptide.push_back(make_pair(it->second, it->first));
+  }
+  
+  sort(scoreToPeptide.begin(), scoreToPeptide.end(), sortRankedPeptides);
+  output_->writeRankedPeptides(scoreToPeptide);
+}
+
+void SpectralCounts::writeRankedProteins() {
+  bool isParsimony = !protein_meta_protein_.empty();
+  // reorganize the protein,score pairs to sort by score
+  vector<boost::tuple<FLOAT_T, Protein*, int> > proteins;
+  for (ProteinToScore::iterator it = protein_scores_.begin(); 
+       it != protein_scores_.end(); ++it){
+    int rank = -1;
+    if (isParsimony) {
+      MetaToRank::const_iterator lookup =
+        meta_protein_ranks_.find(protein_meta_protein_[it->first]);
+      if (lookup != meta_protein_ranks_.end()) {
+        rank = lookup->second;
+      }
+    }
+    proteins.push_back(boost::make_tuple(it->second, it->first, rank));
+  }
+
+  sort(proteins.begin(), proteins.end(), sortRankedProteins);
+  output_->writeRankedProteins(proteins, isParsimony);
+}
+
+bool SpectralCounts::sortRankedPeptides(
+  const pair<FLOAT_T, Peptide*>& x,
+  const pair<FLOAT_T, Peptide*>& y) {
+  return x.first != y.first ? x.first > y.first : !Peptide::lessThan(y.second, x.second);
+}
+
+bool SpectralCounts::sortRankedProteins(
+  const boost::tuple<FLOAT_T, Protein*, int>& x,
+  const boost::tuple<FLOAT_T, Protein*, int>& y) {
+  FLOAT_T xScore = x.get<0>();
+  FLOAT_T yScore = y.get<0>();
+  if (xScore != yScore) {
+    return xScore > yScore;
+  }
+  int xRank = x.get<2>();
+  int yRank = y.get<2>();
+  if (xRank != yRank) {
+    return xRank <= yRank;
+  }
+  return strcmp(y.get<1>()->getIdPointer(), x.get<1>()->getIdPointer()) > 0;
 }
 
 /**
