@@ -25,6 +25,7 @@
 #include "PepXMLWriter.h"
 #include "PinWriter.h"
 #include "MzIdentMLWriter.h"
+#include "boost/tuple/tuple.hpp"
 
 class OutputFiles{
 
@@ -45,10 +46,9 @@ class OutputFiles{
   void writeMatchFeatures(Crux::Match* match, 
                           double* features,
                           int num_features);
-  void writeRankedProteins(ProteinToScore& proteinToScore,
-                           MetaToRank& metaToRank,
-                           ProteinToMetaProtein& proteinToMeta);
-  void writeRankedPeptides(PeptideToScore& peptideToScore);
+  void writeRankedProteins(const std::vector<boost::tuple<FLOAT_T, Crux::Protein*, int> >& proteins,
+                           bool isParsimony);
+  void writeRankedPeptides(const vector<pair<FLOAT_T, Crux::Peptide*> >& scoreToPeptide);
   static bool isConcat();
   static void setConcat(bool enable = true);
   static bool isProteinLevelDecoys();
@@ -153,15 +153,6 @@ class OutputFiles{
  
 };
 
-
-
-
-
-
-
-
-
-
 #endif //OUTPUT_FILES_H
 
 /*
@@ -170,33 +161,4 @@ class OutputFiles{
  * c-basic-offset: 2
  * End:
  */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

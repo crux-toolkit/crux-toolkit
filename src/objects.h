@@ -814,7 +814,7 @@ typedef std::map<Crux::Protein*, FLOAT_T, bool(*)(Crux::Protein*, Crux::Protein*
 typedef std::set<Crux::Protein*, bool(*)(Crux::Protein*, Crux::Protein*) > MetaProtein;
 
 /**
- * \typedef ProteinToMeta
+ * \typedef ProteinToMetaProtein
  * \brief Mapping of Protein to MetaProtein to which it belongs
  */
 typedef std::map<Crux::Protein*, MetaProtein, bool(*)(Crux::Protein*, Crux::Protein*) > ProteinToMetaProtein;

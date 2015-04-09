@@ -19,6 +19,8 @@
 #include "io/SpectrumCollection.h"
 #include "io/OutputFiles.h"
 
+#include "boost/tuple/tuple.hpp"
+
 class SpectralCounts: public CruxApplication { 
 
  public:
@@ -106,6 +108,14 @@ class SpectralCounts: public CruxApplication {
                           Crux::SpectrumCollection* spectra);
   SCORER_TYPE_T get_qval_type(MatchCollection* match_collection);
 
+  void writeRankedPeptides();
+  void writeRankedProteins();
+  static bool sortRankedPeptides(
+    const std::pair<FLOAT_T, Crux::Peptide*>& x,
+    const std::pair<FLOAT_T, Crux::Peptide*>& y);
+  static bool sortRankedProteins(
+    const boost::tuple<FLOAT_T, Crux::Protein*, int>& x,
+    const boost::tuple<FLOAT_T, Crux::Protein*, int>& y);
 
   /**
    * adds all matches 
