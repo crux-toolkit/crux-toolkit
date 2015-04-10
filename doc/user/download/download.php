@@ -6,7 +6,7 @@
        "Linux32" => "crux-2.1.Linux.i686.zip",
        "Linux64" => "crux-2.1.Linux.x86_64.zip",
        "OSX" => "crux-2.1.Darwin.x86_64.zip",
-       "Windows32" => "crux-2.1.Windows.ix86-pc.zip",
+       "Windows" => "crux-2.1.Windows.ix86-pc.zip",
      );
      $directory = "crux-2.1/";
    }
@@ -19,7 +19,7 @@
         "Linux32" => "crux-2.1.$version.Linux.i686.zip",
         "Linux64" => "crux-2.1.$version.Linux.x86_64.zip",
         "OSX" => "crux-2.1.$version.Darwin.x86_64.zip",
-        "Windows32" => "crux-2.1.$version.Windows.i686.zip",
+        "Windows" => "crux-2.1.$version.Windows.AMD64.zip",
       );
       $directory = "daily/";
     }
