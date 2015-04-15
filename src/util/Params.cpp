@@ -2338,7 +2338,9 @@ StringParam::StringParam(const string& name,
                          const string& value,
                          const vector<string>& validValues)
   : Param(name, usage, fileNotes, visible),
-    value_(value), original_(value), validValues_(validValues) {}
+    original_(value), validValues_(validValues) {
+  Set(value);
+}
 void StringParam::ThrowIfInvalid() const {
   if (!validValues_.empty() &&
       find(validValues_.begin(), validValues_.end(), value_) == validValues_.end()) {
@@ -2361,7 +2363,9 @@ string StringParam::GetStringDefault() const { return original_; }
 void StringParam::Set(bool value) { value_ = From(value); }
 void StringParam::Set(int value) { value_ = From(value); }
 void StringParam::Set(double value) { value_ = From(value); }
-void StringParam::Set(const string& value) { value_ = value; }
+void StringParam::Set(const string& value) {
+  value_ = value != "__NULL_STR" ? value : "";
+}
 string StringParam::From(bool b) { return b ? "true" : "false"; }
 string StringParam::From(int i) { return StringUtils::ToString(i); }
 string StringParam::From(double d) { return StringUtils::ToString(d, 6); }
