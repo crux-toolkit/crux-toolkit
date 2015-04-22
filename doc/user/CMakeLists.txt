@@ -36,7 +36,6 @@ set (
   comet.params
   compute-q-values.html 
   contributors.html
-  crux-analyze-matches.html 
   crux-faq.html
   crux-get-ms2-spectrum.html 
   crux-predict-peptide-ions.html 

@@ -17,7 +17,6 @@ using namespace std;
  * Constructor for PercolatorAdapter. 
  */
 PercolatorAdapter::PercolatorAdapter() : Caller() {
-  carp(CARP_DEBUG, "PercolatorAdapter::PercolatorAdapter");
   collection_ = new ProteinMatchCollection();
   decoy_collection_ = new ProteinMatchCollection();
 }
@@ -26,8 +25,6 @@ PercolatorAdapter::PercolatorAdapter() : Caller() {
  * Destructor for PercolatorAdapter
  */
 PercolatorAdapter::~PercolatorAdapter() {
-  carp(CARP_DEBUG, "PercolatorAdapter::~PercolatorAdapter");
-
   // delete match collections created by this adapter
   int collectionsDeleted = 0;
   for (vector<MatchCollection*>::iterator iter = match_collections_made_.begin();
@@ -82,14 +79,12 @@ void PercolatorAdapter::psmScoresToMatchCollection(
     } else if (featureName.find("charge") == 0) {
       size_t chargeNum = atoi(featureName.substr(6).c_str());
       chargeStates[i] = chargeNum;
-    } else if (featureName == "mass") {
-      massIndex = i;
     }
   }
 
   // Iterate over each ScoreHolder in Scores object
-  for (vector<ScoreHolder>::iterator score_itr = fullset.begin();
-       score_itr != fullset.end();
+  for (vector<ScoreHolder>::iterator score_itr = allScores_.begin();
+       score_itr != allScores_.end();
        score_itr++) {
 
     bool is_decoy = score_itr->isDecoy();
@@ -109,11 +104,7 @@ void PercolatorAdapter::psmScoresToMatchCollection(
     int psm_scan;
     int psm_charge;
     int psm_rank;
-    parsePSMId(psm->id, 
-      psm_file_idx,
-      psm_scan,
-      psm_charge,
-      psm_rank);
+    parsePSMId(psm->id, psm_file_idx, psm_scan, psm_charge, psm_rank);
     if (charge_state == -1) {
       // Failed, try to parse charge state from id
       charge_state = psm_charge;
@@ -123,19 +114,16 @@ void PercolatorAdapter::psmScoresToMatchCollection(
     }
     Crux::Peptide* peptide = extractPeptide(psm, charge_state, is_decoy);
 
-    FLOAT_T obsMass = (massIndex < 0) ?
-      0 : psm->getFeatures()[massIndex] * normDiv[massIndex] + normSub[massIndex];
     SpectrumZState zState;
-    zState.setSinglyChargedMass(obsMass, charge_state);
+    zState.setSinglyChargedMass(psm->expMass, charge_state);
     // calcMass/expMass = singly charged mass
     Crux::Spectrum* spectrum = new Crux::Spectrum(
-      psm->scan, psm->scan, zState.getMZ(), vector<int>(1, charge_state), ""
-    );
+      psm->scan, psm->scan, zState.getMZ(), vector<int>(1, charge_state), "");
 
     Crux::Match* match = new Crux::Match(peptide, spectrum, zState, is_decoy);
     match->setScore(PERCOLATOR_SCORE, score_itr->score);
-    match->setScore(PERCOLATOR_QVALUE, psm->q);
-    match->setScore(PERCOLATOR_PEP, psm->pep);
+    match->setScore(PERCOLATOR_QVALUE, score_itr->q);
+    match->setScore(PERCOLATOR_PEP, score_itr->pep);
 
     match->setFileIndex(psm_file_idx);
 
@@ -191,7 +179,7 @@ void PercolatorAdapter::addProteinScores() {
 
   vector<ProteinMatch*> matches;
   vector<ProteinMatch*> decoy_matches;
-  map<const string,Protein*> protein_scores = protEstimator->getProteins();
+  map<const string,Protein*> protein_scores = protEstimator_->getProteins();
   
   for (map<const string,Protein*>::iterator score_iter = protein_scores.begin();
        score_iter != protein_scores.end();
@@ -243,8 +231,8 @@ void PercolatorAdapter::addPeptideScores() {
   carp(CARP_DEBUG, "Setting peptide scores");
 
   // Iterate over each ScoreHolder in Scores object
-  for (vector<ScoreHolder>::iterator score_itr = fullset.begin();
-       score_itr != fullset.end();
+  for (vector<ScoreHolder>::iterator score_itr = allScores_.begin();
+       score_itr != allScores_.end();
        score_itr++) {
 
     PSMDescription* psm = score_itr->pPSM;
@@ -264,8 +252,8 @@ void PercolatorAdapter::addPeptideScores() {
                        psm->getFullPeptideSequence().c_str(), score_itr->isDecoy());
     }
     peptide_match->setScore(PERCOLATOR_SCORE, score_itr->score);
-    peptide_match->setScore(PERCOLATOR_QVALUE, psm->q);
-    peptide_match->setScore(PERCOLATOR_PEP, psm->pep);
+    peptide_match->setScore(PERCOLATOR_QVALUE, score_itr->q);
+    peptide_match->setScore(PERCOLATOR_PEP, score_itr->pep);
 
     free(mod_seq);
 
@@ -448,71 +436,59 @@ MODIFIED_AA_T* PercolatorAdapter::getModifiedAASequence(
  * 4. (optional) calculate peptide probabilities
  * 5. (optional) calculate protein probabilities
  */
-int PercolatorAdapter::run() {  
+int PercolatorAdapter::run() {
 
-  time(&startTime);
-  startClock = clock();
+  time(&startTime_);
+  startClock_ = clock();
   if (VERB > 0) {
     cerr << extendedGreeter();
   }
-  // populate tmp input file with cin information if option is enabled
-  if(readStdIn){
-    ofstream tmpInputFile;
-    tmpInputFile.open(xmlInterface.getXmlInputFN().c_str());
-    while(cin) {
-      char buffer[1000];
-      cin.getline(buffer, 1000);
-      tmpInputFile << buffer << endl;
-    }
-    tmpInputFile.close();
-  }
   
   // Reading input files (pin or temporary file)
-  if(!readFiles()) {
-    throw MyException("ERROR: Failed to read in file, check if the correct file-format was used.");
+  if (!readFiles()) {
+    std::cerr << "ERROR: Failed to read in file, check if the correct " <<
+                 "file-format was used.";
+    //return 0; don't know why percolator returns 0 here, but we'll return 1
+    return 1;
   }
   // Copy feature data to Scores object
   fillFeatureSets();
   
-  // delete temporary file if reading from stdin
-  if(readStdIn) {
-    remove(xmlInterface.getXmlInputFN().c_str());
-  }
-  if(VERB > 2){
+  if (VERB > 2) {
     std::cerr << "FeatureNames::getNumFeatures(): "<< FeatureNames::getNumFeatures() << endl;
   }
-  int firstNumberOfPositives = crossValidation.preIterationSetup(fullset, pCheck, pNorm);
+  int firstNumberOfPositives = crossValidation_.preIterationSetup(allScores_, pCheck_, pNorm_);
   if (VERB > 0) {
     cerr << "Estimating " << firstNumberOfPositives << " over q="
-        << test_fdr << " in initial direction" << endl;
+        << testFdr_ << " in initial direction" << endl;
   }
   
   time_t procStart;
   clock_t procStartClock = clock();
   time(&procStart);
-  double diff = difftime(procStart, startTime);
+  double diff = difftime(procStart, startTime_);
   if (VERB > 1) cerr << "Reading in data and feature calculation took "
-      << ((double)(procStartClock - startClock)) / (double)CLOCKS_PER_SEC
+      << ((double)(procStartClock - startClock_)) / (double)CLOCKS_PER_SEC
       << " cpu seconds or " << diff << " seconds wall time" << endl;
   
   // Do the SVM training
-  crossValidation.train(pNorm);
-  crossValidation.postIterationProcessing(fullset, pCheck);
+  crossValidation_.train(pNorm_);
+  crossValidation_.postIterationProcessing(allScores_, pCheck_);
   // calculate psms level probabilities
   
   //PSM probabilities TDA or TDC
-  calculatePSMProb(false, &fullset, procStart, procStartClock, diff, target_decoy_competition);
+  calculatePSMProb(false, procStart, procStartClock, diff);
   addPsmScores();
-  if (xmlInterface.getXmlOutputFN().size() > 0){
-    xmlInterface.writeXML_PSMs(fullset);
+  if (xmlInterface_.getXmlOutputFN().size() > 0){
+    xmlInterface_.writeXML_PSMs(allScores_);
   }
   
   // calculate unique peptides level probabilities WOTE
-  if(reportUniquePeptides){
-    calculatePSMProb(true, &fullset, procStart, procStartClock, diff, target_decoy_competition);
+  if (reportUniquePeptides_){
+    calculatePSMProb(true, procStart, procStartClock, diff);
     addPeptideScores();
-    if (xmlInterface.getXmlOutputFN().size() > 0){
-      xmlInterface.writeXML_Peptides(fullset);
+    if (xmlInterface_.getXmlOutputFN().size() > 0){
+      xmlInterface_.writeXML_Peptides(allScores_);
     }
   }
   // calculate protein level probabilities with FIDO
@@ -521,7 +497,7 @@ int PercolatorAdapter::run() {
     addProteinScores();
   }
   // write output to file
-  xmlInterface.writeXML(fullset, protEstimator, call);  
+  xmlInterface_.writeXML(allScores_, protEstimator_, call_);  
   //return 1; don't know why percolator returns 1 here, but we'll return 0
   return 0;
 }

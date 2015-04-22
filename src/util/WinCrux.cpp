@@ -198,11 +198,3 @@ char *mkdtemp(char *temp) {
   return dirname;
 
 }
-
-int isinf(FLOAT_T x) {
-  return !_finite(x);
-}
-
-float log2(FLOAT_T x) {
-  return log(x) / log(2.0);
-}

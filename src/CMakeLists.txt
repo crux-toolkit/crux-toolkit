@@ -55,10 +55,10 @@ link_directories(${CMAKE_BINARY_DIR}/ext/lib)
 link_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator-build/src) 
 link_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator-build/src/fido)
 if (WIN32 AND NOT Cygwin)
- # Needed for 32-bit windows build of vendor libraries
+ # Needed for windows build of vendor libraries
   link_directories(
-    ${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/pwiz_aux/msrc/utility/vendor_api/Waters/vc12_x86
-    ${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/pwiz_aux/msrc/utility/vendor_api/Bruker/x86
+    ${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/pwiz_aux/msrc/utility/vendor_api/Waters/vc12_x64 # vc12_x86 for 32-bit
+    ${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/pwiz_aux/msrc/utility/vendor_api/Bruker/x64 # x86 for 32-bit
   )
 endif (WIN32 AND NOT Cygwin)
 
@@ -329,18 +329,18 @@ if (WIN32 AND NOT CYGWIN)
     MassLynxRaw
     cdt
     ws2_32
-    optimized libboost_system-vc100-mt
-    optimized libboost_iostreams-vc100-mt
-    optimized libboost_nowide-vc100-mt
-    optimized libboost_filesystem-vc100-mt
-    optimized libboost_thread-vc100-mt
-    optimized libboost_chrono-vc100-mt
-    debug libboost_system-vc100-mt-gd
-    debug libboost_iostreams-vc100-mt-gd
-    debug libboost_nowide-vc100-mt-gd
-    debug libboost_filesystem-vc100-mt-gd
-    debug libboost_thread-vc100-mt-gd
-    debug libboost_chrono-vc100-mt-gd
+    optimized libboost_system-vc120-mt
+    optimized libboost_iostreams-vc120-mt
+    optimized libboost_nowide-vc120-mt
+    optimized libboost_filesystem-vc120-mt
+    optimized libboost_thread-vc120-mt
+    optimized libboost_chrono-vc120-mt
+    debug libboost_system-vc120-mt-gd
+    debug libboost_iostreams-vc120-mt-gd
+    debug libboost_nowide-vc120-mt-gd
+    debug libboost_filesystem-vc120-mt-gd
+    debug libboost_thread-vc120-mt-gd
+    debug libboost_chrono-vc120-mt-gd
   )
   target_link_libraries(
     xlink-score-spectrum
@@ -372,18 +372,18 @@ if (WIN32 AND NOT CYGWIN)
     MassLynxRaw
     cdt
     ws2_32
-    optimized libboost_system-vc100-mt
-    optimized libboost_iostreams-vc100-mt
-    optimized libboost_filesystem-vc100-mt
-    optimized libboost_nowide-vc100-mt
-    optimized libboost_thread-vc100-mt
-    optimized libboost_chrono-vc100-mt
-    debug libboost_system-vc100-mt-gd
-    debug libboost_iostreams-vc100-mt-gd
-    debug libboost_filesystem-vc100-mt-gd
-    debug libboost_nowide-vc100-mt-gd
-    debug libboost_thread-vc100-mt-gd
-    debug libboost_chrono-vc100-mt-gd
+    optimized libboost_system-vc120-mt
+    optimized libboost_iostreams-vc120-mt
+    optimized libboost_filesystem-vc120-mt
+    optimized libboost_nowide-vc120-mt
+    optimized libboost_thread-vc120-mt
+    optimized libboost_chrono-vc120-mt
+    debug libboost_system-vc120-mt-gd
+    debug libboost_iostreams-vc120-mt-gd
+    debug libboost_filesystem-vc120-mt-gd
+    debug libboost_nowide-vc120-mt-gd
+    debug libboost_thread-vc120-mt-gd
+    debug libboost_chrono-vc120-mt-gd
   )
   target_link_libraries(
     xlink-assign-ions
@@ -408,20 +408,21 @@ if (WIN32 AND NOT CYGWIN)
     libpwiz_utility_minimxml
     libpwiz_utility_misc
     libSHA1
+    MassLynxRaw
     cdt
     ws2_32
-    optimized libboost_system-vc100-mt
-    optimized libboost_iostreams-vc100-mt
-    optimized libboost_filesystem-vc100-mt
-    optimized libboost_nowide-vc100-mt
-    optimized libboost_thread-vc100-mt
-    optimized libboost_chrono-vc100-mt
-    debug libboost_system-vc100-mt-gd
-    debug libboost_iostreams-vc100-mt-gd
-    debug libboost_filesystem-vc100-mt-gd
-    debug libboost_nowide-vc100-mt-gd
-    debug libboost_thread-vc100-mt-gd
-    debug libboost_chrono-vc100-mt-gd
+    optimized libboost_system-vc120-mt
+    optimized libboost_iostreams-vc120-mt
+    optimized libboost_filesystem-vc120-mt
+    optimized libboost_nowide-vc120-mt
+    optimized libboost_thread-vc120-mt
+    optimized libboost_chrono-vc120-mt
+    debug libboost_system-vc120-mt-gd
+    debug libboost_iostreams-vc120-mt-gd
+    debug libboost_filesystem-vc120-mt-gd
+    debug libboost_nowide-vc120-mt-gd
+    debug libboost_thread-vc120-mt-gd
+    debug libboost_chrono-vc120-mt-gd
   )
 else()
   target_link_libraries(
