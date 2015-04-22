@@ -22,33 +22,33 @@ if (WIN32 AND NOT CYGWIN)
   if (${BUILD_TYPE} MATCHES "Debug")
     execute_process(
       COMMAND ${CMAKE_COMMAND} -E copy 
-        ${PREFIX}/lib/libboost_filesystem-vc100-mt-gd.lib
-        ${PREFIX}/lib/libboost_filesystem-vc100-mt-gd-1_54.lib
+        ${PREFIX}/lib/libboost_filesystem-vc120-mt-gd.lib
+        ${PREFIX}/lib/libboost_filesystem-vc120-mt-gd-1_56.lib
       RESULT_VARIABLE status
     )
     execute_process(
       COMMAND ${CMAKE_COMMAND} -E copy 
-        ${PREFIX}/lib/libboost_nowide-vc100-mt-gd.lib
-        ${PREFIX}/lib/libboost_nowide-vc100-mt-gd-1_54.lib
+        ${PREFIX}/lib/libboost_nowide-vc120-mt-gd.lib
+        ${PREFIX}/lib/libboost_nowide-vc120-mt-gd-1_56.lib
       RESULT_VARIABLE status
     )
   else()
     execute_process(
       COMMAND ${CMAKE_COMMAND} -E copy 
-        ${PREFIX}/lib/libboost_filesystem-vc100-mt.lib
-        ${PREFIX}/lib/libboost_filesystem-vc100-mt-1_54.lib
+        ${PREFIX}/lib/libboost_filesystem-vc120-mt.lib
+        ${PREFIX}/lib/libboost_filesystem-vc120-mt-1_56.lib
       RESULT_VARIABLE status
     )
     execute_process(
       COMMAND ${CMAKE_COMMAND} -E copy 
-        ${PREFIX}/lib/libboost_nowide-vc100-mt.lib
-        ${PREFIX}/lib/libboost_nowide-vc100-mt-1_54.lib
+        ${PREFIX}/lib/libboost_nowide-vc120-mt.lib
+        ${PREFIX}/lib/libboost_nowide-vc120-mt-1_56.lib
       RESULT_VARIABLE status
     )
     execute_process(
       COMMAND ${CMAKE_COMMAND} -E copy 
-        ${PREFIX}/lib/libboost_chrono-vc100-mt.lib
-        ${PREFIX}/lib/libboost_chrono-vc100-mt-1_54.lib
+        ${PREFIX}/lib/libboost_chrono-vc120-mt.lib
+        ${PREFIX}/lib/libboost_chrono-vc120-mt-1_56.lib
       RESULT_VARIABLE status
     )
   endif (${BUILD_TYPE} MATCHES "Debug")

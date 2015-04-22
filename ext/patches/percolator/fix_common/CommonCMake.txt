@@ -44,8 +44,8 @@ endfunction()
 
 # VERSION AND NAMESPACES
 set(CPACK_PACKAGE_VERSION_MAJOR "2")
-set(CPACK_PACKAGE_VERSION_MINOR "07")
-set(CPACK_PACKAGE_VERSION_PATCH "01")
+set(CPACK_PACKAGE_VERSION_MINOR "09")
+set(CPACK_PACKAGE_VERSION_PATCH "0")
 set(PIN_VERSION_MAJOR "1")
 set(PIN_VERSION_MINOR "3")
 set(POUT_VERSION_MAJOR "1")
@@ -110,7 +110,7 @@ endif()
 
 # Link Boost static and single threaded
 set(Boost_USE_STATIC_LIBS   ON)
-set(Boost_USE_MULTITHREADED ON)  
+set(Boost_USE_MULTITHREADED OFF)  
 
 set(BOOST_MIN_VERSION "1.46.0")
 set(Boost_ADDITIONAL_VERSIONS "1.36" "1.36.0" "1.41" "1.41.0" "1.39" "1.39.0" "1.42.0" "1.42" "1.43.0" 
@@ -129,8 +129,8 @@ set(CMAKE_MODULE_PATH ${PERCOLATOR_SOURCE_DIR}/cmake)
 ###############################################################################
 
 if(UNIX OR APPLE OR MINGW)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-result -Wno-overflow -Wno-deprecated-declarations")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-result -Wno-overflow -Wno-deprecated-declarations")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-deprecated-declarations")
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -DNDEBUG")
   set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3 -DNDEBUG")
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g")
@@ -143,3 +143,4 @@ if(MSVC)
   # if boost would use single threading, the auto-linking process of boost would fail.
   set(Boost_USE_MULTITHREADED ON)
 endif(MSVC)
+

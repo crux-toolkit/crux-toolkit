@@ -152,12 +152,9 @@ void DelimitedFile::loadData(
   }
 
   string line;
-  bool hasLine;
 
   if (hasHeader) {
-
-    hasLine = getline(file, line) != NULL;
-    if (hasLine) {
+    if (getline(file, line)) {
       vector<string> tokens = StringUtils::Split(line, getDelimiter());
       for (vector<string>::iterator iter = tokens.begin();
         iter != tokens.end();
@@ -171,8 +168,7 @@ void DelimitedFile::loadData(
     }
   }
   
-  hasLine = getline(file, line) != NULL;
-  while (hasLine) {
+  while (getline(file, line)) {
     vector<string> tokens = StringUtils::Split(line, getDelimiter());
     if (!hasHeader && numCols() == 0) {
       //initialize the number of columns so that addRow won't fail.
@@ -190,7 +186,6 @@ void DelimitedFile::loadData(
 
       setString(col_idx, row_idx, tokens[col_idx]);
     }
-    hasLine = getline(file, line) != NULL;
   }
 
   file.close();
