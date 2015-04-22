@@ -97,7 +97,7 @@ void Params::Initialize() {
     "progress information, 50-debug info, 60-detailed debug info.",
     "Available for all crux programs.", true);
   InitStringParam("parameter-file", "", 
-    "A file containing command-line or additional parameters.[[html: See the "
+    "A file containing parameters. [[html: See the "
     "<a href=\"parameter-file.html\">parameter documentation</a> page for details.]]",
     "Available for all crux programs. Any options specified on the "
     "command line will override values in the parameter file.", true);
@@ -934,14 +934,14 @@ void Params::Initialize() {
     "\".fa\", \".fsa\" or \".fasta\")."); 
   InitArgParam("search results",
     "Search results in the [[html:<a href=\"txt-format.html\">]]tab-delimited text format"
-    "[[html:</a>]] produced by Crux. Like the spectra, the search results can be provided "
+    "[[html:</a>]] produced by Crux or in [[html:<a href=\"sqt-format.html\">]]SQT format[[html:</a>]]. Like the spectra, the search results can be provided "
     "as a single file, a list of files or a directory of files. Note, however, that the "
     "input mode for spectra and for search results must be the same; i.e., if you provide "
     "a list of files for the spectra, then you must also provide a list of files "
     "containing your search results. When the MS2 files and tab-delimited text files are "
-    "provided via a file listing, it is assumeed that the order of the MS2 files matches "
+    "provided via a file listing, it is assumed that the order of the MS2 files matches "
     "the order of the tab-delimited files. Alternatively, when the MS2 files and "
-    "tab-delimited files are provided via directories, Q-ranker will search for pairs of "
+    "tab-delimited files are provided via directories, the program will search for pairs of "
     "files with the same root name but different extensions (\".ms2\" and \".txt\").");
   // **** q-ranker options. ****
   InitBoolParam("skip-cleanup", false, 
@@ -955,10 +955,10 @@ void Params::Initialize() {
   InitStringParam("re-run", "",
     "Re-run a previous analysis using a previously computed set of "
     "lookup tables. For this option to work, the --skip-cleanup option must have "
-    "been set to true when the program was run the first time",
+    "been set to true when the program was run the first time.",
     "Available for q-ranker and barista.", true);
   InitBoolParam("use-spec-features", true, 
-    "Use enriched feature set derived from the spectra in ms2 files.",
+    "Use an enriched feature set, including separate features for each ion type.",
     "Available for q-ranker and barista.", true);
   InitStringParam("decoy_prefix", "decoy_",
     "Specifies the prefix of the protein names that indicates a decoy.",

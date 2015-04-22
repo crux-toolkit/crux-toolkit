@@ -2878,12 +2878,12 @@ string Barista::getDescription() const {
     "learning strategy that requires that the database search be carried out "
     "on target and decoy proteins. The searches may be carried out on a "
     "concatenated database or, using the <code>--separate-searches</code> "
-    "option, separate target and decoy databases. The <code>crux create-index"
+    "option, separate target and decoy databases. The <code>crux tide-index"
     "</code> command can be used to generate a decoy database.</p><p>Barista "
     "assigns two types of statistical confidence estimates, q-values and "
     "posterior error probabilities, to identified PSMs, peptides and proteins. "
     "For more information about these values, see the documentation for <a "
-    "href=\"calibrate-scores.html\">calibrate-scores</a>.</p>]]";
+    "href=\"assign-confidence.html\">assign-confidence</a>.</p>]]";
 }
 
 vector<string> Barista::getArgs() const {
@@ -2921,18 +2921,16 @@ vector<string> Barista::getOptions() const {
 map<string, string> Barista::getOutputs() const {
   map<string, string> outputs;
   outputs["barista.xml"] =
-    "an <a href=\"barista-xml-format.html\">XML file format</a> that contains "
-    "four main parts: Proteins, Subset Proteins, Peptides, and PSMs.";
+    "an <a href=\"barista-xml-format.html\">XML file</a> that contains "
+    "four information about proteins, subset proteins, peptides, and PSMs.";
   outputs["barista.target.proteins.txt"] =
     "a <a href=\"txt-format.html\">tab-delimited file</a> containing a ranked "
     "list of groups of indistinguishable target proteins with associated Barista scores "
     "and q-values and with peptides that contributed to the identification of the "
-    "protein group).";
+    "protein group.";
   outputs["barista.target.subset-proteins.txt"] =
     "a <a href=\"txt-format.html\">tab-delimited file</a> containing groups of "
-    "indistinguishable proteins, which constitute a subset of some group in the "
-    "barista.target.proteins.txt file in terms of the peptides identified in "
-    "these proteins.";
+    "indistinguishable proteins.";
   outputs["barista.target.peptides.txt"] =
     "a <a href=\"txt-format.html\">tab-delimited file</a> containing a ranked list "
     "of target peptides with the associated Barista scores and q-values.";
