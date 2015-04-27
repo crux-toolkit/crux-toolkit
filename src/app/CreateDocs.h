@@ -36,6 +36,7 @@ protected:
   const static std::string TOOL_INPUT_TEMPLATE;
   const static std::string TOOL_OUTPUT_TEMPLATE;
   const static std::string TOOL_OPTION_CATEGORY_TEMPLATE;
+  const static std::string TOOL_NO_OPTIONS_TEMPLATE;
   const static std::string TOOL_OPTION_TEMPLATE;
 };
 

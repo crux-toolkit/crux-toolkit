@@ -717,7 +717,7 @@ void Params::Initialize() {
    * Comet parameters
    */
   InitArgParam("input spectra",
-    "The name of the file (in MS2 format) from which to parse the spectra.");
+    "The name of the file from which to parse the spectra.");
   InitArgParam("database name",
     "A full or relative path to the sequence database, "
     "in FASTA format, to search. Example databases include "
@@ -728,186 +728,184 @@ void Params::Initialize() {
     "translate these to amino acid sequences. Do this by setting "
     "nucleotide_reading_frame\" to a value between 1 and 9.");
   InitIntParam("decoy_search", 0, 0, 2,
-    "0=no, 1=concatenated search, 2=separate search",
+    "0=no, 1=concatenated search, 2=separate search.",
     "option for Comet only", true);
   InitIntParam("num_threads", 0, 0, 32, 
-    "0=poll CPU to set num threads; else specify num threads directly (max 32)",
+    "0=poll CPU to set num threads; else specify num threads directly (max 32).",
     "option for Comet only", true);
   InitStringParam("output_suffix", "",
     "specifies the suffix string that is appended to the base output name "
     "for the pep.xml, pin.xml, txt and sqt output files.",
-    "Available for comet.",true);
+    "Available for comet.", true);
   InitDoubleParam("peptide_mass_tolerance", 3.0, 0, BILLION,
     "Controls the mass tolerance value.  The mass tolerance "
     "is set at +/- the specified number i.e. an entered value "
     "of \"1.0\" applies a -1.0 to +1.0 tolerance. "
     "The units of the mass tolerance is controlled by the parameter "
     "\"peptide_mass_units\". ", 
-    "option for Comet only",true);
+    "option for Comet only", true);
   InitIntParam("peptide_mass_units", 0, 0, 2,
-    "0=amu, 1=mmu, 2=ppm",
+    "0=amu, 1=mmu, 2=ppm.",
     "option for Comet only", true);
   InitIntParam("mass_type_parent", 1, 0, 1,
-    "0=average masses, 1=monoisotopic masses","option for Comet only", true);
+    "0=average masses, 1=monoisotopic masses.",
+    "option for Comet only", true);
   InitIntParam("mass_type_fragment", 1, 0, 1,
-    "0=average masses, 1=monoisotopic masses","option for Comet only", true);
+    "0=average masses, 1=monoisotopic masses.",
+    "option for Comet only", true);
   InitIntParam("isotope_error", 0, 0, 2, 
-    "0=off, 1=on -1/0/1/2/3 (standard C13 error), 2= -8/-4/0/4/8 (for +4/+8 labeling)",
+    "0=off, 1=on -1/0/1/2/3 (standard C13 error), 2=-8/-4/0/4/8 (for +4/+8 labeling).",
     "option for Comet only", true);
   InitIntParam("search_enzyme_number", 1, 0, BILLION,
-    "choose from list at end of this params file",
+    "Specify a search enzyme from the end of the parameter file.",
     "option for Comet only", true);
-  InitIntParam("num_enzyme_termini", 2, 1, 2,
-    "valid values are 1 (semi-digested), "
-    "2 (fully digested), 8 N-term, 9 C-term",
+  InitIntParam("num_enzyme_termini", 2, 1, 9,
+    "valid values are 1 (semi-digested), 2 (fully digested), 8 N-term, 9 C-term.",
     "option for Comet only", true);
   InitIntParam("allowed_missed_cleavage", 2, 0, 5,
     "maximum value is 5; for enzyme search",
     "option for Comet only", true);
   InitDoubleParam("fragment_bin_tol", 1.000507, 0, BILLION,
-    "binning to use on fragment ions",
+    "binning to use on fragment ions.",
     "option for Comet only", true);
   InitDoubleParam("fragment_bin_offset", 0.40, 0, 1.0,
-    "offset position to start the binning (0.0 to 1.0)",
+    "offset position to start the binning (0.0 to 1.0).",
     "option for Comet only", true);
   InitIntParam("theoretical_fragment_ions", 1, 0, 1,
-    "0=default peak shape, 1=M peak only",
+    "0=default peak shape, 1=M peak only.",
     "option for Comet only", true);
-  InitIntParam("use_A_ions", 0, 0, 1, 
-    "Controls whether or not A-ions are considered in the search (0 - no, 1 - yes)",
+  InitIntParam("use_A_ions", 0, 0, 1,
+    "Controls whether or not A-ions are considered in the search (0 - no, 1 - yes).",
     "option for Comet only", true);
-  InitIntParam("use_B_ions", 1, 0, 1, 
-    "Controls whether or not B-ions are considered in the search (0 - no, 1 - yes)",
+  InitIntParam("use_B_ions", 1, 0, 1,
+    "Controls whether or not B-ions are considered in the search (0 - no, 1 - yes).",
     "option for Comet only", true);
-  InitIntParam("use_C_ions", 0, 0, 1, 
-    "Controls whether or not C-ions are considered in the search (0 - no, 1 - yes)",
+  InitIntParam("use_C_ions", 0, 0, 1,
+    "Controls whether or not C-ions are considered in the search (0 - no, 1 - yes).",
     "option for Comet only", true);
-  InitIntParam("use_X_ions", 0, 0, 1, 
-    "Controls whether or not X-ions are considered in the search (0 - no, 1 - yes)",
+  InitIntParam("use_X_ions", 0, 0, 1,
+    "Controls whether or not X-ions are considered in the search (0 - no, 1 - yes).",
     "option for Comet only", true);
   InitIntParam("use_Y_ions", 1, 0, 1,
-    "Controls whether or not Y-ions are considered in the search (0 - no, 1 - yes)",
+    "Controls whether or not Y-ions are considered in the search (0 - no, 1 - yes).",
     "option for Comet only", true);
-  InitIntParam("use_Z_ions", 0, 0, 1, 
-    "Controls whether or not Z-ions are considered in the search (0 - no, 1 - yes)",
+  InitIntParam("use_Z_ions", 0, 0, 1,
+    "Controls whether or not Z-ions are considered in the search (0 - no, 1 - yes).",
     "option for Comet only", true);
   InitIntParam("use_NL_ions", 1, 0, 1,
-    "0=no, 1= yes to consider NH3/H2O neutral loss peak",
+    "0=no, 1= yes to consider NH3/H2O neutral loss peak.",
     "option for Comet only", true);
   InitIntParam("use_sparse_matrix", 0, 0, 1,
     "Controls whether or not internal sparse matrix data representation is used.",
     "option for Comet only", true);
   InitIntParam("output_sqtfile", 0, 0, 1,
-    "0=no, 1=yes  write sqt file",
+    "0=no, 1=yes  write sqt file.",
     "option for Comet only", true);
   InitIntParam("output_pepxmlfile", 1, 0, 1,
-    "0=no, 1=yes  write pep.xml file",
+    "0=no, 1=yes  write pep.xml file.",
     "option for Comet only", true);
   InitIntParam("output_percolatorfile", 0, 0, 1,
-    "0=no, 1=yes write percolator file",
+    "0=no, 1=yes write percolator file.",
      "option for Comet only", true);
   InitIntParam("output_txtfile", 1, 0, 1,
-    "0=no, 1=yes  write tab-delimited text file",
+    "0=no, 1=yes  write tab-delimited text file.",
     "option for Comet only", true);
   InitIntParam("output_outfiles", 0, 0, 1,
-    "0=no, 1=yes  write .out files",
+    "0=no, 1=yes  write .out files.",
     "option for Comet only", true);
   InitIntParam("print_expect_score", 1, 0, 1,
-    "0=no, 1=yes to replace Sp with expect in out & sqt",
+    "0=no, 1=yes to replace Sp with expect in out & sqt.",
     "option for Comet.", true);
   InitIntParam("num_output_lines", 5, 1, BILLION,
-    "num peptide results to show",
+    "num peptide results to show.",
     "option for Comet.", true);
   InitIntParam("show_fragment_ions", 0, 0, 1,
-    "0=no, 1=yes for out files only",
+    "0=no, 1=yes for out files only.",
     "option for Comet.", true);
   InitIntParam("sample_enzyme_number", 1,0,10, 
-    "Sample enzyme which is possibly different than the one applied to the search."
+    "Sample enzyme which is possibly different than the one applied to the search. "
     "Used to calculate NTT & NMC in pepXML output.",
     "option for Comet. ", true);
   InitStringParam("scan_range", "0 0",
-    "start and scan scan range to search; 0 as 1st entry "
-    "ignores parameter",
+    "start and scan scan range to search; 0 as 1st entry ignores parameter.",
     "option for Comet", true);
   InitStringParam("precursor_charge", "0 0",
     "precursor charge range to analyze; does not override "
-    "mzXML charge; 0 as 1st entry ignores parameter",
+    "mzXML charge; 0 as 1st entry ignores parameter.",
     "option for Comet.", true);
   InitIntParam("ms_level", 2, 2, 3, 
-    "MS level to analyze, valid are levels 2 or 3",
+    "MS level to analyze, valid are levels 2 or 3.",
     "option for Comet. ", true);
   InitStringParam("activation_method", "ALL", "ALL|CID|ECD|ETD|PQD|HCD|IRMPD",
-    "<string>= ALL|CID|ECD|ETD|PQD|HCD|IRMPD.",
+    "Specifies which scan types are searched.",
     "option for Comet. ", true);
   InitStringParam("digest_mass_range", "600.0 5000.0",
-    "MH+ peptide mass range to analyze",
+    "MH+ peptide mass range to analyze.",
     "option for Comet.", true);
   InitIntParam("num_results", 50, 0, BILLION,
-    "number of search hits to store internally",
+    "number of search hits to store internally.",
     "option for Comet.", true);
   InitIntParam("skip_researching", 1, 0, 1,
-    "for '.out' file output only, 0=search everything again, 1=don't search if .out exists",
+    "for '.out' file output only, 0=search everything again, 1=don't search if .out exists.",
     "option for Comet", true);
   InitIntParam("max_fragment_charge", 3, 1, 5,
-    "set maximum fragment charge state to analyze (allowed max 5)",
+    "set maximum fragment charge state to analyze (allowed max 5).",
     "option for Comet", true);
   InitIntParam("max_precursor_charge", 6, 1, 9,
-    "set maximum precursor charge state to analyze (allowed max 9)",
+    "set maximum precursor charge state to analyze (allowed max 9).",
     "option for Comet", true);
   InitIntParam("nucleotide_reading_frame", 0, 0, 9,
-    "0=proteinDB, 1-6, 7=forward three, 8=reverse three, 9=all six",
+    "0=proteinDB, 1-6, 7=forward three, 8=reverse three, 9=all six.",
     "option for Comet", true);
   InitIntParam("clip_nterm_methionine", 0, 0, 1,
-    "0=leave sequences as-is; 1=also consider sequence w/o N-term methionine",
+    "0=leave sequences as-is; 1=also consider sequence w/o N-term methionine.",
     "option for Comet", true);
   InitIntParam("spectrum_batch_size", 0, 0, BILLION,
-    "max. # of spectra to search at a time; 0 to search the "
-    "entire scan range in one loop",
+    "max. # of spectra to search at a time; 0 to search the entire scan range in one loop.",
     "option for Comet", true);
   InitIntParam("minimum_peaks", 10, 1, BILLION,
-    "minimum num. of peaks in spectrum to search",
+    "minimum num. of peaks in spectrum to search.",
     "option for Comet", true);
   InitDoubleParam("minimum_intensity", 0, 0, BILLION,
-    "minimum intensity value to read in",
+    "minimum intensity value to read in.",
     "option for comet. ", true);
   InitIntParam("remove_precursor_peak", 0, 0, 2, 
-    "0=no, 1=yes, 2=all charge reduced precursor peaks (for ETD)",
+    "0=no, 1=yes, 2=all charge reduced precursor peaks (for ETD).",
     "option for Comet. ", true);
   InitDoubleParam("remove_precursor_tolerance", 1.5, -BILLION, BILLION, 
-    "+- Da tolerance for precursor removal",
+    "+- Da tolerance for precursor removal.",
     "option for Comet. ", true);
   InitStringParam("clear_mz_range", "0.0 0.0",
-    "for iTRAQ/TMT type data; will clear out all peaks in the specified m/z range",
+    "for iTRAQ/TMT type data; will clear out all peaks in the specified m/z range.",
     "option for Comet", true);
   for (int i = 1; i <= 9; i++) {
     InitStringParam("variable_mod0" + StringUtils::ToString(i), "",
-                    "Up to 9 variable modifications are supported\n"
-                    "format: <mass> <residues> <0=variable/1=binary> <max mods per a peptide>\n"
-                    "    e.g. 79.966331 STY 0 3",
+                    "Up to 9 variable modifications are supported; format: "
+                    "\"<mass> <residues> <0=variable/1=binary> <max mods per a peptide>\" "
+                    "e.g. 79.966331 STY 0 3.",
                     "option for Comet", true);
   }
   InitIntParam("require_variable_mod", 0, 0, 1,
-    "controls whether the analyzed peptides must contain at least one variable modification", 
+    "controls whether the analyzed peptides must contain at least one variable modification.",
     "option for Comet", true);
   InitIntParam("max_variable_mods_in_peptide", 5, 0, BILLION,
-    "Specifies the total/maximum number of residues that can "
-    "be modified in a peptide",
+    "Specifies the total/maximum number of residues that can be modified in a peptide.",
     "option for Comet", true);
   InitIntParam("override_charge", 0, 0, 1,
     "specifies the whether to override existing precursor charge state information when present "
-    "in the files with the charge range specified by the \"precursor_charge\" parameter",
+    "in the files with the charge range specified by the \"precursor_charge\" parameter.",
     "option for Comet", true);  
   InitDoubleParam("add_Cterm_peptide", 0, 0, BILLION,
-    "Specifiy a static modification to the c-terminus of all peptides",
+    "Specifiy a static modification to the c-terminus of all peptides.",
     "option for Comet", true);
   InitDoubleParam("add_Nterm_peptide", 0, 0, BILLION,
-    "Specify a static modification to the n-terminus of all peptides",
+    "Specify a static modification to the n-terminus of all peptides.",
     "option for Comet", true);
   InitDoubleParam("add_Cterm_protein", 0, 0, BILLION,
-    "Specify a static modification to the c-terminal peptide of each protein",
+    "Specify a static modification to the c-terminal peptide of each protein.",
     "option for Comet", true);
   InitDoubleParam("add_Nterm_protein", 0, 0, BILLION,
-    "Specify a static modification to the n-terminal peptide of each protein",
+    "Specify a static modification to the n-terminal peptide of each protein.",
     "option for Comet", true);
   for (char c = 'A'; c <= 'Z'; c++) {
     string aaString = string(1, c);
@@ -915,7 +913,7 @@ void Params::Initialize() {
     aaName = aaName.empty() ? "user_amino_acid" : StringUtils::Replace(aaName, " ", "_");
     InitDoubleParam("add_" + aaString + "_" + aaName,
                     c != 'C' ? 0 : CYSTEINE_DEFAULT, 0, BILLION,
-                    "Specify a static modification to the residue " + aaString,
+                    "Specify a static modification to the residue " + aaString + ".",
                     "option for Comet", true);
   }
   // **** q-ranker-barista arguments ****
@@ -1563,6 +1561,92 @@ void Params::Categorize() {
   container_.AddCategory("Cross-linking parameters", items);
 
   items.clear();
+  items.insert("decoy_search");
+  container_.AddCategory("Database", items);
+
+  items.clear();
+  items.insert("num_threads");
+  container_.AddCategory("CPU threads", items);
+
+  items.clear();
+  items.insert("peptide_mass_tolerance");
+  items.insert("peptide_mass_units");
+  items.insert("mass_type_parent");
+  items.insert("mass_type_fragment");
+  items.insert("isotope_error");
+  container_.AddCategory("Masses", items);
+
+  items.clear();
+  items.insert("search_enzyme_number");
+  items.insert("num_enzyme_termini");
+  items.insert("allowed_missed_cleavage");
+  container_.AddCategory("Search enzyme", items);
+
+  items.clear();
+  items.insert("fragment_bin_tol");
+  items.insert("fragment_bin_offset");
+  items.insert("theoretical_fragment_ions");
+  items.insert("use_A_ions");
+  items.insert("use_B_ions");
+  items.insert("use_C_ions");
+  items.insert("use_X_ions");
+  items.insert("use_Y_ions");
+  items.insert("use_Z_ions");
+  items.insert("use_NL_ions");
+  items.insert("use_sparse_matrix");
+  container_.AddCategory("Fragment ions", items);
+
+  items.clear();
+  items.insert("scan_range");
+  items.insert("precursor_charge");
+  items.insert("override_charge");
+  items.insert("ms_level");
+  items.insert("activation_method");
+  container_.AddCategory("mzXML/mzML parameters", items);
+
+  items.clear();
+  items.insert("digest_mass_range");
+  items.insert("num_results");
+  items.insert("skip_researching");
+  items.insert("max_fragment_charge");
+  items.insert("max_precursor_charge");
+  items.insert("nucleotide_reading_frame");
+  items.insert("clip_nterm_methionine");
+  items.insert("spectrum_batch_size");
+  items.insert("decoy_prefix");
+  items.insert("output_suffix");
+  container_.AddCategory("Misc. parameters", items);
+
+  items.clear();
+  items.insert("minimum_peaks");
+  items.insert("minimum_intensity");
+  items.insert("remove_precursor_peak");
+  items.insert("remove_precursor_tolerance");
+  items.insert("clear_mz_range");
+  container_.AddCategory("Spectral processing", items);
+
+  items.clear();
+  for (int i = 1; i <= 9; i++) {
+    items.insert("variable_mod0" + StringUtils::ToString(i));
+  }
+  items.insert("max_variable_mods_in_peptide");
+  items.insert("require_variable_mod");
+  container_.AddCategory("Variable modifications", items);
+
+  items.clear();
+  items.insert("add_Cterm_peptide");
+  items.insert("add_Nterm_peptide");
+  items.insert("add_Cterm_protein");
+  items.insert("add_Nterm_protein");
+  for (char c = 'A'; c <= 'Z'; c++) {
+    string aaString = string(1, c);
+    string aaName = AminoAcidUtil::GetName(c);
+    aaName = aaName.empty() ? "user_amino_acid" : StringUtils::Replace(aaName, " ", "_");
+    items.insert("add_" + aaString + "_" + aaName);
+  }
+  container_.AddCategory("Static modifications", items);
+
+  items.clear();
   items.insert("spectrum-format");
   items.insert("spectrum-parser");
   items.insert("list-of-files");
@@ -1581,6 +1665,15 @@ void Params::Categorize() {
   items.insert("mzid-output");
   items.insert("pin-output");
   items.insert("pout-output");
+  items.insert("output_sqtfile");
+  items.insert("output_txtfile");
+  items.insert("output_pepxmlfile");
+  items.insert("output_percolatorfile");
+  items.insert("output_outfiles");
+  items.insert("print_expect_score");
+  items.insert("num_output_lines");
+  items.insert("show_fragment_ions");
+  items.insert("sample_enzyme_number");
   items.insert("feature-file");
   items.insert("decoy-xml-output");
   items.insert("output-weights");
@@ -2368,7 +2461,7 @@ void StringParam::Set(const string& value) {
 }
 string StringParam::From(bool b) { return b ? "true" : "false"; }
 string StringParam::From(int i) { return StringUtils::ToString(i); }
-string StringParam::From(double d) { return StringUtils::ToString(d, 6); }
+string StringParam::From(double d) { return StringUtils::ToString(d); }
 //
 // ArgParam
 //
