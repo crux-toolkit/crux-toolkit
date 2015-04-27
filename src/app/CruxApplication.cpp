@@ -205,8 +205,10 @@ string CruxApplication::getUsage(
           << StringUtils::LineFormat(Params::ProcessHtmlDocTags(Params::GetUsage(*i)) +
                                      " Default = " + defaultString + ".", 80, 5);
   }
-  usage << endl << endl
-        << "Additional parameters are documented in the online documentation.";
+  if (options.empty()) {
+    usage << endl
+          << "  This command does not support any optional parameters.";
+  }
   return usage.str();
 }
 

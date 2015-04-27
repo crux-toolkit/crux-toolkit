@@ -258,6 +258,9 @@ void CreateDocs::generateToolHtml(
     makeReplacements(&single, replaceMap);
     options += single;
   }
+  if (options.empty()) {
+    options = TOOL_NO_OPTIONS_TEMPLATE;
+  }
 
   map<string, string> replacements;
   replacements["#NAME#"] = appName;
@@ -385,6 +388,11 @@ const string CreateDocs::TOOL_OPTION_CATEGORY_TEMPLATE =
   "<h3><!-- #NAME# --></h3>\n"
   "<ul>\n"
   "<!-- #OPTIONS# --></ul>\n"
+  "</li>\n";
+
+const string CreateDocs::TOOL_NO_OPTIONS_TEMPLATE =
+  "<li>\n"
+  "<p>This command does not support any optional parameters.</p>\n"
   "</li>\n";
 
 const string CreateDocs::TOOL_OPTION_TEMPLATE =
