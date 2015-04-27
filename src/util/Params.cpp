@@ -717,11 +717,11 @@ void Params::Initialize() {
    * Comet parameters
    */
   InitArgParam("input spectra",
-    "The name of file (in MS2 format) from which to parse the spectra.");
-  InitArgParam("database_name",
+    "The name of the file (in MS2 format) from which to parse the spectra.");
+  InitArgParam("database name",
     "A full or relative path to the sequence database, "
     "in FASTA format, to search. Example databases include "
-    "RefSeq or UniProt.  Database can contain amino acid "
+    "RefSeq or UniProt.  The database can contain amino acid "
     "sequences or nucleic acid sequences. If sequences are "
     "amino acid sequences, set the parameter \"nucleotide_reading_frame = 0\". "
     "If the sequences are nucleic acid sequences, you must instruct Comet to "
@@ -996,7 +996,7 @@ void Params::Initialize() {
     "is required. However if --estimation-method is tdc, then the columns \"scan\" and "
     "\"charge\" are required, as well as \"protein ID\" if the search was run with "
     "concat=F. Furthermore, if the --peptide-level option is set to T, then the column "
-    "\"peptide\" must be included, and if sidak is T, then the \"distinct "
+    "\"peptide\" must be included, and if --sidak is set to T, then the \"distinct "
     "matches/spectrum\" column must be included.[[html:<br>Note that multiple files can "
     "also be provided either on the command line or using the --list-of-files option.<br>"
     "Decoys can be provided in two ways: either as a separate file or embedded within the "
@@ -1005,7 +1005,7 @@ void Params::Initialize() {
     "then Crux will search for decoys in a separate file. The decoy file name is constructed "
     "from the target file name by replacing \"target\" with \"decoy\". For example, if "
     "tide-search.target.txt is provided as input, then Crux will search for a corresponding "
-    "file named tide-search.decoy.txt.<br>Note that if decoys are provided in a separate "
+    "file named \"tide-search.decoy.txt.\"<br>Note that if decoys are provided in a separate "
     "file, then assign-confidence will first carry out a target-decoy competition, "
     "identifying corresponding pairs of targets and decoys and eliminating the one with "
     "the worse score. In this case, the column/tag called \"delta_cn\" will be eliminated "
@@ -1431,9 +1431,9 @@ void Params::Initialize() {
     "Available for crux extract-rows", true);
   // create-docs
   InitArgParam("tool name",
-    "Specifies the tool to generate documentation for. If value is 'list', "
-    "a list of available tools will be given. If value is 'default-params', "
-    "a default parameter file will be given.");
+    "Specifies the Crux tool to generate documentation for. If the value is "
+    "'list', then a list of available tools will be given. If the value is "
+    "'default-params', then a default parameter file will be given.");
   InitStringParam("doc-template", "",
     "Specifies the main template to be used for generating documentation.",
     "Available for crux create-docs", false);

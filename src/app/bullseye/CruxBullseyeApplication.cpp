@@ -182,7 +182,7 @@ string CruxBullseyeApplication::getDescription() const {
     "will reduce the chances of multiple PPIDs being assigned.</p><p>Bullseye "
     "uses Hardklör, so all of the <a href=\"hardklor.html\">Hardklör "
     "parameters</a> may also be used with Bullseye. For users familiar with "
-    "the standalone version of Bullseye, the parameter mapping are "
+    "the standalone version of Bullseye, the parameter mapping is "
     "<a href=\"bullseye_standalone_to_crux.html\">here</a>.</p>]]";
 }
 

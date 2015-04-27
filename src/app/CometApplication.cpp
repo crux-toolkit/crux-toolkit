@@ -137,7 +137,7 @@ void CometApplication::setCometParameters(
   string basename = make_file_path(getName());
   searchMgr.SetOutputFileBaseName(basename.c_str());
   
-  searchMgr.SetParam("database_name", get_string_parameter("database_name"), get_string_parameter("database_name"));
+  searchMgr.SetParam("database name", get_string_parameter("database name"), get_string_parameter("database name"));
   searchMgr.SetParam("decoy_prefix", get_string_parameter("decoy_prefix"), get_string_parameter("decoy_prefix"));
   searchMgr.SetParam("output_suffix", get_string_parameter("output_suffix"), get_string_parameter("output_suffix"));
   searchMgr.SetParam("nucleotide_reading_frame", get_string_parameter("nucleotide_reading_frame"), get_int_parameter("nucleotide_reading_frame"));
@@ -345,7 +345,7 @@ string CometApplication::getDescription() const {
 vector<string> CometApplication::getArgs() const {
   string arr[] = {
     "input spectra",
-    "database_name"
+    "database name"
   };
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }
