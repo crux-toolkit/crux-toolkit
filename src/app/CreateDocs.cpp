@@ -310,7 +310,7 @@ string CreateDocs::getName() const {
 }
 
 string CreateDocs::getDescription() const {
-  return "[[html:<p>]]Creates documentation.[[html:</p>]]";
+  return "[[html:<p>]]This command prints to standard output an HTML formatted version of the documentation for a specified Crux command.[[html:</p>]]";
 }
 
 vector<string> CreateDocs::getArgs() const {
@@ -327,7 +327,7 @@ vector<string> CreateDocs::getOptions() const {
 map<string, string> CreateDocs::getOutputs() const {
   map<string, string> outputs;
   outputs["stdout"] =
-    "HTML documentation for the specified tool.";
+    "The command prints to standard output the HTML documentation for the specified Crux tool.";
   return outputs;
 }
 

@@ -45,7 +45,7 @@ string ComputeQValues::getDescription() const {
   return
     "[[nohtml:Assign two types of statistical confidence measures (q-values "
     "and posterior error probabilities) to each PSM in a given set.]]"
-    "[[html:<p>Given a target and decoy scores, estimate a q-value for each "
+    "[[html:<p>Given target and decoy scores, estimate a q-value for each "
     "target score. The q-value is analogous to a p-value but incorporates "
     "false discovery rate multiple testing correction. The q-value associated "
     "with a score threshold T is defined as the minimal false discovery rate "
@@ -69,11 +69,14 @@ string ComputeQValues::getDescription() const {
     "Keich, Attila Kertesz-Farkas and William Stafford Noble. \"An improved "
     "false discovery rate estimation procedure for shotgun proteomics.\" "
     "Submitted.</blockquote><p>Note that the mix-max procedure requires as "
-    "input calibrated scores.</p><p>The mix-max procedure requires that scores "
+    "input calibrated scores, such as Comet E-values or p-values produced "
+    "using Tide-s <code>exact-p-value</code> option.</p>"
+    "<p>The mix-max procedure requires that scores "
     "are reported from separate target and decoy searches. Thus, this approach "
     "is incompatible with a search that is run using the <code>--concat T"
     "</code> option to <code>tide-search</code> or the <code>--decoy_search 2"
-    "</code> option to <code>comet</code>. The TDC procedure can take as input "
+    "</code> option to <code>comet</code>. On the other hand, the TDC "
+    "procedure can take as input "
     "searches conducted in either mode (concatenated or separate). If given "
     "separate search results and asked to do TDC estimation, <code>"
     "assign-confidence</code> will carry out the target-decoy competition as "
@@ -125,8 +128,8 @@ map<string, string> ComputeQValues::getOutputs() const {
   map<string, string> outputs;
   outputs["assign-confidence.target.txt"] =
     "a <a href=\"txt-format.html\">tab-delimited text file</a> that contains the "
-    "targets, sorted by score. The file will contain one new column, named \""
-    "<method>q-value\", where <method> is either \"tdc\" or \"mix-max\".";
+    "targets, sorted by score. The file will contain one new column, named "
+    "\"&lt;method&gt; q-value\", where &lt;method&gt; is either \"tdc\" or \"mix-max\".";
   outputs["assign-confidence.log.txt"] =
     "a log file containing a copy of all messages that were printed to stderr.";
   outputs["assign-confidence.params.txt"] =
