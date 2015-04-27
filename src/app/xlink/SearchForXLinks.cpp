@@ -71,14 +71,7 @@ string SearchForXLinks::getDescription() const {
     "http://noble.gs.washington.edu/papers/mcilwain2010detecting.html\">"
     "&quot;Detecting cross-linked peptides by searching against a database of "
     "cross-linked peptide pairs.&quot;</a> <em>Journal of Proteome Research"
-    "</em>. 2010.</blockquote><p><strong>Modifications:</strong> Currently, "
-    "<code>crux search-for-xlinks</code> supports static modifications (a "
-    "change of mass applied to a given amino acid in every peptide in which it "
-    "occurs). By default, a static modification of +57 Da to cysteine (C) is "
-    "applied. Variable modifications (allowing peptides to be generated with "
-    "and without a mass change to a given amino acid), are supported when <code>"
-    "use-old-xlink=F</code>. Static and variable modifications can be "
-    "specified in the parameter file, as described below.</p>]]";
+    "</em>. 2010.</blockquote>]]";
 }
 
 /**
