@@ -106,11 +106,9 @@ unsigned int DelimitedFileReader::numRows() {
     istream_ptr_->seekg(istream_begin_, ios::beg);
     
     string temp_str;
-    bool has_next = getline(*istream_ptr_,temp_str) != NULL;
 
-    while (has_next) {
+    while (getline(*istream_ptr_,temp_str)) {
       num_rows_++;
-      has_next = getline(*istream_ptr_, temp_str) != NULL;
     }
     
     if (has_header_) {
@@ -183,12 +181,12 @@ void DelimitedFileReader::loadData() {
   column_mismatch_warned_ = false;
   istream_begin_ = istream_ptr_->tellg(); 
 
-  has_next_ = getline(*istream_ptr_, next_data_string_) != NULL;
+  has_next_ = !getline(*istream_ptr_, next_data_string_).fail();
   
   if (has_header_) {
     if (has_next_) {
       column_names_ = StringUtils::Split(next_data_string_, delimiter_);
-      has_next_ = getline(*istream_ptr_, next_data_string_) != NULL;
+      has_next_ = !getline(*istream_ptr_, next_data_string_).fail();
     }
     else {
       carp(CARP_WARNING,"No data/headers found!");
@@ -555,7 +553,7 @@ void DelimitedFileReader::next() {
     }
 
     //read next line
-    has_next_ = getline(*istream_ptr_, next_data_string_) != NULL;
+    has_next_ = !getline(*istream_ptr_, next_data_string_).fail();
     has_current_ = true;
   } else {
     has_current_ = false;

@@ -76,7 +76,7 @@ void LineFileReader::loadData(
     carp(CARP_ERROR, "Opening %s or reading failed", file_name);
     return;
   } else {
-    has_next_ = getline(*file_ptr_, next_data_string_) != NULL;
+    has_next_ = !getline(*file_ptr_, next_data_string_).fail();
     carp(CARP_DEBUG, "first line:%s",next_data_string_.c_str());
     if (!has_next_) {
       carp(CARP_WARNING,"No data found!");
@@ -129,7 +129,7 @@ const string& LineFileReader::next() {
     current_row_++;
     current_data_string_ = next_data_string_;
     //read next line
-    has_next_ = getline(*file_ptr_, next_data_string_) != NULL;
+    has_next_ = !getline(*file_ptr_, next_data_string_).fail();
     has_current_ = true;
   } else {
     has_current_ = false;

@@ -17,8 +17,6 @@
 
 // Rename some functions to the windows version
 #define access _access
-#define isfinite _finite
-#define isnan _isnan
 #define pclose _pclose
 #define popen _popen
 #define chdir _chdir
@@ -62,9 +60,6 @@ int scandir(
  );
 
 int alphasort(const void *d1, const void *d2);
-
-int isinf(FLOAT_T x);
-float log2(float x);
 
 #endif
 #endif

@@ -113,63 +113,22 @@ if (WIN32 AND NOT CYGWIN)
   ExternalProject_Add(
     percolator
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
-    URL http://noble.gs.washington.edu/proj/crux/download/percolator-2.07.tar.gz
-    URL_MD5 4a02ecc2a05d3294eae4aa44c8cb2c0e
+    URL http://cruxtoolkit.sourceforge.net/download/percolator-rel-2-09.tar.gz
+    URL_MD5 b965041b1cc744cc4d75dfdc3b3ffea0
+    DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/downloads
     CMAKE_ARGS -DCMAKE_VERBOSE_MAKEFILE=ON
       -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}
       -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}
       -DCMAKE_BUILD_TYPE=${CMAKE_CFG_INTDIR}
     PATCH_COMMAND ""
   )
-  # On Windows we use this to patch percolator
-  ExternalProject_Add_Step(
-    percolator
-    windows_patch
-    COMMAND ${CMAKE_COMMAND} -E copy 
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/windows/FidoInterface.cpp
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/FidoInterface.cpp
-    COMMAND ${CMAKE_COMMAND} -E copy 
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/windows/ProteinFDRestimator.cpp
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/ProteinFDRestimator.cpp
-    COMMAND ${CMAKE_COMMAND} -E copy 
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/windows/ProteinProbEstimator.cpp
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/ProteinProbEstimator.cpp
-    COMMAND ${CMAKE_COMMAND} -E copy 
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_find_boost/CMakeLists.txt 
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
-    COMMAND ${CMAKE_COMMAND} -E copy 
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/windows/fido/Numerical.h
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/fido/Numerical.h
-    COMMAND ${CMAKE_COMMAND} -E copy 
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/windows/fido/Numerical.cpp
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/fido/Numerical.cpp
-    COMMAND ${CMAKE_COMMAND} -E copy 
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/windows/fido/GroupPowerBigraph.cpp
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/fido/GroupPowerBigraph.cpp
-    COMMAND ${CMAKE_COMMAND} -E copy 
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_mass_cols/DataSet.cpp
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
-    COMMAND ${CMAKE_COMMAND} -E copy 
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_mass_cols/DataSet.h
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
-    COMMAND ${CMAKE_COMMAND} -E copy 
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_mass_cols/PSMDescription.cpp
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
-    COMMAND ${CMAKE_COMMAND} -E copy 
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_mass_cols/SetHandler.h
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
-    COMMAND ${CMAKE_COMMAND} -E copy 
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_mass_cols/SetHandler.cpp
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
-    DEPENDEES patch
-    DEPENDERS configure
-  )
 elseif (APPLE)
   ExternalProject_Add(
     percolator
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
-    URL http://noble.gs.washington.edu/proj/crux/download/percolator-2.07.tar.gz
-    URL_MD5 4a02ecc2a05d3294eae4aa44c8cb2c0e
+    URL http://cruxtoolkit.sourceforge.net/download/percolator-rel-2-09.tar.gz
+    URL_MD5 b965041b1cc744cc4d75dfdc3b3ffea0
+    DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/downloads
     CMAKE_ARGS -DCMAKE_VERBOSE_MAKEFILE=ON 
       -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR} 
       -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}
@@ -183,24 +142,6 @@ elseif (APPLE)
     COMMAND ${CMAKE_COMMAND} -E copy 
       ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_common/CommonCMake.txt 
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/
-    COMMAND ${CMAKE_COMMAND} -E copy 
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_find_boost/CMakeLists.txt 
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
-    COMMAND ${CMAKE_COMMAND} -E copy 
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_mass_cols/DataSet.cpp
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
-    COMMAND ${CMAKE_COMMAND} -E copy 
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_mass_cols/DataSet.h
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
-    COMMAND ${CMAKE_COMMAND} -E copy 
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_mass_cols/PSMDescription.cpp
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
-    COMMAND ${CMAKE_COMMAND} -E copy 
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_mass_cols/SetHandler.h
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
-    COMMAND ${CMAKE_COMMAND} -E copy 
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_mass_cols/SetHandler.cpp
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
     DEPENDEES patch
     DEPENDERS configure
   )
@@ -208,20 +149,16 @@ else(APPLE)
   ExternalProject_Add(
     percolator
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
-    URL http://noble.gs.washington.edu/proj/crux/download/percolator-2.07.tar.gz
-    URL_MD5 4a02ecc2a05d3294eae4aa44c8cb2c0e
+    URL http://cruxtoolkit.sourceforge.net/download/percolator-rel-2-09.tar.gz
+    URL_MD5 b965041b1cc744cc4d75dfdc3b3ffea0
+    DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/downloads
     CMAKE_ARGS -DCMAKE_VERBOSE_MAKEFILE=ON
       -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}
       -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}
       -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
     PATCH_COMMAND cp 
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_find_boost/CMakeLists.txt 
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_mass_cols/DataSet.cpp
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_mass_cols/DataSet.h
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_mass_cols/PSMDescription.cpp
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_mass_cols/SetHandler.h
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_mass_cols/SetHandler.cpp
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_common/CommonCMake.txt
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/
   )
 endif (WIN32 AND NOT CYGWIN)
 
@@ -249,13 +186,24 @@ elseif (WIN32 AND NOT CYGWIN)
     URL_MD5 a72001a9067a4c2c4e0e836d0f92ece4
     DOWNLOAD_DIR downloads
     PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory 
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/protobuf/vs2010/ 
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProtocolBuffers/vsprojects/
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/protobuf/vsprojects/ 
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProtocolBuffers/vsprojects/ &&
+      ${CMAKE_COMMAND} -E copy_directory 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/protobuf/src/ 
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProtocolBuffers/src/
     CONFIGURE_COMMAND ""
     BUILD_COMMAND msbuild 
       /p:Configuration=${CMAKE_CFG_INTDIR}
       /p:Platform=${MSBUILD_PLATFORM} 
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProtocolBuffers/vsprojects/protobuf.sln
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProtocolBuffers/vsprojects/libprotobuf.vcxproj &&
+      msbuild
+      /p:Configuration=${CMAKE_CFG_INTDIR}
+      /p:Platform=${MSBUILD_PLATFORM} 
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProtocolBuffers/vsprojects/libprotoc.vcxproj &&
+      msbuild
+      /p:Configuration=${CMAKE_CFG_INTDIR}
+      /p:Platform=${MSBUILD_PLATFORM} 
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProtocolBuffers/vsprojects/protoc.vcxproj
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE 1
   )
@@ -263,10 +211,10 @@ elseif (WIN32 AND NOT CYGWIN)
     ProtocolBuffers
     copy_binaries
     COMMAND ${CMAKE_COMMAND} -E copy 
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProtocolBuffers/vsprojects/${CMAKE_CFG_INTDIR}/protoc.exe
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProtocolBuffers/vsprojects/${MSBUILD_PLATFORM}/${CMAKE_CFG_INTDIR}/protoc.exe
       ${CMAKE_CURRENT_BINARY_DIR}/bin/protoc.exe
     COMMAND ${CMAKE_COMMAND} -E copy 
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProtocolBuffers/vsprojects/${CMAKE_CFG_INTDIR}/libprotobuf.lib
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProtocolBuffers/vsprojects/${MSBUILD_PLATFORM}/${CMAKE_CFG_INTDIR}/libprotobuf.lib
       ${CMAKE_CURRENT_BINARY_DIR}/lib/protobuf.lib
     DEPENDEES install
   )
@@ -437,8 +385,8 @@ if (WIN32 AND NOT CYGWIN)
     ${CMAKE_CURRENT_BINARY_DIR}/lib/MassSpecDataReader.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/MIDAC.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/MSFileReader.XRawfile2.dll
-    ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/pwiz_aux/msrc/utility/vendor_api/Waters/vc12_x86/cdt.dll
-    ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/pwiz_aux/msrc/utility/vendor_api/Waters/vc12_x86/MassLynxRaw.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/pwiz_aux/msrc/utility/vendor_api/Waters/vc12_${MSBUILD_PLATFORM}/cdt.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/pwiz_aux/msrc/utility/vendor_api/Waters/vc12_${MSBUILD_PLATFORM}/MassLynxRaw.dll
   )
   install (FILES ${vendor_binaries} DESTINATION bin)
 endif (WIN32 AND NOT CYGWIN)
