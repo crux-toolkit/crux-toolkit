@@ -165,8 +165,9 @@ vector<string> StatColumn::getOptions() const {
 map<string, string> StatColumn::getOutputs() const {
   map<string, string> outputs;
   outputs["stdout"] =
-    "the number of rows, the minimum, maximum, sum, average, and median of the "
-    "data values in the specified column.";
+    "The program prints to standard output the following statistics for "
+    "the specified column: number of rows, minimum, maximum, sum, average, "
+    "and median of the data values.";
   return outputs;
 }
 
