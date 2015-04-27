@@ -6,6 +6,7 @@
 #include <math.h>
 #include <iostream>
 #include <algorithm>
+#include <functional>
 #include "spectrum.pb.h"
 #include "spectrum_collection.h"
 #include "mass_constants.h"

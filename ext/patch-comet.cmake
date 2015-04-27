@@ -37,4 +37,13 @@ if (WIN32 AND NOT CYGWIN)
         RESULT_VARIABLE status
     )
     check_status(status)
+    message(${SOURCE_DIR}/patches/comet/MSToolkit/src/mzParser/MSNumpress.cpp)
+    message(${BINARY_DIR}/build/src/comet/MSToolkit/src/mzParser/MSNumpress.cpp)
+    execute_process(
+      COMMAND ${CMAKE_COMMAND} -E copy 
+        ${SOURCE_DIR}/patches/comet/MSToolkit/src/mzParser/MSNumpress.cpp
+        ${BINARY_DIR}/build/src/comet/MSToolkit/src/mzParser/MSNumpress.cpp
+        RESULT_VARIABLE status
+    )
+    check_status(status)
 endif (WIN32 AND NOT CYGWIN)
