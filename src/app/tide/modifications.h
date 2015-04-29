@@ -4,7 +4,7 @@
 #include<algorithm>
 #include<iostream>
 #include<stdio.h>
-#ifdef _MSC_VER
+#if defined ( _MSC_VER ) || defined ( DARWIN )
 #include<unordered_map>
 #else
 #include<tr1/unordered_map>
@@ -75,7 +75,11 @@ class VariableModTable {
       return true;
     vector<double>& UD = unique_delta_;
 
+#if defined _MSC_VER || defined DARWIN
+    unordered_map<double, int> deltas;
+#else
     tr1::unordered_map<double, int> deltas;
+#endif
     for (int i = 0; i < UD.size(); ++i)
       deltas[UD[i]] = i;
 
