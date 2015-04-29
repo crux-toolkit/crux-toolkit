@@ -1,6 +1,4 @@
 #include "CHardklorSetting.h"
-#include <stdio.h>
-#include <string.h>
 
 using namespace std;
 
@@ -20,9 +18,8 @@ CHardklorSetting::CHardklorSetting(){
   window.dUpper=0;
   strcpy(inFile,"");
   strcpy(outFile,"");
-	strcpy(MercuryFile,"ISOTOPE.DAT");
-  //strcpy(HardklorFile,"Hardklor.dat");
-  HardklorFile[0]='\0';
+	strcpy(MercuryFile,"");
+  strcpy(HardklorFile,"");
 	algorithm=FastFewestPeptides;
 	variant = new vector<CHardklorVariant>;
 
@@ -43,13 +40,16 @@ CHardklorSetting::CHardklorSetting(){
 	centroid=false;
 	staticSN=true;
   xml=false;
+	reducedOutput=false;
 
-  ppMatch=1;
-  ppWin=1;
+  //ppMatch=1;
+  //ppWin=1;
   //noiseMatch=1;
   //noiseWindow=3;
   ppm=10.0;
-  sna=0;
+  //sna=0;
+	boxcar=0;
+	boxcarFilter=0;
 
   //rawAvg=false;
   //rawAvgWidth=1;
@@ -59,7 +59,7 @@ CHardklorSetting::CHardklorSetting(){
 }
 
 CHardklorSetting::CHardklorSetting(const CHardklorSetting& c){
-  size_t i;
+  int i;
 
 	//Copy variant list
   variant = new vector<CHardklorVariant>;
@@ -101,13 +101,16 @@ CHardklorSetting::CHardklorSetting(const CHardklorSetting& c){
 	centroid = c.centroid;
 	staticSN = c.staticSN;
   xml = c.xml;
+	reducedOutput = c.reducedOutput;
 
-  ppMatch=c.ppMatch;
-  ppWin=c.ppWin;
+  //ppMatch=c.ppMatch;
+  //ppWin=c.ppWin;
   //noiseMatch=c.noiseMatch;
   //noiseWindow=c.noiseWindow;
   ppm=c.ppm;
-  sna=c.sna;
+  //sna=c.sna;
+	boxcar=c.boxcar;
+	boxcarFilter=c.boxcarFilter;
 
   //rawAvg=c.rawAvg;
   //rawAvgWidth=c.rawAvgWidth;
@@ -120,7 +123,7 @@ CHardklorSetting::~CHardklorSetting(){
 }
 
 CHardklorSetting& CHardklorSetting::operator=(const CHardklorSetting& c){
-  size_t i;
+  int i;
   if (this!=&c){
 		delete variant;
     variant = new vector<CHardklorVariant>;
@@ -162,13 +165,16 @@ CHardklorSetting& CHardklorSetting::operator=(const CHardklorSetting& c){
 		centroid = c.centroid;
 		staticSN = c.staticSN;
     xml = c.xml;
+		reducedOutput = c.reducedOutput;
 
-    ppMatch=c.ppMatch;
-    ppWin=c.ppWin;
+    //ppMatch=c.ppMatch;
+    //ppWin=c.ppWin;
     //noiseMatch=c.noiseMatch;
     //noiseWindow=c.noiseWindow;
     ppm=c.ppm;
-    sna=c.sna;
+    //sna=c.sna;
+		boxcar=c.boxcar;
+		boxcarFilter=c.boxcarFilter;
 
     //rawAvg=c.rawAvg;
     //rawAvgWidth=c.rawAvgWidth;
@@ -185,27 +191,5 @@ void CHardklorSetting::clearVariant(){
 }
 
 void CHardklorSetting::out(char *s){
-  sprintf(s,"minCh:%d maxCh:%d d:%d p:%d s:%d corr:%lf sn:%lf res:%d,%lf win:%lf sl:%d v:%d nb:%d i:%d snWin:%lf mF:%d a:%d cdm:%c sc:%i %i w:%lf %lf\n",
-    minCharge,
-    maxCharge,
-    depth,
-    peptide,
-    smooth,
-    corr,
-    sn,
-    msType,
-    res400,
-    winSize,
-    sl,
-    (int)variant->size(),
-    noBase,
-    iAnalysis,
-    snWindow,
-    mzXMLFilter,
-    algorithm,
-    chargeMode,
-    scan.iLower,
-    scan.iUpper,
-    window.dLower,
-    window.dUpper);
+  sprintf(s,"minCh:%d maxCh:%d d:%d p:%d s:%d corr:%lf sn:%lf res:%d,%lf win:%lf sl:%d v:%d\n",minCharge,maxCharge,depth,peptide,smooth,corr,sn,msType,res400,winSize,sl,variant->size());
 }

@@ -37,7 +37,7 @@ class CSpecAnalyze {
   void MakePredictions(vector<CHardklorVariant>& var);
   int  PredictPeptides();
   void removePeaksBelowSN();
-  void setSpectrum(const Spectrum& s);
+  void setSpectrum(Spectrum& s);
 	void setAveragine(CAveragine *a);
 	void setMercury(CMercury8 *m);
 	void setParams(const CHardklorSetting& sett);
@@ -58,6 +58,7 @@ class CSpecAnalyze {
  private:
 
   //Functions
+	int    binarySearch(double mz);
 	double calcFWHM(double mz);
   void   FirstDerivativePeaks(Spectrum&,int);
 	void   FirstDerivativePeaks(Spectrum&,int,int,int);
@@ -66,7 +67,7 @@ class CSpecAnalyze {
   //Data members
   CAveragine       *averagine;
 	CMercury8        *mercury;
-  Spectrum         spec;
+  Spectrum         *spec;
 	CHardklorSetting userParams;
 	
 };

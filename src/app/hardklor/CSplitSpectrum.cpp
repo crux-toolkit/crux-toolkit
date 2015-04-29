@@ -55,7 +55,7 @@ void CSplitSpectrum::NoSplitAnalysis(){
 		for(i=0;i<wholeSpec->size();i++){
 			if(userParams.window.dLower>0 || userParams.window.dUpper>0){
 				if(wholeSpec->at(i).mz<userParams.window.dLower || wholeSpec->at(i).mz>userParams.window.dUpper) continue;
-			};
+			}
 			goodPeaks.peaks.add(wholeSpec->at(i));
 			s2n->push_back(0);
 		}
@@ -194,12 +194,12 @@ void CSplitSpectrum::SinglePassAnalysis(double gapSize){
     if(i==wholeSpec->size()){
       endA=i-1;
       break;
-    };
+    }
 
     if(wholeSpec->at(i).mz >= userParams.window.dUpper && userParams.window.dUpper>0){
       endA=i;
       break;
-    };
+    }
 
     if(wholeSpec->at(i).mz >= mzStartA && startA == -1) startA=i;
 
@@ -217,24 +217,24 @@ void CSplitSpectrum::SinglePassAnalysis(double gapSize){
 					sa.peaks = signalToNoise(*wholeSpec,startA,endA,(float)userParams.sn,&sa.S2NCutoff,true,true);
 				} else {
 					sa.peaks = signalToNoise(*wholeSpec,startA,endA,(float)userParams.sn,&sa.S2NCutoff);
-				};
+				}
 				sa.FindPeaks();
 
 				for(j=0;j<sa.peaks.size();j++) {
 					goodPeaks.peaks.add(sa.peaks.at(j));
 					s2n->push_back(sa.S2NCutoff);
-				};
+				}
 
-			};
+			}
 
 	    startA=-1;
 		  endA=0;
 			mzStartA = mzEndA + 0.000000001;
       mzEndA = mzEndA + gapSize;
 
-    };
+    }
 
-	};
+	}
 	
 	//Check last window
 	if(endA-startA>1){
@@ -247,17 +247,17 @@ void CSplitSpectrum::SinglePassAnalysis(double gapSize){
 			sa.peaks = signalToNoise(*wholeSpec,startA,endA,(float)userParams.sn,&sa.S2NCutoff,true,true);
 		} else {
 			sa.peaks = signalToNoise(*wholeSpec,startA,endA,(float)userParams.sn,&sa.S2NCutoff);
-		};
+		}
 		sa.FindPeaks();
 
 		for(j=0;j<sa.peaks.size();j++) {
 			goodPeaks.peaks.add(sa.peaks.at(j));
 			s2n->push_back(sa.S2NCutoff);
-		};
+		}
 
-	};
+	}
 
-};
+}
 
 /* 
 	 This function sums (in m/z order) the A and B peak sets. At each peak, it records the
@@ -520,7 +520,7 @@ void CSplitSpectrum::IntersectionAnalysis(){
 	 of peaks is cut between the two peaks that have a maximum distance from each other.
 */
 void CSplitSpectrum::MakeAnalysis(double winSize){
-	int i,j=0,k;
+	int i,j;
 	CSpecAnalyze sa;
 
 	double startMZ;
@@ -529,7 +529,6 @@ void CSplitSpectrum::MakeAnalysis(double winSize){
 	int cutPoint;
 	int startPoint;
 	float lowS2N;
-	bool bFound;
 
 	sa.setAveragine(averagine);
 	sa.setMercury(mercury);
@@ -547,7 +546,6 @@ void CSplitSpectrum::MakeAnalysis(double winSize){
 		cout << goodPeaks.peaks.at(i).mz << "  " << goodPeaks.peaks.at(i).intensity << endl;
 	};
 	*/
-	
 
 	cutPoint=0;
 	peakCount=0;
@@ -586,7 +584,7 @@ void CSplitSpectrum::MakeAnalysis(double winSize){
       while(maxDif<0.53) { 
 
         //remove the least intensity peak;
-        lowIntensity=99999999.0f;
+        lowIntensity=9999999999999.0f;
         for(i=1;i<(int)split.size();i++){
           if(split[i].intensity<lowIntensity){
             lowIntensity=split[i].intensity;
@@ -649,9 +647,14 @@ void CSplitSpectrum::MakeAnalysis(double winSize){
 			//cout << "  Cut point: " << goodPeaks.peaks.at(startPoint).mz << " - " << goodPeaks.peaks.at(cutPoint).mz << endl;
 			
 			//Find charges (FFT & Patterson ONLY)
+			/*
 			if(userParams.chargeMode=='F' || 
 				 userParams.chargeMode=='P' ||
 				 userParams.chargeMode=='S') {
+
+					 cout << "hehe: " << startPoint << " " << cutPoint << endl;
+					 cout << aIndex->size() << endl;
+					 cout << setA->size() << endl;
 
 				//Iterate through all peak indeces in this analysis
 				for(i=startPoint;i<=cutPoint;i++){
@@ -692,7 +695,9 @@ void CSplitSpectrum::MakeAnalysis(double winSize){
 				}//i
 			
 			}//end charge mode block
+			*/
 
+			sa.setSpectrum(*wholeSpec);
 			finalAnalysis->push_back(sa);
 
 		}
@@ -703,17 +708,17 @@ void CSplitSpectrum::MakeAnalysis(double winSize){
 
 CSpecAnalyze CSplitSpectrum::getWindow(int index){
 	return finalAnalysis->at(index);
-};
+}
 
 void CSplitSpectrum::SetAveragine(CAveragine *a){
 	averagine=a;
 	goodPeaks.setAveragine(averagine);
-};
+}
 
 void CSplitSpectrum::SetMercury(CMercury8 *m){
 	mercury=m;
 	goodPeaks.setMercury(mercury);
-};
+}
 
 void CSplitSpectrum::Centroid(Spectrum& s){
 	goodPeaks.clear();
@@ -724,7 +729,7 @@ void CSplitSpectrum::Centroid(Spectrum& s){
 		goodPeaks.peaks.add(s.at(i));
 		s2n->push_back(0);
 	}
-};
+}
 
 //This funciton is for calculating S/N thresholds when using Noise reduced data,
 //such as data found on Thermo FT or Orbitrap instruments
@@ -736,7 +741,7 @@ void CSplitSpectrum::NewSNPass(double gapSize){
 	double mz=0.0;
 	double maxIntensity=0.0;
 	double max;
-	double lowPoint=99999999999.0;
+	double lowPoint=99999999999;
 
   unsigned int i=0;
 
@@ -755,7 +760,7 @@ void CSplitSpectrum::NewSNPass(double gapSize){
 
   while(true){
     
-    if(i==(unsigned int)wholeSpec->size()){
+    if(i==wholeSpec->size()){
       endA=i-1;
       break;
     }

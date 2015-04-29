@@ -20,7 +20,8 @@ class CHardklorParser {
 
   //Methods
   void parse(char*);
-  void parseConfig(char*);
+  bool parseCMD(int argc, char* argv[]);
+  bool parseConfig(char*);
 	MSFileFormat getFileFormat(char* c);
   CHardklorSetting& queue(int);
   int size();
@@ -28,9 +29,13 @@ class CHardklorParser {
  protected:
 
  private:
-  //Data Members
-  CHardklorSetting global;
-  vector<CHardklorSetting> *vQueue;
+	 //Methods
+   bool makeVariant(char* c);
+	 void warn(char*, int);
+	 
+	 //Data Members
+	 CHardklorSetting global;
+	 vector<CHardklorSetting> *vQueue;
 };
 
 

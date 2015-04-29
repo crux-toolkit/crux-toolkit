@@ -1231,23 +1231,52 @@ void Params::Initialize() {
   InitArgParam("link mass",
     "The mass modification of the linker when attached to a peptide.");
   /* hardklor parameters */
-  InitStringParam("hardklor-algorithm", "fast-fewest-peptides",
-    "basic|fewest-peptides|fast-fewest-peptides|fewest-peptides-choice|"
-    "fast-fewest-peptides-choice", 
-    "Choose the algorithm for analyzing combinations of multiple peptide or protein "
-    "isotope distributions.[[html: There are five algorithms to choose from:<ul><li>"
-    "basic &ndash; Computes all combinatorial possibilities and returns the combination "
-    "with the highest score.</li><li>fewest-peptides &ndash; Computes increasing depths "
-    "of combinations until the score threshold is exceeded. The smallest combination "
-    "exceeding the threshold is returned, preventing over-fitting of the data.</li><li>"
-    "fast-fewest-peptides &ndash; Same as the fewest-peptides algorithm, but trades memory "
-    "usage for speed. Use this method if there is sufficient memory on the system.</li><li>"
-    "fewest-peptides-choice &ndash; Same as the fewest-peptides algorithm, but adds a "
-    "heuristic to evalute if further combinatorial analysis would produce a better score. "
-    "This method can dramatically improve speed, but may not be as accurate.</li><li>"
-    "fast-fewest-peptides-choice &ndash; Same as the fewest-peptides-choice algorithm, "
-    "but trades memory usage for speed. Use this method if there is sufficient memory on "
-    "the system.</ul>]]",
+  InitStringParam("hardklor-algorithm", "version1", "basic|version1|version2",
+    "Determines which spectral feature detection algorithm to use. Different results are "
+    "possible with each algorithm, and there are pros and cons to each.[[html: There are "
+    "three algorithms to choose from:<ul><li>basic &ndash; Performs unoptimized "
+    "deconvolution and is provided for legacy purposes only.</li><li>version1 &ndash; "
+    "Uses the optimizations developed during the 1.0+ series. It is very accurate, but has "
+    "limited sensitivity, and moderate speed improvements.</li><li>version2 &ndash; Uses "
+    "the optimizations developed for version 2.0+. It is highly sensitive, but less "
+    "accurate for very low abundance features, and performs exceptionally fast.</li></ul>]]",
+    "Available for crux hardklor", true);
+  InitStringParam("averagine-mod", "",
+    "Defines alternative averagine models in the analysis that incorporate additional "
+    "atoms and/or isotopic enrichments. Modifications are represented as text strings. "
+    "Inclusion of additional atoms in the model is done using by entering an atomic "
+    "formula, such as: PO2 or Cl. Inclusion of isotopic enrichment to the model is done by "
+    "specifying the percent enrichment (as a decimal) followed by the atom being enriched "
+    "and an index of the isotope. For example, 0.75H1 specifies 75% enrichment of the first "
+    "heavy isotope of hydrogen. In other words, 75% deuterium enrichment. Two or more "
+    "modifications can be combined into the same model, and separated by spaces: B2 0.5B1",
+    "Available for crux hardklor", true);
+  InitIntParam("boxcar-averaging", 0, 0, BILLION,
+    "Boxcar averaging is a sliding window that averages n adjacent spectra prior to feature "
+    "detection. Averaging generally improves the signal-to-noise ratio of features in the "
+    "spectra, as well as improving the shape of isotopic envelopes. However, averaging will "
+    "also change the observed peak intensities. Averaging with too wide a window will "
+    "increase the occurrence of overlapping features and broaden the chromatographic "
+    "profiles of observed features. The number specified is the total adjacent scans to be "
+    "combined, centered on the scan being analyzed. Therefore, an odd number is recommended "
+    "to center the boxcar window. For example, a value of 3 would produce an average of the "
+    "scan of interest, plus one scan on each side. A value of 0 disables boxcar averaging.",
+    "Available for crux hardklor", true);
+  InitIntParam("boxcar-filter", 0, 0, BILLION,
+    "This parameter is only functional when boxcar-averaging is used. The filter will "
+    "remove any peaks not seen in n scans in the boxcar window. The effect is to reduce "
+    "peak accumulation due to noise and reduce chromatographic broadening of peaks. Caution "
+    "should be used as over-filtering can occur. The suggested number of scans to set for "
+    "filtering should be equal to or less than the boxcar-averaging window size. A value of "
+    "0 disables filtering.",
+    "Available for crux hardklor", true);
+  InitDoubleParam("boxcar-filter-ppm", 10.0, 0.0, BILLION,
+    "This parameter is only functional when boxcar-filter is used. The value specifies the "
+    "mass tolerance in ppm for declaring a peak the same prior to filtering across all "
+    "scans in the boxcar window.",
+    "Available for crux hardklor", true);
+  InitBoolParam("centroided", false,
+    "Indicates whether the data contain profile or centroided peaks.",
     "Available for crux hardklor", true);
   InitStringParam("cdm", "Q", "B|F|P|Q|S",
     "Choose the charge state determination method.[[html: There are five methods to "
@@ -1257,58 +1286,78 @@ void Params::Initialize() {
     "Senko method, or combined Fast Fourier Transform and Patterson algorithm.</li></ul>]]",
     "Available for crux hardklor", true);
   InitIntParam("min-charge", 1, 1, BILLION,
-    "Set the minimum charge state to look for when analyzing a spectrum.",
+    "Specifies the minimum charge state to allow when finding spectral features. It is "
+    "best to set this value to the lowest assumed charge state to be present. If set higher "
+    "than actual charge states that are present, those features will not be identified or "
+    "incorrectly assigned a different charge state and mass.",
     "Available for crux hardklor", true);
   InitIntParam("max-charge", 5, 1, BILLION,
-    "Set the maximum charge state to look for when analyzing a spectrum.",
+    "Specifies the maximum charge state to allow when finding spectral features. It is "
+    "best to set this value to a practical number (i.e. do not set it to 20 when doing a "
+    "tryptic shotgun analysis). If set higher than actual charge states that are present, "
+    "the algorithm will perform significantly slower without any improvement in results.",
     "Available for crux hardklor", true);
   InitDoubleParam("corr", 0.85, 0, 1.0, 
-    "Set the correlation threshold to accept a predicted isotope distribution. Valid values "
-    "are any decimal value between 0.0 and 1.0, inclusive.",
+    "Sets the correlation threshold (cosine similarity) for accepting each predicted "
+    "feature.",
     "Available for crux hardklor", true);
   InitIntParam("depth", 3, 1, BILLION,
-    "Set the depth of combinatorial analysis. This is the maximum number of protein or "
-    "peptide distributions that can be combined to estimate the observed data at any given "
-    "spectrum segment.",
+    "Sets the depth of combinatorial analysis. For a given set of peaks in a spectrum, "
+    "search for up to this number of combined peptides that explain the observed peaks. "
+    "The analysis stops before depth is reached if the current number of deconvolved "
+    "features explains the observed peaks with a correlation score above the threshold "
+    "defined with the correlation parameter.",
     "Available for crux hardklor", true);
   InitBoolParam("distribution-area", false,
-    "Report peptide intensities as the distribution area.",
+    "When reporting each feature, report abundance as the sum of all isotope peaks. The "
+    "value reported is the estimate of the correct peak heights based on the averagine "
+    "model scaled to the observed peak heights.",
     "Available for crux hardklor", true);
-  InitStringParam("averagine-mod", "",
-    "Include alternative averagine models in the analysis that incorporate additional "
-    "atoms or isotopic enrichments. Modifications are represented as text strings. Inclusion "
-    "of additional atoms in the model is done by entering an atomic formula such as \"PO2\" "
-    "or \"Cl\". Inclusion of isotopic enrichment to the model is done by specifying the "
-    "percent enrichment (as a decimal) followed by the atom being enriched and an index of "
-    "the isotope. For example, 0.75H1 specifies 75% enrichment of the first heavy isotope "
-    "of hydrogren. In other words, 75% deuterium enrichment. Two or more modifications can "
-    "be combined into the same model and separated by colons: \"B2:0.5B1\". Multiple "
-    "averagine models are supported in a single analysis by separating the models with a "
-    "semicolon: \"B2:0.5B1;C2:0.7C1\".",
-    "Available for crux hardklor", true);
-  InitStringParam("mzxml-filter", "none",
-    "Set a filter for mzXML files. If you want to analyze only the MS2 scans in your mzXML "
-    "file, specify --mzxml-filter MS2.",
-    "Available for crux hardklor", true);
-  InitBoolParam("no-base", false,
-    "Specify \"no base\" averagine. Only modified averagine models will be used in the "
-    "analysis.",
-    "Available for crux hardklor", true);
-  InitIntParam("max-p", 10, 1, BILLION,
-    "Set the maximum number of peptides or proteins that are estimated from the peaks "
-    "found in a spectrum segment.",
-    "Available for crux hardklor", true);  
-  InitDoubleParam("resolution", 100000, 1, BILLION,
-    "Set the resolution of the observed spectra at m/z 400. Resolution is a unitless "
-    "quantity defined as the mass of the peak divided by the associated width at half "
-    "maximum height (FWHM). Used in conjunction with --instrument.",
+  InitStringParam("hardklor-data-file", "",
+    "Specifies an ASCII text file that defines symbols for the periodic table.",
     "Available for crux hardklor", true);
   InitStringParam("instrument", "fticr", "fticr|orbitrap|tof|qit",
-    "Type of instrument (fticr|orbitrap|tof|qit) on which the data was "
-    "collected. Used in conjuction with --resolution.",
+    "Indicates the type of instrument used to collect data. This parameter, combined with "
+    "the resolution parameter, define how spectra will be centroided (if you provide "
+    "profile spectra) and the accuracy when aligning observed peaks to the models.",
     "Available for crux hardklor", true);
-  InitBoolParam("centroided", false,
-    "Are spectra centroided?",
+  InitStringParam("isotope-data-file", "",
+    "Specifies an ASCII text file that can be read to override the natural isotope "
+    "abundances for all elements.",
+    "Available for crux hardklor", true);
+  InitIntParam("max-features", 10, 1, BILLION,
+    "Specifies the maximum number of models to build for a set of peaks being analyzed. "
+    "Regardless of the setting, the number of models will never exceed the number of peaks "
+    "in the current set. However, as many of the low abundance peaks are noise or tail ends "
+    "of distributions, defining models for them is detrimental to the analysis.",
+    "Available for crux hardklor", true);
+  InitIntParam("mzxml-filter", 1, 1, 2,
+    "Filters the spectra prior to analysis for the requested MS/MS level. For example, if "
+    "the data contain MS and MS/MS spectra, setting mzxml-filter = 1 will analyze only the "
+    "MS scan events. Setting mzxml-filter = 2 will analyze only the MS/MS scan events.",
+    "Available for crux hardklor", true);
+  InitDoubleParam("mz-max", 0, 0, 10000,
+    "Constrains the search in each spectrum to signals below this value in Thomsons. "
+    "Setting to 0 disables this feature.",
+    "Available for crux hardklor", true);
+  InitDoubleParam("mz-min", 0, 0, 10000,
+    "Constrains the search in each spectrum to signals above this value in Thomsons. "
+    "Setting to 0 disables this feature.",
+    "Available for crux hardklor", true);
+  InitDoubleParam("mz-window", 4.0, 1.0, 20.0,
+    "Only used when algorithm = version1. Defines the maximum window size in Thomsons to "
+    "analyze when deconvolving peaks in a spectrum into features.",
+    "Available for crux hardklor", true);
+  InitDoubleParam("resolution", 100000, 1, BILLION,
+    "Specifies the resolution of the instrument at 400 m/z for the data being analyzed.",
+    "Available for crux hardklor", true);
+  InitIntParam("scan-range-max", 0, 0, BILLION,
+    "Used to restrict analysis to spectra with scan numbers below this parameter value. "
+    "A value of 0 disables this feature.",
+    "Available for crux hardklor", true);
+  InitIntParam("scan-range-min", 0, 0, BILLION,
+    "Used to restrict analysis to spectra with scan numbers above this parameter value. "
+    "A value of 0 disables this feature.",
     "Available for crux hardklor", true);
   InitIntParam("sensitivity", 2, 0, 3,
     "Set the sensitivity level. There are four levels: 0 (low), 1 (moderate), "
@@ -1316,8 +1365,16 @@ void Params::Initialize() {
     "but will also yield more isotope distributions.",
     "Available for crux hardklor", true);
   InitDoubleParam("signal-to-noise", 1.0, 0.0, BILLION,
-    "Set the signal-to-noise threshold. Any integer or decimal "
-    "value greater than or equal to 0.0 is valid.",
+    "Filters spectra to remove peaks below this signal-to-noise ratio prior to finding "
+    "features.",
+    "Available for crux hardklor", true);
+  InitIntParam("smooth", 0, 0, 21,
+    "Uses Savitzky-Golay smoothing on profile peak data prior to centroiding the spectra. "
+    "This parameter is recommended for low resolution spectra only. Smoothing data causes "
+    "peak depression and broadening. Only use odd numbers for the degree of smoothing (as "
+    "it defines a window centered on each data point). Higher values will produce smoother "
+    "peaks, but with greater depression and broadening. Setting this parameter to 0 disables "
+    "smoothing.",
     "Available for crux hardklor", true);
   InitDoubleParam("sn-window", 250.0, 0.0, BILLION,
     "Set the signal-to-noise window length (in m/z). Because noise may "
@@ -1325,22 +1382,12 @@ void Params::Initialize() {
     "considered when calculating a signal-over-noise ratio.",
     "Available for crux hardklor", true);
   InitBoolParam("static-sn", true,
-    "If true, Hardklor will calculate the local noise levels across the "
-    "spectrum using --sn-window, then select a floor of this set of noise "
-    "levels to apply to the whole spectrum.",
+    "Applies the lowest noise threshold of any sn_window across the entire mass range for a "
+    "spectrum. Setting this parameter to 0 turns off this feature, and different noise "
+    "thresholds will be used for each local mass window in a spectrum.",
     "Available for crux hardklor", true);
-  InitStringParam("mz-window", "",
-    "Restrict analysis to only a small window in each segment (in m/z). "
-    "The user must specify the starting and ending m/z values between which "
-    "the analysis will be performed. If unspecified, the whole spectrum is analyzed.",
-    "Available for crux hardklor", true);
-  InitDoubleParam("max-width", 4.0, 0.0, BILLION,
-    "Set the maximum width of any set of peaks in a spectrum when computing the "
-    "results (in m/z). Thus, if the value was 5.0, then sets of peaks greater "
-    "than 5 m/z are divided into smaller sets prior to analysis.",
-    "Available for crux hardklor", true);
-  InitStringParam("hardklor-options", "", 
-    "Directly set hardklor options",
+  InitBoolParam("hardklor-xml-output", false,
+    "Output XML instead of tab-delimited text.",
     "Available for crux hardklor", false);
   /* bullseye parameters */
   InitArgParam("MS1 spectra",

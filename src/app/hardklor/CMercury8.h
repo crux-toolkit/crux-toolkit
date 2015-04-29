@@ -1,7 +1,6 @@
 #ifndef _CMercury8_H
 #define _CMercury8_H
 
-
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>
@@ -39,15 +38,15 @@ class CMercury8 {
   //Functions:
   void AccurateMass(int,int);
   void AddElement(char[],int,int);
-    void CalcFreq(Hardklor::complex*, int, int, int, int);
+  void CalcFreq(complex*, int, int, int, int);
   void CalcMassRange(int*, double, int, int);
   void CalcVariances(double*, double*, int);
   void CalcWeights(double&,double&,double&,int&,int&,int&,int&,int);
-    void ConvertMass(Hardklor::complex*, int, int, double, double, int, int, int, double, double);
-  void GetPeaks(Hardklor::complex*, int, vector<Result>&, int, int);
-  void InitializeData(const char* fn=NULL);
-  void InitializeDataHardcoded();
-  void MassToInt(Hardklor::complex*, int);
+  void ConvertMass(complex*, int, int, double, double, int, int, int, double, double);
+  void DefaultValues();
+  void GetPeaks(complex*, int, vector<Result>&, int, int);
+  void InitializeData(char* fn="ISOTOPE.DAT");
+  void MassToInt(complex*, int);
   void Mercury(int,int);
   int ParseMF(char[], int*);
   void RelativeAbundance(vector<Result>&);
@@ -68,7 +67,7 @@ class CMercury8 {
   void Enrich(int,int,double d=0.99);
   double getMonoMass();
   double getZeroMass();
-  int GoMercury(char*, int=1, const char* filename="\0");
+  int GoMercury(char*, int=1, char* filename="\0");
   void Intro();
   void RelAbun(bool);
   void Reset();

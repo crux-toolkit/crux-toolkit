@@ -1,5 +1,5 @@
 #include "CHardklorProtein.h"
-#include <string.h>
+#include <cstring>
 
 using namespace std;
 
@@ -8,7 +8,7 @@ CHardklorProtein::CHardklorProtein(){
 }
 
 CHardklorProtein::CHardklorProtein(const CHardklorProtein& c){
-  size_t i;
+  int i;
 
   enrich = new vector<sEnrichMercury>;
   for(i=0;i<c.enrich->size();i++) enrich->push_back(c.enrich->at(i));
@@ -30,7 +30,7 @@ CHardklorProtein::~CHardklorProtein(){
 }
 
 CHardklorProtein& CHardklorProtein::operator=(const CHardklorProtein& c){
-  size_t i;
+  int i;
 
   if(this != &c){
     delete enrich;

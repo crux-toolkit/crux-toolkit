@@ -1,6 +1,9 @@
 #ifndef _CPERIODICTABLE_H
 #define _CPERIODICTABLE_H
 
+#include <cstdlib>
+#include <cstdio>
+#include <cstring>
 #include <iostream>
 #include <vector>
 
@@ -15,8 +18,8 @@ typedef struct {
 class CPeriodicTable {
  public:
    //Constructors & Destructors
-   CPeriodicTable();
-   CPeriodicTable(char* c);
+   //CPeriodicTable();
+   CPeriodicTable(char* c="Hardklor.dat");
    ~CPeriodicTable();
 
    //Methods:
@@ -26,10 +29,8 @@ class CPeriodicTable {
  protected:
  private:
    //Methods:
+   void defaultValues();
    void loadTable(char*);
-
-   void init();
-   void add(const char* symbol, double mass);
 
    //Data Members:
    vector<element> table;

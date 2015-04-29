@@ -14,56 +14,10 @@
 
 class CruxHardklorApplication: public CruxApplication {
 
- protected:
-
-  //Calls the main method in HardklorApp
-  static int hardklorMain(int argc, char* argv[]);
-
-
-
-  /**
-   * writes the ISOTOPE.DAT file for hardklor
-   */
-  static void writeIsotopeDat(
-    std::string& filename ///<path for dat file
-  );
-
-  /**
-   * write the ISOTOPE.DAT to an output stream
-   */
-  static void writeIsotopeDat(
-    std::ostream& os ///< the output stream to use
-  );
-
-  /**
-   * writes the Hardklor.dat to a path
-   */
-  static void writeHardklorDat(
-    std::string& filename ///<path to write the Hardklor.dat to
-    );  
-
-  /**
-   * writes the Hardklor.dat to a stream
-   */
-  static void writeHardklorDat(
-    std::ostream& os ///< stream to write to.
-    );  
-
  public:
-
-  /**
-   * \returns a blank CruxHardklorApplication object
-   */
   CruxHardklorApplication();
-
-  /**
-   * Destructor
-   */
   ~CruxHardklorApplication();
 
-  /**
-   * main method for CruxHardklorApplication
-   */
   virtual int main(int argc, char** argv);
 
   /**
@@ -101,9 +55,26 @@ class CruxHardklorApplication: public CruxApplication {
    * \returns whether hardklor was successful or not
    */
   static int main(
-    const std::string& input_spectra ///< file path of spectra to process
+    const std::string& ms1 ///< file path of spectra to process
   );
   
+ protected:
+  static void addArg(
+    std::vector<char*>* args,
+    const std::string& arg
+  );
+
+  static void addArg(
+    std::vector<char*>* args,
+    const std::string& name,
+    const std::string& value
+  );
+
+  static void addArg(
+    std::vector<char*>* args,
+    const std::string& name,
+    bool value
+  );
 };
 
 
