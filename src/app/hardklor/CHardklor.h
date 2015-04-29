@@ -18,7 +18,7 @@
 //#include "CHardklorFileReader.h"
 
 #ifdef _MSC_VER
-#include <windows.h>
+
 #else
 #include <sys/time.h>
 #endif
@@ -55,20 +55,27 @@ class CHardklor{
 	CHardklor(CAveragine *a, CMercury8 *m);
   ~CHardklor();
 
+  //Operators
+  hkMem& operator[](const int& index);
+
   //Methods:
 	void Echo(bool b);
-  int GoHardklor(CHardklorSetting sett);
+  int GoHardklor(CHardklorSetting sett, Spectrum* s=NULL);
 	void SetAveragine(CAveragine *a);
 	void SetMercury(CMercury8 *m);
+  void SetResultsToMemory(bool b);
+  int Size();
 
  protected:
 
  private:
   //Methods:
-  void Analyze();
+  void Analyze(Spectrum* s=NULL);
+  bool AnalyzePeaks(CSpecAnalyze& sa);
   int compareData(const void*, const void*);
   double LinReg(float *match, float *mismatch);
-  //void WriteParams(fstream& fptr, int format=1); 
+  void ResultToMem(SSObject& obj, CPeriodicTable* PT);
+  void WriteParams(fstream& fptr, int format=1); 
   void WritePepLine(SSObject& obj, CPeriodicTable* PT, fstream& fptr, int format=0); 
   void WriteScanLine(Spectrum& s, fstream& fptr, int format=0); 
 
@@ -92,7 +99,18 @@ class CHardklor{
 	CHardklorSetting cs;
 	CAveragine *averagine;
 	CMercury8 *mercury;
+	CPeriodicTable *PT;
+  hkMem hkm;
 	bool bEcho;
+  bool bMem;
+  int currentScanNumber;
+	fstream fptr; //TODO: Get rid of this and use FILE* instead.
+
+	//Vector for holding peptide list of distribution
+  vector<CHardklorVariant> pepVariants;
+
+  //Vector for holding results in memory should that be needed
+  vector<hkMem> vResults;
 
   //Temporary Data Members:
   char bestCh[200];
@@ -100,8 +118,6 @@ class CHardklor{
   int CorrMatches;
   int ExtraPre;
   int ExtraObs;
-
-	int SSIterations;
 
   //For accurate timing of Hardklor
   #ifdef _MSC_VER

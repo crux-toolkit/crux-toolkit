@@ -10,6 +10,7 @@
 #include "MSObject.h"
 #include "MSReader.h"
 #include "Spectrum.h"
+#include "HardklorTypes.h"
 #include "CAveragine.h"
 #include "CMercury8.h"
 #include "CHardklor.h"
@@ -30,39 +31,51 @@ class CHardklor2{
 	CHardklor2(CAveragine *a, CMercury8 *m, CModelLibrary *lib);
   ~CHardklor2();
 
+  //Operators
+  hkMem& operator[](const int& index);
+
   //Methods:
-	void Echo(bool b);
-  int GoHardklor(CHardklorSetting sett);
+  void  Echo(bool b);
+  int   GoHardklor(CHardklorSetting sett, Spectrum* s=NULL);
+  void  SetResultsToMemory(bool b);
+  int   Size();
 
  protected:
 
  private:
   //Methods:
-	int			BinarySearch(Spectrum& s, double mz, bool floor);
-	double	CalcFWHM(double mz,double res,int iType);
-	void		Centroid(Spectrum& s, Spectrum& out);
-	bool		CheckForPeak(vector<Result>& vMR, Spectrum& s, int index);
-  int			CompareData(const void*, const void*);
-  double	LinReg(vector<float>& mer, vector<float>& obs);
-	bool		MatchSubSpectrum(Spectrum& s, int peakIndex, pepHit& pep);
-	double	PeakMatcher(vector<Result>& vMR, Spectrum& s, double lower, double upper, double deltaM, int matchIndex, int& matchCount, int& indexOverlap, vector<int>& vMatchIndex, vector<float>& vMatchIntensity);
-	double	PeakMatcherB(vector<Result>& vMR, Spectrum& s, double lower, double upper, double deltaM, int matchIndex, int& matchCount, vector<int>& vMatchIndex, vector<float>& vMatchIntensity);
-	void		QuickCharge(Spectrum& s, int index, vector<int>& v);
-	void		QuickHardklor(Spectrum& s, vector<pepHit>& vPeps);
-	void		RefineHits(vector<pepHit>& vPeps, Spectrum& s);
-  void		WritePepLine(pepHit& ph, Spectrum& s, FILE* fptr, int format=0); 
-  void		WriteScanLine(Spectrum& s, FILE* fptr, int format=0); 
+  int     BinarySearch(Spectrum& s, double mz, bool floor);
+  double  CalcFWHM(double mz,double res,int iType);
+  void    Centroid(Spectrum& s, Spectrum& out);
+  bool    CheckForPeak(vector<Result>& vMR, Spectrum& s, int index);
+  int     CompareData(const void*, const void*);
+  double  LinReg(vector<float>& mer, vector<float>& obs);
+  bool    MatchSubSpectrum(Spectrum& s, int peakIndex, pepHit& pep);
+  double  PeakMatcher(vector<Result>& vMR, Spectrum& s, double lower, double upper, double deltaM, int matchIndex, int& matchCount, int& indexOverlap, vector<int>& vMatchIndex, vector<float>& vMatchIntensity);
+  double  PeakMatcherB(vector<Result>& vMR, Spectrum& s, double lower, double upper, double deltaM, int matchIndex, int& matchCount, vector<int>& vMatchIndex, vector<float>& vMatchIntensity);
+  void    QuickCharge(Spectrum& s, int index, vector<int>& v);
+  void    QuickHardklor(Spectrum& s, vector<pepHit>& vPeps);
+  void    RefineHits(vector<pepHit>& vPeps, Spectrum& s);
+  void    ResultToMem(pepHit& ph, Spectrum& s);
+  void    WritePepLine(pepHit& ph, Spectrum& s, FILE* fptr, int format=0); 
+  void    WriteScanLine(Spectrum& s, FILE* fptr, int format=0); 
 
-	static int CompareBPI(const void *p1, const void *p2);
+  static int CompareBPI(const void *p1, const void *p2);
 
   //Data Members:
-	CHardklorSetting cs;
-	CAveragine *averagine;
-	CMercury8 *mercury;
-	CModelLibrary* models;
-	CPeriodicTable* PT;
-	Spectrum mask;
-	bool bEcho;
+  CHardklorSetting  cs;
+  CAveragine*       averagine;
+  CMercury8*        mercury;
+  CModelLibrary*    models;
+  CPeriodicTable*   PT;
+  Spectrum          mask;
+  hkMem             hkm;
+  bool              bEcho;
+  bool              bMem;
+  int               currentScanNumber;
+
+  //Vector for holding results in memory should that be needed
+  vector<hkMem> vResults;
 
   //Temporary Data Members:
   char bestCh[200];

@@ -14,6 +14,7 @@ CSpecAnalyze::CSpecAnalyze(){
 	mismatchSize = 0;
 	averagine=NULL;
 	mercury=NULL;
+	spec=NULL;
 }
 
 //Copy constructor
@@ -30,6 +31,7 @@ CSpecAnalyze::CSpecAnalyze(const CSpecAnalyze& c){
   spec = c.spec;
 	averagine = c.averagine;
 	mercury = c.mercury;
+	spec = c.spec;
 
 	predPeak = new vector<CPeakPrediction>;
 	for(i=0;i<c.predPeak->size();i++) predPeak->push_back(c.predPeak->at(i));
@@ -48,6 +50,7 @@ CSpecAnalyze::~CSpecAnalyze(){
 	delete charges;
 	averagine = NULL;
 	mercury = NULL;
+	spec = NULL;
 }
 
 //Overloaded operator
@@ -65,6 +68,7 @@ CSpecAnalyze& CSpecAnalyze::operator=(const CSpecAnalyze& c){
     spec = c.spec;
     averagine = c.averagine;
     mercury = c.mercury;
+		spec = c.spec;
 		
     delete predPeak;
     predPeak = new vector<CPeakPrediction>;
@@ -195,7 +199,7 @@ double CSpecAnalyze::calcFWHM(double mz){
 		deltaM = mz / userParams.res400;
 		break;
 	case QIT:
-		deltaM = userParams.res400;
+		deltaM = userParams.res400 / 5000.0;
 		break;
 	case FTICR:
 	default:
@@ -242,7 +246,7 @@ void CSpecAnalyze::chargeState(){
 }
 
 void CSpecAnalyze::clear(){
-  spec.clear();
+  //spec=NULL;
   peaks.clear();
   peptide.clear();
   delete predPeak;
@@ -274,15 +278,17 @@ void CSpecAnalyze::FindPeptides(){
 //Quickest ways to find all spectrum peaks without making any predictions
 int CSpecAnalyze::FindPeaks(){
 
+	/*
   if(userParams.chargeMode == 'F' ||
 		 userParams.chargeMode == 'P' ||
 		 userParams.chargeMode == 'S') TraditionalCharges();
+	*/
 
 	if(userParams.fileFormat == zs) {
-		peaks = spec;
+		peaks = *spec;
 		FirstDerivativePeaks(peaks,10);
 	} else if(userParams.fileFormat == uzs) {
-		peaks = spec;
+		peaks = *spec;
 		FirstDerivativePeaks(peaks,4);
 	} else {
 		FirstDerivativePeaks(peaks,1);  //10 for zoomscan, 4 for UZS
@@ -295,15 +301,18 @@ int CSpecAnalyze::FindPeaks(){
 //Find all spectrum peaks in a given range (by data point array index)
 int CSpecAnalyze::FindPeaks(Spectrum& s, int start, int stop){
 
+	/*
   if(userParams.chargeMode == 'F' ||
 		 userParams.chargeMode == 'P' ||
 		 userParams.chargeMode == 'S') TraditionalCharges();
+	*/
 
 	if(userParams.fileFormat == zs) {
 		FirstDerivativePeaks(s,start,stop,10);
 	} else if(userParams.fileFormat == uzs) {
 		FirstDerivativePeaks(s,start,stop,4);
 	} else {
+		//intercept low res TOF data here?
 		FirstDerivativePeaks(s,start,stop,1);  //10 for zoomscan, 4 for UZS
 	}
 
@@ -318,6 +327,7 @@ void CSpecAnalyze::FirstDerivativePeaks(Spectrum& s, int winSize){
 
 //First derivative method, returns base peak intensity of the set
 void CSpecAnalyze::FirstDerivativePeaks(Spectrum& s, int start, int stop, int winSize){
+  //cout << "Start centroid " << s.getScanNumber() << " " << start << " " << stop << " " << winSize << endl;
   int i,j;
   float maxIntensity;
   int bestPeak;
@@ -397,6 +407,7 @@ void CSpecAnalyze::FirstDerivativePeaks(Spectrum& s, int start, int stop, int wi
     }
   }
 
+  //cout << "centroid ok" << endl;
   peaks = gp;
 
 }
@@ -527,8 +538,8 @@ void CSpecAnalyze::MakePredictions(vector<CHardklorVariant>& var){
   char v[64];
   float intensity;
 
-  int maxPeak = 0;
-  int matchMaxPeak = 0;
+  int maxPeak;
+  int matchMaxPeak;
   int matchIndex;
 
   int matchCount;
@@ -685,7 +696,7 @@ void CSpecAnalyze::MakePredictions(vector<CHardklorVariant>& var){
     }
 		
     //if we reach the maximum peptides allowed, stop making predictions
-    if(predPep->size() == (size_t)userParams.peptide) {
+    if(predPep->size() == userParams.peptide) {
       return;
     }
   }
@@ -726,12 +737,14 @@ int CSpecAnalyze::PredictPeptides(){
 		case 'F':
 		case 'P':
 		case 'S':
+			TraditionalCharges();
+			if(charges->size()==0) break;
 			for(i=0;i<peaks.size();i++){
 				if(peaks.at(i).intensity==0) continue;
 				p.SetMZ(peaks.at(i).mz);
 				p.SetIntensity(peaks.at(i).intensity);
 				for(j=0;j<(int)charges->size();j++) p.AddCharge(charges->at(j));
-				if(p.Size()>0) predPeak->push_back(p);
+				predPeak->push_back(p);
 			}
 			break;
 		case 'Q':
@@ -781,19 +794,65 @@ void CSpecAnalyze::setParams(const CHardklorSetting& sett){
 	userParams=sett;
 }
 
-void CSpecAnalyze::setSpectrum(const Spectrum& s){
-  spec=s;
+void CSpecAnalyze::setSpectrum(Spectrum& s){
+  spec=&s;
 }
 
 //For using FFT or Patterson for charge states
-//5/1/09 - ToDo: Figure out why Patterson is slow in Hardklor
 void CSpecAnalyze::TraditionalCharges(){
 
-	if(peaks.size()==0) return;
+	if(spec->size()==0) {
+		cout << "Cannot find charge state(s) because spectrum is empty." << endl;
+		exit(6);
+	}
 
+	//Find left and right boundaries in original spectrum
+	double lowMz=peaks[0].mz-0.25;
+	double highMz=peaks[peaks.size()-1].mz+0.25;
+	int lowIndex=binarySearch(lowMz);
+	int highIndex=binarySearch(highMz);
+
+	//fix resolution
 	double mz = peaks.at(peaks.size()/2).mz;
   double deltaM = calcFWHM(mz);
 	deltaM/=4;
-	SenkoCharge(charges,peaks,0,peaks.size()-1,userParams.minCharge,userParams.maxCharge,deltaM,userParams.chargeMode);
 
+	//Find the charges
+	SenkoCharge(charges,*spec,lowIndex,highIndex,userParams.minCharge,userParams.maxCharge,deltaM,userParams.chargeMode);
+
+}
+
+int CSpecAnalyze::binarySearch(double mz){
+	int lower,mid,upper;
+	int sz=spec->size();
+	double dif;
+
+	mid=sz/2;
+	lower=0;
+	upper=sz;
+	
+	while(true){
+		if(lower>=upper) break;
+		if(mz<spec->at(mid).mz){
+			upper=mid-1;
+			mid=(lower+upper)/2;
+		} else {
+			lower=mid+1;
+			mid=(lower+upper)/2;
+		}
+		if(mid==sz) {
+			mid--;
+			break;
+		}
+	}
+
+	if(mid==0 || mid==sz-1) return mid;
+	if(mz<spec->at(mid).mz){
+		dif=spec->at(mid).mz-mz;
+		if(mz-spec->at(mid-1).mz < dif) return mid-1;
+	} else {
+		dif=mz-spec->at(mid).mz;
+		if(spec->at(mid+1).mz-mz < dif) return mid+1;
+	}
+	return mid;
 }

@@ -155,7 +155,7 @@ float findSNCutoff(Spectrum& s, int start, int stop, float sig, bool skipZero){
   float baseIntensity;
   Spectrum newSpec;
 
-  if(s.size()==0) return 0;
+  if(s.size()==0) 0;
 
 	if(skipZero){
 		//count only non-zero values in spectrum
@@ -252,7 +252,7 @@ float findSNCutoff2(Spectrum& s, int start, int stop, float sig, double& max, bo
   float baseIntensity;
   Spectrum newSpec;
 
-  if(s.size()==0) return 0;
+  if(s.size()==0) 0;
 
 	if(skipZero){
 		//count only non-zero values in spectrum

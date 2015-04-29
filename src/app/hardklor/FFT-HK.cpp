@@ -4,10 +4,7 @@
 using namespace std;
 
 void FFTCharge(double *f, Spectrum& s, unsigned int start, unsigned int stop,
-       	 unsigned int lowCharge, unsigned int highCharge, double interval, bool bSpline){
-
-        (int)stop;
-        (int)bSpline;
+							 unsigned int lowCharge, unsigned int highCharge, double interval, bool bSpline){
 
 	Spectrum fft;
 	Peak_T p;
@@ -20,12 +17,12 @@ void FFTCharge(double *f, Spectrum& s, unsigned int start, unsigned int stop,
 	int power;
 	int size = (highCharge - lowCharge + 1) * 3;
 	double *in;
-	Hardklor::complex *out;
+	complex *out;
 
 	//Find out how many points are needed and dimension arrays.
 	power=2;
 	while(power<(s.size()/2)) power*=2;
-	out = new Hardklor::complex[power];	
+	out = new complex[power];	
 	in = new double[power];
 
 	//Build the input array.
@@ -75,10 +72,8 @@ void FFTCharge(double *f, Spectrum& s, unsigned int start, unsigned int stop,
 }
 
 void Patterson(double *f, Spectrum& s, unsigned int start, unsigned int stop,
-  unsigned int lowCharge, unsigned int highCharge/*, double interval*/){
+							 unsigned int lowCharge, unsigned int highCharge, double interval){
 
-
-        
 	int i,j;
 	int size = (highCharge - lowCharge + 1) * 3;
 	double ch;
@@ -94,7 +89,7 @@ void Patterson(double *f, Spectrum& s, unsigned int start, unsigned int stop,
 		ch = (double)(i+2)/3 + shift;
 		ch = 1/ch;
 		ch /= 2;
-		for(j=0;j<s.size();j++){
+		for(j=start;j<=stop;j++){
 				mz1 = s.at(j).mz - ch;
 				mz2 = s.at(j).mz + ch;
 				f[i]+= (GetIntensity(s,start,stop,mz1) * GetIntensity(s,start,stop,mz2));
@@ -112,6 +107,7 @@ void Patterson(double *f, Spectrum& s, unsigned int start, unsigned int stop,
 			//cout << (double)(i+2)/3 + shift << "\t" << f[i] << endl;
 		}
 	}
+	//exit(1);
 
 }
 
@@ -132,7 +128,7 @@ double GetIntensity(Spectrum& s, unsigned int start, unsigned int stop, double m
 	//binary search for correct point
 	while(true){
 		index = (lower + upper) / 2;
-		if(index==(int)start) return 0;
+		if(index==start) return 0;
 
 		if(s.at(index-1).mz < mz && s.at(index).mz > mz) {
 
@@ -164,7 +160,7 @@ void SenkoCharge(vector<int> *charges, Spectrum& s, unsigned int start, unsigned
 	double *array1;
 	double *array2;
 	float ch;
-	//float maxPeak = 0;
+	float maxPeak = 0;
 	int i,c;
 	unsigned int j;
 	int size = (highCharge - lowCharge + 1) * 3;
@@ -175,7 +171,7 @@ void SenkoCharge(vector<int> *charges, Spectrum& s, unsigned int start, unsigned
 	*/
 	Spectrum spl;
 	Peak_T p;
-	//double mz = s.at(start).mz;
+	double mz = s.at(start).mz;
 	p.mz = s.at(start).mz;
 	p.intensity = s.at(start).intensity;
 	spl.add(p);
@@ -194,13 +190,13 @@ void SenkoCharge(vector<int> *charges, Spectrum& s, unsigned int start, unsigned
 			break;
 		case 'P':
 			array1 = new double[size];
-			Patterson(array1,spl,0,spl.size()-1,lowCharge,highCharge/*,interval*/);
+			Patterson(array1,spl,0,spl.size()-1,lowCharge,highCharge,interval);
 			break;
 		case 'S':
 		default:
 			array1 = new double[size];
 			array2 = new double[size];
-			Patterson(array1,spl,0,spl.size()-1,lowCharge,highCharge/*,interval*/);
+			Patterson(array1,spl,0,spl.size()-1,lowCharge,highCharge,interval);
 			FFTCharge(array2,spl,0,spl.size()-1,lowCharge,highCharge,interval);
 			for(i=0;i<size;i++) array1[i]*=array2[i];
 			delete [] array2;

@@ -2,9 +2,8 @@
 #include <iostream>
 #include <cstdlib>
 #include <cstdio>
+#include <cstring>
 #include <fstream>
-#include <string.h>
-
 using namespace std;
 
 CSettings::CSettings(){
@@ -24,7 +23,7 @@ CSettings::CSettings(){
   enrichTimes=0;
   QAR = false;
   ROC = false;
-  readFile((char*)"settings.conf");
+  readFile("settings.conf");
 };
 
 CSettings::CSettings(char *c){

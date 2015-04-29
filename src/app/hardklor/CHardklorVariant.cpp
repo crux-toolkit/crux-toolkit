@@ -9,7 +9,7 @@ CHardklorVariant::CHardklorVariant(){
 };
 
 CHardklorVariant::CHardklorVariant(const CHardklorVariant& c){
-  size_t i;
+  int i;
    
   atoms = new vector<sInt>;
   enrich = new vector<sEnrichMercury>;
@@ -32,7 +32,7 @@ CHardklorVariant::~CHardklorVariant(){
 };
 
 CHardklorVariant& CHardklorVariant::operator=(const CHardklorVariant& c){
-  size_t i;
+  int i;
   if(this!=&c){
     delete atoms;
     delete enrich;

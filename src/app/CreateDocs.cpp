@@ -74,6 +74,18 @@ int CreateDocs::main(int argc, char** argv) {
     }
   } else if (targetApp == "default-params") {
     // Write a default parameter file
+    cout << "########################################"
+            "########################################" << endl
+         << "# Sample parameter file" << endl
+         << "#" << endl
+         << "# On each line, anything after a '#' will be ignored." << endl
+         << "# The format is:" << endl
+         << "#" << endl
+         << "# <parameter-name>=<value>" << endl
+         << "#" << endl
+         << "########################################"
+            "########################################" << endl
+         << endl;
     Params::Write(&cout, true);
   } else if (targetApp == "check-params") {
     // Check for issues with parameters

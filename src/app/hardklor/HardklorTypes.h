@@ -26,9 +26,14 @@ enum hkAlgorithm {
 	FewestPeptides,
 	FewestPeptidesChoice,
 	FastFewestPeptides,
-	FastFewestPeptidesChoice
+	FastFewestPeptidesChoice,
+	Version2
 };
 
+enum hkOutputFormat{
+	hk,
+	pepXML
+};
 
 typedef struct {
   char atom[3];
@@ -120,5 +125,16 @@ typedef struct mercuryModel{
 	double zeroMass;
 	Peak_T* peaks;
 } mercuryModel;
+
+//for storing results to memory for modular Hardklor runs
+typedef struct hkMem{
+  int charge;
+  int scan;
+  float intensity; //or area depending on settings.
+  double corr;
+  double monoMass;
+  double mz;
+  char mods[32];
+} hkMem;
 
 #endif
