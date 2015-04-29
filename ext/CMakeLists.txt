@@ -142,6 +142,9 @@ elseif (APPLE)
     COMMAND ${CMAKE_COMMAND} -E copy 
       ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_common/CommonCMake.txt 
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/
+    COMMAND ${CMAKE_COMMAND} -E copy 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/src/ProteinProbEstimator.cpp 
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/ProteinProbEstimator.cpp
     DEPENDEES patch
     DEPENDERS configure
   )

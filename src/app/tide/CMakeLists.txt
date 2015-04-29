@@ -125,6 +125,13 @@ if (WIN32 AND NOT CYGWIN)
       GFLAGS_DLL_DECLARE_FLAG= 
       GFLAGS_DLL_DEFINE_FLAG=
   )
+elseif (APPLE)
+  set_property(
+    TARGET tide-support 
+    PROPERTY 
+      COMPILE_DEFINITIONS 
+      DARWIN 
+  )
 endif (WIN32 AND NOT CYGWIN)
 
 ###### Build tide-test-spectrum-preprocess  ######

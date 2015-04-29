@@ -19,7 +19,7 @@ class ProteinMatchCollection {
  protected:
 
   struct cmpSeq {
-    bool operator() (const MODIFIED_AA_T* lhs, const MODIFIED_AA_T* rhs) {
+    bool operator() (const MODIFIED_AA_T* lhs, const MODIFIED_AA_T* rhs) const {
       size_t idx = -1;
       MODIFIED_AA_T lhs_aa, rhs_aa;
       do {
