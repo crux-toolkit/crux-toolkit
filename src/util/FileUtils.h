@@ -7,6 +7,8 @@
 class FileUtils {
  public:
   static bool Exists(const std::string& path);
+  static void Rename(const std::string& from, const std::string& to);
+  static void Remove(const std::string& path);
   static std::string Read(const std::string& path);
   static std::ofstream* GetWriteStream(const std::string& path, bool overwrite);
   static std::string BaseName(const std::string& path);

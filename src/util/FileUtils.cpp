@@ -11,6 +11,18 @@ bool FileUtils::Exists(const string& path) {
   return boost::filesystem::exists(path);
 }
 
+void FileUtils::Rename(const string& from, const string& to) {
+  if (Exists(from)) {
+    boost::filesystem::rename(from, to);
+  }
+}
+
+void FileUtils::Remove(const string& path) {
+  if (Exists(path)) {
+    boost::filesystem::remove_all(path);
+  }
+}
+
 string FileUtils::Read(const string& path) {
   try {
     ifstream stream(path.c_str());

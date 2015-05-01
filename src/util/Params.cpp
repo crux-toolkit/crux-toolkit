@@ -453,6 +453,10 @@ void Params::Initialize() {
     " undefined behavior. Using 'none' will turn the binary .csm files "
     "into text.", false);
   // **** percolator options. ****
+  InitStringParam("percolator-seed", "1",
+    "When given a unsigned integer value seeds the random number generator with that value. "
+    "When given the string \"time\" seeds the random number generator with the system time.",
+    "Available for all percolator", true);
   InitBoolParam("feature-file", false,
     "Output the computed features in [[html:<a href=\"features.html\">]]tab-delimited "
     "text format[[html:</a>]].",
@@ -489,6 +493,9 @@ void Params::Initialize() {
     "Availble for crux percolator.", true);
   InitIntParam("maxiter", 10, 0, 100000000,
     "Maximum number of iterations for training.",
+    "Available for crux percolator", true);
+  InitBoolParam("quick-validation", false,
+    "Quicker execution by reduced internal cross-validation.",
     "Available for crux percolator", true);
   InitDoubleParam("train-ratio", 0.6, 0.0, 1.0,
     "Fraction of the negative data set to be used as train set when only providing "
@@ -537,6 +544,11 @@ void Params::Initialize() {
   InitBoolParam("group-proteins", false,
     "Proteins with same probabilities will be grouped.",
     "Available for crux percolator if --protein T is set.", true);
+  InitBoolParam("no-separate-proteins", false,
+    "Proteins with very low scores (~0.0) will not be pruned which means that if a "
+    "peptide with a very low score matches two proteins, when we prune the peptide, "
+    "it will be duplicated to generate two new protein groups.",
+    "Available for crux percolator if --protein T is set.", true);
   InitBoolParam("no-prune-proteins", false,
     "Peptides with low score will not be pruned before calculating protein probabilities. ",
     "Available for crux percolator if --protein T is set.", true);
@@ -549,6 +561,25 @@ void Params::Initialize() {
     "{0.1, 0.25, 0.5}.</li><li>2: alpha = {0.01, 0.04, 0.16, 0.25, 0.36}; beta = {0.0, "
     "0.01, 0.15, 0.030, 0.05}; gamma = {0.1, 0.5}.</li><li>3: alpha = {0.01, 0.04, 0.16, "
     "0.25, 0.36}; beta = {0.0, 0.01, 0.15, 0.030, 0.05}; gamma = {0.5}.</li></ul>]]",
+    "Available for crux percolator if --protein T is set.", true);
+  InitBoolParam("reduce-tree-in-gridsearch", false,
+    "Reduce the tree of proteins (removing low scored proteins) in order to estimate "
+    "alpha, beta, and gamma faster.",
+    "Available for crux percolator if --protein T is set.", true);
+  InitBoolParam("post-processing-tdcn", false,
+    "Use target-decoy competition to compute peptide probabilities.",
+    "Available for crux percolator", true);
+  InitDoubleParam("grid-search-mse-threshold", 0.05, 0, 1,
+    "Q-value threshold that will be used in the computation of the MSE and ROC AUC "
+    "score in the grid search.",
+    "Available for crux percolator if --protein T is set.", true);
+  InitBoolParam("truncation", false,
+    "Proteins with a very low score (<0.001) will be truncated (assigned 0.0 probability.",
+    "Available for crux percolator if --protein T is set.", true);
+  InitBoolParam("protein-group-level-inference", false,
+    "Uses protein group level inference, each cluster of proteins is either present or "
+    "not, therefore when grouping proteins discard all possible combinations for each "
+    "group.",
     "Available for crux percolator if --protein T is set.", true);
   InitBoolParam("static-override", false,
     "By default, Percolator will examine the learned weights for each feature, and if "
@@ -1596,8 +1627,13 @@ void Params::Categorize() {
   items.insert("protein-level-pi0");
   items.insert("empirical-protein-q");
   items.insert("group-proteins");
+  items.insert("no-separate-proteins");
   items.insert("no-prune-proteins");
   items.insert("deepness");
+  items.insert("reduce-tree-in-gridsearch");
+  items.insert("grid-search-mse-threshold");
+  items.insert("truncation");
+  items.insert("protein-group-level-inference");
   container_.AddCategory("Fido options", items);
 
   items.clear();
