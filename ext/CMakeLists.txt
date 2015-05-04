@@ -281,6 +281,9 @@ if (UNIX)
       COMMAND cp
         ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CometSearch/CometWriteTxt.cpp
         ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/
+      COMMAND cp
+        ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CometSearch/CometSearchManager.cpp
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/
     BUILD_COMMAND make -C MSToolkit
       COMMAND make -C CometSearch CXXFLAGS=-DCRUX 
     INSTALL_COMMAND ""
