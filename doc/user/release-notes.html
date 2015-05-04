@@ -12,34 +12,45 @@
 <h3>Major changes</h3>
 
 <ul>
-<li>The Windows version is now 64-bit, built using Visual Studio 2013.</li>
+
+<li>
+The Windows version is now 64-bit, built using Visual Studio 2013.</li>
+
 <li>
 Added the <code>peptide-centric-search</code> option to tide-search.</li>
+
 <li>
 Renamed the command <code>calibrate-scores</code>
 to <code>assign-confidence</code> and completely re-vamped its
 functionality.</li>
-</ul>
 
 <li>
 Updated Hardklor to version 2.19.</li>
+
+</ul>
 
 <h3>Minor changes</h3>
 
 <ul>
 
 <li>
+A bug was fixed in the naming of the Percolator input (.pin) file that
+is produced by Comet when the <code>output_percolatorfile</code>
+option is turned on.  Previously, the file was named "comet.tsv"; now
+it is "comet.target.pin."</li>
 
+<li>
 <code>Assign-confidence</code> can take multiple input files.
 </li>
 
 <li>
-The <code>sidak</code> option has been added to <code>Assign-confidence</code> 
-to perform sidak adjustment.
+The <code>sidak</code> option has been added
+to <code>assign-confidence</code> to perform a Sidak adjustment.
 </li>
 
 <li>
-The <code>peptide-level</code> option has been added to <code>Assign-confidence</code>.
+The <code>peptide-level</code> option has been added
+to <code>assign-confidence</code>.
 </li>
 
 <li>
