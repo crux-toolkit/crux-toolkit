@@ -1942,7 +1942,7 @@ void Params::Write(ostream* out, bool defaults) {
     throw runtime_error("Bad file stream for writing parameter file");
   }
 
-  *out << "# comet_version 2015.01 rev. 0" << endl
+  *out << "# comet_version 2015.02 rev. 0" << endl
        << "# Comet MS/MS search engine parameters file." << endl
        << "# Everything following the \'#\' symbol is treated as a comment." << endl
        << endl;

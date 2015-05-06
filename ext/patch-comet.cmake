@@ -29,7 +29,7 @@ if (WIN32 AND NOT CYGWIN)
     )
     check_status(status)
     message(${SOURCE_DIR}/patches/comet/MSToolkit/include/RAWReader.h)
-    message(${BINARY_DIR}/build/src/comet/MSToolkit/include/RAWReader.cpp)
+    message(${BINARY_DIR}/build/src/comet/MSToolkit/include/RAWReader.h)
     execute_process(
       COMMAND ${CMAKE_COMMAND} -E copy 
         ${SOURCE_DIR}/patches/comet/MSToolkit/include/RAWReader.h
@@ -43,6 +43,15 @@ if (WIN32 AND NOT CYGWIN)
       COMMAND ${CMAKE_COMMAND} -E copy 
         ${SOURCE_DIR}/patches/comet/MSToolkit/src/mzParser/MSNumpress.cpp
         ${BINARY_DIR}/build/src/comet/MSToolkit/src/mzParser/MSNumpress.cpp
+        RESULT_VARIABLE status
+    )
+    check_status(status)
+    message(${SOURCE_DIR}/patches/comet/CometSearch/CometSearchManager.cpp)
+    message(${BINARY_DIR}/build/src/comet/CometSearch/CometSearchManager.cpp)
+    execute_process(
+      COMMAND ${CMAKE_COMMAND} -E copy 
+        ${SOURCE_DIR}/patches/comet/CometSearch/CometSearchManager.cpp
+        ${BINARY_DIR}/build/src/comet/CometSearch/CometSearchManager.cpp
         RESULT_VARIABLE status
     )
     check_status(status)

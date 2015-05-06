@@ -83,7 +83,8 @@ static InputType GetInputType(const char *pszFileName)
    {
       return InputType_RAW;
    }
-   else if (!STRCMP_IGNORE_CASE(pszFileName + iLen - 4, ".ms2"))
+   else if (!STRCMP_IGNORE_CASE(pszFileName + iLen - 4, ".ms2")
+         || !STRCMP_IGNORE_CASE(pszFileName + iLen - 5, ".cms2"))
    {
       return InputType_MS2;
    }
@@ -131,6 +132,7 @@ static bool UpdateInputFile(InputFileInfo *pFileInfo)
       fclose(fp);
    }
 
+#ifndef CRUX
    if (bUpdateBaseName) // set individual basename from input file
    {
       char *pStr;
@@ -151,6 +153,7 @@ static bool UpdateInputFile(InputFileInfo *pFileInfo)
    {
       strcpy(g_staticParams.inputFile.szBaseName, szTmpBaseName);  // set basename from command line
    }
+#endif
 
    // Create .out directory.
    if (g_staticParams.options.bOutputOutFiles)
