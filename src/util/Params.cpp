@@ -41,12 +41,11 @@ void Params::Initialize() {
   /*Percolator arguments*/
   InitArgParam("pin",
     "A collection of target and decoy peptide-spectrum matches (PSMs). Input may "
-    "be in one of five formats: Percolator tab-delimited input format (.pin), SQT, pepXML, [[html:<a href=\"txt-format.html\">]]"
+    "be in one of five formats: PIN, SQT, pepXML, [[html:<a href=\"txt-format.html\">]]"
     "Crux tab-delimited text[[html:</a>]], or a list of files (when list-of-files=T). "
-    "The file type is determined via the filename extension. "
     "Note that if the input is provided as SQT, pepXML, or Crux "
-    "tab-delimited text, then a .pin file will be generated in the output directory "
-    "prior to execution.[[html:<br><br>Decoy PSMs can be provided to Percolator in two "
+    "tab-delimited text, then a PIN file will be generated in the output directory "
+    "prior to execution.[[html:<br>Decoy PSMs can be provided to Percolator in two "
     "ways: either as a separate file or embedded within the same file as the target "
     "PSMs. Percolator will first search for target PSMs in a separate file. The "
     "decoy file name is constructed from the target name by replacing \"target\" with "
@@ -841,6 +840,9 @@ void Params::Initialize() {
      "option for Comet only", true);
   InitIntParam("output_txtfile", 1, 0, 1,
     "0=no, 1=yes  write tab-delimited text file.",
+    "option for Comet only", true);
+  InitIntParam("output_outfiles", 0, 0, 1,
+    "0=no, 1=yes  write .out files.",
     "option for Comet only", true);
   InitIntParam("print_expect_score", 1, 0, 1,
     "0=no, 1=yes to replace Sp with expect in out & sqt.",
@@ -1752,6 +1754,7 @@ void Params::Categorize() {
   items.insert("output_txtfile");
   items.insert("output_pepxmlfile");
   items.insert("output_percolatorfile");
+  items.insert("output_outfiles");
   items.insert("print_expect_score");
   items.insert("num_output_lines");
   items.insert("show_fragment_ions");
