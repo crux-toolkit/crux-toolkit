@@ -6,6 +6,8 @@
 #include "CometSearch/CometSearchManager.h"
 #include "model/ModifiedPeptidesIterator.h"
 #include "util/CarpStreamBuf.h"
+#include "util/FileUtils.h"
+#include "util/Params.h"
 #include "util/StringUtils.h"
 #include "CometApplication.h"
 #include "io/DelimitedFileWriter.h"
@@ -105,38 +107,40 @@ void CometApplication::setCometParameters(
   vector<InputFileInfo*> &pvInputFiles, ///<vector of input spectra files
   CometSearchManager& searchMgr ///< SearchManager to set the parameters
   ) {
-  
   VarMods varModsParam;
   IntRange intRangeParam;
   DoubleRange doubleRangeParam;
 
-  
-  InputFileInfo *pInputFile = new InputFileInfo();
-  pInputFile->iAnalysisType = 0;
-  strcpy(pInputFile->szFileName, get_string_parameter("input spectra").c_str());
-  
-  //VALIDATE
-  FILE *fp;
-  if ((fp = fopen(pInputFile->szFileName, "r")) == NULL) {
-      carp(CARP_FATAL, "Spectra File Not Found:%s", get_string_parameter("input spectra").c_str());
-  }
-  fclose(fp);
-  
-  string scan_range_str = get_string_parameter("scan_range");
-  if (scan_range_str == "0 0") {
-    pInputFile->iAnalysisType = AnalysisType_EntireFile;
-  } else {
-    pInputFile->iAnalysisType = AnalysisType_SpecificScanRange;
+  string scan_range_str = Params::GetString("scan_range");
+  int analysis_type = AnalysisType_EntireFile;
+  int first_scan, last_scan;
+  if (scan_range_str != "0 0") {
+    analysis_type = AnalysisType_SpecificScanRange;
     vector<string> tokens = StringUtils::Split(scan_range_str, ' ');
-    from_string<int>(pInputFile->iFirstScan, tokens[0]);
-    from_string<int>(pInputFile->iLastScan, tokens[1]);
+    first_scan = StringUtils::FromString<int>(tokens[0]);
+    last_scan = StringUtils::FromString<int>(tokens[1]);
   }
 
-  pvInputFiles.push_back(pInputFile);
-  //TODO - Comet allows multiple spectra to be searched, add this to crux.
-  string basename = make_file_path(getName());
-  searchMgr.SetOutputFileBaseName(basename.c_str());
-  
+  vector<string> spec_files = Params::GetStrings("input spectra");
+  for (vector<string>::const_iterator i = spec_files.begin(); i != spec_files.end(); i++) {
+    if (!FileUtils::Exists(*i)) {
+      carp(CARP_FATAL, "Spectra File Not Found:%s", i->c_str());
+    }
+    InputFileInfo* pInputFile = new InputFileInfo();
+    strcpy(pInputFile->szFileName, i->c_str());
+    pInputFile->iAnalysisType = analysis_type;
+    if (analysis_type == AnalysisType_SpecificScanRange) {
+      pInputFile->iFirstScan = first_scan;
+      pInputFile->iLastScan = last_scan;
+    }
+    string basename = make_file_path(getFileStem());
+    if (spec_files.size() > 1) {
+      basename += "." + FileUtils::Stem(*i);
+    }
+    strcpy(pInputFile->szBaseName, basename.c_str());
+    pvInputFiles.push_back(pInputFile);
+  }
+
   searchMgr.SetParam("database_name", get_string_parameter("database name"), get_string_parameter("database name"));
   searchMgr.SetParam("decoy_prefix", get_string_parameter("decoy_prefix"), get_string_parameter("decoy_prefix"));
   searchMgr.SetParam("output_suffix", get_string_parameter("output_suffix"), get_string_parameter("output_suffix"));
@@ -343,7 +347,7 @@ string CometApplication::getDescription() const {
  */
 vector<string> CometApplication::getArgs() const {
   string arr[] = {
-    "input spectra",
+    "input spectra+",
     "database name"
   };
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
