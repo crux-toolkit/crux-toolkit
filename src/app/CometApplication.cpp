@@ -222,6 +222,7 @@ void CometApplication::setCometParameters(
   searchMgr.SetParam("output_txtfile", get_string_parameter("output_txtfile"), get_int_parameter("output_txtfile"));
   searchMgr.SetParam("output_pepxmlfile", get_string_parameter("output_pepxmlfile"), get_int_parameter("output_pepxmlfile"));
   searchMgr.SetParam("output_percolatorfile", get_string_parameter("output_percolatorfile"), get_int_parameter("output_percolatorfile"));
+  searchMgr.SetParam("output_outfiles", "0", 0);
   searchMgr.SetParam("skip_researching", get_string_parameter("skip_researching"), get_int_parameter("skip_researching"));
   searchMgr.SetParam("add_Cterm_peptide", get_string_parameter("add_Cterm_peptide"), get_double_parameter("add_Cterm_peptide"));
   searchMgr.SetParam("add_Nterm_peptide", get_string_parameter("add_Nterm_peptide"), get_double_parameter("add_Nterm_peptide"));
@@ -389,6 +390,7 @@ vector<string> CometApplication::getOptions() const {
     "output_pepxmlfile",
     "output_percolatorfile",
     "output_txtfile",
+    "output_outfiles",
     "print_expect_score",
     "num_output_lines",
     "show_fragment_ions",
@@ -461,20 +463,14 @@ vector<string> CometApplication::getOptions() const {
  */
 map<string, string> CometApplication::getOutputs() const {
   map<string, string> outputs;
-  outputs["comet.target.txt"] =
-    "a tab-delimited text file containing the target PSMs. See "
-    "<a href=\"txt-format.html\">txt file format</a> for a list of the fields.";
-  outputs["comet.target.sqt"] = "a file in SQT format containing the "
-    "target PSMs.";
-  outputs["comet.target.pep.xml"] = "a file in pepXML format containing "
-    "the target PSMs.";
-  outputs["comet.target.pin"] = "a file in tab-delimited Percolator input "
-    "format containing the target PSMs.";
   outputs["comet.params.txt"] =
     "a file containing the name and value of all parameters/options for the "
     "current operation. Not all parameters in the file may have been used in "
     "the operation. The resulting file can be used with the --parameter-file "
     "option for other crux programs.";
+  outputs["comet.target.txt"] =
+    "a tab-delimited text file containing the target PSMs. See <a href=\"txt-format.html\">"
+    "txt file format</a> for a list of the fields.";
   outputs["comet.log.txt"] =
     "a log file containing a copy of all messages that were printed to "
     "standard error.";
