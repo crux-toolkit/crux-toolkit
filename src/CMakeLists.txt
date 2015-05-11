@@ -306,19 +306,21 @@ if (WIN32 AND NOT CYGWIN)
     libpwiz_data_proteome
     libpwiz_data_common
     libpwiz_data_vendor_readers
+    libpwiz_reader_abi
+    libpwiz_reader_abi_t2d
     libpwiz_reader_agilent
     libpwiz_reader_shimadzu
     libpwiz_reader_thermo
     libpwiz_reader_waters
+    libpwiz_vendor_api_abi
     libpwiz_vendor_api_agilent
+    libpwiz_vendor_api_shimadzu
     libpwiz_vendor_api_thermo
     libpwiz_utility_chemistry
     libpwiz_utility_minimxml
     libpwiz_utility_misc
     libpwiz_version
     libSHA1
-    libsqlite3
-    libsqlite3pp
     libzlib
     MassLynxRaw
     cdt
@@ -349,19 +351,20 @@ if (WIN32 AND NOT CYGWIN)
     libpwiz_data_msdata_version
     libpwiz_data_proteome
     libpwiz_data_vendor_readers
+    libpwiz_reader_abi
+    libpwiz_reader_abi_t2d
     libpwiz_reader_agilent
     libpwiz_reader_shimadzu
     libpwiz_reader_thermo
     libpwiz_reader_waters
+    libpwiz_vendor_api_abi
     libpwiz_vendor_api_agilent
     libpwiz_vendor_api_thermo
+    libpwiz_vendor_api_shimadzu
     libpwiz_utility_chemistry
     libpwiz_utility_minimxml
     libpwiz_utility_misc
     libSHA1
-    libsqlite3
-    libsqlite3pp
-    baf2sql_c
     libzlib
     MassLynxRaw
     cdt
@@ -392,11 +395,15 @@ if (WIN32 AND NOT CYGWIN)
     libpwiz_data_msdata_version
     libpwiz_data_proteome
     libpwiz_data_vendor_readers
+    libpwiz_reader_abi
+    libpwiz_reader_abi_t2d
     libpwiz_reader_agilent
     libpwiz_reader_shimadzu
     libpwiz_reader_thermo
     libpwiz_reader_waters
+    libpwiz_vendor_api_abi
     libpwiz_vendor_api_agilent
+    libpwiz_vendor_api_shimadzu
     libpwiz_vendor_api_thermo
     libpwiz_utility_chemistry
     libpwiz_utility_minimxml
