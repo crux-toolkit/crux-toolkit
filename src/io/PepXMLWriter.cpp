@@ -49,7 +49,7 @@ void PepXMLWriter::closeFile(){
  * Requires OpenFile has been called without CloseFile.
  */
 void PepXMLWriter::writeHeader(){
-  MatchCollection::printXmlHeader(file_);
+  MatchCollection::printXmlHeader(file_, "");
 }
 
 /**

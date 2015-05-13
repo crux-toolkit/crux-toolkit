@@ -60,7 +60,6 @@ set (
   crux_lib_files
   util/Alphabet.cpp
   util/AminoAcidUtil.cpp
-  app/analyze_psms.cpp
   util/ArgParser.cpp
   io/carp.cpp
   util/CarpStreamBuf.cpp
@@ -118,6 +117,7 @@ set (
   app/PercolatorAdapter.cpp
   app/PercolatorApplication.cpp
   io/PinWriter.cpp
+  app/Pipeline.cpp
   app/GeneratePeptides.cpp
   model/PostProcessProtein.cpp
   app/PredictPeptideIons.cpp

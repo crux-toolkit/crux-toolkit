@@ -85,6 +85,8 @@ protected:
   double bin_width_;
   double bin_offset_;
 
+  std::string remove_index_;
+
   struct InputFile {
     std::string OriginalName;
     std::string SpectrumRecords;
@@ -117,6 +119,8 @@ public:
    * Main method
    */
   virtual int main(int argc, char** argv);
+
+  int main(const vector<string>& input_files);
 
   static bool hasDecoys();
 

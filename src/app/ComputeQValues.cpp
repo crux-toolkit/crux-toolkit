@@ -4,10 +4,11 @@
  *****************************************************************************/
 #include "ComputeQValues.h"
 #include "io/OutputFiles.h"
-#include "analyze_psms.h"
+#include "util/Params.h"
+#include "q-value.h"
+#include "PosteriorEstimator.h"
 
 using namespace std;
-
 
 /**
  * \returns a blank ComputeQValues object
@@ -26,9 +27,106 @@ ComputeQValues::~ComputeQValues() {
  * main method for ComputeQValues
  */
 int ComputeQValues::main(int argc, char** argv) {
-  //TODO : Figure out how to do this.
-  analyze_matches_main(argc, argv);
+  vector<string> input_files = Params::GetStrings("target input");  
+
+  if (Params::GetBool("list-of-files")) {
+    get_files_from_list(input_files[0], input_files);
+  }
+  return main(input_files);
+}
+
+int ComputeQValues::main(const vector<string>& input_files) {
+  // Prepare the output files.
+  OutputFiles output(this);
+  COMMAND_T command = Params::GetString("estimation-method") == "tdc"
+    ? TDC_COMMAND
+    : MIXMAX_COMMAND;
+  
+  // Perform the analysis.
+  MatchCollection* match_collection = run_qvalue(input_files, output, command);
+  delete match_collection;
+  output.writeFooters();
   return 0;
+}
+
+/**
+ * Compute posterior error probabilities (PEP) from the given target
+ * and decoy scores.
+ * \returns A newly allocated array of PEP for the target scores
+ * sorted.
+ */
+double* ComputeQValues::compute_PEP(double* target_scores, ///< scores for target matches
+                        int num_targets,       ///< size of target_scores
+                        double* decoy_scores,  ///< scores for decoy matches
+                        int num_decoys,         ///< size of decoy_scores
+                        bool ascending ///< are the scores ascending or descending
+){
+  if( target_scores == NULL || decoy_scores == NULL 
+      || num_targets == 0 || num_decoys == 0 ){
+    carp(CARP_FATAL, "Cannot compute PEP without target or decoy scores.");
+  }
+//  pi0 = estimate_pi0(target_scores, num_targets, decoy_scores, num_decoys, ascending);
+
+  // put all of the scores in a single vector of pairs: score, is_target
+  vector<pair<double, bool> > score_labels;
+
+  transform(target_scores, target_scores + num_targets,
+            back_inserter(score_labels),
+            bind2nd(ptr_fun<double,bool,pair<double, bool> >(make_pair), true));
+  transform(decoy_scores, decoy_scores + num_decoys,
+            back_inserter(score_labels),
+            bind2nd(ptr_fun<double,bool,pair<double, bool> >(make_pair), false));
+
+  // sort them 
+  if (ascending) {
+    sort(score_labels.begin(), score_labels.end());
+    PosteriorEstimator::setReversed(true);
+  } else {
+    sort(score_labels.begin(), score_labels.end(),
+       greater<pair<double, bool> > ());  
+  }
+  // get p-values
+  vector<double> pvals;
+  PosteriorEstimator::getPValues(score_labels, pvals);
+  
+  // estimate pi0
+  double pi0 = PosteriorEstimator::estimatePi0(pvals);
+
+  // estimate PEPs
+  vector<double> PEP_vector;
+  PosteriorEstimator::estimatePEP(score_labels, pi0, PEP_vector, 
+                                  true);  // include decoy PEPs
+
+  // now score_labels and PEPs are similarly sorted
+
+  // pull out the PEPs in the order that the scores were given
+  double* PEP_array = new double[PEP_vector.size()];
+
+  for(int target_idx = 0; target_idx < num_targets; target_idx++){
+    
+    // the score to return next    
+    double curr_target_score = target_scores[target_idx];
+
+    // find its position in score_labels
+    vector< pair<double, bool> >::iterator found_score_pos;
+    if (ascending) {
+      found_score_pos 
+        = lower_bound(score_labels.begin(), score_labels.end(), 
+                      make_pair(curr_target_score, true));
+    } else {
+      found_score_pos 
+        = lower_bound(score_labels.begin(), score_labels.end(), 
+                    make_pair(curr_target_score, true),
+                    greater<pair<double, bool> >()); 
+    }
+
+    size_t found_index = distance(score_labels.begin(), found_score_pos);
+
+    // pull out the PEP at the same position in PEP_vector
+    PEP_array[target_idx] = PEP_vector[found_index];
+   }
+
+  return PEP_array;
 }
 
 /**

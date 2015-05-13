@@ -38,6 +38,8 @@ public:
    */
   virtual int main(int argc, char** argv);
 
+  int main(const string& fasta, const string& index, string cmd_line = "");
+
   /**
    * Returns the command name
    */

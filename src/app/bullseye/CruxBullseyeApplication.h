@@ -36,6 +36,11 @@ class CruxBullseyeApplication: public CruxApplication {
    */
   virtual int main(int argc, char** argv);
 
+  int main(const std::string& input_ms1,
+           const std::string& input_ms2,
+           const std::string& match_ms2,
+           const std::string& nomatch_ms2);
+
   /**
    * \returns the command name for CruxBullseyeApplication
    */
@@ -65,6 +70,8 @@ class CruxBullseyeApplication: public CruxApplication {
    * \returns whether the application needs the output directory or not. (default false).
    */
   virtual bool needsOutputDirectory() const;
+
+  virtual COMMAND_T getCommand() const;
 };
 
 

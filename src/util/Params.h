@@ -420,6 +420,10 @@ class ArgParam : public Param {
   std::string GetStringDefault() const;
 
   const std::vector<std::string>& GetStrings() const;
+  void Set(bool value);
+  void Set(int value);
+  void Set(double value);
+  void Set(const std::string& value);
   void AddValue(const std::string& value);
  protected:
   std::vector<std::string> values_;

@@ -32,8 +32,6 @@ SortColumn::~SortColumn() {
  * main method for SortColumn
  */
 int SortColumn::main(int argc, char** argv) {
-  initialize(argc, argv);
-
   /* Get parameters */
   delimited_filename_ = get_string_parameter("tsv file");
   column_name_string_ = get_string_parameter("column name");

@@ -16,11 +16,9 @@ ReadTideIndex::~ReadTideIndex() {
 }
 
 int ReadTideIndex::main(int argc, char** argv) {
-  initialize(argc, argv);
-
   carp(CARP_INFO, "Running read-tide-index...");
 
-  string index_dir = get_string_parameter("tide database index");
+  string index_dir = get_string_parameter("tide database");
   string peptides_file = index_dir + "/pepix";
   string proteins_file = index_dir + "/protix";
   string auxlocs_file = index_dir + "/auxlocs";
@@ -106,7 +104,7 @@ string ReadTideIndex::getDescription() const {
 
 vector<string> ReadTideIndex::getArgs() const {
   string arr[] = {
-    "tide database index"
+    "tide database"
   };
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }

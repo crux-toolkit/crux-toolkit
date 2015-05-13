@@ -65,8 +65,6 @@ bool passesThreshold(
  * main method for ExtractRows
  */
 int ExtractRows::main(int argc, char** argv) {
-  initialize(argc, argv);
-
   /* Get parameters */
   string delimited_filename = get_string_parameter("tsv file");
 

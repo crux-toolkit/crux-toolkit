@@ -85,6 +85,18 @@ void Params::Initialize() {
   InitArgParam("fragmentation spectra",
     "The fragmentation spectra must be provided in [[html:<a href=\"ms2-format.html\">]]"
     "MS2[[html:</a>]], mzXML, or MGF format.");
+  // pipeline arguments
+  InitArgParam("mass spectra",
+    "The name of the file(s) from which to parse the fragmentation spectra, in any of the "
+    "[[html:<a href=\"http://proteowizard.sourceforge.net/tools.shtml\">]]file formats "
+    "supported by ProteoWizard[[html:</a>]]. Alteratively, with Tide-search, these files "
+    "may be binary spectrum files produced by a previous run of [[html:<code>]]crux "
+    "tide-search[[html:</code>]] using the [[html:<code>]]store-spectra[[html:</code>]] "
+    "parameter.");
+  InitArgParam("peptide source",
+    "Either the name of a file in fasta format from which to retrieve proteins and "
+    "peptides or an index created by a previous run of [[html:<code>]]crux tide-index"
+    "[[html:</code>]] (for Tide searching).");
   /* *** Initialize Options (command line and param file) *** */
 
   /* options for all executables */
@@ -611,9 +623,9 @@ void Params::Initialize() {
     "of the file formats supported by ProteoWizard. Alternatively, the argument "
     "may be one or more binary spectrum files produced by a previous run of crux "
     "tide-search using the store-spectra parameter.");
-  InitArgParam("tide database index",
-    "A directory containing a database index created by a previous run of crux "
-    "tide-index.");
+  InitArgParam("tide database",
+    "Either a FASTA file or a directory containing a database index created by a previous "
+    "run of crux tide-index.");
   // **** Tide options ****
   InitStringParam("decoy-format", "shuffle", "none|shuffle|peptide-reverse|protein-reverse",
     "Include a decoy version of every peptide by shuffling or reversing the "
@@ -692,6 +704,10 @@ void Params::Initialize() {
     "mz-bin-width parameter is set to its default value. Variable and static mods are allowed "
     "on non-terminal residues in conjunction with p-value computation, but currently only "
     "static mods are allowed on the N-terminus, and no mods on the C-terminus.",
+    "Available for tide-search", true);
+  InitStringParam("store-index", "",
+    "When providing a FASTA file as the index, the generated binary index will be stored at "
+    "the given path. This option has no effect if a binary index is provided as the index.",
     "Available for tide-search", true);
   InitBoolParam("concat", false,
     "When set to T, target and decoy search results are reported in a single file, and only "
@@ -1507,6 +1523,19 @@ void Params::Initialize() {
     "&ndash; The file value is greater than or equal to the argument value</li><li>neq "
     "&ndash; The file value is not equal to the argument value</li></ul>]]",
     "Available for crux extract-rows", true);
+  // crux pipeline options
+  InitBoolParam("bullseye", false,
+    "Run the Bullseye algorithm on the given MS data, using it to assign high-resolution "
+    "precursor values to the MS/MS data. If a spectrum file ends with .ms2 or .cms2, matching "
+    ".ms1/.cms1 files will be used as the MS1 file. Otherwise, it is assumed that the "
+    "spectrum file contains both MS1 and MS2 scans.",
+    "Available for crux pipeline", true);
+  InitStringParam("search-engine", "tide-search", "comet|tide-search",
+    "Specify which search engine to use.",
+    "Available for crux pipeline", true);
+  InitStringParam("post-processor", "percolator", "percolator|assign-confidence|none",
+    "Specify which post-processor to apply to the search results.",
+    "Available for crux pipeline", true);
   // create-docs
   InitArgParam("tool name",
     "Specifies the Crux tool to generate documentation for. If the value is "
@@ -2569,5 +2598,9 @@ int ArgParam::GetIntDefault() const { return 0; }
 double ArgParam::GetDoubleDefault() const { return 0; }
 string ArgParam::GetStringDefault() const { return ""; }
 const vector<string>& ArgParam::GetStrings() const { return values_; }
+void ArgParam::Set(bool value) { values_ = vector<string>(1, StringParam::From(value)); }
+void ArgParam::Set(int value) { values_ = vector<string>(1, StringParam::From(value)); }
+void ArgParam::Set(double value) { values_ = vector<string>(1, StringParam::From(value)); }
+void ArgParam::Set(const string& value) { values_ = vector<string>(1, value); }
 void ArgParam::AddValue(const string& value) { values_.push_back(value); }
 

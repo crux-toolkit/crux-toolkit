@@ -30,6 +30,20 @@ class ComputeQValues: public CruxApplication {
    */
   virtual int main(int argc, char** argv);
 
+  int main(const std::vector<std::string>& input_files);
+
+  /**
+   * Compute posterior error probabilities (PEP) from the given target
+   * and decoy scores.
+   * \returns A newly allocated array of PEP for the target scores
+   * sorted.
+   */
+  static double* compute_PEP(double* target_scores, ///< scores for target matches
+                             int num_targets,       ///< size of target_scores
+                             double* decoy_scores,  ///< scores for decoy matches
+                             int num_decoys,       ///< size of decoy_scores
+                             bool ascending = false); ///< are the scores ascending/descending?
+
   /**
    * \returns the command name for ComputeQValues
    */

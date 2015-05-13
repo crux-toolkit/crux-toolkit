@@ -402,7 +402,7 @@ void OutputFiles::writeHeaders(int num_proteins, bool isMixedTargetDecoy){
     if( sqt_file_array_ ){
       string database = get_string_parameter("protein-database");
       if (!FileUtils::Exists(database.c_str())) {
-        database = get_string_parameter("tide database index");
+        database = Params::GetString("tide database");
       }
       MatchCollection::printSqtHeader(sqt_file_array_[file_idx],
                        tag, database, num_proteins, exact_pval_search_); 

@@ -34,6 +34,8 @@ class CometApplication: public CruxApplication {
    */
   virtual int main(int argc, char** argv);
 
+  int main(const std::vector<std::string>& input_files);
+
   /**
    * \returns the command name for CometApplication
    */
@@ -59,6 +61,8 @@ class CometApplication: public CruxApplication {
    */
   virtual std::map<std::string, std::string> getOutputs() const;
 
+  virtual COMMAND_T getCommand() const;
+
   /**
    * \returns whether the application needs the output directory or not. (default false).
    */
@@ -68,6 +72,7 @@ class CometApplication: public CruxApplication {
    * Sets the parameters for the Comet application using the crux parameters
    */
   void setCometParameters(
+    const std::vector<std::string>& spec_files,
     std::vector<InputFileInfo*> &pvInputFiles, ///<vector of input spectra files
     CometSearchManager& searchMgr ///< SearchManager to set the parameters
     );

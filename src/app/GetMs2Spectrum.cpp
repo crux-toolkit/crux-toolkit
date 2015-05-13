@@ -48,8 +48,6 @@ GetMs2Spectrum::~GetMs2Spectrum() {
  * MAIN
  ****************************************************************************/
 int GetMs2Spectrum :: main(int argc, char** argv){
-  initialize(argc, argv);
-
   /* Get arguments */
   int min_scan = -1;
   int max_scan = -1;

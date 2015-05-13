@@ -77,8 +77,6 @@ PercolatorApplication::~PercolatorApplication() {
  * main method for PercolatorApplication
  */
 int PercolatorApplication::main(int argc, char** argv) {
-  initialize(argc, argv);
-
   string input_pin = Params::GetString("pin");
 
   // Check if we need to run make-pin first
@@ -96,6 +94,9 @@ int PercolatorApplication::main(int argc, char** argv) {
     const char* make_pin_file = pin_location.c_str();
 
     carp(CARP_INFO, "Running make-pin");
+    for (vector<string>::const_iterator i = result_files.begin(); i != result_files.end(); i++) {
+      carp(CARP_INFO, "%s", i->c_str());
+    }
     int ret = MakePinApplication::main(result_files);
 
     if (ret != 0 || !FileUtils::Exists(make_pin_file)) {
@@ -104,10 +105,9 @@ int PercolatorApplication::main(int argc, char** argv) {
     carp(CARP_INFO, "Finished make-pin.");
     input_pin = string(make_pin_file);
   } else if (!has_extension(input_pin.c_str(), "pin")) {
-      carp(CARP_FATAL, "input file %s is not recognized.", input_pin.c_str() );
+    carp(CARP_FATAL, "input file %s is not recognized.", input_pin.c_str() );
   }
   return main(input_pin);
-
 }
 
 /**

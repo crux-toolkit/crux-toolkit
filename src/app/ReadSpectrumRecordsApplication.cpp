@@ -10,8 +10,6 @@ ReadSpectrumRecordsApplication::~ReadSpectrumRecordsApplication() {
 }
 
 int ReadSpectrumRecordsApplication::main(int argc, char** argv) {
-  initialize(argc, argv);
-
   carp(CARP_INFO, "Running read-spectrumrecords...");
 
   string records_file = get_string_parameter("spectrum records file");

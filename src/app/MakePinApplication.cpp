@@ -6,45 +6,12 @@
 #include "parameter.h"
 #include "io/MatchCollectionParser.h"
 #include "io/SQTReader.h"
+#include "util/StringUtils.h"
 #include <sstream>
 #include <iomanip>
 #include <ios>
+
 using namespace std;
-  /**
-   * Turn the given value into a string.  For floating point numbers,
-   * use the --precision option value.
-   */
-  template<typename TValue>
-  static string to_string(TValue value) {
-
-    ostringstream oss;
-    oss << setprecision(get_int_parameter("precision")) << fixed;
-    oss << value;
-    string out_string = oss.str();
-    return out_string;
-  }
-
-  /**
-   * Turn the given value into a string.  For floating point numbers,
-   * use the given precision.
-   */
-  template<typename TValue>
-  static string to_string
-    (TValue& value,
-     int precision,
-     bool fixed_float = true) {
-
-    ostringstream oss;
-    oss << setprecision(precision);
-    if (fixed_float) {
-      oss << fixed;
-    } else {
-      oss.unsetf(ios_base::floatfield);
-    }
-    oss << value;
-    string out_string = oss.str();
-    return out_string;
-  }
 
 /**
  * \returns a blank PercolatorApplication object
@@ -61,8 +28,6 @@ MakePinApplication::~MakePinApplication() {}
  * main method for MakePinApplication
  */
 int MakePinApplication::main(int argc, char** argv) {
-  initialize(argc, argv);
-
   string target_path = get_string_parameter("target input");
 
   vector<string> search_result_files;
@@ -74,20 +39,20 @@ int MakePinApplication::main(int argc, char** argv) {
 /**
  * \runs make-pin application
  */
-int MakePinApplication::main(vector<string>& paths) {
+int MakePinApplication::main(const vector<string>& paths) {
   //create MatchColletion 
   MatchCollectionParser parser;
 
-  if (paths.size() == 0) {
+  if (paths.empty()) {
     carp(CARP_FATAL, "No search paths found!");
   }
 
   MatchCollection* target_collection = new MatchCollection();
   MatchCollection* decoy_collection = new MatchCollection();
 
-  for (vector<string>::iterator iter = paths.begin(); iter != paths.end(); ++iter) {
+  for (vector<string>::const_iterator iter = paths.begin(); iter != paths.end(); ++iter) {
     carp(CARP_INFO, "Parsing %s", iter->c_str());
-    if (has_extension(*iter, ".sqt")) {
+    if (StringUtils::IEndsWith(*iter, ".sqt")) {
       SQTReader::readSymbols(*iter);
     }
 

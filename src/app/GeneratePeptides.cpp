@@ -31,8 +31,6 @@ GeneratePeptides::~GeneratePeptides() {
  * Main method for GeneratePeptides.
  */
 int GeneratePeptides::main(int argc, char** argv) {
-  initialize(argc, argv);
-
   // Get arguments and options
   bool output_sequence = get_boolean_parameter("output-sequence");
   string filename = get_string_parameter("protein fasta file");

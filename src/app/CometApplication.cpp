@@ -32,8 +32,10 @@ CometApplication::~CometApplication() {
  * main method for CometApplication
  */
 int CometApplication::main(int argc, char** argv) {
-  initialize(argc, argv);
+  return main(Params::GetStrings("input spectra"));
+}
 
+int CometApplication::main(const vector<string>& input_files) {
   /* Re-route stderr to log file */
   CarpStreamBuf buffer;
   streambuf* old = std::cerr.rdbuf();
@@ -42,7 +44,7 @@ int CometApplication::main(int argc, char** argv) {
   /* set Parmeters */
   vector<InputFileInfo*> pv_input_files;
   CometSearchManager comet_search_mgr;
-  setCometParameters(pv_input_files, comet_search_mgr);
+  setCometParameters(input_files, pv_input_files, comet_search_mgr);
   comet_search_mgr.AddInputFiles(pv_input_files);
   
   /* Run search */
@@ -104,6 +106,7 @@ void CometApplication::getIntRange(
  * Sets the parameters for the Comet application using the crux parameters
  */
 void CometApplication::setCometParameters(
+  const vector<string>& spec_files,
   vector<InputFileInfo*> &pvInputFiles, ///<vector of input spectra files
   CometSearchManager& searchMgr ///< SearchManager to set the parameters
   ) {
@@ -121,7 +124,6 @@ void CometApplication::setCometParameters(
     last_scan = StringUtils::FromString<int>(tokens[1]);
   }
 
-  vector<string> spec_files = Params::GetStrings("input spectra");
   for (vector<string>::const_iterator i = spec_files.begin(); i != spec_files.end(); i++) {
     if (!FileUtils::Exists(*i)) {
       carp(CARP_FATAL, "Spectra File Not Found:%s", i->c_str());
@@ -475,6 +477,10 @@ map<string, string> CometApplication::getOutputs() const {
     "a log file containing a copy of all messages that were printed to "
     "standard error.";
   return outputs;
+}
+
+COMMAND_T CometApplication::getCommand() const {
+  return COMET_COMMAND;
 }
 
 /**

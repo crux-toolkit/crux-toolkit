@@ -1,5 +1,7 @@
 #include "Barista.h"
 #include "objects.h"
+#include "app/ComputeQValues.h"
+
 using namespace std; 
 double Barista :: check_gradients_hinge_one_net(int protind, int label){
   int num_pep = d.protind2num_pep(protind);
@@ -1893,8 +1895,8 @@ void Barista :: computePEP(){
   double* decoy_scores = new double[num_decoys];
   copy(decoy_scores_vect.begin(), decoy_scores_vect.end(), decoy_scores);
 
-  double* PEPs = compute_PEP(target_scores, num_targets, 
-                             decoy_scores, num_decoys);
+  double* PEPs = ComputeQValues::compute_PEP(target_scores, num_targets, 
+                                             decoy_scores, num_decoys);
 
   // fill in the data set with the new scores for the targets
   int target_idx = 0;
@@ -1931,8 +1933,8 @@ void Barista :: computePEP(){
   copy(target_scores_vect.begin(), target_scores_vect.end(), target_scores);
   decoy_scores = new double[num_decoys];
   copy(decoy_scores_vect.begin(), decoy_scores_vect.end(), decoy_scores);
-  PEPs = compute_PEP(target_scores, num_targets, 
-                             decoy_scores, num_decoys);
+  PEPs = ComputeQValues::compute_PEP(target_scores, num_targets, 
+                                     decoy_scores, num_decoys);
 
   // fill in the data set with the new scores for the targets
   target_idx = 0;
@@ -1970,8 +1972,8 @@ void Barista :: computePEP(){
   copy(target_scores_vect.begin(), target_scores_vect.end(), target_scores);
   decoy_scores = new double[num_decoys];
   copy(decoy_scores_vect.begin(), decoy_scores_vect.end(), decoy_scores);
-  PEPs = compute_PEP(target_scores, num_targets, 
-                             decoy_scores, num_decoys);
+  PEPs = ComputeQValues::compute_PEP(target_scores, num_targets, 
+                                     decoy_scores, num_decoys);
 
   // fill in the data set with the new scores for the targets
   target_idx = 0;

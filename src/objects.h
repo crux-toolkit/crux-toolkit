@@ -610,6 +610,7 @@ typedef enum _hardklor_algorithm HARDKLOR_ALGORITHM_T;
  */
 enum _command {
   INVALID_COMMAND,      ///< required by coding standards
+  BULLSEYE_COMMAND,     ///< bullseye
   QVALUE_COMMAND,       ///< compute-q-values
   MIXMAX_COMMAND,       ///< compute q-values using mix-max (Uri Keich)
   TDC_COMMAND,          ///< compute q-values using TDC (Elias-Gygi)  
@@ -617,6 +618,7 @@ enum _command {
   PERCOLATOR_COMMAND,   ///< percolator
   TIDE_INDEX_COMMAND,   ///< tide-index
   TIDE_SEARCH_COMMAND,  ///< tide-search
+  COMET_COMMAND,        ///< comet
   READ_SPECTRUMRECORDS_COMMAND, ///< read-spectrumrecords
   READ_TIDE_INDEX_COMMAND, ///< read-tide-index
   SPECTRAL_COUNTS_COMMAND, ///< spectral counts
@@ -627,6 +629,7 @@ enum _command {
   GENERATE_PEPTIDES_COMMAND, ///< generate-peptides
   GET_MS2_SPECTRUM_COMMAND, ///<get-ms2-spectrum 
   PREDICT_PEPTIDE_IONS_COMMAND, ///< predict-peptide-ions
+  PIPELINE_COMMAND,     ///< pipeline
   VERSION_COMMAND,      ///< just print the version number
   MISC_COMMAND,         ///< miscellaneous command
   NUMBER_COMMAND_TYPES  ///< always keep this last so the value

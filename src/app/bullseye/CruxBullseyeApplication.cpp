@@ -9,6 +9,7 @@
 
 #include "util/crux-utils.h"
 #include "util/FileUtils.h"
+#include "util/Params.h"
 
 using namespace std;
 
@@ -16,7 +17,6 @@ using namespace std;
  * \returns a blank CruxBullseyeApplication object
  */
 CruxBullseyeApplication::CruxBullseyeApplication() {
-
 }
 
 /**
@@ -25,18 +25,8 @@ CruxBullseyeApplication::CruxBullseyeApplication() {
 CruxBullseyeApplication::~CruxBullseyeApplication() {
 }
 
-/**
- * main method for CruxBullseyeApplication
- */
 int CruxBullseyeApplication::main(int argc, char** argv) {
-  initialize(argc, argv);
-
-  /* Get parameters. */
-  string hardklor_output;
-  string input_ms1 = get_string_parameter("MS1 spectra");
-  string input_ms2 = get_string_parameter("MS2 spectra");
-
-  string out_format = get_string_parameter("spectrum-format");
+  string out_format = Params::GetString("spectrum-format");
   if (out_format.empty()) {
     out_format = "ms2";
   } else if (out_format != "ms2" && out_format != "bms2" &&
@@ -44,15 +34,28 @@ int CruxBullseyeApplication::main(int argc, char** argv) {
     carp(CARP_FATAL, "spectrum-format must be ms2, bms2, cms2, or mgf, but was %s",
          out_format.c_str());
   }
-  string match_ms2 = make_file_path("bullseye.pid." + out_format);
-  string nomatch_ms2 = make_file_path("bullseye.no-pid." + out_format);
-  bool overwrite = get_boolean_parameter("overwrite");
+  return main(
+    Params::GetString("MS1 spectra"),
+    Params::GetString("MS2 spectra"),
+    make_file_path("bullseye.pid." + out_format),
+    make_file_path("bullseye.no-pid." + out_format)
+  );
+}
 
-  hardklor_output = get_string_parameter("hardklor-file");
-
+/**
+ * main method for CruxBullseyeApplication
+ */
+int CruxBullseyeApplication::main(
+  const string& input_ms1,
+  const string& input_ms2,
+  const string& match_ms2,
+  const string& nomatch_ms2
+) {
+  /* Get parameters. */
+  string hardklor_output = Params::GetString("hardklor-file");
   if (hardklor_output.empty()) {
     hardklor_output = make_file_path("hardklor.mono.txt");
-    if ((overwrite) || (!FileUtils::Exists(hardklor_output))) {
+    if (Params::GetBool("overwrite") || (!FileUtils::Exists(hardklor_output))) {
       carp(CARP_DEBUG,"Calling hardklor");
       bool ret = CruxHardklorApplication::main(input_ms1);
       if (ret != 0) {
@@ -261,6 +264,9 @@ bool CruxBullseyeApplication::needsOutputDirectory() const {
   return true;
 }
 
+COMMAND_T CruxBullseyeApplication::getCommand() const {
+  return BULLSEYE_COMMAND;
+}
 
 /*
  * Local Variables:

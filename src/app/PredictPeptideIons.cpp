@@ -50,8 +50,6 @@ PredictPeptideIons::~PredictPeptideIons() {
  * Main method for PredictPeptideIons.
  */
 int PredictPeptideIons::main(int argc, char** argv) {
-  initialize(argc, argv);
-
   /* Get Arguments */
   string peptide_sequence = get_string_parameter("peptide sequence");
   int charge_state = get_int_parameter("charge state");

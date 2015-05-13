@@ -16,7 +16,6 @@
  ****************************************************************************/
 #include "q-value.h"
 #include "io/MatchCollectionParser.h"
-#include "analyze_psms.h"
 #include "PosteriorEstimator.h"
 #include "util/FileUtils.h"
 #include "util/Params.h"
@@ -401,12 +400,12 @@ FLOAT_T* compute_decoy_qvalues_mixmax(
  * in each match.
  */
 MatchCollection* run_qvalue(
-  vector<string>& input_files,
+  const vector<string>& input_files,
   OutputFiles& output,
   COMMAND_T command  
   ){
   
-  if (input_files.size() == 0) {
+  if (input_files.empty()) {
     carp(CARP_FATAL, "No search paths found!");
   }
   //Note that peptide-level option relies on distinct set of target and decoy peptides.  
@@ -480,7 +479,7 @@ MatchCollection* run_qvalue(
   MatchCollectionParser parser;  
   std::map<string, FLOAT_T> BestPeptideScore;  
   
-  for (vector<string>::iterator iter = input_files.begin(); iter != input_files.end(); ++iter) {
+  for (vector<string>::const_iterator iter = input_files.begin(); iter != input_files.end(); ++iter) {
 
     string target_path = *iter;
     string decoy_path = *iter;

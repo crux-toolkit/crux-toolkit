@@ -38,21 +38,26 @@ TideIndexApplication::~TideIndexApplication() {
 }
 
 int TideIndexApplication::main(int argc, char** argv) {
-  initialize(argc, argv);
+  return main(Params::GetString("protein fasta file"),
+              Params::GetString("index name"),
+              StringUtils::Join(vector<string>(argv, argv + argc), ' '));
+}
 
+int TideIndexApplication::main(
+  const string& fasta,
+  const string& index,
+  string cmd_line
+) {
   carp(CARP_INFO, "Running tide-index...");
+
+  if (cmd_line.empty()) {
+    cmd_line = "crux tide-index " + fasta + " " + index;
+  }
 
   // Reroute stderr
   CarpStreamBuf buffer;
   streambuf* old = cerr.rdbuf();
   cerr.rdbuf(&buffer);
-
-  // Build command line string
-  string cmd_line = "crux tide-index";
-  for (int i = 1; i < argc; ++i) {
-    cmd_line += " ";
-    cmd_line += argv[i];
-  }
 
   FLAGS_tmpfile_prefix = make_file_path("modified_peptides_partial_");
 
@@ -121,8 +126,6 @@ int TideIndexApplication::main(int argc, char** argv) {
   string decoyPrefix = get_string_parameter("decoy-prefix");
 
   // Set up output paths
-  string fasta = get_string_parameter("protein fasta file");
-  string index = get_string_parameter("index name");
   bool overwrite = get_boolean_parameter("overwrite");
 
   if (!FileUtils::Exists(fasta)) {
