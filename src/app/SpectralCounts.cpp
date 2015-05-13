@@ -1055,13 +1055,18 @@ vector<string> SpectralCounts::getOptions() const {
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }
 
-map<string, string> SpectralCounts::getOutputs() const {
-  map<string, string> outputs;
-  outputs["spectral-counts.target.txt"] =
+vector< pair<string, string> > SpectralCounts::getOutputs() const {
+  vector< pair<string, string> > outputs;
+  outputs.push_back(make_pair("spectral-counts.target.txt",
     "a tab-delimited text file containing the protein IDs and their "
-    "corresponding scores, in sorted order.";
-  outputs["spectral-counts.log.txt"] =
-    "All messages written to standard error.";
+    "corresponding scores, in sorted order."));
+  outputs.push_back(make_pair("spectral-counts.params.txt",
+    "a file containing the name and value of all parameters/options for the "
+    "current operation. Not all parameters in the file may have been used in "
+    "the operation. The resulting file can be used with the --parameter-file "
+    "option for other Crux programs."));
+  outputs.push_back(make_pair("spectral-counts.log.txt",
+    "All messages written to standard error."));
   return outputs;
 }
 

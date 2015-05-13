@@ -181,20 +181,20 @@ vector<string> MakePinApplication::getOptions() const {
 /**
  * \returns the command outputs
  */
-map<string, string> MakePinApplication::getOutputs() const {
-  map<string, string> outputs;
-  outputs["make-pin.pin"] =
+vector< pair<string, string> > MakePinApplication::getOutputs() const {
+  vector< pair<string, string> > outputs;
+  outputs.push_back(make_pair("make-pin.pin",
     "a tab-delimited file containing the input target and decoy PSMs in pin "
     "format. This file can be changed to an absolute path (see --output-file "
-    "option).";
-  outputs["make-pin.params.txt"] =
+    "option)."));
+  outputs.push_back(make_pair("make-pin.params.txt",
     "a file containing the name and value of all parameters for the current "
     "operation. Not all parameters in the file may have been used in the "
     "operation. The resulting file can be used with the --parameter-file "
-    "option for other crux programs.";
-  outputs["make-pin.log.txt"] =
+    "option for other crux programs."));
+  outputs.push_back(make_pair("make-pin.log.txt",
     "a log file containing a copy of all messages that were printed to "
-    "standard error.";
+    "standard error."));
   return outputs;
 }
 

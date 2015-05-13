@@ -116,19 +116,19 @@ vector<string> ReadTideIndex::getOptions() const {
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }
 
-map<string, string> ReadTideIndex::getOutputs() const {
-  map<string, string> outputs;
-  outputs["read-tide-index.peptides.txt"] =
+vector< pair<string, string> > ReadTideIndex::getOutputs() const {
+  vector< pair<string, string> > outputs;
+  outputs.push_back(make_pair("read-tide-index.peptides.txt",
     "a tab-delimited file containing two columns with headers: the peptide, and "
-    "a semicolon-delimited list of IDs of the proteins that peptide occurs in.";
-  outputs["read-tide-index.params.txt"] =
+    "a semicolon-delimited list of IDs of the proteins that peptide occurs in."));
+  outputs.push_back(make_pair("read-tide-index.params.txt",
     "a file containing the name and value of all parameters/options for the "
     "current operation. Not all parameters in the file may have been used in "
     "the operation. The resulting file can be used with the --parameter-file "
-    "option for other crux programs.";
-  outputs["read-tide-index.log.txt"] =
+    "option for other crux programs."));
+  outputs.push_back(make_pair("read-tide-index.log.txt",
     "a log file containing a copy of all messages that were printed to the "
-    "screen during execution.";
+    "screen during execution."));
   return outputs;
 }
 

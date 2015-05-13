@@ -167,10 +167,10 @@ vector<string> GetMs2Spectrum::getOptions() const {
 /**
  * \returns The command outputs
  */
-map<string, string> GetMs2Spectrum::getOutputs() const {
-  map<string, string> outputs;
-  outputs["stdout"] =
-    "the requested spectrum or spectra in MS2 format.";
+vector< pair<string, string> > GetMs2Spectrum::getOutputs() const {
+  vector< pair<string, string> > outputs;
+  outputs.push_back(make_pair("stdout",
+    "the requested spectrum or spectra in MS2 format."));
   return outputs;
 }
 

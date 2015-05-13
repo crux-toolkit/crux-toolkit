@@ -1206,26 +1206,26 @@ vector<string> QRanker::getOptions() const {
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }
 
-map<string, string> QRanker::getOutputs() const {
-  map<string, string> outputs;
-  outputs["qranker.target.pep.xml"] =
+vector< pair<string, string> > QRanker::getOutputs() const {
+  vector< pair<string, string> > outputs;
+  outputs.push_back(make_pair("qranker.target.pep.xml",
     "An xml file containing ranked list of target peptide-spectrum matches. The"
     "following entries are included: scan, charge, psm_id, q-value, score, "
-    "precursor_mass, peptide, filename.";
-  outputs["qranker.decoy.pep.xml"] =
-    "An xml file containing ranked list of decoy peptide-spectrum matches.";
-  outputs["qranker.target.psm.txt"] =
+    "precursor_mass, peptide, filename."));
+  outputs.push_back(make_pair("qranker.decoy.pep.xml",
+    "An xml file containing ranked list of decoy peptide-spectrum matches."));
+  outputs.push_back(make_pair("qranker.target.psm.txt",
     "a <a href=\"txt-format.html\">tab-delimited text format</a> containing a "
     "ranked list of target peptide-spectrum matches with the associated Q-ranker "
-    "scores and q-values.";
-  outputs["qranker.decoy.psm.txt"] =
+    "scores and q-values."));
+  outputs.push_back(make_pair("qranker.decoy.psm.txt",
     "a <a href=\"txt-format.html\">tab-delimited text format</a> containing a "
     "ranked list of decoy peptide-spectrum matches with the associated Q-ranker "
-    "scores and q-values.";
-  outputs["qranker.log.txt"] =
-    "a file where the program reports its progress.";
-  outputs["qranker.params.txt"] =
-    "a file with the values of all the options given to the current run.";
+    "scores and q-values."));
+  outputs.push_back(make_pair("qranker.log.txt",
+    "a file where the program reports its progress."));
+  outputs.push_back(make_pair("qranker.params.txt",
+    "a file with the values of all the options given to the current run."));
   return outputs;
 }
 

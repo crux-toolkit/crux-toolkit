@@ -59,7 +59,7 @@ class CometApplication: public CruxApplication {
   /**
    * \returns the command outputs
    */
-  virtual std::map<std::string, std::string> getOutputs() const;
+  virtual std::vector< std::pair<std::string, std::string> > getOutputs() const;
 
   virtual COMMAND_T getCommand() const;
 

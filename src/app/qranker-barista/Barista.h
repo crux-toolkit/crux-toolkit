@@ -127,7 +127,7 @@ class Barista : public CruxApplication
   virtual std::string getDescription() const;
   virtual std::vector<std::string> getArgs() const;
   virtual std::vector<std::string> getOptions() const;
-  virtual std::map<std::string, std::string> getOutputs() const;
+  virtual std::vector< std::pair<std::string, std::string> > getOutputs() const;
   virtual bool needsOutputDirectory() const;
   virtual COMMAND_T getCommand() const;
 

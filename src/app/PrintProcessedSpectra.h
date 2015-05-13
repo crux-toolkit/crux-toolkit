@@ -63,7 +63,7 @@ class PrintProcessedSpectra: public CruxApplication {
   /**
    * \returns the command outputs
    */
-  virtual std::map<std::string, std::string> getOutputs() const;
+  virtual std::vector< std::pair<std::string, std::string> > getOutputs() const;
 
   /**
    * \returns the file stem of the application, default getName.

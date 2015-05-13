@@ -259,14 +259,9 @@ vector<string> CruxHardklorApplication::getOptions() const {
 /**
  * \returns the command outputs
  */
-map<string, string> CruxHardklorApplication::getOutputs() const {
-  map<string, string> outputs;
-  outputs["hardklor.params.txt"] =
-    "a file containing the name and value of all parameters/options for the "
-    "current operation. Not all parameters in the file may have been used in "
-    "the operation. The resulting file can be used with the --parameter-file "
-    "option for other crux programs.";
-  outputs["hardklor.mono.txt"] =
+vector< pair<string, string> > CruxHardklorApplication::getOutputs() const {
+  vector< pair<string, string> > outputs;
+  outputs.push_back(make_pair("hardklor.mono.txt",
     "a tab-delimited text file containing one line for each isotope "
     "distribution. The columns appear in the following order:<ol><li><strong>"
     "scan</strong>: The scan number assigned to this spectrum in the input file."
@@ -286,10 +281,15 @@ map<string, string> CruxHardklorApplication::getOutputs() const {
     "The dot product score applies to all predictions in a given spectrum window. "
     "Thus, if two protein or peptide predictions share the same spectrum window, "
     "then they have a single dot product score that is the score of their combined "
-    "peaks.</li></ol>";
-  outputs["hardklor.log.txt"] =
+    "peaks.</li></ol>"));
+  outputs.push_back(make_pair("hardklor.params.txt",
+    "a file containing the name and value of all parameters/options for the "
+    "current operation. Not all parameters in the file may have been used in "
+    "the operation. The resulting file can be used with the --parameter-file "
+    "option for other crux programs."));
+  outputs.push_back(make_pair("hardklor.log.txt",
     "a log file containing a copy of all messages that were printed to "
-    "stderr.";
+    "stderr."));
   return outputs;
 }
 

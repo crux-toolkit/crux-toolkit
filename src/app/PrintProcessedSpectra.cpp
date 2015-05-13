@@ -157,11 +157,11 @@ vector<string> PrintProcessedSpectra::getOptions() const {
 /**
  * \returns the command outputs
  */
-map<string, string> PrintProcessedSpectra::getOutputs() const {
-  map<string, string> outputs;
-  outputs["output file"] =
+vector< pair<string, string> > PrintProcessedSpectra::getOutputs() const {
+  vector< pair<string, string> > outputs;
+  outputs.push_back(make_pair("output file",
     "The name of the file in which the processed spectra will be printed in "
-    "MS2 format.";
+    "MS2 format."));
   return outputs;
 }
 

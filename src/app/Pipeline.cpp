@@ -258,8 +258,8 @@ vector<string> PipelineApplication::getOptions() const {
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }
 
-map<string, string> PipelineApplication::getOutputs() const {
-  map<string, string> outputs;
+vector< pair<string, string> > PipelineApplication::getOutputs() const {
+  vector< pair<string, string> > outputs;
   return outputs;
 }
 

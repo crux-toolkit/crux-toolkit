@@ -870,22 +870,22 @@ vector<string> TideSearchApplication::getOptions() const {
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }
 
-map<string, string> TideSearchApplication::getOutputs() const {
-  map<string, string> outputs;
-  outputs["tide-search.target.txt"] =
+vector< pair<string, string> > TideSearchApplication::getOutputs() const {
+  vector< pair<string, string> > outputs;
+  outputs.push_back(make_pair("tide-search.target.txt",
     "a tab-delimited text file containing the target PSMs. See <a href=\""
-    "txt-format.html\">txt file format</a> for a list of the fields.";
-  outputs["tide-search.decoy.txt"] =
+    "txt-format.html\">txt file format</a> for a list of the fields."));
+  outputs.push_back(make_pair("tide-search.decoy.txt",
     "a tab-delimited text file containing the decoy PSMs. This file will only "
-    "be created if the index was created with decoys.";
-  outputs["tide-search.params.txt"] =
+    "be created if the index was created with decoys."));
+  outputs.push_back(make_pair("tide-search.params.txt",
     "a file containing the name and value of all parameters/options for the "
     "current operation. Not all parameters in the file may have been used in "
     "the operation. The resulting file can be used with the --parameter-file "
-    "option for other Crux programs.";
-  outputs["tide-search.log.txt"] =
+    "option for other Crux programs."));
+  outputs.push_back(make_pair("tide-search.log.txt",
     "a log file containing a copy of all messages that were printed to the "
-    "screen during execution.";
+    "screen during execution."));
   return outputs;
 }
 bool TideSearchApplication::needsOutputDirectory() const {

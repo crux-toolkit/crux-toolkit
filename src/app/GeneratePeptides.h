@@ -56,7 +56,7 @@ class GeneratePeptides: public CruxApplication {
   /**
    * \returns The command outputs
    */
-  virtual std::map<std::string, std::string> getOutputs() const;
+  virtual std::vector< std::pair<std::string, std::string> > getOutputs() const;
 
   /**
    * \returns The file stem of the application, default getName.

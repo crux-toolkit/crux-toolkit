@@ -44,7 +44,7 @@ class CruxApplication{
   /**
    * \returns the outputs of the application as name -> description
    */
-  virtual std::map<std::string, std::string> getOutputs() const;
+  virtual std::vector< std::pair<std::string, std::string> > getOutputs() const;
 
   /**
    * \returns the file stem of the application, default getName.

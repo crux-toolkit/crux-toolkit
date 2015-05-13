@@ -222,11 +222,11 @@ vector<string> SortColumn::getOptions() const {
 /**
  * \returns the command outputs
  */
-map<string, string> SortColumn::getOutputs() const {
-  map<string, string> outputs;
-  outputs["stdout"] =
+vector< pair<string, string> > SortColumn::getOutputs() const {
+  vector< pair<string, string> > outputs;
+  outputs.push_back(make_pair("stdout",
     "a copy of the given file, with rows sorted according to the values in the "
-    "specified column.";
+    "specified column."));
   return outputs;
 }
 
