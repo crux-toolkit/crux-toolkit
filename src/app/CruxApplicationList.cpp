@@ -218,6 +218,7 @@ int CruxApplicationList::main(int argc, char** argv) {
     return -1;
   }
 
+  crux_application->initialize(argc-1, argv+1);
   int ret = crux_application->main(argc-1, argv+1);
 
   carp(CARP_INFO, "Elapsed time: %.3g s", wall_clock() / 1e6);

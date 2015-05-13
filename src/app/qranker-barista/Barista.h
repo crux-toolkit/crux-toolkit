@@ -18,7 +18,6 @@
 #include "util/crux-utils.h"
 #include "parameter.h"
 #endif
-#include "app/analyze_psms.h"
 #include "io/PepXMLWriter.h"
 #include "DataSet.h"
 #include "ProtScores.h"

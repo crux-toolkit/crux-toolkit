@@ -11,7 +11,6 @@
 #include "crux-main.h"
 #include "util/crux-utils.h" // Need to get definition of NUM_FEATURES.
 
-#include "app/analyze_psms.h"
 #include "app/q-value.h"
 #include "app/xlink/xlink_search.h"
 #include "app/CruxApplicationList.h"
@@ -23,6 +22,7 @@
 #include "app/PrintProcessedSpectra.h"
 #include "app/GeneratePeptides.h"
 #include "app/GetMs2Spectrum.h"
+#include "app/Pipeline.h"
 #include "app/PredictPeptideIons.h"
 #include "app/xlink/SearchForXLinks.h"
 #include "app/ExtractColumns.h"
@@ -70,6 +70,7 @@ int main(int argc, char** argv){
     applications.add(new Barista());
     applications.add(new SearchForXLinks());
     applications.add(new SpectralCounts());
+    applications.add(new PipelineApplication());
 
     // Utilities
     applications.addMessage(applications.getListName() +
@@ -92,8 +93,7 @@ int main(int argc, char** argv){
     applications.add(new StatColumn());
     applications.add(new SortColumn());
 
-    int ret = applications.main(argc, argv);
-    return ret;
+    return applications.main(argc, argv);
   } catch (const std::exception& e) {
     carp(CARP_FATAL, "An exception occurred: %s", e.what());
     return 1;

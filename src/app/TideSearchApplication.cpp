@@ -32,29 +32,27 @@ const double TideSearchApplication::XCORR_SCALING = 100000000.0;
  * tide/spectrum_preprocess2.cc). */
 const double TideSearchApplication::RESCALE_FACTOR = 20.0;
 
-TideSearchApplication::TideSearchApplication() {
-  exact_pval_search_ = false;
+TideSearchApplication::TideSearchApplication():
+  exact_pval_search_(false), remove_index_("") {
 }
 
 TideSearchApplication::~TideSearchApplication() {
+  if (!remove_index_.empty()) {
+    carp(CARP_DEBUG, "Removing temp index '%s'", remove_index_.c_str());
+    FileUtils::Remove(remove_index_);
+  }
 }
 
 int TideSearchApplication::main(int argc, char** argv) {
-  initialize(argc, argv);
+  return main(Params::GetStrings("tide spectra file"));
+}
 
+int TideSearchApplication::main(const vector<string>& input_files) {
   carp(CARP_INFO, "Running tide-search...");
-
-  string cmd_line = "crux tide-search";
-  for (int i = 1; i < argc; ++i) {
-    cmd_line += " ";
-    cmd_line += argv[i];
-  }
-
-  string index_dir = Params::GetString("tide database index");
-  string peptides_file = index_dir + "/pepix";
-  string proteins_file = index_dir + "/protix";
-  string auxlocs_file = index_dir + "/auxlocs";
-  vector<string> input_files = Params::GetStrings("tide spectra file");
+  const string index = Params::GetString("tide database");
+  string peptides_file = index + "/pepix";
+  string proteins_file = index + "/protix";
+  string auxlocs_file = index + "/auxlocs";
 
   double window = Params::GetDouble("precursor-window");
   WINDOW_TYPE_T window_type = string_to_window_type(Params::GetString("precursor-window-type"));
@@ -123,7 +121,7 @@ int TideSearchApplication::main(int argc, char** argv) {
                     " (this will increase runtime).");
   }
 
-  carp(CARP_INFO, "Reading index %s", index_dir.c_str());
+  carp(CARP_INFO, "Reading index %s", index.c_str());
   // Read proteins index file
   ProteinVec proteins;
   pb::Header protein_header;
@@ -826,7 +824,7 @@ string TideSearchApplication::getDescription() const {
 vector<string> TideSearchApplication::getArgs() const {
   string arr[] = {
     "tide spectra file+",
-    "tide database index"
+    "tide database"
   };
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }
@@ -842,6 +840,7 @@ vector<string> TideSearchApplication::getOptions() const {
     "scan-number",
     "top-match",
     "store-spectra",
+    "store-index",
     "concat",
     "compute-sp",
     "remove-precursor-peak",
@@ -1036,22 +1035,40 @@ int TideSearchApplication::calcScoreCount(
 }
 
 void TideSearchApplication::processParams() {
-  pb::Header peptides_header;
-  string peptides_file = Params::GetString("tide database index") + "/pepix";
-  HeadedRecordReader peptide_reader(peptides_file, &peptides_header);
-  if (!peptides_header.file_type() == pb::Header::PEPTIDES ||
-      !peptides_header.has_peptides_header()) {
-    carp(CARP_FATAL, "Error reading index (%s)", peptides_file.c_str());
+  const string index = Params::GetString("tide database");
+  if (!FileUtils::Exists(index)) {
+    carp(CARP_FATAL, "'%s' does not exist", index.c_str());
+  } else if (FileUtils::IsRegularFile(index)) {
+    carp(CARP_INFO, "Creating index from '%s'", index.c_str());
+    string targetIndexName = Params::GetString("store-index");
+    if (targetIndexName.empty()) {
+      targetIndexName = FileUtils::Join(Params::GetString("output-dir"),
+                                        "tide-search.tempindex");
+      remove_index_ = targetIndexName;
+    }
+    TideIndexApplication indexApp;
+    if (indexApp.main(index, targetIndexName) != 0) {
+      carp(CARP_FATAL, "tide-index failed.");
+    }
+    Params::Set("tide database", targetIndexName);
+  } else {
+    pb::Header peptides_header;
+    string peptides_file = index + "/pepix";
+    HeadedRecordReader peptide_reader(peptides_file, &peptides_header);
+    if (!peptides_header.file_type() == pb::Header::PEPTIDES ||
+        !peptides_header.has_peptides_header()) {
+      carp(CARP_FATAL, "Error reading index (%s)", peptides_file.c_str());
+    }
+
+    const pb::Header::PeptidesHeader& pepHeader = peptides_header.peptides_header();
+
+    Params::Set("enzyme", pepHeader.enzyme());
+    char* digestString =
+      digest_type_to_string(pepHeader.full_digestion() ? FULL_DIGEST : PARTIAL_DIGEST);
+    Params::Set("digestion", digestString);
+    free(digestString);
+    Params::Set("monoisotopic-precursor", pepHeader.monoisotopic_precursor() ? true : false);
   }
-
-  const pb::Header::PeptidesHeader& pepHeader = peptides_header.peptides_header();
-
-  Params::Set("enzyme", pepHeader.enzyme());
-  char* digestString =
-    digest_type_to_string(pepHeader.full_digestion() ? FULL_DIGEST : PARTIAL_DIGEST);
-  Params::Set("digestion", digestString);
-  free(digestString);
-  Params::Set("monoisotopic-precursor", pepHeader.monoisotopic_precursor() ? true : false);
 }
 
 /*

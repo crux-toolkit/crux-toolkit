@@ -295,7 +295,7 @@ class MatchCollection {
   /*
    * Print the XML file header
    */ 
-  static void printXmlHeader(FILE* outfile);
+  static void printXmlHeader(FILE* outfile, const string& ms2file);
 
   /*
    * Print the SQT file header 

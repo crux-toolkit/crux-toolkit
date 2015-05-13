@@ -27,8 +27,6 @@ ExtractColumns::~ExtractColumns() {
  * main method for ExtractColumns
  */
 int ExtractColumns::main(int argc, char** argv) {
-  initialize(argc, argv);
-
   string delimited_filename = get_string_parameter("tsv file");
   string column_names_string = get_string_parameter("column names");
 

@@ -11,6 +11,14 @@ bool FileUtils::Exists(const string& path) {
   return boost::filesystem::exists(path);
 }
 
+bool FileUtils::IsRegularFile(const string& path) {
+  return boost::filesystem::is_regular_file(path);
+}
+
+bool FileUtils::IsDir(const string& path) {
+  return boost::filesystem::is_directory(path);
+}
+
 void FileUtils::Rename(const string& from, const string& to) {
   if (Exists(from)) {
     boost::filesystem::rename(from, to);
@@ -21,6 +29,10 @@ void FileUtils::Remove(const string& path) {
   if (Exists(path)) {
     boost::filesystem::remove_all(path);
   }
+}
+
+string FileUtils::Join(const string& path1, const string& path2) {
+  return (boost::filesystem::path(path1) / boost::filesystem::path(path2)).string();
 }
 
 string FileUtils::Read(const string& path) {

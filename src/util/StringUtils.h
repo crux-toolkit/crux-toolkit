@@ -23,10 +23,15 @@ class StringUtils {
 
   // Convert to a string
   template<typename T>
-  static std::string ToString(const T& obj, int decimals = -1) {
+  static std::string ToString(const T& obj, int decimals = -1, bool fixedFloat = true) {
     std::stringstream converter;
     if (decimals >= 0) {
       converter << std::fixed << std::setprecision(decimals);
+      if (fixedFloat) {
+        converter << std::fixed;
+      } else {
+        converter.unsetf(std::ios_base::floatfield);
+      }
     }
     converter << obj;
     return converter.str();
@@ -34,10 +39,10 @@ class StringUtils {
 
   // Joins a vector of strings into a single string separated by a delimiter
   template<typename T>
-  static std::string Join(const std::vector<T>& v, const char delimiter = '\0') {
+  static std::string Join(const T values, const char delimiter ='\0') {
     std::stringstream ss;
-    for (typename std::vector<T>::const_iterator i = v.begin(); i != v.end(); i++) {
-      if (i != v.begin() && delimiter != '\0') {
+    for (typename T::const_iterator i = values.begin(); i != values.end(); i++) {
+      if (i != values.begin() && delimiter != '\0') {
         ss << delimiter;
       }
       ss << *i;
@@ -92,8 +97,14 @@ class StringUtils {
   // Return whether a string begins with a substring
   static bool StartsWith(const std::string& s, const std::string& substring);
 
+  // Return whether a string starts with a substring (case insensitive)
+  static bool IStartsWith(const std::string& s, const std::string& substring);
+
   // Return whether a string ends with a substring
   static bool EndsWith(const std::string& s, const std::string& substring);
+
+  // Return whether a string ends with a substring (case insensitive)
+  static bool IEndsWith(const std::string& s, const std::string& substring);
 
   // Trim whitespace from the beginning and end of a string
   static std::string Trim(const std::string& s);

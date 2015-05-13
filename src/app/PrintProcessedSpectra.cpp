@@ -31,8 +31,6 @@ PrintProcessedSpectra::~PrintProcessedSpectra() {
  * main method for PrintProcessedSpectra
  */
 int PrintProcessedSpectra::main(int argc, char** argv) {
-  initialize(argc, argv);
-
   // Get arguments and options
   string input_ms2_name  = get_string_parameter("ms2 file");
   string output_ms2_name = get_string_parameter("output file");

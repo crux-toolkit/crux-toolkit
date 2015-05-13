@@ -37,7 +37,7 @@ class MakePinApplication: public CruxApplication {
   /**
    * runs make-pin application
    */
-  static int main(std::vector<std::string>& paths);
+  static int main(const std::vector<std::string>& paths);
 
   /**
    * \returns the command name for MakePinApplication

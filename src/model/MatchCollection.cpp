@@ -592,7 +592,8 @@ void MatchCollection::transferWeibull(
  */
 
 void MatchCollection::printXmlHeader(
-  FILE* output
+  FILE* output,
+  const string& ms2file
   ){
   if (output == NULL ){
     return;
@@ -601,17 +602,16 @@ void MatchCollection::printXmlHeader(
   ENZYME_T enzyme = get_enzyme_type_parameter("enzyme");
   char* enz_str = enzyme_type_to_string(enzyme);
   string database = get_string_parameter("protein-database");
-  string msms_file = get_string_parameter("ms2 file");
   char* absolute_msms_path;
-  if (msms_file.empty()) {
+  if (ms2file.empty()) {
     absolute_msms_path = (char*) malloc(sizeof(char)*3);
     strcpy(absolute_msms_path, "NA");
   } else {
 #if DARWIN
     char path_buffer[PATH_MAX];
-    absolute_msms_path =  realpath(msms_file.c_str(), path_buffer);
+    absolute_msms_path =  realpath(ms2file.c_str(), path_buffer);
 #else
-    absolute_msms_path =  realpath(msms_file.c_str(), NULL);
+    absolute_msms_path =  realpath(ms2file.c_str(), NULL);
 #endif
   }
   // Removes the extension from ms2 file path

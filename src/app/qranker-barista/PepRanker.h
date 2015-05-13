@@ -17,7 +17,6 @@ using namespace std;
 #include "util/crux-utils.h"
 #include "parameter.h"
 #endif
-#include "app/analyze_psms.h"
 #include "io/PepXMLWriter.h"
 #include "NeuralNet.h"
 #include "DataSet.h"

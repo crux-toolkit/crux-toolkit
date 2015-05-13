@@ -27,8 +27,6 @@ StatColumn::~StatColumn() {
  * main method for StatColumn
  */
 int StatColumn::main(int argc, char** argv) {
-  initialize(argc, argv);
-
   delimited_filename_ = get_string_parameter("tsv file");
   column_name_string_ = get_string_parameter("column name");
   delimiter_ = get_delimiter_parameter("delimiter");

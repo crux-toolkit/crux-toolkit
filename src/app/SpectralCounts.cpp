@@ -53,8 +53,6 @@ SpectralCounts::~SpectralCounts() {
  * \returns 0 on successful completion.
  */
 int SpectralCounts::main(int argc, char** argv) {
-  initialize(argc, argv);
-
   getParameterValues(); // all the get_<type>_parameter calls here
 
   // open output files

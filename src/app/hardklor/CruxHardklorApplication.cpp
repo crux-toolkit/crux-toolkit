@@ -24,7 +24,6 @@ CruxHardklorApplication::~CruxHardklorApplication() {
 }
 
 int CruxHardklorApplication::main(int argc, char** argv) {
-  initialize(argc, argv);
   return main(Params::GetString("spectra"));
 }
 

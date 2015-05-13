@@ -19,6 +19,7 @@
 #include "GetMs2Spectrum.h"
 #include "MakePinApplication.h"
 #include "PercolatorApplication.h"
+#include "Pipeline.h"
 #include "PredictPeptideIons.h"
 #include "PrintProcessedSpectra.h"
 #include "qranker-barista/QRanker.h"
@@ -40,8 +41,6 @@ CreateDocs::~CreateDocs() {
 }
 
 int CreateDocs::main(int argc, char** argv) {
-  initialize(argc, argv);
-
   CruxApplicationList apps("crux");
   apps.add(new Barista());
   apps.add(new CometApplication());
@@ -55,6 +54,7 @@ int CreateDocs::main(int argc, char** argv) {
   apps.add(new GetMs2Spectrum());
   apps.add(new MakePinApplication());
   apps.add(new PercolatorApplication());
+  apps.add(new PipelineApplication());
   apps.add(new PredictPeptideIons());
   apps.add(new PrintProcessedSpectra());
   apps.add(new QRanker());

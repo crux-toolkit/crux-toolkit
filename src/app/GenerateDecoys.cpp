@@ -13,8 +13,6 @@ GenerateDecoys::~GenerateDecoys() {
 }
 
 int GenerateDecoys::main(int argc, char** argv) {
-  initialize(argc, argv);
-
   const int MAX_SHUFFLE_ATTEMPTS = 10;
 
   // Get decoy type

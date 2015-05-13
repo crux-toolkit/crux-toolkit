@@ -42,7 +42,7 @@ FLOAT_T estimate_pi0( FLOAT_T* target_scores,
   bool     ascending );
   
 MatchCollection* run_qvalue(
-  vector<string>& input_files,
+  const vector<string>& input_files,
   OutputFiles& output,
   COMMAND_T command  );
   
