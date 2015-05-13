@@ -56,7 +56,7 @@ class PredictPeptideIons: public CruxApplication {
   /**
    * \returns The command outputs
    */
-  virtual std::map<std::string, std::string> getOutputs() const;
+  virtual std::vector< std::pair<std::string, std::string> > getOutputs() const;
 
   /**
    * \returns The enum of the application, PREDICT_PEPTIDE_IONS_COMMAND.

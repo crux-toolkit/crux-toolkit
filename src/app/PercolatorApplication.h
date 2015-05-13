@@ -61,7 +61,7 @@ class PercolatorApplication: public CruxApplication {
   /**
    * \returns the command outputs
    */
-  virtual std::map<std::string, std::string> getOutputs() const;
+  virtual std::vector< std::pair<std::string, std::string> > getOutputs() const;
 
   /**
    * \returns whether the application needs the output directory or not. (default false).

@@ -117,11 +117,11 @@ vector<string> ExtractColumns::getOptions() const {
 /**
  * \returns the command outputs
  */
-map<string, string> ExtractColumns::getOutputs() const {
-  map<string, string> outputs;
-  outputs["stdout"] =
+vector< pair<string, string> > ExtractColumns::getOutputs() const {
+  vector< pair<string, string> > outputs;
+  outputs.push_back(make_pair("stdout",
     "the requested columns in tab-delimited format. The columns are printed in "
-    "the same order that they appear in the input column list.";
+    "the same order that they appear in the input column list."));
   return outputs;
 }
 

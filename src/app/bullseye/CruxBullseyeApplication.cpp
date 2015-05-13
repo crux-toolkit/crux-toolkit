@@ -227,14 +227,9 @@ vector<string> CruxBullseyeApplication::getOptions() const {
 /**
  * \returns the command outputs
  */
-map<string, string> CruxBullseyeApplication::getOutputs() const {
-  map<string, string> outputs;
-  outputs["bullseye.params.txt"] =
-    "a file containing the name and value of all parameters/options for the "
-    "current operation. Not all parameters in the file may have been used in "
-    "the operation. The resulting file can be used with the --parameter-file "
-    "option for other crux programs.";
-  outputs["bullseye.pid.<format>"] =
+vector< pair<string, string> > CruxBullseyeApplication::getOutputs() const {
+  vector< pair<string, string> > outputs;
+  outputs.push_back(make_pair("bullseye.pid.<format>",
     "a file containing the fragmentation spectra for which accurate masses "
     "were successfully inferred. Unless otherwise specified (with the "
     "--spectrum-format option), the output file format is \".ms2\". Note that "
@@ -244,16 +239,21 @@ map<string, string> CruxBullseyeApplication::getOutputs() const {
     "analysis) corresponding to each \"Z\" line. The \"I\" line contains "
     "\"EZ\" in the second column, the charge and mass from the associated "
     "\"Z\" line in the third and fourth colummns, followed by the "
-    "chromatographic apex and the intensity at the chromatographic apex.";
-  outputs["bullseye.no-pid.<format>"] =
+    "chromatographic apex and the intensity at the chromatographic apex."));
+  outputs.push_back(make_pair("bullseye.no-pid.<format>",
     "a file containing the fragmentation spectra for which accurate masses "
-    "were not inferred.";
-  outputs["hardklor.mono.txt"] =
+    "were not inferred."));
+  outputs.push_back(make_pair("hardklor.mono.txt",
     "a tab-delimited text file containing one line for each isotope "
-    "distribution, as described <a href=\"hardklor.html\">here</a>.";
-  outputs["bullseye.log.txt"] =
+    "distribution, as described <a href=\"hardklor.html\">here</a>."));
+  outputs.push_back(make_pair("bullseye.params.txt",
+    "a file containing the name and value of all parameters/options for the "
+    "current operation. Not all parameters in the file may have been used in "
+    "the operation. The resulting file can be used with the --parameter-file "
+    "option for other crux programs."));
+  outputs.push_back(make_pair("bullseye.log.txt",
     "a log file containing a copy of all messages that were printed to "
-    "standard error.";
+    "standard error."));
   return outputs;
 }
 

@@ -181,11 +181,11 @@ vector<string> ExtractRows::getOptions() const {
 /**
  * \returns the command outputs
  */
-map<string, string> ExtractRows::getOutputs() const {
-  map<string, string> outputs;
-  outputs["stdout"] =
+vector< pair<string, string> > ExtractRows::getOutputs() const {
+  vector< pair<string, string> > outputs;
+  outputs.push_back(make_pair("stdout",
     "the rows for which the value observed in the specified column of the input "
-    "file match the <column value> given on the command line.";
+    "file match the <column value> given on the command line."));
   return outputs;
 }
 

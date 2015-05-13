@@ -186,7 +186,7 @@ void CreateDocs::generateToolHtml(
   string appName = application->getName();
   string appDescription = application->getDescription();
   vector<string> args = application->getArgs();
-  map<string, string> out = application->getOutputs();
+  vector< pair<string, string> > out = application->getOutputs();
   vector<string> opts = application->getOptions();
 
   // Build usage and input strings
@@ -221,7 +221,7 @@ void CreateDocs::generateToolHtml(
   }
   // Build outputs string
   string outputs;
-  for (map<string, string>::const_iterator i = out.begin(); i != out.end(); i++) {
+  for (vector< pair<string, string> >::const_iterator i = out.begin(); i != out.end(); i++) {
     string single = outputTemplate;
     map<string, string> replaceMap;
     replaceMap["#NAME#"] = i->first;
@@ -339,10 +339,10 @@ vector<string> CreateDocs::getOptions() const {
   return vector<string>();
 }
 
-map<string, string> CreateDocs::getOutputs() const {
-  map<string, string> outputs;
-  outputs["stdout"] =
-    "The command prints to standard output the HTML documentation for the specified Crux tool.";
+vector< pair<string, string> > CreateDocs::getOutputs() const {
+  vector< pair<string, string> > outputs;
+  outputs.push_back(make_pair("stdout",
+    "The command prints to standard output the HTML documentation for the specified Crux tool."));
   return outputs;
 }
 

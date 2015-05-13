@@ -56,7 +56,7 @@ public:
   /**
    * \returns the outputs of the application as name -> description
    */
-  virtual map<string, string> getOutputs() const;
+  virtual vector< pair<string, string> > getOutputs() const;
 
   /**
    * Returns whether the application needs the output directory or not.

@@ -179,26 +179,26 @@ vector<string> GeneratePeptides::getOptions() const {
 /**
  * \returns The command outputs
  */
-map<string, string> GeneratePeptides::getOutputs() const {
-  map<string, string> outputs;
-  outputs["peptides.target.txt"] =
-    "a text file containing the target peptides, one per line.";
-  outputs["peptides.decoy.txt"] =
+vector< pair<string, string> > GeneratePeptides::getOutputs() const {
+  vector< pair<string, string> > outputs;
+  outputs.push_back(make_pair("peptides.target.txt",
+    "a text file containing the target peptides, one per line."));
+  outputs.push_back(make_pair("peptides.decoy.txt",
     "a text file containing the decoy peptides, one per line. There is a "
-    "one-to-one correspondence between targets and decoys.";
-  outputs["proteins.decoy.txt"] =
+    "one-to-one correspondence between targets and decoys."));
+  outputs.push_back(make_pair("proteins.decoy.txt",
     "a FASTA format file containing decoy proteins, in which all of the "
     "peptides have been replaced with their shuffled or reversed counterparts. "
     "Note that this file will only be created if the enzyme specificity is "
-    "\"full-digest\" and no missed cleavages are allowed.";
-  outputs["generate-peptides.params.txt"] =
+    "\"full-digest\" and no missed cleavages are allowed."));
+  outputs.push_back(make_pair("generate-peptides.params.txt",
     "a file containing the name and value of all parameters/options for the "
     "current operation. Not all parameters in the file may have been used in "
     "the operation. The resulting file can be used with the --parameter-file "
-    "option for other crux programs.";
-  outputs["generate-peptides.log.txt"] =
+    "option for other crux programs."));
+  outputs.push_back(make_pair("generate-peptides.log.txt",
     "a log file containing a copy of all messages that were printed to the "
-    "screen during execution.";
+    "screen during execution."));
   return outputs;
 }
 

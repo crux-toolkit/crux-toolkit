@@ -428,18 +428,18 @@ vector<string> TideIndexApplication::getOptions() const {
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }
 
-map<string, string> TideIndexApplication::getOutputs() const {
-  map<string, string> outputs;
-  outputs["index"] =
-    "A binary index, using the name specified on the command line.";
-  outputs["tide-index.params.txt"] =
+vector< pair<string, string> > TideIndexApplication::getOutputs() const {
+  vector< pair<string, string> > outputs;
+  outputs.push_back(make_pair("index",
+    "A binary index, using the name specified on the command line."));
+  outputs.push_back(make_pair("tide-index.params.txt",
     "a file containing the name and value of all parameters/options for the "
     "current operation. Not all parameters in the file may have been used in "
     "the operation. The resulting file can be used with the --parameter-file "
-    "option for other crux programs.";
-  outputs["tide-index.log.txt"] =
+    "option for other crux programs."));
+  outputs.push_back(make_pair("tide-index.log.txt",
     "a log file containing a copy of all messages that were printed to the "
-    "screen during execution.";
+    "screen during execution."));
   return outputs;
 }
 

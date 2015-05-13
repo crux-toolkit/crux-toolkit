@@ -13,7 +13,7 @@ class PipelineApplication : public CruxApplication {
   virtual std::string getDescription() const;
   virtual std::vector<std::string> getArgs() const;
   virtual std::vector<std::string> getOptions() const;
-  virtual std::map<std::string, std::string> getOutputs() const;
+  virtual std::vector< std::pair<std::string, std::string> > getOutputs() const;
   virtual std::string getFileStem() const;
   virtual COMMAND_T getCommand() const;
   virtual bool needsOutputDirectory() const;

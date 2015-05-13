@@ -68,7 +68,7 @@ class SearchForXLinks: public CruxApplication {
   /**
    * \returns the command outputs
    */
-  virtual std::map<std::string, std::string> getOutputs() const;
+  virtual std::vector< std::pair<std::string, std::string> > getOutputs() const;
 
   /**
    * \returns the enum of the application, default MISC_COMMAND

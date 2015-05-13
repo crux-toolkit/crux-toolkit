@@ -463,19 +463,19 @@ vector<string> CometApplication::getOptions() const {
 /**
  * \returns the command outputs
  */
-map<string, string> CometApplication::getOutputs() const {
-  map<string, string> outputs;
-  outputs["comet.params.txt"] =
+vector< pair<string, string> > CometApplication::getOutputs() const {
+  vector< pair<string, string> > outputs;
+  outputs.push_back(make_pair("comet.target.txt",
+    "a tab-delimited text file containing the target PSMs. See <a href=\"txt-format.html\">"
+    "txt file format</a> for a list of the fields."));
+  outputs.push_back(make_pair("comet.params.txt",
     "a file containing the name and value of all parameters/options for the "
     "current operation. Not all parameters in the file may have been used in "
     "the operation. The resulting file can be used with the --parameter-file "
-    "option for other crux programs.";
-  outputs["comet.target.txt"] =
-    "a tab-delimited text file containing the target PSMs. See <a href=\"txt-format.html\">"
-    "txt file format</a> for a list of the fields.";
-  outputs["comet.log.txt"] =
+    "option for other crux programs."));
+  outputs.push_back(make_pair("comet.log.txt",
     "a log file containing a copy of all messages that were printed to "
-    "standard error.";
+    "standard error."));
   return outputs;
 }
 

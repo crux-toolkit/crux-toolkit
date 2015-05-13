@@ -222,19 +222,19 @@ vector<string> ComputeQValues::getOptions() const {
 /**
  * \returns the command outputs
  */
-map<string, string> ComputeQValues::getOutputs() const {
-  map<string, string> outputs;
-  outputs["assign-confidence.target.txt"] =
+vector< pair<string, string> > ComputeQValues::getOutputs() const {
+  vector< pair<string, string> > outputs;
+  outputs.push_back(make_pair("assign-confidence.target.txt",
     "a <a href=\"txt-format.html\">tab-delimited text file</a> that contains the "
     "targets, sorted by score. The file will contain one new column, named "
-    "\"&lt;method&gt; q-value\", where &lt;method&gt; is either \"tdc\" or \"mix-max\".";
-  outputs["assign-confidence.log.txt"] =
-    "a log file containing a copy of all messages that were printed to stderr.";
-  outputs["assign-confidence.params.txt"] =
+    "\"&lt;method&gt; q-value\", where &lt;method&gt; is either \"tdc\" or \"mix-max\"."));
+  outputs.push_back(make_pair("assign-confidence.log.txt",
+    "a log file containing a copy of all messages that were printed to stderr."));
+  outputs.push_back(make_pair("assign-confidence.params.txt",
     "a file containing the name and value of all parameters/options for the "
     "current operation. Not all parameters in the file may have been used in "
     "the operation. The resulting file can be used with the --parameter-file "
-    "option for other crux programs.";
+    "option for other crux programs."));
   return outputs;
 }
 

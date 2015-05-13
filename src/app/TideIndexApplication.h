@@ -63,7 +63,7 @@ public:
   /**
    * Returns the command outputs
    */
-  virtual map<string, string> getOutputs() const;
+  virtual vector< pair<string, string> > getOutputs() const;
 
   /**
    * Returns whether the application needs the output directory or not. (default false)

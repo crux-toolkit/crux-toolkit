@@ -185,9 +185,9 @@ vector<string> PredictPeptideIons::getOptions() const {
 /**
  * \returns The command outputs
  */
-map<string, string> PredictPeptideIons::getOutputs() const {
-  map<string, string> outputs;
-  outputs["stdout"] =
+vector< pair<string, string> > PredictPeptideIons::getOutputs() const {
+  vector< pair<string, string> > outputs;
+  outputs.push_back(make_pair("stdout",
     "a series of lines, describing how the ions were predicted. <blockquote "
     "style=\"font-family: monospace;\"># PEPTIDE: &lt;peptide sequence&gt;<br>"
     "# CHARGE: &lt;peptide charge&gt;</blockquote>"
@@ -210,7 +210,7 @@ map<string, string> PredictPeptideIons::getOutputs() const {
     "<li>&lt;h2o&gt; is the number of H2O Modifications</li>"
     "<li>&lt;isotope&gt; is the number of adjacent isotopic peaks</li>"
     "<li>&lt;flank&gt; is the number of flanking ions</li>"
-    "</ul></p>";
+    "</ul></p>"));
   return outputs;
 }
 

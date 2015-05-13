@@ -40,8 +40,8 @@ vector<string> CruxApplication::getOptions() const {
 /**
  * \returns the outputs of the application as name -> description
  */
-map<string, string> CruxApplication::getOutputs() const {
-  return map<string, string>();
+vector< pair<string, string> > CruxApplication::getOutputs() const {
+  return vector< pair<string, string> >();
 }
 
 /**
