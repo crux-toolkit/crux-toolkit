@@ -1633,7 +1633,6 @@ void Params::Categorize() {
   items.insert("scan-number");
   items.insert("remove-precursor-peak");
   items.insert("remove-precursor-tolerance");
-  items.insert("print-search-progress");
   items.insert("use-flanking-peaks");
   items.insert("use-neutral-loss-peaks");
   items.insert("mz-bin-width");
@@ -1764,10 +1763,12 @@ void Params::Categorize() {
   items.insert("spectrum-format");
   items.insert("spectrum-parser");
   items.insert("list-of-files");
+  items.insert("print-search-progress");
   items.insert("use-z-line");
   items.insert("top-match");
   items.insert("concat");
   items.insert("store-spectra");
+  items.insert("store-index");
   items.insert("xlink-print-db");
   items.insert("fileroot");
   items.insert("output-dir");
