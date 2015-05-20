@@ -2638,8 +2638,6 @@ void Barista :: print_description()
 
 int Barista :: crux_set_command_line_options(int argc, char *argv[])
 {
-  initialize(argc, argv);
-  
   string db_source;
   string sqt_source;
   string ms2_source;

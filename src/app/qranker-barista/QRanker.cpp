@@ -934,8 +934,6 @@ FILE_FORMAT_T QRanker::check_file_format(string& source) {
 
 int QRanker :: crux_set_command_line_options(int argc, char *argv[])
 {
-  initialize(argc, argv);
-
   string sqt_source;
   string ms2_source;
   string sqt_decoy_source;
