@@ -382,7 +382,7 @@ string TideIndexApplication::getDescription() const {
     "http://dx.doi.org/10.1021/pr101196n\">Faster SEQUEST Searching for "
     "Peptide Identification from Tandem Mass Spectra.</a>&quot; <em>Journal of "
     "Proteome Research</em>. 10(9):3871-9, 2011.</blockquote><p>The <code>"
-    "tide-index</code> command performs a required pre-processing step on the "
+    "tide-index</code> command performs an optional pre-processing step on the "
     "protein database, converting it to a binary format suitable for input to "
     "the <code>tide-search</code> command.</p><p>Tide considers only the "
     "standard set of 20 amino acids. Peptides containing non-amino acid "
