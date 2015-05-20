@@ -97,9 +97,10 @@ calls to <code>tide-search</code>.</td>
 <td>
 <a href="tide-search.html">tide-search</a></td>
 <td>
-Search a collection of spectra against a sequence database, returning
-a collection of peptide-spectrum matches (PSMs).  This is a fast
-search engine but requires that you first build an index
+Search a collection of spectra against a sequence database, provided
+either as a FASTA file or an index, returning a collection of
+peptide-spectrum matches (PSMs).  This is a fast search engine, but it
+runs most quickly if provided with a peptide index built
 with <code>tide-index</code>.</td>
 </tr>
 
@@ -337,7 +338,7 @@ Print the Crux version number to standard output, then exit.</td>
 </td>
 <td>in</td>
 <td>in</td>
-<td>&nbsp;</td>
+<td>in</td>
 <td>in</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
@@ -588,7 +589,8 @@ Stafford Noble</a> in the Department of Genome Sciences at the
 University of Washington, Seattle.  The complete list of contributors
 can be found <a href="contributors.html">here</a>.</p>
 
-<p>Maintenance and development of Crux is funded by the National
+<p>
+Maintenance and development of Crux is funded by the National
 Institute of General Medical Sciences grants R01&nbsp;GM096306
 and P41&nbsp;GM103533.</p>
 </center>
@@ -596,7 +598,7 @@ and P41&nbsp;GM103533.</p>
 <hr></hr>
 
 <p>
-Please send comments and questions to cegrant@uw.edu.</p>
+Please send comments and questions to crux-users@googlegroups.com.</p>
 
 </blockquote>
 </body>
