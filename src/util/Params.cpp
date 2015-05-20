@@ -657,7 +657,9 @@ void Params::Initialize() {
     "+79.966331</span>. To specify a static modification, the number preceding the amino "
     "acid must be omitted; i.e., <span style=\"color: green;\">C</span>+<span "
     "style=\"color: blue;\">57.02146</span> specifies a static modification of 57.02146 "
-    "Da to cysteine. Note that Tide allows at most one modification per amino acid.]]",
+    "Da to cysteine. Note that Tide allows at most one modification per amino "
+    "acid.  Also, the default modification (C+57.02146) will be added to "
+    "every mods-spec string unless an explicit C+0 is included.]]",
     "Available for tide-index", true);
   InitStringParam("nterm-peptide-mods-spec", "",
     "[[nohtml:Specifies N-terminal static and variable mass modifications on peptides. "
