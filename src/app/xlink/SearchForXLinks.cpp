@@ -29,8 +29,6 @@ int SearchForXLinks::main(int argc, char** argv) {
   /* Verbosity level for set-up/command line reading */
   set_verbosity_level(CARP_ERROR);
 
-  initialize(argc, argv);
-
   //The use-old-xlink parameter will determine
   //which codebase gets called.
   int ret;
