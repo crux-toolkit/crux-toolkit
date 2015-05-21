@@ -15,6 +15,7 @@
 #include <ios>
 #include "util/CarpStreamBuf.h"
 #include "util/FileUtils.h"
+#include "util/Params.h"
 #include "io/MzIdentMLWriter.h"
 #include "model/ProteinMatchCollection.h"
 #include "io/PMCDelimitedFileWriter.h"
@@ -23,42 +24,6 @@
 
 
 using namespace std;
-  /**
-   * Turn the given value into a string.  For floating point numbers,
-   * use the --precision option value.
-   */
-  template<typename TValue>
-  static string to_string(TValue value) {
-
-    ostringstream oss;
-    oss << setprecision(get_int_parameter("precision")) << fixed;
-    oss << value;
-    string out_string = oss.str();
-    return out_string;
-  }
-
-  /**
-   * Turn the given value into a string.  For floating point numbers,
-   * use the given precision.
-   */
-  template<typename TValue>
-  static string to_string
-    (TValue& value,
-     int precision,
-     bool fixed_float = true) {
-
-    ostringstream oss;
-    oss << setprecision(precision);
-    if (fixed_float) {
-      oss << fixed;
-    } else {
-      oss.unsetf(ios_base::floatfield);
-    }
-    oss << value;
-    string out_string = oss.str();
-    return out_string;
-  }
-
 
 /**
  * \returns a blank PercolatorApplication object
@@ -78,34 +43,22 @@ PercolatorApplication::~PercolatorApplication() {
  */
 int PercolatorApplication::main(int argc, char** argv) {
   string input_pin = Params::GetString("pin");
+  string pin_ext = StringUtils::ToLower(FileUtils::Extension(input_pin));
+  carp(CARP_INFO, "Reading file %s, %s", input_pin.c_str(), pin_ext.c_str());
 
   // Check if we need to run make-pin first
-  if (Params::GetBool("list-of-files") || 
-      has_extension(input_pin.c_str(), "txt") ||
-      has_extension(input_pin.c_str(), "sqt") ||
-      has_extension(input_pin.c_str(), "pep.xml") ||
-      has_extension(input_pin.c_str(), "mzid")) {
-
+  if (!Params::GetBool("feature-in-file") &&
+      (Params::GetBool("list-of-files") || pin_ext == ".txt" || pin_ext == ".sqt" ||
+       pin_ext == ".pep.xml" || pin_ext == ".mzid")) {
     vector<string> result_files;
     get_search_result_paths(input_pin, result_files);
 
-    string pin_location = make_file_path("make-pin.pin");
-
-    const char* make_pin_file = pin_location.c_str();
-
+    input_pin = make_file_path("make-pin.pin");
     carp(CARP_INFO, "Running make-pin");
-    for (vector<string>::const_iterator i = result_files.begin(); i != result_files.end(); i++) {
-      carp(CARP_INFO, "%s", i->c_str());
-    }
-    int ret = MakePinApplication::main(result_files);
-
-    if (ret != 0 || !FileUtils::Exists(make_pin_file)) {
+    if (MakePinApplication::main(result_files) != 0 || !FileUtils::Exists(input_pin)) {
       carp(CARP_FATAL, "make-pin failed. Not running Percolator.");
     }
     carp(CARP_INFO, "Finished make-pin.");
-    input_pin = string(make_pin_file);
-  } else if (!has_extension(input_pin.c_str(), "pin")) {
-    carp(CARP_FATAL, "input file %s is not recognized.", input_pin.c_str() );
   }
   return main(input_pin);
 }
@@ -160,17 +113,9 @@ int PercolatorApplication::main(
     perc_args_vec.push_back("5");
   }
 
-  if(Params::GetBool("decoy-xml-output")){
-    perc_args_vec.push_back("-Z");
-  }
-
   perc_args_vec.push_back("-P");
   string decoy_pre = Params::GetString("decoy-prefix");
-  if(decoy_pre.length()){
-     perc_args_vec.push_back(decoy_pre);
-  } else {
-     perc_args_vec.push_back("random_");
-  }
+  perc_args_vec.push_back(!decoy_pre.empty() ? decoy_pre : "random_");
 
   string seed_parameter = Params::GetString("percolator-seed");
   unsigned int seed_value;
@@ -179,56 +124,51 @@ int PercolatorApplication::main(
     time(&seconds); // Get value from sys clock and set seconds variable.
     // percolator accepts seed values 1-20000
     seed_value = (unsigned int)seconds % 20000 + 1;
-  } else {
+  } else if ((seed_value = StringUtils::FromString<unsigned>(seed_parameter)) == 0) {
     // seed 0 causes segfault in percolator 
-    stringstream seed_extractor(seed_parameter);
-    seed_extractor >> seed_value;
-    if (seed_value == 0) {
-      ++seed_value;
-    }
+    ++seed_value;
   }
-  stringstream seed_stream;
-  seed_stream << seed_value;
   perc_args_vec.push_back("--seed");
-  perc_args_vec.push_back(seed_stream.str());
+  perc_args_vec.push_back(StringUtils::ToString(seed_value));
 
   if (Params::GetBool("pout-output")) {
     perc_args_vec.push_back("-X");
     perc_args_vec.push_back(make_file_path(getFileStem() + ".pout.xml"));
+    if (Params::GetBool("decoy-xml-output")) {
+      perc_args_vec.push_back("-Z");
+    }
   }
 
   perc_args_vec.push_back("-p");
-  perc_args_vec.push_back(to_string(Params::GetDouble("c-pos")));
+  perc_args_vec.push_back(Params::GetString("c-pos"));
  
   perc_args_vec.push_back("-n");
-  perc_args_vec.push_back(to_string(Params::GetDouble("c-neg")));
+  perc_args_vec.push_back(Params::GetString("c-neg"));
  
   perc_args_vec.push_back("--trainFDR");
-  perc_args_vec.push_back(to_string(Params::GetDouble("train-fdr")));
+  perc_args_vec.push_back(Params::GetString("train-fdr"));
  
   perc_args_vec.push_back("--testFDR");
-  perc_args_vec.push_back(to_string(Params::GetDouble("test-fdr")));
+  perc_args_vec.push_back(Params::GetString("test-fdr"));
 
   perc_args_vec.push_back("--maxiter");
-  perc_args_vec.push_back(to_string(Params::GetInt("maxiter")));
+  perc_args_vec.push_back(Params::GetString("maxiter"));
 
   if (Params::GetBool("quick-validation")) {
     perc_args_vec.push_back("--quick-validation");
   }
 
   perc_args_vec.push_back("--train-ratio");
-  perc_args_vec.push_back(to_string(Params::GetDouble("train-ratio")));
+  perc_args_vec.push_back(Params::GetString("train-ratio"));
 
-  if(Params::GetBool("feature-file")){ 
+  if (Params::GetBool("feature-file")) {
     perc_args_vec.push_back("--tab-out");
-    string feature_output=make_file_path(getFileStem() + ".feature.txt");
-    perc_args_vec.push_back(feature_output);
+    perc_args_vec.push_back(make_file_path(getFileStem() + ".feature.txt"));
   }
 
-  if(Params::GetBool("output-weights")){
+  if (Params::GetBool("output-weights")) {
     perc_args_vec.push_back("--weights");
-    string output_wght=make_file_path(getFileStem() + ".weights.txt");
-    perc_args_vec.push_back(output_wght);
+    perc_args_vec.push_back(make_file_path(getFileStem() + ".weights.txt"));
   }
   
   if (!Params::GetString("input-weights").empty()) {
@@ -241,18 +181,21 @@ int PercolatorApplication::main(
     perc_args_vec.push_back(Params::GetString("default-direction"));
   }
 
-  if(Params::GetBool("unitnorm"))
+  if (Params::GetBool("unitnorm")) {
     perc_args_vec.push_back("-u");
+  }
 
-  if(Params::GetBool("test-each-iteration"))
+  if (Params::GetBool("test-each-iteration")) {
     perc_args_vec.push_back("--test-each-iteration");
+  }
 
-  if(Params::GetBool("static-override")){
+  if (Params::GetBool("static-override")) {
     perc_args_vec.push_back("--override");
   }
  
-  if(Params::GetBool("klammer"))
-      perc_args_vec.push_back("--klammer");
+  if (Params::GetBool("klammer")) {
+    perc_args_vec.push_back("--klammer");
+  }
 
   /* --doc option disabled, need retention times in pin file
   int doc_parameter = get_int_parameter("doc");
@@ -265,44 +208,46 @@ int PercolatorApplication::main(
   // FIXME include schema as part of distribution and add option to turn on validation
   perc_args_vec.push_back("-s");
 
-  if(Params::GetBool("allow-protein-group"))
+  if (Params::GetBool("allow-protein-group")) {
     perc_args_vec.push_back("--allow-protein-group");
+  }
  
   bool set_protein = Params::GetBool("protein");
-  if(set_protein){ 
+  if (set_protein) {
     perc_args_vec.push_back("-A");
 
     if (Params::GetDouble("alpha") > 0) {
       perc_args_vec.push_back("--fido-alpha");
-      perc_args_vec.push_back(to_string(Params::GetDouble("alpha")));
+      perc_args_vec.push_back(Params::GetString("alpha"));
     }
     if (Params::GetDouble("beta") > 0) {
       perc_args_vec.push_back("--fido-beta");
-      perc_args_vec.push_back(to_string(Params::GetDouble("beta")));
+      perc_args_vec.push_back(Params::GetString("beta"));
     }
     if (Params::GetDouble("gamma") > 0) {
       perc_args_vec.push_back("--fido-gamma");
-      perc_args_vec.push_back(to_string(Params::GetDouble("gamma")));
+      perc_args_vec.push_back(Params::GetString("gamma"));
     }
 
-    if(Params::GetBool("protein-level-pi0"))
+    if (Params::GetBool("protein-level-pi0")) {
       perc_args_vec.push_back("-I");
-   
-    if(Params::GetBool("empirical-protein-q"))
+    }
+    if (Params::GetBool("empirical-protein-q")) {
        perc_args_vec.push_back("--empirical-protein-q");
-
-    if(!Params::GetBool("group-proteins"))
+    }
+    if (!Params::GetBool("group-proteins")) {
        perc_args_vec.push_back("--fido-no-group-proteins");
+    }
 
     if (Params::GetBool("no-separate-proteins")) {
       perc_args_vec.push_back("--fido-no-separate-proteins");
     }
     
-    if(Params::GetBool("no-prune-proteins"))
+    if (Params::GetBool("no-prune-proteins")) {
       perc_args_vec.push_back("--fido-no-prune-proteins"); 
-
+    }
     perc_args_vec.push_back("--fido-gridsearch-depth");
-    perc_args_vec.push_back(to_string(Params::GetInt("deepness")));
+    perc_args_vec.push_back(Params::GetString("deepness"));
 
     if (Params::GetBool("reduce-tree-in-gridsearch")) {
       perc_args_vec.push_back("--fido-reduce-tree-in-gridsearch");
@@ -335,19 +280,14 @@ int PercolatorApplication::main(
    perc_args_vec.push_back(input_pin);
 
   /* build argv line */
-  int perc_argc = perc_args_vec.size();
 
-  string perc_cmd = perc_args_vec[0];
-  
-  char** perc_argv = new char*[perc_argc];
-
-  perc_argv[0] = (char*)perc_args_vec[0].c_str();
-  //cerr<<"perc_argv["<<0<<"]= "<<perc_argv[0]<<endl;
-  for (int idx = 1;idx < perc_argc ; idx++) {
-    perc_argv[idx] = (char*)perc_args_vec[idx].c_str();
-    perc_cmd = perc_cmd + " " + perc_argv[idx];
-    carp(CARP_DEBUG, "perc_argv[%d]=%s", idx, perc_argv[idx]);
-    //cerr<<"perc_argv["<<idx<<"]= "<<perc_argv[idx]<<endl;
+  string perc_cmd;
+  vector<const char*> perc_argv;
+  for (vector<string>::const_iterator i = perc_args_vec.begin();
+       i != perc_args_vec.end();
+       i++) {
+    perc_argv.push_back(i->c_str());
+    perc_cmd += " " + *i;
   }
 
   carp(CARP_DEBUG, "cmd:%s", perc_cmd.c_str());
@@ -358,45 +298,49 @@ int PercolatorApplication::main(
   std::cerr.rdbuf(&buffer);
 
   /* Call percolatorMain */
-  PercolatorAdapter* pCaller = new PercolatorAdapter();
+  PercolatorAdapter pCaller;
   int retVal = -1;
-  if (pCaller->parseOptions(perc_argc, perc_argv)) {
-    retVal = pCaller->run();
+  if (pCaller.parseOptions(perc_args_vec.size(), (char**)&perc_argv.front())) {
+    retVal = pCaller.run();
   } 
   
-  carp(CARP_DEBUG, "Percolator retval:%d", retVal);
   if (retVal != 0) {
     carp(CARP_FATAL, "Error running percolator:%d", retVal);
   }
 
   // get percolator score information into crux objects
-  ProteinMatchCollection* protein_match_collection =
-    pCaller->getProteinMatchCollection();
-  ProteinMatchCollection* decoy_protein_match_collection =
-    pCaller->getDecoyProteinMatchCollection();
+  ProteinMatchCollection* target_pmc = pCaller.getProteinMatchCollection();
+  ProteinMatchCollection* decoy_pmc = pCaller.getDecoyProteinMatchCollection();
+  if (target_pmc == NULL || decoy_pmc == NULL) {
+    carp(CARP_WARNING, "Failed translating Percolator objects into Crux objects");
+  }
+
   string output_dir = Params::GetString("output-dir");
 
   // write txt
   if (!Params::GetBool("original-output")) {
     FileUtils::Remove(output_target_peptides);
-    FileUtils::Remove(output_target_proteins);
-  }
-  if (Params::GetBool("txt-output") && !Params::GetBool("original-output")) {
-    PMCDelimitedFileWriter txt_writer;
-    txt_writer.writeFile(this, output_target_psms,
-                         PMCDelimitedFileWriter::PSMS, protein_match_collection);
-    txt_writer.writeFile(this, output_decoy_psms,
-                         PMCDelimitedFileWriter::PSMS, decoy_protein_match_collection);
-    txt_writer.writeFile(this, output_target_peptides,
-                         PMCDelimitedFileWriter::PEPTIDES, protein_match_collection);
-    txt_writer.writeFile(this, output_decoy_peptides,
-                         PMCDelimitedFileWriter::PEPTIDES, decoy_protein_match_collection);
-
     if (set_protein) {
-      txt_writer.writeFile(this, output_target_proteins,
-                           PMCDelimitedFileWriter::PROTEINS, protein_match_collection);
-      txt_writer.writeFile(this, output_decoy_proteins,
-                           PMCDelimitedFileWriter::PROTEINS, decoy_protein_match_collection);
+      FileUtils::Remove(output_target_proteins);
+    }
+
+    if (Params::GetBool("txt-output")) {
+      PMCDelimitedFileWriter txt_writer;
+      txt_writer.writeFile(this, output_target_psms,
+                           PMCDelimitedFileWriter::PSMS, target_pmc);
+      txt_writer.writeFile(this, output_decoy_psms,
+                           PMCDelimitedFileWriter::PSMS, decoy_pmc);
+      txt_writer.writeFile(this, output_target_peptides,
+                           PMCDelimitedFileWriter::PEPTIDES, target_pmc);
+      txt_writer.writeFile(this, output_decoy_peptides,
+                           PMCDelimitedFileWriter::PEPTIDES, decoy_pmc);
+
+      if (set_protein) {
+        txt_writer.writeFile(this, output_target_proteins,
+                             PMCDelimitedFileWriter::PROTEINS, target_pmc);
+        txt_writer.writeFile(this, output_decoy_proteins,
+                             PMCDelimitedFileWriter::PROTEINS, decoy_pmc);
+      }
     }
   }
 
@@ -405,11 +349,11 @@ int PercolatorApplication::main(
     MzIdentMLWriter mzid_writer, decoy_mzid_writer;
     string mzid_path = make_file_path(getFileStem() + ".target.mzid");
     mzid_writer.openFile(mzid_path, Params::GetBool("overwrite"));
-    mzid_writer.addProteinMatches(protein_match_collection);
+    mzid_writer.addProteinMatches(target_pmc);
     mzid_writer.closeFile();
     mzid_path = make_file_path(getFileStem() + ".decoy.mzid");
     decoy_mzid_writer.openFile(mzid_path, Params::GetBool("overwrite"));
-    decoy_mzid_writer.addProteinMatches(decoy_protein_match_collection);
+    decoy_mzid_writer.addProteinMatches(decoy_pmc);
     decoy_mzid_writer.closeFile();
   }
   
@@ -418,24 +362,18 @@ int PercolatorApplication::main(
     PMCPepXMLWriter pep_writer;
     string pep_path = make_file_path(getFileStem() + ".target.pep.xml");
     pep_writer.openFile(pep_path.c_str(), Params::GetBool("overwrite"));
-    pep_writer.write(protein_match_collection);
+    pep_writer.write(target_pmc);
     pep_writer.closeFile();
     pep_path = make_file_path(getFileStem() + ".decoy.pep.xml");
     pep_writer.openFile(pep_path.c_str(), Params::GetBool("overwrite"));
-    pep_writer.write(decoy_protein_match_collection);
+    pep_writer.write(decoy_pmc);
     pep_writer.closeFile();
   }
 
-  delete protein_match_collection;
-  
-  delete pCaller;
   Globals::clean();
-  delete []perc_argv;
 
   /* Recover stderr */
-  std::cerr.rdbuf( old );
-
-
+  std::cerr.rdbuf(old);
 
   return retVal;
 }
@@ -520,6 +458,7 @@ vector<string> PercolatorApplication::getOptions() const {
     "feature-file",
     "list-of-files",
     "parameter-file",
+    "feature-in-file",
     "protein",
     "decoy-xml-output",
     "decoy-prefix",

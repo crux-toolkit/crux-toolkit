@@ -529,6 +529,9 @@ void Params::Initialize() {
   InitBoolParam("test-each-iteration", false,
     "Measure performance on test set each iteration.",
     "Available for crux percolator.", true);
+  InitBoolParam("feature-in-file", false,
+    "When set to T, interpret the input file as a PIN file.",
+    "Available for crux percolator.", true);
   InitBoolParam("protein", false,
     "Output protein level probability. Must be true to use any of the Fido options.",
     "Available for crux percolator", true);

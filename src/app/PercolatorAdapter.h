@@ -44,13 +44,7 @@ public:
    */
   virtual ~PercolatorAdapter();
 
-  /**
-   * Converts a set of Percolator scores into a Crux MatchCollection
-   */
-  void psmScoresToMatchCollection(
-    MatchCollection** match_collection,  ///< out parameter for targets
-    MatchCollection** decoy_match_collection ///< out parameter for decoys
-  );
+  void deleteCollections();
 
   /**
    * Adds PSM scores from Percolator objects into a ProteinMatchCollection
@@ -58,14 +52,14 @@ public:
   void addPsmScores();
 
   /**
-   * Adds protein scores from Percolator objects into a ProteinMatchCollection
-   */
-  void addProteinScores();
-
-  /**
    * Adds peptide scores from Percolator objects into a ProteinMatchCollection
    */
   void addPeptideScores();
+
+  /**
+   * Adds protein scores from Percolator objects into a ProteinMatchCollection
+   */
+  void addProteinScores();
 
   /*
    *\returns the ProteinMatchCollection, to be called after Caller::run() is finished
@@ -89,13 +83,12 @@ protected:
   /**
    * Given a Percolator psm_id in the form ".*_([0-9]+)_[^_]*",
    * parse the file_idx, scan#, charge, and rank
+   * Returns true on success
    */
-  static void parsePSMId(
+  static bool parsePSMId(
     const std::string& psm_id, ///<psmid to parse
     int& file_idx, ///< psm file idx
-    int& scan, ///< psm scan
-    int& charge, ///< psm charge
-    int& rank ///< psm rank
+    int& charge ///< psm charge
   );
 
   /**
