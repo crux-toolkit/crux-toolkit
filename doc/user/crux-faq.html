@@ -14,27 +14,29 @@
 <b>What is the difference between Tide and Comet?</b></li>
 
 <p>
-The main difference is that Tide requires that you convert your FASTA
-file to an index (using <code>tide-index</code>) before doing a search
-(using <code>tide-search</code>), whereas Comet does searching
-directly from the FASTA file.  The indexing step allows Tide to
-pre-compute many parts of the search procedure, thereby making the
-search faster.  Other differences are as follows:
+The differences are as follows:
 <ul>
+<li>
+Tide converts your FASTA file to an index (either as part
+of <code>tide-search</code> or by using <code>tide-index</code>),
+whereas Comet does searching directly from the FASTA file.  The
+indexing step allows Tide to pre-compute many parts of the search
+procedure, thereby making the search faster.
 <li>
 Comet is multi-threaded, whereas Tide runs on a single thread.  On
 multi-threaded CPUs, this feature can offset the speed difference
 between Comet and Tide.</li>
 <li>
-For each match, Comet reports the <i>total</i> number of candidate peptides,
-whereas Tide reports the number of <i>distinct</i> candidate peptides.</li>
+For each match, Comet reports the <i>total</i> number of candidate
+peptides, whereas Tide reports the number of <i>distinct</i> candidate
+peptides.</li>
 <li>
 When Tide creates decoy peptides, it keeps the N-terminal and
 C-terminal amino acids in place.  Comet keeps only the C-terminal
 amino acid in place.</li>
 <li>
 Comet provides an option to report an E-value in addition to the raw
-XCorr score, whereas tide provides an option to report a p-value.  The
+XCorr score, whereas Tide provides an option to report a p-value.  The
 methods for computing these two statistical confidence measures are
 quite different.</li>
 <li>
