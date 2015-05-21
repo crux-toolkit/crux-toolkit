@@ -42,24 +42,31 @@ PercolatorAdapter::~PercolatorAdapter() {
     ++proteinsDeleted;
   }
 
-  //delete collection_;  //TODO find out why this crashes
+  deleteCollections();
   carp(CARP_DEBUG, "PercolatorAdapter::~PercolatorAdapter - done. %d "
        "MatchCollections deleted.", collectionsDeleted);
 }
 
+void PercolatorAdapter::deleteCollections() {
+  delete collection_;
+  delete decoy_collection_;
+  collection_ = NULL;
+  decoy_collection_ = NULL;
+}
+
 /**
- * Converts a set of Percolator scores into a Crux MatchCollection
+ * Adds PSM scores from Percolator objects into a ProteinMatchCollection
  */
-void PercolatorAdapter::psmScoresToMatchCollection(
-  MatchCollection** match_collection,  ///< out parameter for targets
-  MatchCollection** decoy_match_collection ///< out parameter for decoys
-) {
+void PercolatorAdapter::addPsmScores() {
+  if (collection_ == NULL || decoy_collection_ == NULL) {
+    return;
+  }
 
   // Create new MatchCollection object that will be the converted Percolator Scores
-  *match_collection = new MatchCollection();
-  match_collections_made_.push_back(*match_collection);
-  *decoy_match_collection = new MatchCollection();
-  match_collections_made_.push_back(*decoy_match_collection);
+  MatchCollection* targets = new MatchCollection();
+  MatchCollection* decoys = new MatchCollection();
+  match_collections_made_.push_back(targets);
+  match_collections_made_.push_back(decoys);
 
   // Find out which feature is lnNumSP and get indices of charge state features
   Normalizer* normalizer = Normalizer::getNormalizer();
@@ -68,16 +75,14 @@ void PercolatorAdapter::psmScoresToMatchCollection(
   FeatureNames& features = DataSet::getFeatureNames();
   string featureNames = features.getFeatureNames();
   vector<string> featureTokens = StringUtils::Split(featureNames, '\t');
-  int lnNumSPIndex = -1, massIndex = -1;
+  int lnNumSPIndex = -1;
   map<int, int> chargeStates; // index of feature -> charge
   for (int i = 0; i < featureTokens.size(); ++i) {
-    string featureName = featureTokens[i];
-    transform(featureName.begin(), featureName.end(),
-              featureName.begin(), ::tolower);
+    string featureName = StringUtils::ToLower(featureTokens[i]);
     if (featureName == "lnnumsp") {
       lnNumSPIndex = i;
-    } else if (featureName.find("charge") == 0) {
-      size_t chargeNum = atoi(featureName.substr(6).c_str());
+    } else if (StringUtils::StartsWith(featureName, "charge")) {
+      size_t chargeNum = StringUtils::FromString<size_t>(featureName.substr(6));
       chargeStates[i] = chargeNum;
     }
   }
@@ -86,10 +91,14 @@ void PercolatorAdapter::psmScoresToMatchCollection(
   for (vector<ScoreHolder>::iterator score_itr = allScores_.begin();
        score_itr != allScores_.end();
        score_itr++) {
-
     bool is_decoy = score_itr->isDecoy();
 
     PSMDescription* psm = score_itr->pPSM;
+
+    int psm_file_idx = -1;
+    int psm_charge;
+    parsePSMId(psm->id, psm_file_idx, psm_charge);
+
     // Try to look up charge state in map
     int charge_state = -1;
     for (map<int, int>::const_iterator i = chargeStates.begin();
@@ -100,19 +109,16 @@ void PercolatorAdapter::psmScoresToMatchCollection(
         break;
       }
     }
-    int psm_file_idx;
-    int psm_scan;
-    int psm_charge;
-    int psm_rank;
-    parsePSMId(psm->id, psm_file_idx, psm_scan, psm_charge, psm_rank);
+
     if (charge_state == -1) {
-      // Failed, try to parse charge state from id
-      charge_state = psm_charge;
-      if (charge_state == -1) {
-        carp_once(CARP_WARNING, "Could not determine charge state of PSM");
-      }
+      carp_once(CARP_WARNING, "Could not determine charge state of PSM");
     }
+
     Crux::Peptide* peptide = extractPeptide(psm, charge_state, is_decoy);
+    if (peptide == NULL) {
+      deleteCollections();
+      return;
+    }
 
     SpectrumZState zState;
     zState.setSinglyChargedMass(psm->expMass, charge_state);
@@ -137,49 +143,82 @@ void PercolatorAdapter::psmScoresToMatchCollection(
     }
 
     if (!is_decoy) {
-      (*match_collection)->addMatch(match);
+      targets->addMatch(match);
     } else {
-      (*decoy_match_collection)->addMatch(match);
+      decoys->addMatch(match);
     }
     match->setPostProcess(true); // so spectra get deleted when match does
     Crux::Match::freeMatch(match); // so match gets deleted when collection does
   }
 
-  (*match_collection)->forceScoredBy(PERCOLATOR_SCORE);
-  (*match_collection)->forceScoredBy(PERCOLATOR_QVALUE);
-  (*match_collection)->forceScoredBy(PERCOLATOR_PEP);
-  (*match_collection)->populateMatchRank(PERCOLATOR_SCORE);
+  targets->forceScoredBy(PERCOLATOR_SCORE);
+  targets->forceScoredBy(PERCOLATOR_QVALUE);
+  targets->forceScoredBy(PERCOLATOR_PEP);
+  targets->populateMatchRank(PERCOLATOR_SCORE);
 
-  (*decoy_match_collection)->forceScoredBy(PERCOLATOR_SCORE);
-  (*decoy_match_collection)->forceScoredBy(PERCOLATOR_QVALUE);
-  (*decoy_match_collection)->forceScoredBy(PERCOLATOR_PEP);
-  (*decoy_match_collection)->populateMatchRank(PERCOLATOR_SCORE);
+  decoys->forceScoredBy(PERCOLATOR_SCORE);
+  decoys->forceScoredBy(PERCOLATOR_QVALUE);
+  decoys->forceScoredBy(PERCOLATOR_PEP);
+  decoys->populateMatchRank(PERCOLATOR_SCORE);
 
   // sort by q-value
-  (*match_collection)->sort(PERCOLATOR_QVALUE);
-  (*decoy_match_collection)->sort(PERCOLATOR_QVALUE);
+  targets->sort(PERCOLATOR_QVALUE);
+  decoys->sort(PERCOLATOR_QVALUE);
 
-}
-
-/**
- * Adds PSM scores from Percolator objects into a ProteinMatchCollection
- */
-void PercolatorAdapter::addPsmScores() {
-  MatchCollection* targets;
-  MatchCollection* decoys;
-  psmScoresToMatchCollection(&targets, &decoys);
   collection_->addMatches(targets);
   decoy_collection_->addMatches(decoys);
 }
 
 /**
+ * Adds peptide scores from Percolator objects into a ProteinMatchCollection
+ */
+void PercolatorAdapter::addPeptideScores() {
+  if (collection_ == NULL || decoy_collection_ == NULL) {
+    return;
+  }
+
+  carp(CARP_DEBUG, "Setting peptide scores");
+
+  // Iterate over each ScoreHolder in Scores object
+  for (vector<ScoreHolder>::iterator score_itr = allScores_.begin();
+       score_itr != allScores_.end();
+       score_itr++) {
+
+    PSMDescription* psm = score_itr->pPSM;
+    string sequence;
+    FLOAT_T peptide_mass;
+    MODIFIED_AA_T* mod_seq = getModifiedAASequence(psm, sequence, peptide_mass);
+    if (mod_seq == NULL) {
+      deleteCollections();
+      return;
+    }
+
+    // Set scores
+    PeptideMatch* peptide_match = !score_itr->isDecoy()
+      ? collection_->getPeptideMatch(mod_seq)
+      : decoy_collection_->getPeptideMatch(mod_seq);
+    free(mod_seq);
+    if (peptide_match == NULL) {
+      deleteCollections();
+      return;
+    }
+    peptide_match->setScore(PERCOLATOR_SCORE, score_itr->score);
+    peptide_match->setScore(PERCOLATOR_QVALUE, score_itr->q);
+    peptide_match->setScore(PERCOLATOR_PEP, score_itr->pep);
+  }
+}
+  
+/**
  * Adds protein scores from Percolator objects into a ProteinMatchCollection
  */
 void PercolatorAdapter::addProteinScores() {
+  if (collection_ == NULL || decoy_collection_ == NULL) {
+    return;
+  }
 
   vector<ProteinMatch*> matches;
   vector<ProteinMatch*> decoy_matches;
-  map<const string,Protein*> protein_scores = protEstimator_->getProteins();
+  map<const string, Protein*> protein_scores = protEstimator_->getProteins();
   
   for (map<const string,Protein*>::iterator score_iter = protein_scores.begin();
        score_iter != protein_scores.end();
@@ -196,9 +235,9 @@ void PercolatorAdapter::addProteinScores() {
       protein_match = decoy_collection_->getProteinMatch(score_iter->second->getName());
       decoy_matches.push_back(protein_match);
     }
-      protein_match->setScore(PERCOLATOR_SCORE, -log(score_iter->second->getP()));
-      protein_match->setScore(PERCOLATOR_QVALUE, score_iter->second->getQ());
-      protein_match->setScore(PERCOLATOR_PEP, score_iter->second->getPEP());
+    protein_match->setScore(PERCOLATOR_SCORE, -log(score_iter->second->getP()));
+    protein_match->setScore(PERCOLATOR_QVALUE, score_iter->second->getQ());
+    protein_match->setScore(PERCOLATOR_PEP, score_iter->second->getPEP());
   }
 
   // set percolator score ranks
@@ -210,57 +249,16 @@ void PercolatorAdapter::addProteinScores() {
   for (vector<ProteinMatch*>::iterator iter = matches.begin();
        iter != matches.end();
        ++iter) {
-    ProteinMatch* match = *iter;
-    match->setRank(PERCOLATOR_SCORE, ++cur_rank);
+    (*iter)->setRank(PERCOLATOR_SCORE, ++cur_rank);
   }
   cur_rank = 0;
   for (vector<ProteinMatch*>::iterator iter = decoy_matches.begin();
        iter != decoy_matches.end();
        ++iter) {
-    ProteinMatch* match = *iter;
-    match->setRank(PERCOLATOR_SCORE, ++cur_rank);
+    (*iter)->setRank(PERCOLATOR_SCORE, ++cur_rank);
   }
-
 }
 
-/**
- * Adds peptide scores from Percolator objects into a ProteinMatchCollection
- */
-void PercolatorAdapter::addPeptideScores() {
-
-  carp(CARP_DEBUG, "Setting peptide scores");
-
-  // Iterate over each ScoreHolder in Scores object
-  for (vector<ScoreHolder>::iterator score_itr = allScores_.begin();
-       score_itr != allScores_.end();
-       score_itr++) {
-
-    PSMDescription* psm = score_itr->pPSM;
-    string sequence;
-    FLOAT_T peptide_mass;
-    MODIFIED_AA_T* mod_seq = getModifiedAASequence(psm, sequence, peptide_mass);
-
-    // Set scores
-    PeptideMatch* peptide_match;
-    if (!score_itr->isDecoy()) {
-      peptide_match = collection_->getPeptideMatch(mod_seq);
-    } else {
-      peptide_match = decoy_collection_->getPeptideMatch(mod_seq);
-    }
-    if (peptide_match == NULL) {
-      carp(CARP_FATAL, "Cannot find peptide %s %i",
-                       psm->getFullPeptideSequence().c_str(), score_itr->isDecoy());
-    }
-    peptide_match->setScore(PERCOLATOR_SCORE, score_itr->score);
-    peptide_match->setScore(PERCOLATOR_QVALUE, score_itr->q);
-    peptide_match->setScore(PERCOLATOR_PEP, score_itr->pep);
-
-    free(mod_seq);
-
-  }
-
-}
-  
 /*
  *\returns the ProteinMatchCollection, to be called after Caller::run() is finished
  */
@@ -275,43 +273,45 @@ ProteinMatchCollection* PercolatorAdapter::getDecoyProteinMatchCollection() {
   return decoy_collection_;
 }
 
-void PercolatorAdapter::parsePSMId(
+bool PercolatorAdapter::parsePSMId(
   const string& psm_id, ///< psm id to parse information from
   int& file_idx, ///< file index of psm
-  int& scan, ///< scan number of psm
-  int& charge, ///< charge of psm
-  int& rank ///< rank of psm
+  int& charge ///< charge of psm
 ) {
   // <target|decoy>_<fileindex>_<scan>_<charge>_<rank> OR
   // <filestem>_<scan>_<charge>_<rank>
   vector<string> tokens = StringUtils::Split(psm_id, '_');
   if (tokens.size() < 4) {
-    carp(CARP_FATAL, "PSMID should be (((target|decoy)_fileidx)|filestem)_"
-                     "scan_charge_rank, but was %s", psm_id.c_str());
+    return false;
   }
-  if (tokens.size() == 5 && (tokens[0] == "target" || tokens[0] == "decoy")) {
-    // Parse as <target|decoy>_<fileindex>_<scan>_<charge>_<rank>
-    from_string<int>(file_idx, tokens[1]);
-    from_string<int>(scan, tokens[2]);
-    from_string<int>(charge, tokens[3]);
-    from_string<int>(rank, tokens[4]);
-  } else {
-    // Try to parse as <filestem>_<scan>_<charge>_<rank>
-    from_string<int>(rank, tokens.back());
-    tokens.pop_back();
-    from_string<int>(charge, tokens.back());
-    tokens.pop_back();
-    from_string<int>(scan, tokens.back());
-    tokens.pop_back();
-    stringstream ss;
-    for (vector<string>::const_iterator i = tokens.begin(); i != tokens.end(); i++) {
-      if (i != tokens.begin()) {
-        ss << '_' << *i;
-      } else {
-        ss << *i;
+  try {
+    if (tokens.size() == 5 && (tokens[0] == "target" || tokens[0] == "decoy")) {
+      // Parse as <target|decoy>_<fileindex>_<scan>_<charge>_<rank>
+      file_idx = StringUtils::FromString<int>(tokens[1]);
+      // tokens[2] = scan
+      charge = StringUtils::FromString<int>(tokens[3]);
+      // tokens[4] = rank
+    } else {
+      // Try to parse as <filestem>_<scan>_<charge>_<rank>
+      // tokens.back() = rank
+      tokens.pop_back();
+      charge = StringUtils::FromString<int>(tokens.back());
+      tokens.pop_back();
+      // tokens.back() = scan
+      tokens.pop_back();
+      stringstream ss;
+      for (vector<string>::const_iterator i = tokens.begin(); i != tokens.end(); i++) {
+        if (i != tokens.begin()) {
+          ss << '_' << *i;
+        } else {
+          ss << *i;
+        }
       }
+      file_idx = Crux::Match::findFileIndex(ss.str(), true);
     }
-    file_idx = Crux::Match::findFileIndex(ss.str(), true);
+    return true;
+  } catch (...) {
+    return false;
   }
 }
 
@@ -335,18 +335,15 @@ Crux::Peptide* PercolatorAdapter::extractPeptide(
   PSMDescription* psm, ///< psm
   int charge_state, ///< charge state
   bool is_decoy ///< is psm a decoy?
-  ) {
-
+) {
   string seq;
   FLOAT_T peptide_mass;
-  
-  MODIFIED_AA_T* mod_seq = getModifiedAASequence(psm, seq, peptide_mass);
 
-  carp(CARP_DEBUG, "seq:%s",seq.c_str());
-  char* mod_seq_str = modified_aa_string_to_string_with_masses(mod_seq, seq.length(), MOD_MASS_ONLY);
-  carp(CARP_DEBUG, "mod seq:%s", mod_seq_str);
-  free(mod_seq_str);
-  
+  MODIFIED_AA_T* mod_seq = getModifiedAASequence(psm, seq, peptide_mass);
+  if (mod_seq == NULL) {
+    return NULL;
+  }
+
   string full_peptide(psm->getFullPeptide());
   carp(CARP_DEBUG, "full peptide:%s", full_peptide.c_str());
   carp(CARP_DEBUG, "=======================");
@@ -357,34 +354,24 @@ Crux::Peptide* PercolatorAdapter::extractPeptide(
     c_term += full_peptide[full_peptide.length() - 1];
   }
 
-  PostProcessProtein* parent_protein = new PostProcessProtein();
-  proteins_made_.push_back(parent_protein);
-  parent_protein->setId((*psm->proteinIds.begin()).c_str());
-  int start_idx = parent_protein->findStart(seq, n_term, c_term);
-
-  Crux::Peptide* peptide = new Crux::Peptide(seq.length(), peptide_mass, parent_protein, start_idx);
-
-  // add other proteins
-  bool skip_one = true;
-  for (set<string>::iterator iter = psm->proteinIds.begin();
-       iter != psm->proteinIds.end();
-       ++iter) {
-    if (skip_one) {
-      skip_one = false;
-      continue;
+  // add proteins
+  Crux::Peptide* peptide = NULL;
+  for (set<string>::const_iterator i = psm->proteinIds.begin();
+       i != psm->proteinIds.end();
+       ++i) {
+    PostProcessProtein* protein = new PostProcessProtein();
+    proteins_made_.push_back(protein);
+    protein->setId(i->c_str());
+    int start_idx = protein->findStart(seq, n_term, c_term);
+    if (peptide == NULL) {
+      peptide = new Crux::Peptide(seq.length(), peptide_mass, protein, start_idx);
+      peptide->setModifiedAASequence(mod_seq, is_decoy);
+      free(mod_seq);
+    } else {
+      peptide->addPeptideSrc(new PeptideSrc(NON_SPECIFIC_DIGEST, protein, start_idx));
     }
-    PostProcessProtein* secondary_protein = new PostProcessProtein();
-    proteins_made_.push_back(secondary_protein);
-    secondary_protein->setId(iter->c_str());
-    int secondary_idx = secondary_protein->findStart(seq, n_term, c_term);
-    peptide->addPeptideSrc(
-      new PeptideSrc(NON_SPECIFIC_DIGEST, secondary_protein, secondary_idx)
-    );
   }
 
-  peptide->setModifiedAASequence(mod_seq, is_decoy);
-
-  free(mod_seq);
   return peptide;
 }
 
@@ -396,35 +383,37 @@ MODIFIED_AA_T* PercolatorAdapter::getModifiedAASequence(
   PSMDescription* psm, ///< psm -in
   string& seq, ///< sequence -out
   FLOAT_T& peptide_mass ///< calculated mass of peptide with modifications -out
-  ) {
-
-  std::stringstream ss_seq;
+) {
   string perc_seq = psm->getFullPeptideSequence();
-  size_t perc_seq_len = perc_seq.length();
-  if (perc_seq_len >= 5 &&
-      perc_seq[1] == '.' && perc_seq[perc_seq_len - 2] == '.') {
+  if (perc_seq.length() >= 5 &&
+      perc_seq[1] == '.' && perc_seq[perc_seq.length() - 2] == '.') {
     // Trim off flanking AA if they exist
-    perc_seq = perc_seq.substr(2, perc_seq_len - 4);
-    perc_seq_len -= 4;
+    perc_seq = perc_seq.substr(2, perc_seq.length() - 4);
   }
-  peptide_mass = 0.0;
   
   if (perc_seq.find("UNIMOD") != string::npos) {
-    carp(CARP_FATAL, 
-      "UNIMOD modifications currently not supported:%s", 
-      perc_seq.c_str());
+    // UNIMOD modifications currently not supported
+    return NULL;
   }
 
   MODIFIED_AA_T* mod_seq = NULL;
   carp(CARP_DEBUG, "PercolatorAdapter::getModifiedAASequence(): seq:%s", perc_seq.c_str());
+
+  // Turn off warnings
+  int verbosity = get_verbosity_level();
+  set_verbosity_level(0);
+
   int mod_len = convert_to_mod_aa_seq(perc_seq.c_str(), &mod_seq, MOD_MASS_ONLY);
   peptide_mass = get_mod_aa_seq_mass(mod_seq, get_mass_type_parameter("isotopic-mass"));
-  char* cseq = modified_aa_to_unmodified_string(mod_seq, mod_len);
-  seq = cseq;
-  free(cseq);
-  
+  seq = string(mod_len, '\0');
+  for (int i = 0; i < mod_len; i++) {
+    seq[i] = modified_aa_to_char(mod_seq[i]);
+  }
+
+  // Restore verbosity
+  set_verbosity_level(verbosity);
+
   carp(CARP_DEBUG, "Peptide mass:%lf", peptide_mass);
-  
   return mod_seq;
 }
 

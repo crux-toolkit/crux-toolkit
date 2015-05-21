@@ -107,13 +107,13 @@ class StringUtils {
   static bool IEndsWith(const std::string& s, const std::string& substring);
 
   // Trim whitespace from the beginning and end of a string
-  static std::string Trim(const std::string& s);
+  static std::string Trim(std::string s);
 
   // Trim whitespace from the beginning of a string
-  static std::string LTrim(const std::string& s);
+  static std::string LTrim(std::string s);
 
   // Trim whitespace from the end of a string
-  static std::string RTrim(const std::string& s);
+  static std::string RTrim(std::string s);
 
   // Return whether a string is numeric
   static bool IsNumeric(

@@ -818,7 +818,10 @@ void MzIdentMLWriter::addPeptideMatches(
  */
 void MzIdentMLWriter::addProteinMatches(
   ProteinMatchCollection* protein_match_collection
-  ) {
+) {
+  if (protein_match_collection == NULL) {
+    carp(CARP_FATAL, "ProteinMatchCollection was null");
+  }
 
   //now add the protein matches.
   for (ProteinMatchIterator match_iter = protein_match_collection->proteinMatchBegin();

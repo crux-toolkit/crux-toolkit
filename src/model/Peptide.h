@@ -663,11 +663,8 @@ class Peptide {
   /**
    * \brief Builds a comma delimited string listing the protein ids
    * for the sources of a peptide.
-   *
-   * \returns a pointer to the string. Caller is responsible for freeing memeory.
-   * If peptide has no sources returns NULL.
    */
-  char *getProteinIds();
+  std::string getProteinIds();
 
   /**
    * \brief Builds a comma delimited string listing the flanking amino acids

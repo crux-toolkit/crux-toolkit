@@ -348,7 +348,6 @@ vector<PeptideSrc*>& Peptide::getPeptideSrcVector() {
  *Return the begining of the peptide_srcs_
  */
 PeptideSrcIterator Peptide::getPeptideSrcBegin() {
-
   return peptide_srcs_.begin();
 }
 /**
@@ -2107,68 +2106,16 @@ string Peptide::getProteinIdsLocations() {
 /**
  * \brief Builds a comma delimited string listing the protein ids
  * for the sources of a peptide.
- *
- * \returns a pointer to the string. Caller is responsible for freeing memeory.
- * If peptide has no sources returns NULL.
  */
-char* Peptide::getProteinIds() {
-
-  char *protein_field = NULL;
-
-  if (!peptide_srcs_.empty()) {
-
-    // Peptide has at least one parent.
-    
-    PeptideSrcIterator iter = getPeptideSrcBegin();
-    PeptideSrc* peptide_src = *iter;
-    Protein* protein = peptide_src->getParentProtein();
-
-    const int allocation_factor = 1;
-    char* protein_id = protein->getId();
-    size_t protein_id_len = strlen(protein_id);
-    size_t protein_field_len = allocation_factor * protein_id_len + 1; // Buffer size
-    protein_field = (char*)mymalloc(sizeof(char) * protein_field_len);
-    size_t protein_field_free = protein_field_len;  // Remaining free buffer space
-    char *protein_field_tail = protein_field;
-    *protein_field = 0;
-
-    // First protein id in list doesn't have leading ','
-
-    strncpy(protein_field_tail, protein_id, protein_field_free);
-    protein_field_tail += protein_id_len;
-    protein_field_free -= protein_id_len;
-    delete protein_id;
-
-    // Following proteins in list have leading ','
-    for (;iter != getPeptideSrcEnd(); ++iter) {
-      peptide_src = *iter;
-      protein = peptide_src->getParentProtein();
-      protein_id = protein->getId();
-      protein_id_len = strlen(protein_id);
-
-      // Allocate more memory if needed, allow space for comma and null
-      if (protein_field_free < (protein_id_len + 2)) {
-        size_t tail_offset = protein_field_tail - protein_field;
-        protein_field = (char*)myrealloc(
-          protein_field, 
-          sizeof(char) * ((allocation_factor * (protein_id_len + 1)) + protein_field_len)
-        );
-        protein_field_len += allocation_factor * (protein_id_len + 1);
-        protein_field_free += allocation_factor * (protein_id_len + 1);
-        protein_field_tail = protein_field + tail_offset;
-      }
-    
-      *protein_field_tail = ',';
-      ++protein_field_tail;
-      --protein_field_free;
-      strncpy(protein_field_tail, protein_id, protein_field_free);
-      protein_field_tail += protein_id_len;
-      protein_field_free -= protein_id_len;
-      delete protein_id;
+string Peptide::getProteinIds() {
+  stringstream ids;
+  for (PeptideSrcIterator i = getPeptideSrcBegin(); i != getPeptideSrcEnd(); ++i) {
+    if (i != getPeptideSrcBegin()) {
+      ids << ',';
     }
+    ids << (*i)->getParentProtein()->getIdPointer();
   }
-  carp(CARP_DEBUG, "Peptide::getProteinIds(): %s", protein_field);
-  return protein_field;
+  return ids.str();
 }
 
 /**

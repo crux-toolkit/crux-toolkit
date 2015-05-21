@@ -93,14 +93,13 @@ int main(int argc, char** argv){
     applications.add(new StatColumn());
     applications.add(new SortColumn());
 
-    return applications.main(argc, argv);
+    int ret = applications.main(argc, argv);
+    google::protobuf::ShutdownProtobufLibrary();
+    return ret;
   } catch (const std::exception& e) {
     carp(CARP_FATAL, "An exception occurred: %s", e.what());
-    return 1;
   } catch (...) {
     carp(CARP_FATAL, "An unknown exception occurred.");
-    return 2;
   }
-
 }// end main
 

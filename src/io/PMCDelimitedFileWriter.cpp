@@ -122,6 +122,8 @@ void PMCDelimitedFileWriter::write(
   ) {
   if (file_ptr_ == NULL) {
     carp(CARP_FATAL, "No file open to write to.");
+  } else if (collection == NULL) {
+    carp(CARP_FATAL, "ProteinMatchCollection was null");
   }
 
   writeHeader();

@@ -53,29 +53,19 @@ bool StringUtils::IEndsWith(const string& s, const string& substring) {
   return EndsWith(ToLower(s), ToLower(substring));
 }
 
-string StringUtils::Trim(const string& s) {
-  size_t start = s.find_first_not_of(WHITESPACE_CHARS);
-  if (start == string::npos) {
-    return "";
-  }
-  size_t end = s.find_last_not_of(WHITESPACE_CHARS);
-  return s.substr(start, end - start + 1);
+string StringUtils::Trim(string s) {
+  boost::trim(s);
+  return s;
 }
 
-string StringUtils::LTrim(const string& s) {
-  size_t start = s.find_first_not_of(WHITESPACE_CHARS);
-  if (start == string::npos) {
-    return "";
-  }
-  return s.substr(start);
+string StringUtils::LTrim(string s) {
+  boost::trim_left(s);
+  return s;
 }
 
-string StringUtils::RTrim(const string& s) {
-  size_t end = s.find_last_not_of(WHITESPACE_CHARS);
-  if (end == string::npos) {
-    return "";
-  }
-  return s.substr(0, end + 1);
+string StringUtils::RTrim(string s) {
+  boost::trim_right(s);
+  return s;
 }
 
 bool StringUtils::IsNumeric(const string& s, bool allowNegative, bool allowDecimal) {
