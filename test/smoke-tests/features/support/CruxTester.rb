@@ -1,6 +1,13 @@
+require "CSV"
 require "fileutils"
 require "open3"
 require "set"
+
+class String
+  def nan?
+    self !~ /^\s*[+-]?((\d+_?)*\d+(\.(\d+_?)*\d+)?|\.(\d+_?)*\d+)(\s*|([eE][+-]?(\d+_?)*\d+)\s*)$/
+  end
+end
 
 class CruxTester
   def initialize(path)
@@ -64,6 +71,57 @@ class CruxTester
     end
     same = FileUtils.cmp(expected, actual)
     copyObserved(actual, expected, same, write_observed)
+    return same
+  end
+
+  def cmpTableWithPrecision(expected, actual, tolerance)
+
+    # Compare the fields of a tab delimited table. Allow floating point
+    # values to differ, as long as the relative error is less than
+    # the given tolerance
+
+    tolerance = tolerance.to_f
+
+    unless File.readable?(expected)
+      raise("cannot read file '" + expected + "'")
+    end
+    unless File.readable?(actual)
+      raise("cannot read file '" + actual + "'")
+    end
+    expected_text = CSV.open(expected, {:col_sep => "\t"}).read
+    actual_text = CSV.open(actual, {:col_sep => "\t"}).read
+    # Compare tables line by line
+    for i in 0..expected_text.size
+      if expected_text[i] == actual_text[i]
+        same = true
+      else
+        # Lines differ, compare value by value
+        for j in 0..expected_text[i].size
+          if expected_text[i][j] == actual_text[i][j]
+            same = true
+          else
+            # Values differ can we compare as floats?
+            if expected_text[i][j].nan? or actual_text[i][j].nan?
+              # Apparently they're not floats
+              same = false
+              break
+            else
+              # They're floats, do they match within the relative error?
+              expected_value = expected_text[i][j].to_f
+              actual_value = actual_text[i][j].to_f
+              relative_difference = ((actual_value - expected_value) /  expected_value).abs
+              if  relative_difference <= tolerance
+                same = true
+              else
+                same = false
+                break
+              end
+            end
+          end
+        end
+        if not same then break end
+      end
+    end
     return same
   end
 

@@ -8,7 +8,7 @@ Scenario Outline: User runs hardklor
   And I pass the arguments --overwrite T <spectra>
   When I run hardklor
   Then the return value should be 0
-  And crux-output/hardklor.mono.txt should match good_results/<expected_output>
+  And crux-output/hardklor.mono.txt should within relative error 0.001 match good_results/<expected_output>
 
 Examples:
   |test_name       |spectra          |expected_output  |

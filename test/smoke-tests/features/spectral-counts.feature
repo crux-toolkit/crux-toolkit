@@ -8,7 +8,7 @@ Scenario Outline: User runs spectral-counts
   And I pass the arguments --overwrite T <args> <results>
   When I run spectral-counts
   Then the return value should be 0
-  And crux-output/spectral-counts.target.txt should match good_results/<expected_output>
+  And crux-output/spectral-counts.target.txt should within relative error 0.001 match good_results/<expected_output>
 
 Examples:
   |test_name                     |args                                                                   |results                    |expected_output                   |
