@@ -34,6 +34,10 @@ Then /^(.*) should match (.*)$/ do | actual, expected |
   expect(@tester.cmp(expected, actual)).to be true
 end
 
+Then /^(.*) should within relative error (.*) match (.*)$/ do | actual, relative_error, expected|
+  expect(@tester.cmpTableWithPrecision(expected, actual, relative_error)).to be true
+end
+
 Then /^(.*) should contain the same lines as (.*)$/ do | actual, expected |
   expect(@tester.cmpUnordered(expected, actual)).to be true
 end
