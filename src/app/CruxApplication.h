@@ -8,6 +8,7 @@
 #define CRUXAPPLICATION_H
 #include "objects.h"
 
+#include <algorithm>
 #include <string>
 #include <vector>
 #include <map>
@@ -41,10 +42,51 @@ class CruxApplication{
    */
   virtual std::vector<std::string> getOptions() const;
 
+  template<typename T>
+  static void addOptionsFrom(std::vector<std::string>* optionsVector) {
+    using std::find;
+    using std::string;
+    using std::vector;
+    CruxApplication* app = new T();
+    vector<string> options = app->getOptions();
+    delete app;
+    for (vector<string>::const_iterator i = options.begin(); i != options.end(); i++) {
+      if (find(optionsVector->begin(), optionsVector->end(), *i) == optionsVector->end()) {
+        optionsVector->push_back(*i);
+      }
+    }
+  }
+
   /**
-   * \returns the outputs of the application as name -> description
+   * \returns the outputs of the application as <name, description>
    */
   virtual std::vector< std::pair<std::string, std::string> > getOutputs() const;
+
+  template<typename T>
+  static void addOutputsFrom(
+    std::vector< std::pair<std::string, std::string> >* outputsVector) {
+    using std::pair;
+    using std::set;
+    using std::string;
+    using std::vector;
+    set<string> existing;
+    for (vector< pair<string, string> >::const_iterator i = outputsVector->begin();
+         i != outputsVector->end();
+         i++) {
+      existing.insert(i->first);
+    }
+
+    CruxApplication* app = new T();
+    vector< pair<string, string> > outputs = app->getOutputs();
+    delete app;
+    for (vector< pair<string, string> >::const_iterator i = outputs.begin();
+         i != outputs.end();
+         i++) {
+      if (existing.insert(i->first).second) {
+        outputsVector->push_back(*i);
+      }
+    }
+  }
 
   /**
    * \returns the file stem of the application, default getName.

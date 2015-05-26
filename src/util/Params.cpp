@@ -2511,8 +2511,7 @@ DoubleParam::DoubleParam(const string& name,
                          double min,
                          double max)
   : Param(name, usage, fileNotes, visible),
-    value_((FLOAT_T)value), original_((FLOAT_T)value), min_(min), max_(max) {}
-    // TODO : For compatibility with old tests, convert to float
+    value_(value), original_(value), min_(min), max_(max) {}
 void DoubleParam::ThrowIfInvalid() const {
   if (value_ < min_ || value_ > max_) {
     throw runtime_error("Value of '" + name_ + "' must be between " +

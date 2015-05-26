@@ -32,6 +32,8 @@ class StringUtils {
       } else {
         converter.unsetf(std::ios_base::floatfield);
       }
+    } else {
+      converter << std::setprecision(8);
     }
     converter << obj;
     return converter.str();

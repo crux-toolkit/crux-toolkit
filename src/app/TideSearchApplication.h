@@ -21,11 +21,6 @@ protected:
 
   static bool HAS_DECOYS;
 
-  /**
-   * Free all existing mods
-   */
-  void cleanMods();
-
   void search(
     const string& spectrum_filename,
     const vector<SpectrumCollection::SpecCharge>* spec_charges,
