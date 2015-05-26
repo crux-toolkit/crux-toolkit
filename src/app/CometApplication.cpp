@@ -1,10 +1,11 @@
 /**
  * \file CometApplication.cpp 
- * \brief Runs hardklor
+ * \brief Runs comet
  *****************************************************************************/
 #include "CometSearch/Common.h"
 #include "CometSearch/CometSearchManager.h"
 #include "model/ModifiedPeptidesIterator.h"
+#include "util/AminoAcidUtil.h"
 #include "util/CarpStreamBuf.h"
 #include "util/FileUtils.h"
 #include "util/Params.h"
@@ -19,7 +20,6 @@ using namespace std;
  * \returns a blank CometApplication object
  */
 CometApplication::CometApplication() {
-
 }
 
 /**
@@ -36,6 +36,15 @@ int CometApplication::main(int argc, char** argv) {
 }
 
 int CometApplication::main(const vector<string>& input_files) {
+  for (vector<string>::const_iterator i = input_files.begin(); i != input_files.end(); i++) {
+    if (!StringUtils::IEndsWith(*i, ".mzXML") && !StringUtils::IEndsWith(*i, ".mzML") &&
+        !StringUtils::IEndsWith(*i, ".mz5") && !StringUtils::IEndsWith(*i, ".mzXML.gz") &&
+        !StringUtils::IEndsWith(*i, ".mzML.gz") && !StringUtils::IEndsWith(*i, ".raw") &&
+        !StringUtils::IEndsWith(*i, ".ms2") && !StringUtils::IEndsWith(*i, ".cms2")) {
+      carp(CARP_FATAL, "The format of file '%s' is not supported.", i->c_str());
+    }
+  }
+
   /* Re-route stderr to log file */
   CarpStreamBuf buffer;
   streambuf* old = std::cerr.rdbuf();
@@ -143,147 +152,99 @@ void CometApplication::setCometParameters(
     pvInputFiles.push_back(pInputFile);
   }
 
-  searchMgr.SetParam("database_name", get_string_parameter("database name"), get_string_parameter("database name"));
-  searchMgr.SetParam("decoy_prefix", get_string_parameter("decoy_prefix"), get_string_parameter("decoy_prefix"));
-  searchMgr.SetParam("output_suffix", get_string_parameter("output_suffix"), get_string_parameter("output_suffix"));
-  searchMgr.SetParam("nucleotide_reading_frame", get_string_parameter("nucleotide_reading_frame"), get_int_parameter("nucleotide_reading_frame"));
-  searchMgr.SetParam("mass_type_parent", get_string_parameter("mass_type_parent"), get_int_parameter("mass_type_parent"));
-  searchMgr.SetParam("mass_type_fragment", get_string_parameter("mass_type_fragment"), get_int_parameter("mass_type_fragment"));
-  searchMgr.SetParam("show_fragment_ions", get_string_parameter("show_fragment_ions"), get_int_parameter("show_fragment_ions"));
-  searchMgr.SetParam("num_threads", get_string_parameter("num_threads"), get_int_parameter("num_threads"));
-  searchMgr.SetParam("clip_nterm_methionine", get_string_parameter("clip_nterm_methionine"), get_int_parameter("clip_nterm_methionine"));
-  searchMgr.SetParam("theoretical_fragment_ions", get_string_parameter("theoretical_fragment_ions"), get_int_parameter("theoretical_fragment_ions"));
-  searchMgr.SetParam("use_A_ions", get_string_parameter("use_A_ions"), get_int_parameter("use_A_ions"));
-  searchMgr.SetParam("use_B_ions", get_string_parameter("use_B_ions"), get_int_parameter("use_B_ions"));
-  searchMgr.SetParam("use_C_ions", get_string_parameter("use_C_ions"), get_int_parameter("use_C_ions"));
-  searchMgr.SetParam("use_X_ions", get_string_parameter("use_X_ions"), get_int_parameter("use_X_ions"));
-  searchMgr.SetParam("use_Y_ions", get_string_parameter("use_Y_ions"), get_int_parameter("use_Y_ions"));
-  searchMgr.SetParam("use_Z_ions", get_string_parameter("use_Z_ions"), get_int_parameter("use_Z_ions"));
-  searchMgr.SetParam("use_NL_ions", get_string_parameter("use_NL_ions"), get_int_parameter("use_NL_ions"));
-  searchMgr.SetParam("use_sparse_matrix", get_string_parameter("use_sparse_matrix"), get_int_parameter("use_sparse_matrix"));
-  
-  if (!get_string_parameter("variable_mod01").empty()) {
-    calcVarMods(get_string_parameter("variable_mod01"), varModsParam);
-    searchMgr.SetParam("variable_mod01", get_string_parameter("variable_mod01"), varModsParam );
-  }
-  if (!get_string_parameter("variable_mod02").empty()) {
-    calcVarMods(get_string_parameter("variable_mod02"), varModsParam);
-    searchMgr.SetParam("variable_mod02", get_string_parameter("variable_mod02"), varModsParam );
-  }
-  if (!get_string_parameter("variable_mod03").empty()) {
-    calcVarMods(get_string_parameter("variable_mod03"), varModsParam);
-    searchMgr.SetParam("variable_mod03", get_string_parameter("variable_mod03"), varModsParam );
-  }
-  if (!get_string_parameter("variable_mod04").empty()) {
-    calcVarMods(get_string_parameter("variable_mod04"), varModsParam);
-    searchMgr.SetParam("variable_mod04", get_string_parameter("variable_mod04"), varModsParam );
-  }
-  if (!get_string_parameter("variable_mod05").empty()) {
-    calcVarMods(get_string_parameter("variable_mod05"), varModsParam);
-    searchMgr.SetParam("variable_mod05", get_string_parameter("variable_mod05"), varModsParam );
-  }
-  if (!get_string_parameter("variable_mod06").empty()) {
-    calcVarMods(get_string_parameter("variable_mod06"), varModsParam);
-    searchMgr.SetParam("variable_mod06", get_string_parameter("variable_mod06"), varModsParam );
-  }
-  if (!get_string_parameter("variable_mod07").empty()) {
-    calcVarMods(get_string_parameter("variable_mod07"), varModsParam);
-    searchMgr.SetParam("variable_mod07", get_string_parameter("variable_mod07"), varModsParam );
-  }
-  if (!get_string_parameter("variable_mod08").empty()) {
-    calcVarMods(get_string_parameter("variable_mod08"), varModsParam);
-    searchMgr.SetParam("variable_mod08", get_string_parameter("variable_mod08"), varModsParam );
-  }
-  if (!get_string_parameter("variable_mod09").empty()) {
-    calcVarMods(get_string_parameter("variable_mod09"), varModsParam);
-    searchMgr.SetParam("variable_mod09", get_string_parameter("variable_mod09"), varModsParam );
+  searchMgr.SetParam("database_name", Params::GetString("database name"), Params::GetString("database name"));
+  searchMgr.SetParam("decoy_prefix", Params::GetString("decoy_prefix"), Params::GetString("decoy_prefix"));
+  searchMgr.SetParam("output_suffix", Params::GetString("output_suffix"), Params::GetString("output_suffix"));
+  searchMgr.SetParam("nucleotide_reading_frame", Params::GetString("nucleotide_reading_frame"), Params::GetInt("nucleotide_reading_frame"));
+  searchMgr.SetParam("mass_type_parent", Params::GetString("mass_type_parent"), Params::GetInt("mass_type_parent"));
+  searchMgr.SetParam("mass_type_fragment", Params::GetString("mass_type_fragment"), Params::GetInt("mass_type_fragment"));
+  searchMgr.SetParam("show_fragment_ions", Params::GetString("show_fragment_ions"), Params::GetInt("show_fragment_ions"));
+  searchMgr.SetParam("num_threads", Params::GetString("num_threads"), Params::GetInt("num_threads"));
+  searchMgr.SetParam("clip_nterm_methionine", Params::GetString("clip_nterm_methionine"), Params::GetInt("clip_nterm_methionine"));
+  searchMgr.SetParam("theoretical_fragment_ions", Params::GetString("theoretical_fragment_ions"), Params::GetInt("theoretical_fragment_ions"));
+  searchMgr.SetParam("use_A_ions", Params::GetString("use_A_ions"), Params::GetInt("use_A_ions"));
+  searchMgr.SetParam("use_B_ions", Params::GetString("use_B_ions"), Params::GetInt("use_B_ions"));
+  searchMgr.SetParam("use_C_ions", Params::GetString("use_C_ions"), Params::GetInt("use_C_ions"));
+  searchMgr.SetParam("use_X_ions", Params::GetString("use_X_ions"), Params::GetInt("use_X_ions"));
+  searchMgr.SetParam("use_Y_ions", Params::GetString("use_Y_ions"), Params::GetInt("use_Y_ions"));
+  searchMgr.SetParam("use_Z_ions", Params::GetString("use_Z_ions"), Params::GetInt("use_Z_ions"));
+  searchMgr.SetParam("use_NL_ions", Params::GetString("use_NL_ions"), Params::GetInt("use_NL_ions"));
+  searchMgr.SetParam("use_sparse_matrix", Params::GetString("use_sparse_matrix"), Params::GetInt("use_sparse_matrix"));
+
+  for (int i = 1; i <= 9; i++) {
+    string param = "variable_mod0" + StringUtils::ToString(i);
+    string paramValue = Params::GetString(param);
+    if (!paramValue.empty()) {
+      calcVarMods(paramValue, varModsParam);
+      searchMgr.SetParam(param, paramValue, varModsParam);
+    }
   }
 
-  searchMgr.SetParam("max_variable_mods_in_peptide", get_string_parameter("max_variable_mods_in_peptide"), get_int_parameter("max_variable_mods_in_peptide"));
-  searchMgr.SetParam("fragment_bin_tol", get_string_parameter("fragment_bin_tol"), get_double_parameter("fragment_bin_tol"));
-  searchMgr.SetParam("fragment_bin_offset", get_string_parameter("fragment_bin_offset"), get_double_parameter("fragment_bin_offset"));
-  searchMgr.SetParam("peptide_mass_tolerance", get_string_parameter("peptide_mass_tolerance"), get_double_parameter("peptide_mass_tolerance"));
-  searchMgr.SetParam("peptide_mass_units", get_string_parameter("peptide_mass_units"), get_int_parameter("peptide_mass_units"));
-  searchMgr.SetParam("isotope_error", get_string_parameter("isotope_error"), get_int_parameter("isotope_error"));
-  searchMgr.SetParam("num_output_lines", get_string_parameter("num_output_lines"), get_int_parameter("num_output_lines"));
-  searchMgr.SetParam("num_results", get_string_parameter("num_results"), get_int_parameter("num_results"));
-  searchMgr.SetParam("remove_precursor_peak", get_string_parameter("remove_precursor_peak"), get_int_parameter("remove_precursor_peak"));
-  searchMgr.SetParam("remove_precursor_tolerance", get_string_parameter("remove_precursor_tolerance"), get_double_parameter("remove_precursor_tolerance"));
+  searchMgr.SetParam("max_variable_mods_in_peptide", Params::GetString("max_variable_mods_in_peptide"), Params::GetInt("max_variable_mods_in_peptide"));
+  searchMgr.SetParam("fragment_bin_tol", Params::GetString("fragment_bin_tol"), Params::GetDouble("fragment_bin_tol"));
+  searchMgr.SetParam("fragment_bin_offset", Params::GetString("fragment_bin_offset"), Params::GetDouble("fragment_bin_offset"));
+  searchMgr.SetParam("peptide_mass_tolerance", Params::GetString("peptide_mass_tolerance"), Params::GetDouble("peptide_mass_tolerance"));
+  searchMgr.SetParam("peptide_mass_units", Params::GetString("peptide_mass_units"), Params::GetInt("peptide_mass_units"));
+  searchMgr.SetParam("isotope_error", Params::GetString("isotope_error"), Params::GetInt("isotope_error"));
+  searchMgr.SetParam("num_output_lines", Params::GetString("num_output_lines"), Params::GetInt("num_output_lines"));
+  searchMgr.SetParam("num_results", Params::GetString("num_results"), Params::GetInt("num_results"));
+  searchMgr.SetParam("remove_precursor_peak", Params::GetString("remove_precursor_peak"), Params::GetInt("remove_precursor_peak"));
+  searchMgr.SetParam("remove_precursor_tolerance", Params::GetString("remove_precursor_tolerance"), Params::GetDouble("remove_precursor_tolerance"));
   
-  getDoubleRange(get_string_parameter("clear_mz_range"), doubleRangeParam );
-  searchMgr.SetParam("clear_mz_range", get_string_parameter("clear_mz_range"), doubleRangeParam );
+  getDoubleRange(Params::GetString("clear_mz_range"), doubleRangeParam );
+  searchMgr.SetParam("clear_mz_range", Params::GetString("clear_mz_range"), doubleRangeParam );
 
-  searchMgr.SetParam("print_expect_score", get_string_parameter("print_expect_score"), get_int_parameter("print_expect_score"));
+  searchMgr.SetParam("print_expect_score", Params::GetString("print_expect_score"), Params::GetInt("print_expect_score"));
   searchMgr.SetParam("output_sqtstream", "0", 0);
   
-  searchMgr.SetParam("override_charge", get_string_parameter("override_charge"), get_int_parameter("override_charge"));
+  searchMgr.SetParam("override_charge", Params::GetString("override_charge"), Params::GetInt("override_charge"));
 
-  searchMgr.SetParam("require_variable_mod", get_string_parameter("require_variable_mod"), get_int_parameter("require_variable_mod"));
+  searchMgr.SetParam("require_variable_mod", Params::GetString("require_variable_mod"), Params::GetInt("require_variable_mod"));
   
-  searchMgr.SetParam("output_sqtfile", get_string_parameter("output_sqtfile"), get_int_parameter("output_sqtfile"));
-  searchMgr.SetParam("output_txtfile", get_string_parameter("output_txtfile"), get_int_parameter("output_txtfile"));
-  searchMgr.SetParam("output_pepxmlfile", get_string_parameter("output_pepxmlfile"), get_int_parameter("output_pepxmlfile"));
-  searchMgr.SetParam("output_percolatorfile", get_string_parameter("output_percolatorfile"), get_int_parameter("output_percolatorfile"));
+  searchMgr.SetParam("output_sqtfile", Params::GetString("output_sqtfile"), Params::GetInt("output_sqtfile"));
+  searchMgr.SetParam("output_txtfile", Params::GetString("output_txtfile"), Params::GetInt("output_txtfile"));
+  searchMgr.SetParam("output_pepxmlfile", Params::GetString("output_pepxmlfile"), Params::GetInt("output_pepxmlfile"));
+  searchMgr.SetParam("output_percolatorfile", Params::GetString("output_percolatorfile"), Params::GetInt("output_percolatorfile"));
   searchMgr.SetParam("output_outfiles", "0", 0);
-  searchMgr.SetParam("skip_researching", get_string_parameter("skip_researching"), get_int_parameter("skip_researching"));
-  searchMgr.SetParam("add_Cterm_peptide", get_string_parameter("add_Cterm_peptide"), get_double_parameter("add_Cterm_peptide"));
-  searchMgr.SetParam("add_Nterm_peptide", get_string_parameter("add_Nterm_peptide"), get_double_parameter("add_Nterm_peptide"));
-  searchMgr.SetParam("add_Cterm_protein", get_string_parameter("add_Cterm_protein"), get_double_parameter("add_Cterm_protein"));
-  searchMgr.SetParam("add_Nterm_protein", get_string_parameter("add_Nterm_protein"), get_double_parameter("add_Nterm_protein"));
-  searchMgr.SetParam("add_G_glycine", get_string_parameter("add_G_glycine"), get_double_parameter("add_G_glycine"));
-  searchMgr.SetParam("add_A_alanine", get_string_parameter("add_A_alanine"), get_double_parameter("add_A_alanine"));
-  searchMgr.SetParam("add_S_serine", get_string_parameter("add_S_serine"), get_double_parameter("add_S_serine"));
-  searchMgr.SetParam("add_P_proline", get_string_parameter("add_P_proline"), get_double_parameter("add_P_proline"));
-  searchMgr.SetParam("add_V_valine", get_string_parameter("add_V_valine"), get_double_parameter("add_V_valine"));
-  searchMgr.SetParam("add_T_threonine", get_string_parameter("add_T_threonine"), get_double_parameter("add_T_threonine"));
-  searchMgr.SetParam("add_C_cysteine", get_string_parameter("add_C_cysteine"), get_double_parameter("add_C_cysteine"));
-  searchMgr.SetParam("add_L_leucine", get_string_parameter("add_L_leucine"), get_double_parameter("add_L_leucine"));
-  searchMgr.SetParam("add_I_isoleucine", get_string_parameter("add_I_isoleucine"), get_double_parameter("add_I_isoleucine"));
-  searchMgr.SetParam("add_N_asparagine", get_string_parameter("add_N_asparagine"), get_double_parameter("add_N_asparagine"));
-  searchMgr.SetParam("add_O_ornithine", get_string_parameter("add_O_ornithine"), get_double_parameter("add_O_ornithine"));
-  searchMgr.SetParam("add_D_aspartic_acid", get_string_parameter("add_D_aspartic_acid"), get_double_parameter("add_D_aspartic_acid"));
-  searchMgr.SetParam("add_Q_glutamine", get_string_parameter("add_Q_glutamine"), get_double_parameter("add_Q_glutamine"));
-  searchMgr.SetParam("add_K_lysine", get_string_parameter("add_K_lysine"), get_double_parameter("add_K_lysine"));
-  searchMgr.SetParam("add_E_glutamic_acid", get_string_parameter("add_E_glutamic_acid"), get_double_parameter("add_E_glutamic_acid"));
-  searchMgr.SetParam("add_M_methionine", get_string_parameter("add_M_methionine"), get_double_parameter("add_M_methionine"));
-  searchMgr.SetParam("add_H_histidine", get_string_parameter("add_H_histidine"), get_double_parameter("add_H_histidine"));
-  searchMgr.SetParam("add_F_phenylalanine", get_string_parameter("add_F_phenylalanine"), get_double_parameter("add_F_phenylalanine"));
-  searchMgr.SetParam("add_R_arginine", get_string_parameter("add_R_arginine"), get_double_parameter("add_R_arginine"));
-  searchMgr.SetParam("add_Y_tyrosine", get_string_parameter("add_Y_tyrosine"), get_double_parameter("add_Y_tyrosine"));
-  searchMgr.SetParam("add_W_tryptophan", get_string_parameter("add_W_tryptophan"), get_double_parameter("add_W_tryptophan"));
-  searchMgr.SetParam("add_B_user_amino_acid", get_string_parameter("add_B_user_amino_acid"), get_double_parameter("add_B_user_amino_acid"));
-  searchMgr.SetParam("add_J_user_amino_acid", get_string_parameter("add_J_user_amino_acid"), get_double_parameter("add_J_user_amino_acid"));
-  searchMgr.SetParam("add_U_user_amino_acid", get_string_parameter("add_U_user_amino_acid"), get_double_parameter("add_U_user_amino_acid"));
-  searchMgr.SetParam("add_X_user_amino_acid", get_string_parameter("add_X_user_amino_acid"), get_double_parameter("add_X_user_amino_acid"));
-  searchMgr.SetParam("add_Z_user_amino_acid", get_string_parameter("add_Z_user_amino_acid"), get_double_parameter("add_Z_user_amino_acid"));
-  searchMgr.SetParam("search_enzyme_number", get_string_parameter("search_enzyme_number"), get_int_parameter("search_enzyme_number"));
-  searchMgr.SetParam("sample_enzyme_number", get_string_parameter("sample_enzyme_number"), get_int_parameter("sample_enzyme_number"));
-  searchMgr.SetParam("num_enzyme_termini", get_string_parameter("num_enzyme_termini"), get_int_parameter("num_enzyme_termini"));
-  searchMgr.SetParam("allowed_missed_cleavage", get_string_parameter("allowed_missed_cleavage"), get_int_parameter("allowed_missed_cleavage"));
+  searchMgr.SetParam("skip_researching", Params::GetString("skip_researching"), Params::GetInt("skip_researching"));
+  searchMgr.SetParam("add_Cterm_peptide", Params::GetString("add_Cterm_peptide"), Params::GetDouble("add_Cterm_peptide"));
+  searchMgr.SetParam("add_Nterm_peptide", Params::GetString("add_Nterm_peptide"), Params::GetDouble("add_Nterm_peptide"));
+  searchMgr.SetParam("add_Cterm_protein", Params::GetString("add_Cterm_protein"), Params::GetDouble("add_Cterm_protein"));
+  searchMgr.SetParam("add_Nterm_protein", Params::GetString("add_Nterm_protein"), Params::GetDouble("add_Nterm_protein"));
+  for (char c = 'A'; c <= 'Z'; c++) {
+    string aaName = AminoAcidUtil::GetName(c);
+    aaName = aaName.empty() ? "user_amino_acid" : StringUtils::Replace(aaName, " ", "_");
+    string param = "add_" + string(1, c) + "_" + aaName;
+    searchMgr.SetParam(param, Params::GetString(param), Params::GetDouble(param));
+  }
+  searchMgr.SetParam("search_enzyme_number", Params::GetString("search_enzyme_number"), Params::GetInt("search_enzyme_number"));
+  searchMgr.SetParam("sample_enzyme_number", Params::GetString("sample_enzyme_number"), Params::GetInt("sample_enzyme_number"));
+  searchMgr.SetParam("num_enzyme_termini", Params::GetString("num_enzyme_termini"), Params::GetInt("num_enzyme_termini"));
+  searchMgr.SetParam("allowed_missed_cleavage", Params::GetString("allowed_missed_cleavage"), Params::GetInt("allowed_missed_cleavage"));
 
-  getIntRange(get_string_parameter("scan_range"), intRangeParam );
-  searchMgr.SetParam("scan_range", get_string_parameter("scan_range"), intRangeParam );
+  getIntRange(Params::GetString("scan_range"), intRangeParam );
+  searchMgr.SetParam("scan_range", Params::GetString("scan_range"), intRangeParam );
 
-  searchMgr.SetParam("spectrum_batch_size", get_string_parameter("spectrum_batch_size"), get_int_parameter("spectrum_batch_size"));
-  searchMgr.SetParam("minimum_peaks", get_string_parameter("minimum_peaks"), get_int_parameter("minimum_peaks"));
+  searchMgr.SetParam("spectrum_batch_size", Params::GetString("spectrum_batch_size"), Params::GetInt("spectrum_batch_size"));
+  searchMgr.SetParam("minimum_peaks", Params::GetString("minimum_peaks"), Params::GetInt("minimum_peaks"));
 
-  getIntRange(get_string_parameter("precursor_charge"), intRangeParam);
-  searchMgr.SetParam("precursor_charge", get_string_parameter("precursor_charge"), intRangeParam);
+  getIntRange(Params::GetString("precursor_charge"), intRangeParam);
+  searchMgr.SetParam("precursor_charge", Params::GetString("precursor_charge"), intRangeParam);
   
-  searchMgr.SetParam("max_fragment_charge", get_string_parameter("max_fragment_charge"), get_int_parameter("max_fragment_charge"));
-  searchMgr.SetParam("max_precursor_charge", get_string_parameter("max_precursor_charge"), get_int_parameter("max_precursor_charge"));
+  searchMgr.SetParam("max_fragment_charge", Params::GetString("max_fragment_charge"), Params::GetInt("max_fragment_charge"));
+  searchMgr.SetParam("max_precursor_charge", Params::GetString("max_precursor_charge"), Params::GetInt("max_precursor_charge"));
 
-  getDoubleRange(get_string_parameter("digest_mass_range"), doubleRangeParam);
-  searchMgr.SetParam("digest_mass_range", get_string_parameter("digest_mass_range"), doubleRangeParam);
+  getDoubleRange(Params::GetString("digest_mass_range"), doubleRangeParam);
+  searchMgr.SetParam("digest_mass_range", Params::GetString("digest_mass_range"), doubleRangeParam);
   
-  searchMgr.SetParam("ms_level", get_string_parameter("ms_level"), get_int_parameter("ms_level"));
-  searchMgr.SetParam("activation_method", get_string_parameter("activation_method"), get_string_parameter("activation_method"));
-  searchMgr.SetParam("minimum_intensity", get_string_parameter("minimum_intensity"), get_double_parameter("minimum_intensity"));
-  searchMgr.SetParam("decoy_search", get_string_parameter("decoy_search"), get_int_parameter("decoy_search"));
+  searchMgr.SetParam("ms_level", Params::GetString("ms_level"), Params::GetInt("ms_level"));
+  searchMgr.SetParam("activation_method", Params::GetString("activation_method"), Params::GetString("activation_method"));
+  searchMgr.SetParam("minimum_intensity", Params::GetString("minimum_intensity"), Params::GetDouble("minimum_intensity"));
+  searchMgr.SetParam("decoy_search", Params::GetString("decoy_search"), Params::GetInt("decoy_search"));
   
   EnzymeInfo enzymeInformation;
   double temp;
-  int search_enzyme_number = get_int_parameter("search_enzyme_number");
+  int search_enzyme_number = Params::GetInt("search_enzyme_number");
 
   if (search_enzyme_number >=0 && search_enzyme_number < get_comet_enzyme_info_lines().size()) {
     const char* szParamBuf = get_comet_enzyme_info_lines()[search_enzyme_number].c_str();
@@ -298,7 +259,7 @@ void CometApplication::setCometParameters(
       search_enzyme_number, (get_comet_enzyme_info_lines().size()-1));
   }
 
-  int sample_enzyme_number = get_int_parameter("sample_enzyme_number");
+  int sample_enzyme_number = Params::GetInt("sample_enzyme_number");
   if (sample_enzyme_number >= 0 && sample_enzyme_number < get_comet_enzyme_info_lines().size()) {
     const char* szParamBuf = get_comet_enzyme_info_lines()[sample_enzyme_number].c_str();
     sscanf(szParamBuf, "%lf %48s %d %20s %20s\n",
@@ -311,7 +272,7 @@ void CometApplication::setCometParameters(
     carp(CARP_FATAL, "sample_enzyme_number=%d out of range (0-%d)", 
       sample_enzyme_number, (get_comet_enzyme_info_lines().size()-1));
   }
-  enzymeInformation.iAllowedMissedCleavage = get_int_parameter("allowed_missed_cleavage");
+  enzymeInformation.iAllowedMissedCleavage = Params::GetInt("allowed_missed_cleavage");
   searchMgr.SetParam("[COMET_ENZYME_INFO]", "TODO", enzymeInformation);
   
 }
