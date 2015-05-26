@@ -23,6 +23,7 @@ class PipelineApplication : public CruxApplication {
  private:
   std::vector<CruxApplication*> apps_;
 
+  static void checkParams();
   static std::vector<std::string> getExpectedResultsFiles(
     CruxApplication* app,
     const std::vector<std::string>& spectra

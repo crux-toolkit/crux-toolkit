@@ -183,14 +183,6 @@ protected:
     vector<PostProcessProtein*>* proteins_made ///< out parameter for new proteins
   );
 
-  /**
-   * Returns a pointer to the modification in the list of mods, adding it if it
-   * doesn't exist
-   */
-  const AA_MOD_T* lookUpMod(
-    double delta_mass ///< mass of the mod to look up
-  );
-
   void gatherTargetsAndDecoys(
     const ActivePeptideQueue* peptides,
     const ProteinVec& proteins,

@@ -18,6 +18,8 @@ PipelineApplication::~PipelineApplication() {
 }
 
 int PipelineApplication::main(int argc, char** argv) {
+  checkParams();
+
   carp(CARP_INFO, "Running pipeline with the following steps:");
   for (vector<CruxApplication*>::iterator i = apps_.begin(); i != apps_.end(); i++) {
     carp(CARP_INFO, "--> %s", (*i)->getName().c_str());
@@ -57,6 +59,17 @@ int PipelineApplication::main(int argc, char** argv) {
   }
 
   return 0;
+}
+
+void PipelineApplication::checkParams() {
+  string search = Params::GetString("search-engine");
+  string postProcessor = Params::GetString("post-processor");
+  if (search == "comet") {
+    if (Params::GetInt("decoy_search") == 0 && postProcessor != "none") {
+      carp(CARP_FATAL, "Cannot perform post-processing without decoys. "
+                       "Set decoy_search to 1 or 2.");
+    }
+  }
 }
 
 vector<string> PipelineApplication::getExpectedResultsFiles(
@@ -255,11 +268,26 @@ vector<string> PipelineApplication::getOptions() const {
     "search-engine",
     "post-processor"
   };
-  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
+  vector<string> options(arr, arr + sizeof(arr) / sizeof(string));
+
+  addOptionsFrom<CruxBullseyeApplication>(&options);
+  addOptionsFrom<TideSearchApplication>(&options);
+  addOptionsFrom<CometApplication>(&options);
+  addOptionsFrom<PercolatorApplication>(&options);
+  addOptionsFrom<ComputeQValues>(&options);
+
+  return options;
 }
 
 vector< pair<string, string> > PipelineApplication::getOutputs() const {
   vector< pair<string, string> > outputs;
+  
+  addOutputsFrom<CruxBullseyeApplication>(&outputs);
+  addOutputsFrom<TideSearchApplication>(&outputs);
+  addOutputsFrom<CometApplication>(&outputs);
+  addOutputsFrom<PercolatorApplication>(&outputs);
+  addOutputsFrom<ComputeQValues>(&outputs);
+
   return outputs;
 }
 

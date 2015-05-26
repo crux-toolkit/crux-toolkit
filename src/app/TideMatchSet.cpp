@@ -742,7 +742,7 @@ Crux::Match* TideMatchSet::getCruxMatch(
     mod_coder_.DecodeMod(mods[i], &mod_index, &mod_delta_index);
     double mod_delta = mod_map_[mod_delta_index];
     // Look up mod and apply it to AA
-    const AA_MOD_T* mod = lookUpMod(mod_delta);
+    const AA_MOD_T* mod = get_aa_mod_from_mass(mod_delta);
     modify_aa(mod_seq + mod_index, mod);
   }
   crux_peptide->setModifiedAASequence(mod_seq, peptide->IsDecoy());
@@ -753,32 +753,6 @@ Crux::Match* TideMatchSet::getCruxMatch(
     crux_peptide, crux_spectrum, crux_z_state, false);
 
   return match;
-}
-
-/**
- * Returns a pointer to the modification in the list of mods, adding it if it
- * doesn't exist
- */
-const AA_MOD_T* TideMatchSet::lookUpMod(double delta_mass) {
-  AA_MOD_T** list_of_mods;
-  int num_mods = get_all_aa_mod_list(&list_of_mods);
-
-  for (int i = 0; i < num_mods; ++i) {
-    const AA_MOD_T* mod = list_of_mods[i];
-    if (aa_mod_get_mass_change(mod) == delta_mass) {
-      carp(CARP_DETAILED_DEBUG, "Found existing mod (%f)", delta_mass);
-      return mod;
-    }
-  }
-
-  carp(CARP_DEBUG, "Adding new mod (%f)", delta_mass);
-  AA_MOD_T* new_mod = new_aa_mod(num_mods);
-  aa_mod_set_mass_change(new_mod, delta_mass);
-  list_of_mods[num_mods] = new_mod;
-
-  incrementNumMods();
-
-  return new_mod;
 }
 
 void TideMatchSet::gatherTargetsAndDecoys(

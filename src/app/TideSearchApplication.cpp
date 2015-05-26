@@ -12,9 +12,6 @@
 #include "util/Params.h"
 #include "util/FileUtils.h"
 
-extern AA_MOD_T* list_of_mods[MAX_AA_MODS];
-extern int num_mods;
-
 bool TideSearchApplication::HAS_DECOYS = false;
 
 /* This constant is the product of the original "magic number" (10000,
@@ -102,7 +99,7 @@ int TideSearchApplication::main(const vector<string>& input_files) {
   bin_width_  = Params::GetDouble("mz-bin-width");
   bin_offset_ = Params::GetDouble("mz-bin-offset");
   // for now don't allow XCorr p-value searches with variable bin width
-  if (exact_pval_search_ && abs(bin_width_ - BIN_WIDTH_MONO) > 0.000001) {
+  if (exact_pval_search_ && !Params::IsDefault("mz-bin-width")) {
     carp(CARP_FATAL, "tide-search with XCorr p-values and variable bin width "
                      "is not allowed in this version of Crux.");
   }
@@ -288,7 +285,7 @@ int TideSearchApplication::main(const vector<string>& input_files) {
 
     // Do the search
     carp(CARP_INFO, "Running search");
-    cleanMods();
+    resetMods();
     search(f->OriginalName, spectra.SpecCharges(), active_peptide_queue, proteins,
            locations, window, window_type, Params::GetDouble("spectrum-min-mz"),
            Params::GetDouble("spectrum-max-mz"), min_scan, max_scan,
@@ -326,17 +323,6 @@ int TideSearchApplication::main(const vector<string>& input_files) {
   delete[] aaMass;
 
   return 0;
-}
-
-/**
- * Free all existing mods
- */
-void TideSearchApplication::cleanMods() {
-  for (int i = 0; i < MAX_AA_MODS; ++i) {
-    free_aa_mod(list_of_mods[i]);
-    list_of_mods[i] = NULL;
-  }
-  num_mods = 0;
 }
 
 void TideSearchApplication::search(
