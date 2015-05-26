@@ -8,7 +8,7 @@ Scenario Outline: User runs make-pin
   And I pass the arguments --overwrite T --output-file <output_file> <target_input>
   When I run make-pin
   Then the return value should be 0
-  And crux-output/<output_file> should within relative error 0.001 match good_results/<expected_output>
+  And crux-output/<output_file> should match good_results/<expected_output>
 
 Examples:
   |test_name   |output_file     |target_input                 |expected_output |
