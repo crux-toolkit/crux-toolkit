@@ -38,7 +38,9 @@ string StringUtils::Replace(string s, const string& oldSubstring, const string& 
 }
 
 bool StringUtils::StartsWith(const string& s, const string& substring) {
-  return s.compare(0, substring.length(), substring) == 0;
+  return substring.length() <= s.length()
+    ? s.compare(0, substring.length(), substring) == 0
+    : false;
 }
 
 bool StringUtils::IStartsWith(const string& s, const string& substring) {
@@ -46,7 +48,9 @@ bool StringUtils::IStartsWith(const string& s, const string& substring) {
 }
 
 bool StringUtils::EndsWith(const string& s, const string& substring) {
-  return s.compare(s.length() - substring.length(), substring.length(), substring) == 0;
+  return substring.length() <= s.length()
+    ? s.compare(s.length() - substring.length(), substring.length(), substring) == 0
+    : false;
 }
 
 bool StringUtils::IEndsWith(const string& s, const string& substring) {

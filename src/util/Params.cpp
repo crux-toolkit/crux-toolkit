@@ -769,7 +769,10 @@ void Params::Initialize() {
    * Comet parameters
    */
   InitArgParam("input spectra",
-    "The name of the file from which to parse the spectra.");
+    "The name of the file from which to parse the spectra. Valid formats include mzXML, "
+    "mzML, mz5, raw, ms2, and cms2. Files in mzML or mzXML may be compressed with gzip. "
+    "RAW files can be parsed only under windows and if the appropriate libraries were "
+    "included at compile time.");
   InitArgParam("database name",
     "A full or relative path to the sequence database, "
     "in FASTA format, to search. Example databases include "
