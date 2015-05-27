@@ -139,7 +139,6 @@ int ActivePeptideQueue::SetActiveRange(double min_mass, double max_mass, double 
     return 0;
   }
 
-
   // Count active targets and decoys
   for (deque<Peptide*>::const_iterator i = iter_; i != end_; ++i) {
     if (!(*i)->IsDecoy()) {

@@ -901,33 +901,56 @@ const char* Spectrum::getFilename(){
 
 /**
  * \Determine charge state for a spectrum without Z line 
- * /return true if it can determine cahrge state and return false if it can't create z line 
+ * /return true if it can determine charge state and return false if it can't create z line 
  */
-bool Spectrum::assignZState(){
-  carp_once(CARP_WARNING,
-       "Spectrum %i has no charge state.\nCalculating charge",
-       first_scan_);
+bool Spectrum::assignZState() {
+  carp_once(CARP_WARNING, "Spectrum %i has no charge state. Calculating charge",
+            first_scan_);
   
-  CHARGE_STATE_T charge = choose_charge(precursor_mz_, peaks_);
+  if (peaks_.empty()) {
+    carp(CARP_INFO, "Cannot determine charge state of spectrum %d with no peaks.",
+         first_scan_);
+    return false;
+  }
+
+  // sum peaks below and above the precursor m/z window separately
+  FLOAT_T left_sum = 0.00001;
+  FLOAT_T right_sum = 0.00001;
+  for (vector<Peak*>::const_iterator i = peaks_.begin(); i != peaks_.end(); i++) {
+    FLOAT_T location = (*i)->getLocation();
+    if (location < precursor_mz_ - 20) {
+      left_sum += (*i)->getIntensity();
+    } else if (location > precursor_mz_ + 20) {
+      right_sum += (*i)->getIntensity();
+    } // else, skip peaks around precursor
+  }
+
+  // What is the justification for this? Ask Mike MacCoss
+  FLOAT_T FractionWindow = 0;
+  FLOAT_T CorrectionFactor = 1;
+  FLOAT_T max_peak_mz = peaks_.back()->getLocation();
+  if ((precursor_mz_ * 2) >= max_peak_mz) {
+    FractionWindow = (precursor_mz_ * 2) - max_peak_mz;
+    CorrectionFactor = fabs((precursor_mz_ - FractionWindow)) / precursor_mz_;
+  }
+
+  // if the ratio of intensities above/below the precursor is small
+  assert(left_sum != 0);
+
   SpectrumZState zstate;
-  switch(charge){
-  case SINGLE_CHARGE_STATE:
+  if ((right_sum / left_sum) < (0.2 * CorrectionFactor)) {
+    // +1 spectrum
     zstate.setMZ(precursor_mz_, 1);
     zstates_.push_back(zstate);
     return true; 
-  case MULTIPLE_CHARGE_STATE:
-    zstate.setMZ(precursor_mz_, 2);
-    zstates_.push_back(zstate);
-    zstate.setMZ(precursor_mz_, 3);
-    zstates_.push_back(zstate);
-    return true;    
-  case INVALID_CHARGE_STATE: 
-  case NUMBER_CHARGE_STATE:
-    carp(CARP_ERROR, "Could not determine charge state for spectrum %d.", 
-         first_scan_);
-    return false; 
- }
-  return true; 
+  }
+
+  // multiply charged spectrum
+  zstate.setMZ(precursor_mz_, 2);
+  zstates_.push_back(zstate);
+  zstate.setMZ(precursor_mz_, 3);
+  zstates_.push_back(zstate);
+  return true;    
 }
 
 /*

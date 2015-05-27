@@ -406,6 +406,9 @@ void TideSearchApplication::search(
       // spectra.
       observed.PreprocessSpectrum(*spectrum, charge);
       int nCandPeptide = active_peptide_queue->SetActiveRange(min_mass, max_mass, min_range, max_range);
+      if (nCandPeptide == 0) {
+        continue;
+      }
       total_candidate_peptides += nCandPeptide;
       TideMatchSet::Arr2 match_arr2(nCandPeptide); // Scored peptides will go here.
 

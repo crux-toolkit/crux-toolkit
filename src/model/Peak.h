@@ -32,17 +32,17 @@ public:
     /**
      * Return the intensity of this Peak
      */
-    FLOAT_T getIntensity();
+    FLOAT_T getIntensity() const;
     
     /**
      * Return the intensity rank of this Peak
      */
-    FLOAT_T getIntensityRank();
+    FLOAT_T getIntensityRank() const;
     
     /**
      * Return the location of this Peak
      */
-    FLOAT_T getLocation();
+    FLOAT_T getLocation() const;
     
     /**
      * Set the intensity of this Peak
