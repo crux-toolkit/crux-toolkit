@@ -1674,60 +1674,9 @@ int prepare_protein_input(
 }
 
 /**
- * \brief  Decide if a spectrum has precursor charge of +1 or more (+2
- * or +3 or +4 etc). 
- * \returns SINGLE_STATE_CHARGE if spectrum precursor is singly or charged MULTIPLE_CHARGE_STATE if multiply
- * charged or INVALID_CHARGE_STATE on error.
- */
-CHARGE_STATE_T choose_charge(FLOAT_T precursor_mz,    ///< m/z of spectrum precursor ion
-                  vector<Peak*>& peaks)  ///< array of spectrum peaks
-{
-  if(peaks.empty()){
-    carp(CARP_ERROR, "Cannot determine charge state of empty peak array.");
-    return  INVALID_CHARGE_STATE;
-  }
-
-  FLOAT_T max_peak_mz = peaks.back()->getLocation();
-  
-  // sum peaks below and above the precursor m/z window separately
-  FLOAT_T left_sum = 0.00001;
-  FLOAT_T right_sum= 0.00001;
-  for(unsigned int peak_idx = 0; peak_idx < peaks.size(); peak_idx++){
-    if (peaks[peak_idx]->getLocation() < precursor_mz - 20) {
-      left_sum += peaks[peak_idx]->getIntensity();
-    }
-    else if (peaks[peak_idx]->getLocation() > precursor_mz + 20) {
-      right_sum += peaks[peak_idx]->getIntensity();
-    } // else, skip peaks around precursor
-  }
-
-  // What is the justification for this? Ask Mike MacCoss
-  FLOAT_T FractionWindow = 0;
-  FLOAT_T CorrectionFactor;
-  if( (precursor_mz * 2) < max_peak_mz){
-    CorrectionFactor = 1;
-  } else {
-    FractionWindow = (precursor_mz * 2) - max_peak_mz;
-    CorrectionFactor = fabs((precursor_mz - FractionWindow)) / precursor_mz;
-  }
-
-  // if the ratio of intensities above/below the precursor is small
-  assert(left_sum != 0);
-  if( (right_sum / left_sum) < (0.2 * CorrectionFactor)){
-    return SINGLE_CHARGE_STATE;  // +1 spectrum
-  } else {
-    return MULTIPLE_CHARGE_STATE;  // multiply charged spectrum
-  }
-
-  // shouldn't get to here
-  return  INVALID_CHARGE_STATE;
-}
-
-/**
  * Maximum characters per line when printing formatted text.
  */
 static const int MAX_CHARS_PER_LINE = 70;
-
 
 /**
  *\brief Extend a given string with lines not exceeding a specified width, 

@@ -118,10 +118,7 @@ bool PWIZSpectrumCollection::parse() {
   int first_scan = -1;
   int last_scan = -1;
 
-  get_range_from_string(
-    range_string,
-    first_scan,
-    last_scan);
+  get_range_from_string(range_string, first_scan, last_scan);
 
   if (first_scan == -1 || last_scan == -1) {
     carp(CARP_FATAL, "The scan number range '%s' is invalid. "
@@ -129,28 +126,28 @@ bool PWIZSpectrumCollection::parse() {
   }
 
   // get info for translating identifiers into scan numbers
-  pwiz::msdata::CVID native_id_format = 
+  pwiz::msdata::CVID native_id_format =
     pwiz::msdata::id::getDefaultNativeIDFormat(*reader_);
 
   // look at all spectra in file
   pwiz::msdata::SpectrumListPtr all_spectra = reader_->run.spectrumListPtr;
-  bool get_peaks = true;
   
   int num_spec = all_spectra->size();
   carp(CARP_DEBUG, "PWIZ:Number of spectra:%i",num_spec);
   bool assign_new_scans = false;
   int scan_counter = 0;
-  for(int spec_idx = 0; spec_idx < num_spec; spec_idx++){
+  for (int spec_idx = 0; spec_idx < num_spec; spec_idx++) {
     carp(CARP_DETAILED_DEBUG, "Parsing spectrum index %d.", spec_idx);
     pwiz::msdata::SpectrumPtr spectrum;
-    
     try {
-      spectrum = all_spectra->spectrum(spec_idx, get_peaks);
+      spectrum = all_spectra->spectrum(spec_idx, true);
     } catch (boost::bad_lexical_cast) {
-      carp(CARP_FATAL, "boost::bad_lexical_cast occured while parsing spectrum.\nDoes your spectra contain z-lines?");
+      carp(CARP_FATAL, "boost::bad_lexical_cast occured while parsing spectrum.\n"
+                       "Do your spectra contain z-lines?");
     }
-    // skip if not ms2
-    if( spectrum->cvParam(pwiz::msdata::MS_ms_level).valueAs<int>() != 2 ){
+    // skip if no peaks or not ms2
+    if (spectrum->defaultArrayLength < 1 ||
+        spectrum->cvParam(pwiz::msdata::MS_ms_level).valueAs<int>() != 2) {
       continue;
     }
 

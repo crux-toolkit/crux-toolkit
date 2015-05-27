@@ -488,15 +488,6 @@ static bool get_range_from_string(
 }
 
 /**
- * \brief  Decide if a spectrum has precursor charge of +1 or more (+2
- * or +3 or +4 etc). 
- * \returns SINGLE_STATE_CHARGE if spectrum precursor is singly charged or
- * MULTIPLE_CHARGE_STATE if multiply charged.
- */
-CHARGE_STATE_T choose_charge(FLOAT_T precursor_mz,         ///< m/z of spectrum precursor ion
-  std::vector<Peak*>& peaks); ///< array of spectrum peaks
-
-/**
  *\brief Extend a given string with lines not exceeding a specified width, 
  * breaking on spaces.
  */

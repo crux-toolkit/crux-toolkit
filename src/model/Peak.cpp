@@ -27,21 +27,21 @@ Peak::Peak(FLOAT_T intensity, FLOAT_T location) {
 /**
  * Return the intensity of this Peak
  */
-FLOAT_T Peak::getIntensity() {
+FLOAT_T Peak::getIntensity() const {
     return this->intensity_;
 }
 
  /**
   * Return the intensity rank of this Peak
   */
-FLOAT_T Peak::getIntensityRank() {
+FLOAT_T Peak::getIntensityRank() const {
     return this->intensity_rank_;
 }
 
 /**
  * Return the location of this Peak
  */
-FLOAT_T Peak::getLocation() {
+FLOAT_T Peak::getLocation() const {
     return this->location_;
 }
 

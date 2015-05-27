@@ -42,10 +42,7 @@ class ActivePeptideQueue {
   bool HasNext() const { return iter_ != end_; }
   Peptide* NextPeptide() { return *iter_; }
   const Peptide* GetPeptide(int back_index) const {
-      if (peptide_centric_ == true)
-          return current_peptide_;
-      else
-          return *(end_ - back_index);
+    return peptide_centric_ ? current_peptide_ : *(end_ - back_index);
   }
   void SetBinSize(double binWidth, double binOffset) {
     theoretical_b_peak_set_.binWidth_ = binWidth;
