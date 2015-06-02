@@ -10,6 +10,14 @@
 
 using namespace std;
 
+#ifdef _MSC_VER
+// The Microsoft C++ compiler has trouble resolving the proper virtual
+// function call when the STL make_pair is combined with the STL ptr_fun.
+// They promise to fix this a later version, but until then we create our own wrapper
+// for this use of make_pair.
+pair<double,bool> make_pair(double db, bool b);
+#endif
+
 /**
  * \returns a blank ComputeQValues object
  */

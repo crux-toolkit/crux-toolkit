@@ -31,14 +31,13 @@ static const int MAX_PSMS = 10000000;
 static const double EPSILON = 0.00000000000001;
 
 #ifdef _MSC_VER
-// The Microsoft 10.0 C++ compiler has trouble resolving the proper virtual
+// The Microsoft C++ compiler has trouble resolving the proper virtual
 // function call when the STL make_pair is combined with the STL ptr_fun.
-// They promise to fix this in v11, but until then we create our own wrapper
-// for this use of make_pair. (See corresponding ifdef block in compute_PEP)
-pair<double,bool> make_pair(double db, bool b);
-// pair<double,bool> make_pair(double db, bool b) {
-//     return std::pair<double,bool>(db, b);
-// }
+// They promise to fix this a later version, but until then we create our own wrapper
+// for this use of make_pair.
+pair<double,bool> make_pair(double db, bool b) {
+  return std::pair<double,bool>(db, b);
+}
 #endif
 
 /**
