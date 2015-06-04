@@ -19,6 +19,8 @@
 
 using namespace std;
 
+std::string getModifiedPeptideSeq(const pb::Peptide* peptide, const ProteinVec* proteins);
+
 class TideIndexApplication : public CruxApplication {
 
 public:

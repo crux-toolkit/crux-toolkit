@@ -11,7 +11,6 @@
 #include "crux-main.h"
 #include "util/crux-utils.h" // Need to get definition of NUM_FEATURES.
 
-#include "app/q-value.h"
 #include "app/xlink/xlink_search.h"
 #include "app/CruxApplicationList.h"
 #include "app/ComputeQValues.h"
@@ -41,6 +40,9 @@
 #include "app/ReadTideIndex.h"
 #include "app/TideSearchApplication.h"
 #include "app/CometApplication.h"
+#include "app/CascadeSearchApplication.h"
+#include "app/AssignConfidenceApplication.h"
+#include "app/SubtractIndexApplication.h"
 /**
  * The starting point for crux.  Prints a general usage statement when
  * given no arguments.  Runs one of the crux commands, including
@@ -71,12 +73,13 @@ int main(int argc, char** argv){
     applications.add(new SearchForXLinks());
     applications.add(new SpectralCounts());
     applications.add(new PipelineApplication());
+    applications.add(new CascadeSearchApplication());
+    applications.add(new AssignConfidenceApplication());
+    applications.add(new SubtractIndexApplication());
 
     // Utilities
     applications.addMessage(applications.getListName() +
       " supports the following utility commands:");
-    applications.add(new ComputeQValuesLegacy()); // deprecated name
-    applications.add(new ComputeQValues());
     applications.add(new MakePinApplication());
     applications.add(new PredictPeptideIons());
     applications.add(new CruxHardklorApplication());

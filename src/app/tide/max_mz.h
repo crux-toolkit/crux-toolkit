@@ -55,7 +55,6 @@ class MaxBin {
   }
 
   static void SetGlobalMax(double highest_mz) {
-    assert(global.max_bin_ == 0); // this should be done only once
     global.InitBin(highest_mz);
     FLAGS_max_bin = global.MaxBinEnd();
   }

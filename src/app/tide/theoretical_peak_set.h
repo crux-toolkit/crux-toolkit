@@ -94,6 +94,7 @@
 #include "max_mz.h"
 #include "theoretical_peak_pair.h"
 #include "math.h"
+#include <functional>
 
 using namespace std;
 typedef google::protobuf::RepeatedField<int>::const_iterator FieldIter;

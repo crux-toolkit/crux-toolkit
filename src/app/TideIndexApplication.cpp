@@ -221,8 +221,8 @@ int TideIndexApplication::main(
     delete *i;
   }
   vector<TideIndexPeptide>().swap(peptideHeap);
-
-  vector<const pb::Protein*> proteins;
+  //typedef vector<const pb::Protein*> ProteinVec;
+  ProteinVec proteins;
   if (!ReadRecordsToVector<pb::Protein>(&proteins, out_proteins)) {
     carp(CARP_FATAL, "Error reading proteins file");
   }
@@ -236,20 +236,13 @@ int TideIndexApplication::main(
   if (out_target_list) {
     // Write peptide lists
     carp(CARP_INFO, "Writing peptide lists...");
-    // Initialize modification variables
-    stringstream mod_stream;
-    mod_stream.precision(get_int_parameter("mod-precision"));
-    int mod_index;
-    double mod_delta;
+
     // This set holds target peptide strings
     set<string> targetPepStrs;
     // This vector holds decoy peptide strings and masses
     vector< pair<string, double> > decoyPepStrs;
     // Read peptides pb file
     vector<const pb::Peptide*> peptides;
-//    if (!ReadRecordsToVector<pb::Peptide>(&peptides, peakless_peptides)) {
-//      carp(CARP_FATAL, "Error reading peptides file");
-//    }
     vector<const pb::AuxLocation*> locations;
     if (!ReadRecordsToVector<pb::AuxLocation>(&locations, out_aux)) {
       carp(CARP_FATAL, "Error reading auxlocs file");
@@ -262,12 +255,6 @@ int TideIndexApplication::main(
     while (!reader.Done()) {
       pb::Peptide* protobuf = new pb::Peptide;
       reader.Read(protobuf);
-//      vec->push_back(protobuf);
-//    }
-//    for (vector<const pb::Peptide*>::const_iterator i = peptides.begin();
-//         i != peptides.end();
-//         ++i) {
-//      const pb::Peptide* peptide = *i;
       pb::Peptide* peptide = protobuf;
       const pb::Location& location = peptide->first_location();
       const pb::Protein* protein = proteins[location.protein_id()];
@@ -278,28 +265,8 @@ int TideIndexApplication::main(
         writeDecoy = peptide->is_decoy();
         writeTarget = !writeDecoy;
       }
-      // Get peptide sequence without mods
-      string pep_str = protein->residues().substr(
-        location.pos(), peptide->length());
-      // Store all mod indices/deltas
-      map<int, double> mod_map;
-      set<int> mod_indices;
-      for (int j = 0; j < peptide->modifications_size(); ++j) {
-//        var_mod_table.DecodeMod(ModCoder::Mod(peptide->modifications(j)), &mod_index, &mod_delta);
-        MassConstants::DecodeMod(ModCoder::Mod(peptide->modifications(j)),
-                                 &mod_index, &mod_delta);
-        mod_indices.insert(mod_index);
-        mod_map[mod_index] = mod_delta;
-      }
-      // Iterate over mod indices in reverse order
-      for (set<int>::const_reverse_iterator j = mod_indices.rbegin();
-           j != mod_indices.rend();
-           ++j) {
-        // Insert the modification string into the peptide sequence
-        mod_stream << '[' << mod_map[*j] << ']';
-        pep_str.insert(*j + 1, mod_stream.str());
-        mod_stream.str("");
-      }
+      string pep_str = getModifiedPeptideSeq(peptide, &proteins);
+
       if (writeTarget) {
         // This is a target, output it
         targetPepStrs.insert(pep_str);
@@ -892,6 +859,46 @@ void TideIndexApplication::processParams() {
   }
   Params::Set("mods-spec", mods_spec);
 }
+
+
+string getModifiedPeptideSeq(const pb::Peptide* peptide,
+  const ProteinVec* proteins){
+  int mod_index;
+  double mod_delta;
+  stringstream mod_stream;
+  const pb::Location& location = peptide->first_location();
+  const pb::Protein* protein = proteins->at(location.protein_id());
+  // Get peptide sequence without mods
+  string pep_str = protein->residues().substr(
+    location.pos(), peptide->length());
+
+  // Store all mod indices/deltas
+  map<int, double> mod_map;
+  set<int> mod_indices;
+  for (int j = 0; j < peptide->modifications_size(); ++j) {
+    //        var_mod_table.DecodeMod(ModCoder::Mod(peptide->modifications(j)), &mod_index, &mod_delta);
+    MassConstants::DecodeMod(ModCoder::Mod(peptide->modifications(j)),
+      &mod_index, &mod_delta);
+    mod_indices.insert(mod_index);
+    mod_map[mod_index] = mod_delta;
+  }
+  for (set<int>::const_reverse_iterator j = mod_indices.rbegin();
+    j != mod_indices.rend();
+    ++j) {
+    // Insert the modification string into the peptide sequence
+    mod_stream << '[' << mod_map[*j] << ']';
+    pep_str.insert(*j + 1, mod_stream.str());
+    mod_stream.str("");
+  }
+  return pep_str;
+}
+/*
+* Local Variables:
+* mode: c
+* c-basic-offset: 2
+* End:
+*/
+
 
 /*
  * Local Variables:
