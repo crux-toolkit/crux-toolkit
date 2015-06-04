@@ -815,7 +815,7 @@ void MatchCollection::printXmlHeader(
     string name = (*i)->GetName();
     if ((*i)->IsVisible() &&
         name != "mod" && name != "cmod" && name != "nmod") {
-      fprintf(output, "<parameter name\"%s\" value=\"%s\"/>\n",
+      fprintf(output, "<parameter name=\"%s\" value=\"%s\"/>\n",
               name.c_str(), (*i)->GetString().c_str());
     }
   }

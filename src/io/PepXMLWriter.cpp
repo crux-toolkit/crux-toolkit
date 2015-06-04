@@ -5,6 +5,7 @@
 #include <iostream>
 #include "PepXMLWriter.h"
 #include "util/crux-utils.h"
+#include "util/StringUtils.h"
 #include "model/MatchCollection.h"
 
 using namespace std;
@@ -195,35 +196,32 @@ void PepXMLWriter::printSpectrumElement(int spectrum_scan_number,
                                         const char* spectrum_title,
                                         double spectrum_neutral_mass, 
                                         int charge){
-
   fprintf(file_, "    <spectrum_query spectrum=\"%s\" start_scan=\"%i\""
           " end_scan=\"%i\" precursor_neutral_mass=\"%.*f\""
-          " assumed_charge=\"%i\" index=\"%i\">\n",
+          " assumed_charge=\"%i\" index=\"%i\">\n"
+          "    <search_result>\n",
           spectrum_title,
           spectrum_scan_number,
           spectrum_scan_number,
           get_int_parameter("mass-precision"),
           spectrum_neutral_mass,
           charge,
-          current_index_
-          );
-
-  fprintf(file_, "    <search_result>\n");
-  current_index_++;
-
+          current_index_++);
 }
 
 string PepXMLWriter::getSpectrumTitle(int spectrum_scan_number, 
                                       const char* filename,
-                                      int charge){
-
+                                      int charge) {
+  string formatted(filename);
+  if (StringUtils::IEndsWith(formatted, ".pid")) {
+    // Remove bullseye extension if it exists
+    formatted.erase(formatted.length() - 4);
+  }
   std::ostringstream spectrum_id;
-  spectrum_id << filename << "." << std::setw(5)  << std::setfill('0')
+  spectrum_id << formatted << "." << std::setw(5)  << std::setfill('0')
               << spectrum_scan_number << "." << std::setw(5) 
               << std::setfill('0') << spectrum_scan_number << "." << charge;
-
   return spectrum_id.str();
-
 }
 
 void PepXMLWriter::closeSpectrumElement(){
@@ -335,26 +333,20 @@ void PepXMLWriter::printScores(
   bool* scores_computed,
   int* ranks
  ){
-  string ranks_to_string[2]= {"sp_rank","xcorr_rank"};
-  for(int score_idx = 0; score_idx < NUMBER_SCORER_TYPES; score_idx++){
-    if(score_idx == BY_IONS_MATCHED || score_idx == BY_IONS_TOTAL) {
+  string ranks_to_string[2] = {"sprank", "xcorr_rank"};
+  for (int i = 0; i < NUMBER_SCORER_TYPES; i++) {
+    if (i == BY_IONS_MATCHED || i == BY_IONS_TOTAL) {
       continue;
     }
-    if(scores_computed[score_idx]){
-      fprintf(file_, 
-        "        <search_score name=\"%s\" value=\"%.*f\" />\n",
-        scorer_type_to_string((SCORER_TYPE_T)score_idx),
-        precision_, scores[score_idx]);
-
-     if(score_idx<2)
-       fprintf(file_, 
-         "        <search_score name=\"%s\" value=\"%i\" />\n",
-         ranks_to_string[score_idx].c_str(),
-         ranks[score_idx]
-      );
+    if (scores_computed[i]) {
+      fprintf(file_, "        <search_score name=\"%s\" value=\"%.*f\" />\n",
+        scorer_type_to_string((SCORER_TYPE_T)i), precision_, scores[i]);
+      if (i < 2) {
+        fprintf(file_, "        <search_score name=\"%s\" value=\"%i\" />\n",
+          ranks_to_string[i].c_str(), ranks[i]);
+      }
     }
   }
-
 }
 
 
@@ -397,7 +389,7 @@ void PepXMLWriter::printAnalysis(double* scores,
   fprintf(file_, "<peptideprophet_result probability=\"%.*f\">\n", 
           precision_, (1 - scores[pep]));
   fprintf(file_, "<search_score_summary>\n");
-  if( !score_name.empty() ){
+  if (!score_name.empty()) {
     fprintf(file_, "<parameter name=\"%s\" value=\"%.*f\"/>\n",
             score_name.c_str(), precision_, scores[score]);
   }

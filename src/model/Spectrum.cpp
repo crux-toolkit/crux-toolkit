@@ -24,6 +24,7 @@
 #include "io/DelimitedFile.h"
 #include "io/MatchFileReader.h"
 #include "MSToolkit/Spectrum.h"
+#include "util/FileUtils.h"
 
 using namespace std;
 using namespace Crux;
@@ -880,25 +881,8 @@ void Spectrum::rankPeaks()
  * \returns The name of the file (no path or extension) this spectrum
  * came from or an empty string, if filename is unavailable.
  */
-const char* Spectrum::getFilename(){
-  
-  if( filename_.empty() ){
-    return "";
-  }
-
-  // store the filename stripped of path and extension
-  if( stripped_filename_.empty() ){
-    char** name_ext_array = parse_filename_path_extension(filename_.c_str(), 
-                                                          NULL);
-    stripped_filename_ = name_ext_array[0];
-    free(name_ext_array[0]);
-    if(name_ext_array[1] != NULL ){
-      free(name_ext_array[1]);
-    }
-    free(name_ext_array);
-  }
-
-  return stripped_filename_.c_str();
+const char* Spectrum::getFilename() {
+  return FileUtils::Stem(filename_).c_str();
 }
 
 /**

@@ -445,50 +445,50 @@ char* ion_type_to_string(ION_TYPE_T type) {
 /*
  * The string version of SCORER_TYPE_T
  */
-static const char* scorer_type_strings[NUMBER_SCORER_TYPES] = 
-  {"sp",
-   "xcorr_score",
-   "evalue_score",
+static const char* scorer_type_strings[NUMBER_SCORER_TYPES] = {
+  "spscore",
+  "xcorr_score",
+  "evalue_score",
 
-   "xcorr first",
-   "xcorr second",
+  "xcorr first",
+  "xcorr second",
 
-   "decoy_xcorr_qvalue",
-   "decoy_xcorr_peptide_qvalue",
-   "decoy_xcorr_PEP",
+  "decoy_xcorr_qvalue",
+  "decoy_xcorr_peptide_qvalue",
+  "decoy_xcorr_PEP",
 
-   "decoy_evalue_qvalue",
-   "decoy_evalue_peptide_qvalue",
-   "decoy_evalue_pep",
+  "decoy_evalue_qvalue",
+  "decoy_evalue_peptide_qvalue",
+  "decoy_evalue_pep",
    
-   "logp_weibull_xcorr",
-   "logp_bonf_weibull_xcorr",
-   "logp_qvalue_weibull_xcorr",
-   "logp_weibull_PEP",
-   "logp_peptide_qvalue_weibull",
+  "logp_weibull_xcorr",
+  "logp_bonf_weibull_xcorr",
+  "logp_qvalue_weibull_xcorr",
+  "logp_weibull_PEP",
+  "logp_peptide_qvalue_weibull",
 
-   "percolator_score", 
-   "percolator_qvalue",
-   "percolator_peptide_qvalue",
-   "percolator_PEP",
+  "percolator_score", 
+  "percolator_qvalue",
+  "percolator_peptide_qvalue",
+  "percolator_PEP",
 
-   "qranker_score", 
-   "qranker_qvalue",
-   "qranker_peptide_qvalue",
-   "qranker_PEP",
+  "qranker_score", 
+  "qranker_qvalue",
+  "qranker_peptide_qvalue",
+  "qranker_PEP",
 
-   "barista_score", 
-   "barista_qvalue",
-   "barista_peptide_qvalue",
-   "barista_PEP",
+  "barista_score", 
+  "barista_qvalue",
+  "barista_peptide_qvalue",
+  "barista_PEP",
 
-   "delta_cn",
-   "delta_lcn",
-   "by_ions_matched",
-   "by_ions_total",
-   "exact_pvalue",
-   "refactored_xcorr",
-  };
+  "deltacn",
+  "deltalcn",
+  "by_ions_matched",
+  "by_ions_total",
+  "exact_pvalue",
+  "refactored_xcorr"
+};
 
 bool string_to_scorer_type(const string& name, SCORER_TYPE_T* result){
   bool success = true;

@@ -54,8 +54,7 @@ class Spectrum{
   FLOAT_T          max_peak_mz_;   ///< The maximum m/z of all peaks
   double           total_energy_;  ///< The sum of intensities in all peaks
   FLOAT_T          lowest_sp_;  ///< The lowest Sp score (for writing SQT)
-  std::string           filename_;      ///< Optional filename
-  std::string           stripped_filename_; ///< filename, no path or extension
+  std::string      filename_;      ///< Optional filename
   std::vector<std::string> i_lines_v_;  ///< store i lines
   std::vector<std::string> d_lines_v_;  ///< store d lines
   bool             has_peaks_;  ///< Does the spectrum contain peak information
