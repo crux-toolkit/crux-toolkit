@@ -18,6 +18,7 @@ class FileUtils {
   static std::string DirName(const std::string& path);
   static std::string Stem(const std::string& path);
   static std::string Extension(const std::string& path);
+  static void Copy(const std::string& orig, const std::string& dest);
  private:
   FileUtils();
   ~FileUtils();

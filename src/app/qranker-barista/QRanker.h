@@ -28,6 +28,13 @@ using namespace std;
 #include "util/mass.h"
 #include "objects.h"
 
+double* compute_PEP(double* target_scores, ///< scores for target matches
+  int num_targets,       ///< size of target_scores
+  double* decoy_scores,  ///< scores for decoy matches
+  int num_decoys,         ///< size of decoy_scores
+  bool ascending ///< are the scores ascending or descending
+  );
+
 class QRanker: public CruxApplication
 {
 

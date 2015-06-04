@@ -16,8 +16,18 @@
 using namespace std; 
 
 class TideSearchApplication : public CruxApplication {
-
 protected:
+  /**
+  brief This variable is used with Cascade Search.
+  This map contains a flag for each spectrum whether
+  a spectrum has not been identified in a prior cycle (0) or not (1).
+  The spectrum ID is a pair containing the ordinal number of the
+  input file in the first component and a scanId-charge-state in the second component.
+  The scanID and the charge state is combined into a single number
+  as scanID*10 + charge_state. Charge state is required to be less than 10.
+  */
+  map<pair<string, unsigned int>, bool>* spectrum_flag_;
+  string output_file_name_;
 
   static bool HAS_DECOYS;
 
@@ -117,6 +127,8 @@ public:
 
   int main(const vector<string>& input_files);
 
+  int main(const vector<string>& input_files, const string input_index);
+
   static bool hasDecoys();
 
   /**
@@ -166,8 +178,10 @@ public:
     int* aaMass,
     double* pValueScoreObs
   );
-
+  
+  void setSpectrumFlag(map<pair<string, unsigned int>, bool>* spectrum_flag);
   virtual void processParams();
+  string getOutputFileName();
 };
 
 #endif

@@ -5,8 +5,8 @@
 #include "ComputeQValues.h"
 #include "io/OutputFiles.h"
 #include "util/Params.h"
-#include "q-value.h"
 #include "PosteriorEstimator.h"
+
 
 using namespace std;
 
@@ -45,15 +45,7 @@ int ComputeQValues::main(int argc, char** argv) {
 
 int ComputeQValues::main(const vector<string>& input_files) {
   // Prepare the output files.
-  OutputFiles output(this);
-  COMMAND_T command = Params::GetString("estimation-method") == "tdc"
-    ? TDC_COMMAND
-    : MIXMAX_COMMAND;
-  
-  // Perform the analysis.
-  MatchCollection* match_collection = run_qvalue(input_files, output, command);
-  delete match_collection;
-  output.writeFooters();
+ 
   return 0;
 }
 
@@ -63,6 +55,16 @@ int ComputeQValues::main(const vector<string>& input_files) {
  * \returns A newly allocated array of PEP for the target scores
  * sorted.
  */
+
+#ifdef _MSC_VER
+// The Microsoft 10.0 C++ compiler has trouble resolving the proper virtual
+// function call when the STL make_pair is combined with the STL ptr_fun.
+// They promise to fix this in v11, but until then we create our own wrapper
+// for this use of make_pair. (See corresponding ifdef block in compute_PEP)
+pair<double, bool> make_pair(double db, bool b) {
+  return std::pair<double, bool>(db, b);
+}
+#endif
 double* ComputeQValues::compute_PEP(double* target_scores, ///< scores for target matches
                         int num_targets,       ///< size of target_scores
                         double* decoy_scores,  ///< scores for decoy matches

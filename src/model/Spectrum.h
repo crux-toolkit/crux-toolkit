@@ -328,6 +328,7 @@ class Spectrum{
    * string, if unavailable.
    */
   const char* getFilename();
+  const char* getFullFilename();
 };    
 
 }

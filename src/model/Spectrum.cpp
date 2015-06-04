@@ -800,6 +800,8 @@ Spectrum* Spectrum::parseTabDelimited(
 
   Spectrum* spectrum = new Spectrum();
 
+  spectrum->filename_ = file.getString(FILE_COL);
+
   spectrum->first_scan_ = file.getInteger(SCAN_COL);
   spectrum->last_scan_ = spectrum->first_scan_;
 
@@ -951,6 +953,14 @@ bool Spectrum::assignZState() {
   zstate.setMZ(precursor_mz_, 3);
   zstates_.push_back(zstate);
   return true;    
+}
+
+const char* Spectrum::getFullFilename(){
+
+  if (filename_.empty()){
+    return "";
+  }
+  return filename_.c_str();
 }
 
 /*

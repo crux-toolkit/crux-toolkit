@@ -58,6 +58,9 @@ endif (WIN32 AND NOT Cygwin)
 
 set (
   crux_lib_files
+  app/SubtractIndexApplication.cpp
+  app/CascadeSearchApplication.cpp
+  app/AssignConfidenceApplication.cpp
   util/Alphabet.cpp
   util/AminoAcidUtil.cpp
   util/ArgParser.cpp
@@ -136,7 +139,6 @@ set (
   io/PMCSQTWriter.cpp
   model/SpectrumMatch.cpp
   io/PWIZSpectrumCollection.cpp
-  app/q-value.cpp
   app/ReadSpectrumRecordsApplication.cpp
   app/ReadTideIndex.cpp
   app/SortColumn.cpp

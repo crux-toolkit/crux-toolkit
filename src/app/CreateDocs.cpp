@@ -31,6 +31,9 @@
 #include "TideIndexApplication.h"
 #include "TideSearchApplication.h"
 #include "CometApplication.h"
+#include "app/CascadeSearchApplication.h"
+#include "app/AssignConfidenceApplication.h"
+#include "app/SubtractIndexApplication.h"
 
 using namespace std;
 
@@ -44,7 +47,6 @@ int CreateDocs::main(int argc, char** argv) {
   CruxApplicationList apps("crux");
   apps.add(new Barista());
   apps.add(new CometApplication());
-  apps.add(new ComputeQValues());
   apps.add(new CreateDocs());
   apps.add(new CruxBullseyeApplication());
   apps.add(new CruxHardklorApplication());
@@ -65,7 +67,10 @@ int CreateDocs::main(int argc, char** argv) {
   apps.add(new StatColumn());
   apps.add(new TideIndexApplication());
   apps.add(new TideSearchApplication());
-
+  apps.add(new CascadeSearchApplication());  
+  apps.add(new AssignConfidenceApplication());
+  apps.add(new SubtractIndexApplication());
+  
   string targetApp = Params::GetString("tool name");
   if (targetApp == "list") {
     // List the applications available for create-docs

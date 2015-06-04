@@ -219,7 +219,10 @@ void ObservedPeakSet::CreateEvidenceVector(
   const double NH3LossHeight = 10.0;    
   const double COLossHeight = 10.0;    // for creating a ions on the fly from b ions
   const double H2OLossHeight = 10.0;
+  const double FlankingHeight = BYHeight / 2;;
   // TODO end need to review
+  bool flanking_peak = Params::GetBool("use-flanking-peaks");
+  bool neutral_loss_peak = Params::GetBool("use-neutral-loss-peaks");
 
   int ma;
   int pc;
@@ -377,7 +380,7 @@ void ObservedPeakSet::CreateEvidenceVector(
   for (ma = binFirst; ma <= binLast; ma++) {
     // b ion
     bIonMass = (ma-0.5+binOffset) * binWidth ;
-    ionBin = (int)floor(bIonMass / binWidth + 1.0 - binOffset);
+    ionBin = MassConstants::mass2bin(bIonMass);
     evidence[ma] = evidence[ma] + intensArrayObs[ionBin] * BYHeight;
     for (pc = 2; pc < precurCharge; pc++) {
       evidence[ma] = evidence[ma] + intensArrayObs[MassConstants::mass2bin(bIonMass, pc)] * BYHeight;
@@ -389,34 +392,55 @@ void ObservedPeakSet::CreateEvidenceVector(
     for (pc = 2; pc < precurCharge; pc++) {
       evidence[ma] = evidence[ma] + intensArrayObs[MassConstants::mass2bin(yIonMass, pc)] * BYHeight;
     }
-    // NH3 loss from b ion
-    ionMassNH3Loss = bIonMass - massNH3Mono;
-    ionBin = MassConstants::mass2bin(ionMassNH3Loss);
-    evidence[ma] = evidence[ma] + intensArrayObs[ionBin] * NH3LossHeight;
-    for (pc = 2; pc < precurCharge; pc++) {
-      evidence[ma] = evidence[ma] + intensArrayObs[MassConstants::mass2bin(ionMassNH3Loss, pc)] * NH3LossHeight;
+    if (flanking_peak == true){
+
+      //flanking peaks for b ions
+      ionBin = MassConstants::mass2bin(bIonMass, 1);
+      evidence[ma] = evidence[ma] + intensArrayObs[ionBin + 1] * FlankingHeight;
+      evidence[ma] = evidence[ma] + intensArrayObs[ionBin - 1] * FlankingHeight;
+      for (pc = 2; pc < precurCharge; pc++) {
+        evidence[ma] = evidence[ma] + intensArrayObs[MassConstants::mass2bin(bIonMass, pc) + 1] * FlankingHeight;
+        evidence[ma] = evidence[ma] + intensArrayObs[MassConstants::mass2bin(bIonMass, pc) - 1] * FlankingHeight;
+      }
+      //flanking peaks for b ions
+      ionBin = MassConstants::mass2bin(yIonMass, pc);
+      evidence[ma] = evidence[ma] + intensArrayObs[ionBin + 1] * FlankingHeight;
+      evidence[ma] = evidence[ma] + intensArrayObs[ionBin - 1] * FlankingHeight;
+      for (pc = 2; pc < precurCharge; pc++) {
+        evidence[ma] = evidence[ma] + intensArrayObs[MassConstants::mass2bin(yIonMass, pc) + 1] * FlankingHeight;
+        evidence[ma] = evidence[ma] + intensArrayObs[MassConstants::mass2bin(yIonMass, pc) - 1] * FlankingHeight;
+      }
     }
-    // NH3 loss from y ion
-    ionMassNH3Loss = yIonMass - massNH3Mono;
-    ionBin = MassConstants::mass2bin(ionMassNH3Loss);//(int)floor(ionMassNH3Loss / binWidth + 1.0 - binOffset);
-    evidence[ma] = evidence[ma] + intensArrayObs[ionBin] * NH3LossHeight;
-    for (pc = 2; pc < precurCharge; pc++) {
-      evidence[ma] = evidence[ma] + intensArrayObs[MassConstants::mass2bin(ionMassNH3Loss, pc)] * NH3LossHeight;
-    }
-    // CO and H2O loss from b ion
-    ionMassCOLoss = bIonMass - massCOMono;
-    ionMassH2OLoss = bIonMass - massH2OMono;
-    evidence[ma] = evidence[ma] + intensArrayObs[MassConstants::mass2bin(ionMassCOLoss)] * COLossHeight;
-    evidence[ma] = evidence[ma] + intensArrayObs[MassConstants::mass2bin(ionMassH2OLoss)] * H2OLossHeight;
-    for (pc = 2; pc < precurCharge; pc++) {
-      evidence[ma] = evidence[ma] + intensArrayObs[MassConstants::mass2bin(ionMassCOLoss, pc)] * COLossHeight;
-      evidence[ma] = evidence[ma] + intensArrayObs[MassConstants::mass2bin(ionMassH2OLoss, pc)] * H2OLossHeight;
-    }
-    // H2O loss from y ion
-    ionMassH2OLoss = yIonMass - massH2OMono;
-    evidence[ma] = evidence[ma] + intensArrayObs[MassConstants::mass2bin(ionMassH2OLoss)] * H2OLossHeight;
-    for (pc = 2; pc < precurCharge; pc++) {
-      evidence[ma] = evidence[ma] + intensArrayObs[MassConstants::mass2bin(ionMassH2OLoss, pc)] * H2OLossHeight;
+    if (neutral_loss_peak == true){
+      // NH3 loss from b ion
+      ionMassNH3Loss = bIonMass - massNH3Mono;
+      ionBin = MassConstants::mass2bin(ionMassNH3Loss);
+      evidence[ma] = evidence[ma] + intensArrayObs[ionBin] * NH3LossHeight;
+      for (pc = 2; pc < precurCharge; pc++) {
+        evidence[ma] = evidence[ma] + intensArrayObs[MassConstants::mass2bin(ionMassNH3Loss, pc)] * NH3LossHeight;
+      }
+      // NH3 loss from y ion
+      ionMassNH3Loss = yIonMass - massNH3Mono;
+      ionBin = MassConstants::mass2bin(ionMassNH3Loss);//(int)floor(ionMassNH3Loss / binWidth + 1.0 - binOffset);
+      evidence[ma] = evidence[ma] + intensArrayObs[ionBin] * NH3LossHeight;
+      for (pc = 2; pc < precurCharge; pc++) {
+        evidence[ma] = evidence[ma] + intensArrayObs[MassConstants::mass2bin(ionMassNH3Loss, pc)] * NH3LossHeight;
+      }
+      // CO and H2O loss from b ion
+      ionMassCOLoss = bIonMass - massCOMono;
+      ionMassH2OLoss = bIonMass - massH2OMono;
+      evidence[ma] = evidence[ma] + intensArrayObs[MassConstants::mass2bin(ionMassCOLoss)] * COLossHeight;
+      evidence[ma] = evidence[ma] + intensArrayObs[MassConstants::mass2bin(ionMassH2OLoss)] * H2OLossHeight;
+      for (pc = 2; pc < precurCharge; pc++) {
+        evidence[ma] = evidence[ma] + intensArrayObs[MassConstants::mass2bin(ionMassCOLoss, pc)] * COLossHeight;
+        evidence[ma] = evidence[ma] + intensArrayObs[MassConstants::mass2bin(ionMassH2OLoss, pc)] * H2OLossHeight;
+      }
+      // H2O loss from y ion
+      ionMassH2OLoss = yIonMass - massH2OMono;
+      evidence[ma] = evidence[ma] + intensArrayObs[MassConstants::mass2bin(ionMassH2OLoss)] * H2OLossHeight;
+      for (pc = 2; pc < precurCharge; pc++) {
+        evidence[ma] = evidence[ma] + intensArrayObs[MassConstants::mass2bin(ionMassH2OLoss, pc)] * H2OLossHeight;
+      }
     }
   }
 

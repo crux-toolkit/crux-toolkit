@@ -630,6 +630,7 @@ enum _command {
   GET_MS2_SPECTRUM_COMMAND, ///<get-ms2-spectrum 
   PREDICT_PEPTIDE_IONS_COMMAND, ///< predict-peptide-ions
   PIPELINE_COMMAND,     ///< pipeline
+  CASCADE_COMMAND,      ///< Cascade Search   
   VERSION_COMMAND,      ///< just print the version number
   MISC_COMMAND,         ///< miscellaneous command
   NUMBER_COMMAND_TYPES  ///< always keep this last so the value

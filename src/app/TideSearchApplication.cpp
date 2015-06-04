@@ -31,6 +31,7 @@ const double TideSearchApplication::RESCALE_FACTOR = 20.0;
 
 TideSearchApplication::TideSearchApplication():
   exact_pval_search_(false), remove_index_("") {
+  spectrum_flag_ = NULL;  
 }
 
 TideSearchApplication::~TideSearchApplication() {
@@ -43,10 +44,13 @@ TideSearchApplication::~TideSearchApplication() {
 int TideSearchApplication::main(int argc, char** argv) {
   return main(Params::GetStrings("tide spectra file"));
 }
+int TideSearchApplication::main(const vector<string>& input_files){
+  return main(input_files, Params::GetString("tide database"));
+}
 
-int TideSearchApplication::main(const vector<string>& input_files) {
+int TideSearchApplication::main(const vector<string>& input_files, const string input_index) {
   carp(CARP_INFO, "Running tide-search...");
-  const string index = Params::GetString("tide database");
+  const string index = input_index;
   string peptides_file = index + "/pepix";
   string proteins_file = index + "/protix";
   string auxlocs_file = index + "/auxlocs";
@@ -100,8 +104,16 @@ int TideSearchApplication::main(const vector<string>& input_files) {
   bin_offset_ = Params::GetDouble("mz-bin-offset");
   // for now don't allow XCorr p-value searches with variable bin width
   if (exact_pval_search_ && !Params::IsDefault("mz-bin-width")) {
-    carp(CARP_FATAL, "tide-search with XCorr p-values and variable bin width "
+    carp(CARP_FATAL, "Tide-search with XCorr p-values and variable bin width "
                      "is not allowed in this version of Crux.");
+  }
+  if (exact_pval_search_ && (Params::GetBool("pin-output")
+                             || Params::GetBool("pepxml-output")
+                             || Params::GetBool("mzid-output")
+                             || Params::GetBool("sqt-output"))){
+    carp(CARP_FATAL, "Exact p-value with "
+      "pin-output, pepxml-output, mzid-output or sqt-output file formats "
+      "is not allowed yet in this version of Crux.");
   }
 
   // Check concat parameter
@@ -196,6 +208,7 @@ int TideSearchApplication::main(const vector<string>& input_files) {
     if (!concat) {
       string target_file_name = make_file_path("tide-search.target.txt");
       target_file = create_stream_in_path(target_file_name.c_str(), NULL, overwrite);
+      output_file_name_ = target_file_name;
       if (HAS_DECOYS) {
         string decoy_file_name = make_file_path("tide-search.decoy.txt");
         decoy_file = create_stream_in_path(decoy_file_name.c_str(), NULL, overwrite);
@@ -203,7 +216,9 @@ int TideSearchApplication::main(const vector<string>& input_files) {
     } else {
       string concat_file_name = make_file_path("tide-search.txt");
       target_file = create_stream_in_path(concat_file_name.c_str(), NULL, overwrite);
+      output_file_name_ = concat_file_name;
     }
+
   }
 
   if (output_files) {
@@ -282,10 +297,11 @@ int TideSearchApplication::main(const vector<string>& input_files) {
     }
     carp(CARP_DEBUG, "Max m/z %f", highest_mz);
     MaxBin::SetGlobalMax(highest_mz);
-
     // Do the search
     carp(CARP_INFO, "Running search");
-    resetMods();
+    if (spectrum_flag_ == NULL){
+      resetMods();
+    }
     search(f->OriginalName, spectra.SpecCharges(), active_peptide_queue, proteins,
            locations, window, window_type, Params::GetDouble("spectrum-min-mz"),
            Params::GetDouble("spectrum-max-mz"), min_scan, max_scan,
@@ -293,6 +309,7 @@ int TideSearchApplication::main(const vector<string>& input_files) {
            Params::GetInt("top-match"), spectra.FindHighestMZ(),
            output_files, target_file, decoy_file, compute_sp,
            nAA, aaFreqN, aaFreqI, aaFreqC, aaMass);
+
     // Delete temporary spectrumrecords file
     if (!f->Keep) {
       carp(CARP_DEBUG, "Deleting %s", spectra_file.c_str());
@@ -380,14 +397,24 @@ void TideSearchApplication::search(
   FLOAT_T sc_total = (FLOAT_T)spec_charges->size();
   int print_interval = Params::GetInt("print-search-progress");
   int total_candidate_peptides = 0;
+
   for (vector<SpectrumCollection::SpecCharge>::const_iterator sc = spec_charges->begin();
        sc != spec_charges->end();
        ++sc) {
-    Spectrum* spectrum = sc->spectrum;
-
+    Spectrum* spectrum = sc->spectrum;   
     double precursor_mz = spectrum->PrecursorMZ();
     int charge = sc->charge;
     int scan_num = spectrum->SpectrumNumber();
+    if (spectrum_flag_ != NULL) {
+      map<pair<string, unsigned int>, bool>::iterator spectrum_id;
+      spectrum_id = spectrum_flag_->find(pair<string, unsigned int>(
+        spectrum_filename, scan_num * 10 + charge));
+      if (spectrum_id != spectrum_flag_->end())
+      {
+        continue;
+      }
+    }
+
     if (precursor_mz < spectrum_min_mz || precursor_mz > spectrum_max_mz ||
         scan_num < min_scan || scan_num > max_scan ||
         spectrum->Size() < min_peaks ||
@@ -1063,6 +1090,14 @@ void TideSearchApplication::processParams() {
     free(digestString);
     Params::Set("monoisotopic-precursor", pepHeader.monoisotopic_precursor() ? true : false);
   }
+}
+
+void TideSearchApplication::setSpectrumFlag(map<pair<string, unsigned int>, bool>* spectrum_flag){
+  spectrum_flag_ = spectrum_flag;
+}
+
+string TideSearchApplication::getOutputFileName(){
+  return output_file_name_;
 }
 
 /*
