@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/usr/bin/env python
 # CREATE DATE: 11 March 2015
 # AUTHOR: William Stafford Noble
 # Derived from run-performance-test.sh.
@@ -200,14 +200,14 @@ runCommand("%s tide-index --output-dir %s --parameter-file %s %s.fa %s"
            "%s/tide-index.peptides.target.txt" % database)
 
 # Run three searches (Comet, Tide XCorr, and Tide p-value).
-runSearch("tide-xcorr", "tide-search", "--exact-p-value T", database, 
+runSearch("tide-xcorr", "tide-search", "", database, 
           "tide-xcorr/tide-search.txt", "xcorr score", "")
-runSearch("tide-p-value", "tide-search", "", database,
+runSearch("tide-p-value", "tide-search", "--exact-p-value T", database,
           "tide-p-value/tide-search.txt", "refactored xcorr",
           "--smaller-is-better T --score \"exact p-value\"")
 runSearch("comet", "comet", "", "%s.fa" % database, 
-          "comet/comet.target.txt", "xcorr score", "")
-# FIXME: The last option should be "--score \"e-value\""
+          "comet/comet.target.txt", "xcorr score", 
+          "--smaller-is-better T --score e-value")
 
 # Make the performance plot.
 gnuplotFileName = "performance.gnuplot"
@@ -217,16 +217,16 @@ gnuplotFile.write("set terminal png\n")
 gnuplotFile.write("set xlabel \"q-value threshold\"\n")
 gnuplotFile.write("set ylabel \"Number of accepted PSMs\"\n")
 gnuplotFile.write("set xrange [0:0.1]\n")
-gnuplotFile.write("set key center right\n")
-gnuplotFile.write("plot \"comet/comet.q.txt\" using 1:0 title \"Comet E-value\" with lines\n")
-gnuplotFile.write("replot \"tide-p-value/tide-search.q.txt\" using 1:0 title \"Tide p-value\" with lines\n")
-gnuplotFile.write("replot \"tide-xcorr/tide-search.q.txt\" using 1:0 title \"Tide XCorr\" with lines\n")
-gnuplotFile.write("replot \"comet/comet.percolator.q.txt\" using 1:0 title \"Comet Percolator\" with lines\n")
-gnuplotFile.write("replot \"tide-p-value/tide-search.percolator.q.txt\" using 1:0 title \"Tide p-value Percolator\" with lines\n")
-gnuplotFile.write("replot \"tide-xcorr/tide-search.percolator.q.txt\" using 1:0 title \"Tide XCorr Percolator\" with lines\n")
-gnuplotFile.write("replot \"comet/comet.q-ranker.q.txt\" using 1:0 title \"Comet q-ranker\" with lines\n")
-gnuplotFile.write("replot \"tide-p-value/tide-search.q-ranker.q.txt\" using 1:0 title \"Tide p-value q-ranker\" with lines\n")
-gnuplotFile.write("replot \"tide-xcorr/tide-search.q-ranker.q.txt\" using 1:0 title \"Tide XCorr q-ranker\" with lines\n")
+gnuplotFile.write("set key bottom right\n")
+gnuplotFile.write("plot \"comet/comet.q.txt\" using 1:0 title \"Comet E-value\" with lines lw 1\n")
+gnuplotFile.write("replot \"tide-p-value/tide-search.q.txt\" using 1:0 title \"Tide p-value\" with lines lw 1\n")
+gnuplotFile.write("replot \"tide-xcorr/tide-search.q.txt\" using 1:0 title \"Tide XCorr\" with lines lw 1\n")
+gnuplotFile.write("replot \"comet/comet.percolator.q.txt\" using 1:0 title \"Comet Percolator\" with lines lw 2\n")
+gnuplotFile.write("replot \"tide-p-value/tide-search.percolator.q.txt\" using 1:0 title \"Tide p-value Percolator\" with lines lw 2\n")
+gnuplotFile.write("replot \"tide-xcorr/tide-search.percolator.q.txt\" using 1:0 title \"Tide XCorr Percolator\" with lines lw 2\n")
+gnuplotFile.write("replot \"comet/comet.q-ranker.q.txt\" using 1:0 title \"Comet q-ranker\" with lines lw 3\n")
+gnuplotFile.write("replot \"tide-p-value/tide-search.q-ranker.q.txt\" using 1:0 title \"Tide p-value q-ranker\" with lines lw 3\n")
+gnuplotFile.write("replot \"tide-xcorr/tide-search.q-ranker.q.txt\" using 1:0 title \"Tide XCorr q-ranker\" with lines lw 3\n")
 gnuplotFile.write("set output\n")
 gnuplotFile.write("replot\n")
 gnuplotFile.close() 
