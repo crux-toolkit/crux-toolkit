@@ -81,12 +81,14 @@ char* PostProcessProtein::getSequencePointer(
 char PostProcessProtein::getNTermFlankingAA(
   int offset ///< The offset (or sequence index) for the flanking AA
   ) {
-  char ans = prev_aas_.at(offset)[0];
-  if (ans == '\0') {
+  
+  char ans = '-';
+  
+  if ((offset >= prev_aas_.size()) || (prev_aas_.at(offset).length() == 0)) {
     carp_once(CARP_WARNING, "Missing nterm flanking for protein:%s offset:%d",
       getIdPointer(), offset); 
-    //just return - for now.
-      ans = '-';
+  } else {
+    ans = prev_aas_.at(offset)[0];
   }
   carp(CARP_DETAILED_DEBUG, "protein:%s offset:%d pflank:%c(%d)", 
     getIdPointer(), offset, ans,(int)ans);
