@@ -753,63 +753,84 @@ FLOAT_T* AssignConfidenceApplication::compute_decoy_qvalues_mixmax(
   if (ascending) {
     sort(target_scores, target_scores + num_targets, greater<FLOAT_T>());
     sort(decoy_scores, decoy_scores + num_decoys, greater<FLOAT_T>());
-  } else {
+  }
+  else {
     sort(target_scores, target_scores + num_targets);
-    sort(decoy_scores, decoy_scores + num_decoys);    
+    sort(decoy_scores, decoy_scores + num_decoys);
   }
 
   //histogram of the target scores.
-  double* z_hist = new double[num_decoys+1];  
+  double* h_w_le_z = new double[num_decoys + 1];   //histogram for N_{w<=z}
+  double* h_z_le_z = new double[num_decoys + 1];   //histogram for N_{z<=z}
+
   int idx = 0;
-  int cnt;
+  int cnt = 0;
   int i;
   for (i = 0; i < num_decoys; ++i) {
-    cnt = 0;
-    while (idx < num_targets && ascending ? 
-        target_scores[idx] >= decoy_scores[i] : 
-        target_scores[idx] < decoy_scores[i]) {
+    while (idx < num_targets && ascending ?
+      decoy_scores[i] <= target_scores[idx] :
+      decoy_scores[i] >= target_scores[idx]) {
       ++cnt;
       ++idx;
     }
-    z_hist[i] = (double)cnt;
+    h_w_le_z[i] = (double)cnt;
   }
-  z_hist[num_decoys] = (double)(num_targets - idx);
-
-  for (i = 1; i <= num_decoys; ++i){
-    z_hist[i] += z_hist[i-1];
+  cnt = 0;
+  idx = 0;
+  for (i = 0; i < num_decoys; ++i) {
+    while (idx < num_targets && ascending ?
+      decoy_scores[i] <= decoy_scores[idx] :
+      decoy_scores[i] >= decoy_scores[idx]) {
+      ++cnt;
+      ++idx;
+    }
+    h_z_le_z[i] = (double)cnt;
   }
-
-  double* p_T_and_X_lt_Y = new double[num_targets];
-  double estPx_lt_zj;
-  int  hist; 
-  for (i = 0; i < num_targets; ++i){
-    hist = z_hist[i > num_decoys ? num_decoys : i+1];
-    estPx_lt_zj = (double)( hist * ((double)i+0.5) ) / (double)(1.0-pi_zero) / (i+0.5);
-    estPx_lt_zj = estPx_lt_zj > 1 ? 1 : estPx_lt_zj;
-    estPx_lt_zj = estPx_lt_zj < 0 ? 0 : estPx_lt_zj;
-    p_T_and_X_lt_Y[i] = estPx_lt_zj * ((1.0-pi_zero));
-  }
+  h_w_le_z[num_decoys] = (double)(num_targets);
+  h_z_le_z[num_decoys] = (double)(num_decoys);
   
   FLOAT_T* fdrmod = new FLOAT_T[num_targets];
-  double E_f1_mod_run_tot = 0;
-  double n_z_gt_w = 0;
+  double estPx_lt_zj = 0.0;
+  double E_f1_mod_run_tot = 0.0;
   int j = num_decoys-1;
+  int k = num_targets-1;
+  int n_z_ge_w = 0;
+  int n_w_ge_w = 0;
   double qvalue;
-  for (i = num_targets-1; i >= 0; --i){ 
+  double cnt_z, cnt_w;
+  double prev_fdr = -1;
 
-    while (j >= 0 && (ascending ? decoy_scores[j] <= target_scores[i] : decoy_scores[j] > target_scores[i])) { 
-      E_f1_mod_run_tot  += p_T_and_X_lt_Y[j];
-      ++n_z_gt_w;
+  for (i = num_targets - 1; i >= 0; --i){
+    while (j >= 0 && (ascending ? 
+      decoy_scores[j] <= target_scores[i] : 
+      decoy_scores[j] >= target_scores[i])) {
+      cnt_w = h_w_le_z[j + 1];
+      cnt_z = h_z_le_z[j + 1];
+      estPx_lt_zj = (double)(cnt_w - pi_zero*cnt_z) / ((1.0 - pi_zero)*cnt_z);
+      estPx_lt_zj = estPx_lt_zj > 1 ? 1 : estPx_lt_zj;
+      estPx_lt_zj = estPx_lt_zj < 0 ? 0 : estPx_lt_zj;
+      E_f1_mod_run_tot += estPx_lt_zj * ((1.0 - pi_zero));
+      ++n_z_ge_w;
       --j;
     }
-    //when j < 0 the running sums remain frozen till the end of the loop
-    qvalue = (n_z_gt_w * pi_zero + E_f1_mod_run_tot) / (num_targets - i + 0.5-1);
-    fdrmod[i] = qvalue > 1 ? 1 : qvalue;  
+    while (k >= 0 && (ascending ?
+      target_scores[k] <= target_scores[i] :
+      target_scores[k] >= target_scores[i])){
+      ++n_w_ge_w;
+      --k;
+    }
+    qvalue = ((double)n_z_ge_w * pi_zero + E_f1_mod_run_tot) / (double)(n_w_ge_w);
+    fdrmod[i] = qvalue > 1.0 ? 1.0 : qvalue;
+    
+    //convert qvalues to fdr
+    if (prev_fdr > fdrmod[i])
+      fdrmod[i] = prev_fdr;
+
+    prev_fdr = fdrmod[i];
   }
   // Convert the FDRs into q-values.
-  convert_fdr_to_qvalue(fdrmod, num_targets);
-  delete [] z_hist;
-  delete [] p_T_and_X_lt_Y;
+  delete[] h_w_le_z;
+  delete[] h_z_le_z;
   return fdrmod;
 }
 
