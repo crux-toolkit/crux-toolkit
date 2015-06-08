@@ -1,164 +1,51 @@
+<!DOCTYPE HTML>
 <html>
-<title>make-pin</title>
-<link href="./crux.css" rel="styleSheet" type="text/css">
+<head>
+<meta charset="UTF-8">
+<title>crux make-pin</title>
+<script type="text/javascript"
+  src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+<script type="text/javascript">
+  MathJax.Hub.Config({jax: ["input/TeX","output/HTML-CSS"], displayAlign: "left"});
+</script>
 </head>
 <body>
-<blockquote>
-
-<h1 align=center>make-pin</H1>
-
+<h1>make-pin</h1>
 <h2>Usage:</h2>
-
-<blockquote>
-<code>crux make-pin [options] &lt;search&nbsp;results&gt; </code>
-</blockquote>
-
+<p><code>crux make-pin [options] &lt;target input&gt;</code></p>
 <h2>Description:</h2>
-
-<ul>
-
-<p>
-Make-pin is a utility program that combines a collection of target and
-decoy peptide-spectrum matches (PSMs) into a single file in pin
-format, according
-to <a href="https://github.com/percolator/percolator/wiki/Interface">
-this format</a>. The resulting file can be provided as input to
-<code><a href="percolator.html">crux percolator</a></code>.</p>
-
-<p>
-<code>make-pin</code> requires as input two sets of PSMs, one set
-derived from matching observed spectra against real ("target")
-peptides and a second set derived from matching the same spectra
-against "decoy" peptides.  The output file contains, for each PSM, a
-set of features for use by the Percolator algorithm.  These features
-are summarized <a href="features.html">here</a>.</p>
-
-<p>
-Note that, in the stand-alone version of Percolator, the functionality
-provided by <code>crux make-pin</code> is incorporated into a program
-called <code>sqt2pin</code>.  However, a significant difference
-between <code>crux percolator</code> and the stand-alone version of
-the program is that <code>crux percolator</code> does not require an
-explicit call to <code>crux make-pin</code>: if input is provided
-to <code>crux percolator</code> in a non-SQT format, then the input
-will be automatically converted to pin format.</p>
-
-</ul>
-
+<p>Make-pin is a utility program that combines a collection of target and decoy peptide-spectrum matches (PSMs) into a single file in pin format, according to <a href="https://github.com/percolator/percolator/wiki/Interface">this format</a>. The resulting file can be provided as input to <code><a href="percolator.html">crux percolator</a></code>.</p><p><code>make-pin</code> requires as input two sets of PSMs, one set derived from matching observed spectra against real (&quot;target&quot;) peptides and a second set derived from matching the same spectra against &quot;decoy&quot; peptides. The output file contains, for each PSM, a set of features for use by the Percolator algorithm. These features are summarized <a href="features.html">here</a>.</p><p>Note that, in the stand-alone version of Percolator, the functionality provided by <code>crux make-pin</code> is incorporated into a program called <code>sqt2pin</code>. However, a significant difference between <code>crux percolator</code> and the stand-alone version of the program is that <code>crux percolator</code> does not require an explicit call to <code>crux make-pin</code>: if input is provided to <code>crux percolator</code> in a non-pin format, then the input will be automatically converted to pin format.</p>
 <h2>Input:</h2>
 <ul>
-
-<LI>
-<p><b>&lt;search&nbsp;results&gt;</b> &ndash; A collection of target
-and decoy peptide-spectrum matches (PSMs).  Input may be in one of five
-formats: 
-SQT, PepXML (obtained from SEQUEST), <a href="txt-format.html">Crux
-tab-delimited text</a>, list of files (when <code>list-of-files=T</code>,
-or a tab-delimited table of features (when <code>feature-in-file=T</code>,
-see below for details). </p>
-
-<p>
-Decoy PSMs can be provided to <code>make-pin</code> in two ways: either as a
-separate file or embedded within the same file as the target PSMs.
-Percolator will first search for target PSMs in a separate file.  The
-decoy file name is constructed from the target name by replacing
-"target" with "decoy."  For example, if <code>search.target.txt</code>
-is provided as input, then <code>make-pin</code> will search for a corresponding
-file named <code>search.decoy.txt</code>.  If no decoy file is found,
-then Percolator will assume that the given input file contains a mix
-of target and decoy PSMs.  Within this file, decoys are identified
-using a prefix (specified via <code>--decoy-prefix</code>) on the
-protein name.</p>
-</li>
-
+  <li><code>&lt;target input&gt;</code> &ndash; One or more files, each containing a collection of peptide-spectrum matches (PSMs) in <a href="txt-format.html">tab-delimited text</a>, <a href="http://tools.proteomecenter.org/wiki/index.php?title=Formats:pepXML">PepXML</a>, or <a href="http://www.psidev.info/mzidentml">mzIdentML</a> format. In tab-delimited text format, only the specified score column is required. However if --estimation-method is tdc, then the columns "scan" and "charge" are required, as well as "protein ID" if the search was run with concat=F. Furthermore, if the --peptide-level option is set to T, then the column "peptide" must be included, and if --sidak is set to T, then the "distinct matches/spectrum" column must be included.<br>Note that multiple files can also be provided either on the command line or using the --list-of-files option.<br>Decoys can be provided in two ways: either as a separate file or embedded within the same file as the targets. Crux will first search the given file for decoys using a prefix (specified via --decoy-prefix) on the protein name. If no decoys are found, then Crux will search for decoys in a separate file. The decoy file name is constructed from the target file name by replacing "target" with "decoy". For example, if tide-search.target.txt is provided as input, then Crux will search for a corresponding file named "tide-search.decoy.txt."<br>Note that if decoys are provided in a separate file, then assign-confidence will first carry out a target-decoy competition, identifying corresponding pairs of targets and decoys and eliminating the one with the worse score. In this case, the column/tag called "delta_cn" will be eliminated from the output.</li>
 </ul>
-
 <h2>Output:</h2>
-
-<p>
-The program writes the following files in the <code>crux-output</code>
-directory:</p>
-
+<p>The program writes files to the folder <code>crux-output</code> by default. The name of the output folder can be set by the user using the <code>--output-dir</code> option. The following files will be created:
 <ul>
-
-<li>
-<b>make-pin.pin</b>: a tab-delimited file containing the input target and
-decoy PSMs in pin format.  This file can be changed to an absolute
-path (see <code>--output-file</code> option).
-</li>
-
-<li>
-<b>make-pin.params.txt</b>: a file containing the name and value of
-all parameters for the current operation.  Not all parameters in the
-file may have been used in the operation.  The resulting file can be
-used with the <code>--parameter-file</code> option for other crux
-programs.
-</li>
-
-<li>
-<b>make-pin.log.txt</b>: a log file containing a copy of all
-messages that were printed to standard error.
-</li>
+  <li><code>make-pin.pin</code> &ndash; a tab-delimited file containing the input target and decoy PSMs in pin format. This file can be changed to an absolute path (see --output-file option).</li>
+  <li><code>make-pin.params.txt</code> &ndash; a file containing the name and value of all parameters for the current operation. Not all parameters in the file may have been used in the operation. The resulting file can be used with the --parameter-file option for other crux programs.</li>
+  <li><code>make-pin.log.txt</code> &ndash; a log file containing a copy of all messages that were printed to standard error.</li>
 </ul>
-
 <h2>Options:</h2>
-
+<ul style="list-style-type: none;">
+<li>
+<h3>Input and output</h3>
 <ul>
-
-<li>
-<code>--top-match &lt;integer&gt;</code> &nbsp; The number of
-psms per spectrum written to the pin file. Default = 5.</li>
-
-<li> 
-<code>--list-of-files &lt;T|F&gt;</code> &ndash; Specify that the
-search results are provided as lists of files, rather than as
-individual files.  Default = F.</li>
-
-<li>
-<code>--decoy-prefix &lt;string&gt;</code> &ndash;
-Specifies the protein name prefix that indicates a decoy.
-Default = "decoy_".</li>
-
-<li>
-<code>--fileroot &lt;string&gt;</code> &ndash;
-The <code>fileroot</code> string will be added as a prefix to all
-output file names. Default = none.</li>
-
-<li>
-<code>--output-dir &lt;filename&gt;</code> &ndash; The name of the
-directory where output files will be created.  Default =
-crux-output.</li>
-
-<li>
-<code>--output-file &lt;file&gt;</code> &ndash; Absolute path where
-pin file will be written.  This option overrides
-crux's <code>output-dir</code> and <code>fileroot</code> file naming
-convention.  Default = no absolute pathname.</li>
-
-<li>
-<code>--overwrite &lt;T|F&gt;</code> Replace existing files if true (T) or
-fail when trying to overwrite a file if false (F). Default =  F.
-
-<LI>
-<code>--parameter-file &lt;filename&gt;</code> &ndash; A file
-containing command-line or additional parameters.  See
-the <a href="parameter-file.html">parameter documentation</a> for
-details.</li>
-
-<LI>
-<code>--verbosity &lt;0-100&gt;</code> &ndash; Specify the verbosity of the
-current processes. Each level prints the following messages, including
-all those at lower verbosity levels: 0-fatal errors, 10-non-fatal
-errors, 20-warnings, 30-information on the progress of execution,
-40-more progress information, 50-debug info, 60-detailed debug info.
-Default = 30.</li>
+  <li><code>--top-match &lt;integer&gt;</code> &ndash; Specify the number of matches to report for each spectrum. Default = <code>5</code>.</li>
+  <li><code>--list-of-files &lt;T|F&gt;</code> &ndash; Specify that the search results are provided as lists of files, rather than as individual files. Default = <code>false</code>.</li>
+  <li><code>--decoy-prefix &lt;string&gt;</code> &ndash; Specifies the prefix of the protein names that indicate a decoy. Default = <code>decoy_</code>.</li>
+  <li><code>--fileroot &lt;string&gt;</code> &ndash; The fileroot string will be added as a prefix to all output file names. Default = <code>&lt;empty&gt;</code>.</li>
+  <li><code>--output-dir &lt;string&gt;</code> &ndash; The name of the directory where output files will be created. Default = <code>crux-output</code>.</li>
+  <li><code>--output-file &lt;string&gt;</code> &ndash; Path where pin file will be written instead of make-pin.pin. Default = <code>&lt;empty&gt;</code>.</li>
+  <li><code>--overwrite &lt;T|F&gt;</code> &ndash; Replace existing files if true or fail when trying to overwrite a file if false. Default = <code>false</code>.</li>
+  <li><code>--parameter-file &lt;string&gt;</code> &ndash; A file containing parameters.  See the <a href="parameter-file.html">parameter documentation</a> page for details. Default = <code>&lt;empty&gt;</code>.</li>
+  <li><code>--verbosity &lt;integer&gt;</code> &ndash; Specify the verbosity of the current processes. Each level prints the following messages, including all those at lower verbosity levels: 0-fatal errors, 10-non-fatal errors, 20-warnings, 30-information on the progress of execution, 40-more progress information, 50-debug info, 60-detailed debug info. Default = <code>30</code>.</li>
+</ul>
+</li>
 
 </ul>
-
-<hr></hr>
-
-<a href="crux.html">Crux home</a>
-
-</blockquote>
+<hr>
+<a href="/">Home</a>
 </body>
 </html>

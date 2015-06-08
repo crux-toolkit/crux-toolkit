@@ -1,316 +1,59 @@
+<!DOCTYPE HTML>
 <html>
 <head>
+<meta charset="UTF-8">
 <title>crux assign-confidence</title>
-<link href="./crux.css" rel="styleSheet" type="text/css">
+<script type="text/javascript"
+  src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+<script type="text/javascript">
+  MathJax.Hub.Config({jax: ["input/TeX","output/HTML-CSS"], displayAlign: "left"});
+</script>
 </head>
 <body>
-<blockquote>
-
-<H1 ALIGN=CENTER>crux assign-confidence</H1>
-
+<h1>assign-confidence</h1>
 <h2>Usage:</h2>
-
-<blockquote>
-<code>crux assign-confidence [options] &lt;search&nbsp;results&gt;+</code>
-</blockquote>
-
+<p><code>crux assign-confidence [options] &lt;target input&gt;+</code></p>
 <h2>Description:</h2>
-
-<blockquote>
-
-<p>
-Given a target and decoy scores, estimate a q-value for each target
-score.  The q-value is analogous to a p-value but incorporates false
-discovery rate multiple testing correction.  The q-value associated
-with a score threshold T is defined as the minimal false discovery
-rate (FDR) at which a score of T is deemed significant.  In this
-setting, the q-value accounts for the fact that we are analyzing a
-large collection of scores. For confidence estimation afficianodos,
-please note that this definition of "q-value" is independent of the
-notion of "positive FDR" as defined in (Storey <i>Annals of
-Statistics</i> 31:2013-2015, 2003).</p>
-
-<p>
-To estimate FDRs, <code>assign-confidence</code> uses one of two
-different procedures.  Both require that the input contain both target
-and decoy scores.  The default, target-decoy competition (TDC)
-procedure is described in this article:</p>
-
-<blockquote>
-Josh E. Elias and Steve P. Gygi.  "Target-decoy search strategy for increased confidence in large-scale protein identifications by mass spectrometry."  
-<i>Nature Methods</i>. 4(3):207-14, 2007.
-</blockquote>
-
-<p>
-Note that <code>assign-confidence</code> implements a variant of the
-protocol proposed by Elias and Gygi: rather than reporting a list that
-contains both targets and decoys, <code>assign-confidence</code>
-reports only the targets.  The FDR estimate is adjusted accordingly
-(by dividing by 2).</p>
-
-<p>
-The alternative, <i>mix-max</i> procedure is described in this
-article:</p>
-
-<blockquote>
-Uri Keich, Attila Kertesz-Farkas and William Stafford Noble.  "An
-  improved false discovery rate estimation procedure for shotgun
-  proteomics."  Submitted.
-</blockquote>
-
-<p>
-Note that the mix-max procedure requires as input calibrated
-scores.</p>
-
-<p>
-The mix-max procedure requires that scores are reported from separate
-target and decoy searches.  Thus, this approach is incompatible with a
-search that is run using the <code>--concat T</code> option
-to <code>tide-search</code> or the <code>--decoy_search 2</code>
-option to <code>comet</code>.  The TDC procedure can take as input
-searches conducted in either mode (concatenated or separate).  If
-given separate search results and asked to do TDC
-estimation, <code>assign-confidence</code> will carry out the
-target-decoy competition as part of the confidence estimation
-procedure.</p>
-
-</ol>
-
-<p>
-In each case, the estimated FDRs are converted to q-values by sorting
-the scores then taking, for each score, the minimum of the current FDR
-and all of the FDRs below it in the ranked list.</p>
-
-<!--
-<h3>Posterior error probability</h3>
-
-<p>
-Unlike the q-value, which is calculated with respect to the collection
-of PSMs with scores above a specified threshold, the PEP (also known
-in the literature as the "local FDR") is calculated with respect to a
-single score. The PEP is the probability that a particular PSM is
-incorrect.  Crux's PEPs are estimated using the methodology described
-in this article:</p>
-
-<blockquote>
-Lukas K&auml;ll, John Storey and William Stafford
-Noble. <a href="http://noble.gs.washington.edu/papers/kall2008nonparametric.html">"Non-parametric
-estimation of posterior error probabilities associated with peptides
-identified by tandem mass spectrometry."</a> <i>Bioinformatics
-(Proceedings of the ECCB)</i>. 24(16):i42-i48, 2008.</blockquote>
-
--->
-
-<p>
-A primer on multiple testing correction can be found here:</p>
-
-<blockquote>
-William Stafford
-Noble. <a href="http://www.nature.com/nbt/journal/v27/n12/full/nbt1209-1135.html">"How
-does multiple testing correction work?"</a> <i>Nature
-Biotechnology.</i> 27(12):1135-1137, 2009.</blockquote>
-
-<!--
-<p>
-A discussion of q-values versus posterior error probabilities is
-provided in this article:</p>
-
-<blockquote>
-Lukas K&auml;ll, John D. Storey, Michael J. MacCoss and William
-Stafford
-Noble. <a href="http://pubs.acs.org/doi/full/10.1021/pr700739d">"Posterior
-error probabilities and false discovery rates: two sides of the same
-coin."</a> <i>Journal of Proteome Research.</i> 7(1):40-44,
-2008.</blockquote>
-
--->
-
-</blockquote>
-
+<p>Given target and decoy scores, estimate a q-value for each target score. The q-value is analogous to a p-value but incorporates false discovery rate multiple testing correction. The q-value associated with a score threshold T is defined as the minimal false discovery rate (FDR) at which a score of T is deemed significant. In this setting, the q-value accounts for the fact that we are analyzing a large collection of scores. For confidence estimation afficionados, please note that this definition of "q-value" is independent of the notion of "positive FDR" as defined in (Storey <em>Annals of Statistics</em> 31:2013-2015:2003).</p><p>To estimate FDRs, <code>assign-confidence</code> uses one of two different procedures. Both require that the input contain both target and decoy scores. The default, target-decoy competition (TDC) procedure is described in this article:</p><blockquote>Josh E. Elias and Steve P. Gygi. "Target-decoy search strategy for increased confidence in large-scale protein identifications by mass spectrometry." <em>Nature Methods</em>. 4(3):207-14, 2007.</blockquote><p>Note that <code>assign-confidence</code> implements a variant of the protocol proposed by Elias and Gygi: rather than reporting a list that contains both targets and decoys, <code>assign-confidence</code> reports only the targets. The FDR estimate is adjusted accordingly (by dividing by 2).</p><p>The alternative, <em>mix-max</em> procedure is described in this article:</p><blockquote>Uri Keich, Attila Kertesz-Farkas and William Stafford Noble. "An improved false discovery rate estimation procedure for shotgun proteomics." Submitted.</blockquote><p>Note that the mix-max procedure requires as input calibrated scores, such as Comet E-values or p-values produced using Tide-s <code>exact-p-value</code> option.</p><p>The mix-max procedure requires that scores are reported from separate target and decoy searches. Thus, this approach is incompatible with a search that is run using the <code>--concat T</code> option to <code>tide-search</code> or the <code>--decoy_search 2</code> option to <code>comet</code>. On the other hand, the TDC procedure can take as input searches conducted in either mode (concatenated or separate). If given separate search results and asked to do TDC estimation, <code>assign-confidence</code> will carry out the target-decoy competition as part of the confidence estimation procedure.</p><p>In each case, the estimated FDRs are converted to q-values by sorting the scores then taking, for each score, the minimum of the current FDR and all of the FDRs below it in the ranked list.</p><p>A primer on multiple testing correction can be found here:</p><blockquote>William Stafford Noble. <a href="http://www.nature.com/nbt/journal/v27/n12/full/nbt1209-1135.html">"How does multiple testing correction work?"</a> <em>Nature Biotechnology</em>. 27(12):1135-1137, 2009.</blockquote>
 <h2>Input:</h2>
-
 <ul>
-
-
-<li>
-<p>
-<b>&lt;search&nbsp;results&gt;</b> &ndash; One or more files, each
-containing a collection of peptide-spectrum matches (PSMs)
-in <a href="txt-format.html">tab-delimited text</a>,
-<a href="http://tools.proteomecenter.org/wiki/index.php?title=Formats:pepXML">PepXML</a>
-or <a href="http://www.psidev.info/mzidentml">mzIdentML</a> format.
-In tab-delimited text format, only the specified score column is
-required.  However, if <code>--estimation-method</code>
-is <code>tdc</code>, then the columns "scan" and "charge" are
-required, as well as "protein ID" if the search was run
-with <code>concat=F</code>.  Furthermore, if
-the <code>--peptide-level</code> option is set to T, then the column
-"peptide" must be included, and if <code>sidak</code> is T, then the
-"distinct matches/spectrum" column must be included.</p>
-
-<p>
-Note that multiple files can also be provided either on the command
-line or using the <code>--list-of-files</code> option.</p>
-
-<p>
-Decoys can be provided in two ways: either as a separate file or
-embedded within the same file as the targets.  Crux will first search
-for the given file for decoys identified using a prefix (specified
-via <code>--decoy-prefix</code>) on the protein name.  If no decoys
-are found, then Crux will search for decoys in a separate file.  The
-decoy file name is constructed from the target file name by replacing
-"target" with "decoy."  For example,
-if <code>tide-search.target.txt</code> is provided as input, then Crux
-will search for a corresponding file
-named <code>tide-search.decoy.txt</code>.</p>
-
-<p>
-Note that if decoys are provided in a separate file,
-then <code>assign-confidence</code> will first carry out a
-target-decoy competition, identifying corresponding pairs of targets
-and decoys and eliminating the one with the worse score.  In this
-case, the column/tag called "delta_cn" will be eliminated from the
-output.</p></li>
-
+  <li><code>&lt;target input&gt;+</code> &ndash; One or more files, each containing a collection of peptide-spectrum matches (PSMs) in <a href="txt-format.html">tab-delimited text</a>, <a href="http://tools.proteomecenter.org/wiki/index.php?title=Formats:pepXML">PepXML</a>, or <a href="http://www.psidev.info/mzidentml">mzIdentML</a> format. In tab-delimited text format, only the specified score column is required. However if --estimation-method is tdc, then the columns "scan" and "charge" are required, as well as "protein ID" if the search was run with concat=F. Furthermore, if the --peptide-level option is set to T, then the column "peptide" must be included, and if --sidak is set to T, then the "distinct matches/spectrum" column must be included.<br>Note that multiple files can also be provided either on the command line or using the --list-of-files option.<br>Decoys can be provided in two ways: either as a separate file or embedded within the same file as the targets. Crux will first search the given file for decoys using a prefix (specified via --decoy-prefix) on the protein name. If no decoys are found, then Crux will search for decoys in a separate file. The decoy file name is constructed from the target file name by replacing "target" with "decoy". For example, if tide-search.target.txt is provided as input, then Crux will search for a corresponding file named "tide-search.decoy.txt."<br>Note that if decoys are provided in a separate file, then assign-confidence will first carry out a target-decoy competition, identifying corresponding pairs of targets and decoys and eliminating the one with the worse score. In this case, the column/tag called "delta_cn" will be eliminated from the output.</li>
 </ul>
-
 <h2>Output:</h2>
-
+<p>The program writes files to the folder <code>crux-output</code> by default. The name of the output folder can be set by the user using the <code>--output-dir</code> option. The following files will be created:
 <ul>
-
-<p>
-The program writes files to the folder <code>crux-output</code> by
-default.  The name of the output folder can be set by the user using
-the <code>--output-dir</code> option.  The following files will be
-created:</p>
-
+  <li><code>assign-confidence.target.txt</code> &ndash; a <a href="txt-format.html">tab-delimited text file</a> that contains the targets, sorted by score. The file will contain one new column, named "&lt;method&gt; q-value", where &lt;method&gt; is either "tdc" or "mix-max".</li>
+  <li><code>assign-confidence.log.txt</code> &ndash; a log file containing a copy of all messages that were printed to stderr.</li>
+  <li><code>assign-confidence.params.txt</code> &ndash; a file containing the name and value of all parameters/options for the current operation. Not all parameters in the file may have been used in the operation. The resulting file can be used with the --parameter-file option for other crux programs.</li>
+</ul>
+<h2>Options:</h2>
+<ul style="list-style-type: none;">
 <li>
-<b>assign-confidence.target.txt</b>:
-a <a href="txt-format.html">tab-delimited text file</a> that is
-contains that targets, sorted by score.  The file will contain one new
-column, named "&lt;method&gt; q-value", where &lt;method&gt is either
-"tdc" or "mix-max".</li>
-
+<h3>assign-confidence options</h3>
+<ul>
+  <li><code>--estimation-method &lt;mix-max|tdc&gt;</code> &ndash; Specify the method used to estimate q-values: the mix-max procedure or target-decoy competition. Default = <code>tdc</code>.</li>
+  <li><code>--score &lt;string&gt;</code> &ndash; Specify the column (for tab-delimited input) or tag (for XML input) used as input to the q-value estimation procedure. Default = <code>xcorr score</code>.</li>
+  <li><code>--smaller-is-better &lt;T|F&gt;</code> &ndash; Specify the semantics of the score, i.e., whether a smaller value implies a better match or vice versa. Specify this parameter T for "exact p-value" and F for "xcorr score". Default = <code>false</code>.</li>
+  <li><code>--sidak &lt;T|F&gt;</code> &ndash; Adjust the score using the Sidak adjustment and reports them in a new column in the output file. Note that this adjustment only makes sense if the given scores are p-values, and that it requires the presence of the "distinct matches/spectrum" feature for each PSM. Default = <code>false</code>.</li>
+  <li><code>--peptide-level &lt;T|F&gt;</code> &ndash; Applied for spectrum-centric search. Eliminates any PSMS for which there exists a better scoring PSM involving the same peptide. This option is incompatible with the mix-max procedure. Default = <code>false</code>.</li>
+</ul>
+</li>
 <li>
-<b>assign-confidence.log.txt</b>: a log file containing a copy of all
-messages that were printed to stderr.</li>
-
-<li>
-<b>assign-confidence.params.txt</b>: a file containing the name and
-value of all parameters/options for the current operation.  Not all
-parameters in the file may have been used in the operation.  The
-resulting file can be used with the <code>--parameter-file</code>
-option for other crux programs.</li>
+<h3>Input and output</h3>
+<ul>
+  <li><code>--decoy-prefix &lt;string&gt;</code> &ndash; Specifies the prefix of the protein names that indicate a decoy. Default = <code>decoy_</code>.</li>
+  <li><code>--verbosity &lt;integer&gt;</code> &ndash; Specify the verbosity of the current processes. Each level prints the following messages, including all those at lower verbosity levels: 0-fatal errors, 10-non-fatal errors, 20-warnings, 30-information on the progress of execution, 40-more progress information, 50-debug info, 60-detailed debug info. Default = <code>30</code>.</li>
+  <li><code>--parameter-file &lt;string&gt;</code> &ndash; A file containing parameters.  See the <a href="parameter-file.html">parameter documentation</a> page for details. Default = <code>&lt;empty&gt;</code>.</li>
+  <li><code>--overwrite &lt;T|F&gt;</code> &ndash; Replace existing files if true or fail when trying to overwrite a file if false. Default = <code>false</code>.</li>
+  <li><code>--output-dir &lt;string&gt;</code> &ndash; The name of the directory where output files will be created. Default = <code>crux-output</code>.</li>
+  <li><code>--list-of-files &lt;T|F&gt;</code> &ndash; Specify that the search results are provided as lists of files, rather than as individual files. Default = <code>false</code>.</li>
+  <li><code>--fileroot &lt;string&gt;</code> &ndash; The fileroot string will be added as a prefix to all output file names. Default = <code>&lt;empty&gt;</code>.</li>
+</ul>
+</li>
 
 </ul>
-
-<h2>Options:</h2>
-
-<UL>
-
-<h3>Miscellaneous</h3>
-
-<li>
-<code>--estimation-method mix-max|tdc</code> &ndash; Specify the
-method used to estimate q-values: the mix-max procedure or
-target-decoy competition.  Default = tdc.</li>
-
-<li>
-<code>--decoy-prefix &lt;string&gt;</code> &ndash;
-Specifies what protein name prefix is used to indicate a decoy.
-Default = "decoy_".</li>
-
-<li>
-<code>--sidak T|F</code> &ndash;
-Adjust the score using the Sidak adjustment and reports them 
-in a new column in the output file. Note that this 
-adjustment only makes sense if the given scores are p-values,
-and that it requires the presence of the "distinct matches/spectrum"
-feature for each PSM. Default = F.</li>
-
-<li>
-<code>--peptide-level T|F</code> &ndash;
-Applied for spectrum-centirc search. Eliminates any PSMS for which there 
-exists a better scoring PSM involving the same peptide. This option is 
-incompatible with the mix-max procedure. Default = F. </li>
-
-<h3>Input and output</h3>
-
-<li>
-<code>--score &lt;string&gt;</code> &ndash; Specify the column (for
-tab-delimited input) or tag (for XML input) used as input to the
-q-value estimation procedure.  By default, the program will use "exact
-p-value" or, if that column/tag is absent, "xcorr score."</li>
-
-<li>
-<code>--smaller-is-better T|F</code> &ndash; Specify the semantics of
-the score, i.e., whether a smaller value implies a better match or
-vice versa. Default is F. Specify this parameter T for <code>exact p-value</code>
-and F for <code>xcorr score</code>.
-<!--By default, if the score is "exact p-value"
-then <code>smaller-is-better</code> is true, and if the score is
-"xcorr score" then <code>smaller-is-better</code> is false.  The
-default value for other scores (specified via <code>--score</code>) is
-false.--></li>
-
-<li>
-<code>--list-of-files T|F</code> &ndash; Specify that the file given
-on the command line is a text file listing filenames of PSM
-files.</li>
-
-<li>
-<code>--fileroot &lt;string&gt;</code> &ndash; 
-The <code>fileroot</code> string will be added as a prefix to all
-output file names. Default = none.</li>
-
-<li>
-<code>--output-dir &lt;filename&gt;</code> &ndash; 
-The name of the directory where output files will be created.
-Default = crux-output.</li>
-
-<!--
-<li>
-<code>--txt-output T|F</code> &ndash; Output a tab-delimited results
-file to the output directory. Note that printing only tab-delimited
-output will give the fastest performance. Enabling other output
-formats (SQT, PepXML, mzIdentML, or PIN) requires a conversion step
-that takes additional time.  Default = T.</li>
-
-<li>
-<code>--pepxml-output T|F</code> &ndash; Output a pepXML
-results file to the output directory. Default = F.</li>
-
-<li>
-<code>--mzid-output T|F</code> &ndash; Output an mzIdentML
-results file to the output directory. Default = F.</li>
--->
-
-<li>
-<code>--overwrite T|F</code> &ndash;
-Replace existing files if true (T) or fail when trying to overwrite a
-file if false (F). Default =  F.
-
-<li>
-<code>--parameter-file &lt;filename&gt;</code> &ndash; A file
-containing command-line or additional parameters.  See
-the <a href="parameter-file.html">parameter documentation</a> page for
-details.</li>
-
-<LI>
-<code>--verbosity &lt;0-100&gt;</code> &ndash; 
-Specify the verbosity of the current processes. Each level prints the
-following messages, including all those at lower verbosity levels:
-0-fatal errors, 10-non-fatal errors, 20-warnings, 30-information on
-the progress of execution, 40-more progress information, 50-debug
-info, 60-detailed debug info. Default = 30.
-
-</UL>
-
-<hr></hr>
-
-<p>
-<a href="crux.html">Crux home</a></p>
-
-</blockquote>
+<hr>
+<a href="/">Home</a>
 </body>
 </html>
