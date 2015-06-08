@@ -25,7 +25,7 @@ if (EXISTS /noble/www/htdocs/proj/crux)
 endif (EXISTS /noble/www/htdocs/proj/crux)
 
 set (
-  crux_documentation
+  UWlogo150p.gif 
   assign-confidence.html
   barista-xml-format.html
   barista.html
@@ -36,13 +36,11 @@ set (
   comet.params
   compute-q-values.html 
   contributors.html
+  create-docs.html
   crux-faq.html
-  crux-get-ms2-spectrum.html 
-  crux-predict-peptide-ions.html 
-  crux-print-processed-spectra.html
-  crux-search-for-xlinks.html 
   crux.css 
   crux.html 
+  crux_documentation
   customize-tutorial.html 
   d.png
   data/demo.ms2 
@@ -56,6 +54,7 @@ set (
   fasta-format.html 
   features.html
   generate-peptides.html 
+  get-ms2-spectrum.html 
   hardklor.html
   hardklor_standalone_to_crux.html
   install-tutorial.html 
@@ -72,6 +71,9 @@ set (
   parameter-file.html 
   percolator.html 
   percolator_legacy.html
+  pipeline.html
+  predict-peptide-ions.html 
+  print-processed-spectra.html
   q-ranker.html 
   quant_empai_1.gif
   read-tide-index.html
@@ -79,6 +81,7 @@ set (
   sample.fasta 
   schematic.png 
   schematic.pptx
+  search-for-xlinks.html 
   search-tutorial.html 
   sin_pep_equation.png
   sin_prot_equation.png
@@ -93,7 +96,6 @@ set (
   tide-index.html
   tide-search.html
   txt-format.html 
-  UWlogo150p.gif 
 )
 set(
   comet_documentation
