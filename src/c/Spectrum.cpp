@@ -152,7 +152,7 @@ void Spectrum::print(FILE* file) ///< output file to print at -out
   if (zstates_.size() == 0 && ezstates_.size() != 0) {
     for (size_t ez_idx = 0; ez_idx < ezstates_.size(); ez_idx++) {
       fprintf(file, "Z\t%d\t%.*f\n", ezstates_[ez_idx].getCharge(), mass_precision,
-	      ezstates_[ez_idx].getSinglyChargedMass());
+      ezstates_[ez_idx].getSinglyChargedMass());
     }
   }
 
@@ -975,7 +975,7 @@ bool Spectrum::assignZState(){
   case INVALID_CHARGE_STATE: 
   case NUMBER_CHARGE_STATE:
     carp(CARP_ERROR, "Could not determine charge state for spectrum %d.", 
-	 first_scan_);
+         first_scan_);
     return false; 
  }
   return true; 

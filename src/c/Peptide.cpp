@@ -92,6 +92,21 @@ Peptide::Peptide() {
   init();
 }
 
+Peptide* Peptide::copyPtr() {
+
+  pointer_count_++;
+  return this;
+}
+
+void Peptide::free(Peptide* peptide) {
+
+  peptide->pointer_count_--;
+  if (peptide->pointer_count_ <= 0) {
+    delete peptide;
+  }
+}
+
+
 /**
  *\returns the protein struct size, value of sizeof function
  */
@@ -229,10 +244,10 @@ Peptide::~Peptide() {
    PeptideSrc::free(peptide_srcs_);
    
   if(modified_seq_){
-    free(modified_seq_);
+    std::free(modified_seq_);
   }
   if(decoy_modified_seq_){
-    free(decoy_modified_seq_);
+    std::free(decoy_modified_seq_);
   }
 }
 
@@ -566,7 +581,7 @@ char* Peptide::getSequenceFromPeptideSrcSqt(
     copy_sequence[length_+3] = parent_sequence[start_idx+length_-1];
   }
   
-  free(mod_pep_seq);
+  std::free(mod_pep_seq);
   // yeah return!!
   return copy_sequence; 
 }
@@ -655,6 +670,15 @@ void Peptide::setMod(
 
 }
 
+bool Peptide::isModified() {
+
+  return modified_seq_ != NULL;
+}
+
+bool Peptide::isDecoy() {
+  return decoy_modified_seq_ != NULL;
+}
+
 /**
  * \brief Get the modified peptide sequence
  *
@@ -675,7 +699,7 @@ MODIFIED_AA_T* Peptide::getModifiedAASequence(){
     carp(CARP_DETAILED_DEBUG, "mod seq NOT cached");
     char* seq = getSequence();
     convert_to_mod_aa_seq(seq, &seq_copy);
-    free(seq);
+    std::free(seq);
   }
   
   return seq_copy;
@@ -690,17 +714,21 @@ void Peptide::setModifiedAASequence(
   ) {
   
   if (modified_seq_) {
-    free(modified_seq_);
+    std::free(modified_seq_);
   }
   modified_seq_ = copy_mod_aa_seq(mod_seq);
 
   if (decoy) {
     if (decoy_modified_seq_) {
-      free(decoy_modified_seq_);
+      std::free(decoy_modified_seq_);
     }
     decoy_modified_seq_ = copy_mod_aa_seq(mod_seq);
   }
+}
 
+
+void Peptide::setDecoyModifiedSeq(MODIFIED_AA_T* decoy_modified_seq) {
+  decoy_modified_seq_ = decoy_modified_seq;
 }
 
 
@@ -858,6 +886,42 @@ FLOAT_T Peptide::calcMass(
   return peptide_mass + MASS_H2O_MONO;
 }
 
+FLOAT_T Peptide::calcModifiedMass(
+  MASS_TYPE_T mass_type ///< isotopic mass type (AVERAGE, MONO) -in
+  ) {
+
+  if (modified_seq_ == NULL) {
+    carp(CARP_DETAILED_DEBUG,"Peptide not modified return sequence mass");
+    return calcMass(mass_type);
+  }
+
+  AA_MOD_T** mod_list = NULL;
+  int total_mods = get_all_aa_mod_list(&mod_list);
+
+  FLOAT_T peptide_mass = 0;
+  for (int idx = 0; idx < length_; idx++) {
+    MODIFIED_AA_T modified_aa = modified_seq_[idx];
+    char aa = modified_aa_to_char(modified_aa);
+    peptide_mass += get_mass_amino_acid(aa, mass_type);
+
+    for (int mod_idx = 0;mod_idx < total_mods;mod_idx++) {
+      if ( is_aa_modified(modified_aa, mod_list[mod_idx])) {
+        peptide_mass += aa_mod_get_mass_change(mod_list[mod_idx]);
+      }
+    }
+  }
+
+  if (mass_type == AVERAGE) {
+    return peptide_mass + MASS_H2O_AVERAGE;
+  } else {
+    return peptide_mass + MASS_H2O_MONO;
+  }
+  
+}
+
+
+
+
 static FLOAT_T krokhin_index['Z'-'A'] = {
   0.8, 0.0, -0.8, -0.5, 0.0, 10.5, -0.9, -1.3, 8.4, 0.0, 
   -1.9, 9.6, 5.8, -1.2, 0.0, 0.2, -0.9, -1.3, -0.8, 0.4,
@@ -907,6 +971,63 @@ int Peptide::getMissedCleavageSites() {
   
   return missed_count;
 }
+
+int Peptide::getMissedCleavageSites(
+  set<int> skip ///< skip these amino acid indices.
+  ) {
+
+  int missed_count = 0;
+  char* sequence = getSequencePointer();
+
+  AA_MOD_T** mod_list = NULL;
+  int total_mods = 0;
+  if (modified_seq_) {
+   
+    total_mods = get_all_aa_mod_list(&mod_list);
+    
+  }
+
+  // count the missed cleavage sites
+  for(int aa_idx=0; aa_idx < length_-1; ++aa_idx){
+    
+    if (skip.find(aa_idx) != skip.end()) {
+      continue;
+    }
+
+    bool cleavage_prevented = true;
+    if(sequence[aa_idx] == 'K' ||
+       sequence[aa_idx] == 'R'){
+
+      cleavage_prevented = false;
+      // skip one that are followed by a P
+      if(sequence[aa_idx+1] == 'P'){
+        cleavage_prevented = true;
+      }
+
+      if (modified_seq_) {
+        int mod_idx = 0;
+        while (!cleavage_prevented && mod_idx < total_mods) {
+          if (aa_mod_get_prevents_cleavage(mod_list[mod_idx])) {
+            if (is_aa_modified(modified_seq_[aa_idx], mod_list[mod_idx])) {
+              cleavage_prevented = true;
+            }
+          }
+          mod_idx++;
+        }
+      }
+    }
+
+    if (!cleavage_prevented) {
+      ++missed_count;
+    }
+  }
+  
+  return missed_count;
+
+
+
+}
+
 
 /**
  * \brief Find the distance from the c-terminus of the source protein
@@ -1009,7 +1130,7 @@ void Peptide::transformToDecoy(){
 
   // delete any existing decoy sequence
   if(decoy_modified_seq_){ 
-    free(decoy_modified_seq_); 
+    std::free(decoy_modified_seq_); 
   }
   // if the peptide is already modified, shuffle the modified sequence
   if(modified_seq_){
@@ -1029,7 +1150,7 @@ void Peptide::transformToDecoy(){
       new_seq = generateShuffledSequence();
     }
     convert_to_mod_aa_seq(new_seq, &(decoy_modified_seq_));
-    free(new_seq);
+    std::free(new_seq);
   }
 }
 
@@ -1097,7 +1218,7 @@ char* Peptide::generateReversedSequence() {
     carp(CARP_DETAILED_INFO, 
          "Peptide %s is a palindrome and will be shuffled instead of reversed.",
          sequence);
-    free(sequence);
+    std::free(sequence);
     sequence = generateShuffledSequence();
   }
 
@@ -1458,7 +1579,7 @@ void Peptide::printInFormat(
 
   // free sequence if allocated
   if(flag_out){
-    free(sequence);
+    std::free(sequence);
   }
 }
 
@@ -1545,7 +1666,7 @@ void Peptide::printFilteredInFormat(
 
   // free sequence if allocated
   if(flag_out){
-    free(sequence);
+    std::free(sequence);
   }
 }
 
@@ -1599,8 +1720,8 @@ bool Peptide::serialize(
   p.modified_seq = modified_seq_;
   if (fwrite(&p, sizeof(PRINT_PEPTIDE_T), 1, file) != 1) {
     carp(CARP_ERROR, 
-	 "Failed to write peptide structure:%s", 
-	 strerror(ferror(file)));
+         "Failed to write peptide structure:%s", 
+         strerror(ferror(file)));
   }
 
   // write peptide src count
@@ -1628,7 +1749,7 @@ bool Peptide::serialize(
   fwrite(modified_seq_, sizeof(MODIFIED_AA_T), mod_seq_length, file);
 
 
-  free(seq);
+  std::free(seq);
   
   // If a text file was given, print the peptide in ASCII.
   if (text_file != NULL) {
@@ -1970,7 +2091,7 @@ string Peptide::getProteinIdsLocations() {
       } else if (peptide_src->getStartIdxOriginal() > 0) {
         protein_loc_stream << "(" << peptide_src->getStartIdxOriginal() << ")";
       }
-      free(protein_id);
+      std::free(protein_id);
       protein_ids_locations.insert(protein_loc_stream.str());
     }
   }

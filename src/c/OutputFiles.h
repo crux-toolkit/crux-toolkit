@@ -54,7 +54,7 @@ class OutputFiles{
   static bool isProteinLevelDecoys();
   static void setProteinLevelDecoys(bool enable = true);
 
-
+  bool exact_pval_search_;
 
  private:
   bool createFiles(FILE*** file_array_ptr,

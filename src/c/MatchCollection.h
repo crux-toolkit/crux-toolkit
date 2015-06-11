@@ -144,6 +144,7 @@ class MatchCollection {
 
 
  public:
+  bool exact_pval_search_;
 
   /**
    * \brief Creates a new match collection with no matches in it.  Sets
@@ -216,6 +217,8 @@ class MatchCollection {
   void spectrumSort(
     SCORER_TYPE_T score_type ///< the score type to sort by -in
     );
+
+  void sortByTideOutput();
 
   /**
    * Rank matches in a collection based on the given score type.  
@@ -454,7 +457,8 @@ class MatchCollection {
     FILE* outfile, 
     const char* type, 
     string database,
-    int num_proteins 
+    int num_proteins,
+    bool exact_pval_search_ = false
     );
 
   /*

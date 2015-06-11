@@ -42,7 +42,15 @@ add_library(
   xlink_search.cpp
   SearchForXLinks.cpp
   xlink_compute_qvalues.cpp
+  LinearPeptide.cpp
+  SelfLoopPeptide.cpp
+  XLink.cpp
+  XLinkScorer.cpp
   XLinkSite.cpp
   XLinkBondMap.cpp
   XLinkablePeptide.cpp
+  XLinkablePeptideIterator.cpp
+  XLinkMatch.cpp
+  XLinkMatchCollection.cpp
+  XLinkPeptide.cpp
 )

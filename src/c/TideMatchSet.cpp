@@ -14,9 +14,6 @@
 #include "TideMatchSet.h"
 #include "TideSearchApplication.h"
 
-extern AA_MOD_T* list_of_mods[MAX_AA_MODS]; // list containing all aa mods
-extern int num_mods;  // ANY_POSITION mods
-
 map<int, double> TideMatchSet::mod_map_;
 ModCoder TideMatchSet::mod_coder_;
 string TideMatchSet::cleavage_type_ = "";
@@ -28,6 +25,7 @@ TideMatchSet::TideMatchSet(
   double max_mz
 ) :
   matches_(matches), max_mz_(max_mz) {
+  exact_pval_search_ = false;
 }
 
 TideMatchSet::~TideMatchSet() {
@@ -46,7 +44,8 @@ void TideMatchSet::report(
   const ActivePeptideQueue* peptides, ///< peptide queue
   const ProteinVec& proteins,  ///< proteins corresponding with peptides
   const vector<const pb::AuxLocation*>& locations,  ///< auxiliary locations
-  bool compute_sp ///< whether to compute sp or not
+  bool compute_sp, ///< whether to compute sp or not
+  bool highScoreBest //< indicates semantics of score magnitude
 ) {
   if (matches_->size() == 0) {
     return;
@@ -56,7 +55,7 @@ void TideMatchSet::report(
        top_n, matches_->size());
 
   vector<Arr::iterator> targets, decoys;
-  gatherTargetsAndDecoys(peptides, proteins, targets, decoys, top_n);
+  gatherTargetsAndDecoys(peptides, proteins, targets, decoys, top_n, highScoreBest);
 
   map<Arr::iterator, FLOAT_T> delta_cn_map;
   computeDeltaCns(targets, &delta_cn_map, top_n);
@@ -95,11 +94,10 @@ void TideMatchSet::writeToFile(
   }
 
   int cur = 0;
-  const vector<Arr::iterator>::const_iterator cutoff =
-    (vec.size() >= top_n) ? vec.begin() + top_n : vec.end();
-
   int concatDistinctMatches = peptides->ActiveTargets() + peptides->ActiveDecoys();
 
+  const vector<Arr::iterator>::const_iterator cutoff =
+    (vec.size() >= top_n) ? vec.begin() + top_n : vec.end();
   for (vector<Arr::iterator>::const_iterator i = vec.begin(); i != cutoff; ++i) {
     const Peptide* peptide = peptides->GetPeptide((*i)->second);
     const pb::Protein* protein = proteins[peptide->FirstLocProteinId()];
@@ -163,12 +161,16 @@ void TideMatchSet::writeToFile(
       *file << sp_data->sp_score << '\t'
             << sp_map->at(*i).second << '\t';
     }
-    *file << ((*i)->first / 100000000.0) << '\t'
-          << ++cur << '\t';
+    *file << (*i)->first.first << '\t';
+    if (exact_pval_search_) {
+      *file << (*i)->first.second << '\t';
+    }
+    *file << ++cur << '\t';
     if (sp_map) {
       *file << sp_data->matched_ions << '\t'
             << sp_data->total_ions << '\t';
     }
+
     if (OutputFiles::isConcat()) {
       *file << concatDistinctMatches << '\t';
     } else {
@@ -202,7 +204,8 @@ void TideMatchSet::report(
   const ActivePeptideQueue* peptides, ///< peptide queue
   const ProteinVec& proteins,  ///< proteins corresponding with peptides
   const vector<const pb::AuxLocation*>& locations,  ///< auxiliary locations
-  bool compute_sp ///< whether to compute sp or not
+  bool compute_sp, ///< whether to compute sp or not
+  bool highScoreBest // indicates semantics of score magnitude
 ) {
   if (matches_->size() == 0) {
     return;
@@ -212,7 +215,7 @@ void TideMatchSet::report(
        top_n, matches_->size());
 
   vector<Arr::iterator> targets, decoys;
-  gatherTargetsAndDecoys(peptides, proteins, targets, decoys, top_n);
+  gatherTargetsAndDecoys(peptides, proteins, targets, decoys, top_n, highScoreBest);
 
   MatchCollection* crux_collection =
     new(match_collection_loc_) MatchCollection();
@@ -231,6 +234,9 @@ void TideMatchSet::report(
     spectrum->PrecursorMZ(), vector<int>(1, charge), "");
   SpectrumZState z_state;
   z_state.setMZ(crux_spectrum.getPrecursorMz(), charge);
+
+  crux_collection->exact_pval_search_ = exact_pval_search_;
+  crux_decoy_collection->exact_pval_search_ = exact_pval_search_;
 
   addCruxMatches(crux_collection, false, top_n, &proteins_made, targets, crux_spectrum,
                  peptides, proteins, locations, z_state, sp_scorer, &lowest_sp);
@@ -278,10 +284,6 @@ void TideMatchSet::addCruxMatches(
   FLOAT_T* lowest_sp_out
 ) {
 
-//  FLOAT_T lnNumSp = log((FLOAT_T) (!decoys ? peptides->ActiveTargets()
-//                                : peptides->ActiveDecoys()));
-
-// We want this number to be the sum in the concatenated case...
   FLOAT_T lnNumSp;
 
   if (OutputFiles::isConcat) {
@@ -290,7 +292,7 @@ void TideMatchSet::addCruxMatches(
     lnNumSp = log((FLOAT_T) (!decoys ? peptides->ActiveTargets()
                                 : peptides->ActiveDecoys()));
   }
-
+  
   // Create a Crux match for each match
   vector<Arr::iterator>::const_iterator endIter = 
     (vec.size() >= top_n) ? vec.begin() + top_n : vec.end();
@@ -300,16 +302,16 @@ void TideMatchSet::addCruxMatches(
     Crux::Match* match = getCruxMatch(peptide, proteins, locations, &crux_spectrum,
                                       z_state, proteins_made);
     match_collection->addMatch(match);
-    // if we just looking at "decoys" boolean, in concatenated case, both targets and
-    // decoys are set as targets. (null peptide == is decoy) This will give correct
-    // output in Mzid when printing whether match is target or decoy.
     if (peptide->IsDecoy()) {
       match->setNullPeptide(true);
     }
     Crux::Match::freeMatch(match); // so match gets deleted when collection does
 
     // Set Xcorr score in match
-    match->setScore(XCORR, (*i)->first / 100000000.0);
+    match->setScore(XCORR, (*i)->first.first);
+    match->setScore(TIDE_SEARCH_EXACT_PVAL, (*i)->first.first);
+    match->setScore(TIDE_SEARCH_REFACTORED_XCORR, (*i)->first.second);
+
     // Set lnNumSp in match
     match->setLnExperimentSize(lnNumSp);
 
@@ -352,7 +354,8 @@ void TideMatchSet::addCruxMatches(
 void TideMatchSet::writeHeaders(
   ofstream* file,
   bool decoyFile,
-  bool sp
+  bool sp,
+  bool exact_pval_search
 ) {
   if (!file) {
     return;
@@ -379,7 +382,12 @@ void TideMatchSet::writeHeaders(
     if (i > 0) {
       *file << '\t';
     }
-    *file << get_column_header(header);
+    if (exact_pval_search && header == XCORR_SCORE_COL) {
+      *file << get_column_header(EXACT_PVALUE_COL) << '\t'
+            << get_column_header(REFACTORED_SCORE_COL);
+    } else {
+      *file << get_column_header(header);
+    }
   }
   *file << endl;
 }
@@ -424,22 +432,14 @@ Crux::Match* TideMatchSet::getCruxMatch(
   proteins_made->push_back(crux_protein);
 
   crux_protein->setId(protein->name().c_str());
-//  string originalTargetSeq = !peptide->IsDecoy() ? peptide->Seq() :
-//    protein->residues().substr(protein->residues().length() - peptide->Len() - 1);
-// NOTE: The original target sequence printed using OutputFiles is different than from regular output.
   string originalTargetSeq = !peptide->IsDecoy() ? peptide->Seq() :
     protein->residues().substr(protein->residues().length() - peptide->Len());
-
   int start_idx = crux_protein->findStart(originalTargetSeq, n_term, c_term);
 
   // Create peptide
   Crux::Peptide* crux_peptide = new Crux::Peptide(
     peptide->Len(), peptide->Mass(), crux_protein, start_idx);
-//  crux_peptide->getPeptideSrc()->setStartIdxOriginal(pos + 1);
-//    NOTE: pos seems to require whether target or decoy.. When we use OutputFiles to write, for all decoys,
-//    it says location of peptide in protein is 2 for all decoys.
-    crux_peptide->getPeptideSrc()->setStartIdxOriginal(((!protein->has_target_pos()) ? pos : protein->target_pos())+1);
-
+  crux_peptide->getPeptideSrc()->setStartIdxOriginal(((!protein->has_target_pos()) ? pos : protein->target_pos()) + 1);
 
   // Add other proteins if any
   if (peptide->HasAuxLocationsIndex()) {
@@ -455,8 +455,7 @@ Crux::Match* TideMatchSet::getCruxMatch(
       crux_protein->setId(protein->name().c_str());
       start_idx = crux_protein->findStart(originalTargetSeq, n_term, c_term);
       PeptideSrc* src = new PeptideSrc(NON_SPECIFIC_DIGEST, crux_protein, start_idx);
-      // NOTE : We modified this above, do we need to modify this here as well ?
-      src->setStartIdxOriginal(pos + 1);
+      src->setStartIdxOriginal(((!protein->has_target_pos()) ? pos : protein->target_pos()) + 1);
       crux_peptide->addPeptideSrc(src);
     }
   }
@@ -489,6 +488,9 @@ Crux::Match* TideMatchSet::getCruxMatch(
  * doesn't exist
  */
 const AA_MOD_T* TideMatchSet::lookUpMod(double delta_mass) {
+  AA_MOD_T** list_of_mods;
+  int num_mods = get_all_aa_mod_list(&list_of_mods);
+
   for (int i = 0; i < num_mods; ++i) {
     const AA_MOD_T* mod = list_of_mods[i];
     if (aa_mod_get_mass_change(mod) == delta_mass) {
@@ -502,7 +504,7 @@ const AA_MOD_T* TideMatchSet::lookUpMod(double delta_mass) {
   aa_mod_set_mass_change(new_mod, delta_mass);
   list_of_mods[num_mods] = new_mod;
 
-  ++num_mods;
+  incrementNumMods();
 
   return new_mod;
 }
@@ -512,12 +514,13 @@ void TideMatchSet::gatherTargetsAndDecoys(
   const ProteinVec& proteins,
   vector<Arr::iterator>& targetsOut,
   vector<Arr::iterator>& decoysOut,
-  int top_n
+  int top_n,
+  bool highScoreBest // indicates semantics of score magnitude
 ) {
-  make_heap(matches_->begin(), matches_->end(), less_score());
+  make_heap(matches_->begin(), matches_->end(), highScoreBest ? lessScore : moreScore);
   if (!OutputFiles::isConcat() && TideSearchApplication::hasDecoys()) {
     for (Arr::iterator i = matches_->end(); i != matches_->begin(); ) {
-      pop_heap(matches_->begin(), i--, less_score());
+      pop_heap(matches_->begin(), i--, highScoreBest ? lessScore : moreScore);
       const Peptide& peptide = *(peptides->GetPeptide(i->second));
       const pb::Protein& protein = *(proteins[peptide.FirstLocProteinId()]);
       vector<Arr::iterator>* vec_ptr = !peptide.IsDecoy() ? &targetsOut : &decoysOut;
@@ -528,7 +531,7 @@ void TideMatchSet::gatherTargetsAndDecoys(
   } else {
     int toAdd = min(top_n + 1, matches_->size());
     for (int i = 0; i < toAdd; ) {
-      pop_heap(matches_->begin(), matches_->end() - i, less_score());
+      pop_heap(matches_->begin(), matches_->end() - i, highScoreBest ? lessScore : moreScore);
       targetsOut.push_back(matches_->end() - (++i));
     }
   }
@@ -603,7 +606,7 @@ void TideMatchSet::computeDeltaCns(
   vector<Arr::iterator>::const_reverse_iterator i = (vec.size() > top_n) ?
     vec.rend() - (top_n + 1) : vec.rbegin();
   for (; i != vec.rend(); ++i) {
-    const FLOAT_T xcorr = (*i)->first / 100000000.0;
+    const FLOAT_T xcorr = (*i)->first.first;
     delta_cn_map->insert(make_pair(*i, (lastXcorr == BILLION) ?
       0 : (xcorr - lastXcorr) / max(xcorr, FLOAT_T(1))));
     lastXcorr = xcorr;

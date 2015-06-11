@@ -32,7 +32,6 @@ void analyze_matches_main(
     "pi-zero",
     "verbosity",
     "parameter-file",
-    "protein-database",
     "overwrite",
     "output-dir",
     "fileroot"

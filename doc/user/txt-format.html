@@ -20,6 +20,7 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <th rowspan="2">comet</th>
 <th rowspan="2">tide</th>
 <th rowspan="2">search-for-xlinks</th>
+<th rowspan="2">search-for-xlinks (new)</th>
 <th colspan="4">barista</th>
 <th rowspan="2">q-ranker</th>
 <th colspan="3">percolator</th>
@@ -51,6 +52,7 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&#10003;</td>
 <td>&#10003;</td>
 <td>&#10003;</td>
+<td>&#10003;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&#10003;</td>
@@ -64,6 +66,7 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>2</td>
 <td>charge</td>
 <td>The charge state for this spectrum in this PSM.</td>
+<td>&#10003;</td>
 <td>&#10003;</td>
 <td>&#10003;</td>
 <td>&#10003;</td>
@@ -87,6 +90,7 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&#10003;</td>
 <td>&#10003;</td>
 <td>&#10003;</td>
+<td>&#10003;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&#10003;</td>
@@ -105,9 +109,10 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&#10003;</td>
 <td>&#10003;</td>
 <td>&#10003;</td>
+<td>&#10003;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-   <td>&#10003;</td>
+<td>&#10003;</td>
 <td>&#10003;</td>
 <td>&#10003;</td>
 <td>&nbsp;</td>
@@ -121,6 +126,7 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&#10003;</td>
 <td>&#10003;</td>
 <td>&nbsp;</td>
+<td>&#10003;</td>
 <td>&#10003;</td>
 <td>&#10003;</td>
 <td>&nbsp;</td>
@@ -141,6 +147,7 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&#10003;</td>
 <td>&#10003;</td>
+<td>&#10003;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&#10003;</td>
@@ -156,6 +163,7 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>The SEQUEST-type preliminary score.</td>
 <td>&#10003;</td>
 <td>&#10003;</td>
+<td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&#10003;</td>
 <td>&#10003;</td>
@@ -179,6 +187,7 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&#10003;</td>
 <td>&#10003;</td>
 <td>&nbsp;</td>
+<td>&nbsp;</td>
 <td>&#10003;</td>
 <td>&#10003;</td>
 <td>&nbsp;</td>
@@ -194,7 +203,9 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <tr bgcolor="#DEDEDE">
 <td>9</td>
 <td>xcorr score</td>
-<td>The SEQUEST-type cross correlation score.</td>
+<td>The SEQUEST-type cross correlation score.
+This column only appears when <code>exact-p-value=F</code>.</td>
+<td>&#10003;</td>
 <td>&#10003;</td>
 <td>&#10003;</td>
 <td>&#10003;</td>
@@ -211,16 +222,20 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 
 <tr>
 <td>10</td>
-<td>xcorr rank</td>
-<td>The rank of this PSM when sorted by xcorr.</td>
-<td>&#10003;</td>
-<td>&#10003;</td>
-<td>&#10003;</td>
-<td>&#10003;</td>
+<td>exact p-value</td>
+<td>The p-value computed as described in
+  <a href="http://www.ncbi.nlm.nih.gov/pubmed/24895379">"Computing Exact p-values
+  for a Cross-correlation Shotgun Proteomics Score Function"</a>.
+  This column only appears when <code>exact-p-value=T</code>.</td>
+<td>&nbsp;</td>
 <td>&#10003;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
@@ -229,16 +244,18 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 
 <tr bgcolor="#DEDEDE">
 <td>11</td>
-<td>p-value</td>
-<td>The p-value computed from the estimated Weibull parameters of the score distribution for this spectrum.</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&#10003;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
+<td>refactored xcorr</td>
+<td>A discretized version of XCorr, used to compute the p-value.
+This column only appears when <code>exact-p-value=T</code>.</td>
 <td>&nbsp;</td>
 <td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
@@ -247,44 +264,47 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 
 <tr>
 <td>12</td>
-<td>percolator score</td>
-<td>The discriminant score assigned by percolator.</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
+<td>xcorr rank</td>
+<td>The rank of this PSM when sorted by xcorr.</td>
 <td>&#10003;</td>
 <td>&#10003;</td>
 <td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 <td>&nbsp;</td>
 </tr>
 
 <tr bgcolor="#DEDEDE">
 <td>13</td>
-<td>percolator rank</td>
-<td>The rank of this PSM, peptide or protein when sorted by percolator score.</td>
+<td>p-value</td>
+<td>The p-value computed from the estimated Weibull parameters of the score distribution for this spectrum.</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&#10003;</td>
-<td>&#10003;</td>
-<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 <td>&nbsp;</td>
 </tr>
 
 <tr>
 <td>14</td>
-<td>percolator q-value</td>
-<td>The q-value assigned by percolator.</td>
+<td>percolator score</td>
+<td>The discriminant score assigned by percolator.</td>
+<td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
@@ -301,8 +321,47 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 
 <tr bgcolor="#DEDEDE">
 <td>15</td>
+<td>percolator rank</td>
+<td>The rank of this PSM, peptide or protein when sorted by percolator score.</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+</tr>
+
+<tr>
+<td>16</td>
+<td>percolator q-value</td>
+<td>The q-value assigned by percolator.</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+</tr>
+
+<tr bgcolor="#DEDEDE">
+<td>17</td>
 <td>q-ranker score</td>
 <td>The discriminant score assigned by q-ranker.</td>
+<td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
@@ -319,7 +378,7 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 </tr>
 
 <tr>
-<td>16</td>
+<td>18</td>
 <td>q-ranker q-value</td>
 <td>The q-value assigned by q-ranker.</td>
 <td>&nbsp;</td>
@@ -329,6 +388,7 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
+<td>&nbsp;</td>
 <td>&#10003;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
@@ -337,7 +397,7 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 </tr>
 
 <tr bgcolor="#DEDEDE">
-<td>17</td>
+<td>19</td>
 <td>q-ranker PEP</td>
 <td>The posterior error probability estimated from the q-ranker score</td>
 <td>&nbsp;</td>
@@ -347,43 +407,8 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-<td>&#10003;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-</tr>
-
-<tr>
-<td>18</td>
-<td>barista score</td>
-<td>The discriminant score assigned by barista.</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&#10003;</td>
-<td>&#10003;</td>
-<td>&#10003;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-</tr>
-
-<tr bgcolor="#DEDEDE">
-<td>19</td>
-<td>barista q-value</td>
-<td>The q-value assigned by barista.</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&#10003;</td>
-<td>&#10003;</td>
-<td>&#10003;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
@@ -392,14 +417,15 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 
 <tr>
 <td>20</td>
-<td>barista PEP</td>
-<td>The PEP assigned by barista</td>
+<td>barista score</td>
+<td>The discriminant score assigned by barista.</td>
+<td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&#10003;</td>
 <td>&#10003;</td>
-<td>&nbsp;</td>
+<td>&#10003;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
@@ -410,15 +436,16 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 
 <tr bgcolor="#DEDEDE">
 <td>21</td>
-<td>b/y ions matched</td>
-<td>The number of b-ions and y-ions in the peptide that have a corresponding peak in the spectrum.</td>
+<td>barista q-value</td>
+<td>The q-value assigned by barista.</td>
 <td>&nbsp;</td>
-<td>&#10003;</td>
-<td>&#10003;</td>
-<td>&#10003;</td>
+<td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
@@ -428,11 +455,50 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 
 <tr>
 <td>22</td>
+<td>barista PEP</td>
+<td>The PEP assigned by barista</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+
+<tr bgcolor="#DEDEDE">
+<td>23</td>
+<td>b/y ions matched</td>
+<td>The number of b-ions and y-ions in the peptide that have a corresponding peak in the spectrum.</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+
+<tr>
+<td>24</td>
 <td>b/y ions total</td>
 <td>The total number of b- and y-ions predicted for this peptide.</td>
 <td>&#10003;</td>
 <td>&#10003;</td>
 <td>&#10003;</td>
+<td>&nbsp;</td>
 <td>&#10003;</td>
 <td>&#10003;</td>
 <td>&nbsp;</td>
@@ -445,7 +511,7 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 </tr>
 
 <tr bgcolor="#DEDEDE">
-<td>23</td>
+<td>25</td>
 <td>total matches/spectrum</td>
 <td>The number of candidate peptides in the database found for this
   spectrum, including duplicates.  Note that this is always the number of target candidate
@@ -453,6 +519,7 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&#10003;</td>
 <td>&nbsp;</td>
 <td>&#10003;</td>
+<td>&nbsp;</td>
 <td>&#10003;</td>
 <td>&#10003;</td>
 <td>&nbsp;</td>
@@ -465,7 +532,7 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 </tr>
 
 <tr>
-<td>24</td>
+<td>26</td>
 <td>distinct matches/spectrum</td>
 <td>The number of unique candidate peptides in the database found for this
   spectrum.  Note that this is always the number of target candidate
@@ -475,6 +542,7 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&#10003;</td>
 <td>&#10003;</td>
 <td>&#10003;</td>
+<td>&#10003;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&#10003;</td>
@@ -486,32 +554,15 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 
 
 <tr bgcolor="#DEDEDE">
-<td>25</td>
+<td>27</td>
 <td>sequence</td>
 <td> The peptide sequence.</td>
 <td>&#10003;</td>
 <td>&#10003;</td>
 <td>&#10003;</td>
 <td>&#10003;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&#10003;</td>
-<td>&#10003;</td>
 <td>&#10003;</td>
 <td>&nbsp;</td>
-<td>&nbsp;</td>
-</tr>
-
-<tr>
-<td>26</td>
-<td>cleavage type</td>
-<td>The cleavage rules for generating this peptide based on the user-specified enzyme specificity.</td>
-<td>&#10003;</td>
-<td>&#10003;</td>
-<td>&#10003;</td>
-<td>&#10003;</td>
-<td>&#10003;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&#10003;</td>
@@ -519,31 +570,13 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&#10003;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-</tr>
-
-<tr bgcolor="#DEDEDE">
-<td>27</td>
-<td>protein id</td>
-<td>A comma-separated list of proteins in which this peptide
-  appears. Optionally, the protein name may be followed by a number in parentheses giving the start position of the peptide in the protein.</td>
-<td>&#10003;</td>
-<td>&#10003;</td>
-<td>&#10003;</td>
-<td>&#10003;</td>
-<td>&#10003;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&#10003;</td>
-<td>&#10003;</td>
-<td>&#10003;</td>
-<td>&#10003;</td>
-<td>&#10003;</td>
 </tr>
 
 <tr>
 <td>28</td>
-<td>flanking aa</td>
-<td>The amino acids that precede and follow this peptide in the parent protein ID.</td>
+<td>cleavage type</td>
+<td>The cleavage rules for generating this peptide based on the user-specified enzyme specificity.</td>
+<td>&#10003;</td>
 <td>&#10003;</td>
 <td>&#10003;</td>
 <td>&#10003;</td>
@@ -560,44 +593,48 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 
 <tr bgcolor="#DEDEDE">
 <td>29</td>
-<td>RAW</td>
-<td>The raw (unnormalized) count of spectra per peptide</td>
+<td>protein id</td>
+<td>A comma-separated list of proteins in which this peptide
+  appears. Optionally, the protein name may be followed by a number in parentheses giving the start position of the peptide in the protein.</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
 <td>&#10003;</td>
 </tr>
 
 <tr>
 <td>30</td>
-<td>SIN</td>
-<td>A protein quantification score</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
+<td>flanking aa</td>
+<td>The amino acids that precede and follow this peptide in the parent protein ID.</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&#10003;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
 
 <tr bgcolor="#DEDEDE">
 <td>31</td>
-<td>NSAF</td>
-<td>The normalized spectral abundace factor</td>
+<td>RAW</td>
+<td>The raw (unnormalized) count of spectra per peptide</td>
+<td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
@@ -614,8 +651,9 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 
 <tr>
 <td>32</td>
-<td>dNSAF</td>
-<td>The distributed normalized spectral abundace factor</td>
+<td>SIN</td>
+<td>A protein quantification score</td>
+<td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
@@ -632,8 +670,9 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 
 <tr bgcolor="#DEDEDE">
 <td>33</td>
-<td>EMPAI</td>
-<td>The exponentially modified protein abundance index</td>
+<td>NSAF</td>
+<td>The normalized spectral abundace factor</td>
+<td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
@@ -650,8 +689,9 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 
 <tr>
 <td>34</td>
-<td> parsimony rank</td>
-<td>The protein rank based on its spectral-counts score.</td>
+<td>dNSAF</td>
+<td>The distributed normalized spectral abundace factor</td>
+<td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
@@ -668,8 +708,47 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 
 <tr bgcolor="#DEDEDE">
 <td>35</td>
+<td>EMPAI</td>
+<td>The exponentially modified protein abundance index</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+</tr>
+
+<tr>
+<td>36</td>
+<td> parsimony rank</td>
+<td>The protein rank based on its spectral-counts score.</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+</tr>
+
+<tr bgcolor="#DEDEDE">
+<td>37</td>
 <td>filename</td>
 <td>The name of the file in which the PSM appears.</td>
+<td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
@@ -685,7 +764,7 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 </tr>
 
 <tr>
-<td>36</td>
+<td>38</td>
 <td>psm_id</td>
 <td>PSM identifier.</td>
 <td>&nbsp;</td>
@@ -695,6 +774,7 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
+<td>&nbsp;</td>
 <td>&#10003;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
@@ -703,7 +783,7 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 </tr>
 
 <tr bgcolor="#DEDEDE">
-<td>37</td>
+<td>39</td>
 <td>protein group number</td>
 <td>Protein group index</td>
 <td>&nbsp;</td>
@@ -712,42 +792,7 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
-<td>&#10003;</td>
 <td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-</tr>
-
-<tr>
-<td>38</td>
-<td>peptides-scan.charge</td>
-<td>Peptides belonging to each protein in the group, with scan and charge (for example, EAMPK-001285.2)</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&#10003;</td>
-<td>&#10003;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&#10003;</td>
-<td>&nbsp;</td>
-</tr>
-
-<tr bgcolor="#DEDEDE">
-<td>39</td>
-<td>proteins</td>
-<td>Proteins in the protein group. Each protein can be followed by peptides in parenthesis, if they belong only to this particular protein in the group. Since peptides are considered indistinguishable if they have identical amino acid sequences or they differ only by I/L or T/S in the same position in the peptide, the peptides shared by the group may not all be identical.</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&#10003;</td>
 <td>&#10003;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
@@ -758,8 +803,47 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 
 <tr>
 <td>40</td>
+<td>peptides-scan.charge</td>
+<td>Peptides belonging to each protein in the group, with scan and charge (for example, EAMPK-001285.2)</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+</tr>
+
+<tr bgcolor="#DEDEDE">
+<td>41</td>
+<td>proteins</td>
+<td>Proteins in the protein group. Each protein can be followed by peptides in parenthesis, if they belong only to this particular protein in the group. Since peptides are considered indistinguishable if they have identical amino acid sequences or they differ only by I/L or T/S in the same position in the peptide, the peptides shared by the group may not all be identical.</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+
+<tr>
+<td>42</td>
 <td>parent group numbers</td>
 <td>The numbers of the protein groups in the barista.target.proteins.txt that are supersets of this group in terms of peptides.</td>
+<td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
@@ -775,7 +859,7 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 </tr>
 
 <tr bgcolor="#DEDEDE">
-<td>41</td>
+<td>43</td>
 <td>peptide mass mono</td>
 <td>Monoisotopic peptide mass</td>
 <td>&nbsp;</td>
@@ -790,10 +874,11 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
 
 <tr>
-<td>42</td>
+<td>44</td>
 <td>peptide mass average</td>
 <td>Average peptide mass</td>
 <td>&nbsp;</td>
@@ -808,10 +893,11 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
 
 <tr bgcolor="#DEDEDE">
-<td>43</td>
+<td>45</td>
 <td>mass error(ppm)</td>
 <td>The mass error (in ppm) between the observed precursor mass and the
     cross-link peptide product</td>
@@ -827,10 +913,34 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
 
 <tr>
-<td>44</td>
+<td>46</td>
+<td>protein id(loc)</td>
+<td>List of protein IDs that give rise to the first and second peptide in the
+    cross-link peptide product. (loc) indicates the location of the
+    peptide in the protein.  The ";" separates the protein ids from the
+    first and second peptide.</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&#10003;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+
+
+<tr>
+<td>47</td>
 <td>protein id(loc) 1</td>
 <td>List of protein IDs that give rise to the first peptide in the
     cross-link peptide product. (loc) indicates the location of the
@@ -847,10 +957,11 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
 
 <tr bgcolor="#DEDEDE">
-<td>45</td>
+<td>48</td>
 <td>protein id(loc) 2</td>
 <td>List of protein IDs that give rise to the second peptide in the
     cross-link peptide product. (loc) indicates the location of the
@@ -867,10 +978,11 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
 
 <tr>
-<td>46</td>
+<td>49</td>
 <td>by total</td>
 <td>Total number of b-y ions in product</td>
 <td>&nbsp;</td>
@@ -885,10 +997,11 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
 
 <tr bgcolor="#DEDEDE">
-<td>47</td>
+<td>50</td>
 <td>by observable (0-1200)</td>
 <td>Total number of b and y ions observable in the 0-1200 m/z range</td>
 <td>&nbsp;</td>
@@ -903,10 +1016,11 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
 
 <tr>
-<td>48</td>
+<td>51</td>
 <td>by observable bin (0-1200)</td>
 <td>Total number of b and y ions observable in the 0-1200 m/z range
   using 1 Da bins</td>
@@ -922,10 +1036,11 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
 
 <tr bgcolor="#DEDEDE">
-<td>49</td>
+<td>52</td>
 <td>by observable (0-max)</td>
 <td>Total number of b and y ions observable in the entire m/z range</td>
 <td>&nbsp;</td>
@@ -940,10 +1055,11 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
 
 <tr>
-<td>50</td>
+<td>53</td>
 <td>by observable bin (0-max)</td>
 <td>Total number of b and y ions observable in the entire m/z range
   using 1 Da bins</td>
@@ -959,10 +1075,11 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
 
 <tr bgcolor="#DEDEDE">
-<td>51</td>
+<td>54</td>
 <td>by observed bin</td>
 <td>Total number of b-y ions observed in spectrum</td>
 <td>&nbsp;</td>
@@ -977,10 +1094,11 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
 
 <tr>
-<td>52</td>
+<td>55</td>
 <td>ion current total</td>
 <td>Total ion current for spectrum</td>
 <td>&nbsp;</td>
@@ -995,10 +1113,11 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
 
 <tr bgcolor="#DEDEDE">
-<td>53</td>
+<td>56</td>
 <td>ion current observed</td>
 <td>Total ion current observed for matching b-y ions</td>
 <td>&nbsp;</td>
@@ -1013,15 +1132,17 @@ Various programs in Crux report their output and read inputs in tab-delimited te
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
+<td>&nbsp;</td>
 </tr>
 
 <tr>
-<td>54</td>
+<td>57</td>
 <td>ions observable bin (0-1200)</td>
 <td>Total ions observable (b, y, flanks, and neutral losses) within 0-1200 m/z range</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&#10003;</td>
+<td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>

@@ -176,8 +176,8 @@ void SpectralCounts::getProteinToPeptides(){
        pep_it != peptide_scores_.end(); ++pep_it){
     Peptide* peptide = pep_it->first;
     for(PeptideSrcIterator iter = peptide->getPeptideSrcBegin();
-	iter!= peptide->getPeptideSrcEnd();
-	++iter) {
+        iter!= peptide->getPeptideSrcEnd();
+        ++iter) {
       PeptideSrc* peptide_src = *iter; 
       Protein* protein = peptide_src->getParentProtein();
       if (protein_supporting_peptides_.find(protein) == 
@@ -228,8 +228,8 @@ void SpectralCounts::getProteinScoresDNSAF() {
     Peptide* peptide = pep_it->first;
     FLOAT_T pep_score = pep_it->second;
     for(PeptideSrcIterator iter=peptide->getPeptideSrcBegin();
-	iter!=peptide->getPeptideSrcEnd();
-	++iter) {
+        iter!=peptide->getPeptideSrcEnd();
+        ++iter) {
       PeptideSrc* peptide_src = *iter;
       Protein* protein = peptide_src->getParentProtein();
       if (protein_scores_unique_.find(protein) == protein_scores_unique_.end()){
@@ -259,8 +259,8 @@ void SpectralCounts::getProteinScoresDNSAF() {
     double unique_sum = 0.0;
    
     for(PeptideSrcIterator iter=peptide->getPeptideSrcBegin();
-	iter!=peptide->getPeptideSrcEnd();
-	++iter){
+        iter!=peptide->getPeptideSrcEnd();
+        ++iter){
       PeptideSrc* peptide_src = *iter;
       
       Protein* protein = peptide_src->getParentProtein();
@@ -273,8 +273,8 @@ void SpectralCounts::getProteinScoresDNSAF() {
     if (unique_sum != 0) {
      
       for(PeptideSrcIterator iter=peptide->getPeptideSrcBegin();
-	  iter!=peptide->getPeptideSrcEnd();
-	  ++iter){
+          iter!=peptide->getPeptideSrcEnd();
+          ++iter){
 
         PeptideSrc* peptide_src = *iter;
       
@@ -323,13 +323,13 @@ void SpectralCounts::getProteinScores(){
       Peptide* peptide = pep_it->first;
       FLOAT_T pep_score = pep_it->second;
       for (PeptideSrcIterator iter=peptide->getPeptideSrcBegin();
-	   iter!=peptide->getPeptideSrcEnd();
-	   ++iter) {
-	PeptideSrc* peptide_src =*iter;
+           iter!=peptide->getPeptideSrcEnd();
+           ++iter) {
+        PeptideSrc* peptide_src =*iter;
         Protein* protein = peptide_src->getParentProtein();
         if (protein_scores_.find(protein) == protein_scores_.end()){
-	  protein_scores_.insert(make_pair(protein, 0.0));
-	}
+          protein_scores_.insert(make_pair(protein, 0.0));
+        }
         protein_scores_[protein] += pep_score;
       }
     }

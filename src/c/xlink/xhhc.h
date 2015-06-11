@@ -99,7 +99,6 @@ void add_decoy(
  * search.
  */
 void find_all_precursor_ions(
-  Database* db,
   std::vector<LinkedPeptide>& all_ions ///< all of the precursors found -out 
   );
 

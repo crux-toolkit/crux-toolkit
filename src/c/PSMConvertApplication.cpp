@@ -59,12 +59,6 @@ int PSMConvertApplication::main(int argc, char** argv) {
 
   Database* data;
 
-/*  Database data(database_file.c_str(), false);
-  // MZID TESTING
-  string input_file = get_string_parameter_pointer("input PSM file");
-  MatchCollection* collection = MzIdentMLReader::parse(input_file.c_str(), &data, NULL);
-*/
-
   if (database_file.empty() || database_file.compare("__NULL_STR") == 0) {
     data = new Database();
     carp(CARP_INFO, database_file);
@@ -73,14 +67,10 @@ int PSMConvertApplication::main(int argc, char** argv) {
     data = new Database(database_file.c_str(), false);
     carp(CARP_INFO, "Created Database using Fasta File");
   }
-  
-// trying to use NULL database for mzid ?
-  Database* decoydata = new Database();
 
   PSMReader* reader;
   string input_format = get_string_parameter_pointer("input-format");
   string input_file = get_string_parameter_pointer("input PSM file");
-  // tsv, html, sqt, pin, pepxml, mzidentml, barista-xml
 
   bool isTabDelimited = false;
 
@@ -106,7 +96,6 @@ int PSMConvertApplication::main(int argc, char** argv) {
     } else {
       carp(CARP_FATAL, "Invalid Input Format, valid formats are: tsv, html, "
         "sqt, pin, pepxml, mzidentml, barista-xml");
-      reader = new MatchFileReader(input_file.c_str(), data, decoydata);
     }
   } else {
     if (endsWith(input_file, ".txt") == 0) {
@@ -132,7 +121,6 @@ int PSMConvertApplication::main(int argc, char** argv) {
         "Please name your files ending with .txt, .html, .sqt, .pin, "
         ".xml, .mzid, .barista.xml or use the --input-format option to "
         "specify file type");
-      reader = new MatchFileReader(input_file.c_str(), data);
     }
   }
 
@@ -191,52 +179,6 @@ int PSMConvertApplication::main(int argc, char** argv) {
   writer->openFile(this, output_file_name.c_str(), PSMWriter::PSMS);
   writer->write(collection, database_file);
   writer->closeFile();
-
-//  string pinfilename = "psm-convert.pin";
-//  string outputdir = string(get_string_parameter_pointer("output-dir"));
-
-/*  vector<MatchCollection*> decoyvec;
-
-  PinWriter pinwriter;
-  pinwriter.openFile(pinfilename.c_str(), outputdir.c_str(), true);
-  pinwriter.write(collection, decoyvec, 5);
-  pinwriter.closeFile();*/
-
-// Temporary, will remove when PSMWriter is finished, so it is ok to ignore this for now.
-/*
-  string output_file_name = make_file_path("psm-convert.txt");
-  ProteinMatchCollection protein_collection(collection);
-
-  if (output_format.compare("tsv") == 0) {
-    PMCDelimitedFileWriter writer;
-    writer.openFile(this, output_file_name, PMCDelimitedFileWriter::PSMS);
-    writer.write(&protein_collection);
-    writer.closeFile();
-  } else if (output_format.compare("html") == 0) {
-    carp(CARP_FATAL, "HTML format has not been implemented yet");
-  } else if (output_format.compare("sqt") == 0) {
-    PMCSQTWriter writer;
-    writer.openFile(this, output_file_name, PMCDelimitedFileWriter::PSMS);
-    writer.write(&protein_collection, database_file);
-    writer.closeFile();
-  } else if (output_format.compare("pin") == 0) {
-    carp(CARP_FATAL, "Pin format has not been implemented yet");
-  } else if (output_format.compare("pepxml") == 0) {
-    PMCPepXMLWriter writer;
-    writer.openFile(output_file_name.c_str(), overwrite);
-    writer.write(&protein_collection);
-    writer.closeFile();
-  } else if (output_format.compare("mzidentml") == 0) {
-    MzIdentMLWriter writer;
-    writer.openFile(output_file_name.c_str(), overwrite);
-    writer.addMatches(collection);
-    writer.closeFile();
-  } else if (output_format.compare("barista-xml") == 0) {
-    carp(CARP_FATAL, "Barista-XML format has not been implemented yet");
-  } else {
-      carp(CARP_FATAL, "Invalid Input Format, valid formats are: tsv, html, "
-        "sqt, pin, pepxml, mzidentml, barista-xml");
-  }*/
 
 // Clean Up
   delete collection;

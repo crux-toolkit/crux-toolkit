@@ -18,6 +18,7 @@
 #include "Index.h"
 #include "WinCrux.h"
 #include "LineFileReader.h"
+#include "boost/filesystem.hpp"
 
 using namespace std;
 
@@ -519,7 +520,10 @@ static const char* scorer_type_strings[NUMBER_SCORER_TYPES] =
   {"sp",
    "xcorr_score",
    "evalue_score",
-   
+
+   "xcorr first",
+   "xcorr second",
+
    "decoy_xcorr_qvalue",
    "decoy_xcorr_peptide_qvalue",
    "decoy_xcorr_PEP",
@@ -553,6 +557,8 @@ static const char* scorer_type_strings[NUMBER_SCORER_TYPES] =
    "delta_lcn",
    "by_ions_matched",
    "by_ions_total",
+   "exact_pvalue",
+   "refactored_xcorr",
   };
 
 bool string_to_scorer_type(const char* name, SCORER_TYPE_T* result){
@@ -789,26 +795,15 @@ char* parse_filename(const char* file){
  * Examines filename to see if it ends in the given extension
  * \returns True if filename ends in the extension, else false.
  */
-bool has_extension(const char* filename, const char* extension){
-
-  if( extension == NULL ){
-    return true;
-  }
-  if( filename == NULL ){
+bool has_extension(string filename, string extension){
+  size_t file_len = filename.length();
+  size_t ext_len = extension.length();
+  if (ext_len > file_len) {
     return false;
   }
-
-  int name_length = strlen(filename);
-  int extension_length = strlen(extension);
-  if( extension_length > name_length ){
-    return false;
-  }
-  // point to the last few characters of the name 
-  const char* look_here = filename + (name_length - extension_length);
-  if( strcmp(look_here, extension) == 0){
-    return true;
-  }
-  return false;
+  std::transform(filename.begin(), filename.end(), filename.begin(), ::tolower);
+  std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
+  return filename.compare(file_len - ext_len, ext_len, extension) == 0;
 }
 
 
@@ -1095,7 +1090,7 @@ int create_output_directory(
     // Does this accomodate the case where one or more of the
     // parent directories doesn't exit?
     int dir_access = S_IRWXU + S_IRWXG + S_IRWXO;
-    if (mkdir(output_folder, dir_access)) {
+    if (!boost::filesystem::create_directories(output_folder)) {
       // mkdir failed
       carp(
         CARP_ERROR,

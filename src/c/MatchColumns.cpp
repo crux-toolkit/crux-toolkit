@@ -19,6 +19,8 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "sp rank",
   "xcorr score",
   "xcorr rank",
+  "exact p-value",
+  "refactored xcorr",
   "e-value",
   "p-value",
 #ifdef NEW_COLUMNS
@@ -74,6 +76,8 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "SpecId",  // for PinWriter, many of these are repeats with slightly different names, is there better way to do this?
   "Label",
   "ScanNr",
+  "ExpMass",
+  "CalcMass",
   "lnrSp",
   "deltLCn",
   "deltCn",
@@ -90,6 +94,12 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "absdM",
   "Peptide",
   "Proteins" // end for PinWriter.
+  "decoy matches/spectrum",
+  "product type",
+  "ppm",
+  "xcorr 1",
+  "xcorr 2",
+  "protein id x"
 };
 
 /**

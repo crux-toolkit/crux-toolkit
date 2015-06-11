@@ -8,23 +8,18 @@
 #include <set>
 #include <string>
 #include <vector>
-#include "crux-file-utils.h"
-#include "crux-utils.h"
-#include "match_objects.h"
 #include "objects.h"
 #include "Spectrum.h"
 #include "mass.h"
-#include "DelimitedFile.h"
 #include "Match.h"
 #include "MatchCollection.h"
-#include "MatchFileWriter.h"
 #include "PSMWriter.h"
 #include "SpectrumZState.h"
 #include "Spectrum.h"
 #include "Peptide.h"
 #include <limits>
 
-class PinWriter : public MatchFileWriter, public PSMWriter {
+class PinWriter : public PSMWriter {
  public:
   PinWriter();
   ~PinWriter();
@@ -49,10 +44,21 @@ class PinWriter : public MatchFileWriter, public PSMWriter {
     std::vector<MatchCollection*>& decoy_psms,
     int top_rank
   );
+
+  // PSMWriter write
+  void write(
+    MatchCollection* collection,
+    std::string database
+  );
   
   void printHeader();
 
   void closeFile();
+  void openFile(
+    const char* filename, 
+    const char* ouput_directory,
+    bool overwrite
+  );
 
   // PSMWriter openfile version
   void openFile(
@@ -60,18 +66,6 @@ class PinWriter : public MatchFileWriter, public PSMWriter {
     std::string filename, ///< name of the file to open
     MATCH_FILE_TYPE type ///< type of file to be written
   );
-
-  // PSMWriter write
-  void write(
-    MatchCollection* collection,
-    std::string database
-  );
-
-  void openFile(
-    const char* filename, 
-    const char* ouput_directory,
-    bool overwrite
-  ); 
 
  protected:
   FILE* output_file_;
@@ -96,9 +90,7 @@ class PinWriter : public MatchFileWriter, public PSMWriter {
 
   void printPSM(
     Crux::Match* match, 
-    Crux::Spectrum* spectrum, 
-    bool is_decoy,
-    int rank
+    Crux::Spectrum* spectrum
   );
 
   std::string getPeptide(Crux::Peptide* peptide);
@@ -107,11 +99,8 @@ class PinWriter : public MatchFileWriter, public PSMWriter {
   bool isInfinite(FLOAT_T x);
 
   std::string getId(
-    int charge,  
-    bool is_decoy,
-    int scan_number,
-    int rank,
-    int file_idx
+    Crux::Match* match,
+    int scan_number
   ); 
 
   FLOAT_T calcMassOfMods(Crux::Peptide* peptide);

@@ -75,7 +75,6 @@ bool XLinkBondMap::canLink(
   Peptide* peptide, ///<peptide object pointer
   int idx             ///<sequence index
    ) {
-
   for (XLinkBondMap::iterator iter = begin();
     iter != end(); ++iter) {
 
@@ -96,21 +95,19 @@ bool XLinkBondMap::canLink(
     int idx2            ///<2nd sequence idx
     ) {
 
-  for (XLinkBondMap::iterator iter1 = begin();
-    iter1 != end(); ++iter1) {
+  return canLink(peptide, peptide, idx1, idx2);
+}
 
-    if (iter1->first.hasSite(peptide, idx1)) {
-        for (set<XLinkSite>::iterator iter2 = iter1->second.begin();
-          iter2 != iter1->second.end();
-          ++iter2) {
-      
-        if (iter2->hasSite(peptide, idx2)) {
-          return true;
-        }
-      }
-    }
-  }
-  return false;
+bool XLinkBondMap::canLink(
+  XLinkablePeptide& pep,
+  int link1_site,
+  int link2_site
+  ) {
+
+  return canLink(
+    pep.getPeptide(),
+    pep.getLinkSite(link1_site),
+    pep.getLinkSite(link2_site));
 }
 
 /**
@@ -140,3 +137,43 @@ bool XLinkBondMap::canLink(
   }
   return false;
 }
+
+bool XLinkBondMap::canLink(
+  XLinkablePeptide& pep1,
+  XLinkablePeptide& pep2,
+  int link1_site,
+  int link2_site
+  ) {
+  
+  return canLink(
+    pep1.getPeptide(),
+    pep2.getPeptide(),
+    pep1.getLinkSite(link1_site),
+    pep2.getLinkSite(link2_site));
+
+}
+
+
+bool XLinkBondMap::canLink(
+  string& protein,
+  int idx) {
+
+  
+  for (XLinkBondMap::iterator iter = begin();
+    iter != end(); ++iter) {
+
+    if (iter->first.hasSite(protein, idx)) {
+      return true;
+    }
+  }
+  return false;
+
+}
+
+/*                                                                                                                                                                                                                          
+ * Local Variables:                                                                                                                                                                                                         
+ * mode: c                                                                                                                                                                                                                  
+ * c-basic-offset: 2                                                                                                                                                                                                        
+ * End:                                                                                                                                                                                                                     
+ */
+

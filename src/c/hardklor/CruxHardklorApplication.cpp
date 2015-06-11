@@ -3,6 +3,7 @@
  * \brief Runs hardklor
  *****************************************************************************/
 #include "CruxHardklorApplication.h"
+#include "CarpStreamBuf.h"
 #include "DelimitedFileWriter.h"
 
 using namespace std;
@@ -43,6 +44,7 @@ int CruxHardklorApplication::main(int argc, char** argv) {
     "max-p",
     "resolution",
     "instrument",
+    "centroided",
     "scan-number",
     "sensitivity",
     "signal-to-noise",
@@ -163,6 +165,12 @@ int CruxHardklorApplication::main(
   hk_args_vec.push_back("-res");
   hk_args_vec.push_back(DelimitedFileWriter::to_string(get_double_parameter("resolution")));
   hk_args_vec.push_back(get_string_parameter("instrument"));
+  
+  if (get_boolean_parameter("centroided")) {
+    hk_args_vec.push_back("-c true");
+  } else {
+    hk_args_vec.push_back("-c false");
+  }
 
   if (string(get_string_parameter_pointer("scan-number")) != "__NULL_STR") {
     const char* scan_numbers=get_string_parameter_pointer("scan-number");
@@ -223,8 +231,16 @@ int CruxHardklorApplication::main(
     carp(CARP_DEBUG, "hk_argv[%d]=%s", idx, hk_argv[idx]);
   }
 
+  // Re-route stream to log file
+  CarpStreamBuf buffer;
+  streambuf* old = cout.rdbuf();
+  cout.rdbuf(&buffer);
+
   /* Call hardklorMain */
   int ret = hardklorMain(hk_argc, hk_argv);
+
+  // Recover stream
+  cout.rdbuf(old);
 
   delete []hk_argv;
 

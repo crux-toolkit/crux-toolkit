@@ -10,6 +10,7 @@
 #include <cstring>
 
 #include <iostream>
+#include <fstream>
 
 #include "DelimitedFile.h"
 #include "parameter.h"
@@ -381,6 +382,82 @@ MatchCollection* SQTReader::parse(
 
   return collection;
 
+}
+
+/**
+ * \use the modification symbols in this SQT file
+ * looks for DiffMod <residues><symbol>=<delta mass.
+ */
+void SQTReader::readSymbols(const string& file, bool append) {
+  ifstream sqt(file.c_str());
+  if (!sqt) {
+    carp(CARP_FATAL, "Could not open '%s' for reading.", file.c_str());
+  }
+
+  bool doneReset = false;
+
+  AA_MOD_T** list_of_mods;
+  int num_mods = get_all_aa_mod_list(&list_of_mods);
+
+  string line;
+  carp(CARP_DEBUG, "Reading modifications from %s", file.c_str());
+  while (std::getline(sqt, line)) {
+    size_t idx;
+    if ((idx = line.find_first_not_of(" \t")) != string::npos &&
+        line[idx] == 'H' &&
+        (idx = line.find("DiffMod", idx + 1)) != string::npos &&
+        (idx = line.find_first_of(" \t", idx + 1)) != string::npos) {
+      if (num_mods == MAX_AA_MODS) {
+        carp(CARP_FATAL, "Too many modifications in file '%s'", file.c_str());
+      }
+      if ((idx = line.find_first_not_of(" \t", idx + 1)) == string::npos) {
+        continue;
+      }
+      char residue = toupper(line[idx]);
+      if (++idx >= line.length()) {
+        continue;
+      }
+      char symbol = line[idx];
+      if ((idx = line.find('=', idx + 1)) == string::npos ||
+          idx >= line.length() - 1) {
+        continue;
+      }
+      FLOAT_T mass;
+      from_string(mass, line.substr(idx + 1));
+
+      if (residue < 'A' || residue > 'Z') {
+        carp(CARP_FATAL, "The DiffMod residue '%c' in file '%s' is invalid",
+                         residue, file.c_str());
+      }
+
+      if (!doneReset && !append) {
+        resetMods();
+        doneReset = true;
+      }
+
+      AA_MOD_T* mod = NULL;
+      for (int i = 0; i < num_mods; ++i) {
+        if (aa_mod_get_mass_change(list_of_mods[i]) == mass) {
+          mod = list_of_mods[i];
+          aa_mod_get_aa_list(mod)[residue - 'A'] = true;
+          break;
+        }
+      }
+      if (!mod) {
+        mod = new_aa_mod(num_mods);
+        aa_mod_set_mass_change(mod, mass);
+        aa_mod_set_symbol(mod, symbol);
+        aa_mod_get_aa_list(mod)[residue - 'A'] = true;
+        list_of_mods[num_mods] = mod;
+        incrementNumMods();
+        ++num_mods;
+      }
+
+      carp(CARP_DETAILED_DEBUG, "Read mod %c (symbol %c) with mass %f",
+           residue, symbol, mass);
+    }
+  }
+  carp(CARP_DEBUG, "Read %d modifications from %s", num_mods, file.c_str());
 }
 
 //TODO - remove this code after some time of debugging.

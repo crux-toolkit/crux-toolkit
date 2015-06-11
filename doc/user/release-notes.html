@@ -7,11 +7,59 @@
 <blockquote> 
 <h1>Release notes for Crux</h1>
 
-<h2>Changes since last release</h2>
+<h2>Changes since last named release</h2>
 
 <h3>Minor changes</h3>
 
 <ul>
+<li>
+The default value of <code>mz_bin_offset</code> has been changed to
+0.40 from 0.68.</li>
+
+<li>
+The <code>percolator</code> command outputs the <code>pout</code> XML format
+again.</li>
+
+<li>
+Fixed a bug in <code>tide-search</code> causing it to fail when
+<code>remove-precursor-peak</code> removed all peaks in a spectrum.</li>
+
+</ul>
+
+<hr></hr>
+
+
+<h2>Version 2.1</h2> October 8, 2014
+
+<h3>Major enhancements</h3>
+
+<ul>
+
+<li>
+The <code>tide-search</code> command now supports calculation of exact
+p-values via dynamic programming, as described
+in <a href="http://www.ncbi.nlm.nih.gov/pubmed/24895379">this
+article</a>.  The p-value calculation is controlled with
+the <code>exact-p-value</code> parameter.</li>
+
+<li>
+<code>search-for-xlinks</code> now supports variable modifications and
+larger protein databases.  This new code is disabled by default, but
+can be turned on by setting the
+parameter <code>use-old-xlink=F</code>.</li>
+
+</ul>
+
+<h3>Minor changes</h3>
+
+<ul>
+
+<li>
+The default value of <code>mz_bin_offset</code> has been changed to 0.40 from 0.68.</li>
+
+<li>
+The <code>centroided</code> parameter for the <code>hardklor</code> command is
+now implemented.</li>
 
 <li>
 The <code>spectrum-format</code> parameter for the <code>bullseye</code> command
@@ -31,12 +79,12 @@ to <code>spectral-counts</code> now only accepts fasta files.  Parsing
 of a protein index is no longer supported.</li>
 
 <li>
-A bug was fixed in the <code>spectral-counts</code> that prevented 
+A bug was fixed in the <code>spectral-counts</code> command that prevented 
 <code>tide-search</code> output files from being parsed correctly.</li>   
 
 <li>
 The <code>default-direction</code> parameter now takes a string value of the feature
-name rather than an integer
+name rather than an integer.
 </li>
 
 <li>
@@ -44,13 +92,13 @@ The parameters <code>mz-bin-width</code> and <code>mz-bin-offset</code> have bee
 to <code>tide-search</code>.</li>
 
 <li>
-Percolator output now includes, for each PSM, the name of the filename
+Percolator output now includes, for each PSM, the name of the file
 in which the spectrum resides.
 </li>
 
 <li>
-The parameters <code>clip-nterm-methionine</code> and <code>keep-terminal-aminos
-</code> have been added to <code>tide-index</code>.</li>
+The parameters <code>clip-nterm-methionine</code>, <code>keep-terminal-aminos</code>, and <code>min-mods</code> have been added to <code>tide-index</code>.
+</li>
 
 <li>
 The parameters <code>use-flanking-peaks</code>
@@ -60,13 +108,33 @@ and <code>use-neutral-loss-peaks</code> have been added to
 <li>
 The calculation of XCorr was simplified in Tide.  In the new version, 
 <code>tide-index</code> only generates peptides and sorts them,
-leaving the generation of theoretical peaks to be done on-the-fly
-by <code>tide-search</code>.</li>
+leaving the generation of theoretical peaks to be done entirely on the
+fly by <code>tide-search</code>.</li>
 
 <li>
 The <code>tide-search</code> command now prints search progress reports both to
 the screen and to the log file. The interval at which progress is printed can
 be controlled using the <code>print-search-progress</code> parameter.</li>
+
+<li>
+The <code>calibrate-scores</code> command now outputs files with the stem
+"calibrate-scores" rather than "qvalue."</li>
+
+<li>
+The <code>use-flanking-peaks</code> parameter now has a default value of
+false.</li>
+
+<li>
+The Comet search engine was updated to version 2014011.</li>
+
+<li>
+The MSToolkit parser was updated to the latest version (r73).</li>
+
+<li>
+The <code>version</code> command now outputs the revision number.</code>
+
+<li>
+Various improvements in performance and error handling were implemented.</li>
 
 </ul>
 

@@ -37,17 +37,8 @@ ln -s -f libgd-*-mt-2_1.a libgd.a
   { ln -s -f libz-*-mt-1_2.a libz-mt-s-1_2.a; ln -s -f libz-*-mt-1_2.a libz.a; }
 ln -s -f libboost_filesystem-*-mt.a libboost_filesystem-mt-s.a 
 ln -s -f libboost_filesystem-*-mt.a libboost_filesystem.a 
-ln -s -f libboost_regex-*-mt.a  libboost_regex-mt-s.a     
-ln -s -f libboost_regex-*-mt.a  libboost_regex.a     
 ln -s -f libboost_system-*-mt.a libboost_system-mt-s.a 
 ln -s -f libboost_system-*-mt.a libboost_system.a 
 ln -s -f libfreetype-*-mt-2_4.a  libfreetype-mt-s-2_4.a
 ln -s -f libfreetype-*-mt-2_4.a  libfreetype.a
-ln -s -f libpng-*-mt-1_5.a libpng-mt-s-1_5.a
-ln -s -f libpng-*-mt-1_5.a libpng.a
 
-# Copy the file needed for Gregorian date time
-
-cd ..
-
-cp $install_path/build/src/ProteoWizard/libraries/boost_1_54_0/boost/date_time/gregorian_calendar.ipp include/boost/date_time

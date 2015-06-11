@@ -20,13 +20,14 @@
 #include "DelimitedFile.h"
 #include "parameter.h"
 #include "MatchCollectionParser.h"
+#include "TideMatchSet.h"
 
 
 using namespace std;
 using namespace Crux;
 
 //Buffer for expat's xml reading routines
-#define BUFFSIZE	8192
+#define BUFFSIZE 8192
 char Buff[BUFFSIZE];
 
 void open_handler(void *data, const char *el, const char **attr) {
@@ -169,8 +170,8 @@ MatchCollection* PepXMLReader::parse() {
 
     if (! XML_Parse(xml_parser, Buff, len, done)) {
       carp(CARP_FATAL, "Parse error at line %d:\n%s\n",
-	      (int)XML_GetCurrentLineNumber(xml_parser),
-	      XML_ErrorString(XML_GetErrorCode(xml_parser)));
+           (int)XML_GetCurrentLineNumber(xml_parser),
+           XML_ErrorString(XML_GetErrorCode(xml_parser)));
       exit(-1);
     }
   }
@@ -213,7 +214,7 @@ void PepXMLReader::spectrumQueryOpen(
   double precursor_mz = (precursor_mass + (MASS_PROTON * (double) charge)) / (double)charge;
   vector<int> charge_vec;
   charge_vec.push_back(charge);
-  current_spectrum_ = new Spectrum(first_scan, last_scan, precursor_mz, charge_vec, "");
+  current_spectrum_ = new Crux::Spectrum(first_scan, last_scan, precursor_mz, charge_vec, "");
   current_zstate_.setNeutralMass(precursor_mass, charge);
 }
 
@@ -345,7 +346,7 @@ void PepXMLReader::searchHitOpen(
   Protein* protein = 
     MatchCollectionParser::getProtein(database_, decoy_database_, protein_string, is_decoy);
   int start_idx = protein->findStart(current_peptide_sequence_, prev_aa, next_aa);
-  Peptide* peptide = new Peptide(length, peptide_mass, protein, start_idx);
+  Crux::Peptide* peptide = new Crux::Peptide(length, peptide_mass, protein, start_idx);
 
   current_match_ = new Match(peptide, current_spectrum_, current_zstate_, is_decoy);
   if (is_decoy) {
@@ -434,7 +435,8 @@ void PepXMLReader::modAminoAcidMassOpen(
   
   if (position > 0 && have_mod_mass) {
     //set aminoacid modification.
-    const AA_MOD_T* aa_mod = get_aa_mod_from_mass(mod_mass);
+//    const AA_MOD_T* aa_mod = get_aa_mod_from_mass(mod_mass);
+    const AA_MOD_T* aa_mod = TideMatchSet::lookUpMod(mod_mass);
     MODIFIED_AA_T* mod_seq = current_match_->getPeptide()->getModifiedAASequence();
     modify_aa(&mod_seq[position-1], aa_mod);
     current_match_->getPeptide()->setModifiedAASequence(mod_seq, true);

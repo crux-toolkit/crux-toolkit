@@ -96,7 +96,7 @@ class SpectrumCollection {
    */
   virtual Crux::Spectrum* getSpectrum(
     int first_scan      ///< The first scan of the spectrum to retrieve -in
-  );
+  ) = 0;
 
   /**
    * Parses a single spectrum from a spectrum_collection with first scan
@@ -107,7 +107,7 @@ class SpectrumCollection {
   virtual bool getSpectrum(
     int first_scan,      ///< The first scan of the spectrum to retrieve -in
     Crux::Spectrum* spectrum   ///< Put the spectrum info here
-  );
+  ) = 0;
 
   /**
    * \returns A pointer to the name of the file containing these spectra.

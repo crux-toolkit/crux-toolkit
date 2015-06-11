@@ -70,10 +70,10 @@ int PredictPeptideIons::main(int argc, char** argv) {
   int num_arguments = sizeof(argument_list) / sizeof(char*);
 
   initialize(argument_list,
-	     num_arguments,
-	     option_list,
-	     num_options,
-	     argc, argv);
+             num_arguments,
+             option_list,
+             num_options,
+             argc, argv);
 
   /* Get Arguments */
   const char* peptide_sequence = get_string_parameter_pointer("peptide sequence");

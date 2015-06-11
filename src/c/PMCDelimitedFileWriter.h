@@ -95,6 +95,7 @@ public:
 private:
 
   bool write_html_; // this determines whether we want to write in html format. Default value = false;
+  CruxApplication* application_; // pointer to the application using this program
 
   // function pointer to the appropriate writing function for the current file type
   void (PMCDelimitedFileWriter::*write_function_)(ProteinMatchCollection*);

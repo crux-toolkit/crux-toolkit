@@ -1,13 +1,17 @@
 <html>
 <head>
-  <meta http-equiv="content-type" content="text/html; charset=utf-8">
-  <title>Using Sourceforge</title>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+  <title>Managing the Crux TeamCity Server</title>
   <style type="text/css" media="screen">
-    body {margin: 72px;
+    body {margin:72px;}
+  </style>
+  <style type="text/css">
+    table {border-collapse:collapse;}
+    th {text-align: left; border-bottom: 1px solid black;}
   </style>
 </head>
 <body>
-<h2>Crux and TeamCity</h2>
+<h2>Managing the Crux TeamCity Server</h2>
 We use
 <a href="http://www.jetbrains.com/teamcity/">TeamCity</a>
 to provide continuous integration services for Crux.
@@ -24,7 +28,8 @@ To log on to nrhel6-x64:
 <ol>
 <li>Log on to a computer beind the GSIT firewall.</li>
 <li>Run <code>ssh nrhel6-x64</code>.</li>
-<li>Run <code>sudo su - teamcity</code></li>
+<li>Run <code>sudo su - teamcity</code> 
+(you may need to have GSIT add you to the sudo list for this command).</li>
 </ol>
 The binaries and supporting scripts for TeamCity will be found in the
 <code>bin</code> subdirectory in the TeamCity home directory:
@@ -79,11 +84,77 @@ Log in using the credentials for your TeamCity account.
 <h2>The TeamCity Build Agents</h2>
 TeamCity uses build agents to build Crux on multiple platforms.
 We currently run build agents on the following machines:
-<ul>
-<li>nrhel6-x64 64-bit Linux (user teamcity)</li>
-<li>nrhel6-i386 32-bit Linux (user cegrant)</li>
-<li>nwin7-x64 32-bit Windows (user cegrant)</li>
-<li>Charles's Mac laptop OS X (user cegrant)</li>
-</ul>
+<p/>
+<table>
+<tr>
+<th width="20%">Machine</th><th width="30%">Platform</th><th
+width="40%">Directory</th><th width="10%">User</th></th>
+</tr>
+<tbody>
+<tr>
+  <td>nrhel6-x64</td>
+  <td>64-bit Linux</td>
+  <td>/data/TeamCity/buildAgent</td>
+  <td>teamcity</td>
+</tr>
+<tr>
+  <td>nrhel6-i386</td>
+  <td>32-bit Linux</td>
+  <td>/data/TeamCity/buildAgent</td>
+  <td>cegrant</td>
+</tr>
+<tr>
+  <td>nwin7-x64</td>
+  <td>32-bit Windows</td>
+  <td>C:\BuildAgent</td>
+  <td>cegrant</td>
+</tr>
+<tr>
+  <td>Charles's Mac</td>
+  <td>OS X Snow Leopard</td>
+  <td>/Users/cegrant/buildAgent</td>
+  <td>cegrant</td>
+</tr>
+</tbody>
+</table>
+<p/>
+The 64-bit Linux agent runs on the same virtual machine as the TeamCity server,
+and runs as the <code>teamcity</code>user. 
+Use the command
+<pre>
+sudo su - teamcity</code>.
+</pre>
+to switch to the <code>teamcity</code> user.
+You may need GSIT to add you to the sudo list for this command. 
+The other agents are currently run as <code>cegrant</code>,
+but can be run by anyone in the <code>noblelab</code> group.
+<p/>
+The agents are not configured to start automatically when the host boots.
+You'll need to login and manually start them.
+To start an agent, navigate to the <code>buildAgent</code> directory
+on the host and run
+<pre>
+bin/agent start
+</pre>
+The agents can be shut down by running
+<pre>
+bin/agent stop
+</pre>
+It can take three or four minutes for an agent to start and connect to the
+TeamCity server.
+<p/>
+To connect to the 32-bit Windows agent you'll need to use a Windows Remote
+Desktop Client (RDC) and your GSIT user name and password.
+If you are connecting from a machine beyond the GSIT firewall you'll need to
+set up tunneling through the firewall:
+<pre>
+ssh -f -N -L 3389:nwin7-x64.gs.washington.edu:3389 cegrant@nexus2.gs.washington.edu
+</pre>
+Then, when starting the RDC, use <code>127.0.0.1</code> as the remote address.
+<p/>
+The OS X Snow Leopard Agent is currently running on the Mac Pro under Charles's
+desk. Contact him if you need access.
+We will be moving the OS X Snow Leopard Agent to a MacBook laptop owned by the
+lab.
 </body>
 </html>

@@ -121,6 +121,8 @@ void MatchFileWriter::setPrecision(){
     case SP_COL:
     case ION_FRAC_COL:
     case LN_NUM_SP_COL:
+    case EXACT_PVALUE_COL:
+    case REFACTORED_SCORE_COL:
 #ifdef NEW_COLUMNS
     case WEIBULL_PEPTIDE_QVALUE_COL:      // NEW
     case DECOY_XCORR_PEPTIDE_QVALUE_COL:  // NEW
@@ -231,7 +233,12 @@ void MatchFileWriter::addColumnNames(CruxApplication* application,
 
   case TIDE_SEARCH_COMMAND: ///< tide-search
     if (get_boolean_parameter("compute-sp") || get_boolean_parameter("sqt-output")) {
-      addColumnName(SP_SCORE_COL);
+      if (get_boolean_parameter("exact-p-value")) {
+        addColumnName(EXACT_PVALUE_COL);
+        addColumnName(REFACTORED_SCORE_COL);
+      } else {
+        addColumnName(SP_SCORE_COL);
+      }
       addColumnName(SP_RANK_COL);
       addColumnName(BY_IONS_MATCHED_COL);
       addColumnName(BY_IONS_TOTAL_COL);
@@ -251,7 +258,13 @@ void MatchFileWriter::addColumnNames(CruxApplication* application,
     break;
 
   case XLINK_SEARCH_COMMAND:
-    // TODO: does search-for-xlinks use MatchFileWriter?
+    if (get_boolean_parameter("compute-p-values")) {
+      addColumnName(PVALUE_COL);
+      addColumnName(ETA_COL);
+      addColumnName(BETA_COL);
+      addColumnName(SHIFT_COL);
+      addColumnName(CORR_COL);
+    }
     break;
 
   case SPECTRAL_COUNTS_COMMAND:
@@ -297,7 +310,12 @@ void MatchFileWriter::addColumnNames(CruxApplication* application,
   addColumnName(SPECTRUM_NEUTRAL_MASS_COL);
   addColumnName(PEPTIDE_MASS_COL);
   addColumnName(DELTA_CN_COL);
-  addColumnName(XCORR_SCORE_COL);
+  if (get_boolean_parameter("exact-p-value")) {
+    addColumnName(EXACT_PVALUE_COL);
+    addColumnName(REFACTORED_SCORE_COL);
+  } else {
+    addColumnName(XCORR_SCORE_COL);
+  }
   addColumnName(XCORR_RANK_COL);
   addColumnName(DISTINCT_MATCHES_SPECTRUM_COL);
   addColumnName(SEQUENCE_COL);

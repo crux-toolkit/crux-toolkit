@@ -8,6 +8,7 @@ using namespace boost;
  */
 PMCDelimitedFileWriter::PMCDelimitedFileWriter() : PSMWriter() {
   write_html_ = false;
+  application_ = NULL;
 }
 
 /**
@@ -42,6 +43,7 @@ void PMCDelimitedFileWriter::openFile(
   closeFile();
 
   file_ptr_ = create_file(filename.c_str(), get_boolean_parameter("overwrite"));
+  application_ = application;
   if (!file_ptr_->is_open()) {
     carp(CARP_FATAL, "Error creating file '%s'.", filename.c_str());
   }
@@ -491,6 +493,7 @@ void PMCDelimitedFileWriter::writePSMs(
   const map<pair<int, int>, int>& spectrum_counts = collection->getMatchesSpectrum();
 
   bool distinct_matches = collection->hasDistinctMatches();
+  COMMAND_T command = application_->getCommand();
 
   for (SpectrumMatchIterator iter = collection->spectrumMatchBegin();
        iter != collection->spectrumMatchEnd();
@@ -504,17 +507,24 @@ void PMCDelimitedFileWriter::writePSMs(
     PeptideMatch* pep_match = match->getPeptideMatch();
     Peptide* peptide = pep_match->getPeptide();
 
-    // psm-convert testing
-    addScoreIfExists(match, DELTA_CN, DELTA_CN_COL);                          // TODO: Figure out difference between match and pep_match,
-    addScoreIfExists(match, BY_IONS_MATCHED, BY_IONS_MATCHED_COL);            // since Percolator was using pep_match...
-    addScoreIfExists(match, BY_IONS_TOTAL, BY_IONS_TOTAL_COL);
+    if (command = PSM_CONVERT_COMMAND) {
+      addScoreIfExists(match, DELTA_CN, DELTA_CN_COL);                          // TODO: Figure out difference between match and pep_match,
+      addScoreIfExists(match, BY_IONS_MATCHED, BY_IONS_MATCHED_COL);            // since Percolator uses pep_match... While tide-search
+      addScoreIfExists(match, BY_IONS_TOTAL, BY_IONS_TOTAL_COL);                // uses match. These are different values, are they supposed to be?
+										// When using pep_match, a lot of things are unknown (-1)
+      setColumnCurrentRow(PROTEIN_ID_COL, peptide->getProteinIdsLocations());   // This was used by an older PMCDelimitedFileWriter and retains the protein id location
+    } else {
+      addScoreIfExists(pep_match, DELTA_CN, DELTA_CN_COL);
+      addScoreIfExists(pep_match, BY_IONS_MATCHED, BY_IONS_MATCHED_COL);
+      addScoreIfExists(pep_match, BY_IONS_TOTAL, BY_IONS_TOTAL_COL);
+      setColumnCurrentRow(PROTEIN_ID_COL, peptide->getProteinIds());
+    }
 
     setColumnCurrentRow(SCAN_COL, spectrum->getFirstScan());
     setColumnCurrentRow(CHARGE_COL, zstate.getCharge());
     setColumnCurrentRow(SPECTRUM_PRECURSOR_MZ_COL, zstate.getMZ());
     setColumnCurrentRow(SPECTRUM_NEUTRAL_MASS_COL, zstate.getNeutralMass());
     setColumnCurrentRow(PEPTIDE_MASS_COL, peptide->getPeptideMass());
-//    addScoreIfExists(pep_match, DELTA_CN, DELTA_CN_COL);                    // Original, used by percolator
     addScoreIfExists(match, SP, SP_SCORE_COL);
     addRankIfExists(match, SP, SP_RANK_COL);
     addScoreIfExists(match, XCORR, XCORR_SCORE_COL);
@@ -522,8 +532,6 @@ void PMCDelimitedFileWriter::writePSMs(
     addScoreIfExists(match, PERCOLATOR_SCORE, PERCOLATOR_SCORE_COL);
     addRankIfExists(match, PERCOLATOR_SCORE, PERCOLATOR_RANK_COL);
     addScoreIfExists(match, PERCOLATOR_QVALUE, PERCOLATOR_QVALUE_COL);
-//    addScoreIfExists(pep_match, BY_IONS_MATCHED, BY_IONS_MATCHED_COL);      // Original, used by percolator
-//    addScoreIfExists(pep_match, BY_IONS_TOTAL, BY_IONS_TOTAL_COL);          // Original, used by percolator
     pair<int, int> scan_charge = make_pair(spectrum->getFirstScan(), zstate.getCharge());
     map<pair<int, int>, int>::const_iterator lookup = spectrum_counts.find(scan_charge);
     if (distinct_matches) {
@@ -540,10 +548,7 @@ void PMCDelimitedFileWriter::writePSMs(
     setAndFree(SEQUENCE_COL, seq_with_masses);
 
     setColumnCurrentRow(CLEAVAGE_TYPE_COL, cleavage);
-//    setColumnCurrentRow(PROTEIN_ID_COL, peptide->getProteinIds()); // TODO: Figure out why this was changed ??? For percolator ???
-    setColumnCurrentRow(PROTEIN_ID_COL, peptide->getProteinIdsLocations());
     setAndFree(FLANKING_AA_COL, peptide->getFlankingAAs());
-//    setColumnCurrentRow(ORIGINAL_TARGET_SEQUENCE_COL, peptide->getUnshuffledSequence());
 
     if (!write_html_) {
       writeRow();

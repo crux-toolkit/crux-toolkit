@@ -201,11 +201,12 @@ IonSeries::~IonSeries()
   // iterate over all ions, and free them
 
   for (unsigned int idx=0;idx<ions_.size();idx++) {
-    delete ions_[idx];
+    Ion::freeIon(ions_[idx]);
   }
   ions_.clear();
 
 }
+
 
 /**
  * Iterator access
@@ -443,6 +444,9 @@ void IonSeries::addIon(
   // add ion to ion series
   ions_.push_back(ion);
   
+  // increment the pointer
+  ion->incrementPointerCount();
+
   // add a pointer of ion to the specific ion_type array
   specific_ions_[ion->getType()].push_back(ion);
 }
@@ -987,6 +991,34 @@ void IonSeries::copy(
 
   dest->is_predicted_ = true;
 }
+
+/**
+ * remove an ion from IonSeries, does not free ion.
+ */
+void IonSeries::removeIon(
+  Ion* ion ///<ion to remove
+  ) {
+
+
+  IonIterator ion_iter;
+
+  for (ion_iter = begin();
+    ion_iter != end();
+    ++ion_iter) {
+
+    if (*ion_iter == ion) {
+      ions_.erase(ion_iter);
+      return;
+    }
+
+    
+
+  }
+
+  carp(CARP_ERROR, "Cannot find ion to delete:%i", ion);
+
+}
+
 
 /*************************************
  * ION_SERIES_T: get and set methods

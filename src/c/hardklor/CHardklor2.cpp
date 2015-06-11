@@ -105,7 +105,7 @@ int CHardklor2::GoHardklor(CHardklorSetting sett){
   else WriteScanLine(curSpec,fout,0);
 
 	//Output progress indicator
-	if(bEcho) cout << iPercent;
+	if(bEcho) cerr << iPercent;
   
   //While there is still data to read in the file.
   while(true){
@@ -137,12 +137,12 @@ int CHardklor2::GoHardklor(CHardklorSetting sett){
 		//Update progress
 		if(bEcho){
 			if (r.getPercent() > iPercent){
-				if(iPercent<10) cout << "\b";
-				else cout << "\b\b";
-				cout.flush();
+				if(iPercent<10) cerr << "\b";
+				else cerr << "\b\b";
+				cerr.flush();
 				iPercent=r.getPercent();
-				cout << iPercent;
-				cout.flush();
+				cerr << iPercent;
+				cerr.flush();
 			}
 		}
 
@@ -188,7 +188,7 @@ int CHardklor2::GoHardklor(CHardklorSetting sett){
 	fclose(fout);
 
 	if(bEcho) {
-		cout << "\n" << endl;
+		cerr << endl;
 		cout << "  Total number of scans analyzed: " << TotalScans << endl;
 
 		i=(int)timeToSec(loadTime,timerFrequency);

@@ -9,6 +9,7 @@
  */
 
 int xlink_search_main(int argc, char** argv);
+int xhhc_search_main(int argc, char** argv);
 
 #endif //PERCOLATOR_CMD_H
 

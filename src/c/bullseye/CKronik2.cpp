@@ -201,7 +201,7 @@ bool CKronik2::processHK(char*  in, char* out) {
   int startCount=pepCount;
   int lastPercent=0;
 
-  cout << lastPercent;
+  cerr << lastPercent;
 
   //Perform the Kronik analysis
   while(pepCount>0){
@@ -404,12 +404,12 @@ bool CKronik2::processHK(char*  in, char* out) {
     //update percent
     iPercent=100-(int)((float)pepCount/(float)startCount*100.0);
     if(iPercent>lastPercent){
-      cout << "\b\b\b" << iPercent;
+      cerr << "\b\b\b" << iPercent;
       lastPercent=iPercent;
     }
 
   }
-  cout << endl;
+  cerr << endl;
 
   if(out[0]!='\0'){
     FILE* f;
