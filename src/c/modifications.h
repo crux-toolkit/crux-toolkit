@@ -301,6 +301,12 @@ void print_a_mod(AA_MOD_T* mod);
 /* Setters and Getters */
 
 /**
+ * \brief Set the symbol used by this modification.
+ * \returns void
+ */
+void aa_mod_set_symbol(AA_MOD_T* mod, char symbol);
+
+/**
  * \brief Set the mass change caused by this modification.
  * \returns void
  */
@@ -403,7 +409,7 @@ int aa_mod_get_identifier(const AA_MOD_T* mod);
  * \brief Generates a string representation of an aa_mod and returns a
  * pointer to that newly allocated string.
  */
-char* aa_mod_to_string(AA_MOD_T* mod);
+char* aa_mod_to_string(const AA_MOD_T* mod);
 
 /**
  * \brief Create a string containing all of the amino acids that can

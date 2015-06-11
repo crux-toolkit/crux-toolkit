@@ -33,28 +33,8 @@ int SearchForXLinks::main(int argc, char** argv) {
   const char* option_list[] = {
     "verbosity",
     "parameter-file",
-    "compute-sp",
     "overwrite",
     "output-dir",
-    "precursor-window",
-    "precursor-window-type",
-    "precursor-window-weibull",
-    "precursor-window-type-weibull",
-    "max-ion-charge",
-    "min-weibull-points",
-    "mz-bin-width",
-    "mz-bin-offset",
-    "xlink-prevents-cleavage", 
-    "scan-number",
-    "spectrum-min-mz",
-    "spectrum-max-mz",
-    "spectrum-charge",
-    "spectrum-parser",
-    "top-match",
-    "xlink-include-linears",
-    "xlink-include-deadends",
-    "xlink-include-selfloops",
-    "use-flanking-peaks"
   };
   int num_options = sizeof(option_list) / sizeof(char*);
 
@@ -70,18 +50,20 @@ int SearchForXLinks::main(int argc, char** argv) {
 
 
   initialize(argument_list, num_arguments,
-		 option_list, num_options, argc, argv);
+    option_list, num_options, argc, argv);
   
 
-  //So the end result is that crux will call the new
-  //refactored code by default when that gets placed
-  //in.  The use-old-xlink parameter will determine
+  //The use-old-xlink parameter will determine
   //which codebase gets called.
+  int ret;
   if (get_boolean_parameter("use-old-xlink")) {
-    return xhhcSearchMain();
+    ret = xhhcSearchMain();
   } else {
-    return xlinkSearchMain();
+    ret = xlinkSearchMain();
   }
+  
+  free_parameters();
+  return ret;
 }
 
 /**

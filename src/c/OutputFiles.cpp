@@ -54,6 +54,11 @@ OutputFiles::OutputFiles(CruxApplication* program_name)
        command != TIDE_SEARCH_COMMAND)) {
     num_files_ = 1;
   }
+  
+  if (command == XLINK_SEARCH_COMMAND) {
+    num_decoy_files = 1;
+    num_files_ = 2;
+  }
 
   makeTargetDecoyList();
 
@@ -136,7 +141,7 @@ OutputFiles::OutputFiles(CruxApplication* program_name)
                filename.c_str(), 
                overwrite);
   }
-
+  exact_pval_search_ = false;
 }
 
 OutputFiles::~OutputFiles(){
@@ -245,10 +250,9 @@ bool OutputFiles::createFiles(FILE*** file_array_ptr,
 
   // create each file
   for(int file_idx = 0; file_idx < num_files_; file_idx++ ){
-    string filename =
-      makeFileName(fileroot, application,
-                   concat_ ? NULL : target_decoy_list_[file_idx].c_str(),
-                   extension);
+    string filename = makeFileName(fileroot, application,
+                                   concat_ ? NULL : target_decoy_list_[file_idx].c_str(),
+                                   extension);
     createFile(&(*file_array_ptr)[file_idx], 
                output_dir, 
                filename.c_str(), 
@@ -286,10 +290,9 @@ bool OutputFiles::createFiles(PepXMLWriter*** xml_writer_array_ptr,
 
   // create each file
   for(int file_idx = 0; file_idx < num_files_; file_idx++ ){
-    string filename =
-      makeFileName(fileroot, application,
-                   concat_ ? NULL : target_decoy_list_[file_idx].c_str(),
-                   extension, output_dir);
+    string filename = makeFileName(fileroot, application,
+                                   concat_ ? NULL : target_decoy_list_[file_idx].c_str(),
+                                   extension, output_dir);
     (*xml_writer_array_ptr)[file_idx] = new PepXMLWriter();
     (*xml_writer_array_ptr)[file_idx]->openFile(filename.c_str(), overwrite);
 
@@ -325,10 +328,9 @@ bool OutputFiles::createFiles(MatchFileWriter*** file_array_ptr,
 
   // create each file writer
   for(int file_idx = 0; file_idx < num_files_; file_idx++ ){
-    string filename =
-      makeFileName(fileroot, application,
-                   concat_ ? NULL : target_decoy_list_[file_idx].c_str(),
-                   extension, output_dir);
+    string filename = makeFileName(fileroot, application,
+                                   concat_ ? NULL : target_decoy_list_[file_idx].c_str(),
+                                   extension, output_dir);
     (*file_array_ptr)[file_idx] = new MatchFileWriter(filename.c_str());
   }
   
@@ -434,10 +436,11 @@ void OutputFiles::writeHeaders(int num_proteins, bool isMixedTargetDecoy){
         database = get_string_parameter_pointer("tide database index");
       }
       MatchCollection::printSqtHeader(sqt_file_array_[file_idx],
-                       tag, database, num_proteins); 
+                       tag, database, num_proteins, exact_pval_search_); 
     }
     
     if ( xml_file_array_){
+      xml_file_array_[file_idx]->exact_pval_search_ = exact_pval_search_;
       xml_file_array_[file_idx]->writeHeader();
     }
 

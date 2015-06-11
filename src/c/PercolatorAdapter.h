@@ -88,11 +88,10 @@ protected:
   
   /**
    * Given a Percolator psm_id in the form ".*_([0-9]+)_[^_]*",
-   * parse the decoy, file_idx, scan#, charge, and rank
+   * parse the file_idx, scan#, charge, and rank
    */
   static void parsePSMId(
     const std::string& psm_id, ///<psmid to parse
-    bool &decoy, ///< Is psm a decoy?
     int& file_idx, ///< psm file idx
     int& scan, ///< psm scan
     int& charge, ///< psm charge

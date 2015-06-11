@@ -40,6 +40,8 @@ class CruxTester
   end
 
   def self.cmp(expected, actual)
+#    system("cp " + actual+ " " + expected); #Comment these 2+2 lines to update output files with new
+#    return true;  
     if File.directory?(expected) && File.directory?(actual)
       Dir.foreach(expected) do | dirent |
         next if dirent == "." or dirent == ".."
@@ -61,6 +63,8 @@ class CruxTester
 
   # Compare files where line order does not matter
   def self.cmpUnordered(expected, actual)
+#    system("cp " + actual+ " " + expected);  #Comment these 2+2 lines to update output files with new
+#    return true;  
     if File.directory?(expected) && File.directory?(actual)
       Dir.foreach(expected) do | dirent |
         next if dirent == "." or dirent == ".."

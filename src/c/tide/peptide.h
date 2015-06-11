@@ -35,6 +35,7 @@ using namespace std;
 
 class FifoAllocator;
 class TheoreticalPeakSet;
+class TheoreticalPeakSetBIons;
 
 // This is the TheoreticalPeakSet we are using at search time.  We may use a
 // different subclass  of TheoreticalPeakSet in a final version, pending more
@@ -118,6 +119,7 @@ class Peptide {
 			       const pb::Peptide& pb_peptide,
                                TheoreticalPeakCompiler* compiler_prog1,
                                TheoreticalPeakCompiler* compiler_prog2);
+  void ComputeBTheoreticalPeaks(TheoreticalPeakSetBIons* workspace) const;
 
   // Return the appropriate program depending on the precursor charge.
   // TODO 257: fix the unfortunate use of max_charge.
@@ -153,9 +155,11 @@ class Peptide {
   }
   ModCoder::Mod* Mods() const { return mods_; }
   bool IsDecoy() const { return decoy_; }
+  double* getAAMasses();
 
  private:
   template<class W> void AddIons(W* workspace) const;
+  template<class W> void AddBIonsOnly(W* workspace) const;
 
   void Compile(const TheoreticalPeakArr* peaks,
 	       const pb::Peptide& pb_peptide,

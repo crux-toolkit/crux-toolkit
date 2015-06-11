@@ -196,7 +196,8 @@ void matchMS2(CKronik2& p, char* ms2File, char* outFile, char* outFile2){
   cout << "Done!" << endl;
 
   //Read in the data
-  cout << "Matching MS/MS..." << iPercent;
+  cout << "Matching MS/MS..." << endl;
+  cerr << iPercent;
 
   b=0;
   z=0;
@@ -337,18 +338,20 @@ void matchMS2(CKronik2& p, char* ms2File, char* outFile, char* outFile2){
 
     //Update file position counter
     if (r.getPercent() > iPercent){
-      if(iPercent<10) cout << "\b";
-      else cout << "\b\b";
-      cout.flush();
+      if(iPercent<10) cerr << "\b";
+      else if (iPercent<100) cerr << "\b\b";
+      else cerr << "\b\b\b";
+      cerr.flush();
       iPercent=r.getPercent();
-      cout << iPercent;
-      cout.flush();
+      cerr << iPercent;
+      cerr.flush();
     }
   }
 
   rPos.appendFile(outFile,o);
   rNeg.appendFile(outFile2,o2);
 
+  cerr << endl;
   cout << "Done!" << endl;
 
   cout << z << " scans had no visible parental distribution." << endl;

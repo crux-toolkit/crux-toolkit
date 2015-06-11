@@ -4,6 +4,7 @@
  *****************************************************************************/
 #include "CruxBullseyeApplication.h"
 #include "CruxHardklorApplication.h"
+#include "CarpStreamBuf.h"
 #include "DelimitedFileWriter.h"
 
 #include "crux-utils.h"
@@ -158,8 +159,16 @@ int CruxBullseyeApplication::main(int argc, char** argv) {
     carp(CARP_DEBUG, "be_argv[%d]=%s", idx, be_argv[idx]);
   }
 
+  // Re-route stream to log file
+  CarpStreamBuf buffer;
+  streambuf* old = cout.rdbuf();
+  cout.rdbuf(&buffer);
+
   /* Call bullseyeMain */
   int ret = bullseyeMain(be_argc, be_argv);
+
+  // Recover stream
+  cout.rdbuf(old);
 
   delete []be_argv;
 

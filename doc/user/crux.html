@@ -48,6 +48,21 @@ and accurate peptide identification from tandem mass spectra."</a>
 <i>Journal of Proteome Research.</i> 7(7):3022-3027, 2008.</li>
 </blockquote>
 
+<p>
+For a more up-to-date description of Crux, please read</p>
+
+<blockquote>
+Sean McIlwain, Kaipo Tamura, Attila Kertesz-Farkas,
+Charles E.  Grant, Benjamin Diament, Barbara Frewen, J. Jeffry
+Howbert, Michael R. Hoopmann, Lukas K&auml;ll, Jimmy K. Eng, Michael
+J. MacCoss and William Stafford
+Noble.  <a href="http://pubs.acs.org/doi/abs/10.1021/pr500741y">"Crux:
+rapid open source protein tandem mass spectrometry
+analysis."</a> <i>Journal of Proteome Research.</i>
+13(10):4488-4491, 2014.
+</blockquote>
+
+
 <p />
 <a href="download" title="Download Crux Toolkit" class="sfdl">
     <span>
@@ -221,200 +236,267 @@ Print the Crux version number to standard output, then exit.</td>
 
 <h2>File formats</h2>
 
-<table border="1">
+<table id="fileFormatsTable" border="1">
+
 <tr>
-
 <td>&nbsp;</td>
+<td>bullseye</td>
+<td>tide-index</td>
+<td>tide-search</td>
+<td>comet</td>
+<td>percolator</td>
+<td>q-ranker</td>
+<td>barista</td>
+<td>search-for-xlinks</td>
+<td>spectral-counts</td>
+</tr>
 
+<tr>
 <td>
 <a href="ms2-format.html">MS1</a>
 </td>
+<td>in</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
 
+<tr>
 <td>
 <a href="ms2-format.html">MS2</a>
-(<a href="data/demo.ms2">sample</a>)<br>
-mzML (1.0 and 1.1), <br>mzXML, MGF, CMS2
+(<a href="data/demo.ms2">sample</a>) / CMS2,
+<a href="http://www.matrixscience.com/help/data_file_help.html">MGF</a>
 </td>
+<td>in/out</td>
+<td>&nbsp;</td>
+<td>in</td>
+<td>in</td>
+<td>in</td>
+<td>in</td>
+<td>in</td>
+<td>in</td>
+<td>in</td>
+</tr>
 
+<tr>
 <td>
-<a href="fasta-format.html">FASTA</a><br>
-(<a href="sample.fasta">sample</a>)</td>
+<a href="http://www.psidev.info/mzml_1_0_0">mzML</a>,
+<a href="http://tools.proteomecenter.org/wiki/index.php?title=Formats:mzXML">mzXML</a>
+</td>
+<td>in</td>
+<td>&nbsp;</td>
+<td>in</td>
+<td>in</td>
+<td>in</td>
+<td>in</td>
+<td>in</td>
+<td>in</td>
+<td>in</td>
+</tr>
 
+<tr>
 <td>
-database index</td>
+<a href="http://sjsupport.thermofinnigan.com/public/detail.asp?id=703">Thermo .raw files</a>
+(Windows only)
+</td>
+<td>in</td>
+<td>&nbsp;</td>
+<td>in</td>
+<td>in</td>
+<td>&nbsp;</td>
+<td>in</td>
+<td>in</td>
+<td>in</td>
+<td>in</td>
+</tr>
 
+<tr>
 <td>
-<a href="txt-format.html">Tab-delimited text</a><br>
-(<a href="data/search.target.txt">sample</a>)</td>
+<a href="http://proteowizard.sourceforge.net/formats.shtml">Other
+  proprietary vendor formats</a>  (Windows only)
+</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>in</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>in</td>
+<td>in</td>
+<td>in</td>
+<td>in</td>
+</tr>
 
+<tr>
 <td>
-pepXML</td>
+<a href="fasta-format.html">FASTA</a>
+(<a href="sample.fasta">sample</a>)
+</td>
+<td>in</td>
+<td>in</td>
+<td>&nbsp;</td>
+<td>in</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>in</td>
+<td>&nbsp;</td>
+</tr>
 
+<tr>
+<td>
+database index
+</td>
+<td>&nbsp;</td>
+<td>out</td>
+<td>in</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+
+<tr>
+<td>
+<a href="txt-format.html">Tab-delimited text</a>
+(<a href="data/search.target.txt">sample</a>)
+</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>out</td>
+<td>out</td>
+<td>in/out</td>
+<td>in/out</td>
+<td>in/out</td>
+<td>out</td>
+<td>in/out</td>
+</tr>
+
+<tr>
+<td>
+<a href="http://tools.proteomecenter.org/wiki/index.php?title=Formats:pepXML">
+pepXML</a>
+</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>out</td>
+<td>out</td>
+<td>in/out</td>
+<td>out</td>
+<td>out</td>
+<td>&nbsp;</td>
+<td>in</td>
+</tr>
+
+<tr>
 <td>
 <a href="https://github.com/percolator/percolator/wiki/Interface">PIN</a>
 </td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>out</td>
+<td>&nbsp;</td>
+<td>in</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
 
-<td>mzIdentML</td>
+<tr>
+<td>
+<a href="https://github.com/percolator/percolator/wiki/Interface">POUT</a>
+</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>out</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
 
+<tr>
+<td>
+<a href="http://www.psidev.info/mzidentml">mzIdentML</a>
+</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>out</td>
+<td>out</td>
+<td>out</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>in</td>
+</tr>
+
+<tr>
 <td>
 <a href="sqt-format.html">SQT</a>
 </td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>out</td>
+<td>out</td>
+<td>in</td>
+<td>in</td>
+<td>in</td>
+<td>&nbsp;</td>
+<td>in</td>
+</tr>
 
+<tr>
 <td>
 <a href="features.html">Features</a>
 </td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>in/out</td>
+<td>out</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
 
+<tr>
 <td>
 <a href="barista-xml-format.html">Barista XML</a>
 </td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>out</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
 
-
+<tr>
 <td>
-<a href="parameter-file.html">Crux parameters</a><br>
-(<a href="default.params">sample</a>)</td>
-</tr>
-
-<tr>
-<td>bullseye</td>
-<td>in</td>
-<td>in/out</td>
-<td>in</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>in/out</td>
-</tr>
-
-<tr bgcolor="#DEDEDE">
-<td>tide-index</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>in</td>
-<td>out</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>in/out</td>
-</tr>
-
-<tr>
-<td>tide-search</td>
-<td>&nbsp;</td>
-<td>in</td>
-<td></td>
-<td>in</td>
-<td>out</td>
-<td>out</td>
-<td>out</td>
-<td>out</td>
-<td>out</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>in/out</td>
-</tr>
-
-<tr bgcolor="#DEDEDE">
-<td>comet</td>
-<td>&nbsp;</td>
-<td>in</td>
-<td>in</td>
-<td>&nbsp;</td>
-<td>out</td>
-<td>out</td>
-<td>&nbsp;</td>
-<td>out</td>
-<td>out</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>in/out</td>
-</tr>
-
-<tr>
-<td>percolator</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
+<a href="parameter-file.html">Crux parameters</a>
+(<a href="default.params">sample</a>)
+</td>
 <td>in/out</td>
 <td>in/out</td>
-<td>in</td>
-<td>out</td>
-<td>in</td>
 <td>in/out</td>
-<td>&nbsp;</td>
 <td>in/out</td>
-</tr>
-
-<tr bgcolor="#DEDEDE">
-<td>q-ranker</td>
-<td>&nbsp;</td>
-<td>in</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
 <td>in/out</td>
-<td>out</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>in</td>
-<td>out</td>
-<td>&nbsp;</td>
 <td>in/out</td>
-</tr>
-
-<tr>
-<td>barista</td>
-<td>&nbsp;</td>
-<td>in</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
 <td>in/out</td>
-<td>out</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>in</td>
-<td>&nbsp;</td>
-<td>out</td>
 <td>in/out</td>
-</tr>
-
-<tr bgcolor="#DEDEDE">
-<td>search-for-xlinks</td>
-<td>&nbsp;</td>
-<td>in</td>
-<td>in</td>
-<td>in</td>
-<td>out</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>in/out</td>
-</tr>
-
-<tr>
-<td>spectral-counts</td>
-<td>&nbsp;</td>
-<td>in</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>in/out</td>
-<td>in</td>
-<td>&nbsp;</td>
-<td>in</td>
-<td>in</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
 <td>in/out</td>
 </tr>
 
@@ -467,7 +549,9 @@ sign up for the Crux users
 
 <li>
 Follow the Crux project
-on <a href="https://sourceforge.net/projects/cruxtoolkit/">Sourceforge</a>.</li>
+on <a href="https://sourceforge.net/projects/cruxtoolkit/">Sourceforge</a>.
+The "Issues" list on Sourceforge includes known bugs as well as
+planned new features.</li>
 
 <li>
 Access the most recent source code from the Crux main development
@@ -476,9 +560,6 @@ trunk using the following Subversion command:<br>
 
 <li>
 <a href="release-notes.html">Release notes.</a></li>
-
-<li>
-<a href="known-issues.html">Known issues.</a></li>
 
 <li>
 Crux is covered by an <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache

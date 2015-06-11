@@ -57,6 +57,10 @@ mzid-use-pass-threshold=false
 # for Sp scoring and 1 for xcorr scoring.
 isotope=0
 
+# Output POUT XML in the output directory.  Default=F
+# Available for percolator.
+pout-output=false
+
 # Specifies N-terminal static and variable mass modifications on
 # peptides. Specify a comma-separated list of N-terminal modification
 # sequences of the form: 1E-18.0106,C-17.0265
@@ -154,8 +158,7 @@ flanking=false
 
 # Include peaks +/- 1da around b/y ions in theoretical spectrum. 
 # default=F.
-# Available in the parameter file for the tide-search and
-# search-for-xlinks commands.
+# Available for the tide-search and search-for-xlinks commands.
 use-flanking-peaks=false
 
 # Change the mass of all amino acids 'A' by the given amount.
@@ -177,7 +180,8 @@ E=0.000000
 # Specify the width of the bins used to discretize the m/z axis.  Also
 # used as tolerance for assigning ions.  Default=1.0005079 for
 # monoisotopic mass or 1.0011413 for average mass.
-# Available for crux-search-for-matches and xlink-assign-ions.
+# Available for crux-search-for-matches, tide-search, and
+# xlink-assign-ions.
 mz-bin-width=1.000508
 
 # Change the mass of all amino acids 'F' by the given amount.
@@ -335,6 +339,11 @@ min-peaks=20
 # Available for tide-search.
 remove-precursor-peak=false
 
+# Uses exact P-value calculation for peptide-spectrum-matching.
+# Default=F.
+# Available for tide-search
+exact-p-value=false
+
 # Predict peaks with the given maximum number of nh3 neutral loss
 # modifications. Default=0.
 # Only available for crux-predict-peptide-ions.
@@ -380,8 +389,7 @@ tide database index=__NULL_STR
 
 # The maximum number of modifications that can be applied to a single
 # peptide.  Default=no limit.
-# Available for tide-index and from parameter file for
-# crux-search-for-matches.
+# Available for tide-index.
 max-mods=255
 
 # Set the tolerance (+/-ppm) for finding persistent peptides. Default =
@@ -396,6 +404,11 @@ persist-tolerance=10.000000
 # at each charge state.  With 1, 2 ,or 3 only spectra with that that
 # charge will be searched.
 spectrum-charge=all
+
+# The minimum number of modifications that can be applied to a single
+# peptide.  Default=0.
+# Available for tide-index.
+min-mods=0
 
 # MS2 file corresponding to the psm file. Required for SIN.
 # Available for spectral-counts with measure=SIN.
@@ -503,8 +516,8 @@ verbosity=30
 
 # Specify the location of the left edge of the first bin used to
 # discretize the m/z axis. Default=0.40
-# Available for crux-search-for-matches.
-mz-bin-offset=0.680000
+# Available for crux-search-for-matches and tide-search.
+mz-bin-offset=0.400000
 
 # False discovery rate threshold for evaluating best cross validation
 # result and the reported end result. Default is 0.01.
@@ -630,9 +643,13 @@ alpha=0.000000
 # Available for crux extract-columns and extract-rows
 header=true
 
+# Are spectra centroided?  Default false.
+# Available for crux hardklor
+centroided=false
+
 # The most informative feature given as the feature name.  The name can
-# be preceded by a hypen (e.g., "-XCorr") to indicate that a lower value
-# is better. By default, Percolator will select the feature that
+# be preceded by a hyphen (e.g., "-XCorr") to indicate that a lower
+# value is better. By default, Percolator will select the feature that
 # produces the largest set of target PSMs at a specified FDR threshold
 # (cf. --train-fdr).
 # Available for crux percolator
@@ -841,7 +858,7 @@ cmod-fixed=NO MODS
 cterm-protein-mods-spec=
 
 # Controls whether neutral loss ions are considered in the search. Two
-# types of	neutral losses are included and are applied only to singly
+# types of neutral losses are included and are applied only to singly
 # charged b- and y-ions: loss of ammonia (NH3, 17.0086343 Da) and H2O
 # (18.0091422). Each neutral loss peak has intensity 1/5 of the primary
 # peak
@@ -896,6 +913,10 @@ column-type=string
 # modifications. Default=0.
 # Only available for crux-predict-peptide-ions.
 h2o=0
+
+# List of integers of isotopic masses to search
+# Used for crux search-for-xlinks
+isotope-windows=0
 
 # Use a name of custom threshold rather than (default NULL)
 # Available for spectral-counts.
@@ -990,6 +1011,11 @@ min-charge=1
 # Print peptide sequence (T,F). Default=F.
 # Available only for crux-generate-peptides.
 output-sequence=false
+
+# Maximum number of modifications allowed on a crosslinked peptide 
+# Default=0.
+# Available for crux search-for-xlinks
+max-xlink-mods=0
 
 # Print the masses of modified sequences in one of three ways
 # 'mod-only', 'total' (residue mass plus modification), or 'separate'
@@ -1186,7 +1212,7 @@ peptide_mass_units=0
 
 # binning to use on fragment ions
 # option for Comet only
-fragment_bin_tol=1.000500
+fragment_bin_tol=1.000507
 
 # added to G - avg.  57.0513, mono.  57.02146
 # option for Comet

@@ -83,6 +83,7 @@ int PercolatorApplication::main(int argc, char** argv) {
     "output-dir",
     "overwrite",
     "txt-output",
+    "pout-output",
     "mzid-output",
     "pepxml-output",
     "feature-file",
@@ -147,8 +148,7 @@ int PercolatorApplication::main(int argc, char** argv) {
     vector<string> result_files;
     get_search_result_paths(input_pin, result_files);
 
-    string pin_location = string(get_string_parameter_pointer("output-dir")) +
-                          "/make-pin.pin";
+    string pin_location = make_file_path("make-pin.pin");
 
     const char* make_pin_file = pin_location.c_str();
 
@@ -254,6 +254,11 @@ int PercolatorApplication::main(
   seed_stream << seed_value;
   perc_args_vec.push_back("--seed");
   perc_args_vec.push_back(seed_stream.str());
+
+  if (get_boolean_parameter("pout-output")) {
+    perc_args_vec.push_back("-X");
+    perc_args_vec.push_back(make_file_path("percolator.pout.xml"));
+  }
 
   perc_args_vec.push_back("-p");
   perc_args_vec.push_back(to_string(get_double_parameter("c-pos")));
@@ -392,14 +397,13 @@ int PercolatorApplication::main(
     carp(CARP_FATAL, "Error running percolator:%d", retVal);
   }
 
-  // remove tab files
-  remove(string(output_target_tab + ".peptides").c_str());
-  remove(string(output_target_tab + ".psms").c_str());
-  remove(string(output_decoy_tab + ".peptides").c_str());
-  remove(string(output_decoy_tab + ".psms").c_str());
-  if (set_protein) {
-    remove(string(output_target_tab + ".proteins").c_str());
-    remove(string(output_decoy_tab + ".proteins").c_str());
+  if (!get_boolean_parameter("txt-output") ||
+      !get_boolean_parameter("original-output")) {
+    // remove tab files
+    remove(string(output_target_tab + ".peptides").c_str());
+    remove(string(output_target_tab + ".psms").c_str());
+    remove(string(output_decoy_tab + ".peptides").c_str());
+    remove(string(output_decoy_tab + ".psms").c_str());
   }
 
   // get percolator score information into crux objects
@@ -415,14 +419,25 @@ int PercolatorApplication::main(
     string txt_path = make_file_path("percolator.target");
     string decoy_txt_path = make_file_path("percolator.decoy");
 
-    txt_writer.writeFile(this, txt_path + ".psms.txt",
-                         PMCDelimitedFileWriter::PSMS, protein_match_collection);
-    txt_writer.writeFile(this, decoy_txt_path + ".psms.txt",
-                         PMCDelimitedFileWriter::PSMS, decoy_protein_match_collection);
-    txt_writer.writeFile(this, txt_path + ".peptides.txt",
-                         PMCDelimitedFileWriter::PEPTIDES, protein_match_collection);
-    txt_writer.writeFile(this, decoy_txt_path + ".peptides.txt",
-                         PMCDelimitedFileWriter::PEPTIDES, decoy_protein_match_collection);
+    if (get_boolean_parameter("original-output")) {
+      rename(string(output_target_tab + ".peptides").c_str(),
+             string(txt_path + ".peptides.txt").c_str());
+      rename(string(output_decoy_tab + ".peptides").c_str(),
+             string(decoy_txt_path + ".peptides.txt").c_str());
+      rename(string(output_target_tab + ".psms").c_str(),
+             string(txt_path + ".psms.txt").c_str());
+      rename(string(output_decoy_tab + ".psms").c_str(),
+             string(decoy_txt_path + ".psms.txt").c_str());
+    } else {
+      txt_writer.writeFile(this, txt_path + ".psms.txt",
+                           PMCDelimitedFileWriter::PSMS, protein_match_collection);
+      txt_writer.writeFile(this, decoy_txt_path + ".psms.txt",
+                           PMCDelimitedFileWriter::PSMS, decoy_protein_match_collection);
+      txt_writer.writeFile(this, txt_path + ".peptides.txt",
+                           PMCDelimitedFileWriter::PEPTIDES, protein_match_collection);
+      txt_writer.writeFile(this, decoy_txt_path + ".peptides.txt",
+                           PMCDelimitedFileWriter::PEPTIDES, decoy_protein_match_collection);
+    }
 
     if (set_protein) {
       txt_writer.writeFile(this, txt_path + ".proteins.txt",

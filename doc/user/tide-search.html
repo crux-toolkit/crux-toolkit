@@ -121,6 +121,20 @@ that were printed to the screen during execution.</li>
 <ul>
 
 <li>
+<code>--exact-p-value T|F</code> &ndash; Enable the calculation of
+exact p-values for the XCorr score, as described in
+<a href="http://www.ncbi.nlm.nih.gov/pubmed/24895379">this
+article</a>.  Calculation of p-values increases the running time but
+increases the number of correct identifications at a fixed confidence
+threshold.  The p-values will be reported in a new column with header
+"exact p-value," and the "xcorr score" column will be replaced with a
+"refactored xcorr" column. Note that, currently, p-values can only be
+computed when the <code>mz-bin-width</code> parameter is set to its default
+value. Variable and static mods are allowed on non-terminal residues in
+conjunction with p-value computation, but currently only static mods are
+allowed on the N-terminus, and no mods on the C-terminus. Default = F.</li>
+
+<li>
 <code>--precursor-window &lt;float&gt;</code> &ndash; Tolerance used for
 matching peptides to spectra.  Peptides must be within +/-
 '<code>precursor-window</code>' of the spectrum value.  The precursor
@@ -236,7 +250,7 @@ In the discretization of the m/z axes of the observed and theoretical
 spectra, this parameter specifies the location of the left edge of the
 first bin, relative to mass = 0 (i.e., mz-bin-offset = 0.xx means the
 left edge of the first bin will be located at +0.xx Da). The parameter
-must lie in the range 0 &le; mz-bin-offset &le; 1.  Default=0.68.</li>
+must lie in the range 0 &le; mz-bin-offset &le; 1.  Default=0.40.</li>
 </ul>
 
 <h3>Input and output</h3>

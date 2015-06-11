@@ -327,7 +327,6 @@ if (WIN32 AND NOT CYGWIN)
     MassLynxRaw
     cdt
     ws2_32
-    optimized libboost_regex-vc100-mt
     optimized libboost_system-vc100-mt
     optimized libboost_iostreams-vc100-mt
     optimized libboost_nowide-vc100-mt
@@ -335,7 +334,6 @@ if (WIN32 AND NOT CYGWIN)
     optimized libboost_thread-vc100-mt
     optimized libboost_chrono-vc100-mt
     debug libboost_nowide-vc100-mt-gd
-    debug libboost_regex-vc100-mt-gd
     debug libboost_system-vc100-mt-gd
     debug libboost_iostreams-vc100-mt-gd
     debug libboost_filesystem-vc100-mt-gd
@@ -375,14 +373,12 @@ if (WIN32 AND NOT CYGWIN)
     optimized libboost_iostreams-vc100-mt
     optimized libboost_filesystem-vc100-mt
     optimized libboost_nowide-vc100-mt
-    optimized libboost_regex-vc100-mt
     optimized libboost_thread-vc100-mt
     optimized libboost_chrono-vc100-mt
     debug libboost_system-vc100-mt-gd
     debug libboost_iostreams-vc100-mt-gd
     debug libboost_filesystem-vc100-mt-gd
     debug libboost_nowide-vc100-mt-gd
-    debug libboost_regex-vc100-mt-gd
     debug libboost_thread-vc100-mt-gd
     debug libboost_chrono-vc100-mt-gd
   )
@@ -419,14 +415,12 @@ if (WIN32 AND NOT CYGWIN)
     optimized libboost_iostreams-vc100-mt
     optimized libboost_filesystem-vc100-mt
     optimized libboost_nowide-vc100-mt
-    optimized libboost_regex-vc100-mt
     optimized libboost_thread-vc100-mt
     optimized libboost_chrono-vc100-mt
     debug libboost_system-vc100-mt-gd
     debug libboost_iostreams-vc100-mt-gd
     debug libboost_filesystem-vc100-mt-gd
     debug libboost_nowide-vc100-mt-gd
-    debug libboost_regex-vc100-mt-gd
     debug libboost_thread-vc100-mt-gd
     debug libboost_chrono-vc100-mt-gd
   )
@@ -464,7 +458,6 @@ else()
     boost_iostreams-mt-s
     z-mt-s-1_2
     boost_filesystem-mt-s
-    boost_regex-mt-s
     boost_thread-mt-s
     boost_chrono
     boost_filesystem
@@ -499,7 +492,6 @@ else()
     z-mt-s-1_2
     boost_chrono
     boost_filesystem-mt-s
-    boost_regex-mt-s
     boost_thread-mt-s
     pthread
   )
@@ -529,7 +521,6 @@ else()
     z-mt-s-1_2
     boost_chrono
     boost_filesystem-mt-s
-    boost_regex-mt-s
     boost_thread-mt-s
     pthread
   )
@@ -543,3 +534,4 @@ install (
   DESTINATION
   bin
 )
+

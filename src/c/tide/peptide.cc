@@ -115,6 +115,38 @@ void Peptide::AddIons(W* workspace) const {
   }
 }
 
+template<class W>
+void Peptide::AddBIonsOnly(W* workspace) const {
+  // Use workspace to assemble b ions only.
+  // Intended primarily to support XCorr p-value calculations.
+  double max_possible_peak = numeric_limits<double>::infinity();
+  if (MaxBin::Global().MaxBinEnd() > 0) {
+    max_possible_peak = MaxBin::Global().CacheBinEnd();
+  }
+  
+  vector<double> aa_masses(Len());
+  const char* residue = residues_;
+  // Collect m/z values for each residue, for z = 1.
+  for (int i = 0; i < Len(); ++i, ++residue) {
+    aa_masses[i] = MassConstants::mono_table[*residue];
+  }
+
+  //Add modifications to amino acids
+  for (int i = 0; i < num_mods_; ++i) {
+    int index;
+    double delta;
+    MassConstants::DecodeMod(mods_[i], &index, &delta);
+    aa_masses[index] += delta;
+  }
+
+  // Add all charge 1 B ions.
+  double total = MassConstants::proton + aa_masses[0];
+  for (int i = 1; i < Len() && total <= max_possible_peak; ++i) {
+    workspace -> AddBIon(total);
+    total += aa_masses[i];
+  }
+}
+
 #ifdef DEBUG
 void DisAsm(const void* prog) {
   unsigned char* pos = (unsigned char*) prog;
@@ -130,7 +162,6 @@ void DisAsm(const void* prog) {
   return;
 }
 #endif
-
 
 void Peptide::Compile(const TheoreticalPeakArr* peaks,
 		      const pb::Peptide& pb_peptide,
@@ -150,10 +181,26 @@ void Peptide::Compile(const TheoreticalPeakArr* peaks,
 //  compiler_prog2->AddPositive(pb_peptide.peak2());
 //  compiler_prog2->AddNegative(pb_peptide.neg_peak2());
   compiler_prog2->Done();
+/*    cout << Seq() << endl;
+    for (int i = 0; i < peaks[0].size(); ++i)
+      cout << "Theoretical Peak[" << peaks[0][i].Bin() << "] = "
+           << peaks[0][i].Type() << endl;
+    for (int i = 0; i < peaks[1].size(); ++i)
+      cout << "Theoretical Peak[" << peaks[1][i].Bin() << "] = "
+           << peaks[1][i].Type() << endl;
+*/
+//	exit(1);  
 }
 
 void Peptide::ComputeTheoreticalPeaks(TheoreticalPeakSet* workspace) const {
   AddIons<TheoreticalPeakSet>(workspace);   // Generic workspace
+#ifdef DEBUG
+  Show();
+#endif
+}
+
+void Peptide::ComputeBTheoreticalPeaks(TheoreticalPeakSetBIons* workspace) const {
+  AddBIonsOnly<TheoreticalPeakSetBIons>(workspace);   // workspace for b ion only peak set
 #ifdef DEBUG
   Show();
 #endif
@@ -185,6 +232,21 @@ void Peptide::ComputeTheoreticalPeaks(ST_TheoreticalPeakSet* workspace,
 #endif
 }
 
+// return the amino acid masses in the current peptide
+double* Peptide::getAAMasses(){
+  double* masses_charge = new double[Len()];
+  const char* residue = residues_;
+  for (int i = 0; i < Len(); ++i, ++residue) {
+    masses_charge[i] = MassConstants::mono_table[*residue];
+  }
+  for (int i = 0; i < num_mods_; ++i) {
+    int index;
+    double delta;
+    MassConstants::DecodeMod(mods_[i], &index, &delta);
+    masses_charge[index] += delta;
+  }
+  return masses_charge;
+}
 
 // Probably defunct, uses old calling format.
 int NoInlineDotProd(Peptide* peptide, const int* cache, int charge) {

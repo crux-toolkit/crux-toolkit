@@ -145,8 +145,7 @@ void CruxApplicationList::usage() {
       unsigned int line_length = 0;
 
       // Print the first line.
-      while(line_length + words[word_index].length() + 1 
-	    < max_descr_line) {
+      while(line_length + words[word_index].length() + 1 < max_descr_line) {
         cerr << " ";
         cerr << words[word_index];
         line_length += words[word_index].length() + 1;
@@ -161,8 +160,7 @@ void CruxApplicationList::usage() {
           cerr<<" ";
         }
         while ((word_index < words.size()) && 
-	       (line_length + words[word_index].length() + 1 
-		< max_descr_line)) {
+               (line_length + words[word_index].length() + 1 < max_descr_line)) {
           cerr << " ";
           cerr << words[word_index];
           line_length += words[word_index].length() + 1;

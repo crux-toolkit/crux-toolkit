@@ -99,7 +99,7 @@ class Match {
   /**
    * Print one field in the tab-delimited output file, based on column index.
    */
-  void printOneMatchField(
+  virtual void printOneMatchField(
     int      column_idx,             ///< Index of the column to print. -in
     MatchCollection* collection,  ///< collection holding this match -in 
     MatchFileWriter*    output_file,            ///< output stream -out
@@ -114,7 +114,7 @@ class Match {
   void init();
 
  public:
-
+  bool exact_pval_search_;
   /**
    * \returns a new memory allocated match
    */
@@ -317,7 +317,8 @@ class Match {
    *\returns the file index for this match
    */
   int getFileIndex();
-  
+
+  static int findFileIndex(const std::string& file_path, bool match_stem = false);
 
   /**                                                                                                      
    * sets the file path for this match                                                                     
@@ -774,6 +775,24 @@ int compareSpectrumDecoyPValueQValue(
   Crux::Match** match_b  ///< the scond match -in
   );
 
+/**
+ * compare two matches, and returns in the same order that tide-search outputs
+ * NOTE: if the order tide outputs in changes, this will need to change as well!
+ * This is only used for testing purposes, as the order has no meaningful information.
+ * If we do not sort a match collection after using MzIdentMLReader, then we will
+ * write out matches in a different order than the original file. This makes it difficult
+ * to compare files, so we will sort the collection instead of writing a very intensive
+ * test.
+ *
+ * First look at neutral mass, and return negative number if less positive if more
+ * Then look at target or decoy - targets get negative, decoys get positive
+ * Finally, look at xcorr score - negative if less, positive if more
+ * (0 if equal ?) Note the zero value may cause problems if identical xcorr scores ?
+ */
+int compareByTideOutput(
+  Crux::Match** match_a, ///< the first match -in  
+  Crux::Match** match_b  ///< the scond match -in
+  );
 
 /************************************************
  * TODO: Why are these here?

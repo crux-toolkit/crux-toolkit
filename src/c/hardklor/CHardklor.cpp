@@ -252,7 +252,7 @@ void CHardklor::Analyze() {
 
   //Set and display on screen percentage counter
   iPercent=0;
-  if(bEcho) cout << iPercent;
+  if(bEcho) cerr << iPercent;
   
   //While there is still data to read in the file.
   while(true){
@@ -449,12 +449,12 @@ void CHardklor::Analyze() {
     //Update the percentage indicator
 		if(bEcho){
 			if (r.getPercent() > iPercent){
-				if(iPercent<10) cout << "\b";
-				else cout << "\b\b";
-				cout.flush();
+				if(iPercent<10) cerr << "\b";
+				else cerr << "\b\b";
+				cerr.flush();
 				iPercent=r.getPercent();
-				cout << iPercent;
-				cout.flush();
+				cerr << iPercent;
+				cerr.flush();
 			}
 		}
     
@@ -582,7 +582,7 @@ void CHardklor::Analyze() {
   fptr.clear();
 
 	if(bEcho) {
-		cout << "\n" << endl;
+		cerr << endl;
 
 		switch(cs.algorithm){
 		case SemiComplete:

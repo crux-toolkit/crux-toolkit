@@ -5,6 +5,7 @@
 #include "PinWriter.h"
 #include "parameter.h"
 #include "MatchCollectionParser.h"
+#include "SQTReader.h"
 #include <sstream>
 #include <iomanip>
 #include <ios>
@@ -71,8 +72,8 @@ int MakePinApplication::main(int argc, char** argv) {
     "output-file",
     "verbosity",
     "parameter-file",
-    "list-of-files"
-
+    "list-of-files",
+    "filestem-prefixes"
   };
 
   int num_options = sizeof(option_list) / sizeof(char*);
@@ -117,6 +118,10 @@ int MakePinApplication::main(vector<string>& paths) {
 
   for (vector<string>::iterator iter = paths.begin(); iter != paths.end(); ++iter) {
     carp(CARP_INFO, "Parsing %s", iter->c_str());
+    if (has_extension(*iter, ".sqt")) {
+      SQTReader::readSymbols(*iter);
+    }
+
     MatchCollection* current_collection = parser.create(iter->c_str(), "__NULL_STR");
     for (int scorer_idx = (int)SP; scorer_idx < (int)NUMBER_SCORER_TYPES; scorer_idx++) {
       target_collection->setScoredType((SCORER_TYPE_T)scorer_idx, 

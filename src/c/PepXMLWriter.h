@@ -15,6 +15,8 @@ class PepXMLWriter{
   PepXMLWriter();
   ~PepXMLWriter();
 
+  bool exact_pval_search_;
+
   /**
    * Open a file of the given name.  Replace an existing file if
    * overwrite is true, else exit if an existing file is found.
@@ -103,7 +105,6 @@ class PepXMLWriter{
     unsigned tot_matched_ions,
     unsigned current_num_matches
   );
-  
  protected:
   void initScoreNames();
   void printSpectrumElement(int spectrum_scan_number, 

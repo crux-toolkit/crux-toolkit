@@ -25,7 +25,11 @@ XLinkSite::XLinkSite(
   string& site_string ///<string describing the cross-linkable site
   ) {
 
-  if (site_string == "nterm") {
+  if (site_string == "cterm") {
+
+    type_ = XLINKSITE_CTERM;
+
+  } else if (site_string == "nterm") {
 
     type_ = XLINKSITE_NTERM;
 
@@ -59,14 +63,31 @@ bool XLinkSite::hasSite(
   ) const {
   
   switch (type_) {
+    case XLINKSITE_CTERM:
+      
+      if (idx == peptide->getLength() - 1) {
+        //cerr <<"Cterm peptide:"<<peptide->getSequence()<<" "<<idx<<":"<<(int)peptide->getLength()<<endl;
+        vector<PeptideSrc*>& srcs = peptide->getPeptideSrcVector();
+        for (size_t idx2 = 0 ; idx2 < srcs.size() ; idx2++ ) {
+          int start_idx = srcs[idx2]->getStartIdx();
+          //cerr << "start:"<<start_idx<<" "<<(start_idx+idx)<<" "<<srcs[idx2]->getParentProtein()->getLength()<<endl;
+
+
+          if ((idx + start_idx) >= srcs[idx2]->getParentProtein()->getLength()) {
+            return true;
+          }
+        }
+      }
+      return false;
+      break;
     case XLINKSITE_NTERM:
       if (idx == 0) {
-	vector<PeptideSrc*>& srcs = peptide->getPeptideSrcVector();
-	for (size_t idx = 0; idx < srcs.size(); idx++ ) {
-	  if (srcs[idx]->getStartIdx() == 1) {
-	    return true;
-	  }
-	}
+        vector<PeptideSrc*>& srcs = peptide->getPeptideSrcVector();
+        for (size_t idx = 0; idx < srcs.size(); idx++ ) {
+          if (srcs[idx]->getStartIdx() == 1) {
+            return true;
+          }
+        }
       }
       return false;
       break;
@@ -80,6 +101,29 @@ bool XLinkSite::hasSite(
     default:
       carp(CARP_FATAL, "Xlink site not set!");
   };
+  return false;
+}
+
+bool XLinkSite::hasSite(
+  string& protein_sequence,
+  int idx) const {
+
+  switch(type_) {
+    case XLINKSITE_CTERM:
+      return idx == protein_sequence.length() - 1;
+    case XLINKSITE_NTERM:
+      return idx == 0;
+      break;
+    case XLINKSITE_ALL:
+      return true;
+      break;
+    case XLINKSITE_AA:
+      return protein_sequence.at(idx) == aa_;
+      break;
+    case XLINKSITE_UNKNOWN:
+    default:
+      carp(CARP_FATAL, "XLink site not set!");
+  }
   return false;
 }
 
@@ -123,3 +167,9 @@ bool XLinkSite::operator < (
   }
 }
 
+/*                                                                                                                                                                                                                          
+ * Local Variables:                                                                                                                                                                                                         
+ * mode: c                                                                                                                                                                                                                  
+ * c-basic-offset: 2                                                                                                                                                                                                        
+ * End:                                                                                                                                                                                                                     
+ */

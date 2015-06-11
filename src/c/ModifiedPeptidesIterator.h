@@ -50,6 +50,20 @@ class ModifiedPeptidesIterator : public PeptideIterator
     Database* dbase    ///< Database from which to draw peptides
    );
 
+  /**
+   * Constructor for returnign all peptides in the index or database
+   * that fall within the mass range
+   */
+  ModifiedPeptidesIterator(
+    double min_mass,    ///< min-mass of peptides
+    double max_mass,    ///< max-mass of peptides
+    PEPTIDE_MOD_T* pmod, ///< Peptide mod to apply
+    bool is_decoy, ///< generate decoy peptides
+    Index* index,     ///< Index from which to draw peptides OR
+    Database* dbase   ///< Database from which to draw peptides
+  );
+
+
   ~ModifiedPeptidesIterator();
 };
 

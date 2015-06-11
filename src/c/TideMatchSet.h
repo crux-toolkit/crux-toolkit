@@ -20,7 +20,12 @@ typedef vector<const pb::Protein*> ProteinVec;
 class TideMatchSet {
 
 public:
-  typedef pair<int, int> Pair;
+  bool exact_pval_search_;
+
+  typedef pair<int, int> Pair2;
+  typedef FixedCapacityArray<Pair2> Arr2;
+
+  typedef pair<pair<double, double>, int> Pair;   //store results for exact_pval calculations
   typedef FixedCapacityArray<Pair> Arr;
 
   // Matches will be an array of pairs, (score, counter), where counter refers
@@ -46,7 +51,8 @@ public:
     const ActivePeptideQueue* peptides, ///< peptide queue
     const ProteinVec& proteins, ///< proteins corresponding with peptides
     const vector<const pb::AuxLocation*>& locations,  ///< auxiliary locations
-    bool compute_sp ///< whether to compute sp or not
+    bool compute_sp, ///< whether to compute sp or not
+    bool highScoreBest //< indicates semantics of score magnitude
   );
 
   /**
@@ -60,13 +66,15 @@ public:
     const ActivePeptideQueue* peptides, ///< peptide queue
     const ProteinVec& proteins, ///< proteins corresponding with peptides
     const vector<const pb::AuxLocation*>& locations,  ///< auxiliary locations
-    bool compute_sp ///< whether to compute sp or not
+    bool compute_sp, ///< whether to compute sp or not
+    bool highScoreBest // indicates semantics of score magnitude
   );
 
   static void writeHeaders(
     ofstream* file,
     bool decoyFile,
-    bool sp
+    bool sp,
+    bool exact_pval_search
   );
 
   static void initModMap(
@@ -77,8 +85,17 @@ public:
     const string& cleavageType
   );
 
+  /**
+   * Returns a pointer to the modification in the list of mods, adding it if it
+   * doesn't exist
+   */
+  static const AA_MOD_T* lookUpMod(
+    double delta_mass ///< mass of the mod to look up
+  );
+
 protected:
   Arr* matches_;
+  Arr2* matches2_;
   double max_mz_;
   static map<int, double> mod_map_; // unique delta index -> delta
   static ModCoder mod_coder_;
@@ -88,10 +105,14 @@ protected:
   static char match_collection_loc_[sizeof(MatchCollection)];
   static char decoy_match_collection_loc_[sizeof(MatchCollection)];
 
-  struct less_score : public binary_function<Pair, Pair, bool> {
+  static bool lessScore(Pair x, Pair y) {
     // Compare scores, ignore counters.
-    bool operator()(Pair x, Pair y) { return x.first < y.first; }
-  };
+    return x.first.first < y.first.first;
+  }
+  static bool moreScore(Pair x, Pair y) {
+    // Compare scores, ignore counters.
+    return x.first.first > y.first.first;
+  }
 
   /**
    * Helper function for tab delimited report function
@@ -139,20 +160,13 @@ protected:
     vector<PostProcessProtein*>* proteins_made ///< out parameter for new proteins
   );
 
-  /**
-   * Returns a pointer to the modification in the list of mods, adding it if it
-   * doesn't exist
-   */
-  const AA_MOD_T* lookUpMod(
-    double delta_mass ///< mass of the mod to look up
-  );
-
   void gatherTargetsAndDecoys(
     const ActivePeptideQueue* peptides,
     const ProteinVec& proteins,
     vector<Arr::iterator>& targetsOut,
     vector<Arr::iterator>& decoysOut,
-    int top_n
+    int top_n,
+    bool highScoreBest // indicates semantics of score magnitude
   );
 
   /**

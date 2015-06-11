@@ -14,17 +14,18 @@
 
 extern HASH_T* parameters;
 extern void AddTheoreticalPeaks(const vector<const pb::Protein*>& proteins,
-                        				const string& input_filename,
-                        				const string& output_filename);
+                                const string& input_filename,
+                                const string& output_filename);
 //extern void AddMods(HeadedRecordReader* reader,
 //                    string out_file,
-//           		    const pb::Header& header,
-//         		    const vector<const pb::Protein*>& proteins);
+//                    const pb::Header& header,
+//                    const vector<const pb::Protein*>& proteins);
 extern void AddMods(HeadedRecordReader* reader,
                     string out_file,
-           		    const pb::Header& header,
-         		    const vector<const pb::Protein*>& proteins, VariableModTable& var_mod_table);
+                    const pb::Header& header,
+                    const vector<const pb::Protein*>& proteins, VariableModTable& var_mod_table);
 DECLARE_int32(max_mods);
+DECLARE_int32(min_mods);
 DECLARE_string(tmpfile_prefix);
 
 TideIndexApplication::TideIndexApplication() {
@@ -54,6 +55,7 @@ int TideIndexApplication::main(int argc, char** argv) {
     "cterm-protein-mods-spec",
     "nterm-protein-mods-spec",
     "max-mods",
+    "min-mods",
     "output-dir",
     "overwrite",
     "peptide-list",
@@ -86,7 +88,7 @@ int TideIndexApplication::main(int argc, char** argv) {
     cmd_line += argv[i];
   }
 
-	FLAGS_tmpfile_prefix = make_file_path("modified_peptides_partial_");
+  FLAGS_tmpfile_prefix = make_file_path("modified_peptides_partial_");
 
   // Get options
   double min_mass = get_double_parameter("min-mass");
@@ -95,6 +97,11 @@ int TideIndexApplication::main(int argc, char** argv) {
   int max_length = get_int_parameter("max-length");
   bool monoisotopic_precursor = get_boolean_parameter("monoisotopic-precursor");
   FLAGS_max_mods = get_int_parameter("max-mods");
+  FLAGS_min_mods = get_int_parameter("min-mods");
+  if (FLAGS_min_mods > FLAGS_max_mods) {
+		carp(CARP_FATAL, "The value for 'min-mods' cannot be greater than the value "
+                     "for 'max-mods'");
+	}
   MASS_TYPE_T mass_type = (monoisotopic_precursor) ? MONO : AVERAGE;
   int missed_cleavages = get_int_parameter("missed-cleavages");
   DIGEST_T digestion = get_digest_type_parameter("digestion");
@@ -380,6 +387,9 @@ int TideIndexApplication::main(int argc, char** argv) {
 
   // Recover stderr
   cerr.rdbuf(old);
+  remove(modless_peptides.c_str());
+  remove(peakless_peptides.c_str());
+
 
   return 0;
 }
@@ -496,6 +506,10 @@ void TideIndexApplication::fastaToPb(
     proteinSequence = new string;
   }
   delete proteinSequence;
+  if (targetsGenerated == 0) {
+    carp(CARP_FATAL, "No target sequences generated.  Is \'%s\' a FASTA file?",
+         fasta.c_str());
+  }
 
   // Generate decoys
   map<const string*, const string*> targetToDecoy;

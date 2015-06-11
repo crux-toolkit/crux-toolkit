@@ -19,6 +19,8 @@ using namespace Crux;
 using namespace pwiz;
 using namespace identdata;
 
+#define calculateMassToCharge(peptide_mass, charge) (FLOAT_T) ((peptide_mass + (charge*MASS_PROTON))/charge)
+
 MzIdentMLWriter::MzIdentMLWriter() : PSMWriter() {
   //data_ = NULL;
   fout_ = NULL;
@@ -100,35 +102,35 @@ PeptidePtr MzIdentMLWriter::getPeptide(
       if (peptide_p -> modification.size() == mod_count) {
         if (mod_count == 0) { // no modifications
           return (peptide_p);
-	} else {
-	  MODIFIED_AA_T* mod_seq = peptide->getModifiedAASequence();
-	  AA_MOD_T** mod_list = NULL;
-	  int total_mods = get_all_aa_mod_list(&mod_list);
-	  bool match = true;
+        } else {
+          MODIFIED_AA_T* mod_seq = peptide->getModifiedAASequence();
+          AA_MOD_T** mod_list = NULL;
+          int total_mods = get_all_aa_mod_list(&mod_list);
+          bool match = true;
           for (mod_iter = peptide_p->modification.begin();
                mod_iter != peptide_p->modification.end();
                ++mod_iter) {
-	    ModificationPtr current_mod = *mod_iter;
-	    int mod_location = current_mod -> location;
-	    //Crux only supports one mass for modifications.
-	    double mono_mass = current_mod ->monoisotopicMassDelta;
+            ModificationPtr current_mod = *mod_iter;
+            int mod_location = current_mod -> location;
+            //Crux only supports one mass for modifications.
+            double mono_mass = current_mod ->monoisotopicMassDelta;
             for (int mod_idx = 0 ; mod_idx < total_mods; mod_idx++) {
               match = false;
-	      if (is_aa_modified(mod_seq[mod_location], mod_list[mod_idx])) {
-		if (aa_mod_get_mass_change(mod_list[mod_idx]) == mono_mass) {
-		  match = true; //we found a match, keep searching
-		  break;
-		}
-	      }
-	    }
-	    if (!match) {break;}
-	  }
+              if (is_aa_modified(mod_seq[mod_location], mod_list[mod_idx])) {
+                if (aa_mod_get_mass_change(mod_list[mod_idx]) == mono_mass) {
+                  match = true; //we found a match, keep searching
+                  break;
+                }
+              }
+            }
+            if (!match) {break;}
+          }
           free(mod_seq);
-	  //all modifications match, return peptide.
-	  if (match) {
-	    return peptide_p;
-	  }
-	}
+          //all modifications match, return peptide.
+          if (match) {
+            return peptide_p;
+          }
+        }
       }
     }
   }
@@ -147,14 +149,14 @@ PeptidePtr MzIdentMLWriter::getPeptide(
     
     for (int mod_seq_idx = 0;mod_seq_idx < peptide->getLength();mod_seq_idx++) {
       for (int mod_idx =0 ; mod_idx < total_mods; mod_idx++) {
-	if (is_aa_modified(mod_seq[mod_seq_idx], mod_list[mod_idx])) {
-	  ModificationPtr mod_p(new pwiz::identdata::Modification());
-	  mod_p->location = mod_seq_idx;
-	  mod_p->monoisotopicMassDelta = aa_mod_get_mass_change(mod_list[mod_idx]);
-	  mod_p->residues.push_back(sequence_str.at(mod_seq_idx));
-	  mod_p->set(MS_unknown_modification);
-	  peptide_p->modification.push_back(mod_p);
-	}
+        if (is_aa_modified(mod_seq[mod_seq_idx], mod_list[mod_idx])) {
+          ModificationPtr mod_p(new pwiz::identdata::Modification());
+          mod_p->location = mod_seq_idx;
+          mod_p->monoisotopicMassDelta = aa_mod_get_mass_change(mod_list[mod_idx]);
+          mod_p->residues.push_back(sequence_str.at(mod_seq_idx));
+          mod_p->set(MS_unknown_modification);
+          peptide_p->modification.push_back(mod_p);
+        }
       }
     }
 
@@ -219,9 +221,9 @@ DBSequencePtr MzIdentMLWriter::getDBSequence(
     if (protein_id == dbs_ptr->accession) {
       if (is_post_process) {
         //sequence str should be the peptide
-	if (sequence_str == dbs_ptr->seq) {
+        if (sequence_str == dbs_ptr->seq) {
           return dbs_ptr;
-	}
+        }
       } else {
         //we have the full sequence.
         return dbs_ptr;
@@ -259,7 +261,7 @@ PeptideEvidencePtr MzIdentMLWriter::getPeptideEvidence(
 
   for (pe_iter = mzid_->sequenceCollection.peptideEvidence.begin();
        pe_iter != mzid_->sequenceCollection.peptideEvidence.end();
-	 ++pe_iter) {
+         ++pe_iter) {
     PeptideEvidencePtr pe_ptr = *pe_iter;
     if ((pe_ptr->peptidePtr->peptideSequence == sequence_str) && (pe_ptr->dbSequencePtr->accession==protein_id)) {
       return pe_ptr;
@@ -293,7 +295,7 @@ PeptideEvidencePtr MzIdentMLWriter::getPeptideEvidence(
 
   for (pe_iter = mzid_->sequenceCollection.peptideEvidence.begin();
        pe_iter != mzid_->sequenceCollection.peptideEvidence.end();
-	 ++pe_iter) {
+         ++pe_iter) {
     PeptideEvidencePtr pe_ptr = *pe_iter;
     if ((pe_ptr->peptidePtr->peptideSequence == sequence_str) && (pe_ptr->dbSequencePtr->accession==protein_id)) {
       return pe_ptr;
@@ -513,7 +515,7 @@ SpectrumIdentificationItemPtr MzIdentMLWriter::getSpectrumIdentificationItem(
     "SII_"+boost::lexical_cast<string>(sii_idx_++)));
   siip->chargeState = zstate.getCharge();
   siip->experimentalMassToCharge = zstate.getMZ();
-  siip->calculatedMassToCharge = FLOAT_T(crux_peptide->getPeptideMass()+MASS_PROTON)/(double)charge_state;
+  siip->calculatedMassToCharge = calculateMassToCharge(crux_peptide->getPeptideMass(), (FLOAT_T) zstate.getCharge());
 
   addSpectrumScores(spectrum_match, siip);
   siip->passThreshold = true;
@@ -617,13 +619,23 @@ void MzIdentMLWriter::addScores(
       score_idx++) {
     SCORER_TYPE_T score_type = (SCORER_TYPE_T)score_idx;
     if (match_collection->getScoredType(score_type)) {
-      CVID cvparam_type = getScoreCVID(score_type);
-      if (cvparam_type != CVID_Unknown) {
-        CVParam cvparam(cvparam_type, match->getScore(score_type));
-        item->cvParams.push_back(cvparam);   
+      if (score_type == XCORR && match_collection->exact_pval_search_) {
+        CVParam exactPval(MS_peptide_identification_confidence_metric,
+                          match->getScore(TIDE_SEARCH_EXACT_PVAL));
+        item->cvParams.push_back(exactPval);
+        CVParam refactXCORR(MS_SEQUEST_xcorr,
+                            match->getScore(TIDE_SEARCH_REFACTORED_XCORR));
+        item->cvParams.push_back(refactXCORR);
+      } else {
+        CVID cvparam_type = getScoreCVID(score_type);
+        if (cvparam_type != CVID_Unknown) {
+          CVParam cvparam(cvparam_type, match->getScore(score_type));
+          item->cvParams.push_back(cvparam);   
+        }
       }
     }
   }
+
 
   if (match_collection->getScoredType(XCORR)) {
     CVParam delta_cn(MS_SEQUEST_deltacn, match->getDeltaCn());
@@ -660,6 +672,21 @@ void MzIdentMLWriter::write(
   addMatches(collection);
 }
 
+// temporary testing method. to be deleted.
+/*struct myclass {
+  bool operator() (Crux::Match* i, Crux::Match* j) {
+//    Crux::SpectrumZState& zstate = i->getZState();
+
+    if (i->getZState().getNeutralMass() != j->getZState().getNeutralMass()) {
+      return (i->getZState().getNeutralMass() < j->getZState().getNeutralMass());
+    } else if (i->getNullPeptide() ^ j->getNullPeptide()) {
+      return (i->getNullPeptide() ? false : true);
+    } else {
+      return (i->getScore(XCORR) > j->getScore(XCORR));
+    }
+  }
+} myobject;*/
+
 /**
  * Adds the matches in the match collection to
  * the mzid objects
@@ -668,12 +695,42 @@ void MzIdentMLWriter::addMatches(
   MatchCollection* collection  ///< matches to add
   ) {
 
+  // temporary sorting test...
+/*  MatchIterator match_iter(collection);
+  vector<Crux::Match*> matchVec;
+  while (match_iter.hasNext()) {
+    Match* match = match_iter.next();
+    matchVec.push_back(match);
+  }
+  sort(matchVec.begin(), matchVec.end(), myobject);*/
+
   MatchIterator match_iter(collection);
   while (match_iter.hasNext()) {
     addMatch(collection, match_iter.next());
   }
-
+/*  for (vector<Match*>::iterator it = matchVec.begin(); it != matchVec.end(); ++it) {
+    addMatch(collection, *it);
+  }*/
 }
+
+/*void MzIdentMLWriter::sortMatch(
+  MatchCollection* collection
+  ) {
+  MatchIterator match_iter(collection);
+  vector<Crux::Match*> matchVec;
+  while (match_iter.hasNext()) {
+    Match* match = match_iter.next();
+    matchVect.push_back(match);
+  }
+  sort(matchVec.begin(), matchVec.end(), myobject);
+  return matchVec;
+}*/
+
+//bool MzIdentMLWriter::comparePeptideMass(
+//  Crux::Peptide* i, Crux::Peptide* j
+//  ) {
+//  return (i->getPeptideMass() < j->getPeptideMass());
+//}
 
 /**
  * Adds the match to the mzIdentML object
@@ -692,7 +749,7 @@ void MzIdentMLWriter::addMatch(
 
   siip->chargeState = zstate.getCharge();
   siip->experimentalMassToCharge = zstate.getMZ();
-  siip->calculatedMassToCharge = FLOAT_T((peptide->getPeptideMass()+MASS_PROTON)/(double)zstate.getCharge());
+  siip->calculatedMassToCharge = calculateMassToCharge(peptide->getPeptideMass(), (FLOAT_T) zstate.getCharge());
 
   if (collection->getScoredType(PERCOLATOR_SCORE)) {
     siip->rank = match->getRank(PERCOLATOR_SCORE);

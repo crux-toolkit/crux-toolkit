@@ -149,30 +149,30 @@ int scandir(
   int (*select)(struct dirent *),
   int (*compar)(const void *, const void *)
 ) {
-	errno = 0;
-	
-	DIR *directory = opendir(dirname);
-	if (!directory) {
-		return -1;
-	}
+  errno = 0;
+  
+  DIR *directory = opendir(dirname);
+  if (!directory) {
+    return -1;
+  }
 
-	struct dirent *entry;
-	vector<struct dirent *> *entries = new vector<struct dirent *>;
-	while(entry = readdir(directory)) {
-		if (!select || select(entry)) {
-			struct dirent *valid_entry = new struct dirent;
-			copy_dirent(entry, valid_entry);
-			entries->push_back(valid_entry);
-		}
-	}
-	if (errno) {
-		return -1;
-	}
+  struct dirent *entry;
+  vector<struct dirent *> *entries = new vector<struct dirent *>;
+  while(entry = readdir(directory)) {
+    if (!select || select(entry)) {
+      struct dirent *valid_entry = new struct dirent;
+      copy_dirent(entry, valid_entry);
+      entries->push_back(valid_entry);
+    }
+  }
+  if (errno) {
+    return -1;
+  }
 
-	*namelist = static_cast<struct dirent **>(malloc(sizeof(struct dirent *) * entries->size()));
-	copy(entries->begin(), entries->end(), *namelist);
+  *namelist = static_cast<struct dirent **>(malloc(sizeof(struct dirent *) * entries->size()));
+  copy(entries->begin(), entries->end(), *namelist);
 
-	return entries->size();
+  return entries->size();
  }
 
 int alphasort(const void *d1, const void *d2) {
@@ -187,7 +187,7 @@ char *mkdtemp(char *temp) {
   char *dirname = _mktemp(temp);
   
   if (dirname) {
-	  // Create the directory
+    // Create the directory
     int result = _mkdir(dirname);
     if (result < 0) {
       free(dirname);

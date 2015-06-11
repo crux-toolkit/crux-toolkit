@@ -6,6 +6,7 @@
 #ifndef XLINKBONDMAP_H
 #define XLINKBONDMAP_H
 
+#include "XLinkablePeptide.h"
 #include "XLinkSite.h"
 #include <map>
 #include <set>
@@ -48,6 +49,10 @@ class XLinkBondMap: public std::map<XLinkSite, std::set<XLinkSite> > {
    */
   virtual ~XLinkBondMap();
 
+  void setLinkString(
+    std::string& links_string
+  );
+
   /**
    * \returns whether a cross-link can occur at a single position in the 
    * peptide (for deadlinks).
@@ -67,6 +72,12 @@ class XLinkBondMap: public std::map<XLinkSite, std::set<XLinkSite> > {
     int idx2            ///<2nd sequence idx
     ); 
 
+  bool canLink(
+    XLinkablePeptide& pep,
+    int link1_site,
+    int link2_site
+    );
+
   /**
    * \returns whether a cross-link can occur between two peptides at their 
    * respective sequence positions (for inter/intra links).
@@ -78,6 +89,26 @@ class XLinkBondMap: public std::map<XLinkSite, std::set<XLinkSite> > {
     int idx2              ///<2nd peptide sequence idx
     );
   
+  bool canLink(
+    XLinkablePeptide& pep1,
+    XLinkablePeptide& pep2,
+    int link1_site,
+    int link2_site
+  );
+
+  bool canLink(
+    std::string& protein_sequence,
+    int idx);
+
+
+
 };
 
 #endif
+
+/*                                                                                                                                                                                                                          
+ * Local Variables:                                                                                                                                                                                                         
+ * mode: c                                                                                                                                                                                                                  
+ * c-basic-offset: 2                                                                                                                                                                                                        
+ * End:                                                                                                                                                                                                                     
+ */

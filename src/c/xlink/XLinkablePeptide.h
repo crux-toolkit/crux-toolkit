@@ -24,9 +24,15 @@ class XLinkablePeptide {
   Crux::Peptide* peptide_; ///< the peptide object of this XLinkablePeptide (can be null)
   char* sequence_; ///< the sequence 
   std::vector<int> link_sites_; ///< the sequence indices where linking is possible
+  bool is_decoy_; //Is this from the decoy database?
 
+  /**
+   * Initialize object
+   */
+  void init();
+  
  public:
-
+  
   /**
    * Default constructor
    */
@@ -38,6 +44,14 @@ class XLinkablePeptide {
   XLinkablePeptide(
     char* sequence ///< the peptide sequence
     );
+
+  XLinkablePeptide(
+    const XLinkablePeptide& xlinkablepeptide
+  );
+
+  XLinkablePeptide(
+    XLinkablePeptide& xlinkablepeptide
+  );
 
   /**
    * Constructor that defines the peptide and the linking sites
@@ -59,8 +73,8 @@ class XLinkablePeptide {
   /**
    * Default destructor
    */
-  virtual ~XLinkablePeptide();
-
+  virtual ~XLinkablePeptide() {};
+ 
   /**
    * given a peptide and a XLinkBondMap object,
    * generate the possible link sites
@@ -124,6 +138,15 @@ class XLinkablePeptide {
    */
   bool isLinkable();
   
+
+  void setDecoy(bool is_decoy);
+
+  /**
+   * \returns whether the peptide is a decoy or not
+   */
+  bool isDecoy();
+
+
   /**
    * \returns whether the peptide is linkable using the bond map
    */
@@ -182,6 +205,11 @@ class XLinkablePeptide {
    */
   std::string getModifiedSequenceString();
 
+  
+  /**
+   * Is the linkable peptide modified?
+   */
+  bool isModified();
   /**
    * \returns whether the peptide is less than (by lexical modified sequence)
    */
@@ -190,6 +218,10 @@ class XLinkablePeptide {
   ) const;
   
 };
+
+bool compareXLinkablePeptideMass(const XLinkablePeptide& xpep1, const XLinkablePeptide& xpep2);
+
+
 
 #endif
 

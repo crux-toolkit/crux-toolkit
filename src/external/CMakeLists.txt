@@ -12,29 +12,47 @@ if (UNIX)
 endif (UNIX)
 SET(ENV{CMAKE_PREFIX_PATH} ${CMAKE_CURRENT_BINARY_DIR})
 SET(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR})
+SET(USE_LATEST_PWIZ ON CACHE BOOL "Use lastest version of ProteoWizard")
 
 # Download and build a partial distribution of the pwiz source
 # from the ProteoWizard TeamCity repository.
 if (WIN32 AND NOT CYGWIN)
-  ExternalProject_Add(
-    ProteoWizard
-    DOWNLOAD_COMMAND 
-      ${CMAKE_COMMAND} 
-        -DDOWNLOAD_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/downloads
-        -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
-        -P  ${CMAKE_CURRENT_SOURCE_DIR}/download_pwiz.cmake
-    DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/downloads
-    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND 
-      ${CMAKE_COMMAND} 
-      	-DBUILD_TYPE:STRING=${CMAKE_CFG_INTDIR}
-        -DPREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
-        -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
-        -P  ${CMAKE_CURRENT_SOURCE_DIR}/build_pwiz.cmake
-    INSTALL_COMMAND ""
-    BUILD_IN_SOURCE 1
-  )
+  if (USE_LATEST_PWIZ)
+    ExternalProject_Add(
+      ProteoWizard
+      DOWNLOAD_COMMAND 
+        ${CMAKE_COMMAND} 
+          -DDOWNLOAD_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/downloads
+          -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
+          -P  ${CMAKE_CURRENT_SOURCE_DIR}/download_pwiz.cmake
+      DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/downloads
+      PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
+      CONFIGURE_COMMAND ""
+      BUILD_COMMAND 
+        ${CMAKE_COMMAND} 
+          -DBUILD_TYPE:STRING=${CMAKE_CFG_INTDIR}
+          -DPREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
+          -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
+          -P  ${CMAKE_CURRENT_SOURCE_DIR}/build_pwiz.cmake
+      INSTALL_COMMAND ""
+      BUILD_IN_SOURCE 1
+    )
+  else (USE_LATEST_PWIZ)
+    ExternalProject_Add(
+      ProteoWizard
+      URL http://cruxtoolkit.sourceforge.net/download/crux-2.1/pwiz-src-3_0_6736.tar.bz2
+      PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
+      CONFIGURE_COMMAND ""
+      BUILD_COMMAND 
+        ${CMAKE_COMMAND} 
+          -DBUILD_TYPE:STRING=${CMAKE_CFG_INTDIR}
+          -DPREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
+          -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
+          -P  ${CMAKE_CURRENT_SOURCE_DIR}/build_pwiz.cmake
+      INSTALL_COMMAND ""
+      BUILD_IN_SOURCE 1
+    )
+  endif (USE_LATEST_PWIZ)
   # On Windows we have to do some extra house keeping
   ExternalProject_Add_Step(
     ProteoWizard
@@ -47,27 +65,46 @@ if (WIN32 AND NOT CYGWIN)
     DEPENDEES install
   )
 else (WIN32 AND NOT CYGWIN)
-  ExternalProject_Add(
-    ProteoWizard
-    DOWNLOAD_COMMAND 
-      ${CMAKE_COMMAND} 
-        -DDOWNLOAD_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/downloads
-        -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
-        -P  ${CMAKE_CURRENT_SOURCE_DIR}/download_pwiz.cmake
-    DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/downloads
-    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND 
-      ${CMAKE_COMMAND} 
-      	-DBUILD_TYPE:STRING=${CMAKE_CFG_INTDIR}
-        -DPREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
-        -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
-        -P  ${CMAKE_CURRENT_SOURCE_DIR}/build_pwiz.cmake
-    INSTALL_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/create_links.sh 
-      --prefix=${CMAKE_CURRENT_BINARY_DIR}
-    INSTALL_COMMAND ""
-    BUILD_IN_SOURCE 1
-  )
+  if (USE_LATEST_PWIZ)
+    ExternalProject_Add(
+      ProteoWizard
+      DOWNLOAD_COMMAND 
+        ${CMAKE_COMMAND} 
+          -DDOWNLOAD_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/downloads
+          -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
+          -P  ${CMAKE_CURRENT_SOURCE_DIR}/download_pwiz.cmake
+      DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/downloads
+      PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
+      CONFIGURE_COMMAND ""
+      BUILD_COMMAND 
+        ${CMAKE_COMMAND} 
+          -DBUILD_TYPE:STRING=${CMAKE_CFG_INTDIR}
+          -DPREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
+          -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
+          -P  ${CMAKE_CURRENT_SOURCE_DIR}/build_pwiz.cmake
+      INSTALL_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/create_links.sh 
+        --prefix=${CMAKE_CURRENT_BINARY_DIR}
+      INSTALL_COMMAND ""
+      BUILD_IN_SOURCE 1
+    )
+  else (USE_LATEST_PWIZ)
+    ExternalProject_Add(
+      ProteoWizard
+      URL http://cruxtoolkit.sourceforge.net/download/crux-2.1/pwiz-src-3_0_6736.tar.bz2
+      PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
+      CONFIGURE_COMMAND ""
+      BUILD_COMMAND 
+        ${CMAKE_COMMAND} 
+          -DBUILD_TYPE:STRING=${CMAKE_CFG_INTDIR}
+          -DPREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
+          -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
+          -P  ${CMAKE_CURRENT_SOURCE_DIR}/build_pwiz.cmake
+      INSTALL_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/create_links.sh 
+        --prefix=${CMAKE_CURRENT_BINARY_DIR}
+      INSTALL_COMMAND ""
+      BUILD_IN_SOURCE 1
+    )
+  endif (USE_LATEST_PWIZ)
 endif (WIN32 AND NOT CYGWIN)
 
 if (WIN32 AND NOT CYGWIN)
@@ -107,6 +144,21 @@ if (WIN32 AND NOT CYGWIN)
     COMMAND ${CMAKE_COMMAND} -E copy 
       ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/windows/fido/GroupPowerBigraph.cpp
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/fido/GroupPowerBigraph.cpp
+    COMMAND ${CMAKE_COMMAND} -E copy 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_mass_cols/DataSet.cpp
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
+    COMMAND ${CMAKE_COMMAND} -E copy 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_mass_cols/DataSet.h
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
+    COMMAND ${CMAKE_COMMAND} -E copy 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_mass_cols/PSMDescription.cpp
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
+    COMMAND ${CMAKE_COMMAND} -E copy 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_mass_cols/SetHandler.h
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
+    COMMAND ${CMAKE_COMMAND} -E copy 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_mass_cols/SetHandler.cpp
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
     DEPENDEES patch
     DEPENDERS configure
   )
@@ -132,6 +184,21 @@ elseif (APPLE)
     COMMAND ${CMAKE_COMMAND} -E copy 
       ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_find_boost/CMakeLists.txt 
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
+    COMMAND ${CMAKE_COMMAND} -E copy 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_mass_cols/DataSet.cpp
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
+    COMMAND ${CMAKE_COMMAND} -E copy 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_mass_cols/DataSet.h
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
+    COMMAND ${CMAKE_COMMAND} -E copy 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_mass_cols/PSMDescription.cpp
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
+    COMMAND ${CMAKE_COMMAND} -E copy 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_mass_cols/SetHandler.h
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
+    COMMAND ${CMAKE_COMMAND} -E copy 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_mass_cols/SetHandler.cpp
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
     DEPENDEES patch
     DEPENDERS configure
   )
@@ -147,6 +214,11 @@ else(APPLE)
       -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
     PATCH_COMMAND cp 
       ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_find_boost/CMakeLists.txt 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_mass_cols/DataSet.cpp
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_mass_cols/DataSet.h
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_mass_cols/PSMDescription.cpp
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_mass_cols/SetHandler.h
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_mass_cols/SetHandler.cpp
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
   )
 endif (WIN32 AND NOT CYGWIN)
@@ -250,6 +322,9 @@ if (UNIX)
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     UPDATE_COMMAND ""
     CONFIGURE_COMMAND ""
+    PATCH_COMMAND cp
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/MSToolkit/src/MSToolkit/MSReader.cpp
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/MSToolkit/src/MSToolkit
     BUILD_COMMAND make -C MSToolkit
       COMMAND make -C CometSearch CXXFLAGS=-DCRUX 
     INSTALL_COMMAND ""
@@ -261,53 +336,32 @@ if (UNIX)
     TARGET comet
     POST_BUILD
     COMMAND 
-      ${CMAKE_COMMAND} -E copy_directory 
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/MSToolkit/include
-      ${CMAKE_CURRENT_BINARY_DIR}/include/MSToolkit/
+      [ -d ${CMAKE_CURRENT_BINARY_DIR}/include/MSToolkit ] ||
+        mkdir ${CMAKE_CURRENT_BINARY_DIR}/include/MSToolkit
     COMMAND 
-      ${CMAKE_COMMAND} -E copy
+      cp -p
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/MSToolkit/include/*
+      ${CMAKE_CURRENT_BINARY_DIR}/include/MSToolkit
+    COMMAND 
+      cp -p
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/MSToolkit/libmstoolkitlite.a
-      ${CMAKE_CURRENT_BINARY_DIR}/lib
-    COMMAND 
-      ${CMAKE_COMMAND} -E copy
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/Common.h
-      ${CMAKE_CURRENT_BINARY_DIR}/include/CometSearch/Common.h
-    COMMAND 
-      ${CMAKE_COMMAND} -E copy
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/CometData.h
-      ${CMAKE_CURRENT_BINARY_DIR}/include/CometSearch/CometData.h
-    COMMAND 
-      ${CMAKE_COMMAND} -E copy
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/CometSearch.h
-      ${CMAKE_CURRENT_BINARY_DIR}/include/CometSearch/CometSearch.h
-    COMMAND 
-      ${CMAKE_COMMAND} -E copy
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/CometSearchManager.h
-      ${CMAKE_CURRENT_BINARY_DIR}/include/CometSearch/CometSearchManager.h
-    COMMAND 
-      ${CMAKE_COMMAND} -E copy
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/CometPreprocess.h
-      ${CMAKE_CURRENT_BINARY_DIR}/include/CometSearch/CometPreprocess.h
-    COMMAND 
-      ${CMAKE_COMMAND} -E copy
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/ThreadPool.h
-      ${CMAKE_CURRENT_BINARY_DIR}/include/CometSearch/ThreadPool.h
-    COMMAND 
-      ${CMAKE_COMMAND} -E copy
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/Threading.h
-      ${CMAKE_CURRENT_BINARY_DIR}/include/CometSearch/Threading.h
-    COMMAND 
-      ${CMAKE_COMMAND} -E copy
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/OSSpecificThreading.h
-      ${CMAKE_CURRENT_BINARY_DIR}/include/CometSearch/OSSpecificThreading.h
-    COMMAND 
-      ${CMAKE_COMMAND} -E copy
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/CometInterfaces.h
-      ${CMAKE_CURRENT_BINARY_DIR}/include/CometSearch/CometInterfaces.h
-    COMMAND 
-      ${CMAKE_COMMAND} -E copy
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/libcometsearch.a
       ${CMAKE_CURRENT_BINARY_DIR}/lib
+    COMMAND 
+      [ -d ${CMAKE_CURRENT_BINARY_DIR}/include/CometSearch ] ||
+        mkdir ${CMAKE_CURRENT_BINARY_DIR}/include/CometSearch
+    COMMAND
+      cp -p
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/Common.h
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/CometData.h
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/CometSearch.h
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/CometSearchManager.h
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/CometPreprocess.h
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/ThreadPool.h
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/Threading.h
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/OSSpecificThreading.h
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/CometInterfaces.h
+      ${CMAKE_CURRENT_BINARY_DIR}/include/CometSearch
   )
 elseif (WIN32 AND NOT CYGWIN)
   set(LIBPATH "${CMAKE_CURRENT_BINARY_DIR}/lib;")

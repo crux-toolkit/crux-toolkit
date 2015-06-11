@@ -845,7 +845,7 @@ void print_a_mod(AA_MOD_T* mod){
  * \brief Generates a string representation of an aa_mod and returns a
  * pointer to that newly allocated string.
  */
-char* aa_mod_to_string(AA_MOD_T* mod){
+char* aa_mod_to_string(const AA_MOD_T* mod){
   const char* format_str = 
     "mass change=%.2f, symbol=%c, max=%d, position=%s, apply to ";
   char* return_str = (char*)mycalloc( strlen(format_str) + 50, sizeof(char));
@@ -881,6 +881,14 @@ char* aa_mod_to_string(AA_MOD_T* mod){
 }
 
 /* Setters and Getters */
+
+/**
+ * \brief Set the symbol used by this modification.
+ * \returns void
+ */
+void aa_mod_set_symbol(AA_MOD_T* mod, char symbol) {
+  mod->symbol = symbol;
+}
 
 /**
  * \brief Set the mass change caused by this modification.

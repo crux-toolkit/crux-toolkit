@@ -98,19 +98,24 @@ programs.
 fragmentation spectra for which accurate masses were successfully
 inferred.  Unless otherwise specified (with
 the <code>--spectrum-format</code> option), the output file format is
-the same as the input MS2 file format.  If the output format is
-".ms2," then a single spectrum may have multiple "Z" lines, each
-indicating a charge state and accurate mass.  In addition, Bullseye
-inserts an "I" line (for charge-dependent analysis) corresponding to
-each "Z" line.  The "I" line contains "EZ" in the second column, the
-charge and mass from the associated "Z" line in the third and fourth
-colummns, followed by the chromatographic apex and the intensity at
-the chromatographic apex.</li>
+".ms2".  Note that if the output format is ".ms2," then a single
+spectrum may have multiple "Z" lines, each indicating a charge state
+and accurate mass.  In addition, Bullseye inserts an "I" line (for
+charge-dependent analysis) corresponding to each "Z" line.  The "I"
+line contains "EZ" in the second column, the charge and mass from the
+associated "Z" line in the third and fourth colummns, followed by the
+chromatographic apex and the intensity at the chromatographic
+apex.</li>
 
 <li>
 <b>bullseye.no-pid.&lt;format&gt</b>: a file containing the
 fragmentation spectra for which accurate masses were not
 inferred.</li>
+
+<li>
+<b>hardklor.mono.txt</b>: a tab-delimited text file containing one
+line for each isotope distribution, as
+described <a href="hardklor.html">here</a>.</li>
 
 <li>
 <b>bullseye.log.txt</b>: a log file containing a copy of all messages

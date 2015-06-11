@@ -74,7 +74,7 @@ string get_protein_ids_locations(
  */
 int SearchForXLinks::xhhcSearchMain() {
 
-  carp(CARP_INFO, "Beginning crux xlink-search");
+  carp(CARP_INFO, "Beginning crux xlink-search (original)");
 
   //Get parameters
   const char* ms2_file = get_string_parameter_pointer("ms2 file");
@@ -101,8 +101,7 @@ int SearchForXLinks::xhhcSearchMain() {
 
   vector<LinkedPeptide> all_ions;
   carp(CARP_DETAILED_DEBUG,"Calling find all precursor ions");
-  Database* database = new Database(get_string_parameter_pointer("protein-database"), false);
-  find_all_precursor_ions(database, all_ions);
+  find_all_precursor_ions(all_ions);
   carp(CARP_DETAILED_DEBUG,"Sort");
   // sort filtered ions and decoy ions by mass
   //sort(all_ions.begin(), all_ions.end());
@@ -132,7 +131,7 @@ int SearchForXLinks::xhhcSearchMain() {
   FLOAT_T score;
  // best pvalues
 
-  const char* target_filename = "search.target.txt";
+  const char* target_filename = "search-for-xlinks.target.txt";
   
   string target_path = string(output_directory) + "/" + string(target_filename);
   ofstream search_target_file(target_path.c_str());
@@ -163,7 +162,7 @@ int SearchForXLinks::xhhcSearchMain() {
   search_target_file << "ion current observed"<<"\t";
   search_target_file << "ions observable bin (0-1200)"<<endl;
 
-  const char *decoy_filename = "search.decoy.txt";
+  const char *decoy_filename = "search-for-xlinks.decoy.txt";
   string decoy_path = string(output_directory) + "/" + string(decoy_filename);
 
   ofstream search_decoy_file (decoy_path.c_str());
@@ -236,16 +235,16 @@ int SearchForXLinks::xhhcSearchMain() {
 
     carp(CARP_DEBUG, "finding training xpeptides in decoy precursor window..%g", precursor_window_weibull);
     get_ions_from_window(
-	target_decoy_xpeptides,
-	all_ions,
-	precursor_mass,
-	precursor_window_weibull,
-	window_type_weibull);
+  target_decoy_xpeptides,
+  all_ions,
+  precursor_mass,
+  precursor_window_weibull,
+  window_type_weibull);
     
     carp(CARP_DETAILED_DEBUG, "Creating decoys for target window");
     //create the decoys from the target found in the target_mass_window.
     for (vector<LinkedPeptide>::iterator ion = target_xpeptides.begin();
-	 ion != target_xpeptides.end(); ++ion) {
+   ion != target_xpeptides.end(); ++ion) {
         add_decoy(decoy_xpeptides, *ion);
     }
     
@@ -254,8 +253,8 @@ int SearchForXLinks::xhhcSearchMain() {
     //create the decoys from the target found in the decoy_mass_window.
     while ((decoy_train_xpeptides.size() + target_xpeptides.size()) < min_weibull_points) {
       for (vector<LinkedPeptide>::iterator ion = target_decoy_xpeptides.begin();
-	   ion != target_decoy_xpeptides.end(); ++ion) {
-	add_decoy(decoy_train_xpeptides, *ion);
+     ion != target_decoy_xpeptides.end(); ++ion) {
+  add_decoy(decoy_train_xpeptides, *ion);
       }
     }    
 
@@ -310,7 +309,7 @@ int SearchForXLinks::xhhcSearchMain() {
   
     for (unsigned int idx=0;idx<scores.size();idx++) {
       if (!scores[idx].second.isDecoy())
-	linked_decoy_scores_array[idx+decoy_train_xpeptides.size()] = scores[idx].first;
+  linked_decoy_scores_array[idx+decoy_train_xpeptides.size()] = scores[idx].first;
     }
 
 
@@ -324,10 +323,10 @@ int SearchForXLinks::xhhcSearchMain() {
 
     carp(CARP_DEBUG, "Fitting weibull to %d scores", num_training_points);
     hhc_estimate_weibull_parameters_from_xcorrs(linked_decoy_scores_array, 
-						num_training_points, 
-						&eta_linked, &beta_linked, 
-						&shift_linked, &correlation_linked, 
-						spectrum, charge);
+            num_training_points, 
+            &eta_linked, &beta_linked, 
+            &shift_linked, &correlation_linked, 
+            spectrum, charge);
 
     //okay we don't need the training peptides/scores anymore
     delete []linked_decoy_scores_array;
@@ -349,40 +348,40 @@ int SearchForXLinks::xhhcSearchMain() {
           scores[score_index].second.getMass(MONO) * 1e6;
 
       double pvalue = compute_weibull_pvalue(scores[score_index].first, eta_linked, beta_linked, shift_linked);
-	
+  
       if (pvalue != pvalue) {
         pvalue = 1;
       }
 
       if (scores[score_index].second.isDecoy() && ndecoys < top_match) {
         ndecoys++;
-	search_decoy_file << scan_num << "\t"; 
-	search_decoy_file << charge << "\t"; 
-	search_decoy_file << precursor_mz << "\t";
-	search_decoy_file << precursor_mass << "\t";
-	search_decoy_file << scores[score_index].second.getMass(MONO) << "\t";
-	search_decoy_file << scores[score_index].second.getMass(AVERAGE) << "\t";
+        search_decoy_file << scan_num << "\t"; 
+        search_decoy_file << charge << "\t"; 
+        search_decoy_file << precursor_mz << "\t";
+        search_decoy_file << precursor_mass << "\t";
+        search_decoy_file << scores[score_index].second.getMass(MONO) << "\t";
+        search_decoy_file << scores[score_index].second.getMass(AVERAGE) << "\t";
         search_decoy_file << ppm_error << "\t";
-	search_decoy_file << scores[score_index].first <<"\t";
-	search_decoy_file << ndecoys << "\t";
-	search_decoy_file << pvalue << "\t";
-	search_decoy_file << decoy_xpeptides.size() << "\t";
-	search_decoy_file << scores[score_index].second<<endl;
+        search_decoy_file << scores[score_index].first <<"\t";
+        search_decoy_file << ndecoys << "\t";
+        search_decoy_file << pvalue << "\t";
+        search_decoy_file << decoy_xpeptides.size() << "\t";
+        search_decoy_file << scores[score_index].second<<endl;
 
       } else if (!scores[score_index].second.isDecoy() && ntargets < top_match) {
-	ntargets++;
-	search_target_file << scan_num << "\t"; 
-	search_target_file << charge << "\t"; 
-	search_target_file << precursor_mz << "\t";
-	search_target_file << precursor_mass << "\t";
-	search_target_file << scores[score_index].second.getMass(MONO) << "\t";
-	search_target_file << scores[score_index].second.getMass(AVERAGE) << "\t";
+        ntargets++;
+        search_target_file << scan_num << "\t"; 
+        search_target_file << charge << "\t"; 
+        search_target_file << precursor_mz << "\t";
+        search_target_file << precursor_mass << "\t";
+        search_target_file << scores[score_index].second.getMass(MONO) << "\t";
+        search_target_file << scores[score_index].second.getMass(AVERAGE) << "\t";
         search_target_file << ppm_error << "\t";
-	search_target_file << scores[score_index].first <<"\t";
-	search_target_file << ntargets << "\t";
-	search_target_file << pvalue << "\t";
-	search_target_file << target_xpeptides.size() << "\t";
-	search_target_file << scores[score_index].second<<"\t";
+        search_target_file << scores[score_index].first <<"\t";
+        search_target_file << ntargets << "\t";
+        search_target_file << pvalue << "\t";
+        search_target_file << target_xpeptides.size() << "\t";
+        search_target_file << scores[score_index].second<<"\t";
 
         //output protein ids/peptide locations.  If it is a linear, dead or self loop, only
         //use the 1st field.
@@ -452,7 +451,6 @@ int SearchForXLinks::xhhcSearchMain() {
   delete spectrum_iterator;
   delete spectra;
   free_peptides();
-  Database::freeDatabase(database);
 
   // get list of mods
   PEPTIDE_MOD_T** peptide_mods = NULL;

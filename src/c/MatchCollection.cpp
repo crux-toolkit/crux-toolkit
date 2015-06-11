@@ -58,6 +58,7 @@ void MatchCollection::init() {
   post_process_collection_ = false;
   post_scored_type_set_ = false;
   top_scoring_sp_ = NULL;
+  exact_pval_search_ = false;
   has_distinct_matches_ = false;
 }
 
@@ -718,6 +719,18 @@ void MatchCollection::spectrumSort(
   case INVALID_SCORER_TYPE:
     carp(CARP_FATAL, "Something is terribly wrong in the sorting code!");
  }
+}
+
+/**
+ * Sort the match collection by the order of tide output.
+ * Currently: 1. spectrum neutral mass (low -> high)
+ * 2. target or decoy? (targets -> decoy)
+ * 3. xcorr score (high->low)
+ */
+void MatchCollection::sortByTideOutput()
+{
+  qsortMatch(match_, match_total_,
+                (QSORT_COMPARE_METHOD)compareByTideOutput);
 }
 
 /**
@@ -1685,7 +1698,7 @@ void MatchCollection::printXmlHeader(
   
   // variable amino acid modifications
   AA_MOD_T** mod_list = NULL;
-  int num_mods = get_aa_mod_list(&mod_list);
+  int num_mods = get_all_aa_mod_list(&mod_list);
   for (int mod_idx = 0; mod_idx < num_mods; mod_idx++){
     FLOAT_T mod_mass = aa_mod_get_mass_change(mod_list[mod_idx]);
     
@@ -1705,7 +1718,7 @@ void MatchCollection::printXmlHeader(
     }
 
   }
-
+/*
   // terminal modifciations
   // variable
   num_mods = get_c_mod_list(&mod_list); // variable c mods
@@ -1725,7 +1738,7 @@ void MatchCollection::printXmlHeader(
             MASS_H_MONO + mod_mass,
             mod_mass
             );
-  }
+  }*/
   // fixed
   if( get_num_fixed_mods() != 0 ){
     get_all_aa_mod_list(&mod_list);
@@ -1762,7 +1775,8 @@ void MatchCollection::printSqtHeader(
  FILE* output, 
  const char* type, 
  string database,
- int num_proteins){  
+ int num_proteins,
+ bool exact_pval_search){  
   if( output == NULL ){
     return;
   }
@@ -1889,15 +1903,19 @@ void MatchCollection::printSqtHeader(
   fprintf(output, "H\tEnzymeSpec\t%s-%s%s\n", enz_str, dig_str, custom_str);
   free(enz_str);
   free(dig_str);
-
   // write a comment that says what the scores are
   fprintf(output, "H\tLine fields: S, scan number, scan number, "
           "charge, 0, server, experimental mass, total ion intensity, "
           "lowest Sp, number of matches\n");
-
-  fprintf(output, "H\tLine fields: M, rank by xcorr score, rank by sp score, "
-          "peptide mass, deltaCn, xcorr score, sp score, number ions matched, "
-          "total ions compared, sequence, validation status\n");
+  if (exact_pval_search) {
+    fprintf(output, "H\tLine fields: M, rank by xcorr score, rank by sp score, "
+            "peptide mass, deltaCn, exact P-value, recalibrated xcorr, sp score, number ions matched, "
+            "total ions compared, sequence, validation status\n");
+  } else {
+    fprintf(output, "H\tLine fields: M, rank by xcorr score, rank by sp score, "
+            "peptide mass, deltaCn, xcorr score, sp score, number ions matched, "
+            "total ions compared, sequence, validation status\n");
+  }
 }
 
 /**
@@ -2046,8 +2064,15 @@ bool MatchCollection::printXml(
     scores_computed[score_idx] = false;
   }
   scores_computed[main_score] = true;
-  if( scored_type_[SP])
+  if( scored_type_[SP]) {
     scores_computed[SP] = true;
+  }
+  scores_computed[TIDE_SEARCH_EXACT_PVAL] = exact_pval_search_;
+  scores_computed[TIDE_SEARCH_REFACTORED_XCORR] = exact_pval_search_;
+  scored_type_[TIDE_SEARCH_EXACT_PVAL] = exact_pval_search_;
+  scored_type_[TIDE_SEARCH_REFACTORED_XCORR] = exact_pval_search_;
+  scores_computed[main_score] = !exact_pval_search_;
+
   double* scores = new double[NUMBER_SCORER_TYPES];
   int* ranks=new int[NUMBER_SCORER_TYPES];
 

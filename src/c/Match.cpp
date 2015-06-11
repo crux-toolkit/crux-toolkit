@@ -31,6 +31,7 @@
 #include "MatchCollection.h" 
 #include "Peptide.h"
 
+#include <boost/filesystem.hpp>
 #include <string>
 
 #include "MatchFileReader.h"
@@ -75,6 +76,7 @@ void Match::init() {
 Match::Match(){
   init();
   ++pointer_count_;
+  exact_pval_search_ = false;
 }
 
 /**
@@ -92,6 +94,7 @@ Match::Match(Peptide* peptide, ///< the peptide for this match
   null_peptide_ = is_decoy;
 
   ++pointer_count_;
+  exact_pval_search_ = false;
 }
 
 /**
@@ -610,6 +613,34 @@ int compareMatchSpectrumDecoyPValueQValue(
   return 0; // Return value to avoid compiler warning.
 }
 
+/**
+ * compare two matches, and returns in the same order that tide-search outputs
+ * NOTE: if the order tide outputs in changes, this will need to change as well!
+ * This is only used for testing purposes, as the order has no meaningful information.
+ * If we do not sort a match collection after using MzIdentMLReader, then we will
+ * write out matches in a different order than the original file. This makes it difficult
+ * to compare files, so we will sort the collection instead of writing a very intensive
+ * test.
+ *
+ * First look at neutral mass, and return negative number if less positive if more
+ * Then look at target or decoy - targets get negative, decoys get positive
+ * Finally, look at xcorr score - negative if less, positive if more
+ * (0 if equal ?) Note the zero value may cause problems if identical xcorr scores ?
+ */
+int compareByTideOutput(
+  Match** match_a, ///< the first match -in  
+  Match** match_b  ///< the scond match -in
+  )
+{
+  if((*match_b)->getZState().getNeutralMass() != (*match_a)->getZState().getNeutralMass()){ // two neutral mass are different
+    return (*match_a)->getZState().getNeutralMass() - (*match_b)->getZState().getNeutralMass();
+  } else if ((*match_b)->getNullPeptide() ^ (*match_a)->getNullPeptide()){ // one is target and other is decoy
+    return ((*match_a)->getNullPeptide() ? 1 : -1);
+  } else {
+    return (*match_b)->getScore(XCORR) - (*match_a)->getScore(XCORR);
+  }
+}
+
 /* ****** End of sorting functions ************/
 
 /**
@@ -641,20 +672,39 @@ void Match::printSqt(
   int precision = get_int_parameter("precision");
 
   // print match info
-  fprintf(file, "M\t%i\t%i\t%.*f\t%.2f\t%.*g\t%.*g\t%i\t%i\t%s\tU\n",
-          getRank(XCORR),
-          getRank(SP),
-          get_int_parameter("mass-precision"),
-          peptide->getPeptideMass() + MASS_PROTON,
-          delta_cn,
-          precision,
-          score_main,
-          precision,
-          getScore(SP),
-          b_y_matched,
-          b_y_total,
-          sequence
-          );
+  if (exact_pval_search_) {
+    fprintf(file, "M\t%i\t%i\t%.*f\t%.2f\t%.*g\t%.*g\t%.*g\t%i\t%i\t%s\tU\n",
+            getRank(XCORR),
+            getRank(SP),
+            get_int_parameter("mass-precision"),
+            peptide->getPeptideMass() + MASS_PROTON,
+            delta_cn,
+            precision,
+            getScore(TIDE_SEARCH_EXACT_PVAL),
+            precision,
+            getScore(TIDE_SEARCH_REFACTORED_XCORR),
+            precision,
+            getScore(SP),
+            b_y_matched,
+            b_y_total,
+            sequence
+            );
+  } else {
+    fprintf(file, "M\t%i\t%i\t%.*f\t%.2f\t%.*g\t%.*g\t%i\t%i\t%s\tU\n",
+            getRank(XCORR),
+            getRank(SP),
+            get_int_parameter("mass-precision"),
+            peptide->getPeptideMass() + MASS_PROTON,
+            delta_cn,
+            precision,
+            score_main,
+            precision,
+            getScore(SP),
+            b_y_matched,
+            b_y_total,
+            sequence
+            );
+  }
   free(sequence);
   
   PeptideSrc* peptide_src = NULL;
@@ -746,6 +796,14 @@ void Match::printOneMatchField(
   case XCORR_SCORE_COL:
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
                                      getScore(XCORR));
+    break;
+  case EXACT_PVALUE_COL:
+    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
+                                     getScore(TIDE_SEARCH_EXACT_PVAL));
+    break;
+  case REFACTORED_SCORE_COL:
+    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
+                                     getScore(TIDE_SEARCH_REFACTORED_XCORR));
     break;
   case XCORR_RANK_COL:
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
@@ -987,6 +1045,7 @@ void Match::printTab(
   int column_idx;
   for (column_idx = 0; column_idx < NUMBER_MATCH_COLUMNS; column_idx++) {
     carp(CARP_DETAILED_DEBUG,"print col:%i",column_idx);
+    carp(CARP_DETAILED_DEBUG, "%s", get_column_header(column_idx));
     printOneMatchField(column_idx, 
                        collection,
                        output_file,
@@ -1527,6 +1586,23 @@ int Match::getFileIndex() {
   return(file_idx_);
 }
 
+int Match::findFileIndex(const string& file_path, bool match_stem) {
+  for (size_t idx = 0; idx < file_paths_.size(); idx++) {
+    if (file_path == file_paths_[idx]) {
+      return idx;
+    }
+  }
+  if (match_stem) {
+    for (size_t idx = 0; idx < file_paths_.size(); idx++) {
+      boost::filesystem::path boost_path(file_paths_[idx]);
+      if (file_path == boost_path.stem().string()) {
+        return idx;
+      }
+    }
+  }
+  return -1;
+}
+
 /**
  * sets the file path for this match
  * \returns the associated file index
@@ -1534,16 +1610,7 @@ int Match::getFileIndex() {
 int Match::setFilePath(
   const string& file_path ///< file path to set
   ) {
-
-  file_idx_ = -1;
-  
-  for (size_t idx = 0;idx < file_paths_.size(); idx++) {
-    if (file_path == file_paths_[idx]) {
-      file_idx_ = idx;
-      break;
-    }
-  }
-
+  file_idx_ = findFileIndex(file_path);
   if (file_idx_ == -1) {
     file_idx_ = file_paths_.size();
     file_paths_.push_back(file_path);
@@ -1559,7 +1626,7 @@ string Match::getFilePath() {
 }
 
 string Match::getFilePath(int file_idx) {
-  if (file_idx == -1) {
+  if (file_idx == -1 || file_paths_.empty()) {
     return string("");
   } else {
     return(file_paths_[file_idx]);

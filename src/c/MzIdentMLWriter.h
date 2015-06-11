@@ -230,6 +230,10 @@ class MzIdentMLWriter : public PSMWriter {
     MatchCollection* collection ///< matches to add
   );
 
+/*  void sortMatch(
+    MatchCollection* collection
+  );*/
+
   /**
    * Adds the match to the mzIdentML object
    */

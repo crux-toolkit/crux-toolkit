@@ -24,6 +24,7 @@ static const int MAX_NUM_ION_TYPE = 8; // number of different ion_types
  * check that it is not NULL.
  */
 class IonSeries {
+  friend class XLinkPeptide;
  protected:
   // TODO change name to unmodified_char_seq
   char* peptide_; ///< The peptide sequence for this ion series
@@ -143,7 +144,6 @@ class IonSeries {
    */
   virtual ~IonSeries();
 
-
   /**
    *Iterator access
    */
@@ -229,6 +229,14 @@ class IonSeries {
     IonSeries* src,///< ion to copy from -in
     IonSeries* dest///< ion to copy to -out
     );
+
+  /**
+   * remove an ion from IonSeries, does not free ion.
+   */
+  void removeIon(
+    Ion* ion ///<ion to remove
+  );
+
 
   /*************************************
    * ION_SERIES_T: get and set methods
