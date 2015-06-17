@@ -390,6 +390,9 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
     cols_to_print[CLEAVAGE_TYPE_COL] = true;
     cols_to_print[PROTEIN_ID_COL] = true;
     cols_to_print[FLANKING_AA_COL] = true;
+    if (spectrum_flag_ != NULL){
+      cols_to_print[INDEX_NAME_COL] = true;
+    }
 
     output_->writeHeaders(cols_to_print);
   }
@@ -482,6 +485,9 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
       spectrum_flag_->insert(make_pair(pair<string, unsigned int>(
         match->getSpectrum()->getFullFilename(),
         match->getSpectrum()->getFirstScan() * 10 + match->getCharge()), true));
+      
+      match->setDatabaseIndexName(index_name_);
+
       accepted_matches->addMatch(match);
       ++accepted_psms_;
     }
@@ -893,17 +899,25 @@ void AssignConfidenceApplication::peptide_level_filtering(
 map<pair<string, unsigned int>, bool>* AssignConfidenceApplication::getSpectrumFlag(){
   return spectrum_flag_;
 }
+
 void AssignConfidenceApplication::setSpectrumFlag(map<pair<string, unsigned int>, bool>* spectrum_flag){
   spectrum_flag_ = spectrum_flag;
 }
+
 void AssignConfidenceApplication::setCascadeFDR(double cascade_fdr){
   cascade_fdr_ = cascade_fdr;
 }
+
 void AssignConfidenceApplication::setIterationCnt(unsigned int iteration_cnt){
   iteration_cnt_ = iteration_cnt;
 }
+
 void AssignConfidenceApplication::setOutput(OutputFiles *output){
   output_ = output;
+}
+
+void AssignConfidenceApplication::setIndexName(string index_name){
+  index_name_ = index_name;
 }
 
 unsigned int AssignConfidenceApplication::getAcceptedPSMs(){

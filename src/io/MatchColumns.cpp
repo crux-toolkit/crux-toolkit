@@ -83,7 +83,8 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "ppm",
   "xcorr 1",
   "xcorr 2",
-  "protein id x"
+  "protein id x",
+  "index name"
 };
 
 /**

@@ -29,6 +29,7 @@ protected:
   unsigned int iteration_cnt_;
   OutputFiles* output_;
   unsigned int accepted_psms_;
+  string index_name_;
 public:
 
   map<pair<string, unsigned int>, bool>* getSpectrumFlag();
@@ -37,6 +38,11 @@ public:
   void setIterationCnt(unsigned int iteration_cnt);
   void setOutput(OutputFiles *output);
   unsigned int getAcceptedPSMs();
+
+  /**
+  * stores the name of the index file used in an iteration in Cascade Search.
+  */
+  void setIndexName(string index_name);
 
   /**
   * \returns a blank ComputeQValues object
