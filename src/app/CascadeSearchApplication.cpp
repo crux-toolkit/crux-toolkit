@@ -9,6 +9,8 @@
 #include "util/Params.h"
 #include "util/StringUtils.h"
 #include "util/FileUtils.h"
+#include "stdio.h"
+#include "boost/filesystem.hpp"
 
 using namespace std;
 
@@ -55,10 +57,11 @@ int CascadeSearchApplication::main(int argc, char** argv) {
     bridge_file_name.push_back(TideSearchProgram.getOutputFileName());
 
     //carry out assign confidence
-    AssignConfidenceApplication AssignConfidenceProgram;    
+    AssignConfidenceApplication AssignConfidenceProgram;
     AssignConfidenceProgram.setSpectrumFlag(spectrum_flag);
     AssignConfidenceProgram.setIterationCnt(cascade_cnt);
     AssignConfidenceProgram.setOutput(output);
+    AssignConfidenceProgram.setIndexName(database_indeces[cascade_cnt]);
 
     return_code = AssignConfidenceProgram.main(bridge_file_name);
     if (return_code != 0) {
@@ -67,11 +70,10 @@ int CascadeSearchApplication::main(int argc, char** argv) {
     spectrum_flag = AssignConfidenceProgram.getSpectrumFlag();
 
     //remove tide-search and assign-confidence output files.
-    string file_names = TideSearchProgram.getName() + "*";
-    FileUtils::Remove(file_names);
-    file_names = AssignConfidenceProgram.getName() + "*";
-    FileUtils::Remove(file_names);
-
+    string outputdir = Params::GetString("output-dir");
+    RemoveTempFiles(outputdir, TideSearchProgram.getName());
+    RemoveTempFiles(outputdir, AssignConfidenceProgram.getName());
+  
     if (AssignConfidenceProgram.getAcceptedPSMs() < CASCADE_TERMINATION_CONDITION) {
       break;
     }
@@ -202,6 +204,23 @@ void CascadeSearchApplication::processParams() {
     carp(CARP_FATAL, "Cascade-Search cannot work with sqt-output=T.");
   }
   
+}
+
+void CascadeSearchApplication::RemoveTempFiles(const string& path, const string& prefix) {
+
+  boost::filesystem::directory_iterator end_itr; // Default ctor yields past-the-end
+  for (boost::filesystem::directory_iterator i(path); i != end_itr; ++i)
+  {
+    // Skip if not a file
+    if (!boost::filesystem::is_regular_file(i->status())) continue;
+
+    string filename = i->path().filename().generic_string();
+    if (filename.compare(0, prefix.length(), prefix) == 0){
+      string t = path + "/" + filename;
+      printf("matched: %s\n", t.c_str());
+      FileUtils::Remove(path + "/" + filename);
+    }
+  }
 }
 
 /*

@@ -1017,6 +1017,10 @@ void Match::printOneMatchField(
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
                                      collection->getCalibrationCorr());
     break;
+  case INDEX_NAME_COL:
+    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx,
+      database_index_name_);
+    break;
     // values only for spectral-counts
   case RAW_SCORE_COL:
   case SIN_SCORE_COL:
@@ -2102,6 +2106,10 @@ int get_num_terminal_cleavage(
     num_tol_term++;
   }
   return num_tol_term;
+}
+
+void Match::setDatabaseIndexName(string index_name){
+  database_index_name_ = index_name;
 }
 
                              

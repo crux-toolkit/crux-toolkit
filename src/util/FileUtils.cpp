@@ -1,7 +1,5 @@
 #include "FileUtils.h"
-
 #include "boost/filesystem.hpp"
-
 #include <fstream>
 #include <stdexcept>
 

@@ -92,6 +92,7 @@ class Match {
   int num_decoy_matches_;///< decoy candidates for this spectrum if decoy match
   bool best_per_peptide_; ///< Is this the best scoring PSM for this peptide?
   int file_idx_; ///< index of where this match came from 
+  string database_index_name_;
   static std::vector<std::string> file_paths_;
   /**
    * Print one field in the tab-delimited output file, based on column index.
@@ -477,6 +478,11 @@ class Match {
    * Set the best-per-peptide Boolean to true.
    */
   void setBestPerPeptide();
+
+  /**
+  *Set the database index name where the peptide comes from
+  */
+  void setDatabaseIndexName(string index_name);
 
 };
 
