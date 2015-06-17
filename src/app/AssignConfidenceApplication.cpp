@@ -84,57 +84,58 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
   SCORER_TYPE_T score_type = INVALID_SCORER_TYPE;
   SCORER_TYPE_T derived_score_type = INVALID_SCORER_TYPE;
 
-  string score_param = get_string_parameter("score");
-  int score_col = get_column_idx(score_param.c_str());
-  switch (score_col) {
-  case SP_SCORE_COL:
-    score_type = SP;    ///< SEQUEST preliminary score
-    break;
-  case XCORR_SCORE_COL:
-    score_type = XCORR;   ///< SEQUEST primary score
-    break;
-  case EVALUE_COL:
-    score_type = EVALUE;  ///< Comet e-value
-    break;
-  case PERCOLATOR_SCORE_COL:
-    score_type = PERCOLATOR_SCORE;
-    break;
-  case PERCOLATOR_QVALUE_COL:
-    score_type = PERCOLATOR_QVALUE;
-    break;
-  case PERCOLATOR_PEP_COL:
-    score_type = PERCOLATOR_PEP;
-    break;
-  case QRANKER_SCORE_COL:
-    score_type = QRANKER_SCORE;
-    break;
-  case QRANKER_QVALUE_COL:
-    score_type = QRANKER_QVALUE;
-    break;
-  case QRANKER_PEP_COL:
-    score_type = QRANKER_PEP;
-    break;
-  case BARISTA_SCORE_COL:
-    score_type = BARISTA_SCORE;
-    break;
-  case BARISTA_QVALUE_COL:
-    score_type = BARISTA_QVALUE;
-    break;
-  case EXACT_PVALUE_COL:
-    score_type = TIDE_SEARCH_EXACT_PVAL;
-    break;
-  case REFACTORED_SCORE_COL:
-    score_type = TIDE_SEARCH_REFACTORED_XCORR;
-    break;
-  default:
-    carp(CARP_FATAL, "The PSM feature \"%s\" is not supported.", score_param.c_str());
+  string score_param = Params::GetString("score");
+  if (!score_param.empty()) {
+    switch (get_column_idx(score_param.c_str())) {
+    case SP_SCORE_COL:
+      score_type = SP;    ///< SEQUEST preliminary score
+      break;
+    case XCORR_SCORE_COL:
+      score_type = XCORR;   ///< SEQUEST primary score
+      break;
+    case EVALUE_COL:
+      score_type = EVALUE;  ///< Comet e-value
+      break;
+    case PERCOLATOR_SCORE_COL:
+      score_type = PERCOLATOR_SCORE;
+      break;
+    case PERCOLATOR_QVALUE_COL:
+      score_type = PERCOLATOR_QVALUE;
+      break;
+    case PERCOLATOR_PEP_COL:
+      score_type = PERCOLATOR_PEP;
+      break;
+    case QRANKER_SCORE_COL:
+      score_type = QRANKER_SCORE;
+      break;
+    case QRANKER_QVALUE_COL:
+      score_type = QRANKER_QVALUE;
+      break;
+    case QRANKER_PEP_COL:
+      score_type = QRANKER_PEP;
+      break;
+    case BARISTA_SCORE_COL:
+      score_type = BARISTA_SCORE;
+      break;
+    case BARISTA_QVALUE_COL:
+      score_type = BARISTA_QVALUE;
+      break;
+    case EXACT_PVALUE_COL:
+      score_type = TIDE_SEARCH_EXACT_PVAL;
+      break;
+    case REFACTORED_SCORE_COL:
+      score_type = TIDE_SEARCH_REFACTORED_XCORR;
+      break;
+    default:
+      carp(CARP_FATAL, "The PSM feature \"%s\" is not supported.", score_param.c_str());
+    }
   }
 
   bool sidak = Params::GetBool("sidak");
 
   if (sidak && score_type != TIDE_SEARCH_EXACT_PVAL) {
     carp(CARP_WARNING, "Sidak adjustment may not be compatible"
-      "with score: %s", get_string_parameter("score").c_str());
+      "with score: %s", score_param.c_str());
   }
 
   // Create two match collections, for targets and decoys.
@@ -168,6 +169,36 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
     MatchCollection* match_collection =
       parser.create(target_path, get_string_parameter("protein-database"));
     distinct_matches = match_collection->getHasDistinctMatches();
+
+    if (score_type == INVALID_SCORER_TYPE) {
+      // Look for various scores
+      SCORER_TYPE_T typeArr[] = {XCORR, EVALUE, TIDE_SEARCH_EXACT_PVAL};
+      vector<SCORER_TYPE_T> scoreTypes(typeArr,
+                                       typeArr + sizeof(typeArr) / sizeof(SCORER_TYPE_T));
+      for (vector<SCORER_TYPE_T>::const_iterator i = scoreTypes.begin();
+           i != scoreTypes.end();
+           i++) {
+        if (match_collection->getScoredType(*i)) {
+          score_type = *i;
+          carp(CARP_INFO, "Automatically detected score type: %s",
+               scorer_type_to_string(score_type));
+          break;
+        }
+      }
+      if (score_type == INVALID_SCORER_TYPE) {
+        carp(CARP_FATAL, "Could not detect score type. Specify the score type using the "
+                         "\"score\" and \"smaller-is-better\" parameters.");
+      }
+      switch (score_type) {
+        case EVALUE:
+        case TIDE_SEARCH_EXACT_PVAL:
+          // lower score better
+          ascending = true;
+        default:
+          // higher score better
+          ascending = false;
+      }
+    }
 
     if (match_collection->getScoredType(score_type) == false){
       const char* score_str = scorer_type_to_string(score_type);
