@@ -196,6 +196,8 @@ for notes on how to run the executables.
 </ul>
 <a name="OSX"></a>
 <h2>OS X</h2>
+<span class=prog>Crux</span> requires OS X Yosemite.
+<p/>
 <b>Note:</b> 
 when typing the commands shown in these instructions do not type the
 leading <code>$</code> before each command; it indicates the
@@ -264,8 +266,9 @@ for notes on how to run the executables.
 To build Crux from source on OS X you must have installed the
 following software:
 <ul>
-<li><code>gcc</code></li>
-<li><code>g++</code></li>
+<li><code>OS X Yosemite</code></li>
+<li><code>XCode 6.3.1 or later</code></li>
+<li><code>XCode Command Line Tools</code></li>
 <li><code>cmake</code></li>
 <li><code>make</code></li>
 <li><code>svn</code></li>
@@ -281,64 +284,21 @@ These will automatically be copied from the <span class=prog>Proteowizard</span>
 and <span class=prog>Percolator</span>
 repositories and statically linked into <span class=prog>crux</span>.
 <p />
-The C++ compiler that comes with Apples's <span class=prog>XCode</span>
-is partially incompatible with the GNU 
-<span class=prog>C++</span> compilers
-and can't compile some parts of <span class=prog>crux</span> and the supporting libraries.
-If you are building on OS X 
-you will need to install a copy of the GNU C and C++ compilers
-from a repository such as <a href="http://www.macports.org">MacPorts</a>.
-We have used version 4.7 of the GNU <span class=prog>g++</span> compiler
-downloaded from <a href="http://www.macports.org">MacPorts</a>.
-Once you've installed 
-<a href="http://www.macports.org">MacPorts</a>
-the commands to install the GNU C and C++ compilers is
-<div class=code>
-<code>
-$ sudo port install gcc47
-</code>
-</div>
-<p />
-<a href="http://www.macports.org">MacPorts</a>
-allows you to install multiple versions of the GNU compilers.
-You'll want to set your prefered version as the default for MacPorts.
-Fo example:
-<div class=code>
-<code>
-$ sudo port select --set gcc mp-gcc47
-</code>
-</div>
-<p />
-You will also have to configure your environment to use the MacPorts compilers.
-This is done using the environment variables
-<span class=prog>PATH</span>, which sets the list of directories
-that are searched for executables,
-<span class=prog>CC</span>, which identifies the C compiler,
-and
-<span class=prog>CXX</span>, which identifies the C++ compiler.
-Before staring your build set these environment variables to point
-to the MacPorts compilers.
-For example:
-<div class=code>
-<code>
-$ export PATH=/opt/local/bin:$PATH
-<br/>
-$ export CC=/opt/local/bin/gcc
-<br/>
-$ export CXX=/opt/local/bin/g++
-</code>
-</div>
+Building <span class=prog>Crux</span> on OS X requires a current version of
+<span class=prog>XCode</span>, and the XCode command line tools.
+Earlier versions of <span class=prog>Crux</span> 
+had to be built using the GCC compilers.
+which are no supported by Apple.
 <p/>
-You may want to include these commands in your 
-<span class=file>.profile</span>
-or
-<span class=file>.bashrc</span>.
-<p/>
+The programs
 <span class=prog>cmake</span>,
 <span class=prog>svn</span>,
 and
 <span class=prog>wget</span>,
-can also be installed from MacPorts.
+can be installed from 
+<a href="https://www.macports.org">MacPorts</a>
+or 
+<a href="http://brew.sh">Homebrew</a>.
 Note that you must install the <span class=prog>ssl</span> variant of 
 <span class=prog>wget</span>:
 <div class=code>
@@ -495,12 +455,12 @@ have to log on again for the change to take effect.
 To run Crux on Windows you must have installed the
 following software:
 <ul>
-<li><a
-href="http://sjsupport.thermofinnigan.com/public/detail.asp?id=703"><code>Thermo
-32-bit MSFileReader</code></a></li>
+<li>
+<a href="http://sjsupport.thermofinnigan.com/public/detail.asp?id=703"><code>Thermo
+64-bit MSFileReader</code></a>
 </ul>
 <p/>
-Be sure to install the 32-bit version of the library.
+Be sure to install the 64-bit version of the library.
 <p/>
 <li><b>Download the files</b> 
 <p/>
