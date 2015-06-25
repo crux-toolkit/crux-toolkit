@@ -57,6 +57,17 @@ class CruxApplication{
     }
   }
 
+  static void removeOptionFrom(std::vector<std::string>* optionsVector, std::string option) {
+    using std::find;
+    using std::string;
+    using std::vector;
+    vector<string>::iterator i;
+    i = find(optionsVector->begin(), optionsVector->end(), option);
+    if (i != optionsVector->end()) {
+      optionsVector->erase(i);
+    }
+  }
+
   /**
    * \returns the outputs of the application as <name, description>
    */
