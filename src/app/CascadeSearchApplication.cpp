@@ -140,6 +140,7 @@ vector<string> CascadeSearchApplication::getOptions() const {
   vector<string> options(arr, arr + sizeof(arr) / sizeof(string));
   addOptionsFrom<AssignConfidenceApplication>(&options);
   addOptionsFrom<TideSearchApplication>(&options);
+  removeOptionFrom(&options, "top-match");
 
   return options;
 }
@@ -182,7 +183,7 @@ bool CascadeSearchApplication::needsOutputDirectory() const {
 
 void CascadeSearchApplication::processParams() {
 
-  if (Params::GetInt("top-match") != 1) {
+  if (Params::GetInt("top-match") != 1 && Params::GetInt("top-match") != 5) {
     carp(CARP_WARNING, "Cascade-Search can work with top-match = 1 only.");
   }
   Params::Set("top-match", 1);
