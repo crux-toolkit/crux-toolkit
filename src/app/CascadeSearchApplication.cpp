@@ -218,7 +218,6 @@ void CascadeSearchApplication::RemoveTempFiles(const string& path, const string&
     string filename = i->path().filename().generic_string();
     if (filename.compare(0, prefix.length(), prefix) == 0){
       string t = path + "/" + filename;
-      printf("matched: %s\n", t.c_str());
       FileUtils::Remove(path + "/" + filename);
     }
   }
