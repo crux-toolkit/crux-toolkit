@@ -118,7 +118,9 @@ int TideIndexApplication::main(
 
   var_mod_table.SerializeUniqueDeltas();
 
-  if (!MassConstants::Init(var_mod_table.ParsedModTable(), 0, 0)) {
+  if (!MassConstants::Init(var_mod_table.ParsedModTable(), 
+    var_mod_table.ParsedNtpepModTable(), 
+    var_mod_table.ParsedCtpepModTable(), 0, 0)) {
     carp(CARP_FATAL, "Error in MassConstants::Init");
   }
 
@@ -195,6 +197,8 @@ int TideIndexApplication::main(
     pep_header.set_max_missed_cleavages(missed_cleavages);
   }
   pep_header.mutable_mods()->CopyFrom(*(var_mod_table.ParsedModTable()));
+  pep_header.mutable_nterm_mods()->CopyFrom(*(var_mod_table.ParsedNtpepModTable()));
+  pep_header.mutable_cterm_mods()->CopyFrom(*(var_mod_table.ParsedCtpepModTable()));
 
   header_with_mods.set_file_type(pb::Header::PEPTIDES);
   header_with_mods.set_command_line(cmd_line);
@@ -762,7 +766,13 @@ FLOAT_T TideIndexApplication::calcPepMassTide(
   if (massType == AVERAGE) {
     mass = MassConstants::fixp_avg_h2o;
     for (size_t i = 0; i < sequence.length(); ++i) {
-      aaMass = MassConstants::fixp_avg_table[sequence[i]];
+      if (i == 0) {
+        aaMass = MassConstants::fixp_nterm_avg_table[sequence[i]];
+      } else if (i == sequence.length() - 1) {
+        aaMass = MassConstants::fixp_cterm_avg_table[sequence[i]];
+      } else {
+        aaMass = MassConstants::fixp_avg_table[sequence[i]];
+      }
       if (aaMass == 0) {
         return -1;
       }
@@ -771,7 +781,13 @@ FLOAT_T TideIndexApplication::calcPepMassTide(
   } else if (massType == MONO) {
     mass = MassConstants::fixp_mono_h2o;
     for (size_t i = 0; i < sequence.length(); ++i) {
-      aaMass = MassConstants::fixp_mono_table[sequence[i]];
+      if (i == 0) {
+        aaMass = MassConstants::fixp_nterm_mono_table[sequence[i]];
+      } else if (i == sequence.length() - 1) {
+        aaMass = MassConstants::fixp_cterm_mono_table[sequence[i]];
+      } else {
+        aaMass = MassConstants::fixp_mono_table[sequence[i]];
+      }
       if (aaMass == 0) {
         return -1;
       }

@@ -69,7 +69,9 @@ int SubtractIndexApplication::main(int argc, char** argv) {
       OutputFiles::setProteinLevelDecoys();
     }
   }
-  MassConstants::Init(&peptides_header1.peptides_header().mods(), 0.0, 0.0);
+  MassConstants::Init(&peptides_header1.peptides_header().mods(), 
+    &peptides_header1.peptides_header().nterm_mods(),
+    &peptides_header1.peptides_header().cterm_mods(), 0.0, 0.0);
 
   //open tide index 2
   const string index2 = Params::GetString("tide index 2");

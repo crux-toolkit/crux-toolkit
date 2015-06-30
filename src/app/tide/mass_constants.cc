@@ -34,6 +34,10 @@ const double MassConstants::elts_avg[] = {
     
 double MassConstants::mono_table[256];
 double MassConstants::avg_table[256];
+double MassConstants::nterm_mono_table[256];
+double MassConstants::cterm_mono_table[256];
+double MassConstants::nterm_avg_table[256];
+double MassConstants::cterm_avg_table[256];
 //double* MassConstants::aa_mass_table = NULL;
 //double MassConstants::aa_bin_1[256];
 //double MassConstants::aa_bin_2[256];
@@ -69,6 +73,10 @@ double MassConstants::bin_offset_ = BIN_OFFSET; //0.40;
 
 FixPt MassConstants::fixp_mono_table[256];
 FixPt MassConstants::fixp_avg_table[256];
+FixPt MassConstants::fixp_nterm_mono_table[256];
+FixPt MassConstants::fixp_cterm_mono_table[256];
+FixPt MassConstants::fixp_nterm_avg_table[256];
+FixPt MassConstants::fixp_cterm_avg_table[256];
 
 const FixPt MassConstants::fixp_mono_h2o = ToFixPt(MassConstants::mono_h2o);
 const FixPt MassConstants::fixp_avg_h2o  = ToFixPt(MassConstants::avg_h2o);
@@ -116,15 +124,37 @@ void MassConstants::FillMassTable(const double* elements, double* table) {
 }
 
 
-bool MassConstants::Init(const pb::ModTable* mod_table, const double bin_width, const double bin_offset) {
+bool MassConstants::Init(const pb::ModTable* mod_table, 
+  const pb::ModTable* n_mod_table, 
+  const pb::ModTable* c_mod_table, 
+  const double bin_width, const double bin_offset) {
+
   if (mod_table && !CheckModTable(*mod_table))
     return false;
 
-  for (int i = 0; i < 256; ++i)
-    mono_table[i] = avg_table[i] = 0;
+  if (!n_mod_table || !c_mod_table) {
+    carp(CARP_FATAL, "We could not find nterm or cterm mod tables. "
+    "This is a [relatively] new requirement in attempt to fix static "
+    "mod discrepancies - 5/19/2015.");
+  }
+
+  if (n_mod_table && !CheckModTable(*n_mod_table))
+    return false;
+
+  if (c_mod_table && !CheckModTable(*c_mod_table))
+    return false;
+
+  for (int i = 0; i < 256; ++i) {
+    mono_table[i] = avg_table[i] = nterm_mono_table[i] = 
+    cterm_mono_table[i] = nterm_avg_table[i] = cterm_avg_table[i] = 0;
+  }
 
   FillMassTable(elts_mono, mono_table);
   FillMassTable(elts_avg, avg_table);
+  FillMassTable(elts_mono, nterm_mono_table);
+  FillMassTable(elts_mono, cterm_mono_table);
+  FillMassTable(elts_avg, nterm_avg_table);
+  FillMassTable(elts_avg, cterm_avg_table);
 
   if (mod_table) {
     // TODO: consider handling average and monoisotopic masses
@@ -136,6 +166,10 @@ bool MassConstants::Init(const pb::ModTable* mod_table, const double bin_width, 
       double delta = mod_table->static_mod(i).delta();
       mono_table[aa] += delta;
       avg_table[aa] += delta;
+      nterm_mono_table[aa] += delta;
+      cterm_mono_table[aa] += delta;
+      nterm_avg_table[aa] += delta;
+      cterm_avg_table[aa] += delta;
     }
     carp(CARP_DEBUG, "Number of unique modification masses: %d\n", mod_table->unique_deltas_size());
 
@@ -147,6 +181,45 @@ bool MassConstants::Init(const pb::ModTable* mod_table, const double bin_width, 
     }
   }
 
+  ApplyTerminusStaticMods(n_mod_table, nterm_mono_table, nterm_avg_table);
+  ApplyTerminusStaticMods(c_mod_table, cterm_mono_table, cterm_avg_table);
+
+  SetFixPt(mono_table, avg_table, fixp_mono_table, fixp_avg_table);
+  SetFixPt(nterm_mono_table, nterm_avg_table, fixp_nterm_mono_table, fixp_nterm_avg_table);
+  SetFixPt(cterm_mono_table, cterm_avg_table, fixp_cterm_mono_table, fixp_cterm_avg_table);
+
+  bin_width_ = bin_width;
+  bin_offset_ = bin_offset;
+  BIN_H2O = mass2bin(mono_h2o,1);
+  BIN_NH3 = mass2bin(mono_nh3,1);
+
+  return true;
+}
+
+/* Updates the masses for the respective table to include the
+static mod information from the mod table. */
+void MassConstants::ApplyTerminusStaticMods(const pb::ModTable* mod_table, 
+  double* mono_table, double* avg_table) {
+
+  for (int i = 0; i < mod_table->static_mod_size(); ++i) {
+    char aa = (mod_table->static_mod(i).amino_acids())[0];
+    double delta = mod_table->static_mod(i).delta();
+    if (aa == 'X') {
+      const char* AA = "ACDEFGHIKLMNPQRSTVWY";
+      for (int currAA = 0; AA[currAA] != '\0'; currAA++) {
+        mono_table[AA[currAA]] += delta;
+        avg_table[AA[currAA]] += delta;
+      }
+    } else {
+      mono_table[aa] += delta;
+      avg_table[aa] += delta;
+    }
+  }
+}
+
+/* Sets the fixpt for the given mono and avg tables */
+void MassConstants::SetFixPt(double* mono_table, double* avg_table, 
+            FixPt* fixp_mono_table, FixPt* fixp_avg_table) {
   for (int i = 0; i < 256; ++i) {
     if (mono_table[i] == 0) {
       mono_table[i] = avg_table[i]/* = aa_bin_1[i] = aa_bin_2[i]*/
@@ -157,12 +230,6 @@ bool MassConstants::Init(const pb::ModTable* mod_table, const double bin_width, 
       fixp_avg_table[i] = ToFixPt(avg_table[i]);
     }
   }
-  bin_width_ = bin_width;
-  bin_offset_ = bin_offset;
-  BIN_H2O = mass2bin(mono_h2o,1);
-  BIN_NH3 = mass2bin(mono_nh3,1);
-
-  return true;
 }
 
 static bool CheckModification(const pb::Modification& mod,
@@ -188,9 +255,23 @@ static bool CheckModTable(const pb::ModTable& mod_table) {
   bool repeats[256];
   for (int i = 0; i < 256; ++i)
     repeats[i] = false;
-  for (int i = 0; i < mod_table.static_mod_size(); ++i)
-    if (!CheckModification(mod_table.static_mod(i), repeats))
+  bool usingXMod = false;
+  for (int i = 0; i < mod_table.static_mod_size(); ++i) {
+    const pb::Modification& mod = mod_table.static_mod(i);
+    string aa_str = mod.amino_acids();
+    if (aa_str.length() != 1) {
       return false;
+    } else if (aa_str[0] == 'X') {
+      usingXMod = true;
+    } else if (!CheckModification(mod, repeats)) {
+      carp(CARP_FATAL, "Multiple static mods on same residue detected");
+      return false;
+    }
+  }
+  if (usingXMod && mod_table.static_mod_size() > 1) {
+    carp(CARP_FATAL, "We are using X static mod, but we have detected "
+    "other static mods as well. Only one static mod is allowed.");
+  }
 
   return true;
 }

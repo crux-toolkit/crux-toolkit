@@ -75,7 +75,13 @@ void Peptide::AddIons(W* workspace) const {
   const char* residue = residues_;
   // Collect m/z values for each residue, for z = 1, 2.
   for (int i = 0; i < Len(); ++i, ++residue) {
-    aa_masses[i] = MassConstants::mono_table[*residue];
+    if (i == 0) { // nterm static pep
+      aa_masses[i] = MassConstants::nterm_mono_table[*residue];
+    } else if (i == Len() - 1) { // cterm static pep
+      aa_masses[i] = MassConstants::cterm_mono_table[*residue];
+    } else { // all other mods
+      aa_masses[i] = MassConstants::mono_table[*residue];
+    }
   }
 
   for (int i = 0; i < num_mods_; ++i) {
@@ -128,7 +134,13 @@ void Peptide::AddBIonsOnly(W* workspace) const {
   const char* residue = residues_;
   // Collect m/z values for each residue, for z = 1.
   for (int i = 0; i < Len(); ++i, ++residue) {
-    aa_masses[i] = MassConstants::mono_table[*residue];
+    if (i == 0) { // nterm static pep
+      aa_masses[i] = MassConstants::nterm_mono_table[*residue];
+    } else if (i == Len() - 1) { // cterm static pep
+      aa_masses[i] = MassConstants::cterm_mono_table[*residue];
+    } else { // all other mods
+      aa_masses[i] = MassConstants::mono_table[*residue];
+    }
   }
 
   //Add modifications to amino acids
@@ -237,7 +249,13 @@ double* Peptide::getAAMasses(){
   double* masses_charge = new double[Len()];
   const char* residue = residues_;
   for (int i = 0; i < Len(); ++i, ++residue) {
-    masses_charge[i] = MassConstants::mono_table[*residue];
+    if (i == 0) { // nterm static pep
+      masses_charge[i] = MassConstants::nterm_mono_table[*residue];
+    } else if (i == Len() - 1) { // cterm static pep
+      masses_charge[i] = MassConstants::cterm_mono_table[*residue];
+    } else { // all other mods
+      masses_charge[i] = MassConstants::mono_table[*residue];
+    }
   }
   for (int i = 0; i < num_mods_; ++i) {
     int index;

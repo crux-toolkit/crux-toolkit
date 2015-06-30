@@ -36,10 +36,23 @@ class MassConstants {
   static const double proton = 1.00727646688;
 #endif
 
-  static bool Init(const pb::ModTable* mod_table, const double bin_width, const double bin_offset);
+  static bool Init(const pb::ModTable* mod_table, 
+    const pb::ModTable* n_mod_table, 
+    const pb::ModTable* c_mod_table, 
+    const double bin_width, const double bin_offset);
+
+  static void ApplyTerminusStaticMods(const pb::ModTable* mod_table, 
+    double* mono_table, double* avg_table);
+
+  static void SetFixPt(double* mono_table, double* avg_table, 
+    FixPt* fixp_mono_table, FixPt* fixp_avg_table);
   
   static double mono_table[];
   static double avg_table[];
+  static double nterm_mono_table[];
+  static double cterm_mono_table[];
+  static double nterm_avg_table[];
+  static double cterm_avg_table[];
   static const double mono_h2o;
   static const double avg_h2o;
   static const double mono_nh3;
@@ -79,6 +92,10 @@ class MassConstants {
 
   static FixPt fixp_mono_table[];
   static FixPt fixp_avg_table[];
+  static FixPt fixp_nterm_mono_table[];
+  static FixPt fixp_cterm_mono_table[];
+  static FixPt fixp_nterm_avg_table[];
+  static FixPt fixp_cterm_avg_table[];
 
   static const FixPt fixp_mono_h2o;
   static const FixPt fixp_avg_h2o;
