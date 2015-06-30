@@ -155,7 +155,9 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
         !aaf_peptides_header.has_peptides_header()) {
       carp(CARP_FATAL, "Error reading index (%s)", peptides_file.c_str());
     }
-    MassConstants::Init(&aaf_peptides_header.peptides_header().mods(),
+    MassConstants::Init(&aaf_peptides_header.peptides_header().mods(), 
+      &aaf_peptides_header.peptides_header().nterm_mods(), 
+      &aaf_peptides_header.peptides_header().cterm_mods(),
                         bin_width_, bin_offset_);
     ActivePeptideQueue* active_peptide_queue =
       new ActivePeptideQueue(aaf_peptide_reader.Reader(), proteins);
@@ -189,7 +191,8 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
     }
   }
 
-  MassConstants::Init(&pepHeader.mods(), bin_width_, bin_offset_);
+  MassConstants::Init(&pepHeader.mods(), &pepHeader.nterm_mods(), 
+    &pepHeader.cterm_mods(), bin_width_, bin_offset_);
   TideMatchSet::initModMap(pepHeader.mods());
 
   OutputFiles* output_files = NULL;

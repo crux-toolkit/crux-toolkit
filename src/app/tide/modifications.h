@@ -178,7 +178,7 @@ class VariableModTable {
       if (limit > 1 && pb_mod_table_ptr != &pb_mod_table_)
 	limit = 1;
 
-      if (limit == 0 && pb_mod_table_ptr == &pb_mod_table_) {
+      if (limit == 0) {
         mod = pb_mod_table_ptr->add_static_mod();
       } else {
 	mod = pb_mod_table_ptr->add_variable_mod();
@@ -302,6 +302,8 @@ class VariableModTable {
   }
 
   const pb::ModTable* ParsedModTable() const { return &pb_mod_table_; }
+  const pb::ModTable* ParsedNtpepModTable() const { return &pb_ntpep_mod_table_; }
+  const pb::ModTable* ParsedCtpepModTable() const { return &pb_ctpep_mod_table_; }
   const vector<int>* MaxCounts() const { return &max_counts_; }
   const vector<double>* OriginalDeltas() const { return &original_deltas_; }
 
