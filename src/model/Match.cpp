@@ -748,7 +748,12 @@ void Match::printOneMatchField(
 ) {
   switch ((MATCH_COLUMNS_T)column_idx) {
   case FILE_COL:
-    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, getFilePath());
+    if (strlen(spectrum->getFullFilename()) == 0) {
+      output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, getFilePath());
+    }
+    else {
+      output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, spectrum->getFullFilename());
+    }
     break;
   case SCAN_COL:
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx,
@@ -1273,6 +1278,9 @@ Match* Match::parseTabDelimited(
   Peptide* peptide = Peptide::parseTabDelimited(result_file, 
                                                 database, 
                                                 decoy_database);
+  string index_name = result_file.getString(INDEX_NAME_COL);
+  match->setDatabaseIndexName(index_name);
+
   if(peptide == NULL){
     carp(CARP_ERROR, "Failed to parse peptide (tab delimited)");
     // FIXME should this exit or return null. I think sometimes we can get
