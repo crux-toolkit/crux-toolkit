@@ -1,389 +1,80 @@
+<!DOCTYPE HTML>
 <html>
 <head>
+<meta charset="UTF-8">
 <title>crux hardklor</title>
-<link href="./crux.css" rel="styleSheet" type="text/css">
-
-<script type="text/javascript">
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-26136956-1']);
-  _gaq.push(['_trackPageview']);
-
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
+<script type="text/javascript"
+  src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
 </script>
-
+<script type="text/javascript">
+  MathJax.Hub.Config({jax: ["input/TeX","output/HTML-CSS"], displayAlign: "left"});
+</script>
 </head>
 <body>
-<blockquote>
-
-<H1 ALIGN=CENTER>crux hardklor</H1>
-
-<B>Usage:</B>
-
-<blockquote>
-<code>crux hardklor [options] &lt;spectra&gt;</code>
-</blockquote>
-
-<B>Description:</B>
-
-<blockquote>
-<p>
-Hardkl&ouml;r analyzes high-resolution mass spectra, identifying
-protein or peptide isotope distributions and determining the
-corresponding monoisotopic masses and charge states.  Hardkl&ouml;r is
-specifically designed to handle overlapping isotope distributions in a
-single spectrum.  A detailed description of the Hardkl&ouml;r
-algorithm is given in</p>
-
-<quote>
-Hoopmann MR, Finney GL and MacCoss
-MJ. <a href="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2556510/">"High
-speed data reduction, feature selection, and MS/MS spectrum quality
-assessment of shotgun proteomics datasets using high resolution mass
-spectrometry."</a> <i>Analytical Chemistry</i>. 79:5630-5632 (2007).
-</quote>
-
-</blockquote>
-
-<p>
-<B>Input:</B>
-
-<UL>
-
-<LI>
-&lt;spectra&gt; &ndash; The name of a file from which to parse
-high-resolution spectra.  The file may be in MS1 (.ms1),
-binary MS1 (.bms1), compressed MS1 (.cms1), or mzXML (.mzXML) format.
-</li>
-
-</UL>
-
-<B>Output:</B>
-
-<p>
-The program writes files to the folder <code>crux-output</code> by
-default.  The name of the output folder can be set by the user using
-the <code>--output-dir</code> option.  The following files will be
-created:</p>
+<h1>hardklor</h1>
+<h2>Usage:</h2>
+<p><code>crux hardklor [options] &lt;spectra&gt;</code></p>
+<h2>Description:</h2>
+<p>Hardkl&ouml;r analyzes high-resolution mass spectra, identifying protein or peptide isotope distributions and determining the corresponding monoisotopic masses and charge states. The algorithm aims to identify persistence peptide isotope distribution (PPIDs), i.e., isotope distributions that recur over multiple scans. Hardkl&ouml;r is specifically designed to handle overlapping isotope distributions in a single spectrum. A detailed description of the Hardkl&ouml;r algorithm is given in</p><blockquote>Hoopmann MR, Finney GL and MacCoss MJ. <a href="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2556510/">&quot;High speed data reduction, feature selection, and MS/MS spectrum quality assessment of shotgun proteomics datasets using high resolution mass spectrometry.&quot;</a> <em>Analytical Chemistry</em>. 79:5630-5632 (2007).</blockquote>
+<h2>Input:</h2>
 <ul>
-
-<li>
-<b>hardklor.params.txt</b>: a file containing the name and value of all
-parameters/options for the current operation.  Not all parameters in
-the file may have been used in the operation.  The resulting file can
-be used with the <code>--parameter-file</code> option for other crux
-programs.
-</li>
-
-<li>
-<b>hardklor.mono.txt</b>: a tab-delimited text file containing one
-line for each isotope distribution.  The columns appear in the
-following order:</li>
-
-<ol>
-<li>
-<b>scan</b>: The scan number assigned to this spectrum in the input
-file.</li>
-<li>
-<b>retention time</b>: The time (in seconds) at which the spectrum
-was collected.</li>
-<li>
-<b>mass</b>: The uncharged monoisotopic mass of the protein or
-peptide.</li>
-<li>
-<b>charge</b>: The inferred charge state of the protein or peptide.</li>
-<li>
-<b>intensity</b>: The intensity of the base isotope peak of the model
-used to predict the protein or peptide.</li>
-<li>
-<b>m/z</b>: The m/z of the base peak.</li>
-<li>
-<b>s/n</b>: The signal-to-noise threshold, i.e., the relative
-abundance a peak must exceed in the spectrum window to be considered
-in the scoring algorithm.  Note that this is a local noise threshold
-for the area of the spectrum that the peptide was identified in</li>
-<li>
-<b>modifications</b>: Deviations to the averagine model.  Only
-modifications specified by the user are considered.  If no
-modifications are found in a particular PPID, then the column is
-marked with an underscore.</li>
-<li>
-<b>dotp</b>: The dot product score applies to all predictions in a
-given spectrum window. Thus, if two protein or peptide predictions
-share the same spectrum window, then they have a single dot product
-score that is the score of their combined peaks. </li>
-</ol>
-
-<li>
-<b>hardklor.log.txt</b>: a log file containing a copy of all messages
-that were printed to stderr.
-
+  <li><code>&lt;spectra&gt;</code> &ndash; The name of a file from which to parse high-resolution spectra. The file may be in MS1 (.ms1), binary MS1 (.bms1), compressed MS1 (.cms1), or mzXML (.mzXML) format.</li>
 </ul>
-
-<B>Options:</B>
-<UL>
-
-<li>
-<code>--hardklor-algorithm &lt;name&gt;</code> &ndash; Choose the algorithm for
-analyzing combinations of multiple peptide or protein isotope
-distributions. There are five algorithms to choose from:
+<h2>Output:</h2>
+<p>The program writes files to the folder <code>crux-output</code> by default. The name of the output folder can be set by the user using the <code>--output-dir</code> option. The following files will be created:
 <ul>
-<li>
-<code>basic</code> &ndash; Computes all combinatorial possibilities
-and returns the combination with the highest score.</li>
-<li>
-<code>fewest-peptides</code> &ndash; Computes increasing depths of
-combinations until the score threshold is exceeded. The smallest
-combination exceeding the threshold is returned, preventing
-over-fitting of the data.</li>
-<li>
-<code>fast-fewest-peptides</code> &ndash; Same as
-the <code>fewest-peptides</code> algorithm, but trades memory usage
-for speed. Use this method if there is sufficient memory on the
-system.</li>
-<li>
-<code>fewest-peptides-choice</code> &ndash; Same as
-the <code>fewest-peptides</code> algorithm, but adds a heuristic to
-evaluate if further combinatorial analysis would produce a better
-score. This method can dramatically improve speed, but may not be as
-accurate.</li>
-<li>
-<code>fast-fewest-peptides-choice</code> &ndash; Same as the
-<code>fewest-peptides-choice</code> algorithm, but trades memory usage
-for speed. Use this method if there is sufficient memory on the
-system.</li>
+  <li><code>hardklor.mono.txt</code> &ndash; a tab-delimited text file containing one line for each isotope distribution. The columns appear in the following order:<ol><li><strong>scan</strong>: The scan number assigned to this spectrum in the input file.</li><li><strong>retention time</strong>: The time (in seconds) at which the spectrum was collected.</li><li><strong>mass</strong>: The uncharged monoisotopic mass of the protein or peptide.</li><li><strong>charge</strong>: The inferred charge state of the protein or peptide.</li><li><strong>intensity</strong>: The intensity of the base isotope peak of the model used to predict the protein or peptide.</li><li><strong>m/z</strong>: The m/z of the base peak.</li><li><strong>s/n</strong>: The signal-to-noise threshold, i.e., the relative abundance a peak must exceed in the spectrum window to be considered in the scoring algorithm. Note that this is a local noise threshold for the area of the spectrum that the peptide was identified in.</li><li><strong>modifications</strong>: Deviations to the averagine model. Only modifications specified by the user are considered. If no modifications are found in a particular PPID, then the column is marked with an underscore.</li><li><strong>dotp</strong>: The dot product score applies to all predictions in a given spectrum window. Thus, if two protein or peptide predictions share the same spectrum window, then they have a single dot product score that is the score of their combined peaks.</li></ol></li>
+  <li><code>hardklor.params.txt</code> &ndash; a file containing the name and value of all parameters/options for the current operation. Not all parameters in the file may have been used in the operation. The resulting file can be used with the --parameter-file option for other crux programs.</li>
+  <li><code>hardklor.log.txt</code> &ndash; a log file containing a copy of all messages that were printed to stderr.</li>
 </ul>
-The default setting is fast-fewest-peptides.</li>
-
+<h2>Options:</h2>
+<ul style="list-style-type: none;">
 <li>
-<code>--cdm B|F|P|Q|S</code> &ndash; Choose the charge state
-determination method. There are five methods to choose from:
+<h3>hardklor options</h3>
 <ul>
-<li>
-<code>B</code> &ndash; Basic method, assume all charge states are
-possible.</li>
-<li>
-<code>F</code> &ndash; Fast Fourier transform.</li>
-<li>
-<code>P</code> &ndash; Patterson algorithm.</li>
-<li>
-<code>Q</code> &ndash; QuickCharge method, uses inverse peak
-distances.</li>
-<li>
-<code>S</code> &ndash; Senko method, or combined Fast Fourier
-Transform and Patterson algorithm.</li>
+  <li><code>--hardklor-algorithm &lt;basic|version1|version2&gt;</code> &ndash; Determines which spectral feature detection algorithm to use. Different results are possible with each algorithm, and there are pros and cons to each. There are three algorithms to choose from:<ul><li>basic &ndash; Performs unoptimized deconvolution and is provided for legacy purposes only.</li><li>version1 &ndash; Uses the optimizations developed during the 1.0+ series. It is very accurate, but has limited sensitivity, and moderate speed improvements.</li><li>version2 &ndash; Uses the optimizations developed for version 2.0+. It is highly sensitive, but less accurate for very low abundance features, and performs exceptionally fast.</li></ul> Default = <code>version1</code>.</li>
+  <li><code>--averagine-mod &lt;string&gt;</code> &ndash; Defines alternative averagine models in the analysis that incorporate additional atoms and/or isotopic enrichments. Modifications are represented as text strings. Inclusion of additional atoms in the model is done using by entering an atomic formula, such as: PO2 or Cl. Inclusion of isotopic enrichment to the model is done by specifying the percent enrichment (as a decimal) followed by the atom being enriched and an index of the isotope. For example, 0.75H1 specifies 75% enrichment of the first heavy isotope of hydrogen. In other words, 75% deuterium enrichment. Two or more modifications can be combined into the same model, and separated by spaces: B2 0.5B1 Default = <code>&lt;empty&gt;</code>.</li>
+  <li><code>--boxcar-averaging &lt;integer&gt;</code> &ndash; Boxcar averaging is a sliding window that averages n adjacent spectra prior to feature detection. Averaging generally improves the signal-to-noise ratio of features in the spectra, as well as improving the shape of isotopic envelopes. However, averaging will also change the observed peak intensities. Averaging with too wide a window will increase the occurrence of overlapping features and broaden the chromatographic profiles of observed features. The number specified is the total adjacent scans to be combined, centered on the scan being analyzed. Therefore, an odd number is recommended to center the boxcar window. For example, a value of 3 would produce an average of the scan of interest, plus one scan on each side. A value of 0 disables boxcar averaging. Default = <code>0</code>.</li>
+  <li><code>--boxcar-filter &lt;integer&gt;</code> &ndash; This parameter is only functional when boxcar-averaging is used. The filter will remove any peaks not seen in n scans in the boxcar window. The effect is to reduce peak accumulation due to noise and reduce chromatographic broadening of peaks. Caution should be used as over-filtering can occur. The suggested number of scans to set for filtering should be equal to or less than the boxcar-averaging window size. A value of 0 disables filtering. Default = <code>0</code>.</li>
+  <li><code>--boxcar-filter-ppm &lt;float&gt;</code> &ndash; This parameter is only functional when boxcar-filter is used. The value specifies the mass tolerance in ppm for declaring a peak the same prior to filtering across all scans in the boxcar window. Default = <code>10</code>.</li>
+  <li><code>--centroided &lt;T|F&gt;</code> &ndash; Indicates whether the data contain profile or centroided peaks. Default = <code>false</code>.</li>
+  <li><code>--cdm &lt;B|F|P|Q|S&gt;</code> &ndash; Choose the charge state determination method. There are five methods to choose from:<ul><li>B &ndash; Basic method, assume all charge states are possible.</li><li>F &ndash; Fast Fourier transform.</li><li>P &ndash; Patterson algorithm.</li><li>Q &ndash; QuickCharge method, uses inverse peak distances.</li><li>S &ndash; Senko method, or combined Fast Fourier Transform and Patterson algorithm.</li></ul> Default = <code>Q</code>.</li>
+  <li><code>--min-charge &lt;integer&gt;</code> &ndash; Specifies the minimum charge state to allow when finding spectral features. It is best to set this value to the lowest assumed charge state to be present. If set higher than actual charge states that are present, those features will not be identified or incorrectly assigned a different charge state and mass. Default = <code>1</code>.</li>
+  <li><code>--max-charge &lt;integer&gt;</code> &ndash; Specifies the maximum charge state to allow when finding spectral features. It is best to set this value to a practical number (i.e. do not set it to 20 when doing a tryptic shotgun analysis). If set higher than actual charge states that are present, the algorithm will perform significantly slower without any improvement in results. Default = <code>5</code>.</li>
+  <li><code>--corr &lt;float&gt;</code> &ndash; Sets the correlation threshold (cosine similarity) for accepting each predicted feature. Default = <code>0.85</code>.</li>
+  <li><code>--depth &lt;integer&gt;</code> &ndash; Sets the depth of combinatorial analysis. For a given set of peaks in a spectrum, search for up to this number of combined peptides that explain the observed peaks. The analysis stops before depth is reached if the current number of deconvolved features explains the observed peaks with a correlation score above the threshold defined with the correlation parameter. Default = <code>3</code>.</li>
+  <li><code>--distribution-area &lt;T|F&gt;</code> &ndash; When reporting each feature, report abundance as the sum of all isotope peaks. The value reported is the estimate of the correct peak heights based on the averagine model scaled to the observed peak heights. Default = <code>false</code>.</li>
+  <li><code>--hardklor-data-file &lt;string&gt;</code> &ndash; Specifies an ASCII text file that defines symbols for the periodic table. Default = <code>&lt;empty&gt;</code>.</li>
+  <li><code>--instrument &lt;fticr|orbitrap|tof|qit&gt;</code> &ndash; Indicates the type of instrument used to collect data. This parameter, combined with the resolution parameter, define how spectra will be centroided (if you provide profile spectra) and the accuracy when aligning observed peaks to the models. Default = <code>fticr</code>.</li>
+  <li><code>--isotope-data-file &lt;string&gt;</code> &ndash; Specifies an ASCII text file that can be read to override the natural isotope abundances for all elements. Default = <code>&lt;empty&gt;</code>.</li>
+  <li><code>--max-features &lt;integer&gt;</code> &ndash; Specifies the maximum number of models to build for a set of peaks being analyzed. Regardless of the setting, the number of models will never exceed the number of peaks in the current set. However, as many of the low abundance peaks are noise or tail ends of distributions, defining models for them is detrimental to the analysis. Default = <code>10</code>.</li>
+  <li><code>--mzxml-filter &lt;integer&gt;</code> &ndash; Filters the spectra prior to analysis for the requested MS/MS level. For example, if the data contain MS and MS/MS spectra, setting mzxml-filter = 1 will analyze only the MS scan events. Setting mzxml-filter = 2 will analyze only the MS/MS scan events. Default = <code>1</code>.</li>
+  <li><code>--mz-max &lt;float&gt;</code> &ndash; Constrains the search in each spectrum to signals below this value in Thomsons. Setting to 0 disables this feature. Default = <code>0</code>.</li>
+  <li><code>--mz-min &lt;float&gt;</code> &ndash; Constrains the search in each spectrum to signals above this value in Thomsons. Setting to 0 disables this feature. Default = <code>0</code>.</li>
+  <li><code>--mz-window &lt;float&gt;</code> &ndash; Only used when algorithm = version1. Defines the maximum window size in Thomsons to analyze when deconvolving peaks in a spectrum into features. Default = <code>4</code>.</li>
+  <li><code>--resolution &lt;float&gt;</code> &ndash; Specifies the resolution of the instrument at 400 m/z for the data being analyzed. Default = <code>100000</code>.</li>
+  <li><code>--scan-range-max &lt;integer&gt;</code> &ndash; Used to restrict analysis to spectra with scan numbers below this parameter value. A value of 0 disables this feature. Default = <code>0</code>.</li>
+  <li><code>--scan-range-min &lt;integer&gt;</code> &ndash; Used to restrict analysis to spectra with scan numbers above this parameter value. A value of 0 disables this feature. Default = <code>0</code>.</li>
+  <li><code>--sensitivity &lt;integer&gt;</code> &ndash; Set the sensitivity level. There are four levels: 0 (low), 1 (moderate), 2 (high), and 3 (max). Increasing the sensitivity will increase computation time, but will also yield more isotope distributions. Default = <code>2</code>.</li>
+  <li><code>--signal-to-noise &lt;float&gt;</code> &ndash; Filters spectra to remove peaks below this signal-to-noise ratio prior to finding features. Default = <code>1</code>.</li>
+  <li><code>--smooth &lt;integer&gt;</code> &ndash; Uses Savitzky-Golay smoothing on profile peak data prior to centroiding the spectra. This parameter is recommended for low resolution spectra only. Smoothing data causes peak depression and broadening. Only use odd numbers for the degree of smoothing (as it defines a window centered on each data point). Higher values will produce smoother peaks, but with greater depression and broadening. Setting this parameter to 0 disables smoothing. Default = <code>0</code>.</li>
+  <li><code>--sn-window &lt;float&gt;</code> &ndash; Set the signal-to-noise window length (in m/z). Because noise may be non-uniform across a spectrum, this value adjusts the segment size considered when calculating a signal-over-noise ratio. Default = <code>250</code>.</li>
+  <li><code>--static-sn &lt;T|F&gt;</code> &ndash; Applies the lowest noise threshold of any sn_window across the entire mass range for a spectrum. Setting this parameter to 0 turns off this feature, and different noise thresholds will be used for each local mass window in a spectrum. Default = <code>true</code>.</li>
 </ul>
-The default setting is Q.</li>
-
-<li>
-<code>--min-charge &lt;int&gt;</code> &ndash; Set the minimum charge
-state to look for when analyzing a spectrum. The default value is
-1.</li>
-
-<li>
-<code>--max-charge &lt;int&gt;</code> &ndash; Set the maximum charge
-state to look for when analyzing a spectrum. The default value is
-5.</li>
-
-<li>
-<code>--corr &lt;float&gt;</code> &ndash; Set the correlation
-threshold to accept a predicted isotope distribution. Valid values are
-any decimal value between 0.0 and 1.0, inclusive. The default value is
-0.85.</li>
-
-<li>
-<code>--depth &lt;int&gt;</code> &ndash; Set the depth of
-combinatorial analysis. This is the maximum number of protein or
-peptide distributions that can be combined to estimate the observed
-data at any given spectrum segment. The default value is 3.</li>
-
-<li>
-<code>--distribution-area &lt;T|F&gt;</code> &ndash; Report peptide
-intensities as the distribution area. Default false.</li>
-
-<li>
-<code>--averagine-mod &lt;string&gt;</code> &ndash; Include alternative
-averagine models in the analysis that incorporate additional atoms or
-isotopic enrichments. Modifications are represented as text
-strings. Inclusion of additional atoms in the model is done using by
-entering an atomic formula such as "PO2" or "Cl". Inclusion of
-isotopic enrichment to the model is done by specifying the percent
-enrichment (as a decimal) followed by the atom being enriched and an
-index of the isotope. For example, 0.75H1 specifies 75% enrichment of
-the first heavy isotope of hydrogen. In other words, 75% deuterium
-enrichment. Two or more modifications can be combined into the same
-model and separated by colons: "B2:0.5B1". Multiple averagine models
-are supported in a single analysis by separating the models with a 
-semicolon: "B2:0.5B1;C2:0.7C1".</li>
-
-<li>
-<code>--mzxml-filter ms1|ms2|ms3|none</code> &ndash; Set a filter for
-mzXML files. If you want to analyze only the MS2 scans in your mzXML
-file, specify <code>--mzxml-filter MS2</code>.  Default = none.</li>
-
-<li>
-<code>--no-base T|F</code> &ndash; Specify "no base" averagine. Only
-modified averagine models will be used in the analysis. Default =
-F.</li>
-
-<li>
-<code>--max-p &lt;int&gt;</code> &ndash; Set the maximum number of
-peptides or proteins that are estimated from the peaks found in a
-spectrum segment. The default value is 10.</li>
-
-<li>
-<code>--resolution &lt;double&gt;</code> &ndash;
-Set the resolution of the observed spectra at m/z 400. Resolution
-is a unitless quantity defined as the mass of the peak divided by the
-associated width at half maximum height (FWHM).  Used in
-conjunction with <code>--instrument</code>. The default is 100000.</li>
-
-<li>
-<code>--instrument fticr|orbi|tof|qit</code> &ndash;
-Type of instrument on which the data was collected.  Used in
-conjuction with <code>--resolution</code>.  The default is fticr.</li>
-
-<li>
-<code>--centroided T|F</code> &ndash; Are the spectra centroided?  
-Default = F.</li>
-
-<li>
-<code>--scan-number &lt;number range&gt;</code> &ndash; A single scan
-number or a range of numbers to be analyzed. Range should be specified
-as 'first-last' which will include scans 'first' and 'last'.  Default
-= search all spectra.</li>
-
-<li>
-<code>--sensitivity 0|1|2|3</code> &ndash; Set the sensitivity
-level. There are four levels, 0 (low), 1 (moderate), 2 (high), and 3
-(max). Increasing the sensitivity will increase computation time, but
-will also yield more isotope distributions. The default value is 2.</li>
-
-<li>
-<code>--signal-to-noise &lt;float&gt;</code> &ndash; Set the
-signal-to-noise threshold. Any integer or decimal value greater than
-or equal to 0.0 is valid. The default value is 1.0.</li>
-
-<li>
-<code>--sn-window &lt;float&gt;</code> &ndash; Set the signal-to-noise
-window length (in m/z). Because noise may be non-uniform across a
-spectra, this value adjusts the segment size considered when
-calculating a signal-over-noise ratio. The default value is 250.0.</li>
-
-<li>
-<code>--static-sn &lt;T|F&gt;</code> &ndash; If true, Hardklor will
-calculate the local noise levels across the spectrum
-using <code>--sn-window</code>, then select a floor of this set of
-noise levels to apply to the whole spectrum.  Default is true.</li>
-
-<li>
-<code>--mz-window &lt;double&gt;-&lt;double&gt;</code> &ndash; Restrict
-analysis to only a small window in each segment (in m/z). The user
-must specify the starting and ending m/z values between which the
-analysis will be performed. By default the whole spectrum is
-analyzed.</li>
-
-<li>
-<code>--max-width &lt;float&gt;</code> &ndash; Set the maximum width
-of any set of peaks in a spectrum when computing the results (in
-m/z). Thus, if the value was 5.0, then sets of peaks greater than 5
-m/z are divided into smaller sets prior to analysis. The default value
-is 4.0.</li>
-
-<h3>Output</h3>
-
-<li>
-<code>--fileroot &lt;string&gt;</code> &ndash; 
-The <code>fileroot</code> string will be added as a prefix to all
-output file names. Default = none.</li>
-
-<li>
-<code>--output-dir &lt;filename&gt;</code> &ndash; 
-The name of the directory where output files will be created.
-Default = crux-output.</li>
-
-<li>
-<code>--overwrite &lt;T|F&gt;</code> &ndash;
-Replace existing files if true (T) or fail when trying to overwrite a
-file if false (F). Default =  F.</li>
-
-
-<li>
-<code>--parameter-file &lt;filename&gt;</code> &ndash; A file
-containing command-line or additional parameters.  See
-the <a href="parameter-file.html">parameter documentation</a> page for
-details.  Default = no parameter file.</li>
-
-<li>
-<code>--verbosity &lt;0-100&gt;</code> &ndash; 
-Specify the verbosity of the current processes. Each level prints the
-following messages, including all those at lower verbosity levels:
-0-fatal errors, 10-non-fatal errors, 20-warnings, 30-information on
-the progress of execution, 40-more progress information, 50-debug
-info, 60-detailed debug info. Default = 30.</li>
-
-<!-- Other parameters
-<li>
-<code>--no-split T|F</code> - user can decide not to divide the spectrum into windows. 
-    Only good for specialized, small spectra. Leave this at FALSE.<br>
 </li>
 <li>
-<code>--xml-output T|F</code> - write the output to an xml file. 
-    This was a user request because they had an xml parser they liked.
-</li>
-<li>
-<code>--zero-intensity-values T|F</code> - For processed spectra (Thermo spectra), 
-   a lot of intensity data points are represented as zeros. You can choose to 
-   include these in your Hardklor analysis. I do not recommend it, leave this at FALSE.
-</li>
-<li>
-<code>--custom-molecule &lt;atomic formula%gt;</code> - instead of using averagine, 
-search your data for a specific molecule. This is generally not useful for shotgun data. 
-</li>
-<li>
-<code>--signal-to-noise-algorithm STD|ASN|AVG</code> - Use a different signal to noise algorithm.
-The published algorithm (and default) has the code STD (for standard). I have a few others: 
-1. ASN, advanced signal to noise, 2. AVG, boxcar averaging, 3. MIX, combines ASN and AVG. 
-There are also codes of V2, V2ASN, and V2MIX that can be used, but they require a much longer 
-and separate discussion. After you have finished making your initial tests, ask me about these 
-options again as they are probably what can be toggled to best improve your results.
-</li>
-<li>
--ppMatch, -ppm, and -ppWin are all parameters for use with ASN and MIX above.
-</li>
-
-<code>--reference-filter &lt;string&rt;</code> - Can filter out spectra based on the 
-reference line in the spectrum header. 
-
-Here's my recommended settings for overriding default values:
-
--d 2
--corr 0.90
--sl 3
--sn 0
--win 5.25
--p 12
--da true
-
-
-
--->
-</ul>
-<b>Notes:</b>
+<h3>Input and output</h3>
 <ul>
-<li>
-For users familiar with the standalone version of Hardkl&ouml;r, the 
-parameter mappings are <a href="hardklor_standalone_to_crux.html">here</a>.
+  <li><code>--fileroot &lt;string&gt;</code> &ndash; The fileroot string will be added as a prefix to all output file names. Default = <code>&lt;empty&gt;</code>.</li>
+  <li><code>--output-dir &lt;string&gt;</code> &ndash; The name of the directory where output files will be created. Default = <code>crux-output</code>.</li>
+  <li><code>--overwrite &lt;T|F&gt;</code> &ndash; Replace existing files if true or fail when trying to overwrite a file if false. Default = <code>false</code>.</li>
+  <li><code>--parameter-file &lt;string&gt;</code> &ndash; A file containing parameters.  See the <a href="parameter-file.html">parameter documentation</a> page for details. Default = <code>&lt;empty&gt;</code>.</li>
+  <li><code>--verbosity &lt;integer&gt;</code> &ndash; Specify the verbosity of the current processes. Each level prints the following messages, including all those at lower verbosity levels: 0-fatal errors, 10-non-fatal errors, 20-warnings, 30-information on the progress of execution, 40-more progress information, 50-debug info, 60-detailed debug info. Default = <code>30</code>.</li>
 </ul>
+</li>
 
-<hr></hr>
-
-<p>
-<a href="crux.html">Crux home</A></P>
-
-</blockquote>
+</ul>
+<hr>
+<a href="/">Home</a>
 </body>
 </html>

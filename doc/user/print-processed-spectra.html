@@ -1,0 +1,53 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>crux print-processed-spectra</title>
+<script type="text/javascript"
+  src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+<script type="text/javascript">
+  MathJax.Hub.Config({jax: ["input/TeX","output/HTML-CSS"], displayAlign: "left"});
+</script>
+</head>
+<body>
+<h1>print-processed-spectra</h1>
+<h2>Usage:</h2>
+<p><code>crux print-processed-spectra [options] &lt;ms2 file&gt; &lt;output file&gt;</code></p>
+<h2>Description:</h2>
+<p>Pre-process each spectrum in a given file in preparation for computing XCorr. The pre-processing steps are described in detail in this paper:</p><blockquote>J. K. Eng, B. Fischer, J. Grossman and M. J. MacCoss. <a href="http://pubs.acs.org/doi/abs/10.1021/pr800420s">&quot;A fast SEQUEST cross correlation algorithm process the peaks as for computing.&quot;</a> <em>Journal of Proteome Research</em>. 7(10):4598-4602, 2008.</blockquote><p>The output of this program is equivalent to the spectrum shown in Figure 1D of the above paper.</p>
+<h2>Input:</h2>
+<ul>
+  <li><code>&lt;ms2 file&gt;</code> &ndash; File containing spectra to be searched.</li>
+  <li><code>&lt;output file&gt;</code> &ndash; File where spectrum will be written.</li>
+</ul>
+<h2>Output:</h2>
+<p>The program writes files to the folder <code>crux-output</code> by default. The name of the output folder can be set by the user using the <code>--output-dir</code> option. The following files will be created:
+<ul>
+  <li><code>output file</code> &ndash; The name of the file in which the processed spectra will be printed in MS2 format.</li>
+</ul>
+<h2>Options:</h2>
+<ul style="list-style-type: none;">
+<li>
+<h3>print-processed-spectra options</h3>
+<ul>
+  <li><code>--stop-after &lt;remove-precursor|square-root|remove-grass|ten-bin|xcorr&gt;</code> &ndash; Stop after the specified pre-processing step. Default = <code>xcorr</code>.</li>
+  <li><code>--output-units &lt;mz|bin&gt;</code> &ndash; Specify the output units for processed spectra. Default = <code>bin</code>.</li>
+</ul>
+</li>
+<li>
+<h3>Input and output</h3>
+<ul>
+  <li><code>--spectrum-parser &lt;pwiz|mstoolkit&gt;</code> &ndash; Specify the parser to use for reading in MS/MS spectra. The default, ProteoWizard parser can read the MS/MS file formats listed <a href="http://proteowizard.sourceforge.net/formats.shtml">here</a>. The alternative is <a href="http://cruxtoolkit.sourceforge.net/mstoolkit.html">MSToolkit parser</a>. If the ProteoWizard parser fails to read your files properly, you may want to try the MSToolkit parser instead. Default = <code>pwiz</code>.</li>
+  <li><code>--use-z-line &lt;T|F&gt;</code> &ndash; Specify whether, when parsing an MS2 spectrum file, Crux obtains the precursor mass information from the "S" line or the "Z" line.  Default = <code>true</code>.</li>
+  <li><code>--verbosity &lt;integer&gt;</code> &ndash; Specify the verbosity of the current processes. Each level prints the following messages, including all those at lower verbosity levels: 0-fatal errors, 10-non-fatal errors, 20-warnings, 30-information on the progress of execution, 40-more progress information, 50-debug info, 60-detailed debug info. Default = <code>30</code>.</li>
+  <li><code>--parameter-file &lt;string&gt;</code> &ndash; A file containing parameters.  See the <a href="parameter-file.html">parameter documentation</a> page for details. Default = <code>&lt;empty&gt;</code>.</li>
+  <li><code>--overwrite &lt;T|F&gt;</code> &ndash; Replace existing files if true or fail when trying to overwrite a file if false. Default = <code>false</code>.</li>
+</ul>
+</li>
+
+</ul>
+<hr>
+<a href="/">Home</a>
+</body>
+</html>

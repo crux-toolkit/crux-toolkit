@@ -1,0 +1,50 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>crux subtract-index</title>
+<script type="text/javascript"
+  src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+<script type="text/javascript">
+  MathJax.Hub.Config({jax: ["input/TeX","output/HTML-CSS"], displayAlign: "left"});
+</script>
+</head>
+<body>
+<h1>subtract-index</h1>
+<h2>Usage:</h2>
+<p><code>crux subtract-index [options] &lt;tide index 1&gt; &lt;tide index 2&gt; &lt;output index&gt;</code></p>
+<h2>Description:</h2>
+<p>This command takes two peptide indices, created by the tide-index command, and subtracts the second index from the first. The result is an output index that contains peptides that appear in the first index but not the second.</p>
+<h2>Input:</h2>
+<ul>
+  <li><code>&lt;tide index 1&gt;</code> &ndash; A peptide index produced using tide-index</li>
+  <li><code>&lt;tide index 2&gt;</code> &ndash; A second peptide index, to be subtracted from the first index.</li>
+  <li><code>&lt;output index&gt;</code> &ndash; A new peptide index containing all peptides that occur in thefirst index but not the second.</li>
+</ul>
+<h2>Output:</h2>
+<p>The program writes files to the folder <code>crux-output</code> by default. The name of the output folder can be set by the user using the <code>--output-dir</code> option. The following files will be created:
+<ul>
+  <li><code>subtract-index.target.txt</code> &ndash; a <a href="txt-format.html">tab-delimited text file</a> containing the target peptides.</li>
+  <li><code>subtract-index.decoy.txt</code> &ndash; a <a href="txt-format.html">tab-delimited text file</a> containing the decoy peptides.</li>
+  <li><code>subtract-index.log.txt</code> &ndash; a log file containing a copy of all messages that were printed to stderr.</li>
+  <li><code>subtract-index.params.txt</code> &ndash; a file containing the name and value of all parameters/options for the current operation. Not all parameters in the file may have been used in the operation. The resulting file can be used with the --parameter-file option for other crux programs.</li>
+</ul>
+<h2>Options:</h2>
+<ul style="list-style-type: none;">
+<li>
+<h3>Input and output</h3>
+<ul>
+  <li><code>--verbosity &lt;integer&gt;</code> &ndash; Specify the verbosity of the current processes. Each level prints the following messages, including all those at lower verbosity levels: 0-fatal errors, 10-non-fatal errors, 20-warnings, 30-information on the progress of execution, 40-more progress information, 50-debug info, 60-detailed debug info. Default = <code>30</code>.</li>
+  <li><code>--parameter-file &lt;string&gt;</code> &ndash; A file containing parameters.  See the <a href="parameter-file.html">parameter documentation</a> page for details. Default = <code>&lt;empty&gt;</code>.</li>
+  <li><code>--overwrite &lt;T|F&gt;</code> &ndash; Replace existing files if true or fail when trying to overwrite a file if false. Default = <code>false</code>.</li>
+  <li><code>--peptide-list &lt;T|F&gt;</code> &ndash; Create in the output directory a text file listing of all the peptides in the database, along with their neutral masses, one per line. If decoys are generated, then a second file will be created containing the decoy peptides. Decoys that also appear in the target database are marked with an asterisk in a third column. Default = <code>false</code>.</li>
+  <li><code>--output-dir &lt;string&gt;</code> &ndash; The name of the directory where output files will be created. Default = <code>crux-output</code>.</li>
+</ul>
+</li>
+
+</ul>
+<hr>
+<a href="/">Home</a>
+</body>
+</html>

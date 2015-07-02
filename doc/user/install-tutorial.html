@@ -196,6 +196,8 @@ for notes on how to run the executables.
 </ul>
 <a name="OSX"></a>
 <h2>OS X</h2>
+<span class=prog>Crux</span> requires OS X Yosemite.
+<p/>
 <b>Note:</b> 
 when typing the commands shown in these instructions do not type the
 leading <code>$</code> before each command; it indicates the
@@ -264,8 +266,9 @@ for notes on how to run the executables.
 To build Crux from source on OS X you must have installed the
 following software:
 <ul>
-<li><code>gcc</code></li>
-<li><code>g++</code></li>
+<li><code>OS X Yosemite</code></li>
+<li><code>XCode 6.3.1 or later</code></li>
+<li><code>XCode Command Line Tools</code></li>
 <li><code>cmake</code></li>
 <li><code>make</code></li>
 <li><code>svn</code></li>
@@ -281,64 +284,21 @@ These will automatically be copied from the <span class=prog>Proteowizard</span>
 and <span class=prog>Percolator</span>
 repositories and statically linked into <span class=prog>crux</span>.
 <p />
-The C++ compiler that comes with Apples's <span class=prog>XCode</span>
-is partially incompatible with the GNU 
-<span class=prog>C++</span> compilers
-and can't compile some parts of <span class=prog>crux</span> and the supporting libraries.
-If you are building on OS X 
-you will need to install a copy of the GNU C and C++ compilers
-from a repository such as <a href="http://www.macports.org">MacPorts</a>.
-We have used version 4.7 of the GNU <span class=prog>g++</span> compiler
-downloaded from <a href="http://www.macports.org">MacPorts</a>.
-Once you've installed 
-<a href="http://www.macports.org">MacPorts</a>
-the commands to install the GNU C and C++ compilers is
-<div class=code>
-<code>
-$ sudo port install gcc47
-</code>
-</div>
-<p />
-<a href="http://www.macports.org">MacPorts</a>
-allows you to install multiple versions of the GNU compilers.
-You'll want to set your prefered version as the default for MacPorts.
-Fo example:
-<div class=code>
-<code>
-$ sudo port select --set gcc mp-gcc47
-</code>
-</div>
-<p />
-You will also have to configure your environment to use the MacPorts compilers.
-This is done using the environment variables
-<span class=prog>PATH</span>, which sets the list of directories
-that are searched for executables,
-<span class=prog>CC</span>, which identifies the C compiler,
-and
-<span class=prog>CXX</span>, which identifies the C++ compiler.
-Before staring your build set these environment variables to point
-to the MacPorts compilers.
-For example:
-<div class=code>
-<code>
-$ export PATH=/opt/local/bin:$PATH
-<br/>
-$ export CC=/opt/local/bin/gcc
-<br/>
-$ export CXX=/opt/local/bin/g++
-</code>
-</div>
+Building <span class=prog>Crux</span> on OS X requires a current version of
+<span class=prog>XCode</span>, and the XCode command line tools.
+Earlier versions of <span class=prog>Crux</span> 
+had to be built using the GCC compilers.
+which are no supported by Apple.
 <p/>
-You may want to include these commands in your 
-<span class=file>.profile</span>
-or
-<span class=file>.bashrc</span>.
-<p/>
+The programs
 <span class=prog>cmake</span>,
 <span class=prog>svn</span>,
 and
 <span class=prog>wget</span>,
-can also be installed from MacPorts.
+can be installed from 
+<a href="https://www.macports.org">MacPorts</a>
+or 
+<a href="http://brew.sh">Homebrew</a>.
 Note that you must install the <span class=prog>ssl</span> variant of 
 <span class=prog>wget</span>:
 <div class=code>
@@ -437,7 +397,7 @@ On Linux and OS X systems you can always run any of the programs by specifying i
 path.  For example,</p>
 
 <div class=code><code>
-$ <em>&lt;install directory&gt;</em>/bin/crux search-for-matches</code>
+$ <em>&lt;install directory&gt;</em>/bin/crux comet</code>
 </div>
 
 <p>In this final step of the installation, we'll set things up so that
@@ -475,7 +435,7 @@ run the <span class=prog>crux</span> programs by just typing their
 names.  Try this.</p>
 
 <div class=code><code>
-$ crux search-for-matches</code>
+$ crux comet</code>
 </div>
 
 <p>The change to <span class=code>$PATH</span> is only temporary.  As
@@ -495,12 +455,12 @@ have to log on again for the change to take effect.
 To run Crux on Windows you must have installed the
 following software:
 <ul>
-<li><a
-href="http://sjsupport.thermofinnigan.com/public/detail.asp?id=703"><code>Thermo
-32-bit MSFileReader</code></a></li>
+<li>
+<a href="http://sjsupport.thermofinnigan.com/public/detail.asp?id=703"><code>Thermo
+64-bit MSFileReader</code></a>
 </ul>
 <p/>
-Be sure to install the 32-bit version of the library.
+Be sure to install the 64-bit version of the library.
 <p/>
 <li><b>Download the files</b> 
 <p/>
@@ -537,22 +497,18 @@ following software:
 <li><code>
 <a
 href="http://www.visualstudio.com/downloads/download-visual-studio-vs#DownloadFamilies_4">Microsoft
-Visual C++ 2010</a></code></li>
-<li><code>
-<a
-href="http://www.microsoft.com/en-us/download/details.aspx?id=23691">Microsoft
-Visual C++ 2010 Service Pack 1</a></code></li>
+Visual C++ 2013</a></code></li>
 <li><a
 href="http://sjsupport.thermofinnigan.com/public/detail.asp?id=703"><code>Thermo
-32-bit MSFileReader</code></a></li>
+64-bit MSFileReader</code></a></li>
 <li><a href="http://www.cmake.org/cmake/resources/software.html"><code>CMake</code></a></li>
 <li><a href="http://sourceforge.net/projects/win32svn/"><code>SVN</code></a></li>
 <li><a href="http://getgnuwin32.sourceforge.net"><code>wget</code> (must support SSL)</a></li>
 </ul>
 <p/>
 <b>Other verions of Visual Studio will not be able to build Crux!</b>
-You must have Visual Studio 2010, and you must install Service Pack 1.
-The Express version of Visual Studio 2010 does work.
+You must have Visual Studio 2013.
+Visual Studio 2013 Express for Windows Desktop does work.
 <p/>
 <span class=code>wget</span> is available as part of the GnuWin32 package.
 The easiest way to install this is via the 
@@ -601,7 +557,7 @@ very near the disk root (typically
 <b>Open the command line development environment.</b>
 <p/>
 Under the "Start" button
-open the "Visual Studio 2010" folder, then open the "Visual Studio Tools"
+open the "Visual Studio 2013" folder, then open the "Visual Studio Tools"
 folder, and double-click on "Visual Studio x64 Win64 Command Prompt".
 This will launch a 
 <span class=file>cmd</span> shell configured to use the 
@@ -614,12 +570,14 @@ move into the <span class=file>crux-x.xx.Source</span>
 directory from step 1.
 Run the command
 <div class=code><code>
-cmake -DCMAKE_INSTALL_PREFIX:PATH=&lt;install directory&gt; -G "Visual Studio 10" .
+cmake -DCMAKE_INSTALL_PREFIX:PATH=&lt;install directory&gt; -G "Visual Studio
+12 Win64" .
 </code>
 </div>
 <p/>
 where <span class=file>&lt;install directory&gt;</span> is
 the location where you wish to install the <span class=prog>crux</span> programs. 
+Note that, somewhat confusingly, Visual Studio 2013 is version 12.
 <p/>
 <li><b>Build and install</b> 
 <p/>
@@ -659,7 +617,7 @@ On Windows systems you can always run any of the programs by specifying its full
 path.  For example,</p>
 
 <div class=code><code>
-C:\ <em>&lt;install directory&gt;</em>\bin\crux search-for-matches</code>
+C:\ <em>&lt;install directory&gt;</em>\bin\crux comet</code>
 </div>
 
 <p>In this final step of the installation, we'll set things up so that

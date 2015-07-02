@@ -1,75 +1,44 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<HTML>
-<HEAD>
-<TITLE>stat-column</TITLE>
-</HEAD>
-<BODY>
-<blockquote>
-<H1 ALIGN=CENTER>stat-column</H1>
-
-<B>Usage:</B>
-
-<blockquote>
-<code>crux stat-column [options] &nbsp;&lt;tsv&nbsp;filename&gt; 
-  &nbsp;&lt;column&nbsp;name&gt; </code>
-</blockquote>
-
-<B>Description:</B>
-<p>
-Given a tab-delimited file, collect summary statistics on the values
-within a specified column.  The specified column must contain numeric
-values.</p>
-
-<B>Input:</B>
-<UL>
-
-<li>
-&lt;tsv&nbsp;filename&gt; &ndash; A tab-delimited file, with column
-headers in the first row.  Use "-" to read from standard input. 
-</li>
-	
-<li>
-&lt;column&nbsp;name&nbsp&gt; &ndash; The column to process.
-</li>
-
-</UL>
-
-<B>Output:</B>
-
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>crux stat-column</title>
+<script type="text/javascript"
+  src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+<script type="text/javascript">
+  MathJax.Hub.Config({jax: ["input/TeX","output/HTML-CSS"], displayAlign: "left"});
+</script>
+</head>
+<body>
+<h1>stat-column</h1>
+<h2>Usage:</h2>
+<p><code>crux stat-column [options] &lt;tsv file&gt; &lt;column name&gt;</code></p>
+<h2>Description:</h2>
+<p>Given a tab-delimited file, collect summary statistics on the values within a specified column. The specified column must contain numeric values.</p>
+<h2>Input:</h2>
 <ul>
-The program prints to standard output the number of rows, the minimum,
-maximum, sum, average, and median of the data values in the specified
-column.
+  <li><code>&lt;tsv file&gt;</code> &ndash; A tab-delimited file, with column headers in the first row. Use "-" to read from standard input.</li>
+  <li><code>&lt;column name&gt;</code> &ndash; A column name.</li>
 </ul>
-
-<B>Options:</B>
-
-<UL>
-
+<h2>Output:</h2>
+<ul>
+  <li><code>stdout</code> &ndash; The program prints to standard output the following statistics for the specified column: number of rows, minimum, maximum, sum, average, and median of the data values.</li>
+</ul>
+<h2>Options:</h2>
+<ul style="list-style-type: none;">
 <li>
-<code>--delimiter &lt;char&gt;|tab</code> &ndash; Specify the input
-and output delimiter to use when processing the delimited file.
-Default=tab.</li>
-
-<li>
-<code>--header T|F</code> &ndash; Print the header line of the file,
-in addition to the columns that match.  Default=T.
-
-<LI>
-<code>--verbosity &lt;0-100&gt;</code> &ndash; Specify the verbosity of the
-current processes. Each level prints the following messages, including
-all those at lower verbosity levels: 0-fatal errors, 10-non-fatal
-errors, 20-warnings, 30-information on the progress of execution,
-40-more progress information, 50-debug info, 60-detailed debug info.
-Default = 30.</li>
+<h3>Input and output</h3>
+<ul>
+  <li><code>--delimiter &lt;string&gt;</code> &ndash; Specify the input and output delimiter to use when processing the delimited file.  The argument can be either a single character or the keyword 'tab.' Default = <code>tab</code>.</li>
+  <li><code>--header &lt;T|F&gt;</code> &ndash; Print the header line of the file, in addition to the columns that match. Default = <code>true</code>.</li>
+  <li><code>--precision &lt;integer&gt;</code> &ndash; Set the precision for scores written to sqt and text files. Default = <code>8</code>.</li>
+  <li><code>--verbosity &lt;integer&gt;</code> &ndash; Specify the verbosity of the current processes. Each level prints the following messages, including all those at lower verbosity levels: 0-fatal errors, 10-non-fatal errors, 20-warnings, 30-information on the progress of execution, 40-more progress information, 50-debug info, 60-detailed debug info. Default = <code>30</code>.</li>
+</ul>
+</li>
 
 </ul>
-
-<hr></hr>
-
-<p>
-<a href="crux.html">Crux home</a></p>
-
-</blockquote>
+<hr>
+<a href="/">Home</a>
 </body>
 </html>

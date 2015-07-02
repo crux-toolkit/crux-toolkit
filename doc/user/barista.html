@@ -1,330 +1,75 @@
+<!DOCTYPE HTML>
 <html>
+<head>
+<meta charset="UTF-8">
 <title>crux barista</title>
-<link href="./crux.css" rel="styleSheet" type="text/css">
+<script type="text/javascript"
+  src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+<script type="text/javascript">
+  MathJax.Hub.Config({jax: ["input/TeX","output/HTML-CSS"], displayAlign: "left"});
+</script>
 </head>
 <body>
-<blockquote>
-
-<H1 ALIGN=CENTER>crux barista</H1>
-
-
-<p>
-<b>Description:</b></p>
-
-<blockquote>
-<p>
-Barista is a protein identification algorithm that combines two
-different tasks&mdash;peptide-spectrum match (PSM) verification and
-protein inference&mdash;into a single learning algorithm.  The program
-requires three inputs: a set of MS2 spectra, a protein database, and
-the results of searching the spectra against the database.  Barista
-produces as output three ranked lists of proteins, peptides and PSMs,
-based on how likely the proteins and peptides are to be present in the
-sample and how likely the PSMs are to be correct.  Barista can jointly
-analyze the results of multiple shotgun proteomics experiments,
-corresponding to different experiments or replicate runs.</p>
-
-<p>
-Barista uses a machine learning strategy that requires that the
-database search be carried out on target and decoy proteins.  The
-searches may be carried out on a concatenated database or, using
-the <code>--separate-searches</code> option, separate target and decoy
-databases.  The <code>crux create-index</code> command can be used to
-generate a decoy database.</p>
-
-<p>
-Barista assigns two types of statistical confidence estimates,
-q-values and posterior error probabilities, to identified PSMs,
-peptides and proteins.  For more information about these values, see the
-documentation
-for <a href="calibrate-scores.html">calibrate-scores</a>.</p>
-
-</blockquote>
-
-<p>
-<b>Usage:</b></p>
-
-<blockquote>
-<code>crux barista [options] &lt;protein-database&gt; &lt;spectra&gt; 
- &lt;search&nbsp;results&gt;</code>
-
-</code>
-</blockquote>
-
-
-<p>
-<b>Required Inputs:</b></p>
-
+<h1>barista</h1>
+<h2>Usage:</h2>
+<p><code>crux barista [options] &lt;database&gt; &lt;fragmentation spectra&gt; &lt;search results&gt;</code></p>
+<h2>Description:</h2>
+<p>Barista is a protein identification algorithm that combines two different tasks&ndash;peptide-spectrum match (PSM) verification and protein inference&ndash;into a single learning algorithm. The program requires three inputs: a set of MS2 spectra, a protein database, and the results of searching the spectra against the database. Barista produces as output three ranked lists of proteins, peptides and PSMs, based on how likely the proteins and peptides are to be present in the sample and how likely the PSMs are to be correct. Barista can jointly analyze the results of multiple shotgun proteomics experiments, corresponding to different experiments or replicate runs.</p><p>Barista uses a machine learning strategy that requires that the database search be carried out on target and decoy proteins. The searches may be carried out on a concatenated database or, using the <code>--separate-searches</code> option, separate target and decoy databases. The <code>crux tide-index</code> command can be used to generate a decoy database.</p><p>Barista assigns two types of statistical confidence estimates, q-values and posterior error probabilities, to identified PSMs, peptides and proteins. For more information about these values, see the documentation for <a href="assign-confidence.html">assign-confidence</a>.</p>
+<h2>Input:</h2>
 <ul>
-
-<li>
-<b>protein-database</b> &ndash; The program requires the FASTA format
-protein database files against which the search was performed. The
-protein database input may be a concatenated database or separate
-target and decoy databases. In either
-case, Barista distinguishes between target and decoy proteins based on
-the presence of a decoy prefix on the sequence identifiers (see
-the <code>--decoy-prefix</code> option, below).</li>
-
-<li>
-<b>spectra</b> &ndash; The fragmentation spectra must be provided
-in <a href="ms2-format.html">MS2 format</a>.</li>
-
-<li>
-<b>search results</b> &ndash; Barista recognizes search results
-in <!--a href="sqt-format.html">SQT format</a--> <!--and in-->
-the <a href="txt-format.html">tab-delimited text format</a> produced
-by Crux.</li>
-
-<p>
-Each of the three required arguments can be provided in three
-different ways: (1) as a single file, (2) as a text file containing
-a list of filenames, one per line, or (3) as a directory containing
-multiple files.  File types are identified based on the filename
-extension: ".fa", ".fasta" or ".fsa" for FASTA files, ".ms2" for MS2
-files<!-- ".sqt" for SQT files,--> and ".txt" for tab-delimited text files
-or lists of filenames.  Note that the input mode for spectra and for
-search results must be the same; i.e., if you provide a list of files
-for the spectra, then you must also provide a list of files containing
-your search results.  This mode is specified using the
-<code>--list-of-files</code> option, described below.</p>
-
+  <li><code>&lt;database&gt;</code> &ndash; The program requires the FASTA format protein database files against which the search was performed. The protein database input may be a concatenated database or separate target and decoy databases; the latter is supported with the --separate-searches option, described below. In either case, Barista distinguishes between target and decoy proteins based on the presence of a decoy prefix on the sequence identifiers (see the --decoy-prefix option, below). The database can be provided in three different ways: (1) as a a single FASTA file with suffix ".fa", ".fsa" or ".fasta", (2) as a text file containing a list of FASTA files, one per line, or (3) as a directory containing multiple FASTA files (identified via the filename suffixes ".fa", ".fsa" or ".fasta").</li>
+  <li><code>&lt;fragmentation spectra&gt;</code> &ndash; The fragmentation spectra must be provided in <a href="ms2-format.html">MS2</a>, mzXML, or MGF format.</li>
+  <li><code>&lt;search results&gt;</code> &ndash; Search results in the <a href="txt-format.html">tab-delimited text format</a> produced by Crux or in <a href="sqt-format.html">SQT format</a>. Like the spectra, the search results can be provided as a single file, a list of files or a directory of files. Note, however, that the input mode for spectra and for search results must be the same; i.e., if you provide a list of files for the spectra, then you must also provide a list of files containing your search results. When the MS2 files and tab-delimited text files are provided via a file listing, it is assumed that the order of the MS2 files matches the order of the tab-delimited files. Alternatively, when the MS2 files and tab-delimited files are provided via directories, the program will search for pairs of files with the same root name but different extensions (".ms2" and ".txt").</li>
 </ul>
-
-<B>Output:</B>
-
-<UL>
-<p>
-The program writes files to the folder <code>crux-output</code> by
-default.  The name of the output folder can be set by the user using
-the <code>--output-dir</code> option.  The following files will be
-created:</p>
-
-<li>
-
-<b>barista.xml:</b> an <a href="barista-xml-format.html">XML file format</a> that contains four main parts: 
-<ol>
-<li>Proteins</li>
-<li>Subset Proteins</li>
-<li>Peptides</li>
-<li>PSMs</li>
-</ol>
-<li>
-<b>barista.target.proteins.txt</b>: a <a href="txt-format.html"> tab-delimited file</a> containing a
-ranked list of groups of indistinguishable target proteins with
-associated Barista scores and q-values and with peptides that
-contributed to the identification of the protein group).
-</li>
-
-<li>
-<b>barista.target.subset-proteins.txt</b>: a <a href="txt-format.html">tab-delimited file</a>
-containing groups of indistinguishable proteins, which constitute a
-subset of some group in the barista.target.proteins.txt file in terms
-of the peptides identified in these proteins. 
-</li>
-
-<li>
-<b>barista.target.peptides.txt</b>: a <a href="txt-format.html">tab-delimited file </a>containing a
-ranked list of target peptides with the associated Barista scores and
-q-values. 
-</li>
-
-<li>
-<b>barista.target.psm.txt</b>: a <a href="txt-format.html">tab-delimited file format </a>containing a
-ranked list of target peptide-spectrum matches with the associated
-Barista scores and q-values.
-</li>
-
-<li>
-<b>barista.log.txt</b>: a file where the program reports its progress. 
-</li>
-
-<li>
-<b>barista.params.txt</b>: a file with the values of all the options
-given to the current run.
-</li>
-
-</ul>
-
-<b>Options:</b>
-
+<h2>Output:</h2>
+<p>The program writes files to the folder <code>crux-output</code> by default. The name of the output folder can be set by the user using the <code>--output-dir</code> option. The following files will be created:
 <ul>
-
-<li>
-<code>--enzyme trypsin|chymotrypsin|elastase</code> &ndash; The enzyme
-used to digest the proteins in the experiment.  Default =
-trypsin.</li>
-
-<li>
-<code>--decoy-prefix &lt;string&gt;</code> &ndash; Specifies the
-prefix of the protein names that indicates a decoy. Default = rand_.
-</li>
-
-<li>
-<code>--optimization &lt;string&gt;</code> &ndash; Specifies whether to do optimization at the protein, peptide or psm level. Default = protein.
-</li>
-
-<li>
-<code>--spectrum-parser pwiz|mstoolkit</code> &ndash;
-Specify the parser to use for reading in MS/MS spectra. The default,
-ProteoWizard parser should be able to read the MS/MS file formats listed
-<a href="http://proteowizard.sourceforge.net/formats.shtml">here</a>. The
-alternative is <a href="mstoolkit.html">MSToolkit parser</a>. If the
-ProteoWizard parser fails to read your files properly, you may want to try the
-MSToolkit parser instead. Default = pwiz.</li>
-
-<li>
-<code>--separate-searches &lt;search&nbsp;results&gt;</code> &ndash; This option
-indicates that the target and decoy searches were run separately,
-rather than using a concatenated database.  In this case, Barista will
-assume that the database search results provided as a required
-argument are from the target database search.  This option then allows
-the user to specify the location of the decoy search results.  Like
-the required arguments, these search results can be provided as a
-single file, a list of files or a directory.  However, the choice
-(file, list or directory) must be consistent for the spectrum files
-and the target and decoy search results.  Also, if the spectrum and
-the search results are provided in directories, then Barista will use
-the spectrum filename (<code>&lt;name&gt;.ms2</code>) to identify
-corresponding target and decoy search results with names
-<!--code>&lt;name&gt;*.target.sqt</code--><code>&lt;name&gt;*.target.txt</code>,
-<!--code>&lt;name&gt;*.decoy.sqt</code-->
-and <code>&lt;name&gt;*.decoy.txt</code>.  Note that the decoy
-database can be provided as part of the required &lt;database&gt;
-argument.</li>
-
-<li>
-<code>--fileroot &lt;string&gt;</code> &ndash;
-The <code>fileroot</code> string will be added as a prefix to all
-output file names. Default = none.</li>
-
-<li>
-<code>--output-dir &lt;directory&gt;</code> &ndash; 
-The name of the directory where output files will be created.
-Default = crux-output.</li>
-
-<li>
-<code>--overwrite &lt;T/F&gt;</code> &ndash; The option applies to the
-situation when the output directory specified for the run already
-exists. If set to T, Barista will overwrite the contents of the
-output directory specified for the run. Default = F.</li>
-
-<li>
-<code>--skip-cleanup &lt;T/F&gt;</code> &ndash; Barista analysis
-begins with a pre-processsing step that creates a set of lookup tables
-which are then used during training. Normally, these lookup tables are
-deleted at the end of the Barista analysis, but setting this option
-to <code>T</code> prevents the deletion of these tables.
-Subsequently, the Barista analysis can be repeated more efficiently by
-specifying the <code>--re-run</code> option (see below). Default =
-F.</li>
-
-<li>
-<code>--re-run &lt;directory&gt;</code> &ndash; Re-run a previous
-Barista analysis using a previously computed set of lookup tables.
-For this option to work, the <code>--skip-cleanup</code> must have
-been set to true when Barista was run the first time.</li>
-
-<li>
-<code>--use-spec-features &lt;T/F&gt;</code> &ndash; Barista uses an
-enriched feature set derived from the spectra. Default = T.</li>
-<!--SQT-->
-<li><code>--parameter-file &lt;filename&gt;</code> &ndash; 
-A file containing command-line or additional parameters.  See
-the <a href="parameter-file.html">parameter documentation</a> page
-for details.  Default = no parameter file.</li>
-
-<li> 
-<code>--feature-file &lt;T|F&gt;</code> &ndash;
-Optional file into which PSM features are printed. Default = F.</li>
-
-<li> 
-<code>--list-of-files &lt;T|F&gt;</code> &ndash; Specify that the
-spectra and search results are provided as lists of files, rather than
-as individual files.  When the spectrum files and the database search
-results files are provided via a file listing, Barista assumes that
-the order of the spectrum files matches the order of the search result
-files. Alternatively, when the spectrum files and search results files
-are provided via directories, Barista will search for pairs of files
-with the same root name but different extensions (".ms2" 
-<!--and--".sqt"/"-->.txt").  Default = F.</li>
-
-<li>
-<code>--verbosity &lt;0-100&gt;</code> &ndash; 
-Specify the verbosity of the current processes. Each level prints the
-following messages, including all those at lower verbosity levels:
-0-fatal errors, 10-non-fatal errors, 20-warnings, 30-information on
-the progress of execution, 40-more progress information, 50-debug
-info, 60-detailed debug info. Default = 30.</li>
-
-<li>
-<code>--txt-output &lt;T|F&gt;</code> &ndash; Output a tab-delimited
-results file to the output directory. Default = T.</li>
-
-<li>
-<code>--pepxml-output &lt;T|F&gt;</code> &ndash; Output a pepXML
-results file to the output directory. Default = F.</li>
-
-
+  <li><code>barista.xml</code> &ndash; an <a href="barista-xml-format.html">XML file</a> that contains four information about proteins, subset proteins, peptides, and PSMs.</li>
+  <li><code>barista.target.proteins.txt</code> &ndash; a <a href="txt-format.html">tab-delimited file</a> containing a ranked list of groups of indistinguishable target proteins with associated Barista scores and q-values and with peptides that contributed to the identification of the protein group.</li>
+  <li><code>barista.target.subset-proteins.txt</code> &ndash; a <a href="txt-format.html">tab-delimited file</a> containing groups of indistinguishable proteins.</li>
+  <li><code>barista.target.peptides.txt</code> &ndash; a <a href="txt-format.html">tab-delimited file</a> containing a ranked list of target peptides with the associated Barista scores and q-values.</li>
+  <li><code>barista.target.psm.txt</code> &ndash; a <a href="txt-format.html">tab-delimited file format</a> containing a ranked list of target peptide-spectrum matches with the associated Barista scores and q-values.</li>
+  <li><code>barista.log.txt</code> &ndash; a file where the program reports its progress.</li>
+  <li><code>barista.params.txt</code> &ndash; a file with the values of all the options given to the current run.</li>
 </ul>
-
-<p>
-<b>Selected Examples of Use:</b></p>
-
+<h2>Options:</h2>
+<ul style="list-style-type: none;">
+<li>
+<h3>barista options</h3>
 <ul>
-
-<li><b>Concatenated Search (Using Comet and/or Tide):</b><br>
-  <br>
-  1) Generate a decoy protein fasta:<br>
-  <code>crux create-index decoys protein-shuffle proteins.fasta temp-index</code><br>
-  <br>
-  2) Create concatenated fasta:<br>
-  <code>cat proteins.fasta ./temp-index/proteins-random.fasta > target-decoy.fasta</code><br>
-  <br>
-  3) run comet using fasta with no decoys generated:<br>
-  <code>crux comet --decoy_search 0 spectra.mzXML.gz target-decoy.fasta</code><br>
-  <br>
-  4) run tide-search using fasta with no decoys generated:<br>
-  <code>crux tide-index --decoy-format none target-decoy.fasta tide-index</code><br>
-  <code>crux tide-search spectra.mzXML.gz tide-index</code><br>
-  <br>
-  5) If needed, convert spectra to ms2:<br>
-  crux get-ms2-spectrum spectra.mzXML.gz > spectra.ms2<br>
-  <br>
-  6) Run barista:<br>
-  <code>crux barista target-decoy.fasta spectra.ms2 crux-output/comet.target.txt</code><br>
-  <br>
-  <code>crux barista target-decoy.fasta spectra.ms2 crux-output/tide-search.txt</code><br>
+  <li><code>--separate-searches &lt;string&gt;</code> &ndash; If the target and decoy searches were run separately, rather than using a concatenated database, then the program will assume that the database search results provided as a required argument are from the target database search. This option then allows the user to specify the location of the decoy search results. Like the required arguments, these search results can be provided as a single file, a list of files or a directory. However, the choice (file, list or directory) must be consistent for the MS2 files and the target and decoy tab-delimited files. Also, if the MS2 and tab-delimited files are provided in directories, then Q-ranker will use the MS2 filename (foo.ms2) to identify corresponding target and decoy tab-delimited files with names like foo*.target.txt and foo*.decoy.txt. This naming convention allows the target and decoy txt files to reside in the same directory. Default = <code>&lt;empty&gt;</code>.</li>
+  <li><code>--skip-cleanup &lt;T|F&gt;</code> &ndash; Analysis begins with a pre-processsing step that creates a set of lookup tables which are then used during training. Normally, these lookup tables are deleted at the end of the analysis, but setting this option to T prevents the deletion of these tables. Subsequently, analyses can be repeated more efficiently by specifying the --re-run option. Default = <code>false</code>.</li>
+  <li><code>--re-run &lt;string&gt;</code> &ndash; Re-run a previous analysis using a previously computed set of lookup tables. For this option to work, the --skip-cleanup option must have been set to true when the program was run the first time. Default = <code>&lt;empty&gt;</code>.</li>
+  <li><code>--use-spec-features &lt;T|F&gt;</code> &ndash; Use an enriched feature set, including separate features for each ion type. Default = <code>true</code>.</li>
+  <li><code>--optimization &lt;protein|peptide|psm&gt;</code> &ndash; Specifies whether to do optimization at the protein, peptide or psm level. Default = <code>protein</code>.</li>
+</ul>
+</li>
+<li>
+<h3>Enzymatic digestion</h3>
+<ul>
+  <li><code>--enzyme &lt;no-enzyme|trypsin|trypsin/p|chymotrypsin|elastase|clostripain|cyanogen-bromide|iodosobenzoate|proline-endopeptidase|staph-protease|asp-n|lys-c|lys-n|arg-c|glu-c|pepsin-a|elastase-trypsin-chymotrypsin|custom-enzyme&gt;</code> &ndash; Specify the enzyme used to digest the proteins in silico. Available enzymes (with the corresponding digestion rules indicated in parentheses) include no-enzyme ([X]|[X]), trypsin ([RK]|{P}), trypsin/p ([RK]|[]), chymotrypsin ([FWYL]|{P}), elastase ([ALIV]|{P}), clostripain ([R]|[]), cyanogen-bromide ([M]|[]), iodosobenzoate ([W]|[]), proline-endopeptidase ([P]|[]), staph-protease ([E]|[]), asp-n ([]|[D]), lys-c ([K]|{P}), lys-n ([]|[K]), arg-c ([R]|{P}), glu-c ([DE]|{P}), pepsin-a ([FL]|{P}), elastase-trypsin-chymotrypsin ([ALIVKRWFY]|{P}). Specifying --enzyme no-enzyme yields a non-enzymatic digest. <strong>Warning:</strong> the resulting index may be quite large. Default = <code>trypsin</code>.</li>
+</ul>
+</li>
+<li>
+<h3>Input and output</h3>
+<ul>
+  <li><code>--decoy-prefix &lt;string&gt;</code> &ndash; Specifies the prefix of the protein names that indicate a decoy. Default = <code>decoy_</code>.</li>
+  <li><code>--fileroot &lt;string&gt;</code> &ndash; The fileroot string will be added as a prefix to all output file names. Default = <code>&lt;empty&gt;</code>.</li>
+  <li><code>--output-dir &lt;string&gt;</code> &ndash; The name of the directory where output files will be created. Default = <code>crux-output</code>.</li>
+  <li><code>--overwrite &lt;T|F&gt;</code> &ndash; Replace existing files if true or fail when trying to overwrite a file if false. Default = <code>false</code>.</li>
+  <li><code>--pepxml-output &lt;T|F&gt;</code> &ndash; Output a pepXML results file to the output directory. Default = <code>false</code>.</li>
+  <li><code>--txt-output &lt;T|F&gt;</code> &ndash; Output a tab-delimited results file to the output directory. Default = <code>true</code>.</li>
+  <li><code>--parameter-file &lt;string&gt;</code> &ndash; A file containing parameters.  See the <a href="parameter-file.html">parameter documentation</a> page for details. Default = <code>&lt;empty&gt;</code>.</li>
+  <li><code>--verbosity &lt;integer&gt;</code> &ndash; Specify the verbosity of the current processes. Each level prints the following messages, including all those at lower verbosity levels: 0-fatal errors, 10-non-fatal errors, 20-warnings, 30-information on the progress of execution, 40-more progress information, 50-debug info, 60-detailed debug info. Default = <code>30</code>.</li>
+  <li><code>--list-of-files &lt;T|F&gt;</code> &ndash; Specify that the search results are provided as lists of files, rather than as individual files. Default = <code>false</code>.</li>
+  <li><code>--feature-file &lt;T|F&gt;</code> &ndash; Output the computed features in <a href="features.html">tab-delimited text format</a>. Default = <code>false</code>.</li>
+  <li><code>--spectrum-parser &lt;pwiz|mstoolkit&gt;</code> &ndash; Specify the parser to use for reading in MS/MS spectra. The default, ProteoWizard parser can read the MS/MS file formats listed <a href="http://proteowizard.sourceforge.net/formats.shtml">here</a>. The alternative is <a href="http://cruxtoolkit.sourceforge.net/mstoolkit.html">MSToolkit parser</a>. If the ProteoWizard parser fails to read your files properly, you may want to try the MSToolkit parser instead. Default = <code>pwiz</code>.</li>
+</ul>
 </li>
 
-<li><b>Separate Search:</b><br>
-<br>
-<b>Using Comet:</b><br>
-<code>crux create-index decoys protein-shuffle proteins.fasta temp-index<br>
-cat proteins.fasta ./temp-index/proteins-random.fasta > target-decoy.fasta<br>
-crux comet --output-dir target-search --decoy_search 0 spectra.mzXML.gz proteins.fasta<br>
-crux comet --output-dir decoy-search --decoy_search 0 spectra.mzXML.gz ./temp-index/proteins-random.fasta<br>
-crux get-ms2-spectrum spectra.mzXML.gz > spectra.ms2<br>
-crux barista --separate-searches decoy-search/comet.target.txt target-decoy.fasta spectra.ms2 target-search/comet.target.txt<br></code>
-<br>
-<b>Using Tide-Search:</b><br>
-<code>
-crux create-index decoys protein-shuffle proteins.fasta temp-index<br>
-cat proteins.fasta ./temp-index/proteins-random.fasta > target-decoy.fasta<br>
-crux tide-index --decoy-format none proteins.fasta target-index<br>
-crux tide-index --decoy-format none ./temp-index/proteins-random.fasta decoy-index<br>
-crux tide-search --output-dir target-search spectra.mzXML.gz target-index<br>
-crux tide-search --output-dir decoy-search spectra.mzXML.gz decoy-index<br>
-crux get-ms2-spectrum spectra.mzXML.gz > spectra.ms2<br>
-crux barista --separate-searches decoy-search/tide-search.txt target-decoy.fasta spectra.ms2 target-search/tide-search.txt<br>
-</code>
-
-
 </ul>
-
-<hr></hr>
-<a href="crux.html">Crux home</a>
-
-</blockquote>
+<hr>
+<a href="/">Home</a>
 </body>
 </html>

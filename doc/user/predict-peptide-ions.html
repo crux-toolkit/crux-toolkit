@@ -1,0 +1,53 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>crux predict-peptide-ions</title>
+<script type="text/javascript"
+  src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+<script type="text/javascript">
+  MathJax.Hub.Config({jax: ["input/TeX","output/HTML-CSS"], displayAlign: "left"});
+</script>
+</head>
+<body>
+<h1>predict-peptide-ions</h1>
+<h2>Usage:</h2>
+<p><code>crux predict-peptide-ions [options] &lt;peptide sequence&gt; &lt;charge state&gt;</code></p>
+<h2>Description:</h2>
+<p>Given a peptide and a charge state, predict the corresponding fragment ions according to the provided options.</p>
+<h2>Input:</h2>
+<ul>
+  <li><code>&lt;peptide sequence&gt;</code> &ndash; The peptide sequence.</li>
+  <li><code>&lt;charge state&gt;</code> &ndash; The charge state of the peptide.</li>
+</ul>
+<h2>Output:</h2>
+<ul>
+  <li><code>stdout</code> &ndash; a series of lines, describing how the ions were predicted. <blockquote style="font-family: monospace;"># PEPTIDE: &lt;peptide sequence&gt;<br># CHARGE: &lt;peptide charge&gt;</blockquote>The program then prints a one-line header that labels the tab-delimited columns, followed by one line per ion:<blockquote style="font-family: monospace;">m/z&nbsp;mass&nbsp;charge&nbsp;ion-series&nbsp;peptide-bond-index&nbsp;nh3&nbsp;h2o&nbsp;isotope&nbsp;flank</blockquote><p>The columns contain the following values:<ul><li>&lt;m/z&gt; is the ion's mass-to-charge</li><li>&lt;mass&gt; is the ion's (charged) mass</li><li>&lt;charge&gt; is the ion's charge e.g. 1,2,3</li><li>&lt;ion-type&gt; is a string representing the series 'a', 'b', 'c', 'x', 'y', 'z', and 'p'</li><li>&lt;peptide-bond-index&gt; is in [1...n), where n is peptide-length. Consistent with standard mass spec terminology, b-1 corresponds to a prefix ion of a single amino acid, and y-1 corresponds to a suffix ion of a single amino acid.<li><li>&lt;nh3&gt; is the number of NH3 modifications</li><li>&lt;h2o&gt; is the number of H2O Modifications</li><li>&lt;isotope&gt; is the number of adjacent isotopic peaks</li><li>&lt;flank&gt; is the number of flanking ions</li></ul></p></li>
+</ul>
+<h2>Options:</h2>
+<ul style="list-style-type: none;">
+<li>
+<h3>predict-peptide-ions options</h3>
+<ul>
+  <li><code>--primary-ions &lt;a|b|y|by|bya&gt;</code> &ndash; Predict the specified primary ion series. 'a' indicates a-ions only, 'b' indicates b-ions only, 'y' indicates y-ions only, 'by' indicates both b and y, 'bya' indicates b, y, and a. Default = <code>by</code>.</li>
+  <li><code>--precursor-ions &lt;T|F&gt;</code> &ndash; Predict the precursor ions, and all associated ions (neutral losses, multiple charge states) consistent with the other specified options. Default = <code>false</code>.</li>
+  <li><code>--isotope &lt;integer&gt;</code> &ndash; Predict the given number of isotope peaks (0|1|2). Default = <code>0</code>.</li>
+  <li><code>--flanking &lt;T|F&gt;</code> &ndash; Predict flanking peaks for b- and y ions. Default = <code>false</code>.</li>
+  <li><code>--nh3 &lt;integer&gt;</code> &ndash; Include among the predicted peaks b/y ions with up to n losses of nh3. For example, for --nh3 2, predict a peak for each b- and y-ion with the loss of one nh3 group and predict a second peak for each b- and y-ion with the loss of two nh3 groups. These peaks will have 1 and 2, respectively, in the NH3 column of the output. Default = <code>0</code>.</li>
+  <li><code>--h2o &lt;integer&gt;</code> &ndash; Include in the predicted peaks, b/y ions with the loss of 1 to n water molecules. See --nh3 for an example. Default = <code>0</code>.</li>
+</ul>
+</li>
+<li>
+<h3>Search parameters</h3>
+<ul>
+  <li><code>--max-ion-charge &lt;string&gt;</code> &ndash; Predict theoretical ions up to max charge state (1, 2, ... ,6) or up to the charge state of the peptide ("peptide"). If the max-ion-charge is greater than the charge state of the peptide, then the maximum is the peptide charge.  Default = <code>peptide</code>.</li>
+  <li><code>--fragment-mass &lt;average|mono&gt;</code> &ndash; Specify which isotopes to use in calculating fragment ion mass. Default = <code>mono</code>.</li>
+</ul>
+</li>
+
+</ul>
+<hr>
+<a href="/">Home</a>
+</body>
+</html>

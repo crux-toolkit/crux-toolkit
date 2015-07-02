@@ -1,0 +1,89 @@
+<html>
+<title>Crux performance test</title>
+<body>
+
+<h1>Crux performance test</h1>
+
+<p>
+This test checks how well the Crux search tools work on a sample data
+set.  The data set consists of 7243 spectra, of which 160 are 1+, 7083
+are 2+ and 7055 are 3+.  Thus, there are a total of 14298 searches to
+be performed.  The database is comprised of 23,932 proteins and 10.5
+million amino acids, including <i>C. elegans</i> proteins plus some
+common contaminants.  The test runs <code>crux
+search-for-matches</code> using a 3.0 Da precursor mass window,
+shuffled decoys and a fully tryptic digest.  The searches are followed
+up by analysis via <code>crux calibrate-scores</code> (twice, using
+Weibull p-values or decoys as the null), <code>crux
+percolator</code>, <code>crux q-ranker</code> and <code>crux
+barista</code>.  The performance of each method is summarized as a
+plot showing the number of spectra identified as a function of q-value
+threshold.</p>
+
+<p>
+You can execute the test by running the
+script <code>run-performance-test.sh</code> in this directory or the
+command <code>make performance-test</code> in the parent directory.
+Assuming that you have gnuplot installed, then the resulting picture
+should show up in the right-hand panel below:</p>
+
+<center>
+<table>
+<tr>
+<td><img src="stored-performance.png"></td>
+<td><img src="performance.png"></td>
+</tr>
+<tr>
+<td><center>Stored plot</center></td>
+<td><center>Plot resulting from your test</center></td>
+</tr>
+</table>
+</center>
+
+<p>
+Here are some things to look for in the output:</p>
+
+<ul>
+
+<li>
+All the series should start in the lower left corner and be
+non-decreasing as the q-value threshold is relaxed.</li>
+
+<li>
+Because there are only 7243 distinct spectra, no method should ever
+find more than this number of PSMs.  In practice, the best method is
+likely to give &lt;3000 PSMs at a q-value threshold of 0.1.</li>
+
+<li>
+No method should leave the y-axis before about 1000 PSMs have been
+observed.</li>
+
+</ul>
+
+<p>
+The following plot evaluates the agreement between Tide XCorr and
+Comet XCorr.  Ideally, this plot should lie on the line y=x.  Note
+that this scatter plot overestimates the agreement, because it ignores
+PSMs that are identified by only one of the two search tools.</p>
+
+<center>
+<table>
+<tr>
+<td><img src="stored-xcorr.png"></td>
+<td><img src="xcorr.comet.png"></td>
+</tr>
+<tr>
+<td><img src="stored-xcorr.refactored.png"></td>
+<td><img src="xcorr.refactored.png"></td>
+</tr>
+<tr>
+<td><center>Stored plots</center></td>
+<td><center>Plots resulting from your test</center></td>
+</tr>
+</table>
+</center>
+
+
+</body>
+</html>
+
