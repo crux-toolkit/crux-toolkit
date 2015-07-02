@@ -27,7 +27,7 @@
   <area shape="rect" coords="260,247,342,278" alt="bullseye" href="bullseye.html"/>
   <area shape="rect" coords="510,100,612,132" alt="tide-search" href="tide-search.html"/>
   <area shape="rect" coords="528,191,595,222" alt="comet" href="comet.html"/>
-  <area shape="rect" coords="512,281,613,335" alt="search-for-xlinks" href="crux-search-for-xlinks.html"/>
+  <area shape="rect" coords="512,281,613,335" alt="search-for-xlinks" href="search-for-xlinks.html"/>
   <area shape="rect" coords="776,100,873,132" alt="percolator" href="percolator.html"/>
   <area shape="rect" coords="791,160,861,192" alt="barista" href="barista.html"/>
   <area shape="rect" coords="783,222,866,252" alt="q-ranker" href="q-ranker.html"/>
@@ -97,11 +97,20 @@ calls to <code>tide-search</code>.</td>
 <td>
 <a href="tide-search.html">tide-search</a></td>
 <td>
-Search a collection of spectra against a sequence database, returning
-a collection of peptide-spectrum matches (PSMs).  This is a fast
-search engine but requires that you first build an index
+Search a collection of spectra against a sequence database, provided
+either as a FASTA file or an index, returning a collection of
+peptide-spectrum matches (PSMs).  This is a fast search engine, but it
+runs most quickly if provided with a peptide index built
 with <code>tide-index</code>.</td>
 </tr>
+
+<tr>
+<td>
+<a href="cascade-search.html">cascade-search</a></td>
+<td>
+An iterative procedure for incorporating information about peptide
+groups into the database search and confidence estimation
+procedure.</td></tr>
 
 <tr>
 <td>
@@ -116,8 +125,9 @@ database in FASTA format.</td>
 <td>
 <a href="percolator.html">percolator</a></td>
 <td>
-Re-rank a collection of PSMs using the Percolator algorithm.
-Optionally, also produce protein rankings using the Fido algorithm.</td></tr>
+Re-rank and assign confidence estimates to a collection of PSMs using
+the Percolator algorithm.  Optionally, also produce protein rankings
+using the Fido algorithm.</td></tr>
 
 <tr>
 <td>
@@ -134,7 +144,7 @@ identification.</td></tr>
 
 <tr>
 <td>
-<a href="crux-search-for-xlinks.html">search-for-xlinks</a></td>
+<a href="search-for-xlinks.html">search-for-xlinks</a></td>
 <td>
 Search a collection of spectra against a sequence database, finding
 cross-linked peptide matches.</td></tr>
@@ -143,7 +153,17 @@ cross-linked peptide matches.</td></tr>
 <td>
 <a href="spectral-counts.html">spectral-counts</a></td>
 <td>
-Quantify peptides or proteins using one of three spectral counting methods.</td></tr>
+Quantify peptides or proteins using one of three spectral counting
+methods.</td></tr>
+
+<tr>
+<td>
+<a href="pipeline.html">pipeline</a></td>
+<td>
+Given one or more sets of tandem mass spectra as well as a protein
+database, this command runs a series of Crux tools and reports all of
+the results in a single output directory. 
+</td></tr>
 
 <tr>
 <td colspan="2"><b>Utilities</b></td>
@@ -151,35 +171,9 @@ Quantify peptides or proteins using one of three spectral counting methods.</td>
 
 <tr>
 <td>
-<a href="calibrate-scores.html">calibrate-scores</a></td>
+<a href="assign-confidence.html">assign-confidence</a></td>
 <td>
-Assign two types of statistical confidence measures (q-values and
-posterior error probabilities) to each PSM in a given set.</td></tr>
-
-<tr>
-<td><a href="make-pin.html">make-pin</a></td>
-<td>Given a set of search results files, generate a pin file for input to
-<code>crux percolator</code></td>
-</tr>
-
-<tr>
-<td>
-<a href="crux-predict-peptide-ions.html">predict-peptide-ions</a></td>
-<td>
-Given a peptide and a charge state, predict the m/z values of the
-resulting fragment ions.</td>
-</tr>
-
-<tr>
-<td><a href="hardklor.html">hardkl&ouml;r</a></td>
-<td>Identify isotopic distributions from high-resolution mass spectra.</td>
-</tr>
-
-<tr>
-<td>
-<a href="crux-print-processed-spectra.html">print-processed-spectra</a></td>
-<td>
-Process spectra as for scoring xcorr and print the results to a file.</td></tr>
+Assign statistical confidence measures to each PSM in a given set.</td></tr>
 
 <tr>
 <td>
@@ -191,10 +185,42 @@ decoy peptides fitting the specified criteria.</td>
 
 <tr>
 <td>
-<a href="crux-get-ms2-spectrum.html">get-ms2-spectrum</a></td>
+<a href="get-ms2-spectrum.html">get-ms2-spectrum</a></td>
 <td>
 Extract one or more fragmentation spectra, specified by scan number, from
 an <code>MS2</code> file.</td>
+</tr>
+
+<tr>
+<td><a href="hardklor.html">hardkl&ouml;r</a></td>
+<td>Identify isotopic distributions from high-resolution mass spectra.</td>
+</tr>
+
+<tr>
+<td><a href="make-pin.html">make-pin</a></td>
+<td>Given a set of search results files, generate a pin file for input to
+<code>crux percolator</code></td>
+</tr>
+
+<tr>
+<td>
+<a href="predict-peptide-ions.html">predict-peptide-ions</a></td>
+<td>
+Given a peptide and a charge state, predict the m/z values of the
+resulting fragment ions.</td>
+</tr>
+
+<tr>
+<td>
+<a href="print-processed-spectra.html">print-processed-spectra</a></td>
+<td>
+Process spectra as for scoring xcorr and print the results to a file.</td></tr>
+
+<tr>
+<td>
+<a href="subtract-index.html">subtract-index</a></td>
+<td>Subtract an index file from another both generated by tide-index. 
+It is used to create disjoint pepitde indexes.</td>
 </tr>
 
 <tr>
@@ -338,7 +364,7 @@ Print the Crux version number to standard output, then exit.</td>
 </td>
 <td>in</td>
 <td>in</td>
-<td>&nbsp;</td>
+<td>in</td>
 <td>in</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
@@ -456,7 +482,7 @@ pepXML</a>
 
 <tr>
 <td>
-<a href="features.html">Features</a>
+<a href="features.html">Feature file</a>
 </td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
@@ -533,6 +559,15 @@ Percolator</a></li>
 <a href="crux-faq.html">Crux frequently asked questions</a></li>
 
 <li>
+A graphical user interface for the Crux search tools, as well as a
+variety of other search tools, is available
+through <a href="http://searchgui.googlecode.com/">SearchGUI</a>. The
+sister
+program, <a href="http://peptide-shaker.googlecode.com/">PeptideShaker</a>
+provides a way to combine the results of multiple search engines in
+the analysis of a single data set.</li>
+
+<li>
 <a href="http://scholar.google.com/citations?hl=en&user=Rw9S1HIAAAAJ">Crux
 Google Scholar profile</a></li>
 
@@ -580,15 +615,17 @@ Stafford Noble</a> in the Department of Genome Sciences at the
 University of Washington, Seattle.  The complete list of contributors
 can be found <a href="contributors.html">here</a>.</p>
 
-<p>Maintenance and development of Crux is funded by the National
-Institute of General Medical Sciences grants R01&nbsp;GM096306
-and P41&nbsp;GM103533.</p>
+<p>
+Maintenance and development of Crux is funded by the National
+Institutes of Health awards R01&nbsp;GM096306 and
+P41&nbsp;GM103533.</p>
 </center>
 
 <hr></hr>
 
 <p>
-Please send comments and questions to cegrant@uw.edu.</p>
+Please send comments and questions to crux-developers@uw.edu or
+crux-users@googlegroups.com.</p>
 
 </blockquote>
 </body>

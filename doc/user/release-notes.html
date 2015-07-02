@@ -9,12 +9,94 @@
 
 <h2>Changes since last named release</h2>
 
+<h3>Major changes</h3>
+
+<ul>
+
+<li>
+Cascade-search application added to crux.</li>
+
+<li>
+Subtract-index application added to crux.</li>
+
+<li>
+The OS X version now requires OS X Yosemite. It can be built
+from source using the Clang compilers distributed with the latest version of
+XCode.</li>
+
+<li>
+The Windows version is now 64-bit, built using Visual Studio 2013.</li>
+
+<li>
+Added the <code>peptide-centric-search</code> option to tide-search.</li>
+
+<li>
+Renamed the command <code>calibrate-scores</code>
+to <code>assign-confidence</code> and completely re-vamped its
+functionality.</li>
+
+<li>
+Updated Hardklor to version 2.19.</li>
+
+<li>
+Updated Comet to version 2015.01 rev. 2.</li>
+
+<li>
+Added the <code>pipeline</code> command.</li>
+
+</ul>
+
 <h3>Minor changes</h3>
 
 <ul>
+
 <li>
-The default value of <code>mz_bin_offset</code> has been changed to
-0.40 from 0.68.</li>
+Bug fixed in reporting flanking amino acids in <code>PostProcessProtein.cpp</code>.</li>
+
+<li>
+<code>Mix-max</code> procedure is updated to handle ties among target and decoy scores.</li>
+
+<li>
+Default value of <code>use-neutral-loss-peaks</code> changed to <code>true</code></li>
+
+<li>
+<code>Exact p-value</code> calculation takes into account the flanking and neutral loss peaks. </li>
+
+<li>
+A bug was fixed in the naming of the Percolator input (.pin) file that
+is produced by Comet when the <code>output_percolatorfile</code>
+option is turned on.  Previously, the file was named "comet.tsv"; now
+it is "comet.target.pin."</li>
+
+<li>
+<code>Assign-confidence</code> can take multiple input files.
+</li>
+
+<li>
+The <code>comet</code> command can take multiple input files.
+</li>
+
+<li>
+The <code>sidak</code> option has been added
+to <code>assign-confidence</code> to perform a Sidak adjustment.
+</li>
+
+<li>
+The <code>peptide-level</code> option has been added
+to <code>assign-confidence</code>.
+</li>
+
+<li>
+The refactored XCorr score has been re-scaled (by dividing by 20) to
+put it into a range that is comparable to that of the original XCorr score.</li>
+
+<li>
+The comet version has been updated to 2015.01 rev. 0
+</li>
+
+<li>
+The default value of <code>mz-bin-offset</code> has been changed from
+0.68 to 0.40.</li>
 
 <li>
 The <code>percolator</code> command outputs the <code>pout</code> XML format
@@ -24,6 +106,49 @@ again.</li>
 Fixed a bug in <code>tide-search</code> causing it to fail when
 <code>remove-precursor-peak</code> removed all peaks in a spectrum.</li>
 
+<li>
+The <code>max-precursor-charge</code> parameter
+for <code>tide-search</code> has been introduced.</li>
+
+<li>
+Fixed a bug in candidate peptide selection when m/z tolerance is
+used.</li>
+
+<li>
+Added the <code>read-tide-index</code> command, which reads an index produced
+by <code>tide-index</code> and prints a list of peptides it contains.</li>
+
+<li>
+Added the <code>stop-after</code> option to print-processed-spectra, which
+controls the point at which to stop preprocessing.</li>
+
+<li>
+The <code>tide-search</code> command now accepts multiple spectrum input files.
+</li>
+
+<li>
+Added the <code>use-z-line</code> option to specify whether precursor
+information is taken from the S or Z line when parsing MS2 files using
+ProteoWizard.</li>
+
+<li>
+Added missing options to the <code>percolator</code> command.</li>
+
+<li>
+The <code>tide-search</code> command may now accept a FASTA database in
+place of the index, in which case <code>tide-index</code> will be run prior to
+the search. The <code>store-index</code> option allows the generated index
+to be saved.</li>
+
+<li>
+<code>2015/06/17 &ndash;</code>
+The <code>cascade-search</code> will report the source index database of the 
+peptide for all identified PSMs.</li>
+
+<li>
+<code>2015/06/25 &ndash;</code>
+The <code>top-match</code> parameter has been removed from
+<code>cascade-search</code>.</li>
 </ul>
 
 <hr></hr>

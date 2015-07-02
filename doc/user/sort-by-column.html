@@ -1,86 +1,45 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<HTML>
-<HEAD>
-<TITLE>sort-by-column</TITLE>
-</HEAD>
-<BODY>
-<blockquote>
-<H1 ALIGN=CENTER>sort-by-column</H1>
-
-<B>Usage:</B>
-
-<blockquote>
-<code>crux sort-by-column [options] &nbsp;&lt;filename&gt; 
-  &lt;column&nbsp;name&gt;</code>
-</blockquote>
-
-<B>Description:</B>
-<p>
-Sort the rows of a tab-delimited file according to the values in a
-specified column.
-</p>
-
-<B>Input:</B>
-<UL>
-
-<li>
-&lt;filename&gt; &ndash; A tab-delimited file, with column
-headers in the first row.  Use "-" to read from standard input. 
-</li>
-	
-<li>
-&lt;column name&gt; &ndash; A column name
-</li>
-
-</UL>
-
-<B>Output:</B>
-
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>crux sort-by-column</title>
+<script type="text/javascript"
+  src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+<script type="text/javascript">
+  MathJax.Hub.Config({jax: ["input/TeX","output/HTML-CSS"], displayAlign: "left"});
+</script>
+</head>
+<body>
+<h1>sort-by-column</h1>
+<h2>Usage:</h2>
+<p><code>crux sort-by-column [options] &lt;tsv file&gt; &lt;column name&gt;</code></p>
+<h2>Description:</h2>
+<p>Sort the rows of a tab-delimited file according to the values in a specified column.</p>
+<h2>Input:</h2>
 <ul>
-The program prints to standard output a copy of the given file, with
-rows sorted according to the values in the specified column.
+  <li><code>&lt;tsv file&gt;</code> &ndash; A tab-delimited file, with column headers in the first row. Use "-" to read from standard input.</li>
+  <li><code>&lt;column name&gt;</code> &ndash; A column name.</li>
 </ul>
-
-<B>Options:</B>
-
-<UL>
-
+<h2>Output:</h2>
+<ul>
+  <li><code>stdout</code> &ndash; a copy of the given file, with rows sorted according to the values in the specified column.</li>
+</ul>
+<h2>Options:</h2>
+<ul style="list-style-type: none;">
 <li>
-<code>--delimiter &lt;char&gt;|tab</code> &ndash; Specify the input
-and output delimiter to use when processing the delimited file.
-Default=tab.</li>
-
-<li>
-<code>--header T|F</code> &ndash; Print the header line of the file,
-in addition to the rows that match.  Default=T.
+<h3>Input and output</h3>
+<ul>
+  <li><code>--delimiter &lt;string&gt;</code> &ndash; Specify the input and output delimiter to use when processing the delimited file.  The argument can be either a single character or the keyword 'tab.' Default = <code>tab</code>.</li>
+  <li><code>--header &lt;T|F&gt;</code> &ndash; Print the header line of the file, in addition to the columns that match. Default = <code>true</code>.</li>
+  <li><code>--column-type &lt;int|real|string&gt;</code> &ndash; Specifies the data type of the column, either an integer (int), a floating point number (real), or a string. Default = <code>string</code>.</li>
+  <li><code>--ascending &lt;T|F&gt;</code> &ndash; Sort in ascending (T) or descending (F) order. Default = <code>true</code>.</li>
+  <li><code>--verbosity &lt;integer&gt;</code> &ndash; Specify the verbosity of the current processes. Each level prints the following messages, including all those at lower verbosity levels: 0-fatal errors, 10-non-fatal errors, 20-warnings, 30-information on the progress of execution, 40-more progress information, 50-debug info, 60-detailed debug info. Default = <code>30</code>.</li>
+</ul>
 </li>
 
-<li>
-<code>--column-type int|real|string</code> &ndash; Specify the data
- type of the column, either an integer (<code>int</code>), 
- a floating point number (<code>real</code>), or
- a <code>string</code>. The default value is <code>string</code>.
-</li>
-
-<li>
-<code>--ascending T|F</code> &ndash; Sort the file in ascending (T) or
-descending (F) order. Default=T.</li>
-
-<LI>
-<code>--verbosity &lt;0-100&gt;</code> &ndash; Specify the verbosity of the
-current processes. Each level prints the following messages, including
-all those at lower verbosity levels: 0-fatal errors, 10-non-fatal
-errors, 20-warnings, 30-information on the progress of execution,
-40-more progress information, 50-debug info, 60-detailed debug info.
-Default = 30.</li>
-
 </ul>
-
-<hr></hr>
-
-<p>
-<a href="crux.html">Crux home</a></p>
-
-</blockquote>
+<hr>
+<a href="/">Home</a>
 </body>
 </html>

@@ -1,208 +1,72 @@
+<!DOCTYPE HTML>
 <html>
 <head>
+<meta charset="UTF-8">
 <title>crux generate-peptides</title>
-<link href="./crux.css" rel="styleSheet" type="text/css">
+<script type="text/javascript"
+  src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+<script type="text/javascript">
+  MathJax.Hub.Config({jax: ["input/TeX","output/HTML-CSS"], displayAlign: "left"});
+</script>
 </head>
 <body>
-<blockquote>
-
-<h1 align=center>crux generate-peptides</h1>
-
+<h1>generate-peptides</h1>
 <h2>Usage:</h2>
-
-<blockquote>
-<code>crux generate-peptides [options]  &lt;protein&nbsp;input&nbsp;file&gt;</code>
-</blockquote>
-
+<p><code>crux generate-peptides [options] &lt;protein fasta file&gt;</code></p>
 <h2>Description:</h2>
-
-<blockquote>
-
-<p>
-This command takes as input a protein FASTA file and outputs the
-corresponding list of peptides, as well as a matched list of decoy
-peptides and decoy proteins.  Decoys are generated either by reversing
-or shuffling the non-terminal amino acids of each peptide.  The
-program will shuffle each peptide multiple times to attempt to ensure
-that there is no overlap between the target and decoy peptides.  For
-homopolymers, this is not possible.  In this case, the occurrence of
-these target/decoy overlaps is recorded in the log file.</p>
-
-<p>
-The program considers only the standard set of 20 amino acids.
-Peptides containing non-amino acid alphanumeric characters (BJOUXZ)
-are skipped.  Non-alphanumeric characters are ignored completely.</p>
-
-</blockquote>
-
+<p>This command takes as input a protein FASTA file and outputs the corresponding list of peptides, as well as a matched list of decoy peptides and decoy proteins. Decoys are generated either by reversing or shuffling the non-terminal amino acids of each peptide. The program will shuffle each peptide multiple times to attempt to ensure that there is no overlap between the target and decoy peptides. For homopolymers, this is not possible. In this case, the occurrence of these target/decoy overlaps is recorded in the log file.</p><p>The program considers only the standard set of 20 amino acids. Peptides containing non-amino acid alphanumeric characters (BJOUXZ) are skipped. Non-alphanumeric characters are ignored completely.</p>
 <h2>Input:</h2>
-
 <ul>
-
-<li>
-&lt;protein&nbsp;input&nbsp;file&gt; &ndash; A file in FASTA format
-containing proteins.</li>
-
+  <li><code>&lt;protein fasta file&gt;</code> &ndash; The name of the file in FASTA format from which to retrieve proteins.</li>
 </ul>
-
 <h2>Output:</h2>
-
 <ul>
-<p>
-The program writes files to the folder <code>crux-output</code> by
-default.  The name of the output folder can be set by the user using
-the <code>--output-dir</code> option.  The following files will be
-created:</p>
-
-<li>
-<b>peptides.target.txt</b>: a text file containing the target
-peptides, one per line.</li>
-
-<li>
-<b>peptides.decoy.txt</b>: a text file containing the decoy peptides,
-one per line.  There is a one-to-one correspondence between targets
-and decoys.</li>
-
-<li>
-<b>proteins.decoy.txt</b>: a FASTA format file containing decoy
-proteins, in which all of the peptides have been replaced with their
-shuffled or reversed counterparts.  Note that this file will only be
-created if the enzyme specificity is "full-digest" and no missed
-cleavages are allowed.</li>
-
-<li>
-<b>generate-decoys.params.txt</b>: a file containing the name and value of all
-parameters/options for the current operation.  Not all parameters in
-the file may have been used in the operation.  The resulting file can
-be used with the <code>--parameter-file</code> option for other crux
-programs.</li>
-
-<li>
-<b>tide-search.log.txt</b>: a log file containing a copy of all messages
-that were printed to the screen during execution.</li>
-
+  <li><code>peptides.target.txt</code> &ndash; a text file containing the target peptides, one per line.</li>
+  <li><code>peptides.decoy.txt</code> &ndash; a text file containing the decoy peptides, one per line. There is a one-to-one correspondence between targets and decoys.</li>
+  <li><code>proteins.decoy.txt</code> &ndash; a FASTA format file containing decoy proteins, in which all of the peptides have been replaced with their shuffled or reversed counterparts. Note that this file will only be created if the enzyme specificity is "full-digest" and no missed cleavages are allowed.</li>
+  <li><code>generate-peptides.params.txt</code> &ndash; a file containing the name and value of all parameters/options for the current operation. Not all parameters in the file may have been used in the operation. The resulting file can be used with the --parameter-file option for other crux programs.</li>
+  <li><code>generate-peptides.log.txt</code> &ndash; a log file containing a copy of all messages that were printed to the screen during execution.</li>
 </ul>
-
 <h2>Options:</h2>
-
+<ul style="list-style-type: none;">
+<li>
+<h3>generate-peptides options</h3>
 <ul>
-
+  <li><code>--decoys &lt;none|reverse|protein-shuffle|peptide-shuffle&gt;</code> &ndash; Include a decoy version of every peptide by shuffling or reversing the target sequence. Each peptide is either reversed or shuffled, leaving the N-terminal and C-terminal amino acids in place. Note that peptides that appear multiple times in the target database are only shuffled once. In reverse mode, palindromic peptides are shuffled. Also, if a shuffled peptide produces an overlap with the target or decoy database, then the peptide is re-shuffled up to 5 times. Note that, despite this repeated shuffling, homopolymers will appear in both the target and decoy database. Default = <code>peptide-shuffle</code>.</li>
+</ul>
+</li>
+<li>
 <h3>Peptide properties</h3>
-
 <ul>
-
+  <li><code>--min-length &lt;integer&gt;</code> &ndash; The minimum length of peptides to consider. Default = <code>6</code>.</li>
+  <li><code>--max-length &lt;integer&gt;</code> &ndash; The maximum length of peptides to consider. Default = <code>50</code>.</li>
+  <li><code>--min-mass &lt;float&gt;</code> &ndash; The minimum mass (in Da) of peptides to consider. Default = <code>200</code>.</li>
+  <li><code>--max-mass &lt;float&gt;</code> &ndash; The maximum mass (in Da) of peptides to consider. Default = <code>7200</code>.</li>
+  <li><code>--isotopic-mass &lt;average|mono&gt;</code> &ndash; Specify the type of isotopic masses to use when calculating the peptide mass. Default = <code>average</code>.</li>
+  <li><code>--unique-peptides &lt;T|F&gt;</code> &ndash; Generate peptides only once, even if they appear in more than one protein. Default = <code>true</code>.</li>
+</ul>
+</li>
 <li>
-<code>--max-length &lt;integer&gt;</code> &ndash; Specify the maximum
-length of the peptides included in the index.  Default=50.</li>
-
+<h3>Enzymatic digestion</h3>
+<ul>
+  <li><code>--enzyme &lt;no-enzyme|trypsin|trypsin/p|chymotrypsin|elastase|clostripain|cyanogen-bromide|iodosobenzoate|proline-endopeptidase|staph-protease|asp-n|lys-c|lys-n|arg-c|glu-c|pepsin-a|elastase-trypsin-chymotrypsin|custom-enzyme&gt;</code> &ndash; Specify the enzyme used to digest the proteins in silico. Available enzymes (with the corresponding digestion rules indicated in parentheses) include no-enzyme ([X]|[X]), trypsin ([RK]|{P}), trypsin/p ([RK]|[]), chymotrypsin ([FWYL]|{P}), elastase ([ALIV]|{P}), clostripain ([R]|[]), cyanogen-bromide ([M]|[]), iodosobenzoate ([W]|[]), proline-endopeptidase ([P]|[]), staph-protease ([E]|[]), asp-n ([]|[D]), lys-c ([K]|{P}), lys-n ([]|[K]), arg-c ([R]|{P}), glu-c ([DE]|{P}), pepsin-a ([FL]|{P}), elastase-trypsin-chymotrypsin ([ALIVKRWFY]|{P}). Specifying --enzyme no-enzyme yields a non-enzymatic digest. <strong>Warning:</strong> the resulting index may be quite large. Default = <code>trypsin</code>.</li>
+  <li><code>--custom-enzyme &lt;string&gt;</code> &ndash; Specify rules for in silico digestion of protein sequences. Overrides the enzyme option. Two lists of residues are given enclosed in square brackets or curly braces and separated by a |. The first list contains residues required/prohibited before the cleavage site and the second list is residues after the cleavage site. If the residues are required for digestion, they are in square brackets, '[' and ']'. If the residues prevent digestion, then they are enclosed in curly braces, '{' and '}'. Use X to indicate all residues. For example, trypsin cuts after R or K but not before P which is represented as [RK]|{P}. AspN cuts after any residue but only before D which is represented as [X]|[D]. Default = <code>&lt;empty&gt;</code>.</li>
+  <li><code>--digestion &lt;full-digest|partial-digest|non-specific-digest&gt;</code> &ndash; Specify whether every peptide in the database must have two enzymatic termini (full-digest) or if peptides with only one enzymatic terminus are also included (partial-digest). Default = <code>full-digest</code>.</li>
+  <li><code>--missed-cleavages &lt;integer&gt;</code> &ndash; Maximum number of missed cleavages per peptide to allow in enzymatic digestion. Default = <code>0</code>.</li>
+</ul>
+</li>
 <li>
-<code>--min-length &lt;integer&gt;</code> &ndash; Specify the minimum
-length of the peptides included in the index.  Default=6.</li>
-
-<li>
-<code>--max-mass &lt;integer&gt;</code> &ndash; Specify the maximum
-monoisotopic mass (in Da) of the peptides included in the index.
-Default=7200.</li>
-
-<li>
-<code>--min-mass &lt;integer&gt;</code> &ndash; Specify the minimum
-monoisotopic mass (in Da) of the peptides included in the index.
-Default=200.</li>
-
-<li>
-<red><code>--monoisotopic-precursor &lt;T|F&gt;</code> &ndash; When
-computing the mass of a peptide, use monoisotopic masses rather than
-average mass values.  Default = F.</red>
+<h3>Input and output</h3>
+<ul>
+  <li><code>--output-sequence &lt;T|F&gt;</code> &ndash; Print peptide sequence. Default = <code>false</code>.</li>
+  <li><code>--verbosity &lt;integer&gt;</code> &ndash; Specify the verbosity of the current processes. Each level prints the following messages, including all those at lower verbosity levels: 0-fatal errors, 10-non-fatal errors, 20-warnings, 30-information on the progress of execution, 40-more progress information, 50-debug info, 60-detailed debug info. Default = <code>30</code>.</li>
+  <li><code>--parameter-file &lt;string&gt;</code> &ndash; A file containing parameters.  See the <a href="parameter-file.html">parameter documentation</a> page for details. Default = <code>&lt;empty&gt;</code>.</li>
+</ul>
 </li>
 
 </ul>
-
-<h3>Decoy database generation</h3>
-
-<ul>
-
-<li>
-<code>--decoys none|shuffle|reverse</code> &ndash; Include a decoy
-version of every peptide by shuffling or reversing the target
-sequence.  Each peptide is either or reversed or shuffled, leaving the
-N-terminal and C-terminal amino acids in place. Note that peptides
-that appear multiple times in the target database are only shuffled
-once.  In <code>reverse</code> mode, palindromic peptides are
-shuffled.  Also, if a shuffled peptide produces an overlap with the
-target or decoy database, then the peptide is re-shuffled up to 5
-times.  Note that, despite this repeated shuffling, homopolymers will
-appear in both the target and decoy database.  Default=shuffle.</li>
-
-</ul>
-
-<h3>Enyzmatic digestion</h3>
-
-<ul>
-
-<li>
-<code>--enzyme &lt;string&gt;</code> &ndash; Specify the enzyme used
-to digest the proteins <i>in silico</i>.  Available enzymes include trypsin,
-trypsin/p, chymotrypsin, elastase, clostripain, cyanogen-bromide, idosobenzoate,
-proline-endopeptidase, staph-protease, asp-n, lys-c, lys-n, arg-c, glu-c,
-pepsin-a, elastase-trypsin-chymotrypsin.
-Specifying <code>--enzyme no-enzyme</code> yields a non-enzymatic
-digest.  <b>Warning:</b> the resulting index may be quite large.
-Default=<code>trypsin</code>.</li>
-
-<li>
-<code>--digestion &lt;full-digest|partial-digest&gt;</code> &ndash; Specify
-whether every peptide in the database must have two enzymatic termini
-(<code>full-digest</code>) or if peptides with only one enzymatic
-terminus are also included (<code>partial-digest</code>).
-Default=<code>full-digest</code></li>
-
-<li>
-<code>--missed-cleavages &lt;integer&gt;</code> &ndash; Maximum number of missed
-cleavages per peptide to allow in enzymatic digestion.  If this option is not
-specified, then missed cleavages are not allowed.</li>
-
-</ul>
-
-
-<h3>Input and output</h3>
-
-<ul>
-
-<li>
-<code>--output-dir &lt;filename&gt;</code> &ndash; 
-The name of the directory where output files will be created.
-Default = crux-output.</li>
-
-<li>
-<code>--overwrite &lt;T|F&gt;</code> &ndash;
-Replace existing files if true (T) or fail when trying to overwrite a
-file if false (F). Default =  F.</li>
-
-<LI><code>--parameter-file &lt;filename&gt;</code> &ndash; 
-A file containing command-line or additional parameters.  See
-the <a href="parameter-file.html">parameter documentation</a> page
-for details.  Default = no parameter file.</li>
-
-<LI>
-<code>--verbosity &lt;0-100&gt;</code> &ndash; 
-Specify the verbosity of the current processes. Each level prints the
-following messages, including all those at lower verbosity levels:
-0-fatal errors, 10-non-fatal errors, 20-warnings, 30-information on
-the progress of execution, 40-more progress information, 50-debug
-info, 60-detailed debug info. Default = 30.</li>
-
-</ul>
-
-</ul>
-</ul>
-
-<hr></hr>
-
-<p>
-<a href="crux.html">Home</a></p>
-
-</blockquote>
+<hr>
+<a href="/">Home</a>
 </body>
 </html>
-
-
