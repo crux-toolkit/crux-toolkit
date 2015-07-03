@@ -49,6 +49,7 @@ class OutputFiles{
   void writeRankedProteins(const std::vector<boost::tuple<FLOAT_T, Crux::Protein*, int> >& proteins,
                            bool isParsimony);
   void writeRankedPeptides(const vector<pair<FLOAT_T, Crux::Peptide*> >& scoreToPeptide);
+  void pinSetEnabledStatus(const std::string& name, bool enabled);
   static bool isConcat();
   static void setConcat(bool enable = true);
   static bool isProteinLevelDecoys();
@@ -121,9 +122,8 @@ class OutputFiles{
 
   void printMatchesPin(
     MatchCollection* target_matches, ///< form real peptides 
-    std::vector<MatchCollection*>& decoy_maches_array, 
+    std::vector<MatchCollection*>& decoy_maches_array
                           ///< array of collection from shuffled peptides  
-    Crux::Spectrum* spectrum=NULL
   );
 
   void printMatchesMzid(

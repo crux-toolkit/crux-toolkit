@@ -15,7 +15,6 @@ using namespace std;
  * \returns a blank MatchFileReader object 
  */
 MatchFileReader::MatchFileReader() : DelimitedFileReader() {
-  ;
 }
 
 /**
@@ -74,7 +73,6 @@ void MatchFileReader::loadData(
  * parses the header and builds the internal hash table
  */
 void MatchFileReader::parseHeader() {
-  
   for (int idx=0;idx<NUMBER_MATCH_COLUMNS;idx++) {
     match_indices_[idx] = findColumn(get_column_header(idx));
   }
@@ -87,17 +85,12 @@ void MatchFileReader::parseHeader() {
 FLOAT_T MatchFileReader::getFloat(
   MATCH_COLUMNS_T col_type ///<the column type
 ) {
-
   int idx = match_indices_[col_type];
   if (idx == -1) {
-
-    carp(CARP_DEBUG,
-         "column \"%s\" not found for getFloat",
-         get_column_header(col_type));
+    carp(CARP_DEBUG, "column \"%s\" not found for getFloat", get_column_header(col_type));
     return -1;
-  } else {
-    return DelimitedFileReader::getFloat(idx);
   }
+  return DelimitedFileReader::getFloat(idx);
 }
 
 /**
@@ -106,18 +99,13 @@ FLOAT_T MatchFileReader::getFloat(
 double MatchFileReader::getDouble(
   MATCH_COLUMNS_T col_type ///<the column type
 ) {
-  carp(CARP_DETAILED_DEBUG, "reading double from column %s", 
-    get_column_header(col_type));
+  carp(CARP_DETAILED_DEBUG, "reading double from column %s", get_column_header(col_type));
   int idx = match_indices_[col_type];
   if (idx == -1) {
-
-    carp(CARP_DEBUG,
-         "column \"%s\" not found for getDouble",
-         get_column_header(col_type));
+    carp(CARP_DEBUG, "column \"%s\" not found for getDouble", get_column_header(col_type));
     return -1;
-  } else {
-    return DelimitedFileReader::getDouble(idx);
   }
+  return DelimitedFileReader::getDouble(idx);
 }
 
 
@@ -127,56 +115,38 @@ double MatchFileReader::getDouble(
 int MatchFileReader::getInteger(
   MATCH_COLUMNS_T col_type ///< the column name
 ) {
-  carp(CARP_DETAILED_DEBUG, "Reading integer from column %s",
-    get_column_header(col_type));
+  carp(CARP_DETAILED_DEBUG, "Reading integer from column %s", get_column_header(col_type));
   int idx = match_indices_[col_type];
   if (idx == -1) {
-
-    carp(CARP_DEBUG,
-         "column \"%s\" not found for getInteger",
-         get_column_header(col_type));
+    carp(CARP_DEBUG, "column \"%s\" not found for getInteger", get_column_header(col_type));
     return -1;
-  } else {
-
-    return DelimitedFileReader::getInteger(idx);
   }
+  return DelimitedFileReader::getInteger(idx);
 }
-
-
-//this is to avoid the return warning
-string BLANK_STRING="";
 
 /**
  * \returns the string value of a cell
  */
-const std::string& MatchFileReader::getString(
+string MatchFileReader::getString(
   MATCH_COLUMNS_T col_type ///<the column type
 ) {
-  carp(CARP_DEBUG, "Getting string from column %s",get_column_header(col_type));
-
+  carp(CARP_DETAILED_DEBUG, "Getting string from column %s",get_column_header(col_type));
   int idx = match_indices_[col_type];
   if (idx == -1) {
-
-    carp(CARP_DEBUG,
-         "column \"%s\" not found for getString",
-         get_column_header(col_type));
-    return BLANK_STRING;
-  } else {
-    return DelimitedFileReader::getString(idx);
+    carp(CARP_DEBUG, "column \"%s\" not found for getString", get_column_header(col_type));
+    return "";
   }
+  return DelimitedFileReader::getString(idx);
 }
 
 bool MatchFileReader::empty(
   MATCH_COLUMNS_T col_type ///<the column type
 ) {
-
   int idx = match_indices_[col_type];
   if (idx == -1) {
     return true;
-  } else {
-
-    return DelimitedFileReader::getString(idx).empty();
   }
+  return DelimitedFileReader::getString(idx).empty();
 }
 
 /**
@@ -206,14 +176,10 @@ MatchCollection* MatchFileReader::parse(
   Database* database,
   Database* decoy_database
   ) {
-
   MatchFileReader delimited_result_file(file_path);
   MatchCollection* match_collection = new MatchCollection();
   match_collection->preparePostProcess();
-
   match_collection->extendTabDelimited(database, delimited_result_file, decoy_database);
   return match_collection;
-
-
 }
 

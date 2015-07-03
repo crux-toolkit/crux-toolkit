@@ -18,29 +18,15 @@
 #include "model/Peptide.h"
 #include <limits>
 
-class PinWriter{
+class PinWriter {
  public:
   PinWriter();
   ~PinWriter();
   PinWriter(const char* output_file);
  
   void write(
-    MatchIterator* iterator,
-    Crux::Spectrum* spectrum,
-    int top_rank
-  );
- 
-  void write (
-    MatchCollection* target_collection, 
-    std::vector<MatchCollection*>& decoy_matches,
-    Crux::Spectrum* spectrum, 
-    int top_rank
-  );
- 
-  //write pin file without spectrum, when reading matches form sqt or txt file
-  void write (
     MatchCollection* target_collection,
-    std::vector<MatchCollection*>& decoy_psms,
+    const std::vector<MatchCollection*>& decoys,
     int top_rank
   );
   
@@ -49,52 +35,42 @@ class PinWriter{
   void closeFile();
   void openFile(
     const std::string& filename, 
-    const std::string& ouput_directory,
+    const std::string& output_directory,
     bool overwrite
-  ); 
+  );
+
+  void setEnabledStatus(const std::string& name, bool enabled);
 
  protected:
-  FILE* output_file_;
-  std::string decoy_file_path_;
-  std::string target_file_path_;
-  std::string output_file_path_; 
-  std::string directory_;
-  
+  std::vector< std::pair<std::string, bool> > features_;
+  std::vector<std::string> enabledFeatures_;
+  std::ofstream* out_;
   ENZYME_T enzyme_; 
-  MASS_TYPE_T isotopic_mass_;
   int precision_;
   int mass_precision_;
-  int scan_number_;
-  bool is_sp_; 
-  std::string decoy_prefix_;
-  std::set<int> charges_; 
 
-  void printFeatures(
-    Crux::Match* match, 
-    bool is_sp
-  );
-
-  void printPSM(
-    Crux::Match* match, 
-    Crux::Spectrum* spectrum
-  );
+  void printPSM(Crux::Match* match);
 
   std::string getPeptide(Crux::Peptide* peptide);
-  std::string getProteins(Crux::Peptide* peptide);
-  bool isDecoy(Crux::Match* match);
   bool isInfinite(FLOAT_T x);
+  std::string getId(Crux::Match* match, int scan_number); 
 
-  std::string getId(
-    Crux::Match* match,
-    int scan_number
-  ); 
+  struct IsFeature : public std::unary_function<const std::pair<std::string, bool>&, bool> {
+    IsFeature(const std::string& name): search_(name) {}
+    bool operator() (const std::pair<std::string, bool>& check) {
+      return search_ == check.first;
+    }
+    std::string search_;
+  };
 
-  FLOAT_T calcMassOfMods(Crux::Peptide* peptide);
- 
-  void calculateDeltaCN(map<pair<int, int>, vector<Crux::Match*> >& scan_charge_to_matches);
-  void calculateDeltaCN(vector<Crux::Match*>& collection);
-  void calculateDeltaCN(MatchCollection* target_collection, std::vector<MatchCollection*>& decoys);
-  void calculateDeltaCN(MatchCollection* matchCollection);
+  struct FeatureCopy {
+    FeatureCopy(std::vector<std::string>* target): target_(target) {}
+    void operator() (const std::pair<std::string, bool>& feature) {
+      if (feature.second) target_->push_back(feature.first);
+    }
+    std::vector<std::string>* target_;
+  };
 };
+
 #endif // PINWRITER_H
 

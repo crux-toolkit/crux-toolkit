@@ -98,13 +98,11 @@ MatchCollection::~MatchCollection() {
 MatchCollection::MatchCollection(
   bool is_decoy
   ){
-
   init();
   null_peptide_collection_ = is_decoy;
 }
 
 void MatchCollection::preparePostProcess() {
-
   // prepare the match_collection
   init();
   // set this as a post_process match collection
@@ -170,109 +168,51 @@ void MatchCollection::sort(
   SCORER_TYPE_T score_type ///< the score type to sort by -in
   )
 {
-  carp(CARP_DEBUG, "Sorting match collection.");
+  carp(CARP_DETAILED_DEBUG, "Sorting match collection.");
 
   // check if we are allowed to alter match_collection
-  if(iterator_lock_){
+  if (iterator_lock_) {
     carp(CARP_FATAL,
-         "Cannot sort a match collection when a match iterator is already"
-         " instantiated");
+         "Cannot sort a match collection when a match iterator is already instantiated");
   }
 
-  // Switch to the equivalent sort key.
-  SCORER_TYPE_T sort_by = NUMBER_SCORER_TYPES; // Initialize to nonsense.
-  int (*compare_match_function)(const void*, const void*) 
-    = (QSORT_COMPARE_METHOD)compareSp;
+  SCORER_TYPE_T sort_by = score_type;
+  bool less = false;
   switch (score_type) {
-  case SP: 
-    carp(CARP_DEBUG, "Sorting match collection by Sp.");
-    sort_by = SP;
-    compare_match_function = (QSORT_COMPARE_METHOD)compareSp;
-    break;
   case EVALUE:
-    sort_by = EVALUE;
-    compare_match_function = (QSORT_COMPARE_METHOD)compareEValue;
+  case SIDAK_ADJUSTED:
+  case TIDE_SEARCH_EXACT_PVAL:
+    less = true;
     break;
-  case XCORR:
   case DECOY_XCORR_QVALUE:
   case LOGP_WEIBULL_XCORR: 
   case DECOY_XCORR_PEPTIDE_QVALUE:
   case DECOY_XCORR_PEP:
-    carp(CARP_DEBUG, "Sorting match collection by XCorr.");
     sort_by = XCORR;
-    compare_match_function = (QSORT_COMPARE_METHOD)compareXcorr;
     break;
-  case SIDAK_ADJUSTED:
-    carp(CARP_DEBUG, "Sorting match collection by sidak corrected exact p-value.");
-    sort_by = SIDAK_ADJUSTED;
-    compare_match_function = (QSORT_COMPARE_METHOD)compareSidakPValue;
-  break;  
-  case TIDE_SEARCH_EXACT_PVAL:
-    carp(CARP_DEBUG, "Sorting match collection by exact p-value.");
-    sort_by = TIDE_SEARCH_EXACT_PVAL;
-    compare_match_function = (QSORT_COMPARE_METHOD)compareExactPValue;
-    break;  
-  case LOGP_BONF_WEIBULL_XCORR: 
   case LOGP_QVALUE_WEIBULL_XCORR:
   case LOGP_PEPTIDE_QVALUE_WEIBULL:
   case LOGP_WEIBULL_PEP:
-    carp(CARP_DEBUG, "Sorting match collection by p-value.");
     sort_by = LOGP_BONF_WEIBULL_XCORR;
-    compare_match_function = (QSORT_COMPARE_METHOD)comparePValue;
     break;
-/*
-  case PERCOLATOR_SCORE:
-    carp(CARP_INFO, "Sorting match collection by Percolator score.");
-    sort_by = PERCOLATOR_SCORE;
-    compare_match_function = (QSORT_COMPARE_METHOD)comparePercolatorScore;
-    break;
-*/
   case PERCOLATOR_QVALUE:
   case PERCOLATOR_PEPTIDE_QVALUE:
   case PERCOLATOR_PEP:
-    carp(CARP_DEBUG, "Sorting match collection by Percolator q-value.");
+    less = true;
     sort_by = PERCOLATOR_QVALUE;
-    compare_match_function = (QSORT_COMPARE_METHOD)comparePercolatorQValue;
     break;
-/*
-  case PERCOLATOR_SCAN:
-    carp(CARP_INFO, "Sorting match collection by Percolator scan.");
-    sort_by = PERCOLATOR_SCAN;
-    compare_match_function = (QSORT_COMPARE_METHOD)compareSpectrum;
-    break;
-*/
-  case QRANKER_SCORE:
-    carp(CARP_DEBUG, "Sorting match collection by Q-ranker score.");
-    sort_by = QRANKER_SCORE;
-    compare_match_function = (QSORT_COMPARE_METHOD)compareQRankerScore;
-    break;
-
   case QRANKER_QVALUE:
   case QRANKER_PEPTIDE_QVALUE:
   case QRANKER_PEP:
-    carp(CARP_DEBUG, "Sorting match collection by Q-ranker q-value.");
-    compare_match_function = (QSORT_COMPARE_METHOD)compareQRankerQValue;
+    less = true;
     sort_by = QRANKER_QVALUE;
     break;
-
-  case BARISTA_SCORE:
-    carp(CARP_DEBUG, "Sorting match collection by barista score.");
-    sort_by = BARISTA_SCORE;
-    compare_match_function = (QSORT_COMPARE_METHOD)compareBaristaScore;
-    break;
-
   case BARISTA_QVALUE:
   case BARISTA_PEPTIDE_QVALUE:
   case BARISTA_PEP:
-    carp(CARP_DEBUG, "Sorting match collection by barista q-value.");
-    compare_match_function = (QSORT_COMPARE_METHOD)compareBaristaQValue;
+    less = true;
     sort_by = BARISTA_QVALUE;
     break;
-
-  // Should never reach this point.
-  case NUMBER_SCORER_TYPES:
-  case INVALID_SCORER_TYPE:
-    carp(CARP_FATAL, "Something is terribly wrong in the sorting code!");
   }
 
   // Don't sort if it's already sorted.
@@ -280,101 +220,15 @@ void MatchCollection::sort(
     return;
   }
 
-  // Do the sort.
-  qsortMatch(match_, compare_match_function);
-  last_sorted_ = sort_by;
-}
-
-/**
- * \brief Sort a match_collection by the given score type, grouping
- * matches by spectrum (if multiple spectra are present).
- */
-void MatchCollection::spectrumSort(
-  SCORER_TYPE_T score_type ///< the score type to sort by -in
-  ){
-
-  // check if we are allowed to alter match_collection
-  if(iterator_lock_){
-    carp(CARP_FATAL,
-         "Cannot alter match_collection when a match iterator is already"
-         " instantiated");
+  if (!scored_type_[sort_by]) {
+    carp(CARP_WARNING, "Cannot sort MatchCollection (does not have %d scores)", sort_by);
+    return;
   }
 
-  switch(score_type){
-  case SP: 
-    qsortMatch(match_, (QSORT_COMPARE_METHOD)compareSpectrumSp);
-    last_sorted_ = SP;
-    break;
-  case TIDE_SEARCH_EXACT_PVAL:
-    qsortMatch(match_, (QSORT_COMPARE_METHOD)compareExactPValue);
-    last_sorted_ = TIDE_SEARCH_EXACT_PVAL;    
-    break;
-  case XCORR:
-  case LOGP_WEIBULL_XCORR: 
-  case LOGP_BONF_WEIBULL_XCORR: 
-  case LOGP_QVALUE_WEIBULL_XCORR: 
-  case LOGP_PEPTIDE_QVALUE_WEIBULL:
-  case LOGP_WEIBULL_PEP:
-  case DECOY_XCORR_QVALUE:
-  case DECOY_XCORR_PEPTIDE_QVALUE:
-  case DECOY_XCORR_PEP:
-    /* If we are sorting on a per-spectrum basis, then the xcorr is
-       good enough, even in the presence of p-values. */
-    qsortMatch(match_, (QSORT_COMPARE_METHOD)compareSpectrumXcorr);
-    last_sorted_ = XCORR;
-    break;
-
-  case PERCOLATOR_SCORE:
-    qsortMatch(match_, (QSORT_COMPARE_METHOD)compareSpectrumPercolatorScore);
-    last_sorted_ = PERCOLATOR_SCORE;
-    break;
-
-  case PERCOLATOR_QVALUE:
-  case PERCOLATOR_PEPTIDE_QVALUE:
-  case PERCOLATOR_PEP:
-    qsortMatch(match_, (QSORT_COMPARE_METHOD)compareSpectrumPercolatorQValue);
-    last_sorted_ = PERCOLATOR_QVALUE;
-    break;
-/*
-  case PERCOLATOR_SCAN: 
-    qsortMatch(
-      match_,
-      match_total_,
-      (QSORT_COMPARE_METHOD)compareSpectrumScan
-    );
-    last_sorted_=PERCOLATOR_SCAN;
-    break; 
-*/
-  case QRANKER_SCORE:
-    qsortMatch(match_, (QSORT_COMPARE_METHOD)compareSpectrumQRankerScore);
-    last_sorted_ = QRANKER_SCORE;
-    break;
-
-  case QRANKER_QVALUE:
-  case QRANKER_PEPTIDE_QVALUE:
-  case QRANKER_PEP:
-    qsortMatch(match_, (QSORT_COMPARE_METHOD)compareSpectrumQRankerQValue);
-    last_sorted_ = QRANKER_QVALUE;
-    break;
-
-  case BARISTA_SCORE:
-    qsortMatch(match_, (QSORT_COMPARE_METHOD)compareSpectrumBaristaScore);
-    last_sorted_ = BARISTA_SCORE;
-    break;
-
-  case BARISTA_QVALUE:
-  case BARISTA_PEPTIDE_QVALUE:
-  case BARISTA_PEP:
-    qsortMatch(match_, (QSORT_COMPARE_METHOD)compareSpectrumBaristaQValue);
-    last_sorted_ = BARISTA_QVALUE;
-    break;
-
-
-  // Should never reach this point.
-  case NUMBER_SCORER_TYPES:
-  case INVALID_SCORER_TYPE:
-    carp(CARP_FATAL, "Something is terribly wrong in the sorting code!");
- }
+  // Do the sort.
+  Match::ScoreComparer comparer(sort_by, less);
+  std::sort(match_.begin(), match_.end(), comparer);
+  last_sorted_ = sort_by;
 }
 
 /**
@@ -393,9 +247,7 @@ bool MatchCollection::populateMatchRank(
   carp(CARP_DETAILED_DEBUG, "Ranking matches by %i.", score_type);
   carp(CARP_DETAILED_DEBUG, "Collection currently ranked by %d", last_sorted_);
   // check if the match collection is in the correct sorted order
-  if(last_sorted_ != score_type){
-    // sort match collection by score type
-    carp(CARP_DETAILED_DEBUG, "Sorting by score_type %i", score_type);
+  if (last_sorted_ != score_type) {
     sort(score_type);
   }
 
@@ -499,7 +351,6 @@ int MatchCollection::setFilePath(
     }
     return file_idx;
   } else {
-    carp(CARP_WARNING, "MatchCollection::setFilePath(): No matches in %s",file_path.c_str());
     return -1;
   }
 }
@@ -602,23 +453,7 @@ void MatchCollection::printXmlHeader(
   ENZYME_T enzyme = get_enzyme_type_parameter("enzyme");
   char* enz_str = enzyme_type_to_string(enzyme);
   string database = get_string_parameter("protein-database");
-  char* absolute_msms_path;
-  if (ms2file.empty()) {
-    absolute_msms_path = (char*) malloc(sizeof(char)*3);
-    strcpy(absolute_msms_path, "NA");
-  } else {
-#if DARWIN
-    char path_buffer[PATH_MAX];
-    absolute_msms_path =  realpath(ms2file.c_str(), path_buffer);
-#else
-    absolute_msms_path =  realpath(ms2file.c_str(), NULL);
-#endif
-  }
-  // Removes the extension from ms2 file path
-  char* extension = strstr(absolute_msms_path, ".ms2");
-  if (extension != NULL) (*extension) = '\0';
-  
-  
+
   MASS_TYPE_T isotopic_mass_type = get_mass_type_parameter("isotopic-mass");
   MASS_TYPE_T fragment_mass_type = get_mass_type_parameter("fragment-mass");
 
@@ -680,7 +515,7 @@ void MatchCollection::printXmlHeader(
   fprintf(output, "<msms_run_summary base_name=\"%s\" msManufacturer=\"%s\" "
           "msModel=\"%s\" msIonization=\"%s\" msAnalyzer=\"%s\" "
           "msDectector=\"%s\" raw_data_type=\"%s\" raw_data=\"%s\" >\n",
-          absolute_msms_path,
+          "NA", // TODO, dummy value
           "NA", // TODO, dummy value
           "NA", // TODO, dummy value
           "NA", // TODO, dummy value
@@ -696,7 +531,7 @@ void MatchCollection::printXmlHeader(
   fprintf(output, "<search_summary base_name=\"%s\" search_engine=\"%s\" "
           "precursor_mass_type=\"%s\" fragment_mass_type=\"%s\" "
           "out_data_type=\"%s\" out_data=\"%s\" search_id=\"%i\" >\n",
-          absolute_msms_path,
+          "NA", // TODO, dummy value
           "Crux",
           isotopic_mass, // isotopic mass type is precursor mass type?
           fragment_mass,
@@ -718,7 +553,6 @@ void MatchCollection::printXmlHeader(
           );
 
 #ifndef DARWIN
-  free(absolute_msms_path);
   free(absolute_database_path);
 #endif
   free(enz_str);
@@ -1122,8 +956,6 @@ bool MatchCollection::printXml(
   }
   scores_computed[TIDE_SEARCH_EXACT_PVAL] = exact_pval_search_;
   scores_computed[TIDE_SEARCH_REFACTORED_XCORR] = exact_pval_search_;
-  scored_type_[TIDE_SEARCH_EXACT_PVAL] = exact_pval_search_;
-  scored_type_[TIDE_SEARCH_REFACTORED_XCORR] = exact_pval_search_;
   scores_computed[main_score] = !exact_pval_search_;
 
   double* scores = new double[NUMBER_SCORER_TYPES];
@@ -1132,8 +964,7 @@ bool MatchCollection::printXml(
   Match* match = NULL;
   // create match iterator
   // true: return match in sorted order of main_score type
-  MatchIterator* match_iterator = 
-    new MatchIterator(this, main_score, true);
+  MatchIterator* match_iterator = new MatchIterator(this, main_score, true);
   // iterate over matches
   while(match_iterator->hasNext()){
     match = match_iterator->next();
@@ -1199,9 +1030,9 @@ bool MatchCollection::printXml(
        count, match_.size());
 
   delete match_iterator;
-  delete scores_computed;
-  delete scores;
-  delete ranks;
+  delete [] scores_computed;
+  delete [] scores;
+  delete [] ranks;
 
   return true;
 }
@@ -1512,10 +1343,6 @@ bool MatchCollection::extendTabDelimited(
   Database* decoy_database ///< the database holding the decoy peptides -in
   )
 {
-  Match* match = NULL;
-
-  FLOAT_T delta_cn = 0;
-  FLOAT_T ln_delta_cn = 0;
   FLOAT_T ln_experiment_size = 0;
 
   // only for post_process_collections
@@ -1530,13 +1357,6 @@ bool MatchCollection::extendTabDelimited(
     zstate_.setNeutralMass(
       result_file.getFloat(SPECTRUM_NEUTRAL_MASS_COL),
       result_file.getInteger(CHARGE_COL));
-    scored_type_[DELTA_CN] = scored_type_[DELTA_CN] || !result_file.empty(DELTA_CN_COL);
-    delta_cn = result_file.getFloat(DELTA_CN_COL);
-    if (delta_cn <= 0.0) {
-      ln_delta_cn = 0;
-    } else {
-      ln_delta_cn = logf(delta_cn);
-    }
     if (!result_file.empty(DISTINCT_MATCHES_SPECTRUM_COL)) {
       has_distinct_matches_ = true;
       ln_experiment_size = log(result_file.getFloat(DISTINCT_MATCHES_SPECTRUM_COL));
@@ -1547,16 +1367,13 @@ bool MatchCollection::extendTabDelimited(
     }
 
     //TODO: Parse all boolean indicators for scores
+    scored_type_[DELTA_CN] = !result_file.empty(DELTA_CN_COL);
+    scored_type_[DELTA_LCN] = !result_file.empty(DELTA_LCN_COL);
     scored_type_[SP] = !result_file.empty(SP_SCORE_COL);
-
     scored_type_[XCORR] = !result_file.empty(XCORR_SCORE_COL);
-
     scored_type_[TIDE_SEARCH_EXACT_PVAL] = !result_file.empty(EXACT_PVALUE_COL);
-
     scored_type_[TIDE_SEARCH_REFACTORED_XCORR] = !result_file.empty(REFACTORED_SCORE_COL);
-    
     scored_type_[EVALUE] = !result_file.empty(EVALUE_COL);
-    
     scored_type_[DECOY_XCORR_QVALUE] = !result_file.empty(DECOY_XCORR_QVALUE_COL);
 
 /* TODO
@@ -1565,34 +1382,19 @@ bool MatchCollection::extendTabDelimited(
       result_file.getString("logp weibull xcorr") != "";
 */
 
-    scored_type_[LOGP_BONF_WEIBULL_XCORR] = 
-      !result_file.empty(PVALUE_COL);
-
-    scored_type_[PERCOLATOR_QVALUE] = 
-      !result_file.empty(PERCOLATOR_QVALUE_COL);
-
-    scored_type_[PERCOLATOR_SCORE] = 
-      !result_file.empty(PERCOLATOR_SCORE_COL);
-
-    scored_type_[LOGP_QVALUE_WEIBULL_XCORR] = 
-      !result_file.empty(WEIBULL_QVALUE_COL);
-  
-    scored_type_[QRANKER_SCORE] = 
-      !result_file.empty(QRANKER_SCORE_COL);
-    
-    scored_type_[QRANKER_QVALUE] = 
-      !result_file.empty(QRANKER_QVALUE_COL);
-
-    scored_type_[BARISTA_SCORE] =
-      !result_file.empty(BARISTA_SCORE_COL);
-
-    scored_type_[BARISTA_QVALUE] =
-      !result_file.empty(BARISTA_QVALUE_COL);
+    scored_type_[LOGP_BONF_WEIBULL_XCORR] = !result_file.empty(PVALUE_COL);
+    scored_type_[PERCOLATOR_QVALUE] = !result_file.empty(PERCOLATOR_QVALUE_COL);
+    scored_type_[PERCOLATOR_SCORE] = !result_file.empty(PERCOLATOR_SCORE_COL);
+    scored_type_[LOGP_QVALUE_WEIBULL_XCORR] = !result_file.empty(WEIBULL_QVALUE_COL);
+    scored_type_[QRANKER_SCORE] = !result_file.empty(QRANKER_SCORE_COL);
+    scored_type_[QRANKER_QVALUE] = !result_file.empty(QRANKER_QVALUE_COL);
+    scored_type_[BARISTA_SCORE] = !result_file.empty(BARISTA_SCORE_COL);
+    scored_type_[BARISTA_QVALUE] = !result_file.empty(BARISTA_QVALUE_COL);
 
     post_scored_type_set_ = true;
 
     // parse match object
-    match = Match::parseTabDelimited(result_file, database, decoy_database);
+    Match* match = Match::parseTabDelimited(result_file, database, decoy_database);
     if (match == NULL) {
       carp(CARP_ERROR, "Failed to parse tab-delimited PSM match");
       return false;
@@ -1600,8 +1402,6 @@ bool MatchCollection::extendTabDelimited(
 
     //set all spectrum specific features to parsed match
     match->setZState(zstate_);
-    match->setScore(DELTA_CN, delta_cn);
-    match->setScore(DELTA_LCN, ln_delta_cn);
     match->setLnExperimentSize(ln_experiment_size);    
     //add match to match collection.
     addMatchToPostMatchCollection(match);
@@ -1670,55 +1470,6 @@ bool MatchCollection::addMatchToPostMatchCollection(
 }
 
 /**
- * Fill the match objects score with the given the array, and populate
- * the corresponding ranks.  The match object order must not have been
- * altered since scoring.  The result array size must equal the number
- * of matches in the given match collection.  After the function
- * completes, the match collection is sorted by the specified score,
- * unless preserve_order is set to true.
- */
-void MatchCollection::fillResult(
-  double* results,           ///< array of scores -in
-  SCORER_TYPE_T score_type,  ///< The score type of the results to fill -in
-  bool preserve_order   ///< preserve match order?
-  )
-{
-  Match** match_array = NULL;
-  SCORER_TYPE_T score_type_old = last_sorted_;
-
-  // iterate over match object in collection, set scores
-  int match_idx = 0;
-  for(; match_idx < match_.size(); ++match_idx){
-    Match* match = match_[match_idx];
-    match->setScore(score_type, results[match_idx]);    
-  }
-  
-  // if need to preserve order store a copy of array in original order 
-  if(preserve_order){
-    match_array = (Match**)mycalloc(match_.size(), sizeof(Match*));
-    for(match_idx=0; match_idx < match_.size(); ++match_idx){
-      match_array[match_idx] = match_[match_idx];
-    }
-  }
-
-  // populate the rank of match_collection
-  if(!populateMatchRank(score_type)){
-    carp(CARP_FATAL, "failed to populate match rank in match_collection");
-  }
-  
-  // restore match order.
-  if(preserve_order){
-    for(match_idx=0; match_idx < match_.size(); ++match_idx){
-      match_[match_idx] = match_array[match_idx];
-    }
-    last_sorted_ = score_type_old;
-    free(match_array);
-  }
-
-  scored_type_[score_type] = true;
-}
-
-/**
  * \brief Calculate the delta_cn of each match and populate the field.
  * 
  * Delta_cn is the normalized difference between xcorrs of different ranks.
@@ -1726,53 +1477,77 @@ void MatchCollection::fillResult(
  * Sorts match_collection by xcorr, if necessary.
  * 
  */
-bool MatchCollection::calculateDeltaCn(){
-
-  if( scored_type_[XCORR] == false ){
-    carp(CARP_WARNING, 
-      "Delta_cn not calculated because match collection not scored for xcorr");
+bool MatchCollection::calculateDeltaCn() {
+  if (scored_type_[DELTA_CN] && scored_type_[DELTA_LCN]) {
     return false;
   }
 
-  // sort, if not already
-  // N.B. Can't use sort_match_collection because iterator already exists!
-  if( last_sorted_ != XCORR ){
-    qsortMatch(match_, (QSORT_COMPARE_METHOD)compareXcorr);
-    last_sorted_ = XCORR;
+  SCORER_TYPE_T type = XCORR;
+  if (!scored_type_[type]) {
+    type = TIDE_SEARCH_EXACT_PVAL;
+    if (!scored_type_[type]) {
+      carp(CARP_WARNING,
+           "Delta_cn not calculated because match collection not scored for xcorr");
+      return false;
+    }
   }
 
-  if (match_.size() < 2) {
-    return true;
+  vector<FLOAT_T> scores;
+  for (vector<Match*>::iterator i = match_.begin(); i != match_.end(); i++) {
+    scores.push_back((*i)->getScore(type));
+  }
+  vector< pair<FLOAT_T, FLOAT_T> > deltaCns = calculateDeltaCns(scores, type);
+
+  for (size_t i = 0; i < deltaCns.size(); i++) {
+    match_[i]->setScore(DELTA_CN, deltaCns[i].first);
+    match_[i]->setScore(DELTA_LCN, deltaCns[i].second);
   }
 
-  FLOAT_T last_xcorr=0.0;
-  FLOAT_T delta_cn = 0.0;
-  FLOAT_T delta_lcn = 0.0;
-  FLOAT_T next_xcorr=0.0;
-  FLOAT_T current_xcorr = 0 ; 
-  last_xcorr = match_.back()->getScore(XCORR);
-  for (size_t idx = 0 ;idx < match_.size();idx++) { 
-    current_xcorr = match_[idx]->getScore(XCORR);
-    if (idx+1<=match_.size()-1)
-      next_xcorr=match_[idx+1]->getScore(XCORR);
-    delta_cn = (current_xcorr - next_xcorr) / max(current_xcorr, (FLOAT_T)1.0);
-    delta_lcn = (current_xcorr - last_xcorr) / max(current_xcorr, (FLOAT_T)1.0);
-  
-    if(fabs(delta_cn)== numeric_limits<FLOAT_T>::infinity()){
-      carp(CARP_DEBUG, "delta_cn was %f and set to zero. XCorr score is %f", delta_cn, current_xcorr);
-      delta_cn = 0.0;
-    }   
-    if(fabs(delta_lcn) == numeric_limits<FLOAT_T>::infinity()){
-      carp(CARP_DEBUG, "delta_lcn was %f and set to zero. XCorr score is %f", delta_lcn, current_xcorr);
-      delta_lcn = 0.0;
-    }   
-    match_[idx]->setScore(DELTA_CN, delta_cn);
-    match_[idx]->setScore(DELTA_LCN, delta_lcn);
-  }   
-
+  scored_type_[DELTA_CN] = scored_type_[DELTA_LCN] = true;
   return true;
 }
 
+vector< pair<FLOAT_T, FLOAT_T> > MatchCollection::calculateDeltaCns(
+  vector<FLOAT_T> scores,
+  SCORER_TYPE_T type
+) {
+  vector< pair<FLOAT_T, FLOAT_T> > deltaCns(scores.size(), make_pair(0, 0));
+  if (scores.empty()) {
+    return deltaCns;
+  }
+
+  map< const FLOAT_T*, pair<FLOAT_T, FLOAT_T>* > scorePtrs;
+  for (size_t i = 0; i < scores.size(); i++) {
+    scorePtrs[&scores[i]] = &deltaCns[i];
+  }
+
+  if (type != TIDE_SEARCH_EXACT_PVAL) {
+    // Higher is better - sort descending
+    std::sort(scores.begin(), scores.end(), std::greater<FLOAT_T>());
+  } else {
+    // Lower is better - sort ascending
+    std::sort(scores.begin(), scores.end(), std::less<FLOAT_T>());
+  }
+
+  FLOAT_T last = scores.back();
+  for (vector<FLOAT_T>::const_iterator i = scores.begin(); i != scores.end(); i++) {
+    vector<FLOAT_T>::const_iterator next = (i != scores.end() - 1) ? i + 1 : i;
+    FLOAT_T deltaCn, deltaLCn;
+    switch (type) {
+      default:
+        deltaCn = (*i - *next) / max(*i, (FLOAT_T)1.0);
+        deltaLCn = (*i - last) / max(*i, (FLOAT_T)1.0);
+        break;
+      case TIDE_SEARCH_EXACT_PVAL:
+        deltaCn = -log10(*i) + log10(*next);
+        deltaLCn = -log10(*i) + log10(last);
+        break;
+    }
+    scorePtrs[&*i]->first = deltaCn;
+    scorePtrs[&*i]->second = deltaLCn;
+  }
+  return deltaCns;
+}
 
 /**********************************
  * match_collection get, set methods
@@ -1808,12 +1583,6 @@ bool MatchCollection::setZState(
         "once it has been set.");
     return false;
   }
-}
-
-// cheater functions for testing
-
-void MatchCollection::forceScoredBy(SCORER_TYPE_T type){
-  scored_type_[type] = true;
 }
 
 /**

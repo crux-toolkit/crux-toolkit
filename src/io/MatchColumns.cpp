@@ -16,6 +16,7 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "spectrum neutral mass",
   "peptide mass",
   "delta_cn",
+  "delta_lcn",
   "sp score",
   "sp rank",
   "xcorr score",
@@ -111,3 +112,4 @@ int get_column_idx(
   }
   return INVALID_COL;
 }
+

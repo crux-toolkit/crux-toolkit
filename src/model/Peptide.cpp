@@ -10,6 +10,7 @@
 #include <set>
 #include <vector>
 #include "io/MatchFileReader.h"
+#include "util/StringUtils.h"
 
 using namespace std;
 using namespace Crux;
@@ -2107,15 +2108,12 @@ string Peptide::getProteinIdsLocations() {
  * \brief Builds a comma delimited string listing the protein ids
  * for the sources of a peptide.
  */
-string Peptide::getProteinIds() {
-  stringstream ids;
-  for (PeptideSrcIterator i = getPeptideSrcBegin(); i != getPeptideSrcEnd(); ++i) {
-    if (i != getPeptideSrcBegin()) {
-      ids << ',';
-    }
-    ids << (*i)->getParentProtein()->getIdPointer();
+vector<string> Peptide::getProteinIds() {
+  vector<string> ids;
+  for (PeptideSrcIterator iter = getPeptideSrcBegin(); iter != getPeptideSrcEnd(); ++iter) {
+    ids.push_back((*iter)->getParentProtein()->getIdPointer());
   }
-  return ids.str();
+  return ids;
 }
 
 /**

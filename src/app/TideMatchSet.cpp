@@ -68,7 +68,7 @@ void TideMatchSet::report(
   if (nHit < top_matches) {
       top_matches = nHit;
   }
-  if (exact_pval_search_ == true) {
+  if (exact_pval_search_) {
     sort(peptide_->spectrum_matches_array.begin(),
          peptide_->spectrum_matches_array.end(),
          Peptide::spectrum_matches::compPV);
@@ -303,8 +303,8 @@ void TideMatchSet::report(
   gatherTargetsAndDecoys(peptides, proteins, targets, decoys, top_n, highScoreBest);
 
   map<Arr::iterator, FLOAT_T> delta_cn_map;
-  computeDeltaCns(targets, &delta_cn_map, top_n);
-  computeDeltaCns(decoys, &delta_cn_map, top_n);
+  computeDeltaCns(targets, &delta_cn_map);
+  computeDeltaCns(decoys, &delta_cn_map);
 
   map<Arr::iterator, pair<const SpScorer::SpScoreData, int> > sp_map;
   if (compute_sp) {
@@ -507,7 +507,9 @@ void TideMatchSet::report(
   if (!OutputFiles::isConcat()) {
     decoy_vector.push_back(crux_decoy_collection);
   }
-  output_files->writeMatches(crux_collection, decoy_vector, XCORR, &crux_spectrum);
+  SCORER_TYPE_T scoreType =
+    !Params::GetBool("exact-p-value") ? XCORR : TIDE_SEARCH_EXACT_PVAL;
+  output_files->writeMatches(crux_collection, decoy_vector, scoreType, &crux_spectrum);
 
   // Clean up
   crux_collection->~MatchCollection();
@@ -536,19 +538,15 @@ void TideMatchSet::addCruxMatches(
   SpScorer* sp_scorer,
   FLOAT_T* lowest_sp_out
 ) {
+  FLOAT_T lnNumSp = OutputFiles::isConcat
+    ? log((FLOAT_T) (peptides->ActiveTargets() + peptides->ActiveDecoys()))
+    : log((FLOAT_T) (!decoys ? peptides->ActiveTargets() : peptides->ActiveDecoys()));
 
-  FLOAT_T lnNumSp;
-
-  if (OutputFiles::isConcat) {
-    lnNumSp = log((FLOAT_T) (peptides->ActiveTargets() + peptides->ActiveDecoys()));
-  } else {
-    lnNumSp = log((FLOAT_T) (!decoys ? peptides->ActiveTargets()
-                                : peptides->ActiveDecoys()));
-  }
+  bool exactPValue = Params::GetBool("exact-p-value");
   
   // Create a Crux match for each match
   vector<Arr::iterator>::const_iterator endIter = 
-    (vec.size() >= top_n) ? vec.begin() + top_n : vec.end();
+    (vec.size() >= top_n + 1) ? vec.begin() + top_n + 1 : vec.end();
   for (vector<Arr::iterator>::const_iterator i = vec.begin(); i != endIter; ++i) {
     const Peptide* peptide = peptides->GetPeptide((*i)->second);
 
@@ -561,9 +559,12 @@ void TideMatchSet::addCruxMatches(
     Crux::Match::freeMatch(match); // so match gets deleted when collection does
 
     // Set Xcorr score in match
-    match->setScore(XCORR, (*i)->first.first);
-    match->setScore(TIDE_SEARCH_EXACT_PVAL, (*i)->first.first);
-    match->setScore(TIDE_SEARCH_REFACTORED_XCORR, (*i)->first.second);
+    if (!exactPValue) {
+      match->setScore(XCORR, (*i)->first.first);
+    } else {
+      match->setScore(TIDE_SEARCH_EXACT_PVAL, (*i)->first.first);
+      match->setScore(TIDE_SEARCH_REFACTORED_XCORR, (*i)->first.second);
+    }
 
     // Set lnNumSp in match
     match->setLnExperimentSize(lnNumSp);
@@ -593,11 +594,18 @@ void TideMatchSet::addCruxMatches(
   } else {
     match_collection->setExperimentSize(peptides->ActiveTargets() + peptides->ActiveDecoys());
   }
-  match_collection->populateMatchRank(XCORR);
-  match_collection->forceScoredBy(XCORR);
   if (sp_scorer) {
+    match_collection->setScoredType(SP, true);
     match_collection->populateMatchRank(SP);
-    match_collection->forceScoredBy(SP);
+  }
+  if (!exactPValue) {
+    match_collection->setScoredType(XCORR, true);
+    match_collection->populateMatchRank(XCORR);
+  } else {
+    match_collection->setScoredType(TIDE_SEARCH_REFACTORED_XCORR, true);
+    match_collection->populateMatchRank(TIDE_SEARCH_REFACTORED_XCORR);
+    match_collection->setScoredType(TIDE_SEARCH_EXACT_PVAL, true);
+    match_collection->populateMatchRank(TIDE_SEARCH_EXACT_PVAL);
   }
 }
 
@@ -749,8 +757,7 @@ Crux::Match* TideMatchSet::getCruxMatch(
   free(mod_seq);
 
   // Create match and return
-  Crux::Match* match = new Crux::Match(
-    crux_peptide, crux_spectrum, crux_z_state, false);
+  Crux::Match* match = new Crux::Match(crux_peptide, crux_spectrum, crux_z_state, false);
 
   return match;
 }
@@ -820,8 +827,7 @@ string TideMatchSet::getProteinName(
   int pos
 ) {
   stringstream proteinNameStream;
-  proteinNameStream << protein.name()
-                    << '(' << pos + 1 << ')';
+  proteinNameStream << protein.name() << '(' << pos + 1 << ')';
   return proteinNameStream.str();
 }
 
@@ -845,17 +851,16 @@ void TideMatchSet::getFlankingAAs(
 
 void TideMatchSet::computeDeltaCns(
   const vector<Arr::iterator>& vec, // xcorr*100000000.0, high to low
-  map<Arr::iterator, FLOAT_T>* delta_cn_map, // map to add delta cn scores to
-  int top_n // number of top matches we will be reporting
+  map<Arr::iterator, FLOAT_T>* delta_cn_map // map to add delta cn scores to
 ) {
-  FLOAT_T lastXcorr = BILLION;
-  vector<Arr::iterator>::const_reverse_iterator i = (vec.size() > top_n) ?
-    vec.rend() - (top_n + 1) : vec.rbegin();
-  for (; i != vec.rend(); ++i) {
-    const FLOAT_T xcorr = (*i)->first.first;
-    delta_cn_map->insert(make_pair(*i, (lastXcorr == BILLION) ?
-      0 : (xcorr - lastXcorr) / max(xcorr, FLOAT_T(1))));
-    lastXcorr = xcorr;
+  vector<FLOAT_T> scores;
+  for (vector<Arr::iterator>::const_iterator i = vec.begin(); i != vec.end(); i++) {
+    scores.push_back((*i)->first.first);
+  }
+  vector< pair<FLOAT_T, FLOAT_T> > deltaCns = MatchCollection::calculateDeltaCns(
+    scores, !Params::GetBool("exact-p-value") ? XCORR : TIDE_SEARCH_EXACT_PVAL);
+  for (int i = 0; i < vec.size(); i++) {
+    delta_cn_map->insert(make_pair(vec[i], deltaCns[i].first));
   }
 }
 

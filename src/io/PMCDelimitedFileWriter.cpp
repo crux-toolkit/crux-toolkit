@@ -1,5 +1,6 @@
 #include "PMCDelimitedFileWriter.h"
 #include "util/FileUtils.h"
+#include "util/StringUtils.h"
 
 using namespace Crux;
 using namespace boost;
@@ -478,7 +479,7 @@ void PMCDelimitedFileWriter::writePSMs(
     setAndFree(SEQUENCE_COL, seq_with_masses);
 
     setColumnCurrentRow(CLEAVAGE_TYPE_COL, cleavage);
-    setColumnCurrentRow(PROTEIN_ID_COL, peptide->getProteinIds());
+    setColumnCurrentRow(PROTEIN_ID_COL, StringUtils::Join(peptide->getProteinIds(), ','));
     setAndFree(FLANKING_AA_COL, peptide->getFlankingAAs());
 
     writeRow();

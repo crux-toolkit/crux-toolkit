@@ -6,13 +6,6 @@
  */
 #include "MatchIterator.h"
 
-
-/**
- * match_iterator routines!
- *
- */
-
-
 /**
  * Initializes a match iterator object.
  */
@@ -100,31 +93,6 @@ MatchIterator::MatchIterator(
 }
 
 /**
- * \brief Create a match iterator to return matches from a collection
- * grouped by spectrum and sorted by given score type.
- *
- * \returns A heap-allocated match iterator.
- */
-/*
-MatchIterator::MatchIterator(
-  MatchCollection* match_collection,  ///< for iteration -in
-  SCORER_TYPE_T scorer ///< the score type to sort by -in
-){
-
-  init();
-
-  // set up fields
-  match_collection_ = match_collection;
-  match_mode_ = scorer;
-  match_idx_ = 0;
-  match_total_ = match_collection->match_total_;
-
-  match_collection->spectrumSort(scorer);
-
-  match_collection->iterator_lock_ = true;
-}
-*/
-/**
  * free the memory allocated iterator
  */
 MatchIterator::~MatchIterator()
@@ -134,15 +102,13 @@ MatchIterator::~MatchIterator()
   }
 }
 
-
-
 /**
  * Does the match_iterator have another match struct to return?
  *\returns true, if match iter has a next match, else False
  */
 bool MatchIterator::hasNext()
 {
-  return (match_idx_ < match_total_);
+  return match_idx_ < match_total_;
 }
 
 /**
