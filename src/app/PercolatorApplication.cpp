@@ -6,7 +6,6 @@
 #include "PercolatorApplication.h"
 #include "PercolatorAdapter.h"
 #include "Caller.h"
-#include "parameter.h"
 #include "util/Params.h"
 #include <string>
 #include <algorithm>
@@ -29,7 +28,6 @@ using namespace std;
  * \returns a blank PercolatorApplication object
  */
 PercolatorApplication::PercolatorApplication() {
-
 }
 
 /**
@@ -43,13 +41,15 @@ PercolatorApplication::~PercolatorApplication() {
  */
 int PercolatorApplication::main(int argc, char** argv) {
   string input_pin = Params::GetString("pin");
-  string pin_ext = StringUtils::ToLower(FileUtils::Extension(input_pin));
-  carp(CARP_INFO, "Reading file %s, %s", input_pin.c_str(), pin_ext.c_str());
+  carp(CARP_INFO, "Reading file %s", input_pin.c_str());
 
   // Check if we need to run make-pin first
   if (!Params::GetBool("feature-in-file") &&
-      (Params::GetBool("list-of-files") || pin_ext == ".txt" || pin_ext == ".sqt" ||
-       pin_ext == ".pep.xml" || pin_ext == ".mzid")) {
+      (Params::GetBool("list-of-files") ||
+       StringUtils::IEndsWith(input_pin, ".txt") ||
+       StringUtils::IEndsWith(input_pin, ".sqt") ||
+       StringUtils::IEndsWith(input_pin, ".pep.xml") ||
+       StringUtils::IEndsWith(input_pin, ".mzid"))) {
     vector<string> result_files;
     get_search_result_paths(input_pin, result_files);
 

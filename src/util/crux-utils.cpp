@@ -699,23 +699,6 @@ char* parse_filename(const char* file){
   return filename;
 }
 
-
-/**
- * Examines filename to see if it ends in the given extension
- * \returns True if filename ends in the extension, else false.
- */
-bool has_extension(string filename, string extension){
-  size_t file_len = filename.length();
-  size_t ext_len = extension.length();
-  if (ext_len > file_len) {
-    return false;
-  }
-  std::transform(filename.begin(), filename.end(), filename.begin(), ::tolower);
-  std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
-  return filename.compare(file_len - ext_len, ext_len, extension) == 0;
-}
-
-
 /**
  * convert the integer into a string
  * \returns a heap allocated string
@@ -1083,7 +1066,7 @@ char* generate_name_path(
 
   // check the filename for the extension.  Use the first that matches
   for(size_t suffix_idx = 0; suffix_idx < old_suffixes.size(); suffix_idx++){
-    if( has_extension(filename, old_suffixes[suffix_idx])){
+    if(StringUtils::IEndsWith(filename, old_suffixes[suffix_idx])){
       return generate_name_path(filename, old_suffixes[suffix_idx],
                                 new_suffix, new_path);
     }

@@ -14,6 +14,7 @@
 #include "model/Protein.h"
 #include "model/PostProcessProtein.h"
 #include "util/FileUtils.h"
+#include "util/StringUtils.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -181,11 +182,11 @@ MatchCollection* MatchCollectionParser::create(
   
   if (is_directory(match_path)) {
     carp(CARP_FATAL, "Internal error");
-  } else if (has_extension(match_path, ".xml")) {
+  } else if (StringUtils::IEndsWith(match_path, ".xml")) {
     collection = PepXMLReader::parse(match_path, database_, decoy_database_);
-  } else if (has_extension(match_path, ".sqt")) {
+  } else if (StringUtils::IEndsWith(match_path, ".sqt")) {
     collection = SQTReader::parse(match_path, database_, decoy_database_);
-  } else if (has_extension(match_path, ".mzid")) {
+  } else if (StringUtils::IEndsWith(match_path, ".mzid")) {
     collection = MzIdentMLReader::parse(match_path, database_, decoy_database_);
   } else {
     collection = MatchFileReader::parse(match_path, database_, decoy_database_);

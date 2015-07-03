@@ -134,6 +134,21 @@ class Match {
 
   virtual ~Match();
 
+  struct ScoreComparer {
+   public:
+    // If less, sort is from least to greatest
+    ScoreComparer(SCORER_TYPE_T type, bool less): type_(type), less_(less) {}
+    bool operator() (const Match* x, const Match* y) {
+      FLOAT_T scoreX = x->getScore(type_);
+      FLOAT_T scoreY = y->getScore(type_);
+      return less_ ? scoreX < scoreY : scoreX > scoreY;
+    }
+
+    private:
+     SCORER_TYPE_T type_;
+     bool less_;
+  };
+
   /**
    * TODO: should be this be here or parameterized better?
    * shuffle the matches in the array between index start and end-1
@@ -181,13 +196,6 @@ class Match {
   /*******************************************
    * match post_process extension
    ******************************************/
-  /**
-   * Constructs the 20 feature array that pass over to percolator registration
-   *\returns the feature FLOAT_T array
-   */
-  double* getPercolatorFeatures(
-    MatchCollection* match_collection ///< the match collection to iterate -in
-    );
 
   /**
    *
@@ -260,7 +268,7 @@ class Match {
    */
   FLOAT_T getScore(
     SCORER_TYPE_T match_mode ///< the working mode (SP, XCORR) -in
-    );
+    ) const;
 
   /**
    * sets the match score
@@ -487,290 +495,6 @@ class Match {
 };
 
 } /* Namespace for Match */
-
-/**
- * Comparator class for Match objects
- * Used for sorting.
- */
-class CompareMatch {
- protected:
-  int (*sort_by_)(const void*, const void*);
- public:  
-  
-  
-  CompareMatch(
-    int (*sort_by)(const void*, const void*)); ///<sort key
-
-  bool operator()(
-    const Crux::Match*a, 
-    const Crux::Match*b
-  );
-
-};
-
-/**
- * sort the match array with the corresponding compare method
- */
-/*
-void sortMatches(
-  Crux::Match** match_array, ///< the match arrray to sort -in
-  int match_total, ///< the total number of match objects -in
-  int (*compare_method)(const void*, const void*) ///< the compare method to use -in
-  );
-*/  
-
-/**
- * sort the match array with the corresponding compare method
- */
-void qsortMatch(
-  Crux::Match** match_array, ///< the match array to sort -in  
-  int match_total,  ///< the total number of match objects -in
-  int (*compare_method)(const void*, const void*) ///< the compare method to use -in
-  );
-
-void qsortMatch(
-  std::vector<Crux::Match*>& matches,
-  int (*compare_method)(const void*, const void*)
-  );
-
-/**
- * compare two matches, used for qsort
- * \returns the difference between sp score in match_a and match_b
- */
-int compareSp(
-  Crux::Match** match_a, ///< the first match -in  
-  Crux::Match** match_b  ///< the scond match -in
-  );
-
-/**
- * compare two matches, used for qsort
- * \returns the difference between xcorr score in match_a and match_b
- */
-int compareXcorr(
-  Crux::Match** match_a, ///< the first match -in  
-  Crux::Match** match_b  ///< the scond match -in
-  );
-
-/**
- * compare two matches, used for qsort
- * \returns the difference between e-value in match_a and match_b
- */
-int compareEValue(
-  Crux::Match** match_a, ///< the first match -in
-  Crux::Match** match_b ///< the second match -in
-);
-
-/**
- * compare two matches, used for qsort
- * \returns the difference between p_value (LOGP_BONF_WEIBULL_XCORR)
- * score in match_a and match_b 
- */
-int comparePValue(
-  Crux::Match** match_a, ///< the first match -in  
-  Crux::Match** match_b  ///< the scond match -in
-  );
-
-int compareExactPValue(
-  Crux::Match** match_a, ///< the first match -in  
-  Crux::Match** match_b  ///< the scond match -in
-  );
-int compareSidakPValue  (
-  Crux::Match** match_a, ///< the first match -in  
-  Crux::Match** match_b  ///< the scond match -in
-  );
-
-int comparePercolatorQValue(
-  Crux::Match** match_a, ///< the first match -in  
-  Crux::Match** match_b  ///< the scond match -in
-);
-
-int compareQRankerQValue(
-  Crux::Match** match_a, ///< the first match -in  
-  Crux::Match** match_b  ///< the scond match -in
-  );
-
-/**
- * compare two matches, used for qsort
- * \returns the difference between xcorr score in match_a and match_b
- */
-int compareQValue(
-  Crux::Match** match_a, ///< the first match -in  
-  Crux::Match** match_b  ///< the scond match -in
-  );
-
-/**
- * compare two matches, used for qsort
- * \returns the difference between qranker qvalue in match_a and match_b
- */
-int compareQRankerQValue(
-  Crux::Match** match_a, ///< the first match -in  
-  Crux::Match** match_b  ///< the scond match -in
-  );
-
-/**
- * compare two matches, used for qsort
- * \returns the difference between barista qvalue in match_a and match_b
- */
-int compareBaristaQValue(
-  Crux::Match** match_a, ///< the first match -in  
-  Crux::Match** match_b  ///< the scond match -in
-  );
-
-/**
- * compare two matches, used for PERCOLATOR_SCORE
- * \returns the difference between PERCOLATOR_SCORE score in match_a and match_b
- */
-int comparePercolatorScore(
-  Crux::Match** match_a, ///< the first match -in  
-  Crux::Match** match_b  ///< the scond match -in
-  );
-
-
-/**
- * compare two matches, used for QRANKER_SCORE
- * \returns the difference between QRANKER_SCORE score in match_a and match_b
- */
-int compareQRankerScore(
-  Crux::Match** match_a, ///< the first match -in  
-  Crux::Match** match_b  ///< the scond match -in
-  );
-
-/**
- * compare two matches, used for BARISTA_SCORE
- * \returns the difference between BARISTA_SCORE score in match_a and match_b
- */
-int compareBaristaScore(
-  Crux::Match** match_a, ///< the first match -in  
-  Crux::Match** match_b  ///< the scond match -in
-  );
-
-/**
- * Compare two matches by spectrum scan number and sp score, used for qsort.
- * \returns -1 if match a spectrum number is less than that of match b
- * or if scan number is same, if sp score of match a is less than
- * match b.  1 if scan number and sp are equal, else 0.
- */
-int compareSpectrumSp(
-  Crux::Match** match_a, ///< the first match -in  
-  Crux::Match** match_b  ///< the scond match -in
-  );
-
-/**
- * Compare two matches by spectrum scan number and xcorr, used for qsort.
- * \returns -1 if match a spectrum number is less than that of match b
- * or if scan number is same, if score of match a is less than
- * match b.  1 if scan number and score are equal, else 0.
- */
-int compareSpectrumXcorr(
-  Crux::Match** match_a, ///< the first match -in  
-  Crux::Match** match_b  ///< the scond match -in
-  );
-
-/**
- * Compare two matches by spectrum scan number and q-value, used for qsort.
- * \returns -1 if match a spectrum number is less than that of match b
- * or if scan number is same, if score of match a is less than
- * match b.  1 if scan number and score are equal, else 0.
- */
-int compareSpectrumPercolatorQValue(
-  Crux::Match** match_a, ///< the first match -in  
-  Crux::Match** match_b  ///< the scond match -in
-  );
-
-/**
- * Compare two matches by spectrum scan number.
- * \returns -1 if match a spectrum number is less than that of match b
- * or if scan number is same, if score of match a is less than
- * match b.  1 if scan number and score are equal, else 0.
- */
-int compareSpectrumScan(
-  Crux::Match** match_a, ///< the first match -in  
-  Crux::Match** match_b  ///< the scond match -in
-  );
-/**
- * Compare two matches by spectrum scan number and qranker q-value, 
- * used for qsort.
- * \returns -1 if match a spectrum number is less than that of match b
- * or if scan number is same, if score of match a is less than
- * match b.  1 if scan number and score are equal, else 0.
- */
-int compareSpectrumQRankerQValue(
-  Crux::Match** match_a, ///< the first match -in  
-  Crux::Match** match_b  ///< the scond match -in
-  );
-
-/**
- * Compare two matches by spectrum scan number and barista q-value, 
- * used for qsort.
- * \returns -1 if match a spectrum number is less than that of match b
- * or if scan number is same, if score of match a is less than
- * match b.  1 if scan number and score are equal, else 0.
- */
-int compareSpectrumBaristaQValue(
-  Crux::Match** match_a, ///< the first match -in  
-  Crux::Match** match_b  ///< the scond match -in
-  );
-
-/**
- * Compare two matches by spectrum scan number and percolator score,
- * used for qsort. 
- * \returns -1 if match a spectrum number is less than that of match b
- * or if scan number is same, if score of match a is less than
- * match b.  1 if scan number and score are equal, else 0.
- */
-int compareSpectrumPercolatorScore(
-  Crux::Match** match_a, ///< the first match -in  
-  Crux::Match** match_b  ///< the scond match -in
-  );
-
-/**
- * Compare two matches by spectrum scan number and qranker score,
- * used for qsort. 
- * \returns -1 if match a spectrum number is less than that of match b
- * or if scan number is same, if score of match a is less than
- * match b.  1 if scan number and score are equal, else 0.
- */
-int compareSpectrumQRankerScore(
-  Crux::Match** match_a, ///< the first match -in  
-  Crux::Match** match_b  ///< the scond match -in
-  );
-
-/**
- * Compare two matches by spectrum scan number and barista score,
- * used for qsort. 
- * \returns -1 if match a spectrum number is less than that of match b
- * or if scan number is same, if score of match a is less than
- * match b.  1 if scan number and score are equal, else 0.
- */
-int compareSpectrumBaristaScore(
-  Crux::Match** match_a, ///< the first match -in  
-  Crux::Match** match_b  ///< the scond match -in
-  );
-
-/**
- * Compare two matches by spectrum scan number and q-value (from the decoys and xcorr score),
- * used for qsort. 
- * \returns -1 if match a spectrum number is less than that of match b
- * or if scan number is same, if score of match a is less than
- * match b.  1 if scan number and score are equal, else 0.
- */
-int compareSpectrumDecoyXcorrQValue(
-  Crux::Match** match_a, ///< the first match -in  
-  Crux::Match** match_b  ///< the scond match -in
-  );
-
-/**
- * Compare two matches by spectrum scan number and q-value (from the decoys and weibull est p-values),
- * used for qsort. 
- * \returns -1 if match a spectrum number is less than that of match b
- * or if scan number is same, if score of match a is less than
- * match b.  1 if scan number and score are equal, else 0.
- */
-int compareSpectrumDecoyPValueQValue(
-  Crux::Match** match_a, ///< the first match -in  
-  Crux::Match** match_b  ///< the scond match -in
-  );
-
 
 /************************************************
  * TODO: Why are these here?

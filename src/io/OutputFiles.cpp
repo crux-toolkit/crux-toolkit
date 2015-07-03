@@ -482,28 +482,22 @@ void OutputFiles::writeMatches(
   Spectrum* spectrum            ///< given when all matches are to one spec
   ){
 
-  if( target_matches == NULL ){
+  if (!target_matches) {
     return;  // warn?
   }
 
   // confirm that there are the expected number of decoy collections
-  if( (int)decoy_matches_array.size() != num_files_ - 1){
-    carp(CARP_FATAL, 
-         "WriteMatches was given %d decoy collections but was expecting %d.",
+  if ((int)decoy_matches_array.size() != num_files_ - 1) {
+    carp(CARP_FATAL, "WriteMatches was given %d decoy collections but was expecting %d.",
          (int)decoy_matches_array.size(), num_files_ - 1);
   }
 
   // print to each file type
   printMatchesTab(target_matches, decoy_matches_array, rank_type, spectrum);
-
   printMatchesSqt(target_matches, decoy_matches_array, spectrum);
-
   printMatchesXml(target_matches, decoy_matches_array, spectrum, rank_type);
-  
-  printMatchesPin(target_matches,decoy_matches_array,spectrum);
-
+  printMatchesPin(target_matches, decoy_matches_array);
   printMatchesMzid(target_matches, decoy_matches_array, rank_type);
-
 }
 
 // already confirmed that num_files_ = num decoy collections + 1
@@ -512,11 +506,11 @@ void OutputFiles::printMatchesTab(
   vector<MatchCollection*>& decoy_matches_array,  
   SCORER_TYPE_T rank_type,
   Spectrum* spectrum
-){
+) {
 
   carp(CARP_DETAILED_DEBUG, "Writing tab delimited results.");
 
-  if( delim_file_array_ == NULL ){
+  if (!delim_file_array_) {
     return;
   }
 
@@ -544,23 +538,11 @@ void OutputFiles::printMatchesTab(
 
 void OutputFiles::printMatchesPin(
   MatchCollection* target_matches,
-  vector<MatchCollection*>& decoy_matches_array,
-  Spectrum* spectrum
+  vector<MatchCollection*>& decoy_matches_array
   ) {
-
-  if (pin_file_ == NULL) {
-    return;
+  if (pin_file_) {
+    pin_file_->write(target_matches, decoy_matches_array, matches_per_spec_);
   }
-  
-  if( spectrum ){
-    
-    pin_file_->write(target_matches, decoy_matches_array,
-                         spectrum, matches_per_spec_);
-  }
-  else 
-    pin_file_->write(target_matches, decoy_matches_array,
-                         matches_per_spec_);
-   
 }
 
 
@@ -599,27 +581,20 @@ void OutputFiles::printMatchesXml(
   SCORER_TYPE_T rank_type
   
 ){
-  
   static int index = 1;
-  if( xml_file_array_ == NULL ){
+  if (!xml_file_array_){
     return;
   }
 
   MatchCollection* cur_matches = target_matches;
 
-  for(int file_idx = 0; file_idx < num_files_; file_idx++){
-
-    cur_matches->printXml(xml_file_array_[file_idx],
-                               matches_per_spec_,
-                               spectrum,
-                               rank_type);
-
+  for (int file_idx = 0; file_idx < num_files_; file_idx++) {
+    cur_matches->printXml(xml_file_array_[file_idx], matches_per_spec_, spectrum, rank_type);
     if( decoy_matches_array.size() > (size_t)file_idx ){
       cur_matches = decoy_matches_array[file_idx];
     } // else if NULL, num_files_==1 and this is last loop
   }
   index++;
-
 }
 
 void OutputFiles::printMatchesMzid(
@@ -627,12 +602,7 @@ void OutputFiles::printMatchesMzid(
   vector<MatchCollection*>& decoy_matches_array,
   SCORER_TYPE_T rank_type
   ) {
-
-  if (mzid_file_ == NULL) {
-    return;
-  }
-
-  if (target_matches == NULL) {
+  if (!mzid_file_ || !target_matches) {
     return;
   }
 
@@ -641,14 +611,12 @@ void OutputFiles::printMatchesMzid(
   for (size_t idx = 0; idx < decoy_matches_array.size();idx++) {
     printMatchesMzid(decoy_matches_array[idx], rank_type);
   }
-
 }
 
 void OutputFiles::printMatchesMzid(
   MatchCollection* collection,
   SCORER_TYPE_T rank_type
   ) {
-
   MatchIterator match_iter(collection,rank_type);
 
   while(match_iter.hasNext()) {
@@ -659,7 +627,6 @@ void OutputFiles::printMatchesMzid(
       break;
     }
   }
-
 }
 
 void OutputFiles::writeMatches(
@@ -746,6 +713,11 @@ void OutputFiles::writeRankedPeptides(const vector<pair<FLOAT_T, Peptide*> >& sc
 
 }
 
+void OutputFiles::pinSetEnabledStatus(const string& name, bool enabled) {
+  if (pin_file_) {
+    pin_file_->setEnabledStatus(name, enabled);
+  }
+}
 
 /**
  * Print all of the proteins and their associated scores in sorted
