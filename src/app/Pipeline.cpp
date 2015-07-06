@@ -1,5 +1,5 @@
 #include "io/carp.h"
-#include "ComputeQValues.h"
+#include "AssignConfidenceApplication.h"
 #include "bullseye/CruxBullseyeApplication.h"
 #include "util/FileUtils.h"
 #include "MakePinApplication.h"
@@ -213,7 +213,7 @@ int PipelineApplication::runPostProcessor(
   }
 
   if (assignConfidence) {
-    return ((ComputeQValues*)app)->main(resultsFiles);
+    return ((AssignConfidenceApplication*)app)->main(resultsFiles);
   }
 
   string pin;
@@ -274,7 +274,7 @@ vector<string> PipelineApplication::getOptions() const {
   addOptionsFrom<TideSearchApplication>(&options);
   addOptionsFrom<CometApplication>(&options);
   addOptionsFrom<PercolatorApplication>(&options);
-  addOptionsFrom<ComputeQValues>(&options);
+  addOptionsFrom<AssignConfidenceApplication>(&options);
 
   return options;
 }
@@ -286,7 +286,7 @@ vector< pair<string, string> > PipelineApplication::getOutputs() const {
   addOutputsFrom<TideSearchApplication>(&outputs);
   addOutputsFrom<CometApplication>(&outputs);
   addOutputsFrom<PercolatorApplication>(&outputs);
-  addOutputsFrom<ComputeQValues>(&outputs);
+  addOutputsFrom<AssignConfidenceApplication>(&outputs);
 
   return outputs;
 }
@@ -322,7 +322,7 @@ void PipelineApplication::processParams() {
 
   const string postProcessor = Params::GetString("post-processor");
   if (postProcessor == "assign-confidence") {
-    apps_.push_back(new ComputeQValues());
+    apps_.push_back(new AssignConfidenceApplication());
   } else if (postProcessor == "percolator") {
     apps_.push_back(new PercolatorApplication());
   }
