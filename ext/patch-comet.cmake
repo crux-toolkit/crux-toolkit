@@ -93,6 +93,7 @@ if (WIN32 AND NOT CYGWIN)
         ${SOURCE_DIR}/patches/comet/CometSearch/CometSearchManager.cpp
         ${BINARY_DIR}/build/src/comet/CometSearch/CometSearchManager.cpp
         RESULT_VARIABLE status
+    )
     check_status(status)
     message(${SOURCE_DIR}/patches/comet/CometSearch/CometWriteSqt.cpp)
     message(${BINARY_DIR}/build/src/comet/CometSearch/CometWriteSqt.cpp)
