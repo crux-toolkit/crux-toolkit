@@ -151,6 +151,12 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
     string target_path = *iter;
     string decoy_path = *iter;
 
+    if (target_path.find("decoy") != string::npos) {
+      carp(CARP_FATAL, "%s appears to be a decoy file. Only target or concatenated files "
+        "should be given to assign-confidence because it automatically searches for "
+        "corresponding decoy files.", target_path.c_str());
+    }
+
     check_target_decoy_files(target_path, decoy_path);
 
     if (!FileUtils::Exists(target_path)) {
@@ -883,10 +889,11 @@ void AssignConfidenceApplication::peptide_level_filtering(
       Peptide* peptide = match->getPeptide();
       FLOAT_T score = match->getScore(score_type);
       string peptideStr = peptide->getModifiedSequenceWithMasses(MOD_MASS_ONLY);
-      FLOAT_T bestScore;
+      FLOAT_T bestScore = 0.0;
       try {
         bestScore = BestPeptideScore->at(peptideStr);
       } catch (const std::out_of_range& oor){
+        BestPeptideScore->insert(std::pair<string, FLOAT_T>(peptideStr, score));
         continue;
       }
       if ((ascending && bestScore > score) || (!ascending && score > bestScore)) {
