@@ -213,7 +213,13 @@ int PipelineApplication::runPostProcessor(
   }
 
   if (assignConfidence) {
-    return ((AssignConfidenceApplication*)app)->main(resultsFiles);
+    vector<string> targetFiles;
+    for (vector<string>::const_iterator i = resultsFiles.begin(); i != resultsFiles.end(); i++) {
+      if (i->find("decoy") == string::npos) {
+        targetFiles.push_back(*i);
+      }
+    }
+    return ((AssignConfidenceApplication*)app)->main(targetFiles);
   }
 
   string pin;
