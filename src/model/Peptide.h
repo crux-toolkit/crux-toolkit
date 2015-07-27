@@ -664,7 +664,7 @@ class Peptide {
    * \brief Builds a comma delimited string listing the protein ids
    * for the sources of a peptide.
    */
-  std::string getProteinIds();
+  std::vector<std::string> getProteinIds();
 
   /**
    * \brief Builds a comma delimited string listing the flanking amino acids

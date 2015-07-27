@@ -155,7 +155,7 @@ int PSMConvertApplication::main(int argc, char** argv) {
 
   string output_file_name = make_file_path(output_file_name_builder.str());
 
-  writer->openFile(this, output_file_name.c_str(), PSMWriter::PSMS);
+  writer->openFile(this, output_file_name, PSMWriter::PSMS);
   writer->write(collection, database_file);
   writer->closeFile();
 

@@ -156,33 +156,33 @@ bool PWIZSpectrumCollection::parse() {
     if (!assign_new_scans) {
       string ms_peak_list_scans = spectrum->cvParam(pwiz::msdata::MS_peak_list_scans).value;
       string ms_spectrum_title = spectrum->cvParam(pwiz::msdata::MS_spectrum_title).value;
-      carp(CARP_DEBUG, "ms_peak_list_scans:%s", ms_peak_list_scans.c_str());
-      carp(CARP_DEBUG, "ms_spectrum_title:%s", ms_spectrum_title.c_str());
+      carp(CARP_DETAILED_DEBUG, "ms_peak_list_scans:%s", ms_peak_list_scans.c_str());
+      carp(CARP_DETAILED_DEBUG, "ms_spectrum_title:%s", ms_spectrum_title.c_str());
       if (ms_peak_list_scans.empty() || !get_first_last_scan_from_string(ms_peak_list_scans, scan_number_begin, scan_number_end)) {
         if (ms_spectrum_title.empty() || !parseFirstLastScanFromTitle(ms_spectrum_title, scan_number_begin, scan_number_end)) {
           string scan_value = pwiz::msdata::id::translateNativeIDToScanNumber(
           native_id_format, spectrum->id);
-          carp(CARP_DEBUG, "scan_value:%s", scan_value.c_str());
+          carp(CARP_DETAILED_DEBUG, "scan_value:%s", scan_value.c_str());
           if (scan_value.empty() || !get_range_from_string<int>(
             scan_value.c_str(), scan_number_begin, scan_number_end)) {
               assign_new_scans = true;
               carp(CARP_ERROR, "Pwiz parser could not determine scan numbers "
                          "for this file, assigning new scan numbers.");
           } else {
-            carp(CARP_DEBUG, "found scan:%i-%i from native id", scan_number_begin, scan_number_end);
+            carp(CARP_DETAILED_DEBUG, "found scan:%i-%i from native id", scan_number_begin, scan_number_end);
           }
         } else {
-          carp(CARP_DEBUG, "found scan:%i-%i from ms_spectrum_title", scan_number_begin, scan_number_end);
+          carp(CARP_DETAILED_DEBUG, "found scan:%i-%i from ms_spectrum_title", scan_number_begin, scan_number_end);
         }
       } else {
-        carp(CARP_DEBUG, "found scan:%i-%i from ms_peak_list_scans", scan_number_begin, scan_number_end);
+        carp(CARP_DETAILED_DEBUG, "found scan:%i-%i from ms_peak_list_scans", scan_number_begin, scan_number_end);
       }
     }
     if (assign_new_scans) {
       scan_number_begin = ++scan_counter;
       scan_number_end = scan_number_begin;
     }
-    carp(CARP_DEBUG, "found scan:%i %i-%i", scan_number_begin, first_scan, last_scan);
+    carp(CARP_DETAILED_DEBUG, "found scan:%i %i-%i", scan_number_begin, first_scan, last_scan);
     if( scan_number_end < first_scan ){
       continue;
     } else if( scan_number_begin > last_scan ){

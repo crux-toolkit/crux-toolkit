@@ -29,6 +29,7 @@
 #include "Match.h" 
 #include "MatchCollection.h" 
 #include "Peptide.h"
+#include "util/Params.h"
 
 #include <boost/filesystem.hpp>
 #include <string>
@@ -127,547 +128,6 @@ Match::~Match() {
     free(mod_sequence_);
   }
 }
-
-/* ************ SORTING FUNCTIONS ****************** */
-/**
- * Compare two matches by spectrum scan number.
- * \return 0 if scan numbers are equal, -1 if a is smaller, 1 if b is
- * smaller.
- */
-int compareSpectrum(
-  Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the second match -in
-  ){
-
-  Spectrum* spec_a = (*match_a)->getSpectrum();
-  Spectrum* spec_b = (*match_b)->getSpectrum();
-  int scan_a = spec_a->getFirstScan();
-  int scan_b = spec_b->getFirstScan();
-  int charge_a = (*match_a)->getCharge();
-  int charge_b = (*match_b)->getCharge();
-
-  if( scan_a < scan_b ){
-    return -1;
-  }else if( scan_a > scan_b ){
-    return 1;
-  }else{// else scan numbers equal
-    if(charge_a < charge_b){
-      return -1;
-    }else if(charge_a > charge_b){
-      return 1;
-    }
-  }// else scan number and charge equal
-  return 0;
-}
-
-/**
- * compare two matches, used for qsort
- * \returns 0 if sp scores are equal, -1 if a is less than b, 1 if a
- * is greather than b.
- */
-int compareSp(
-  Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the second match -in
-  )
-{
-  // might have to worry about cases below 1 and -1
-  // return(int)(match_b->match_scores_[SP] - match_a->match_scores_[SP]);
-
-  if((*match_b)->getScore(SP) > (*match_a)->getScore(SP)){
-    return 1;
-  }
-  else if((*match_b)->getScore(SP) < (*match_a)->getScore(SP)){
-    return -1;
-  }
-  return 0;
-
-}
-
-/**
- * Compare two matches by spectrum scan number and sp score, used for qsort.
- * \returns -1 if match a spectrum number is less than that of match b
- * or if scan number is same, if sp score of match a is less than
- * match b.  1 if scan number and sp are equal, else 0.
- */
-int compareSpectrumSp(
-  Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the second match -in
-  ){
-
-  int return_me = compareSpectrum( match_a, match_b );
-
-  if( return_me == 0 ){
-    return_me = compareSp(match_a, match_b);
-  }
-
-  return return_me;
-}
-
-/**
- * compare two matches, used for qsort
- * \returns 0 if xcorr scores are equal, -1 if a is less than b, 1 if a
- * is greather than b.
- */
-int compareXcorr(
-  Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the second match -in
-)
-{
-
-  if((*match_b)->getScore(XCORR) > (*match_a)->getScore(XCORR)){
-    return 1;
-  }
-  else if((*match_b)->getScore(XCORR) < (*match_a)->getScore(XCORR)){
-    return -1;
-  }
-  return 0;
-
-}
-
-/**
- * Compare two matches by spectrum scan number and xcorr, used for qsort.
- * \returns -1 if match a spectrum number is less than that of match b
- * or if scan number is same, if score of match a is less than
- * match b.  1 if scan number and score are equal, else 0.
- */
-int compareSpectrumXcorr(
-  Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the second match -in
-){
-
-  int return_me = compareSpectrum( match_a, match_b );
-
-  if( return_me == 0 ){
-    return_me = compareXcorr(match_a, match_b);
-  }
-
-  return return_me;
-}
-
-/**
- * compare two matches, used for qsort
- * \returns the difference between e-value in match_a and match_b
- */
-int compareEValue(
-  Match** match_a, ///< the first match -in
-  Match** match_b ///< the second match -in
-) {
-
-  if((*match_b)->getScore(EVALUE) < (*match_a)->getScore(EVALUE)){
-    return 1;
-  }
-  else if((*match_b)->getScore(EVALUE) > (*match_a)->getScore(EVALUE)){
-    return -1;
-  }
-  return 0;
-
-}
-
-/**
- * compare two matches, used for qsort
- * \returns the difference between p_value (LOGP_BONF_WEIBULL_XCORR)
- * score in match_a and match_b 
- */
-int comparePValue(
-  Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the second match -in
-  ){
-
-  if((*match_b)->getScore(LOGP_BONF_WEIBULL_XCORR) 
-     > (*match_a)->getScore(LOGP_BONF_WEIBULL_XCORR)){
-    return 1;
-  }
-  else if((*match_b)->getScore(LOGP_BONF_WEIBULL_XCORR) 
-          < (*match_a)->getScore(LOGP_BONF_WEIBULL_XCORR)){
-    return -1;
-  }
-  return 0;
-
-}
-
-int compareExactPValue(
-  Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the second match -in
-  ){
-
-  if((*match_b)->getScore(TIDE_SEARCH_EXACT_PVAL) 
-     < (*match_a)->getScore(TIDE_SEARCH_EXACT_PVAL)){
-    return 1;
-  }
-  else if((*match_b)->getScore(TIDE_SEARCH_EXACT_PVAL) 
-          > (*match_a)->getScore(TIDE_SEARCH_EXACT_PVAL)){
-    return -1;
-  }
-  return 0;
-}
-
-int compareSidakPValue(
-  Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the second match -in
-  ){
-
-  if((*match_b)->getScore(SIDAK_ADJUSTED) 
-     < (*match_a)->getScore(SIDAK_ADJUSTED)){
-    return 1;
-  }
-  else if((*match_b)->getScore(SIDAK_ADJUSTED) 
-          > (*match_a)->getScore(SIDAK_ADJUSTED)){
-    return -1;
-  }
-  return 0;
-}/**
- * Compare two matches; used for qsort.
- * Smaller q-values are better.  Break ties using the raw score.
- * \returns 0 if q-value scores are equal, -1 if a is less than b, 1 if a
- * is greather than b.
- */
-int comparePercolatorQValue(
-  Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the second match -in
-)
-{
-
-  if((*match_b)->getScore(PERCOLATOR_QVALUE) 
-     < (*match_a)->getScore(PERCOLATOR_QVALUE)){
-    return 1;
-  }
-  else if((*match_b)->getScore(PERCOLATOR_QVALUE)
-          > (*match_a)->getScore(PERCOLATOR_QVALUE)){
-    return -1;
-  }
-  return comparePercolatorScore(match_a, match_b);
-}
-
-/**
- * Compare two matches; used for qsort.
- * Smaller q-values are better.  Break ties using the raw q-ranker score.
- * \returns 0 if q-value scores are equal, -1 if a is less than b, 1 if a
- * is greather than b.
- */
-int compareQRankerQValue(
-  Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the second match -in
-)
-{
-
-  if((*match_b)->getScore(QRANKER_QVALUE) < 
-      (*match_a)->getScore(QRANKER_QVALUE)){
-    return 1;
-  }
-  else if((*match_b)->getScore(QRANKER_QVALUE) > 
-          (*match_a)->getScore(QRANKER_QVALUE)){
-    return -1;
-  }
-  return compareQRankerScore(match_a, match_b);
-}
-
-/**
- * Compare two matches; used for qsort.
- * Smaller q-values are better.  Break ties using the raw barista score.
- * \returns 0 if q-value scores are equal, -1 if a is less than b, 1 if a
- * is greather than b.
- */
-int compareBaristaQValue(
-  Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the second match -in
-)
-{
-
-  if((*match_b)->getScore(BARISTA_QVALUE) < 
-      (*match_a)->getScore(BARISTA_QVALUE)){
-    return 1;
-  }
-  else if((*match_b)->getScore(BARISTA_QVALUE) > 
-          (*match_a)->getScore(BARISTA_QVALUE)){
-    return -1;
-  }
-  return compareBaristaScore(match_a, match_b);
-}
-
-/**
- * Compare two matches by spectrum scan number and percolator q-value, 
- * used for qsort.
- * \returns -1 if match a spectrum number is less than that of match b
- * or if scan number is same, if score of match a is less than
- * match b.  1 if scan number and score are equal, else 0.
- */
-int compareSpectrumPercolatorQValue(
-  Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the second match -in
-){
-
-  int return_me = compareSpectrum( match_a, match_b );
-
-  if( return_me == 0 ){
-    return_me = comparePercolatorQValue(match_a, match_b);
-  }
-
-  return return_me;
-}
-
-
-/**
- * Compare two matches by spectrum scan number and qranker q-value, 
- * used for qsort.
- * \returns -1 if match a spectrum number is less than that of match b
- * or if scan number is same, if score of match a is less than
- * match b.  1 if scan number and score are equal, else 0.
- */
-int compareSpectrumQRankerQValue(
-  Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the second match -in
-){
-
-  int return_me = compareSpectrum( match_a, match_b );
-
-  if( return_me == 0 ){
-    return_me = compareQRankerQValue(match_a, match_b);
-  }
-
-  return return_me;
-}
-
-/**
- * Compare two matches by spectrum scan number and barista q-value, 
- * used for qsort.
- * \returns -1 if match a spectrum number is less than that of match b
- * or if scan number is same, if score of match a is less than
- * match b.  1 if scan number and score are equal, else 0.
- */
-int compareSpectrumBaristaQValue(
-  Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the second match -in
-){
-
-  int return_me = compareSpectrum( match_a, match_b );
-
-  if( return_me == 0 ){
-    return_me = compareBaristaQValue(match_a, match_b);
-  }
-
-  return return_me;
-}
-
-
-/**
- * compare two matches, used for PERCOLATOR_SCORE
- * \returns 0 if percolator scores are equal, -1 if a is less than b,
- * 1 if a is greather than b.
- */
-int comparePercolatorScore(
-  Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the second match -in
-)
-{
-  if((*match_b)->getScore(PERCOLATOR_SCORE) > (*match_a)->getScore(PERCOLATOR_SCORE)){
-    return 1;
-  }
-  else if((*match_b)->getScore(PERCOLATOR_SCORE) < (*match_a)->getScore(PERCOLATOR_SCORE)){
-    return -1;
-  }
-  return 0;
-
-}
-
-
-/**
- * Compare two matches by spectrum scan number and percolator score,
- * used for qsort. 
- * \returns -1 if match a spectrum number is less than that of match b
- * or if scan number is same, if score of match a is less than
- * match b.  1 if scan number and score are equal, else 0.
- */
-int compareSpectrumPercolatorScore(
-  Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the second match -in
-  )
-{
-
-  int return_me = compareSpectrum( match_a, match_b );
-
-  if( return_me == 0 ){
-    return_me = comparePercolatorScore(match_a, match_b);
-  }
-
-  return return_me;
-}
-
-/**
- * compare two matches, used for QRANKER_SCORE
- * \returns 0 if qranker scores are equal, -1 if a is less than b,
- * 1 if a is greather than b.
- */
-int compareQRankerScore(
-  Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the second match -in
-)
-{
-  if((*match_b)->getScore(QRANKER_SCORE) > (*match_a)->getScore(QRANKER_SCORE)){
-    return 1;
-  }
-  else if((*match_b)->getScore(QRANKER_SCORE) < (*match_a)->getScore(QRANKER_SCORE)){
-    return -1;
-  }
-  return 0;
-
-}
-
-/**
- * compare two matches, used for BARISTA_SCORE
- * \returns 0 if qranker scores are equal, -1 if a is less than b,
- * 1 if a is greather than b.
- */
-int compareBaristaScore(
-  Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the second match -in
-)
-{
-  if((*match_b)->getScore(BARISTA_SCORE) 
-     > (*match_a)->getScore(BARISTA_SCORE)){
-    return 1;
-  }
-  else if((*match_b)->getScore(BARISTA_SCORE) 
-          < (*match_a)->getScore(BARISTA_SCORE)){
-    return -1;
-  }
-  return 0;
-
-}
-
-
-
-/**
- * Compare two matches by spectrum scan number and qranker score,
- * used for qsort. 
- * \returns -1 if match a spectrum number is less than that of match b
- * or if scan number is same, if score of match a is less than
- * match b.  1 if scan number and score are equal, else 0.
- */
-int compareSpectrumQRankerScore(
-  Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the second match -in
-  )
-{
-
-  int return_me = compareSpectrum( match_a, match_b );
-
-  if( return_me == 0 ){
-    return_me = compareQRankerScore(match_a, match_b);
-  }
-
-  return return_me;
-}
-
-/**
- * Compare two matches by spectrum scan number and barista score,
- * used for qsort. 
- * \returns -1 if match a spectrum number is less than that of match b
- * or if scan number is same, if score of match a is less than
- * match b.  1 if scan number and score are equal, else 0.
- */
-int compareSpectrumBaristaScore(
-  Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the scond match -in
-  )
-{
-
-  int return_me = compareSpectrum( match_a, match_b );
-
-  if( return_me == 0 ){
-    return_me = compareBaristaScore(match_a, match_b);
-  }
-
-  return return_me;
-}
-
-
-/**
- * Compare two matches by spectrum scan number
- * \returns -1 if match a spectrum number is less than that of match b
- * or if scan number is same, if score of match a is less than
- * match b.  1 if scan number and score are equal, else 0.
- */
-int compareSpectrumScan(
-  Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the second match -in
-  )
-{
-
-  int return_me = compareSpectrum( match_a, match_b );
-  if( return_me == 0 ){
-    return_me = compareSpectrum(match_a, match_b);
-  }
-  return return_me;
-}
-/**
- * Compare two matches by spectrum scan number and q-value (from the decoys and xcorr score),
- * used for qsort. 
- * \returns -1 if match a spectrum number is less than that of match b
- * or if scan number is same, if score of match a is less than
- * match b.  1 if scan number and score are equal, else 0.
- */
-int compareMatchSpectrumDecoyXcorrQValue(
-  Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the second match -in
-  )
-{
-  // delete this, just for the compiler
-  if( match_a == NULL || match_b == NULL ){
-    return 0;
-  }
-  carp(CARP_FATAL, "HEY, you haven't implemented sorting by decoy-qvalue yet!");
-  return 0; // Return value to avoid compiler warning.
-}
-
-/**
- * Compare two matches by spectrum scan number and q-value (from the decoys and weibull est p-values),
- * used for qsort. 
- * \returns -1 if match a spectrum number is less than that of match b
- * or if scan number is same, if score of match a is less than
- * match b.  1 if scan number and score are equal, else 0.
- */
-int compareMatchSpectrumDecoyPValueQValue(
-  Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the second match -in
-  )
-{
-  // delete this, just for the compiler
-  if( match_a == NULL || match_b == NULL ){
-    return 0;
-  }
-  carp(CARP_FATAL, "HEY, you haven't implemented sorting by decoy-qvalue yet!");
-  return 0; // Return value to avoid compiler warning.
-}
-
-/**
- * compare two matches, and returns in the same order that tide-search outputs
- * NOTE: if the order tide outputs in changes, this will need to change as well!
- * This is only used for testing purposes, as the order has no meaningful information.
- * If we do not sort a match collection after using MzIdentMLReader, then we will
- * write out matches in a different order than the original file. This makes it difficult
- * to compare files, so we will sort the collection instead of writing a very intensive
- * test.
- *
- * First look at neutral mass, and return negative number if less positive if more
- * Then look at target or decoy - targets get negative, decoys get positive
- * Finally, look at xcorr score - negative if less, positive if more
- * (0 if equal ?) Note the zero value may cause problems if identical xcorr scores ?
- */
-int compareByTideOutput(
-  Match** match_a, ///< the first match -in  
-  Match** match_b  ///< the scond match -in
-  )
-{
-  if((*match_b)->getZState().getNeutralMass() != (*match_a)->getZState().getNeutralMass()){ // two neutral mass are different
-    return (*match_a)->getZState().getNeutralMass() - (*match_b)->getZState().getNeutralMass();
-  } else if ((*match_b)->getNullPeptide() ^ (*match_a)->getNullPeptide()){ // one is target and other is decoy
-    return ((*match_a)->getNullPeptide() ? 1 : -1);
-  } else {
-    return (*match_b)->getScore(XCORR) - (*match_a)->getScore(XCORR);
-  }
-}
-
-/* ****** End of sorting functions ************/
 
 /**
  * \brief Print the match information in sqt format to the given file
@@ -842,7 +302,7 @@ void Match::printOneMatchField(
     break;
   case XCORR_RANK_COL:
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
-                                     getRank(XCORR));
+      getRank(!Params::GetBool("exact-p-value") ? XCORR : TIDE_SEARCH_EXACT_PVAL));
     break;
   case EVALUE_COL:
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx,
@@ -1137,153 +597,6 @@ void Match::shuffleMatches(
   }
 }
 
-CompareMatch::CompareMatch(
-  int (*sort_by)(const void*, const void*) ///< sort key
-  ) {
-
-  sort_by_ = sort_by;
-}
-
-bool CompareMatch::operator() (
-  const Match* a,
-  const Match* b
-  ) {
-
-  return sort_by_(&a, &b) < 0;
-}
-
-/**
- * sort the match array with the corresponding compare method
- */
-void sortMatches(
-  Match** match_array, ///< the match arrray to sort -in
-  int match_total, ///< the total number of match objects -in
-  int (*compare_method)(const void*, const void*) ///< the compare method to use -in
-  ) {
-
-  //sort using c++ standard.
-  sort(match_array, match_array+match_total, CompareMatch(compare_method));
-}
-
-
-
-/**
- * sort the match array with the corresponding compare method
- */
-void qsortMatch(
-  Match** match_array, ///< the match array to sort -in  
-  int match_total,  ///< the total number of match objects -in
-  int (*compare_method)(const void*, const void*) ///< the compare method to use -in
-  )
-{
-  qsort(match_array, match_total, sizeof(Match*), compare_method);
-}
-
-void qsortMatch(
-  vector<Crux::Match*>& matches,
-  int (*compare_method)(const void*, const void*)
-  )
-{
-  if (!matches.empty()) {
-    qsortMatch(&matches[0], matches.size(), compare_method);
-  }
-}
-
-/*******************************************
- * match post_process extension
- ******************************************/
-
-/**
- * Constructs the 20 feature array that pass over to percolator registration
- * Go to top README for N,C terminus tryptic feature info.
- *\returns the feature FLOAT_T array
- */
-double* Match::getPercolatorFeatures(
-  MatchCollection* match_collection ///< the match collection to iterate -in
-  )
-{
-  match_collection->isDecoy();
-  int feature_count = NUM_FEATURES;
-  double* feature_array = (double*)mycalloc(feature_count, sizeof(double));
-  FLOAT_T weight_diff = peptide_->getPeptideMass() -
-    (zstate_.getNeutralMass());
-
-  
-  carp(CARP_DETAILED_DEBUG, "spec: %d, charge: %d", 
-    spectrum_->getFirstScan(),
-    zstate_.getCharge());
-
-  carp(CARP_DETAILED_DEBUG,"peptide mass:%f", 
-       peptide_->getPeptideMass());
-  carp(CARP_DETAILED_DEBUG,"spectrum neutral mass:%f", 
-       zstate_.getNeutralMass());
-
-  // Xcorr
-  feature_array[0] = getScore(XCORR);
-  // FIX - Using delta_cn as a feature in percolator/q-ranker gives
-  // erroneous results, set to zero for now and figure out what to do with
-  // it later (SJM 07-07-2010).
-  // DeltCN
-  feature_array[1] = 0;//match->delta_cn;
-  
-  // SP
-  feature_array[2] = getScore(SP);
-  // lnrSP
-  feature_array[3] = logf(getRank(SP));
-  // SP is no longer scored so we need place holder values
-  if( feature_array[2] == NOT_SCORED ){ 
-    feature_array[2] = 0;
-    feature_array[3] = 0;
-  }
-  // dM
-  feature_array[4] = weight_diff;
-  // absdM
-  feature_array[5] = fabsf(weight_diff);
-  // Mass
-  feature_array[6] = zstate_.getNeutralMass();
-  // ionFrac
-  feature_array[7] = b_y_ion_fraction_matched_;
-  // lnSM
-  feature_array[8] = ln_experiment_size_;
-
-  feature_array[9] = true; // TODO(if perc support continues, figure out what these should be
-  feature_array[10] = true;
-  // get the missed cleave sites
-  feature_array[11] = peptide_->getMissedCleavageSites();
-  
-  // pepLen
-  feature_array[12] = peptide_->getLength();
-  
-  int charge = zstate_.getCharge();
-
-  // set charge
-  if(charge == 1){
-    feature_array[13] = true;
-  }
-  else if(charge == 2){
-    feature_array[14] = true;
-  }
-  else if(charge == 3){
-    feature_array[15] = true;
-  }
-
-  // now check that no value is with in infinity
-  for(int check_idx=0; check_idx < feature_count; ++check_idx){
-    
-    FLOAT_T feature = feature_array[check_idx];
-    carp(CARP_DETAILED_DEBUG, "feature[%d]=%f", check_idx, feature);
-    if(feature <= -BILLION || feature  >= BILLION){
-      carp(CARP_ERROR,
-          "Percolator feature out of bounds: %d, with value %.2f. Modifying.",
-           check_idx, feature);
-      feature_array[check_idx] = feature <= - BILLION ? -BILLION : BILLION;
-    }
-  }
-
-  return feature_array;
-}
-
-
 /**
  *
  *\returns a match object that is parsed from the tab-delimited result file
@@ -1327,7 +640,14 @@ Match* Match::parseTabDelimited(
 
   match -> match_scores_[XCORR] = result_file.getFloat(XCORR_SCORE_COL);
   match -> match_rank_[XCORR] = result_file.getInteger(XCORR_RANK_COL);
-  
+
+  if (!result_file.empty(DELTA_CN_COL)) {
+    match -> match_scores_[DELTA_CN] = result_file.getFloat(DELTA_CN_COL);
+  }
+  if (!result_file.empty(DELTA_LCN_COL)) {
+    match -> match_scores_[DELTA_LCN] = result_file.getFloat(DELTA_LCN_COL);
+  }
+
   if (!result_file.empty(EXACT_PVALUE_COL)){
     match -> match_scores_[TIDE_SEARCH_EXACT_PVAL] = result_file.getFloat(EXACT_PVALUE_COL);
     match -> match_scores_[TIDE_SEARCH_REFACTORED_XCORR] = result_file.getFloat(REFACTORED_SCORE_COL);
@@ -1409,8 +729,6 @@ Match* Match::parseTabDelimited(
     result_file.getString(PROTEIN_ID_COL).find(decoy_prefix) != string::npos) {
     match -> null_peptide_ = true;
   }
-  carp(CARP_DEBUG, "null:%d", match->null_peptide_);
-
 
   //assign fields
   match -> peptide_sequence_ = NULL;
@@ -1571,9 +889,9 @@ char* Match::getModSequenceStrWithMasses(
  * Must ask for score that has been computed
  *\returns the match_mode score in the match object
  */
-FLOAT_T Match::getScore(
+FLOAT_T Match::getScore (
   SCORER_TYPE_T match_mode ///< the working mode (SP, XCORR) -in
-  )
+  ) const
 {
   return match_scores_[match_mode];
 }
@@ -1922,7 +1240,6 @@ void Match::incrementPointerCount()
  * Set the best-per-peptide Boolean to true.
  */
 void Match::setBestPerPeptide() {
-
   best_per_peptide_ = true;
 }
 
@@ -2098,11 +1415,6 @@ void get_terminal_cleavages(
   bool& nterm, ///< -out is nterminus from a proper cleavage
   bool& cterm ///< -out is cterminus from a proper cleavage?
   ) {
-
-  carp(CARP_DEBUG, "seq:%s", peptide_sequence);
-  carp(CARP_DEBUG, "prev:%c", flanking_aas_prev);
-  carp(CARP_DEBUG, "next:%c", flanking_aas_next);
-
   int num_tol_term = 0;
   char cleavage[3];
   cleavage[2] = '\0';
@@ -2147,10 +1459,6 @@ int get_num_terminal_cleavage(
 void Match::setDatabaseIndexName(string index_name){
   database_index_name_ = index_name;
 }
-
-                             
-
-
 
 /*
  * Local Variables:

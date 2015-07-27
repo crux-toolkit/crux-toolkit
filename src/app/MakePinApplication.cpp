@@ -4,6 +4,7 @@
 #include "MakePinApplication.h"
 #include "io/PinWriter.h"
 #include "parameter.h"
+#include "util/Params.h"
 #include "io/MatchCollectionParser.h"
 #include "io/SQTReader.h"
 #include "util/StringUtils.h"
@@ -28,7 +29,7 @@ MakePinApplication::~MakePinApplication() {}
  * main method for MakePinApplication
  */
 int MakePinApplication::main(int argc, char** argv) {
-  string target_path = get_string_parameter("target input");
+  string target_path = Params::GetString("target input");
 
   vector<string> search_result_files;
   get_search_result_paths(target_path, search_result_files);
@@ -50,6 +51,7 @@ int MakePinApplication::main(const vector<string>& paths) {
   MatchCollection* target_collection = new MatchCollection();
   MatchCollection* decoy_collection = new MatchCollection();
 
+  int max_charge = 0;
   for (vector<string>::const_iterator iter = paths.begin(); iter != paths.end(); ++iter) {
     carp(CARP_INFO, "Parsing %s", iter->c_str());
     if (StringUtils::IEndsWith(*iter, ".sqt")) {
@@ -58,62 +60,73 @@ int MakePinApplication::main(const vector<string>& paths) {
 
     MatchCollection* current_collection = parser.create(iter->c_str(), "");
     for (int scorer_idx = (int)SP; scorer_idx < (int)NUMBER_SCORER_TYPES; scorer_idx++) {
-      target_collection->setScoredType((SCORER_TYPE_T)scorer_idx, 
-        current_collection->getScoredType((SCORER_TYPE_T)scorer_idx));
-      decoy_collection->setScoredType((SCORER_TYPE_T)scorer_idx,
-        current_collection->getScoredType((SCORER_TYPE_T)scorer_idx));
+      SCORER_TYPE_T cur_type = (SCORER_TYPE_T)scorer_idx;
+      bool scored = current_collection->getScoredType(cur_type);
+      target_collection->setScoredType(cur_type, scored);
+      decoy_collection->setScoredType(cur_type, scored);
     } 
-    MatchIterator* match_iter = new MatchIterator(current_collection);
-    while(match_iter->hasNext()) {
-      Crux::Match* match = match_iter->next();
+    MatchIterator match_iter(current_collection);
+    while (match_iter.hasNext()) {
+      Crux::Match* match = match_iter.next();
       if (match->getNullPeptide()) {
         decoy_collection->addMatch(match);
       } else {
         target_collection->addMatch(match);
       }
+      int charge = match->getCharge();
+      if (charge > max_charge) {
+        max_charge = charge;
+      }
     }
-    delete match_iter;
     delete current_collection;
   }
 
-  carp(CARP_INFO, "There are %d target matches and %d decoys",target_collection->getMatchTotal(), decoy_collection->getMatchTotal());
+  carp(CARP_INFO, "There are %d target matches and %d decoys",
+       target_collection->getMatchTotal(), decoy_collection->getMatchTotal());
   if (target_collection->getMatchTotal() == 0) {
     carp(CARP_FATAL, "No target matches found!");
-  }
-  if (decoy_collection->getMatchTotal() == 0) {
+  } else if (decoy_collection->getMatchTotal() == 0) {
     carp(CARP_FATAL, "No decoy matches found!  Did you set 'decoy-prefix' properly?");
   }
 
-  PinWriter* writer = new PinWriter();
-
-  string output_dir = get_string_parameter("output-dir");
- 
-  //perpare output file 
-  string output_filename = get_string_parameter("output-file");
+  //prepare output file 
+  string output_filename = Params::GetString("output-file");
   if (output_filename.empty()) {
-    string fileroot = get_string_parameter("fileroot");
+    string fileroot = Params::GetString("fileroot");
     if (!fileroot.empty()) {
       fileroot += ".";
     }
     output_filename = fileroot + "make-pin.pin";
   }
-  writer->openFile(output_filename.c_str(),output_dir.c_str(), get_boolean_parameter("overwrite"));
+  PinWriter writer;
+  writer.openFile(output_filename, Params::GetString("output-dir"),
+                  Params::GetBool("overwrite"));
 
- //write .pin file 
-  vector<MatchCollection*> decoys;
-  decoys.push_back(decoy_collection);
-  writer->write(target_collection, decoys, get_int_parameter("top-match"));
+  for (int i = 1; i <= max_charge; i++) {
+    writer.setEnabledStatus("Charge" + StringUtils::ToString(i), true);
+  }
+  writer.setEnabledStatus("deltCn", target_collection->getScoredType(DELTA_CN));
+  writer.setEnabledStatus("deltLCn", target_collection->getScoredType(DELTA_LCN));
+  bool is_sp = target_collection->getScoredType(SP);
+  writer.setEnabledStatus("lnrSp", is_sp);
+  writer.setEnabledStatus("Sp", is_sp);
+  writer.setEnabledStatus("IonFrac", is_sp);
+  bool is_refactored_xcorr = target_collection->getScoredType(TIDE_SEARCH_REFACTORED_XCORR);
+  writer.setEnabledStatus("XCorr", !is_refactored_xcorr);
+  writer.setEnabledStatus("RefactoredXCorr", is_refactored_xcorr);
+  writer.setEnabledStatus("NegLog10PValue",
+                          target_collection->getScoredType(TIDE_SEARCH_EXACT_PVAL));
 
-  //close file 
-  writer->closeFile();
+  //write .pin file 
+  writer.printHeader();
+  writer.write(target_collection, vector<MatchCollection*>(1, decoy_collection),
+               Params::GetInt("top-match"));
 
   delete target_collection;
   delete decoy_collection;
-  delete writer;
 
   return 0;
 }
-
 
 /**
  * \returns the command name for PercolatorApplication

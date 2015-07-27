@@ -1089,7 +1089,7 @@ void Params::Initialize() {
     "exists a better scoring PSM involving the same peptide. This option is "
     "incompatible with the mix-max procedure.",
     "Used by assign-confidence.", true);
-  InitStringParam("score", "xcorr score", 
+  InitStringParam("score", "",
     "Specify the column (for tab-delimited input) or tag (for XML input) "
     "used as input to the q-value estimation procedure.",
     "Used by assign-confidence.", true);

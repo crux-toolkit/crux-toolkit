@@ -196,9 +196,6 @@ MatchCollection* MzIdentMLReader::parse() {
 
   parsePSMs();
 
-  // temporary, for testing purposes
-  match_collection_->sortByTideOutput();
-
   return match_collection_;
 }
 
