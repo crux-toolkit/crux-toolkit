@@ -51,9 +51,9 @@ int TideSearchApplication::main(const vector<string>& input_files){
 int TideSearchApplication::main(const vector<string>& input_files, const string input_index) {
   carp(CARP_INFO, "Running tide-search...");
   const string index = input_index;
-  string peptides_file = index + "/pepix";
-  string proteins_file = index + "/protix";
-  string auxlocs_file = index + "/auxlocs";
+  string peptides_file = FileUtils::Join(index, "pepix");
+  string proteins_file = FileUtils::Join(index, "protix");
+  string auxlocs_file = FileUtils::Join(index, "auxlocs");
 
   double window = Params::GetDouble("precursor-window");
   WINDOW_TYPE_T window_type = string_to_window_type(Params::GetString("precursor-window-type"));
@@ -202,6 +202,15 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
       Params::GetBool("mzid-output") || Params::GetBool("pin-output")) {
     carp(CARP_DEBUG, "Using OutputFiles to write matches");
     output_files = new OutputFiles(this);
+    for (int i = 1; i <= Params::GetInt("max-precursor-charge"); i++) {
+      output_files->pinSetEnabledStatus("Charge" + StringUtils::ToString(i), true);
+    }
+    output_files->pinSetEnabledStatus("lnrSp", compute_sp);
+    output_files->pinSetEnabledStatus("Sp", compute_sp);
+    output_files->pinSetEnabledStatus("IonFrac", compute_sp);
+    output_files->pinSetEnabledStatus("XCorr", !Params::GetBool("exact-p-value"));
+    output_files->pinSetEnabledStatus("RefactoredXCorr", Params::GetBool("exact-p-value"));
+    output_files->pinSetEnabledStatus("NegLog10PValue", Params::GetBool("exact-p-value"));
   } else {
     carp(CARP_DEBUG, "Using TideMatchSet to write matches");
     bool overwrite = Params::GetBool("overwrite");
@@ -1077,7 +1086,7 @@ void TideSearchApplication::processParams() {
     Params::Set("tide database", targetIndexName);
   } else {
     pb::Header peptides_header;
-    string peptides_file = index + "/pepix";
+    string peptides_file = FileUtils::Join(index, "pepix");
     HeadedRecordReader peptide_reader(peptides_file, &peptides_header);
     if (!peptides_header.file_type() == pb::Header::PEPTIDES ||
         !peptides_header.has_peptides_header()) {

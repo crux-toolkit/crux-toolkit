@@ -1,5 +1,6 @@
 #include "PMCDelimitedFileWriter.h"
 #include "util/FileUtils.h"
+#include "util/StringUtils.h"
 
 using namespace Crux;
 using namespace boost;
@@ -517,7 +518,7 @@ void PMCDelimitedFileWriter::writePSMs(
       addScoreIfExists(pep_match, DELTA_CN, DELTA_CN_COL);
       addScoreIfExists(pep_match, BY_IONS_MATCHED, BY_IONS_MATCHED_COL);
       addScoreIfExists(pep_match, BY_IONS_TOTAL, BY_IONS_TOTAL_COL);
-      setColumnCurrentRow(PROTEIN_ID_COL, peptide->getProteinIds());
+      setColumnCurrentRow(PROTEIN_ID_COL, StringUtils::Join(peptide->getProteinIds(), ','));
     }
 
     setColumnCurrentRow(SCAN_COL, spectrum->getFirstScan());

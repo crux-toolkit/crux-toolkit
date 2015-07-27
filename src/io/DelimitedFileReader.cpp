@@ -19,11 +19,8 @@ using namespace std;
 /**
  * \returns a DelimitedFileReader object
  */  
-DelimitedFileReader::DelimitedFileReader() {
-  num_rows_valid_ = false;
-  istream_ptr_ = NULL;
-  delimiter_ = '\t';
-  owns_stream_ = false;
+DelimitedFileReader::DelimitedFileReader():
+  num_rows_valid_(false), istream_ptr_(NULL), delimiter_('\t'), owns_stream_(false) {
 }
 
 /**
@@ -34,11 +31,7 @@ DelimitedFileReader::DelimitedFileReader(
   const char *file_name, ///< the path of the file to read
   bool has_header, ///< indicates whether the header exists (default true).
   char delimiter ///< the delimiter to use (default tab).
-  ) {
-
-  istream_ptr_ = NULL;
-  num_rows_valid_ = false;
-  delimiter_ = delimiter;
+): istream_ptr_(NULL), num_rows_valid_(false), delimiter_(delimiter) {
   loadData(file_name, has_header);
 }
 
@@ -50,10 +43,7 @@ DelimitedFileReader::DelimitedFileReader(
   const std::string& file_name, ///< the path of the file  to read
   bool has_header, ///< indicates whether the header exists (default true).
   char delimiter ///< the delimiter to use (default tab)
-  ) {
-
-  istream_ptr_ = NULL;
-  delimiter_ = delimiter;
+): istream_ptr_(NULL), delimiter_(delimiter) {
   loadData(file_name, has_header);
 }
 
@@ -65,18 +55,9 @@ DelimitedFileReader::DelimitedFileReader(
   std::istream* istream_ptr, ///< the stream to be read
   bool has_header, ///<indicates whether header exists
   char delimiter ///< the delimiter to use (default tab)
-  ) {
-
-  
-  istream_ptr_ = istream_ptr;
-  istream_begin_ = istream_ptr->tellg();
-
-  delimiter_ = delimiter;
-  has_header_ = has_header;
-  owns_stream_ = false;
-
+): istream_ptr_(istream_ptr), istream_begin_(istream_ptr->tellg()), delimiter_(delimiter),
+   has_header_(has_header), owns_stream_(false) {
   loadData();
-
 }
 
 
@@ -84,7 +65,6 @@ DelimitedFileReader::DelimitedFileReader(
  * Destructor
  */
 DelimitedFileReader::~DelimitedFileReader() {
-
   if (istream_ptr_ != NULL && owns_stream_) {
     delete istream_ptr_;
   }
@@ -94,11 +74,8 @@ DelimitedFileReader::~DelimitedFileReader() {
  * \returns the number of rows, assuming a square matrix
  */
 unsigned int DelimitedFileReader::numRows() {
-
   if (!num_rows_valid_) {
-
     num_rows_ = 0;
-
 
     streampos last_pos = istream_ptr_->tellg();
 
@@ -117,7 +94,6 @@ unsigned int DelimitedFileReader::numRows() {
     num_rows_valid_ = true;
     istream_ptr_->clear();
     istream_ptr_->seekg(last_pos);
-
   }
   return num_rows_;
 }
@@ -126,7 +102,6 @@ unsigned int DelimitedFileReader::numRows() {
  *\returns the number of columns
  */
 unsigned int DelimitedFileReader::numCols() {
-
   return column_names_.size();
 }
 
@@ -149,7 +124,6 @@ string DelimitedFileReader::getAvailableColumnsString() {
  *\returns the column name header string
  */
 string DelimitedFileReader::getHeaderString() {
-
   if (numCols() == 0) {
     return string("");
   }
@@ -166,7 +140,6 @@ string DelimitedFileReader::getHeaderString() {
 
 
 void DelimitedFileReader::loadData() {
-
   if (!istream_ptr_->good()) {
     carp(CARP_ERROR, "Stream is not good!");
     carp(CARP_ERROR, "Filename:%s", file_name_.c_str());
@@ -197,7 +170,6 @@ void DelimitedFileReader::loadData() {
   if (has_next_) {
     next();
   } 
-
 }
 
 /**
@@ -234,7 +206,6 @@ void DelimitedFileReader::loadData(
   const string& file, ///< the file path
   bool has_header ///< header indicator
   ) {
-
   loadData(file.c_str(), has_header);
 }
 
@@ -245,7 +216,6 @@ void DelimitedFileReader::loadData(
 int DelimitedFileReader::findColumn(
   const string& column_name ///< the column name
   ) {
-
   for (unsigned int col_idx=0;col_idx<column_names_.size();col_idx++) {
     if (column_names_[col_idx] == column_name) {
       return col_idx;
@@ -261,8 +231,7 @@ int DelimitedFileReader::findColumn(
 int DelimitedFileReader::findColumn(
   const char* column_name ///< the column name
 ) {
-  string sname = string(column_name);
-  return findColumn(sname);
+  return findColumn(string(column_name));
 }
 
 /**
@@ -278,7 +247,6 @@ const string& DelimitedFileReader::getColumnName(
  *\returns the column_names
  */
 const vector<string>& DelimitedFileReader::getColumnNames() {
-
   return column_names_;
 }
 
@@ -297,7 +265,6 @@ const string& DelimitedFileReader::getString() {
   if (!has_current_) {
     carp(CARP_FATAL, "End of file!");
   }
-  
   return current_data_string_;
 }
 
@@ -307,15 +274,10 @@ const string& DelimitedFileReader::getString() {
 const string& DelimitedFileReader::getString(
   unsigned int col_idx ///< the column index
   ) {
-
   if (col_idx >= data_.size()) {
-    carp(CARP_FATAL, 
-      "col idx:%i is out of bounds! (0,%i,%i)",
-      col_idx, 
-      (column_names_.size()-1),
-      (data_.size()-1));
+    carp(CARP_FATAL, "col idx:%i is out of bounds! (0,%i,%i)",
+         col_idx, (column_names_.size()-1), (data_.size()-1));
   }
-
   return data_.at(col_idx);
 }
 
@@ -327,10 +289,8 @@ const string& DelimitedFileReader::getString(
   ) {
   int col_idx = findColumn(column_name);
   if (col_idx == -1) {
-    carp(CARP_FATAL, "Cannot find column %s\n" 
-                     "Available Columns:%s\n",
-                      column_name, getAvailableColumnsString().c_str());
-
+    carp(CARP_FATAL, "Cannot find column %s\n" "Available Columns:%s\n",
+         column_name, getAvailableColumnsString().c_str());
   }
   return getString(col_idx);
 }
@@ -343,7 +303,6 @@ template<typename TValue>
 TValue DelimitedFileReader::getValue(
   unsigned int col_idx ///< the column index 
   ) {
-
   const string& string_ans = getString(col_idx);
   TValue type_ans;
   from_string<TValue>(type_ans, string_ans);
@@ -356,16 +315,12 @@ TValue DelimitedFileReader::getValue(
 FLOAT_T DelimitedFileReader::getFloat(
   unsigned int col_idx ///< the column index
   ) {
-  
   const string& string_ans = getString(col_idx);
   if (string_ans == "Inf") {
-
     return numeric_limits<FLOAT_T>::infinity();
   } else if (string_ans == "-Inf") {
-
     return -numeric_limits<FLOAT_T>::infinity();
-  }
-  else {
+  } else {
     return getValue<FLOAT_T>(col_idx);
   }
 }
@@ -393,20 +348,14 @@ FLOAT_T DelimitedFileReader::getFloat(
 double DelimitedFileReader::getDouble(
   unsigned int col_idx ///< the column index 
   ) {
-
   const string& string_ans = getString(col_idx);
   if (string_ans == "") {
-
     return 0.0;
   } else if (string_ans == "Inf") {
-
     return numeric_limits<double>::infinity();
   } else if (string_ans == "-Inf") {
-
     return -numeric_limits<double>::infinity();
-  }
-  else {
-
+  } else {
     return getValue<double>(col_idx);
   }
 }
@@ -505,9 +454,8 @@ void DelimitedFileReader::getDoubleVectorFromCell(
   double_vector.clear();
 
   for (vector<string>::iterator string_iter = string_vector_ans.begin();
-    string_iter != string_vector_ans.end();
-    ++string_iter) {
-
+       string_iter != string_vector_ans.end();
+       ++string_iter) {
     double double_ans;
     from_string<double>(double_ans, *string_iter);
     double_vector.push_back(double_ans);
@@ -522,14 +470,12 @@ void DelimitedFileReader::reset() {
   istream_ptr_->clear();
   istream_ptr_->seekg(istream_begin_, ios::beg);
   loadData();
-  
 }
 
 /**
  * parses the next line in the file. 
  */
 void DelimitedFileReader::next() {
-
   if (has_next_) {
     current_row_++;
     current_data_string_ = next_data_string_;
@@ -538,17 +484,14 @@ void DelimitedFileReader::next() {
     //make sure data has the right number of columns for the header.
     if (data_.size() < column_names_.size()) {
       if (!column_mismatch_warned_) {
-        carp(CARP_WARNING,
-          "Column count %d for line %d is less than header %d",
-          data_.size(), current_row_, column_names_.size());
-        carp(CARP_WARNING,
-          "%s", current_data_string_.c_str());
-        carp(CARP_WARNING,
-          "Suppressing warnings, other mismatches may exist!");
+        carp(CARP_WARNING, "Column count %d for line %d is less than header %d",
+             data_.size(), current_row_, column_names_.size());
+        carp(CARP_WARNING, "%s", current_data_string_.c_str());
+        carp(CARP_WARNING, "Suppressing warnings, other mismatches may exist!");
         column_mismatch_warned_ = true;
       }
       while (data_.size() < column_names_.size()) {
-        data_.push_back(string(""));
+        data_.push_back("");
       }
     }
 
@@ -567,3 +510,4 @@ void DelimitedFileReader::next() {
 bool DelimitedFileReader::hasNext() {
   return has_next_ || has_current_;
 }
+

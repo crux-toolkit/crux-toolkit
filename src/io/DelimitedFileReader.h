@@ -147,7 +147,7 @@ class DelimitedFileReader {
  /**
    * finds the index of a column
    *\returns the column index, -1 if not found.
-   */ 
+   */
   int findColumn(
     const char* column_name ///< the column name
   );

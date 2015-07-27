@@ -16,6 +16,7 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "spectrum neutral mass",
   "peptide mass",
   "delta_cn",
+  "delta_lcn",
   "sp score",
   "sp rank",
   "xcorr score",
@@ -125,12 +126,11 @@ const char* get_column_header(
 int get_column_idx(
   const char* column_name
 ) {
-  int i;
-  for (i = FILE_COL; i < NUMBER_MATCH_COLUMNS; ++i) {
+  for (int i = FILE_COL; i < NUMBER_MATCH_COLUMNS; ++i) {
     if (strcmp(column_name, match_column_strings[i]) == 0) {
       return i;
     }
   }
-  carp(CARP_FATAL, "Cannot find column %s.\n", column_name);
-  return i;
+  return INVALID_COL;
 }
+

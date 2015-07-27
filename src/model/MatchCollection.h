@@ -138,16 +138,6 @@ class MatchCollection {
     );
 
   /**
-   * \brief Sort a match_collection by the given score type, grouping
-   * matches by spectrum (if multiple spectra are present).
-   */
-  void spectrumSort(
-    SCORER_TYPE_T score_type ///< the score type to sort by -in
-    );
-
-  void sortByTideOutput();
-
-  /**
    * Rank matches in a collection based on the given score type.  
    * Requires that match_collection was already scored for that score type.
    * Rank 1, means highest score
@@ -240,6 +230,10 @@ class MatchCollection {
   int getCharge();
 
   bool calculateDeltaCn();
+
+  // Take a vector of scores and return a vector of <deltaCn, deltaLCn>
+  static std::vector< std::pair<FLOAT_T, FLOAT_T> > calculateDeltaCns(
+    std::vector<FLOAT_T>, SCORER_TYPE_T type);
 
   /**
    * \brief Transfer the Weibull distribution parameters, including the
@@ -439,29 +433,7 @@ class MatchCollection {
   /*******************************************
    * match_collection post_process extension
    ******************************************/
-  /**
-   * Fill the match objects score with the given the FLOAT_T array. 
-   * The match object order must not have been altered since scoring.
-   * The result array size must match the match_total count.
-   * Match ranks are also populated to preserve the original order of the
-   * match input true for preserve_order.
-   *\returns true, if successfully fills the scores into match object, else false.
-   */
-  void fillResult(
-    double* results,  ///< The result score array to fill the match objects -in
-    SCORER_TYPE_T score_type,  ///< The score type of the results to fill -in
-    bool preserve_order ///< preserve match order?
-    );
-
-// cheater functions for testing
-  void forceScoredBy(SCORER_TYPE_T type);
-
-  bool addMatchToPostMatchCollection(
-    Crux::Match* match 
-    );
-
-
-
+  bool addMatchToPostMatchCollection(Crux::Match* match);
 };
 
 /**

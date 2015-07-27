@@ -151,14 +151,14 @@ void PercolatorAdapter::addPsmScores() {
     Crux::Match::freeMatch(match); // so match gets deleted when collection does
   }
 
-  targets->forceScoredBy(PERCOLATOR_SCORE);
-  targets->forceScoredBy(PERCOLATOR_QVALUE);
-  targets->forceScoredBy(PERCOLATOR_PEP);
+  targets->setScoredType(PERCOLATOR_SCORE, true);
+  targets->setScoredType(PERCOLATOR_QVALUE, true);
+  targets->setScoredType(PERCOLATOR_PEP, true);
   targets->populateMatchRank(PERCOLATOR_SCORE);
 
-  decoys->forceScoredBy(PERCOLATOR_SCORE);
-  decoys->forceScoredBy(PERCOLATOR_QVALUE);
-  decoys->forceScoredBy(PERCOLATOR_PEP);
+  decoys->setScoredType(PERCOLATOR_SCORE, true);
+  decoys->setScoredType(PERCOLATOR_QVALUE, true);
+  decoys->setScoredType(PERCOLATOR_PEP, true);
   decoys->populateMatchRank(PERCOLATOR_SCORE);
 
   // sort by q-value

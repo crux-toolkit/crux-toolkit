@@ -220,8 +220,7 @@ protected:
 
   static void computeDeltaCns(
     const vector<Arr::iterator>& vec, // xcorr*100000000.0, high to low
-    map<Arr::iterator, FLOAT_T>* delta_cn_map, // map to add delta cn scores to
-    int top_n // number of top matches we will be reporting
+    map<Arr::iterator, FLOAT_T>* delta_cn_map // map to add delta cn scores to
   );
 
   static void computeSpData(
