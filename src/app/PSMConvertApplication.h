@@ -50,17 +50,12 @@ public:
    */
   virtual vector<string> getOptions() const;
 
-  /*
-   * Accepts two strings, returns whether the first string ends with the second
-   */
-  virtual int endsWith(string s, string ending);
-
   /**
    * Returns whether the application needs the output directory or not. (default false)
    */
-  virtual bool needsOutputDirectory();
+  virtual bool needsOutputDirectory() const;
 
-  virtual COMMAND_T getCommand();
+  virtual COMMAND_T getCommand() const;
   
 };
 

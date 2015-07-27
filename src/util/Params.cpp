@@ -1223,8 +1223,8 @@ void Params::Initialize() {
       "given amount.", "", visible);
   }
   /* psm-convert options */
-  InitStringParam("input-format", "auto", "auto|sqt|pin|pepxml|mzidentml",
-    "Legal values are auto, sqt, pin, pepxml or mzidentml format.",
+  InitStringParam("input-format", "auto", "auto|tsv|sqt|pin|pepxml|mzidentml",
+    "Legal values are auto, tsv, sqt, pin, pepxml or mzidentml format.",
     "option, for psm-convert", true);
   InitBoolParam("distinct-matches", true,
     "Whether matches/ion are distinct (As apposed to total).",
