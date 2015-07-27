@@ -15,7 +15,6 @@ using namespace std;
  * \returns a blank MatchFileReader object 
  */
 MatchFileReader::MatchFileReader() : DelimitedFileReader(), PSMReader() {
-  ;
 }
 
 /**
@@ -30,8 +29,8 @@ MatchFileReader::MatchFileReader(const char* file_name) : DelimitedFileReader(fi
  * \returns a MatchFileReader object and loads the tab-delimited
  * data specified by file_name.
  */
-MatchFileReader::MatchFileReader(const string& file_name) : DelimitedFileReader(file_name, true),
-  PSMReader(file_name) {
+MatchFileReader::MatchFileReader(const string& file_name)
+  : DelimitedFileReader(file_name, true), PSMReader(file_name) {
   parseHeader();
 }
 
@@ -80,8 +79,7 @@ void MatchFileReader::loadData(
  * parses the header and builds the internal hash table
  */
 void MatchFileReader::parseHeader() {
-  
-  for (int idx=0;idx<NUMBER_MATCH_COLUMNS;idx++) {
+  for (int idx = 0; idx < NUMBER_MATCH_COLUMNS; idx++) {
     match_indices_[idx] = findColumn(get_column_header(idx));
   }
 }
@@ -93,12 +91,9 @@ void MatchFileReader::parseHeader() {
 FLOAT_T MatchFileReader::getFloat(
   MATCH_COLUMNS_T col_type ///<the column type
 ) {
-
   int idx = match_indices_[col_type];
   if (idx == -1) {
-
-    carp(CARP_DEBUG,
-         "column \"%s\" not found for getFloat",
+    carp(CARP_DEBUG, "column \"%s\" not found for getFloat",
          get_column_header(col_type));
     return -1;
   } else {

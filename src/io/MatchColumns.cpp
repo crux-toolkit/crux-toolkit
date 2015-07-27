@@ -99,7 +99,7 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "dm",
   "absdM",
   "Peptide",
-  "Proteins" // end for PinWriter.
+  "Proteins", // end for PinWriter.
   "product type",
   "ppm",
   "xcorr 1",
@@ -114,11 +114,11 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
 const char* get_column_header(
   int columnIndex
 ) {
-  if ((columnIndex < 0) || (columnIndex >= NUMBER_MATCH_COLUMNS)) {
+  if (columnIndex < 0 || columnIndex >= NUMBER_MATCH_COLUMNS) {
     carp(CARP_FATAL, "Cannot access output column %d.\n", columnIndex);
   }
-  carp(CARP_DETAILED_DEBUG, "get_column_header: %d/%d %s", columnIndex, 
-    NUMBER_MATCH_COLUMNS, match_column_strings[columnIndex]);
+  carp(CARP_DETAILED_DEBUG, "get_column_header: %d/%d %s",
+       columnIndex, NUMBER_MATCH_COLUMNS - 1, match_column_strings[columnIndex]);
   return(match_column_strings[columnIndex]);
 }
 

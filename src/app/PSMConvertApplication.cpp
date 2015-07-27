@@ -1,7 +1,7 @@
 #include <cstdio>
 
 #include "io/carp.h"
-#include "parameter.h"
+#include "util/Params.h"
 #include "PSMConvertApplication.h"
 #include "io/PepXMLWriter.h"
 #include "io/PSMReader.h"
@@ -30,23 +30,16 @@ PSMConvertApplication::~PSMConvertApplication() {
 
 int PSMConvertApplication::main(int argc, char** argv) {
 
-  bool overwrite = get_boolean_parameter("overwrite");
+  bool overwrite = Params::GetBool("overwrite");
 
   carp(CARP_INFO, "Running psm-convert...");
 
-  string cmd_line = "crux psm-convert";
-  for (int i = 1; i < argc; ++i) {
-    cmd_line += " ";
-    cmd_line += argv[i];
-  }
-
-  string database_file = get_string_parameter("protein-database");
+  string database_file = Params::GetString("protein-database");
 
   Database* data;
 
-  if (database_file.empty() || database_file.compare("__NULL_STR") == 0) {
+  if (database_file.empty()) {
     data = new Database();
-    carp(CARP_INFO, database_file);
     carp(CARP_INFO, "Database not provided, will use empty database");
   } else {
     data = new Database(database_file.c_str(), false);
@@ -54,28 +47,28 @@ int PSMConvertApplication::main(int argc, char** argv) {
   }
 
   PSMReader* reader;
-  string input_format = get_string_parameter("input-format");
-  string input_file = get_string_parameter("input PSM file");
+  string input_format = Params::GetString("input-format");
+  string input_file = Params::GetString("input PSM file");
 
   bool isTabDelimited = false;
 
-  if (input_format.compare("auto") == 0) {
-    if (input_format.compare("tsv") == 0) {
+  if (input_format != "auto") {
+    if (input_format == "tsv") {
       reader = new MatchFileReader(input_file.c_str(), data);
       isTabDelimited = true;
-    } else if (input_format.compare("html") == 0) {
+    } else if (input_format == "html") {
       carp(CARP_FATAL, "HTML format has not been implemented yet");
       reader = new MatchFileReader(input_file.c_str(), data);
-    } else if (input_format.compare("sqt") == 0) {
+    } else if (input_format == "sqt") {
       reader = new SQTReader(input_file.c_str(), data);
-    } else if (input_format.compare("pin") == 0) {
+    } else if (input_format == "pin") {
       carp(CARP_FATAL, "Pin format has not been implemented yet");
       reader = new MatchFileReader(input_file.c_str(), data);
-    } else if (input_format.compare("pepxml") == 0) {
+    } else if (input_format == "pepxml") {
       reader = new PepXMLReader(input_file.c_str(), data);
-    } else if (input_format.compare("mzidentml") == 0) {
+    } else if (input_format == "mzidentml") {
       reader = new MzIdentMLReader(input_file.c_str(), data);
-    } else if (input_format.compare("barista-xml") == 0) {
+    } else if (input_format == "barista-xml") {
       carp(CARP_FATAL, "Barista-XML format has not been implemented yet");
       reader = new MatchFileReader(input_file.c_str(), data);
     } else {
@@ -83,22 +76,22 @@ int PSMConvertApplication::main(int argc, char** argv) {
         "sqt, pin, pepxml, mzidentml, barista-xml");
     }
   } else {
-    if (endsWith(input_file, ".txt") == 0) {
+    if (StringUtils::IEndsWith(input_file, ".txt")) {
       reader = new MatchFileReader(input_file.c_str(), data);
       isTabDelimited = true;
-    } else if (endsWith(input_file, ".html") == 0) {
+    } else if (StringUtils::IEndsWith(input_file, ".html")) {
       carp(CARP_FATAL, "HTML format has not been implemented yet");
       reader = new MatchFileReader(input_file.c_str(), data);
-    } else if (endsWith(input_file, ".sqt") == 0) {
+    } else if (StringUtils::IEndsWith(input_file, ".sqt")) {
       reader = new SQTReader(input_file.c_str(), data);
-    } else if (endsWith(input_file, ".pin") == 0) {
+    } else if (StringUtils::IEndsWith(input_file, ".pin")) {
       carp(CARP_FATAL, "Pin format has not been implemented yet");
       reader = new MatchFileReader(input_file.c_str(), data);
-    } else if (endsWith(input_file, ".xml") == 0) {
+    } else if (StringUtils::IEndsWith(input_file, ".xml")) {
       reader = new PepXMLReader(input_file.c_str(), data);
-    } else if (endsWith(input_file, ".mzid") == 0) {
+    } else if (StringUtils::IEndsWith(input_file, ".mzid")) {
       reader = new MzIdentMLReader(input_file.c_str(), data);
-    } else if (endsWith(input_file, ".barista.xml") == 0) {
+    } else if (StringUtils::IEndsWith(input_file, ".barista.xml")) {
       carp(CARP_FATAL, "Barista-XML format has not been implemented yet");
       reader = new MatchFileReader(input_file.c_str(), data);
     } else {
@@ -112,44 +105,45 @@ int PSMConvertApplication::main(int argc, char** argv) {
   MatchCollection* collection = reader->parse();
 
   if (!isTabDelimited) {
-    collection->setHasDistinctMatches(get_boolean_parameter("distinct-matches"));
-  } else if (collection->getHasDistinctMatches() != get_boolean_parameter("distinct-matches")) {
+    collection->setHasDistinctMatches(Params::GetBool("distinct-matches"));
+  } else if (collection->getHasDistinctMatches() != Params::GetBool("distinct-matches")) {
+    const char* matchType = collection->getHasDistinctMatches() ?
+      "distinct" : "not distinct";
     carp(CARP_WARNING, "Parser has detected that matches are %s, but parameter "
-      "distinct-matches is set to %s. We will assume that matches are %s",
-      collection->getHasDistinctMatches() ? "distinct" : "not distinct",
-      get_boolean_parameter("distinct-matches") ? "distinct" : "not distinct",
-      collection->getHasDistinctMatches() ? "distinct" : "not distinct");
+                       "distinct-matches is set to %s. We will assume that matches are %s",
+         matchType, Params::GetBool("distinct-matches") ? "distinct" : "not distinct",
+         matchType);
   }
 
   carp(CARP_INFO, "Reader has been succesfully parsed");
 
-  string output_format = get_string_parameter("output format");
+  string output_format = Params::GetString("output format");
 
-// What will be used when PSMWriter is finished.
+  // What will be used when PSMWriter is finished.
 
   PSMWriter* writer;
   stringstream output_file_name_builder;
   output_file_name_builder << "psm-convert.";
 
-  if (output_format.compare("tsv") == 0) {
+  if (output_format == ("tsv")) {
     output_file_name_builder << "txt";
     writer = new PMCDelimitedFileWriter();
-  } else if (output_format.compare("html") == 0) {
+  } else if (output_format == ("html")) {
     output_file_name_builder << "html";
     writer = new HTMLWriter();
-  } else if (output_format.compare("sqt") == 0) {
+  } else if (output_format == ("sqt")) {
     output_file_name_builder << "sqt";
     writer = new PMCSQTWriter();
-  } else if (output_format.compare("pin") == 0) {
+  } else if (output_format == ("pin")) {
     output_file_name_builder << "pin";
     writer = new PinWriter();
-  } else if (output_format.compare("pepxml") == 0) {
+  } else if (output_format == ("pepxml")) {
     output_file_name_builder << "pep.xml";
     writer = new PMCPepXMLWriter();
-  } else if (output_format.compare("mzidentml") == 0) {
+  } else if (output_format == ("mzidentml")) {
     output_file_name_builder << "mzid";
     writer = new MzIdentMLWriter();
-  } else if (output_format.compare("barista-xml") == 0) {
+  } else if (output_format == ("barista-xml")) {
     carp(CARP_FATAL, "Barista-XML format has not been implemented yet");
     output_file_name_builder << "barista.xml";
     writer = new PMCDelimitedFileWriter();
@@ -165,21 +159,12 @@ int PSMConvertApplication::main(int argc, char** argv) {
   writer->write(collection, database_file);
   writer->closeFile();
 
-// Clean Up
+  // Clean Up
   delete collection;
   delete reader;
   delete writer;
 
   return 0;
-}
-
-// Accepts two strings, returns whether the first string ends with the
-// second string
-int PSMConvertApplication::endsWith(string s, string ending) {
-  if (s.length() >= ending.length()) {
-    return s.compare(s.length() - ending.length(), ending.length(), ending);
-  }
-  return 1;
 }
 
 string PSMConvertApplication::getName() const {
@@ -213,11 +198,11 @@ vector<string> PSMConvertApplication::getOptions() const {
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }
 
-bool PSMConvertApplication::needsOutputDirectory() {
+bool PSMConvertApplication::needsOutputDirectory() const {
   return true;
 }
 
-COMMAND_T PSMConvertApplication::getCommand() {
+COMMAND_T PSMConvertApplication::getCommand() const {
   return PSM_CONVERT_COMMAND;
 }
 
