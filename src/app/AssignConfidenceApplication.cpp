@@ -200,6 +200,7 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
         case TIDE_SEARCH_EXACT_PVAL:
           // lower score better
           ascending = true;
+          break;
         default:
           // higher score better
           ascending = false;
