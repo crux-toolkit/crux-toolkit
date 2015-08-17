@@ -286,9 +286,8 @@ void SQTReader::parseMatch(string& line) {
   current_match_->setRank(XCORR, xcorr_rank);
   current_match_->setRank(SP, sp_rank);
 
-  current_match_->setBYIonMatched(matched_ions);
-  current_match_->setBYIonPossible(expected_ions);
-  current_match_->setBYIonFractionMatched((FLOAT_T)matched_ions / (FLOAT_T)expected_ions);
+  current_match_->setScore(BY_IONS_MATCHED, matched_ions);
+  current_match_->setScore(BY_IONS_TOTAL, expected_ions);
   current_match_->setLnExperimentSize(current_ln_experiment_size_);
 
   last_parsed_ = SQT_LINE_MATCH;

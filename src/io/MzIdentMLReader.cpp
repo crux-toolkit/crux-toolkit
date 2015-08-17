@@ -133,11 +133,11 @@ void MzIdentMLReader::addScores(
         break;
       case MS_SEQUEST_matched_ions:
         from_string(ivalue, iter->value);
-        match->setBYIonMatched(ivalue);
+        match->setScore(BY_IONS_MATCHED, ivalue);
         break;
       case MS_SEQUEST_total_ions:
         from_string(ivalue, iter->value);
-        match->setBYIonPossible(ivalue);
+        match->setScore(BY_IONS_TOTAL, ivalue);
         break;
       default:
         carp(CARP_DEBUG, "Unknown score type, will be set in custom scores");

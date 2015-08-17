@@ -643,10 +643,12 @@ void MzIdentMLWriter::addScores(
     item->cvParams.push_back(delta_cn);
   }
 
-  if (match_collection->getScoredType(SP)) {
-    CVParam matched_ions(MS_SEQUEST_matched_ions, match->getBYIonMatched());
+  if (match_collection->getScoredType(BY_IONS_MATCHED)) {
+    CVParam matched_ions(MS_SEQUEST_matched_ions, match->getScore(BY_IONS_MATCHED));
     item->cvParams.push_back(matched_ions);
-    CVParam total_ions(MS_SEQUEST_total_ions, match->getBYIonPossible()); 
+  }
+  if (match_collection->getScoredType(BY_IONS_TOTAL)) {
+    CVParam total_ions(MS_SEQUEST_total_ions, match->getScore(BY_IONS_TOTAL)); 
     item->cvParams.push_back(total_ions);
   }
 }

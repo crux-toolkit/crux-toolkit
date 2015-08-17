@@ -51,6 +51,11 @@ public:
   virtual vector<string> getOptions() const;
 
   /**
+   * \returns the outputs of the application as <name, description>
+   */
+  virtual vector< pair<string, string> > getOutputs() const;
+
+  /**
    * Returns whether the application needs the output directory or not. (default false)
    */
   virtual bool needsOutputDirectory() const;

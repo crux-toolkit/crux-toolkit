@@ -142,11 +142,17 @@ void PMCDelimitedFileWriter::write(
   // Is there a better way to do this or move to setUpPSMSColumns? Seems messy...
   SpectrumMatchIterator first_spec = collection->spectrumMatchBegin();
   SpectrumMatch* match = *first_spec;
+  
+  if (!match->getFilePath().empty()) {
+    addColumnName(FILE_COL);
+  }
   addScoreColumnIfExists(match, DELTA_CN, DELTA_CN_COL);
   addScoreColumnIfExists(match, SP, SP_SCORE_COL);
   addRankColumnIfExists(match, SP, SP_RANK_COL);
   addScoreColumnIfExists(match, XCORR, XCORR_SCORE_COL);
   addRankColumnIfExists(match, XCORR, XCORR_RANK_COL);
+  addScoreColumnIfExists(match, TIDE_SEARCH_EXACT_PVAL, EXACT_PVALUE_COL);
+  addScoreColumnIfExists(match, TIDE_SEARCH_REFACTORED_XCORR, REFACTORED_SCORE_COL);
   addScoreColumnIfExists(match, BY_IONS_MATCHED, BY_IONS_MATCHED_COL);
   addScoreColumnIfExists(match, BY_IONS_TOTAL, BY_IONS_TOTAL_COL);
   if (collection->hasDistinctMatches()) {
@@ -530,6 +536,8 @@ void PMCDelimitedFileWriter::writePSMs(
     addRankIfExists(match, SP, SP_RANK_COL);
     addScoreIfExists(match, XCORR, XCORR_SCORE_COL);
     addRankIfExists(match, XCORR, XCORR_RANK_COL);
+    addScoreIfExists(match, TIDE_SEARCH_EXACT_PVAL, EXACT_PVALUE_COL);
+    addScoreIfExists(match, TIDE_SEARCH_REFACTORED_XCORR, REFACTORED_SCORE_COL);
     addScoreIfExists(match, PERCOLATOR_SCORE, PERCOLATOR_SCORE_COL);
     addRankIfExists(match, PERCOLATOR_SCORE, PERCOLATOR_RANK_COL);
     addScoreIfExists(match, PERCOLATOR_QVALUE, PERCOLATOR_QVALUE_COL);
