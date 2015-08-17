@@ -198,6 +198,18 @@ vector<string> PSMConvertApplication::getOptions() const {
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }
 
+vector< pair<string, string> > PSMConvertApplication::getOutputs() const {
+  vector< pair<string, string> > outputs;
+  outputs.push_back(make_pair("psm-convert.log.txt",
+    "a log file containing a copy of all messages that were printed to stderr."));
+  outputs.push_back(make_pair("psm-convert.params.txt",
+    "a file containing the name and value of all parameters/options for the "
+    "current operation. Not all parameters in the file may have been used in "
+    "the operation. The resulting file can be used with the --parameter-file "
+    "option for other crux programs."));
+  return outputs;
+}
+
 bool PSMConvertApplication::needsOutputDirectory() const {
   return true;
 }

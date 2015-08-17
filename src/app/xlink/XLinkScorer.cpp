@@ -115,7 +115,8 @@ FLOAT_T XLinkScorer::scoreCandidate(
     FLOAT_T sp = scorer_sp_->scoreSpectrumVIonSeries(spectrum_, ion_series_sp_);
     
     candidate->setScore(SP, sp);
-    candidate->setBYIonInfo(scorer_sp_);
+    candidate->setScore(BY_IONS_MATCHED, scorer_sp_->getSpBYIonMatched());
+    candidate->setScore(BY_IONS_TOTAL, scorer_sp_->getSpBYIonPossible());
 
   }
 

@@ -213,8 +213,12 @@ void PinWriter::printPSM(
     } else if (feature == "Sp") {
       fields.push_back(StringUtils::ToString(match->getScore(SP), precision_));
     } else if (feature == "IonFrac") {
-      FLOAT_T ion_frac = match->getBYIonFractionMatched();
-      fields.push_back(StringUtils::ToString(!isnan(ion_frac) ? ion_frac : 0, precision_));
+      FLOAT_T ionMatch = match->getScore(BY_IONS_MATCHED);
+      FLOAT_T ionTotal = match->getScore(BY_IONS_TOTAL);
+      FLOAT_T ionFrac = (ionMatch != NOT_SCORED && ionTotal != NOT_SCORED && ionTotal > 0)
+        ? ionMatch / ionTotal
+        : 0;
+      fields.push_back(StringUtils::ToString(ionFrac, precision_));
     } else if (feature == "RefactoredXCorr") {
       fields.push_back(
         StringUtils::ToString(match->getScore(TIDE_SEARCH_REFACTORED_XCORR), precision_));

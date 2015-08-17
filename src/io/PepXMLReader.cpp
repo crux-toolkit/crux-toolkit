@@ -355,11 +355,9 @@ void PepXMLReader::searchHitOpen(
     current_match_->setRank(XCORR, hit_rank);
   }
   if(by_ions_total>0){
-    current_match_->setBYIonMatched(by_ions_matched);
-    current_match_->setBYIonPossible(by_ions_total);
-    current_match_-> setBYIonFractionMatched((FLOAT_T)by_ions_matched/(FLOAT_T)by_ions_total); 
-  }else 
-    current_match_->setBYIonFractionMatched(0);
+    current_match_->setScore(BY_IONS_MATCHED, by_ions_matched);
+    current_match_->setScore(BY_IONS_TOTAL, by_ions_total);
+  }
 
   if(current_num_matches>0) {
     current_match_->setLnExperimentSize(logf(current_num_matches));

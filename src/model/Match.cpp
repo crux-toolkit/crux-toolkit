@@ -51,9 +51,6 @@ void Match::init() {
     match_rank_[idx] = 0;
   }
   pointer_count_ = 0;
-  b_y_ion_fraction_matched_ = 0;
-  b_y_ion_matched_ = 0;
-  b_y_ion_possible_ = 0;
   // default is not a null peptide match
   null_peptide_ = false;
   peptide_sequence_ = NULL;
@@ -148,8 +145,14 @@ void Match::printSqt(
   // this should get the sequence from the match, not the peptide
   char* sequence = getSequenceSqt();
 
-  int b_y_total = getBYIonPossible();
-  int b_y_matched = getBYIonMatched();
+  int b_y_total = getScore(BY_IONS_TOTAL);
+  if (b_y_total == NOT_SCORED) {
+    b_y_total = 0;
+  }
+  int b_y_matched = getScore(BY_IONS_MATCHED);
+  if (b_y_matched == NOT_SCORED) {
+    b_y_matched = 0;
+  }
   
   FLOAT_T delta_cn = getScore(DELTA_CN);
   FLOAT_T score_main = getScore(XCORR);
@@ -548,8 +551,14 @@ void Match::printTab(
     return;
   }
 
-  int b_y_total = getBYIonPossible();
-  int b_y_matched = getBYIonMatched();
+  int b_y_total = getScore(BY_IONS_TOTAL);
+  if (b_y_total == NOT_SCORED) {
+    b_y_total = 0;
+  }
+  int b_y_matched = getScore(BY_IONS_MATCHED);
+  if (b_y_matched == NOT_SCORED) {
+    b_y_matched = 0;
+  }
   
   // Print tab delimited fields
   int column_idx;
@@ -684,6 +693,13 @@ Match* Match::parseTabDelimited(
     match->match_scores_[BARISTA_QVALUE] = result_file.getFloat(BARISTA_QVALUE_COL);
   }
 
+  if (!result_file.empty(BY_IONS_MATCHED_COL)) {
+    match->match_scores_[BY_IONS_MATCHED] = result_file.getInteger(BY_IONS_MATCHED_COL);
+  }
+  if (!result_file.empty(BY_IONS_TOTAL_COL)) {
+    match->match_scores_[BY_IONS_TOTAL] = result_file.getInteger(BY_IONS_TOTAL_COL);
+  }
+
   // get experiment size
   match->num_target_matches_ = 0;
   if (!result_file.empty(DISTINCT_MATCHES_SPECTRUM_COL)) {
@@ -706,22 +722,8 @@ Match* Match::parseTabDelimited(
   if((spectrum = Spectrum::parseTabDelimited(result_file))== NULL){
     carp(CARP_ERROR, "Failed to parse spectrum (tab delimited).");
   }
+  match->setFilePath(spectrum->getFullFilename());
 
-  // spectrum specific features
-  if (result_file.empty(BY_IONS_MATCHED_COL)){ 
-    match -> b_y_ion_matched_ = 0;
-  } else {
-    match -> b_y_ion_matched_ = result_file.getInteger(BY_IONS_MATCHED_COL);
-  }
-  if (result_file.empty(BY_IONS_TOTAL_COL)) {
-      match -> b_y_ion_possible_ = 0;
-      match -> b_y_ion_fraction_matched_ = 0.0;
-  } else {
-    match -> b_y_ion_possible_ = result_file.getInteger(BY_IONS_TOTAL_COL);
-    match -> b_y_ion_fraction_matched_ = 
-      (FLOAT_T)match -> b_y_ion_matched_ /
-      (FLOAT_T)match -> b_y_ion_possible_;
-  }
   //parse match overall digestion
   match -> digest_ = string_to_digest_type((char*)result_file.getString(CLEAVAGE_TYPE_COL).c_str()); 
 
@@ -1010,7 +1012,7 @@ string Match::getFilePath() {
 
 string Match::getFilePath(int file_idx) {
   if (file_idx == -1 || file_paths_.empty()) {
-    return string("");
+    return "";
   } else {
     return(file_paths_[file_idx]);
   }
@@ -1159,82 +1161,12 @@ int Match::getDecoyExperimentSize(){
 }
 
 /**
- * sets the match b_y_ion information
- */
-void Match::setBYIonInfo(
-  Scorer* scorer ///< the scorer from which to extract information -in
-  ) {
-
-  b_y_ion_fraction_matched_ = scorer->getSpBYIonFractionMatched(); 
-  b_y_ion_matched_ = scorer->getSpBYIonMatched(); 
-  b_y_ion_possible_ = scorer->getSpBYIonPossible(); 
-}
-
-void Match::setBYIonFractionMatched(
-  FLOAT_T fraction_matched
-  ) {
-
-  b_y_ion_fraction_matched_ = fraction_matched;
-}
-
-void Match::calcBYIonFractionMatched() {
-  b_y_ion_fraction_matched_ = (FLOAT_T)b_y_ion_matched_ / (FLOAT_T)b_y_ion_possible_;
-}
-
-/**
- * gets the match b_y_ion_fraction_matched
- */
-FLOAT_T Match::getBYIonFractionMatched()
-{
-  return b_y_ion_fraction_matched_;
-}
-
-/**
- * sets the match b_y_ion_matched
- */
-void Match::setBYIonMatched(int matched) {
-  b_y_ion_matched_ = matched;
-  if (b_y_ion_matched_ > 0 && b_y_ion_possible_ > 0) {
-    calcBYIonFractionMatched();
-  }
-  
-}
-
-/**
- * gets the match b_y_ion_matched
- */
-int Match::getBYIonMatched()
-{
-  return b_y_ion_matched_;
-}
-
-
-/**
- * sets the match b_y_ion_possible
- */
-void Match::setBYIonPossible(int possible) {
-  b_y_ion_possible_ = possible;
-  if (b_y_ion_possible_ > 0 && b_y_ion_matched_ > 0) {
-    calcBYIonFractionMatched();
-  }
-} 
-
-/**
- * gets the match b_y_ion_possible
- */
-int Match::getBYIonPossible()
-{
-  return b_y_ion_possible_;
-}
-
-/**
  *Increments the pointer count to the match object
  */
 void Match::incrementPointerCount()
 {
   ++pointer_count_;
 }
-
 
 /**
  * Set the best-per-peptide Boolean to true.

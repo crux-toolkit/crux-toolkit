@@ -585,8 +585,8 @@ void TideMatchSet::addCruxMatches(
 
       // Set Sp, B/Y scores in match
       match->setScore(SP, sp);
-      match->setBYIonMatched(sp_score_data.matched_ions);
-      match->setBYIonPossible(sp_score_data.total_ions);
+      match->setScore(BY_IONS_MATCHED, sp_score_data.matched_ions);
+      match->setScore(BY_IONS_TOTAL, sp_score_data.total_ions);
     }
   }
   match_collection->setZState(z_state);
