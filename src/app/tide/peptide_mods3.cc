@@ -189,12 +189,10 @@ void ModsOutputter::OutputNtermMods(int pos, vector<int>& counts) {
   for (int i = 0; i < num_poss; ++i) {
     int poss_max_ct = mod_table_->PossMaxCt(aa, i, NTPEP);
     if (max_counts_[poss_max_ct] == 0) {
-      ++counts[poss_max_ct];
       int delta_index = mod_table_->PossDeltIx(aa, i, NTPEP);
       peptide_->add_modifications(mod_table_->EncodeMod(pos, delta_index));
       OutputMods(1, counts);
       peptide_->mutable_modifications()->RemoveLast();
-      --counts[poss_max_ct];
       any_term_modification = true;
     }
   }
@@ -203,12 +201,10 @@ void ModsOutputter::OutputNtermMods(int pos, vector<int>& counts) {
   for (int i = 0; i < num_poss; ++i) {
     int poss_max_ct = mod_table_->PossMaxCt(aa, i, NTPEP);
     if (max_counts_[poss_max_ct] == 0) {
-      ++counts[poss_max_ct];
       int delta_index = mod_table_->PossDeltIx(aa, i, NTPEP);
       peptide_->add_modifications(mod_table_->EncodeMod(pos, delta_index));
       OutputMods(1, counts);
       peptide_->mutable_modifications()->RemoveLast();
-      --counts[poss_max_ct];
       any_term_modification = true;
     }
   }
@@ -264,7 +260,6 @@ void ModsOutputter::OutputCtermMods(int pos, vector<int>& counts) {
   for (int i = 0; i < num_poss; ++i) {
     int poss_max_ct = mod_table_->PossMaxCt(aa, i, CTPEP);
     if (max_counts_[poss_max_ct] == 0) {
-      ++counts[poss_max_ct];
       int delta_index = mod_table_->PossDeltIx(aa, i, CTPEP);
       peptide_->add_modifications(mod_table_->EncodeMod(pos, delta_index));
 
@@ -274,7 +269,6 @@ void ModsOutputter::OutputCtermMods(int pos, vector<int>& counts) {
       }
 
       peptide_->mutable_modifications()->RemoveLast();
-      --counts[poss_max_ct];
       any_term_modification = true;
     }
   }
@@ -283,7 +277,6 @@ void ModsOutputter::OutputCtermMods(int pos, vector<int>& counts) {
   for (int i = 0; i < num_poss; ++i) {
     int poss_max_ct = mod_table_->PossMaxCt(aa, i, CTPEP);
     if (max_counts_[poss_max_ct] == 0) {
-      ++counts[poss_max_ct];
       int delta_index = mod_table_->PossDeltIx(aa, i, CTPEP);
       peptide_->add_modifications(mod_table_->EncodeMod(pos, delta_index));
 
@@ -293,7 +286,6 @@ void ModsOutputter::OutputCtermMods(int pos, vector<int>& counts) {
       }
 
       peptide_->mutable_modifications()->RemoveLast();
-      --counts[poss_max_ct];
       any_term_modification = true;
     }
   }
