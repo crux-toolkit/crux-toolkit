@@ -38,7 +38,6 @@ USAGE = """USAGE: ppnet.py [options] <file> <root>
 # Add one edge to the graph.  Each edge is represented twice (once for each
 # direction) with a node as the key and a list of nodes as the value.
 def addEdge(node1, node2):
-  sys.stderr.write("Adding edge %s -> %s\n" % (node1, node2))
 
   if (edges.has_key(node1)):
     edges[node1].append(node2)
@@ -53,15 +52,16 @@ def addEdge(node1, node2):
 ###############################################################################
 def printConnectedPeptides(startProtein, graphvizString, stats):
 
-  if (not proteins[startProtein]):
+  if (startProtein not in isPrinted):
     graphvizString = "%s\"%s\";\n" % (graphvizString, startProtein)
-    proteins[startProtein] = True # Mark this protein as printed.
+    isPrinted[startProtein] = True # Mark this protein as printed.
     stats[0] += 1
 
     for peptide in edges[startProtein]:
-      if (not peptides[peptide]):
+      if ((peptide, startProtein) not in isPrinted):
         graphvizString = "%s\"%s\" -- \"%s\";\n" % (graphvizString, 
                                                     startProtein, peptide)
+        isPrinted[(peptide, startProtein)] = True # Mark this edge as printed.
         stats[2] += 1
         graphvizString = printConnectedProteins(peptide, graphvizString, stats)
 
@@ -70,15 +70,16 @@ def printConnectedPeptides(startProtein, graphvizString, stats):
 ###############################################################################
 def printConnectedProteins(startPeptide, graphvizString, stats):
 
-  if (not peptides[startPeptide]):
+  if (startPeptide not in isPrinted):
     graphvizString = "%s\"%s\";\n" % (graphvizString, startPeptide)
-    peptides[startPeptide] = True # Mark this peptide as printed.
+    isPrinted[startPeptide] = True # Mark this peptide as printed.
     stats[1] += 1
 
     for proteinID in edges[startPeptide]:
-      if (not proteins[proteinID]):
+      if ((startPeptide, proteinID) not in isPrinted):
         graphvizString = "%s\"%s\" -- \"%s\";\n" % (graphvizString,
                                                     proteinID, startPeptide)
+        isPrinted[(startPeptide, proteinID)] = True # Mark this edge as printed.
         stats[2] += 1
         graphvizString = \
             printConnectedPeptides(proteinID, graphvizString, stats)
@@ -167,13 +168,16 @@ sys.stderr.write("Reading protein IDs from column %d.\n" % proteinColumn)
 
 # Define the graph data structure.
 # N.B. These are global variables.
-peptides = {} # Key = peptide sequence, value = Boolean (printed?)
-proteins = {} # Key = protein ID, value = Boolean (printed?)
+peptides = {} # Key = peptide sequence, value = True
+proteins = {} # Key = protein ID, value = True
 edges = {}    # Key = peptide sequence or protein ID, value = list of 
               #       peptide sequences or protein IDs
+isPrinted = {}# Key = peptide sequence, protein ID or (peptide, protein) pair.
+              # Value = True
 
 # Read the graph from the input file.
 lineNum = 0
+numEdges = 0
 for line in inputFile:
   line = line.rstrip()
   words = line.split("\t")
@@ -186,10 +190,11 @@ for line in inputFile:
       proteinID = proteinMapping[proteinID]
     proteins[proteinID] = False
     addEdge(peptideSequence, proteinID)
+    numEdges += 1
   lineNum += 1
 inputFile.close()
 sys.stderr.write("Read %d peptides, %d proteins and %d edges from %s.\n"
-                 % (len(peptides), len(proteins), len(edges), inputFileName))
+                 % (len(peptides), len(proteins), numEdges, inputFileName))
 
 # Initialize the HTML
 htmlFileName = "%s.html" % outputFileRoot
@@ -198,12 +203,12 @@ htmlFile.write("<html><body>\n")
 
 graphNumber = 0
 for startProtein in proteins:
-  if (not proteins[startProtein]):
+  if (startProtein not in isPrinted):
 
     # Initialize a counter of number of proteins, peptides, edges.
     stats = [0, 0, 0]
 
-    # Create the graphviz-formmated graph.
+    # Create the graphviz-formated graph.
     graphvizString = "graph G {\n"
     graphvizString = printConnectedPeptides(startProtein, 
                                             graphvizString, stats)
@@ -225,7 +230,7 @@ for startProtein in proteins:
       runCommand("dot -Tpng %s > %s" % (graphFileName, pngFileName))
 
       # Add it to the HTML page.
-      htmlFile.write("<img src=\"%s\">\n" % pngFileName)
+      htmlFile.write("<img src=\"%s\"><br>\n" % pngFileName)
       message = "%d: %d proteins, %d peptides, %d edges.\n" % \
          (graphNumber, stats[0], stats[1], stats[2])
       htmlFile.write("%s<hr></hr>\n" % message)
