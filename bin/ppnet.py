@@ -16,7 +16,7 @@ USAGE = """USAGE: ppnet.py [options] <file> <root>
 
   The input file is tab-delimited, with peptides in a column named
   "%s" and comma-delimited lists of protein IDs in a column
-  named "%s".
+  named "%s".  Specifying "-" will read from stdin.
 
   The output is a series of pairs of files with names of the form
   <root>.<int>.gvz and <root>.<int>.png, where <root> is given on the
@@ -30,12 +30,15 @@ USAGE = """USAGE: ppnet.py [options] <file> <root>
     --min-nodes <int>   Skip components with fewer than <int> nodes.
     --min-peptides <int>  Skip components with fewer than <int> peptides.
     --min-proteins <int>  Skip components with fewer than <int> proteins.
+    --protein-mapping <file>  Convert protein names.
+
 """ % (PEPTIDE_COLUMN, PROTEIN_COLUMN)
 
 ###############################################################################
 # Add one edge to the graph.  Each edge is represented twice (once for each
 # direction) with a node as the key and a list of nodes as the value.
 def addEdge(node1, node2):
+  sys.stderr.write("Adding edge %s -> %s\n" % (node1, node2))
 
   if (edges.has_key(node1)):
     edges[node1].append(node2)
@@ -103,6 +106,7 @@ def runCommand(command):
 minNodes = 1
 minPeptides = 1
 minProteins = 1
+proteinMappingFileName = ""
 sys.argv = sys.argv[1:]
 while (len(sys.argv) > 2):
   nextArg = sys.argv[0]
@@ -116,6 +120,9 @@ while (len(sys.argv) > 2):
   elif (nextArg == "--min-proteins"):
     minProteins = int(sys.argv[0])
     sys.argv = sys.argv[1:]
+  elif (nextArg == "--protein-mapping"):
+    proteinMappingFileName = sys.argv[0]
+    sys.argv = sys.argv[1:]
   else:
     sys.stderr.write("Invalid option (%s).\n" % nextArg)
     sys.exit(1)
@@ -125,8 +132,20 @@ if (len(sys.argv) != 2):
 inputFileName = sys.argv[0]
 outputFileRoot = sys.argv[1]
 
+# If provided, read the protein mapping into a dictionary.
+proteinMapping = {} # Key = old name, value = new name
+if (proteinMappingFileName != ""):
+  proteinMappingFile = open(proteinMappingFileName, "r")
+  for line in proteinMappingFile:
+    (oldName, newName) = line.rstrip().split()
+    proteinMapping[oldName] = newName
+  proteinMappingFile.close()
+
 # Read the header line and identify the target columns.
-inputFile = open(inputFileName, "r")
+if (inputFileName == "-"):
+  inputFile = sys.stdin
+else:
+  inputFile = open(inputFileName, "r")
 headerLine = inputFile.readline().rstrip()
 colIndex = 0
 peptideColumn = -1
@@ -163,6 +182,8 @@ for line in inputFile:
   peptides[peptideSequence] = False
   for proteinID in proteinIDs:
     proteinID = proteinID.split("(")[0] # Get rid of (<int>) on each ID.
+    if (proteinID in proteinMapping):
+      proteinID = proteinMapping[proteinID]
     proteins[proteinID] = False
     addEdge(peptideSequence, proteinID)
   lineNum += 1
@@ -206,7 +227,7 @@ for startProtein in proteins:
       # Add it to the HTML page.
       htmlFile.write("<img src=\"%s\">\n" % pngFileName)
       message = "%d: %d proteins, %d peptides, %d edges.\n" % \
-          (graphNumber, stats[0], stats[1], stats[2]))
+         (graphNumber, stats[0], stats[1], stats[2])
       htmlFile.write("%s<hr></hr>\n" % message)
 
       sys.stderr.write(message)
