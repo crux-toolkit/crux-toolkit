@@ -163,6 +163,7 @@ FLOAT_T SelfLoopPeptide::calcMass(
  * \returns a shuffled version of self-loop candidate
  */
 XLinkMatch* SelfLoopPeptide::shuffle() {
+  carp(CARP_DEBUG, "SelfLoopPeptide::shuffle");
   SelfLoopPeptide* decoy = new SelfLoopPeptide();
 
   decoy->linked_peptide_ = linked_peptide_.shuffle();

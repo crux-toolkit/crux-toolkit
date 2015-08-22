@@ -63,7 +63,7 @@ void LinearPeptide::addCandidates(
       Crux::Peptide* peptide = peptide_iterator->next();
       XLinkMatch* new_candidate = new LinearPeptide(peptide);
       if (new_candidate->getNumMissedCleavages() <= max_missed_cleavages) {
-        //cerr <<"Adding Linear Peptide:"<<new_candidate -> getSequenceString()<<" "<<new_candidate->getMass()<<endl;
+        //cerr <<"Adding Linear Peptide:"<<new_candidate -> getSequenceString()<<" "<<new_candidate->getMass(MONO)<<endl;
         candidates.add(new_candidate);
         XLink::addAllocatedPeptide(peptide);
       } else {
@@ -75,6 +75,7 @@ void LinearPeptide::addCandidates(
 
 
     //add the decoys
+    /*
     peptide_iterator = new
       ModifiedPeptidesIterator(min_mass - delta_mass, max_mass - delta_mass, peptide_mod,
         true, database);
@@ -92,7 +93,7 @@ void LinearPeptide::addCandidates(
     }
 
     delete peptide_iterator;
-
+    */
 
   }
 }
@@ -145,7 +146,8 @@ FLOAT_T LinearPeptide::calcMass(
  *\returns a shuffled version of the peptide
  */
 XLinkMatch* LinearPeptide::shuffle() {
-
+  string seq = getSequenceString();
+  carp(CARP_DEBUG, "LinearPeptide::shuffle %s", seq.c_str());
   Crux::Peptide* decoy_peptide = new Crux::Peptide(peptide_);
 
   decoy_peptide->transformToDecoy();

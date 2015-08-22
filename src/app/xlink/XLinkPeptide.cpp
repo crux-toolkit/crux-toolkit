@@ -11,6 +11,12 @@
 
 #include "XLinkablePeptideIterator.h"
 
+#if defined ( _MSC_VER ) || defined ( DARWIN )
+#include<unordered_map>
+#else
+#include<tr1/unordered_map>
+#endif
+
 
 #include <iostream>
 #include <sstream>
@@ -136,98 +142,23 @@ int XLinkPeptide::getLinkPos(
  * proteins
  */
 bool XLinkPeptide::isInter() {
-
-  Crux::Peptide* peptide_a = linked_peptides_[0].getPeptide();
-  Crux::Peptide* peptide_b = linked_peptides_[1].getPeptide();
-
-  vector<Crux::Protein*> proteins_a;
-  vector<Crux::Protein*> proteins_b;
-
-
-  for (PeptideSrcIterator src_iterator = peptide_a->getPeptideSrcBegin();
-    src_iterator != peptide_a->getPeptideSrcEnd();
-    ++src_iterator) {
-    PeptideSrc* src = *src_iterator;
-    proteins_a.push_back(src->getParentProtein());
-  }
-
-  for (PeptideSrcIterator src_iterator = peptide_b->getPeptideSrcBegin();
-    src_iterator != peptide_b->getPeptideSrcEnd();
-    ++src_iterator) {
-    PeptideSrc* src = *src_iterator;
-    proteins_b.push_back(src->getParentProtein());
-  }
-  
-  sort(proteins_a.begin(), proteins_a.end());
-  sort(proteins_b.begin(), proteins_b.end());
-
-
-  for (unsigned int idx_a=0;idx_a<proteins_a.size();idx_a++) {
-
-    for (unsigned int idx_b=0;idx_b<proteins_b.size();idx_b++) {
-      
-      string id_a = proteins_a[idx_a] -> getIdPointer();
-      string id_b = proteins_b[idx_b] -> getIdPointer();
-
-      if (id_a.find(id_b) == string::npos && id_b.find(id_a) == string::npos) {
-        //Found an instance where the proteins are not equal, therefore it is
-        //inter. but still could be intra....
-        return true;
-      }
-    }
-  }
-
-  //all proteins equal, so it is definately intra
-  return false;
-
+  return XLink::isCrossLinkInter(linked_peptides_.at(0).getPeptide(), linked_peptides_.at(1).getPeptide());
 }
 
 /**
  * \returns whether the cross-link is from peptides within the same protein
  */
 bool XLinkPeptide::isIntra() {
-
-  Crux::Peptide* peptide_a = linked_peptides_[0].getPeptide();
-  Crux::Peptide* peptide_b = linked_peptides_[1].getPeptide();
-
-  vector<Crux::Protein*> proteins_a;
-  vector<Crux::Protein*> proteins_b;
-  
-
-  for (PeptideSrcIterator src_iterator = peptide_a->getPeptideSrcBegin();
-    src_iterator != peptide_a->getPeptideSrcEnd();
-    ++src_iterator) {
-    PeptideSrc* src = *src_iterator;
-    proteins_a.push_back(src->getParentProtein());
-  }
-
-  for (PeptideSrcIterator src_iterator = peptide_b->getPeptideSrcBegin();
-    src_iterator != peptide_b->getPeptideSrcEnd();
-    ++src_iterator) {
-    PeptideSrc* src = *src_iterator;
-    proteins_b.push_back(src->getParentProtein());
-  }
-
-  sort(proteins_a.begin(), proteins_a.end());
-  sort(proteins_b.begin(), proteins_b.end());
-
-
-  for (unsigned int idx_a=0;idx_a<proteins_a.size();idx_a++) {
-
-    for (unsigned int idx_b=0;idx_b<proteins_b.size();idx_b++) {
-      string id_a = proteins_a[idx_a] -> getIdPointer();
-      string id_b = proteins_b[idx_b] -> getIdPointer();
-      if (id_a.find(id_b) != string::npos || id_b.find(id_a) != string::npos) {
-        //Found an instance where the protein are equal, therefore it is
-        //intra. but still also be inter as well....
-        return true;
-      }
-    }
-  }
-
-  //all proteins inequal, so it is definately inter
-  return false;
+  return XLink::isCrossLinkInter(linked_peptides_[0].getPeptide(), linked_peptides_[1].getPeptide());
 }
+
+/**
+ * \returns whether the cross-link is from peptides that are both within the same protein and from different proteins
+ */
+bool XLinkPeptide::isInterIntra() {
+  return(isInter() && isIntra());
+}
+
 
 /**
  * Gets all peptides that are linkable, i.e. have link sites
@@ -309,6 +240,26 @@ void XLinkPeptide::addCandidates(
 
 }
 
+void XLinkPeptide::addXLinkPeptides(
+  XLinkablePeptide& pep1, 
+  XLinkablePeptide& pep2,
+  XLinkBondMap& bondmap,
+  XLinkMatchCollection& candidates
+  ) {
+
+  //for every linkable site, generate the candidate if it is legal.
+  for (unsigned int link1_idx=0;link1_idx < pep1.numLinkSites(); link1_idx++) {
+    for (unsigned int link2_idx=0;link2_idx < pep2.numLinkSites();link2_idx++) {
+      if (bondmap.canLink(pep1, pep2, link1_idx, link2_idx)) {
+        //create the candidate
+        XLinkMatch* newCandidate = 
+          new XLinkPeptide(pep1, pep2, link1_idx, link2_idx);
+        candidates.add(newCandidate);
+      }
+    }
+  }
+}
+
 /**
  * adds crosslink candidates to the XLinkMatchCollection using
  * the passed in iterator for the 1st peptide
@@ -324,58 +275,126 @@ void XLinkPeptide::addCandidates(
   XLinkMatchCollection& candidates ///< candidates -in/out
   ) {
 
+  bool include_inter = get_boolean_parameter("xlink-include-inter");
+  bool include_intra = get_boolean_parameter("xlink-include-intra");
+  bool include_inter_intra = get_boolean_parameter("xlink-include-inter-intra");
+
   int max_mod_xlink = get_int_parameter("max-xlink-mods");
-
-  set<XLinkablePeptide> visited;
-
-  while (iter1.hasNext()) {
+  
+  size_t xpeptide_count = 0;
+  vector<vector<XLinkablePeptide> > protein_idx_to_xpeptides;
+  
+  while(iter1.hasNext()) {
     XLinkablePeptide pep1 = iter1.next();
-    //cerr <<"pep1:"<<pep1.getSequence()<<endl;
-    char* seq1 = pep1.getPeptide()->getUnshuffledSequence();
-    string seq1_string(seq1);
-    std::free(seq1);
+    for (PeptideSrcIterator src_iterator1 = pep1.getPeptide()->getPeptideSrcBegin();
+      src_iterator1 != pep1.getPeptide()->getPeptideSrcEnd();
+      ++src_iterator1) {
+      PeptideSrc* src1 = *src_iterator1;
+      size_t id1 = src1->getParentProtein()->getProteinIdx();
+      while(protein_idx_to_xpeptides.size() <= id1) {
+        protein_idx_to_xpeptides.push_back(vector<XLinkablePeptide>());
+      }
+      protein_idx_to_xpeptides.at(id1).push_back(pep1);
+    }
+    xpeptide_count = xpeptide_count+1;
+  }
 
-    FLOAT_T peptide2_min_mass = min_mass - pep1.getMass() - linker_mass_;
-    FLOAT_T peptide2_max_mass = max_mass - pep1.getMass() - linker_mass_;
+  //if there are no linkable peptides, then return
+  if (protein_idx_to_xpeptides.empty()) {
+    return;
+  }
 
-    assert (peptide2_min_mass <= peptide2_max_mass);
-  
+  vector<size_t> protein_indices;
+  for (size_t protein_idx=0;protein_idx<protein_idx_to_xpeptides.size();protein_idx++) {
+    vector<XLinkablePeptide>& xlinkable_peptides = protein_idx_to_xpeptides.at(protein_idx);
+    if (xlinkable_peptides.size() > 0) {
+      sort(xlinkable_peptides.begin(), xlinkable_peptides.end(), compareXLinkablePeptideMass);
+      protein_indices.push_back(protein_idx);
+    }
+  }
+  carp(CARP_INFO, "there are %i linkable peptides", xpeptide_count);
+  carp(CARP_INFO, "have peptides for %i proteins", protein_indices.size());
 
-    if (peptide2_max_mass >= pmin_) {
-      XLinkablePeptideIterator iter2(peptide2_min_mass, peptide2_max_mass, database, peptide_mod2, decoy2, bondmap);
-      while (iter2.hasNext()) {
-        XLinkablePeptide pep2 = iter2.next();
-        if (visited.find(pep2) == visited.end()) {
-          FLOAT_T mass = pep1.getMass() + pep2.getMass() + linker_mass_;
+  if (include_intra  || include_inter_intra) {
+    for (size_t protein_idx_idx=0;protein_idx_idx<protein_indices.size();protein_idx_idx++) {
+
+      vector<XLinkablePeptide>& xlinkable_peptides = 
+        protein_idx_to_xpeptides.at(protein_indices[protein_idx_idx]);
+
+      bool done=false;
+      for (size_t pep1_idx = 0;pep1_idx < xlinkable_peptides.size();pep1_idx++) {
+        XLinkablePeptide& pep1 = xlinkable_peptides.at(pep1_idx);
+        FLOAT_T pep1_mass = pep1.getMass();
+        FLOAT_T peptide2_min_mass = min_mass - pep1_mass - linker_mass_;
+        FLOAT_T peptide2_max_mass = max_mass - pep1_mass - linker_mass_;
+        for (size_t pep2_idx = pep1_idx; pep2_idx < xlinkable_peptides.size(); pep2_idx++) {
+          XLinkablePeptide& pep2 = xlinkable_peptides.at(pep2_idx);
+          FLOAT_T current_mass = pep2.getMass();
+          if (current_mass > peptide2_max_mass) {
+            if (pep2_idx == pep1_idx) {
+              done = true;
+            }
+            break;
+          } else if (current_mass >= peptide2_min_mass) {
+            bool is_inter = XLink::isCrossLinkInter(pep1.getPeptide(), pep2.getPeptide());
+            if ((include_intra && (include_inter_intra || !is_inter)) || (!include_intra && include_inter_intra && is_inter)) {
+              int mods = pep1.getPeptide()->countModifiedAAs() + pep2.getPeptide()->countModifiedAAs();
+              if (mods <= max_mod_xlink) {
+                addXLinkPeptides(pep1, pep2, bondmap, candidates);
+              } // if (mods <= max_mod_xlink .. 
+            }
+          }
+        }
+        if (done) {
+          break;
+        }
+      }
+    }
+  }
+  if (include_inter) {
+    //cerr <<"include_inter"<<endl;
     
-          if ((mass >= min_mass) && (mass <= max_mass)) {
-    
-            int mods = pep1.getPeptide()->countModifiedAAs() + pep2.getPeptide()->countModifiedAAs();
-            if (mods <= max_mod_xlink) {
-    
-              //for every linkable site, generate the candidate if it is legal.
-              for (unsigned int link1_idx=0;link1_idx < pep1.numLinkSites(); link1_idx++) {
-                for (unsigned int link2_idx=0;link2_idx < pep2.numLinkSites();link2_idx++) {
-                  if (bondmap.canLink(pep1, pep2, link1_idx, link2_idx)) {
-                  //create the candidate
-                    XLinkMatch* newCandidate = 
-                      new XLinkPeptide(pep1, pep2, link1_idx, link2_idx);
-                    candidates.add(newCandidate);
-                  }
+    for (size_t protein_idx_idx1=0;protein_idx_idx1 < (protein_indices.size()-1); protein_idx_idx1++) {
+      vector<XLinkablePeptide>& peptides1 = 
+        protein_idx_to_xpeptides[protein_indices[protein_idx_idx1]];
+      for (size_t protein_idx_idx2=protein_idx_idx1+1;protein_idx_idx2 < protein_indices.size(); protein_idx_idx2++) {
+        vector<XLinkablePeptide>& peptides2 = 
+          protein_idx_to_xpeptides[protein_indices[protein_idx_idx2]];
+        bool done=false;
+        size_t pep2_idx = 0;
+        for (size_t pep1_idx = 0;pep1_idx < peptides1.size();pep1_idx++) {
+          XLinkablePeptide& pep1 = peptides1.at(pep1_idx);
+          FLOAT_T pep1_mass = pep1.getMass();
+          FLOAT_T peptide2_min_mass = min_mass - pep1_mass - linker_mass_;
+          FLOAT_T peptide2_max_mass = max_mass - pep1_mass - linker_mass_;
+          for (size_t pep2_idx =0; pep2_idx < peptides2.size(); pep2_idx++) {
+            XLinkablePeptide& pep2 = peptides2.at(pep2_idx);
+            FLOAT_T current_mass = pep2.getMass();
+            if (current_mass > peptide2_max_mass) {
+              if (pep2_idx == pep1_idx) {
+                done = true;
+              }
+              break;
+            } else if (current_mass >= peptide2_min_mass) {
+              //Only include it if it is just inter only, because if its inter-intra, and the user asked for it
+              //it should have been included in the above if
+              if (!XLink::isCrossLinkIntra(pep1.getPeptide(), pep2.getPeptide())) {
+                int mods = pep1.getPeptide()->countModifiedAAs() + pep2.getPeptide()->countModifiedAAs();
+                if (mods <= max_mod_xlink) {
+                  addXLinkPeptides(pep1, pep2, bondmap, candidates);
                 }
-              } // for link1_idx 
-            } // if (mods <= max_mod_xlink .. 
-          } // if ((mass >= min_mass) && (mass <= max_mass))
-   
-        } // if (visited.find(pep2) == visited.end()
+              }
+            }
+          } // for (pep2_idx)
+          if (done) {
+            break;
+          }
+        } // for (pep1_idx)
+      } //for (protein_idx2
+    } // for (protein_idx1)
+  } // if include inter
+}
   
-      } // while (iter2.hasNext()) 
-  
-    } // if (peptide2_max_mass >= pmin_)
-
-    visited.insert(pep1);
-  } // while (iter1.hasNext()) 
-}  
 
 
 
@@ -384,18 +403,8 @@ void XLinkPeptide::addCandidates(
  */
 XLINKMATCH_TYPE_T XLinkPeptide::getCandidateType() {
 
-  if (isInter()) {
-    if (isIntra()) {
-      return XLINK_INTER_INTRA_CANDIDATE;
-    } else {
-      return XLINK_INTER_CANDIDATE;
-    }
-  } else if (isIntra()) {
-    return XLINK_INTRA_CANDIDATE;
-  } else {
-    carp(CARP_ERROR, "Something wrong happened!");
-  }
-  return XLINK_INTER_INTRA_CANDIDATE;
+  return(XLink::getCrossLinkCandidateType(linked_peptides_.at(0).getPeptide(), linked_peptides_.at(1).getPeptide()));
+
 }
 
 /**
@@ -438,7 +447,7 @@ FLOAT_T XLinkPeptide::calcMass(MASS_TYPE_T mass_type) {
  * \returns a shuffled xlink peptide
  */
 XLinkMatch* XLinkPeptide::shuffle() {
-
+  //carp(CARP_INFO, "XLinkPeptide::shuffle");
   XLinkPeptide* decoy = new XLinkPeptide();
   decoy->setZState(getZState());
   decoy->linked_peptides_.push_back(linked_peptides_[0].shuffle());

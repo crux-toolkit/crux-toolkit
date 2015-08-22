@@ -3,7 +3,7 @@
 #include "LinkedPeptide.h"
 #include "XHHC_Peptide.h"
 #include "XLinkablePeptide.h"
-
+#include "XLink.h"
 
 #include "parameter.h"
 #include "model/Peptide.h"
@@ -311,7 +311,7 @@ void add_linked_peptides(
         if (pepA.linkSitePreventsCleavage(link_idx)) {
           total_cleavages--;
         }
-        if (total_cleavages <= max_missed_cleavages) {
+        if (total_cleavages <= max_missed_cleavages) {   
           ions.push_back(LinkedPeptide((char*)seqA.c_str(), NULL, seq_idx, -1, charge));
         }
       }
@@ -348,7 +348,7 @@ void add_linked_peptides(
         XLinkablePeptide pepB = *iterB;
         string seqB = pepB.getModifiedSequenceString();
         int seqB_missed_cleavages = pepB.getMissedCleavageSites();
-        if (seqB_missed_cleavages <= (max_missed_cleavages+1)) {
+        if (seqB_missed_cleavages <= (max_missed_cleavages+1)  && XLink::testInterIntraKeep(pepA.getPeptide(), pepB.getPeptide())) {
           for (size_t link_idx1 = 0;link_idx1 < pepA.numLinkSites();link_idx1++) {
             for (size_t link_idx2 = 0; link_idx2 < pepB.numLinkSites();link_idx2++) {
               int seq_idx1 = pepA.getLinkSite(link_idx1);
