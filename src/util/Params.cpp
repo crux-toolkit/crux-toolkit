@@ -1274,6 +1274,15 @@ void Params::Initialize() {
   InitBoolParam("xlink-include-selfloops", true, 
     "Include self-loop peptides in the search.",
     "Available for crux search-for-xlinks program.", true);
+  InitBoolParam("xlink-include-intra", true,
+    "Include intra-protein cross-link candiates within the search.",
+    "Available for crux search-for-xlinks program.", true);
+  InitBoolParam("xlink-include-inter", true,
+    "Include inter-protein cross-link candidates within the search.",
+    "Available for crux search-for-xlinks program.", true);
+  InitBoolParam("xlink-include-inter-intra", true,
+    "Include crosslink candidates that are both inter and intra.",
+    "Available for crux search-for-xlinks program.", true);
   InitStringParam("xlink-prevents-cleavage", "K",
     "List of amino acids for which the cross-linker can prevent cleavage. This option is "
     "only available when use-old-xlink=F.",

@@ -1122,7 +1122,6 @@ char* Peptide::getHashValue() {
  * sequence. 
  */
 void Peptide::transformToDecoy(){
-
   bool reverse_seq = (get_decoy_type_parameter("decoys") == PROTEIN_REVERSE_DECOYS);
 
   // delete any existing decoy sequence

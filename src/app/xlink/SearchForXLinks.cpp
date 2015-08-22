@@ -26,9 +26,6 @@ SearchForXLinks::~SearchForXLinks() {
  */
 int SearchForXLinks::main(int argc, char** argv) {
 
-  /* Verbosity level for set-up/command line reading */
-  set_verbosity_level(CARP_ERROR);
-
   //The use-old-xlink parameter will determine
   //which codebase gets called.
   int ret;
@@ -94,6 +91,9 @@ vector<string> SearchForXLinks::getOptions() const {
     "xlink-include-linears",
     "xlink-include-deadends",
     "xlink-include-selfloops",
+    "xlink-include-inter",
+    "xlink-include-intra",
+    "xlink-include-inter-intra",
     "xlink-prevents-cleavage",
     "max-xlink-mods",
     "min-mass",
