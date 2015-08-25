@@ -33,7 +33,7 @@
 <h3>assign-confidence options</h3>
 <ul>
   <li><code>--estimation-method &lt;mix-max|tdc&gt;</code> &ndash; Specify the method used to estimate q-values: the mix-max procedure or target-decoy competition. Default = <code>tdc</code>.</li>
-  <li><code>--score &lt;string&gt;</code> &ndash; Specify the column (for tab-delimited input) or tag (for XML input) used as input to the q-value estimation procedure. Default = <code>xcorr score</code>.</li>
+  <li><code>--score &lt;string&gt;</code> &ndash; Specify the column (for tab-delimited input) or tag (for XML input) used as input to the q-value estimation procedure. Default = <code>&lt;empty&gt;</code>.</li>
   <li><code>--smaller-is-better &lt;T|F&gt;</code> &ndash; Specify the semantics of the score, i.e., whether a smaller value implies a better match or vice versa. Specify this parameter T for "exact p-value" and F for "xcorr score". Default = <code>false</code>.</li>
   <li><code>--sidak &lt;T|F&gt;</code> &ndash; Adjust the score using the Sidak adjustment and reports them in a new column in the output file. Note that this adjustment only makes sense if the given scores are p-values, and that it requires the presence of the "distinct matches/spectrum" feature for each PSM. Default = <code>false</code>.</li>
   <li><code>--peptide-level &lt;T|F&gt;</code> &ndash; Applied for spectrum-centric search. Eliminates any PSMS for which there exists a better scoring PSM involving the same peptide. This option is incompatible with the mix-max procedure. Default = <code>false</code>.</li>
