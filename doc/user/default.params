@@ -707,7 +707,7 @@ peptide-level=false
 # Specify the column (for tab-delimited input) or tag (for XML input) used as
 # input to the q-value estimation procedure.
 # Used by assign-confidence.
-score=xcorr score
+score=
 
 # Specify the semantics of the score, i.e., whether a smaller value implies a
 # better match or vice versa. Specify this parameter T for "exact p-value" and F
@@ -947,6 +947,18 @@ xlink-include-deadends=true
 # Include self-loop peptides in the search.
 # Available for crux search-for-xlinks program.
 xlink-include-selfloops=true
+
+# Include intra-protein cross-link candiates within the search.
+# Available for crux search-for-xlinks program.
+xlink-include-intra=true
+
+# Include inter-protein cross-link candidates within the search.
+# Available for crux search-for-xlinks program.
+xlink-include-inter=true
+
+# Include crosslink candidates that are both inter and intra.
+# Available for crux search-for-xlinks program.
+xlink-include-inter-intra=true
 
 # List of amino acids for which the cross-linker can prevent cleavage. This
 # option is only available when use-old-xlink=F.

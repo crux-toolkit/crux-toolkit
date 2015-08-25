@@ -1699,6 +1699,9 @@ void Params::Categorize() {
 
   items.clear();
   items.insert("use-old-xlink");
+  items.insert("xlink-include-inter");
+  items.insert("xlink-include-intra");
+  items.insert("xlink-include-inter-intra");
   items.insert("xlink-include-linears");
   items.insert("xlink-include-deadends");
   items.insert("xlink-include-selfloops");
