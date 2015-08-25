@@ -1192,9 +1192,10 @@ void Params::Initialize() {
     "Available for spectral-counts. All PSMs with higher (or lower) than "
     "this will be ignored.", true);
   InitStringParam("custom-threshold-name", "",
-    "Specify which field to apply the threshold to. By default, the threshold "
-    "applies to the q-value. The direction of the threshold (<= or >=) is "
-    "governed by --custom-threshold-min.",
+    "Specify which field to apply the threshold to. The direction of the threshold "
+    "(<= or >=) is governed by --custom-threshold-min. By default, the threshold "
+    "applies to the q-value, specified by \"percolator q-value\", \"q-ranker q-value\", "
+    "\"decoy q-value (xcorr)\", or \"barista q-value\".",
     "Available for spectral-counts.", true);
   InitBoolParam("custom-threshold-min", true,
     "When selecting matches with a custom threshold, custom-threshold-min determines "
