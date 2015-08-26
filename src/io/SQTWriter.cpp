@@ -169,7 +169,7 @@ void SQTWriter::writeHeader(
   // modified to match TideSearch sqt output
   *file_ << "H\tLine fields: S, scan number, scan number, "
          << "charge, 0, server, experimental mass, total ion intensity, "
-	 << "lowest Sp, number of matches" << endl
+         << "lowest Sp, number of matches" << endl
          << "H\tLine fields: M, rank by xcorr score, rank by sp score, "
          << "peptide mass, deltaCn, xcorr score, sp score, number ions matched, "
          << "total ions compared, sequence, validation status" << endl;

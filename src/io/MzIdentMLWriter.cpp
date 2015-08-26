@@ -580,6 +580,8 @@ CVID MzIdentMLWriter::getScoreCVID(
       return MS_SEQUEST_xcorr;
     case SP:
       return MS_SEQUEST_PeptideSp;
+    case TIDE_SEARCH_EXACT_PVAL:
+      return MS_peptide_identification_confidence_metric;
     case PERCOLATOR_SCORE:
       return MS_percolator_score;
     case PERCOLATOR_QVALUE:
