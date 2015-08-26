@@ -11,13 +11,6 @@
 
 #include "XLinkablePeptideIterator.h"
 
-#if defined ( _MSC_VER ) || defined ( DARWIN )
-#include<unordered_map>
-#else
-#include<tr1/unordered_map>
-#endif
-
-
 #include <iostream>
 #include <sstream>
 
