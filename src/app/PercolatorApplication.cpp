@@ -44,7 +44,7 @@ int PercolatorApplication::main(int argc, char** argv) {
   carp(CARP_INFO, "Reading file %s", input_pin.c_str());
 
   // Check if we need to run make-pin first
-  if (!Params::GetBool("feature-in-file") &&
+  if (!Params::GetBool("feature-file-in") &&
       (Params::GetBool("list-of-files") ||
        StringUtils::IEndsWith(input_pin, ".txt") ||
        StringUtils::IEndsWith(input_pin, ".sqt") ||
@@ -158,10 +158,8 @@ int PercolatorApplication::main(
     perc_args_vec.push_back("--quick-validation");
   }
 
-  perc_args_vec.push_back("--train-ratio");
-  perc_args_vec.push_back(Params::GetString("train-ratio"));
 
-  if (Params::GetBool("feature-file")) {
+  if (Params::GetBool("feature-file-out")) {
     perc_args_vec.push_back("--tab-out");
     perc_args_vec.push_back(make_file_path(getFileStem() + ".feature.txt"));
   }
@@ -171,9 +169,9 @@ int PercolatorApplication::main(
     perc_args_vec.push_back(make_file_path(getFileStem() + ".weights.txt"));
   }
   
-  if (!Params::GetString("input-weights").empty()) {
+  if (!Params::GetString("init-weights").empty()) {
     perc_args_vec.push_back("--init-weights");
-    perc_args_vec.push_back(Params::GetString("input-weights"));
+    perc_args_vec.push_back(Params::GetString("init-weights"));
   }
 
   if (!Params::GetString("default-direction").empty()) {  
@@ -189,7 +187,7 @@ int PercolatorApplication::main(
     perc_args_vec.push_back("--test-each-iteration");
   }
 
-  if (Params::GetBool("static-override")) {
+  if (Params::GetBool("override")) {
     perc_args_vec.push_back("--override");
   }
  
@@ -208,65 +206,54 @@ int PercolatorApplication::main(
   // FIXME include schema as part of distribution and add option to turn on validation
   perc_args_vec.push_back("-s");
 
-  if (Params::GetBool("allow-protein-group")) {
-    perc_args_vec.push_back("--allow-protein-group");
-  }
- 
   bool set_protein = Params::GetBool("protein");
   if (set_protein) {
     perc_args_vec.push_back("-A");
 
-    if (Params::GetDouble("alpha") > 0) {
+    if (Params::GetDouble("fido-alpha") > 0) {
       perc_args_vec.push_back("--fido-alpha");
-      perc_args_vec.push_back(Params::GetString("alpha"));
+      perc_args_vec.push_back(Params::GetString("fido-alpha"));
     }
-    if (Params::GetDouble("beta") > 0) {
+    if (Params::GetDouble("fido-beta") > 0) {
       perc_args_vec.push_back("--fido-beta");
-      perc_args_vec.push_back(Params::GetString("beta"));
+      perc_args_vec.push_back(Params::GetString("fido-beta"));
     }
-    if (Params::GetDouble("gamma") > 0) {
+    if (Params::GetDouble("fido-gamma") > 0) {
       perc_args_vec.push_back("--fido-gamma");
-      perc_args_vec.push_back(Params::GetString("gamma"));
+      perc_args_vec.push_back(Params::GetString("fido-gamma"));
     }
 
-    if (Params::GetBool("protein-level-pi0")) {
-      perc_args_vec.push_back("-I");
+    if (Params::GetBool("fido-protein-level-pi0")) {
+      perc_args_vec.push_back("--fido-protein-level-pi0");
     }
-    if (Params::GetBool("empirical-protein-q")) {
-       perc_args_vec.push_back("--empirical-protein-q");
-    }
-    if (!Params::GetBool("group-proteins")) {
-       perc_args_vec.push_back("--fido-no-group-proteins");
+    if (Params::GetBool("fido-empirical-protein-q")) {
+       perc_args_vec.push_back("--fido-empirical-protein-q");
     }
 
-    if (Params::GetBool("no-separate-proteins")) {
-      perc_args_vec.push_back("--fido-no-separate-proteins");
-    }
-    
-    if (Params::GetBool("no-prune-proteins")) {
-      perc_args_vec.push_back("--fido-no-prune-proteins"); 
-    }
     perc_args_vec.push_back("--fido-gridsearch-depth");
-    perc_args_vec.push_back(Params::GetString("deepness"));
+    perc_args_vec.push_back(Params::GetString("fido-gridsearch-depth"));
 
-    if (Params::GetBool("reduce-tree-in-gridsearch")) {
-      perc_args_vec.push_back("--fido-reduce-tree-in-gridsearch");
+
+    perc_args_vec.push_back("--fido-fast-gridsearch");
+    perc_args_vec.push_back(Params::GetString("fido-fast-gridsearch"));
+
+    perc_args_vec.push_back("--fido-protein-truncation-threshold");
+    perc_args_vec.push_back(Params::GetString("fido-protein-truncation-threshold"));
+
+    if (Params::GetBool("fido-split-large-components")) {
+      perc_args_vec.push_back("--fido-split-large-components");
     }
 
-    if (Params::GetBool("post-processing-tdcn")) {
-      perc_args_vec.push_back("--post-processing-tdcn");
+    if (Params::GetBool("post-processing-qvality")) {
+      perc_args_vec.push_back("--post-processing-qvality");
     }
 
-    perc_args_vec.push_back("--grid-search-mse-threshold");
-    perc_args_vec.push_back(Params::GetString("grid-search-mse-threshold"));
-
-    if (Params::GetBool("truncation")) {
-      perc_args_vec.push_back("--fido-truncation");
+    if (Params::GetBool("post-processing-tdc")) {
+      perc_args_vec.push_back("--post-processing-tdc");
     }
 
-    if (Params::GetBool("protein-group-level-inference")) {
-      perc_args_vec.push_back("--fido-protein-group-level-inference");
-    }
+    perc_args_vec.push_back("--fido-gridsearch-mse-threshold");
+    perc_args_vec.push_back(Params::GetString("fido-gridsearch-mse-threshold"));
 
     // Target proteins file is written to prevent writing to stdout
     perc_args_vec.push_back("-l");
@@ -455,10 +442,10 @@ vector<string> PercolatorApplication::getOptions() const {
     "pout-output",
     "mzid-output",
     "pepxml-output",
-    "feature-file",
+    "feature-file-out",
     "list-of-files",
     "parameter-file",
-    "feature-in-file",
+    "feature-file-in",
     "protein",
     "decoy-xml-output",
     "decoy-prefix",
@@ -468,32 +455,28 @@ vector<string> PercolatorApplication::getOptions() const {
     "test-fdr",
     "maxiter",
     "quick-validation",
-    "train-ratio",
     "output-weights",
-    "input-weights",
+    "init-weights",
     "default-direction",
     "unitnorm",
-    "alpha",
-    "beta",
-    "gamma",
+    "fido-alpha",
+    "fido-beta",
+    "fido-gamma",
     "test-each-iteration",
-    "static-override",
+    "override",
     "percolator-seed",
     "klammer",
     "only-psms",
     //"doc",
-    "allow-protein-group",
-    "protein-level-pi0",
-    "empirical-protein-q",
-    "group-proteins",
-    "no-separate-proteins",
-    "no-prune-proteins",
-    "deepness",
-    "reduce-tree-in-gridsearch",
-    "post-processing-tdcn",
-    "grid-search-mse-threshold",
-    "truncation",
-    "protein-group-level-inference",
+    "fido-protein-level-pi0",
+    "fido-empirical-protein-q",
+    "fido-gridsearch-depth",
+    "post-processing-tdc",
+    "fido-gridsearch-mse-threshold",
+    "fido-fast-gridsearch",
+    "fido-protein-truncation-threshold",
+    "fido-split-large-components",
+    "post-processing-qvality",
     "verbosity",
     "top-match"
   };
