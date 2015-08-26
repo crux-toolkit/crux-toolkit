@@ -973,7 +973,7 @@ int QRanker :: crux_set_command_line_options(int argc, char *argv[])
 
   output_directory = get_string_parameter("output-dir");
 
-  feature_file_flag = get_boolean_parameter("feature-file");
+  feature_file_flag = get_boolean_parameter("feature-file-out");
   feature_file_name << output_directory << "/" << fileroot << "q-ranker.features.txt";
 
   if(found_dir_with_tables)
@@ -1198,7 +1198,7 @@ vector<string> QRanker::getOptions() const {
     "parameter-file",
     "verbosity",
      "list-of-files",
-    "feature-file",
+    "feature-file-out",
     "spectrum-parser"
   };
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
