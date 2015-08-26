@@ -1077,12 +1077,23 @@ void Params::Initialize() {
     "Used by assign-confidence.", true);
   InitStringParam("score", "",
     "Specify the column (for tab-delimited input) or tag (for XML input) "
-    "used as input to the q-value estimation procedure.",
+    "used as input to the q-value estimation procedure. If this parameter is unspecified, "
+    "then assign-confidence tries to seach for \"xcorr score\", \"evalue\" (comet), "
+    "\"exact p-value\" score fields in this order in the input file. "
+    "The \"smaller-the-better\" parameter will then be automatically adjusted.",
     "Used by assign-confidence.", true);
   InitBoolParam("smaller-is-better", false, 
     "Specify the semantics of the score, i.e., whether a smaller value implies a better "
-    "match or vice versa. Specify this parameter T for \"exact p-value\" and F for \""
-    "xcorr score\".",
+    "match or vice versa. For example, set this parameter to T for \"exact p-value\" and F for "
+    "\"xcorr score\".",
+    "Used by assign-confidence.", true);
+  InitBoolParam("combine-charge-states", false,
+    "Specify this parameter to T in order to combine charge states with peptide sequences"
+    "in peptide-centric search. Works only if peptide-level=T.",
+    "Used by assign-confidence.", true);
+  InitBoolParam("combine-modified-peptides", false,
+    "Specify this parameter to T in order to treat peptides carrying different or "
+    "no modifications as being the same. Works only if peptide-level=T.",
     "Used by assign-confidence.", true);
   InitStringParam("percolator-intraset-features", "F",
     "Set a feature for percolator that in later versions is not an option.",
