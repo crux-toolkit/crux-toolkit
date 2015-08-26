@@ -204,7 +204,6 @@ void CascadeSearchApplication::processParams() {
   if (Params::GetBool("sqt-output") == true) {
     carp(CARP_FATAL, "Cascade-Search cannot work with sqt-output=T.");
   }
-  
 }
 
 void CascadeSearchApplication::RemoveTempFiles(const string& path, const string& prefix) {
