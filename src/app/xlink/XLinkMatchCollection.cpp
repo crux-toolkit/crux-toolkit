@@ -126,6 +126,9 @@ XLinkMatchCollection::XLinkMatchCollection(
       copyCandidate =
   new XLinkPeptide(*(XLinkPeptide*)currentCandidate);
       break;
+    case INVALID_CANDIDATE:
+      carp(CARP_ERROR, "Invalid candidate type.");
+      exit(1);
     }
     add(copyCandidate);
   }
@@ -175,7 +178,7 @@ void XLinkMatchCollection::addCandidates(
   include_linear_peptides_ = get_boolean_parameter("xlink-include-linears");
   include_self_loops_ = get_boolean_parameter("xlink-include-selfloops");
 
-  carp(CARP_DEBUG, "Adding xlink candidates");
+  carp(CARP_INFO, "Adding xlink candidates");
 
   XLinkPeptide::addCandidates(
     min_mass, 
@@ -291,6 +294,7 @@ void XLinkMatchCollection::shuffle(
   decoy_vector.scan_ = scan_;
 
   for (int idx=0;idx<getMatchTotal();idx++) {
+    //cerr << "shuffling:" << at(idx)->getSequenceString()<<endl;
     decoy_vector.add(at(idx)->shuffle());
   }
 

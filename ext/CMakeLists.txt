@@ -113,8 +113,8 @@ if (WIN32 AND NOT CYGWIN)
   ExternalProject_Add(
     percolator
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
-    URL http://cruxtoolkit.sourceforge.net/download/percolator-rel-2-09.tar.gz
-    URL_MD5 b965041b1cc744cc4d75dfdc3b3ffea0
+    URL http://cruxtoolkit.sourceforge.net/download/rel-2-10.tar.gz
+    URL_MD5 a8874396962c9efd02e3076ed5f6846a
     DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/downloads
     CMAKE_ARGS -DCMAKE_VERBOSE_MAKEFILE=ON
       -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}
@@ -126,8 +126,8 @@ elseif (APPLE)
   ExternalProject_Add(
     percolator
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
-    URL http://cruxtoolkit.sourceforge.net/download/percolator-rel-2-09.tar.gz
-    URL_MD5 b965041b1cc744cc4d75dfdc3b3ffea0
+    URL http://cruxtoolkit.sourceforge.net/download/rel-2-10.tar.gz
+    URL_MD5 a8874396962c9efd02e3076ed5f6846a
     DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/downloads
     CMAKE_ARGS -DCMAKE_VERBOSE_MAKEFILE=ON 
       -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR} 
@@ -152,8 +152,8 @@ else(APPLE)
   ExternalProject_Add(
     percolator
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
-    URL http://cruxtoolkit.sourceforge.net/download/percolator-rel-2-09.tar.gz
-    URL_MD5 b965041b1cc744cc4d75dfdc3b3ffea0
+    URL http://cruxtoolkit.sourceforge.net/download/rel-2-10.tar.gz
+    URL_MD5 a8874396962c9efd02e3076ed5f6846a
     DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/downloads
     CMAKE_ARGS -DCMAKE_VERBOSE_MAKEFILE=ON
       -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}

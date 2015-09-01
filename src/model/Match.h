@@ -97,7 +97,7 @@ class Match {
     int      column_idx,             ///< Index of the column to print. -in
     MatchCollection* collection,  ///< collection holding this match -in 
     MatchFileWriter*    output_file,            ///< output stream -out
-    Spectrum* spectrum,
+    Crux::Spectrum* spectrum,
     int     num_target_matches,     ///< target matches for this spectrum -in
     int     num_decoy_matches, ///< decoy matches (if any) for this spectrum -in
     int     b_y_total,              ///< total b/y ions -in

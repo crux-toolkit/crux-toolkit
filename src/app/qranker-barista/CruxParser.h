@@ -6,7 +6,9 @@
  ****************************************************************************/
 #ifndef CRUXPARSER_H
 #define CRUXPARSER_H
+#ifndef CRUX
 #define CRUX
+#endif
 
 #include <sys/stat.h>
 #ifndef _MSC_VER

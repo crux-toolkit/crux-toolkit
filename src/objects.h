@@ -14,6 +14,8 @@
 #include <map>
 #include "util/utils.h"
 
+#include <stdint.h>
+
 #define QSORT_COMPARE_METHOD int(*)(const void*, const void*)
 
 
@@ -512,6 +514,7 @@ enum _scorer_type {
   TIDE_SEARCH_EXACT_PVAL,
   TIDE_SEARCH_REFACTORED_XCORR,
   SIDAK_ADJUSTED,
+  TIDE_SEARCH_EXACT_SMOOTHED,
   
   QVALUE_TDC,
   QVALUE_MIXMAX,
@@ -676,7 +679,8 @@ typedef enum _set_type SET_TYPE_T;
  * modifications.h for more details.
  */
 // why doesn't this work when I put it in modifications.h????
-typedef unsigned short MODIFIED_AA_T; ///< letters in the expanded peptide
+//typedef unsigned short MODIFIED_AA_T; ///< letters in the expanded peptide
+typedef uint16_t MODIFIED_AA_T; 
 
 /**
  * \typedef AA_MOD_T

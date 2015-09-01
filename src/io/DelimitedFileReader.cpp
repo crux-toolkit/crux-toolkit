@@ -155,7 +155,7 @@ void DelimitedFileReader::loadData() {
   istream_begin_ = istream_ptr_->tellg(); 
 
   has_next_ = !getline(*istream_ptr_, next_data_string_).fail();
-  
+  next_data_string_ = StringUtils::Trim(next_data_string_);
   if (has_header_) {
     if (has_next_) {
       column_names_ = StringUtils::Split(next_data_string_, delimiter_);

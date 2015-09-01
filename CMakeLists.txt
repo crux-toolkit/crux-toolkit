@@ -12,6 +12,9 @@ message(
 )
 
 add_subdirectory(doc/user)
+add_subdirectory(doc/user/comet-options)
+add_subdirectory(doc/user/data)
+add_subdirectory(doc/user/demos)
 add_subdirectory(ext)
 add_subdirectory(src)
 
@@ -99,6 +102,7 @@ add_dependencies(xlink percolator)
 add_dependencies(xlink ProteoWizard)
 add_dependencies(xlink-assign-ions crux)
 add_dependencies(xlink-score-spectrum crux)
+add_dependencies(create-docs crux)
 
 # build a CPack driven installer package
 include (InstallRequiredSystemLibraries)

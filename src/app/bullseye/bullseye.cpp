@@ -421,7 +421,7 @@ MSFileFormat getFileFormat(char* c){
 
 void usage(){
 	cout << "Usage: bullseye [flags] <HK file> <Data file> <Pos file> <Neg file>" << endl;
-	cout << "\n  HK files are Hardklör generated results files." << endl;
+	cout << "\n  HK files are Hardklor generated results files." << endl;
   cout << "  http://proteome.gs.washington.edu/software/hardklor" << endl;
 	cout << "\n  Data files contain the MS/MS data to be used." << endl;
   cout << "  Acceptable formats:" << endl;

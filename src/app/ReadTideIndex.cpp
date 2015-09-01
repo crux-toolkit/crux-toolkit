@@ -45,7 +45,7 @@ int ReadTideIndex::main(int argc, char** argv) {
   carp(CARP_INFO, "Reading peptides...");
   pb::Header peptides_header;
   HeadedRecordReader peptide_reader(peptides_file, &peptides_header);
-  if (!peptides_header.file_type() == pb::Header::PEPTIDES ||
+  if (peptides_header.file_type() != pb::Header::PEPTIDES ||
       !peptides_header.has_peptides_header()) {
     carp(CARP_FATAL, "Error reading index (%s)", peptides_file.c_str());
   }

@@ -143,7 +143,7 @@ int SearchForXLinks::xlinkSearchMain() {
 
     FLOAT_T precursor_mz = spectrum->getPrecursorMz();
 
-    carp(CARP_DEBUG, "Getting candidates for scan %d charge %d mass %f", scan_num, zstate.getCharge(), zstate.getNeutralMass());  
+    carp(CARP_INFO, "Getting candidates for scan %d charge %d mass %f", scan_num, zstate.getCharge(), zstate.getNeutralMass());  
 
     XLinkMatchCollection* target_candidates = new XLinkMatchCollection(precursor_mz,
                        zstate,
@@ -163,10 +163,10 @@ int SearchForXLinks::xlinkSearchMain() {
     }
 
     //score targets
-    carp(CARP_DEBUG, "scoring candidates:%d", target_candidates->getMatchTotal());
+    carp(CARP_INFO, "scoring candidates:%d", target_candidates->getMatchTotal());
     target_candidates->scoreSpectrum(spectrum);
     
-    carp(CARP_DEBUG, "Getting decoy candidates");
+    carp(CARP_INFO, "Getting decoy candidates");
 
     XLinkMatchCollection* decoy_candidates = new XLinkMatchCollection();
     target_candidates->shuffle(*decoy_candidates);

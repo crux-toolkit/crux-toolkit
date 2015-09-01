@@ -707,10 +707,10 @@ void SpectralCounts::filterMatchesQValue() {
   // figure out which qvalue we are using
   SCORER_TYPE_T qval_type = get_qval_type(match_collection_);
   if( qval_type == INVALID_SCORER_TYPE ){
-    carp(CARP_FATAL, "The matches in %s do not have q-values from percolator,"
-                     " q-ranker, or compute-q-values.\n"
-                     " Please provide file with q-values or "
-                     "use threshold-type=none, custom", psm_file_.c_str());
+    carp(CARP_FATAL, "The matches in %s do not have q-values.\n"
+                     "Please either provide a file with q-values or "
+                     "set threshold-type to \"none\" or \"custom.\"",
+	 psm_file_.c_str());
   }
 
   carp(CARP_DETAILED_DEBUG,

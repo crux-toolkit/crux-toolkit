@@ -28,13 +28,7 @@ class MassConstants {
   static const double elts_mono[];
   static const double elts_avg[];
 
-#ifdef _MSC_VER
-  // The windows compiler only allows intialization
-  // of static constant integer types within a class
   static const double proton;
-#else
-  static const double proton = 1.00727646688;
-#endif
 
   static bool Init(const pb::ModTable* mod_table, 
     const pb::ModTable* n_mod_table, 
@@ -76,13 +70,7 @@ class MassConstants {
   static const double BIN_SHIFT_NH3_CHG_2_CASE_A;
   static const double BIN_SHIFT_NH3_CHG_2_CASE_B;
 */  // Fixed-Point Versions
-#ifdef _MSC_VER
-  // The windows compiler only allows intialization
-  // of static constant integer types within a class
   static const double kFixedPointScalar;
-#else
-  static const double kFixedPointScalar = 1e5;
-#endif
   static FixPt ToFixPt(double x) {
     return FixPt(x * kFixedPointScalar + 0.5);
   }

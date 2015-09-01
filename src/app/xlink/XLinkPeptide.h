@@ -37,6 +37,17 @@ class XLinkPeptide : public XLinkMatch {
   int getLinkPos(
     int peptide_idx ///< 0 - first peptide, 1 - second peptide
   );
+ 
+  /*
+   * Iterates through all linkable sites and adds valid xlink peptide candidates
+   */
+  static void addXLinkPeptides(
+    XLinkablePeptide& pep1, ///< First linkable peptide
+    XLinkablePeptide& pep2, ///< Second linkable peptide
+    XLinkBondMap& bondmap, ///< bondmap describing valid linkages
+    XLinkMatchCollection& candidates ///< XLinkable Candidates -out
+  );
+
 
  public:
   
@@ -86,6 +97,13 @@ class XLinkPeptide : public XLinkMatch {
    * \returns whether the cross-link is from peptides within the same protein
    */
   bool isIntra();
+
+  /**
+   * \returns whether the cross-link is from peptides that are both within the same protein and can be from different proteins
+   */
+  bool isInterIntra();
+
+
 
   /**
    * sets the static linker mass variable

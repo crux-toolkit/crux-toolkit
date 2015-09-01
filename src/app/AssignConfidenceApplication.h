@@ -14,13 +14,13 @@
 #include "objects.h"
 #include "parameter.h"
 #include "model/Protein.h"
-#include "model/Peptide.h"
 #include "model/Spectrum.h"
 #include "io/SpectrumCollection.h"
 #include "model/Scorer.h"
 #include "model/Match.h"
 #include "model/MatchCollection.h"
 #include "io/OutputFiles.h"
+#include "model/Peptide.h"
 
 class AssignConfidenceApplication : public CruxApplication {
 protected: 
@@ -30,6 +30,8 @@ protected:
   OutputFiles* output_;
   unsigned int accepted_psms_;
   string index_name_;
+  bool combine_modified_peptides_;
+  bool combine_charge_states_;
 public:
 
   map<pair<string, unsigned int>, bool>* getSpectrumFlag();
@@ -38,6 +40,8 @@ public:
   void setIterationCnt(unsigned int iteration_cnt);
   void setOutput(OutputFiles *output);
   unsigned int getAcceptedPSMs();
+  std::string getPeptideSeq(Crux::Match* match);
+
 
   /**
   * stores the name of the index file used in an iteration in Cascade Search.
@@ -100,7 +104,6 @@ public:
   * \returns whether the application needs the output directory or not.
   */
   virtual bool needsOutputDirectory() const;
-
 
   FLOAT_T* compute_decoy_qvalues_tdc(
     FLOAT_T* target_scores,

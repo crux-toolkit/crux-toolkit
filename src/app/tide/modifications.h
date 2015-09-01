@@ -13,15 +13,7 @@
 
 using namespace std;
 
-#define SHOW(x) { cout << (#x) << ": " << (x) << "\n"; }
-#if 0
-#define SHOW_ALL(x) {							  \
-  cout << (#x) << ":";                                                    \
-  for (typeof(x)::const_iterator it = (x).begin(); it != (x).end(); ++it) \
-    cout << " " << (*it);                                                 \
-  cout << "\n";                                                           \
- }
-#endif
+#define SHOW_ONE(x) { cout << (#x) << ": " << (x) << "\n"; }
 #define SHOW_PAIR(x) ((x).first) << ", " << ((x).second)
 
 enum mods_spec_type   { MOD_SPEC, //table for regular amino acid modifications
@@ -265,7 +257,7 @@ class VariableModTable {
 #endif
   bool SerializeUniqueDeltas() {
     if (unique_delta_.size() == 0)
-      return 0;
+      return(0);
     original_deltas_.resize(unique_delta_.size());
     copy(unique_delta_.begin(), unique_delta_.end(), original_deltas_.begin());
     sort(unique_delta_.begin(), unique_delta_.end());
@@ -283,6 +275,7 @@ class VariableModTable {
     SerializeUniqueDeltas(&pb_ntpep_mod_table_);
     SerializeUniqueDeltas(&pb_ctpro_mod_table_);
     SerializeUniqueDeltas(&pb_ntpro_mod_table_);
+    return(1);
   }
 
   bool SerializeUniqueDeltas(pb::ModTable* pb_mod_table) {
@@ -312,9 +305,9 @@ class VariableModTable {
   }
 
   void Show() {
-    SHOW(unique_delta_.size());
+    SHOW_ONE(unique_delta_.size());
     SHOW_ALL(unique_delta_);
-    SHOW(max_counts_.size());
+    SHOW_ONE(max_counts_.size());
     SHOW_ALL(max_counts_);
     const char* aa = "ACDEFGHIKLMNPQRSTVWYX";
     for (const char* c = aa; *c; ++c) {

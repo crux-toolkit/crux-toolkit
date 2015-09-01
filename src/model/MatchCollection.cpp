@@ -24,8 +24,12 @@ using namespace Crux;
  * \returns An (empty) match_collection object.
  */
 void MatchCollection::init() {
-
-  match_.reserve(10 * MILLION);
+  try {
+    match_.reserve(10 * MILLION);
+  }
+  catch (std::bad_alloc& ba) {
+    carp(CARP_DEBUG, "Bad alloc in reserve: %s", ba.what());
+  }
   experiment_size_ = 0;
   target_experiment_size_ = 0;
   zstate_ = SpectrumZState();
