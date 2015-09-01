@@ -128,7 +128,7 @@ void TranslateFastaToPB(const string& fasta_filename,
   CHECK(writer.OK());
   
   const pb::Protein* protein;
-  while (protein = reader.GetProtein())
+  while ((protein = reader.GetProtein()))
     writer.Write(protein);
 
   CHECK(writer.OK());

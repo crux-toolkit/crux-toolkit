@@ -36,6 +36,7 @@ Crux::SpectrumCollection* SpectrumCollectionFactory::create(const string& filena
   }
 
   carp(CARP_FATAL, "Unknown spectrum parser type");
+  return(NULL); // Avoid compiler warning.
 }
 
 /*

@@ -521,8 +521,8 @@ void Params::Initialize() {
     "be assigned probability = 0.",
     "Available for crux percolator", true);
   InitBoolParam("post-processing-qvality", false,
-    "Replace the target­decoy competition with the method qvality to "
-    "assign q­values and PEPs. Note that this option only has an "
+    "Replace the target-decoy competition with the method qvality to "
+    "assign q-values and PEPs. Note that this option only has an "
     "effect if the input PSMs are from separate target and decoy "
     "searches.", 
     "Available for crux percolator", true);

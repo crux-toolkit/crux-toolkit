@@ -151,7 +151,7 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
     pb::Header aaf_peptides_header;
     HeadedRecordReader aaf_peptide_reader(peptides_file, &aaf_peptides_header);
 
-    if (!aaf_peptides_header.file_type() == pb::Header::PEPTIDES ||
+    if ((aaf_peptides_header.file_type() != pb::Header::PEPTIDES) ||
         !aaf_peptides_header.has_peptides_header()) {
       carp(CARP_FATAL, "Error reading index (%s)", peptides_file.c_str());
     }
@@ -177,7 +177,7 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
   pb::Header peptides_header;
   HeadedRecordReader* peptide_reader =
     new HeadedRecordReader(peptides_file, &peptides_header);
-  if (!peptides_header.file_type() == pb::Header::PEPTIDES ||
+  if ((peptides_header.file_type() != pb::Header::PEPTIDES) ||
       !peptides_header.has_peptides_header()) {
     carp(CARP_FATAL, "Error reading index (%s)", peptides_file.c_str());
   }
@@ -1088,7 +1088,7 @@ void TideSearchApplication::processParams() {
     pb::Header peptides_header;
     string peptides_file = FileUtils::Join(index, "pepix");
     HeadedRecordReader peptide_reader(peptides_file, &peptides_header);
-    if (!peptides_header.file_type() == pb::Header::PEPTIDES ||
+    if ((peptides_header.file_type() != pb::Header::PEPTIDES) ||
         !peptides_header.has_peptides_header()) {
       carp(CARP_FATAL, "Error reading index (%s)", peptides_file.c_str());
     }

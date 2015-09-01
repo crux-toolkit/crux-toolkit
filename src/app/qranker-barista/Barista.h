@@ -1,6 +1,8 @@
 #ifndef BARISTA_H
 #define BARISTA_H
+#ifndef CRUX
 #define CRUX
+#endif
 #include <sys/types.h>
 #ifndef _MSC_VER
 #include <dirent.h>

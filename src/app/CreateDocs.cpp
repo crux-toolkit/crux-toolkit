@@ -298,7 +298,7 @@ void CreateDocs::makeReplacements(
   const string OPEN_TAG = "<!--";
   const string CLOSE_TAG = "-->";
 
-  unsigned idx, end_idx = 0;
+  size_t idx, end_idx = 0;
   while ((idx = templateStr->find(OPEN_TAG, end_idx)) != string::npos) {
     if (idx > templateStr->length()) {
       break;

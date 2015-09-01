@@ -126,6 +126,9 @@ XLinkMatchCollection::XLinkMatchCollection(
       copyCandidate =
   new XLinkPeptide(*(XLinkPeptide*)currentCandidate);
       break;
+    case INVALID_CANDIDATE:
+      carp(CARP_ERROR, "Invalid candidate type.");
+      exit(1);
     }
     add(copyCandidate);
   }

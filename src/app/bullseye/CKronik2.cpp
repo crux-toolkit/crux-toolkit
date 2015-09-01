@@ -123,6 +123,7 @@ bool CKronik2::loadHK(char* in){
 	fclose(hkr);
 
   cout << pepCount << " peptides from " << hkData.size() << " scans." << endl;
+  return true;
 }
 
 bool CKronik2::processHK(char*  in, char* out) {
