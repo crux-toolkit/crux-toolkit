@@ -92,6 +92,7 @@ XLINKMATCH_TYPE_T getCrossLinkCandidateType(
   } else {
     carp(CARP_FATAL, "Internal error at getCrossLinkCandidateType");
   }
+  return(INVALID_CANDIDATE);
 }
 
 /**

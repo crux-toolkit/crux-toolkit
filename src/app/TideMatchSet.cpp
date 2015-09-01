@@ -538,7 +538,7 @@ void TideMatchSet::addCruxMatches(
   SpScorer* sp_scorer,
   FLOAT_T* lowest_sp_out
 ) {
-  FLOAT_T lnNumSp = OutputFiles::isConcat
+  FLOAT_T lnNumSp = OutputFiles::isConcat()
     ? log((FLOAT_T) (peptides->ActiveTargets() + peptides->ActiveDecoys()))
     : log((FLOAT_T) (!decoys ? peptides->ActiveTargets() : peptides->ActiveDecoys()));
 
