@@ -270,6 +270,7 @@ PeptideEvidencePtr MzIdentMLWriter::getPeptideEvidence(
   }
 
   carp(CARP_FATAL, "Couldn't find %s in %s", sequence_str.c_str(), protein_id.c_str());
+  return(*pe_iter); // Avoid compiler warning.
 }
 
 

@@ -8,12 +8,123 @@
 
 
 #include <sstream>
-
+#include <iostream>
 using namespace std;
 
 namespace XLink {
 
 set<Crux::Peptide*> allocated_peptides_; ///< tracker for allocated peptides
+
+bool testInterIntraKeep(
+  Crux::Peptide *pep1,
+  Crux::Peptide *pep2
+  ) {
+  return(testInterIntraKeep(pep1, pep2, get_boolean_parameter("xlink-include-intra"), 
+    get_boolean_parameter("xlink-include-inter"),
+    get_boolean_parameter("xlink-include-inter-intra")));
+
+}
+
+bool testInterIntraKeep(
+  Crux::Peptide* pep1,
+  Crux::Peptide* pep2,
+  bool include_intra,
+  bool include_inter,
+  bool include_inter_intra
+  ) {
+  //  carp(CARP_INFO, "testInterIntraKeep:start");
+  if (include_intra && 
+      include_inter && 
+      include_inter_intra) {
+    //no need to test
+    return true;
+  }
+
+  XLINKMATCH_TYPE_T cross_link_type = getCrossLinkCandidateType(pep1, pep2);
+
+  if (cross_link_type == XLINK_INTER_INTRA_CANDIDATE  && include_inter_intra) {
+    return true;
+  } else if (cross_link_type == XLINK_INTER_CANDIDATE && include_inter) {
+    return true;
+  } else if (cross_link_type == XLINK_INTRA_CANDIDATE && include_intra) {
+    return true;
+  }
+  return false;
+}
+
+XLINKMATCH_TYPE_T getCrossLinkCandidateType(
+  Crux::Peptide* pep1,
+  Crux::Peptide* pep2
+  ) {
+
+  bool is_intra = false;
+  bool is_inter = false;
+  
+  for (PeptideSrcIterator src_iterator1 = pep1->getPeptideSrcBegin();
+    src_iterator1 != pep1->getPeptideSrcEnd();
+    ++src_iterator1) {
+    PeptideSrc* src1 = *src_iterator1;
+    size_t id1 = src1->getParentProtein()->getProteinIdx();
+
+    for (PeptideSrcIterator src_iterator2 = pep2->getPeptideSrcBegin();
+      src_iterator2 != pep2->getPeptideSrcEnd();
+      ++src_iterator2) {
+      PeptideSrc* src2 = *src_iterator2;
+      size_t id2 = src2->getParentProtein()->getProteinIdx();
+      if (id1 == id2) {
+        is_intra = true;
+        if (is_inter) {
+          return(XLINK_INTER_INTRA_CANDIDATE);
+        }
+      } else {
+        is_inter = true;
+        if (is_intra) {
+          return(XLINK_INTER_INTRA_CANDIDATE);
+        }
+      }
+    }
+  }
+
+  if (is_intra && !is_inter) {
+    return (XLINK_INTRA_CANDIDATE);
+  } else if (is_inter & !is_intra) {
+    return(XLINK_INTER_CANDIDATE);
+  } else {
+    carp(CARP_FATAL, "Internal error at getCrossLinkCandidateType");
+  }
+  return(INVALID_CANDIDATE);
+}
+
+/**
+ * \returns whether two proposed peptides would contain an intra-protein crosslink
+ */
+bool isCrossLinkIntra(
+   Crux::Peptide* pep1,
+   Crux::Peptide* pep2
+  ) {
+
+  return(getCrossLinkCandidateType(pep1, pep2) == XLINK_INTRA_CANDIDATE);
+}
+
+/**
+ * \returns whether two proposed peptides would contain an inter-protein crosslink
+ */
+bool isCrossLinkInter(
+  Crux::Peptide* pep1,
+  Crux::Peptide* pep2
+  ) {
+  
+  return(getCrossLinkCandidateType(pep1, pep2) == XLINK_INTER_CANDIDATE);
+}
+
+bool isCrossLinkInterIntra(
+  Crux::Peptide* pep1,
+  Crux::Peptide* pep2
+  ) {
+
+  return(getCrossLinkCandidateType(pep1, pep2) == XLINK_INTER_INTRA_CANDIDATE);
+}
+
 
 /**
  * add a peptide to the list of allocated peptides
@@ -82,8 +193,6 @@ string get_protein_ids_locations(
   return protein_field_string;
 
 }
-
-
 
 
 

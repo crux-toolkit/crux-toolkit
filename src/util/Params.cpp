@@ -476,7 +476,7 @@ void Params::Initialize() {
     "When given a unsigned integer value seeds the random number generator with that value. "
     "When given the string \"time\" seeds the random number generator with the system time.",
     "Available for all percolator", true);
-  InitBoolParam("feature-file", false,
+  InitBoolParam("feature-file-out", false,
     "Output the computed features in [[html:<a href=\"features.html\">]]tab-delimited "
     "text format[[html:</a>]].",
     "Available for percolator and q-ranker.", true);
@@ -489,7 +489,7 @@ void Params::Initialize() {
   InitBoolParam("output-weights", false,
     "Output final weights to a file named \"percolator.weights.txt\".",
     "Available for crux percolator", true);
-  InitStringParam("input-weights", "",
+  InitStringParam("init-weights", "",
     "Read initial weights from the given file (one per line).",
     "Available for crux percolator ", true);
   InitDoubleParam("c-pos", 0.01,
@@ -509,17 +509,35 @@ void Params::Initialize() {
   InitDoubleParam("test-fdr", 0.01, 0.0, 1.0,
     "False discovery rate threshold used in selecting hyperparameters during internal "
     "cross-validation and for reporting the final results.",
-    "Availble for crux percolator.", true);
+    "Available for crux percolator.", true);
+  InitDoubleParam("fido-fast-gridsearch", 0.0, 0.0, 1.0,
+    "Apply the specified threshold to PSM, peptide and protein probabilities to "
+    "obtain a faster estimate of the alpha, beta and gamma parameters.",
+    "Available for crux percolator.", true);
+  InitBoolParam("fido-split-large-components", false,
+    "Approximate the posterior distribution by allowing large graph "
+    "components to be split into subgraphs. The splitting is done by "
+    "duplicating peptides with low probabilities. Splitting continues "
+    "until the number of possible configurations of each subgraph is "
+    "below 2^18", 
+    "Available for crux percolator", true);
+  InitDoubleParam("fido-protein-truncation-threshold", 0.01, 0.0, 1.0,
+    "To speed up inference, proteins for which none of the associated "
+    "peptides has a probability exceeding the specified threshold will "
+    "be assigned probability = 0.",
+    "Available for crux percolator", true);
+  InitBoolParam("post-processing-qvality", false,
+    "Replace the target-decoy competition with the method qvality to "
+    "assign q-values and PEPs. Note that this option only has an "
+    "effect if the input PSMs are from separate target and decoy "
+    "searches.", 
+    "Available for crux percolator", true);
   InitIntParam("maxiter", 10, 0, 100000000,
     "Maximum number of iterations for training.",
     "Available for crux percolator", true);
   InitBoolParam("quick-validation", false,
     "Quicker execution by reduced internal cross-validation.",
     "Available for crux percolator", true);
-  InitDoubleParam("train-ratio", 0.6, 0.0, 1.0,
-    "Fraction of the negative data set to be used as train set when only providing "
-    "one negative set. The remaining examples will be used as test set.",
-    "Available for crux percolator.", true);
   InitStringParam("default-direction", "",
     "In its initial round of training, Percolator uses one feature to induce a ranking "
     "of PSMs. By default, Percolator will select the feature that produces the largest "
@@ -536,47 +554,33 @@ void Params::Initialize() {
   InitBoolParam("test-each-iteration", false,
     "Measure performance on test set each iteration.",
     "Available for crux percolator.", true);
-  InitBoolParam("feature-in-file", false,
+  InitBoolParam("feature-file-in", false,
     "When set to T, interpret the input file as a PIN file.",
     "Available for crux percolator.", true);
   InitBoolParam("protein", false,
     "Output protein level probability. Must be true to use any of the Fido options.",
     "Available for crux percolator", true);
-  InitDoubleParam("alpha", 0.0, 0.0, 1.0,
+  InitDoubleParam("fido-alpha", 0.0, 0.0, 1.0,
     "Specify the probability with which a present protein emits an associated peptide. "
-    "Set by grid search (see --deepness parameter) if not specified.",
+    "Set by grid search (see --fido-gridsearch-depth parameter) if not specified.",
     "Available for crux percolator if --protein T is set.", true);
-  InitDoubleParam("beta", 0.0, 0.0, 10.0,
+  InitDoubleParam("fido-beta", 0.0, 0.0, 10.0,
     "Specify the probability of the creation of a peptide from noise. Set by grid "
-    "search (see --deepness parameter) if not specified.",
+    "search (see --fido-gridsearch-depth parameter) if not specified.",
     "Available for crux percolator if --protein T is set.", true);
-  InitDoubleParam("gamma", 0.0, 0.0, 10.0,
+  InitDoubleParam("fido-gamma", 0.0, 0.0, 10.0,
     "Specify the prior probability that a protein is present in the sample. Set by grid "
-    "search (see --deepness parameter) if not specified.",
+    "search (see --fido-gridsearch-depth parameter) if not specified.",
     "Available for crux percolator if --protein T is set.", true);
-  InitBoolParam("allow-protein-group", false,
-    "Treate ties as if it were one protein.",
-    "Available for crux percolator.", true);
-  InitBoolParam("protein-level-pi0", false,
+  InitBoolParam("fido-protein-level-pi0", false,
     "Use pi_0 value when calculating empirical q-values",
     "Available for crux percolator if --protein T is set.", true);
-  InitBoolParam("empirical-protein-q", false,
+  InitBoolParam("fido-empirical-protein-q", false,
     "Output empirical q-values from target-decoy analysis.",
     "Available for crux percolator if --protein T is set.", true);
-  InitBoolParam("group-proteins", false,
-    "Proteins with same probabilities will be grouped.",
-    "Available for crux percolator if --protein T is set.", true);
-  InitBoolParam("no-separate-proteins", false,
-    "Proteins with very low scores (~0.0) will not be pruned which means that if a "
-    "peptide with a very low score matches two proteins, when we prune the peptide, "
-    "it will be duplicated to generate two new protein groups.",
-    "Available for crux percolator if --protein T is set.", true);
-  InitBoolParam("no-prune-proteins", false,
-    "Peptides with low score will not be pruned before calculating protein probabilities. ",
-    "Available for crux percolator if --protein T is set.", true);
-  InitIntParam("deepness", 0, 0, 2,
+  InitIntParam("fido-gridsearch-depth", 0, 0, 2,
     "Set depth of the grid search for alpha, beta and gamma estimation.[[html: The values "
-    "considered, for each possible value of the --deepness parameter, are as follows:<ul>"
+    "considered, for each possible value of the --fido-gridsearch-depth parameter, are as follows:<ul>"
     "<li>0: alpha = {0.01, 0.04, 0.09, 0.16, 0.25, 0.36, 0.5}; beta = {0.0, 0.01, 0.15, "
     "0.025, 0.035, 0.05, 0.1}; gamma = {0.1, 0.25, 0.5, 0.75}.</li><li>1: alpha = {0.01, "
     "0.04, 0.09, 0.16, 0.25, 0.36}; beta = {0.0, 0.01, 0.15, 0.025, 0.035, 0.05}; gamma = "
@@ -584,26 +588,14 @@ void Params::Initialize() {
     "0.01, 0.15, 0.030, 0.05}; gamma = {0.1, 0.5}.</li><li>3: alpha = {0.01, 0.04, 0.16, "
     "0.25, 0.36}; beta = {0.0, 0.01, 0.15, 0.030, 0.05}; gamma = {0.5}.</li></ul>]]",
     "Available for crux percolator if --protein T is set.", true);
-  InitBoolParam("reduce-tree-in-gridsearch", false,
-    "Reduce the tree of proteins (removing low scored proteins) in order to estimate "
-    "alpha, beta, and gamma faster.",
-    "Available for crux percolator if --protein T is set.", true);
-  InitBoolParam("post-processing-tdcn", false,
+  InitBoolParam("post-processing-tdc", false,
     "Use target-decoy competition to compute peptide probabilities.",
     "Available for crux percolator", true);
-  InitDoubleParam("grid-search-mse-threshold", 0.05, 0, 1,
+  InitDoubleParam("fido-gridsearch-mse-threshold", 0.05, 0, 1,
     "Q-value threshold that will be used in the computation of the MSE and ROC AUC "
     "score in the grid search.",
     "Available for crux percolator if --protein T is set.", true);
-  InitBoolParam("truncation", false,
-    "Proteins with a very low score (<0.001) will be truncated (assigned 0.0 probability.",
-    "Available for crux percolator if --protein T is set.", true);
-  InitBoolParam("protein-group-level-inference", false,
-    "Uses protein group level inference, each cluster of proteins is either present or "
-    "not, therefore when grouping proteins discard all possible combinations for each "
-    "group.",
-    "Available for crux percolator if --protein T is set.", true);
-  InitBoolParam("static-override", false,
+  InitBoolParam("override", false,
     "By default, Percolator will examine the learned weights for each feature, and if "
     "the weight appears to be problematic, then percolator will discard the learned "
     "weights and instead employ a previously trained, static score vector. This switch "
@@ -1091,12 +1083,23 @@ void Params::Initialize() {
     "Used by assign-confidence.", true);
   InitStringParam("score", "",
     "Specify the column (for tab-delimited input) or tag (for XML input) "
-    "used as input to the q-value estimation procedure.",
+    "used as input to the q-value estimation procedure. If this parameter is unspecified, "
+    "then assign-confidence tries to seach for \"xcorr score\", \"evalue\" (comet), "
+    "\"exact p-value\" score fields in this order in the input file. "
+    "The \"smaller-the-better\" parameter will then be automatically adjusted.",
     "Used by assign-confidence.", true);
   InitBoolParam("smaller-is-better", false, 
     "Specify the semantics of the score, i.e., whether a smaller value implies a better "
-    "match or vice versa. Specify this parameter T for \"exact p-value\" and F for \""
-    "xcorr score\".",
+    "match or vice versa. For example, set this parameter to T for \"exact p-value\" and F for "
+    "\"xcorr score\".",
+    "Used by assign-confidence.", true);
+  InitBoolParam("combine-charge-states", false,
+    "Specify this parameter to T in order to combine charge states with peptide sequences"
+    "in peptide-centric search. Works only if peptide-level=T.",
+    "Used by assign-confidence.", true);
+  InitBoolParam("combine-modified-peptides", false,
+    "Specify this parameter to T in order to treat peptides carrying different or "
+    "no modifications as being the same. Works only if peptide-level=T.",
     "Used by assign-confidence.", true);
   InitStringParam("percolator-intraset-features", "F",
     "Set a feature for percolator that in later versions is not an option.",
@@ -1198,9 +1201,10 @@ void Params::Initialize() {
     "Available for spectral-counts. All PSMs with higher (or lower) than "
     "this will be ignored.", true);
   InitStringParam("custom-threshold-name", "",
-    "Specify which field to apply the threshold to. By default, the threshold "
-    "applies to the q-value. The direction of the threshold (<= or >=) is "
-    "governed by --custom-threshold-min.",
+    "Specify which field to apply the threshold to. The direction of the threshold "
+    "(<= or >=) is governed by --custom-threshold-min. By default, the threshold "
+    "applies to the q-value, specified by \"percolator q-value\", \"q-ranker q-value\", "
+    "\"decoy q-value (xcorr)\", or \"barista q-value\".",
     "Available for spectral-counts.", true);
   InitBoolParam("custom-threshold-min", true,
     "When selecting matches with a custom threshold, custom-threshold-min determines "
@@ -1286,6 +1290,15 @@ void Params::Initialize() {
     "Available for crux search-for-xlinks program.", true);
   InitBoolParam("xlink-include-selfloops", true, 
     "Include self-loop peptides in the search.",
+    "Available for crux search-for-xlinks program.", true);
+  InitBoolParam("xlink-include-intra", true,
+    "Include intra-protein cross-link candiates within the search.",
+    "Available for crux search-for-xlinks program.", true);
+  InitBoolParam("xlink-include-inter", true,
+    "Include inter-protein cross-link candidates within the search.",
+    "Available for crux search-for-xlinks program.", true);
+  InitBoolParam("xlink-include-inter-intra", true,
+    "Include crosslink candidates that are both inter and intra.",
     "Available for crux search-for-xlinks program.", true);
   InitStringParam("xlink-prevents-cleavage", "K",
     "List of amino acids for which the cross-linker can prevent cleavage. This option is "
@@ -1685,24 +1698,23 @@ void Params::Categorize() {
 
   items.clear();
   items.insert("protein");
-  items.insert("alpha");
-  items.insert("beta");
-  items.insert("gamma");
-  items.insert("allow-protein-group");
-  items.insert("protein-level-pi0");
-  items.insert("empirical-protein-q");
-  items.insert("group-proteins");
-  items.insert("no-separate-proteins");
-  items.insert("no-prune-proteins");
-  items.insert("deepness");
-  items.insert("reduce-tree-in-gridsearch");
-  items.insert("grid-search-mse-threshold");
-  items.insert("truncation");
-  items.insert("protein-group-level-inference");
+  items.insert("fido-alpha");
+  items.insert("fido-beta");
+  items.insert("fido-gamma");
+  items.insert("fido-protein-level-pi0");
+  items.insert("fido-empirical-protein-q");
+  items.insert("fido-gridsearch-depth");
+  items.insert("fido-gridsearch-mse-threshold");
+  items.insert("fido-fast-gridsearch");
+  items.insert("fido-protein-truncation-threshold");
+  items.insert("fido-split-large-components");
   container_.AddCategory("Fido options", items);
 
   items.clear();
   items.insert("use-old-xlink");
+  items.insert("xlink-include-inter");
+  items.insert("xlink-include-intra");
+  items.insert("xlink-include-inter-intra");
   items.insert("xlink-include-linears");
   items.insert("xlink-include-deadends");
   items.insert("xlink-include-selfloops");
@@ -1826,10 +1838,11 @@ void Params::Categorize() {
   items.insert("num_output_lines");
   items.insert("show_fragment_ions");
   items.insert("sample_enzyme_number");
-  items.insert("feature-file");
+  items.insert("feature-file-in");
+  items.insert("feature-file-out");
   items.insert("decoy-xml-output");
   items.insert("output-weights");
-  items.insert("input-weights");
+  items.insert("init-weights");
   items.insert("parameter-file");
   items.insert("verbosity");
   items.insert("decoy-prefix");

@@ -681,7 +681,7 @@ void TideIndexApplication::writePeptidesAndAuxLocs(
   if (!ReadRecordsToVector<pb::Protein>(&proteins, proteinsFile,
                                         &proteinsHeader)) {
     carp(CARP_FATAL, "Error reading proteins from %s", proteinsFile.c_str());
-  } else if (!proteinsHeader.file_type() == pb::Header::RAW_PROTEINS) {
+  } else if (proteinsHeader.file_type() != pb::Header::RAW_PROTEINS) {
     carp(CARP_FATAL, "Proteins file %s had invalid type", proteinsFile.c_str());
   }
   // Clean up

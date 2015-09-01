@@ -26,9 +26,6 @@ SearchForXLinks::~SearchForXLinks() {
  */
 int SearchForXLinks::main(int argc, char** argv) {
 
-  /* Verbosity level for set-up/command line reading */
-  set_verbosity_level(CARP_ERROR);
-
   //The use-old-xlink parameter will determine
   //which codebase gets called.
   int ret;
@@ -56,17 +53,18 @@ string SearchForXLinks::getDescription() const {
     "[[nohtml:Search a collection of spectra against a sequence database, "
     "returning a collection of matches corresponding to linear and "
     "cross-linked peptides scored by XCorr.]]"
-    "[[html:<p>This command searches a protein database with a set of spectra. "
-    "For each spectrum, the precursor mass is computed from either the "
-    "precursor singly charged mass (m+h) or the mass-to-charge (m/z) and an "
-    "assumed charge. Candidates molecules are linear peptides, dead-end "
-    "products, self-loop products or cross-linked products whose mass lies "
-    "within a specified range of the precursor mass. These candidate peptides "
-    " are ranked using XCorr. The input protein database is in FASTA format."
+    "[[html:<p>This command compares a set of spectra to cross-linked "
+    "peptides derived from a protein database in FASTA format. "
+    "For each spectrum, the program generates a list of candidate "
+    "molecules, including linear peptides, dead-end products, self-loop "
+    "products and cross-linked products, with masses that lie within a "
+    "specified range of the spectrum's precursor mass. These candidate "
+    "molecules are ranked using XCorr, and the XCorr scores are assigned "
+    "statistical confidence estimates using an empirical curve fitting procedure."
     "</p><p>The algorithm is described in more detail in the following article:"
     "</p><blockquote>Sean McIlwain, Paul Draghicescu, Pragya Singh, David R. "
-    "Goodlett and William Stafford Noble.<a href=\""
-    "http://noble.gs.washington.edu/papers/mcilwain2010detecting.html\">"
+    "Goodlett and William Stafford Noble. <a href=\""
+    "http://pubs.acs.org/doi/abs/10.1021/pr901163d\">"
     "&quot;Detecting cross-linked peptides by searching against a database of "
     "cross-linked peptide pairs.&quot;</a> <em>Journal of Proteome Research"
     "</em>. 2010.</blockquote>]]";
@@ -94,6 +92,9 @@ vector<string> SearchForXLinks::getOptions() const {
     "xlink-include-linears",
     "xlink-include-deadends",
     "xlink-include-selfloops",
+    "xlink-include-inter",
+    "xlink-include-intra",
+    "xlink-include-inter-intra",
     "xlink-prevents-cleavage",
     "max-xlink-mods",
     "min-mass",

@@ -104,8 +104,11 @@ double* ComputeQValues::compute_PEP(double* target_scores, ///< scores for targe
 
   // estimate PEPs
   vector<double> PEP_vector;
-  PosteriorEstimator::estimatePEP(score_labels, pi0, PEP_vector, 
-                                  true);  // include decoy PEPs
+
+  PosteriorEstimator::estimatePEP(score_labels,
+    true, // usePi0
+    pi0, PEP_vector, 
+    true);  // include decoy PEPs
 
   // now score_labels and PEPs are similarly sorted
 

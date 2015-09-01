@@ -57,7 +57,7 @@ char mod_sqt_symbols[MAX_AA_MODS] = //{'*', '@', '#', '^', '~', '%',
   {'*', '#', '@', '^', '~', '%', // like sequest
                                      '$', '&', '!', '?', '+'};
 
-unsigned short mod_id_masks[MAX_AA_MODS] = 
+uint16_t mod_id_masks[MAX_AA_MODS] = 
   {
    0x0020,   // 0000 0000 0010 0000 *
    0x0040,   // 0000 0000 0100 0000 #

@@ -1,6 +1,8 @@
 #ifndef SQTPARSER_H
 #define SQTPARSER_H
+#ifndef CRUX
 #define CRUX
+#endif
 #include <sys/stat.h>
 #ifndef _MSC_VER
 #include <dirent.h>

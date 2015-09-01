@@ -57,7 +57,7 @@ int SubtractIndexApplication::main(int argc, char** argv) {
   
   pb::Header peptides_header1;
   HeadedRecordReader peptide_reader1(peptides_file1, &peptides_header1);
-  if (!peptides_header1.file_type() == pb::Header::PEPTIDES ||
+  if (peptides_header1.file_type() != pb::Header::PEPTIDES ||
     !peptides_header1.has_peptides_header()) {
     carp(CARP_FATAL, "Error reading index (%s)", peptides_file1.c_str());
   }

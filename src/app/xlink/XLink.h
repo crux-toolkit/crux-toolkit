@@ -29,6 +29,52 @@ void get_min_max_mass(
 
 namespace XLink {
 
+
+/** 
+ * \returns whether the proposed xlink peptides would survive the inter/intra filters set by the user
+ */
+bool testInterIntraKeep(Crux::Peptide* pep1, Crux::Peptide* pep2);
+
+bool testInterIntraKeep(
+  Crux::Peptide* pep1,
+  Crux::Peptide* pep2,
+  bool include_intra,
+  bool include_inter,
+  bool include_inter_intra
+  );
+
+/**
+ * \ returns the crosslink candidate type between two peptides
+ */
+XLINKMATCH_TYPE_T getCrossLinkCandidateType(
+  Crux::Peptide* pep1, 
+  Crux::Peptide* pep2
+  );
+
+/**
+ * \returns whether two proposed peptides would contain an inter-protein crosslink
+ */
+bool isCrossLinkInter(
+  Crux::Peptide* pep1,
+  Crux::Peptide* pep2
+  );
+
+/**
+ * \returns whether two proposed peptides would contain an intra-protein crosslink
+ */
+bool isCrossLinkIntra(
+   Crux::Peptide* pep1,
+   Crux::Peptide* pep2
+  );
+
+/**
+ * \returns whether two propsed peptides would contain both an intra and inter protein cross link
+ */ 
+bool isCrossLinkInterIntra(
+  Crux::Peptide* pep1,
+  Crux::Peptide* pep2
+);
+
 /**
  * \returns protein ids with start locations marked with (X)
  */
