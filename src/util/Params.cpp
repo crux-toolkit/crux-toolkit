@@ -552,7 +552,7 @@ void Params::Initialize() {
     "When set to T, interpret the input file as a PIN file.",
     "Available for crux percolator.", true);
   InitBoolParam("protein", false,
-    "Output protein level probability. Must be true to use any of the Fido options.",
+    "Use the Fido algorithm to infer protein probabilities. Must be true to use any of the Fido options.",
     "Available for crux percolator", true);
   InitDoubleParam("fido-alpha", 0.0, 0.0, 1.0,
     "Specify the probability with which a present protein emits an associated peptide. "
@@ -570,7 +570,7 @@ void Params::Initialize() {
     "Use pi_0 value when calculating empirical q-values",
     "Available for crux percolator if --protein T is set.", true);
   InitBoolParam("fido-empirical-protein-q", false,
-    "Output empirical q-values from target-decoy analysis.",
+    "Estimate empirical p-values and q-values for proteins using target-decoy analysis.",
     "Available for crux percolator if --protein T is set.", true);
   InitIntParam("fido-gridsearch-depth", 0, 0, 2,
     "Set depth of the grid search for alpha, beta and gamma estimation.[[html: The values "
@@ -583,7 +583,7 @@ void Params::Initialize() {
     "0.25, 0.36}; beta = {0.0, 0.01, 0.15, 0.030, 0.05}; gamma = {0.5}.</li></ul>]]",
     "Available for crux percolator if --protein T is set.", true);
   InitBoolParam("post-processing-tdc", false,
-    "Use target-decoy competition to compute peptide probabilities.",
+    "Use target-decoy competition to assign q-values and PEPs.",
     "Available for crux percolator", true);
   InitDoubleParam("fido-gridsearch-mse-threshold", 0.05, 0, 1,
     "Q-value threshold that will be used in the computation of the MSE and ROC AUC "
