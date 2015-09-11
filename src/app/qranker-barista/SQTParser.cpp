@@ -680,6 +680,11 @@ void SQTParser :: extract_features(sqt_match &m, int hits_read, int final_hits,e
 	  string pept = peptide.substr(pos+1,peptide.size());
 	  pos = pept.rfind('.');
 	  pept = pept.substr(0,pos);
+
+      if (pept.find('[') != string::npos) {
+          carp(CARP_FATAL, "Modification detected in peptide %s. Barista does not "
+               "support modifications when use-spec-features=T.", pept.c_str());
+      }
 	  
 	  if(num_spec_features == 3)
 	    sfg.get_spec_features_m3(m.scan, m.charge,pept,xs);

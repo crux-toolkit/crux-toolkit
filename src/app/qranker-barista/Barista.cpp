@@ -1938,7 +1938,7 @@ void Barista :: computePEP(){
 
   // fill in the data set with the new scores for the targets
   target_idx = 0;
-  for(int full_idx = 0; full_idx < psmtrainset.size(); full_idx++){
+  for(int full_idx = 0; full_idx < peptrainset.size(); full_idx++){
     if( peptrainset[full_idx].label == 1 ){
       peptrainset[full_idx].PEP = PEPs[target_idx];
       target_idx++; 
