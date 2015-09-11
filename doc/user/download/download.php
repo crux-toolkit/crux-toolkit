@@ -1,4 +1,37 @@
- <?php 
+<?php 
+  function log_download($download_filename) {
+
+     $log_filename = "downloads.txt";
+   
+    // Get time of request
+    if( ($time = $_SERVER['REQUEST_TIME']) == '') {
+      $time = time();
+    }
+   
+    // Get IP address
+    if( ($remote_addr = $_SERVER['REMOTE_ADDR']) == '') {
+      $remote_addr = "REMOTE_ADDR_UNKNOWN";
+    }
+   
+    // Format the date and time
+    $date = date("Y-m-d H:i:s", $time);
+   
+    // Append to the log file
+    if($fd = @fopen($log_filename, "a")) {
+      $result = fputcsv($fd, array($date, $remote_addr, $download_filename));
+      fclose($fd);
+   
+      if($result > 0)
+        return array(status => true);  
+      else
+        return array(status => false, message => 'Unable to write to '.$log_filename.'!');
+    }
+    else {
+      return array(status => false, message => 'Unable to open log '.$log_filename.'!');
+    }
+  }
+
+  date_default_timezone_set('UTC');
   # Set names of files available for download
    if (isset($_POST['release_button'])) {
      $FileNameBaseArray = array(
@@ -27,6 +60,7 @@
 	  $downloadType = $_POST['downloadtype'];
 	  $filename = $FileNameBaseArray[$downloadType];
     $filepath = $directory . $filename;
+    log_download($filepath);
     header("Location: http://cruxtoolkit.sourceforge.net/download/" . $filepath);
     exit;
  ?> 
