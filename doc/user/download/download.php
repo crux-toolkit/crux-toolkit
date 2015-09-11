@@ -1,4 +1,13 @@
 <?php 
+  function getRemoteIPAddress() {
+    if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+        return $_SERVER['HTTP_CLIENT_IP'];
+    } else if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) { 
+        return $_SERVER['HTTP_X_FORWARDED_FOR'];
+    }
+    return $_SERVER['REMOTE_ADDR'];
+  }
+
   function log_download($download_filename) {
 
      $log_filename = "downloads.txt";
@@ -9,7 +18,8 @@
     }
    
     // Get IP address
-    if( ($remote_addr = $_SERVER['REMOTE_ADDR']) == '') {
+    $remote_addr = getRemoteIPAddress();
+    if($remote_addr  == '') {
       $remote_addr = "REMOTE_ADDR_UNKNOWN";
     }
    
