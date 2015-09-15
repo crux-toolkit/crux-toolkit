@@ -1,6 +1,7 @@
 #include "GenerateDecoys.h"
 #include "parameter.h"
 #include "model/ProteinPeptideIterator.h"
+#include "util/Params.h"
 
 using namespace std;
 
@@ -20,11 +21,11 @@ int GenerateDecoys::main(int argc, char** argv) {
   bool proteinReverse = decoyType == PROTEIN_REVERSE_DECOYS;
 
   // Get options
-  double minMass = get_double_parameter("min-mass");
-  double maxMass = get_double_parameter("max-mass");
+  double minMass = Params::GetDouble("min-mass");
+  double maxMass = Params::GetDouble("max-mass");
   massType_ = get_mass_type_parameter("isotopic-mass");
 
-  bool overwrite = get_boolean_parameter("overwrite");
+  bool overwrite = Params::GetBool("overwrite");
 
   string targetsFile = make_file_path("peptides.target.txt");
   string decoysFile = make_file_path("peptides.decoy.txt");
@@ -36,7 +37,7 @@ int GenerateDecoys::main(int argc, char** argv) {
     create_stream_in_path(proteinDecoysFile.c_str(), NULL, overwrite) : NULL;
 
   // Read fasta
-  string fastaFile = get_string_parameter("protein fasta file");
+  string fastaFile = Params::GetString("protein fasta file");
   carp(CARP_INFO, "Reading %s", fastaFile.c_str());
   map< string, vector<string> > proteins;
   set<string> targetSeqs;
@@ -104,7 +105,8 @@ int GenerateDecoys::main(int argc, char** argv) {
       for (map< string, vector<string> >::iterator proteinIter = proteins.begin();
            proteinIter != proteins.end();
            ++proteinIter) {
-        (*proteinDecoysStream) << ">decoy_" << proteinIter->first << endl;
+        (*proteinDecoysStream) << '>' << Params::GetString("decoy-prefix")
+                               << proteinIter->first << endl;
         for (vector<string>::iterator pepIter = proteinIter->second.begin();
              pepIter != proteinIter->second.end();
              ++pepIter) {
@@ -125,7 +127,7 @@ int GenerateDecoys::main(int argc, char** argv) {
 }
 
 bool GenerateDecoys::canGenerateDecoyProteins() {
-  const string decoyFormat = get_string_parameter("decoy-format");
+  const string decoyFormat = Params::GetString("decoy-format");
 
   // Can never write decoy proteins if not making decoys
   if (decoyFormat == "none") {
@@ -139,10 +141,10 @@ bool GenerateDecoys::canGenerateDecoyProteins() {
 
   // If making peptide-level decoys, we can only write decoy proteins if:
   // Using an enzyme, full digestion, no missed cleavages
-  bool customEnzyme = !get_string_parameter("custom-enzyme").empty();
+  bool customEnzyme = !Params::GetString("custom-enzyme").empty();
   bool useEnzyme = get_enzyme_type_parameter("enzyme") != NO_ENZYME;
   bool fullDigest = get_digest_type_parameter("digestion") == FULL_DIGEST;
-  bool noMissedCleavages = get_int_parameter("missed-cleavages") == 0;
+  bool noMissedCleavages = Params::GetInt("missed-cleavages") == 0;
 
   return (customEnzyme || useEnzyme) && fullDigest && noMissedCleavages;
 }
@@ -167,14 +169,14 @@ void GenerateDecoys::readFasta(
   string id, sequence;
   ENZYME_T enzyme = get_enzyme_type_parameter("enzyme");
   DIGEST_T digest = get_digest_type_parameter("digestion");
-  int missedCleavages = get_int_parameter("missed-cleavages");
-  int minLength = get_int_parameter("min-length");
-  int maxLength = get_int_parameter("max-length");
-  if (!get_string_parameter("custom-enzyme").empty()) {
+  int missedCleavages = Params::GetInt("missed-cleavages");
+  int minLength = Params::GetInt("min-length");
+  int maxLength = Params::GetInt("max-length");
+  if (!Params::GetString("custom-enzyme").empty()) {
     enzyme = CUSTOM_ENZYME;
   }
-  vector<string> trypticPeptides;
-  vector<string> reversedFastaPeptides;
+  vector< pair<string, int> > trypticPeptides;
+  vector< pair<string, int> > reversedFastaPeptides;
   int proteinTotal = 0;
   int peptideTotal = 0;
   while (getNextProtein(fasta, id, sequence)) {
@@ -183,17 +185,26 @@ void GenerateDecoys::readFasta(
     cleaveProtein(sequence, enzyme, digest, missedCleavages,
                   minLength, maxLength, trypticPeptides);
     peptideTotal += trypticPeptides.size();
-    copy(trypticPeptides.begin(), trypticPeptides.end(),
-         inserter(outPeptides, outPeptides.end()));
-    outProteins[id] = trypticPeptides;
+    outProteins[id] = vector<string>();
+    vector<string>& proteinPeptides = outProteins[id];
+    for (vector< pair<string, int> >::const_iterator i = trypticPeptides.begin();
+         i != trypticPeptides.end();
+         i++) {
+      outPeptides.insert(i->first);
+      proteinPeptides.push_back(i->first);
+    }
     if (reversedFasta) {
       reverse(sequence.begin(), sequence.end());
-      (*reversedFasta) << ">decoy_" << id << '\n' << sequence << endl;
+      (*reversedFasta) << '>' << Params::GetString("decoy-prefix")
+                       << id << '\n' << sequence << endl;
       if (outReversedPeptides) {
         cleaveProtein(sequence, enzyme, digest, missedCleavages,
                       minLength, maxLength, reversedFastaPeptides);
-        copy(reversedFastaPeptides.begin(), reversedFastaPeptides.end(),
-             inserter(*outReversedPeptides, outReversedPeptides->end()));
+        for (vector< pair<string, int> >::const_iterator i = reversedFastaPeptides.begin();
+             i != reversedFastaPeptides.end();
+             i++) {
+          outReversedPeptides->insert(i->first);
+        }
       }
     }
   }
@@ -222,17 +233,10 @@ bool GenerateDecoys::getNextProtein(
     string line;
     getline(fasta, line);
     // Trim whitespace
-    size_t first = line.find_first_not_of(whitespace);
-    if (first != string::npos) {
-      line.erase(0, first);
-      size_t last = line.find_last_not_of(whitespace);
-      line.erase(last + 1);
-    } else {
-      line.clear();
-    }
+    line = StringUtils::Trim(line);
     if (outId.empty()) {
       // Reading id
-      if (line.length() > 0 && line[0] == '>') {
+      if (StringUtils::StartsWith(line, ">")) {
         outId = line.substr(1);
       }
     } else {
@@ -244,7 +248,7 @@ bool GenerateDecoys::getNextProtein(
     }
   }
 
-  if (!outSequence.empty() && outSequence[outSequence.length() - 1] == '*') {
+  if (StringUtils::EndsWith(outSequence, "*")) {
     // Remove the last character of the sequence if it is an asterisk
     outSequence.erase(outSequence.length() - 1);
   }
@@ -264,97 +268,6 @@ bool GenerateDecoys::getNextProtein(
 
 /**
  * Cleave protein sequence using specified enzyme and store results in vector
- */
-  void GenerateDecoys::cleaveProtein(
-  const string& sequence, ///< Protein sequence to cleave
-  ENZYME_T enzyme,  ///< Enzyme to use for cleavage
-  DIGEST_T digest,  ///< Digestion to use for cleavage
-  int missedCleavages,  ///< Maximum allowed missed cleavages
-  int minLength,  //< Min length of peptides to return
-  int maxLength,  //< Max length of peptides to return
-  vector<string>& outPeptides ///< vector to store peptides
-) {
-  outPeptides.clear();
-  bool clip_nterm_methionine = get_boolean_parameter("clip-nterm-methionine");
-  if (enzyme != NO_ENZYME) {
-    // Enzyme
-    size_t pepStart = 0, nextPepStart = 0;
-    int cleaveSites = 0;
-    for (int i = 0; i < sequence.length(); ++i) {
-      // Determine if this is a valid cleavage position
-      bool cleavePos =
-        ProteinPeptideIterator::validCleavagePosition(sequence.c_str() + i, enzyme);
-      if (i != sequence.length() - 1 && !cleavePos && digest == PARTIAL_DIGEST) {
-        // Partial digestion (not last AA or cleavage position), add this peptide
-        outPeptides.push_back(sequence.substr(pepStart, i + 1 - pepStart));
-      } else if (cleavePos) {
-        // Cleavage position, add this peptide
-        outPeptides.push_back(sequence.substr(pepStart, i + 1 - pepStart));
-        if (clip_nterm_methionine && sequence[0] == 'M' && pepStart == 0 && digest != PARTIAL_DIGEST) {
-          outPeptides.push_back(sequence.substr(pepStart + 1, i + 1 - pepStart - 1));
-        }
-        if (++cleaveSites == 1) {
-          // This is the first cleavage position, remember it
-          nextPepStart = i + 1;
-        }
-        if (digest == PARTIAL_DIGEST) {
-          // For partial digest, add peptides ending at this cleavage position
-          for (int j = pepStart + 1; j < nextPepStart; ++j) {
-            outPeptides.push_back(sequence.substr(j, i - j + 1));
-          }
-        }
-        if (cleaveSites > missedCleavages) {
-          // We have missed the allowed amount of cleavages
-          // Move iterator+pepStart to the first cleavage position
-          pepStart = nextPepStart;
-          i = pepStart - 1;
-          cleaveSites = 0;
-        }
-      } else if (i == sequence.length() - 1 &&
-                 cleaveSites > 0 && cleaveSites <= missedCleavages) {
-        // Last AA in sequence and we haven't missed the allowed amount yet
-        // Add this peptide and move iterator+pepStart to first cleavage position
-        outPeptides.push_back(sequence.substr(pepStart));
-        if (digest == PARTIAL_DIGEST) {
-          // For partial digest, add peptides ending at last AA
-          for (int j = pepStart + 1; j < nextPepStart; ++j) {
-            outPeptides.push_back(sequence.substr(j, i - j + 1));
-          }
-        }
-        pepStart = nextPepStart;
-        i = pepStart - 1;
-        cleaveSites = 0;
-      }
-    }
-    // Add the last peptide
-    outPeptides.push_back(sequence.substr(nextPepStart));
-    if (digest == PARTIAL_DIGEST) {
-      // For partial digest, add peptides ending at last AA
-      for (int j = pepStart + 1; j < sequence.length(); ++j) {
-        outPeptides.push_back(sequence.substr(j));
-      }
-    }
-    // Erase peptides that don't meet length requirement
-    for (vector<string>::reverse_iterator i = outPeptides.rbegin();
-         i != outPeptides.rend();
-         ++i) {
-      if (i->length() < minLength || i->length() > maxLength) {
-        outPeptides.erase((i + 1).base());
-      }
-    }
-  } else {
-    // No enzyme
-    // Get all substrings min <= length <= max
-    for (int i = 0; i < sequence.length(); ++i) {
-      for (int j = minLength; i + j <= sequence.length() && j <= maxLength; ++j) {
-        outPeptides.push_back(sequence.substr(i, j));
-      }
-    }
-  }
-}
-
-/**
- * Cleave protein sequence using specified enzyme and store results in vector
  * Vector also contains start location of each peptide within the protein
  */
 void GenerateDecoys::cleaveProtein(
@@ -367,26 +280,24 @@ void GenerateDecoys::cleaveProtein(
   vector< pair<string, int> >& outPeptides ///< vector to store peptides
 ) {
   outPeptides.clear();
-  bool clip_nterm_methionine = get_boolean_parameter("clip-nterm-methionine");
   if (enzyme != NO_ENZYME) {
     // Enzyme
     size_t pepStart = 0, nextPepStart = 0;
     int cleaveSites = 0;
     for (int i = 0; i < sequence.length(); ++i) {
       // Determine if this is a valid cleavage position
-      bool cleavePos =
+      bool cleavePos = i != sequence.length() - 1 &&
         ProteinPeptideIterator::validCleavagePosition(sequence.c_str() + i, enzyme);
-      if (i != sequence.length() - 1 && !cleavePos && digest == PARTIAL_DIGEST) {
+      if (digest == PARTIAL_DIGEST && i != sequence.length() - 1 && !cleavePos) {
         // Partial digestion (not last AA or cleavage position), add this peptide
-        outPeptides.push_back(
-          make_pair(sequence.substr(pepStart, i + 1 - pepStart), pepStart));
+        outPeptides.push_back(make_pair(sequence.substr(pepStart, i + 1 - pepStart), pepStart));
       } else if (cleavePos) {
         // Cleavage position, add this peptide
-        outPeptides.push_back(
-          make_pair(sequence.substr(pepStart, i + 1 - pepStart), pepStart));
-        if (clip_nterm_methionine && sequence[0] == 'M' && pepStart == 0 && digest != PARTIAL_DIGEST) {
-          outPeptides.push_back(
-            make_pair(sequence.substr(pepStart + 1, i + 1 - pepStart - 1), pepStart + 1));
+        outPeptides.push_back(make_pair(sequence.substr(pepStart, i + 1 - pepStart), pepStart));
+        if (Params::GetBool("clip-nterm-methionine") && sequence[0] == 'M' &&
+            pepStart == 0 && digest != PARTIAL_DIGEST) {
+          outPeptides.push_back(make_pair(
+            sequence.substr(pepStart + 1, i + 1 - pepStart - 1), pepStart + 1));
         }
         if (++cleaveSites == 1) {
           // This is the first cleavage position, remember it
@@ -463,9 +374,8 @@ bool GenerateDecoys::makeDecoy(
 ) {
   const int MAX_SHUFFLE_ATTEMPTS = 6;
 
-  const string keepTerminal = get_string_parameter("keep-terminal-aminos");
-  string decoyPre;
-  string decoyPost;
+  const string keepTerminal = Params::GetString("keep-terminal-aminos");
+  string decoyPre, decoyPost;
   if (keepTerminal == "N") {
     if (seq.length() <= 2) {
       decoyOut = seq;
@@ -589,6 +499,7 @@ vector<string> GenerateDecoys::getOptions() const {
     "isotopic-mass",
     "clip-nterm-methionine",
     "decoy-format",
+    "decoy-prefix",
     "keep-terminal-aminos",
     "overwrite",
     "fileroot",
