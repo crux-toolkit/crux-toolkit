@@ -64,19 +64,6 @@ public:
 
   /**
    * Cleave protein sequence using specified enzyme and store results in vector
-   */
-  static void cleaveProtein(
-    const std::string& sequence, ///< Protein sequence to cleave
-    ENZYME_T enzyme,  ///< Enzyme to use for cleavage
-    DIGEST_T digest,  ///< Digestion to use for cleavage
-    int missedCleavages,  ///< Maximum allowed missed cleavages
-    int minLength,  //< Min length of peptides to return
-    int maxLength,  //< Max length of peptides to return
-    std::vector<std::string>& outPeptides ///< vector to store peptides
-  );
-
-  /**
-   * Cleave protein sequence using specified enzyme and store results in vector
    * Vector also contains start location of each peptide within the protein
    */
   static void cleaveProtein(
