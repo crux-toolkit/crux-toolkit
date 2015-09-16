@@ -19,7 +19,7 @@
 class SpectrumZState {
  protected:
   int charge_;
-  FLOAT_T neutral_mass_;
+  double neutral_mass_;
 
   /* EZ State fields */
   FLOAT_T rtime_;
@@ -35,7 +35,7 @@ class SpectrumZState {
    * sets the neutral mass and charge
    */
   SpectrumZState(
-    FLOAT_T neutral_mass, 
+    double neutral_mass, 
     int charge
   );
 
@@ -71,14 +71,14 @@ class SpectrumZState {
    * Sets the m+h charged mass for this z-state
    */
   void setSinglyChargedMass(
-    FLOAT_T mph,
+    double mph,
     int charge
     );
 
   /**
    * \returns the m+h charged mass for this z-state
    */
-  FLOAT_T getSinglyChargedMass() const;
+  double getSinglyChargedMass() const;
 
   /**
    * Sets the neutral mass for this z-state

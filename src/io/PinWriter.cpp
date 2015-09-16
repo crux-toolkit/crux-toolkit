@@ -140,7 +140,7 @@ void PinWriter::printPSM(
   int charge = match->getCharge();
   bool enzC = false;
   bool enzN = false;
-  FLOAT_T obsMass = match->getZState().getSinglyChargedMass();
+  double obsMass = match->getZState().getSinglyChargedMass();
   FLOAT_T calcMass = peptide->getPeptideMass() + MASS_PROTON;
   FLOAT_T dM = (obsMass - calcMass) / charge;
 
