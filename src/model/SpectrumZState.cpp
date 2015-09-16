@@ -22,7 +22,7 @@ SpectrumZState::SpectrumZState() {
 }
 
 SpectrumZState::SpectrumZState(
-  FLOAT_T neutral_mass,
+  double neutral_mass,
   int charge
   ) {
 
@@ -86,7 +86,7 @@ FLOAT_T SpectrumZState::getMZ() const {
  * using the singly charged mass.
  */
 void SpectrumZState::setSinglyChargedMass(
-  FLOAT_T mph,
+  double mph,
   int charge
   ) {
 
@@ -97,7 +97,7 @@ void SpectrumZState::setSinglyChargedMass(
 /**
  * \returns the m+h charged mass for this z-state
  */
-FLOAT_T SpectrumZState:: getSinglyChargedMass() const {
+double SpectrumZState:: getSinglyChargedMass() const {
   
   return (neutral_mass_ > 0) ?
     neutral_mass_ + MASS_PROTON :
