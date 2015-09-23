@@ -11,6 +11,7 @@
 #include "util/ArgParser.h"
 #include "util/FileUtils.h"
 #include "util/Params.h"
+#include "util/StringUtils.h"
 #include "util/WinCrux.h"
 
 #include <iostream>

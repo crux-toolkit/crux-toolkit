@@ -1,27 +1,18 @@
 #ifndef PARAMS_H
 #define PARAMS_H
 
-#include "StringUtils.h"
-
 #include <ostream>
 #include <limits>
 #include <map>
 #include <set>
 #include <vector>
 
-class ParamContainer;
 class Param;
-class BoolParam;
-class IntParam;
-class DoubleParam;
-class StringParam;
 
 class Params {
  public:
-  static void Initialize();
-
-  // Group parameters by category
-  static void Categorize();
+  Params();
+  ~Params();
 
   // Get the value of the parameter
   static bool GetBool(const std::string& name);
@@ -100,65 +91,18 @@ class Params {
     std::set<const Param*> Items;
   };
 
-  // A class to store Params
-  class ParamContainer {
-   public:
-    ParamContainer();
-    ~ParamContainer();
-
-    // Add a parameter to the container
-    // Throws exception if parameter has an invalid value, already exists,
-    // or parameters have been finalized
-    void Add(Param* param);
-
-    // Get a parameter by name; returns NULL if the parameter doesn't exist
-    Param* Get(const std::string& name);
-
-    // Get whether the container is empty or not
-    bool Empty() const;
-
-    // Get whether the parameters have been finalized or not
-    bool Finalized() const;
-
-    // Get iterators for the beginning and end of the entire parameter list
-    std::map<std::string, Param*>::const_iterator BeginAll() const;
-    std::map<std::string, Param*>::const_iterator EndAll() const;
-
-    // Get iterators for the beginning and end of the ordered parameter list
-    std::vector<const Param*>::const_iterator Begin() const;
-    std::vector<const Param*>::const_iterator End() const;
-
-    // Lock parameters and prevent them from being modified
-    void Finalize();
-
-    // Throw exception if the parameters have been finalized
-    void CanModifyCheck() const;
-
-    // Add parameter category
-    void AddCategory(const std::string& name, const std::set<std::string>& params);
-
-    // Get whether any categories have been added or not
-    bool CategoriesEmpty() const;
-
-    // Get all categories
-    const std::vector<ParamCategory>& GetCategories() const;
-
-   private:
-    std::map<std::string, Param*> params_;
-    std::vector<const Param*> paramsOrdered_;
-    std::vector<ParamCategory> categories_;
-    bool finalized_;
-  };
+  // Group parameters by category
+  void Categorize();
 
   // Initialize optional parameters
-  static void InitBoolParam(
+  void InitBoolParam(
     const std::string& name,
     bool value,
     const std::string& usage,
     const std::string& fileNotes,
     bool visible
   );
-  static void InitIntParam(
+  void InitIntParam(
     const std::string& name,
     int value,
     int min,
@@ -167,14 +111,14 @@ class Params {
     const std::string& fileNotes,
     bool visible
   );
-  static void InitIntParam(
+  void InitIntParam(
     const std::string& name,
     int value,
     const std::string& usage,
     const std::string& fileNotes,
     bool visible
   );
-  static void InitDoubleParam(
+  void InitDoubleParam(
     const std::string& name,
     double value,
     double min,
@@ -183,14 +127,14 @@ class Params {
     const std::string& fileNotes,
     bool visible
   );
-  static void InitDoubleParam(
+  void InitDoubleParam(
     const std::string& name,
     double value,
     const std::string& usage,
     const std::string& fileNotes,
     bool visible
   );
-  static void InitStringParam(
+  void InitStringParam(
     const std::string& name,
     const std::string& value,
     const std::string& validValues,
@@ -198,28 +142,46 @@ class Params {
     const std::string& fileNotes,
     bool visible
   );
-  static void InitStringParam(
+  void InitStringParam(
     const std::string& name,
     const std::string& value,
     const std::string& usage,
     const std::string& fileNotes,
     bool visible
   );
-  static void InitArgParam(
+  void InitArgParam(
     const std::string& name,
     const std::string& usage
   );
 
   // Get a parameter by name
   // Throws exception if the parameter doesn't exist
-  static Param* GetParam(const std::string& name);
+  static Param* Require(const std::string& name);
 
-  // Disallow instantiation
-  Params();
-  ~Params();
+  // Get a parameter by name; returns NULL if the parameter doesn't exist
+  Param* Get(const std::string& name);
 
-  static ParamContainer container_;
+  // Add a parameter to the container
+  // Throws exception if parameter has an invalid value, already exists,
+  // or parameters have been finalized
+  void Add(Param* param);
+
+  // Add parameter category
+  void AddCategory(const std::string& name, const std::set<std::string>& params);
+
+  // Lock parameters and prevent them from being modified
+  void FinalizeParams();
+
+  // Throw exception if the parameters have been finalized
+  void CanModifyCheck() const;
+
+  std::map<std::string, Param*> params_;
+  std::vector<const Param*> paramsOrdered_;
+  std::vector<ParamCategory> categories_;
+  bool finalized_;
 };
+
+static Params container_;
 
 class Param {
  public:

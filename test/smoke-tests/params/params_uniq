@@ -1,4 +1,6 @@
-unique-peptides=T
 seed=5
 precision=2
 top-match=5
+digestion=partial-digest
+missed-cleavages=3
+overwrite=T

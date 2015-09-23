@@ -617,7 +617,6 @@ enum _command {
   QVALUE_COMMAND,       ///< compute-q-values
   MIXMAX_COMMAND,       ///< compute q-values using mix-max (Uri Keich)
   TDC_COMMAND,          ///< compute q-values using TDC (Elias-Gygi)  
-  GENERATE_DECOYS_COMMAND, ///< generate-decoys
   PERCOLATOR_COMMAND,   ///< percolator
   TIDE_INDEX_COMMAND,   ///< tide-index
   TIDE_SEARCH_COMMAND,  ///< tide-search

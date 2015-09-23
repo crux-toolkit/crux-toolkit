@@ -1,5 +1,6 @@
+overwrite=T
 min-length=8
-max-length=12
+max-length=20
 min-mass=404
 max-mass=4004
 #cleavages=all

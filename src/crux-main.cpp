@@ -32,7 +32,6 @@
 #include "app/SortColumn.h"
 #include "app/hardklor/CruxHardklorApplication.h"
 #include "app/bullseye/CruxBullseyeApplication.h"
-#include "app/GenerateDecoys.h"
 #include "app/PercolatorApplication.h"
 #include "app/MakePinApplication.h"
 #include "app/TideIndexApplication.h"
@@ -85,7 +84,6 @@ int main(int argc, char** argv){
     applications.add(new CruxHardklorApplication());
     applications.add(new PrintProcessedSpectra());
     applications.add(new GeneratePeptides());
-    applications.add(new GenerateDecoys());
     applications.add(new GetMs2Spectrum());
     applications.add(new CreateDocs());
     applications.add(new PrintVersion());

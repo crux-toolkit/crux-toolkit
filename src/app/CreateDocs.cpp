@@ -8,6 +8,7 @@
 #include "CruxApplicationList.h"
 #include "util/FileUtils.h"
 #include "util/Params.h"
+#include "util/StringUtils.h"
 
 #include "qranker-barista/Barista.h"
 #include "ComputeQValues.h"

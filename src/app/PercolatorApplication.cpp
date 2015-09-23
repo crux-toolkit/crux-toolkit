@@ -15,6 +15,7 @@
 #include "util/CarpStreamBuf.h"
 #include "util/FileUtils.h"
 #include "util/Params.h"
+#include "util/StringUtils.h"
 #include "io/MzIdentMLWriter.h"
 #include "model/ProteinMatchCollection.h"
 #include "io/PMCDelimitedFileWriter.h"

@@ -6,6 +6,7 @@
 #include "PercolatorApplication.h"
 #include "Pipeline.h"
 #include "util/Params.h"
+#include "util/StringUtils.h"
 #include "TideSearchApplication.h"
 #include "CometApplication.h"
 
