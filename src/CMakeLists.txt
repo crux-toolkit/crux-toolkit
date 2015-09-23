@@ -83,7 +83,6 @@ set (
   util/FileUtils.cpp
   model/FilteredSpectrumChargeIterator.cpp
   util/FileUtils.cpp
-  app/GenerateDecoys.cpp
   model/GeneratePeptidesIterator.cpp
   app/GetMs2Spectrum.cpp
   model/Ion.cpp
@@ -430,6 +429,7 @@ if (WIN32 AND NOT CYGWIN)
 else()
   target_link_libraries(
     crux
+    xlink
     barista
     bullseye
     crux-support
@@ -443,7 +443,6 @@ else()
     ${RT_LIBRARY}
     mstoolkitlite
     perclibrary
-    xlink
     fido
     pwiz_data_identdata
     pwiz_data_identdata_version

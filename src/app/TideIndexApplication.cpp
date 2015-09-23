@@ -5,7 +5,8 @@
 #include "util/AminoAcidUtil.h"
 #include "util/Params.h"
 #include "util/FileUtils.h"
-#include "GenerateDecoys.h"
+#include "util/StringUtils.h"
+#include "GeneratePeptides.h"
 #include "TideIndexApplication.h"
 #include "TideMatchSet.h"
 #include "app/tide/modifications.h"
@@ -149,7 +150,7 @@ int TideIndexApplication::main(
         "tide-index.peptides.decoy.txt").c_str(), NULL, overwrite);
     }
   }
-  ofstream* out_decoy_fasta = GenerateDecoys::canGenerateDecoyProteins() ?
+  ofstream* out_decoy_fasta = GeneratePeptides::canGenerateDecoyProteins() ?
     create_stream_in_path(make_file_path(
       "tide-index.decoy.fasta").c_str(), NULL, overwrite) : NULL;
 
@@ -465,7 +466,7 @@ void TideIndexApplication::fastaToPb(
 
   // Iterate over all proteins in FASTA file
   unsigned int targetsGenerated = 0, decoysGenerated = 0;
-  while (GenerateDecoys::getNextProtein(fastaStream, proteinName, *proteinSequence)) {
+  while (GeneratePeptides::getNextProtein(fastaStream, proteinName, *proteinSequence)) {
     outProteinSequences.push_back(proteinSequence);
     // Trim protein name, only take first word
     size_t endFirstWord = proteinName.find_first_of(" \t\v\r\n");
@@ -479,7 +480,7 @@ void TideIndexApplication::fastaToPb(
     // Write pb::Protein
     getPbProtein(++curProtein, proteinName, *proteinSequence, pbProtein);
     proteinWriter.Write(&pbProtein);
-    GenerateDecoys::cleaveProtein(*proteinSequence, enzyme, digestion,
+    GeneratePeptides::cleaveProtein(*proteinSequence, enzyme, digestion,
       missedCleavages, minLength, maxLength, cleavedPeptides);
     // Iterate over all generated peptides for this protein
     for (vector<PeptideInfo>::iterator i = cleavedPeptides.begin();
@@ -537,7 +538,7 @@ void TideIndexApplication::fastaToPb(
         (*decoyFasta) << ">"<< decoyPrefix << i->first.name << endl
                       << decoyProtein << endl;
       }
-      GenerateDecoys::cleaveProtein(decoyProtein, enzyme, digestion,
+      GeneratePeptides::cleaveProtein(decoyProtein, enzyme, digestion,
         missedCleavages, minLength, maxLength, cleavedReverse);
       // Iterate over all generated peptides for this protein
       for (vector<PeptideInfo>::iterator j = cleavedReverse.begin();
@@ -594,7 +595,7 @@ void TideIndexApplication::fastaToPb(
         *decoySequence = *(decoyCheck->second);
       } else {
         // Try to generate decoy
-        if (!GenerateDecoys::makeDecoy(*i, setTargets, setDecoys,
+        if (!GeneratePeptides::makeDecoy(*i, setTargets, setDecoys,
                                        decoyType == PEPTIDE_SHUFFLE_DECOYS,
                                        *decoySequence)) {
         carp(CARP_DEBUG, "Failed to generate decoy for sequence %s",

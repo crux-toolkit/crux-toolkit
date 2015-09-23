@@ -21,6 +21,7 @@
 #include <boost/filesystem.hpp>
 #include "util/Params.h"
 #include "util/FileUtils.h"
+#include "util/StringUtils.h"
 #include <boost/foreach.hpp>
 
 using namespace std;

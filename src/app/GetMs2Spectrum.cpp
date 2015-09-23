@@ -26,7 +26,6 @@
 #include "model/Peak.h"
 #include "io/SpectrumCollectionFactory.h"
 #include "util/WinCrux.h"
-#include "model/ModifiedPeptidesIterator.h"
 
 using namespace std;
 using namespace Crux;

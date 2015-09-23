@@ -5,17 +5,13 @@
 #include "objects.h"
 #include "parameter.h"
 #include "Params.h"
+#include "StringUtils.h"
 
 #include <algorithm>
 
 using namespace std;
 
-Params::ParamContainer Params::container_;
-
-void Params::Initialize() {
-  if (!container_.Empty() || container_.Finalized()) {
-    throw runtime_error("Parameters already initialized");
-  }
+Params::Params() : finalized_(false) {
   /* generate_peptide arguments */
   InitArgParam("protein fasta file",
    "The name of the file in FASTA format from which to retrieve proteins.");
@@ -122,19 +118,19 @@ void Params::Initialize() {
   InitIntParam("min-length", 6, 1, MAX_PEPTIDE_LENGTH,
     "The minimum length of peptides to consider.",
     "Used from the command line or parameter file by "
-    "crux-generate-peptides, crux tide-index, and crux generate-decoys.", true);
+    "crux-generate-peptides, and crux tide-index.", true);
   InitIntParam("max-length", 50, 1, MAX_PEPTIDE_LENGTH,
     "The maximum length of peptides to consider.",
     "Available from command line or parameter file for "
-    "crux-generate-peptides, crux tide-index, and crux generate-decoys. ", true);
+    "crux-generate-peptides, crux tide-index. ", true);
   InitDoubleParam("min-mass", 200, 0, BILLION,
     "The minimum mass (in Da) of peptides to consider.",
     "Available from command line or parameter file for "
-    "crux-generate-peptides, crux tide-index, and crux generate-decoys. ", true);
+    "crux-generate-peptides and crux tide-index. ", true);
   InitDoubleParam("max-mass", 7200, 1, BILLION, 
     "The maximum mass (in Da) of peptides to consider.",
     "Available from command line or parameter file for "
-    "crux-generate-peptides, crux tide-index, and crux generate-decoys. ", true);
+    "crux-generate-peptides and crux tide-index. ", true);
   InitIntParam("min-peaks", 20, 0, BILLION,
     "The minimum number of peaks a spectrum must have for it to be searched.",
     "Available for tide-search.", true);
@@ -151,7 +147,7 @@ void Params::Initialize() {
     "glu-c ([DE]|{P}), pepsin-a ([FL]|{P}), elastase-trypsin-chymotrypsin "
     "([ALIVKRWFY]|{P}). Specifying --enzyme no-enzyme yields a non-enzymatic digest. "
     "[[html:<strong>]]Warning:[[html:</strong>]] the resulting index may be quite large.",
-    "Available for crux-generate-peptides, crux tide-index, and crux generate-decoys.", true);
+    "Available for crux-generate-peptides and crux tide-index.", true);
   InitStringParam("custom-enzyme", "", 
     "Specify rules for in silico digestion of protein sequences. Overrides the enzyme "
     "option. Two lists of residues are given enclosed in square brackets or curly "
@@ -168,11 +164,10 @@ void Params::Initialize() {
     "Specify whether every peptide in the database must have two enzymatic termini "
     "(full-digest) or if peptides with only one enzymatic terminus are also included "
     "(partial-digest).",
-    "Available for crux-generate-peptides, crux tide-index, and crux generate-decoys.", true);
+    "Available for crux-generate-peptides and crux tide-index.", true);
   InitIntParam("missed-cleavages", 0, 0, 500,
     "Maximum number of missed cleavages per peptide to allow in enzymatic digestion.",
-    "Available from command line or parameter file for "
-    "crux-generate-peptides and crux generate-decoys. "
+    "Available from command line or parameter file for crux-generate-peptides. "
     "When used with enzyme=<trypsin|elastase|chymotrypsin> "
     "includes peptides containing one or more potential cleavage sites.", true);
   InitDoubleParam("precursor-window", 3.0, 0, 100, 
@@ -215,13 +210,7 @@ void Params::Initialize() {
     "keep-terminal-aminos to \"NC\" will yield \"EPMAK\"; setting it to \"C\" will yield "
     "\"PMAEK\"; setting it to \"N\" will yield \"EKPMA\"; and setting it to \"none\" will "
     "yield \"KPMAE\".",
-    "Available for tide-index and generate-decoys.", true);
-  InitBoolParam("unique-peptides", true,
-    "Generate peptides only once, even if they appear in more "
-    "than one protein.",
-    "Available from command line or parameter file for "
-    "crux-genereate-peptides. Returns one line per peptide "
-    "when true or one line per peptide per protein occurence when false.", true);
+    "Available for tide-index.", true);
   InitBoolParam("peptide-list", false,
     "Create in the output directory a text file listing of all the peptides in the "
     "database, along with their neutral masses, one per line. If decoys are generated, "
@@ -237,9 +226,6 @@ void Params::Initialize() {
     "Specify the output units for processed spectra.",
     "Available for print-processed-spectra", true);
   /* more generate_peptide parameters */
-  InitBoolParam("output-sequence", false, 
-    "Print peptide sequence.",
-    "Available only for crux-generate-peptides.", true);
   InitBoolParam("sqt-output", false,
     "Outputs an SQT results file to the output directory. Note that if sqt-output is "
     "enabled, then compute-sp is automatically enabled and cannot be overridden.",
@@ -380,8 +366,7 @@ void Params::Initialize() {
     "Used by crux-predict-peptide-ions.", true);
   InitStringParam("isotopic-mass", "average", "average|mono",
     "Specify the type of isotopic masses to use when calculating the peptide mass.",
-    "Used from command line or parameter file by "
-    "crux-generate-peptides and crux generate-decoys.", true);
+    "Used from command line or parameter file by crux-generate-peptides.", true);
   InitStringParam("mod", "NO MODS",
     "[[nohtml:"
     "<mass change>:<aa list>:<max per peptide>:<prevents cleavage>:<prevents cross-link>]]"
@@ -1597,6 +1582,18 @@ void Params::Initialize() {
     "Specifies the template to be used for options when generating "
     "documentation.",
     "Available for crux create-docs", false);
+
+  Categorize();
+}
+
+Params::~Params() {
+  for (map<string, Param*>::iterator i = params_.begin(); i != params_.end(); i++) {
+     delete i->second;
+  }
+  //for (int i = 0; i < MAX_AA_MODS; i++) {
+    //free_aa_mod(list_of_mods[i]);
+    //list_of_mods[i] = NULL;
+  //}
 }
 
 void Params::Categorize() {
@@ -1609,13 +1606,13 @@ void Params::Categorize() {
   items.insert("gap-tolerance");
   items.insert("bullseye-max-mass");
   items.insert("bullseye-min-mass");
-  container_.AddCategory("Identifying PPIDs in MS1 spectra", items);
+  AddCategory("Identifying PPIDs in MS1 spectra", items);
 
   items.clear();
   items.insert("exact-match");
   items.insert("exact-tolerance");
   items.insert("retention-tolerance");
-  container_.AddCategory("Matching PPIDs to MS2 spectra", items);
+  AddCategory("Matching PPIDs to MS2 spectra", items);
 
   items.clear();
   items.insert("max-length");
@@ -1625,8 +1622,7 @@ void Params::Categorize() {
   items.insert("monoisotopic-precursor");
   items.insert("isotopic-mass");
   items.insert("clip-nterm-methionine");
-  items.insert("unique-peptides");
-  container_.AddCategory("Peptide properties", items);
+  AddCategory("Peptide properties", items);
 
   items.clear();
   items.insert("mods-spec");
@@ -1640,20 +1636,20 @@ void Params::Categorize() {
   for (char c = 'A'; c <= 'Z'; c++) {
     items.insert(string(1, c));
   }
-  container_.AddCategory("Amino acid modifications", items);
+  AddCategory("Amino acid modifications", items);
 
   items.clear();
   items.insert("decoy-format");
   items.insert("keep-terminal-aminos");
   items.insert("seed");
-  container_.AddCategory("Decoy database generation", items);
+  AddCategory("Decoy database generation", items);
 
   items.clear();
   items.insert("enzyme");
   items.insert("custom-enzyme");
   items.insert("digestion");
   items.insert("missed-cleavages");
-  container_.AddCategory("Enzymatic digestion", items);
+  AddCategory("Enzymatic digestion", items);
 
   items.clear();
   items.insert("max-precursor-charge");
@@ -1681,7 +1677,7 @@ void Params::Categorize() {
   items.insert("fragment-mass");
   items.insert("isotope-windows");
   items.insert("compute-p-values");
-  container_.AddCategory("Search parameters", items);
+  AddCategory("Search parameters", items);
 
   items.clear();
   items.insert("protein");
@@ -1695,7 +1691,7 @@ void Params::Categorize() {
   items.insert("fido-fast-gridsearch");
   items.insert("fido-protein-truncation-threshold");
   items.insert("fido-split-large-components");
-  container_.AddCategory("Fido options", items);
+  AddCategory("Fido options", items);
 
   items.clear();
   items.insert("use-old-xlink");
@@ -1707,15 +1703,15 @@ void Params::Categorize() {
   items.insert("xlink-include-selfloops");
   items.insert("xlink-prevents-cleavage");
   items.insert("max-xlink-mods");
-  container_.AddCategory("Cross-linking parameters", items);
+  AddCategory("Cross-linking parameters", items);
 
   items.clear();
   items.insert("decoy_search");
-  container_.AddCategory("Database", items);
+  AddCategory("Database", items);
 
   items.clear();
   items.insert("num_threads");
-  container_.AddCategory("CPU threads", items);
+  AddCategory("CPU threads", items);
 
   items.clear();
   items.insert("peptide_mass_tolerance");
@@ -1723,13 +1719,13 @@ void Params::Categorize() {
   items.insert("mass_type_parent");
   items.insert("mass_type_fragment");
   items.insert("isotope_error");
-  container_.AddCategory("Masses", items);
+  AddCategory("Masses", items);
 
   items.clear();
   items.insert("search_enzyme_number");
   items.insert("num_enzyme_termini");
   items.insert("allowed_missed_cleavage");
-  container_.AddCategory("Search enzyme", items);
+  AddCategory("Search enzyme", items);
 
   items.clear();
   items.insert("fragment_bin_tol");
@@ -1743,7 +1739,7 @@ void Params::Categorize() {
   items.insert("use_Z_ions");
   items.insert("use_NL_ions");
   items.insert("use_sparse_matrix");
-  container_.AddCategory("Fragment ions", items);
+  AddCategory("Fragment ions", items);
 
   items.clear();
   items.insert("scan_range");
@@ -1751,7 +1747,7 @@ void Params::Categorize() {
   items.insert("override_charge");
   items.insert("ms_level");
   items.insert("activation_method");
-  container_.AddCategory("mzXML/mzML parameters", items);
+  AddCategory("mzXML/mzML parameters", items);
 
   items.clear();
   items.insert("digest_mass_range");
@@ -1764,7 +1760,7 @@ void Params::Categorize() {
   items.insert("spectrum_batch_size");
   items.insert("decoy_prefix");
   items.insert("output_suffix");
-  container_.AddCategory("Misc. parameters", items);
+  AddCategory("Misc. parameters", items);
 
   items.clear();
   items.insert("minimum_peaks");
@@ -1772,7 +1768,7 @@ void Params::Categorize() {
   items.insert("remove_precursor_peak");
   items.insert("remove_precursor_tolerance");
   items.insert("clear_mz_range");
-  container_.AddCategory("Spectral processing", items);
+  AddCategory("Spectral processing", items);
 
   items.clear();
   for (int i = 1; i <= 9; i++) {
@@ -1780,7 +1776,7 @@ void Params::Categorize() {
   }
   items.insert("max_variable_mods_in_peptide");
   items.insert("require_variable_mod");
-  container_.AddCategory("Variable modifications", items);
+  AddCategory("Variable modifications", items);
 
   items.clear();
   items.insert("add_Cterm_peptide");
@@ -1793,7 +1789,7 @@ void Params::Categorize() {
     aaName = aaName.empty() ? "user_amino_acid" : StringUtils::Replace(aaName, " ", "_");
     items.insert("add_" + aaString + "_" + aaName);
   }
-  container_.AddCategory("Static modifications", items);
+  AddCategory("Static modifications", items);
 
   items.clear();
   items.insert("spectrum-format");
@@ -1835,49 +1831,48 @@ void Params::Categorize() {
   items.insert("decoy-prefix");
   items.insert("precision");
   items.insert("peptide-list");
-  items.insert("output-sequence");
   items.insert("comparison");
   items.insert("header");
   items.insert("column-type");
   items.insert("ascending");
   items.insert("delimiter");
-  container_.AddCategory("Input and output", items);
+  AddCategory("Input and output", items);
 }
 
 bool Params::GetBool(const string& name) {
-  return GetParam(name)->GetBool();
+  return Require(name)->GetBool();
 }
 
 int Params::GetInt(const string& name) {
-  return GetParam(name)->GetInt();
+  return Require(name)->GetInt();
 }
 
 double Params::GetDouble(const string& name) {
-  return GetParam(name)->GetDouble();
+  return Require(name)->GetDouble();
 }
 
 string Params::GetString(const string& name) {
-  return GetParam(name)->GetString();
+  return Require(name)->GetString();
 }
 
 bool Params::GetBoolDefault(const string& name) {
-  return GetParam(name)->GetBoolDefault();
+  return Require(name)->GetBoolDefault();
 }
 
 int Params::GetIntDefault(const string& name) {
-  return GetParam(name)->GetIntDefault();
+  return Require(name)->GetIntDefault();
 }
 
 double Params::GetDoubleDefault(const string& name) {
-  return GetParam(name)->GetDoubleDefault();
+  return Require(name)->GetDoubleDefault();
 }
 
 string Params::GetStringDefault(const string& name) {
-  return GetParam(name)->GetStringDefault();
+  return Require(name)->GetStringDefault();
 }
 
 const vector<string>& Params::GetStrings(const string& name) {
-  Param* param = GetParam(name);
+  Param* param = Require(name);
   if (!param->IsArgument()) {
     throw runtime_error("Parameter '" + name + "' is not an argument");
   }
@@ -1885,27 +1880,27 @@ const vector<string>& Params::GetStrings(const string& name) {
 }
 
 string Params::GetUsage(const string& name) {
-  return GetParam(name)->GetUsage();
+  return Require(name)->GetUsage();
 }
 
 string Params::GetFileNotes(const string& name) {
-  return GetParam(name)->GetFileNotes();
+  return Require(name)->GetFileNotes();
 }
 
 bool Params::IsVisible(const string& name) {
-  return GetParam(name)->IsVisible();
+  return Require(name)->IsVisible();
 }
 
 bool Params::IsArgument(const string& name) {
-  return GetParam(name)->IsArgument();
+  return Require(name)->IsArgument();
 }
 
 string Params::GetAcceptedValues(const string& name) {
-  return GetParam(name)->GetAcceptedValues();
+  return Require(name)->GetAcceptedValues();
 }
 
 bool Params::IsDefault(const string& name) {
-  return GetParam(name)->IsDefault();
+  return Require(name)->IsDefault();
 }
 
 bool Params::Exists(const string& name) {
@@ -1914,21 +1909,21 @@ bool Params::Exists(const string& name) {
 
 void Params::Set(const string& name, bool value) {
   container_.CanModifyCheck();
-  Param* param = GetParam(name);
+  Param* param = Require(name);
   param->Set(value);
   param->ThrowIfInvalid();
 }
 
 void Params::Set(const string& name, int value) {
   container_.CanModifyCheck();
-  Param* param = GetParam(name);
+  Param* param = Require(name);
   param->Set(value);
   param->ThrowIfInvalid();
 }
 
 void Params::Set(const string& name, double value) {
   container_.CanModifyCheck();
-  Param* param = GetParam(name);
+  Param* param = Require(name);
   param->Set(value);
   param->ThrowIfInvalid();
 }
@@ -1939,14 +1934,14 @@ void Params::Set(const string& name, const char* value) {
 
 void Params::Set(const string& name, const string& value) {
   container_.CanModifyCheck();
-  Param* param = GetParam(name);
+  Param* param = Require(name);
   param->Set(value);
   param->ThrowIfInvalid();
 }
 
 void Params::AddArgValue(const string& name, const string& value) {
   container_.CanModifyCheck();
-  Param* param = GetParam(name);
+  Param* param = Require(name);
   if (!param->IsArgument()) {
     throw runtime_error("Cannot add value to '" + name + "', it is not an argument");
   }
@@ -1954,57 +1949,7 @@ void Params::AddArgValue(const string& name, const string& value) {
 }
 
 void Params::Finalize() {
-  if (container_.Finalized()) {
-    return;
-  }
-
-  if (GetString("enzyme") == "no-enzyme") {
-    Set("digestion", "non-specific-digest");
-    Set("missed-cleavages", 500);
-  }
-
-  for (char c = 'A'; c <= 'Z'; c++) {
-    double deltaMass = GetDouble(string(1, c));
-    increase_amino_acid_mass(c, deltaMass);
-  }
-
-  translate_decoy_options();
-
-  string customEnzyme = GetString("custom-enzyme");
-  if (!customEnzyme.empty()) {
-    parse_custom_enzyme(customEnzyme);
-    Set("enzyme", "custom-enzyme");
-  }
-
-  if (GetString("enzyme") == "no-enzyme") {
-    Set("digestion", "non-specific-digest");
-  } else if (GetString("digestion") == "non-specific-digest") {
-    Set("enzyme", "no-enzyme");
-  }
-
-  double new_value = GetDouble("mz-bin-width");
-// ***************************
-#ifdef _MSC_VER
-  // Peculiarities of Windows floating point handling 
-  // results in us getting 0.0 here rather than Nan
-  // FIXME: is there a more portable way of checking
-  // that a floating point value has not been set?
-  if (new_value == 0.0) {
-#else
-  if (isnan(new_value)) {
-#endif
-    // If no width specified, choose based on mass type.
-    if (get_mass_type_parameter("fragment-mass") == MONO) {
-      new_value = BIN_WIDTH_MONO;
-    } else {
-      new_value = BIN_WIDTH_AVERAGE;
-    }
-
-    Set("mz-bin-width", new_value);
-  }
-// ***************************
-
-  container_.Finalize();
+  container_.FinalizeParams();
 }
 
 void Params::Write(ostream* out, bool defaults) {
@@ -2085,19 +2030,19 @@ void Params::Write(ostream* out, bool defaults) {
 }
 
 map<string, Param*>::const_iterator Params::BeginAll() {
-  return container_.BeginAll();
+  return container_.params_.begin();
 }
 
 map<string, Param*>::const_iterator Params::EndAll() {
-  return container_.EndAll();
+  return container_.params_.end();
 }
 
 vector<const Param*>::const_iterator Params::Begin() {
-  return container_.Begin();
+  return container_.paramsOrdered_.begin();
 }
 
 vector<const Param*>::const_iterator Params::End() {
-  return container_.End();
+  return container_.paramsOrdered_.end();
 }
 
 string Params::ProcessHtmlDocTags(string s, bool html) {
@@ -2146,24 +2091,19 @@ string Params::ProcessHtmlDocTags(string s, bool html) {
 }
 
 vector< pair< string, vector<string> > > Params::GroupByCategory(const vector<string>& options) {
-  if (container_.CategoriesEmpty()) {
-    Categorize();
-  }
-
   vector< pair< string, vector<string> > > groups;
 
   pair< string, vector<string> > uncategorizedPair = make_pair("", vector<string>(options));
   vector<string>& uncategorized = uncategorizedPair.second;
 
-  const vector<ParamCategory>& categories = container_.GetCategories();
   // Iterate over all categories
-  for (vector<ParamCategory>::const_iterator i = categories.begin();
-       i != categories.end();
+  for (vector<ParamCategory>::const_iterator i = container_.categories_.begin();
+       i != container_.categories_.end();
        i++) {
     bool any = false;
     // Iterate over each given option and check if it is in the category
     for (vector<string>::const_iterator j = options.begin(); j != options.end(); j++) {
-      Param* param = GetParam(*j);
+      Param* param = Require(*j);
       // This option was in the category
       if (i->Items.find(param) != i->Items.end()) {
         if (!any) {
@@ -2193,7 +2133,7 @@ void Params::InitBoolParam(
   const string& fileNotes,
   bool visible
 ) {
-  container_.Add(new BoolParam(name, usage, fileNotes, visible, value));
+  Add(new BoolParam(name, usage, fileNotes, visible, value));
 }
 
 void Params::InitIntParam(
@@ -2205,7 +2145,7 @@ void Params::InitIntParam(
   const string& fileNotes,
   bool visible
 ) {
-  container_.Add(new IntParam(name, usage, fileNotes, visible, value, min, max));
+  Add(new IntParam(name, usage, fileNotes, visible, value, min, max));
 }
 
 void Params::InitIntParam(
@@ -2215,7 +2155,7 @@ void Params::InitIntParam(
   const string& fileNotes,
   bool visible
 ) {
-  container_.Add(new IntParam(name, usage, fileNotes, visible, value));
+  Add(new IntParam(name, usage, fileNotes, visible, value));
 }
 
 void Params::InitDoubleParam(
@@ -2227,7 +2167,7 @@ void Params::InitDoubleParam(
   const string& fileNotes,
   bool visible
 ) {
-  container_.Add(new DoubleParam(name, usage, fileNotes, visible, value, min, max));
+  Add(new DoubleParam(name, usage, fileNotes, visible, value, min, max));
 }
 
 void Params::InitDoubleParam(
@@ -2237,7 +2177,7 @@ void Params::InitDoubleParam(
   const string& fileNotes,
   bool visible
 ) {
-  container_.Add(new DoubleParam(name, usage, fileNotes, visible, value));
+  Add(new DoubleParam(name, usage, fileNotes, visible, value));
 }
 
 void Params::InitStringParam(
@@ -2248,8 +2188,8 @@ void Params::InitStringParam(
   const string& fileNotes,
   bool visible
 ) {
-  container_.Add(new StringParam(name, usage, fileNotes, visible, value,
-                 StringUtils::Split(validValues, '|')));
+  Add(new StringParam(name, usage, fileNotes, visible, value,
+                      StringUtils::Split(validValues, '|')));
 }
 
 void Params::InitStringParam(
@@ -2259,17 +2199,17 @@ void Params::InitStringParam(
   const string& fileNotes,
   bool visible
 ) {
-  container_.Add(new StringParam(name, usage, fileNotes, visible, value));
+  Add(new StringParam(name, usage, fileNotes, visible, value));
 }
 
 void Params::InitArgParam(
   const string& name,
   const string& usage
 ) {
-  container_.Add(new ArgParam(name, usage));
+  Add(new ArgParam(name, usage));
 }
 
-Param* Params::GetParam(const string& name) {
+Param* Params::Require(const string& name) {
   Param* param = container_.Get(name);
   if (param == NULL) {
     throw runtime_error("Parameter '" + name + "' does not exist");
@@ -2277,28 +2217,12 @@ Param* Params::GetParam(const string& name) {
   return param;
 }
 
-Params::Params() {
+Param* Params::Get(const string& name) {
+  map<string, Param*>::iterator i = params_.find(name);
+  return (i == params_.end()) ? NULL : i->second;
 }
 
-Params::~Params() {
-}
-
-// ***** Parameter container ***** //
-Params::ParamContainer::ParamContainer()
-  : finalized_(false) {
-}
-
-Params::ParamContainer::~ParamContainer() {
-  for (map<string, Param*>::iterator i = params_.begin(); i != params_.end(); i++) {
-     delete i->second;
-  }
-  //for (int i = 0; i < MAX_AA_MODS; i++) {
-    //free_aa_mod(list_of_mods[i]);
-    //list_of_mods[i] = NULL;
-  //}
-}
-
-void Params::ParamContainer::Add(Param* param) {
+void Params::Add(Param* param) {
   CanModifyCheck();
   param->ThrowIfInvalid();
 
@@ -2311,46 +2235,7 @@ void Params::ParamContainer::Add(Param* param) {
   }
 }
 
-Param* Params::ParamContainer::Get(const string& name) {
-  map<string, Param*>::iterator i = params_.find(name);
-  return (i == params_.end()) ? NULL : i->second;
-}
-
-bool Params::ParamContainer::Empty() const {
-  return params_.empty();
-}
-
-bool Params::ParamContainer::Finalized() const {
-  return finalized_;
-}
-
-map<string, Param*>::const_iterator Params::ParamContainer::BeginAll() const {
-  return params_.begin();
-}
-
-map<string, Param*>::const_iterator Params::ParamContainer::EndAll() const {
-  return params_.end();
-}
-
-vector<const Param*>::const_iterator Params::ParamContainer::Begin() const {
-  return paramsOrdered_.begin();
-}
-
-vector<const Param*>::const_iterator Params::ParamContainer::End() const {
-  return paramsOrdered_.end();
-}
-
-void Params::ParamContainer::Finalize() {
-  finalized_ = true;
-}
-
-void Params::ParamContainer::CanModifyCheck() const {
-  if (finalized_) {
-    throw runtime_error("Parameters have been finalized and cannot be modified");
-  }
-}
-
-void Params::ParamContainer::AddCategory(const string& name, const set<string>& params) {
+void Params::AddCategory(const string& name, const set<string>& params) {
   // Validate passed in set
   for (set<string>::const_iterator i = params.begin(); i != params.end(); i++) {
     if (Get(*i) == NULL) {
@@ -2391,12 +2276,64 @@ void Params::ParamContainer::AddCategory(const string& name, const set<string>& 
   }
 }
 
-bool Params::ParamContainer::CategoriesEmpty() const {
-  return categories_.empty();
+void Params::FinalizeParams() {
+  if (finalized_) {
+    return;
+  }
+
+  if (GetString("enzyme") == "no-enzyme") {
+    Set("digestion", "non-specific-digest");
+    Set("missed-cleavages", 500);
+  }
+
+  for (char c = 'A'; c <= 'Z'; c++) {
+    double deltaMass = GetDouble(string(1, c));
+    increase_amino_acid_mass(c, deltaMass);
+  }
+
+  translate_decoy_options();
+
+  string customEnzyme = GetString("custom-enzyme");
+  if (!customEnzyme.empty()) {
+    parse_custom_enzyme(customEnzyme);
+    Set("enzyme", "custom-enzyme");
+  }
+
+  if (GetString("enzyme") == "no-enzyme") {
+    Set("digestion", "non-specific-digest");
+  } else if (GetString("digestion") == "non-specific-digest") {
+    Set("enzyme", "no-enzyme");
+  }
+
+  double new_value = GetDouble("mz-bin-width");
+// ***************************
+#ifdef _MSC_VER
+  // Peculiarities of Windows floating point handling 
+  // results in us getting 0.0 here rather than Nan
+  // FIXME: is there a more portable way of checking
+  // that a floating point value has not been set?
+  if (new_value == 0.0) {
+#else
+  if (isnan(new_value)) {
+#endif
+    // If no width specified, choose based on mass type.
+    if (get_mass_type_parameter("fragment-mass") == MONO) {
+      new_value = BIN_WIDTH_MONO;
+    } else {
+      new_value = BIN_WIDTH_AVERAGE;
+    }
+
+    Set("mz-bin-width", new_value);
+  }
+// ***************************
+
+  finalized_ = true;
 }
 
-const vector<Params::ParamCategory>& Params::ParamContainer::GetCategories() const {
-  return categories_;
+void Params::CanModifyCheck() const {
+  if (finalized_) {
+    throw runtime_error("Parameters have been finalized and cannot be modified");
+  }
 }
 
 // ***** Parameter classes ***** //
@@ -2641,5 +2578,4 @@ void ArgParam::Set(int value) { values_ = vector<string>(1, StringParam::From(va
 void ArgParam::Set(double value) { values_ = vector<string>(1, StringParam::From(value)); }
 void ArgParam::Set(const string& value) { values_ = vector<string>(1, value); }
 void ArgParam::AddValue(const string& value) { values_.push_back(value); }
-
 

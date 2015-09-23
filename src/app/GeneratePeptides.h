@@ -1,87 +1,131 @@
-/**
- * \file GeneratePeptides.h
- *
- * AUTHOR: Barbara Frewen
- * CREATE DATE: January 20, 2012
- * DESCRIPTION: Main method for the generate-peptides command.
- *              Output all peptide sequences in the given fasta file
- *              that fall within all peptide constraints.
- */
-#ifndef GENERATEPEPTIDES_H
-#define GENERATEPEPTIDES_H
+#ifndef GENERATE_PEPTIDES_H
+#define GENERATE_PEPTIDES_H
+
+#include <fstream>
 
 #include "CruxApplication.h"
-#include "util/crux-utils.h"
-#include "io/carp.h"
-#include "parameter.h"
+#include "model/Peptide.h"
 
-class GeneratePeptides: public CruxApplication {
+class GeneratePeptides : public CruxApplication {
 
- public:
+protected:
+  struct massCompare {
+    // Sort peptides by mass (descending)
+    bool operator() (const std::string& lhs, const std::string& rhs) const {
+      return Crux::Peptide::calcSequenceMass(lhs.c_str(), massType_) >
+             Crux::Peptide::calcSequenceMass(rhs.c_str(), massType_);
+    }
+  };
+  static MASS_TYPE_T massType_;
+
+public:
+
   /**
-   * \returns A blank GeneratePeptides object.
+   * Constructor
    */
   GeneratePeptides();
-  
+
   /**
    * Destructor
    */
   ~GeneratePeptides();
 
   /**
-   * Main method for GeneratePeptides.
+   * Main method
    */
   virtual int main(int argc, char** argv);
 
   /**
-   * \returns The command name for GeneratePeptides.
+   * Check if we can generate decoy proteins with the current settings.
+   */
+  static bool canGenerateDecoyProteins();
+
+  /**
+   * Given a FASTA file, read in all protein IDs/sequences and cleave them.
+   * Return a map of protein IDs to digested peptides from that protein
+   */
+  static void readFasta(
+    const std::string& fastaName,  ///< FASTA file name
+    std::map< std::string, std::vector<std::string> >& outProteins, ///< map to store proteins
+    std::set<std::string>& outPeptides,  ///< set of unique peptides
+    std::ofstream* reversedFasta, ///< optional stream to write reversed proteins
+    std::set<std::string>* outReversedPeptides  ///< optional set of peptides from rev fasta
+  );
+
+  /**
+   * Reads the next protein ID and corresponding sequence from the FASTA stream
+   * Returns false if no more proteins in stream
+   */
+  static bool getNextProtein(
+    std::ifstream& fasta,  ///< FASTA stream
+    std::string& outId,  ///< string to store protein ID
+    std::string& outSequence ///< string to store sequence
+  );
+
+  /**
+   * Cleave protein sequence using specified enzyme and store results in vector
+   * Vector also contains start location of each peptide within the protein
+   */
+  static void cleaveProtein(
+    const std::string& sequence, ///< Protein sequence to cleave
+    ENZYME_T enzyme,  ///< Enzyme to use for cleavage
+    DIGEST_T digest,  ///< Digestion to use for cleavage
+    int missedCleavages,  ///< Maximum allowed missed cleavages
+    int minLength,  //< Min length of peptides to return
+    int maxLength,  //< Max length of peptides to return
+    std::vector< std::pair<std::string, int> >& outPeptides ///< vector to store peptides
+  );
+
+  /**
+   * Makes a decoy from the sequence.
+   * Returns false on failure, and decoyOut will be the same as seq.
+   */
+  static bool makeDecoy(
+    const std::string& seq, ///< sequence to make decoy from
+    const std::set<std::string>& targetSeqs,  ///< targets to check against
+    const std::set<std::string>& decoySeqs,  ///< decoys to check against
+    bool shuffle, ///< shuffle (if false, reverse)
+    std::string& decoyOut ///< string to store decoy
+  );
+
+  /**
+   * Shuffles the peptide sequence.
+   * Returns false if no different sequence was generated
+   */
+  static bool shufflePeptide(
+    std::string& seq  ///< Peptide sequence to shuffle
+  );
+
+  /**
+   * Reverses the peptide sequence.
+   * Returns false if no different sequence was generated
+   */
+  static bool reversePeptide(
+    std::string& seq ///< Peptide sequence to reverse
+  );
+
+  /**
+   * Returns the command name
    */
   virtual std::string getName() const;
 
   /**
-   * \returns The description for GeneratePeptides.
+   * Returns the command description
    */
   virtual std::string getDescription() const;
 
-  /**
-   * \returns The command arguments
-   */
   virtual std::vector<std::string> getArgs() const;
-
-  /**
-   * \returns The command options
-   */
   virtual std::vector<std::string> getOptions() const;
-
-  /**
-   * \returns The command outputs
-   */
   virtual std::vector< std::pair<std::string, std::string> > getOutputs() const;
 
   /**
-   * \returns The file stem of the application, default getName.
-   */
-  virtual std::string getFileStem() const;
-
-  /**
-   * \returns The enum of the application, default MISC_COMMAND.
-   */
-  virtual COMMAND_T getCommand() const;
-
-  /**
-   * \returns False, i.e. GeneratePeptides does not require an
-   * output directory.
+   * Returns whether the application needs the output directory or not. (default false)
    */
   virtual bool needsOutputDirectory() const;
 
- protected:
-  /**
-   * Print header lines to stdout.
-   */
-  void printHeader();
-
+  virtual COMMAND_T getCommand() const;
+  
 };
-
 
 #endif
 
@@ -91,5 +135,3 @@ class GeneratePeptides: public CruxApplication {
  * c-basic-offset: 2
  * End:
  */
-
-

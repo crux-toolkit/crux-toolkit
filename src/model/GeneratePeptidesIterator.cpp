@@ -23,8 +23,7 @@ GeneratePeptidesIterator::GeneratePeptidesIterator(
 
   // Check that database exists
   if (database == NULL){
-    carp(CARP_FATAL, 
-         "Cannot genrate peptides when database is NULL.");
+    carp(CARP_FATAL, "Cannot generate peptides when database is NULL.");
   }
 
 	iterator_ = new DatabasePeptideIterator(database,

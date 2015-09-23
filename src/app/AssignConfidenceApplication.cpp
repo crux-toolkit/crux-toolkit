@@ -9,6 +9,7 @@
 #include "PosteriorEstimator.h"
 #include "util/FileUtils.h"
 #include "util/Params.h"
+#include "util/StringUtils.h"
 
 #include <map>
 #include <utility>

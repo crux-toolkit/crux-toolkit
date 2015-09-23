@@ -105,12 +105,6 @@ void initialize_parameters(void){
   pre_for_inclusion = true;
   post_for_inclusion = false;
 
-  /* *** Initialize Arguments *** */
-
-  // set with name, default value, [max, min], usage, notes, for param file
-  // all arguments are left out of param file
-  Params::Initialize();
-
   // Default comet enzyme lines
   comet_enzyme_info_lines_.push_back("0.  No_enzyme\t\t\t\t0       -           -");
   comet_enzyme_info_lines_.push_back("1.  Trypsin\t\t\t\t1      KR           P");

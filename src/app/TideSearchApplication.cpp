@@ -11,6 +11,7 @@
 #include "TideMatchSet.h"
 #include "util/Params.h"
 #include "util/FileUtils.h"
+#include "util/StringUtils.h"
 
 bool TideSearchApplication::HAS_DECOYS = false;
 
