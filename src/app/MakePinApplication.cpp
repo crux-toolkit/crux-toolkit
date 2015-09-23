@@ -180,6 +180,7 @@ vector<string> MakePinApplication::getOptions() const {
   string arr[] = {
     "top-match",
     "list-of-files",
+    "filestem-prefixes",
     "decoy-prefix",
     "fileroot",
     "output-dir",

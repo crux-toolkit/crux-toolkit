@@ -85,6 +85,9 @@ void MatchFileWriter::setPrecision(){
       // mass fields
     case SPECTRUM_PRECURSOR_MZ_COL:
     case SPECTRUM_NEUTRAL_MASS_COL:
+    case MASS_COL:
+    case DM_COL:
+    case ABS_DM_COL:
     case PEPTIDE_MASS_COL:
       match_precision_[col_idx] = get_int_parameter("mass-precision");
       match_fixed_float_[col_idx] = true;
@@ -112,6 +115,13 @@ void MatchFileWriter::setPrecision(){
     case NSAF_SCORE_COL:
     case DNSAF_SCORE_COL:
     case EMPAI_SCORE_COL:
+    case LNR_SP_COL:
+    case DELT_L_CN_COL:
+    case DELT_CN_COL:
+    case XCORR_COL:
+    case SP_COL:
+    case ION_FRAC_COL:
+    case LN_NUM_SP_COL:
     case EXACT_PVALUE_COL:
     case REFACTORED_SCORE_COL:
     case SIDAK_ADJUSTED_COL:

@@ -73,7 +73,7 @@ void LineFileReader::loadData(
 
 
   if (!file_ptr_ -> is_open()) {
-    carp(CARP_ERROR, "Opening %s or reading failed", file_name);
+    carp(CARP_FATAL, "Opening %s or reading failed", file_name);
     return;
   } else {
     has_next_ = !getline(*file_ptr_, next_data_string_).fail();

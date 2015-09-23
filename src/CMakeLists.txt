@@ -85,6 +85,7 @@ set (
   util/FileUtils.cpp
   model/GeneratePeptidesIterator.cpp
   app/GetMs2Spectrum.cpp
+  io/HTMLWriter.cpp
   model/Ion.cpp
   model/IonConstraint.cpp
   model/IonFilteredIterator.cpp
@@ -130,6 +131,9 @@ set (
   model/ProteinIndex.cpp
   model/ProteinIndexIterator.cpp
   model/ProteinMatchCollection.cpp
+  app/PSMConvertApplication.cpp
+  io/PSMReader.cpp
+  io/PSMWriter.cpp
   model/AbstractMatch.cpp
   model/ProteinMatch.cpp
   model/PeptideMatch.cpp

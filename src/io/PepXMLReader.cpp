@@ -89,14 +89,12 @@ void PepXMLReader::init() {
   peptideprophet_result_open_ = false;
 
   current_spectrum_ = NULL;
-  database_ = NULL;
-  decoy_database_ = NULL;
 }
 
 /**
  * \returns an initialized object
  */
-PepXMLReader::PepXMLReader() {
+PepXMLReader::PepXMLReader() : PSMReader() {
   init();
 }
 
@@ -105,9 +103,8 @@ PepXMLReader::PepXMLReader() {
  */
 PepXMLReader::PepXMLReader(
   const string& file_path ///< the path of the pep.xml file
-  ) {
+  ) : PSMReader(file_path) {
   init();
-  file_path_ = file_path;
 }
 
 /**
@@ -117,12 +114,8 @@ PepXMLReader::PepXMLReader(
   const string& file_path, ///< the path of the pep.xml
   Database* database, ///< the protein database
   Database* decoy_database ///< the decoy protein database (can be null)
-  ) {
-
-  file_path_ = file_path;
-  database_ = database;
-  decoy_database_ = decoy_database;
-
+  ) : PSMReader(file_path, database, decoy_database) {
+  init();
 }
 
 /**
@@ -137,6 +130,9 @@ PepXMLReader::~PepXMLReader() {
 MatchCollection* PepXMLReader::parse() {
 
   FILE* file_ptr = fopen(file_path_.c_str(), "r");
+  if (file_ptr == NULL) {
+    carp(CARP_FATAL, "Opening %s or reading failed", file_path_.c_str());
+  }
 
   XML_Parser xml_parser = XML_ParserCreate(NULL);
 
@@ -208,7 +204,7 @@ void PepXMLReader::spectrumQueryOpen(
   double precursor_mz = (precursor_mass + (MASS_PROTON * (double) charge)) / (double)charge;
   vector<int> charge_vec;
   charge_vec.push_back(charge);
-  current_spectrum_ = new Spectrum(first_scan, last_scan, precursor_mz, charge_vec, "");
+  current_spectrum_ = new Crux::Spectrum(first_scan, last_scan, precursor_mz, charge_vec, "");
   current_zstate_.setNeutralMass(precursor_mass, charge);
 }
 
@@ -340,7 +336,7 @@ void PepXMLReader::searchHitOpen(
   Protein* protein = 
     MatchCollectionParser::getProtein(database_, decoy_database_, protein_string, is_decoy);
   int start_idx = protein->findStart(current_peptide_sequence_, prev_aa, next_aa);
-  Peptide* peptide = new Peptide(length, peptide_mass, protein, start_idx);
+  Peptide* peptide = new Crux::Peptide(length, peptide_mass, protein, start_idx);
 
   current_match_ = new Match(peptide, current_spectrum_, current_zstate_, is_decoy);
   if (is_decoy) {
@@ -351,15 +347,16 @@ void PepXMLReader::searchHitOpen(
     current_match_->setRank(XCORR, hit_rank);
   }
   if(by_ions_total>0){
-    current_match_->setBYIonMatched(by_ions_matched);
-    current_match_->setBYIonPossible(by_ions_total);
-    current_match_-> setBYIonFractionMatched((FLOAT_T)by_ions_matched/(FLOAT_T)by_ions_total); 
-  }else 
-    current_match_->setBYIonFractionMatched(0);
-  if(current_num_matches>0)
+    current_match_->setScore(BY_IONS_MATCHED, by_ions_matched);
+    current_match_->setScore(BY_IONS_TOTAL, by_ions_total);
+  }
+
+  if(current_num_matches>0) {
     current_match_->setLnExperimentSize(logf(current_num_matches));
-  else 
+    current_match_collection_->setHasDistinctMatches(true);
+  } else { 
     current_match_->setLnExperimentSize(0);
+  }
 }
 
 /**
@@ -594,27 +591,6 @@ void PepXMLReader::peptideProphetResultClose() {
 
   peptideprophet_result_open_ = false;
 }
-
-
-/**
- * sets the target protein database
- */
-void PepXMLReader::setDatabase(
-  Database* database ///< the target protein database
-  ) {
-
-  database_ = database;
-}
-
-/**
- * sets the decoy protein database
- */
-void PepXMLReader::setDecoyDatabase(
-  Database* decoy_database ///< sets the decoy protein database
-  ) {
-  decoy_database_ = decoy_database;
-}
-
 
 /**
  * \returns the MatchCollection resulting from the parsed xml file

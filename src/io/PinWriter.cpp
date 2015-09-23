@@ -74,6 +74,10 @@ void PinWriter::openFile(const string& filename, const string& output_dir, bool 
   }
 }
 
+void PinWriter::openFile(CruxApplication* application, string filename, MATCH_FILE_TYPE type) {
+  openFile(filename, "", Params::GetBool("overwrite"));
+}
+
 void PinWriter::setEnabledStatus(const string& name, bool enabled) {
   IsFeature finder(name);
   vector< pair<string, bool> >::iterator i =
@@ -113,6 +117,33 @@ void PinWriter::write(
       }
     }
   }
+}
+
+void PinWriter::write(MatchCollection* collection, string database) {
+  bool sp = collection->getScoredType(SP);
+  bool xcorr = collection->getScoredType(XCORR);
+  bool exact_p = collection->getScoredType(TIDE_SEARCH_REFACTORED_XCORR);
+  setEnabledStatus("lnrSp", sp);
+  setEnabledStatus("deltLCn", collection->getScoredType(DELTA_LCN));
+  setEnabledStatus("deltCn", collection->getScoredType(DELTA_CN));
+  setEnabledStatus("XCorr", xcorr);
+  setEnabledStatus("Sp", sp);
+  setEnabledStatus("IonFrac", sp);
+  setEnabledStatus("RefactoredXCorr", exact_p);
+  setEnabledStatus("NegLog10PValue", exact_p);
+
+  int max_charge = 0;
+  for (MatchIterator i = MatchIterator(collection); i.hasNext();) {
+    max_charge = max(i.next()->getCharge(), max_charge);
+  }
+  for (int i = 1; i <= max_charge; i++) {
+    setEnabledStatus("Charge" + StringUtils::ToString(i), true);
+  }
+
+  vector<MatchCollection*> decoyvec;
+  int top_match = Params::GetInt("top-match");
+  printHeader();
+  write(collection, decoyvec, top_match); // TODO: When top match is greater than default (5) in a given PSM File?
 }
 
 bool PinWriter::isInfinite(FLOAT_T x) {
@@ -183,8 +214,12 @@ void PinWriter::printPSM(
     } else if (feature == "Sp") {
       fields.push_back(StringUtils::ToString(match->getScore(SP), precision_));
     } else if (feature == "IonFrac") {
-      FLOAT_T ion_frac = match->getBYIonFractionMatched();
-      fields.push_back(StringUtils::ToString(!isnan(ion_frac) ? ion_frac : 0, precision_));
+      FLOAT_T ionMatch = match->getScore(BY_IONS_MATCHED);
+      FLOAT_T ionTotal = match->getScore(BY_IONS_TOTAL);
+      FLOAT_T ionFrac = (ionMatch != NOT_SCORED && ionTotal != NOT_SCORED && ionTotal > 0)
+        ? ionMatch / ionTotal
+        : 0;
+      fields.push_back(StringUtils::ToString(ionFrac, precision_));
     } else if (feature == "RefactoredXCorr") {
       fields.push_back(
         StringUtils::ToString(match->getScore(TIDE_SEARCH_REFACTORED_XCORR), precision_));

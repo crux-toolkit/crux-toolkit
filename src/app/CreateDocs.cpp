@@ -23,6 +23,7 @@
 #include "Pipeline.h"
 #include "PredictPeptideIons.h"
 #include "PrintProcessedSpectra.h"
+#include "PSMConvertApplication.h"
 #include "qranker-barista/QRanker.h"
 #include "ReadTideIndex.h"
 #include "xlink/SearchForXLinks.h"
@@ -60,6 +61,7 @@ int CreateDocs::main(int argc, char** argv) {
   apps.add(new PipelineApplication());
   apps.add(new PredictPeptideIons());
   apps.add(new PrintProcessedSpectra());
+  apps.add(new PSMConvertApplication());
   apps.add(new QRanker());
   apps.add(new ReadTideIndex());
   apps.add(new SearchForXLinks());

@@ -2,6 +2,33 @@
 
 using namespace Crux;
 
+void PMCPepXMLWriter::openFile(
+  string filename,
+  bool overwrite
+) {
+  PepXMLWriter::openFile(filename.c_str(), overwrite);
+}
+
+void PMCPepXMLWriter::openFile(
+  CruxApplication* application,
+  string filename,
+  MATCH_FILE_TYPE type
+) {
+  PepXMLWriter::openFile(filename.c_str(), get_boolean_parameter("overwrite"));
+}
+
+void PMCPepXMLWriter::write(
+  MatchCollection* collection,
+  string database
+) {
+  ProteinMatchCollection protein_collection(collection);
+  write(&protein_collection);
+}
+
+void PMCPepXMLWriter::closeFile() {
+  PepXMLWriter::closeFile();
+}
+
 /**
  * Writes the data in a ProteinMatchCollection to the currently open file
  */

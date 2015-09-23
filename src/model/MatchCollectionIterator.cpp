@@ -6,6 +6,7 @@
  */
 
 #include "MatchCollectionIterator.h"
+#include "util/StringUtils.h"
 
 /******************************
  * match_collection_iterator
@@ -89,22 +90,17 @@ MatchCollectionIterator::MatchCollectionIterator(
   }
   
   // determine how many decoy sets we have
-  while((directory_entry = readdir(working_directory_))){
-    
-    if(suffix_compare(directory_entry->d_name, "decoy-1.txt")) {
+  while ((directory_entry = readdir(working_directory_))) {
+    if (StringUtils::IEndsWith(directory_entry->d_name, "decoy-1.txt")) {
       carp(CARP_DEBUG, "Found decoy file %s", directory_entry->d_name);
       decoy_1 = true;
-    }
-    else if(suffix_compare(directory_entry->d_name, "decoy.txt")) {
+    } else if (StringUtils::IEndsWith(directory_entry->d_name, "decoy.txt")) {
       decoy_1 = true;
-    }
-    else if(suffix_compare(directory_entry->d_name, "decoy-2.txt")) {
+    } else if (StringUtils::IEndsWith(directory_entry->d_name, "decoy-2.txt")) {
       decoy_2 = true;
-    }
-    else if(suffix_compare(directory_entry->d_name, "decoy-3.txt")) {
+    } else if (StringUtils::IEndsWith(directory_entry->d_name, "decoy-3.txt")) {
       decoy_3 = true;
-    }    
-    else if(suffix_compare(directory_entry->d_name, ".txt")){
+    } else if (StringUtils::IEndsWith(directory_entry->d_name, ".txt")) {
       carp(CARP_DEBUG, "Found target file %s", directory_entry->d_name);
       boolean_result = true;
     }

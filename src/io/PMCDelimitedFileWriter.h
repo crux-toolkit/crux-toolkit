@@ -17,18 +17,18 @@
 #include "model/PostProcessProtein.h"
 #include "model/ProteinMatch.h"
 #include "model/ProteinMatchCollection.h"
+#include "PSMWriter.h"
 #include "model/Spectrum.h"
 #include "model/SpectrumMatch.h"
 
 using namespace std;
 
-class PMCDelimitedFileWriter : public MatchFileWriter {
+class PMCDelimitedFileWriter : public MatchFileWriter, public PSMWriter {
 
 public:
   /**
    * Defines the type of match file being written
    */
-  enum MATCH_FILE_TYPE { NONE, PROTEINS, PEPTIDES, PSMS };
 
   /**
    * Returns an empty PMCDelimitedFileWriter object
@@ -73,6 +73,11 @@ public:
     string stem ///< filestem to be prepended to the filenames
   );
 
+  void write(
+    MatchCollection* collection,
+    string database
+  );
+
   /**
    * Writes the data in a ProteinMatchCollection to the currently open file
    */
@@ -80,7 +85,16 @@ public:
     ProteinMatchCollection* collection ///< collection to be written
   );
 
+  /**
+    * Sets whether we should write our output in tab delimited or HTML format. Default = false (tab delimited)
+    */
+  void setWriteHTML(bool write_html);
+
 private:
+
+  bool write_html_; // this determines whether we want to write in html format. Default value = false;
+  CruxApplication* application_; // pointer to the application using this program
+
   // function pointer to the appropriate writing function for the current file type
   void (PMCDelimitedFileWriter::*write_function_)(ProteinMatchCollection*);
 
@@ -132,6 +146,24 @@ private:
   string getCleavageType();
 
   /**
+   * Adds a column to the header if match has score
+   */
+  void addScoreColumnIfExists(
+    AbstractMatch* match, ///< match to get score from
+    SCORER_TYPE_T scoreType, ///< score type to get
+    MATCH_COLUMNS_T column ///< column to add the score to
+  );
+
+  /**
+   * Adds a column to the header if match has rank
+   */
+  void addRankColumnIfExists(
+    AbstractMatch* match, ///< match to get rank from
+    SCORER_TYPE_T scoreType, ///< rank type to get
+    MATCH_COLUMNS_T column ///< column to add the rank to
+  );
+
+  /**
    * Adds the value of a score to the specified column, if it exists in the match
    */
   void addScoreIfExists(
@@ -156,6 +188,18 @@ private:
     MATCH_COLUMNS_T column, ///< column to add the char* to
     char* value ///< char* to set the column value to
   );
+
+  /**
+   * Writes the header in HTML format, this is used for HTMLWriter instead of
+   * DelimitedFileWriter's writeHeader()
+   */
+  void writeHTMLHeader();
+
+  /**
+   * Writes a row in HTML format, this is used for HTMLWriter instead of
+   * DelimitedFileWriter's writeRow() 
+   */
+  void writeHTMLRow();
 
 };
 

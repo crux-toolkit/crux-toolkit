@@ -54,6 +54,8 @@ class Spectrum{
   FLOAT_T          max_peak_mz_;   ///< The maximum m/z of all peaks
   double           total_energy_;  ///< The sum of intensities in all peaks
   FLOAT_T          lowest_sp_;  ///< The lowest Sp score (for writing SQT)
+  bool             has_total_energy_;
+  bool             has_lowest_sp_;
   std::string      filename_;      ///< Optional filename
   std::vector<std::string> i_lines_v_;  ///< store i lines
   std::vector<std::string> d_lines_v_;  ///< store d lines
@@ -278,10 +280,39 @@ class Spectrum{
   );
 
   /**
+   * returns whether there is a total energy
+   */
+  bool hasTotalEnergy();
+
+  /**
+   * sets whether there is a total energy
+   */
+  void setHasTotalEnergy(
+    bool has_total_energy
+  );
+
+  /**
    * Sets the lowest Sp score.
    */
   void setLowestSp(
     FLOAT_T sp ///< the lowest Sp score for this spectrum
+  );
+
+  /**
+   * Returns the lowest Sp score
+   */
+  FLOAT_T getLowestSp();
+
+  /**
+   * returns whether there is a lowest sp score
+   */
+  bool hasLowestSp();
+
+  /**
+   * sets whether there is a lowest sp score
+   */
+  void setHasLowestSp(
+    bool has_lowest_sp
   );
 
   /**

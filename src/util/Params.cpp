@@ -19,6 +19,12 @@ Params::Params() : finalized_(false) {
     "The desired name of the binary index.");
   InitArgParam("ms2 file",
     "File containing spectra to be searched.");
+  /* psm-convert arguments */
+  InitArgParam("input PSM file",
+    "The name of a PSM file in tab-delimited text, SQT, PIN, pepXML or mzIdentML format");
+  InitArgParam("output format",
+    "The desired format of the output file. Legal values are tsv, html, sqt, pin, "
+    "pepxml, mzidentml, barista-xml.");
   /* get-ms2-spectrum */
   InitIntParam("scan number", 0, 0, BILLION,
     "Scan number identifying the spectrum.",
@@ -1205,6 +1211,13 @@ Params::Params() : finalized_(false) {
       "Change the mass of all amino acids '" + string(1, c) + "' by the "
       "given amount.", "", visible);
   }
+  /* psm-convert options */
+  InitStringParam("input-format", "auto", "auto|tsv|sqt|pin|pepxml|mzidentml",
+    "Legal values are auto, tsv, sqt, pin, pepxml or mzidentml format.",
+    "option, for psm-convert", true);
+  InitBoolParam("distinct-matches", true,
+    "Whether matches/ion are distinct (As apposed to total).",
+    "option, for psm-convert", true);
   /* get-ms2-spectrum options */
   InitBoolParam("stats", false, 
     "Rather than the spectrum, output summary statistics to standard output. Each statistic "

@@ -343,6 +343,7 @@ void TideMatchSet::writeToFile(
 
   const vector<Arr::iterator>::const_iterator cutoff =
     (vec.size() >= top_n) ? vec.begin() + top_n : vec.end();
+
   for (vector<Arr::iterator>::const_iterator i = vec.begin(); i != cutoff; ++i) {
     const Peptide* peptide = peptides->GetPeptide((*i)->second);	
     const pb::Protein* protein = proteins[peptide->FirstLocProteinId()];
@@ -584,8 +585,8 @@ void TideMatchSet::addCruxMatches(
 
       // Set Sp, B/Y scores in match
       match->setScore(SP, sp);
-      match->setBYIonMatched(sp_score_data.matched_ions);
-      match->setBYIonPossible(sp_score_data.total_ions);
+      match->setScore(BY_IONS_MATCHED, sp_score_data.matched_ions);
+      match->setScore(BY_IONS_TOTAL, sp_score_data.total_ions);
     }
   }
   match_collection->setZState(z_state);

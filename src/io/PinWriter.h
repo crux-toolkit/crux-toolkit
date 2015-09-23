@@ -13,12 +13,13 @@
 #include "util/mass.h"
 #include "model/Match.h"
 #include "model/MatchCollection.h"
+#include "PSMWriter.h"
 #include "model/SpectrumZState.h"
 #include "model/Spectrum.h"
 #include "model/Peptide.h"
 #include <limits>
 
-class PinWriter {
+class PinWriter : public PSMWriter {
  public:
   PinWriter();
   ~PinWriter();
@@ -29,7 +30,12 @@ class PinWriter {
     const std::vector<MatchCollection*>& decoys,
     int top_rank
   );
-  
+  // PSMWriter write
+  void write(
+    MatchCollection* collection,
+    std::string database
+  );
+
   void printHeader();
 
   void closeFile();
@@ -37,6 +43,13 @@ class PinWriter {
     const std::string& filename, 
     const std::string& output_directory,
     bool overwrite
+  );
+
+  // PSMWriter openfile version
+  void openFile(
+    CruxApplication* application, ///< application writing the file
+    std::string filename, ///< name of the file to open
+    MATCH_FILE_TYPE type ///< type of file to be written
   );
 
   void setEnabledStatus(const std::string& name, bool enabled);

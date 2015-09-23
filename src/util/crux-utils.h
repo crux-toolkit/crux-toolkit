@@ -180,20 +180,6 @@ int create_output_directory(
 ); 
 
 /**
- * returns whether the given filename is a directory.
- * Returns TRUE if a directory, FALSE otherwise.
- * Terminates program if unable to determine status of file.
- */
-bool is_directory(const std::string& fileName);
-
-/**
- * deletes a given directory and it's files inside.
- * assumes that there's no sub directories, only files
- * \returns TRUE if successfully deleted directory
- */
-bool delete_dir(char* dir);
-
-/**
  * given a fasta_file name it returns a name with the name_tag add to the end
  * format: myfasta_nameTag
  * \returns A heap allocated file name of the given fasta file
@@ -257,24 +243,6 @@ std::ofstream* create_stream_in_path(
   const char* filename,  ///< the filename to create & open -in
   const char* directory,  ///< the directory to open the file in -in
   bool overwrite  ///< replace file (T) or die if exists (F)
-  );
-
-/**
- * check if the string has the correct suffix
- * \returns TRUE, if the string starts with the suffix, else FALSE
- */
-bool prefix_compare(
-  const char* string, ///< The string to compare -in
-  const char* prefix  ///< The prefix to find in the string -in
-  );
-
-/**
- * check if the string has the correct suffix
- * \returns TRUE, if the string starts with the suffix, else FALSE
- */
-bool suffix_compare(
-  const char* string, ///< The string to compare -in
-  const char* suffix  ///< The suffix to find in the string -in
   );
 
 /**
