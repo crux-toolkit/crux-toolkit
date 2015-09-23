@@ -13,16 +13,13 @@
 #include <string>
 #include <vector>
 
+#include "PSMReader.h"
 #include "pwiz/data/identdata/IdentDataFile.hpp"
 #include "objects.h"
 
-class MzIdentMLReader {
+class MzIdentMLReader : public PSMReader {
 
  protected:
-
-  Database* database_; ///< target database of proteins
-  Database* decoy_database_; ///< decoy database of proteins
-  std::string file_path_; ///< path of the mzidentml file
 
   pwiz::identdata::IdentDataFile* pwiz_reader_; ///< proteowizard's reader for mzid.
 
@@ -76,20 +73,6 @@ class MzIdentMLReader {
     Database* database, ///< the protein database
     Database* decoy_database=NULL ///< the decoy protein database (can be null)
     );
-
-  /**
-   * sets the target protein database
-   */
-  void setDatabase(
-    Database* database ///< the target protein database
-  );
-
-  /**
-   * sets the decoy protein database
-   */
-  void setDecoyDatabase(
-    Database* decoy_database ///<  the decoy protein database
-  );
 
   /**
    * \returns the MatchCollection resulting from the parsed xml file

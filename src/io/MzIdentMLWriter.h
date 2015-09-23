@@ -7,11 +7,13 @@
 
 #include <string>
 #include <vector>
+
+#include "PSMWriter.h"
 #include "objects.h"
 #include "model/match_objects.h"
 #include "pwiz/data/identdata/IdentData.hpp"
 
-class MzIdentMLWriter{
+class MzIdentMLWriter : public PSMWriter {
 
  protected:
   std::ofstream* fout_; ///< stream to write the mzid to
@@ -197,6 +199,12 @@ class MzIdentMLWriter{
     );
 
   void openFile(
+    CruxApplication* application,
+    std::string filename,
+    MATCH_FILE_TYPE type
+  );
+
+  void openFile(
     const char* filename, 
     bool overwrite
   );
@@ -205,6 +213,14 @@ class MzIdentMLWriter{
    * Writes out the mzid and frees the memory
    */
   void closeFile();
+
+  /**
+  * Adds matches in the match collection to mzid objects [does same thing as "addMatches"]
+  */
+  void write(
+    MatchCollection* collection,
+    std::string database
+  );
 
   /**
    * Adds the matches in the match collection to

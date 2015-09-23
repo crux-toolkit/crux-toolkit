@@ -275,7 +275,9 @@ void PepXMLWriter::printPeptideElement(int *ranks,
     fprintf(file_, "tot_num_ions=\"%i\" ", (unsigned)scores[BY_IONS_TOTAL]);
   }
 
-  fprintf(file_, "calc_neutral_pep_mass=\"%.*f\" "
+  if (flanking_aas_prev != 'X' && flanking_aas_next != 'X') {
+
+    fprintf(file_, "calc_neutral_pep_mass=\"%.*f\" "
           "massdiff=\"%+.*f\" "
           "num_tol_term=\"%i\" num_missed_cleavages=\"%i\" "
           "num_matched_peptides=\"%i\""
@@ -289,6 +291,23 @@ void PepXMLWriter::printPeptideElement(int *ranks,
           current_num_matches,
           0
           );
+  } else {
+
+    fprintf(file_, "calc_neutral_pep_mass=\"%.*f\" "
+          "massdiff=\"%+.*f\" "
+          "num_tol_term=\"\" num_missed_cleavages=\"%i\" "
+          "num_matched_peptides=\"%i\""
+          " is_rejected=\"%i\" ",
+          mass_precision_,
+          peptide_mass,
+          mass_precision_,
+          spectrum_mass - peptide_mass, 
+          num_missed_cleavages, 
+          current_num_matches,
+          0
+          );
+  }
+
   fprintf(file_, "protein_descr=\"%s\">\n",
           protein_annotation.c_str());
 

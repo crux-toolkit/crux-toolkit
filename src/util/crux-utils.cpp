@@ -653,7 +653,7 @@ char** parse_filename_path_extension(
   if( extension != NULL ){
 
     carp(CARP_DETAILED_DEBUG, "File trimmed of path is %s", trimmed_filename);
-    if( ! suffix_compare(trimmed_filename, extension) ){
+    if( ! StringUtils::EndsWith(trimmed_filename, extension) ){
       return file_path_array;  // extension not found, don't change filename
     }
 
@@ -799,65 +799,6 @@ string make_file_path(
 }
 
 /**
- * \brief Check if the string has the correct prefix
- * \returns true if the string starts with the given prefix or if the
- * prefix is NULL, else false.
- */
-bool prefix_compare(
-  const char* string, ///< The string to check
-  const char* prefix  ///< The prefix to find in the string
-  )
-{
-  if( prefix == NULL ){
-    return true;
-  }
-
-  int len = strlen(string);
-  int len_prefix = strlen(prefix);
-
-  if(len_prefix > len){
-    return false;
-  }
-  
-  if(strncmp(string, prefix, len_prefix) == 0){
-    return true;
-  }
-  
-  return false;
-}
-
-/**
- * \brief Check if the string has the correct suffix
- * \returns true if the end of the string matches the given suffix, else false
- */
-bool suffix_compare(
-  const char* string, ///< The string to check
-  const char* suffix  ///< The suffix to find in the string
-  )
-{
-    int string_len = strlen(string);
-    int suffix_len = strlen(suffix);
-    int string_idx = string_len;
-    int suffix_idx = suffix_len;
-
-    if( suffix_len > string_len ){
-      return false;
-    }
-
-    //compare name and ext from end of strings backwards
-    for(suffix_idx = suffix_idx; suffix_idx > -1; suffix_idx--){
-      //carp(CARP_DETAILED_DEBUG, "Name[%d]='%d', ext[%d]='%d'", 
-      //   string_idx, string[string_idx], suffix_idx, suffix[suffix_idx]);
-      // if they stop matching, don't change filename
-      if( suffix[suffix_idx] != string[string_idx--]){
-        return false;
-      }
-    }
-
-  return true;
-}
-
-/**
  * Given the path and the filename return a file with path
  * "path/filename".  Returns filename unchanged if path = NULL.
  * \returns a heap allocated string, "path/filename"
@@ -989,64 +930,6 @@ int create_output_directory(
   }
   return result;
 } 
-
-/**
- * returns whether the given filename is a directory.
- * Returns true if a directory, false otherwise.
- * Terminates program if unable to determine status of file.
- */
-bool is_directory(const string& fileName) {
-  struct stat file;
-  if (stat(fileName.c_str(), &file) == 0) {
-    return S_ISDIR(file.st_mode);
-  } else {
-    char *error = strerror(errno);
-    carp(CARP_FATAL, "stat failed. Unable to determine status of %s. Error: %s.",
-      fileName.c_str(), error);
-    return false; // Avoid compiler warning
-  }
-}
-
-/**
- * deletes a given directory and it's files inside.
- * assumes that there's no sub directories, only files
- * \returns true if successfully deleted directory
- */
-bool delete_dir(char* dir) {
-  struct dirent **namelist =NULL;
-  int num_file =0;
-  int result;
-  char* cwd = getcwd(NULL, 0); //gnu lib
-
-  // does the directory to remove exist?, if so move into it..
-  if(chdir(dir) == -1){
-    carp(CARP_DETAILED_DEBUG, "Could not find directory '%s' to remove", dir);
-    return false;
-  }
-
-  // collect all files in dir
-  num_file = scandir(".", &namelist, NULL, alphasort);
-
-  // delete all files in temp dir
-  while(num_file--){
-    remove(namelist[num_file]->d_name);
-    free(namelist[num_file]);
-  }
-  free(namelist);
-
-  //chdir(".."); // assumes the directory to delete is in cwd
-  if( chdir(cwd) == -1 ){ 
-    free(cwd);
-    return false;
-  }
-  result = rmdir(dir);
-  if(result == false){
-    free(cwd);
-    return false;
-  }
-  free(cwd);
-  return true;
-}
 
 /**
  * \brief Take a filename, strip its leading path information (if

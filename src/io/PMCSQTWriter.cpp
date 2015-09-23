@@ -1,12 +1,31 @@
 #include "PMCSQTWriter.h"
 
+void PMCSQTWriter::openFile(
+  CruxApplication* application,
+  string filename,
+  MATCH_FILE_TYPE type
+) {
+  SQTWriter::openFile(filename);
+}
+
+void PMCSQTWriter::write(
+  MatchCollection* collection,
+  string database
+) {
+  ProteinMatchCollection protein_collection(collection);
+  write(&protein_collection, database);
+}
+
+void PMCSQTWriter::closeFile() {
+  SQTWriter::closeFile();
+}
+
 /**
  * Writes the data in a ProteinMatchCollection to the currently open file
  */
 void PMCSQTWriter::write(
   ProteinMatchCollection* collection, ///< collection to be written
-  string database, ///< the database name
-  int top_match ///< the top matches to output
+  string database ///< the database name
 ) {
   if (!file_) {
     carp(CARP_FATAL, "No file open to write to.");
@@ -21,18 +40,19 @@ void PMCSQTWriter::write(
   }
 
   writeHeader(database, num_proteins);
-  writePSMs(collection, top_match);
+  writePSMs(collection);
 }
 
 /**
  * Writes the PSMs in a ProteinMatchCollection to the currently open file
  */
 void PMCSQTWriter::writePSMs(
-  ProteinMatchCollection* collection, ///< collection to be written
-  int top_match ///< the top matches to output
+  ProteinMatchCollection* collection ///< collection to be written
 ) {
 
   const map<pair<int, int>, int>& spectrum_counts = collection->getMatchesSpectrum();
+
+  string lastPrintedSpectrum = "";
 
   // iterate over matches
   for (SpectrumMatchIterator spec_iter = collection->spectrumMatchBegin();
@@ -46,8 +66,13 @@ void PMCSQTWriter::writePSMs(
     SpectrumZState z_state = spec_match->getZState();
     map<pair<int, int>, int>::const_iterator lookup =
       spectrum_counts.find(make_pair(spectrum->getFirstScan(), z_state.getCharge()));
-    writeSpectrum(spectrum, z_state, (lookup != spectrum_counts.end()) ?
-                  lookup->second : 0);
+
+    string spectrum_title = getSpectrumTitle(spectrum->getFirstScan(), z_state.getCharge());
+    if (spectrum_title.compare(lastPrintedSpectrum) != 0) {
+      writeSpectrum(spectrum, z_state, (lookup != spectrum_counts.end()) ?
+                    lookup->second : 0);
+      lastPrintedSpectrum = spectrum_title;
+    }
 
     FLOAT_T xcorr_score = -1.0;
     int xcorr_rank = -1;
@@ -65,9 +90,6 @@ void PMCSQTWriter::writePSMs(
     }
     if (spec_match->hasRank(XCORR)) {
       xcorr_rank = spec_match->getRank(XCORR);
-      if (xcorr_rank > top_match) {
-        continue;
-      }
     } else {
       carp_once(CARP_WARNING, "Missing XCorr rank writing SQT.");
     }
@@ -103,6 +125,14 @@ void PMCSQTWriter::writePSMs(
       carp_once(CARP_WARNING, "Missing B/Y ions total value writing SQT.");
     }
 
+    // checking whether lowest sp and total ion intensity need carp warning
+    if (spectrum->getTotalEnergy() == -1) {
+      carp_once(CARP_WARNING, "Missing Total Energy value writing SQT.");
+    }
+    if (spectrum->getLowestSp() == -1) {
+      carp_once(CARP_WARNING, "Missing Lowest Sp value writing SQT.");
+    }
+
     bool is_decoy = false; // TODO not sure how to determine
 
     // write psm
@@ -113,7 +143,12 @@ void PMCSQTWriter::writePSMs(
              by_ions_matched, by_ions_total,
              is_decoy);
   }
- 
+}
+
+string PMCSQTWriter::getSpectrumTitle(int spectrum_scan_number, int charge){
+  std::ostringstream spectrum_id;
+  spectrum_id << spectrum_scan_number << "." << spectrum_scan_number << "." << charge;
+  return spectrum_id.str();
 }
 
 /*

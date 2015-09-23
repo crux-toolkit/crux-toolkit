@@ -587,7 +587,7 @@ void MatchCollection::printXmlHeader(
   
   // variable amino acid modifications
   AA_MOD_T** mod_list = NULL;
-  int num_mods = get_aa_mod_list(&mod_list);
+  int num_mods = get_all_aa_mod_list(&mod_list);
   for (int mod_idx = 0; mod_idx < num_mods; mod_idx++){
     FLOAT_T mod_mass = aa_mod_get_mass_change(mod_list[mod_idx]);
     
@@ -894,6 +894,9 @@ void MatchCollection::printMultiSpectraXml(
         num_matches=getExperimentSize();
       else 
         num_matches=getTargetExperimentSize(); 
+
+      int byIonMatched = cur_match->getScore(BY_IONS_MATCHED);
+      int byIonTotal = cur_match->getScore(BY_IONS_TOTAL);
       output->writePSM(spectrum->getFirstScan(),
         spectrum->getFilename(),
         cur_match->getNeutralMass(),
@@ -909,8 +912,8 @@ void MatchCollection::printMultiSpectraXml(
         cur_match->getScore(DELTA_CN),
         scored_type_,
         scores,
-        cur_match->getBYIonMatched(),
-        cur_match->getBYIonPossible(),
+        byIonMatched != NOT_SCORED ? byIonMatched : 0,
+        byIonTotal != NOT_SCORED ? byIonTotal : 0,
         num_matches
       );
     }
@@ -1000,6 +1003,9 @@ bool MatchCollection::printXml(
        num_matches= getExperimentSize(); 
      else
        num_matches= getTargetExperimentSize(); 
+
+      int byIonMatched = match->getScore(BY_IONS_MATCHED);
+      int byIonTotal = match->getScore(BY_IONS_TOTAL);
       output->writePSM(spectrum->getFirstScan(),
         spectrum->getFilename(),
         zstate_.getNeutralMass(),
@@ -1015,8 +1021,8 @@ bool MatchCollection::printXml(
         match->getScore(DELTA_CN),
         scores_computed,
         scores,
-        match->getBYIonMatched(),
-        match->getBYIonPossible(), 
+        byIonMatched != NOT_SCORED ? byIonMatched : 0,
+        byIonTotal != NOT_SCORED ? byIonTotal : 0,
         num_matches
       );
       count++;
@@ -1394,6 +1400,9 @@ bool MatchCollection::extendTabDelimited(
     scored_type_[QRANKER_QVALUE] = !result_file.empty(QRANKER_QVALUE_COL);
     scored_type_[BARISTA_SCORE] = !result_file.empty(BARISTA_SCORE_COL);
     scored_type_[BARISTA_QVALUE] = !result_file.empty(BARISTA_QVALUE_COL);
+
+    scored_type_[BY_IONS_MATCHED] = !result_file.empty(BY_IONS_MATCHED_COL);
+    scored_type_[BY_IONS_TOTAL] = !result_file.empty(BY_IONS_TOTAL_COL);
 
     post_scored_type_set_ = true;
 

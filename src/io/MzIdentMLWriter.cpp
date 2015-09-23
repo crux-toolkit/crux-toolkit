@@ -21,7 +21,7 @@ using namespace identdata;
 
 #define calculateMassToCharge(peptide_mass, charge) (FLOAT_T) ((peptide_mass + (charge*MASS_PROTON))/charge)
 
-MzIdentMLWriter::MzIdentMLWriter() {
+MzIdentMLWriter::MzIdentMLWriter() : PSMWriter() {
   //data_ = NULL;
   fout_ = NULL;
   sir_idx_ = 0;
@@ -54,6 +54,14 @@ void MzIdentMLWriter::openFile(
   bool overwrite) {
 
   openFile(filename.c_str(), overwrite);
+}
+
+void MzIdentMLWriter::openFile(
+  CruxApplication* application,
+  string filename,
+  MATCH_FILE_TYPE type) {
+
+  openFile(filename.c_str(), get_boolean_parameter("overwrite"));
 }
 
 /**
@@ -573,6 +581,8 @@ CVID MzIdentMLWriter::getScoreCVID(
       return MS_SEQUEST_xcorr;
     case SP:
       return MS_SEQUEST_PeptideSp;
+    case TIDE_SEARCH_EXACT_PVAL:
+      return MS_peptide_identification_confidence_metric;
     case PERCOLATOR_SCORE:
       return MS_percolator_score;
     case PERCOLATOR_QVALUE:
@@ -636,10 +646,12 @@ void MzIdentMLWriter::addScores(
     item->cvParams.push_back(delta_cn);
   }
 
-  if (match_collection->getScoredType(SP)) {
-    CVParam matched_ions(MS_SEQUEST_matched_ions, match->getBYIonMatched());
+  if (match_collection->getScoredType(BY_IONS_MATCHED)) {
+    CVParam matched_ions(MS_SEQUEST_matched_ions, match->getScore(BY_IONS_MATCHED));
     item->cvParams.push_back(matched_ions);
-    CVParam total_ions(MS_SEQUEST_total_ions, match->getBYIonPossible()); 
+  }
+  if (match_collection->getScoredType(BY_IONS_TOTAL)) {
+    CVParam total_ions(MS_SEQUEST_total_ions, match->getScore(BY_IONS_TOTAL)); 
     item->cvParams.push_back(total_ions);
   }
 }
@@ -659,6 +671,12 @@ void MzIdentMLWriter::addRanks(
   }
 }
   
+void MzIdentMLWriter::write(
+  MatchCollection* collection,
+  string database) {
+
+  addMatches(collection);
+}
 
 /**
  * Adds the matches in the match collection to
@@ -667,12 +685,10 @@ void MzIdentMLWriter::addRanks(
 void MzIdentMLWriter::addMatches(
   MatchCollection* collection  ///< matches to add
   ) {
-
   MatchIterator match_iter(collection);
   while (match_iter.hasNext()) {
     addMatch(collection, match_iter.next());
   }
-
 }
 
 /**

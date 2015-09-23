@@ -14,7 +14,7 @@ using namespace std;
 /**
  * \returns a blank MatchFileReader object 
  */
-MatchFileReader::MatchFileReader() : DelimitedFileReader() {
+MatchFileReader::MatchFileReader() : DelimitedFileReader(), PSMReader() {
 }
 
 /**
@@ -29,7 +29,13 @@ MatchFileReader::MatchFileReader(const char* file_name) : DelimitedFileReader(fi
  * \returns a MatchFileReader object and loads the tab-delimited
  * data specified by file_name.
  */
-MatchFileReader::MatchFileReader(const string& file_name) : DelimitedFileReader(file_name, true) {
+MatchFileReader::MatchFileReader(const string& file_name)
+  : DelimitedFileReader(file_name, true), PSMReader(file_name) {
+  parseHeader();
+}
+
+MatchFileReader::MatchFileReader(const string& file_name, Database* database, Database* decoy_database)
+  : DelimitedFileReader(file_name, true), PSMReader(file_name, database, decoy_database) {
   parseHeader();
 }
 
@@ -73,7 +79,7 @@ void MatchFileReader::loadData(
  * parses the header and builds the internal hash table
  */
 void MatchFileReader::parseHeader() {
-  for (int idx=0;idx<NUMBER_MATCH_COLUMNS;idx++) {
+  for (int idx = 0; idx < NUMBER_MATCH_COLUMNS; idx++) {
     match_indices_[idx] = findColumn(get_column_header(idx));
   }
 }
@@ -169,6 +175,19 @@ void MatchFileReader::getMatchColumnsPresent(
   for(int col_idx = 0; col_idx < NUMBER_MATCH_COLUMNS; col_idx++){
     col_is_present[col_idx] = (match_indices_[col_idx] > -1);
   }
+}
+
+MatchCollection* MatchFileReader::parse() {
+
+  MatchFileReader delimited_result_file(file_path_);
+  MatchCollection* match_collection = new MatchCollection();
+  match_collection->preparePostProcess();
+
+  match_collection->extendTabDelimited(database_, delimited_result_file, decoy_database_);
+
+  return match_collection;
+
+
 }
 
 MatchCollection* MatchFileReader::parse(

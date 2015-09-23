@@ -41,6 +41,8 @@ Spectrum::Spectrum() :
    max_peak_mz_(0),
    total_energy_(0),
    lowest_sp_(0),
+   has_total_energy_(false),
+   has_lowest_sp_(false),
    has_peaks_(false),
    sorted_by_mz_(false),
    sorted_by_intensity_(false),
@@ -65,6 +67,9 @@ Spectrum::Spectrum
    min_peak_mz_(0),
    max_peak_mz_(0),
    total_energy_(0),
+   lowest_sp_(0),
+   has_total_energy_(false),
+   has_lowest_sp_(false),
    filename_(filename),
    has_peaks_(false),
    sorted_by_mz_(false),
@@ -706,11 +711,51 @@ void Spectrum::setTotalEnergy(FLOAT_T tic)
 }
 
 /**
+ * returns whether there is a total energy
+ */
+bool Spectrum::hasTotalEnergy()
+{
+  return has_total_energy_;
+}
+
+/**
+ * sets whether there is a total energy
+ */
+void Spectrum::setHasTotalEnergy(bool has_total_energy)
+{
+  has_total_energy_ = has_total_energy;
+}
+
+/**
  * Sets the lowest Sp score.
  */
 void Spectrum::setLowestSp(FLOAT_T sp)
 {
   lowest_sp_ = sp;
+}
+
+/**
+ * Returns the lowest Sp score
+ */
+FLOAT_T Spectrum::getLowestSp()
+{
+  return lowest_sp_;
+}
+
+/**
+ * returns whether there is a lowest sp score
+ */
+bool Spectrum::hasLowestSp()
+{
+  return has_lowest_sp_;
+}
+
+/**
+ * sets whether there is a lowest sp score
+ */
+void Spectrum::setHasLowestSp(bool has_lowest_sp)
+{
+  has_lowest_sp_ = has_lowest_sp;
 }
 
 /**

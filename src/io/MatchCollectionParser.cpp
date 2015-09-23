@@ -15,8 +15,6 @@
 #include "model/PostProcessProtein.h"
 #include "util/FileUtils.h"
 #include "util/StringUtils.h"
-#include <sys/types.h>
-#include <sys/stat.h>
 
 using namespace Crux;
 
@@ -47,7 +45,7 @@ void MatchCollectionParser::loadDatabase(
     decoy_database = new Database();
     database -> setIsParsed(true);
   } else {
-    bool use_index = is_directory(fasta_file);
+    bool use_index = FileUtils::IsDir(fasta_file);
     // get binary fasta file name with path to crux directory 
     if (use_index == true){ 
       //We aren't supporting search-for-matches anymore, so we won't be
@@ -105,8 +103,10 @@ Protein* MatchCollectionParser::getProtein(
   if (protein_id.find(decoy_prefix) != string::npos) {
     carp(CARP_DEBUG, "adding to decoy database");
     is_decoy = true;
-    decoy_database->addProtein(protein);
-    
+    // Fixes segfault in case of NULL decoy database
+    if (decoy_database != NULL) {
+      decoy_database->addProtein(protein);
+    }
   } else {
     carp(CARP_DEBUG, "adding to target database");
     is_decoy = false;
@@ -142,7 +142,9 @@ Protein* MatchCollectionParser::getProtein(
   //try creating it and adding it to the database as a postprocess protein
   carp(CARP_DEBUG, "Creating new protein for %s",protein_id.c_str());
   carp(CARP_DEBUG, "Sequence :%s",sequence.c_str());
-  protein = new Protein();
+
+  protein = new PostProcessProtein();
+
   protein->setId(protein_id.c_str());
   protein->setSequence(sequence.c_str());
   protein->setLength(sequence.length());
@@ -151,7 +153,10 @@ Protein* MatchCollectionParser::getProtein(
   string decoy_prefix = get_string_parameter("decoy-prefix");
   if (protein_id.find(decoy_prefix) != string::npos) {
     is_decoy = true;
-    decoy_database->addProtein(protein);
+    // Fixes segfault in case of NULL database
+    if (decoy_database != NULL) {
+      decoy_database->addProtein(protein);
+    }
   } else {
     is_decoy = false;
     database->addProtein(protein);
@@ -180,7 +185,7 @@ MatchCollection* MatchCollectionParser::create(
   }
   MatchCollection* collection = NULL;
   
-  if (is_directory(match_path)) {
+  if (FileUtils::IsDir(match_path)) {
     carp(CARP_FATAL, "Internal error");
   } else if (StringUtils::IEndsWith(match_path, ".xml")) {
     collection = PepXMLReader::parse(match_path, database_, decoy_database_);

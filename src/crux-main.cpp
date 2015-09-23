@@ -39,6 +39,7 @@
 #include "app/ReadTideIndex.h"
 #include "app/TideSearchApplication.h"
 #include "app/CometApplication.h"
+#include "app/PSMConvertApplication.h"
 #include "app/CascadeSearchApplication.h"
 #include "app/AssignConfidenceApplication.h"
 #include "app/SubtractIndexApplication.h"
@@ -87,6 +88,7 @@ int main(int argc, char** argv){
     applications.add(new GetMs2Spectrum());
     applications.add(new CreateDocs());
     applications.add(new PrintVersion());
+    applications.add(new PSMConvertApplication());
 
     // Utilities for processing tab-delimited text files
     applications.add(new ExtractColumns());

@@ -74,10 +74,6 @@ class Match {
     ///< rank of this match for each type scored (index with SCORER_TYPE_T)
   int pointer_count_; 
     ///< number of pointers to this match object (when reach 0, free memory)
-  FLOAT_T b_y_ion_fraction_matched_; 
-    ///< the fraction of the b, y ion matched while scoring for SP
-  int b_y_ion_matched_; ///< number of b, y ion matched while scoring SP
-  int b_y_ion_possible_; ///< number of possible b, y ion while scoring SP
   bool null_peptide_; ///< Is the match a null (decoy) peptide match?
   char* peptide_sequence_; ///< peptide sequence is that of peptide or shuffled
   MODIFIED_AA_T* mod_sequence_; ///< seq of peptide or shuffled if null peptide
@@ -440,47 +436,6 @@ class Match {
   void setPostProcess(
     bool post_process ///< whether the match is post process or not
   );
-
-  /**
-   * sets the match b_y_ion info
-   */
-  void setBYIonInfo(
-    Scorer* scorer ///< the scorer from which to extract information -in
-    );
-
-  void calcBYIonFractionMatched();
-
-  /**
-   * sets the match b_y_ion_matched
-   */
-  void setBYIonFractionMatched(
-    FLOAT_T frac_matched ///< the fraction of ions matched
-    );
-
-  /**
-   * gets the match b_y_ion_match
-   */
-  FLOAT_T getBYIonFractionMatched();
-
-  /**
-   * sets the match b_y_ion_matched
-   */
-  void setBYIonMatched(int matched);
-
-  /**
-   * gets the match b_y_ion_matched
-   */
-  int getBYIonMatched();
-
-  /**
-   * sets the match b_y_ion_possible
-   */
-  void setBYIonPossible(int possible);
-
-  /**
-   * gets the match b_y_ion_possible
-   */
-  int getBYIonPossible();
 
   /**
    * Set the best-per-peptide Boolean to true.

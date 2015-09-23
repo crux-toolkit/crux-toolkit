@@ -1,6 +1,6 @@
 /*************************************************************************//**
  * \file SQTReader.cpp
- * \brief Object for parsing pepxml files
+ * \brief Object for parsing sqt files
  ****************************************************************************/
 
 #include "SQTReader.h"
@@ -26,6 +26,8 @@ const int spectrum_low_scan_idx = 1;
 const int spectrum_high_scan_idx = 2;
 const int spectrum_charge_idx = 3;
 const int spectrum_observed_mass_idx = 6;
+const int spectrum_total_ion_intensity_idx = 7;
+const int spectrum_lowest_sp_idx = 8;
 const int spectrum_num_matches_idx = 9;
 
 const int match_xcorr_rank_idx = 1;
@@ -49,14 +51,12 @@ void SQTReader::init() {
   last_parsed_ = SQT_LINE_NONE;
   current_spectrum_ = NULL;
   current_match_ = NULL;
-  database_ = NULL;
-  decoy_database_ = NULL;
 }
 
 /**
  * \returns an initialized object
  */
-SQTReader::SQTReader() {
+SQTReader::SQTReader() : PSMReader() {
   init();
 }
 
@@ -65,24 +65,20 @@ SQTReader::SQTReader() {
  */
 SQTReader::SQTReader(
   const string& file_path ///< the path of the pep.xml file
-  ) {
+  ) : PSMReader(file_path) {
   init();
-  file_path_ = file_path;
 }
 
 /**
  * \returns an object initialized with the xml path, and the target,decoy databases
  */
 SQTReader::SQTReader(
-  const string& file_path, ///< the path of the pep.xml
+  const string& file_path, ///< the path of the sqt
   Database* database, ///< the protein database
   Database* decoy_database ///< the decoy protein database (can be null)
-  ) {
+  ) : PSMReader(file_path, database, decoy_database) {
 
   init();
-  file_path_ = file_path;
-  database_ = database;
-  decoy_database_ = decoy_database;
 
 }
 
@@ -167,10 +163,14 @@ void SQTReader::parseSpectrum(string& line) {
   double observed_mass;
   from_string(observed_mass, tokens[spectrum_observed_mass_idx]);
 
-  from_string(current_num_matches_, tokens[spectrum_num_matches_idx]);
+  int current_num_matches;
+  from_string(current_num_matches, tokens[spectrum_num_matches_idx]);
+  if (current_num_matches >= 0) {
+    current_match_collection_->setHasDistinctMatches(true);
+  }
 
-  current_ln_experiment_size_ = logf((FLOAT_T)current_num_matches_);
-  
+  current_ln_experiment_size_ = logf((FLOAT_T)current_num_matches);
+
   last_parsed_ = SQT_LINE_SPECTRUM;
 
   current_zstate_.setSinglyChargedMass(observed_mass, charge);
@@ -180,6 +180,21 @@ void SQTReader::parseSpectrum(string& line) {
     current_zstate_.getMZ(),
     vector<int>(1, charge),
     "");
+
+  if (tokens[spectrum_total_ion_intensity_idx] != "") {
+    current_spectrum_->setHasTotalEnergy(true);
+  }
+  if (tokens[spectrum_lowest_sp_idx] != "") {
+    current_spectrum_->setHasLowestSp(true);
+  }
+
+  double total_ion_intensity;
+  from_string(total_ion_intensity, tokens[spectrum_total_ion_intensity_idx]);
+  double lowest_sp;
+  from_string(lowest_sp, tokens[spectrum_lowest_sp_idx]);
+  current_spectrum_->setTotalEnergy(total_ion_intensity);
+  current_spectrum_->setLowestSp(lowest_sp);
+
   /*
   cerr << "spectrum line:"<<line<<endl;
   cerr << "low scan:"<<low_scan<<endl;
@@ -268,9 +283,8 @@ void SQTReader::parseMatch(string& line) {
   current_match_->setRank(XCORR, xcorr_rank);
   current_match_->setRank(SP, sp_rank);
 
-  current_match_->setBYIonMatched(matched_ions);
-  current_match_->setBYIonPossible(expected_ions);
-  current_match_->setBYIonFractionMatched((FLOAT_T)matched_ions / (FLOAT_T)expected_ions);
+  current_match_->setScore(BY_IONS_MATCHED, matched_ions);
+  current_match_->setScore(BY_IONS_TOTAL, expected_ions);
   current_match_->setLnExperimentSize(current_ln_experiment_size_);
 
   last_parsed_ = SQT_LINE_MATCH;
@@ -345,26 +359,6 @@ int SQTReader::findStart(
 }
 
 /**
- * sets the target protein database
- */
-void SQTReader::setDatabase(
-  Database* database ///< the target protein database
-  ) {
-
-  database_ = database;
-}
-
-/**
- * sets the decoy protein database
- */
-void SQTReader::setDecoyDatabase(
-  Database* decoy_database ///< sets the decoy protein database
-  ) {
-  decoy_database_ = decoy_database;
-}
-
-
-/**
  * \returns the MatchCollection resulting from the parsed xml file
  */
 MatchCollection* SQTReader::parse(
@@ -378,7 +372,6 @@ MatchCollection* SQTReader::parse(
   MatchCollection* collection = reader->parse();
 
   return collection;
-
 
 }
 

@@ -8,7 +8,9 @@ using namespace boost;
 /** 
  * Returns an empty PMCDelimitedFileWriter object
  */
-PMCDelimitedFileWriter::PMCDelimitedFileWriter() {
+PMCDelimitedFileWriter::PMCDelimitedFileWriter() : PSMWriter() {
+  write_html_ = false;
+  application_ = NULL;
 }
 
 /**
@@ -43,6 +45,7 @@ void PMCDelimitedFileWriter::openFile(
   closeFile();
 
   file_ptr_ = FileUtils::GetWriteStream(filename, get_boolean_parameter("overwrite"));
+  application_ = application;
   if (!file_ptr_->is_open()) {
     carp(CARP_FATAL, "Error creating file '%s'.", filename.c_str());
   }
@@ -115,6 +118,14 @@ void PMCDelimitedFileWriter::writeAll(
 
 }
 
+void PMCDelimitedFileWriter::write(
+  MatchCollection* collection,
+  string database
+  ) {
+  ProteinMatchCollection protein_collection(collection);
+  write(&protein_collection);
+}
+
 /**
  * Writes the data in a ProteinMatchCollection to the currently open file
  */
@@ -127,8 +138,57 @@ void PMCDelimitedFileWriter::write(
     carp(CARP_FATAL, "ProteinMatchCollection was null");
   }
 
-  writeHeader();
+  // psm-convert: trying to detect whether additional columns are needed....
+  // Is there a better way to do this or move to setUpPSMSColumns? Seems messy...
+  SpectrumMatchIterator first_spec = collection->spectrumMatchBegin();
+  SpectrumMatch* match = *first_spec;
+  
+  if (!match->getFilePath().empty()) {
+    addColumnName(FILE_COL);
+  }
+  addScoreColumnIfExists(match, DELTA_CN, DELTA_CN_COL);
+  addScoreColumnIfExists(match, SP, SP_SCORE_COL);
+  addRankColumnIfExists(match, SP, SP_RANK_COL);
+  addScoreColumnIfExists(match, XCORR, XCORR_SCORE_COL);
+  addRankColumnIfExists(match, XCORR, XCORR_RANK_COL);
+  addScoreColumnIfExists(match, TIDE_SEARCH_EXACT_PVAL, EXACT_PVALUE_COL);
+  addScoreColumnIfExists(match, TIDE_SEARCH_REFACTORED_XCORR, REFACTORED_SCORE_COL);
+  addScoreColumnIfExists(match, BY_IONS_MATCHED, BY_IONS_MATCHED_COL);
+  addScoreColumnIfExists(match, BY_IONS_TOTAL, BY_IONS_TOTAL_COL);
+  if (collection->hasDistinctMatches()) {
+    addColumnName(DISTINCT_MATCHES_SPECTRUM_COL);
+  } else {
+    addColumnName(MATCHES_SPECTRUM_COL);
+  }
+
+  if (!write_html_) {
+    writeHeader();
+  } else {
+    writeHTMLHeader();
+  }
   (this->*this->PMCDelimitedFileWriter::write_function_)(collection);
+}
+
+// adds score to header and columns if exists
+void PMCDelimitedFileWriter::addScoreColumnIfExists(
+  AbstractMatch* match, ///< match to get score from
+  SCORER_TYPE_T scoreType, ///< score type to get
+  MATCH_COLUMNS_T column ///< column to add the score to
+  ) {
+  if (match->hasScore(scoreType)) {
+    addColumnName(column);
+  }
+}
+
+// adds rank to header and columns if exists
+void PMCDelimitedFileWriter::addRankColumnIfExists(
+  AbstractMatch* match, ///< match to get rank from
+  SCORER_TYPE_T scoreType, ///< rank type to get
+  MATCH_COLUMNS_T column ///< column to add the rank to
+  ) {
+  if (match->hasRank(scoreType)) {
+    addColumnName(column);
+  }
 }
 
 /**
@@ -373,10 +433,7 @@ void PMCDelimitedFileWriter::writePeptides(
 void PMCDelimitedFileWriter::setUpPSMsColumns(
   CruxApplication* application ///< application writing the file
 ) {
-
-  COMMAND_T command = application->getCommand();
-
-  switch(command) {
+  switch (application->getCommand()) {
   default:
     carp(CARP_FATAL, "Command (%s) not yet implemented for writing tab "
                      "delimited files.", application->getName().c_str());
@@ -392,27 +449,22 @@ void PMCDelimitedFileWriter::setUpPSMsColumns(
     carp(CARP_FATAL, "Invalid command (%s) for writing tab delimited file.",
                      application->getName().c_str());
     return;
+  case PSM_CONVERT_COMMAND:
+    break;
   case PERCOLATOR_COMMAND:
+    addColumnName(FILE_IDX_COL);
+    addColumnName(FILE_COL);
+    addColumnName(MATCHES_SPECTRUM_COL);
     addColumnName(PERCOLATOR_SCORE_COL);
     addColumnName(PERCOLATOR_RANK_COL);
     addColumnName(PERCOLATOR_QVALUE_COL);
     break;
   }
-  addColumnName(FILE_IDX_COL);
-  addColumnName(FILE_COL);
   addColumnName(SCAN_COL);
   addColumnName(CHARGE_COL);
   addColumnName(SPECTRUM_PRECURSOR_MZ_COL);
   addColumnName(SPECTRUM_NEUTRAL_MASS_COL);
   addColumnName(PEPTIDE_MASS_COL);
-  //addColumnName(DELTA_CN_COL);
-  //addColumnName(SP_SCORE_COL);
-  //addColumnName(SP_RANK_COL);
-  //addColumnName(XCORR_SCORE_COL);
-  //addColumnName(XCORR_RANK_COL);
-  //addColumnName(BY_IONS_MATCHED_COL);
-  //addColumnName(BY_IONS_TOTAL_COL);
-  addColumnName(MATCHES_SPECTRUM_COL);
   addColumnName(SEQUENCE_COL);
   addColumnName(CLEAVAGE_TYPE_COL);
   addColumnName(PROTEIN_ID_COL);
@@ -435,6 +487,7 @@ void PMCDelimitedFileWriter::writePSMs(
   const map<pair<int, int>, int>& spectrum_counts = collection->getMatchesSpectrum();
 
   bool distinct_matches = collection->hasDistinctMatches();
+  COMMAND_T command = application_->getCommand();
 
   for (SpectrumMatchIterator iter = collection->spectrumMatchBegin();
        iter != collection->spectrumMatchEnd();
@@ -448,21 +501,33 @@ void PMCDelimitedFileWriter::writePSMs(
     PeptideMatch* pep_match = match->getPeptideMatch();
     Peptide* peptide = pep_match->getPeptide();
 
+    if (command = PSM_CONVERT_COMMAND) {
+      addScoreIfExists(match, DELTA_CN, DELTA_CN_COL);                          // TODO: Figure out difference between match and pep_match,
+      addScoreIfExists(match, BY_IONS_MATCHED, BY_IONS_MATCHED_COL);            // since Percolator uses pep_match... While tide-search
+      addScoreIfExists(match, BY_IONS_TOTAL, BY_IONS_TOTAL_COL);                // uses match. These are different values, are they supposed to be?
+										// When using pep_match, a lot of things are unknown (-1)
+      setColumnCurrentRow(PROTEIN_ID_COL, peptide->getProteinIdsLocations());   // This was used by an older PMCDelimitedFileWriter and retains the protein id location
+    } else {
+      addScoreIfExists(pep_match, DELTA_CN, DELTA_CN_COL);
+      addScoreIfExists(pep_match, BY_IONS_MATCHED, BY_IONS_MATCHED_COL);
+      addScoreIfExists(pep_match, BY_IONS_TOTAL, BY_IONS_TOTAL_COL);
+      setColumnCurrentRow(PROTEIN_ID_COL, StringUtils::Join(peptide->getProteinIds(), ','));
+    }
+
     setColumnCurrentRow(SCAN_COL, spectrum->getFirstScan());
     setColumnCurrentRow(CHARGE_COL, zstate.getCharge());
     setColumnCurrentRow(SPECTRUM_PRECURSOR_MZ_COL, zstate.getMZ());
     setColumnCurrentRow(SPECTRUM_NEUTRAL_MASS_COL, zstate.getNeutralMass());
     setColumnCurrentRow(PEPTIDE_MASS_COL, peptide->getPeptideMass());
-    addScoreIfExists(pep_match, DELTA_CN, DELTA_CN_COL);
     addScoreIfExists(match, SP, SP_SCORE_COL);
     addRankIfExists(match, SP, SP_RANK_COL);
     addScoreIfExists(match, XCORR, XCORR_SCORE_COL);
     addRankIfExists(match, XCORR, XCORR_RANK_COL);
+    addScoreIfExists(match, TIDE_SEARCH_EXACT_PVAL, EXACT_PVALUE_COL);
+    addScoreIfExists(match, TIDE_SEARCH_REFACTORED_XCORR, REFACTORED_SCORE_COL);
     addScoreIfExists(match, PERCOLATOR_SCORE, PERCOLATOR_SCORE_COL);
     addRankIfExists(match, PERCOLATOR_SCORE, PERCOLATOR_RANK_COL);
     addScoreIfExists(match, PERCOLATOR_QVALUE, PERCOLATOR_QVALUE_COL);
-    addScoreIfExists(pep_match, BY_IONS_MATCHED, BY_IONS_MATCHED_COL);
-    addScoreIfExists(pep_match, BY_IONS_TOTAL, BY_IONS_TOTAL_COL);
     pair<int, int> scan_charge = make_pair(spectrum->getFirstScan(), zstate.getCharge());
     map<pair<int, int>, int>::const_iterator lookup = spectrum_counts.find(scan_charge);
     if (distinct_matches) {
@@ -479,10 +544,17 @@ void PMCDelimitedFileWriter::writePSMs(
     setAndFree(SEQUENCE_COL, seq_with_masses);
 
     setColumnCurrentRow(CLEAVAGE_TYPE_COL, cleavage);
-    setColumnCurrentRow(PROTEIN_ID_COL, StringUtils::Join(peptide->getProteinIds(), ','));
     setAndFree(FLANKING_AA_COL, peptide->getFlankingAAs());
 
-    writeRow();
+    if (!write_html_) {
+      writeRow();
+    } else {
+      writeHTMLRow();
+    }
+
+  }
+  if (write_html_) {
+    *file_ptr_ << "</table>" << endl;
   }
 }
 
@@ -545,4 +617,91 @@ void PMCDelimitedFileWriter::setAndFree(
   } else {
     carp(CARP_WARNING, "Cannot set value for column %d", column);
   }
+}
+
+/**
+  * Sets whether we should write our output in tab delimited or HTML format. Default = false (tab delimited)
+  */
+void PMCDelimitedFileWriter::setWriteHTML(bool write_html) {
+  write_html_ = write_html;
+};
+
+/**
+ * Writes the header in HTML format, this is used for HTMLWriter instead of
+ * DelimitedFileWriter's writeHeader()
+ */
+void PMCDelimitedFileWriter::writeHTMLHeader() {
+
+  num_columns_ = 0;
+  // set file position index for all columns being printed
+  for(unsigned int col_type = 0; col_type < NUMBER_MATCH_COLUMNS; col_type++){
+    if( match_to_print_[col_type] == true ){
+      match_indices_[col_type] = num_columns_++;
+    } else {
+      match_indices_[col_type] = -1;
+    }
+  }
+
+  // set all the names for which we have match_indices_
+  column_names_.assign(num_columns_, "");
+  for(unsigned int col_type = 0; col_type < NUMBER_MATCH_COLUMNS; col_type++){
+    if( match_indices_[col_type] > -1 ){
+      if (get_column_header(col_type) == NULL) {
+        carp(CARP_FATAL, "Error col type: %d doesn't exist!", col_type);
+      }
+      DelimitedFileWriter::setColumnName(get_column_header(col_type), 
+                                         match_indices_[col_type]);
+    }
+  }
+
+  if( column_names_.empty() ){
+    return;
+  }
+  
+  if( file_ptr_ == NULL || !file_ptr_->is_open() ){
+    carp(CARP_FATAL, "Cannot write to NULL delimited file.");
+  }
+  *file_ptr_ << "<table border=\"1\">" << "\t<tr>" << endl
+	     << "\t\t<td><b>" << column_names_[0] << "</b></td>" << endl;
+  for(size_t idx = 1; idx < column_names_.size(); idx++){
+    if( !column_names_[idx].empty() ){
+      *file_ptr_ << "\t\t<td><b>" << column_names_[idx] << "</b></td>" << endl;
+    }
+  }
+  
+  *file_ptr_ << "\t</tr>" << endl;
+
+  // with a header, each line must be that length
+  current_row_.assign(column_names_.size(), "");
+}
+
+/**
+ * Writes a row in HTML format, this is used for HTMLWriter instead of
+ * DelimitedFileWriter's writeRow() 
+ */
+void PMCDelimitedFileWriter::writeHTMLRow() {
+  if( current_row_.empty() ){
+    return;
+  }
+
+  // make the row as long as the header
+  while( current_row_.size() < column_names_.size()){
+    current_row_.push_back("");
+  }
+  // TODO? warning if row is longer than non-empty header?
+
+  // print each value separated by delimiter
+  *file_ptr_ << "\t<tr>" << endl
+             << "\t\t<td>" << current_row_[0] << "</td>" << endl;
+  for(size_t idx = 1; idx < current_row_.size(); idx++){
+    *file_ptr_ << "\t\t<td>" << current_row_[idx] << "</td>" << endl;
+  }
+  // end with newline
+  *file_ptr_ << "\t</tr>" << endl;
+
+  // clear the current_row and refill with blanks
+  // if there is a header, that is the min length
+  // if not, each row can be a different length
+  current_row_.assign(column_names_.size(), "");
+
 }
