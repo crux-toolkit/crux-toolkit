@@ -11,7 +11,6 @@ Abstract class for a peptide-spectrum match writers
 #include <iostream>
 #include <fstream>
 #include <iomanip>
-#include <gflags/gflags.h>
 #include <string>
 
 class PSMWriter {
