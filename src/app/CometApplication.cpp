@@ -450,6 +450,17 @@ bool CometApplication::needsOutputDirectory() const {
   return true;
 }
 
+void CometApplication::processParams() {
+  const string varModPrefix = "variable_mod0";
+  const string varModEmptyDefault = "0 null 0 0";
+  for (int i = 1; i <= 9; i++) {
+    string mod = varModPrefix + StringUtils::ToString(i);
+    if (Params::GetString(mod).empty()) {
+      Params::Set(mod, varModEmptyDefault);
+    }
+  }
+}
+
 /*
  * Local Variables:
  * mode: c

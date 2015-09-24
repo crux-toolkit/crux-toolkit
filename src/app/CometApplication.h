@@ -68,6 +68,8 @@ class CometApplication: public CruxApplication {
    */
   virtual bool needsOutputDirectory() const;
 
+  virtual void processParams();
+
   /**
    * Sets the parameters for the Comet application using the crux parameters
    */
