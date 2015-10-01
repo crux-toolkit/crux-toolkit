@@ -509,8 +509,7 @@ void TideIndexApplication::fastaToPb(
         greater<TideIndexPeptide>());
       if (decoyType != NO_DECOYS) {
         const string* setTarget = &*(setTargets.insert(cleavedSequence).first);
-        targetInfo.insert(make_pair(
-          setTarget, TargetInfo(proteinInfo, startLoc, pepMass))).first->second;
+        targetInfo.insert(make_pair(setTarget, TargetInfo(proteinInfo, startLoc, pepMass)));
       }
       ++targetsGenerated;
       ++i;
