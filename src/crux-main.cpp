@@ -11,6 +11,8 @@
 #include "crux-main.h"
 #include "util/crux-utils.h" // Need to get definition of NUM_FEATURES.
 
+#include "app/xlink/xlink_assign_ions.h"
+#include "app/xlink/xhhc_score_peptide_spectrum.h"
 #include "app/xlink/xlink_search.h"
 #include "app/CruxApplicationList.h"
 #include "app/ComputeQValues.h"
@@ -71,6 +73,8 @@ int main(int argc, char** argv){
     applications.add(new QRanker());
     applications.add(new Barista());
     applications.add(new SearchForXLinks());
+    applications.add(new XLinkAssignIons());
+    applications.add(new XLinkScoreSpectrum());
     applications.add(new SpectralCounts());
     applications.add(new PipelineApplication());
     applications.add(new CascadeSearchApplication());

@@ -409,9 +409,9 @@ int SearchForXLinks::xhhcSearchMain() {
         int by_observed_bin;
         int ions_observable;
         int ions_observable_bin;
-        ion_series.getObservableIons(0, 1200, bin_width_mono, ions_observable, ions_observable_bin);
-        ion_series.getObservableBYIons(0, 1200, bin_width_mono, by_observable, by_observable_bin);
-        ion_series.getObservableBYIons(0, spectrum->getMaxPeakMz(), bin_width_mono, by_observable2, by_observable_bin2);
+        ion_series.getObservableIons(0, 1200, BIN_WIDTH_MONO, ions_observable, ions_observable_bin);
+        ion_series.getObservableBYIons(0, 1200, BIN_WIDTH_MONO, by_observable, by_observable_bin);
+        ion_series.getObservableBYIons(0, spectrum->getMaxPeakMz(), BIN_WIDTH_MONO, by_observable2, by_observable_bin2);
         scorer.getIonCurrentExplained(ion_series, spectrum, ion_current_observed, by_observed_bin);
         
   

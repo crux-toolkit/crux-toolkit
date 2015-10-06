@@ -1,5 +1,6 @@
 //TODO - Change cout to carps
 
+#include "xhhc_score_peptide_spectrum.h"
 #include "xhhc.h"
 #include "LinkedIonSeries.h"
 #include "xhhc_scorer.h"
@@ -23,49 +24,13 @@
 
 using namespace Crux;
 
-#define bin_width_mono 1.0005079
+XLinkScoreSpectrum::XLinkScoreSpectrum() {
+}
 
-double get_concat_score(char* peptideA, char* peptideB, int link_site, 
-                        int charge, Spectrum* spectrum);
-void print_spectrum(Spectrum* spectrum, LinkedIonSeries& ion_series);
-int main(int argc, char** argv){
+XLinkScoreSpectrum::~XLinkScoreSpectrum() {
+}
 
-  /* Verbosity level for set-up/command line reading */
-  set_verbosity_level(CARP_ERROR);
-  
-  /* Define optional command line arguments */
-  string options[] = {
-    "verbosity",
-    "version",
-    "use-flanking-peaks",
-    "xlink-score-method"
-  };
-
-  /* Define required command line arguments */
-  string args[] = {
-    "peptide A",
-    "peptide B",
-    "pos A",
-    "pos B",
-    "link mass",
-    "charge state",
-    "scan number",
-    "ms2 file"
-  };
-
-  /* for debugging of parameter processing */
-  set_verbosity_level( CARP_ERROR );
-  
-  /* Define optional and required command line arguments */
-  CruxApplication::initializeParams(
-    "xlink-score-peptide-spectrum",
-    vector<string>(args, args + sizeof(args) / sizeof(string)),
-    vector<string>(options, options + sizeof(options) / sizeof(string)),
-    argc, argv);
-
-  /* Set verbosity */
-  set_verbosity_level(get_int_parameter("verbosity"));
-
+int XLinkScoreSpectrum::main(int argc, char** argv){
   /* Get Arguments */
   string peptideAStr = get_string_parameter("peptide A");
   string peptideBStr = get_string_parameter("peptide B");
@@ -179,10 +144,12 @@ int main(int argc, char** argv){
   // free heap
   delete collection;
   delete spectrum;
+
+  return 0;
 }
 
 
-double get_concat_score(char* peptideA, char* peptideB, int link_site, int charge, Spectrum* spectrum) {
+double XLinkScoreSpectrum::get_concat_score(char* peptideA, char* peptideB, int link_site, int charge, Spectrum* spectrum) {
   string lpeptide = string(peptideA) + string(peptideB); 
   
   IonConstraint* ion_constraint = IonConstraint::newIonConstraintSmart(XCORR, charge);
@@ -301,11 +268,11 @@ double get_concat_score(char* peptideA, char* peptideB, int link_site, int charg
 
 }
 
-FLOAT_T* get_observed_raw(Spectrum* spectrum, int charge) {
+FLOAT_T* XLinkScoreSpectrum::get_observed_raw(Spectrum* spectrum, int charge) {
   FLOAT_T peak_location = 0;
   int mz = 0;
   FLOAT_T intensity = 0;
-  FLOAT_T bin_width = bin_width_mono;
+  FLOAT_T bin_width = BIN_WIDTH_MONO;
   FLOAT_T precursor_mz = spectrum->getPrecursorMz();
   FLOAT_T experimental_mass_cut_off = precursor_mz*charge + 50;
 
@@ -366,7 +333,7 @@ FLOAT_T* get_observed_raw(Spectrum* spectrum, int charge) {
 
 
 
-void print_spectrum(Spectrum* spectrum, LinkedIonSeries& ion_series) {
+void XLinkScoreSpectrum::print_spectrum(Spectrum* spectrum, LinkedIonSeries& ion_series) {
 
 
       Scorer* scorer = new Scorer(XCORR);
@@ -400,3 +367,50 @@ void print_spectrum(Spectrum* spectrum, LinkedIonSeries& ion_series) {
 
       fout.close();
 }
+
+string XLinkScoreSpectrum::getName() const {
+  return "xlink-score-spectrum";
+}
+
+string XLinkScoreSpectrum::getDescription() const {
+  return
+    "[[nohtml:Takes a defined cross-linked peptide, a spectra file, and a scan "
+    "number and will calculate the XCorr score a number of different ways.]]"
+    "[[html:Takes a defined cross-linked peptide, a spectra file, and a scan "
+    "number and will calculate the XCorr score a number of different ways, "
+    "depending upon the xlink-score-method parameter:<ul><li>composite &ndash; "
+    "combined XCorr score</li><li>modification - score separately as a "
+    "modification score</li><li>concatenated - scored as if candidate was "
+    "concatenated as in Alex's paper</li></ul>]]";
+}
+
+vector<string> XLinkScoreSpectrum::getArgs() const {
+  string arr[] = {
+    "peptide A",
+    "peptide B",
+    "pos A",
+    "pos B",
+    "link mass",
+    "charge state",
+    "scan number",
+    "ms2 file"
+  };
+  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
+}
+
+vector<string> XLinkScoreSpectrum::getOptions() const {
+  string arr[] = {
+    "verbosity",
+    "use-flanking-peaks",
+    "xlink-score-method"
+  };
+  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
+}
+
+vector< pair<string, string> > XLinkScoreSpectrum::getOutputs() const {
+  vector< pair<string, string> > outputs;
+  outputs.push_back(make_pair("stdout",
+    "XCorr score(s) in descending order"));
+  return outputs;
+}
+

@@ -26,9 +26,8 @@ Params::Params() : finalized_(false) {
     "The desired format of the output file. Legal values are tsv, html, sqt, pin, "
     "pepxml, mzidentml, barista-xml.");
   /* get-ms2-spectrum */
-  InitIntParam("scan number", 0, 0, BILLION,
-    "Scan number identifying the spectrum.",
-    "Argument for get-ms2-spectrum", false);
+  InitArgParam("scan number",
+    "Scan number identifying the spectrum.");
   InitArgParam("output file",
     "File where spectrum will be written.");
   /* predict-peptide-ions */
@@ -1227,21 +1226,17 @@ Params::Params() : finalized_(false) {
     "peaks</li><li>Minimum m/z</li><li>Maximum m/z</li></ul>In addition, for each possible "
     "spectrum charge state, the following statistics are reported:<ul><li>Charge state</li>"
     "<li>Neutral mass</li><li>Charged mass</li><li>M+H+ mass</li></ul>]]",
-    "Avaliable only for crux-get-ms2-spectrum.  Does not affect contents "
+    "Available only for crux-get-ms2-spectrum.  Does not affect contents "
     "of the output file.", true);
   // **** xlink-predict-peptide-ions options ****
-  InitStringParam("peptide A", "", 
-    "The sequence of peptide A.",
-    "Argument for xlink-predict-peptide-ions.", false);
-  InitStringParam("peptide B", "", 
-    "The sequence of peptide B.",
-    "Argument for xlink-predict-peptide-ions.", false);
-  InitIntParam("pos A", 0 , 0, BILLION, 
-    "Position of xlink on peptide A",
-    "Available for xlink-predict-peptide-ions.", false);
-  InitIntParam("pos B", 0 , 0, BILLION, 
-    "Position of xlink on peptide B",
-    "Available for xlink-predict-peptide-ions.", false);
+  InitArgParam("peptide A",
+    "The sequence of peptide A.");
+  InitArgParam("peptide B",
+    "The sequence of peptide B.");
+  InitArgParam("pos A",
+    "Position of cross-link on peptide A");
+  InitArgParam("pos B",
+    "Position of cross-link on peptide B");
   InitBoolParam("print-theoretical-spectrum", false,
     "Print the theoretical spectrum",
     "Available for xlink-predict-peptide-ions.", true);

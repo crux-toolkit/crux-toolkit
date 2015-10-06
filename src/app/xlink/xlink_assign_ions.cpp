@@ -1,5 +1,7 @@
 //TODO - change cerr/couts to carp.
 
+#include "xlink_assign_ions.h"
+
 #include "xhhc.h"
 #include "LinkedIonSeries.h"
 #include "xhhc_scorer.h"
@@ -23,48 +25,13 @@
 
 using namespace Crux;
 
-void print_spectrum(Spectrum* spectrum, LinkedIonSeries& ion_series);
-int main(int argc, char** argv){
+XLinkAssignIons::XLinkAssignIons() {
+}
 
-  /* Verbosity level for set-up/command line reading */
-  set_verbosity_level(CARP_ERROR);
-  
-  /* Define optional command line arguments */
-  string options[] = {
-    "verbosity",
-    "version",
-    "spectrum-parser",
-    "fragment-mass",
-    "max-ion-charge",
-    "mz-bin-width",
-    "precision"
-  };
+XLinkAssignIons::~XLinkAssignIons() {
+}
 
-  /* Define required command line arguments */
-  string args[] = {
-    "peptide A",
-    "peptide B",
-    "pos A",
-    "pos B",
-    "link mass",
-    "charge state",
-    "scan number",
-    "ms2 file"
-  };
-  
-  /* for debugging of parameter processing */
-  set_verbosity_level( CARP_ERROR );
-  
-  /* Define optional and required command line arguments */
-  CruxApplication::initializeParams(
-    "xlink-assign-ions",
-    vector<string>(args, args + sizeof(args) / sizeof(string)),
-    vector<string>(options, options + sizeof(options) / sizeof(string)),
-    argc, argv);
-
-  /* Set verbosity */
-  set_verbosity_level(get_int_parameter("verbosity"));
-
+int XLinkAssignIons::main(int argc, char** argv){
   /* Get Arguments */
   string peptideAStr = get_string_parameter("peptide A");
   string peptideBStr = get_string_parameter("peptide B");
@@ -131,9 +98,10 @@ int main(int argc, char** argv){
   // free heap
   delete collection;
   //free_spectrum(spectrum);
+  return 0;
 }
 
-void print_spectrum(Spectrum* spectrum, LinkedIonSeries& ion_series) {
+void XLinkAssignIons::print_spectrum(Spectrum* spectrum, LinkedIonSeries& ion_series) {
 
       int total_by_ions = ion_series.getTotalBYIons();
       int matched_by_ions = XHHC_Scorer::getMatchedBYIons(spectrum, ion_series);
@@ -240,3 +208,56 @@ void print_spectrum(Spectrum* spectrum, LinkedIonSeries& ion_series) {
       cout << result_file;
 
 }
+
+string XLinkAssignIons::getName() const {
+  return "xlink-assign-ions";
+}
+
+string XLinkAssignIons::getDescription() const {
+  return
+    "Given a spectrum and a pair of cross-linked peptides, assign theoretical "
+    "ion type labels to peaks in the observed spectrum.";
+}
+
+vector<string> XLinkAssignIons::getArgs() const {
+  string arr[] = {
+    "peptide A",
+    "peptide B",
+    "pos A",
+    "pos B",
+    "link mass",
+    "charge state",
+    "scan number",
+    "ms2 file"
+  };
+  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
+}
+
+vector<string> XLinkAssignIons::getOptions() const {
+  string arr[] = {
+    "verbosity",
+    "spectrum-parser",
+    "fragment-mass",
+    "max-ion-charge",
+    "mz-bin-width",
+    "precision"
+  };
+  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
+}
+
+vector< pair<string, string> > XLinkAssignIons::getOutputs() const {
+  vector< pair<string, string> > outputs;
+  outputs.push_back(make_pair("stdout",
+    "tab-delimited text in which each row is a peak in the observed spectrum, "
+    "and the columns are <ol>"
+    "<li>The m/z value.</li>"
+    "<li>The observed intensity.</li>"
+    "<li>The matched intensity.</li>"
+    "<li>The calculated m/z value of the theoretical peak.</li>"
+    "<li>The mass associated with the observed peak.</li>"
+    "<li>The mass difference (in ppm) between the observed and theoretical peaks.</li>"
+    "<li>The ion type, specified as b or y, followed by the charge state in parentheses.</li>"
+    "<li>The amino acid sequence of the fragment.</li>"));
+  return outputs;
+}
+
