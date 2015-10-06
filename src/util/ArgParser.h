@@ -2,6 +2,7 @@
 #define ARGPARSER_H
 
 #include <map>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -32,6 +33,14 @@ class ArgParser {
 
   std::map< std::string, std::vector<std::string> > args_;
   std::map<std::string, std::string> options_;
+};
+
+class ArgParserException : public std::runtime_error {
+ public:
+  ArgParserException(const std::string& what, bool fullUsage = false);
+  bool ShowFullUsage() const;
+ private:
+  bool fullUsage_;
 };
 
 #endif

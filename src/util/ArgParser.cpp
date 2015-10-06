@@ -1,8 +1,6 @@
 #include "ArgParser.h"
 #include "StringUtils.h"
 
-#include <stdexcept>
-
 using namespace std;
 
 ArgParser::ArgParser() {
@@ -32,7 +30,7 @@ void ArgParser::Parse(int argc, char** argv, const vector<string>& args) {
       // This is a option name
       string option = arg.substr(2);
       if (++i == argc) {
-        throw runtime_error("No value found for option '" + option + "'");
+        throw ArgParserException("No value found for option '" + option + "'");
       }
       options_[option] = argv[i];
     } else {
@@ -43,14 +41,16 @@ void ArgParser::Parse(int argc, char** argv, const vector<string>& args) {
 
   int excess_args = parsedArgs.size() - argSpecs.size();
   if (multi == -1 && excess_args != 0) {
-    throw runtime_error("Expected " + StringUtils::ToString(argSpecs.size()) +
-                        " arguments, but found " +
-                        StringUtils::ToString(parsedArgs.size()));
+    throw ArgParserException("Expected " + StringUtils::ToString(argSpecs.size()) +
+                             " arguments, but found " +
+                             StringUtils::ToString(parsedArgs.size()),
+                             argc == 1);
   } else if (multi != -1 && excess_args < 0) {
-    throw runtime_error("Expected at least " +
-                        StringUtils::ToString(argSpecs.size()) +
-                        " arguments, but found " +
-                        StringUtils::ToString(parsedArgs.size()));
+    throw ArgParserException("Expected at least " +
+                             StringUtils::ToString(argSpecs.size()) +
+                             " arguments, but found " +
+                             StringUtils::ToString(parsedArgs.size()),
+                             argc == 1);
   }
 
   int curParsedArg = -1;
@@ -115,5 +115,13 @@ vector<ArgParser::ArgSpec> ArgParser::ArgStringsToArgSpecs(const vector<string>&
     }
   }
   return specs;
+}
+
+ArgParserException::ArgParserException(const string& what, bool fullUsage)
+ : runtime_error(what), fullUsage_(fullUsage) {
+}
+
+bool ArgParserException::ShowFullUsage() const {
+  return fullUsage_;
 }
 
