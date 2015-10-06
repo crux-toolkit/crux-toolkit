@@ -100,8 +100,6 @@ add_dependencies(tide-support google-gflags)
 add_dependencies(xlink comet)
 add_dependencies(xlink percolator)
 add_dependencies(xlink ProteoWizard)
-add_dependencies(xlink-assign-ions crux)
-add_dependencies(xlink-score-spectrum crux)
 add_dependencies(create-docs crux)
 
 # build a CPack driven installer package

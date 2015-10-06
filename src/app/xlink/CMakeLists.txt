@@ -39,6 +39,7 @@ add_library(
   xhhc_score_peptide_spectrum.cpp
   xhhc_scorer.cpp
   xhhc_search.cpp
+  xlink_assign_ions.cpp
   xlink_search.cpp
   SearchForXLinks.cpp
   xlink_compute_qvalues.cpp

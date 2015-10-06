@@ -15,9 +15,6 @@
 #include "model/Spectrum.h"
 #include "io/SpectrumCollection.h"
 
-// TODO - Get rid of this dependency. (xhhc_scorer and xhhc_search).
-#define bin_width_mono 1.0005079
-
 class LinkedIonSeries {
  protected:
 

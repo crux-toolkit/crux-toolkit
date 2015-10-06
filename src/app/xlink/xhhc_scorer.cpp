@@ -85,7 +85,7 @@ int XHHC_Scorer::getMatchedBYIons(
   Spectrum* spectrum,
   LinkedIonSeries& ion_series) {
 
-  FLOAT_T bin_width = bin_width_mono;
+  FLOAT_T bin_width = BIN_WIDTH_MONO;
   vector<LinkedPeptide>& ions = ion_series.getIons();
 
   int ans = 0;
@@ -189,7 +189,7 @@ bool XHHC_Scorer::xlinkCreateMapTheoretical(
 
   theoretical.clear();
   int intensity_array_idx = 0;
-  FLOAT_T bin_width = bin_width_mono;
+  FLOAT_T bin_width = BIN_WIDTH_MONO;
   vector<LinkedPeptide>& ions = ion_series.getIons();
   // while there are ion's in ion iterator, add matched observed peak intensity
   for (vector<LinkedPeptide>::iterator ion = ions.begin(); ion != ions.end(); ++ion) {
@@ -306,7 +306,7 @@ FLOAT_T XHHC_Scorer::getIonCurrentExplained(
   explained = 0.0;
   by_observed = 0;
 
-  FLOAT_T bin_width = bin_width_mono;
+  FLOAT_T bin_width = BIN_WIDTH_MONO;
 
   FLOAT_T ans = 0.0;
 

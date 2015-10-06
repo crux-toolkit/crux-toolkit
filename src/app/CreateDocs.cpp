@@ -10,6 +10,8 @@
 #include "util/Params.h"
 #include "util/StringUtils.h"
 
+#include "xlink/xlink_assign_ions.h"
+#include "xlink/xhhc_score_peptide_spectrum.h"
 #include "qranker-barista/Barista.h"
 #include "ComputeQValues.h"
 #include "CruxBullseyeApplication.h"
@@ -47,7 +49,9 @@ CreateDocs::~CreateDocs() {
 
 int CreateDocs::main(int argc, char** argv) {
   CruxApplicationList apps("crux");
+  apps.add(new AssignConfidenceApplication());
   apps.add(new Barista());
+  apps.add(new CascadeSearchApplication());  
   apps.add(new CometApplication());
   apps.add(new CreateDocs());
   apps.add(new CruxBullseyeApplication());
@@ -68,11 +72,11 @@ int CreateDocs::main(int argc, char** argv) {
   apps.add(new SortColumn());
   apps.add(new SpectralCounts());
   apps.add(new StatColumn());
+  apps.add(new SubtractIndexApplication());
   apps.add(new TideIndexApplication());
   apps.add(new TideSearchApplication());
-  apps.add(new CascadeSearchApplication());  
-  apps.add(new AssignConfidenceApplication());
-  apps.add(new SubtractIndexApplication());
+  apps.add(new XLinkAssignIons());
+  apps.add(new XLinkScoreSpectrum());
   
   string targetApp = Params::GetString("tool name");
   if (targetApp == "list") {

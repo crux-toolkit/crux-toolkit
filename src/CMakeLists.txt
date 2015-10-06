@@ -263,24 +263,6 @@ if (WIN32 AND NOT CYGWIN)
   add_definitions(-DXML_STATIC)
 endif (WIN32 AND NOT CYGWIN)
 
-add_executable(xlink-score-spectrum app/xlink/xhhc_score_peptide_spectrum.cpp)
-set_property(
-  TARGET
-  xlink-score-spectrum
-  PROPERTY
-  COMPILE_DEFINITIONS
-  MAIN
-)
-
-add_executable(xlink-assign-ions app/xlink/xlink_assign_ions.cpp)
-set_property(
-  TARGET
-  xlink-assign-ions
-  PROPERTY
-  COMPILE_DEFINITIONS
-  MAIN
-)
-
 # The rt library is not needed for OS X
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set(RT_LIBRARY "")
@@ -343,93 +325,6 @@ if (WIN32 AND NOT CYGWIN)
     debug libboost_thread-vc120-mt-gd
     debug libboost_chrono-vc120-mt-gd
   )
-  target_link_libraries(
-    xlink-score-spectrum
-    crux-support
-    xlink
-    mstoolkitlite
-    libpwiz_data_common
-    libpwiz_data_identdata
-    libpwiz_data_identdata_version
-    libpwiz_data_misc
-    libpwiz_data_msdata
-    libpwiz_data_msdata_version
-    libpwiz_data_proteome
-    libpwiz_data_vendor_readers
-    libpwiz_reader_abi
-    libpwiz_reader_abi_t2d
-    libpwiz_reader_agilent
-    libpwiz_reader_shimadzu
-    libpwiz_reader_thermo
-    libpwiz_reader_waters
-    libpwiz_vendor_api_abi
-    libpwiz_vendor_api_agilent
-    libpwiz_vendor_api_thermo
-    libpwiz_vendor_api_shimadzu
-    libpwiz_utility_chemistry
-    libpwiz_utility_minimxml
-    libpwiz_utility_misc
-    libSHA1
-    libzlib
-    MassLynxRaw
-    cdt
-    ws2_32
-    optimized libboost_system-vc120-mt
-    optimized libboost_iostreams-vc120-mt
-    optimized libboost_filesystem-vc120-mt
-    optimized libboost_nowide-vc120-mt
-    optimized libboost_thread-vc120-mt
-    optimized libboost_chrono-vc120-mt
-    debug libboost_system-vc120-mt-gd
-    debug libboost_iostreams-vc120-mt-gd
-    debug libboost_filesystem-vc120-mt-gd
-    debug libboost_nowide-vc120-mt-gd
-    debug libboost_thread-vc120-mt-gd
-    debug libboost_chrono-vc120-mt-gd
-  )
-  target_link_libraries(
-    xlink-assign-ions
-    crux-support
-    xlink
-    mstoolkitlite
-    libpwiz_data_common
-    libpwiz_data_identdata
-    libpwiz_data_identdata_version
-    libpwiz_data_misc
-    libpwiz_data_msdata
-    libpwiz_data_msdata_version
-    libpwiz_data_proteome
-    libpwiz_data_vendor_readers
-    libpwiz_reader_abi
-    libpwiz_reader_abi_t2d
-    libpwiz_reader_agilent
-    libpwiz_reader_shimadzu
-    libpwiz_reader_thermo
-    libpwiz_reader_waters
-    libpwiz_vendor_api_abi
-    libpwiz_vendor_api_agilent
-    libpwiz_vendor_api_shimadzu
-    libpwiz_vendor_api_thermo
-    libpwiz_utility_chemistry
-    libpwiz_utility_minimxml
-    libpwiz_utility_misc
-    libSHA1
-    MassLynxRaw
-    cdt
-    ws2_32
-    optimized libboost_system-vc120-mt
-    optimized libboost_iostreams-vc120-mt
-    optimized libboost_filesystem-vc120-mt
-    optimized libboost_nowide-vc120-mt
-    optimized libboost_thread-vc120-mt
-    optimized libboost_chrono-vc120-mt
-    debug libboost_system-vc120-mt-gd
-    debug libboost_iostreams-vc120-mt-gd
-    debug libboost_filesystem-vc120-mt-gd
-    debug libboost_nowide-vc120-mt-gd
-    debug libboost_thread-vc120-mt-gd
-    debug libboost_chrono-vc120-mt-gd
-  )
 else()
   target_link_libraries(
     crux
@@ -470,73 +365,11 @@ else()
     boost_system
     pthread
   )
-    
-  target_link_libraries(
-    xlink-score-spectrum
-    dl
-    m
-    ${RT_LIBRARY}
-    xlink
-    crux-support
-    mstoolkitlite
-    pwiz_data_msdata
-    pwiz_data_common
-    pwiz_data_identdata
-    pwiz_data_msdata_version
-    pwiz_data_misc
-    pwiz_utility_chemistry
-    pwiz_utility_misc
-    pwiz_utility_minimxml
-    pwiz_data_common
-    pwiz_data_identdata
-    pwiz_data_identdata_version
-    pwiz_data_proteome
-    SHA1
-    boost_chrono
-    boost_system-mt-s
-    boost_iostreams-mt-s
-    z-mt-s-1_2
-    boost_chrono
-    boost_filesystem-mt-s
-    boost_thread-mt-s
-    pthread
-  )
-  target_link_libraries(
-    xlink-assign-ions
-    dl
-    m
-    ${RT_LIBRARY}
-    xlink
-    crux-support
-    mstoolkitlite
-    pwiz_data_msdata
-    pwiz_data_common
-    pwiz_data_identdata
-    pwiz_data_msdata_version
-    pwiz_data_misc
-    pwiz_utility_chemistry
-    pwiz_utility_misc
-    pwiz_utility_minimxml
-    pwiz_data_common
-    pwiz_data_identdata
-    pwiz_data_identdata_version
-    pwiz_data_proteome
-    SHA1
-    boost_system-mt-s
-    boost_iostreams-mt-s
-    z-mt-s-1_2
-    boost_chrono
-    boost_filesystem-mt-s
-    boost_thread-mt-s
-    pthread
-  )
 endif(WIN32 AND NOT CYGWIN)
 
 install (
   TARGETS
   crux
-  xlink-score-spectrum
-  xlink-assign-ions
   DESTINATION
   bin
 )
