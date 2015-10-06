@@ -149,7 +149,8 @@ class CruxApplication{
   static std::string getUsage(
     const std::string& appName,
     const std::vector<std::string>& args,
-    const std::vector<std::string>& options
+    const std::vector<std::string>& options,
+    bool full
   );
 };
 

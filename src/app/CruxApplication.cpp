@@ -146,18 +146,28 @@ void CruxApplication::initializeParams(
     // Process command line options
     const map<string, string>& options = argParser.GetOptions();
     for (map<string, string>::const_iterator i = options.begin(); i != options.end(); i++) {
-      Params::Set(i->first, i->second);
+      try {
+        Params::Set(i->first, i->second);
+      } catch (const runtime_error& e) {
+        throw ArgParserException(e.what());
+      }
     }
     // Process command line arguments
     const map< string, vector<string> >& args = argParser.GetArgs();
     for (map< string, vector<string> >::const_iterator i = args.begin(); i != args.end(); i++) {
       for (vector<string>::const_iterator j = i->second.begin(); j != i->second.end(); j++) {
-        Params::AddArgValue(i->first, *j);
+        try {
+          Params::AddArgValue(i->first, *j);
+        } catch (const runtime_error& e) {
+          throw ArgParserException(e.what());
+        }
       }
     }
-  } catch (const runtime_error& e) {
+  } catch (const ArgParserException& e) {
     carp(CARP_FATAL, "%s\n\n%s\n", e.what(),
-         getUsage(appName, appArgs, appOptions).c_str());
+         getUsage(appName, appArgs, appOptions, e.ShowFullUsage()).c_str());
+  } catch (const runtime_error& e) {
+    carp(CARP_FATAL, "%s", e.what());
   }
 }
 
@@ -171,7 +181,8 @@ void CruxApplication::processParams() {
 string CruxApplication::getUsage(
   const string& appName,
   const vector<string>& args,
-  const vector<string>& options
+  const vector<string>& options,
+  bool full
 ) {
   vector<string> argDisplay;
   for (vector<string>::const_iterator i = args.begin(); i != args.end(); i++) {
@@ -186,29 +197,36 @@ string CruxApplication::getUsage(
   for (vector<string>::const_iterator i = argDisplay.begin(); i != argDisplay.end(); i++) {
     usage << ' ' << *i;
   }
-  usage << endl << endl
-        << "REQUIRED ARGUMENTS:";
-  for (vector<string>::const_iterator i = argDisplay.begin(); i != argDisplay.end(); i++) {
-    stringstream line;
-    string argName = i->substr(1, i->length() - (StringUtils::EndsWith(*i, "+") ? 3 : 2));
-    line << *i << ' ' << Params::ProcessHtmlDocTags(Params::GetUsage(argName));
-    usage << endl << endl << StringUtils::LineFormat(line.str(), 80, 2);
-  }
-  usage << endl << endl
-        << "OPTIONAL ARGUMENTS:" << endl;
-  for (vector<string>::const_iterator i = options.begin(); i != options.end(); i++) {
-    string defaultString = Params::GetStringDefault(*i);
-    if (defaultString.empty()) {
-      defaultString = "<empty>";
+
+  if (full) {
+    usage << endl << endl
+          << "REQUIRED ARGUMENTS:";
+    for (vector<string>::const_iterator i = argDisplay.begin(); i != argDisplay.end(); i++) {
+      stringstream line;
+      string argName = i->substr(1, i->length() - (StringUtils::EndsWith(*i, "+") ? 3 : 2));
+      line << *i << ' ' << Params::ProcessHtmlDocTags(Params::GetUsage(argName));
+      usage << endl << endl << StringUtils::LineFormat(line.str(), 80, 2);
     }
-    usage << endl
-          << "  [--" << *i << " <" << Params::GetAcceptedValues(*i) << ">]" << endl
-          << StringUtils::LineFormat(Params::ProcessHtmlDocTags(Params::GetUsage(*i)) +
-                                     " Default = " + defaultString + ".", 80, 5);
-  }
-  if (options.empty()) {
-    usage << endl
-          << "  This command does not support any optional parameters.";
+    usage << endl << endl
+          << "OPTIONAL ARGUMENTS:" << endl;
+    for (vector<string>::const_iterator i = options.begin(); i != options.end(); i++) {
+      string defaultString = Params::GetStringDefault(*i);
+      if (defaultString.empty()) {
+        defaultString = "<empty>";
+      }
+      usage << endl
+            << "  [--" << *i << " <" << Params::GetAcceptedValues(*i) << ">]" << endl
+            << StringUtils::LineFormat(Params::ProcessHtmlDocTags(Params::GetUsage(*i)) +
+                                       " Default = " + defaultString + ".", 80, 5);
+    }
+    if (options.empty()) {
+      usage << endl
+            << "  This command does not support any optional parameters.";
+    }
+  } else {
+    usage << endl << endl
+          << "Run \"crux " << appName << "\" with no arguments to see a full "
+             "list of options.";
   }
   return usage.str();
 }
