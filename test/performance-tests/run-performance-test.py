@@ -61,7 +61,6 @@ def createParameterFile(parameterFileName):
   parameterFile.write("peptide_mass_units=0\n") # 0=amu, 1=mmu, 2=ppm
   
   # Precursor mass type.
-  parameterFile.write("isotopic-mass=mono\n")
   parameterFile.write("monoisotopic-precursor=T\n")
   parameterFile.write("mass_type_parent=1\n") # 1=monoisotopic
   
@@ -72,19 +71,20 @@ def createParameterFile(parameterFileName):
   # Decoys.
   parameterFile.write("decoy-format=peptide-reverse\n")
   parameterFile.write("num-decoys-per-target=1\n")
-  parameterFile.write("keep-terminal-aminos=C\n")
   parameterFile.write("decoy_search=1\n")  # 1 = concatenated decoy search
+  parameterFile.write("concat=T\n")
+  parameterFile.write("keep-terminal-aminos=C\n") # No corresponding Comet param
   
   # Report the top 5 matches.
+  parameterFile.write("top-match=5\n")
   parameterFile.write("num_results=6\n")
   parameterFile.write("num_output_lines=5\n")
-  parameterFile.write("top-match=5\n")
   
   # Precursor removal.
-  parameterFile.write("remove_precursor_peak=1\n")
-  parameterFile.write("remove_precursor_tolerance=15\n")
   parameterFile.write("remove-precursor-peak=T\n")
   parameterFile.write("remove-precursor-tolerance=15\n")
+  parameterFile.write("remove_precursor_peak=1\n")
+  parameterFile.write("remove_precursor_tolerance=15\n")
   
   # Flanking peaks.
   parameterFile.write("use-flanking-peaks=F\n")
@@ -92,23 +92,27 @@ def createParameterFile(parameterFileName):
   parameterFile.write("use-neutral-loss-peaks=F\n") 
 
   # Fragment m/z discretization.
-  parameterFile.write("fragment_bin_offset=0.68\n")
-  parameterFile.write("fragment_bin_tol=1.0005079\n")
   parameterFile.write("mz-bin-offset=0.68\n")
   parameterFile.write("mz-bin-width=1.0005079\n")
+  parameterFile.write("fragment_bin_offset=0.68\n")
+  parameterFile.write("fragment_bin_tol=1.0005079\n")
+
+  # Peptide mass range.
+  parameterFile.write("min-mass=200\n")
+  parameterFile.write("max-mass=7200\n")
+  parameterFile.write("digest_mass_range=200 7200\n")
   
   # Other Crux parameters.
-  parameterFile.write("concat=T\n")
   parameterFile.write("compute-sp=T\n")
   parameterFile.write("verbosity=40\n")
   parameterFile.write("overwrite=T\n")
   parameterFile.write("peptide-list=T\n")
+
   
   # Comet parameters
   parameterFile.write("output_pepxml=0\n")
   parameterFile.write("add_C_cysteine=57.021464\n")
   parameterFile.write("num_threads=1\n") # Multithreaded sometimes dumps core.
-  parameterFile.write("digest_mass_range=200 7200\n")
   parameterFile.write("max_fragment_charge=2\n")
   parameterFile.write("isotope_error=0\n")
   parameterFile.write("use_A_ions=0\n")
