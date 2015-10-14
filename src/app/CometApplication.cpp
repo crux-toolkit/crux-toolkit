@@ -56,12 +56,12 @@ int CometApplication::main(const vector<string>& input_files) {
   comet_search_mgr.AddInputFiles(pv_input_files);
   
   /* Run search */
-  comet_search_mgr.DoSearch();
+  bool success = comet_search_mgr.DoSearch();
 
   /* Recover stderr */
   std::cerr.rdbuf(old);
 
-  return 0;
+  return success ? 0 : 1;
 }
 
 /**
