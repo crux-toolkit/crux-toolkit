@@ -374,14 +374,18 @@ string XLinkScoreSpectrum::getName() const {
 
 string XLinkScoreSpectrum::getDescription() const {
   return
-    "[[nohtml:Takes a defined cross-linked peptide, a spectra file, and a scan "
-    "number and will calculate the XCorr score a number of different ways.]]"
-    "[[html:Takes a defined cross-linked peptide, a spectra file, and a scan "
-    "number and will calculate the XCorr score a number of different ways, "
-    "depending upon the xlink-score-method parameter:<ul><li>composite &ndash; "
-    "combined XCorr score</li><li>modification - score separately as a "
-    "modification score</li><li>concatenated - scored as if candidate was "
-    "concatenated as in Alex's paper</li></ul>]]";
+    "[[nohtml:Given a cross-linked peptide and a spectrum "
+    "calculate the corresponding XCorr score a number of different ways.]]"
+    "[[html:Given a cross-linked peptide and a spectrum "
+    "calculate the corresponding XCorr score a number of different ways, "
+    "depending upon the xlink-score-method parameter:"
+    "<ul><li>composite &ndash; compute a combined XCorr score</li>"
+    "<li>modification - score the two peptides "
+    "separately, treating the second peptide as a variable modification "
+    "on the first peptide</li><li>concatenated - score as the concatenation "
+    "of the two peptides.  Note that this mode gives four scores, "
+    "corresponding to the two relative orders of the peptides (AB and BA) "
+    "and the modification appearing on the first or second peptide.</li></ul>]]";
 }
 
 vector<string> XLinkScoreSpectrum::getArgs() const {
