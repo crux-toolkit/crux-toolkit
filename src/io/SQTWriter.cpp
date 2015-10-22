@@ -233,10 +233,12 @@ void SQTWriter::writePSM(
   Protein* protein = peptide->getPeptideSrc()->getParentProtein();
   string seq_str;
   if (protein->isPostProcess()) {
+    char nTerm[] = {peptide->getNTermFlankingAA()};
+    char cTerm[] = {peptide->getCTermFlankingAA()};
     seq_str = string("") +
-      peptide->getNTermFlankingAA() + "." +
+      string(nTerm) + "." +
       string(peptide->getSequence()) +
-      "." + peptide->getCTermFlankingAA();
+      "." + string(cTerm);
   } else {
     char* seq = peptide->getSequenceSqt();
     seq_str = seq;
