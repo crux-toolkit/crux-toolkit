@@ -5,7 +5,7 @@
  * \brief Abstract Object for a CruxApplication
  *****************************************************************************/
 #include "CruxApplication.h"
-
+#include "crux_version.h"
 #include "io/carp.h"
 #include "parameter.h"
 #include "util/ArgParser.h"
@@ -96,8 +96,9 @@ void CruxApplication::initialize(int argc, char** argv) {
     // Open the log file to record carp messages 
     open_log_file(getFileStem() + ".log.txt");
   
-    // Store the host name, start date and time, and command line.
+    // Store the host name, start date and time, version number, and command line.
     carp(CARP_INFO, "CPU: %s", hostname());
+    carp(CARP_INFO, "Crux version: %s\n", CRUX_VERSION);
     carp(CARP_INFO, date_and_time());
     log_command_line(argc, argv);
 
