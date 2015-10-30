@@ -11,10 +11,11 @@
 #include <errno.h>
 #include <gflags/gflags.h>
 #include "header.pb.h"
-#include "app/tide/records.h"
-#include "app/tide/peptide.h"
-#include "app/tide/theoretical_peak_set.h"
-#include "app/tide/abspath.h"
+#include "tide/records.h"
+#include "tide/peptide.h"
+#include "tide/theoretical_peak_set.h"
+#include "tide/abspath.h"
+#include "TideSearchApplication.h"
 #include "util/crux-utils.h"
 
 using namespace std;
@@ -22,6 +23,8 @@ using namespace std;
 std::string getModifiedPeptideSeq(const pb::Peptide* peptide, const ProteinVec* proteins);
 
 class TideIndexApplication : public CruxApplication {
+
+  friend class TideSearchApplication;
 
 public:
 

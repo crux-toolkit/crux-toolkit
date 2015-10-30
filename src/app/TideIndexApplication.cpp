@@ -866,7 +866,7 @@ void TideIndexApplication::addAuxLoc(
 void TideIndexApplication::processParams() {
   // Update mods-spec parameter for default cysteine mod
   string default_cysteine = "C+" + StringUtils::ToString(CYSTEINE_DEFAULT);
-  string mods_spec = get_string_parameter("mods-spec");
+  string mods_spec = Params::GetString("mods-spec");
   if (mods_spec.find('C') == string::npos) {
     mods_spec = mods_spec.empty() ?
       default_cysteine : default_cysteine + ',' + mods_spec;

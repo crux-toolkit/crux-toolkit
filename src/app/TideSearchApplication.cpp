@@ -1073,6 +1073,7 @@ void TideSearchApplication::processParams() {
   if (!FileUtils::Exists(index)) {
     carp(CARP_FATAL, "'%s' does not exist", index.c_str());
   } else if (FileUtils::IsRegularFile(index)) {
+    // Index is FASTA file
     carp(CARP_INFO, "Creating index from '%s'", index.c_str());
     string targetIndexName = Params::GetString("store-index");
     if (targetIndexName.empty()) {
@@ -1081,11 +1082,13 @@ void TideSearchApplication::processParams() {
       remove_index_ = targetIndexName;
     }
     TideIndexApplication indexApp;
+    indexApp.processParams();
     if (indexApp.main(index, targetIndexName) != 0) {
       carp(CARP_FATAL, "tide-index failed.");
     }
     Params::Set("tide database", targetIndexName);
   } else {
+    // Index is Tide index directory
     pb::Header peptides_header;
     string peptides_file = FileUtils::Join(index, "pepix");
     HeadedRecordReader peptide_reader(peptides_file, &peptides_header);
