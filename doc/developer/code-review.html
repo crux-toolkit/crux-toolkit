@@ -81,10 +81,10 @@ documentation changes to Bill for final review.</p>
 </ul>
 
 <h2>Format of the review process</h2>
-<p>Reviews may be done in person or by email.  Longer reviews may be more
-  appropriately done in person with the programmer taking notes on the
-  reviewer's comments.  Short reviews can be done by email with all or
-  part of the process being automated (see below).
+<p>Reviews may be done in person, on the Review Board website, or by email.
+  Longer reviews may be more appropriately done in person with the programmer
+  taking notes on the reviewer's comments.  Short reviews can be done by email
+  with all or part of the process being automated (see below).
 </p>
 
 <h3>The outline of a review</h3>
@@ -101,13 +101,30 @@ documentation changes to Bill for final review.</p>
   comments.
   <li>Programmer listens quietly, not offering explanations.
 </ul>
+<li><b>Review Board reviews</b>
+<ul>
+  <li>Programmer creates an account on the <a href="http://review.maccoss.com">
+  Review Board</a> site, if he/she does not have one.
+  <li>From the dashboard, click "New Review Request", then select the Crux
+  repository.
+  <li>Select a diff file as created by the svn diff command and enter the path
+  within the repository where the patch should be applied. For a diff file
+  created by running svn diff in the root of the trunk, this would be
+  "crux/trunk" (you can see this by running svn info and taking the part of the
+  URL after "code").
+  <li>Fill out the information about the diff on the next page, including the
+  summary, description, and reviewer(s). To add someone as a reviewer, the
+  person must also have an account on the site.
+  <li>Publish the request, and the reviewers will receive an email linking them
+  to the review request where they can view the diff and leave comments.
+</ul>
 <li><b>Email reviews</b>
 <ul>
   <li>Reviewer makes comments in-line in the diff file.
   <li>Reviewer emails the comments to the programmer.
   <li>Programmer reviews comments.
 </ul>
-<li><b>In both cases</b> the reviewer and programmer need to come to
+<li><b>In each case</b> the reviewer and programmer need to come to
   an agreement regarding the changes. No changes should be submitted
   to the repository trunk before they have been agreed upon.
 
