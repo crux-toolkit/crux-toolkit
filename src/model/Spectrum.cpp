@@ -25,6 +25,7 @@
 #include "io/MatchFileReader.h"
 #include "MSToolkit/Spectrum.h"
 #include "util/FileUtils.h"
+#include "util/StringUtils.h"
 
 using namespace std;
 using namespace Crux;
@@ -211,16 +212,18 @@ void Spectrum::printProcessedPeaks(
 
   // print peaks
   for(int bin_idx = 0; bin_idx < max_mz_bin; bin_idx++){
-    if( intensities[bin_idx] != 0 ){
-      double intensity = intensities[bin_idx];
-      if (Params::GetString("output-units") == "mz") {
-        fprintf(file, "%f %.*f\n",
-          (bin_idx - 0.5 + Params::GetDouble("mz-bin-offset")) *
-          Params::GetDouble("mz-bin-width"),
-          mass_precision, intensity);
-      } else {
-        fprintf(file, "%d %.*f\n", bin_idx, mass_precision, intensity);
-      }
+    string intensity = StringUtils::ToString(intensities[bin_idx], mass_precision);
+    // Make sure the value has at least one non-zero digit, once it has been
+    // converted to a string with the specified precision
+    if (intensity.find_first_of("123456789") == string::npos) {
+      continue;
+    }
+    if (Params::GetString("output-units") == "mz") {
+      double mz = (bin_idx - 0.5 + Params::GetDouble("mz-bin-offset")) *
+        Params::GetDouble("mz-bin-width");
+      fprintf(file, "%f %s\n", mz, intensity.c_str());
+    } else {
+      fprintf(file, "%d %s\n", bin_idx, intensity.c_str());
     }
   }
   return;
