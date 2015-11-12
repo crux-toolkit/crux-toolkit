@@ -17,7 +17,9 @@
     
     <li><b>decoy peptide</b>: A shuffled, reversed or randomly
       generated peptide sequence. Matches to decoy peptides are used
-      to estimate statistical confidence measures.</li>
+      for two purposes: to estimate statistical confidence measures
+      such as the false discovery rate, and to train machine learning
+      methods to recognize correctly identified spectra.</li>
 
     <li><b>modification</b>: A chemical modification of a single amino
       acid, typically corresponding to the addition of a molecular
@@ -35,7 +37,7 @@
     <li><b>static modification</b>: A chemical modification of a
       single amino that is expected to occur on every instance of that
       amino acid.  A common example is carbamidomethylation of
-      cysteine, which adds a 57.02146 Da to the mass of every
+      cysteine, which adds 57.02146 Da to the mass of every
       cysteine.</li>
 
     <li><b>target peptide</b>: A real peptide, usually drawn from a
