@@ -16,117 +16,192 @@ GeneratePeptides::~GeneratePeptides() {
 }
 
 int GeneratePeptides::main(int argc, char** argv) {
-  string fastaFile = Params::GetString("protein fasta file");
-  if (!FileUtils::Exists(fastaFile)) {
-    carp(CARP_FATAL, "File does not exist: '%s'", fastaFile.c_str());
+  string fastaPath = Params::GetString("protein fasta file");
+  if (!FileUtils::Exists(fastaPath)) {
+    carp(CARP_FATAL, "File does not exist: '%s'", fastaPath.c_str());
   }
 
-  // Get decoy type
-  const DECOY_TYPE_T decoyType = get_tide_decoy_type_parameter("decoy-format");
-  bool proteinReverse = decoyType == PROTEIN_REVERSE_DECOYS;
-
-  // Get options
-  double minMass = Params::GetDouble("min-mass");
-  double maxMass = Params::GetDouble("max-mass");
+  DECOY_TYPE_T decoyType = get_tide_decoy_type_parameter("decoy-format");
   massType_ = get_mass_type_parameter("isotopic-mass");
-
   bool overwrite = Params::GetBool("overwrite");
 
-  string targetsFile = make_file_path("peptides.target.txt");
-  string decoysFile = make_file_path("peptides.decoy.txt");
-  string proteinDecoysFile = make_file_path("proteins.decoy.txt");
-  ofstream* targetsStream = create_stream_in_path(targetsFile.c_str(), NULL, overwrite);
-  ofstream* decoysStream = decoyType != NO_DECOYS ?
-    create_stream_in_path(decoysFile.c_str(), NULL, overwrite) : NULL;
-  ofstream* proteinDecoysStream = canGenerateDecoyProteins() ?
-    create_stream_in_path(proteinDecoysFile.c_str(), NULL, overwrite) : NULL;
+  string targetsFile = make_file_path("generate-peptides.target.txt");
+  string decoysFile = make_file_path("generate-peptides.decoy.txt");
 
-  // Read fasta
-  carp(CARP_INFO, "Reading %s", fastaFile.c_str());
-  map< string, vector<string> > proteins;
-  set<string> targetSeqs, decoySeqs;
-  readFasta(fastaFile, proteins, targetSeqs,
-            proteinReverse ? proteinDecoysStream : NULL,
-            proteinReverse ? &decoySeqs : NULL);
+  ofstream* targetPeptides = create_stream_in_path(targetsFile.c_str(), NULL, overwrite);
+  ofstream* decoyPeptides = decoyType != NO_DECOYS
+    ? create_stream_in_path(decoysFile.c_str(), NULL, overwrite)
+    : NULL;
 
-  // Make decoys from targets and write to peptides files
-  if (decoysStream) {
-    carp(CARP_INFO, "Making decoys and writing peptides files");
-  } else {
-    carp(CARP_INFO, "Writing peptides file");
+  string decoyFastaPath = canGenerateDecoyProteins()
+    ? make_file_path("generate-peptides.proteins.decoy.txt")
+    : "";
+
+  processFasta(fastaPath, targetPeptides, decoyFastaPath, decoyPeptides, decoyType);
+  return 0;
+}
+
+void GeneratePeptides::processFasta(
+  const string& fastaPath,
+  ofstream* targetList,
+  const string& decoyFastaPath,
+  ofstream* decoyList,
+  DECOY_TYPE_T decoyType
+) {
+  double minMass = Params::GetDouble("min-mass");
+  double maxMass = Params::GetDouble("max-mass");
+
+  carp(CARP_INFO, "Reading %s", fastaPath.c_str());
+  ifstream* fasta = new ifstream(fastaPath.c_str(), ifstream::in);
+
+  ofstream* decoyFasta = decoyFastaPath.empty() ? NULL
+    : create_stream_in_path(decoyFastaPath.c_str(), NULL, Params::GetBool("overwrite"));
+
+  ENZYME_T enzyme = get_enzyme_type_parameter("enzyme");
+  if (!Params::GetString("custom-enzyme").empty()) {
+    enzyme = CUSTOM_ENZYME;
   }
-  map<string, const string*> targetToDecoy;
-  for (set<string>::const_iterator i = targetSeqs.begin();
-       i != targetSeqs.end();
-       ++i) {
-    const string& targetSeq = *i;
-    // Don't need to check peptide length, it is done in cleaveProtein
-    // Check peptide mass
-    FLOAT_T pepMass = Crux::Peptide::calcSequenceMass(i->c_str(), massType_);
-    if (pepMass < minMass || pepMass > maxMass) {
-      carp(CARP_DETAILED_DEBUG, "Skipping peptide with mass %f", pepMass);
-      continue;
-    }
-    *targetsStream << *i << endl;
-    if (decoysStream && !proteinReverse) {
-      // Try to make decoy
-      string decoySeq;
-      if (makeDecoy(targetSeq, targetSeqs, decoySeqs,
-                    decoyType == PEPTIDE_SHUFFLE_DECOYS, decoySeq)) {
-        // Success
-        pair<set<string>::iterator, bool> decoyInsert = decoySeqs.insert(decoySeq);
-        targetToDecoy[targetSeq] = &*decoyInsert.first;
-      } else {
-        carp_once(CARP_WARNING, "Could not make decoy from %s", targetSeq.c_str());
-      }
-      *decoysStream << decoySeq << endl;
-    }
-  }
+  DIGEST_T digest = get_digest_type_parameter("digestion");
+  int missed = Params::GetInt("missed-cleavages");
+  int minLen = Params::GetInt("min-length");
+  int maxLen = Params::GetInt("max-length");
+  string decoyPrefix = Params::GetString("decoy-prefix");
+  bool proteinReverse = decoyType == PROTEIN_REVERSE_DECOYS;
+  bool peptideShuffle = decoyType == PEPTIDE_SHUFFLE_DECOYS;
+  bool peptideReverse = decoyType == PEPTIDE_REVERSE_DECOYS;
 
-  // Write decoy peptides for protein shuffle
-  if (proteinReverse) {
-    for (set<string>::const_iterator i = decoySeqs.begin();
-         i != decoySeqs.end();
-         ++i) {
-      FLOAT_T pepMass = Crux::Peptide::calcSequenceMass(i->c_str(), massType_);
-      if (pepMass < minMass || pepMass > maxMass) {
-        carp(CARP_DETAILED_DEBUG, "Skipping peptide with mass %f", pepMass);
+  set<string> targets, decoys;
+  map<const string*, const string*> targetToDecoy;
+  map< OrderedPeptide, vector<string> > peptideToProtein;
+  int proteinTotal = 0, peptideTotal = 0;
+
+  // Iterate over all proteins from this FASTA
+  while (true) {
+    string id, proteinSequence;
+    if (!getNextProtein(*fasta, &id, &proteinSequence)) {
+      break;
+    }
+    ++proteinTotal;
+    carp(CARP_DEBUG, "Read %s", id.c_str());
+
+    // Get peptides
+    vector<CleavedPeptide> peptides =
+      cleaveProtein(proteinSequence, enzyme, digest, missed, minLen, maxLen);
+    peptideTotal += peptides.size();
+
+    // Write reversed protein to decoy FASTA, if protein reverse
+    if (decoyFasta && proteinReverse) {
+      reverse(proteinSequence.begin(), proteinSequence.end());
+      *decoyFasta << '>' << decoyPrefix << id << endl
+                  << proteinSequence << endl;
+    }
+
+    // Iterate over all peptides from this protein
+    for (vector<CleavedPeptide>::const_iterator i = peptides.begin();
+         i != peptides.end();
+         i++) {
+      FLOAT_T mass = i->Mass();
+      if (mass < minMass || mass > maxMass) {
+        carp(CARP_DETAILED_DEBUG, "Skipping peptide with mass %f", mass);
         continue;
       }
-      *decoysStream << *i << endl;
-    }
-  }
-
-  targetsStream->close();
-  delete targetsStream;
-  if (decoysStream) {
-    decoysStream->close();
-    delete decoysStream;
-    // Write decoy proteins (unless protein-shuffle, because we already did)
-    if (proteinDecoysStream && !proteinReverse) {
-      carp(CARP_INFO, "Writing decoy proteins");
-      for (map< string, vector<string> >::iterator proteinIter = proteins.begin();
-           proteinIter != proteins.end();
-           ++proteinIter) {
-        *proteinDecoysStream << '>' << Params::GetString("decoy-prefix")
-                             << proteinIter->first << endl;
-        for (vector<string>::iterator pepIter = proteinIter->second.begin();
-             pepIter != proteinIter->second.end();
-             ++pepIter) {
-          map<string, const string*>::const_iterator lookup = targetToDecoy.find(*pepIter);
-          const string* toOutput = lookup != targetToDecoy.end() ?
-            lookup->second : &*pepIter;
-          *proteinDecoysStream << *toOutput;
-        }
-        *proteinDecoysStream << endl;
+      const string& sequence = i->Sequence();
+      pair<set<string>::iterator, bool> insert = targets.insert(sequence);
+      if (insert.second) {
+        peptideToProtein[*i] = vector<string>(1, id);
+      } else {
+        peptideToProtein[*i].push_back(id);
       }
-      carp(CARP_DEBUG, "Printed %d decoy proteins", proteins.size());
-      proteinDecoysStream->close();
-      delete proteinDecoysStream;
+    }
+  }
+  delete fasta;
+  carp(CARP_DEBUG, "Read %d proteins and %d peptides", proteinTotal, peptideTotal);
+
+  // Once we have all targets, try to generate a decoy for each one
+  if (peptideShuffle || peptideReverse) {
+    for (set<string>::const_iterator i = targets.begin(); i != targets.end(); i++) {
+      string decoy;
+      if (makeDecoy(*i, targets, decoys, peptideShuffle, decoy)) {
+        targetToDecoy[&*i] = &*(decoys.insert(decoy).first);
+      } else {
+        carp_once(CARP_WARNING, "Could not make decoy from %s", i->c_str());
+      }
     }
   }
 
-  return 0;
+  // Re-read FASTA and generate decoy FASTA
+  if (decoyFasta && (peptideShuffle || peptideReverse)) {
+    ifstream* fasta = new ifstream(fastaPath.c_str(), ifstream::in);
+    while (true) {
+      string id, proteinSequence;
+      if (!getNextProtein(*fasta, &id, &proteinSequence)) {
+        break;
+      }
+
+      *decoyFasta << '>' << decoyPrefix << id << endl;
+
+      // Get peptides
+      vector<CleavedPeptide> peptides =
+        cleaveProtein(proteinSequence, enzyme, digest, missed, 0, 1000000);
+
+      // Iterate over all peptides from this protein
+      for (vector<CleavedPeptide>::const_iterator i = peptides.begin();
+           i != peptides.end();
+           i++) {
+        const string& sequence = i->Sequence();
+        set<string>::const_iterator j = targets.find(sequence);
+        if (j != targets.end()) {
+          map<const string*, const string*>::const_iterator k = targetToDecoy.find(&*j);
+          if (k != targetToDecoy.end()) {
+            *decoyFasta << *k->second;
+            continue;
+          }
+        }
+        *decoyFasta << sequence;
+      }
+      *decoyFasta << endl;
+    }
+    delete fasta;
+  }
+
+  for (map< OrderedPeptide, vector<string> >::const_iterator i = peptideToProtein.begin();
+       i != peptideToProtein.end();
+       i++) {
+    const string& sequence = i->first.Sequence();
+    FLOAT_T mass = i->first.Mass();
+    vector<string>::const_iterator j = i->second.begin();
+    *targetList << sequence << '\t' << mass << '\t' << *j;
+    for (j = j + 1; j != i->second.end(); j++) {
+      string proteinId = *j;
+      *targetList << ',' << proteinId;
+    }
+    *targetList << endl;
+
+    if ((peptideShuffle || peptideReverse) && decoyList) {
+      set<string>::const_iterator target = targets.find(sequence);
+      map<const string*, const string*>::const_iterator k = targetToDecoy.find(&*target);
+      if (k != targetToDecoy.end()) {
+        j = i->second.begin();
+        *decoyList << *k->second << '\t' << mass << '\t' << decoyPrefix << *j;
+        for (j = j + 1; j != i->second.end(); j++) {
+          *decoyList << ',' << decoyPrefix << *j;
+        }
+        *decoyList << endl;
+      }
+    }
+  }
+
+  if (decoyFasta) {
+    delete decoyFasta;
+  }
+
+  delete targetList;
+
+  if (proteinReverse && !decoyFastaPath.empty()) {
+    processFasta(decoyFastaPath, decoyList, "", NULL, NO_DECOYS);
+  } else if (decoyList) {
+    delete decoyList;
+  }
 }
 
 bool GeneratePeptides::canGenerateDecoyProteins() {
@@ -153,78 +228,16 @@ bool GeneratePeptides::canGenerateDecoyProteins() {
 }
 
 /**
- * Given a FASTA file, read in all protein IDs/sequences and cleave them.
- * Return a map of protein IDs to digested peptides from that protein
- */
-void GeneratePeptides::readFasta(
-  const string& fastaName,  ///< FASTA file name
-  map< string, vector<string> >& outProteins, ///< map to store proteins
-  set<string>& outPeptides,  ///< set of unique peptides
-  ofstream* reversedFasta, ///< optional stream to write reversed proteins
-  set<string>* outReversedPeptides  ///< optional set of peptides from rev fasta
-) {
-  // Open FASTA
-  ifstream fasta(fastaName.c_str(), ifstream::in);
-
-  // Read all proteins
-  outProteins.clear();
-  outPeptides.clear();
-  string id, sequence;
-  ENZYME_T enzyme = get_enzyme_type_parameter("enzyme");
-  DIGEST_T digest = get_digest_type_parameter("digestion");
-  int missedCleavages = Params::GetInt("missed-cleavages");
-  int minLength = Params::GetInt("min-length");
-  int maxLength = Params::GetInt("max-length");
-  if (!Params::GetString("custom-enzyme").empty()) {
-    enzyme = CUSTOM_ENZYME;
-  }
-  vector< pair<string, int> > cleavedPeptides, reversedFastaPeptides;
-  int proteinTotal = 0, peptideTotal = 0;
-  while (getNextProtein(fasta, id, sequence)) {
-    ++proteinTotal;
-    carp(CARP_DEBUG, "Read %s", id.c_str());
-    cleaveProtein(sequence, enzyme, digest, missedCleavages,
-                  minLength, maxLength, cleavedPeptides);
-    peptideTotal += cleavedPeptides.size();
-    outProteins[id] = vector<string>();
-    vector<string>& proteinPeptides = outProteins[id];
-    for (vector< pair<string, int> >::const_iterator i = cleavedPeptides.begin();
-         i != cleavedPeptides.end();
-         i++) {
-      outPeptides.insert(i->first);
-      proteinPeptides.push_back(i->first);
-    }
-    if (reversedFasta) {
-      reverse(sequence.begin(), sequence.end());
-      *reversedFasta << '>' << Params::GetString("decoy-prefix")
-                     << id << '\n' << sequence << endl;
-      if (outReversedPeptides) {
-        cleaveProtein(sequence, enzyme, digest, missedCleavages,
-                      minLength, maxLength, reversedFastaPeptides);
-        for (vector< pair<string, int> >::const_iterator i = reversedFastaPeptides.begin();
-             i != reversedFastaPeptides.end();
-             i++) {
-          outReversedPeptides->insert(i->first);
-        }
-      }
-    }
-  }
-  fasta.close();
-
-  carp(CARP_DEBUG, "Read %d proteins and %d peptides", proteinTotal, peptideTotal);
-}
-
-/**
  * Reads the next protein ID and corresponding sequence from the FASTA stream
  * Returns false if no more proteins in stream
  */
 bool GeneratePeptides::getNextProtein(
   ifstream& fasta,  ///< FASTA stream
-  string& outId,  ///< string to store protein ID
-  string& outSequence ///< string to store sequence
+  string* outId,  ///< string to store protein ID
+  string* outSequence ///< string to store sequence
 ) {
-  outId.clear();
-  outSequence.clear();
+  outId->clear();
+  outSequence->clear();
   if (!fasta.good()) {
     return false;
   }
@@ -233,7 +246,7 @@ bool GeneratePeptides::getNextProtein(
     string line;
     getline(fasta, line);
     line = StringUtils::Trim(line);
-    if (outId.empty()) {
+    if (outId->empty()) {
       // Reading id
       if (StringUtils::StartsWith(line, ">")) {
         bool idStart = false;
@@ -249,25 +262,25 @@ bool GeneratePeptides::getNextProtein(
             break;
           }
         }
-        outId = string(begin, end);
+        *outId = string(begin, end);
       }
     } else {
       // Reading sequence
-      outSequence += line;
+      *outSequence += line;
       if (fasta.eof() || fasta.peek() == '>') {
         break;
       }
     }
   }
 
-  if (StringUtils::EndsWith(outSequence, "*")) {
+  if (StringUtils::EndsWith(*outSequence, "*")) {
     // Remove the last character of the sequence if it is an asterisk
-    outSequence.erase(outSequence.length() - 1);
+    outSequence->erase(outSequence->length() - 1);
   }
 
-  if (outSequence.empty()) {
-    carp(CARP_WARNING, "Found protein ID without sequence: %s", outId.c_str());
-    outId.clear();
+  if (outSequence->empty()) {
+    carp(CARP_WARNING, "Found protein ID without sequence: %s", outId->c_str());
+    outId->clear();
     return false;
   }
 
@@ -282,26 +295,24 @@ bool GeneratePeptides::getNextProtein(
  * Cleave protein sequence using specified enzyme and store results in vector
  * Vector also contains start location of each peptide within the protein
  */
-void GeneratePeptides::cleaveProtein(
+vector<GeneratePeptides::CleavedPeptide> GeneratePeptides::cleaveProtein(
   const string& sequence, ///< Protein sequence to cleave
   ENZYME_T enzyme,  ///< Enzyme to use for cleavage
   DIGEST_T digest,  ///< Digestion to use for cleavage
   int missedCleavages,  ///< Maximum allowed missed cleavages
   int minLength,  //< Min length of peptides to return
-  int maxLength,  //< Max length of peptides to return
-  vector< pair<string, int> >& outPeptides ///< vector to store peptides
+  int maxLength  //< Max length of peptides to return
 ) {
-  outPeptides.clear();
-
+  vector<CleavedPeptide> peptides;
   // No enzyme
   // Get all substrings min <= length <= max
   if (enzyme == NO_ENZYME) {
     for (int i = 0; i < sequence.length(); ++i) {
       for (int j = minLength; i + j <= sequence.length() && j <= maxLength; ++j) {
-        outPeptides.push_back(make_pair(sequence.substr(i, j), i));
+        peptides.push_back(CleavedPeptide(sequence.substr(i, j), i));
       }
     }
-    return;
+    return peptides;
   }
 
   size_t pepStart = 0, nextPepStart = 0;
@@ -312,13 +323,13 @@ void GeneratePeptides::cleaveProtein(
       ProteinPeptideIterator::validCleavagePosition(sequence.c_str() + i, enzyme);
     if (digest == PARTIAL_DIGEST && i != sequence.length() - 1 && !cleavePos) {
       // Partial digestion (not last AA or cleavage position), add this peptide
-      outPeptides.push_back(make_pair(sequence.substr(pepStart, i + 1 - pepStart), pepStart));
+      peptides.push_back(CleavedPeptide(sequence.substr(pepStart, i + 1 - pepStart), pepStart));
     } else if (cleavePos) {
       // Cleavage position, add this peptide
-      outPeptides.push_back(make_pair(sequence.substr(pepStart, i + 1 - pepStart), pepStart));
+      peptides.push_back(CleavedPeptide(sequence.substr(pepStart, i + 1 - pepStart), pepStart));
       if (Params::GetBool("clip-nterm-methionine") && sequence[0] == 'M' &&
           pepStart == 0 && digest != PARTIAL_DIGEST) {
-        outPeptides.push_back(make_pair(
+        peptides.push_back(CleavedPeptide(
           sequence.substr(pepStart + 1, i + 1 - pepStart - 1), pepStart + 1));
       }
       if (++cleaveSites == 1) {
@@ -328,7 +339,7 @@ void GeneratePeptides::cleaveProtein(
       if (digest == PARTIAL_DIGEST) {
         // For partial digest, add peptides ending at this cleavage position
         for (int j = pepStart + 1; j < nextPepStart; ++j) {
-          outPeptides.push_back(make_pair(sequence.substr(j, i - j + 1), j));
+          peptides.push_back(CleavedPeptide(sequence.substr(j, i - j + 1), j));
         }
       }
       if (cleaveSites > missedCleavages) {
@@ -342,11 +353,11 @@ void GeneratePeptides::cleaveProtein(
                cleaveSites > 0 && cleaveSites <= missedCleavages) {
       // Last AA in sequence and we haven't missed the allowed amount yet
       // Add this peptide and move iterator+pepStart to first cleavage position
-      outPeptides.push_back(make_pair(sequence.substr(pepStart), pepStart));
+      peptides.push_back(CleavedPeptide(sequence.substr(pepStart), pepStart));
       if (digest == PARTIAL_DIGEST) {
         // For partial digest, add peptides ending at last AA
         for (int j = pepStart + 1; j < nextPepStart; ++j) {
-          outPeptides.push_back(make_pair(sequence.substr(j, i - j + 1), j));
+          peptides.push_back(CleavedPeptide(sequence.substr(j, i - j + 1), j));
         }
       }
       pepStart = nextPepStart;
@@ -355,23 +366,22 @@ void GeneratePeptides::cleaveProtein(
     }
   }
   // Add the last peptide
-  outPeptides.push_back(make_pair(sequence.substr(nextPepStart), nextPepStart));
+  peptides.push_back(CleavedPeptide(sequence.substr(nextPepStart), nextPepStart));
   if (digest == PARTIAL_DIGEST) {
     // For partial digest, add peptides ending at last AA
     for (int j = pepStart + 1; j < sequence.length(); ++j) {
-      outPeptides.push_back(make_pair(sequence.substr(j), j));
+      peptides.push_back(CleavedPeptide(sequence.substr(j), j));
     }
   }
   // Erase peptides that don't meet length requirement
-  for (vector< pair<string, int> >::iterator i = outPeptides.begin();
-       i != outPeptides.end();
-  ) {
-    if (i->first.length() < minLength || i->first.length() > maxLength) {
-      i = outPeptides.erase(i);
+  for (vector<CleavedPeptide>::iterator i = peptides.begin(); i != peptides.end(); ) {
+    if (i->Length() < minLength || i->Length() > maxLength) {
+      i = peptides.erase(i);
     } else {
       ++i;
     }
   }
+  return peptides;
 }
 
 /**
@@ -385,8 +395,6 @@ bool GeneratePeptides::makeDecoy(
   bool shuffle, ///< shuffle (if false, reverse)
   string& decoyOut  ///< string to store decoy
 ) {
-  const int MAX_SHUFFLE_ATTEMPTS = 6;
-
   const string keepTerminal = Params::GetString("keep-terminal-aminos");
   string decoyPre, decoyPost;
   if (keepTerminal == "N") {
@@ -434,16 +442,14 @@ bool GeneratePeptides::makeDecoy(
   }
 
   // Shuffle
-  for (int i = 0; i < MAX_SHUFFLE_ATTEMPTS; ++i) {
-    if (shufflePeptide(decoyOut)) {
-      // Re-add n/c
-      string decoyCheck = decoyPre + decoyOut + decoyPost;
-      // Check in sets
-      if (targetSeqs.find(decoyCheck) == targetSeqs.end() &&
-          decoySeqs.find(decoyCheck) == decoySeqs.end()) {
-        decoyOut = decoyCheck;
-        return true;
-      }
+  if (shufflePeptide(decoyOut)) {
+    // Re-add n/c
+    string decoyCheck = decoyPre + decoyOut + decoyPost;
+    // Check in sets
+    if (targetSeqs.find(decoyCheck) == targetSeqs.end() &&
+        decoySeqs.find(decoyCheck) == decoySeqs.end()) {
+      decoyOut = decoyCheck;
+      return true;
     }
   }
 
@@ -456,19 +462,29 @@ bool GeneratePeptides::makeDecoy(
  * Returns false if no different sequence was generated
  */
 bool GeneratePeptides::shufflePeptide(
-  string& seq ///< Peptide sequence to shuffle
+  string& seq, ///< Peptide sequence to shuffle
+  unsigned int maxShuffleAttempts ///< Maximum number of shuffle attempts
 ) {
-  // Special case, length 2
-  if (seq.length() == 2) {
+  switch (seq.length()) {
+  case 0:
+  case 1:
+    return false;
+  case 2: {
     char second = seq[1];
     seq[1] = seq[0];
     seq[0] = second;
     return true;
   }
-
-  string originalSeq(seq);
-  random_shuffle(seq.begin(), seq.end(), myrandom_limit);
-  return seq != originalSeq;
+  default:
+    string originalSeq(seq);
+    for (int i = 0; i < maxShuffleAttempts; i++) {
+      random_shuffle(seq.begin(), seq.end(), myrandom_limit);
+      if (seq != originalSeq) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
 
 /**
@@ -538,12 +554,14 @@ vector<string> GeneratePeptides::getOptions() const {
 
 vector< pair<string, string> > GeneratePeptides::getOutputs() const {
   vector< pair<string, string> > outputs;
-  outputs.push_back(make_pair("peptides.target.txt",
-    "a text file containing the target peptides, one per line."));
-  outputs.push_back(make_pair("peptides.decoy.txt",
-    "a text file containing the decoy peptides, one per line. There is a "
-    "one-to-one correspondence between targets and decoys."));
-  outputs.push_back(make_pair("proteins.decoy.txt",
+  outputs.push_back(make_pair("generate-peptides.target.txt",
+    "a tab-delimited text file containing the target peptides, one per line, "
+    "along with the peptide mass and the comma-delimited list of protein IDs."));
+  outputs.push_back(make_pair("generate-peptides.decoy.txt",
+    "a tab-delimited text file containing the decoy peptides, one per line, "
+    "along with the peptide mass and the comma-delimited list of protein IDs. "
+    "There is a one-to-one correspondence between targets and decoys."));
+  outputs.push_back(make_pair("generate-peptides.proteins.decoy.txt",
     "a FASTA format file containing decoy proteins, in which all of the "
     "peptides have been replaced with their shuffled or reversed counterparts. "
     "Note that this file will only be created if the enzyme specificity is "
