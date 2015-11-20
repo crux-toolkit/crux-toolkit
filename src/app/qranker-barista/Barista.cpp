@@ -2883,7 +2883,13 @@ string Barista::getDescription() const {
     "assigns two types of statistical confidence estimates, q-values and "
     "posterior error probabilities, to identified PSMs, peptides and proteins. "
     "For more information about these values, see the documentation for <a "
-    "href=\"assign-confidence.html\">assign-confidence</a>.</p>]]";
+    "href=\"assign-confidence.html\">assign-confidence</a>.</p>"
+    "<p>More details on the Barista algorithm are provided in</p>"
+    "<blockquote>Marina Spivak, Jason Weston, Michael J. MacCoss and "
+    "William Stafford Noble.  <a href=\"http://www.mcponline.org/content/"
+    "11/2/M111.012161.long\">\"Direct maximization of protein identifications "
+    "from tandem mass spectra.\"</a>  <i>Molecular and Cellular "
+    "Proteomics</i>. 11(2):M111.012161, 2012.</blockquote>]]";
 }
 
 vector<string> Barista::getArgs() const {
