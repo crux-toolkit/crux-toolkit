@@ -8,7 +8,7 @@ Scenario Outline: User runs generate-peptides
   And I pass the arguments <args>
   When I run generate-peptides
   Then the return value should be 0
-  And crux-output/peptides.target.txt should match good_results/<expected_output>
+  And crux-output/generate-peptides.target.txt should match good_results/<expected_output>
 
 Examples:
   |test_name                                  |args                                                 |expected_output                                           |
