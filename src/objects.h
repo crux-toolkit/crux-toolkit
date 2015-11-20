@@ -287,18 +287,6 @@ enum MASS_FORMAT_T {
 };
 
 /**
-*\enum CHARGE_STATE_T
-*/
-
-enum CHARGE_STATE_T{
-  INVALID_CHARGE_STATE,
-  SINGLE_CHARGE_STATE,
-  MULTIPLE_CHARGE_STATE,
-  NUMBER_CHARGE_STATE
-};
-
-
-/**
  * \typedef WINDOW_TYPE_T
  * \brief The typedef for window type (mass, mz, ppm);
  */
@@ -641,23 +629,6 @@ enum _command {
 };
 
 typedef enum _command COMMAND_T;
-/**
- * \typedef RECORD_T
- * \brief RECORD_T for each value/key pair
- */
-typedef struct record RECORD_T;
-
-/**
- * \typedef HASH_T
- * \brief HASH_T hash table, contains the records
- */
-typedef struct our_hash HASH_T;
-
-/**
- * \typedef HASH_ITERATOR_T
- * \brief HASH_ITERATOR_T iterator for keys in a hash
- */
-typedef struct hash_iterator HASH_ITERATOR_T;
 
 /**
  * Identifying which set the PSM belongs to
@@ -747,9 +718,6 @@ enum XLINKMATCH_TYPE_T {
   XLINK_INTER_CANDIDATE,
   XLINK_INTRA_CANDIDATE,
   XLINK_INTER_INTRA_CANDIDATE};
-
-
-
 
 /**
  * \class LinkedPeptide

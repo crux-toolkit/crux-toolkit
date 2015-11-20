@@ -18,7 +18,6 @@ using namespace std;
 static int G_verbosity; 
 static FILE* log_file = NULL;
 
-HASH_T * messages_;
 unsigned int hash_size_ = 1000;
 
 void set_verbosity_level(int verbosity){

@@ -9,16 +9,37 @@
 class GeneratePeptides : public CruxApplication {
 
 protected:
-  struct massCompare {
-    // Sort peptides by mass (descending)
-    bool operator() (const std::string& lhs, const std::string& rhs) const {
-      return Crux::Peptide::calcSequenceMass(lhs.c_str(), massType_) >
-             Crux::Peptide::calcSequenceMass(rhs.c_str(), massType_);
-    }
-  };
   static MASS_TYPE_T massType_;
 
 public:
+
+  class OrderedPeptide {
+  public:
+    OrderedPeptide(const std::string& sequence):
+      sequence_(sequence), sequencePtr_(NULL),
+      mass_(Crux::Peptide::calcSequenceMass(sequence, massType_)) {}
+    OrderedPeptide(const std::string* sequence):
+      sequence_(""), sequencePtr_(sequence),
+      mass_(Crux::Peptide::calcSequenceMass(*sequence, massType_)) {}
+
+    std::string Sequence() const { return sequencePtr_ ? *sequencePtr_ : sequence_; }
+    unsigned int Length() const { return Sequence().length(); }
+    FLOAT_T Mass() const { return mass_; }
+    bool operator <(const OrderedPeptide& rhs) const { return Sequence() < rhs.Sequence(); }
+  protected:
+    std::string sequence_;
+    const std::string* sequencePtr_;
+    FLOAT_T mass_;
+  };
+
+  class CleavedPeptide : public OrderedPeptide {
+  public:
+    CleavedPeptide(const std::string& sequence, unsigned int position):
+      OrderedPeptide(sequence), position_(position) {}
+    unsigned int Position() const { return position_; }
+  private:
+    unsigned int position_;
+  };
 
   /**
    * Constructor
@@ -35,22 +56,18 @@ public:
    */
   virtual int main(int argc, char** argv);
 
+  void processFasta(
+    const std::string& fastaPath,
+    std::ofstream* targetList,
+    const std::string& decoyFastaPath,
+    std::ofstream* decoyList,
+    DECOY_TYPE_T decoyType
+  );
+
   /**
    * Check if we can generate decoy proteins with the current settings.
    */
   static bool canGenerateDecoyProteins();
-
-  /**
-   * Given a FASTA file, read in all protein IDs/sequences and cleave them.
-   * Return a map of protein IDs to digested peptides from that protein
-   */
-  static void readFasta(
-    const std::string& fastaName,  ///< FASTA file name
-    std::map< std::string, std::vector<std::string> >& outProteins, ///< map to store proteins
-    std::set<std::string>& outPeptides,  ///< set of unique peptides
-    std::ofstream* reversedFasta, ///< optional stream to write reversed proteins
-    std::set<std::string>* outReversedPeptides  ///< optional set of peptides from rev fasta
-  );
 
   /**
    * Reads the next protein ID and corresponding sequence from the FASTA stream
@@ -58,22 +75,21 @@ public:
    */
   static bool getNextProtein(
     std::ifstream& fasta,  ///< FASTA stream
-    std::string& outId,  ///< string to store protein ID
-    std::string& outSequence ///< string to store sequence
+    std::string* outId,  ///< string to store protein ID
+    std::string* outSequence ///< string to store sequence
   );
 
   /**
    * Cleave protein sequence using specified enzyme and store results in vector
    * Vector also contains start location of each peptide within the protein
    */
-  static void cleaveProtein(
+  static std::vector<CleavedPeptide> cleaveProtein(
     const std::string& sequence, ///< Protein sequence to cleave
     ENZYME_T enzyme,  ///< Enzyme to use for cleavage
     DIGEST_T digest,  ///< Digestion to use for cleavage
     int missedCleavages,  ///< Maximum allowed missed cleavages
     int minLength,  //< Min length of peptides to return
-    int maxLength,  //< Max length of peptides to return
-    std::vector< std::pair<std::string, int> >& outPeptides ///< vector to store peptides
+    int maxLength  //< Max length of peptides to return
   );
 
   /**
@@ -93,7 +109,8 @@ public:
    * Returns false if no different sequence was generated
    */
   static bool shufflePeptide(
-    std::string& seq  ///< Peptide sequence to shuffle
+    std::string& seq,  ///< Peptide sequence to shuffle
+    unsigned int maxShuffleAttempts = 6 ///< Maximum number of shuffle attempts
   );
 
   /**
@@ -124,7 +141,7 @@ public:
   virtual bool needsOutputDirectory() const;
 
   virtual COMMAND_T getCommand() const;
-  
+
 };
 
 #endif

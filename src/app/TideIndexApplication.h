@@ -136,8 +136,6 @@ protected:
     }
   };
 
-  typedef pair<string, int> PeptideInfo;  // sequence, start location
-
   struct ProteinInfo {
     string name;
     const string* sequence;
