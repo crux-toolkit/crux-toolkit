@@ -55,7 +55,7 @@ int TideIndexApplication::main(
   streambuf* old = cerr.rdbuf();
   cerr.rdbuf(&buffer);
 
-  FLAGS_tmpfile_prefix = make_file_path("modified_peptides_partial_");
+  // memory leak: FLAGS_tmpfile_prefix = make_file_path("modified_peptides_partial_");
 
   // Get options
   double min_mass = Params::GetDouble("min-mass");
@@ -311,6 +311,10 @@ int TideIndexApplication::main(
        ++i) {
     delete *i;
   }
+
+  // clean up out_decoy_fasta
+  out_decoy_fasta->close();
+  delete out_decoy_fasta;
 
   // Recover stderr
   cerr.rdbuf(old);
