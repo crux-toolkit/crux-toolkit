@@ -313,8 +313,9 @@ int TideIndexApplication::main(
   }
 
   // clean up out_decoy_fasta
-  out_decoy_fasta->close();
-  delete out_decoy_fasta;
+  if (out_decoy_fasta) {
+    delete out_decoy_fasta;
+  }
 
   // Recover stderr
   cerr.rdbuf(old);
