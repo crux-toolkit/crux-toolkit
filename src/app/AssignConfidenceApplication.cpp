@@ -680,13 +680,6 @@ FLOAT_T* AssignConfidenceApplication::compute_decoy_qvalues_tdc(
   }
   carp(CARP_DEBUG, "Computing decoy q-values.");
 
-  int target_idx;
-  for (target_idx = 0; target_idx < num_targets; target_idx++) {
-    carp(CARP_DEBUG, "target_scores[%d]=%g decoy_scores[%d]=%g",
-         target_idx, target_scores[target_idx],
-         target_idx, decoy_scores[target_idx]);
-  }
-
   // Sort both sets of scores.
   if (forward) {
     sort(target_scores, target_scores + num_targets);
@@ -695,17 +688,10 @@ FLOAT_T* AssignConfidenceApplication::compute_decoy_qvalues_tdc(
     sort(target_scores, target_scores + num_targets, greater<FLOAT_T>());
     sort(decoy_scores, decoy_scores + num_decoys, greater<FLOAT_T>());
   }
-  for (target_idx = 0; target_idx < num_targets; target_idx++) {
-    carp(CARP_DEBUG, "target_scores[%d]=%g decoy_scores[%d]=%g",
-         target_idx, target_scores[target_idx],
-         target_idx, decoy_scores[target_idx]);
-  }
-
-  // Precompute the ratio of targets to decoys.
-  //FLOAT_T targets_to_decoys = (FLOAT_T)num_targets / (FLOAT_T)num_decoys;
 
   // Compute false discovery rate for each target score.
   FLOAT_T* qvalues = (FLOAT_T*)mycalloc(num_targets, sizeof(FLOAT_T));
+  int target_idx;
   int decoy_idx = 0;
   for (target_idx = 0; target_idx < num_targets; target_idx++) {
     FLOAT_T target_score = target_scores[target_idx];
