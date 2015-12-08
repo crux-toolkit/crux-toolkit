@@ -237,7 +237,6 @@ int TideIndexApplication::main(
     // This vector holds decoy peptide strings and masses
     vector< pair<string, double> > decoyPepStrs;
     // Read peptides protocol buffer file
-    vector<const pb::Peptide*> peptides;
     vector<const pb::AuxLocation*> locations;
     if (!ReadRecordsToVector<pb::AuxLocation>(&locations, out_aux)) {
       carp(CARP_FATAL, "Error reading auxlocs file");
@@ -281,13 +280,6 @@ int TideIndexApplication::main(
         *out_decoy_list << "\t*";
       }
       *out_decoy_list << endl;
-    }
-
-    // Clean up peptides
-    for (vector<const pb::Peptide*>::iterator i = peptides.begin();
-         i != peptides.end();
-         ++i) {
-      delete *i;
     }
 
     // Close and clean up streams
