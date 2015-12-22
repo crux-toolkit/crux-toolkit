@@ -2,20 +2,20 @@
 <Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
-      <Configuration>Debug</Configuration>
-      <Platform>Win32</Platform>
+      <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+      <IntDir>\$(Platform)\$(Configuration)\</IntDir>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|x64">
-      <Configuration>Debug</Configuration>
-      <Platform>x64</Platform>
+      <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+      <IntDir>\$(Platform)\$(Configuration)\</IntDir>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Release|Win32">
-      <Configuration>Release</Configuration>
-      <Platform>Win32</Platform>
+      <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+      <IntDir>\$(Platform)\$(Configuration)\</IntDir>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Release|x64">
-      <Configuration>Release</Configuration>
-      <Platform>x64</Platform>
+      <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+      <IntDir>\$(Platform)\$(Configuration)\</IntDir>
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
