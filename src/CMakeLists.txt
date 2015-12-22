@@ -50,10 +50,17 @@ link_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator-build/src)
 link_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator-build/src/fido)
 if (WIN32 AND NOT Cygwin)
  # Needed for windows build of vendor libraries
-  link_directories(
-    ${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/pwiz_aux/msrc/utility/vendor_api/Waters/vc12_x64 # vc12_x86 for 32-bit
-    ${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/pwiz_aux/msrc/utility/vendor_api/Bruker/x64 # x86 for 32-bit
-  )
+  if (CMAKE_GENERATOR MATCHES "^.*Win64$")
+    link_directories(
+      ${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/pwiz_aux/msrc/utility/vendor_api/Waters/vc12_x64
+      ${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/pwiz_aux/msrc/utility/vendor_api/Bruker/x64
+    )
+  else (CMAKE_GENERATOR MATCHES "^.*Win64$")
+    link_directories(
+      ${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/pwiz_aux/msrc/utility/vendor_api/Waters/vc12_x86
+      ${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/pwiz_aux/msrc/utility/vendor_api/Bruker/x86
+    )
+  endif (CMAKE_GENERATOR MATCHES "^.*Win64$")
 endif (WIN32 AND NOT Cygwin)
 
 set (

@@ -14,7 +14,14 @@ SET(ENV{CMAKE_PREFIX_PATH} ${CMAKE_CURRENT_BINARY_DIR})
 SET(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR})
 SET(USE_LATEST_PWIZ ON CACHE BOOL "Use lastest version of ProteoWizard")
 
-SET(MSBUILD_PLATFORM "x64")
+if (WIN32 AND NOT CYGWIN)
+  # If windows build we need to select 32/64 bit platform
+  if (CMAKE_GENERATOR MATCHES "^.*Win64$")
+    SET(MSBUILD_PLATFORM "x64")
+  else (CMAKE_GENERATOR MATCHES "^.*Win64$")
+    SET(MSBUILD_PLATFORM "Win32")
+  endif (CMAKE_GENERATOR MATCHES "^.*Win64$")
+endif (WIN32 AND NOT CYGWIN)
 
 # Download and build a partial distribution of the pwiz source
 # from the ProteoWizard TeamCity repository.
@@ -32,6 +39,7 @@ if (WIN32 AND NOT CYGWIN)
       CONFIGURE_COMMAND ""
       BUILD_COMMAND 
         ${CMAKE_COMMAND} 
+          -DMSBUILD_PLATFORM=${MSBUILD_PLATFORM}
           -DBUILD_TYPE:STRING=${CMAKE_CFG_INTDIR}
           -DPREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
           -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
