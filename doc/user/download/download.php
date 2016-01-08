@@ -62,7 +62,8 @@
         "Linux32" => "crux-2.1.$version.Linux.i686.zip",
         "Linux64" => "crux-2.1.$version.Linux.x86_64.zip",
         "OSX" => "crux-2.1.$version.Darwin.x86_64.zip",
-        "Windows" => "crux-2.1.$version.Windows.AMD64.zip",
+        "Windows64" => "crux-2.1.$version.Windows.AMD64.zip",
+        "Windows32" => "crux-2.1.$version.Windows.i386.zip",
       );
       $directory = "daily/";
     }
