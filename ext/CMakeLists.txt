@@ -158,7 +158,7 @@ elseif (APPLE)
     percolator
     apple_patch
     COMMAND ${CMAKE_COMMAND} -E copy 
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_common/CommonCMake.txt.mac 
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_common/CommonCMake.txt 
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/CommonCMake.txt
     COMMAND ${CMAKE_COMMAND} -E copy 
       ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/src/ProteinProbEstimator.cpp 
