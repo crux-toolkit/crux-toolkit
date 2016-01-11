@@ -456,11 +456,9 @@ To run Crux on Windows you must have installed the
 following software:
 <ul>
 <li>
-<a href="https://thermo.flexnetoperations.com/control/thmo/login"><code>Thermo
-64-bit MSFileReader</code></a>
+<a href="https://thermo.flexnetoperations.com/control/thmo/login">
+<code>Thermo MSFileReader</code></a>
 </ul>
-<p/>
-Be sure to install the 64-bit version of the library.
 <p/>
 <li><b>Download the files</b> 
 <p/>
@@ -499,8 +497,8 @@ following software:
 href="http://www.visualstudio.com/downloads/download-visual-studio-vs#DownloadFamilies_4">Microsoft
 Visual C++ 2013</a></code></li>
 <li><a
-href="https://thermo.flexnetoperations.com/control/thmo/login"><code>Thermo
-64-bit MSFileReader</code></a></li>
+href="https://thermo.flexnetoperations.com/control/thmo/login">
+<code>Thermo MSFileReader</code></a></li>
 <li><a href="http://www.cmake.org/cmake/resources/software.html"><code>CMake</code></a></li>
 <li><a href="http://sourceforge.net/projects/win32svn/"><code>SVN</code></a></li>
 <li><a href="http://getgnuwin32.sourceforge.net"><code>wget</code> (must support SSL)</a></li>
@@ -558,7 +556,7 @@ very near the disk root (typically
 <p/>
 Under the "Start" button
 open the "Visual Studio 2013" folder, then open the "Visual Studio Tools"
-folder, and double-click on "Visual Studio x64 Win64 Command Prompt".
+folder, and double-click on "Developer Command Prompt for VS2013".
 This will launch a 
 <span class=file>cmd</span> shell configured to use the 
 Microsoft development tools.
@@ -584,6 +582,7 @@ Note that, somewhat confusingly, Visual Studio 2013 is version 12.
 To complete the process run the commands</li>
 <div class=code><code>
 cmake --build . --config Release --target ALL_BUILD
+<br/>
 cmake --build . --config Release --target INSTALL
 </code>
 <p/>
