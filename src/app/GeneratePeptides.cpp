@@ -121,12 +121,8 @@ void GeneratePeptides::processFasta(
   if (peptideShuffle || peptideReverse) {
     for (set<string>::const_iterator i = targets.begin(); i != targets.end(); i++) {
       string decoy;
-      if (makeDecoy(*i, peptideShuffle, decoy)) {
-        // check the sets
-        if (targets.find(decoy) == targets.end() ||
-             decoys.find(decoy) == decoys.end()) {
-          targetToDecoy[&*i] = &*(decoys.insert(decoy).first);
-        }
+      if (makeDecoy(*i, targets, decoys, peptideShuffle, decoy)) {
+        targetToDecoy[&*i] = &*(decoys.insert(decoy).first);
       } else {
         carp_once(CARP_WARNING, "Could not make decoy from %s", i->c_str());
       }
@@ -394,6 +390,8 @@ vector<GeneratePeptides::CleavedPeptide> GeneratePeptides::cleaveProtein(
  */
 bool GeneratePeptides::makeDecoy(
   const string& seq,  ///< sequence to make decoy from
+  const set<string>& targetSeqs,  ///< targets to check against
+  const set<string>& decoySeqs,  ///< decoys to check against
   bool shuffle, ///< shuffle (if false, reverse)
   string& decoyOut  ///< string to store decoy
 ) {
@@ -433,8 +431,12 @@ bool GeneratePeptides::makeDecoy(
     if (reversePeptide(decoyOut)) {
       // Re-add n/c
       string decoyCheck = decoyPre + decoyOut + decoyPost;
+      // Check in sets
+      if (targetSeqs.find(decoyCheck) == targetSeqs.end() &&
+          decoySeqs.find(decoyCheck) == decoySeqs.end()) {
         decoyOut = decoyCheck;
         return true;
+      }
     }
     carp(CARP_DEBUG, "Failed reversing %s, shuffling", seq.c_str());
   }
@@ -443,8 +445,12 @@ bool GeneratePeptides::makeDecoy(
   if (shufflePeptide(decoyOut)) {
     // Re-add n/c
     string decoyCheck = decoyPre + decoyOut + decoyPost;
+    // Check in sets
+    if (targetSeqs.find(decoyCheck) == targetSeqs.end() &&
+        decoySeqs.find(decoyCheck) == decoySeqs.end()) {
       decoyOut = decoyCheck;
       return true;
+    }
   }
 
   decoyOut = seq;

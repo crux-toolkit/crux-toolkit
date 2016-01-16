@@ -445,8 +445,8 @@ void TideIndexApplication::fastaToPb(
   string* proteinSequence = new string;
   int curProtein = -1;
   vector< pair< ProteinInfo, vector<PeptideInfo> > > cleavedPeptideInfo;
-  set<string> setDecoys;
-  map<string, TargetInfo> targetInfo;
+  set<string> setTargets, setDecoys;
+  map<const string*, TargetInfo> targetInfo;
 
   // Iterate over all proteins in FASTA file
   unsigned int targetsGenerated = 0, decoysGenerated = 0;
@@ -482,7 +482,7 @@ void TideIndexApplication::fastaToPb(
       outPeptideHeap.push_back(pepTarget);
       push_heap(outPeptideHeap.begin(), outPeptideHeap.end(), greater<TideIndexPeptide>());
       if (decoyType != NO_DECOYS) {
-        const string setTarget = i->Sequence();
+        const string* setTarget = &*(setTargets.insert(i->Sequence()).first);
         targetInfo.insert(make_pair(setTarget, TargetInfo(proteinInfo, i->Position(), pepMass)));
       }
       ++targetsGenerated;
@@ -526,7 +526,7 @@ void TideIndexApplication::fastaToPb(
         } else if (pepMass < minMass || pepMass > maxMass) {
           // Skip to next peptide if not in mass range
           continue;
-        } else if (targetInfo.find(j->Sequence()) != targetInfo.end()) {
+        } else if (setTargets.find(j->Sequence()) != setTargets.end()) {
           // Sequence already exists as a target
           continue;
         }
@@ -547,10 +547,12 @@ void TideIndexApplication::fastaToPb(
       }
     }
   } else {
-    for (map<string, TargetInfo>::iterator targetLookup = targetInfo.begin();
-         targetLookup != targetInfo.end();
-         ++targetLookup) {
-      const string* setTarget = &targetLookup->first;
+    for (set<string>::const_iterator i = setTargets.begin();
+         i != setTargets.end();
+         ++i) {
+      const string* setTarget = &*i;
+      const map<const string*, TargetInfo>::iterator targetLookup =
+        targetInfo.find(setTarget);
       const ProteinInfo& proteinInfo = targetLookup->second.proteinInfo;
       const int startLoc = targetLookup->second.start;
       const map<const string*, const string*>::const_iterator decoyCheck =
@@ -561,7 +563,7 @@ void TideIndexApplication::fastaToPb(
         *decoySequence = *(decoyCheck->second);
       } else {
         // Try to generate decoy
-        if (!GeneratePeptides::makeDecoy(*setTarget,
+        if (!GeneratePeptides::makeDecoy(*i, setTargets, setDecoys,
                                          decoyType == PEPTIDE_SHUFFLE_DECOYS,
                                          *decoySequence)) {
         carp(CARP_DEBUG, "Failed to generate decoy for sequence %s",
@@ -569,15 +571,7 @@ void TideIndexApplication::fastaToPb(
         ++failedDecoyCnt;
         delete decoySequence;
         continue;
-        } else if (targetInfo.find(*decoySequence) != targetInfo.end() ||
-             setDecoys.find(*decoySequence) != setDecoys.end()) {
-          // check the target and decoy set
-          carp(CARP_DEBUG, "Failed to generate decoy for sequence %s",
-             setTarget->c_str());
-          ++failedDecoyCnt;
-          delete decoySequence;
-          continue;
-        }else {
+        } else {
           targetToDecoy[setTarget] = &*(setDecoys.insert(*decoySequence).first);
         }
       }
@@ -590,7 +584,7 @@ void TideIndexApplication::fastaToPb(
       // Add decoy to heap
       FLOAT_T pepMass = targetLookup->second.mass;
       TideIndexPeptide pepDecoy(
-        pepMass, setTarget->length(), decoySequence, curProtein, (startLoc > 0) ? 1 : 0, true);
+        pepMass, i->length(), decoySequence, curProtein, (startLoc > 0) ? 1 : 0, true);
       outPeptideHeap.push_back(pepDecoy);
       push_heap(outPeptideHeap.begin(), outPeptideHeap.end(),
         greater<TideIndexPeptide>());
@@ -618,7 +612,7 @@ void TideIndexApplication::fastaToPb(
            j != i->second.end();
            ++j) {
         // In the protein sequence, replace the target peptide with its decoy
-        const string* setTarget = &(targetInfo.find(j->Sequence())->first);
+        const string* setTarget = &*(setTargets.find(j->Sequence()));
         const map<const string*, const string*>::const_iterator decoyCheck =
           targetToDecoy.find(setTarget);
         if (decoyCheck != targetToDecoy.end()) {
