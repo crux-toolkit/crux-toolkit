@@ -98,6 +98,8 @@ public:
    */
   static bool makeDecoy(
     const std::string& seq, ///< sequence to make decoy from
+    const std::set<std::string>& targetSeqs,  ///< targets to check against
+    const std::set<std::string>& decoySeqs,  ///< decoys to check against
     bool shuffle, ///< shuffle (if false, reverse)
     std::string& decoyOut ///< string to store decoy
   );
