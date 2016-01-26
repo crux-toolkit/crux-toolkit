@@ -833,7 +833,7 @@ Params::Params() : finalized_(false) {
   InitIntParam("use_NL_ions", 1, 0, 1,
     "0=no, 1= yes to consider NH3/H2O neutral loss peak.",
     "option for Comet only", true);
-  InitIntParam("use_sparse_matrix", 0, 0, 1,
+  InitIntParam("use_sparse_matrix", 1, 0, 1,
     "Controls whether or not internal sparse matrix data representation is used.",
     "option for Comet only", true);
   InitIntParam("output_sqtfile", 0, 0, 1,
