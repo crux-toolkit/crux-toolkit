@@ -11,7 +11,7 @@
 #include "model/IonConstraint.h"
 #include "model/Scorer.h"
 #include "io/SpectrumCollectionFactory.h"
-
+#include "util/Params.h"
 
 #include <math.h>
 #include <assert.h>
@@ -366,6 +366,13 @@ void XLinkScoreSpectrum::print_spectrum(Spectrum* spectrum, LinkedIonSeries& ion
       }
 
       fout.close();
+}
+
+void XLinkScoreSpectrum::processParams() {
+  for (char c = 'A'; c <= 'Z'; c++) {
+    double deltaMass = Params::GetDouble(string(1, c));
+    increase_amino_acid_mass(c, deltaMass);
+  }
 }
 
 string XLinkScoreSpectrum::getName() const {

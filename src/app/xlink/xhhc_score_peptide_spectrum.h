@@ -11,6 +11,7 @@ class XLinkScoreSpectrum : public CruxApplication {
   ~XLinkScoreSpectrum();
 
   virtual int main(int argc, char** argv);
+  virtual void processParams();
   virtual std::string getName() const;
   virtual std::string getDescription() const;
   virtual std::vector<std::string> getArgs() const;

@@ -15,6 +15,7 @@
 #include "io/MatchFileReader.h"
 #include "io/SQTReader.h"
 #include "util/Params.h"
+#include "util/StringUtils.h"
 #include "util/WinCrux.h"
 
 using namespace std;
@@ -513,7 +514,7 @@ void MatchCollection::printXmlHeader(
   fprintf(output, "<msms_pipeline_analysis date=\"%s\" xmlns=\"%s\""
           " xmlns:xsi=\"%s\" xsi:schemaLocation=\"%s %s\""
           " summary_xml=\"\">\n",
-          ctime(&hold_time),
+          StringUtils::RTrim(string(ctime(&hold_time))).c_str(),
           xmlns, xsi, xmlns, schema_location);
 
   fprintf(output, "<msms_run_summary base_name=\"%s\" msManufacturer=\"%s\" "
@@ -592,8 +593,8 @@ void MatchCollection::printXmlHeader(
     FLOAT_T mod_mass = aa_mod_get_mass_change(mod_list[mod_idx]);
     
     bool* aas_modified = aa_mod_get_aa_list(mod_list[mod_idx]);
-    for (int aa_idx = 0; aa_idx < AA_LIST_LENGTH; aa_idx++){
-      if (aas_modified[aa_idx] == true ){
+    for (int aa_idx = 0; aa_idx < AA_LIST_LENGTH; aa_idx++) {
+      if (aas_modified[aa_idx]) {
         int aa = (aa_idx+'A');
         FLOAT_T aa_mass = get_mass_amino_acid(aa , isotopic_type);
         fprintf(output, "<aminoacid_modification aminoacid=\"%c\" mass=\"%f\" "

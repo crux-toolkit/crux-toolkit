@@ -1252,13 +1252,12 @@ void find_variable_modifications(
  map<int, double>& mods,
  const char* mod_seq
 ){
-  
+    MASS_TYPE_T isotopic_type = get_mass_type_parameter("isotopic-mass");
     int seq_index = 1;
     const char* amino = mod_seq;
     const char* end = NULL;
     const char* start = NULL;
-    // Parse returned string to find modifications within
-    // brackets
+    // Parse returned string to find modifications within brackets
     while (*(amino) != '\0' && *(amino+1) != '\0'){
       if (*(amino+1) =='['){
         start = amino+2;
@@ -1269,7 +1268,7 @@ void find_variable_modifications(
         char* mass  = (char *) mymalloc(sizeof(char)*(end-start+1));
         strncpy(mass, start, end-start);
         mass[end-start] = '\0';
-        mods[seq_index] = atof(mass);
+        mods[seq_index] = atof(mass) + get_mass_amino_acid(*amino, isotopic_type);
         amino = end;
         free(mass);
       } else if (*(amino+1) < 'A' || *(amino+1) > 'Z'){ // a mod symbol
@@ -1279,7 +1278,7 @@ void find_variable_modifications(
           mass += get_mod_mass_from_symbol(*end);
           end++;
         }
-        mods[seq_index] = mass;
+        mods[seq_index] = mass + get_mass_amino_acid(*amino, isotopic_type);
       }
       seq_index++;
       amino++;
@@ -1297,9 +1296,9 @@ void find_static_modifications(
   const char* peptide_sequence
 ){
   const char* seq_iter = peptide_sequence;
-  
+
   MASS_TYPE_T isotopic_type = get_mass_type_parameter("isotopic-mass");
-  
+
   char aa[2];
   aa[1] = '\0';
   int seq_index = 1;
@@ -1310,13 +1309,12 @@ void find_static_modifications(
     if (get_double_parameter( (const char *)aa)!= 0 && 
         var_mods.find(seq_index) == var_mods.end()){
 
-      //double mass = get_mass_amino_acid(*seq_iter, isotopic_type);
-      static_mods[seq_index] = get_double_parameter( (const char*)aa);
+      double mass = get_mass_amino_acid(*seq_iter, isotopic_type);
+      static_mods[seq_index] = get_double_parameter((const char*)aa) + mass;
     }
     seq_iter++;
     seq_index++;
   }
-
 }
 
 

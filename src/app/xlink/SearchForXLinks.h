@@ -45,6 +45,8 @@ class SearchForXLinks: public CruxApplication {
    */
   virtual int main(int argc, char** argv);
 
+  virtual void processParams();
+
   /**
    * \returns the command name for SearchForXLinks
    */
