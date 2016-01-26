@@ -12,6 +12,7 @@
 #include "model/Scorer.h"
 #include "io/SpectrumCollectionFactory.h"
 #include "io/DelimitedFile.h"
+#include "util/Params.h"
 
 #include <math.h>
 #include <assert.h>
@@ -207,6 +208,13 @@ void XLinkAssignIons::print_spectrum(Spectrum* spectrum, LinkedIonSeries& ion_se
       }
       cout << result_file;
 
+}
+
+void XLinkAssignIons::processParams() {
+  for (char c = 'A'; c <= 'Z'; c++) {
+    double deltaMass = Params::GetDouble(string(1, c));
+    increase_amino_acid_mass(c, deltaMass);
+  }
 }
 
 string XLinkAssignIons::getName() const {

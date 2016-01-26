@@ -1,6 +1,7 @@
 #include "GeneratePeptides.h"
 #include "parameter.h"
 #include "model/ProteinPeptideIterator.h"
+#include "util/mass.h"
 #include "util/FileUtils.h"
 #include "util/Params.h"
 #include "util/StringUtils.h"
@@ -164,13 +165,16 @@ void GeneratePeptides::processFasta(
     delete fasta;
   }
 
+  int precision = Params::GetInt("mass-precision");
   for (map< OrderedPeptide, vector<string> >::const_iterator i = peptideToProtein.begin();
        i != peptideToProtein.end();
        i++) {
     const string& sequence = i->first.Sequence();
     FLOAT_T mass = i->first.Mass();
     vector<string>::const_iterator j = i->second.begin();
-    *targetList << sequence << '\t' << mass << '\t' << *j;
+    *targetList << sequence << '\t'
+                << StringUtils::ToString(mass + MASS_PROTON, precision) << '\t'
+                << *j;
     for (j = j + 1; j != i->second.end(); j++) {
       string proteinId = *j;
       *targetList << ',' << proteinId;
@@ -182,7 +186,9 @@ void GeneratePeptides::processFasta(
       map<const string*, const string*>::const_iterator k = targetToDecoy.find(&*target);
       if (k != targetToDecoy.end()) {
         j = i->second.begin();
-        *decoyList << *k->second << '\t' << mass << '\t' << decoyPrefix << *j;
+        *decoyList << *k->second << '\t'
+                   << StringUtils::ToString(mass + MASS_PROTON, precision) << '\t'
+                   << decoyPrefix << *j;
         for (j = j + 1; j != i->second.end(); j++) {
           *decoyList << ',' << decoyPrefix << *j;
         }
@@ -555,11 +561,15 @@ vector<string> GeneratePeptides::getOptions() const {
 vector< pair<string, string> > GeneratePeptides::getOutputs() const {
   vector< pair<string, string> > outputs;
   outputs.push_back(make_pair("generate-peptides.target.txt",
-    "a tab-delimited text file containing the target peptides, one per line, "
-    "along with the peptide mass and the comma-delimited list of protein IDs."));
+    "A text file containing the target peptides, one per line. Each line has "
+    "three tab-delimited columns, containing the peptide sequence, the m+h "
+    "mass of the unmodified peptide, and a comma-delimited list of protein IDs "
+    "in which the peptide occurs."));
   outputs.push_back(make_pair("generate-peptides.decoy.txt",
-    "a tab-delimited text file containing the decoy peptides, one per line, "
-    "along with the peptide mass and the comma-delimited list of protein IDs. "
+    "A text file containing the decoy peptides, one per line. Each line has "
+    "three tab-delimited columns, containing the peptide sequence, the m+h "
+    "mass of the unmodified peptide, and a comma-delimited list of protein IDs "
+    "in which the peptide occurs. "
     "There is a one-to-one correspondence between targets and decoys."));
   outputs.push_back(make_pair("generate-peptides.proteins.decoy.txt",
     "a FASTA format file containing decoy proteins, in which all of the "

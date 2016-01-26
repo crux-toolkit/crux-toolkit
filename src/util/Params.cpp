@@ -2294,11 +2294,6 @@ void Params::FinalizeParams() {
     Set("missed-cleavages", 500);
   }
 
-  for (char c = 'A'; c <= 'Z'; c++) {
-    double deltaMass = GetDouble(string(1, c));
-    increase_amino_acid_mass(c, deltaMass);
-  }
-
   translate_decoy_options();
 
   string customEnzyme = GetString("custom-enzyme");

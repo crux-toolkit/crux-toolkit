@@ -5,6 +5,8 @@
 #include "SearchForXLinks.h"
 
 #include "xlink_search.h"
+#include "util/mass.h"
+#include "util/Params.h"
 
 using namespace std;
 
@@ -36,6 +38,13 @@ int SearchForXLinks::main(int argc, char** argv) {
   }
   
   return ret;
+}
+
+void SearchForXLinks::processParams() {
+  for (char c = 'A'; c <= 'Z'; c++) {
+    double deltaMass = Params::GetDouble(string(1, c));
+    increase_amino_acid_mass(c, deltaMass);
+  }
 }
 
 /**
