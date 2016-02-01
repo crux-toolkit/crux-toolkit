@@ -99,6 +99,11 @@ public:
   * \returns the enum of the application, default MISC_COMMAND
   */
   virtual COMMAND_T getCommand() const;
+  
+  /**
+  * \Preprocesses the program arguments before finalizing them.
+  */
+  virtual void processParams();
 
   /**
   * \returns whether the application needs the output directory or not.
