@@ -1031,7 +1031,8 @@ Params::Params() : finalized_(false) {
     "[[html:</a>]] format. In tab-delimited text format, only the specified score column "
     "is required. However if --estimation-method is tdc, then the columns \"scan\" and "
     "\"charge\" are required, as well as \"protein ID\" if the search was run with "
-    "concat=F. Furthermore, if the --peptide-level option is set to T, then the column "
+    "concat=F. Furthermore, if the --estimation-method is specified to peptide-level " 
+	"is set to T, then the column "
     "\"peptide\" must be included, and if --sidak is set to T, then the \"distinct "
     "matches/spectrum\" column must be included.[[html:<br>Note that multiple files can "
     "also be provided either on the command line or using the --list-of-files option.<br>"
@@ -1050,9 +1051,10 @@ Params::Params() : finalized_(false) {
     "The estimated percent of target scores that are drawn from the "
     "null distribution.",
     "Used by assign-confidence, compute-q-values, percolator and q-ranker", false);
-  InitStringParam("estimation-method", "tdc", "mix-max|tdc",
+  InitStringParam("estimation-method", "tdc", "mix-max|tdc|peptide-level",
     "Specify the method used to estimate q-values: the mix-max procedure or target-decoy "
-    "competition.",
+    "competition. peptide-level is applied for spectrum-centric search. Eliminates any PSMS for which there "
+    "exists a better scoring PSM involving the same peptide. ",
     "Used by assign-confidence.", true);      
   InitBoolParam("sidak", false, 
     "Adjust the score using the Sidak adjustment and reports them in a new column in the "
@@ -1060,11 +1062,6 @@ Params::Params() : finalized_(false) {
     "p-values, and that it requires the presence of the \"distinct matches/spectrum\" "
     "feature for each PSM.",
     "Used by assign-confidence.", true);      
-  InitBoolParam("peptide-level", false,
-    "Applied for spectrum-centric search. Eliminates any PSMS for which there "
-    "exists a better scoring PSM involving the same peptide. This option is "
-    "incompatible with the mix-max procedure.",
-    "Used by assign-confidence.", true);
   InitStringParam("score", "",
     "Specify the column (for tab-delimited input) or tag (for XML input) "
     "used as input to the q-value estimation procedure. If this parameter is unspecified, "
