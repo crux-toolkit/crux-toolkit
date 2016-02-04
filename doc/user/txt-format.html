@@ -534,9 +534,10 @@ This column only appears when <code>exact-p-value=T</code>.</td>
 <tr>
 <td>26</td>
 <td>distinct matches/spectrum</td>
-<td>The number of unique candidate peptides in the database found for this
-  spectrum.  Note that this is always the number of target candidate
-  peptides, even if the PSM involves a decoy peptide.</td>
+<td>The number of distinct target candidate peptides in the database
+  for this spectrum.  If concat=T, then target and decoy peptides are
+  included in the count.  If concat=F, then the count is only of
+  target peptides, even if the PSM itself is a decoy.</td>
 <td>&nbsp;</td>
 <td>&#10003;</td>
 <td>&#10003;</td>
