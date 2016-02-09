@@ -25,6 +25,7 @@
 #include "model/Spectrum.h"
 #include "model/Peak.h"
 #include "io/SpectrumCollectionFactory.h"
+#include "util/Params.h"
 #include "util/WinCrux.h"
 
 using namespace std;
@@ -50,7 +51,7 @@ int GetMs2Spectrum :: main(int argc, char** argv){
   /* Get arguments */
   int min_scan = -1;
   int max_scan = -1;
-  string range_string = get_string_parameter("scan-number");
+  string range_string = Params::GetString("scan-number");
 
   get_range_from_string(
     range_string,
@@ -59,11 +60,11 @@ int GetMs2Spectrum :: main(int argc, char** argv){
   
   fprintf(stderr, "Scanning from %d to %d.\n", min_scan, max_scan);
 
-  string ms2_filename = get_string_parameter("ms2 file");
+  string ms2_filename = Params::GetString("ms2 file");
   carp(CARP_DETAILED_DEBUG, "ms2_filename: %s", ms2_filename.c_str());
 
   /* Get options */
-  bool options = get_boolean_parameter("stats");
+  bool options = Params::GetBool("stats");
 
   /* read input file */
   if( access(ms2_filename.c_str(), F_OK)){

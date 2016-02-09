@@ -282,9 +282,6 @@ class Match {
     std::string& match_score_name ///< the name of the score -in
     );
 
-
-  
-
   /**
    * set the custom match score
    */
@@ -485,41 +482,6 @@ int get_num_terminal_cleavage(
   const char flanking_aas_next,
   ENZYME_T enzyme
 );
-
-
-/**
- * \brief prints both variable and static modifications for 
- *  peptide sequence
- *
- */
-void print_modifications_xml(
-  const char* mod_seq,
-  const char* sequence,
-  FILE* output_file
-);
-
-/**
- * \brief takes an empty mapping of index to mass
- * of static mods and a full mapping of var mods
- * to fill up the mapping of static mods
- */
-void find_static_modifications(
-  std::map<int, double>& static_mods,
-  std::map<int, double>& var_mods,
-  const char* sequence
-);
-
-/**
- * \brief takes an empty mapping of index to mass
- * and extract information from mod sequence fill
- * up map
- */
-void find_variable_modifications(
- std::map<int, double>& mods,
- const char* mod_seq
-);
-
-
 
 #endif //MATCH_H
 

@@ -10,6 +10,7 @@
 #include "util/crux-utils.h"
 #include "util/FileUtils.h"
 #include "util/Params.h"
+#include "util/StringUtils.h"
 
 using namespace std;
 
@@ -72,47 +73,33 @@ int CruxBullseyeApplication::main(
   /* add flags */
   
   be_args_vec.push_back("-c");
-  be_args_vec.push_back(
-    DelimitedFileWriter::to_string(get_double_parameter("max-persist"))
-    );
+  be_args_vec.push_back(Params::GetString("max-persist"));
   
-  if (get_boolean_parameter("exact-match")) {
+  if (Params::GetBool("exact-match")) {
     be_args_vec.push_back("-e");
     be_args_vec.push_back("-p");
-    be_args_vec.push_back(
-      DelimitedFileWriter::to_string(get_double_parameter("exact-tolerance"))
-      );
+    be_args_vec.push_back(Params::GetString("exact-tolerance"));
   }
   
   be_args_vec.push_back("-g");
-  be_args_vec.push_back(
-    DelimitedFileWriter::to_string(get_int_parameter("gap-tolerance"))
-    );
+  be_args_vec.push_back(Params::GetString("gap-tolerance"));
   
   be_args_vec.push_back("-r");
-  be_args_vec.push_back(
-    DelimitedFileWriter::to_string(get_double_parameter("persist-tolerance"))
-    );
+  be_args_vec.push_back(Params::GetString("persist-tolerance"));
   
   be_args_vec.push_back("-n");
-  be_args_vec.push_back(
-    DelimitedFileWriter::to_string(get_double_parameter("bullseye-min-mass"))
-    );
+  be_args_vec.push_back(Params::GetString("bullseye-min-mass"));
 
   be_args_vec.push_back("-m");
-  be_args_vec.push_back(
-    DelimitedFileWriter::to_string(get_double_parameter("bullseye-max-mass")));
+  be_args_vec.push_back(Params::GetString("bullseye-max-mass"));
 
   be_args_vec.push_back("-s"); 
   be_args_vec.push_back(
     //TODO- I don't know why bullseye.cpp adds 1 to the value passed in...
-    DelimitedFileWriter::to_string<int>(get_int_parameter("scan-tolerance")-1)
-    );
+    StringUtils::ToString(Params::GetInt("scan-tolerance") - 1));
   
   be_args_vec.push_back("-t");
-  be_args_vec.push_back(
-    DelimitedFileWriter::to_string(get_double_parameter("retention-tolerance"))
-    );
+  be_args_vec.push_back(Params::GetString("retention-tolerance"));
   
 
 

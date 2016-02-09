@@ -3,43 +3,35 @@
  * \brief Object for parsing pepxml files
  ****************************************************************************/
 
+#include "expat.h"
 #include "PepXMLReader.h"
 #include "util/mass.h"
-#include "expat.h"
-
+#include "util/AminoAcidUtil.h"
+#include "util/MathUtil.h"
 #include "model/Protein.h"
 #include "model/PostProcessProtein.h"
 #include "model/Peptide.h"
-
-
-#include <cstdio>
-#include <cstring>
-
-#include <iostream>
-
 #include "DelimitedFile.h"
 #include "parameter.h"
 #include "MatchCollectionParser.h"
 
+#include <cstdio>
+#include <cstring>
+#include <iostream>
 
 using namespace std;
 using namespace Crux;
 
-//Buffer for expat's xml reading routines
-#define BUFFSIZE 8192
-char Buff[BUFFSIZE];
-
 void open_handler(void *data, const char *el, const char **attr) {
-  
   PepXMLReader* reader = (PepXMLReader*)data;
-  if (strcmp(el, "spectrum_query") == 0) {
+  if (strcmp(el, "aminoacid_modification") == 0) {
+    reader->aminoacidModificationOpen(attr);
+  } else if (strcmp(el, "spectrum_query") == 0) {
     reader->spectrumQueryOpen(attr);
   } else if (strcmp(el, "search_result") == 0) {
     reader->searchResultOpen();
   } else if (strcmp(el, "search_hit") == 0) {
     reader->searchHitOpen(attr);
-  } else if (strcmp(el, "modification_info") == 0) {
-    reader->modificationInfoOpen(attr);
   } else if (strcmp(el, "mod_aminoacid_mass") == 0) {
     reader->modAminoAcidMassOpen(attr);
   } else if (strcmp(el, "alternative_protein") == 0) {
@@ -54,16 +46,15 @@ void open_handler(void *data, const char *el, const char **attr) {
 }
 
 void close_handler(void *data, const char *el) {
-
   PepXMLReader* reader = (PepXMLReader*)data;
-  if (strcmp(el, "spectrum_query") == 0) {
+  if (strcmp(el, "aminoacid_modification") == 0) {
+    reader->aminoacidModificationClose();
+  } else if (strcmp(el, "spectrum_query") == 0) {
     reader->spectrumQueryClose();
   } else if (strcmp(el, "search_result") == 0) {
     reader->searchResultClose();
   } else if (strcmp(el, "search_hit") == 0) {
     reader->searchHitClose();
-  } else if (strcmp(el, "modification_info") == 0) {
-    reader->modificationInfoClose();
   } else if (strcmp(el, "mod_aminoacid_mass") == 0) {
     reader->modAminoAcidMassClose();
   } else if (strcmp(el, "alternative_protein") == 0) {
@@ -81,6 +72,7 @@ void close_handler(void *data, const char *el) {
  * Initializes the object
  */
 void PepXMLReader::init() {
+  aminoacid_modification_open_ = false;
   spectrum_query_open_ = false;
   search_result_open_ = false;
   search_hit_open_ = false;
@@ -128,7 +120,6 @@ PepXMLReader::~PepXMLReader() {
  * \returns the MatchCollection resulting from the parsed xml file
  */
 MatchCollection* PepXMLReader::parse() {
-
   FILE* file_ptr = fopen(file_path_.c_str(), "r");
   if (file_ptr == NULL) {
     carp(CARP_FATAL, "Opening %s or reading failed", file_path_.c_str());
@@ -136,39 +127,72 @@ MatchCollection* PepXMLReader::parse() {
 
   XML_Parser xml_parser = XML_ParserCreate(NULL);
 
-  if (! xml_parser) {
+  if (!xml_parser) {
     carp(CARP_FATAL, "Couldn't allocate memory for parser");
   }
 
   current_match_collection_ = new MatchCollection();
   current_match_collection_->preparePostProcess();
-  int total_matches=current_match_collection_->getMatchTotal();
-  cerr<<"total matches: "<< total_matches<<endl;
   XML_SetUserData(xml_parser, this);
   XML_SetElementHandler(xml_parser, open_handler, close_handler);
 
   int done = 0;
-
-  while (done == 0) {
-
-    int len = fread(Buff, 1, BUFFSIZE, file_ptr);
+  while (!done) {
+    char buf[8192];
+    int len = fread(buf, 1, sizeof(buf), file_ptr);
     if (ferror(stdin)) {
       carp(CARP_FATAL, "Read error");
-      exit(-1);
     }
     done = feof(file_ptr);
-
-    if (! XML_Parse(xml_parser, Buff, len, done)) {
+    if (!XML_Parse(xml_parser, buf, len, done)) {
       carp(CARP_FATAL, "Parse error at line %d:\n%s\n",
            (int)XML_GetCurrentLineNumber(xml_parser),
            XML_ErrorString(XML_GetErrorCode(xml_parser)));
-      exit(-1);
+    }
+  }
+  fclose(file_ptr);
+  return current_match_collection_;
+}
+
+void PepXMLReader::aminoacidModificationOpen(const char** attr) {
+  if (aminoacid_modification_open_) {
+    carp(CARP_FATAL, "aminoacid_modification not closed before another was opened!");
+  }
+  aminoacid_modification_open_ = true;
+
+  ModPosition pos = ANY;
+  char aa = '\0';
+  double mass = 0, dMass = 0;
+  bool variable = false;
+  char symbol = '\0';
+
+  for (int i = 0; attr[i]; i += 2) {
+    if (strcmp(attr[i], "aminoacid") == 0) {
+      aa = attr[i + 1][0];
+    } else if (strcmp(attr[i], "mass") == 0) {
+      mass = atof(attr[i + 1]);
+    } else if (strcmp(attr[i], "massdiff") == 0) {
+      dMass = atof(attr[i + 1]);
+    } else if (strcmp(attr[i], "variable") == 0) {
+      variable = strcmp(attr[i + 1], "Y") == 0;
+    } else if (strcmp(attr[i], "peptide_terminus") == 0) {
+      if (strcmp(attr[i + 1], "n") == 0) {
+        pos = PROTEIN_N;
+      } else if (strcmp(attr[i + 1], "c") == 0) {
+        pos = PROTEIN_C;
+      } else if (strcmp(attr[i + 1], "nc") == 0) {
+        //pos = PROTEIN_NC; TODO
+      }
+    } else if (strcmp(attr[i], "symbol") == 0) {
+      symbol = attr[i + 1][0];
     }
   }
 
-  fclose(file_ptr);
+  ModificationDefinition::New(string(1, aa), dMass, pos, !variable);
+}
 
-  return current_match_collection_;
+void PepXMLReader::aminoacidModificationClose() {
+  aminoacid_modification_open_ = false;
 }
 
 /**
@@ -177,10 +201,8 @@ MatchCollection* PepXMLReader::parse() {
 void PepXMLReader::spectrumQueryOpen(
   const char** attr ///< attribute array for element
   ) {
-
   if (spectrum_query_open_) {
     carp(CARP_FATAL, "spectrum_query not closed before another was opened!");
-    exit(-1);
   }
   spectrum_query_open_ = true;
 
@@ -241,12 +263,10 @@ int PepXMLReader::findStart(
   string prev_aa, ///< the amino acid before the sequence in the protein
   string next_aa ///< the next amino acid after the sequence in the protein
   ) {
-
   if (protein->getSequencePointer() == NULL) {
     return -1;
   }
   int case_ = -1;
-
   int ans = -1;
 
   if (prev_aa == "-") {
@@ -267,18 +287,18 @@ int PepXMLReader::findStart(
       seq = peptide_sequence;
       pos = protein_seq.find(seq);
       if (pos == string::npos) {
-        carp(CARP_FATAL, "could not find %s in protein %s\n%s", seq.c_str(), protein->getIdPointer(), protein_seq.c_str());
+        carp(CARP_FATAL, "could not find %s in protein %s\n%s",
+             seq.c_str(), protein->getIdPointer(), protein_seq.c_str());
       }
       case_ = 2;
       ans = (pos+1);
     } else {
       case_ = 3;
-      ans = (pos+2);
+      ans = pos+2;
     }
   }
 
   return ans;
-
 }
 
 /**
@@ -291,18 +311,12 @@ void PepXMLReader::searchHitOpen(
     carp(CARP_FATAL, "Search Hit not closed before another open!");
   }
   search_hit_open_ = true;
-
-
   int hit_rank = -1;
-  string protein_string;
+  string protein_string, prev_aa, next_aa;
+  unsigned by_ions_matched = 0;
+  unsigned by_ions_total = 0;
+  unsigned current_num_matches = 0;
 
-  string prev_aa;
-  string next_aa;
-  unsigned  by_ions_matched=0; 
-  unsigned by_ions_total=0; 
-  unsigned current_num_matches=0; 
-
-  double peptide_mass = 0.0;
   for (int i = 0; attr[i]; i += 2) {
     if (strcmp(attr[i], "hit_rank") == 0) {
       hit_rank = atoi(attr[i+1]);
@@ -312,31 +326,28 @@ void PepXMLReader::searchHitOpen(
       protein_string = attr[i+1];
     } else if (strcmp(attr[i], "num_tot_proteins") == 0) {
       ; // do nothing.
-    }else if (strcmp(attr[i], "num_matched_ions") == 0) {
+    } else if (strcmp(attr[i], "num_matched_ions") == 0) {
+      current_match_collection_->setScoredType(BY_IONS_MATCHED, true);
       by_ions_matched = atoi(attr[i+1]);  
-    }else if (strcmp(attr[i], "tot_num_ions") == 0){
+    } else if (strcmp(attr[i], "tot_num_ions") == 0) {
+      current_match_collection_->setScoredType(BY_IONS_TOTAL, true);
       by_ions_total = atoi(attr[i+1]); 
-    }else if (strcmp(attr[i], "calc_neutral_pep_mass") == 0) {
-      peptide_mass = atof(attr[i+1]);
     } else if (strcmp(attr[i], "peptide_prev_aa") == 0) {
       prev_aa = attr[i+1];
     } else if (strcmp(attr[i], "peptide_next_aa") == 0) {
       next_aa = attr[i+1];
-    } else if( strcmp(attr[i], "num_matched_peptides") == 0){
-      current_num_matches=atoi(attr[i+1]);
+    } else if (strcmp(attr[i], "num_matched_peptides") == 0) {
+      current_num_matches = atoi(attr[i+1]);
     }
   }
 
-  
   unsigned char length = current_peptide_sequence_.length();
-    
-
   bool is_decoy;
 
-  Protein* protein = 
+  Protein* protein =
     MatchCollectionParser::getProtein(database_, decoy_database_, protein_string, is_decoy);
   int start_idx = protein->findStart(current_peptide_sequence_, prev_aa, next_aa);
-  Peptide* peptide = new Crux::Peptide(length, peptide_mass, protein, start_idx);
+  Peptide* peptide = new Crux::Peptide(length, protein, start_idx);
 
   current_match_ = new Match(peptide, current_spectrum_, current_zstate_, is_decoy);
   if (is_decoy) {
@@ -346,12 +357,12 @@ void PepXMLReader::searchHitOpen(
   if ((hit_rank > 0) && (current_match_->getRank(XCORR) == 0)) {
     current_match_->setRank(XCORR, hit_rank);
   }
-  if(by_ions_total>0){
+  if (by_ions_total > 0) {
     current_match_->setScore(BY_IONS_MATCHED, by_ions_matched);
     current_match_->setScore(BY_IONS_TOTAL, by_ions_total);
   }
 
-  if(current_num_matches>0) {
+  if (current_num_matches > 0) {
     current_match_->setLnExperimentSize(logf(current_num_matches));
     current_match_collection_->setHasDistinctMatches(true);
   } else { 
@@ -364,39 +375,8 @@ void PepXMLReader::searchHitOpen(
  */
 void PepXMLReader::searchHitClose() {
   search_hit_open_ = false;
-  
   //We should have all the information needed to add the match object.
   current_match_collection_->addMatch(current_match_);
-
-}
-
-/**
- * Handles the modification_info open tag event
- */
-void PepXMLReader::modificationInfoOpen(
-  const char** attr ///< attribute array for element
-  ) {
-  
-  modification_info_open_ = true;
-  for (int idx = 0; attr[idx]; idx += 2) {
-    if (strcmp(attr[idx], "mod_nterm_mass") == 0) {
-
-      FLOAT_T mod_nterm_mass = atof(attr[idx+1]);
-      //set nterm mod mass
-      const AA_MOD_T* aa_mod = get_aa_mod_from_mass(mod_nterm_mass);
-      MODIFIED_AA_T* mod_seq = current_match_->getPeptide()->getModifiedAASequence();
-      modify_aa(&mod_seq[0], aa_mod);
-      current_match_->getPeptide()->setModifiedAASequence(mod_seq, true);
-      free(mod_seq);
-    } 
-  }
-}
-
-/**
- * Handles the modification_info close tag event
- */
-void PepXMLReader::modificationInfoClose() {
-  modification_info_open_ = false;
 }
 
 /**
@@ -405,7 +385,6 @@ void PepXMLReader::modificationInfoClose() {
 void PepXMLReader::modAminoAcidMassOpen(
   const char** attr ///< attribute array for element
   ) {
-  
   mod_aminoacid_mass_open_ = true;
   int position = -1;
   FLOAT_T mod_mass = 0;
@@ -419,14 +398,28 @@ void PepXMLReader::modAminoAcidMassOpen(
       have_mod_mass = true;
     }
   }
-  
+
   if (position > 0 && have_mod_mass) {
-    //set aminoacid modification.
-    const AA_MOD_T* aa_mod = get_aa_mod_from_mass(mod_mass);
-    MODIFIED_AA_T* mod_seq = current_match_->getPeptide()->getModifiedAASequence();
-    modify_aa(&mod_seq[position-1], aa_mod);
-    current_match_->getPeptide()->setModifiedAASequence(mod_seq, true);
-    free(mod_seq);
+    // mass includes amino acid mass, subtract it
+    char* seq = current_match_->getPeptide()->getSequence();
+    mod_mass -= AminoAcidUtil::GetMass(seq[position - 1]);
+    free(seq);
+    const ModificationDefinition* mod = ModificationDefinition::Find(mod_mass, false);
+    if (mod == NULL) {
+      mod = ModificationDefinition::Find(mod_mass, true);
+    }
+    if (mod != NULL) {
+      current_match_->getPeptide()->addMod(mod, position - 1);
+    } else {
+      // mod was not defined at top of file
+      mod_mass = MathUtil::Round(mod_mass, Params::GetInt("mod-precision"));
+      //set aminoacid modification.
+      const AA_MOD_T* aa_mod = get_aa_mod_from_mass(mod_mass);
+      MODIFIED_AA_T* mod_seq = current_match_->getPeptide()->getModifiedAASequence();
+      modify_aa(&mod_seq[position-1], aa_mod);
+      current_match_->getPeptide()->setModifiedAASequence(mod_seq, true);
+      free(mod_seq);
+    }
   } else {
     carp(CARP_WARNING, "mod_aminoacid_mass error");
   }
@@ -445,8 +438,6 @@ void PepXMLReader::modAminoAcidMassClose() {
 void PepXMLReader::alternativeProteinOpen(
   const char** attr ///< atttribute array for element
   ) {
-
-
   alternative_protein_open_ = true;
 
   string protein_string;
@@ -472,18 +463,15 @@ void PepXMLReader::alternativeProteinOpen(
   }
   int start_idx = protein->findStart(current_peptide_sequence_, prev_aa, next_aa);
 
-  PeptideSrc* src = new PeptideSrc((DIGEST_T)0, protein, start_idx);
+  PeptideSrc* src = new PeptideSrc(INVALID_DIGEST, protein, start_idx);
   current_match_->getPeptide()->addPeptideSrc(src);
-
 }
 
 /**
  * Handles the alternative_protein close tag event
  */
 void PepXMLReader::alternativeProteinClose() {
-
   alternative_protein_open_ = false;
-
 }
 
 /**
@@ -492,7 +480,6 @@ void PepXMLReader::alternativeProteinClose() {
 void PepXMLReader::searchScoreOpen(
   const char** attr ///< attribute array for element
   ) {
-
   search_score_open_ = true;
   string name;
   double value = 0.0;
@@ -540,7 +527,6 @@ void PepXMLReader::searchScoreOpen(
   } 
   //set the custom score
   current_match_->setCustomScore(name, value);
-
 }
 
 /**
@@ -550,21 +536,17 @@ void PepXMLReader::searchScoreClose() {
   search_score_open_ = false;
 }
 
-
 /**
  * Handles the peptideprophet_result open tag event
  */
 void PepXMLReader::peptideProphetResultOpen(
   const char** attr ///< attribute array for element
   ) {
-
-
   if (peptideprophet_result_open_) {
     carp(CARP_FATAL, "peptideprophet_result_open_ before close!");
   }  
 
   peptideprophet_result_open_ = true;
-
 
   FLOAT_T probability = 0;
   bool probability_parsed = false;
@@ -583,12 +565,10 @@ void PepXMLReader::peptideProphetResultOpen(
   }
 }
 
-
 /**
  * Handles the peptideprophet_result close tag event
  */
 void PepXMLReader::peptideProphetResultClose() {
-
   peptideprophet_result_open_ = false;
 }
 
@@ -600,60 +580,11 @@ MatchCollection* PepXMLReader::parse(
   Database* database, ///< target protein database
   Database* decoy_database ///< decoy protein database (can be null)
   ) {
-
-  PepXMLReader* reader = new PepXMLReader(file_path);
-  reader->setDatabase(database);
-  reader->setDecoyDatabase(decoy_database);
-
-  MatchCollection* collection = reader->parse();
-
-  return collection;
-
-
+  PepXMLReader reader(file_path);
+  reader.setDatabase(database);
+  reader.setDecoyDatabase(decoy_database);
+  return reader.parse();
 }
-
-//TODO - remove this code after some time of debugging.
-#ifdef MAIN
-int main(int argc, char** argv) {
-
-  initialize_parameters();
-  set_verbosity_level(CARP_INFO);
-  char* file_path = argv[1];
-  char* database_path = argv[2];
-
-  Database* database;
-  Database* decoy_database;
- 
-  //MatchCollectionFactory::loadDatabase(database_path, database, decoy_database);
-  database = new Database();
-  decoy_database = new Database();
-
-
-  PepXMLReader* reader = new PepXMLReader(file_path);
-  reader->setDatabase(database);
-  reader->setDecoyDatabase(decoy_database);
-
-  MatchCollection* match_collection = reader->parse();
-
-  cerr << "there are "<<match_collection->getMatchTotal()<<" matches read"<<endl;
-
-  MatchIterator* match_iterator = new MatchIterator(match_collection, XCORR, true);
-
-  while(match_iterator->hasNext()) {
-    Match* match = match_iterator->next();
-
-    cout << "xcorr:"<<match->getScore(XCORR);
-    cout <<" rank:"<<match->getRank(XCORR);
-    cout <<" sequence:"<<match->getPeptide()->getSequence();
-    cout <<" protein:"<< match->getPeptide()->getProteinIdsLocations()<<endl;
-
-  }
-
-
-
-  return 0;
-}
-#endif
 
 /*
  * Local Variables:

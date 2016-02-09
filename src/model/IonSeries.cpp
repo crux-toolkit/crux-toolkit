@@ -13,6 +13,7 @@
 #include "objects.h"
 #include "Ion.h"
 #include "IonSeries.h"
+#include "util/Params.h"
 #include "util/utils.h"
 #include "util/crux-utils.h"
 #include "parameter.h"
@@ -118,7 +119,7 @@ IonSeries::IonSeries(
   charge_ = charge;
   // use max peptide len so loss_limit array can be used for any peptide
   loss_limit_ = 
-    (LOSS_LIMIT_T*)mycalloc(get_int_parameter("max-length"), 
+    (LOSS_LIMIT_T*)mycalloc(Params::GetInt("max-length"), 
                             sizeof(LOSS_LIMIT_T));
 }
 

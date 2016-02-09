@@ -9,6 +9,7 @@
 #include "model/Scorer.h"
 #include "model/Ion.h"
 #include "model/IonSeries.h"
+#include "util/Params.h"
 #include "XLinkPeptide.h"
 
 #include <iostream>
@@ -58,7 +59,7 @@ void XLinkScorer::init(
  */
 XLinkScorer::XLinkScorer() {
 
-  init(NULL, 0, get_boolean_parameter("compute-sp"));
+  init(NULL, 0, Params::GetBool("compute-sp"));
 }
 
 /**
@@ -69,7 +70,7 @@ XLinkScorer::XLinkScorer(
   int charge ///< charge state
   ) {
 
-  init(spectrum, charge, get_boolean_parameter("compute-sp"));
+  init(spectrum, charge, Params::GetBool("compute-sp"));
 }
 
 /**

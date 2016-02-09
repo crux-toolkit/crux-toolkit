@@ -64,7 +64,7 @@ class PinWriter : public PSMWriter {
 
   void printPSM(Crux::Match* match);
 
-  std::string getPeptide(Crux::Peptide* peptide);
+  std::string getPeptide(Crux::Peptide* pep);
   bool isInfinite(FLOAT_T x);
   std::string getId(Crux::Match* match, int scan_number); 
 

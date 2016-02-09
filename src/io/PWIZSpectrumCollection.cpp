@@ -6,6 +6,7 @@
  */
 #include "PWIZSpectrumCollection.h" 
 #include "util/crux-utils.h"
+#include "util/Params.h"
 #include "util/StringUtils.h"
 #include "parameter.h"
 #include <iostream>
@@ -79,9 +80,9 @@ bool PWIZSpectrumCollection::parseFirstLastScanFromTitle(
     //try to parse the first scan, last scan, and charge from the title, keeping track
     //of whether we were successful.
 
-    success = from_string(title_charge, scan_title_tokens[n-2]);
-    success &= from_string(title_last_scan, scan_title_tokens[n-3]);
-    success &= from_string(title_first_scan, scan_title_tokens[n-4]);
+    success = StringUtils::TryFromString(scan_title_tokens[n-2], &title_charge);
+    success &= StringUtils::TryFromString(scan_title_tokens[n-3], &title_last_scan);
+    success &= StringUtils::TryFromString(scan_title_tokens[n-4], &title_first_scan);
 
     if (success) {
       //okay we parsed the three numbers, fill in the results.
@@ -114,7 +115,7 @@ bool PWIZSpectrumCollection::parse() {
 
   // TODO add first/last scan to base class
   // get a list of scans to include if requested
-  string range_string = get_string_parameter("scan-number");
+  string range_string = Params::GetString("scan-number");
   int first_scan = -1;
   int last_scan = -1;
 

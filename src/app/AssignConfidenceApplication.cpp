@@ -36,10 +36,8 @@ pair<double,bool> make_pair(double db, bool b);
 /**
 * \returns a blank ComputeQValues object
 */
-AssignConfidenceApplication::AssignConfidenceApplication() {
-  spectrum_flag_ = NULL;
-  cascade_fdr_ = -1.0;
-  iteration_cnt_ = 0;
+AssignConfidenceApplication::AssignConfidenceApplication():
+  spectrum_flag_(NULL), iteration_cnt_(0) {
 }
 
 /**
@@ -53,13 +51,11 @@ AssignConfidenceApplication::~AssignConfidenceApplication() {
 */
 
 int AssignConfidenceApplication::main(int argc, char** argv) {
-
   return main(Params::GetStrings("target input"));
 }
 
 int AssignConfidenceApplication::main(const vector<string> input_files) {
-
-  cascade_fdr_ = Params::GetDouble("q-value-threshold");
+  double cascade_fdr = Params::GetDouble("q-value-threshold");
   // Prepare the output files if not in Cascade Search
   if (spectrum_flag_ == NULL){
     output_ = new OutputFiles(this);
@@ -80,19 +76,17 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
   if (input_files.size() == 0) {
     carp(CARP_FATAL, "No input files found.");
   }
-  combine_modified_peptides_ = Params::GetBool("combine-modified-peptides");
-  if (peptide_level == false && combine_modified_peptides_ == true){
+  if (!peptide_level && Params::GetBool("combine-modified-peptides")) {
     carp(CARP_WARNING, "The \"combine-modified-peptides\" option is ignored when estimation-method=peptide-level.");
   }
   bool sidak = Params::GetBool("sidak");
-  combine_charge_states_ = Params::GetBool("combine-charge-states");
 
   int top_match = 1;
   if (peptide_level == true){
     top_match = MAX_PSMS+1;
   }
 
-  bool ascending = get_boolean_parameter("smaller-is-better");
+  bool ascending = Params::GetBool("smaller-is-better");
   SCORER_TYPE_T score_type = INVALID_SCORER_TYPE;
   SCORER_TYPE_T derived_score_type = INVALID_SCORER_TYPE;
 
@@ -186,7 +180,7 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
     }
 
     MatchCollection* match_collection =
-      parser.create(target_path, get_string_parameter("protein-database"));
+      parser.create(target_path, Params::GetString("protein-database"));
     distinct_matches = match_collection->getHasDistinctMatches();
 
     carp(CARP_INFO, "Found %d PSMs in %s.", match_collection->getMatchTotal(),
@@ -245,7 +239,7 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
     decoy_matches->setScoredType(SIDAK_ADJUSTED, sidak);
 
     if (decoy_path != "") {
-      MatchCollection* temp_collection = parser.create(decoy_path, get_string_parameter("protein-database"));
+      MatchCollection* temp_collection = parser.create(decoy_path, Params::GetString("protein-database"));
       carp(CARP_INFO, "Found %d PSMs in %s.", temp_collection->getMatchTotal(),
 	   decoy_path.c_str());
 
@@ -528,7 +522,7 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
     qvalues = compute_decoy_qvalues_mixmax(pvalues, num_pvals,
       decoy_scores, num_decoys,
       ascending,
-      get_double_parameter("pi-zero"));
+      Params::GetDouble("pi-zero"));
 
     break;
   }
@@ -573,7 +567,7 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
     while (match_iterator->hasNext()){
       Match* match = match_iterator->next();
 
-      if (match->getScore(QVALUE_TDC) > cascade_fdr_){
+      if (match->getScore(QVALUE_TDC) > cascade_fdr){
         break;
       }
       spectrum_flag_->insert(make_pair(pair<string, unsigned int>(
@@ -979,13 +973,12 @@ void AssignConfidenceApplication::peptide_level_filtering(
 
 string AssignConfidenceApplication::getPeptideSeq(Match* match){
   string peptideSeq;
-  if(combine_modified_peptides_) {
+  if (Params::GetBool("combine-modified-peptides")) {
     peptideSeq = match->getPeptide()->getSequence();
+  } else {
+    peptideSeq = match->getPeptide()->getModifiedSequenceWithMasses();
   }
-  else {
-    peptideSeq = match->getPeptide()->getModifiedSequenceWithMasses(MOD_MASS_ONLY);
-  }
-  if (combine_charge_states_){
+  if (Params::GetBool("combine-charge-states")) {
     peptideSeq += StringUtils::ToString(match->getCharge());
   }
   return peptideSeq;
@@ -995,12 +988,8 @@ map<pair<string, unsigned int>, bool>* AssignConfidenceApplication::getSpectrumF
   return spectrum_flag_;
 }
 
-void AssignConfidenceApplication::setSpectrumFlag(map<pair<string, unsigned int>, bool>* spectrum_flag){
+void AssignConfidenceApplication::setSpectrumFlag(map<pair<string, unsigned int>, bool>* spectrum_flag) {
   spectrum_flag_ = spectrum_flag;
-}
-
-void AssignConfidenceApplication::setCascadeFDR(double cascade_fdr){
-  cascade_fdr_ = cascade_fdr;
 }
 
 void AssignConfidenceApplication::setIterationCnt(unsigned int iteration_cnt){

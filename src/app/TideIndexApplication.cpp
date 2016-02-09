@@ -62,7 +62,7 @@ int TideIndexApplication::main(
   double max_mass = Params::GetDouble("max-mass");
   int min_length = Params::GetInt("min-length");
   int max_length = Params::GetInt("max-length");
-  bool monoisotopic_precursor = Params::GetBool("monoisotopic-precursor");
+  bool monoisotopic_precursor = Params::GetString("isotopic-mass") != "average";
   FLAGS_max_mods = Params::GetInt("max-mods");
   FLAGS_min_mods = Params::GetInt("min-mods");
   if (FLAGS_min_mods > FLAGS_max_mods) {
@@ -365,7 +365,7 @@ vector<string> TideIndexApplication::getOptions() const {
     "max-mass",
     "min-length",
     "min-mass",
-    "monoisotopic-precursor",
+    "isotopic-mass",
     "mods-spec",
     "cterm-peptide-mods-spec",
     "nterm-peptide-mods-spec",

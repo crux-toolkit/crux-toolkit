@@ -631,18 +631,6 @@ enum _command {
 typedef enum _command COMMAND_T;
 
 /**
- * Identifying which set the PSM belongs to
- */
-enum  _set_type {SET_TARGET=0,SET_DECOY1,SET_DECOY2,SET_DECOY3};
-
-/**
- * \typedef SET_TYPE_T
- * \brief the typedef for set types for match type TARGET, DECOY1,
- * DECOY2, DECOY3 
- */
-typedef enum _set_type SET_TYPE_T;
-
-/**
  * \typedef MODIFIED_AA_T
  * \brief The alternate type for encoding a peptide sequence (instead
  * of char).  Allows modifications to be added to each AA.  See

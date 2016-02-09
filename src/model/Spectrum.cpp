@@ -122,7 +122,7 @@ PeakIterator Spectrum::end() const {
  */
 void Spectrum::print(FILE* file) ///< output file to print at -out
 {
-  int mass_precision = get_int_parameter("mass-precision");
+  int mass_precision = Params::GetInt("mass-precision");
   fprintf(file, "S\t%06d\t%06d\t%.*f\n", 
          first_scan_,
          last_scan_,
@@ -179,7 +179,7 @@ void Spectrum::printProcessedPeaks(
   int max_mz_bin,       ///< num_bins in intensities
   FILE* file){          ///< print to this file
 
-  int mass_precision = get_int_parameter("mass-precision");
+  int mass_precision = Params::GetInt("mass-precision");
 
   // print S line
   fprintf(file, "S\t%06d\t%06d\t%.*f\n", 
@@ -246,10 +246,10 @@ void Spectrum::printSqt(
           zstate.getCharge(), 
           0.0, // FIXME dummy <process time>
           "server", // FIXME dummy <server>
-          get_int_parameter("mass-precision"),
+          Params::GetInt("mass-precision"),
           zstate.getSinglyChargedMass(), //this is used in search
           total_energy_,
-          get_int_parameter("precision"),
+          Params::GetInt("precision"),
           lowest_sp_,
           num_matches);
 }
@@ -783,7 +783,7 @@ const vector<SpectrumZState>& Spectrum::getZStates() const {
 vector<SpectrumZState> Spectrum::getZStatesToSearch() {
 
   vector<SpectrumZState> select_zstates;
-  string charge_str = get_string_parameter("spectrum-charge");
+  string charge_str = Params::GetString("spectrum-charge");
 
   if (charge_str == "all") { // return full array of charges
     select_zstates = getZStates();

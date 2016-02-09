@@ -15,6 +15,7 @@
 #include <iostream>
 #include "crux-utils.h"
 #include "model/Database.h"
+#include "Params.h"
 #include "parameter.h"
 #include "StringUtils.h"
 #include "WinCrux.h"
@@ -769,7 +770,7 @@ char* cat_string(const char* string_one, const char* string_two){
  * Adds the fileroot parameter to a string as a prefix.
  */
 string prefix_fileroot_to_name(const string& name) {
-  string fileroot = get_string_parameter("fileroot");
+  string fileroot = Params::GetString("fileroot");
   return (fileroot.empty()) ? name : fileroot + '.' + name;
 }
 
@@ -779,8 +780,8 @@ string prefix_fileroot_to_name(const string& name) {
 string make_file_path(
   const string& filename ///< the name of the file
   ) {
-  string output_directory = get_string_parameter("output-dir");
-  string fileroot = get_string_parameter("fileroot");
+  string output_directory = Params::GetString("output-dir");
+  string fileroot = Params::GetString("fileroot");
 
   ostringstream name_builder;
   name_builder << output_directory;
@@ -1222,9 +1223,6 @@ bool get_first_last_scan_from_string(
 bool get_scans_from_string(
   const string& const_scans_string,
   set<int>& scans) {
-
-  bool success;
-
   scans.clear();
 
   //first tokenize by comma.
@@ -1239,8 +1237,7 @@ bool get_scans_from_string(
   for (size_t idx1=0;idx1<tokens_comma.size();idx1++) {
     string current = tokens_comma[idx1];
     if (current.find("-") == string::npos) {
-      success = from_string<int>(temp_scan, current);
-      if (success) {
+      if (StringUtils::TryFromString(current, &temp_scan)) {
         scans.insert(temp_scan);
       } else {
         carp(CARP_ERROR, "Error parsing scans line:%s", const_scans_string.c_str());
@@ -1254,8 +1251,8 @@ bool get_scans_from_string(
         return false;
       }
       int temp_scan2;
-      success = from_string<int>(temp_scan, tokens_dash[0]);
-      success &= from_string<int>(temp_scan2, tokens_dash[1]);
+      bool success = StringUtils::TryFromString(tokens_dash[0], &temp_scan);
+      success &= StringUtils::TryFromString(tokens_dash[1], &temp_scan2);
       if (!success || temp_scan > temp_scan2) {
         carp(CARP_ERROR, "Error parsing scans line:%s here: %s", 
           const_scans_string.c_str(), tokens_comma[idx1].c_str());
@@ -1609,11 +1606,11 @@ void check_target_decoy_files(
 
 void get_search_result_paths(
   const string &infile, ///< path of the first file.
-  std::vector<std::string> &outpaths ///< paths of all search results -out                                                                                                         
+  std::vector<std::string> &outpaths ///< paths of all search results -out
   ) {
   
   outpaths.clear();
-  if (get_boolean_parameter("list-of-files")) {
+  if (Params::GetBool("list-of-files")) {
     LineFileReader reader(infile);
     while(reader.hasNext()) {
       string current = reader.next();
@@ -1651,7 +1648,7 @@ void get_files_from_list(
   ) {
   
   outpaths.clear();
-  if (get_boolean_parameter("list-of-files")) {
+  if (Params::GetBool("list-of-files")) {
     LineFileReader reader(infile);
     while(reader.hasNext()) {
       string current = reader.next();

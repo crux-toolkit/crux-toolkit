@@ -8,6 +8,7 @@
 
 #include "objects.h"
 #include "util/modifications.h"
+#include "util/Params.h"
 
 #include <iostream>
 
@@ -115,7 +116,7 @@ bool XLinkablePeptide::linkSeqPreventsCleavage(
 
       char aa = peptide->getSequencePointer()[seq_idx];
 
-      string xlink_prevents_cleavage = get_string_parameter("xlink-prevents-cleavage");
+      string xlink_prevents_cleavage = Params::GetString("xlink-prevents-cleavage");
       for (string::const_iterator i = xlink_prevents_cleavage.begin();
            i != xlink_prevents_cleavage.end();
            i++) {
@@ -192,7 +193,7 @@ void XLinkablePeptide::findLinkSites(
   ) {
 
   int missed_cleavages = getMissedCleavageSites(peptide);
-  int max_missed_cleavages = get_int_parameter("missed-cleavages")+
+  int max_missed_cleavages = Params::GetInt("missed-cleavages")+
     2; // +2 because a self loop can prevent two cleavages from happening
 
   link_sites.clear();
@@ -528,12 +529,8 @@ string XLinkablePeptide::getModifiedSequenceString() {
   if (peptide_ == NULL) {
     return string(sequence_);
   } else {
-    char* seq = peptide_->getModifiedSequenceWithMasses(MOD_MASS_ONLY);
-    string string_seq(seq);
-    free(seq);
-    return string_seq;
+    return peptide_->getModifiedSequenceWithMasses();
   }
-
 }
 
 bool XLinkablePeptide::isModified() {

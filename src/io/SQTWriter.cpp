@@ -13,7 +13,7 @@ SQTWriter::~SQTWriter() {
 }
 
 void SQTWriter::openFile(string filename) {
-  file_ = FileUtils::GetWriteStream(filename, get_boolean_parameter("overwrite"));
+  file_ = FileUtils::GetWriteStream(filename, Params::GetBool("overwrite"));
   if (!file_) {
     carp(CARP_FATAL, "Error creating file '%s'.", filename.c_str());
   }
@@ -48,11 +48,11 @@ void SQTWriter::writeHeader(
   char fragment_masses[64];
   mass_type_to_string(mass_type, fragment_masses);
 
-  double tol = get_double_parameter("precursor-window");
-  double frag_mass_tol = get_double_parameter("mz-bin-width") / 2.0;
+  double tol = Params::GetDouble("precursor-window");
+  double frag_mass_tol = Params::GetDouble("mz-bin-width") / 2.0;
 
-  string prelim_score_type = get_string_parameter("prelim-score-type");
-  string score_type = get_string_parameter("score-type");
+  string prelim_score_type = Params::GetString("prelim-score-type");
+  string score_type = Params::GetString("score-type");
 
   *file_ << "H\tSQTGenerator Crux" << endl
          << "H\tSQTGeneratorVersion 1.0" << endl
@@ -89,7 +89,7 @@ void SQTWriter::writeHeader(
   *file_ << fixed << setprecision(3);
   for(aa = (int)'A'; aa < alphabet_size -1; aa++){
     aa_str[0] = (char)aa;
-    double mod = get_double_parameter(aa_str);
+    double mod = Params::GetDouble(aa_str);
     if( mod != 0 ){
       //      double mass = mod + get_mass_amino_acid(aa, isotopic_type);
       double mass = get_mass_amino_acid(aa, isotopic_type);
@@ -108,13 +108,12 @@ void SQTWriter::writeHeader(
   for(mod_idx = 0; mod_idx < num_mods; mod_idx++){
     
     AA_MOD_T* aamod = aa_mod_list[mod_idx];
-    char* aa_list_str = aa_mod_get_aa_list_string(aamod);
+    string aa_list_str = aa_mod_get_aa_list_string(aamod);
     char aa_symbol = aa_mod_get_symbol(aamod);
     double mass_dif = aa_mod_get_mass_change(aamod);
 
     *file_ << "H\tDiffMod\t" << aa_list_str << aa_symbol << "="
            << (mass_dif >= 0 ? "+" : "-") << mass_dif << endl;
-    free(aa_list_str);
   }
   file_->unsetf(ios_base::fixed);
   file_->precision(old_precision);
@@ -138,13 +137,13 @@ void SQTWriter::writeHeader(
   }
 
   //for letters in alphabet
-  //  double mod = get_double_parameter(letter);
+  //  double mod = Params::GetDouble(letter);
   //  if mod != 0
   //     double mass = mod + getmass(letter);
   //     fprintf(output, "H\tStaticMod\t%s=%.3f\n", letter, mass);
   //  fprintf(output, "H\tStaticMod\tC=160.139\n");
-  *file_ << "H\tAlg-DisplayTop\t" << get_int_parameter("top-match") << endl;
-          //          get_int_parameter("max-sqt-result")); 
+  *file_ << "H\tAlg-DisplayTop\t" << Params::GetInt("top-match") << endl;
+          //          Params::GetInt("max-sqt-result")); 
   // this is not correct for an sqt from analzyed matches
 
   ENZYME_T enzyme = get_enzyme_type_parameter("enzyme");
@@ -153,7 +152,7 @@ void SQTWriter::writeHeader(
   char* dig_str = digest_type_to_string(digestion);
   string custom_str;
   if( enzyme == CUSTOM_ENZYME){
-    string rule = get_string_parameter("custom-enzyme");
+    string rule = Params::GetString("custom-enzyme");
     custom_str = ", custom pattern: " + rule;
   }
   *file_ << "H\tEnzymeSpec\t" << enz_str << "-" << dig_str << custom_str << endl;
@@ -240,16 +239,14 @@ void SQTWriter::writePSM(
       string(peptide->getSequence()) +
       "." + string(cTerm);
   } else {
-    char* seq = peptide->getSequenceSqt();
-    seq_str = seq;
-    free(seq);
+    seq_str = peptide->getSequenceSqt();
   }
 
   *file_ << "M"
          << "\t" << xcorr_rank
          << "\t" << sp_rank
          << "\t" << StringUtils::ToString(
-                    peptide->getPeptideMass() + MASS_PROTON, Params::GetInt("mass-precision"))
+                    peptide->calcModifiedMass() + MASS_PROTON, Params::GetInt("mass-precision"))
          << "\t" << StringUtils::ToString(delta_cn, 2)
          << "\t" << StringUtils::ToString(xcorr_score, Params::GetInt("precision"))
          << "\t" << StringUtils::ToString(sp_score, Params::GetInt("precision"))
@@ -268,7 +265,7 @@ void SQTWriter::writePSM(
     string protein_id_str(protein_id);
     free(protein_id);
     if (is_decoy && protein->getDatabase()->getDecoyType() == NO_DECOYS) {
-      protein_id_str = get_string_parameter("decoy-prefix") + protein_id_str;
+      protein_id_str = Params::GetString("decoy-prefix") + protein_id_str;
     }
     *file_ << "L"
            << "\t" << protein_id_str

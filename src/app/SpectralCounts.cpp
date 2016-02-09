@@ -1,11 +1,11 @@
 #include <iterator>
 #include "SpectralCounts.h"
 #include "util/crux-utils.h"
+#include "util/Params.h"
 #include "io/OutputFiles.h"
 #include "model/Peptide.h"
 #include "model/ProteinPeptideIterator.h"
 #include "io/SpectrumCollectionFactory.h"
-#include "model/MatchCollectionIterator.h"
 
 using namespace std;
 using namespace Crux;
@@ -116,24 +116,24 @@ int SpectralCounts::main(int argc, char** argv) {
  * as member variables.
  */
 void SpectralCounts::getParameterValues(){
-  psm_file_ = get_string_parameter("input PSMs");
-  threshold_ = get_double_parameter("threshold");
-  database_name_ = get_string_parameter("protein-database");
-  unique_mapping_ = get_boolean_parameter("unique-mapping");
-  quantitation_ = string_to_quant_level_type(get_string_parameter("quant-level"));
-  parsimony_ = string_to_parsimony_type(get_string_parameter("parsimony"));
-  measure_ = string_to_measure_type(get_string_parameter("measure"));
+  psm_file_ = Params::GetString("input PSMs");
+  threshold_ = Params::GetDouble("threshold");
+  database_name_ = Params::GetString("protein-database");
+  unique_mapping_ = Params::GetBool("unique-mapping");
+  quantitation_ = string_to_quant_level_type(Params::GetString("quant-level"));
+  parsimony_ = string_to_parsimony_type(Params::GetString("parsimony"));
+  measure_ = string_to_measure_type(Params::GetString("measure"));
 
-  if (measure_ == MEASURE_SIN && get_string_parameter("input-ms2").empty()) {
+  if (measure_ == MEASURE_SIN && Params::GetString("input-ms2").empty()) {
     carp(CARP_FATAL, "The SIN computation for spectral-counts requires "
                      "that the --input-ms2 option specify a file.");
   }
 
-  bin_width_ = get_double_parameter("mz-bin-width");
+  bin_width_ = Params::GetDouble("mz-bin-width");
   
   threshold_type_ = get_threshold_type_parameter("threshold-type");
-  custom_threshold_name_ = get_string_parameter("custom-threshold-name");
-  threshold_min_ = get_boolean_parameter("custom-threshold-min");
+  custom_threshold_name_ = Params::GetString("custom-threshold-name");
+  threshold_min_ = Params::GetBool("custom-threshold-min");
 }
 
 /**
@@ -501,7 +501,7 @@ void SpectralCounts::getPeptideScores()
 
   // for SIN, parse out spectrum collection from ms2 fiel
   if( measure_ == MEASURE_SIN ){
-    spectra = SpectrumCollectionFactory::create(get_string_parameter("input-ms2"));
+    spectra = SpectrumCollectionFactory::create(Params::GetString("input-ms2"));
   }
 
   for(set<Match*>::iterator match_it = matches_.begin();

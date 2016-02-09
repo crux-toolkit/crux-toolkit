@@ -14,6 +14,7 @@
 #include "model/Protein.h"
 #include "model/PostProcessProtein.h"
 #include "util/FileUtils.h"
+#include "util/Params.h"
 #include "util/StringUtils.h"
 
 using namespace Crux;
@@ -99,7 +100,7 @@ Protein* MatchCollectionParser::getProtein(
   carp(CARP_DEBUG, "Creating new protein for %s",protein_id.c_str());
   protein = new PostProcessProtein();
   protein->setId(protein_id.c_str());
-  string decoy_prefix = get_string_parameter("decoy-prefix");
+  string decoy_prefix = Params::GetString("decoy-prefix");
   if (protein_id.find(decoy_prefix) != string::npos) {
     carp(CARP_DEBUG, "adding to decoy database");
     is_decoy = true;
@@ -150,7 +151,7 @@ Protein* MatchCollectionParser::getProtein(
   protein->setLength(sequence.length());
   
 
-  string decoy_prefix = get_string_parameter("decoy-prefix");
+  string decoy_prefix = Params::GetString("decoy-prefix");
   if (protein_id.find(decoy_prefix) != string::npos) {
     is_decoy = true;
     // Fixes segfault in case of NULL database
@@ -171,7 +172,6 @@ MatchCollection* MatchCollectionParser::create(
   const string& match_path, ///< path to the file of matches 
   const string& fasta_path ///< path to the protein database
   ) {
-
   carp(CARP_DEBUG, "match path:%s", match_path.c_str());
   if (!fasta_path.empty()) {
     carp(CARP_DEBUG, "fasta path:%s", fasta_path.c_str());

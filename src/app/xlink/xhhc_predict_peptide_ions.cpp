@@ -2,6 +2,7 @@
 #include "xhhc_scorer.h"
 #include "LinkedPeptide.h"
 #include "XHHC_Peptide.h"
+#include "util/Params.h"
 
 #include <iostream>
 #include <fstream>
@@ -60,19 +61,19 @@ int main(int argc, char** argv) {
   parse_cmd_line_into_params_hash(argc, argv, "xlink-predict-peptide-ions");
 
   /* Set verbosity */
-  set_verbosity_level(get_int_parameter("verbosity"));
+  set_verbosity_level(Params::GetInt("verbosity"));
 
   /* Get Arguments */
-  linker_mass = get_double_parameter("link mass");
-  charge = get_int_parameter("charge state");
+  linker_mass = Params::GetDouble("link mass");
+  charge = Params::GetInt("charge state");
 
-  peptideA = get_string_parameter("peptide A");
-  peptideB = get_string_parameter("peptide B");
+  peptideA = Params::GetString("peptide A");
+  peptideB = Params::GetString("peptide B");
   
-  posA = get_int_parameter("pos A");
-  posB = get_int_parameter("pos B");
+  posA = Params::GetInt("pos A");
+  posB = Params::GetInt("pos B");
 
-  print_spectrum = get_boolean_parameter("print-theoretical-spectrum");
+  print_spectrum = Params::GetBool("print-theoretical-spectrum");
 
   LinkedPeptide::setLinkerMass(linker_mass); 
   LinkedPeptide linked_peptide;

@@ -194,7 +194,10 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
 
   MassConstants::Init(&pepHeader.mods(), &pepHeader.nterm_mods(), 
     &pepHeader.cterm_mods(), bin_width_, bin_offset_);
-  TideMatchSet::initModMap(pepHeader.mods());
+  ModificationDefinition::ClearAll();
+  TideMatchSet::initModMap(pepHeader.mods(), ANY);
+  TideMatchSet::initModMap(pepHeader.nterm_mods(), PEPTIDE_N);
+  TideMatchSet::initModMap(pepHeader.cterm_mods(), PEPTIDE_C);
 
   OutputFiles* output_files = NULL;
   ofstream* target_file = NULL;
@@ -217,7 +220,7 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
     bool overwrite = Params::GetBool("overwrite");
     stringstream ss;
     ss << Params::GetString("enzyme") << '-' << Params::GetString("digestion");
-    TideMatchSet::setCleavageType(ss.str());
+    TideMatchSet::CleavageType = ss.str();
     if (!concat) {
       string target_file_name = make_file_path("tide-search.target.txt");
       target_file = create_stream_in_path(target_file_name.c_str(), NULL, overwrite);
@@ -1104,7 +1107,7 @@ void TideSearchApplication::processParams() {
       digest_type_to_string(pepHeader.full_digestion() ? FULL_DIGEST : PARTIAL_DIGEST);
     Params::Set("digestion", digestString);
     free(digestString);
-    Params::Set("monoisotopic-precursor", pepHeader.monoisotopic_precursor() ? true : false);
+    Params::Set("isotopic-mass", pepHeader.monoisotopic_precursor() ? "mono" : "average");
   }
 }
 
