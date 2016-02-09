@@ -5,12 +5,12 @@
 
 #include "MzIdentMLReader.h"
 #include "util/mass.h"
+#include "util/Params.h"
+#include "util/StringUtils.h"
 #include "expat.h"
-
 
 #include "model/Protein.h"
 #include "model/Peptide.h"
-
 
 #include <cstdio>
 #include <cstring>
@@ -20,7 +20,6 @@
 #include "DelimitedFile.h"
 #include "parameter.h"
 #include "MatchCollectionParser.h"
-
 
 using namespace std;
 using namespace Crux;
@@ -33,7 +32,7 @@ using namespace identdata;
  */
 void MzIdentMLReader::init() {
   match_collection_ = NULL;
-  use_pass_threshold_ = get_boolean_parameter("mzid-use-pass-threshold");
+  use_pass_threshold_ = Params::GetBool("mzid-use-pass-threshold");
 }
 
 /**
@@ -86,29 +85,29 @@ void MzIdentMLReader::addScores(
   for (; iter != item.cvParams.end(); ++iter) {
     switch (iter->cvid) {
       case MS_SEQUEST_xcorr:
-        from_string(fvalue, iter->value);
+        fvalue = StringUtils::FromString<FLOAT_T>(iter->value);
         match->setScore(XCORR, fvalue);
         match_collection_->setScoredType(XCORR, true);
         break;
       case MS_SEQUEST_PeptideSp:
-        from_string(fvalue, iter->value);
+        fvalue = StringUtils::FromString<FLOAT_T>(iter->value);
         match->setScore(SP, fvalue);
         match_collection_->setScoredType(SP, true);
         break;
       case MS_SEQUEST_PeptideRankSp:
-        from_string(ivalue, iter->value);
+        ivalue = StringUtils::FromString<int>(iter->value);
         match->setRank(SP, ivalue);
         break;
       case MS_SEQUEST_deltacn:
-        from_string(fvalue, iter->value);
+        fvalue = StringUtils::FromString<FLOAT_T>(iter->value);
         match->setScore(DELTA_CN, fvalue);
         break;
       case MS_SEQUEST_matched_ions:
-        from_string(ivalue, iter->value);
+        ivalue = StringUtils::FromString<int>(iter->value);
         match->setScore(BY_IONS_MATCHED, ivalue);
         break;
       case MS_SEQUEST_total_ions:
-        from_string(ivalue, iter->value);
+        ivalue = StringUtils::FromString<int>(iter->value);
         match->setScore(BY_IONS_TOTAL, ivalue);
         break;
       default:
@@ -116,7 +115,7 @@ void MzIdentMLReader::addScores(
     }
     //go ahead and set all custom scores to the cvParam names.
     string name = cvTermInfo((*iter).cvid).name;
-    from_string(fvalue, iter->value);
+    fvalue = StringUtils::FromString<FLOAT_T>(iter->value);
     match->setCustomScore(name, fvalue);
   }
 
@@ -126,8 +125,7 @@ void MzIdentMLReader::addScores(
   for (; iter2 != item.userParams.end(); ++iter2) {
     string name = iter2->name;
 
-    bool success = from_string(fvalue, iter2->value);
-    if (success) {
+    if (StringUtils::TryFromString(iter2->value, &fvalue)) {
       match->setCustomScore(name, fvalue);
     }
   }
@@ -261,14 +259,11 @@ void MzIdentMLReader::parsePSMs() {
           vector<int> charge_vec;
           charge_vec.push_back(charge);
 
-
-          Spectrum* spectrum = 
-            new Spectrum(first_scan,last_scan,obs_mz, charge_vec, "");
+          Spectrum* spectrum = new Spectrum(first_scan,last_scan,obs_mz, charge_vec, "");
 
           FLOAT_T calc_mz = item.calculatedMassToCharge;
           FLOAT_T calc_mass = (calc_mz - MASS_PROTON ) * (FLOAT_T)charge;
           int rank = item.rank;
-
 
           PeptidePtr peptide_ptr = item.peptidePtr;
 
@@ -305,12 +300,9 @@ void MzIdentMLReader::parsePSMs() {
           }
 
           int length = sequence.length();
-        
           carp(CARP_DEBUG, "creating peptide %s %f %i",sequence.c_str(), calc_mass, start_idx);
 
-          Crux::Peptide* peptide = 
-            new Crux::Peptide(length, calc_mass, protein, start_idx);
-        
+          Crux::Peptide* peptide = new Crux::Peptide(length, protein, start_idx);
           for (int pe_idx = 1; pe_idx < peptide_evidences.size();pe_idx++) {
             PeptideEvidencePtr peptide_evidence_ptr = peptide_evidences[pe_idx];
             int start = peptide_evidence_ptr->start;
@@ -349,7 +341,6 @@ void MzIdentMLReader::parsePSMs() {
         }
       }
     }
-
 
     count++;
   }

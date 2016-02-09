@@ -29,10 +29,10 @@ class PepXMLReader : public PSMReader {
   MatchCollection* current_match_collection_; ///< keeps track of the current match collection object
 
   /*State variable for element tags */
+  bool aminoacid_modification_open_;
   bool spectrum_query_open_; ///< are we within a spectrum_query?
   bool search_result_open_; ///< are we within a search_result element
   bool search_hit_open_;  ///< are we within a search 
-  bool modification_info_open_; ///< are we within a modification_info element?
   bool mod_aminoacid_mass_open_; ///< are we within a mod_aminoacid_mass element?
   bool alternative_protein_open_; ///< are we within a alternative_protein element
   bool search_score_open_; ///< are we within a search_score element
@@ -49,6 +49,9 @@ class PepXMLReader : public PSMReader {
   );
 
   /* Specific element tag handler functions */
+
+  void aminoacidModificationOpen(const char** attr);
+  void aminoacidModificationClose();
 
   /**
    * Handles the spectrum_query open tag event 
@@ -84,18 +87,6 @@ class PepXMLReader : public PSMReader {
    */
   void searchHitClose();
 
-  /**
-   * Handles the modification_info open tag event
-   */
-  void modificationInfoOpen(
-    const char** attr ///< attribute array for element
-  );
-  
-  /**
-   * Handles the modification_info close tag event
-   */
-  void modificationInfoClose();
-  
   /**
    * Handles the mod_aminoacid_mass open tag event
    */

@@ -21,6 +21,7 @@
 
 #include "peptide_modifications.h"
 #include "model/Peptide.h"
+#include "Params.h"
 
 using namespace Crux;
 
@@ -236,7 +237,7 @@ int generate_peptide_mod_list_TESTER(
         (QSORT_COMPARE_METHOD)compare_peptide_mod_num_aa_mods);
 
   // find the index of the first peptide mod with too many aa mods
-  int max = get_int_parameter("max-mods");
+  int max = Params::GetInt("max-mods");
   // should use binary search...
   int mod_idx = 0;
   for(mod_idx=0; mod_idx < final_counter; mod_idx++){
@@ -357,7 +358,6 @@ bool is_peptide_modifiable
   // for each aa_mod (skip those not in peptide_mod)
   
   AA_MOD_T** all_mods = NULL;
-  //  int num_aa_mods = get_aa_mod_list(&all_mods);
   int num_aa_mods = get_all_aa_mod_list(&all_mods);
   assert( num_aa_mods < MAX_AA_MODS );
 
@@ -754,7 +754,6 @@ void print_p_mod(PEPTIDE_MOD_T* mod){
 
   int i=0;
   AA_MOD_T** all_mods = NULL;
-  //int num_aa_mods = get_aa_mod_list( &all_mods );
   int num_aa_mods = get_all_aa_mod_list( &all_mods );
   assert( num_aa_mods < MAX_AA_MODS );
 
@@ -778,7 +777,6 @@ void peptide_mod_add_aa_mod(
   int copies ){           ///< How many of the aa_mod to add
 
   AA_MOD_T** all_mods = NULL;
-  //  int num_aa_mods = get_aa_mod_list( &all_mods );
   int num_aa_mods = get_all_aa_mod_list( &all_mods );
   assert( num_aa_mods < MAX_AA_MODS );
 

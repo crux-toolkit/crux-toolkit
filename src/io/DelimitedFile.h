@@ -23,7 +23,7 @@
 #include <vector>
 
 #include "parameter.h"
-
+#include "util/Params.h"
 
 class DelimitedFile {
 
@@ -36,7 +36,6 @@ class DelimitedFile {
   std::vector<std::string> column_names_;
   unsigned int current_row_; //used for iterating through the table.
   char delimiter_;
-
 
   /**
    * reorders the rows of a delimited file using a built map 
@@ -288,7 +287,7 @@ class DelimitedFile {
     unsigned int row_idx, ///< the row index
     TValue value ///< the new value
   ) {
-      int precision = get_int_parameter("precision");
+      int precision = Params::GetInt("precision");
       std::ostringstream ss;
       ss << std::setprecision(precision) << value;
       std::string svalue = ss.str();
@@ -467,7 +466,7 @@ class DelimitedFile {
 
       if (elements.size() == 0) return "";
 
-      int precision = get_int_parameter("precision");
+      int precision = Params::GetInt("precision");
       std::ostringstream ss;
       ss << std::setprecision(precision);
       

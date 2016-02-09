@@ -135,8 +135,7 @@ Match::~Match() {
 void Match::printSqt(
   FILE* file                  ///< output stream -out
   ){
-
-  if( file == NULL ){
+  if (!file) {
     carp(CARP_ERROR, "Cannot print match to sqt file from null input");
     return;
   }
@@ -158,15 +157,15 @@ void Match::printSqt(
   FLOAT_T score_main = getScore(XCORR);
 
   // write format string with variable precision
-  int precision = get_int_parameter("precision");
+  int precision = Params::GetInt("precision");
 
   // print match info
   if (exact_pval_search_) {
     fprintf(file, "M\t%i\t%i\t%.*f\t%.2f\t%.*g\t%.*g\t%.*g\t%i\t%i\t%s\tU\n",
             getRank(XCORR),
             getRank(SP),
-            get_int_parameter("mass-precision"),
-            peptide->getPeptideMass() + MASS_PROTON,
+            Params::GetInt("mass-precision"),
+            peptide->calcModifiedMass() + MASS_PROTON,
             delta_cn,
             precision,
             getScore(TIDE_SEARCH_EXACT_PVAL),
@@ -182,8 +181,8 @@ void Match::printSqt(
     fprintf(file, "M\t%i\t%i\t%.*f\t%.2f\t%.*g\t%.*g\t%i\t%i\t%s\tU\n",
             getRank(XCORR),
             getRank(SP),
-            get_int_parameter("mass-precision"),
-            peptide->getPeptideMass() + MASS_PROTON,
+            Params::GetInt("mass-precision"),
+            peptide->calcModifiedMass() + MASS_PROTON,
             delta_cn,
             precision,
             score_main,
@@ -212,7 +211,7 @@ void Match::printSqt(
     Database* database = protein->getDatabase();
     if( null_peptide_ 
         && (database != NULL && database->getDecoyType() == NO_DECOYS) ){
-      rand = get_string_parameter("decoy-prefix"); 
+      rand = Params::GetString("decoy-prefix"); 
     }
 
     // print match info (locus line), add "decoy-prefix" to locus name for decoys
@@ -265,7 +264,7 @@ void Match::printOneMatchField(
   case PEPTIDE_MASS_COL:
     {
       Peptide* peptide = getPeptide();
-      double peptide_mass = peptide->getPeptideMass();
+      double peptide_mass = peptide->calcModifiedMass();
       output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
                                        peptide_mass);
     }
@@ -458,6 +457,12 @@ void Match::printOneMatchField(
       free(sequence);
     }
     break;
+  case MODIFICATIONS_COL:
+    {
+      output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx,
+                                       getPeptide()->getModsString());
+    }
+    break;
   case CLEAVAGE_TYPE_COL:
     {
       ENZYME_T enzyme = get_enzyme_type_parameter("enzyme");
@@ -492,9 +497,8 @@ void Match::printOneMatchField(
     break;
   case ORIGINAL_TARGET_SEQUENCE_COL:
     if (null_peptide_ == true || OutputFiles::isConcat()) {
-      char* seq = peptide_->getUnshuffledSequence();
-      output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, seq);
-      free(seq);
+      output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx,
+                                       peptide_->getUnshuffledSequence());
     }
     break;
   case ETA_COL:
@@ -616,7 +620,7 @@ Match* Match::parseTabDelimited(
   Database* decoy_database ///< database with decoy peptides
   ) {
 
-  string decoy_prefix = get_string_parameter("decoy-prefix");
+  string decoy_prefix = Params::GetString("decoy-prefix");
 
   Match* match = new Match();
 
@@ -625,9 +629,7 @@ Match* Match::parseTabDelimited(
   // this is a post_process match object
   match->post_process_match_ = true;
 
-  Peptide* peptide = Peptide::parseTabDelimited(result_file, 
-                                                database, 
-                                                decoy_database);
+  Peptide* peptide = Peptide::parseTabDelimited(result_file, database, decoy_database);
   string index_name = result_file.getString(INDEX_NAME_COL);
   match->setDatabaseIndexName(index_name);
 
@@ -1181,142 +1183,6 @@ void Match::setBestPerPeptide() {
 /************************************************
  * TODO: Why are these here?
  ************************************************/
-
-/**
- * \brief prints both variable and static modifications for 
- *  peptide sequence in xml format to the specificed output file
- *
- *
- */
-void print_modifications_xml(
-  const char* mod_seq,
-  const char* pep_seq,
-  FILE* output_file
-){
-  map<int, double> var_mods;
-  map<int, double> static_mods;
-  carp(CARP_DEBUG,"print_modifications_xml:%s %s", mod_seq, pep_seq);
-  // variable modifications
-  int mod_precision = get_int_parameter("mod-precision");
-  find_variable_modifications(var_mods, mod_seq);
-  if (!var_mods.empty()){
-    fprintf(output_file, 
-            "<modification_info modified_peptide=\"%s\">\n",
-            mod_seq);
-   carp(CARP_DEBUG,
-            "<modification_info modified_peptide=\"%s\">\n",
-            mod_seq);
-        for (map<int, double>::iterator it = var_mods.begin()
-           ; it != var_mods.end(); ++it){
-      fprintf(output_file, "<mod_aminoacid_mass position=\"%i\" mass=\"%.*f\"/>\n",
-              (*it).first,   //index
-              mod_precision, (*it).second); //mass
-      carp(CARP_DEBUG, "<mod_aminoacid_mass position=\"%i\" mass=\"%.*f\"/>\n",
-              (*it).first,   //index                                                                                                                                                                                                            
-              mod_precision, (*it).second); //mass           
-    }
-    fprintf(output_file, "</modification_info>\n");
-  }
-
-  // static modifications
-  find_static_modifications(static_mods, var_mods, pep_seq);
-  if (!static_mods.empty()){
-    carp(CARP_DEBUG, "<modification_info modified_peptide=\"%s\">\n",
-            pep_seq);
-    fprintf(output_file, "<modification_info modified_peptide=\"%s\">\n",
-            pep_seq);
-    for (map<int, double>::iterator it = static_mods.begin(); 
-         it != static_mods.end(); ++it){
-      fprintf(output_file, "<mod_aminoacid_mass position=\"%i\" mass=\"%.*f\"/>\n",
-              (*it).first,   //index
-              mod_precision, (*it).second); //mass
-      carp(CARP_DEBUG, "<mod_aminoacid_mass position=\"%i\" mass=\"%.*f\"/>\n",
-              (*it).first,   //index                                                                                                                                                                                                            
-              mod_precision, (*it).second); //mass 
-    }
-    fprintf(output_file, "</modification_info>\n");
-  }
-
-  static_mods.clear();
-  var_mods.clear();
-
-}
-
-
-/**
- * \brief takes an empty mapping of index to mass
- * and extract information from mod sequence fill
- * up map
- */
-void find_variable_modifications(
- map<int, double>& mods,
- const char* mod_seq
-){
-    MASS_TYPE_T isotopic_type = get_mass_type_parameter("isotopic-mass");
-    int seq_index = 1;
-    const char* amino = mod_seq;
-    const char* end = NULL;
-    const char* start = NULL;
-    // Parse returned string to find modifications within brackets
-    while (*(amino) != '\0' && *(amino+1) != '\0'){
-      if (*(amino+1) =='['){
-        start = amino+2;
-        end = amino+2;
-        while (*end != ']'){
-          end++;
-        }
-        char* mass  = (char *) mymalloc(sizeof(char)*(end-start+1));
-        strncpy(mass, start, end-start);
-        mass[end-start] = '\0';
-        mods[seq_index] = atof(mass) + get_mass_amino_acid(*amino, isotopic_type);
-        amino = end;
-        free(mass);
-      } else if (*(amino+1) < 'A' || *(amino+1) > 'Z'){ // a mod symbol
-        double mass = 0; // sum up all adjacent symbols
-        end = amino + 1;
-        while( *end < 'A' || *end > 'Z' ){
-          mass += get_mod_mass_from_symbol(*end);
-          end++;
-        }
-        mods[seq_index] = mass + get_mass_amino_acid(*amino, isotopic_type);
-      }
-      seq_index++;
-      amino++;
-    }
-}
-
-/**
- * \brief takes an empty mapping of index to mass
- * of static mods and a full mapping of var mods
- * to fill up the mapping of static mods
- */
-void find_static_modifications(
-  map<int, double>& static_mods,
-  map<int, double>& var_mods,
-  const char* peptide_sequence
-){
-  const char* seq_iter = peptide_sequence;
-
-  MASS_TYPE_T isotopic_type = get_mass_type_parameter("isotopic-mass");
-
-  char aa[2];
-  aa[1] = '\0';
-  int seq_index = 1;
-  while ((*seq_iter) != '\0'){
-    *aa = (*seq_iter);
-    // write static mod if user requested static mod and also
-    // if there is no variable mod on the same character
-    if (get_double_parameter( (const char *)aa)!= 0 && 
-        var_mods.find(seq_index) == var_mods.end()){
-
-      double mass = get_mass_amino_acid(*seq_iter, isotopic_type);
-      static_mods[seq_index] = get_double_parameter((const char*)aa) + mass;
-    }
-    seq_iter++;
-    seq_index++;
-  }
-}
-
 
 /**
  * \brief Counts the number of internal cleavages

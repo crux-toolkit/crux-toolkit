@@ -7,6 +7,8 @@
 #include <string>
 #include "MzIdentMLWriter.h"
 #include "util/crux-utils.h"
+#include "util/Params.h"
+#include "util/StringUtils.h"
 #include "model/MatchCollection.h"
 #include "pwiz/data/identdata/Serializer_mzid.hpp"
 #include "model/ProteinMatch.h"
@@ -61,7 +63,7 @@ void MzIdentMLWriter::openFile(
   string filename,
   MATCH_FILE_TYPE type) {
 
-  openFile(filename.c_str(), get_boolean_parameter("overwrite"));
+  openFile(filename.c_str(), Params::GetBool("overwrite"));
 }
 
 /**
@@ -461,9 +463,9 @@ SpectrumIdentificationResultPtr MzIdentMLWriter::getSpectrumIdentificationResult
   ) {
 
   string spectrum_idStr = 
-    DelimitedFileWriter::to_string(spectrum->getFirstScan()) + 
+    StringUtils::ToString(spectrum->getFirstScan()) + 
     "-" +
-    DelimitedFileWriter::to_string(spectrum->getLastScan());
+    StringUtils::ToString(spectrum->getLastScan());
 
   SpectrumIdentificationListPtr silp = getSpectrumIdentificationList();
 
@@ -517,7 +519,7 @@ SpectrumIdentificationItemPtr MzIdentMLWriter::getSpectrumIdentificationItem(
   siip->chargeState = zstate.getCharge();
   siip->experimentalMassToCharge = zstate.getMZ();
 
-  siip->calculatedMassToCharge = calculateMassToCharge(crux_peptide->getPeptideMass(), (FLOAT_T) zstate.getCharge());
+  siip->calculatedMassToCharge = calculateMassToCharge(crux_peptide->calcModifiedMass(), (FLOAT_T) zstate.getCharge());
 
   addSpectrumScores(spectrum_match, siip);
   siip->passThreshold = true;
@@ -709,7 +711,7 @@ void MzIdentMLWriter::addMatch(
   siip->chargeState = zstate.getCharge();
   siip->experimentalMassToCharge = zstate.getMZ();
 
-  siip->calculatedMassToCharge = calculateMassToCharge(peptide->getPeptideMass(), (FLOAT_T) zstate.getCharge());
+  siip->calculatedMassToCharge = calculateMassToCharge(peptide->calcModifiedMass(), (FLOAT_T) zstate.getCharge());
 
   if (collection->getScoredType(PERCOLATOR_SCORE)) {
     siip->rank = match->getRank(PERCOLATOR_SCORE);

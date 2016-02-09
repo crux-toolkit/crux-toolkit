@@ -11,6 +11,7 @@
 
 #include "PrintProcessedSpectra.h"
 #include "io/SpectrumCollectionFactory.h"
+#include "util/Params.h"
 
 using namespace std;
 
@@ -32,12 +33,12 @@ PrintProcessedSpectra::~PrintProcessedSpectra() {
  */
 int PrintProcessedSpectra::main(int argc, char** argv) {
   // Get arguments and options
-  string input_ms2_name  = get_string_parameter("ms2 file");
-  string output_ms2_name = get_string_parameter("output file");
+  string input_ms2_name  = Params::GetString("ms2 file");
+  string output_ms2_name = Params::GetString("output file");
   output_ms2_name = prefix_fileroot_to_name(output_ms2_name);
-  string output_dir = get_string_parameter("output-dir");
-  bool overwrite = get_boolean_parameter("overwrite");
-  string stop_after = get_string_parameter("stop-after");
+  string output_dir = Params::GetString("output-dir");
+  bool overwrite = Params::GetBool("overwrite");
+  string stop_after = Params::GetString("stop-after");
 
   if (stop_after != "discretize" && stop_after != "remove-precursor" &&
       stop_after != "square-root" && stop_after != "remove-grass" &&

@@ -21,7 +21,7 @@ Examples:
   # Tests that vary tide-index options
   |tide-peplen    |--min-length 5 --max-length 10                               |                                                        |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-peplen.txt    |
   |tide-pepmass   |--min-mass 1000 --max-mass 2000                              |                                                        |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-pepmass.txt   |
-  |tide-avgmass   |--monoisotopic-precursor F                                   |                                                        |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-avgmass.txt   |
+  |tide-avgmass   |--isotopic-mass average                                      |                                                        |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-avgmass.txt   |
   |tide-clipn     |--clip-nterm-methionine T                                    |                                                        |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-clipn.txt     |
   |tide-mods1     |--mods-spec C+57.02146,2M+15.9949,1STY+79.966331             |                                                        |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-mods1.txt     |
   |tide-mods1limit|--mods-spec C+57.02146,2M+15.9949,1STY+79.966331 --max-mods 1|                                                        |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-mods1limit.txt|

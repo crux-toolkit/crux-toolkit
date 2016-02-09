@@ -4,6 +4,7 @@
  */
 #include "ModifiedPeptidesIterator.h"
 #include "SpectrumZState.h"
+#include "util/Params.h"
 
 using namespace std;
 using namespace Crux;
@@ -26,7 +27,7 @@ ModifiedPeptidesIterator::ModifiedPeptidesIterator(
                                                  is_decoy, dbase);
   peptide_modification_ = pmod;
   temp_peptide_list_ = new_empty_list();
-  max_aas_modified_ = get_int_parameter("max-aas-modified");
+  max_aas_modified_ = Params::GetInt("max-aas-modified");
 
   initialize();
   carp(CARP_DETAILED_DEBUG, 
@@ -48,7 +49,7 @@ ModifiedPeptidesIterator::ModifiedPeptidesIterator(
 
   peptide_modification_ = pmod;
   temp_peptide_list_ = new_empty_list();
-  max_aas_modified_ = get_int_parameter("max-aas-modified");
+  max_aas_modified_ = Params::GetInt("max-aas-modified");
   initialize();
 }
 
@@ -71,7 +72,7 @@ ModifiedPeptidesIterator::ModifiedPeptidesIterator(
 
   peptide_modification_ = pmod;
   temp_peptide_list_ = new_empty_list();
-  max_aas_modified_ = get_int_parameter("max-aas-modified");
+  max_aas_modified_ = Params::GetInt("max-aas-modified");
   initialize();
 }
 
@@ -93,8 +94,8 @@ ModifiedPeptidesIterator::~ModifiedPeptidesIterator(){
  */
 pair<FLOAT_T,FLOAT_T>ModifiedPeptidesIterator::getMinMaxMass()
 {
-  return pair<FLOAT_T,FLOAT_T>(get_double_parameter("min-mass"),
-                               get_double_parameter("max-mass"));
+  return pair<FLOAT_T,FLOAT_T>(Params::GetDouble("min-mass"),
+                               Params::GetDouble("max-mass"));
 }
 
 /**
@@ -108,8 +109,8 @@ pair<FLOAT_T,FLOAT_T> ModifiedPeptidesIterator::getMinMaxMass(
   PEPTIDE_MOD_T* pmod) ///< peptide mod with the delta mass for peptides
 {
   WINDOW_TYPE_T precursor_window_type = 
-    string_to_window_type(get_string_parameter("precursor-window-type"));
-  double window = get_double_parameter("precursor-window");
+    string_to_window_type(Params::GetString("precursor-window-type"));
+  double window = Params::GetDouble("precursor-window");
   double min_mass = 0;
   double max_mass = 0;
 
@@ -221,9 +222,8 @@ bool ModifiedPeptidesIterator::queueNextPeptide(){
   next_peptide_ = (Peptide*)pop_front_linked_list(temp_peptide_list_);
   
   IF_CARP_DETAILED_DEBUG(
-    char* seq = next_peptide_->getModifiedSequenceWithMasses(MOD_MASS_ONLY);
-    carp(CARP_DETAILED_DEBUG, "Queue set next peptide as %s", seq);
-    free(seq);
+    string seq = next_peptide_->getModifiedSequenceWithMasses();
+    carp(CARP_DETAILED_DEBUG, "Queue set next peptide as %s", seq.c_str());
   )
 
   return true;

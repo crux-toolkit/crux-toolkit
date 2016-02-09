@@ -1,5 +1,6 @@
 #include "PMCDelimitedFileWriter.h"
 #include "util/FileUtils.h"
+#include "util/Params.h"
 #include "util/StringUtils.h"
 
 using namespace Crux;
@@ -44,7 +45,7 @@ void PMCDelimitedFileWriter::openFile(
   ) {
   closeFile();
 
-  file_ptr_ = FileUtils::GetWriteStream(filename, get_boolean_parameter("overwrite"));
+  file_ptr_ = FileUtils::GetWriteStream(filename, Params::GetBool("overwrite"));
   application_ = application;
   if (!file_ptr_->is_open()) {
     carp(CARP_FATAL, "Error creating file '%s'.", filename.c_str());
@@ -398,7 +399,7 @@ void PMCDelimitedFileWriter::writePeptides(
     setColumnCurrentRow(CHARGE_COL, DelimitedFile::splice(spec_charges, ','));
     setColumnCurrentRow(SPECTRUM_PRECURSOR_MZ_COL, DelimitedFile::splice(spec_precursors, ','));
     setColumnCurrentRow(SPECTRUM_NEUTRAL_MASS_COL, DelimitedFile::splice(spec_neutral_masses, ','));
-    setColumnCurrentRow(PEPTIDE_MASS_COL, peptide->getPeptideMass());
+    setColumnCurrentRow(PEPTIDE_MASS_COL, peptide->calcModifiedMass());
     addScoreIfExists(match, DELTA_CN, DELTA_CN_COL);
     addScoreIfExists(match, SP, SP_SCORE_COL);
     addRankIfExists(match, SP, SP_RANK_COL);
@@ -518,7 +519,7 @@ void PMCDelimitedFileWriter::writePSMs(
     setColumnCurrentRow(CHARGE_COL, zstate.getCharge());
     setColumnCurrentRow(SPECTRUM_PRECURSOR_MZ_COL, zstate.getMZ());
     setColumnCurrentRow(SPECTRUM_NEUTRAL_MASS_COL, zstate.getNeutralMass());
-    setColumnCurrentRow(PEPTIDE_MASS_COL, peptide->getPeptideMass());
+    setColumnCurrentRow(PEPTIDE_MASS_COL, peptide->calcModifiedMass());
     addScoreIfExists(match, SP, SP_SCORE_COL);
     addRankIfExists(match, SP, SP_RANK_COL);
     addScoreIfExists(match, XCORR, XCORR_SCORE_COL);

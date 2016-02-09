@@ -21,6 +21,10 @@
 
 #include "modifications.h"
 #include "mass.h"
+#include "Params.h"
+
+using namespace std;
+
 /* Private constants */
 //enum { MAX_PROTEIN_SEQ_LENGTH = 40000 };
 
@@ -72,30 +76,6 @@ uint16_t mod_id_masks[MAX_AA_MODS] =
    0x8000    // 1000 0000 0000 0000 +
 }; 
 
-/* Private data types, typedefed in objects.h */
-
-/**
- * \struct _aa_mod
- * 
- *  Modification at the amino acid level.  A single mass change that can
- *  occur on any of the residues listed.  This information is given by
- *  the user in the parameter file.  Also stores a character symbol
- *  assigned at runtime to be used in the sqt result file and an
- *  integer bitmask to be used to give each aa_mod a unique identifier.
- */
-struct _aa_mod{ 
-  double mass_change;  ///< the amount by which the mass of the residue changes
-  bool aa_list[AA_LIST_LENGTH];
-                       ///< an array indexed by AA, true if can be modified
-  int max_per_peptide; ///< the maximum number of mods per peptide
-  MOD_POSITION_T position; ///< where the mod can occur in the pep/prot
-  int max_distance;        ///< the max distance from the protein terminus
-  char symbol;         ///< the character to represent the mod in sqt files
-  bool prevents_cleavage; ///< can modification prevent cleavage?
-  bool prevents_xlink; ///< can modification prevent xlink?
-  MODIFIED_AA_T identifier; ///< the bitmask assigned for unique ID
-};
-
 /* Definitions of public methods */
 
 /**
@@ -139,13 +119,6 @@ void free_aa_mod(AA_MOD_T* mod){
     //if( mod->aa_list ){free(mod->aa_list);}
     free(mod);
   }
-}
-
-/**
- * \brief Gives the size of the aa_mod struct.  For serialization
- */
-int get_aa_mod_sizeof(){
-  return sizeof(AA_MOD_T);
 }
 
 /**
@@ -311,7 +284,7 @@ char* modified_aa_string_to_string_with_masses(
     }
   }
 
-  int precision = get_int_parameter("mod-precision");
+  int precision = Params::GetInt("mod-precision");
   // max total length = #aas + ( #mods * (strlen("[000.,]")+precision) ) + '/0'
   int buffer_size = length + (count * (9 + precision)) + 1;
   char* return_string = (char*)mymalloc(buffer_size * sizeof(char));
@@ -534,28 +507,6 @@ MODIFIED_AA_T* copy_mod_aa_seq(
 
 }
 
-
-/**
- * \returns whether the two modified sequences are equal or not
- */
-bool equal_seq(
-  const MODIFIED_AA_T* seq1, ///< Sequence 1
-  const MODIFIED_AA_T* seq2  ///< Sequence 2
-  ) {
-
-  size_t idx = 0;
-
-  while (seq1[idx] != MOD_SEQ_NULL && seq2[idx] != MOD_SEQ_NULL) {
-    if (seq1[idx] != seq2[idx]) {
-      return false;
-    }
-    idx++;
-  }
-
-  return (seq1[idx] == MOD_SEQ_NULL && seq2[idx] == MOD_SEQ_NULL);
-
-}
-
 /**
  * \brief Remove any characters not A-Z from a peptide sequence.
  * \returns A newly allocated string with the given sequence less any
@@ -619,83 +570,6 @@ bool modified_aa_seq_is_palindrome(MODIFIED_AA_T* seq, int length){
   // if we got to here, they all matched
   return true;
 }
-
-
-/**
- * \brief Frees memory for an array of MODIFIED_AA_Ts.  Assumes is
- * terminated with the MOD_SEQ_NULL value
- */
-/*
-void free_mod_aa_seq( MODIFIED_AA_T* seq ){
-
-}
-*/
-
-/**
- * \brief Check that the list of peptide_modifications from the file of
- * serialized PSMs matches those in the paramter file.
- *
- * If there was no parameter file or if it did not contain any mods,
- * return false.  If the given mod list does not exactly match the
- * mods read from the parameter file (including the order in which
- * they are listed) return false.  If returning false, print a warning
- * with the lines that should be included in the parameter file.
- *
- * \returns true if the given mods are the same as those from the
- * parameter file.
- */
-bool compare_mods(AA_MOD_T** psm_file_mod_list, int file_num_mods){
-  AA_MOD_T** mod_list = NULL;
-  int num_mods = get_all_aa_mod_list(&mod_list);
-
-  if( num_mods != file_num_mods ){
-    return false;
-  }
-  int mod_idx = 0;
-  for(mod_idx=0; mod_idx<num_mods; mod_idx++){
-    if( ! compare_two_mods(mod_list[mod_idx], psm_file_mod_list[mod_idx]) ){
-      print_a_mod(mod_list[mod_idx]);
-      print_a_mod(psm_file_mod_list[mod_idx]);
-      return false;
-    }
-  }
-  return true;
-}
-
-/**
- * \brief Compare two mods to see if they are the same, i.e. same mass
- * change, unique identifier, position
- */
-bool compare_two_mods(AA_MOD_T* mod1, AA_MOD_T* mod2){
-  if(mod1->mass_change != mod2->mass_change ){
-    return false;
-  }
-  if(mod1->max_per_peptide != mod2->max_per_peptide ){
-    return false;
-  }
-  if(mod1->position != mod2->position ){
-    return false;
-  }
-  if(mod1->max_distance != mod2->max_distance ){
-    return false;
-  }
-  if(mod1->symbol != mod2->symbol ){
-    return false;
-  }
-  if(mod1->identifier != mod2->identifier ){
-    return false;
-  }
-  // aa list
-  int i = 0;
-  for(i=0; i<AA_LIST_LENGTH; i++){
-    if(mod1->aa_list[i] != mod2->aa_list[i]){
-      return false;
-    }
-  }
-  // everything matched
-  return true;
-}
-
 
 // FIXME: implement this
 bool is_aa_modified(MODIFIED_AA_T aa, AA_MOD_T* mod){
@@ -796,7 +670,6 @@ AA_MOD_T multi_mod;
  * Requires that parameters have been initialized.
  */
 const AA_MOD_T* get_aa_mod_from_mass(FLOAT_T mass){
-
   // find the identifier for this mass shift
   MODIFIED_AA_T id = get_mod_identifier(mass);
 
@@ -815,9 +688,6 @@ const AA_MOD_T* get_aa_mod_from_mass(FLOAT_T mass){
   } else {
     // set multi_mod_identifier to that id and mass
     multi_mod.identifier = id;
-    
-    
-    
   }
   multi_mod.mass_change = mass;
   carp(CARP_DETAILED_DEBUG, "Returning %i %f", multi_mod.identifier, multi_mod.mass_change);
@@ -1016,32 +886,19 @@ char aa_mod_get_symbol(const AA_MOD_T* mod){
 }
 
 /**
- * \brief The bitmask used to uniquely identify the mod.
- * \returns The short int bitmask used to identify the mod.
- */
-int aa_mod_get_identifier(const AA_MOD_T* mod){
-  return mod->identifier;
-}
-
-/**
  * \brief Create a string containing all of the amino acids that can
  * be modified by this aa_mod.  E.g. if S, T, and Y can be modified,
  * returns "STY".
  * \returns A newly allocated string.
  */
-char* aa_mod_get_aa_list_string(AA_MOD_T* mod){
-
-  char* list_string = (char*)mycalloc(AA_LIST_LENGTH+1, sizeof(char));
-  int mod_idx, string_idx=0;
-  for(mod_idx = 0; mod_idx < AA_LIST_LENGTH; mod_idx++){
-    if(mod->aa_list[mod_idx] == true){
-      list_string[string_idx] = (char)('A' + mod_idx);
-      string_idx++;
+string aa_mod_get_aa_list_string(AA_MOD_T* mod) {
+  string s;
+  for (int i = 0; i < AA_LIST_LENGTH; i++) {
+    if (mod->aa_list[i]) {
+      s += (char)('A' + i);
     }
-    
-  }// next aa
-  list_string[string_idx] = '\0';
-  return list_string;
+  }
+  return s;
 }
 
 /**
@@ -1063,43 +920,6 @@ int count_modified_aas(MODIFIED_AA_T* seq){
 
   return count;
 
-}
-
-/**
- * /returns the mass of the modified sequence
- */
-FLOAT_T get_mod_aa_seq_mass(
-  MODIFIED_AA_T* seq, ///< The modified sequence
-  MASS_TYPE_T mass_type ///<  mono or average?
-  ) {
-  
-  // get access to the mods
-  AA_MOD_T** global_mod_list = NULL;
-  int mod_list_length = get_all_aa_mod_list(&global_mod_list);
-  
-  if (seq == NULL) {
-    return 0.0;
-  }
-  
-  FLOAT_T ans = 0;
-  int aa_idx = 0;
-  while(seq[aa_idx] != MOD_SEQ_NULL) {
-    ans += get_mass_amino_acid(modified_aa_to_char(seq[aa_idx]), mass_type);
-    if ( GET_MOD_MASK & seq[aa_idx]) {
-      for(int global_idx = 0; global_idx < mod_list_length; global_idx++){
-        if( is_aa_modified(seq[aa_idx], 
-                     global_mod_list[global_idx]) ){
-          ans += aa_mod_get_mass_change(global_mod_list[global_idx]);
-        }
-      }
-    }
-    aa_idx++;
-  }
-  if (mass_type == AVERAGE) {
-    return ans + MASS_H2O_AVERAGE;
-  } else {
-    return ans + MASS_H2O_MONO;
-  }
 }
 
 /*

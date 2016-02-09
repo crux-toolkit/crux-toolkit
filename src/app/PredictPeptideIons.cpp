@@ -29,6 +29,7 @@
 #include "model/IonSeries.h"
 #include "model/IonConstraint.h"
 #include "model/Peptide.h"
+#include "util/Params.h"
 
 using namespace std;
 using namespace Crux;
@@ -51,19 +52,19 @@ PredictPeptideIons::~PredictPeptideIons() {
  */
 int PredictPeptideIons::main(int argc, char** argv) {
   /* Get Arguments */
-  string peptide_sequence = get_string_parameter("peptide sequence");
-  int charge_state = get_int_parameter("charge state");
+  string peptide_sequence = Params::GetString("peptide sequence");
+  int charge_state = Params::GetInt("charge state");
 
   /* Get Options */
   ION_TYPE_T ion_type;
-  string_to_ion_type(get_string_parameter("primary-ions"), &ion_type);
-  bool use_precursor_ions = get_boolean_parameter("precursor-ions");
-  int isotope_count = get_int_parameter("isotope");
-  bool is_flanking = get_boolean_parameter("flanking");
-  string max_ion_charge = get_string_parameter("max-ion-charge");
+  string_to_ion_type(Params::GetString("primary-ions"), &ion_type);
+  bool use_precursor_ions = Params::GetBool("precursor-ions");
+  int isotope_count = Params::GetInt("isotope");
+  bool is_flanking = Params::GetBool("flanking");
+  string max_ion_charge = Params::GetString("max-ion-charge");
 
-  int nh3_count = get_int_parameter("nh3");
-  int h2o_count = get_int_parameter("h2o");
+  int nh3_count = Params::GetInt("nh3");
+  int h2o_count = Params::GetInt("h2o");
 
   int neutral_loss_count[MAX_MODIFICATIONS];
   bool is_modification = false;

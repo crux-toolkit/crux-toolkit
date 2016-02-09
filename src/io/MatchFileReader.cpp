@@ -178,7 +178,6 @@ void MatchFileReader::getMatchColumnsPresent(
 }
 
 MatchCollection* MatchFileReader::parse() {
-
   MatchFileReader delimited_result_file(file_path_);
   MatchCollection* match_collection = new MatchCollection();
   match_collection->preparePostProcess();
@@ -186,8 +185,6 @@ MatchCollection* MatchFileReader::parse() {
   match_collection->extendTabDelimited(database_, delimited_result_file, decoy_database_);
 
   return match_collection;
-
-
 }
 
 MatchCollection* MatchFileReader::parse(

@@ -116,15 +116,6 @@ class MatchCollection {
   MatchCollection(bool is_decoy = false);
 
   /**
-   * create a new match collection from the serialized PSM output files
-   *\returns a new match_collection object that is instantiated by the PSm output files
-   */
-  MatchCollection(
-    MatchCollectionIterator* match_collection_iterator, ///< the working match_collection_iterator -in
-    SET_TYPE_T set_type  ///< what set of match collection are we creating? (TARGET, DECOY1~3) -in 
-   );
-
-  /**
    * free the memory allocated match collection
    */
   virtual ~MatchCollection();
@@ -375,13 +366,6 @@ class MatchCollection {
 
   bool getHasDistinctMatches();
   void setHasDistinctMatches(bool distinct_matches);
-  /**
-   * Print the calibration parameters eta, beta, shift and correlation
-   * with tabs between.
-   */
-  void printCalibrationParameters(
-    FILE* output ///< The output file -in
-    );
 
   /**
    * Try setting the match collection's zstate.  Successful if the
@@ -408,26 +392,8 @@ class MatchCollection {
    */
   void assignQValues(
     const map<FLOAT_T, FLOAT_T>* score_to_qvalue_hash,
-    SCORER_TYPE_T score_type
-    );
-    
-  /**
-   * Given a hash table that maps from a score to its q-value, assign
-   * q-values to all of the matches in a given collection.
-   */
-  void assignQValues(
-    const map<FLOAT_T, FLOAT_T>* score_to_qvalue_hash,
     SCORER_TYPE_T score_type,
     SCORER_TYPE_T derived_score_type
-    );
-
-  /**
-   * Given a hash table that maps from a score to its PEP, assign
-   * PEPs to all of the matches in a given collection.
-   */
-  void assignPEPs(
-    const map<FLOAT_T, FLOAT_T>* score_to_qvalue_hash,
-    SCORER_TYPE_T score_type
     );
 
   /*******************************************
@@ -435,17 +401,6 @@ class MatchCollection {
    ******************************************/
   bool addMatchToPostMatchCollection(Crux::Match* match);
 };
-
-/**
- * Read files in the directory and return the names of target or
- * decoy files to use for post-search commands.
- * \returns Vector parameter filled with names of target or decoy
- * files.
- */
-void get_target_decoy_filenames(vector<string>& target_decoy_names,
-                                DIR* directory,
-                                SET_TYPE_T type);
-
 
 #endif
 

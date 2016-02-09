@@ -499,10 +499,7 @@ TValue DelimitedFile::getValue(
   unsigned int col_idx, ///< the column index 
   unsigned int row_idx  ///< the row index
   ) {
-  string& string_ans = getString(col_idx, row_idx);
-  TValue type_ans;
-  from_string<TValue>(type_ans, string_ans);
-  return type_ans;
+  return StringUtils::FromString<TValue>(getString(col_idx, row_idx));
 }
 
 
@@ -688,10 +685,7 @@ void DelimitedFile::getIntegerVectorFromCell(
   for (vector<string>::iterator string_iter = string_vector_ans.begin();
     string_iter != string_vector_ans.end();
     ++string_iter) {
-
-    int int_ans;
-    from_string<int>(int_ans, *string_iter);
-    int_vector.push_back(int_ans);
+    int_vector.push_back(StringUtils::FromString<int>(*string_iter));
   }
 }
 

@@ -32,19 +32,19 @@ XLinkScoreSpectrum::~XLinkScoreSpectrum() {
 
 int XLinkScoreSpectrum::main(int argc, char** argv){
   /* Get Arguments */
-  string peptideAStr = get_string_parameter("peptide A");
-  string peptideBStr = get_string_parameter("peptide B");
+  string peptideAStr = Params::GetString("peptide A");
+  string peptideBStr = Params::GetString("peptide B");
   char* peptideA = my_copy_string(peptideAStr.c_str());
   char* peptideB = my_copy_string(peptideBStr.c_str());
 
-  int posA     = get_int_parameter("pos A");
-  int posB     = get_int_parameter("pos B");
-  int charge   = get_int_parameter("charge state"); 
-  int scan_num = get_int_parameter("scan number"); 
+  int posA     = Params::GetInt("pos A");
+  int posB     = Params::GetInt("pos B");
+  int charge   = Params::GetInt("charge state"); 
+  int scan_num = Params::GetInt("scan number"); 
 
-  string ms2_file = get_string_parameter("ms2 file");
+  string ms2_file = Params::GetString("ms2 file");
 
-  LinkedPeptide::setLinkerMass(get_double_parameter("link mass"));
+  LinkedPeptide::setLinkerMass(Params::GetDouble("link mass"));
  
   // create new ion series
   
@@ -73,7 +73,7 @@ int XLinkScoreSpectrum::main(int argc, char** argv){
   XHHC_Scorer xhhc_scorer;
   xhhc_scorer.setPrint(false);
 
-  string scoremethod(get_string_parameter("xlink-score-method"));
+  string scoremethod(Params::GetString("xlink-score-method"));
 
   if (scoremethod=="composite") {
 

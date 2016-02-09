@@ -78,10 +78,10 @@ void CometApplication::calcVarMods(
   memset(varmods.szVarModChar,0,MAX_VARMOD_AA);
 
   vector<string> tokens = StringUtils::Split(var_str, ' ');
-  from_string<double>(varmods.dVarModMass, tokens[0]);
+  varmods.dVarModMass = StringUtils::FromString<double>(tokens[0]);
   strcpy(varmods.szVarModChar, tokens[1].c_str());
-  from_string<int>(varmods.bBinaryMod, tokens[2]);
-  from_string<int>(varmods.iMaxNumVarModAAPerMod, tokens[3]);
+  varmods.bBinaryMod = StringUtils::FromString<int>(tokens[2]);
+  varmods.iMaxNumVarModAAPerMod = StringUtils::FromString<int>(tokens[3]);
 }
 
 /**
@@ -92,9 +92,8 @@ void CometApplication::getDoubleRange(
     DoubleRange& doubleRangeParam ///< DoubleRange parameter -out
     ) {
   vector<string> tokens = StringUtils::Split(str, ' ');
-  
-  from_string<double>(doubleRangeParam.dStart, tokens[0]);
-  from_string<double>(doubleRangeParam.dEnd, tokens[1]);
+  doubleRangeParam.dStart = StringUtils::FromString<double>(tokens[0]);
+  doubleRangeParam.dEnd = StringUtils::FromString<double>(tokens[1]);
 }
 
 /*
@@ -105,9 +104,8 @@ void CometApplication::getIntRange(
     IntRange& intRangeParam ///< IntRange parameter -out
     ) {
   vector<string> tokens = StringUtils::Split(str, ' ');
-  
-  from_string<int>(intRangeParam.iStart, tokens[0]);
-  from_string<int>(intRangeParam.iEnd, tokens[1]);
+  intRangeParam.iStart = StringUtils::FromString<double>(tokens[0]);
+  intRangeParam.iEnd = StringUtils::FromString<double>(tokens[1]);
 }
 
 /**

@@ -146,25 +146,15 @@ void SQTReader::parseHeader(string& line) {
   headers_.push_back(line);
 }
 
-
 void SQTReader::parseSpectrum(string& line) {
 
   vector<string> tokens = StringUtils::Split(line, '\t');
 
-  int low_scan;
-  from_string(low_scan, tokens[spectrum_low_scan_idx]);
-  
-  int high_scan;
-  from_string(high_scan, tokens[spectrum_high_scan_idx]);
-
-  int charge;
-  from_string(charge, tokens[spectrum_charge_idx]);
-
-  double observed_mass;
-  from_string(observed_mass, tokens[spectrum_observed_mass_idx]);
-
-  int current_num_matches;
-  from_string(current_num_matches, tokens[spectrum_num_matches_idx]);
+  int low_scan = StringUtils::FromString<int>(tokens[spectrum_low_scan_idx]);
+  int high_scan = StringUtils::FromString<int>(tokens[spectrum_high_scan_idx]);
+  int charge = StringUtils::FromString<int>(tokens[spectrum_charge_idx]);
+  double observed_mass = StringUtils::FromString<double>(tokens[spectrum_observed_mass_idx]);
+  int current_num_matches = StringUtils::FromString<int>(tokens[spectrum_num_matches_idx]);
   if (current_num_matches >= 0) {
     current_match_collection_->setHasDistinctMatches(true);
   }
@@ -181,30 +171,19 @@ void SQTReader::parseSpectrum(string& line) {
     vector<int>(1, charge),
     "");
 
-  if (tokens[spectrum_total_ion_intensity_idx] != "") {
+  if (!tokens[spectrum_total_ion_intensity_idx].empty()) {
     current_spectrum_->setHasTotalEnergy(true);
   }
   if (tokens[spectrum_lowest_sp_idx] != "") {
     current_spectrum_->setHasLowestSp(true);
   }
 
-  double total_ion_intensity;
-  from_string(total_ion_intensity, tokens[spectrum_total_ion_intensity_idx]);
-  double lowest_sp;
-  from_string(lowest_sp, tokens[spectrum_lowest_sp_idx]);
+  double total_ion_intensity = StringUtils::FromString<double>(
+    tokens[spectrum_total_ion_intensity_idx]);
+  double lowest_sp = StringUtils::FromString<double>(
+    tokens[spectrum_lowest_sp_idx]);
   current_spectrum_->setTotalEnergy(total_ion_intensity);
   current_spectrum_->setLowestSp(lowest_sp);
-
-  /*
-  cerr << "spectrum line:"<<line<<endl;
-  cerr << "low scan:"<<low_scan<<endl;
-  cerr << "high scan:"<<high_scan<<endl;
-  cerr << "charge:"<<charge<<endl;
-  cerr << "observed mass:"<<observed_mass<<endl;
-  cerr << "num matches:"<<num_matches<<endl;
-  cerr << "======================="<<endl;
- */
-
 }
 
 
@@ -212,29 +191,14 @@ void SQTReader::parseMatch(string& line) {
 
   vector<string> tokens = StringUtils::Split(line, '\t');
 
-  int xcorr_rank;
-  from_string(xcorr_rank, tokens[match_xcorr_rank_idx]);
-  
-  int sp_rank;
-  from_string(sp_rank, tokens[match_sp_rank_idx]);
-
-  double calculated_mass;
-  from_string(calculated_mass, tokens[match_calculated_mass_idx]);
-
-  double delta_cn;
-  from_string(delta_cn, tokens[match_delta_cn_idx]);
-
-  double xcorr;
-  from_string(xcorr, tokens[match_xcorr_idx]);
-
-  double sp;
-  from_string(sp, tokens[match_sp_idx]);
-
-  int matched_ions;
-  from_string(matched_ions, tokens[match_matched_ions_idx]);
-
-  int expected_ions;
-  from_string(expected_ions, tokens[match_expected_ions_idx]);
+  int xcorr_rank = StringUtils::FromString<int>(tokens[match_xcorr_rank_idx]);
+  int sp_rank = StringUtils::FromString<int>(tokens[match_sp_rank_idx]);
+  double calculated_mass = StringUtils::FromString<double>(tokens[match_calculated_mass_idx]);
+  double delta_cn = StringUtils::FromString<double>(tokens[match_delta_cn_idx]);
+  double xcorr = StringUtils::FromString<double>(tokens[match_xcorr_idx]);
+  double sp = StringUtils::FromString<double>(tokens[match_sp_idx]);
+  int matched_ions = StringUtils::FromString<int>(tokens[match_matched_ions_idx]);
+  int expected_ions = StringUtils::FromString<int>(tokens[match_expected_ions_idx]);
 
   string sqt_sequence = tokens[match_sequence_idx];
   vector<string> sequence_tokens = StringUtils::Split(sqt_sequence, '.');
@@ -244,28 +208,11 @@ void SQTReader::parseMatch(string& line) {
   sequence_tokens.erase(sequence_tokens.begin());
   sequence_tokens.pop_back();
   current_peptide_sequence_ = DelimitedFile::splice(sequence_tokens, '.');
- /*
-  cerr << "Match line:"<<line<<endl;
-  cerr << "xcorr rank:"<<xcorr_rank<<endl;
-  cerr << "sp rank:"<<sp_rank<<endl;
-  cerr << "calculated mass:"<<calculated_mass<<endl;
-  cerr << "delta cn:"<<delta_cn<<endl;
-  cerr << "xcorr:"<<xcorr<<endl;
-  cerr << "sp:"<<sp<<endl;
-  cerr << "matched ions:"<<matched_ions<<endl;
-  cerr << "expected ions:"<<expected_ions<<endl;
-  cerr << "sequence:"<<current_peptide_sequence_<<endl;
-  cerr << "prev_aa:"<<current_prev_aa_<<endl;
-  cerr << "next_aa:"<<current_next_aa_<<endl;
-  cerr << "====================" << endl;
-*/
   if (current_match_ != NULL) {
     current_match_collection_->addMatchToPostMatchCollection(current_match_);
   }
 
   Peptide* peptide = new Peptide();
-
-  peptide->setPeptideMass(calculated_mass - MASS_PROTON);
 
   MODIFIED_AA_T* mods = NULL;
   convert_to_mod_aa_seq(current_peptide_sequence_.c_str(), &mods);
@@ -413,8 +360,7 @@ void SQTReader::readSymbols(const string& file, bool append) {
           idx >= line.length() - 1) {
         continue;
       }
-      FLOAT_T mass;
-      from_string(mass, line.substr(idx + 1));
+      FLOAT_T mass = StringUtils::FromString<FLOAT_T>(line.substr(idx + 1));
 
       if (residue < 'A' || residue > 'Z') {
         carp(CARP_FATAL, "The DiffMod residue '%c' in file '%s' is invalid",
