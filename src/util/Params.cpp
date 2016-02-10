@@ -748,6 +748,10 @@ Params::Params() : finalized_(false) {
   InitBoolParam("skip-preprocessing", false,
     "Skip preprocessing steps on spectra. Default = F.",
     "Available for tide-search", false);
+  InitStringParam("score-function", "xcorr","xcorr|residueEvidenceMatrix|both",
+    "Function used for scoring PSMs. Options are xcorr, residueEvidenceMatrix, or both. XCorr is the original scoring function used by SEQUEST. residueEvidenceMatrix is a score function made for scoring high-resolution MS2 spectra. Using the 'both' option along with calculation of exact-p-values must be scored using residueEvidenceMatrix.",
+    "Available for tide-search.", true);
+
   /*
    * Comet parameters
    */
@@ -1682,6 +1686,7 @@ void Params::Categorize() {
   items.insert("fragment-mass");
   items.insert("isotope-windows");
   items.insert("compute-p-values");
+  items.insert("score-function");
   AddCategory("Search parameters", items);
 
   items.clear();
