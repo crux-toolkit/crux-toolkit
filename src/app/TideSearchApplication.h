@@ -31,6 +31,13 @@ protected:
 
   static bool HAS_DECOYS;
 
+  enum SCORE_FUNCTION { //Added by Andy Lin on 2/9/2016
+    INVALID_SCORE_FUNCTION, //invalid score function
+    XCORR, //score function is original SEQUEST implementation 
+    RESIDUE_EVIDENCE_MATRIX, //score function can be used with high-res MS2 data
+    BOTH //use both score functions from above
+  };
+
   void search(
     const string& spectrum_filename,
     const vector<SpectrumCollection::SpecCharge>* spec_charges,
@@ -109,6 +116,7 @@ public:
   static const double RESCALE_FACTOR;
 
   bool exact_pval_search_;
+  string scoreFunction_;
 
   /**
    * Constructor
