@@ -748,8 +748,8 @@ Params::Params() : finalized_(false) {
   InitBoolParam("skip-preprocessing", false,
     "Skip preprocessing steps on spectra. Default = F.",
     "Available for tide-search", false);
-  InitStringParam("score-function", "xcorr","xcorr|residueEvidenceMatrix|both",
-    "Function used for scoring PSMs. Options are xcorr, residueEvidenceMatrix, or both. XCorr is the original scoring function used by SEQUEST. residueEvidenceMatrix is a score function made for scoring high-resolution MS2 spectra. Using the 'both' option along with calculation of exact-p-values must be scored using residueEvidenceMatrix.",
+  InitStringParam("score-function", "xcorr","xcorr|residue-evidence|both",
+    "Function used for scoring PSMs. 'xcorr' is the original scoring function used by SEQUEST; 'residue-evidence' is designed to score high-resolution MS2 spectra; and 'both' calculates both scores. The latter requires that exact-p-values=T.",
     "Available for tide-search.", true);
 
   /*
