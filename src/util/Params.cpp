@@ -2443,7 +2443,7 @@ void IntParam::ThrowIfInvalid() const {
                         StringUtils::ToString(max_));
   }
 }
-string IntParam::GetAcceptedValues() const { return "integer"; }
+string IntParam::GetAcceptedValues() const { return "<integer>"; }
 bool IntParam::IsDefault() const { return value_ == original_; }
 bool IntParam::GetBool() const { return BoolParam::From(value_); }
 int IntParam::GetInt() const { return value_; }
@@ -2486,7 +2486,7 @@ void DoubleParam::ThrowIfInvalid() const {
                         StringUtils::ToString(max_));
   }
 }
-string DoubleParam::GetAcceptedValues() const { return "float"; }
+string DoubleParam::GetAcceptedValues() const { return "<float>"; }
 bool DoubleParam::IsDefault() const { return value_ == original_; }
 bool DoubleParam::GetBool() const { return BoolParam::From(value_); }
 int DoubleParam::GetInt() const { return IntParam::From(value_); }
@@ -2531,7 +2531,7 @@ void StringParam::ThrowIfInvalid() const {
   }
 }
 string StringParam::GetAcceptedValues() const {
-  return validValues_.empty() ? "string" : StringUtils::Join(validValues_, '|');
+  return validValues_.empty() ? "<string>" : StringUtils::Join(validValues_, '|');
 }
 bool StringParam::IsDefault() const { return value_ == original_; }
 bool StringParam::GetBool() const { return BoolParam::From(value_); }
@@ -2556,7 +2556,7 @@ string StringParam::From(double d) { return StringUtils::ToString(d); }
 //
 ArgParam::ArgParam(const string& name, const string& usage)
   : Param(name, usage, "", false), values_(vector<string>()) {}
-string ArgParam::GetAcceptedValues() const { return "string"; }
+string ArgParam::GetAcceptedValues() const { return "<string>"; }
 bool ArgParam::IsArgument() const { return true; }
 bool ArgParam::IsDefault() const { return false; }
 bool ArgParam::GetBool() const { return BoolParam::From(GetString()); }

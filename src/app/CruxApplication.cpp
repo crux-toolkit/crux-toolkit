@@ -216,7 +216,7 @@ string CruxApplication::getUsage(
         defaultString = "<empty>";
       }
       usage << endl
-            << "  [--" << *i << " <" << Params::GetAcceptedValues(*i) << ">]" << endl
+            << "  [--" << *i << " " << Params::GetAcceptedValues(*i) << "]" << endl
             << StringUtils::LineFormat(Params::ProcessHtmlDocTags(Params::GetUsage(*i)) +
                                        " Default = " + defaultString + ".", 80, 5);
     }
