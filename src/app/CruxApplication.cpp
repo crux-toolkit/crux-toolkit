@@ -98,7 +98,7 @@ void CruxApplication::initialize(int argc, char** argv) {
   
     // Store the host name, start date and time, version number, and command line.
     carp(CARP_INFO, "CPU: %s", hostname());
-    carp(CARP_INFO, "Crux version: %s\n", CRUX_VERSION);
+    carp(CARP_INFO, "Crux version: %s", CRUX_VERSION);
     carp(CARP_INFO, date_and_time());
     log_command_line(argc, argv);
 
