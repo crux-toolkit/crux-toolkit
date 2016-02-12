@@ -22,6 +22,20 @@
 #include "io/OutputFiles.h"
 #include "model/Peptide.h"
 
+/**
+ * Legal values for the --estimation-method option.
+ */
+enum _estimation_method {
+  INVALID_METHOD,
+  MIXMAX_METHOD,       ///< compute q-values using mix-max (Uri Keich)
+  TDC_METHOD,          ///< compute q-values using TDC (Elias-Gygi)  
+  PEPTIDE_LEVEL_METHOD,///< simple peptide-level decoy-based estimation (WOTE)
+  NUMBER_METHOD_TYPES  ///< always keep this last so the value
+                        /// changes as cmds are added
+};
+
+typedef enum _estimation_method ESTIMATION_METHOD_T;
+
 class AssignConfidenceApplication : public CruxApplication {
 protected: 
   map<pair<string, unsigned int>, bool>* spectrum_flag_;  // this variable is used in Cascade Search, this is an idicator 
