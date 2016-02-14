@@ -418,7 +418,7 @@ void TideSearchApplication::search(
   if (tmpScoreFunction == "xcorr") {
     curScoreFunction = XCORR;
   }
-  else if (tmpScoreFunction == "residueEvidenceMatrix") {
+  else if (tmpScoreFunction == "residue-evidence") {
     curScoreFunction = RESIDUE_EVIDENCE_MATRIX;
   }
   else if (tmpScoreFunction == "both") {
@@ -458,6 +458,8 @@ void TideSearchApplication::search(
     double min_mass, max_mass, min_range, max_range;
     computeWindow(*sc, window_type, precursor_window, max_charge, &min_mass, &max_mass, &min_range, &max_range);
 
+    //Switch statment added by Andy Lin on 2/10/2016
+    //Original code is placed in case named XCORR
     switch (curScoreFunction) {
     case XCORR: 
       if (!exact_pval_search_) {  //execute original tide-search program
@@ -680,6 +682,11 @@ void TideSearchApplication::search(
       }
       break;
     case RESIDUE_EVIDENCE_MATRIX:
+
+      observed.CreateResidueEvidenceMatrix(*spectrum);
+
+
+      std::cout << std::endl << "So far so good" << std::endl;
       carp(CARP_FATAL,"This is not implemented yet.");
       break;
     case BOTH:
