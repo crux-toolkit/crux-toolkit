@@ -24,6 +24,8 @@
 #include "max_mz.h"
 #include "util/Params.h"
 
+#include <iostream> //Remove this when done -- Andy Lin
+
 using namespace std;
 
 // Number of m/z regions in XCorr normalization.
@@ -176,6 +178,152 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum,
 #endif
 }
 
+//TODO Code may be perform same thing as the above PreprocessSpectrum function
+//Moved by Andy Lin on 2/12/2016
+//Code was originally in CreateEvidenceVector
+//Moved preprocessing code to own function
+//Preprocesses spectum with following steps
+// 1) Discretize mass bins of observed spectrum
+// 2) Take square root of intensity
+// 3) Grass removal
+// 4) Observed spectrum is split into 10 segments and intensities
+//    within segment are normalized to maxItensPerRegion (currently set to 50.0)
+//Preseved code is below this function
+void ObservedPeakSet::PreprocessSpectrum(
+  const Spectrum& spectrum,
+  double* intensArrayObs,
+  int* intensRegion,
+  int maxPrecurMass,
+  int charge)
+{
+  // TODO need to review these constants, decide which can be moved to parameter file
+  const int nRegion = NUM_SPECTRUM_REGIONS;
+  const double maxIntensPerRegion = 50.0;
+  const double precursorMZExclude = 15.0;
+
+  int ma;
+  int ionBin;
+  double precurMz = spectrum.PrecursorMZ();
+  int nIon = spectrum.Size();
+  int precurCharge = charge;
+  double experimentalMassCutoff = precurMz * precurCharge + 50.0;
+
+  //Determining max ion mass and max ion intensity
+  double maxIonMass = 0.0;
+  double maxIonIntens = 0.0;
+  for (int ion = 0; ion < nIon; ion++) {
+    double ionMass = spectrum.M_Z(ion);
+    double ionIntens = spectrum.Intensity(ion);
+    if (ionMass >= experimentalMassCutoff) {
+      continue;
+    }
+    if (maxIonMass < ionMass) {
+      maxIonMass = ionMass;
+    }
+    if (maxIonIntens < ionIntens) {
+      maxIonIntens = ionIntens;
+    }
+  }
+
+  //Mass axis is descretized into 1 dalton bins
+  int regionSelector = (int)floor(MassConstants::mass2bin(maxIonMass) / (double)nRegion);
+  for (int ion = 0; ion < nIon; ion++) {
+    double ionMass = spectrum.M_Z(ion);
+    double ionIntens = spectrum.Intensity(ion);
+    if (ionMass >= experimentalMassCutoff) {
+      continue;
+    }
+    if (ionMass > precurMz - precursorMZExclude && ionMass < precurMz + precursorMZExclude) {
+      continue;
+    }
+    ionBin = MassConstants::mass2bin(ionMass);
+    int region = (int)floor((double)(ionBin) / (double)regionSelector);
+    if (region >= nRegion) {
+      region = nRegion - 1;
+    }
+    intensRegion[ionBin] = region;
+    if (intensArrayObs[ionBin] < ionIntens) {
+      intensArrayObs[ionBin] = ionIntens;
+    }
+  }
+
+  //Take square root of intensities as well as grass removal
+  maxIonIntens = sqrt(maxIonIntens);
+  for (ma = 0; ma < maxPrecurMass; ma++) {
+    intensArrayObs[ma] = sqrt(intensArrayObs[ma]);
+    if (intensArrayObs[ma] <= 0.05 * maxIonIntens) {
+      intensArrayObs[ma] = 0.0;
+    }
+  }
+
+  //Split ovserved spectrum int nRegions (currently 10)
+  //Scale each region itensities to maxItensPerRegion (currently 50)
+  double* maxRegion = new double[nRegion];
+  for (int re = 0; re < nRegion; re++) {
+    maxRegion[re] = 0.0;
+  }
+
+  for (ma = 0; ma < maxPrecurMass; ma++) {
+    int reg = intensRegion[ma];
+    if (reg >= 0 && maxRegion[reg] < intensArrayObs[ma]) {
+      maxRegion[reg] = intensArrayObs[ma];
+    }
+  }
+  for (ma = 0; ma < maxPrecurMass; ma++) {
+    int reg = intensRegion[ma];
+    if (reg >= 0 && maxRegion[reg] > 0.0) {
+      intensArrayObs[ma] *= (maxIntensPerRegion / maxRegion[reg]);
+    }
+  }
+  delete [] maxRegion;
+}
+//End -- Moved by Andy Lin
+
+/*
+TODO preserved from PreprocessSpectrum only for historical reference; get rid of eventually  
+// Fill peaks
+int largest_mz = 0;
+double highest_intensity = 0;
+for (int i = 0; i < spectrum.Size(); ++i) {
+  double peak_location = spectrum.M_Z(i);
+  if(peak_location >= experimental_mass_cut_off)
+    continue;
+  double intensity = spectrum.Intensity(i);
+  int mz = (int)(peak_location / bin_width + 0.5);
+ 
+  if ((mz > largest_mz) && (intensity > 0))
+    largest_mz = mz;
+ 
+  intensity = sqrt(intensity);
+  if (intensity > highest_intensity)
+    highest_intensity = intensity;
+  if (intensity > peaks_[mz])
+    peaks_[mz] = intensity;
+}
+
+double intensity_cutoff = highest_intensity * 0.05;
+int region_size = largest_mz / NUM_SPECTRUM_REGIONS;
+for (int i = 0; i < NUM_SPECTRUM_REGIONS; ++i) {
+  highest_intensity = 0;
+  for (int j = 0; j < region_size; ++j) {
+    int index = i * region_size + j;
+    if (peaks_[index] <= intensity_cutoff)
+      peaks_[index] = 0;
+    if (peaks_[index] > highest_intensity)
+      highest_intensity = peaks_[index];
+  }
+  if (highest_intensity == 0)
+    continue;
+  double normalizer = 50.0/highest_intensity;
+  for (int j = 0; j < region_size; ++j) {
+    int index = i * region_size + j;
+    if (peaks_[index] != 0)
+      peaks_[index] *= normalizer;
+  }    
+}
+//TODO end preserved
+*/
+
 /* Calculates vector of cleavage evidence for an observed spectrum, using XCorr
  * b/y/neutral peak sets and heights.
  *
@@ -251,111 +399,10 @@ void ObservedPeakSet::CreateEvidenceVector(
   double experimentalMassCutoff = precurMz * precurCharge + 50.0;
   double proton = MassConstants::proton;
 
-  // TODO preserved from PreprocessSpectrum only for historical reference; get rid of eventually  
-  // // Fill peaks
-  // int largest_mz = 0;
-  // double highest_intensity = 0;
-  // for (int i = 0; i < spectrum.Size(); ++i) {
-    // double peak_location = spectrum.M_Z(i);
-    // if(peak_location >= experimental_mass_cut_off)
-      // continue;
-
-    // double intensity = spectrum.Intensity(i);
-    // int mz = (int)(peak_location / bin_width + 0.5);
-    // if ((mz > largest_mz) && (intensity > 0))
-      // largest_mz = mz;
-
-    // intensity = sqrt(intensity);
-    // if (intensity > highest_intensity)
-      // highest_intensity = intensity;
-    // if (intensity > peaks_[mz])
-      // peaks_[mz] = intensity;
-  // }
-
-  // double intensity_cutoff = highest_intensity * 0.05;
-
-  // int region_size = largest_mz / NUM_SPECTRUM_REGIONS;
-  // for (int i = 0; i < NUM_SPECTRUM_REGIONS; ++i) {
-    // highest_intensity = 0;
-    // for (int j = 0; j < region_size; ++j) {
-      // int index = i * region_size + j;
-      // if (peaks_[index] <= intensity_cutoff)
-	// peaks_[index] = 0;
-      // if (peaks_[index] > highest_intensity)
-	// highest_intensity = peaks_[index];
-    // }
-    // if (highest_intensity == 0)
-      // continue;
-    // double normalizer = 50.0/highest_intensity;
-    // for (int j = 0; j < region_size; ++j) {
-      // int index = i * region_size + j;
-      // if (peaks_[index] != 0)
-	// peaks_[index] *= normalizer;
-    // }    
-  // }
-  // TODO end preserved
-
-  double maxIonMass = 0.0;
-  double maxIonIntens = 0.0;
-  for (int ion = 0; ion < nIon; ion++) {
-    double ionMass = spectrum.M_Z(ion);
-    double ionIntens = spectrum.Intensity(ion);
-    if (ionMass >= experimentalMassCutoff) {
-      continue;
-    }
-    if (maxIonMass < ionMass) {
-      maxIonMass = ionMass;
-    }
-    if (maxIonIntens < ionIntens) {
-      maxIonIntens = ionIntens;
-    }
-  }
-  int regionSelector = (int)floor(MassConstants::mass2bin(maxIonMass) / (double)nRegion);
-  for (int ion = 0; ion < nIon; ion++) {
-    double ionMass = spectrum.M_Z(ion);
-    double ionIntens = spectrum.Intensity(ion);
-    if (ionMass >= experimentalMassCutoff) {
-      continue;
-    }
-    if (ionMass > precurMz - precursorMZExclude && ionMass < precurMz + precursorMZExclude) {
-      continue;
-    }
-    ionBin = MassConstants::mass2bin(ionMass);
-    int region = (int)floor((double)(ionBin) / (double)regionSelector);
-    if (region >= nRegion) {
-      region = nRegion - 1;
-    }
-    intensRegion[ionBin] = region;
-    if (intensArrayObs[ionBin] < ionIntens) {
-      intensArrayObs[ionBin] = ionIntens;
-    }
-  }
-
-  maxIonIntens = sqrt(maxIonIntens);
-  for (ma = 0; ma < maxPrecurMass; ma++) {
-    intensArrayObs[ma] = sqrt(intensArrayObs[ma]);
-    if (intensArrayObs[ma] <= 0.05 * maxIonIntens) {
-      intensArrayObs[ma] = 0.0;
-    }
-  }
-
-  double* maxRegion = new double[nRegion];
-  for (int re = 0; re < nRegion; re++) {
-    maxRegion[re] = 0.0;
-  }
-  for (ma = 0; ma < maxPrecurMass; ma++) {
-    int reg = intensRegion[ma];
-    if (reg >= 0 && maxRegion[reg] < intensArrayObs[ma]) {
-      maxRegion[reg] = intensArrayObs[ma];
-    }
-  }
-  for (ma = 0; ma < maxPrecurMass; ma++) {
-    int reg = intensRegion[ma];
-    if (reg >= 0 && maxRegion[reg] > 0.0) {
-      intensArrayObs[ma] *= (maxIntensPerRegion / maxRegion[reg]);
-    }
-  }
-  delete [] maxRegion;
+  //Added by Andy Lin on 2/12/2016
+  //preprocesses spectrum 
+  PreprocessSpectrum(spectrum, intensArrayObs, intensRegion,maxPrecurMass,charge);
+  //End added by Andy Lin
 
   // ***** Adapted from tide/spectrum_preprocess2.cc.
   // TODO replace, if possible, with call to 
@@ -561,3 +608,11 @@ int ObservedPeakSet::DebugDotProd(const TheoreticalPeakArr& theoretical) {
   return total;
 }
 #endif
+
+void ObservedPeakSet::CreateResidueEvidenceMatrix(const Spectrum& spectrum) {
+  int a=1;
+}
+
+
+
+

@@ -143,6 +143,11 @@ class ObservedPeakSet {
 		double binOffset, int charge, double pepMassMonoMean,
 		int maxPrecurMass, int* evidenceInt);
 
+  //created by Andy Lin 2/11/2016
+  //Method for creating residue evidence matrix from Spectrum
+  void CreateResidueEvidenceMatrix(const Spectrum& spectrum);
+  //END -- added by Andy Lin
+
   // For debugging
   void Show(const string& name, TheoreticalPeakType peak_type, bool cache_end) {
     int end = cache_end ? max_mz_.CacheBinEnd() : max_mz_.BackgroundBinEnd();
@@ -184,6 +189,8 @@ class ObservedPeakSet {
   }
   void MakeInteger();
   void ComputeCache();
+  void PreprocessSpectrum(const Spectrum& spectrum, double* intensArrayObs, 
+                          int* intensRegion, int maxPrecurMass,int charge);
 
   double* peaks_;
   int* cache_;
