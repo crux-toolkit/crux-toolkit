@@ -16,6 +16,14 @@
 using namespace std; 
 
 class TideSearchApplication : public CruxApplication {
+private:
+  //Added by Andy Lin in Feb 2016
+  //function determines which mass bin a precusor mass is in
+  void getMassBin (
+    int* pepMassInt,
+    vector<int>& pepMassIntUnique,
+    ActivePeptideQueue* active_peptide_queue
+  );
 protected:
   /**
   brief This variable is used with Cascade Search.

@@ -609,8 +609,18 @@ int ObservedPeakSet::DebugDotProd(const TheoreticalPeakArr& theoretical) {
 }
 #endif
 
-void ObservedPeakSet::CreateResidueEvidenceMatrix(const Spectrum& spectrum) {
-  int a=1;
+//Written by Andy Lin in Feb 2016
+//From an observed spectrum, calculate and populate the residue evidence matrix
+void ObservedPeakSet::CreateResidueEvidenceMatrix(
+  const Spectrum& spectrum,
+  double binWidth,
+  double binOffset,
+  int charge,
+  double pepMassMonoMean,
+  int maxPrecurMass //need to add as input a 2D matrix
+  ) {
+  
+  const int nRegion = NUM_SPECTRUM_REGIONS;
 }
 
 

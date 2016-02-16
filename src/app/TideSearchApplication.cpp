@@ -514,12 +514,12 @@ void TideSearchApplication::search(
           }
         }  //end peptide_centric == true
       } else { //execute exact-pval-search
-        
+       
         const int minDeltaMass = aaMass[0];
         const int maxDeltaMass = aaMass[nAA - 1];
-
-        int maxPrecurMass = floor(MaxBin::Global().CacheBinEnd() + 50.0); // TODO works, but is this the best way to get?
+        int maxPrecurMass = floor(MaxBin::Global().CacheBinEnd() + 50.0);
         int nCandPeptide = active_peptide_queue->SetActiveRangeBIons(min_mass, max_mass, min_range, max_range);
+
         total_candidate_peptides += nCandPeptide;
         TideMatchSet::Arr match_arr(nCandPeptide); // scored peptides will go here.
  
@@ -544,16 +544,11 @@ void TideSearchApplication::search(
         int* pepMassInt = new int[nCandPeptide];
         vector<int> pepMassIntUnique;
         pepMassIntUnique.reserve(nCandPeptide);
-        pe = 0;
-        for (iter_ = active_peptide_queue->iter_;
-             iter_ != active_peptide_queue->end_;
-             ++iter_) {
-          double pepMass = (*iter_)->Mass();
-          pepMaInt = MassConstants::mass2bin(pepMass);
-          pepMassInt[pe] = pepMaInt;
-          pepMassIntUnique.push_back(pepMaInt);
-          pe++;
-        }
+       
+	//Added by Andy Lin in Feb 2016 
+        getMassBin(pepMassInt,pepMassIntUnique,active_peptide_queue);
+	//End added by Andy Lin
+        
         std::sort(pepMassIntUnique.begin(), pepMassIntUnique.end());
         vector<int>::iterator last = std::unique(pepMassIntUnique.begin(),
                                                  pepMassIntUnique.end());
@@ -681,13 +676,60 @@ void TideSearchApplication::search(
                sc_index, sc_index / sc_total * 100);
       }
       break;
-    case RESIDUE_EVIDENCE_MATRIX:
+    case RESIDUE_EVIDENCE_MATRIX: //Following case written by Andy Lin in Feb 2016
+      if (!exact_pval_search_) {
+        std::cout << std::endl << "So far so good" << std::endl;
+        carp(CARP_FATAL,"This is not implemented yet.");
+      } else{
 
-      observed.CreateResidueEvidenceMatrix(*spectrum);
+        const int minDeltaMass = aaMass[0];
+        const int maxdeltaMass = aaMass[nAA - 1];
+        int maxPrecurMass = floor(MaxBin::Global().CacheBinEnd() + 50.0);
+        int nCandPeptide = active_peptide_queue->SetActiveRangeBIons(min_mass, max_mass, min_range, max_range);
+
+        total_candidate_peptides += nCandPeptide;
+        TideMatchSet::Arr match_arr(nCandPeptide); // scored peptides will go here.
+
+        //For one spectrum calculates:
+        // 1) residue evidence matrix
+        // 2) score count vectors for range of integer masses
+        // 3) p-values of residue evidence match between spectrum and all selected candidate 
+        //    target and decoy peptides
+
+        // iterators needed at multiple places in following code
+        deque<Peptide*>::const_iterator iter_ = active_peptide_queue->iter_;
+        deque<TheoreticalPeakSetBIons>::const_iterator iter1_ = active_peptide_queue->iter1_;
+        vector<int>::const_iterator iter_int;
+        vector<unsigned int>::const_iterator iter_uint;
+        
+        int pe;
+        int ma;
+        int pepMaInt;
+        int* pepMassInt = new int[nCandPeptide];
+        vector<int> pepMassIntUnique;
+        pepMassIntUnique.reserve(nCandPeptide);
+        pe = 0;
+
+        //Following loop determine which bin peptide candidate is in 
+        //Or in other words: which bin the precursor mass is in
+        for (iter_ = active_peptide_queue->iter_;
+             iter_ != active_peptide_queue->end_;
+             ++iter_) {
+          double pepMass = (*iter_)->Mass();
+          pepMaInt = MassConstants::mass2bin(pepMass);
+          pepMassInt[pe] = pepMaInt;
+          pepMassIntUnique.push_back(pepMaInt);
+          pe++;
+        }
+        
+//        observed.CreateResidueEvidenceMatrix(*spectrum,bin_width_, bin_offset_,charge,
+//                                           pepMassMonoMean, maxPrecurMass);
 
 
-      std::cout << std::endl << "So far so good" << std::endl;
-      carp(CARP_FATAL,"This is not implemented yet.");
+        std::cout << std::endl << "So far so good" << std::endl;
+        carp(CARP_FATAL,"This is not implemented yet.");
+      }
+
       break;
     case BOTH:
       if (!exact_pval_search_){
@@ -1164,6 +1206,30 @@ void TideSearchApplication::setSpectrumFlag(map<pair<string, unsigned int>, bool
 
 string TideSearchApplication::getOutputFileName(){
   return output_file_name_;
+}
+
+//Added by Andy Lin in Feb 2016
+//Loop determines which mass bin peptide candidate is in 
+//function determines which mass bin a precursor mass is in
+void TideSearchApplication::getMassBin(
+  int* pepMassInt,
+  vector<int>& pepMassIntUnique,
+  ActivePeptideQueue* active_peptide_queue
+) {
+  int pe = 0;
+  int pepMaInt;
+
+  deque<Peptide*>::const_iterator iter_ = active_peptide_queue->iter_;
+
+  for (iter_ = active_peptide_queue->iter_;
+       iter_ != active_peptide_queue->end_;
+       ++iter_) {
+    double pepMass = (*iter_)->Mass();
+    pepMaInt = MassConstants::mass2bin(pepMass);
+    pepMassInt[pe] = pepMaInt;
+    pepMassIntUnique.push_back(pepMaInt);
+    pe++;
+  }
 }
 
 /*
