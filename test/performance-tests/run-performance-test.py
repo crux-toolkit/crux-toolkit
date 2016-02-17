@@ -136,7 +136,7 @@ def extractData(inputFileName, columnName, outputFileName):
 
 #############################################################################
 def runSearch(outputDirectory, searchName, searchParam, database, 
-              psmFile, scoreColumn, confidenceParam):
+              concatenatedDatabase, psmFile, scoreColumn, confidenceParam):
 
   runCommand("%s %s --output-dir %s --parameter-file %s %s %s %s"
              % (CRUX, searchName, outputDirectory, parameterFileName, 
@@ -163,6 +163,14 @@ def runSearch(outputDirectory, searchName, searchParam, database,
 
   qFile = "%s/%s.q-ranker.q.txt" % (outputDirectory, searchName)
   extractData(qrankerFile, "q-ranker q-value", qFile)
+
+  baristaFile = "%s/barista.target.psms.txt" % outputDirectory
+  runCommand("%s barista --decoy-prefix decoy_ --output-dir %s %s %s %s"
+             % (CRUX, outputDirectory, concatenatedDatabase, ms2, psmFile),
+             baristaFile)
+
+  qFile = "%s/%s.barista.q.txt" % (outputDirectory, searchName)
+  extractData(baristaFile, "barista q-value", qFile)
 
   reducedFile = "%s/%s.target.reduced.txt" % (outputDirectory, searchName)
   runCommand("%s extract-columns %s \"scan,charge,sequence,%s\" | awk 'NR > 1' | awk '{print $1 \"~\" $2 \"~\" $3 \"\t\" $4}' | sort -k 1b,1 > %s"
@@ -200,18 +208,23 @@ createParameterFile(parameterFileName)
 
 # Create the index.
 runCommand("%s tide-index --output-dir %s --parameter-file %s %s.fa %s"
-           % (CRUX, database, parameterFileName, database, database), 
+           % (CRUX, database, parameterFileName, database, database),
            "%s/tide-index.peptides.target.txt" % database)
+# Create concatenated database for use by Barista
+concatenatedDatabase = "targets-and-decoys.fasta"
+runCommand("cat %s/tide-index.decoy.fasta %s.fa > %s"
+           % (database, database, concatenatedDatabase), "")
 
 # Run three searches (Comet, Tide XCorr, and Tide p-value).
-runSearch("tide-xcorr", "tide-search", "", database, 
-          "tide-xcorr/tide-search.txt", "xcorr score", "")
-runSearch("tide-p-value", "tide-search", "--exact-p-value T", database,
-          "tide-p-value/tide-search.txt", "refactored xcorr",
-          "--smaller-is-better T --score \"exact p-value\"")
-runSearch("comet", "comet", "", "%s.fa" % database, 
-          "comet/comet.target.txt", "xcorr score", 
-          "--smaller-is-better T --score e-value")
+runSearch("tide-xcorr", "tide-search", "", database,
+          concatenatedDatabase, "tide-xcorr/tide-search.txt",
+          "xcorr score", "")
+runSearch("tide-p-value", "tide-search", "--exact-p-value T",
+          database, concatenatedDatabase, "tide-p-value/tide-search.txt",
+          "refactored xcorr", "--smaller-is-better T --score \"exact p-value\"")
+runSearch("comet", "comet", "", "%s.fa" % database,
+          concatenatedDatabase, "comet/comet.target.txt",
+          "xcorr score", "--smaller-is-better T --score e-value")
 
 # Make the performance plot.
 gnuplotFileName = "performance.gnuplot"
@@ -228,9 +241,15 @@ gnuplotFile.write("replot \"tide-xcorr/tide-search.q.txt\" using 1:0 title \"Tid
 gnuplotFile.write("replot \"comet/comet.percolator.q.txt\" using 1:0 title \"Comet Percolator\" with lines lw 2\n")
 gnuplotFile.write("replot \"tide-p-value/tide-search.percolator.q.txt\" using 1:0 title \"Tide p-value Percolator\" with lines lw 2\n")
 gnuplotFile.write("replot \"tide-xcorr/tide-search.percolator.q.txt\" using 1:0 title \"Tide XCorr Percolator\" with lines lw 2\n")
+
 gnuplotFile.write("replot \"comet/comet.q-ranker.q.txt\" using 1:0 title \"Comet q-ranker\" with lines lw 3\n")
 gnuplotFile.write("replot \"tide-p-value/tide-search.q-ranker.q.txt\" using 1:0 title \"Tide p-value q-ranker\" with lines lw 3\n")
 gnuplotFile.write("replot \"tide-xcorr/tide-search.q-ranker.q.txt\" using 1:0 title \"Tide XCorr q-ranker\" with lines lw 3\n")
+
+gnuplotFile.write("replot \"comet/comet.barista.q.txt\" using 1:0 title \"Comet barista\" with lines lw 3\n")
+gnuplotFile.write("replot \"tide-p-value/tide-search.barista.q.txt\" using 1:0 title \"Tide p-value barista\" with lines lw 3\n")
+gnuplotFile.write("replot \"tide-xcorr/tide-search.barista.q.txt\" using 1:0 title \"Tide XCorr barista\" with lines lw 3\n")
+
 gnuplotFile.write("set output\n")
 gnuplotFile.write("replot\n")
 gnuplotFile.close() 
