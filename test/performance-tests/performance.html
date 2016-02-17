@@ -10,15 +10,15 @@ set.  The data set consists of 7243 spectra, of which 160 are 1+, 7083
 are 2+ and 7055 are 3+.  Thus, there are a total of 14298 searches to
 be performed.  The database is comprised of 23,932 proteins and 10.5
 million amino acids, including <i>C. elegans</i> proteins plus some
-common contaminants.  The test runs <code>crux
-search-for-matches</code> using a 3.0 Da precursor mass window,
-shuffled decoys and a fully tryptic digest.  The searches are followed
-up by analysis via <code>crux calibrate-scores</code> (twice, using
-Weibull p-values or decoys as the null), <code>crux
-percolator</code>, <code>crux q-ranker</code> and <code>crux
-barista</code>.  The performance of each method is summarized as a
-plot showing the number of spectra identified as a function of q-value
-threshold.</p>
+common contaminants.  The test runs three different searches (comet,
+and tide-search with and without exact p-values) using a 3.0 Da
+precursor mass window, reversed peptide decoys and a fully tryptic
+digest.  The searches are followed up by analysis
+via <code>assign-confidence</code>,
+ <code>percolator</code>, <code>q-ranker</code>
+and <code>barista</code>.  The performance of each method is
+summarized in a plot showing the number of spectra identified as a
+function of q-value threshold.</p>
 
 <p>
 You can execute the test by running the
@@ -62,26 +62,36 @@ observed.</li>
 
 <p>
 The following plot evaluates the agreement between Tide XCorr and
-Comet XCorr.  Ideally, this plot should lie on the line y=x.  Note
+Comet XCorr.  Ideally, the plot should lie on the line y=x.  Note
 that this scatter plot overestimates the agreement, because it ignores
 PSMs that are identified by only one of the two search tools.</p>
 
-<center>
 <table>
 <tr>
 <td><img src="stored-xcorr.png"></td>
 <td><img src="xcorr.comet.png"></td>
+<tr>
+<td><center>Stored plots</center></td>
+<td><center>Plot resulting from your test</center></td>
 </tr>
+</table>
+
+<p>
+The next plot is similar to the one above, except that it compares
+XCorr to the refactored XCorr used in conjunction with the exact
+p-value computation.  We expect the correlation to be lower in this
+plot than in the Comet-versus-Tide comparison above.</p>
+
+<table>
 <tr>
 <td><img src="stored-xcorr.refactored.png"></td>
 <td><img src="xcorr.refactored.png"></td>
 </tr>
 <tr>
 <td><center>Stored plots</center></td>
-<td><center>Plots resulting from your test</center></td>
+<td><center>Plot resulting from your test</center></td>
 </tr>
 </table>
-</center>
 
 
 </body>
