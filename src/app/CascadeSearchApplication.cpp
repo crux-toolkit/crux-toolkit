@@ -95,7 +95,11 @@ string CascadeSearchApplication::getName() const {
  * \returns the description for CascadeSearchApplication
  */
 string CascadeSearchApplication::getDescription() const {
-  return "[[html:<p>Cascade search is a general procedure for incorporating information about "
+  return
+    "[[nohtml:An iterative procedure for incorporating information about "
+    "peptide groups into the database search and confidence estimation "
+    "procedure.]]"
+    "[[html:<p>Cascade search is a general procedure for incorporating information about "
     "peptide groups into the database search and confidence estimation procedure. Peptides "
     "may be grouped according to, for example, their enzymatic properties (zero, one, or "
     "two enzymatic termini) or the presence of different types of numbers of variable "
@@ -106,17 +110,7 @@ string CascadeSearchApplication::getDescription() const {
     "<blockquote>Attila Kertesz-Farkas, Uri Keich and William Stafford Noble. "
     "<a href=\"http://pubs.acs.org/doi/abs/10.1021/pr501173s\">\"Tandem mass spectrum "
     "identification via cascaded search.\"</a> <i>Journal of Proteome Research</i>. "
-    "14(8):3027-38, 2015. </blockquote>]]"
-    "[[nohtml:Cascade search is a general procedure for incorporating information about "
-    "peptide groups into the database search and confidence estimation procedure. Peptides "
-    "may be grouped according to, for example, their enzymatic properties (zero, one, or "
-    "two enzymatic termini) or the presence of different types of numbers of variable "
-    "modifications. The algorithm works on a series of databases, each corresponding to a "
-    "different peptide group. The database is searched in series, and after each search, any "
-    "spectrum that is identified with a user-specified confidence threshold is sequestered "
-    "from subsequent searches. The full cascade search procedure is described in this article:\n"
-    "Attila Kertesz-Farkas, Uri Keich and William Stafford Noble. \"Tandem mass spectrum "
-    "identification via cascaded search.\" Submitted.]]";
+    "14(8):3027-38, 2015. </blockquote>]]";
 }
 
 /**
