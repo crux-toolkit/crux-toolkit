@@ -76,6 +76,7 @@ DECOY_TYPE_T string_to_tide_decoy_type(const string& name) {
     return PROTEIN_REVERSE_DECOYS;
   }
   carp(CARP_FATAL, "Invalid decoy type %s", name.c_str());
+  return(INVALID_DECOY_TYPE); // Avoid compiler warning.
 }
 
 char* decoy_type_to_string(DECOY_TYPE_T type){
