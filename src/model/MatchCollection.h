@@ -215,7 +215,8 @@ class MatchCollection {
    * \returns the associated file idx
    */
   int setFilePath(
-    const std::string& file_path  ///< File path to set
+    const std::string& file_path,  ///< File path to set
+    bool overwrite ///< Overwrite existing files?
   );
 
   /**

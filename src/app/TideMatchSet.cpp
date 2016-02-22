@@ -494,8 +494,8 @@ void TideMatchSet::report(
                  peptides, proteins, locations, z_state, sp_scorer, &lowest_sp);
   addCruxMatches(crux_decoy_collection, true, top_n, &proteins_made, decoys, crux_spectrum,
                  peptides, proteins, locations, z_state, sp_scorer, &lowest_sp);
-  crux_collection->setFilePath(spectrum_filename);
-  crux_decoy_collection->setFilePath(spectrum_filename);
+  crux_collection->setFilePath(spectrum_filename, true);
+  crux_decoy_collection->setFilePath(spectrum_filename, true);
 
   if (sp_scorer) {
     crux_spectrum.setTotalEnergy(sp_scorer->TotalIonIntensity());
