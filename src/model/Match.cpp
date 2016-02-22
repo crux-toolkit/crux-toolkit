@@ -639,6 +639,10 @@ Match* Match::parseTabDelimited(
     return NULL;
   }
 
+  if (!result_file.empty(FILE_COL)) {
+    match->setFilePath(result_file.getString(FILE_COL));
+  }
+  
   if ((result_file.empty(SP_SCORE_COL)) || (result_file.empty(SP_RANK_COL))){
     match -> match_scores_[SP] = NOT_SCORED;
     match -> match_rank_[SP] = 0;
