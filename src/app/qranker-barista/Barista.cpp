@@ -506,27 +506,14 @@ void Barista :: report_all_results()
   trainset.clear();
   testset.clear();
   ProtScores::fillProteinsFull(trainset, d);
-#ifdef CRUX
   carp(CARP_INFO, "finished training, making parsimonious protein set");
-#else
-  cout << "finished training, making parsimonious protein set\n";
-#endif
   trainset.make_meta_set(d);
   int fdr_trn = getOverFDRProtParsimonious(trainset,max_net_prot,selectionfdr);
-#ifdef CRUX
   carp(CARP_INFO, "total proteins parsimonious at q<%.2f: %d", selectionfdr, fdr_trn);
-#else
-  cout << "total proteins parsimonious at q<" << selectionfdr << ": " << fdr_trn << endl;
-#endif
 
   int fdr_trn_psm = getOverFDRPSM(psmtrainset, max_net_psm, selectionfdr);
-#ifdef CRUX
   carp(CARP_INFO, "peptides at q<%.2f: %d", selectionfdr, getOverFDRPep(peptrainset, max_net_pep, selectionfdr)); 
   carp(CARP_INFO, "psms at q<%.2f: %d", selectionfdr, fdr_trn_psm);
-#else  
-  cout << "peptides at q< " << selectionfdr << ": " <<  << endl;
-  cout << "psms at q< " << selectionfdr << ": " << fdr_trn_psm << endl;
-#endif
   
   write_results_prot(out_dir, fdr_trn);
 }
@@ -1677,11 +1664,9 @@ void Barista :: setup_for_reporting_results()
   testset.clear();
 
   ProtScores::fillProteinsFull(trainset, d);
-#ifdef CRUX
+
   carp(CARP_INFO, "finished training, making parsimonious protein set");
-#else
-  cout << "finished training, making parsimonious protein set\n";
-#endif
+
   trainset.make_meta_set(d);
   
   psmtrainset.clear();
@@ -1694,23 +1679,18 @@ void Barista :: setup_for_reporting_results()
   
   int fdr_trn = getOverFDRProt(trainset,max_net_prot,selectionfdr);
   fdr_trn = getOverFDRProtParsimonious(trainset,max_net_prot,selectionfdr);
-#ifdef CRUX
+
   carp(CARP_INFO, "total proteins parsimonious at q<%.2f: %d", selectionfdr, fdr_trn);
-#else
-  cout << "total proteins parsimonious at q<" << selectionfdr << ": " << fdr_trn << endl;
-#endif
+
   int fdr_trn_psm = getOverFDRPSM(psmtrainset, max_net_psm, selectionfdr);
 
   pepind_to_max_psmind.clear();
   pepind_to_max_psmind.resize(d.get_num_peptides(),-1);
   int fdr_trn_pep = getOverFDRPep(peptrainset, max_net_pep, selectionfdr);
-#ifdef CRUX
+
   carp(CARP_INFO, "peptides at q<%.2f: %d", selectionfdr, fdr_trn_pep);
   carp(CARP_INFO, "psms at q<%.2f: %d", selectionfdr, fdr_trn_psm);
-#else 
-  cout << "peptides at q< " << selectionfdr << ": " << getOverFDRPep(peptrainset, max_net_pep, selectionfdr) << endl;
-  cout << "psms at q< " << selectionfdr << ": " << fdr_trn_psm << endl;
-#endif
+
   d.clear_labels_psm_training();
   
   d.clear_data_prot_training();
@@ -2296,17 +2276,14 @@ void Barista :: train_net(double selectionfdr)
 	  max_fdr = fdr_trn;
 	  if(verbose == 0)
 	    {
-#ifdef CRUX
+
 	      if(testset.size() > 0)
-		carp(CARP_INFO, "q<%.2f: max non-parsimonious so far %d %d", selectionfdr, max_fdr, getOverFDRProt(testset,max_net_prot,selectionfdr));
+		carp(CARP_INFO, "q<%.2f: max non-parsimonious so far %d %d",
+		     selectionfdr, max_fdr,
+		     getOverFDRProt(testset,max_net_prot,selectionfdr));
 	      else
-		carp(CARP_INFO, "q<%.2f: max non-parsimonious so far %d", selectionfdr, max_fdr);
-#else
-	      cout << "q< " << selectionfdr << ": max non-parsimonious so far " << max_fdr;
-	      if(testset.size() > 0)
-		cout << " " << getOverFDRProt(testset,max_net_prot,selectionfdr);
-	      cout << endl;
-#endif
+		carp(CARP_INFO, "q<%.2f: max non-parsimonious so far %d",
+		     selectionfdr, max_fdr);
 	    }
 	}
       if(verbose > 0)
@@ -2387,17 +2364,13 @@ void Barista :: train_net_multi_task(double selectionfdr, int interval)
 	  max_fdr = fdr_trn;
 	  if(verbose == 0)
 	    {
-#ifdef CRUX
 	      if(testset.size() > 0)
-		carp(CARP_INFO, "q<%.2f: max non-parsimonious so far %d %d", selectionfdr, max_fdr, getOverFDRProt(testset,max_net_prot,selectionfdr));
+		carp(CARP_INFO, "q<%.2f: max non-parsimonious so far %d %d",
+		     selectionfdr, max_fdr,
+		     getOverFDRProt(testset,max_net_prot,selectionfdr));
 	      else
-		carp(CARP_INFO, "q<%.2f: max non-parsimonious so far %d", selectionfdr, max_fdr);
-#else
-	      cout << "q< " << selectionfdr << ": max non-parsimonious so far " << max_fdr;
-	      if(testset.size() > 0)
-		cout << " " << getOverFDRProt(testset,max_net_prot,selectionfdr);
-	      cout << endl;
-#endif
+		carp(CARP_INFO, "q<%.2f: max non-parsimonious so far %d",
+		     selectionfdr, max_fdr);
 	    }
 	}
       if(verbose > 0)
@@ -2438,37 +2411,22 @@ void Barista :: train_net_multi_task(double selectionfdr, int interval)
 
 void Barista :: setup_for_training(int trn_to_tst)
 {
-#ifdef CRUX
   carp(CARP_INFO, "loading and normalizing data");
-#else
-  cout << "loading data" << endl;
-#endif
    
   d.load_data_prot_training();
   d.load_labels_prot_training();
   
   if(trn_to_tst)
     {
-#ifdef CRUX
       carp(CARP_INFO, "splitting data into training and testing sets");
-#else
-      cout << "splitting data into training and testing sets" << endl;
-#endif
       ProtScores::fillProteinsSplit(trainset, testset, d, trn_to_tst);
-#ifdef CRUX
-      carp(CARP_INFO, "trainset size %d testset size %d", trainset.size(), testset.size());
-#else
-      cout << "trainset size " << trainset.size() << " testset size " << testset.size() << endl;
-#endif
+      carp(CARP_INFO, "trainset size %d testset size %d", trainset.size(),
+	   testset.size());
     }
   else
     {
       ProtScores::fillProteinsFull(trainset, d);
-#ifdef CRUX
       carp(CARP_INFO, "trainset size %d", trainset.size());
-#else
-      cout << "trainset size " << trainset.size() << endl;
-#endif
     }
   thresholdset = trainset;
   
@@ -2571,11 +2529,7 @@ int Barista :: run_tries_multi_task()
     
   //fdebug.open("debug.txt");
 
-#ifdef CRUX
   carp(CARP_INFO, "training the model");
-#else
-  cout << "training the model" << endl;
-#endif
 
   int tries = 3;
   vector<double> mu_choices;
