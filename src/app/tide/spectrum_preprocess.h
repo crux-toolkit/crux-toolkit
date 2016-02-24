@@ -145,10 +145,13 @@ class ObservedPeakSet {
 
   //created by Andy Lin 2/11/2016
   //Method for creating residue evidence matrix from Spectrum
-  void CreateResidueEvidenceMatrix(const Spectrum& spectrumi, double bindWidth,
-                                   double binOffset, int charge,
-                                   double pepMassMonoMean,
-                                   int maxPrecurMass);
+  void CreateResidueEvidenceMatrix(const Spectrum& spectrum,
+                                   int charge,
+                                   int maxPrecurMassBin,
+                                   double precursorMass,
+                                   int nAA,
+                                   const int* aaMass,
+                                   vector< vector<double> >& residueEvidenceMatrix);
   //END -- added by Andy Lin
 
   // For debugging
