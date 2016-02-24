@@ -23,6 +23,7 @@
 #include "mass_constants.h"
 #include "max_mz.h"
 #include "util/Params.h"
+#include <cmath>
 
 #include <iostream> //Remove this when done -- Andy Lin
 
@@ -224,7 +225,7 @@ void ObservedPeakSet::PreprocessSpectrum(
       maxIonIntens = ionIntens;
     }
   }
-
+ 
   //Mass axis is descretized into 1 dalton bins
   int regionSelector = (int)floor(MassConstants::mass2bin(maxIonMass) / (double)nRegion);
   for (int ion = 0; ion < nIon; ion++) {
@@ -613,14 +614,130 @@ int ObservedPeakSet::DebugDotProd(const TheoreticalPeakArr& theoretical) {
 //From an observed spectrum, calculate and populate the residue evidence matrix
 void ObservedPeakSet::CreateResidueEvidenceMatrix(
   const Spectrum& spectrum,
-  double binWidth,
-  double binOffset,
   int charge,
-  double pepMassMonoMean,
-  int maxPrecurMass //need to add as input a 2D matrix
+  int maxPrecurMassBin,
+  double precursorMass,
+  int nAA, //index 1?
+  const int* aaMass,
+  vector<vector<double> >& residueEvidenceMatrix
   ) {
-  
-  const int nRegion = NUM_SPECTRUM_REGIONS;
+
+  assert(MaxBin::Global().MaxBinEnd() > 0);
+
+  const double massHMono = 1.0078246;      // mass of hydrogen (monoisotopic)
+
+  //TODO used in Xcorr function..not used in residue-evidence?
+  //bool flanking_peak = Params::GetBool("use-flanking-peaks");
+  //bool neutral_loss_peak = Params::GetBool("use-neutral-loss-peaks");
+
+  int ma;
+  int pc;
+
+//CHECK BELOW FOR CHANGE
+  double* evidence = new double[maxPrecurMassBin];
+  double* intensArrayObs = new double[maxPrecurMassBin];
+  int* intensRegion = new int[maxPrecurMassBin];
+
+  for (ma = 0; ma < maxPrecurMassBin; ma++) {
+    evidence[ma] = 0.0;
+    //evidenceInt[ma] = 0; code to set vals to 0 in residueEvidenceMatrix?
+    intensArrayObs[ma] = 0.0;
+    intensRegion[ma] = -1;
+  }
+//CHECK ABOVE FOR CHANGE
+
+  double precurMz = spectrum.PrecursorMZ();
+  int nIon = spectrum.Size();
+  int precurCharge = charge;
+  double experimentalMassCutoff = precurMz * precurCharge + 50.0;
+  double proton = MassConstants::proton;
+
+  //preprocesses spectrum 
+  PreprocessSpectrum(spectrum, intensArrayObs, intensRegion, maxPrecurMassBin,charge);
+
+  //Iterators used 
+  vector<int>::iterator it;
+
+  //Determine which bin each amino acid mass is in
+  vector<int> aaMassBin;
+  for (int i = 0 ; i < nAA ; i++) {
+    int binMass= (int)floor(MassConstants::mass2bin(aaMass[i]));
+    aaMassBin.push_back(binMass);
+  }
+
+  //Need to add lines for matlab line 56?
+  //Basically bounds the ion masses and ion mass bins so that
+  // 1: ionMassBinB >=1
+  // 2: ionMassBinB <= maxMassBin - max(aaMassBin)
+  // Also need to figure out maxMassBin (currently hard coded to 8500)
+  // need to do 4 times (+1/+2/B ion/ yion)
+
+  //Determine which bin each ion mass is in
+  vector<int> ionMassBin;
+  for(int ion=0 ; ion<nIon ; ion++) {
+    double tmpIonMass = spectrum.M_Z(ion);
+    int binTmpIonMass = (int)floor(MassConstants::mass2bin(tmpIonMass));
+    ionMassBin.push_back(binTmpIonMass);
+  }
+
+  //need to change this at some point
+  double residueToleranceMass = 0.00000001;
+
+  int bIonMassBin;
+  double bIonMass;
+  double bIonIntens;
+
+  //find pairs of b ions in 1+ charge state
+  for (int ion=0 ; ion<nIon ; ion++) {
+    bIonMass = spectrum.M_Z(ion);
+    bIonMassBin = (int)floor(MassConstants::mass2bin(bIonMass));
+    bIonIntens = intensArrayObs[ion];
+
+    for(int curAaMass = 0 ; curAaMass < nAA ; curAaMass) {
+      int newResMassBin = bIonMassBin + aaMassBin[curAaMass];
+
+      //Find all ion mass bins that match newResMassBin
+      int index = find(ionMassBin.begin(), ionMassBin.end(),newResMassBin) - ionMassBin.begin();
+      for(int i = index ; i < nIon ; i++) {
+        if (newResMassBin != ionMassBin[i])
+          continue;
+
+        double ionMassDiff = ionMassBin[i] - bIonMass;
+        double aaTolScore = residueToleranceMass - std::abs(ionMassDiff - aaMass[curAaMass]);
+
+        if (aaTolScore >= 0) {
+          //add evidence to matrix
+          residueEvidenceMatrix[curAaMass][newResMassBin] += aaTolScore;
+        }
+      }
+    }
+  }
+  ionMassBin.clear();
+
+
+  //for y ions don't forget flipud command
+  int yIonMassbin;
+  double yIonMass;
+  double yIonIntens;
+
+  vector<double> ionMass;
+  for(int ion=0 ; ion<nIon ; ion++) {
+    //conver to equivalent b ion masses for ease of processing
+    double tmpIonMass = precursorMass - spectrum.M_Z(ion) + (2.0 * massHMono);
+    ionMass.push_back(tmpIonMass);
+
+    //Determine which bin each ion mass is in
+    int binTmpIonMass = (int)floor(MassConstants::mass2bin(tmpIonMass));
+    ionMassBin.push_back(binTmpIonMass);
+  }
+  ionMass.clear();
+  ionMassBin.clear();
+  //dont forget to clear ions and ionMassBin
+
+
+
+
+  std::cout << "Made to end of residue evidence matrix creation" <<std::endl;
 }
 
 
