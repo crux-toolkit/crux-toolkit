@@ -125,6 +125,8 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
     case EVALUE_COL:
       score_type = EVALUE;  ///< Comet e-value
       break;
+    case PVALUE_COL:        ///< Search-for-xlinks p-value
+      score_type =  LOGP_BONF_WEIBULL_XCORR;
     case PERCOLATOR_SCORE_COL:
       score_type = PERCOLATOR_SCORE;
       break;
@@ -211,7 +213,7 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
     
     // If necessary, automatically identify the score type.
     if (score_type == INVALID_SCORER_TYPE) {
-      SCORER_TYPE_T typeArr[] = { XCORR, EVALUE, TIDE_SEARCH_EXACT_PVAL, TIDE_SEARCH_EXACT_SMOOTHED};
+      SCORER_TYPE_T typeArr[] = { XCORR, EVALUE, TIDE_SEARCH_EXACT_PVAL, TIDE_SEARCH_EXACT_SMOOTHED, LOGP_BONF_WEIBULL_XCORR};
       vector<SCORER_TYPE_T> scoreTypes(typeArr,
                                        typeArr + sizeof(typeArr) / sizeof(SCORER_TYPE_T));
       for (vector<SCORER_TYPE_T>::const_iterator i = scoreTypes.begin();
@@ -232,6 +234,7 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
         case EVALUE:
         case TIDE_SEARCH_EXACT_SMOOTHED:
         case TIDE_SEARCH_EXACT_PVAL:
+        case LOGP_BONF_WEIBULL_XCORR:
           // lower score better
 	  carp(CARP_INFO, "Setting smaller-is-better=T.");
           ascending = true;
@@ -509,8 +512,6 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
     score_type = SIDAK_ADJUSTED;
   }
 
-  bool have_pvalues = target_matches->getScoredType(TIDE_SEARCH_EXACT_PVAL);
-  bool have_evalues = target_matches->getScoredType(EVALUE);
   target_matches->setScoredType(score_type, true);
   decoy_matches->setScoredType(score_type, true);
 
@@ -527,12 +528,13 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
     cols_to_print[DELTA_CN_COL] = target_matches->getScoredType(DELTA_CN);
     cols_to_print[SP_SCORE_COL] = target_matches->getScoredType(SP);
     cols_to_print[SP_RANK_COL] = target_matches->getScoredType(SP);
-    cols_to_print[XCORR_SCORE_COL] = !have_pvalues;
+    cols_to_print[XCORR_SCORE_COL] = !target_matches->getScoredType(TIDE_SEARCH_EXACT_PVAL);
     cols_to_print[XCORR_RANK_COL] = true;
-    cols_to_print[EVALUE_COL] = have_evalues;
-    cols_to_print[EXACT_PVALUE_COL] = have_pvalues;
+    cols_to_print[EVALUE_COL] = target_matches->getScoredType(EVALUE);
+    cols_to_print[EXACT_PVALUE_COL] = target_matches->getScoredType(TIDE_SEARCH_EXACT_PVAL);
+    cols_to_print[PVALUE_COL] = target_matches->getScoredType(LOGP_BONF_WEIBULL_XCORR);
     cols_to_print[SIDAK_ADJUSTED_COL] = sidak;
-    if (have_pvalues) {
+    if (target_matches->getScoredType(TIDE_SEARCH_EXACT_PVAL)) {
       cols_to_print[REFACTORED_SCORE_COL] = true;
     }
     cols_to_print[BY_IONS_MATCHED_COL] = target_matches->getScoredType(BY_IONS_MATCHED);
