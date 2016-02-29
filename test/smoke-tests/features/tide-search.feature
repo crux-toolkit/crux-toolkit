@@ -45,8 +45,4 @@ Examples:
   |tide-usenl     |                                                             |--use-neutral-loss-peaks T                              |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-usenl.txt     |
   |tide-mzbins    |                                                             |--mz-bin-width 0.02 --mz-bin-offset 0.34                |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-mzbins.txt    |
   |tide-exact-pval|                                                             |--exact-p-value T                                       |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-exact-pval.txt|
-  |tide-1thread   |                                                             |--num_threads 1                                         |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-default.txt   |
-  |tide-7thread   |                                                             |--num_threads 7                                         |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-default.txt   |
-  |tide-exact-pval-1thread|                                                     |--exact-p-value T --num_threads 1                       |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-exact-pval.txt|
-  |tide-exact-pval-7thread|                                                     |--exact-p-value T --num_threads 7                       |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-exact-pval.txt|
 
