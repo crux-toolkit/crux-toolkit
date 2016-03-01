@@ -211,6 +211,9 @@ string CruxApplication::getUsage(
     usage << endl << endl
           << "OPTIONAL ARGUMENTS:" << endl;
     for (vector<string>::const_iterator i = options.begin(); i != options.end(); i++) {
+      if (!Params::IsVisible(*i)) {
+        continue;
+      }
       string defaultString = Params::GetStringDefault(*i);
       if (defaultString.empty()) {
         defaultString = "<empty>";

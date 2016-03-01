@@ -1246,7 +1246,7 @@ Params::Params() : finalized_(false) {
   // **** xlink-score-spectrum options ****
   InitStringParam("xlink-score-method", "composite", "composite|modification|concatenated",
     "Score method for xlink {composite, modification, concatenated}.",
-    "Argument for xlink-score-spectrum.", false);
+    "Argument for xlink-score-spectrum.", true);
   // **** search-xlink options ****
   InitStringParam("isotope-windows", "0",
     "Provides a list of isotopic windows to search. For example, -1,0,1 will search in "
