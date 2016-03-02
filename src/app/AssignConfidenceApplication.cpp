@@ -127,6 +127,7 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
       break;
     case PVALUE_COL:        ///< Search-for-xlinks p-value
       score_type =  LOGP_BONF_WEIBULL_XCORR;
+      break;
     case PERCOLATOR_SCORE_COL:
       score_type = PERCOLATOR_SCORE;
       break;
@@ -232,18 +233,22 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
       }
       switch (score_type) {
         case EVALUE:
-        case TIDE_SEARCH_EXACT_SMOOTHED:
         case TIDE_SEARCH_EXACT_PVAL:
+        case TIDE_SEARCH_EXACT_SMOOTHED:
         case LOGP_BONF_WEIBULL_XCORR:
           // lower score better
-	  carp(CARP_INFO, "Setting smaller-is-better=T.");
           ascending = true;
           break;
         default:
           // higher score better
-	  carp(CARP_INFO, "Setting smaller-is-better=F.");
           ascending = false;
       }
+      carp(CARP_INFO, "Setting smaller-is-better=%s.",
+	   StringParam::From(ascending).c_str());
+
+    } else {
+      carp(CARP_INFO, "User-specified score type=%sw with smaller-is-better=%s.",
+	   scorer_type_to_string(score_type), StringParam::From(ascending).c_str());
     }
 
     if (match_collection->getScoredType(score_type) == false){
@@ -310,13 +315,11 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
 	  break;
 	case TDC_METHOD:
 	case PEPTIDE_LEVEL_METHOD:
+	  // If the PSM is already there, that means there was a tie
+	  // for top-ranked decoys.  In that case, there is no need to
+	  // store a pointer to the second one.
 	  if (pairidx[myTuple] == 0) {
 	    pairidx[myTuple] = cnt;
-	  } else {
-	    carp(CARP_FATAL,
-		 "Duplicate decoy PSMs (file=%s scan=%d charge=%d rank=%d).",
-		 decoy_match->getSpectrum()->getFullFilename(),
-		 scanid, charge, rank);
 	  }
 	  break;
 	case INVALID_METHOD:
