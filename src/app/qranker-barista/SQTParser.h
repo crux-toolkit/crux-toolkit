@@ -1,14 +1,13 @@
 #ifndef SQTPARSER_H
 #define SQTPARSER_H
-#ifndef CRUX
-#define CRUX
-#endif
+
 #include <sys/stat.h>
 #ifndef _MSC_VER
 #include <dirent.h>
 #else
 #include "util/WinCrux.h"
 #endif
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -21,12 +20,12 @@
 #include <cstring>
 #include "SpecFeatures.h"
 #include "BipartiteGraph.h"
-#ifdef CRUX
+
 #include "app/CruxApplication.h"
 #include "io/carp.h"
 #include "util/crux-utils.h"
 #include "parameter.h"
-#endif
+
 using namespace std;
 
 typedef enum {TRYPSIN_ENZ,CHYMOTRYPSIN_ENZ,ELASTASE_ENZ} enzyme;

@@ -197,6 +197,15 @@ Rearranged estimation methods in <code>assign-confidence</code>.</li>
 Added top-match option for <code>estimation-method=peptide-level</code> 
 case in <code>assign-confidence</code>.</li>
 
+<li><code>2016/02/04 &ndash;</code>
+Modified assign-confidence so that ties during target-decoy
+competition are broken randomly.</li>
+
+<li><code>2016/02/22 &ndash;</code>
+Changed the Percolator output feature "file" to contain the name of
+  the file containing the spectrum (if available), rather than the
+  name of the file containing the PSM.</li>
+
 </ul>
 
 <hr></hr>
@@ -1105,7 +1114,7 @@ searches.</li>
 
 <li>
 This version of Crux is released with a demo version of a new search
-engine, <a href="../tide/index.html">Tide</a>.  Tide is an independent
+engine, Tide.  Tide is an independent
 reimplementation of the SEQUEST<sup>&reg;</sup> algorithm. The
 immediate ancestor of Tide is the Crux <code>search-for-matches</code>
 command, but Tide has been completely re-engineered to achieve a

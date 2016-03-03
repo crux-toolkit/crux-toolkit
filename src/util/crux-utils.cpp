@@ -17,6 +17,7 @@
 #include "model/Database.h"
 #include "Params.h"
 #include "parameter.h"
+#include "Params.h"
 #include "StringUtils.h"
 #include "WinCrux.h"
 #include "io/LineFileReader.h"
@@ -76,6 +77,7 @@ DECOY_TYPE_T string_to_tide_decoy_type(const string& name) {
     return PROTEIN_REVERSE_DECOYS;
   }
   carp(CARP_FATAL, "Invalid decoy type %s", name.c_str());
+  return(INVALID_DECOY_TYPE); // Avoid compiler warning.
 }
 
 char* decoy_type_to_string(DECOY_TYPE_T type){
@@ -1606,14 +1608,13 @@ void check_target_decoy_files(
 
 void get_search_result_paths(
   const string &infile, ///< path of the first file.
-  std::vector<std::string> &outpaths ///< paths of all search results -out
-  ) {
-  
+  std::vector<std::string> &outpaths ///< paths of all search results -out 
+) {
   outpaths.clear();
   if (Params::GetBool("list-of-files")) {
     LineFileReader reader(infile);
     while(reader.hasNext()) {
-      string current = reader.next();
+      string current = StringUtils::Trim(reader.next());
       carp(CARP_INFO, "current is:%s", current.c_str());
       if (FileUtils::Exists(current)) {
         outpaths.push_back(current);
@@ -1625,14 +1626,14 @@ void get_search_result_paths(
     string target = infile;
     string decoy = infile;
     check_target_decoy_files(target, decoy);
-    if (target.length() > 0) {
+    if (!target.empty()) {
       if (FileUtils::Exists(target)) {
         outpaths.push_back(target);
       } else {
         carp(CARP_ERROR, "Target file '%s' doesn't exist", target.c_str());
       }
     }
-    if (decoy.length() > 0) {
+    if (!decoy.empty()) {
       if (FileUtils::Exists(decoy)) {
         outpaths.push_back(decoy);
       } else {

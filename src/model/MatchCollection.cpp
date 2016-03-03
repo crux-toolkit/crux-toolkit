@@ -286,24 +286,22 @@ void MatchCollection::getCustomScoreNames(
 
 }
 
-/**                                                                                                    
- * Set the filepath for all matches in the collection                                                  
- *\returns the associated file idx                                                                    
+/**
+ * Set the filepath for all matches in the collection
+ *\returns the associated file idx
  */
 int MatchCollection::setFilePath(
-  const string& file_path  ///< File path to set                                                  
+  const string& file_path,  ///< File path to set
+  bool overwrite ///< Overwrite existing files?
   ) {
 
-  if (!match_.empty()) {
-    vector<Crux::Match*>::iterator i = match_.begin();
-    int file_idx = (*i)->setFilePath(file_path);
-    for (i = i + 1; i != match_.end(); i++) {
-      (*i)->setFileIndex(file_idx);
+  int file_idx = -1;
+  for (vector<Crux::Match*>::iterator i = match_.begin(); i != match_.end(); i++) {
+    if (overwrite || (*i)->getFileIndex() == -1) {
+      file_idx = (*i)->setFilePath(file_path);
     }
-    return file_idx;
-  } else {
-    return -1;
   }
+  return file_idx;
 }
 
 /**
