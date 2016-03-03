@@ -1,12 +1,11 @@
 #ifndef BARISTA_H
 #define BARISTA_H
-#ifndef CRUX
-#define CRUX
-#endif
+
 #include <sys/types.h>
 #ifndef _MSC_VER
 #include <dirent.h>
 #endif
+
 #include <iostream>
 #include <sstream>
 #include <set>
@@ -14,12 +13,10 @@
 #include <assert.h>
 #include <cstdio>
 #include <iomanip>
-#ifdef CRUX
 #include "app/CruxApplication.h"
 #include "io/carp.h"
 #include "util/crux-utils.h"
 #include "parameter.h"
-#endif
 #include "io/PepXMLWriter.h"
 #include "DataSet.h"
 #include "ProtScores.h"

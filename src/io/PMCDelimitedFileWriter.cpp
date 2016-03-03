@@ -502,7 +502,7 @@ void PMCDelimitedFileWriter::writePSMs(
     PeptideMatch* pep_match = match->getPeptideMatch();
     Peptide* peptide = pep_match->getPeptide();
 
-    if (command = PSM_CONVERT_COMMAND) {
+    if (command == PSM_CONVERT_COMMAND) {
       addScoreIfExists(match, DELTA_CN, DELTA_CN_COL);                          // TODO: Figure out difference between match and pep_match,
       addScoreIfExists(match, BY_IONS_MATCHED, BY_IONS_MATCHED_COL);            // since Percolator uses pep_match... While tide-search
       addScoreIfExists(match, BY_IONS_TOTAL, BY_IONS_TOTAL_COL);                // uses match. These are different values, are they supposed to be?

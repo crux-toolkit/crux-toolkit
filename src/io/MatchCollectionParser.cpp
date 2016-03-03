@@ -196,8 +196,10 @@ MatchCollection* MatchCollectionParser::create(
   } else {
     collection = MatchFileReader::parse(match_path, database_, decoy_database_);
   }
-  collection->setFilePath(match_path);
-
+  
+  //  Test if collection already has file path set, otherwise set it.
+  collection->setFilePath(match_path, false);
+ 
   return collection;
 }
 

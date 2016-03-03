@@ -98,7 +98,7 @@ void CruxApplication::initialize(int argc, char** argv) {
   
     // Store the host name, start date and time, version number, and command line.
     carp(CARP_INFO, "CPU: %s", hostname());
-    carp(CARP_INFO, "Crux version: %s\n", CRUX_VERSION);
+    carp(CARP_INFO, "Crux version: %s", CRUX_VERSION);
     carp(CARP_INFO, date_and_time());
     log_command_line(argc, argv);
 
@@ -211,12 +211,15 @@ string CruxApplication::getUsage(
     usage << endl << endl
           << "OPTIONAL ARGUMENTS:" << endl;
     for (vector<string>::const_iterator i = options.begin(); i != options.end(); i++) {
+      if (!Params::IsVisible(*i)) {
+        continue;
+      }
       string defaultString = Params::GetStringDefault(*i);
       if (defaultString.empty()) {
         defaultString = "<empty>";
       }
       usage << endl
-            << "  [--" << *i << " <" << Params::GetAcceptedValues(*i) << ">]" << endl
+            << "  [--" << *i << " " << Params::GetAcceptedValues(*i) << "]" << endl
             << StringUtils::LineFormat(Params::ProcessHtmlDocTags(Params::GetUsage(*i)) +
                                        " Default = " + defaultString + ".", 80, 5);
     }

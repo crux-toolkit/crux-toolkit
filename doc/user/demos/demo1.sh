@@ -10,13 +10,25 @@ else
   CRUX=../../../release/src/crux
 fi    
     
-
 rm -rf yeast-index crux-output
+chmod +x ./tsv2html.py
 cp ../data/demo.ms2 .
 cp ../data/small-yeast.fasta .
-$CRUX tide-index small-yeast.fasta yeast-index
-$CRUX tide-search --compute-sp T demo.ms2 yeast-index
-$CRUX percolator crux-output/tide-search.target.txt 
 
-tsv2html.py --table-only  crux-output/percolator.target.psms.txt \
-     > crux-output/percolator.target.psms.html
+$CRUX tide-index small-yeast.fasta yeast-index
+
+$CRUX tide-search --compute-sp T demo.ms2 yeast-index
+$CRUX sort-by-column --column-type real --ascending F \
+      crux-output/tide-search.target.txt "xcorr score" \
+      > crux-output/tide-search.target.sort.txt
+head -11 crux-output/tide-search.target.sort.txt \
+     | ./tsv2html.py - \
+     > crux-output/tide-search.target.sort.html
+
+$CRUX percolator crux-output/tide-search.target.txt 
+$CRUX sort-by-column --column-type real --ascending F \
+      crux-output/percolator.target.psms.txt "percolator score" \
+      > crux-output/percolator.target.psms.sort.txt
+head -11 crux-output/percolator.target.psms.sort.txt \
+     | ./tsv2html.py - \
+     > crux-output/percolator.target.psms.sort.html

@@ -218,7 +218,7 @@ void CreateDocs::generateToolHtml(
     }
     string single = inputTemplate;
     map<string, string> replaceMap;
-    replaceMap["#NAME#"] = !multiArg ? "&lt;" + argName + "&gt;" : "&lt;" + argName + "&gt;+";
+    replaceMap["#NAME#"] = !multiArg ? argName : argName + "+";
     replaceMap["#DESCRIPTION#"] = Params::ProcessHtmlDocTags(Params::GetUsage(argName), true);
     makeReplacements(&single, replaceMap);
     inputs += single;
@@ -268,7 +268,10 @@ void CreateDocs::generateToolHtml(
       map<string, string> replaceMap;
       replaceMap["#NAME#"] = *j;
       replaceMap["#DESCRIPTION#"] = Params::ProcessHtmlDocTags(Params::GetUsage(*j), true);
-      replaceMap["#VALUES#"] = Params::GetAcceptedValues(*j);
+      string acceptedValues = Params::GetAcceptedValues(*j);
+      acceptedValues = StringUtils::Replace(acceptedValues, "<", "&lt;");
+      acceptedValues = StringUtils::Replace(acceptedValues, ">", "&gt;");
+      replaceMap["#VALUES#"] = acceptedValues;
       string defaultOutput = Params::GetStringDefault(*j);
       replaceMap["#DEFAULT#"] = !defaultOutput.empty() ? defaultOutput : "&lt;empty&gt;";
       makeReplacements(&single, replaceMap);
@@ -420,6 +423,6 @@ const string CreateDocs::TOOL_NO_OPTIONS_TEMPLATE =
   "</li>\n";
 
 const string CreateDocs::TOOL_OPTION_TEMPLATE =
-  "  <li><code>--<!-- #NAME# --> &lt;<!-- #VALUES# -->&gt;</code> &ndash; "
+  "  <li><code>--<!-- #NAME# --> <!-- #VALUES# --></code> &ndash; "
   "<!-- #DESCRIPTION# --> Default = <code><!-- #DEFAULT# --></code>.</li>\n";
 

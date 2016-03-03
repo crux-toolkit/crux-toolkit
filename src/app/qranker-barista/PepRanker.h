@@ -11,12 +11,12 @@
 #include <string>
 #include <math.h>
 using namespace std;
-#ifdef CRUX
+
 #include "app/CruxApplication.h"
 #include "io/carp.h"
 #include "util/crux-utils.h"
 #include "parameter.h"
-#endif
+
 #include "io/PepXMLWriter.h"
 #include "NeuralNet.h"
 #include "DataSet.h"
