@@ -313,10 +313,10 @@ Params::Params() : finalized_(false) {
     "Used by tide-search.", true);
   InitStringParam("fileroot", "", 
     "The fileroot string will be added as a prefix to all output file names.",
-    "Used by crux percolator, crux compute-q-values, and crux q-ranker.", true);
+    "Available for all commands that produce an output directory.", true);
   InitStringParam("output-dir", "crux-output",
     "The name of the directory where output files will be created.",
-    "Used by crux compute-q-values, and crux percolator.", true);
+    "Available for most commands.", true);
   // user options regarding decoys
   InitStringParam("decoys", "peptide-shuffle", "none|reverse|protein-shuffle|peptide-shuffle",
     "Include a decoy version of every peptide by shuffling or reversing the target "
@@ -373,29 +373,31 @@ Params::Params() : finalized_(false) {
     "Specify the type of isotopic masses to use when calculating the peptide mass.",
     "Used from command line or parameter file by crux-generate-peptides.", true);
   InitStringParam("mod", "NO MODS",
-    "[[nohtml:"
-    "<mass change>:<aa list>:<max per peptide>:<prevents cleavage>:<prevents cross-link>]]"
-    "[[html:"
+    "Consider modifications on any amino acid in aa list with at most max-per-peptide in one "
+    "peptide. "
+    "The parameter takes the form [[html:"
     "&lt;mass change&gt;:&lt;aa list&gt;:&lt;max per peptide&gt;:&lt;prevents cleavage&gt;:"
     "&lt;prevents cross-link&gt;]]. "
-    "Consider modifications on any amino acid in aa list with at most max-per-peptide in one "
-    "peptide. This parameter may be included with different values multiple times so long as "
-    "the total number of mod, cmod, and nmod parameters does not exceed 11. The prevents "
-    "cleavage and prevents cross-link are T/F optional arguments for describing whether the "
-    "modification prevents enzymatic cleavage of cross-linking respectively. This option is "
-    "only available when use-old-xlink=F.",
-    "Available from parameter file for crux-generate-peptides and "
-    "the same must be used for crux compute-q-value.", true);
+    "This parameter may be included with different values multiple times so long as "
+    "the total number of mod, cmod, and nmod parameters does not exceed 11. The \"prevents "
+    "cleavage\" and \"prevents cross-link\" arguments are optional T/F arguments for describing whether the "
+    "modification prevents enzymatic cleavage of cross-linking, respectively. This option is "
+    "only available when use-old-xlink=F. "
+    "Note that this parameter only takes effect when specified in the "
+    "parameter file.",
+    "Available for search-for-xlinks.", true);
   InitStringParam("cmod", "NO MODS",
     "Specify a variable modification to apply to C-terminus of peptides. " 
-    "<mass change>:<max distance from protein c-term (-1 for no max)>.",
-    "Available from parameter file for crux-generate-peptides and "
-    "the same must be used for crux compute-q-value.", true);
+    "<mass change>:<max distance from protein c-term (-1 for no max)>. "
+    "Note that this parameter only takes effect when specified in the "
+    "parameter file.",
+    "Available for search-for-xlinks.", true);
   InitStringParam("nmod", "NO MODS",
     "Specify a variable modification to apply to N-terminus of peptides.  " 
-    "<mass change>:<max distance from protein n-term (-1 for no max)>",
-    "Available from parameter file for crux-generate-peptides and "
-    "the same must be used for crux compute-q-value.", true);
+    "<mass change>:<max distance from protein n-term (-1 for no max)> "
+    "Note that this parameter only takes effect when specified in the "
+    "parameter file.",
+    "Available for search-for-xlinks.", true);
   InitIntParam("min-mods", 0, 0, MAX_PEPTIDE_LENGTH,
     "The minimum number of modifications that can be applied to a single " 
     "peptide.",
@@ -411,7 +413,7 @@ Params::Params() : finalized_(false) {
   InitStringParam("mod-mass-format", "mod-only", "mod-only|total|separate",
     "Specify how sequence modifications are reported in various output files. Each "
     "modification is reported as a number enclosed in square braces following the "
-    "modified residue; however the number may correspond to one of three different "
+    "modified residue; however, the number may correspond to one of three different "
     "masses: (1) 'mod-only' reports the value of the mass shift induced by the "
     "modification; (2) 'total' reports the mass of the residue with the modification "
     "(residue mass plus modification mass); (3) 'separate' is the same as 'mod-only', "
@@ -427,11 +429,15 @@ Params::Params() : finalized_(false) {
     "the max mod precision in the param file.",
     false);
   InitIntParam("precision", 8, 1, 100, //max is arbitrary
-    "Set the precision for scores written to sqt and text files.",
-    "Available from parameter file for percolator and compute-q-values.", true);
+    "Set the precision for scores written to sqt and text files. "
+    "Note that this parameter only takes effect when specified in the "
+    "parameter file.",
+    "Available percolator.", true);
   InitIntParam("mass-precision", 4, 1, 100, // max is arbitrary
-    "Set the precision for masses and m/z written to sqt and .txt files.",
-    "Available from parameter file for all commands.", true);
+    "Set the precision for masses and m/z written to sqt and .txt files. "
+    "Note that this parameter only takes effect when specified in the "
+    "parameter file.",
+    "Available for all commands.", true);
   InitIntParam("print-search-progress", 1000, 0, BILLION,
     "Show search progress by printing every n spectra searched. Set to 0 to show no "
     "search progress.",
@@ -767,12 +773,12 @@ Params::Params() : finalized_(false) {
     "nucleotide_reading_frame\" to a value between 1 and 9.");
   InitIntParam("decoy_search", 0, 0, 2,
     "0=no, 1=concatenated search, 2=separate search.",
-    "option for Comet only", true);
+    "Available for comet.", true);
   InitIntParam("num_threads", 0, 0, 32, 
     "0=poll CPU to set num threads; else specify num threads directly (max 32).",
-    "option for Comet only", true);
+    "Available for comet.", true);
   InitStringParam("output_suffix", "",
-    "specifies the suffix string that is appended to the base output name "
+    "Specifies the suffix string that is appended to the base output name "
     "for the pep.xml, pin.xml, txt and sqt output files.",
     "Available for comet.", true);
   InitDoubleParam("peptide_mass_tolerance", 3.0, 0, BILLION,
@@ -781,170 +787,170 @@ Params::Params() : finalized_(false) {
     "of \"1.0\" applies a -1.0 to +1.0 tolerance. "
     "The units of the mass tolerance is controlled by the parameter "
     "\"peptide_mass_units\". ", 
-    "option for Comet only", true);
+    "Available for comet.", true);
   InitIntParam("peptide_mass_units", 0, 0, 2,
     "0=amu, 1=mmu, 2=ppm.",
-    "option for Comet only", true);
+    "Available for comet.", true);
   InitIntParam("mass_type_parent", 1, 0, 1,
     "0=average masses, 1=monoisotopic masses.",
-    "option for Comet only", true);
+    "Available for comet.", true);
   InitIntParam("mass_type_fragment", 1, 0, 1,
     "0=average masses, 1=monoisotopic masses.",
-    "option for Comet only", true);
+    "Available for comet.", true);
   InitIntParam("isotope_error", 0, 0, 2, 
     "0=off, 1=on -1/0/1/2/3 (standard C13 error), 2=-8/-4/0/4/8 (for +4/+8 labeling).",
-    "option for Comet only", true);
+    "Available for comet.", true);
   InitIntParam("search_enzyme_number", 1, 0, BILLION,
     "Specify a search enzyme from the end of the parameter file.",
-    "option for Comet only", true);
+    "Available for comet.", true);
   InitIntParam("num_enzyme_termini", 2, 1, 9,
     "valid values are 1 (semi-digested), 2 (fully digested), 8 N-term, 9 C-term.",
-    "option for Comet only", true);
+    "Available for comet.", true);
   InitIntParam("allowed_missed_cleavage", 2, 0, 5,
-    "maximum value is 5; for enzyme search",
-    "option for Comet only", true);
+    "Maximum value is 5; for enzyme search.",
+    "Available for comet.", true);
   InitDoubleParam("fragment_bin_tol", 1.000507, 0, BILLION,
-    "binning to use on fragment ions.",
-    "option for Comet only", true);
+    "Binning to use on fragment ions.",
+    "Available for comet.", true);
   InitDoubleParam("fragment_bin_offset", 0.40, 0, 1.0,
-    "offset position to start the binning (0.0 to 1.0).",
-    "option for Comet only", true);
+    "Offset position to start the binning (0.0 to 1.0).",
+    "Available for comet.", true);
   InitIntParam("theoretical_fragment_ions", 1, 0, 1,
     "0=default peak shape, 1=M peak only.",
-    "option for Comet only", true);
+    "Available for comet.", true);
   InitIntParam("use_A_ions", 0, 0, 1,
     "Controls whether or not A-ions are considered in the search (0 - no, 1 - yes).",
-    "option for Comet only", true);
+    "Available for comet.", true);
   InitIntParam("use_B_ions", 1, 0, 1,
     "Controls whether or not B-ions are considered in the search (0 - no, 1 - yes).",
-    "option for Comet only", true);
+    "Available for comet.", true);
   InitIntParam("use_C_ions", 0, 0, 1,
     "Controls whether or not C-ions are considered in the search (0 - no, 1 - yes).",
-    "option for Comet only", true);
+    "Available for comet.", true);
   InitIntParam("use_X_ions", 0, 0, 1,
     "Controls whether or not X-ions are considered in the search (0 - no, 1 - yes).",
-    "option for Comet only", true);
+    "Available for comet.", true);
   InitIntParam("use_Y_ions", 1, 0, 1,
     "Controls whether or not Y-ions are considered in the search (0 - no, 1 - yes).",
-    "option for Comet only", true);
+    "Available for comet.", true);
   InitIntParam("use_Z_ions", 0, 0, 1,
     "Controls whether or not Z-ions are considered in the search (0 - no, 1 - yes).",
-    "option for Comet only", true);
+    "Available for comet.", true);
   InitIntParam("use_NL_ions", 1, 0, 1,
     "0=no, 1= yes to consider NH3/H2O neutral loss peak.",
-    "option for Comet only", true);
+    "Available for comet.", true);
   InitIntParam("use_sparse_matrix", 1, 0, 1,
     "Controls whether or not internal sparse matrix data representation is used.",
-    "option for Comet only", true);
+    "Available for comet.", true);
   InitIntParam("output_sqtfile", 0, 0, 1,
     "0=no, 1=yes  write sqt file.",
-    "option for Comet only", true);
+    "Available for comet.", true);
   InitIntParam("output_pepxmlfile", 1, 0, 1,
     "0=no, 1=yes  write pep.xml file.",
-    "option for Comet only", true);
+    "Available for comet.", true);
   InitIntParam("output_percolatorfile", 0, 0, 1,
     "0=no, 1=yes write percolator file.",
-     "option for Comet only", true);
+     "Available for comet.", true);
   InitIntParam("output_txtfile", 1, 0, 1,
     "0=no, 1=yes  write tab-delimited text file.",
-    "option for Comet only", true);
+    "Available for comet.", true);
   InitIntParam("output_outfiles", 0, 0, 1,
     "0=no, 1=yes  write .out files.",
-    "option for Comet only", true);
+    "Available for comet.", true);
   InitIntParam("print_expect_score", 1, 0, 1,
     "0=no, 1=yes to replace Sp with expect in out & sqt.",
-    "option for Comet.", true);
+    "Available for comet.", true);
   InitIntParam("num_output_lines", 5, 1, BILLION,
     "num peptide results to show.",
-    "option for Comet.", true);
+    "Available for comet.", true);
   InitIntParam("show_fragment_ions", 0, 0, 1,
     "0=no, 1=yes for out files only.",
-    "option for Comet.", true);
+    "Available for comet.", true);
   InitIntParam("sample_enzyme_number", 1,0,10, 
     "Sample enzyme which is possibly different than the one applied to the search. "
     "Used to calculate NTT & NMC in pepXML output.",
-    "option for Comet. ", true);
+    "Available for comet. ", true);
   InitStringParam("scan_range", "0 0",
-    "start and scan scan range to search; 0 as 1st entry ignores parameter.",
-    "option for Comet", true);
+    "Start and scan scan range to search; 0 as first entry ignores parameter.",
+    "Available for comet.", true);
   InitStringParam("precursor_charge", "0 0",
-    "precursor charge range to analyze; does not override "
-    "mzXML charge; 0 as 1st entry ignores parameter.",
-    "option for Comet.", true);
+    "Precursor charge range to analyze; does not override "
+    "mzXML charge; 0 as first entry ignores parameter.",
+    "Available for comet.", true);
   InitIntParam("ms_level", 2, 2, 3, 
     "MS level to analyze, valid are levels 2 or 3.",
-    "option for Comet. ", true);
+    "Available for comet. ", true);
   InitStringParam("activation_method", "ALL", "ALL|CID|ECD|ETD|PQD|HCD|IRMPD",
     "Specifies which scan types are searched.",
-    "option for Comet. ", true);
+    "Available for comet. ", true);
   InitStringParam("digest_mass_range", "600.0 5000.0",
     "MH+ peptide mass range to analyze.",
-    "option for Comet.", true);
+    "Available for comet.", true);
   InitIntParam("num_results", 50, 0, BILLION,
-    "number of search hits to store internally.",
-    "option for Comet.", true);
+    "Number of search hits to store internally.",
+    "Available for comet.", true);
   InitIntParam("skip_researching", 1, 0, 1,
-    "for '.out' file output only, 0=search everything again, 1=don't search if .out exists.",
-    "option for Comet", true);
+    "For '.out' file output only, 0=search everything again, 1=don't search if .out exists.",
+    "Available for comet.", true);
   InitIntParam("max_fragment_charge", 3, 1, 5,
-    "set maximum fragment charge state to analyze (allowed max 5).",
-    "option for Comet", true);
+    "Set maximum fragment charge state to analyze (allowed max 5).",
+    "Available for comet.", true);
   InitIntParam("max_precursor_charge", 6, 1, 9,
-    "set maximum precursor charge state to analyze (allowed max 9).",
-    "option for Comet", true);
+    "Set maximum precursor charge state to analyze (allowed max 9).",
+    "Available for comet.", true);
   InitIntParam("nucleotide_reading_frame", 0, 0, 9,
     "0=proteinDB, 1-6, 7=forward three, 8=reverse three, 9=all six.",
-    "option for Comet", true);
+    "Available for comet.", true);
   InitIntParam("clip_nterm_methionine", 0, 0, 1,
     "0=leave sequences as-is; 1=also consider sequence w/o N-term methionine.",
-    "option for Comet", true);
+    "Available for comet.", true);
   InitIntParam("spectrum_batch_size", 0, 0, BILLION,
-    "max. # of spectra to search at a time; 0 to search the entire scan range in one loop.",
-    "option for Comet", true);
+    "Maximum number of spectra to search at a time; 0 to search the entire scan range in one loop.",
+    "Available for comet.", true);
   InitIntParam("minimum_peaks", 10, 1, BILLION,
-    "minimum num. of peaks in spectrum to search.",
-    "option for Comet", true);
+    "Minimum number of peaks in spectrum to search.",
+    "Available for comet.", true);
   InitDoubleParam("minimum_intensity", 0, 0, BILLION,
-    "minimum intensity value to read in.",
-    "option for comet. ", true);
+    "Minimum intensity value to read in.",
+    "Available for comet. ", true);
   InitIntParam("remove_precursor_peak", 0, 0, 2, 
     "0=no, 1=yes, 2=all charge reduced precursor peaks (for ETD).",
-    "option for Comet. ", true);
+    "Available for comet. ", true);
   InitDoubleParam("remove_precursor_tolerance", 1.5, -BILLION, BILLION, 
     "+- Da tolerance for precursor removal.",
-    "option for Comet. ", true);
+    "Available for comet. ", true);
   InitStringParam("clear_mz_range", "0.0 0.0",
-    "for iTRAQ/TMT type data; will clear out all peaks in the specified m/z range.",
-    "option for Comet", true);
+    "For iTRAQ/TMT type data; will clear out all peaks in the specified m/z range.",
+    "Available for comet.", true);
   for (int i = 1; i <= 9; i++) {
     InitStringParam("variable_mod0" + StringUtils::ToString(i), "",
                     "Up to 9 variable modifications are supported; format: "
                     "\"<mass> <residues> <0=variable/1=binary> <max mods per a peptide>\" "
                     "e.g. 79.966331 STY 0 3.",
-                    "option for Comet", true);
+                    "Available for comet.", true);
   }
   InitIntParam("require_variable_mod", 0, 0, 1,
-    "controls whether the analyzed peptides must contain at least one variable modification.",
-    "option for Comet", true);
+    "Controls whether the analyzed peptides must contain at least one variable modification.",
+    "Available for comet.", true);
   InitIntParam("max_variable_mods_in_peptide", 5, 0, BILLION,
     "Specifies the total/maximum number of residues that can be modified in a peptide.",
-    "option for Comet", true);
+    "Available for comet.", true);
   InitIntParam("override_charge", 0, 0, 1,
-    "specifies the whether to override existing precursor charge state information when present "
+    "Specifies the whether to override existing precursor charge state information when present "
     "in the files with the charge range specified by the \"precursor_charge\" parameter.",
-    "option for Comet", true);  
+    "Available for comet.", true);  
   InitDoubleParam("add_Cterm_peptide", 0, 0, BILLION,
     "Specifiy a static modification to the c-terminus of all peptides.",
-    "option for Comet", true);
+    "Available for comet.", true);
   InitDoubleParam("add_Nterm_peptide", 0, 0, BILLION,
     "Specify a static modification to the n-terminus of all peptides.",
-    "option for Comet", true);
+    "Available for comet.", true);
   InitDoubleParam("add_Cterm_protein", 0, 0, BILLION,
     "Specify a static modification to the c-terminal peptide of each protein.",
-    "option for Comet", true);
+    "Available for comet.", true);
   InitDoubleParam("add_Nterm_protein", 0, 0, BILLION,
     "Specify a static modification to the n-terminal peptide of each protein.",
-    "option for Comet", true);
+    "Available for comet.", true);
   for (char c = 'A'; c <= 'Z'; c++) {
     string aaString = string(1, c);
     string aaName = AminoAcidUtil::GetName(c);
@@ -952,7 +958,7 @@ Params::Params() : finalized_(false) {
     InitDoubleParam("add_" + aaString + "_" + aaName,
                     c != 'C' ? 0 : CYSTEINE_DEFAULT, 0, BILLION,
                     "Specify a static modification to the residue " + aaString + ".",
-                    "option for Comet", true);
+                    "Available for comet.", true);
   }
   // **** q-ranker-barista arguments ****
   InitArgParam("database",
@@ -1050,7 +1056,7 @@ Params::Params() : finalized_(false) {
   InitDoubleParam("pi-zero", 1.0, 0, 1, 
     "The estimated percent of target scores that are drawn from the "
     "null distribution.",
-    "Used by assign-confidence, compute-q-values, percolator and q-ranker", false);
+    "Used by assign-confidence, percolator and q-ranker", false);
   InitStringParam("estimation-method", "tdc", "mix-max|tdc|peptide-level",
     "Specify the method used to estimate q-values: the mix-max procedure or target-decoy "
     "competition. peptide-level is applied for spectrum-centric search. Eliminates any PSMS for which there "
