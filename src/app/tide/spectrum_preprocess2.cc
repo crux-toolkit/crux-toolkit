@@ -20,9 +20,10 @@
 #include <gflags/gflags.h>
 #include "spectrum_collection.h"
 #include "spectrum_preprocess.h"
-#include "mass_constants.h"
+#include "mass_constants.h" //added by Andy Lin
 #include "max_mz.h"
 #include "util/Params.h"
+#include "util/mass.h"
 #include <cmath>
 
 #include <iostream> //Remove this when done -- Andy Lin
@@ -200,7 +201,7 @@ void ObservedPeakSet::PreprocessSpectrum(
   // TODO need to review these constants, decide which can be moved to parameter file
   const int nRegion = NUM_SPECTRUM_REGIONS;
   const double maxIntensPerRegion = 50.0;
-  const double precursorMZExclude = 15.0;
+  const double precursorMZExclude = 15.0; //also used in CreateResidueEvidenceMatrix
 
   int ma;
   int ionBin;
@@ -618,7 +619,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   int maxPrecurMassBin,
   double precursorMass,
   int nAA, //index 1?
-  const int* aaMass,
+  const int* aaMass1,
   vector<vector<double> >& residueEvidenceMatrix
   ) {
 
@@ -634,35 +635,74 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   int pc;
 
 //CHECK BELOW FOR CHANGE
-  double* evidence = new double[maxPrecurMassBin];
-  double* intensArrayObs = new double[maxPrecurMassBin];
-  int* intensRegion = new int[maxPrecurMassBin];
+//  double* evidence = new double[maxPrecurMassBin];
+//  double* intensArrayObs = new double[maxPrecurMassBin];
+//  int* intensRegion = new int[maxPrecurMassBin];
 
-  for (ma = 0; ma < maxPrecurMassBin; ma++) {
-    evidence[ma] = 0.0;
-    //evidenceInt[ma] = 0; code to set vals to 0 in residueEvidenceMatrix?
-    intensArrayObs[ma] = 0.0;
-    intensRegion[ma] = -1;
-  }
+//  for (ma = 0; ma < maxPrecurMassBin; ma++) {
+//    evidence[ma] = 0.0;
+//    intensArrayObs[ma] = 0.0;
+//    intensRegion[ma] = -1;
+//  }
 //CHECK ABOVE FOR CHANGE
 
   double precurMz = spectrum.PrecursorMZ();
   int nIon = spectrum.Size();
   int precurCharge = charge;
-  double experimentalMassCutoff = precurMz * precurCharge + 50.0;
+  double experimentalMassCutoff = precursorMass + 50.0;
   double proton = MassConstants::proton;
+  double residueToleranceMass = 100.0 * 200.0 * 0.000001;
+  const double precursorMZExclude = 15.0; //also used in PreprocessSpectrum
 
-  //preprocesses spectrum 
-  PreprocessSpectrum(spectrum, intensArrayObs, intensRegion, maxPrecurMassBin,charge);
+  //preprocess function for XCorr -- could use except xcorr
+  //discretize evidence into bins
+  //PreprocessSpectrum(spectrum, intensArrayObs, intensRegion, maxPrecurMassBin,charge);
 
-  //Iterators used 
-  vector<int>::iterator it;
+  //Determining max sqrt(ion intensity)
+  double maxIonIntens = 0.0;
+  for (int ion = 0; ion < nIon; ion++) {
+    double ionMass = spectrum.M_Z(ion);
+    double ionIntens = sqrt(spectrum.Intensity(ion));
+    if (ionMass >= experimentalMassCutoff) {
+      continue;
+    }
+    if (maxIonIntens < ionIntens) {
+      maxIonIntens = ionIntens;
+    }
+  }
+
+  //MZ that pass preprocessing filters 
+  vector<double> ionMasses;
+  for(int ion=0 ; ion<nIon ; ion++) {
+    double ionMass = spectrum.M_Z(ion);
+    double ionIntens = sqrt(spectrum.Intensity(ion));
+    //remove peaks larger than experimentalMassCutoff
+    if (ionMass >= experimentalMassCutoff) {
+      continue;
+    }
+    //remove peaks within precursorMZExclude of precurMz
+    if (ionMass > precurMz - precursorMZExclude && ionMass < precurMz + precursorMZExclude) {
+      continue;
+    }
+    //grass removal
+    if (ionIntens < 0.05 * maxIonIntens) {
+      continue;
+    }
+    ionMasses.push_back(ionMass);
+  }
+
+
+  //Get mass of amino acids in double format
+  vector<double> aaMass;
+  getAaMass(aaMass);
+  nAA = aaMass.size();
 
   //Determine which bin each amino acid mass is in
   vector<int> aaMassBin;
   for (int i = 0 ; i < nAA ; i++) {
     int binMass= (int)floor(MassConstants::mass2bin(aaMass[i]));
     aaMassBin.push_back(binMass);
+    std::cout << aaMass[i] << endl;
   }
 
   //Need to add lines for matlab line 56?
@@ -672,37 +712,37 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   // Also need to figure out maxMassBin (currently hard coded to 8500)
   // need to do 4 times (+1/+2/B ion/ yion)
 
-  //Determine which bin each ion mass is in
-  vector<int> ionMassBin;
-  for(int ion=0 ; ion<nIon ; ion++) {
-    double tmpIonMass = spectrum.M_Z(ion);
-    int binTmpIonMass = (int)floor(MassConstants::mass2bin(tmpIonMass));
-    ionMassBin.push_back(binTmpIonMass);
-  }
-
-  //need to change this at some point
-  double residueToleranceMass = 0.00000001;
-
   int bIonMassBin;
   double bIonMass;
   double bIonIntens;
 
-  //find pairs of b ions in 1+ charge state
-  for (int ion=0 ; ion<nIon ; ion++) {
-    bIonMass = spectrum.M_Z(ion);
-    bIonMassBin = (int)floor(MassConstants::mass2bin(bIonMass));
-    bIonIntens = intensArrayObs[ion];
+  //Populate ionMass and ionMassBin for b ions in 1+ charge state
+  vector<double> ionMass;
+  vector<int> ionMassBin;
 
-    for(int curAaMass = 0 ; curAaMass < nAA ; curAaMass) {
+  for(int ion=0 ; ion<ionMasses.size() ; ion++) {
+    double tmpIonMass = ionMasses[ion];
+    int binTmpIonMass = (int)floor(MassConstants::mass2bin(tmpIonMass));
+
+    ionMass.push_back(tmpIonMass);
+    ionMassBin.push_back(binTmpIonMass);
+  }
+
+  //find pairs of b ions in 1+ charge state
+  for (int ion=0 ; ion<ionMasses.size() ; ion++) {
+    bIonMass = ionMass[ion];
+    bIonMassBin = ionMassBin[ion];
+
+    for(int curAaMass = 0 ; curAaMass < nAA ; curAaMass++) {
       int newResMassBin = bIonMassBin + aaMassBin[curAaMass];
 
       //Find all ion mass bins that match newResMassBin
       int index = find(ionMassBin.begin(), ionMassBin.end(),newResMassBin) - ionMassBin.begin();
-      for(int i = index ; i < nIon ; i++) {
+      for(int i = index ; i<ionMasses.size() ; i++) {
         if (newResMassBin != ionMassBin[i])
           continue;
 
-        double ionMassDiff = ionMassBin[i] - bIonMass;
+        double ionMassDiff = ionMass[i] - bIonMass;
         double aaTolScore = residueToleranceMass - std::abs(ionMassDiff - aaMass[curAaMass]);
 
         if (aaTolScore >= 0) {
@@ -712,34 +752,186 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
       }
     }
   }
+  ionMass.clear();
   ionMassBin.clear();
 
+/*
+  for(int i =0;i<maxPrecurMassBin;i++) {
+    for(int curAaMass = 0; curAaMass<nAA;curAaMass++){
+      if (residueEvidenceMatrix[curAaMass][i] != 0) {
+        std::cout << "massBin: " << i << std::endl;
+        std::cout << "curAaMass:" << curAaMass << std::endl;
+        std::cout << "evidence: " << residueEvidenceMatrix[curAaMass][i] << std::endl <<std::endl;
+      }
+    }
+  }
+  std::cout << "Finished b ions in 1+ charge state" << std::endl;
+*/
 
-  //for y ions don't forget flipud command
-  int yIonMassbin;
+  int yIonMassBin;
   double yIonMass;
   double yIonIntens;
-
-  vector<double> ionMass;
-  for(int ion=0 ; ion<nIon ; ion++) {
-    //conver to equivalent b ion masses for ease of processing
-    double tmpIonMass = precursorMass - spectrum.M_Z(ion) + (2.0 * massHMono);
+  //find pairs of y ions in 1+ charge state
+  for(int ion=0 ; ion<ionMasses.size() ; ion++) {
+    //convert to equivalent b ion masses for ease of processing
+    double tmpIonMass = precursorMass - ionMasses[ion] + (2.0 * massHMono);
     ionMass.push_back(tmpIonMass);
 
     //Determine which bin each ion mass is in
     int binTmpIonMass = (int)floor(MassConstants::mass2bin(tmpIonMass));
     ionMassBin.push_back(binTmpIonMass);
   }
+  reverse(ionMass.begin(),ionMass.end());
+  reverse(ionMassBin.begin(), ionMassBin.end());
+
+  for(int ion=0 ; ion<ionMasses.size() ; ion++) {
+    yIonMass = ionMass[ion];
+    yIonMassBin = ionMassBin[ion];
+
+    for(int curAaMass=0 ; curAaMass<nAA ; curAaMass++) {
+      int newResMassBin = yIonMassBin + aaMassBin[curAaMass];
+ 
+      //Find all ion mass bins that match newResMassBin
+      int index = find(ionMassBin.begin(),ionMassBin.end(),newResMassBin) - ionMassBin.begin();
+      for(int i=index ; i<ionMasses.size() ; i++) {
+        if (newResMassBin != ionMassBin[i])
+          continue;
+        
+        double ionMassDiff = ionMass[i] - yIonMass;
+        double aaTolScore = residueToleranceMass - std::abs(ionMassDiff - aaMass[curAaMass]);
+
+        if (aaTolScore >= 0) {
+          //add evidence to matrix
+          residueEvidenceMatrix[curAaMass][newResMassBin] += aaTolScore;
+        }
+      }
+    }
+  }
   ionMass.clear();
   ionMassBin.clear();
-  //dont forget to clear ions and ionMassBin
 
 
+  //find pairs of b ions in 2+ charge state
+  for(int ion=0 ; ion<ionMasses.size() ; ion++) {
+    double tmpIonMass = (2.0 * ionMasses[ion]) - massHMono;
+    int binTmpIonMass = (int)floor(MassConstants::mass2bin(tmpIonMass));
+
+    ionMass.push_back(tmpIonMass);
+    ionMassBin.push_back(binTmpIonMass);
+  }
+
+  for(int ion=0 ; ion<ionMasses.size() ; ion++) {
+    bIonMass = ionMass[ion];
+    bIonMassBin = ionMassBin[ion];
+
+    for(int curAaMass=0 ; curAaMass<nAA ; curAaMass++) {
+      int newResMassBin = bIonMassBin + aaMassBin[curAaMass];
+      
+      //Find all ion mass bins that match newResMassBin
+      int index = find(ionMassBin.begin(),ionMassBin.end(),newResMassBin) - ionMassBin.begin();
+      for(int i=index ; i<ionMasses.size() ; i++) {
+        if (newResMassBin != ionMassBin[i])
+          continue;
+
+        double ionMassDiff = ionMass[i] - bIonMass;
+        double aaTolScore = residueToleranceMass - std::abs(ionMassDiff - aaMass[curAaMass]);
+
+        if(aaTolScore >= 0) {
+          //add evidence to matrix
+          residueEvidenceMatrix[curAaMass][newResMassBin] += aaTolScore;
+        }
+      }
+    }
+  }
+  ionMass.clear();
+  ionMassBin.clear();
 
 
-  std::cout << "Made to end of residue evidence matrix creation" <<std::endl;
+  //find pairs of y ions in 2+ charge state
+  for(int ion=0 ; ion<ionMasses.size() ; ion++) {
+    double tmpIonMass = (2.0 * ionMasses[ion]) - massHMono;
+    int binTmpIonMass = (int)floor(MassConstants::mass2bin(tmpIonMass));
+
+    ionMass.push_back(tmpIonMass);
+    ionMassBin.push_back(binTmpIonMass);
+  }
+  reverse(ionMass.begin(),ionMass.end());
+  reverse(ionMassBin.begin(),ionMassBin.end());
+
+  for(int ion=0 ; ion<ionMasses.size() ; ion++) {
+    yIonMass = ionMass[ion];
+    yIonMassBin = ionMassBin[ion];
+
+    for(int curAaMass=0 ; curAaMass<nAA ; curAaMass++) {
+      int newResMassBin = yIonMassBin + aaMassBin[curAaMass];
+ 
+      //Find all ion mass bins that match newResMassBin
+      int index = find(ionMassBin.begin(), ionMassBin.end(), newResMassBin) - ionMassBin.begin();
+      for(int i=index ; i<ionMasses.size() ; i++) {
+        if(newResMassBin != ionMassBin[i])
+          continue;
+   
+        double ionMassDiff = ionMass[i] - yIonMass;
+        double aaTolScore = residueToleranceMass - std::abs(ionMassDiff - aaMass[curAaMass]);
+ 
+        if (aaTolScore >= 0) {
+          //add evidence to matrix
+          residueEvidenceMatrix[curAaMass][newResMassBin] += aaTolScore;
+        }
+      }
+    }
+  }
+  ionMass.clear();
+  ionMassBin.clear();
+
+  //Get maxEvidence value
+  double maxEvidence = -1.0;
+  for(int i =0 ; i<maxPrecurMassBin ; i++) {
+    for(int curAaMass = 0; curAaMass<nAA;curAaMass++){
+      if (residueEvidenceMatrix[curAaMass][i] > maxEvidence) {
+        maxEvidence = residueEvidenceMatrix[curAaMass][i];
+      }
+    }
+  }
+
+  //discretize residue evidence so largest value is residueEvidenceIntScale
+  double residueEvidenceIntScale = 25.0;
+  for(int i=0 ; i<maxPrecurMassBin ; i++) {
+    for(int curAaMass = 0; curAaMass<nAA;curAaMass++){
+      if (residueEvidenceMatrix[curAaMass][i] > 0) {
+        double residueEvidence = residueEvidenceMatrix[curAaMass][i];
+        residueEvidenceMatrix[curAaMass][i] = round(residueEvidenceIntScale * residueEvidence / maxEvidence);
+      }
+    }
+  }
+
+
+  for(int i =0;i<maxPrecurMassBin;i++) {
+    for(int curAaMass = 0; curAaMass<nAA;curAaMass++){
+      if (residueEvidenceMatrix[curAaMass][i] != 0) {
+        std::cout << "massBin: " << i << std::endl;
+        std::cout << "curAaMass:" << curAaMass << std::endl;
+        std::cout << "evidence: " << residueEvidenceMatrix[curAaMass][i] << std::endl <<std::endl;
+      }
+    }
+  } 
+
+  std::cout <<"Created Evidence Residue Matrix" << std::endl;
+  std::cout << "nAA: " << nAA << std::endl;
+  for(int i=0; i<nAA;i++){
+    std::cout << i+1 << " " << aaMass[i] << std::endl;
+  }
+  std::cout << "num bin: " << maxPrecurMassBin <<std::endl;
+  std::cout << "ionMasses.size(): " << ionMasses.size() <<std::endl;
 }
 
-
-
-
+//Added by Andy Lin - March 2016
+//Gets masses of all amino acids (not integerized)
+//TODO Currently not taking into account modifications
+void ObservedPeakSet::getAaMass(vector<double>& aaMassVector) {
+  //Done in this order to match Matlab code by Jeff Howbert (ie in mass order)
+  string aa = "GASPVTILNDKQEMHFRCYW";
+  for(int i=0 ; i<aa.length() ; i++) {
+      aaMassVector.push_back(MassConstants::mono_table[aa[i]]);
+    }
+}
