@@ -197,6 +197,7 @@ class ObservedPeakSet {
   void ComputeCache();
   void PreprocessSpectrum(const Spectrum& spectrum, double* intensArrayObs, 
                           int* intensRegion, int maxPrecurMass,int charge);
+  void getAaMass(vector<double>&); //Added by Andy Lin - March 2016
 
   double* peaks_;
   int* cache_;
