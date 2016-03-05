@@ -181,43 +181,99 @@ void MatchCollection::sort(
          "Cannot sort a match collection when a match iterator is already instantiated");
   }
 
+  // The order here follows that of the definition in ../objects.h.
   SCORER_TYPE_T sort_by = score_type;
-  bool less = false;
+  bool smaller_is_better = false;
   switch (score_type) {
-  case EVALUE:
-  case SIDAK_ADJUSTED:
-  case TIDE_SEARCH_EXACT_PVAL:
-    less = true;
+  case SP:
+  case XCORR:
+    smaller_is_better = false;
     break;
+  case EVALUE:
+    smaller_is_better = true;
+    break;
+
   case DECOY_XCORR_QVALUE:
-  case LOGP_WEIBULL_XCORR: 
   case DECOY_XCORR_PEPTIDE_QVALUE:
   case DECOY_XCORR_PEP:
+    smaller_is_better = false;
     sort_by = XCORR;
     break;
+
+  case DECOY_EVALUE_QVALUE:
+  case DECOY_EVALUE_PEPTIDE_QVALUE:
+  case DECOY_EVALUE_PEP:
+    smaller_is_better = true;
+    sort_by = EVALUE;
+    break;
+
+  // N.B. These are actually NEGATIVE log p-values.
+  case LOGP_WEIBULL_XCORR:
+  case LOGP_BONF_WEIBULL_XCORR:
   case LOGP_QVALUE_WEIBULL_XCORR:
-  case LOGP_PEPTIDE_QVALUE_WEIBULL:
   case LOGP_WEIBULL_PEP:
+  case LOGP_PEPTIDE_QVALUE_WEIBULL:
+    smaller_is_better = false;
     sort_by = LOGP_BONF_WEIBULL_XCORR;
     break;
+
+  case PERCOLATOR_SCORE:
   case PERCOLATOR_QVALUE:
   case PERCOLATOR_PEPTIDE_QVALUE:
   case PERCOLATOR_PEP:
-    less = true;
-    sort_by = PERCOLATOR_QVALUE;
+    smaller_is_better = false;
+    sort_by = PERCOLATOR_SCORE;
     break;
+
+  case QRANKER_SCORE:
   case QRANKER_QVALUE:
   case QRANKER_PEPTIDE_QVALUE:
   case QRANKER_PEP:
-    less = true;
-    sort_by = QRANKER_QVALUE;
+    smaller_is_better = false;
+    sort_by = QRANKER_SCORE;
     break;
+
+  case BARISTA_SCORE:
   case BARISTA_QVALUE:
   case BARISTA_PEPTIDE_QVALUE:
   case BARISTA_PEP:
-    less = true;
-    sort_by = BARISTA_QVALUE;
+    smaller_is_better = false;
+    sort_by = BARISTA_SCORE;
     break;
+
+  case DELTA_CN:
+  case DELTA_LCN:
+  case BY_IONS_MATCHED:
+  case BY_IONS_TOTAL:
+    carp(CARP_FATAL, "Cannot sort by score type %s.",
+	 scorer_type_to_string(score_type));
+    break;
+
+  case TIDE_SEARCH_EXACT_PVAL:
+    smaller_is_better = true;
+    break;
+  case TIDE_SEARCH_REFACTORED_XCORR:
+    smaller_is_better = false;
+    break;
+  case SIDAK_ADJUSTED:
+  case TIDE_SEARCH_EXACT_SMOOTHED:
+    smaller_is_better = true;
+    break;
+
+  case XCORR_FIRST:
+  case XCORR_SECOND:
+    carp(CARP_FATAL, "Cannot sort by score type %s.",
+	 scorer_type_to_string(score_type));
+    
+  case QVALUE_TDC:
+  case QVALUE_MIXMAX:
+    smaller_is_better = true;
+    break;
+
+  case NUMBER_SCORER_TYPES:
+  case INVALID_SCORER_TYPE:
+    carp(CARP_FATAL, "Cannot sort by score type %s.",
+	 scorer_type_to_string(score_type));
   }
 
   // Don't sort if it's already sorted.
@@ -226,12 +282,21 @@ void MatchCollection::sort(
   }
 
   if (!scored_type_[sort_by]) {
-    carp(CARP_WARNING, "Cannot sort MatchCollection (does not have %d scores)", sort_by);
+    carp(CARP_WARNING, "Cannot sort MatchCollection (does not have %s scores)",
+	 scorer_type_to_string(sort_by));
     return;
   }
 
+  if (smaller_is_better) {
+    carp(CARP_INFO, "Sorting in ascending order by %s.",
+	 scorer_type_to_string(score_type));
+  } else {
+    carp(CARP_INFO, "Sorting in descending order by %s.",
+	 scorer_type_to_string(score_type));
+  }	 
+
   // Do the sort.
-  Match::ScoreComparer comparer(sort_by, less);
+  Match::ScoreComparer comparer(sort_by, smaller_is_better);
   std::sort(match_.begin(), match_.end(), comparer);
   last_sorted_ = sort_by;
 }
@@ -1638,15 +1703,22 @@ void MatchCollection::assignQValues(
     Match* match = match_iterator->next();
     FLOAT_T score = match->getScore(score_type);
 
-    // Retrieve the corresponding q-value.
-    map<FLOAT_T, FLOAT_T>::const_iterator map_position 
-      = score_to_qvalue_hash->find(score);
-    if (map_position == score_to_qvalue_hash->end()) {
-      carp(CARP_FATAL,
-           "Cannot find q-value corresponding to score of %g.",
-           score);
+    FLOAT_T qvalue;
+    // If the score is not a number, punt.
+    if ( isinf(score) || isnan(score) ) {
+      carp(CARP_DEBUG, "Found inf or nan score.");
+      qvalue = numeric_limits<double>::quiet_NaN();
+    } else {
+      // Retrieve the corresponding q-value.
+      map<FLOAT_T, FLOAT_T>::const_iterator map_position 
+	= score_to_qvalue_hash->find(score);
+      if (map_position == score_to_qvalue_hash->end()) {
+	carp(CARP_FATAL,
+	     "Cannot find q-value corresponding to score of %g.",
+	     score);
+      }
+      qvalue = map_position->second;
     }
-    FLOAT_T qvalue = map_position->second;
 
     /* If we're given a base score, then store the q-value.  If we're
        given a q-value, then store the peptide-level q-value. */
@@ -1732,16 +1804,22 @@ void MatchCollection::assignQValues(
     Match* match = match_iterator->next();
     FLOAT_T score = match->getScore(score_type);
 
-    // Retrieve the corresponding q-value.
-    map<FLOAT_T, FLOAT_T>::const_iterator map_position 
-      = score_to_qvalue_hash->find(score);
-    if (map_position == score_to_qvalue_hash->end()) {
-      carp(CARP_FATAL,
-           "Cannot find q-value corresponding to score of %g.",
-           score);
+    FLOAT_T qvalue;
+    // If the score is not a number, punt.
+    if ( isinf(score) || isnan(score) ) {
+      carp(CARP_DEBUG, "Found inf or nan score.");
+      qvalue = numeric_limits<double>::quiet_NaN();
+    } else {
+      // Retrieve the corresponding q-value.
+      map<FLOAT_T, FLOAT_T>::const_iterator map_position 
+	= score_to_qvalue_hash->find(score);
+      if (map_position == score_to_qvalue_hash->end()) {
+	carp(CARP_FATAL,
+	     "Cannot find q-value corresponding to score of %g.",
+	     score);
+      }
+      qvalue = map_position->second;
     }
-    FLOAT_T qvalue = map_position->second;
-
     match->setScore(derived_score_type, qvalue);
   }
   scored_type_[derived_score_type] = true;
