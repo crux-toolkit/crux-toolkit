@@ -11,6 +11,10 @@ double MathUtil::Round(double x, int decimals) {
     : ceil(x * shift - 0.5) / shift;
 }
 
+bool MathUtil::AlmostEqual(double x, double y, int precision) {
+  return abs(x - y) < 5*pow(10, -(precision + 1));
+}
+
 MathUtil::MathUtil() {}
 MathUtil::~MathUtil() {}
 

@@ -55,11 +55,9 @@ void Match::init() {
   null_peptide_ = false;
   peptide_sequence_ = NULL;
   mod_sequence_ = NULL;
-  digest_ = INVALID_DIGEST;
   post_process_match_ = 0;
   ln_experiment_size_ = 0;
   num_target_matches_ = 0;
-  num_decoy_matches_ = 0;
   best_per_peptide_ = false;
   file_idx_ = -1;
 }
@@ -79,7 +77,7 @@ Match::Match(){
  */
 Match::Match(Peptide* peptide, ///< the peptide for this match
              Spectrum* spectrum, ///< the spectrum for this match
-             SpectrumZState& zstate, ///< the charge/mass of the spectrum
+             const SpectrumZState& zstate, ///< the charge/mass of the spectrum
              bool is_decoy)///< is the peptide a decoy or not
 {
   init();
@@ -610,151 +608,9 @@ void Match::shuffleMatches(
   }
 }
 
-/**
- *
- *\returns a match object that is parsed from the tab-delimited result file
- */
-Match* Match::parseTabDelimited(
-  MatchFileReader& result_file,  ///< the result file to parse PSMs -in
-  Database* database, ///< the database to which the peptides are created -in
-  Database* decoy_database ///< database with decoy peptides
-  ) {
-
-  string decoy_prefix = Params::GetString("decoy-prefix");
-
-  Match* match = new Match();
-
-  Spectrum* spectrum = NULL;
-
-  // this is a post_process match object
-  match->post_process_match_ = true;
-
-  Peptide* peptide = Peptide::parseTabDelimited(result_file, database, decoy_database);
-  string index_name = result_file.getString(INDEX_NAME_COL);
-  match->setDatabaseIndexName(index_name);
-
-  if(peptide == NULL){
-    carp(CARP_ERROR, "Failed to parse peptide (tab delimited)");
-    // FIXME should this exit or return null. I think sometimes we can get
-    // no peptides, which is valid, in which case NULL makes sense.
-    // maybe this should be fixed at the output match level however.
-    return NULL;
-  }
-
-  if (!result_file.empty(FILE_COL)) {
-    match->setFilePath(result_file.getString(FILE_COL));
-  }
-  
-  if ((result_file.empty(SP_SCORE_COL)) || (result_file.empty(SP_RANK_COL))){
-    match -> match_scores_[SP] = NOT_SCORED;
-    match -> match_rank_[SP] = 0;
-  } else {
-    match -> match_scores_[SP] = result_file.getFloat(SP_SCORE_COL);
-    match -> match_rank_[SP] = result_file.getInteger(SP_RANK_COL);
-  }
-
-  match -> match_scores_[XCORR] = result_file.getFloat(XCORR_SCORE_COL);
-  match -> match_rank_[XCORR] = result_file.getInteger(XCORR_RANK_COL);
-
-  if (!result_file.empty(DELTA_CN_COL)) {
-    match -> match_scores_[DELTA_CN] = result_file.getFloat(DELTA_CN_COL);
-  }
-  if (!result_file.empty(DELTA_LCN_COL)) {
-    match -> match_scores_[DELTA_LCN] = result_file.getFloat(DELTA_LCN_COL);
-  }
-
-  if (!result_file.empty(EXACT_PVALUE_COL)){
-    match -> match_scores_[TIDE_SEARCH_EXACT_PVAL] = result_file.getFloat(EXACT_PVALUE_COL);
-    match -> match_scores_[TIDE_SEARCH_REFACTORED_XCORR] = result_file.getFloat(REFACTORED_SCORE_COL);
-  }
-  if (!result_file.empty(DECOY_XCORR_QVALUE_COL)){
-    match->match_scores_[DECOY_XCORR_QVALUE] = result_file.getFloat(DECOY_XCORR_QVALUE_COL);
-  }
-  /* TODO I personally would like access to the raw p-value as well as the bonferonni corrected one (SJM).
-  match -> match_scores[LOGP_WEIBULL_XCORR] = result_file.getFloat("logp weibull xcorr");
-  */
-  if (!result_file.empty(PVALUE_COL)){
-    match->match_scores_[LOGP_BONF_WEIBULL_XCORR] = -log(result_file.getFloat(PVALUE_COL));
-  }
-  if (!result_file.empty(EVALUE_COL)){
-    match->match_scores_[EVALUE]  = result_file.getFloat(EVALUE_COL);
-  }
-  if (!result_file.empty(PERCOLATOR_QVALUE_COL)){
-    match->match_scores_[PERCOLATOR_QVALUE] = result_file.getFloat(PERCOLATOR_QVALUE_COL);
-  }
-  if (!result_file.empty(PERCOLATOR_SCORE_COL)){
-    match->match_scores_[PERCOLATOR_SCORE] = result_file.getFloat(PERCOLATOR_SCORE_COL);
-    match->match_rank_[PERCOLATOR_SCORE] = result_file.getInteger(PERCOLATOR_RANK_COL);
-  }
-  if (!result_file.empty(WEIBULL_QVALUE_COL)){
-    match->match_scores_[LOGP_QVALUE_WEIBULL_XCORR] = result_file.getFloat(WEIBULL_QVALUE_COL);
-  }
-  if (!result_file.empty(QRANKER_SCORE_COL)){
-    match->match_scores_[QRANKER_SCORE] = result_file.getFloat(QRANKER_SCORE_COL);
-    match->match_scores_[QRANKER_QVALUE] = result_file.getFloat(QRANKER_QVALUE_COL);
-  }
-
-  if (!result_file.empty(BARISTA_SCORE_COL)) {
-    match->match_scores_[BARISTA_SCORE] = result_file.getFloat(BARISTA_SCORE_COL);
-    match->match_scores_[BARISTA_QVALUE] = result_file.getFloat(BARISTA_QVALUE_COL);
-  }
-
-  if (!result_file.empty(BY_IONS_MATCHED_COL)) {
-    match->match_scores_[BY_IONS_MATCHED] = result_file.getInteger(BY_IONS_MATCHED_COL);
-  }
-  if (!result_file.empty(BY_IONS_TOTAL_COL)) {
-    match->match_scores_[BY_IONS_TOTAL] = result_file.getInteger(BY_IONS_TOTAL_COL);
-  }
-
-  // get experiment size
-  match->num_target_matches_ = 0;
-  if (!result_file.empty(DISTINCT_MATCHES_SPECTRUM_COL)) {
-
-    match->num_target_matches_ = result_file.getInteger(DISTINCT_MATCHES_SPECTRUM_COL);
-  } else if (!result_file.empty(MATCHES_SPECTRUM_COL)) {
-    match->num_target_matches_ = result_file.getInteger(MATCHES_SPECTRUM_COL);
-  }
-  if (match->num_target_matches_ == 0) {
-    carp_once(CARP_WARNING, "num target matches=0, suppressing warning");
-    match->ln_experiment_size_ = 0;
-  } else {
-    match->ln_experiment_size_ = log((FLOAT_T) match->num_target_matches_);
-  }
-  if (!result_file.empty(DECOY_MATCHES_SPECTRUM_COL)){
-        match->num_decoy_matches_ = result_file.getInteger(DECOY_MATCHES_SPECTRUM_COL);
-  }
-
-  // parse spectrum
-  if((spectrum = Spectrum::parseTabDelimited(result_file))== NULL){
-    carp(CARP_ERROR, "Failed to parse spectrum (tab delimited).");
-  }
-  string path = spectrum->getFullFilename();
-  if (!path.empty()) {
-    match->setFilePath(path);
-  }
-
-  //parse match overall digestion
-  match -> digest_ = string_to_digest_type((char*)result_file.getString(CLEAVAGE_TYPE_COL).c_str()); 
-
-  if (!result_file.empty(PROTEIN_ID_COL) && 
-    result_file.getString(PROTEIN_ID_COL).find(decoy_prefix) != string::npos) {
-    match -> null_peptide_ = true;
-  }
-
-  //assign fields
-  match -> peptide_sequence_ = NULL;
-  match -> spectrum_ = spectrum;
-  match -> peptide_ = peptide;
-  
-  return match;
-}
-
-
-
 /****************************
  * match get, set methods
  ***************************/
-
 
 /**
  * Returns a heap allocated peptide sequence of the PSM
@@ -1158,14 +1014,6 @@ void Match::setTargetExperimentSize(int num_matches){
  */
 int Match::getTargetExperimentSize(){
   return num_target_matches_;
-}
-
-/**
- * \returns The total number of decoy matches searched for this
- * spectrum if this is a match to a decoy spectrum.
- */
-int Match::getDecoyExperimentSize(){
-  return num_decoy_matches_;
 }
 
 /**

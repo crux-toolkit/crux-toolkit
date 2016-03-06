@@ -55,8 +55,8 @@ Spectrum::Spectrum() :
 /**
  * Constructor initializes spectrum with given values.
  */ 
-Spectrum::Spectrum
-(int               first_scan,   ///< The number of the first scan -in
+Spectrum::Spectrum (
+ int               first_scan,   ///< The number of the first scan -in
  int               last_scan,    ///< The number of the last scan -in
  FLOAT_T           precursor_mz, ///< The m/z of the precursor 
  const vector<int>& possible_z,  ///< The possible charge states 
@@ -84,8 +84,6 @@ Spectrum::Spectrum
     zstate.setMZ(precursor_mz, possible_z.at(idx));
     zstates_.push_back(zstate);
   }
-
-
 }
 
 /**
@@ -781,7 +779,6 @@ const vector<SpectrumZState>& Spectrum::getZStates() const {
  * /returns A vector of charge states to consider for this spectrum.
  */ 
 vector<SpectrumZState> Spectrum::getZStatesToSearch() {
-
   vector<SpectrumZState> select_zstates;
   string charge_str = Params::GetString("spectrum-charge");
 
@@ -803,7 +800,6 @@ vector<SpectrumZState> Spectrum::getZStatesToSearch() {
   }
 
   return select_zstates;
-
 }
 
 /**
@@ -836,49 +832,6 @@ FLOAT_T Spectrum::getMaxPeakIntensity()
     }
   }
   return max_intensity; 
-}
-
-
-/**
- * Parse the spectrum from the tab-delimited result file.
- *\returns The parsed spectrum, else returns NULL for failed parse.
- */
-Spectrum* Spectrum::parseTabDelimited(
-  MatchFileReader& file ///< output stream -out
-  ) {
-
-  Spectrum* spectrum = new Spectrum();
-
-  spectrum->filename_ = file.getString(FILE_COL);
-
-  spectrum->first_scan_ = file.getInteger(SCAN_COL);
-  spectrum->last_scan_ = spectrum->first_scan_;
-
-  spectrum->precursor_mz_ = file.getFloat(SPECTRUM_PRECURSOR_MZ_COL);
-  //Is it okay to assign an individual spectrum object for each charge?
-
-  int charge = file.getInteger(CHARGE_COL);
-
-  FLOAT_T neutral_mass = file.getFloat(SPECTRUM_NEUTRAL_MASS_COL);
-  
-  SpectrumZState zstate;
-
-  zstate.setNeutralMass(neutral_mass, charge);
-
-  spectrum->zstates_.push_back(zstate);
-
-
-  /*
-  TODO : Implement these in the tab delimited file?
-  spectrum -> min_peak_mz = file.getFloat("spectrum min peak mz");
-  spectrum -> max_peak_mz = file.getFloat("spectrum max peak mz");
-  spectrum -> num_peaks = file.getInteger("spectrum num peaks");
-  spectrum -> total_energy = file.getInteger("spectrum total energy");
-  */
-
-  spectrum->has_peaks_ = false;
-  return spectrum;
-
 }
 
 /**

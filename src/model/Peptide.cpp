@@ -1105,54 +1105,6 @@ bool Peptide::lessThan(
 /* Public functions--Printing / parsing */
 
 /**
- * \brief Read in a peptide from a tab-delimited file and return it.
- *
- * Parses the information for a peptide match from the search
- * file.  Allocates memory for the peptide and all of
- * its peptide_src's.  Requires a database so that the protein can be
- * set for each peptide_src.  Returns NULL if eof or if file format
- * appears incorrect.
- *
- * \returns A newly allocated peptide or NULL
- */ 
-Peptide* Peptide::parseTabDelimited(
-  MatchFileReader& file, ///< the tab delimited peptide file -in
-  Database* database,///< the database containing the peptides -in 
-  Database* decoy_database ///< database with decoy peptides
-  ) {
-  // the new peptide to be given values in file
-  Peptide* peptide = new Peptide();
-
-  //populate peptide struct.
-  string string_sequence = file.getString(SEQUENCE_COL);
-  if (!string_sequence.empty()) {
-    //In cases where the sequence is in X.seq.X format, parse out the seq part
-    if ((string_sequence.length() > 4) && 
-        (string_sequence[1] == '.') && 
-        (string_sequence[string_sequence.length()-2]=='.')) {
-      carp_once(CARP_WARNING, "parsing sequence out of %s", string_sequence.c_str());
-      string_sequence = string_sequence.substr(2, string_sequence.length()-4);
-      carp_once(CARP_WARNING, "sequence is now:%s", string_sequence.c_str());
-    }
-
-    // string length may include mod symbols and be longer than the peptide seq
-    MODIFIED_AA_T* modified_seq;
-    peptide->length_ = convert_to_mod_aa_seq(string_sequence.c_str(), &modified_seq);
-    peptide->setModifiedAASequence(modified_seq, false);
-  
-    if (!PeptideSrc::parseTabDelimited(peptide, file, database, decoy_database)) {
-      carp(CARP_ERROR, "Failed to parse peptide src.");
-      delete peptide;
-      return NULL;
-    }
-  } else {
-    carp(CARP_ERROR, "No sequence found...");
-  }
-
-  return peptide;
-}
-
-/**
  * Fills the given vectors with the names and descriptions of all
  * proteins containing this peptide.  Makes the descriptions
  * xml-friendly by swapping double for single quotes and angled braces

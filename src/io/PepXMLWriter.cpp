@@ -15,7 +15,7 @@ using namespace std;
 PepXMLWriter::PepXMLWriter():
   file_(NULL), current_index_(1), mass_precision_(Params::GetInt("mass-precision")),
   enzyme_(get_enzyme_type_parameter("enzyme")),
-  precision_(Params::GetInt("precision")), exact_pval_search_(false) {
+  precision_(Params::GetInt("precision")) {
 }
 
 PepXMLWriter::~PepXMLWriter() {
@@ -358,17 +358,13 @@ void PepXMLWriter::print_modifications_xml(
   int mod_precision = Params::GetInt("mod-precision");
   map<int, double> var_mods = find_variable_modifications(mod_seq);
   if (!var_mods.empty()){
-    fprintf(output_file, 
-            "<modification_info modified_peptide=\"%s\">\n",
-            mod_seq);
-   carp(CARP_DEBUG,
-            "<modification_info modified_peptide=\"%s\">\n",
-            mod_seq);
+    fprintf(output_file, "<modification_info modified_peptide=\"%s\">\n", mod_seq);
+   carp(CARP_DEBUG, "<modification_info modified_peptide=\"%s\">", mod_seq);
         for (map<int, double>::iterator it = var_mods.begin(); it != var_mods.end(); ++it) {
           fprintf(output_file, "<mod_aminoacid_mass position=\"%i\" mass=\"%.*f\"/>\n",
                   it->first,   //index
                   mod_precision, it->second); //mass
-          carp(CARP_DEBUG, "<mod_aminoacid_mass position=\"%i\" mass=\"%.*f\"/>\n",
+          carp(CARP_DEBUG, "<mod_aminoacid_mass position=\"%i\" mass=\"%.*f\"/>",
                it->first,   //index
                mod_precision, it->second); //mass
     }
@@ -378,15 +374,13 @@ void PepXMLWriter::print_modifications_xml(
   // static modifications
   map<int, double> static_mods = find_static_modifications(var_mods, pep_seq);
   if (!static_mods.empty()) {
-    carp(CARP_DEBUG, "<modification_info modified_peptide=\"%s\">\n",
-            pep_seq);
-    fprintf(output_file, "<modification_info modified_peptide=\"%s\">\n",
-            pep_seq);
+    carp(CARP_DEBUG, "<modification_info modified_peptide=\"%s\">", pep_seq);
+    fprintf(output_file, "<modification_info modified_peptide=\"%s\">\n", pep_seq);
     for (map<int, double>::iterator it = static_mods.begin(); it != static_mods.end(); ++it) {
       fprintf(output_file, "<mod_aminoacid_mass position=\"%i\" mass=\"%.*f\"/>\n",
               it->first,   //index
               mod_precision, it->second); //mass
-      carp(CARP_DEBUG, "<mod_aminoacid_mass position=\"%i\" mass=\"%.*f\"/>\n",
+      carp(CARP_DEBUG, "<mod_aminoacid_mass position=\"%i\" mass=\"%.*f\"/>",
            it->first,   //index
            mod_precision, it->second); //mass
     }

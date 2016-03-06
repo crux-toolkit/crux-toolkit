@@ -4,6 +4,7 @@
 class MathUtil {
  public:
   static double Round(double x, int decimals = 0);
+  static bool AlmostEqual(double x, double y, int precision);
 
  private:
   MathUtil();
