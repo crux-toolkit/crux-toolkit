@@ -394,8 +394,7 @@ void OutputFiles::writeHeaders(int num_proteins, bool isMixedTargetDecoy){
       if( isMixedTargetDecoy ){ // unless it is both
         has_decoy = true;
       }
-        delim_file_array_[file_idx]->addColumnNames(application_, 
-                                                    has_decoy);
+        delim_file_array_[file_idx]->addColumnNames(application_, has_decoy);
         delim_file_array_[file_idx]->writeHeader();
     }
 
@@ -409,7 +408,6 @@ void OutputFiles::writeHeaders(int num_proteins, bool isMixedTargetDecoy){
     }
     
     if ( xml_file_array_){
-      xml_file_array_[file_idx]->exact_pval_search_ = exact_pval_search_;
       xml_file_array_[file_idx]->writeHeader();
     }
 

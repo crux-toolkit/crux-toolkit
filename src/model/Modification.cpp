@@ -1,5 +1,6 @@
 #include "Modification.h"
 #include "io/carp.h"
+#include "util/MathUtil.h"
 #include "util/Params.h"
 #include "util/StringUtils.h"
 
@@ -8,17 +9,36 @@
 #include <cstdio>
 #include <sstream>
 
+// TODO READ  tsv | sqt |      |     | pepxml | mzid
+//      WRITE tsv | sqt | html | pin | pepxml | mzid
+
 using namespace std;
+
+ModificationDefinition::ModificationDefinition(
+  const string& aminoAcids, double deltaMass, ModPosition position,
+  bool preventsCleavage, bool preventsXLink, char symbol)
+  : deltaMass_(deltaMass), position_(position != UNKNOWN ? position : ANY),
+    symbol_(symbol), preventsCleavage_(preventsCleavage), preventsXLink_(preventsXLink) {
+  for (string::const_iterator i = aminoAcids.begin(); i != aminoAcids.end(); i++) {
+    if (*i == 'X') {
+      for (char j = 'A'; j <= 'Z'; j++) {
+        aminoAcids_.insert(j);
+      }
+      break;
+    }
+    aminoAcids_.insert(*i);
+  }
+}
+
+ModificationDefinition::~ModificationDefinition() {
+}
 
 const ModificationDefinition* ModificationDefinition::New(
   const string& aminoAcids, double deltaMass, ModPosition position,
   bool isStatic, bool preventsCleavage, bool preventsXLink) {
-  if (isStatic) {
-    return NewStaticMod(
-      aminoAcids, deltaMass, position, preventsCleavage, preventsXLink);
-  }
-  return NewVarMod(
-    aminoAcids, deltaMass, position, preventsCleavage, preventsXLink, '\0');
+  return isStatic
+    ? NewStaticMod(aminoAcids, deltaMass, position, preventsCleavage, preventsXLink)
+    : NewVarMod(aminoAcids, deltaMass, position, preventsCleavage, preventsXLink, '\0');
 }
 
 const ModificationDefinition* ModificationDefinition::NewStaticMod(
@@ -44,25 +64,6 @@ const ModificationDefinition* ModificationDefinition::NewVarMod(
     aminoAcids, deltaMass, position, preventsCleavage, preventsXLink, symbol);
   modContainer_.Add(mod);
   return mod;
-}
-
-ModificationDefinition::~ModificationDefinition() {
-}
-
-ModificationDefinition::ModificationDefinition(
-  const string& aminoAcids, double deltaMass, ModPosition position,
-  bool preventsCleavage, bool preventsXLink, char symbol)
-  : deltaMass_(deltaMass), position_(position != UNKNOWN ? position : ANY),
-    symbol_(symbol), preventsCleavage_(preventsCleavage), preventsXLink_(preventsXLink) {
-  for (string::const_iterator i = aminoAcids.begin(); i != aminoAcids.end(); i++) {
-    if (*i == 'X') {
-      for (char j = 'A'; j <= 'Z'; j++) {
-        aminoAcids_.insert(j);
-      }
-      break;
-    }
-    aminoAcids_.insert(*i);
-  }
 }
 
 string ModificationDefinition::String() const {
@@ -189,7 +190,6 @@ const ModificationDefinition* ModificationDefinition::Find(char symbol) {
 
 const ModificationDefinition* ModificationDefinition::Find(
   double deltaMass, bool isStatic, ModPosition position) {
-  double minDiff = 5*pow(10, -(Params::GetInt("mod-precision") + 1));
 
   vector<const ModificationDefinition*> staticMods = modContainer_.StaticMods();
   vector<const ModificationDefinition*>* mods = isStatic ? &staticMods : &modContainer_.varMods_;
@@ -197,7 +197,7 @@ const ModificationDefinition* ModificationDefinition::Find(
        i != mods->end();
        i++) {
     if ((position == UNKNOWN || position == (*i)->Position()) &&
-        abs((*i)->deltaMass_ - deltaMass) < minDiff) {
+        MathUtil::AlmostEqual((*i)->deltaMass_, deltaMass, Params::GetInt("mod-precision"))) {
       return *i;
     }
   }

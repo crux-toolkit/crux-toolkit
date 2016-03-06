@@ -45,21 +45,13 @@ void MatchCollection::init() {
   // set last score to -1, thus nothing has been done yet
   last_sorted_ = (SCORER_TYPE_T)-1;
   iterator_lock_ = false;
-  sp_scores_sum_ = 0;
-  sp_scores_mean_ = 0;
-  mu_ = 0;
-  l_value_ = 0;
-  top_fit_sp_ = 0;
-  base_score_sp_ = 0;
   eta_ = 0;
   beta_ = 0;
   shift_ = 0;
   correlation_ = 0;
-  num_samples_ = 0;
   xcorrs_.reserve(10 * MILLION);
 
   post_process_collection_ = false;
-  post_scored_type_set_ = false;
   top_scoring_sp_ = NULL;
   exact_pval_search_ = false;
   has_distinct_matches_ = false;
@@ -71,17 +63,9 @@ void MatchCollection::init() {
  * and peptide. 
  */
 MatchCollection::~MatchCollection() {
-
   // decrement the pointer count in each match object
   for (vector<Crux::Match*>::iterator i = match_.begin(); i != match_.end(); i++) {
     Match::freeMatch(*i);
-  }
-
-  // and free the sample matches
-  while(num_samples_ > 0){
-    --num_samples_;
-    Match::freeMatch(sample_matches_[num_samples_]);
-    sample_matches_[num_samples_] = NULL;
   }
 
   if(top_scoring_sp_){
@@ -1164,94 +1148,6 @@ void MatchCollection::printMultiSpectra(
   }
 }
 
-/*******************************************
- * match_collection post_process extension
- ******************************************/
-
-/**
- * parse all the match objects and add to match collection
- *\returns true, if successfully parse all PSMs in result_file, else false
- */
-bool MatchCollection::extendTabDelimited(
-  Database* database, ///< the database holding the peptides -in
-  MatchFileReader& result_file,   ///< the result file to parse PSMs -in
-  Database* decoy_database ///< the database holding the decoy peptides -in
-  )
-{
-  FLOAT_T ln_experiment_size = 0;
-
-  // only for post_process_collections
-  if(!post_process_collection_){
-    carp(CARP_ERROR, "Must be a post process match collection to extend.");
-    return false;
-  }
-
-  while (result_file.hasNext()) {
-
-    /*** get spectrum specific features ***/
-    zstate_.setNeutralMass(
-      result_file.getFloat(SPECTRUM_NEUTRAL_MASS_COL),
-      result_file.getInteger(CHARGE_COL));
-    if (!result_file.empty(DISTINCT_MATCHES_SPECTRUM_COL)) {
-      has_distinct_matches_ = true;
-      ln_experiment_size = log(result_file.getFloat(DISTINCT_MATCHES_SPECTRUM_COL));
-    } else if (!result_file.empty(MATCHES_SPECTRUM_COL)) {
-      ln_experiment_size = log(result_file.getFloat(MATCHES_SPECTRUM_COL));
-    } else {
-      ln_experiment_size = 0;
-    }
-
-    //TODO: Parse all boolean indicators for scores
-    scored_type_[DELTA_CN] = !result_file.empty(DELTA_CN_COL);
-    scored_type_[DELTA_LCN] = !result_file.empty(DELTA_LCN_COL);
-    scored_type_[SP] = !result_file.empty(SP_SCORE_COL);
-    scored_type_[XCORR] = !result_file.empty(XCORR_SCORE_COL);
-    scored_type_[TIDE_SEARCH_EXACT_PVAL] = !result_file.empty(EXACT_PVALUE_COL);
-    scored_type_[TIDE_SEARCH_REFACTORED_XCORR] = !result_file.empty(REFACTORED_SCORE_COL);
-    scored_type_[EVALUE] = !result_file.empty(EVALUE_COL);
-    scored_type_[DECOY_XCORR_QVALUE] = !result_file.empty(DECOY_XCORR_QVALUE_COL);
-
-/* TODO
-    match_collection -> 
-      scored_type[LOGP_WEIBULL_XCORR] = 
-      result_file.getString("logp weibull xcorr") != "";
-*/
-
-    scored_type_[LOGP_BONF_WEIBULL_XCORR] = !result_file.empty(PVALUE_COL);
-    scored_type_[PERCOLATOR_QVALUE] = !result_file.empty(PERCOLATOR_QVALUE_COL);
-    scored_type_[PERCOLATOR_SCORE] = !result_file.empty(PERCOLATOR_SCORE_COL);
-    scored_type_[LOGP_QVALUE_WEIBULL_XCORR] = !result_file.empty(WEIBULL_QVALUE_COL);
-    scored_type_[QRANKER_SCORE] = !result_file.empty(QRANKER_SCORE_COL);
-    scored_type_[QRANKER_QVALUE] = !result_file.empty(QRANKER_QVALUE_COL);
-    scored_type_[BARISTA_SCORE] = !result_file.empty(BARISTA_SCORE_COL);
-    scored_type_[BARISTA_QVALUE] = !result_file.empty(BARISTA_QVALUE_COL);
-
-    scored_type_[BY_IONS_MATCHED] = !result_file.empty(BY_IONS_MATCHED_COL);
-    scored_type_[BY_IONS_TOTAL] = !result_file.empty(BY_IONS_TOTAL_COL);
-
-    post_scored_type_set_ = true;
-
-    // parse match object
-    Match* match = Match::parseTabDelimited(result_file, database, decoy_database);
-    if (match == NULL) {
-      carp(CARP_ERROR, "Failed to parse tab-delimited PSM match");
-      return false;
-    }
-
-    //set all spectrum specific features to parsed match
-    match->setZState(zstate_);
-    match->setLnExperimentSize(ln_experiment_size);    
-    //add match to match collection.
-    addMatchToPostMatchCollection(match);
-    //increment pointer.
-    result_file.next();
-  }
-
-  return true;
-}
-
-
-
 /**
  * \brief Adds the match to match_collection by copying the pointer.
  * 
@@ -1410,7 +1306,6 @@ bool MatchCollection::isDecoy() {
 bool MatchCollection::setZState(
   SpectrumZState& zstate ///< new zstate
   ) {
-
   if (getCharge() == 0) {
     zstate_ = zstate;
     return true;

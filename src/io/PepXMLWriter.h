@@ -15,8 +15,6 @@ class PepXMLWriter {
   PepXMLWriter();
   ~PepXMLWriter();
 
-  bool exact_pval_search_;
-
   /**
    * Open a file of the given name.  Replace an existing file if
    * overwrite is true, else exit if an existing file is found.

@@ -46,7 +46,6 @@ using namespace std;
 static const int _PSM_SAMPLE_SIZE = 500;
 ///< max number of peptides a single match collection can hold
 
-
 class MatchCollection {
  friend class MatchIterator;
  protected:
@@ -64,36 +63,17 @@ class MatchCollection {
 
   bool has_distinct_matches_; ///< does the match collection have distinct matches?
 
-  // values used for various scoring functions.
-  // TODO this should be moved to match
-  FLOAT_T sp_scores_sum_; ///< for getting mean, backward compatible
-  FLOAT_T sp_scores_mean_;  ///< the mean value of the scored peptides sp score
-  FLOAT_T mu_;// obsolete 
-  ///< EVD parameter Xcorr(characteristic value of extreme value distribution)
-  FLOAT_T l_value_; // obsolete
-  ///< EVD parameter Xcorr(decay constant of extreme value distribution)
-  int top_fit_sp_; // obsolete
-  ///< The top ranked sp scored peptides to use as EXP_SP parameter estimation
-  FLOAT_T base_score_sp_; // obsolete
- ///< The lowest sp score within top_fit_sp, used as the base to rescale sp
   // Values for fitting the Weibull distribution
   FLOAT_T eta_;  ///< The eta parameter for the Weibull distribution.
   FLOAT_T beta_; ///< The beta parameter for the Weibull distribution.
   FLOAT_T shift_; ///< The location parameter for the Weibull distribution.
   FLOAT_T correlation_; ///< The correlation parameter for the Weibull distribution.
-  // replace this ...
-  Crux::Match* sample_matches_[_PSM_SAMPLE_SIZE];
-  int num_samples_;  // the number of items in the above array
-  // ...with this
   vector<FLOAT_T> xcorrs_; ///< xcorrs to be used for weibull
 
   // The following features (post_*) are only valid when
   // post_process_collection boolean is true 
   bool post_process_collection_; 
   ///< Is this a post process match_collection?
-  bool post_scored_type_set_; 
-  ///< has the scored type been confirmed for the match collection,
-  // set after the first match collection is extended
   Crux::Match* top_scoring_sp_; ///< the match with Sp rank == 1
 
   /**
@@ -162,12 +142,6 @@ class MatchCollection {
   );
 
   void preparePostProcess();
-
-  bool extendTabDelimited(
-    Database* database, ///< the database holding the peptides -in
-    MatchFileReader& result_file,   ///< the result file to parse PSMs -in
-    Database* decoy_database = NULL ///< optional database with decoy peptides
-    );
 
   /**
    *\returns true, if there is a  match_iterators instantiated by match collection 

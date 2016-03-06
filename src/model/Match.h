@@ -77,7 +77,6 @@ class Match {
   bool null_peptide_; ///< Is the match a null (decoy) peptide match?
   char* peptide_sequence_; ///< peptide sequence is that of peptide or shuffled
   MODIFIED_AA_T* mod_sequence_; ///< seq of peptide or shuffled if null peptide
-  DIGEST_T digest_;
   SpectrumZState zstate_;
   // post_process match object features
   // only valid when post_process_match is true
@@ -85,7 +84,6 @@ class Match {
   FLOAT_T ln_experiment_size_; 
      ///< natural log of total number of candidate peptides evaluated
   int num_target_matches_; ///< total target candidates for this spectrum
-  int num_decoy_matches_;///< decoy candidates for this spectrum if decoy match
   bool best_per_peptide_; ///< Is this the best scoring PSM for this peptide?
   int file_idx_; ///< index of where this match came from 
   string database_index_name_;
@@ -118,7 +116,7 @@ class Match {
    */
   Match(Crux::Peptide* peptide, ///< the peptide for this match
         Crux::Spectrum* spectrum, ///< the spectrum for this match
-        SpectrumZState& zstate, ///< the charge/mass of the spectrum
+        const SpectrumZState& zstate, ///< the charge/mass of the spectrum
         bool is_decoy);///< is the peptide a decoy or not
 
   /**
@@ -187,20 +185,6 @@ class Match {
     Spectrum* spectrum,
     int num_target_matches,  ///< target matches for this spectrum -in
     int num_decoy_matches ///< decoy matches (if any) for this spectrum -in
-    );
-
-  /*******************************************
-   * match post_process extension
-   ******************************************/
-
-  /**
-   *
-   *\returns a match object that is parsed from the tab-delimited result file
-   */
-  static Match* parseTabDelimited(
-    MatchFileReader& result_file,  ///< the result file to parse PSMs -in
-    Database* database, ///< the database to which the peptides are created -in
-    Database* decoy_database = NULL ///< optional database with decoy peptides
     );
 
   /****************************
@@ -402,12 +386,6 @@ class Match {
    * sets the total number of target matches searched for this spectrum.
    */
   void setTargetExperimentSize(int num_matches);
-
-  /**
-   * \returns The total number of decoy matches searched for this
-   * spectrum if this is a match to a decoy spectrum.
-   */
-  int getDecoyExperimentSize();
 
   /**
    *Increments the pointer count to the match object

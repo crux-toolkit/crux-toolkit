@@ -406,23 +406,6 @@ class Peptide {
     );
 
   /**
-   * \brief Read in a peptide from a tab-delimited file and return it.
-   *
-   * Parses the information for a peptide match from the search
-   * file.  Allocates memory for the peptide and all of
-   * its peptide_src's.  Requires a database so that the protein can be
-   * set for each peptide_src.  Returns NULL if eof or if file format
-   * appears incorrect.
-   *
-   * \returns A newly allocated peptide or NULL
-   */
-  static Peptide* parseTabDelimited(
-    MatchFileReader& file, ///< the tab delimited peptide file -in
-    Database* database,///< the database containing the peptides -in
-    Database* decoy_database = NULL ///< optional database with decoy peptides
-    );
-
-  /**
    * \brief Builds a comma delimited string listing the 
    * protein id(peptide start index) for the sources of 
    * a peptide

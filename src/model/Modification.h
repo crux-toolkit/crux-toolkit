@@ -17,6 +17,11 @@ enum ModPosition {
 
 class ModificationDefinition {
 public:
+  ModificationDefinition(
+    const std::string& aminoAcids, double deltaMass, ModPosition position,
+    bool preventsCleavage, bool preventsXLink, char symbol);
+  virtual ~ModificationDefinition();
+
   static const ModificationDefinition* New(
     const std::string& aminoAcids, double deltaMass, ModPosition position,
     bool isStatic, bool preventsCleavage = false, bool preventsXLink = false);
@@ -26,8 +31,6 @@ public:
   static const ModificationDefinition* NewVarMod(
     const std::string& aminoAcids, double deltaMass, ModPosition position,
     bool preventsCleavage = false, bool preventsXLink = false, char symbol = '\0');
-
-  virtual ~ModificationDefinition();
 
   std::string String() const;
   static void ListAll();
@@ -52,10 +55,6 @@ public:
   static const ModificationDefinition* Find(double deltaMass,
     bool isStatic, ModPosition position = UNKNOWN);
 protected:
-  ModificationDefinition(const std::string& aminoAcids, double deltaMass,
-                         ModPosition position, bool preventsCleavage, bool preventsXLink,
-                         char symbol);
-
   std::set<char> aminoAcids_;
   double deltaMass_;
   ModPosition position_;
