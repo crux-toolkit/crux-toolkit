@@ -618,8 +618,8 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   int charge,
   int maxPrecurMassBin,
   double precursorMass,
-  int nAA, //index 1?
-  const int* aaMass1,
+  int nAA, //TODO different than one used in CreateEvidenceVector
+  const vector<double> aaMass, //TODO different aaMass then one used in CreateEvidenceVector
   vector<vector<double> >& residueEvidenceMatrix
   ) {
 
@@ -690,12 +690,6 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
     }
     ionMasses.push_back(ionMass);
   }
-
-
-  //Get mass of amino acids in double format
-  vector<double> aaMass;
-  getAaMass(aaMass);
-  nAA = aaMass.size();
 
   //Determine which bin each amino acid mass is in
   vector<int> aaMassBin;
@@ -905,7 +899,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
     }
   }
 
-
+/*
   for(int i =0;i<maxPrecurMassBin;i++) {
     for(int curAaMass = 0; curAaMass<nAA;curAaMass++){
       if (residueEvidenceMatrix[curAaMass][i] != 0) {
@@ -915,23 +909,13 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
       }
     }
   } 
-
+*/
   std::cout <<"Created Evidence Residue Matrix" << std::endl;
   std::cout << "nAA: " << nAA << std::endl;
   for(int i=0; i<nAA;i++){
     std::cout << i+1 << " " << aaMass[i] << std::endl;
   }
+
   std::cout << "num bin: " << maxPrecurMassBin <<std::endl;
   std::cout << "ionMasses.size(): " << ionMasses.size() <<std::endl;
-}
-
-//Added by Andy Lin - March 2016
-//Gets masses of all amino acids (not integerized)
-//TODO Currently not taking into account modifications
-void ObservedPeakSet::getAaMass(vector<double>& aaMassVector) {
-  //Done in this order to match Matlab code by Jeff Howbert (ie in mass order)
-  string aa = "GASPVTILNDKQEMHFRCYW";
-  for(int i=0 ; i<aa.length() ; i++) {
-      aaMassVector.push_back(MassConstants::mono_table[aa[i]]);
-    }
 }
