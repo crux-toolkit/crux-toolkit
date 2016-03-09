@@ -24,6 +24,16 @@ private:
     vector<int>& pepMassIntUnique,
     ActivePeptideQueue* active_peptide_queue
   );
+ 
+  //Added by Andy Lin in March 2016
+  //function gets the max evidence of each mass bin(column)
+  //up to mass bin of candidate precursor
+  //Returns max value in curResidueEvidenceMatrix
+  int getMaxColEvidence(
+    const vector<vector<double> >& curResidueEvidenceMatrix,
+    vector<int>& maxEvidence,
+    int pepMassInt
+  );
 protected:
   /**
   brief This variable is used with Cascade Search.
@@ -70,7 +80,8 @@ protected:
     double* aaFreqN,
     double* aaFreqI,
     double* aaFreqC,
-    int* aaMass
+    int* aaMass,
+    const pb::ModTable& mod_table
   );
 
   void collectScoresCompiled(

@@ -321,7 +321,7 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
            Params::GetInt("min-peaks"), charge_to_search,
            Params::GetInt("top-match"), spectra.FindHighestMZ(),
            output_files, target_file, decoy_file, compute_sp,
-           nAA, aaFreqN, aaFreqI, aaFreqC, aaMass);
+           nAA, aaFreqN, aaFreqI, aaFreqC, aaMass, pepHeader.mods());
 
     // Delete temporary spectrumrecords file
     if (!f->Keep) {
@@ -379,7 +379,8 @@ void TideSearchApplication::search(
   double* aaFreqN,
   double* aaFreqI,
   double* aaFreqC,
-  int* aaMass
+  int* aaMass,
+  const pb::ModTable& mod_table
 ) {
   int elution_window = Params::GetInt("elution-window-size");
   bool peptide_centric = Params::GetBool("peptide-centric-search");
@@ -434,6 +435,9 @@ void TideSearchApplication::search(
        ++sc) {
     Spectrum* spectrum = sc->spectrum;   
     double precursor_mz = spectrum->PrecursorMZ();
+    //Added by Andy Lin (needed for residue evidence)
+    double precursorMass = sc->neutral_mass;
+    //End added by Andy Lin
     int charge = sc->charge;
     int scan_num = spectrum->SpectrumNumber();
     if (spectrum_flag_ != NULL) {
@@ -513,11 +517,11 @@ void TideSearchApplication::search(
                          locations, compute_sp, true);
           }
         }  //end peptide_centric == true
-      } else { //execute exact-pval-search
-       
+      } else { //execute exact-pval-search for case: XCORR
+
         const int minDeltaMass = aaMass[0];
         const int maxDeltaMass = aaMass[nAA - 1];
-        int maxPrecurMass = floor(MaxBin::Global().CacheBinEnd() + 50.0);
+        int maxPrecurMass = floor(MaxBin::Global().CacheBinEnd() + 50.0); //TODO is this last mass bin spectrum is in?
         int nCandPeptide = active_peptide_queue->SetActiveRangeBIons(min_mass, max_mass, min_range, max_range);
 
         total_candidate_peptides += nCandPeptide;
@@ -669,26 +673,49 @@ void TideSearchApplication::search(
           }
         } // end peptide_centric == true
       }
-
-      ++sc_index;
-      if (print_interval > 0 && sc_index % print_interval == 0) {
-          carp(CARP_INFO, "%d spectrum-charge combinations searched, %.0f%% complete",
-               sc_index, sc_index / sc_total * 100);
-      }
       break;
     case RESIDUE_EVIDENCE_MATRIX: //Following case written by Andy Lin in Feb 2016
       if (!exact_pval_search_) {
         std::cout << std::endl << "So far so good" << std::endl;
         carp(CARP_FATAL,"This is not implemented yet.");
-      } else{
-
+      } else{ //Case RESIDUE_EVIDENCE_MATRIX
+    
+        //TODO section below can be removed when options have been
+        //implemented for residue evidence
+        bool flanking_peak = Params::GetBool("use-flanking-peaks");
+        bool neutral_loss_peak = Params::GetBool("use-neutral-loss-peaks");
+        if (neutral_loss_peak == true) {
+          carp(CARP_FATAL,"--score-function residue-evidence with --use-neutral-loss-peaks true not implemented yet");
+        }
+        if (flanking_peak == true) {
+          carp(CARP_FATAL,"--score-function residue-evidence with --use-flanking-peaks true not implemented yet");
+        }
+        //END TODO
+        
         const int minDeltaMass = aaMass[0];
         const int maxdeltaMass = aaMass[nAA - 1];
-        int maxPrecurMass = floor(MaxBin::Global().CacheBinEnd() + 50.0);
+        int maxPrecurMassBin = floor(MaxBin::Global().CacheBinEnd() + 50.0);
         int nCandPeptide = active_peptide_queue->SetActiveRangeBIons(min_mass, max_mass, min_range, max_range);
 
         total_candidate_peptides += nCandPeptide;
         TideMatchSet::Arr match_arr(nCandPeptide); // scored peptides will go here.
+
+        //Gets masses of all amino acids in double form
+        //argument aaMasses are integer masses. Therefore need to create for this one
+        vector<double> aaMassDouble;
+        string aa = "GASPVTILNDKQEMHFRCYW";//This order to match Matlab code by Jeff Howbert
+        for(int i=0 ; i<aa.length() ; i++) {
+          aaMassDouble.push_back(MassConstants::mono_table[aa[i]]);
+        }
+
+        //Get masses of all dynamically modified amino acids
+        for(int i=0 ; i<mod_table.variable_mod_size() ; i++) {
+          double delta = mod_table.variable_mod(i).delta();
+          string curModAA = mod_table.variable_mod(i).amino_acids();
+          int pos = aa.find(curModAA);
+          double newMass = MassConstants::mono_table[aa[pos]] + delta;
+          aaMassDouble.push_back(newMass);
+        }
 
         //For one spectrum calculates:
         // 1) residue evidence matrix
@@ -704,33 +731,75 @@ void TideSearchApplication::search(
         
         int pe;
         int ma;
-        int pepMaInt;
         int* pepMassInt = new int[nCandPeptide];
         vector<int> pepMassIntUnique;
         pepMassIntUnique.reserve(nCandPeptide);
-        pe = 0;
 
-        //Following loop determine which bin peptide candidate is in 
-        //Or in other words: which bin the precursor mass is in
-        for (iter_ = active_peptide_queue->iter_;
-             iter_ != active_peptide_queue->end_;
-             ++iter_) {
-          double pepMass = (*iter_)->Mass();
-          pepMaInt = MassConstants::mass2bin(pepMass);
-          pepMassInt[pe] = pepMaInt;
-          pepMassIntUnique.push_back(pepMaInt);
-          pe++;
+        //For each candidate peptide, determine which discretized mass bin it is in
+        getMassBin(pepMassInt,pepMassIntUnique,active_peptide_queue);
+ 
+        //Sort vector, take unique of vector, get rid of extra space in vector
+        std::sort(pepMassIntUnique.begin(), pepMassIntUnique.end());
+        vector<int>::iterator last = std::unique(pepMassIntUnique.begin(),
+                                                 pepMassIntUnique.end());
+        pepMassIntUnique.erase(last, pepMassIntUnique.end());
+        int nPepMassIntUniq = (int)pepMassIntUnique.size();
+
+        int* scoreOffsetObs = new int[nPepMassIntUniq];
+
+        //Creates a 3D vector representing 3D matrix
+        //Below are the 3 axes
+        //nPepMassIntUniq: number of mass bins candidate are in
+        //nAA: number of amino acids
+        //maxPrecurMassBin: max number of mass bins
+        //initalize all values to 0
+        vector<vector<vector<double> > > residueEvidenceMatrix(nPepMassIntUniq, 
+               vector<vector<double> >(nAA, vector<double>(maxPrecurMassBin,0)));
+
+//        std::cout << "Spectrum index: " << sc->spectrum_index << std::endl;
+//        std::cout << "precursor mass: " << sc->neutral_mass <<std::endl;
+//        std::cout << "charge: " << sc->charge << std::endl;
+//        std::cout << "nCandPeptide: " << nCandPeptide << endl;
+//        std::cout << "nPepMassIntUniq: " << nPepMassIntUniq << std::endl << std::endl;
+/*          std::cout << "nAA: " << nAA <<std::endl;
+        for(int i=0;i<nAA;i++) {
+          std::cout << i << " " << aaMass[i] <<std::endl;
         }
-        
-//        observed.CreateResidueEvidenceMatrix(*spectrum,bin_width_, bin_offset_,charge,
-//                                           pepMassMonoMean, maxPrecurMass);
+*/
+        for (pe=0 ; pe<nPepMassIntUniq ; pe++) {
+          int curPepMassInt = pepMassIntUnique[pe];
 
+          //TODO aaMassDouble.size() replaced nAA
+          //TODO aaMassDouble replaced aaMass
+          //TODO This is aaMass is int while aaMassDouble is double
+          //TODO Also becausebecause nAA does not match expected nAA (eg 37 v 21 )
+          observed.CreateResidueEvidenceMatrix(*spectrum,charge,
+                                               maxPrecurMassBin,precursorMass,
+                                               aaMassDouble.size(),aaMassDouble,
+                                               residueEvidenceMatrix[pe]);
 
-        std::cout << std::endl << "So far so good" << std::endl;
-        carp(CARP_FATAL,"This is not implemented yet.");
+          //In Matlab code. This is converted to an int matrix.
+          //I believe do not need to do this here because residueEvidenceMatrix
+          //has been rounded
+          vector<vector<double> > curResidueEvidenceMatrix = residueEvidenceMatrix[pe];
+          vector<int> maxColEvidence(curPepMassInt,0);
+
+          //maxColEvidence is edited by reference
+          int maxEvidence = getMaxColEvidence(curResidueEvidenceMatrix,maxColEvidence,curPepMassInt);
+          int maxNResidue = floor((double)curPepMassInt / 57.0);
+          //sor maxColEvidence in descending order
+          std::sort(maxColEvidence.begin(),maxColEvidence.end(),greater<int>());
+          int maxScore=0;
+          for(int i=0 ; i<maxNResidue ; i++) { //maxColEvidence has been sorted
+            maxScore += maxColEvidence[i];
+          }
+          
+        }
+
+        //carp(CARP_FATAL,"This is not implemented yet.");
       }
 
-      break;
+      break; //End Case RESIDUE_EVIDENCE_MATRIX
     case BOTH:
       if (!exact_pval_search_){
         carp(CARP_FATAL,"Using the residueEvidenceMatrix score function with XCorr requires the exact-p-value option to be true.");
@@ -740,8 +809,21 @@ void TideSearchApplication::search(
     case INVALID_SCORE_FUNCTION:
       carp(CARP_FATAL,"Score function is not supported.");
       break;
+
+    } //End bracket for switch statement
+
+    ++sc_index;
+    if (print_interval > 0 && sc_index % print_interval == 0) {
+      carp(CARP_INFO, "%d spectrum-charge combinations searched, %.0f%% complete",
+           sc_index, sc_index / sc_total * 100);
+
+    //WHEN DONE REMOVE -- Andy Lin
+    if (sc_index == 12){
+      carp(CARP_FATAL,"This is not implemented yet.");
     }
-  }
+
+    }
+  } //End bracket for for spectrum loop 
     
   carp(CARP_INFO, "Time per spectrum-charge combination: %lf s.", wall_clock() / (1e6*sc_total));
   carp(CARP_INFO, "Average number of candidates per spectrum-charge combination: %lf ",
@@ -1231,6 +1313,37 @@ void TideSearchApplication::getMassBin(
     pe++;
   }
 }
+
+//Added by Andy Lin in March 2016
+//Gets the max evidence of each mass bin (column) up to mass bin of candidate precursor
+//TODO for some reason in matlab code, this is done on int version even though
+//curResidueEvidenceMatrix has been rounded already
+//Assumption that all values in curResidueEvidenceMatrix have been rounded
+//Returns max value in curResidueEvidenceMatrix
+int TideSearchApplication::getMaxColEvidence(
+  const vector<vector<double> >& curResidueEvidenceMatrix,
+  vector<int>& maxColEvidence,
+  int pepMassInt
+) {
+
+  assert(maxColEvidence.size() == curResidueEvidenceMatrix[0].size());
+
+  int maxEvidence = -1;
+  
+  for(int curAA=0 ; curAA<curResidueEvidenceMatrix.size() ; curAA++) {
+    for(int curMassBin=0 ; curMassBin<pepMassInt ; curMassBin++) {
+      if(curResidueEvidenceMatrix[curAA][curMassBin] > maxColEvidence[curMassBin]) {
+        maxColEvidence[curMassBin] = curResidueEvidenceMatrix[curAA][curMassBin];
+      }
+      if (curResidueEvidenceMatrix[curAA][curMassBin] > maxEvidence) {
+        maxEvidence = curResidueEvidenceMatrix[curAA][curMassBin];
+      }
+    }
+  }
+  assert(maxEvidence >= 0);
+  return maxEvidence;
+}
+
 
 /*
  * Local Variables:
