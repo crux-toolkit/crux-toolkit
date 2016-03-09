@@ -34,8 +34,6 @@ double Barista :: check_gradients_hinge_one_net(int protind, int label){
     sm+= max_psm_scores[i];
   sm /= n;
 
-  //if(sm < 1)
-  // {
   net.clear_gradients();
   double *gc = new double[1];
   gc[0] = -label/n;
@@ -81,7 +79,6 @@ double Barista :: check_gradients_hinge_one_net(int protind, int label){
       sm1 /= n;
       
       diff += (1-sm1*label);
-      //cout << dw[k] << " " << diff/h << " " << dw[k]-diff/h << endl;
       err += dw[k]-diff/h;
       w[k]-=h;
       diff -= (1-sm1*label);
@@ -122,7 +119,6 @@ double Barista :: check_gradients_hinge_one_net(int protind, int label){
       sm1 /= n;
 
       diff += 1-sm1*label;
-      //cout << dbias[k] << " " << diff/h << " " << dbias[k]-diff/h << endl;
       err += dbias[k]-diff/h;
       bias[k]-=h;
       diff -= 1-sm1*label;
@@ -162,7 +158,6 @@ double Barista :: check_gradients_hinge_one_net(int protind, int label){
       sm1 /= n;
 
       diff += 1-sm1*label;
-      //cout << dw[k] << " " << diff/h << " " << dw[k]-diff/h << endl;
       err += dw[k]-diff/h;
       w[k]-=h;
       diff -= 1-sm1*label;
@@ -202,12 +197,10 @@ double Barista :: check_gradients_hinge_one_net(int protind, int label){
       sm1 /= n;
 
       diff += 1-sm1*label;
-      //cout << dbias[k] << " " << diff/h << " " << dbias[k]-diff/h << endl;
       err += dbias[k]-diff/h;
       bias[k]-=h;
       diff -= 1-sm1*label;
     }
-  //}
   return err;
 }
 
@@ -227,7 +220,6 @@ double Barista :: check_gradients_hinge_clones(int protind, int label)
       w[k] += h;
       double sm1 = get_protein_score(protind);
       diff += (1-sm1*label);
-      //cout << dw[k] << " " << diff/h << " " << dw[k]-diff/h << endl;
       err += dw[k]-diff/h;
       w[k]-=h;
       diff -= (1-sm1*label);
@@ -240,7 +232,6 @@ double Barista :: check_gradients_hinge_clones(int protind, int label)
       bias[k] += h;
       double sm1 = get_protein_score(protind);
       diff += 1-sm1*label;
-      //cout << dbias[k] << " " << diff/h << " " << dbias[k]-diff/h << endl;
       err += dbias[k]-diff/h;
       bias[k]-=h;
       diff -= 1-sm1*label;
@@ -253,7 +244,6 @@ double Barista :: check_gradients_hinge_clones(int protind, int label)
       w[k] += h;
       double sm1 = get_protein_score(protind);
       diff += 1-sm1*label;
-      //cout << dw[k] << " " << diff/h << " " << dw[k]-diff/h << endl;
       err += dw[k]-diff/h;
       w[k]-=h;
       diff -= 1-sm1*label;
@@ -266,7 +256,6 @@ double Barista :: check_gradients_hinge_clones(int protind, int label)
       bias[k] += h;
       double sm1 = get_protein_score(protind);
       diff += 1-sm1*label;
-      //cout << dbias[k] << " " << diff/h << " " << dbias[k]-diff/h << endl;
       err += dbias[k]-diff/h;
       bias[k]-=h;
       diff -= 1-sm1*label;
@@ -455,7 +444,6 @@ void Barista :: write_results_prot(string &out_dir, int fdr)
 {
   ostringstream fn;
   fn << out_dir <<"/barista.target.proteins.txt";
-  //cout << "writing results to " << fn.str() << endl;
   carp(CARP_INFO, "write_results to %s", fn.str().c_str());
   ofstream f_res(fn.str().c_str());
 
@@ -488,7 +476,7 @@ void Barista :: write_results_prot(string &out_dir, int fdr)
 	      if(psmind > -1)
 		f_res << "-" << d.psmind2scan(psmind) << "." << d.psmind2charge(psmind);
 	      else
-		cout << "warning: did not assign peptide max psmind\n";
+		carp(CARP_DEBUG, "warning: did not assign peptide a max psm index");
 	      f_res << " ";
 	    }
 	  f_res << endl << endl;
@@ -650,7 +638,6 @@ void Barista :: write_results_prot_xml(ofstream &os)
 	  os << "  <protein_ids>" << endl;
 	  protein_str = d.ind2prot(protind);
 	  get_tab_delim_proteins(protein_str, tab_delim_proteins);
-	  //os << "   <protein_id>" << d.ind2prot(protind) << "</protein_id>" <<endl;
 	  for(unsigned int k = 0; k < tab_delim_proteins.size(); k++)
 	    os << "   <protein_id>" << tab_delim_proteins[k] << "</protein_id>" <<endl;
 	  
@@ -709,7 +696,6 @@ void Barista :: write_subset_protein_special_case_xml(ofstream &os, int i)
   os << "  <protein_ids>" << endl;
   protein_str = d.ind2prot(protind);
   get_tab_delim_proteins(protein_str, tab_delim_proteins);
-  //os << "   <protein_id>" << d.ind2prot(protind) << "</protein_id>" <<endl;
   for(unsigned int k = 0; k < tab_delim_proteins.size(); k++)
     os << "   <protein_id>" << tab_delim_proteins[k] << "</protein_id>" <<endl;
 
@@ -807,7 +793,6 @@ void Barista :: write_results_subset_prot_xml(ofstream &os)
 	  os << "  <protein_ids>" << endl;
 	  protein_str = d.ind2prot(protind);
 	  get_tab_delim_proteins(protein_str, tab_delim_proteins);
-	  //os << "   <protein_id>" << d.ind2prot(protind) << "</protein_id>" <<endl;
 	  for(unsigned int k = 0; k < tab_delim_proteins.size(); k++)
 	    os << "   <protein_id>" << tab_delim_proteins[k] << "</protein_id>" <<endl;
 	  
@@ -870,8 +855,8 @@ void Barista :: write_results_peptides_xml(ofstream &os)
 	  if(psmind > -1)
 	    os << "  <main_psm_id>"<< psmind << "</main_psm_id>" << endl;
 	  else
-	    cout << "warning: did not assign peptide" << pep  << " ind " << pepind << " max psmind\n";
-	    	  
+	    carp(CARP_DEBUG,"warning: did not assign peptide %s and index %d a max"
+		 "psm index", pep.c_str(), psmind);
 	  //print out all the psms in which this peptide is present
 	  int num_psm = d.pepind2num_psm(pepind);
 	  int *psminds = d.pepind2psminds(pepind);
@@ -889,8 +874,8 @@ void Barista :: write_results_peptides_xml(ofstream &os)
 	      protein_str = d.ind2prot(protinds[j]);
 	      get_tab_delim_proteins(protein_str, tab_delim_proteins);
 	      for(unsigned int k = 0; k < tab_delim_proteins.size(); k++)
-		os << "   <protein_id>" << tab_delim_proteins[k] << "</protein_id>" <<endl;
-	      //os << "   <protein_id>" << d.ind2prot(protinds[j]) << "</protein_id>" << endl;
+		os << "   <protein_id>" << tab_delim_proteins[k] << "</protein_id>"
+		   <<endl;
 	    }
 	  os << "  </protein_ids>" << endl;
 	  os << " </peptide>" << endl;  
@@ -1095,9 +1080,7 @@ void Barista :: write_results_prot_special_case_tab(ofstream &os, int i)
     os << pep <<  "-" << d.psmind2scan(psmind) << "." << d.psmind2charge(psmind);
   else
     {
-#ifndef CRUX
-      cout << "warning: did not assign peptide max psmind\n";
-#endif
+      carp(CARP_DEBUG,"warning: did not assign peptide max psm index");
     }
   for( int j = 1; j < num_pep; j++)
     {
@@ -1110,9 +1093,8 @@ void Barista :: write_results_prot_special_case_tab(ofstream &os, int i)
 	os << "," << pep <<  "-" << d.psmind2scan(psmind) << "." << d.psmind2charge(psmind);
       else
 	{
-#ifndef CRUX
-	  cout << "warning: did not assign peptide" << pep  << " ind " << pepind << " max psmind\n";
-#endif
+	carp(CARP_DEBUG,"warning: did not assign peptide %s and index %d a max"
+	     "psm index", pep.c_str(), psmind);
 	}
     }
   os << endl;
@@ -1169,9 +1151,7 @@ void Barista :: write_results_prot_tab(ofstream &os)
 	    os << pep <<  "-" << d.psmind2scan(psmind) << "." << d.psmind2charge(psmind);
 	  else
 	    {
-#ifndef CRUX
-	      cout << "warning: did not assign peptide max psmind\n";
-#endif
+	      carp(CARP_DEBUG,"warning: did not assign peptide a max psm index");
 	    }
 	  for( int j = 1; j < num_pep; j++)
 	    {
@@ -1184,9 +1164,8 @@ void Barista :: write_results_prot_tab(ofstream &os)
 		os << "," << pep <<  "-" << d.psmind2scan(psmind) << "." << d.psmind2charge(psmind);
 	      else
 		{
-#ifndef CRUX
-		  cout << "warning: did not assign peptide" << pep  << " ind " << pepind << " max psmind\n";
-#endif
+		  carp(CARP_DEBUG, "warning: did not assign peptide %s and index %d a"
+		       "max psm index", pep.c_str(), psmind);
 		}
 	    }
 	  os << endl;
@@ -1276,9 +1255,7 @@ void Barista :: write_subset_protein_special_case_tab(ofstream &os, int i)
     os << pep <<  "-" << d.psmind2scan(psmind) << "." << d.psmind2charge(psmind);
   else
     {
-#ifndef CRUX
-      cout << "warning: did not assign peptide max psmind\n";
-#endif
+      carp(CARP_DEBUG, "warning: did not assign peptide a  max psm index");
     }
   for( int j = 1; j < num_pep; j++)
     {
@@ -1291,9 +1268,8 @@ void Barista :: write_subset_protein_special_case_tab(ofstream &os, int i)
 	os << "," << pep <<  "-" << d.psmind2scan(psmind) << "." << d.psmind2charge(psmind);
       else
 	{
-#ifndef CRUX
-	  cout << "warning: did not assign peptide" << pep  << " ind " << pepind << " max psmind\n";
-#endif
+	  carp(CARP_DEBUG,"warning: did not assign peptide %s and index %d a max"
+	       "psm index", pep.c_str(), psmind);
 	}
     }
   os << endl;
@@ -1362,9 +1338,7 @@ void Barista :: write_results_subset_prot_tab(ofstream &os)
 	    os << pep <<  "-" << d.psmind2scan(psmind) << "." << d.psmind2charge(psmind);
 	  else
 	    {
-#ifndef CRUX
-	      cout << "warning: did not assign peptide max psmind\n";
-#endif
+		carp(CARP_DEBUG, "warning: did not assign peptide a max psm index");
 	    }
 	  for( int j = 1; j < num_pep; j++)
 	    {
@@ -1377,9 +1351,8 @@ void Barista :: write_results_subset_prot_tab(ofstream &os)
 		os << "," << pep <<  "-" << d.psmind2scan(psmind) << "." << d.psmind2charge(psmind);
 	      else
 		{
-#ifndef CRUX
-		  cout << "warning: did not assign peptide" << pep  << " ind " << pepind << " max psmind\n";
-#endif
+		  carp(CARP_DEBUG, "warning: did not assign peptide %s and index %d a"
+		       " max psm index", pep.c_str(), psmind);
 		}
 	    }
 	  
@@ -1770,16 +1743,6 @@ int Barista :: computeNSAF()
   else
     return 0;
 
-  /*
-  double check = 0.0;
-  for(int i = 0; i < trainset.size(); i++)
-    {
-      if(trainset[i]. label == 1)
-	check += trainset[i].nsaf;
-    }
-  cout << check << endl;
-  */
-
   psmind_to_ind.clear();
   return 1;
 }
@@ -1837,15 +1800,6 @@ int Barista :: computePepNSAF()
   else
     return 0;
 
-  /*
-  double check = 0.0;
-  for(int i = 0; i < peptrainset.size(); i++)
-    {
-      if(peptrainset[i]. label == 1)
-	check += peptrainset[i].nsaf;
-    }
-  cout << check << endl;
-  */
   psmind_to_ind.clear();
   return 1;
 }
@@ -2243,7 +2197,6 @@ void Barista :: train_net(double selectionfdr)
 {
   for (int k = 0; k < nepochs; k++)
     {
-      //fdebug << "epoch " << k << endl;
     if(verbose > 0)
 	cout << "epoch " << k << endl;
       double err_sum = 0.0;
@@ -2254,13 +2207,7 @@ void Barista :: train_net(double selectionfdr)
 	  int label = trainset[ind].label;
 	  err_sum += train_hinge(protind,label);
 	}      
-      //int fdr_trn = getOverFDRProt(trainset,net,selectionfdr);
       int fdr_trn = getOverFDRProt(trainset,selectionfdr);
-      
-      //fdebug << fixed;
-      //for(int j = 0; j < trainset.size(); j++)
-	//fdebug << j << " " << trainset[j].protind << " " << setprecision(16) << trainset[j].score << endl;
-	//fdebug << j << " " << trainset[j].protind  << endl;
       
       if(verbose > 0)
 	{
@@ -2325,7 +2272,6 @@ void Barista :: train_net_multi_task(double selectionfdr, int interval)
 {
   for (int k = 0; k < nepochs; k++)
     {
-      //fdebug << "epoch " << k << endl;
     if(verbose > 0)
 	cout << "epoch " << k << endl;
       double err_sum = 0.0;
@@ -2341,13 +2287,7 @@ void Barista :: train_net_multi_task(double selectionfdr, int interval)
 	  label = psmtrainset[ind].label;
 	  train_hinge_psm(psmind,label);	
 	}      
-      //int fdr_trn = getOverFDRProt(trainset,net,selectionfdr);
       int fdr_trn = getOverFDRProt(trainset,selectionfdr);
-      
-      //fdebug << fixed;
-      //for(int j = 0; j < trainset.size(); j++)
-	//fdebug << j << " " << trainset[j].protind << " " << setprecision(16) << trainset[j].score << endl;
-	//fdebug << j << " " << trainset[j].protind  << endl;
       
       if(verbose > 0)
 	{
@@ -2380,7 +2320,6 @@ void Barista :: train_net_multi_task(double selectionfdr, int interval)
 	    cout << " " << getOverFDRProt(testset,max_net_prot,selectionfdr);
 	  cout << endl;
 	}
-      //cout << "max prot " << getOverFDRProtMax(trainset,max_net_prot,selectionfdr) << endl;
       if(1)
 	{
 	  int fdr_trn_psm = getOverFDRPSM(psmtrainset, net, selectionfdr); 
@@ -2490,7 +2429,6 @@ void Barista :: setup_for_training(int trn_to_tst)
 
 int Barista :: run()
 {
-  //mysrandom(seed); This is set by CruxApplication::initialize()
   setup_for_training(0);
   
   train_net(selectionfdr);
@@ -2526,8 +2464,6 @@ int Barista :: run_tries()
 int Barista :: run_tries_multi_task()
 {
   setup_for_training(0);
-    
-  //fdebug.open("debug.txt");
 
   carp(CARP_INFO, "training the model");
 
@@ -2543,8 +2479,6 @@ int Barista :: run_tries_multi_task()
       net.make_random();
       train_net_multi_task(selectionfdr, psmtrainset.size());
     }
-    
-  //net.copy(max_net_prot);
 
   int interval= getOverFDRPSM(psmtrainset,max_net_psm,0.01)*2;
   if(interval > psmtrainset.size())
@@ -2553,12 +2487,8 @@ int Barista :: run_tries_multi_task()
     interval = psmtrainset.size()/4;
   train_net_multi_task(selectionfdr, interval);
 
-  //report_all_fdr_counts();
   report_all_results_xml_tab();
-  
-  //fdebug.close();
-
-   return 0;
+  return 0;
 
 }
 
@@ -2784,8 +2714,6 @@ int Barista :: crux_set_command_line_options(int argc, char *argv[])
 }
 
 int Barista::main(int argc, char **argv) {
- //int main(int argc, char **argv){
-
   if(!crux_set_command_line_options(argc,argv))
     return 1;
 
@@ -2795,10 +2723,8 @@ int Barista::main(int argc, char **argv) {
     pr.run();
   else
     {
-      //run();
-      run_tries();
-      //run_tries_multi_task();
-    }
+       run_tries();
+     }
   if(skip_cleanup_flag != 1)
     parser->clean_up(out_dir);
   
