@@ -696,7 +696,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   for (int i = 0 ; i < nAA ; i++) {
     int binMass= (int)floor(MassConstants::mass2bin(aaMass[i]));
     aaMassBin.push_back(binMass);
-    std::cout << aaMass[i] << endl;
+//    std::cout << aaMass[i] << endl;
   }
 
   //Need to add lines for matlab line 56?
@@ -900,22 +900,32 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   }
 
 /*
+  int cnt=0;
   for(int i =0;i<maxPrecurMassBin;i++) {
     for(int curAaMass = 0; curAaMass<nAA;curAaMass++){
       if (residueEvidenceMatrix[curAaMass][i] != 0) {
+        std::cout << "aa: " << curAaMass+1 << endl;
         std::cout << "massBin: " << i << std::endl;
-        std::cout << "curAaMass:" << curAaMass << std::endl;
         std::cout << "evidence: " << residueEvidenceMatrix[curAaMass][i] << std::endl <<std::endl;
+        cnt+=1;
       }
     }
-  } 
+  }
+*/
+/*
+  if (cnt>3000){
+  std::cout << "charge" << charge << std::endl;
+  std::cout << "precursorMass: " << precursorMass << std::endl;
+  std::cout << "cnt: " << cnt <<std::endl; 
+  }
 */
   std::cout <<"Created Evidence Residue Matrix" << std::endl;
+/*
   std::cout << "nAA: " << nAA << std::endl;
   for(int i=0; i<nAA;i++){
     std::cout << i+1 << " " << aaMass[i] << std::endl;
   }
-
+*/
   std::cout << "num bin: " << maxPrecurMassBin <<std::endl;
   std::cout << "ionMasses.size(): " << ionMasses.size() <<std::endl;
 }

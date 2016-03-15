@@ -321,7 +321,8 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
            Params::GetInt("min-peaks"), charge_to_search,
            Params::GetInt("top-match"), spectra.FindHighestMZ(),
            output_files, target_file, decoy_file, compute_sp,
-           nAA, aaFreqN, aaFreqI, aaFreqC, aaMass, pepHeader.mods());
+           nAA, aaFreqN, aaFreqI, aaFreqC, aaMass,
+           pepHeader.mods(), pepHeader.nterm_mods(), pepHeader.cterm_mods());
 
     // Delete temporary spectrumrecords file
     if (!f->Keep) {
@@ -380,7 +381,9 @@ void TideSearchApplication::search(
   double* aaFreqI,
   double* aaFreqC,
   int* aaMass,
-  const pb::ModTable& mod_table
+  const pb::ModTable& mod_table,
+  const pb::ModTable& nterm_mod_table,
+  const pb::ModTable& cterm_mod_table
 ) {
   int elution_window = Params::GetInt("elution-window-size");
   bool peptide_centric = Params::GetBool("peptide-centric-search");
@@ -572,6 +575,7 @@ void TideSearchApplication::search(
           }
           scoreOffsetObs[pe] = 0;
           pepMaInt = pepMassIntUnique[pe]; // TODO should be accessed with an iterator
+
           //preprocess to create one integerized evidence vector for each cluster of masses among selected peptides
           double pepMassMonoMean = (pepMaInt - 0.5 + bin_offset_) * bin_width_;
           observed.CreateEvidenceVector(*spectrum, bin_width_, bin_offset_, charge,
@@ -693,7 +697,7 @@ void TideSearchApplication::search(
         //END TODO
         
         const int minDeltaMass = aaMass[0];
-        const int maxdeltaMass = aaMass[nAA - 1];
+        const int maxDeltaMass = aaMass[nAA - 1];
         int maxPrecurMassBin = floor(MaxBin::Global().CacheBinEnd() + 50.0);
         int nCandPeptide = active_peptide_queue->SetActiveRangeBIons(min_mass, max_mass, min_range, max_range);
 
@@ -703,9 +707,13 @@ void TideSearchApplication::search(
         //Gets masses of all amino acids in double form
         //argument aaMasses are integer masses. Therefore need to create for this one
         vector<double> aaMassDouble;
+        vector<int> aaMassInt;
         string aa = "GASPVTILNDKQEMHFRCYW";//This order to match Matlab code by Jeff Howbert
         for(int i=0 ; i<aa.length() ; i++) {
           aaMassDouble.push_back(MassConstants::mono_table[aa[i]]);
+
+          int tmpMass = MassConstants::mass2bin(MassConstants::mono_table[aa[i]]);
+          aaMassInt.push_back(tmpMass);
         }
 
         //Get masses of all dynamically modified amino acids
@@ -715,6 +723,9 @@ void TideSearchApplication::search(
           int pos = aa.find(curModAA);
           double newMass = MassConstants::mono_table[aa[pos]] + delta;
           aaMassDouble.push_back(newMass);
+
+          int tmpMass = MassConstants::mass2bin(newMass);
+          aaMassInt.push_back(tmpMass);
         }
 
         //For one spectrum calculates:
@@ -751,28 +762,36 @@ void TideSearchApplication::search(
         //Below are the 3 axes
         //nPepMassIntUniq: number of mass bins candidate are in
         //nAA: number of amino acids
+        //replaced nAA with aaMassDouble.size()
+        //This is because nAA = 37 but aaMassDouble.size() = 21
         //maxPrecurMassBin: max number of mass bins
         //initalize all values to 0
         vector<vector<vector<double> > > residueEvidenceMatrix(nPepMassIntUniq, 
-               vector<vector<double> >(nAA, vector<double>(maxPrecurMassBin,0)));
+               vector<vector<double> >(aaMassDouble.size(), vector<double>(maxPrecurMassBin,0)));
 
 //        std::cout << "Spectrum index: " << sc->spectrum_index << std::endl;
 //        std::cout << "precursor mass: " << sc->neutral_mass <<std::endl;
 //        std::cout << "charge: " << sc->charge << std::endl;
 //        std::cout << "nCandPeptide: " << nCandPeptide << endl;
 //        std::cout << "nPepMassIntUniq: " << nPepMassIntUniq << std::endl << std::endl;
-/*          std::cout << "nAA: " << nAA <<std::endl;
+/*        std::cout << "nAA: " << nAA <<std::endl;
         for(int i=0;i<nAA;i++) {
           std::cout << i << " " << aaMass[i] <<std::endl;
         }
 */
+        //TODO need to add mass for N-term argument
+        //TODO this needs to be changed to reflect argument modifications
+        int NTermMassBin = MassConstants::mass2bin(MassConstants::mono_h+229.163);
+        int CTermMassBin = MassConstants::mass2bin(MassConstants::mono_oh);
+
         for (pe=0 ; pe<nPepMassIntUniq ; pe++) {
           int curPepMassInt = pepMassIntUnique[pe];
 
           //TODO aaMassDouble.size() replaced nAA
           //TODO aaMassDouble replaced aaMass
           //TODO This is aaMass is int while aaMassDouble is double
-          //TODO Also becausebecause nAA does not match expected nAA (eg 37 v 21 )
+          //TODO Also because nAA does not match expected nAA (eg 37 v 21 )
+          //In jeff code -- he uses 21 amino acids instead of 37
           observed.CreateResidueEvidenceMatrix(*spectrum,charge,
                                                maxPrecurMassBin,precursorMass,
                                                aaMassDouble.size(),aaMassDouble,
@@ -787,13 +806,36 @@ void TideSearchApplication::search(
           //maxColEvidence is edited by reference
           int maxEvidence = getMaxColEvidence(curResidueEvidenceMatrix,maxColEvidence,curPepMassInt);
           int maxNResidue = floor((double)curPepMassInt / 57.0);
-          //sor maxColEvidence in descending order
+          //sort maxColEvidence in descending order
           std::sort(maxColEvidence.begin(),maxColEvidence.end(),greater<int>());
           int maxScore=0;
           for(int i=0 ; i<maxNResidue ; i++) { //maxColEvidence has been sorted
             maxScore += maxColEvidence[i];
           }
-          
+
+          int scoreOffset; //set in calcResidueScoreCount function
+          //initalized and populated in calcResidueScoreCount function
+          vector<double> scoreCount;
+
+          //TODO in this version replaced nAA with aaMassDouble.size()
+          //This is because aaMassDouble.size() = 21 matches Jeff code
+          //but does not match nAA =27
+          calcResidueScoreCount(aaMassDouble.size(),curPepMassInt,
+                                curResidueEvidenceMatrix,aaMassInt,
+                                aaFreqN, aaFreqI, aaFreqC,
+                                NTermMassBin,CTermMassBin,
+                                //minDeltaMass,maxDeltaMass, original line
+                                *std::min_element(aaMassInt.begin(),aaMassInt.end()), *std::max_element(aaMassInt.begin(),aaMassInt.end()),
+                                maxEvidence,maxScore,
+                                scoreCount,scoreOffset);
+
+
+          std::cout << "Finished scoring peptide" <<std::endl;
+          std::cout << "scoreOffset: " << scoreOffset << std::endl;
+          std::cout << "scoreCount" <<std::endl;
+          for(int i=0;i<scoreCount.size();i++){
+            std::cout << "Row: " << i+1 << " Count: " << scoreCount[i] << std::endl;
+          }
         }
 
         //carp(CARP_FATAL,"This is not implemented yet.");
@@ -1240,6 +1282,173 @@ int TideSearchApplication::calcScoreCount(
   delete [] scoreCountBinAdjust;
   
   return scoreOffsetObs;
+}
+
+/*
+ * Calculates counts of peptides with various residue evidence scores, given
+ * a preprocessed residue evidence matrix, using dynamic programming
+ *
+ * This version:
+ *  - calculates most of dimension and inexing variables required or
+ *    dynamic programming inside of function, instead of externally 
+ *    in MATLAB
+ *  - uses uniform amino acid probabilities for all positions in peptide
+ *
+ * This used to be a MEX-file to be called in MATLAB
+ *  - has been incorprated into Tide/Crus
+ *
+ * Written by Jeff Howbert, August, 2015.
+ *
+ * Added by Andy Lin, March 2-16
+ * Edited to work within Crux code instead of with original MATLAB code
+ */
+void TideSearchApplication::calcResidueScoreCount (
+  int nAa,
+  int pepMassInt,
+  vector<vector<double> >& residueEvidenceMatrix,
+  vector<int>& aaMass, 
+  double* probN, //not being used at present
+  double* probI, //not being used at present
+  double* probC, //not being used at present
+  int NTermMass, //this is NTermMassBin
+  int CTermMass, //this is CTermMassBin
+  int minAaMass,
+  int maxAaMass,
+  int maxEvidence,
+  int maxScore,
+  vector<double>& scoreCount, //this is returned for later use
+  int& scoreOffset //this is returned for later use
+) {
+  int minEvidence  = 0;
+  int minScore     = 0;
+
+  // copy residue evidence matrix to C++ memory
+  int** residEvid = new int* [ nAa ];
+  for ( int row = 0; row < nAa; row++ ) {
+    residEvid[ row ] = new int[ pepMassInt ];
+    for ( int col = 0; col < pepMassInt; col++ ) {
+      residEvid[row][col] = residueEvidenceMatrix[row][col];
+    }
+  }
+  
+  int row;
+  int col;
+  int ma;
+  int evid;
+  int de;
+  int evidRow;
+  double sumScore;
+
+  int bottomRowBuffer = maxEvidence;
+  int topRowBuffer = -minEvidence;
+  int colBuffer = maxAaMass;
+  int colStart = NTermMass;
+  int nRow = bottomRowBuffer - minScore + 1 + maxScore + topRowBuffer;
+  int nCol = colBuffer + pepMassInt;
+  int rowFirst = bottomRowBuffer + 1;
+  int rowLast = rowFirst - minScore + maxScore;
+  int colFirst = colStart + 1;
+  int colLast = pepMassInt - CTermMass;
+  int initCountRow = bottomRowBuffer - minScore + 1;
+  int initCountCol = maxAaMass + colStart;
+
+  // convert to zero-based indexing
+  rowFirst = rowFirst - 1;
+  rowLast = rowLast - 1;
+  colFirst = colFirst - 1;
+  colLast = colLast - 1;
+  initCountRow = initCountRow - 1;
+  initCountCol = initCountCol - 1;
+
+  double** dynProgArray = 0;
+  dynProgArray = new double* [ nRow ];
+  for ( row = 0; row < nRow; row++ ) {
+    dynProgArray[ row ] = new double[ nCol ];
+    for ( col = 0; col < nCol; col++ ) {
+      dynProgArray[ row ][ col ] = 0.0;
+    }
+  }
+
+  //initial count of peptides with mass = NTermMass
+  dynProgArray[ initCountRow ][ initCountCol ] = 1.0;
+
+  int* aaMassCol = new int[ nAa ];
+
+  // populate matrix with scores for first (i.e. N-terminal) amino acid in sequence
+  for ( de = 0; de < nAa; de++ ) {
+    ma = aaMass[ de ];
+    //&& -1 is to account for zero-based indexing in evidence vector
+    row = initCountRow + residEvid[ de ][ ma + NTermMass - 1 ];
+    col = initCountCol + ma;
+    if ( col <= maxAaMass + colLast ) {
+      //&&ignore aa probs for now
+      dynProgArray[ row ][ col ] += dynProgArray[ initCountRow ][ initCountCol ];
+    }
+  }
+  
+  //set to zero now that score counts for first amino acid are in matrix
+  dynProgArray[ initCountRow ][ initCountCol ] = 0.0;
+
+  //populate matrix with score counts for non-terminal amino acids in sequence
+  for ( ma = colFirst; ma < colLast; ma++ ) {
+    col = maxAaMass + ma;
+    for ( de = 0; de < nAa; de++ ) {
+      aaMassCol[ de ] = col - aaMass[ de ];
+    }
+    for ( row = rowFirst; row <= rowLast; row++ ) {
+      sumScore = dynProgArray[ row ][ col ];
+      for ( de = 0; de < nAa; de++ ) {
+        evidRow = row - residEvid[ de ][ ma ];
+
+        //&& ignore aa probs for now
+        sumScore += dynProgArray[ evidRow ][ aaMassCol[ de ] ]; 
+      }
+      dynProgArray[ row ][ col ] = sumScore;
+    }
+  }
+
+  std::cout << "Row 26: " << dynProgArray[25][maxAaMass+colLast] << std::endl;
+  std::cout << "Row 27: " << dynProgArray[26][maxAaMass+colLast] << std::endl;
+
+  // populate matrix with score counts for last (i.e. C-terminal) amino acid in sequence
+  ma = colLast;
+  col = maxAaMass + ma;
+  
+  evid = 0; // no evidence should be added for last amino acid in sequence
+  for ( de = 0; de < nAa; de++ ) {
+    aaMassCol[ de ] = col - aaMass[ de ];
+  }
+  for ( row = rowFirst; row <= rowLast; row++ ) {
+    evidRow = row - evid;
+    sumScore = 0.0;
+    for ( de = 0; de < nAa; de++ ) {
+      //&& ignore aa probs for now
+      sumScore += dynProgArray[ evidRow ][ aaMassCol[ de ] ];
+    }
+    dynProgArray[ row ][ col ] = sumScore;
+  }
+  std::cout << "Row 26: " << dynProgArray[25][maxAaMass+colLast] << std::endl;
+  std::cout << "Row 27: " << dynProgArray[26][maxAaMass+colLast] << std::endl;
+
+
+  scoreCount.resize(nRow); //resize for return value
+  scoreOffset = initCountRow; //set return value
+
+  int colScoreCount = maxAaMass + colLast;
+  for ( int row = 0; row < nRow; row++ ) {
+    scoreCount[ row ] = dynProgArray[ row ][ colScoreCount ];
+  }
+
+  // clean up
+  for( int row = 0; row < nRow; row++ ) {
+    delete [] dynProgArray[ row ];
+  }
+  delete [] dynProgArray;
+  delete [] aaMassCol;
+  for ( int row = 0; row < nAa; row++ ) {
+    delete [] residEvid[ row ];
+  }
+  delete [] residEvid;
 }
 
 void TideSearchApplication::processParams() {
