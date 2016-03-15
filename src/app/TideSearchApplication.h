@@ -81,7 +81,9 @@ protected:
     double* aaFreqI,
     double* aaFreqC,
     int* aaMass,
-    const pb::ModTable& mod_table
+    const pb::ModTable& mod_table,
+    const pb::ModTable& nterm_mod_table,
+    const pb::ModTable& cterm_mod_table
   );
 
   void collectScoresCompiled(
@@ -204,6 +206,24 @@ public:
     double* aaFreqC,
     int* aaMass,
     double* pValueScoreObs
+  );
+
+  void calcResidueScoreCount (
+    int nAa,
+    int pepMassInt,
+    vector<vector<double> >& residueEvidenceMatrix,
+    vector<int>& aaMass, 
+    double* probN, //not being used at present
+    double* probI, //not being used at present
+    double* probC, //not being used at present
+    int NTermMass,
+    int CTermMass,
+    int minAaMass,
+    int maxAaMass,
+    int maxEvidence,
+    int maxScore,
+    vector<double>& scoreCount, //this is returned for later use
+    int& scoreOffSet //this is returned for later use
   );
   
   void setSpectrumFlag(map<pair<string, unsigned int>, bool>* spectrum_flag);
