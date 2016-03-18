@@ -356,7 +356,7 @@ bool Spectrum::parseMstoolkitSpectrum
     for (int z_idx = 0; z_idx < mst_real_spectrum -> sizeZ(); z_idx++) {
       SpectrumZState zstate;
       zstate.setSinglyChargedMass(
-        mst_real_spectrum->atZ(z_idx).mz,
+        mst_real_spectrum->atZ(z_idx).mh,
         mst_real_spectrum->atZ(z_idx).z);
       zstates_.push_back(zstate);
     }

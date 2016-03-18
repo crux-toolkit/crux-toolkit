@@ -27,6 +27,7 @@ string AminoAcidUtil::GetName(char c) {
     case 'R': return "arginine";
     case 'S': return "serine";
     case 'T': return "threonine";
+    case 'U': return "selenocysteine";
     case 'V': return "valine";
     case 'W': return "tryptophan";
     case 'Y': return "tyrosine";

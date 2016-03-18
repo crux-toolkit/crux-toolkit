@@ -83,6 +83,28 @@ class StringUtils {
     return tokens;
   }
 
+  static std::vector<std::string> Fields(const std::string& s);
+
+  template<typename T>
+  static std::vector<T> Fields(const std::string& s) {
+    std::vector<T> fields;
+    std::string current;
+    for (std::string::const_iterator i = s.begin(); i != s.end(); i++) {
+      if (*i == ' ' || *i == '\t') {
+        if (!current.empty()) {
+          fields.push_back(FromString<T>(current));
+          current.clear();
+        }
+      } else {
+        current.push_back(*i);
+      }
+    }
+    if (!current.empty()) {
+      fields.push_back(FromString<T>(current));
+    }
+    return fields;
+  }
+
   // Convert a string to lowercase
   static std::string ToLower(std::string s);
 
