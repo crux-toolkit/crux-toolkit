@@ -762,7 +762,8 @@ Params::Params() : finalized_(false) {
     "mzML, mz5, raw, ms2, and cms2. Files in mzML or mzXML may be compressed with gzip. "
     "RAW files can be parsed only under windows and if the appropriate libraries were "
     "included at compile time.");
-  InitArgParam("database name",
+  /* Comet - Database */
+  InitArgParam("database_name",
     "A full or relative path to the sequence database, "
     "in FASTA format, to search. Example databases include "
     "RefSeq or UniProt.  The database can contain amino acid "
@@ -774,13 +775,11 @@ Params::Params() : finalized_(false) {
   InitIntParam("decoy_search", 0, 0, 2,
     "0=no, 1=concatenated search, 2=separate search.",
     "Available for comet.", true);
-  InitIntParam("num_threads", 0, 0, 32, 
-    "0=poll CPU to set num threads; else specify num threads directly (max 32).",
+  /* Comet - CPU threads */
+  InitIntParam("num_threads", 0, -64, 64, 
+    "0=poll CPU to set num threads; else specify num threads directly.",
     "Available for comet.", true);
-  InitStringParam("output_suffix", "",
-    "Specifies the suffix string that is appended to the base output name "
-    "for the pep.xml, pin.xml, txt and sqt output files.",
-    "Available for comet.", true);
+  /* Comet - Masses */
   InitDoubleParam("peptide_mass_tolerance", 3.0, 0, BILLION,
     "Controls the mass tolerance value.  The mass tolerance "
     "is set at +/- the specified number i.e. an entered value "
@@ -797,9 +796,13 @@ Params::Params() : finalized_(false) {
   InitIntParam("mass_type_fragment", 1, 0, 1,
     "0=average masses, 1=monoisotopic masses.",
     "Available for comet.", true);
+  InitIntParam("precursor_tolerance_type", 0, 0, 1,
+    "0=singly charged peptide mass, 1=precursor m/z.",
+    "Available for comet.", true);
   InitIntParam("isotope_error", 0, 0, 2, 
     "0=off, 1=on -1/0/1/2/3 (standard C13 error), 2=-8/-4/0/4/8 (for +4/+8 labeling).",
     "Available for comet.", true);
+  /* Comet - Search enzyme */
   InitIntParam("search_enzyme_number", 1, 0, BILLION,
     "Specify a search enzyme from the end of the parameter file.",
     "Available for comet.", true);
@@ -809,6 +812,7 @@ Params::Params() : finalized_(false) {
   InitIntParam("allowed_missed_cleavage", 2, 0, 5,
     "Maximum value is 5; for enzyme search.",
     "Available for comet.", true);
+  /* Comet - Fragment ions */
   InitDoubleParam("fragment_bin_tol", 1.000507, 0, BILLION,
     "Binning to use on fragment ions.",
     "Available for comet.", true);
@@ -839,11 +843,12 @@ Params::Params() : finalized_(false) {
   InitIntParam("use_NL_ions", 1, 0, 1,
     "0=no, 1= yes to consider NH3/H2O neutral loss peak.",
     "Available for comet.", true);
-  InitIntParam("use_sparse_matrix", 1, 0, 1,
-    "Controls whether or not internal sparse matrix data representation is used.",
-    "Available for comet.", true);
+  /* Comet - Output */
   InitIntParam("output_sqtfile", 0, 0, 1,
     "0=no, 1=yes  write sqt file.",
+    "Available for comet.", true);
+  InitIntParam("output_txtfile", 1, 0, 1,
+    "0=no, 1=yes  write tab-delimited text file.",
     "Available for comet.", true);
   InitIntParam("output_pepxmlfile", 1, 0, 1,
     "0=no, 1=yes  write pep.xml file.",
@@ -851,9 +856,6 @@ Params::Params() : finalized_(false) {
   InitIntParam("output_percolatorfile", 0, 0, 1,
     "0=no, 1=yes write percolator file.",
      "Available for comet.", true);
-  InitIntParam("output_txtfile", 1, 0, 1,
-    "0=no, 1=yes  write tab-delimited text file.",
-    "Available for comet.", true);
   InitIntParam("output_outfiles", 0, 0, 1,
     "0=no, 1=yes  write .out files.",
     "Available for comet.", true);
@@ -866,10 +868,11 @@ Params::Params() : finalized_(false) {
   InitIntParam("show_fragment_ions", 0, 0, 1,
     "0=no, 1=yes for out files only.",
     "Available for comet.", true);
-  InitIntParam("sample_enzyme_number", 1,0,10, 
+  InitIntParam("sample_enzyme_number", 1, 0, 10, 
     "Sample enzyme which is possibly different than the one applied to the search. "
     "Used to calculate NTT & NMC in pepXML output.",
     "Available for comet. ", true);
+  /* Comet - mzXML/mzML parameters */
   InitStringParam("scan_range", "0 0",
     "Start and scan scan range to search; 0 as first entry ignores parameter.",
     "Available for comet.", true);
@@ -877,12 +880,17 @@ Params::Params() : finalized_(false) {
     "Precursor charge range to analyze; does not override "
     "mzXML charge; 0 as first entry ignores parameter.",
     "Available for comet.", true);
+  InitIntParam("override_charge", 0, 0, 3,
+    "Specifies the whether to override existing precursor charge state information when present "
+    "in the files with the charge range specified by the \"precursor_charge\" parameter.",
+    "Available for comet.", true);  
   InitIntParam("ms_level", 2, 2, 3, 
     "MS level to analyze, valid are levels 2 or 3.",
     "Available for comet. ", true);
   InitStringParam("activation_method", "ALL", "ALL|CID|ECD|ETD|PQD|HCD|IRMPD",
     "Specifies which scan types are searched.",
     "Available for comet. ", true);
+  /* Comet - Misc. parameters */
   InitStringParam("digest_mass_range", "600.0 5000.0",
     "MH+ peptide mass range to analyze.",
     "Available for comet.", true);
@@ -907,6 +915,20 @@ Params::Params() : finalized_(false) {
   InitIntParam("spectrum_batch_size", 0, 0, BILLION,
     "Maximum number of spectra to search at a time; 0 to search the entire scan range in one loop.",
     "Available for comet.", true);
+  InitStringParam("decoy_prefix", "decoy_",
+    "Specifies the prefix of the protein names that indicates a decoy.",
+    "Available for comet.", true);
+  InitStringParam("output_suffix", "",
+    "Specifies the suffix string that is appended to the base output name "
+    "for the pep.xml, pin.xml, txt and sqt output files.",
+    "Available for comet.", true);
+  InitStringParam("mass_offsets", "",
+    "Specifies one or more mass offsets to apply. This value(s) are effectively "
+    "subtracted from each precursor mass such that peptides that are smaller "
+    "than the precursor mass by the offset value can still be matched to the "
+    "respective spectrum.",
+    "Available for comet.", true);
+  /* Comet - Spectral processing */
   InitIntParam("minimum_peaks", 10, 1, BILLION,
     "Minimum number of peaks in spectrum to search.",
     "Available for comet.", true);
@@ -922,23 +944,21 @@ Params::Params() : finalized_(false) {
   InitStringParam("clear_mz_range", "0.0 0.0",
     "For iTRAQ/TMT type data; will clear out all peaks in the specified m/z range.",
     "Available for comet.", true);
+  /* Comet - Variable modifications */
   for (int i = 1; i <= 9; i++) {
-    InitStringParam("variable_mod0" + StringUtils::ToString(i), "",
+    InitStringParam("variable_mod0" + StringUtils::ToString(i), "0.0 null 0 4 -1 0 0",
                     "Up to 9 variable modifications are supported; format: "
                     "\"<mass> <residues> <0=variable/1=binary> <max mods per a peptide>\" "
                     "e.g. 79.966331 STY 0 3.",
                     "Available for comet.", true);
   }
-  InitIntParam("require_variable_mod", 0, 0, 1,
-    "Controls whether the analyzed peptides must contain at least one variable modification.",
-    "Available for comet.", true);
   InitIntParam("max_variable_mods_in_peptide", 5, 0, BILLION,
     "Specifies the total/maximum number of residues that can be modified in a peptide.",
     "Available for comet.", true);
-  InitIntParam("override_charge", 0, 0, 1,
-    "Specifies the whether to override existing precursor charge state information when present "
-    "in the files with the charge range specified by the \"precursor_charge\" parameter.",
-    "Available for comet.", true);  
+  InitIntParam("require_variable_mod", 0, 0, 1,
+    "Controls whether the analyzed peptides must contain at least one variable modification.",
+    "Available for comet.", true);
+  /* Comet - Static modifications */
   InitDoubleParam("add_Cterm_peptide", 0, 0, BILLION,
     "Specifiy a static modification to the c-terminus of all peptides.",
     "Available for comet.", true);
@@ -1001,9 +1021,6 @@ Params::Params() : finalized_(false) {
     "Available for q-ranker and barista.", true);
   InitBoolParam("use-spec-features", true, 
     "Use an enriched feature set, including separate features for each ion type.",
-    "Available for q-ranker and barista.", true);
-  InitStringParam("decoy_prefix", "decoy_",
-    "Specifies the prefix of the protein names that indicates a decoy.",
     "Available for q-ranker and barista.", true);
   InitStringParam("separate-searches", "",
     "If the target and decoy searches were run separately, rather than "
@@ -1729,6 +1746,7 @@ void Params::Categorize() {
   items.insert("peptide_mass_units");
   items.insert("mass_type_parent");
   items.insert("mass_type_fragment");
+  items.insert("precursor_tolerance_type");
   items.insert("isotope_error");
   AddCategory("Masses", items);
 
@@ -1749,7 +1767,6 @@ void Params::Categorize() {
   items.insert("use_Y_ions");
   items.insert("use_Z_ions");
   items.insert("use_NL_ions");
-  items.insert("use_sparse_matrix");
   AddCategory("Fragment ions", items);
 
   items.clear();
@@ -1771,6 +1788,7 @@ void Params::Categorize() {
   items.insert("spectrum_batch_size");
   items.insert("decoy_prefix");
   items.insert("output_suffix");
+  items.insert("mass_offsets");
   AddCategory("Misc. parameters", items);
 
   items.clear();
@@ -1970,7 +1988,7 @@ void Params::Write(ostream* out, bool defaults) {
 
   *out << "# Crux parameter file (generated by Crux version " << CRUX_VERSION << ")" << endl
        << "# Full documentation available at http://cruxtoolkit.sourceforge.net/" << endl
-       << "# comet_version 2015.01 rev. 2" << endl
+       << "# comet_version 2016.01 rev. 0" << endl
        << "# Everything following the \'#\' symbol is treated as a comment." << endl
        << endl;
 
@@ -1990,9 +2008,9 @@ void Params::Write(ostream* out, bool defaults) {
   print_mods_parameter_file(out, "cmod", get_c_mod_list);
 
   // Print Comet parameters
-  *out << "#################" << endl
-       << "#Comet Parameters" << endl
-       << "#################" << endl;
+  *out << "####################" << endl
+       << "# Comet Parameters #" << endl
+       << "####################" << endl;
   for (vector<const Param*>::const_iterator i = Begin(); i != End(); i++) {
     string name = (*i)->GetName();
     // Print mods and Comet parameters later
