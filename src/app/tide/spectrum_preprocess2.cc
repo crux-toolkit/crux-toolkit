@@ -625,7 +625,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
 
   assert(MaxBin::Global().MaxBinEnd() > 0);
 
-  const double massHMono = 1.0078246;      // mass of hydrogen (monoisotopic)
+  const double massHMono = MassConstants::mono_h;  // mass of hydrogen (monoisotopic)
 
   //TODO used in Xcorr function..not used in residue-evidence?
   //bool flanking_peak = Params::GetBool("use-flanking-peaks");
@@ -634,29 +634,13 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   int ma;
   int pc;
 
-//CHECK BELOW FOR CHANGE
-//  double* evidence = new double[maxPrecurMassBin];
-//  double* intensArrayObs = new double[maxPrecurMassBin];
-//  int* intensRegion = new int[maxPrecurMassBin];
-
-//  for (ma = 0; ma < maxPrecurMassBin; ma++) {
-//    evidence[ma] = 0.0;
-//    intensArrayObs[ma] = 0.0;
-//    intensRegion[ma] = -1;
-//  }
-//CHECK ABOVE FOR CHANGE
-
   double precurMz = spectrum.PrecursorMZ();
   int nIon = spectrum.Size();
   int precurCharge = charge;
   double experimentalMassCutoff = precursorMass + 50.0;
   double proton = MassConstants::proton;
-  double residueToleranceMass = 100.0 * 200.0 * 0.000001;
+  double residueToleranceMass = 100.0 * 200.0 * 0.000001; //TODO this needs to be made option
   const double precursorMZExclude = 15.0; //also used in PreprocessSpectrum
-
-  //preprocess function for XCorr -- could use except xcorr
-  //discretize evidence into bins
-  //PreprocessSpectrum(spectrum, intensArrayObs, intensRegion, maxPrecurMassBin,charge);
 
   //Determining max sqrt(ion intensity)
   double maxIonIntens = 0.0;
@@ -696,7 +680,6 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   for (int i = 0 ; i < nAA ; i++) {
     int binMass= (int)floor(MassConstants::mass2bin(aaMass[i]));
     aaMassBin.push_back(binMass);
-//    std::cout << aaMass[i] << endl;
   }
 
   //Need to add lines for matlab line 56?
@@ -741,7 +724,8 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
 
         if (aaTolScore >= 0) {
           //add evidence to matrix
-          residueEvidenceMatrix[curAaMass][newResMassBin] += aaTolScore;
+          //&&-1 since all mass bins are index 1 istead of index 0
+          residueEvidenceMatrix[curAaMass][newResMassBin-1] += aaTolScore;
         }
       }
     }
@@ -759,7 +743,6 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
       }
     }
   }
-  std::cout << "Finished b ions in 1+ charge state" << std::endl;
 */
 
   int yIonMassBin;
@@ -796,7 +779,8 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
 
         if (aaTolScore >= 0) {
           //add evidence to matrix
-          residueEvidenceMatrix[curAaMass][newResMassBin] += aaTolScore;
+          //&&-1 since all mass bins are index 1 istead of index 0
+          residueEvidenceMatrix[curAaMass][newResMassBin-1] += aaTolScore;
         }
       }
     }
@@ -804,10 +788,22 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   ionMass.clear();
   ionMassBin.clear();
 
+/*
+  for(int i =0;i<maxPrecurMassBin;i++) {
+    for(int curAaMass = 0; curAaMass<nAA;curAaMass++){
+      if (residueEvidenceMatrix[curAaMass][i] != 0) {
+        std::cout << "massBin: " << i << std::endl;
+        std::cout << "curAaMass:" << curAaMass << std::endl;
+        std::cout << "evidence: " << residueEvidenceMatrix[curAaMass][i] << std::endl <<std::endl;
+      }
+    }
+  }
+*/
+
 
   //find pairs of b ions in 2+ charge state
   for(int ion=0 ; ion<ionMasses.size() ; ion++) {
-    double tmpIonMass = (2.0 * ionMasses[ion]) - massHMono;
+    double tmpIonMass = 2.0 * ionMasses[ion] - massHMono;
     int binTmpIonMass = (int)floor(MassConstants::mass2bin(tmpIonMass));
 
     ionMass.push_back(tmpIonMass);
@@ -832,7 +828,8 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
 
         if(aaTolScore >= 0) {
           //add evidence to matrix
-          residueEvidenceMatrix[curAaMass][newResMassBin] += aaTolScore;
+          //&&-1 since all mass bins are index 1 istead of index 0
+          residueEvidenceMatrix[curAaMass][newResMassBin-1] += aaTolScore;
         }
       }
     }
@@ -840,10 +837,22 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   ionMass.clear();
   ionMassBin.clear();
 
+/*
+  for(int i =0;i<maxPrecurMassBin;i++) {
+    for(int curAaMass = 0; curAaMass<nAA;curAaMass++){
+      if (residueEvidenceMatrix[curAaMass][i] != 0) {
+        std::cout << "massBin: " << i << std::endl;
+        std::cout << "curAaMass:" << curAaMass << std::endl;
+        std::cout << "evidence: " << residueEvidenceMatrix[curAaMass][i] << std::endl <<std::endl;
+      }
+    }
+  }
+*/
+
 
   //find pairs of y ions in 2+ charge state
   for(int ion=0 ; ion<ionMasses.size() ; ion++) {
-    double tmpIonMass = (2.0 * ionMasses[ion]) - massHMono;
+    double tmpIonMass = precursorMass - (2.0 * ionMasses[ion] - massHMono) + (2.0 * massHMono);
     int binTmpIonMass = (int)floor(MassConstants::mass2bin(tmpIonMass));
 
     ionMass.push_back(tmpIonMass);
@@ -870,13 +879,26 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
  
         if (aaTolScore >= 0) {
           //add evidence to matrix
-          residueEvidenceMatrix[curAaMass][newResMassBin] += aaTolScore;
+          //&&-1 since all mass bins are index 1 instead of index 0
+          residueEvidenceMatrix[curAaMass][newResMassBin-1] += aaTolScore;
         }
       }
     }
   }
   ionMass.clear();
   ionMassBin.clear();
+
+/*
+  for(int i =0;i<maxPrecurMassBin;i++) {
+    for(int curAaMass = 0; curAaMass<nAA;curAaMass++){
+      if (residueEvidenceMatrix[curAaMass][i] != 0) {
+        std::cout << "aa: " << curAaMass+1 << endl;
+        std::cout << "massBin: " << i << std::endl;
+        std::cout << "evidence: " << residueEvidenceMatrix[curAaMass][i] << std::endl <<std::endl;
+      }
+    }
+  }
+*/
 
   //Get maxEvidence value
   double maxEvidence = -1.0;
@@ -899,33 +921,21 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
     }
   }
 
-/*
+
+  std::cout << std::endl;
+  std::cout << "maxEvidence: " << maxEvidence << std::endl;
   int cnt=0;
   for(int i =0;i<maxPrecurMassBin;i++) {
     for(int curAaMass = 0; curAaMass<nAA;curAaMass++){
       if (residueEvidenceMatrix[curAaMass][i] != 0) {
         std::cout << "aa: " << curAaMass+1 << endl;
-        std::cout << "massBin: " << i << std::endl;
+        std::cout << "massBin: " << i+1 << std::endl;
         std::cout << "evidence: " << residueEvidenceMatrix[curAaMass][i] << std::endl <<std::endl;
         cnt+=1;
       }
     }
   }
-*/
-/*
-  if (cnt>3000){
-  std::cout << "charge" << charge << std::endl;
-  std::cout << "precursorMass: " << precursorMass << std::endl;
-  std::cout << "cnt: " << cnt <<std::endl; 
-  }
-*/
-  std::cout <<"Created Evidence Residue Matrix" << std::endl;
-/*
-  std::cout << "nAA: " << nAA << std::endl;
-  for(int i=0; i<nAA;i++){
-    std::cout << i+1 << " " << aaMass[i] << std::endl;
-  }
-*/
-  std::cout << "num bin: " << maxPrecurMassBin <<std::endl;
-  std::cout << "ionMasses.size(): " << ionMasses.size() <<std::endl;
+
+//  std::cout << "num bin: " << maxPrecurMassBin <<std::endl;
+//  std::cout << "ionMasses.size(): " << ionMasses.size() <<std::endl;
 }
