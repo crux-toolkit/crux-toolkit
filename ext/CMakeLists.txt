@@ -289,7 +289,7 @@ if (UNIX)
   # Get Comet source from SVN and buld using it's own makefile
   ExternalProject_Add(
     comet
-    SVN_REPOSITORY svn://svn.code.sf.net/p/comet-ms/code/tags/release_2016010/
+    SVN_REPOSITORY svn://svn.code.sf.net/p/comet-ms/code/tags/release_2016011/
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     UPDATE_COMMAND ""
     CONFIGURE_COMMAND ""
@@ -338,7 +338,7 @@ elseif (WIN32 AND NOT CYGWIN)
   set(LIBPATH "${CMAKE_CURRENT_BINARY_DIR}/lib;")
   ExternalProject_Add(
     comet
-    SVN_REPOSITORY http://svn.code.sf.net/p/comet-ms/code/tags/release_2016010/
+    SVN_REPOSITORY http://svn.code.sf.net/p/comet-ms/code/tags/release_2016011/
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     UPDATE_COMMAND ""
     # Copy the Comet and MSToolkit include files and libraries to
