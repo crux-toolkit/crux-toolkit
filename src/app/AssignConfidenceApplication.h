@@ -37,7 +37,7 @@ enum _estimation_method {
 typedef enum _estimation_method ESTIMATION_METHOD_T;
 
 class AssignConfidenceApplication : public CruxApplication {
-protected: 
+protected:
   map<pair<string, unsigned int>, bool>* spectrum_flag_;  // this variable is used in Cascade Search, this is an idicator 
   unsigned int iteration_cnt_;
   OutputFiles* output_;
@@ -149,11 +149,10 @@ public:
   void convert_fdr_to_qvalue
     (FLOAT_T* qvalues,     ///< Come in as FDRs, go out as q-values.
     int      num_values);
-  map<FLOAT_T, FLOAT_T>* store_arrays_as_hash
+  map<FLOAT_T, FLOAT_T> store_arrays_as_hash
     (FLOAT_T* keys,
     FLOAT_T* values,
-    int      num_values
-    );
+    int      num_values);
   FLOAT_T* compute_decoy_qvalues_tdc(
     FLOAT_T* target_scores,
     int      num_targets,
@@ -171,7 +170,6 @@ public:
     FLOAT_T  pi_zero
     );
 };
-
 
 #endif //ASSIGNCONFIDENCE_H
 

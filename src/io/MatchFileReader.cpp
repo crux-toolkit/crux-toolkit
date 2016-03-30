@@ -295,7 +295,9 @@ Crux::Match* MatchFileReader::parseMatch() {
   match -> match_scores[LOGP_WEIBULL_XCORR] = getFloat("logp weibull xcorr");
   */
   if (!empty(PVALUE_COL)) {
-    match->setScore(LOGP_BONF_WEIBULL_XCORR, -log(getFloat(PVALUE_COL)));
+    FLOAT_T pval = getFloat(PVALUE_COL);
+    match->setScore(LOGP_BONF_WEIBULL_XCORR,
+                    pval > 0 ? -log(pval) : numeric_limits<FLOAT_T>::infinity());
   }
   if (!empty(EVALUE_COL)) {
     match->setScore(EVALUE, getFloat(EVALUE_COL));

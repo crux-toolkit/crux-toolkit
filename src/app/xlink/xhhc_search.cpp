@@ -26,7 +26,7 @@
 #include "io/SpectrumCollectionFactory.h"
 #include "model/FilteredSpectrumChargeIterator.h"
 #include "util/Params.h"
-
+#include "io/MatchColumns.h"
 //C++ includes
 #include <cmath>
 #include <ctime>
@@ -147,7 +147,7 @@ int SearchForXLinks::xhhcSearchMain() {
   search_target_file << "xcorr score\t";
   search_target_file << "xcorr rank\t";
   search_target_file << "p-value\t";
-  search_target_file << "distinct matches/spectrum\t";
+  search_target_file << get_column_header(DISTINCT_MATCHES_SPECTRUM_COL) << "\t";
   search_target_file << "sequence\t";
   search_target_file << "protein id(loc) 1\t";
   search_target_file << "protein id(loc) 2\t";
@@ -177,7 +177,7 @@ int SearchForXLinks::xhhcSearchMain() {
   search_decoy_file << "xcorr score\t";
   search_decoy_file << "xcorr rank\t";
   search_decoy_file << "p-value\t";
-  search_decoy_file << "distinct matches/spectrum\t";
+  search_decoy_file << get_column_header(DISTINCT_MATCHES_SPECTRUM_COL) << "\t";
   search_decoy_file << "sequence"<<endl;
 
   XHHC_Scorer hhc_scorer;
@@ -334,7 +334,7 @@ int SearchForXLinks::xhhcSearchMain() {
     
     carp(CARP_DEBUG, "sorting %u scores", scores.size());
     sort(scores.begin(), scores.end(), greater<pair<FLOAT_T, LinkedPeptide> >());
-    carp(CARP_INFO, "done sorting");
+    carp(CARP_DEBUG, "done sorting");
     int ndecoys = 0;
     int ntargets = 0;
     unsigned int score_index = 0;

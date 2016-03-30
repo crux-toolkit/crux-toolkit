@@ -121,7 +121,7 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
       score_type = EVALUE;  ///< Comet e-value
       break;
     case PVALUE_COL:        ///< Search-for-xlinks p-value
-      score_type =  LOGP_BONF_WEIBULL_XCORR;
+      score_type = LOGP_BONF_WEIBULL_XCORR;
       break;
     case PERCOLATOR_SCORE_COL:
       score_type = PERCOLATOR_SCORE;
@@ -227,22 +227,26 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
                          "\"score\" and \"smaller-is-better\" parameters.");
       }
       switch (score_type) {
-        case EVALUE:
-        case TIDE_SEARCH_EXACT_PVAL:
-        case TIDE_SEARCH_EXACT_SMOOTHED:
-        case LOGP_BONF_WEIBULL_XCORR:
-          // lower score better
-          ascending = true;
-          break;
-        default:
-          // higher score better
-          ascending = false;
+      case XCORR:
+	// higher score better
+	ascending = false;
+	break;
+      case EVALUE:
+      case TIDE_SEARCH_EXACT_PVAL:
+      case TIDE_SEARCH_EXACT_SMOOTHED:
+      case LOGP_BONF_WEIBULL_XCORR:
+	// lower score better
+	ascending = true;
+	break;
+      default:
+	carp(CARP_FATAL, "Cannot infer sort order for score %s.",
+	     scorer_type_to_string(score_type));
       }
       carp(CARP_INFO, "Setting smaller-is-better=%s.",
 	   StringParam::From(ascending).c_str());
 
     } else {
-      carp(CARP_INFO, "User-specified score type=%sw with smaller-is-better=%s.",
+      carp(CARP_INFO, "User-specified score type=%s with smaller-is-better=%s.",
 	   scorer_type_to_string(score_type), StringParam::From(ascending).c_str());
     }
 
@@ -364,41 +368,39 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
 	    numLostDecoys++;
 	  }
 
-          if (estimation_method == PEPTIDE_LEVEL_METHOD) {
-            if (decoy_idx > 0){
-              decoy_match = decoy_iter->getMatch(decoy_idx - 1);
-              numCandidates = target_match->getTargetExperimentSize() + decoy_match->getTargetExperimentSize();
-              target_match->setTargetExperimentSize(numCandidates);
-              decoy_match->setTargetExperimentSize(numCandidates);
-              tdc_collection->addMatch(target_match);
-              tdc_collection->addMatch(decoy_match);
-            }
-            else {
-              numCandidates = target_match->getTargetExperimentSize();
-              target_match->setTargetExperimentSize(numCandidates);
-              tdc_collection->addMatch(target_match);
-            }
-          } else {
-
-            if (decoy_idx > 0){
-              decoy_match = decoy_iter->getMatch(decoy_idx - 1);
-            }
-            else {
-              tdc_collection->addMatch(target_match);
-              continue;
-            }
-            numCandidates = target_match->getTargetExperimentSize() + decoy_match->getTargetExperimentSize();
-            target_match->setTargetExperimentSize(numCandidates);
-            decoy_match->setTargetExperimentSize(numCandidates);
+    if (estimation_method == PEPTIDE_LEVEL_METHOD) {
+      if (decoy_idx > 0){
+        decoy_match = decoy_iter->getMatch(decoy_idx - 1);
+        numCandidates = target_match->getTargetExperimentSize() + decoy_match->getTargetExperimentSize();
+        target_match->setTargetExperimentSize(numCandidates);
+        decoy_match->setTargetExperimentSize(numCandidates);
+        tdc_collection->addMatch(target_match);
+        tdc_collection->addMatch(decoy_match);
+      } else {
+        numCandidates = target_match->getTargetExperimentSize();
+        target_match->setTargetExperimentSize(numCandidates);
+        tdc_collection->addMatch(target_match);
+      }
+    } else {
+      if (decoy_idx > 0){
+        decoy_match = decoy_iter->getMatch(decoy_idx - 1);
+      }
+      else {
+        tdc_collection->addMatch(target_match);
+        continue;
+      }
+      numCandidates = target_match->getTargetExperimentSize() + decoy_match->getTargetExperimentSize();
+      target_match->setTargetExperimentSize(numCandidates);
+      decoy_match->setTargetExperimentSize(numCandidates);
 
 	    // This is where the target-decoy competition happens.
 	    carp(CARP_DEBUG, "TDC: Comparing target (%d, +%d) with score %g to decoy (%d, +%d) with score %g.",
-		 target_match->getSpectrum()->getFirstScan(),
-		 target_match->getCharge(),
-		 target_match->getScore(score_type),
-		 decoy_match->getSpectrum()->getFirstScan(),
-		 decoy_match->getCharge(),
-		 decoy_match->getScore(score_type));
+		  target_match->getSpectrum()->getFirstScan(),
+		  target_match->getCharge(),
+		  target_match->getScore(score_type),
+		  decoy_match->getSpectrum()->getFirstScan(),
+		  decoy_match->getCharge(),
+		  decoy_match->getScore(score_type));
 
 	    float score_difference = target_match->getScore(score_type) - decoy_match->getScore(score_type);
 	    numCompetitions++;
@@ -411,16 +413,16 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
 	      score_difference *= -1.0;
 	    }
 	    if (score_difference >= 0.0) {
-              tdc_collection->addMatch(target_match);
+        tdc_collection->addMatch(target_match);
 	    } else {
-              tdc_collection->addMatch(decoy_match);
-            }
-          }
-        }
-        delete target_iter;
-        delete decoy_iter;
-        delete match_collection;
-        match_collection = tdc_collection;
+        tdc_collection->addMatch(decoy_match);
+      }
+    }
+  }
+  delete target_iter;
+  delete decoy_iter;
+  delete match_collection;
+  match_collection = tdc_collection;
 	if (numCompetitions > 0) {
 	  carp(CARP_INFO, "Randomly broke %d ties in %d target-decoy competitions.",
 	       numTies, numCompetitions);
@@ -620,14 +622,13 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
   free(decoy_scores);
 
   // Store p-values to q-values as a hash, and then assign them.
-  map<FLOAT_T, FLOAT_T>* qvalue_hash
+  map<FLOAT_T, FLOAT_T> qvalue_hash
     = store_arrays_as_hash(target_scores, qvalues, num_targets);
 
-  target_matches->assignQValues(qvalue_hash, score_type, derived_score_type);
+  target_matches->assignQValues(&qvalue_hash, score_type, derived_score_type);
 
   free(target_scores);
   free(qvalues);
-  delete qvalue_hash;
   
   // Store targets by score.
   target_matches->sort(score_type);
@@ -642,11 +643,10 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
     MatchIterator* match_iterator =
       new MatchIterator(target_matches, score_type, false);
 
-
-    while (match_iterator->hasNext()){
+    while (match_iterator->hasNext()) {
       Match* match = match_iterator->next();
 
-      if (match->getScore(QVALUE_TDC) > cascade_fdr){
+      if (match->getScore(QVALUE_TDC) > cascade_fdr) {
         break;
       }
       spectrum_flag_->insert(make_pair(pair<string, unsigned int>(
@@ -763,20 +763,16 @@ void AssignConfidenceApplication::convert_fdr_to_qvalue
 
 /**
  * Store two parallel arrays of floats in a hash table.
- * The new hash table must be freed by the caller.
  */
-map<FLOAT_T, FLOAT_T>* AssignConfidenceApplication::store_arrays_as_hash
+map<FLOAT_T, FLOAT_T> AssignConfidenceApplication::store_arrays_as_hash
   (FLOAT_T* keys, 
    FLOAT_T* values,
    int      num_values
 ){
-
-  map<FLOAT_T, FLOAT_T>* return_value = new map<FLOAT_T, FLOAT_T>();
-
-  int idx;
-  for (idx=0; idx < num_values; idx++){
+  map<FLOAT_T, FLOAT_T> return_value;
+  for (int idx=0; idx < num_values; idx++){
     carp(CARP_DETAILED_DEBUG, "%g maps to %g", keys[idx], values[idx]);
-    (*return_value)[keys[idx]] = values[idx];
+    return_value[keys[idx]] = values[idx];
   }
   return(return_value);
 }
@@ -793,40 +789,42 @@ FLOAT_T* AssignConfidenceApplication::compute_decoy_qvalues_tdc(
   int      num_targets,
   FLOAT_T* decoy_scores,
   int      num_decoys,
-  bool     forward,
+  bool     ascending,
   FLOAT_T  pi_zero
 ){
   if ((num_targets == 0) || (num_decoys == 0)) {
     carp(CARP_FATAL, "Cannot compute q-values (%d targets, %d nulls).",
          num_targets, num_decoys);
   }
-  carp(CARP_DEBUG, "Computing decoy q-values.");
+  carp(CARP_DEBUG, "Computing decoy q-values with %d targets and %d decoys.",
+       num_targets, num_decoys);
 
   // Sort both sets of scores.
-  if (forward) {
-    sort(target_scores, target_scores + num_targets);
-    sort(decoy_scores, decoy_scores + num_decoys);    
+  if (ascending) {
+    sort(target_scores, target_scores + num_targets, Match::ScoreLess);
+    sort(decoy_scores, decoy_scores + num_decoys, Match::ScoreLess);
   } else {
-    sort(target_scores, target_scores + num_targets, greater<FLOAT_T>());
-    sort(decoy_scores, decoy_scores + num_decoys, greater<FLOAT_T>());
+    sort(target_scores, target_scores + num_targets, Match::ScoreGreater);
+    sort(decoy_scores, decoy_scores + num_decoys, Match::ScoreGreater);
   }
 
   // Compute false discovery rate for each target score.
   FLOAT_T* qvalues = (FLOAT_T*)mycalloc(num_targets, sizeof(FLOAT_T));
-  int target_idx;
   int decoy_idx = 0;
-  for (target_idx = 0; target_idx < num_targets; target_idx++) {
+  for (int target_idx = 0; target_idx < num_targets; target_idx++) {
     FLOAT_T target_score = target_scores[target_idx];
 
     // Find the index of the first decoy score greater than this target score.
-    if (forward) {
-      while ((decoy_idx < num_decoys) &&
-             (decoy_scores[decoy_idx] < target_score)) {
+    if (ascending) {
+      while (decoy_idx < num_decoys &&
+             Match::ScoreLess(decoy_scores[decoy_idx], target_score)) {
+        carp(CARP_DEBUG, "Decoy score %g.", decoy_scores[decoy_idx]);
         decoy_idx++;
       }
     } else {   
-      while ((decoy_idx < num_decoys) &&
-             (decoy_scores[decoy_idx] > target_score)) {
+      while (decoy_idx < num_decoys &&
+             Match::ScoreGreater(decoy_scores[decoy_idx], target_score)) {
+        carp(CARP_DEBUG, "Decoy score %g.", decoy_scores[decoy_idx]);
         decoy_idx++;
       }
     }
@@ -834,20 +832,22 @@ FLOAT_T* AssignConfidenceApplication::compute_decoy_qvalues_tdc(
     // FDR = #decoys / #targets
     FLOAT_T fdr = /*pi_zero * targets_to_decoys * */
       ((FLOAT_T)decoy_idx / (FLOAT_T)(target_idx + 1));
-    carp(CARP_DEBUG, "target_idx=%d target_score=%g decoy_idx=%d fdr=%g",
-         target_idx, target_score, decoy_idx, fdr);
     
     if ( fdr > 1.0 ){
       fdr = 1.0;
     }
     
+    carp(CARP_DEBUG, "FDR for score %g = min(1,%d/%d) = %g",
+         target_score, decoy_idx, target_idx + 1,
+	 (FLOAT_T)decoy_idx / (FLOAT_T)(target_idx + 1), fdr);
+
     qvalues[target_idx] = fdr;
   }
   
   // Convert the FDRs into q-values.
   convert_fdr_to_qvalue(qvalues, num_targets);
 
-  return (qvalues);
+  return qvalues;
 }
 
 FLOAT_T AssignConfidenceApplication::estimate_pi0(FLOAT_T* target_scores,
@@ -931,8 +931,7 @@ FLOAT_T* AssignConfidenceApplication::compute_decoy_qvalues_mixmax(
 
   }
   // continue with mix-max procedure
-  int target_idx;
-  for (target_idx = 0; target_idx < num_targets; ++target_idx) {
+  for (int target_idx = 0; target_idx < num_targets; ++target_idx) {
     carp(CARP_DEBUG, "target_scores[%d]=%lf decoy_scores[%d]=%lf",
          target_idx, target_scores[target_idx],
          target_idx, decoy_scores[target_idx]);

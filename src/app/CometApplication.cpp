@@ -37,8 +37,8 @@ int CometApplication::main(int argc, char** argv) {
 int CometApplication::main(const vector<string>& input_files) {
   for (vector<string>::const_iterator i = input_files.begin(); i != input_files.end(); i++) {
     if (!StringUtils::IEndsWith(*i, ".mzXML") && !StringUtils::IEndsWith(*i, ".mzML") &&
-        !StringUtils::IEndsWith(*i, ".mz5") && !StringUtils::IEndsWith(*i, ".mzXML.gz") &&
-        !StringUtils::IEndsWith(*i, ".mzML.gz") && !StringUtils::IEndsWith(*i, ".raw") &&
+        !StringUtils::IEndsWith(*i, ".mzXML.gz") && !StringUtils::IEndsWith(*i, ".mzML.gz") &&
+        !StringUtils::IEndsWith(*i, ".raw") && !StringUtils::IEndsWith(*i, ".mgf") &&
         !StringUtils::IEndsWith(*i, ".ms2") && !StringUtils::IEndsWith(*i, ".cms2")) {
       carp(CARP_FATAL, "The format of file '%s' is not supported.", i->c_str());
     }
@@ -49,14 +49,13 @@ int CometApplication::main(const vector<string>& input_files) {
   streambuf* old = std::cerr.rdbuf();
   std::cerr.rdbuf(&buffer);
 
-  /* set Parmeters */
+  /* set parameters */
   vector<InputFileInfo*> pv_input_files;
-  CometSearchManager comet_search_mgr;
-  setCometParameters(input_files, pv_input_files, comet_search_mgr);
-  comet_search_mgr.AddInputFiles(pv_input_files);
+  setCometParameters(input_files, pv_input_files);
+  searchManager_.AddInputFiles(pv_input_files);
   
   /* Run search */
-  bool success = comet_search_mgr.DoSearch();
+  bool success = searchManager_.DoSearch();
 
   /* Recover stderr */
   std::cerr.rdbuf(old);
@@ -64,48 +63,96 @@ int CometApplication::main(const vector<string>& input_files) {
   return success ? 0 : 1;
 }
 
-/**
- * Extracts the variable modification info from the string
- */
-void CometApplication::calcVarMods(
-    const string& var_str, ///< variable modification string
-    VarMods& varmods ///< Variable modification structure to set
-    ) {
-  
-  varmods.bBinaryMod = 0;
-  varmods.iMaxNumVarModAAPerMod = 0;
-  varmods.dVarModMass = 0.0;
-  memset(varmods.szVarModChar,0,MAX_VARMOD_AA);
-
-  vector<string> tokens = StringUtils::Split(var_str, ' ');
-  varmods.dVarModMass = StringUtils::FromString<double>(tokens[0]);
-  strcpy(varmods.szVarModChar, tokens[1].c_str());
-  varmods.bBinaryMod = StringUtils::FromString<int>(tokens[2]);
-  varmods.iMaxNumVarModAAPerMod = StringUtils::FromString<int>(tokens[3]);
+void CometApplication::setString(const string& param) {
+  searchManager_.SetParam(param, Params::GetString(param), Params::GetString(param));
 }
 
-/**
- * Sets a double range from a string
- */
-void CometApplication::getDoubleRange(
-    const string& str, ///< range string to set -in
-    DoubleRange& doubleRangeParam ///< DoubleRange parameter -out
-    ) {
-  vector<string> tokens = StringUtils::Split(str, ' ');
-  doubleRangeParam.dStart = StringUtils::FromString<double>(tokens[0]);
-  doubleRangeParam.dEnd = StringUtils::FromString<double>(tokens[1]);
+void CometApplication::setInt(const string& param) {
+  searchManager_.SetParam(param, Params::GetString(param), Params::GetInt(param));
 }
 
-/*
- * sets the integer range from a string
- */
-void CometApplication::getIntRange(
-    const string& str, ///< range string to set -in
-    IntRange& intRangeParam ///< IntRange parameter -out
-    ) {
-  vector<string> tokens = StringUtils::Split(str, ' ');
-  intRangeParam.iStart = StringUtils::FromString<double>(tokens[0]);
-  intRangeParam.iEnd = StringUtils::FromString<double>(tokens[1]);
+void CometApplication::setIntRange(const string& param) {
+  vector<int> tokens = StringUtils::Fields<int>(Params::GetString(param));
+  IntRange r;
+  r.iStart = tokens[0];
+  r.iEnd = tokens[1];
+  searchManager_.SetParam(param, Params::GetString(param), r);
+}
+
+void CometApplication::setDouble(const string& param) {
+  searchManager_.SetParam(param, Params::GetString(param), Params::GetDouble(param));
+}
+
+void CometApplication::setDoubleRange(const string& param) {
+  vector<double> tokens = StringUtils::Fields<double>(Params::GetString(param));
+  DoubleRange r;
+  r.dStart = tokens[0];
+  r.dEnd = tokens[1];
+  searchManager_.SetParam(param, Params::GetString(param), r);
+}
+
+void CometApplication::setDoubleVector(const string& param) {
+  vector<double> v = StringUtils::Fields<double>(Params::GetString(param));
+  searchManager_.SetParam(param, Params::GetString(param), v);
+}
+
+void CometApplication::setVarMod(const string& param) {
+  vector<string> fields = StringUtils::Fields(Params::GetString(param));
+  if (fields.empty()) {
+    return;
+  }
+  VarMods m;
+  for (int i = 0; i < fields.size(); i++) {
+    string field = fields[i];
+    switch (i) {
+      case 0: m.dVarModMass = StringUtils::FromString<double>(field); break;
+      case 1: strcpy(m.szVarModChar, field.c_str()); break;
+      case 2: m.iBinaryMod = StringUtils::FromString<int>(field); break;
+      case 3: m.iMaxNumVarModAAPerMod = StringUtils::FromString<int>(field); break;
+      case 4: m.iVarModTermDistance = StringUtils::FromString<int>(field); break;
+      case 5: m.iWhichTerm = StringUtils::FromString<int>(field); break;
+      case 6: m.bRequireThisMod = StringUtils::FromString<int>(field); break;
+    }
+  }
+  searchManager_.SetParam(param, Params::GetString(param), m);
+}
+
+void CometApplication::setEnzyme(
+  const string& param,
+  const string& searchParam,
+  const string& sampleParam,
+  const string& missedCleavageParam) {
+  EnzymeInfo e;
+  double temp;
+  int search = Params::GetInt(searchParam);
+  if (search >= 0 && search < get_comet_enzyme_info_lines().size()) {
+    const char* szParamBuf = get_comet_enzyme_info_lines()[search].c_str();
+    sscanf(szParamBuf, "%lf %48s %d %20s %20s\n",
+      &temp,
+      e.szSearchEnzymeName,
+      &e.iSearchEnzymeOffSet,
+      e.szSearchEnzymeBreakAA,
+      e.szSearchEnzymeNoBreakAA);
+  } else {
+    carp(CARP_FATAL, "search_enzyme_number=%d out of range (0-%d)",
+      search, get_comet_enzyme_info_lines().size() - 1);
+  }
+
+  int sample = Params::GetInt(sampleParam);
+  if (sample >= 0 && sample < get_comet_enzyme_info_lines().size()) {
+    const char* szParamBuf = get_comet_enzyme_info_lines()[sample].c_str();
+    sscanf(szParamBuf, "%lf %48s %d %20s %20s\n",
+      &temp,
+      e.szSampleEnzymeName,
+      &e.iSampleEnzymeOffSet,
+      e.szSampleEnzymeBreakAA,
+      e.szSampleEnzymeNoBreakAA);
+  } else {
+    carp(CARP_FATAL, "sample_enzyme_number=%d out of range (0-%d)",
+      sample, get_comet_enzyme_info_lines().size() - 1);
+  }
+  e.iAllowedMissedCleavage = Params::GetInt(missedCleavageParam);
+  searchManager_.SetParam(param, "TODO", e);
 }
 
 /**
@@ -113,19 +160,14 @@ void CometApplication::getIntRange(
  */
 void CometApplication::setCometParameters(
   const vector<string>& spec_files,
-  vector<InputFileInfo*> &pvInputFiles, ///<vector of input spectra files
-  CometSearchManager& searchMgr ///< SearchManager to set the parameters
+  vector<InputFileInfo*>& pvInputFiles ///<vector of input spectra files
   ) {
-  VarMods varModsParam;
-  IntRange intRangeParam;
-  DoubleRange doubleRangeParam;
-
   string scan_range_str = Params::GetString("scan_range");
   int analysis_type = AnalysisType_EntireFile;
   int first_scan, last_scan;
   if (scan_range_str != "0 0") {
     analysis_type = AnalysisType_SpecificScanRange;
-    vector<string> tokens = StringUtils::Split(scan_range_str, ' ');
+    vector<string> tokens = StringUtils::Fields(scan_range_str);
     first_scan = StringUtils::FromString<int>(tokens[0]);
     last_scan = StringUtils::FromString<int>(tokens[1]);
   }
@@ -149,131 +191,95 @@ void CometApplication::setCometParameters(
     pvInputFiles.push_back(pInputFile);
   }
 
-  searchMgr.SetParam("database_name", Params::GetString("database name"), Params::GetString("database name"));
-  searchMgr.SetParam("decoy_prefix", Params::GetString("decoy_prefix"), Params::GetString("decoy_prefix"));
-  searchMgr.SetParam("output_suffix", Params::GetString("output_suffix"), Params::GetString("output_suffix"));
-  searchMgr.SetParam("nucleotide_reading_frame", Params::GetString("nucleotide_reading_frame"), Params::GetInt("nucleotide_reading_frame"));
-  searchMgr.SetParam("mass_type_parent", Params::GetString("mass_type_parent"), Params::GetInt("mass_type_parent"));
-  searchMgr.SetParam("mass_type_fragment", Params::GetString("mass_type_fragment"), Params::GetInt("mass_type_fragment"));
-  searchMgr.SetParam("show_fragment_ions", Params::GetString("show_fragment_ions"), Params::GetInt("show_fragment_ions"));
-  searchMgr.SetParam("num_threads", Params::GetString("num_threads"), Params::GetInt("num_threads"));
-  searchMgr.SetParam("clip_nterm_methionine", Params::GetString("clip_nterm_methionine"), Params::GetInt("clip_nterm_methionine"));
-  searchMgr.SetParam("theoretical_fragment_ions", Params::GetString("theoretical_fragment_ions"), Params::GetInt("theoretical_fragment_ions"));
-  searchMgr.SetParam("use_A_ions", Params::GetString("use_A_ions"), Params::GetInt("use_A_ions"));
-  searchMgr.SetParam("use_B_ions", Params::GetString("use_B_ions"), Params::GetInt("use_B_ions"));
-  searchMgr.SetParam("use_C_ions", Params::GetString("use_C_ions"), Params::GetInt("use_C_ions"));
-  searchMgr.SetParam("use_X_ions", Params::GetString("use_X_ions"), Params::GetInt("use_X_ions"));
-  searchMgr.SetParam("use_Y_ions", Params::GetString("use_Y_ions"), Params::GetInt("use_Y_ions"));
-  searchMgr.SetParam("use_Z_ions", Params::GetString("use_Z_ions"), Params::GetInt("use_Z_ions"));
-  searchMgr.SetParam("use_NL_ions", Params::GetString("use_NL_ions"), Params::GetInt("use_NL_ions"));
-  searchMgr.SetParam("use_sparse_matrix", Params::GetString("use_sparse_matrix"), Params::GetInt("use_sparse_matrix"));
-
-  for (int i = 1; i <= 9; i++) {
-    string param = "variable_mod0" + StringUtils::ToString(i);
-    string paramValue = Params::GetString(param);
-    if (!paramValue.empty()) {
-      calcVarMods(paramValue, varModsParam);
-      searchMgr.SetParam(param, paramValue, varModsParam);
-    }
-  }
-
-  searchMgr.SetParam("max_variable_mods_in_peptide", Params::GetString("max_variable_mods_in_peptide"), Params::GetInt("max_variable_mods_in_peptide"));
-  searchMgr.SetParam("fragment_bin_tol", Params::GetString("fragment_bin_tol"), Params::GetDouble("fragment_bin_tol"));
-  searchMgr.SetParam("fragment_bin_offset", Params::GetString("fragment_bin_offset"), Params::GetDouble("fragment_bin_offset"));
-  searchMgr.SetParam("peptide_mass_tolerance", Params::GetString("peptide_mass_tolerance"), Params::GetDouble("peptide_mass_tolerance"));
-  searchMgr.SetParam("peptide_mass_units", Params::GetString("peptide_mass_units"), Params::GetInt("peptide_mass_units"));
-  searchMgr.SetParam("isotope_error", Params::GetString("isotope_error"), Params::GetInt("isotope_error"));
-  searchMgr.SetParam("num_output_lines", Params::GetString("num_output_lines"), Params::GetInt("num_output_lines"));
-  searchMgr.SetParam("num_results", Params::GetString("num_results"), Params::GetInt("num_results"));
-  searchMgr.SetParam("remove_precursor_peak", Params::GetString("remove_precursor_peak"), Params::GetInt("remove_precursor_peak"));
-  searchMgr.SetParam("remove_precursor_tolerance", Params::GetString("remove_precursor_tolerance"), Params::GetDouble("remove_precursor_tolerance"));
-  
-  getDoubleRange(Params::GetString("clear_mz_range"), doubleRangeParam );
-  searchMgr.SetParam("clear_mz_range", Params::GetString("clear_mz_range"), doubleRangeParam );
-
-  searchMgr.SetParam("print_expect_score", Params::GetString("print_expect_score"), Params::GetInt("print_expect_score"));
-  searchMgr.SetParam("output_sqtstream", "0", 0);
-  
-  searchMgr.SetParam("override_charge", Params::GetString("override_charge"), Params::GetInt("override_charge"));
-
-  searchMgr.SetParam("require_variable_mod", Params::GetString("require_variable_mod"), Params::GetInt("require_variable_mod"));
-  
-  searchMgr.SetParam("output_sqtfile", Params::GetString("output_sqtfile"), Params::GetInt("output_sqtfile"));
-  searchMgr.SetParam("output_txtfile", Params::GetString("output_txtfile"), Params::GetInt("output_txtfile"));
-  searchMgr.SetParam("output_pepxmlfile", Params::GetString("output_pepxmlfile"), Params::GetInt("output_pepxmlfile"));
-  searchMgr.SetParam("output_percolatorfile", Params::GetString("output_percolatorfile"), Params::GetInt("output_percolatorfile"));
-  searchMgr.SetParam("output_outfiles", "0", 0);
-  searchMgr.SetParam("skip_researching", Params::GetString("skip_researching"), Params::GetInt("skip_researching"));
-  searchMgr.SetParam("add_Cterm_peptide", Params::GetString("add_Cterm_peptide"), Params::GetDouble("add_Cterm_peptide"));
-  searchMgr.SetParam("add_Nterm_peptide", Params::GetString("add_Nterm_peptide"), Params::GetDouble("add_Nterm_peptide"));
-  searchMgr.SetParam("add_Cterm_protein", Params::GetString("add_Cterm_protein"), Params::GetDouble("add_Cterm_protein"));
-  searchMgr.SetParam("add_Nterm_protein", Params::GetString("add_Nterm_protein"), Params::GetDouble("add_Nterm_protein"));
+  // Database
+  setString("database_name");
+  setInt("decoy_search");
+  // CPU threads
+  setInt("num_threads");
+  // Masses
+  setDouble("peptide_mass_tolerance");
+  setInt("peptide_mass_units");
+  setInt("mass_type_parent");
+  setInt("mass_type_fragment");
+  setInt("precursor_tolerance_type");
+  setInt("isotope_error");
+  // Search enzyme
+  setInt("search_enzyme_number");
+  setInt("num_enzyme_termini");
+  setInt("allowed_missed_cleavage");
+  // Fragment ions
+  setDouble("fragment_bin_tol");
+  setDouble("fragment_bin_offset");
+  setInt("theoretical_fragment_ions");
+  setInt("use_A_ions");
+  setInt("use_B_ions");
+  setInt("use_C_ions");
+  setInt("use_X_ions");
+  setInt("use_Y_ions");
+  setInt("use_Z_ions");
+  setInt("use_NL_ions");
+  // Output
+  searchManager_.SetParam("output_sqtstream", "0", 0);
+  setInt("output_sqtfile");
+  setInt("output_txtfile");
+  setInt("output_pepxmlfile");
+  setInt("output_percolatorfile");
+  setInt("output_outfiles");
+  setInt("print_expect_score");
+  setInt("num_output_lines");
+  setInt("show_fragment_ions");
+  setInt("sample_enzyme_number");
+  // mzXML/mzML parameters
+  setIntRange("scan_range");
+  setIntRange("precursor_charge");
+  setInt("override_charge");
+  setInt("ms_level");
+  setString("activation_method");
+  // Misc. parameters
+  setDoubleRange("digest_mass_range");
+  setInt("num_results");
+  setInt("skip_researching");
+  setInt("max_fragment_charge");
+  setInt("max_precursor_charge");
+  setInt("nucleotide_reading_frame");
+  setInt("clip_nterm_methionine");
+  setInt("spectrum_batch_size");
+  setString("decoy_prefix");
+  setString("output_suffix");
+  setDoubleVector("mass_offsets");
+  // Spectral processing
+  setInt("minimum_peaks");
+  setDouble("minimum_intensity");
+  setInt("remove_precursor_peak");
+  setDouble("remove_precursor_tolerance");
+  setDoubleRange("clear_mz_range");
+  // Variable modifications
+  setVarMod("variable_mod01");
+  setVarMod("variable_mod02");
+  setVarMod("variable_mod03");
+  setVarMod("variable_mod04");
+  setVarMod("variable_mod05");
+  setVarMod("variable_mod06");
+  setVarMod("variable_mod07");
+  setVarMod("variable_mod08");
+  setVarMod("variable_mod09");
+  setInt("max_variable_mods_in_peptide");
+  setInt("require_variable_mod");
+  // Static modifications
+  setDouble("add_Cterm_peptide");
+  setDouble("add_Nterm_peptide");
+  setDouble("add_Cterm_protein");
+  setDouble("add_Nterm_protein");
   for (char c = 'A'; c <= 'Z'; c++) {
     string aaName = AminoAcidUtil::GetName(c);
     aaName = aaName.empty() ? "user_amino_acid" : StringUtils::Replace(aaName, " ", "_");
     string param = "add_" + string(1, c) + "_" + aaName;
-    searchMgr.SetParam(param, Params::GetString(param), Params::GetDouble(param));
-  }
-  searchMgr.SetParam("search_enzyme_number", Params::GetString("search_enzyme_number"), Params::GetInt("search_enzyme_number"));
-  searchMgr.SetParam("sample_enzyme_number", Params::GetString("sample_enzyme_number"), Params::GetInt("sample_enzyme_number"));
-  searchMgr.SetParam("num_enzyme_termini", Params::GetString("num_enzyme_termini"), Params::GetInt("num_enzyme_termini"));
-  searchMgr.SetParam("allowed_missed_cleavage", Params::GetString("allowed_missed_cleavage"), Params::GetInt("allowed_missed_cleavage"));
-
-  getIntRange(Params::GetString("scan_range"), intRangeParam );
-  searchMgr.SetParam("scan_range", Params::GetString("scan_range"), intRangeParam );
-
-  searchMgr.SetParam("spectrum_batch_size", Params::GetString("spectrum_batch_size"), Params::GetInt("spectrum_batch_size"));
-  searchMgr.SetParam("minimum_peaks", Params::GetString("minimum_peaks"), Params::GetInt("minimum_peaks"));
-
-  getIntRange(Params::GetString("precursor_charge"), intRangeParam);
-  searchMgr.SetParam("precursor_charge", Params::GetString("precursor_charge"), intRangeParam);
-  
-  searchMgr.SetParam("max_fragment_charge", Params::GetString("max_fragment_charge"), Params::GetInt("max_fragment_charge"));
-  searchMgr.SetParam("max_precursor_charge", Params::GetString("max_precursor_charge"), Params::GetInt("max_precursor_charge"));
-
-  getDoubleRange(Params::GetString("digest_mass_range"), doubleRangeParam);
-  searchMgr.SetParam("digest_mass_range", Params::GetString("digest_mass_range"), doubleRangeParam);
-  
-  searchMgr.SetParam("ms_level", Params::GetString("ms_level"), Params::GetInt("ms_level"));
-  searchMgr.SetParam("activation_method", Params::GetString("activation_method"), Params::GetString("activation_method"));
-  searchMgr.SetParam("minimum_intensity", Params::GetString("minimum_intensity"), Params::GetDouble("minimum_intensity"));
-  searchMgr.SetParam("decoy_search", Params::GetString("decoy_search"), Params::GetInt("decoy_search"));
-  
-  EnzymeInfo enzymeInformation;
-  double temp;
-  int search_enzyme_number = Params::GetInt("search_enzyme_number");
-
-  if (search_enzyme_number >=0 && search_enzyme_number < get_comet_enzyme_info_lines().size()) {
-    const char* szParamBuf = get_comet_enzyme_info_lines()[search_enzyme_number].c_str();
-    sscanf(szParamBuf, "%lf %48s %d %20s %20s\n",
-      &temp, 
-      enzymeInformation.szSearchEnzymeName, 
-      &enzymeInformation.iSearchEnzymeOffSet, 
-      enzymeInformation.szSearchEnzymeBreakAA, 
-      enzymeInformation.szSearchEnzymeNoBreakAA);
-  } else {
-    carp(CARP_FATAL, "search_enzyme_number=%d out of range (0-%d)", 
-      search_enzyme_number, (get_comet_enzyme_info_lines().size()-1));
+    setDouble(param);
   }
 
-  int sample_enzyme_number = Params::GetInt("sample_enzyme_number");
-  if (sample_enzyme_number >= 0 && sample_enzyme_number < get_comet_enzyme_info_lines().size()) {
-    const char* szParamBuf = get_comet_enzyme_info_lines()[sample_enzyme_number].c_str();
-    sscanf(szParamBuf, "%lf %48s %d %20s %20s\n",
-      &temp, 
-      enzymeInformation.szSampleEnzymeName, 
-      &enzymeInformation.iSampleEnzymeOffSet, 
-      enzymeInformation.szSampleEnzymeBreakAA, 
-      enzymeInformation.szSampleEnzymeNoBreakAA);
-  } else {
-    carp(CARP_FATAL, "sample_enzyme_number=%d out of range (0-%d)", 
-      sample_enzyme_number, (get_comet_enzyme_info_lines().size()-1));
-  }
-  enzymeInformation.iAllowedMissedCleavage = Params::GetInt("allowed_missed_cleavage");
-  searchMgr.SetParam("[COMET_ENZYME_INFO]", "TODO", enzymeInformation);
-  
+  setEnzyme("[COMET_ENZYME_INFO]",
+            "search_enzyme_number", "sample_enzyme_number", "allowed_missed_cleavage");
 }
-
 
 /**
  * \returns the command name for CometApplication
@@ -309,7 +315,7 @@ string CometApplication::getDescription() const {
 vector<string> CometApplication::getArgs() const {
   string arr[] = {
     "input spectra+",
-    "database name"
+    "database_name"
   };
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }
@@ -324,17 +330,22 @@ vector<string> CometApplication::getOptions() const {
     "overwrite",
     "parameter-file",
     "verbosity",
+    // Database
     "decoy_search",
+    // CPU threads
     "num_threads",
-    "output_suffix",
+    // Masses
     "peptide_mass_tolerance",
     "peptide_mass_units",
     "mass_type_parent",
     "mass_type_fragment",
+    "precursor_tolerance_type",
     "isotope_error",
+    // Search enzyme
     "search_enzyme_number",
     "num_enzyme_termini",
     "allowed_missed_cleavage",
+    // Fragment ions
     "fragment_bin_tol",
     "fragment_bin_offset",
     "theoretical_fragment_ions",
@@ -345,20 +356,23 @@ vector<string> CometApplication::getOptions() const {
     "use_Y_ions",
     "use_Z_ions",
     "use_NL_ions",
-    "use_sparse_matrix",
+    // Output
     "output_sqtfile",
+    "output_txtfile",
     "output_pepxmlfile",
     "output_percolatorfile",
-    "output_txtfile",
     "output_outfiles",
     "print_expect_score",
     "num_output_lines",
     "show_fragment_ions",
     "sample_enzyme_number",
+    // mzXML/mzML parameters
     "scan_range",
     "precursor_charge",
+    "override_charge",
     "ms_level",
     "activation_method",
+    // Misc. parameters
     "digest_mass_range",
     "num_results",
     "skip_researching",
@@ -367,11 +381,16 @@ vector<string> CometApplication::getOptions() const {
     "nucleotide_reading_frame",
     "clip_nterm_methionine",
     "spectrum_batch_size",
+    "decoy_prefix",
+    "output_suffix",
+    "mass_offsets",
+    // Spectral processing
     "minimum_peaks",
     "minimum_intensity",
     "remove_precursor_peak",
     "remove_precursor_tolerance",
     "clear_mz_range",
+    // Variable modifications
     "variable_mod01",
     "variable_mod02",
     "variable_mod03",
@@ -381,9 +400,9 @@ vector<string> CometApplication::getOptions() const {
     "variable_mod07",
     "variable_mod08",
     "variable_mod09",
-    "require_variable_mod",
     "max_variable_mods_in_peptide",
-    "override_charge",
+    "require_variable_mod",
+    // Static modifications
     "add_Cterm_peptide",
     "add_Nterm_peptide",
     "add_Cterm_protein",
@@ -408,7 +427,7 @@ vector<string> CometApplication::getOptions() const {
     "add_R_arginine",
     "add_S_serine",
     "add_T_threonine",
-    "add_U_user_amino_acid",
+    "add_U_selenocysteine",
     "add_V_valine",
     "add_W_tryptophan",
     "add_X_user_amino_acid",
@@ -450,7 +469,7 @@ bool CometApplication::needsOutputDirectory() const {
 
 void CometApplication::processParams() {
   const string varModPrefix = "variable_mod0";
-  const string varModEmptyDefault = "0 null 0 0";
+  const string varModEmptyDefault = "0.0 null 0 4 -1 0 0";
   for (int i = 1; i <= 9; i++) {
     string mod = varModPrefix + StringUtils::ToString(i);
     if (Params::GetString(mod).empty()) {

@@ -686,7 +686,7 @@ void PepRanker :: write_results_peptides_tab(ofstream &os)
     os<<"b/y ions matched"<<"\t";
     os<<"b/y ions total"<<"\t";
   }
-  os<<"matches/spectrum"<<"\t";
+  os<<"distinct matches/spectrum"<<"\t";
   os<<"sequence\t"; 
   os<<"cleavage type"<<"\t"; 
   os<<"protein id"<<"\t";
@@ -783,7 +783,7 @@ void PepRanker :: write_results_psm_tab(ofstream &os)
     os<<"b/y ions matched"<<"\t";
     os<<"b/y ions total"<<"\t";
   }
-  os<<"matches/spectrum"<<"\t";
+  os<<"distinct matches/spectrum"<<"\t";
   os<<"sequence"<<"\t";
   os<<"cleavage type"<<"\t"; 
   os<<"protein id"<<"\t";
@@ -833,7 +833,7 @@ void PepRanker :: write_results_psm_tab(ofstream &os)
             //by ions total 
             os<<d.psmind2by_ions_total(psmind)<<"\t";
           }
-      	  //Matches/Spectrum 
+          //Distinct matches/Spectrum
       	  os<<d.psmind2matches_spectrum(psmind)<<"\t";
       	  get_pep_seq(pep,seq,n,c);
       	  //Sequence 

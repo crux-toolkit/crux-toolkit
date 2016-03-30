@@ -37,6 +37,7 @@ class CHardklor2{
   //Methods:
   void  Echo(bool b);
   int   GoHardklor(CHardklorSetting sett, Spectrum* s=NULL);
+  void    QuickCharge(Spectrum& s, int index, vector<int>& v);
   void  SetResultsToMemory(bool b);
   int   Size();
 
@@ -53,7 +54,6 @@ class CHardklor2{
   bool    MatchSubSpectrum(Spectrum& s, int peakIndex, pepHit& pep);
   double  PeakMatcher(vector<Result>& vMR, Spectrum& s, double lower, double upper, double deltaM, int matchIndex, int& matchCount, int& indexOverlap, vector<int>& vMatchIndex, vector<float>& vMatchIntensity);
   double  PeakMatcherB(vector<Result>& vMR, Spectrum& s, double lower, double upper, double deltaM, int matchIndex, int& matchCount, vector<int>& vMatchIndex, vector<float>& vMatchIntensity);
-  void    QuickCharge(Spectrum& s, int index, vector<int>& v);
   void    QuickHardklor(Spectrum& s, vector<pepHit>& vPeps);
   void    RefineHits(vector<pepHit>& vPeps, Spectrum& s);
   void    ResultToMem(pepHit& ph, Spectrum& s);
