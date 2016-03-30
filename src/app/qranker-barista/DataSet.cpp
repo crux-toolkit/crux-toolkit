@@ -35,7 +35,8 @@ Dataset::~Dataset()
   delete[] psmind_to_precursor_mass; psmind_to_precursor_mass = (double*)0;
   delete[] psmind_to_sp_rank; psmind_to_sp_rank=(int*)0;//Sp Rank
   delete[] psmind_to_xcorr_rank; psmind_to_xcorr_rank=(int*)0;//xcorr Rank
-  delete[] psmind_to_matches_spectrum; psmind_to_matches_spectrum=(int*)0;//matches/spectrum 
+  // distinct matches/spectrum
+  delete[] psmind_to_matches_spectrum; psmind_to_matches_spectrum=(int*)0;
   delete[] psmind_to_by_ions_matched; psmind_to_by_ions_matched=(double*)0;// b/y ions matched
   delete[] psmind_to_by_ions_total; psmind_to_by_ions_total=(double*)0;// b/y ions total
   delete[] psmind_to_peptide_position; psmind_to_peptide_position=(int*)0;//peptide position in protein 
@@ -397,7 +398,8 @@ void Dataset :: clear_data_psm_results()
   delete [] psmind_to_fileind; psmind_to_fileind = (int*)0;
   delete [] psmind_to_sp_rank; psmind_to_sp_rank=(int*)0;//sp rank
   delete [] psmind_to_xcorr_rank; psmind_to_xcorr_rank=(int*)0;//xcorr rank
-  delete[] psmind_to_matches_spectrum; psmind_to_matches_spectrum=(int*)0;//matches/spectrum
+  // distinct matches/spectrum
+  delete[] psmind_to_matches_spectrum; psmind_to_matches_spectrum=(int*)0;
   delete [] psmind_to_by_ions_total; psmind_to_by_ions_total=(double*)0; //b/y ions total 
   delete [] psmind_to_by_ions_matched;  psmind_to_by_ions_matched=(double*)0; //by ions matched 
   delete [] psmind_to_peptide_position; psmind_to_peptide_position=(int*)0; //position of peptide in 

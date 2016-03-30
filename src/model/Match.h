@@ -132,16 +132,14 @@ class Match {
    public:
     // If less, sort is from least to greatest
     ScoreComparer(SCORER_TYPE_T type, bool less): type_(type), less_(less) {}
-    bool operator() (const Match* x, const Match* y) {
-      FLOAT_T scoreX = x->getScore(type_);
-      FLOAT_T scoreY = y->getScore(type_);
-      return less_ ? scoreX < scoreY : scoreX > scoreY;
-    }
+    bool operator() (const Match* x, const Match* y);
 
     private:
      SCORER_TYPE_T type_;
      bool less_;
   };
+  static bool ScoreLess(FLOAT_T x, FLOAT_T y);
+  static bool ScoreGreater(FLOAT_T x, FLOAT_T y);
 
   /**
    * TODO: should be this be here or parameterized better?

@@ -175,7 +175,7 @@ void QRanker :: write_results_psm_tab(ofstream &osTarget, ofstream &osDecoy)
       os<<"b/y ions matched"<<"\t";
       os<<"b/y ions total"<<"\t";
     }
-    os<<"matches/spectrum"<<"\t";
+    os<<"distinct matches/spectrum"<<"\t";
     os<<"sequence"<<"\t";
     os<<"cleavage type"<<"\t"; 
     os<<"protein id"<<"\t";

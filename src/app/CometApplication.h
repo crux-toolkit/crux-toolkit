@@ -16,6 +16,19 @@
 class CometApplication: public CruxApplication {
 
  protected:
+  CometSearchManager searchManager_;
+
+  void setString(const std::string& param);
+  void setInt(const std::string& param);
+  void setIntRange(const std::string& param);
+  void setDouble(const std::string& param);
+  void setDoubleRange(const std::string& param);
+  void setDoubleVector(const std::string& param);
+  void setVarMod(const std::string& param);
+  void setEnzyme(const std::string& param,
+                 const std::string& searchParam,
+                 const std::string& sampleParam,
+                 const std::string& missedCleavageParam);
 
  public:
 
@@ -75,36 +88,9 @@ class CometApplication: public CruxApplication {
    */
   void setCometParameters(
     const std::vector<std::string>& spec_files,
-    std::vector<InputFileInfo*> &pvInputFiles, ///<vector of input spectra files
-    CometSearchManager& searchMgr ///< SearchManager to set the parameters
+    std::vector<InputFileInfo*>& pvInputFiles ///<vector of input spectra files
     );
-  
-  /**
-   * Extracts the variable modification info from the string
-   */
-  void calcVarMods(
-    const std::string& var_str, ///< variable modification string
-    VarMods& varmods ///< Variable modification structure to set
-    );
-
-  /**
-   * Sets a double range from a string
-   */
-  void getDoubleRange(
-    const std::string& str, ///< range string to set -in
-    DoubleRange& doubleRangeParam ///< DoubleRange parameter -out
-    );
-
-  /*
-   * sets the integer range from a string
-   */
-  void getIntRange(
-    const std::string& str, ///< range string to set -in
-    IntRange& intRangeParam ///< IntRange parameter -out
-    );
-
 };
-
 
 #endif
 

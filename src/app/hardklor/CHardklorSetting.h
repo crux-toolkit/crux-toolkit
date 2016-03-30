@@ -46,6 +46,7 @@ class CHardklorSetting {
   int depth;        //maximum number of overlapping peptides
   int maxCharge;    //max charge state to search for
   int minCharge;    //min charge state to search for
+  int msLevel;      //integer representation of the scan level
   int peptide;			//maximum peptide models to analyze at a single time
   //int ppMatch;      //pre-processing matches. m/z must be observed this amount across ppWin
   //int ppWin;        //pre-processing window size (1 = +/-1 scan)

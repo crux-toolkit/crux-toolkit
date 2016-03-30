@@ -107,7 +107,6 @@ void Match::freeMatch(
 }
 
 Match::~Match() {
-
   // but aren't there multiple matches pointing to the same peptide?
   // if so, create a new free_shallow_match which doesn't touch the members
   if (peptide_ != NULL){
@@ -122,6 +121,32 @@ Match::~Match() {
   if (mod_sequence_ != NULL){
     free(mod_sequence_);
   }
+}
+
+bool Match::ScoreComparer::operator() (const Match* x, const Match* y) {
+  FLOAT_T scoreX = x->getScore(type_);
+  FLOAT_T scoreY = y->getScore(type_);
+  return less_ ? Match::ScoreLess(scoreX, scoreY) : Match::ScoreGreater(scoreX, scoreY);
+}
+
+bool Match::ScoreLess(FLOAT_T x, FLOAT_T y) {
+  if (isnan(x) || isinf(x)) {
+    x = std::numeric_limits<FLOAT_T>::max();
+  }
+  if (isnan(y) || isinf(y)) {
+    y = std::numeric_limits<FLOAT_T>::max();
+  }
+  return x < y;
+}
+
+bool Match::ScoreGreater(FLOAT_T x, FLOAT_T y) {
+  if (isnan(x) || isinf(x)) {
+    x = -std::numeric_limits<FLOAT_T>::max();
+  }
+  if (isnan(y) || isinf(y)) {
+    y = -std::numeric_limits<FLOAT_T>::max();
+  }
+  return x > y;
 }
 
 /**
@@ -313,10 +338,11 @@ void Match::printOneMatchField(
       double log_pvalue = getScore(LOGP_BONF_WEIBULL_XCORR);
       if (P_VALUE_NA == log_pvalue) {
         output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, "NaN");
-      }
-      else {
-        output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
-                                         exp(-1 * log_pvalue));
+      } else {
+        double p_value = log_pvalue != numeric_limits<FLOAT_T>::infinity() ?
+          exp(-1 * log_pvalue) : 0;
+        output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx,
+                                         p_value);
       }
     }
     break;

@@ -14,6 +14,10 @@ vector<string> StringUtils::Split(const string& s, const string& delimiter) {
   return Split<string>(s, delimiter);
 }
 
+vector<string> StringUtils::Fields(const string& s) {
+  return Fields<string>(s);
+}
+
 string StringUtils::ToLower(string s) {
   boost::to_lower(s);
   return s;
