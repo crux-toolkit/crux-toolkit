@@ -523,6 +523,30 @@ the <code>precursor-window</code> and
 <code>precursor-window-type</code> options.</p>
 
 <li>
+  <b>How can I run many jobs in parallel?</b>
+
+
+  <p>
+In combination with GNU parallel, parallelization of Crux can be
+achieved rather painlessly. For example, to run tide-search on a set
+of spectrum files, you can just get your spectra files into a filelist:</p>
+
+<pre>
+  find . -name "*.mzXML" &gt; file.list
+</pre>
+
+<p>
+Then, with a bit of bash magic, run parallel as follows (assuming
+there are 100 files in file.list):</p>
+
+<pre>
+  parallel --xapply crux tide-search &lt;options&gt; --fileroot {1} {2} database.db ::: $(seq 1 100) ::: $(cat file.list)
+</pre>
+
+  <p>
+    <i>Thanks to Ben Templeton for this answer.</i></p>
+    
+<li>
 <b>How can I contribute to Crux?</b></li>
 
 <p>
