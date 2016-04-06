@@ -6,10 +6,12 @@ class CruxTester
   def initialize(path)
     @crux_path = path
     @crux_args = Array.new
+    @ignore_patterns = Array.new
   end
 
   def set_test_name(name) @crux_test_name = name end
   def add_arg(arg) @crux_args.push(arg) end
+  def add_ignore_pattern(pattern) @ignore_patterns.push(Regexp.new(pattern)) end
 
   def exec(cmd)
     if @crux_test_name == nil
@@ -62,7 +64,27 @@ class CruxTester
     unless File.readable?(actual)
       raise("cannot read file '" + actual + "'")
     end
-    same = FileUtils.cmp(expected, actual)
+
+    same = true
+    file_expected = File.open(expected)
+    file_actual = File.open(actual)
+    file_expected.each.zip(file_actual.each).each do | line_expected, line_actual |
+      if not line_expected == line_actual
+        ignore = false
+        @ignore_patterns.each do | pattern |
+          if pattern.match(line_expected) != nil && pattern.match(line_actual) != nil
+            ignore = true
+            break
+          end
+        end
+        if not ignore
+          same = false
+          break
+        end
+      end
+    end
+    file_expected.close
+    file_actual.close
     copyObserved(actual, expected, same, write_observed)
     return same
   end
