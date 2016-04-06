@@ -8,6 +8,9 @@ Scenario Outline: User runs psm-convert
   And I want to run a test named <test_name>
   And I pass the arguments --overwrite T test_results/<results> <out_format>
   When I run psm-convert
+  When I ignore lines matching the pattern: /^H[ \t]+StartTime.*$/
+  When I ignore lines matching the pattern: /^<msms_pipeline_analysis .*$/
+  When I ignore lines matching the pattern: /^<MzIdentML .*$/
   Then the return value should be 0
   And crux-output/<actual_output> should match good_results/<expected_output>
 
@@ -24,14 +27,14 @@ Examples:
   # From txt
   |psmconv-txt-to-html1|results1.txt    |html      |psm-convert.html   |psmconv-from-txt1.html   |
   |psmconv-txt-to-html2|results2.txt    |html      |psm-convert.html   |psmconv-from-txt2.html   |
-  #|psmconv-txt-to-sqt1 |results1.txt    |sqt       |psm-convert.sqt    |psmconv-from-txt1.sqt    | TODO: ignore time in comparison
-  #|psmconv-txt-to-sqt2 |results2.txt    |sqt       |psm-convert.sqt    |psmconv-from-txt2.sqt    | TODO: ignore time in comparison
+  #|psmconv-txt-to-sqt1 |results1.txt    |sqt       |psm-convert.sqt    |psmconv-from-txt1.sqt    | TODO: sqt term mods
+  #|psmconv-txt-to-sqt2 |results2.txt    |sqt       |psm-convert.sqt    |psmconv-from-txt2.sqt    | TODO: sqt term mods
   |psmconv-txt-to-pin1 |results1.txt    |pin       |psm-convert.pin    |psmconv-from-txt1.pin    |
   |psmconv-txt-to-pin2 |results2.txt    |pin       |psm-convert.pin    |psmconv-from-txt2.pin    |
-  #|psmconv-txt-to-pep1 |results1.txt    |pepxml    |psm-convert.pep.xml|psmconv-from-txt1.pep.xml| TODO: ignore time in comparison
-  #|psmconv-txt-to-pep2 |results2.txt    |pepxml    |psm-convert.pep.xml|psmconv-from-txt2.pep.xml| TODO: ignore time in comparison
-  #|psmconv-txt-to-mzid1|results1.txt    |mzidentml |psm-convert.mzid   |psmconv-from-txt1.mzid   | TODO: ignore time in comparison
-  #|psmconv-txt-to-mzid2|results2.txt    |mzidentml |psm-convert.mzid   |psmconv-from-txt2.mzid   | TODO: ignore time in comparison
+  |psmconv-txt-to-pep1 |results1.txt    |pepxml    |psm-convert.pep.xml|psmconv-from-txt1.pep.xml|
+  |psmconv-txt-to-pep2 |results2.txt    |pepxml    |psm-convert.pep.xml|psmconv-from-txt2.pep.xml|
+  |psmconv-txt-to-mzid1|results1.txt    |mzidentml |psm-convert.mzid   |psmconv-from-txt1.mzid   |
+  |psmconv-txt-to-mzid2|results2.txt    |mzidentml |psm-convert.mzid   |psmconv-from-txt2.mzid   |
   # To txt
   #|psmconv-sqt-to-txt1 |results1.sqt    |tsv       |psm-convert.txt    |psmconv-from-sqt1.txt    | TODO: sqt term mods
   #|psmconv-sqt-to-txt2 |results2.sqt    |tsv       |psm-convert.txt    |psmconv-from-sqt2.txt    | TODO: sqt term mods
