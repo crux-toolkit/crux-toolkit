@@ -3,46 +3,19 @@
  * \brief Object for parsing sqt files
  ****************************************************************************/
 
-#include "SQTReader.h"
-#include "LineFileReader.h"
-
 #include <cstdio>
 #include <cstring>
-
 #include <iostream>
 #include <fstream>
 
-#include "DelimitedFile.h"
 #include "parameter.h"
+#include "LineFileReader.h"
 #include "MatchCollectionParser.h"
 #include "SQTReader.h"
 #include "util/StringUtils.h"
 
 using namespace std;
 using namespace Crux;
-
-
-const int spectrum_low_scan_idx = 1;
-const int spectrum_high_scan_idx = 2;
-const int spectrum_charge_idx = 3;
-const int spectrum_observed_mass_idx = 6;
-const int spectrum_total_ion_intensity_idx = 7;
-const int spectrum_lowest_sp_idx = 8;
-const int spectrum_num_matches_idx = 9;
-
-const int match_xcorr_rank_idx = 1;
-const int match_sp_rank_idx = 2;
-const int match_calculated_mass_idx = 3;
-const int match_delta_cn_idx = 4;
-const int match_xcorr_idx = 5;
-const int match_sp_idx = 6;
-const int match_matched_ions_idx = 7;
-const int match_expected_ions_idx = 8;
-const int match_sequence_idx = 9;
-const int match_validation_idx = 10;
-
-const int locus_protein_id_idx = 1;
-const int locus_protein_desc_idx = 2;
 
 /**
  * Initializes the object
@@ -77,9 +50,7 @@ SQTReader::SQTReader(
   Database* database, ///< the protein database
   Database* decoy_database ///< the decoy protein database (can be null)
   ) : PSMReader(file_path, database, decoy_database) {
-
   init();
-
 }
 
 /**
@@ -92,24 +63,17 @@ SQTReader::~SQTReader() {
  * \returns the MatchCollection resulting from the parsed xml file
  */
 MatchCollection* SQTReader::parse() {
-
-
-  LineFileReader* line_reader = new LineFileReader(file_path_);
   current_match_collection_ = new MatchCollection();
   current_match_collection_->preparePostProcess();
   current_match_collection_->setScoredType(XCORR, true);
   current_match_collection_->setScoredType(SP, true);
   last_parsed_ = SQT_LINE_NONE;
 
-  while (line_reader->hasNext()) {
-
-    string line = line_reader->next();
-
-    if (line.length() > 0) {
-
-      char type = line[0];
-
-      switch (type) {
+  LineFileReader line_reader(file_path_);
+  while (line_reader.hasNext()) {
+    string line = line_reader.next();
+    if (!line.empty()) {
+      switch (line[0]) {
         case 'H':
           parseHeader(line);
           break;
@@ -123,71 +87,113 @@ MatchCollection* SQTReader::parse() {
           parseLocus(line);
           break;
         default:
-          carp(CARP_ERROR, "Unknown line %d\n%s",line_reader->getCurrentRow(), line.c_str());
+          carp(CARP_ERROR, "Unknown line %d\n%s", line_reader.getCurrentRow(), line.c_str());
       }
-    } else {
-      carp(CARP_ERROR, "blank line at row %d", line_reader->getCurrentRow());
     }
   }
-
-  delete line_reader;
 
   //add the last match
   if (current_match_ != NULL) {
     current_match_collection_->addMatchToPostMatchCollection(current_match_);
   }
-
   return current_match_collection_;
 }
 
 
-void SQTReader::parseHeader(string& line) {
+void SQTReader::parseHeader(const string& line) {
   last_parsed_ = SQT_LINE_HEADER;
-  headers_.push_back(line);
+  string content = StringUtils::Trim(line.substr(2));
+  if (StringUtils::StartsWith(content, "StaticMod")) {
+    content = StringUtils::Trim(content.substr(10));
+    vector<string> tokens = StringUtils::Split(content, '=');
+    if (tokens.size() == 2) {
+      ModificationDefinition::NewStaticMod(
+        tokens[0], StringUtils::FromString<double>(tokens[1]), UNKNOWN /*TODO*/);
+    }
+  } else if (StringUtils::StartsWith(content, "DiffMod")) {
+    content = StringUtils::Trim(content.substr(8));
+    vector<string> tokens = StringUtils::Split(content, '=');
+    if (tokens.size() == 2) {
+      string t0 = StringUtils::Trim(tokens[0]);
+      string aminoAcids = t0.substr(0, t0.length() - 1);
+      char symbol = t0[t0.length() - 1];
+      double deltaMass = StringUtils::FromString<double>(tokens[1]);
+      ModificationDefinition::NewVarMod(
+        aminoAcids, deltaMass, UNKNOWN /*TODO*/, false, false, symbol);
+    }
+  }
 }
 
-void SQTReader::parseSpectrum(string& line) {
+void SQTReader::parseSpectrum(const string& line) {
+  const int spectrum_low_scan_idx = 1;
+  const int spectrum_high_scan_idx = 2;
+  const int spectrum_charge_idx = 3;
+  const int spectrum_observed_mass_idx = 6;
+  const int spectrum_total_ion_intensity_idx = 7;
+  const int spectrum_lowest_sp_idx = 8;
+  const int spectrum_num_matches_idx = 9;
 
   vector<string> tokens = StringUtils::Split(line, '\t');
 
-  int low_scan = StringUtils::FromString<int>(tokens[spectrum_low_scan_idx]);
-  int high_scan = StringUtils::FromString<int>(tokens[spectrum_high_scan_idx]);
-  int charge = StringUtils::FromString<int>(tokens[spectrum_charge_idx]);
-  double observed_mass = StringUtils::FromString<double>(tokens[spectrum_observed_mass_idx]);
-  int current_num_matches = StringUtils::FromString<int>(tokens[spectrum_num_matches_idx]);
-  if (current_num_matches >= 0) {
-    current_match_collection_->setHasDistinctMatches(true);
+  int low_scan = -1;
+  int high_scan = -1;
+  int charge = -1;
+  current_ln_experiment_size_ = 0.0;
+  for (int i = 0; i < tokens.size(); i++) {
+    switch (i) {
+      case spectrum_low_scan_idx:
+        low_scan = StringUtils::FromString<int>(tokens[i]);
+        break;
+      case spectrum_high_scan_idx:
+        high_scan = StringUtils::FromString<int>(tokens[i]);
+        break;
+      case spectrum_charge_idx:
+        charge = StringUtils::FromString<int>(tokens[i]);
+        break;
+      case spectrum_observed_mass_idx: {
+        double observed_mass = StringUtils::FromString<double>(tokens[i]);
+        current_zstate_.setSinglyChargedMass(observed_mass, charge);
+        vector<int> chargeVec(1, charge);
+        current_spectrum_ = new Spectrum(low_scan, high_scan,
+                                         current_zstate_.getMZ(), chargeVec, "");
+        break;
+      }
+      case spectrum_num_matches_idx: {
+        int current_num_matches = StringUtils::FromString<int>(tokens[i]);
+        if (current_num_matches > 0) {
+          current_match_collection_->setHasDistinctMatches(true);
+          current_ln_experiment_size_ = logf((FLOAT_T)current_num_matches);
+        }
+        break;
+      }
+      case spectrum_total_ion_intensity_idx:
+        if (!tokens[i].empty()) {
+          current_spectrum_->setHasTotalEnergy(true);
+          current_spectrum_->setTotalEnergy(StringUtils::FromString<double>(tokens[i]));
+        }
+        break;
+      case spectrum_lowest_sp_idx:
+        if (!tokens[i].empty()) {
+          current_spectrum_->setHasLowestSp(true);
+          current_spectrum_->setLowestSp(StringUtils::FromString<double>(tokens[i]));
+        }
+        break;
+    }
   }
-
-  current_ln_experiment_size_ = logf((FLOAT_T)current_num_matches);
-
   last_parsed_ = SQT_LINE_SPECTRUM;
-
-  current_zstate_.setSinglyChargedMass(observed_mass, charge);
-  current_spectrum_ = new Spectrum(
-    low_scan,
-    high_scan,
-    current_zstate_.getMZ(),
-    vector<int>(1, charge),
-    "");
-
-  if (!tokens[spectrum_total_ion_intensity_idx].empty()) {
-    current_spectrum_->setHasTotalEnergy(true);
-  }
-  if (tokens[spectrum_lowest_sp_idx] != "") {
-    current_spectrum_->setHasLowestSp(true);
-  }
-
-  double total_ion_intensity = StringUtils::FromString<double>(
-    tokens[spectrum_total_ion_intensity_idx]);
-  double lowest_sp = StringUtils::FromString<double>(
-    tokens[spectrum_lowest_sp_idx]);
-  current_spectrum_->setTotalEnergy(total_ion_intensity);
-  current_spectrum_->setLowestSp(lowest_sp);
 }
 
-
-void SQTReader::parseMatch(string& line) {
+void SQTReader::parseMatch(const string& line) {
+  const int match_xcorr_rank_idx = 1;
+  const int match_sp_rank_idx = 2;
+  const int match_calculated_mass_idx = 3;
+  const int match_delta_cn_idx = 4;
+  const int match_xcorr_idx = 5;
+  const int match_sp_idx = 6;
+  const int match_matched_ions_idx = 7;
+  const int match_expected_ions_idx = 8;
+  const int match_sequence_idx = 9;
+  const int match_validation_idx = 10;
 
   vector<string> tokens = StringUtils::Split(line, '\t');
 
@@ -207,21 +213,30 @@ void SQTReader::parseMatch(string& line) {
   current_next_aa_ = sequence_tokens.back();
   sequence_tokens.erase(sequence_tokens.begin());
   sequence_tokens.pop_back();
-  current_peptide_sequence_ = DelimitedFile::splice(sequence_tokens, '.');
+  current_peptide_sequence_ = StringUtils::Join(sequence_tokens, '.');
   if (current_match_ != NULL) {
     current_match_collection_->addMatchToPostMatchCollection(current_match_);
   }
 
-  Peptide* peptide = new Peptide();
+  string unmodifiedSequence;
+  vector<Modification> mods;
+  for (size_t i = 0; i < current_peptide_sequence_.size(); i++) {
+    char c = current_peptide_sequence_[i];
+    if ('A' <= c && c <= 'Z') {
+      unmodifiedSequence.push_back(c);
+    } else {
+      const ModificationDefinition* modDef = ModificationDefinition::Find(c);
+      if (modDef != NULL) {
+        mods.push_back(Modification(modDef, (i > 0) ? i - 1 : 0));
+      } else {
+        carp(CARP_ERROR, "Unknown modification in %s: %c",
+             current_peptide_sequence_.c_str(), c);
+      }
 
-  MODIFIED_AA_T* mods = NULL;
-  convert_to_mod_aa_seq(current_peptide_sequence_.c_str(), &mods);
-
-  char* unmodified_sequence_pointer = unmodify_sequence(current_peptide_sequence_.c_str());
-  current_peptide_sequence_ = unmodified_sequence_pointer;
-  free(unmodified_sequence_pointer);
-  peptide->setLength(current_peptide_sequence_.length());
-  peptide->setModifiedAASequence(mods, false);
+    }
+  }
+  Peptide* peptide = new Peptide(unmodifiedSequence, mods);
+  current_peptide_sequence_ = unmodifiedSequence;
 
   current_match_ = new Match(peptide, current_spectrum_, current_zstate_, false);
   current_match_->setScore(XCORR, xcorr);
@@ -237,7 +252,9 @@ void SQTReader::parseMatch(string& line) {
   last_parsed_ = SQT_LINE_MATCH;
 }
 
-void SQTReader::parseLocus(string& line) {
+void SQTReader::parseLocus(const string& line) {
+  const int locus_protein_id_idx = 1;
+  const int locus_protein_desc_idx = 2;
 
   vector<string> tokens = StringUtils::Split(line, '\t');
 
@@ -246,24 +263,13 @@ void SQTReader::parseLocus(string& line) {
   if (tokens.size() > 2) {
     protein_desc = tokens[locus_protein_desc_idx];
   }
-/*
-  cerr << "Locus line:"<<line<<endl;
-  cerr << "Protein id:"<<protein_id<<endl;
-  cerr << "Protein desc:"<<protein_desc<<endl;
-  cerr << "========================="<<endl;
-*/
   bool is_decoy;
-  Protein* protein = MatchCollectionParser::getProtein(database_,
-                                                       decoy_database_,
-                                                       protein_id,
-                                                       is_decoy);
+  Protein* protein =
+    MatchCollectionParser::getProtein(database_, decoy_database_, protein_id, is_decoy);
 
   int start_idx = protein->findStart(current_peptide_sequence_, current_prev_aa_, current_next_aa_);
-
   PeptideSrc* peptide_src = new PeptideSrc((DIGEST_T)0, protein, start_idx);
-  
   current_match_->getPeptide()->addPeptideSrc(peptide_src);
-
   if (is_decoy) {
     current_match_->setNullPeptide(true);
   }
@@ -280,7 +286,6 @@ int SQTReader::findStart(
   string prev_aa, ///< the amino acid before the sequence in the protein
   string next_aa ///< the next amino acid after the sequence in the protein
   ) {
-
   if (prev_aa == "-") {
     return 1;
   } else if (next_aa == "-") {
@@ -299,9 +304,9 @@ int SQTReader::findStart(
       if (pos == string::npos) {
         carp(CARP_FATAL, "could not %s in protein %s\n%s", seq.c_str(), protein->getIdPointer(), protein_seq.c_str());
       }
-      return (pos+1);
+      return pos+1;
     }
-    return (pos+2);
+    return pos+2;
   }
 }
 
@@ -316,10 +321,7 @@ MatchCollection* SQTReader::parse(
   SQTReader* reader = new SQTReader(file_path);
   reader->setDatabase(database);
   reader->setDecoyDatabase(decoy_database);
-  MatchCollection* collection = reader->parse();
-
-  return collection;
-
+  return reader->parse();
 }
 
 /**
@@ -396,37 +398,6 @@ void SQTReader::readSymbols(const string& file, bool append) {
   }
   carp(CARP_DEBUG, "Read %d modifications from %s", num_mods, file.c_str());
 }
-
-//TODO - remove this code after some time of debugging.
-#ifdef MAIN
-int main(int argc, char** argv) {
-
-  initialize_parameters();
-
-  char* file_path = argv[1];
-  char* database_path = argv[2];
-
-  MatchCollection* match_collection = MatchCollectionParser::create(file_path, database_path);
-
-  cerr << "there are "<<match_collection->getMatchTotal()<<" matches read"<<endl;
-
-  MatchIterator* match_iterator = new MatchIterator(match_collection, XCORR, true);
-
-  while(match_iterator->hasNext()) {
-    Match* match = match_iterator->next();
-
-    cout << "xcorr:"<<match->getScore(XCORR);
-    cout <<" rank:"<<match->getRank(XCORR);
-    cout <<" sequence:"<<match->getPeptide()->getSequence();
-    cout <<" protein:"<< match->getPeptide()->getProteinIdsLocations()<<endl;
-
-  }
-
-
-
-  return 0;
-}
-#endif
 
 /*
  * Local Variables:

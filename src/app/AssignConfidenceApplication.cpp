@@ -70,7 +70,6 @@ int AssignConfidenceApplication::main(int argc, char** argv) {
 }
 
 int AssignConfidenceApplication::main(const vector<string> input_files) {
-  double cascade_fdr = Params::GetDouble("q-value-threshold");
   // Prepare the output files if not in Cascade Search
   if (spectrum_flag_ == NULL){
     output_ = new OutputFiles(this);
@@ -646,7 +645,7 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
     while (match_iterator->hasNext()) {
       Match* match = match_iterator->next();
 
-      if (match->getScore(QVALUE_TDC) > cascade_fdr) {
+      if (match->getScore(QVALUE_TDC) > Params::GetDouble("q-value-threshold")) {
         break;
       }
       spectrum_flag_->insert(make_pair(pair<string, unsigned int>(

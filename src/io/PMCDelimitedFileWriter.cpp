@@ -280,7 +280,7 @@ void PMCDelimitedFileWriter::writeProteins(
         peptide_strings.push_back(ss.str());
       }
     }
-    setColumnCurrentRow(PEPTIDES_COL, DelimitedFile::splice(peptide_strings, ','));
+    setColumnCurrentRow(PEPTIDES_COL, StringUtils::Join(peptide_strings, ','));
 
     writeRow();
   }
@@ -395,10 +395,10 @@ void PMCDelimitedFileWriter::writePeptides(
       /*****************************************************************/
     }
 
-    setColumnCurrentRow(SCAN_COL, DelimitedFile::splice(spec_scans, ','));
-    setColumnCurrentRow(CHARGE_COL, DelimitedFile::splice(spec_charges, ','));
-    setColumnCurrentRow(SPECTRUM_PRECURSOR_MZ_COL, DelimitedFile::splice(spec_precursors, ','));
-    setColumnCurrentRow(SPECTRUM_NEUTRAL_MASS_COL, DelimitedFile::splice(spec_neutral_masses, ','));
+    setColumnCurrentRow(SCAN_COL, StringUtils::Join(spec_scans, ','));
+    setColumnCurrentRow(CHARGE_COL, StringUtils::Join(spec_charges, ','));
+    setColumnCurrentRow(SPECTRUM_PRECURSOR_MZ_COL, StringUtils::Join(spec_precursors, ','));
+    setColumnCurrentRow(SPECTRUM_NEUTRAL_MASS_COL, StringUtils::Join(spec_neutral_masses, ','));
     setColumnCurrentRow(PEPTIDE_MASS_COL, peptide->calcModifiedMass());
     addScoreIfExists(match, DELTA_CN, DELTA_CN_COL);
     addScoreIfExists(match, SP, SP_SCORE_COL);
@@ -420,9 +420,9 @@ void PMCDelimitedFileWriter::writePeptides(
     setAndFree(SEQUENCE_COL, seq_with_masses);
 
     setColumnCurrentRow(CLEAVAGE_TYPE_COL, cleavage);
-    setColumnCurrentRow(PROTEIN_ID_COL, DelimitedFile::splice(protein_ids, ','));
+    setColumnCurrentRow(PROTEIN_ID_COL, StringUtils::Join(protein_ids, ','));
     //setAndFree(FLANKING_AA_COL, peptide->getFlankingAAs());
-    setColumnCurrentRow(FLANKING_AA_COL, DelimitedFile::splice(flanking_aas, ','));
+    setColumnCurrentRow(FLANKING_AA_COL, StringUtils::Join(flanking_aas, ','));
 
     writeRow();
   }
@@ -467,6 +467,7 @@ void PMCDelimitedFileWriter::setUpPSMsColumns(
   addColumnName(SPECTRUM_NEUTRAL_MASS_COL);
   addColumnName(PEPTIDE_MASS_COL);
   addColumnName(SEQUENCE_COL);
+  addColumnName(MODIFICATIONS_COL);
   addColumnName(CLEAVAGE_TYPE_COL);
   addColumnName(PROTEIN_ID_COL);
   addColumnName(FLANKING_AA_COL);
@@ -543,6 +544,7 @@ void PMCDelimitedFileWriter::writePSMs(
       mod_seq, peptide->getLength(), mass_format_type);
     free(mod_seq);
     setAndFree(SEQUENCE_COL, seq_with_masses);
+    setColumnCurrentRow(MODIFICATIONS_COL, peptide->getModsString());
 
     setColumnCurrentRow(CLEAVAGE_TYPE_COL, cleavage);
     setAndFree(FLANKING_AA_COL, peptide->getFlankingAAs());

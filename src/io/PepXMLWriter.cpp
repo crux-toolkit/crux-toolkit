@@ -357,22 +357,18 @@ void PepXMLWriter::print_modifications_xml(
   // variable modifications
   int mod_precision = Params::GetInt("mod-precision");
   map<int, double> var_mods = find_variable_modifications(mod_seq);
-  if (!var_mods.empty()){
+  if (!var_mods.empty()) {
     fprintf(output_file, "<modification_info modified_peptide=\"%s\">\n", mod_seq);
-   carp(CARP_DEBUG, "<modification_info modified_peptide=\"%s\">", mod_seq);
-        for (map<int, double>::iterator it = var_mods.begin(); it != var_mods.end(); ++it) {
-          fprintf(output_file, "<mod_aminoacid_mass position=\"%i\" mass=\"%.*f\"/>\n",
-                  it->first,   //index
-                  mod_precision, it->second); //mass
-          carp(CARP_DEBUG, "<mod_aminoacid_mass position=\"%i\" mass=\"%.*f\"/>",
-               it->first,   //index
-               mod_precision, it->second); //mass
+    for (map<int, double>::iterator it = var_mods.begin(); it != var_mods.end(); ++it) {
+      fprintf(output_file, "<mod_aminoacid_mass position=\"%i\" mass=\"%.*f\"/>\n",
+              it->first,   //index
+              mod_precision, it->second); //mass
     }
     fprintf(output_file, "</modification_info>\n");
   }
 
   // static modifications
-  map<int, double> static_mods = find_static_modifications(var_mods, pep_seq);
+  map<int, double> static_mods = find_static_modifications(pep_seq);
   if (!static_mods.empty()) {
     carp(CARP_DEBUG, "<modification_info modified_peptide=\"%s\">", pep_seq);
     fprintf(output_file, "<modification_info modified_peptide=\"%s\">\n", pep_seq);
@@ -380,9 +376,6 @@ void PepXMLWriter::print_modifications_xml(
       fprintf(output_file, "<mod_aminoacid_mass position=\"%i\" mass=\"%.*f\"/>\n",
               it->first,   //index
               mod_precision, it->second); //mass
-      carp(CARP_DEBUG, "<mod_aminoacid_mass position=\"%i\" mass=\"%.*f\"/>",
-           it->first,   //index
-           mod_precision, it->second); //mass
     }
     fprintf(output_file, "</modification_info>\n");
   }
@@ -435,27 +428,29 @@ map<int, double> PepXMLWriter::find_variable_modifications(const char* mod_seq) 
  * to fill up the mapping of static mods
  */
 map<int, double> PepXMLWriter::find_static_modifications(
-  const map<int, double>& var_mods,
   const char* peptide_sequence
 ){
   map<int, double> static_mods;
   const char* seq_iter = peptide_sequence;
   MASS_TYPE_T isotopic_type = get_mass_type_parameter("isotopic-mass");
-
-  char aa[2];
-  aa[1] = '\0';
-  int seq_index = 1;
-  while ((*seq_iter) != '\0'){
-    *aa = (*seq_iter);
-    // write static mod if user requested static mod and also
-    // if there is no variable mod on the same character
-    if (Params::GetDouble( (const char *)aa)!= 0 && 
-        var_mods.find(seq_index) == var_mods.end()){
-      double mass = get_mass_amino_acid(*seq_iter, isotopic_type);
-      static_mods[seq_index] = Params::GetDouble((const char*)aa) + mass;
+  for (size_t i = 0; peptide_sequence[i] != '\0'; i++) {
+    char aa = peptide_sequence[i];
+    double sum = AminoAcidUtil::GetMass(aa, isotopic_type == MONO);
+    int modCount = 0;
+    vector<const ModificationDefinition*> staticMods = ModificationDefinition::StaticMods(aa);
+    for (vector<const ModificationDefinition*>::const_iterator j = staticMods.begin();
+         j != staticMods.end();
+         j++) {
+      if ((*j)->Position() == ANY ||
+          ((*j)->Position() == PEPTIDE_N && i == 0) ||
+          ((*j)->Position() == PEPTIDE_C && peptide_sequence[i + 1] == '\0')) {
+        ++modCount;
+        sum += (*j)->DeltaMass();
+      }
     }
-    seq_iter++;
-    seq_index++;
+    if (modCount > 0) {
+      static_mods[i + 1] = sum;
+    }
   }
   return static_mods;
 }

@@ -102,7 +102,6 @@ int PSMConvertApplication::main(int argc, char** argv) {
   }
 
   carp(CARP_INFO, "Reader has been succesfully parsed");
-
   string output_format = Params::GetString("output format");
 
   // What will be used when PSMWriter is finished.
@@ -132,7 +131,7 @@ int PSMConvertApplication::main(int argc, char** argv) {
   } else if (output_format == "barista-xml") {
     carp(CARP_FATAL, "Barista-XML format has not been implemented yet");
   } else {
-    carp(CARP_FATAL, "Invalid Input Format, valid formats are: tsv, html, "
+    carp(CARP_FATAL, "Invalid Output Format, valid formats are: tsv, html, "
                      "sqt, pin, pepxml, mzidentml, barista-xml");
   }
 

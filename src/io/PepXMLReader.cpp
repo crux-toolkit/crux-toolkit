@@ -408,7 +408,7 @@ void PepXMLReader::modAminoAcidMassOpen(
     if (mod == NULL) {
       mod = ModificationDefinition::Find(mod_mass, true);
     }
-    if (mod != NULL) {
+    if (mod != NULL && !mod->Static()) {
       current_match_->getPeptide()->addMod(mod, position - 1);
     } else {
       // mod was not defined at top of file

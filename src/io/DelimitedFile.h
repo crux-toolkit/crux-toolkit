@@ -456,36 +456,12 @@ class DelimitedFile {
   bool hasNext();
 
   /**
-   * \returns a delimited string from the vector of elements 
-   */
-  template<typename T>
-  static std::string splice(
-    const std::vector<T>& elements, ///<vector of elements to splice
-    char delimiter = '\t' ///<delimited to use
-  ) {
-
-      if (elements.size() == 0) return "";
-
-      int precision = Params::GetInt("precision");
-      std::ostringstream ss;
-      ss << std::setprecision(precision);
-      
-      ss << elements[0];
-      for (int idx=1;idx < elements.size();idx++) {
-        ss << delimiter << elements[idx];
-      }
-      std::string out_string = ss.str();
-      return out_string;
-  }
-
-  /**
    * Allows object to be printed to a stream
    */
   friend std::ostream &operator<< (
     std::ostream& os, ///< The stream to output to
     DelimitedFile& delimited_file ///< The delimited file to output to
   ); 
-
 };
 
 #endif //DELIMITEDFILE_H

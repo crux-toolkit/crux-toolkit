@@ -13,6 +13,7 @@
 #include <string>
 #include "io/MatchFileReader.h"
 #include "io/SQTReader.h"
+#include "util/AminoAcidUtil.h"
 #include "util/Params.h"
 #include "util/StringUtils.h"
 #include "util/WinCrux.h"
@@ -332,7 +333,6 @@ void MatchCollection::getCustomScoreNames(
   if (!match_.empty()) {
     match_.front()->getCustomScoreNames(custom_score_names);
   }
-
 }
 
 /**
@@ -343,7 +343,6 @@ int MatchCollection::setFilePath(
   const string& file_path,  ///< File path to set
   bool overwrite ///< Overwrite existing files?
   ) {
-
   int file_idx = -1;
   for (vector<Crux::Match*>::iterator i = match_.begin(); i != match_.end(); i++) {
     if (overwrite || (*i)->getFileIndex() == -1) {
@@ -356,16 +355,14 @@ int MatchCollection::setFilePath(
 /**
  *\returns true, if there is a  match_iterators instantiated by match collection 
  */
-bool MatchCollection::getIteratorLock()
-{
+bool MatchCollection::getIteratorLock() {
   return iterator_lock_;
 }
 
 /**
  *\returns the total match objects avaliable in current match_collection
  */
-int MatchCollection::getMatchTotal()
-{
+int MatchCollection::getMatchTotal() {
   return match_.size();
 }
 
@@ -378,8 +375,7 @@ void MatchCollection::setHasDistinctMatches(bool distinct) {
 }
 
 
-void MatchCollection::setExperimentSize(int size)
-{
+void MatchCollection::setExperimentSize(int size) {
   experiment_size_ = size;
 }
 
@@ -388,8 +384,7 @@ void MatchCollection::setExperimentSize(int size)
  * target peptides for a target collection or decoy peptides for a
  * decoy collection.
  */
-int MatchCollection::getExperimentSize()
-{
+int MatchCollection::getExperimentSize() {
   return experiment_size_;
 }
 
@@ -397,7 +392,7 @@ int MatchCollection::getExperimentSize()
  * Sets the total number of target peptides searched for this
  * spectrum.  Only needs to be used by decoy match collections.
  */
-void MatchCollection::setTargetExperimentSize(int numMatches){
+void MatchCollection::setTargetExperimentSize(int numMatches) {
   target_experiment_size_ = numMatches;
 }
 
@@ -405,7 +400,7 @@ void MatchCollection::setTargetExperimentSize(int numMatches){
  * \returns The number of target matches that this spectrum had.
  * Different than getExperimentSize() for decoy match collections.
  */
-int MatchCollection::getTargetExperimentSize(){
+int MatchCollection::getTargetExperimentSize() {
   if( null_peptide_collection_ ){
     return target_experiment_size_;
   }
@@ -444,7 +439,7 @@ void MatchCollection::printXmlHeader(
   FILE* output,
   const string& ms2file
   ){
-  if (output == NULL ){
+  if (output == NULL) {
     return;
   }
   time_t hold_time;
@@ -498,7 +493,6 @@ void MatchCollection::printXmlHeader(
   }
   
   hold_time = time(0);
-
   const char* xsi = "http://www.w3.org/2001/XMLSchema-instance";
   const char* xmlns = "http://regis-web.systemsbiology.net/pepXML";
   const char* schema_location = "/usr/local/tpp/schema/pepXML_v110.xsd";
@@ -509,7 +503,6 @@ void MatchCollection::printXmlHeader(
           " summary_xml=\"\">\n",
           StringUtils::RTrim(string(ctime(&hold_time))).c_str(),
           xmlns, xsi, xmlns, schema_location);
-
   fprintf(output, "<msms_run_summary base_name=\"%s\" msManufacturer=\"%s\" "
           "msModel=\"%s\" msIonization=\"%s\" msAnalyzer=\"%s\" "
           "msDectector=\"%s\" raw_data_type=\"%s\" raw_data=\"%s\" >\n",
@@ -522,10 +515,7 @@ void MatchCollection::printXmlHeader(
           "NA", // TODO, dummy value
           "NA" // TODO, dummy value
           );
-  
-
   fprintf(output, "<sample_enzyme name=\"%s\">\n</sample_enzyme>\n", enz_str);
-
   fprintf(output, "<search_summary base_name=\"%s\" search_engine=\"%s\" "
           "precursor_mass_type=\"%s\" fragment_mass_type=\"%s\" "
           "out_data_type=\"%s\" out_data=\"%s\" search_id=\"%i\" >\n",
@@ -537,24 +527,18 @@ void MatchCollection::printXmlHeader(
           "NA",
           1 // TODO, dummy value
           );
-
-  
   fprintf(output, "<search_database local_path=\"%s\" type=\"%s\" />\n", 
           absolute_database_path, 
-          "AA"
-          );
+          "AA");
   fprintf(output, "<enzymatic_search_constraint enzyme=\"%s\" "
           "max_num_internal_cleavages=\"%i\" min_number_termini=\"%i\"/>\n",
           enz_str,
           max_num_internal_cleavages,
-          min_number_termini
-          );
-
+          min_number_termini);
 #ifndef DARWIN
   free(absolute_database_path);
 #endif
   free(enz_str);
-
 
   char aa_str[2];
   aa_str[1] = '\0';
@@ -563,84 +547,51 @@ void MatchCollection::printXmlHeader(
   int aa = 0;
 
   // static amino acid modifications
-  for (aa = (int)'A'; aa < alphabet_size-1; aa++){
-    aa_str[0] = (char)aa;
-    double mod = Params::GetDouble(aa_str);
-    double mass = get_mass_amino_acid(aa, isotopic_type);
-    
-    if (mod != 0 ){
-      fprintf(output, "<aminoacid_modification aminoacid=\"%s\" mass=\"%f\" "
-              "massdiff=\"%f\" variable=\"%s\" />\n",
-              aa_str,
-              mass + mod,
-              mod,
-              "N" // N if static modification
-              );      
-    }
-  }
-  
-  // variable amino acid modifications
-  AA_MOD_T** mod_list = NULL;
-  int num_mods = get_all_aa_mod_list(&mod_list);
-  for (int mod_idx = 0; mod_idx < num_mods; mod_idx++){
-    FLOAT_T mod_mass = aa_mod_get_mass_change(mod_list[mod_idx]);
-    
-    bool* aas_modified = aa_mod_get_aa_list(mod_list[mod_idx]);
-    for (int aa_idx = 0; aa_idx < AA_LIST_LENGTH; aa_idx++) {
-      if (aas_modified[aa_idx]) {
-        int aa = (aa_idx+'A');
-        FLOAT_T aa_mass = get_mass_amino_acid(aa , isotopic_type);
-        fprintf(output, "<aminoacid_modification aminoacid=\"%c\" mass=\"%f\" "
-                "massdiff=\"%f\" variable=\"%s\" />\n",
-                aa,
-                aa_mass + mod_mass,
-                mod_mass,
-                "Y" // Y if variable modification
-                );    
+  for (char aa = 'A'; aa <= 'Z'; aa++) {
+    vector<const ModificationDefinition*> staticMods = ModificationDefinition::StaticMods(aa);
+    double aaMass = AminoAcidUtil::GetMass(aa, isotopic_type == MONO);
+    for (vector<const ModificationDefinition*>::const_iterator i = staticMods.begin();
+         i != staticMods.end();
+         i++) {
+      double modMass = (*i)->DeltaMass();
+      double totalMass = aaMass + modMass;
+      string termString;
+      switch ((*i)->Position()) {
+        case PEPTIDE_N: termString = "peptide_terminus=\"n\" "; break;
+        case PEPTIDE_C: termString = "peptide_terminus=\"c\" "; break;
       }
+      fprintf(output, "<aminoacid_modification aminoacid=\"%c\" mass=\"%s\" "
+                      "massdiff=\"%s\" variable=\"N\" %s/>\n",
+              aa,
+              StringUtils::ToString(totalMass, Params::GetInt("mass-precision")).c_str(),
+              StringUtils::ToString(modMass, Params::GetInt("mod-precision")).c_str(),
+              termString.c_str());
     }
-
   }
 
-  // terminal modifciations
-  // variable
-  num_mods = get_c_mod_list(&mod_list); // variable c mods
-  for(int mod_idx = 0; mod_idx < num_mods; mod_idx++){
-    FLOAT_T mod_mass = aa_mod_get_mass_change(mod_list[mod_idx]);
-    fprintf(output, "<terminal_modification terminus=\"c\" "
-            "mass=\"%f\" massdiff=\"%f\" variable=\"Y\" />\n",
-            MASS_OH + mod_mass,
-            mod_mass
-            );
-  }
-  num_mods = get_n_mod_list(&mod_list); // variable n mods
-  for(int mod_idx = 0; mod_idx < num_mods; mod_idx++){
-    FLOAT_T mod_mass = aa_mod_get_mass_change(mod_list[mod_idx]);
-    fprintf(output, "<terminal_modification terminus=\"n\" "
-            "mass=\"%f\" massdiff=\"%f\" variable=\"Y\" />\n",
-            MASS_H_MONO + mod_mass,
-            mod_mass
-            );
-  }
-  // fixed
-  if( get_num_fixed_mods() != 0 ){
-    get_all_aa_mod_list(&mod_list);
-    int fixed_mod_idx = get_fixed_mod_index(N_TERM); // fixed n mods
-    if( fixed_mod_idx > -1 ){
-      fprintf(output, "<terminal_modification terminus=\"n\" "
-              "mass=\"?\" massdiff=\"%f\" variable=\"N\" />\n",
-              aa_mod_get_mass_change(mod_list[fixed_mod_idx])
-              );
+  // variable amino acid modifications
+  vector<const ModificationDefinition*> varMods = ModificationDefinition::VarMods();
+  for (vector<const ModificationDefinition*>::const_iterator i = varMods.begin();
+       i != varMods.end();
+       i++) {
+    for (set<char>::const_iterator j = (*i)->AminoAcids().begin();
+         j != (*i)->AminoAcids().end();
+         j++) {
+      double modMass = (*i)->DeltaMass();
+      double aaMass = AminoAcidUtil::GetMass(*j, isotopic_type == MONO);
+      double totalMass = aaMass + modMass;
+      string termString;
+      switch ((*i)->Position()) {
+        case PEPTIDE_N: termString = "peptide_terminus=\"n\" "; break;
+        case PEPTIDE_C: termString = "peptide_terminus=\"c\" "; break;
+      }
+      fprintf(output, "<aminoacid_modification aminoacid=\"%c\" mass=\"%s\" "
+                      "massdiff=\"%s\" variable=\"Y\" %s/>\n",
+              *j,
+              StringUtils::ToString(totalMass, Params::GetInt("mass-precision")).c_str(),
+              StringUtils::ToString(modMass, Params::GetInt("mod-precision")).c_str(),
+              termString.c_str());
     }
-
-    fixed_mod_idx = get_fixed_mod_index(C_TERM); // fixed c mods
-    if( fixed_mod_idx > -1 ){
-      fprintf(output, "<terminal_modification terminus=\"c\" "
-              "mass=\"?\" massdiff=\"%f\" variable=\"N\" />\n",
-              aa_mod_get_mass_change(mod_list[fixed_mod_idx])
-              );
-    }
-
   }
 
   for (vector<const Param*>::const_iterator i = Params::Begin(); i != Params::End(); i++) {
@@ -651,9 +602,7 @@ void MatchCollection::printXmlHeader(
               name.c_str(), (*i)->GetString().c_str());
     }
   }
-
   fprintf(output, "</search_summary>\n");
-
 }
 
 /**
