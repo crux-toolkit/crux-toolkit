@@ -80,70 +80,43 @@ void SQTWriter::writeHeader(
   *file_ << "H\tComment\tpreliminary algorithm " << prelim_score_type << endl
          << "H\tComment\tfinal algorithm " << score_type << endl;
 
-  int aa = 0;
-  char aa_str[2];
-  aa_str[1] = '\0';
-  int alphabet_size = (int)'A' + ((int)'Z'-(int)'A');
-  MASS_TYPE_T isotopic_type = get_mass_type_parameter("isotopic-mass");
-
-  *file_ << fixed << setprecision(3);
-  for(aa = (int)'A'; aa < alphabet_size -1; aa++){
-    aa_str[0] = (char)aa;
-    double mod = Params::GetDouble(aa_str);
-    if( mod != 0 ){
-      //      double mass = mod + get_mass_amino_acid(aa, isotopic_type);
-      double mass = get_mass_amino_acid(aa, isotopic_type);
-      *file_ << "H\tStaticMod\t" << aa_str << "=" << mass << endl;
+  for (char aa = 'A'; aa <= 'Z'; aa++) {
+    vector<const ModificationDefinition*> staticMods = ModificationDefinition::StaticMods(aa);
+    for (vector<const ModificationDefinition*>::const_iterator i = staticMods.begin();
+         i != staticMods.end();
+         i++) {
+      *file_ << "H\tStaticMod\t" << aa << '='
+             << StringUtils::ToString((*i)->DeltaMass(), Params::GetInt("mod-precision"))
+             << endl;
     }
   }
-  file_->unsetf(ios_base::fixed);
-  file_->precision(old_precision);
 
   // print dynamic mods, if any
   // format DiffMod <AAs><symbol>=<mass change>
-  AA_MOD_T** aa_mod_list = NULL;
-  int num_mods = get_all_aa_mod_list(&aa_mod_list);
-  int mod_idx = 0;
-  *file_ << fixed << setprecision(2);
-  for(mod_idx = 0; mod_idx < num_mods; mod_idx++){
-    
-    AA_MOD_T* aamod = aa_mod_list[mod_idx];
-    string aa_list_str = aa_mod_get_aa_list_string(aamod);
-    char aa_symbol = aa_mod_get_symbol(aamod);
-    double mass_dif = aa_mod_get_mass_change(aamod);
-
-    *file_ << "H\tDiffMod\t" << aa_list_str << aa_symbol << "="
-           << (mass_dif >= 0 ? "+" : "-") << mass_dif << endl;
-  }
-  file_->unsetf(ios_base::fixed);
-  file_->precision(old_precision);
-
-  num_mods = get_c_mod_list(&aa_mod_list);
-  for(mod_idx = 0; mod_idx < num_mods; mod_idx++){
-    AA_MOD_T* aamod = aa_mod_list[mod_idx];
-    char aa_symbol = aa_mod_get_symbol(aamod);
-
-    *file_ << "H\tComment\tMod " << aa_symbol
-           << " is a C-terminal modification" << endl;
+  vector<const ModificationDefinition*> varMods = ModificationDefinition::VarMods();
+  for (vector<const ModificationDefinition*>::const_iterator i = varMods.begin();
+       i != varMods.end();
+       i++) {
+    char symbol = (*i)->Symbol();
+    *file_ << "H\tDiffMod\t" << StringUtils::Join((*i)->AminoAcids()) << symbol << "=";
+    if ((*i)->DeltaMass() >= 0) {
+      *file_ << '+';
+    }
+    *file_ << StringUtils::ToString((*i)->DeltaMass(), Params::GetInt("mod-precision"))
+           << endl;
+    switch ((*i)->Position()) {
+    case PEPTIDE_N:
+    case PROTEIN_N:
+      *file_ << "H\tComment\tMod " << symbol << " is an N-terminal modification" << endl;
+      break;
+    case PEPTIDE_C:
+    case PROTEIN_C:
+      *file_ << "H\tComment\tMod " << symbol << " is an C-terminal modification" << endl;
+      break;
+    }
   }
 
-  num_mods = get_n_mod_list(&aa_mod_list);
-  for(mod_idx = 0; mod_idx < num_mods; mod_idx++){
-    AA_MOD_T* aamod = aa_mod_list[mod_idx];
-    char aa_symbol = aa_mod_get_symbol(aamod);
-
-    *file_ << "H\tComment\tMod " << aa_symbol
-           << " is a N-terminal modification" << endl;
-  }
-
-  //for letters in alphabet
-  //  double mod = Params::GetDouble(letter);
-  //  if mod != 0
-  //     double mass = mod + getmass(letter);
-  //     fprintf(output, "H\tStaticMod\t%s=%.3f\n", letter, mass);
-  //  fprintf(output, "H\tStaticMod\tC=160.139\n");
   *file_ << "H\tAlg-DisplayTop\t" << Params::GetInt("top-match") << endl;
-          //          Params::GetInt("max-sqt-result")); 
   // this is not correct for an sqt from analzyed matches
 
   ENZYME_T enzyme = get_enzyme_type_parameter("enzyme");
@@ -222,25 +195,13 @@ void SQTWriter::writePSM(
   }
 
   int length = peptide->getLength();
-  peptide->getModifiedAASequence();
-  MODIFIED_AA_T* mod_seq =
-    copy_mod_aa_seq(peptide->getModifiedAASequence(), length);
+  MODIFIED_AA_T* mod_seq = copy_mod_aa_seq(peptide->getModifiedAASequence(), length);
   if (!mod_seq) {
     return;
   }
 
   Protein* protein = peptide->getPeptideSrc()->getParentProtein();
-  string seq_str;
-  if (protein->isPostProcess()) {
-    char nTerm[] = {peptide->getNTermFlankingAA()};
-    char cTerm[] = {peptide->getCTermFlankingAA()};
-    seq_str = string("") +
-      string(nTerm) + "." +
-      string(peptide->getSequence()) +
-      "." + string(cTerm);
-  } else {
-    seq_str = peptide->getSequenceSqt();
-  }
+  string seq_str = peptide->getSequenceSqt();
 
   *file_ << "M"
          << "\t" << xcorr_rank
@@ -267,9 +228,7 @@ void SQTWriter::writePSM(
     if (is_decoy && protein->getDatabase()->getDecoyType() == NO_DECOYS) {
       protein_id_str = Params::GetString("decoy-prefix") + protein_id_str;
     }
-    *file_ << "L"
-           << "\t" << protein_id_str
-           << endl;
+    *file_ << "L" << "\t" << protein_id_str << endl;
   }
 }
 

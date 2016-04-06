@@ -178,7 +178,7 @@ protected:
   );
 
   Crux::Peptide getCruxPeptide(const Peptide* peptide);
-  std::vector<Modification> getMods(const Peptide* peptide);
+  std::vector<Crux::Modification> getMods(const Peptide* peptide);
 
   void gatherTargetsAndDecoys(
     const ActivePeptideQueue* peptides,

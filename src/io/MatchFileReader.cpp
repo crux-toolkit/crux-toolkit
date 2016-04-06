@@ -365,6 +365,23 @@ Crux::Peptide* MatchFileReader::parsePeptide() {
     peptide->setLength(convert_to_mod_aa_seq(seq.c_str(), &modified_seq));
     peptide->setModifiedAASequence(modified_seq, false);
 
+    string modsString = getString(MODIFICATIONS_COL);
+    if (!modsString.empty()) {
+      vector<string> modStrings = StringUtils::Split(getString(MODIFICATIONS_COL), ',');
+      vector<Crux::Modification> mods;
+      for (vector<string>::const_iterator i = modStrings.begin(); i != modStrings.end(); i++) {
+        try {
+          Crux::Modification mod = Crux::Modification::Parse(StringUtils::Trim(*i), peptide);
+          if (!mod.Static()) {
+            mods.push_back(mod);
+          }
+        } catch (runtime_error& e) {
+          carp(CARP_ERROR, "Error parsing modification string: %s", e.what());
+        }
+      }
+      peptide->setMods(mods);
+    }
+
     if (!PeptideSrc::parseTabDelimited(peptide, *this, database_, decoy_database_)) {
       carp(CARP_ERROR, "Failed to parse peptide src.");
       delete peptide;

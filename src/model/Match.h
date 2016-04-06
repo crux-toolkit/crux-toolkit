@@ -142,16 +142,6 @@ class Match {
   static bool ScoreGreater(FLOAT_T x, FLOAT_T y);
 
   /**
-   * TODO: should be this be here or parameterized better?
-   * shuffle the matches in the array between index start and end-1
-   */
-  static void shuffleMatches(
-    Match** match_array, ///< the match array to shuffle  
-    int start_idx,         ///< index of first element to shuffle
-    int end_index          ///< index AFTER the last element to shuffle
-    );
-
-  /**
    * print the information of the match
    */
   void print(

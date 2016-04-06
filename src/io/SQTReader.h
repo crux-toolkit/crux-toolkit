@@ -3,8 +3,8 @@
  * $Revision: 1.00 $ 
  * DATE: July 11th, 2012
  * AUTHOR: Sean McIlwain
- * \brief Object for reading pep.xml.  This object will read a pepxml file,
- * creating a matchcollection object.  Use the expat library in MSToolkit.
+ * \brief Object for reading sqt.  This object will read a sqt file,
+ * creating a matchcollection object.
  * 
  **************************************************************************/
 
@@ -30,9 +30,6 @@ enum SQT_LINE_T {
 class SQTReader : public PSMReader {
 
  protected:
-
-  std::vector<std::string> headers_;
-
   SpectrumZState current_zstate_; ///< keeps track of the current zstate
   Crux::Spectrum* current_spectrum_; ///< Keeps track of the current spectrum object
   FLOAT_T current_ln_experiment_size_;
@@ -61,11 +58,10 @@ class SQTReader : public PSMReader {
    */
   void init();
 
-  void parseHeader(std::string& line);
-  void parseSpectrum(std::string& line);
-  void parseMatch(std::string& line);
-  void parseLocus(std::string& line);
-
+  void parseHeader(const std::string& line);
+  void parseSpectrum(const std::string& line);
+  void parseMatch(const std::string& line);
+  void parseLocus(const std::string& line);
 
  public:  
 
@@ -73,7 +69,6 @@ class SQTReader : public PSMReader {
    * \returns an initialized object
    */
   SQTReader();
-
 
   /**
    * \returns an object initialized with the file_path

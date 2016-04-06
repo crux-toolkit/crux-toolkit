@@ -688,8 +688,8 @@ Crux::Peptide TideMatchSet::getCruxPeptide(const Peptide* peptide) {
   return Crux::Peptide(peptide->Seq(), getMods(peptide));
 }
 
-vector<Modification> TideMatchSet::getMods(const Peptide* peptide) {
-  vector<Modification> modVector;
+vector<Crux::Modification> TideMatchSet::getMods(const Peptide* peptide) {
+  vector<Crux::Modification> modVector;
   string seq(peptide->Seq());
   const ModCoder::Mod* mods;
   int pep_mods = peptide->Mods(&mods);
@@ -702,7 +702,7 @@ vector<Modification> TideMatchSet::getMods(const Peptide* peptide) {
       carp(CARP_ERROR, "Could not find modification with delta %f", mod_delta);
       continue;
     }
-    modVector.push_back(Modification(modDef, mod_index));
+    modVector.push_back(Crux::Modification(modDef, mod_index));
   }
   return modVector;
 }

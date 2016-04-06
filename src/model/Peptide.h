@@ -33,7 +33,11 @@ static const int MAX_PEPTIDE_LENGTH = 255;
  * \brief A subsequence of a protein.
  */
 
+class ModificationDefinition;
+
 namespace Crux {
+
+class Modification;
 
 class Peptide {
 
@@ -220,6 +224,8 @@ class Peptide {
 
   void addMod(const ModificationDefinition* mod, unsigned char index);
   void setMods(const std::vector<Modification>& mods);
+  std::vector<Modification> getMods() const;
+  std::vector<Modification> getVarMods() const;
   std::vector<Modification> getStaticMods() const;
 
   /**

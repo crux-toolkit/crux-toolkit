@@ -416,7 +416,6 @@ void MatchFileWriter::writeHeader(){
   current_row_.assign(num_columns_, "");
 }
 
-
 /*
  * Local Variables:
  * mode: c

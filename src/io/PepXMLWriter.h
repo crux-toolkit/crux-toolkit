@@ -109,7 +109,6 @@ class PepXMLWriter {
    * to fill up the mapping of static mods
    */
   std::map<int, double> find_static_modifications(
-    const std::map<int, double>& var_mods,
     const char* sequence
   );
 

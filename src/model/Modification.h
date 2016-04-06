@@ -1,6 +1,7 @@
 #ifndef CRUX_MODIFICATION_H
 #define CRUX_MODIFICATION_H
 
+#include "model/Peptide.h"
 #include "util/modifications.h"
 
 #include <deque>
@@ -41,7 +42,9 @@ public:
   static void ClearStaticMods();
   static void ClearVarMods();
 
-  static const std::vector<const ModificationDefinition*>& StaticMods(char c);
+  static std::vector<const ModificationDefinition*> AllMods();
+  static std::vector<const ModificationDefinition*> StaticMods(char c = '\0');
+  static std::vector<const ModificationDefinition*> VarMods();
 
   const std::set<char>& AminoAcids() const;
   double DeltaMass() const;
@@ -55,6 +58,8 @@ public:
   static const ModificationDefinition* Find(double deltaMass,
     bool isStatic, ModPosition position = UNKNOWN);
 protected:
+  std::string AddAminoAcids(const std::string& aminoAcids);
+
   std::set<char> aminoAcids_;
   double deltaMass_;
   ModPosition position_;
@@ -63,9 +68,13 @@ protected:
   bool preventsXLink_;
 };
 
+namespace Crux { class Modification; }
+void swap(Crux::Modification& x, Crux::Modification& y);
+
+namespace Crux {
 class Modification {
 public:
-  friend void swap(Modification& x, Modification& y);
+  friend void ::swap(Modification& x, Modification& y);
   friend std::ostream& operator<<(std::ostream& stream, const Modification& mod);
 
   Modification(const ModificationDefinition* mod, unsigned char index);
@@ -77,8 +86,10 @@ public:
   bool operator!=(const Modification& other) const;
 
   std::string String() const;
+  static Modification Parse(const std::string& modString, Peptide* peptide);
 
   unsigned char Index() const;
+  const ModificationDefinition* Definition() const;
   double DeltaMass() const;
   bool Static() const;
   ModPosition Position() const;
@@ -93,6 +104,7 @@ protected:
   unsigned char index_; // 0 based position
   const ModificationDefinition* mod_;
 };
+}
 
 class ModificationDefinitionContainer {
 public:
@@ -102,14 +114,13 @@ public:
   virtual ~ModificationDefinitionContainer();
 protected:
   void InitSymbolPool();
-  std::vector<const ModificationDefinition*> StaticMods() const;
-  void Add(const ModificationDefinition* def);
+  std::vector<ModificationDefinition*> StaticMods(char c = '\0');
+  void Add(ModificationDefinition* def);
   char NextSymbol();
   void ConsumeSymbol(char c);
 
-  std::vector<const ModificationDefinition*> varMods_;
-  std::map< char, std::vector<const ModificationDefinition*> > staticMods_;
-  std::vector<const ModificationDefinition*> dummy_;
+  std::vector<ModificationDefinition*> varMods_;
+  std::map< char, std::vector<ModificationDefinition*> > staticMods_;
   std::deque<char> symbolPool_;
 };
 

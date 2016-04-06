@@ -606,34 +606,6 @@ void Match::printTab(
   carp(CARP_DETAILED_DEBUG, "Match::printTab done.");
 }
 
-/**
- * shuffle the matches in the array between index start and end-1
- */
-void Match::shuffleMatches(
-  Match** match_array, ///< the match array to shuffle  
-  int start_index,       ///< index of first element to shuffle
-  int end_index          ///< index AFTER the last element to shuffle
-  ){
-  if( match_array == NULL ){
-    carp(CARP_ERROR, "Cannot shuffle null match array.");
-    return;
-  }
-  //  srandom(time(NULL));
-
-  int match_idx = 0;
-  for(match_idx = start_index; match_idx < end_index-1; match_idx++){
-    Match* cur_match = match_array[match_idx];
-
-    // pick a random index between match_index and end_index-1
-    int rand_idx = get_random_number_interval(match_idx+1, end_index-1);
-
-    //    fprintf(stderr, "%i values between %i and %i, rand %.4f, index %i\n",
-    //            range, match_idx, end_index, rand_scaler, rand_idx);
-    match_array[match_idx] = match_array[rand_idx];    
-    match_array[rand_idx] = cur_match;
-  }
-}
-
 /****************************
  * match get, set methods
  ***************************/
@@ -764,7 +736,6 @@ char* Match::getModSequenceStrWithSymbols(){
 char* Match::getModSequenceStrWithMasses(
  MASS_FORMAT_T mass_format)
 {
-
   // if post_process_match and has a null peptide you can't get sequence
   if(post_process_match_ && null_peptide_){
     return NULL;
@@ -997,16 +968,14 @@ SpectrumZState& Match::getZState() {
 /**
  * gets the match charge
  */
-int Match::getCharge()
-{
+int Match::getCharge() {
   return getZState().getCharge();
 }
 
 /**
  * /returns the match neutral mass
  */
-FLOAT_T Match::getNeutralMass()
-{
+FLOAT_T Match::getNeutralMass() {
   return getZState().getNeutralMass();
 }
 
@@ -1023,8 +992,7 @@ void Match::setLnExperimentSize(
 /**
  * gets the match ln_experiment_size
  */
-FLOAT_T Match::getLnExperimentSize()
-{
+FLOAT_T Match::getLnExperimentSize() {
   return ln_experiment_size_;
 }
 
@@ -1045,8 +1013,7 @@ int Match::getTargetExperimentSize(){
 /**
  *Increments the pointer count to the match object
  */
-void Match::incrementPointerCount()
-{
+void Match::incrementPointerCount() {
   ++pointer_count_;
 }
 

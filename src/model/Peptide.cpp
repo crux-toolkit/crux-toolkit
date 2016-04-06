@@ -325,53 +325,9 @@ char* Peptide::getSequencePointer() {
  * \returns A newly allocated char* with formated peptide sequence
  */
 string Peptide::getSequenceSqt() {
-  if (sequence_.empty()) {
-    return string(1, getNTermFlankingAA()) + sequence_ + string(1, getCTermFlankingAA());
-  }
-
-  if(peptide_srcs_.empty()){
-    carp(CARP_ERROR, "Cannot get sequence from no peptide srcs.");
-    return NULL;
-  }
-  char* copy_sequence = NULL;
-  PeptideSrc* peptide_src = peptide_srcs_[0];
-  Protein* protein = peptide_src->getParentProtein();
-
-  // get peptide start idx of protein in prarent protein
-  int start_idx = peptide_src->getStartIdx();
-
-  // parent protein length
-  int protein_length = protein->getLength();
-
-  char* parent_sequence = 
-    protein->getSequencePointer();
-
-  // get modified petpide sequence
-  string mod_pep_seq = getModifiedSequenceWithMasses();
-  int mod_pep_len = mod_pep_seq.length();
-
-  // allocate peptide memory
-  copy_sequence = (char*)mycalloc(mod_pep_len+5, sizeof(char));
-
-  // Default template is "X.peptide.X", where "X" are flanking amino acids
-  copy_sequence[0] = '-';
-  copy_sequence[1] = '.';
-  copy_sequence[mod_pep_len+2] = '.';
-  copy_sequence[mod_pep_len+3] = '-';
-  copy_sequence[mod_pep_len+4] = '\0';
-
-  // copy over the peptide sequences
-  strncpy(&copy_sequence[2], mod_pep_seq.c_str(), mod_pep_len);
-  
-  // is there an AA before?
-  if(start_idx != 1){
-    copy_sequence[0] = parent_sequence[start_idx-2];
-  }
-  // is there an AA after?
-  if((start_idx + length_ - 1) < protein_length){
-    copy_sequence[length_+3] = parent_sequence[start_idx+length_-1];
-  }
-  return copy_sequence; 
+  return string(1, getNTermFlankingAA()) + "." +
+         getModifiedSequenceWithSymbols() +
+         "." + string(1, getCTermFlankingAA());
 }
 
 /**
@@ -447,6 +403,17 @@ void Peptide::addMod(const ModificationDefinition* mod, unsigned char index) {
 
 void Peptide::setMods(const vector<Modification>& mods) {
   varMods_ = mods;
+}
+
+vector<Modification> Peptide::getMods() const {
+  vector<Modification> mods = varMods_;
+  vector<Modification> staticMods = getStaticMods();
+  mods.insert(mods.end(), staticMods.begin(), staticMods.end());
+  return mods;
+}
+
+vector<Modification> Peptide::getVarMods() const {
+  return varMods_;
 }
 
 vector<Modification> Peptide::getStaticMods() const {
@@ -538,7 +505,7 @@ void Peptide::setModifiedAASequence(
   MODIFIED_AA_T* mod_seq, ///< modified sequence to set
   bool decoy ///< is the peptide a decoy?
 ) {
-  Modification::FromSeq(mod_seq, length_, &sequence_, &varMods_);
+  Modification::FromSeq(mod_seq, length_, &sequence_, NULL /* TODO &varMods_*/);
   if (decoy) {
     if (decoy_modified_seq_) {
       std::free(decoy_modified_seq_);
