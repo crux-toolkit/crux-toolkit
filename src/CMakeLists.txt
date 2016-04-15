@@ -35,7 +35,15 @@ if (WIN32 AND NOT Cygwin)
   include_directories(${CMAKE_BINARY_DIR}/ext/build/src/google-gflags/src/windows)
   # Needed to include google/protobuf on Windows
   include_directories(${CMAKE_BINARY_DIR}/ext/build/src/ProtocolBuffers/src)
-  SET(CMAKE_EXE_LINKER_FLAGS_DEBUG  "${CMAKE_EXE_LINKER_FLAGS} /VERBOSE:LIB /NODEFAULTLIB:MSVCRT" )
+  SET(
+    CMAKE_EXE_LINKER_FLAGS 
+    "${CMAKE_EXE_LINKER_FLAGS} /VERBOSE:LIB /NODEFAULTLIB:libboost_date_time-vc120-mt-1_56 /NODEFAULTLIB:libboost_system-vc120-mt-1_56 /NODEFAULTLIB:libboost_thread-vc120-mt-1_56"
+  )
+  SET(
+  CMAKE_EXE_LINKER_FLAGS_DEBUG 
+  "${CMAKE_EXE_LINKER_FLAGS}
+  /VERBOSE:LIB /NODEFAULTLIB:libboost_chrono-vc120-mt-gd-1_56 /NODEFAULTLIB:libboost_date_time-vc120-mt-gd-1_56 /NODEFAULTLIB:libboost_system-vc120-mt-gd-1_56 /NODEFAULTLIB:libboost_thread-vc120-mt-gd-1_56"
+)
   #  Need Comet base directory for Windows
   include_directories(${CMAKE_BINARY_DIR}/ext/build/src/comet/)
 endif (WIN32 AND NOT Cygwin)
