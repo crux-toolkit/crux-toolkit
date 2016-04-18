@@ -33,7 +33,8 @@ if (WIN32 AND NOT CYGWIN)
         ${CMAKE_COMMAND} 
           -DDOWNLOAD_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/downloads
           -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
-          -P  ${CMAKE_CURRENT_SOURCE_DIR}/download_pwiz.cmake
+          -DSKIP_VENDOR_LIBRARIES="${SKIP_VENDOR_LIBRARIES}"
+          -P  ${CMAKE_CURRENT_SOURCE_DIR}/download-pwiz.cmake
       DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/downloads
       PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
       CONFIGURE_COMMAND ""
@@ -43,7 +44,7 @@ if (WIN32 AND NOT CYGWIN)
           -DBUILD_TYPE:STRING=${CMAKE_CFG_INTDIR}
           -DPREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
           -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
-          -P  ${CMAKE_CURRENT_SOURCE_DIR}/build_pwiz.cmake
+          -P  ${CMAKE_CURRENT_SOURCE_DIR}/build-pwiz.cmake
       INSTALL_COMMAND ""
       BUILD_IN_SOURCE 1
     )
@@ -58,7 +59,8 @@ if (WIN32 AND NOT CYGWIN)
           -DBUILD_TYPE:STRING=${CMAKE_CFG_INTDIR}
           -DPREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
           -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
-          -P  ${CMAKE_CURRENT_SOURCE_DIR}/build_pwiz.cmake
+          -DSKIP_VENDOR_LIBRARIES="${SKIP_VENDOR_LIBRARIES}"
+          -P  ${CMAKE_CURRENT_SOURCE_DIR}/build-pwiz.cmake
       INSTALL_COMMAND ""
       BUILD_IN_SOURCE 1
     )
@@ -71,7 +73,7 @@ if (WIN32 AND NOT CYGWIN)
       ${CMAKE_COMMAND} 
         -DBUILD_TYPE:STRING=${CMAKE_CFG_INTDIR}
         -DPREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
-        -P  ${CMAKE_CURRENT_SOURCE_DIR}/post_install_pwiz.cmake
+        -P  ${CMAKE_CURRENT_SOURCE_DIR}/post-install-pwiz.cmake
     DEPENDEES install
   )
 else (WIN32 AND NOT CYGWIN)
@@ -82,7 +84,7 @@ else (WIN32 AND NOT CYGWIN)
         ${CMAKE_COMMAND} 
           -DDOWNLOAD_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/downloads
           -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
-          -P  ${CMAKE_CURRENT_SOURCE_DIR}/download_pwiz.cmake
+          -P  ${CMAKE_CURRENT_SOURCE_DIR}/download-pwiz.cmake
       DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/downloads
       PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
       CONFIGURE_COMMAND ""
@@ -91,8 +93,8 @@ else (WIN32 AND NOT CYGWIN)
           -DBUILD_TYPE:STRING=${CMAKE_CFG_INTDIR}
           -DPREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
           -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
-          -P  ${CMAKE_CURRENT_SOURCE_DIR}/build_pwiz.cmake
-      INSTALL_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/create_links.sh 
+          -P  ${CMAKE_CURRENT_SOURCE_DIR}/build-pwiz.cmake
+      INSTALL_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/create-links.sh 
         --prefix=${CMAKE_CURRENT_BINARY_DIR}
       INSTALL_COMMAND ""
       BUILD_IN_SOURCE 1
@@ -108,8 +110,8 @@ else (WIN32 AND NOT CYGWIN)
           -DBUILD_TYPE:STRING=${CMAKE_CFG_INTDIR}
           -DPREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
           -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
-          -P  ${CMAKE_CURRENT_SOURCE_DIR}/build_pwiz.cmake
-      INSTALL_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/create_links.sh 
+          -P  ${CMAKE_CURRENT_SOURCE_DIR}/build-pwiz.cmake
+      INSTALL_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/create-links.sh 
         --prefix=${CMAKE_CURRENT_BINARY_DIR}
       INSTALL_COMMAND ""
       BUILD_IN_SOURCE 1

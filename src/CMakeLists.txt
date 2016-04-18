@@ -286,60 +286,104 @@ else(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 if (WIN32 AND NOT CYGWIN)
-  target_link_libraries(
-    crux
-    barista
-    bullseye
-    hardklor
-    cometsearch
-    perclibrary
-    fido
-    xlink
-    gflags
-    crux-support
-    tide-support
-    mstoolkitlite
-    protobuf
-    libpwiz_data_identdata
-    libpwiz_data_identdata_version
-    libpwiz_data_misc
-    libpwiz_data_msdata
-    libpwiz_data_msdata_version
-    libpwiz_data_proteome
-    libpwiz_data_common
-    libpwiz_data_vendor_readers
-    libpwiz_reader_abi
-    libpwiz_reader_abi_t2d
-    libpwiz_reader_agilent
-    libpwiz_reader_shimadzu
-    libpwiz_reader_thermo
-    libpwiz_reader_waters
-    libpwiz_vendor_api_abi
-    libpwiz_vendor_api_agilent
-    libpwiz_vendor_api_shimadzu
-    libpwiz_vendor_api_thermo
-    libpwiz_utility_chemistry
-    libpwiz_utility_minimxml
-    libpwiz_utility_misc
-    libpwiz_version
-    libSHA1
-    libzlib
-    MassLynxRaw
-    cdt
-    ws2_32
-    optimized libboost_system-vc120-mt
-    optimized libboost_iostreams-vc120-mt
-    optimized libboost_nowide-vc120-mt
-    optimized libboost_filesystem-vc120-mt
-    optimized libboost_thread-vc120-mt
-    optimized libboost_chrono-vc120-mt
-    debug libboost_system-vc120-mt-gd
-    debug libboost_iostreams-vc120-mt-gd
-    debug libboost_nowide-vc120-mt-gd
-    debug libboost_filesystem-vc120-mt-gd
-    debug libboost_thread-vc120-mt-gd
-    debug libboost_chrono-vc120-mt-gd
-  )
+  if (${SKIP_VENDOR_LIBRARIES})
+    target_link_libraries(
+      crux
+      barista
+      bullseye
+      hardklor
+      cometsearch
+      perclibrary
+      fido
+      xlink
+      gflags
+      crux-support
+      tide-support
+      mstoolkitlite
+      protobuf
+      libpwiz_data_identdata
+      libpwiz_data_identdata_version
+      libpwiz_data_misc
+      libpwiz_data_msdata
+      libpwiz_data_msdata_version
+      libpwiz_data_proteome
+      libpwiz_data_common
+      libpwiz_utility_chemistry
+      libpwiz_utility_minimxml
+      libpwiz_utility_misc
+      libpwiz_version
+      libSHA1
+      libzlib
+      ws2_32
+      optimized libboost_system-vc120-mt
+      optimized libboost_iostreams-vc120-mt
+      optimized libboost_nowide-vc120-mt
+      optimized libboost_filesystem-vc120-mt
+      optimized libboost_thread-vc120-mt
+      optimized libboost_chrono-vc120-mt
+      debug libboost_system-vc120-mt-gd
+      debug libboost_iostreams-vc120-mt-gd
+      debug libboost_nowide-vc120-mt-gd
+      debug libboost_filesystem-vc120-mt-gd
+      debug libboost_thread-vc120-mt-gd
+      debug libboost_chrono-vc120-mt-gd
+    )
+  else (${SKIP_VENDOR_LIBRARIES})
+    target_link_libraries(
+      crux
+      barista
+      bullseye
+      hardklor
+      cometsearch
+      perclibrary
+      fido
+      xlink
+      gflags
+      crux-support
+      tide-support
+      mstoolkitlite
+      protobuf
+      libpwiz_data_identdata
+      libpwiz_data_identdata_version
+      libpwiz_data_misc
+      libpwiz_data_msdata
+      libpwiz_data_msdata_version
+      libpwiz_data_proteome
+      libpwiz_data_common
+      libpwiz_data_vendor_readers
+      libpwiz_reader_abi
+      libpwiz_reader_abi_t2d
+      libpwiz_reader_agilent
+      libpwiz_reader_shimadzu
+      libpwiz_reader_thermo
+      libpwiz_reader_waters
+      libpwiz_vendor_api_abi
+      libpwiz_vendor_api_agilent
+      libpwiz_vendor_api_shimadzu
+      libpwiz_vendor_api_thermo
+      libpwiz_utility_chemistry
+      libpwiz_utility_minimxml
+      libpwiz_utility_misc
+      libpwiz_version
+      libSHA1
+      libzlib
+      MassLynxRaw
+      cdt
+      ws2_32
+      optimized libboost_system-vc120-mt
+      optimized libboost_iostreams-vc120-mt
+      optimized libboost_nowide-vc120-mt
+      optimized libboost_filesystem-vc120-mt
+      optimized libboost_thread-vc120-mt
+      optimized libboost_chrono-vc120-mt
+      debug libboost_system-vc120-mt-gd
+      debug libboost_iostreams-vc120-mt-gd
+      debug libboost_nowide-vc120-mt-gd
+      debug libboost_filesystem-vc120-mt-gd
+      debug libboost_thread-vc120-mt-gd
+      debug libboost_chrono-vc120-mt-gd
+    )
+  endif (${SKIP_VENDOR_LIBRARIES})
 else()
   target_link_libraries(
     crux
