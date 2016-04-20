@@ -22,6 +22,10 @@ void IonConstraint::init(){
     modifications_[modification_idx] = 0;
   }
 
+  for (int idx = 0;idx < NUMBER_ION_TYPES; idx++) {
+    ion_types_[idx] = false;
+  }
+  
   mass_type_ = MONO;
   max_charge_ = 0;
   ion_type_ = (ION_TYPE_T)0;
@@ -76,6 +80,7 @@ IonConstraint::IonConstraint(
   min_charge_ = 0;
   exact_modifications_ = false;
   ion_type_ = ion_type;
+  setUseIonType(ion_type, true);
   precursor_ion_ = precursor_ion;
   pointer_count_ = 1;
 
@@ -113,6 +118,8 @@ IonConstraint* IonConstraint::newIonConstraintSmart(
   }
   return new_constraint;
 }
+
+
 
 /**
  * modification, sets all fields for gmtk settings
@@ -355,9 +362,23 @@ bool IonConstraint::isSatisfied(
 /**
  * \returns ION_TYPE for this constraint
  */
+/*
 ION_TYPE_T IonConstraint::getIonType() {
   return ion_type_;
 }
+*/
+
+void IonConstraint::setUseIonType(
+  ION_TYPE_T ion_type,
+  bool val
+  ) {
+  ion_types_[ion_type] = val;
+}
+
+bool IonConstraint::getUseIonType(ION_TYPE_T ion_type) {
+  return(ion_types_[ion_type]);
+}
+
 
 
 

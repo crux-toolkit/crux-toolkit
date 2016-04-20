@@ -140,7 +140,7 @@ Scorer::Scorer(
 
   // set fields needed for each score type
   if(type == SP){
-    sp_beta_ = get_double_parameter("beta");
+    //sp_beta_ = get_double_parameter("beta");  TODO what happened to beta? SJM
     sp_max_mz_ = get_double_parameter("max-mz");
     // allocate the intensity array
     intensity_array_ = (FLOAT_T*)mycalloc(getMaxBin(), sizeof(FLOAT_T));
@@ -1035,7 +1035,9 @@ bool Scorer::createIntensityArrayTheoretical(
     */
     // is it B, Y ion?
     if(ion_type == B_ION || 
-       ion_type == Y_ION){
+       ion_type == Y_ION ||
+       ion_type == C_ION ||
+       ion_type == Z_ION){
       if (!ion->isModified()){
         // Add peaks of intensity 50.0 for B, Y type ions. 
         // In addition, add peaks of intensity of 25.0 to +/- 1 m/z flanking each B, Y ion if requested.
@@ -1067,7 +1069,7 @@ bool Scorer::createIntensityArrayTheoretical(
       }
 
     }// is it A ion?
-    else if(ion_type == A_ION){
+    else if(ion_type == A_ION || ion_type == X_ION){
       // Add peaks of intensity 10.0 for A type ions. 
       addIntensity(theoretical, intensity_array_idx, LOSS_HEIGHT);
     }
