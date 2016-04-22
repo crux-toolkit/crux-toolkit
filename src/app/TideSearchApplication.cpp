@@ -62,14 +62,14 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
     NUM_THREADS = 1;
     carp(CARP_INFO, "Threading for peptide-centric formats are not supported yet");
   } else {
-    NUM_THREADS = Params::GetInt("num_threads");
+    NUM_THREADS = Params::GetInt("num-threads");
   }
   if (NUM_THREADS < 1) {
     NUM_THREADS = boost::thread::hardware_concurrency(); // MINIMUM # = 1.
     // (Meaning just main thread) Do not make this value below 1.
   // make sure that number of threads are reasonable, e.g. user did not specify millions of threads...
-  } else if (NUM_THREADS > 32) {
-    carp(CARP_INFO, "Requested Threads > 32, Will not thread.");
+  } else if (NUM_THREADS > 64) {
+    carp(CARP_INFO, "Requested Threads > 64, Will not thread.");
     NUM_THREADS = 1;    
   }
   carp(CARP_INFO, "Number of Threads: %d", NUM_THREADS); // prints the number of threads
@@ -1056,6 +1056,7 @@ vector<string> TideSearchApplication::getOptions() const {
     "max-precursor-charge",
     "peptide-centric-search",
     "elution-window-size",
+    "num-threads",
     "verbosity"
   };
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
