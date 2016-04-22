@@ -46,6 +46,15 @@ if (WIN32 AND NOT Cygwin)
 )
   #  Need Comet base directory for Windows
   include_directories(${CMAKE_BINARY_DIR}/ext/build/src/comet/)
+
+  # On Windows we should build vendor libraries by default
+  if (WIN32 AND NOT Cygwin)
+    if (NOT DEFINED INCLUDE_VENDOR_LIBRARIES)
+      set(INCLUDE_VENDOR_LIBRARIES TRUE)
+      message("INCLUDE_VENDOR_LIBRARIES ${INCLUDE_VENDOR_LIBRARIES}")
+    endif (NOT DEFINED INCLUDE_VENDOR_LIBRARIES)
+  endif (WIN32 AND NOT Cygwin)
+
 endif (WIN32 AND NOT Cygwin)
 
 link_directories(.)
@@ -276,132 +285,51 @@ if (WIN32 AND NOT CYGWIN)
   # MSToolkit library.
   add_definitions(-DBOOST_ALL_NO_LIB)
   add_definitions(-DXML_STATIC)
+  if (INCLUDE_VENDOR_LIBRARIES)
+    add_definitions(-DINCLUDE_VENDOR_LIBRARIES)
+  endif (INCLUDE_VENDOR_LIBRARIES)
+
 endif (WIN32 AND NOT CYGWIN)
 
-# The rt library is not needed for OS X
-if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set(RT_LIBRARY "")
-else(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set(RT_LIBRARY "rt")
-endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+# Create list of librarys common to all builds
+list(
+  APPEND 
+  common_libs 
+  barista
+  bullseye
+  cometsearch
+  crux-support
+  fido
+  gflags
+  hardklor
+  mstoolkitlite
+  perclibrary
+  protobuf
+  tide-support
+  xlink
+)
 
+# Create list of ProteoWizard libraries
 if (WIN32 AND NOT CYGWIN)
-  if (${SKIP_VENDOR_LIBRARIES})
-    target_link_libraries(
-      crux
-      barista
-      bullseye
-      hardklor
-      cometsearch
-      perclibrary
-      fido
-      xlink
-      gflags
-      crux-support
-      tide-support
-      mstoolkitlite
-      protobuf
-      libpwiz_data_identdata
-      libpwiz_data_identdata_version
-      libpwiz_data_misc
-      libpwiz_data_msdata
-      libpwiz_data_msdata_version
-      libpwiz_data_proteome
-      libpwiz_data_common
-      libpwiz_utility_chemistry
-      libpwiz_utility_minimxml
-      libpwiz_utility_misc
-      libpwiz_version
-      libSHA1
-      libzlib
-      ws2_32
-      optimized libboost_system-vc120-mt
-      optimized libboost_iostreams-vc120-mt
-      optimized libboost_nowide-vc120-mt
-      optimized libboost_filesystem-vc120-mt
-      optimized libboost_thread-vc120-mt
-      optimized libboost_chrono-vc120-mt
-      debug libboost_system-vc120-mt-gd
-      debug libboost_iostreams-vc120-mt-gd
-      debug libboost_nowide-vc120-mt-gd
-      debug libboost_filesystem-vc120-mt-gd
-      debug libboost_thread-vc120-mt-gd
-      debug libboost_chrono-vc120-mt-gd
-    )
-  else (${SKIP_VENDOR_LIBRARIES})
-    target_link_libraries(
-      crux
-      barista
-      bullseye
-      hardklor
-      cometsearch
-      perclibrary
-      fido
-      xlink
-      gflags
-      crux-support
-      tide-support
-      mstoolkitlite
-      protobuf
-      libpwiz_data_identdata
-      libpwiz_data_identdata_version
-      libpwiz_data_misc
-      libpwiz_data_msdata
-      libpwiz_data_msdata_version
-      libpwiz_data_proteome
-      libpwiz_data_common
-      libpwiz_data_vendor_readers
-      libpwiz_reader_abi
-      libpwiz_reader_abi_t2d
-      libpwiz_reader_agilent
-      libpwiz_reader_shimadzu
-      libpwiz_reader_thermo
-      libpwiz_reader_waters
-      libpwiz_vendor_api_abi
-      libpwiz_vendor_api_agilent
-      libpwiz_vendor_api_shimadzu
-      libpwiz_vendor_api_thermo
-      libpwiz_utility_chemistry
-      libpwiz_utility_minimxml
-      libpwiz_utility_misc
-      libpwiz_version
-      libSHA1
-      libzlib
-      MassLynxRaw
-      cdt
-      ws2_32
-      optimized libboost_system-vc120-mt
-      optimized libboost_iostreams-vc120-mt
-      optimized libboost_nowide-vc120-mt
-      optimized libboost_filesystem-vc120-mt
-      optimized libboost_thread-vc120-mt
-      optimized libboost_chrono-vc120-mt
-      debug libboost_system-vc120-mt-gd
-      debug libboost_iostreams-vc120-mt-gd
-      debug libboost_nowide-vc120-mt-gd
-      debug libboost_filesystem-vc120-mt-gd
-      debug libboost_thread-vc120-mt-gd
-      debug libboost_chrono-vc120-mt-gd
-    )
-  endif (${SKIP_VENDOR_LIBRARIES})
-else()
-  target_link_libraries(
-    crux
-    xlink
-    barista
-    bullseye
-    crux-support
-    tide-support
-    protobuf
-    gflags
-    cometsearch
-    dl
-    hardklor
-    m
-    ${RT_LIBRARY}
-    mstoolkitlite
-    perclibrary
-    fido
+  list(
+    APPEND
+    pwiz_libs
+    libpwiz_data_identdata
+    libpwiz_data_identdata_version
+    libpwiz_data_misc
+    libpwiz_data_msdata
+    libpwiz_data_msdata_version
+    libpwiz_data_proteome
+    libpwiz_data_common
+    libpwiz_utility_chemistry
+    libpwiz_utility_minimxml
+    libpwiz_utility_misc
+    libpwiz_version
+  )
+else (WIN32 AND NOT CYGWIN)
+  list(
+    APPEND
+    pwiz_libs
     pwiz_data_identdata
     pwiz_data_identdata_version
     pwiz_data_misc
@@ -413,18 +341,104 @@ else()
     pwiz_utility_minimxml
     pwiz_utility_misc
     pwiz_version
-    SHA1
+  )
+endif (WIN32 AND NOT CYGWIN)
+
+# Create list of BOOST librarlies
+if (WIN32 AND NOT CYGWIN)
+  list(
+    APPEND
+    boost_libs
+    optimized libboost_system-vc120-mt
+    optimized libboost_iostreams-vc120-mt
+    optimized libboost_nowide-vc120-mt
+    optimized libboost_filesystem-vc120-mt
+    optimized libboost_thread-vc120-mt
+    optimized libboost_chrono-vc120-mt
+    debug libboost_system-vc120-mt-gd
+    debug libboost_iostreams-vc120-mt-gd
+    debug libboost_nowide-vc120-mt-gd
+    debug libboost_filesystem-vc120-mt-gd
+    debug libboost_thread-vc120-mt-gd
+    debug libboost_chrono-vc120-mt-gd
+  )
+else (WIN32 AND NOT CYGWIN)
+  list(
+    APPEND
+    boost_libs
     boost_system-mt-s
     boost_iostreams-mt-s
-    z-mt-s-1_2
     boost_filesystem-mt-s
     boost_thread-mt-s
     boost_chrono
     boost_filesystem
     boost_system
-    pthread
   )
-endif(WIN32 AND NOT CYGWIN)
+endif (WIN32 AND NOT CYGWIN)
+
+# Create list of vendor libraries
+# Vendor libaries are only available on Windows
+# and are included by default. Set INCLUDE_VENDOR_LIBRARIES 
+# to false to not include them
+set(vendor_libs "")
+if (WIN32 AND NOT CYGWIN)
+  if (INCLUDE_VENDOR_LIBRARIES)
+    list(
+      APPEND
+      vendor_libs
+      libpwiz_data_vendor_readers
+      libpwiz_reader_abi
+      libpwiz_reader_abi_t2d
+      libpwiz_reader_agilent
+      libpwiz_reader_shimadzu
+      libpwiz_reader_thermo
+      libpwiz_reader_waters
+      libpwiz_vendor_api_abi
+      libpwiz_vendor_api_agilent
+      libpwiz_vendor_api_shimadzu
+      libpwiz_vendor_api_thermo
+      MassLynxRaw
+      cdt
+    )
+  endif (INCLUDE_VENDOR_LIBRARIES)
+endif (WIN32 AND NOT CYGWIN)
+
+# Create list of other required libaries
+if (WIN32 AND NOT CYGWIN)
+  list(
+    APPEND
+    other_libs
+    ws2_32
+    libSHA1
+    libzlib
+  )
+else (WIN32 AND NOT CYGWIN)
+  list(
+    APPEND
+    other_libs
+    dl
+    m
+    pthread
+    SHA1
+    z-mt-s-1_2
+  )
+  if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    list(
+      APPEND
+      other_libs
+      rt
+    )
+  endif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+endif (WIN32 AND NOT CYGWIN)
+
+target_link_libraries(
+  crux
+  ${common_libs}
+  ${pwiz_libs}
+  ${boost_libs}
+  ${vendor_libs}
+  ${other_libs}
+)
 
 install (
   TARGETS

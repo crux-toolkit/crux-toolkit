@@ -10,15 +10,15 @@
 #include "parameter.h"
 #include <iostream>
 #include "pwiz/data/msdata/SpectrumInfo.hpp"
-#ifdef _MSC_VER
-//#include "pwiz/data/msdata/DefaultReaderList.hpp"
+#if defined (_MSC_VER) &&  defined(INCLUDE_VENDOR_LIBRARIES)
+#include "pwiz/data/msdata/DefaultReaderList.hpp"
 //#include "pwiz/data/vendor_readers/ABI/Reader_ABI.hpp"
 //#include "pwiz/data/vendor_readers/ABI/T2D/Reader_ABI_T2D.hpp"
-//#include "pwiz/data/vendor_readers/Agilent/Reader_Agilent.hpp"
-//#include "pwiz/data/vendor_readers/Bruker/Reader_Bruker.hpp"
-//#include "pwiz/data/vendor_readers/Shimadzu/Reader_Shimadzu.hpp"
-//#include "pwiz/data/vendor_readers/Thermo/Reader_Thermo.hpp"
-//#include "pwiz/data/vendor_readers/Waters/Reader_Waters.hpp"
+#include "pwiz/data/vendor_readers/Agilent/Reader_Agilent.hpp"
+#include "pwiz/data/vendor_readers/Bruker/Reader_Bruker.hpp"
+#include "pwiz/data/vendor_readers/Shimadzu/Reader_Shimadzu.hpp"
+#include "pwiz/data/vendor_readers/Thermo/Reader_Thermo.hpp"
+#include "pwiz/data/vendor_readers/Waters/Reader_Waters.hpp"
 #endif
 
 
@@ -30,16 +30,16 @@ using namespace std;
 PWIZSpectrumCollection::PWIZSpectrumCollection(
   const string& filename   ///< The spectrum collection filename.
  ) : SpectrumCollection(filename){
-#ifdef _MSC_VER
-  //pwiz::msdata::DefaultReaderList readerList;
+#if defined(_MSC_VER) && defined(INCLUDE_VENDOR_LIBRARIES)
+  pwiz::msdata::DefaultReaderList readerList;
   //readerList.push_back(pwiz::msdata::ReaderPtr(new pwiz::msdata::Reader_ABI));
   //readerList.push_back(pwiz::msdata::ReaderPtr(new pwiz::msdata::Reader_ABI_T2D));
-  //readerList.push_back(pwiz::msdata::ReaderPtr(new pwiz::msdata::Reader_Agilent));
+  readerList.push_back(pwiz::msdata::ReaderPtr(new pwiz::msdata::Reader_Agilent));
   //readerList.push_back(pwiz::msdata::ReaderPtr(new pwiz::msdata::Reader_Bruker));
-  //readerList.push_back(pwiz::msdata::ReaderPtr(new pwiz::msdata::Reader_Shimadzu));
-  //readerList.push_back(pwiz::msdata::ReaderPtr(new pwiz::msdata::Reader_Thermo));
-  //readerList.push_back(pwiz::msdata::ReaderPtr(new pwiz::msdata::Reader_Waters));
-  //reader_ = new pwiz::msdata::MSDataFile(filename_, &readerList);
+  readerList.push_back(pwiz::msdata::ReaderPtr(new pwiz::msdata::Reader_Shimadzu));
+  readerList.push_back(pwiz::msdata::ReaderPtr(new pwiz::msdata::Reader_Thermo));
+  readerList.push_back(pwiz::msdata::ReaderPtr(new pwiz::msdata::Reader_Waters));
+  reader_ = new pwiz::msdata::MSDataFile(filename_, &readerList);
   reader_ = new pwiz::msdata::MSDataFile(filename_);
 #else
   reader_ = new pwiz::msdata::MSDataFile(filename_);
