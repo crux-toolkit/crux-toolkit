@@ -428,7 +428,7 @@ else (WIN32 AND NOT CYGWIN)
       other_libs
       rt
     )
-  endif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  endif (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 endif (WIN32 AND NOT CYGWIN)
 
 target_link_libraries(
