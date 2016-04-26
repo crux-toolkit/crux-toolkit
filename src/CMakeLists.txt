@@ -292,21 +292,23 @@ if (WIN32 AND NOT CYGWIN)
 endif (WIN32 AND NOT CYGWIN)
 
 # Create list of librarys common to all builds
+# Note the order of the libraries is significant
+# for the GCC linker.
 list(
   APPEND 
   common_libs 
+  xlink
   barista
   bullseye
-  cometsearch
   crux-support
-  fido
-  gflags
-  hardklor
-  mstoolkitlite
-  perclibrary
-  protobuf
   tide-support
-  xlink
+  protobuf
+  gflags
+  cometsearch
+  mstoolkitlite
+  hardklor
+  perclibrary
+  fido
 )
 
 # Create list of ProteoWizard libraries
