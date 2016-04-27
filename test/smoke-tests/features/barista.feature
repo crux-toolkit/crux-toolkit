@@ -4,7 +4,7 @@ Feature: barista
 Scenario Outline: User runs barista
   Given the path to Crux is ../../src/crux
   And I want to run a test named <test_name>
-  And I pass the arguments <args> <spectra> <search_results>
+  And I pass the arguments --overwrite T <args> <spectra> <search_results>
   When I run barista
   Then the return value should be 0
   And crux-output/<actual_output> should match good_results/<expected_output>
