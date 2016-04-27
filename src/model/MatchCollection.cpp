@@ -288,10 +288,10 @@ void MatchCollection::sort(
   }
 
   if (smaller_is_better) {
-    carp(CARP_INFO, "Sorting in ascending order by %s.",
+    carp(CARP_DEBUG, "Sorting in ascending order by %s.",
 	 scorer_type_to_string(score_type));
   } else {
-    carp(CARP_INFO, "Sorting in descending order by %s.",
+    carp(CARP_DEBUG, "Sorting in descending order by %s.",
 	 scorer_type_to_string(score_type));
   }	 
 
