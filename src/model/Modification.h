@@ -108,7 +108,7 @@ protected:
 
 class ModificationDefinitionContainer {
 public:
-  friend ModificationDefinition;
+  friend class ModificationDefinition;
 
   ModificationDefinitionContainer();
   virtual ~ModificationDefinitionContainer();
