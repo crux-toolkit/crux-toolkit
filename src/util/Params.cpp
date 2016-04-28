@@ -1661,10 +1661,12 @@ Params::Params() : finalized_(false) {
     "Specify which post-processor to apply to the search results.",
     "Available for crux pipeline", true);
   // create-docs
-  InitArgParam("tool name",
+  InitArgParam("tool-name",
     "Specifies the Crux tool to generate documentation for. If the value is "
     "'list', then a list of available tools will be given. If the value is "
-    "'default-params', then a default parameter file will be given.");
+    "'default-params', then a default parameter file will be given."
+    "If the value is 'param-table' then a table will be printed showing "
+    "which parameters are associated with which commands.");
   InitStringParam("doc-template", "",
     "Specifies the main template to be used for generating documentation.",
     "Available for crux create-docs", false);
