@@ -25,6 +25,7 @@ public:
 protected:
   void checkParams(const CruxApplicationList* apps = NULL);
 
+  void makeParamTable(const CruxApplicationList* apps);
   void generateToolHtml(std::ostream* outStream, const CruxApplication* application);
 
   void makeReplacements(
