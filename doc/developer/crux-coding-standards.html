@@ -9,7 +9,7 @@
 <h3>Objects in C</h3>
 
 <p>
-Crux is currently undergoing a transition from C to C++.  For the
+Crux underwent a transition from C to C++.  For the
 remaining C code, we aim to produce modularized code, with each module
 acting like a C++ object.  In particular, a
 <code>struct</code> object should be encapsulated in a pair of
@@ -241,14 +241,12 @@ C class-like structs should be named in all caps as
 capitalization as in <code>ClassName</code>.
 
 <li>
-Known deviations from the coding standards and other bugs should be
+Known deviations from the coding standards and other bugs were previously
 indicated with a one-line comment like this:
 <pre>
 // FIXME (WSN 19-Dec-05): Create access routines for this module.
 </pre>
-With either FIXME or TODO at the beginning. FIXME is for more serious
-violations, that should probably be fixed before a production release. TODO
-are nice to have.
+We now strongly prefer the creation of issues in the issue tracker. 
 
 <li>
 Use <code>FLOAT_T</code> to declare floating point variables rather then
@@ -276,78 +274,15 @@ to bring the entire file into conformance with these standards.
 <h3>Structured comments</h3>
 
 <p>
-Crux uses <a
+Crux previously used <a
 href='http://www.stack.nl/~dimitri/doxygen/manual.html'>doxygen</a> to
 produce documentation directly from structured comments in the source
-code.  Unstructured comments are still allowed, and do not show up in
-the generated documentation.  Because Doxygen is able to parse C and
-C++ files, only a few additional markup tags are required to generate
-documentation from the structured comments.  Following is an
-abbreviated description of how to use doxygen-style structured
-comments.  See the <a
-href='http://www.stack.nl/~dimitri/doxygen/manual.html'>doxygen
-documentation</a> for a full description:</p>
+code. Even though we have abandoned the use of doxygen, please still try
+to leave informative comments on methods and in difficult to understand
+portions of your code.</p>
 
 <p>
-A structured comment block begins with <code>/**</code> and 
-ends with <code>*/</code>. Note that a comment beginning with
-<code>/***</code> is <i>not</i> considered a structured comment.
-In-line structured comments are marked with <code>///</code>.
-Structured comments are assumed to refer to the code
-immediately following the comment.
-If you wish an in-line structured comment to refer to the code
-immediately preceding it, use <code>///&lt;</code>.
-Within a structured comment markup tags are identified
-by a leading '\'.
-You may embed HTML or Tex formatting in your structured comments.
-<p>
-The lines in a structured comment block up to the first '.'
-are assumed to be a brief description of the code that follows.
-Further text in the comment block is assumed to be a more detailed explanation.
-The structured comment describing a file is shown below:
-<pre>
-/**
- * \file test.c
- * A test module.
- * This module demonstrates doxygen structured comments and tags.
- * It might go on for several lines.
- */
-</pre>
-The markup tag <code>file</code> tells doxygen that the comment
-refers to the file <code>test.c</code> as a whole. 
-The next line is brief description of the file, 
-and the following lines are a fuller description.
-<p>
-A function <code>foo</code> would be commented like this:
-<pre>
-/**
- * foo operates on its parameters.
- * This is a detailed description of foo.
- * It might go on for several lines.
- * \return The result of foo.
- */
-int foo(
-  char a, ///< The user's first initial - in
-  int b, ///< user's age  - in
-  double c, ///< The distance to the nearest coffee stand - in
-  char* d ///< The functions guess for the users middle initial - out
-)
-</pre>
-Doxygen assumes that the comment refers to the function 
-<code>foo</code> immediately following it.
-It also will recognize the comments
-following the formal arguments to <code>foo</code> as
-parameter descriptions. 
-A markup tag, <code>\return</code>,
-is used to identify the text describing the return value of the function.
-<p>
-A simple C program following basic doxygen markup standards is
-<a href='./sample_doxygen/test.c'>here</a>, and the corresponding HTML
-output for that program is 
-<a href='./sample_doxygen/html/index.html'>here</a>.
-
-<p>
-Here are some coding standards related to structured comments:</p>
+Generally please try to follow these  standards related to structured comments:</p>
 
 <ul>
 
