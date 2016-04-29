@@ -35,17 +35,17 @@ private or protected with get and set functions as necessary.
 <ul>
 
 <li>
-Insert a space after every comma.
+Insert a space after every comma.</li>
 
 <li>
-Insert a space around arithmetic operators.
+Insert a space around arithmetic operators.</li>
 
 <li>
 Do not separate variable names and the arrow operator (<code>-&gt;</code>)
-with a space.
+with a space.</li>
 
 <li>
-Use no more than eight parameters per function.
+Use no more than eight parameters per function.</li>
 
 <li>
 If a function call doesn't fit on one line, place each argument on a
@@ -60,23 +60,24 @@ separate line.  For example:
     parameter5
   );
 </pre>
+</li>
 
 <li>
-When an actual parameter list contains a constant, that constant
-should be followed by a comment that indicates the formal parameter
-name.
+When an actual parameter list contains a constant (e.g, "true"), that
+constant should be followed by a comment that indicates the formal
+parameter name.</li>
 
 <li>
 Use underscores, rather than internal capitalization, to separate
-multi-word variable and (non-class-member) function names.
+multi-word variable and (non-class-member) function names.</li>
 
 <li>
-Use a single trailing underscore for class member variables.
+Use a single trailing underscore for class member variables.</li>
 
 <li>
 Indent two characters per level.  Note that, within emacs, this
 indentation can be automatically achieved by appending the following
-comment at the end of the file:
+comment at the end of the file
 
 <pre>
 /*
@@ -87,20 +88,20 @@ comment at the end of the file:
  */
 </pre>
 
-This comment should be included in every <code>.c</code>, <code>.cpp
-</code> and <code>.h</code> file. 
-<P>
+This comment should be included in every <code>.cpp</code>
+and <code>.h</code> file.</p>
+
+<p>
 In vim this is set by including the line 
 
 <pre>
 set tabstop=2
 </pre>
 
-in your .vimrc file.
-
+in your .vimrc file.</li>
 
 <li>
-Make each line at most 80 characters wide.
+Make each line at most 80 characters wide.</li>
 
 <li>
 Configure your editor to use spaces rather then tabs for indentation.
@@ -111,15 +112,15 @@ In emacs this is done by setting <code>indent-tabs-mode</code> to
 set expandtab
 </pre>
 
-in your .vimrc file.
+in your .vimrc file.</li>
 
 <li>
 Follow the keywords <code>for</code>, <code>while</code>, etc. by a
 brace on the same line.  Do not leave off the braces, even for a
-single-line block.
+single-line block.</li>
 
 <li>
-Place each end brace on a line of its own.
+Place each end brace on a line of its own.</li>
 
 <li>
 The keyword <code>else</code> may optionally "cuddle" between two
@@ -127,9 +128,10 @@ braces:
 <pre>
   } else {
 </pre>
+</li>
 
 <li>
-Use parentheses to make expression precedence explicit.
+Use parentheses to make expression precedence explicit.</li>
 
 <li>
 When an expression continues over more then one line,
@@ -140,7 +142,7 @@ For example:
   foo = param1 + param2 + param3
     + param4 + param5;
 </pre>
-
+</li>
 
 <li>
 When a fixed string assignment continues over more then one line,
@@ -150,15 +152,16 @@ take advantage of ANSI C's implicit concatenation:
   string = "this is a really long string"
     " that runs over two lines";
 </pre>
+</li>
 
 <li>
-Do not use single-letter variable names.
+Do not use single-letter variable names.</li>
 
 <li>
-Name loop indices using <code>&lt;name&gt;_idx</code>.
+Name loop indices using <code>&lt;name&gt;_idx</code>.</li>
 
 <li>
-Name loop iterators using <code>&lt;name&gt;_itr</code>.
+Name loop iterators using <code>&lt;name&gt;_itr</code>.</li>
 
 <li>
 Use only the following allowed abbreviations:
@@ -191,32 +194,35 @@ mz = mass-to-charge
 </ul>
 
 <li>
-Define variables anywhere within a block.
+Define variables anywhere within a block.</li>
 
 <li>
 Use all lowercase characters.  The only exceptions are constants,
 enumerated types (see below) and macros, which are written in all
 uppercase.  Class methods should begin with a lowercase letter and 
-capitalize multiple words (i.e. camel case).
+capitalize multiple words (i.e. camel case).</li>
 
 <li>
 Use <code>static const &lt;type&gt;</code> to define constants rather
-than <code>#define</code>.
+than <code>#define</code>.</li>
 
 <li>
-Name files with the class name as it is written (e.g. PeptideIterator.h).
+Name files with the class name as it is written
+(e.g. PeptideIterator.h).</li>
 
 <li>
 Usage statements should conform to the following:
   <ul>
-    <li> All options should have '--' not '-'
-    <li> Use periods consistently at the end of option descriptions.
-    <li> Put '(Default = XX)' or '(default = XX )' to indicate default behavior.
+    <li> All options should have '--' not '-'.</li>
+    <li> Use periods consistently at the end of option descriptions.</li>
+    <li> Put '(Default = XX)' or '(default = XX )' to indicate default
+    behavior.</li>
   </ul>
+</li>
 
 <li>
-Routines that return a status indicator should use zero to indicate success and
-a non-zero value to indicate failure of some kind.
+Routines that return a status indicator should use zero to indicate
+success and a non-zero value to indicate failure of some kind.</li>
 
 <li>
 Use <code>/*  */</code> comment style only for multi-line comments.
@@ -233,12 +239,12 @@ used to enumerate through all of the types.  The last value should be
 and <code>case</code> statements that handle the type should handle all
 values.  <code>case</code> statements should have an explicit case
 for <code>INVALID</code> and <code>NUM_TYPES</code> rather than
-using <code>default</code>.
+using <code>default</code>.</li>
 
 <li>
 C class-like structs should be named in all caps as 
 <code>&lt;name&gt;_T</code>.  C++ classes should be named with internal 
-capitalization as in <code>ClassName</code>.
+capitalization as in <code>ClassName</code>.</li>
 
 <li>
 Known deviations from the coding standards and other bugs were previously
@@ -246,28 +252,30 @@ indicated with a one-line comment like this:
 <pre>
 // FIXME (WSN 19-Dec-05): Create access routines for this module.
 </pre>
-We now strongly prefer the creation of issues in the issue tracker. 
+We now strongly prefer the creation of issues in the issue tracker. </li>
 
 <li>
 Use <code>FLOAT_T</code> to declare floating point variables rather then
-<code>float</code>. This allows us to switch to double precision arithmetic
-throughout Crux by specifying the <code>--enable-doubles</code> configure option.
+<code>float</code>. This allows us to switch to double precision
+arithmetic throughout Crux by specifying
+the <code>--enable-doubles</code> configure option.</li>
 
 <li>
-Do not write messages directly to <code>stderr</code>. 
-Always use the <code>carp()</code> function
-to report information, warnings, and errors.
+Do not write messages directly to <code>stderr</code>.  Always use
+the <code>carp()</code> function to report information, warnings, and
+errors.</li>
 
 <li>
-Do not call <code>exit()</code> directly for fatal errors. 
-Use <code>carp(CARP_FATAL, ...)</code>.
-This will report a fatal error and call <code>exit(1)</code>.
+Do not call <code>exit()</code> directly for fatal errors.
+Use <code>carp(CARP_FATAL, ...)</code>.  This will report a fatal
+error and call <code>exit(1)</code>.</li>
 
 <li>
-If you find yourself making small changes in a file that doesn't meet these
-coding standards, write your changes in the existing style of the file.
-If you are making a substantial revision to the file, take the time
-to bring the entire file into conformance with these standards.
+If you find yourself making small changes in a file that doesn't meet
+these coding standards, write your changes in the existing style of
+the file.  If you are making a substantial revision to the file, take
+the time to bring the entire file into conformance with these
+standards.</li>
 
 </ul>
 
@@ -282,7 +290,8 @@ to leave informative comments on methods and in difficult to understand
 portions of your code.</p>
 
 <p>
-Generally please try to follow these  standards related to structured comments:</p>
+Generally please try to follow these standards related to structured
+comments:</p>
 
 <ul>
 
@@ -301,13 +310,13 @@ Begin each file with a header of the following form:
 <li>
 Precede each function definition with a block comment.  The comment
 should give a brief description of the function, as well as describing
-the input and output parameters and side effects.
+the input and output parameters and side effects.</li>
 
 <li>
 Function parameters lists should begin with input parameters, followed
 by input/output parameters, followed by output parameters.  In the
 formal parameter list, each parameter should be followed by a one-line
-explanatory comment.
+explanatory comment.</li>
 
 </ul>
 
@@ -324,28 +333,28 @@ All command lines should be of the following form:
 
 where <code>arg1 arg2</code> are required arguments.  Obviously, the
 number of required arguments will differ by program, but every program
-will have at least one required argument.
+will have at least one required argument.</li>
 
 <li>
 Command line option names should be verbose, and should be preceded
-with a double hyphen.
+with a double hyphen.</li>
 
 <li>
-Multi-word command line options should have internal hyphens.
+Multi-word command line options should have internal hyphens.</li>
 
 <li>
 Where it makes sense, a hyphen on the command line in place of a file
 name should be interpreted to mean "read from standard input."  Where
-this is possible, it should be documented.
+this is possible, it should be documented.</li>
 
 <li>
 Every program should provide a <code>--verbose</code>
 option that controls the verbosity of messages to standard error and a
 <code>--parameter-file</code> option that allows additional parameters
-to be specified via a file.
+to be specified via a file.</li>
 
 <li>
-The usage message should list the default value for every option.
+The usage message should list the default value for every option.</li>
 
 </ul>
 
