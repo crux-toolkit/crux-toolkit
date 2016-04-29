@@ -151,8 +151,6 @@ Params::Params() : finalized_(false) {
   /* *** Initialize Options (command line and param file) *** */
 
   /* options for all executables */
-  InitBoolParam("version", false, "Print version number and quit.",
-    "Available for all crux programs.  On command line use '--version T'.", true);
   InitIntParam("verbosity", 30, 0, 100,
     "Specify the verbosity of the current processes. Each level prints the following "
     "messages, including all those at lower verbosity levels: 0-fatal errors, 10-non-"
@@ -304,8 +302,7 @@ Params::Params() : finalized_(false) {
   InitStringParam("prelim-score-type", "sp", "sp|xcorr",
     "Initial scoring (sp, xcorr).", 
     "The score applied to all possible psms for a given spectrum. Typically "
-    "used to filter out the most plausible for further scoring. See "
-    "max-rank-preliminary and score-type.", false);
+    "used to filter out the most plausible for further scoring.", false);
   InitStringParam("score-type", "xcorr", "xcorr|sp|xcorr-pvalue|sp-pvalue",
     "The primary scoring method to use (xcorr, sp, xcorr-pvalue, sp-pvalue).",
     "Primary scoring is typically done on a subset (see max-rank-preliminary) of all "
@@ -366,48 +363,14 @@ Params::Params() : finalized_(false) {
   InitStringParam("output-dir", "crux-output",
     "The name of the directory where output files will be created.",
     "Available for most commands.", true);
-  // user options regarding decoys
-  InitStringParam("decoys", "peptide-shuffle", "none|reverse|protein-shuffle|peptide-shuffle",
-    "Include a decoy version of every peptide by shuffling or reversing the target "
-    "sequence. Each peptide is either reversed or shuffled, leaving the N-terminal and C-"
-    "terminal amino acids in place. Note that peptides that appear multiple times in the "
-    "target database are only shuffled once. In reverse mode, palindromic peptides are "
-    "shuffled. Also, if a shuffled peptide produces an overlap with the target or decoy "
-    "database, then the peptide is re-shuffled up to 5 times. Note that, despite this "
-    "repeated shuffling, homopolymers will appear in both the target and decoy database.",
-    "", true);
-  InitIntParam("num-decoys-per-target", 1, 0, 10,
-    "Number of decoy peptides to search for every target peptide searched."
-    "Only valid for fasta searches when --decoys is not none.",
-    "Use --decoy-location to control where they are returned (which "
-    "file(s)) and --decoys to control how targets are randomized.", true);
-  InitStringParam("decoy-location", "separate-decoy-files",
-    "Specify location of decoy search results. "
-    "<string>=target-file|one-decoy-file|separate-decoy-files.",
-    "Applies when decoys is not none.  Use 'target-file' to mix "
-    "target and decoy search results in one file. 'one-decoy-file' will "
-    "return target results in one file and all decoys in another. "
-    "'separate-decoy-files' will create as many decoy files as "
-    "num-decoys-per-target.", true);
   // coder options regarding decoys
   InitIntParam("num-decoy-files", 2, 0, 10,
     "Replaces number-decoy-set.  Determined by decoy-location"
     " and num-decoys-per-target",
     "", false);
-  InitBoolParam("tdc", false,
-    "Target-decoy competition. puts decoy psms in target file. ",
-    "Now hidden from the user", false);
   InitBoolParam("decoy-p-values", false,
     "Store all decoy p-values in a file",
     "", false);
-  InitIntParam("max-rank-preliminary", 500, 0, BILLION, 
-    "Number of psms per spectrum to score with xcorr after preliminary "
-    "scoring with Sp. "
-    "Set to 0 to score all psms with xcorr.",
-    "For positive values, the Sp "
-    "(preliminary) score acts as a filter; only high scoring psms go "
-    "on to be scored with xcorr.  This saves some time.  If set to 0, "
-    "all psms are scored with both scores. ", true);
   InitIntParam("top-match", 5, 1, BILLION, 
     "Specify the number of matches to report for each spectrum.",
     "Available for tide-search and crux percolator", true);
@@ -455,10 +418,6 @@ Params::Params() : finalized_(false) {
     "The maximum number of modifications that can be applied to a single " 
     "peptide.",
     "Available for tide-index.", true);
-  InitIntParam("max-aas-modified", MAX_PEPTIDE_LENGTH, 0, MAX_PEPTIDE_LENGTH,
-    "The maximum number of modified amino acids that can appear in one "
-    "peptide.  Each aa can be modified multiple times.",
-    "", true);
   InitStringParam("mod-mass-format", "mod-only", "mod-only|total|separate",
     "Specify how sequence modifications are reported in various output files. Each "
     "modification is reported as a number enclosed in square braces following the "
@@ -668,9 +627,6 @@ Params::Params() : finalized_(false) {
     "conditions\" by Klammer AA, Yi X, MacCoss MJ and Noble WS. ([[html:<em>]]Analytical "
     "Chemistry[[html:</em>]]. 2007 Aug 15;79(16):6111-8.).",
     "Available for crux percolator", true);
-  InitIntParam("doc", -1, -1, 15,
-    "Include description of correct features.",
-    "Avilable for crux percolator", true);
   InitBoolParam("only-psms", false,
     "Do not remove redundant peptides; keep all PSMs and exclude peptide level probability.",
     "Available for crux percolator", true);
@@ -1307,9 +1263,6 @@ Params::Params() : finalized_(false) {
   /* psm-convert options */
   InitStringParam("input-format", "auto", "auto|tsv|sqt|pin|pepxml|mzidentml",
     "Legal values are auto, tsv, sqt, pin, pepxml or mzidentml format.",
-    "option, for psm-convert", true);
-  InitBoolParam("distinct-matches", true,
-    "Whether matches/ion are distinct (As apposed to total).",
     "option, for psm-convert", true);
   /* get-ms2-spectrum options */
   InitBoolParam("stats", false, 
@@ -2400,8 +2353,6 @@ void Params::FinalizeParams() {
     Set("digestion", "non-specific-digest");
     Set("missed-cleavages", 500);
   }
-
-  translate_decoy_options();
 
   string customEnzyme = GetString("custom-enzyme");
   if (!customEnzyme.empty()) {
