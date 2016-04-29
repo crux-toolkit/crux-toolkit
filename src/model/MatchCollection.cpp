@@ -1281,7 +1281,7 @@ void MatchCollection::printMultiSpectra(
 
   // if file location is target (i.e. tdc=T), print all to target
   MatchFileWriter* decoy_file = decoy_tab_file;
-  if( get_boolean_parameter("tdc") == true ){
+  if (Params::GetString("estimation-method") == "tdc") {
     decoy_file = tab_file;
   }
 
