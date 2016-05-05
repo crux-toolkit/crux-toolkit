@@ -1048,6 +1048,7 @@ vector<string> TideSearchApplication::getOptions() const {
     "mzid-output",
     "pin-output",
     "fileroot",
+    "file-column",
     "output-dir",
     "overwrite",
     "parameter-file",

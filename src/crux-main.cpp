@@ -73,13 +73,10 @@ int main(int argc, char** argv){
     applications.add(new QRanker());
     applications.add(new Barista());
     applications.add(new SearchForXLinks());
-    applications.add(new XLinkAssignIons());
-    applications.add(new XLinkScoreSpectrum());
     applications.add(new SpectralCounts());
     applications.add(new PipelineApplication());
     applications.add(new CascadeSearchApplication());
     applications.add(new AssignConfidenceApplication());
-    applications.add(new SubtractIndexApplication());
 
     // Utilities
     applications.addMessage(applications.getListName() +
@@ -93,6 +90,9 @@ int main(int argc, char** argv){
     applications.add(new CreateDocs());
     applications.add(new PrintVersion());
     applications.add(new PSMConvertApplication());
+    applications.add(new SubtractIndexApplication());
+    applications.add(new XLinkAssignIons());
+    applications.add(new XLinkScoreSpectrum());
 
     // Utilities for processing tab-delimited text files
     applications.add(new ExtractColumns());

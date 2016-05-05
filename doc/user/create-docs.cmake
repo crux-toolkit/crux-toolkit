@@ -57,3 +57,37 @@ foreach (doc ${doc_list})
   endif (NOT ${PROJECT_SOURCE_DIR} MATCHES ${PROJECT_BINARY_DIR})
 endforeach (doc ${doc_list})
 
+# Create the parameter table
+execute_process(
+  COMMAND ${CRUX_PATH} create-docs param-table
+    RESULT_VARIABLE status
+    ERROR_VARIABLE error_message
+    OUTPUT_FILE param-table.html
+)
+if (NOT ${status} EQUAL 0)
+  message(
+    FATAL_ERROR
+    "Unable to generate param-table.html" 
+    "\nError message: ${error_message}"
+    "\nCreation of param-table failed."
+  )
+endif (NOT ${status} EQUAL 0)
+message(STATUS "Created param-table.html")
+if (NOT ${PROJECT_SOURCE_DIR} MATCHES ${PROJECT_BINARY_DIR})
+  # If building out of source copy doc files back to 
+  # source doc directory.
+  execute_process(
+    COMMAND ${CMAKE_COMMAND} 
+      -E copy param-table.html ${DOC_DIR}
+      RESULT_VARIABLE status
+      ERROR_VARIABLE error_message
+  )
+  if (NOT ${status} EQUAL 0)
+    message(
+      FATAL_ERROR
+      "Unable to copy param-table.html to ${DOC_DIR}" 
+      "\nError message: ${error_message}"
+      "\nCreation of param-table failed."
+    )
+  endif (NOT ${status} EQUAL 0)
+endif (NOT ${PROJECT_SOURCE_DIR} MATCHES ${PROJECT_BINARY_DIR})
