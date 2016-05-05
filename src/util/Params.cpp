@@ -821,6 +821,9 @@ Params::Params() : finalized_(false) {
   InitBoolParam("skip-preprocessing", false,
     "Skip preprocessing steps on spectra. Default = F.",
     "Available for tide-search", false);
+  InitIntParam("num-threads", 0, 0, 64,
+               "0=poll CPU to set num threads; else specify num threads directly.",
+               "Available for tide-search tab-delimited files only.", true);
   /*
    * Comet parameters
    */
@@ -1654,10 +1657,12 @@ Params::Params() : finalized_(false) {
     "Specify which post-processor to apply to the search results.",
     "Available for crux pipeline", true);
   // create-docs
-  InitArgParam("tool name",
+  InitArgParam("tool-name",
     "Specifies the Crux tool to generate documentation for. If the value is "
     "'list', then a list of available tools will be given. If the value is "
-    "'default-params', then a default parameter file will be given.");
+    "'default-params', then a default parameter file will be given."
+    "If the value is 'param-table' then a table will be printed showing "
+    "which parameters are associated with which commands.");
   InitStringParam("doc-template", "",
     "Specifies the main template to be used for generating documentation.",
     "Available for crux create-docs", false);
@@ -1809,6 +1814,7 @@ void Params::Categorize() {
   AddCategory("Database", items);
 
   items.clear();
+  items.insert("num-threads");
   items.insert("num_threads");
   AddCategory("CPU threads", items);
 
