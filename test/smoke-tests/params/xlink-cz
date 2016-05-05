@@ -9,3 +9,4 @@ use-b-ions=F
 use-x-ions=F
 use-y-ions=F
 use-z-ions=T
+isotopic-mass=average
