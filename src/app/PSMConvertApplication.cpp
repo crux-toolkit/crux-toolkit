@@ -171,6 +171,7 @@ vector<string> PSMConvertApplication::getArgs() const {
 vector<string> PSMConvertApplication::getOptions() const {
   string arr[] = {
     "input-format",
+    "distinct-matches",
     "protein-database",
     "output-dir",
     "overwrite",

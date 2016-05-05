@@ -192,9 +192,11 @@ void CreateDocs::makeParamTable(const CruxApplicationList* apps) {
   carp(CARP_INFO, "Creating a table of parameters X commands.");
   cout << "<!DOCTYPE HTML>" << endl
        << "<html><head><meta charset=\"UTF-8\">" << endl
-       << "<title>Crux parameters</title></head>" << endl
+       << "<title>Crux parameters</title>" << endl
+       << "<link href=\"./crux.css\" rel=\"styleSheet\" type=\"text/css\">"
+       << "</head>" << endl
        << "<body><h1>Crux parameters</h1>" << endl
-       << "<table border=\"1\">" << endl;
+       << "<table border=\"1\" align=\"center\">" << endl;
 
   // Print the header row.
   cout << "<tr><td>&nbsp;</td>";
@@ -207,6 +209,9 @@ void CreateDocs::makeParamTable(const CruxApplicationList* apps) {
 
   // Keep track of whether this parameter row has been printed.
   std::map<const string, bool> isPrinted;
+
+  // Alternate background.
+  bool backgroundIsGrey = true;
   
   /*
    * We use a double loop to print the parameters so that we ensure
@@ -224,7 +229,13 @@ void CreateDocs::makeParamTable(const CruxApplicationList* apps) {
       */
       if (!isPrinted[*appOptionIter] && Params::IsVisible(*appOptionIter)) {
 	isPrinted[*appOptionIter] = true;
-	cout << "<tr><td>" << *appOptionIter << "</td>";
+	if (backgroundIsGrey) {
+	  cout << "<tr bgcolor=\"#DEDEDE\">" << endl;
+	} else {
+	  cout << "<tr>" << endl;
+	}
+	backgroundIsGrey = !backgroundIsGrey;
+	cout << "<td>" << *appOptionIter << "</td>";
 	for (vector<CruxApplication*>::const_iterator appIter2 = apps->begin();
 	     appIter2 != apps->end();
 	     appIter2++) {
@@ -233,7 +244,7 @@ void CreateDocs::makeParamTable(const CruxApplicationList* apps) {
 	  bool hasOption = std::find(appOptions.begin(), appOptions.end(),
 				     *appOptionIter) != appOptions.end();
 	  if (hasOption) {
-	    cout << "<td>X</td>";
+	    cout << "<td>&#10003;</td>";
 	  } else {
 	    cout << "<td>&nbsp;</td>";
 	  }

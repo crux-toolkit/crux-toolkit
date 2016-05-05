@@ -105,7 +105,6 @@ typedef enum parameter_type PARAMETER_TYPE_T;
  */
 void initialize_parameters(void);
 
-void translate_decoy_options();
 void parse_custom_enzyme(const std::string& rule_str);
 
 /**

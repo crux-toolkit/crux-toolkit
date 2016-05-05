@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href=""?>
-<msms_pipeline_analysis date="Thu May  5 11:33:59 2016" xmlns="http://regis-web.systemsbiology.net/pepXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://regis-web.systemsbiology.net/pepXML /usr/local/tpp/schema/pepXML_v110.xsd" summary_xml="">
+<msms_pipeline_analysis date="Thu May  5 12:37:40 2016" xmlns="http://regis-web.systemsbiology.net/pepXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://regis-web.systemsbiology.net/pepXML /usr/local/tpp/schema/pepXML_v110.xsd" summary_xml="">
 <msms_run_summary base_name="NA" msManufacturer="NA" msModel="NA" msIonization="NA" msAnalyzer="NA" msDectector="NA" raw_data_type="NA" raw_data="NA" >
 <sample_enzyme name="trypsin">
 </sample_enzyme>
@@ -11,7 +11,6 @@
 <aminoacid_modification aminoacid="K" mass="129.8950" massdiff="1.80" variable="Y" peptide_terminus="c" />
 <aminoacid_modification aminoacid="A" mass="72.7371" massdiff="1.70" variable="Y" peptide_terminus="n" />
 <parameter name="output-file" value=""/>
-<parameter name="version" value="false"/>
 <parameter name="verbosity" value="30"/>
 <parameter name="parameter-file" value=""/>
 <parameter name="overwrite" value="true"/>
@@ -49,17 +48,12 @@
 <parameter name="spectrum-charge" value="all"/>
 <parameter name="fileroot" value=""/>
 <parameter name="output-dir" value="crux-output"/>
-<parameter name="decoys" value="peptide-shuffle"/>
-<parameter name="num-decoys-per-target" value="1"/>
-<parameter name="decoy-location" value="separate-decoy-files"/>
-<parameter name="max-rank-preliminary" value="500"/>
 <parameter name="top-match" value="5"/>
 <parameter name="seed" value="1"/>
 <parameter name="fragment-mass" value="mono"/>
 <parameter name="isotopic-mass" value="mono"/>
 <parameter name="min-mods" value="0"/>
 <parameter name="max-mods" value="255"/>
-<parameter name="max-aas-modified" value="255"/>
 <parameter name="mod-mass-format" value="mod-only"/>
 <parameter name="use-a-ions" value="false"/>
 <parameter name="use-b-ions" value="true"/>
@@ -101,7 +95,6 @@
 <parameter name="fido-gridsearch-mse-threshold" value="0.05"/>
 <parameter name="override" value="false"/>
 <parameter name="klammer" value="false"/>
-<parameter name="doc" value="-1"/>
 <parameter name="only-psms" value="false"/>
 <parameter name="decoy-format" value="shuffle"/>
 <parameter name="mods-spec" value="C+57.02146"/>

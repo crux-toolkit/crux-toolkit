@@ -113,66 +113,6 @@ void initialize_parameters(void){
 }
 
 /**
- * \brief Take the user options related to decoys to set the number of
- * decoy files and to adjust the number of top Sp-ranked PSMs to
- * score with xcorr.  Number of decoy files is 0 if decoy location is
- * "target", 1 if location is "one-decoy-file", or
- * num-decoys-per-target.  Max rank prelimiary is adjusted if location
- * is target and num-decoys-per-target > 1.
- */
-void translate_decoy_options(){
-  // get user values
-  int num_decoy_per_target = Params::GetInt("num-decoys-per-target");
-  string decoy_type_str = Params::GetString("decoys");
-  DECOY_TYPE_T decoy_type = string_to_decoy_type(decoy_type_str.c_str());
-
-  string location = Params::GetString("decoy-location");
-  int max_rank_preliminary = Params::GetInt("max-rank-preliminary");
-
-  // store new values here
-  bool tdc = false;  // target-decoy competitition
-  int new_num_decoy_files = -1;
-  int new_max_rank_preliminary = max_rank_preliminary; 
-
-  // user may not have set num-decoys-per-target and default is 1
-  if (decoy_type == NO_DECOYS) {
-    num_decoy_per_target = 0;
-  } 
-
-  // user may not have set target-location if no decoys requested
-  if (num_decoy_per_target == 0) {
-    location = "separate-decoy-files";
-    new_num_decoy_files = 0;
-  }
-
-  // set new values
-  if (location == "target-file") {
-    tdc = true;
-    new_num_decoy_files = 0;
-
-    if( max_rank_preliminary > 0 ){  // scale to num decoys
-      new_max_rank_preliminary = max_rank_preliminary * 
-                                (1 + num_decoy_per_target);
-    }
-  } else if (location == "one-decoy-file") {
-    tdc = false;
-    new_num_decoy_files = 1;
-  } else if (location == "separate-decoy-files") {
-    tdc = false;
-    new_num_decoy_files = num_decoy_per_target;
-  } else {
-    carp(CARP_FATAL, "Unrecoginzed decoy location '%s'."
-         "Must be target-file, one-decoy-file, or separate-decoy-files",
-         location.c_str());
-  }
-
-  // now update all values
-  Params::Set("num-decoy-files", new_num_decoy_files);
-  Params::Set("max-rank-preliminary", new_max_rank_preliminary);
-  Params::Set("tdc", tdc);
-}
-
-/**
  * Read the value given for custom-enzyme and enter values into global
  * params.  Correct syntax is [A-Z]|[A-Z] or {A-Z}|{A-Z}.  An X
  * indicates that any residue is legal. Sets pre/post_list size and
