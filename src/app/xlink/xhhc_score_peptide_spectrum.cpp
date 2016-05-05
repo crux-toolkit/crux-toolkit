@@ -7,6 +7,10 @@
 #include "LinkedPeptide.h"
 #include "XHHC_Peptide.h"
 
+#include "XLinkPeptide.h"
+#include "SelfLoopPeptide.h"
+#include "XLinkScorer.h"
+
 #include "objects.h"
 #include "model/IonConstraint.h"
 #include "model/Scorer.h"
@@ -44,19 +48,28 @@ int XLinkScoreSpectrum::main(int argc, char** argv){
 
   string ms2_file = Params::GetString("ms2 file");
 
-  LinkedPeptide::setLinkerMass(Params::GetDouble("link mass"));
- 
-  // create new ion series
+  FLOAT_T link_mass = Params::GetDouble("link mass");
+  XLinkPeptide::setLinkerMass(link_mass);
+  string scoremethod(Params::GetString("xlink-score-method"));
+
+
+  XLinkMatch* candidate = NULL;
   
   // a single peptide linked to itself
   if (strcmp(peptideB, "NULL") == 0) {
-    cout << "B is null" << endl; 
-    peptideB = NULL;
+    cout << "B is null" << endl;
+    if (scoremethod != "composite") {
+      carp(CARP_FATAL, "For composite scoring, provide a linked peptide, "
+	   "not a self loop");
+    }
+    candidate = new SelfLoopPeptide(peptideA, posA, posB);
+  } else {
+    candidate = new XLinkPeptide(peptideA, peptideB, posA, posB);
   }
 
   // read ms2 file
   Crux::SpectrumCollection* collection = SpectrumCollectionFactory::create(ms2_file);
-
+  
   // search for spectrum with correct scan number
   Spectrum* spectrum = collection->getSpectrum(scan_num);
   if( spectrum == NULL ){
@@ -65,52 +78,39 @@ int XLinkScoreSpectrum::main(int argc, char** argv){
     exit(1);
   }
   
-  //created linked peptide.
-  LinkedPeptide lp = LinkedPeptide(peptideA, peptideB, posA, posB, charge);
-
-  cout <<"LinkedPeptide:"<<lp<<" mass:"<<lp.getMass(MONO)<<endl;
+  XLinkScorer xlink_scorer(spectrum, charge);
   
-  XHHC_Scorer xhhc_scorer;
-  xhhc_scorer.setPrint(false);
+  IonConstraint* ion_constraint = xlink_scorer.getIonConstraintXCorr();
+  ion_constraint->setUseIonType(BY_ION, false);
+  ion_constraint->setUseIonType(BYA_ION, false);
+  ion_constraint->setUseIonType(ALL_ION, false);
+  ion_constraint->setUseIonType(A_ION, Params::GetBool("use-a-ions"));
+  ion_constraint->setUseIonType(B_ION, Params::GetBool("use-b-ions"));
+  ion_constraint->setUseIonType(C_ION, Params::GetBool("use-c-ions"));
+  ion_constraint->setUseIonType(X_ION, Params::GetBool("use-x-ions"));
+  ion_constraint->setUseIonType(Y_ION, Params::GetBool("use-y-ions"));
+  ion_constraint->setUseIonType(Z_ION, Params::GetBool("use-z-ions"));
 
-  string scoremethod(Params::GetString("xlink-score-method"));
-
-  if (scoremethod=="composite") {
-
-    LinkedIonSeries ion_series(charge);
-
-    //cout << lp << endl;
-    
-    ion_series.addLinkedIons(lp);
-       
-    double score = xhhc_scorer.scoreSpectrumVsSeries(spectrum, ion_series);
+  if (scoremethod == "composite") {
+    FLOAT_T score = xlink_scorer.scoreCandidate(candidate);   
 
     cout <<score<<endl;
 
-    bool do_print_spectra = true;
-    if (do_print_spectra) {
-      print_spectrum(spectrum, ion_series);
-    }
-  } else if (scoremethod=="modification") {
+  } else if (scoremethod == "modification") {
     
-    LinkedIonSeries ion_seriesA;
-    ion_seriesA.addLinkedIons(lp, SPLITTYPE_A);
-    double scoreA = xhhc_scorer.scoreSpectrumVsSeries(spectrum, ion_seriesA);
+    XLinkPeptide* xlp = (XLinkPeptide*)candidate;
+    FLOAT_T deltaB = xlp->getXLinkablePeptide(1).getMass() + link_mass;
+    FLOAT_T scoreA = xlink_scorer.scoreXLinkablePeptide(xlp->getXLinkablePeptide(0), 0, deltaB);
     
-    LinkedIonSeries ion_seriesB;
-    ion_seriesB.addLinkedIons(lp, SPLITTYPE_B);
-
-    
-
-    double scoreB = xhhc_scorer.scoreSpectrumVsSeries(spectrum, ion_seriesB);
+    FLOAT_T deltaA = xlp->getXLinkablePeptide(0).getMass() + link_mass;
+    FLOAT_T scoreB = xlink_scorer.scoreXLinkablePeptide(xlp->getXLinkablePeptide(1), 0, deltaA);
 
     if (scoreA > scoreB)
       cout << scoreA << "\t" << scoreB << endl;
     else
       cout << scoreB << "\t" << scoreA << endl;
 
-  } else if (scoremethod=="concatenation") {
-
+  } else if (scoremethod == "concatenation") {
 
     vector<double> scores;
     double score1 = get_concat_score(peptideA, peptideB, posA, charge, spectrum);
@@ -118,7 +118,6 @@ int XLinkScoreSpectrum::main(int argc, char** argv){
 
     double score2 = get_concat_score(peptideB, peptideA, posB, charge, spectrum);
     scores.push_back(score2);
-
 
     int lengthA = string(peptideA).length();
     int lengthB = string(peptideB).length();
@@ -131,15 +130,14 @@ int XLinkScoreSpectrum::main(int argc, char** argv){
 
     sort(scores.begin(), scores.end(), less<double>());
     cout <<scores[0];
-    for (int i=1;i<4;i++)
-      {
-	cout <<"\t"<<scores[i];
-      }
+    for (int i=1;i<4;i++) {
+      cout <<"\t"<<scores[i];
+    }
 
     cout << endl;
   }
   else {
-    carp(CARP_ERROR,"Unknown method");
+    carp(CARP_ERROR,"Unknown score method (%s).", scoremethod.c_str());
   }
   // free heap
   delete collection;
@@ -413,7 +411,13 @@ vector<string> XLinkScoreSpectrum::getOptions() const {
   string arr[] = {
     "verbosity",
     "use-flanking-peaks",
-    "xlink-score-method"
+    "xlink-score-method",
+    "use-a-ions",
+    "use-b-ions",
+    "use-c-ions",
+    "use-x-ions",
+    "use-y-ions",
+    "use-z-ions"
   };
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }

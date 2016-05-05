@@ -181,13 +181,15 @@ int convert_to_mod_aa_seq(const char* sequence, MODIFIED_AA_T** mod_sequence,
 /**
  * \brief Allocate a new MODIFIED_AA_T array and copy values into it.
  */
-MODIFIED_AA_T* copy_mod_aa_seq(MODIFIED_AA_T* source, int length);
+MODIFIED_AA_T* copy_mod_aa_seq(
+  const MODIFIED_AA_T* source, 
+  int length);
 
 /**
  * \brief Allocate a new MODIFIED_AA_T array and copy values into it.
  */
 MODIFIED_AA_T* copy_mod_aa_seq(
-  MODIFIED_AA_T* source ///< Sequence to copy
+  const MODIFIED_AA_T* source ///< Sequence to copy
   );
 
 /**
