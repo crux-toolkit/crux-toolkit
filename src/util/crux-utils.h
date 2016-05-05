@@ -26,8 +26,8 @@
 #include "utils.h"
 #include "objects.h"
 #include "parameter.h"
+#include "StringUtils.h"
 #include "model/Peak.h"
-
 #include "app/CruxApplication.h"
 
 #include <set>
@@ -386,20 +386,6 @@ int prepare_protein_input(
   Database** database);///< return new fasta database here
 
 /**
- * convert string to data type
- * \returns whether the conversion was successful or not.
- */
-template<typename TValue>  
-static bool from_string(
-  TValue& value,
-  const std::string& s
-  ) {
-
-  std::istringstream iss(s);
-  return !(iss >> std::dec >> value).fail();
-}   
-
-/**
  * converts a string in #-# format to
  * a first and last variable
  * \returns whether the extraction was successful or not
@@ -435,8 +421,8 @@ static bool get_range_from_string(
 
   char* dash = strchr(range_string, '-');
   if( dash == NULL ){ // a single number
-    ret = from_string(first, range_string);
-    last=first;
+    ret = StringUtils::TryFromString(range_string, &first);
+    last = first;
   } else {
     //invalid if more than one dash
     const char* dash_check = strchr(dash + 1, '-');
@@ -444,10 +430,10 @@ static bool get_range_from_string(
       ret = false;
     } else {
       *dash = '\0';
-      ret = from_string(first,range_string);
+      ret = StringUtils::TryFromString(range_string, &first);
       *dash = '-';
       dash++;
-      ret &= from_string(last,dash);
+      ret &= StringUtils::TryFromString(dash, &last);
     }
   }
 

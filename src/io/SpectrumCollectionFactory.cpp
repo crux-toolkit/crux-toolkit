@@ -10,6 +10,7 @@
 #include "MSToolkitSpectrumCollection.h"
 #include "PWIZSpectrumCollection.h"
 #include "util/FileUtils.h"
+#include "util/Params.h"
 
 /**
  * Instantiates a SpectrumCollection based on the extension of the
@@ -24,7 +25,7 @@ Crux::SpectrumCollection* SpectrumCollectionFactory::create(const string& filena
 (.ms2,.mgf, or .mzXML)",filename.c_str());
   }
 
-  string parser = get_string_parameter("spectrum-parser");
+  string parser = Params::GetString("spectrum-parser");
   if (parser == "pwiz") {
     carp(CARP_DEBUG, "Using protewizard to parse spectra");
     return new PWIZSpectrumCollection(filename);

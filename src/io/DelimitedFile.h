@@ -23,7 +23,7 @@
 #include <vector>
 
 #include "parameter.h"
-
+#include "util/Params.h"
 
 class DelimitedFile {
 
@@ -36,7 +36,6 @@ class DelimitedFile {
   std::vector<std::string> column_names_;
   unsigned int current_row_; //used for iterating through the table.
   char delimiter_;
-
 
   /**
    * reorders the rows of a delimited file using a built map 
@@ -288,7 +287,7 @@ class DelimitedFile {
     unsigned int row_idx, ///< the row index
     TValue value ///< the new value
   ) {
-      int precision = get_int_parameter("precision");
+      int precision = Params::GetInt("precision");
       std::ostringstream ss;
       ss << std::setprecision(precision) << value;
       std::string svalue = ss.str();
@@ -457,36 +456,12 @@ class DelimitedFile {
   bool hasNext();
 
   /**
-   * \returns a delimited string from the vector of elements 
-   */
-  template<typename T>
-  static std::string splice(
-    const std::vector<T>& elements, ///<vector of elements to splice
-    char delimiter = '\t' ///<delimited to use
-  ) {
-
-      if (elements.size() == 0) return "";
-
-      int precision = get_int_parameter("precision");
-      std::ostringstream ss;
-      ss << std::setprecision(precision);
-      
-      ss << elements[0];
-      for (int idx=1;idx < elements.size();idx++) {
-        ss << delimiter << elements[idx];
-      }
-      std::string out_string = ss.str();
-      return out_string;
-  }
-
-  /**
    * Allows object to be printed to a stream
    */
   friend std::ostream &operator<< (
     std::ostream& os, ///< The stream to output to
     DelimitedFile& delimited_file ///< The delimited file to output to
   ); 
-
 };
 
 #endif //DELIMITEDFILE_H

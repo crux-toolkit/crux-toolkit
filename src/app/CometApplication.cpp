@@ -102,7 +102,7 @@ void CometApplication::setVarMod(const string& param) {
     return;
   }
   VarMods m;
-  for (int i = 0; i < fields.size(); i++) {
+  for (size_t i = 0; i < fields.size(); i++) {
     string field = fields[i];
     switch (i) {
       case 0: m.dVarModMass = StringUtils::FromString<double>(field); break;
@@ -125,7 +125,7 @@ void CometApplication::setEnzyme(
   EnzymeInfo e;
   double temp;
   int search = Params::GetInt(searchParam);
-  if (search >= 0 && search < get_comet_enzyme_info_lines().size()) {
+  if (search >= 0 && (size_t)search < get_comet_enzyme_info_lines().size()) {
     const char* szParamBuf = get_comet_enzyme_info_lines()[search].c_str();
     sscanf(szParamBuf, "%lf %48s %d %20s %20s\n",
       &temp,
@@ -139,7 +139,7 @@ void CometApplication::setEnzyme(
   }
 
   int sample = Params::GetInt(sampleParam);
-  if (sample >= 0 && sample < get_comet_enzyme_info_lines().size()) {
+  if (sample >= 0 && (size_t)sample < get_comet_enzyme_info_lines().size()) {
     const char* szParamBuf = get_comet_enzyme_info_lines()[sample].c_str();
     sscanf(szParamBuf, "%lf %48s %d %20s %20s\n",
       &temp,

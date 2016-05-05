@@ -1,6 +1,7 @@
 #include "Barista.h"
 #include "objects.h"
 #include "app/ComputeQValues.h"
+#include "util/Params.h"
 
 using namespace std; 
 double Barista :: check_gradients_hinge_one_net(int protind, int label){
@@ -932,8 +933,9 @@ void Barista :: write_results_pep_xml(PepXMLWriter& xmlfile)
   scores_to_print[BARISTA_SCORE] = true;
   scores_to_print[BARISTA_QVALUE] = true;
   scores_to_print[BARISTA_PEP] = true;
-
-  xmlfile.SetScoresComputed(scores_to_print);
+  scores_to_print[DELTA_CN] = true;
+  scores_to_print[BY_IONS_MATCHED] = true;
+  scores_to_print[BY_IONS_TOTAL] = true;
 
   double* scores = new double[NUMBER_SCORER_TYPES];
 
@@ -969,7 +971,7 @@ void Barista :: write_results_pep_xml(PepXMLWriter& xmlfile)
       vector<string> protein_descriptions;
       for(int prot_idx = 0; prot_idx < num_proteins; prot_idx++){
         string protein_name = d.ind2prot(protein_indexes[prot_idx]);
-	protein_names.push_back(protein_name);
+        protein_names.push_back(protein_name);
         protein_descriptions.push_back("");
         flanking_aas += "," + n + c; // todo
       }
@@ -983,15 +985,16 @@ void Barista :: write_results_pep_xml(PepXMLWriter& xmlfile)
       scores[QRANKER_SCORE] = psmtrainset[i].score;
       scores[QRANKER_QVALUE] = psmtrainset[i].q;
       scores[QRANKER_PEP] = psmtrainset[i].PEP;
+      scores[DELTA_CN] = delta_cn;
+      scores[BY_IONS_MATCHED] = d.psmind2by_ions_matched(psmind);
+      scores[BY_IONS_TOTAL] = d.psmind2by_ions_total(psmind);
       psm_ranks[SP]=d.psmind2sp_rank(psmind); 
       psm_ranks[XCORR]=d.psmind2xcorr_rank(psmind);
-      double by_ion_matched=d.psmind2by_ions_matched(psmind);
       xmlfile.writePSM(scan, filename, spectrum_mass, charge, psm_ranks,
                        sequence, modified_sequence.c_str(),
                        peptide_mass, num_proteins,
                        flanking_aas.c_str(), protein_names, 
-                       protein_descriptions, delta_cn, scores_to_print, scores,by_ion_matched, 
-                       d.psmind2by_ions_total(psmind), 
+                       protein_descriptions, scores_to_print, scores,
                        d.psmind2matches_spectrum(psmind));
 
       free(sequence);
@@ -1572,7 +1575,7 @@ void Barista :: report_all_results_xml()
 
   write_results_psm_xml(of);
 
-  if (get_boolean_parameter("pepxml-output")) {
+  if (Params::GetBool("pepxml-output")) {
     ostringstream xml_file_name;
     xml_file_name << out_dir << "/" << fileroot << "barista.target.pep.xml";
     PepXMLWriter xmlfile;
@@ -1627,7 +1630,7 @@ void Barista :: report_all_results_xml_tab()
   setup_for_reporting_results();
   stringstream fname;
   report_all_results_xml();
-  if (get_boolean_parameter("txt-output")) {
+  if (Params::GetBool("txt-output")) {
     report_all_results_tab();
   }
   d.clear_data_all_results(); 
@@ -2541,9 +2544,9 @@ int Barista :: crux_set_command_line_options(int argc, char *argv[])
   bool list_of_files_flag; 
   bool spec_features_flag;
 
-  opt_type = get_string_parameter("optimization");
+  opt_type = Params::GetString("optimization");
 
-  fileroot = get_string_parameter("fileroot");
+  fileroot = Params::GetString("fileroot");
   if(!fileroot.empty()) {
     fileroot.append(".");
   }
@@ -2552,31 +2555,31 @@ int Barista :: crux_set_command_line_options(int argc, char *argv[])
   else if(opt_type.compare("peptide") == 0)
     pr.set_fileroot(fileroot);
   
-  overwrite_flag = get_boolean_parameter("overwrite");
+  overwrite_flag = Params::GetBool("overwrite");
   if(opt_type.compare("psm") == 0)
     qr.set_overwrite_flag(overwrite_flag);
   if(opt_type.compare("peptide") == 0)
     pr.set_overwrite_flag(overwrite_flag);
 
   //options for the parser
-  decoy_prefix = get_string_parameter("decoy-prefix");
+  decoy_prefix = Params::GetString("decoy-prefix");
 
-  enzyme = get_string_parameter("enzyme");
+  enzyme = Params::GetString("enzyme");
 
-  spec_features_flag = get_boolean_parameter("use-spec-features");
+  spec_features_flag = Params::GetBool("use-spec-features");
   
-  skip_cleanup_flag = get_boolean_parameter("skip-cleanup");
+  skip_cleanup_flag = Params::GetBool("skip-cleanup");
   
-  dir_with_tables = get_string_parameter("re-run"); 
+  dir_with_tables = Params::GetString("re-run"); 
     if(!dir_with_tables.empty()) {
     found_dir_with_tables = 1;
   } else {
     found_dir_with_tables = 0;
   }
   
-  output_directory = get_string_parameter("output-dir");
+  output_directory = Params::GetString("output-dir");
 
-  feature_file_flag = get_boolean_parameter("feature-file-out");
+  feature_file_flag = Params::GetBool("feature-file-out");
   feature_file_name << output_directory << "/" << fileroot << "barista.features.txt";
   
   if(found_dir_with_tables){
@@ -2599,11 +2602,11 @@ int Barista :: crux_set_command_line_options(int argc, char *argv[])
       carp(CARP_INFO, "directory with tables: %s", dir_with_tables.c_str());
       carp(CARP_INFO, "output_directory: %s", output_directory.c_str());
     }else{
-      db_source = get_string_parameter("database");
-      ms2_source = get_string_parameter("fragmentation spectra");
-      sqt_source = get_string_parameter("search results");
-      sqt_decoy_source = get_string_parameter("separate-searches"); 
-      list_of_files_flag=get_boolean_parameter("list-of-files");
+      db_source = Params::GetString("database");
+      ms2_source = Params::GetString("fragmentation spectra");
+      sqt_source = Params::GetString("search results");
+      sqt_decoy_source = Params::GetString("separate-searches"); 
+      list_of_files_flag = Params::GetBool("list-of-files");
       vector<string> files; 
       string files_list; 
        

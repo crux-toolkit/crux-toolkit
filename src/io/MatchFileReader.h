@@ -19,15 +19,16 @@
 #include "MatchColumns.h"
 #include "PSMReader.h"
 
-
 class MatchFileReader: public DelimitedFileReader, public PSMReader {
   protected:
+    void parseHeader();
+    Crux::Match* parseMatch();
+    Crux::Peptide* parsePeptide();
+    Crux::Spectrum* parseSpectrum();
+
     int match_indices_[NUMBER_MATCH_COLUMNS];
 
-    void parseHeader();
-
   public:
-
    /**
     * \returns a blank MatchFileReader object 
     */
@@ -126,14 +127,13 @@ class MatchFileReader: public DelimitedFileReader, public PSMReader {
      */
     void getMatchColumnsPresent (std::vector<bool>& col_is_present);
 
-    MatchCollection* parse();
-
     static MatchCollection* parse(
       const std::string& file_path,
       Database* database,
       Database* decoy_database
     );
 
+    MatchCollection* parse();
 };
 
 #endif //MATCHFILEREADER_H

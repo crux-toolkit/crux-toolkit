@@ -36,21 +36,21 @@ XLinkScoreSpectrum::~XLinkScoreSpectrum() {
 
 int XLinkScoreSpectrum::main(int argc, char** argv){
   /* Get Arguments */
-  string peptideAStr = get_string_parameter("peptide A");
-  string peptideBStr = get_string_parameter("peptide B");
+  string peptideAStr = Params::GetString("peptide A");
+  string peptideBStr = Params::GetString("peptide B");
   char* peptideA = my_copy_string(peptideAStr.c_str());
   char* peptideB = my_copy_string(peptideBStr.c_str());
 
-  int posA     = get_int_parameter("pos A");
-  int posB     = get_int_parameter("pos B");
-  int charge   = get_int_parameter("charge state"); 
-  int scan_num = get_int_parameter("scan number"); 
+  int posA     = Params::GetInt("pos A");
+  int posB     = Params::GetInt("pos B");
+  int charge   = Params::GetInt("charge state"); 
+  int scan_num = Params::GetInt("scan number"); 
 
-  string ms2_file = get_string_parameter("ms2 file");
+  string ms2_file = Params::GetString("ms2 file");
 
-  FLOAT_T link_mass = get_double_parameter("link mass");
+  FLOAT_T link_mass = Params::GetDouble("link mass");
   XLinkPeptide::setLinkerMass(link_mass);
-  string scoremethod(get_string_parameter("xlink-score-method"));
+  string scoremethod(Params::GetString("xlink-score-method"));
 
 
   XLinkMatch* candidate = NULL;
@@ -84,12 +84,12 @@ int XLinkScoreSpectrum::main(int argc, char** argv){
   ion_constraint->setUseIonType(BY_ION, false);
   ion_constraint->setUseIonType(BYA_ION, false);
   ion_constraint->setUseIonType(ALL_ION, false);
-  ion_constraint->setUseIonType(A_ION, get_boolean_parameter("use-a-ions"));
-  ion_constraint->setUseIonType(B_ION, get_boolean_parameter("use-b-ions"));
-  ion_constraint->setUseIonType(C_ION, get_boolean_parameter("use-c-ions"));
-  ion_constraint->setUseIonType(X_ION, get_boolean_parameter("use-x-ions"));
-  ion_constraint->setUseIonType(Y_ION, get_boolean_parameter("use-y-ions"));
-  ion_constraint->setUseIonType(Z_ION, get_boolean_parameter("use-z-ions"));
+  ion_constraint->setUseIonType(A_ION, Params::GetBool("use-a-ions"));
+  ion_constraint->setUseIonType(B_ION, Params::GetBool("use-b-ions"));
+  ion_constraint->setUseIonType(C_ION, Params::GetBool("use-c-ions"));
+  ion_constraint->setUseIonType(X_ION, Params::GetBool("use-x-ions"));
+  ion_constraint->setUseIonType(Y_ION, Params::GetBool("use-y-ions"));
+  ion_constraint->setUseIonType(Z_ION, Params::GetBool("use-z-ions"));
 
   if (scoremethod == "composite") {
     FLOAT_T score = xlink_scorer.scoreCandidate(candidate);   

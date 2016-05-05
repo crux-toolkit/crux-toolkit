@@ -15,6 +15,7 @@
 
 #include "DelimitedFileWriter.h"
 #include "util/FileUtils.h"
+#include "util/Params.h"
 
 #include <fstream>
 
@@ -64,7 +65,7 @@ void DelimitedFileWriter::openFile(const char* filename){
   }
 
   // open the file if either it doesn't exist or if we are allowed to overwrite
-  file_ptr_ = FileUtils::GetWriteStream(filename, get_boolean_parameter("overwrite"));
+  file_ptr_ = FileUtils::GetWriteStream(filename, Params::GetBool("overwrite"));
   if( file_ptr_ == NULL ){
     carp(CARP_FATAL, "Error creating file '%s'.", filename);
   }

@@ -173,7 +173,7 @@ void PinWriter::printPSM(
   bool enzC = false;
   bool enzN = false;
   double obsMass = match->getZState().getSinglyChargedMass();
-  FLOAT_T calcMass = peptide->getPeptideMass() + MASS_PROTON;
+  FLOAT_T calcMass = peptide->calcModifiedMass() + MASS_PROTON;
   FLOAT_T dM = (obsMass - calcMass) / charge;
 
   char* sequence = peptide->getSequence();
@@ -254,19 +254,13 @@ void PinWriter::printPSM(
   *out_ << StringUtils::Join(fields, '\t') << endl;
 }
 
-string PinWriter::getPeptide(Peptide* peptide) {
+string PinWriter::getPeptide(Peptide* pep) {
   stringstream sequence;
-  sequence << peptide->getNTermFlankingAA() << '.';
-
-  char* modified_sequence = Params::GetBool("mod-symbols")
-    ? peptide->getModifiedSequenceWithSymbols()
-    : peptide->getModifiedSequenceWithMasses(
-        get_mass_format_type_parameter("mod-mass-format"));
-  sequence << modified_sequence;
-  free(modified_sequence);
-
-  sequence << '.' << peptide->getCTermFlankingAA();
-
+  sequence << pep->getNTermFlankingAA() << '.'
+           << (Params::GetBool("mod-symbols")
+                ? pep->getModifiedSequenceWithSymbols()
+                : pep->getModifiedSequenceWithMasses())
+           << '.' << pep->getCTermFlankingAA();
   return sequence.str();
 }
 

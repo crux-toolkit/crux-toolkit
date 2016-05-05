@@ -60,26 +60,9 @@ class PeptideSrc {
     );
 
   /**
-   * Frees the entire allocated peptide_src object
-   */
-  static void free(
-    std::vector<PeptideSrc*>& peptide_srcs ///< object to free -in 
-  );
-
-  /**
    * Frees the an individual allocated peptide_src object
    */
   virtual ~PeptideSrc();
-
-
-  /**
-   * Prints a peptide object to file.
-   */
-  /*
-  void print(
-    FILE* file  ///< the output stream -out
-    );
-  */
 
   /**
    * Copies the entire vector of peptide_src object src to dest.

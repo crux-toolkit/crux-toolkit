@@ -31,7 +31,7 @@ int SearchForXLinks::main(int argc, char** argv) {
   //The use-old-xlink parameter will determine
   //which codebase gets called.
   int ret;
-  if (get_boolean_parameter("use-old-xlink")) {
+  if (Params::GetBool("use-old-xlink")) {
     ret = xhhcSearchMain();
   } else {
     ret = xlinkSearchMain();

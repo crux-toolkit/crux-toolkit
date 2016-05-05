@@ -14,6 +14,7 @@
 #include "io/carp.h"
 #include "model/Ion.h"
 #include "modifications.h"
+#include "Params.h"
 
 /* Private Variables */
 
@@ -241,7 +242,7 @@ MODIFIED_AA_T get_mod_identifier(FLOAT_T mass_shift){
     initialize_amino_masses();
   }
 
-  int precision = get_int_parameter("mod-precision");
+  int precision = Params::GetInt("mod-precision");
   for(int mod_idx = 0; mod_idx < (int)NUM_MOD_MASSES; mod_idx++){
     if( is_equal(mass_shift, aa_mod_masses[mod_idx], precision) ){
       MODIFIED_AA_T identifier = mod_idx;

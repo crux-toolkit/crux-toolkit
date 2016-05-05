@@ -6,6 +6,7 @@
 #include "LinkedPeptide.h"
 
 #include "util/crux-utils.h"
+#include "util/Params.h"
 #include "objects.h"
 #include "model/Scorer.h"
 #include "io/DelimitedFile.h"
@@ -157,7 +158,7 @@ int xlink_compute_qvalues(){
   /* Get Arguments */
 
   carp(CARP_INFO,"reading targets");
-  string output_dir = get_string_parameter("output-dir");
+  string output_dir = Params::GetString("output-dir");
   string target_filename = "search-for-xlinks.target.txt";
 
   //Read in targets.
