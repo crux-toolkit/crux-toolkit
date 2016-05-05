@@ -55,7 +55,8 @@ class Barista : public CruxApplication
     max_fdr(0),
     max_peptides(0),   
     max_fdr_psm(0),
-    max_fdr_pep(0){}
+    max_fdr_pep(0),
+    parser(NULL){}
   ~Barista(){clear();}
   void clear();
   void print_description();
@@ -137,7 +138,7 @@ class Barista : public CruxApplication
   FILE_FORMAT_T check_file_format(string filename);
   string file_extension(string str); 
  protected:
-  SQTParser* parser; 
+  SQTParser* parser;
   int verbose;
   int skip_cleanup_flag;
   int overwrite_flag;

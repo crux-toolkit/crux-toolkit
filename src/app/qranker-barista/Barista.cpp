@@ -386,6 +386,10 @@ void Barista :: clear()
   max_psm_scores.clear();
   used_peptides.clear();
   pepind_to_max_psmind.clear();
+  if (parser)
+    {
+      delete parser;
+    }
 }
 
 
@@ -2730,7 +2734,7 @@ int Barista::main(int argc, char **argv) {
      }
   if(skip_cleanup_flag != 1)
     parser->clean_up(out_dir);
-  
+
   return 0;
 }   
 

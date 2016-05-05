@@ -78,7 +78,7 @@ int CreateDocs::main(int argc, char** argv) {
   apps.add(new XLinkAssignIons());
   apps.add(new XLinkScoreSpectrum());
   
-  string targetApp = Params::GetString("tool name");
+  string targetApp = Params::GetString("tool-name");
   if (targetApp == "list") {
     // List the applications available for create-docs
     for (vector<CruxApplication*>::const_iterator i = apps.begin(); i != apps.end(); i++) {
@@ -102,6 +102,9 @@ int CreateDocs::main(int argc, char** argv) {
   } else if (targetApp == "check-params") {
     // Check for issues with parameters
     checkParams(&apps);
+  } else if (targetApp == "param-table") {
+    // Make a table of parameters x commands.
+    makeParamTable(&apps);
   } else {
     CruxApplication* app = apps.find(targetApp);
     if (app == NULL) {
@@ -184,6 +187,75 @@ void CreateDocs::checkParams(const CruxApplicationList* apps) {
     }
   }
 }
+
+void CreateDocs::makeParamTable(const CruxApplicationList* apps) {
+  carp(CARP_INFO, "Creating a table of parameters X commands.");
+  cout << "<!DOCTYPE HTML>" << endl
+       << "<html><head><meta charset=\"UTF-8\">" << endl
+       << "<title>Crux parameters</title></head>" << endl
+       << "<body><h1>Crux parameters</h1>" << endl
+       << "<table border=\"1\">" << endl;
+
+  // Print the header row.
+  cout << "<tr><td>&nbsp;</td>";
+  for (vector<CruxApplication*>::const_iterator appIter = apps->begin();
+       appIter != apps->end();
+       appIter++) {
+    cout << "<td>" << (*appIter)->getName() << "</td>";
+  }
+  cout << "</tr>" << endl;
+
+  // Keep track of whether this parameter row has been printed.
+  std::map<const string, bool> isPrinted;
+  
+  /*
+   * We use a double loop to print the parameters so that we ensure
+   * that parameters are listed in order of their use by the commands.
+   */ 
+  for (vector<CruxApplication*>::const_iterator appIter1 = apps->begin();
+       appIter1 != apps->end();
+       appIter1++) {
+    vector<string> appOptions1 = (*appIter1)->getOptions();
+    for (vector<string>::const_iterator appOptionIter = appOptions1.begin();
+	 appOptionIter != appOptions1.end();
+	 appOptionIter++) {
+
+      /*    
+      */
+      if (!isPrinted[*appOptionIter] and Params::IsVisible(*appOptionIter)) {
+	isPrinted[*appOptionIter] = true;
+	cout << "<tr><td>" << *appOptionIter << "</td>";
+	for (vector<CruxApplication*>::const_iterator appIter2 = apps->begin();
+	     appIter2 != apps->end();
+	     appIter2++) {
+
+	  vector<string> appOptions = (*appIter2)->getOptions();
+	  bool hasOption = std::find(appOptions.begin(), appOptions.end(),
+				     *appOptionIter) != appOptions.end();
+	  if (hasOption) {
+	    cout << "<td>X</td>";
+	  } else {
+	    cout << "<td>&nbsp;</td>";
+	  }
+	}
+	cout << "</tr>" << endl;
+      }
+    }
+  }
+  cout << "</table></body></html>" << endl;
+
+  // Check that all parameters were printed.
+  for (vector<const Param*>::const_iterator paramIter = Params::Begin();
+       paramIter != Params::End();
+       paramIter++) {
+    string paramName = (*paramIter)->GetName();
+    if (!isPrinted[paramName] and Params::IsVisible(paramName)) {
+      carp(CARP_WARNING, "Parameter %s was not printed.", paramName.c_str());
+    }
+  }
+  
+}
+
 
 void CreateDocs::generateToolHtml(
   ostream* outStream,
@@ -345,7 +417,7 @@ string CreateDocs::getDescription() const {
 
 vector<string> CreateDocs::getArgs() const {
   string arr[] = {
-    "tool name"
+    "tool-name"
   };
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }
