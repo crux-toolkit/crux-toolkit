@@ -11,6 +11,55 @@
 
 using namespace std;
 
+
+/**
+ * \file Params.cpp
+ *
+ * This module handles user-level parameters in Crux.  Required
+ * arguments are given on the command line; optional parameters can be
+ * specified either on the command line or in a parameter file.
+ * Textual descriptions of each parameter are stored in the source
+ * code, and these are used to automatically generate usage
+ * statements, comments in output parameter files, and HTML
+ * documentation.
+ *
+ * Following are the steps required to add a new argument or parameter
+ * to an existing command:
+ *
+ * - In Params.cpp, inside the constructor Params::Params(), add a
+ *   call to Init{Bool,Int,String,Double,Arg}Param.  This will specify
+ *   things like the parameter name, type, default value, what
+ *   commands it works with, and whether it is visible to the end
+ *   user.
+ *
+ * - If your parameter is optional, then in Params::Categorize(), add
+ *   an "items.insert()" with the name of your new parameter. This
+ *   controls what category the parameter gets printed in when the
+ *   HTML documentation is created.  Note that if the parameter
+ *   doesn't get added to a category in Params::Categorize(), it just
+ *   appears under a generic category called "<command name> options"
+ *
+ * - In the .cpp file that contains the main() for the command that
+ *   uses this parameter, find a call to either getArgs() (if your new
+ *   parameter is required) or getOptions() (if it is optional), and
+ *   add the name of your new parameter to the list of options there.
+
+ * - In the same file, add a call to
+ *   Params::get{Bool,Int,String,Double}() to retrieve the value
+ *   associated with the parameter.  In general, these methods can be
+ *   used anywhere in the source code in order to retrieve parameters.
+ *   However, it's good form, when feasible, to access parameters in
+ *   the main() and then to pass them as arguments, rather than
+ *   accessing them as globals within subroutines.
+ *
+ * - If you need to edit the textual description of the command
+ *   itself, search in the same file for a call to getDescription().
+ *   Portions of that description enclosed in "[[nohtml: XXX ]]" will
+ *   be used for the usage statement, and portions in "[[html: XXX ]]"
+ *   will be in the HTML docs.
+ *
+ */
+
 Params::Params() : finalized_(false) {
   /* generate_peptide arguments */
   InitArgParam("protein fasta file",

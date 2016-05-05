@@ -256,7 +256,8 @@ void TideMatchSet::report(
   const ProteinVec& proteins,  ///< proteins corresponding with peptides
   const vector<const pb::AuxLocation*>& locations,  ///< auxiliary locations
   bool compute_sp, ///< whether to compute sp or not
-  bool highScoreBest //< indicates semantics of score magnitude
+  bool highScoreBest, //< indicates semantics of score magnitude
+  boost::mutex * rwlock
 ) {
   if (matches_->size() == 0) {
     return;
@@ -279,9 +280,9 @@ void TideMatchSet::report(
     computeSpData(decoys, &sp_map, &sp_scorer, peptides);
   }
   writeToFile(target_file, top_n, targets, spectrum_filename, spectrum, charge,
-              peptides, proteins, locations, delta_cn_map, compute_sp ? &sp_map : NULL);
+              peptides, proteins, locations, delta_cn_map, compute_sp ? &sp_map : NULL, rwlock);
   writeToFile(decoy_file, top_n, decoys, spectrum_filename, spectrum, charge,
-              peptides, proteins, locations, delta_cn_map, compute_sp ? &sp_map : NULL);
+              peptides, proteins, locations, delta_cn_map, compute_sp ? &sp_map : NULL, rwlock);
 }
 
 /**
@@ -298,7 +299,8 @@ void TideMatchSet::writeToFile(
   const ProteinVec& proteins,
   const vector<const pb::AuxLocation*>& locations,
   const map<Arr::iterator, FLOAT_T>& delta_cn_map,
-  const map<Arr::iterator, pair<const SpScorer::SpScoreData, int> >* sp_map
+  const map<Arr::iterator, pair<const SpScorer::SpScoreData, int> >* sp_map,
+  boost::mutex * rwlock
 ) {
   if (!file) {
     return;
@@ -340,6 +342,7 @@ void TideMatchSet::writeToFile(
     Crux::Peptide cruxPep = getCruxPeptide(peptide);
     const SpScorer::SpScoreData* sp_data = sp_map ? &(sp_map->at(*i).first) : NULL;
 
+    rwlock->lock();
     if (Params::GetBool("file-column")) {
       *file << spectrum_filename << '\t';
     }
@@ -384,6 +387,7 @@ void TideMatchSet::writeToFile(
             << cruxPep.getUnshuffledSequence();
     }
     *file << endl;
+    rwlock->unlock();
   }
 }
 

@@ -1,6 +1,7 @@
 #ifndef TIDE_MATCH_SET_H
 #define TIDE_MATCH_SET_H
 
+#include <boost/thread.hpp>
 #include <vector>
 #include "raw_proteins.pb.h"
 #include "tide/records.h"
@@ -72,7 +73,8 @@ public:
     const ProteinVec& proteins, ///< proteins corresponding with peptides
     const vector<const pb::AuxLocation*>& locations,  ///< auxiliary locations
     bool compute_sp, ///< whether to compute sp or not
-    bool highScoreBest //< indicates semantics of score magnitude
+    bool highScoreBest, //< indicates semantics of score magnitude
+    boost::mutex * rwlock
   );
 
   /**
@@ -144,7 +146,8 @@ protected:
     const ProteinVec& proteins,
     const vector<const pb::AuxLocation*>& locations,
     const map<Arr::iterator, FLOAT_T>& delta_cn_map,
-    const map<Arr::iterator, pair<const SpScorer::SpScoreData, int> >* sp_map
+    const map<Arr::iterator, pair<const SpScorer::SpScoreData, int> >* sp_map,
+    boost::mutex * rwlock
   );
 
   /**
