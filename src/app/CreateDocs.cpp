@@ -222,7 +222,7 @@ void CreateDocs::makeParamTable(const CruxApplicationList* apps) {
 
       /*    
       */
-      if (!isPrinted[*appOptionIter] and Params::IsVisible(*appOptionIter)) {
+      if (!isPrinted[*appOptionIter] && Params::IsVisible(*appOptionIter)) {
 	isPrinted[*appOptionIter] = true;
 	cout << "<tr><td>" << *appOptionIter << "</td>";
 	for (vector<CruxApplication*>::const_iterator appIter2 = apps->begin();
@@ -249,7 +249,7 @@ void CreateDocs::makeParamTable(const CruxApplicationList* apps) {
        paramIter != Params::End();
        paramIter++) {
     string paramName = (*paramIter)->GetName();
-    if (!isPrinted[paramName] and Params::IsVisible(paramName)) {
+    if (!isPrinted[paramName] && Params::IsVisible(paramName)) {
       carp(CARP_WARNING, "Parameter %s was not printed.", paramName.c_str());
     }
   }
