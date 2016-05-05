@@ -9,6 +9,8 @@
 #include "objects.h"
 #include "util/modifications.h"
 #include "util/Params.h"
+#include "model/Ion.h"
+#include "model/IonSeries.h"
 
 #include <iostream>
 
@@ -51,7 +53,11 @@ XLinkablePeptide::XLinkablePeptide(
   const XLinkablePeptide& xlinkablepeptide
   ) {
   init();
-  peptide_ = xlinkablepeptide.peptide_->copyPtr();
+  if (xlinkablepeptide.peptide_) {
+    peptide_ = xlinkablepeptide.peptide_->copyPtr();
+  } else {
+    sequence_ = xlinkablepeptide.sequence_;
+  }
   is_decoy_ = xlinkablepeptide.is_decoy_;
   link_sites_ = xlinkablepeptide.link_sites_;
 }
@@ -60,7 +66,11 @@ XLinkablePeptide::XLinkablePeptide(
   XLinkablePeptide& xlinkablepeptide
 ) {
   init();
-  peptide_ = xlinkablepeptide.peptide_->copyPtr();
+  if (xlinkablepeptide.peptide_) {
+    peptide_ = xlinkablepeptide.peptide_->copyPtr();
+  } else {
+    sequence_ = xlinkablepeptide.sequence_;
+  }
   is_decoy_ = xlinkablepeptide.is_decoy_;
   link_sites_ = xlinkablepeptide.link_sites_;
 }
@@ -389,6 +399,13 @@ MODIFIED_AA_T* XLinkablePeptide::getModifiedSequence() {
 
   return mod_seq;
 }
+const MODIFIED_AA_T* XLinkablePeptide::getModifiedSequencePtr() {
+  if (mod_seq_ == NULL) {
+    mod_seq_ = getModifiedSequence();
+  } else {
+  }
+  return(mod_seq_);
+}
 
 int findLink(vector<int>& link_sites, int link_site) {
   
@@ -557,6 +574,64 @@ bool XLinkablePeptide::operator < (
 
 }
 
+void XLinkablePeptide::predictIons(
+  IonSeries* ion_series,
+  int charge,
+  int link_idx,
+  FLOAT_T mod_mass,
+  bool clear
+  ) {
+  IonSeries* cached_ions = NULL;
+  bool cached = false;
+  /* TODO UNCOMMENT WHEN XLINKIONSERIESCACHE is in the trunk
+  if (get_boolean_parameter("xlink-use-ion-cache")) {
+    cached_ions = XLinkIonSeriesCache::getXLinkablePeptideIonSeries(*this, charge);
+    bool cached = cached_ions != NULL;
+  }
+  */
+  if (!cached) {
+    cached_ions = new IonSeries(ion_series->getIonConstraint(), charge);
+    cached_ions->update(getSequence(), getModifiedSequencePtr());
+    cached_ions->predictIons();
+  }
+  int link_pos=link_sites_[link_idx];
+  int seq_len = peptide_->getLength();
+  if (clear) {
+    ion_series->clear();
+  }
+  for (IonIterator ion_iter = cached_ions->begin(); 
+    ion_iter != cached_ions->end(); 
+    ++ion_iter) { 
+    Ion* src_ion = *ion_iter; 
+    Ion* ion = src_ion;
+    unsigned int cleavage_idx = ion->getCleavageIdx(); 
+    if (ion->isForwardType()) { 
+      if (cleavage_idx > (unsigned int)link_pos) {
+        ion = new Ion();
+	Ion::copy(src_ion, ion, (char *)"");
+        FLOAT_T mass = ion->getMassFromMassZ() + mod_mass;
+        ion->setMassZFromMass(mass); 
+        if (isnan(ion->getMassZ())) { 
+          carp(CARP_FATAL, "NAN3"); 
+        } 
+      } 
+    } else { 
+      if (cleavage_idx >= (seq_len-(unsigned int)link_pos)) { 
+        ion = new Ion();
+	Ion::copy(src_ion, ion, (char *)"");
+        FLOAT_T mass = ion->getMassFromMassZ() + mod_mass;
+        ion->setMassZFromMass(mass); 
+        if (isnan(ion->getMassZ())) { 
+          carp(CARP_FATAL, "NAN4"); 
+        } 
+      } 
+    }
+    ion_series->addIon(ion);
+  }
+  if (!cached) {
+    delete cached_ions;
+  }
+}
 /*
  * Local Variables:
  * mode: c

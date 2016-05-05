@@ -25,6 +25,7 @@ static const int MAX_NUM_ION_TYPE = 8; // number of different ion_types
  */
 class IonSeries {
   friend class XLinkPeptide;
+  friend class XLinkablePeptide;
  protected:
   // TODO change name to unmodified_char_seq
   char* peptide_; ///< The peptide sequence for this ion series
@@ -134,8 +135,8 @@ class IonSeries {
  * and re-initialize for the new peptide sequence.
  */
  void update(
-   char* peptide, ///< The peptide sequence for this ion series. -in
-  MODIFIED_AA_T* mod_seq ///< modified version of seq -in
+  char* peptide, ///< The peptide sequence for this ion series. -in
+  const MODIFIED_AA_T* mod_seq ///< modified version of seq -in
   );
 
 
@@ -328,6 +329,7 @@ class IonSeries {
   std::vector<Ion*>& getSpecificIons(
     ION_TYPE_T ion_type /// < the type of ions -in
   );
+  void clear();
 };
 
 /*

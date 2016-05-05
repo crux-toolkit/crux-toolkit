@@ -477,6 +477,28 @@ Params::Params() : finalized_(false) {
     "Also changes mods written to parameter file. Set internally based on "
     "the max mod precision in the param file.",
     false);
+
+  InitBoolParam("use-a-ions", false,
+    "Consider a-ions in the search? Note that an a-ion is equivalent to a "
+    "neutral loss of CO from the b-ion.  "
+    "Peak height is 10 (in arbitrary units).",
+    "Available for search-for-xlinks and xlink-score-spectrum.", true);
+  InitBoolParam("use-b-ions", true,
+    "Consider b-ions in the search? Peak height is 50 (in arbitrary units).",
+    "Available for search-for-xlinks and xlink-score-spectrum.", true);
+  InitBoolParam("use-c-ions", false,
+    "Consider c-ions in the search? Peak height is 50 (in arbitrary units).",
+    "Available for search-for-xlinks and xlink-score-spectrum.", true);
+  InitBoolParam("use-x-ions", false,
+    "Consider x-ions in the search? Peak height is 10 (in arbitrary units).",
+    "Available for search-for-xlinks and xlink-score-spectrum.", true);
+  InitBoolParam("use-y-ions", true,
+    "Consider y-ions in the search? Peak height is 50 (in arbitrary units).",
+    "Available for search-for-xlinks and xlink-score-spectrum.", true);
+  InitBoolParam("use-z-ions", false,
+    "Consider z-ions in the search? Peak height is 50 (in arbitrary units).",
+    "Available for search-for-xlinks and xlink-score-spectrum.", true);
+
   InitIntParam("precision", 8, 1, 100, //max is arbitrary
     "Set the precision for scores written to sqt and text files. "
     "Note that this parameter only takes effect when specified in the "
@@ -775,7 +797,7 @@ Params::Params() : finalized_(false) {
     "Two types of neutral losses are included and are applied only to "
     "singly charged b- and y-ions: loss of ammonia (NH3, 17.0086343 Da) "
     "and H2O (18.0091422). Each neutral loss peak has intensity 1/5 of "
-    "the primary peak",
+    "the primary peak.",
     "Available for tide-search.", true);
   InitIntParam("max-precursor-charge", 5, 1, BILLION,
     "The maximum charge state of a spectra to consider in search.",
@@ -1314,7 +1336,7 @@ Params::Params() : finalized_(false) {
   // **** xlink-score-spectrum options ****
   InitStringParam("xlink-score-method", "composite", "composite|modification|concatenated",
     "Score method for xlink {composite, modification, concatenated}.",
-    "Argument for xlink-score-spectrum.", true);
+    "Available for xlink-score-spectrum.", true);
   // **** search-xlink options ****
   InitStringParam("isotope-windows", "0",
     "Provides a list of isotopic windows to search. For example, -1,0,1 will search in "
@@ -1748,6 +1770,15 @@ void Params::Categorize() {
   AddCategory("Search parameters", items);
 
   items.clear();
+  items.insert("use-a-ions");
+  items.insert("use-b-ions");
+  items.insert("use-c-ions");
+  items.insert("use-x-ions");
+  items.insert("use-y-ions");
+  items.insert("use-z-ions");
+  AddCategory("Fragment ion parameters", items);
+  
+  items.clear();
   items.insert("protein");
   items.insert("fido-alpha");
   items.insert("fido-beta");
@@ -1829,7 +1860,7 @@ void Params::Categorize() {
   items.insert("decoy_prefix");
   items.insert("output_suffix");
   items.insert("mass_offsets");
-  AddCategory("Misc. parameters", items);
+  AddCategory("Miscellaneous parameters", items);
 
   items.clear();
   items.insert("minimum_peaks");
@@ -2651,3 +2682,10 @@ void ArgParam::Set(double value) { values_ = vector<string>(1, StringParam::From
 void ArgParam::Set(const string& value) { values_ = vector<string>(1, value); }
 void ArgParam::AddValue(const string& value) { values_.push_back(value); }
 
+/*
+ * Local Variables:
+ * mode: c
+ * c-basic-offset: 2
+ * End:
+ */
+ 

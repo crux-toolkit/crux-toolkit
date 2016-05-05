@@ -10,6 +10,7 @@ Scenario Outline: User runs psm-convert
   When I run psm-convert
   When I ignore lines matching the pattern: /^H[ \t]+StartTime.*$/
   When I ignore lines matching the pattern: /^<msms_pipeline_analysis .*$/
+  When I ignore lines matching the pattern: /^<parameter .*$/
   When I ignore lines matching the pattern: /^<MzIdentML .*$/
   Then the return value should be 0
   And crux-output/<actual_output> should match good_results/<expected_output>
