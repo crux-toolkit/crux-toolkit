@@ -39,23 +39,18 @@ typedef enum _estimation_method ESTIMATION_METHOD_T;
 class AssignConfidenceApplication : public CruxApplication {
 protected:
   map<pair<string, unsigned int>, bool>* spectrum_flag_;  // this variable is used in Cascade Search, this is an idicator 
-  double cascade_fdr_;
   unsigned int iteration_cnt_;
   OutputFiles* output_;
   unsigned int accepted_psms_;
   string index_name_;
-  bool combine_modified_peptides_;
-  bool combine_charge_states_;
-public:
 
+public:
   map<pair<string, unsigned int>, bool>* getSpectrumFlag();
   void setSpectrumFlag(map<pair<string, unsigned int>, bool>* spectrum_flag);
-  void setCascadeFDR(double cascade_fdr);
   void setIterationCnt(unsigned int iteration_cnt);
   void setOutput(OutputFiles *output);
   unsigned int getAcceptedPSMs();
   std::string getPeptideSeq(Crux::Match* match);
-
 
   /**
   * stores the name of the index file used in an iteration in Cascade Search.

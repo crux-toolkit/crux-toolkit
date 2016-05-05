@@ -8,6 +8,7 @@
 #include "model/ModifiedPeptidesIterator.h"
 #include "model/IonSeries.h"
 #include "model/Ion.h"
+#include "util/Params.h"
 
 #include "XLinkablePeptideIterator.h"
 
@@ -176,7 +177,7 @@ void XLinkPeptide::addLinkablePeptides(
       is_decoy,
       database);
 
-  int max_mod_xlink = get_int_parameter("max-xlink-mods");
+  int max_mod_xlink = Params::GetInt("max-xlink-mods");
 
   while (peptide_iterator->hasNext()) {
     Crux::Peptide* peptide = peptide_iterator->next();
@@ -216,9 +217,9 @@ void XLinkPeptide::addCandidates(
 
   if (!pmin_set_) {
     FLOAT_T min_length_mass = get_mass_amino_acid('G', MONO) * 
-      (FLOAT_T)get_int_parameter("min-length") + 
+      (FLOAT_T)Params::GetInt("min-length") + 
       MASS_H2O_MONO;
-    pmin_ = max((FLOAT_T)get_double_parameter("min-mass"), min_length_mass);
+    pmin_ = max((FLOAT_T)Params::GetDouble("min-mass"), min_length_mass);
     pmin_set_ = true;
   }
   FLOAT_T peptide1_min_mass = pmin_;
@@ -270,11 +271,11 @@ void XLinkPeptide::addCandidates(
   XLinkMatchCollection& candidates ///< candidates -in/out
   ) {
 
-  bool include_inter = get_boolean_parameter("xlink-include-inter");
-  bool include_intra = get_boolean_parameter("xlink-include-intra");
-  bool include_inter_intra = get_boolean_parameter("xlink-include-inter-intra");
+  bool include_inter = Params::GetBool("xlink-include-inter");
+  bool include_intra = Params::GetBool("xlink-include-intra");
+  bool include_inter_intra = Params::GetBool("xlink-include-inter-intra");
 
-  int max_mod_xlink = get_int_parameter("max-xlink-mods");
+  int max_mod_xlink = Params::GetInt("max-xlink-mods");
   
   size_t xpeptide_count = 0;
   vector<vector<XLinkablePeptide> > protein_idx_to_xpeptides;

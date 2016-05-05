@@ -25,6 +25,7 @@
 #include "model/Spectrum.h"
 #include "io/SpectrumCollectionFactory.h"
 #include "model/FilteredSpectrumChargeIterator.h"
+#include "util/Params.h"
 #include "io/MatchColumns.h"
 //C++ includes
 #include <cmath>
@@ -77,22 +78,22 @@ int SearchForXLinks::xhhcSearchMain() {
   carp(CARP_INFO, "Beginning crux xlink-search (original)");
 
   //Get parameters
-  string ms2_file = get_string_parameter("ms2 file");
+  string ms2_file = Params::GetString("ms2 file");
 
-  FLOAT_T precursor_window = get_double_parameter("precursor-window");
-  FLOAT_T precursor_window_weibull = get_double_parameter("precursor-window-weibull");
+  FLOAT_T precursor_window = Params::GetDouble("precursor-window");
+  FLOAT_T precursor_window_weibull = Params::GetDouble("precursor-window-weibull");
   WINDOW_TYPE_T precursor_window_type = 
-    string_to_window_type(get_string_parameter("precursor-window-type"));
+    string_to_window_type(Params::GetString("precursor-window-type"));
   WINDOW_TYPE_T window_type_weibull = 
-    string_to_window_type(get_string_parameter("precursor-window-type-weibull"));
+    string_to_window_type(Params::GetString("precursor-window-type-weibull"));
 
-  string output_directory = get_string_parameter("output-dir");
+  string output_directory = Params::GetString("output-dir");
 
   unsigned int min_weibull_points = 
-    (unsigned int)get_int_parameter("min-weibull-points");
+    (unsigned int)Params::GetInt("min-weibull-points");
   int max_ion_charge = get_max_ion_charge_parameter("max-ion-charge");
-  int top_match = get_int_parameter("top-match");
-  FLOAT_T linker_mass = get_double_parameter("link mass");
+  int top_match = Params::GetInt("top-match");
+  FLOAT_T linker_mass = Params::GetDouble("link mass");
   int scan_num = 0;
   SpectrumZState zstate;
  
@@ -105,7 +106,7 @@ int SearchForXLinks::xhhcSearchMain() {
   carp(CARP_DETAILED_DEBUG,"Sort");
   // sort filtered ions and decoy ions by mass
   //sort(all_ions.begin(), all_ions.end());
-  if (get_boolean_parameter("xlink-print-db")) {
+  if (Params::GetBool("xlink-print-db")) {
     ostringstream oss;
     oss << output_directory << "/" << "xlink_peptides.txt";
     string temp = oss.str();
@@ -134,7 +135,7 @@ int SearchForXLinks::xhhcSearchMain() {
   string target_path = output_directory + "/search-for-xlinks.target.txt";
   ofstream search_target_file(target_path.c_str());
   //set precision
-  search_target_file << setprecision(get_int_parameter("precision"));
+  search_target_file << setprecision(Params::GetInt("precision"));
   //print header
   search_target_file << "scan\t";
   search_target_file << "charge\t";
@@ -164,7 +165,7 @@ int SearchForXLinks::xhhcSearchMain() {
 
   ofstream search_decoy_file (decoy_path.c_str());
   //set precision
-  search_decoy_file << setprecision(get_int_parameter("precision"));
+  search_decoy_file << setprecision(Params::GetInt("precision"));
   //print header
   search_decoy_file << "scan\t";
   search_decoy_file << "charge\t";

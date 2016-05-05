@@ -244,7 +244,7 @@ int PercolatorApplication::main(
   }
 
   /* --doc option disabled, need retention times in pin file
-  int doc_parameter = get_int_parameter("doc");
+  int doc_parameter = Params::GetInt("doc");
   if(doc_parameter >= 0) {
     perc_args_vec.push_back("--doc");
     perc_args_vec.push_back(to_string(doc_parameter));

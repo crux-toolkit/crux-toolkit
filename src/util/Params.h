@@ -181,7 +181,7 @@ class Params {
   bool finalized_;
 };
 
-static Params container_;
+static Params paramContainer_;
 
 class Param {
  public:

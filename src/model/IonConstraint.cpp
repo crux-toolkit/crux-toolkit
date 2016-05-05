@@ -1,6 +1,7 @@
 #include "IonConstraint.h"
+#include "util/Params.h"
+#include "util/StringUtils.h"
 #include <string>
-
 
 using namespace std;
 /*************************
@@ -63,14 +64,13 @@ IonConstraint::IonConstraint(
   // set all fields of constraint
   mass_type_ = mass_type;
 
-  string charge_str = get_string_parameter("max-ion-charge");
+  string charge_str = Params::GetString("max-ion-charge");
 
   max_charge_ = max(1, max_charge - 1);
 
   if (charge_str != "peptide") {
     int charge_val;
-    bool success = from_string(charge_val, charge_str);
-    if (success) {
+    if (StringUtils::TryFromString(charge_str, &charge_val)) {
       max_charge_ = min(charge_val, max_charge_);
     } else {
       carp_once(CARP_WARNING, "Charge is not valid:%s", charge_str.c_str());
@@ -110,10 +110,10 @@ IonConstraint* IonConstraint::newIonConstraintSmart(
   default:
     // use default type for others
     ION_TYPE_T ion_type;
-    string_to_ion_type(get_string_parameter("primary-ions"), &ion_type);
+    string_to_ion_type(Params::GetString("primary-ions"), &ion_type);
     new_constraint = new IonConstraint(
       get_mass_type_parameter("fragment-mass"),
-      charge, ion_type, get_boolean_parameter("precursor-ions")); 
+      charge, ion_type, Params::GetBool("precursor-ions")); 
     break;
   }
   return new_constraint;

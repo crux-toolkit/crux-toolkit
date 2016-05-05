@@ -21,6 +21,17 @@ class StringUtils {
     }
   }
 
+  //Convert from a string, returning false if conversion fails
+  template<typename T>
+  static bool TryFromString(const std::string& s, T* out) {
+    try {
+      *out = boost::lexical_cast<T>(s);
+      return true;
+    } catch (...) {
+      return false;
+    }
+  }
+
   // Convert to a string
   template<typename T>
   static std::string ToString(const T& obj, int decimals = -1, bool fixedFloat = true) {

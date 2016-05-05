@@ -97,7 +97,6 @@ set (
   app/ExtractRows.cpp
   util/FileUtils.cpp
   model/FilteredSpectrumChargeIterator.cpp
-  util/FileUtils.cpp
   model/GeneratePeptidesIterator.cpp
   app/GetMs2Spectrum.cpp
   io/HTMLWriter.cpp
@@ -117,6 +116,8 @@ set (
   model/MatchCollectionIterator.cpp
   io/MatchCollectionParser.cpp
   model/MatchIterator.cpp
+  util/MathUtil.cpp
+  model/Modification.cpp
   util/modifications.cpp
   model/ModifiedPeptidesIterator.cpp
   io/MSToolkitSpectrumCollection.cpp

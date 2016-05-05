@@ -164,12 +164,6 @@ class Spectrum{
     int firstScan,
     int lastScan
   );
-
-  /**
-   * Parse the spectrum from the tab-delimited result file
-   *\returns the parsed spectrum , else returns NULL for failed parse
-   */
-  static Spectrum* parseTabDelimited(MatchFileReader& file); 
   
   /**
    * Normalize peak intensities so that they sum to unity.

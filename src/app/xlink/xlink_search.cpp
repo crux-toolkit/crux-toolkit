@@ -14,6 +14,7 @@
 #include "objects.h"
 #include "model/FilteredSpectrumChargeIterator.h"
 #include "io/OutputFiles.h"
+#include "util/Params.h"
 #include "io/SpectrumCollectionFactory.h"
 
 //C++ Includes
@@ -57,13 +58,13 @@ int SearchForXLinks::xlinkSearchMain() {
 
   /* Get parameters */
   carp(CARP_INFO, "Getting parameters");
-  string ms2_file = get_string_parameter("ms2 file");
-  string input_file = get_string_parameter("protein fasta file");
-  string output_directory = get_string_parameter("output-dir");
-  int top_match = get_int_parameter("top-match");
-  XLinkPeptide::setLinkerMass(get_double_parameter("link mass"));
-  int min_weibull_points = get_int_parameter("min-weibull-points");
-  bool compute_pvalues = get_boolean_parameter("compute-p-values");
+  string ms2_file = Params::GetString("ms2 file");
+  string input_file = Params::GetString("protein fasta file");
+  string output_directory = Params::GetString("output-dir");
+  int top_match = Params::GetInt("top-match");
+  XLinkPeptide::setLinkerMass(Params::GetDouble("link mass"));
+  int min_weibull_points = Params::GetInt("min-weibull-points");
+  bool compute_pvalues = Params::GetBool("compute-p-values");
 
   XLinkBondMap bondmap;
 
@@ -76,7 +77,7 @@ int SearchForXLinks::xlinkSearchMain() {
   int num_peptide_mods = generate_peptide_mod_list( &peptide_mods );
 
   /* Usually for debugging purposes, print out the database of canddiates */
-  if (get_boolean_parameter("xlink-print-db"))
+  if (Params::GetBool("xlink-print-db"))
   {
     carp(CARP_INFO, "generating and printing xlink database");
     ostringstream oss;

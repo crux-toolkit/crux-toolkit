@@ -1,4 +1,5 @@
 #include "PMCPepXMLWriter.h"
+#include "util/Params.h"
 
 using namespace Crux;
 
@@ -14,7 +15,7 @@ void PMCPepXMLWriter::openFile(
   string filename,
   MATCH_FILE_TYPE type
 ) {
-  PepXMLWriter::openFile(filename.c_str(), get_boolean_parameter("overwrite"));
+  PepXMLWriter::openFile(filename.c_str(), Params::GetBool("overwrite"));
 }
 
 void PMCPepXMLWriter::write(
@@ -119,7 +120,7 @@ void PMCPepXMLWriter::writePSMs(
     string flanking_str(flanking);
     free(flanking);
                                                              
-    FLOAT_T peptide_mass = peptide->getPeptideMass();
+    FLOAT_T peptide_mass = peptide->calcModifiedMass();
 
     // write psm
     map<pair<int, int>, int>::const_iterator lookup =

@@ -381,7 +381,7 @@ Params::Params() : finalized_(false) {
   InitStringParam("fragment-mass", "mono", "average|mono",
     "Specify which isotopes to use in calculating fragment ion mass.",
     "Used by crux-predict-peptide-ions.", true);
-  InitStringParam("isotopic-mass", "average", "average|mono",
+  InitStringParam("isotopic-mass", "mono", "average|mono",
     "Specify the type of isotopic masses to use when calculating the peptide mass.",
     "Used from command line or parameter file by crux-generate-peptides.", true);
   InitStringParam("mod", "NO MODS",
@@ -656,10 +656,6 @@ Params::Params() : finalized_(false) {
     "peptide is re-shuffled up to 5 times. Note that, despite this repeated shuffling, "
     "homopolymers will appear in both the target and decoy database. The protein-reverse "
     "mode reverses the entire protein sequence, irrespective of the composite peptides.",
-    "Available for tide-index", true);
-  InitBoolParam("monoisotopic-precursor", true,
-    "When computing the mass of a peptide, use monoisotopic masses rather than "
-    "average masses.",
     "Available for tide-index", true);
   InitStringParam("mods-spec", "C+57.02146",
     "[[nohtml:Expression for static and variable mass modifications to include. "
@@ -1264,6 +1260,9 @@ Params::Params() : finalized_(false) {
   InitStringParam("input-format", "auto", "auto|tsv|sqt|pin|pepxml|mzidentml",
     "Legal values are auto, tsv, sqt, pin, pepxml or mzidentml format.",
     "option, for psm-convert", true);
+  InitBoolParam("distinct-matches", true,
+    "Whether matches/ion are distinct (as opposed to total).",
+    "option, for psm-convert.", true);
   /* get-ms2-spectrum options */
   InitBoolParam("stats", false, 
     "Rather than the spectrum, output summary statistics to standard output. Each statistic "
@@ -1647,10 +1646,6 @@ Params::~Params() {
   for (map<string, Param*>::iterator i = params_.begin(); i != params_.end(); i++) {
      delete i->second;
   }
-  //for (int i = 0; i < MAX_AA_MODS; i++) {
-    //free_aa_mod(list_of_mods[i]);
-    //list_of_mods[i] = NULL;
-  //}
 }
 
 void Params::Categorize() {
@@ -1676,7 +1671,6 @@ void Params::Categorize() {
   items.insert("min-length");
   items.insert("max-mass");
   items.insert("min-mass");
-  items.insert("monoisotopic-precursor");
   items.insert("isotopic-mass");
   items.insert("clip-nterm-methionine");
   AddCategory("Peptide properties", items);
@@ -1972,25 +1966,25 @@ bool Params::IsDefault(const string& name) {
 }
 
 bool Params::Exists(const string& name) {
-  return container_.Get(name) != NULL;
+  return paramContainer_.Get(name) != NULL;
 }
 
 void Params::Set(const string& name, bool value) {
-  container_.CanModifyCheck();
+  paramContainer_.CanModifyCheck();
   Param* param = Require(name);
   param->Set(value);
   param->ThrowIfInvalid();
 }
 
 void Params::Set(const string& name, int value) {
-  container_.CanModifyCheck();
+  paramContainer_.CanModifyCheck();
   Param* param = Require(name);
   param->Set(value);
   param->ThrowIfInvalid();
 }
 
 void Params::Set(const string& name, double value) {
-  container_.CanModifyCheck();
+  paramContainer_.CanModifyCheck();
   Param* param = Require(name);
   param->Set(value);
   param->ThrowIfInvalid();
@@ -2001,14 +1995,14 @@ void Params::Set(const string& name, const char* value) {
 }
 
 void Params::Set(const string& name, const string& value) {
-  container_.CanModifyCheck();
+  paramContainer_.CanModifyCheck();
   Param* param = Require(name);
   param->Set(value);
   param->ThrowIfInvalid();
 }
 
 void Params::AddArgValue(const string& name, const string& value) {
-  container_.CanModifyCheck();
+  paramContainer_.CanModifyCheck();
   Param* param = Require(name);
   if (!param->IsArgument()) {
     throw runtime_error("Cannot add value to '" + name + "', it is not an argument");
@@ -2017,7 +2011,7 @@ void Params::AddArgValue(const string& name, const string& value) {
 }
 
 void Params::Finalize() {
-  container_.FinalizeParams();
+  paramContainer_.FinalizeParams();
 }
 
 void Params::Write(ostream* out, bool defaults) {
@@ -2098,19 +2092,19 @@ void Params::Write(ostream* out, bool defaults) {
 }
 
 map<string, Param*>::const_iterator Params::BeginAll() {
-  return container_.params_.begin();
+  return paramContainer_.params_.begin();
 }
 
 map<string, Param*>::const_iterator Params::EndAll() {
-  return container_.params_.end();
+  return paramContainer_.params_.end();
 }
 
 vector<const Param*>::const_iterator Params::Begin() {
-  return container_.paramsOrdered_.begin();
+  return paramContainer_.paramsOrdered_.begin();
 }
 
 vector<const Param*>::const_iterator Params::End() {
-  return container_.paramsOrdered_.end();
+  return paramContainer_.paramsOrdered_.end();
 }
 
 string Params::ProcessHtmlDocTags(string s, bool html) {
@@ -2165,8 +2159,8 @@ vector< pair< string, vector<string> > > Params::GroupByCategory(const vector<st
   vector<string>& uncategorized = uncategorizedPair.second;
 
   // Iterate over all categories
-  for (vector<ParamCategory>::const_iterator i = container_.categories_.begin();
-       i != container_.categories_.end();
+  for (vector<ParamCategory>::const_iterator i = paramContainer_.categories_.begin();
+       i != paramContainer_.categories_.end();
        i++) {
     bool any = false;
     // Iterate over each given option and check if it is in the category
@@ -2278,7 +2272,7 @@ void Params::InitArgParam(
 }
 
 Param* Params::Require(const string& name) {
-  Param* param = container_.Get(name);
+  Param* param = paramContainer_.Get(name);
   if (param == NULL) {
     throw runtime_error("Parameter '" + name + "' does not exist");
   }
@@ -2347,6 +2341,14 @@ void Params::AddCategory(const string& name, const set<string>& params) {
 void Params::FinalizeParams() {
   if (finalized_) {
     return;
+  }
+
+  for (char c = 'A'; c <= 'Z'; c++) {
+    string aa = string(1, c);
+    double deltaMass = GetDouble(aa);
+    if (deltaMass != 0) {
+      ModificationDefinition::NewStaticMod(aa, deltaMass, ANY);
+    }
   }
 
   if (GetString("enzyme") == "no-enzyme") {
