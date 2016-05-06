@@ -179,41 +179,39 @@ bool CascadeSearchApplication::needsOutputDirectory() const {
 
 void CascadeSearchApplication::processParams() {
 
-  if (Params::GetInt("top-match") != 1 && Params::GetInt("top-match") != 5) {
+  if (Params::GetInt("top-match") != 1 && !Params::IsDefault("top-match")) {
     carp(CARP_WARNING, "Cascade-Search can work with top-match = 1 only.");
   }
   Params::Set("top-match", 1);
 
-  if (Params::GetBool("exact-p-value") == true){
+  if (Params::GetBool("exact-p-value")) {
     Params::Set("score", "exact p-value");
-    Params::Set("smaller-is-better", true);
   }
-  if (Params::GetBool("pin-output") == true) {
+  if (Params::GetBool("pin-output")) {
     carp(CARP_FATAL, "Cascade-Search cannot work with pinxml-output=T.");
   }
-  if (Params::GetBool("pepxml-output") == true) {
+  if (Params::GetBool("pepxml-output")) {
     carp(CARP_FATAL, "Cascade-Search cannot work with pepxml-output=T.");
   }
-  if (Params::GetBool("mzid-output") == true) {
+  if (Params::GetBool("mzid-output")) {
     carp(CARP_FATAL, "Cascade-Search cannot work with mzid-output=T.");
   }
-  if (Params::GetBool("sqt-output") == true) {
+  if (Params::GetBool("sqt-output")) {
     carp(CARP_FATAL, "Cascade-Search cannot work with sqt-output=T.");
   }
 }
 
 void CascadeSearchApplication::RemoveTempFiles(const string& path, const string& prefix) {
-
   boost::filesystem::directory_iterator end_itr; // Default ctor yields past-the-end
-  for (boost::filesystem::directory_iterator i(path); i != end_itr; ++i)
-  {
+  for (boost::filesystem::directory_iterator i(path); i != end_itr; ++i) {
     // Skip if not a file
-    if (!boost::filesystem::is_regular_file(i->status())) continue;
+    if (!boost::filesystem::is_regular_file(i->status())) {
+      continue;
+    }
 
     string filename = i->path().filename().generic_string();
     if (filename.compare(0, prefix.length(), prefix) == 0){
-      string t = path + "/" + filename;
-      FileUtils::Remove(path + "/" + filename);
+      FileUtils::Remove(FileUtils::Join(path, filename));
     }
   }
 }
