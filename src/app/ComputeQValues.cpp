@@ -219,7 +219,6 @@ vector<string> ComputeQValues::getOptions() const {
     "estimation-method",
     "decoy-prefix",
     "score",
-    "smaller-is-better",
     "sidak",
     "peptide-level",
     "verbosity",

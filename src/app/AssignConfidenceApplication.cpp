@@ -103,9 +103,9 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
     top_match = MAX_PSMS+1;
   }
 
-  bool ascending = Params::GetBool("smaller-is-better");
   SCORER_TYPE_T score_type = INVALID_SCORER_TYPE;
   SCORER_TYPE_T derived_score_type = INVALID_SCORER_TYPE;
+  bool ascending;
 
   string score_param = Params::GetString("score");
   if (!score_param.empty()) {
@@ -174,7 +174,6 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
   std::map<string, FLOAT_T> BestPeptideScore;
   
   for (vector<string>::const_iterator iter = input_files.begin(); iter != input_files.end(); ++iter) {
-
     string target_path = *iter;
     string decoy_path = *iter;
 
@@ -204,13 +203,16 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
     distinct_matches = match_collection->getHasDistinctMatches();
 
     carp(CARP_INFO, "Found %d PSMs in %s.", match_collection->getMatchTotal(),
-	 target_path.c_str());
+         target_path.c_str());
     
     // If necessary, automatically identify the score type.
     if (score_type == INVALID_SCORER_TYPE) {
-      SCORER_TYPE_T typeArr[] = { XCORR, EVALUE, TIDE_SEARCH_EXACT_PVAL, TIDE_SEARCH_EXACT_SMOOTHED, LOGP_BONF_WEIBULL_XCORR};
-      vector<SCORER_TYPE_T> scoreTypes(typeArr,
-                                       typeArr + sizeof(typeArr) / sizeof(SCORER_TYPE_T));
+      vector<SCORER_TYPE_T> scoreTypes;
+      scoreTypes.push_back(XCORR);
+      scoreTypes.push_back(EVALUE);
+      scoreTypes.push_back(TIDE_SEARCH_EXACT_PVAL);
+      scoreTypes.push_back(TIDE_SEARCH_EXACT_SMOOTHED);
+      scoreTypes.push_back(LOGP_BONF_WEIBULL_XCORR);
       for (vector<SCORER_TYPE_T>::const_iterator i = scoreTypes.begin();
            i != scoreTypes.end();
            i++) {
@@ -223,35 +225,26 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
       }
       if (score_type == INVALID_SCORER_TYPE) {
         carp(CARP_FATAL, "Could not detect score type. Specify the score type using the "
-                         "\"score\" and \"smaller-is-better\" parameters.");
+                         "\"score\" parameter.");
       }
-      switch (score_type) {
-      case XCORR:
-	// higher score better
-	ascending = false;
-	break;
-      case EVALUE:
-      case TIDE_SEARCH_EXACT_PVAL:
-      case TIDE_SEARCH_EXACT_SMOOTHED:
-      case LOGP_BONF_WEIBULL_XCORR:
-	// lower score better
-	ascending = true;
-	break;
-      default:
-	carp(CARP_FATAL, "Cannot infer sort order for score %s.",
-	     scorer_type_to_string(score_type));
-      }
-      carp(CARP_INFO, "Setting smaller-is-better=%s.",
-	   StringParam::From(ascending).c_str());
-
-    } else {
-      carp(CARP_INFO, "User-specified score type=%s with smaller-is-better=%s.",
-	   scorer_type_to_string(score_type), StringParam::From(ascending).c_str());
     }
+    int direction = getDirection(score_type);
+    if (direction == -1) {
+      ascending = false;
+    } else if (direction == 1) {
+      ascending = true;
+    } else {
+      carp(CARP_FATAL, "Cannot infer sort order for score %s.",
+           scorer_type_to_string(score_type));
+    }
+    carp(CARP_INFO, "Score type=%s, sorting in %s order",
+         scorer_type_to_string(score_type),
+         ascending ? "ascending" : "descending");
 
-    if (match_collection->getScoredType(score_type) == false){
+    if (!match_collection->getScoredType(score_type)) {
       const char* score_str = scorer_type_to_string(score_type);
-      carp(CARP_FATAL, "The PSM feature \"%s\" was not found in file \"%s\".", score_str, target_path.c_str());
+      carp(CARP_FATAL, "The PSM feature \"%s\" was not found in file \"%s\".",
+           score_str, target_path.c_str());
     }
 
     // Find and keep the best score for each peptide.
@@ -278,7 +271,7 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
     if (decoy_path != "") {
       MatchCollection* temp_collection = parser.create(decoy_path, Params::GetString("protein-database"));
       carp(CARP_INFO, "Found %d PSMs in %s.", temp_collection->getMatchTotal(),
-	   decoy_path.c_str());
+           decoy_path.c_str());
 
       // Mark decoy matches
       // key = (filename, scan number, charge, rank); value = index
@@ -299,29 +292,29 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
           continue;
         }
 
-	fileIndex = stringToIndex(decoy_match->getSpectrum()->getFullFilename());
-	scanid = decoy_match->getSpectrum()->getFirstScan();
-	charge = decoy_match->getCharge();
-	rank   = decoy_match->getRank(XCORR);
-	boost::tuple<int, int, int, int> myTuple (fileIndex, scanid, charge, rank);
-	
-	decoy_match->setNullPeptide(true);
-	switch (estimation_method) {
-	case MIXMAX_METHOD:
-	  // Put match directly in the final set of decoys, because no TDC.
+        fileIndex = stringToIndex(decoy_match->getSpectrum()->getFullFilename());
+        scanid = decoy_match->getSpectrum()->getFirstScan();
+        charge = decoy_match->getCharge();
+        rank   = decoy_match->getRank(XCORR);
+        boost::tuple<int, int, int, int> myTuple (fileIndex, scanid, charge, rank);
+
+        decoy_match->setNullPeptide(true);
+        switch (estimation_method) {
+        case MIXMAX_METHOD:
+          // Put match directly in the final set of decoys, because no TDC.
           decoy_matches->addMatch(decoy_match);
-	  break;
-	case TDC_METHOD:
-	case PEPTIDE_LEVEL_METHOD:
-	  // If the PSM is already there, that means there was a tie
-	  // for top-ranked decoys.  In that case, there is no need to
-	  // store a pointer to the second one.
-	  if (pairidx[myTuple] == 0) {
-	    pairidx[myTuple] = cnt;
-	  }
-	  break;
-	case INVALID_METHOD:
-	  carp(CARP_FATAL, "No estimation method specified.");
+          break;
+        case TDC_METHOD:
+        case PEPTIDE_LEVEL_METHOD:
+          // If the PSM is already there, that means there was a tie
+          // for top-ranked decoys.  In that case, there is no need to
+          // store a pointer to the second one.
+          if (pairidx[myTuple] == 0) {
+            pairidx[myTuple] = cnt;
+          }
+          break;
+        case INVALID_METHOD:
+          carp(CARP_FATAL, "No estimation method specified.");
         }
       }
       delete temp_iter;
@@ -335,9 +328,9 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
       if (estimation_method != MIXMAX_METHOD) {
         int decoy_idx;
         int numCandidates;
-	int numCompetitions = 0;
-	int numLostDecoys = 0;
-	int numTies = 0;
+        int numCompetitions = 0;
+        int numLostDecoys = 0;
+        int numTies = 0;
         MatchCollection* tdc_collection = new MatchCollection();
         tdc_collection->setScoredType(score_type, true);
         MatchIterator* target_iter = new MatchIterator(match_collection);
@@ -347,25 +340,25 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
 
           // Only use top-ranked matches.
           if (target_match->getRank(XCORR) > top_match){
-	    num_target_rank_skipped++;
+            num_target_rank_skipped++;
             continue;
           }
 
           // Retrieve the index of the corresponding decoy PSM.
           Crux::Match* decoy_match;
-	  fileIndex = stringToIndex(target_match->getSpectrum()->getFullFilename());
+          fileIndex = stringToIndex(target_match->getSpectrum()->getFullFilename());
           scanid = target_match->getSpectrum()->getFirstScan();
           charge = target_match->getCharge();
-	  rank   = target_match->getRank(XCORR);
-	  decoy_idx = pairidx[boost::tuple <int, int, int, int>
-			      (fileIndex, scanid, charge, rank)];
-	  if (decoy_idx == 0) {
-	    carp(CARP_DEBUG,
-		 "Failed to find decoy for file=%s scan=%d charge=%d rank=%d.",
-		 target_match->getSpectrum()->getFullFilename(),
-		 scanid, charge, rank);
-	    numLostDecoys++;
-	  }
+          rank   = target_match->getRank(XCORR);
+          decoy_idx = pairidx[boost::tuple <int, int, int, int>
+                              (fileIndex, scanid, charge, rank)];
+          if (decoy_idx == 0) {
+            carp(CARP_DEBUG,
+                 "Failed to find decoy for file=%s scan=%d charge=%d rank=%d.",
+                 target_match->getSpectrum()->getFullFilename(),
+                 scanid, charge, rank);
+            numLostDecoys++;
+          }
 
     if (estimation_method == PEPTIDE_LEVEL_METHOD) {
       if (decoy_idx > 0){
@@ -383,8 +376,7 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
     } else {
       if (decoy_idx > 0){
         decoy_match = decoy_iter->getMatch(decoy_idx - 1);
-      }
-      else {
+      } else {
         tdc_collection->addMatch(target_match);
         continue;
       }
@@ -392,28 +384,28 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
       target_match->setTargetExperimentSize(numCandidates);
       decoy_match->setTargetExperimentSize(numCandidates);
 
-	    // This is where the target-decoy competition happens.
-	    carp(CARP_DEBUG, "TDC: Comparing target (%d, +%d) with score %g to decoy (%d, +%d) with score %g.",
-		  target_match->getSpectrum()->getFirstScan(),
-		  target_match->getCharge(),
-		  target_match->getScore(score_type),
-		  decoy_match->getSpectrum()->getFirstScan(),
-		  decoy_match->getCharge(),
-		  decoy_match->getScore(score_type));
+      // This is where the target-decoy competition happens.
+      carp(CARP_DEBUG, "TDC: Comparing target (%d, +%d) with score %g to decoy (%d, +%d) with score %g.",
+           target_match->getSpectrum()->getFirstScan(),
+           target_match->getCharge(),
+           target_match->getScore(score_type),
+           decoy_match->getSpectrum()->getFirstScan(),
+           decoy_match->getCharge(),
+           decoy_match->getScore(score_type));
 
-	    float score_difference = target_match->getScore(score_type) - decoy_match->getScore(score_type);
-	    numCompetitions++;
-	    // Randomly break ties.
-	    if (fabs(score_difference) < 1e-10) {
-	      numTies++;
-	      score_difference += 0.5 - ((double)myrandom() / UNIFORM_INT_DISTRIBUTION_MAX);
-	    }
-	    if (ascending) { // smaller-is-better=T
-	      score_difference *= -1.0;
-	    }
-	    if (score_difference >= 0.0) {
+      float score_difference = target_match->getScore(score_type) - decoy_match->getScore(score_type);
+      numCompetitions++;
+      // Randomly break ties.
+      if (fabs(score_difference) < 1e-10) {
+        numTies++;
+        score_difference += 0.5 - ((double)myrandom() / UNIFORM_INT_DISTRIBUTION_MAX);
+      }
+      if (ascending) { // smaller scores are better
+        score_difference *= -1.0;
+      }
+      if (score_difference >= 0.0) {
         tdc_collection->addMatch(target_match);
-	    } else {
+      } else {
         tdc_collection->addMatch(decoy_match);
       }
     }
@@ -422,13 +414,13 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
   delete decoy_iter;
   delete match_collection;
   match_collection = tdc_collection;
-	if (numCompetitions > 0) {
-	  carp(CARP_INFO, "Randomly broke %d ties in %d target-decoy competitions.",
-	       numTies, numCompetitions);
-	}
-	if (numLostDecoys > 0) {
-	  carp(CARP_INFO, "Failed to find %d decoys.", numLostDecoys);
-	}
+  if (numCompetitions > 0) {
+    carp(CARP_INFO, "Randomly broke %d ties in %d target-decoy competitions.",
+         numTies, numCompetitions);
+  }
+  if (numLostDecoys > 0) {
+    carp(CARP_INFO, "Failed to find %d decoys.", numLostDecoys);
+  }
       }
       delete temp_collection;
     }
@@ -499,11 +491,11 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
     delete match_collection;
     if (num_decoy_rank_skipped + num_target_rank_skipped > 0) {
       carp(CARP_INFO, "Skipped %d target and %d decoy PSMs with rank > %d.",
-	   num_target_rank_skipped, num_decoy_rank_skipped, top_match);
+           num_target_rank_skipped, num_decoy_rank_skipped, top_match);
     }
     if (num_target_peptide_skipped + num_decoy_peptide_skipped > 0) {
       carp(CARP_INFO, "Skipped %d target and %d decoy PSMs due to peptide-level filtering.",
-	   num_target_peptide_skipped, num_decoy_peptide_skipped);
+           num_target_peptide_skipped, num_decoy_peptide_skipped);
     }
   }
 
@@ -592,9 +584,7 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
   case TDC_METHOD:
   case PEPTIDE_LEVEL_METHOD:
     qvalues = compute_decoy_qvalues_tdc(target_scores, num_targets,
-      decoy_scores, num_decoys,
-      ascending,
-      1.0);
+      decoy_scores, num_decoys, ascending, 1.0);
     break;
   case MIXMAX_METHOD:
     qvalues = compute_decoy_qvalues_mixmax(target_scores, num_targets,
@@ -838,7 +828,7 @@ FLOAT_T* AssignConfidenceApplication::compute_decoy_qvalues_tdc(
     
     carp(CARP_DEBUG, "FDR for score %g = min(1,%d/%d) = %g",
          target_score, decoy_idx, target_idx + 1,
-	 (FLOAT_T)decoy_idx / (FLOAT_T)(target_idx + 1), fdr);
+         (FLOAT_T)decoy_idx / (FLOAT_T)(target_idx + 1), fdr);
 
     qvalues[target_idx] = fdr;
   }
@@ -1085,6 +1075,26 @@ unsigned int AssignConfidenceApplication::getAcceptedPSMs(){
   return accepted_psms_;
 }
 
+int AssignConfidenceApplication::getDirection(SCORER_TYPE_T scoreType) {
+  // Return -1 for higher score better, 1 for lower score better, or 0 for unknown
+  switch (scoreType) {
+    case SP:
+    case XCORR:
+    case LOGP_BONF_WEIBULL_XCORR: // negative log p-values
+    case TIDE_SEARCH_REFACTORED_XCORR:
+      // higher score better, ascending = false
+      return -1;
+    case EVALUE:
+    case TIDE_SEARCH_EXACT_PVAL:
+    case TIDE_SEARCH_EXACT_SMOOTHED:
+      // lower score better, ascending = true
+      return 1;
+    default:
+      // unknown score type
+      return 0;
+  }
+}
+
 /**
 * \returns the command name for ComputeQValues
 */
@@ -1164,7 +1174,6 @@ vector<string> AssignConfidenceApplication::getOptions() const {
     "estimation-method",
     "decoy-prefix",
     "score",
-    "smaller-is-better",
     "sidak",
     "verbosity",
     "parameter-file",
@@ -1216,12 +1225,11 @@ bool AssignConfidenceApplication::needsOutputDirectory() const {
 }
 
 void AssignConfidenceApplication::processParams() {
-
-  if (Params::GetString("estimation-method") != "peptide-level"){	  
-	if (Params::GetInt("top-match") != 1 && Params::GetInt("top-match") != 5) {
-  	  carp(CARP_WARNING, "assign-confidence can work with top-match = 1 only.");
-	}
-	Params::Set("top-match", 1);
+  if (Params::GetString("estimation-method") != "peptide-level") {
+    if (Params::GetInt("top-match") != 1 && !Params::IsDefault("top-match")) {
+      carp(CARP_WARNING, "assign-confidence can work with top-match = 1 only.");
+    }
+    Params::Set("top-match", 1);
   }
 }
 /*

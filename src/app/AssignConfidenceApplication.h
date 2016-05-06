@@ -74,6 +74,8 @@ public:
 
   virtual int main(const vector<string> input_files);
 
+  static int getDirection(SCORER_TYPE_T scoreType);
+
   /**
   * \returns the command name for ComputeQValues
   */
