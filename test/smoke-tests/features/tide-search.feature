@@ -31,6 +31,7 @@ Examples:
   |tide-chymo     |--enzyme chymotrypsin                                        |                                                        |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-chymo.txt     |
   |tide-partial   |--digestion partial-digest                                   |                                                        |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-partial.txt   |
   |tide-misscleave|--missed-cleavages 2                                         |                                                        |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-misscleave.txt|
+  |tide-reverse   |--decoy-format peptide-reverse                               |                                                        |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-reverse.txt   |
   # Tests that vary tide-search options
   |tide-masswin   |                                                             |--precursor-window 5 --precursor-window-type mass       |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-masswin.txt   |
   |tide-mzwin     |                                                             |--precursor-window 5 --precursor-window-type mz         |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-mzwin.txt     |
