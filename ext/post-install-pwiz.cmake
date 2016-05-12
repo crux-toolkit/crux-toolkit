@@ -22,6 +22,30 @@ if (WIN32 AND NOT CYGWIN)
   if (${BUILD_TYPE} MATCHES "Debug")
     execute_process(
       COMMAND ${CMAKE_COMMAND} -E copy 
+        ${PREFIX}/lib/libboost_chrono-vc120-mt-gd.lib
+        ${PREFIX}/lib/libboost_chrono-vc120-mt-gd-1_56.lib
+      RESULT_VARIABLE status
+    )
+    execute_process(
+      COMMAND ${CMAKE_COMMAND} -E copy 
+        ${PREFIX}/lib/libboost_date_time-vc120-mt-gd.lib
+        ${PREFIX}/lib/libboost_date_time-vc120-mt-gd-1_56.lib
+      RESULT_VARIABLE status
+    )
+    execute_process(
+      COMMAND ${CMAKE_COMMAND} -E copy 
+        ${PREFIX}/lib/libboost_system-vc120-mt-gd.lib
+        ${PREFIX}/lib/libboost_system-vc120-mt-gd-1_56.lib
+      RESULT_VARIABLE status
+    )
+    execute_process(
+      COMMAND ${CMAKE_COMMAND} -E copy 
+        ${PREFIX}/lib/libboost_thread-vc120-mt-gd.lib
+        ${PREFIX}/lib/libboost_thread-vc120-mt-gd-1_56.lib
+      RESULT_VARIABLE status
+    )
+    execute_process(
+      COMMAND ${CMAKE_COMMAND} -E copy 
         ${PREFIX}/lib/libboost_filesystem-vc120-mt-gd.lib
         ${PREFIX}/lib/libboost_filesystem-vc120-mt-gd-1_56.lib
       RESULT_VARIABLE status
@@ -33,6 +57,24 @@ if (WIN32 AND NOT CYGWIN)
       RESULT_VARIABLE status
     )
   else()
+    execute_process(
+      COMMAND ${CMAKE_COMMAND} -E copy 
+        ${PREFIX}/lib/libboost_date_time-vc120-mt.lib
+        ${PREFIX}/lib/libboost_date_time-vc120-mt-1_56.lib
+      RESULT_VARIABLE status
+    )
+    execute_process(
+      COMMAND ${CMAKE_COMMAND} -E copy 
+        ${PREFIX}/lib/libboost_system-vc120-mt.lib
+        ${PREFIX}/lib/libboost_system-vc120-mt-1_56.lib
+      RESULT_VARIABLE status
+    )
+    execute_process(
+      COMMAND ${CMAKE_COMMAND} -E copy 
+        ${PREFIX}/lib/libboost_thread-vc120-mt.lib
+        ${PREFIX}/lib/libboost_thread-vc120-mt-1_56.lib
+      RESULT_VARIABLE status
+    )
     execute_process(
       COMMAND ${CMAKE_COMMAND} -E copy 
         ${PREFIX}/lib/libboost_filesystem-vc120-mt.lib
