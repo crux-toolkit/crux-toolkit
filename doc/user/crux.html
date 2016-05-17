@@ -2,10 +2,21 @@
 <head>
 <title>Crux tandem mass spectrometry analysis software</title>
 <link href="./crux.css" rel="styleSheet" type="text/css">
+<link rel="icon" 
+      type="image/png" 
+      href="./crux-trimmed.png">
 </head>
 <body>
 <blockquote>
 
+<!--
+  Logo was trimmed with the following command:
+
+  convert -crop 600x600+600+600 ../logo/crux.png crux-trimmed.png
+
+  WSN 17 May 2016
+-->
+  
 <!--
   N.B. I created this image in PowerPoint, exported to PDF and then
   created the PNG using the following command:
@@ -20,7 +31,22 @@
  SJM 8 May 2014
 -->
 
-<center>
+
+<table><tr>
+
+<td valign="top">
+<img src="./crux-trimmed.png" height="300">
+
+<p/>
+<a href="download" title="Download Crux Toolkit" class="sfdl">
+    <span>
+        <b>Download Crux Toolkit</b>
+    </span>
+</a></p>
+
+</td>
+
+<td>
 <img  src="schematic.png" usemap="#commands-files">
 <map name="commands-files">
   <area shape="rect" coords="253,135,349,169" alt="tide-index" href="tide-index.html"/>
@@ -33,8 +59,9 @@
   <area shape="rect" coords="783,222,866,252" alt="q-ranker" href="q-ranker.html"/>
   <area shape="rect" coords="784,281,867,334" alt="spectral-counts" href="spectral-counts.html"/>
 </map>
+</td>
 
-</center>
+</tr></table>
 
 <p>
 Crux is a software toolkit for tandem mass spectrometry analysis.  If
@@ -62,14 +89,12 @@ analysis."</a> <i>Journal of Proteome Research.</i>
 13(10):4488-4491, 2014.
 </blockquote>
 
-
-<p />
-<a href="download" title="Download Crux Toolkit" class="sfdl">
-    <span>
-        <b>Download Crux Toolkit</b>
-    </span>
-</a>
 <div style="clear:both;"></div>
+
+<center>
+</center>
+
+
 <p/>
 Crux is provided as a single executable that supports the following
 commands:</p>
