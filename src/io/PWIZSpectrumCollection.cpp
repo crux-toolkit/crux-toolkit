@@ -11,7 +11,7 @@
 #include "parameter.h"
 #include <iostream>
 #include "pwiz/data/msdata/SpectrumInfo.hpp"
-#ifdef _MSC_VER
+#if defined (_MSC_VER) &&  defined(INCLUDE_VENDOR_LIBRARIES)
 #include "pwiz/data/msdata/DefaultReaderList.hpp"
 //#include "pwiz/data/vendor_readers/ABI/Reader_ABI.hpp"
 //#include "pwiz/data/vendor_readers/ABI/T2D/Reader_ABI_T2D.hpp"
@@ -30,8 +30,8 @@ using namespace std;
  */
 PWIZSpectrumCollection::PWIZSpectrumCollection(
   const string& filename   ///< The spectrum collection filename.
- ) : SpectrumCollection(filename){
-#ifdef _MSC_VER
+) : SpectrumCollection(filename){
+#if defined(_MSC_VER) && defined(INCLUDE_VENDOR_LIBRARIES)
   pwiz::msdata::DefaultReaderList readerList;
   //readerList.push_back(pwiz::msdata::ReaderPtr(new pwiz::msdata::Reader_ABI));
   //readerList.push_back(pwiz::msdata::ReaderPtr(new pwiz::msdata::Reader_ABI_T2D));
@@ -40,9 +40,21 @@ PWIZSpectrumCollection::PWIZSpectrumCollection(
   readerList.push_back(pwiz::msdata::ReaderPtr(new pwiz::msdata::Reader_Shimadzu));
   readerList.push_back(pwiz::msdata::ReaderPtr(new pwiz::msdata::Reader_Thermo));
   readerList.push_back(pwiz::msdata::ReaderPtr(new pwiz::msdata::Reader_Waters));
-  reader_ = new pwiz::msdata::MSDataFile(filename_, &readerList);
+  carp(CARP_INFO, "Support for vendor specific formats enabled.");  
+  try {
+     reader_ = new pwiz::msdata::MSDataFile(filename_, &readerList);
+   }
+   catch (const runtime_error& error) {
+    carp(CARP_FATAL, "Unable to parse spectrum file %s. Error: %s.", filename_.c_str(), error.what());
+   }
 #else
-  reader_ = new pwiz::msdata::MSDataFile(filename_);
+  carp(CARP_INFO, "Support for vendor specific formats not enabled.");  
+  try {
+    reader_ = new pwiz::msdata::MSDataFile(filename_);
+  }
+  catch (const runtime_error& error) {
+    carp(CARP_FATAL, "Unable to parse spectrum file %s. Error: %s.", filename_.c_str(), error.what());  
+  }
 #endif
   if( reader_ == NULL ){
     carp(CARP_FATAL, "PWIZSpectrumCollection unable to open '%s'.", 

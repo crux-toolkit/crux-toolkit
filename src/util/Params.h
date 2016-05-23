@@ -181,8 +181,6 @@ class Params {
   bool finalized_;
 };
 
-static Params paramContainer_;
-
 class Param {
  public:
   Param(const std::string& name,

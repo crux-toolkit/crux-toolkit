@@ -60,6 +60,8 @@ using namespace std;
  *
  */
 
+static Params paramContainer_;
+
 Params::Params() : finalized_(false) {
   /* generate_peptide arguments */
   InitArgParam("protein fasta file",

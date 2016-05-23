@@ -46,6 +46,12 @@ if (WIN32 AND NOT Cygwin)
 )
   #  Need Comet base directory for Windows
   include_directories(${CMAKE_BINARY_DIR}/ext/build/src/comet/)
+
+  # On Windows we should build vendor libraries by default
+  if (NOT DEFINED INCLUDE_VENDOR_LIBRARIES)
+    set(INCLUDE_VENDOR_LIBRARIES TRUE)
+  endif (NOT DEFINED INCLUDE_VENDOR_LIBRARIES)
+
 endif (WIN32 AND NOT Cygwin)
 
 link_directories(.)
@@ -277,6 +283,9 @@ if (WIN32 AND NOT CYGWIN)
   # MSToolkit library.
   add_definitions(-DBOOST_ALL_NO_LIB)
   add_definitions(-DXML_STATIC)
+  if (INCLUDE_VENDOR_LIBRARIES)
+    add_definitions(-DINCLUDE_VENDOR_LIBRARIES)
+  endif (INCLUDE_VENDOR_LIBRARIES)
 endif (WIN32 AND NOT CYGWIN)
 
 # The rt library is not needed for OS X
@@ -287,6 +296,54 @@ else(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 if (WIN32 AND NOT CYGWIN)
+  if (INCLUDE_VENDOR_LIBRARIES)
+    set (
+      PWIZ_LIBRARIES
+      libpwiz_data_identdata
+      libpwiz_data_identdata_version
+      libpwiz_data_misc
+      libpwiz_data_msdata
+      libpwiz_data_msdata_version
+      libpwiz_data_proteome
+      libpwiz_data_common
+      libpwiz_data_vendor_readers
+      libpwiz_reader_abi
+      libpwiz_reader_abi_t2d
+      libpwiz_reader_agilent
+      libpwiz_reader_shimadzu
+      libpwiz_reader_thermo
+      libpwiz_reader_waters
+      libpwiz_vendor_api_abi
+      libpwiz_vendor_api_agilent
+      libpwiz_vendor_api_shimadzu
+      libpwiz_vendor_api_thermo
+      libpwiz_utility_chemistry
+      libpwiz_utility_minimxml
+      libpwiz_utility_misc
+      libpwiz_version
+      libSHA1
+      libzlib
+      MassLynxRaw
+      cdt
+    )
+  else (INCLUDE_VENDOR_LIBRARIES)
+    set (
+      PWIZ_LIBRARIES
+      libpwiz_data_identdata
+      libpwiz_data_identdata_version
+      libpwiz_data_misc
+      libpwiz_data_msdata
+      libpwiz_data_msdata_version
+      libpwiz_data_proteome
+      libpwiz_data_common
+      libpwiz_utility_chemistry
+      libpwiz_utility_minimxml
+      libpwiz_utility_misc
+      libpwiz_version
+      libSHA1
+      libzlib
+    )
+  endif (INCLUDE_VENDOR_LIBRARIES)
   target_link_libraries(
     crux
     barista
@@ -301,32 +358,7 @@ if (WIN32 AND NOT CYGWIN)
     tide-support
     mstoolkitlite
     protobuf
-    libpwiz_data_identdata
-    libpwiz_data_identdata_version
-    libpwiz_data_misc
-    libpwiz_data_msdata
-    libpwiz_data_msdata_version
-    libpwiz_data_proteome
-    libpwiz_data_common
-    libpwiz_data_vendor_readers
-    libpwiz_reader_abi
-    libpwiz_reader_abi_t2d
-    libpwiz_reader_agilent
-    libpwiz_reader_shimadzu
-    libpwiz_reader_thermo
-    libpwiz_reader_waters
-    libpwiz_vendor_api_abi
-    libpwiz_vendor_api_agilent
-    libpwiz_vendor_api_shimadzu
-    libpwiz_vendor_api_thermo
-    libpwiz_utility_chemistry
-    libpwiz_utility_minimxml
-    libpwiz_utility_misc
-    libpwiz_version
-    libSHA1
-    libzlib
-    MassLynxRaw
-    cdt
+    ${PWIZ_LIBRARIES}
     ws2_32
     optimized libboost_system-vc120-mt
     optimized libboost_iostreams-vc120-mt
