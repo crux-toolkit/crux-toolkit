@@ -366,7 +366,7 @@ Params::Params() : finalized_(false) {
     "The name of the directory where output files will be created.",
     "Available for most commands.", true);
   // coder options regarding decoys
-  InitIntParam("num-decoy-files", 2, 0, 10,
+  InitIntParam("num-decoy-files", 1, 0, 10,
     "Replaces number-decoy-set.  Determined by decoy-location"
     " and num-decoys-per-target",
     "", false);
