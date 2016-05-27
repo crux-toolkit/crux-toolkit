@@ -5,6 +5,47 @@
 
 <h1>Coding standards</h1>
 
+<h3>Lint checking</h3>
+<p>
+As of spring 2016, we began using <a href="https://en.wikipedia.org/wiki/Cpplint">cpplint</a> to perform style/lint checking on our code base. Because it had built in a number of agreeable standards (from the <a href="http://google.github.io/styleguide/cppguide.html">Google style guide</a>) we decided to incorporate many into our own. We've done this in two groups: lenient rules (for the legacy code with existing errors) and strict rules (the desired standard). The lint checker (<code>cruxlint.sh</code>) runs on one file at a time and takes the flag <code>-l</code> for lenient style checking. For example:
+</p>
+<pre>
+     test/lint/cruxlint.sh -l src/app/CruxApplication.cpp
+</pre>
+<p>
+The new rules (some of which are common sense) are as follow (quotes come from the Google style guide or internal <code>cpplint.py</code> documentation). If you have a complaint or confusion about a rule, please checkout the Google style guide (which goes into more detail) or examine <code>cpplint.py</code>. Rule categories can be modified through the files <code>include_rules.txt</code>,<code>include_lax_rules.txt</code>, and <code>exclude_rules.txt</code> in <code>test/lint</code>.
+</p>
+<h4>Lenient rule/checks:</h4>
+<ul>
+  <li>class -- All c++ classes must be declared completely.</li>
+  <li>c++11 -- Our code runs c++11. This means no future features, such as r value references</li>
+  <li>deprecated -- No deprecated functions. For example: &quot;&lt;? and &gt;? (max and min) operators are non-standard and deprecated.&quot;</li>
+  <li>utf-8 -- Non ASCII characters should use UTF-8 formatting</li>
+  <li>invalid increment -- checks for invalid increment. For example if <code>count</code> is a pointer, <code>*count++</code> &quot;is invalid, because it effectively does count++, moving pointer, and should be replaced with ++*count, (*count)++ or *count += 1&quot;</li>
+  <li>memset -- &quot;Checks for potential memset bugs like memset(buf, sizeof(buf), 0)&quot;</li>
+  <li>printf format -- Dissallows printf formats allowed by gcc-2, but which are non-standard</li>
+  <li> printf -- Checks for format string bugs. The second argument of <code>sprintf</code> should not be literal. Use <code>sizeof</code> instead.</li>
+  <li>threadsafe function -- Suggests use of thread safe functions in correct places (such as POSIX)</li>
+</ul>
+<h4>Strict rules/checks:</h4>
+<ul>
+  <li> explicit_make_pair -- &quot;For C++11-compatibility, omit template arguments from make_pair OR use pair directly OR if appropriate, construct a pair directly&quot;</li>
+  <li> storage_class -- &quot;Storage class (static, extern, typedef, etc) should be first.&quot;</li>
+  <li> casting -- Don't use c-style casts</li>
+  <li> function -- &quot;All parameters should be named in a function&quot;</li>
+  <li> inheritance -- Don't include redundant virtuals</li>
+  <li> namespace -- &quot;Namespace should be terminated with "// namespace&quot; SOME_NACESPACE_NAME</li>
+  <li> nolint -- <code>cpplint</code> results in some false positives. &quot;False positives can be ignored by putting // NOLINT at the end of the line or // NOLINTNEXTLINE in the previous line.&quot;</li>
+  <li> nul -- Don't include a nul byte. These are problimatic for some tools</li>
+  <li> casting -- Don't use c-style casts or take the address of a cast (because c++ uses temporary variables for these)</li>
+  <li> explicit -- &quot;onstructors callable with one argument should be marked explicit.&quot;</li>
+  <li> indentation_namespace -- Do not indent inside of a namespace</li>
+  <li> init -- Checks if a member variable is initialized within itself</li>
+  <li> int -- &quot;use a precise-width integer type from <code>&lt;stdint.h&gt;</code>, such as <code>int16_t</code>.&quot; </li>
+  <li> operator -- &quot;Unary <code>operator&amp;</code> is dangerous.  Do not use it.&quot;</li>
+  <li> references -- &quot;All parameters passed by reference must be labeled const.&quot; </li>
+  <li> whitespace checks -- cpplint includes various whitespace checks which agree with those already required by this style guide. For example, spaces around operators. </li>
+</ul>
 
 <h3>Objects in C</h3>
 
