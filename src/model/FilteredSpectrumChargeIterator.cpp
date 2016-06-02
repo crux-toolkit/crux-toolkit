@@ -7,6 +7,7 @@
 #include "FilteredSpectrumChargeIterator.h"
 
 #include "parameter.h"
+#include "util/Params.h"
 
 using namespace std;
 using namespace Crux;
@@ -88,11 +89,11 @@ FilteredSpectrumChargeIterator::FilteredSpectrumChargeIterator(
   has_next_ = false;
   spectrum_index_ = -1;
   zstate_index_ = -1;
-  min_mz_ = get_double_parameter("spectrum-min-mz");
-  max_mz_ = get_double_parameter("spectrum-max-mz");
-  min_peaks_ = get_int_parameter("min-peaks");
+  min_mz_ = Params::GetDouble("spectrum-min-mz");
+  max_mz_ = Params::GetDouble("spectrum-max-mz");
+  min_peaks_ = Params::GetInt("min-peaks");
 
-  string charge_str = get_string_parameter("spectrum-charge");
+  string charge_str = Params::GetString("spectrum-charge");
   if (charge_str == "all") {
     search_charge_ = 0;
   } else {

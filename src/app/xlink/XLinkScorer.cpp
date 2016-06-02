@@ -9,6 +9,7 @@
 #include "model/Scorer.h"
 #include "model/Ion.h"
 #include "model/IonSeries.h"
+#include "util/Params.h"
 #include "XLinkPeptide.h"
 
 #include <iostream>
@@ -53,12 +54,19 @@ void XLinkScorer::init(
   }
 }
 
+IonConstraint* XLinkScorer::getIonConstraintXCorr() {
+  return ion_constraint_xcorr_;
+}
+
+
+
+
 /**
  * default constructor
  */
 XLinkScorer::XLinkScorer() {
 
-  init(NULL, 0, get_boolean_parameter("compute-sp"));
+  init(NULL, 0, Params::GetBool("compute-sp"));
 }
 
 /**
@@ -69,7 +77,7 @@ XLinkScorer::XLinkScorer(
   int charge ///< charge state
   ) {
 
-  init(spectrum, charge, get_boolean_parameter("compute-sp"));
+  init(spectrum, charge, Params::GetBool("compute-sp"));
 }
 
 /**
@@ -104,7 +112,6 @@ XLinkScorer::~XLinkScorer() {
 FLOAT_T XLinkScorer::scoreCandidate(
   XLinkMatch* candidate ///< candidate to score
   ) {
-
   candidate->predictIons(ion_series_xcorr_, charge_);
   FLOAT_T xcorr = scorer_xcorr_->scoreSpectrumVIonSeries(spectrum_, ion_series_xcorr_);
   candidate->setScore(XCORR, xcorr);
@@ -119,7 +126,7 @@ FLOAT_T XLinkScorer::scoreCandidate(
     candidate->setScore(BY_IONS_TOTAL, scorer_sp_->getSpBYIonPossible());
 
   }
-
+/*
   if (candidate->getCandidateType() == XLINK_INTER_CANDIDATE || candidate->getCandidateType() == XLINK_INTRA_CANDIDATE) {
     carp(CARP_DEBUG, "Scoring xlink peptides individually");
     XLinkPeptide* xlink_match = (XLinkPeptide*)candidate;
@@ -139,7 +146,17 @@ FLOAT_T XLinkScorer::scoreCandidate(
     candidate->setScore(XCORR_FIRST, xcorr);
     candidate->setScore(XCORR_SECOND, xcorr);
   }
+  */
+  return xcorr;
+}
 
+FLOAT_T XLinkScorer::scoreXLinkablePeptide(
+  XLinkablePeptide& xlpeptide,
+  int link_idx,
+  FLOAT_T mod_mass) {
+
+  xlpeptide.predictIons(ion_series_xcorr_, charge_, link_idx, mod_mass);
+  FLOAT_T xcorr = scorer_xcorr_->scoreSpectrumVIonSeries(spectrum_, ion_series_xcorr_);
   return xcorr;
 
 }

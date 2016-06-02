@@ -4,6 +4,7 @@
 
 #include "model/Spectrum.h"
 #include "model/Scorer.h"
+#include "util/Params.h"
 
 #include <fstream>
 
@@ -25,8 +26,8 @@ void XHHC_Scorer::init() {
   max_bin_ = 0;
   current_spectrum_ = NULL;
 
-  bin_width_ = get_double_parameter("mz-bin-width");
-  bin_offset_ = get_double_parameter("mz-bin-offset");
+  bin_width_ = Params::GetDouble("mz-bin-width");
+  bin_offset_ = Params::GetDouble("mz-bin-offset");
 
 }
 
@@ -204,7 +205,7 @@ bool XHHC_Scorer::xlinkCreateMapTheoretical(
     // In addition, add peaks of intensity of 25.0 to +/- 1 m/z flanking each B, Y ion.
     // Skip ions that are located beyond max mz limit
     addIntensityMap(theoretical, intensity_array_idx, 50);
-    if (get_boolean_parameter("use-flanking-peaks")) {
+    if (Params::GetBool("use-flanking-peaks")) {
       if (intensity_array_idx > 0) {
 	addIntensityMap(theoretical, intensity_array_idx - 1, 25);
       }
@@ -256,11 +257,11 @@ bool XHHC_Scorer::hhcCreateIntensityArrayTheoretical(
       //if (ion->type() == Y_ION)
       //add_intensity(theoretical, intensity_array_idx, 51);
       Scorer::addIntensity(theoretical, intensity_array_idx, 50);
-      if (get_boolean_parameter("use-flanking-peaks") &&
+      if (Params::GetBool("use-flanking-peaks") &&
         intensity_array_idx > 0) {
         Scorer::addIntensity(theoretical, intensity_array_idx - 1, 25);
       }
-      if(get_boolean_parameter("use-flanking-peaks") &&
+      if(Params::GetBool("use-flanking-peaks") &&
 	 ((intensity_array_idx + 1)< max_bin_)) {
         Scorer::addIntensity(theoretical, intensity_array_idx + 1, 25);
       }
@@ -359,7 +360,7 @@ void XHHC_Scorer::printSpectrums(
   theoretical_file << "> theoretical" << endl;
   observed_file << "> observed" << endl;
   spectrums_file << "> spectrums" << endl;
-  bool noflanks = get_boolean_parameter("use-flanking-peaks");
+  bool noflanks = Params::GetBool("use-flanking-peaks");
   int normalize = NORMALIZE;
   int max_mz = MAX_MZ;
   int min_mz = MIN_MZ;

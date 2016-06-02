@@ -50,7 +50,7 @@ li {
 }
 a {
     text-decoration: none;
-    color: #02656A;
+    color:#2188b8;
 }
 a:hover {
     text-decoration: underline;
@@ -166,10 +166,7 @@ note{
   margin:3px;
   padding:4px;
   color:#FFF;
-  background:#363;
-  background-image:-moz-linear-gradient(center top, #393 0%, #373 100%);
-  background-image:-webkit-gradient(linear, left top, left bottom, color-stop(0, #393),color-stop(1, #373));
-  background-image:linear-gradient(top, #393 0%, #373 100%);
+  background:#2188b8;
   height:34px;
   line-height:34px;
   vertical-align:middle;

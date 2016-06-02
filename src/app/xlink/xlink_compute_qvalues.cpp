@@ -6,9 +6,11 @@
 #include "LinkedPeptide.h"
 
 #include "util/crux-utils.h"
+#include "util/Params.h"
 #include "objects.h"
 #include "model/Scorer.h"
 #include "io/DelimitedFile.h"
+#include "io/MatchColumns.h"
 
 #include "xlink_compute_qvalues.h"
 
@@ -29,7 +31,7 @@ void getBestBonf(DelimitedFile& matches, int start, int stop,
   if (numScans == 1) {
     best_index = start;
     double pvalue = matches.getDouble("p-value", best_index);
-    int ntests = matches.getInteger("distinct matches/spectrum", best_index);
+    int ntests = matches.getInteger(get_column_header(DISTINCT_MATCHES_SPECTRUM_COL), best_index);
     best_bonf = bonferroni_correction(pvalue, ntests);
   } else {
     map<int, pair<int, double> > charge_best_score; 
@@ -45,7 +47,7 @@ void getBestBonf(DelimitedFile& matches, int start, int stop,
         charge_best_score[charge] = make_pair(match_idx, pvalue);
       }
       if (charge_ntests.find(charge) == charge_ntests.end()) {
-        int ntests = matches.getInteger("distinct matches/spectrum", match_idx);
+        int ntests = matches.getInteger(get_column_header(DISTINCT_MATCHES_SPECTRUM_COL), match_idx);
         charge_ntests[charge] = ntests;
       }
     }
@@ -156,7 +158,7 @@ int xlink_compute_qvalues(){
   /* Get Arguments */
 
   carp(CARP_INFO,"reading targets");
-  string output_dir = get_string_parameter("output-dir");
+  string output_dir = Params::GetString("output-dir");
   string target_filename = "search-for-xlinks.target.txt";
 
   //Read in targets.

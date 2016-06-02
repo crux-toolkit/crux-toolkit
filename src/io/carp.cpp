@@ -8,6 +8,7 @@
 #include "carp.h"
 #include "util/crux-utils.h"
 #include "parameter.h"
+#include "util/Params.h"
 #include "util/utils.h"
 
 using namespace std;
@@ -34,8 +35,8 @@ int get_verbosity_level(void){
  * Parameters must have been processed before calling this function.
  */
 void open_log_file(string log_file_name) {
-  string output_dir = get_string_parameter("output-dir");
-  bool overwrite = get_boolean_parameter("overwrite");
+  string output_dir = Params::GetString("output-dir");
+  bool overwrite = Params::GetBool("overwrite");
   log_file_name = prefix_fileroot_to_name(log_file_name);
   log_file = create_file_in_path(log_file_name, output_dir.c_str(), overwrite);
 }

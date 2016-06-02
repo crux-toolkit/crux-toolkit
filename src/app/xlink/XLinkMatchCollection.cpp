@@ -12,6 +12,7 @@
 #include "XLinkScorer.h"
 
 #include "model/Spectrum.h"
+#include "util/Params.h"
 #include "util/StringUtils.h"
 
 #include <iostream>
@@ -72,16 +73,16 @@ void get_min_max_mass(
     get_min_max_mass(precursor_mz,
          zstate,
                      isotope,
-         get_double_parameter("precursor-window-weibull"),
-         string_to_window_type(get_string_parameter("precursor-window-type-weibull")),
+         Params::GetDouble("precursor-window-weibull"),
+         string_to_window_type(Params::GetString("precursor-window-type-weibull")),
          min_mass,
          max_mass);
   } else {
     get_min_max_mass(precursor_mz,
          zstate,
                      isotope,
-         get_double_parameter("precursor-window"),
-         string_to_window_type(get_string_parameter("precursor-window-type")),
+         Params::GetDouble("precursor-window"),
+         string_to_window_type(Params::GetString("precursor-window-type")),
          min_mass,
          max_mass);
   }
@@ -148,8 +149,8 @@ XLinkMatchCollection::XLinkMatchCollection(
   
   carp(CARP_DEBUG, "XLinkMatchCollection(...)");
 
-  FLOAT_T min_mass = get_double_parameter("min-mass");
-  FLOAT_T max_mass = get_double_parameter("max-mass");
+  FLOAT_T min_mass = Params::GetDouble("min-mass");
+  FLOAT_T max_mass = Params::GetDouble("max-mass");
 
   addCandidates(
     min_mass, 
@@ -175,8 +176,8 @@ void XLinkMatchCollection::addCandidates(
 
   carp(CARP_DEBUG, "XLinkMatchCollection.addCandidates() start");
 
-  include_linear_peptides_ = get_boolean_parameter("xlink-include-linears");
-  include_self_loops_ = get_boolean_parameter("xlink-include-selfloops");
+  include_linear_peptides_ = Params::GetBool("xlink-include-linears");
+  include_self_loops_ = Params::GetBool("xlink-include-selfloops");
 
   carp(CARP_INFO, "Adding xlink candidates");
 
@@ -236,7 +237,7 @@ XLinkMatchCollection::XLinkMatchCollection(
 
   FLOAT_T min_mass;
   FLOAT_T max_mass;
-  vector<int> isotopes = StringUtils::Split<int>(get_string_parameter("isotope-windows"), ',');
+  vector<int> isotopes = StringUtils::Split<int>(Params::GetString("isotope-windows"), ',');
   for (int idx = 0; idx < isotopes.size();idx++) {
     get_min_max_mass(precursor_mz, zstate, isotopes[idx], use_decoy_window, min_mass, max_mass);
     carp(CARP_INFO, "isotope %i min:%g max:%g", isotopes[idx], min_mass, max_mass);
@@ -321,7 +322,7 @@ void XLinkMatchCollection::scoreSpectrum(
 
   // set the match_collection as having been scored
   scored_type_[XCORR] = true;
-  if (get_boolean_parameter("compute-sp")) {
+  if (Params::GetBool("compute-sp")) {
     scored_type_[SP] = true;
   }
 
@@ -344,7 +345,7 @@ void XLinkMatchCollection::fitWeibull() {
 
   std::sort(xcorrs, xcorrs + getMatchTotal(), greater<FLOAT_T>());
 
-  double fraction_to_fit = get_double_parameter("fraction-top-scores-to-fit");
+  double fraction_to_fit = Params::GetDouble("fraction-top-scores-to-fit");
   int num_tail_samples = (int)(getMatchTotal() * fraction_to_fit);
 
   fit_three_parameter_weibull(xcorrs,

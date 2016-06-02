@@ -5,7 +5,7 @@
  * \brief Utility functions for search-for-xlinks
  *****************************************************************************/
 #include "XLink.h"
-
+#include "util/Params.h"
 
 #include <sstream>
 #include <iostream>
@@ -19,10 +19,9 @@ bool testInterIntraKeep(
   Crux::Peptide *pep1,
   Crux::Peptide *pep2
   ) {
-  return(testInterIntraKeep(pep1, pep2, get_boolean_parameter("xlink-include-intra"), 
-    get_boolean_parameter("xlink-include-inter"),
-    get_boolean_parameter("xlink-include-inter-intra")));
-
+  return(testInterIntraKeep(pep1, pep2, Params::GetBool("xlink-include-intra"), 
+    Params::GetBool("xlink-include-inter"),
+    Params::GetBool("xlink-include-inter-intra")));
 }
 
 bool testInterIntraKeep(

@@ -35,6 +35,27 @@ static const int MOD_MASS_PRECISION = 2;  // printed as X[1.23]X
 #define GET_AA_MASK  0x001F   // 0000 0000 0001 1111
 #define GET_MOD_MASK 0xFFE0   // 1111 1111 1110 0000
 
+/**
+ * \struct _aa_mod
+ * 
+ *  Modification at the amino acid level.  A single mass change that can
+ *  occur on any of the residues listed.  This information is given by
+ *  the user in the parameter file.  Also stores a character symbol
+ *  assigned at runtime to be used in the sqt result file and an
+ *  integer bitmask to be used to give each aa_mod a unique identifier.
+ */
+struct _aa_mod{ 
+  double mass_change;  ///< the amount by which the mass of the residue changes
+  bool aa_list[AA_LIST_LENGTH];
+                       ///< an array indexed by AA, true if can be modified
+  int max_per_peptide; ///< the maximum number of mods per peptide
+  MOD_POSITION_T position; ///< where the mod can occur in the pep/prot
+  int max_distance;        ///< the max distance from the protein terminus
+  char symbol;         ///< the character to represent the mod in sqt files
+  bool prevents_cleavage; ///< can modification prevent cleavage?
+  bool prevents_xlink; ///< can modification prevent xlink?
+  MODIFIED_AA_T identifier; ///< the bitmask assigned for unique ID
+};
 
 // this was moved to object.h b/c methods in peptide.h weren't compiling
 //typedef unsigned short MODIFIED_AA_T; ///< letters in the expanded peptide
@@ -160,21 +181,15 @@ int convert_to_mod_aa_seq(const char* sequence, MODIFIED_AA_T** mod_sequence,
 /**
  * \brief Allocate a new MODIFIED_AA_T array and copy values into it.
  */
-MODIFIED_AA_T* copy_mod_aa_seq(MODIFIED_AA_T* source, int length);
+MODIFIED_AA_T* copy_mod_aa_seq(
+  const MODIFIED_AA_T* source, 
+  int length);
 
 /**
  * \brief Allocate a new MODIFIED_AA_T array and copy values into it.
  */
 MODIFIED_AA_T* copy_mod_aa_seq(
-  MODIFIED_AA_T* source ///< Sequence to copy
-  );
-
-/**
- * \returns whether the two modified sequences are equal or not
- */
-bool equal_seq(
-  const MODIFIED_AA_T* seq1, ///< Sequence 1
-  const MODIFIED_AA_T* seq2 ///< Sequence 2
+  const MODIFIED_AA_T* source ///< Sequence to copy
   );
 
 /**
@@ -204,25 +219,6 @@ bool modified_aa_seq_is_palindrome(MODIFIED_AA_T* seq, int length);
  * terminated with the MOD_SEQ_NULL value
  */
 void free_mod_aa_seq(MODIFIED_AA_T* seq);
-
-/**
- * \brief Gives the size of the aa_mod struct.  For serialization
- */
-int get_aa_mod_sizeof();
-
-/**
- * The new definition of a PEPTIDE_T object.
- * 
- */
-/*
-struct peptide{
-  unsigned char length; ///< The length of the peptide
-  FLOAT_T peptide_mass;   ///< The peptide's mass with any modifications
-  PEPTIDE_SRC_T* peptide_src; ///< a linklist of peptide_src
-  bool is_modified;   ///< if true sequence != NULL
-  MODIFIED_AA_T* sequence; ///< sequence with modifications
-};
-*/
 
 /**
  * \brief checks to see if an amino acid is modified by a given mod
@@ -271,27 +267,6 @@ FLOAT_T get_mod_mass_from_symbol(const char symbol);
  * Requires that parameters have been initialized.
  */
 const AA_MOD_T* get_aa_mod_from_mass(FLOAT_T mass);
-
-/**
- * \brief Check that the list of peptide_modifications from the file of
- * serialized PSMs matches those in the paramter file.
- *
- * If there was no parameter file or if it did not contain any mods,
- * return FALSE.  If the given mod list does not exactly match the
- * mods read from the parameter file (including the order in which
- * they are listed) return FALSE.  If returning false, print a warning
- * with the lines that should be included in the parameter file.
- *
- * \returns TRUE if the given mods are the same as those from the
- * parameter file.
- */
-bool compare_mods(AA_MOD_T** psm_file_mod_list, int num_mods);
-
-/**
- * \brief Compare two mods to see if they are the same, i.e. same mass
- * change, unique identifier, position
- */
-bool compare_two_mods(AA_MOD_T* mod1, AA_MOD_T* mod2);
 
 /**
  * print all fields in mod.  For debugging
@@ -400,12 +375,6 @@ bool aa_mod_get_prevents_xlink(AA_MOD_T* mod);
 char aa_mod_get_symbol(const AA_MOD_T* mod);
 
 /**
- * \brief The bitmask used to uniquely identify the mod.
- * \returns The short int bitmask used to identify the mod.
- */
-int aa_mod_get_identifier(const AA_MOD_T* mod);
-
-/**
  * \brief Generates a string representation of an aa_mod and returns a
  * pointer to that newly allocated string.
  */
@@ -417,20 +386,12 @@ char* aa_mod_to_string(const AA_MOD_T* mod);
  * returns "STY".
  * \returns A newly allocated string.
  */
-char* aa_mod_get_aa_list_string(AA_MOD_T* mod);
+std::string aa_mod_get_aa_list_string(AA_MOD_T* mod);
 
 /**
  * Count the number of modified aas in the string.
  */
 int count_modified_aas(MODIFIED_AA_T* seq);
-
-/**
- * /returns the mass of the modified sequence
- */
-FLOAT_T get_mod_aa_seq_mass(
-  MODIFIED_AA_T* seq, ///< The modified sequence
-  MASS_TYPE_T mass_type ///<  mono or average?
-  );
 
 #endif //MODIFICATION_FILE_H
 

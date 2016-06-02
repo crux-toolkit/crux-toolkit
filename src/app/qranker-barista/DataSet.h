@@ -77,7 +77,9 @@ class Dataset
   inline int psmind2xcorr_rank(int psmind){return psmind_to_xcorr_rank[psmind];}//xcorr rank
   inline double psmind2by_ions_matched(int psmind){return psmind_to_by_ions_matched[psmind];}//b/y ions matched 
   inline double psmind2by_ions_total(int psmind){return psmind_to_by_ions_total[psmind];}//b/y ions total 
-  inline int psmind2matches_spectrum(int psmind) {return psmind_to_matches_spectrum[psmind];}///<matchs/spectrum
+  inline int psmind2matches_spectrum(int psmind) {
+    return psmind_to_matches_spectrum[psmind];
+  }// Distinct matchs/spectrum
   inline int psmind2peptide_position(int psmind){return psmind_to_peptide_position[psmind];}///<peptide position in protein 
   
   inline void get_features_header(vector<string> str){features_header_.swap(str);}
@@ -111,7 +113,7 @@ class Dataset
   int* psmind_to_sp_rank;//Sp rank 
   int *protind_to_length;
   int* psmind_to_xcorr_rank;//xcorr rank 
-  int *psmind_to_matches_spectrum;//matches/spectrum
+  int *psmind_to_matches_spectrum; // distinct matches/spectrum
   double* psmind_to_by_ions_matched; //b/y ions matched
   double* psmind_to_by_ions_total; //b/y ions total
   int*  psmind_to_peptide_position;//<pepetide position in protein 

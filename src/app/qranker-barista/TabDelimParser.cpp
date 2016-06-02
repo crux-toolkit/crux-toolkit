@@ -71,7 +71,7 @@ TabDelimParser :: ~TabDelimParser()
 6. sp score        
 7. xcorr score     
 8. xcorr rank      
-9. matches/spectrum        
+9. distinct matches/spectrum
 10. sequence        
 11. cleavage type   
 12. protein id      
@@ -493,7 +493,7 @@ int TabDelimParser :: run(vector<string> &filenames)
  * 11. xcorr score     
  * 12. xcorr rank      
  * 13. p-value 
- * 14. matches/spectrum        
+ * 14. distinct matches/spectrum
  * 15. sequence        
  * 16. protein id(loc) 1       
  * 17. protein id(loc) 2

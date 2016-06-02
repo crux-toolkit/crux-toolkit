@@ -21,7 +21,7 @@ Examples:
   # Tests that vary tide-index options
   |tide-peplen    |--min-length 5 --max-length 10                               |                                                        |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-peplen.txt    |
   |tide-pepmass   |--min-mass 1000 --max-mass 2000                              |                                                        |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-pepmass.txt   |
-  |tide-avgmass   |--monoisotopic-precursor F                                   |                                                        |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-avgmass.txt   |
+  |tide-avgmass   |--isotopic-mass average                                      |                                                        |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-avgmass.txt   |
   |tide-clipn     |--clip-nterm-methionine T                                    |                                                        |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-clipn.txt     |
   |tide-mods1     |--mods-spec C+57.02146,2M+15.9949,1STY+79.966331             |                                                        |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-mods1.txt     |
   |tide-mods1limit|--mods-spec C+57.02146,2M+15.9949,1STY+79.966331 --max-mods 1|                                                        |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-mods1limit.txt|
@@ -31,6 +31,8 @@ Examples:
   |tide-chymo     |--enzyme chymotrypsin                                        |                                                        |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-chymo.txt     |
   |tide-partial   |--digestion partial-digest                                   |                                                        |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-partial.txt   |
   |tide-misscleave|--missed-cleavages 2                                         |                                                        |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-misscleave.txt|
+  |tide-reverse   |--decoy-format peptide-reverse                               |                                                        |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-reverse.txt   |
+
   # Tests that vary tide-search options
   |tide-masswin   |                                                             |--precursor-window 5 --precursor-window-type mass       |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-masswin.txt   |
   |tide-mzwin     |                                                             |--precursor-window 5 --precursor-window-type mz         |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-mzwin.txt     |
@@ -45,4 +47,8 @@ Examples:
   |tide-usenl     |                                                             |--use-neutral-loss-peaks T                              |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-usenl.txt     |
   |tide-mzbins    |                                                             |--mz-bin-width 0.02 --mz-bin-offset 0.34                |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-mzbins.txt    |
   |tide-exact-pval|                                                             |--exact-p-value T                                       |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-exact-pval.txt|
+  |tide-1thread   |                                                             |--num-threads 1                                         |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-default.txt   |
+  |tide-7thread   |                                                             |--num-threads 7                                         |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-default.txt   |
+  |tide-exact-pval-1thread|                                                     |--exact-p-value T --num-threads 1                       |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-exact-pval.txt|
+  |tide-exact-pval-7thread|                                                     |--exact-p-value T --num-threads 7                       |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-exact-pval.txt|
 

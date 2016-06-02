@@ -6,11 +6,12 @@
  */
 #include "PWIZSpectrumCollection.h" 
 #include "util/crux-utils.h"
+#include "util/Params.h"
 #include "util/StringUtils.h"
 #include "parameter.h"
 #include <iostream>
 #include "pwiz/data/msdata/SpectrumInfo.hpp"
-#ifdef _MSC_VER
+#if defined (_MSC_VER) &&  defined(INCLUDE_VENDOR_LIBRARIES)
 #include "pwiz/data/msdata/DefaultReaderList.hpp"
 //#include "pwiz/data/vendor_readers/ABI/Reader_ABI.hpp"
 //#include "pwiz/data/vendor_readers/ABI/T2D/Reader_ABI_T2D.hpp"
@@ -29,8 +30,8 @@ using namespace std;
  */
 PWIZSpectrumCollection::PWIZSpectrumCollection(
   const string& filename   ///< The spectrum collection filename.
- ) : SpectrumCollection(filename){
-#ifdef _MSC_VER
+) : SpectrumCollection(filename){
+#if defined(_MSC_VER) && defined(INCLUDE_VENDOR_LIBRARIES)
   pwiz::msdata::DefaultReaderList readerList;
   //readerList.push_back(pwiz::msdata::ReaderPtr(new pwiz::msdata::Reader_ABI));
   //readerList.push_back(pwiz::msdata::ReaderPtr(new pwiz::msdata::Reader_ABI_T2D));
@@ -39,9 +40,21 @@ PWIZSpectrumCollection::PWIZSpectrumCollection(
   readerList.push_back(pwiz::msdata::ReaderPtr(new pwiz::msdata::Reader_Shimadzu));
   readerList.push_back(pwiz::msdata::ReaderPtr(new pwiz::msdata::Reader_Thermo));
   readerList.push_back(pwiz::msdata::ReaderPtr(new pwiz::msdata::Reader_Waters));
-  reader_ = new pwiz::msdata::MSDataFile(filename_, &readerList);
+  carp(CARP_DETAILED_INFO, "Support for vendor specific formats enabled.");  
+  try {
+     reader_ = new pwiz::msdata::MSDataFile(filename_, &readerList);
+   }
+   catch (const runtime_error& error) {
+    carp(CARP_FATAL, "Unable to parse spectrum file %s. Error: %s.", filename_.c_str(), error.what());
+   }
 #else
-  reader_ = new pwiz::msdata::MSDataFile(filename_);
+  carp(CARP_DETAILED_INFO, "Support for vendor specific formats not enabled.");  
+  try {
+    reader_ = new pwiz::msdata::MSDataFile(filename_);
+  }
+  catch (const runtime_error& error) {
+    carp(CARP_FATAL, "Unable to parse spectrum file %s. Error: %s.", filename_.c_str(), error.what());  
+  }
 #endif
   if( reader_ == NULL ){
     carp(CARP_FATAL, "PWIZSpectrumCollection unable to open '%s'.", 
@@ -79,9 +92,9 @@ bool PWIZSpectrumCollection::parseFirstLastScanFromTitle(
     //try to parse the first scan, last scan, and charge from the title, keeping track
     //of whether we were successful.
 
-    success = from_string(title_charge, scan_title_tokens[n-2]);
-    success &= from_string(title_last_scan, scan_title_tokens[n-3]);
-    success &= from_string(title_first_scan, scan_title_tokens[n-4]);
+    success = StringUtils::TryFromString(scan_title_tokens[n-2], &title_charge);
+    success &= StringUtils::TryFromString(scan_title_tokens[n-3], &title_last_scan);
+    success &= StringUtils::TryFromString(scan_title_tokens[n-4], &title_first_scan);
 
     if (success) {
       //okay we parsed the three numbers, fill in the results.
@@ -114,7 +127,7 @@ bool PWIZSpectrumCollection::parse() {
 
   // TODO add first/last scan to base class
   // get a list of scans to include if requested
-  string range_string = get_string_parameter("scan-number");
+  string range_string = Params::GetString("scan-number");
   int first_scan = -1;
   int last_scan = -1;
 

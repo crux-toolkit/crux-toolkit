@@ -537,7 +537,7 @@ bool CNoiseReduction::NewScanAverage(Spectrum& sp, char* file, int width, float 
   int posRight;
   int index;
   char cFilter1[256];
-  char cFilter2[256];
+  //char cFilter2[256];
 
   //double slope;
   //double intercept;
@@ -599,14 +599,14 @@ bool CNoiseReduction::NewScanAverage(Spectrum& sp, char* file, int width, float 
           posA++;
           posRight++;
           posLeft=0;
-          ts.getRawFilter(cFilter2,256);
-          if(strcmp(cFilter1,cFilter2)==0) {
+          //ts.getRawFilter(cFilter2,256);
+          if(ts.getMsLevel()==cs.msLevel) {
             index=posLeft;
             break;
           }
         } else {
-          bs[posLeft].getRawFilter(cFilter2,256);
-          if(strcmp(cFilter1,cFilter2)==0) {
+          //bs[posLeft].getRawFilter(cFilter2,256);
+          if(bs[posLeft].getMsLevel()==cs.msLevel) {
             index=posLeft;
             break;
           }
@@ -627,14 +627,14 @@ bool CNoiseReduction::NewScanAverage(Spectrum& sp, char* file, int width, float 
             break;
           }
           bs.push_back(ts);
-          ts.getRawFilter(cFilter2,256);
-          if(strcmp(cFilter1,cFilter2)==0) {
+          //ts.getRawFilter(cFilter2,256);
+          if(ts.getMsLevel()==cs.msLevel) {
             index=posRight;
             break;
           }
         } else {
-          bs[posRight].getRawFilter(cFilter2,256);
-          if(strcmp(cFilter1,cFilter2)==0) {
+          //bs[posRight].getRawFilter(cFilter2,256);
+          if(bs[posRight].getMsLevel()==cs.msLevel) {
             index=posRight;
             break;
           }
@@ -1139,7 +1139,7 @@ bool CNoiseReduction::ScanAveragePlusDeNoise(Spectrum& sp, char* file, int width
   int posRight=ps.getScanNumber()+1;
   int index;
   char cFilter1[256];
-  char cFilter2[256];
+  //char cFilter2[256];
 
   sp.clear();
 
@@ -1197,14 +1197,14 @@ bool CNoiseReduction::ScanAveragePlusDeNoise(Spectrum& sp, char* file, int width
           posA++;
           posRight++;
           posLeft=0;
-          ts.getRawFilter(cFilter2,256);
-          if(strcmp(cFilter1,cFilter2)==0) {
+          //ts.getRawFilter(cFilter2,256);
+          if(ts.getMsLevel()==cs.msLevel) {
             index=posLeft;
             break;
           }
         } else {
-          bs[posLeft].getRawFilter(cFilter2,256);
-          if(strcmp(cFilter1,cFilter2)==0) {
+          //bs[posLeft].getRawFilter(cFilter2,256);
+          if(bs[posLeft].getMsLevel()==cs.msLevel) {
             index=posLeft;
             break;
           }
@@ -1225,14 +1225,14 @@ bool CNoiseReduction::ScanAveragePlusDeNoise(Spectrum& sp, char* file, int width
             break;
           }
           bs.push_back(ts);
-          ts.getRawFilter(cFilter2,256);
-          if(strcmp(cFilter1,cFilter2)==0) {
+          //ts.getRawFilter(cFilter2,256);
+          if(ts.getMsLevel()==cs.msLevel) {
             index=posRight;
             break;
           }
         } else {
-          bs[posRight].getRawFilter(cFilter2,256);
-          if(strcmp(cFilter1,cFilter2)==0) {
+          //bs[posRight].getRawFilter(cFilter2,256);
+          if(bs[posRight].getMsLevel()==cs.msLevel) {
             index=posRight;
             break;
           }

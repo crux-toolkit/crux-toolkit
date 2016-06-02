@@ -1,0 +1,10 @@
+build/class
+build/c++11
+build/deprecated
+build/printf_format
+readability/utf8
+runtime/invalid_increment
+runtime/memset
+runtime/printf
+runtime/printf_format
+runtime/threadsafe_fn

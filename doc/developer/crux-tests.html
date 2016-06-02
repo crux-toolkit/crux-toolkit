@@ -64,6 +64,40 @@ Ruby.
 </p>
 
 <p>
+  To add a new test to an existing command, do the following:</p>
+<ol>
+  <li>
+    Find in the
+    directory <code>test/smoke-tests/features/</code>
+    the <code>*.feature</code> file that corresponds to your
+    command.</li>
+    <li>
+    In the "Examples:" portion at the end of the file, add a new
+    line to define your test.  The meanings of the various fields
+    (delimited by "|") are listed immediately below the "Examples:"
+    line.</li>
+  <li>
+    If necessary, copy your input files into
+    the <code>smoke-tests</code> directory.  In many cases, you can
+    re-use existing input files from other tests.</li>
+  <li>
+    Create a new parameter file in the <code>params</code> directory
+    that includes the parameters for your test.</li>
+  <li>
+    Run the command corresponding to your test and check that the
+    results make sense.</li>
+  <li>
+    Decide which output file you want the test to look at. Write the
+    name of that file in the "actual_output" field. Make a copy
+    of the file, with a name of your choice, in the "good_results"
+    directory, and then write that name in the "expected_output"
+    field.</li>
+  <li>
+    Run cucumber to ensure that your new test passes.</li>
+</ol>
+
+
+<p>
 More information on Cucumber and its documentation are available on its website
 <a href="https://cukes.info/"> here</a>.
 </p>

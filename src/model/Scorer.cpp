@@ -25,6 +25,7 @@
 #include "model/IonFilteredIterator.h"
 #include "model/IonSeries.h"
 #include "util/crux-utils.h"
+#include "util/Params.h"
 #include "model/Spectrum.h"
 #include "Scorer.h"
 #include "parameter.h"
@@ -135,13 +136,13 @@ Scorer::Scorer(
   type_ = type;
   
   // set bin_width and bin_offset.
-  bin_width_ = get_double_parameter("mz-bin-width");
-  bin_offset_ = get_double_parameter("mz-bin-offset");
+  bin_width_ = Params::GetDouble("mz-bin-width");
+  bin_offset_ = Params::GetDouble("mz-bin-offset");
 
   // set fields needed for each score type
   if(type == SP){
-    sp_beta_ = get_double_parameter("beta");
-    sp_max_mz_ = get_double_parameter("max-mz");
+    //sp_beta_ = Params::GetDouble("beta");  TODO what happened to beta? SJM
+    sp_max_mz_ = Params::GetDouble("max-mz");
     // allocate the intensity array
     intensity_array_ = (FLOAT_T*)mycalloc(getMaxBin(), sizeof(FLOAT_T));
     max_intensity_ = 0;
@@ -150,7 +151,7 @@ Scorer::Scorer(
     initialized_ = false;
   }
   else if(type == XCORR){
-    // scorer->sp_max_mz = get_double_parameter("max-mz");
+    // scorer->sp_max_mz = Params::GetDouble("max-mz");
     // scorer->observed = (FLOAT_T*)mycalloc((int)scorer->sp_max_mz, sizeof(FLOAT_T));
     last_idx_ = 0;
     // the scorer as not been initialized yet.
@@ -161,15 +162,13 @@ Scorer::Scorer(
     initialized_ = false;
   }
 
-  use_flanks_ = get_boolean_parameter("use-flanking-peaks");
-
+  use_flanks_ = Params::GetBool("use-flanking-peaks");
 }
 
 /**
  * Frees an allocated scorer object.
  */
 Scorer::~Scorer() {
-
   // score type SP?
   if (intensity_array_ != NULL) {
     free(intensity_array_);
@@ -868,7 +867,7 @@ bool Scorer::createIntensityArrayObserved(
   }
   int region_selector = INTEGERIZE(max_peak, bin_width_, bin_offset_) / NUM_REGIONS + 1;
 
-  FLOAT_T tolerance = get_double_parameter("remove-precursor-tolerance");
+  FLOAT_T tolerance = Params::GetDouble("remove-precursor-tolerance");
 
   // while there are more peaks to iterate over..
   // bin peaks, adjust intensties, find max for each region
@@ -1035,7 +1034,9 @@ bool Scorer::createIntensityArrayTheoretical(
     */
     // is it B, Y ion?
     if(ion_type == B_ION || 
-       ion_type == Y_ION){
+       ion_type == Y_ION ||
+       ion_type == C_ION ||
+       ion_type == Z_ION){
       if (!ion->isModified()){
         // Add peaks of intensity 50.0 for B, Y type ions. 
         // In addition, add peaks of intensity of 25.0 to +/- 1 m/z flanking each B, Y ion if requested.
@@ -1067,7 +1068,7 @@ bool Scorer::createIntensityArrayTheoretical(
       }
 
     }// is it A ion?
-    else if(ion_type == A_ION){
+    else if(ion_type == A_ION || ion_type == X_ION){
       // Add peaks of intensity 10.0 for A type ions. 
       addIntensity(theoretical, intensity_array_idx, LOSS_HEIGHT);
     }

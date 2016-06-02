@@ -26,6 +26,7 @@ class XLinkablePeptide {
   std::vector<int> link_sites_; ///< the sequence indices where linking is possible
   bool is_decoy_; //Is this from the decoy database?
 
+  MODIFIED_AA_T* mod_seq_;
   /**
    * Initialize object
    */
@@ -200,12 +201,20 @@ class XLinkablePeptide {
    */
   MODIFIED_AA_T* getModifiedSequence();
 
+  const MODIFIED_AA_T* getModifiedSequencePtr();
   /**
    * \returns the modified sequence string of the xlinkable peptide
    */
   std::string getModifiedSequenceString();
 
   
+  void predictIons(
+    IonSeries* ion_series,
+    int charge,
+    int link_idx,
+    FLOAT_T mod_mass,
+    bool clear=true
+    );
   /**
    * Is the linkable peptide modified?
    */

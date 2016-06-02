@@ -4,25 +4,21 @@
  */
 #include <iostream>
 #include "PepXMLWriter.h"
+#include "util/AminoAcidUtil.h"
 #include "util/crux-utils.h"
+#include "util/Params.h"
 #include "util/StringUtils.h"
 #include "model/MatchCollection.h"
 
 using namespace std;
 
-PepXMLWriter::PepXMLWriter() 
-{
-  file_ = NULL;
-  scores_computed_ = NULL;
-  current_index_ = 1;
-  mass_precision_ = get_int_parameter("mass-precision");
-  enzyme_ = get_enzyme_type_parameter("enzyme");
-  precision_ = get_int_parameter("precision");
-  exact_pval_search_ = false;
+PepXMLWriter::PepXMLWriter():
+  file_(NULL), current_index_(1), mass_precision_(Params::GetInt("mass-precision")),
+  enzyme_(get_enzyme_type_parameter("enzyme")),
+  precision_(Params::GetInt("precision")) {
 }
 
-PepXMLWriter::~PepXMLWriter()
-{
+PepXMLWriter::~PepXMLWriter() {
   closeFile();
 }
 
@@ -38,7 +34,7 @@ void PepXMLWriter::openFile(const char* filename, bool overwrite){
  * Close the file, if open.
  */
 void PepXMLWriter::closeFile(){
-  if( file_ != NULL ){
+  if (file_) {
     fclose(file_);
     file_ = NULL;
   }
@@ -63,22 +59,6 @@ void PepXMLWriter::writeFooter(){
 }
 
 /**
- * Define which scores will be printed.
- * Assumes that all psms will have all the same scores.  Requires that
- * scores_computed is an array with NUMBER_SCORER_TYPES elements
- * indexed by SCORER_TYPE_T.  So if scores_computed[i] == true, then
- * (SCORER_TYPE_T)i will be printed.
- * Requires OpenFile has been called without CloseFile.
- */
-void PepXMLWriter::SetScoresComputed(const bool* scores_computed){
-  if( scores_computed )
-    return;
-  //  delete scores_computed_;
-  //  scores_computed_ = new bool[NUM];
-
-}
-
-/**
  * Write the details for a PSM to be contained in a spectrum_query
  * element.  
  * Begins with the <spectrum_query> element if spectrum_scan_number is
@@ -94,35 +74,30 @@ void PepXMLWriter::SetScoresComputed(const bool* scores_computed){
 void PepXMLWriter::writePSM(
   int spectrum_scan_number, ///< identifier for the spectrum
   const char* filename, ///< file the spectrum came from
-  double spectrum_neutral_mass, ///< computed mass of the spectrum
-                                  ///at this charge state
+  double spectrum_neutral_mass, ///< computed mass of the spectrum at this charge state
   int charge, ///< assumed charge state for the match
-  
   int* PSM_ranks, ///< rank of this peptide for the spectrum
   const char* unmodified_peptide_sequence, ///< sequence with no mods
   const char* modified_peptide_sequence, ///< either with symbols or masses
   double peptide_mass, ///< mass of the peptide sequence
   int num_proteins, ///< proteins matched to this peptide
   const char* flanking_aas, ///< "XY, AB, " X and Y are the preceeding and
-                        /// following aas in the first protein 
+                            /// following aas in the first protein 
   vector<string>& protein_names, ///<
   vector<string>& protein_descriptions, ///<
   bool* scores_computed,
   double* scores, ///< indexed by score type
   unsigned cur_num_matches
-  ){
-
-  string spectrum_title = getSpectrumTitle(spectrum_scan_number, 
-                                           filename, charge);
+){
+  string spectrum_title = getSpectrumTitle(spectrum_scan_number, filename, charge);
   //cerr<<"by_ion_fraction_matched: "<<by_ion_fraction_matched<<endl;
   // close the last spec element if this is a new spectrum and not the first
-  if( !last_spectrum_printed_.empty()
-      &&last_spectrum_printed_ != spectrum_title ){ 
+  if (!last_spectrum_printed_.empty() && last_spectrum_printed_ != spectrum_title) {
     closeSpectrumElement();
   }
 
   // print the spec info if this is a new spectrum
-  if( last_spectrum_printed_ != spectrum_title ){  
+  if (last_spectrum_printed_ != spectrum_title) {
     printSpectrumElement(spectrum_scan_number, spectrum_title.c_str(), 
                          spectrum_neutral_mass, charge);
     last_spectrum_printed_ = spectrum_title;
@@ -140,53 +115,7 @@ void PepXMLWriter::writePSM(
     protein_descriptions,
     scores_computed,
     scores,
-    cur_num_matches
-  );
-
-
-}
-
-/**
- * Legacy function that sets delta_cn, by_ions_matched, and by_ions_total
- */
-void PepXMLWriter::writePSM(
-  int spectrum_scan_number, ///< identifier for the spectrum
-  const char* filename, ///< file the spectrum came from
-  double spectrum_neutral_mass, ///< computed mass of the spectrum
-                                  ///at this charge state
-  int charge, ///< assumed charge state for the match
-  
-  int* PSM_ranks, ///< rank of this peptide for the spectrum
-  const char* unmodified_peptide_sequence, ///< sequence with no mods
-  const char* modified_peptide_sequence, ///< either with symbols or masses
-  double peptide_mass, ///< mass of the peptide sequence
-  int num_proteins, ///< proteins matched to this peptide
-  const char* flanking_aas, ///< "XY, AB, " X and Y are the preceeding and
-                        /// following aas in the first protein 
-  vector<string>& protein_names, ///<
-  vector<string>& protein_descriptions, ///<
-  double delta_cn, ///<
-  bool* scores_computed,
-  double* scores, ///< indexed by score type
-  unsigned by_ions_matched, 
-  unsigned by_ions_total, 
-  unsigned cur_num_matches
-  ){
-
-  scores[DELTA_CN] = delta_cn;
-  scores_computed[DELTA_CN] = true;
-
-  scores[BY_IONS_MATCHED] = by_ions_matched;
-  scores_computed[BY_IONS_MATCHED] = true;
-
-  scores[BY_IONS_TOTAL] = by_ions_total;
-  scores_computed[BY_IONS_TOTAL] = true;
-
-  writePSM(spectrum_scan_number, filename, spectrum_neutral_mass, charge,
-           PSM_ranks, unmodified_peptide_sequence, modified_peptide_sequence,
-           peptide_mass, num_proteins, flanking_aas,
-           protein_names, protein_descriptions, scores_computed, scores,
-           cur_num_matches);
+    cur_num_matches);
 }
 
 /**
@@ -203,7 +132,7 @@ void PepXMLWriter::printSpectrumElement(int spectrum_scan_number,
           spectrum_title,
           spectrum_scan_number,
           spectrum_scan_number,
-          get_int_parameter("mass-precision"),
+          Params::GetInt("mass-precision"),
           spectrum_neutral_mass,
           charge,
           current_index_++);
@@ -244,7 +173,6 @@ void PepXMLWriter::printPeptideElement(int *ranks,
   double* scores,
   unsigned current_num_matches  
 ){
-
   // get values
   char flanking_aas_prev = flanking_aas[0];
   char flanking_aas_next = flanking_aas[1];
@@ -276,7 +204,6 @@ void PepXMLWriter::printPeptideElement(int *ranks,
   }
 
   if (flanking_aas_prev != 'X' && flanking_aas_next != 'X') {
-
     fprintf(file_, "calc_neutral_pep_mass=\"%.*f\" "
           "massdiff=\"%+.*f\" "
           "num_tol_term=\"%i\" num_missed_cleavages=\"%i\" "
@@ -289,10 +216,8 @@ void PepXMLWriter::printPeptideElement(int *ranks,
           num_tol_term, 
           num_missed_cleavages, 
           current_num_matches,
-          0
-          );
+          0);
   } else {
-
     fprintf(file_, "calc_neutral_pep_mass=\"%.*f\" "
           "massdiff=\"%+.*f\" "
           "num_tol_term=\"\" num_missed_cleavages=\"%i\" "
@@ -304,12 +229,10 @@ void PepXMLWriter::printPeptideElement(int *ranks,
           spectrum_mass - peptide_mass, 
           num_missed_cleavages, 
           current_num_matches,
-          0
-          );
+          0);
   }
 
-  fprintf(file_, "protein_descr=\"%s\">\n",
-          protein_annotation.c_str());
+  fprintf(file_, "protein_descr=\"%s\">\n", protein_annotation.c_str());
 
   // print additonal proteins
   for(int prot_idx = 1; prot_idx < num_proteins; prot_idx++){
@@ -419,8 +342,117 @@ void PepXMLWriter::printAnalysis(double* scores,
   fprintf(file_, "</search_score_summary>\n");
   fprintf(file_, "</peptideprophet_result>\n");
   fprintf(file_, "</analysis_result>\n");
-  
+}
 
+/**
+ * \brief prints both variable and static modifications for 
+ *  peptide sequence in xml format to the specificed output file
+ */
+void PepXMLWriter::print_modifications_xml(
+  const char* mod_seq,
+  const char* pep_seq,
+  FILE* output_file
+){
+  carp(CARP_DEBUG,"print_modifications_xml:%s %s", mod_seq, pep_seq);
+  // variable modifications
+  int mod_precision = Params::GetInt("mod-precision");
+  map<int, double> var_mods = find_variable_modifications(mod_seq);
+  if (!var_mods.empty()) {
+    fprintf(output_file, "<modification_info modified_peptide=\"%s\">\n", mod_seq);
+    for (map<int, double>::iterator it = var_mods.begin(); it != var_mods.end(); ++it) {
+      fprintf(output_file, "<mod_aminoacid_mass position=\"%i\" mass=\"%.*f\"/>\n",
+              it->first,   //index
+              mod_precision, it->second); //mass
+    }
+    fprintf(output_file, "</modification_info>\n");
+  }
+
+  // static modifications
+  map<int, double> static_mods = find_static_modifications(pep_seq);
+  if (!static_mods.empty()) {
+    carp(CARP_DEBUG, "<modification_info modified_peptide=\"%s\">", pep_seq);
+    fprintf(output_file, "<modification_info modified_peptide=\"%s\">\n", pep_seq);
+    for (map<int, double>::iterator it = static_mods.begin(); it != static_mods.end(); ++it) {
+      fprintf(output_file, "<mod_aminoacid_mass position=\"%i\" mass=\"%.*f\"/>\n",
+              it->first,   //index
+              mod_precision, it->second); //mass
+    }
+    fprintf(output_file, "</modification_info>\n");
+  }
+}
+
+/**
+ * \brief takes an empty mapping of index to mass
+ * and extract information from mod sequence fill
+ * up map
+ */
+map<int, double> PepXMLWriter::find_variable_modifications(const char* mod_seq) {
+  bool monoisotopic = get_mass_type_parameter("isotopic-mass") != AVERAGE;
+  map<int, double> mods;
+  int seq_index = 1;
+  const char* amino = mod_seq;
+  const char* end = NULL;
+  const char* start = NULL;
+  // Parse returned string to find modifications within brackets
+  while (*(amino) != '\0' && *(amino+1) != '\0'){
+    if (*(amino+1) =='['){
+      start = amino+2;
+      end = amino+2;
+      while (*end != ']'){
+        end++;
+      }
+      char* mass  = (char*)mymalloc(sizeof(char)*(end-start+1));
+      strncpy(mass, start, end-start);
+      mass[end-start] = '\0';
+      mods[seq_index] = atof(mass) + AminoAcidUtil::GetMass(*amino, monoisotopic);
+      amino = end;
+      free(mass);
+    } else if (*(amino+1) < 'A' || *(amino+1) > 'Z'){ // a mod symbol
+      double mass = 0; // sum up all adjacent symbols
+      end = amino + 1;
+      while( *end < 'A' || *end > 'Z' ){
+        mass += get_mod_mass_from_symbol(*end);
+        end++;
+      }
+      mods[seq_index] = mass + AminoAcidUtil::GetMass(*amino, monoisotopic);
+    }
+    seq_index++;
+    amino++;
+  }
+  return mods;
+}
+
+/**
+ * \brief takes an empty mapping of index to mass
+ * of static mods and a full mapping of var mods
+ * to fill up the mapping of static mods
+ */
+map<int, double> PepXMLWriter::find_static_modifications(
+  const char* peptide_sequence
+){
+  map<int, double> static_mods;
+  const char* seq_iter = peptide_sequence;
+  MASS_TYPE_T isotopic_type = get_mass_type_parameter("isotopic-mass");
+  for (size_t i = 0; peptide_sequence[i] != '\0'; i++) {
+    char aa = peptide_sequence[i];
+    double sum = AminoAcidUtil::GetMass(aa, isotopic_type == MONO);
+    int modCount = 0;
+    vector<const ModificationDefinition*> staticMods = ModificationDefinition::StaticMods(aa);
+    for (vector<const ModificationDefinition*>::const_iterator j = staticMods.begin();
+         j != staticMods.end();
+         j++) {
+      if ((*j)->Position() == ANY ||
+          ((*j)->Position() == PEPTIDE_N && i == 0) ||
+          ((*j)->Position() == PEPTIDE_C && peptide_sequence[i + 1] == '\0')) {
+        ++modCount;
+        sum += (*j)->DeltaMass();
+      }
+    }
+    if (modCount > 0) {
+      static_mods[i + 1] = sum;
+    }
+  }
+  return static_mods;
 }
 
 /*
@@ -429,5 +461,3 @@ void PepXMLWriter::printAnalysis(double* scores,
  * c-basic-offset: 2
  * End:
  */
-
-

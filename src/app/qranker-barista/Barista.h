@@ -1,12 +1,11 @@
 #ifndef BARISTA_H
 #define BARISTA_H
-#ifndef CRUX
-#define CRUX
-#endif
+
 #include <sys/types.h>
 #ifndef _MSC_VER
 #include <dirent.h>
 #endif
+
 #include <iostream>
 #include <sstream>
 #include <set>
@@ -14,12 +13,10 @@
 #include <assert.h>
 #include <cstdio>
 #include <iomanip>
-#ifdef CRUX
 #include "app/CruxApplication.h"
 #include "io/carp.h"
 #include "util/crux-utils.h"
 #include "parameter.h"
-#endif
 #include "io/PepXMLWriter.h"
 #include "DataSet.h"
 #include "ProtScores.h"
@@ -58,7 +55,8 @@ class Barista : public CruxApplication
     max_fdr(0),
     max_peptides(0),   
     max_fdr_psm(0),
-    max_fdr_pep(0){}
+    max_fdr_pep(0),
+    parser(NULL){}
   ~Barista(){clear();}
   void clear();
   void print_description();
@@ -140,7 +138,7 @@ class Barista : public CruxApplication
   FILE_FORMAT_T check_file_format(string filename);
   string file_extension(string str); 
  protected:
-  SQTParser* parser; 
+  SQTParser* parser;
   int verbose;
   int skip_cleanup_flag;
   int overwrite_flag;

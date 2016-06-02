@@ -3,6 +3,7 @@
 #include "XLink.h"
 #include "model/ModifiedPeptidesIterator.h"
 #include "model/IonSeries.h"
+#include "util/Params.h"
 
 #include <iostream>
 
@@ -48,7 +49,7 @@ void LinearPeptide::addCandidates(
   XLinkMatchCollection& candidates ///< Vector of candidate -inout
   ) {
 
-  int max_missed_cleavages = get_int_parameter("missed-cleavages");
+  int max_missed_cleavages = Params::GetInt("missed-cleavages");
 
   for (int mod_idx=0;mod_idx<num_peptide_mods; mod_idx++) {
     PEPTIDE_MOD_T* peptide_mod = peptide_mods[mod_idx];
@@ -118,9 +119,7 @@ string LinearPeptide::getSequenceString() {
     oss << sequence_;
 
   } else {
-    char* seq = peptide_->getModifiedSequenceWithMasses(MOD_MASSES_SEPARATE);
-    oss << seq;
-    free(seq);
+    oss << peptide_->getModifiedSequenceWithMasses();
   }
 
   oss << " ()";

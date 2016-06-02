@@ -5,11 +5,52 @@
 
 <h1>Coding standards</h1>
 
+<h3>Lint checking</h3>
+<p>
+As of spring 2016, we began using <a href="https://en.wikipedia.org/wiki/Cpplint">cpplint</a> to perform style/lint checking on our code base. Because it had built in a number of agreeable standards (from the <a href="http://google.github.io/styleguide/cppguide.html">Google style guide</a>) we decided to incorporate many into our own. We've done this in two groups: lenient rules (for the legacy code with existing errors) and strict rules (the desired standard). The lint checker (<code>cruxlint.sh</code>) runs on one file at a time and takes the flag <code>-l</code> for lenient style checking. For example:
+</p>
+<pre>
+     test/lint/cruxlint.sh -l src/app/CruxApplication.cpp
+</pre>
+<p>
+The new rules (some of which are common sense) are as follow (quotes come from the Google style guide or internal <code>cpplint.py</code> documentation). If you have a complaint or confusion about a rule, please checkout the Google style guide (which goes into more detail) or examine <code>cpplint.py</code>. Rule categories can be modified through the files <code>include_rules.txt</code>,<code>include_lax_rules.txt</code>, and <code>exclude_rules.txt</code> in <code>test/lint</code>.
+</p>
+<h4>Lenient rule/checks:</h4>
+<ul>
+  <li>class -- All c++ classes must be declared completely.</li>
+  <li>c++11 -- Our code runs c++11. This means no future features, such as r value references</li>
+  <li>deprecated -- No deprecated functions. For example: &quot;&lt;? and &gt;? (max and min) operators are non-standard and deprecated.&quot;</li>
+  <li>utf-8 -- Non ASCII characters should use UTF-8 formatting</li>
+  <li>invalid increment -- checks for invalid increment. For example if <code>count</code> is a pointer, <code>*count++</code> &quot;is invalid, because it effectively does count++, moving pointer, and should be replaced with ++*count, (*count)++ or *count += 1&quot;</li>
+  <li>memset -- &quot;Checks for potential memset bugs like memset(buf, sizeof(buf), 0)&quot;</li>
+  <li>printf format -- Dissallows printf formats allowed by gcc-2, but which are non-standard</li>
+  <li> printf -- Checks for format string bugs. The second argument of <code>sprintf</code> should not be literal. Use <code>sizeof</code> instead.</li>
+  <li>threadsafe function -- Suggests use of thread safe functions in correct places (such as POSIX)</li>
+</ul>
+<h4>Strict rules/checks:</h4>
+<ul>
+  <li> explicit_make_pair -- &quot;For C++11-compatibility, omit template arguments from make_pair OR use pair directly OR if appropriate, construct a pair directly&quot;</li>
+  <li> storage_class -- &quot;Storage class (static, extern, typedef, etc) should be first.&quot;</li>
+  <li> casting -- Don't use c-style casts</li>
+  <li> function -- &quot;All parameters should be named in a function&quot;</li>
+  <li> inheritance -- Don't include redundant virtuals</li>
+  <li> namespace -- &quot;Namespace should be terminated with "// namespace&quot; SOME_NACESPACE_NAME</li>
+  <li> nolint -- <code>cpplint</code> results in some false positives. &quot;False positives can be ignored by putting // NOLINT at the end of the line or // NOLINTNEXTLINE in the previous line.&quot;</li>
+  <li> nul -- Don't include a nul byte. These are problimatic for some tools</li>
+  <li> casting -- Don't use c-style casts or take the address of a cast (because c++ uses temporary variables for these)</li>
+  <li> explicit -- &quot;onstructors callable with one argument should be marked explicit.&quot;</li>
+  <li> indentation_namespace -- Do not indent inside of a namespace</li>
+  <li> init -- Checks if a member variable is initialized within itself</li>
+  <li> int -- &quot;use a precise-width integer type from <code>&lt;stdint.h&gt;</code>, such as <code>int16_t</code>.&quot; </li>
+  <li> operator -- &quot;Unary <code>operator&amp;</code> is dangerous.  Do not use it.&quot;</li>
+  <li> references -- &quot;All parameters passed by reference must be labeled const.&quot; </li>
+  <li> whitespace checks -- cpplint includes various whitespace checks which agree with those already required by this style guide. For example, spaces around operators. </li>
+</ul>
 
 <h3>Objects in C</h3>
 
 <p>
-Crux is currently undergoing a transition from C to C++.  For the
+Crux underwent a transition from C to C++.  For the
 remaining C code, we aim to produce modularized code, with each module
 acting like a C++ object.  In particular, a
 <code>struct</code> object should be encapsulated in a pair of
@@ -35,17 +76,17 @@ private or protected with get and set functions as necessary.
 <ul>
 
 <li>
-Insert a space after every comma.
+Insert a space after every comma.</li>
 
 <li>
-Insert a space around arithmetic operators.
+Insert a space around arithmetic operators.</li>
 
 <li>
 Do not separate variable names and the arrow operator (<code>-&gt;</code>)
-with a space.
+with a space.</li>
 
 <li>
-Use no more than eight parameters per function.
+Use no more than eight parameters per function.</li>
 
 <li>
 If a function call doesn't fit on one line, place each argument on a
@@ -60,23 +101,24 @@ separate line.  For example:
     parameter5
   );
 </pre>
+</li>
 
 <li>
-When an actual parameter list contains a constant, that constant
-should be followed by a comment that indicates the formal parameter
-name.
+When an actual parameter list contains a constant (e.g, "true"), that
+constant should be followed by a comment that indicates the formal
+parameter name.</li>
 
 <li>
 Use underscores, rather than internal capitalization, to separate
-multi-word variable and (non-class-member) function names.
+multi-word variable and (non-class-member) function names.</li>
 
 <li>
-Use a single trailing underscore for class member variables.
+Use a single trailing underscore for class member variables.</li>
 
 <li>
 Indent two characters per level.  Note that, within emacs, this
 indentation can be automatically achieved by appending the following
-comment at the end of the file:
+comment at the end of the file
 
 <pre>
 /*
@@ -87,20 +129,20 @@ comment at the end of the file:
  */
 </pre>
 
-This comment should be included in every <code>.c</code>, <code>.cpp
-</code> and <code>.h</code> file. 
-<P>
+This comment should be included in every <code>.cpp</code>
+and <code>.h</code> file.</p>
+
+<p>
 In vim this is set by including the line 
 
 <pre>
 set tabstop=2
 </pre>
 
-in your .vimrc file.
-
+in your .vimrc file.</li>
 
 <li>
-Make each line at most 80 characters wide.
+Make each line at most 80 characters wide.</li>
 
 <li>
 Configure your editor to use spaces rather then tabs for indentation.
@@ -111,15 +153,15 @@ In emacs this is done by setting <code>indent-tabs-mode</code> to
 set expandtab
 </pre>
 
-in your .vimrc file.
+in your .vimrc file.</li>
 
 <li>
 Follow the keywords <code>for</code>, <code>while</code>, etc. by a
 brace on the same line.  Do not leave off the braces, even for a
-single-line block.
+single-line block.</li>
 
 <li>
-Place each end brace on a line of its own.
+Place each end brace on a line of its own.</li>
 
 <li>
 The keyword <code>else</code> may optionally "cuddle" between two
@@ -127,9 +169,10 @@ braces:
 <pre>
   } else {
 </pre>
+</li>
 
 <li>
-Use parentheses to make expression precedence explicit.
+Use parentheses to make expression precedence explicit.</li>
 
 <li>
 When an expression continues over more then one line,
@@ -140,7 +183,7 @@ For example:
   foo = param1 + param2 + param3
     + param4 + param5;
 </pre>
-
+</li>
 
 <li>
 When a fixed string assignment continues over more then one line,
@@ -150,15 +193,16 @@ take advantage of ANSI C's implicit concatenation:
   string = "this is a really long string"
     " that runs over two lines";
 </pre>
+</li>
 
 <li>
-Do not use single-letter variable names.
+Do not use single-letter variable names.</li>
 
 <li>
-Name loop indices using <code>&lt;name&gt;_idx</code>.
+Name loop indices using <code>&lt;name&gt;_idx</code>.</li>
 
 <li>
-Name loop iterators using <code>&lt;name&gt;_itr</code>.
+Name loop iterators using <code>&lt;name&gt;_itr</code>.</li>
 
 <li>
 Use only the following allowed abbreviations:
@@ -191,32 +235,35 @@ mz = mass-to-charge
 </ul>
 
 <li>
-Define variables anywhere within a block.
+Define variables anywhere within a block.</li>
 
 <li>
 Use all lowercase characters.  The only exceptions are constants,
 enumerated types (see below) and macros, which are written in all
 uppercase.  Class methods should begin with a lowercase letter and 
-capitalize multiple words (i.e. camel case).
+capitalize multiple words (i.e. camel case).</li>
 
 <li>
 Use <code>static const &lt;type&gt;</code> to define constants rather
-than <code>#define</code>.
+than <code>#define</code>.</li>
 
 <li>
-Name files with the class name as it is written (e.g. PeptideIterator.h).
+Name files with the class name as it is written
+(e.g. PeptideIterator.h).</li>
 
 <li>
 Usage statements should conform to the following:
   <ul>
-    <li> All options should have '--' not '-'
-    <li> Use periods consistently at the end of option descriptions.
-    <li> Put '(Default = XX)' or '(default = XX )' to indicate default behavior.
+    <li> All options should have '--' not '-'.</li>
+    <li> Use periods consistently at the end of option descriptions.</li>
+    <li> Put '(Default = XX)' or '(default = XX )' to indicate default
+    behavior.</li>
   </ul>
+</li>
 
 <li>
-Routines that return a status indicator should use zero to indicate success and
-a non-zero value to indicate failure of some kind.
+Routines that return a status indicator should use zero to indicate
+success and a non-zero value to indicate failure of some kind.</li>
 
 <li>
 Use <code>/*  */</code> comment style only for multi-line comments.
@@ -233,121 +280,59 @@ used to enumerate through all of the types.  The last value should be
 and <code>case</code> statements that handle the type should handle all
 values.  <code>case</code> statements should have an explicit case
 for <code>INVALID</code> and <code>NUM_TYPES</code> rather than
-using <code>default</code>.
+using <code>default</code>.</li>
 
 <li>
 C class-like structs should be named in all caps as 
 <code>&lt;name&gt;_T</code>.  C++ classes should be named with internal 
-capitalization as in <code>ClassName</code>.
+capitalization as in <code>ClassName</code>.</li>
 
 <li>
-Known deviations from the coding standards and other bugs should be
+Known deviations from the coding standards and other bugs were previously
 indicated with a one-line comment like this:
 <pre>
 // FIXME (WSN 19-Dec-05): Create access routines for this module.
 </pre>
-With either FIXME or TODO at the beginning. FIXME is for more serious
-violations, that should probably be fixed before a production release. TODO
-are nice to have.
+We now strongly prefer the creation of issues in the issue tracker. </li>
 
 <li>
 Use <code>FLOAT_T</code> to declare floating point variables rather then
-<code>float</code>. This allows us to switch to double precision arithmetic
-throughout Crux by specifying the <code>--enable-doubles</code> configure option.
+<code>float</code>. This allows us to switch to double precision
+arithmetic throughout Crux by specifying
+the <code>--enable-doubles</code> configure option.</li>
 
 <li>
-Do not write messages directly to <code>stderr</code>. 
-Always use the <code>carp()</code> function
-to report information, warnings, and errors.
+Do not write messages directly to <code>stderr</code>.  Always use
+the <code>carp()</code> function to report information, warnings, and
+errors.</li>
 
 <li>
-Do not call <code>exit()</code> directly for fatal errors. 
-Use <code>carp(CARP_FATAL, ...)</code>.
-This will report a fatal error and call <code>exit(1)</code>.
+Do not call <code>exit()</code> directly for fatal errors.
+Use <code>carp(CARP_FATAL, ...)</code>.  This will report a fatal
+error and call <code>exit(1)</code>.</li>
 
 <li>
-If you find yourself making small changes in a file that doesn't meet these
-coding standards, write your changes in the existing style of the file.
-If you are making a substantial revision to the file, take the time
-to bring the entire file into conformance with these standards.
+If you find yourself making small changes in a file that doesn't meet
+these coding standards, write your changes in the existing style of
+the file.  If you are making a substantial revision to the file, take
+the time to bring the entire file into conformance with these
+standards.</li>
 
 </ul>
 
 <h3>Structured comments</h3>
 
 <p>
-Crux uses <a
+Crux previously used <a
 href='http://www.stack.nl/~dimitri/doxygen/manual.html'>doxygen</a> to
 produce documentation directly from structured comments in the source
-code.  Unstructured comments are still allowed, and do not show up in
-the generated documentation.  Because Doxygen is able to parse C and
-C++ files, only a few additional markup tags are required to generate
-documentation from the structured comments.  Following is an
-abbreviated description of how to use doxygen-style structured
-comments.  See the <a
-href='http://www.stack.nl/~dimitri/doxygen/manual.html'>doxygen
-documentation</a> for a full description:</p>
+code. Even though we have abandoned the use of doxygen, please still try
+to leave informative comments on methods and in difficult to understand
+portions of your code.</p>
 
 <p>
-A structured comment block begins with <code>/**</code> and 
-ends with <code>*/</code>. Note that a comment beginning with
-<code>/***</code> is <i>not</i> considered a structured comment.
-In-line structured comments are marked with <code>///</code>.
-Structured comments are assumed to refer to the code
-immediately following the comment.
-If you wish an in-line structured comment to refer to the code
-immediately preceding it, use <code>///&lt;</code>.
-Within a structured comment markup tags are identified
-by a leading '\'.
-You may embed HTML or Tex formatting in your structured comments.
-<p>
-The lines in a structured comment block up to the first '.'
-are assumed to be a brief description of the code that follows.
-Further text in the comment block is assumed to be a more detailed explanation.
-The structured comment describing a file is shown below:
-<pre>
-/**
- * \file test.c
- * A test module.
- * This module demonstrates doxygen structured comments and tags.
- * It might go on for several lines.
- */
-</pre>
-The markup tag <code>file</code> tells doxygen that the comment
-refers to the file <code>test.c</code> as a whole. 
-The next line is brief description of the file, 
-and the following lines are a fuller description.
-<p>
-A function <code>foo</code> would be commented like this:
-<pre>
-/**
- * foo operates on its parameters.
- * This is a detailed description of foo.
- * It might go on for several lines.
- * \return The result of foo.
- */
-int foo(
-  char a, ///< The user's first initial - in
-  int b, ///< user's age  - in
-  double c, ///< The distance to the nearest coffee stand - in
-  char* d ///< The functions guess for the users middle initial - out
-)
-</pre>
-Doxygen assumes that the comment refers to the function 
-<code>foo</code> immediately following it.
-It also will recognize the comments
-following the formal arguments to <code>foo</code> as
-parameter descriptions. 
-A markup tag, <code>\return</code>,
-is used to identify the text describing the return value of the function.
-<p>
-A simple C program following basic doxygen markup standards is
-<a href='./sample_doxygen/test.c'>here</a>, and the corresponding HTML
-output for that program is 
-<a href='./sample_doxygen/html/index.html'>here</a>.
-
-<p>
-Here are some coding standards related to structured comments:</p>
+Generally please try to follow these standards related to structured
+comments:</p>
 
 <ul>
 
@@ -366,13 +351,13 @@ Begin each file with a header of the following form:
 <li>
 Precede each function definition with a block comment.  The comment
 should give a brief description of the function, as well as describing
-the input and output parameters and side effects.
+the input and output parameters and side effects.</li>
 
 <li>
 Function parameters lists should begin with input parameters, followed
 by input/output parameters, followed by output parameters.  In the
 formal parameter list, each parameter should be followed by a one-line
-explanatory comment.
+explanatory comment.</li>
 
 </ul>
 
@@ -389,28 +374,28 @@ All command lines should be of the following form:
 
 where <code>arg1 arg2</code> are required arguments.  Obviously, the
 number of required arguments will differ by program, but every program
-will have at least one required argument.
+will have at least one required argument.</li>
 
 <li>
 Command line option names should be verbose, and should be preceded
-with a double hyphen.
+with a double hyphen.</li>
 
 <li>
-Multi-word command line options should have internal hyphens.
+Multi-word command line options should have internal hyphens.</li>
 
 <li>
 Where it makes sense, a hyphen on the command line in place of a file
 name should be interpreted to mean "read from standard input."  Where
-this is possible, it should be documented.
+this is possible, it should be documented.</li>
 
 <li>
 Every program should provide a <code>--verbose</code>
 option that controls the verbosity of messages to standard error and a
 <code>--parameter-file</code> option that allows additional parameters
-to be specified via a file.
+to be specified via a file.</li>
 
 <li>
-The usage message should list the default value for every option.
+The usage message should list the default value for every option.</li>
 
 </ul>
 
