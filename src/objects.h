@@ -103,7 +103,7 @@ class FilteredSpectrumChargeIterator;
  */
 namespace Crux {
 
-  class Peptide;
+class Peptide;
 
 };
 

@@ -118,8 +118,8 @@ void parse_parameter_file(
 void read_mods_from_file(const char* param_file);
 
 MASS_TYPE_T get_mass_type_parameter(
- const char* name
- );
+  const char* name
+  );
 
 char get_delimiter_parameter(
   const char* name
