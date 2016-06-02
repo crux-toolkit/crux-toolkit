@@ -160,6 +160,7 @@ protected:
     FLOAT_T maxMass,
     int minLength,
     int maxLength,
+    bool dups,
     MASS_TYPE_T massType,
     DECOY_TYPE_T decoyType,
     const std::string& fasta,
@@ -207,6 +208,24 @@ protected:
     int proteinId,
     int proteinPos,
     pb::AuxLocation& outAuxLoc
+  );
+
+  static bool generateDecoy(
+    const string& setTarget,
+    std::map<const string, const string*>& targetToDecoy,
+    set<string>* setTargets,
+    set<string>* setDecoys,
+    DECOY_TYPE_T decoyType,
+    bool dups,
+    unsigned int& failedDecoyCnt,
+    unsigned int& decoysGenerated,
+    int& curProtein,
+    const ProteinInfo& proteinInfo,
+    const int startLoc,
+    pb::Protein& pbProtein,
+    FLOAT_T pepMass,
+    vector<TideIndexPeptide>& outPeptideHeap,
+    vector<string*>& outProteinSequences
   );
 
   virtual void processParams();
