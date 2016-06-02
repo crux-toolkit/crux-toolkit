@@ -55,7 +55,11 @@ for filename in `find ../../src -name \*.cpp` \
 
   errorCount=`grep "Total errors found" $outFile | awk '{print $4}'`
 
-  echo \<a href=\"$outFile\"\> $filename \</a\> >> $results
+  if [[ $errorCount == "0" ]]; then
+    echo $filename >> $results
+  else
+    echo \<a href=\"$outFile\"\> $filename \</a\> >> $results
+  fi
   echo \($errorCount errors found\) \<br\> >> $results
 done
 
