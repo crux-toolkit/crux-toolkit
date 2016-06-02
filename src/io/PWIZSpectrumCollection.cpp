@@ -40,7 +40,7 @@ PWIZSpectrumCollection::PWIZSpectrumCollection(
   readerList.push_back(pwiz::msdata::ReaderPtr(new pwiz::msdata::Reader_Shimadzu));
   readerList.push_back(pwiz::msdata::ReaderPtr(new pwiz::msdata::Reader_Thermo));
   readerList.push_back(pwiz::msdata::ReaderPtr(new pwiz::msdata::Reader_Waters));
-  carp(CARP_INFO, "Support for vendor specific formats enabled.");  
+  carp(CARP_DETAILED_INFO, "Support for vendor specific formats enabled.");  
   try {
      reader_ = new pwiz::msdata::MSDataFile(filename_, &readerList);
    }
@@ -48,7 +48,7 @@ PWIZSpectrumCollection::PWIZSpectrumCollection(
     carp(CARP_FATAL, "Unable to parse spectrum file %s. Error: %s.", filename_.c_str(), error.what());
    }
 #else
-  carp(CARP_INFO, "Support for vendor specific formats not enabled.");  
+  carp(CARP_DETAILED_INFO, "Support for vendor specific formats not enabled.");  
   try {
     reader_ = new pwiz::msdata::MSDataFile(filename_);
   }

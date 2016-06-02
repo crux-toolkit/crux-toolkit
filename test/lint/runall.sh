@@ -34,8 +34,7 @@ echo "<p>" >> $results
 date >> $results
 echo "</p>" >> $results
 
-for filename in `find ../../src -name \*.cpp` \
-                `find ../../src -name \*.h` ; do
+for filename in `find ../../src \( -name \*.cpp -o -name \*.h \)`; do
 
   truncatedName=`echo $filename | sed 's|../../src/||g'`
   echo $truncatedName
