@@ -17,6 +17,7 @@
 #include "DelimitedFileWriter.h"
 #include "MatchColumns.h"
 #include "objects.h"
+#include "util/StringUtils.h"
 #include <iostream>
 
 class MatchFileWriter : public DelimitedFileWriter {
@@ -92,8 +93,8 @@ class MatchFileWriter : public DelimitedFileWriter {
     if( file_column == -1 ){
       return;
     }
-    current_row_.at(file_column) = 
-      DelimitedFileWriter::to_string(value, match_precision_[col_type], match_fixed_float_[col_type]);
+    current_row_.at(file_column) =
+      StringUtils::ToString(value, match_precision_[col_type], match_fixed_float_[col_type]);
   }
 
 };

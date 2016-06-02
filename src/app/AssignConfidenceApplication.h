@@ -37,25 +37,20 @@ enum _estimation_method {
 typedef enum _estimation_method ESTIMATION_METHOD_T;
 
 class AssignConfidenceApplication : public CruxApplication {
-protected: 
+protected:
   map<pair<string, unsigned int>, bool>* spectrum_flag_;  // this variable is used in Cascade Search, this is an idicator 
-  double cascade_fdr_;
   unsigned int iteration_cnt_;
   OutputFiles* output_;
   unsigned int accepted_psms_;
   string index_name_;
-  bool combine_modified_peptides_;
-  bool combine_charge_states_;
-public:
 
+public:
   map<pair<string, unsigned int>, bool>* getSpectrumFlag();
   void setSpectrumFlag(map<pair<string, unsigned int>, bool>* spectrum_flag);
-  void setCascadeFDR(double cascade_fdr);
   void setIterationCnt(unsigned int iteration_cnt);
   void setOutput(OutputFiles *output);
   unsigned int getAcceptedPSMs();
   std::string getPeptideSeq(Crux::Match* match);
-
 
   /**
   * stores the name of the index file used in an iteration in Cascade Search.
@@ -78,6 +73,8 @@ public:
   virtual int main(int argc, char** argv);
 
   virtual int main(const vector<string> input_files);
+
+  static int getDirection(SCORER_TYPE_T scoreType);
 
   /**
   * \returns the command name for ComputeQValues
@@ -154,11 +151,10 @@ public:
   void convert_fdr_to_qvalue
     (FLOAT_T* qvalues,     ///< Come in as FDRs, go out as q-values.
     int      num_values);
-  map<FLOAT_T, FLOAT_T>* store_arrays_as_hash
+  map<FLOAT_T, FLOAT_T> store_arrays_as_hash
     (FLOAT_T* keys,
     FLOAT_T* values,
-    int      num_values
-    );
+    int      num_values);
   FLOAT_T* compute_decoy_qvalues_tdc(
     FLOAT_T* target_scores,
     int      num_targets,
@@ -175,9 +171,7 @@ public:
     bool     ascending,
     FLOAT_T  pi_zero
     );
-
 };
-
 
 #endif //ASSIGNCONFIDENCE_H
 

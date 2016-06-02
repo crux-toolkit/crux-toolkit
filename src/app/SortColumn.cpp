@@ -11,6 +11,7 @@
 
 #include <errno.h>
 #include "util/WinCrux.h"
+#include "util/Params.h"
 
 using namespace std;
 
@@ -33,12 +34,12 @@ SortColumn::~SortColumn() {
  */
 int SortColumn::main(int argc, char** argv) {
   /* Get parameters */
-  delimited_filename_ = get_string_parameter("tsv file");
-  column_name_string_ = get_string_parameter("column name");
+  delimited_filename_ = Params::GetString("tsv file");
+  column_name_string_ = Params::GetString("column name");
   column_type_ = get_column_type_parameter("column-type");
-  ascending_ = get_boolean_parameter("ascending");
+  ascending_ = Params::GetBool("ascending");
   delimiter_ = get_delimiter_parameter("delimiter");
-  header_ = get_boolean_parameter("header");
+  header_ = Params::GetBool("header");
 
   DelimitedFileReader delimited_file(delimited_filename_, true, delimiter_);
   

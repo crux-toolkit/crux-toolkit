@@ -1,6 +1,7 @@
 #include "IonConstraint.h"
+#include "util/Params.h"
+#include "util/StringUtils.h"
 #include <string>
-
 
 using namespace std;
 /*************************
@@ -22,6 +23,10 @@ void IonConstraint::init(){
     modifications_[modification_idx] = 0;
   }
 
+  for (int idx = 0;idx < NUMBER_ION_TYPES; idx++) {
+    ion_types_[idx] = false;
+  }
+  
   mass_type_ = MONO;
   max_charge_ = 0;
   ion_type_ = (ION_TYPE_T)0;
@@ -59,14 +64,13 @@ IonConstraint::IonConstraint(
   // set all fields of constraint
   mass_type_ = mass_type;
 
-  string charge_str = get_string_parameter("max-ion-charge");
+  string charge_str = Params::GetString("max-ion-charge");
 
   max_charge_ = max(1, max_charge - 1);
 
   if (charge_str != "peptide") {
     int charge_val;
-    bool success = from_string(charge_val, charge_str);
-    if (success) {
+    if (StringUtils::TryFromString(charge_str, &charge_val)) {
       max_charge_ = min(charge_val, max_charge_);
     } else {
       carp_once(CARP_WARNING, "Charge is not valid:%s", charge_str.c_str());
@@ -76,6 +80,7 @@ IonConstraint::IonConstraint(
   min_charge_ = 0;
   exact_modifications_ = false;
   ion_type_ = ion_type;
+  setUseIonType(ion_type, true);
   precursor_ion_ = precursor_ion;
   pointer_count_ = 1;
 
@@ -105,14 +110,16 @@ IonConstraint* IonConstraint::newIonConstraintSmart(
   default:
     // use default type for others
     ION_TYPE_T ion_type;
-    string_to_ion_type(get_string_parameter("primary-ions"), &ion_type);
+    string_to_ion_type(Params::GetString("primary-ions"), &ion_type);
     new_constraint = new IonConstraint(
       get_mass_type_parameter("fragment-mass"),
-      charge, ion_type, get_boolean_parameter("precursor-ions")); 
+      charge, ion_type, Params::GetBool("precursor-ions")); 
     break;
   }
   return new_constraint;
 }
+
+
 
 /**
  * modification, sets all fields for gmtk settings
@@ -355,9 +362,23 @@ bool IonConstraint::isSatisfied(
 /**
  * \returns ION_TYPE for this constraint
  */
+/*
 ION_TYPE_T IonConstraint::getIonType() {
   return ion_type_;
 }
+*/
+
+void IonConstraint::setUseIonType(
+  ION_TYPE_T ion_type,
+  bool val
+  ) {
+  ion_types_[ion_type] = val;
+}
+
+bool IonConstraint::getUseIonType(ION_TYPE_T ion_type) {
+  return(ion_types_[ion_type]);
+}
+
 
 
 

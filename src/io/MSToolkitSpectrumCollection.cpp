@@ -7,6 +7,7 @@
 #include "MSReader.h"
 #include "MSToolkitSpectrumCollection.h" 
 #include "util/crux-utils.h"
+#include "util/Params.h"
 #include "parameter.h"
 #include "model/Spectrum.h"
 
@@ -33,7 +34,7 @@ bool MSToolkitSpectrumCollection::parse() {
   }
 
   // get a list of scans to include if requested
-  string range_string = get_string_parameter("scan-number");
+  string range_string = Params::GetString("scan-number");
   int first_scan;
   int last_scan;
   

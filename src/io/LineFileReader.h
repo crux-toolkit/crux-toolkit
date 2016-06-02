@@ -85,21 +85,6 @@ class LineFileReader {
   bool hasNext();
 
   void reset();
-
-  /**
-   * convert string to data type
-   */
-  template<typename TValue>  
-  static bool from_string(
-    TValue& value,
-    const std::string& s
-    ) {
-
-    std::istringstream iss(s);
-    return !(iss >> std::dec >> value).fail();
-  }   
-
-
 };
 
 #endif //LINEFILEREADER_H

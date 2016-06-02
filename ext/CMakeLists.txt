@@ -21,6 +21,16 @@ if (WIN32 AND NOT CYGWIN)
   else (CMAKE_GENERATOR MATCHES "^.*Win64$")
     SET(MSBUILD_PLATFORM "Win32")
   endif (CMAKE_GENERATOR MATCHES "^.*Win64$")
+
+  # On Windows we should build vendor libraries by default
+  if (NOT DEFINED INCLUDE_VENDOR_LIBRARIES)
+    set(INCLUDE_VENDOR_LIBRARIES TRUE)
+  endif (NOT DEFINED INCLUDE_VENDOR_LIBRARIES)
+  if (INCLUDE_VENDOR_LIBRARIES)
+    message(STATUS "Including vendor libraries.")
+  else (INCLUDE_VENDOR_LIBRARIES)
+    message(STATUS "Not including vendor libraries.")
+  endif (INCLUDE_VENDOR_LIBRARIES)
 endif (WIN32 AND NOT CYGWIN)
 
 # Download and build a partial distribution of the pwiz source
@@ -43,6 +53,7 @@ if (WIN32 AND NOT CYGWIN)
           -DBUILD_TYPE:STRING=${CMAKE_CFG_INTDIR}
           -DPREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
           -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
+          -DINCLUDE_VENDOR_LIBRARIES:BOOLEAN=${INCLUDE_VENDOR_LIBRARIES}
           -P  ${CMAKE_CURRENT_SOURCE_DIR}/build_pwiz.cmake
       INSTALL_COMMAND ""
       BUILD_IN_SOURCE 1
@@ -58,6 +69,7 @@ if (WIN32 AND NOT CYGWIN)
           -DBUILD_TYPE:STRING=${CMAKE_CFG_INTDIR}
           -DPREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
           -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
+          -DINCLUDE_VENDOR_LIBRARIES:BOOLEAN=${INCLUDE_VENDOR_LIBRARIES}
           -P  ${CMAKE_CURRENT_SOURCE_DIR}/build_pwiz.cmake
       INSTALL_COMMAND ""
       BUILD_IN_SOURCE 1
@@ -289,13 +301,12 @@ if (UNIX)
   # Get Comet source from SVN and buld using it's own makefile
   ExternalProject_Add(
     comet
-    SVN_REPOSITORY svn://svn.code.sf.net/p/comet-ms/code/tags/release_2015012/
+    SVN_REPOSITORY svn://svn.code.sf.net/p/comet-ms/code/tags/release_2016011/
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     UPDATE_COMMAND ""
     CONFIGURE_COMMAND ""
     PATCH_COMMAND cp
       ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CometSearch/CometSearchManager.cpp
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CometSearch/CometWriteSqt.cpp
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/
     BUILD_COMMAND make -C MSToolkit
       COMMAND make -C CometSearch CXXFLAGS=-DCRUX 
@@ -339,7 +350,7 @@ elseif (WIN32 AND NOT CYGWIN)
   set(LIBPATH "${CMAKE_CURRENT_BINARY_DIR}/lib;")
   ExternalProject_Add(
     comet
-    SVN_REPOSITORY http://svn.code.sf.net/p/comet-ms/code/tags/release_2015012/
+    SVN_REPOSITORY http://svn.code.sf.net/p/comet-ms/code/tags/release_2016011/
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     UPDATE_COMMAND ""
     # Copy the Comet and MSToolkit include files and libraries to

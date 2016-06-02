@@ -1,6 +1,7 @@
 #ifndef TIDE_MATCH_SET_H
 #define TIDE_MATCH_SET_H
 
+#include <boost/thread.hpp>
 #include <vector>
 #include "raw_proteins.pb.h"
 #include "tide/records.h"
@@ -11,6 +12,7 @@
 #include "tide/spectrum_collection.h"
 
 #include "io/OutputFiles.h"
+#include "model/Modification.h"
 #include "model/PostProcessProtein.h"
 
 using namespace std;
@@ -71,7 +73,8 @@ public:
     const ProteinVec& proteins, ///< proteins corresponding with peptides
     const vector<const pb::AuxLocation*>& locations,  ///< auxiliary locations
     bool compute_sp, ///< whether to compute sp or not
-    bool highScoreBest //< indicates semantics of score magnitude
+    bool highScoreBest, //< indicates semantics of score magnitude
+    boost::mutex * rwlock
   );
 
   /**
@@ -96,22 +99,15 @@ public:
     bool sp
   );
 
-  static void initModMap(
-    const pb::ModTable& modTable
-  );
+  static void initModMap(const pb::ModTable& modTable, ModPosition position);
 
-  static void setCleavageType(
-    const string& cleavageType
-  );
+  static string CleavageType;
 
 protected:
   Arr* matches_;
   Arr2* matches2_;
   Peptide* peptide_;  
   double max_mz_;
-  static map<int, double> mod_map_; // unique delta index -> delta
-  static ModCoder mod_coder_;
-  static string cleavage_type_;
 
   // For allocation
   static char match_collection_loc_[sizeof(MatchCollection)];
@@ -150,7 +146,8 @@ protected:
     const ProteinVec& proteins,
     const vector<const pb::AuxLocation*>& locations,
     const map<Arr::iterator, FLOAT_T>& delta_cn_map,
-    const map<Arr::iterator, pair<const SpScorer::SpScoreData, int> >* sp_map
+    const map<Arr::iterator, pair<const SpScorer::SpScoreData, int> >* sp_map,
+    boost::mutex * rwlock
   );
 
   /**
@@ -182,6 +179,9 @@ protected:
     SpectrumZState& crux_z_state, ///< Crux z state for match
     vector<PostProcessProtein*>* proteins_made ///< out parameter for new proteins
   );
+
+  Crux::Peptide getCruxPeptide(const Peptide* peptide);
+  std::vector<Crux::Modification> getMods(const Peptide* peptide);
 
   void gatherTargetsAndDecoys(
     const ActivePeptideQueue* peptides,

@@ -64,6 +64,7 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "total matches/spectrum",
   "distinct matches/spectrum",
   "sequence",
+  "modfications",
   "cleavage type",
   "protein id",
   "peptides",

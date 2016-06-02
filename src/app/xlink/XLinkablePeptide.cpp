@@ -8,6 +8,9 @@
 
 #include "objects.h"
 #include "util/modifications.h"
+#include "util/Params.h"
+#include "model/Ion.h"
+#include "model/IonSeries.h"
 
 #include <iostream>
 
@@ -50,7 +53,11 @@ XLinkablePeptide::XLinkablePeptide(
   const XLinkablePeptide& xlinkablepeptide
   ) {
   init();
-  peptide_ = xlinkablepeptide.peptide_->copyPtr();
+  if (xlinkablepeptide.peptide_) {
+    peptide_ = xlinkablepeptide.peptide_->copyPtr();
+  } else {
+    sequence_ = xlinkablepeptide.sequence_;
+  }
   is_decoy_ = xlinkablepeptide.is_decoy_;
   link_sites_ = xlinkablepeptide.link_sites_;
 }
@@ -59,7 +66,11 @@ XLinkablePeptide::XLinkablePeptide(
   XLinkablePeptide& xlinkablepeptide
 ) {
   init();
-  peptide_ = xlinkablepeptide.peptide_->copyPtr();
+  if (xlinkablepeptide.peptide_) {
+    peptide_ = xlinkablepeptide.peptide_->copyPtr();
+  } else {
+    sequence_ = xlinkablepeptide.sequence_;
+  }
   is_decoy_ = xlinkablepeptide.is_decoy_;
   link_sites_ = xlinkablepeptide.link_sites_;
 }
@@ -115,7 +126,7 @@ bool XLinkablePeptide::linkSeqPreventsCleavage(
 
       char aa = peptide->getSequencePointer()[seq_idx];
 
-      string xlink_prevents_cleavage = get_string_parameter("xlink-prevents-cleavage");
+      string xlink_prevents_cleavage = Params::GetString("xlink-prevents-cleavage");
       for (string::const_iterator i = xlink_prevents_cleavage.begin();
            i != xlink_prevents_cleavage.end();
            i++) {
@@ -192,7 +203,7 @@ void XLinkablePeptide::findLinkSites(
   ) {
 
   int missed_cleavages = getMissedCleavageSites(peptide);
-  int max_missed_cleavages = get_int_parameter("missed-cleavages")+
+  int max_missed_cleavages = Params::GetInt("missed-cleavages")+
     2; // +2 because a self loop can prevent two cleavages from happening
 
   link_sites.clear();
@@ -388,6 +399,13 @@ MODIFIED_AA_T* XLinkablePeptide::getModifiedSequence() {
 
   return mod_seq;
 }
+const MODIFIED_AA_T* XLinkablePeptide::getModifiedSequencePtr() {
+  if (mod_seq_ == NULL) {
+    mod_seq_ = getModifiedSequence();
+  } else {
+  }
+  return(mod_seq_);
+}
 
 int findLink(vector<int>& link_sites, int link_site) {
   
@@ -528,12 +546,8 @@ string XLinkablePeptide::getModifiedSequenceString() {
   if (peptide_ == NULL) {
     return string(sequence_);
   } else {
-    char* seq = peptide_->getModifiedSequenceWithMasses(MOD_MASS_ONLY);
-    string string_seq(seq);
-    free(seq);
-    return string_seq;
+    return peptide_->getModifiedSequenceWithMasses();
   }
-
 }
 
 bool XLinkablePeptide::isModified() {
@@ -560,6 +574,64 @@ bool XLinkablePeptide::operator < (
 
 }
 
+void XLinkablePeptide::predictIons(
+  IonSeries* ion_series,
+  int charge,
+  int link_idx,
+  FLOAT_T mod_mass,
+  bool clear
+  ) {
+  IonSeries* cached_ions = NULL;
+  bool cached = false;
+  /* TODO UNCOMMENT WHEN XLINKIONSERIESCACHE is in the trunk
+  if (get_boolean_parameter("xlink-use-ion-cache")) {
+    cached_ions = XLinkIonSeriesCache::getXLinkablePeptideIonSeries(*this, charge);
+    bool cached = cached_ions != NULL;
+  }
+  */
+  if (!cached) {
+    cached_ions = new IonSeries(ion_series->getIonConstraint(), charge);
+    cached_ions->update(getSequence(), getModifiedSequencePtr());
+    cached_ions->predictIons();
+  }
+  int link_pos=link_sites_[link_idx];
+  int seq_len = peptide_->getLength();
+  if (clear) {
+    ion_series->clear();
+  }
+  for (IonIterator ion_iter = cached_ions->begin(); 
+    ion_iter != cached_ions->end(); 
+    ++ion_iter) { 
+    Ion* src_ion = *ion_iter; 
+    Ion* ion = src_ion;
+    unsigned int cleavage_idx = ion->getCleavageIdx(); 
+    if (ion->isForwardType()) { 
+      if (cleavage_idx > (unsigned int)link_pos) {
+        ion = new Ion();
+	Ion::copy(src_ion, ion, (char *)"");
+        FLOAT_T mass = ion->getMassFromMassZ() + mod_mass;
+        ion->setMassZFromMass(mass); 
+        if (isnan(ion->getMassZ())) { 
+          carp(CARP_FATAL, "NAN3"); 
+        } 
+      } 
+    } else { 
+      if (cleavage_idx >= (seq_len-(unsigned int)link_pos)) { 
+        ion = new Ion();
+	Ion::copy(src_ion, ion, (char *)"");
+        FLOAT_T mass = ion->getMassFromMassZ() + mod_mass;
+        ion->setMassZFromMass(mass); 
+        if (isnan(ion->getMassZ())) { 
+          carp(CARP_FATAL, "NAN4"); 
+        } 
+      } 
+    }
+    ion_series->addIon(ion);
+  }
+  if (!cached) {
+    delete cached_ions;
+  }
+}
 /*
  * Local Variables:
  * mode: c

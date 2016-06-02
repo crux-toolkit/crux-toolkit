@@ -24,7 +24,7 @@
 #include <vector>
 
 #include "parameter.h"
-
+#include "util/Params.h"
 
 class DelimitedFileReader {
 
@@ -281,22 +281,6 @@ class DelimitedFileReader {
    * iterate through
    */
   bool hasNext();
-
-  /**
-   * converts a datatype to a string
-   */
-  template<typename TValue>
-  static std::string to_string(
-    TValue& value ///< the data to convert
-  ) {
-
-    std::ostringstream oss;
-    oss << std::setprecision(get_int_parameter("precision"));
-    oss << value;
-    std::string out_string = oss.str();
-    return out_string;
-  }
-
 };
 
 #endif //DELIMITEDFILEREADER_H

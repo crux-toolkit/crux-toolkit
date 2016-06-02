@@ -1,7 +1,7 @@
 #include "ReadSpectrumRecordsApplication.h"
 
 #include "io/carp.h"
-#include "parameter.h"
+#include "util/Params.h"
 
 ReadSpectrumRecordsApplication::ReadSpectrumRecordsApplication() {
 }
@@ -12,7 +12,7 @@ ReadSpectrumRecordsApplication::~ReadSpectrumRecordsApplication() {
 int ReadSpectrumRecordsApplication::main(int argc, char** argv) {
   carp(CARP_INFO, "Running read-spectrumrecords...");
 
-  string records_file = get_string_parameter("spectrum records file");
+  string records_file = Params::GetString("spectrum records file");
 
   pb::Header header;
   HeadedRecordReader reader(records_file, &header);
