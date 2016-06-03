@@ -31,3 +31,5 @@ barista.html
 cascade-search.html
 predict-peptide-ions.html
 xlink-score-spectrum.html
+param-table.html
+default.params
