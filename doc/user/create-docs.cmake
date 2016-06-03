@@ -91,3 +91,37 @@ if (NOT ${PROJECT_SOURCE_DIR} MATCHES ${PROJECT_BINARY_DIR})
     )
   endif (NOT ${status} EQUAL 0)
 endif (NOT ${PROJECT_SOURCE_DIR} MATCHES ${PROJECT_BINARY_DIR})
+# Create the default.params file
+execute_process(
+  COMMAND ${CRUX_PATH} create-docs default-params
+    RESULT_VARIABLE status
+    ERROR_VARIABLE error_message
+    OUTPUT_FILE default.params
+)
+if (NOT ${status} EQUAL 0)
+  message(
+    FATAL_ERROR
+    "Unable to generate default.params"
+    "\nError message: ${error_message}"
+    "\nCreation of default.params failed."
+  )
+endif (NOT ${status} EQUAL 0)
+message(STATUS "Created default.params")
+if (NOT ${PROJECT_SOURCE_DIR} MATCHES ${PROJECT_BINARY_DIR})
+  # If building out of source copy doc files back to 
+  # source doc directory.
+  execute_process(
+    COMMAND ${CMAKE_COMMAND} 
+      -E copy default.params ${DOC_DIR}
+      RESULT_VARIABLE status
+      ERROR_VARIABLE error_message
+  )
+  if (NOT ${status} EQUAL 0)
+    message(
+      FATAL_ERROR
+      "Unable to copy default.params to ${DOC_DIR}" 
+      "\nError message: ${error_message}"
+      "\nCreation of param-table failed."
+    )
+  endif (NOT ${status} EQUAL 0)
+endif (NOT ${PROJECT_SOURCE_DIR} MATCHES ${PROJECT_BINARY_DIR})
