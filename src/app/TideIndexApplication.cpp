@@ -937,4 +937,3 @@ bool TideIndexApplication::generateDecoy(
 * c-basic-offset: 2
 * End:
 */
-
