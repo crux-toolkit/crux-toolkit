@@ -1,5 +1,6 @@
 #include "Modification.h"
 #include "io/carp.h"
+#include "util/AminoAcidUtil.h"
 #include "util/MathUtil.h"
 #include "util/Params.h"
 #include "util/StringUtils.h"
@@ -16,7 +17,7 @@ using namespace Crux;
 ModificationDefinition::ModificationDefinition(
   const string& aminoAcids, double deltaMass, ModPosition position,
   bool preventsCleavage, bool preventsXLink, char symbol)
-  : deltaMass_(deltaMass), position_(position != UNKNOWN ? position : ANY),
+  : deltaMass_(deltaMass), position_(position),
     symbol_(symbol), preventsCleavage_(preventsCleavage), preventsXLink_(preventsXLink) {
   AddAminoAcids(aminoAcids);
 }
@@ -41,12 +42,15 @@ const ModificationDefinition* ModificationDefinition::NewStaticMod(
        i != staticMods.end();
        i++) {
     if (MathUtil::AlmostEqual((*i)->deltaMass_, deltaMass, Params::GetInt("mod-precision")) &&
-        (*i)->position_ == position &&
+        (position == UNKNOWN || (*i)->position_ == UNKNOWN || (*i)->position_ == position) &&
         (*i)->preventsCleavage_ == preventsCleavage &&
         (*i)->preventsXLink_ == preventsXLink) {
       string added = (*i)->AddAminoAcids(aminoAcids);
       for (string::const_iterator j = added.begin(); j != added.end(); j++) {
         modContainer_.staticMods_[*j].push_back(*i);
+      }
+      if (position != UNKNOWN && (*i)->position_ == UNKNOWN) {
+        (*i)->position_ = position;
       }
       return *i;
     }
@@ -66,11 +70,14 @@ const ModificationDefinition* ModificationDefinition::NewVarMod(
        i != modContainer_.varMods_.end();
        i++) {
     if (MathUtil::AlmostEqual((*i)->deltaMass_, deltaMass, Params::GetInt("mod-precision")) &&
-        (*i)->position_ == position &&
+        (position == UNKNOWN || (*i)->position_ == UNKNOWN || (*i)->position_ == position) &&
         (*i)->preventsCleavage_ == preventsCleavage &&
         (*i)->preventsXLink_ == preventsXLink &&
         (symbol == '\0' || (*i)->symbol_ == symbol)) {
       (*i)->AddAminoAcids(aminoAcids);
+      if (position != UNKNOWN && (*i)->position_ == UNKNOWN) {
+        (*i)->position_ = position;
+      }
       return *i;
     }
   }
@@ -191,6 +198,19 @@ vector<const ModificationDefinition*> ModificationDefinition::VarMods() {
     mods.push_back(*i);
   }
   return mods;
+}
+
+double ModificationDefinition::DeltaMass(char c, ModPosition position) {
+  double mass = 0.0;
+  vector<const ModificationDefinition*> staticMods = StaticMods(c);
+  for (vector<const ModificationDefinition*>::const_iterator i = staticMods.begin();
+       i != staticMods.end();
+       i++) {
+    if ((*i)->position_ == UNKNOWN || (*i)->position_ == ANY || position == (*i)->position_) {
+      mass += (*i)->DeltaMass();
+    }
+  }
+  return mass;
 }
 
 const set<char>& ModificationDefinition::AminoAcids() const {

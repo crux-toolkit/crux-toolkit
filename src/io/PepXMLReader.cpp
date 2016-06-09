@@ -176,12 +176,13 @@ void PepXMLReader::aminoacidModificationOpen(const char** attr) {
     } else if (strcmp(attr[i], "variable") == 0) {
       variable = strcmp(attr[i + 1], "Y") == 0;
     } else if (strcmp(attr[i], "peptide_terminus") == 0) {
+      // TODO: is this protein terminus?
       if (strcmp(attr[i + 1], "n") == 0) {
-        pos = PROTEIN_N;
+        pos = PEPTIDE_N;
       } else if (strcmp(attr[i + 1], "c") == 0) {
-        pos = PROTEIN_C;
+        pos = PEPTIDE_C;
       } else if (strcmp(attr[i + 1], "nc") == 0) {
-        //pos = PROTEIN_NC; TODO
+        //pos = PEPTIDE_NC; TODO
       }
     } else if (strcmp(attr[i], "symbol") == 0) {
       symbol = attr[i + 1][0];
@@ -400,25 +401,36 @@ void PepXMLReader::modAminoAcidMassOpen(
   }
 
   if (position > 0 && have_mod_mass) {
-    // mass includes amino acid mass, subtract it
     char* seq = current_match_->getPeptide()->getSequence();
-    mod_mass -= AminoAcidUtil::GetMass(seq[position - 1]);
-    free(seq);
-    const ModificationDefinition* mod = ModificationDefinition::Find(mod_mass, false);
-    if (mod == NULL) {
-      mod = ModificationDefinition::Find(mod_mass, true);
+    ModPosition mod_position = ANY;
+    if (position <= 1) {
+      mod_position = PEPTIDE_N;
+    } else if (position >= strlen(seq)) {
+      mod_position = PEPTIDE_C;
     }
-    if (mod != NULL && !mod->Static()) {
-      current_match_->getPeptide()->addMod(mod, position - 1);
-    } else {
-      // mod was not defined at top of file
-      mod_mass = MathUtil::Round(mod_mass, Params::GetInt("mod-precision"));
-      //set aminoacid modification.
-      const AA_MOD_T* aa_mod = get_aa_mod_from_mass(mod_mass);
-      MODIFIED_AA_T* mod_seq = current_match_->getPeptide()->getModifiedAASequence();
-      modify_aa(&mod_seq[position-1], aa_mod);
-      current_match_->getPeptide()->setModifiedAASequence(mod_seq, true);
-      free(mod_seq);
+    char aa = seq[position - 1];
+    free(seq);
+    double staticDeltaMass = ModificationDefinition::DeltaMass(aa, mod_position);
+    mod_mass -= staticDeltaMass;
+    // mass includes amino acid mass, subtract it
+    mod_mass -= AminoAcidUtil::GetMass(aa, Params::GetString("isotopic-mass") == "mono");
+    if (MathUtil::Round(mod_mass, Params::GetInt("mod-precision")) != 0.0) {
+      // look for a variable mod with this mass
+      const ModificationDefinition* mod = ModificationDefinition::Find(mod_mass, false);
+      if (mod == NULL) {
+        // no variable mod with this mass, try finding a static one
+        mod = ModificationDefinition::Find(staticDeltaMass, true);
+      }
+      if (mod != NULL) {
+        if (!mod->Static()) {
+          current_match_->getPeptide()->addMod(mod, position - 1);
+        }
+      } else {
+        // mod was not defined at top of file, add it as a variable modification
+        mod_mass = MathUtil::Round(mod_mass, Params::GetInt("mod-precision"));
+        mod = ModificationDefinition::NewVarMod(string(1, aa), mod_mass, UNKNOWN);
+        current_match_->getPeptide()->addMod(mod, position - 1);
+      }
     }
   } else {
     carp(CARP_WARNING, "mod_aminoacid_mass error");
