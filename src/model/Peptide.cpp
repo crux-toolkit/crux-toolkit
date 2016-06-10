@@ -505,7 +505,7 @@ void Peptide::setModifiedAASequence(
   MODIFIED_AA_T* mod_seq, ///< modified sequence to set
   bool decoy ///< is the peptide a decoy?
 ) {
-  Modification::FromSeq(mod_seq, length_, &sequence_, NULL /* TODO &varMods_*/);
+  Modification::FromSeq(mod_seq, length_, &sequence_, &varMods_);
   if (decoy) {
     if (decoy_modified_seq_) {
       std::free(decoy_modified_seq_);
