@@ -108,6 +108,7 @@
 <parameter name="remove-precursor-peak" value="false"/>
 <parameter name="remove-precursor-tolerance" value="1.5"/>
 <parameter name="clip-nterm-methionine" value="false"/>
+<parameter name="allow-dups" value="false"/>
 <parameter name="use-neutral-loss-peaks" value="true"/>
 <parameter name="max-precursor-charge" value="5"/>
 <parameter name="peptide-centric-search" value="false"/>
