@@ -6,6 +6,14 @@
 <p><i>Note: A detailed <a href=#todo>checklist</a> is at the bottom of
     this page</i>
 
+<h3>Introduction</h3>
+After every successful commit to the Crux SVN repository
+our TeamCity server automatically publishes the current source distribution
+and binaries for all platforms to the Crux web site.
+As functionality milestones are achieved
+we also publish stable, versioned releases.
+This document describes how to publish a versioned release.
+
 <h3>Before you begin</h3>
 <p>Confirm that the TeamCity server successfully built Crux from the current
   repository trunk on all platforms, and that the smoke and performance tests all 
@@ -21,23 +29,23 @@
   -->
 
 <h3>Branching</h3>
-<p>The first release of crux, version 1.0, was given its own development
-branch named <code>rel-1-0</code> in the SVN repository.  Bugs
-reported by users were fixed in this branch and builds from this
-branch were made available for download. Changes made to this branch
-are periodically merged into the trunk. The next release should
-be given its own branch at which point work in <code>rel-1-0</code>
-will cease.</p>
+In SVN tags and branches are really the same,
+but tags are traditionally used
+for branches intended to be permanent, named, versions.
+<p>Each release of Crux should be given its own branch in the 
+<code>crux/tags</code> subdirectory of the Crux SVN repository.
+Bugs reported for the release are fixed in this branch and then
+merged into the trunk.
 <p/>
 For example:
 <pre>
 svn copy \ 
   svn+ssh://charlesegrant@svn.code.sf.net/p/cruxtoolkit/code/crux/trunk \
-  svn+ssh://charlesegrant@svn.code.sf.net/p/cruxtoolkit/code/crux/tags/crux-X.Y \
+  svn+ssh://charlesegrant@svn.code.sf.net/p/cruxtoolkit/code/crux/tags/crux-2.1 \
 </pre>
-In SVN tags and branches are really the same, but tags are traditionally used
-for branches intended to be permanent, named, versions.
-<h3>Version numbers</h3>
+All the edits that follow should take place in the release branch
+and then be merged back into the trunk.
+<h3>Update the version number</h3>
 <p>Each time new files are made available for download, the version
 number should increment by 0.01 for minor releases or by 0.1 for major
 releases. The version number is maintained in CMakeLists.txt in the
@@ -49,14 +57,7 @@ set (CPACK_PACKAGE_VERSION_MINOR "XX")
 This controls the numbering of packages and what is reported by the 
 <code>--version</code> option.
 </p>
-Once you have updated the version number you'll also need
-to update the TeamCity tasks for building Crux on each of the platforms,
-and for copying the resulting artifacts to the website.
 
-<h3>Create a download directory for the new release</h3>
-<a href="crux-sourceforge.html" >Log on</a> to the <code>crux-toolkit</code> server.
-Create a subdirectory for the new release in 
-<code>/home/project-web/cruxtoolkit/htdocs/download</code>
 <h3>Prepare a static tarball of ProteoWizard</h3>
 The normal build of Crux pulls the latest version of ProteoWizard 
 from the SVN repository.
@@ -73,36 +74,43 @@ into the current directory.
 It can then be 
 <a href="crux-sourceforge.html">copied</a> into the download directory for the new release on the
 <code>crux-toolkit</code> web site.
-<h3>Modify the Crux build to use the ProteoWizard tarball.</h3>
-<h3>Building packages</h3>
-<p>Avoid building packages in the root.
-Create a sub-directory in the root for the relase type (source, 32-bit
-Linux, 64-bit Linux, Darwin).
-Move into the sub-directory and run
+<h3>Modify the Crux build to use the new ProteoWizard tarball</h3>
+Crux's build of ProteoWizard is controled in <code>ext/CMakeLists.txt</code>.
+Open that file and look for the comment:
 <pre>
-cmake ..
+# Download and build a partial distribution of the pwiz source
+# from the ProteoWizard TeamCity repository.
 </pre>
-</p>
-<p>There are two targets for building packages.  
-The command <code>make package_source</code> will create a tarred and zipped file
-containing source code and documentation.
-The command <code>make package</code> will create a zipped file containing 
-the compiled binaries for all of the crux tools and the documentation.  
-The binary package file will include the
-computer architecture and operating system in the name so that builds
-on multiple computers can be easily distinguished.</p>
-
-<p>After building the packages, run <code>make checksum</code>.  Do
-this for each bdist package built.  A new file with the output of the
-checksum is created for each package and will be included on the
-download page.</p>
-
-<p>The distribution files are no longer being stored in SVN. However,
-putting the files in <code>crux/doc/user/downloads</code> will
-facilitate the website update step.  Detailed notes about changes made can be
-recorded in <code>crux/ChangeLog</code>.  A more general description of changes
-(aimed at the user) should be recorded in
-<code>crux/doc/user/download/release-notes.html</code></p> 
+Under that comment there will be two <code>if-else</code> blocks conditional on
+the CMake variable <code>USE_LATEST_PWIZE</code> (one for UNIX systems and one
+for Windows).
+In each of the <code>else</code> blocks there will be a URL parameter in a call
+to <code>ExternalProject_Add()</code>.
+Update this URL to point to the new ProteoWizard tarball.
+</pre>
+<h3>Update the documentation and the download page</h3>
+Make sure that the release notes reflect all the changes since the last
+release.
+Update 
+<code>doc/user/download/index.html</code>
+and
+<code>doc/user/download/download.php</code>
+to refer to the new release.
+You'll need to update the value of the <code>release_button</code>
+in <code>index.html</code> and the filenames listed for the
+<code>release_button</code> POST handler in
+<code>download.php</code>.
+<h3>Perform a local build</h3>
+Once you've made the above changes perform a build on build on each platform
+and generate the binary packages. On 64-bit Linux make sure the smoke tests
+pass and build a source package.
+<h3>Update the TeamCity build tasks</h3>
+Once you statisfied with the build you'll also need
+to add the TeamCity tasks for building Crux on each of the platforms,
+and for copying the resulting artifacts to the website.
+<a href="crux-sourceforge.html" >Log on</a> to the <code>crux-toolkit</code> server.
+Create a subdirectory for the new release in 
+<code>/home/project-web/cruxtoolkit/htdocs/download</code>
 
 <h3>Updating the website</h3>
 <p>The public crux website is at

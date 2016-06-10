@@ -78,7 +78,7 @@ void MzIdentMLWriter::closeFile(){
          i++) {
       SearchModificationPtr smp(new SearchModification());
       smp->fixedMod = (*i)->Static();
-      smp->massDelta = (*i)->DeltaMass();
+      smp->massDelta = MathUtil::Round((*i)->DeltaMass(), Params::GetInt("mod-precision"));
       smp->residues = vector<char>((*i)->AminoAcids().begin(), (*i)->AminoAcids().end());
       switch ((*i)->Position()) {
         case PEPTIDE_N:
@@ -174,7 +174,7 @@ PeptidePtr MzIdentMLWriter::getPeptide(
         mod_p->location = i->Index() + 1;
         break;
     }
-    mod_p->monoisotopicMassDelta = i->DeltaMass();
+    mod_p->monoisotopicMassDelta = MathUtil::Round(i->DeltaMass(), modPrecision);
     mod_p->residues.push_back(sequence[i->Index()]);
     mod_p->set(MS_unknown_modification);
     peptide_p->modification.push_back(mod_p);

@@ -1,7 +1,6 @@
 build/explicit_make_pair
 build/storage_class
 readability/braces
-readability/casting
 readability/function
 readability/inheritance
 readability/namespace

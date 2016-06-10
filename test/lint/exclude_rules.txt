@@ -8,6 +8,7 @@ build/include_what_you_use
 build/namespaces
 legal/copyright
 readability/alt_tokens
+readability/casting
 readability/check
 readability/constructors
 readability/fn_size

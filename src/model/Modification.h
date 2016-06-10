@@ -45,6 +45,7 @@ public:
   static std::vector<const ModificationDefinition*> AllMods();
   static std::vector<const ModificationDefinition*> StaticMods(char c = '\0');
   static std::vector<const ModificationDefinition*> VarMods();
+  static double DeltaMass(char c, ModPosition position);
 
   const std::set<char>& AminoAcids() const;
   double DeltaMass() const;
