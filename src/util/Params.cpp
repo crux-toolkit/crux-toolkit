@@ -750,6 +750,14 @@ Params::Params() : finalized_(false) {
     "put two copies of the leading peptide into the index, with and without the N-terminal "
     "methionine.",
     "Available for tide-index.", true);
+  InitBoolParam("allow-dups", false,
+    "Prevent duplicate peptides between the target and decoy databases. When set to \"F\", "
+    "the program keeps all target and previously generated decoy peptides in memory. A shuffled "
+    "decoy will be re-shuffled multiple times to avoid duplication. If a non-duplicated peptide "
+    "cannot be generated, the decoy is skipped entirely. When set to \"T\", every decoy is added to "
+    "the database without checking for duplication. This option reduces the memory requirements "
+    "significantly. Default = F.",
+    "Available for tide-index.", true);
   InitBoolParam("use-neutral-loss-peaks", true,
     "Controls whether neutral loss ions are considered in the search. "
     "Two types of neutral losses are included and are applied only to "
