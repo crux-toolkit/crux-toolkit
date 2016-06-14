@@ -391,62 +391,64 @@ add_dependencies(percolator ProteoWizard)
 
 # On Windows we have to include the vendor libraries in the package
 if (WIN32 AND NOT CYGWIN)
-  if (CMAKE_GENERATOR MATCHES "^.*Win64$")
-    set(
-      vendor_binaries
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/agtsampleinforw.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/baf2sql_c.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/BaseCommon.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/BaseDataAccess.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/BaseError.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/BaseTof.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.Compression.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.Data.AnalystDataProvider.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.Data.CommonInterfaces.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.Data.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.Data.WiffReader.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.InternalRawXYProcessing.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.Muni.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.ProjectUtilities.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.RawXYProcessing.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.StructuredStorage.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.Utility.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/fileio_x64.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/fregistry_x64.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/MassSpecDataReader.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/MIDAC.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/MSFileReader.XRawfile2.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/pwiz_aux/msrc/utility/vendor_api/Waters/vc12_x64/cdt.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/pwiz_aux/msrc/utility/vendor_api/Waters/vc12_x64/MassLynxRaw.dll
-    )
-  else (CMAKE_GENERATOR MATCHES "^.*Win64$")
-    set(
-      vendor_binaries
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/agtsampleinforw.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/baf2sql_c.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/BaseCommon.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/BaseDataAccess.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/BaseError.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/BaseTof.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.Compression.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.Data.AnalystDataProvider.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.Data.CommonInterfaces.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.Data.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.Data.WiffReader.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.InternalRawXYProcessing.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.Muni.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.ProjectUtilities.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.RawXYProcessing.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.StructuredStorage.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.Utility.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/fileio.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/fregistry.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/MassSpecDataReader.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/MIDAC.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/MSFileReader.XRawfile2.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/pwiz_aux/msrc/utility/vendor_api/Waters/vc12_x86/cdt.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/pwiz_aux/msrc/utility/vendor_api/Waters/vc12_x86/MassLynxRaw.dll
-    )
-  endif (CMAKE_GENERATOR MATCHES "^.*Win64$")
-  install (FILES ${vendor_binaries} DESTINATION bin)
+  if (INCLUDE_VENDOR_LIBRARIES)
+    if (CMAKE_GENERATOR MATCHES "^.*Win64$")
+      set(
+        vendor_binaries
+        ${CMAKE_CURRENT_BINARY_DIR}/lib/agtsampleinforw.dll
+        ${CMAKE_CURRENT_BINARY_DIR}/lib/baf2sql_c.dll
+        ${CMAKE_CURRENT_BINARY_DIR}/lib/BaseCommon.dll
+        ${CMAKE_CURRENT_BINARY_DIR}/lib/BaseDataAccess.dll
+        ${CMAKE_CURRENT_BINARY_DIR}/lib/BaseError.dll
+        ${CMAKE_CURRENT_BINARY_DIR}/lib/BaseTof.dll
+        ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.Compression.dll
+        ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.Data.AnalystDataProvider.dll
+        ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.Data.CommonInterfaces.dll
+        ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.Data.dll
+        ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.Data.WiffReader.dll
+        ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.InternalRawXYProcessing.dll
+        ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.Muni.dll
+        ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.ProjectUtilities.dll
+        ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.RawXYProcessing.dll
+        ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.StructuredStorage.dll
+        ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.Utility.dll
+        ${CMAKE_CURRENT_BINARY_DIR}/lib/fileio_x64.dll
+        ${CMAKE_CURRENT_BINARY_DIR}/lib/fregistry_x64.dll
+        ${CMAKE_CURRENT_BINARY_DIR}/lib/MassSpecDataReader.dll
+        ${CMAKE_CURRENT_BINARY_DIR}/lib/MIDAC.dll
+        ${CMAKE_CURRENT_BINARY_DIR}/lib/MSFileReader.XRawfile2.dll
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/pwiz_aux/msrc/utility/vendor_api/Waters/vc12_x64/cdt.dll
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/pwiz_aux/msrc/utility/vendor_api/Waters/vc12_x64/MassLynxRaw.dll
+      )
+    else (CMAKE_GENERATOR MATCHES "^.*Win64$")
+      set(
+        vendor_binaries
+        ${CMAKE_CURRENT_BINARY_DIR}/lib/agtsampleinforw.dll
+        ${CMAKE_CURRENT_BINARY_DIR}/lib/baf2sql_c.dll
+        ${CMAKE_CURRENT_BINARY_DIR}/lib/BaseCommon.dll
+        ${CMAKE_CURRENT_BINARY_DIR}/lib/BaseDataAccess.dll
+        ${CMAKE_CURRENT_BINARY_DIR}/lib/BaseError.dll
+        ${CMAKE_CURRENT_BINARY_DIR}/lib/BaseTof.dll
+        ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.Compression.dll
+        ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.Data.AnalystDataProvider.dll
+        ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.Data.CommonInterfaces.dll
+        ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.Data.dll
+        ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.Data.WiffReader.dll
+        ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.InternalRawXYProcessing.dll
+        ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.Muni.dll
+        ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.ProjectUtilities.dll
+        ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.RawXYProcessing.dll
+        ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.StructuredStorage.dll
+        ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.Utility.dll
+        ${CMAKE_CURRENT_BINARY_DIR}/lib/fileio.dll
+        ${CMAKE_CURRENT_BINARY_DIR}/lib/fregistry.dll
+        ${CMAKE_CURRENT_BINARY_DIR}/lib/MassSpecDataReader.dll
+        ${CMAKE_CURRENT_BINARY_DIR}/lib/MIDAC.dll
+        ${CMAKE_CURRENT_BINARY_DIR}/lib/MSFileReader.XRawfile2.dll
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/pwiz_aux/msrc/utility/vendor_api/Waters/vc12_x86/cdt.dll
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/pwiz_aux/msrc/utility/vendor_api/Waters/vc12_x86/MassLynxRaw.dll
+      )
+    endif (CMAKE_GENERATOR MATCHES "^.*Win64$")
+    install (FILES ${vendor_binaries} DESTINATION bin)
+  endif (INCLUDE_VENDOR_LIBRARIES)
 endif (WIN32 AND NOT CYGWIN)
