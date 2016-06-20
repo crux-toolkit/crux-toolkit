@@ -60,7 +60,7 @@ int ReadTideIndex::main(int argc, char** argv) {
   string output_file = make_file_path(getName() + ".peptides.txt");
   ofstream* output_stream = create_stream_in_path(
     output_file.c_str(), NULL, Params::GetBool("overwrite"));
-	*output_stream << get_column_header(SEQUENCE_COL) << '\t'
+  *output_stream << get_column_header(SEQUENCE_COL) << '\t'
                  << get_column_header(PROTEIN_ID_COL) << endl;
 
   RecordReader* reader = peptide_reader.Reader();

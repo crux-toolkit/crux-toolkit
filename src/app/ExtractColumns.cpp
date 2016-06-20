@@ -38,12 +38,12 @@ int ExtractColumns::main(int argc, char** argv) {
   vector<string> column_name_list = StringUtils::Split(column_names_string, ',');
 
   vector<int> column_indices;
-  for (unsigned int i=0;i<column_name_list.size();i++) {
+  for (unsigned int i = 0; i < column_name_list.size(); i++) {
     int col_idx = delimited_file.findColumn(column_name_list[i]);
     if (col_idx != -1) {
       column_indices.push_back(col_idx);
     } else {
-      carp(CARP_ERROR,"column not found:%s\n\n%s", 
+      carp(CARP_ERROR, "column not found:%s\n\n%s", 
         column_name_list[i].c_str(),
         delimited_file.getAvailableColumnsString().c_str());
       return(-1);
@@ -53,10 +53,10 @@ int ExtractColumns::main(int argc, char** argv) {
   //print out the header if desired
   if (Params::GetBool("header")) {
     cout << column_name_list[0];
-    for (unsigned int col_idx = 1;col_idx<column_name_list.size();col_idx++) {
+    for (unsigned int col_idx = 1; col_idx < column_name_list.size(); col_idx++) {
       cout << delimiter << column_name_list[col_idx];
     }
-    cout<<endl;
+    cout << endl;
   }
 
   while(delimited_file.hasNext()) {

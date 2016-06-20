@@ -69,26 +69,26 @@ void TideMatchSet::report(
          Peptide::spectrum_matches::compSC);
   } 
  
- for (int cnt = 0; cnt < nHit; ++cnt) {
-      d_cn = 0.0;
-      if (exact_pval_search_ == true) {
-          score = peptide_->spectrum_matches_array[cnt].score1_;
-          if (cnt < nHit-1) {
-            d_cn = (double)((log10(peptide_->spectrum_matches_array[cnt+1].score1_)
-                           - log10(peptide_->spectrum_matches_array[cnt].score1_))
-                           /max((FLOAT_T)(-1*log10(peptide_->spectrum_matches_array[cnt].score1_)), FLOAT_T(1)));
-          }
-      } else {
-          score = (double)(peptide_->spectrum_matches_array[cnt].score1_ / 100000000.0);
-          if (cnt < nHit-1) {
-              d_cn = (double)( score 
-                            - (double)(peptide_->spectrum_matches_array[cnt+1].score1_ / 100000000.0)
-                            / (double)max((FLOAT_T)score , FLOAT_T(1)));
-          }
+  for (int cnt = 0; cnt < nHit; ++cnt) {
+    d_cn = 0.0;
+    if (exact_pval_search_ == true) {
+      score = peptide_->spectrum_matches_array[cnt].score1_;
+      if (cnt < nHit-1) {
+        d_cn = (double)((log10(peptide_->spectrum_matches_array[cnt+1].score1_)
+                       - log10(peptide_->spectrum_matches_array[cnt].score1_))
+                       /max((FLOAT_T)(-1*log10(peptide_->spectrum_matches_array[cnt].score1_)), FLOAT_T(1)));
       }
-      peptide_->spectrum_matches_array[cnt].score1_ = score;
-      peptide_->spectrum_matches_array[cnt].d_cn_ = d_cn;
-      peptide_->spectrum_matches_array[cnt].score3_ = nHit;
+    } else {
+      score = (double)(peptide_->spectrum_matches_array[cnt].score1_ / 100000000.0);
+      if (cnt < nHit-1) {
+        d_cn = (double)( score 
+                      - (double)(peptide_->spectrum_matches_array[cnt+1].score1_ / 100000000.0)
+                      / (double)max((FLOAT_T)score , FLOAT_T(1)));
+      }
+    }
+    peptide_->spectrum_matches_array[cnt].score1_ = score;
+    peptide_->spectrum_matches_array[cnt].d_cn_ = d_cn;
+    peptide_->spectrum_matches_array[cnt].score3_ = nHit;
   }
   //smoothing primary scores in the elution window, only in DIA mode.
   if (elution_window_ > 0) {
@@ -187,8 +187,7 @@ void TideMatchSet::writeToFile(
   for (vector<Peptide::spectrum_matches>::const_iterator 
         i = peptide_->spectrum_matches_array.begin(); 
         i != peptide_->spectrum_matches_array.end(); 
-        ++i)
-  {
+        ++i) {
     Spectrum* spectrum = i->spectrum_;
     
     *file << spectrum->SpectrumNumber() << '\t'
@@ -316,7 +315,7 @@ void TideMatchSet::writeToFile(
     (vec.size() >= top_n) ? vec.begin() + top_n : vec.end();
 
   for (vector<Arr::iterator>::const_iterator i = vec.begin(); i != cutoff; ++i) {
-    const Peptide* peptide = peptides->GetPeptide((*i)->second);	
+    const Peptide* peptide = peptides->GetPeptide((*i)->second);
     const pb::Protein* protein = proteins[peptide->FirstLocProteinId()];
     int pos = peptide->FirstLocPos();
     string proteinNames = getProteinName(*protein,
@@ -602,7 +601,7 @@ void TideMatchSet::writeHeaders(ofstream* file, bool decoyFile, bool sp) {
       writtenHeader = true;
       continue;
     }
-    if (header == DISTINCT_MATCHES_SPECTRUM_COL){
+    if (header == DISTINCT_MATCHES_SPECTRUM_COL) {
       if (Params::GetBool("peptide-centric-search")) {
         *file << get_column_header(DISTINCT_MATCHES_PEPTIDE_COL) << '\t';
         *file << get_column_header(DISTINCT_MATCHES_SPECTRUM_COL);

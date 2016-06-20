@@ -222,34 +222,31 @@ void CreateDocs::makeParamTable(const CruxApplicationList* apps) {
        appIter1++) {
     vector<string> appOptions1 = (*appIter1)->getOptions();
     for (vector<string>::const_iterator appOptionIter = appOptions1.begin();
-	 appOptionIter != appOptions1.end();
-	 appOptionIter++) {
-
-      /*    
-      */
+         appOptionIter != appOptions1.end();
+         appOptionIter++) {
       if (!isPrinted[*appOptionIter] && Params::IsVisible(*appOptionIter)) {
-	isPrinted[*appOptionIter] = true;
-	if (backgroundIsGrey) {
-	  cout << "<tr bgcolor=\"#DEDEDE\">" << endl;
-	} else {
-	  cout << "<tr>" << endl;
-	}
-	backgroundIsGrey = !backgroundIsGrey;
-	cout << "<td>" << *appOptionIter << "</td>";
-	for (vector<CruxApplication*>::const_iterator appIter2 = apps->begin();
-	     appIter2 != apps->end();
-	     appIter2++) {
+        isPrinted[*appOptionIter] = true;
+        if (backgroundIsGrey) {
+          cout << "<tr bgcolor=\"#DEDEDE\">" << endl;
+        } else {
+          cout << "<tr>" << endl;
+        }
+        backgroundIsGrey = !backgroundIsGrey;
+        cout << "<td>" << *appOptionIter << "</td>";
+        for (vector<CruxApplication*>::const_iterator appIter2 = apps->begin();
+             appIter2 != apps->end();
+             appIter2++) {
 
-	  vector<string> appOptions = (*appIter2)->getOptions();
-	  bool hasOption = std::find(appOptions.begin(), appOptions.end(),
-				     *appOptionIter) != appOptions.end();
-	  if (hasOption) {
-	    cout << "<td>&#10003;</td>";
-	  } else {
-	    cout << "<td>&nbsp;</td>";
-	  }
-	}
-	cout << "</tr>" << endl;
+          vector<string> appOptions = (*appIter2)->getOptions();
+          bool hasOption = std::find(appOptions.begin(), appOptions.end(),
+                   *appOptionIter) != appOptions.end();
+          if (hasOption) {
+            cout << "<td>&#10003;</td>";
+          } else {
+            cout << "<td>&nbsp;</td>";
+          }
+        }
+        cout << "</tr>" << endl;
       }
     }
   }

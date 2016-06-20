@@ -96,10 +96,9 @@ int SubtractIndexApplication::main(int argc, char** argv) {
 
   if (create_output_directory(index_out.c_str(), overwrite) != 0) {
     carp(CARP_FATAL, "Error creating index directory");
-  }
-  else if (FileUtils::Exists(out_proteins) ||
-    FileUtils::Exists(out_peptides) ||
-    FileUtils::Exists(out_aux)) {
+  } else if (FileUtils::Exists(out_proteins) ||
+             FileUtils::Exists(out_peptides) ||
+             FileUtils::Exists(out_aux)) {
     if (overwrite) {
       carp(CARP_DEBUG, "Cleaning old index file(s)");
       remove(out_proteins.c_str());
@@ -147,39 +146,35 @@ int SubtractIndexApplication::main(int argc, char** argv) {
   pre_pep_mass1 = 0.0;
   bool found;
 
-  while (!peptide_reader1.Done()){
-
+  while (!peptide_reader1.Done()) {
     peptide_reader1.Read(&pb_peptide1);
     pep_mass1 = pb_peptide1.mass();
     found = false;
 
-
-    if (pre_pep_mass1 < pep_mass1){
+    if (pre_pep_mass1 < pep_mass1) {
       peptide_container.clear();
       pre_pep_mass1 = pep_mass1;
     }
 
-    while (pep_mass2 < pep_mass1){
-      if (!peptide_reader2.Done()){
+    while (pep_mass2 < pep_mass1) {
+      if (!peptide_reader2.Done()) {
         peptide_reader2.Read(&pb_peptide2);
         pep_mass2 = pb_peptide2.mass();
-      }
-      else { 
+      } else { 
         break; 
       }
     }
-    while (pep_mass2 == pep_mass1){
+    while (pep_mass2 == pep_mass1) {
       peptide_container.push_back(pb_peptide2);
-      if (!peptide_reader2.Done()){
+      if (!peptide_reader2.Done()) {
         peptide_reader2.Read(&pb_peptide2);
         pep_mass2 = pb_peptide2.mass();
-      }
-      else {
+      } else {
         break;
       }
     }
     pep_str1 = getModifiedPeptideSeq(&pb_peptide1, &proteins1);
-    for (vector<pb::Peptide>::iterator it = peptide_container.begin(); it != peptide_container.end(); ++it){
+    for (vector<pb::Peptide>::iterator it = peptide_container.begin(); it != peptide_container.end(); ++it) {
       pep_str2 = getModifiedPeptideSeq(&(*it), &proteins2);
       if (pep_str1 == pep_str2) {
         found = true;
@@ -191,10 +186,9 @@ int SubtractIndexApplication::main(int argc, char** argv) {
       carp(CARP_DEBUG, "%s\t%lf\n", pep_str1.c_str(), pep_mass1);
 
       if (write_peptides) {
-        if (!pb_peptide1.is_decoy()){
+        if (!pb_peptide1.is_decoy()) {
           *out_target_list << pep_str1 << '\t' << pb_peptide1.mass() << endl;
-        }
-        else {
+        } else {
           *out_decoy_list << pep_str1 << '\t' << pb_peptide1.mass() << endl;
         }
       }

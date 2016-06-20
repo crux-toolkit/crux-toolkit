@@ -210,7 +210,7 @@ void CascadeSearchApplication::RemoveTempFiles(const string& path, const string&
     }
 
     string filename = i->path().filename().generic_string();
-    if (filename.compare(0, prefix.length(), prefix) == 0){
+    if (filename.compare(0, prefix.length(), prefix) == 0) {
       FileUtils::Remove(FileUtils::Join(path, filename));
     }
   }

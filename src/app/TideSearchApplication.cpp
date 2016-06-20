@@ -45,7 +45,7 @@ TideSearchApplication::~TideSearchApplication() {
 int TideSearchApplication::main(int argc, char** argv) {
   return main(Params::GetStrings("tide spectra file"));
 }
-int TideSearchApplication::main(const vector<string>& input_files){
+int TideSearchApplication::main(const vector<string>& input_files) {
   return main(input_files, Params::GetString("tide database"));
 }
 
@@ -102,8 +102,7 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
     min_scan = 0;
     max_scan = BILLION;
     carp(CARP_DEBUG, "Searching all scans");
-  }
-  else if (scan_range.find('-') == string::npos) {
+  } else if (scan_range.find('-') == string::npos) {
     // Single scan
     min_scan = max_scan = atoi(scan_range.c_str());
     carp(CARP_DEBUG, "Searching single scan %d", min_scan);
@@ -133,7 +132,7 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
   if (exact_pval_search_ && (Params::GetBool("pin-output")
                              || Params::GetBool("pepxml-output")
                              || Params::GetBool("mzid-output")
-                             || Params::GetBool("sqt-output"))){
+                             || Params::GetBool("sqt-output"))) {
     carp(CARP_FATAL, "Exact p-value with "
       "pin-output, pepxml-output, mzid-output or sqt-output file formats "
       "is not allowed yet in this version of Crux.");
@@ -147,7 +146,7 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
 
   // Check compute-sp parameter
   bool compute_sp = Params::GetBool("compute-sp");
-  if (Params::GetBool("sqt-output") && !compute_sp){
+  if (Params::GetBool("sqt-output") && !compute_sp) {
     compute_sp = true;
     carp(CARP_INFO, "Enabling parameter compute-sp since SQT output is enabled "
                     " (this will increase runtime).");
@@ -348,7 +347,7 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
     MaxBin::SetGlobalMax(highest_mz);
     // Do the search
     carp(CARP_INFO, "Running search");
-    if (spectrum_flag_ == NULL){
+    if (spectrum_flag_ == NULL) {
       resetMods();
     }
     search(f->OriginalName, spectra.SpecCharges(), active_peptide_queue, proteins,
@@ -394,8 +393,7 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
   return 0;
 }
 
-void TideSearchApplication::search(void* threadarg)
-{
+void TideSearchApplication::search(void* threadarg) {
   struct thread_data *my_data = (struct thread_data *) threadarg;
 
   const string& spectrum_filename = my_data->spectrum_filename;
@@ -417,8 +415,8 @@ void TideSearchApplication::search(void* threadarg)
   ofstream* target_file = my_data -> target_file;
   ofstream* decoy_file = my_data->decoy_file;
   bool compute_sp = my_data->compute_sp;
-  long thread_num = my_data->thread_num;
-  long num_threads = my_data->num_threads;
+  int64_t thread_num = my_data->thread_num;
+  int64_t num_threads = my_data->num_threads;
   int nAA = my_data->nAA;
   double* aaFreqN = my_data->aaFreqN;
   double* aaFreqI = my_data->aaFreqI;
@@ -462,8 +460,7 @@ void TideSearchApplication::search(void* threadarg)
       map<pair<string, unsigned int>, bool>::iterator spectrum_id;
       spectrum_id = spectrum_flag->find(pair<string, unsigned int>(
         spectrum_filename, scan_num * 10 + charge));
-      if (spectrum_id != spectrum_flag->end())
-      {
+      if (spectrum_id != spectrum_flag->end()) {
         continue;
       }
       locks_array[1]->unlock();
@@ -510,7 +507,7 @@ void TideSearchApplication::search(void* threadarg)
           deque<Peptide*>::const_iterator iter_ = active_peptide_queue->iter_;
           TideMatchSet::Arr2::iterator it = match_arr2.begin();
           for (; it != match_arr2.end(); ++iter_, ++it) {
-                   (*iter_)->AddHit(spectrum, it->first,0.0,it->second,charge);
+                   (*iter_)->AddHit(spectrum, it->first, 0.0, it->second, charge);
           }
       } else {  //spectrum centric match report.
         TideMatchSet::Arr match_arr(nCandPeptide);
@@ -587,7 +584,7 @@ void TideSearchApplication::search(void* threadarg)
       int** evidenceObs = new int*[nPepMassIntUniq];
       int* scoreOffsetObs = new int[nPepMassIntUniq];
       double** pValueScoreObs = new double*[nPepMassIntUniq];
-      int* intensArrayTheor = new int [maxPrecurMass]; // initialized later in loop
+      int* intensArrayTheor = new int[maxPrecurMass]; // initialized later in loop
       for (pe = 0; pe < nPepMassIntUniq; pe++) { // TODO should probably instead use iterator over pepMassIntUnique
         evidenceObs[pe] = new int[maxPrecurMass];
         for (ma = 0; ma < maxPrecurMass; ma++) {
@@ -653,7 +650,7 @@ void TideSearchApplication::search(void* threadarg)
         }
         int scoreCountIdx = scoreRefactInt + scoreOffsetObs[pepMassIntIdx];
         double pValue = pValueScoreObs[pepMassIntIdx][scoreCountIdx];
-        if (peptide_centric){
+        if (peptide_centric) {
             (*iter_)->AddHit(spectrum, pValue, (double)scoreRefactInt, nCandPeptide - pe, charge);
         } else {
           TideMatchSet::Pair pair;
@@ -677,23 +674,23 @@ void TideSearchApplication::search(void* threadarg)
       delete [] evidenceObs;
       delete [] pValueScoreObs;
       delete [] intensArrayTheor;
-      if (!peptide_centric){
+      if (!peptide_centric) {
         // matches will arrange the results in a heap by score, return the top
         // few, and recover the association between counter and peptide. We output
         // the top matches.
-          TideMatchSet matches(&match_arr, highest_mz);
-          matches.exact_pval_search_ = exact_pval_search;
+        TideMatchSet matches(&match_arr, highest_mz);
+        matches.exact_pval_search_ = exact_pval_search;
 
-          if (output_files) {
-            matches.report(output_files, top_matches, spectrum_filename, spectrum, charge,
-                           active_peptide_queue, proteins, locations, compute_sp, false);
-          } else {
-            matches.report(target_file, decoy_file, top_matches, spectrum_filename,
-                           spectrum, charge, active_peptide_queue, proteins,
-                           locations, compute_sp, false, locks_array[0]);
-          }
+        if (output_files) {
+          matches.report(output_files, top_matches, spectrum_filename, spectrum, charge,
+                         active_peptide_queue, proteins, locations, compute_sp, false);
+        } else {
+          matches.report(target_file, decoy_file, top_matches, spectrum_filename,
+                         spectrum, charge, active_peptide_queue, proteins,
+                         locations, compute_sp, false, locks_array[0]);
+        }
       } // end peptide_centric == true
-   } // end exact-pval-search
+    } // end exact-pval-search
 
     locks_array[3]->lock();
     ++(*sc_index);
@@ -731,8 +728,6 @@ void TideSearchApplication::search(
   double* aaFreqC,
   int* aaMass
 ) {
-
-
   // Create an array of 4 locks.
   // Lock #0: Results file output
   // Lock #1: Only used by cascade-search on spectrum_flag (map)
@@ -768,14 +763,14 @@ void TideSearchApplication::search(
     }
   }
   
-  if (!peptide_centric || !exact_pval_search_){
+  if (!peptide_centric || !exact_pval_search_) {
     for (int i = 0; i < NUM_THREADS; i++) {
       active_peptide_queue[i]->setElutionWindow(0);
     }
   }
 
   for (int i = 0; i < NUM_THREADS; i++) {
-    active_peptide_queue[i]->SetOutputs(output_files, &locations, top_matches, compute_sp, target_file, decoy_file,highest_mz);
+    active_peptide_queue[i]->SetOutputs(output_files, &locations, top_matches, compute_sp, target_file, decoy_file, highest_mz);
   }
 
   // Creating structs to hold information required for each thread to search through
@@ -794,7 +789,7 @@ void TideSearchApplication::search(
   boost::thread_group threadgroup;
 
   // Launch threads
-  for (long t = 1; t < NUM_THREADS; t++) {
+  for (int64_t t = 1; t < NUM_THREADS; t++) {
     boost::thread * currthread = new boost::thread(boost::bind(&TideSearchApplication::search, this, (void *) &(thread_data_array[t])));
     threadgroup.add_thread(currthread);
   }
@@ -955,15 +950,15 @@ void TideSearchApplication::computeWindow(
     *min_range = mz_minus_proton*sc.charge - precursor_window*max_charge;
     *max_range = mz_minus_proton*sc.charge + precursor_window*max_charge;
     break;
-    }
+  }
   case WINDOW_PPM: {
     double tiny_precursor = precursor_window * 1e-6;
     *out_min = sc.neutral_mass * (1.0 - tiny_precursor);
     *out_max = sc.neutral_mass * (1.0 + tiny_precursor);
     *min_range = *out_min;
     *max_range = *out_max;
-   break;
-    }
+    break;
+  }
   default:
     carp(CARP_FATAL, "Invalid window type");
   }
@@ -1149,7 +1144,7 @@ int TideSearchApplication::calcScoreCount(
     }
   }
   double* scoreCountBinAdjust = 0;
-  scoreCountBinAdjust = new double [nRow];
+  scoreCountBinAdjust = new double[nRow];
   for (row = 0; row < nRow; row++) {
     scoreCountBinAdjust[row] = 0.0;
   }
@@ -1269,11 +1264,11 @@ void TideSearchApplication::processParams() {
   }
 }
 
-void TideSearchApplication::setSpectrumFlag(map<pair<string, unsigned int>, bool>* spectrum_flag){
+void TideSearchApplication::setSpectrumFlag(map<pair<string, unsigned int>, bool>* spectrum_flag) {
   spectrum_flag_ = spectrum_flag;
 }
 
-string TideSearchApplication::getOutputFileName(){
+string TideSearchApplication::getOutputFileName() {
   return output_file_name_;
 }
 

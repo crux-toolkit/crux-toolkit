@@ -16,11 +16,11 @@ using namespace std;
 
 class ReadSpectrumRecordsApplication : public CruxApplication {
 
-protected:
+ protected:
 
   void show(HeadedRecordReader& reader);
 
-public:
+ public:
 
   /**
    * Constructor

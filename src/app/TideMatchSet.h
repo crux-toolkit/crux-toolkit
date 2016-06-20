@@ -21,7 +21,7 @@ typedef vector<const pb::Protein*> ProteinVec;
 
 class TideMatchSet {
 
-public:
+ public:
   bool exact_pval_search_;
   int elution_window_;
   
@@ -103,7 +103,7 @@ public:
 
   static string CleavageType;
 
-protected:
+ protected:
   Arr* matches_;
   Arr2* matches2_;
   Peptide* peptide_;  

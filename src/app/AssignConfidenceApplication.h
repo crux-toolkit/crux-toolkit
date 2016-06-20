@@ -37,14 +37,14 @@ enum _estimation_method {
 typedef enum _estimation_method ESTIMATION_METHOD_T;
 
 class AssignConfidenceApplication : public CruxApplication {
-protected:
+ protected:
   map<pair<string, unsigned int>, bool>* spectrum_flag_;  // this variable is used in Cascade Search, this is an idicator 
   unsigned int iteration_cnt_;
   OutputFiles* output_;
   unsigned int accepted_psms_;
   string index_name_;
 
-public:
+ public:
   map<pair<string, unsigned int>, bool>* getSpectrumFlag();
   void setSpectrumFlag(map<pair<string, unsigned int>, bool>* spectrum_flag);
   void setIterationCnt(unsigned int iteration_cnt);
