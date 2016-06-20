@@ -37,7 +37,7 @@ int StatColumn::main(int argc, char** argv) {
   int col_idx = delimited_file.findColumn(column_name_string_);
 
   if (col_idx == -1) {
-    carp(CARP_ERROR,"column not found:%s\n\n%s", 
+    carp(CARP_ERROR, "column not found:%s\n\n%s", 
       column_name_string_.c_str(),
       delimited_file.getAvailableColumnsString().c_str());
     return(-1);
@@ -96,7 +96,7 @@ int StatColumn::main(int argc, char** argv) {
   //print out the header
 
   if (header_) {
-    cout <<"N\tMin\tMax\tSum\tAverage\tStdDev\tMedian"<<endl;
+    cout << "N\tMin\tMax\tSum\tAverage\tStdDev\tMedian" << endl;
   }
 
   cout << std::setprecision(Params::GetInt("precision"));

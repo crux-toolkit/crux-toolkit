@@ -47,7 +47,7 @@ GetMs2Spectrum::~GetMs2Spectrum() {
 /****************************************************************************
  * MAIN
  ****************************************************************************/
-int GetMs2Spectrum :: main(int argc, char** argv){
+int GetMs2Spectrum::main(int argc, char** argv) {
   /* Get arguments */
   int min_scan = -1;
   int max_scan = -1;
@@ -67,7 +67,7 @@ int GetMs2Spectrum :: main(int argc, char** argv){
   bool options = Params::GetBool("stats");
 
   /* read input file */
-  if( access(ms2_filename.c_str(), F_OK)){
+  if (access(ms2_filename.c_str(), F_OK)) {
     carp(CARP_FATAL, "Could not read from ms2 file '%s'", ms2_filename.c_str());
   }
   carp(CARP_DETAILED_DEBUG, "Creating spectrum collection.");
@@ -82,11 +82,9 @@ int GetMs2Spectrum :: main(int argc, char** argv){
     if (spectrum->getFirstScan() >= min_scan && spectrum->getFirstScan() <= max_scan) {
 
       /* Print either the spectrum or stats. */
-      if (!options){
+      if (!options) {
         spectrum->print(stdout);
-
       } else {
-
         int charge_state_index = 0; 
         int charge_state_num = spectrum->getNumZStates();
         std::vector<SpectrumZState> zstates_array = spectrum->getZStates();
@@ -94,15 +92,12 @@ int GetMs2Spectrum :: main(int argc, char** argv){
         printf("Scan number: %i\n", spectrum->getFirstScan());
         printf("Precursor m/z:%.2f\n", spectrum->getPrecursorMz());
         printf("Total Ion Current:%.2f\n", spectrum->getTotalEnergy());
-        printf("Base Peak Intensity:%.1f\n", 
-             spectrum->getMaxPeakIntensity()); // base is max
+        printf("Base Peak Intensity:%.1f\n", spectrum->getMaxPeakIntensity()); // base is max
         printf("Number of peaks:%d\n", spectrum->getNumPeaks());
         printf("Minimum m/z:%.1f\n", spectrum->getMinPeakMz());
         printf("Maximum m/z:%.1f\n", spectrum->getMaxPeakMz());
     
-        for(charge_state_index=0; charge_state_index < charge_state_num; 
-            ++charge_state_index){
-
+        for (charge_state_index = 0; charge_state_index < charge_state_num; ++charge_state_index) {
           SpectrumZState& zstate = zstates_array[charge_state_index];
           FLOAT_T charged_mass = spectrum->getPrecursorMz() * (FLOAT_T)zstate.getCharge();
 

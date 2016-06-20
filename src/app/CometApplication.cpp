@@ -106,7 +106,7 @@ void CometApplication::setVarMod(const string& param) {
     string field = fields[i];
     switch (i) {
       case 0: m.dVarModMass = StringUtils::FromString<double>(field); break;
-      case 1: strcpy(m.szVarModChar, field.c_str()); break;
+      case 1: sprintf(m.szVarModChar, "%s", field.c_str()); break;
       case 2: m.iBinaryMod = StringUtils::FromString<int>(field); break;
       case 3: m.iMaxNumVarModAAPerMod = StringUtils::FromString<int>(field); break;
       case 4: m.iVarModTermDistance = StringUtils::FromString<int>(field); break;
@@ -177,7 +177,7 @@ void CometApplication::setCometParameters(
       carp(CARP_FATAL, "Spectra File Not Found:%s", i->c_str());
     }
     InputFileInfo* pInputFile = new InputFileInfo();
-    strcpy(pInputFile->szFileName, i->c_str());
+    sprintf(pInputFile->szFileName, "%s", i->c_str());
     pInputFile->iAnalysisType = analysis_type;
     if (analysis_type == AnalysisType_SpecificScanRange) {
       pInputFile->iFirstScan = first_scan;
@@ -187,7 +187,7 @@ void CometApplication::setCometParameters(
     if (spec_files.size() > 1) {
       basename += "." + FileUtils::Stem(*i);
     }
-    strcpy(pInputFile->szBaseName, basename.c_str());
+    sprintf(pInputFile->szBaseName, "%s", basename.c_str());
     pvInputFiles.push_back(pInputFile);
   }
 

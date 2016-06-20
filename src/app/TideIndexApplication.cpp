@@ -203,7 +203,7 @@ int TideIndexApplication::main(
   del->mutable_variable_mod()->Clear();
   del->mutable_unique_deltas()->Clear();
 
-  bool need_mods = var_mod_table.Unique_delta_size()>0;
+  bool need_mods = var_mod_table.Unique_delta_size() > 0;
 
   string basic_peptides = need_mods ? modless_peptides : peakless_peptides;
   carp(CARP_DETAILED_DEBUG, "basic_peptides=%s", basic_peptides.c_str());
@@ -567,11 +567,11 @@ void TideIndexApplication::fastaToPb(
   
   } else { // allow dups
     for (vector<pair<ProteinInfo, vector<PeptideInfo> > >::const_iterator i = cleavedPeptideInfo.begin();
-   i != cleavedPeptideInfo.end();
-   ++i) {
+         i != cleavedPeptideInfo.end();
+         ++i) {
       for (vector<PeptideInfo>::const_iterator j = i->second.begin();
-    j != i->second.end();
-    ++j) {
+           j != i->second.end();
+           ++j) {
         const string setTarget = j->Sequence();
         const ProteinInfo& proteinInfo = i->first;
         const int startLoc = j->Position();
@@ -839,15 +839,14 @@ void TideIndexApplication::processParams() {
 
 
 string getModifiedPeptideSeq(const pb::Peptide* peptide,
-  const ProteinVec* proteins){
+  const ProteinVec* proteins) {
   int mod_index;
   double mod_delta;
   stringstream mod_stream;
   const pb::Location& location = peptide->first_location();
   const pb::Protein* protein = proteins->at(location.protein_id());
   // Get peptide sequence without mods
-  string pep_str = protein->residues().substr(
-    location.pos(), peptide->length());
+  string pep_str = protein->residues().substr(location.pos(), peptide->length());
 
   // Store all mod indices/deltas
   map<int, double> mod_map;

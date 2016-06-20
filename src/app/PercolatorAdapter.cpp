@@ -219,7 +219,7 @@ void PercolatorAdapter::addProteinScores() {
   vector<ProteinMatch*> decoy_matches;
   map<const string, Protein*> protein_scores = protEstimator_->getProteins();
   
-  for (map<const string,Protein*>::iterator score_iter = protein_scores.begin();
+  for (map<const string, Protein*>::iterator score_iter = protein_scores.begin();
        score_iter != protein_scores.end();
        score_iter++) {
     if (score_iter->second == NULL) {
@@ -462,20 +462,20 @@ int PercolatorAdapter::run() {
   //PSM probabilities TDA or TDC
   calculatePSMProb(false, procStart, procStartClock, diff);
   addPsmScores();
-  if (xmlInterface_.getXmlOutputFN().size() > 0){
+  if (xmlInterface_.getXmlOutputFN().size() > 0) {
     xmlInterface_.writeXML_PSMs(allScores_);
   }
   
   // calculate unique peptides level probabilities WOTE
-  if (reportUniquePeptides_){
+  if (reportUniquePeptides_) {
     calculatePSMProb(true, procStart, procStartClock, diff);
     addPeptideScores();
-    if (xmlInterface_.getXmlOutputFN().size() > 0){
+    if (xmlInterface_.getXmlOutputFN().size() > 0) {
       xmlInterface_.writeXML_Peptides(allScores_);
     }
   }
   // calculate protein level probabilities with FIDO
-  if(ProteinProbEstimator::getCalcProteinLevelProb()){
+  if(ProteinProbEstimator::getCalcProteinLevelProb()) {
     calculateProteinProbabilitiesFido();
     addProteinScores();
   }

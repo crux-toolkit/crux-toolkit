@@ -26,7 +26,7 @@ class TideIndexApplication : public CruxApplication {
 
   friend class TideSearchApplication;
 
-public:
+ public:
 
   /**
    * Constructor
@@ -77,17 +77,17 @@ public:
 
   virtual COMMAND_T getCommand() const;
 
-protected:
+ protected:
 
   class TideIndexPeptide {
-  private:
+   private:
     double mass_;
     int length_;
     int proteinId_;
     int proteinPos_;
     const char* residues_;  // points at protein sequence
     bool decoy_;
-  public:
+   public:
     TideIndexPeptide() {}
     TideIndexPeptide(double mass, int length, string* proteinSeq,
                      int proteinId, int proteinPos, bool decoy) {

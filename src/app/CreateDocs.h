@@ -9,7 +9,7 @@
 #include "CruxApplicationList.h"
 
 class CreateDocs : public CruxApplication {
-public:
+ public:
   CreateDocs();
   virtual ~CreateDocs();
 
@@ -22,7 +22,7 @@ public:
   virtual bool needsOutputDirectory() const;
   virtual bool hidden() const;
 
-protected:
+ protected:
   void checkParams(const CruxApplicationList* apps = NULL);
 
   void makeParamTable(const CruxApplicationList* apps);
@@ -33,12 +33,12 @@ protected:
     const std::map<std::string, std::string>& replacements
   );
 
-  const static std::string TOOL_TEMPLATE;
-  const static std::string TOOL_INPUT_TEMPLATE;
-  const static std::string TOOL_OUTPUT_TEMPLATE;
-  const static std::string TOOL_OPTION_CATEGORY_TEMPLATE;
-  const static std::string TOOL_NO_OPTIONS_TEMPLATE;
-  const static std::string TOOL_OPTION_TEMPLATE;
+  static const std::string TOOL_TEMPLATE;
+  static const std::string TOOL_INPUT_TEMPLATE;
+  static const std::string TOOL_OUTPUT_TEMPLATE;
+  static const std::string TOOL_OPTION_CATEGORY_TEMPLATE;
+  static const std::string TOOL_NO_OPTIONS_TEMPLATE;
+  static const std::string TOOL_OPTION_TEMPLATE;
 };
 
 #endif

@@ -311,8 +311,8 @@ int PercolatorApplication::main(
       perc_args_vec.push_back(output_decoy_proteins);
     }
   }
-  
-   perc_args_vec.push_back(input_pin);
+
+  perc_args_vec.push_back(input_pin);
 
   /* build argv line */
 

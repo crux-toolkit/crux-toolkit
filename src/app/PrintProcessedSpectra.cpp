@@ -71,12 +71,12 @@ int PrintProcessedSpectra::main(int argc, char** argv) {
   FilteredSpectrumChargeIterator* spectrum_iterator =
     new FilteredSpectrumChargeIterator(spectra);
 
-  if( spectrum_iterator == NULL ){
+  if (spectrum_iterator == NULL) {
     carp(CARP_FATAL, "Could create spectrum iterator");
   }
 
   // loop over all spectra, process, print
-  while(spectrum_iterator->hasNext()){
+  while (spectrum_iterator->hasNext()) {
     SpectrumZState cur_zstate;
     int cur_charge = 0;
     Crux::Spectrum* cur_spectrum = 

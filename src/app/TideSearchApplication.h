@@ -16,7 +16,7 @@
 using namespace std; 
 
 class TideSearchApplication : public CruxApplication {
-protected:
+ protected:
   /**
   brief This variable is used with Cascade Search.
   This map contains a flag for each spectrum whether
@@ -96,7 +96,7 @@ protected:
   );
 
   struct ScSortByMz {
-    ScSortByMz(double precursor_window) { precursor_window_ = precursor_window; }
+    explicit ScSortByMz(double precursor_window) { precursor_window_ = precursor_window; }
     bool operator() (const SpectrumCollection::SpecCharge x,
                      const SpectrumCollection::SpecCharge y) {
       return (x.spectrum->PrecursorMZ() - MASS_PROTON - precursor_window_) * x.charge <
@@ -119,7 +119,7 @@ protected:
       OriginalName(name), SpectrumRecords(spectrumrecords), Keep(keep) {}
   };
 
-public:
+ public:
 
   // See TideSearchApplication.cpp for descriptions of these two constants
   static const double XCORR_SCALING;
@@ -206,8 +206,8 @@ public:
     ofstream* target_file;
     ofstream* decoy_file;
     bool compute_sp;
-    long thread_num;
-    long num_threads;
+    int64_t thread_num;
+    int64_t num_threads;
     int nAA;
     double* aaFreqN;
     double* aaFreqI;
@@ -222,12 +222,12 @@ public:
     int* total_candidate_peptides;
 
     thread_data (const string& spectrum_filename_, const vector<SpectrumCollection::SpecCharge>* spec_charges_,
-    	ActivePeptideQueue* active_peptide_queue_, ProteinVec proteins_,
-    	vector<const pb::AuxLocation*> locations_, double precursor_window_,
-    	WINDOW_TYPE_T window_type_, double spectrum_min_mz_, double spectrum_max_mz_,
-    	int min_scan_, int max_scan_, int min_peaks_, int search_charge_, int top_matches_,
-    	double highest_mz_, OutputFiles* output_files_, ofstream* target_file_,
-    	ofstream* decoy_file_, bool compute_sp_, long thread_num_, long num_threads_, int nAA_,
+            ActivePeptideQueue* active_peptide_queue_, ProteinVec proteins_,
+            vector<const pb::AuxLocation*> locations_, double precursor_window_,
+            WINDOW_TYPE_T window_type_, double spectrum_min_mz_, double spectrum_max_mz_,
+            int min_scan_, int max_scan_, int min_peaks_, int search_charge_, int top_matches_,
+            double highest_mz_, OutputFiles* output_files_, ofstream* target_file_,
+            ofstream* decoy_file_, bool compute_sp_, int64_t thread_num_, int64_t num_threads_, int nAA_,
             double* aaFreqN_, double* aaFreqI_, double* aaFreqC_, int* aaMass_, vector<boost::mutex*> locks_array_,  
             double bin_width_, double bin_offset_, bool exact_pval_search_, map<pair<string, unsigned int>, bool>* spectrum_flag_,
             unsigned* sc_index_, int* total_candidate_peptides_) : 
@@ -237,7 +237,7 @@ public:
             min_peaks(min_peaks_), search_charge(search_charge_), top_matches(top_matches_), highest_mz(highest_mz_),
             output_files(output_files_), target_file(target_file_), decoy_file(decoy_file_), compute_sp(compute_sp_), 
             thread_num(thread_num_), num_threads(num_threads_), nAA(nAA_), aaFreqN(aaFreqN_), aaFreqI(aaFreqI_), aaFreqC(aaFreqC_), 
-						aaMass(aaMass_), locks_array(locks_array_), bin_width(bin_width_), bin_offset(bin_offset_), exact_pval_search(exact_pval_search_), 
+            aaMass(aaMass_), locks_array(locks_array_), bin_width(bin_width_), bin_offset(bin_offset_), exact_pval_search(exact_pval_search_), 
             spectrum_flag(spectrum_flag_), sc_index(sc_index_), total_candidate_peptides(total_candidate_peptides_) {}
   };
 

@@ -1,8 +1,8 @@
-/*************************************************************************//**
- * \file ExtractRows.cpp
- * \brief Given a tab delimited file and column name and value, print
- * out all rows that pass the relation operator (default equals).
- ****************************************************************************/
+/*******************************************************************************
+  * \file ExtractRows.cpp
+  * \brief Given a tab delimited file and column name and value, print
+  * out all rows that pass the relation operator (default equals).
+  ****************************************************************************/
 
 #include "ExtractRows.h"
 
@@ -79,7 +79,7 @@ int ExtractRows::main(int argc, char** argv) {
   int column_idx = delimited_file.findColumn(column_name);
 
   if (column_idx == -1) {
-    carp(CARP_FATAL,"column not found:%s\n\n:%s",
+    carp(CARP_FATAL, "column not found:%s\n\n:%s",
       column_name.c_str(),
       delimited_file.getAvailableColumnsString().c_str());
   }
@@ -113,7 +113,7 @@ int ExtractRows::main(int argc, char** argv) {
         break;
       case NUMBER_COLTYPES:
       case COLTYPE_INVALID:
-        carp(CARP_FATAL,"Unknown column type");
+        carp(CARP_FATAL, "Unknown column type");
     }
     
     if (passes) {

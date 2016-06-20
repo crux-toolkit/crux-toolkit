@@ -15,7 +15,7 @@ using namespace std;
 // function call when the STL make_pair is combined with the STL ptr_fun.
 // They promise to fix this a later version, but until then we create our own wrapper
 // for this use of make_pair.
-pair<double,bool> make_pair(double db, bool b);
+pair<double, bool> make_pair(double db, bool b);
 #endif
 
 /**
@@ -70,9 +70,8 @@ double* ComputeQValues::compute_PEP(double* target_scores, ///< scores for targe
                         double* decoy_scores,  ///< scores for decoy matches
                         int num_decoys,         ///< size of decoy_scores
                         bool ascending ///< are the scores ascending or descending
-){
-  if( target_scores == NULL || decoy_scores == NULL 
-      || num_targets == 0 || num_decoys == 0 ){
+) {
+  if (target_scores == NULL || decoy_scores == NULL || num_targets == 0 || num_decoys == 0) {
     carp(CARP_FATAL, "Cannot compute PEP without target or decoy scores.");
   }
 //  pi0 = estimate_pi0(target_scores, num_targets, decoy_scores, num_decoys, ascending);
@@ -82,10 +81,10 @@ double* ComputeQValues::compute_PEP(double* target_scores, ///< scores for targe
 
   transform(target_scores, target_scores + num_targets,
             back_inserter(score_labels),
-            bind2nd(ptr_fun<double,bool,pair<double, bool> >(make_pair), true));
+            bind2nd(ptr_fun<double, bool, pair<double, bool> >(make_pair), true));
   transform(decoy_scores, decoy_scores + num_decoys,
             back_inserter(score_labels),
-            bind2nd(ptr_fun<double,bool,pair<double, bool> >(make_pair), false));
+            bind2nd(ptr_fun<double, bool, pair<double, bool> >(make_pair), false));
 
   // sort them 
   if (ascending) {
@@ -115,8 +114,7 @@ double* ComputeQValues::compute_PEP(double* target_scores, ///< scores for targe
   // pull out the PEPs in the order that the scores were given
   double* PEP_array = new double[PEP_vector.size()];
 
-  for(int target_idx = 0; target_idx < num_targets; target_idx++){
-    
+  for (int target_idx = 0; target_idx < num_targets; target_idx++) {
     // the score to return next    
     double curr_target_score = target_scores[target_idx];
 
@@ -137,7 +135,7 @@ double* ComputeQValues::compute_PEP(double* target_scores, ///< scores for targe
 
     // pull out the PEP at the same position in PEP_vector
     PEP_array[target_idx] = PEP_vector[found_index];
-   }
+  }
 
   return PEP_array;
 }

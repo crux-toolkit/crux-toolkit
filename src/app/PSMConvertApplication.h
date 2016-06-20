@@ -13,7 +13,7 @@ using namespace std;
 
 class PSMConvertApplication : public CruxApplication {
 
-public:
+ public:
 
   /**
    * Constructor
