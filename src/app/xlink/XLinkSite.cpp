@@ -1,4 +1,4 @@
-/*************************************************************************//**
+/*************************************************************************
  * \file XLinkSite.cpp
  * AUTHOR: Sean McIlwain
  * CREATE DATE:  Febuary 22, 2011
@@ -40,11 +40,11 @@ XLinkSite::XLinkSite(
   } else if (site_string.length() == 1) {
 
     type_ = XLINKSITE_AA;
-    aa_=site_string[0];
+    aa_ = site_string[0];
 
   } else {
 
-    carp(CARP_FATAL, "Unknown link site:%s",site_string.c_str());
+    carp(CARP_FATAL, "Unknown link site:%s", site_string.c_str());
   }
 }
 
@@ -100,7 +100,7 @@ bool XLinkSite::hasSite(
     case XLINKSITE_UNKNOWN:
     default:
       carp(CARP_FATAL, "Xlink site not set!");
-  };
+  }
   return false;
 }
 

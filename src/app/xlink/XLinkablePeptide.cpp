@@ -1,4 +1,4 @@
-/*************************************************************************//**
+/*************************************************************************
  * \file XLinkablePeptide.cpp
  * AUTHOR: Sean McIlwain
  * CREATE DATE:  Febuary 22, 2011
@@ -85,7 +85,7 @@ XLinkablePeptide::XLinkablePeptide(
   init();
   peptide_ = peptide->copyPtr();
 
-  for (unsigned int idx=0;idx<link_sites.size();idx++) {
+  for (unsigned int idx = 0; idx < link_sites.size(); idx++) {
     addLinkSite(link_sites[idx]);
   }
   is_decoy_ = false;
@@ -100,7 +100,7 @@ XLinkablePeptide::XLinkablePeptide(
   XLinkBondMap& bondmap ///< the bond map
   ) {
   init();
-  peptide_=peptide->copyPtr();
+  peptide_ = peptide->copyPtr();
   findLinkSites(peptide_, bondmap, link_sites_);
 }
 
@@ -216,7 +216,7 @@ void XLinkablePeptide::findLinkSites(
   for (int mod_idx = 0;mod_idx < total_mods; mod_idx++) {
     if (aa_mod_get_prevents_xlink(mod_list[mod_idx])) {
       prevents_xlink.push_back(mod_list[mod_idx]);
-   }
+    }
   }
 
   //scan through the sequence and find linkable sites.
@@ -240,7 +240,7 @@ void XLinkablePeptide::findLinkSites(
       //prevents the cross-link
       if (!link_prevented) {
         //check if the modification prevents xlink.
-        for (unsigned int mod_idx=0;mod_idx<prevents_xlink.size();mod_idx++) {
+        for (unsigned int mod_idx = 0; mod_idx < prevents_xlink.size(); mod_idx++) {
           //if aa is modified by any modification that can prevent
           //cross-linking, then don't add the site as a link_site.
           if (is_aa_modified(mod_seq[seq_idx], prevents_xlink[mod_idx])) {
@@ -409,7 +409,7 @@ const MODIFIED_AA_T* XLinkablePeptide::getModifiedSequencePtr() {
 
 int findLink(vector<int>& link_sites, int link_site) {
   
-  for (unsigned int idx=0;idx<link_sites.size();idx++) {
+  for (unsigned int idx = 0; idx < link_sites.size(); idx++) {
     if (link_sites[idx] == link_site)
       return idx;
   }
@@ -486,7 +486,7 @@ MODIFIED_AA_T* generateShuffledModSequence(
   --end_idx;
   
   // shuffle from left to right, using the Knuth algorithm for shuffling.
-  while(start_idx < end_idx){
+  while(start_idx < end_idx) {
     switch_idx = get_random_number_interval(start_idx, end_idx);
     temp_aa = sequence[start_idx];
     sequence[start_idx] = sequence[switch_idx];
@@ -506,7 +506,7 @@ XLinkablePeptide XLinkablePeptide::shuffle() {
   XLink::addAllocatedPeptide(peptide);
   //cerr <<"Linksites"<<endl;
   vector<int> link_sites;
-  for (unsigned int idx=0;idx<numLinkSites();idx++) {
+  for (unsigned int idx = 0; idx < numLinkSites(); idx++) {
     link_sites.push_back(getLinkSite(idx));
   }
 
@@ -594,7 +594,7 @@ void XLinkablePeptide::predictIons(
     cached_ions->update(getSequence(), getModifiedSequencePtr());
     cached_ions->predictIons();
   }
-  int link_pos=link_sites_[link_idx];
+  int link_pos = link_sites_[link_idx];
   int seq_len = peptide_->getLength();
   if (clear) {
     ion_series->clear();
@@ -608,7 +608,7 @@ void XLinkablePeptide::predictIons(
     if (ion->isForwardType()) { 
       if (cleavage_idx > (unsigned int)link_pos) {
         ion = new Ion();
-	Ion::copy(src_ion, ion, (char *)"");
+        Ion::copy(src_ion, ion, (char *)"");
         FLOAT_T mass = ion->getMassFromMassZ() + mod_mass;
         ion->setMassZFromMass(mass); 
         if (isnan(ion->getMassZ())) { 
@@ -618,7 +618,7 @@ void XLinkablePeptide::predictIons(
     } else { 
       if (cleavage_idx >= (seq_len-(unsigned int)link_pos)) { 
         ion = new Ion();
-	Ion::copy(src_ion, ion, (char *)"");
+        Ion::copy(src_ion, ion, (char *)"");
         FLOAT_T mass = ion->getMassFromMassZ() + mod_mass;
         ion->setMassZFromMass(mass); 
         if (isnan(ion->getMassZ())) { 

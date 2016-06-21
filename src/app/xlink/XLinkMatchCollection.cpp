@@ -108,7 +108,7 @@ XLinkMatchCollection::XLinkMatchCollection(
   zstate_ = vector.zstate_;
   scan_ = vector.scan_;
 
-  for (int idx=0;idx<vector.getMatchTotal();idx++) {
+  for (int idx = 0; idx < vector.getMatchTotal(); idx++) {
     XLinkMatch* currentCandidate = (XLinkMatch*)vector[idx];
     XLinkMatch* copyCandidate = NULL;
     switch (currentCandidate -> getCandidateType()) {
@@ -276,7 +276,7 @@ XLinkMatch* XLinkMatchCollection::at(
 /**
  * \returns a candidate from the list by index
  */
-XLinkMatch* XLinkMatchCollection::operator [](
+XLinkMatch* XLinkMatchCollection::operator[] (
   int idx ///< index of the candidate
   ) {
   return (XLinkMatch*)match_[idx];
@@ -294,7 +294,7 @@ void XLinkMatchCollection::shuffle(
   decoy_vector.zstate_ = zstate_;
   decoy_vector.scan_ = scan_;
 
-  for (int idx=0;idx<getMatchTotal();idx++) {
+  for (int idx = 0; idx < getMatchTotal(); idx++) {
     //cerr << "shuffling:" << at(idx)->getSequenceString()<<endl;
     decoy_vector.add(at(idx)->shuffle());
   }
@@ -315,7 +315,7 @@ void XLinkMatchCollection::scoreSpectrum(
     spectrum, 
     min(zstate_.getCharge(), max_ion_charge));
 
-  for (int idx=0;idx<getMatchTotal();idx++) {
+  for (int idx = 0; idx < getMatchTotal(); idx++) {
     carp(CARP_DEBUG, "Scoring candidate:%d", idx);
     scorer.scoreCandidate(at(idx));
   }
@@ -335,10 +335,10 @@ void XLinkMatchCollection::scoreSpectrum(
 void XLinkMatchCollection::fitWeibull() {
 
   //create the array of x's and 
-  shift_=0;
-  eta_=0;
-  beta_=0;
-  correlation_=0;
+  shift_ = 0;
+  eta_ = 0;
+  beta_ = 0;
+  correlation_ = 0;
 
   FLOAT_T* xcorrs = extractScores(XCORR);
 // reverse sort the scores

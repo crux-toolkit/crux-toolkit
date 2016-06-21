@@ -128,9 +128,9 @@ FLOAT_T XHHC_Peptide::getMass(
   MASS_TYPE_T mass_type ///< MONO or AVERAGE
   ) {
 
-  if (mass_calculated_[mass_type]) 
+  if (mass_calculated_[mass_type]) {
     return mass_[mass_type];
-  else {
+  } else {
     mass_[mass_type] = Peptide::calcSequenceMass((char*)sequence_.c_str(), mass_type);
     mass_calculated_[mass_type] = true;
     return mass_[mass_type];
@@ -173,7 +173,9 @@ void XHHC_Peptide::splitAt(
         pepA.addLink(idx); 
         if (!other.isEmpty() && !is_loop) linkedA.addPeptide(other);
         // if a loop, skip cleavages in between link sites (same mass as precursor)
-	if (is_loop) self_flag = !self_flag;
+        if (is_loop) {
+          self_flag = !self_flag;
+        }
       }
     }
     if (!self_flag) continue;
@@ -181,8 +183,9 @@ void XHHC_Peptide::splitAt(
     for (int idx = index; idx < length_; idx++) {
       if (hasLinkAt(idx)) {
         pepB.addLink(idx - index);
-	if (!other.isEmpty() && !is_loop) linkedB.addPeptide(other);
-	//else (self_flag = !self_flag);
+        if (!other.isEmpty() && !is_loop) {
+          linkedB.addPeptide(other);
+        }
       }
     } 
     linkedA.addPeptide(pepA);
@@ -205,7 +208,7 @@ XHHC_Peptide XHHC_Peptide::shuffle() {
   int end_idx = length_ - 2;
   int switch_idx = 0;
   char temp_char = 0;
-  while(start_idx <= end_idx){
+  while(start_idx <= end_idx) {
     switch_idx = get_random_number_interval(start_idx, end_idx);
     temp_char = shuffled[start_idx];
     shuffled[start_idx] = shuffled[switch_idx];

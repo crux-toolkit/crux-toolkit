@@ -75,7 +75,7 @@ void SelfLoopPeptide::addCandidates(
   vector<XLinkablePeptide> linkable_peptides;
   int cur_aa_mods = 0;
   //loop over modifications.
-  for (int mod_idx=0;mod_idx<num_peptide_mods;mod_idx++) {
+  for (int mod_idx = 0; mod_idx < num_peptide_mods; mod_idx++) {
   
     PEPTIDE_MOD_T* peptide_mod = peptide_mods[mod_idx];
     int this_aa_mods = peptide_mod_get_num_aa_mods(peptide_mod);
@@ -107,8 +107,8 @@ void SelfLoopPeptide::addCandidates(
   for (unsigned int idx =0;idx < linkable_peptides.size();idx++) {
     XLinkablePeptide &pep = linkable_peptides[idx];
 
-    for (unsigned int link1_idx=0;link1_idx<pep.numLinkSites()-1;link1_idx++) {
-      for (unsigned int link2_idx=link1_idx+1;link2_idx<pep.numLinkSites();link2_idx++) {
+    for (unsigned int link1_idx = 0; link1_idx < pep.numLinkSites()-1; link1_idx++) {
+      for (unsigned int link2_idx = link1_idx+1; link2_idx < pep.numLinkSites(); link2_idx++) {
         if (bondmap.canLink(pep, link1_idx, link2_idx)) {
           //create the candidate.
           XLinkMatch* new_candidate = 

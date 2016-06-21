@@ -12,7 +12,6 @@ runtime/indentation_namespace
 runtime/init
 runtime/int
 runtime/operator
-runtime/references
 whitespace/braces
 whitespace/comma
 whitespace/forcolon

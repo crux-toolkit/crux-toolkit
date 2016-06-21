@@ -113,7 +113,7 @@ void XLinkPeptide::doSort() {
 void XLinkPeptide::setLinkerMass(
   FLOAT_T linker_mass ///< linker mass
   ) {
-  linker_mass_=linker_mass;
+  linker_mass_ = linker_mass;
 }
 
 /**
@@ -301,7 +301,7 @@ void XLinkPeptide::addCandidates(
   }
 
   vector<size_t> protein_indices;
-  for (size_t protein_idx=0;protein_idx<protein_idx_to_xpeptides.size();protein_idx++) {
+  for (size_t protein_idx = 0; protein_idx < protein_idx_to_xpeptides.size(); protein_idx++) {
     vector<XLinkablePeptide>& xlinkable_peptides = protein_idx_to_xpeptides.at(protein_idx);
     if (xlinkable_peptides.size() > 0) {
       sort(xlinkable_peptides.begin(), xlinkable_peptides.end(), compareXLinkablePeptideMass);
@@ -312,12 +312,12 @@ void XLinkPeptide::addCandidates(
   carp(CARP_INFO, "have peptides for %i proteins", protein_indices.size());
 
   if (include_intra  || include_inter_intra) {
-    for (size_t protein_idx_idx=0;protein_idx_idx<protein_indices.size();protein_idx_idx++) {
+    for (size_t protein_idx_idx = 0; protein_idx_idx < protein_indices.size(); protein_idx_idx++) {
 
       vector<XLinkablePeptide>& xlinkable_peptides = 
         protein_idx_to_xpeptides.at(protein_indices[protein_idx_idx]);
 
-      bool done=false;
+      bool done = false;
       for (size_t pep1_idx = 0;pep1_idx < xlinkable_peptides.size();pep1_idx++) {
         XLinkablePeptide& pep1 = xlinkable_peptides.at(pep1_idx);
         FLOAT_T pep1_mass = pep1.getMass();
@@ -356,7 +356,7 @@ void XLinkPeptide::addCandidates(
       for (size_t protein_idx_idx2=protein_idx_idx1+1;protein_idx_idx2 < protein_indices.size(); protein_idx_idx2++) {
         vector<XLinkablePeptide>& peptides2 = 
           protein_idx_to_xpeptides[protein_indices[protein_idx_idx2]];
-        bool done=false;
+        bool done = false;
         size_t pep2_idx = 0;
         for (size_t pep1_idx = 0;pep1_idx < peptides1.size();pep1_idx++) {
           XLinkablePeptide& pep1 = peptides1.at(pep1_idx);
@@ -468,7 +468,7 @@ void XLinkPeptide::predictIons(
   MASS_TYPE_T fragment_mass_type = get_mass_type_parameter("fragment-mass");
 
   char* seq = NULL;
-   MODIFIED_AA_T* mod_seq = NULL;
+  MODIFIED_AA_T* mod_seq = NULL;
   int link_pos;
   FLOAT_T mod_mass;
 

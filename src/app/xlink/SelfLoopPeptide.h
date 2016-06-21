@@ -57,7 +57,7 @@ class SelfLoopPeptide : public XLinkMatch {
   /**
    * Default destructor
    */
-  virtual ~SelfLoopPeptide() {};
+  virtual ~SelfLoopPeptide() {}
 
   /**
    * Adds Self-loop candidates to the collection

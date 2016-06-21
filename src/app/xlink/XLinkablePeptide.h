@@ -74,7 +74,7 @@ class XLinkablePeptide {
   /**
    * Default destructor
    */
-  virtual ~XLinkablePeptide() {};
+  virtual ~XLinkablePeptide() {}
  
   /**
    * given a peptide and a XLinkBondMap object,
@@ -188,7 +188,7 @@ class XLinkablePeptide {
    * \returns the mass of the xlinkable peptide
    */
   FLOAT_T getMass(
-    MASS_TYPE_T mass_type=MONO ///< MONO or AVERAGE
+    MASS_TYPE_T mass_type = MONO ///< MONO or AVERAGE
   ) const;
 
   /**
@@ -213,7 +213,7 @@ class XLinkablePeptide {
     int charge,
     int link_idx,
     FLOAT_T mod_mass,
-    bool clear=true
+    bool clear = true
     );
   /**
    * Is the linkable peptide modified?
