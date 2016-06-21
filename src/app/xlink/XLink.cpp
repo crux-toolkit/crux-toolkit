@@ -98,8 +98,8 @@ XLINKMATCH_TYPE_T getCrossLinkCandidateType(
  * \returns whether two proposed peptides would contain an intra-protein crosslink
  */
 bool isCrossLinkIntra(
-   Crux::Peptide* pep1,
-   Crux::Peptide* pep2
+  Crux::Peptide* pep1,
+  Crux::Peptide* pep2
   ) {
 
   return(getCrossLinkCandidateType(pep1, pep2) == XLINK_INTRA_CANDIDATE);
@@ -193,14 +193,13 @@ string get_protein_ids_locations(
 
 }
 
+} // namespace XLink
 
 
-};
-
-/*                                                                                                                                                                                                                          
- * Local Variables:                                                                                                                                                                                                         
- * mode: c                                                                                                                                                                                                                  
- * c-basic-offset: 2                                                                                                                                                                                                        
- * End:                                                                                                                                                                                                                     
+/*
+ * Local Variables:
+ * mode: c 
+ * c-basic-offset: 2
+ * End:
  */
 

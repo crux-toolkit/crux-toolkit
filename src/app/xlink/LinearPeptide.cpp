@@ -51,7 +51,7 @@ void LinearPeptide::addCandidates(
 
   int max_missed_cleavages = Params::GetInt("missed-cleavages");
 
-  for (int mod_idx=0;mod_idx<num_peptide_mods; mod_idx++) {
+  for (int mod_idx=0;mod_idx < num_peptide_mods; mod_idx++) {
     PEPTIDE_MOD_T* peptide_mod = peptide_mods[mod_idx];
     double delta_mass = peptide_mod_get_mass_change(peptide_mod);
     //
@@ -194,9 +194,9 @@ string LinearPeptide::getIonSequence(
 
   int cleavage_idx = ion->getCleavageIdx();
   if (ion->isForwardType() == B_ION) {
-    return seq_str.substr(0,cleavage_idx);
+    return seq_str.substr(0, cleavage_idx);
   } else {
-    return seq_str.substr(seq_str.length()-cleavage_idx,seq_str.length());
+    return seq_str.substr(seq_str.length()-cleavage_idx, seq_str.length());
   }
 }
 

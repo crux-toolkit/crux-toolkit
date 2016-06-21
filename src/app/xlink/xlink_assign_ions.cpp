@@ -32,7 +32,7 @@ XLinkAssignIons::XLinkAssignIons() {
 XLinkAssignIons::~XLinkAssignIons() {
 }
 
-int XLinkAssignIons::main(int argc, char** argv){
+int XLinkAssignIons::main(int argc, char** argv) {
   /* Get Arguments */
   string peptideAStr = Params::GetString("peptide A");
   string peptideBStr = Params::GetString("peptide B");
@@ -108,10 +108,10 @@ void XLinkAssignIons::print_spectrum(Spectrum* spectrum, LinkedIonSeries& ion_se
       int matched_by_ions = XHHC_Scorer::getMatchedBYIons(spectrum, ion_series);
       FLOAT_T frac_by_ions = (double)matched_by_ions / (double) total_by_ions;
 
-      carp(CARP_INFO, "total theoretical ions:%d",total_by_ions);
-      carp(CARP_INFO,"theoretical ions matched:%d",matched_by_ions);
-      carp(CARP_INFO,"frac theoretical ions matched:%f",frac_by_ions);
-      carp(CARP_INFO,"npeaks:%d",spectrum->getNumPeaks());
+      carp(CARP_INFO, "total theoretical ions:%d", total_by_ions);
+      carp(CARP_INFO, "theoretical ions matched:%d", matched_by_ions);
+      carp(CARP_INFO, "frac theoretical ions matched:%f", frac_by_ions);
+      carp(CARP_INFO, "npeaks:%d", spectrum->getNumPeaks());
 
       FLOAT_T bin_width = Params::GetDouble("mz-bin-width");
       vector<LinkedPeptide>& ions = ion_series.getIons();
@@ -119,30 +119,30 @@ void XLinkAssignIons::print_spectrum(Spectrum* spectrum, LinkedIonSeries& ion_se
       map<Peak*, LinkedPeptide> matched;
       double matched_intensity = 0;
       for (vector<LinkedPeptide>::iterator ion = ions.begin();
-	   ion != ions.end(); 
-	   ++ion) {
+           ion != ions.end(); 
+           ++ion) {
 
-	  if (ion -> getIonType() == B_ION || ion -> getIonType() == Y_ION) {
-	    Peak * peak = spectrum->getMaxIntensityPeak(ion->getMZ(MONO), 
+          if (ion -> getIonType() == B_ION || ion -> getIonType() == Y_ION) {
+            Peak * peak = spectrum->getMaxIntensityPeak(ion->getMZ(MONO), 
                                                     bin_width);
-	    if (peak != NULL) {
+            if (peak != NULL) {
               if (matched.find(peak) == matched.end()) {
-		matched_intensity += peak->getIntensity();
+                matched_intensity += peak->getIntensity();
               }
-	      matched[peak] = *ion;
-	    } else {
-              carp(CARP_DETAILED_DEBUG,"Ion clash!");
+              matched[peak] = *ion;
+            } else {
+              carp(CARP_DETAILED_DEBUG, "Ion clash!");
             }
-	  }
-	//}
+          }
+        //}
       }
 
       double total_intensity = spectrum->getTotalEnergy();
       double frac_intensity = matched_intensity / total_intensity;
 
-      carp(CARP_INFO,"matched intensity:%lf",matched_intensity);
-      carp(CARP_INFO,"total intensity:%lf",total_intensity);
-      carp(CARP_INFO,"frac intensity:%lf",frac_intensity);
+      carp(CARP_INFO, "matched intensity:%lf", matched_intensity);
+      carp(CARP_INFO, "total intensity:%lf", total_intensity);
+      carp(CARP_INFO, "frac intensity:%lf", frac_intensity);
       
 
       //now print out the spectrum
@@ -163,7 +163,7 @@ void XLinkAssignIons::print_spectrum(Spectrum* spectrum, LinkedIonSeries& ion_se
         peak_iter != spectrum->end();
         ++peak_iter) {
 
-	Peak * peak = *peak_iter;
+        Peak * peak = *peak_iter;
         if (peak->getIntensity() > 0) { 
 
 
@@ -173,7 +173,7 @@ void XLinkAssignIons::print_spectrum(Spectrum* spectrum, LinkedIonSeries& ion_se
 
           
 
-	  if (matched.find(peak) != matched.end()) {
+          if (matched.find(peak) != matched.end()) {
               LinkedPeptide& ion = matched[peak];
               double mz_calc = ion.getMZ(MONO);
               double mz_obs = peak->getLocation();

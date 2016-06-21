@@ -118,7 +118,7 @@ class LinkedIonSeries {
    */
   void addLinkedIons(
     LinkedPeptide& linked_peptide, ///< The linked peptide 
-    SPLITTYPE_T split_type=SPLITTYPE_BOTH ///< Which peptide to split
+    SPLITTYPE_T split_type = SPLITTYPE_BOTH ///< Which peptide to split
   );
 
   /**

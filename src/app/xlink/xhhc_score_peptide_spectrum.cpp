@@ -1,5 +1,3 @@
-//TODO - Change cout to carps
-
 #include "xhhc_score_peptide_spectrum.h"
 #include "xhhc.h"
 #include "LinkedIonSeries.h"
@@ -34,7 +32,7 @@ XLinkScoreSpectrum::XLinkScoreSpectrum() {
 XLinkScoreSpectrum::~XLinkScoreSpectrum() {
 }
 
-int XLinkScoreSpectrum::main(int argc, char** argv){
+int XLinkScoreSpectrum::main(int argc, char** argv) {
   /* Get Arguments */
   string peptideAStr = Params::GetString("peptide A");
   string peptideBStr = Params::GetString("peptide B");
@@ -60,7 +58,7 @@ int XLinkScoreSpectrum::main(int argc, char** argv){
     cout << "B is null" << endl;
     if (scoremethod != "composite") {
       carp(CARP_FATAL, "For composite scoring, provide a linked peptide, "
-	   "not a self loop");
+           "not a self loop");
     }
     candidate = new SelfLoopPeptide(peptideA, posA, posB);
   } else {
@@ -72,7 +70,7 @@ int XLinkScoreSpectrum::main(int argc, char** argv){
   
   // search for spectrum with correct scan number
   Spectrum* spectrum = collection->getSpectrum(scan_num);
-  if( spectrum == NULL ){
+  if( spectrum == NULL ) {
     carp(CARP_ERROR, "Failed to find spectrum with scan_num: %d", scan_num);
     delete collection;
     exit(1);
@@ -94,7 +92,7 @@ int XLinkScoreSpectrum::main(int argc, char** argv){
   if (scoremethod == "composite") {
     FLOAT_T score = xlink_scorer.scoreCandidate(candidate);   
 
-    cout <<score<<endl;
+    cout << score << endl;
 
   } else if (scoremethod == "modification") {
     
@@ -130,14 +128,13 @@ int XLinkScoreSpectrum::main(int argc, char** argv){
 
     sort(scores.begin(), scores.end(), less<double>());
     cout <<scores[0];
-    for (int i=1;i<4;i++) {
-      cout <<"\t"<<scores[i];
+    for (int i=1; i < 4; i++) {
+      cout << "\t" << scores[i];
     }
 
     cout << endl;
-  }
-  else {
-    carp(CARP_ERROR,"Unknown score method (%s).", scoremethod.c_str());
+  } else {
+    carp(CARP_ERROR, "Unknown score method (%s).", scoremethod.c_str());
   }
   // free heap
   delete collection;
@@ -173,97 +170,87 @@ double XLinkScoreSpectrum::get_concat_score(char* peptideA, char* peptideB, int 
     ION_TYPE_T ion_type = ion->getType();
 
     //if contains cterm of 1st peptide, modify by -OH 
-      
-    carp(CARP_DEBUG,"====================");
+    carp(CARP_DEBUG, "====================");
     if (ion_type == B_ION) {
-	carp(CARP_DEBUG,"B-ion");
-	carp(CARP_DEBUG,"%s",lpeptide.substr(0,cleavage_idx).c_str());
-      } else if (ion_type == Y_ION) {
-	carp(CARP_DEBUG,"Y-ion");
-	carp(CARP_DEBUG,"%s",lpeptide.substr(llength-cleavage_idx,llength).c_str());
-      }
-      else continue;
-
-      carp(CARP_DEBUG,"cleavage idx:%d",cleavage_idx);
-      //print_ion(ion, stdout);
-
-      bool cterm_1st = false;
-      if (ion_type == B_ION) {
-	carp(CARP_DEBUG,"B-Ion");
-	if (cleavage_idx >= pepB_begin) {
-	  cterm_1st = true;
-	}
-      } else if (ion_type == Y_ION) {
-	carp(CARP_DEBUG,"Y-ion");
-	if (cleavage_idx > (llength - pepB_begin)) {
-	  cterm_1st = true;
-	}
-      }
-
-      bool nterm_2nd = false;
-      if (ion_type == B_ION) {
-	if (cleavage_idx > pepB_begin) {
-	  nterm_2nd = true;
-	}
-      } else if (ion_type == Y_ION) {
-	if (cleavage_idx >= (llength-pepB_begin)) {
-	  nterm_2nd = true;
-	}
-      }
-
-      bool has_link_site = false;
-     if (ion_type == B_ION) {
-	if (cleavage_idx > link_site) {
-	  has_link_site = true;
-	}
-      } else if (ion_type == Y_ION) {
-       if (cleavage_idx >= (llength- link_site)) {
-	  has_link_site = true;
-	}
-      }
-      
-     carp(CARP_DEBUG,"cterm:%d",cterm_1st);
-     carp(CARP_DEBUG,"nterm:%d",nterm_2nd);
-     carp(CARP_DEBUG,"has site:%d",has_link_site);
-      
-
-      //if it contains the cterm of the 1st peptide, modify by -OH
-      if (cterm_1st) {
-	FLOAT_T old_mass = (ion->getMassZ() - MASS_H_MONO) * (FLOAT_T)ion_charge;
-	FLOAT_T new_mass = old_mass + MASS_H2O_MONO - MASS_H_MONO;
-	FLOAT_T new_mz = (new_mass + (FLOAT_T)ion_charge) / (FLOAT_T)ion_charge;
-	ion->setMassZ(new_mz);
-      }
-      //if contains the nterm of 2nd peptide, modify by -H
-      if (nterm_2nd) {
-	FLOAT_T old_mass = (ion->getMassZ() - MASS_H_MONO) * (FLOAT_T)ion_charge;
-	FLOAT_T new_mass = old_mass + MASS_H_MONO;
-	FLOAT_T new_mz = (new_mass + (FLOAT_T)ion_charge) / (FLOAT_T)ion_charge;
-	ion->setMassZ(new_mz);
-      }
-      //if contains the link site, modify by link mass.
-      if (has_link_site) {
-	FLOAT_T old_mass = (ion->getMassZ() - MASS_H_MONO) * (FLOAT_T)ion_charge;
-	FLOAT_T new_mass = old_mass + LinkedPeptide::getLinkerMass();
-	FLOAT_T new_mz = (new_mass + (FLOAT_T)ion_charge) / (FLOAT_T)ion_charge;
-	ion->setMassZ(new_mz);
-      }
-    
-
-    
-
-      //print_ion(ion, stdout);
-    
+      carp(CARP_DEBUG, "B-ion");
+      carp(CARP_DEBUG, "%s", lpeptide.substr(0, cleavage_idx).c_str());
+    } else if (ion_type == Y_ION) {
+      carp(CARP_DEBUG, "Y-ion");
+      carp(CARP_DEBUG, "%s", lpeptide.substr(llength-cleavage_idx, llength).c_str());
+    } else {
+      continue;
     }
 
-    Scorer* scorer = new Scorer(XCORR); 
+    carp(CARP_DEBUG, "cleavage idx:%d", cleavage_idx);
 
-    // calculate the score
-    FLOAT_T score = scorer->scoreSpectrumVIonSeries(spectrum, ion_series);
-    return score;
+    bool cterm_1st = false;
+    if (ion_type == B_ION) {
+      carp(CARP_DEBUG, "B-Ion");
+      if (cleavage_idx >= pepB_begin) {
+        cterm_1st = true;
+      }
+    } else if (ion_type == Y_ION) {
+      carp(CARP_DEBUG, "Y-ion");
+      if (cleavage_idx > (llength - pepB_begin)) {
+        cterm_1st = true;
+      }
+    }
 
+    bool nterm_2nd = false;
+    if (ion_type == B_ION) {
+      if (cleavage_idx > pepB_begin) {
+        nterm_2nd = true;
+      }
+    } else if (ion_type == Y_ION) {
+      if (cleavage_idx >= (llength-pepB_begin)) {
+        nterm_2nd = true;
+      }
+    }
 
+    bool has_link_site = false;
+    if (ion_type == B_ION) {
+      if (cleavage_idx > link_site) {
+        has_link_site = true;
+      }
+    } else if (ion_type == Y_ION) {
+      if (cleavage_idx >= (llength- link_site)) {
+        has_link_site = true;
+      }
+    }
+      
+    carp(CARP_DEBUG, "cterm:%d", cterm_1st);
+    carp(CARP_DEBUG, "nterm:%d", nterm_2nd);
+    carp(CARP_DEBUG, "has site:%d", has_link_site);
+      
 
+    //if it contains the cterm of the 1st peptide, modify by -OH
+    if (cterm_1st) {
+      FLOAT_T old_mass = (ion->getMassZ() - MASS_H_MONO) * (FLOAT_T)ion_charge;
+      FLOAT_T new_mass = old_mass + MASS_H2O_MONO - MASS_H_MONO;
+      FLOAT_T new_mz = (new_mass + (FLOAT_T)ion_charge) / (FLOAT_T)ion_charge;
+      ion->setMassZ(new_mz);
+    }
+    //if contains the nterm of 2nd peptide, modify by -H
+    if (nterm_2nd) {
+      FLOAT_T old_mass = (ion->getMassZ() - MASS_H_MONO) * (FLOAT_T)ion_charge;
+      FLOAT_T new_mass = old_mass + MASS_H_MONO;
+      FLOAT_T new_mz = (new_mass + (FLOAT_T)ion_charge) / (FLOAT_T)ion_charge;
+      ion->setMassZ(new_mz);
+    }
+    //if contains the link site, modify by link mass.
+    if (has_link_site) {
+      FLOAT_T old_mass = (ion->getMassZ() - MASS_H_MONO) * (FLOAT_T)ion_charge;
+      FLOAT_T new_mass = old_mass + LinkedPeptide::getLinkerMass();
+      FLOAT_T new_mz = (new_mass + (FLOAT_T)ion_charge) / (FLOAT_T)ion_charge;
+      ion->setMassZ(new_mz);
+    }
+  }
+
+  Scorer* scorer = new Scorer(XCORR); 
+
+  // calculate the score
+  FLOAT_T score = scorer->scoreSpectrumVIonSeries(spectrum, ion_series);
+  return score;
 }
 
 FLOAT_T* XLinkScoreSpectrum::get_observed_raw(Spectrum* spectrum, int charge) {
@@ -277,12 +264,12 @@ FLOAT_T* XLinkScoreSpectrum::get_observed_raw(Spectrum* spectrum, int charge) {
   // set max_mz and malloc space for the observed intensity array
   FLOAT_T sp_max_mz = 512;
 
-  if(experimental_mass_cut_off > 512){
+  if(experimental_mass_cut_off > 512) {
     int x = (int)experimental_mass_cut_off / 1024;
     FLOAT_T y = experimental_mass_cut_off - (1024 * x);
     sp_max_mz = x * 1024;
 
-    if(y > 0){
+    if(y > 0) {
       sp_max_mz += 1024;
     }
   }
@@ -302,7 +289,7 @@ FLOAT_T* XLinkScoreSpectrum::get_observed_raw(Spectrum* spectrum, int charge) {
     peak_location = peak->getLocation();
     
     // skip all peaks larger than experimental mass
-    if(peak_location > experimental_mass_cut_off){
+    if(peak_location > experimental_mass_cut_off) {
       continue;
     }
     
@@ -319,7 +306,7 @@ FLOAT_T* XLinkScoreSpectrum::get_observed_raw(Spectrum* spectrum, int charge) {
     intensity = peak->getIntensity();
 
     // set intensity in array with correct mz, only if max peak in the bin
-    if(observed[mz] < intensity){
+    if(observed[mz] < intensity) {
       observed[mz] = intensity;
       }
     }    
@@ -354,7 +341,7 @@ void XLinkScoreSpectrum::print_spectrum(Spectrum* spectrum, LinkedIonSeries& ion
 
       
       ofstream fout("ion_match.out");
-      for (int i=0;i<max_mz;i++) {
+      for (int i = 0; i < max_mz; i++) {
         fout << i << "\t" 
              << observed_raw[i] << "\t"
              << observed_processed[i] << "\t" 

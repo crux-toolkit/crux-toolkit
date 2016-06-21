@@ -72,13 +72,12 @@ int SearchForXLinks::xlinkSearchMain() {
   carp(CARP_DEBUG, "Preparing database");
   Database* database = NULL;
   int num_proteins = prepare_protein_input(input_file, &database);
-  carp(CARP_DEBUG, "Number of proteins:%d",num_proteins);
+  carp(CARP_DEBUG, "Number of proteins:%d", num_proteins);
   PEPTIDE_MOD_T** peptide_mods = NULL;
   int num_peptide_mods = generate_peptide_mod_list( &peptide_mods );
 
   /* Usually for debugging purposes, print out the database of canddiates */
-  if (Params::GetBool("xlink-print-db"))
-  {
+  if (Params::GetBool("xlink-print-db")) {
     carp(CARP_INFO, "generating and printing xlink database");
     ostringstream oss;
     oss << output_directory << "/" << "xlink_peptides.txt";
@@ -91,7 +90,7 @@ int SearchForXLinks::xlinkSearchMain() {
       new XLinkMatchCollection(bondmap, peptide_mods, num_peptide_mods, database);
 
     
-    peptides_file << "mass\tsequence\tprotein id"<<endl;
+    peptides_file << "mass\tsequence\tprotein id" << endl;
 
     for (int idx=0;idx < all_candidates->getMatchTotal();idx++) {
       XLinkMatch* candidate = all_candidates->at(idx);
@@ -135,10 +134,10 @@ int SearchForXLinks::xlinkSearchMain() {
     spectrum = spectrum_iterator->next(zstate);
     scan_num = spectrum->getFirstScan();
 
-    carp(CARP_DEBUG,"count %d scan %d charge %d", search_count, scan_num, zstate.getCharge());
+    carp(CARP_DEBUG, "count %d scan %d charge %d", search_count, scan_num, zstate.getCharge());
 
     if (search_count % 10 == 0) {
-      carp(CARP_INFO,"count %d scan %d charge %d", search_count, scan_num, zstate.getCharge());
+      carp(CARP_INFO, "count %d scan %d charge %d", search_count, scan_num, zstate.getCharge());
     }
     search_count++;
 
@@ -228,7 +227,7 @@ int SearchForXLinks::xlinkSearchMain() {
       target_candidates->sort(XCORR);
 
 
-      int nprint = min(top_match,target_candidates->getMatchTotal());
+      int nprint = min(top_match, target_candidates->getMatchTotal());
 
       carp(CARP_DEBUG, "Calculating %d target p-values", nprint);
  
@@ -237,13 +236,13 @@ int SearchForXLinks::xlinkSearchMain() {
         target_candidates->computeWeibullPValue(idx);
       }
 
-      nprint = min(top_match,(int)decoy_candidates->getMatchTotal());
+      nprint = min(top_match, (int)decoy_candidates->getMatchTotal());
 
-      carp(CARP_DEBUG,"Calculating %d decoy p-values", nprint);
+      carp(CARP_DEBUG, "Calculating %d decoy p-values", nprint);
 
       decoy_candidates->sort(XCORR);
 
-      for (int idx=0;idx < nprint;idx++) {
+      for (int idx = 0; idx < nprint; idx++) {
         decoy_candidates->computeWeibullPValue(idx);
       }
 
@@ -297,7 +296,7 @@ int SearchForXLinks::xlinkSearchMain() {
 
   delete spectrum_iterator;
   delete spectra;
-  for(int mod_idx = 0; mod_idx < num_peptide_mods; mod_idx++){
+  for(int mod_idx = 0; mod_idx < num_peptide_mods; mod_idx++) {
     free_peptide_mod(peptide_mods[mod_idx]);
   }
   free(peptide_mods);

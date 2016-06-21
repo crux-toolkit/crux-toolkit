@@ -17,6 +17,7 @@ readability/multiline_string
 readability/todo
 runtime/arrays
 runtime/member_string_references
+runtime/references
 runtime/string
 runtime/vlog
 whitespace/blank_line

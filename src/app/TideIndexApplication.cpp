@@ -902,7 +902,7 @@ bool TideIndexApplication::generateDecoy(
     if (!GeneratePeptides::makeDecoy(setTarget, *setTargets, *setDecoys,
                                      decoyType == PEPTIDE_SHUFFLE_DECOYS,
                                      *decoySequence)) {
-    carp(CARP_INFO, "Failed to generate decoy for sequence %s",
+    carp(CARP_DETAILED_INFO, "Failed to generate decoy for sequence %s",
          setTarget.c_str());
     ++failedDecoyCnt;
     delete decoySequence;

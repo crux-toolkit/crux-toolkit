@@ -38,10 +38,10 @@ int main(int argc, char** argv) {
   int num_arguments = NUM_ARGUMENTS;
   const char* argument_list[NUM_ARGUMENTS] = {"peptide A",
                                               "peptide B",
-					      "pos A",
-					      "pos B",
-					      "charge state",
-					      "link mass"};
+                                              "pos A",
+                                              "pos B",
+                                              "charge state",
+                                              "link mass"};
 
 
 
@@ -80,8 +80,7 @@ int main(int argc, char** argv) {
 
   if (string(peptideB) == "NULL") {
     linked_peptide = LinkedPeptide(peptideA, NULL, posA-1, posB-1, charge);
-  }
-  else {
+  } else {
     linked_peptide = LinkedPeptide( peptideA, peptideB, posA-1, posB-1, charge);  
   }
  
@@ -102,16 +101,16 @@ int main(int argc, char** argv) {
     carp(CARP_INFO, "Writing XCORR theoretical spectrum to theoretical.out");
     map<int, FLOAT_T> theoretical;
     XHHC_Scorer::xlinkCreateMapTheoretical(ion_series,
-					 theoretical);
+                                         theoretical);
 
     ofstream fout("theoretical.out");
-    fout <<"> "<< linked_peptide<<"\t"<<linked_peptide.getMZ(MONO)<<endl;
+    fout << "> " << linked_peptide << "\t" << linked_peptide.getMZ(MONO) << endl;
     
     map<int, FLOAT_T>::iterator iter;
 
     for (iter = theoretical.begin();
-	 iter != theoretical.end();
-	 ++iter) {
+         iter != theoretical.end();
+         ++iter) {
       fout << iter -> first << "\t";
       fout << iter -> second << "\t" << endl;
     }

@@ -243,7 +243,7 @@ FLOAT_T LinkedPeptide::getMass(
  */
 void LinkedPeptide::calculateMass(
   MASS_TYPE_T mass_type ///< MONO or AVERAGE
-  ){
+  ) {
 
   // remove H2O from mass if it's a b-ion
 
@@ -260,8 +260,7 @@ void LinkedPeptide::calculateMass(
   if (type_ == B_ION) {
     if (mass_type == MONO) {
       mass_[mass_type] -= MASS_H2O_MONO;
-    }
-    else {
+    } else {
       mass_[mass_type] -= MASS_H2O_AVERAGE;
     }
   } 
@@ -297,7 +296,7 @@ void LinkedPeptide::split(
   XHHC_Peptide peptideB = peptides_[0];
   // dead end
   if (isDeadEnd()) {
-   peptideB.setSequence("");
+    peptideB.setSequence("");
   }
   // if a loop
   if (peptideA.getNumLinks() == 2) {
@@ -365,11 +364,11 @@ std::ostream &operator<< (std::ostream& os, LinkedPeptide& lp) {
   ostringstream link_positions;
   link_positions << "(";
   for (int idx = 0; idx < peptides[0].getLength(); ++idx) {
-	if (peptides[0].hasLinkAt(idx)) link_positions << (idx+1) << "," ;
+    if (peptides[0].hasLinkAt(idx)) link_positions << (idx+1) << "," ;
   }
   if (peptides.size() == 2) {
     for (int idx = 0; idx < peptides[1].getLength(); ++idx) {
-	if (peptides[1].hasLinkAt(idx)) link_positions << (idx+1) << ")";
+      if (peptides[1].hasLinkAt(idx)) link_positions << (idx+1) << ")";
     }
     return os << peptides[0].getSequence() << "," << peptides[1].getSequence() << link_positions.str();// << " +" << lp.charge();
   }
@@ -418,8 +417,7 @@ void LinkedPeptide::sortByMass(
 
   if (mass_type == MONO) {
     sort(linked_peptides.begin(), linked_peptides.end(), compareMassMono);
-  }
-  else {
+  } else {
     sort(linked_peptides.begin(), linked_peptides.end(), compareMassAverage);
   }
 }
@@ -447,8 +445,7 @@ void LinkedPeptide::sortByMZ(
 
   if (mass_type == MONO) {
     sort(linked_peptides.begin(), linked_peptides.end(), compareMZMono);
-  }
-  else {
+  } else {
     sort(linked_peptides.begin(), linked_peptides.end(), compareMZAverage);
   }
 }

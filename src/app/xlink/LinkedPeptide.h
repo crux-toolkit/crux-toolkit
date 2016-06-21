@@ -220,7 +220,7 @@ class LinkedPeptide {
    */
   static void sortByMass(
     std::vector<LinkedPeptide>& linked_peptides, ///< The LinkedPeptides to sort
-    MASS_TYPE_T mass_type=MONO ///< MONO or AVERAGE
+    MASS_TYPE_T mass_type = MONO ///< MONO or AVERAGE
   );
 
   /**
@@ -228,7 +228,7 @@ class LinkedPeptide {
    */
   static void sortByMZ(
     std::vector<LinkedPeptide>& linked_peptides, ///< The LinkedPeptides to sort
-    MASS_TYPE_T mass_type=MONO ///< MONO or AVERAGE
+    MASS_TYPE_T mass_type = MONO ///< MONO or AVERAGE
   );
 
   /**
