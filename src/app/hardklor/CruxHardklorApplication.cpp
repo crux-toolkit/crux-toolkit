@@ -95,7 +95,7 @@ int CruxHardklorApplication::main(const string& ms1) {
   }
 
   // Create all the output files that will be used
-  for (int i = 0; i< hp.size(); i++){
+  for (int i = 0; i< hp.size(); i++) {
     const char* out = &hp.queue(i).outFile[0];
     if (FileUtils::Exists(out) && !Params::GetBool("overwrite")) {
       carp(CARP_FATAL, "The file '%s' already exists and cannot be overwritten. "
@@ -154,7 +154,7 @@ void CruxHardklorApplication::addArg(
   const string& arg
 ) {
   char* toAdd = new char[arg.length() + 1];
-  strcpy(toAdd, arg.c_str());
+  snprintf(toAdd, arg.length() + 1, arg.c_str());
   args->push_back(toAdd);
 }
 

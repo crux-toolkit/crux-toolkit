@@ -70,7 +70,7 @@ using namespace std;
 
 class RecordWriter {
  public:
-  RecordWriter(const string& filename, int buf_size = -1)
+  explicit RecordWriter(const string& filename, int buf_size = -1)
     : raw_output_(NULL), coded_output_(NULL) {
     if ((fd_ = open(filename.c_str(), O_CREAT | O_TRUNC | O_WRONLY, 0644)) < 0) {
       cerr << "couldn't open file for write "
@@ -81,7 +81,7 @@ class RecordWriter {
     Init();
   }
   
-  RecordWriter(google::protobuf::io::ZeroCopyOutputStream* raw_output)
+  explicit RecordWriter(google::protobuf::io::ZeroCopyOutputStream* raw_output)
     : fd_(-1), raw_output_(raw_output) {
     Init();
     raw_output_ = NULL; // we do not own (and will not delete) raw_output
@@ -127,7 +127,7 @@ class RecordWriter {
 
 class RecordReader {
  public:
-  RecordReader(const string& filename, int buf_size = -1)
+  explicit RecordReader(const string& filename, int buf_size = -1)
     : raw_input_(NULL), coded_input_(NULL), size_(UINT32_MAX), valid_(false) {
     fd_ = open(filename.c_str(), O_RDONLY);
     if (fd_ < 0)
@@ -170,8 +170,8 @@ class RecordReader {
       = coded_input_->PushLimit(size_);
     if (!message->ParseFromCodedStream(coded_input_))
       return valid_ = false;
-    if (!coded_input_->ConsumedEntireMessage()
-	|| (coded_input_->BytesUntilLimit() != 0))
+    if (!coded_input_->ConsumedEntireMessage() ||
+        coded_input_->BytesUntilLimit() != 0)
       return valid_ = false;
     coded_input_->PopLimit(limit); // for completeness; perhaps remove
     delete coded_input_;
@@ -191,18 +191,18 @@ class RecordReader {
 class HeadedRecordWriter {
  public:
   HeadedRecordWriter(const string& filename, const pb::Header& header,
-		     int buf_size = -1) 
+                     int buf_size = -1) 
     : writer_(filename, buf_size) {
     if (!writer_.OK())
       carp(CARP_FATAL, "Cannot create the file %s\n", filename.c_str());
     Write(&header);
-  };
+  }
 
   HeadedRecordWriter(google::protobuf::io::ZeroCopyOutputStream* raw_output,
-		     const pb::Header& header) 
+                     const pb::Header& header) 
     : writer_(raw_output) {
     Write(&header);
-  };
+  }
 
   RecordWriter* Writer() { return &writer_; }
 
@@ -220,7 +220,7 @@ class HeadedRecordWriter {
 class HeadedRecordReader {
  public:
   HeadedRecordReader(const string& filename, pb::Header* header = NULL,
-		     int buf_size = -1)
+                     int buf_size = -1)
     : reader_(filename, buf_size), header_(header),
     del_header_(header == NULL) {
     if (header == NULL)

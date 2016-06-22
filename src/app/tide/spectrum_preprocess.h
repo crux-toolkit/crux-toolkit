@@ -117,16 +117,16 @@ class Spectrum;
 class ObservedPeakSet {
  public:
     
-	ObservedPeakSet(double bin_width = MassConstants::bin_width_, 
-		 double bin_offset = MassConstants::bin_width_, 
-		 bool NL = false, bool FP = false)
+  ObservedPeakSet(double bin_width = MassConstants::bin_width_, 
+     double bin_offset = MassConstants::bin_width_, 
+     bool NL = false, bool FP = false)
     : peaks_(new double[MaxBin::Global().BackgroundBinEnd()]),
     cache_(new int[MaxBin::Global().CacheBinEnd()*NUM_PEAK_TYPES]) {
     
-	bin_width_  = bin_width;
-	bin_offset_ = bin_offset;
-	NL_ = NL;	//NL means neutral loss
-    FP_ = FP;	//FP means flanking peaks
+    bin_width_  = bin_width;
+    bin_offset_ = bin_offset;
+    NL_ = NL; //NL means neutral loss
+    FP_ = FP; //FP means flanking peaks
   }
 
   ~ObservedPeakSet() { delete[] peaks_; delete[] cache_; }
@@ -140,8 +140,8 @@ class ObservedPeakSet {
 #endif
   void PreprocessSpectrum(const Spectrum& spectrum, int charge);
   void CreateEvidenceVector(const Spectrum& spectrum, double binWidth,
-		double binOffset, int charge, double pepMassMonoMean,
-		int maxPrecurMass, int* evidenceInt);
+    double binOffset, int charge, double pepMassMonoMean,
+    int maxPrecurMass, int* evidenceInt);
 
   // For debugging
   void Show(const string& name, TheoreticalPeakType peak_type, bool cache_end) {

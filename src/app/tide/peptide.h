@@ -92,9 +92,9 @@ class Peptide {
     }
   }
   class spectrum_matches {
-  public:
+   public:
       spectrum_matches(Spectrum* spectrum, double score1, double score2,
-          int score3, int charge){
+          int score3, int charge) {
           spectrum_ = spectrum;
           score1_ = score1;
           score2_ = score2;
@@ -103,7 +103,7 @@ class Peptide {
           d_cn_ = 0.0;
           elution_score_ = 0.0;
       }
-      spectrum_matches(){
+      spectrum_matches() {
           spectrum_ = NULL;
           score1_ = 0.0;
           score2_ = 0.0;
@@ -136,7 +136,7 @@ class Peptide {
   };
   vector<spectrum_matches> spectrum_matches_array;
   void AddHit(Spectrum* spectrum, double score1, double score2,
-          int score3, int charge){
+          int score3, int charge) {
 
     spectrum_matches_array.push_back(spectrum_matches(spectrum,
                                      score1, score2, score3, charge));

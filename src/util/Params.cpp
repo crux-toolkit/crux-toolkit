@@ -65,7 +65,7 @@ static Params paramContainer_;
 Params::Params() : finalized_(false) {
   /* generate_peptide arguments */
   InitArgParam("protein fasta file",
-   "The name of the file in FASTA format from which to retrieve proteins.");
+    "The name of the file in FASTA format from which to retrieve proteins.");
   InitArgParam("index name",
     "The desired name of the binary index.");
   InitArgParam("ms2 file",
@@ -271,7 +271,7 @@ Params::Params() : finalized_(false) {
     "then a second file will be created containing the decoy peptides. Decoys that also "
     "appear in the target database are marked with an asterisk in a third column.",
     "Available for tide-index.", true);
-   // print-processed-spectra option
+  // print-processed-spectra option
   InitStringParam("stop-after", "xcorr", "remove-precursor|square-root|"
     "remove-grass|ten-bin|xcorr",
     "Stop after the specified pre-processing step.",
@@ -1077,7 +1077,7 @@ Params::Params() : finalized_(false) {
   InitBoolParam("list-of-files", false, 
     "Specify that the search results are provided as lists of files, rather than as "
     "individual files.",
-    "Available for barista and percolator.",true);
+    "Available for barista and percolator.", true);
   InitStringParam("optimization", "protein", "protein|peptide|psm",
      "Specifies whether to do optimization at the protein, peptide or psm level.",
      "Available for barista.", true);
@@ -1091,7 +1091,7 @@ Params::Params() : finalized_(false) {
     "is required. However if --estimation-method is tdc, then the columns \"scan\" and "
     "\"charge\" are required, as well as \"protein ID\" if the search was run with "
     "concat=F. Furthermore, if the --estimation-method is specified to peptide-level " 
-	"is set to T, then the column "
+    "is set to T, then the column "
     "\"peptide\" must be included, and if --sidak is set to T, then the \"distinct "
     "matches/spectrum\" column must be included.[[html:<br>Note that multiple files can "
     "also be provided either on the command line or using the --list-of-files option.<br>"
@@ -1139,7 +1139,7 @@ Params::Params() : finalized_(false) {
     "Set a feature for percolator that in later versions is not an option.",
     "Shouldn't be variable; hide from user.", false);
   /* Cascade-Search parameters */
-  InitDoubleParam("q-value-threshold",0.01, 0,1.0,
+  InitDoubleParam("q-value-threshold", 0.01, 0, 1.0,
     "The q-value threshold used by cascade search. Spectra identified with q-value "
     "less than this threshold in one search will be excluded from all subsequent searches.",
     "Used by Cascade-Search", true);

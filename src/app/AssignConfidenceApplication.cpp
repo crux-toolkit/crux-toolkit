@@ -29,7 +29,7 @@ static const double EPSILON = 0.00000000000001;
 // function call when the STL make_pair is combined with the STL ptr_fun.
 // They promise to fix this in v11, but until then we create our own wrapper
 // for this use of make_pair. (See corresponding ifdef block in compute_PEP)
-pair<double,bool> make_pair(double db, bool b);
+pair<double, bool> make_pair(double db, bool b);
 // pair<double,bool> make_pair(double db, bool b) {
 //     return std::pair<double,bool>(db, b);
 // }
@@ -71,7 +71,7 @@ int AssignConfidenceApplication::main(int argc, char** argv) {
 
 int AssignConfidenceApplication::main(const vector<string> input_files) {
   // Prepare the output files if not in Cascade Search
-  if (spectrum_flag_ == NULL){
+  if (spectrum_flag_ == NULL) {
     output_ = new OutputFiles(this);
   }
   
@@ -99,7 +99,7 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
   bool sidak = Params::GetBool("sidak");
 
   int top_match = 1;
-  if (estimation_method == PEPTIDE_LEVEL_METHOD){
+  if (estimation_method == PEPTIDE_LEVEL_METHOD) {
     top_match = MAX_PSMS+1;
   }
 
@@ -287,7 +287,7 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
         cnt++;
 
         // Only use top-ranked matches.
-        if (decoy_match->getRank(XCORR) > top_match){
+        if (decoy_match->getRank(XCORR) > top_match) {
           num_decoy_rank_skipped++;
           continue;
         }
@@ -339,7 +339,7 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
           Crux::Match* target_match = target_iter->next();
 
           // Only use top-ranked matches.
-          if (target_match->getRank(XCORR) > top_match){
+          if (target_match->getRank(XCORR) > top_match) {
             num_target_rank_skipped++;
             continue;
           }
@@ -361,7 +361,7 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
           }
 
     if (estimation_method == PEPTIDE_LEVEL_METHOD) {
-      if (decoy_idx > 0){
+      if (decoy_idx > 0) {
         decoy_match = decoy_iter->getMatch(decoy_idx - 1);
         numCandidates = target_match->getTargetExperimentSize() + decoy_match->getTargetExperimentSize();
         target_match->setTargetExperimentSize(numCandidates);
@@ -374,7 +374,7 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
         tdc_collection->addMatch(target_match);
       }
     } else {
-      if (decoy_idx > 0){
+      if (decoy_idx > 0) {
         decoy_match = decoy_iter->getMatch(decoy_idx - 1);
       } else {
         tdc_collection->addMatch(target_match);
@@ -429,12 +429,12 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
     MatchIterator* match_iterator =
       new MatchIterator(match_collection, score_type, false);
     double sidak_adjustment;
-    while (match_iterator->hasNext()){
+    while (match_iterator->hasNext()) {
       Match* match = match_iterator->next();
       bool is_decoy = match->getNullPeptide();
 
       // Only use top-ranked matches.
-      if (match->getRank(XCORR) > top_match){
+      if (match->getRank(XCORR) > top_match) {
         if (is_decoy) {
           num_decoy_rank_skipped++;
         } else {
@@ -454,25 +454,22 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
           if (bestScore != score) {  //not the best scoring peptide
             if (is_decoy) {
               num_decoy_peptide_skipped++;
-            } 
-            else {
+            } else {
               num_target_peptide_skipped++;              
             }
             continue;
-          }
-          else {
+          } else {
             BestPeptideScore.at(peptideStr) += ascending ? -1.0 : 1.0;  //make sure only one best scoring peptide reported.
           }
-        }
-        catch (const std::out_of_range& oor){
+        } catch (const std::out_of_range& oor) {
           carp(CARP_DEBUG, "Error in peptide-level filtering");
         }
       }
 
       // Do the Sidak correction.
       if (sidak) {
-        if (match->getRank(XCORR) > 1){
-          carp_once(CARP_WARNING, "Sidak correction is not defined for non-top-matches. Further warnings are not shown. ");
+        if (match->getRank(XCORR) > 1) {
+          carp_once(CARP_WARNING, "Sidak correction is not defined for non-top-matches. Further warnings are not shown.");
         }
         sidak_adjustment = 1.0 - pow(1.0 - match->getScore(score_type), match->getTargetExperimentSize());
         match->setScore(SIDAK_ADJUSTED, sidak_adjustment);
@@ -481,8 +478,7 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
       // Add this match to one of the collections.
       if (is_decoy) {
         decoy_matches->addMatch(match);
-      }
-      else {
+      } else {
         target_matches->addMatch(match);
       }
       Match::freeMatch(match);
@@ -533,11 +529,10 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
 
     if (distinct_matches) {
       cols_to_print[DISTINCT_MATCHES_SPECTRUM_COL] = true;
-    }
-    else {
+    } else {
       cols_to_print[MATCHES_SPECTRUM_COL] = true;
     }
-    switch (estimation_method){
+    switch (estimation_method) {
     case TDC_METHOD:
     case PEPTIDE_LEVEL_METHOD: // FIXME: Make a peptide-level q-value column. --WSN 4 Feb 2016
       cols_to_print[QVALUE_TDC_COL] = true;
@@ -552,13 +547,13 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
     cols_to_print[CLEAVAGE_TYPE_COL] = true;
     cols_to_print[PROTEIN_ID_COL] = true;
     cols_to_print[FLANKING_AA_COL] = true;
-    if (spectrum_flag_ != NULL){
+    if (spectrum_flag_ != NULL) {
       cols_to_print[INDEX_NAME_COL] = true;
     }
 
     output_->writeHeaders(cols_to_print);
   }
-  switch (estimation_method){
+  switch (estimation_method) {
   case TDC_METHOD:
   case PEPTIDE_LEVEL_METHOD:
     derived_score_type = QVALUE_TDC;
@@ -580,7 +575,7 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
        num_targets, num_decoys);
 
   FLOAT_T* qvalues = NULL;
-  switch (estimation_method){
+  switch (estimation_method) {
   case TDC_METHOD:
   case PEPTIDE_LEVEL_METHOD:
     qvalues = compute_decoy_qvalues_tdc(target_scores, num_targets,
@@ -599,7 +594,7 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
   unsigned int fdr1 = 0;
   unsigned int fdr5 = 0;
   unsigned int fdr10 = 0;
-  for (unsigned int i = 0; i < num_targets; ++i){
+  for (unsigned int i = 0; i < num_targets; ++i) {
     if (qvalues[i] < 0.01) ++fdr1;
     if (qvalues[i] < 0.05) ++fdr5;
     if (qvalues[i] < 0.10) ++fdr10;
@@ -664,10 +659,10 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
 *
 * Results are stored in the given match collection.
 */
-void AssignConfidenceApplication::identify_best_psm_per_peptide
-(MatchCollection* all_matches,
- SCORER_TYPE_T score_type)
-{
+void AssignConfidenceApplication::identify_best_psm_per_peptide(
+  MatchCollection* all_matches,
+  SCORER_TYPE_T score_type
+) {
   /* Instantiate a hash table.  key = peptide; value = maximal xcorr
      for that peptide. */
   map<string, FLOAT_T> best_score_per_peptide;
@@ -675,7 +670,7 @@ void AssignConfidenceApplication::identify_best_psm_per_peptide
   // Store in the hash the best score per peptide.
   MatchIterator* match_iterator 
     = new MatchIterator(all_matches, score_type, false);
-  while(match_iterator->hasNext()){
+  while(match_iterator->hasNext()) {
     Match* match = match_iterator->next();
 
     // Skip matches that are not top-ranked.
@@ -702,7 +697,7 @@ void AssignConfidenceApplication::identify_best_psm_per_peptide
 
   // Set the best_per_peptide Boolean in the match, based on the hash.
   match_iterator = new MatchIterator(all_matches, score_type, false);
-  while(match_iterator->hasNext()){
+  while(match_iterator->hasNext()) {
     Match* match = match_iterator->next();
 
      // Skip matches that are not top-ranked.
@@ -733,13 +728,13 @@ void AssignConfidenceApplication::identify_best_psm_per_peptide
  * converts them into q-values.  The FDRs should be ordered from
  * lowest to highest, sorted according to the underlying score.
  */
-void AssignConfidenceApplication::convert_fdr_to_qvalue
-  (FLOAT_T* qvalues,     ///< Come in as FDRs, go out as q-values.
-   int      num_values)
-{
+void AssignConfidenceApplication::convert_fdr_to_qvalue(
+  FLOAT_T* qvalues,     ///< Come in as FDRs, go out as q-values.
+  int      num_values
+) {
   FLOAT_T prev_fdr = qvalues[num_values - 1];
   int idx;
-  for (idx=num_values - 2; idx >= 0; idx--){
+  for (idx=num_values - 2; idx >= 0; idx--) {
     carp(CARP_DETAILED_DEBUG, "fdr[%i] = %.10f", idx, qvalues[idx]);
     FLOAT_T this_fdr = qvalues[idx];
     if (prev_fdr < this_fdr) {
@@ -753,13 +748,13 @@ void AssignConfidenceApplication::convert_fdr_to_qvalue
 /**
  * Store two parallel arrays of floats in a hash table.
  */
-map<FLOAT_T, FLOAT_T> AssignConfidenceApplication::store_arrays_as_hash
-  (FLOAT_T* keys, 
-   FLOAT_T* values,
-   int      num_values
-){
+map<FLOAT_T, FLOAT_T> AssignConfidenceApplication::store_arrays_as_hash(
+  FLOAT_T* keys, 
+  FLOAT_T* values,
+  int      num_values
+) {
   map<FLOAT_T, FLOAT_T> return_value;
-  for (int idx=0; idx < num_values; idx++){
+  for (int idx=0; idx < num_values; idx++) {
     carp(CARP_DETAILED_DEBUG, "%g maps to %g", keys[idx], values[idx]);
     return_value[keys[idx]] = values[idx];
   }
@@ -780,7 +775,7 @@ FLOAT_T* AssignConfidenceApplication::compute_decoy_qvalues_tdc(
   int      num_decoys,
   bool     ascending,
   FLOAT_T  pi_zero
-){
+) {
   if ((num_targets == 0) || (num_decoys == 0)) {
     carp(CARP_FATAL, "Cannot compute q-values (%d targets, %d nulls).",
          num_targets, num_decoys);
@@ -822,7 +817,7 @@ FLOAT_T* AssignConfidenceApplication::compute_decoy_qvalues_tdc(
     FLOAT_T fdr = /*pi_zero * targets_to_decoys * */
       ((FLOAT_T)decoy_idx / (FLOAT_T)(target_idx + 1));
     
-    if ( fdr > 1.0 ){
+    if ( fdr > 1.0 ) {
       fdr = 1.0;
     }
     
@@ -844,14 +839,14 @@ FLOAT_T AssignConfidenceApplication::estimate_pi0(FLOAT_T* target_scores,
   FLOAT_T* decoy_scores,
   int      num_decoys,
   bool     ascending
-){
+) {
   vector<pair<double, bool> > score_labels;
   transform(target_scores, target_scores + num_targets,
             back_inserter(score_labels),
-            bind2nd(ptr_fun<double,bool,pair<double, bool> >(make_pair), true));
+            bind2nd(ptr_fun<double, bool, pair<double, bool> >(make_pair), true));
   transform(decoy_scores, decoy_scores + num_decoys,
             back_inserter(score_labels),
-            bind2nd(ptr_fun<double,bool,pair<double, bool> >(make_pair), false));
+            bind2nd(ptr_fun<double, bool, pair<double, bool> >(make_pair), false));
 
   // sort them 
   if (ascending) {
@@ -884,7 +879,7 @@ FLOAT_T* AssignConfidenceApplication::compute_decoy_qvalues_mixmax(
   int      num_decoys,
   bool     ascending,
   FLOAT_T  pi_zero
-){
+) {
   if ((num_targets == 0) || (num_decoys == 0)) {
     carp(CARP_FATAL, "Cannot compute q-values (%d targets, %d decoys).",
          num_targets, num_decoys);
@@ -896,10 +891,10 @@ FLOAT_T* AssignConfidenceApplication::compute_decoy_qvalues_mixmax(
       vector<pair<double, bool> > score_labels;
       transform(target_scores, target_scores + num_targets,
                 back_inserter(score_labels),
-                bind2nd(ptr_fun<double,bool,pair<double, bool> >(make_pair), true));
+                bind2nd(ptr_fun<double, bool, pair<double, bool> >(make_pair), true));
       transform(decoy_scores, decoy_scores + num_decoys,
                 back_inserter(score_labels),
-                bind2nd(ptr_fun<double,bool,pair<double, bool> >(make_pair), false));
+                bind2nd(ptr_fun<double, bool, pair<double, bool> >(make_pair), false));
 
       // sort them 
       if (ascending) {
@@ -930,8 +925,7 @@ FLOAT_T* AssignConfidenceApplication::compute_decoy_qvalues_mixmax(
   if (ascending) {
     sort(target_scores, target_scores + num_targets, greater<FLOAT_T>());
     sort(decoy_scores, decoy_scores + num_decoys, greater<FLOAT_T>());
-  }
-  else {
+  } else {
     sort(target_scores, target_scores + num_targets);
     sort(decoy_scores, decoy_scores + num_decoys);
   }
@@ -977,7 +971,7 @@ FLOAT_T* AssignConfidenceApplication::compute_decoy_qvalues_mixmax(
   double cnt_z, cnt_w;
   double prev_fdr = -1;
 
-  for (i = num_targets - 1; i >= 0; --i){
+  for (i = num_targets - 1; i >= 0; --i) {
     while (j >= 0 && (ascending ? 
       decoy_scores[j] <= target_scores[i] : 
       decoy_scores[j] >= target_scores[i])) {
@@ -992,7 +986,7 @@ FLOAT_T* AssignConfidenceApplication::compute_decoy_qvalues_mixmax(
     }
     while (k >= 0 && (ascending ?
       target_scores[k] <= target_scores[i] :
-      target_scores[k] >= target_scores[i])){
+      target_scores[k] >= target_scores[i])) {
       ++n_w_ge_w;
       --k;
     }
@@ -1015,7 +1009,7 @@ void AssignConfidenceApplication::peptide_level_filtering(
   MatchCollection* match_collection,
   std::map<string, FLOAT_T>* BestPeptideScore, 
   SCORER_TYPE_T score_type,
-  bool ascending){
+  bool ascending) {
 
     MatchIterator* temp_iter = new MatchIterator(match_collection);
 
@@ -1027,7 +1021,7 @@ void AssignConfidenceApplication::peptide_level_filtering(
       FLOAT_T bestScore = 0.0;
       try {
         bestScore = BestPeptideScore->at(peptideStr);
-      } catch (const std::out_of_range& oor){
+      } catch (const std::out_of_range& oor) {
         BestPeptideScore->insert(std::pair<string, FLOAT_T>(peptideStr, score));
         continue;
       }
@@ -1038,7 +1032,7 @@ void AssignConfidenceApplication::peptide_level_filtering(
     delete temp_iter;
 }
 
-string AssignConfidenceApplication::getPeptideSeq(Match* match){
+string AssignConfidenceApplication::getPeptideSeq(Match* match) {
   string peptideSeq;
   if (Params::GetBool("combine-modified-peptides")) {
     peptideSeq = match->getPeptide()->getSequence();
@@ -1051,7 +1045,7 @@ string AssignConfidenceApplication::getPeptideSeq(Match* match){
   return peptideSeq;
 }
 
-map<pair<string, unsigned int>, bool>* AssignConfidenceApplication::getSpectrumFlag(){
+map<pair<string, unsigned int>, bool>* AssignConfidenceApplication::getSpectrumFlag() {
   return spectrum_flag_;
 }
 
@@ -1059,19 +1053,19 @@ void AssignConfidenceApplication::setSpectrumFlag(map<pair<string, unsigned int>
   spectrum_flag_ = spectrum_flag;
 }
 
-void AssignConfidenceApplication::setIterationCnt(unsigned int iteration_cnt){
+void AssignConfidenceApplication::setIterationCnt(unsigned int iteration_cnt) {
   iteration_cnt_ = iteration_cnt;
 }
 
-void AssignConfidenceApplication::setOutput(OutputFiles *output){
+void AssignConfidenceApplication::setOutput(OutputFiles *output) {
   output_ = output;
 }
 
-void AssignConfidenceApplication::setIndexName(string index_name){
+void AssignConfidenceApplication::setIndexName(string index_name) {
   index_name_ = index_name;
 }
 
-unsigned int AssignConfidenceApplication::getAcceptedPSMs(){
+unsigned int AssignConfidenceApplication::getAcceptedPSMs() {
   return accepted_psms_;
 }
 

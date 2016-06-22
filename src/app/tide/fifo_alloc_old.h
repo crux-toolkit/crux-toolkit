@@ -6,7 +6,7 @@
 
 class FifoPage {
  public:
-  FifoPage(size_t size) : size_(size) {
+  explicit FifoPage(size_t size) : size_(size) {
     page_ = (char*) GetPage(size);
     end_ = page_ + size;
     next_ = this;
@@ -51,7 +51,7 @@ class FifoPage {
 
   void Show() {
     fprintf(stderr, "{ page(%x, %x) used(%x, %x) }",
-	    page_, end_, begin_used_, end_used_);
+            page_, end_, begin_used_, end_used_);
   }
 
  private:
@@ -68,7 +68,7 @@ class FifoPage {
 
 class FifoAllocator {
  public:
-  FifoAllocator(size_t page_size) : page_size_(page_size) {
+  explicit FifoAllocator(size_t page_size) : page_size_(page_size) {
     current_page_ = new FifoPage(page_size_);
   }
 

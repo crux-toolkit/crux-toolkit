@@ -22,7 +22,7 @@
 template <class C>
 class FixedCapacityArray {
  public:
-  FixedCapacityArray(int capacity)
+  explicit FixedCapacityArray(int capacity)
     : data_(new C[capacity]), size_(0), del_(true) {
   }
 

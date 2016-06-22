@@ -17,7 +17,7 @@
 #include "records.h"
 template<class Protobuf, class VecElement>
 bool ReadRecordsToVector(vector<VecElement*>* vec, const string& filename,
-			 pb::Header* header = NULL) {
+       pb::Header* header = NULL) {
   HeadedRecordReader reader(filename, header);
   while (!reader.Done()) {
     Protobuf* protobuf = new Protobuf;

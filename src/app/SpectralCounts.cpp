@@ -196,9 +196,9 @@ void SpectralCounts::getProteinScoresDNSAF() {
 
     Peptide* peptide = pep_it->first;
     FLOAT_T pep_score = pep_it->second;
-    for(PeptideSrcIterator iter=peptide->getPeptideSrcBegin();
-        iter!=peptide->getPeptideSrcEnd();
-        ++iter) {
+    for (PeptideSrcIterator iter = peptide->getPeptideSrcBegin();
+         iter != peptide->getPeptideSrcEnd();
+         ++iter) {
       PeptideSrc* peptide_src = *iter;
       Protein* protein = peptide_src->getParentProtein();
       if (protein_scores_unique_.find(protein) == protein_scores_unique_.end()) {
@@ -227,9 +227,9 @@ void SpectralCounts::getProteinScoresDNSAF() {
 
     double unique_sum = 0.0;
    
-    for(PeptideSrcIterator iter=peptide->getPeptideSrcBegin();
-        iter!=peptide->getPeptideSrcEnd();
-        ++iter) {
+    for (PeptideSrcIterator iter = peptide->getPeptideSrcBegin();
+         iter != peptide->getPeptideSrcEnd();
+         ++iter) {
       PeptideSrc* peptide_src = *iter;
       
       Protein* protein = peptide_src->getParentProtein();
@@ -240,8 +240,8 @@ void SpectralCounts::getProteinScoresDNSAF() {
     }   
   
     if (unique_sum != 0) {
-      for (PeptideSrcIterator iter=peptide->getPeptideSrcBegin();
-           iter!=peptide->getPeptideSrcEnd();
+      for (PeptideSrcIterator iter = peptide->getPeptideSrcBegin();
+           iter != peptide->getPeptideSrcEnd();
            ++iter) {
         PeptideSrc* peptide_src = *iter;
         Protein* protein = peptide_src->getParentProtein();
@@ -286,8 +286,8 @@ void SpectralCounts::getProteinScores() {
          pep_it != peptide_scores_.end(); ++pep_it) {
       Peptide* peptide = pep_it->first;
       FLOAT_T pep_score = pep_it->second;
-      for (PeptideSrcIterator iter=peptide->getPeptideSrcBegin();
-           iter!=peptide->getPeptideSrcEnd();
+      for (PeptideSrcIterator iter = peptide->getPeptideSrcBegin();
+           iter != peptide->getPeptideSrcEnd();
            ++iter) {
         PeptideSrc* peptide_src =*iter;
         Protein* protein = peptide_src->getParentProtein();
@@ -399,7 +399,7 @@ void SpectralCounts::checkProteinNormalization() {
       iter != protein_scores_.end();
       ++iter) {
 
-      carp(CARP_DEBUG, "%s %f",iter->first->getIdPointer(), iter->second);
+      carp(CARP_DEBUG, "%s %f", iter->first->getIdPointer(), iter->second);
     }
   }
 }
@@ -433,8 +433,7 @@ void SpectralCounts::computeEmpai() {
  * \return The sum of unmodified b and y ions.
  */
 FLOAT_T SpectralCounts::sumMatchIntensity(Match* match,
-                                        Crux::SpectrumCollection* spectra)
-{
+                                        Crux::SpectrumCollection* spectra) {
   FLOAT_T match_intensity = 0;
   char* peptide_seq = match->getSequence();
   MODIFIED_AA_T* modified_sequence = match->getModSequence();
@@ -488,8 +487,7 @@ FLOAT_T SpectralCounts::sumMatchIntensity(Match* match,
  * For EMPAI, the score is 1 as it only reqires the number of peptides
  * observed per protein.
  */
-void SpectralCounts::getPeptideScores()
-{
+void SpectralCounts::getPeptideScores() {
   Crux::SpectrumCollection* spectra = NULL;
 
   // for SIN, parse out spectrum collection from ms2 fiel
@@ -516,7 +514,7 @@ void SpectralCounts::getPeptideScores()
       //keep track of unique and shared mappings.
       if (peptide->getNumPeptideSrc() > 1) {
         if (peptide_scores_shared_.find(peptide) == peptide_scores_shared_.end()) {
-          peptide_scores_shared_.insert(make_pair(peptide,0.0));
+          peptide_scores_shared_.insert(make_pair(peptide, 0.0));
         }
         peptide_scores_shared_[peptide] += match_intensity;
       } else {
@@ -703,7 +701,7 @@ void SpectralCounts::filterMatchesQValue() {
     carp(CARP_FATAL, "The matches in %s do not have q-values.\n"
                      "Please either provide a file with q-values or "
                      "set threshold-type to \"none\" or \"custom.\"",
-	 psm_file_.c_str());
+    psm_file_.c_str());
   }
 
   carp(CARP_DETAILED_DEBUG,
@@ -715,7 +713,7 @@ void SpectralCounts::filterMatchesQValue() {
   while (match_iterator->hasNext()) {
     Match* match = match_iterator->next();
      
-    carp(CARP_DEBUG, "xcorr rank:%d q-value:%f",match->getRank(XCORR), match->getScore(qval_type));
+    carp(CARP_DEBUG, "xcorr rank:%d q-value:%f", match->getRank(XCORR), match->getScore(qval_type));
     if (match->isDecoy()) {
       continue;
     } 
@@ -819,7 +817,7 @@ bool SpectralCounts::sortRankedProteins(
 void SpectralCounts::getMetaMapping() {
   carp(CARP_DEBUG, "Creating a mapping of meta protein to peptides");
   int count = 0;
-  for(ProteinToPeptides::iterator prot_it= protein_supporting_peptides_.begin();
+  for(ProteinToPeptides::iterator prot_it = protein_supporting_peptides_.begin();
        prot_it != protein_supporting_peptides_.end(); ++prot_it) {
     Protein* protein = prot_it->first;
     PeptideSet pep_set = prot_it->second;
@@ -916,7 +914,7 @@ void SpectralCounts::performParsimonyAnalysis() {
     PeptideSet cur_peptides = node.first;
     // update the peptide sets for the rest of meta proteins
     for (vector< pair<PeptideSet, MetaProtein > >::iterator
-           iter= peps_vector.begin();
+         iter = peps_vector.begin();
          iter != peps_vector.end(); ++iter) {
       PeptideSet peptides = (*iter).first;
       PeptideSet difference(Peptide::lessThan);

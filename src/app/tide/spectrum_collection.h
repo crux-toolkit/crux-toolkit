@@ -46,7 +46,7 @@ class Spectrum {
     peak_intensity_.push_back(intensity);
   }
   
-  Spectrum(const pb::Spectrum& spec); // Instantiation from PB
+  explicit Spectrum(const pb::Spectrum& spec); // Instantiation from PB
   void FillPB(pb::Spectrum* spec);
 
   int SpectrumNumber() const { return spectrum_number_; }
@@ -99,7 +99,7 @@ class SpectrumCollection {
     int spectrum_index;
 
     SpecCharge(double neutral_mass_param, int charge_param,
-	       Spectrum* spectrum_param, int spectrum_index_param)
+               Spectrum* spectrum_param, int spectrum_index_param)
     : neutral_mass(neutral_mass_param), charge(charge_param),
       spectrum(spectrum_param), spectrum_index(spectrum_index_param) {
     }
