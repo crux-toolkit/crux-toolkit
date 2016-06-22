@@ -154,7 +154,7 @@ void CruxHardklorApplication::addArg(
   const string& arg
 ) {
   char* toAdd = new char[arg.length() + 1];
-  snprintf(toAdd, arg.length() + 1, arg.c_str());
+  strcpy(toAdd, arg.c_str());
   args->push_back(toAdd);
 }
 
