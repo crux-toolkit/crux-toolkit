@@ -60,7 +60,7 @@ class ActivePeptideQueue {
 
   void ReportPeptideHits(Peptide* peptide);
   void SetOutputs(OutputFiles* output_files, const vector<const pb::AuxLocation*>* locations, int top_matches,
-                  bool compute_sp, ofstream* target_file, ofstream* decoy_file, double highest_mz){
+                  bool compute_sp, ofstream* target_file, ofstream* decoy_file, double highest_mz) {
       locations_ = locations;
       output_files_ = output_files;
       top_matches_ = top_matches;
@@ -73,7 +73,7 @@ class ActivePeptideQueue {
     peptide_centric_ = peptide_centric;
   }
   
-  void setElutionWindow(int elution_window){
+  void setElutionWindow(int elution_window) {
     elution_window_ = elution_window;
   }
   // iter_ points to the current peptide. Client access is by HasNext(),
@@ -82,7 +82,7 @@ class ActivePeptideQueue {
   deque<Peptide*>::const_iterator iter_, end_;
   
 //  const ProteinVec& proteins_;
-private:
+ private:
   const vector<const pb::AuxLocation*>* locations_;
   OutputFiles* output_files_;
   int top_matches_;

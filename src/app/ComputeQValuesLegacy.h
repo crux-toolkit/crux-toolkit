@@ -12,12 +12,12 @@ class ComputeQValuesLegacy : public ComputeQValues {
   /**
    * \returns A blank ComputeQValues object.
    */
-  ComputeQValuesLegacy(){}
+  ComputeQValuesLegacy() {}
 
   /**
    * Destructor
    */
-  ~ComputeQValuesLegacy(){}
+  ~ComputeQValuesLegacy() {}
 
   /**
    * \returns The command name for ComputeQValues.

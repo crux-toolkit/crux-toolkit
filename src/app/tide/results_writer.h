@@ -56,15 +56,15 @@ namespace ResultsWriterUtils {
       return 1.0 - (xcorr_n/xcorr_top);
     return 0.0;
   }
-};
+}; // namespace ResultsWriterUtils
 
 ///////////////////////////////////////////////////////////////////////////////
 // Base class to display results.
 ///////////////////////////////////////////////////////////////////////////////
 class ResultsWriter {
-public:
+ public:
   virtual void WriteResults(pb::Results& pb_result) = 0;
-  virtual ~ResultsWriter() {};
+  virtual ~ResultsWriter() {}
 };
 
 
@@ -74,7 +74,7 @@ public:
 // writing individual text fields in the order specified by the user.
 ///////////////////////////////////////////////////////////////////////////////
 class TextFieldWriter {
-  public:
+ public:
     // Subclasses are to override exactly one of these
     virtual void WriteSpectrumField(const pb::Spectrum& spectrum, int charge, 
                                     ostream& out_stream_) {
@@ -90,7 +90,7 @@ class TextFieldWriter {
 };
 
 class TextSpectrumNumWriter : public TextFieldWriter {
-  public:
+ public:
     void WriteSpectrumField(const pb::Spectrum& spectrum, int charge,
                             ostream& out_stream) {
       out_stream << spectrum.spectrum_number();
@@ -98,7 +98,7 @@ class TextSpectrumNumWriter : public TextFieldWriter {
 };
 
 class TextMzWriter : public TextFieldWriter {
-  public:
+ public:
     void WriteSpectrumField(const pb::Spectrum& spectrum, int charge,
                             ostream& out_stream) {
       out_stream << fixed << setprecision(2) 
@@ -107,7 +107,7 @@ class TextMzWriter : public TextFieldWriter {
 };
 
 class TextChargeWriter : public TextFieldWriter {
-  public:
+ public:
     void WriteSpectrumField(const pb::Spectrum& spectrum, int charge,
                             ostream& out_stream) {
       out_stream << charge;
@@ -115,7 +115,7 @@ class TextChargeWriter : public TextFieldWriter {
 };
 
 class TextRTimeWriter : public TextFieldWriter {
-  public:
+ public:
     void WriteSpectrumField(const pb::Spectrum& spectrum, int charge,
                             ostream& out_stream) {
       out_stream << spectrum.rtime();
@@ -123,7 +123,7 @@ class TextRTimeWriter : public TextFieldWriter {
 };
 
 class TextXcorrWriter : public TextFieldWriter {
-  public:
+ public:
     void WriteMatchField(const ProteinVec& proteins, const pb::Match& match, 
                          ostream& out_stream) {
       out_stream << setprecision(6) << match.xcorr();
@@ -131,7 +131,7 @@ class TextXcorrWriter : public TextFieldWriter {
 };
 
 class TextSequenceWriter : public TextFieldWriter {
-  public:
+ public:
     void WriteMatchField(const ProteinVec& proteins, const pb::Match& match, 
                          ostream& out_stream) {
       out_stream << ResultsWriterUtils::GetSeq(match.peptide(), proteins);
@@ -139,7 +139,7 @@ class TextSequenceWriter : public TextFieldWriter {
 };
 
 class TextProteinNameWriter : public TextFieldWriter {
-  public:
+ public:
     void WriteProteinField(const pb::Protein& protein, 
                            const pb::Location& location, 
                            int peptide_len, ostream& out_stream) {
@@ -148,7 +148,7 @@ class TextProteinNameWriter : public TextFieldWriter {
 };
 
 class TextPositionWriter : public TextFieldWriter {
-  public:
+ public:
     void WriteProteinField(const pb::Protein& protein, 
                            const pb::Location& location, 
                            int peptide_len, ostream& out_stream) {
@@ -157,7 +157,7 @@ class TextPositionWriter : public TextFieldWriter {
 };
 
 class TextAABeforeWriter : public TextFieldWriter {
-  public:
+ public:
     void WriteProteinField(const pb::Protein& protein, 
                            const pb::Location& location, 
                            int peptide_len, ostream& out_stream) {
@@ -167,7 +167,7 @@ class TextAABeforeWriter : public TextFieldWriter {
 };
 
 class TextAAAfterWriter : public TextFieldWriter {
-  public:
+ public:
     void WriteProteinField(const pb::Protein& protein, 
                            const pb::Location& location, 
                            int peptide_len, ostream& out_stream) {
@@ -308,13 +308,13 @@ class XMLWriter {
 class PepXMLResultsWriter : public ResultsWriter {
  public:
   PepXMLResultsWriter(const ProteinVec& proteins, const AuxLocVec& aux_locs,
-		      ostream& out_stream);
+          ostream& out_stream);
   void WriteResults(pb::Results& pb_result);
 
  private:
   void WriteSpectrum(pb::Results& pb_result, XMLWriter& xml);
   void WriteMatch(const pb::Match& pb_match, int match,
-		  double delta_cn, XMLWriter& xml);
+      double delta_cn, XMLWriter& xml);
   // void WriteProteinLocation(const pb::Protein& protein);
 
   const ProteinVec& proteins_;

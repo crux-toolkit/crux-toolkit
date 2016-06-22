@@ -7,7 +7,7 @@ using namespace std;
 double MathUtil::Round(double x, int decimals) {
   double shift = pow(10, decimals);
   return (x >= 0)
-	  ? floor(x * shift + 0.5) / shift
+    ? floor(x * shift + 0.5) / shift
     : ceil(x * shift - 0.5) / shift;
 }
 

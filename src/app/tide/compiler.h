@@ -81,7 +81,7 @@
 
 class TheoreticalPeakCompiler {
  public:
-  TheoreticalPeakCompiler(FifoAllocator* fifo_alloc) 
+  explicit TheoreticalPeakCompiler(FifoAllocator* fifo_alloc) 
     : fifo_alloc_(fifo_alloc), last_alloc_end_(NULL) {
       // fifo_alloc_ will make room for generated programs.
   }
@@ -164,9 +164,9 @@ class TheoreticalPeakCompiler {
 
  private:
   // Various x86 instructions we need.
-  static const unsigned short int add_to_eax_at_edx_plus = 33283;
-  static const unsigned short int mov_to_eax_at_edx_plus = 33419;
-  static const unsigned short int sub_from_eax_at_edx_plus = 33323;
+  static const uint16_t add_to_eax_at_edx_plus = 33283;
+  static const uint16_t mov_to_eax_at_edx_plus = 33419;
+  static const uint16_t sub_from_eax_at_edx_plus = 33323;
   static const unsigned char ret = 195;
   static const unsigned char jmp_relative = 233;
 
@@ -174,9 +174,9 @@ class TheoreticalPeakCompiler {
 
   void AddPositive(int peak) {
     if (first_) { // First theoretical peak uses a 'mov' rather than an 'add'
-      *((unsigned short int*) pos_) = mov_to_eax_at_edx_plus;
+      *((uint16_t*) pos_) = mov_to_eax_at_edx_plus;
     } else {
-      *((unsigned short int*) pos_) = add_to_eax_at_edx_plus;
+      *((uint16_t*) pos_) = add_to_eax_at_edx_plus;
     }
     first_ = false;
     pos_ += 2;
@@ -185,7 +185,7 @@ class TheoreticalPeakCompiler {
   }
 
   void AddNegative(int peak) {
-    *((unsigned short int*) pos_) = sub_from_eax_at_edx_plus;
+    *((uint16_t*) pos_) = sub_from_eax_at_edx_plus;
     pos_ += 2;
     *((int*) pos_) = peak << 2; // Store 4 * the peak position.
     pos_ += 4;

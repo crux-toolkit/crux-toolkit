@@ -50,7 +50,7 @@
  * given no arguments.  Runs one of the crux commands, including
  * printing the current version number.
  */
-int main(int argc, char** argv){
+int main(int argc, char** argv) {
   try {
 #ifdef _MSC_VER
     // Turn off auto-tranlation of line-feed to 

@@ -57,7 +57,7 @@ int CruxBullseyeApplication::main(
   if (hardklor_output.empty()) {
     hardklor_output = make_file_path("hardklor.mono.txt");
     if (Params::GetBool("overwrite") || (!FileUtils::Exists(hardklor_output))) {
-      carp(CARP_DEBUG,"Calling hardklor");
+      carp(CARP_DEBUG, "Calling hardklor");
       bool ret = CruxHardklorApplication::main(input_ms1);
       if (ret != 0) {
         carp(CARP_WARNING, "Hardklor failed:%d", ret);
