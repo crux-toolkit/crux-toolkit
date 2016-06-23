@@ -1,0 +1,48 @@
+<html>
+<title>Barista benchmark test</title>
+<body>
+
+<h1>Barista benchmark test</h1>
+
+<p>
+This test checks how well the barista works on increasing samples of 
+ms2 data.  The data used comes from increasing in size subsets
+<code>/net/noble/vol1/data/crux-datasets/2013wu-variation/</code>,
+specifically the <code>ms2-centroid</code> spectra. The test runs
+barista on the spectra after each subset is run through tide-search
+with low resolution and exact p-value. The exact run specifications
+are shown in <code>./setup.sh</code>. The performance of barista
+according to time and max memory usage is shown against the number of
+input spectra. To change the data set used for benchmarking, one need
+only modify <code>./setup.sh</code> <code>./*_job.sh</code> to change
+the <code>tide search</code> parameters and location of input files.
+</p>
+
+<p>
+You can execute the test by running the
+script <code>./dispatch.sh</code> in this directory, which will dispatch
+a number of jobs to the <code>uge</code> noblelab cluster. After these
+jobs finish, you can run <code>summarize.py</code> (also in this directory)
+to parse the output (which currently goes to <code>~/barista_benchmark/</code>).
+Assuming that you have gnuplot installed, then your plots should show
+up in the right-hand set of plots below. </p>
+
+<center>
+<table>
+<tr>
+<td><center>Stored plot</center></td>
+<td><center>Plot resulting from your test</center></td>
+</tr>
+<tr>
+<td><img src="stored-plots/time.png"></td>
+<td><img src="plots/time.png"></td>
+</tr>
+<tr>
+<td><img src="stored-plots/memory.png"></td>
+<td><img src="plots/memory.png"></td>
+</tr>
+</table>
+</center>
+
+</body>
+</html>
