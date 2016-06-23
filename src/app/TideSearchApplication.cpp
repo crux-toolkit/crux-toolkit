@@ -429,7 +429,7 @@ void TideSearchApplication::search(void* threadarg) {
   bool exact_pval_search = my_data->exact_pval_search;
   map<pair<string, unsigned int>, bool>* spectrum_flag = my_data->spectrum_flag;
 
-  unsigned* sc_index = my_data->sc_index;
+  int* sc_index = my_data->sc_index;
   int* total_candidate_peptides = my_data->total_candidate_peptides;
 
   // params
@@ -450,8 +450,16 @@ void TideSearchApplication::search(void* threadarg) {
   for (vector<SpectrumCollection::SpecCharge>::const_iterator sc = spec_charges->begin()+thread_num;
        sc < spec_charges->begin() + (spec_charges->size());
        sc = sc + num_threads) {
+    
+    locks_array[3]->lock();
+    ++(*sc_index);
+    if (print_interval > 0 && *sc_index % print_interval == 0) {
+      carp(CARP_INFO, "%d spectrum-charge combinations searched, %.0f%% complete",
+           *sc_index, *sc_index / sc_total * 100);
+    }
+    locks_array[3]->unlock();
 
-    Spectrum* spectrum = sc->spectrum;   
+    Spectrum* spectrum = sc->spectrum;
     double precursor_mz = spectrum->PrecursorMZ();
     int charge = sc->charge;
     int scan_num = spectrum->SpectrumNumber();
@@ -691,14 +699,6 @@ void TideSearchApplication::search(void* threadarg) {
         }
       } // end peptide_centric == true
     } // end exact-pval-search
-
-    locks_array[3]->lock();
-    ++(*sc_index);
-    if (print_interval > 0 && *sc_index % print_interval == 0) {
-      carp(CARP_INFO, "%d spectrum-charge combinations searched, %.0f%% complete",
-           *sc_index, *sc_index / sc_total * 100);
-    }
-    locks_array[3]->unlock();
   }
 }
 
@@ -744,7 +744,7 @@ void TideSearchApplication::search(
   bool peptide_centric = Params::GetBool("peptide-centric-search");
 
   // initialize fields required for output
-  unsigned* sc_index = new unsigned(0);
+  int* sc_index = new int(-1);
   int* total_candidate_peptides = new int(0);
   FLOAT_T sc_total = (FLOAT_T)spec_charges->size();
 
