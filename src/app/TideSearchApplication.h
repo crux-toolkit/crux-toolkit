@@ -218,7 +218,7 @@ class TideSearchApplication : public CruxApplication {
     double bin_offset;
     bool exact_pval_search;
     map<pair<string, unsigned int>, bool>* spectrum_flag;
-    unsigned* sc_index;
+    int* sc_index;
     int* total_candidate_peptides;
 
     thread_data (const string& spectrum_filename_, const vector<SpectrumCollection::SpecCharge>* spec_charges_,
@@ -230,7 +230,7 @@ class TideSearchApplication : public CruxApplication {
             ofstream* decoy_file_, bool compute_sp_, int64_t thread_num_, int64_t num_threads_, int nAA_,
             double* aaFreqN_, double* aaFreqI_, double* aaFreqC_, int* aaMass_, vector<boost::mutex*> locks_array_,  
             double bin_width_, double bin_offset_, bool exact_pval_search_, map<pair<string, unsigned int>, bool>* spectrum_flag_,
-            unsigned* sc_index_, int* total_candidate_peptides_) : 
+            int* sc_index_, int* total_candidate_peptides_) :
             spectrum_filename(spectrum_filename_), spec_charges(spec_charges_), active_peptide_queue(active_peptide_queue_),
             proteins(proteins_), locations(locations_), precursor_window(precursor_window_), window_type(window_type_),
             spectrum_min_mz(spectrum_min_mz_), spectrum_max_mz(spectrum_max_mz_), min_scan(min_scan_), max_scan(max_scan_),
