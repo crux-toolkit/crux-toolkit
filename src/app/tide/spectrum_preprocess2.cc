@@ -27,6 +27,7 @@
 #include <cmath>
 
 #include <iostream> //Remove this when done -- Andy Lin
+#include <iomanip> //Remove this when done -- Andy Lin
 
 using namespace std;
 
@@ -638,7 +639,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   int nIon = spectrum.Size();
   int precurCharge = charge;
   double experimentalMassCutoff = precursorMass + 50.0;
-  double proton = MassConstants::proton;
+//  double proton = MassConstants::proton;
   double residueToleranceMass = 100.0 * 200.0 * 0.000001; //TODO this needs to be made option
   const double precursorMZExclude = 15.0; //also used in PreprocessSpectrum
 
