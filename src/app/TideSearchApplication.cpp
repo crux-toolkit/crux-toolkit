@@ -14,6 +14,8 @@
 #include "util/StringUtils.h"
 #include <math.h> //Added by Andy Lin
 
+#include <iomanip> //DELETE WHEN DONE -- Andy //TODO
+
 bool TideSearchApplication::HAS_DECOYS = false;
 
 /* This constant is the product of the original "magic number" (10000,
@@ -772,13 +774,14 @@ void TideSearchApplication::search(
         vector<vector<vector<double> > > residueEvidenceMatrix(nPepMassIntUniq, 
                vector<vector<double> >(aaMassDouble.size(), vector<double>(maxPrecurMassBin,0)));
 
-//        std::cout << "Spectrum index: " << sc->spectrum_index << std::endl;
-        std::cout << "precursor mass: ";
-        printf("%15f",sc->neutral_mass);
-        std::cout << std::endl;
-//        std::cout << "charge: " << sc->charge << std::endl;
+        std::cout << "Spectrum index: " << sc->spectrum_index << std::endl;
+        std::cout << "precursor mass: " << setprecision(13) <<  sc->neutral_mass << std::endl;
+        std::cout << "charge: " << sc->charge << std::endl;
+        std::cout << "precursorMz: "  << sc->spectrum->PrecursorMZ() << std::endl;
+        std::cout << "proton mass: " << MassConstants::proton << std::endl;
 //        std::cout << "nCandPeptide: " << nCandPeptide << endl;
-        std::cout << "nPepMassIntUniq: " << nPepMassIntUniq << std::endl << std::endl;
+        std::cout << "nPepMassIntUniq: " << nPepMassIntUniq << std::endl;
+        std::cout << 1.0 << std::endl;
 
         //Initalize to -1 for length of vector (maxPrecurMassBin)
         //scoreOffset will be placed into corresponding mass bin 
@@ -974,7 +977,7 @@ void TideSearchApplication::search(
           double pValue = pValuesResidueObs[curPepMassInt][scoreCountIdx];
  
           if(peptide_centric) {
-            carp(CARP_FATAL, "residue-evidence has not been implemented with 'peptide-centru-search T' yet.");
+            carp(CARP_FATAL, "residue-evidence has not been implemented with 'peptide-centric-search T' yet.");
           }
           else {
             TideMatchSet::Pair pair;
@@ -1000,8 +1003,26 @@ void TideSearchApplication::search(
         //clean up 
         delete [] pepMassInt;
         delete [] scoreOffsetObs;
-      }
+	//TODO need to delete a lot more stuff
+	
 
+	if (!peptide_centric){
+          // below text is copied from text above in the exact-p-value XCORR case
+          // matches will arrange th results in a heap by score, return the top
+          // few, and recover the association between counter and peptide. We output 
+          // the top matches.
+          TideMatchSet matches(&match_arr, highest_mz);
+	  matches.exact_pval_search_ = exact_pval_search_;
+	  if (output_files) {
+	    matches.report(output_files, top_matches, spectrum_filename, spectrum, charge,
+	                   active_peptide_queue, proteins, locations, compute_sp, false);
+	  } else {
+            matches.report(target_file, decoy_file, top_matches, spectrum_filename, 
+                           spectrum, charge, active_peptide_queue, proteins,
+                           locations, compute_sp, false);
+          }
+	} //end peptide_centric == true
+      }
       break; //End Case RESIDUE_EVIDENCE_MATRIX
     case BOTH:
       if (!exact_pval_search_){
