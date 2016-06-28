@@ -276,7 +276,7 @@ void print_mods_parameter_file(ostream* param_file,
 
   // if there were no mods, print placeholder
   if( total_mods == 0 ){
-    *param_file << comments << name << "=NO MODS" << endl << endl;
+    *param_file << Params::ProcessHtmlDocTags(comments) << name << "=NO MODS" << endl << endl;
   }
 }
 

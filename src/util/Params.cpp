@@ -388,11 +388,11 @@ Params::Params() : finalized_(false) {
     "Used from command line or parameter file by crux-generate-peptides.", true);
   InitStringParam("mod", "NO MODS",
     "Consider modifications on any amino acid in aa list with at most max-per-peptide in one "
-    "peptide. "
-    "The parameter takes the form [[html:"
-    "&lt;mass change&gt;:&lt;aa list&gt;:&lt;max per peptide&gt;:&lt;prevents cleavage&gt;:"
-    "&lt;prevents cross-link&gt;]]. "
-    "This parameter may be included with different values multiple times so long as "
+    "peptide. The parameter takes the form "
+    "[[html:&lt;mass change&gt;:&lt;aa list&gt;:&lt;max per peptide&gt;:&lt;prevents cleavage&gt;:"
+    "&lt;prevents cross-link&gt;]]"
+    "[[nohtml:<mass change>:<aa list>:<max per peptide>:<prevents cleavage>:<prevents cross-link>]]"
+    ". This parameter may be included with different values multiple times so long as "
     "the total number of mod, cmod, and nmod parameters does not exceed 11. The \"prevents "
     "cleavage\" and \"prevents cross-link\" arguments are optional T/F arguments for describing whether the "
     "modification prevents enzymatic cleavage of cross-linking, respectively. This option is "
