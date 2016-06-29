@@ -1276,8 +1276,11 @@ vector< pair<FLOAT_T, FLOAT_T> > MatchCollection::calculateDeltaCns(
     // Lower is better - sort ascending
     std::sort(scores.begin(), scores.end(), std::less<FLOAT_T>());
   }
+  
+  int top_match = Params::GetInt("top-match");
 
-  FLOAT_T last = scores.back();
+//  FLOAT_T last = scores.back();
+  FLOAT_T last = scores[min(top_match, (int) scores.size()) - 1];
   for (vector<FLOAT_T>::const_iterator i = scores.begin(); i != scores.end(); i++) {
     vector<FLOAT_T>::const_iterator next = (i != scores.end() - 1) ? i + 1 : i;
     FLOAT_T deltaCn, deltaLCn;

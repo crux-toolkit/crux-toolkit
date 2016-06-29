@@ -269,8 +269,9 @@ void TideMatchSet::report(
   gatherTargetsAndDecoys(peptides, proteins, targets, decoys, top_n, highScoreBest);
 
   map<Arr::iterator, FLOAT_T> delta_cn_map;
-  computeDeltaCns(targets, &delta_cn_map);
-  computeDeltaCns(decoys, &delta_cn_map);
+  map<Arr::iterator, FLOAT_T> delta_lcn_map;
+  computeDeltaCns(targets, &delta_cn_map, &delta_lcn_map);
+  computeDeltaCns(decoys, &delta_cn_map, &delta_lcn_map);
 
   map<Arr::iterator, pair<const SpScorer::SpScoreData, int> > sp_map;
   if (compute_sp) {
@@ -279,9 +280,9 @@ void TideMatchSet::report(
     computeSpData(decoys, &sp_map, &sp_scorer, peptides);
   }
   writeToFile(target_file, top_n, targets, spectrum_filename, spectrum, charge,
-              peptides, proteins, locations, delta_cn_map, compute_sp ? &sp_map : NULL, rwlock);
+              peptides, proteins, locations, delta_cn_map, delta_lcn_map, compute_sp ? &sp_map : NULL, rwlock);
   writeToFile(decoy_file, top_n, decoys, spectrum_filename, spectrum, charge,
-              peptides, proteins, locations, delta_cn_map, compute_sp ? &sp_map : NULL, rwlock);
+              peptides, proteins, locations, delta_cn_map, delta_lcn_map, compute_sp ? &sp_map : NULL, rwlock);
 }
 
 /**
@@ -298,6 +299,7 @@ void TideMatchSet::writeToFile(
   const ProteinVec& proteins,
   const vector<const pb::AuxLocation*>& locations,
   const map<Arr::iterator, FLOAT_T>& delta_cn_map,
+  const map<Arr::iterator, FLOAT_T>& delta_lcn_map,
   const map<Arr::iterator, pair<const SpScorer::SpScoreData, int> >* sp_map,
   boost::mutex * rwlock
 ) {
@@ -350,7 +352,8 @@ void TideMatchSet::writeToFile(
           << StringUtils::ToString(spectrum->PrecursorMZ(), massPrecision) << '\t'
           << StringUtils::ToString((spectrum->PrecursorMZ() - MASS_PROTON) * charge, massPrecision) << '\t'
           << StringUtils::ToString(cruxPep.calcModifiedMass(), massPrecision) << '\t'
-          << delta_cn_map.at(*i) << '\t';
+          << delta_cn_map.at(*i) << '\t'
+          << delta_lcn_map.at(*i) << '\t';
     if (sp_map) {
       *file << StringUtils::ToString(sp_data->sp_score, precision) << '\t'
             << sp_map->at(*i).second << '\t';
@@ -567,7 +570,7 @@ void TideMatchSet::writeHeaders(ofstream* file, bool decoyFile, bool sp) {
   }
   const int headers[] = {
     FILE_COL, SCAN_COL, CHARGE_COL, SPECTRUM_PRECURSOR_MZ_COL, SPECTRUM_NEUTRAL_MASS_COL,
-    PEPTIDE_MASS_COL, DELTA_CN_COL, SP_SCORE_COL, SP_RANK_COL,
+    PEPTIDE_MASS_COL, DELTA_CN_COL, DELTA_LCN_COL, SP_SCORE_COL, SP_RANK_COL,
     XCORR_SCORE_COL, XCORR_RANK_COL, BY_IONS_MATCHED_COL, BY_IONS_TOTAL_COL,
     DISTINCT_MATCHES_SPECTRUM_COL, SEQUENCE_COL, MODIFICATIONS_COL, CLEAVAGE_TYPE_COL,
     PROTEIN_ID_COL, FLANKING_AA_COL, ORIGINAL_TARGET_SEQUENCE_COL
@@ -794,7 +797,8 @@ void TideMatchSet::getFlankingAAs(
 
 void TideMatchSet::computeDeltaCns(
   const vector<Arr::iterator>& vec, // xcorr*100000000.0, high to low
-  map<Arr::iterator, FLOAT_T>* delta_cn_map // map to add delta cn scores to
+  map<Arr::iterator, FLOAT_T>* delta_cn_map, // map to add delta cn scores to
+  map<Arr::iterator, FLOAT_T>* delta_lcn_map // map to add delta cn scores to
 ) {
   vector<FLOAT_T> scores;
   for (vector<Arr::iterator>::const_iterator i = vec.begin(); i != vec.end(); i++) {
@@ -804,6 +808,7 @@ void TideMatchSet::computeDeltaCns(
     scores, !Params::GetBool("exact-p-value") ? XCORR : TIDE_SEARCH_EXACT_PVAL);
   for (int i = 0; i < vec.size(); i++) {
     delta_cn_map->insert(make_pair(vec[i], deltaCns[i].first));
+    delta_lcn_map->insert(make_pair(vec[i], deltaCns[i].second));
   }
 }
 

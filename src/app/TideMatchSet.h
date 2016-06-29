@@ -146,6 +146,7 @@ class TideMatchSet {
     const ProteinVec& proteins,
     const vector<const pb::AuxLocation*>& locations,
     const map<Arr::iterator, FLOAT_T>& delta_cn_map,
+    const map<Arr::iterator, FLOAT_T>& delta_lcn_map,
     const map<Arr::iterator, pair<const SpScorer::SpScoreData, int> >* sp_map,
     boost::mutex * rwlock
   );
@@ -220,7 +221,8 @@ class TideMatchSet {
 
   static void computeDeltaCns(
     const vector<Arr::iterator>& vec, // xcorr*100000000.0, high to low
-    map<Arr::iterator, FLOAT_T>* delta_cn_map // map to add delta cn scores to
+    map<Arr::iterator, FLOAT_T>* delta_cn_map, // map to add delta cn scores to
+    map<Arr::iterator, FLOAT_T>* delta_lcn_map
   );
 
   static void computeSpData(
