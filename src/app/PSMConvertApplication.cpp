@@ -26,9 +26,7 @@ PSMConvertApplication::PSMConvertApplication() {
 PSMConvertApplication::~PSMConvertApplication() {
 }
 
-int PSMConvertApplication::main(int argc, char** argv) {
-  string database_file = Params::GetString("protein-database");
-
+void PSMConvertApplication::convertFile(string input_format, string output_format, string input_file, string output_file_base, string database_file, bool distinct_matches) {
   Database* data;
   if (database_file.empty()) {
     data = new Database();
@@ -37,13 +35,10 @@ int PSMConvertApplication::main(int argc, char** argv) {
     data = new Database(database_file.c_str(), false);
     carp(CARP_INFO, "Created Database using Fasta File");
   }
-
-  PSMReader* reader;
-  string input_format = Params::GetString("input-format");
-  string input_file = Params::GetString("input PSM file");
-
+  
   bool isTabDelimited = false;
-
+  PSMReader* reader;
+  
   if (input_format != "auto") {
     if (input_format == "tsv") {
       reader = new MatchFileReader(input_file.c_str(), data);
@@ -62,7 +57,7 @@ int PSMConvertApplication::main(int argc, char** argv) {
       carp(CARP_FATAL, "Barista-XML format has not been implemented yet");
     } else {
       carp(CARP_FATAL, "Invalid Input Format, valid formats are: tsv, html, "
-                       "sqt, pin, pepxml, mzidentml, barista-xml");
+           "sqt, pin, pepxml, mzidentml, barista-xml");
     }
   } else {
     if (StringUtils::IEndsWith(input_file, ".txt")) {
@@ -82,34 +77,33 @@ int PSMConvertApplication::main(int argc, char** argv) {
       carp(CARP_FATAL, "Barista-XML format has not been implemented yet");
     } else {
       carp(CARP_FATAL, "Could not determine input format, "
-        "Please name your files ending with .txt, .html, .sqt, .pin, "
-        ".xml, .mzid, .barista.xml or use the --input-format option to "
-        "specify file type");
+           "Please name your files ending with .txt, .html, .sqt, .pin, "
+           ".xml, .mzid, .barista.xml or use the --input-format option to "
+           "specify file type");
     }
   }
-
+  
   MatchCollection* collection = reader->parse();
-
+  
   if (!isTabDelimited) {
-    collection->setHasDistinctMatches(Params::GetBool("distinct-matches"));
-  } else if (collection->getHasDistinctMatches() != Params::GetBool("distinct-matches")) {
+    collection->setHasDistinctMatches(distinct_matches);
+  } else if (collection->getHasDistinctMatches() != distinct_matches) {
     const char* matchType = collection->getHasDistinctMatches() ?
-      "distinct" : "not distinct";
+    "distinct" : "not distinct";
     carp(CARP_WARNING, "Parser has detected that matches are %s, but parameter "
-                       "distinct-matches is set to %s. We will assume that matches are %s",
-         matchType, Params::GetBool("distinct-matches") ? "distinct" : "not distinct",
+         "distinct-matches is set to %s. We will assume that matches are %s",
+         matchType, distinct_matches ? "distinct" : "not distinct",
          matchType);
   }
-
+  
   carp(CARP_INFO, "Reader has been succesfully parsed");
-  string output_format = Params::GetString("output format");
-
+  
   // What will be used when PSMWriter is finished.
-
+  
   PSMWriter* writer;
   stringstream output_file_name_builder;
-  output_file_name_builder << "psm-convert.";
-
+  output_file_name_builder << output_file_base;
+  
   if (output_format == "tsv") {
     output_file_name_builder << "txt";
     writer = new PMCDelimitedFileWriter();
@@ -132,19 +126,31 @@ int PSMConvertApplication::main(int argc, char** argv) {
     carp(CARP_FATAL, "Barista-XML format has not been implemented yet");
   } else {
     carp(CARP_FATAL, "Invalid Output Format, valid formats are: tsv, html, "
-                     "sqt, pin, pepxml, mzidentml, barista-xml");
+         "sqt, pin, pepxml, mzidentml, barista-xml");
   }
-
+  
   string output_file_name = make_file_path(output_file_name_builder.str());
-
+  
   writer->openFile(this, output_file_name, PSMWriter::PSMS);
   writer->write(collection, database_file);
   writer->closeFile();
-
+  
   // Clean Up
   delete collection;
   delete reader;
   delete writer;
+
+}
+
+
+int PSMConvertApplication::main(int argc, char** argv) {
+  string database_file = Params::GetString("protein-database");
+  string input_format = Params::GetString("input-format");
+  string input_file = Params::GetString("input PSM file");
+  string output_format = Params::GetString("output format");
+  bool distinct_matches = Params::GetBool("distinct-matches");
+  
+  convertFile(input_format, output_format, input_file, "psm-convert.", database_file, distinct_matches);
 
   return 0;
 }

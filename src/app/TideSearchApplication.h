@@ -64,7 +64,6 @@ class TideSearchApplication : public CruxApplication {
     int search_charge,
     int top_matches,
     double highest_mz,
-    OutputFiles* output_files,
     ofstream* target_file,
     ofstream* decoy_file,
     bool compute_sp,
@@ -202,7 +201,6 @@ class TideSearchApplication : public CruxApplication {
     int search_charge;
     int top_matches;
     double highest_mz;
-    OutputFiles* output_files;
     ofstream* target_file;
     ofstream* decoy_file;
     bool compute_sp;
@@ -226,7 +224,7 @@ class TideSearchApplication : public CruxApplication {
             vector<const pb::AuxLocation*> locations_, double precursor_window_,
             WINDOW_TYPE_T window_type_, double spectrum_min_mz_, double spectrum_max_mz_,
             int min_scan_, int max_scan_, int min_peaks_, int search_charge_, int top_matches_,
-            double highest_mz_, OutputFiles* output_files_, ofstream* target_file_,
+            double highest_mz_, ofstream* target_file_,
             ofstream* decoy_file_, bool compute_sp_, int64_t thread_num_, int64_t num_threads_, int nAA_,
             double* aaFreqN_, double* aaFreqI_, double* aaFreqC_, int* aaMass_, vector<boost::mutex*> locks_array_,  
             double bin_width_, double bin_offset_, bool exact_pval_search_, map<pair<string, unsigned int>, bool>* spectrum_flag_,
@@ -235,7 +233,7 @@ class TideSearchApplication : public CruxApplication {
             proteins(proteins_), locations(locations_), precursor_window(precursor_window_), window_type(window_type_),
             spectrum_min_mz(spectrum_min_mz_), spectrum_max_mz(spectrum_max_mz_), min_scan(min_scan_), max_scan(max_scan_),
             min_peaks(min_peaks_), search_charge(search_charge_), top_matches(top_matches_), highest_mz(highest_mz_),
-            output_files(output_files_), target_file(target_file_), decoy_file(decoy_file_), compute_sp(compute_sp_), 
+            target_file(target_file_), decoy_file(decoy_file_), compute_sp(compute_sp_),
             thread_num(thread_num_), num_threads(num_threads_), nAA(nAA_), aaFreqN(aaFreqN_), aaFreqI(aaFreqI_), aaFreqC(aaFreqC_), 
             aaMass(aaMass_), locks_array(locks_array_), bin_width(bin_width_), bin_offset(bin_offset_), exact_pval_search(exact_pval_search_), 
             spectrum_flag(spectrum_flag_), sc_index(sc_index_), total_candidate_peptides(total_candidate_peptides_) {}

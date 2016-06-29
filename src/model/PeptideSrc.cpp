@@ -331,7 +331,7 @@ bool PeptideSrc::parseTabDelimited(
       } else {
         string protein_id_string = protein_id.substr(0, left_paren_index);
         string peptide_start_index_string = protein_id.substr(left_paren_index+1, 
-          protein_id.length() - 1);
+          protein_id.length() - left_paren_index-2);
 
         bool is_decoy;    
         //  set fields in new peptide src

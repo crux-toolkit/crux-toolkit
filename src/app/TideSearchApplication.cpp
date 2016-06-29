@@ -7,6 +7,7 @@
 #include "io/SpectrumRecordWriter.h"
 #include "TideIndexApplication.h"
 #include "TideSearchApplication.h"
+#include "PSMConvertApplication.h"
 #include "app/tide/mass_constants.h"
 #include "TideMatchSet.h"
 #include "util/Params.h"
@@ -53,11 +54,7 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
   carp(CARP_INFO, "Running tide-search...");
 
   // prevent different output formats from using threading
-  if (Params::GetBool("sqt-output") || Params::GetBool("pepxml-output") ||
-      Params::GetBool("mzid-output") || Params::GetBool("pin-output")) {
-    NUM_THREADS = 1;
-    carp(CARP_INFO, "Threading for non tab-delimited file formats are not supported yet");
-  } else if (Params::GetBool("peptide-centric-search") == true) {
+  if (Params::GetBool("peptide-centric-search") == true) {
     NUM_THREADS = 1;
     carp(CARP_INFO, "Threading for peptide-centric formats are not supported yet");
   } else {
@@ -140,9 +137,6 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
 
   // Check concat parameter
   bool concat = Params::GetBool("concat");
-  if (concat) {
-    OutputFiles::setConcat();
-  }
 
   // Check compute-sp parameter
   bool compute_sp = Params::GetBool("compute-sp");
@@ -212,9 +206,6 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
   DECOY_TYPE_T headerDecoyType = (DECOY_TYPE_T)pepHeader.decoys();
   if (headerDecoyType != NO_DECOYS) {
     HAS_DECOYS = true;
-    if (headerDecoyType == PROTEIN_REVERSE_DECOYS) {
-      OutputFiles::setProteinLevelDecoys();
-    }
   }
 
   MassConstants::Init(&pepHeader.mods(), &pepHeader.nterm_mods(), 
@@ -224,48 +215,29 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
   TideMatchSet::initModMap(pepHeader.nterm_mods(), PEPTIDE_N);
   TideMatchSet::initModMap(pepHeader.cterm_mods(), PEPTIDE_C);
 
-  OutputFiles* output_files = NULL;
   ofstream* target_file = NULL;
   ofstream* decoy_file = NULL;
-  if (Params::GetBool("sqt-output") || Params::GetBool("pepxml-output") ||
-      Params::GetBool("mzid-output") || Params::GetBool("pin-output")) {
-    carp(CARP_DEBUG, "Using OutputFiles to write matches");
-    output_files = new OutputFiles(this);
-    for (int i = 1; i <= Params::GetInt("max-precursor-charge"); i++) {
-      output_files->pinSetEnabledStatus("Charge" + StringUtils::ToString(i), true);
-    }
-    output_files->pinSetEnabledStatus("lnrSp", compute_sp);
-    output_files->pinSetEnabledStatus("Sp", compute_sp);
-    output_files->pinSetEnabledStatus("IonFrac", compute_sp);
-    output_files->pinSetEnabledStatus("XCorr", !Params::GetBool("exact-p-value"));
-    output_files->pinSetEnabledStatus("RefactoredXCorr", Params::GetBool("exact-p-value"));
-    output_files->pinSetEnabledStatus("NegLog10PValue", Params::GetBool("exact-p-value"));
-  } else {
-    carp(CARP_DEBUG, "Using TideMatchSet to write matches");
-    bool overwrite = Params::GetBool("overwrite");
-    stringstream ss;
-    ss << Params::GetString("enzyme") << '-' << Params::GetString("digestion");
-    TideMatchSet::CleavageType = ss.str();
-    if (!concat) {
-      string target_file_name = make_file_path("tide-search.target.txt");
-      target_file = create_stream_in_path(target_file_name.c_str(), NULL, overwrite);
-      output_file_name_ = target_file_name;
-      if (HAS_DECOYS) {
-        string decoy_file_name = make_file_path("tide-search.decoy.txt");
-        decoy_file = create_stream_in_path(decoy_file_name.c_str(), NULL, overwrite);
-      }
-    } else {
-      string concat_file_name = make_file_path("tide-search.txt");
-      target_file = create_stream_in_path(concat_file_name.c_str(), NULL, overwrite);
-      output_file_name_ = concat_file_name;
-    }
 
+  carp(CARP_DEBUG, "Using TideMatchSet to write matches");
+  bool overwrite = Params::GetBool("overwrite");
+  stringstream ss;
+  ss << Params::GetString("enzyme") << '-' << Params::GetString("digestion");
+  TideMatchSet::CleavageType = ss.str();
+  if (!concat) {
+    string target_file_name = make_file_path("tide-search.target.txt");
+    target_file = create_stream_in_path(target_file_name.c_str(), NULL, overwrite);
+    output_file_name_ = target_file_name;
+    if (HAS_DECOYS) {
+      string decoy_file_name = make_file_path("tide-search.decoy.txt");
+      decoy_file = create_stream_in_path(decoy_file_name.c_str(), NULL, overwrite);
+    }
+  } else {
+    string concat_file_name = make_file_path("tide-search.txt");
+    target_file = create_stream_in_path(concat_file_name.c_str(), NULL, overwrite);
+    output_file_name_ = concat_file_name;
   }
 
-  if (output_files) {
-    output_files->exact_pval_search_ = exact_pval_search_;
-    output_files->writeHeaders();
-  } else if (target_file) {
+  if (target_file) {
     TideMatchSet::writeHeaders(target_file, false, compute_sp);
     TideMatchSet::writeHeaders(decoy_file, true, compute_sp);
   }
@@ -355,9 +327,58 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
            Params::GetDouble("spectrum-max-mz"), min_scan, max_scan,
            Params::GetInt("min-peaks"), charge_to_search,
            Params::GetInt("top-match"), spectra.FindHighestMZ(),
-           output_files, target_file, decoy_file, compute_sp,
+           target_file, decoy_file, compute_sp,
            nAA, aaFreqN, aaFreqI, aaFreqC, aaMass);
 
+    PSMConvertApplication converter;
+    
+    // convert tab delimited to other file formats.
+    if (!concat) {
+      string target_file_name = make_file_path("tide-search.target.txt");
+      if (Params::GetBool("pin-output")) {
+        converter.convertFile("tsv", "pin", target_file_name, "tide-search.target.", Params::GetString("protein-database"), true);
+      }
+      if (Params::GetBool("pepxml-output")) {
+        converter.convertFile("tsv", "pepxml", target_file_name, "tide-search.target.", Params::GetString("protein-database"), true);
+      }
+      if (Params::GetBool("mzid-output")) {
+        converter.convertFile("tsv", "mzidentml", target_file_name, "tide-search.target.", Params::GetString("protein-database"), true);
+      }
+      if (Params::GetBool("sqt-output")) {
+        converter.convertFile("tsv", "sqt", target_file_name, "tide-search.target.", Params::GetString("protein-database"), true);
+      }
+
+      if (HAS_DECOYS) {
+        string decoy_file_name = make_file_path("tide-search.decoy.txt");
+        if (Params::GetBool("pin-output")) {
+          converter.convertFile("tsv", "pin", decoy_file_name, "tide-search.decoy.", Params::GetString("protein-database"), true);
+        }
+        if (Params::GetBool("pepxml-output")) {
+          converter.convertFile("tsv", "pepxml", decoy_file_name, "tide-search.decoy.", Params::GetString("protein-database"), true);
+        }
+        if (Params::GetBool("mzid-output")) {
+          converter.convertFile("tsv", "mzidentml", decoy_file_name, "tide-search.decoy.", Params::GetString("protein-database"), true);
+        }
+        if (Params::GetBool("sqt-output")) {
+          converter.convertFile("tsv", "sqt", decoy_file_name, "tide-search.decoy.", Params::GetString("protein-database"), true);
+        }
+      }
+    } else {
+      string concat_file_name = make_file_path("tide-search.txt");
+      if (Params::GetBool("pin-output")) {
+        converter.convertFile("tsv", "pin", concat_file_name, "tide-search.", Params::GetString("protein-database"), true);
+      }
+      if (Params::GetBool("pepxml-output")) {
+        converter.convertFile("tsv", "pepxml", concat_file_name, "tide-search.", Params::GetString("protein-database"), true);
+      }
+      if (Params::GetBool("mzid-output")) {
+        converter.convertFile("tsv", "mzidentml", concat_file_name, "tide-search.", Params::GetString("protein-database"), true);
+      }
+      if (Params::GetBool("sqt-output")) {
+        converter.convertFile("tsv", "sqt", concat_file_name, "tide-search.", Params::GetString("protein-database"), true);
+      }
+    }
+    
     // Delete temporary spectrumrecords file
     if (!f->Keep) {
       carp(CARP_DEBUG, "Deleting %s", spectra_file.c_str());
@@ -375,9 +396,6 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
 
   for (ProteinVec::iterator i = proteins.begin(); i != proteins.end(); ++i) {
     delete *i;
-  }
-  if (output_files) {
-    delete output_files;
   }
   if (target_file) {
     delete target_file;
@@ -411,7 +429,6 @@ void TideSearchApplication::search(void* threadarg) {
   int search_charge = my_data->search_charge;
   int top_matches = my_data->top_matches;
   double highest_mz = my_data->highest_mz;
-  OutputFiles* output_files = my_data->output_files;
   ofstream* target_file = my_data -> target_file;
   ofstream* decoy_file = my_data->decoy_file;
   bool compute_sp = my_data->compute_sp;
@@ -531,14 +548,9 @@ void TideSearchApplication::search(void* threadarg) {
         TideMatchSet matches(&match_arr, highest_mz);
         matches.exact_pval_search_ = exact_pval_search;
 
-        if (output_files) {
-          matches.report(output_files, top_matches, spectrum_filename, spectrum, charge,
-                         active_peptide_queue, proteins, locations, compute_sp, true);
-        } else {
-          matches.report(target_file, decoy_file, top_matches, spectrum_filename,
+        matches.report(target_file, decoy_file, top_matches, spectrum_filename,
                          spectrum, charge, active_peptide_queue, proteins,
                          locations, compute_sp, true, locks_array[0]);
-        }
       }  //end peptide_centric == true
     } else {  // execute exact-pval-search
 
@@ -689,14 +701,10 @@ void TideSearchApplication::search(void* threadarg) {
         TideMatchSet matches(&match_arr, highest_mz);
         matches.exact_pval_search_ = exact_pval_search;
 
-        if (output_files) {
-          matches.report(output_files, top_matches, spectrum_filename, spectrum, charge,
-                         active_peptide_queue, proteins, locations, compute_sp, false);
-        } else {
-          matches.report(target_file, decoy_file, top_matches, spectrum_filename,
-                         spectrum, charge, active_peptide_queue, proteins,
-                         locations, compute_sp, false, locks_array[0]);
-        }
+        matches.report(target_file, decoy_file, top_matches, spectrum_filename,
+                       spectrum, charge, active_peptide_queue, proteins,
+                       locations, compute_sp, false, locks_array[0]);
+        
       } // end peptide_centric == true
     } // end exact-pval-search
   }
@@ -718,7 +726,6 @@ void TideSearchApplication::search(
   int search_charge,
   int top_matches,
   double highest_mz,
-  OutputFiles* output_files,
   ofstream* target_file,
   ofstream* decoy_file,
   bool compute_sp,
@@ -770,7 +777,7 @@ void TideSearchApplication::search(
   }
 
   for (int i = 0; i < NUM_THREADS; i++) {
-    active_peptide_queue[i]->SetOutputs(output_files, &locations, top_matches, compute_sp, target_file, decoy_file, highest_mz);
+    active_peptide_queue[i]->SetOutputs(NULL, &locations, top_matches, compute_sp, target_file, decoy_file, highest_mz);
   }
 
   // Creating structs to hold information required for each thread to search through
@@ -781,7 +788,7 @@ void TideSearchApplication::search(
       thread_data_array.push_back(thread_data(spectrum_filename, spec_charges, active_peptide_queue[i],
       proteins, locations, precursor_window, window_type, spectrum_min_mz,
       spectrum_max_mz, min_scan, max_scan, min_peaks, search_charge, top_matches,
-      highest_mz, output_files, target_file, decoy_file, compute_sp,
+      highest_mz, target_file, decoy_file, compute_sp,
       i, NUM_THREADS, nAA, aaFreqN, aaFreqI, aaFreqC, aaMass, locks_array, 
       bin_width_, bin_offset_, exact_pval_search_, spectrum_flag_, sc_index, total_candidate_peptides));
   }
@@ -809,9 +816,6 @@ void TideSearchApplication::search(
   delete sc_index;
   delete total_candidate_peptides;
 
-  if (output_files) {
-    output_files->writeFooters();
-  }
 }
 
 void TideSearchApplication::collectScoresCompiled(
