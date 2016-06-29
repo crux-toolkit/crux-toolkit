@@ -4,6 +4,8 @@
 #include <stdio.h>
 #ifndef _MSC_VER
 #include <unistd.h>
+#else
+#include <windows.h>
 #endif
 #include <string>
 #include <vector>
@@ -23,7 +25,6 @@ using namespace std;
 
 #define CHECK(x) GOOGLE_CHECK(x)
 
-DEFINE_string(tmpfile_prefix, "/tmp/modified_peptides_partial_", "Temporary filename prefix.");
 DEFINE_int32(buf_size, 1024, "Buffer size for files, in KBytes.");
 DEFINE_int32(max_mods, 255, "Maximum number of modifications that can be applied "
                             "to a single peptide.");
@@ -31,9 +32,15 @@ DEFINE_int32(min_mods, 0, "Minimum number of modifications that can be applied "
                           "to a single peptide.");
 
 static string GetTempName(int filenum) {
-  char buf[10];
-  sprintf(buf, "%d", filenum);
-  return FLAGS_tmpfile_prefix + buf;
+  char buf[36];
+  sprintf(buf, "modified_peptides_partial_%d", filenum);
+#ifdef _MSC_VER
+  char buf2[261];
+  GetTempPath(261, buf2);
+  return string(buf2) + buf;
+#else
+  return "/tmp/" + buf;
+#endif
 }
 
 class ModsOutputter {

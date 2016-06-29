@@ -25,7 +25,6 @@ extern void AddMods(HeadedRecordReader* reader,
                     const vector<const pb::Protein*>& proteins, VariableModTable& var_mod_table);
 DECLARE_int32(max_mods);
 DECLARE_int32(min_mods);
-DECLARE_string(tmpfile_prefix);
 
 TideIndexApplication::TideIndexApplication() {
 }
