@@ -14,8 +14,8 @@
 <ul>
 
 <li>
-  <code>crux tide-search</code> now supports threading for tab-delimited output.
-</li>
+<code>crux tide-search</code> now supports threading. See the
+<code>num-threads</code> parameter.</li>
 
 <li>
 <code>crux percolator</code> is now using version 2.10.  Changes to the interface were made
@@ -28,10 +28,16 @@
 <code>crux search-for-xlinks</code></li>
 
 <li>
-Cascade-search application added to crux.</li>
+<code>create-docs</code> application added to crux.</li>
 
 <li>
-Subtract-index application added to crux.</li>
+<code>cascade-search</code> application added to crux.</li>
+
+<li>
+<code>subtract-index</code> application added to crux.</li>
+
+<li>
+<code>psm-convert</code> application added to crux.</li>
 
 <li>
 The OS X version now requires OS X Yosemite. It can be built
@@ -67,6 +73,46 @@ Added the <code>pipeline</code> command.</li>
 <h3>Minor changes</h3>
 
 <ul>
+
+<li>The <code>generate-peptides</code> application has been re-vamped.</li>
+
+<li>Fixed a bug in <code>barista</code> that occurred when the number of
+peptides exceeded the number of PSMs.</li>
+
+<li>Precursor mass selection is fixed in <code>tide-search</code> when units
+are m/z.</li>
+
+<li><code>hardklor</code> and <code>bullseye</code> now use standard logging.</li>
+
+<li>Version number added to log files. Additionally, the version numbers of
+<code>percolator</code>, <code>comet</code>, and <code>boost</code> are shown
+in the output of the <code>version</code> command.</li>
+
+<li>
+Short usage message is displayed on error (the full usage message is still
+displayed when a command is entered with no arguments).</li>
+
+<li>
+<code>feature-in-file</code> parameter added to <code>percolator</code>.</li>
+
+<li>
+The <code>seed</code> parameter for <code>percolator</code> has been renamed
+to <code>percolator-seed</code>.</li>
+
+<li>
+<code>comet</code> exits with return code 1 on failure, rather than 0.</li>
+
+<li>
+Default value for <code>use_sparse_matrix</code> changed to <code>1</code>.</li>
+
+<li>
+Default value for <code>use-neutral-loss-peaks<code> changed to <code>true</code>.</li>
+
+<li>
+<code>xlink-score-method</code> parameter added to <code>xlink-score-spectrum</code>.</li>
+
+<li>
+deltaLCn column added to <code>tide-search</code> tab-delimited output.</li>
 
 <li>
 Bug fixed in reporting flanking amino acids in <code>PostProcessProtein.cpp</code>.</li>
@@ -109,16 +155,16 @@ The refactored XCorr score has been re-scaled (by dividing by 20) to
 put it into a range that is comparable to that of the original XCorr score.</li>
 
 <li>
-The comet version has been updated to 2015.01 rev. 0
-</li>
-
-<li>
 The default value of <code>mz-bin-offset</code> has been changed from
 0.68 to 0.40.</li>
 
 <li>
 The <code>percolator</code> command outputs the <code>pout</code> XML format
-again.</li>
+again (controlled by the <code>pout-output</code> parameter).</li>
+
+<li>
+The <code>percolator</code> command can output its native output by using the
+<code>original-output</code> parameter.</li>
 
 <li>
 Fixed a bug in <code>tide-search</code> causing it to fail when
@@ -180,8 +226,8 @@ and "combine-charge-states".</li>
 
 <li>
 <code>2015/08/24 &ndash;</code>
-<code>Assign-confidence</code> now supports top-match>1 in peptide-level filtering 
-mode. </li>
+<code>Assign-confidence</code> now supports top-match&gt;1 in peptide-level filtering 
+mode.</li>
 
 <li>
 <code>2015/08/24 &ndash;</code>
@@ -218,6 +264,8 @@ Changed the Percolator output feature "file" to contain the name of
 Added to <code>search-for-xlinks</code>
   and <code>xlink-score-spectrum</code> parameters of the form
   "use-a-ion" for a, b, c, x, y, and z-ions.</li>
+
+<li>Various other minor bug/leak fixes and performance enhancements.</li>
 
 </ul>
 
