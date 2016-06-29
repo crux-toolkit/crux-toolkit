@@ -39,7 +39,7 @@ static string GetTempName(int filenum) {
   GetTempPath(261, buf2);
   return string(buf2) + buf;
 #else
-  return "/tmp/" + buf;
+  return string("/tmp/") + buf;
 #endif
 }
 
