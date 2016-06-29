@@ -1,12 +1,5 @@
-#ifdef _MSC_VER
-#include <direct.h>
-#define getcwd _getcwd
-#else
-#include <unistd.h>
-#endif
-#include <stdlib.h>
-#include <string>
 #include "abspath.h"
+#include <boost/filesystem.hpp>
 
 using namespace std;
 
@@ -15,13 +8,5 @@ using namespace std;
 // Although the result is correct (according to 'man path_resolution')
 // no effort is made to decode symlinks or normalize /. and /..
 string AbsPath(const string& path) {
-  if (path.empty())
-    return "";
-  if (path[0] == '/')
-    return path;
-  char* cwd = getcwd(NULL, 0);
-  string result(cwd);
-  free(cwd);
-  result += string("/") + path;
-  return result;
+  return boost::filesystem::absolute(path).string();
 }

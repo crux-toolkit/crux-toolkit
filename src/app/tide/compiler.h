@@ -79,6 +79,8 @@
 #ifndef COMPILER_H
 #define COMPILER_H
 
+#include <stdint.h>
+
 class TheoreticalPeakCompiler {
  public:
   explicit TheoreticalPeakCompiler(FifoAllocator* fifo_alloc) 
