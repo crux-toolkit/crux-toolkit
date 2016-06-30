@@ -14,30 +14,28 @@
 <ul>
 
 <li>
-<code>crux tide-search</code> now supports threading. See the
-<code>num-threads</code> parameter.</li>
+The <code>tide-search</code> command now supports threading. See the
+<code>num-threads</code> parameter for details.</li>
 
 <li>
-<code>crux percolator</code> is now using version 2.10.  Changes to the interface were made
-</li>
-
-
-<li>
-<code>xlink-include-inter</code>, <code>xlink-include-intra</code>, and
-<code>xlink-include-inter-intra</code> are available options for 
-<code>crux search-for-xlinks</code></li>
+Added the <code>pipeline</a> command to run a series of commands, and
+the <code>cascade-search</code> to run searches across a series of
+databases.</li>
 
 <li>
-<code>create-docs</code> application added to crux.</li>
+Renamed the command <code>calibrate-scores</code>
+to <code>assign-confidence</code> and completely revamped its
+functionality.</li>
 
 <li>
-<code>cascade-search</code> application added to crux.</li>
+The <code>search-for-xlinks</code> command offers parameters to
+control categories of
+candidates: <code>xlink-include-inter</code>, <code>xlink-include-intra</code>,
+and
+<code>xlink-include-inter-intra</code>.</li>
 
 <li>
-<code>subtract-index</code> application added to crux.</li>
-
-<li>
-<code>psm-convert</code> application added to crux.</li>
+Added the <code>peptide-centric-search</code> option to tide-search.</li>
 
 <li>
 The OS X version now requires OS X Yosemite. It can be built
@@ -49,15 +47,10 @@ XCode.</li>
 
 <li>
 The Windows version of Crux can be built with support for vendor specific file
-formats disabled.
-</li>
-<li>
-Added the <code>peptide-centric-search</code> option to tide-search.</li>
+formats disabled.</li>
 
 <li>
-Renamed the command <code>calibrate-scores</code>
-to <code>assign-confidence</code> and completely re-vamped its
-functionality.</li>
+Updated Percolator to version 2.10.</li>
 
 <li>
 Updated Hardklor to version 2.30.</li>
@@ -65,16 +58,17 @@ Updated Hardklor to version 2.30.</li>
 <li>
 Updated Comet to version 2016.01 rev. 1.</li>
 
-<li>
-Added the <code>pipeline</code> command.</li>
-
 </ul>
 
 <h3>Minor changes</h3>
 
 <ul>
 
-<li>The <code>generate-peptides</code> application has been re-vamped.</li>
+<li>
+The utilities <code>create-docs</code>, <code>subtract-index</code>,
+and <code>psm-convert</code> were added to Crux.</li>
+
+<li>The <code>generate-peptides</code> application has been revamped.</li>
 
 <li>Fixed a bug in <code>barista</code> that occurred when the number of
 peptides exceeded the number of PSMs.</li>
@@ -204,63 +198,55 @@ place of the index, in which case <code>tide-index</code> will be run prior to
 the search. The <code>store-index</code> option allows the generated index
 to be saved.</li>
 
-<li><code>2015/06/17 &ndash;</code>
+<li>
 The <code>assign-confidence</code> command will automatically detect
 score type if the <code>score</code> parameter is not specified, searching for
 xcorr, e-value, or exact p-values.</li>
 
 <li>
-<code>2015/06/17 &ndash;</code>
 The <code>cascade-search</code> will report the source index database of the 
 peptide for all identified PSMs.</li>
 
 <li>
-<code>2015/06/25 &ndash;</code>
 The <code>top-match</code> parameter has been removed from
 <code>cascade-search</code>.</li>
 
 <li>
-<code>2015/08/24 &ndash;</code>
 <code>Assign-confidence</code> has got new options: "combine-modified-peptide" 
 and "combine-charge-states".</li>
 
 <li>
-<code>2015/08/24 &ndash;</code>
 <code>Assign-confidence</code> now supports top-match&gt;1 in peptide-level filtering 
 mode.</li>
 
 <li>
-<code>2015/08/24 &ndash;</code>
 <code>Assign-confidence</code> can use smoothed-p-value scores for PSM ranking.</li>
 
 <li>
-<code>2015/08/24 &ndash;</code>
 <code>Assign-confidence</code> now does not carry out target-decoy competition in 
 peptide-level filtering mode.</li>
 
 <li>
-<code>2015/10/05 &ndash;</code>
 Added the <code>xlink-assign-ions</code> and <code>xlink-score-spectrum
 </code> commands.</li>
 
 <li>
-<code>2015/12/07 &ndash;</code>
 Rearranged estimation methods in <code>assign-confidence</code>.</li>
 
-<code>2015/12/07 &ndash;</code>
+<li>
 Added top-match option for <code>estimation-method=peptide-level</code> 
 case in <code>assign-confidence</code>.</li>
 
-<li><code>2016/02/04 &ndash;</code>
+<li>
 Modified assign-confidence so that ties during target-decoy
 competition are broken randomly.</li>
 
-<li><code>2016/02/22 &ndash;</code>
+<li>
 Changed the Percolator output feature "file" to contain the name of
   the file containing the spectrum (if available), rather than the
   name of the file containing the PSM.</li>
 
-<li><code>2016/04/19 &ndash;</code>
+<li>
 Added to <code>search-for-xlinks</code>
   and <code>xlink-score-spectrum</code> parameters of the form
   "use-a-ion" for a, b, c, x, y, and z-ions.</li>
