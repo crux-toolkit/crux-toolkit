@@ -36,6 +36,11 @@ class XLinkablePeptide;
 class XLinkBondMap;
 
 /**
+ * Object for defining a cross-link product match
+ */
+class XLinkMatch;
+
+/**
  * Object for define a cross link peptide
  */
 class XLinkPeptide;

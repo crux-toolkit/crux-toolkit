@@ -2,14 +2,14 @@
 
 #include "xlink_assign_ions.h"
 
-#include "xhhc.h"
-#include "LinkedIonSeries.h"
-#include "xhhc_scorer.h"
-#include "LinkedPeptide.h"
-#include "XHHC_Peptide.h"
+#include "XLinkMatch.h"
+#include "SelfLoopPeptide.h"
+#include "XLinkPeptide.h"
 
 #include "objects.h"
 #include "model/Scorer.h"
+#include "model/IonSeries.h"
+#include "model/Ion.h"
 #include "io/SpectrumCollectionFactory.h"
 #include "io/DelimitedFile.h"
 #include "util/Params.h"
@@ -46,7 +46,7 @@ int XLinkAssignIons::main(int argc, char** argv) {
 
   string ms2_file = Params::GetString("ms2 file");
 
-  LinkedPeptide::setLinkerMass(Params::GetDouble("link mass"));
+  XLinkPeptide::setLinkerMass(Params::GetDouble("link mass"));
  
   // create new ion series
   
@@ -80,133 +80,148 @@ int XLinkAssignIons::main(int argc, char** argv) {
 
   // search for spectrum with correct scan number
   if (spectrum == NULL) {
-    carp(CARP_ERROR, "failed to find spectrum with  scan_num: %d", scan_num);
+    carp(CARP_ERROR, "Failed to find spectrum with scan number %d.", scan_num);
     delete collection;
     exit(1);
   }
 
   //created linked peptide.
-  LinkedPeptide lp = LinkedPeptide(peptideA, peptideB, posA-1, posB-1, charge);
+  XLinkMatch* xlp = NULL;
+  if (peptideB != NULL) {
+    xlp = new XLinkPeptide(peptideA, peptideB, posA-1, posB-1);
+  } else {
+    xlp = new SelfLoopPeptide(peptideA, posA-1, posB-1); 
+  }
+  
+  IonConstraint* ion_constraint = IonConstraint::newIonConstraintSequestXcorr(charge);
+  ion_constraint->setUseIonType(BY_ION, false);
+  ion_constraint->setUseIonType(BYA_ION, false);
+  ion_constraint->setUseIonType(ALL_ION, false);
+  ion_constraint->setUseIonType(A_ION, Params::GetBool("use-a-ions"));
+  ion_constraint->setUseIonType(B_ION, Params::GetBool("use-b-ions"));
+  ion_constraint->setUseIonType(C_ION, Params::GetBool("use-c-ions"));
+  ion_constraint->setUseIonType(X_ION, Params::GetBool("use-x-ions"));
+  ion_constraint->setUseIonType(Y_ION, Params::GetBool("use-y-ions"));
+  ion_constraint->setUseIonType(Z_ION, Params::GetBool("use-z-ions"));
+  
+  IonSeries* ion_series = new IonSeries(ion_constraint, charge);
+  xlp->predictIons(ion_series, charge);
 
-  int max_ion_charge = get_max_ion_charge_parameter("max-ion-charge");
-
-  int max_charge = min(max_ion_charge, charge);
-
-  LinkedIonSeries ion_series(max_charge);
-  ion_series.addLinkedIons(lp);
-  print_spectrum(spectrum, ion_series);
+  print_spectrum(spectrum, xlp, ion_series);
 
   // free heap
   delete collection;
+  delete ion_series;
+  delete ion_constraint;
+  delete xlp;
   //free_spectrum(spectrum);
   return 0;
 }
 
-void XLinkAssignIons::print_spectrum(Spectrum* spectrum, LinkedIonSeries& ion_series) {
+void XLinkAssignIons::print_spectrum(
+  Spectrum* spectrum,
+  XLinkMatch* xlp,
+  IonSeries* ion_series
+  ) {
+ 
+  carp(CARP_INFO, "Number of peaks = %d", spectrum->getNumPeaks());
 
-      int total_by_ions = ion_series.getTotalBYIons();
-      int matched_by_ions = XHHC_Scorer::getMatchedBYIons(spectrum, ion_series);
-      FLOAT_T frac_by_ions = (double)matched_by_ions / (double) total_by_ions;
-
-      carp(CARP_INFO, "total theoretical ions:%d", total_by_ions);
-      carp(CARP_INFO, "theoretical ions matched:%d", matched_by_ions);
-      carp(CARP_INFO, "frac theoretical ions matched:%f", frac_by_ions);
-      carp(CARP_INFO, "npeaks:%d", spectrum->getNumPeaks());
-
-      FLOAT_T bin_width = Params::GetDouble("mz-bin-width");
-      vector<LinkedPeptide>& ions = ion_series.getIons();
+  FLOAT_T bin_width = Params::GetDouble("mz-bin-width");
       
-      map<Peak*, LinkedPeptide> matched;
-      double matched_intensity = 0;
-      for (vector<LinkedPeptide>::iterator ion = ions.begin();
-           ion != ions.end(); 
-           ++ion) {
-
-          if (ion -> getIonType() == B_ION || ion -> getIonType() == Y_ION) {
-            Peak * peak = spectrum->getMaxIntensityPeak(ion->getMZ(MONO), 
-                                                    bin_width);
-            if (peak != NULL) {
-              if (matched.find(peak) == matched.end()) {
-                matched_intensity += peak->getIntensity();
-              }
-              matched[peak] = *ion;
-            } else {
-              carp(CARP_DETAILED_DEBUG, "Ion clash!");
-            }
-          }
-        //}
+  map<Peak*, Ion*> matched;
+  double matched_intensity = 0;
+      
+  for (IonIterator ion_iterator = ion_series->begin();
+       ion_iterator != ion_series->end();
+        ++ion_iterator) {
+    
+    Ion* ion = *ion_iterator;
+    Peak* peak = spectrum->getMaxIntensityPeak(ion->getMassZ(), bin_width);  
+    if (peak != NULL) {
+      if (matched.find(peak) == matched.end()) {
+        matched_intensity += peak->getIntensity();
+        matched[peak] = ion;
+      } else {
+        carp(CARP_WARNING, "Peak at %g matches more than one theoretical peak.", peak->getLocation());
       }
+    }
+  }
 
-      double total_intensity = spectrum->getTotalEnergy();
-      double frac_intensity = matched_intensity / total_intensity;
-
-      carp(CARP_INFO, "matched intensity:%lf", matched_intensity);
-      carp(CARP_INFO, "total intensity:%lf", total_intensity);
-      carp(CARP_INFO, "frac intensity:%lf", frac_intensity);
+  double total_intensity = spectrum->getTotalEnergy();
+  double frac_intensity = matched_intensity / total_intensity;
+  carp(CARP_INFO, "Fraction matched intensity = %lf / %lf = %lf",
+       matched_intensity, total_intensity, frac_intensity);
       
 
-      //now print out the spectrum
+  //now print out the spectrum
 
-      DelimitedFile result_file;
+  DelimitedFile result_file;
 
-      unsigned int mz_obs_col = result_file.addColumn("m/z obs");
-      unsigned int int_col = result_file.addColumn("intensity");
-      unsigned int int_matched_col = result_file.addColumn("matched intensity");
-      unsigned int mz_calc_col = result_file.addColumn("m/z calc");
-      unsigned int mass_obs_col = result_file.addColumn("mass obs");
-      unsigned int mass_calc_col = result_file.addColumn("mass calc");
-      unsigned int ppm_col = result_file.addColumn("ppm(Mass)");
-      unsigned int ion_col = result_file.addColumn("ion");
-      unsigned int seq_col = result_file.addColumn("sequence");
+  unsigned int mz_obs_col = result_file.addColumn("m/z obs");
+  unsigned int int_col = result_file.addColumn("intensity");
+  unsigned int int_matched_col = result_file.addColumn("matched intensity");
+  unsigned int mz_calc_col = result_file.addColumn("m/z calc");
+  unsigned int mass_obs_col = result_file.addColumn("mass obs");
+  unsigned int mass_calc_col = result_file.addColumn("mass calc");
+  unsigned int ppm_col = result_file.addColumn("ppm(Mass)");
+  unsigned int ion_col = result_file.addColumn("ion");
+  unsigned int seq_col = result_file.addColumn("sequence");
       
-      for (PeakIterator peak_iter = spectrum->begin();
-        peak_iter != spectrum->end();
-        ++peak_iter) {
+  for (PeakIterator peak_iter = spectrum->begin();
+    peak_iter != spectrum->end();
+    ++peak_iter) {
 
-        Peak * peak = *peak_iter;
-        if (peak->getIntensity() > 0) { 
-
-
-          unsigned int row_idx = result_file.addRow();
-          result_file.setValue(mz_obs_col, row_idx, peak->getLocation());
-          result_file.setValue(int_col, row_idx, peak->getIntensity());
-
-          
-
-          if (matched.find(peak) != matched.end()) {
-              LinkedPeptide& ion = matched[peak];
-              double mz_calc = ion.getMZ(MONO);
-              double mz_obs = peak->getLocation();
-              int charge = ion.getCharge();
-              double mass_calc = ion.getMass(MONO);
-              double mass_obs = (mz_obs - MASS_PROTON) * (double)charge;
-              double ppm =  fabs(mass_calc - mass_obs) / mass_calc * 1e6;
+    Peak * peak = *peak_iter;
+    if (peak->getIntensity() > 0) { 
+      unsigned int row_idx = result_file.addRow();
+      result_file.setValue(mz_obs_col, row_idx, peak->getLocation());
+      result_file.setValue(int_col, row_idx, peak->getIntensity());
+      if (matched.find(peak) != matched.end()) {
+        Ion* ion = matched[peak];
+        double mz_calc = ion->getMassZ();
+        double mz_obs = peak->getLocation();
+        int charge = ion->getCharge();
+        double mass_calc = ion->getMassFromMassZ();
+        double mass_obs = (mz_obs - MASS_PROTON) * (double)charge;
+        double ppm =  fabs(mass_calc - mass_obs) / mass_calc * 1e6;
          
-              result_file.setValue(int_matched_col, row_idx, peak->getIntensity()); 
-              result_file.setValue(mz_calc_col, row_idx, mz_calc);
-              result_file.setValue(mass_obs_col, row_idx, mass_obs);
-              result_file.setValue(mass_calc_col, row_idx, mass_calc);
-              result_file.setValue(ppm_col, row_idx, ppm);
+        result_file.setValue(int_matched_col, row_idx, peak->getIntensity()); 
+        result_file.setValue(mz_calc_col, row_idx, mz_calc);
+        result_file.setValue(mass_obs_col, row_idx, mass_obs);
+        result_file.setValue(mass_calc_col, row_idx, mass_calc);
+        result_file.setValue(ppm_col, row_idx, ppm);
               
-              ostringstream ion_string_oss;
-           
-
-
-              if (ion.getIonType() == B_ION) {
-                ion_string_oss << "b";
-              } else if (ion.getIonType() == Y_ION) {
-                ion_string_oss << "y";
-              } else {
-                ion_string_oss << "u";
-              }
-              ion_string_oss << "(+" << charge << ")";
-
-              result_file.setValue(ion_col, row_idx, ion_string_oss.str());
-              result_file.setValue(seq_col, row_idx, ion);
-          }
+        ostringstream ion_string_oss;
+        switch(ion->getType()) {
+          case A_ION:
+            ion_string_oss << "a";
+            break;
+          case B_ION:
+            ion_string_oss << "b";
+            break;
+          case C_ION:
+            ion_string_oss << "c";
+            break;
+          case X_ION:
+            ion_string_oss << "x";
+            break;
+          case Y_ION:
+            ion_string_oss << "y";
+            break;
+          case Z_ION:
+            ion_string_oss << "z";
+            break;
+          default:
+            ion_string_oss << "u";
         }
+        ion_string_oss << "(+" << charge << ")";
+
+        result_file.setValue(ion_col, row_idx, ion_string_oss.str());
+        result_file.setValue(seq_col, row_idx, xlp->getIonSequence(ion));
       }
-      cout << result_file;
+    }
+  }
+  cout << result_file;
 
 }
 
