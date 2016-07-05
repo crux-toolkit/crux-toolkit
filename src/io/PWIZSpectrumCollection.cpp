@@ -179,7 +179,7 @@ bool PWIZSpectrumCollection::parse() {
           if (scan_value.empty() || !get_range_from_string<int>(
             scan_value.c_str(), scan_number_begin, scan_number_end)) {
               assign_new_scans = true;
-              carp(CARP_ERROR, "Pwiz parser could not determine scan numbers "
+              carp(CARP_ERROR, "Proteowizard parser could not determine scan numbers "
                          "for this file, assigning new scan numbers.");
           } else {
             carp(CARP_DETAILED_DEBUG, "found scan:%i-%i from native id", scan_number_begin, scan_number_end);
@@ -190,8 +190,16 @@ bool PWIZSpectrumCollection::parse() {
       } else {
         carp(CARP_DETAILED_DEBUG, "found scan:%i-%i from ms_peak_list_scans", scan_number_begin, scan_number_end);
       }
+      if (scan_number_begin == 0) {
+        // PWiz assigns scan numbers starting from 0 if they are missing. In this case, we re-assign starting from 1 below.
+        carp_once(CARP_INFO, "Parser could not determine scan numbers for this "
+                             "file, using ordinal numbers as scan numbers.");
+        assign_new_scans = true;
+      }
     }
     if (assign_new_scans) {
+      carp(CARP_INFO, "Proteowizard parser could not determine scan numbers "
+           "for this file, assigning new scan numbers.");
       scan_number_begin = ++scan_counter;
       scan_number_end = scan_number_begin;
     }

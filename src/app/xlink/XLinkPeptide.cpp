@@ -308,8 +308,8 @@ void XLinkPeptide::addCandidates(
       protein_indices.push_back(protein_idx);
     }
   }
-  carp(CARP_INFO, "there are %i linkable peptides", xpeptide_count);
-  carp(CARP_INFO, "have peptides for %i proteins", protein_indices.size());
+  carp(CARP_INFO, "Found %i linkable peptides.", xpeptide_count);
+  carp(CARP_INFO, "Found peptides for %i proteins.", protein_indices.size());
 
   if (include_intra  || include_inter_intra) {
     for (size_t protein_idx_idx = 0; protein_idx_idx < protein_indices.size(); protein_idx_idx++) {
@@ -443,7 +443,6 @@ FLOAT_T XLinkPeptide::calcMass(MASS_TYPE_T mass_type) {
  * \returns a shuffled xlink peptide
  */
 XLinkMatch* XLinkPeptide::shuffle() {
-  //carp(CARP_INFO, "XLinkPeptide::shuffle");
   XLinkPeptide* decoy = new XLinkPeptide();
   decoy->setZState(getZState());
   decoy->linked_peptides_.push_back(linked_peptides_[0].shuffle());
@@ -591,7 +590,6 @@ void XLinkPeptide::predictIons(
     ++ion_iter) {
 
     Ion* ion = *ion_iter;
-
     unsigned int cleavage_idx = ion->getCleavageIdx();
     if (ion->isForwardType()) {
       if (cleavage_idx > (unsigned int)getLinkPos(1)) {
@@ -612,6 +610,9 @@ void XLinkPeptide::predictIons(
         }
       }
     }
+    //some magic here, we will keep the 1st peptide's sequence, but not the second since
+    //we lose it upon freeing the seq2 memory.
+    ion->setPeptideSequence(NULL);
     ion_series->addIon(ion);
   }
   free(seq1);
@@ -629,16 +630,18 @@ string XLinkPeptide::getIonSequence(
   Ion* ion ///< pointer to the ion
   ) {
 
-  int peptide_idx = 0;
-
-  string ion_sequence = ion->getPeptideSequence();
-
-  if (ion_sequence == linked_peptides_[0].getSequence()) {
-    peptide_idx = 0;
-  } else {
+  int peptide_idx = -1;
+  //Since we free the second ion series, that sequence is lost.  We have
+  //the first one though and the peptide sequence is get to null if it is
+  //the second.
+  
+  if (ion->getPeptideSequence() == NULL) {
     peptide_idx = 1;
+  } else  {
+    peptide_idx = 0;
   }
-
+  
+  string ion_sequence = linked_peptides_[peptide_idx].getSequence();
   unsigned int cleavage_idx = ion->getCleavageIdx();
 
   bool is_linked = false;
@@ -648,11 +651,11 @@ string XLinkPeptide::getIonSequence(
   } else {
     is_linked = (cleavage_idx >= (ion_sequence.length() - getLinkPos(peptide_idx)));
   }
-
   string subseq;
   if (ion->isForwardType()) {
     subseq = ion_sequence.substr(0, cleavage_idx);
   } else {
+    
     subseq = ion_sequence.substr(ion_sequence.length() - cleavage_idx, ion_sequence.length());
   }
 
@@ -742,7 +745,7 @@ string XLinkPeptide::getProteinIdString() {
   Crux::Peptide* peptide = this -> getPeptide(0);
 
   if (peptide == NULL) {
-    carp(CARP_FATAL, "XLinkPeptide : Null first peptide!");
+    carp(CARP_FATAL, "XLinkPeptide : Null first peptide.");
   } else {
     oss << peptide->getProteinIdsLocations();
   }
@@ -751,7 +754,7 @@ string XLinkPeptide::getProteinIdString() {
   peptide = this -> getPeptide(1);
 
   if (peptide == NULL) {
-    carp(CARP_FATAL, "XLinkPeptide : Null second peptide!");
+    carp(CARP_FATAL, "XLinkPeptide : Null second peptide.");
   } else {
     oss << peptide->getProteinIdsLocations();
   }
@@ -825,7 +828,7 @@ string XLinkPeptide::getFlankingAAString() {
   Crux::Peptide* peptide = this -> getPeptide(0);
   
   if (peptide == NULL) {
-    carp(CARP_FATAL, "XLinkPeptide::getFlankingAAString() : Null first peptide!");
+    carp(CARP_FATAL, "XLinkPeptide::getFlankingAAString() : Null first peptide.");
   } else {
 
     char* flanking_aas = peptide->getFlankingAAs();
@@ -838,7 +841,7 @@ string XLinkPeptide::getFlankingAAString() {
   peptide = this->getPeptide(1);
 
   if (peptide == NULL) {
-    carp(CARP_FATAL, "XLinkPeptide::getFlankingAAString() : Null second peptide!");
+    carp(CARP_FATAL, "XLinkPeptide::getFlankingAAString() : Null second peptide.");
   } else {
 
     char* flanking_aas = peptide->getFlankingAAs();

@@ -4,6 +4,7 @@
 #include "app/CruxApplication.h"
 #include "model/Spectrum.h"
 #include "LinkedIonSeries.h"
+#include "objects.h"
 
 class XLinkAssignIons : public CruxApplication {
  public:
@@ -19,7 +20,11 @@ class XLinkAssignIons : public CruxApplication {
   virtual std::vector< std::pair<std::string, std::string> > getOutputs() const;
 
  private:
-  void print_spectrum(Crux::Spectrum* spectrum, LinkedIonSeries& ion_series);
+  void print_spectrum(
+    Crux::Spectrum* spectrum,
+    XLinkMatch* xlp,
+    IonSeries* ion_series
+  );
 };
 
 #endif
