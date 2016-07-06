@@ -10,6 +10,7 @@
 #include<tr1/unordered_map>
 #endif
 #include "mod_coder.h"
+#include "io/carp.h"
 
 using namespace std;
 
@@ -84,6 +85,7 @@ class VariableModTable {
       }
     }
     offset_ += pb_mod_table.variable_mod_size();
+
     // Check possibles lists
     for (int i = 0; i < 256; ++i) {
       vector<pair<int, int> >& p = possibles[i];
@@ -93,9 +95,9 @@ class VariableModTable {
       sort(p.begin(), p.end());
       vector<pair<int, int> >::iterator dup = adjacent_find(p.begin(), p.end(), first_eq());
       if (dup != p.end()) {
-        cerr << "ERROR: Amino acid modification " << char(i) << "+"
-             << unique_delta_[dup->first] << " appears more than once in "
-             << "modifications table.\n";
+	carp(CARP_FATAL, 
+	     "ERROR: Amino acid modification %c+%g appears more than once in modifications table.",
+	     char(i), unique_delta_[dup->first]);
         return false;
       }
     }

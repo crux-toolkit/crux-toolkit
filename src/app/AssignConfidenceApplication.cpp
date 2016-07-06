@@ -313,6 +313,7 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
             pairidx[myTuple] = cnt;
           }
           break;
+        case NUMBER_METHOD_TYPES:
         case INVALID_METHOD:
           carp(CARP_FATAL, "No estimation method specified.");
         }
@@ -540,6 +541,7 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
     case MIXMAX_METHOD:
       cols_to_print[QVALUE_MIXMAX_COL] = true;
       break;
+    case NUMBER_METHOD_TYPES:
     case INVALID_METHOD:
       carp(CARP_FATAL, "No estimation method specified.");
     }
@@ -561,6 +563,7 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
   case MIXMAX_METHOD:
     derived_score_type = QVALUE_MIXMAX;
     break;
+  case NUMBER_METHOD_TYPES:
   case INVALID_METHOD:
     carp(CARP_FATAL, "No estimation method specified.");
   }
@@ -587,6 +590,7 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
       ascending,
       Params::GetDouble("pi-zero"));
     break;
+  case NUMBER_METHOD_TYPES:
   case INVALID_METHOD:
       carp(CARP_FATAL, "No estimation method specified.");
   }

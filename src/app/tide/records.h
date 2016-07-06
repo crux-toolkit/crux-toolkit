@@ -73,8 +73,8 @@ class RecordWriter {
   explicit RecordWriter(const string& filename, int buf_size = -1)
     : raw_output_(NULL), coded_output_(NULL) {
     if ((fd_ = open(filename.c_str(), O_CREAT | O_TRUNC | O_WRONLY, 0644)) < 0) {
-      cerr << "couldn't open file for write "
-              "(errno " << errno << ": " << strerror(errno) << ")" << endl;
+      carp(CARP_FATAL, "Couldn't open file %s for write (errno %d: %s).",
+	   filename.c_str(), errno, strerror(errno));
       return;
     }
     raw_output_ = new google::protobuf::io::FileOutputStream(fd_, buf_size);
