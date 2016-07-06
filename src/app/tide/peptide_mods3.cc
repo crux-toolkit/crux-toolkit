@@ -20,6 +20,7 @@
 #include "peptides.pb.h"
 #include "mass_constants.h"
 #include "modifications.h"
+#include "io/carp.h"
 
 using namespace std;
 
@@ -70,7 +71,6 @@ class ModsOutputter {
     residues_ = proteins_[loc.protein_id()]->residues().data() + loc.pos();
     vector<int> counts(max_counts_.size(), 0);
     OutputNtermMods(0, counts);
-//    OutputMods(0, counts);
   }
 
  private:
@@ -90,6 +90,10 @@ class ModsOutputter {
     }
 
     writers_.resize(prod);
+    if (prod > 100) {
+      carp(CARP_INFO, "Opening %d files for modifications.", prod);
+    }
+
     for (int i = 0; i < prod; ++i) {
       writers_[i] = new RecordWriter(GetTempName(i), FLAGS_buf_size << 10);
       if (!writers_[i]->OK()) {
@@ -448,20 +452,20 @@ void ModsOutputter::Merge() {
 
 void AddMods(HeadedRecordReader* reader, string out_file,
 	     const pb::Header& header,
-	     const vector<const pb::Protein*>& proteins, VariableModTable& var_mod_table) {
-//  VariableModTable var_mod_table;
-//  var_mod_table.Init(header.peptides_header().mods());
+	     const vector<const pb::Protein*>& proteins, 
+	     VariableModTable& var_mod_table) {
   CHECK(reader->OK());
   HeadedRecordWriter writer(out_file, header, FLAGS_buf_size << 10);
   CHECK(writer.OK());
   ModsOutputter outputter(proteins, &var_mod_table, &writer);
+  var_mod_table.Show();
   outputter.modpeptidecnt_ = 0; 
   pb::Peptide peptide;
   while (!reader->Done()) {
     CHECK(reader->Read(&peptide));
     outputter.Output(&peptide);
   } 
-//  cout << "no of modified peptides:\t" << outputter.modpeptidecnt_ << endl<<endl;
+  carp(CARP_INFO, "Created %d peptides.", outputter.modpeptidecnt_);
   CHECK(reader->OK());
 }
 
