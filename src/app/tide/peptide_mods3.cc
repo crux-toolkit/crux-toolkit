@@ -458,7 +458,6 @@ void AddMods(HeadedRecordReader* reader, string out_file,
   HeadedRecordWriter writer(out_file, header, FLAGS_buf_size << 10);
   CHECK(writer.OK());
   ModsOutputter outputter(proteins, &var_mod_table, &writer);
-  var_mod_table.Show();
   outputter.modpeptidecnt_ = 0; 
   pb::Peptide peptide;
   while (!reader->Done()) {
