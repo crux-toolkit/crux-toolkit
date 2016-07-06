@@ -96,7 +96,7 @@ class VariableModTable {
       vector<pair<int, int> >::iterator dup = adjacent_find(p.begin(), p.end(), first_eq());
       if (dup != p.end()) {
 	carp(CARP_FATAL, 
-	     "ERROR: Amino acid modification %c+%g appears more than once in modifications table.",
+	     "Amino acid modification %c+%g appears more than once in modifications table.",
 	     char(i), unique_delta_[dup->first]);
         return false;
       }
