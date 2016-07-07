@@ -35,8 +35,7 @@ bool initialized_amino_masses = false;
 /**
  * initializes the mass array
  */
-void initialize_amino_masses (void)
-{
+void initialize_amino_masses() {
   // average mass
   amino_masses['A' - 'A'] = 71.0788;
   // set mass high to prevent peptides containing B
@@ -112,10 +111,10 @@ void initialize_amino_masses (void)
  * mod5 has a mass change of 10, then the entry at index 
  * (binary 00010001 =) 17 is (50 + 10=) 60.
  */
-void initialize_aa_mod_combinations_array(){
+void initialize_aa_mod_combinations_array() {
   // set all to 0
   int i = 0;
-  for(i = 0; i < NUM_MOD_MASSES; i++){
+  for (i = 0; i < NUM_MOD_MASSES; i++) {
     aa_mod_masses[i] = 0;
   }
 
@@ -125,11 +124,11 @@ void initialize_aa_mod_combinations_array(){
   int mod_idx = 0;
 
   // for each aa mod
-  for(mod_idx = 0; mod_idx < num_mods; mod_idx++){
+  for (mod_idx = 0; mod_idx < num_mods; mod_idx++) {
     //printf("\nmod#: %i\n", mod_idx);
     int entry_idx = 0;
 
-    while( entry_idx < NUM_MOD_MASSES ){
+    while (entry_idx < NUM_MOD_MASSES) {
       //printf("skip from %i", entry_idx);
       // skip 2^i entries for mod_i (first mod is 1)
       entry_idx += (int)pow(2.0, mod_idx);
@@ -138,7 +137,7 @@ void initialize_aa_mod_combinations_array(){
       // write i entries for mod_i
       //int write_num = mod_idx+1;
       int write_num = (int)pow(2.0, mod_idx);
-      while(write_num > 0 && entry_idx < NUM_MOD_MASSES){
+      while (write_num > 0 && entry_idx < NUM_MOD_MASSES) {
         //printf("write at %i from %.3f", entry_idx, aa_mod_masses[entry_idx]);
 
         aa_mod_masses[entry_idx] += aa_mod_get_mass_change(amod_list[mod_idx]);
@@ -150,7 +149,7 @@ void initialize_aa_mod_combinations_array(){
   }// next mod
 
   //printf("Initialized mod combinations are:\n");
-  //for(i=0; i<36; i++){
+  //for (i = 0; i < 36; i++) {
     //printf("index %i\tmass %.1f\n", i, aa_mod_masses[i]);
   //}
 }
@@ -161,19 +160,15 @@ void initialize_aa_mod_combinations_array(){
 FLOAT_T get_mass_amino_acid(
   char amino_acid, ///< the query amino acid -in
   MASS_TYPE_T mass_type ///< the isotopic mass type (AVERAGE, MONO) -in
-  )
-{
-  if(mass_type == AVERAGE){
+) {
+  if (mass_type == AVERAGE) {
     return get_mass_amino_acid_average(amino_acid);
-  }
-  else if(mass_type == MONO){
+  } else if (mass_type == MONO) {
     return get_mass_amino_acid_monoisotopic(amino_acid);
   }
-  else{
-    carp(CARP_FATAL, "ERROR: mass type does not exist\n");
-    // avoid compiler warning
-    return 1;
-  }
+  carp(CARP_FATAL, "ERROR: mass type does not exist\n");
+  // avoid compiler warning
+  return 1;
 }
 
 /**
@@ -182,15 +177,14 @@ FLOAT_T get_mass_amino_acid(
 FLOAT_T get_mass_mod_amino_acid(
   MODIFIED_AA_T amino_acid, ///< the query amino acid -in
   MASS_TYPE_T mass_type ///< the isotopic mass type (AVERAGE, MONO) -in
-  ){
-
-  switch( mass_type ){
+) {
+  switch (mass_type) {
   case AVERAGE:
     return get_mass_mod_amino_acid_average(amino_acid);
   case MONO:
     return get_mass_mod_amino_acid_monoisotopic(amino_acid);
   case NUMBER_MASS_TYPES:
-    carp(CARP_FATAL,"Bad mass type.");
+    carp(CARP_FATAL, "Bad mass type.");
   }
   return 0;
 }
@@ -200,10 +194,9 @@ FLOAT_T get_mass_mod_amino_acid(
  */
 FLOAT_T get_mass_amino_acid_average(
   char amino_acid ///< the query amino acid -in
-  )
-{
+) {
   // has the amino_masses array been initialized?
-  if(!initialized_amino_masses){
+  if (!initialized_amino_masses) {
     initialize_amino_masses();
     initialized_amino_masses = true;
   }
@@ -215,8 +208,8 @@ FLOAT_T get_mass_amino_acid_average(
  */
 FLOAT_T get_mass_mod_amino_acid_average(
   MODIFIED_AA_T amino_acid ///< the query amino acid -in
-  ){
-  if(!initialized_amino_masses){
+) {
+  if (!initialized_amino_masses) {
     initialize_amino_masses();
   }
   //printf("aa is %hu, char %c\n", (unsigned short)amino_acid, modified_aa_to_char(amino_acid));
@@ -236,15 +229,14 @@ FLOAT_T get_mass_mod_amino_acid_average(
  * identifier can be used to modify a MODIFIED_AA_T so that it has the
  * given mass shift. 
  */
-MODIFIED_AA_T get_mod_identifier(FLOAT_T mass_shift){
-
-  if(!initialized_amino_masses){
+MODIFIED_AA_T get_mod_identifier(FLOAT_T mass_shift) {
+  if (!initialized_amino_masses) {
     initialize_amino_masses();
   }
 
   int precision = Params::GetInt("mod-precision");
-  for(int mod_idx = 0; mod_idx < (int)NUM_MOD_MASSES; mod_idx++){
-    if( is_equal(mass_shift, aa_mod_masses[mod_idx], precision) ){
+  for (int mod_idx = 0; mod_idx < (int)NUM_MOD_MASSES; mod_idx++) {
+    if (is_equal(mass_shift, aa_mod_masses[mod_idx], precision)) {
       MODIFIED_AA_T identifier = mod_idx;
       identifier = identifier << 5;
       return identifier;
@@ -264,10 +256,9 @@ MODIFIED_AA_T get_mod_identifier(FLOAT_T mass_shift){
  */
 FLOAT_T get_mass_amino_acid_monoisotopic(
   char amino_acid ///< the query amino acid -in
-  )
-{
+) {
   // has the amino_masses array been initialized?
-  if(!initialized_amino_masses){
+  if (!initialized_amino_masses) {
     initialize_amino_masses();
     initialized_amino_masses = true;
   }
@@ -279,8 +270,8 @@ FLOAT_T get_mass_amino_acid_monoisotopic(
  */
 FLOAT_T get_mass_mod_amino_acid_monoisotopic(
   MODIFIED_AA_T amino_acid ///< the query amino acid -in
-  ){
-  if(!initialized_amino_masses){
+) {
+  if (!initialized_amino_masses) {
     initialize_amino_masses();
   }
 
@@ -299,16 +290,15 @@ FLOAT_T get_mass_mod_amino_acid_monoisotopic(
 void increase_amino_acid_mass(
   char amino_acid, ///< the query amino acid -in
   FLOAT_T update_mass ///< the mass amount to update for the amino acid -in
-  )
-{
+) {
   // has the amino_masses array been initialized?
-  if(!initialized_amino_masses){
+  if (!initialized_amino_masses) {
     initialize_amino_masses();
     initialized_amino_masses = true;
   }
 
   // check if amino acid
-  if((short int)amino_acid < 'A' || (short int)amino_acid > 'Z'){
+  if ((short int)amino_acid < 'A' || (short int)amino_acid > 'Z') {
     carp(CARP_ERROR, "Cannot update mass, char: %c not an amino acid");
   }
   

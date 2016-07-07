@@ -27,7 +27,7 @@ int CarpStreamBuf::overflow(
     buffer_.push_back((char)over_char);
 
     if (buffer_.find(endl_str_) != string::npos) {
-      buffer_.erase(buffer_.length()-endl_str_.length(),endl_str_.length());
+      buffer_.erase(buffer_.length()-endl_str_.length(), endl_str_.length());
       carp(CARP_INFO, "%s", buffer_.c_str());
       buffer_.clear();
     }

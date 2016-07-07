@@ -1,11 +1,11 @@
-/****************************************************************//**
- * \file utils.cpp
- * AUTHOR: William Stafford Noble
- * CREATE DATE: 9-8-97
- * PROJECT: shared
- * COPYRIGHT: 1997-2001 Columbia University
- * DESCRIPTION: Various useful generic utilities.
- ********************************************************************/
+/*********************************************************************
+  * \file utils.cpp
+  * AUTHOR: William Stafford Noble
+  * CREATE DATE: 9-8-97
+  * PROJECT: shared
+  * COPYRIGHT: 1997-2001 Columbia University
+  * DESCRIPTION: Various useful generic utilities.
+  ********************************************************************/
 #include <stdarg.h>
 #include <string.h>
 #ifdef _MSC_VER
@@ -81,8 +81,7 @@ int getline(char **lineptr, size_t *n, FILE *stream) {
     // Return the length of the string
     // without the terminating null.
     return index;
-  }
-  else {
+  } else {
     // Some sort of read error
     return -1;
   }
@@ -93,23 +92,21 @@ int getline(char **lineptr, size_t *n, FILE *stream) {
 /***********************************************************************
  * Return the value to replace a missing value -- NaN.
  ***********************************************************************/
-double NaN
-  (void)
-{
+double NaN(void) {
   return atof("NaN");
 }
 
 /***********************************************************************
  * Return elapsed time in microseconds since the last call.
  ***********************************************************************/
-double wall_clock(){
+double wall_clock() {
   static int first_call = 1;
   static double first_time;
   double t;
   struct timeval tp;
 
   gettimeofday(&tp, NULL);
-  if(first_call == 1){
+  if (first_call == 1) {
     first_time = (1E6*((double)tp.tv_sec)+
                  ((double)tp.tv_usec));
     t = first_time;
@@ -125,14 +122,14 @@ double wall_clock(){
 /************************************************************************
  * See .h file for description.
  ************************************************************************/
-bool open_file
-  (const char *    filename,      /* Name of the file to be opened. */
-   const char *    file_mode,     /* Mode to be passed to fopen. */
-   bool allow_stdin,         /* If true, filename "-" is stdin. */
-   const char *    file_description,   
-   const char *    content_description,
-   FILE **         afile)         /* Pointer to the open file. */
-{
+bool open_file(
+  const char *    filename,      /* Name of the file to be opened. */
+  const char *    file_mode,     /* Mode to be passed to fopen. */
+  bool allow_stdin,         /* If true, filename "-" is stdin. */
+  const char *    file_description,   
+  const char *    content_description,
+  FILE **         afile        /* Pointer to the open file. */
+) {
   if (filename == NULL) {
     carp(CARP_ERROR, "No %s filename specified.\n", file_description);
     return(false);
@@ -160,9 +157,7 @@ bool open_file
  * 
  * See .h file for descriptions.
  ********************************************************************/
-void *mymalloc
-  (size_t size)
-{
+void *mymalloc(size_t size) {
   void * temp_ptr;
 
   if (size == 0)
@@ -178,10 +173,7 @@ void *mymalloc
   return(temp_ptr);
 }
 
-void *mycalloc
-  (size_t nelem,
-   size_t size)
-{
+void *mycalloc(size_t nelem, size_t size) {
   void * temp_ptr;
 
   /* Make sure we allocate something. */
@@ -201,10 +193,7 @@ void *mycalloc
   return(temp_ptr);
 }
 
-void * myrealloc
-  (void * ptr,
-   size_t  size)
-{
+void * myrealloc(void * ptr, size_t  size) {
   void * temp_ptr;
 
   /* Make sure we allocate something. */
@@ -229,14 +218,14 @@ void * myrealloc
 /********************************************************************
  * fwrite with a check to make sure it was successful (useful for NFS problems)
  ********************************************************************/
-bool myfwrite
-  (const void *ptr, 
-   size_t size, 
-   size_t nitems, 
-   FILE *stream){
-
+bool myfwrite(
+  const void *ptr, 
+  size_t size, 
+  size_t nitems, 
+  FILE *stream
+) {
   size_t ret = fwrite(ptr, size, nitems, stream);
-  if (nitems != ret){
+  if (nitems != ret) {
     carp(CARP_ERROR, "Problem writing %i items", nitems);
     return false;
   }
@@ -246,9 +235,7 @@ bool myfwrite
 /**********************************************************************
  * Compute a logarithm.
  **********************************************************************/
-PROB_T my_log
-  (PROB_T x)
-{
+PROB_T my_log(PROB_T x) {
   if (x > 0.0) {
     return(LOG_VALUE(log(x)));
   } else if (x < 0.0) {
@@ -264,9 +251,7 @@ static PROB_T log_table[(int) LOG_PRECISION + 2];
 /**********************************************************************
  * Set up lookup table for log(x), 0 <= x <= 1.
  **********************************************************************/
-void init_log_prob
-  (void)
-{
+void init_log_prob(void) {
   int    i_table;
   PROB_T table_value;
 
@@ -281,9 +266,7 @@ void init_log_prob
 /**********************************************************************
  * Efficiently find log(x), when 0 < x <= 1.  Doesn't check bounds.
  **********************************************************************/
-PROB_T log_prob
-  (PROB_T value)
-{
+PROB_T log_prob (PROB_T value) {
   const PROB_T scaled_value = value * LOG_PRECISION;
   const int    log_index = (int)scaled_value;
   const PROB_T decimal_part = scaled_value - log_index;
@@ -301,10 +284,7 @@ PROB_T log_prob
 /**************************************************************************
  * See .h file for description.
  **************************************************************************/
-bool is_zero
-  (double    value,
-   bool log_form)
-{
+bool is_zero (double value, bool log_form) {
   if ((log_form) && (value < LOG_SMALL)) {
     return(true);
   } else if ((!log_form) && (value == 0.0)) {
@@ -317,11 +297,7 @@ bool is_zero
 /**************************************************************************
  * See .h file for description.
  **************************************************************************/
-bool almost_equal
-  (double value1,
-   double value2,
-   double slop)
-{
+bool almost_equal(double value1, double value2, double slop) {
   if ((value1 - slop > value2) || (value1 + slop < value2)) {
     return(false);
   } else {
@@ -338,11 +314,11 @@ bool almost_equal
  *
  * Assumes that the zeroth enumerated type element is invalid.
  **************************************************************************/
-const char * convert_enum_type
-  (int     enum_type, /* The enumerated type object to be converted. */
-   const char *  enum_strs[], /* String values associated with this type. */
-   int     num_enums) /* Number of values of the type. */
-{
+const char * convert_enum_type (
+  int     enum_type, /* The enumerated type object to be converted. */
+  const char *  enum_strs[], /* String values associated with this type. */
+  int     num_enums  /* Number of values of the type. */
+) {
   if ((enum_type <= 0) || (enum_type >= num_enums)) {
     carp(CARP_FATAL, "Illegal enumerated type value (%d).", enum_type);
   }
@@ -350,12 +326,12 @@ const char * convert_enum_type
   return(enum_strs[enum_type]);
 }
     
-int convert_enum_type_str
-  (const char *  enum_type_str, /* String to be converted. */
-   int     default_value, /* Value to return if string not found. */
-   const char ** enum_strs,     /* String values associated with this type. */
-   int     num_enums)     /* Number of values of the type. */
-{
+int convert_enum_type_str(
+  const char *  enum_type_str, /* String to be converted. */
+  int     default_value, /* Value to return if string not found. */
+  const char ** enum_strs,     /* String values associated with this type. */
+  int     num_enums      /* Number of values of the type. */
+) {
   int i_enum;
 
   /* If no string was given, return the default. */
@@ -374,13 +350,11 @@ int convert_enum_type_str
   return( default_value ); 
 }
 
-/************************************************************************//**
- * \brief Get the name of the CPU.
- ****************************************************************************/
+/*******************************************************************************
+  * \brief Get the name of the CPU.
+  ****************************************************************************/
 static const int MAX_HOST_NAME = 100;
-const char* hostname
- ()
-{
+const char* hostname() {
   static char the_hostname[MAX_HOST_NAME];
 #ifdef _MSC_VER
   WSADATA wsaData;
@@ -394,12 +368,10 @@ const char* hostname
   return(the_hostname);
 }
 
-/************************************************************************//**
- * \brief Get the current date and time.
- ****************************************************************************/
-const char* date_and_time
-  ()
-{
+/*******************************************************************************
+  * \brief Get the current date and time.
+  ****************************************************************************/
+const char* date_and_time() {
   FILE *           date_stream;
   static char      the_date[MAX_HOST_NAME];
   static bool first_time = true;
@@ -413,7 +385,9 @@ const char* date_and_time
 #else
     date_stream = (FILE *)popen("date", "r");
 #endif
-    if( fgets(the_date, MAX_HOST_NAME, date_stream) == NULL ){ return NULL; }
+    if (fgets(the_date, MAX_HOST_NAME, date_stream) == NULL) {
+      return NULL;
+    }
     pclose(date_stream);
   }
 
@@ -425,35 +399,6 @@ const char* date_and_time
   return(the_date);
 }
 
-/****************************************************************************
- * Copy a string, with allocation.
- ****************************************************************************/
-void copy_string
- (char** target,
-  char*  source)
-{
-  if (source == NULL) {
-    *target = NULL;
-  } else {
-    *target = (char *)mycalloc(strlen(source) + 1, sizeof(char));
-    strcpy(*target, source);
-  }
-}
-
-/************************************************************************
- * Copy an array of integers.
- ************************************************************************/
-void copy_int_array
- (int  nelems,
-  int* source,
-  int* target)
-{
-  int i;
-
-  for (i = 0; i < nelems; i++)
-    target[i] = source[i];
-}
-
 /**
  * parses a file of length max_lines and returns an array of strings
  */
@@ -461,7 +406,7 @@ char** parse_file(
   char* file_name,
   int max_lines,
   int* num_lines
-  ){
+) {
 
   FILE *infile;
   if (open_file(file_name, "r", 1, "input", "", &infile) == 0)
@@ -471,15 +416,15 @@ char** parse_file(
   char** lines = (char**) mycalloc(max_lines, sizeof(char*));
   int line_idx = 0;
   int length = 0;
-  while ((length = getline(&lines[line_idx], &buf_length, infile)) != -1){
+  while ((length = getline(&lines[line_idx], &buf_length, infile)) != -1) {
     char* line = lines[line_idx];
-    if (line[length-2] == '\n' || line[length-2] == '\r'){
+    if (line[length-2] == '\n' || line[length-2] == '\r') {
       line[length-2] = '\0';
-    } else if (line[length-1] == '\n' || line[length-1] == '\r'){
+    } else if (line[length-1] == '\n' || line[length-1] == '\r') {
       line[length-1]='\0';
     }
     line_idx++;
-    if (line_idx >= max_lines){
+    if (line_idx >= max_lines) {
       carp(CARP_FATAL, "Number of lines in %s exceeds maximum of %i!", 
           file_name, max_lines);
     }
@@ -515,36 +460,6 @@ int myrandom_limit(int max) {
 void mysrandom(unsigned seed) {
   get_mt19937().seed(seed);
 }
-
-#ifdef MAIN
-
-
-int main (int argc, char *argv[])
-{
-  FILE *outfile;
-
-  if (argc != 2) {
-    carp(CARP_FATAL, "USAGE: utils <filename>");
-  }
-
-  if (open_file(argv[1], "w", 1, "output", "", &outfile) == 0)
-    exit(1);
-
-  // double double_array[8] = {1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0};
-  // fwrite(double_array, sizeof(double), 8, outfile);
-  int int_array[8] = {1,2,3,4,5,6,7,8};
-  bool a = myfwrite(int_array, sizeof(int), 0, outfile);
-  if (a == true){ 
-    printf("myfwrite succeeded\n");
-  } else {
-    printf("myfwrite failed\n");
-  }
-  fclose(outfile);
-
-   return(0);
-}
-
-#endif
 
 /*
  * Local Variables:

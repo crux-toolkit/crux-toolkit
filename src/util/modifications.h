@@ -90,7 +90,7 @@ AA_MOD_T* new_aa_mod(int mod_idx);
 /**
  * \brief Free the memory for an AA_MOD including the aa_list.
  */
-void free_aa_mod(AA_MOD_T*);
+void free_aa_mod(AA_MOD_T* mod);
 
 /**
  * \brief Converts a MODIFIED_AA into a char, effectively unmodifying it.
@@ -142,9 +142,9 @@ char* modified_aa_to_string_with_masses(MODIFIED_AA_T aa,
  * representation of the modified sequence.
  */
 char* modified_aa_string_to_string_with_masses(
- MODIFIED_AA_T* aa_string, // the modified aa's to translate
- int length, // length of aa_string
- MASS_FORMAT_T mass_format); // which mass value to print
+  MODIFIED_AA_T* aa_string, // the modified aa's to translate
+  int length, // length of aa_string
+  MASS_FORMAT_T mass_format); // which mass value to print
 
 /**
  * \brief Take an array of MODIFIED_AA_T's and return an array of
@@ -155,8 +155,8 @@ char* modified_aa_string_to_string_with_masses(
  * representation of the modified sequence.
  */
 char* modified_aa_string_to_string_with_symbols(
- MODIFIED_AA_T* aa_string, // modified aa's to translate
- int length); // length of aa_string
+  MODIFIED_AA_T* aa_string, // modified aa's to translate
+  int length); // length of aa_string
 
 /**
  * \brief Takes an array of MODIFIED_AA_T's and returns an array of
