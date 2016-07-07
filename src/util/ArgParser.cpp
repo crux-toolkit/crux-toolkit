@@ -118,7 +118,7 @@ vector<ArgParser::ArgSpec> ArgParser::ArgStringsToArgSpecs(const vector<string>&
 }
 
 ArgParserException::ArgParserException(const string& what, bool fullUsage)
- : runtime_error(what), fullUsage_(fullUsage) {
+  : runtime_error(what), fullUsage_(fullUsage) {
 }
 
 bool ArgParserException::ShowFullUsage() const {

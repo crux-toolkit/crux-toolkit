@@ -38,8 +38,7 @@
 int gettimeofday(struct timeval *tv, struct timezone *tz);
 char *realpath(const char * file_name, char * resolved_name);
 
-typedef struct 
-{ 
+typedef struct { 
    HANDLE f; 
    HANDLE m; 
    void *p; 
@@ -56,7 +55,7 @@ int scandir(
   struct dirent ***namelist,
   int (*select)(struct dirent *),
   int (*compar)(const void *, const void *)
- );
+);
 
 int alphasort(const void *d1, const void *d2);
 

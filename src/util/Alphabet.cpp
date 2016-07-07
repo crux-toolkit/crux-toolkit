@@ -1,8 +1,8 @@
-/****************************************************************//**
- * \file alphabet.cpp
- * AUTHOR: Unknown
- * \brief Provide a function for converting amino acids to ints.
- ********************************************************************/
+/*********************************************************************
+  * \file alphabet.cpp
+  * AUTHOR: Unknown
+  * \brief Provide a function for converting amino acids to ints.
+  ********************************************************************/
 #include "Alphabet.h"
 
 int Alphabet::amino_array_[AMINO_ARRAY_CAPACITY] = {0};
@@ -11,8 +11,8 @@ bool Alphabet::amino_array_populated_ = false;
 /**
  * Converts a character into an amino acid
  */
-void Alphabet::populateAminoArray(void){
-  if ( amino_array_populated_ ){
+void Alphabet::populateAminoArray(void) {
+  if ( amino_array_populated_ ) {
     return;
   }
   amino_array_['A'-'A'] = 0;
@@ -43,7 +43,7 @@ void Alphabet::populateAminoArray(void){
 /**
  * Converts a character into an int using the global amino_hash 
  */
-int Alphabet::aminoToInt(char amino){
+int Alphabet::aminoToInt(char amino) {
   populateAminoArray();
   int value = amino_array_[amino - 'A'];
   return value;

@@ -58,7 +58,7 @@ void free_peptide_mod(PEPTIDE_MOD_T* mod);
  * peptide_mod_list argument.
  */
 int generate_peptide_mod_list(
- PEPTIDE_MOD_T*** peptide_mod_list ///< return here the list of peptide_mods
+  PEPTIDE_MOD_T*** peptide_mod_list ///< return here the list of peptide_mods
 );
 
 /**

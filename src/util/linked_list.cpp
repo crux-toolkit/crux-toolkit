@@ -9,7 +9,7 @@
  * \struct _linked_list_node
  * \brief A node of a linked list
  */
-struct _linked_list_node{
+struct _linked_list_node {
   void* data;
   struct _linked_list_node *next;
 };
@@ -19,7 +19,7 @@ struct _linked_list_node{
  * \struct _linked_list_head
  * \brief The head of a linked list
  */
-struct _linked_list_head{
+struct _linked_list_head {
   // TODO change next to head or first
   struct _linked_list_node *next;
   struct _linked_list_node *last;
@@ -30,7 +30,7 @@ struct _linked_list_head{
  * \brief Allocate the first element of a new list.
  * \returns A pointer to the new list.
  */
-LINKED_LIST_T* new_empty_list(){
+LINKED_LIST_T* new_empty_list() {
   LINKED_LIST_T* head = (LINKED_LIST_T*)mymalloc(sizeof(LINKED_LIST_T));
   head->next = NULL;
   head->last = NULL;
@@ -42,7 +42,7 @@ LINKED_LIST_T* new_empty_list(){
  * Allocates the node, sets data field to new_item, sets next to NULL.
  * \returns A pointer to the newly created node.
  */
-LIST_POINTER_T* new_node(void* new_item){
+LIST_POINTER_T* new_node(void* new_item) {
   LIST_POINTER_T* the_node = (LIST_POINTER_T*)mymalloc(sizeof(LIST_POINTER_T));
   the_node->data = new_item;
   the_node->next = NULL;
@@ -53,7 +53,7 @@ LIST_POINTER_T* new_node(void* new_item){
  * \brief Allocate the first element of a new list.
  * \returns A pointer to the new list.
  */
-LINKED_LIST_T* new_list(void* first_item){
+LINKED_LIST_T* new_list(void* first_item) {
   LINKED_LIST_T* head = (LINKED_LIST_T*)mymalloc(sizeof(LINKED_LIST_T));
   head->next = new_node(first_item);
   head->last = head->next;
@@ -65,15 +65,15 @@ LINKED_LIST_T* new_list(void* first_item){
  * of the list, creates a new list node, and adds it to the end of the list.
  * \returns A pointer to the last (newly created) element in the list.
  */
-LIST_POINTER_T* push_back_linked_list(LINKED_LIST_T* list_head, void* add_me){
+LIST_POINTER_T* push_back_linked_list(LINKED_LIST_T* list_head, void* add_me) {
 
-  if( list_head == NULL ){
+  if( list_head == NULL ) {
     carp(CARP_ERROR, "Cannot add to a NULL list.");
     return NULL;
   }
 
   // adding to an empty list
-  if( list_head->next == NULL ){
+  if( list_head->next == NULL ) {
     list_head->next = new_node(add_me);
     list_head->last = list_head->next;
     return list_head->next;
@@ -93,9 +93,9 @@ LIST_POINTER_T* push_back_linked_list(LINKED_LIST_T* list_head, void* add_me){
  * list node, and insersts it between the head and the first node.
  * \returns A pointer to the first (newly created) element in the list.
  */
-LIST_POINTER_T* push_front_linked_list(LINKED_LIST_T* list_head, void* add_me){
+LIST_POINTER_T* push_front_linked_list(LINKED_LIST_T* list_head, void* add_me) {
 
-  if( list_head == NULL ){
+  if( list_head == NULL ) {
     carp(CARP_ERROR, "Cannot add to null list\n");
     return NULL;
   }
@@ -103,7 +103,7 @@ LIST_POINTER_T* push_front_linked_list(LINKED_LIST_T* list_head, void* add_me){
   LIST_POINTER_T* add_this_node = new_node(add_me);
   add_this_node->next = list_head->next;
   list_head->next = add_this_node;
-  if( list_head->last == NULL ){
+  if( list_head->last == NULL ) {
     list_head->last = add_this_node;
   }
   return add_this_node;
@@ -117,9 +117,9 @@ LIST_POINTER_T* push_front_linked_list(LINKED_LIST_T* list_head, void* add_me){
  * \returns A pointer to the data in the last item in the list, NULL
  * if list is empty.
  */
-void* pop_back_linked_list(LINKED_LIST_T* list){
+void* pop_back_linked_list(LINKED_LIST_T* list) {
 
-  if( list == NULL || list->next == NULL ){
+  if( list == NULL || list->next == NULL ) {
     return NULL;
   }
 
@@ -128,14 +128,14 @@ void* pop_back_linked_list(LINKED_LIST_T* list){
   void* data = last_node->data;
 
   // special case of one item in list
-  if( last_node == list->next ){
+  if( last_node == list->next ) {
     list->last = NULL;
     list->next = NULL;
-  }else{
+  } else {
     // find the node pointing to last
     LIST_POINTER_T* second_to_last_node = list->next;
 
-    while( second_to_last_node->next != last_node ){
+    while( second_to_last_node->next != last_node ) {
       second_to_last_node = second_to_last_node->next;
     }
 
@@ -155,9 +155,9 @@ void* pop_back_linked_list(LINKED_LIST_T* list){
  * \returns A pointer to the data in the first item in the list, NULL
  * if list is empty.
  */
-void* pop_front_linked_list(LINKED_LIST_T* list){
+void* pop_front_linked_list(LINKED_LIST_T* list) {
 
-  if( list == NULL || list->next == NULL ){
+  if( list == NULL || list->next == NULL ) {
     return NULL;
   }
 
@@ -165,7 +165,7 @@ void* pop_front_linked_list(LINKED_LIST_T* list){
   void* data = first_node->data;
   list->next = first_node->next;
   // if only one node, change last to NULL
-  if( list->next == NULL ){
+  if( list->next == NULL ) {
     list->last = NULL;
   }
 
@@ -178,8 +178,8 @@ void* pop_front_linked_list(LINKED_LIST_T* list){
  * to start a traverse of the list.
  * \returns A pointer to the first list node.  NULL if empty list.
  */
-LIST_POINTER_T* get_first_linked_list(LINKED_LIST_T* head){
-  if( head == NULL ){
+LIST_POINTER_T* get_first_linked_list(LINKED_LIST_T* head) {
+  if( head == NULL ) {
     return NULL;
   }
   return head->next;
@@ -190,8 +190,8 @@ LIST_POINTER_T* get_first_linked_list(LINKED_LIST_T* head){
  * traversing a list.
  * \returns A pointer to the next list node.  NULL if at end of list.
  */
-LIST_POINTER_T* get_next_linked_list(LIST_POINTER_T* node){
-  if( node == NULL ){
+LIST_POINTER_T* get_next_linked_list(LIST_POINTER_T* node) {
+  if( node == NULL ) {
     return NULL;
   }
   return node->next;
@@ -201,8 +201,8 @@ LIST_POINTER_T* get_next_linked_list(LIST_POINTER_T* node){
  * \brief Get the item pointed to by this node in the list.
  * \returns Returns a void pointer to the item held at this node.
  */
-void* get_data_linked_list(LIST_POINTER_T* node){
-  if( node == NULL ){
+void* get_data_linked_list(LIST_POINTER_T* node) {
+  if( node == NULL ) {
     return NULL;
   }
   return node->data;
@@ -212,8 +212,8 @@ void* get_data_linked_list(LIST_POINTER_T* node){
  * \brief Is this list empty?
  * \returns true if node->next is NULL, else false
  */
-bool is_empty_linked_list(LINKED_LIST_T* head){
-  if( head == NULL || head->next == NULL ){
+bool is_empty_linked_list(LINKED_LIST_T* head) {
+  if( head == NULL || head->next == NULL ) {
     return true;
   }
   return false;
@@ -223,8 +223,8 @@ bool is_empty_linked_list(LINKED_LIST_T* head){
  * \brief Is this list element at the end of the list?
  * \returns false if node->next is NULL, else true
  */
-bool has_next_linked_list(LIST_POINTER_T* node){
-  if( node == NULL || node->next == NULL ){
+bool has_next_linked_list(LIST_POINTER_T* node) {
+  if( node == NULL || node->next == NULL ) {
     return false;
   }
   return true;
@@ -236,19 +236,19 @@ bool has_next_linked_list(LIST_POINTER_T* node){
  * a pointer to the second list. Does not change the second list.
  * \returns Returns a pointer to the beginning of the combined lists.
  */
-LINKED_LIST_T* combine_lists(LINKED_LIST_T* first, LINKED_LIST_T* second){
-  if( first == NULL ){
+LINKED_LIST_T* combine_lists(LINKED_LIST_T* first, LINKED_LIST_T* second) {
+  if( first == NULL ) {
     return second;
   }
-  if( second == NULL ){
+  if( second == NULL ) {
     return first;
   }
 
   // check for empty list
-  if( first->next == NULL ){
+  if( first->next == NULL ) {
     first->next = second->next;
     first->last = second->last;
-  }else{
+  } else {
     // find the end of the first list
     LIST_POINTER_T* last_node = first->last;
     
@@ -266,14 +266,14 @@ LINKED_LIST_T* combine_lists(LINKED_LIST_T* first, LINKED_LIST_T* second){
  * the same order.
  * \return A pointer to the head of the new list.
  */
-LINKED_LIST_T* copy_list(LINKED_LIST_T* original){
-  if( original == NULL ){
+LINKED_LIST_T* copy_list(LINKED_LIST_T* original) {
+  if( original == NULL ) {
     return NULL;
   }
 
   LINKED_LIST_T* copy = new_empty_list();
   // check for empty list
-  if( is_empty_linked_list( original ) ){
+  if( is_empty_linked_list( original ) ) {
     return copy;
   }
 
@@ -284,7 +284,7 @@ LINKED_LIST_T* copy_list(LINKED_LIST_T* original){
   LIST_POINTER_T* cur_copy = copy->next;
   cur_original = cur_original->next;
   
-  while( cur_original != NULL ){
+  while( cur_original != NULL ) {
     cur_copy->next = new_node( cur_original->data );
     cur_copy = cur_copy->next;
     cur_original = cur_original->next;
@@ -300,12 +300,12 @@ LINKED_LIST_T* copy_list(LINKED_LIST_T* original){
  * one WITHOUT deleting the data pointed to.
  * \returns void
  */
-void delete_list_node(LIST_POINTER_T* list){
-  if( list == NULL ){
+void delete_list_node(LIST_POINTER_T* list) {
+  if( list == NULL ) {
     return;
   }
 
-  if( list->next != NULL ){
+  if( list->next != NULL ) {
     delete_list_node(list->next);
   }// else next is null and this is the end of the list
   
@@ -316,8 +316,8 @@ void delete_list_node(LIST_POINTER_T* list){
 /**
  * \brief Removes all nodes from a list while leaving the data intact.
  */
-void clear_list(LINKED_LIST_T* list){
-  if( list == NULL ){
+void clear_list(LINKED_LIST_T* list) {
+  if( list == NULL ) {
     return;
   }
   LIST_POINTER_T* first = list->next;
@@ -331,9 +331,9 @@ void clear_list(LINKED_LIST_T* list){
  * \brief Deletes the given list WITHOUT deleting the data pointed to.
  * \returns void
  */
-void delete_linked_list(LINKED_LIST_T* list){
-  if( list ){
-    if( list->next != NULL ){
+void delete_linked_list(LINKED_LIST_T* list) {
+  if( list ) {
+    if( list->next != NULL ) {
       delete_list_node(list->next);
     }// else next is null and this is the end of the list
     
@@ -348,16 +348,16 @@ void delete_linked_list(LINKED_LIST_T* list){
  * untouched. 
  * \returns A pointer to the new list element that follows the given one.
  */
-LIST_POINTER_T* delete_next_list_node(LIST_POINTER_T* pre_node){
+LIST_POINTER_T* delete_next_list_node(LIST_POINTER_T* pre_node) {
 
-  if( pre_node == NULL ){
+  if( pre_node == NULL ) {
     return NULL;
   }
   // before: head ....pre-> delete-> next...NULL
   // after : head ....pre-> next...NULL
 
   LIST_POINTER_T* delete_node = pre_node->next;
-  if( delete_node == NULL ){
+  if( delete_node == NULL ) {
     return NULL;
   }
   LIST_POINTER_T* next_node = delete_node->next;
@@ -368,9 +368,3 @@ LIST_POINTER_T* delete_next_list_node(LIST_POINTER_T* pre_node){
   return next_node;
 }
 
-
-/*
-// add node after this but before what follows
-void insert_linked_list(LIST_POINTER_T* node){
-}
-*/

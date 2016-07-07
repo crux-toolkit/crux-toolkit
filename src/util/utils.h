@@ -61,8 +61,7 @@ int getline(char **lineptr, size_t *n, FILE *stream);
 /***********************************************************************
  * Return a not-a-number.
  ***********************************************************************/
-double NaN
-  (void);
+double NaN(void);
 
 /***********************************************************************
  * Return elapsed time in microseconds since the last call.
@@ -76,13 +75,13 @@ double wall_clock(void);
  *
  * RETURN: Was the open successful?
  ************************************************************************/
-bool open_file
-(const char*     filename,            // Name of the file to be opened.
- const char*     file_mode,           // Mode to be passed to fopen.
- bool allow_stdin,         // If true, filename "-" is stdin.
- const char*     file_description,   
- const char*     content_description,
- FILE**    afile);              // Pointer to the open file.
+bool open_file(
+  const char*     filename,            // Name of the file to be opened.
+  const char*     file_mode,           // Mode to be passed to fopen.
+  bool allow_stdin,         // If true, filename "-" is stdin.
+  const char*     file_description,   
+  const char*     content_description,
+  FILE**    afile);              // Pointer to the open file.
 
 /********************************************************************
  * DEBUG_CODE (macro)
@@ -92,7 +91,7 @@ bool open_file
  ********************************************************************/
 #ifdef DEBUG
 #define DEBUG_CODE( debug_value, code_fragment ) \
-   { if (debug_value) { code_fragment } }
+  { if (debug_value) { code_fragment } }
 #else
 #define DEBUG_CODE( debug_value, code_fragment )
 #endif 
@@ -100,23 +99,14 @@ bool open_file
 /********************************************************************
  * Allocate dynamic memory. Die gracefully if memory is exhausted.
  ********************************************************************/
-void *mymalloc
-  (size_t size);
-void *mycalloc
-  (size_t nelem,
-   size_t size);
-void * myrealloc
-  (void * ptr,
-   size_t size);
+void *mymalloc(size_t size);
+void *mycalloc(size_t nelem, size_t size);
+void *myrealloc(void * ptr, size_t size);
 
 /********************************************************************
  * fwrite with a check to make sure it was successful (useful for NFS problems)
  ********************************************************************/
-bool myfwrite
-  (const void *ptr, 
-   size_t size, 
-   size_t nitems, 
-   FILE *stream);
+bool myfwrite(const void *ptr, size_t size, size_t nitems, FILE *stream);
 
 /********************************************************************
  * Math macros.
@@ -131,10 +121,10 @@ typedef double PROB_T;       // Type definition for probability/frequency.
 #define BITS      (33.2)     // = LOG2(-LOG_ZERO)
 
 #ifndef MIN
-#define MIN(a,b)         (((a)<(b))?(a):(b))
+#define MIN(a, b)         (((a) < (b)) ? (a) : (b))
 #endif
 #ifndef MAX
-#define MAX(a,b)         (((a)>(b))?(a):(b))
+#define MAX(a, b)         (((a) > (b)) ? (a) : (b))
 #endif
 
 /***************************************************************************
@@ -199,17 +189,12 @@ PROB_T my_log
 /**************************************************************************
  * Test for zero on a value that may be either a log or a raw float.
  **************************************************************************/
-bool is_zero
-  (double    value,
-   bool log_form);
+bool is_zero(double value, bool log_form);
 
 /**************************************************************************
  * Test to see if two values are approximately equal.
  **************************************************************************/
-bool almost_equal
-  (double value1,
-   double value2,
-   double slop);
+bool almost_equal(double value1, double value2, double slop);
 
 /**************************************************************************
  * Generic functions for converting between integer and string
@@ -220,16 +205,16 @@ bool almost_equal
  *
  * Assumes that the zeroth enumerated type element is invalid.
  **************************************************************************/
-const char*  convert_enum_type
-  (int     enum_type,  /* The enumerated type object to be converted. */
-   const char*  enum_strs[],  /* String values associated with this type. */
-   int     num_enums); /* Number of values of the type. */
+const char*  convert_enum_type(
+  int     enum_type,  /* The enumerated type object to be converted. */
+  const char*  enum_strs[],  /* String values associated with this type. */
+  int     num_enums); /* Number of values of the type. */
 
-int convert_enum_type_str
-  (const char*   enum_type_str, /* String to be converted. */
-   int     default_value, /* Value to return if first arg is null. */
-   const char**  enum_strs,     /* String values associated with this type. */
-   int     num_enums);    /* Number of values of the type. */
+int convert_enum_type_str(
+  const char*   enum_type_str, /* String to be converted. */
+  int     default_value, /* Value to return if first arg is null. */
+  const char**  enum_strs,     /* String values associated with this type. */
+  int     num_enums);    /* Number of values of the type. */
 
 /**************************************************************************
  * Get the name of the CPU.
@@ -241,21 +226,6 @@ const char* hostname(void);
  **************************************************************************/
 const char* date_and_time(void);
 
-/**************************************************************************
- * Copy a string, with allocation.
- **************************************************************************/
-void copy_string
- (char**  target,
-  char*   source);
-
-/************************************************************************
- * Copy an array of integers.
- ************************************************************************/
-void copy_int_array
- (int  nelems,
-  int* source,
-  int* target);
-
 /************************************************************************
  * parses a file of length max_lines and returns an array of strings
  ************************************************************************/
@@ -264,7 +234,6 @@ char** parse_file(
   int max_lines, 
   int* num_lines
   );
-
 
 int myrandom();
 int myrandom_limit(int max);
