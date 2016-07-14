@@ -1,1704 +1,1759 @@
+<!DOCTYPE html>
 <html>
 <head>
 <title>Release notes for Crux</title>
-<link href="./crux.css" rel="styleSheet" type="text/css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" type="text/css" href="/styles.css">
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-26136956-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<script type="text/javascript">
+	// Main Menu
+	$( document ).ready(function() {
+			var pull 		= $('.btn');
+				menu 		= $('nav ul');
+				menuHeight	= menu.height();
+
+			$(pull).on('click', function(e) {
+				e.preventDefault();
+				menu.slideToggle();
+			});
+
+			$(window).resize(function(){
+	    		var w = $(window).width();
+	    		if(w > 320 && menu.is(':hidden')) {
+	    			menu.removeAttr('style');
+	    		} 
+			});
+	});
+</script>
 </head>
 <body>
-<blockquote> 
-<h1>Release notes for Crux</h1>
+	<div class="page-wrap">
+	 	<nav>
+			<div class="btn">
+		    </div>
+		    <img src="/images/crux-logo.png" id="logo"></a>
+			<ul id="navitems">
+			    <li><a href="/index.html">Home</a></li>
+			    <li><a href="/download.html">Download</a></li>
+			    <li><a href="/fileformats.html">File Formats</a></li>
+		        <li><a href="http://groups.google.com/group/crux-users">Contact</a></li> <!--Link to google support board-->
+		    </ul>
+		</nav>
+		<div id="content">
+		<!-- START CONTENT -->
+		<blockquote> 
+		<h2>Release notes for Crux</h2>
 
-<h2>Changes since last named release</h2>
+		<h3>Changes since last named release</h3>
 
-<h3>Major changes</h3>
+		<h4>Major changes</h4>
 
-<ul>
+		<ul>
 
-<li>
-The <code>tide-search</code> command now supports threading. See the
-<code>num-threads</code> parameter for details.</li>
+		<li>
+		  <code>crux tide-search</code> now supports threading for tab-delimited output.
+		</li>
 
-<li>
-Added the <code>pipeline</a> command to run a series of commands, and
-the <code>cascade-search</code> to run searches across a series of
-databases.</li>
+		<li>
+		<code>crux percolator</code> is now using version 2.10.  Changes to the interface were made
+		</li>
 
-<li>
-Renamed the command <code>calibrate-scores</code>
-to <code>assign-confidence</code> and completely revamped its
-functionality.</li>
 
-<li>
-The <code>search-for-xlinks</code> command offers parameters to
-control categories of
-candidates: <code>xlink-include-inter</code>, <code>xlink-include-intra</code>,
-and
-<code>xlink-include-inter-intra</code>.</li>
+		<li>
+		<code>xlink-include-inter</code>, <code>xlink-include-intra</code>, and
+		<code>xlink-include-inter-intra</code> are available options for 
+		<code>crux search-for-xlinks</code></li>
 
-<li>
-Added the <code>peptide-centric-search</code> option to tide-search.</li>
+		<li>
+		Cascade-search application added to crux.</li>
 
-<li>
-The OS X version now requires OS X Yosemite. It can be built
-from source using the Clang compilers distributed with the latest version of
-XCode.</li>
+		<li>
+		Subtract-index application added to crux.</li>
 
-<li>
-32-bit and 64-bit Windows versions are now available, built using Visual Studio 2013.</li>
+		<li>
+		The OS X version now requires OS X Yosemite. It can be built
+		from source using the Clang compilers distributed with the latest version of
+		XCode.</li>
 
-<li>
-The Windows version of Crux can be built with support for vendor specific file
-formats disabled.</li>
+		<li>
+		32-bit and 64-bit Windows versions are now available, built using Visual Studio 2013.</li>
 
-<li>
-Updated Percolator to version 2.10.</li>
+		<li>
+		The Windows version of Crux can be built with support for vendor specific file
+		formats disabled.
+		</li>
+		<li>
+		Added the <code>peptide-centric-search</code> option to tide-search.</li>
+
+		<li>
+		Renamed the command <code>calibrate-scores</code>
+		to <code>assign-confidence</code> and completely re-vamped its
+		functionality.</li>
 
-<li>
-Updated Hardklor to version 2.30.</li>
+		<li>
+		Updated Hardklor to version 2.30.</li>
+
+		<li>
+		Updated Comet to version 2016.01 rev. 1.</li>
 
-<li>
-Updated Comet to version 2016.01 rev. 1.</li>
+		<li>
+		Added the <code>pipeline</code> command.</li>
+
+		</ul>
+
+		<h4>Minor changes</h4>
+
+		<ul>
+
+		<li>
+		Bug fixed in reporting flanking amino acids in <code>PostProcessProtein.cpp</code>.</li>
+
+		<li>
+		<code>Mix-max</code> procedure is updated to handle ties among target and decoy scores.</li>
+
+		<li>
+		Default value of <code>use-neutral-loss-peaks</code> changed to <code>true</code></li>
+
+		<li>
+		<code>Exact p-value</code> calculation takes into account the flanking and neutral loss peaks. </li>
+
+		<li>
+		A bug was fixed in the naming of the Percolator input (.pin) file that
+		is produced by Comet when the <code>output_percolatorfile</code>
+		option is turned on.  Previously, the file was named "comet.tsv"; now
+		it is "comet.target.pin."</li>
+
+		<li>
+		<code>Assign-confidence</code> can take multiple input files.
+		</li>
+
+		<li>
+		The <code>comet</code> command can take multiple input files.
+		</li>
+
+		<li>
+		The <code>sidak</code> option has been added
+		to <code>assign-confidence</code> to perform a Sidak adjustment.
+		</li>
+
+		<li>
+		The <code>peptide-level</code> option has been added
+		to <code>assign-confidence</code>.
+		</li>
+
+		<li>
+		The refactored XCorr score has been re-scaled (by dividing by 20) to
+		put it into a range that is comparable to that of the original XCorr score.</li>
+
+		<li>
+		The comet version has been updated to 2015.01 rev. 0
+		</li>
+
+		<li>
+		The default value of <code>mz-bin-offset</code> has been changed from
+		0.68 to 0.40.</li>
+
+		<li>
+		The <code>percolator</code> command outputs the <code>pout</code> XML format
+		again.</li>
+
+		<li>
+		Fixed a bug in <code>tide-search</code> causing it to fail when
+		<code>remove-precursor-peak</code> removed all peaks in a spectrum.</li>
+
+		<li>
+		The <code>max-precursor-charge</code> parameter
+		for <code>tide-search</code> has been introduced.</li>
+
+		<li>
+		Fixed a bug in candidate peptide selection when m/z tolerance is
+		used.</li>
+
+		<li>
+		Added the <code>read-tide-index</code> command, which reads an index produced
+		by <code>tide-index</code> and prints a list of peptides it contains.</li>
+
+		<li>
+		Added the <code>stop-after</code> option to print-processed-spectra, which
+		controls the point at which to stop preprocessing.</li>
+
+		<li>
+		The <code>tide-search</code> command now accepts multiple spectrum input files.
+		</li>
+
+		<li>
+		Added the <code>use-z-line</code> option to specify whether precursor
+		information is taken from the S or Z line when parsing MS2 files using
+		ProteoWizard.</li>
+
+		<li>
+		Added missing options to the <code>percolator</code> command.</li>
+
+		<li>
+		The <code>tide-search</code> command may now accept a FASTA database in
+		place of the index, in which case <code>tide-index</code> will be run prior to
+		the search. The <code>store-index</code> option allows the generated index
+		to be saved.</li>
 
-</ul>
+		<li><code>2015/06/17 &ndash;</code>
+		The <code>assign-confidence</code> command will automatically detect
+		score type if the <code>score</code> parameter is not specified, searching for
+		xcorr, e-value, or exact p-values.</li>
 
-<h3>Minor changes</h3>
+		<li>
+		<code>2015/06/17 &ndash;</code>
+		The <code>cascade-search</code> will report the source index database of the 
+		peptide for all identified PSMs.</li>
+
+		<li>
+		<code>2015/06/25 &ndash;</code>
+		The <code>top-match</code> parameter has been removed from
+		<code>cascade-search</code>.</li>
+
+		<li>
+		<code>2015/08/24 &ndash;</code>
+		<code>Assign-confidence</code> has got new options: "combine-modified-peptide" 
+		and "combine-charge-states".</li>
 
-<ul>
+		<li>
+		<code>2015/08/24 &ndash;</code>
+		<code>Assign-confidence</code> now supports top-match>1 in peptide-level filtering 
+		mode. </li>
 
-<li>
-The utilities <code>create-docs</code>, <code>subtract-index</code>,
-and <code>psm-convert</code> were added to Crux.</li>
+		<li>
+		<code>2015/08/24 &ndash;</code>
+		<code>Assign-confidence</code> can use smoothed-p-value scores for PSM ranking.</li>
 
-<li>The <code>generate-peptides</code> application has been revamped.</li>
+		<li>
+		<code>2015/08/24 &ndash;</code>
+		<code>Assign-confidence</code> now does not carry out target-decoy competition in 
+		peptide-level filtering mode.</li>
+
+		<li>
+		<code>2015/10/05 &ndash;</code>
+		Added the <code>xlink-assign-ions</code> and <code>xlink-score-spectrum
+		</code> commands.</li>
+
+		<li>
+		<code>2015/12/07 &ndash;</code>
+		Rearranged estimation methods in <code>assign-confidence</code>.</li>
+
+		<code>2015/12/07 &ndash;</code>
+		Added top-match option for <code>estimation-method=peptide-level</code> 
+		case in <code>assign-confidence</code>.</li>
+
+		<li><code>2016/02/04 &ndash;</code>
+		Modified assign-confidence so that ties during target-decoy
+		competition are broken randomly.</li>
+
+		<li><code>2016/02/22 &ndash;</code>
+		Changed the Percolator output feature "file" to contain the name of
+		  the file containing the spectrum (if available), rather than the
+		  name of the file containing the PSM.</li>
+
+		<li><code>2016/04/19 &ndash;</code>
+		Added to <code>search-for-xlinks</code>
+		  and <code>xlink-score-spectrum</code> parameters of the form
+		  "use-a-ion" for a, b, c, x, y, and z-ions.</li>
+
+		</ul>
+
+		<hr></hr>
+
+
+		<h3>Version 2.1</h3> October 8, 2014
+
+		<h4>Major enhancements</h4>
+
+		<ul>
+
+		<li>
+		The <code>tide-search</code> command now supports calculation of exact
+		p-values via dynamic programming, as described
+		in <a href="http://www.ncbi.nlm.nih.gov/pubmed/24895379">this
+		article</a>.  The p-value calculation is controlled with
+		the <code>exact-p-value</code> parameter.</li>
 
-<li>Fixed a bug in <code>barista</code> that occurred when the number of
-peptides exceeded the number of PSMs.</li>
+		<li>
+		<code>search-for-xlinks</code> now supports variable modifications and
+		larger protein databases.  This new code is disabled by default, but
+		can be turned on by setting the
+		parameter <code>use-old-xlink=F</code>.</li>
 
-<li>Precursor mass selection is fixed in <code>tide-search</code> when units
-are m/z.</li>
+		</ul>
 
-<li><code>hardklor</code> and <code>bullseye</code> now use standard logging.</li>
+		<h4>Minor changes</h4>
 
-<li>Version number added to log files. Additionally, the version numbers of
-<code>percolator</code>, <code>comet</code>, and <code>boost</code> are shown
-in the output of the <code>version</code> command.</li>
+		<ul>
 
-<li>
-Short usage message is displayed on error (the full usage message is still
-displayed when a command is entered with no arguments).</li>
+		<li>
+		The default value of <code>mz_bin_offset</code> has been changed to 0.40 from 0.68.</li>
 
-<li>
-<code>feature-in-file</code> parameter added to <code>percolator</code>.</li>
+		<li>
+		The <code>centroided</code> parameter for the <code>hardklor</code> command is
+		now implemented.</li>
 
-<li>
-The <code>seed</code> parameter for <code>percolator</code> has been renamed
-to <code>percolator-seed</code>.</li>
+		<li>
+		The <code>spectrum-format</code> parameter for the <code>bullseye</code> command
+		works properly.</li>
 
-<li>
-<code>comet</code> exits with return code 1 on failure, rather than 0.</li>
+		<li>
+		The <code>tide-search</code> command now uses information from the Z line rather
+		than the S line when reading spectrum files in the MS2 file format.</li>
 
-<li>
-Default value for <code>use_sparse_matrix</code> changed to <code>1</code>.</li>
+		<li>
+		The <code>tide-search</code> command now accepts the
+		<code>spectrum-parser</code> parameter.</li>
 
-<li>
-Default value for <code>use-neutral-loss-peaks<code> changed to <code>true</code>.</li>
+		<li>
+		The <code>protein-database</code> parameter
+		to <code>spectral-counts</code> now only accepts fasta files.  Parsing
+		of a protein index is no longer supported.</li>
 
-<li>
-<code>xlink-score-method</code> parameter added to <code>xlink-score-spectrum</code>.</li>
+		<li>
+		A bug was fixed in the <code>spectral-counts</code> command that prevented 
+		<code>tide-search</code> output files from being parsed correctly.</li>   
 
-<li>
-deltaLCn column added to <code>tide-search</code> tab-delimited output.</li>
+		<li>
+		The <code>default-direction</code> parameter now takes a string value of the feature
+		name rather than an integer.
+		</li>
 
-<li>
-Bug fixed in reporting flanking amino acids in <code>PostProcessProtein.cpp</code>.</li>
-
-<li>
-<code>Mix-max</code> procedure is updated to handle ties among target and decoy scores.</li>
-
-<li>
-Default value of <code>use-neutral-loss-peaks</code> changed to <code>true</code></li>
+		<li>
+		The parameters <code>mz-bin-width</code> and <code>mz-bin-offset</code> have been added
+		to <code>tide-search</code>.</li>
 
-<li>
-<code>Exact p-value</code> calculation takes into account the flanking and neutral loss peaks. </li>
+		<li>
+		Percolator output now includes, for each PSM, the name of the file
+		in which the spectrum resides.
+		</li>
 
-<li>
-A bug was fixed in the naming of the Percolator input (.pin) file that
-is produced by Comet when the <code>output_percolatorfile</code>
-option is turned on.  Previously, the file was named "comet.tsv"; now
-it is "comet.target.pin."</li>
-
-<li>
-<code>Assign-confidence</code> can take multiple input files.
-</li>
-
-<li>
-The <code>comet</code> command can take multiple input files.
-</li>
+		<li>
+		The parameters <code>clip-nterm-methionine</code>, <code>keep-terminal-aminos</code>, and <code>min-mods</code> have been added to <code>tide-index</code>.
+		</li>
 
-<li>
-The <code>sidak</code> option has been added
-to <code>assign-confidence</code> to perform a Sidak adjustment.
-</li>
+		<li>
+		The parameters <code>use-flanking-peaks</code>
+		and <code>use-neutral-loss-peaks</code> have been added to
+		<code>tide-search</code>.</li>
 
-<li>
-The <code>peptide-level</code> option has been added
-to <code>assign-confidence</code>.
-</li>
+		<li>
+		The calculation of XCorr was simplified in Tide.  In the new version, 
+		<code>tide-index</code> only generates peptides and sorts them,
+		leaving the generation of theoretical peaks to be done entirely on the
+		fly by <code>tide-search</code>.</li>
 
-<li>
-The refactored XCorr score has been re-scaled (by dividing by 20) to
-put it into a range that is comparable to that of the original XCorr score.</li>
+		<li>
+		The <code>tide-search</code> command now prints search progress reports both to
+		the screen and to the log file. The interval at which progress is printed can
+		be controlled using the <code>print-search-progress</code> parameter.</li>
 
-<li>
-The default value of <code>mz-bin-offset</code> has been changed from
-0.68 to 0.40.</li>
+		<li>
+		The <code>calibrate-scores</code> command now outputs files with the stem
+		"calibrate-scores" rather than "qvalue."</li>
 
-<li>
-The <code>percolator</code> command outputs the <code>pout</code> XML format
-again (controlled by the <code>pout-output</code> parameter).</li>
+		<li>
+		The <code>use-flanking-peaks</code> parameter now has a default value of
+		false.</li>
 
-<li>
-The <code>percolator</code> command can output its native output by using the
-<code>original-output</code> parameter.</li>
+		<li>
+		The Comet search engine was updated to version 2014011.</li>
 
-<li>
-Fixed a bug in <code>tide-search</code> causing it to fail when
-<code>remove-precursor-peak</code> removed all peaks in a spectrum.</li>
+		<li>
+		The MSToolkit parser was updated to the latest version (r73).</li>
 
-<li>
-The <code>max-precursor-charge</code> parameter
-for <code>tide-search</code> has been introduced.</li>
+		<li>
+		The <code>version</code> command now outputs the revision number.</code>
 
-<li>
-Fixed a bug in candidate peptide selection when m/z tolerance is
-used.</li>
+		<li>
+		Various improvements in performance and error handling were implemented.</li>
 
-<li>
-Added the <code>read-tide-index</code> command, which reads an index produced
-by <code>tide-index</code> and prints a list of peptides it contains.</li>
+		</ul>
 
-<li>
-Added the <code>stop-after</code> option to print-processed-spectra, which
-controls the point at which to stop preprocessing.</li>
+		<hr></hr>
 
-<li>
-The <code>tide-search</code> command now accepts multiple spectrum input files.
-</li>
+		<h3>Version 2.0</h3> June 6, 2014
+		<h4>Major enhancements</h4>
+		<ul>
 
-<li>
-Added the <code>use-z-line</code> option to specify whether precursor
-information is taken from the S or Z line when parsing MS2 files using
-ProteoWizard.</li>
+		<li>
+		Two new search engines are now included in Crux: Comet and Tide.  The
+		old search engine, search-for-matches, has been retired.</li>
 
-<li>
-Added missing options to the <code>percolator</code> command.</li>
+		<li>Percolator has been updated to version 2.07.</li>
 
-<li>
-The <code>tide-search</code> command may now accept a FASTA database in
-place of the index, in which case <code>tide-index</code> will be run prior to
-the search. The <code>store-index</code> option allows the generated index
-to be saved.</li>
+		<li>
+		Crux now compiles in native Windows, rather than requiring
+		Cygwin.  Consequently, Crux running under Windows can parse vendor
+		proprietary formats using the appropriate Proteowizard libraries.</li>
 
-<li>
-The <code>assign-confidence</code> command will automatically detect
-score type if the <code>score</code> parameter is not specified, searching for
-xcorr, e-value, or exact p-values.</li>
+		</ul>
 
-<li>
-The <code>cascade-search</code> will report the source index database of the 
-peptide for all identified PSMs.</li>
+		<h4>Minor changes</h4>
 
-<li>
-The <code>top-match</code> parameter has been removed from
-<code>cascade-search</code>.</li>
+		<ul>
 
-<li>
-<code>Assign-confidence</code> has got new options: "combine-modified-peptide" 
-and "combine-charge-states".</li>
+		<li>
+		The "enyzme" parameters "lysc", "lysn", "arg_c", "glue_c", and
+		"pepsin_a" were renamed to "lys-c", "lys-n", "arg-c", "glue-c", and
+		"pepsin-a".</li>
 
-<li>
-<code>Assign-confidence</code> now supports top-match&gt;1 in peptide-level filtering 
-mode.</li>
-
-<li>
-<code>Assign-confidence</code> can use smoothed-p-value scores for PSM ranking.</li>
-
-<li>
-<code>Assign-confidence</code> now does not carry out target-decoy competition in 
-peptide-level filtering mode.</li>
-
-<li>
-Added the <code>xlink-assign-ions</code> and <code>xlink-score-spectrum
-</code> commands.</li>
-
-<li>
-Rearranged estimation methods in <code>assign-confidence</code>.</li>
-
-<li>
-Added top-match option for <code>estimation-method=peptide-level</code> 
-case in <code>assign-confidence</code>.</li>
-
-<li>
-Modified assign-confidence so that ties during target-decoy
-competition are broken randomly.</li>
-
-<li>
-Changed the Percolator output feature "file" to contain the name of
-  the file containing the spectrum (if available), rather than the
-  name of the file containing the PSM.</li>
-
-<li>
-Added to <code>search-for-xlinks</code>, <code>xlink-assign-ions</code>
-  and <code>xlink-score-spectrum</code> parameters of the form
-  "use-a-ion" for a, b, c, x, y, and z-ions.</li>
-
-<li>Various other minor bug/leak fixes and performance enhancements.</li>
-
-</ul>
-
-<hr></hr>
-
-
-<h2>Version 2.1</h2> October 8, 2014
-
-<h3>Major enhancements</h3>
-
-<ul>
-
-<li>
-The <code>tide-search</code> command now supports calculation of exact
-p-values via dynamic programming, as described
-in <a href="http://www.ncbi.nlm.nih.gov/pubmed/24895379">this
-article</a>.  The p-value calculation is controlled with
-the <code>exact-p-value</code> parameter.</li>
-
-<li>
-<code>search-for-xlinks</code> now supports variable modifications and
-larger protein databases.  This new code is disabled by default, but
-can be turned on by setting the
-parameter <code>use-old-xlink=F</code>.</li>
-
-</ul>
-
-<h3>Minor changes</h3>
-
-<ul>
-
-<li>
-The default value of <code>mz_bin_offset</code> has been changed to 0.40 from 0.68.</li>
-
-<li>
-The <code>centroided</code> parameter for the <code>hardklor</code> command is
-now implemented.</li>
-
-<li>
-The <code>spectrum-format</code> parameter for the <code>bullseye</code> command
-works properly.</li>
-
-<li>
-The <code>tide-search</code> command now uses information from the Z line rather
-than the S line when reading spectrum files in the MS2 file format.</li>
-
-<li>
-The <code>tide-search</code> command now accepts the
-<code>spectrum-parser</code> parameter.</li>
-
-<li>
-The <code>protein-database</code> parameter
-to <code>spectral-counts</code> now only accepts fasta files.  Parsing
-of a protein index is no longer supported.</li>
-
-<li>
-A bug was fixed in the <code>spectral-counts</code> command that prevented 
-<code>tide-search</code> output files from being parsed correctly.</li>   
-
-<li>
-The <code>default-direction</code> parameter now takes a string value of the feature
-name rather than an integer.
-</li>
-
-<li>
-The parameters <code>mz-bin-width</code> and <code>mz-bin-offset</code> have been added
-to <code>tide-search</code>.</li>
-
-<li>
-Percolator output now includes, for each PSM, the name of the file
-in which the spectrum resides.
-</li>
-
-<li>
-The parameters <code>clip-nterm-methionine</code>, <code>keep-terminal-aminos</code>, and <code>min-mods</code> have been added to <code>tide-index</code>.
-</li>
-
-<li>
-The parameters <code>use-flanking-peaks</code>
-and <code>use-neutral-loss-peaks</code> have been added to
-<code>tide-search</code>.</li>
-
-<li>
-The calculation of XCorr was simplified in Tide.  In the new version, 
-<code>tide-index</code> only generates peptides and sorts them,
-leaving the generation of theoretical peaks to be done entirely on the
-fly by <code>tide-search</code>.</li>
-
-<li>
-The <code>tide-search</code> command now prints search progress reports both to
-the screen and to the log file. The interval at which progress is printed can
-be controlled using the <code>print-search-progress</code> parameter.</li>
-
-<li>
-The <code>calibrate-scores</code> command now outputs files with the stem
-"calibrate-scores" rather than "qvalue."</li>
-
-<li>
-The <code>use-flanking-peaks</code> parameter now has a default value of
-false.</li>
-
-<li>
-The Comet search engine was updated to version 2014011.</li>
-
-<li>
-The MSToolkit parser was updated to the latest version (r73).</li>
-
-<li>
-The <code>version</code> command now outputs the revision number.</code>
-
-<li>
-Various improvements in performance and error handling were implemented.</li>
-
-</ul>
-
-<hr></hr>
-
-<h2>Version 2.0</h2> June 6, 2014
-<h3>Major enhancements</h3>
-<ul>
-
-<li>
-Two new search engines are now included in Crux: Comet and Tide.  The
-old search engine, search-for-matches, has been retired.</li>
-
-<li>Percolator has been updated to version 2.07.</li>
-
-<li>
-Crux now compiles in native Windows, rather than requiring
-Cygwin.  Consequently, Crux running under Windows can parse vendor
-proprietary formats using the appropriate Proteowizard libraries.</li>
-
-</ul>
-
-<h3>Minor changes</h3>
-
-<ul>
-
-<li>
-The "enyzme" parameters "lysc", "lysn", "arg_c", "glue_c", and
-"pepsin_a" were renamed to "lys-c", "lys-n", "arg-c", "glue-c", and
-"pepsin-a".</li>
-
-<li>
-Percolator outputs decoy files in addition to target files.</li>
-
-<li>
-Percolator tab-delimited peptides output now contain a posterior error
-probability (PEP) column.</li>
-
-<li>
-The Percolator tab-delimited peptide output has been corrected to show
-the PSM with the best score, rather than the worst.</li>
-
-<li>
-The Percolator tab-delimited PSMs output "matches/spectrum" value has
-been corrected.</li>
-
-<li>
-A new utility command, <code>make-pin</code>, is provided to create
-input files for use by Percolator.</li>
-
-<li>
-The <code>spectrum-min-mass</code> and <code>spectrum-max-mass</code>
-options have been renamed to <code>spectrum-min-mz</code> and
-<code>spectrum-max-mz</code>, respectively.</li>
-
-<li>
-A <code>spectrum-parser</code> option was added to <code>q-ranker</code> and
-<code>barista</code>.</li>
-
-<li>
-A bug was fixed in <code>q-ranker</code> and <code>barista</code> when
-reading peptides with modifications.</li>
-
-<li>
-Fixed the <code>q-ranker</code> tab delimited output so that, for a
-given peptide, flanking amino acids are reported for each protein that
-contains that peptide, rather than only reporting one set of flanking
-amino acids.</li>
-
-<li>
-A bug was fixed in <code>percolator</code>, wherein the first and last
-two characters were being truncated from peptide sequences when the
-input was missing the flanking amino acids or when the charge state
-was not indicated in the PSM IDs.</li>
-
-<li>
-The crux spectrum parser has been removed.</li>
-
-<li>
-Q-ranker now outputs decoy files.</li>
-
-<li>
-The Boost.Random library is now being used for random number
-generation.</li>
-
-<li>
-<code>calibrate-scores</code> no longer requires a protein input.</li>
-
-<li>
-<code>calibrate-scores</code> now only takes the top match per
-spectrum and charge.</li>
-
-<li>
-<code>get-ms2-spectrum</code> now prints z-lines with Bullseye
-files.</li>
-
-<li>
-Various performance and error handling improvements.</li>
-
-</ul>
-
-<hr></hr>
-
-<h2>Version 1.40</h2> May 22, 2013
-<h3>Major enchancements</h3>
-<ul>
-
-<li>
-Crux Percolator was updated from version 1.05 to the latest release,
-version 2.04.</li>
-
-</ul>
-<h3>Minor changes</h3>
-<ul>
-
-<li>
-<p>The formula that is used to convert fragment m/z values from real
-numbers into integers was modified.  Previously, the conversion was
-<pre>
-  floor( (x / mz-bin-size) + 0.5 + mz-bin-offset )
-</pre>
-The new conversion formula is 
-<pre>
-  floor( (x / mz-bin-size) + 1.0 - mz-bin-offset )
-</pre>
-The default values of the two parameters (mz-bin-size and
-mz-bin-offset) have not changed.  The allowed range of the
-mz-bin-offset parameter was previously [-1,1], but has been changed to
-[0,1].</p>
-
-<p>
-To understand the motivation for the changed formula, note that the
-mz-bin-offset parameter controls the location of bin edges, relative
-to integer masses on the mass scale.  In general, mz-bin-offset should
-be chosen so that bin edges fall between the expected clusters of
-fragment masses.  For fragments with 1+ charge, masses will cluster
-near integer values (after dividing by mz-bin-width), and the ideal
-value of mz-bin-offset would be 0.5.  For mixtures of fragments with
-1+ and 2+ charges, masses will cluster near integer and half-integer
-values, so mz-bin-offset near 0.25 or 0.75 would produce bin edges
-that best avoid the clusters of fragment masses.  The old conversion
-formula did not correctly locate bin edges, given a chosen
-mz-bin-offset.  The new conversion formula produces a proper
-translation of mz-bin-offset into bin edge locations.</p></li>
-
-<li>
-The <code>seed</code> parameter is now available to control the
-seeding of random number generator.  The default value is 1.
-<code>seed</code> is available as a parameter from all applications.
-It can be set as a command line option for 
-<code>crux search-for-matches</code>
-and 
-<code>crux percolator</code>.
-</li>
-
-<li>
-The default value of the <code>decoys</code> parameter for <code>crux
-search-for-matches</code> was incorrectly documented.  The default is
-actually <code>peptide-shuffle</code>, but the documentation said the
-default was <code>protein-shuffle</code>.  The documentation has been
-corrected.</li>
-
-<li>
-The incorrectly labeled column header <code>xcorr rank</code> in barista and
-q-ranker feature files has been corrected to <code>xcorr score</code>.
-</li>
-
-<li>
-The q-ranker output file <code>qranker_output.xml</code> has been renamed to
-<code>qranker.xml</code>.
-</li>
-
-<li>
-The deltaCn computation has been modified to be consistent with
-Percolator. Rather than using
-<pre>
-     deltaCn<sub>i</sub> = (xcorr<sub>1</sub> - xcorr<sub>i+1</sub>) / xcorr<sub>1</sub>
-</pre>
-it is now computed using
-<pre>
-     deltaCn<sub>i</sub> = (xcorr<sub>i</sub> - xcorr<sub>i+1</sub>) / max(xcorr<sub>i</sub>, 1.0)
-</pre>
-</li>
-
-<li>
-Percolator now accepts inputs in SQT, PepXML, and tab-delimited formats in addition to 
-the PinXML format.
-</li>
-
-<li>
-Flags were added to several commands allowing the user to control
-whether various results files are created in the output directory:
-<ul>
-  <li><code>--sqt-output &lt;T|F&gt;</code> (search-for-matches)</li>
-  <li><code>--mzid-output &lt;T|F&gt;</code> (search-for-matches, percolator)</li>
-  <li><code>--pinxml-output &lt;T|F&gt;</code> (search-for-matches)</li>
-  <li><code>--pepxml-output &lt;T|F&gt;</code> (search-for-matches, q-ranker, barista, percolator)</li>
-  <li><code>--txt-output &lt;T|F&gt;</code> (search-for-matches, q-ranker, barista, percolator)</li>
-</ul>
-By default, all of these flags are set to false except <code>txt-output</code>.
-</li>
-
-</ul>
-
-<hr></hr>
-
-<h2>Version 1.39</h2> October 6, 2012
-
-<h3>Major enchancements</h3>
-
-<ul>
-
-<li>
-Crux is now released under an Apache license for all users.
-</li>
-
-
-<li>
-Parsing MS/MS spectra is now supported using <a href="http://proteowizard.sourceforge.net/">Proteowizard</a> (v. 3.0.3950).  
-This allows Crux to
-handle MS/MS spectra in mzML (1.0 and 1.1), mzXML, MGF, MS2 and CMS2
-formats.
-Use <code>spectrum-parser=pwiz</code> to enable Proteowizard parsing.</li>
-<li>
-Crux now uses <code>cmake</code> for the build process rather than
-<code>autoconf</code>/<code>automake</code>.
-</li>
-</ul>
-<h3>Minor changes</h3>
-<ul>
-
-<li>
-The Tide database search software is no longer distributed as part of Crux because its license is not compatible with the new Crux license.
-</li>
-
-<li>
-Support for PIN XML output was added to <code>crux
-search-for-matches</code>.
-</li>
-<li>
-Fixed a bug in <code>crux create-index</code> on Windows and Cygin
-that caused the program to fail with the message:
-<pre>
+		<li>
+		Percolator outputs decoy files in addition to target files.</li>
+
+		<li>
+		Percolator tab-delimited peptides output now contain a posterior error
+		probability (PEP) column.</li>
+
+		<li>
+		The Percolator tab-delimited peptide output has been corrected to show
+		the PSM with the best score, rather than the worst.</li>
+
+		<li>
+		The Percolator tab-delimited PSMs output "matches/spectrum" value has
+		been corrected.</li>
+
+		<li>
+		A new utility command, <code>make-pin</code>, is provided to create
+		input files for use by Percolator.</li>
+
+		<li>
+		The <code>spectrum-min-mass</code> and <code>spectrum-max-mass</code>
+		options have been renamed to <code>spectrum-min-mz</code> and
+		<code>spectrum-max-mz</code>, respectively.</li>
+
+		<li>
+		A <code>spectrum-parser</code> option was added to <code>q-ranker</code> and
+		<code>barista</code>.</li>
+
+		<li>
+		A bug was fixed in <code>q-ranker</code> and <code>barista</code> when
+		reading peptides with modifications.</li>
+
+		<li>
+		Fixed the <code>q-ranker</code> tab delimited output so that, for a
+		given peptide, flanking amino acids are reported for each protein that
+		contains that peptide, rather than only reporting one set of flanking
+		amino acids.</li>
+
+		<li>
+		A bug was fixed in <code>percolator</code>, wherein the first and last
+		two characters were being truncated from peptide sequences when the
+		input was missing the flanking amino acids or when the charge state
+		was not indicated in the PSM IDs.</li>
+
+		<li>
+		The crux spectrum parser has been removed.</li>
+
+		<li>
+		Q-ranker now outputs decoy files.</li>
+
+		<li>
+		The Boost.Random library is now being used for random number
+		generation.</li>
+
+		<li>
+		<code>calibrate-scores</code> no longer requires a protein input.</li>
+
+		<li>
+		<code>calibrate-scores</code> now only takes the top match per
+		spectrum and charge.</li>
+
+		<li>
+		<code>get-ms2-spectrum</code> now prints z-lines with Bullseye
+		files.</li>
+
+		<li>
+		Various performance and error handling improvements.</li>
+
+		</ul>
+
+		<hr></hr>
+
+		<h3>Version 1.40</h3> May 22, 2013
+		<h4>Major enchancements</h4>
+		<ul>
+
+		<li>
+		Crux Percolator was updated from version 1.05 to the latest release,
+		version 2.04.</li>
+
+		</ul>
+		<h4>Minor changes</h4>
+		<ul>
+
+		<li>
+		<p>The formula that is used to convert fragment m/z values from real
+		numbers into integers was modified.  Previously, the conversion was
+		<pre>
+floor( (x / mz-bin-size) + 0.5 + mz-bin-offset )
+		</pre>
+		<br />The new conversion formula is <br />
+		<pre>
+floor( (x / mz-bin-size) + 1.0 - mz-bin-offset )
+		</pre><br />
+		The default values of the two parameters (mz-bin-size and
+		mz-bin-offset) have not changed.  The allowed range of the
+		mz-bin-offset parameter was previously [-1,1], but has been changed to
+		[0,1].</p>
+
+		<p>
+		To understand the motivation for the changed formula, note that the
+		mz-bin-offset parameter controls the location of bin edges, relative
+		to integer masses on the mass scale.  In general, mz-bin-offset should
+		be chosen so that bin edges fall between the expected clusters of
+		fragment masses.  For fragments with 1+ charge, masses will cluster
+		near integer values (after dividing by mz-bin-width), and the ideal
+		value of mz-bin-offset would be 0.5.  For mixtures of fragments with
+		1+ and 2+ charges, masses will cluster near integer and half-integer
+		values, so mz-bin-offset near 0.25 or 0.75 would produce bin edges
+		that best avoid the clusters of fragment masses.  The old conversion
+		formula did not correctly locate bin edges, given a chosen
+		mz-bin-offset.  The new conversion formula produces a proper
+		translation of mz-bin-offset into bin edge locations.</p></li>
+
+		<li>
+		The <code>seed</code> parameter is now available to control the
+		seeding of random number generator.  The default value is 1.
+		<code>seed</code> is available as a parameter from all applications.
+		It can be set as a command line option for 
+		<code>crux search-for-matches</code>
+		and 
+		<code>crux percolator</code>.
+		</li>
+
+		<li>
+		The default value of the <code>decoys</code> parameter for <code>crux
+		search-for-matches</code> was incorrectly documented.  The default is
+		actually <code>peptide-shuffle</code>, but the documentation said the
+		default was <code>protein-shuffle</code>.  The documentation has been
+		corrected.</li>
+
+		<li>
+		The incorrectly labeled column header <code>xcorr rank</code> in barista and
+		q-ranker feature files has been corrected to <code>xcorr score</code>.
+		</li>
+
+		<li>
+		The q-ranker output file <code>qranker_output.xml</code> has been renamed to
+		<code>qranker.xml</code>.
+		</li>
+
+		<li>
+		The deltaCn computation has been modified to be consistent with
+		Percolator. Rather than using
+		<br /><pre>
+deltaCn<sub>i</sub> = (xcorr<sub>1</sub> - xcorr<sub>i+1</sub>) / xcorr<sub>1</sub>
+		</pre><br />
+		it is now computed using<br />
+		<pre>
+deltaCn<sub>i</sub> = (xcorr<sub>i</sub> - xcorr<sub>i+1</sub>) / max(xcorr<sub>i</sub>, 1.0)
+		</pre><br />
+		</li>
+
+		<li>
+		Percolator now accepts inputs in SQT, PepXML, and tab-delimited formats in addition to 
+		the PinXML format.
+		</li>
+
+		<li>
+		Flags were added to several commands allowing the user to control
+		whether various results files are created in the output directory:
+		<ul>
+		  <li><code>--sqt-output &lt;T|F&gt;</code> (search-for-matches)</li>
+		  <li><code>--mzid-output &lt;T|F&gt;</code> (search-for-matches, percolator)</li>
+		  <li><code>--pinxml-output &lt;T|F&gt;</code> (search-for-matches)</li>
+		  <li><code>--pepxml-output &lt;T|F&gt;</code> (search-for-matches, q-ranker, barista, percolator)</li>
+		  <li><code>--txt-output &lt;T|F&gt;</code> (search-for-matches, q-ranker, barista, percolator)</li>
+		</ul>
+		By default, all of these flags are set to false except <code>txt-output</code>.
+		</li>
+
+		</ul>
+
+		<hr></hr>
+
+		<h3>Version 1.39</h3> October 6, 2012
+
+		<h4>Major enchancements</h4>
+
+		<ul>
+
+		<li>
+		Crux is now released under an Apache license for all users.
+		</li>
+
+
+		<li>
+		Parsing MS/MS spectra is now supported using <a href="http://proteowizard.sourceforge.net/">Proteowizard</a> (v. 3.0.3950).  
+		This allows Crux to
+		handle MS/MS spectra in mzML (1.0 and 1.1), mzXML, MGF, MS2 and CMS2
+		formats.
+		Use <code>spectrum-parser=pwiz</code> to enable Proteowizard parsing.</li>
+		<li>
+		Crux now uses <code>cmake</code> for the build process rather than
+		<code>autoconf</code>/<code>automake</code>.
+		</li>
+		</ul>
+		<h4>Minor changes</h4>
+		<ul>
+
+		<li>
+		The Tide database search software is no longer distributed as part of Crux because its license is not compatible with the new Crux license.
+		</li>
+
+		<li>
+		Support for PIN XML output was added to <code>crux
+		search-for-matches</code>.
+		</li>
+		<li>
+		Fixed a bug in <code>crux create-index</code> on Windows and Cygin
+		that caused the program to fail with the message:
+		<br /><pre>
 WARNING: Cannot rename directory
 FATAL: Failed to create index
-</pre>
-</li>
-<li>
-The parameter <code>protein database</code> is now an option rather than a required argument for <code>crux spectral-counts</code>.
-</li>
-<li>
-mzIdentML file support has been added for <code>crux spectral-counts</code>.
-</li>
-<li>
-PepXML file support has been fixed for <code>crux spectral-counts</code> .
-</li>
-<li>
-Fixed bug in packedNorm() that sometimes generated incorrect values for the posterior error probability.
-</li>
-<li>
-Fixed bug in <code>crux create-index</code> on Windows and Cygwin that caused it to fail on Windows and Cygin.
-</li>
-</ul>
-
-<hr></hr>
-
-<h2>Version 1.38</h2> July 20, 2012
-
-<h3>Major enhancements</h3>
-
-<ul>
-
-<li>
-Hardklor and Bullseye, tools for analyzing high-resolution precursor
-spectra, are now incorporated into Crux.</li>
-
-<li>
-Barista has been modified extensively so that it more closely
-resembles the other tools in Crux:</li>
-
-<ul>
-<li>
-Barista and Q-ranker accept search results in tab-delimited format, in addition to
-SQT format.</li>
-<li>
-Barista now reports posterior error probabilities, in addition to
-q-values, for PSMs, peptides and proteins.</li>
-<li>
-Barista's pep.xml output has been updated to be compatible with the
-TransProteomic Pipeline (TPP).</li>
-</ul>
-
-<li>
-The <code>sequest-search</code> command has been removed.  The
-functionality of this command is still available using options for
-the <code>search-for-matches</code> command (see
-the <a href="crux-faq.html">frequently asked questions list</a> for
-details).</li>
-
-</ul>
-
-<h3>Minor changes</h3>
-
-<ul>
-
-<li>
-<code>crux predict-peptide-ions</code> calculates the mass shift
-resulting from the nh3 or h2o neutral loss correctly.  Previously, a
-neutral loss resulted in an addition of mass rather than subtraction.
-</li>
-
-<li>
-<code>crux predict-peptide-ions</code> reports ion-type as
-'b','y','a', or 'p' rather than a number (i.e. 0, 1, 2, 3).</li>
-
-<li>
-<code>crux predict-peptide-ions</code> now only allows one type of
-neutral loss modification per ion.  Previously, multiple different
-types of neutral loss could be applied simultaneously to a single
-ion.</li>
-
-<li>
-The <code>neutral-losses</code> option was removed from <code>crux
-predict-peptide-ions</code>, due to its redundancy with the supported
-the <code>--nh3</code> and <code>--h2o</code> options.</li>
-
-<li>
-<code>crux predict-peptide-ions</code> supports 'bya' in the
-<code>--primary-ions</code> parameter, which will generate 
-the a-ion series in addition to the 'b' and 'y' ions.</li> 
-
-<li>
-The spectrum parsing is updated so that peaks with zero intensity are
-ignored.</li>
-
-<li>
-<code>crux spectral-counts</code> now has an option to compute the raw
-spectral count.</li>
-
-<li>
-<code>crux spectral-counts</code> now has an option to compute dNSAF
-values.</li>
-
-<li>
-A bug in <code>crux spectral-counts</code> was fixed so that it now
-properly normalizes the NSAF value.</li>
-
-<li>
-Multiple missed cleavages are now handled by <code>crux
-search-for-xlinks</code> using the missed-cleavages parameter.
-Previously, this was unsupported.</li>
-
-<li>
-Ambiguous amino acids are handled differently.  'J' is interpreted to
-indicate 'I' or 'L'.  Peptides containing B, Z, and X are no longer be
-allowed, and a warning is issued when these amino acid codes are
-encountered.</li>
+		</pre>
+		</li>
+		<li>
+		The parameter <code>protein database</code> is now an option rather than a required argument for <code>crux spectral-counts</code>.
+		</li>
+		<li>
+		mzIdentML file support has been added for <code>crux spectral-counts</code>.
+		</li>
+		<li>
+		PepXML file support has been fixed for <code>crux spectral-counts</code> .
+		</li>
+		<li>
+		Fixed bug in packedNorm() that sometimes generated incorrect values for the posterior error probability.
+		</li>
+		<li>
+		Fixed bug in <code>crux create-index</code> on Windows and Cygwin that caused it to fail on Windows and Cygin.
+		</li>
+		</ul>
+
+		<hr></hr>
+
+		<h3>Version 1.38</h3> July 20, 2012
+
+		<h4>Major enhancements</h4>
+
+		<ul>
+
+		<li>
+		Hardklor and Bullseye, tools for analyzing high-resolution precursor
+		spectra, are now incorporated into Crux.</li>
+
+		<li>
+		Barista has been modified extensively so that it more closely
+		resembles the other tools in Crux:</li>
+
+		<ul>
+		<li>
+		Barista and Q-ranker accept search results in tab-delimited format, in addition to
+		SQT format.</li>
+		<li>
+		Barista now reports posterior error probabilities, in addition to
+		q-values, for PSMs, peptides and proteins.</li>
+		<li>
+		Barista's pep.xml output has been updated to be compatible with the
+		TransProteomic Pipeline (TPP).</li>
+		</ul>
+
+		<li>
+		The <code>sequest-search</code> command has been removed.  The
+		functionality of this command is still available using options for
+		the <code>search-for-matches</code> command (see
+		the <a href="crux-faq.html">frequently asked questions list</a> for
+		details).</li>
+
+		</ul>
+
+		<h4>Minor changes</h4>
+
+		<ul>
+
+		<li>
+		<code>crux predict-peptide-ions</code> calculates the mass shift
+		resulting from the nh4 or h3o neutral loss correctly.  Previously, a
+		neutral loss resulted in an addition of mass rather than subtraction.
+		</li>
+
+		<li>
+		<code>crux predict-peptide-ions</code> reports ion-type as
+		'b','y','a', or 'p' rather than a number (i.e. 0, 1, 2, 3).</li>
+
+		<li>
+		<code>crux predict-peptide-ions</code> now only allows one type of
+		neutral loss modification per ion.  Previously, multiple different
+		types of neutral loss could be applied simultaneously to a single
+		ion.</li>
+
+		<li>
+		The <code>neutral-losses</code> option was removed from <code>crux
+		predict-peptide-ions</code>, due to its redundancy with the supported
+		the <code>--nh4</code> and <code>--h3o</code> options.</li>
+
+		<li>
+		<code>crux predict-peptide-ions</code> supports 'bya' in the
+		<code>--primary-ions</code> parameter, which will generate 
+		the a-ion series in addition to the 'b' and 'y' ions.</li> 
+
+		<li>
+		The spectrum parsing is updated so that peaks with zero intensity are
+		ignored.</li>
+
+		<li>
+		<code>crux spectral-counts</code> now has an option to compute the raw
+		spectral count.</li>
+
+		<li>
+		<code>crux spectral-counts</code> now has an option to compute dNSAF
+		values.</li>
+
+		<li>
+		A bug in <code>crux spectral-counts</code> was fixed so that it now
+		properly normalizes the NSAF value.</li>
+
+		<li>
+		Multiple missed cleavages are now handled by <code>crux
+		search-for-xlinks</code> using the missed-cleavages parameter.
+		Previously, this was unsupported.</li>
+
+		<li>
+		Ambiguous amino acids are handled differently.  'J' is interpreted to
+		indicate 'I' or 'L'.  Peptides containing B, Z, and X are no longer be
+		allowed, and a warning is issued when these amino acid codes are
+		encountered.</li>
 
-<li>
-The stand-alone <code>crux-predict-peptide-ions</code>
-and <code>crux-generate-peptides</code> applications have been integrated
-into the main <code>crux</code> application.</li>
-
-<li>
-A bug has been fixed that affected the intensity adjustment of
-observed spectra when the bin width was set much larger or smaller
-than 1.</li>
-
-<li>
-Beginning with version 1.37, q-ranker erroneously included decoy PSMs
-along with target PSMs in the q-ranker.target.psms.txt file.  All PSMs
-were sorted by q-ranker score so the targets and decoys were mixed
-together with no accompanying labels.  This bug has been fixed so that
-Q-ranker once again returns only target PSMs.</li>
-
-<li>
-The search option <code>display-summed-masses</code> has been replaced by
-<code>mod-mass-format</code>.  With this option, there is a new format
-for reporting modificiations: the mass in the square braces is that of the
-preceeding amino acid plus the modification mass.  This format is compliant
-with TPP pep.xml output.</li>
-
-<li>
-Modifications are reported differently in the pep.xml header to be
-compliant with the TPP.</li>
-
-<li>
-The command <code>crux compute-q-values</code> now reports posterior
-error probabilities in addition to q-values.  Consequently, the
-command was renamed <code>crux calibrate-scores</code>.</li>
-
-<li>
-Crux now provides an explicit error message when an incorrectly
-formatted MS2 file is parsed.  Previously, crux simply reported that
-no spectra were found.</li>
-
-<li>
-Several additional scores were added to the <code>q-ranker</code>
-pep.xml files.</li>
-
-<li>Fixed the build procedure to work on both Lion and pre-Lion versions of OS X.</li>
-
-<li>Fixed a bug in the normalization of the observed spectra.
-Previously, after the 10-bin normalization of intensities, peaks with
-heights below 5% of the maximum were not being removed.</li>
-
-<li>
-When a fragmentation spectra file is read, the assumed
-peptide charge state information can be missing for the scans.  
-In cases where this information has not been provided, 
-Crux will now estimate the possible charge states.
-</li>
-
-<li>
-The feature files for Q-ranker and Barista now contain a header
-describing each feature.
-</li>
-
-<li>
-Q-ranker and Barista now output all of the fields provided in the
-input search files.
-</li>
-
-</ul>
-
-<hr></hr>
-
-
-<h2>Version 1.37</h2> December 22, 2011
-
-<h3>Major enhancements</h3>
-
-<ul>
-<li>
-Added <code>crux barista</code>, a tool for inferring protein
-identifications.</li>
-
-<li>
-Reimplemented <code>crux q-ranker</code> with new outputs and
-command-line syntax.</li>
-
-<li>
-Percolator and compute-q-values now compute and report posterior error
-probabilities, in addition to q-values.</li>
-
-<li>
-<code>crux create-index</code> now generates and store decoy
-peptides in the index.  Decoys can still be generated on-the-fly when
-searching .fasta files.</li>
-
-</ul>
-
-<h3>Minor changes</h3>
-
-<ul>
-
-<li>
-A pair of options, <code>cterm-fixed</code>
-and <code>nterm-fixed</code>, allow fixed terminal peptide
-modifications, i.e., a mass shift applied to every peptide on either or
-both termini.</li>
-
-<li>
-A bug in the spectrum processing code was fixed, which was erroneously
-eliminating a few of the highest m/z fragment peaks.  Xcorrs have
-changed slightly as a result.</li>
-
-<li>
-Simplified the <code>--mz-bin-width</code> and 
-</code>--mz-offset</code> parameters so that <code>--xcorr-var-bin</code>
-is no longer needed.</li>
-
-<li>
-Indexes now store information about any static mods used when they
-were created.</li>
-
-<li>
-In the tab-delimited output files the 'matches/spectrum' column gives
-the number of target peptides compared to the spectrum and the decoy
-file has an additional column, 'decoy matches/spectrum' that gives the
-number of decoy peptides compared to the spectrum.  These two numbers
-may differ when decoys are not generated on-the-fly.</li>
-<li>
-The header lines of Barista and QRanker include all of the columns 
-in the search results.</li>
-</ul>
-
-<hr></hr>
-
-<h2>Version 1.36</h2> August 4, 2011
-
-<h3>Tide changes</h3>
-
-<ul>
-
-<li>
-Added support for user-specifiable variable and static amino acid
-modifications.</li>
-
-<li>
-Tide's version of XCorr has been modified so that it is always
-identical to those of a recent version SEQUEST<sup>&reg;</sup>.</li>
-
-<li>
-Added support for user-specifiable maximum number of missed enzyme
-cleavage points.</li>
+		<li>
+		The stand-alone <code>crux-predict-peptide-ions</code>
+		and <code>crux-generate-peptides</code> applications have been integrated
+		into the main <code>crux</code> application.</li>
+
+		<li>
+		A bug has been fixed that affected the intensity adjustment of
+		observed spectra when the bin width was set much larger or smaller
+		than 1.</li>
+
+		<li>
+		Beginning with version 1.37, q-ranker erroneously included decoy PSMs
+		along with target PSMs in the q-ranker.target.psms.txt file.  All PSMs
+		were sorted by q-ranker score so the targets and decoys were mixed
+		together with no accompanying labels.  This bug has been fixed so that
+		Q-ranker once again returns only target PSMs.</li>
+
+		<li>
+		The search option <code>display-summed-masses</code> has been replaced by
+		<code>mod-mass-format</code>.  With this option, there is a new format
+		for reporting modificiations: the mass in the square braces is that of the
+		preceeding amino acid plus the modification mass.  This format is compliant
+		with TPP pep.xml output.</li>
+
+		<li>
+		Modifications are reported differently in the pep.xml header to be
+		compliant with the TPP.</li>
+
+		<li>
+		The command <code>crux compute-q-values</code> now reports posterior
+		error probabilities in addition to q-values.  Consequently, the
+		command was renamed <code>crux calibrate-scores</code>.</li>
+
+		<li>
+		Crux now provides an explicit error message when an incorrectly
+		formatted MS2 file is parsed.  Previously, crux simply reported that
+		no spectra were found.</li>
+
+		<li>
+		Several additional scores were added to the <code>q-ranker</code>
+		pep.xml files.</li>
+
+		<li>Fixed the build procedure to work on both Lion and pre-Lion versions of OS X.</li>
+
+		<li>Fixed a bug in the normalization of the observed spectra.
+		Previously, after the 10-bin normalization of intensities, peaks with
+		heights below 5% of the maximum were not being removed.</li>
+
+		<li>
+		When a fragmentation spectra file is read, the assumed
+		peptide charge state information can be missing for the scans.  
+		In cases where this information has not been provided, 
+		Crux will now estimate the possible charge states.
+		</li>
+
+		<li>
+		The feature files for Q-ranker and Barista now contain a header
+		describing each feature.
+		</li>
+
+		<li>
+		Q-ranker and Barista now output all of the fields provided in the
+		input search files.
+		</li>
+
+		</ul>
+
+		<hr></hr>
+
+
+		<h3>Version 1.37</h3> December 22, 2011
+
+		<h4>Major enhancements</h4>
+
+		<ul>
+		<li>
+		Added <code>crux barista</code>, a tool for inferring protein
+		identifications.</li>
+
+		<li>
+		Reimplemented <code>crux q-ranker</code> with new outputs and
+		command-line syntax.</li>
+
+		<li>
+		Percolator and compute-q-values now compute and report posterior error
+		probabilities, in addition to q-values.</li>
+
+		<li>
+		<code>crux create-index</code> now generates and store decoy
+		peptides in the index.  Decoys can still be generated on-the-fly when
+		searching .fasta files.</li>
+
+		</ul>
+
+		<h4>Minor changes</h4>
+
+		<ul>
+
+		<li>
+		A pair of options, <code>cterm-fixed</code>
+		and <code>nterm-fixed</code>, allow fixed terminal peptide
+		modifications, i.e., a mass shift applied to every peptide on either or
+		both termini.</li>
+
+		<li>
+		A bug in the spectrum processing code was fixed, which was erroneously
+		eliminating a few of the highest m/z fragment peaks.  Xcorrs have
+		changed slightly as a result.</li>
+
+		<li>
+		Simplified the <code>--mz-bin-width</code> and 
+		</code>--mz-offset</code> parameters so that <code>--xcorr-var-bin</code>
+		is no longer needed.</li>
+
+		<li>
+		Indexes now store information about any static mods used when they
+		were created.</li>
+
+		<li>
+		In the tab-delimited output files the 'matches/spectrum' column gives
+		the number of target peptides compared to the spectrum and the decoy
+		file has an additional column, 'decoy matches/spectrum' that gives the
+		number of decoy peptides compared to the spectrum.  These two numbers
+		may differ when decoys are not generated on-the-fly.</li>
+		<li>
+		The header lines of Barista and QRanker include all of the columns 
+		in the search results.</li>
+		</ul>
+
+		<hr></hr>
+
+		<h3>Version 1.36</h3> August 4, 2011
+
+		<h4>Tide changes</h4>
+
+		<ul>
+
+		<li>
+		Added support for user-specifiable variable and static amino acid
+		modifications.</li>
+
+		<li>
+		Tide's version of XCorr has been modified so that it is always
+		identical to those of a recent version SEQUEST<sup>&reg;</sup>.</li>
+
+		<li>
+		Added support for user-specifiable maximum number of missed enzyme
+		cleavage points.</li>
 
-<li>
-Tide now performs basic charge state inference when this information
-is missing from the spectrum input files.</li>
+		<li>
+		Tide now performs basic charge state inference when this information
+		is missing from the spectrum input files.</li>
 
-<li>
-User-specifiable output formatting, using new
-the <code>tide-results</code> utility, including
-  <ul>
-  <li>Text format with user-specifiable fields.
-  <li>SQT format.
-  <li>PepXML format.
-  <li>Choose whether to display all proteins in which each peptide occurs or
-just one representative.
-  </ul>
+		<li>
+		User-specifiable output formatting, using new
+		the <code>tide-results</code> utility, including
+		  <ul>
+		  <li>Text format with user-specifiable fields.
+		  <li>SQT format.
+		  <li>PepXML format.
+		  <li>Choose whether to display all proteins in which each peptide occurs or
+		just one representative.
+		  </ul>
 
-<li>
-Note that new file formats are created
-by <code>tide-index</code>. Index files created by previous versions
-of Tide should not be used with the new version.</li>
+		<li>
+		Note that new file formats are created
+		by <code>tide-index</code>. Index files created by previous versions
+		of Tide should not be used with the new version.</li>
 
-</ul>
+		</ul>
 
-<h3>Minor changes</h3>
+		<h4>Minor changes</h4>
 
-<ul>
-<li>
-Q-ranker now reports q-values instead of false discovery rates.</li>
+		<ul>
+		<li>
+		Q-ranker now reports q-values instead of false discovery rates.</li>
 
-<li>
-Corrected several errors in the pep.xml output, related to reporting
-the spectrum filename, charge, and neutral mass.</li>
+		<li>
+		Corrected several errors in the pep.xml output, related to reporting
+		the spectrum filename, charge, and neutral mass.</li>
 
-<li>
-Changed the <code>missed-cleavages</code> option to allow specifying
-the maximum number of missed cleavages in a peptide rather than
-specifying none/any.</li>
+		<li>
+		Changed the <code>missed-cleavages</code> option to allow specifying
+		the maximum number of missed cleavages in a peptide rather than
+		specifying none/any.</li>
 
-<li>
-Fixed a bug that did not print the spectrum file name correctly in the
-pep.xml files.</li>
+		<li>
+		Fixed a bug that did not print the spectrum file name correctly in the
+		pep.xml files.</li>
 
-<li>
-Improved the error message produced by <code>crux
-spectral-counts</code> when the input PSM file does not contain the
-required q-values.</li>
+		<li>
+		Improved the error message produced by <code>crux
+		spectral-counts</code> when the input PSM file does not contain the
+		required q-values.</li>
 
-<li>
-Previously, Crux's theoretical spectrum includes two flanking peaks
-around each b- and y-ion.  The new
-Boolean flag <code>use-flanking-peaks</code>, allows these to be
-either on or off.  Flanking peaks are by default in 
-<code>crux sequest-search</code> but are not used by default
-in <code>crux search-for-matches</code>.</li>
+		<li>
+		Previously, Crux's theoretical spectrum includes two flanking peaks
+		around each b- and y-ion.  The new
+		Boolean flag <code>use-flanking-peaks</code>, allows these to be
+		either on or off.  Flanking peaks are by default in 
+		<code>crux sequest-search</code> but are not used by default
+		in <code>crux search-for-matches</code>.</li>
 
-</ul>
+		</ul>
 
-<hr></hr>
+		<hr></hr>
 
-<h2>Version 1.35</h2> March 23, 2011
+		<h3>Version 1.35</h3> March 23, 2011
 
-<h3>Major enhancements</h3>
+		<h4>Major enhancements</h4>
 
-<ul>
+		<ul>
 
-<li>
-Added the <code>crux spectral-counts</code> command for estimating
-protein quantification.</li>
+		<li>
+		Added the <code>crux spectral-counts</code> command for estimating
+		protein quantification.</li>
 
-</ul>
+		</ul>
 
-<h3>Minor changes</h3>
+		<h4>Minor changes</h4>
 
-<ul>
+		<ul>
 
-<li>
-The spectrum neutral mass is now calculated from the m+h value
-provided by the Z-lines of an MS2 file.  Also, multiple z-lines of a
-spectrum that have the same charge are now supported.  With these
-changes, <code>crux search-for-matches</code> and <code>crux
-sequest-search</code> can now take advantage of accurate precursor
-masses in MS2 files generated by Bullseye (Hsieh et al. <i>J. Proteome
-Res.</i>  9(2):1138-43, 2010).</li>
+		<li>
+		The spectrum neutral mass is now calculated from the m+h value
+		provided by the Z-lines of an MS2 file.  Also, multiple z-lines of a
+		spectrum that have the same charge are now supported.  With these
+		changes, <code>crux search-for-matches</code> and <code>crux
+		sequest-search</code> can now take advantage of accurate precursor
+		masses in MS2 files generated by Bullseye (Hsieh et al. <i>J. Proteome
+		Res.</i>  9(2):1138-43, 2010).</li>
 
-<li>
-Made the <code>pep.xml</code> file header produced by Crux compatible
-with the Transproteomic Pipeline.</li>
+		<li>
+		Made the <code>pep.xml</code> file header produced by Crux compatible
+		with the Transproteomic Pipeline.</li>
 
-<li>
-Introduced several changes to improve performance on MacOS X.</li>
+		<li>
+		Introduced several changes to improve performance on MacOS X.</li>
 
-<li>
-Added an <code>nterm</code> option to the link argument of <code>crux
-search-for-xlinks</code>.</li>
+		<li>
+		Added an <code>nterm</code> option to the link argument of <code>crux
+		search-for-xlinks</code>.</li>
 
-</ul>
+		</ul>
 
-<hr></hr>
+		<hr></hr>
 
-<h2>Version 1.34</h3> December 22, 2010
+		<h3>Version 1.34</h4> December 22, 2010
 
-<h3>Minor changes</h3>
+		<h4>Minor changes</h4>
 
-<ul>
+		<ul>
 
-<li>
-The default value of the "pi-zero" parameter has been changed from 0.9
-to 1.0.</li>
+		<li>
+		The default value of the "pi-zero" parameter has been changed from 0.9
+		to 1.0.</li>
 
-<li>
-A new option <code>--peptide-list</code> has been added to <code>crux
-create-index</code>.  When set to T, this option causes an ASCII
-file of peptides to be included in the output directory.  Each line
-of the file lists the peptide sequence and its neutral mass.</li>
+		<li>
+		A new option <code>--peptide-list</code> has been added to <code>crux
+		create-index</code>.  When set to T, this option causes an ASCII
+		file of peptides to be included in the output directory.  Each line
+		of the file lists the peptide sequence and its neutral mass.</li>
 
-<li>
-The default bin offset was returned to 0.68.  It had erroneously been
-changed to 0 in version 1.33.</li>
+		<li>
+		The default bin offset was returned to 0.68.  It had erroneously been
+		changed to 0 in version 1.33.</li>
 
-<li>
-A new option <code>--compute-sp</code> has been added to <code>crux
-search-for-matches</code>.  When set to true, all candidate peptides
-will be scored by Sp in addition to xcorr.  This option is recommended
-for generating input to <code>percolator</code>
-or <code>q-ranker</code>.</li>
+		<li>
+		A new option <code>--compute-sp</code> has been added to <code>crux
+		search-for-matches</code>.  When set to true, all candidate peptides
+		will be scored by Sp in addition to xcorr.  This option is recommended
+		for generating input to <code>percolator</code>
+		or <code>q-ranker</code>.</li>
 
-<li>
-Added <code>max-ion-charge</code> parameter to designate the maximum
-charge for theoretical ions in <code>crux search-for-xlinks</code> and 
-<code>crux xlink-assign-ions</code>.
+		<li>
+		Added <code>max-ion-charge</code> parameter to designate the maximum
+		charge for theoretical ions in <code>crux search-for-xlinks</code> and 
+		<code>crux xlink-assign-ions</code>.
 
-<li>
-Modifications may optionally indicate if they prevent cleavage or
-prevent cross linking.
+		<li>
+		Modifications may optionally indicate if they prevent cleavage or
+		prevent cross linking.
 
-<li>
-Results are printed to .pep.xml files in addition to .txt files.
+		<li>
+		Results are printed to .pep.xml files in addition to .txt files.
 
-<li>
-Added a <code>mass-precision</code> option which sets how many digits
-are written for all mass and m/z values in .txt, .sqt, and .ms2 files.
+		<li>
+		Added a <code>mass-precision</code> option which sets how many digits
+		are written for all mass and m/z values in .txt, .sqt, and .ms2 files.
 
-<li>
-The columns printed to the .txt files now vary with the 
-<code>crux</code> command being run and the settings so that unused
-columns are not printed.  
+		<li>
+		The columns printed to the .txt files now vary with the 
+		<code>crux</code> command being run and the settings so that unused
+		columns are not printed.  
 
-<li>
-Fixed a bug that limited what files were used as input for post-search
-commands (e.g. <code>crux percolator</code>) based on fileroot.  Now
-files with different fileroots can be analyzed together.
+		<li>
+		Fixed a bug that limited what files were used as input for post-search
+		commands (e.g. <code>crux percolator</code>) based on fileroot.  Now
+		files with different fileroots can be analyzed together.
 
-<li>
-Fixed a bug that caused searches using fasta files to search peptides 
-multiple times if they appeared in a file multiple times.
+		<li>
+		Fixed a bug that caused searches using fasta files to search peptides 
+		multiple times if they appeared in a file multiple times.
 
 
-</ul>
+		</ul>
 
-<hr></hr>
+		<hr></hr>
 
-<h2>Version 1.33</h2> July 7, 2010
+		<h3>Version 1.33</h3> July 7, 2010
 
-<h3>Major enhancements</h3>
+		<h4>Major enhancements</h4>
 
-<ul>
+		<ul>
 
-<li>
-The command line syntax
-for <code>compute-q-values</code>, <code>percolator</code>
-and <code>q-ranker</code> was modified to allow the programs to read
-from and write to separate directories.</li>
+		<li>
+		The command line syntax
+		for <code>compute-q-values</code>, <code>percolator</code>
+		and <code>q-ranker</code> was modified to allow the programs to read
+		from and write to separate directories.</li>
 
-<li>
-A bug in q-ranker and percolator was fixed.  This bug was introduced
-several versions ago, and it led to erroneously many PSMs receiving
-very small q-values.  The problem relates to the scaling of the delta
-Cn feature, and the fix is a temporary stopgap: we remove the feature
-entirely.  The next version should have the corrected feature in
-place.</li>
+		<li>
+		A bug in q-ranker and percolator was fixed.  This bug was introduced
+		several versions ago, and it led to erroneously many PSMs receiving
+		very small q-values.  The problem relates to the scaling of the delta
+		Cn feature, and the fix is a temporary stopgap: we remove the feature
+		entirely.  The next version should have the corrected feature in
+		place.</li>
 
-</ul>
+		</ul>
 
-<h3>Minor changes</h3>
+		<h4>Minor changes</h4>
 
-<ul>
+		<ul>
 
-<li>
-A new option <code>--min-peaks</code> has been added to set a filter 
-for the minimum number of peaks a spectrum must have in order for it
-to be searched.  The default minimum is 20 peaks.</li>
+		<li>
+		A new option <code>--min-peaks</code> has been added to set a filter 
+		for the minimum number of peaks a spectrum must have in order for it
+		to be searched.  The default minimum is 20 peaks.</li>
 
-<li>
-The hardcoded limit for the number of proteins allowed in a database 
-has been removed.</li>
+		<li>
+		The hardcoded limit for the number of proteins allowed in a database 
+		has been removed.</li>
 
-<li>
-The hardcoded limit for the number of spectra and the number of 
-peaks/spectrum has been removed.</li>
+		<li>
+		The hardcoded limit for the number of spectra and the number of 
+		peaks/spectrum has been removed.</li>
 
-<li>
-A new option <code>--xcorr-var-bin</code> has been added to toggle the
-new binning of the m/z axis.  The default bin offset was returned back
-to 0, but the default bin width is still 1.000508. (<i>Note: this
-erroneous change was subsequently reverted in version 1.34</i>.)
-</li>
+		<li>
+		A new option <code>--xcorr-var-bin</code> has been added to toggle the
+		new binning of the m/z axis.  The default bin offset was returned back
+		to 0, but the default bin width is still 1.000508. (<i>Note: this
+		erroneous change was subsequently reverted in version 1.34</i>.)
+		</li>
 
-<li>
-The option <code>--max-ion-charge</code> now places a limit on the
-maximum charge state of the ions generated for the xcorr theoretical 
-spectra for <code>crux search-for-xlinks</code>.  This change is also 
-supported by <code>xlink-assign-ions</code>.
+		<li>
+		The option <code>--max-ion-charge</code> now places a limit on the
+		maximum charge state of the ions generated for the xcorr theoretical 
+		spectra for <code>crux search-for-xlinks</code>.  This change is also 
+		supported by <code>xlink-assign-ions</code>.
 
-<li>
-The option <code>--no-xval</code> was added to q-ranker, allowing
-faster execution by skipping the internal cross-validation to select
-hyperparameters.</li>
+		<li>
+		The option <code>--no-xval</code> was added to q-ranker, allowing
+		faster execution by skipping the internal cross-validation to select
+		hyperparameters.</li>
 
-<li>
-The precision of modification masses written to the .txt files now matches 
-the maximum precision given in the parameter file.
+		<li>
+		The precision of modification masses written to the .txt files now matches 
+		the maximum precision given in the parameter file.
 
-<li>
-Sub-options <code>prevents&nbsp;cleavage</code> and 
-<code>prevents&nbsp;cross-link</code> have been added to variable modifications 
-and support has been provided for the <code>"prevents&nbsp;cleavage"</code> 
-sub-option.</li>
+		<li>
+		Sub-options <code>prevents&nbsp;cleavage</code> and 
+		<code>prevents&nbsp;cross-link</code> have been added to variable modifications 
+		and support has been provided for the <code>"prevents&nbsp;cleavage"</code> 
+		sub-option.</li>
 
-</ul>
+		</ul>
 
-<hr></hr>
+		<hr></hr>
 
-<h2>Version 1.32</h2> July 6, 2010
+		<h3>Version 1.32</h3> July 6, 2010
 
-<h3>Major enhancement</h3>
+		<h4>Major enhancement</h4>
 
-<ul>
+		<ul>
 
-<li>
-Version 1.32 includes changes only to Tide. A new binary is introduced
-&mdash; a modified version of ProteoWizard's <b>msconvert</b> program
-&mdash; that is capable of converting spectrum data from a wide range
-of file formats into Tide-readable <i>.spectrumrecords</i> input
-files.</li>
+		<li>
+		Version 1.32 includes changes only to Tide. A new binary is introduced
+		&mdash; a modified version of ProteoWizard's <b>msconvert</b> program
+		&mdash; that is capable of converting spectrum data from a wide range
+		of file formats into Tide-readable <i>.spectrumrecords</i> input
+		files.</li>
 
-</ul>
+		</ul>
 
-<h3>Minor changes</h3>
+		<h4>Minor changes</h4>
 
-<ul>
+		<ul>
 
-<li>
-<b>tide-import-spectra</b> is removed from the distribution. Although
-it was faster than msconvert, it was specific to ms2 files, whereas
-msconvert now works with any ProteoWizard-supported file format.</li>
+		<li>
+		<b>tide-import-spectra</b> is removed from the distribution. Although
+		it was faster than msconvert, it was specific to ms2 files, whereas
+		msconvert now works with any ProteoWizard-supported file format.</li>
 
-<li>
-A standalone utility for reading binary <i>.spectrumrecords</i> files
-is introduced, called <b>read-spectrumrecords</b>. This program is
-useful, for example, for visually checking the output of msconvert.</li>
+		<li>
+		A standalone utility for reading binary <i>.spectrumrecords</i> files
+		is introduced, called <b>read-spectrumrecords</b>. This program is
+		useful, for example, for visually checking the output of msconvert.</li>
 
-<li>
-Demo input files <b>worm-06-10000.spectrumrecords</b>
-and <b>yeast-02-10000.spectrumrecords</b> now replace their
-counterparts worm-06-10000.ms2 and yeast-02-10000.ms2. With the
-introduction of Tide-compatible msconvert, ms2 files are in no way
-special to Tide anymore. Any ProteoWizard-supported file format can be
-converted to the <i>.spectrumrecords</i> format for use with
-Tide. Starting with data files in Tide's spectrumrecords format
-eliminates the conversion step in the Tide search demo.</li>
+		<li>
+		Demo input files <b>worm-06-10000.spectrumrecords</b>
+		and <b>yeast-02-10000.spectrumrecords</b> now replace their
+		counterparts worm-06-10000.ms2 and yeast-02-10000.ms2. With the
+		introduction of Tide-compatible msconvert, ms2 files are in no way
+		special to Tide anymore. Any ProteoWizard-supported file format can be
+		converted to the <i>.spectrumrecords</i> format for use with
+		Tide. Starting with data files in Tide's spectrumrecords format
+		eliminates the conversion step in the Tide search demo.</li>
 
-<li>
-The old demo scripts worm-demo.sh and yeast-demo.sh have each been
-replaced by a pair of new scripts that demonstrate the indexing and
-searching steps separately. This is in order to highlight the two-step
-process and the fact that indexing needs to be done just once for each
-fasta file, whereafter the index may be reused indefinitely to perform
-searches.</li>
+		<li>
+		The old demo scripts worm-demo.sh and yeast-demo.sh have each been
+		replaced by a pair of new scripts that demonstrate the indexing and
+		searching steps separately. This is in order to highlight the two-step
+		process and the fact that indexing needs to be done just once for each
+		fasta file, whereafter the index may be reused indefinitely to perform
+		searches.</li>
 
-</ul>
+		</ul>
 
-<hr></hr>
+		<hr></hr>
 
-<h2>Version 1.31</h2> June 2, 2010
+		<h3>Version 1.31</h3> June 2, 2010
 
-<h3>Major enhancements</h3>
+		<h4>Major enhancements</h4>
 
-<ul>
+		<ul>
 
-<li>
-This version of Crux is released with a demo version of a new search
-engine, Tide.  Tide is an independent
-reimplementation of the SEQUEST<sup>&reg;</sup> algorithm. The
-immediate ancestor of Tide is the Crux <code>search-for-matches</code>
-command, but Tide has been completely re-engineered to achieve a
-thousandfold improvement in speed while exactly replicating Crux XCorr
-scores.  Currently, Tide is not fully integrated with Crux, and is
-available only in binary executable format.</li>
+		<li>
+		This version of Crux is released with a demo version of a new search
+		engine, Tide.  Tide is an independent
+		reimplementation of the SEQUEST<sup>&reg;</sup> algorithm. The
+		immediate ancestor of Tide is the Crux <code>search-for-matches</code>
+		command, but Tide has been completely re-engineered to achieve a
+		thousandfold improvement in speed while exactly replicating Crux XCorr
+		scores.  Currently, Tide is not fully integrated with Crux, and is
+		available only in binary executable format.</li>
 
-</ul>
+		</ul>
 
-<h3>Minor changes</h3>
+		<h4>Minor changes</h4>
 
-<ul>
-<li>
-Two options have been added to <code>crux search-for-matches</code>
-(<code>--mz-bin-width</code> and <code>--mz-bin-offset</code>) to
-allow control of the binning of the m/z axis.</li>
+		<ul>
+		<li>
+		Two options have been added to <code>crux search-for-matches</code>
+		(<code>--mz-bin-width</code> and <code>--mz-bin-offset</code>) to
+		allow control of the binning of the m/z axis.</li>
 
-<li>
-The <code>ion-tolerance</code> option was removed from the search
-tools.</li>
-
-<li>
-The default location of the left edge of the first bin along the m/z
-axis is 0.68, rather than 0.0.  This change makes bin edges less
-likely to fall near fragment peak locations.  The default bin width
-has also changed from 1.001141 to 1.000508</li>
-
-<li>
-The log file now includes information about the date and time that the
-command was issued, the name of the computer on which the command was
-run, and the elapsed wall clock time at the end of the run.</li>
-
-<li>
-The command line option <code>--version T</code> has been replaced
-with a command <code>crux version</code> that prints the version
-number to standard output and then exits.</li>
-
-<li>
-The header for the feature file produced optionally by 
-<code>crux percolator</code> and <code>crux q-ranker</code> now includes names
-for the first two columns, scan number and label (i.e. target or decoy peptide).
-
-</ul>
-
-<hr></hr>
-
-<h2>Version 1.30</h2> May 5, 2010
-
-<h3>Major enhancements</h3>
-
-<ul>
-<li>
-A new command, <code>xlink-search</code>, has been added.  This command
-searches a collection of spectra against a sequence database, finding
-cross-linked peptide matches.  The algorithm was described in the
-following article:</li>
-
-<blockquote>
-Sean McIlwain, Paul Draghicescu, Pragya Singh, David R. Goodlett and
-William Stafford
-Noble.  <a href="http://noble.gs.washington.edu/proj/xhhc/">"Detecting
-cross-linked peptides by searching against a database of cross-linked
-peptide pairs."</a> <i>Journal of Proteome Research</i>.  2010.
-</blockquote>
-
-<li>
-A new search command, <code>sequest-search</code>, was added.  The
-original command, <code>search-for-matches</code>, behaves as before
-except that no .sqt files are printed and no Sp scoring is performed.
-The new <code>sequest-search</code> emulates SEQUEST<sup>&reg;</sup>
-searching.  It first scores all candidate peptides with the Sp score,
-then ranks and filters the results by that score, scoring the
-remaining candidates with xcorr.  Results are printed to .txt and .sqt
-files.</li>
-
-<li>
-The .mzXML file format is now supported for crux search-for-matches
-and crux sequest-search when the <code>--use-mstoolkit</code> option
-is set to TRUE.</li>
-
-<li>
-The .csm output files from <code>search-for-matches</code> are no
-longer produced and post-search operations take .txt files as input.
-</li>
-
-</ul>
-
-<h3>
-Minor changes</h3>
-
-<ul>
-
-<li>
-Replaced <code>mass-window</code> parameter with <code>
-precursor-window</code> and added <code>precursor-window-type</code>
-for selecting windows of type mass, m/z, or ppm. 
-</li>
-
-<li>
-The <code>feature-file</code> option is now true/false instead of
-taking a file name.  The file is named '&lt;fileroot&gt;.&lt;qranker|
-percolator&gt;.features.txt'.  A header with the column names was
-added to the file.</li>
-
-<li>
-The new option, <code>--scan-number</code>, performs a search on a 
-specified subset of the spectra in the given file.</li>
-
-<li>
-When only one decoy file is produced, the name is now 'decoy.txt'
-instead of 'decoy-1.txt'
-
-<li>
-In the .txt files, protein names are now followed by the start index
-of the peptide.
-
-<li>
-Modified sequences are reported differently in the .txt files.
-Instead of modifications being represented by symbols (*,@,#, etc.)
-they are indicated with the mass shift of the modification within
-square brackets.  As before, the modification information follows the
-residue that is modified.  If multiple modifications appear on one
-residue, the masses may either be summed together or printed
-separately in a comma separated list.  This behavior is controlled by
-the <code>--display-summed-mod-masses</code> option.</li>
-
-<li>
-The modified decoy sequences are generated differently.  Before, all
-modified peptides were generated and each one was shuffled to create a
-decoy peptide.  Now a peptide is shuffled once for each peptide_mod
-and all modifications are applied to that same shuffled peptide.</li>
-
-<li>
-The 'percolator rank' column is now based on percolator scores instead
-of percolator q-values.  For cases where two PSMs have different
-percolator scores but the same q-value, the ranks will reflect the
-score differences.</li>
-
-<li>
-The Weibull parameters used for computing p-values are now printed to
-the .txt files.</li> 
-
-<li>
-The reporting of DeltaCn has changed.  For PSMs of rank i, deltaCn
-used to computed be as deltaCn_i = (xcorr_0 - xcorr_i) / xcorr_0.
-Thus, deltaCn for the top-ranked PSM was always 0.  Now deltaCn_i =
-(xcorr_0 - xcorr_i+1) / xcorr_0.  This change only
-affects <code>search-for-matches</code>,
-not <code>sequest-search</code>.  It also means that 
-<code>q-ranker</code> and <code>percolator</code> use the correct
-DeltaCn values.
-</li>
-
-<li>
-A new command, <code>print-processed-spectra</code>, performs
-XCorr-style pre-processing on all spectra in a given file.</li>
-
-<li>
-A small bug was fixed, in which even if the user requested average
-mass, the search programs still used monoisotopic mass in the
-calculation of XCorr and Sp.</li>
-
-<li>
-Protein fasta files are now parsed protein-by-protein so that parsing
-large files does not use excessive amounts of memory.</li>
-
-<li>
-A limit was removed on how many peptides a protein can produce.</li>
-
-<li>
-Crux is now built with g++ instead of gcc.</li>
-
-</ul>
-
-<hr></hr>
-
-<h2>Version 1.22</h2> September 16, 2009
-
-<h3>
-Major enhancements</h3>
-
-<ul>
-
-<li>
-Crux is now distributed in two versions, a full version that is
-covered by the same type of license as before (free to non-profit
-users, and via a licensing fee to commercial users), as well as a
-stripped-down version that is released under an open source license.
-The stripped-down version does not include the database search
-functionality but does include all of the post-processing tools.  We
-are unable to release the entire Crux package under an open source
-license due to intellectual property issues.  Both versions of Crux
-are available via the Crux web
-page: <a href="http://noble.gs.washington.edu/proj/crux/">http://noble.gs.washington.edu/proj/crux/</a>.</li>
-
-<li>
-A new tool, q-ranker, is available for estimating peptide-spectrum
-match q-values.  This tool was described in the following article:
-
-<blockquote>
-Marina Spivak, Jason Weston, Leon Bottou, Lukas K&auml;ll and William
-Stafford Noble.  "Improvements to the Percolator algorithm for peptide
-identification from shotgun proteomics data sets." <i>Journal of
-Proteome Research.</i></blockquote></li>
-
-<li>
-Version 1.05 of <code>percolator</code> has now been integrated into
-the Crux source tree.  A separate installation
-of <code>percolator</code> is no longer needed for basic
-<code>percolator</code> functionality. Note, however,
-that <code>percolator</code> remains under active development.  You
-may therefore wish to install the current, stand-alone version
-of <code>percolator</code> and run it separately to take advantage of
-new features.</li>
-
-</ul>
-
-<h3>Minor changes</h3>
-
-<ul>
-
-<li>
-The internal normalization of the observed spectra has been modifed to
-drop those peaks whose intensity is less than 1/20 of the maximum
-intensity in the spectrum.  This brings the xcorr score
-for <code>crux</code> into closer agreement with the xcorr score
-for SEQUEST<sup>&reg;</sup>.</li>
-
-<li>
-Compute-q-values now generates three different q-values (1) from
-p-values using an analytical null model, (2) from decoys and xcorr
-using an empirical null model, or (3) from decoys and p-values using
-an empirical null model.  All three types of q-values are computed
-when p-values and decoys are present in the search results.</li>
-
-<li>
-A parameter file is now automatically written to the output
-directory.</li>
-
-<li>
-A log file recording messages sent to stderr has been added for
-<code>search-for-matches</code>, <code>compute-q-values</code>,
-and <code>percolator</code>.</li>
-
-<li>
-The <code>--use-mz-window</code> parameter is now available for
-<code>search-for-matches</code>.  When enabled, peptides must be
-within +/- 'm/z-window' of the spectrum m/z.  The m/z-window value is
-taken from <code>mass-window</code>.</li>
-
-<li>
-A numerical bug in the Weibull p-value calculation was fixed, which
-had previously caused occasional erroneous NaNs to be output.</li>
-
-<li>
-The Weibull estimated p-values generated
-by <code>search-for-matches</code> are now returned as p-values
-instead of as -log(p-value).  The corresponding q-values returned from
-<code>compute-q-values</code> are also now returned without the -log
-transform.</li>
-
-<li>
-The <code>--precision</code> option has been changed to control the
-total number of significant digits printed instead of the number of
-digits after the decimal point.  The default precision has changed
-from 6 to 8.</li>
-
-<li>
-The parameters estimated for the Weibull distribution (used for
-computing p-values) now use the xcorrs from all PSMs for a spectrum
-instead of a random selection of 500.</li>
-
-<li>
-The estimation of Weibull distribution parameters requires a minimum
-number of scored PSMs.  In the previous version, spectra with fewer
-PSMs than the minimum were not given a p-value.  Crux will now
-generate extra decoys until there are enough scores.</li>
-
-<li>
-The p-values for decoy PSMs are now generated from the same Weibull
-distribution parameters as are used for the targets of the same
-spectrum.</li>
-
-</ul>
-
-<hr></hr>
-
-<h2>Version 1.21</h2> May 14, 2009
-
-<ul>
-
-<li>
-The output for <code>search-for-matches</code>, 
-<code>compute-q-values</code>, and <code>percolator</code>
-has been revised extensively.
-<code>crux</code> will now create a directory, and all output files
-will be created in that directory. 
-By default the directory will be named <code>crux-output</code>,
-but this can be changed using the new <code>output-dir</code> option.
-<br>
-The output files for <code>search-for-matches</code> will be:
-<ul>
-<li><code>search.target.csm</code></li>
-<li><code>search.decoy-?.csm</code></li>
-<li><code>search.target.sqt</code></li>
-<li><code>search.target.txt</code></li>
-</ul>
-The output files for <code>compute-q-values</code> will be:
-<ul>
-<li><code>qvalues.target.sqt</code></li>
-<li><code>qvalues.target.txt</code></li>
-</ul>
-The output files for <code>percolator</code> will be:
-<ul>
-<li><code>percolator.target.sqt</code></li>
-<li><code>percolator.target.txt</code></li>
-</ul>
-</li>
-<li>
-The <code>fileroot</code> option has been added.
-This option is used to specify a string which will be added as a prefix
-to all output files.
-</li>
-<li>
-The option <code>cleavages</code> was replaced with two
-options, <code>enzyme</code> which specifies the name of an enzyme
-(e.g.trypsin) and <code>digestion</code> which indicates
-the degree of specificity, partial or full digest.  The full list of
-available enzymes is in the html docs and in the usage statement.
-See also <code>custom-enzyme</code> below.
-
-<li>
-The option <code>custom-enzyme</code> allows users to define arbitrary
-digestion rules.  This overrides the <code>enzyme</code> option.
-Syntax for the custom digestion rule is the same the syntax used by
-X!Tandem and is described in the html docs.
-
-<li>
-The number of PSMs per spectrum printed to the output files is now
-controlled by one option, <code>top-match</code>.  This
-makes <code>max-sqt-result</code> obsolete.
-
-<li>
-It is now possible to control how many decoy sequences are generated
-and in which file(s) they are returned.  There is a new
-option, <code>num-decoys-per-target</code>, which can be used to
-generate more than one shuffled peptide per spectrum.  This
-replaces <code>number-decoy-set</code>.    
-
-<li>
-A new option, <code>decoy-location</code> has been introduced.  The
-three possible values are 'target-file' where all PSMs (target and
-decoys) are sorted together for each spectrum and returned in one
-file, 'one-decoy-file' where target PSMs are printed to one file and
-all decoys are printed to another, and 'separate-decoy-files' where
-there are as many decoy files as there are decoys per target.
-
-<li>
-Protein names for decoy matches are now prepended with 'rand_' in the
-SQT files as in 
-'L rand_Y45678'.
-
-<li>
-The option <code>unique-peptides</code> only applies
-to <code>crux-generate-matches</code>.  Each peptide is stored in the
-index exactly once with references to all protein sources.  Searches with
-fasta files print each peptide only once.
-
-<li>
-The precision of the masses and scores printed to the sqt and text
-files can now be specified by the user.  The default precision changed
-from 2 to 6.</li>
-
-<li>
-Search progress is now reported by printing every 10th spectrum that is
-searched.  The verbosity can be adjusted with the  parameter
-<code>print-search-progress</code>.
-
-<li>
-Decoy (shuffled) sequences now keep the first and last residue the
-same as the target sequence that was shuffled to produce it.  This is
-a reversion to previous behavior.
-
-<li>
-It is now possible to skip the Sp score and score all PSMs with xcorr.
-The default procedure is still to score all peptides for one spectrum
-with Sp, rank by Sp, and eliminate all but the best-ranking PSMs (by
-default, the top 500).  The remaining PSMs are scored by xcorr,
-re-ranked by xcorr and the top results returned.  By setting
-max-rank-preliminary=0, the Sp scoring is skipped and xcorr is
-computed for all PSMs.</li>
-
-<li>
-A new parameter <code>reverse-sequence</code> can be used to generate
-decoy peptides by reversing them rather than shuffling.  The first and
-last residues are left unmoved.  If the sequence is a palindrome ,
-then a decoy will be generated by shuffling and a note to that effect
-will be printed at the DETAILED INFO level of output (verbosity =
-40).</li>
-
-<li>
-P-values are now computed for decoy peptides.</li>
-
-<li>
-The algorithm used to calculated the xcorr score has been modified so
-that xcorr score will be in better agreement with scores generated by
-SEQUEST<sup>&reg;</sup>.</li>
-
-</ul>
-
-<hr></hr>
-
-<h2>Version 1.20</h2> January 6, 2009
-
-<ul>
-
-<li>
-Generating peptides and searching with up to eleven different dynamic
-modifications is now possible.  New options associated with this
-feature are mod, cmod, nmod, max-mods, max-aas-modified.
-
-<li>
-The format of the .csm files has changed and files written by older
-versions of crux are not readable with crux version 1.2.
-
-<li>
-When the option <code>cleavages</code> is set to <code>all</code>,
-peptide generation ignores all tryptic cleavage sites, effectively setting
-the <code>missed-cleavages</code> option to <code>TRUE</code>
-regardless of user settings.
-
-<li>
-When one spectrum has identical xcorr scores for different sequences,
-the rank of all those matches will be the same.  Matches with the next
-highest score will rank one below.
-
-<li>
-The options for setting the preliminary and primary score type have
-been removed and are fixed as Sp and xcorr, respectively.  A new
-option, <code>compute-p-values=&lt;T | F&gt;</code>, was added to
-control p-value computation.
-
-<li>
-The SQT file contains the spectrum calculated mass instead of observed
-mass/charge on the S line.
-
-<li>
-There is now a test for confirming that the file downloaded from the
-crux website was not corrupted.  See installation instructions for
-details. 
-
-<li>
-Calculating a p-value requires a minimum of 40 matches.  Spectra with
-fewer than 40 matches will have p-value scores returned as NaN and a
-warning will be printed at the DETAILED_INFO level (40) of verbosity.
-
-<li>
-Fixed error in generating neutral-loss peaks created as part of the
-theoretical spectrum. 
-
-</ul>
-
-<hr></hr>
-
-<h2>Version 1.02</h2> December 1, 2008
-
-<ul>
-
-<li>
-Three programs, <code>crux-create-index</code>,
-<code>crux-search-for-matches</code>,
-and <code>crux-analyze-matches</code>, were merged into one program
-named
-<code>crux</code>.</li>
-
-<li>
-Percolator is now truly optional as all Crux programs will build
-without it.</li>
-
-<li>
-Fragment masses can now be calculated as average or mono-isotopic.
-This is controlled by the <code>fragment-mass</code> option in the
-parameter file.</li>
-
-<li>
-The name of the score-type option that calculates p-values was changed
-from xcorr-logp to xcorr-pvalue.</li>
-
-<li>
-SQT files have two new lines in the header which describe the
-arrangement of values in the results.</li>
-
-<li>
-HTML documentation was updated to reflect the above changes.</li>
-
-</ul>
-
-<hr></hr>
-
-<h2>Version 1.01</h2>
-
-<p>October 15, 2008</p>
-
-<ul>
-
-<li>
-A bug limiting the length of the name of an index file was fixed.</li>
-
-<li>
-Modifications were made so that Crux will build with version
-1.05 of Percolator.  This is the only supported version of
-Percolator.</li>
-
-<li>
-Memory leaks in <code>crux-search-for-matches</code> were patched.</li>
-
-<li>
-The <code>--version</code> option was added.</li>
-
-</ul>
-
-<hr></hr>
-
-<h2>Version 1.0</h2>
-
-<p>March 4, 2008</p>
-
-<blockquote>
-Initial release
-</blockquote>
-
-<hr></hr>
-
-<p>
-<a href="crux.html">Crux home</a></p>
-
-</blockquote>
+		<li>
+		The <code>ion-tolerance</code> option was removed from the search
+		tools.</li>
+
+		<li>
+		The default location of the left edge of the first bin along the m/z
+		axis is 0.68, rather than 0.0.  This change makes bin edges less
+		likely to fall near fragment peak locations.  The default bin width
+		has also changed from 1.001141 to 1.000508</li>
+
+		<li>
+		The log file now includes information about the date and time that the
+		command was issued, the name of the computer on which the command was
+		run, and the elapsed wall clock time at the end of the run.</li>
+
+		<li>
+		The command line option <code>--version T</code> has been replaced
+		with a command <code>crux version</code> that prints the version
+		number to standard output and then exits.</li>
+
+		<li>
+		The header for the feature file produced optionally by 
+		<code>crux percolator</code> and <code>crux q-ranker</code> now includes names
+		for the first two columns, scan number and label (i.e. target or decoy peptide).
+
+		</ul>
+
+		<hr></hr>
+
+		<h3>Version 1.30</h3> May 5, 2010
+
+		<h4>Major enhancements</h4>
+
+		<ul>
+		<li>
+		A new command, <code>xlink-search</code>, has been added.  This command
+		searches a collection of spectra against a sequence database, finding
+		cross-linked peptide matches.  The algorithm was described in the
+		following article:</li>
+
+		<blockquote>
+		Sean McIlwain, Paul Draghicescu, Pragya Singh, David R. Goodlett and
+		William Stafford
+		Noble.  <a href="http://noble.gs.washington.edu/proj/xhhc/">"Detecting
+		cross-linked peptides by searching against a database of cross-linked
+		peptide pairs."</a> <i>Journal of Proteome Research</i>.  2010.
+		</blockquote>
+
+		<li>
+		A new search command, <code>sequest-search</code>, was added.  The
+		original command, <code>search-for-matches</code>, behaves as before
+		except that no .sqt files are printed and no Sp scoring is performed.
+		The new <code>sequest-search</code> emulates SEQUEST<sup>&reg;</sup>
+		searching.  It first scores all candidate peptides with the Sp score,
+		then ranks and filters the results by that score, scoring the
+		remaining candidates with xcorr.  Results are printed to .txt and .sqt
+		files.</li>
+
+		<li>
+		The .mzXML file format is now supported for crux search-for-matches
+		and crux sequest-search when the <code>--use-mstoolkit</code> option
+		is set to TRUE.</li>
+
+		<li>
+		The .csm output files from <code>search-for-matches</code> are no
+		longer produced and post-search operations take .txt files as input.
+		</li>
+
+		</ul>
+
+		<h4>
+		Minor changes</h4>
+
+		<ul>
+
+		<li>
+		Replaced <code>mass-window</code> parameter with <code>
+		precursor-window</code> and added <code>precursor-window-type</code>
+		for selecting windows of type mass, m/z, or ppm. 
+		</li>
+
+		<li>
+		The <code>feature-file</code> option is now true/false instead of
+		taking a file name.  The file is named '&lt;fileroot&gt;.&lt;qranker|
+		percolator&gt;.features.txt'.  A header with the column names was
+		added to the file.</li>
+
+		<li>
+		The new option, <code>--scan-number</code>, performs a search on a 
+		specified subset of the spectra in the given file.</li>
+
+		<li>
+		When only one decoy file is produced, the name is now 'decoy.txt'
+		instead of 'decoy-1.txt'
+
+		<li>
+		In the .txt files, protein names are now followed by the start index
+		of the peptide.
+
+		<li>
+		Modified sequences are reported differently in the .txt files.
+		Instead of modifications being represented by symbols (*,@,#, etc.)
+		they are indicated with the mass shift of the modification within
+		square brackets.  As before, the modification information follows the
+		residue that is modified.  If multiple modifications appear on one
+		residue, the masses may either be summed together or printed
+		separately in a comma separated list.  This behavior is controlled by
+		the <code>--display-summed-mod-masses</code> option.</li>
+
+		<li>
+		The modified decoy sequences are generated differently.  Before, all
+		modified peptides were generated and each one was shuffled to create a
+		decoy peptide.  Now a peptide is shuffled once for each peptide_mod
+		and all modifications are applied to that same shuffled peptide.</li>
+
+		<li>
+		The 'percolator rank' column is now based on percolator scores instead
+		of percolator q-values.  For cases where two PSMs have different
+		percolator scores but the same q-value, the ranks will reflect the
+		score differences.</li>
+
+		<li>
+		The Weibull parameters used for computing p-values are now printed to
+		the .txt files.</li> 
+
+		<li>
+		The reporting of DeltaCn has changed.  For PSMs of rank i, deltaCn
+		used to computed be as deltaCn_i = (xcorr_0 - xcorr_i) / xcorr_0.
+		Thus, deltaCn for the top-ranked PSM was always 0.  Now deltaCn_i =
+		(xcorr_0 - xcorr_i+1) / xcorr_0.  This change only
+		affects <code>search-for-matches</code>,
+		not <code>sequest-search</code>.  It also means that 
+		<code>q-ranker</code> and <code>percolator</code> use the correct
+		DeltaCn values.
+		</li>
+
+		<li>
+		A new command, <code>print-processed-spectra</code>, performs
+		XCorr-style pre-processing on all spectra in a given file.</li>
+
+		<li>
+		A small bug was fixed, in which even if the user requested average
+		mass, the search programs still used monoisotopic mass in the
+		calculation of XCorr and Sp.</li>
+
+		<li>
+		Protein fasta files are now parsed protein-by-protein so that parsing
+		large files does not use excessive amounts of memory.</li>
+
+		<li>
+		A limit was removed on how many peptides a protein can produce.</li>
+
+		<li>
+		Crux is now built with g++ instead of gcc.</li>
+
+		</ul>
+
+		<hr></hr>
+
+		<h3>Version 1.22</h3> September 16, 2009
+
+		<h4>
+		Major enhancements</h4>
+
+		<ul>
+
+		<li>
+		Crux is now distributed in two versions, a full version that is
+		covered by the same type of license as before (free to non-profit
+		users, and via a licensing fee to commercial users), as well as a
+		stripped-down version that is released under an open source license.
+		The stripped-down version does not include the database search
+		functionality but does include all of the post-processing tools.  We
+		are unable to release the entire Crux package under an open source
+		license due to intellectual property issues.  Both versions of Crux
+		are available via the Crux web
+		page: <a href="http://noble.gs.washington.edu/proj/crux/">http://noble.gs.washington.edu/proj/crux/</a>.</li>
+
+		<li>
+		A new tool, q-ranker, is available for estimating peptide-spectrum
+		match q-values.  This tool was described in the following article:
+
+		<blockquote>
+		Marina Spivak, Jason Weston, Leon Bottou, Lukas K&auml;ll and William
+		Stafford Noble.  "Improvements to the Percolator algorithm for peptide
+		identification from shotgun proteomics data sets." <i>Journal of
+		Proteome Research.</i></blockquote></li>
+
+		<li>
+		Version 1.05 of <code>percolator</code> has now been integrated into
+		the Crux source tree.  A separate installation
+		of <code>percolator</code> is no longer needed for basic
+		<code>percolator</code> functionality. Note, however,
+		that <code>percolator</code> remains under active development.  You
+		may therefore wish to install the current, stand-alone version
+		of <code>percolator</code> and run it separately to take advantage of
+		new features.</li>
+
+		</ul>
+
+		<h4>Minor changes</h4>
+
+		<ul>
+
+		<li>
+		The internal normalization of the observed spectra has been modifed to
+		drop those peaks whose intensity is less than 1/20 of the maximum
+		intensity in the spectrum.  This brings the xcorr score
+		for <code>crux</code> into closer agreement with the xcorr score
+		for SEQUEST<sup>&reg;</sup>.</li>
+
+		<li>
+		Compute-q-values now generates three different q-values (1) from
+		p-values using an analytical null model, (2) from decoys and xcorr
+		using an empirical null model, or (3) from decoys and p-values using
+		an empirical null model.  All three types of q-values are computed
+		when p-values and decoys are present in the search results.</li>
+
+		<li>
+		A parameter file is now automatically written to the output
+		directory.</li>
+
+		<li>
+		A log file recording messages sent to stderr has been added for
+		<code>search-for-matches</code>, <code>compute-q-values</code>,
+		and <code>percolator</code>.</li>
+
+		<li>
+		The <code>--use-mz-window</code> parameter is now available for
+		<code>search-for-matches</code>.  When enabled, peptides must be
+		within +/- 'm/z-window' of the spectrum m/z.  The m/z-window value is
+		taken from <code>mass-window</code>.</li>
+
+		<li>
+		A numerical bug in the Weibull p-value calculation was fixed, which
+		had previously caused occasional erroneous NaNs to be output.</li>
+
+		<li>
+		The Weibull estimated p-values generated
+		by <code>search-for-matches</code> are now returned as p-values
+		instead of as -log(p-value).  The corresponding q-values returned from
+		<code>compute-q-values</code> are also now returned without the -log
+		transform.</li>
+
+		<li>
+		The <code>--precision</code> option has been changed to control the
+		total number of significant digits printed instead of the number of
+		digits after the decimal point.  The default precision has changed
+		from 6 to 8.</li>
+
+		<li>
+		The parameters estimated for the Weibull distribution (used for
+		computing p-values) now use the xcorrs from all PSMs for a spectrum
+		instead of a random selection of 500.</li>
+
+		<li>
+		The estimation of Weibull distribution parameters requires a minimum
+		number of scored PSMs.  In the previous version, spectra with fewer
+		PSMs than the minimum were not given a p-value.  Crux will now
+		generate extra decoys until there are enough scores.</li>
+
+		<li>
+		The p-values for decoy PSMs are now generated from the same Weibull
+		distribution parameters as are used for the targets of the same
+		spectrum.</li>
+
+		</ul>
+
+		<hr></hr>
+
+		<h3>Version 1.21</h3> May 14, 2009
+
+		<ul>
+
+		<li>
+		The output for <code>search-for-matches</code>, 
+		<code>compute-q-values</code>, and <code>percolator</code>
+		has been revised extensively.
+		<code>crux</code> will now create a directory, and all output files
+		will be created in that directory. 
+		By default the directory will be named <code>crux-output</code>,
+		but this can be changed using the new <code>output-dir</code> option.
+		<br>
+		The output files for <code>search-for-matches</code> will be:
+		<ul>
+		<li><code>search.target.csm</code></li>
+		<li><code>search.decoy-?.csm</code></li>
+		<li><code>search.target.sqt</code></li>
+		<li><code>search.target.txt</code></li>
+		</ul>
+		The output files for <code>compute-q-values</code> will be:
+		<ul>
+		<li><code>qvalues.target.sqt</code></li>
+		<li><code>qvalues.target.txt</code></li>
+		</ul>
+		The output files for <code>percolator</code> will be:
+		<ul>
+		<li><code>percolator.target.sqt</code></li>
+		<li><code>percolator.target.txt</code></li>
+		</ul>
+		</li>
+		<li>
+		The <code>fileroot</code> option has been added.
+		This option is used to specify a string which will be added as a prefix
+		to all output files.
+		</li>
+		<li>
+		The option <code>cleavages</code> was replaced with two
+		options, <code>enzyme</code> which specifies the name of an enzyme
+		(e.g.trypsin) and <code>digestion</code> which indicates
+		the degree of specificity, partial or full digest.  The full list of
+		available enzymes is in the html docs and in the usage statement.
+		See also <code>custom-enzyme</code> below.
+
+		<li>
+		The option <code>custom-enzyme</code> allows users to define arbitrary
+		digestion rules.  This overrides the <code>enzyme</code> option.
+		Syntax for the custom digestion rule is the same the syntax used by
+		X!Tandem and is described in the html docs.
+
+		<li>
+		The number of PSMs per spectrum printed to the output files is now
+		controlled by one option, <code>top-match</code>.  This
+		makes <code>max-sqt-result</code> obsolete.
+
+		<li>
+		It is now possible to control how many decoy sequences are generated
+		and in which file(s) they are returned.  There is a new
+		option, <code>num-decoys-per-target</code>, which can be used to
+		generate more than one shuffled peptide per spectrum.  This
+		replaces <code>number-decoy-set</code>.    
+
+		<li>
+		A new option, <code>decoy-location</code> has been introduced.  The
+		three possible values are 'target-file' where all PSMs (target and
+		decoys) are sorted together for each spectrum and returned in one
+		file, 'one-decoy-file' where target PSMs are printed to one file and
+		all decoys are printed to another, and 'separate-decoy-files' where
+		there are as many decoy files as there are decoys per target.
+
+		<li>
+		Protein names for decoy matches are now prepended with 'rand_' in the
+		SQT files as in 
+		'L rand_Y45678'.
+
+		<li>
+		The option <code>unique-peptides</code> only applies
+		to <code>crux-generate-matches</code>.  Each peptide is stored in the
+		index exactly once with references to all protein sources.  Searches with
+		fasta files print each peptide only once.
+
+		<li>
+		The precision of the masses and scores printed to the sqt and text
+		files can now be specified by the user.  The default precision changed
+		from 2 to 6.</li>
+
+		<li>
+		Search progress is now reported by printing every 10th spectrum that is
+		searched.  The verbosity can be adjusted with the  parameter
+		<code>print-search-progress</code>.
+
+		<li>
+		Decoy (shuffled) sequences now keep the first and last residue the
+		same as the target sequence that was shuffled to produce it.  This is
+		a reversion to previous behavior.
+
+		<li>
+		It is now possible to skip the Sp score and score all PSMs with xcorr.
+		The default procedure is still to score all peptides for one spectrum
+		with Sp, rank by Sp, and eliminate all but the best-ranking PSMs (by
+		default, the top 500).  The remaining PSMs are scored by xcorr,
+		re-ranked by xcorr and the top results returned.  By setting
+		max-rank-preliminary=0, the Sp scoring is skipped and xcorr is
+		computed for all PSMs.</li>
+
+		<li>
+		A new parameter <code>reverse-sequence</code> can be used to generate
+		decoy peptides by reversing them rather than shuffling.  The first and
+		last residues are left unmoved.  If the sequence is a palindrome ,
+		then a decoy will be generated by shuffling and a note to that effect
+		will be printed at the DETAILED INFO level of output (verbosity =
+		40).</li>
+
+		<li>
+		P-values are now computed for decoy peptides.</li>
+
+		<li>
+		The algorithm used to calculated the xcorr score has been modified so
+		that xcorr score will be in better agreement with scores generated by
+		SEQUEST<sup>&reg;</sup>.</li>
+
+		</ul>
+
+		<hr></hr>
+
+		<h3>Version 1.20</h3> January 6, 2009
+
+		<ul>
+
+		<li>
+		Generating peptides and searching with up to eleven different dynamic
+		modifications is now possible.  New options associated with this
+		feature are mod, cmod, nmod, max-mods, max-aas-modified.
+
+		<li>
+		The format of the .csm files has changed and files written by older
+		versions of crux are not readable with crux version 1.2.
+
+		<li>
+		When the option <code>cleavages</code> is set to <code>all</code>,
+		peptide generation ignores all tryptic cleavage sites, effectively setting
+		the <code>missed-cleavages</code> option to <code>TRUE</code>
+		regardless of user settings.
+
+		<li>
+		When one spectrum has identical xcorr scores for different sequences,
+		the rank of all those matches will be the same.  Matches with the next
+		highest score will rank one below.
+
+		<li>
+		The options for setting the preliminary and primary score type have
+		been removed and are fixed as Sp and xcorr, respectively.  A new
+		option, <code>compute-p-values=&lt;T | F&gt;</code>, was added to
+		control p-value computation.
+
+		<li>
+		The SQT file contains the spectrum calculated mass instead of observed
+		mass/charge on the S line.
+
+		<li>
+		There is now a test for confirming that the file downloaded from the
+		crux website was not corrupted.  See installation instructions for
+		details. 
+
+		<li>
+		Calculating a p-value requires a minimum of 40 matches.  Spectra with
+		fewer than 40 matches will have p-value scores returned as NaN and a
+		warning will be printed at the DETAILED_INFO level (40) of verbosity.
+
+		<li>
+		Fixed error in generating neutral-loss peaks created as part of the
+		theoretical spectrum. 
+
+		</ul>
+
+		<hr></hr>
+
+		<h3>Version 1.02</h3> December 1, 2008
+
+		<ul>
+
+		<li>
+		Three programs, <code>crux-create-index</code>,
+		<code>crux-search-for-matches</code>,
+		and <code>crux-analyze-matches</code>, were merged into one program
+		named
+		<code>crux</code>.</li>
+
+		<li>
+		Percolator is now truly optional as all Crux programs will build
+		without it.</li>
+
+		<li>
+		Fragment masses can now be calculated as average or mono-isotopic.
+		This is controlled by the <code>fragment-mass</code> option in the
+		parameter file.</li>
+
+		<li>
+		The name of the score-type option that calculates p-values was changed
+		from xcorr-logp to xcorr-pvalue.</li>
+
+		<li>
+		SQT files have two new lines in the header which describe the
+		arrangement of values in the results.</li>
+
+		<li>
+		HTML documentation was updated to reflect the above changes.</li>
+
+		</ul>
+
+		<hr></hr>
+
+		<h3>Version 1.01</h3>
+
+		<p>October 15, 2008</p>
+
+		<ul>
+
+		<li>
+		A bug limiting the length of the name of an index file was fixed.</li>
+
+		<li>
+		Modifications were made so that Crux will build with version
+		1.05 of Percolator.  This is the only supported version of
+		Percolator.</li>
+
+		<li>
+		Memory leaks in <code>crux-search-for-matches</code> were patched.</li>
+
+		<li>
+		The <code>--version</code> option was added.</li>
+
+		</ul>
+
+		<hr></hr>
+
+		<h3>Version 1.0</h3>
+
+		<p>March 4, 2008</p>
+
+		<blockquote>
+		Initial release
+		</blockquote>
+	<!-- END CONTENT -->
+		</div>
+	</div>
+
+<footer class="site-footer">
+	<div id="centerfooter">
+		<div class="footerimportantlinks">
+			<img src="/images/linkicon.png" style="width:16px; height:16px"><h3>Important links</h3>
+			<ul>
+				<li><a href="/faq.html">Crux <strong>FAQ</strong></a></li>
+				<li><a href="/glossary.html">Glossary of terminology</a></li>
+				<li><a href="http://scholar.google.com/citations?hl=en&user=Rw9S1HIAAAAJ">Google Scholar profile</a></li>
+				<li><a href="https://sourceforge.net/projects/cruxtoolkit/">SourceForge Issue's list</a></li>
+				<li><a href="/release-notes.html">Release Notes</a></li>
+				<li><a href="https://mailman1.u.washington.edu/mailman/listinfo/crux-users" title="Receive announcements of new versions">Join the mailing list</a></li>
+				<li><a href="http://www.apache.org/licenses/LICENSE-2.0">Apache license</a></li>
+				<li><a href="http://groups.google.com/group/crux-users">Support Board</a></li>
+			</ul>
+		</div>
+		<div class="footerimportantlinks tutoriallinks">
+			<img src="/images/tutorialicon.png" style="height:16px"><h3>Tutorials</h3>
+			<ul>
+				<li><a href="/tutorials/install.html">Installation</a></li>
+				<li><a href="/tutorials/gettingstarted.html">Getting started with Crux</a></li>
+				<li><a href="/tutorials/search.html">Running a simple search using Tide and Percolator</a></li>
+				<li><a href="/tutorials/customizedsearch.html">Customization and search options</a></li>
+				<li><a href="/tutorials/spectralcounts.html">Using spectral-counts</a></li>
+			</ul>
+		</div>
+		<div id="footertext">
+			<p>
+				The original version of Crux was written by Chris Park and Aaron Klammer
+				under the supervision
+				of <a href="http://www.gs.washington.edu/faculty/maccoss.htm">Prof. Michael
+				MacCoss</a>
+				and <a href="http://noble.gs.washington.edu/~noble">Prof. William
+				Stafford Noble</a> in the Department of Genome Sciences at the
+				University of Washington, Seattle.  Website by <a href="http://www.yuvalboss.com/">Yuval Boss</a>. 
+				<br />The complete list of contributors
+				can be found <a href="/contributors.html">here</a>.
+				<br />
+				<br />
+				Maintenance and development of Crux is funded by the <a href="https://www.nih.gov/">National Institutes of Health</a> awards R01 GM096306 and P41 GM103533. 
+			</p>
+		</div>
+	</div>
+</footer>
+	
 </body>
-</html>
 
+</html>

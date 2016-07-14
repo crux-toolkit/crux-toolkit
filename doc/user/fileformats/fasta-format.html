@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Crux contributors</title>
+<title>Crux Template</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <link rel="stylesheet" type="text/css" href="/styles.css">
 <script type="text/javascript">
@@ -52,79 +52,71 @@
 		</nav>
 		<div id="content">
 		<!-- START CONTENT -->
-		<h2>Crux contributors</h2>
+		<H2>FASTA file format</H2>
+
 		<p>
-		The current Crux development team consists of the following people:</p>
+		Crux searches protein sequence databases given in FASTA format.  The
+		format is very simple. Every entry consists of a sequence identifier
+		(ID), an optional comment (COMMENT), and a sequence (SEQUENCE). The
+		format looks like this:
+		</p>
 
-		<ul>
+		<pre>
+&gt;ID COMMENT
+SEQUENCE
+		</pre>
 
-		<li>
-		Charles Grant, February 2008&mdash;present</li>
+		<p>
+		The special character "&gt;" marks the beginning of a new sequence.
+		The "&gt;" character is followed immediately by the sequence
+		identifier. The rest of that line is occupied by the optional
+		comment. Subsequent lines contain the sequence itself.
+		</p>
 
-		<li>
-		Sean McIlwain, January 2009&mdash;present</li>
+		<p>Some rules about representing sequences:</p>
 
-		<li>
-		Kaipo Tamura, October 2012&mdash;present</li>
-
-		<li>
-		J. Jeffry Howbert, October 2011&mdash;present</li>
-
-		<li>
-		Alice Cheng, March 2014&mdash;present</li>
-
-		<li>
-		Jared Moore, September 2015&mdash;present</li>
-
-		<li>
-		Atul Pai, September 2015&mdash;present</li>
+		<ul style="padding:0; font-size:14px;">
 
 		<li>
-		Zijin Zhang, September 2015&mdash;present</li>
+		A single protein sequence can span multiple lines.  The &gt; character
+		occurring at the beginning of the line indicates the end of the
+		sequence.</li>
+
+		<li>
+		Case doesn't matter. Crux Suite converts everything to uppercase.</li>
+
+		<li>
+		White space (spaces and newlines) within the sequence are
+		ignored.</li>
+
+		<li>
+		Characters should be from the amino acid alphabet, which contains
+		twenty characters for amino acids ("ACDEFGHIKLMNPQRSTVWY") and is
+		augmented by four more ambiguous characters ("BUXZ"):</li>
+
+		<pre>
+A  alanine                         P  proline
+B  aspartate or asparagine         Q  glutamine
+C  cystine                         R  arginine
+D  aspartate                       S  serine
+E  glutamate                       T  threonine
+F  phenylalanine                   U  any
+G  glycine                         V  valine
+H  histidine                       W  tryptophan
+I  isoleucine                      Y  tyrosine
+K  lysine                          Z  glutamate or glutamine
+L  leucine                         X  any
+M  methionine                      
+N  asparagine
+		</pre>
 
 		</ul>
 
 		<p>
-		Former Crux contributors include</p>
+		<a href="sample.fasta">Here</a> is an example of three sequences in
+		FASTA format.</p>
 
-		<ul>
-
-		<li>
-		Chris Park, June 2006&mdash;August 2007</li>
-
-		<li>
-		Aaron Klammer, June 2006&mdash;June 2008</li>
-
-		<li>
-		Lukas K&auml;ll, November 2007&mdash;July 2008</li>
-
-		<li>
-		Michael Mathews, June 2010&mdash;December 2010</li>
-
-		<li>
-		Benjamin Diament, July 2010&mdash;September 2011</li>
-
-		<li>
-		Kha Nguyen, April 2011&mdash;July 2011</li>
-
-		<li>
-		Manijeh Naseri, January 2012&mdash;September 2012</li>
-
-		<li>
-		Marina Spivak, September 2009&mdash;September 2012</li>
-
-		<li>
-		Barbara Frewen, October 2007&mdash;September 2014</li>
-
-		<li>
-		Attila Kertesz-Farkas, September 2013&mdash;September 2015</li>
-
-		</ul>
-
-		<p>
-		The Crux project is overseen and directed by Michael MacCoss and
-		William Stafford Noble.</p>
-		<!-- END CONTENT -->
+	<!-- END CONTENT -->
 		</div>
 	</div>
 
