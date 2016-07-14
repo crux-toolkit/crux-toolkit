@@ -1213,11 +1213,11 @@ vector< pair<string, string> > QRanker::getOutputs() const {
   outputs.push_back(make_pair("qranker.decoy.pep.xml",
     "An xml file containing ranked list of decoy peptide-spectrum matches."));
   outputs.push_back(make_pair("qranker.target.psm.txt",
-    "a <a href=\"txt-format.html\">tab-delimited text format</a> containing a "
+    "a <a href=\"/fileformats/txt-format.html\">tab-delimited text format</a> containing a "
     "ranked list of target peptide-spectrum matches with the associated Q-ranker "
     "scores and q-values."));
   outputs.push_back(make_pair("qranker.decoy.psm.txt",
-    "a <a href=\"txt-format.html\">tab-delimited text format</a> containing a "
+    "a <a href=\"/fileformats/txt-format.html\">tab-delimited text format</a> containing a "
     "ranked list of decoy peptide-spectrum matches with the associated Q-ranker "
     "scores and q-values."));
   outputs.push_back(make_pair("qranker.log.txt",

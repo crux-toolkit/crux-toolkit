@@ -538,22 +538,22 @@ vector< pair<string, string> > PercolatorApplication::getOutputs() const {
   vector< pair<string, string> > outputs;
   outputs.push_back(make_pair("percolator.target.proteins.txt",
     "a tab-delimited file containing the target protein matches. See "
-    "<a href=\"txt-format.html\">here</a> for a list of the fields."));
+    "<a href=\"/fileformats/txt-format.html\">here</a> for a list of the fields."));
   outputs.push_back(make_pair("percolator.decoy.proteins.txt",
     "a tab-delimited file containing the decoy protein matches. See "
-    "<a href=\"txt-format.html\">here</a> for a list of the fields."));
+    "<a href=\"/fileformats/txt-format.html\">here</a> for a list of the fields."));
   outputs.push_back(make_pair("percolator.target.peptides.txt",
     "a tab-delimited file containing the target peptide matches. See "
-    "<a href=\"txt-format.html\">here</a> for a list of the fields."));
+    "<a href=\"/fileformats/txt-format.html\">here</a> for a list of the fields."));
   outputs.push_back(make_pair("percolator.decoy.peptides.txt",
     "a tab-delimited file containing the decoy peptide matches. See "
-    "<a href=\"txt-format.html\">here</a> for a list of the fields."));
+    "<a href=\"/fileformats/txt-format.html\">here</a> for a list of the fields."));
   outputs.push_back(make_pair("percolator.target.psms.txt",
     "a tab-delimited file containing the target PSMs. See "
-    "<a href=\"txt-format.html\">here</a> for a list of the fields."));
+    "<a href=\"/fileformats/txt-format.html\">here</a> for a list of the fields."));
   outputs.push_back(make_pair("percolator.decoy.psms.txt",
     "a tab-delimited file containing the decoy PSMs. See "
-    "<a href=\"txt-format.html\">here</a> for a list of the fields."));
+    "<a href=\"/fileformats/txt-format.html\">here</a> for a list of the fields."));
   outputs.push_back(make_pair("percolator.params.txt",
     "a file containing the name and value of all parameters for the current "
     "operation. Not all parameters in the file may have been used in the "
