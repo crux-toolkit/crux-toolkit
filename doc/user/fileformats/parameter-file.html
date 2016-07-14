@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Crux contributors</title>
+<title>Crux Template</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <link rel="stylesheet" type="text/css" href="/styles.css">
 <script type="text/javascript">
@@ -52,79 +52,31 @@
 		</nav>
 		<div id="content">
 		<!-- START CONTENT -->
-		<h2>Crux contributors</h2>
-		<p>
-		The current Crux development team consists of the following people:</p>
+		<h2>Crux parameter files</h2>
 
-		<ul>
+		<b>Description:</b>
+		<p>A file containing parameters and their arguments passed to a crux
+		program to control various aspects of execution.  Every command-line
+		option and many additional options can be read from a parameter
+		file.  If an option is specified in a file and on the command line,
+		the command line value will be used.
+		</p>
 
-		<li>
-		Charles Grant, February 2008&mdash;present</li>
+		<b>Usage:</b>
+		<p><span class="code">&lt;program name&gt; --parameter-file &lt;file name&gt; [&lt;argument&gt;+]</span></p>
 
-		<li>
-		Sean McIlwain, January 2009&mdash;present</li>
-
-		<li>
-		Kaipo Tamura, October 2012&mdash;present</li>
-
-		<li>
-		J. Jeffry Howbert, October 2011&mdash;present</li>
-
-		<li>
-		Alice Cheng, March 2014&mdash;present</li>
-
-		<li>
-		Jared Moore, September 2015&mdash;present</li>
-
-		<li>
-		Atul Pai, September 2015&mdash;present</li>
-
-		<li>
-		Zijin Zhang, September 2015&mdash;present</li>
-
-		</ul>
+		<b>Format:</b>
+		<p>The parameter file can contain parameter lines, comment lines and
+		blank lines.  Parameter lines are name-value pairs separated by  an
+		equal sign, '=' with no spaces in between.  Comment lines must begin
+		with '#'.  Blank lines should contain no spaces or tabs before the newline.
+		</p>
 
 		<p>
-		Former Crux contributors include</p>
-
-		<ul>
-
-		<li>
-		Chris Park, June 2006&mdash;August 2007</li>
-
-		<li>
-		Aaron Klammer, June 2006&mdash;June 2008</li>
-
-		<li>
-		Lukas K&auml;ll, November 2007&mdash;July 2008</li>
-
-		<li>
-		Michael Mathews, June 2010&mdash;December 2010</li>
-
-		<li>
-		Benjamin Diament, July 2010&mdash;September 2011</li>
-
-		<li>
-		Kha Nguyen, April 2011&mdash;July 2011</li>
-
-		<li>
-		Manijeh Naseri, January 2012&mdash;September 2012</li>
-
-		<li>
-		Marina Spivak, September 2009&mdash;September 2012</li>
-
-		<li>
-		Barbara Frewen, October 2007&mdash;September 2014</li>
-
-		<li>
-		Attila Kertesz-Farkas, September 2013&mdash;September 2015</li>
-
-		</ul>
-
-		<p>
-		The Crux project is overseen and directed by Michael MacCoss and
-		William Stafford Noble.</p>
-		<!-- END CONTENT -->
+		<a href="../files/default.params">Here</a> is a sample parameter file
+		containing the default values for every parameter/option available to
+		all crux programs.</p>
+			<!-- END CONTENT -->
 		</div>
 	</div>
 
