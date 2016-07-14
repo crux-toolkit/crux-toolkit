@@ -94,7 +94,7 @@ Params::Params() : finalized_(false) {
   /*Percolator arguments*/
   InitArgParam("pin",
     "A collection of target and decoy peptide-spectrum matches (PSMs). Input may "
-    "be in one of five formats: PIN, SQT, pepXML, [[html:<a href=\"txt-format.html\">]]"
+    "be in one of five formats: PIN, SQT, pepXML, [[html:<a href=\"/fileformats/txt-format.html\">]]"
     "Crux tab-delimited text[[html:</a>]], or a list of files (when list-of-files=T). "
     "Note that if the input is provided as SQT, pepXML, or Crux "
     "tab-delimited text, then a PIN file will be generated in the output directory "
@@ -111,7 +111,7 @@ Params::Params() : finalized_(false) {
   InitArgParam("psm results",
     "A collection of target and decoy peptide-spectrum matches (PSMs). Input may be in "
     "one of four formats: SQT, PepXML (obtained from SEQUEST), [[html:<a href=\""
-    "txt-format.html\">]]Crux tab-delimited text[[html:</a>]], or list of files (when "
+    "/fileformats/txt-format.html\">]]Crux tab-delimited text[[html:</a>]], or list of files (when "
     "list-of-files=T)."
     "[[html:<br>Decoy PSMs can be provided to make-pin in two ways: either as a separate "
     "file or embedded within the same file as the target PSMs. make-pin will first search "
@@ -136,7 +136,7 @@ Params::Params() : finalized_(false) {
     "Available for make-pin", false);
   // q-ranker/barista arguments
   InitArgParam("fragmentation spectra",
-    "The fragmentation spectra must be provided in [[html:<a href=\"ms2-format.html\">]]"
+    "The fragmentation spectra must be provided in [[html:<a href=\"/fileformats/ms2-format.html\">]]"
     "MS2[[html:</a>]], mzXML, or MGF format.");
   // pipeline arguments
   InitArgParam("mass spectra",
@@ -161,7 +161,7 @@ Params::Params() : finalized_(false) {
     "Available for all crux programs.", true);
   InitStringParam("parameter-file", "", 
     "A file containing parameters. [[html: See the "
-    "<a href=\"parameter-file.html\">parameter documentation</a> page for details.]]",
+    "<a href=\"/fileformats/parameter-file.html\">parameter documentation</a> page for details.]]",
     "Available for all crux programs. Any options specified on the "
     "command line will override values in the parameter file.", true);
   InitBoolParam("overwrite", false, 
@@ -248,7 +248,7 @@ Params::Params() : finalized_(false) {
     "Specify the parser to use for reading in MS/MS spectra.[[html: The default, "
     "ProteoWizard parser can read the MS/MS file formats listed <a href=\""
     "http://proteowizard.sourceforge.net/formats.shtml\">here</a>. The alternative is "
-    "<a href=\"http://cruxtoolkit.sourceforge.net/mstoolkit.html\">MSToolkit parser</a>. "
+    "<a href=\"/mstoolkit.html\">MSToolkit parser</a>. "
     "If the ProteoWizard parser fails to read your files properly, you may want to try the "
     "MSToolkit parser instead.]]",
     "Available for search-for-xlinks.", true);
@@ -499,7 +499,7 @@ Params::Params() : finalized_(false) {
     "When given the string \"time\" seeds the random number generator with the system time.",
     "Available for all percolator", true);
   InitBoolParam("feature-file-out", false,
-    "Output the computed features in [[html:<a href=\"features.html\">]]tab-delimited "
+    "Output the computed features in [[html:<a href=\"/fileformats/features.html\">]]tab-delimited "
     "text format[[html:</a>]].",
     "Available for percolator and q-ranker.", true);
   InitBoolParam("decoy-xml-output", false,
@@ -565,7 +565,7 @@ Params::Params() : finalized_(false) {
     "of PSMs. By default, Percolator will select the feature that produces the largest "
     "set of target PSMs at a specified FDR threshold (cf. --train-fdr). This option "
     "allows the user to specify which feature is used for the initial ranking, using the "
-    "name as a string[[html: from <a href=\"features.html\">this table</a>]]. The name "
+    "name as a string[[html: from <a href=\"/fileformats/features.html\">this table</a>]]. The name "
     "can be preceded by a hyphen (e.g. \"-XCorr\") to indicate that a lower value is "
     "better.",
     "Available for crux percolator", true);
@@ -1031,8 +1031,9 @@ Params::Params() : finalized_(false) {
     "containing multiple FASTA files (identified via the filename suffixes "
     "\".fa\", \".fsa\" or \".fasta\")."); 
   InitArgParam("search results",
-    "Search results in the [[html:<a href=\"txt-format.html\">]]tab-delimited text format"
-    "[[html:</a>]] produced by Crux or in [[html:<a href=\"sqt-format.html\">]]SQT format[[html:</a>]]. Like the spectra, the search results can be provided "
+    "Search results in the [[html:<a href=\"/fileformats/txt-format.html\">]]tab-delimited text format"
+    "[[html:</a>]] produced by Crux or in [[html:<a href=\"/fileformats/sqt-format.html\">]]SQT format[[html:</a>]]. "
+    "Like the spectra, the search results can be provided "
     "as a single file, a list of files or a directory of files. Note, however, that the "
     "input mode for spectra and for search results must be the same; i.e., if you provide "
     "a list of files for the spectra, then you must also provide a list of files "
@@ -1084,7 +1085,7 @@ Params::Params() : finalized_(false) {
   /* analyze-matches parameter options */
   InitArgParam("target input",
     "One or more files, each containing a collection of peptide-spectrum matches (PSMs) "
-    "in [[html:<a href=\"txt-format.html\">]]tab-delimited text[[html:</a>]], [[html:<a "
+    "in [[html:<a href=\"/fileformats/txt-format.html\">]]tab-delimited text[[html:</a>]], [[html:<a "
     "href=\"http://tools.proteomecenter.org/wiki/index.php?title=Formats:pepXML\">]]PepXML"
     "[[html:</a>]], or [[html:<a href=\"http://www.psidev.info/mzidentml\">]]mzIdentML"
     "[[html:</a>]] format. In tab-delimited text format, only the specified score column "
