@@ -12,8 +12,8 @@ fi
     
 rm -rf yeast-index crux-output
 chmod +x ./tsv2html.py
-cp ../data/demo.ms2 .
-cp ../data/small-yeast.fasta .
+cp ../example-files/demo.ms2 .
+cp ../example-files/small-yeast.fasta .
 
 $CRUX tide-index small-yeast.fasta yeast-index
 

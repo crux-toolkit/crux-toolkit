@@ -12,9 +12,6 @@ message(
 )
 
 add_subdirectory(doc/user)
-add_subdirectory(doc/user/comet-options)
-add_subdirectory(doc/user/data)
-add_subdirectory(doc/user/demos)
 add_subdirectory(ext)
 add_subdirectory(src)
 
