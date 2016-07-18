@@ -756,7 +756,7 @@ Params::Params() : finalized_(false) {
     "decoy will be re-shuffled multiple times to avoid duplication. If a non-duplicated peptide "
     "cannot be generated, the decoy is skipped entirely. When set to \"T\", every decoy is added to "
     "the database without checking for duplication. This option reduces the memory requirements "
-    "significantly. Default = F.",
+    "significantly.",
     "Available for tide-index.", true);
   InitBoolParam("use-neutral-loss-peaks", true,
     "Controls whether neutral loss ions are considered in the search. "
@@ -1697,6 +1697,7 @@ void Params::Categorize() {
   items.insert("decoy-format");
   items.insert("keep-terminal-aminos");
   items.insert("seed");
+  items.insert("allow-dups");
   AddCategory("Decoy database generation", items);
 
   items.clear();
