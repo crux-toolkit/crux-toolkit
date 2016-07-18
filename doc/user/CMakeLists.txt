@@ -25,9 +25,6 @@ install(
   DIRECTORY . 
   DESTINATION doc
   PATTERN "CMakeLists.txt" EXCLUDE
-  PATTERN "comet-options" EXCLUDE
-  PATTERN "data" EXCLUDE
-  PATTERN "demos" EXCLUDE
   PATTERN "download" EXCLUDE 
   PATTERN "open_source_download" EXCLUDE 
 )
