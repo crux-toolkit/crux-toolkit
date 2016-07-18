@@ -375,7 +375,8 @@ vector<string> TideIndexApplication::getOptions() const {
     "parameter-file",
     "seed",
     "clip-nterm-methionine",
-    "verbosity"
+    "verbosity",
+    "allow-dups"
   };
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }
