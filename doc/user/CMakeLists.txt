@@ -26,5 +26,4 @@ install(
   DESTINATION doc
   PATTERN "CMakeLists.txt" EXCLUDE
   PATTERN "download" EXCLUDE 
-  PATTERN "open_source_download" EXCLUDE 
 )
