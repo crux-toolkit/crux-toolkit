@@ -147,7 +147,7 @@ vector<string> CascadeSearchApplication::getOptions() const {
 vector< pair<string, string> > CascadeSearchApplication::getOutputs() const {
   vector< pair<string, string> > outputs;
   outputs.push_back(make_pair("cascade-search.target.txt",
-    "a <a href=\"txt-format.html\">tab-delimited text file</a> containing the "
+    "a <a href=\"../file-formats/txt-format.html\">tab-delimited text file</a> containing the "
     "target PSMs accepted at a pre-defined fdr."));
   outputs.push_back(make_pair("cascade-search.log.txt",
     "a log file containing a copy of all messages that were printed to stderr."));

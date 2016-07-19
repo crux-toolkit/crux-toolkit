@@ -446,7 +446,7 @@ string PercolatorApplication::getDescription() const {
     "output consists of ranked lists of PSMs, peptides and proteins. Peptides "
     "and proteins are assigned two types of statistical confidence estimates: "
     "q-values and posterior error probabilities.</p><p>The features used by "
-    "Percolator to represent each PSM are summarized <a href=\"features.html\">"
+    "Percolator to represent each PSM are summarized <a href=\"../file-formats/features.html\">"
     "here</a>.</p><p>Percolator also includes code from <a href=\""
     "http://noble.gs.washington.edu/proj/fido/\">Fido</a>, whch performs "
     "protein-level inference. The Fido algorithm is described in this article:"
@@ -538,22 +538,22 @@ vector< pair<string, string> > PercolatorApplication::getOutputs() const {
   vector< pair<string, string> > outputs;
   outputs.push_back(make_pair("percolator.target.proteins.txt",
     "a tab-delimited file containing the target protein matches. See "
-    "<a href=\"txt-format.html\">here</a> for a list of the fields."));
+    "<a href=\"../file-formats/txt-format.html\">here</a> for a list of the fields."));
   outputs.push_back(make_pair("percolator.decoy.proteins.txt",
     "a tab-delimited file containing the decoy protein matches. See "
-    "<a href=\"txt-format.html\">here</a> for a list of the fields."));
+    "<a href=\"../file-formats/txt-format.html\">here</a> for a list of the fields."));
   outputs.push_back(make_pair("percolator.target.peptides.txt",
     "a tab-delimited file containing the target peptide matches. See "
-    "<a href=\"txt-format.html\">here</a> for a list of the fields."));
+    "<a href=\"../file-formats/txt-format.html\">here</a> for a list of the fields."));
   outputs.push_back(make_pair("percolator.decoy.peptides.txt",
     "a tab-delimited file containing the decoy peptide matches. See "
-    "<a href=\"txt-format.html\">here</a> for a list of the fields."));
+    "<a href=\"../file-formats/txt-format.html\">here</a> for a list of the fields."));
   outputs.push_back(make_pair("percolator.target.psms.txt",
     "a tab-delimited file containing the target PSMs. See "
-    "<a href=\"txt-format.html\">here</a> for a list of the fields."));
+    "<a href=\"../file-formats/txt-format.html\">here</a> for a list of the fields."));
   outputs.push_back(make_pair("percolator.decoy.psms.txt",
     "a tab-delimited file containing the decoy PSMs. See "
-    "<a href=\"txt-format.html\">here</a> for a list of the fields."));
+    "<a href=\"../file-formats/txt-format.html\">here</a> for a list of the fields."));
   outputs.push_back(make_pair("percolator.params.txt",
     "a file containing the name and value of all parameters for the current "
     "operation. Not all parameters in the file may have been used in the "

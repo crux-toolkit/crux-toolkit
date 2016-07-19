@@ -2814,21 +2814,21 @@ vector<string> Barista::getOptions() const {
 vector< pair<string, string> > Barista::getOutputs() const {
   vector< pair<string, string> > outputs;
   outputs.push_back(make_pair("barista.xml",
-    "an <a href=\"barista-xml-format.html\">XML file</a> that contains "
+    "an <a href=\"../file-formats/barista-xml-format.html\">XML file</a> that contains "
     "four information about proteins, subset proteins, peptides, and PSMs."));
   outputs.push_back(make_pair("barista.target.proteins.txt",
-    "a <a href=\"txt-format.html\">tab-delimited file</a> containing a ranked "
+    "a <a href=\"../file-formats/txt-format.html\">tab-delimited file</a> containing a ranked "
     "list of groups of indistinguishable target proteins with associated Barista scores "
     "and q-values and with peptides that contributed to the identification of the "
     "protein group."));
   outputs.push_back(make_pair("barista.target.subset-proteins.txt",
-    "a <a href=\"txt-format.html\">tab-delimited file</a> containing groups of "
+    "a <a href=\"../file-formats/txt-format.html\">tab-delimited file</a> containing groups of "
     "indistinguishable proteins."));
   outputs.push_back(make_pair("barista.target.peptides.txt",
-    "a <a href=\"txt-format.html\">tab-delimited file</a> containing a ranked list "
+    "a <a href=\"../file-formats/txt-format.html\">tab-delimited file</a> containing a ranked list "
     "of target peptides with the associated Barista scores and q-values."));
   outputs.push_back(make_pair("barista.target.psm.txt",
-    "a <a href=\"txt-format.html\">tab-delimited file format</a> containing a ranked list "
+    "a <a href=\"../file-formats/txt-format.html\">tab-delimited file format</a> containing a ranked list "
     "of target peptide-spectrum matches with the associated Barista scores and q-values."));
   outputs.push_back(make_pair("barista.log.txt",
     "a file where the program reports its progress."));

@@ -1170,7 +1170,7 @@ string QRanker::getDescription() const {
     "identification from shotgun proteomics data sets.&quot;</a> <em>Journal "
     "of Proteome Research</em>. 8(7):3737-3745, 2009.</blockquote><p>For more "
     "on q-values and posterior error probabilities (PEP), see the "
-    "documentation for <a href=\"calibrate-scores.html\">calibrate-scores</a>."
+    "documentation for <a href=\"assign-confidence.html\">assign-confidence</a>."
     "</p>]]";
 }
 
@@ -1213,11 +1213,11 @@ vector< pair<string, string> > QRanker::getOutputs() const {
   outputs.push_back(make_pair("qranker.decoy.pep.xml",
     "An xml file containing ranked list of decoy peptide-spectrum matches."));
   outputs.push_back(make_pair("qranker.target.psm.txt",
-    "a <a href=\"txt-format.html\">tab-delimited text format</a> containing a "
+    "a <a href=\"../file-formats/txt-format.html\">tab-delimited text format</a> containing a "
     "ranked list of target peptide-spectrum matches with the associated Q-ranker "
     "scores and q-values."));
   outputs.push_back(make_pair("qranker.decoy.psm.txt",
-    "a <a href=\"txt-format.html\">tab-delimited text format</a> containing a "
+    "a <a href=\"../file-formats/txt-format.html\">tab-delimited text format</a> containing a "
     "ranked list of decoy peptide-spectrum matches with the associated Q-ranker "
     "scores and q-values."));
   outputs.push_back(make_pair("qranker.log.txt",

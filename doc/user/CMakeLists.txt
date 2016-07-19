@@ -17,17 +17,13 @@ add_custom_target(
       -DPROJECT_SOURCE_DIR=${PROJECT_SOURCE_DIR}
       -DPROJECT_BINARY_DIR=${PROJECT_BINARY_DIR}
       -DCRUX_PATH:PATH=${CRUX_PATH}
-      -DDOC_DIR:PATH=${PROJECT_SOURCE_DIR}/doc/user
+      -DDOC_DIR:PATH=${PROJECT_SOURCE_DIR}/doc/user/commands
       -P  ${CMAKE_CURRENT_SOURCE_DIR}/create-docs.cmake
 )
 
 install(
   DIRECTORY . 
-  DESTINATION doc 
+  DESTINATION doc
   PATTERN "CMakeLists.txt" EXCLUDE
-  PATTERN "comet-options" EXCLUDE
-  PATTERN "data" EXCLUDE
-  PATTERN "demos" EXCLUDE
   PATTERN "download" EXCLUDE 
-  PATTERN "open_source_download" EXCLUDE 
 )

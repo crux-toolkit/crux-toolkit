@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Crux Installation Instructions</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" type="text/css" href="../styles.css">
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-26136956-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<script type="text/javascript">
+	// Main Menu
+	$( document ).ready(function() {
+			var pull 		= $('.btn');
+				menu 		= $('nav ul');
+				menuHeight	= menu.height();
+
+			$(pull).on('click', function(e) {
+				e.preventDefault();
+				menu.slideToggle();
+			});
+
+			$(window).resize(function(){
+	    		var w = $(window).width();
+	    		if(w > 320 && menu.is(':hidden')) {
+	    			menu.removeAttr('style');
+	    		} 
+			});
+	});
+</script>
+</head>
+<body>
+	<div class="page-wrap">
+	 	<nav>
+			<div class="btn">
+		    </div>
+		    <img src="../images/crux-logo.png" id="logo"></a>
+			<ul id="navitems">
+			    <li><a href="../index.html">Home</a></li>
+			    <li><a href="../download.html">Download</a></li>
+			    <li><a href="../fileformats.html">File Formats</a></li>
+		        <li><a href="http://groups.google.com/group/crux-users">Contact</a></li> <!--Link to google support board-->
+		    </ul>
+		</nav>
+		<div id="content">
+		<!-- START CONTENT -->
+		<div id="main">
+		<h2>Crux Installation Instructions</h2>
+
+		<p/>
+		This page will walk you through the steps of
+		installing <span class=prog>crux<span/> on your computer.
+		Seperate sections describe the installation for 
+		<a href="#LINUX">Linux</a>,
+		<a href="#OSX">OS X</a>,
+		and
+		<a href="#WINDOWS">Windows</a>.
+		You have the choice of installing precompiled binaries or building
+		Crux from the source code.
+		The compiled binaries offer the easiest installation option.  
+
+		<a name="LINUX"></a>
+		<h3>Linux</h3>
+		<b>Note:</b> when typing the commands shown in these instructions
+		do not type the
+		leading <code>$</code> before each command; it indicates the
+		prompt. These instructions will refer to your home directory as
+		<code>$HOME</code>.  You can type <code>$HOME</code> in the commands
+		or you can use the fully qualified path to your home directory which
+		may be something like <code>/home/yourname/</code>.  Note that you can
+		find out the location of your home directory by logging in and
+		typing <code>pwd</code> or <code>echo $HOME</code>.
+		<h3>Installing Pre-compiled Crux Binaries on Linux</h3>
+		<ul>
+		<li><b>Download the files</b> 
+		<p/>
+		<span class=prog>Crux</span> is freely
+		available for download under an
+		<a href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0 license</a>.  
+		On the download page click on the link "Linux [architecture]
+		Build (zipped)" to download them to your computer.
+		If your computer is running a 32-bit version of Linux select the
+		i686 version.
+		If your computer is running a 64-bit version of Linux select the
+		x86_64 version.
+		If a window pops
+		up, select the "Save" button.
+		To check that the file was
+		transfered correctly, run this command
+
+		<div class=code><code>
+		$ md5sum <i>[downloaded file]</i></code>
+		</div>
+		<p/>
+		and compare the output to the "MD5 checksum" link next to the file you
+		downloaded.  
+		<p/>
+		</li>
+
+		<li><b>Unpack and install the files</b>
+		<p/>
+		The file you downloaded
+		should be named something like 
+		<span class=file>crux-x.xx-XXXX-GNU-Linux.zip</span>
+		where <span class=file>x.xx</span>
+		is replaced with the most current release version.
+		and 
+		<span class=file>XXXX</span> is either i686 or x86_64.
+		Move this file 
+		to a convenient location and unpack the file with this command.
+
+		<div class=code><code>
+		$ unzip crux-x.xx-XXXX-GNU-Linux.zip</code>
+		</div>
+		<p/>
+		You should now have a new directory,
+		<span class=file>crux-x.xx-XXXX-GNU-Linux</span>,
+		with two subdirectories <span class=file>bin</span>, and <span
+		class=file>doc</span>.  The <span class=prog>crux</span> programs are
+		in the <span class=file>bin</span> directory. You may want to move 
+		these files somewhere
+		more convenient for you, but otherwise, that completes the
+		installation!  Skip ahead to 
+		<a href="#linux_path">Setting the PATH on Linux and OS X</a>
+		for notes on how to run the executables.
+		</ul>
+		<h3>Building Crux From Source on Linux</h3>
+		<ul>
+		<li><b>Prerequisites</b>
+		<p/>
+		To build Crux from source on Linux you must have installed the
+		following software:
+		<ul>
+		<li><code>gcc</code></li>
+		<li><code>g++</code></li>
+		<li><code>cmake</code></li>
+		<li><code>make</code></li>
+		<li><code>svn</code></li>
+		<li><code>wget</code> (must support SSL)</li>
+		</ul>
+		<p/>
+		Building <span class=prog>crux</span> also requires the
+		<a href="http://proteowizard.sourceforge.net"><span class=prog>Proteowizard</span></a>
+		and 
+		<a href="http://per-colator.com"><span class=prog>Percolator</span></a>
+		libraries. 
+		These will automatically be copied from the <span class=prog>Proteowizard</span>
+		and <span class=prog>Percolator</span>
+		repositories and statically linked into <span class=prog>crux</span>.
+
+		<li><b>Download the files</b> 
+		<p/>
+		The <span class=prog>Crux</span> source is freely
+		available for download under an
+		<a href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0 license></a>.  
+		On the download page click on the link "Source (tarred, gzipped)",
+		and choose save to disk if prompted. 
+		To check that the file was
+		transfered correctly, run this command
+
+		<div class=code><code>
+		$ md5sum <i>[downloaded file]</i></code>
+		</div>
+		<p/>
+		and compare the output to the "MD5 checksum" link next to the file you
+		selected on the Crux download page.  
+		<p/>
+		The file you downloaded should be named something like 
+		<span class=file>crux-x.xx.source.tar.gz</span>, 
+		where <span class=file>x.xx</span>
+		is replaced with the most current release version.
+		<li><b>Unpack the files</b>
+		<p/>
+		Move the downloaded file to a
+		convenient location and unpack it with this command.
+
+		<div class=code>
+		$ tar -zxvf crux-x.xx.Source.tar.gz
+		</div>
+		A new directory named <span class=file>crux-x.xx.Source</span> will be
+		created and a long list of files will stream by as they are being put
+		into the new directory.
+		<p/>
+		</li>
+
+		<li><b>Configure the build</b> 
+		<p/>
+		Move into the <span class=file>crux-x.xx.Source</span>
+		directory from step 1.
+		Run the command
+		<div class=code><code>
+		cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:PATH=&lt;install directory&gt; .
+		</code>
+		</div>
+		<p/>
+		where <span class=file>&lt;install directory&gt;</span> is
+		the location where you wish to install the <span class=prog>crux</span> programs. 
+		If you want <span class=prog>crux</span> to go in <span class=file>$HOME/bin</span>,
+		then <span class=file>&lt;install directory&gt;</span> would be <span class=file>$HOME</span>.
+		The installation process will automatically put the programs in a directory called
+		<span class=file>bin</span>.
+		<p/>
+		Note, this configuration will build with optimizations turned on,
+		and will not include debug symbols.
+		To build with optimizations turned off,
+		and debug symbols included,
+		use the command:
+		<div class=code><code>
+		cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX:PATH=&lt;install directory&gt; .
+		</code>
+		</div>
+		</li>
+		<p/>
+		<li><b>Build and install</b>
+		<p/>
+		To complete the process, run these two commands.</li>
+		<div class=code><code>
+		$ make<br>
+		$ make install
+		</code>
+		</div>
+		<p/>
+		The <span class=prog>crux</span> programs are
+		in the <span class=file>bin</span> subdirectory
+		of the
+		<span class=file>&lt;install directory&gt;</span>
+		That completes the installation!  Skip ahead to 
+		<a href="#linux_path">Setting the PATH on Linux and OS X</a>
+		for notes on how to run the executables.
+		</ul>
+		<a name="OSX"></a>
+		<h3>OS X</h3>
+		<span class=prog>Crux</span> requires OS X Yosemite.
+		<p/>
+		<b>Note:</b> 
+		when typing the commands shown in these instructions do not type the
+		leading <code>$</code> before each command; it indicates the
+		prompt. These instructions will refer to your home directory as
+		<code>$HOME</code>.  You can type <code>$HOME</code> in the commands
+		or you can use the fully qualified path to your home directory which
+		may be something like <code>/home/yourname/</code>.  Note that you can
+		find out the location of your home directory by logging in and
+		typing <code>pwd</code> or <code>echo $HOME</code>.
+		<p/>
+		To install and use <code>crux</code> on OS X
+		you'll need to be familiar with the <span class=code>Terminal</span>
+		application.
+		<h3>Installing Pre-compiled Crux Binaries on OS X</h3>
+		<ul>
+		<li><b>Download the files</b> 
+		<p/>
+		<span class=prog>Crux</span> is freely
+		available for download under an
+		<a href=""http://www.apache.org/licenses/LICENSE-2.0>Apache 2.0 license</a>.  
+		On the download page click on the link "OS X x86_64 Build (zipped)" 
+		to download them to your computer.
+		If a window pops
+		up, select the "Save" button.
+		To check that the file was
+		transfered correctly, run this command
+
+		<div class=code><code>
+		$ md5 <i>[downloaded file]</i></code>
+		</div>
+		<p/>
+		and compare the output to the "MD5 checksum" link next to the file you
+		downloaded.  
+		<p/>
+		</li>
+
+		<li><b>Unpack and install the files</b>
+		<p/>
+		The file you downloaded
+		should be named something like 
+		<span class=file>crux-x.xx.Darwin.x86_64.zip</span>
+		where <span class=file>x.xx</span>
+		is replaced with the most current release version.
+		Move this file 
+		to a convenient location and unpack the file with this command.
+
+		<div class=code><code>
+		$ unzip crux-x.xx.Darwin.x86_64.zip</code>
+		</div>
+		<p/>
+		You should now have a new directory,
+		<span class=file>crux-x.xx.Darwin.x86_64</span>,
+		with two subdirectories <span class=file>bin</span>, and <span
+		class=file>doc</span>.  The <span class=prog>crux</span> programs are
+		in the <span class=file>bin</span> directory. You may want to move 
+		these files somewhere
+		more convenient for you, but otherwise, that completes the
+		installation!  Skip ahead to 
+		<a href="#linux_path">Setting the PATH on Linux and OS X</a>
+		for notes on how to run the executables.
+		</ul>
+		<h3>Building Crux From Source on OS X</h3>
+		<ul>
+		<li><b>Prerequisites</b>
+		<p/>
+		To build Crux from source on OS X you must have installed the
+		following software:
+		<ul>
+		<li><code>OS X Yosemite</code></li>
+		<li><code>XCode 6.3.1 or later</code></li>
+		<li><code>XCode Command Line Tools</code></li>
+		<li><code>cmake</code></li>
+		<li><code>make</code></li>
+		<li><code>svn</code></li>
+		<li><code>wget</code> (must support SSL)</li>
+		</ul>
+		<p/>
+		Building <span class=prog>crux</span> also requires the
+		<a href="http://proteowizard.sourceforge.net"><span class=prog>Proteowizard</span></a>
+		and 
+		<a href="http://per-colator.com"><span class=prog>Percolator</span></a>
+		libraries. 
+		These will automatically be copied from the <span class=prog>Proteowizard</span>
+		and <span class=prog>Percolator</span>
+		repositories and statically linked into <span class=prog>crux</span>.
+		<p />
+		Building <span class=prog>Crux</span> on OS X requires a current version of
+		<span class=prog>XCode</span>, and the XCode command line tools.
+		Earlier versions of <span class=prog>Crux</span> 
+		had to be built using the GCC compilers.
+		which are no supported by Apple.
+		<p/>
+		The programs
+		<span class=prog>cmake</span>,
+		<span class=prog>svn</span>,
+		and
+		<span class=prog>wget</span>,
+		can be installed from 
+		<a href="https://www.macports.org">MacPorts</a>
+		or 
+		<a href="http://brew.sh">Homebrew</a>.
+		Note that you must install the <span class=prog>ssl</span> variant of 
+		<span class=prog>wget</span>:
+		<div class=code>
+		<code>
+		$ sudo port install wget +ssl
+		</code>
+		</div>
+		<p/>
+		<li><b>Download the files</b> 
+		<p/>
+		The <span class=prog>Crux</span> source is freely
+		available for download under an
+		<a href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0 license></a>.  
+		On the download page click on the link "Source (tarred, gzipped)",
+		and choose save to disk if prompted. 
+		To check that the file was
+		transfered correctly, run this command
+
+		<div class=code><code>
+		$ md5sum <i>[downloaded file]</i></code>
+		</div>
+		<p/>
+		and compare the output to the "MD5 checksum" link next to the file you
+		selected on the Crux download page.  
+		<p/>
+		The file you downloaded should be named something like 
+		<span class=file>crux-x.xx.source.tar.gz</span>, 
+		where <span class=file>x.xx</span>
+		is replaced with the most current release version.
+		<li><b>Unpack the files</b>
+		<p/>
+		Move the downloaded file to a
+		convenient location and unpack it with this command.
+
+		<div class=code>
+		$ tar -zxvf crux-x.xx.Source.tar.gz
+		</div>
+		A new directory named <span class=file>crux-x.xx.Source</span> will be
+		created and a long list of files will stream by as they are being put
+		into the new directory.
+		<p/>
+		</li>
+
+		<li><b>Configure the build</b> 
+		<p/>
+		Move into the <span class=file>crux-x.xx.Source</span>
+		directory from step 1.
+		Run the command
+		<div class=code><code>
+		cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:PATH=&lt;install directory&gt; .
+		</code>
+		</div>
+		<p/>
+		where <span class=file>&lt;install directory&gt;</span> is
+		the location where you wish to install the <span class=prog>crux</span> programs. 
+		If you want <span class=prog>crux</span> to go in <span class=file>$HOME/bin</span>,
+		then <span class=file>&lt;install directory&gt;</span> would be <span class=file>$HOME</span>.
+		The installation process will automatically put the programs in a directory called
+		<span class=file>bin</span>.
+		<p/>
+		Note, this configuration will build with optimizations turned on,
+		and will not include debug symbols.
+		To build with optimizations turned off,
+		and debug symbols included,
+		use the command:
+		<div class=code><code>
+		cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX:PATH=&lt;install directory&gt; .
+		</code>
+		</div>
+		</li>
+		<p/>
+		<li><b>Build and install</b>
+		<p/>
+		To complete the process, run these two commands.</li>
+		<div class=code><code>
+		$ make<br>
+		$ make install
+		</code>
+		</div>
+		<p/>
+		The <span class=prog>crux</span> programs are
+		in the <span class=file>bin</span> subdirectory
+		of the
+		<span class=file>&lt;install directory&gt;</span>
+		That completes the installation!  Skip ahead to 
+		<a href="#linux_path">Setting the PATH on Linux and OS X</a>
+		for notes on how to run the executables.
+		</ul>
+
+		<a name="linux_path"></a>
+		<h3>Setting the PATH on Linux and OS X</h3>
+		<ul>
+		<li>
+		<p/>
+		On Linux and OS X systems you can always run any of the programs by specifying its full
+		path.  For example,</p>
+
+		<div class=code><code>
+		$ <em>&lt;install directory&gt;</em>/bin/crux comet</code>
+		</div>
+
+		<p>In this final step of the installation, we'll set things up so that
+		you can also run any of the programs by just typing its name.  This is
+		done with an environment variable called <span
+		class=code>$PATH</span>.  <span class=code>$PATH</span> is a list of
+		places that the computer looks for executable programs.  Find out what
+		is in the current list with this command:
+
+		<div class=code><code>
+		$ echo $PATH</code><br>
+		</div>
+		<p>The value returned might look something like this:
+		<code>
+		/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games
+		</code>
+		<p>The first directory in this colon-separated list, <span
+		class=out>/usr/local/bin</span>, is the first place the computer looks
+		for a program.  If it doesn't find the program there it tries <span
+		class=out>/usr/bin</span> and so on down the list.  You can either
+		move the crux executable files into one of these directories already
+		in your PATH, or you can add <span
+		class=code><em>&lt;install directory&gt;</em></span> to PATH with this
+		command.  (Remember to replace the word <em>&lt;install directory&gt;</em> with the
+		actual location of your installation)</p> 
+
+		<div class=code><code>
+		$ export PATH=$PATH:&lt;install directory&gt;/bin</code>
+		</div>
+
+		<p>Try '<span class=code>echo $PATH</span>' again to see that the
+		change was made.  <em>&lt;install directory&gt;/bin</em> should be at the end of the
+		list.  Now you can 
+		run the <span class=prog>crux</span> programs by just typing their
+		names.  Try this.</p>
+
+		<div class=code><code>
+		$ crux comet</code>
+		</div>
+
+		<p>The change to <span class=code>$PATH</span> is only temporary.  As
+		soon as you close the window, the change will disappear.  In order to
+		make the change every time you log on, add the line <span
+		class=code>export PATH=$PATH:&lt;install directory&gt;/bin</span> to the file <span
+		class=out>.bashrc</span> located in your home directory.  You will
+		have to log on again for the change to take effect.
+		</ul>
+		<a name="WINDOWS"></a>
+		<h3>Windows</h3>
+		<h3>Installing Pre-compiled Crux Binaries on Windows</h3>
+
+		<ul>
+		<li><b>Prerequisites</b>
+		<p/>
+		To run Crux with support for vendor specific file formats
+		on Windows you must have installed the following software:
+		<ul>
+		<li>
+		<a href="https://thermo.flexnetoperations.com/control/thmo/login">
+		<code>Thermo MSFileReader</code></a>
+		</ul>
+		<p/>
+		<li><b>Download the files</b> 
+		<p/>
+		<span class=prog>Crux</span> is freely
+		available for download under an
+		<a href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0 license</a>.  
+		On the download page click on the link "Windows x86
+		Build (zipped)" to download them to your computer.
+		If a window pops up, select the "Save" button.
+		</li>
+		<li><b>Unpack and install the files</b>
+		<p/>
+		Browse to the downloaded file in Windows Explorer.
+		Right click on the file and choose "Expand All ...".
+		You should now have a new directory,
+		<span class=file>crux-x.xx</span>,
+		with two subdirectories <span class=file>bin</span>, and <span
+		class=file>doc</span>.  The <span class=prog>crux</span> programs are
+		in the <span class=file>bin</span> directory. You may want to move 
+		these files somewhere
+		more convenient for you, but otherwise, that completes the
+		installation!  Skip ahead to 
+		<a href="#windows_path">Setting the PATH on Windows</a>
+		for notes on how to run the executables.
+		</ul>
+
+		<h3>Building Crux From Source on Windows</h3>
+		<ul>
+		<li><b>Prerequisites</b>
+		<p/>
+		To build Crux from source on Windows you must have installed the
+		following software:
+		<ul>
+		<li><code>
+		<a
+		href="http://www.visualstudio.com/downloads/download-visual-studio-vs#DownloadFamilies_4">Microsoft
+		Visual C++ 2013</a></code></li>
+		<li><a href="http://www.cmake.org/cmake/resources/software.html"><code>CMake</code></a></li>
+		<li><a href="http://sourceforge.net/projects/win32svn/"><code>SVN</code></a></li>
+		<li><a href="http://getgnuwin32.sourceforge.net"><code>wget</code> (must support SSL)</a></li>
+		<li><a
+		href="https://thermo.flexnetoperations.com/control/thmo/login">
+		<code>Thermo MSFileReader</code></a> (This may be omitted if support for 
+		vendor specific file formats is disabled.)</li>
+		</ul>
+		<p/>
+		<b>Other verions of Visual Studio will not be able to build Crux!</b>
+		You must have Visual Studio 2013.
+		Visual Studio 2013 Express for Windows Desktop does work.
+		<p/>
+		<span class=code>wget</span> is available as part of the GnuWin32 package.
+		The easiest way to install this is via the 
+		<a href="http://getgnuwin32.sourceforge.net"><code>GetGnuWin32</code></a>
+		package manager.
+		<span class=code>wget</span> must support SSL, so install the optional
+		packages provided by
+		<a href="http://getgnuwin32.sourceforge.net"><code>GetGnuWin32</code></a> .
+		<p/>
+		<span class=code>wget</span> and 
+		<span class=code>svn</span> must be included in the execution PATH
+		for your system.
+		See the section <i>Setting the PATH on Windows</i> for more information.
+		<p/>
+		<li><b>Download the file</b> 
+		<p/>
+		The <span class=prog>Crux</span> source is freely
+		available for download under an
+		<a href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0 license></a>.  
+		On the download page click on the link "Source (zipped)",
+		and choose save to disk if prompted. 
+		<p/>
+		The file you downloaded should be named something like 
+		<span class=file>crux-x.xx.Source.zip</span>, 
+		where <span class=file>x.xx</span>
+		is replaced with the most current release version.
+		<p />
+		<li><b>Unpack the files</b> 
+		<p />
+		Unpack the downloaded file using Windows Explorer.
+		Right click on the file icon and click on "Extract All ...".
+		A new directory named <span class=file>crux-x.xx.Source</span> will be
+		created containing the source code and documentation for Crux.
+		<p/>
+		<b>Note</b> Windows has a fixed maximum path length of 270 characters.
+		The Crux build creates several levels of directories so it
+		is very easy to exceed this limit. 
+		This will cause the build to fail.
+		To avoid this problem we recommend keeping the Crux source and build trees 
+		very near the disk root (typically
+		<span class=code>C:\</span>
+
+		</li>
+		<li>
+		<p/>
+		<b>Open the command line development environment.</b>
+		<p/>
+		Under the "Start" button
+		open the "Visual Studio 2013" folder, then open the "Visual Studio Tools"
+		folder, and double-click on "Developer Command Prompt for VS2013".
+		This will launch a 
+		<span class=file>cmd</span> shell configured to use the 
+		Microsoft development tools.
+		</li>
+		<li><b>Configure</b> 
+		<p/>
+		In the <span class=file>cmd</span> shell  you just opened,
+		move into the <span class=file>crux-x.xx.Source</span>
+		directory from step 1.
+		Run the command
+		<div class=code><code>
+		cmake -DCMAKE_INSTALL_PREFIX:PATH=&lt;install directory&gt; -G "Visual Studio
+		12 Win64" .
+		</code>
+		</div>
+		<p/>
+		where <span class=file>&lt;install directory&gt;</span> is
+		the location where you wish to install the <span class=prog>crux</span> programs. 
+		Note that, somewhat confusingly, Visual Studio 2013 is version 12.
+		<p/>
+		If you wish to disable support for vendor specific file formats,
+		use this command instead
+		<p/>
+		<div class=code><code>
+		cmake 
+		-DCMAKE_INSTALL_PREFIX:PATH=&lt;install directory&gt; -DINCLUDE_VENDOR_LIBRARIES=FALSE -G "Visual Studio 12 Win64" .
+		</code>
+		</div>
+		<p/>
+		<li><b>Build and install</b> 
+		<p/>
+		To complete the process run the commands</li>
+		<div class=code><code>
+		cmake --build . --config Release --target ALL_BUILD
+		<br/>
+		cmake --build . --config Release --target INSTALL
+		</code>
+		<p/>
+		Once you've run the configuration step
+		you can also build and debug Crux from within the Visual Studio IDE.
+		CMake will generate a file named
+		<span class=file>crux.sln</span>. 
+		Open this file in Visual Studio.
+		You can select the build configuration: Release or Debug
+		in the combo box under the menu bar.
+		<p/>
+		<b>Note</b> The Crux build will not automatically generate
+		debugging symbols even if you've selected the Debug configuration.
+		Right click on the Crux folder in the "Solution Explorer" and
+		select "Properties" from the pop-up menu.
+		In the "Properties" page select the "Debugging" item under the "Linker"
+		properties. Set "Generate Debug Info" to "Yes".
+		<p/>
+		Changes made to the Visual Studio solution and project files will be lost
+		the next time CMake regenerates the project.
+		</div>
+		<p/>
+
+		</ul>
+		</ul>
+
+		<a name="windows_path"></a>
+		<h3>Setting the PATH on Windows</h3>
+		<ul>
+		<li>
+		On Windows systems you can always run any of the programs by specifying its full
+		path.  For example,</p>
+
+		<div class=code><code>
+		C:\ <em>&lt;install directory&gt;</em>\bin\crux comet</code>
+		</div>
+
+		<p>In this final step of the installation, we'll set things up so that
+		you can also run any of the programs by just typing its name.  This is
+		done with an environment variable called <span
+		class=code>PATH</span>.  <span class=code>PATH</span> is a list of
+		directoires that the computer looks for executable programs.  Find out what
+		is in the current list with this command:
+		<p/>
+		<div class=code><code>
+		C:\ echo %PATH%</code><br>
+		</div>
+		<p/>
+		<p>The value returned might look something like this:
+		<p/>
+		<div class=code><code>
+		<code>
+		C:\Windows;C:\Windows\system32;c:\Program Files\Microsoft Visual 
+		Studio 10.0\Common7\IDE\;c:\Program Files\Microsoft 
+		Visual Studio 10.0\VC\BIN;C:\Program Files\Common Files\Microsoft Shared\
+		Windows Live;C:\Windows\System32\Wbem;C:\Windows\S
+		ystem32\WindowsPowerShell\v1.0\;c:\Program files\Notepad++;C:\Program Files\Tort
+		oiseSVN\bin;C:\Program Files\Windows Live\Shared;C:\Program Files\CMake 2.8\bin;
+		C:\Program Files\PuTTY;C:\Program Files\Subversion\bin;C:\GnuWin32\bin;
+		</code>
+		</div>
+		<p>The first directory in this semicolon-separated list, <span
+		class=out>C:\Windows</span>, is the first place the computer looks
+		for a program.  If it doesn't find the program there it tries <span
+		class=out>C:\WIndows\system32</span> and so on down the list.  You can either
+		move the crux executable files into one of these directories already
+		in your PATH, or you can add <span
+		class=code><em>&lt;install directory&gt;</em></span> to PATH with this
+		command.  (Remember to replace the word <em>&lt;install directory&gt;</em> with the
+		actual location of your installation)</p> 
+		<div class=code><code>
+		  set PATH=%PATH%;&lt;install directory&gt;\bin;</code><br>
+		</div>
+		<p>The change to <span class=code>PATH</span> is only temporary.
+		To make a permanent change to the path follow the following steps:
+		<ol>
+		<li>Open the "Control Panel".</li>
+		<li>Click on "System and Security".</li>
+		<li>Click on "Advanced System Settings" in the list on the left 
+		(you may be asked to give an administrative password).
+		<li>
+		You'll  presented with a dialog box titled "System Properties".
+		Click on the button labeled "Environment Variables".
+		<li>
+		You'll be presented with a new dialog box containing two list boxes: one for user
+		environment variables, and one for system environment variables.
+		Select the 
+		<span class=code>PATH</span>
+		variable in the system variables list, and click on the "Edit ..." button.
+		<li>
+		Add the full path to the directory containing the Crux executables to the 
+		list of directories. Remember that each
+		<span class=code>PATH</span>
+		entry should end with a semi-colon.
+		</ol>
+
+		</div>
+		<!-- END CONTENT -->
+		</div>
+	</div>
+
+<footer class="site-footer">
+	<div id="centerfooter">
+		<div class="footerimportantlinks">
+			<img src="../images/linkicon.png" style="width:16px; height:16px"><h3>Important links</h3>
+			<ul>
+				<li><a href="../faq.html">Crux <strong>FAQ</strong></a></li>
+				<li><a href="../glossary.html">Glossary of terminology</a></li>
+				<li><a href="http://scholar.google.com/citations?hl=en&user=Rw9S1HIAAAAJ">Google Scholar profile</a></li>
+				<li><a href="https://sourceforge.net/projects/cruxtoolkit/">SourceForge Issue's list</a></li>
+				<li><a href="../release-notes.html">Release Notes</a></li>
+				<li><a href="https://mailman1.u.washington.edu/mailman/listinfo/crux-users" title="Receive announcements of new versions">Join the mailing list</a></li>
+				<li><a href="http://www.apache.org/licenses/LICENSE-2.0">Apache license</a></li>
+				<li><a href="http://groups.google.com/group/crux-users">Support Board</a></li>
+			</ul>
+		</div>
+		<div class="footerimportantlinks tutoriallinks">
+			<img src="../images/tutorialicon.png" style="height:16px"><h3>Tutorials</h3>
+			<ul>
+				<li><a href="install.html">Installation</a></li>
+				<li><a href="gettingstarted.html">Getting started with Crux</a></li>
+				<li><a href="search.html">Running a simple search using Tide and Percolator</a></li>
+				<li><a href="customizedsearch.html">Customization and search options</a></li>
+				<li><a href="spectralcounts.html">Using spectral-counts</a></li>
+			</ul>
+		</div>
+		<div id="footertext">
+			<p>
+				The original version of Crux was written by Chris Park and Aaron Klammer
+				under the supervision
+				of <a href="http://www.gs.washington.edu/faculty/maccoss.htm">Prof. Michael
+				MacCoss</a>
+				and <a href="http://noble.gs.washington.edu/~noble">Prof. William
+				Stafford Noble</a> in the Department of Genome Sciences at the
+				University of Washington, Seattle.  Website by <a href="http://www.yuvalboss.com/">Yuval Boss</a>. 
+				<br />The complete list of contributors
+				can be found <a href="../contributors.html">here</a>.
+				<br />
+				<br />
+				Maintenance and development of Crux is funded by the <a href="https://www.nih.gov/">National Institutes of Health</a> awards R01 GM096306 and P41 GM103533. 
+			</p>
+		</div>
+	</div>
+</footer>
+	
+</body>
+
+</html>

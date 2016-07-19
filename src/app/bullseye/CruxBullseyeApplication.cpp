@@ -170,7 +170,7 @@ string CruxBullseyeApplication::getDescription() const {
     "retention time tolerance (&quot;--retention-tolerance&quot;) or reducing "
     "the tolerance for persistent peptides (&quot;--persist-tolerance&quot;) "
     "will reduce the chances of multiple PPIDs being assigned.</p><p>Bullseye "
-    "uses Hardklör, so all of the <a href=\"hardklor.html\">Hardklör "
+    "uses Hardkl&ouml;r, so all of the <a href=\"hardklor.html\">Hardkl&ouml;r "
     "parameters</a> may also be used with Bullseye. For users familiar with "
     "the standalone version of Bullseye, the parameter mapping is "
     "<a href=\"bullseye_standalone_to_crux.html\">here</a>.</p>]]";

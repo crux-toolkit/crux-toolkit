@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Customization and search options</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" type="text/css" href="../styles.css">
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-26136956-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<script type="text/javascript">
+	// Main Menu
+	$( document ).ready(function() {
+			var pull 		= $('.btn');
+				menu 		= $('nav ul');
+				menuHeight	= menu.height();
+
+			$(pull).on('click', function(e) {
+				e.preventDefault();
+				menu.slideToggle();
+			});
+
+			$(window).resize(function(){
+	    		var w = $(window).width();
+	    		if(w > 320 && menu.is(':hidden')) {
+	    			menu.removeAttr('style');
+	    		} 
+			});
+	});
+</script>
+</head>
+<body>
+	<div class="page-wrap">
+	 	<nav>
+			<div class="btn">
+		    </div>
+		    <img src="../images/crux-logo.png" id="logo"></a>
+			<ul id="navitems">
+			    <li><a href="../index.html">Home</a></li>
+			    <li><a href="../download.html">Download</a></li>
+			    <li><a href="../fileformats.html">File Formats</a></li>
+		        <li><a href="http://groups.google.com/group/crux-users">Contact</a></li> <!--Link to google support board-->
+		    </ul>
+		</nav>
+		<div id="content">
+		<!-- START CONTENT -->
+		<h2>Customization and search options</h2>
+
+		<p><span class="prog">Crux</span> allows the user the flexibility to
+		change many of the search and analysis parameters.  Attributes like
+		the output format and which peptides are selected from the protein
+		database are controlled through numerous options.  This page
+		starts with some general information about options and then describe
+		the use of some key <span class="prog">crux</span> options.
+		</p>
+
+		<a name="intro"></a>
+		<h3>Introduction to options</h3>
+
+		<p>
+		A <span class="prog">crux</span> command is made up of four parts:
+		executable name, command, options, and required arguments. Let's use
+		a <span class="prog">crux tide-search</span> command as an example.
+		Here is the general form.</p>
+
+		<div class="code"><code>
+		$ crux tide-search [options] &lt;mass spectra&gt; &lt;peptide index&gt;
+		</code>
+		</div>
+
+		<p>
+		In this case, the command is <span class="prog">tide-search</span>.
+		This is followed by zero or more optional arguments.  Finally, the
+		required arguments, listed above inside angle brackets, include the
+		name of the file containing the spectra to be identified and the name
+		of a peptide index produced previously by
+		the <span class="prog">tide-index</span> command.</p>
+
+		<p>
+		All of the available options are described for each command on
+		the <a href="../index.html">documentation</a> pages.  You can also get a
+		list of available options by running a command with no arguments.
+		For example, the command</p>
+
+		<div class="code"><code>
+		$ crux tide-search</code>
+		</div>
+
+		<p>
+		will produce output that looks like this:</p>
+
+		<pre>
+bash-3.2$ ~/proj/crux/trunk/src/c/crux tide-search
+FATAL: Error in command line. Error # 5
+The required argument &lt;tide spectra file&gt; is missing.
+
+USAGE:
+
+   crux tide-search [options] &lt;tide spectra file&gt; &lt;tide database index&gt; 
+
+REQUIRED ARGUMENTS:
+
+  &lt;tide spectra file&gt; The name of the file from which to parse the fragmentation spectra, in any of the file formats supported by ProteoWizard. Alternatively, the argument may be a binary spectrum file produced by a previous run of crux tide-search using the store-spectra parameter.
+  &lt;tide database index&gt; A directory containing a database index created by a previous run of crux tide-index.
+
+OPTIONAL ARGUMENTS:
+
+  [--precursor-window &lt;double&gt;]
+     Search peptides within +/- 'precursor-window' of the spectrum mass. 
+     Definition of precursor window depends upon precursor-window-type.
+     Default=3.0.
+  [--precursor-window-type &lt;string&gt;]
+     Window type to use for selecting candidate peptides. 
+     &lt;string&gt;=mass|mz|ppm. Default=mass.
+  [--spectrum-min-mz &lt;double&gt;]
+     The lowest spectrum m/z to search. Default=0.0.
+  [--spectrum-max-mz &lt;double&gt;]
+     The highest spectrum m/z to search. Default=no maximum.
+  [--min-peaks &lt;int&gt;]
+     The minimum number of peaks a spectrum must have for it to be
+     searched. Default=20.
+...
+		</pre>
+
+		<p>The first three lines are telling you that you forgot the required
+		arguments and are reminding you what they are.  The following lines
+		list all the options (only five of which are shown
+		above).  <span class="prog">Crux</span> options all begin with two
+		dashes followed by the option name.  The name is followed by a space
+		and the appropriate argument.  This example increases the verbosity to
+		40:
+		</p>
+
+		<div class="code"><code>
+		$ crux tide-search --verbosity 40 sample.ms2 yeast.fasta</code>
+		</div>
+
+		<a name="file"></a>
+		<h3>Specifying options via a parameter file</h3>
+
+		<p>
+		The second option listed
+		above, <span class="out">--parameter-file</span>, is available for all
+		Crux commands.  The parameter file allows multiple options to be
+		specified in a file.  All of the command line options can be put in a
+		parameter file, but the format is slightly different.  In the
+		parameter file, the two leading dashes are removed from the option
+		name, and the option name and value must be separated by an equal sign
+		instead of a space:
+		</p>
+		<div class=code><code>
+		&lt;option name&gt;=&lt;argument&gt;</code>
+		</div>
+
+		<p>
+		The above example, in which we changed the verbosity, would look like this
+		in a parameter file:</p>
+
+		<div class="code"><code>
+		verbosity=40
+		</div>
+
+		<p>
+		The parameter file allows only one option per line.  Lines beginning
+		with "#" are considered comments and are ignored.  A sample parameter
+		file can be found <a href="../file-formats/parameter-file.html">here</a>.  Command
+		line and parameter file options may be used separately or together.
+		If an option is specified in both places, then value on the command
+		line will be used.
+		</p>
+
+		<p>
+		During execution of any Crux command, a parameter file containing the
+		name and value of all the options for the current operation
+		will be automatically be saved in the output directory.  Note that not
+		all parameters in the file may have been used in the operation.  The
+		parameter file will be named
+		<code>&lt;command&gt;.params.txt</code>,
+		where <code>&lt;tag&gt;</code> is the name of the command that was
+		executed.</p>
+
+		<a name="shared"></a>
+		<h3>Shared options</h3>
+
+		<p>
+		In addition to <code>--parameter-file</code>, Crux includes several 
+		other options that are shared across all, or nearly all, Crux commands.
+		</p>
+
+		<ul>
+		<li>
+		<code>--output-dir &lt;filename&gt;</code> &ndash; 
+		The name of the directory where output files will be created.
+		Default = crux-output.</li>
+
+		<li>
+		<code>--fileroot &lt;string&gt;</code> &ndash; 
+		The <code>fileroot</code> string will be added as a prefix to all
+		output file names. Default = none.</li>
+
+		<li>
+		<code>--overwrite &lt;T|F&gt;</code> &ndash; By default, if Crux
+		detects that the output file it is about to produce already exists,
+		then Crux will exit with an error.  This option allows Crux to
+		overwrite existing files.</li>
+
+		<li>
+		<code>--verbosity &lt;0-100&gt;</code> &ndash; Specify the verbosity
+		of the current command. Each level prints the following messages,
+		including all those at lower verbosity levels: 0-fatal errors,
+		10-non-fatal errors, 20-warnings, 30-information on the progress of
+		execution, 40-more progress information, 50-debug info, 60-detailed
+		debug info. Default = 30.</li>
+
+		<li>
+		In addition, many Crux commands include various options of the form
+		<code>--&lt;format&gt;-output</code>.  These options take Boolean
+		arguments (specified as "T" or "F") and indicate whether output files
+		in the specified format should be produced.  For example, in addition
+		to tab-delimited text format, <code>tide-search</code> can produce
+		output in PepXML, MZid, SQT and PINxml formats.</li>
+
+		</ul>
+
+		<a name="index"></a>
+		<h3>Changing the indexing and searching parameters</h3>
+
+		<p>
+		Various options to <span class="prog">tide-index</span> control how
+		the proteins in the database are converted to peptides.  These options
+		fall into several categories, allowing specification of peptide
+		properties such as minimum and maximum length, enzymatic digestion
+		rules, decoy database generation and specification of various static
+		and variable modifications.  These options are fully
+		documented <a href="../commands/tide-index.html">here</a>.  Similarly,
+		the <code><a href="../commands/tide-search.html">tide-search</a></code>
+		documentation describes options for selecting which spectra to score,
+		the rules for selecting candidate peptides for a given spectrum, and
+		for deciding what kinds of scores to report.</p>
+		<!-- END CONTENT -->
+		</div>
+	</div>
+
+<footer class="site-footer">
+	<div id="centerfooter">
+		<div class="footerimportantlinks">
+			<img src="../images/linkicon.png" style="width:16px; height:16px"><h3>Important links</h3>
+			<ul>
+				<li><a href="../faq.html">Crux <strong>FAQ</strong></a></li>
+				<li><a href="../glossary.html">Glossary of terminology</a></li>
+				<li><a href="http://scholar.google.com/citations?hl=en&user=Rw9S1HIAAAAJ">Google Scholar profile</a></li>
+				<li><a href="https://sourceforge.net/projects/cruxtoolkit/">SourceForge Issue's list</a></li>
+				<li><a href="../release-notes.html">Release Notes</a></li>
+				<li><a href="https://mailman1.u.washington.edu/mailman/listinfo/crux-users" title="Receive announcements of new versions">Join the mailing list</a></li>
+				<li><a href="http://www.apache.org/licenses/LICENSE-2.0">Apache license</a></li>
+				<li><a href="http://groups.google.com/group/crux-users">Support Board</a></li>
+			</ul>
+		</div>
+		<div class="footerimportantlinks tutoriallinks">
+			<img src="../images/tutorialicon.png" style="height:16px"><h3>Tutorials</h3>
+			<ul>
+				<li><a href="install.html">Installation</a></li>
+				<li><a href="gettingstarted.html">Getting started with Crux</a></li>
+				<li><a href="search.html">Running a simple search using Tide and Percolator</a></li>
+				<li><a href="customizedsearch.html">Customization and search options</a></li>
+				<li><a href="spectralcounts.html">Using spectral-counts</a></li>
+			</ul>
+		</div>
+		<div id="footertext">
+			<p>
+				The original version of Crux was written by Chris Park and Aaron Klammer
+				under the supervision
+				of <a href="http://www.gs.washington.edu/faculty/maccoss.htm">Prof. Michael
+				MacCoss</a>
+				and <a href="http://noble.gs.washington.edu/~noble">Prof. William
+				Stafford Noble</a> in the Department of Genome Sciences at the
+				University of Washington, Seattle.  Website by <a href="http://www.yuvalboss.com/">Yuval Boss</a>. 
+				<br />The complete list of contributors
+				can be found <a href="../contributors.html">here</a>.
+				<br />
+				<br />
+				Maintenance and development of Crux is funded by the <a href="https://www.nih.gov/">National Institutes of Health</a> awards R01 GM096306 and P41 GM103533. 
+			</p>
+		</div>
+	</div>
+</footer>
+	
+</body>
+
+</html>

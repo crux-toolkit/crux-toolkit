@@ -1068,7 +1068,7 @@ vector< pair<string, string> > TideSearchApplication::getOutputs() const {
   vector< pair<string, string> > outputs;
   outputs.push_back(make_pair("tide-search.target.txt",
     "a tab-delimited text file containing the target PSMs. See <a href=\""
-    "txt-format.html\">txt file format</a> for a list of the fields."));
+    "../file-formats/txt-format.html\">txt file format</a> for a list of the fields."));
   outputs.push_back(make_pair("tide-search.decoy.txt",
     "a tab-delimited text file containing the decoy PSMs. This file will only "
     "be created if the index was created with decoys."));

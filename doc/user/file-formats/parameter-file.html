@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>MSToolKit</title>
+<title>Crux Template</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<link rel="stylesheet" type="text/css" href="styles.css">
+<link rel="stylesheet" type="text/css" href="../styles.css">
 <script type="text/javascript">
   var _gaq = _gaq || [];
   _gaq.push(['_setAccount', 'UA-26136956-1']);
@@ -42,67 +42,67 @@
 	 	<nav>
 			<div class="btn">
 		    </div>
-		    <img src="images/crux-logo.png" id="logo"></a>
+		    <img src="../images/crux-logo.png" id="logo"></a>
 			<ul id="navitems">
-			    <li><a href="index.html">Home</a></li>
-			    <li><a href="download.html">Download</a></li>
-			    <li><a href="fileformats.html">File Formats</a></li>
+			    <li><a href="../index.html">Home</a></li>
+			    <li><a href="../download.html">Download</a></li>
+			    <li><a href="../fileformats.html">File Formats</a></li>
 		        <li><a href="http://groups.google.com/group/crux-users">Contact</a></li> <!--Link to google support board-->
 		    </ul>
 		</nav>
 		<div id="content">
 		<!-- START CONTENT -->
-		<h2>MSToolkit</h2>
-		<p>
-		MSToolkit is a library for handling mass spectrometry data in various file
-		formats. Crux is capable of using MSToolkit to parse spectrum files. The
-		ProteoWizard parser is used by default, but the MSToolkit parser can be used by
-		commands that support the <span class="code">spectrum-parser</span> parameter.
+		<h2>Crux parameter files</h2>
+
+		<b>Description:</b>
+		<p>A file containing parameters and their arguments passed to a crux
+		program to control various aspects of execution.  Every command-line
+		option and many additional options can be read from a parameter
+		file.  If an option is specified in a file and on the command line,
+		the command line value will be used.
 		</p>
-		<p>
-		The following is a list of spectrum file formats supported by MSToolkit.
+
+		<b>Usage:</b>
+		<p><span class="code">&lt;program name&gt; --parameter-file &lt;file name&gt; [&lt;argument&gt;+]</span></p>
+
+		<b>Format:</b>
+		<p>The parameter file can contain parameter lines, comment lines and
+		blank lines.  Parameter lines are name-value pairs separated by  an
+		equal sign, '=' with no spaces in between.  Comment lines must begin
+		with '#'.  Blank lines should contain no spaces or tabs before the newline.
 		</p>
-		<ul>
-		<li>MS1/CMS1/BMS1</li>
-		<li><a href="file-formats/ms2-format.html">MS2</a>/CMS2/BMS2</li>
-		<li>ZS</li>
-		<li>UZS</li>
-		<li>MSMAT</li>
-		<li>RAW</li>
-		<li><a href="http://tools.proteomecenter.org/wiki/index.php?title=Formats:mzXML">MZXML[.GZ]</a></li>
-		<li>MZ5</li>
-		<li><a href="http://www.psidev.info/mzml_1_0_0">MZML[.GZ]</a></li>
-		<li><a href="http://www.matrixscience.com/help/data_file_help.html">MGF</a> (Mascot Generic Format)</li>
-		<li>SQLITE3</li>
-		<li>PSM</li>
-		</ul>
-		<!-- END CONTENT -->
+
+		<p>
+		<a href="../commands/default.params">Here</a> is a sample parameter file
+		containing the default values for every parameter/option available to
+		all crux programs.</p>
+			<!-- END CONTENT -->
 		</div>
 	</div>
 
 <footer class="site-footer">
 	<div id="centerfooter">
 		<div class="footerimportantlinks">
-			<img src="images/linkicon.png" style="width:16px; height:16px"><h3>Important links</h3>
+			<img src="../images/linkicon.png" style="width:16px; height:16px"><h3>Important links</h3>
 			<ul>
-				<li><a href="faq.html">Crux <strong>FAQ</strong></a></li>
-				<li><a href="glossary.html">Glossary of terminology</a></li>
+				<li><a href="../faq.html">Crux <strong>FAQ</strong></a></li>
+				<li><a href="../glossary.html">Glossary of terminology</a></li>
 				<li><a href="http://scholar.google.com/citations?hl=en&user=Rw9S1HIAAAAJ">Google Scholar profile</a></li>
 				<li><a href="https://sourceforge.net/projects/cruxtoolkit/">SourceForge Issue's list</a></li>
-				<li><a href="release-notes.html">Release Notes</a></li>
+				<li><a href="../release-notes.html">Release Notes</a></li>
 				<li><a href="https://mailman1.u.washington.edu/mailman/listinfo/crux-users" title="Receive announcements of new versions">Join the mailing list</a></li>
 				<li><a href="http://www.apache.org/licenses/LICENSE-2.0">Apache license</a></li>
 				<li><a href="http://groups.google.com/group/crux-users">Support Board</a></li>
 			</ul>
 		</div>
 		<div class="footerimportantlinks tutoriallinks">
-			<img src="images/tutorialicon.png" style="height:16px"><h3>Tutorials</h3>
+			<img src="../images/tutorialicon.png" style="height:16px"><h3>Tutorials</h3>
 			<ul>
-				<li><a href="tutorials/install.html">Installation</a></li>
-				<li><a href="tutorials/gettingstarted.html">Getting started with Crux</a></li>
-				<li><a href="tutorials/search.html">Running a simple search using Tide and Percolator</a></li>
-				<li><a href="tutorials/customizedsearch.html">Customization and search options</a></li>
-				<li><a href="tutorials/spectralcounts.html">Using spectral-counts</a></li>
+				<li><a href="../tutorials/install.html">Installation</a></li>
+				<li><a href="../tutorials/gettingstarted.html">Getting started with Crux</a></li>
+				<li><a href="../tutorials/search.html">Running a simple search using Tide and Percolator</a></li>
+				<li><a href="../tutorials/customizedsearch.html">Customization and search options</a></li>
+				<li><a href="../tutorials/spectralcounts.html">Using spectral-counts</a></li>
 			</ul>
 		</div>
 		<div id="footertext">
@@ -113,9 +113,9 @@
 				MacCoss</a>
 				and <a href="http://noble.gs.washington.edu/~noble">Prof. William
 				Stafford Noble</a> in the Department of Genome Sciences at the
-				University of Washington, Seattle.  Website by <a href="http://www.yuvalboss.com/">Yuval Boss</a>.
+				University of Washington, Seattle.  Website by <a href="http://www.yuvalboss.com/">Yuval Boss</a>. 
 				<br />The complete list of contributors
-				can be found <a href="contributors.html">here</a>.
+				can be found <a href="../contributors.html">here</a>.
 				<br />
 				<br />
 				Maintenance and development of Crux is funded by the <a href="https://www.nih.gov/">National Institutes of Health</a> awards R01 GM096306 and P41 GM103533. 
