@@ -110,9 +110,9 @@ class ModsOutputter {
       double total_delta = 0;
       int x = i;
       for (int j = max_counts_.size() - 1; j >= 0; --j) {
-	int digit = x / counts_mapper_vec_[j];
-	x %= counts_mapper_vec_[j];
-	total_delta += deltas[j] * digit;
+        int digit = x / counts_mapper_vec_[j];
+        x %= counts_mapper_vec_[j];
+        total_delta += deltas[j] * digit;
       }
       delta_by_file_[i] = total_delta;
     }
@@ -136,7 +136,6 @@ class ModsOutputter {
     peptide_->set_mass(delta_by_file_[index] + mass);
     writers_[index]->Write(peptide_);
     peptide_->set_mass(mass);
-
     return writers_[index];
   }
 
