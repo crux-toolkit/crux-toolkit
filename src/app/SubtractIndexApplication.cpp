@@ -250,10 +250,10 @@ vector<string> SubtractIndexApplication::getOptions() const {
 vector< pair<string, string> > SubtractIndexApplication::getOutputs() const {
   vector< pair<string, string> > outputs;
   outputs.push_back(make_pair("subtract-index.target.txt",
-    "a <a href=\"txt-format.html\">tab-delimited text file</a> containing the "
+    "a <a href=\"../file-formats/txt-format.html\">tab-delimited text file</a> containing the "
     "target peptides."));
   outputs.push_back(make_pair("subtract-index.decoy.txt",
-    "a <a href=\"txt-format.html\">tab-delimited text file</a> containing the "
+    "a <a href=\"../file-formats/txt-format.html\">tab-delimited text file</a> containing the "
     "decoy peptides."));
   outputs.push_back(make_pair("subtract-index.log.txt",
     "a log file containing a copy of all messages that were printed to stderr."));

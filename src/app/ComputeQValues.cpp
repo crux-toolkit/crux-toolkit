@@ -235,7 +235,7 @@ vector<string> ComputeQValues::getOptions() const {
 vector< pair<string, string> > ComputeQValues::getOutputs() const {
   vector< pair<string, string> > outputs;
   outputs.push_back(make_pair("assign-confidence.target.txt",
-    "a <a href=\"txt-format.html\">tab-delimited text file</a> that contains the "
+    "a <a href=\"../file-formats/txt-format.html\">tab-delimited text file</a> that contains the "
     "targets, sorted by score. The file will contain one new column, named "
     "\"&lt;method&gt; q-value\", where &lt;method&gt; is either \"tdc\" or \"mix-max\"."));
   outputs.push_back(make_pair("assign-confidence.log.txt",

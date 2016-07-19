@@ -1,72 +1,165 @@
+<!DOCTYPE html>
 <html>
 <head>
 <title>Crux glossary</title>
-<link href="./crux.css" rel="styleSheet" type="text/css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" type="text/css" href="styles.css">
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-26136956-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<script type="text/javascript">
+	// Main Menu
+	$( document ).ready(function() {
+			var pull 		= $('.btn');
+				menu 		= $('nav ul');
+				menuHeight	= menu.height();
+
+			$(pull).on('click', function(e) {
+				e.preventDefault();
+				menu.slideToggle();
+			});
+
+			$(window).resize(function(){
+	    		var w = $(window).width();
+	    		if(w > 320 && menu.is(':hidden')) {
+	    			menu.removeAttr('style');
+	    		} 
+			});
+	});
+</script>
 </head>
 <body>
-<blockquote>
+	<div class="page-wrap">
+	 	<nav>
+			<div class="btn">
+		    </div>
+		    <img src="images/crux-logo.png" id="logo"></a>
+			<ul id="navitems">
+			    <li><a href="index.html">Home</a></li>
+			    <li><a href="download.html">Download</a></li>
+			    <li><a href="fileformats.html">File Formats</a></li>
+		        <li><a href="http://groups.google.com/group/crux-users">Contact</a></li> <!--Link to google support board-->
+		    </ul>
+		</nav>
+		<div id="content">
+		<!-- START CONTENT -->
+		  <h2>Crux glossary</h2>
 
-  <h1>Crux glossary</h1>
+		  <h3>Mass spectrometry terminology</h3>
 
-  <h2>Mass spectrometry terminology</h2>
+		  <ul>
 
-  <ul>
+		    <li><b>c-term peptide</b>: The last peptide in the protein,
+		      occurring at the c-terminal end of the protein.</li>
+		    
+		    <li><b>decoy peptide</b>: A shuffled, reversed or randomly
+		      generated peptide sequence. Matches to decoy peptides are used
+		      for two purposes: to estimate statistical confidence measures
+		      such as the false discovery rate, and to train machine learning
+		      methods to recognize correctly identified spectra.</li>
 
-    <li><b>c-term peptide</b>: The last peptide in the protein,
-      occurring at the c-terminal end of the protein.</li>
-    
-    <li><b>decoy peptide</b>: A shuffled, reversed or randomly
-      generated peptide sequence. Matches to decoy peptides are used
-      for two purposes: to estimate statistical confidence measures
-      such as the false discovery rate, and to train machine learning
-      methods to recognize correctly identified spectra.</li>
+		    <li><b>modification</b>: A chemical modification of a single amino
+		      acid, typically corresponding to the addition of a molecular
+		      group to the amino acid side chain.</li>
+		    
+		    <li><b>n-term peptide</b>: The first peptide in the protein,
+		      occurring at the n-terminal end of the protein.</li>
+		    
+		    <li><b>peptide</b>: A subsequence of a protein.</li>
+		    
+		    <li><b>peptide-spectrum match (PSM)</b>: An observed spectrum
+		      paired with a peptide sequence, along with a score quantifying
+		      the quality of the match.</li>
 
-    <li><b>modification</b>: A chemical modification of a single amino
-      acid, typically corresponding to the addition of a molecular
-      group to the amino acid side chain.</li>
-    
-    <li><b>n-term peptide</b>: The first peptide in the protein,
-      occurring at the n-terminal end of the protein.</li>
-    
-    <li><b>peptide</b>: A subsequence of a protein.</li>
-    
-    <li><b>peptide-spectrum match (PSM)</b>: An observed spectrum
-      paired with a peptide sequence, along with a score quantifying
-      the quality of the match.</li>
+		    <li><b>static modification</b>: A chemical modification of a
+		      single amino that is expected to occur on every instance of that
+		      amino acid.  A common example is carbamidomethylation of
+		      cysteine, which adds 57.02146 Da to the mass of every
+		      cysteine.</li>
 
-    <li><b>static modification</b>: A chemical modification of a
-      single amino that is expected to occur on every instance of that
-      amino acid.  A common example is carbamidomethylation of
-      cysteine, which adds 57.02146 Da to the mass of every
-      cysteine.</li>
+		    <li><b>target peptide</b>: A real peptide, usually drawn from a
+		      protein database.</li>
 
-    <li><b>target peptide</b>: A real peptide, usually drawn from a
-      protein database.</li>
+		    <li><b>trypsin</b>: An enzyme used to cleave a protein into
+		      peptides.</li>
+		    
+		    <li><b>variable modification</b>: A chemical modification of a
+		      single amino that is expected to occur on some instances of that
+		      amino acid but not others.  A common example is phosphorylation
+		      of serine, threonine or tyrosine, which adds a mass of 79.966331
+		      Da to each of those amino acids.</li>
 
-    <li><b>trypsin</b>: An enzyme used to cleave a protein into
-      peptides.</li>
-    
-    <li><b>variable modification</b>: A chemical modification of a
-      single amino that is expected to occur on some instances of that
-      amino acid but not others.  A common example is phosphorylation
-      of serine, threonine or tyrosine, which adds a mass of 79.966331
-      Da to each of those amino acids.</li>
+		  </ul>
 
-  </ul>
+		  <h3>Analysis terminology</h3>
 
-  <h2>Analysis terminology</h2>
+		  <ul>
 
-  <ul>
+		  <li><b>false discovery rate (FDR)</b>: Estimated proportion of
+		    incorrectly identifications among a set of PSMs, peptides or
+		    proteins.</li>
 
-  <li><b>false discovery rate (FDR)</b>: Estimated proportion of
-    incorrectly identifications among a set of PSMs, peptides or
-    proteins.</li>
+		  <li><b>support vector machine (SVM)</b>: A machine learning method
+		    that learns to classify data objects into two groups.</li>
 
-  <li><b>support vector machine (SVM)</b>: A machine learning method
-    that learns to classify data objects into two groups.</li>
+		  </ul>
+		<!-- END CONTENT -->
+		</div>
+	</div>
 
-  </ul>
-
-</blockquote>
+<footer class="site-footer">
+	<div id="centerfooter">
+		<div class="footerimportantlinks">
+			<img src="images/linkicon.png" style="width:16px; height:16px"><h3>Important links</h3>
+			<ul>
+				<li><a href="faq.html">Crux <strong>FAQ</strong></a></li>
+				<li><a href="glossary.html">Glossary of terminology</a></li>
+				<li><a href="http://scholar.google.com/citations?hl=en&user=Rw9S1HIAAAAJ">Google Scholar profile</a></li>
+				<li><a href="https://sourceforge.net/projects/cruxtoolkit/">SourceForge Issue's list</a></li>
+				<li><a href="release-notes.html">Release Notes</a></li>
+				<li><a href="https://mailman1.u.washington.edu/mailman/listinfo/crux-users" title="Receive announcements of new versions">Join the mailing list</a></li>
+				<li><a href="http://www.apache.org/licenses/LICENSE-2.0">Apache license</a></li>
+				<li><a href="http://groups.google.com/group/crux-users">Support Board</a></li>
+			</ul>
+		</div>
+		<div class="footerimportantlinks tutoriallinks">
+			<img src="images/tutorialicon.png" style="height:16px"><h3>Tutorials</h3>
+			<ul>
+				<li><a href="tutorials/install.html">Installation</a></li>
+				<li><a href="tutorials/gettingstarted.html">Getting started with Crux</a></li>
+				<li><a href="tutorials/search.html">Running a simple search using Tide and Percolator</a></li>
+				<li><a href="tutorials/customizedsearch.html">Customization and search options</a></li>
+				<li><a href="tutorials/spectralcounts.html">Using spectral-counts</a></li>
+			</ul>
+		</div>
+		<div id="footertext">
+			<p>
+				The original version of Crux was written by Chris Park and Aaron Klammer
+				under the supervision
+				of <a href="http://www.gs.washington.edu/faculty/maccoss.htm">Prof. Michael
+				MacCoss</a>
+				and <a href="http://noble.gs.washington.edu/~noble">Prof. William
+				Stafford Noble</a> in the Department of Genome Sciences at the
+				University of Washington, Seattle.  Website by <a href="http://www.yuvalboss.com/">Yuval Boss</a>. 
+				<br />The complete list of contributors
+				can be found <a href="contributors.html">here</a>.
+				<br />
+				<br />
+				Maintenance and development of Crux is funded by the <a href="https://www.nih.gov/">National Institutes of Health</a> awards R01 GM096306 and P41 GM103533. 
+			</p>
+		</div>
+	</div>
+</footer>
+	
 </body>
+
 </html>

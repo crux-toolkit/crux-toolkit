@@ -183,13 +183,13 @@ vector< pair<string, string> > SearchForXLinks::getOutputs() const {
   vector< pair<string, string> > outputs;
   outputs.push_back(make_pair("search-for-xlinks.target.txt",
     "a tab-delimited text file containing the peptide-spectrum matches (PSMs). "
-    "See the <a href=\"txt-format.html\">txt file format</a> for a list of the fields."));
+    "See the <a href=\"../file-formats/txt-format.html\">txt file format</a> for a list of the fields."));
   outputs.push_back(make_pair("search-for-xlinks.decoy.txt",
     "a tab-delimited text file containing the decoy PSMs. "
-    "See the <a href=\"txt-format.html\">txt file format</a> for a list of the fields."));
+    "See the <a href=\"../file-formats/txt-format.html\">txt file format</a> for a list of the fields."));
   outputs.push_back(make_pair("search-for-xlinks.qvalues.txt",
     "a tab-delimited text file containing the top ranked PSMs with calculated q-values. "
-    "See the <a href=\"txt-format.html\">txt file format</a> for a list of the fields."));
+    "See the <a href=\"../file-formats/txt-format.html\">txt file format</a> for a list of the fields."));
   outputs.push_back(make_pair("search-for-xlinks.params.txt",
     "a file containing the name and value of all parameters/options for the "
     "current operation. Not all parameters in the file may have been used in "

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Crux Template</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" type="text/css" href="../styles.css">
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-26136956-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<script type="text/javascript">
+	// Main Menu
+	$( document ).ready(function() {
+			var pull 		= $('.btn');
+				menu 		= $('nav ul');
+				menuHeight	= menu.height();
+
+			$(pull).on('click', function(e) {
+				e.preventDefault();
+				menu.slideToggle();
+			});
+
+			$(window).resize(function(){
+	    		var w = $(window).width();
+	    		if(w > 320 && menu.is(':hidden')) {
+	    			menu.removeAttr('style');
+	    		} 
+			});
+	});
+</script>
+</head>
+<body>
+	<div class="page-wrap">
+	 	<nav>
+			<div class="btn">
+		    </div>
+		    <img src="../images/crux-logo.png" id="logo"></a>
+			<ul id="navitems">
+			    <li><a href="../index.html">Home</a></li>
+			    <li><a href="../download.html">Download</a></li>
+			    <li><a href="../fileformats.html">File Formats</a></li>
+		        <li><a href="http://groups.google.com/group/crux-users">Contact</a></li> <!--Link to google support board-->
+		    </ul>
+		</nav>
+		<div id="content">
+		<!-- START CONTENT -->
+		<h2>barista.xml </h2>
+		<p>
+		The barista.xml is an XML files that used to record four main 
+		parts: 
+		</p>
+		<pre>
+&lt proteins &gt ... &lt /proteins &gt
+&lt subset_proteins &gt ... &lt /subset_proteins &gt
+&lt peptides &gt ... &lt /peptides &gt
+&lt psms &gt ... &lt /psms &gt
+		</pre>
+		<p>
+		<ol>
+		<li>
+		<b>Proteins:</b>contains the ranked list of groups of indistinguishable
+		target proteins.  Each protein entry includes the following fields:
+		<ol>
+		<li>
+		<b>protein group:</b> a number that identifies a group. </li>
+		<li>
+		<b>q-value: </b>The minimal protein-level false discovery rate at which this
+		protein is deemed significant.  This q-value is computed based on the
+		ranking of the proteins induced by the Barista score.</li>
+		<li>
+		<b>score:</b> The score assigned to the proteins by Barista.  Higher values
+		correspond to more confident identifications.</code>
+		<li>
+		<b>protein_ids:</b> proteins in the protein group. </li>
+		<li>
+		<b>alternative_peptide_id: </b>peptides are considered indistinguishable if
+		they have identical amino acid sequences or they differ only by I/L or
+		T/S in the same position in the peptide. If the peptides shared by the
+		group are not identical, they are listed immediately after the
+		proteins they belong to. </li>
+		<li><b>
+		peptide_ids:</b> belong to each of the proteins in the
+		group.</li>
+		</ol>
+
+		<br>
+		For example, suppose that
+		<dl>
+		<dd> <b> protein_a </b> has peptide  <b> KLEAEVEALKK </b>  &nbsp &nbsp &nbsp  // 'L' in second position </dd>
+		          <dd> and peptide  <b> VLGAK </b>  </dd>            
+		<dd> <b> protein_b </b> has peptide  <b> KIEAEVEALKK </b>  &nbsp &nbsp &nbsp  // 'I' in second position
+		          <dd> and peptide  <b> VLGAK </b> </dd>
+		</dl>
+
+		<br>
+		Then the xml entry could look like this <br />
+		<pre>
+&lt proteins &gt
+&lt q_value &gt 0 &lt /q_value &gt
+&lt score &gt 8.9 &gt &lt /score &gt
+&lt protein_group group_id="1" &gt
+&lt protein_ids &gt
+&lt protein_id &gt protein_a &lt /protein_id &gt
+&lt alternative_peptide_id &gt KLEAEVEALKK &lt /alternative_peptide_id &gt
+&lt protein_id &gt protein_b &lt /protein_id &gt
+&lt alternative_peptide_id &gt KIEAEVEALKK &lt /alternative_peptide_id &gt
+&lt /protein_ids &gt
+&lt peptide_ids &gt
+&lt peptide_id &gt VLGAK &lt /peptide_id &gt
+&lt /peptide_ids &gt
+&lt /protein_group &gt
+&lt /proteins &gt
+		</pre>
+		</li>
+		</p>
+		<li>
+		<p>
+		<b>Subset proteins</b> contains groups of indistinguishable proteins, which
+		   constitute a subset of some group in the proteins section in
+		   terms of the peptides identified in these proteins. Each entry includes
+		<ol>
+		<li>
+		group id and parent group id: the identifier of the group and the
+		identifier of the protein group which has the superset of the peptide
+		set belonging the current group
+		</li>
+		<li>
+		protein_ids : proteins that belong to the group
+		</li>
+		<li>
+		peptide_ids: peptides that belong to the proteins in the group.
+		</li>
+		</ol>
+		</li>
+		</p>
+		<li>
+		<p>
+		<b>Peptides</b> contains a ranked list of target peptides. Each peptide entry
+		includes:
+		<ol>
+		<li>
+		peptide: Peptide amino acid sequence.
+		<li>
+		q-value: The minimal peptide-level false discovery rate at which this
+		peptide is deemed significant.  This q-value is computed based on the
+		ranking of the peptides induced by the Barista score.</li>
+		<li>
+		score: The score assigned to the peptide by Barista.  Higher values
+		correspond to more confident identifications.</li>
+		<li>
+		main_psm_id: The PSM identifier based on which the peptide received
+		its score. A peptide score is the maximum over all the PSMs that
+		contain this peptide. </li>
+		<li>
+		psm_ids: The identifiers of all the PMS that contain this peptide .</li>
+		<li>
+		protein_ids: All the proteins that contain this peptide and were
+		infered based on some PSMs from the database search. </li>
+		</ol>
+
+		</li>
+		</p>
+		<li>
+		<p>
+		<b>PSMs</b> contains ranked list of target peptide-spectrum matches. The
+		following columns are included:
+		<ol>
+		<li>
+		psm_id: PSM identifier. </li>
+		<li>
+		q-value: The minimal PSM-level false discovery rate at which this PSM
+		is deemed significant.  This q-value is computed based on the ranking
+		of the PSMs induced by the Barista score.</li>
+		<li>
+		score: The score assigned to the PSM by Barista.  Higher values
+		correspond to more confident identifications.</code>
+		<li>
+		scan: the scan number</li>
+		<li>
+		charge: the inferred charge state</li>
+		<li>
+		precursor_mass: precrusor mass as recorded during the MS1 scan </li>
+		<li>
+		peptide: the peptide sequence</li>
+		<li>
+		filename: name of the file in which the PSM appears</li>
+		</ol>
+		</p>
+		</ol>
+		</li>
+	<!-- END CONTENT -->
+		</div>
+	</div>
+
+<footer class="site-footer">
+	<div id="centerfooter">
+		<div class="footerimportantlinks">
+			<img src="../images/linkicon.png" style="width:16px; height:16px"><h3>Important links</h3>
+			<ul>
+				<li><a href="../faq.html">Crux <strong>FAQ</strong></a></li>
+				<li><a href="../glossary.html">Glossary of terminology</a></li>
+				<li><a href="http://scholar.google.com/citations?hl=en&user=Rw9S1HIAAAAJ">Google Scholar profile</a></li>
+				<li><a href="https://sourceforge.net/projects/cruxtoolkit/">SourceForge Issue's list</a></li>
+				<li><a href="../release-notes.html">Release Notes</a></li>
+				<li><a href="https://mailman1.u.washington.edu/mailman/listinfo/crux-users" title="Receive announcements of new versions">Join the mailing list</a></li>
+				<li><a href="http://www.apache.org/licenses/LICENSE-2.0">Apache license</a></li>
+				<li><a href="http://groups.google.com/group/crux-users">Support Board</a></li>
+			</ul>
+		</div>
+		<div class="footerimportantlinks tutoriallinks">
+			<img src="../images/tutorialicon.png" style="height:16px"><h3>Tutorials</h3>
+			<ul>
+				<li><a href="../tutorials/install.html">Installation</a></li>
+				<li><a href="../tutorials/gettingstarted.html">Getting started with Crux</a></li>
+				<li><a href="../tutorials/search.html">Running a simple search using Tide and Percolator</a></li>
+				<li><a href="../tutorials/customizedsearch.html">Customization and search options</a></li>
+				<li><a href="../tutorials/spectralcounts.html">Using spectral-counts</a></li>
+			</ul>
+		</div>
+		<div id="footertext">
+			<p>
+				The original version of Crux was written by Chris Park and Aaron Klammer
+				under the supervision
+				of <a href="http://www.gs.washington.edu/faculty/maccoss.htm">Prof. Michael
+				MacCoss</a>
+				and <a href="http://noble.gs.washington.edu/~noble">Prof. William
+				Stafford Noble</a> in the Department of Genome Sciences at the
+				University of Washington, Seattle.  Website by <a href="http://www.yuvalboss.com/">Yuval Boss</a>. 
+				<br />The complete list of contributors
+				can be found <a href="../contributors.html">here</a>.
+				<br />
+				<br />
+				Maintenance and development of Crux is funded by the <a href="https://www.nih.gov/">National Institutes of Health</a> awards R01 GM096306 and P41 GM103533. 
+			</p>
+		</div>
+	</div>
+</footer>
+	
+</body>
+
+</html>
