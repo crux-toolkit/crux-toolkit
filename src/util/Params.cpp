@@ -334,7 +334,7 @@ Params::Params() : finalized_(false) {
   InitDoubleParam("mz-bin-width", 1.0005079, 1e-4, BILLION,
     "Before calculation of the XCorr score, the m/z axes of the observed and theoretical "
     "spectra are discretized. This parameter specifies the size of each bin. The exact "
-    "formula is floor((x/mz-bin-width) + 1.0 - mz-bin-offset), where x is the observed m/z "
+    "formula for computing the discretized m/z value is floor((x/mz-bin-width) + 1.0 - mz-bin-offset), where x is the observed m/z "
     "value. For low resolution ion trap ms/ms data 1.0005079 and for high resolution ms/ms "
     "0.02 is recommended.",
     "Available for tide-search and xlink-assign-ions.", true);
