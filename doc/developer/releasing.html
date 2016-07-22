@@ -19,7 +19,8 @@ This document describes how to publish a versioned release.
   repository trunk on all platforms, and that the smoke and performance tests all 
   passed on the 64-bit Linux build.
   Update the release notes
-  (crux/doc/user/release-notes.html).
+  (doc/user/release-notes.html), and update the PHP script to point at the
+  new packages (doc/user/download/download.php).
 
 <h3>Branching</h3>
 In SVN tags and branches are really the same,
@@ -161,6 +162,8 @@ You should also download and test the distribution for each platform.
 <li>Change version number in <code>CMakeLists.txt</code> in the project root.
 <li>Look at the SVN log since the last release and update release
   notes accordingly.
+<li>Update <code>doc/user/download/download.php</code> to point at the new
+versions of the distribution packages.</li>
 <li>Commit changes.
 <li>Create a tarball of the current version of Proteowizard and store a copy in
 the download directory on the Crux web site.
