@@ -19,8 +19,8 @@ This document describes how to publish a versioned release.
   repository trunk on all platforms, and that the smoke and performance tests all 
   passed on the 64-bit Linux build.
   Update the release notes
-  (doc/user/release-notes.html), and update the PHP script to point at the
-  new packages (doc/user/download/download.php).
+  (<code>doc/user/release-notes.html</code>), and update the PHP script to point at the
+  new packages (<code>doc/user/download/download.php</code>).
 
 <h3>Branching</h3>
 In SVN tags and branches are really the same,
@@ -154,19 +154,23 @@ You should also download and test the distribution for each platform.
 <p>Here is a list of steps to follow, roughly in this order</p>
 <ol>
 <h4>Preliminaries</h4>
-<li>Check that the current trunk builds correctly for all platforms.</li>
-<li>Check that the smokes tests for the current trunk run correctly for 64-bit Linux</li>
-<li>Create a release branch.
-<li>Do a clean checkout of the release branch.
-<h4>Edit documentation and and Proteowizard tarball</h4>
 <li>Change version number in <code>CMakeLists.txt</code> in the project root.
 <li>Look at the SVN log since the last release and update release
-  notes accordingly.
+notes accordingly.</li>
 <li>Update <code>doc/user/download/download.php</code> to point at the new
 versions of the distribution packages.</li>
-<li>Commit changes.
-<li>Create a tarball of the current version of Proteowizard and store a copy in
-the download directory on the Crux web site.
+<li>Check that the current trunk builds correctly for all platforms.</li>
+<li>Check that the smokes tests for the current trunk run correctly for 64-bit Linux</li>
+<li>Commit changes to the trunk.</li>
+<h4>Create new version branch and Proteowizard tarball</h4>
+<li>Create a branch in the SVN repositoroy fornew branch in the SVN
+repositoroy for the new versionn</li>
+<li>Check out a clean copy of the branch for the version.</li>
+<li>Create a tarball of the current version of Proteowizard and store a copy 
+in the download directory of the Crux web site.</li>
+<li>Update the <code>ext/download_pwiz.cmake</code> script to point at the
+Proteowizard tarball you just created.</li>
+<li>Commit changes to the branch.
 <h4>Update TeamCity build tasks</h4>
 <li>Copy TeamCity tasks for previous release to tasks for new release.</li>
 <li>Update details of tasks for new release.</li>
