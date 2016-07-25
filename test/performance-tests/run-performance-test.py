@@ -251,10 +251,10 @@ runSearch("tide-xcorr", "tide-search", "", database,
           "xcorr score", "")
 runSearch("tide-p-value", "tide-search", "--exact-p-value T",
           database, concatenatedDatabase, "tide-p-value/tide-search.txt",
-          "refactored xcorr", "--smaller-is-better T --score \"exact p-value\"")
+          "refactored xcorr", "--score \"exact p-value\"")
 runSearch("comet", "comet", "", "%s.fa" % database,
           concatenatedDatabase, "comet/comet.target.txt",
-          "xcorr score", "--smaller-is-better T --score e-value")
+          "xcorr score", "--score e-value")
 
 # Make the performance plots, segregated by search method..
 makePerformancePlot("comet", [("comet/comet.q.txt", "Comet E-value"),
