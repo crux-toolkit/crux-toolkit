@@ -11,9 +11,9 @@
  */
 
 #include "MatchFileWriter.h"
-#include "OutputFiles.h"
 #include "parameter.h"
 #include "util/Params.h"
+#include "app/TideSearchApplication.h"
 #include <iostream>
 
 using namespace std;
@@ -297,8 +297,8 @@ void MatchFileWriter::addColumnNames(CruxApplication* application,
   addColumnName(CLEAVAGE_TYPE_COL);
   addColumnName(PROTEIN_ID_COL);
   addColumnName(FLANKING_AA_COL);
-  if ((has_decoys || OutputFiles::isConcat()) &&
-      !OutputFiles::isProteinLevelDecoys()) {
+  if ((has_decoys || Params::GetBool("concat")) &&
+      !TideSearchApplication::proteinLevelDecoys()) {
     addColumnName(ORIGINAL_TARGET_SEQUENCE_COL);
   }
 

@@ -16,6 +16,9 @@
 using namespace std; 
 
 class TideSearchApplication : public CruxApplication {
+
+  friend class SubtractIndexApplication;
+
  protected:
   /**
   brief This variable is used with Cascade Search.
@@ -30,6 +33,7 @@ class TideSearchApplication : public CruxApplication {
   string output_file_name_;
 
   static bool HAS_DECOYS;
+  static bool PROTEIN_LEVEL_DECOYS;
 
   /**
    * Function that contains the search algorithm and performs the search
@@ -148,6 +152,7 @@ class TideSearchApplication : public CruxApplication {
   int main(const vector<string>& input_files, const string input_index);
 
   static bool hasDecoys();
+  static bool proteinLevelDecoys();
 
   /**
    * Returns the command name

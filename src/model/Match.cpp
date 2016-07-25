@@ -23,7 +23,6 @@
 #include "IonSeries.h"
 #include "util/crux-utils.h"
 #include "objects.h"
-#include "io/OutputFiles.h"
 #include "parameter.h"
 #include "Scorer.h" 
 #include "Match.h" 
@@ -520,7 +519,7 @@ void Match::printOneMatchField(
     }
     break;
   case ORIGINAL_TARGET_SEQUENCE_COL:
-    if (null_peptide_ == true || OutputFiles::isConcat()) {
+    if (null_peptide_ || Params::GetBool("concat")) {
       output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx,
                                        peptide_->getUnshuffledSequence());
     }
