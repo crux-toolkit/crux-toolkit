@@ -50,10 +50,6 @@ class OutputFiles{
                            bool isParsimony);
   void writeRankedPeptides(const vector<pair<FLOAT_T, Crux::Peptide*> >& scoreToPeptide);
   void pinSetEnabledStatus(const std::string& name, bool enabled);
-  static bool isConcat();
-  static void setConcat(bool enable = true);
-  static bool isProteinLevelDecoys();
-  static void setProteinLevelDecoys(bool enable = true);
 
   bool exact_pval_search_;
 
@@ -138,8 +134,6 @@ class OutputFiles{
   );
 
   int num_files_;         ///< num files in each array
-  static bool concat_;
-  static bool proteinLevelDecoys_;
   std::string* target_decoy_list_; ///< target or decoy[-n] string of each file
   MatchFileWriter** delim_file_array_; ///< array of .txt files
   FILE** sqt_file_array_; ///< array of .sqt files

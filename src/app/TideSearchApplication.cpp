@@ -15,6 +15,7 @@
 #include "util/StringUtils.h"
 
 bool TideSearchApplication::HAS_DECOYS = false;
+bool TideSearchApplication::PROTEIN_LEVEL_DECOYS = false;
 
 /* This constant is the product of the original "magic number" (10000,
  * on line 4622 of search28.c) that was used to rescale the XCorr
@@ -32,8 +33,7 @@ const double TideSearchApplication::XCORR_SCALING = 100000000.0;
 const double TideSearchApplication::RESCALE_FACTOR = 20.0;
 
 TideSearchApplication::TideSearchApplication():
-  exact_pval_search_(false), remove_index_("") {
-  spectrum_flag_ = NULL;  
+  exact_pval_search_(false), remove_index_(""), spectrum_flag_(NULL) {
 }
 
 TideSearchApplication::~TideSearchApplication() {
@@ -206,6 +206,9 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
   DECOY_TYPE_T headerDecoyType = (DECOY_TYPE_T)pepHeader.decoys();
   if (headerDecoyType != NO_DECOYS) {
     HAS_DECOYS = true;
+    if (headerDecoyType == PROTEIN_REVERSE_DECOYS) {
+      PROTEIN_LEVEL_DECOYS = true;
+    }
   }
 
   MassConstants::Init(&pepHeader.mods(), &pepHeader.nterm_mods(), 
@@ -972,6 +975,10 @@ void TideSearchApplication::computeWindow(
 
 bool TideSearchApplication::hasDecoys() {
   return HAS_DECOYS;
+}
+
+bool TideSearchApplication::proteinLevelDecoys() {
+  return PROTEIN_LEVEL_DECOYS;
 }
 
 string TideSearchApplication::getName() const {
