@@ -27,6 +27,8 @@
 using namespace std;
 using namespace Crux; 
 
+#define MAX_LOG_P 100.0 // Needed for handling p-value = 0, which should not happen, but alas does.
+
 PinWriter::PinWriter():
   out_(NULL),
   enzyme_(get_enzyme_type_parameter("enzyme")),
@@ -224,8 +226,8 @@ void PinWriter::printPSM(
       fields.push_back(
         StringUtils::ToString(match->getScore(TIDE_SEARCH_REFACTORED_XCORR), precision_));
     } else if (feature == "NegLog10PValue") {
-      fields.push_back(StringUtils::ToString(
-        -log10(match->getScore(TIDE_SEARCH_EXACT_PVAL)), precision_));
+      FLOAT_T logP = -log10(match->getScore(TIDE_SEARCH_EXACT_PVAL));
+      fields.push_back(StringUtils::ToString(isInfinite(logP) ? MAX_LOG_P : logP, precision_));
     } else if (feature == "PepLen") {
       fields.push_back(StringUtils::ToString((unsigned) peptide->getLength()));
     } else if (StringUtils::StartsWith(feature, "Charge")) {
