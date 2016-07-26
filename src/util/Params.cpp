@@ -98,7 +98,10 @@ Params::Params() : finalized_(false) {
     "Crux tab-delimited text[[html:</a>]], or a list of files (when list-of-files=T). "
     "Note that if the input is provided as SQT, pepXML, or Crux "
     "tab-delimited text, then a PIN file will be generated in the output directory "
-    "prior to execution.[[html:<br>Decoy PSMs can be provided to Percolator in two "
+    "prior to execution."
+    "Crux determines the format of the input file by examining its "
+    "filename extension.  "
+    "[[html:<br>Decoy PSMs can be provided to Percolator in two "
     "ways: either as a separate file or embedded within the same file as the target "
     "PSMs. Percolator will first search for target PSMs in a separate file. The "
     "decoy file name is constructed from the target name by replacing \"target\" with "
@@ -365,6 +368,10 @@ Params::Params() : finalized_(false) {
   InitStringParam("output-dir", "crux-output",
     "The name of the directory where output files will be created.",
     "Available for most commands.", true);
+  InitStringParam("temp-dir", "",
+    "The name of the directory where temporary files will be created. If this "
+    "parameter is blank, then the system temporary directory will be used",
+    "Available for tide-index.", true);
   // coder options regarding decoys
   InitIntParam("num-decoy-files", 1, 0, 10,
     "Replaces number-decoy-set.  Determined by decoy-location"
@@ -1871,6 +1878,7 @@ void Params::Categorize() {
   items.insert("store-index");
   items.insert("xlink-print-db");
   items.insert("fileroot");
+  items.insert("temp-dir");
   items.insert("output-dir");
   items.insert("output-file");
   items.insert("overwrite");
