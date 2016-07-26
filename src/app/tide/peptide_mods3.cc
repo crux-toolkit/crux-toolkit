@@ -20,6 +20,7 @@
 #include "peptides.pb.h"
 #include "mass_constants.h"
 #include "modifications.h"
+#include "util/FileUtils.h"
 #include "io/carp.h"
 
 using namespace std;
@@ -32,22 +33,26 @@ DEFINE_int32(max_mods, 255, "Maximum number of modifications that can be applied
 DEFINE_int32(min_mods, 0, "Minimum number of modifications that can be applied "
                           "to a single peptide.");
 
-static string GetTempName(int filenum) {
+static string GetTempName(string tmpDir, int filenum) {
   char buf[36];
   sprintf(buf, "modified_peptides_partial_%d", filenum);
+  if (tmpDir != "") {
+    return FileUtils::Join(tmpDir, buf);
+  }    
 #ifdef _MSC_VER
   char buf2[261];
   GetTempPath(261, buf2);
-  return string(buf2) + buf;
+  return FileUtils::Join(string(buf2), buf);
 #else
-  return string("/tmp/") + buf;
+  return FileUtils::Join(string("/tmp/"), buf);
 #endif
 }
 
 class ModsOutputter {
  public:
   unsigned long modpeptidecnt_;
-  ModsOutputter(const vector<const pb::Protein*>& proteins,
+  ModsOutputter(string tmpDir,
+                const vector<const pb::Protein*>& proteins,
 		VariableModTable* var_mod_table,
 		HeadedRecordWriter* final_writer)
     : proteins_(proteins),
@@ -56,7 +61,7 @@ class ModsOutputter {
       counts_mapper_vec_(max_counts_.size(), 0),
       final_writer_(final_writer),
       count_(0) {
-    InitCountsMapper();
+    InitCountsMapper(tmpDir);
   }
 
   ~ModsOutputter() {
@@ -74,12 +79,15 @@ class ModsOutputter {
   }
 
  private:
+  string tmpDir_;
   void OutputMods(int pos, vector<int>& counts);
   void OutputNtermMods(int pos, vector<int>& counts);
   void OutputCtermMods(int pos, vector<int>& counts);
   void Merge();
 
-  void InitCountsMapper() {
+  void InitCountsMapper(string tmpDir) {
+    tmpDir_ = tmpDir;
+    
     int prod = 1;
     for (int i = 0; i < max_counts_.size(); ++i) {
       counts_mapper_vec_[i] = prod;
@@ -95,11 +103,11 @@ class ModsOutputter {
     }
 
     for (int i = 0; i < prod; ++i) {
-      writers_[i] = new RecordWriter(GetTempName(i), FLAGS_buf_size << 10);
+      writers_[i] = new RecordWriter(GetTempName(tmpDir, i), FLAGS_buf_size << 10);
       if (!writers_[i]->OK()) {
         // delete temporary files
         for (int j = 0; j < i; ++j)
-          unlink(GetTempName(j).c_str());
+          unlink(GetTempName(tmpDir, j).c_str());
         CHECK(writers_[i]->OK());
       }
     }
@@ -413,7 +421,7 @@ void ModsOutputter::Merge() {
   int num_files = writers_.size();
   vector<PepReader*> readers(num_files);
   for (int i = 0; i < num_files; ++i)
-    readers[i] = new PepReader(GetTempName(i));
+    readers[i] = new PepReader(GetTempName(tmpDir_, i));
 
   // initialize heap
   PepReader** heap_end = &(readers[0]) + num_files;
@@ -447,18 +455,19 @@ void ModsOutputter::Merge() {
   // delete temporary files
   for (int i = 0; i < num_files; ++i) {
     delete readers[i];
-    unlink(GetTempName(i).c_str());
+    unlink(GetTempName(tmpDir_, i).c_str());
   }
 }
 
 void AddMods(HeadedRecordReader* reader, string out_file,
+             string tmpDir,
 	     const pb::Header& header,
 	     const vector<const pb::Protein*>& proteins, 
 	     VariableModTable& var_mod_table) {
   CHECK(reader->OK());
   HeadedRecordWriter writer(out_file, header, FLAGS_buf_size << 10);
   CHECK(writer.OK());
-  ModsOutputter outputter(proteins, &var_mod_table, &writer);
+  ModsOutputter outputter(tmpDir, proteins, &var_mod_table, &writer);
   outputter.modpeptidecnt_ = 0; 
   pb::Peptide peptide;
   while (!reader->Done()) {
@@ -470,6 +479,7 @@ void AddMods(HeadedRecordReader* reader, string out_file,
 }
 
 void AddMods(HeadedRecordReader* reader, string out_file,
+             string tmpDir,
 	     const pb::Header& header,
 	     const vector<const pb::Protein*>& proteins) {
   VariableModTable var_mod_table;
@@ -477,7 +487,7 @@ void AddMods(HeadedRecordReader* reader, string out_file,
   CHECK(reader->OK());
   HeadedRecordWriter writer(out_file, header, FLAGS_buf_size << 10);
   CHECK(writer.OK());
-  ModsOutputter outputter(proteins, &var_mod_table, &writer);
+  ModsOutputter outputter(tmpDir, proteins, &var_mod_table, &writer);
 
   pb::Peptide peptide;
   while (!reader->Done()) {

@@ -388,7 +388,7 @@ Crux::Peptide* MatchFileReader::parsePeptide() {
       return NULL;
     }
   } else {
-    carp(CARP_ERROR, "No sequence found...");
+    carp(CARP_FATAL, "No peptide sequence (%s).", seq.c_str());
   }
   return peptide;
 }

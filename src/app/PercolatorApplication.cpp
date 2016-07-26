@@ -101,11 +101,11 @@ int PercolatorApplication::main(int argc, char** argv) {
         }
       }
     } else {
-      carp(CARP_INFO, "Running make-pin");
+      carp(CARP_INFO, "Converting input to pin format.");
       if (MakePinApplication::main(result_files) != 0 || !FileUtils::Exists(input_pin)) {
         carp(CARP_FATAL, "make-pin failed. Not running Percolator.");
       }
-      carp(CARP_INFO, "Finished make-pin.");
+      carp(CARP_INFO, "File conversion complete.");
     }
   }
   return main(input_pin);

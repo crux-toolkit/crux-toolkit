@@ -21,6 +21,7 @@ extern void AddTheoreticalPeaks(const vector<const pb::Protein*>& proteins,
                                 const string& output_filename);
 extern void AddMods(HeadedRecordReader* reader,
                     string out_file,
+                    string tmpDir,                    
                     const pb::Header& header,
                     const vector<const pb::Protein*>& proteins, VariableModTable& var_mod_table);
 DECLARE_int32(max_mods);
@@ -223,7 +224,7 @@ int TideIndexApplication::main(
   if (need_mods) {
     carp(CARP_INFO, "Computing modified peptides...");
     HeadedRecordReader reader(modless_peptides, NULL, 1024 << 10); // 1024kb buffer
-    AddMods(&reader, peakless_peptides, header_with_mods, proteins, var_mod_table);
+    AddMods(&reader, peakless_peptides, Params::GetString("temp-dir"), header_with_mods, proteins, var_mod_table);
   }
 
   if (out_target_list) {
@@ -376,7 +377,8 @@ vector<string> TideIndexApplication::getOptions() const {
     "seed",
     "clip-nterm-methionine",
     "verbosity",
-    "allow-dups"
+    "allow-dups",
+    "temp-dir"
   };
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }
