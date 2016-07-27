@@ -471,7 +471,11 @@ void check_target_decoy_files(
 
 void get_files_from_list(
   const std::string &infile, ///< path of the first file.
-  std::vector<std::string> &outpaths ///< paths of all search results -out                                                                                                         
+  std::vector<std::string> &outpaths ///< paths of all search results -out
 );
+
+bool parseUrl(std::string url, std::string* host, std::string* path);
+std::string httpRequest(const std::string& url, const std::string& data = "", bool waitForResponse = true);
+void postToAnalytics(const std::string& appName);
 
 #endif

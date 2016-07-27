@@ -9,12 +9,14 @@
 #include "io/carp.h"
 #include "parameter.h"
 #include "util/ArgParser.h"
+#include "util/crux-utils.h"
 #include "util/FileUtils.h"
 #include "util/Params.h"
 #include "util/StringUtils.h"
 #include "util/WinCrux.h"
 
 #include <iostream>
+#include <boost/thread.hpp>
 
 using namespace std;
 
@@ -68,6 +70,11 @@ void CruxApplication::initialize(int argc, char** argv) {
   initializeParams(getName(), getArgs(), getOptions(), argc, argv);
   processParams();
   Params::Finalize();
+
+  if (!Params::GetBool("no-analytics")) {
+    // Post data to Google Analytics using a separate thread
+    boost::thread analytics_thread(postToAnalytics, getName());
+  }
 
   set_verbosity_level(Params::GetInt("verbosity"));
 
