@@ -75,9 +75,8 @@ int TideIndexApplication::main(
   char* enzymePtr = enzyme_type_to_string(enzyme_t);
   string enzyme(enzymePtr);
   free(enzymePtr);
-  if (enzyme == "no-enzyme") {
-    enzyme = "none";
-  } else if (digestion != FULL_DIGEST && digestion != PARTIAL_DIGEST) {
+  if ((enzyme != "no-enzyme") && 
+      (digestion != FULL_DIGEST && digestion != PARTIAL_DIGEST)) {
     carp(CARP_FATAL, "'digestion' must be 'full-digest' or 'partial-digest'");
   }
 
@@ -183,7 +182,7 @@ int TideIndexApplication::main(
   pep_header.set_max_length(max_length);
   pep_header.set_monoisotopic_precursor(monoisotopic_precursor);
   pep_header.set_enzyme(enzyme);
-  if (enzyme != "none") {
+  if (enzyme != "no-enzyme") {
     pep_header.set_full_digestion(digestion == FULL_DIGEST);
     pep_header.set_max_missed_cleavages(missed_cleavages);
   }
