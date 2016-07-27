@@ -20,7 +20,7 @@ class CruxTester
     unless File.executable?(@crux_path)
       raise(@crux_path + " cannot be executed")
     end
-    Open3.popen3(@crux_path + " " + cmd + " " + @crux_args.join(" ")) do | stdin, stdout, stderr, thread |
+    Open3.popen3(@crux_path + " " + cmd + " --no-analytics T " + @crux_args.join(" ")) do | stdin, stdout, stderr, thread |
       @last_stdout = ""
       while line = stdout.gets
         @last_stdout << line

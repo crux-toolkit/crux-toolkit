@@ -55,7 +55,8 @@ if (WIN32 AND NOT CYGWIN)
           -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
           -DINCLUDE_VENDOR_LIBRARIES:BOOLEAN=${INCLUDE_VENDOR_LIBRARIES}
           -P  ${CMAKE_CURRENT_SOURCE_DIR}/build_pwiz.cmake
-      INSTALL_COMMAND ""
+      INSTALL_COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost ${CMAKE_CURRENT_BINARY_DIR}/include/boost
       BUILD_IN_SOURCE 1
     )
   else (USE_LATEST_PWIZ)
@@ -71,7 +72,8 @@ if (WIN32 AND NOT CYGWIN)
           -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
           -DINCLUDE_VENDOR_LIBRARIES:BOOLEAN=${INCLUDE_VENDOR_LIBRARIES}
           -P  ${CMAKE_CURRENT_SOURCE_DIR}/build_pwiz.cmake
-      INSTALL_COMMAND ""
+      INSTALL_COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost ${CMAKE_CURRENT_BINARY_DIR}/include/boost
       BUILD_IN_SOURCE 1
     )
   endif (USE_LATEST_PWIZ)
@@ -105,7 +107,8 @@ else (WIN32 AND NOT CYGWIN)
           -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
           -P  ${CMAKE_CURRENT_SOURCE_DIR}/build_pwiz.cmake
       INSTALL_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/create_links.sh 
-        --prefix=${CMAKE_CURRENT_BINARY_DIR}
+        --prefix=${CMAKE_CURRENT_BINARY_DIR} &&
+        ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost ${CMAKE_CURRENT_BINARY_DIR}/include/boost
       INSTALL_COMMAND ""
       BUILD_IN_SOURCE 1
     )
@@ -122,7 +125,8 @@ else (WIN32 AND NOT CYGWIN)
           -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
           -P  ${CMAKE_CURRENT_SOURCE_DIR}/build_pwiz.cmake
       INSTALL_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/create_links.sh 
-        --prefix=${CMAKE_CURRENT_BINARY_DIR}
+        --prefix=${CMAKE_CURRENT_BINARY_DIR} &&
+        ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost ${CMAKE_CURRENT_BINARY_DIR}/include/boost
       INSTALL_COMMAND ""
       BUILD_IN_SOURCE 1
     )

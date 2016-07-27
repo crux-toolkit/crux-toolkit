@@ -3,7 +3,7 @@
 
 # Create the list of documents to create
 execute_process(
-  COMMAND ${CRUX_PATH} create-docs list
+  COMMAND ${CRUX_PATH} create-docs --no-analytics T list
   RESULT_VARIABLE status
   OUTPUT_VARIABLE doc_list 
   ERROR_VARIABLE error_message
@@ -23,7 +23,7 @@ STRING(REGEX REPLACE "\n" ";" doc_list "${doc_list}")
 # Generate each document
 foreach (doc ${doc_list})
   execute_process(
-    COMMAND ${CRUX_PATH} create-docs ${doc}
+    COMMAND ${CRUX_PATH} create-docs --no-analytics T ${doc}
       RESULT_VARIABLE status
       ERROR_VARIABLE error_message
       OUTPUT_FILE "${doc}.html"
@@ -59,7 +59,7 @@ endforeach (doc ${doc_list})
 
 # Create the parameter table
 execute_process(
-  COMMAND ${CRUX_PATH} create-docs param-table
+  COMMAND ${CRUX_PATH} create-docs --no-analytics T param-table
     RESULT_VARIABLE status
     ERROR_VARIABLE error_message
     OUTPUT_FILE param-table.html
@@ -93,7 +93,7 @@ if (NOT ${PROJECT_SOURCE_DIR} MATCHES ${PROJECT_BINARY_DIR})
 endif (NOT ${PROJECT_SOURCE_DIR} MATCHES ${PROJECT_BINARY_DIR})
 # Create the default.params file
 execute_process(
-  COMMAND ${CRUX_PATH} create-docs default-params
+  COMMAND ${CRUX_PATH} create-docs --no-analytics T default-params
     RESULT_VARIABLE status
     ERROR_VARIABLE error_message
     OUTPUT_FILE default.params

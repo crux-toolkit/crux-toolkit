@@ -1651,6 +1651,8 @@ Params::Params() : finalized_(false) {
     "documentation.",
     "Available for crux create-docs", false);
 
+  InitBoolParam("no-analytics", false, "Don't post data to Google Analytics.", "", false);
+
   Categorize();
 }
 

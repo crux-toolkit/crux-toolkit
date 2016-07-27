@@ -21,8 +21,10 @@
 #include "StringUtils.h"
 #include "WinCrux.h"
 #include "io/LineFileReader.h"
-#include "boost/filesystem.hpp"
+#include <boost/filesystem.hpp>
+#include <boost/asio.hpp>
 #include "FileUtils.h"
+#include "crux_version.h"
 
 using namespace std;
 
@@ -1520,6 +1522,109 @@ void get_files_from_list(
     }
   } else if (FileUtils::Exists(infile)) {
     outpaths.push_back(infile);
+  }
+}
+
+bool parseUrl(string url, string* host, string* path) {
+  if (!host || !path) {
+    return false;
+  }
+  // find protocol
+  size_t protocolSuffix = url.find("://");
+  if (protocolSuffix != string::npos) {
+    url = url.substr(protocolSuffix + 3);
+  }
+  size_t pathBegin = url.find('/');
+  if (pathBegin == string::npos) {
+    *host = url;
+    *path = "/";
+  } else {
+    *host = url.substr(0, pathBegin);
+    *path = url.substr(pathBegin);
+  }
+  if (host->empty()) {
+    *host = *path = "";
+    return false;
+  }
+  return true;
+}
+
+string httpRequest(const string& url, const std::string& data, bool waitForResponse) {
+  // Parse URL into host and path components
+  string host, path;
+  if (!parseUrl(url, &host, &path)) {
+    carp(CARP_ERROR, "Failed parsing URL %s", url.c_str());
+    return "";
+  }
+
+  using namespace boost::asio;
+
+  // Establish TCP connection to host on port 80
+  io_service service;
+  ip::tcp::resolver resolver(service);
+  ip::tcp::resolver::iterator endpoint = resolver.resolve(ip::tcp::resolver::query(host, "80"));
+  ip::tcp::socket sock(service);
+  connect(sock, endpoint);
+
+  // Determine method (GET if no data; otherwise POST)
+  string method = data.empty() ? "GET" : "POST";
+  string contentLengthHeader = data.empty()
+    ? ""
+    : "Content-Length: " + StringUtils::ToString(data.length()) + "\r\n";
+  // Send the HTTP request
+  string request =
+    method + " " + path + " HTTP/1.1\r\n"
+    "Host: " + host + "\r\n" +
+    contentLengthHeader +
+    "Connection: close\r\n"
+    "\r\n" + data;
+  sock.send(buffer(request));
+
+  if (!waitForResponse) {
+    return "";
+  }
+
+  // Read the response into stringstream
+  stringstream response;
+  boost::system::error_code ec;
+  do {
+    char buf[1024];
+    size_t n = sock.receive(buffer(buf), 0, ec);
+    if (!ec) {
+      response.write(buf, n);
+    }
+  } while (!ec);
+  return response.str();
+}
+
+void postToAnalytics(const string& appName) {
+  // Post data to Google Analytics
+  // For more information, see: https://developers.google.com/analytics/devguides/collection/protocol/v1/devguide
+  try {
+    stringstream paramBuilder;
+    paramBuilder << "v=1"                // Protocol verison
+                 << "&tid=UA-26136956-1" // Tracking ID
+                 // TODO Generate UUID for cid
+                 // The Client ID (cid) anonymously identifies a particular user
+                 // or device and should be a random UUID
+                 << "&cid=35009a79-1a05-49d7-b876-2b884d0f825b"
+                 << "&t=event"           // Hit type
+                 << "&ec=crux"           // Event category
+                 << "&ea=" << appName    // Event action
+                 << "&el="               // Event label
+#ifdef _MSC_VER
+                      "win"
+#elif __APPLE__
+                      "mac"
+#else
+                      "linux"
+#endif
+                   << '-' << CRUX_VERSION;
+      httpRequest(
+        "http://www.google-analytics.com/collect",
+        paramBuilder.str(),
+        false);
+  } catch (...) {
   }
 }
 
