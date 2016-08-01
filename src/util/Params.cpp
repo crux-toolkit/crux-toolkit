@@ -72,10 +72,10 @@ Params::Params() : finalized_(false) {
     "File containing spectra to be searched.");
   /* psm-convert arguments */
   InitArgParam("input PSM file",
-    "The name of a PSM file in tab-delimited text, SQT, PIN, pepXML or mzIdentML format");
+    "The name of a PSM file in tab-delimited text, SQT, pepXML or mzIdentML format");
   InitArgParam("output format",
     "The desired format of the output file. Legal values are tsv, html, sqt, pin, "
-    "pepxml, mzidentml, barista-xml.");
+    "pepxml, mzidentml.");
   /* get-ms2-spectrum */
   InitArgParam("scan number",
     "Scan number identifying the spectrum.");
@@ -1269,8 +1269,8 @@ Params::Params() : finalized_(false) {
       "given amount.", "", visible);
   }
   /* psm-convert options */
-  InitStringParam("input-format", "auto", "auto|tsv|sqt|pin|pepxml|mzidentml",
-    "Legal values are auto, tsv, sqt, pin, pepxml or mzidentml format.",
+  InitStringParam("input-format", "auto", "auto|tsv|sqt|pepxml|mzidentml",
+    "Legal values are auto, tsv, sqt, pepxml or mzidentml format.",
     "option, for psm-convert", true);
   InitBoolParam("distinct-matches", true,
     "Whether matches/ion are distinct (as opposed to total).",
