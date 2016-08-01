@@ -146,8 +146,6 @@ void MatchFileWriter::setPrecision(){
       match_fixed_float_[col_idx] = false;
       break;
 
-
-
     case NUMBER_MATCH_COLUMNS:
     case INVALID_COL:
       carp(CARP_FATAL, "Invalid match column type for setting precision.");
@@ -161,7 +159,6 @@ void MatchFileWriter::setPrecision(){
  * indiciating if the MATCH_COLUMN_T should be printed.
  */
 void MatchFileWriter::addColumnNames(const std::vector<bool>& col_is_printed){
-
   // for each column, if we should print it, mark as true
   for(size_t col_idx = 0; col_idx < col_is_printed.size(); col_idx++){
     bool print_it = col_is_printed[col_idx];
@@ -169,7 +166,6 @@ void MatchFileWriter::addColumnNames(const std::vector<bool>& col_is_printed){
       match_to_print_[col_idx] = true;
     } 
   }
-
 }
 
 /**

@@ -126,14 +126,6 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
     carp(CARP_FATAL, "Tide-search with XCorr p-values and variable bin width "
                      "is not allowed in this version of Crux.");
   }
-  if (exact_pval_search_ && (Params::GetBool("pin-output")
-                             || Params::GetBool("pepxml-output")
-                             || Params::GetBool("mzid-output")
-                             || Params::GetBool("sqt-output"))) {
-    carp(CARP_FATAL, "Exact p-value with "
-      "pin-output, pepxml-output, mzid-output or sqt-output file formats "
-      "is not allowed yet in this version of Crux.");
-  }
 
   // Check concat parameter
   bool concat = Params::GetBool("concat");
