@@ -106,6 +106,11 @@ void MzIdentMLReader::addScores(
         ivalue = StringUtils::FromString<int>(i->value);
         match->setScore(BY_IONS_TOTAL, ivalue);
         break;
+      case MS_p_value: // exact p-value
+        fvalue = StringUtils::FromString<FLOAT_T>(i->value);
+        match->setScore(TIDE_SEARCH_EXACT_PVAL, fvalue);
+        match_collection_->setScoredType(TIDE_SEARCH_EXACT_PVAL, true);
+        break;
       default:
         carp(CARP_DEBUG, "Unknown score type, will be set in custom scores");
     }
