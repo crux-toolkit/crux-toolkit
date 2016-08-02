@@ -2,8 +2,8 @@ project(crux)
 cmake_minimum_required(VERSION 2.8.4)
 cmake_policy(VERSION 2.8.4)
 
-set (CRUX_VERSION_MAJOR "2")
-set (CRUX_VERSION_MINOR "1")
+set (CRUX_VERSION_MAJOR "3")
+set (CRUX_VERSION_MINOR "0")
 set (CRUX_VERSION ${CRUX_VERSION_MAJOR}.${CRUX_VERSION_MINOR})
 
 message(
