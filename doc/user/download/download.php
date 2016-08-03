@@ -49,7 +49,8 @@
        "Linux32" => "crux-3.0.Linux.i686.zip",
        "Linux64" => "crux-3.0.Linux.x86_64.zip",
        "OSX" => "crux-3.0.Darwin.x86_64.zip",
-       "Windows" => "crux-3.0.Windows.ix86-pc.zip",
+       "Windows64" => "crux-3.0.Windows.AMD64.zip",
+       "Windows32" => "crux-3.0.Windows.i386.zip",
      );
      $directory = "crux-3.0/";
    }
