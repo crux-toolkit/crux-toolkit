@@ -751,6 +751,12 @@ Params::Params() : finalized_(false) {
   InitStringParam("score-function", "xcorr","xcorr|residue-evidence|both",
     "Function used for scoring PSMs. 'xcorr' is the original scoring function used by SEQUEST; 'residue-evidence' is designed to score high-resolution MS2 spectra; and 'both' calculates both scores. The latter requires that exact-p-values=T.",
     "Available for tide-search.", true);
+  InitIntParam("fragment-tolerance", 200, 0, BILLION,
+    "Mass tolerance used for scoring pairs of peaks in relation to residue masses when creating the residue evidence matrix. Default is in ppm",
+    "Available for tide-search", true);
+  InitIntParam("evidence-granularity", 25, 5, 100,
+    "Granularity of evidence to be created following the scaling of evidence from zero to one in the residue evidence matrix.",
+    "Available for tide-search",true);
 
   /*
    * Comet parameters
@@ -1687,6 +1693,8 @@ void Params::Categorize() {
   items.insert("isotope-windows");
   items.insert("compute-p-values");
   items.insert("score-function");
+  items.insert("fragment-tolerance");
+  items.insert("evidence-granularity");
   AddCategory("Search parameters", items);
 
   items.clear();

@@ -151,6 +151,7 @@ class ObservedPeakSet {
                                    double precursorMass,
                                    int nAA,
                                    const vector<double> aaMass,
+                                   int fragTol,int granularityScale,
                                    vector< vector<double> >& residueEvidenceMatrix);
   //END -- added by Andy Lin
 
