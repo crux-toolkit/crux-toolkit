@@ -753,7 +753,7 @@ Params::Params() : finalized_(false) {
     "'residue-evidence' is designed to score high-resolution MS2 spectra; and 'both' calculates "
     "both scores. The latter requires that exact-p-value=T.",
     "Available for tide-search.", true);
-  InitIntParam("fragment-tolerance", 200, 0, BILLION,
+  InitIntParam("fragment-tolerance", 10, 0, 500,
     "Mass tolerance (in ppm) for scoring pairs of peaks when creating the residue evidence matrix. "
     "This parameter only makes sense when score-fuction is 'residue-evidence' or 'both'.",
     "Available for tide-search.", true);
