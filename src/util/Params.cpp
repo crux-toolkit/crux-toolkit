@@ -749,13 +749,18 @@ Params::Params() : finalized_(false) {
     "Skip preprocessing steps on spectra. Default = F.",
     "Available for tide-search", false);
   InitStringParam("score-function", "xcorr","xcorr|residue-evidence|both",
-    "Function used for scoring PSMs. 'xcorr' is the original scoring function used by SEQUEST; 'residue-evidence' is designed to score high-resolution MS2 spectra; and 'both' calculates both scores. The latter requires that exact-p-values=T.",
+    "Function used for scoring PSMs. 'xcorr' is the original scoring function used by SEQUEST; "
+    "'residue-evidence' is designed to score high-resolution MS2 spectra; and 'both' calculates "
+    "both scores. The latter requires that exact-p-value=T.",
     "Available for tide-search.", true);
   InitIntParam("fragment-tolerance", 200, 0, BILLION,
-    "Mass tolerance used for scoring pairs of peaks in relation to residue masses when creating the residue evidence matrix. Default is in ppm",
-    "Available for tide-search", true);
+    "Mass tolerance (in ppm) for scoring pairs of peaks when creating the residue evidence matrix. "
+    "This parameter only makes sense when score-fuction is 'residue-evidence' or 'both'.",
+    "Available for tide-search.", true);
   InitIntParam("evidence-granularity", 25, 5, 100,
-    "Granularity of evidence to be created following the scaling of evidence from zero to one in the residue evidence matrix.",
+    "When exact-pvalue=T, this parameter controls the granularity of the entries in the dynamic "
+    "programming matrix.  Smaller values make the program run faster but give less exact p-values; "
+    "larger values make the program run more slowly but give more exact p-values.",
     "Available for tide-search",true);
 
   /*
