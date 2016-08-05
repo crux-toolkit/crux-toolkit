@@ -582,7 +582,7 @@ CVID MzIdentMLWriter::getScoreCVID(
     case SP:
       return MS_SEQUEST_PeptideSp;
     case TIDE_SEARCH_EXACT_PVAL:
-      return MS_peptide_identification_confidence_metric;
+      return MS_p_value;
     case PERCOLATOR_SCORE:
       return MS_percolator_score;
     case PERCOLATOR_QVALUE:
@@ -624,7 +624,7 @@ void MzIdentMLWriter::addScores(
     SCORER_TYPE_T score_type = (SCORER_TYPE_T)score_idx;
     if (match_collection->getScoredType(score_type)) {
       if (score_type == XCORR && match_collection->exact_pval_search_) {
-        CVParam exactPval(MS_peptide_identification_confidence_metric,
+        CVParam exactPval(MS_p_value,
                           match->getScore(TIDE_SEARCH_EXACT_PVAL));
         item->cvParams.push_back(exactPval);
         CVParam refactXCORR(MS_SEQUEST_xcorr,
