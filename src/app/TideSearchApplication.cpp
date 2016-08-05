@@ -14,7 +14,7 @@
 #include "util/StringUtils.h"
 #include <math.h> //Added by Andy Lin
 
-#include <iomanip> //DELETE WHEN DONE -- Andy //TODO
+#include <iomanip> //TODO delete when residue evidence is done
 
 bool TideSearchApplication::HAS_DECOYS = false;
 
@@ -683,7 +683,6 @@ void TideSearchApplication::search(
       break;
     case RESIDUE_EVIDENCE_MATRIX: //Following case written by Andy Lin in Feb 2016
       if (!exact_pval_search_) {
-        std::cout << std::endl << "So far so good" << std::endl;
         carp(CARP_FATAL,"This is not implemented yet.");
       } else { //Case RESIDUE_EVIDENCE_MATRIX
     
@@ -774,14 +773,14 @@ void TideSearchApplication::search(
         vector<vector<vector<double> > > residueEvidenceMatrix(nPepMassIntUniq, 
                vector<vector<double> >(aaMassDouble.size(), vector<double>(maxPrecurMassBin,0)));
 
-        std::cout << "Spectrum index: " << sc->spectrum_index << std::endl;
-        std::cout << "precursor mass: " << setprecision(13) <<  sc->neutral_mass << std::endl;
-        std::cout << "charge: " << sc->charge << std::endl;
-        std::cout << "precursorMz: "  << sc->spectrum->PrecursorMZ() << std::endl;
-        std::cout << "proton mass: " << MassConstants::proton << std::endl;
+
+//        std::cout << "Spectrum: " << sc->spectrum->SpectrumNumber() << std::endl;
+//        std::cout << "precursor mass: " << setprecision(13) <<  sc->neutral_mass << std::endl;
+//        std::cout << "charge: " << sc->charge << std::endl;
+//        std::cout << "precursorMz: "  << sc->spectrum->PrecursorMZ() << std::endl;
+//        std::cout << "proton mass: " << MassConstants::proton << std::endl;
 //        std::cout << "nCandPeptide: " << nCandPeptide << endl;
-        std::cout << "nPepMassIntUniq: " << nPepMassIntUniq << std::endl;
-        std::cout << 1.0 << std::endl;
+//        std::cout << "nPepMassIntUniq: " << nPepMassIntUniq << std::endl;
 
         //Initalize to -1 for length of vector (maxPrecurMassBin)
         //scoreOffset will be placed into corresponding mass bin 
@@ -812,6 +811,8 @@ void TideSearchApplication::search(
           CTermMassBin = MassConstants::mass2bin(MassConstants::mono_oh);
         }
 
+        int fragTol = Params::GetInt("fragment-tolerance");
+        int granularityScale = Params::GetInt("evidence-granularity");
         for (pe=0 ; pe<nPepMassIntUniq ; pe++) {
           int curPepMassInt = pepMassIntUnique[pe];
 
@@ -823,6 +824,7 @@ void TideSearchApplication::search(
           observed.CreateResidueEvidenceMatrix(*spectrum,charge,
                                                maxPrecurMassBin,precursorMass,
                                                aaMassDouble.size(),aaMassDouble,
+                                               fragTol,granularityScale,
                                                residueEvidenceMatrix[pe]);
 
           //In Matlab code. This is converted to an int matrix.
@@ -860,12 +862,13 @@ void TideSearchApplication::search(
                                 *std::min_element(aaMassInt.begin(),aaMassInt.end()), *std::max_element(aaMassInt.begin(),aaMassInt.end()),
                                 maxEvidence,maxScore,
                                 scoreResidueCount,scoreOffset);
-
-          std::cout << "scoreOffset: " << scoreOffset << std::endl;
+/*
+          std::cout << "scoreOffset: " << scoreOffset+1 << std::endl;
           for(int i=0; i <scoreResidueCount.size(); i++) {
-            std::cout << "row: " << i+1 << " " << scoreResidueCount[i] << std::endl;
+//            std::cout << "row: " << i+1 << " " << scoreResidueCount[i] << std::endl;
+            std::cout << scoreResidueCount[i] << std::endl;
           }  
-
+*/
           scoreResidueOffsetObs[curPepMassInt] = scoreOffset;
 
           vector<double> scoreResidueCountAdjust(scoreResidueCount.size());
@@ -887,8 +890,9 @@ void TideSearchApplication::search(
 
 /*
           for(int i=0; i <scoreResidueCount.size(); i++) {
-            std::cout << "row: " << i+1 << " " << scoreResidueCount[i] << std::endl;
-          }         
+//            std::cout << "row: " << i+1 << " " << scoreResidueCount[i] << std::endl;
+            std::cout << scoreResidueCount[i] << std::endl;
+          }
 */
         }
 
@@ -899,7 +903,13 @@ void TideSearchApplication::search(
         vector<int>::const_iterator iter_int;
         vector<unsigned int>::const_iterator iter_uint;
 
+//        std::cout << "Spectrum: " << sc->spectrum->SpectrumNumber() << std::endl;
+//        std::cout << "minMass: " << min_mass << std::endl;
+//        std::cout << "precursorMass: " << precursorMass << std::endl;
+//        std::cout << "maxMass: " << max_mass << std::endl;
+//        std::cout << "precursorMZ: " << precursor_mz << std::endl;
 //        std::cout << "nCandPeptide: " << nCandPeptide << std::endl;
+//        std::cout << sc->spectrum->SpectrumNumber() << " " << precursorMass << endl;
         for(pe = 0; pe < nCandPeptide; pe++) {
           int pepMassIntIdx = 0;
           int curPepMassInt;
@@ -914,8 +924,8 @@ void TideSearchApplication::search(
             }
           }
 
-          vector<vector<double> > curResidueEvidenceMatrix = residueEvidenceMatrix[pepMassIntIdx];          scoreResidueEvidence = 0;
-
+          vector<vector<double> > curResidueEvidenceMatrix = residueEvidenceMatrix[pepMassIntIdx];
+          scoreResidueEvidence = 0;
           Peptide* curPeptide = (*iter_);
           int pepLen = curPeptide->Len();
 
@@ -937,45 +947,50 @@ void TideSearchApplication::search(
             int index;
             double delta;
             MassConstants::DecodeMod(mods[i],&index,&delta);
-
             assert(mod_map.find(index) == mod_map.end()); 
-
             mod_map[index] = delta;
-//            std::cout << index << std::endl;
+//           std::cout << index << std::endl;
 //           std::cout << delta << std::endl;
           }
 
           string curPepSeq = curPeptide->Seq();
           for(int res = 0; res < pepLen-1 ; res++) {
-            //Line below defined above
-            //string aa = "GASPVTILNDKQEMHFRCYW";
+            //aa defined above - string aa = "GASPVTILNDKQEMHFRCYW";
             //determines position current residue is in string aa
             std::string::size_type pos = aa.find(curPepSeq[res]);
  
             double tmpMass;
             map<int,double>::iterator it;
-
             it = mod_map.find(res);
             if (it != mod_map.end()) {
               tmpMass = MassConstants::mono_table[aa[pos]] + mod_map[res];
-            }
-            else {
+            } else {
               tmpMass = MassConstants::mono_table[aa[pos]];
             }
-
-            //aaMassDouble is defined above and contains all massses used in
-            //the residueEvidenceMatrix
+            //aaMassDouble is defined above and contains all massses used in residueEvidenceMatrix
             int tmp = find(aaMassDouble.begin(),aaMassDouble.end(),tmpMass) - 
                             aaMassDouble.begin();
-
             scoreResidueEvidence += 
-                 curResidueEvidenceMatrix[tmp][intensArrayTheor[res]];
-         
+                 curResidueEvidenceMatrix[tmp][intensArrayTheor[res]-1];
           }
- 
           int scoreCountIdx = scoreResidueEvidence + scoreResidueOffsetObs[curPepMassInt];
           double pValue = pValuesResidueObs[curPepMassInt][scoreCountIdx];
- 
+/*
+          std::cout << "decoy: " << curPeptide->IsDecoy() << std::endl;
+          std::cout << "pepMassIntIdx: " << pepMassIntIdx << std::endl;
+          std::cout << "curPepSeq: " << curPepSeq << std::endl;
+          std::cout << "curPepMassInt: " << curPepMassInt <<std::endl;
+          std::cout << "scoreResideEvidence: " <<scoreResidueEvidence << std::endl;
+          std::cout << "pValue: " << pValue << std::endl << std::endl;;
+*/ 
+/*
+          if (curPeptide->IsDecoy() == false){
+//            std::cout << curPepSeq << " " << scoreResidueEvidence << std::endl;
+//            std::cout << "pvalue: " << pValue << std::endl;
+//            std::cout << curPepSeq << " " << curPepMassInt << " " << pValue << std::endl;
+            std::cout << curPepSeq << std::endl;
+          }
+*/
           if(peptide_centric) {
             carp(CARP_FATAL, "residue-evidence has not been implemented with 'peptide-centric-search T' yet.");
           }
@@ -991,20 +1006,12 @@ void TideSearchApplication::search(
 
           ++iter_;
           ++iter1_;
-/*
-          std::cout << curPepSeq << std::endl;
-          std::cout << "pValue: " << pValue << std::endl;
-          std::cout << (double)scoreResidueEvidence <<std::endl;
-          std::cout << nCandPeptide - pe << std::endl;
-*/
-//          break; //TODO delete
         }
  
         //clean up 
         delete [] pepMassInt;
         delete [] scoreOffsetObs;
-	//TODO need to delete a lot more stuff
-	
+	//TODO check if need to delete more stuff
 
 	if (!peptide_centric){
           // below text is copied from text above in the exact-p-value XCORR case
@@ -1291,7 +1298,9 @@ vector<string> TideSearchApplication::getOptions() const {
     "peptide-centric-search",
     "elution-window-size",
     "verbosity",
-    "score-function"
+    "score-function",
+    "fragment-tolerance",
+    "evidence-granularity"
   };
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }
@@ -1521,6 +1530,11 @@ void TideSearchApplication::calcResidueScoreCount (
   int colBuffer = maxAaMass;
   int colStart = NTermMass;
   int nRow = bottomRowBuffer - minScore + 1 + maxScore + topRowBuffer;
+//  std::cout << nRow << std::endl;
+//  std::cout << bottomRowBuffer << std::endl;
+//  std::cout << minScore << std::endl;
+//  std::cout << maxScore << std::endl;
+//  std::cout << topRowBuffer << std::endl;
   int nCol = colBuffer + pepMassInt;
   int rowFirst = bottomRowBuffer + 1;
   int rowLast = rowFirst - minScore + maxScore;
@@ -1685,6 +1699,7 @@ void TideSearchApplication::getMassBin(
        iter_ != active_peptide_queue->end_;
        ++iter_) {
     double pepMass = (*iter_)->Mass();
+//    std::cout << pepMass << std::endl;
     pepMaInt = MassConstants::mass2bin(pepMass);
     pepMassInt[pe] = pepMaInt;
     pepMassIntUnique.push_back(pepMaInt);

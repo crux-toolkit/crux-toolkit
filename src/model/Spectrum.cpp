@@ -27,6 +27,9 @@
 #include "util/FileUtils.h"
 #include "util/StringUtils.h"
 
+//TODO DELETE WHEN RESIDUEEVIDENCE IS DONE - Andy
+//#include <iostream>
+
 using namespace std;
 using namespace Crux;
 namespace pzd = pwiz::msdata;
@@ -471,6 +474,12 @@ bool Spectrum::parsePwizSpecInfo(
           zstate.setMZ(boost::lexical_cast<double>(zLine.substr(separator + 1)),
                        boost::lexical_cast<int>(zLine.substr(0, separator)));
           zstates_.push_back(zstate);
+          //TODO delete lines below when residue evidence is done
+//          std::cout << "zLine: " << zLine << std::endl;
+//          std::cout << "wefew: " << zLine.substr(separator+1) << std::endl;
+//          std::cout << "qqqq:" << zLine.substr(0,separator) << std::endl;
+//          std::cout << "fefef, neutral mass: " << zstate.getNeutralMass() << std::endl;
+//        //TODO delete lines above when residue evidence is done
         }
       }
     }
