@@ -187,11 +187,15 @@ int PercolatorApplication::main(
     }
   }
 
-  perc_args_vec.push_back("-p");
-  perc_args_vec.push_back(Params::GetString("c-pos"));
+  if (!Params::IsDefault("c-pos")) {
+    perc_args_vec.push_back("-p");
+    perc_args_vec.push_back(Params::GetString("c-pos"));
+  }
  
-  perc_args_vec.push_back("-n");
-  perc_args_vec.push_back(Params::GetString("c-neg"));
+  if (!Params::IsDefault("c-neg")) {
+    perc_args_vec.push_back("-n");
+    perc_args_vec.push_back(Params::GetString("c-neg"));
+  }
  
   perc_args_vec.push_back("--trainFDR");
   perc_args_vec.push_back(Params::GetString("train-fdr"));
