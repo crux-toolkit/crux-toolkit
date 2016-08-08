@@ -521,15 +521,15 @@ Params::Params() : finalized_(false) {
   InitStringParam("init-weights", "",
     "Read initial weights from the given file (one per line).",
     "Available for crux percolator ", true);
-  InitDoubleParam("c-pos", 0.01,
-    "Penalty for mistakes made on positive examples. If this value is not specified, "
+  InitDoubleParam("c-pos", 0.00,
+    "Penalty for mistakes made on positive examples. If this value is set to 0, "
     "then it is set via cross validation over the values {0.1, 1, 10}, selecting the "
     "value that yields the largest number of PSMs identified at the q-value threshold "
     "set via the --test-fdr parameter.",
     "Available for crux percolator", true);
   InitDoubleParam("c-neg", 0.0, 0.0, 0.90,
-    "Penalty for mistake made on negative examples. This parameter requires the c-pos "
-    "is set explicitly; otherwise, --c-neg will have no effect. If not specified, then "
+    "Penalty for mistake made on negative examples. This parameter requires that c-pos "
+    "is set to a non-zero value; otherwise, --c-neg will have no effect. If not specified, then "
     "this value is set by cross validation over {0.1, 1, 10}.",
     "Available for crux percolator", true);
   InitDoubleParam("train-fdr", 0.01, 0, BILLION,
