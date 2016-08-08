@@ -682,30 +682,87 @@ void TideSearchApplication::search(
       }
       break;
     case RESIDUE_EVIDENCE_MATRIX: //Following case written by Andy Lin in Feb 2016
+    { 
+      //TODO section below can be removed when options have been
+      //implemented for residue evidence
+      bool flanking_peak = Params::GetBool("use-flanking-peaks");
+      bool neutral_loss_peak = Params::GetBool("use-neutral-loss-peaks");
+      if (neutral_loss_peak == true) {
+        carp(CARP_FATAL,"--score-function residue-evidence with --use-neutral-loss-peaks true not implemented yet");
+      }
+      if (flanking_peak == true) {
+        carp(CARP_FATAL,"--score-function residue-evidence with --use-flanking-peaks true not implemented yet");
+      }
+      //END TODO
+
+      int nCandPeptide = active_peptide_queue->SetActiveRangeBIons(min_mass, max_mass, min_range, max_range);
+      if (nCandPeptide==0) {
+          continue;
+      }
+
       if (!exact_pval_search_) {
         carp(CARP_FATAL,"This is not implemented yet.");
-      } else { //Case RESIDUE_EVIDENCE_MATRIX
-    
-        //TODO section below can be removed when options have been
-        //implemented for residue evidence
-        bool flanking_peak = Params::GetBool("use-flanking-peaks");
-        bool neutral_loss_peak = Params::GetBool("use-neutral-loss-peaks");
-        if (neutral_loss_peak == true) {
-          carp(CARP_FATAL,"--score-function residue-evidence with --use-neutral-loss-peaks true not implemented yet");
-        }
-        if (flanking_peak == true) {
-          carp(CARP_FATAL,"--score-function residue-evidence with --use-flanking-peaks true not implemented yet");
-        }
-        //END TODO
-        
-        const int minDeltaMass = aaMass[0];
-        const int maxDeltaMass = aaMass[nAA - 1];
-        int maxPrecurMassBin = floor(MaxBin::Global().CacheBinEnd() + 50.0);
-        int nCandPeptide = active_peptide_queue->SetActiveRangeBIons(min_mass, max_mass, min_range, max_range);
 
-        if (nCandPeptide==0) {
-          continue;
+//TODO This commented code is in another spot
+//        const int minDeltaMass = aaMass[0]; //TODO not needed currently since masses are given by string aa
+//                                          //This will need to change once we decided to get string aa or 
+//                                          //go to a double version of aaMass         
+//        const int maxDeltaMass = aaMass[nAA - 1]; //TODO look above
+        int maxPrecurMassBin = floor(MaxBin::Global().CacheBinEnd() + 50.0);
+
+        //TODO Below is not implemented or tested yet
+        total_candidate_peptides +=nCandPeptide;
+        TideMatchSet::Arr2 match_arr2(nCandPeptide); //TODO -- check if this is right arr to use
+
+        //Gets masses of all amino acids in double form
+        //argument aaMasses are integer masses. Therefore need to create for this one
+        vector<double> aaMassDouble;
+        vector<int> aaMassInt;
+        string aa = "GASPVTILNDKQEMHFRCYW";//This order to match Matlab code by Jeff Howbert
+        for(int i=0 ; i<aa.length() ; i++) {
+          aaMassDouble.push_back(MassConstants::mono_table[aa[i]]);
+          int tmpMass = MassConstants::mass2bin(MassConstants::mono_table[aa[i]]);
+          aaMassInt.push_back(tmpMass);
         }
+
+        //Contains all amino acids (1 letter code) that are dynamically modified
+        vector<string> modAA;
+        //Get masses of all dynamically modified amino acids
+        for(int i=0 ; i<mod_table.variable_mod_size() ; i++) {
+          string curModAA = mod_table.variable_mod(i).amino_acids();
+          modAA.push_back(curModAA);
+
+          double delta = mod_table.variable_mod(i).delta();
+          int pos = aa.find(curModAA);
+          double newMass = MassConstants::mono_table[aa[pos]] + delta;
+          aaMassDouble.push_back(newMass);
+          int tmpMass = MassConstants::mass2bin(newMass);
+          aaMassInt.push_back(tmpMass);
+        }
+ 
+        //For one spectrum calculates:
+        // 1) residue evidence matrix 
+        // 2) calculates score between spectrum and all selected candidate
+        //    target and decoy peptides
+
+        int pe;
+        int ma;
+        int* pepMassInt = new int[nCandPeptide];
+        vector<int> pepMassIntUnique;
+        pepMassIntUnique.reserve(nCandPeptide);
+
+        //For each candidate peptide, determine which discretized mass bin it is in
+        getMassBin(pepMassInt,pepMassIntUnique,active_peptide_queue);
+
+
+        //TODO Above is not implemented or tested yet
+      } else { //Case RESIDUE_EVIDENCE_MATRIX
+//        const int minDeltaMass = aaMass[0]; //TODO not needed currently since masses are given by string aa
+//                                            //This will need to change once we decided to get string aa or 
+//                                            //go to a double version of aaMass         
+//        const int maxDeltaMass = aaMass[nAA - 1]; //TODO look above
+
+        int maxPrecurMassBin = floor(MaxBin::Global().CacheBinEnd() + 50.0);
 
         total_candidate_peptides += nCandPeptide;
         TideMatchSet::Arr match_arr(nCandPeptide); // scored peptides will go here.
@@ -1031,6 +1088,7 @@ void TideSearchApplication::search(
 	} //end peptide_centric == true
       }
       break; //End Case RESIDUE_EVIDENCE_MATRIX
+    }
     case BOTH:
       if (!exact_pval_search_){
         carp(CARP_FATAL,"Using the residueEvidenceMatrix score function with XCorr requires the exact-p-value option to be true.");
