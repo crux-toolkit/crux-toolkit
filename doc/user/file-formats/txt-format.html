@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Crux Template</title>
+<title>Crux Tab-delimited File Format</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <link rel="stylesheet" type="text/css" href="../styles.css">
 <script type="text/javascript">
@@ -59,7 +59,6 @@
 		<table border="1" id="tabformat">
 		<!-- table headers-->
 		<tr>
-		<th rowspan="2"></th>
 		<th rowspan="2">Name</th>
 		<th rowspan="2">Description</th>
 		<th rowspan="2">comet</th>
@@ -89,9 +88,26 @@
 		<!--"–"=&#8211-->
 
 		<tr bgcolor="#DEDEDE">
-		<td>1</td>
+		<td>file</td>
+		<td>The name of the file containing the scan.</td>
+		<td>&nbsp;</td>
+		<td>&#10003;</td>
+		<td>&#10003;</td>
+		<td>&#10003;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		</tr>
+
+		<tr bgcolor="#DEDEDE">
 		<td>scan</td>
-		<td>The identifying number of each scan</td>
+		<td>The identifying number of each scan.</td>
 		<td>&#10003;</td>
 		<td>&#10003;</td>
 		<td>&#10003;</td>
@@ -108,7 +124,6 @@
 		</tr>
 
 		<tr>
-		<td>2</td>
 		<td>charge</td>
 		<td>The charge state for this spectrum in this PSM.</td>
 		<td>&#10003;</td>
@@ -127,7 +142,6 @@
 		</tr>
 
 		<tr bgcolor="#DEDEDE">
-		<td>3</td>
 		<td>spectrum precursor m/z</td>
 		<td>The observed m/z of the spectrum precursor ion.</td>
 		<td>&#10003;</td>
@@ -146,7 +160,6 @@
 		</tr>
 
 		<tr>
-		<td>4</td>
 		<td>spectrum neutral mass</td>
 		<td>The computed mass of the spectrum precursor at the given charge   state. This is equal to the precursor m/z minus the mass of a proton (1.00727646677 Da), all multiplied by the charge.</td>
 		<td>&#10003;</td>
@@ -165,7 +178,6 @@
 		</tr>
 
 		<tr bgcolor="#DEDEDE">
-		<td>5</td>
 		<td>peptide mass</td>
 		<td>The mass of the peptide sequence, computed as the sum of the the amino acid masses plus the mass of water (18.010564684 Da or 18.0153 Da, depending on whether we are using monoisotopic or average mass).</td>
 		<td>&#10003;</td>
@@ -184,7 +196,6 @@
 		</tr>
 
 		<tr>
-		<td>6</td>
 		<td>delta_cn</td>
 		<td>The normalized difference in xcorr for this PSM relative to other PSMs for this spectrum at this charge state.</td>
 		<td>&#10003;</td>
@@ -202,8 +213,26 @@
 		<td>&nbsp;</td>
 		</tr>
 
+		<tr>
+		  <td>delta_lcn</td>
+                  <!-- This description needs to be corrected. -->
+		<td>The normalized difference in xcorr for this PSM relative to other PSMs for this spectrum at this charge state.</td>
+		<td>&nbsp;</td>
+		<td>&#10003;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		</tr>
+
 		<tr bgcolor="#DEDEDE">
-		<td>7</td>
 		<td>sp score</td>
 		<td>The SEQUEST-type preliminary score.</td>
 		<td>&#10003;</td>
@@ -222,7 +251,6 @@
 		</tr>
 
 		<tr>
-		<td>8</td>
 		<td>sp rank</td>
 		<td>The rank of this PSM when sorted by Sp score.  Note that,
 		  in <code>tide-search</code>, the Sp score is only computed for PSMs
@@ -244,9 +272,7 @@
 		<td>&nbsp;</td>
 		</tr>
 
-		<!--9.xcorr score-->
 		<tr bgcolor="#DEDEDE">
-		<td>9</td>
 		<td>xcorr score</td>
 		<td>The SEQUEST-type cross correlation score.
 		This column only appears when <code>exact-p-value=F</code>.</td>
@@ -266,7 +292,6 @@
 		</tr>
 
 		<tr>
-		<td>10</td>
 		<td>exact p-value</td>
 		<td>The p-value computed as described in
 		  <a href="http://www.ncbi.nlm.nih.gov/pubmed/24895379">"Computing Exact p-values
@@ -288,7 +313,6 @@
 		</tr>
 
 		<tr bgcolor="#DEDEDE">
-		<td>11</td>
 		<td>refactored xcorr</td>
 		<td>A discretized version of XCorr, used to compute the p-value.
 		This column only appears when <code>exact-p-value=T</code>.</td>
@@ -308,7 +332,6 @@
 		</tr>
 
 		<tr>
-		<td>12</td>
 		<td>xcorr rank</td>
 		<td>The rank of this PSM when sorted by xcorr.</td>
 		<td>&#10003;</td>
@@ -327,7 +350,6 @@
 		</tr>
 
 		<tr bgcolor="#DEDEDE">
-		<td>13</td>
 		<td>p-value</td>
 		<td>The p-value computed from the estimated Weibull parameters of the score distribution for this spectrum.</td>
 		<td>&nbsp;</td>
@@ -346,7 +368,6 @@
 		</tr>
 
 		<tr>
-		<td>14</td>
 		<td>percolator score</td>
 		<td>The discriminant score assigned by percolator.</td>
 		<td>&nbsp;</td>
@@ -365,7 +386,6 @@
 		</tr>
 
 		<tr bgcolor="#DEDEDE">
-		<td>15</td>
 		<td>percolator rank</td>
 		<td>The rank of this PSM, peptide or protein when sorted by percolator score.</td>
 		<td>&nbsp;</td>
@@ -384,7 +404,6 @@
 		</tr>
 
 		<tr>
-		<td>16</td>
 		<td>percolator q-value</td>
 		<td>The q-value assigned by percolator.</td>
 		<td>&nbsp;</td>
@@ -403,7 +422,6 @@
 		</tr>
 
 		<tr bgcolor="#DEDEDE">
-		<td>17</td>
 		<td>q-ranker score</td>
 		<td>The discriminant score assigned by q-ranker.</td>
 		<td>&nbsp;</td>
@@ -423,7 +441,6 @@
 		</tr>
 
 		<tr>
-		<td>18</td>
 		<td>q-ranker q-value</td>
 		<td>The q-value assigned by q-ranker.</td>
 		<td>&nbsp;</td>
@@ -442,7 +459,6 @@
 		</tr>
 
 		<tr bgcolor="#DEDEDE">
-		<td>19</td>
 		<td>q-ranker PEP</td>
 		<td>The posterior error probability estimated from the q-ranker score</td>
 		<td>&nbsp;</td>
@@ -461,7 +477,6 @@
 		</tr>
 
 		<tr>
-		<td>20</td>
 		<td>barista score</td>
 		<td>The discriminant score assigned by barista.</td>
 		<td>&nbsp;</td>
@@ -480,7 +495,6 @@
 		</tr>
 
 		<tr bgcolor="#DEDEDE">
-		<td>21</td>
 		<td>barista q-value</td>
 		<td>The q-value assigned by barista.</td>
 		<td>&nbsp;</td>
@@ -499,7 +513,6 @@
 		</tr>
 
 		<tr>
-		<td>22</td>
 		<td>barista PEP</td>
 		<td>The PEP assigned by barista</td>
 		<td>&nbsp;</td>
@@ -518,7 +531,6 @@
 		</tr>
 
 		<tr bgcolor="#DEDEDE">
-		<td>23</td>
 		<td>b/y ions matched</td>
 		<td>The number of b-ions and y-ions in the peptide that have a corresponding peak in the spectrum.</td>
 		<td>&nbsp;</td>
@@ -537,7 +549,6 @@
 		</tr>
 
 		<tr>
-		<td>24</td>
 		<td>b/y ions total</td>
 		<td>The total number of b- and y-ions predicted for this peptide.</td>
 		<td>&#10003;</td>
@@ -556,7 +567,6 @@
 		</tr>
 
 		<tr bgcolor="#DEDEDE">
-		<td>25</td>
 		<td>total matches/spectrum</td>
 		<td>The number of candidate peptides in the database found for this
 		  spectrum, including duplicates.  Note that this is always the number of target candidate
@@ -577,7 +587,6 @@
 		</tr>
 
 		<tr>
-		<td>26</td>
 		<td>distinct matches/spectrum</td>
 		<td>The number of unique candidate peptides in the database found for this
 		  spectrum.  Note that this is always the number of target candidate
@@ -599,9 +608,8 @@
 
 
 		<tr bgcolor="#DEDEDE">
-		<td>27</td>
 		<td>sequence</td>
-		<td> The peptide sequence.</td>
+		<td>The peptide sequence, not including any modifications.</td>
 		<td>&#10003;</td>
 		<td>&#10003;</td>
 		<td>&#10003;</td>
@@ -617,8 +625,44 @@
 		<td>&nbsp;</td>
 		</tr>
 
+		<tr bgcolor="#DEDEDE">
+		<td>modified sequence</td>
+		<td>The peptide sequence, with modifications included.</td>
+		<td>&#10003;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		</tr>
+
+		<tr bgcolor="#DEDEDE">
+		  <td>modifications</td>
+                  <!-- This description needs to be expanded considerably.  -->
+		<td>Variable modifications applied to the sequence.</td>
+		<td></td>
+		<td>&#10003;</td>
+		<td>&#10003;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		</tr>
+
 		<tr>
-		<td>28</td>
 		<td>cleavage type</td>
 		<td>The cleavage rules for generating this peptide based on the user-specified enzyme specificity.</td>
 		<td>&#10003;</td>
@@ -637,7 +681,6 @@
 		</tr>
 
 		<tr bgcolor="#DEDEDE">
-		<td>29</td>
 		<td>protein id</td>
 		<td>A comma-separated list of proteins in which this peptide
 		  appears. Optionally, the protein name may be followed by a number in parentheses giving the start position of the peptide in the protein.</td>
@@ -657,9 +700,12 @@
 		</tr>
 
 		<tr>
-		<td>30</td>
 		<td>flanking aa</td>
-		<td>The amino acids that precede and follow this peptide in the parent protein ID.</td>
+		<td>The amino acids that precede and follow this
+		peptide in the parent protein ID.  If the peptide
+		occurs in more than one protein, then this column
+		will contain a comma-separated list of pairs of amino
+		acids.</td>
 		<td>&#10003;</td>
 		<td>&#10003;</td>
 		<td>&#10003;</td>
@@ -675,8 +721,29 @@
 		<td>&nbsp;</td>
 		</tr>
 
+		<tr>
+		<td>original target sequence</td>
+		<td>The unmodified target sequence. For a target PSM,
+		the value in this column will be identical to the
+		value in the "sequence" column.  For a decoy PSM,
+		this column will contain the corresponding target
+		sequence.</td>
+		<td>&nbsp;</td>
+		<td>&#10003;</td>
+		<td>&#10003;</td>
+		<td>&#10003;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		</tr>
+
 		<tr bgcolor="#DEDEDE">
-		<td>31</td>
 		<td>RAW</td>
 		<td>The raw (unnormalized) count of spectra per peptide</td>
 		<td>&nbsp;</td>
@@ -695,7 +762,6 @@
 		</tr>
 
 		<tr>
-		<td>32</td>
 		<td>SIN</td>
 		<td>A protein quantification score</td>
 		<td>&nbsp;</td>
@@ -714,7 +780,6 @@
 		</tr>
 
 		<tr bgcolor="#DEDEDE">
-		<td>33</td>
 		<td>NSAF</td>
 		<td>The normalized spectral abundace factor</td>
 		<td>&nbsp;</td>
@@ -733,7 +798,6 @@
 		</tr>
 
 		<tr>
-		<td>34</td>
 		<td>dNSAF</td>
 		<td>The distributed normalized spectral abundace factor</td>
 		<td>&nbsp;</td>
@@ -752,7 +816,6 @@
 		</tr>
 
 		<tr bgcolor="#DEDEDE">
-		<td>35</td>
 		<td>EMPAI</td>
 		<td>The exponentially modified protein abundance index</td>
 		<td>&nbsp;</td>
@@ -771,7 +834,6 @@
 		</tr>
 
 		<tr>
-		<td>36</td>
 		<td> parsimony rank</td>
 		<td>The protein rank based on its spectral-counts score.</td>
 		<td>&nbsp;</td>
@@ -790,7 +852,6 @@
 		</tr>
 
 		<tr bgcolor="#DEDEDE">
-		<td>37</td>
 		<td>filename</td>
 		<td>The name of the file in which the PSM appears.</td>
 		<td>&nbsp;</td>
@@ -809,7 +870,6 @@
 		</tr>
 
 		<tr>
-		<td>38</td>
 		<td>psm_id</td>
 		<td>PSM identifier.</td>
 		<td>&nbsp;</td>
@@ -828,7 +888,6 @@
 		</tr>
 
 		<tr bgcolor="#DEDEDE">
-		<td>39</td>
 		<td>protein group number</td>
 		<td>Protein group index</td>
 		<td>&nbsp;</td>
@@ -847,7 +906,6 @@
 		</tr>
 
 		<tr>
-		<td>40</td>
 		<td>peptides-scan.charge</td>
 		<td>Peptides belonging to each protein in the group, with scan and charge (for example, EAMPK-001285.2)</td>
 		<td>&nbsp;</td>
@@ -866,7 +924,6 @@
 		</tr>
 
 		<tr bgcolor="#DEDEDE">
-		<td>41</td>
 		<td>proteins</td>
 		<td>Proteins in the protein group. Each protein can be followed by peptides in parenthesis, if they belong only to this particular protein in the group. Since peptides are considered indistinguishable if they have identical amino acid sequences or they differ only by I/L or T/S in the same position in the peptide, the peptides shared by the group may not all be identical.</td>
 		<td>&nbsp;</td>
@@ -885,7 +942,6 @@
 		</tr>
 
 		<tr>
-		<td>42</td>
 		<td>parent group numbers</td>
 		<td>The numbers of the protein groups in the barista.target.proteins.txt that are supersets of this group in terms of peptides.</td>
 		<td>&nbsp;</td>
@@ -904,7 +960,6 @@
 		</tr>
 
 		<tr bgcolor="#DEDEDE">
-		<td>43</td>
 		<td>peptide mass mono</td>
 		<td>Monoisotopic peptide mass</td>
 		<td>&nbsp;</td>
@@ -923,7 +978,6 @@
 		</tr>
 
 		<tr>
-		<td>44</td>
 		<td>peptide mass average</td>
 		<td>Average peptide mass</td>
 		<td>&nbsp;</td>
@@ -942,7 +996,6 @@
 		</tr>
 
 		<tr bgcolor="#DEDEDE">
-		<td>45</td>
 		<td>mass error(ppm)</td>
 		<td>The mass error (in ppm) between the observed precursor mass and the
 		    cross-link peptide product</td>
@@ -962,7 +1015,6 @@
 		</tr>
 
 		<tr>
-		<td>46</td>
 		<td>protein id(loc)</td>
 		<td>List of protein IDs that give rise to the first and second peptide in the
 		    cross-link peptide product. (loc) indicates the location of the
@@ -985,7 +1037,6 @@
 
 
 		<tr>
-		<td>47</td>
 		<td>protein id(loc) 1</td>
 		<td>List of protein IDs that give rise to the first peptide in the
 		    cross-link peptide product. (loc) indicates the location of the
@@ -1006,7 +1057,6 @@
 		</tr>
 
 		<tr bgcolor="#DEDEDE">
-		<td>48</td>
 		<td>protein id(loc) 2</td>
 		<td>List of protein IDs that give rise to the second peptide in the
 		    cross-link peptide product. (loc) indicates the location of the
@@ -1027,7 +1077,6 @@
 		</tr>
 
 		<tr>
-		<td>49</td>
 		<td>by total</td>
 		<td>Total number of b-y ions in product</td>
 		<td>&nbsp;</td>
@@ -1046,7 +1095,6 @@
 		</tr>
 
 		<tr bgcolor="#DEDEDE">
-		<td>50</td>
 		<td>by observable (0-1200)</td>
 		<td>Total number of b and y ions observable in the 0-1200 m/z range</td>
 		<td>&nbsp;</td>
@@ -1065,7 +1113,6 @@
 		</tr>
 
 		<tr>
-		<td>51</td>
 		<td>by observable bin (0-1200)</td>
 		<td>Total number of b and y ions observable in the 0-1200 m/z range
 		  using 1 Da bins</td>
@@ -1085,7 +1132,6 @@
 		</tr>
 
 		<tr bgcolor="#DEDEDE">
-		<td>52</td>
 		<td>by observable (0-max)</td>
 		<td>Total number of b and y ions observable in the entire m/z range</td>
 		<td>&nbsp;</td>
@@ -1104,7 +1150,6 @@
 		</tr>
 
 		<tr>
-		<td>53</td>
 		<td>by observable bin (0-max)</td>
 		<td>Total number of b and y ions observable in the entire m/z range
 		  using 1 Da bins</td>
@@ -1124,7 +1169,6 @@
 		</tr>
 
 		<tr bgcolor="#DEDEDE">
-		<td>54</td>
 		<td>by observed bin</td>
 		<td>Total number of b-y ions observed in spectrum</td>
 		<td>&nbsp;</td>
@@ -1143,7 +1187,6 @@
 		</tr>
 
 		<tr>
-		<td>55</td>
 		<td>ion current total</td>
 		<td>Total ion current for spectrum</td>
 		<td>&nbsp;</td>
@@ -1162,7 +1205,6 @@
 		</tr>
 
 		<tr bgcolor="#DEDEDE">
-		<td>56</td>
 		<td>ion current observed</td>
 		<td>Total ion current observed for matching b-y ions</td>
 		<td>&nbsp;</td>
@@ -1181,7 +1223,6 @@
 		</tr>
 
 		<tr>
-		<td>57</td>
 		<td>ions observable bin (0-1200)</td>
 		<td>Total ions observable (b, y, flanks, and neutral losses) within 0-1200 m/z range</td>
 		<td>&nbsp;</td>

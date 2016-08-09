@@ -1,4 +1,4 @@
-scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	delta_lcn	xcorr score	xcorr rank	distinct matches/spectrum	sequence	modfications	cleavage type	protein id	flanking aa
+scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	delta_lcn	xcorr score	xcorr rank	distinct matches/spectrum	sequence	modifications	cleavage type	protein id	flanking aa
 148	1	713.0700	712.0627	714.3660	0.149569	0.235802	0.42336526	1	15	ARPGDSL		chymotrypsin-full-digest	YPL266W(165)	LY
 35	1	709.0700	708.0627	709.3283	0.142266	0.375667	0.36257386	1	11	TISNEF		chymotrypsin-full-digest	YMR309C(141)	LD
 106	1	713.0700	712.0627	714.3660	0.14551	0.401226	0.48080388	1	15	ARPGDSL		chymotrypsin-full-digest	YPL266W(165)	LY
