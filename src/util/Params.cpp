@@ -528,8 +528,7 @@ Params::Params() : finalized_(false) {
     "set via the --test-fdr parameter.",
     "Available for crux percolator", true);
   InitDoubleParam("c-neg", 0.0, 0.0, 0.90,
-    "Penalty for mistake made on negative examples. This parameter requires that c-pos "
-    "is set to a non-zero value; otherwise, --c-neg will have no effect. If not specified, then "
+    "Penalty for mistake made on negative examples. If not specified, then "
     "this value is set by cross validation over {0.1, 1, 10}.",
     "Available for crux percolator", true);
   InitDoubleParam("train-fdr", 0.01, 0, BILLION,
