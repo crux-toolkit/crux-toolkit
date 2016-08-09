@@ -1,6 +1,6 @@
 #!/bin/bash
 
-rm good_results/*.observed
+rm -f good_results/*.observed
 cucumber "$@"
 echo
 

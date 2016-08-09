@@ -1,4 +1,4 @@
-scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	xcorr score	xcorr rank	distinct matches/spectrum	sequence	modfications	cleavage type	protein id	flanking aa
+scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	xcorr score	xcorr rank	distinct matches/spectrum	sequence	modifications	cleavage type	protein id	flanking aa
 35	1	709.0699	708.0627	706.8905	0.24122301	1	0	IPYSPK	1_S_1.70_n,6_S_1.80_c	trypsin-full-digest	YMR309C	-X
 35	1	709.0699	708.0627	707.8527	0.19312476	2	0	CVLADK	1_S_57.02,1_S_1.70_n,6_S_1.80_c	trypsin-full-digest	YLR371W	-X
 35	1	709.0699	708.0627	707.8340	0.12987687	3	0	DQDLSK	1_S_1.70_n,6_S_1.80_c	trypsin-full-digest	YFR053C	-X

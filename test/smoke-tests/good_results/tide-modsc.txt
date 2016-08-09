@@ -1,4 +1,4 @@
-scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	delta_lcn	xcorr score	xcorr rank	distinct matches/spectrum	sequence	modfications	cleavage type	protein id	flanking aa
+scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	delta_lcn	xcorr score	xcorr rank	distinct matches/spectrum	sequence	modifications	cleavage type	protein id	flanking aa
 128	1	711.0700	710.0627	709.3622	0.213912	0.387799	0.48200190	1	15	VAEIEK	6_S_21.98_c	trypsin-full-digest	YMR242C(132)	KT
 128	1	711.0700	710.0627	711.3527	0.149956	0.173887	0.26809004	2	15	QTSNIK	6_S_21.98_c	trypsin-full-digest	YPL106C(57)	KN
 128	1	711.0700	710.0627	708.4146	0.0040047	0.023931	0.11813414	3	15	LSQLVK	6_S_21.98_c	trypsin-full-digest	YGR086C(58)	KI
