@@ -522,7 +522,7 @@ void TideSearchApplication::search(
                          spectrum, charge, active_peptide_queue, proteins,
                          locations, compute_sp, true);
           }
-        }  //end peptide_centric == true
+        }  //end peptide_centric == false
       } else { //execute exact-pval-search for case: XCORR
 
         const int minDeltaMass = aaMass[0];
@@ -697,7 +697,34 @@ void TideSearchApplication::search(
 
       int nCandPeptide = active_peptide_queue->SetActiveRangeBIons(min_mass, max_mass, min_range, max_range);
       if (nCandPeptide==0) {
-          continue;
+        continue;
+      }
+
+      //Gets masses of all amino acids in double form
+      //argument aaMasses are integer masses. Therefore need to create for this one
+      vector<double> aaMassDouble;
+      vector<int> aaMassInt;
+      string aa = "GASPVTILNDKQEMHFRCYW";//This order to match Matlab code by Jeff Howbert
+      for(int i=0 ; i<aa.length() ; i++) {
+        aaMassDouble.push_back(MassConstants::mono_table[aa[i]]);
+        int tmpMass = MassConstants::mass2bin(MassConstants::mono_table[aa[i]]);
+        aaMassInt.push_back(tmpMass);
+      }
+
+
+      //Contains all amino acids (1 letter code) that are dynamically modified
+      vector<string> modAA;
+      //Get masses of all dynamically modified amino acids
+      for(int i=0 ; i<mod_table.variable_mod_size() ; i++) {
+        string curModAA = mod_table.variable_mod(i).amino_acids();
+        modAA.push_back(curModAA);
+
+        double delta = mod_table.variable_mod(i).delta();
+        int pos = aa.find(curModAA);
+        double newMass = MassConstants::mono_table[aa[pos]] + delta;
+        aaMassDouble.push_back(newMass);
+        int tmpMass = MassConstants::mass2bin(newMass);
+        aaMassInt.push_back(tmpMass);
       }
 
       if (!exact_pval_search_) {
@@ -714,32 +741,6 @@ void TideSearchApplication::search(
         total_candidate_peptides +=nCandPeptide;
         TideMatchSet::Arr2 match_arr2(nCandPeptide); //TODO -- check if this is right arr to use
 
-        //Gets masses of all amino acids in double form
-        //argument aaMasses are integer masses. Therefore need to create for this one
-        vector<double> aaMassDouble;
-        vector<int> aaMassInt;
-        string aa = "GASPVTILNDKQEMHFRCYW";//This order to match Matlab code by Jeff Howbert
-        for(int i=0 ; i<aa.length() ; i++) {
-          aaMassDouble.push_back(MassConstants::mono_table[aa[i]]);
-          int tmpMass = MassConstants::mass2bin(MassConstants::mono_table[aa[i]]);
-          aaMassInt.push_back(tmpMass);
-        }
-
-        //Contains all amino acids (1 letter code) that are dynamically modified
-        vector<string> modAA;
-        //Get masses of all dynamically modified amino acids
-        for(int i=0 ; i<mod_table.variable_mod_size() ; i++) {
-          string curModAA = mod_table.variable_mod(i).amino_acids();
-          modAA.push_back(curModAA);
-
-          double delta = mod_table.variable_mod(i).delta();
-          int pos = aa.find(curModAA);
-          double newMass = MassConstants::mono_table[aa[pos]] + delta;
-          aaMassDouble.push_back(newMass);
-          int tmpMass = MassConstants::mass2bin(newMass);
-          aaMassInt.push_back(tmpMass);
-        }
- 
         //For one spectrum calculates:
         // 1) residue evidence matrix 
         // 2) calculates score between spectrum and all selected candidate
@@ -754,6 +755,167 @@ void TideSearchApplication::search(
         //For each candidate peptide, determine which discretized mass bin it is in
         getMassBin(pepMassInt,pepMassIntUnique,active_peptide_queue);
 
+        //Sort vector, take unique of vector, get rid of extra space in vector
+        std::sort(pepMassIntUnique.begin(), pepMassIntUnique.end());
+        vector<int>::iterator last = std::unique(pepMassIntUnique.begin(),
+                                                 pepMassIntUnique.end());
+        pepMassIntUnique.erase(last, pepMassIntUnique.end());
+        int nPepMassIntUniq = (int)pepMassIntUnique.size();
+ 
+        //Creates a 3D vector representing 3D matrix
+        //Below are the 3 axes
+        //nPepMassIntUniq: number of mass bins candidate are in
+        //nAA: number of amino acids
+        //replaced nAA with aaMassDouble.size()
+        //This is because nAA = 37 but aaMassDouble.size() = 21
+        //maxPrecurMassBin: max number of mass bins
+        //initalize all values to 0
+        vector<vector<vector<double> > > residueEvidenceMatrix(nPepMassIntUniq,
+               vector<vector<double> >(aaMassDouble.size(), vector<double>(maxPrecurMassBin,0)));
+
+
+        //TODO assumption is that there is one nterm mod per peptide
+        int NTermMassBin;
+        if (nterm_mod_table.static_mod_size() > 0) {
+          NTermMassBin = MassConstants::mass2bin(
+                         MassConstants::mono_h + nterm_mod_table.static_mod(0).delta());
+        }
+        else {
+          NTermMassBin = MassConstants::mass2bin(MassConstants::mono_h);
+        }
+
+        //TODO assumption is that there is one cterm mod per peptide
+        int CTermMassBin;
+        if (cterm_mod_table.static_mod_size() > 0) {
+          CTermMassBin = MassConstants::mass2bin(
+                         MassConstants::mono_oh + cterm_mod_table.static_mod(0).delta());
+        }
+        else {
+          CTermMassBin = MassConstants::mass2bin(MassConstants::mono_oh);
+        }
+ 
+        int fragTol = Params::GetInt("fragment-tolerance");
+        int granularityScale = Params::GetInt("evidence-granularity");
+
+        for (pe=0 ; pe<nPepMassIntUniq ; pe++) {
+          int curPepMassInt = pepMassIntUnique[pe];
+
+          //TODO aaMassDouble.size() replaced nAA
+          //TODO aaMassDouble replaced aaMass
+          //TODO This is aaMass is int while aaMassDouble is double
+          //TODO Also because nAA does not match expected nAA (eg 37 v 21 )
+          //In jeff code -- he uses 21 amino acids instead of 37
+          observed.CreateResidueEvidenceMatrix(*spectrum,charge,
+                                               maxPrecurMassBin,precursorMass,
+                                               aaMassDouble.size(),aaMassDouble,
+                                               fragTol,granularityScale,
+                                               residueEvidenceMatrix[pe]);
+
+          //In Matlab code. This is converted to an int matrix.
+          //I believe do not need to do this here because residueEvidenceMatrix
+          //has been rounded
+          vector<vector<double> > curResidueEvidenceMatrix = residueEvidenceMatrix[pe];
+          //Get rid of values larger than curPepMassInt
+          for(int i=0 ; i<curResidueEvidenceMatrix.size() ; i++){
+            curResidueEvidenceMatrix[i].resize(curPepMassInt);
+          }
+        }
+
+        /**************Find Best Target Peptide Match *******************/
+        double scoreResidueEvidence;
+        deque<Peptide*>::const_iterator iter_ = active_peptide_queue->iter_;
+        deque<TheoreticalPeakSetBIons>::const_iterator iter1_ = active_peptide_queue->iter1_;
+        vector<int>::const_iterator iter_int;
+        vector<unsigned int>::const_iterator iter_uint;
+
+        for(pe = 0; pe < nCandPeptide; pe++) {
+          int pepMassIntIdx = 0;
+          int curPepMassInt;
+
+          //TODO should probably use iterator instead
+          for(ma = 0; ma < nPepMassIntUniq; ma++ ) {
+            //TODO pepMassIntUnique should be accessed with an interator
+            if(pepMassIntUnique[ma] == pepMassInt[pe]) {
+              pepMassIntIdx = ma;
+              curPepMassInt = pepMassIntUnique[ma];
+              break;
+            }
+          }
+
+          vector<vector<double> > curResidueEvidenceMatrix = residueEvidenceMatrix[pepMassIntIdx];
+          scoreResidueEvidence = 0;
+          Peptide* curPeptide = (*iter_);
+          int pepLen = curPeptide->Len();
+
+          vector<unsigned int> intensArrayTheor;
+          for(iter_uint = iter1_->unordered_peak_list_.begin();
+              iter_uint != iter1_->unordered_peak_list_.end();
+              iter_uint++) {
+                intensArrayTheor.push_back(*iter_uint);
+          }
+
+          //Make sure the number of theoretical peaks match pepLen-1
+          assert(intensArrayTheo.size() == pepLen -1);
+
+          //TODO assume 1 mod per amino acid is specified in arguments
+          const ModCoder::Mod* mods;
+          int numMods = curPeptide->Mods(&mods);
+          map<int,double> mod_map;
+          for(int i=0;i<numMods;i++) {
+            int index;
+            double delta;
+            MassConstants::DecodeMod(mods[i],&index,&delta);
+            assert(mod_map.find(index) == mod_map.end());
+            mod_map[index] = delta;
+          }
+
+          string curPepSeq = curPeptide->Seq();
+          for(int res = 0; res < pepLen-1 ; res++) {
+            //aa defined above - string aa = "GASPVTILNDKQEMHFRCYW";
+            //determines position current residue is in string aa
+            std::string::size_type pos = aa.find(curPepSeq[res]);
+
+            double tmpMass;
+            map<int,double>::iterator it;
+            it = mod_map.find(res);
+            if (it != mod_map.end()) {
+              tmpMass = MassConstants::mono_table[aa[pos]] + mod_map[res];
+            } else {
+              tmpMass = MassConstants::mono_table[aa[pos]];
+            }
+            //aaMassDouble is defined above and contains all massses used in residueEvidenceMatrix
+            int tmp = find(aaMassDouble.begin(),aaMassDouble.end(),tmpMass) -
+                           aaMassDouble.begin();
+            scoreResidueEvidence += curResidueEvidenceMatrix[tmp][intensArrayTheor[res]-1];
+          }
+
+          if(peptide_centric) {
+            carp(CARP_FATAL, "residue-evidence has not been implemented with 'peptide-centric-search T' yet.");
+          }
+          else {
+            continue;
+/*
+            //TODO need to fix this part
+            for (TideMatchSet::Arr2::iterator it = match_arr2.begin();
+                 it != match_arr2.end();
+                 it++) {
+              TideMatchSet::Pair pair;
+              pair.first.first = (double)(it->first);
+              pair.first.second = 0.0;
+              pair.second = it->second;
+              match_arr.push_back(pair);
+            }
+*/
+          }
+
+          ++iter_;
+          ++iter1_;
+        }
+
+        //clean up
+        delete [] pepMassInt;
+        //TODO check if need to delete more stuff
+
 
         //TODO Above is not implemented or tested yet
       } else { //Case RESIDUE_EVIDENCE_MATRIX
@@ -766,34 +928,6 @@ void TideSearchApplication::search(
 
         total_candidate_peptides += nCandPeptide;
         TideMatchSet::Arr match_arr(nCandPeptide); // scored peptides will go here.
-
-        //Gets masses of all amino acids in double form
-        //argument aaMasses are integer masses. Therefore need to create for this one
-        vector<double> aaMassDouble;
-        vector<int> aaMassInt;
-        string aa = "GASPVTILNDKQEMHFRCYW";//This order to match Matlab code by Jeff Howbert
-        for(int i=0 ; i<aa.length() ; i++) {
-          aaMassDouble.push_back(MassConstants::mono_table[aa[i]]);
-
-          int tmpMass = MassConstants::mass2bin(MassConstants::mono_table[aa[i]]);
-          aaMassInt.push_back(tmpMass);
-        }
-
-        //Contains all amino acids (1 letter code) that are dynamically modified
-        vector<string> modAA;
-        //Get masses of all dynamically modified amino acids
-        for(int i=0 ; i<mod_table.variable_mod_size() ; i++) {
-          string curModAA = mod_table.variable_mod(i).amino_acids();
-          modAA.push_back(curModAA);
-
-          double delta = mod_table.variable_mod(i).delta();
-          int pos = aa.find(curModAA);
-          double newMass = MassConstants::mono_table[aa[pos]] + delta;
-          aaMassDouble.push_back(newMass);
-
-          int tmpMass = MassConstants::mass2bin(newMass);
-          aaMassInt.push_back(tmpMass);
-        }
 
         //For one spectrum calculates:
         // 1) residue evidence matrix
@@ -835,7 +969,6 @@ void TideSearchApplication::search(
 //        std::cout << "precursor mass: " << setprecision(13) <<  sc->neutral_mass << std::endl;
 //        std::cout << "charge: " << sc->charge << std::endl;
 //        std::cout << "precursorMz: "  << sc->spectrum->PrecursorMZ() << std::endl;
-//        std::cout << "proton mass: " << MassConstants::proton << std::endl;
 //        std::cout << "nCandPeptide: " << nCandPeptide << endl;
 //        std::cout << "nPepMassIntUniq: " << nPepMassIntUniq << std::endl;
 
@@ -1026,9 +1159,8 @@ void TideSearchApplication::search(
             }
             //aaMassDouble is defined above and contains all massses used in residueEvidenceMatrix
             int tmp = find(aaMassDouble.begin(),aaMassDouble.end(),tmpMass) - 
-                            aaMassDouble.begin();
-            scoreResidueEvidence += 
-                 curResidueEvidenceMatrix[tmp][intensArrayTheor[res]-1];
+                           aaMassDouble.begin();
+            scoreResidueEvidence += curResidueEvidenceMatrix[tmp][intensArrayTheor[res]-1];
           }
           int scoreCountIdx = scoreResidueEvidence + scoreResidueOffsetObs[curPepMassInt];
           double pValue = pValuesResidueObs[curPepMassInt][scoreCountIdx];
@@ -1057,6 +1189,7 @@ void TideSearchApplication::search(
             //TODO do I ned a RESCALE_FACTOR?
             pair.first.second = (double)scoreResidueEvidence;
             //TODO ugly hack to conform with the way these indices are generated in standard tide-search
+            //TODO above comment was copied. not sure applies here
             pair.second = nCandPeptide - pe; 
             match_arr.push_back(pair);
           }
