@@ -21,7 +21,7 @@ class ArgParser {
  protected:
   class ArgSpec {
    public:
-    ArgSpec(const std::string& name, bool multi = false);
+    explicit ArgSpec(const std::string& name, bool multi = false);
     std::string GetName() const;
     bool IsMulti() const;
    protected:
@@ -37,7 +37,7 @@ class ArgParser {
 
 class ArgParserException : public std::runtime_error {
  public:
-  ArgParserException(const std::string& what, bool fullUsage = false);
+  explicit ArgParserException(const std::string& what, bool fullUsage = false);
   bool ShowFullUsage() const;
  private:
   bool fullUsage_;

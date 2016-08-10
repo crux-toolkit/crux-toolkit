@@ -27,6 +27,8 @@
 using namespace std;
 using namespace Crux; 
 
+#define MAX_LOG_P 100.0 // Needed for handling p-value = 0, which should not happen, but alas does.
+
 PinWriter::PinWriter():
   out_(NULL),
   enzyme_(get_enzyme_type_parameter("enzyme")),
@@ -173,7 +175,7 @@ void PinWriter::printPSM(
   bool enzC = false;
   bool enzN = false;
   double obsMass = match->getZState().getSinglyChargedMass();
-  FLOAT_T calcMass = peptide->getPeptideMass() + MASS_PROTON;
+  FLOAT_T calcMass = peptide->calcModifiedMass() + MASS_PROTON;
   FLOAT_T dM = (obsMass - calcMass) / charge;
 
   char* sequence = peptide->getSequence();
@@ -224,8 +226,8 @@ void PinWriter::printPSM(
       fields.push_back(
         StringUtils::ToString(match->getScore(TIDE_SEARCH_REFACTORED_XCORR), precision_));
     } else if (feature == "NegLog10PValue") {
-      fields.push_back(StringUtils::ToString(
-        -log10(match->getScore(TIDE_SEARCH_EXACT_PVAL)), precision_));
+      FLOAT_T logP = -log10(match->getScore(TIDE_SEARCH_EXACT_PVAL));
+      fields.push_back(StringUtils::ToString(isInfinite(logP) ? MAX_LOG_P : logP, precision_));
     } else if (feature == "PepLen") {
       fields.push_back(StringUtils::ToString((unsigned) peptide->getLength()));
     } else if (StringUtils::StartsWith(feature, "Charge")) {
@@ -254,19 +256,13 @@ void PinWriter::printPSM(
   *out_ << StringUtils::Join(fields, '\t') << endl;
 }
 
-string PinWriter::getPeptide(Peptide* peptide) {
+string PinWriter::getPeptide(Peptide* pep) {
   stringstream sequence;
-  sequence << peptide->getNTermFlankingAA() << '.';
-
-  char* modified_sequence = Params::GetBool("mod-symbols")
-    ? peptide->getModifiedSequenceWithSymbols()
-    : peptide->getModifiedSequenceWithMasses(
-        get_mass_format_type_parameter("mod-mass-format"));
-  sequence << modified_sequence;
-  free(modified_sequence);
-
-  sequence << '.' << peptide->getCTermFlankingAA();
-
+  sequence << pep->getNTermFlankingAA() << '.'
+           << (Params::GetBool("mod-symbols")
+                ? pep->getModifiedSequenceWithSymbols()
+                : pep->getModifiedSequenceWithMasses())
+           << '.' << pep->getCTermFlankingAA();
   return sequence.str();
 }
 

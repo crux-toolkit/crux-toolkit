@@ -61,7 +61,7 @@ def createParameterFile(parameterFileName):
   parameterFile.write("peptide_mass_units=0\n") # 0=amu, 1=mmu, 2=ppm
   
   # Precursor mass type.
-  parameterFile.write("monoisotopic-precursor=T\n")
+  parameterFile.write("isotopic-mass=mono\n")
   parameterFile.write("mass_type_parent=1\n") # 1=monoisotopic
   
   # Fragment mass type.  Tides uses only monoisotopic.
@@ -70,7 +70,6 @@ def createParameterFile(parameterFileName):
   
   # Decoys.
   parameterFile.write("decoy-format=peptide-reverse\n")
-  parameterFile.write("num-decoys-per-target=1\n")
   parameterFile.write("decoy_search=1\n")  # 1 = concatenated decoy search
   parameterFile.write("concat=T\n")
   parameterFile.write("keep-terminal-aminos=C\n") # No corresponding Comet param
@@ -104,15 +103,13 @@ def createParameterFile(parameterFileName):
   
   # Other Crux parameters.
   parameterFile.write("compute-sp=T\n")
-  parameterFile.write("verbosity=40\n")
   parameterFile.write("overwrite=T\n")
   parameterFile.write("peptide-list=T\n")
-
   
   # Comet parameters
-  parameterFile.write("output_pepxml=0\n")
+  parameterFile.write("output_pepxmlfile=0\n")
   parameterFile.write("add_C_cysteine=57.021464\n")
-  parameterFile.write("num_threads=1\n") # Multithreaded sometimes dumps core.
+#  parameterFile.write("num_threads=1\n") # Multithreaded sometimes dumps core.
   parameterFile.write("max_fragment_charge=2\n")
   parameterFile.write("isotope_error=0\n")
   parameterFile.write("use_A_ions=0\n")
@@ -136,7 +133,7 @@ def extractData(inputFileName, columnName, outputFileName):
 
 #############################################################################
 def runSearch(outputDirectory, searchName, searchParam, database, 
-              psmFile, scoreColumn, confidenceParam):
+              concatenatedDatabase, psmFile, scoreColumn, confidenceParam):
 
   runCommand("%s %s --output-dir %s --parameter-file %s %s %s %s"
              % (CRUX, searchName, outputDirectory, parameterFileName, 
@@ -164,6 +161,14 @@ def runSearch(outputDirectory, searchName, searchParam, database,
   qFile = "%s/%s.q-ranker.q.txt" % (outputDirectory, searchName)
   extractData(qrankerFile, "q-ranker q-value", qFile)
 
+  baristaFile = "%s/barista.target.psms.txt" % outputDirectory
+  runCommand("%s barista --decoy-prefix decoy_ --output-dir %s %s %s %s"
+             % (CRUX, outputDirectory, concatenatedDatabase, ms2, psmFile),
+             baristaFile)
+
+  qFile = "%s/%s.barista.q.txt" % (outputDirectory, searchName)
+  extractData(baristaFile, "barista q-value", qFile)
+
   reducedFile = "%s/%s.target.reduced.txt" % (outputDirectory, searchName)
   runCommand("%s extract-columns %s \"scan,charge,sequence,%s\" | awk 'NR > 1' | awk '{print $1 \"~\" $2 \"~\" $3 \"\t\" $4}' | sort -k 1b,1 > %s"
              % (CRUX, psmFile, scoreColumn, reducedFile), "")
@@ -189,7 +194,37 @@ def makeScatterPlot(xData, xLabel, yData, yLabel, outputRoot):
 
   runCommand("gnuplot %s > %s.png" % (gnuplotFileName, outputRoot), "")
 
+# Create a gnuplot of a list of methods.
+def makePerformancePlot(title, listOfMethods):
+  if not os.path.isdir("plots"):
+    os.mkdir("plots")
+  gnuplotFileName = "plots/%s.gnuplot" % title
+  gnuplotFile = open(gnuplotFileName, "w")
+  gnuplotFile.write("set output \"/dev/null\"\n")
+  gnuplotFile.write("set terminal png\n")
+  gnuplotFile.write("set title \"%s\"\n" % title)
+  gnuplotFile.write("set xlabel \"q-value threshold\"\n")
+  gnuplotFile.write("set ylabel \"Number of accepted PSMs\"\n")
+  gnuplotFile.write("set xrange [0:0.1]\n")
+  gnuplotFile.write("set key bottom right\n")
+  firstOne = True
+  for myTuple in listOfMethods:
+    (dataFileName, seriesTitle) = myTuple
 
+    if firstOne:
+      firstOne = False
+    else:
+      gnuplotFile.write("re")
+
+    gnuplotFile.write("plot \"%s\" using 1:0 title \"%s\" with lines lw 1\n" 
+                      % (dataFileName, seriesTitle))
+
+  gnuplotFile.write("set output\n")
+  gnuplotFile.write("replot\n")
+  gnuplotFile.close() 
+  runCommand("gnuplot %s > plots/%s.png" % (gnuplotFileName, title), "")
+  
+  
 #############################################################################
 # MAIN
 #############################################################################
@@ -200,41 +235,64 @@ createParameterFile(parameterFileName)
 
 # Create the index.
 runCommand("%s tide-index --output-dir %s --parameter-file %s %s.fa %s"
-           % (CRUX, database, parameterFileName, database, database), 
+           % (CRUX, database, parameterFileName, database, database),
            "%s/tide-index.peptides.target.txt" % database)
+# Create concatenated database for use by Barista
+concatenatedDatabase = "targets-and-decoys.fasta"
+runCommand("cat %s/tide-index.decoy.fasta %s.fa > %s"
+           % (database, database, concatenatedDatabase), "")
 
 # Run three searches (Comet, Tide XCorr, and Tide p-value).
-runSearch("tide-xcorr", "tide-search", "", database, 
-          "tide-xcorr/tide-search.txt", "xcorr score", "")
-runSearch("tide-p-value", "tide-search", "--exact-p-value T", database,
-          "tide-p-value/tide-search.txt", "refactored xcorr",
-          "--smaller-is-better T --score \"exact p-value\"")
-runSearch("comet", "comet", "", "%s.fa" % database, 
-          "comet/comet.target.txt", "xcorr score", 
-          "--smaller-is-better T --score e-value")
+runSearch("tide-xcorr", "tide-search", "", database,
+          concatenatedDatabase, "tide-xcorr/tide-search.txt",
+          "xcorr score", "")
+runSearch("tide-p-value", "tide-search", "--exact-p-value T",
+          database, concatenatedDatabase, "tide-p-value/tide-search.txt",
+          "refactored xcorr", "--score \"exact p-value\"")
+runSearch("comet", "comet", "", "%s.fa" % database,
+          concatenatedDatabase, "comet/comet.target.txt",
+          "xcorr score", "--score e-value")
 
-# Make the performance plot.
-gnuplotFileName = "performance.gnuplot"
-gnuplotFile = open(gnuplotFileName, "w")
-gnuplotFile.write("set output \"/dev/null\"\n")
-gnuplotFile.write("set terminal png\n")
-gnuplotFile.write("set xlabel \"q-value threshold\"\n")
-gnuplotFile.write("set ylabel \"Number of accepted PSMs\"\n")
-gnuplotFile.write("set xrange [0:0.1]\n")
-gnuplotFile.write("set key bottom right\n")
-gnuplotFile.write("plot \"comet/comet.q.txt\" using 1:0 title \"Comet E-value\" with lines lw 1\n")
-gnuplotFile.write("replot \"tide-p-value/tide-search.q.txt\" using 1:0 title \"Tide p-value\" with lines lw 1\n")
-gnuplotFile.write("replot \"tide-xcorr/tide-search.q.txt\" using 1:0 title \"Tide XCorr\" with lines lw 1\n")
-gnuplotFile.write("replot \"comet/comet.percolator.q.txt\" using 1:0 title \"Comet Percolator\" with lines lw 2\n")
-gnuplotFile.write("replot \"tide-p-value/tide-search.percolator.q.txt\" using 1:0 title \"Tide p-value Percolator\" with lines lw 2\n")
-gnuplotFile.write("replot \"tide-xcorr/tide-search.percolator.q.txt\" using 1:0 title \"Tide XCorr Percolator\" with lines lw 2\n")
-gnuplotFile.write("replot \"comet/comet.q-ranker.q.txt\" using 1:0 title \"Comet q-ranker\" with lines lw 3\n")
-gnuplotFile.write("replot \"tide-p-value/tide-search.q-ranker.q.txt\" using 1:0 title \"Tide p-value q-ranker\" with lines lw 3\n")
-gnuplotFile.write("replot \"tide-xcorr/tide-search.q-ranker.q.txt\" using 1:0 title \"Tide XCorr q-ranker\" with lines lw 3\n")
-gnuplotFile.write("set output\n")
-gnuplotFile.write("replot\n")
-gnuplotFile.close() 
-runCommand("gnuplot %s > performance.png" % gnuplotFileName, "")
+# Make the performance plots, segregated by search method..
+makePerformancePlot("comet", [("comet/comet.q.txt", "Comet E-value"),
+                     ("comet/comet.percolator.q.txt", "Comet Percolator"),
+                     ("comet/comet.q-ranker.q.txt", "Comet q-ranker"),
+                     ("comet/comet.barista.q.txt", "Comet barista")])
+makePerformancePlot("tide.p-value",
+                    [("tide-p-value/tide-search.q.txt", "Tide p-value"),
+                     ("tide-p-value/tide-search.percolator.q.txt", "Tide p-value Percolator"),
+                     ("tide-p-value/tide-search.q-ranker.q.txt", "Tide p-value q-ranker"),
+                     ("tide-p-value/tide-search.barista.q.txt", "Tide p-value barista")])
+makePerformancePlot("tide.xcorr",
+                    [("tide-xcorr/tide-search.q.txt", "Tide XCorr"),
+                     ("tide-xcorr/tide-search.percolator.q.txt", "Tide XCorr Percolator"),
+                     ("tide-xcorr/tide-search.q-ranker.q.txt", "Tide XCorr q-ranker"),
+                     ("tide-xcorr/tide-search.barista.q.txt", "Tide XCorr barista")])
+
+# Make the performance plots, segregated by post-processor.
+makePerformancePlot("assign-confidence",
+                    [("comet/comet.q.txt", "Comet E-value"),
+                     ("tide-p-value/tide-search.q.txt", "Tide p-value"),
+                     ("tide-xcorr/tide-search.q.txt", "Tide XCorr")])
+makePerformancePlot("percolator",
+                    [("comet/comet.percolator.q.txt", "Comet Percolator"),
+                     ("tide-p-value/tide-search.percolator.q.txt", "Tide p-value Percolator"),
+                     ("tide-xcorr/tide-search.percolator.q.txt", "Tide XCorr Percolator")])
+makePerformancePlot("q-ranker",
+                    [("comet/comet.q-ranker.q.txt", "Comet q-ranker"),
+                     ("tide-xcorr/tide-search.q-ranker.q.txt", "Tide XCorr q-ranker"),
+                     ("tide-p-value/tide-search.q-ranker.q.txt", "Tide p-value q-ranker")])
+makePerformancePlot("barista",
+                    [("comet/comet.barista.q.txt", "Comet barista"),
+                     ("tide-p-value/tide-search.barista.q.txt", "Tide p-value barista"),
+                     ("tide-xcorr/tide-search.barista.q.txt", "Tide XCorr barista")])
+
+
+# Assign-confidence
+# Percolator
+# q-ranker
+# Barista
+
 
 
 # Make the XCorr scatter plots.
@@ -242,11 +300,11 @@ makeScatterPlot("tide-xcorr/tide-search.target.reduced.txt",
                 "Tide XCorr",
                 "tide-p-value/tide-search.target.reduced.txt", 
                 "Refactored XCorr",
-                "xcorr.refactored")
+                "plots/xcorr.refactored")
 makeScatterPlot("tide-xcorr/tide-search.target.reduced.txt", 
                 "Tide XCorr",
                 "comet/comet.target.reduced.txt", 
                 "Comet XCorr",
-                "xcorr.comet")
+                "plots/xcorr.comet")
 
 

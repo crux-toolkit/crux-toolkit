@@ -117,13 +117,13 @@ class SpSpectrum {
 
     if (left >= right) return;
     
-    SwapQuick(a,left,Random(left,right));
+    SwapQuick(a, left, Random(left, right));
     for (i = left + 1; i <= right; i++)
       if (a[i] > a[left]) /// CHECK THIS!!
-        SwapQuick(a,++last,i);
-    SwapQuick(a,left,last);
-    QuickSort(a,left,last-1);
-    QuickSort(a,last+1,right);
+        SwapQuick(a, ++last, i);
+    SwapQuick(a, left, last);
+    QuickSort(a, left, last-1);
+    QuickSort(a, last+1, right);
   }
 
   void QuickSort(double a[], int array_size) {

@@ -1,4 +1,4 @@
-/*************************************************************************//**
+/*************************************************************************
  * \file XLinkBondMap.cpp
  * AUTHOR: Sean McIlwain
  * CREATE DATE:  Febuary 22, 2011
@@ -6,6 +6,7 @@
  ****************************************************************************/
 
 #include "XLinkBondMap.h"
+#include "util/Params.h"
 #include "util/StringUtils.h"
 
 using namespace std;
@@ -15,7 +16,7 @@ using namespace Crux;
  * Default constructor.
  */
 XLinkBondMap::XLinkBondMap() {
-  string links_string(get_string_parameter("link sites"));
+  string links_string(Params::GetString("link sites"));
   init(links_string);
 }
 
@@ -71,7 +72,7 @@ XLinkBondMap::~XLinkBondMap() {
 bool XLinkBondMap::canLink(
   Peptide* peptide, ///<peptide object pointer
   int idx             ///<sequence index
-   ) {
+  ) {
   for (XLinkBondMap::iterator iter = begin();
     iter != end(); ++iter) {
 

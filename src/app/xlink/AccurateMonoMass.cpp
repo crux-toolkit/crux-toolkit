@@ -109,7 +109,7 @@ double AccurateMonoMass::calculateMass(const string& sequence) {
   if (!map_generated_) generateMap();
   MolecularFormula formula;
 
-  for (int i=0;i<sequence.length();i++) {
+  for (int i=0;i < sequence.length();i++) {
 
     formula.add(amino_acid_to_formula_[sequence[i]]);
 
@@ -131,15 +131,15 @@ int main(int argc, char**argv) {
   for (iter = amino_acid_to_formula_.begin();
     iter != amino_acid_to_formula_.end();
     ++iter) {
-    cout << "Mass of :"<<iter -> first <<" = " << iter -> second.calculateMass() << endl;
+    cout << "Mass of :" <<iter -> first << " = " << iter -> second.calculateMass() << endl;
   }
 
   double diff = amino_acid_to_formula_['c'].calculateMass() - amino_acid_to_formula_['C'].calculateMass();
 
-  cout <<"Diff of acetomide:"<<diff<<endl;
+  cout << "Diff of acetomide:" << diff << endl;
 
-  cout <<"Mass of AA:"<<AccurateMonoMass::calculateMass(string("AA"))<<endl;
-  cout <<"Mass of A + A:"<<(AccurateMonoMass::calculateMass(string("A")) + AccurateMonoMass::calculateMass(string("A"))-H2O.calculateMass())<<endl;
+  cout << "Mass of AA:" << AccurateMonoMass::calculateMass(string("AA")) << endl;
+  cout << "Mass of A + A:" << (AccurateMonoMass::calculateMass(string("A")) + AccurateMonoMass::calculateMass(string("A"))-H2O.calculateMass()) << endl;
   double massA = AccurateMonoMass::calculateMass("A");
 
   double massAA = AccurateMonoMass::calculateMass("AAAAAAA");
@@ -148,9 +148,9 @@ int main(int argc, char**argv) {
 
   double ppm = fabs(massAA - massApA) / massAA * 1e6;
 
-  cout <<"ppm:"<<ppm<<endl;
+  cout <<" ppm:" << ppm << endl;
 
-  cout <<"H2O:"<<H2O.calculateMass()<<endl;
+  cout <<"H2O:"<< H2O.calculateMass() << endl;
 
 }
 

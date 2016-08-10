@@ -36,7 +36,7 @@ class TheoreticalPeakPair {
  public:
   TheoreticalPeakPair() {} // no intialization; beware.
 
-  TheoreticalPeakPair(int code) : code_(code) {}
+  explicit TheoreticalPeakPair(int code) : code_(code) {}
 
   TheoreticalPeakPair(int bin, TheoreticalPeakType peak_type)
     : code_(bin * NUM_PEAK_TYPES + peak_type) {
@@ -59,8 +59,8 @@ class TheoreticalPeakPair {
   }
 
  private:
-   // code_ represents the bin position and the peak type together. See
-   // constructors and accessors.
+  // code_ represents the bin position and the peak type together. See
+  // constructors and accessors.
   int code_;
 };
 

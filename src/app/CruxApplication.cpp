@@ -9,12 +9,14 @@
 #include "io/carp.h"
 #include "parameter.h"
 #include "util/ArgParser.h"
+#include "util/crux-utils.h"
 #include "util/FileUtils.h"
 #include "util/Params.h"
 #include "util/StringUtils.h"
 #include "util/WinCrux.h"
 
 #include <iostream>
+#include <boost/thread.hpp>
 
 using namespace std;
 
@@ -69,6 +71,11 @@ void CruxApplication::initialize(int argc, char** argv) {
   processParams();
   Params::Finalize();
 
+  if (!Params::GetBool("no-analytics")) {
+    // Post data to Google Analytics using a separate thread
+    boost::thread analytics_thread(postToAnalytics, getName());
+  }
+
   set_verbosity_level(Params::GetInt("verbosity"));
 
   carp(CARP_INFO, "Beginning %s.", getName().c_str());
@@ -98,7 +105,7 @@ void CruxApplication::initialize(int argc, char** argv) {
   
     // Store the host name, start date and time, version number, and command line.
     carp(CARP_INFO, "CPU: %s", hostname());
-    carp(CARP_INFO, "Crux version: %s\n", CRUX_VERSION);
+    carp(CARP_INFO, "Crux version: %s", CRUX_VERSION);
     carp(CARP_INFO, date_and_time());
     log_command_line(argc, argv);
 
@@ -211,12 +218,15 @@ string CruxApplication::getUsage(
     usage << endl << endl
           << "OPTIONAL ARGUMENTS:" << endl;
     for (vector<string>::const_iterator i = options.begin(); i != options.end(); i++) {
+      if (!Params::IsVisible(*i)) {
+        continue;
+      }
       string defaultString = Params::GetStringDefault(*i);
       if (defaultString.empty()) {
         defaultString = "<empty>";
       }
       usage << endl
-            << "  [--" << *i << " <" << Params::GetAcceptedValues(*i) << ">]" << endl
+            << "  [--" << *i << " " << Params::GetAcceptedValues(*i) << "]" << endl
             << StringUtils::LineFormat(Params::ProcessHtmlDocTags(Params::GetUsage(*i)) +
                                        " Default = " + defaultString + ".", 80, 5);
     }

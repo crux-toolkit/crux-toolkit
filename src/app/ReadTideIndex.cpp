@@ -5,6 +5,7 @@
 #include "parameter.h"
 #include "app/tide/records_to_vector-inl.h"
 #include "app/tide/peptide.h"
+#include "util/Params.h"
 #include <vector>
 
 using namespace std;
@@ -18,7 +19,7 @@ ReadTideIndex::~ReadTideIndex() {
 int ReadTideIndex::main(int argc, char** argv) {
   carp(CARP_INFO, "Running read-tide-index...");
 
-  string index_dir = get_string_parameter("tide database");
+  string index_dir = Params::GetString("tide database");
   string peptides_file = index_dir + "/pepix";
   string proteins_file = index_dir + "/protix";
   string auxlocs_file = index_dir + "/auxlocs";
@@ -52,14 +53,14 @@ int ReadTideIndex::main(int argc, char** argv) {
 
   const pb::Header::PeptidesHeader& pepHeader = peptides_header.peptides_header();
   MassConstants::Init(&pepHeader.mods(), &pepHeader.nterm_mods(), &pepHeader.cterm_mods(),
-                      get_double_parameter("mz-bin-width"),
-                      get_double_parameter("mz-bin-offset"));
+                      Params::GetDouble("mz-bin-width"),
+                      Params::GetDouble("mz-bin-offset"));
 
   // Set up output file
   string output_file = make_file_path(getName() + ".peptides.txt");
   ofstream* output_stream = create_stream_in_path(
-    output_file.c_str(), NULL, get_boolean_parameter("overwrite"));
-	*output_stream << get_column_header(SEQUENCE_COL) << '\t'
+    output_file.c_str(), NULL, Params::GetBool("overwrite"));
+  *output_stream << get_column_header(SEQUENCE_COL) << '\t'
                  << get_column_header(PROTEIN_ID_COL) << endl;
 
   RecordReader* reader = peptide_reader.Reader();
@@ -67,7 +68,7 @@ int ReadTideIndex::main(int argc, char** argv) {
     // Read peptide
     pb::Peptide pb_peptide;
     reader->Read(&pb_peptide);
-    if (get_boolean_parameter("skip-decoys") && pb_peptide.is_decoy()) {
+    if (Params::GetBool("skip-decoys") && pb_peptide.is_decoy()) {
       continue;
     }
     Peptide peptide(pb_peptide, proteins);

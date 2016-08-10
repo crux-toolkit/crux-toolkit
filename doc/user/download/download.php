@@ -45,25 +45,26 @@
   # Set names of files available for download
    if (isset($_POST['release_button'])) {
      $FileNameBaseArray = array(
-       "Source" => "crux-2.1.Source.tar.gz",
-       "Linux32" => "crux-2.1.Linux.i686.zip",
-       "Linux64" => "crux-2.1.Linux.x86_64.zip",
-       "OSX" => "crux-2.1.Darwin.x86_64.zip",
-       "Windows" => "crux-2.1.Windows.ix86-pc.zip",
+       "Source" => "crux-3.0.Source.tar.gz",
+       "Linux32" => "crux-3.0.Linux.i686.zip",
+       "Linux64" => "crux-3.0.Linux.x86_64.zip",
+       "OSX" => "crux-3.0.Darwin.x86_64.zip",
+       "Windows64" => "crux-3.0.Windows.AMD64.zip",
+       "Windows32" => "crux-3.0.Windows.i386.zip",
      );
-     $directory = "crux-2.1/";
+     $directory = "crux-3.0/";
    }
     else {
       # File names for daily build include SVN revsion number.
       # Read revision number from file.
       $version = chop(file_get_contents("daily/latest-build.txt"));
       $FileNameBaseArray = array(
-        "Source" => "crux-2.1.$version.Source.tar.gz",
-        "Linux32" => "crux-2.1.$version.Linux.i686.zip",
-        "Linux64" => "crux-2.1.$version.Linux.x86_64.zip",
-        "OSX" => "crux-2.1.$version.Darwin.x86_64.zip",
-        "Windows64" => "crux-2.1.$version.Windows.AMD64.zip",
-        "Windows32" => "crux-2.1.$version.Windows.i386.zip",
+        "Source" => "crux-3.0.$version.Source.tar.gz",
+        "Linux32" => "crux-3.0.$version.Linux.i686.zip",
+        "Linux64" => "crux-3.0.$version.Linux.x86_64.zip",
+        "OSX" => "crux-3.0.$version.Darwin.x86_64.zip",
+        "Windows64" => "crux-3.0.$version.Windows.AMD64.zip",
+        "Windows32" => "crux-3.0.$version.Windows.i386.zip",
       );
       $directory = "daily/";
     }

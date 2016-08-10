@@ -95,7 +95,11 @@ string CascadeSearchApplication::getName() const {
  * \returns the description for CascadeSearchApplication
  */
 string CascadeSearchApplication::getDescription() const {
-  return "[[html:<p>Cascade search is a general procedure for incorporating information about "
+  return
+    "[[nohtml:An iterative procedure for incorporating information about "
+    "peptide groups into the database search and confidence estimation "
+    "procedure.]]"
+    "[[html:<p>Cascade-search is a general procedure for incorporating information about "
     "peptide groups into the database search and confidence estimation procedure. Peptides "
     "may be grouped according to, for example, their enzymatic properties (zero, one, or "
     "two enzymatic termini) or the presence of different types of numbers of variable "
@@ -106,17 +110,7 @@ string CascadeSearchApplication::getDescription() const {
     "<blockquote>Attila Kertesz-Farkas, Uri Keich and William Stafford Noble. "
     "<a href=\"http://pubs.acs.org/doi/abs/10.1021/pr501173s\">\"Tandem mass spectrum "
     "identification via cascaded search.\"</a> <i>Journal of Proteome Research</i>. "
-    "14(8):3027-38, 2015. </blockquote>]]"
-    "[[nohtml:Cascade search is a general procedure for incorporating information about "
-    "peptide groups into the database search and confidence estimation procedure. Peptides "
-    "may be grouped according to, for example, their enzymatic properties (zero, one, or "
-    "two enzymatic termini) or the presence of different types of numbers of variable "
-    "modifications. The algorithm works on a series of databases, each corresponding to a "
-    "different peptide group. The database is searched in series, and after each search, any "
-    "spectrum that is identified with a user-specified confidence threshold is sequestered "
-    "from subsequent searches. The full cascade search procedure is described in this article:\n"
-    "Attila Kertesz-Farkas, Uri Keich and William Stafford Noble. \"Tandem mass spectrum "
-    "identification via cascaded search.\" Submitted.]]";
+    "14(8):3027-38, 2015. </blockquote>]]";
 }
 
 /**
@@ -153,7 +147,7 @@ vector<string> CascadeSearchApplication::getOptions() const {
 vector< pair<string, string> > CascadeSearchApplication::getOutputs() const {
   vector< pair<string, string> > outputs;
   outputs.push_back(make_pair("cascade-search.target.txt",
-    "a <a href=\"txt-format.html\">tab-delimited text file</a> containing the "
+    "a <a href=\"../file-formats/txt-format.html\">tab-delimited text file</a> containing the "
     "target PSMs accepted at a pre-defined fdr."));
   outputs.push_back(make_pair("cascade-search.log.txt",
     "a log file containing a copy of all messages that were printed to stderr."));
@@ -185,41 +179,39 @@ bool CascadeSearchApplication::needsOutputDirectory() const {
 
 void CascadeSearchApplication::processParams() {
 
-  if (Params::GetInt("top-match") != 1 && Params::GetInt("top-match") != 5) {
+  if (Params::GetInt("top-match") != 1 && !Params::IsDefault("top-match")) {
     carp(CARP_WARNING, "Cascade-Search can work with top-match = 1 only.");
   }
   Params::Set("top-match", 1);
 
-  if (Params::GetBool("exact-p-value") == true){
+  if (Params::GetBool("exact-p-value")) {
     Params::Set("score", "exact p-value");
-    Params::Set("smaller-is-better", true);
   }
-  if (Params::GetBool("pin-output") == true) {
+  if (Params::GetBool("pin-output")) {
     carp(CARP_FATAL, "Cascade-Search cannot work with pinxml-output=T.");
   }
-  if (Params::GetBool("pepxml-output") == true) {
+  if (Params::GetBool("pepxml-output")) {
     carp(CARP_FATAL, "Cascade-Search cannot work with pepxml-output=T.");
   }
-  if (Params::GetBool("mzid-output") == true) {
+  if (Params::GetBool("mzid-output")) {
     carp(CARP_FATAL, "Cascade-Search cannot work with mzid-output=T.");
   }
-  if (Params::GetBool("sqt-output") == true) {
+  if (Params::GetBool("sqt-output")) {
     carp(CARP_FATAL, "Cascade-Search cannot work with sqt-output=T.");
   }
 }
 
 void CascadeSearchApplication::RemoveTempFiles(const string& path, const string& prefix) {
-
   boost::filesystem::directory_iterator end_itr; // Default ctor yields past-the-end
-  for (boost::filesystem::directory_iterator i(path); i != end_itr; ++i)
-  {
+  for (boost::filesystem::directory_iterator i(path); i != end_itr; ++i) {
     // Skip if not a file
-    if (!boost::filesystem::is_regular_file(i->status())) continue;
+    if (!boost::filesystem::is_regular_file(i->status())) {
+      continue;
+    }
 
     string filename = i->path().filename().generic_string();
-    if (filename.compare(0, prefix.length(), prefix) == 0){
-      string t = path + "/" + filename;
-      FileUtils::Remove(path + "/" + filename);
+    if (filename.compare(0, prefix.length(), prefix) == 0) {
+      FileUtils::Remove(FileUtils::Join(path, filename));
     }
   }
 }

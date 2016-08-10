@@ -6,9 +6,11 @@
 #include "LinkedPeptide.h"
 
 #include "util/crux-utils.h"
+#include "util/Params.h"
 #include "objects.h"
 #include "model/Scorer.h"
 #include "io/DelimitedFile.h"
+#include "io/MatchColumns.h"
 
 #include "xlink_compute_qvalues.h"
 
@@ -29,7 +31,7 @@ void getBestBonf(DelimitedFile& matches, int start, int stop,
   if (numScans == 1) {
     best_index = start;
     double pvalue = matches.getDouble("p-value", best_index);
-    int ntests = matches.getInteger("distinct matches/spectrum", best_index);
+    int ntests = matches.getInteger(get_column_header(DISTINCT_MATCHES_SPECTRUM_COL), best_index);
     best_bonf = bonferroni_correction(pvalue, ntests);
   } else {
     map<int, pair<int, double> > charge_best_score; 
@@ -45,7 +47,7 @@ void getBestBonf(DelimitedFile& matches, int start, int stop,
         charge_best_score[charge] = make_pair(match_idx, pvalue);
       }
       if (charge_ntests.find(charge) == charge_ntests.end()) {
-        int ntests = matches.getInteger("distinct matches/spectrum", match_idx);
+        int ntests = matches.getInteger(get_column_header(DISTINCT_MATCHES_SPECTRUM_COL), match_idx);
         charge_ntests[charge] = ntests;
       }
     }
@@ -93,7 +95,7 @@ void collapseScans(DelimitedFile& matches_in, DelimitedFile& matches_out) {
   matches_out.clear();
   //matches_out.addColumns(matches_in.getColumnNames());
   vector<string>& column_names = matches_in.getColumnNames();
-  for (unsigned int idx=0;idx<column_names.size();idx++) {
+  for (unsigned int idx = 0; idx < column_names.size(); idx++) {
     matches_out.addColumn(column_names[idx]);
   }
   
@@ -121,13 +123,13 @@ void collapseScans(DelimitedFile& matches_in, DelimitedFile& matches_out) {
     if (last_scan != current_scan) {
       //process the scans between the first and match_idx-1.
       //find the best row and calculate the bonferroni corrected p-value.
-      carp(CARP_DEBUG,"Collaping %d %d %d",last_scan, first_row, match_idx-1);
+      carp(CARP_DEBUG, "Collaping %d %d %d", last_scan, first_row, match_idx-1);
       getBestBonf(matches_in, first_row, match_idx-1, best_row, best_bonf);  
-      carp(CARP_DEBUG,"Copying row best: %d %lf", best_row, best_bonf);
+      carp(CARP_DEBUG, "Copying row best: %d %lf", best_row, best_bonf);
       //update matches out
       int new_row = matches_out.addRow();
       matches_in.copyToRow(matches_out, best_row, new_row);
-      carp(CARP_DEBUG,"Adding bonferroni");
+      carp(CARP_DEBUG, "Adding bonferroni");
       matches_out.setValue<double>("p-value bonf.", new_row, best_bonf);
 
 
@@ -137,10 +139,10 @@ void collapseScans(DelimitedFile& matches_in, DelimitedFile& matches_out) {
     }
   }
 
-  carp(CARP_DEBUG,"Doing last entry");
+  carp(CARP_DEBUG, "Doing last entry");
   //finish the last entry
   getBestBonf(matches_in, first_row, matches_in.numRows() - 1, best_row, best_bonf);
-  carp(CARP_DEBUG,"best: %d %lf", best_row, best_bonf);
+  carp(CARP_DEBUG, "best: %d %lf", best_row, best_bonf);
   int new_row = matches_out.addRow();
   matches_in.copyToRow(matches_out, best_row, new_row);
   matches_out.setValue("p-value bonf.", new_row, best_bonf);
@@ -151,12 +153,12 @@ void collapseScans(DelimitedFile& matches_in, DelimitedFile& matches_out) {
 }
 
 
-int xlink_compute_qvalues(){
+int xlink_compute_qvalues() {
 
   /* Get Arguments */
 
-  carp(CARP_INFO,"reading targets");
-  string output_dir = get_string_parameter("output-dir");
+  carp(CARP_INFO, "reading targets");
+  string output_dir = Params::GetString("output-dir");
   string target_filename = "search-for-xlinks.target.txt";
 
   //Read in targets.
@@ -167,7 +169,7 @@ int xlink_compute_qvalues(){
 
   //Read in decoys.
 
-  carp(CARP_INFO,"reading decoys");
+  carp(CARP_INFO, "reading decoys");
 
   string decoy_filename = "search-for-xlinks.decoy.txt";
   string decoy_path = output_dir + "/" + decoy_filename;
@@ -177,21 +179,21 @@ int xlink_compute_qvalues(){
 
   //Collapse to the best target/decoy and calculate bonferonni corrected p-value.
 
-  carp(CARP_INFO,"collapsing targets");
+  carp(CARP_INFO, "collapsing targets");
   DelimitedFile target_matches_bonf;
   collapseScans(target_matches, target_matches_bonf);
 
-  carp(CARP_INFO,"collapsing decoys");
+  carp(CARP_INFO, "collapsing decoys");
   DelimitedFile decoy_matches_bonf;
   collapseScans(decoy_matches, decoy_matches_bonf);
 
   //Sort by increasing p-value.
-  carp(CARP_INFO,"Sorting by p-value bonf.");
+  carp(CARP_INFO, "Sorting by p-value bonf.");
   target_matches_bonf.sortByFloatColumn("p-value bonf.");
   decoy_matches_bonf.sortByFloatColumn("p-value bonf."); 
 
   //test the decoy p-values for accuracy.
-  for (unsigned int idx=0;idx < decoy_matches_bonf.numRows();idx++) {
+  for (unsigned int idx = 0; idx < decoy_matches_bonf.numRows(); idx++) {
     double calc_pvalue = decoy_matches_bonf.getDouble("p-value bonf.", idx);
     double rank_pvalue = (double)(idx + 1) / (double) decoy_matches_bonf.numRows();
 
@@ -206,7 +208,7 @@ int xlink_compute_qvalues(){
     } 
   }
   
-  carp(CARP_INFO,"Adding q-value column");
+  carp(CARP_INFO, "Adding q-value column");
   target_matches_bonf.addColumn("fdr b-h");
   target_matches_bonf.addColumn("fdr decoy");
   target_matches_bonf.addColumn("q-value b-h");
@@ -230,8 +232,8 @@ int xlink_compute_qvalues(){
     //cout <<"q_value_bh:"<<q_value_bh<<endl;
 
     while ((decoy_idx < decoy_matches_bonf.numRows()) && 
-	   (decoy_matches_bonf.getDouble("p-value bonf.", decoy_idx) <= 
-	    current_pvalue)) {
+           (decoy_matches_bonf.getDouble("p-value bonf.", decoy_idx) <= 
+            current_pvalue)) {
       decoy_idx++;
     }
 
@@ -248,7 +250,7 @@ int xlink_compute_qvalues(){
   }
 
   double min_fdr = 1.0;
-  for (int idx=target_matches_bonf.numRows()-1;idx>=0;idx--) {
+  for (int idx = target_matches_bonf.numRows()-1; idx >= 0; idx--) {
     double cur_fdr = target_matches_bonf.getDouble("fdr b-h", idx);
     if (cur_fdr < min_fdr) {
       min_fdr = cur_fdr;
@@ -257,7 +259,7 @@ int xlink_compute_qvalues(){
   }
 
   min_fdr = 1.0;
-  for (int idx=target_matches_bonf.numRows()-1;idx>=0;idx--) {
+  for (int idx = target_matches_bonf.numRows()-1; idx >= 0; idx--) {
     double cur_fdr = target_matches_bonf.getDouble("fdr decoy", idx);
     if (cur_fdr < min_fdr) {
       min_fdr = cur_fdr;

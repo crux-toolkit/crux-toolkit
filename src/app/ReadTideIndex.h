@@ -16,7 +16,7 @@ using namespace std;
 
 class ReadTideIndex : public CruxApplication {
 
-public:
+ public:
 
   /**
    * Constructor
@@ -67,7 +67,7 @@ public:
 
   virtual bool hidden() const;
 
-protected:
+ protected:
 
 };
 

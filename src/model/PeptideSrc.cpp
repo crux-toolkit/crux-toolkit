@@ -61,66 +61,12 @@ PeptideSrc::PeptideSrc(
   setStartIdx(start_idx);
 }
 
-
-/**
- * Frees the entire allocated peptide_srcs object
- */
-void PeptideSrc::free(vector<PeptideSrc*>& peptide_srcs) {
-
-
-  for(vector<PeptideSrc*>::iterator iter = peptide_srcs.begin();
-     iter != peptide_srcs.end();
-     ++iter) {
-  delete *iter; 
-
-  }
-  peptide_srcs.clear();
-}
-
 /**
  * Frees the an individual allocated peptide_src object
  * assumes that new_association pointer is NULL or some other pointer exist for the rest of the linklist 
  */
 PeptideSrc::~PeptideSrc() {
-  ;
 }
-
-// FIXME might need to change how this is printed
-/**
- * Prints a peptide object to file.
- */
-/*
-void print_peptide_src(
-  PEPTIDE_SRC_T* peptide_src, ///< object to print -in 
-  FILE* file  ///< the out put stream -out
-  )
-{
-  char* sequence = get_protein_sequence(peptide_src->parent_protein);
-  fprintf(file, "parent protein:%s\n", sequence);
-
-  fprintf(file, "peptide start: %d\n", peptide_src->start_idx);
-
-  if(peptide_type == TRYPTIC){
-    fprintf(file, "peptide type:%s\n", "TRYPTIC");
-  }
-  else if(peptide_type == PARTIALLY_TRYPTIC){
-    fprintf(file, "peptide type:%s\n", "PARTIALLY_TRYPTIC");
-  }
-  else if(peptide_type == N_TRYPTIC){
-    fprintf(file, "%s", "N_TRYPTIC");
-  }
-  else if(peptide_type == C_TRYPTIC){
-    fprintf(file, "%s", "C_TRYPTIC");
-  }
-  else if(peptide_type == NOT_TRYPTIC){
-    fprintf(file, "peptide type:%s\n", "NOT_TRYPTIC");
-  }
-  else if(peptide_type == ANY_TRYPTIC){
-    fprintf(file, "peptide type:%s\n", "ANY_TRYPTIC");
-  }
-  free(sequence);
-}
-*/
 
 /**
  * Copies the entire linklist of peptide_src object src to dest.
@@ -165,7 +111,6 @@ DIGEST_T PeptideSrc::getDigest() {
 void PeptideSrc::setParentProtein(
   Protein* parent_protein ///< the parent of this preptide -in  
   ) {
-
   parent_protein_ = parent_protein;
 }
 
@@ -173,16 +118,15 @@ void PeptideSrc::setParentProtein(
  * \returns a pointer to the parent protein
  */
 Protein* PeptideSrc::getParentProtein() {
-
   return parent_protein_;
 }
+
 /**
  * sets the start index of the peptide in the protein sequence
  */
 void PeptideSrc::setStartIdx(
   int start_idx ///< start index of the peptide in the protein sequence -in
   ) {
-
   start_idx_ = start_idx;
 }
 
@@ -190,7 +134,6 @@ void PeptideSrc::setStartIdx(
  * \returns the start index of the peptide in the protein sequence
  */
 int PeptideSrc::getStartIdx() {
-
   return start_idx_;
 }
 
@@ -297,15 +240,12 @@ bool PeptideSrc::parseTabDelimited(
 
     //if we haven't done this already, build a map of sequence strings to peptide
     //objects.
-    if (sequence_to_peptide_.size() == 0) {
+    if (sequence_to_peptide_.empty()) {
       fillPeptides(database, decoy_database);
     }
 
-    char* seq = peptide->getUnshuffledModifiedSequence();
-    string seq_string(seq);
-    std::free(seq);
-    
-    
+    string seq_string(peptide->getModifiedSequenceWithSymbols());
+
     if (sequence_to_peptide_.find(seq_string) == sequence_to_peptide_.end()) {
       carp(CARP_WARNING, "Cannot find peptide in database!");
       return false;
@@ -319,12 +259,8 @@ bool PeptideSrc::parseTabDelimited(
       PeptideSrc* new_src = *iter;
       peptide->addPeptideSrc(new_src);
     }
-
     return true;
-
-
   } else {
-
     vector<string> protein_ids = StringUtils::Split(file.getString(PROTEIN_ID_COL), ',');
   
     if (protein_ids.size() == 0) {
@@ -348,12 +284,10 @@ bool PeptideSrc::parseTabDelimited(
 
     //For every protein id source, create the object and add it to the list.
     for (size_t idx = 0; idx < protein_ids.size(); idx++) {
-    
       PeptideSrc* peptide_src = new PeptideSrc();
       DIGEST_T digestion = 
         string_to_digest_type((char*)file.getString(CLEAVAGE_TYPE_COL).c_str()); 
   
-
       Protein* parent_protein = NULL;
       int start_index = 1;
 
@@ -380,7 +314,6 @@ bool PeptideSrc::parseTabDelimited(
           continue;
         }
 
-
         //find the start index
         MODIFIED_AA_T* mod_seq;
         int seq_length = convert_to_mod_aa_seq(file.getString(SEQUENCE_COL).c_str(), &mod_seq);
@@ -398,7 +331,7 @@ bool PeptideSrc::parseTabDelimited(
       } else {
         string protein_id_string = protein_id.substr(0, left_paren_index);
         string peptide_start_index_string = protein_id.substr(left_paren_index+1, 
-          protein_id.length() - 1);
+          protein_id.length() - left_paren_index-2);
 
         bool is_decoy;    
         //  set fields in new peptide src
@@ -418,8 +351,7 @@ bool PeptideSrc::parseTabDelimited(
           // if this is valid usage, since PMCDelimitedFileWriter uses startidxoriginal to print protein
           // id location] so I am making an assumption that this is the purpose of start_idx_original.
           // Also, I'm not sure if I need this for all proteins or just post process ones.
-          int peptide_start_index_int;
-          from_string<int>(peptide_start_index_int, peptide_start_index_string);
+          int peptide_start_index_int = StringUtils::FromString<int>(peptide_start_index_string);
           peptide_src->setStartIdxOriginal(peptide_start_index_int);
         }
 
@@ -475,12 +407,10 @@ void PeptideSrc::fillPeptides(
   delete iterator;
   delete constraint;
 
-
   //TODO - map the decoy sequences to Peptides if we need them in the future.
   if (decoy_database == NULL) {
     carp(CARP_INFO, "decoy database is null");
   }
-
 }
 
 

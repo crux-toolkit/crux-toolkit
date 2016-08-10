@@ -15,8 +15,8 @@ using namespace std;
 
 class RecordWriter {
  public:
- RecordWriter(const string& filename)
-   : raw_output_(NULL), coded_output_(NULL) {
+  explicit RecordWriter(const string& filename)
+    : raw_output_(NULL), coded_output_(NULL) {
     fd_ = open(filename.c_str(), O_CREAT | O_TRUNC | O_WRONLY, 0644);
     if (fd_ < 0)
       return;
@@ -48,7 +48,7 @@ class RecordWriter {
 
 class RecordReader {
  public:
-  RecordReader(const string& filename)
+  explicit RecordReader(const string& filename)
     : raw_input_(NULL), coded_input_(NULL), size_(UINT32_MAX), valid_(false) {
     fd_ = open(filename.c_str(), O_RDONLY);
     if (fd_ < 0)

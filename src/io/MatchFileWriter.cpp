@@ -11,9 +11,9 @@
  */
 
 #include "MatchFileWriter.h"
-#include "OutputFiles.h"
 #include "parameter.h"
 #include "util/Params.h"
+#include "app/TideSearchApplication.h"
 #include <iostream>
 
 using namespace std;
@@ -89,7 +89,7 @@ void MatchFileWriter::setPrecision(){
     case DM_COL:
     case ABS_DM_COL:
     case PEPTIDE_MASS_COL:
-      match_precision_[col_idx] = get_int_parameter("mass-precision");
+      match_precision_[col_idx] = Params::GetInt("mass-precision");
       match_fixed_float_[col_idx] = true;
       break;
 
@@ -133,7 +133,7 @@ void MatchFileWriter::setPrecision(){
     case PERCOLATOR_PEPTIDE_QVALUE_COL:   // NEW
     case QRANKER_PEPTIDE_QVALUE_COL:      // NEW
 #endif
-      match_precision_[col_idx] = get_int_parameter("precision");
+      match_precision_[col_idx] = Params::GetInt("precision");
       match_fixed_float_[col_idx] = false;
       break;
 
@@ -145,8 +145,6 @@ void MatchFileWriter::setPrecision(){
       match_precision_[col_idx] = 6;
       match_fixed_float_[col_idx] = false;
       break;
-
-
 
     case NUMBER_MATCH_COLUMNS:
     case INVALID_COL:
@@ -161,7 +159,6 @@ void MatchFileWriter::setPrecision(){
  * indiciating if the MATCH_COLUMN_T should be printed.
  */
 void MatchFileWriter::addColumnNames(const std::vector<bool>& col_is_printed){
-
   // for each column, if we should print it, mark as true
   for(size_t col_idx = 0; col_idx < col_is_printed.size(); col_idx++){
     bool print_it = col_is_printed[col_idx];
@@ -169,7 +166,6 @@ void MatchFileWriter::addColumnNames(const std::vector<bool>& col_is_printed){
       match_to_print_[col_idx] = true;
     } 
   }
-
 }
 
 /**
@@ -218,8 +214,8 @@ void MatchFileWriter::addColumnNames(CruxApplication* application,
     if (Params::GetBool("file-column")) {
       addColumnName(FILE_COL);
     }
-    if (get_boolean_parameter("compute-sp") || get_boolean_parameter("sqt-output")) {
-      if (get_boolean_parameter("exact-p-value")) {
+    if (Params::GetBool("compute-sp") || Params::GetBool("sqt-output")) {
+      if (Params::GetBool("exact-p-value")) {
         addColumnName(EXACT_PVALUE_COL);
         addColumnName(REFACTORED_SCORE_COL);
       } else {
@@ -232,7 +228,7 @@ void MatchFileWriter::addColumnNames(CruxApplication* application,
     break;
 
   case XLINK_SEARCH_COMMAND:
-    if (get_boolean_parameter("compute-p-values")) {
+    if (Params::GetBool("compute-p-values")) {
       addColumnName(PVALUE_COL);
       addColumnName(ETA_COL);
       addColumnName(BETA_COL);
@@ -243,18 +239,18 @@ void MatchFileWriter::addColumnNames(CruxApplication* application,
 
   case SPECTRAL_COUNTS_COMMAND:
     // protein or peptide
-    if( string_to_quant_level_type(get_string_parameter("quant-level")) == PEPTIDE_QUANT_LEVEL ){
+    if( string_to_quant_level_type(Params::GetString("quant-level")) == PEPTIDE_QUANT_LEVEL ){
       addColumnName(SEQUENCE_COL);
     } else {
       addColumnName(PROTEIN_ID_COL);
       // parsimony?
-      if( string_to_parsimony_type(get_string_parameter("parsimony")) != PARSIMONY_NONE ){
+      if( string_to_parsimony_type(Params::GetString("parsimony")) != PARSIMONY_NONE ){
         addColumnName(PARSIMONY_RANK_COL);
       }
     }
 
     // SIN or NSAF score
-    switch (string_to_measure_type(get_string_parameter("measure"))) {
+    switch (string_to_measure_type(Params::GetString("measure"))) {
       case MEASURE_RAW:
         addColumnName(RAW_SCORE_COL);
         break;
@@ -284,7 +280,7 @@ void MatchFileWriter::addColumnNames(CruxApplication* application,
   addColumnName(SPECTRUM_NEUTRAL_MASS_COL);
   addColumnName(PEPTIDE_MASS_COL);
   addColumnName(DELTA_CN_COL);
-  if (get_boolean_parameter("exact-p-value")) {
+  if (Params::GetBool("exact-p-value")) {
     addColumnName(EXACT_PVALUE_COL);
     addColumnName(REFACTORED_SCORE_COL);
   } else {
@@ -293,11 +289,12 @@ void MatchFileWriter::addColumnNames(CruxApplication* application,
   addColumnName(XCORR_RANK_COL);
   addColumnName(DISTINCT_MATCHES_SPECTRUM_COL);
   addColumnName(SEQUENCE_COL);
+  addColumnName(MODIFICATIONS_COL);
   addColumnName(CLEAVAGE_TYPE_COL);
   addColumnName(PROTEIN_ID_COL);
   addColumnName(FLANKING_AA_COL);
-  if ((has_decoys || OutputFiles::isConcat()) &&
-      !OutputFiles::isProteinLevelDecoys()) {
+  if ((has_decoys || Params::GetBool("concat")) &&
+      !TideSearchApplication::proteinLevelDecoys()) {
     addColumnName(ORIGINAL_TARGET_SEQUENCE_COL);
   }
 
@@ -414,7 +411,6 @@ void MatchFileWriter::writeHeader(){
   // every line will be this length, reserve space in current row for speed
   current_row_.assign(num_columns_, "");
 }
-
 
 /*
  * Local Variables:

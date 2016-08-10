@@ -16,17 +16,17 @@
 
 class SubtractIndexApplication: public CruxApplication {
 
-public:
+ public:
 
   /**
    * \returns a blank CascadeSearchApplication object
    */
-   SubtractIndexApplication();
+  SubtractIndexApplication();
   
   /**
    * Destructor
    */
-   ~SubtractIndexApplication();
+  ~SubtractIndexApplication();
 
   /**
    * main method for CascadeSearchApplication

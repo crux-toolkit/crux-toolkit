@@ -19,16 +19,14 @@ using namespace std;
 
 #define DELTA_EPOCH_IN_MICROSECS  11644473600000000Ui64
  
-struct timezone
-{
+struct timezone {
   int  tz_minuteswest; /* minutes W of Greenwich */
   int  tz_dsttime;     /* type of dst correction */
 };
  
 // Definition of a gettimeofday function
  
-int gettimeofday(struct timeval *tv, struct timezone *tz)
-{
+int gettimeofday(struct timeval *tv, struct timezone *tz) {
 // Define a structure to receive the current Windows filetime
   FILETIME ft;
  
@@ -36,8 +34,7 @@ int gettimeofday(struct timeval *tv, struct timezone *tz)
   unsigned __int64 tmpres = 0;
   static int tzflag = 0;
  
-  if (NULL != tv)
-  {
+  if (NULL != tv) {
     GetSystemTimeAsFileTime(&ft);
  
 // The GetSystemTimeAsFileTime returns the number of 100 nanosecond 
@@ -60,10 +57,8 @@ int gettimeofday(struct timeval *tv, struct timezone *tz)
     tv->tv_usec = (long)(tmpres % 1000000UL);
   }
  
-  if (NULL != tz)
-  {
-    if (!tzflag)
-    {
+  if (NULL != tz) {
+    if (!tzflag) {
       _tzset();
       tzflag++;
     }
@@ -118,15 +113,14 @@ page for a longer description of the public domain non-license).
 
 // Public domain code from https://mollyrocket.com/forums/viewtopic.php?p=2529
 // map 'filename' and return a pointer to it. fill out *length and *un if not-NULL 
-void *stub_mmap(const char *filename, SIMPLE_UNMMAP *un) 
-{ 
+void *stub_mmap(const char *filename, SIMPLE_UNMMAP *un) { 
    HANDLE f = CreateFile(filename, GENERIC_READ, FILE_SHARE_READ,  NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL); 
    HANDLE m; 
    void *p; 
    if (!f) return NULL; 
-   m = CreateFileMapping(f, NULL, PAGE_READONLY, 0,0, NULL); 
+   m = CreateFileMapping(f, NULL, PAGE_READONLY, 0, 0, NULL); 
    if (!m) { CloseHandle(f); return NULL; } 
-   p = MapViewOfFile(m, FILE_MAP_READ, 0,0,0); 
+   p = MapViewOfFile(m, FILE_MAP_READ, 0, 0, 0); 
    if (!p) { CloseHandle(m); CloseHandle(f); return NULL; } 
    if (un) { 
       un->f = f; 
@@ -136,8 +130,7 @@ void *stub_mmap(const char *filename, SIMPLE_UNMMAP *un)
    return p; 
 } 
 
-void stub_unmmap(SIMPLE_UNMMAP *un) 
-{ 
+void stub_unmmap(SIMPLE_UNMMAP *un) { 
    UnmapViewOfFile(un->p); 
    CloseHandle(un->m); 
    CloseHandle(un->f); 
@@ -173,7 +166,7 @@ int scandir(
   copy(entries->begin(), entries->end(), *namelist);
 
   return entries->size();
- }
+}
 
 int alphasort(const void *d1, const void *d2) {
 

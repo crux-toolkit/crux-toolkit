@@ -2,6 +2,7 @@
 #include "xhhc_scorer.h"
 #include "LinkedPeptide.h"
 #include "XHHC_Peptide.h"
+#include "util/Params.h"
 
 #include <iostream>
 #include <fstream>
@@ -37,10 +38,10 @@ int main(int argc, char** argv) {
   int num_arguments = NUM_ARGUMENTS;
   const char* argument_list[NUM_ARGUMENTS] = {"peptide A",
                                               "peptide B",
-					      "pos A",
-					      "pos B",
-					      "charge state",
-					      "link mass"};
+                                              "pos A",
+                                              "pos B",
+                                              "charge state",
+                                              "link mass"};
 
 
 
@@ -60,27 +61,26 @@ int main(int argc, char** argv) {
   parse_cmd_line_into_params_hash(argc, argv, "xlink-predict-peptide-ions");
 
   /* Set verbosity */
-  set_verbosity_level(get_int_parameter("verbosity"));
+  set_verbosity_level(Params::GetInt("verbosity"));
 
   /* Get Arguments */
-  linker_mass = get_double_parameter("link mass");
-  charge = get_int_parameter("charge state");
+  linker_mass = Params::GetDouble("link mass");
+  charge = Params::GetInt("charge state");
 
-  peptideA = get_string_parameter("peptide A");
-  peptideB = get_string_parameter("peptide B");
+  peptideA = Params::GetString("peptide A");
+  peptideB = Params::GetString("peptide B");
   
-  posA = get_int_parameter("pos A");
-  posB = get_int_parameter("pos B");
+  posA = Params::GetInt("pos A");
+  posB = Params::GetInt("pos B");
 
-  print_spectrum = get_boolean_parameter("print-theoretical-spectrum");
+  print_spectrum = Params::GetBool("print-theoretical-spectrum");
 
   LinkedPeptide::setLinkerMass(linker_mass); 
   LinkedPeptide linked_peptide;
 
   if (string(peptideB) == "NULL") {
     linked_peptide = LinkedPeptide(peptideA, NULL, posA-1, posB-1, charge);
-  }
-  else {
+  } else {
     linked_peptide = LinkedPeptide( peptideA, peptideB, posA-1, posB-1, charge);  
   }
  
@@ -101,16 +101,16 @@ int main(int argc, char** argv) {
     carp(CARP_INFO, "Writing XCORR theoretical spectrum to theoretical.out");
     map<int, FLOAT_T> theoretical;
     XHHC_Scorer::xlinkCreateMapTheoretical(ion_series,
-					 theoretical);
+                                         theoretical);
 
     ofstream fout("theoretical.out");
-    fout <<"> "<< linked_peptide<<"\t"<<linked_peptide.getMZ(MONO)<<endl;
+    fout << "> " << linked_peptide << "\t" << linked_peptide.getMZ(MONO) << endl;
     
     map<int, FLOAT_T>::iterator iter;
 
     for (iter = theoretical.begin();
-	 iter != theoretical.end();
-	 ++iter) {
+         iter != theoretical.end();
+         ++iter) {
       fout << iter -> first << "\t";
       fout << iter -> second << "\t" << endl;
     }

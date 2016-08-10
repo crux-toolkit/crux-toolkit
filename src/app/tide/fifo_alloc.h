@@ -35,7 +35,7 @@
 // Used by FifoAllocator; probably not useful alone. See .cc file.
 class FifoPage {
  public:
-  FifoPage(size_t size)
+  explicit FifoPage(size_t size)
     : size_(size),
     page_((char*) GetPage(size)),
     end_(page_ + size_),
@@ -105,7 +105,7 @@ class FifoPage {
 
 class FifoAllocator {
  public:
-  FifoAllocator(size_t page_size) : page_size_(page_size) {
+  explicit FifoAllocator(size_t page_size) : page_size_(page_size) {
     current_page_ = new FifoPage(page_size_);
     first_page_ = current_page_;
   }

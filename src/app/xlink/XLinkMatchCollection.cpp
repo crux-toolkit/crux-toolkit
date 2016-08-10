@@ -12,6 +12,7 @@
 #include "XLinkScorer.h"
 
 #include "model/Spectrum.h"
+#include "util/Params.h"
 #include "util/StringUtils.h"
 
 #include <iostream>
@@ -72,16 +73,16 @@ void get_min_max_mass(
     get_min_max_mass(precursor_mz,
          zstate,
                      isotope,
-         get_double_parameter("precursor-window-weibull"),
-         string_to_window_type(get_string_parameter("precursor-window-type-weibull")),
+         Params::GetDouble("precursor-window-weibull"),
+         string_to_window_type(Params::GetString("precursor-window-type-weibull")),
          min_mass,
          max_mass);
   } else {
     get_min_max_mass(precursor_mz,
          zstate,
                      isotope,
-         get_double_parameter("precursor-window"),
-         string_to_window_type(get_string_parameter("precursor-window-type")),
+         Params::GetDouble("precursor-window"),
+         string_to_window_type(Params::GetString("precursor-window-type")),
          min_mass,
          max_mass);
   }
@@ -107,7 +108,7 @@ XLinkMatchCollection::XLinkMatchCollection(
   zstate_ = vector.zstate_;
   scan_ = vector.scan_;
 
-  for (int idx=0;idx<vector.getMatchTotal();idx++) {
+  for (int idx = 0; idx < vector.getMatchTotal(); idx++) {
     XLinkMatch* currentCandidate = (XLinkMatch*)vector[idx];
     XLinkMatch* copyCandidate = NULL;
     switch (currentCandidate -> getCandidateType()) {
@@ -148,8 +149,8 @@ XLinkMatchCollection::XLinkMatchCollection(
   
   carp(CARP_DEBUG, "XLinkMatchCollection(...)");
 
-  FLOAT_T min_mass = get_double_parameter("min-mass");
-  FLOAT_T max_mass = get_double_parameter("max-mass");
+  FLOAT_T min_mass = Params::GetDouble("min-mass");
+  FLOAT_T max_mass = Params::GetDouble("max-mass");
 
   addCandidates(
     min_mass, 
@@ -175,8 +176,8 @@ void XLinkMatchCollection::addCandidates(
 
   carp(CARP_DEBUG, "XLinkMatchCollection.addCandidates() start");
 
-  include_linear_peptides_ = get_boolean_parameter("xlink-include-linears");
-  include_self_loops_ = get_boolean_parameter("xlink-include-selfloops");
+  include_linear_peptides_ = Params::GetBool("xlink-include-linears");
+  include_self_loops_ = Params::GetBool("xlink-include-selfloops");
 
   carp(CARP_INFO, "Adding xlink candidates");
 
@@ -236,7 +237,7 @@ XLinkMatchCollection::XLinkMatchCollection(
 
   FLOAT_T min_mass;
   FLOAT_T max_mass;
-  vector<int> isotopes = StringUtils::Split<int>(get_string_parameter("isotope-windows"), ',');
+  vector<int> isotopes = StringUtils::Split<int>(Params::GetString("isotope-windows"), ',');
   for (int idx = 0; idx < isotopes.size();idx++) {
     get_min_max_mass(precursor_mz, zstate, isotopes[idx], use_decoy_window, min_mass, max_mass);
     carp(CARP_INFO, "isotope %i min:%g max:%g", isotopes[idx], min_mass, max_mass);
@@ -275,7 +276,7 @@ XLinkMatch* XLinkMatchCollection::at(
 /**
  * \returns a candidate from the list by index
  */
-XLinkMatch* XLinkMatchCollection::operator [](
+XLinkMatch* XLinkMatchCollection::operator[] (
   int idx ///< index of the candidate
   ) {
   return (XLinkMatch*)match_[idx];
@@ -293,7 +294,7 @@ void XLinkMatchCollection::shuffle(
   decoy_vector.zstate_ = zstate_;
   decoy_vector.scan_ = scan_;
 
-  for (int idx=0;idx<getMatchTotal();idx++) {
+  for (int idx = 0; idx < getMatchTotal(); idx++) {
     //cerr << "shuffling:" << at(idx)->getSequenceString()<<endl;
     decoy_vector.add(at(idx)->shuffle());
   }
@@ -314,14 +315,14 @@ void XLinkMatchCollection::scoreSpectrum(
     spectrum, 
     min(zstate_.getCharge(), max_ion_charge));
 
-  for (int idx=0;idx<getMatchTotal();idx++) {
+  for (int idx = 0; idx < getMatchTotal(); idx++) {
     carp(CARP_DEBUG, "Scoring candidate:%d", idx);
     scorer.scoreCandidate(at(idx));
   }
 
   // set the match_collection as having been scored
   scored_type_[XCORR] = true;
-  if (get_boolean_parameter("compute-sp")) {
+  if (Params::GetBool("compute-sp")) {
     scored_type_[SP] = true;
   }
 
@@ -334,17 +335,17 @@ void XLinkMatchCollection::scoreSpectrum(
 void XLinkMatchCollection::fitWeibull() {
 
   //create the array of x's and 
-  shift_=0;
-  eta_=0;
-  beta_=0;
-  correlation_=0;
+  shift_ = 0;
+  eta_ = 0;
+  beta_ = 0;
+  correlation_ = 0;
 
   FLOAT_T* xcorrs = extractScores(XCORR);
 // reverse sort the scores
 
   std::sort(xcorrs, xcorrs + getMatchTotal(), greater<FLOAT_T>());
 
-  double fraction_to_fit = get_double_parameter("fraction-top-scores-to-fit");
+  double fraction_to_fit = Params::GetDouble("fraction-top-scores-to-fit");
   int num_tail_samples = (int)(getMatchTotal() * fraction_to_fit);
 
   fit_three_parameter_weibull(xcorrs,

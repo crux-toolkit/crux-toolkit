@@ -23,6 +23,8 @@
 #include <iomanip>
 #include <ios>
 #include "parameter.h"
+#include "util/Params.h"
+#include "util/StringUtils.h"
 
 class DelimitedFileWriter {
 
@@ -101,7 +103,7 @@ class DelimitedFileWriter {
       current_row_.push_back("");
     }
     
-    current_row_[col_idx] = to_string(value, precision, fixed_float);
+    current_row_[col_idx] = StringUtils::ToString(value, precision, fixed_float);
   }
 
   /**
@@ -118,60 +120,9 @@ class DelimitedFileWriter {
       current_row_.push_back("");
     }
     
-    current_row_[col_idx] = to_string(value);
-  }
-
-  /**
-   * Turn the given value into a string.  For floating point numbers,
-   * use the --precision option value.
-   */
-  template<typename TValue>
-  static std::string to_string(TValue value) {
-    return to_string(value, get_int_parameter("precision"));
-  }
-
-  /**
-   * Turn the given value into a string.  For floating point numbers,
-   * use the given precision.
-   */
-  template<typename TValue>
-  static std::string to_string
-    (TValue& value,
-     int precision,
-     bool fixed_float = true) {
-
-    std::ostringstream oss;
-    oss << std::setprecision(precision);
-    if (fixed_float) {
-      oss << std::fixed;
-    } else {
-      oss.unsetf(std::ios_base::floatfield);
-    }
-    oss << value;
-    std::string out_string = oss.str();
-    return (out_string != "-0") ? out_string : "0";
+    current_row_[col_idx] = StringUtils::ToString(value);
   }
 
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #endif //DELIMITED_FILE_WRITER_H

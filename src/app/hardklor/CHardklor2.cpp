@@ -51,6 +51,8 @@ int CHardklor2::GoHardklor(CHardklorSetting sett, Spectrum* s){
   iPercent=0;
 	getTimerFrequency(timerFrequency);
 
+  vResults.clear();
+
 	//For noise reduction
 	CNoiseReduction nr(&r,cs);
 
@@ -1210,6 +1212,8 @@ void CHardklor2::QuickHardklor(Spectrum& s, vector<pepHit>& vPeps) {
 	}
 
 	//Sort results by base peak
+  //This sort is expensive. Instead, try sorting before exporting to file. Make sure RefineHits below is not
+  //order dependent.
 	if(vPeps.size()>0) qsort(&vPeps[0],vPeps.size(),sizeof(pepHit),CompareBPI);
 
 	//Refine overfitting based on density
@@ -1438,13 +1442,13 @@ void CHardklor2::WriteScanLine(Spectrum& s, FILE* fptr, int format){
 		//For Alex Panchaud, special ZS case
 		if(s.getFileType()==ZS || s.getFileType()==UZS){
 			if(s.sizeZ()>0){
-				for(int i=0;i<s.sizeZ();i++) fprintf(fptr,"\t%d,%.6lf",s.atZ(i).z,s.atZ(i).mz);
+				for(int i=0;i<s.sizeZ();i++) fprintf(fptr,"\t%d,%.6lf",s.atZ(i).z,s.atZ(i).mh);
 			}
 		} else {
 
 			//otherwise output precursor info if it exists
 			if(s.sizeZ()==1){
-				fprintf(fptr,"\t%.4lf\t%d\t%.4lf",s.atZ(0).mz-1.00727649,s.atZ(0).z,s.getMZ());
+				fprintf(fptr,"\t%.4lf\t%d\t%.4lf",s.atZ(0).mh-1.00727649,s.atZ(0).z,s.getMZ());
 			} else if(s.sizeZ()>1){
 				fprintf(fptr,"\t0.0\t0\t%.4lf",s.getMZ());
 			} else {
@@ -1460,11 +1464,11 @@ void CHardklor2::WriteScanLine(Spectrum& s, FILE* fptr, int format){
 		fprintf(fptr,"Filename=\"%s\"",cs.inFile);
 		if(s.getFileType()==ZS || s.getFileType()==UZS){
 			if(s.sizeZ()>0){
-				for(int i=0;i<s.sizeZ();i++) fprintf(fptr," PeptideSignal%d=\"%d,%.4lf\"",i,s.atZ(i).z,s.atZ(i).mz);
+				for(int i=0;i<s.sizeZ();i++) fprintf(fptr," PeptideSignal%d=\"%d,%.4lf\"",i,s.atZ(i).z,s.atZ(i).mh);
 			}
 		} else {
 			if(s.sizeZ()==1){
-				fprintf(fptr," AccMonoMass=\"%.4lf\" PrecursorCharge=\"%d\" PrecursorMZ=\"%.4lf\"",s.atZ(0).mz-1.00727649,s.atZ(0).z,s.getMZ());
+				fprintf(fptr," AccMonoMass=\"%.4lf\" PrecursorCharge=\"%d\" PrecursorMZ=\"%.4lf\"",s.atZ(0).mh-1.00727649,s.atZ(0).z,s.getMZ());
 			} else if(s.sizeZ()>1){
 				fprintf(fptr," AccMonoMass=\"0.0\" PrecursorCharge=\"0\" PrecursorMZ=\"%.4lf\"",s.getMZ());
 			} else {

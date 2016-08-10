@@ -226,8 +226,16 @@ void CHardklorParser::parse(char* cmd) {
 
 	} else if(strcmp(param,"max_features")==0){
 	} else if(strcmp(param,"ms_level")==0){
-    if(atoi(tok)==2) global.mzXMLFilter=MS2;
-    else global.mzXMLFilter=MS1;
+    if(atoi(tok)==3){
+      global.mzXMLFilter=MS3;
+      global.msLevel=3;
+    } else if(atoi(tok)==2) {
+      global.mzXMLFilter=MS2;
+      global.msLevel=2;
+    } else {
+      global.mzXMLFilter=MS1;
+      global.msLevel=1;
+    }
 
 	} else if(strcmp(param,"mz_max")==0){
 		global.window.dUpper=atof(tok);

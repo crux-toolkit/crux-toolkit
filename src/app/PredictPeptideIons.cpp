@@ -29,6 +29,7 @@
 #include "model/IonSeries.h"
 #include "model/IonConstraint.h"
 #include "model/Peptide.h"
+#include "util/Params.h"
 
 using namespace std;
 using namespace Crux;
@@ -51,45 +52,41 @@ PredictPeptideIons::~PredictPeptideIons() {
  */
 int PredictPeptideIons::main(int argc, char** argv) {
   /* Get Arguments */
-  string peptide_sequence = get_string_parameter("peptide sequence");
-  int charge_state = get_int_parameter("charge state");
+  string peptide_sequence = Params::GetString("peptide sequence");
+  int charge_state = Params::GetInt("charge state");
 
   /* Get Options */
   ION_TYPE_T ion_type;
-  string_to_ion_type(get_string_parameter("primary-ions"), &ion_type);
-  bool use_precursor_ions = get_boolean_parameter("precursor-ions");
-  int isotope_count = get_int_parameter("isotope");
-  bool is_flanking = get_boolean_parameter("flanking");
-  string max_ion_charge = get_string_parameter("max-ion-charge");
+  string_to_ion_type(Params::GetString("primary-ions"), &ion_type);
+  bool use_precursor_ions = Params::GetBool("precursor-ions");
+  int isotope_count = Params::GetInt("isotope");
+  bool is_flanking = Params::GetBool("flanking");
+  string max_ion_charge = Params::GetString("max-ion-charge");
 
-  int nh3_count = get_int_parameter("nh3");
-  int h2o_count = get_int_parameter("h2o");
+  int nh3_count = Params::GetInt("nh3");
+  int h2o_count = Params::GetInt("h2o");
 
   int neutral_loss_count[MAX_MODIFICATIONS];
   bool is_modification = false;
 
   // check peptide sequence
-  if(!valid_peptide_sequence(peptide_sequence)){
-    carp(CARP_FATAL, "The peptide sequence '%s' is not valid", 
-         peptide_sequence.c_str());
+  if (!valid_peptide_sequence(peptide_sequence)) {
+    carp(CARP_FATAL, "The peptide sequence '%s' is not valid", peptide_sequence.c_str());
   }
 
-   // neutral_losses
-   // initialize
-   int modification_idx = 0;
-   for(; modification_idx < MAX_MODIFICATIONS; ++modification_idx){
-     neutral_loss_count[modification_idx] = 0;
-   }
+  // neutral_losses
+  // initialize
+  int modification_idx = 0;
+  for(; modification_idx < MAX_MODIFICATIONS; ++modification_idx) {
+    neutral_loss_count[modification_idx] = 0;
+  }
 
-   is_modification = (nh3_count || 
-                      h2o_count ||
-                      isotope_count || 
-                      is_flanking);
+  is_modification = (nh3_count || h2o_count || isotope_count || is_flanking);
 
-   neutral_loss_count[NH3] = nh3_count;
-   neutral_loss_count[H2O] = h2o_count;
-   neutral_loss_count[FLANK] = (int)is_flanking;
-   neutral_loss_count[ISOTOPE] = isotope_count;
+  neutral_loss_count[NH3] = nh3_count;
+  neutral_loss_count[H2O] = h2o_count;
+  neutral_loss_count[FLANK] = (int)is_flanking;
+  neutral_loss_count[ISOTOPE] = isotope_count;
 
   // create ion_constraint
   MASS_TYPE_T frag_masses = get_mass_type_parameter("fragment-mass");
@@ -99,8 +96,8 @@ int PredictPeptideIons::main(int argc, char** argv) {
     new IonConstraint(frag_masses, charge_state, ion_type, use_precursor_ions);
 
    
-   // set ion_constraint3 modification counts, if modifications should occur
-  if(is_modification){
+  // set ion_constraint3 modification counts, if modifications should occur
+  if (is_modification) {
     ion_constraint->setModification(NH3, neutral_loss_count[NH3]);
     ion_constraint->setModification(H2O, neutral_loss_count[H2O]);
     ion_constraint->setModification(ISOTOPE, neutral_loss_count[ISOTOPE]);
@@ -108,22 +105,21 @@ int PredictPeptideIons::main(int argc, char** argv) {
   }
 
   // create ion_series
-  IonSeries* ion_series = new IonSeries(peptide_sequence, 
-                                        charge_state, ion_constraint);
+  IonSeries* ion_series = new IonSeries(peptide_sequence, charge_state, ion_constraint);
    
   // now predict ions
   ion_series->predictIons();
 
   // print settings
-  printf("# PEPTIDE: %s\n",peptide_sequence.c_str());
+  printf("# PEPTIDE: %s\n", peptide_sequence.c_str());
   printf("# AVERAGE: %f MONO:%f\n",
     Peptide::calcSequenceMass(peptide_sequence, AVERAGE),
     Peptide::calcSequenceMass(peptide_sequence, MONO));
   printf("# CHARGE: %d\n", charge_state);
   printf("# MAX-ION-CHARGE: %s\n", max_ion_charge.c_str());
   printf("# NH3 modification: %d\n", neutral_loss_count[NH3]);
-  printf("# H2O modification: %d\n", neutral_loss_count[H2O] );
-  printf("# ISOTOPE modification: %d\n", neutral_loss_count[ISOTOPE] );
+  printf("# H2O modification: %d\n", neutral_loss_count[H2O]);
+  printf("# ISOTOPE modification: %d\n", neutral_loss_count[ISOTOPE]);
   printf("# FLANK modification: %d\n", neutral_loss_count[FLANK]);
   // print ions
   ion_series->print(stdout);

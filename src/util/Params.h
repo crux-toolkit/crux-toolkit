@@ -86,7 +86,7 @@ class Params {
 
  private:
   struct ParamCategory {
-    ParamCategory(std::string name): Name(name), Items(std::set<const Param*>()) {}
+    explicit ParamCategory(std::string name): Name(name), Items(std::set<const Param*>()) {}
     std::string Name;
     std::set<const Param*> Items;
   };
@@ -180,8 +180,6 @@ class Params {
   std::vector<ParamCategory> categories_;
   bool finalized_;
 };
-
-static Params container_;
 
 class Param {
  public:

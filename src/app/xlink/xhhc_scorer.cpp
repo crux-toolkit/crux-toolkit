@@ -4,6 +4,7 @@
 
 #include "model/Spectrum.h"
 #include "model/Scorer.h"
+#include "util/Params.h"
 
 #include <fstream>
 
@@ -25,8 +26,8 @@ void XHHC_Scorer::init() {
   max_bin_ = 0;
   current_spectrum_ = NULL;
 
-  bin_width_ = get_double_parameter("mz-bin-width");
-  bin_offset_ = get_double_parameter("mz-bin-offset");
+  bin_width_ = Params::GetDouble("mz-bin-width");
+  bin_offset_ = Params::GetDouble("mz-bin-offset");
 
 }
 
@@ -96,7 +97,7 @@ int XHHC_Scorer::getMatchedBYIons(
       Peak * peak = spectrum->getNearestPeak(ion->getMZ(AVERAGE), 
                                               bin_width);
       if (peak != NULL) {
-	ans++;
+        ans++;
       }
     }
   }
@@ -132,7 +133,7 @@ FLOAT_T XHHC_Scorer::hhcGenScoreXcorr(
     current_spectrum_ = spectrum;
     if (scorer_ != NULL) { 
       delete scorer_; 
-      scorer_=NULL;
+      scorer_ = NULL;
     }
     scorer_ = new Scorer(XCORR);
     if (!scorer_->createIntensityArrayXcorr(spectrum, ion_series.getCharge())) {
@@ -145,7 +146,7 @@ FLOAT_T XHHC_Scorer::hhcGenScoreXcorr(
   // create theoretical array
   theoretical = (FLOAT_T*)mycalloc((size_t)max_bin_, sizeof(FLOAT_T));
   
- if (!hhcCreateIntensityArrayTheoretical(ion_series, theoretical)) {
+  if (!hhcCreateIntensityArrayTheoretical(ion_series, theoretical)) {
     carp(CARP_ERROR, "failed to create theoretical spectrum for Xcorr");
     return false;
   }
@@ -204,9 +205,9 @@ bool XHHC_Scorer::xlinkCreateMapTheoretical(
     // In addition, add peaks of intensity of 25.0 to +/- 1 m/z flanking each B, Y ion.
     // Skip ions that are located beyond max mz limit
     addIntensityMap(theoretical, intensity_array_idx, 50);
-    if (get_boolean_parameter("use-flanking-peaks")) {
+    if (Params::GetBool("use-flanking-peaks")) {
       if (intensity_array_idx > 0) {
-	addIntensityMap(theoretical, intensity_array_idx - 1, 25);
+        addIntensityMap(theoretical, intensity_array_idx - 1, 25);
       }
       addIntensityMap(theoretical, intensity_array_idx + 1, 25);
      
@@ -216,7 +217,7 @@ bool XHHC_Scorer::xlinkCreateMapTheoretical(
     //  mass_z + (modification_masses[(int)ion_modification]/(FLOAT_T)charge) * modification_count;  
     
     //TODO put this back in
-    //if(ion_type == B_ION){
+    //if(ion_type == B_ION) {
       int h2o_array_idx = (int)((ion->getMZ(MONO) - (MASS_H2O_MONO/ion->getCharge()) ) / bin_width + 0.5);
       addIntensityMap(theoretical, h2o_array_idx, 10);
     //}
@@ -252,16 +253,16 @@ bool XHHC_Scorer::hhcCreateIntensityArrayTheoretical(
     // Add peaks of intensity 50.0 for B, Y type ions. 
     // In addition, add peaks of intensity of 25.0 to +/- 1 m/z flanking each B, Y ion.
     // Skip ions that are located beyond max mz limit
-    if((intensity_array_idx)< max_bin_){
+    if((intensity_array_idx)< max_bin_) {
       //if (ion->type() == Y_ION)
       //add_intensity(theoretical, intensity_array_idx, 51);
       Scorer::addIntensity(theoretical, intensity_array_idx, 50);
-      if (get_boolean_parameter("use-flanking-peaks") &&
+      if (Params::GetBool("use-flanking-peaks") &&
         intensity_array_idx > 0) {
         Scorer::addIntensity(theoretical, intensity_array_idx - 1, 25);
       }
-      if(get_boolean_parameter("use-flanking-peaks") &&
-	 ((intensity_array_idx + 1)< max_bin_)) {
+      if(Params::GetBool("use-flanking-peaks") &&
+         ((intensity_array_idx + 1)< max_bin_)) {
         Scorer::addIntensity(theoretical, intensity_array_idx + 1, 25);
       }
     }
@@ -270,17 +271,17 @@ bool XHHC_Scorer::hhcCreateIntensityArrayTheoretical(
     //  mass_z + (modification_masses[(int)ion_modification]/(FLOAT_T)charge) * modification_count;  
 
 
-    if(ion_type == B_ION){
+    if(ion_type == B_ION) {
       int h2o_array_idx = 
         INTEGERIZE((ion->getMZ(MONO) - (MASS_H2O_MONO/ion->getCharge())), bin_width_, bin_offset_);
 
       if (h2o_array_idx < max_bin_)
-	Scorer::addIntensity(theoretical, h2o_array_idx, 10);
+        Scorer::addIntensity(theoretical, h2o_array_idx, 10);
       }
 
       int nh3_array_idx = 
         INTEGERIZE((ion->getMZ(MONO) -  (MASS_NH3_MONO/ion->getCharge())),
-		   bin_width_, bin_offset_);
+                   bin_width_, bin_offset_);
       if (nh3_array_idx < max_bin_) {
         Scorer::addIntensity(theoretical, nh3_array_idx, 10);
       }
@@ -323,10 +324,10 @@ FLOAT_T XHHC_Scorer::getIonCurrentExplained(
     int intensity_array_idx = (int)(spec_mz / bin_width + 0.5);
 
     if (theoretical[intensity_array_idx] >= 45) {
-    //it is a b-y ions that is observed.
+      //it is a b-y ion that is observed.
       if (by_found.find(intensity_array_idx) == by_found.end()) {
         by_found[intensity_array_idx] = true;
-        by_observed ++;
+        by_observed++;
       }
       ans += spec_intensity;
     }
@@ -346,7 +347,7 @@ FLOAT_T XHHC_Scorer::getIonCurrentExplained(
 void XHHC_Scorer::printSpectrums(
   FLOAT_T* theoretical, ///< The theoretical spectrum array
   Spectrum* spectrum ///< The spectrum to print
-  ){
+  ) {
    
   ofstream theoretical_file;
   ofstream observed_file;
@@ -359,7 +360,7 @@ void XHHC_Scorer::printSpectrums(
   theoretical_file << "> theoretical" << endl;
   observed_file << "> observed" << endl;
   spectrums_file << "> spectrums" << endl;
-  bool noflanks = get_boolean_parameter("use-flanking-peaks");
+  bool noflanks = Params::GetBool("use-flanking-peaks");
   int normalize = NORMALIZE;
   int max_mz = MAX_MZ;
   int min_mz = MIN_MZ;
@@ -407,12 +408,12 @@ void XHHC_Scorer::printSpectrums(
         theoretical_file << i << "\t" << *index << "\tnolabel\tred" << endl;
       Peak * peak = spectrum->getNearestPeak(i, 1);
       if (peak != NULL) {
-	++match_count;
-	peak_colors[peak] = "green";
-	spectrums_file << i << "\t" << -10000 << "\tnolabel\tgreen" << endl;
-	//spectrums_file << get_peak_location(peak) << "\t" << pow (get_peak_intensity(peak) * average * normalize, 0.2) << "\tnolabel\tgreen" << endl;
+        ++match_count;
+        peak_colors[peak] = "green";
+        spectrums_file << i << "\t" << -10000 << "\tnolabel\tgreen" << endl;
+        //spectrums_file << get_peak_location(peak) << "\t" << pow (get_peak_intensity(peak) * average * normalize, 0.2) << "\tnolabel\tgreen" << endl;
       } else {
-	++mismatch_count;
+        ++mismatch_count;
         spectrums_file << i << "\t" << -10000 << "\tnolabel\tred" << endl;
       }
     }

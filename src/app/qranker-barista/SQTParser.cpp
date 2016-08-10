@@ -1421,7 +1421,7 @@ void SQTParser :: close_files()
   f_psmind_to_fileind.close();
   f_psmind_to_sp_rank.close();//sp rank
   f_psmind_to_xcorr_rank.close();//xcorr rank
-  f_pmsind_to_matches_spectrum.close();//matches/spectrum
+  f_pmsind_to_matches_spectrum.close();// distinct matches/spectrum
   f_psmind_to_by_ions_matched.close();// b/y ions match  
   f_psmind_to_by_ions_total.close();//b/y ions total  
   f_psmind_to_peptide_position.close();//peptide position 

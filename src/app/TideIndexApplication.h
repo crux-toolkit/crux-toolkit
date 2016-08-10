@@ -26,7 +26,7 @@ class TideIndexApplication : public CruxApplication {
 
   friend class TideSearchApplication;
 
-public:
+ public:
 
   /**
    * Constructor
@@ -77,17 +77,17 @@ public:
 
   virtual COMMAND_T getCommand() const;
 
-protected:
+ protected:
 
   class TideIndexPeptide {
-  private:
+   private:
     double mass_;
     int length_;
     int proteinId_;
     int proteinPos_;
     const char* residues_;  // points at protein sequence
     bool decoy_;
-  public:
+   public:
     TideIndexPeptide() {}
     TideIndexPeptide(double mass, int length, string* proteinSeq,
                      int proteinId, int proteinPos, bool decoy) {
@@ -160,6 +160,7 @@ protected:
     FLOAT_T maxMass,
     int minLength,
     int maxLength,
+    bool dups,
     MASS_TYPE_T massType,
     DECOY_TYPE_T decoyType,
     const std::string& fasta,
@@ -207,6 +208,28 @@ protected:
     int proteinId,
     int proteinPos,
     pb::AuxLocation& outAuxLoc
+  );
+
+  /**
+   * Generates decoy for the target peptide, writes the decoy protein to pbProtein
+   * and adds decoy to the heap.
+   */
+  static bool generateDecoy(
+    const string& setTarget,
+    std::map<const string, const string*>& targetToDecoy,
+    set<string>* setTargets,
+    set<string>* setDecoys,
+    DECOY_TYPE_T decoyType,
+    bool allowDups,
+    unsigned int& failedDecoyCnt,
+    unsigned int& decoysGenerated,
+    int& curProtein,
+    const ProteinInfo& proteinInfo,
+    const int startLoc,
+    pb::Protein& pbProtein,
+    FLOAT_T pepMass,
+    vector<TideIndexPeptide>& outPeptideHeap,
+    vector<string*>& outProteinSequences
   );
 
   virtual void processParams();

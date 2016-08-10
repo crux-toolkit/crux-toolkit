@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Crux FAQs</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" type="text/css" href="styles.css">
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-26136956-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<script type="text/javascript">
+	// Main Menu
+	$( document ).ready(function() {
+			var pull 		= $('.btn');
+				menu 		= $('nav ul');
+				menuHeight	= menu.height();
+
+			$(pull).on('click', function(e) {
+				e.preventDefault();
+				menu.slideToggle();
+			});
+
+			$(window).resize(function(){
+	    		var w = $(window).width();
+	    		if(w > 320 && menu.is(':hidden')) {
+	    			menu.removeAttr('style');
+	    		} 
+			});
+	});
+</script>
+</head>
+<body>
+	<div class="page-wrap">
+	 	<nav>
+			<div class="btn">
+		    </div>
+		    <img src="images/crux-logo.png" id="logo"></a>
+			<ul id="navitems">
+			    <li><a href="index.html">Home</a></li>
+			    <li><a href="download.html">Download</a></li>
+			    <li><a href="fileformats.html">File Formats</a></li>
+		        <li><a href="http://groups.google.com/group/crux-users">Contact</a></li> <!--Link to google support board-->
+		    </ul>
+		</nav>
+		<div id="content">
+		<!-- START CONTENT -->
+		<h2>Crux Frequently Asked Questions</h2>
+
+		<ol>
+
+		<li>
+		<b>What is the difference between Tide and Comet?</b></li>
+
+		<p>
+		The differences are as follows:
+		<ul>
+		<li>
+		Tide converts your FASTA file to an index (either as part
+		of <code>tide-search</code> or by using <code>tide-index</code>),
+		whereas Comet does searching directly from the FASTA file.  The
+		indexing step allows Tide to pre-compute many parts of the search
+		procedure, thereby making the search faster.
+		<li>
+		Comet is multi-threaded, whereas Tide runs on a single thread.  On
+		multi-threaded CPUs, this feature can offset the speed difference
+		between Comet and Tide.</li>
+		<li>
+		For each match, Comet reports the <i>total</i> number of candidate
+		peptides, whereas Tide reports the number of <i>distinct</i> candidate
+		peptides.</li>
+		<li>
+		Comet provides an option to report an E-value in addition to the raw
+		XCorr score, whereas Tide provides an option to report a p-value.  The
+		methods for computing these two statistical confidence measures are
+		quite different.</li>
+		<li>
+		Some options are available only in Comet (various options related to
+		different types of theoretical fragment ions, max_fragment_charge,
+		nucleotide_reading_frame, etc.) whereas others are only available in
+		Tide (e.g., keep-terminal-aminos).</li>
+		</ul></p>
+
+		<p>
+		Overall, for a given set of spectra, the XCorr scores computed by
+		Comet and by Tide should be quite similar to one another, assuming
+		that the various search parameters are set similarly between the two
+		algorithms.  Below is a table summarizing the correspondence between
+		the two sets of parameters.  The specified values will yield nearly
+		identical XCorr scores from the two search engines.</p>
+
+		<table border="1">
+		<tr>
+		<td>
+		<b>Tide parameter</b></td>
+		<td>
+		<b>Tide value</b></td>
+		<td>
+		<b>Comet parameter</b></td>
+		<td>
+		<b>Comet value</b></td>
+		</tr>
+
+		<tr>
+		<td>
+		enzyme</td>
+		<td>
+		trypsin</td>
+		<td>
+		search_enzyme_number</td>
+		<td>
+		1</td>
+		</tr>
+
+		<tr>
+		<td>
+		digestion</td>
+		<td>
+		full-digest</td>
+		<td>
+		num_enzyme_termini</td>
+		<td>
+		2</td>
+		</tr>
+
+		<tr>
+		<td>
+		missed-cleavages</td>
+		<td>
+		0</td>
+		<td>
+		allowed_missed_cleavage</td>
+		<td>
+		0</td>
+		</tr>
+
+		<tr>
+		<td>
+		min-peaks</td>
+		<td>
+		10</td>
+		<td>
+		minimum_peaks</td>
+		<td>
+		10</td>
+		</tr>
+
+		<tr>
+		<td>
+		precursor-window</td>
+		<td>
+		3</td>
+		<td>
+		peptide_mass_tolerance</td>
+		<td>
+		3</td>
+		</tr>
+
+		<tr>
+		<td>
+		precursor-window-type</td>
+		<td>
+		mass</td>
+		<td>
+		peptide_mass_units</td>
+		<td>
+		0</td>
+		</tr>
+
+		<tr>
+		<td>
+		monoisotopic-precursor</td>
+		<td>
+		T</td>
+		<td>
+		mass_type_parent</td>
+		<td>
+		1</td>
+		</tr>
+
+		<tr>
+		<td>
+		fragment-mass</td>
+		<td>
+		mono</td>
+		<td>
+		mass_type_fragment</td>
+		<td>
+		1</td>
+		</tr>
+
+		<tr>
+		<td>
+		decoy-format</td>
+		<td>
+		peptide-reverse</td>
+		<td>
+		N/A</td>
+		<td>
+		&nbsp;</td>
+		</tr>
+
+		<tr>
+		<td>
+		num-decoys-per-target</td>
+		<td>
+		1</td>
+		<td>
+		N/A</td>
+		<td>
+		&nbsp;</td>
+		</tr>
+
+		<tr>
+		<td>
+		keep-terminal-aminos</td>
+		<td>
+		C</td>
+		<td>
+		N/A</td>
+		<td>
+		&nbsp;</td>
+		</tr>
+
+		<tr>
+		<td>
+		concat</td>
+		<td>
+		T</td>
+		<td>
+		decoy_search</td>
+		<td>
+		1</td>
+		</tr>
+
+		<tr>
+		<td>
+		top-match</td>
+		<td>
+		5</td>
+		<td>
+		num_results, num_output_lines</td>
+		<td>
+		6, 5</td>
+		</tr>
+
+		<tr>
+		<td>
+		remove-precursor-peak</td>
+		<td>
+		T</td>
+		<td>
+		remove_precursor_peak</td>
+		<td>
+		1</td>
+		</tr>
+
+		<tr>
+		<td>
+		remove-precursor-tolerance</td>
+		<td>
+		15</td>
+		<td>
+		remove_precursor_tolerance</td>
+		<td>
+		15</td>
+		</tr>
+
+		<tr>
+		<td>
+		use-flanking-peaks</td>
+		<td>
+		F</td>
+		<td>
+		theoretical_fragment_ions</td>
+		<td>
+		1</td>
+		</tr>
+
+		<tr>
+		<td>
+		use-neutral-loss-peaks</td>
+		<td>
+		F</td>
+		<td>
+		use_NL_ions</td>
+		<td>
+		F</td>
+		</tr>
+
+		<tr>
+		<td>
+		fragment-bin-width</td>
+		<td>
+		1.0005079</td>
+		<td>
+		fragment_bin_tol</td>
+		<td>
+		1.0005079</td>
+		</tr>
+
+		<tr>
+		<td>
+		mz-bin-offset</td>
+		<td>
+		0.4</td>
+		<td>
+		fragment_bin_offset</td>
+		<td>
+		0.4</td>
+		</tr>
+
+		<tr>
+		<td>
+		min-mass, max-mass</td>
+		<td>
+		200, 7200</td>
+		<td>
+		digest_mass_range</td>
+		<td>
+		200 7200</td>
+		</tr>
+
+		<tr>
+		<td>
+		N/A</td>
+		<td>
+		&nbsp;</td>
+		<td>
+		max_fragment_charge</td>
+		<td>
+		2</td>
+		</tr>
+
+		</table>
+
+		<p>
+		Here is a scatter plot of XCorr scores from a search run with the
+		parameters listed above:</p>
+
+		<img src="images/stored-xcorr.png">
+
+
+		<li>
+		<b>What operating systems does Crux work with?</b></li>
+
+		<p>
+		Crux is written in C++, so in principle it should work on virtually
+		any modern operating system.  We provide pre-compiled binaries for
+		Linux, MacOS and Windows.</p>
+
+		<li>
+		<b>How does Crux compute the masses of peptides and peptide
+		  fragments?</b></li>
+
+		<p>
+		<ul>
+
+		<li>
+		Each amino acid can be characterized either by its monoisotopic mass,
+		which is the mass of the most abundant isotopic form of that amino acid,
+		or the average mass, which is a weighted average of the masses of all
+		the isotopic forms.  By default, Crux uses average mass to calculate
+		peptide masses, though this behavior can be controlled by the
+		<code>isotopic-mass</code> option to <code>tide-index</code> and the
+		<code>mass_type_parent</code> option to <code>comet</code>.  For
+		fragments, <code>tide-search</code> always uses the monoisotopic mass,
+		whereas <code>comet</code> allows selection
+		via <code>mass_type_fragment</code>.</li>
+
+		<li>
+		The neutral mass of a peptide is not the sum of the masses of its
+		amino acids.  The N-terminus and C-terminus of the peptide together
+		contribute an additional water molecule, whose mass is either
+		18.010564684 Da (monoisotopic) or 18.0153 Da (average).</li>
+		<li>
+		A charged peptide has an additional approximately 1 Da mass for each
+		charge, corresponding to the mass of a hydrogen atom.  The exact mass
+		to be added depends on whether we are using the monoisotopic mass
+		(1.007825035) or average mass (1.00794).</li>
+
+		<li>When a peptide fragments, each b-ion will have a mass equal to
+		the sum of its amino acids plus one hydrogen for each charge on the
+		fragment, while each y-ion will have a mass equal to the sum of its
+		amino acids plus water plus one hydrogen for each charge on the
+		fragment.</li>
+
+		<li>
+		By default, both Tide and Comet add a static modification of
+		57.021464 Da to all cysteines.  This is because in most protein
+		preparation protocols the peptides are alkylated with iodoacetamide,
+		resulting in carbamidomethylation of cysteine. The alkylation step
+		prevents the reformation of disulfide bonds.  Other alykylation
+		reagents may be used, in which case the appropriate mass shift can be
+		specified with the <code>C=[mass]</code> option
+		to <code>tide-index</code> or the <code>add_C_cysteine</code> option
+		to <code>comet</code>.</li>
+
+		</ul>
+		</p>
+
+		<li>
+		<b>How does Crux assign fragment masses to bins prior to computing
+		the XCorr score?</b>
+		</li>
+
+		<p>The XCorr score is essentially a dot product between a preprocessed
+		form of the observed spectrum and the theoretical spectrum derived
+		from the candidate peptide. In order to compute this dot product, the
+		masses of the fragments in both spectra are assigned to discrete mass
+		bins. This can be viewed as a form of rounding, but with more control
+		over the discrete masses. Two parameters, <code>mz-bin-width</code> and
+		<code>mz-bin-offset</code>, control the size and location of the bins,
+		and are used to convert fragment masses according to this formula:</p>
+
+		<p align=center>binned mass = floor( ( original mass / <code>bin-width</code> ) + 1.0 - <code>bin-offset</code> )</p>
+
+		<p>
+		The default values <code>bin-width</code>=1.0005079
+		and <code>bin-offset</code>=0.40 are suitable for most low-resolution
+		datasets.
+		</p>
+
+		<li>
+		<b>How does Crux estimate the possible charge states of the peptides when the
+		   information is not provided within the spectra file?</b>
+		</li>
+
+		<p>
+		Crux calculates the ratio of two values: (1) the sum of the
+		intensities from the peaks in the fragmentation spectrum whose m/z is
+		greater than the precursor m/z versus (2) the sum of the peaks whose
+		m/z is smaller than the precursor.  If this ratio is greater than or
+		equal to a calculated threshold based upon the location of the
+		precursor m/z and the max m/z in the spectrum, Crux then assigns both
+		+2 and +3 as possible charge states to the spectrum.  Otherwise, Crux
+		assigns +1 as the charge state.  The algorithm is based upon the
+		observation that fragmentation spectra collected from +1 peptides
+		should have no peaks above the precursor m/z.  In contrast, a peptide
+		of charge state greater than +1 can generate fragment ions of lower
+		charge whose m/z is greater than the precursor m/z, thus indicating a
+		multiply charged precursor.</p>
+
+		<p>
+		Note that, in addition, <code>comet</code> includes
+		a <code>precursor_charge</code> parameter.  If the first number in
+		this parameter is set to 0, i.e., <code>precursor_charge = 0 0</code>,
+		then the charge state rule above is applied.  However, if a user
+		specifies a precursor charge range, i.e., <code>precursor_charge = 1
+		5</code>, then Comet will search every spectrum through this range of
+		assumed charge states for every spectrum whose precursor charge
+		is unknown.</p>
+
+		<li>
+		<b>How does Crux create peptides from the given set of proteins in the
+		  database?</b></li>
+
+		<p>
+		The options <code>enzyme</code> (for <code>tide-index</code>)
+		and <code>search_enzyme_number</code> (for <code>comet</code>) define
+		the enzymatic cleavage rules.  When <code>enzyme=no-enzyme</code>
+		or <code>search_enzyme_number=0</code>, then any subsequence of a
+		protein may be considered as a candidate peptide. For other values of
+		these parameters, the residues at the termini of the protein
+		subsequence must follow specific rules.  For example, trypsin requires
+		that the preceeding residue must be an R or K and the following
+		residue may not be a P.</p>
+
+		<p>
+		When <code>digestion=full-digest</code> (for <code>tide-index</code>)
+		or <code>num_enzyme_termini=2</code> (for <code>comet</code>), then
+		these rules must be true at both ends of the peptide.  When it
+		is <code>digestion=partial-digest</code>
+		or <code>num_enzyme_termini=1</code>, then the rules must be true at
+		at least one of the ends.  The <code>missed-cleavages</code>
+		and <code>allowed_missed_cleavages</code> parameters control the
+		maximum number of cleavage sites that may lie within the peptide
+		sequence.</p>
+
+		<p>
+		Note that if <code>enzyme=no-enzyme</code>
+		or <code>search_enzyme_number=0</code>, then
+		the <code>digestion</code>, <code>num_enzyme_termini</code>, <code>missed-cleavages</code>
+		and <code>allowed_missed_cleaveages</code> parameters are not used.</p>
+
+
+		<li>
+		<b>How does Crux select candidate peptides from the database?</b></li>
+
+		<p>
+		The Crux search tools (<code>tide-index</code> and <code>comet</code>)
+		select candidate peptides for each spectrum based on its precursor
+		singly charged mass (m+h) or the mass-to-charge (m/z) and an assumed
+		charge state (specified in the input file).  If the m+h and charge is
+		provided in the input file (e.g., from the Z lines of an MS2 file),
+		then the precursor mass is calculated from the m+h minus the mass of a
+		proton. Otherwise, the precursor mass is calculated from the precursor
+		m/z and an assumed charge.  A mass window is defined in one of three
+		ways based on the
+		<code>precursor-window-type</code> and <code>precursor-window</code>
+		options.</p>
+
+		<ul>
+		<li>  
+		If the <code>precursor-window-type</code> is set to <code>mz</code>,
+		then the window is calculated as spectrum precursor m/z &plusmn;
+		<code>precursor-window</code> and the resulting range is converted
+		to mass using the charge state with the formula:<br>  
+		Mass=m/z * charge - MASS_PROTON * charge, where MASS_PROTON=1.00727646677
+		</li>
+
+		<li>
+		If the <code>precursor-window-type</code> is set to <code>mass</code>, then
+		the window is defined as the precursor mass &plusmn; 
+		<code>precursor-window</code>.
+		</li>
+
+		<li>
+		If the <code>precursor-window-type</code> is set to <code>ppm</code>
+		(parts per million), then the window spans from the precursor mass /
+		(1.0 + window * 1e-6) to precursor mass / (1.0 - window * 1e-6).</li>
+		</ul>
+
+		<p>
+		Candidate peptides are those whose mass falls within the defined
+		window.  The peptide mass is computed as the sum of the average amino
+		acid masses plus 18 Da for the terminal OH group.  Candidate peptides
+		can also be constrained by minimum and maximum allowed length. </p>
+
+		<li>
+		<b>How can I search my ITRAQ data?</b></li>
+
+		<p>
+		ITRAQ and other tagged seaches can be done by using terninal
+		modifications.  For example, if your tag has a mass of 304.199040, add
+		these lines to your parameter file:
+		<pre>
+nmod=304.199040:-1
+cmod=304.199040:-1
+		</pre>
+		<p>
+		Crux will then generate peptides with this modification (+304.199904)
+		on the n-terminus, the c-terminus and on both termini.  The -1 in the
+		option means to add the modification regardless of where the peptide
+		terminus lies relative to the rest of the protein.
+
+		<li>
+		<b>What happens if I decrease the size of the precursor window during
+		searching?</b></li>
+
+		<p>
+		Reducing the precursor mass tolerance has two main benefits.  One is
+		reduced search time, and the other is improved statistical power to
+		detect matches.  With a smaller window, fewer candidates are tested
+		against a spectrum.  As a result, the statistical confidence measure
+		calculated after multiple testing correction will be more significant.
+		Of course, the flipside is that if you make the precursor window too
+		small, then you may end up throwing out correct identifications.
+		Control over the size of the window is provided by the using
+		the <code>precursor-window</code> and
+		<code>precursor-window-type</code> options.</p>
+
+		<li>
+		  <b>How can I run many jobs in parallel?</b>
+
+
+		  <p>
+		In combination with GNU parallel, parallelization of Crux can be
+		achieved rather painlessly. For example, to run tide-search on a set
+		of spectrum files, you can just get your spectra files into a filelist:</p>
+
+		<pre>
+find . -name "*.mzXML" &gt; file.list
+		</pre>
+
+		<p>
+		Then, with a bit of bash magic, run parallel as follows (assuming
+		there are 100 files in file.list):</p>
+
+		<pre>
+parallel --xapply crux tide-search &lt;options&gt; --fileroot {1} {2} database.db ::: $(seq 1 100) ::: $(cat file.list)
+		</pre>
+
+		  <p>
+		    <i>Thanks to Ben Temperton for this answer.</i></p>
+		    
+		<li>
+		<b>How can I contribute to Crux?</b></li>
+
+		<p>
+		Patches implementing new features can be emailed to the development
+		team at crux-support@uw.edu for review and inclusion in subsequent
+		releases of Crux.</p>
+
+		<li>
+		<b>Where does the name "Crux" come from?</b></li>
+
+		<p>
+		Thin air.  The name is not an acronym or a reference to anything in
+		particular.</p>
+
+		</ol>
+		<!-- END CONTENT -->
+		</div>
+	</div>
+
+<footer class="site-footer">
+	<div id="centerfooter">
+		<div class="footerimportantlinks">
+			<img src="images/linkicon.png" style="width:16px; height:16px"><h3>Important links</h3>
+			<ul>
+				<li><a href="faq.html">Crux <strong>FAQ</strong></a></li>
+				<li><a href="glossary.html">Glossary of terminology</a></li>
+				<li><a href="http://scholar.google.com/citations?hl=en&user=Rw9S1HIAAAAJ">Google Scholar profile</a></li>
+				<li><a href="https://sourceforge.net/projects/cruxtoolkit/">SourceForge Issue's list</a></li>
+				<li><a href="release-notes.html">Release Notes</a></li>
+				<li><a href="https://mailman1.u.washington.edu/mailman/listinfo/crux-users" title="Receive announcements of new versions">Join the mailing list</a></li>
+				<li><a href="http://www.apache.org/licenses/LICENSE-2.0">Apache license</a></li>
+				<li><a href="http://groups.google.com/group/crux-users">Support Board</a></li>
+			</ul>
+		</div>
+		<div class="footerimportantlinks tutoriallinks">
+			<img src="images/tutorialicon.png" style="height:16px"><h3>Tutorials</h3>
+			<ul>
+				<li><a href="tutorials/install.html">Installation</a></li>
+				<li><a href="tutorials/gettingstarted.html">Getting started with Crux</a></li>
+				<li><a href="tutorials/search.html">Running a simple search using Tide and Percolator</a></li>
+				<li><a href="tutorials/customizedsearch.html">Customization and search options</a></li>
+				<li><a href="tutorials/spectralcounts.html">Using spectral-counts</a></li>
+			</ul>
+		</div>
+		<div id="footertext">
+			<p>
+				The original version of Crux was written by Chris Park and Aaron Klammer
+				under the supervision
+				of <a href="http://www.gs.washington.edu/faculty/maccoss.htm">Prof. Michael
+				MacCoss</a>
+				and <a href="http://noble.gs.washington.edu/~noble">Prof. William
+				Stafford Noble</a> in the Department of Genome Sciences at the
+				University of Washington, Seattle.  Website by <a href="http://www.yuvalboss.com/">Yuval Boss</a>. 
+				<br />The complete list of contributors
+				can be found <a href="contributors.html">here</a>.
+				<br />
+				<br />
+				Maintenance and development of Crux is funded by the <a href="https://www.nih.gov/">National Institutes of Health</a> awards R01 GM096306 and P41 GM103533. 
+			</p>
+		</div>
+	</div>
+</footer>
+	
+</body>
+
+</html>

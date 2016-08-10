@@ -28,6 +28,8 @@ class IonConstraint {
     ///< maximum charge of the ions, cannot exceed the parent peptide's charge
   ION_TYPE_T ion_type_; 
     ///< the ion types the peptide series should include
+    
+  bool ion_types_[NUMBER_ION_TYPES];  
   bool precursor_ion_; 
     ///< does a precursor-ion satisfy this constraint
   int min_charge_; 
@@ -143,8 +145,16 @@ class IonConstraint {
   /**
    * \returns ION_TYPE for this constraint
    */
-  ION_TYPE_T getIonType();
+  //ION_TYPE_T getIonType();
 
+  void setUseIonType(
+    ION_TYPE_T ion_type,
+    bool val
+  );
+  
+  bool getUseIonType(
+    ION_TYPE_T ion_type
+  );
 
   /**
    * Sets the modification count

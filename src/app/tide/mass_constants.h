@@ -17,8 +17,8 @@
 #define BIN_WIDTH 1.0005079
 #define BIN_OFFSET 0.68
 typedef unsigned int FixPt; // 32-bit fixed-point arithmetic
-   // ALTERNATIVE unsigned long long int; // 64 bits
-   // ALTERNATIVE unsigned long int; // machine register size
+  // ALTERNATIVE unsigned long long int; // 64 bits
+  // ALTERNATIVE unsigned long int; // machine register size
 
 namespace pb { class ModTable; }
 
@@ -98,10 +98,10 @@ class MassConstants {
     mod_coder_.DecodeMod(code, aa_index, &unique_delta_index);
     *delta = unique_deltas_[unique_delta_index];
   }
-  static unsigned int mass2bin(double mass, int charge = 1){
+  static unsigned int mass2bin(double mass, int charge = 1) {
     return (unsigned int)((mass + (charge - 1)*proton)/(charge*bin_width_) + 1.0 - bin_offset_);
   }
-  static double bin2mass(int bin, int charge = 1){
+  static double bin2mass(int bin, int charge = 1) {
     return (bin - 1.0 + bin_offset_) * charge*bin_width_ + (charge - 1)*proton;
   }
 

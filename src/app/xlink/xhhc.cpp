@@ -10,6 +10,7 @@
 #include "io/DelimitedFile.h"
 #include "model/DatabaseProteinIterator.h"
 #include "model/ProteinPeptideIterator.h"
+#include "util/Params.h"
 
 using namespace std;
 using namespace Crux;
@@ -26,7 +27,7 @@ void get_linear_peptides(
   PeptideConstraint* peptide_constraint
   ) {
 
-  int max_missed_cleavages = get_int_parameter("missed-cleavages");
+  int max_missed_cleavages = Params::GetInt("missed-cleavages");
 
   ProteinPeptideIterator* peptide_iterator = NULL;
   Protein* protein;
@@ -50,14 +51,14 @@ void get_linear_peptides(
       free(seq);
 
       if (peptide->getMissedCleavageSites() <= max_missed_cleavages) {
-        carp(CARP_DEBUG, "Adding linear peptide:%s",peptide->getSequence());
+        carp(CARP_DEBUG, "Adding linear peptide:%s", peptide->getSequence());
         peptides.insert(sequence);
 
         map<string, vector<Peptide*> >::iterator find_iter;
 
         find_iter = sequence_peptide_map.find(sequence);
 
-        carp(CARP_DEBUG,"Adding to map:%s,",sequence.c_str());
+        carp(CARP_DEBUG, "Adding to map:%s,", sequence.c_str());
 
         if (find_iter == sequence_peptide_map.end()) {
           vector<Peptide*> peptide_vector;
@@ -90,7 +91,7 @@ void free_peptides() {
        map_iter != sequence_peptide_map.end();
        ++map_iter) {
     vector<Peptide*>& peptides = map_iter -> second;
-    for (unsigned int i=0;i<peptides.size();i++) {
+    for (unsigned int i = 0; i < peptides.size(); i++) {
       delete peptides[i];
     }
   }
@@ -102,8 +103,8 @@ void get_linkable_peptides(
         set<XLinkablePeptide>& peptides, 
         XLinkBondMap& bondmap,
   DatabaseProteinIterator* protein_iterator,
-  PeptideConstraint* peptide_constraint) 
-{
+  PeptideConstraint* peptide_constraint) {
+
   ProteinPeptideIterator* peptide_iterator = NULL;
   Protein* protein;
   Peptide* peptide;
@@ -127,7 +128,7 @@ void get_linkable_peptides(
 
       find_iter = sequence_peptide_map.find(sequence);
 
-      carp(CARP_DEBUG,"Adding to map:%s",sequence.c_str());
+      carp(CARP_DEBUG, "Adding to map:%s", sequence.c_str());
 
       if (find_iter == sequence_peptide_map.end()) {
         vector<Peptide*> peptide_vector;
@@ -154,7 +155,7 @@ void print_precursor_count(vector<LinkedPeptide>& all_ions) {
   int dead_end_products = 0;
   int xlink_products = 0;
 
-  for (unsigned int idx=0;idx<all_ions.size();idx++) {
+  for (unsigned int idx = 0; idx < all_ions.size(); idx++) {
     LinkedPeptide& current = all_ions[idx];
     if (current.isLinear())
       linear_peptides++;
@@ -165,13 +166,13 @@ void print_precursor_count(vector<LinkedPeptide>& all_ions) {
     else if (current.isCrossLinked())
       xlink_products++;
     else
-      carp(CARP_ERROR,"Unknown product");
+      carp(CARP_ERROR, "Unknown product");
   }
   
-  carp(CARP_INFO,"Linear Peptides:%d",linear_peptides);
-  carp(CARP_INFO,"Inter/Intra Xlinks:%d",xlink_products);
-  carp(CARP_INFO,"Dead End Products:%d",dead_end_products);
-  carp(CARP_INFO,"Self Loop Products:%d",self_loop_products);
+  carp(CARP_INFO, "Linear Peptides:%d", linear_peptides);
+  carp(CARP_INFO, "Inter/Intra Xlinks:%d", xlink_products);
+  carp(CARP_INFO, "Dead End Products:%d", dead_end_products);
+  carp(CARP_INFO, "Self Loop Products:%d", self_loop_products);
 
 }
 
@@ -180,27 +181,27 @@ void find_all_precursor_ions(
   vector<LinkedPeptide>& all_ions
   ) {
 
-  string database_file = get_string_parameter("protein fasta file");
+  string database_file = Params::GetString("protein fasta file");
   
-  carp(CARP_DEBUG,"find_all_precursor_ions: start()");
+  carp(CARP_DEBUG, "find_all_precursor_ions: start()");
   Database* db = new Database(database_file, false);
-  carp(CARP_DEBUG,"peptide constraint");
+  carp(CARP_DEBUG, "peptide constraint");
   PeptideConstraint* peptide_constraint = 
     PeptideConstraint::newFromParameters();
   // add two to account for a self loop that prevents two cleavages
-  peptide_constraint->setNumMisCleavage(get_int_parameter("missed-cleavages") + 2);
+  peptide_constraint->setNumMisCleavage(Params::GetInt("missed-cleavages") + 2);
 
-  carp(CARP_DEBUG,"protein iterator");
+  carp(CARP_DEBUG, "protein iterator");
   DatabaseProteinIterator* protein_iterator = new DatabaseProteinIterator(db);
 
   set<XLinkablePeptide> peptides;
-  carp(CARP_DEBUG,"get_linkable_peptides");
+  carp(CARP_DEBUG, "get_linkable_peptides");
   XLinkBondMap bondmap;
   get_linkable_peptides(peptides, bondmap, protein_iterator, peptide_constraint);
   carp(CARP_DEBUG, "add_linked_peptides");
   add_linked_peptides(all_ions, peptides, bondmap, 1);
   
-  if (get_boolean_parameter("xlink-include-linears")) {
+  if (Params::GetBool("xlink-include-linears")) {
     delete protein_iterator;
     protein_iterator = new DatabaseProteinIterator(db);
     set<string> linear_peptides;
@@ -222,10 +223,10 @@ void find_all_precursor_ions(
   delete protein_iterator;
 
 
-  carp(CARP_DEBUG,"find_all_precursor_ions: done()");
+  carp(CARP_DEBUG, "find_all_precursor_ions: done()");
 
   //TODO - sort by increasing mass.
-  IF_CARP(CARP_DEBUG,print_precursor_count(all_ions));
+  IF_CARP(CARP_DEBUG, print_precursor_count(all_ions));
 }
 
 
@@ -240,10 +241,10 @@ bool hhc_estimate_weibull_parameters_from_xcorrs(
   FLOAT_T* correlation,
   Spectrum* spectrum,
   int charge
-  ){
+  ) {
 
   // check that we have the minimum number of matches
-  if( num_scores < MIN_WEIBULL_MATCHES ){
+  if( num_scores < MIN_WEIBULL_MATCHES ) {
     carp(CARP_DETAILED_INFO, "Too few psms (%i) to estimate "
          "p-value parameters for spectrum %i, charge %i",
          num_scores, spectrum->getFirstScan(), charge);
@@ -256,7 +257,7 @@ bool hhc_estimate_weibull_parameters_from_xcorrs(
 
   // use only a fraction of the samples, the high-scoring tail
   // this parameter is hidden from the user
-  double fraction_to_fit = get_double_parameter("fraction-top-scores-to-fit");
+  double fraction_to_fit = Params::GetDouble("fraction-top-scores-to-fit");
   assert( fraction_to_fit >= 0 && fraction_to_fit <= 1 );
   int num_tail_samples = (int)(num_scores * fraction_to_fit);
   carp(CARP_DEBUG, "Estimating Weibull params with %d psms (%.2f of %i)",
@@ -299,10 +300,10 @@ void add_linked_peptides(
 
     //vector<Peptide*>& crux_peptides = get_peptides_from_sequence(seqA);
 
-    int max_missed_cleavages = get_int_parameter("missed-cleavages");
+    int max_missed_cleavages = Params::GetInt("missed-cleavages");
     int seqA_missed_cleavages = pepA.getMissedCleavageSites();
-    carp(CARP_DEBUG,"seqA:%s %i %i",seqA.c_str(), pepA.numLinkSites(), seqA_missed_cleavages);
-    if (get_boolean_parameter("xlink-include-deadends") && 
+    carp(CARP_DEBUG, "seqA:%s %i %i", seqA.c_str(), pepA.numLinkSites(), seqA_missed_cleavages);
+    if (Params::GetBool("xlink-include-deadends") && 
       seqA_missed_cleavages <= (max_missed_cleavages+1)) {
       
       for (size_t link_idx = 0;link_idx < pepA.numLinkSites();link_idx++) {
@@ -317,7 +318,7 @@ void add_linked_peptides(
       }
     } /* xlink-include-dead-ends */
 
-    if (get_boolean_parameter("xlink-include-selfloops") && 
+    if (Params::GetBool("xlink-include-selfloops") && 
         (seqA_missed_cleavages <= (max_missed_cleavages+2))) {
       
       for (size_t link_idx1 = 0;link_idx1 < pepA.numLinkSites()-1;link_idx1++) {

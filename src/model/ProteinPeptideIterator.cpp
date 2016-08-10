@@ -4,6 +4,7 @@
  */
 
 #include "ProteinPeptideIterator.h"
+#include "util/Params.h"
 
 using namespace std;
 using namespace Crux;
@@ -244,7 +245,7 @@ void ProteinPeptideIterator::selectPeptides(
  */
 void ProteinPeptideIterator::prepare()
 {
-  prepareMc(get_int_parameter("missed-cleavages"));
+  prepareMc(Params::GetInt("missed-cleavages"));
 }
 
 void ProteinPeptideIterator::prepareMc(
@@ -435,8 +436,8 @@ ProteinPeptideIterator::ProteinPeptideIterator(
 
   // estimate array size and reserve space to avoid resizing vector
   int max_peptides = countMaxPeptides(protein->getLength(), 
-                                        get_int_parameter("min-length"),
-                                        get_int_parameter("max-length"));
+                                      Params::GetInt("min-length"),
+                                      Params::GetInt("max-length"));
   nterm_cleavage_positions_->reserve(max_peptides); 
   peptide_lengths_->reserve(max_peptides);
   peptide_masses_->reserve(max_peptides);
@@ -484,11 +485,9 @@ Crux::Peptide* ProteinPeptideIterator::next()
   int cleavage_idx = current_cleavage_idx_;
   int current_start = (*nterm_cleavage_positions_)[cleavage_idx];
   int current_length = (*peptide_lengths_)[cleavage_idx];
-  FLOAT_T peptide_mass = (*peptide_masses_)[cleavage_idx];
 
   // create new peptide
-  Peptide* peptide = new Peptide(current_length, peptide_mass, 
-                                   protein_, current_start);//, peptide_type);
+  Peptide* peptide = new Peptide(current_length, protein_, current_start);
   // update position of iterator
   ++current_cleavage_idx_;
 

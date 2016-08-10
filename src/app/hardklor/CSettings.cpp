@@ -2,7 +2,6 @@
 #include <iostream>
 #include <cstdlib>
 #include <cstdio>
-#include <cstring>
 #include <fstream>
 using namespace std;
 

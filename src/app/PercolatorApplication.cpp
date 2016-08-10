@@ -55,11 +55,58 @@ int PercolatorApplication::main(int argc, char** argv) {
     get_search_result_paths(input_pin, result_files);
 
     input_pin = make_file_path("make-pin.pin");
-    carp(CARP_INFO, "Running make-pin");
-    if (MakePinApplication::main(result_files) != 0 || !FileUtils::Exists(input_pin)) {
-      carp(CARP_FATAL, "make-pin failed. Not running Percolator.");
+
+    vector<string>::const_iterator fileIter = result_files.begin();
+    if (StringUtils::IEndsWith(*fileIter, ".pin")) {
+      if (FileUtils::Exists(input_pin)) {
+        if (Params::GetBool("overwrite")) {
+          FileUtils::Remove(input_pin);
+        } else {
+          carp(CARP_FATAL, "The file '%s' already exists and cannot be overwritten. "
+               "Use --overwrite T to replace or choose a different output file name",
+               input_pin.c_str());
+        }
+      }
+      FileUtils::Copy(*fileIter, input_pin);
+      string headers;
+      fstream out(input_pin.c_str());
+      if (!out.good()) {
+        carp(CARP_FATAL, "Filestream error '%s'", input_pin.c_str());
+      }
+      getline(out, headers);
+      out.seekp(0, ios_base::end);
+      for (fileIter++; fileIter != result_files.end(); fileIter++) {
+        if (!StringUtils::IEndsWith(*fileIter, ".pin")) {
+          FileUtils::Remove(input_pin);
+          carp(CARP_FATAL, "Cannot mix .pin with non-pin files");
+        }
+        ifstream in(fileIter->c_str());
+        if (!in.good()) {
+          FileUtils::Remove(input_pin);
+          carp(CARP_FATAL, "Error opening file '%s' for reading", fileIter->c_str());
+        }
+        string inLine;
+        getline(in, inLine);
+        if (headers != inLine) {
+          FileUtils::Remove(input_pin);
+          carp(CARP_FATAL, "Headers in pin file '%s' were '%s', but expected '%s'",
+               fileIter->c_str(), inLine.c_str(), headers.c_str());
+        }
+        while (!in.eof()) {
+          getline(in, inLine);
+          out << inLine;
+          if (in.peek() != EOF) {
+            out << endl;
+          }
+        }
+      }
+    } else {
+      carp(CARP_INFO, "Converting input to pin format.");
+      if (MakePinApplication::main(result_files) != 0 || !FileUtils::Exists(input_pin)) {
+        carp(CARP_FATAL, "make-pin failed. Not running Percolator.");
+      }
+      carp(CARP_INFO, "File conversion complete.");
     }
-    carp(CARP_INFO, "Finished make-pin.");
   }
   return main(input_pin);
 }
@@ -140,11 +187,15 @@ int PercolatorApplication::main(
     }
   }
 
-  perc_args_vec.push_back("-p");
-  perc_args_vec.push_back(Params::GetString("c-pos"));
+  if (!Params::IsDefault("c-pos")) {
+    perc_args_vec.push_back("-p");
+    perc_args_vec.push_back(Params::GetString("c-pos"));
+  }
  
-  perc_args_vec.push_back("-n");
-  perc_args_vec.push_back(Params::GetString("c-neg"));
+  if (!Params::IsDefault("c-neg")) {
+    perc_args_vec.push_back("-n");
+    perc_args_vec.push_back(Params::GetString("c-neg"));
+  }
  
   perc_args_vec.push_back("--trainFDR");
   perc_args_vec.push_back(Params::GetString("train-fdr"));
@@ -197,7 +248,7 @@ int PercolatorApplication::main(
   }
 
   /* --doc option disabled, need retention times in pin file
-  int doc_parameter = get_int_parameter("doc");
+  int doc_parameter = Params::GetInt("doc");
   if(doc_parameter >= 0) {
     perc_args_vec.push_back("--doc");
     perc_args_vec.push_back(to_string(doc_parameter));
@@ -264,8 +315,8 @@ int PercolatorApplication::main(
       perc_args_vec.push_back(output_decoy_proteins);
     }
   }
-  
-   perc_args_vec.push_back(input_pin);
+
+  perc_args_vec.push_back(input_pin);
 
   /* build argv line */
 
@@ -399,7 +450,7 @@ string PercolatorApplication::getDescription() const {
     "output consists of ranked lists of PSMs, peptides and proteins. Peptides "
     "and proteins are assigned two types of statistical confidence estimates: "
     "q-values and posterior error probabilities.</p><p>The features used by "
-    "Percolator to represent each PSM are summarized <a href=\"features.html\">"
+    "Percolator to represent each PSM are summarized <a href=\"../file-formats/features.html\">"
     "here</a>.</p><p>Percolator also includes code from <a href=\""
     "http://noble.gs.washington.edu/proj/fido/\">Fido</a>, whch performs "
     "protein-level inference. The Fido algorithm is described in this article:"
@@ -491,22 +542,22 @@ vector< pair<string, string> > PercolatorApplication::getOutputs() const {
   vector< pair<string, string> > outputs;
   outputs.push_back(make_pair("percolator.target.proteins.txt",
     "a tab-delimited file containing the target protein matches. See "
-    "<a href=\"txt-format.html\">here</a> for a list of the fields."));
+    "<a href=\"../file-formats/txt-format.html\">here</a> for a list of the fields."));
   outputs.push_back(make_pair("percolator.decoy.proteins.txt",
     "a tab-delimited file containing the decoy protein matches. See "
-    "<a href=\"txt-format.html\">here</a> for a list of the fields."));
+    "<a href=\"../file-formats/txt-format.html\">here</a> for a list of the fields."));
   outputs.push_back(make_pair("percolator.target.peptides.txt",
     "a tab-delimited file containing the target peptide matches. See "
-    "<a href=\"txt-format.html\">here</a> for a list of the fields."));
+    "<a href=\"../file-formats/txt-format.html\">here</a> for a list of the fields."));
   outputs.push_back(make_pair("percolator.decoy.peptides.txt",
     "a tab-delimited file containing the decoy peptide matches. See "
-    "<a href=\"txt-format.html\">here</a> for a list of the fields."));
+    "<a href=\"../file-formats/txt-format.html\">here</a> for a list of the fields."));
   outputs.push_back(make_pair("percolator.target.psms.txt",
     "a tab-delimited file containing the target PSMs. See "
-    "<a href=\"txt-format.html\">here</a> for a list of the fields."));
+    "<a href=\"../file-formats/txt-format.html\">here</a> for a list of the fields."));
   outputs.push_back(make_pair("percolator.decoy.psms.txt",
     "a tab-delimited file containing the decoy PSMs. See "
-    "<a href=\"txt-format.html\">here</a> for a list of the fields."));
+    "<a href=\"../file-formats/txt-format.html\">here</a> for a list of the fields."));
   outputs.push_back(make_pair("percolator.params.txt",
     "a file containing the name and value of all parameters for the current "
     "operation. Not all parameters in the file may have been used in the "

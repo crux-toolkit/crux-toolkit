@@ -5,6 +5,7 @@
  *****************************************************************************/
 #include "ExtractColumns.h"
 #include "util/crux-utils.h"
+#include "util/Params.h"
 #include "util/StringUtils.h"
 
 using namespace std;
@@ -27,8 +28,8 @@ ExtractColumns::~ExtractColumns() {
  * main method for ExtractColumns
  */
 int ExtractColumns::main(int argc, char** argv) {
-  string delimited_filename = get_string_parameter("tsv file");
-  string column_names_string = get_string_parameter("column names");
+  string delimited_filename = Params::GetString("tsv file");
+  string column_names_string = Params::GetString("column names");
 
   char delimiter = get_delimiter_parameter("delimiter");
 
@@ -37,12 +38,12 @@ int ExtractColumns::main(int argc, char** argv) {
   vector<string> column_name_list = StringUtils::Split(column_names_string, ',');
 
   vector<int> column_indices;
-  for (unsigned int i=0;i<column_name_list.size();i++) {
+  for (unsigned int i = 0; i < column_name_list.size(); i++) {
     int col_idx = delimited_file.findColumn(column_name_list[i]);
     if (col_idx != -1) {
       column_indices.push_back(col_idx);
     } else {
-      carp(CARP_ERROR,"column not found:%s\n\n%s", 
+      carp(CARP_ERROR, "column not found:%s\n\n%s", 
         column_name_list[i].c_str(),
         delimited_file.getAvailableColumnsString().c_str());
       return(-1);
@@ -50,12 +51,12 @@ int ExtractColumns::main(int argc, char** argv) {
   }
 
   //print out the header if desired
-  if (get_boolean_parameter("header")) {
+  if (Params::GetBool("header")) {
     cout << column_name_list[0];
-    for (unsigned int col_idx = 1;col_idx<column_name_list.size();col_idx++) {
+    for (unsigned int col_idx = 1; col_idx < column_name_list.size(); col_idx++) {
       cout << delimiter << column_name_list[col_idx];
     }
-    cout<<endl;
+    cout << endl;
   }
 
   while(delimited_file.hasNext()) {
