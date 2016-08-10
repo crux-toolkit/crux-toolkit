@@ -72,6 +72,36 @@ with permission to access the project files for <code>Crux-Toolkit</code> is
 ssh -t crux-toolkit,cruxtoolkit@shell.sourceforge.net create
 </pre>
 After you've logged on, you'll be in your home directory.
+The general syntax for starting a Sourceforge shell with access to the project
+files is:
+<pre>
+ssh -t USER,PROJECT@shell.sourceforge.net create
+</pre>
+In the case of user <code>charlesegrant</code> connecting to project <code>Crux-Toolkit</code>
+this becomes:
+<pre>
+ssh -t charlesegrant,cruxtoolkit@shell.sourceforge.net create
+</pre>
+Sourceforge only uses lower case letters,
+and doesn't allow the character '-' in project directory names,
+so although the official name of the project is <code>Crux-Toolkit</code>,
+the project directory name is <code>cruxtoolkit</code>.
+The character '-' <b>is</b> allowed in user names,
+so the command to start a shell session for the user <code>crux-toolkit</code>
+with permission to access the project files for <code>Crux-Toolkit</code> is
+<pre>
+ssh -t crux-toolkit,cruxtoolkit@shell.sourceforge.net create
+</pre>
+After you've logged on, you'll be in your home directory.
+<h2>Backing up the Sourceforge SVN repository</h2>
+Sourceforge is susceptible to outages, and it's future is somewhat uncertain.
+Backups of the code repository and web site should be made periodically.
+The command to make a local copy of the Crux SVN repository is:
+<pre>
+rsync -av svn.code.sf.net::p/cruxtoolkit/ .
+</pre>
+The backup copy is currently stored in
+<code>/net/noble/vol1/home/cegrant/sourceforge-backup</code>
 <h2>Crux-Toolkit Web Site</h2>
 The Sourceforge web services for projects are described
 <a
@@ -79,50 +109,14 @@ href="https://sourceforge.net/p/forge/documentation/Project%20Web%20and%20Develo
 The directory containing the Crux-Toolkit project files is:
 <code>/home/project-web/cruxtoolkit/htdocs/</code>.
 <p/>
-The directory containing the log files for the Crux-Toolkit web site
-is <code> /home/logs-project-web/cruxtoolkit</code>
+Sourceforge no longer provides log files for the Crux web site.
+Our <code>doc/user/downbload/download.php</code> script
+does log downloads of the Crux distributions.
+The distrubution download log can be downloaded via <code>scp</code>:
+<pre>
+scp -r  crux-toolkit@web.sourceforge.net:/home/project-web/cruxtoolkit/htdocs/download/downloads.txt .
+</pre>
 <p/>
-The web directories for Crux-Toolkit can be accessed by a shell session as
-described above.
-They can also be via <code>scp</code> and <code>sftp</code>,
-but these use a different server name: <code>web.sourceforge.net</code>.
-<p/>
-For example, to download all the web log files for Crux-Toolkit, use
-the command:
-<pre>
-scp -r crux-toolkit@web.sourceforge.net:/home/logs-project-web/cruxtoolkit crux-toolkit-logs
-</pre>
-<h2>Analyzing the Crux-Toolkit Sourceforge web logs</h2>
-A report on the usage of the Crux-Toolkit Site can be generated
-using the <code>Awstats</code> package.
-This is available as a module on the Noble lab Linux boxes.
-The analysis requires several steps.
-<ol>
-<li>
-Download the Crux-Toolkit web log files:
-<pre>
-scp -r crux-toolkit@web.sourceforge.net:/home/logs-project-web/cruxtoolkit crux-toolkit-logs
-</pre>
-</li>
-<li>Load the <code>awstats</code> module:
-<pre>
-module load awstats
-</pre>
-</li>
-<li>
-Concatenate all the log files into a single log file:
-<pre>
-logresolvemerge.pl crux-toolkit-logs/*.log > crux-toolkit-master.log
-</pre>
-</li>
-<li>
-Create usage report from the log file:
-<pre>
-awstats.pl -config=cruxtoolkit.sourceforge.net -LogFile=crux-toolkit-master.log \
-  -update -output > crux-web-report.html
-</pre>
-</li>
-</ol>
 <h2>Interactions Between Crux-Toolkit Site on Sourceforge and Our TeamCity Server</h2>
 Our TeamCity server runs two scripts that interact with the Crux-Toolkit on Sourceforge.
 <ul>

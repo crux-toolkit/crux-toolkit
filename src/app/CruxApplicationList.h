@@ -26,7 +26,7 @@ class CruxApplicationList {
   /**
    * \brief Creates an application list with a listname
    */
-  CruxApplicationList(const char* list_name);
+  explicit CruxApplicationList(const char* list_name);
 
   
   /**

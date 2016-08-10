@@ -32,7 +32,7 @@
  */
 class PercolatorAdapter : public Caller {
 
-public:
+ public:
 
   /**
    * Constructor for PercolatorAdapter.
@@ -73,7 +73,7 @@ public:
 
   int run();
   
-protected:
+ protected:
     
   ProteinMatchCollection* collection_; ///< Collection containing all of the psm, peptide, and protein results.
   ProteinMatchCollection* decoy_collection_;  ///< Decoy ProteinMatchCollection
@@ -114,8 +114,7 @@ protected:
    */
   static MODIFIED_AA_T* getModifiedAASequence(
     PSMDescription* psm, ///< psm -in
-    std::string& seq, ///< sequence -out
-    FLOAT_T& peptide_mass ///< calculated mass of peptide with modifications -out
+    std::string& seq ///< sequence -out
     );
 };
 

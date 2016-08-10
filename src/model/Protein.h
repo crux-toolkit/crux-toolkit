@@ -169,10 +169,9 @@ class Protein {
 
   /**
    * Change the sequence of a protein to be a randomized version of
-   * itself.  The method of randomization is dependant on the
+   * itself.  The method of randomization is dependent on the
    * decoy_type (shuffle or reverse).  The name of the protein is also
-   * changed by prefixing with reverse_ or rand_, depending on how it
-   * was randomized. 
+   * changed by prefixing with "decoy-prefix"
    */
   void shuffle(DECOY_TYPE_T decoy_type);
 

@@ -8,17 +8,17 @@
 
 class GeneratePeptides : public CruxApplication {
 
-protected:
+ protected:
   static MASS_TYPE_T massType_;
 
-public:
+ public:
 
   class OrderedPeptide {
-  public:
-    OrderedPeptide(const std::string& sequence):
+   public:
+    explicit OrderedPeptide(const std::string& sequence):
       sequence_(sequence), sequencePtr_(NULL),
       mass_(Crux::Peptide::calcSequenceMass(sequence, massType_)) {}
-    OrderedPeptide(const std::string* sequence):
+    explicit OrderedPeptide(const std::string* sequence):
       sequence_(""), sequencePtr_(sequence),
       mass_(Crux::Peptide::calcSequenceMass(*sequence, massType_)) {}
 
@@ -26,18 +26,18 @@ public:
     unsigned int Length() const { return Sequence().length(); }
     FLOAT_T Mass() const { return mass_; }
     bool operator <(const OrderedPeptide& rhs) const { return Sequence() < rhs.Sequence(); }
-  protected:
+   protected:
     std::string sequence_;
     const std::string* sequencePtr_;
     FLOAT_T mass_;
   };
 
   class CleavedPeptide : public OrderedPeptide {
-  public:
+   public:
     CleavedPeptide(const std::string& sequence, unsigned int position):
       OrderedPeptide(sequence), position_(position) {}
     unsigned int Position() const { return position_; }
-  private:
+   private:
     unsigned int position_;
   };
 

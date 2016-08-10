@@ -40,9 +40,9 @@ class XLinkMatch : public Crux::Match {
   virtual std::string getSequenceString() = 0;
   virtual FLOAT_T calcMass(MASS_TYPE_T mass_type) = 0;
   virtual XLinkMatch* shuffle() = 0;
-  virtual void predictIons(IonSeries* ion_series, int charge)=0;
-  virtual std::string getIonSequence(Ion* ion)=0;
-  virtual Crux::Peptide* getPeptide(int peptide_idx)=0;
+  virtual void predictIons(IonSeries* ion_series, int charge) = 0;
+  virtual std::string getIonSequence(Ion* ion) = 0;
+  virtual Crux::Peptide* getPeptide(int peptide_idx) = 0;
 
   /**
    * \returns the mass of the match

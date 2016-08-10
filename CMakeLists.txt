@@ -2,8 +2,8 @@ project(crux)
 cmake_minimum_required(VERSION 2.8.4)
 cmake_policy(VERSION 2.8.4)
 
-set (CRUX_VERSION_MAJOR "2")
-set (CRUX_VERSION_MINOR "1")
+set (CRUX_VERSION_MAJOR "3")
+set (CRUX_VERSION_MINOR "0")
 set (CRUX_VERSION ${CRUX_VERSION_MAJOR}.${CRUX_VERSION_MINOR})
 
 message(
@@ -12,9 +12,6 @@ message(
 )
 
 add_subdirectory(doc/user)
-add_subdirectory(doc/user/comet-options)
-add_subdirectory(doc/user/data)
-add_subdirectory(doc/user/demos)
 add_subdirectory(ext)
 add_subdirectory(src)
 

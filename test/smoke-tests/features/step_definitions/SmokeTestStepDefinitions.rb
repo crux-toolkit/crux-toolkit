@@ -26,6 +26,10 @@ When /^I run ([^\s]+) as an intermediate step$/ do | cmd |
   @last_ret = @tester.exec(cmd)
 end
 
+When /^I ignore lines matching the pattern: \/(.*)\/$/ do | pattern |
+  @tester.add_ignore_pattern(pattern)
+end
+
 Then /^the return value should be (-?[0-9]+)$/ do | ret |
   expect(@last_ret).to eq(ret.to_i)
 end

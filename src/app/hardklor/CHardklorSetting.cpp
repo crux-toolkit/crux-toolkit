@@ -7,6 +7,7 @@ CHardklorSetting::CHardklorSetting(){
 	iAnalysis=false;
   maxCharge=5;
 	minCharge=1;
+  msLevel=1;
   depth=3;
   peptide=10;
   smooth=0;
@@ -70,6 +71,7 @@ CHardklorSetting::CHardklorSetting(const CHardklorSetting& c){
 	iAnalysis=c.iAnalysis;
   maxCharge=c.maxCharge;
 	minCharge=c.minCharge;
+  msLevel=c.msLevel;
   depth=c.depth;
   peptide=c.peptide;
   smooth=c.smooth;
@@ -134,6 +136,7 @@ CHardklorSetting& CHardklorSetting::operator=(const CHardklorSetting& c){
 		iAnalysis=c.iAnalysis;
     maxCharge=c.maxCharge;
 		minCharge=c.minCharge;
+    msLevel=c.msLevel;
     depth=c.depth;
 		peptide=c.peptide;
     smooth=c.smooth;

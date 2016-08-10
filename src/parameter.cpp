@@ -18,8 +18,6 @@
 
 using namespace std;
 
-//TODO:  in all set, change result=add_... to result= result && add_...
-
 /*
  * Global variables
  */
@@ -58,7 +56,6 @@ bool post_for_inclusion;
 
 vector<string> comet_enzyme_info_lines_;
 
-
 /**
  * \returns the comet enzyme info lines parsed from the file
  * or generated defaults
@@ -72,9 +69,6 @@ const std::vector<std::string>& get_comet_enzyme_info_lines() {
  ************************************ 
  */
 
-/**
- *
- */
 bool string_to_param_type(const char*, PARAMETER_TYPE_T* );
 
 /************************************
@@ -91,8 +85,7 @@ bool string_to_param_type(const char*, PARAMETER_TYPE_T* );
  */
 void initialize_parameters(void){
   /* initialize the list of mods */                           
-  int mod_idx = 0;                                            
-  for(mod_idx = 0; mod_idx < MAX_AA_MODS; mod_idx++){         
+  for (int mod_idx = 0; mod_idx < MAX_AA_MODS; mod_idx++) {
     //initialize_aa_mod(&list_of_mods[mod_idx], mod_idx);     
     list_of_mods[mod_idx] = new_aa_mod(mod_idx);              
   }                                                           
@@ -117,66 +110,6 @@ void initialize_parameters(void){
   comet_enzyme_info_lines_.push_back("8.  Glu_C\t\t\t\t1      DE           P");
   comet_enzyme_info_lines_.push_back("9.  PepsinA\t\t\t\t1      FL           P");
   comet_enzyme_info_lines_.push_back("10. Chymotrypsin\t\t\t1      FWYL         P");
-}
-
-/**
- * \brief Take the user options related to decoys to set the number of
- * decoy files and to adjust the number of top Sp-ranked PSMs to
- * score with xcorr.  Number of decoy files is 0 if decoy location is
- * "target", 1 if location is "one-decoy-file", or
- * num-decoys-per-target.  Max rank prelimiary is adjusted if location
- * is target and num-decoys-per-target > 1.
- */
-void translate_decoy_options(){
-  // get user values
-  int num_decoy_per_target = get_int_parameter("num-decoys-per-target");
-  string decoy_type_str = get_string_parameter("decoys");
-  DECOY_TYPE_T decoy_type = string_to_decoy_type(decoy_type_str.c_str());
-
-  string location = get_string_parameter("decoy-location");
-  int max_rank_preliminary = get_int_parameter("max-rank-preliminary");
-
-  // store new values here
-  bool tdc = false;  // target-decoy competitition
-  int new_num_decoy_files = -1;
-  int new_max_rank_preliminary = max_rank_preliminary; 
-
-  // user may not have set num-decoys-per-target and default is 1
-  if (decoy_type == NO_DECOYS) {
-    num_decoy_per_target = 0;
-  } 
-
-  // user may not have set target-location if no decoys requested
-  if (num_decoy_per_target == 0) {
-    location = "separate-decoy-files";
-    new_num_decoy_files = 0;
-  }
-
-  // set new values
-  if (location == "target-file") {
-    tdc = true;
-    new_num_decoy_files = 0;
-
-    if( max_rank_preliminary > 0 ){  // scale to num decoys
-      new_max_rank_preliminary = max_rank_preliminary * 
-                                (1 + num_decoy_per_target);
-    }
-  } else if (location == "one-decoy-file") {
-    tdc = false;
-    new_num_decoy_files = 1;
-  } else if (location == "separate-decoy-files") {
-    tdc = false;
-    new_num_decoy_files = num_decoy_per_target;
-  } else {
-    carp(CARP_FATAL, "Unrecoginzed decoy location '%s'."
-         "Must be target-file, one-decoy-file, or separate-decoy-files",
-         location.c_str());
-  }
-
-  // now update all values
-  Params::Set("num-decoy-files", new_num_decoy_files);
-  Params::Set("max-rank-preliminary", new_max_rank_preliminary);
-  Params::Set("tdc", tdc);
 }
 
 /**
@@ -308,7 +241,7 @@ void print_mods_parameter_file(ostream* param_file,
   char comments[PARAMETER_BUFFER] = "";
   strcat_formatted(comments, "# ", Params::GetUsage(name).c_str());
   strcat_formatted(comments, "# ", Params::GetFileNotes(name).c_str());
-  int precision = get_int_parameter("mod-precision");
+  int precision = Params::GetInt("mod-precision");
 
   // get list of mods to print
   AA_MOD_T** mod_list = NULL;
@@ -343,7 +276,7 @@ void print_mods_parameter_file(ostream* param_file,
 
   // if there were no mods, print placeholder
   if( total_mods == 0 ){
-    *param_file << comments << name << "=NO MODS" << endl << endl;
+    *param_file << Params::ProcessHtmlDocTags(comments) << name << "=NO MODS" << endl << endl;
   }
 }
 
@@ -417,106 +350,15 @@ void parse_parameter_file(
     comet_enzyme_info_lines_.push_back("9.  PepsinA\t\t\t\t1      FL           P");
     comet_enzyme_info_lines_.push_back("10. Chymotrypsin\t\t\t1      FWYL         P");
   }
-  /*
-    TODO: Put these back in after we figure out what to do
-    with enzyme info.
-    fprintf(param_file, "11. Elastase \t\t\t\t");
-    fprintf(param_file, "1");
-    fprintf(param_file, "      ALIV         P\n");
-    
-    fprintf(param_file, "12. Clostripai\t\t\t\t");
-    fprintf(param_file, "1");
-    fprintf(param_file, "      R            -\n");
-    
-    fprintf(param_file, "13. Iodosobenzoate\t\t\t");
-    fprintf(param_file, "1");
-    fprintf(param_file, "      W            -\n");
-    
-    fprintf(param_file, "14. Proline_Endopeptidase\t\t");
-    fprintf(param_file, "1");
-    fprintf(param_file, "      P            -\n");
-    
-    fprintf(param_file, "15. Staph_Protease\t\t\t");
-    fprintf(param_file, "1");
-    fprintf(param_file, "      E            -\n");
-    
-    fprintf(param_file, "16. Modified_Chymotrypsin\t\t");
-    fprintf(param_file, "1");
-    fprintf(param_file, "      FWYL         P\n");
-    
-    
-    fprintf(param_file, "17. Elastase_Trypisn_Chymotrypsin\t");
-    fprintf(param_file, "1");
-    fprintf(param_file, "      ALIVKRWFY    P\n");
-    
-  */
-
 }
-
 
 /**************************************************
  *   GETTERS (public)
  **************************************************
  */
 
-/**
- * Each of the following functions searches through the hash table of
- * parameters, looking for one whose name matches the string.  The
- * function returns the corresponding value.
- * \returns true if paramater value is true, else false
- */ 
-bool get_boolean_parameter(
- const char*     name  ///< the name of the parameter looking for -in
- )
-{
-  return Params::GetBool(name);
-}
-
-/**
- * Searches through the list of parameters, looking for one whose
- * name matches the string.  This function returns the parameter value if the
- * parameter is in the parameter hash table.  This
- * function exits if there is a conversion error. 
- *\returns the int value of the parameter
- */
-int get_int_parameter(
-  const char* name  ///< the name of the parameter looking for -in
-  )
-{
-  return Params::GetInt(name);
-}
-
-/**
- * Searches through the list of parameters, looking for one whose
- * name matches the string.  This function returns the parameter value if the
- * parameter is in the parameter hash table.  This
- * function exits if there is a conversion error. 
- *\returns the double value of the parameter
- */
-double get_double_parameter(
-  const char* name   ///< the name of the parameter looking for -in
-  )
-{
-  return Params::GetDouble(name);
-}
-
-/**
- * \brief Get the value of a parameter whose type is char*
- *
- * Searches through the list of parameters, looking for one whose
- * parameter_name matches the given name string. 
- * If the value is not found, abort.
- * \returns The hash-alllocated string value of the given parameter name
- */
-string get_string_parameter(
-  const string& name  ///< the name of the parameter looking for -in
-  )
-{
-  return Params::GetString(name);
-}
-
 DIGEST_T get_digest_type_parameter( const char* name ){
-  string param = get_string_parameter(name);
+  string param = Params::GetString(name);
   DIGEST_T digest_type = string_to_digest_type(param);
   if( digest_type == INVALID_DIGEST ){
     carp(CARP_FATAL, "Digest_type parameter %s has the value %s " 
@@ -526,7 +368,7 @@ DIGEST_T get_digest_type_parameter( const char* name ){
 }
 
 ENZYME_T get_enzyme_type_parameter( const char* name ){
-  string param = get_string_parameter(name);
+  string param = Params::GetString(name);
   ENZYME_T enzyme_type = string_to_enzyme_type(param);
   if( enzyme_type == INVALID_ENZYME ){
     carp(CARP_FATAL, "Enzyme_type parameter %s has the value %s " 
@@ -538,7 +380,7 @@ ENZYME_T get_enzyme_type_parameter( const char* name ){
 MASS_TYPE_T get_mass_type_parameter(
    const char* name
    ){
-  string param_value_str = get_string_parameter(name);
+  string param_value_str = Params::GetString(name);
   MASS_TYPE_T param_value;
   bool success = string_to_mass_type(param_value_str, &param_value);
 
@@ -553,31 +395,31 @@ MASS_TYPE_T get_mass_type_parameter(
 THRESHOLD_T get_threshold_type_parameter(
   const char* name
   ){
-  return string_to_threshold_type(get_string_parameter(name));
+  return string_to_threshold_type(Params::GetString(name));
 }
 
 DECOY_TYPE_T get_decoy_type_parameter(
   const char* name
   ){
-  return string_to_decoy_type(get_string_parameter(name));
+  return string_to_decoy_type(Params::GetString(name));
 }
 
 DECOY_TYPE_T get_tide_decoy_type_parameter(
   const char* name
 ) {
-  return string_to_tide_decoy_type(get_string_parameter(name));
+  return string_to_tide_decoy_type(Params::GetString(name));
 }
 
 MASS_FORMAT_T get_mass_format_type_parameter(
   const char* name
   ){
-  return string_to_mass_format(get_string_parameter(name));
+  return string_to_mass_format(Params::GetString(name));
 }
 
 int get_max_ion_charge_parameter(
   const char* name
   ){
-  string param_value_str = get_string_parameter(name);
+  string param_value_str = Params::GetString(name);
   if (param_value_str == "peptide") {
     return BILLION; //using this with min function on peptide charge.
   }
@@ -593,7 +435,7 @@ int get_max_ion_charge_parameter(
 char get_delimiter_parameter(
   const char* name
   ) {
-  string param_value_str = get_string_parameter(name);
+  string param_value_str = Params::GetString(name);
   if (param_value_str == "tab") {
     return '\t'; //using this with min function on peptide charge.
   } else {
@@ -607,11 +449,11 @@ char get_delimiter_parameter(
 }
 
 COLTYPE_T get_column_type_parameter(const char* name){
-  return string_to_column_type(get_string_parameter(name));
+  return string_to_column_type(Params::GetString(name));
 }
 
 COMPARISON_T get_comparison_parameter(const char* name) {
-  return string_to_comparison(get_string_parameter(name));
+  return string_to_comparison(Params::GetString(name));
 }
 
 
@@ -650,7 +492,6 @@ int get_aa_mod_list
 {
   *mods = list_of_variable_mods;
   return num_mods;
-
 }
 
 /**
@@ -971,8 +812,7 @@ int read_mods(
       token = read_prevents_xlink(cur_mod, token, ':');
 
 
-    }// fill in values for c- or n-mod
-    else{
+    } else { // fill in values for c- or n-mod
       // get the max distance
       read_max_distance(cur_mod, token);
 
@@ -1004,7 +844,7 @@ int read_mods(
  * number of mods in the parameter file is greater than MAX_AA_MODS.
  * \returns void
  */
-void read_mods_from_file(const char* param_filename){
+void read_mods_from_file(const char* param_filename) {
   carp(CARP_DEBUG, "Reading mods from parameter file '%s'", param_filename);
 
   // open file
@@ -1018,14 +858,13 @@ void read_mods_from_file(const char* param_filename){
   int max_precision = 0;  // gets updated with max seen in param file
 
   // start with fixed terminal mods
-  total_num_mods = read_mods(param_file, 0, "nmod-fixed=", 
+  total_num_mods = read_mods(param_file, 0, "nmod-fixed=",
                              N_TERM, max_precision);
   // keep track of where we stored the fixed mod
   if( total_num_mods == 1 ){
     fixed_n_mod = 0;  // first in list
   } else if (total_num_mods > 1){
-    carp(CARP_FATAL, 
-         "Cannot specify more than one fixed n-terminal modification.");
+    carp(CARP_FATAL, "Cannot specify more than one fixed n-terminal modification.");
   }
   rewind( param_file );
 
@@ -1060,7 +899,7 @@ void read_mods_from_file(const char* param_filename){
   num_c_mods = total_num_mods - num_mods - num_fixed_mods;
 
   // if no cmods present, don't point to the list of mods
-  if( num_c_mods == 0){
+  if (num_c_mods == 0) {
     list_of_c_mods = NULL;
   }
 
@@ -1088,7 +927,7 @@ void read_mods_from_file(const char* param_filename){
 }
 
 void incrementNumMods() {
-    num_mods++;
+  num_mods++;
 }
 
 void resetMods() {

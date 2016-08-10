@@ -78,10 +78,9 @@ string FileUtils::Extension(const string& path) {
   boost::filesystem::path p(path);
   return p.has_extension() ? p.extension().string() : "";
 }
-void FileUtils::Copy(const std::string& orig, const std::string& dest){
+void FileUtils::Copy(const std::string& orig, const std::string& dest) {
   if (Exists(orig)) {
     boost::filesystem::copy(orig, dest);
   }
 }
-
 

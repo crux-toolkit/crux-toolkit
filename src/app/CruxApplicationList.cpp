@@ -44,7 +44,7 @@ void CruxApplicationList::add(
   ) {
 
   if (find(application->getName()) != NULL) {
-    carp(CARP_FATAL, "Name clash! %s",application->getName().c_str());
+    carp(CARP_FATAL, "Name clash! %s", application->getName().c_str());
   }
 
   applications_.push_back(application);
@@ -113,7 +113,7 @@ void CruxApplicationList::usage() {
 
   vector<CruxApplication*>::iterator iter;
 
-  size_t max_name_length=0;
+  size_t max_name_length = 0;
 
   for (iter = applications_.begin();
     iter != applications_.end();
@@ -137,9 +137,9 @@ void CruxApplicationList::usage() {
     string description = Params::ProcessHtmlDocTags(applications_[i]->getDescription());
     int padding = max_name_length - name.length();
 
-    cerr<<"  "<<name<<" ";
-    for (int idx=0;idx<padding;idx++) {
-      cerr<<" ";
+    cerr << "  " << name << " ";
+    for (int idx = 0; idx < padding; idx++) {
+      cerr << " ";
     }
 
     const int LINE_WIDTH = 80;
@@ -148,11 +148,9 @@ void CruxApplicationList::usage() {
 
     // If the description is short enough, just print.
     if (description.length() < max_descr_line) {
-      cerr<<" "<<description<<endl;
-    }
-
-    // Otherwise, insert EOLs.
-    else {
+      cerr << " " << description << endl;
+    } else {
+      // Otherwise, insert EOLs.
       vector<string> words = StringUtils::Split(description, ' ');
 
       unsigned int word_index = 0;
@@ -171,7 +169,7 @@ void CruxApplicationList::usage() {
         line_length = 0;
         cerr << endl;
         for (unsigned int idx =0;idx < max_name_length + 3; idx++) {
-          cerr<<" ";
+          cerr << " ";
         }
         while ((word_index < words.size()) && 
                (line_length + words[word_index].length() + 1 < max_descr_line)) {
@@ -181,12 +179,12 @@ void CruxApplicationList::usage() {
           word_index++;
         }
       }
-      cerr<<endl;
+      cerr << endl;
     }
   }
   cerr << endl << endl;
-  cerr << "Options and arguments are specific to each command."<< endl;
-  cerr << "Type '"<< list_name_ <<" <command>' for details."<<endl;
+  cerr << "Options and arguments are specific to each command." << endl;
+  cerr << "Type '" << list_name_ << " <command>' for details." << endl;
 
 }
 
@@ -213,7 +211,7 @@ int CruxApplicationList::main(int argc, char** argv) {
   CruxApplication* crux_application = find(appname);
 
   if (crux_application == NULL) {
-    cerr<< "Cannot find "<<appname<<" in available applications"<<endl;
+    cerr << "Cannot find " << appname << " in available applications" << endl;
     usage();
     return -1;
   }

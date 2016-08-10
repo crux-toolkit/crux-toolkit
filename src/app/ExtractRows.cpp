@@ -1,8 +1,8 @@
-/*************************************************************************//**
- * \file ExtractRows.cpp
- * \brief Given a tab delimited file and column name and value, print
- * out all rows that pass the relation operator (default equals).
- ****************************************************************************/
+/*******************************************************************************
+  * \file ExtractRows.cpp
+  * \brief Given a tab delimited file and column name and value, print
+  * out all rows that pass the relation operator (default equals).
+  ****************************************************************************/
 
 #include "ExtractRows.h"
 
@@ -10,9 +10,10 @@
 
 #include "io/DelimitedFileReader.h"
 #include "io/DelimitedFile.h"
-
 #include "io/carp.h"
 #include "parameter.h"
+#include "util/Params.h"
+#include "util/StringUtils.h"
 
 using namespace std;
 
@@ -20,7 +21,6 @@ using namespace std;
  * \returns a blank ExtractRows object
  */
 ExtractRows::ExtractRows() {
-
 }
 
 /**
@@ -36,7 +36,7 @@ ExtractRows::~ExtractRows() {
 template<typename TValue>
 bool passesThreshold(
   TValue a,
-  TValue& b,
+  TValue b,
   COMPARISON_T& comparison) {
 
   switch (comparison) {
@@ -58,7 +58,6 @@ bool passesThreshold(
       return false;
   }
   return false;
-
 }
 
 /**
@@ -66,10 +65,10 @@ bool passesThreshold(
  */
 int ExtractRows::main(int argc, char** argv) {
   /* Get parameters */
-  string delimited_filename = get_string_parameter("tsv file");
+  string delimited_filename = Params::GetString("tsv file");
 
-  string column_name = get_string_parameter("column name");
-  string column_value = get_string_parameter("column value");
+  string column_name = Params::GetString("column name");
+  string column_value = Params::GetString("column value");
 
   COLTYPE_T column_type = get_column_type_parameter("column-type");
   COMPARISON_T comparison = get_comparison_parameter("comparison");
@@ -80,38 +79,30 @@ int ExtractRows::main(int argc, char** argv) {
   int column_idx = delimited_file.findColumn(column_name);
 
   if (column_idx == -1) {
-    carp(CARP_FATAL,"column not found:%s\n\n:%s",
+    carp(CARP_FATAL, "column not found:%s\n\n:%s",
       column_name.c_str(),
       delimited_file.getAvailableColumnsString().c_str());
   }
 
-  if (get_boolean_parameter("header")) {
+  if (Params::GetBool("header")) {
     cout << delimited_file.getHeaderString() << endl;
   }
 
-  string column_value_str = get_string_parameter("column value");
-
-  int column_value_int = 0;
-  from_string(column_value_int, column_value_str);
-
-  FLOAT_T column_value_real = 0;
-  from_string(column_value_real, column_value_str);
-
+  string column_value_str = Params::GetString("column value");
 
   while (delimited_file.hasNext()) {
-
     bool passes = false;
     switch(column_type) {
       case COLTYPE_INT:
         passes = passesThreshold(
           delimited_file.getInteger(column_idx),
-          column_value_int, 
+          StringUtils::FromString<int>(column_value_str), 
           comparison);
         break;
       case COLTYPE_REAL:
         passes = passesThreshold(
           delimited_file.getFloat(column_idx),
-          column_value_real,
+          StringUtils::FromString<FLOAT_T>(column_value_str), 
           comparison);
         break;
       case COLTYPE_STRING:
@@ -122,7 +113,7 @@ int ExtractRows::main(int argc, char** argv) {
         break;
       case NUMBER_COLTYPES:
       case COLTYPE_INVALID:
-        carp(CARP_FATAL,"Unknown column type");
+        carp(CARP_FATAL, "Unknown column type");
     }
     
     if (passes) {

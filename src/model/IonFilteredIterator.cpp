@@ -51,17 +51,17 @@ IonFilteredIterator::IonFilteredIterator(
   has_next_ = false;
 
   // set the working array of ions
-  if(constraint_->getIonType() == ALL_ION ||
-     constraint_->getIonType() == BY_ION ||
-     constraint_->getIonType() == BYA_ION){
+  if(constraint_->getUseIonType(ALL_ION) ||
+     constraint_->getUseIonType(BY_ION) ||
+     constraint_->getUseIonType(BYA_ION)) {
 
     ion_iterator_ = ion_series->begin();
     ion_iterator_end_ = ion_series->end();
   }
   else{
-
-    ion_iterator_ = ion_series->getSpecificIons(constraint->getIonType()).begin();
-    ion_iterator_end_ = ion_series->getSpecificIons(constraint->getIonType()).end();
+    carp(CARP_FATAL, "DEPRECATED/FIX!");
+    //ion_iterator_ = ion_series->getSpecificIons(constraint->getIonType()).begin();
+    //ion_iterator_end_ = ion_series->getSpecificIons(constraint->getIonType()).end();
   }
   
   // initialize iterator

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Using spectral-counts</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" type="text/css" href="../styles.css">
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-26136956-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<script type="text/javascript">
+	// Main Menu
+	$( document ).ready(function() {
+			var pull 		= $('.btn');
+				menu 		= $('nav ul');
+				menuHeight	= menu.height();
+
+			$(pull).on('click', function(e) {
+				e.preventDefault();
+				menu.slideToggle();
+			});
+
+			$(window).resize(function(){
+	    		var w = $(window).width();
+	    		if(w > 320 && menu.is(':hidden')) {
+	    			menu.removeAttr('style');
+	    		} 
+			});
+	});
+</script>
+</head>
+<body>
+	<div class="page-wrap">
+	 	<nav>
+			<div class="btn">
+		    </div>
+		    <img src="../images/crux-logo.png" id="logo"></a>
+			<ul id="navitems">
+			    <li><a href="../index.html">Home</a></li>
+			    <li><a href="../download.html">Download</a></li>
+			    <li><a href="../fileformats.html">File Formats</a></li>
+		        <li><a href="http://groups.google.com/group/crux-users">Contact</a></li> <!--Link to google support board-->
+		    </ul>
+		</nav>
+		<div id="content">
+		<!-- START CONTENT -->
+		<h2>Using spectral-counts</h2>
+
+		<p> 
+		After you have run a <a href="search.html">search</a> and
+		assigned confidence to your identified PSMs, you can now calculate
+		relative quantification values for the proteins by running the
+		command:<br>
+
+		<div class=code>
+		<code>$ crux spectral-counts --protein-database small-yeast.fasta ./crux-output/percolator.target.psms.txt</code>
+		</div>
+		<br>
+		Alternatively, you can use the pepXML output by q-ranker using the command:<br>
+		<br>
+		<div class=code>
+		<code>$ crux spectral-counts --protein-database small-yeast.fasta ./crux-output/percolator.target.psms.txt</code>
+		</div>
+
+		<p>While the command is running, you will see output like this
+		</p>
+
+		<pre>
+INFO: Beginning spectral-counts.
+INFO: Total proteins found: 56
+INFO: Number of matches passed the threshold 116
+		</pre>
+
+		<p>When the command is finished, it will print</p>
+		<pre>
+INFO: Finished crux spectral-counts.
+		</pre>
+
+		<p>
+		Within the <code>crux-output</code> directory, there will be three new files:
+		<li>spectral-counts.target.txt &ndash; tab-delimited file of the <code>spectral-counts</code> results</li>
+		<li>spectral-counts.params.txt &ndash; the parameters used for running <code>spectral-counts</code></li>
+		<li>spectral-counts.log.txt &ndash; the log output of <code>spectral-counts</code></li>
+		</p>
+
+		<p>The spectral-counts.target.txt file will look something like:<br>
+		<pre>
+protein id 	NSAF
+YLR043C 	0.61643416
+YGL135W 	0.17810018
+YEL027W 	0.10352074
+YGL009C 	0.035437137
+YLR185W 	0.031369921
+YJR069C 	0.014012959
+YGR192C 	0.0083149187
+YMR235C 	0.0067826854
+YBR118W 	0.0060274079
+		</pre>
+
+		<p>
+		In this output, the first field is the identifier and the second field
+		is the spectral-counting measure (NSAF, dNSAF, SIN, or EMPAI) result
+		for each protein.  To select which measure is computed, see the
+		<a href="../commands/spectral-counts.html">crux spectral-counts</a> documentation.</p>
+
+
+		<h3>Using peptideprophet probability from pepXML</h3>
+		<p><code>crux spectral-counts</code> also supports using the Peptide Prophet probability provided in the pepXML file.  Use the command:<br>
+		<br>
+		<div class=code>
+		<code>$ crux spectral-counts --protein-database small-yeast.fasta --threshold-type custom --custom-threshold-name peptideprophet --threshold 0.9 --custom-threshold-min F target.pep.xml</code>
+		</div>          
+		This code will filter out matches whose Peptide Prophet probability is &lt; 0.9 and calculate NSAF for the proteins of the remaining PSMs.<br>
+
+		<h3>Using mzIdentML files with spectral-counts</h3>
+		<p><code>crux spectral-counts</code> also supports mzIdentML as input.  For example, </p> 
+		<div class="code">
+			$ crux spectral-counts --measure RAW file.mzid
+		</div>
+		<p>
+		If the protein sequences are not provided in the mzIdentML file, then you will have to provide
+		a database using the <span class="code">protein-database</span> parameter for the NSAF, dNSAF, EMPAI, and SIN metrics.
+		</p>
+		<!-- END CONTENT -->
+		</div>
+	</div>
+
+<footer class="site-footer">
+	<div id="centerfooter">
+		<div class="footerimportantlinks">
+			<img src="../images/linkicon.png" style="width:16px; height:16px"><h3>Important links</h3>
+			<ul>
+				<li><a href="../faq.html">Crux <strong>FAQ</strong></a></li>
+				<li><a href="../glossary.html">Glossary of terminology</a></li>
+				<li><a href="http://scholar.google.com/citations?hl=en&user=Rw9S1HIAAAAJ">Google Scholar profile</a></li>
+				<li><a href="https://sourceforge.net/projects/cruxtoolkit/">SourceForge Issue's list</a></li>
+				<li><a href="../release-notes.html">Release Notes</a></li>
+				<li><a href="https://mailman1.u.washington.edu/mailman/listinfo/crux-users" title="Receive announcements of new versions">Join the mailing list</a></li>
+				<li><a href="http://www.apache.org/licenses/LICENSE-2.0">Apache license</a></li>
+				<li><a href="http://groups.google.com/group/crux-users">Support Board</a></li>
+			</ul>
+		</div>
+		<div class="footerimportantlinks tutoriallinks">
+			<img src="../images/tutorialicon.png" style="height:16px"><h3>Tutorials</h3>
+			<ul>
+				<li><a href="install.html">Installation</a></li>
+				<li><a href="gettingstarted.html">Getting started with Crux</a></li>
+				<li><a href="search.html">Running a simple search using Tide and Percolator</a></li>
+				<li><a href="customizedsearch.html">Customization and search options</a></li>
+				<li><a href="spectralcounts.html">Using spectral-counts</a></li>
+			</ul>
+		</div>
+		<div id="footertext">
+			<p>
+				The original version of Crux was written by Chris Park and Aaron Klammer
+				under the supervision
+				of <a href="http://www.gs.washington.edu/faculty/maccoss.htm">Prof. Michael
+				MacCoss</a>
+				and <a href="http://noble.gs.washington.edu/~noble">Prof. William
+				Stafford Noble</a> in the Department of Genome Sciences at the
+				University of Washington, Seattle.  Website by <a href="http://www.yuvalboss.com/">Yuval Boss</a>. 
+				<br />The complete list of contributors
+				can be found <a href="../contributors.html">here</a>.
+				<br />
+				<br />
+				Maintenance and development of Crux is funded by the <a href="https://www.nih.gov/">National Institutes of Health</a> awards R01 GM096306 and P41 GM103533. 
+			</p>
+		</div>
+	</div>
+</footer>
+	
+</body>
+
+</html>

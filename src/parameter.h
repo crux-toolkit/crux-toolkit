@@ -105,7 +105,6 @@ typedef enum parameter_type PARAMETER_TYPE_T;
  */
 void initialize_parameters(void);
 
-void translate_decoy_options();
 void parse_custom_enzyme(const std::string& rule_str);
 
 /**
@@ -118,51 +117,9 @@ void parse_parameter_file(
 
 void read_mods_from_file(const char* param_file);
 
-/**
- * Each of the following functions searches through the hash table of
- * parameters, looking for one whose name matches the string.  The
- * function returns the corresponding value.
- * \returns TRUE if paramater value is TRUE, else FALSE
- */ 
-bool get_boolean_parameter(
- const char*     name  ///< the name of the parameter looking for -in
- );
-
-/**
- * Searches through the list of parameters, looking for one whose
- * name matches the string.  This function returns the parameter value if the
- * parameter is in the parameter hash table.  This
- * function exits if there is a conversion error. 
- *\returns the int value of the parameter
- */
-int get_int_parameter(
-  const char* name  ///< the name of the parameter looking for -in
-  );
-
-/**
- * Searches through the list of parameters, looking for one whose
- * name matches the string.  This function returns the parameter value if the
- * parameter is in the parameter hash table.  This
- * function exits if there is a conversion error. 
- *\returns the double value of the parameter
- */
-double get_double_parameter(
-  const char* name   ///< the name of the parameter looking for -in
-  );
-
-/**
- * Searches through the list of parameters, looking for one whose
- * parameter_name matches the string. 
- * If the value is not found, abort.
- * \returns the string value to which matches the parameter name, else aborts
- */
-std::string get_string_parameter(
-  const std::string& name  ///< the name of the parameter looking for -in
-  );
-
 MASS_TYPE_T get_mass_type_parameter(
- const char* name
- );
+  const char* name
+  );
 
 char get_delimiter_parameter(
   const char* name

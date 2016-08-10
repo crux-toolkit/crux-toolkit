@@ -1,36 +1,105 @@
 <html>
 <head>
 <title>Release notes for Crux</title>
-<link href="./crux.css" rel="styleSheet" type="text/css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" type="text/css" href="styles.css">
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-26136956-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<script type="text/javascript">
+	// Main Menu
+	$( document ).ready(function() {
+			var pull 		= $('.btn');
+				menu 		= $('nav ul');
+				menuHeight	= menu.height();
+
+			$(pull).on('click', function(e) {
+				e.preventDefault();
+				menu.slideToggle();
+			});
+
+			$(window).resize(function(){
+	    		var w = $(window).width();
+	    		if(w > 320 && menu.is(':hidden')) {
+	    			menu.removeAttr('style');
+	    		} 
+			});
+	});
+</script>
 </head>
 <body>
-<blockquote> 
-<h1>Release notes for Crux</h1>
+	<div class="page-wrap">
+	 	<nav>
+			<div class="btn">
+		    </div>
+		    <img src="images/crux-logo.png" id="logo"></a>
+			<ul id="navitems">
+			    <li><a href="index.html">Home</a></li>
+			    <li><a href="download.html">Download</a></li>
+			    <li><a href="fileformats.html">File Formats</a></li>
+		        <li><a href="http://groups.google.com/group/crux-users">Contact</a></li> <!--Link to google support board-->
+		    </ul>
+		</nav>
+		<div id="content">
+		<!-- START CONTENT -->
+    <blockquote> 
+    <h2>Release notes for Crux</h2>
 
-<h2>Changes since last named release</h2>
+<h3>Changes since the last major release</h3>
 
-<h3>Major changes</h3>
+<h4>Minor changes</h4>
+
+<ul>
+
+  <li>
+    8 Aug 2016: Fixed incorrect default value for the cpos parameter
+    to percolator.</li>
+
+</ul>
+
+<hr></hr>
+
+<h3>Version 3.0</h3> August 1, 2016
+
+<h4>Major changes</h4>
 
 <ul>
 
 <li>
-<code>crux percolator</code> is now using version 2.10.  Changes to the interface were made
-</li>
-
-
-<li>
-<code>xlink-include-inter</code>, <code>xlink-include-intra</code>, and
-<code>xlink-include-inter-intra</code> are available options for 
-<code>crux search-for-xlinks</code></li>
+The <code>tide-search</code> command now supports threading. See the
+<code>num-threads</code> parameter for details.</li>
 
 <li>
-Cascade-search application added to crux.</li>
+Added the <code>pipeline</a> command to run a series of commands, and
+the <code>cascade-search</code> to run searches across a series of
+databases.</li>
 
 <li>
-Subtract-index application added to crux.</li>
+Renamed the command <code>calibrate-scores</code>
+to <code>assign-confidence</code> and completely revamped its
+functionality.</li>
 
 <li>
-The OS X version now requires OS X Yosemite. It can be built
+The <code>search-for-xlinks</code> command offers parameters to
+control categories of
+candidates: <code>xlink-include-inter</code>, <code>xlink-include-intra</code>,
+and
+<code>xlink-include-inter-intra</code>.</li>
+
+<li>
+Added the <code>peptide-centric-search</code> option to tide-search.</li>
+
+<li>
+Compiling the Mac OS version now requires OS X Yosemite. It can be built
 from source using the Clang compilers distributed with the latest version of
 XCode.</li>
 
@@ -38,27 +107,71 @@ XCode.</li>
 32-bit and 64-bit Windows versions are now available, built using Visual Studio 2013.</li>
 
 <li>
-Added the <code>peptide-centric-search</code> option to tide-search.</li>
+Updated Percolator to version 2.10.</li>
 
 <li>
-Renamed the command <code>calibrate-scores</code>
-to <code>assign-confidence</code> and completely re-vamped its
-functionality.</li>
+Updated Hardklor to version 2.30.</li>
 
 <li>
-Updated Hardklor to version 2.19.</li>
-
-<li>
-Updated Comet to version 2015.01 rev. 2.</li>
-
-<li>
-Added the <code>pipeline</code> command.</li>
+Updated Comet to version 2016.01 rev. 1.</li>
 
 </ul>
 
-<h3>Minor changes</h3>
+<h4>Minor changes</h4>
 
 <ul>
+
+<li>
+The Windows version of Crux can be built with support for vendor specific file
+formats disabled.</li>
+
+<li>
+Added the <code>temp-dir</code> option
+to <code>tide-index</code>.</li>
+
+<li>
+The utilities <code>create-docs</code>, <code>subtract-index</code>,
+and <code>psm-convert</code> were added to Crux.</li>
+
+<li>The <code>generate-peptides</code> application has been revamped.</li>
+
+<li>Fixed a bug in <code>barista</code> that occurred when the number of
+peptides exceeded the number of PSMs.</li>
+
+<li>Precursor mass selection is fixed in <code>tide-search</code> when units
+are m/z.</li>
+
+<li><code>hardklor</code> and <code>bullseye</code> now use standard logging.</li>
+
+<li>Version number added to log files. Additionally, the version numbers of
+<code>percolator</code>, <code>comet</code>, and <code>boost</code> are shown
+in the output of the <code>version</code> command.</li>
+
+<li>
+Short usage message is displayed on error (the full usage message is still
+displayed when a command is entered with no arguments).</li>
+
+<li>
+<code>feature-in-file</code> parameter added to <code>percolator</code>.</li>
+
+<li>
+The <code>seed</code> parameter for <code>percolator</code> has been renamed
+to <code>percolator-seed</code>.</li>
+
+<li>
+<code>comet</code> exits with return code 1 on failure, rather than 0.</li>
+
+<li>
+Default value for <code>use_sparse_matrix</code> changed to <code>1</code>.</li>
+
+<li>
+Default value for <code>use-neutral-loss-peaks<code> changed to <code>true</code>.</li>
+
+<li>
+<code>xlink-score-method</code> parameter added to <code>xlink-score-spectrum</code>.</li>
+
+<li>
+deltaLCn column added to <code>tide-search</code> tab-delimited output.</li>
 
 <li>
 Bug fixed in reporting flanking amino acids in <code>PostProcessProtein.cpp</code>.</li>
@@ -101,16 +214,16 @@ The refactored XCorr score has been re-scaled (by dividing by 20) to
 put it into a range that is comparable to that of the original XCorr score.</li>
 
 <li>
-The comet version has been updated to 2015.01 rev. 0
-</li>
-
-<li>
 The default value of <code>mz-bin-offset</code> has been changed from
 0.68 to 0.40.</li>
 
 <li>
 The <code>percolator</code> command outputs the <code>pout</code> XML format
-again.</li>
+again (controlled by the <code>pout-output</code> parameter).</li>
+
+<li>
+The <code>percolator</code> command can output its native output by using the
+<code>original-output</code> parameter.</li>
 
 <li>
 Fixed a bug in <code>tide-search</code> causing it to fail when
@@ -150,61 +263,71 @@ place of the index, in which case <code>tide-index</code> will be run prior to
 the search. The <code>store-index</code> option allows the generated index
 to be saved.</li>
 
-<li><code>2015/06/17 &ndash;</code>
+<li>
 The <code>assign-confidence</code> command will automatically detect
 score type if the <code>score</code> parameter is not specified, searching for
 xcorr, e-value, or exact p-values.</li>
 
 <li>
-<code>2015/06/17 &ndash;</code>
 The <code>cascade-search</code> will report the source index database of the 
 peptide for all identified PSMs.</li>
 
 <li>
-<code>2015/06/25 &ndash;</code>
 The <code>top-match</code> parameter has been removed from
 <code>cascade-search</code>.</li>
 
 <li>
-<code>2015/08/24 &ndash;</code>
 <code>Assign-confidence</code> has got new options: "combine-modified-peptide" 
 and "combine-charge-states".</li>
 
 <li>
-<code>2015/08/24 &ndash;</code>
-<code>Assign-confidence</code> now supports top-match>1 in peptide-level filtering 
-mode. </li>
+<code>Assign-confidence</code> now supports top-match&gt;1 in peptide-level filtering 
+mode.</li>
 
 <li>
-<code>2015/08/24 &ndash;</code>
 <code>Assign-confidence</code> can use smoothed-p-value scores for PSM ranking.</li>
 
 <li>
-<code>2015/08/24 &ndash;</code>
 <code>Assign-confidence</code> now does not carry out target-decoy competition in 
 peptide-level filtering mode.</li>
 
 <li>
-<code>2015/10/05 &ndash;</code>
 Added the <code>xlink-assign-ions</code> and <code>xlink-score-spectrum
 </code> commands.</li>
 
 <li>
-<code>2015/12/07 &ndash;</code>
 Rearranged estimation methods in <code>assign-confidence</code>.</li>
 
-<code>2015/12/07 &ndash;</code>
+<li>
 Added top-match option for <code>estimation-method=peptide-level</code> 
 case in <code>assign-confidence</code>.</li>
+
+<li>
+Modified assign-confidence so that ties during target-decoy
+competition are broken randomly.</li>
+
+<li>
+Changed the Percolator output feature "file" to contain the name of
+  the file containing the spectrum (if available), rather than the
+  name of the file containing the PSM.</li>
+
+<li>
+Added to <code>search-for-xlinks</code>, <code>xlink-assign-ions</code>
+  and <code>xlink-score-spectrum</code> parameters of the form
+  "use-a-ion" for a, b, c, x, y, and z-ions.</li>
+
+<li>Various other minor bug/leak fixes and performance enhancements.</li>
+
+<li>Added the <code>allow-dups</code> option to tide-index.</li>
 
 </ul>
 
 <hr></hr>
 
 
-<h2>Version 2.1</h2> October 8, 2014
+<h3>Version 2.1</h3> October 8, 2014
 
-<h3>Major enhancements</h3>
+<h4>Major enhancements</h4>
 
 <ul>
 
@@ -223,7 +346,7 @@ parameter <code>use-old-xlink=F</code>.</li>
 
 </ul>
 
-<h3>Minor changes</h3>
+<h4>Minor changes</h4>
 
 <ul>
 
@@ -313,8 +436,8 @@ Various improvements in performance and error handling were implemented.</li>
 
 <hr></hr>
 
-<h2>Version 2.0</h2> June 6, 2014
-<h3>Major enhancements</h3>
+<h3>Version 2.0</h3> June 6, 2014
+<h4>Major enhancements</h4>
 <ul>
 
 <li>
@@ -330,7 +453,7 @@ proprietary formats using the appropriate Proteowizard libraries.</li>
 
 </ul>
 
-<h3>Minor changes</h3>
+<h4>Minor changes</h4>
 
 <ul>
 
@@ -411,8 +534,8 @@ Various performance and error handling improvements.</li>
 
 <hr></hr>
 
-<h2>Version 1.40</h2> May 22, 2013
-<h3>Major enchancements</h3>
+<h3>Version 1.40</h3> May 22, 2013
+<h4>Major enchancements</h4>
 <ul>
 
 <li>
@@ -420,7 +543,7 @@ Crux Percolator was updated from version 1.05 to the latest release,
 version 2.04.</li>
 
 </ul>
-<h3>Minor changes</h3>
+<h4>Minor changes</h4>
 <ul>
 
 <li>
@@ -483,13 +606,13 @@ The q-ranker output file <code>qranker_output.xml</code> has been renamed to
 <li>
 The deltaCn computation has been modified to be consistent with
 Percolator. Rather than using
-<pre>
+<br /><pre>
      deltaCn<sub>i</sub> = (xcorr<sub>1</sub> - xcorr<sub>i+1</sub>) / xcorr<sub>1</sub>
-</pre>
-it is now computed using
+</pre><br />
+it is now computed using<br />
 <pre>
      deltaCn<sub>i</sub> = (xcorr<sub>i</sub> - xcorr<sub>i+1</sub>) / max(xcorr<sub>i</sub>, 1.0)
-</pre>
+</pre><br />
 </li>
 
 <li>
@@ -514,9 +637,9 @@ By default, all of these flags are set to false except <code>txt-output</code>.
 
 <hr></hr>
 
-<h2>Version 1.39</h2> October 6, 2012
+<h3>Version 1.39</h3> October 6, 2012
 
-<h3>Major enchancements</h3>
+<h4>Major enchancements</h4>
 
 <ul>
 
@@ -550,7 +673,7 @@ search-for-matches</code>.
 <li>
 Fixed a bug in <code>crux create-index</code> on Windows and Cygin
 that caused the program to fail with the message:
-<pre>
+<br /><pre>
 WARNING: Cannot rename directory
 FATAL: Failed to create index
 </pre>
@@ -574,9 +697,9 @@ Fixed bug in <code>crux create-index</code> on Windows and Cygwin that caused it
 
 <hr></hr>
 
-<h2>Version 1.38</h2> July 20, 2012
+<h3>Version 1.38</h3> July 20, 2012
 
-<h3>Major enhancements</h3>
+<h4>Major enhancements</h4>
 
 <ul>
 
@@ -604,12 +727,12 @@ TransProteomic Pipeline (TPP).</li>
 The <code>sequest-search</code> command has been removed.  The
 functionality of this command is still available using options for
 the <code>search-for-matches</code> command (see
-the <a href="crux-faq.html">frequently asked questions list</a> for
+the <a href="faq.html">frequently asked questions list</a> for
 details).</li>
 
 </ul>
 
-<h3>Minor changes</h3>
+<h4>Minor changes</h4>
 
 <ul>
 
@@ -736,9 +859,9 @@ input search files.
 <hr></hr>
 
 
-<h2>Version 1.37</h2> December 22, 2011
+<h3>Version 1.37</h3> December 22, 2011
 
-<h3>Major enhancements</h3>
+<h4>Major enhancements</h4>
 
 <ul>
 <li>
@@ -760,7 +883,7 @@ searching .fasta files.</li>
 
 </ul>
 
-<h3>Minor changes</h3>
+<h4>Minor changes</h4>
 
 <ul>
 
@@ -797,9 +920,9 @@ in the search results.</li>
 
 <hr></hr>
 
-<h2>Version 1.36</h2> August 4, 2011
+<h3>Version 1.36</h3> August 4, 2011
 
-<h3>Tide changes</h3>
+<h4>Tide changes</h4>
 
 <ul>
 
@@ -837,7 +960,7 @@ of Tide should not be used with the new version.</li>
 
 </ul>
 
-<h3>Minor changes</h3>
+<h4>Minor changes</h4>
 
 <ul>
 <li>
@@ -873,9 +996,9 @@ in <code>crux search-for-matches</code>.</li>
 
 <hr></hr>
 
-<h2>Version 1.35</h2> March 23, 2011
+<h3>Version 1.35</h3> March 23, 2011
 
-<h3>Major enhancements</h3>
+<h4>Major enhancements</h4>
 
 <ul>
 
@@ -885,7 +1008,7 @@ protein quantification.</li>
 
 </ul>
 
-<h3>Minor changes</h3>
+<h4>Minor changes</h4>
 
 <ul>
 
@@ -913,9 +1036,9 @@ search-for-xlinks</code>.</li>
 
 <hr></hr>
 
-<h2>Version 1.34</h3> December 22, 2010
+<h3>Version 1.34</h3> December 22, 2010
 
-<h3>Minor changes</h3>
+<h4>Minor changes</h4>
 
 <ul>
 
@@ -975,9 +1098,9 @@ multiple times if they appeared in a file multiple times.
 
 <hr></hr>
 
-<h2>Version 1.33</h2> July 7, 2010
+<h3>Version 1.33</h3> July 7, 2010
 
-<h3>Major enhancements</h3>
+<h4>Major enhancements</h4>
 
 <ul>
 
@@ -997,7 +1120,7 @@ place.</li>
 
 </ul>
 
-<h3>Minor changes</h3>
+<h4>Minor changes</h4>
 
 <ul>
 
@@ -1046,9 +1169,9 @@ sub-option.</li>
 
 <hr></hr>
 
-<h2>Version 1.32</h2> July 6, 2010
+<h3>Version 1.32</h3> July 6, 2010
 
-<h3>Major enhancement</h3>
+<h4>Major enhancement</h4>
 
 <ul>
 
@@ -1061,7 +1184,7 @@ files.</li>
 
 </ul>
 
-<h3>Minor changes</h3>
+<h4>Minor changes</h4>
 
 <ul>
 
@@ -1097,15 +1220,15 @@ searches.</li>
 
 <hr></hr>
 
-<h2>Version 1.31</h2> June 2, 2010
+<h3>Version 1.31</h3> June 2, 2010
 
-<h3>Major enhancements</h3>
+<h4>Major enhancements</h4>
 
 <ul>
 
 <li>
 This version of Crux is released with a demo version of a new search
-engine, <a href="../tide/index.html">Tide</a>.  Tide is an independent
+engine, Tide.  Tide is an independent
 reimplementation of the SEQUEST<sup>&reg;</sup> algorithm. The
 immediate ancestor of Tide is the Crux <code>search-for-matches</code>
 command, but Tide has been completely re-engineered to achieve a
@@ -1115,7 +1238,7 @@ available only in binary executable format.</li>
 
 </ul>
 
-<h3>Minor changes</h3>
+<h4>Minor changes</h4>
 
 <ul>
 <li>
@@ -1152,9 +1275,9 @@ for the first two columns, scan number and label (i.e. target or decoy peptide).
 
 <hr></hr>
 
-<h2>Version 1.30</h2> May 5, 2010
+<h3>Version 1.30</h3> May 5, 2010
 
-<h3>Major enhancements</h3>
+<h4>Major enhancements</h4>
 
 <ul>
 <li>
@@ -1193,8 +1316,8 @@ longer produced and post-search operations take .txt files as input.
 
 </ul>
 
-<h3>
-Minor changes</h3>
+<h4>
+Minor changes</h4>
 
 <ul>
 
@@ -1282,10 +1405,10 @@ Crux is now built with g++ instead of gcc.</li>
 
 <hr></hr>
 
-<h2>Version 1.22</h2> September 16, 2009
+<h3>Version 1.22</h3> September 16, 2009
 
-<h3>
-Major enhancements</h3>
+<h4>
+Major enhancements</h4>
 
 <ul>
 
@@ -1323,7 +1446,7 @@ new features.</li>
 
 </ul>
 
-<h3>Minor changes</h3>
+<h4>Minor changes</h4>
 
 <ul>
 
@@ -1393,7 +1516,7 @@ spectrum.</li>
 
 <hr></hr>
 
-<h2>Version 1.21</h2> May 14, 2009
+<h3>Version 1.21</h3> May 14, 2009
 
 <ul>
 
@@ -1518,7 +1641,7 @@ SEQUEST<sup>&reg;</sup>.</li>
 
 <hr></hr>
 
-<h2>Version 1.20</h2> January 6, 2009
+<h3>Version 1.20</h3> January 6, 2009
 
 <ul>
 
@@ -1570,7 +1693,7 @@ theoretical spectrum.
 
 <hr></hr>
 
-<h2>Version 1.02</h2> December 1, 2008
+<h3>Version 1.02</h3> December 1, 2008
 
 <ul>
 
@@ -1605,7 +1728,7 @@ HTML documentation was updated to reflect the above changes.</li>
 
 <hr></hr>
 
-<h2>Version 1.01</h2>
+<h3>Version 1.01</h3>
 
 <p>October 15, 2008</p>
 
@@ -1629,20 +1752,62 @@ The <code>--version</code> option was added.</li>
 
 <hr></hr>
 
-<h2>Version 1.0</h2>
+<h3>Version 1.0</h3>
 
 <p>March 4, 2008</p>
 
 <blockquote>
 Initial release
 </blockquote>
+	<!-- END CONTENT -->
+		</div>
+	</div>
 
-<hr></hr>
-
-<p>
-<a href="crux.html">Crux home</a></p>
-
-</blockquote>
+<footer class="site-footer">
+	<div id="centerfooter">
+		<div class="footerimportantlinks">
+			<img src="images/linkicon.png" style="width:16px; height:16px"><h3>Important links</h3>
+			<ul>
+				<li><a href="faq.html">Crux <strong>FAQ</strong></a></li>
+				<li><a href="glossary.html">Glossary of terminology</a></li>
+				<li><a href="http://scholar.google.com/citations?hl=en&user=Rw9S1HIAAAAJ">Google Scholar profile</a></li>
+				<li><a href="https://sourceforge.net/projects/cruxtoolkit/">SourceForge Issue's list</a></li>
+				<li><a href="release-notes.html">Release Notes</a></li>
+				<li><a href="https://mailman1.u.washington.edu/mailman/listinfo/crux-users" title="Receive announcements of new versions">Join the mailing list</a></li>
+				<li><a href="http://www.apache.org/licenses/LICENSE-2.0">Apache license</a></li>
+				<li><a href="http://groups.google.com/group/crux-users">Support Board</a></li>
+			</ul>
+		</div>
+		<div class="footerimportantlinks tutoriallinks">
+			<img src="images/tutorialicon.png" style="height:16px"><h3>Tutorials</h3>
+			<ul>
+				<li><a href="tutorials/install.html">Installation</a></li>
+				<li><a href="tutorials/gettingstarted.html">Getting started with Crux</a></li>
+				<li><a href="tutorials/search.html">Running a simple search using Tide and Percolator</a></li>
+				<li><a href="tutorials/customizedsearch.html">Customization and search options</a></li>
+				<li><a href="tutorials/spectralcounts.html">Using spectral-counts</a></li>
+			</ul>
+		</div>
+		<div id="footertext">
+			<p>
+				The original version of Crux was written by Chris Park and Aaron Klammer
+				under the supervision
+				of <a href="http://www.gs.washington.edu/faculty/maccoss.htm">Prof. Michael
+				MacCoss</a>
+				and <a href="http://noble.gs.washington.edu/~noble">Prof. William
+				Stafford Noble</a> in the Department of Genome Sciences at the
+				University of Washington, Seattle.  Website by <a href="http://www.yuvalboss.com/">Yuval Boss</a>. 
+				<br />The complete list of contributors
+				can be found <a href="contributors.html">here</a>.
+				<br />
+				<br />
+				Maintenance and development of Crux is funded by the <a href="https://www.nih.gov/">National Institutes of Health</a> awards R01 GM096306 and P41 GM103533. 
+			</p>
+		</div>
+	</div>
+</footer>
+	
 </body>
+
 </html>
 

@@ -12,7 +12,7 @@ void ArgParser::Parse(int argc, char** argv, const vector<string>& args) {
 
   vector<ArgSpec> argSpecs = ArgStringsToArgSpecs(args);
   int multi = -1; // Which argument accepts multiple values?
-  for (int i = 0; i < argSpecs.size(); i++) {
+  for (size_t i = 0; i < argSpecs.size(); i++) {
     if (!argSpecs[i].IsMulti()) {
       continue;
     } else if (multi != -1) {
@@ -118,7 +118,7 @@ vector<ArgParser::ArgSpec> ArgParser::ArgStringsToArgSpecs(const vector<string>&
 }
 
 ArgParserException::ArgParserException(const string& what, bool fullUsage)
- : runtime_error(what), fullUsage_(fullUsage) {
+  : runtime_error(what), fullUsage_(fullUsage) {
 }
 
 bool ArgParserException::ShowFullUsage() const {

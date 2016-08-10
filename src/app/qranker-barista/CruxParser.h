@@ -6,9 +6,6 @@
  ****************************************************************************/
 #ifndef CRUXPARSER_H
 #define CRUXPARSER_H
-#ifndef CRUX
-#define CRUX
-#endif
 
 #include <sys/stat.h>
 #ifndef _MSC_VER
@@ -27,12 +24,11 @@
 #include "SpecFeatures.h"
 #include "BipartiteGraph.h"
 #include "SQTParser.h"
-#ifdef CRUX
 #include "app/CruxApplication.h"
 #include "io/carp.h"
 #include "util/crux-utils.h"
 #include "parameter.h"
-#endif
+
 using namespace std;
 
 class CruxParser:public SQTParser{

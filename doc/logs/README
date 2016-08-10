@@ -1,0 +1,12 @@
+This directory contains the log of Crux distribution downloads from the Crux
+Sourceforge web site.
+
+The log file, downloads.txt, is downloaded from the Crux web site using:
+
+scp -r  crux-toolkit@web.sourceforge.net:/home/project-web/cruxtoolkit/htdocs/download/downloads.txt .
+
+This log file is generated on the Crux SourceForge site by the PHP script
+doc/user/download/download.php. This script gets installed to
+/home/project-web/cruxtoolkit/htdocs/download/download.php on the website,
+and is run whenever a user clicks on one of the download buttons in
+doc/user/download.html.

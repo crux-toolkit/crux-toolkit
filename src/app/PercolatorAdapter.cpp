@@ -186,8 +186,7 @@ void PercolatorAdapter::addPeptideScores() {
 
     PSMDescription* psm = score_itr->pPSM;
     string sequence;
-    FLOAT_T peptide_mass;
-    MODIFIED_AA_T* mod_seq = getModifiedAASequence(psm, sequence, peptide_mass);
+    MODIFIED_AA_T* mod_seq = getModifiedAASequence(psm, sequence);
     if (mod_seq == NULL) {
       deleteCollections();
       return;
@@ -220,7 +219,7 @@ void PercolatorAdapter::addProteinScores() {
   vector<ProteinMatch*> decoy_matches;
   map<const string, Protein*> protein_scores = protEstimator_->getProteins();
   
-  for (map<const string,Protein*>::iterator score_iter = protein_scores.begin();
+  for (map<const string, Protein*>::iterator score_iter = protein_scores.begin();
        score_iter != protein_scores.end();
        score_iter++) {
     if (score_iter->second == NULL) {
@@ -337,9 +336,7 @@ Crux::Peptide* PercolatorAdapter::extractPeptide(
   bool is_decoy ///< is psm a decoy?
 ) {
   string seq;
-  FLOAT_T peptide_mass;
-
-  MODIFIED_AA_T* mod_seq = getModifiedAASequence(psm, seq, peptide_mass);
+  MODIFIED_AA_T* mod_seq = getModifiedAASequence(psm, seq);
   if (mod_seq == NULL) {
     return NULL;
   }
@@ -364,7 +361,7 @@ Crux::Peptide* PercolatorAdapter::extractPeptide(
     protein->setId(i->c_str());
     int start_idx = protein->findStart(seq, n_term, c_term);
     if (peptide == NULL) {
-      peptide = new Crux::Peptide(seq.length(), peptide_mass, protein, start_idx);
+      peptide = new Crux::Peptide(seq.length(), protein, start_idx);
       peptide->setModifiedAASequence(mod_seq, is_decoy);
       free(mod_seq);
     } else {
@@ -381,8 +378,7 @@ Crux::Peptide* PercolatorAdapter::extractPeptide(
  */
 MODIFIED_AA_T* PercolatorAdapter::getModifiedAASequence(
   PSMDescription* psm, ///< psm -in
-  string& seq, ///< sequence -out
-  FLOAT_T& peptide_mass ///< calculated mass of peptide with modifications -out
+  string& seq ///< sequence -out
 ) {
   string perc_seq = psm->getFullPeptideSequence();
   if (perc_seq.length() >= 5 &&
@@ -404,7 +400,6 @@ MODIFIED_AA_T* PercolatorAdapter::getModifiedAASequence(
   set_verbosity_level(0);
 
   int mod_len = convert_to_mod_aa_seq(perc_seq.c_str(), &mod_seq, MOD_MASS_ONLY);
-  peptide_mass = get_mod_aa_seq_mass(mod_seq, get_mass_type_parameter("isotopic-mass"));
   seq = string(mod_len, '\0');
   for (int i = 0; i < mod_len; i++) {
     seq[i] = modified_aa_to_char(mod_seq[i]);
@@ -413,7 +408,6 @@ MODIFIED_AA_T* PercolatorAdapter::getModifiedAASequence(
   // Restore verbosity
   set_verbosity_level(verbosity);
 
-  carp(CARP_DEBUG, "Peptide mass:%lf", peptide_mass);
   return mod_seq;
 }
 
@@ -468,20 +462,20 @@ int PercolatorAdapter::run() {
   //PSM probabilities TDA or TDC
   calculatePSMProb(false, procStart, procStartClock, diff);
   addPsmScores();
-  if (xmlInterface_.getXmlOutputFN().size() > 0){
+  if (xmlInterface_.getXmlOutputFN().size() > 0) {
     xmlInterface_.writeXML_PSMs(allScores_);
   }
   
   // calculate unique peptides level probabilities WOTE
-  if (reportUniquePeptides_){
+  if (reportUniquePeptides_) {
     calculatePSMProb(true, procStart, procStartClock, diff);
     addPeptideScores();
-    if (xmlInterface_.getXmlOutputFN().size() > 0){
+    if (xmlInterface_.getXmlOutputFN().size() > 0) {
       xmlInterface_.writeXML_Peptides(allScores_);
     }
   }
   // calculate protein level probabilities with FIDO
-  if(ProteinProbEstimator::getCalcProteinLevelProb()){
+  if(ProteinProbEstimator::getCalcProteinLevelProb()) {
     calculateProteinProbabilitiesFido();
     addProteinScores();
   }

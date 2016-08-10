@@ -123,7 +123,7 @@ void LinkedIonSeries::addLinkedIons(
       break;
     case SPLITTYPE_INVALID:
     case NUMBER_SPLITTYPES:
-      carp(CARP_FATAL, "SPLITTYPE invalid:%d",(int)split_type);
+      carp(CARP_FATAL, "SPLITTYPE invalid:%d", (int)split_type);
   }
   
   for (vector<pair<LinkedPeptide, LinkedPeptide> >::iterator ion_pair = 
@@ -158,7 +158,7 @@ int LinkedIonSeries::getTotalBYIons() {
   for (ion_iter = all_ions_.begin(); 
     ion_iter != all_ions_.end(); 
      ++ion_iter) {
-	
+
     if (ion_iter -> getIonType() == B_ION || ion_iter -> getIonType() == Y_ION) {
       ans++;
     }

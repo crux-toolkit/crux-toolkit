@@ -4,6 +4,8 @@
 #include <stdio.h>
 #ifndef _MSC_VER
 #include <unistd.h>
+#else
+#include <windows.h>
 #endif
 #include <string>
 #include <vector>
@@ -18,28 +20,39 @@
 #include "peptides.pb.h"
 #include "mass_constants.h"
 #include "modifications.h"
+#include "util/FileUtils.h"
+#include "io/carp.h"
 
 using namespace std;
 
 #define CHECK(x) GOOGLE_CHECK(x)
 
-DEFINE_string(tmpfile_prefix, "/tmp/modified_peptides_partial_", "Temporary filename prefix.");
 DEFINE_int32(buf_size, 1024, "Buffer size for files, in KBytes.");
 DEFINE_int32(max_mods, 255, "Maximum number of modifications that can be applied "
                             "to a single peptide.");
 DEFINE_int32(min_mods, 0, "Minimum number of modifications that can be applied "
                           "to a single peptide.");
 
-static string GetTempName(int filenum) {
-  char buf[10];
-  sprintf(buf, "%d", filenum);
-  return FLAGS_tmpfile_prefix + buf;
+static string GetTempName(string tmpDir, int filenum) {
+  char buf[36];
+  sprintf(buf, "modified_peptides_partial_%d", filenum);
+  if (tmpDir != "") {
+    return FileUtils::Join(tmpDir, buf);
+  }    
+#ifdef _MSC_VER
+  char buf2[261];
+  GetTempPath(261, buf2);
+  return FileUtils::Join(string(buf2), buf);
+#else
+  return FileUtils::Join(string("/tmp/"), buf);
+#endif
 }
 
 class ModsOutputter {
  public:
   unsigned long modpeptidecnt_;
-  ModsOutputter(const vector<const pb::Protein*>& proteins,
+  ModsOutputter(string tmpDir,
+                const vector<const pb::Protein*>& proteins,
 		VariableModTable* var_mod_table,
 		HeadedRecordWriter* final_writer)
     : proteins_(proteins),
@@ -48,7 +61,7 @@ class ModsOutputter {
       counts_mapper_vec_(max_counts_.size(), 0),
       final_writer_(final_writer),
       count_(0) {
-    InitCountsMapper();
+    InitCountsMapper(tmpDir);
   }
 
   ~ModsOutputter() {
@@ -63,16 +76,18 @@ class ModsOutputter {
     residues_ = proteins_[loc.protein_id()]->residues().data() + loc.pos();
     vector<int> counts(max_counts_.size(), 0);
     OutputNtermMods(0, counts);
-//    OutputMods(0, counts);
   }
 
  private:
+  string tmpDir_;
   void OutputMods(int pos, vector<int>& counts);
   void OutputNtermMods(int pos, vector<int>& counts);
   void OutputCtermMods(int pos, vector<int>& counts);
   void Merge();
 
-  void InitCountsMapper() {
+  void InitCountsMapper(string tmpDir) {
+    tmpDir_ = tmpDir;
+    
     int prod = 1;
     for (int i = 0; i < max_counts_.size(); ++i) {
       counts_mapper_vec_[i] = prod;
@@ -83,12 +98,16 @@ class ModsOutputter {
     }
 
     writers_.resize(prod);
+    if (prod > 100) {
+      carp(CARP_INFO, "Opening %d files for modifications.", prod);
+    }
+
     for (int i = 0; i < prod; ++i) {
-      writers_[i] = new RecordWriter(GetTempName(i), FLAGS_buf_size << 10);
+      writers_[i] = new RecordWriter(GetTempName(tmpDir, i), FLAGS_buf_size << 10);
       if (!writers_[i]->OK()) {
         // delete temporary files
         for (int j = 0; j < i; ++j)
-          unlink(GetTempName(j).c_str());
+          unlink(GetTempName(tmpDir, j).c_str());
         CHECK(writers_[i]->OK());
       }
     }
@@ -99,9 +118,9 @@ class ModsOutputter {
       double total_delta = 0;
       int x = i;
       for (int j = max_counts_.size() - 1; j >= 0; --j) {
-	int digit = x / counts_mapper_vec_[j];
-	x %= counts_mapper_vec_[j];
-	total_delta += deltas[j] * digit;
+        int digit = x / counts_mapper_vec_[j];
+        x %= counts_mapper_vec_[j];
+        total_delta += deltas[j] * digit;
       }
       delta_by_file_[i] = total_delta;
     }
@@ -123,9 +142,10 @@ class ModsOutputter {
     int index = DotProd(counts);
     double mass = peptide_->mass();
     peptide_->set_mass(delta_by_file_[index] + mass);
-    writers_[index]->Write(peptide_);
+    if (!writers_[index]->Write(peptide_)) {
+      carp(CARP_FATAL, "I/O error writing modifications");
+    }
     peptide_->set_mass(mass);
-
     return writers_[index];
   }
 
@@ -401,7 +421,7 @@ void ModsOutputter::Merge() {
   int num_files = writers_.size();
   vector<PepReader*> readers(num_files);
   for (int i = 0; i < num_files; ++i)
-    readers[i] = new PepReader(GetTempName(i));
+    readers[i] = new PepReader(GetTempName(tmpDir_, i));
 
   // initialize heap
   PepReader** heap_end = &(readers[0]) + num_files;
@@ -435,30 +455,31 @@ void ModsOutputter::Merge() {
   // delete temporary files
   for (int i = 0; i < num_files; ++i) {
     delete readers[i];
-    unlink(GetTempName(i).c_str());
+    unlink(GetTempName(tmpDir_, i).c_str());
   }
 }
 
 void AddMods(HeadedRecordReader* reader, string out_file,
+             string tmpDir,
 	     const pb::Header& header,
-	     const vector<const pb::Protein*>& proteins, VariableModTable& var_mod_table) {
-//  VariableModTable var_mod_table;
-//  var_mod_table.Init(header.peptides_header().mods());
+	     const vector<const pb::Protein*>& proteins, 
+	     VariableModTable& var_mod_table) {
   CHECK(reader->OK());
   HeadedRecordWriter writer(out_file, header, FLAGS_buf_size << 10);
   CHECK(writer.OK());
-  ModsOutputter outputter(proteins, &var_mod_table, &writer);
+  ModsOutputter outputter(tmpDir, proteins, &var_mod_table, &writer);
   outputter.modpeptidecnt_ = 0; 
   pb::Peptide peptide;
   while (!reader->Done()) {
     CHECK(reader->Read(&peptide));
     outputter.Output(&peptide);
   } 
-//  cout << "no of modified peptides:\t" << outputter.modpeptidecnt_ << endl<<endl;
+  carp(CARP_INFO, "Created %d peptides.", outputter.modpeptidecnt_);
   CHECK(reader->OK());
 }
 
 void AddMods(HeadedRecordReader* reader, string out_file,
+             string tmpDir,
 	     const pb::Header& header,
 	     const vector<const pb::Protein*>& proteins) {
   VariableModTable var_mod_table;
@@ -466,7 +487,7 @@ void AddMods(HeadedRecordReader* reader, string out_file,
   CHECK(reader->OK());
   HeadedRecordWriter writer(out_file, header, FLAGS_buf_size << 10);
   CHECK(writer.OK());
-  ModsOutputter outputter(proteins, &var_mod_table, &writer);
+  ModsOutputter outputter(tmpDir, proteins, &var_mod_table, &writer);
 
   pb::Peptide peptide;
   while (!reader->Done()) {

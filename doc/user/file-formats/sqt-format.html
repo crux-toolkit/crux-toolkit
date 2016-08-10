@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Crux Template</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" type="text/css" href="../styles.css">
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-26136956-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<script type="text/javascript">
+	// Main Menu
+	$( document ).ready(function() {
+			var pull 		= $('.btn');
+				menu 		= $('nav ul');
+				menuHeight	= menu.height();
+
+			$(pull).on('click', function(e) {
+				e.preventDefault();
+				menu.slideToggle();
+			});
+
+			$(window).resize(function(){
+	    		var w = $(window).width();
+	    		if(w > 320 && menu.is(':hidden')) {
+	    			menu.removeAttr('style');
+	    		} 
+			});
+	});
+</script>
+</head>
+<body>
+	<div class="page-wrap">
+	 	<nav>
+			<div class="btn">
+		    </div>
+		    <img src="../images/crux-logo.png" id="logo"></a>
+			<ul id="navitems">
+			    <li><a href="../index.html">Home</a></li>
+			    <li><a href="../download.html">Download</a></li>
+			    <li><a href="../fileformats.html">File Formats</a></li>
+		        <li><a href="http://groups.google.com/group/crux-users">Contact</a></li> <!--Link to google support board-->
+		    </ul>
+		</nav>
+		<div id="content">
+		<!-- START CONTENT -->
+		<h2>SQT file format</h2>
+		<p>
+		The SQT file format is used to record the matches between MS/MS spectra
+		and a sequence database.
+		A full description of the SQT file format may be found in:</p>
+
+		McDonald, W.H. et al.
+		<a href="http://onlinelibrary.wiley.com/doi/10.1002/rcm.1603/abstract">"MS1, MS2, and SQT-three unified, compact, and easily parsed file formats for the storage
+		of shotgun proteomic spectra and identifications."</a> <i>Rapid
+		    Communications in Mass Spectrometry.</i> <b>18</b>, 2162-2168 (2004).
+		</blockquote>
+
+		<p>
+		An SQT file consists of a header followed by one or more spectrum matches.
+		The header and match data are broken into records, one record per line. 
+		Fields within a record are separated by white space.
+		</p>
+		<p>
+		A sample SQT file may be found <a href="../example-files/target.sqt">here</a>.
+		</p>
+
+		<h3>Header details</h3>
+		<p>
+		Each line in the header must begin with an <code>H</code>.
+		This is followed by a field label, and then a field value,
+		all separated by white space.
+		The field label must be one of the labels listed  below,
+		while the field value can be an aribrary string.
+		A typical header is shown below.
+		</p>
+		<pre>
+H	SQTGenerator Crux
+H	SQTGeneratorVersion 1.0
+H	Comment Crux was written by...
+H	Comment ref...
+H	StartTime	Tue Dec  2 15:22:50 2008
+H	EndTime                               
+H	Database	test_crux_index/test-binary-fasta
+H	DBSeqLength	?
+H	DBLocusCount	4
+H	PrecursorMasses	average
+H	FragmentMasses	mono
+H	Alg-PreMasTol	3.0
+H	Alg-FragMassTol	0.50
+H	Alg-XCorrMode	0
+H	Comment	preliminary algorithm sp
+H	Comment	final algorithm xcorr
+H	StaticMod	C=160.139
+H	Alg-DisplayTop	5
+H	EnzymeSpec	tryptic
+		</pre>
+		<p>
+		The following field labels must appear in the header:
+		</p>
+		<table style="text-align: left;">
+		<caption style="text-align: left;">Required header field labels</caption>
+		<thead>
+		<tr>
+		<th>Field Label</th>
+		<th>Description</th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+		<td>SQTGenerator</td><td>The name of the software used to create the SQT file</td>
+		</tr>
+		<tr>
+		<td>SQTGeneratorVersion</td><td>The version number of the SQTGenerator software</td>
+		</tr>
+		<tr>
+		<td>Database</td><td>Path to sequence database used to generate the SQT file</td>
+		</tr>
+		<tr>
+		<td>FragmentMasses</td>
+		<td>Were average or mono-istopic residue masses used to predict the fragment ion mass</td>
+		</tr>
+		<tr>
+		<td>PrecursorMasses</td>
+		<td>Were average or mono-istopic residue masses used to predict the precursor ion mass</td>
+		</tr>
+		<tr>
+		<td>StartTime</td><td>Time when SQT file was created</td>
+		</tr>
+		<tr>
+		<td>StaticMod</td>
+		<td>Non-standard amino-acid masses used in identification 
+		(repeat this record if there are multiple non-standard masses)</td>
+		</tr>
+		<tr>
+		<td>DynamicMod</td>
+		<td>List of dynamic modifications used in identification</td>
+		</tr>
+		</tbody>
+		</table>
+		<p>
+		The following field labels are optional, and may appear in the header:
+		</p>
+		<table style="text-align: left;">
+		<caption style="text-align: left;">Optional header field labels</caption>
+		<thead>
+		<tr>
+		<th>Field Label</th>
+		<th>Description</th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+		<td>Comment</td>
+		<td>Remarks. Multiple comment lines are allowed<td>
+		</tr>
+		<tr>
+		<td>DBSeqLength</td>
+		<td>Number of aminio acids in sequence database</td>
+		</tr>
+		<tr>
+		<td>DBLocusCount</td>
+		<td>Number of proteins in sequence database</td>
+		</tr>
+		<tr>
+		<td>DBMD5Sum</td>
+		<td>MD5 checksum of sequence database</td>
+		</tr>
+		<tr>
+		<td>SortedBy</td>
+		<td>Name of field use to sort spectra<td>
+		</tr>
+		<tr>
+		<td>Alg-</td>
+		<td>Field names begining with Alg- are algorithm specific<td>
+		</tr>
+		<tr>
+		<td>*</td>
+		<td>Other field names are allowed, but may not contain white-space<td>
+		</tr>
+		</tbody>
+		</table>
+
+		<h3>Match details</h3>
+		<p>
+		Each spectrum match begins with a spectrum (S) record, 
+		each S record is followed by one or more match (M) records,
+		and each M record is followed by one or more Locus (L) records.
+		The S record contains the scan number and other details for the spectum,
+		the M records contains the highest scoring peptide matches for the parent spectrum,
+		and the L records give the names of proteins containing the parent match peptide.
+		</p>
+		<pre>
+S	45894	45894	2	1	maccoss007	2038.59	9199.5	147.1	153628
+M	  1	 27	2040.244	0.0000	 1.5881	 245.6	 11	34	    V.YKCAADKQDATVVELTNL.T	U
+L	YCR102C
+M	  2	 68	2038.265	0.0116	 1.5698	 208.4	 11	36	    S.TQSGIVAEQALLHSLNENL.S	U
+L	YGR080W
+M	  3	 34	2039.247	0.1582	 1.3369	 239.3	 11	36	    I.NEKTSPALVIPTPDAENEI.S	U
+L	YLR035C
+M	  4	322	2040.365	0.1699	 1.3183	 160.0	  9	36	    I.LKESKSVQPGKAIPDIIES.P	U
+L	YJL126W
+M	  5	 74	2039.453	0.2288	 1.2248	 203.6	 10	32	    D.MISVDLKTPLVIFKCHH.G	U
+L	YAL002W
+M	 65	  1	2041.246	0.4179	 0.9245	 370.2	 13	32	    S.CCGLSLPGLHDLLRHYE.E	U
+L	YLR403W
+S	45904	45904	3	1	maccoss007	2834.54	10103.7	246.4	152668
+M	  1	237	2833.059	0.0000	 1.9175	 273.1	 20	108	        N.NSGSDTVDPLAGLNNLRNSIKSAGNGME.N	U
+L	YDR505C
+M	  2	223	2834.278	0.1390	 1.6510	 274.8	 18	96	        G.HLSRISNIDDILISMRMDAFDSLIG.Y	U
+L	YLR247C
+M	  3	 52	2835.100	0.1503	 1.6292	 324.1	 20	96	  S.KSTTEPIQLNNKHDLHLGQELTEST.V	U
+L	YDR098C-B
+L	YDR365W-B
+L	YER138C
+L	YGR027W-B
+		</pre>
+		</p>
+		<table style="text-align: left;">
+		<caption style="text-align: left;">Record types for scans</caption>
+		<thead>
+		<tr>
+		<th>Symbol</th>
+		<th>Description</th>
+		<th>Generic form</th>
+		<th>Required</th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+		<td>S</td>
+		<td>Spectrum</td>
+		<td><code>S [low scan] [high scan] [charge] [process time] 
+		<br />
+		[server] [experimental neutral mass] [total ion intensity] [lowest Sp] [# of seq. matched]
+		</code></td>
+		<td>yes</td>
+		</tr>
+		<tr>
+		<td>M</td>
+		<td>Match</td>
+		<td><code>M [rank by Xcorr] [rank by Sp] [calculated mass]
+		<br />
+		[DeltaCN] [Xcorr] [Sp] [matched ions] [expected ions] [sequence matched] 
+		<br />
+		[validation status U = unknown, Y = yes, N = no, M = Maybe]
+		</code></td>
+		<td>yes</td>
+		</tr>
+		<tr>
+		<td>L</td>
+		<td>Locus</td>
+		<td><code>L [locus name] [description if available]</code></td>
+		<td>yes</td>
+		</tr>
+		</tbody>
+		</table>
+
+		<h3>Differences between Crux's SQT format and the published
+		  version</h3>
+
+		<ul>
+		<li>
+		Relative to the original specification of SQT, Crux expects an
+		additional field [total ion intensity] in the "S" lines.</li>
+		<li>
+		In the original specification, the FragmentMasses and PrecursorMasses
+		header lines used the values  "AVG" or "MONO", but Crux uses "average"
+		and "mono".</li>
+		</ul>
+			<!-- END CONTENT -->
+		</div>
+	</div>
+
+<footer class="site-footer">
+	<div id="centerfooter">
+		<div class="footerimportantlinks">
+			<img src="../images/linkicon.png" style="width:16px; height:16px"><h3>Important links</h3>
+			<ul>
+				<li><a href="../faq.html">Crux <strong>FAQ</strong></a></li>
+				<li><a href="../glossary.html">Glossary of terminology</a></li>
+				<li><a href="http://scholar.google.com/citations?hl=en&user=Rw9S1HIAAAAJ">Google Scholar profile</a></li>
+				<li><a href="https://sourceforge.net/projects/cruxtoolkit/">SourceForge Issue's list</a></li>
+				<li><a href="../release-notes.html">Release Notes</a></li>
+				<li><a href="https://mailman1.u.washington.edu/mailman/listinfo/crux-users" title="Receive announcements of new versions">Join the mailing list</a></li>
+				<li><a href="http://www.apache.org/licenses/LICENSE-2.0">Apache license</a></li>
+				<li><a href="http://groups.google.com/group/crux-users">Support Board</a></li>
+			</ul>
+		</div>
+		<div class="footerimportantlinks tutoriallinks">
+			<img src="../images/tutorialicon.png" style="height:16px"><h3>Tutorials</h3>
+			<ul>
+				<li><a href="../tutorials/install.html">Installation</a></li>
+				<li><a href="../tutorials/gettingstarted.html">Getting started with Crux</a></li>
+				<li><a href="../tutorials/search.html">Running a simple search using Tide and Percolator</a></li>
+				<li><a href="../tutorials/customizedsearch.html">Customization and search options</a></li>
+				<li><a href="../tutorials/spectralcounts.html">Using spectral-counts</a></li>
+			</ul>
+		</div>
+		<div id="footertext">
+			<p>
+				The original version of Crux was written by Chris Park and Aaron Klammer
+				under the supervision
+				of <a href="http://www.gs.washington.edu/faculty/maccoss.htm">Prof. Michael
+				MacCoss</a>
+				and <a href="http://noble.gs.washington.edu/~noble">Prof. William
+				Stafford Noble</a> in the Department of Genome Sciences at the
+				University of Washington, Seattle.  Website by <a href="http://www.yuvalboss.com/">Yuval Boss</a>. 
+				<br />The complete list of contributors
+				can be found <a href="../contributors.html">here</a>.
+				<br />
+				<br />
+				Maintenance and development of Crux is funded by the <a href="https://www.nih.gov/">National Institutes of Health</a> awards R01 GM096306 and P41 GM103533. 
+			</p>
+		</div>
+	</div>
+</footer>
+	
+</body>
+
+</html>

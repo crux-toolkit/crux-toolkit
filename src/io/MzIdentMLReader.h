@@ -22,15 +22,18 @@ class MzIdentMLReader : public PSMReader {
  protected:
 
   pwiz::identdata::IdentDataFile* pwiz_reader_; ///< proteowizard's reader for mzid.
-
   MatchCollection* match_collection_; ///<resulting match collection
   bool use_pass_threshold_; ///<indicator of whether to use the passThreshold attribute
-
 
   /**
    * Initializes the object
    */
   void init();
+
+  /**
+   * parses the modifications from the mzid file
+   */
+  void parseMods();
 
   /**
    * parses the psms from the mzid file

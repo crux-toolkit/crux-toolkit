@@ -107,9 +107,9 @@ class TheoreticalPeakSet {
   virtual void AddYIon(double mass, int charge) = 0;
   virtual void AddBIon(double mass, int charge) = 0;
   virtual void GetPeaks(TheoreticalPeakArr* peaks_charge_1,
-			TheoreticalPeakArr* negs_charge_1,
+                        TheoreticalPeakArr* negs_charge_1,
                         TheoreticalPeakArr* peaks_charge_2,
-			TheoreticalPeakArr* negs_charge_2,
+                        TheoreticalPeakArr* negs_charge_2,
                         const pb::Peptide* peptide = NULL) = 0;
   
  protected:
@@ -443,7 +443,7 @@ DECLARE_bool(dups_ok);
 // for each Y ion of charge 2.
 class TheoreticalPeakSetBYSparse : public TheoreticalPeakSet {
  public:
-  TheoreticalPeakSetBYSparse(int capacity) {
+  explicit TheoreticalPeakSetBYSparse(int capacity) {
     peaks_[0].Init(capacity);
     peaks_[1].Init(capacity);
   }
@@ -458,12 +458,12 @@ class TheoreticalPeakSetBYSparse : public TheoreticalPeakSet {
   void AddYIon(double mass, int charge) {
      assert(charge <= 2);
     int index_y = MassConstants::mass2bin(mass + MassConstants::Y + MassConstants::proton, charge);
-//	  cout << "index_y:  " << index_y << endl;
+//    cout << "index_y:  " << index_y << endl;
     TheoreticalPeakType series;
     if (charge == 1) {
       series = PeakCombinedY1;
     } else {
-//	  int nh3_diff = index_y - MassConstants::mass2bin(mass + MassConstants::Y_NH3, charge);
+//    int nh3_diff = index_y - MassConstants::mass2bin(mass + MassConstants::Y_NH3, charge);
 //      assert(nh3_diff == MassConstants::BIN_SHIFT_NH3_CHG_2_CASE_A ||
 //             nh3_diff == MassConstants::BIN_SHIFT_NH3_CHG_2_CASE_B);
 //      series = nh3_diff == MassConstants::BIN_SHIFT_NH3_CHG_2_CASE_A ? PeakCombinedY2a 
@@ -480,12 +480,12 @@ class TheoreticalPeakSetBYSparse : public TheoreticalPeakSet {
   void AddBIon(double mass, int charge) {
      assert(charge <= 2);
     int index_b = MassConstants::mass2bin(mass + MassConstants::B + MassConstants::proton, charge);
-//	  cout << "index_b:  " << index_b << endl;
+//    cout << "index_b:  " << index_b << endl;
     TheoreticalPeakType series;
     if (charge == 1) {
       series = PeakCombinedB1;
     } else {
-//	  int nh3_diff = index_b - MassConstants::mass2bin(mass + MassConstants::B_NH3, charge);
+//      int nh3_diff = index_b - MassConstants::mass2bin(mass + MassConstants::B_NH3, charge);
 //      assert(nh3_diff == MassConstants::BIN_SHIFT_NH3_CHG_2_CASE_A ||
 //             nh3_diff == MassConstants::BIN_SHIFT_NH3_CHG_2_CASE_B);
 //      series = nh3_diff == MassConstants::BIN_SHIFT_NH3_CHG_2_CASE_A ? PeakCombinedB2a 
@@ -541,12 +541,12 @@ class TheoreticalPeakSetBYSparse : public TheoreticalPeakSet {
 
   void AddYIon(double mass, int charge) {
     assert(charge <= 2);
-	int index_y = MassConstants::mass2bin(mass + MassConstants::Y, charge);
+    int index_y = MassConstants::mass2bin(mass + MassConstants::Y, charge);
     TheoreticalPeakType series;
     if (charge == 1) {
       series = PeakCombinedY1;
     } else {
-	  int nh3_diff = index_y - MassConstants::mass2bin(mass + MassConstants::Y_NH3, charge);
+      int nh3_diff = index_y - MassConstants::mass2bin(mass + MassConstants::Y_NH3, charge);
       assert(nh3_diff == MassConstants::BIN_SHIFT_NH3_CHG_2_CASE_A ||
              nh3_diff == MassConstants::BIN_SHIFT_NH3_CHG_2_CASE_B);
       series = nh3_diff == MassConstants::BIN_SHIFT_NH3_CHG_2_CASE_A ? PeakCombinedY2a 
@@ -573,8 +573,8 @@ class TheoreticalPeakSetBYSparse : public TheoreticalPeakSet {
 
 
   void GetPeaks(TheoreticalPeakArr* peaks_charge_1,
-		TheoreticalPeakArr* negs_charge_1,
-		TheoreticalPeakArr* peaks_charge_2,
+    TheoreticalPeakArr* negs_charge_1,
+    TheoreticalPeakArr* peaks_charge_2,
 		TheoreticalPeakArr* negs_charge_2,
 		const pb::Peptide* peptide = NULL) {
     ordered_peak_sets_.Merge(peptide);
@@ -613,10 +613,10 @@ class TheoreticalPeakSetBYAll : public TheoreticalPeakSet {
   }
 
   void GetPeaks(TheoreticalPeakArr* peaks_charge_1,
-		TheoreticalPeakArr* negs_charge_1,
-		TheoreticalPeakArr* peaks_charge_2,
-		TheoreticalPeakArr* negs_charge_2,
-		const pb::Peptide* peptide = NULL) {
+    TheoreticalPeakArr* negs_charge_1,
+    TheoreticalPeakArr* peaks_charge_2,
+    TheoreticalPeakArr* negs_charge_2,
+    const pb::Peptide* peptide = NULL) {
     assert(peptide == NULL);
     ordered_peak_sets_.Merge();
     Copy(ordered_peak_sets_.temp1_, peaks_charge_1);
@@ -625,7 +625,7 @@ class TheoreticalPeakSetBYAll : public TheoreticalPeakSet {
 
  private:
   void AddYIon(double mass, int charge, TheoreticalPeakArr* dest) {
-	int index_y = MassConstants::mass2bin(mass + MassConstants::Y, charge);
+    int index_y = MassConstants::mass2bin(mass + MassConstants::Y, charge);
     if (charge == 1) {
       AddPeak(dest, index_y - MassConstants::BIN_SHIFT_H2O_CHG_1, LossPeak);
       AddPeak(dest, index_y - MassConstants::BIN_SHIFT_NH3_CHG_1, LossPeak);
@@ -634,7 +634,7 @@ class TheoreticalPeakSetBYAll : public TheoreticalPeakSet {
       // In case A the NH3 peak will have been added already...
       assert(MassConstants::BIN_SHIFT_H2O_CHG_2 == MassConstants::BIN_SHIFT_NH3_CHG_2_CASE_A);
       // Otherwise (case B), a separate NH3 peak is needed. 
-	  if (index_y - MassConstants::mass2bin(mass + MassConstants::Y_NH3, charge) 
+      if (index_y - MassConstants::mass2bin(mass + MassConstants::Y_NH3, charge) 
           == MassConstants::BIN_SHIFT_NH3_CHG_2_CASE_B)
         AddPeak(dest, index_y - MassConstants::BIN_SHIFT_NH3_CHG_2_CASE_B, LossPeak);
     }
@@ -751,14 +751,14 @@ class TheoreticalPeakSetSparse : public TheoreticalPeakSet {
   }
 
   void GetPeaks(TheoreticalPeakArr* peaks_charge_1,
-		TheoreticalPeakArr* negs_charge_1,
-		TheoreticalPeakArr* peaks_charge_2,
-		TheoreticalPeakArr* negs_charge_2,
-		const pb::Peptide* peptide = NULL) {
+                TheoreticalPeakArr* negs_charge_1,
+                TheoreticalPeakArr* peaks_charge_2,
+                TheoreticalPeakArr* negs_charge_2,
+                const pb::Peptide* peptide = NULL) {
     assert(peptide == NULL);
     BY_sparse_.GetPeaks(peaks_charge_1, NULL, peaks_charge_2, NULL);
     diff_.GetPeaks(peaks_charge_1, negs_charge_1,
-		   peaks_charge_2, negs_charge_2);
+                   peaks_charge_2, negs_charge_2);
   }
 
  private:
@@ -769,11 +769,11 @@ class TheoreticalPeakSetSparse : public TheoreticalPeakSet {
 */
 
 // This class is used to store theoretical b ions only, with true monoisotopic mass,
-//		for use in exact p-value calculations.
+// for use in exact p-value calculations.
 class TheoreticalPeakSetBIons {
  public:
   TheoreticalPeakSetBIons() {}
-  TheoreticalPeakSetBIons(int capacity) {
+  explicit TheoreticalPeakSetBIons(int capacity) {
     unordered_peak_list_.reserve(capacity);
   }
   virtual ~TheoreticalPeakSetBIons() {}

@@ -63,8 +63,8 @@ bool isCrossLinkInter(
  * \returns whether two proposed peptides would contain an intra-protein crosslink
  */
 bool isCrossLinkIntra(
-   Crux::Peptide* pep1,
-   Crux::Peptide* pep2
+  Crux::Peptide* pep1,
+  Crux::Peptide* pep2
   );
 
 /**
@@ -94,13 +94,14 @@ void addAllocatedPeptide(
  */
 void deleteAllocatedPeptides();
 
-};
-  
+} // namespace XLink
+
 #endif
 
-/*                                                                                                                                                                                                                          
- * Local Variables:                                                                                                                                                                                                         
- * mode: c                                                                                                                                                                                                                  
- * c-basic-offset: 2                                                                                                                                                                                                        
- * End:                                                                                                                                                                                                                     
+/*
+ * Local Variables:
+ * mode: c 
+ * c-basic-offset: 2
+ * End:
  */
+

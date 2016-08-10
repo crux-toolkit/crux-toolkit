@@ -7,6 +7,7 @@
 
 #include "XLinkablePeptideIterator.h"
 #include "XLink.h"
+#include "util/Params.h"
 #include <iostream>
 
 using namespace std;
@@ -35,9 +36,6 @@ XLinkablePeptideIterator::XLinkablePeptideIterator(
       is_decoy,
       database);
   queueNextPeptide();
-
-  
-
 }
 
 /**
@@ -53,7 +51,7 @@ XLinkablePeptideIterator::~XLinkablePeptideIterator() {
 void XLinkablePeptideIterator::queueNextPeptide() {
 
   has_next_ = false;
-  int max_mod_xlink = get_int_parameter("max-xlink-mods");
+  int max_mod_xlink = Params::GetInt("max-xlink-mods");
   while (peptide_iterator_->hasNext() && !has_next_) {
 
     Crux::Peptide* peptide = peptide_iterator_->next();

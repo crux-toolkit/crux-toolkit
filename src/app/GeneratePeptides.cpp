@@ -120,13 +120,17 @@ void GeneratePeptides::processFasta(
 
   // Once we have all targets, try to generate a decoy for each one
   if (peptideShuffle || peptideReverse) {
+    int decoyFailures = 0;
     for (set<string>::const_iterator i = targets.begin(); i != targets.end(); i++) {
       string decoy;
       if (makeDecoy(*i, targets, decoys, peptideShuffle, decoy)) {
         targetToDecoy[&*i] = &*(decoys.insert(decoy).first);
       } else {
-        carp_once(CARP_WARNING, "Could not make decoy from %s", i->c_str());
+        ++decoyFailures;
       }
+    }
+    if (decoyFailures > 0) {
+      carp(CARP_WARNING, "Failed to generate decoys for %d targets", decoyFailures);
     }
   }
 

@@ -64,7 +64,7 @@ int MakePinApplication::main(const vector<string>& paths) {
       bool scored = current_collection->getScoredType(cur_type);
       target_collection->setScoredType(cur_type, scored);
       decoy_collection->setScoredType(cur_type, scored);
-    } 
+    }
     MatchIterator match_iter(current_collection);
     while (match_iter.hasNext()) {
       Crux::Match* match = match_iter.next();
@@ -152,7 +152,7 @@ string MakePinApplication::getDescription() const {
     "(&quot;target&quot;) peptides and a second set derived from matching the "
     "same spectra against &quot;decoy&quot; peptides. The output file contains, "
     "for each PSM, a set of features for use by the Percolator algorithm. These "
-    "features are summarized <a href=\"features.html\">here</a>.</p><p>Note "
+    "features are summarized <a href=\"../file-formats/features.html\">here</a>.</p><p>Note "
     "that, in the stand-alone version of Percolator, the functionality provided "
     "by <code>crux make-pin</code> is incorporated into a program called "
     "<code>sqt2pin</code>. However, a significant difference between <code>crux "

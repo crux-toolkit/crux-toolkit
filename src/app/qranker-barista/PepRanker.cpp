@@ -1,5 +1,6 @@
 #include "PepRanker.h"
 #include "util/modifications.h"
+#include "util/Params.h"
 #include "app/ComputeQValues.h"
 
 PepRanker::PepRanker() :  
@@ -685,7 +686,7 @@ void PepRanker :: write_results_peptides_tab(ofstream &os)
     os<<"b/y ions matched"<<"\t";
     os<<"b/y ions total"<<"\t";
   }
-  os<<"matches/spectrum"<<"\t";
+  os<<"distinct matches/spectrum"<<"\t";
   os<<"sequence\t"; 
   os<<"cleavage type"<<"\t"; 
   os<<"protein id"<<"\t";
@@ -782,7 +783,7 @@ void PepRanker :: write_results_psm_tab(ofstream &os)
     os<<"b/y ions matched"<<"\t";
     os<<"b/y ions total"<<"\t";
   }
-  os<<"matches/spectrum"<<"\t";
+  os<<"distinct matches/spectrum"<<"\t";
   os<<"sequence"<<"\t";
   os<<"cleavage type"<<"\t"; 
   os<<"protein id"<<"\t";
@@ -832,7 +833,7 @@ void PepRanker :: write_results_psm_tab(ofstream &os)
             //by ions total 
             os<<d.psmind2by_ions_total(psmind)<<"\t";
           }
-      	  //Matches/Spectrum 
+          //Distinct matches/Spectrum
       	  os<<d.psmind2matches_spectrum(psmind)<<"\t";
       	  get_pep_seq(pep,seq,n,c);
       	  //Sequence 
@@ -935,33 +936,33 @@ int PepRanker :: crux_set_command_line_options(int argc, char *argv[])
 
   bool spec_features_flag;
   bool list_of_files_flag; 
-  overwrite_flag = get_boolean_parameter("overwrite");
+  overwrite_flag = Params::GetBool("overwrite");
   
-  fileroot = get_string_parameter("fileroot");
+  fileroot = Params::GetString("fileroot");
   if(!fileroot.empty()) {
     fileroot.append(".");
   }
 
-  decoy_prefix = get_string_parameter("decoy-prefix");
+  decoy_prefix = Params::GetString("decoy-prefix");
 
 
-  enzyme = get_string_parameter("enzyme");
+  enzyme = Params::GetString("enzyme");
 
-  spec_features_flag = get_boolean_parameter("use-spec-features");
+  spec_features_flag = Params::GetBool("use-spec-features");
 
-  skip_cleanup_flag = get_boolean_parameter("skip-cleanup");
+  skip_cleanup_flag = Params::GetBool("skip-cleanup");
   
 
-  dir_with_tables = get_string_parameter("re-run"); 
+  dir_with_tables = Params::GetString("re-run"); 
   if(!dir_with_tables.empty()) {
     found_dir_with_tables = 1;
   } else {
     found_dir_with_tables = 0;
   }
 
-  output_directory = get_string_parameter("output-dir");
+  output_directory = Params::GetString("output-dir");
 
-  feature_file_flag = get_boolean_parameter("feature-file-out");
+  feature_file_flag = Params::GetBool("feature-file-out");
   feature_file_name << output_directory << "/" << fileroot << "q-ranker.features.txt";
 
   if(found_dir_with_tables)
@@ -975,9 +976,9 @@ int PepRanker :: crux_set_command_line_options(int argc, char *argv[])
       carp(CARP_INFO, "directory with tables: %s", dir_with_tables.c_str());
       carp(CARP_INFO, "output_directory: %s", output_directory.c_str());
     }else{
-      ms2_source = get_string_parameter("fragmentation spectra");
-      sqt_source = get_string_parameter("search results");
-      list_of_files_flag=get_boolean_parameter("list-of-files");
+      ms2_source = Params::GetString("fragmentation spectra");
+      sqt_source = Params::GetString("search results");
+      list_of_files_flag = Params::GetBool("list-of-files");
       //check file format 
      
       vector<string> files; 
@@ -1032,7 +1033,7 @@ int PepRanker :: crux_set_command_line_options(int argc, char *argv[])
         if(parser->get_use_quadratic_features())
           parser->add_quadratic_features_header(); 
         d.get_features_header(parser->get_final_features_header());
-        sqt_decoy_source = get_string_parameter("separate-searches"); 
+        sqt_decoy_source = Params::GetString("separate-searches"); 
         if(!sqt_decoy_source.empty()) {
 	  separate_search_flag = 1;
         } else {
@@ -1244,8 +1245,9 @@ void PepRanker :: write_results_pep_xml(PepXMLWriter& xmlfile)
   scores_to_print[BARISTA_SCORE] = true;
   scores_to_print[BARISTA_QVALUE] = true;
   scores_to_print[BARISTA_PEP] = true;
-
-  xmlfile.SetScoresComputed(scores_to_print);
+  scores_to_print[DELTA_CN] = true;
+  scores_to_print[BY_IONS_MATCHED] = true;
+  scores_to_print[BY_IONS_TOTAL] = true;
 
   double* scores = new double[NUMBER_SCORER_TYPES];
 
@@ -1289,19 +1291,21 @@ void PepRanker :: write_results_pep_xml(PepXMLWriter& xmlfile)
       // psm info
       int* psm_rank=new int[NUMBER_SCORER_TYPES] ;
       psm_rank[XCORR]=1;
-      double delta_cn = d.psmind2deltaCn(psmind);
       scores[XCORR] = d.psmind2xcorr(psmind);
       scores[SP] = d.psmind2spscore(psmind);
       scores[QRANKER_SCORE] = psmtrainset[i].score;
       scores[QRANKER_QVALUE] = psmtrainset[i].q;
       scores[QRANKER_PEP] = psmtrainset[i].PEP;
+      scores[DELTA_CN] = d.psmind2deltaCn(psmind);
+      scores[BY_IONS_MATCHED] = d.psmind2by_ions_matched(psmind);
+      scores[BY_IONS_TOTAL] = d.psmind2by_ions_total(psmind);
         
       xmlfile.writePSM(scan, filename, spectrum_mass, charge, psm_rank,
                        sequence, modified_sequence.c_str(),
                        peptide_mass, num_proteins,
                        flanking_aas.c_str(), protein_names, 
-                       protein_descriptions, delta_cn, scores_to_print, scores,d.psmind2by_ions_matched(psmind),
-                       d.psmind2by_ions_total(psmind), d.psmind2matches_spectrum(psmind));
+                       protein_descriptions, scores_to_print, scores,
+                       d.psmind2matches_spectrum(psmind));
 
       free(sequence);
       if( path_name[0] ){

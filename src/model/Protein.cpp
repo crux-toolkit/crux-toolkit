@@ -8,6 +8,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <vector>
+#include "util/Params.h"
 #include "util/utils.h"
 #include "util/crux-utils.h"
 #include "parameter.h"
@@ -584,7 +585,7 @@ bool Protein::readRawSequence
 
 /**
  * Change the sequence of a protein to be a randomized version of
- * itself.  The method of randomization is dependant on the
+ * itself.  The method of randomization is dependent on the
  * decoy_type (shuffle or reverse).  The name of the protein is also
  * changed by prefixing with "decoy-prefix"
  */
@@ -619,7 +620,7 @@ void Protein::shuffle(
   }
 
   // change the protein name
-  string prefix = get_string_parameter("decoy-prefix");
+  string prefix = Params::GetString("decoy-prefix");
 
   char* new_name = cat_string(prefix.c_str(), id_);
   free(id_);

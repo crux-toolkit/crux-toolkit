@@ -6,6 +6,7 @@
 #include "StatColumn.h"
 
 #include "io/DelimitedFile.h"
+#include "util/Params.h"
 
 using namespace std;
 
@@ -27,8 +28,8 @@ StatColumn::~StatColumn() {
  * main method for StatColumn
  */
 int StatColumn::main(int argc, char** argv) {
-  delimited_filename_ = get_string_parameter("tsv file");
-  column_name_string_ = get_string_parameter("column name");
+  delimited_filename_ = Params::GetString("tsv file");
+  column_name_string_ = Params::GetString("column name");
   delimiter_ = get_delimiter_parameter("delimiter");
 
   DelimitedFileReader delimited_file(delimited_filename_, true, delimiter_);
@@ -36,7 +37,7 @@ int StatColumn::main(int argc, char** argv) {
   int col_idx = delimited_file.findColumn(column_name_string_);
 
   if (col_idx == -1) {
-    carp(CARP_ERROR,"column not found:%s\n\n%s", 
+    carp(CARP_ERROR, "column not found:%s\n\n%s", 
       column_name_string_.c_str(),
       delimited_file.getAvailableColumnsString().c_str());
     return(-1);
@@ -95,10 +96,10 @@ int StatColumn::main(int argc, char** argv) {
   //print out the header
 
   if (header_) {
-    cout <<"N\tMin\tMax\tSum\tAverage\tStdDev\tMedian"<<endl;
+    cout << "N\tMin\tMax\tSum\tAverage\tStdDev\tMedian" << endl;
   }
 
-  cout << std::setprecision(get_int_parameter("precision"));
+  cout << std::setprecision(Params::GetInt("precision"));
   cout << num_points << delimiter_;
   cout << min        << delimiter_;
   cout << max        << delimiter_;

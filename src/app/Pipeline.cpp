@@ -320,7 +320,7 @@ void PipelineApplication::processParams() {
   }
 
   if (Params::GetString("search-engine") == "comet") {
-    Params::Set("database name", Params::GetString("peptide source"));
+    Params::Set("database_name", Params::GetString("peptide source"));
     apps_.push_back(new CometApplication());
   } else {
     Params::Set("tide database", Params::GetString("peptide source"));

@@ -23,7 +23,6 @@
 #define getcwd _getcwd
 #define mkdir(a, b) _mkdir(a)
 #define mkstemp _mktemp_s
-#define sleep(x) Sleep(1000 * (x))
 #define snprintf _snprintf
 
 #undef NO_ERROR
@@ -39,8 +38,7 @@
 int gettimeofday(struct timeval *tv, struct timezone *tz);
 char *realpath(const char * file_name, char * resolved_name);
 
-typedef struct 
-{ 
+typedef struct { 
    HANDLE f; 
    HANDLE m; 
    void *p; 
@@ -57,7 +55,7 @@ int scandir(
   struct dirent ***namelist,
   int (*select)(struct dirent *),
   int (*compar)(const void *, const void *)
- );
+);
 
 int alphasort(const void *d1, const void *d2);
 

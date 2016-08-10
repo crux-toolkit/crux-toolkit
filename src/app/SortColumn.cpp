@@ -11,6 +11,7 @@
 
 #include <errno.h>
 #include "util/WinCrux.h"
+#include "util/Params.h"
 
 using namespace std;
 
@@ -33,12 +34,12 @@ SortColumn::~SortColumn() {
  */
 int SortColumn::main(int argc, char** argv) {
   /* Get parameters */
-  delimited_filename_ = get_string_parameter("tsv file");
-  column_name_string_ = get_string_parameter("column name");
+  delimited_filename_ = Params::GetString("tsv file");
+  column_name_string_ = Params::GetString("column name");
   column_type_ = get_column_type_parameter("column-type");
-  ascending_ = get_boolean_parameter("ascending");
+  ascending_ = Params::GetBool("ascending");
   delimiter_ = get_delimiter_parameter("delimiter");
-  header_ = get_boolean_parameter("header");
+  header_ = Params::GetBool("header");
 
   DelimitedFileReader delimited_file(delimited_filename_, true, delimiter_);
   
@@ -95,7 +96,7 @@ int SortColumn::main(int argc, char** argv) {
 
       char ctemp_filename[50] = "SortColumn_XXXXXX";
     
-      int fd=mkstemp(ctemp_filename);
+      int fd = mkstemp(ctemp_filename);
       if (fd == -1) {
         carp(CARP_ERROR, "Error creating temp file!\n "
                          "Error: %s", strerror(errno));
@@ -158,7 +159,7 @@ int SortColumn::main(int argc, char** argv) {
     delete(temp_delimited);
 
     //flush everything.
-    for (unsigned int i=0;i<temp_file_descriptors.size();i++) {
+    for (unsigned int i=0; i < temp_file_descriptors.size(); i++) {
       temp_file_streams[i]->flush();
     }
 
@@ -167,7 +168,7 @@ int SortColumn::main(int argc, char** argv) {
   }
   
   //clean everything up
-  for (unsigned int idx=0;idx<temp_file_descriptors.size();idx++) {
+  for (unsigned int idx=0; idx < temp_file_descriptors.size(); idx++) {
     delete temp_file_streams[idx];
     close(temp_file_descriptors[idx]);
     remove(temp_filenames[idx].c_str());
@@ -300,14 +301,14 @@ void SortColumn::mergeDelimitedFiles(
       //if a best was found, print out the row and advance to the
       //next row.
       if (best_idx != -1) {
-        cout << delimited_files[best_idx]->getString()<<endl;
+        cout << delimited_files[best_idx]->getString() << endl;
         delimited_files[best_idx]->next();
       }
     }
     //iterate until all rows of all temporary files are printed out.
   } while (best_idx != -1);
 
-  for (unsigned int idx=0;idx<temp_filenames.size();idx++) {
+  for (unsigned int idx = 0; idx < temp_filenames.size(); idx++) {
     delete delimited_files[idx];
   }
 }
@@ -347,7 +348,7 @@ int SortColumn::compare(
     break;
     case NUMBER_COLTYPES:
     case COLTYPE_INVALID:
-      carp(CARP_FATAL,"Column type invalid!");
+      carp(CARP_FATAL, "Column type invalid!");
 
   }
 

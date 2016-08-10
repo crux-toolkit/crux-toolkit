@@ -1,6 +1,7 @@
 #ifndef TIDE_MATCH_SET_H
 #define TIDE_MATCH_SET_H
 
+#include <boost/thread.hpp>
 #include <vector>
 #include "raw_proteins.pb.h"
 #include "tide/records.h"
@@ -10,7 +11,7 @@
 #include "tide/sp_scorer.h"
 #include "tide/spectrum_collection.h"
 
-#include "io/OutputFiles.h"
+#include "model/Modification.h"
 #include "model/PostProcessProtein.h"
 
 using namespace std;
@@ -19,7 +20,7 @@ typedef vector<const pb::Protein*> ProteinVec;
 
 class TideMatchSet {
 
-public:
+ public:
   bool exact_pval_search_;
   int elution_window_;
   
@@ -71,23 +72,8 @@ public:
     const ProteinVec& proteins, ///< proteins corresponding with peptides
     const vector<const pb::AuxLocation*>& locations,  ///< auxiliary locations
     bool compute_sp, ///< whether to compute sp or not
-    bool highScoreBest //< indicates semantics of score magnitude
-  );
-
-  /**
-   * Write matches to output files
-   */
-  void report(
-    OutputFiles* output_files,  ///< pointer to output handler
-    int top_n,  ///< number of matches to report
-    const string& spectrum_filename, ///< name of spectrum file
-    const Spectrum* spectrum, ///< spectrum for matches
-    int charge, ///< charge for matches
-    const ActivePeptideQueue* peptides, ///< peptide queue
-    const ProteinVec& proteins, ///< proteins corresponding with peptides
-    const vector<const pb::AuxLocation*>& locations,  ///< auxiliary locations
-    bool compute_sp, ///< whether to compute sp or not
-    bool highScoreBest // indicates semantics of score magnitude
+    bool highScoreBest, //< indicates semantics of score magnitude
+    boost::mutex * rwlock
   );
 
   static void writeHeaders(
@@ -96,22 +82,15 @@ public:
     bool sp
   );
 
-  static void initModMap(
-    const pb::ModTable& modTable
-  );
+  static void initModMap(const pb::ModTable& modTable, ModPosition position);
 
-  static void setCleavageType(
-    const string& cleavageType
-  );
+  static string CleavageType;
 
-protected:
+ protected:
   Arr* matches_;
   Arr2* matches2_;
   Peptide* peptide_;  
   double max_mz_;
-  static map<int, double> mod_map_; // unique delta index -> delta
-  static ModCoder mod_coder_;
-  static string cleavage_type_;
 
   // For allocation
   static char match_collection_loc_[sizeof(MatchCollection)];
@@ -150,38 +129,13 @@ protected:
     const ProteinVec& proteins,
     const vector<const pb::AuxLocation*>& locations,
     const map<Arr::iterator, FLOAT_T>& delta_cn_map,
-    const map<Arr::iterator, pair<const SpScorer::SpScoreData, int> >* sp_map
+    const map<Arr::iterator, FLOAT_T>& delta_lcn_map,
+    const map<Arr::iterator, pair<const SpScorer::SpScoreData, int> >* sp_map,
+    boost::mutex * rwlock
   );
 
-  /**
-   * Helper function for normal report function
-   */
-  void addCruxMatches(
-    MatchCollection* match_collection,
-    bool decoys,
-    int top_n,
-    vector<PostProcessProtein*>* proteins_made,
-    const vector<Arr::iterator>& vec,
-    Crux::Spectrum& spectrum,
-    const ActivePeptideQueue* peptides,
-    const ProteinVec& proteins,
-    const vector<const pb::AuxLocation*>& locations,
-    SpectrumZState& z_state,
-    SpScorer* sp_scorer,
-    FLOAT_T* lowest_sp_out
-  );
-
-  /**
-   * Create a Crux match from Tide data structures
-   */
-  Crux::Match* getCruxMatch(
-    const Peptide* peptide, ///< Tide peptide for match
-    const ProteinVec& proteins, ///< Tide proteins
-    const vector<const pb::AuxLocation*>& locations, /// auxiliary locations
-    Crux::Spectrum* crux_spectrum,  ///< Crux spectrum for match
-    SpectrumZState& crux_z_state, ///< Crux z state for match
-    vector<PostProcessProtein*>* proteins_made ///< out parameter for new proteins
-  );
+  Crux::Peptide getCruxPeptide(const Peptide* peptide);
+  std::vector<Crux::Modification> getMods(const Peptide* peptide);
 
   void gatherTargetsAndDecoys(
     const ActivePeptideQueue* peptides,
@@ -220,7 +174,8 @@ protected:
 
   static void computeDeltaCns(
     const vector<Arr::iterator>& vec, // xcorr*100000000.0, high to low
-    map<Arr::iterator, FLOAT_T>* delta_cn_map // map to add delta cn scores to
+    map<Arr::iterator, FLOAT_T>* delta_cn_map, // map to add delta cn scores to
+    map<Arr::iterator, FLOAT_T>* delta_lcn_map
   );
 
   static void computeSpData(

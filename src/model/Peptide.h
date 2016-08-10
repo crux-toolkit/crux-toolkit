@@ -14,6 +14,7 @@
 #include "util/utils.h"
 #include "util/crux-utils.h"
 #include "util/mass.h"
+#include "Modification.h"
 #include "Protein.h"
 #include "objects.h"
 #include "io/carp.h"
@@ -32,41 +33,32 @@ static const int MAX_PEPTIDE_LENGTH = 255;
  * \brief A subsequence of a protein.
  */
 
+class ModificationDefinition;
+
 namespace Crux {
+
+class Modification;
 
 class Peptide {
 
  protected:
-
-  /**
-   * static global variable
-   * determines if the peptide src are created by link lists or array
-   * if true, peptides are implented with link list peptide src, else array
-   */
-
-  /* Private data types */
-
   int pointer_count_;
   unsigned char length_; ///< The length of the peptide
-  FLOAT_T peptide_mass_;   ///< The peptide's mass.
-  std:: vector<PeptideSrc*> peptide_srcs_; ///< a vector of peptide_srcs_
+  std::vector<PeptideSrc*> peptide_srcs_; ///< a vector of peptide_srcs_
 
-  MODIFIED_AA_T* modified_seq_; ///< peptide sequence with modifications
   MODIFIED_AA_T* decoy_modified_seq_; ///< randomized peptide sequence
-
-  /**
-   * Initializes an (empty) peptide object
-   */
-  void init();
+  std::string sequence_;
+  std::vector<Modification> varMods_;
 
  public:
-
   /*  Allocators/deallocators  */
   
   /**
    * \returns An (empty) peptide object.
    */
   Peptide();
+  Peptide(std::string sequence);
+  Peptide(std::string sequence, std::vector<Modification> mods);
 
   /**
    * \returns A new peptide object, populated with the user specified
@@ -74,7 +66,6 @@ class Peptide {
    */
   Peptide(
     unsigned char length,     ///< The length of the peptide -in
-    FLOAT_T peptide_mass,       ///< The neutral mass of the peptide -in
     Crux::Protein* parent_protein, ///< The parent_protein of this peptide -in
     int start_idx ///< Start index of peptide in the protein sequence -in
     );
@@ -87,23 +78,6 @@ class Peptide {
   Peptide(
     Peptide* src ///< source peptide -in
   );
-
-  /**
-   *\returns the protein struct size, value of sizeof function
-   */
-  int getSizeOf(void);
- 
-  /**
-   * Merge to identical peptides, copy all peptide_src into one of the peptide
-   * peptide_dest, peptide_bye must have at least one peptide src
-   * frees the peptide_bye, once the peptide_src are re-linked to the peptide_dest
-   * Assumes that both peptides use linklist implemenation for peptide_src
-   * \returns true if merge is successful else false
-   */
-  static bool mergePeptides(
-    Peptide* peptide_dest,
-    Peptide* peptide_bye
-    );
                              
   /**
    * Merges two identical peptides by adding the peptide_src of the
@@ -123,39 +97,9 @@ class Peptide {
    */
   ~Peptide();
 
-  static void free(Crux::Peptide* peptide);
   Crux::Peptide* copyPtr();
 
   /*  Getters and Setters  */
-  
-  /*  Get-set:  mass */
-
-
-  /**
-   * sets the peptide mass
-   */
-  void setPeptideMass(
-    FLOAT_T peptide_mass  ///< the mass of the peptide - in
-    );
-
-  /**
-   * \returns the peptide mass
-   */
-  /*inline*/ FLOAT_T getPeptideMass();
-
-  /** 
-   * \returns the mass of the peptide if it had charge "charge"
-   */
-  FLOAT_T getChargedMass(
-    int charge ///< charge of peptide -in
-    );
-
-  /** 
-   * \returns the m/z of the peptide if it had charge "charge"
-   */
-  FLOAT_T getMz(
-    int charge ///< the charge of peptide -in
-    );
 
   /*  Get-set:  source */
   
@@ -190,7 +134,7 @@ class Peptide {
   /**
    * returns a pointer to the first PeptideSrc object of the peptide
    */
-  PeptideSrc* getPeptideSrc();
+  PeptideSrc* getPeptideSrc() const;
 
   /**
    * returns a point to the peptide_protein_association field of the peptide
@@ -215,8 +159,6 @@ class Peptide {
    */
   Crux::Protein* getParentProtein();
 
-  /*  Get-set:  sequence */
-
   /**
    * sets the sequence length of the peptide
    */
@@ -235,7 +177,7 @@ class Peptide {
    * least one peptide src 
    * \returns A newly allocated copy of the sequence.
    */
-  char* getSequence();
+  char* getSequence() const;
 
   /**
    * \brief Get a string representation of the target (unshuffled)
@@ -243,7 +185,7 @@ class Peptide {
    * For target peptides, returns the same as get_peptide_sequence.
    * \returns The newly-allocated sequence of peptide
    */
-  char* getUnshuffledSequence();
+  std::string getUnshuffledSequence() const;
 
   /**
    * \returns a pointer to the start of peptide sequence with in it's protein parent sequence, 
@@ -262,23 +204,7 @@ class Peptide {
    * least one peptide src 
    * \returns A newly allocated string with the sqt-formated peptide sequence.
    */
-  char* getSequenceSqt();
-
-  /**
-   * \brief Formats the sequence of the peptide from a particular
-   * peptide_src.
-   *
-   * Is called by get_peptide_sequence_sqt()
-   * Format is "X.peptide_sequence.X", where "X" is a flanking amino acid.
-   * "X", is printed as "-" if there is no flanking sequence.
-   * Goes to the first peptide_src to gain sequence, thus must have at
-   * least one peptide src 
-   *
-   * \returns A newly allocated string with the sqt-formated peptide sequence.
-   */
-  char* getSequenceFromPeptideSrcSqt(
-    PeptideSrc* peptide_src ///< peptide_src -in 
-   );
+  std::string getSequenceSqt();
 
   /**
    * \brief Return a char for the amino acid c-terminal to the peptide
@@ -296,6 +222,12 @@ class Peptide {
    */
   char getNTermFlankingAA();
 
+  void addMod(const ModificationDefinition* mod, unsigned char index);
+  void setMods(const std::vector<Modification>& mods);
+  std::vector<Modification> getMods() const;
+  std::vector<Modification> getVarMods() const;
+  std::vector<Modification> getStaticMods() const;
+
   /**
    * \brief Add a modification to a peptide.
    *
@@ -307,6 +239,8 @@ class Peptide {
     MODIFIED_AA_T* mod_seq, ///< modified seq to add
     PEPTIDE_MOD_T* pep_mod  ///< mod that made the seq
   );
+
+  std::string getModsString() const;
 
   bool isModified();
 
@@ -329,17 +263,15 @@ class Peptide {
     MODIFIED_AA_T* mod_seq,  ///< modified sequence to set
     bool decoy ///< is the peptide a decoy?
   );
-  
 
   /**
    * \brief Get the modified aa sequence in string form.
    *
    * If the peptide has no modifications, returns same string as
    * get_peptide_sequence.  If modified, adds the mod symbols to the string.
-   * \returns A newly allocated string of the peptide sequence including
-   * any modifications.
+   * \returns The peptide sequence including any modifications.
    */
-  char* getModifiedSequenceWithSymbols();
+  std::string getModifiedSequenceWithSymbols();
 
   /**
    * \brief Get the modified aa sequence in string form.
@@ -349,30 +281,11 @@ class Peptide {
    * all modifications.  If merge_masses is true, prints the sum of all
    * modifications for a residue.  If false, prints all masses in a
    * comma separated list.
-   * \returns A newly allocated string of the peptide sequence including
-   * any modifications.
+   * \returns The peptide sequence including any modifications.
    */
-  char* getModifiedSequenceWithMasses(
-    MASS_FORMAT_T merge_masses ///< do we want to merge masses?
-    );
+  std::string getModifiedSequenceWithMasses();
 
-  /**
-   * \brief Get the target sequence of the peptide encoded as char*
-   * including modification symbols (e.g. *,#).
-   *
-   * If the peptide is not a decoy, returns the same sequence as
-   * get_peptide_modified_sequence.  If the peptide has no
-   * modifications, returns same string as get_peptide_sequence.  If
-   * modified, adds the mod symbols to the string. 
-   * \returns A newly allocated string of the peptide's unshuffled
-   * (target) sequence including any modifications.
-   */
-  char* getUnshuffledModifiedSequence();
-
-  void setDecoyModifiedSeq(
-    MODIFIED_AA_T* decoy_modified_seq
-  );
-
+  void setDecoyModifiedSeq(MODIFIED_AA_T* decoy_modified_seq);
 
   /*  Getters requiring calculation */
   int countModifiedAAs();
@@ -390,19 +303,16 @@ class Peptide {
    */
   FLOAT_T calcMass(
     MASS_TYPE_T mass_type ///< isotopic mass type (AVERAGE, MONO) -in
-    );
+    ) const;
 
   /**
    * \returns the mass of the given peptide, with modifications
    */
   FLOAT_T calcModifiedMass(
     MASS_TYPE_T mass_type ///< isotopic mass type (AVERAGE, MONO) -in
-  );
+  ) const;
 
-  /**
-   * \returns The hydrophobicity of the given peptide, as in Krokhin (2004).
-   */
-  FLOAT_T calcKrokhinHydrophobicity();
+  FLOAT_T calcModifiedMass() const;
 
   /**
    * Examines the peptide sequence and counts how many tryptic missed
@@ -432,13 +342,6 @@ class Peptide {
    * \returns The distance from the protein c-terminus.
    */
   int getCDistance();
-
-  /**
-   * Creates a heap allocated hash_value for the peptide that should
-   * uniquely identify the peptide
-   *\returns the string of "<first src protein idx><start idx><length>"
-   */
-  char* getHashValue();
 
   /**
    * Change the given target peptide into a decoy by randomizing its sequence.
@@ -487,21 +390,12 @@ class Peptide {
   MODIFIED_AA_T* generateReversedModSequence();
 
   /*  Comparisons for sorting  */
-  
-  /**
-   * Compare peptide sequence
-   * \returns true if peptide sequence is identical else false
-   */
-  static bool compareSequence(
-    Peptide* peptide_one,
-    Peptide* peptide_two
-  );
 
   /**
    * Compare two peptide sequences.
    * \returns Zero (0) if the sequences are identical, -1 if the first
    * sequence is less than the first and 1 if the first sequence is
-   * greater than teh first.
+   * greater than the first.
    */
   static int triCompareSequence(
     Peptide* peptide_one,  ///< the peptide sequence to compare  -out
@@ -510,146 +404,12 @@ class Peptide {
 
   /**
    * Compare the sequence of two peptides and return true if the first
-   * petpide sequence is less than (in a lexical sort) the second peptide.
+   * peptide sequence is less than (in a lexical sort) the second peptide.
    */
   static bool lessThan(
     Peptide* peptide_one,
     Peptide* peptide_two
     );
-
-  /**
-   * compares two peptides with the lexical sort type
-   * for qsort
-   * /returns 1 if peptide_one has lower priority, 0 if equal, -1 if greater priority
-   */
-  static int compareLexicalQSort(
-    Peptide** peptide_one, ///< peptide to compare one -in
-    Peptide** peptide_two ///< peptide to compare two -in
-    );
-
-  /**
-   * compares two peptides with the mass sort type
-   * if peptide mass is identical sort by lexicographical order
-   * used for qsort function
-   * /returns 1 if peptide_one has lower priority, 0 if equal, -1 if greater priority
-   */
-  static int compareMassQSort(
-    Peptide** peptide_one, ///< peptide to compare one -in
-    Peptide** peptide_two ///< peptide to compare two -in
-    );
-
-  /**
-   * compares two peptides with the length sort type
-   * /returns 1 if peptide_one has lower priority, 0 if equal, -1 if greater priority
-   */
-  static int compareLengthQSort(
-    Peptide** peptide_one, ///< peptide to compare one -in
-    Peptide** peptide_two ///< peptide to compare two -in
-    );
-
-  /**
-   * Compare peptide mass
-   * \returns 0 if peptide mass is identical else 1 if peptide_one is larger, -1 if peptide_two is larger
-   */
-  static int compareMass(
-    Peptide* peptide_one,
-    Peptide* peptide_two
-    );
-
-  /*  Printing / parsing       */
-
-  /**
-   * Prints a peptide object to file.
-   * prints all peptide_src object it's associated 
-   * mass \\t protein-id \\t peptide-start \\t peptide-length <\\t peptide-trypticity> <\\t peptide-sequence> \n
-   *      \\t protein-id \\t peptide-start \\t peptide-length <\\t peptide-trypticity> <\\t peptide-sequence> \n
-   * prints in correct format for generate_peptide
-   */
-  void printInFormat(
-    bool flag_out, ///< print peptide sequence? -in
-    FILE* file  ///< the out put stream -out
-    );
-
-  /**
-   * Prints a peptide object to file.
-   * ONLY prints peptide_src that match the peptide_src
-   * mass \\t protein-id \\t peptide-start \\t peptide-length <\\t peptide-sequence> \n
-   *      \\t protein-id \\t peptide-start \\t peptide-length <\\t peptide-sequence> \n
-   * prints in correct format for generate_peptide
-   */
-  void printFilteredInFormat(
-    bool flag_out, ///< print peptide sequence? -in
-    FILE* file  ///< the out put stream -out
-    );
-
-  /**
-   * Serialize a peptide to a FILE in binary
-   * \returns true if serialization is successful, else false
-   *
-   * The peptide serialization format looks like this:
-   *
-   *<Peptide: peptide struct><int: number of peptide_src>[<int: protein index><PEPTIDE_TYPE_T: peptide_type><int: peptide start index>]+
-   * the bracket peptide src information repeats for the number of peptide src listed before the bracket
-   * the protein index is the index of the parent protein in the database Database
-   *
-   */
-  bool serialize(
-    FILE* file,
-    FILE* text_file
-    );
- 
-  /**
-   * \brief Read in a peptide from a tab-delimited file and return it.
-   *
-   * Parses the information for a peptide match from the search
-   * file.  Allocates memory for the peptide and all of
-   * its peptide_src's.  Requires a database so that the protein can be
-   * set for each peptide_src.  Returns NULL if eof or if file format
-   * appears incorrect.
-   *
-   * \returns A newly allocated peptide or NULL
-   */
-  static Peptide* parseTabDelimited(
-    MatchFileReader& file, ///< the tab delimited peptide file -in
-    Database* database,///< the database containing the peptides -in
-    Database* decoy_database = NULL ///< optional database with decoy peptides
-    );
-
-  /**
-   * \brief Read in a peptide from a binary file and return it.
-   *
-   * Assumes the peptide has been written to file using
-   * serialize_peptide().  Allocates memory for the peptide and all of
-   * its peptide_src's.  Requires a database so that the protein can be
-   * set for each peptide_src.  Returns NULL if eof or if file format
-   * appears incorrect.
-   *
-   * \returns A newly allocated peptide or NULL
-   */
-  static Peptide* parse(
-    FILE* file, ///< the serialized peptide file -in
-    Database* database ///< the database containing the peptides -in
-    );
-
-  /**
-   * \brief Read in a peptide from a binary file without reading its
-   * peptide_src's.
-   *
-   * This parsing method is for callers that do not want memory
-   * allcoated for every peptide in the file.  Caller allocates memory
-   * once, parses peptide, checks values, and returns or keeps looking.
-   * To get the peptide_src for this peptide, caller uses 
-   * fseek(file, peptide_src_file_location, SEEK_SET);
-   * parse_peptide_src(peptide, file, database, use_array);
-   *
-   * Assumes that the peptide has been written to file using
-   * serialize_peptide().  
-   * \returns true if peptide was successfully parsed or false if it was
-   * not. 
-   */
-  bool parseNoSrc(
-    FILE* file,       ///< file pointing to a serialized peptide
-    long int* pepitde_src_file_location);  // use to seek back to peptide_src
 
   /**
    * \brief Builds a comma delimited string listing the 

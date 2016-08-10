@@ -35,9 +35,23 @@ if (WIN32 AND NOT Cygwin)
   include_directories(${CMAKE_BINARY_DIR}/ext/build/src/google-gflags/src/windows)
   # Needed to include google/protobuf on Windows
   include_directories(${CMAKE_BINARY_DIR}/ext/build/src/ProtocolBuffers/src)
-  SET(CMAKE_EXE_LINKER_FLAGS_DEBUG  "${CMAKE_EXE_LINKER_FLAGS} /VERBOSE:LIB /NODEFAULTLIB:MSVCRT" )
+  SET(
+    CMAKE_EXE_LINKER_FLAGS 
+    "${CMAKE_EXE_LINKER_FLAGS} /VERBOSE:LIB /NODEFAULTLIB:libboost_date_time-vc120-mt-1_56 /NODEFAULTLIB:libboost_system-vc120-mt-1_56 /NODEFAULTLIB:libboost_thread-vc120-mt-1_56"
+  )
+  SET(
+  CMAKE_EXE_LINKER_FLAGS_DEBUG 
+  "${CMAKE_EXE_LINKER_FLAGS}
+  /VERBOSE:LIB /NODEFAULTLIB:libboost_chrono-vc120-mt-gd-1_56 /NODEFAULTLIB:libboost_date_time-vc120-mt-gd-1_56 /NODEFAULTLIB:libboost_system-vc120-mt-gd-1_56 /NODEFAULTLIB:libboost_thread-vc120-mt-gd-1_56"
+)
   #  Need Comet base directory for Windows
   include_directories(${CMAKE_BINARY_DIR}/ext/build/src/comet/)
+
+  # On Windows we should build vendor libraries by default
+  if (NOT DEFINED INCLUDE_VENDOR_LIBRARIES)
+    set(INCLUDE_VENDOR_LIBRARIES TRUE)
+  endif (NOT DEFINED INCLUDE_VENDOR_LIBRARIES)
+
 endif (WIN32 AND NOT Cygwin)
 
 link_directories(.)
@@ -89,7 +103,6 @@ set (
   app/ExtractRows.cpp
   util/FileUtils.cpp
   model/FilteredSpectrumChargeIterator.cpp
-  util/FileUtils.cpp
   model/GeneratePeptidesIterator.cpp
   app/GetMs2Spectrum.cpp
   io/HTMLWriter.cpp
@@ -109,6 +122,8 @@ set (
   model/MatchCollectionIterator.cpp
   io/MatchCollectionParser.cpp
   model/MatchIterator.cpp
+  util/MathUtil.cpp
+  model/Modification.cpp
   util/modifications.cpp
   model/ModifiedPeptidesIterator.cpp
   io/MSToolkitSpectrumCollection.cpp
@@ -184,6 +199,10 @@ add_library(
 )
 add_dependencies(crux-support tide-support)
 
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -DNDEBUG")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG")
+
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     set_property(
       DIRECTORY
@@ -203,7 +222,6 @@ else (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	  _LARGEFILE64_SOURCE
 	  _BSD_SOURCE
 	  _POSIX_C_SOURCE=199506L
-	  NDEBUG
 	  _FILE_OFFSET_BITS=64
 	  _GNU_SOURCE
 	  GCC
@@ -268,6 +286,9 @@ if (WIN32 AND NOT CYGWIN)
   # MSToolkit library.
   add_definitions(-DBOOST_ALL_NO_LIB)
   add_definitions(-DXML_STATIC)
+  if (INCLUDE_VENDOR_LIBRARIES)
+    add_definitions(-DINCLUDE_VENDOR_LIBRARIES)
+  endif (INCLUDE_VENDOR_LIBRARIES)
 endif (WIN32 AND NOT CYGWIN)
 
 # The rt library is not needed for OS X
@@ -278,6 +299,54 @@ else(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 if (WIN32 AND NOT CYGWIN)
+  if (INCLUDE_VENDOR_LIBRARIES)
+    set (
+      PWIZ_LIBRARIES
+      libpwiz_data_identdata
+      libpwiz_data_identdata_version
+      libpwiz_data_misc
+      libpwiz_data_msdata
+      libpwiz_data_msdata_version
+      libpwiz_data_proteome
+      libpwiz_data_common
+      libpwiz_data_vendor_readers
+      libpwiz_reader_abi
+      libpwiz_reader_abi_t2d
+      libpwiz_reader_agilent
+      libpwiz_reader_shimadzu
+      libpwiz_reader_thermo
+      libpwiz_reader_waters
+      libpwiz_vendor_api_abi
+      libpwiz_vendor_api_agilent
+      libpwiz_vendor_api_shimadzu
+      libpwiz_vendor_api_thermo
+      libpwiz_utility_chemistry
+      libpwiz_utility_minimxml
+      libpwiz_utility_misc
+      libpwiz_version
+      libSHA1
+      libzlib
+      MassLynxRaw
+      cdt
+    )
+  else (INCLUDE_VENDOR_LIBRARIES)
+    set (
+      PWIZ_LIBRARIES
+      libpwiz_data_identdata
+      libpwiz_data_identdata_version
+      libpwiz_data_misc
+      libpwiz_data_msdata
+      libpwiz_data_msdata_version
+      libpwiz_data_proteome
+      libpwiz_data_common
+      libpwiz_utility_chemistry
+      libpwiz_utility_minimxml
+      libpwiz_utility_misc
+      libpwiz_version
+      libSHA1
+      libzlib
+    )
+  endif (INCLUDE_VENDOR_LIBRARIES)
   target_link_libraries(
     crux
     barista
@@ -292,32 +361,7 @@ if (WIN32 AND NOT CYGWIN)
     tide-support
     mstoolkitlite
     protobuf
-    libpwiz_data_identdata
-    libpwiz_data_identdata_version
-    libpwiz_data_misc
-    libpwiz_data_msdata
-    libpwiz_data_msdata_version
-    libpwiz_data_proteome
-    libpwiz_data_common
-    libpwiz_data_vendor_readers
-    libpwiz_reader_abi
-    libpwiz_reader_abi_t2d
-    libpwiz_reader_agilent
-    libpwiz_reader_shimadzu
-    libpwiz_reader_thermo
-    libpwiz_reader_waters
-    libpwiz_vendor_api_abi
-    libpwiz_vendor_api_agilent
-    libpwiz_vendor_api_shimadzu
-    libpwiz_vendor_api_thermo
-    libpwiz_utility_chemistry
-    libpwiz_utility_minimxml
-    libpwiz_utility_misc
-    libpwiz_version
-    libSHA1
-    libzlib
-    MassLynxRaw
-    cdt
+    ${PWIZ_LIBRARIES}
     ws2_32
     optimized libboost_system-vc120-mt
     optimized libboost_iostreams-vc120-mt

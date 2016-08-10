@@ -13,7 +13,7 @@ using namespace std;
 
 class PSMConvertApplication : public CruxApplication {
 
-public:
+ public:
 
   /**
    * Constructor
@@ -30,6 +30,11 @@ public:
    */
   virtual int main(int argc, char** argv);
 
+  /**
+   * Perform Convert
+   */
+  virtual void convertFile(string input_format, string output_format, string input_file, string output_file_base, string database_file, bool distinct_matches);
+  
   /**
    * Returns the command name
    */

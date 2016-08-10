@@ -15,12 +15,16 @@
 #include <iostream>
 #include "crux-utils.h"
 #include "model/Database.h"
+#include "Params.h"
 #include "parameter.h"
+#include "Params.h"
 #include "StringUtils.h"
 #include "WinCrux.h"
 #include "io/LineFileReader.h"
-#include "boost/filesystem.hpp"
+#include <boost/filesystem.hpp>
+#include <boost/asio.hpp>
 #include "FileUtils.h"
+#include "crux_version.h"
 
 using namespace std;
 
@@ -49,15 +53,16 @@ static const int INVALID_ENUM_STRING = -10;
 /**
  * The string version of the decoy types
  */
-static const char* decoy_type_strings[NUMBER_DECOY_TYPES] = 
-  { "invalid", "none", "reverse", "protein-shuffle",
-    "peptide-shuffle", "peptide-reverse" };
+static const char* decoy_type_strings[NUMBER_DECOY_TYPES] = {
+  "invalid", "none", "reverse", "protein-shuffle",
+  "peptide-shuffle", "peptide-reverse"
+};
 
-DECOY_TYPE_T string_to_decoy_type(const string& name){
+DECOY_TYPE_T string_to_decoy_type(const string& name) {
   int decoy_int = convert_enum_type_str(name.c_str(), INVALID_ENUM_STRING,
                                         decoy_type_strings,
                                         NUMBER_DECOY_TYPES);
-  if( decoy_int < 0 ){
+  if (decoy_int < 0) {
     decoy_int = 0;
   }
 
@@ -75,9 +80,10 @@ DECOY_TYPE_T string_to_tide_decoy_type(const string& name) {
     return PROTEIN_REVERSE_DECOYS;
   }
   carp(CARP_FATAL, "Invalid decoy type %s", name.c_str());
+  return(INVALID_DECOY_TYPE); // Avoid compiler warning.
 }
 
-char* decoy_type_to_string(DECOY_TYPE_T type){
+char* decoy_type_to_string(DECOY_TYPE_T type) {
   return my_copy_string(decoy_type_strings[type]);
 }
 
@@ -87,18 +93,18 @@ char* decoy_type_to_string(DECOY_TYPE_T type){
 static const char* mass_format_type_strings[NUMBER_MASS_FORMATS] = 
   { "invalid", "mod-only", "total", "separate" };
 
-MASS_FORMAT_T string_to_mass_format(const string& name){
+MASS_FORMAT_T string_to_mass_format(const string& name) {
   int mass_format_int = convert_enum_type_str(name.c_str(), INVALID_ENUM_STRING, 
                                               mass_format_type_strings, 
                                               NUMBER_MASS_FORMATS);
-  if( mass_format_int < 0 ){
+  if (mass_format_int < 0) {
     mass_format_int = 0;
   }
 
   return (MASS_FORMAT_T)mass_format_int;
 }
 
-char* mass_format_type_to_string(MASS_FORMAT_T type){
+char* mass_format_type_to_string(MASS_FORMAT_T type) {
   return my_copy_string(mass_format_type_strings[type]);
 }
 
@@ -107,7 +113,7 @@ char* mass_format_type_to_string(MASS_FORMAT_T type){
  */
 static const char* mass_type_strings[NUMBER_MASS_TYPES] = {"average", "mono"};
 
-bool string_to_mass_type(const string& name, MASS_TYPE_T* result){
+bool string_to_mass_type(const string& name, MASS_TYPE_T* result) {
   bool success = true;
   //this is copied from parameter.c::get_peptide_mass_type
   int mass_type = convert_enum_type_str(name.c_str(), INVALID_ENUM_STRING, 
@@ -115,15 +121,15 @@ bool string_to_mass_type(const string& name, MASS_TYPE_T* result){
 
   (*result) = (MASS_TYPE_T)mass_type;
 
-  if( mass_type < 0 ){
+  if (mass_type < 0) {
     success = false;
   }
   return success;
 }
 
-bool mass_type_to_string(MASS_TYPE_T type, char* type_str){
+bool mass_type_to_string(MASS_TYPE_T type, char* type_str) {
   bool success = true;
-  if( (int)type > NUMBER_MASS_TYPES ){
+  if ((int)type > NUMBER_MASS_TYPES) {
     success = false;
     type_str = NULL;
   }
@@ -141,19 +147,19 @@ bool mass_type_to_string(MASS_TYPE_T type, char* type_str){
 static const char* digest_type_strings[NUMBER_DIGEST_TYPES] =
   {"invalid", "full-digest", "partial-digest", "non-specific-digest"};
 
-DIGEST_T string_to_digest_type(const string& name){
+DIGEST_T string_to_digest_type(const string& name) {
   int clev_int = convert_enum_type_str(name.c_str(), INVALID_ENUM_STRING, 
                                        digest_type_strings, 
                                        NUMBER_DIGEST_TYPES);
-  if( clev_int < 0 ){
+  if (clev_int < 0) {
     clev_int = 0;
   }
 
   return (DIGEST_T)clev_int;
 }
 
-char* digest_type_to_string(DIGEST_T type){
-  if( (int)type > NUMBER_DIGEST_TYPES){
+char* digest_type_to_string(DIGEST_T type) {
+  if ((int)type > NUMBER_DIGEST_TYPES) {
     return NULL;
   }
 
@@ -165,32 +171,30 @@ char* digest_type_to_string(DIGEST_T type){
 /**
  * The string version of enzyme types
  */
-static const char* enzyme_type_strings[NUMBER_ENZYME_TYPES] = 
-  {"invalid", "no-enzyme", "trypsin","trypsin/p", "chymotrypsin", 
-   "elastase","clostripain", "cyanogen-bromide", "iodosobenzoate", 
-   "proline-endopeptidase", "staph-protease", "asp-n", "lys-c",
-   "lys-n" , "arg-c" , "glu-c" ,"pepsin-a", "elastase-trypsin-chymotrypsin",
-   "custom-enzyme"};
+static const char* enzyme_type_strings[NUMBER_ENZYME_TYPES] = {
+  "invalid", "no-enzyme", "trypsin", "trypsin/p", "chymotrypsin",
+  "elastase", "clostripain", "cyanogen-bromide", "iodosobenzoate",
+  "proline-endopeptidase", "staph-protease", "asp-n", "lys-c",
+  "lys-n" , "arg-c" , "glu-c" , "pepsin-a", "elastase-trypsin-chymotrypsin",
+  "custom-enzyme"
+};
 
-ENZYME_T string_to_enzyme_type(const string& name){
+ENZYME_T string_to_enzyme_type(const string& name) {
   int enz_int = convert_enum_type_str(name.c_str(), INVALID_ENUM_STRING, 
                                       enzyme_type_strings, 
                                       NUMBER_ENZYME_TYPES);
-  if( enz_int < 0 ){
+  if (enz_int < 0) {
     enz_int = 0;
   }
 
   return (ENZYME_T)enz_int;
 }
 
-char* enzyme_type_to_string(ENZYME_T type){
-  if( (int)type > NUMBER_ENZYME_TYPES){
+char* enzyme_type_to_string(ENZYME_T type) {
+  if ((int)type > NUMBER_ENZYME_TYPES) {
     return NULL;
   }
-
-  char* type_str = my_copy_string(enzyme_type_strings[type]);
-
-  return type_str;
+  return my_copy_string(enzyme_type_strings[type]);
 }
 
 /**
@@ -199,11 +203,11 @@ char* enzyme_type_to_string(ENZYME_T type){
 static const char* window_type_strings[NUMBER_WINDOW_TYPES] = 
   {"invalid", "mass", "mz", "ppm"};
 
-WINDOW_TYPE_T string_to_window_type(const string& name){
+WINDOW_TYPE_T string_to_window_type(const string& name) {
   int window_int = convert_enum_type_str(name.c_str(), INVALID_ENUM_STRING, 
                                          window_type_strings, 
                                          NUMBER_WINDOW_TYPES);
-  if( window_int < 0 ){
+  if (window_int < 0) {
     window_int = 0;
   }
 
@@ -216,11 +220,11 @@ WINDOW_TYPE_T string_to_window_type(const string& name){
 static const char* parsimony_type_strings[NUMBER_PARSIMONY_TYPES] =
   {"invalid", "simple", "greedy", "none"};
 
-PARSIMONY_TYPE_T string_to_parsimony_type(const string& name){
+PARSIMONY_TYPE_T string_to_parsimony_type(const string& name) {
   int parsimony_int = convert_enum_type_str(name.c_str(), INVALID_ENUM_STRING,
                                             parsimony_type_strings,
                                             NUMBER_PARSIMONY_TYPES);
-  if ( parsimony_int < 0 ){
+  if (parsimony_int < 0) {
     parsimony_int = 0;
   }
 
@@ -233,11 +237,11 @@ PARSIMONY_TYPE_T string_to_parsimony_type(const string& name){
 static const char* measure_type_strings[NUMBER_MEASURE_TYPES] =
   {"invalid", "RAW", "SIN", "NSAF", "dNSAF", "EMPAI"};
 
-MEASURE_TYPE_T string_to_measure_type(const string& name){
+MEASURE_TYPE_T string_to_measure_type(const string& name) {
   int measure_int = convert_enum_type_str(name.c_str(), INVALID_ENUM_STRING,
                                           measure_type_strings,
                                           NUMBER_MEASURE_TYPES);
-  if ( measure_int < 0 ){
+  if (measure_int < 0) {
     measure_int = 0;
   }
   
@@ -245,8 +249,8 @@ MEASURE_TYPE_T string_to_measure_type(const string& name){
 }
 
 
-char * measure_type_to_string(MEASURE_TYPE_T type){
-  if ( (int)type > NUMBER_MEASURE_TYPES){
+char * measure_type_to_string(MEASURE_TYPE_T type) {
+  if ((int)type > NUMBER_MEASURE_TYPES) {
     return NULL;
   }
 
@@ -258,8 +262,9 @@ char * measure_type_to_string(MEASURE_TYPE_T type){
 /**
  * the string version of threshold type
  */
-static const char* threshold_type_strings[NUMBER_THRESHOLD_TYPES] =
-  {"invalid","none","qvalue","custom"};
+static const char* threshold_type_strings[NUMBER_THRESHOLD_TYPES] = {
+  "invalid", "none", "qvalue", "custom"
+};
 
 THRESHOLD_T string_to_threshold_type(const string& name) {
 
@@ -290,14 +295,13 @@ char* threshold_type_to_string(THRESHOLD_T type) {
 static const char* quant_level_type_strings[NUMBER_QUANT_LEVEL_TYPES] =
   {"invalid", "peptide", "protein"};
 
-QUANT_LEVEL_TYPE_T string_to_quant_level_type(const string& name){
+QUANT_LEVEL_TYPE_T string_to_quant_level_type(const string& name) {
   int quant_int = convert_enum_type_str(name.c_str(), INVALID_ENUM_STRING,
                                         quant_level_type_strings,
                                         NUMBER_QUANT_LEVEL_TYPES);
-  if ( quant_int < 0 ){
+  if (quant_int < 0) {
     quant_int = 0;
   }
-  
   return (QUANT_LEVEL_TYPE_T)quant_int;
 }
 
@@ -349,23 +353,21 @@ COMPARISON_T string_to_comparison(const string& name) {
 static const char* ion_type_strings[NUMBER_ION_TYPES] = {
   "a", "b", "c", "x", "y", "z", "p", "by", "bya", "all" };
 
-bool string_to_ion_type(const string& name, ION_TYPE_T* result){
+bool string_to_ion_type(const string& name, ION_TYPE_T* result) {
   bool success = true;
-
   int ion_type = convert_enum_type_str(name.c_str(), INVALID_ENUM_STRING, 
                                        ion_type_strings, NUMBER_ION_TYPES);
   (*result) = (ION_TYPE_T)ion_type;
-
-  if( ion_type < 0){
+  if (ion_type < 0) {
     success = false;
   }
   return success;
 }
 
 bool ion_type_to_string(ION_TYPE_T type,
-                             char* type_str){
+                        char* type_str) {
   bool success = true;
-  if( (int)type > NUMBER_ION_TYPES ){
+  if ((int)type > NUMBER_ION_TYPES) {
     success = false;
     type_str = NULL;
   }
@@ -376,27 +378,27 @@ bool ion_type_to_string(ION_TYPE_T type,
 /*
  * The string version of ALGORITHM_TYPE_T
  */
-static const char* algorithm_type_strings[NUMBER_ALGORITHM_TYPES] = 
-  {"percolator", "rczar", "curve-fit",
-   "none", "all", "q-ranker"};
+static const char* algorithm_type_strings[NUMBER_ALGORITHM_TYPES] = {
+  "percolator", "rczar", "curve-fit",
+  "none", "all", "q-ranker"
+};
 
-bool string_to_algorithm_type(char* name, ALGORITHM_TYPE_T* result){
+bool string_to_algorithm_type(char* name, ALGORITHM_TYPE_T* result) {
   bool success = true;
 
   int algorithm_type = convert_enum_type_str(name, INVALID_ENUM_STRING,
                                              algorithm_type_strings,
                                              NUMBER_ALGORITHM_TYPES);
-  (*result) = (ALGORITHM_TYPE_T)algorithm_type;
-
-  if(algorithm_type < 0){
+  *result = (ALGORITHM_TYPE_T)algorithm_type;
+  if (algorithm_type < 0) {
     success = false;
   }
   return success;
 }
 
-bool algorithm_type_to_string(ALGORITHM_TYPE_T type, char* type_str){
+bool algorithm_type_to_string(ALGORITHM_TYPE_T type, char* type_str) {
   bool success = true;
-  if( (int)type > NUMBER_ALGORITHM_TYPES){
+  if ((int)type > NUMBER_ALGORITHM_TYPES) {
     success = false;
     type_str = NULL;
   }
@@ -407,16 +409,17 @@ bool algorithm_type_to_string(ALGORITHM_TYPE_T type, char* type_str){
 /* 
  * The string version of HARDKLOR_ALGORITHM_T
  */
-static const char* hardklor_algorithm_type_strings[NUMBER_HK_ALGORITHM_TYPES] =
-  {"invalid", "basic", "fewest-peptides", "fast-fewest-peptides", 
-   "fewest-peptides-choice", "fast-fewest-peptides-choice" };
+static const char* hardklor_algorithm_type_strings[NUMBER_HK_ALGORITHM_TYPES] = {
+  "invalid", "basic", "fewest-peptides", "fast-fewest-peptides", 
+  "fewest-peptides-choice", "fast-fewest-peptides-choice"
+};
 
-static const char* hardklor_hardklor_algorithm_type_strings[NUMBER_HK_ALGORITHM_TYPES] =
-  {"invalid", "Basic", "FewestPeptides", "FastFewestPeptides",
-   "FewestPeptidesChoice", "FastFewestPeptidesChoice" };
+static const char* hardklor_hardklor_algorithm_type_strings[NUMBER_HK_ALGORITHM_TYPES] = {
+  "invalid", "Basic", "FewestPeptides", "FastFewestPeptides",
+  "FewestPeptidesChoice", "FastFewestPeptidesChoice"
+};
 
 HARDKLOR_ALGORITHM_T string_to_hardklor_algorithm_type(const string& name) {
-
   int hk_algorithm = convert_enum_type_str(name.c_str(), INVALID_ENUM_STRING,
     hardklor_algorithm_type_strings, NUMBER_HK_ALGORITHM_TYPES);
 
@@ -425,12 +428,11 @@ HARDKLOR_ALGORITHM_T string_to_hardklor_algorithm_type(const string& name) {
   }
 
   return (HARDKLOR_ALGORITHM_T)hk_algorithm;
-
 }
 
 string hardklor_hardklor_algorithm_type_to_string(
   HARDKLOR_ALGORITHM_T type
-  ){
+) {
   return string(hardklor_hardklor_algorithm_type_strings[type]);
 }
 
@@ -490,22 +492,20 @@ static const char* scorer_type_strings[NUMBER_SCORER_TYPES] = {
   "refactored_xcorr"
 };
 
-bool string_to_scorer_type(const string& name, SCORER_TYPE_T* result){
+bool string_to_scorer_type(const string& name, SCORER_TYPE_T* result) {
   bool success = true;
-
   int scorer_type = convert_enum_type_str(name.c_str(), INVALID_ENUM_STRING, 
                                           scorer_type_strings,
                                           NUMBER_SCORER_TYPES);
-  (*result) = (SCORER_TYPE_T)scorer_type;
-
-  if( scorer_type < 0){
+  *result = (SCORER_TYPE_T)scorer_type;
+  if (scorer_type < 0) {
     success = false;
   }
   return success;
 }
 
-const char* scorer_type_to_string(SCORER_TYPE_T type){
-  if( (int)type > NUMBER_SCORER_TYPES){
+const char* scorer_type_to_string(SCORER_TYPE_T type) {
+  if ((int)type > NUMBER_SCORER_TYPES) {
     return NULL;
   }
   return scorer_type_strings[type];
@@ -515,8 +515,8 @@ const char* scorer_type_to_string(SCORER_TYPE_T type){
 /**
  * returns a heap allocated copy of the src string
  */
-char* my_copy_string(const char* src){
-  if( src == NULL ){
+char* my_copy_string(const char* src) {
+  if (src == NULL) {
     return NULL;
   }
   int length = strlen(src) +1; // +\0
@@ -530,7 +530,7 @@ char* my_copy_string(const char* src){
  * Includes a null terminating character.
  * The string is heap allocated; thus, user must free.
  */
-char* copy_string_part(const char* src, int length){
+char* copy_string_part(const char* src, int length) {
   char* copy = (char*)mycalloc(length+1, sizeof(char));
   strncpy(copy, src, length);
   copy[length] = '\0';
@@ -545,19 +545,14 @@ char* copy_string_part(const char* src, int length){
  * to the range of the numbers, allowing a single epsilon to be used for many, 
  * or perhaps all compares.
  */
-/*inline*/ int compare_float(FLOAT_T float_a, FLOAT_T float_b){
+/*inline*/ int compare_float(FLOAT_T float_a, FLOAT_T float_b) {
   FLOAT_T EPSILON = PRECISION;
   FLOAT_T sum = float_a + float_b;
-  // a == b
-  if( fabsf(float_a - float_b) <= fabsf(sum)* EPSILON ){
+  if (fabsf(float_a - float_b) <= fabsf(sum)* EPSILON) { // a == b
     return 0;
-  }
-  // a > b
-  else if((float_a - float_b) > fabsf(sum)* EPSILON){
+  } else if ((float_a - float_b) > fabsf(sum)* EPSILON) { // a > b
     return 1;
-  }
-  // a < b
-  else{
+  } else { // a < b
     return -1;
   }
 }
@@ -567,26 +562,10 @@ char* copy_string_part(const char* src, int length){
  * precision they are equal.  Otherwise, returns false.  
  * E.g. is_equal(0.10, 0.14, 1) -> true. is_equal(0.10, 0.15, 1) -> false
  */
-bool is_equal(FLOAT_T a, FLOAT_T b, int precision){
+bool is_equal(FLOAT_T a, FLOAT_T b, int precision) {
   a = (a * pow((FLOAT_T) 10.0, (FLOAT_T) precision)) + 0.5;
   b = (b * pow((FLOAT_T) 10.0, (FLOAT_T) precision)) + 0.5;
-
-  if( (int)a == (int)b ){
-    return true;
-  }
-  // else
-  return false;
-}
-
-/**
- *\returns true if float_a is between the interaval of min and max, else false
- */
-inline bool compare_float_three(FLOAT_T float_a, FLOAT_T min, FLOAT_T max){
-  if(compare_float(float_a, min) == -1 ||
-     compare_float(float_a, max) ==  1){
-    return false;
-  }
-  return true;
+  return (int)a == (int)b;
 }
 
 /**
@@ -597,7 +576,7 @@ inline bool compare_float_three(FLOAT_T float_a, FLOAT_T min, FLOAT_T max){
  *     file_name => returns filename, NULL
  *\returns A heap allocated array of both filename and path
  */
-char** parse_filename_path(const string& file){
+char** parse_filename_path(const string& file) {
   int len = file.length();
   int end_idx = len;
   int end_path = -1;  // index of where the last "/" is located
@@ -605,14 +584,14 @@ char** parse_filename_path(const string& file){
   char* filename = NULL;
   char** result = (char**)mycalloc(2, sizeof(char*));
 
-  for(; end_idx > 0; --end_idx){
+  for (; end_idx > 0; --end_idx) {
     if (file[end_idx - 1] == '/') {
       end_path = end_idx;
       break;
     }
   }
   // copy path, if there is a "/" in the file
-  if(end_path != -1){
+  if (end_path != -1) {
     path = copy_string_part(file.c_str(), end_path);
   }
   // copy filename
@@ -643,17 +622,16 @@ char** parse_filename_path(const string& file){
 char** parse_filename_path_extension(
   const char* file, ///< filename and path to parse -in
   const char* extension ///< extension to look for (includes leading .) --in
-){
+) {
 
   carp(CARP_DETAILED_DEBUG, "Given path/file %s and ext %s", file, extension);
   char** file_path_array = parse_filename_path(file);
   char* trimmed_filename = file_path_array[0];
 
   // look for extension
-  if( extension != NULL ){
-
+  if (extension != NULL) {
     carp(CARP_DETAILED_DEBUG, "File trimmed of path is %s", trimmed_filename);
-    if( ! StringUtils::EndsWith(trimmed_filename, extension) ){
+    if (!StringUtils::EndsWith(trimmed_filename, extension)) {
       return file_path_array;  // extension not found, don't change filename
     }
 
@@ -664,7 +642,7 @@ char** parse_filename_path_extension(
 
   } else { // find the last "."
     char* dot = strrchr(trimmed_filename, '.');
-    if( dot != NULL ){
+    if (dot != NULL) {
       *dot = '\0';
     }
   }
@@ -680,14 +658,14 @@ char** parse_filename_path_extension(
  * ex) ../../file_name => returns filename
  *\returns A heap allocated array of filename
  */
-char* parse_filename(const char* file){
+char* parse_filename(const char* file) {
   int len = strlen(file);
   int end_idx = len;
   int end_path = -1;  // index of where the last "/" is located
   char* filename = NULL;
   
-  for(; end_idx > 0; --end_idx){
-    if(strncmp(&file[end_idx - 1], "/", 1) == 0){
+  for (; end_idx > 0; --end_idx) {
+    if (strncmp(&file[end_idx - 1], "/", 1) == 0) {
       end_path = end_idx;
       break;
     }
@@ -703,7 +681,7 @@ char* parse_filename(const char* file){
  * convert the integer into a string
  * \returns a heap allocated string
  */
-char* int_to_char(unsigned int i){
+char* int_to_char(unsigned int i) {
   unsigned int digit = i / 10;
   char* int_string = (char*)mycalloc(digit+2, sizeof(char));
   sprintf(int_string, "%d", i);
@@ -714,48 +692,18 @@ char* int_to_char(unsigned int i){
  * convert the integer into a string
  * \returns a heap allocated string
  */
-char* signed_int_to_char(int i){
+char* signed_int_to_char(int i) {
   int digit = abs(i)/ 10;
   char* int_string = (char*)mycalloc(digit+2, sizeof(char));
   sprintf(int_string, "%d", i);
   return int_string;
 }
-/**
- * Gives the peptide type as defined by the string
- * Returns false if the string is not a valid type
- */
-//bool string_to_peptide_type
 
-/**
- *prints the peptide type given it's enum value
- */
-/*
-void print_peptide_type(PEPTIDE_TYPE_T peptide_type, FILE* file){
-  if(peptide_type == TRYPTIC){
-    fprintf(file, "%s", "TRYPTIC");
-  }
-  else if(peptide_type == PARTIALLY_TRYPTIC){
-    fprintf(file, "%s", "PARTIALLY_TRYPTIC");
-  }
-  else if(peptide_type == N_TRYPTIC){
-    fprintf(file, "%s", "N_TRYPTIC");
-  }
-  else if(peptide_type == C_TRYPTIC){
-    fprintf(file, "%s", "C_TRYPTIC");
-  }
-  else if(peptide_type == NOT_TRYPTIC){
-    fprintf(file, "%s", "NOT_TRYPTIC");
-  }
-  else if(peptide_type == ANY_TRYPTIC){
-    fprintf(file, "%s", "ANY_TRYPTIC");
-  }
-}
-*/
 /**
  * given two strings return a concatenated third string
  * \returns a heap allocated string that concatenates the two inputs
  */
-char* cat_string(const char* string_one, const char* string_two){
+char* cat_string(const char* string_one, const char* string_two) {
   int len_one = strlen(string_one);
   int len_two = strlen(string_two);
   
@@ -769,7 +717,7 @@ char* cat_string(const char* string_one, const char* string_two){
  * Adds the fileroot parameter to a string as a prefix.
  */
 string prefix_fileroot_to_name(const string& name) {
-  string fileroot = get_string_parameter("fileroot");
+  string fileroot = Params::GetString("fileroot");
   return (fileroot.empty()) ? name : fileroot + '.' + name;
 }
 
@@ -779,8 +727,8 @@ string prefix_fileroot_to_name(const string& name) {
 string make_file_path(
   const string& filename ///< the name of the file
   ) {
-  string output_directory = get_string_parameter("output-dir");
-  string fileroot = get_string_parameter("fileroot");
+  string output_directory = Params::GetString("output-dir");
+  string fileroot = Params::GetString("fileroot");
 
   ostringstream name_builder;
   name_builder << output_directory;
@@ -803,8 +751,7 @@ string make_file_path(
  * "path/filename".  Returns filename unchanged if path = NULL.
  * \returns a heap allocated string, "path/filename"
  */
-char* get_full_filename(const char* path, const char* filename){
-
+char* get_full_filename(const char* path, const char* filename) {
   char* result = NULL;
   if (path == NULL || strlen(path) == 0) {
     result = my_copy_string(filename);
@@ -814,17 +761,16 @@ char* get_full_filename(const char* path, const char* filename){
     result = cat_string(ready_path, filename);
     free(ready_path);
   }
-
   return result;
 }
 
 /**
  * returns the file size of the given filename
  */
-long get_filesize(char *FileName){
+long get_filesize(char *FileName) {
     struct stat file;
     // return file size
-    if(!stat(FileName,&file)){
+    if (!stat(FileName, &file)) {
       return file.st_size;
     }
     return 0;
@@ -842,9 +788,7 @@ long get_filesize(char *FileName){
 int create_output_directory(
   const string& output_folder, // Name of output folder.
   bool overwrite  // Whether or not to overwrite an existing dir 
-) 
-{
-
+) {
   int result = -1;
   bool path_is_directory = false;
   bool path_exists = false;
@@ -856,8 +800,7 @@ int create_output_directory(
       // stat failed because the path doesn't exist.
       path_exists = false;
       path_is_directory = false;
-    }
-    else {
+    } else {
       // stat failed for some other reason
       carp(
         CARP_ERROR,
@@ -867,65 +810,44 @@ int create_output_directory(
       );
       result = -1;
     }
-  }
-  else {
+  } else {
     path_exists = true;
     path_is_directory = S_ISDIR(stat_buffer.st_mode);
   }
 
   if (path_exists) {
     if (!path_is_directory) {
-      carp(
-        CARP_ERROR,
+      carp(CARP_ERROR,
         "A non-directory file named '%s' already exists,\n"
         "so that name can't be used for an output directory.\n",
-        output_folder.c_str()
-      );
+        output_folder.c_str());
       result = -1;
-    }
-    else {
+    } else {
       if (!overwrite) {
-        carp(
-          CARP_WARNING,
+        carp(CARP_WARNING,
           "The output directory '%s' already exists.\nExisting files will not"
-          " be overwritten.",
-          output_folder.c_str()
-        );
+          " be overwritten.", output_folder.c_str());
         result = 0;
-      }
-      else {
-        carp(
-          CARP_WARNING,
-          "The output directory '%s' already exists.\nExisting files will"
-          " be overwritten.",
-          output_folder.c_str()
-        );
+      } else {
+        carp(CARP_WARNING,
+          "The output directory '%s' already exists.\nExisting files will be overwritten.",
+          output_folder.c_str());
         result = 0;
       }
     }
-  }
-  else {
+  } else {
     // The directory doesn't exist, so we can create it.
     // Does this accomodate the case where one or more of the
     // parent directories doesn't exit?
     int dir_access = S_IRWXU + S_IRWXG + S_IRWXO;
     if (!boost::filesystem::create_directories(output_folder)) {
       // mkdir failed
-      carp(
-        CARP_ERROR,
-        "Unable to create output directory '%s': %s.\n",
-        output_folder.c_str(),
-        strerror(errno)
-      );
+      carp(CARP_ERROR, "Unable to create output directory '%s': %s.\n",
+        output_folder.c_str(), strerror(errno));
       result = -1;
-    }
-    else {
+    } else {
       result = 0;
-      carp(
-        CARP_INFO,
-        "Writing results to output directory '%s'.",
-        output_folder.c_str()
-      );
+      carp(CARP_INFO, "Writing results to output directory '%s'.", output_folder.c_str());
     }
   }
   return result;
@@ -945,11 +867,10 @@ char* generate_name_path(
   vector<const char*> old_suffixes,
   const char* new_suffix,
   const char* new_path
-  ){
-
+) {
   // check the filename for the extension.  Use the first that matches
-  for(size_t suffix_idx = 0; suffix_idx < old_suffixes.size(); suffix_idx++){
-    if(StringUtils::IEndsWith(filename, old_suffixes[suffix_idx])){
+  for (size_t suffix_idx = 0; suffix_idx < old_suffixes.size(); suffix_idx++) {
+    if (StringUtils::IEndsWith(filename, old_suffixes[suffix_idx])) {
       return generate_name_path(filename, old_suffixes[suffix_idx],
                                 new_suffix, new_path);
     }
@@ -974,8 +895,7 @@ char* generate_name_path(
   const char* old_suffix,
   const char* new_suffix,
   const char* new_path
-  ){
-
+) {
   carp(CARP_DEBUG, "Generate name given filename '%s', old suffix '%s', " \
        "new suffix '%s', new path '%s'", 
        filename, old_suffix, new_suffix, new_path);
@@ -1009,8 +929,7 @@ char* generate_name(
   const char* name_tag,
   const char* file_extension,
   const char* suffix
-  )
-{
+) {
   int len = strlen(fasta_filename);
   int end_path = len;  // index of where the "." is located in the file
   char* name = NULL;
@@ -1021,15 +940,15 @@ char* generate_name(
 
   // cut off the file extension if needed
   int end_idx;
-  for(end_idx = len; end_idx > 0; --end_idx){
-    if(strcmp(&fasta_filename[end_idx - 1], file_extension) == 0){
+  for (end_idx = len; end_idx > 0; --end_idx) {
+    if (strcmp(&fasta_filename[end_idx - 1], file_extension) == 0) {
       end_path = end_idx - 1;
       break;
     }
   }
   
   // check suffix
-  if(suffix != NULL){
+  if (suffix != NULL) {
     suffix_length = strlen(suffix);
     file_n_path = parse_filename_path(fasta_filename);
   }
@@ -1039,9 +958,9 @@ char* generate_name(
   after_suffix = name;
   
   // if suffix exit add to top
-  if(suffix_length != 0){
+  if (suffix_length != 0) {
     length = strlen(file_n_path[1]);
-    if(file_n_path[1] != NULL){
+    if (file_n_path[1] != NULL) {
       strncpy(name, file_n_path[1], length);
       after_suffix = &name[length];
     }    
@@ -1056,8 +975,7 @@ char* generate_name(
     free(file_n_path[0]);
     free(file_n_path[1]);
     free(file_n_path);
-  }
-  else{
+  } else {
     strncpy(after_suffix, fasta_filename, end_path);
   }
   
@@ -1069,7 +987,7 @@ char* generate_name(
  * checks if each AA is an AA
  *\returns true if sequence is valid else, false
  */
-bool valid_peptide_sequence(const string& sequence){
+bool valid_peptide_sequence(const string& sequence) {
   for (string::const_iterator i = sequence.begin(); i != sequence.end(); i++) {
     if (!isupper(*i)) {
       return false;
@@ -1090,37 +1008,30 @@ FILE* create_file_in_path(
   const string& filename,  ///< the filename to create & open -in
   const string& directory,  ///< the directory to open the file in -in
   bool overwrite  ///< replace file (T) or die if exists (F)
-  )
-{
+) {
   char* file_full_path = get_full_filename(directory.c_str(), filename.c_str());
   // FIXME CEG consider using stat instead
   FILE* file = fopen(file_full_path, "rb"); //to test if file exists
-  if( file != NULL ){  
+  if (file != NULL) {
     //The file exists, are we allowed to overwrite it?
     fclose(file);
     file = NULL;
-    if( ! overwrite ){
+    if (!overwrite) {
         // Not allowed to overwrite, we must die.
-        carp(
-          CARP_FATAL, 
-          "The file '%s' already exists and cannot be overwritten. " \
-            "Use --overwrite T to replace or choose a different output file name",
-          file_full_path
-        );
-    }
-    else {
+        carp(CARP_FATAL, 
+          "The file '%s' already exists and cannot be overwritten. "
+          "Use --overwrite T to replace or choose a different output file name",
+          file_full_path);
+    } else {
       // Allowed to overwrite, send warning message.
-      carp(
-        CARP_WARNING, 
-        "The file '%s' already exists and will be overwritten.",
-        file_full_path
-      );
+      carp(CARP_WARNING, 
+        "The file '%s' already exists and will be overwritten.", file_full_path);
     }
   }
   
   file = fopen(file_full_path, "wb+"); //read and write, replace existing
 
-  if(file == NULL){
+  if (file == NULL) {
     carp(CARP_FATAL, "Failed to create and open file: %s", file_full_path);
   }
   
@@ -1133,72 +1044,34 @@ ofstream* create_stream_in_path(
   const char* filename,  ///< the filename to create & open -in
   const char* directory,  ///< the directory to open the file in -in
   bool overwrite  ///< replace file (T) or die if exists (F)
-  )
-{
+) {
   char* file_full_path = get_full_filename(directory, filename);
   // FIXME CEG consider using stat instead
   FILE* file = fopen(file_full_path, "rb"); //to test if file exists
-  if( file != NULL ){  
+  if (file != NULL) {  
     //The file exists, are we allowed to overwrite it?
     fclose(file);
     file = NULL;
-    if( ! overwrite ){
+    if (!overwrite) {
         // Not allowed to overwrite, we must die.
-        carp(
-          CARP_FATAL, 
-          "The file '%s' already exists and cannot be overwritten. " \
-            "Use --overwrite T to replace or choose a different output file name",
-          file_full_path
-        );
-    }
-    else {
+        carp(CARP_FATAL, 
+          "The file '%s' already exists and cannot be overwritten. "
+          "Use --overwrite T to replace or choose a different output file name",
+          file_full_path);
+    } else {
       // Allowed to overwrite, send warning message.
-      carp(
-        CARP_WARNING, 
-        "The file '%s' already exists and will be overwritten.",
-        file_full_path
-      );
+      carp(CARP_WARNING, 
+        "The file '%s' already exists and will be overwritten.", file_full_path);
     }
   }
   
   ofstream* fout = new ofstream(file_full_path);
 
-  if(fout == NULL){
+  if (fout == NULL) {
     carp(CARP_FATAL, "Failed to create and open file: %s", file_full_path);
   }
-  
   free(file_full_path);
-
   return fout;
-}
-
-
-/**
- *\returns a heap allocated feature name array
- */
-char** generate_feature_name_array()
-{
-  char** name_array = NULL;
-
-  name_array = (char**)mycalloc(NUM_FEATURES, sizeof(char *));
-  name_array[0] =  my_copy_string("XCorr");
-  name_array[1] =  my_copy_string("DeltCN");
-  name_array[2] =  my_copy_string("Sp");
-  name_array[3] =  my_copy_string("lnrSp");
-  name_array[4] =  my_copy_string("dM");
-  name_array[5] =  my_copy_string("absdM");
-  name_array[6] =  my_copy_string("Mass");
-  name_array[7] =  my_copy_string("ionFrac");
-  name_array[8] =  my_copy_string("lnSM");
-  name_array[9] =  my_copy_string("enzN");
-  name_array[10] =  my_copy_string("enzC");
-  name_array[11] =  my_copy_string("enzInt");
-  name_array[12] =  my_copy_string("pepLen");
-  name_array[13] =  my_copy_string("charge1");
-  name_array[14] =  my_copy_string("charge2");
-  name_array[15] =  my_copy_string("charge3");
-
-  return name_array;
 }
 
 bool get_first_last_scan_from_string(
@@ -1222,9 +1095,6 @@ bool get_first_last_scan_from_string(
 bool get_scans_from_string(
   const string& const_scans_string,
   set<int>& scans) {
-
-  bool success;
-
   scans.clear();
 
   //first tokenize by comma.
@@ -1236,11 +1106,10 @@ bool get_scans_from_string(
   }
   int temp_scan;
 
-  for (size_t idx1=0;idx1<tokens_comma.size();idx1++) {
+  for (size_t idx1 = 0; idx1 < tokens_comma.size(); idx1++) {
     string current = tokens_comma[idx1];
     if (current.find("-") == string::npos) {
-      success = from_string<int>(temp_scan, current);
-      if (success) {
+      if (StringUtils::TryFromString(current, &temp_scan)) {
         scans.insert(temp_scan);
       } else {
         carp(CARP_ERROR, "Error parsing scans line:%s", const_scans_string.c_str());
@@ -1254,8 +1123,8 @@ bool get_scans_from_string(
         return false;
       }
       int temp_scan2;
-      success = from_string<int>(temp_scan, tokens_dash[0]);
-      success &= from_string<int>(temp_scan2, tokens_dash[1]);
+      bool success = StringUtils::TryFromString(tokens_dash[0], &temp_scan);
+      success &= StringUtils::TryFromString(tokens_dash[1], &temp_scan2);
       if (!success || temp_scan > temp_scan2) {
         carp(CARP_ERROR, "Error parsing scans line:%s here: %s", 
           const_scans_string.c_str(), tokens_comma[idx1].c_str());
@@ -1278,8 +1147,7 @@ bool get_scans_from_string(
 int get_random_number_interval(
   int low, ///< the number for lower bound -in
   int high ///< the number for higher bound -in
-  )
-{  
+) {  
   return (myrandom_limit(high - low + 1) + low);
 }
 
@@ -1288,13 +1156,11 @@ int get_random_number_interval(
  */
 int get_number_digits(
   int number ///< the number to count digits
-  )
-{
+) {
   int idx = 0;
-  for(; number >= 10; ++idx){
+  for (; number >= 10; ++idx) {
     number = number/10;    
   }
-
   return ++idx;
 }
 
@@ -1302,8 +1168,7 @@ void swap_quick(
   FLOAT_T* a,
   int idx,
   int jdx
-  )
-{
+) {
   FLOAT_T temp = 0;
   temp = a[idx];
   a[idx] = a[jdx];
@@ -1319,33 +1184,34 @@ void quick_sort(FLOAT_T a[], int left, int right) {
 
   if (left >= right) return;
   
-  swap_quick(a,left,Random(left,right));
-  for (i = left + 1; i <= right; i++)
-    if (a[i] > a[left]) /// CHECK THIS!!
-      swap_quick(a,++last,i);
-  swap_quick(a,left,last);
-  quick_sort(a,left,last-1);
-  quick_sort(a,last+1,right);
+  swap_quick(a, left, Random(left, right));
+  for (i = left + 1; i <= right; i++) {
+    if (a[i] > a[left]) { /// CHECK THIS!!
+      swap_quick(a, ++last, i);
+    }
+  }
+  swap_quick(a, left, last);
+  quick_sort(a, left, last-1);
+  quick_sort(a, last+1, right);
 }
 
-void quicksort(FLOAT_T a[], int array_size){
-  quick_sort(a, 0, array_size-1);
+void quicksort(FLOAT_T a[], int array_size) {
+  quick_sort(a, 0, array_size - 1);
 }
 
 /**
  * \brief Shuffle an array of floats.  Uses the Knuth algorithm.  Uses
  * get_random_number_interval() to generate random numbers. 
  */
-void shuffle_floats(FLOAT_T* array, int size){
-  if( array == NULL ){
+void shuffle_floats(FLOAT_T* array, int size) {
+  if (array == NULL) {
     carp(CARP_ERROR, "Cannot shuffle NULL array.");
     return;
   }
-
   int idx, switch_idx;
   int last_element_idx = size - 1;
   FLOAT_T temp_value;
-  for(idx=0; idx < size; idx++){
+  for (idx = 0; idx < size; idx++) {
     switch_idx = get_random_number_interval(idx, last_element_idx);
     temp_value = array[idx];
     array[idx] = array[switch_idx];
@@ -1361,19 +1227,18 @@ void shuffle_floats(FLOAT_T* array, int size){
  * be shifted by) and the best correlation coefficient
  */
 void fit_three_parameter_weibull(
-    FLOAT_T* data, ///< the data to be fit -in
-    int fit_data_points, ///< the number of data points to fit -in
-    int total_data_points, ///< the total number of data points to fit -in
-    FLOAT_T min_shift, ///< the minimum shift to allow -in
-    FLOAT_T max_shift, ///< the maximum shift to allow -in
-    FLOAT_T step,      ///< step for shift -in
-    FLOAT_T corr_threshold, ///< minimum correlation, else no fit -in
-    FLOAT_T* eta,      ///< the eta parameter of the Weibull dist -out
-    FLOAT_T* beta,      ///< the beta parameter of the Weibull dist -out
-    FLOAT_T* shift,     ///< the best shift -out
-    FLOAT_T* correlation   ///< the best correlation -out
-    ){
-  
+  FLOAT_T* data, ///< the data to be fit -in
+  int fit_data_points, ///< the number of data points to fit -in
+  int total_data_points, ///< the total number of data points to fit -in
+  FLOAT_T min_shift, ///< the minimum shift to allow -in
+  FLOAT_T max_shift, ///< the maximum shift to allow -in
+  FLOAT_T step,      ///< step for shift -in
+  FLOAT_T corr_threshold, ///< minimum correlation, else no fit -in
+  FLOAT_T* eta,      ///< the eta parameter of the Weibull dist -out
+  FLOAT_T* beta,      ///< the beta parameter of the Weibull dist -out
+  FLOAT_T* shift,     ///< the best shift -out
+  FLOAT_T* correlation   ///< the best correlation -out
+) {
   FLOAT_T correlation_tolerance = 0.1;
   
   FLOAT_T best_eta = 0.0;
@@ -1386,17 +1251,17 @@ void fit_three_parameter_weibull(
   FLOAT_T cur_correlation = 0.0;
   FLOAT_T cur_shift = 0.0;
 
-  for (cur_shift = max_shift; cur_shift > min_shift ; cur_shift -= step){
+  for (cur_shift = max_shift; cur_shift > min_shift ; cur_shift -= step) {
 
     fit_two_parameter_weibull(data, fit_data_points, total_data_points, 
                               cur_shift, &cur_eta, &cur_beta, &cur_correlation);
 
-    if (cur_correlation > best_correlation){
+    if (cur_correlation > best_correlation) {
       best_eta = cur_eta;
       best_beta = cur_beta;
       best_shift = cur_shift;
       best_correlation = cur_correlation;
-    } else if (cur_correlation < best_correlation - correlation_tolerance){
+    } else if (cur_correlation < best_correlation - correlation_tolerance) {
       break;
     }
   }
@@ -1431,16 +1296,15 @@ void fit_two_parameter_weibull(
     FLOAT_T* eta,      ///< the eta parameter of the Weibull dist -out
     FLOAT_T* beta,      ///< the beta parameter of the Weibull dist -out
     FLOAT_T* correlation ///< the best correlation -out
-    ){
-
+) {
   FLOAT_T* X = (FLOAT_T*)mymalloc(sizeof(FLOAT_T) * fit_data_points); //hold data here
 
   // transform data into an array of values for fitting
   // shift (including only non-neg data values) and take log
   int idx;
-  for(idx=0; idx < fit_data_points; idx++){
+  for (idx = 0; idx < fit_data_points; idx++) {
     FLOAT_T score = data[idx] + shift; // move right by shift
-    if (score <= 0.0){
+    if (score <= 0.0) {
       carp(CARP_DEBUG, "Reached negative score at idx %i", idx);
       fit_data_points = idx;
       break;
@@ -1450,7 +1314,7 @@ void fit_two_parameter_weibull(
   }
 
   FLOAT_T* Y   = (FLOAT_T*)mymalloc(sizeof(FLOAT_T) * fit_data_points);
-  for(idx=0; idx < fit_data_points; idx++){
+  for (idx = 0; idx < fit_data_points; idx++) {
     int reverse_idx = total_data_points - idx;
     FLOAT_T F_T_idx = (reverse_idx - 0.3) / (total_data_points + 0.4);
     Y[idx] = log( -log(1.0 - F_T_idx) );
@@ -1462,7 +1326,7 @@ void fit_two_parameter_weibull(
   FLOAT_T sum_X  = 0.0;
   FLOAT_T sum_XY = 0.0;
   FLOAT_T sum_XX = 0.0;
-  for(idx=0; idx < fit_data_points; idx++){
+  for (idx = 0; idx < fit_data_points; idx++) {
     sum_Y  += Y[idx];
     sum_X  += X[idx];
     sum_XX += X[idx] * X[idx];
@@ -1488,7 +1352,7 @@ void fit_two_parameter_weibull(
   FLOAT_T c_denom_Y = 0.0;
   FLOAT_T mean_X = sum_X / N;
   FLOAT_T mean_Y = sum_Y / N;
-  for (idx=0; idx < N; idx++){
+  for (idx = 0; idx < N; idx++) {
     FLOAT_T X_delta = X[idx] - mean_X; 
     FLOAT_T Y_delta = Y[idx] - mean_Y;
     c_num += X_delta * Y_delta;
@@ -1496,7 +1360,7 @@ void fit_two_parameter_weibull(
     c_denom_Y += Y_delta * Y_delta;
   }
   FLOAT_T c_denom = sqrt(c_denom_X * c_denom_Y);
-  if (c_denom == 0.0){
+  if (c_denom == 0.0) {
     //carp(CARP_FATAL, "Zero denominator in correlation calculation!");
     carp(CARP_DETAILED_DEBUG, "Zero denominator in correlation calculation!");
     *correlation = 0.0; // min value
@@ -1505,7 +1369,7 @@ void fit_two_parameter_weibull(
   } else {
     *correlation = c_num / c_denom;
   }
-  carp(CARP_DETAILED_DEBUG, "shift=%.6f",shift);
+  carp(CARP_DETAILED_DEBUG, "shift=%.6f", shift);
   carp(CARP_DETAILED_DEBUG, "eta=%.6f", *eta);
   carp(CARP_DETAILED_DEBUG, "beta=%.6f", *beta);
   carp(CARP_DETAILED_DEBUG, "correlation=%.6f", *correlation);
@@ -1522,21 +1386,20 @@ void fit_two_parameter_weibull(
  */
 int prepare_protein_input(
   const string& input_file,     ///< name of the fasta file
-  Database** database)///< return new fasta database here
-{
-
+  Database** database ///< return new fasta database here
+) {
   int num_proteins = 0;
 
-	carp(CARP_INFO, "Preparing protein fasta file %s", input_file.c_str());
-	*database = new Database(input_file, false);         
-	if( database == NULL ){
-		carp(CARP_FATAL, "Could not create protein database");
-	} 
+  carp(CARP_INFO, "Preparing protein fasta file %s", input_file.c_str());
+  *database = new Database(input_file, false);         
+  if (database == NULL) {
+    carp(CARP_FATAL, "Could not create protein database");
+  } 
 
-	if(!(*database)->parse()){
-		carp(CARP_FATAL, "Error with protein database.");
-	} 
-	return (*database)->getNumProteins();
+  if (!(*database)->parse()) {
+    carp(CARP_FATAL, "Error with protein database.");
+  } 
+  return (*database)->getNumProteins();
 }
 
 /**
@@ -1548,13 +1411,11 @@ static const int MAX_CHARS_PER_LINE = 70;
  *\brief Extend a given string with lines not exceeding a specified width, 
  * breaking on spaces.
  */
-void strcat_formatted
-(
- char*       string_to_extend,
- const char* lead_string,        // Appears at the start of each line.
- const char* extension           // Text to add.
- )
-{
+void strcat_formatted(
+  char*       string_to_extend,
+  const char* lead_string,        // Appears at the start of each line.
+  const char* extension           // Text to add.
+) {
   int i_string = 0;
   int string_length = strlen(extension);
   char buffer[MAX_CHARS_PER_LINE + 1];
@@ -1589,18 +1450,17 @@ void strcat_formatted
 void check_target_decoy_files(
   string &target,   //filename of the target PSMs
   string &decoy     //filename of the decoy PSMs
-)
-{
- int target_pos = target.find("target");
- if (target_pos < 0) {
-   int decoy_pos = decoy.find("decoy");
-   if (decoy_pos < 0) {
-     // user gave concatenated result file
-     decoy = "";
-   } else {
-     // user gave decoy results file
-     target.replace(decoy_pos, DECOY_STRING_LENGTH, "target");
-   }
+) {
+  int target_pos = target.find("target");
+  if (target_pos < 0) {
+    int decoy_pos = decoy.find("decoy");
+    if (decoy_pos < 0) {
+      // user gave concatenated result file
+      decoy = "";
+    } else {
+      // user gave decoy results file
+      target.replace(decoy_pos, DECOY_STRING_LENGTH, "target");
+    }
   } else {
     // user gave target results file
     decoy.replace(target_pos, TARGET_STRING_LENGTH, "decoy"); 
@@ -1609,14 +1469,13 @@ void check_target_decoy_files(
 
 void get_search_result_paths(
   const string &infile, ///< path of the first file.
-  std::vector<std::string> &outpaths ///< paths of all search results -out                                                                                                         
-  ) {
-  
+  std::vector<std::string> &outpaths ///< paths of all search results -out 
+) {
   outpaths.clear();
-  if (get_boolean_parameter("list-of-files")) {
+  if (Params::GetBool("list-of-files")) {
     LineFileReader reader(infile);
     while(reader.hasNext()) {
-      string current = reader.next();
+      string current = StringUtils::Trim(reader.next());
       carp(CARP_INFO, "current is:%s", current.c_str());
       if (FileUtils::Exists(current)) {
         outpaths.push_back(current);
@@ -1628,14 +1487,14 @@ void get_search_result_paths(
     string target = infile;
     string decoy = infile;
     check_target_decoy_files(target, decoy);
-    if (target.length() > 0) {
+    if (!target.empty()) {
       if (FileUtils::Exists(target)) {
         outpaths.push_back(target);
       } else {
         carp(CARP_ERROR, "Target file '%s' doesn't exist", target.c_str());
       }
     }
-    if (decoy.length() > 0) {
+    if (!decoy.empty()) {
       if (FileUtils::Exists(decoy)) {
         outpaths.push_back(decoy);
       } else {
@@ -1647,13 +1506,12 @@ void get_search_result_paths(
 
 void get_files_from_list(
   const string &infile, ///< path of the first file.
-  std::vector<std::string> &outpaths ///< paths of all search results -out                                                                                                         
+  std::vector<std::string> &outpaths ///< paths of all search results -out
   ) {
-  
   outpaths.clear();
-  if (get_boolean_parameter("list-of-files")) {
+  if (Params::GetBool("list-of-files")) {
     LineFileReader reader(infile);
-    while(reader.hasNext()) {
+    while (reader.hasNext()) {
       string current = reader.next();
       carp(CARP_INFO, "current is:%s", current.c_str());
       if (FileUtils::Exists(current)) {
@@ -1662,10 +1520,111 @@ void get_files_from_list(
         carp(CARP_ERROR, "Search file '%s' doesn't exist", current.c_str());
       }
     }
+  } else if (FileUtils::Exists(infile)) {
+    outpaths.push_back(infile);
+  }
+}
+
+bool parseUrl(string url, string* host, string* path) {
+  if (!host || !path) {
+    return false;
+  }
+  // find protocol
+  size_t protocolSuffix = url.find("://");
+  if (protocolSuffix != string::npos) {
+    url = url.substr(protocolSuffix + 3);
+  }
+  size_t pathBegin = url.find('/');
+  if (pathBegin == string::npos) {
+    *host = url;
+    *path = "/";
   } else {
-    if (FileUtils::Exists(infile)) {
-      outpaths.push_back(infile);
-    } 
+    *host = url.substr(0, pathBegin);
+    *path = url.substr(pathBegin);
+  }
+  if (host->empty()) {
+    *host = *path = "";
+    return false;
+  }
+  return true;
+}
+
+string httpRequest(const string& url, const std::string& data, bool waitForResponse) {
+  // Parse URL into host and path components
+  string host, path;
+  if (!parseUrl(url, &host, &path)) {
+    carp(CARP_ERROR, "Failed parsing URL %s", url.c_str());
+    return "";
+  }
+
+  using namespace boost::asio;
+
+  // Establish TCP connection to host on port 80
+  io_service service;
+  ip::tcp::resolver resolver(service);
+  ip::tcp::resolver::iterator endpoint = resolver.resolve(ip::tcp::resolver::query(host, "80"));
+  ip::tcp::socket sock(service);
+  connect(sock, endpoint);
+
+  // Determine method (GET if no data; otherwise POST)
+  string method = data.empty() ? "GET" : "POST";
+  string contentLengthHeader = data.empty()
+    ? ""
+    : "Content-Length: " + StringUtils::ToString(data.length()) + "\r\n";
+  // Send the HTTP request
+  string request =
+    method + " " + path + " HTTP/1.1\r\n"
+    "Host: " + host + "\r\n" +
+    contentLengthHeader +
+    "Connection: close\r\n"
+    "\r\n" + data;
+  sock.send(buffer(request));
+
+  if (!waitForResponse) {
+    return "";
+  }
+
+  // Read the response into stringstream
+  stringstream response;
+  boost::system::error_code ec;
+  do {
+    char buf[1024];
+    size_t n = sock.receive(buffer(buf), 0, ec);
+    if (!ec) {
+      response.write(buf, n);
+    }
+  } while (!ec);
+  return response.str();
+}
+
+void postToAnalytics(const string& appName) {
+  // Post data to Google Analytics
+  // For more information, see: https://developers.google.com/analytics/devguides/collection/protocol/v1/devguide
+  try {
+    stringstream paramBuilder;
+    paramBuilder << "v=1"                // Protocol verison
+                 << "&tid=UA-26136956-1" // Tracking ID
+                 // TODO Generate UUID for cid
+                 // The Client ID (cid) anonymously identifies a particular user
+                 // or device and should be a random UUID
+                 << "&cid=35009a79-1a05-49d7-b876-2b884d0f825b"
+                 << "&t=event"           // Hit type
+                 << "&ec=crux"           // Event category
+                 << "&ea=" << appName    // Event action
+                 << "&el="               // Event label
+#ifdef _MSC_VER
+                      "win"
+#elif __APPLE__
+                      "mac"
+#else
+                      "linux"
+#endif
+                   << '-' << CRUX_VERSION;
+      httpRequest(
+        "http://www.google-analytics.com/collect",
+        paramBuilder.str(),
+        false);
+  } catch (...) {
   }
 }
 

@@ -21,6 +21,17 @@ class StringUtils {
     }
   }
 
+  //Convert from a string, returning false if conversion fails
+  template<typename T>
+  static bool TryFromString(const std::string& s, T* out) {
+    try {
+      *out = boost::lexical_cast<T>(s);
+      return true;
+    } catch (...) {
+      return false;
+    }
+  }
+
   // Convert to a string
   template<typename T>
   static std::string ToString(const T& obj, int decimals = -1, bool fixedFloat = true) {
@@ -81,6 +92,28 @@ class StringUtils {
     }
     tokens.push_back(FromString<T>(s.substr(from)));
     return tokens;
+  }
+
+  static std::vector<std::string> Fields(const std::string& s);
+
+  template<typename T>
+  static std::vector<T> Fields(const std::string& s) {
+    std::vector<T> fields;
+    std::string current;
+    for (std::string::const_iterator i = s.begin(); i != s.end(); i++) {
+      if (*i == ' ' || *i == '\t') {
+        if (!current.empty()) {
+          fields.push_back(FromString<T>(current));
+          current.clear();
+        }
+      } else {
+        current.push_back(*i);
+      }
+    }
+    if (!current.empty()) {
+      fields.push_back(FromString<T>(current));
+    }
+    return fields;
   }
 
   // Convert a string to lowercase
