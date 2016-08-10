@@ -99,7 +99,7 @@ string CascadeSearchApplication::getDescription() const {
     "[[nohtml:An iterative procedure for incorporating information about "
     "peptide groups into the database search and confidence estimation "
     "procedure.]]"
-    "[[html:<p>Cascade search is a general procedure for incorporating information about "
+    "[[html:<p>Cascade-search is a general procedure for incorporating information about "
     "peptide groups into the database search and confidence estimation procedure. Peptides "
     "may be grouped according to, for example, their enzymatic properties (zero, one, or "
     "two enzymatic termini) or the presence of different types of numbers of variable "
