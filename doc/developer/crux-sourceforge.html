@@ -79,50 +79,14 @@ href="https://sourceforge.net/p/forge/documentation/Project%20Web%20and%20Develo
 The directory containing the Crux-Toolkit project files is:
 <code>/home/project-web/cruxtoolkit/htdocs/</code>.
 <p/>
-The directory containing the log files for the Crux-Toolkit web site
-is <code> /home/logs-project-web/cruxtoolkit</code>
+Sourceforge no longer provides log files for the Crux web site.
+Our <code>doc/user/downbload/download.php</code> script
+does log downloads of the Crux distributions.
+The distrubution download log can be downloaded via <code>scp</code>:
+<pre>
+scp -r  crux-toolkit@web.sourceforge.net:/home/project-web/cruxtoolkit/htdocs/download/downloads.txt .
+</pre>
 <p/>
-The web directories for Crux-Toolkit can be accessed by a shell session as
-described above.
-They can also be via <code>scp</code> and <code>sftp</code>,
-but these use a different server name: <code>web.sourceforge.net</code>.
-<p/>
-For example, to download all the web log files for Crux-Toolkit, use
-the command:
-<pre>
-scp -r crux-toolkit@web.sourceforge.net:/home/logs-project-web/cruxtoolkit crux-toolkit-logs
-</pre>
-<h2>Analyzing the Crux-Toolkit Sourceforge web logs</h2>
-A report on the usage of the Crux-Toolkit Site can be generated
-using the <code>Awstats</code> package.
-This is available as a module on the Noble lab Linux boxes.
-The analysis requires several steps.
-<ol>
-<li>
-Download the Crux-Toolkit web log files:
-<pre>
-scp -r crux-toolkit@web.sourceforge.net:/home/logs-project-web/cruxtoolkit crux-toolkit-logs
-</pre>
-</li>
-<li>Load the <code>awstats</code> module:
-<pre>
-module load awstats
-</pre>
-</li>
-<li>
-Concatenate all the log files into a single log file:
-<pre>
-logresolvemerge.pl crux-toolkit-logs/*.log > crux-toolkit-master.log
-</pre>
-</li>
-<li>
-Create usage report from the log file:
-<pre>
-awstats.pl -config=cruxtoolkit.sourceforge.net -LogFile=crux-toolkit-master.log \
-  -update -output > crux-web-report.html
-</pre>
-</li>
-</ol>
 <h2>Interactions Between Crux-Toolkit Site on Sourceforge and Our TeamCity Server</h2>
 Our TeamCity server runs two scripts that interact with the Crux-Toolkit on Sourceforge.
 <ul>
