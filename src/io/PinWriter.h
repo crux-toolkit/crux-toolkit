@@ -23,7 +23,7 @@ class PinWriter : public PSMWriter {
  public:
   PinWriter();
   ~PinWriter();
-  PinWriter(const char* output_file);
+  explicit PinWriter(const char* output_file);
  
   void write(
     MatchCollection* target_collection,
@@ -69,7 +69,7 @@ class PinWriter : public PSMWriter {
   std::string getId(Crux::Match* match, int scan_number); 
 
   struct IsFeature : public std::unary_function<const std::pair<std::string, bool>&, bool> {
-    IsFeature(const std::string& name): search_(name) {}
+    explicit IsFeature(const std::string& name): search_(name) {}
     bool operator() (const std::pair<std::string, bool>& check) {
       return search_ == check.first;
     }
@@ -77,7 +77,7 @@ class PinWriter : public PSMWriter {
   };
 
   struct FeatureCopy {
-    FeatureCopy(std::vector<std::string>* target): target_(target) {}
+    explicit FeatureCopy(std::vector<std::string>* target): target_(target) {}
     void operator() (const std::pair<std::string, bool>& feature) {
       if (feature.second) target_->push_back(feature.first);
     }

@@ -30,20 +30,19 @@ namespace Crux {
 SpectrumCollection::SpectrumCollection (
   const string& filename ///< The spectrum collection filename. 
   ) 
-: filename_(filename), is_parsed_(false), num_charged_spectra_(0) 
-{
+: filename_(filename), is_parsed_(false), num_charged_spectra_(0) {
 #if DARWIN
   char path_buffer[PATH_MAX];
   char* absolute_path_file =  realpath(filename.c_str(), path_buffer);
 #else
   char* absolute_path_file =  realpath(filename.c_str(), NULL);
 #endif
-  if (absolute_path_file == NULL){
+  if (absolute_path_file == NULL) {
     carp(CARP_FATAL, "Error from spectrum file '%s'. (%s)",
          filename.c_str(), strerror(errno)); 
   }
   
-  if(access(absolute_path_file, F_OK)){
+  if(access(absolute_path_file, F_OK)) {
     carp(CARP_FATAL, "File %s could not be opened\n", absolute_path_file);
   }
   filename_ = absolute_path_file;
@@ -61,8 +60,7 @@ SpectrumCollection::SpectrumCollection(
   SpectrumCollection& old_collection
   ) : filename_(old_collection.filename_),
       is_parsed_(old_collection.is_parsed_),
-      num_charged_spectra_(old_collection.num_charged_spectra_)
-{
+      num_charged_spectra_(old_collection.num_charged_spectra_) {
   // copy spectra
   for (SpectrumIterator spectrum_iterator = old_collection.begin();
     spectrum_iterator != old_collection.end();
@@ -156,8 +154,7 @@ bool SpectrumCollection::getSpectrum(
  */
 void SpectrumCollection::addSpectrumToEnd(
   Spectrum* spectrum ///< spectrum to add to spectrum_collection -in
-  )
-{
+  ) {
   // set spectrum
   spectra_.push_back(spectrum);
   num_charged_spectra_ += spectrum->getNumZStates();
@@ -170,15 +167,15 @@ void SpectrumCollection::addSpectrumToEnd(
  */
 void SpectrumCollection::addSpectrum(
   Spectrum* spectrum ///< spectrum to add to spectrum_collection -in
-  )
-{
+  ) {
+    
   unsigned int add_index = 0;
 
   // find correct location
   // TODO -- replace with binary search if necessary.
-  for(; add_index < spectra_.size(); ++add_index){
+  for(; add_index < spectra_.size(); ++add_index) {
     if(spectra_[add_index]->getFirstScan() >
-       spectrum->getFirstScan()){
+       spectrum->getFirstScan()) {
       break;
     }
   }
@@ -195,14 +192,14 @@ void SpectrumCollection::addSpectrum(
  */
 void SpectrumCollection::removeSpectrum(
   Spectrum* spectrum ///< spectrum to be removed from spectrum_collection -in
-  )
-{
+  ) {
+    
   int scan_num = spectrum->getFirstScan();
   unsigned int spectrum_index = 0;
   
   // find where the spectrum is located in the spectrum array
-  for(; spectrum_index < spectra_.size(); ++spectrum_index){
-    if(scan_num == spectra_[spectrum_index]->getFirstScan() ){
+  for(; spectrum_index < spectra_.size(); ++spectrum_index) {
+    if(scan_num == spectra_[spectrum_index]->getFirstScan() ) {
       break;
     }
   }
@@ -223,8 +220,7 @@ void SpectrumCollection::removeSpectrum(
  * \returns A pointer to the name of the file from which the spectra
  * were parsed.
  */
-const char* SpectrumCollection::getFilename()
-{  
+const char* SpectrumCollection::getFilename() {
   return filename_.c_str();
 }
 
@@ -232,8 +228,7 @@ const char* SpectrumCollection::getFilename()
  * \returns The current number of spectrum in the
  * spectrum_collection.  Zero if the file has not yet been parsed.
  */
-int SpectrumCollection::getNumSpectra()
-{
+int SpectrumCollection::getNumSpectra() {
   return spectra_.size();
 }
 
@@ -243,8 +238,7 @@ int SpectrumCollection::getNumSpectra()
  * spectra) in the spectrum_collection.  Zero if the file has not been
  * parsed.
  */
-int SpectrumCollection::getNumChargedSpectra()
-{
+int SpectrumCollection::getNumChargedSpectra() {
   return num_charged_spectra_;
 }
 
@@ -252,8 +246,7 @@ int SpectrumCollection::getNumChargedSpectra()
 /**
  * \returns True if the spectrum_collection file has been parsed.
  */
-bool SpectrumCollection::getIsParsed()
-{
+bool SpectrumCollection::getIsParsed() {
   return is_parsed_;
 }
 

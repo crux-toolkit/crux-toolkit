@@ -21,7 +21,7 @@ namespace Crux {
 
 class SpectrumCollection {
 
- friend class ::FilteredSpectrumChargeIterator;
+  friend class ::FilteredSpectrumChargeIterator;
 
  protected:
   std::deque<Crux::Spectrum*> spectra_;  ///< spectra from the file

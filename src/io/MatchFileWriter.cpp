@@ -23,8 +23,8 @@ using namespace std;
  */
 MatchFileWriter::MatchFileWriter() 
   : DelimitedFileWriter(),
-    num_columns_(0){
-  for(int col_type = 0; col_type < NUMBER_MATCH_COLUMNS; col_type++){
+    num_columns_(0) {
+  for(int col_type = 0; col_type < NUMBER_MATCH_COLUMNS; col_type++) {
     match_to_print_[col_type] = false;
     match_precision_[col_type] = 0;
     match_fixed_float_[col_type] = true;
@@ -38,8 +38,8 @@ MatchFileWriter::MatchFileWriter()
  */
 MatchFileWriter::MatchFileWriter(const char* filename) 
   : DelimitedFileWriter(filename),
-    num_columns_(0){
-  for(int col_type = 0; col_type < NUMBER_MATCH_COLUMNS; col_type++){
+    num_columns_(0) {
+  for(int col_type = 0; col_type < NUMBER_MATCH_COLUMNS; col_type++) {
     match_to_print_[col_type] = false;
     match_precision_[col_type] = 0;
     match_fixed_float_[col_type] = true;
@@ -50,16 +50,16 @@ MatchFileWriter::MatchFileWriter(const char* filename)
 /**
  * Destructor
  */
-MatchFileWriter::~MatchFileWriter(){
+MatchFileWriter::~MatchFileWriter() {
 }
 
 /**
  * Set the correct level of precision for each MATCH_COLUMNS_T type.
  * Also set whether the field should be fixed float or not.
  */
-void MatchFileWriter::setPrecision(){
-  for(int col_idx = 0; col_idx < NUMBER_MATCH_COLUMNS; col_idx++){
-    switch(col_idx){
+void MatchFileWriter::setPrecision() {
+  for(int col_idx = 0; col_idx < NUMBER_MATCH_COLUMNS; col_idx++) {
+    switch(col_idx) {
       // integer and string fields
     case FILE_COL:
     case SCAN_COL:
@@ -158,11 +158,11 @@ void MatchFileWriter::setPrecision(){
  * Defines the columns to print based on the vector of flags
  * indiciating if the MATCH_COLUMN_T should be printed.
  */
-void MatchFileWriter::addColumnNames(const std::vector<bool>& col_is_printed){
+void MatchFileWriter::addColumnNames(const std::vector<bool>& col_is_printed) {
   // for each column, if we should print it, mark as true
-  for(size_t col_idx = 0; col_idx < col_is_printed.size(); col_idx++){
+  for(size_t col_idx = 0; col_idx < col_is_printed.size(); col_idx++) {
     bool print_it = col_is_printed[col_idx];
-    if( print_it ){
+    if( print_it ) {
       match_to_print_[col_idx] = true;
     } 
   }
@@ -171,7 +171,7 @@ void MatchFileWriter::addColumnNames(const std::vector<bool>& col_is_printed){
 /**
  * Adds another columns to print.  Printed in order the names are set.
  */
-void MatchFileWriter::addColumnName(MATCH_COLUMNS_T column_type){
+void MatchFileWriter::addColumnName(MATCH_COLUMNS_T column_type) {
   match_to_print_[column_type] = true;
 }
 
@@ -180,11 +180,11 @@ void MatchFileWriter::addColumnName(MATCH_COLUMNS_T column_type){
  * search-for-matches, sequest-search and spectral-counts.
  */
 void MatchFileWriter::addColumnNames(CruxApplication* application, 
-                                     bool has_decoys){
+                                     bool has_decoys) {
 
   COMMAND_T command = application->getCommand();
 
-  switch (command){
+  switch (command) {
   // commands with no tab files
   case MISC_COMMAND:
   case PROCESS_SPEC_COMMAND: ///< print-processed-spectra
@@ -239,12 +239,12 @@ void MatchFileWriter::addColumnNames(CruxApplication* application,
 
   case SPECTRAL_COUNTS_COMMAND:
     // protein or peptide
-    if( string_to_quant_level_type(Params::GetString("quant-level")) == PEPTIDE_QUANT_LEVEL ){
+    if( string_to_quant_level_type(Params::GetString("quant-level")) == PEPTIDE_QUANT_LEVEL ) {
       addColumnName(SEQUENCE_COL);
     } else {
       addColumnName(PROTEIN_ID_COL);
       // parsimony?
-      if( string_to_parsimony_type(Params::GetString("parsimony")) != PARSIMONY_NONE ){
+      if( string_to_parsimony_type(Params::GetString("parsimony")) != PARSIMONY_NONE ) {
         addColumnName(PARSIMONY_RANK_COL);
       }
     }
@@ -306,12 +306,12 @@ void MatchFileWriter::addColumnNames(CruxApplication* application,
  */
 void MatchFileWriter::addColumnNames
   (CruxApplication* application, 
-   bool has_decoys,
-   const vector<bool>& cols_to_print){
+  bool has_decoys,
+  const vector<bool>& cols_to_print) {
 
   COMMAND_T command = application->getCommand();
 
-  switch (command){
+  switch (command) {
   // commands with no tab files
   case MISC_COMMAND:
   case PROCESS_SPEC_COMMAND: ///< print-processed-spectra
@@ -334,7 +334,7 @@ void MatchFileWriter::addColumnNames
 
   // valid commands
   case QVALUE_COMMAND:       ///< compute-q-values
-    if( cols_to_print[PVALUE_COL] ){
+    if( cols_to_print[PVALUE_COL] ) {
       addColumnName(WEIBULL_QVALUE_COL);
 //      addColumnName(WEIBULL_PEP_COL);
       //addColumnName(WEIBULL_PEPTIDE_QVALUE_COL);
@@ -343,8 +343,8 @@ void MatchFileWriter::addColumnNames
 //        addColumnName(DECOY_EVALUE_QVALUE_COL);
 //        addColumnName(DECOY_EVALUE_PEP_COL);
       }
- //     addColumnName(DECOY_XCORR_QVALUE_COL);
- //     addColumnName(DECOY_XCORR_PEP_COL);
+//     addColumnName(DECOY_XCORR_QVALUE_COL);
+//     addColumnName(DECOY_XCORR_PEP_COL);
       //addColumnName(DECOY_XCORR_PEPTIDE_QVALUE_COL);
     }
     break;
@@ -367,7 +367,7 @@ void MatchFileWriter::addColumnNames
     break;
   }
 
-  if( has_decoys ){
+  if( has_decoys ) {
     addColumnName(ORIGINAL_TARGET_SEQUENCE_COL);
   }
 
@@ -383,11 +383,11 @@ void MatchFileWriter::addColumnNames
 /**
  * Write header to file using column names that have been set.
  */
-void MatchFileWriter::writeHeader(){
+void MatchFileWriter::writeHeader() {
   num_columns_ = 0;
   // set file position index for all columns being printed
-  for(unsigned int col_type = 0; col_type < NUMBER_MATCH_COLUMNS; col_type++){
-    if( match_to_print_[col_type] == true ){
+  for(unsigned int col_type = 0; col_type < NUMBER_MATCH_COLUMNS; col_type++) {
+    if( match_to_print_[col_type] == true ) {
       match_indices_[col_type] = num_columns_++;
     } else {
       match_indices_[col_type] = -1;
@@ -396,8 +396,8 @@ void MatchFileWriter::writeHeader(){
 
   // set all the names for which we have match_indices_
   column_names_.assign(num_columns_, "");
-  for(unsigned int col_type = 0; col_type < NUMBER_MATCH_COLUMNS; col_type++){
-    if( match_indices_[col_type] > -1 ){
+  for(unsigned int col_type = 0; col_type < NUMBER_MATCH_COLUMNS; col_type++) {
+    if( match_indices_[col_type] > -1 ) {
       if (get_column_header(col_type) == NULL) {
         carp(CARP_FATAL, "Error col type: %d doesn't exist!", col_type);
       }

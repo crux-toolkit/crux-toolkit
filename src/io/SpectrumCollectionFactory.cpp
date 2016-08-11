@@ -16,13 +16,13 @@
  * Instantiates a SpectrumCollection based on the extension of the
  * given file and the use-mstoolkit and msgf options.
  */
-Crux::SpectrumCollection* SpectrumCollectionFactory::create(const string& filename){
+Crux::SpectrumCollection* SpectrumCollectionFactory::create(const string& filename) {
   if (!FileUtils::Exists(filename)) {
     carp(CARP_FATAL, "The file %s does not exist. \n", filename.c_str());
   }
-  if (FileUtils::IsDir(filename)){
+  if (FileUtils::IsDir(filename)) {
     carp(CARP_FATAL, "Path %s is a directory. \n Please enter a spectrum filename\
-(.ms2,.mgf, or .mzXML)",filename.c_str());
+(.ms2, .mgf, or .mzXML)", filename.c_str());
   }
 
   string parser = Params::GetString("spectrum-parser");

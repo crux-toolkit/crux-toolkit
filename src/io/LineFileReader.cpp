@@ -1,7 +1,7 @@
-/*************************************************************************//**
+/*************************************************************************
  * \file LineFileReader.cpp
  * \brief Object for parsing the tab-delimited files
- ****************************************************************************/
+ *************************************************************************/
 
 #include "LineFileReader.h"
 
@@ -25,7 +25,7 @@ LineFileReader::LineFileReader() {
  */  
 LineFileReader::LineFileReader(
   const char *file_name ///< the path of the file to read 
-  ){
+  ) {
 
   file_ptr_ = NULL;
   loadData(file_name);
@@ -37,7 +37,7 @@ LineFileReader::LineFileReader(
  */
 LineFileReader::LineFileReader(
     const string& file_name ///< the path of the file  to read
-  ){
+  ) {
 
   file_ptr_ = NULL;
   loadData(file_name);
@@ -77,9 +77,9 @@ void LineFileReader::loadData(
     return;
   } else {
     has_next_ = !getline(*file_ptr_, next_data_string_).fail();
-    carp(CARP_DEBUG, "first line:%s",next_data_string_.c_str());
+    carp(CARP_DEBUG, "first line:%s", next_data_string_.c_str());
     if (!has_next_) {
-      carp(CARP_WARNING,"No data found!");
+      carp(CARP_WARNING, "No data found!");
     } 
   }
 }

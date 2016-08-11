@@ -30,7 +30,7 @@
 class OutputFiles{
 
  public:
-  OutputFiles(CruxApplication* application);///< command printing files
+  explicit OutputFiles(CruxApplication* application);///< command printing files
 
   ~OutputFiles();
   void writeHeaders(int num_proteins = 0, bool isMixedTargetDecoy = false);

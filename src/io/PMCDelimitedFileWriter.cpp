@@ -507,7 +507,7 @@ void PMCDelimitedFileWriter::writePSMs(
       addScoreIfExists(match, DELTA_CN, DELTA_CN_COL);                          // TODO: Figure out difference between match and pep_match,
       addScoreIfExists(match, BY_IONS_MATCHED, BY_IONS_MATCHED_COL);            // since Percolator uses pep_match... While tide-search
       addScoreIfExists(match, BY_IONS_TOTAL, BY_IONS_TOTAL_COL);                // uses match. These are different values, are they supposed to be?
-										// When using pep_match, a lot of things are unknown (-1)
+                    // When using pep_match, a lot of things are unknown (-1)
       setColumnCurrentRow(PROTEIN_ID_COL, peptide->getProteinIdsLocations());   // This was used by an older PMCDelimitedFileWriter and retains the protein id location
     } else {
       addScoreIfExists(pep_match, DELTA_CN, DELTA_CN_COL);
@@ -627,7 +627,7 @@ void PMCDelimitedFileWriter::setAndFree(
   */
 void PMCDelimitedFileWriter::setWriteHTML(bool write_html) {
   write_html_ = write_html;
-};
+}
 
 /**
  * Writes the header in HTML format, this is used for HTMLWriter instead of
@@ -637,8 +637,8 @@ void PMCDelimitedFileWriter::writeHTMLHeader() {
 
   num_columns_ = 0;
   // set file position index for all columns being printed
-  for(unsigned int col_type = 0; col_type < NUMBER_MATCH_COLUMNS; col_type++){
-    if( match_to_print_[col_type] == true ){
+  for(unsigned int col_type = 0; col_type < NUMBER_MATCH_COLUMNS; col_type++) {
+    if( match_to_print_[col_type] == true ) {
       match_indices_[col_type] = num_columns_++;
     } else {
       match_indices_[col_type] = -1;
@@ -647,8 +647,8 @@ void PMCDelimitedFileWriter::writeHTMLHeader() {
 
   // set all the names for which we have match_indices_
   column_names_.assign(num_columns_, "");
-  for(unsigned int col_type = 0; col_type < NUMBER_MATCH_COLUMNS; col_type++){
-    if( match_indices_[col_type] > -1 ){
+  for(unsigned int col_type = 0; col_type < NUMBER_MATCH_COLUMNS; col_type++) {
+    if( match_indices_[col_type] > -1 ) {
       if (get_column_header(col_type) == NULL) {
         carp(CARP_FATAL, "Error col type: %d doesn't exist!", col_type);
       }
@@ -657,17 +657,17 @@ void PMCDelimitedFileWriter::writeHTMLHeader() {
     }
   }
 
-  if( column_names_.empty() ){
+  if( column_names_.empty() ) {
     return;
   }
   
-  if( file_ptr_ == NULL || !file_ptr_->is_open() ){
+  if( file_ptr_ == NULL || !file_ptr_->is_open() ) {
     carp(CARP_FATAL, "Cannot write to NULL delimited file.");
   }
   *file_ptr_ << "<table border=\"1\">" << "\t<tr>" << endl
-	     << "\t\t<td><b>" << column_names_[0] << "</b></td>" << endl;
-  for(size_t idx = 1; idx < column_names_.size(); idx++){
-    if( !column_names_[idx].empty() ){
+      << "\t\t<td><b>" << column_names_[0] << "</b></td>" << endl;
+  for(size_t idx = 1; idx < column_names_.size(); idx++) {
+    if( !column_names_[idx].empty() ) {
       *file_ptr_ << "\t\t<td><b>" << column_names_[idx] << "</b></td>" << endl;
     }
   }
@@ -683,12 +683,12 @@ void PMCDelimitedFileWriter::writeHTMLHeader() {
  * DelimitedFileWriter's writeRow() 
  */
 void PMCDelimitedFileWriter::writeHTMLRow() {
-  if( current_row_.empty() ){
+  if( current_row_.empty() ) {
     return;
   }
 
   // make the row as long as the header
-  while( current_row_.size() < column_names_.size()){
+  while( current_row_.size() < column_names_.size()) {
     current_row_.push_back("");
   }
   // TODO? warning if row is longer than non-empty header?
@@ -696,7 +696,7 @@ void PMCDelimitedFileWriter::writeHTMLRow() {
   // print each value separated by delimiter
   *file_ptr_ << "\t<tr>" << endl
              << "\t\t<td>" << current_row_[0] << "</td>" << endl;
-  for(size_t idx = 1; idx < current_row_.size(); idx++){
+  for(size_t idx = 1; idx < current_row_.size(); idx++) {
     *file_ptr_ << "\t\t<td>" << current_row_[idx] << "</td>" << endl;
   }
   // end with newline

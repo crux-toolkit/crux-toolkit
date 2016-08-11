@@ -1,7 +1,7 @@
-/*************************************************************************//**
+/*************************************************************************
  * \file DelimitedFileReader.cpp
  * \brief Object for parsing the tab-delimited files
- ****************************************************************************/
+ *************************************************************************/
 
 #include "DelimitedFileReader.h"
 
@@ -56,7 +56,7 @@ DelimitedFileReader::DelimitedFileReader(
   bool has_header, ///<indicates whether header exists
   char delimiter ///< the delimiter to use (default tab)
 ): istream_ptr_(istream_ptr), istream_begin_(istream_ptr->tellg()), delimiter_(delimiter),
-   has_header_(has_header), owns_stream_(false) {
+has_header_(has_header), owns_stream_(false) {
   loadData();
 }
 
@@ -84,7 +84,7 @@ unsigned int DelimitedFileReader::numRows() {
     
     string temp_str;
 
-    while (getline(*istream_ptr_,temp_str)) {
+    while (getline(*istream_ptr_, temp_str)) {
       num_rows_++;
     }
     
@@ -111,8 +111,8 @@ unsigned int DelimitedFileReader::numCols() {
 string DelimitedFileReader::getAvailableColumnsString() {
 
   ostringstream oss;
-  oss << "Available columns:"<<endl;
-  for (unsigned int col_idx=0;col_idx<numCols();col_idx++) {
+  oss << "Available columns:" << endl;
+  for (unsigned int col_idx=0;col_idx < numCols();col_idx++) {
     oss << col_idx << "  " << getColumnName(col_idx) << endl;
   }
 
@@ -130,7 +130,7 @@ string DelimitedFileReader::getHeaderString() {
   
   ostringstream oss;
   oss << getColumnName(0);
-  for (unsigned int col_idx=1;col_idx<numCols();col_idx++) {
+  for (unsigned int col_idx=1;col_idx < numCols();col_idx++) {
     oss << delimiter_ << getColumnName(col_idx);
   }
   
@@ -160,9 +160,8 @@ void DelimitedFileReader::loadData() {
     if (has_next_) {
       column_names_ = StringUtils::Split(next_data_string_, delimiter_);
       has_next_ = !getline(*istream_ptr_, next_data_string_).fail();
-    }
-    else {
-      carp(CARP_WARNING,"No data/headers found!");
+    } else {
+      carp(CARP_WARNING, "No data/headers found!");
       return;
     }
   }
@@ -216,7 +215,7 @@ void DelimitedFileReader::loadData(
 int DelimitedFileReader::findColumn(
   const string& column_name ///< the column name
   ) {
-  for (unsigned int col_idx=0;col_idx<column_names_.size();col_idx++) {
+  for (unsigned int col_idx=0;col_idx < column_names_.size();col_idx++) {
     if (column_names_[col_idx] == column_name) {
       return col_idx;
     }

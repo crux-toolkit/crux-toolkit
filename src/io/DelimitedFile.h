@@ -52,7 +52,7 @@ class DelimitedFile {
    * \returns a DelimitedFile object 
    */
   DelimitedFile(
-    char delimiter='\t' ///< the delimiter to use (default tab)
+    char delimiter = '\t' ///< the delimiter to use (default tab)
   );
   
   /**
@@ -61,8 +61,8 @@ class DelimitedFile {
    */  
   DelimitedFile(
     const char *file_name, ///< the path of the file to read 
-    bool hasHeader=true, ///< indicate whether header exists
-    char delimiter='\t' ///< the delimiter to use (default tab)
+    bool hasHeader = true, ///< indicate whether header exists
+    char delimiter = '\t' ///< the delimiter to use (default tab)
   );
 
   /** 
@@ -71,8 +71,8 @@ class DelimitedFile {
    */
   DelimitedFile(
     const std::string& file_name, ///< the path of the file  to read
-    bool hasHeader=true, ///< indicates whether header exists
-    char delimiter='\t' ///< the delimiter to use (default tab)
+    bool hasHeader = true, ///< indicates whether header exists
+    char delimiter = '\t' ///< the delimiter to use (default tab)
   );
 
   /**
@@ -124,8 +124,8 @@ class DelimitedFile {
    */
   void loadData(
     const char *file_name, ///< the file path
-    bool hasHeader=true, ///< header indicator
-    char delimiter='\t' ///< the delimiter to use (default tab).
+    bool hasHeader = true, ///< header indicator
+    char delimiter = '\t' ///< the delimiter to use (default tab).
   );
 
   /**
@@ -133,8 +133,8 @@ class DelimitedFile {
    */
   void loadData(
     const std::string& file_name, ///< the file path
-    bool hasHeader=true, ///< header indicator
-    char delimiter='\t' ///< the delimiter to use (default tab).
+    bool hasHeader = true, ///< header indicator
+    char delimiter = '\t' ///< the delimiter to use (default tab).
   );
 
   /**
@@ -303,7 +303,7 @@ class DelimitedFile {
 
     int col_idx = findColumn(column_name);
     if (col_idx == -1) {
-      carp(CARP_FATAL,"Column not found %s",column_name.c_str());
+      carp(CARP_FATAL, "Column not found %s", column_name.c_str());
     }
     setValue(col_idx, row_idx, value);
   }
@@ -393,7 +393,7 @@ class DelimitedFile {
   void getIntegerVectorFromCell(
     const char* column_name, ///< the column name
     std::vector<int>& int_vector, ///<the vector of integers
-    char delimiter=',' ///<the delimiter to use
+    char delimiter = ',' ///<the delimiter to use
   );
 
   /**

@@ -15,7 +15,7 @@ Abstract class for a peptide-spectrum match writers
 
 class PSMWriter {
 
-public:
+ public:
   // Constructor
   PSMWriter();
 
