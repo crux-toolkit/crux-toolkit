@@ -157,7 +157,6 @@ private:
   static const double RESCALE_FACTOR;
 
   bool exact_pval_search_;
-  string scoreFunction_;
 
   /**
    * Constructor
