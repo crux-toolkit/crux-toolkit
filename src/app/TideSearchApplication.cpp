@@ -387,6 +387,10 @@ void TideSearchApplication::search(void* threadarg) {
   double* aaFreqI = my_data->aaFreqI;
   double* aaFreqC = my_data->aaFreqC;
   int* aaMass = my_data->aaMass;
+  const pb::ModTable& mod_table = my_data->mod_table;
+  const pb::ModTable& nterm_mod_table = my_data->nterm_mod_table;
+  const pb::ModTable& cterm_mod_table = my_data->cterm_mod_table;
+
   vector<boost::mutex*> locks_array = my_data->locks_array;
 
   double bin_width = my_data->bin_width;
@@ -402,8 +406,6 @@ void TideSearchApplication::search(void* threadarg) {
   bool use_neutral_loss_peaks = Params::GetBool("use-neutral-loss-peaks");
   bool use_flanking_peaks = Params::GetBool("use-flanking-peaks");
   int max_charge = Params::GetInt("max-precursor-charge");
-
-
 
   // This is the main search loop.
   ObservedPeakSet observed(bin_width, bin_offset,
@@ -1239,19 +1241,6 @@ void TideSearchApplication::search(void* threadarg) {
       break;
 
     } //End bracket for switch statement
-
-    ++sc_index;
-    if (print_interval > 0 && sc_index % print_interval == 0) {
-      carp(CARP_INFO, "%d spectrum-charge combinations searched, %.0f%% complete",
-           sc_index, sc_index / sc_total * 100);
-    }
-  } //End bracket for for spectrum loop 
-    
-  carp(CARP_INFO, "Time per spectrum-charge combination: %lf s.", wall_clock() / (1e6*sc_total));
-  carp(CARP_INFO, "Average number of candidates per spectrum-charge combination: %lf ",
-                total_candidate_peptides / sc_total);  
-  if (output_files) {
-    output_files->writeFooters();
   }  
 }
 
@@ -1278,7 +1267,11 @@ void TideSearchApplication::search(
   double* aaFreqN,
   double* aaFreqI,
   double* aaFreqC,
-  int* aaMass
+  int* aaMass,
+  const pb::ModTable& mod_table,
+  const pb::ModTable& nterm_mod_table,
+  const pb::ModTable& cterm_mod_table
+
 ) {
   // Create an array of 4 locks.
   // Lock #0: Results file output
