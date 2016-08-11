@@ -124,7 +124,7 @@ void SQTWriter::writeHeader(
   char* enz_str = enzyme_type_to_string(enzyme);
   char* dig_str = digest_type_to_string(digestion);
   string custom_str;
-  if( enzyme == CUSTOM_ENZYME){
+  if (enzyme == CUSTOM_ENZYME) {
     string rule = Params::GetString("custom-enzyme");
     custom_str = ", custom pattern: " + rule;
   }

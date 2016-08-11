@@ -83,7 +83,7 @@ class SQTReader : public PSMReader {
   SQTReader(
     const std::string& file_path_, ///< the path of the pep.xml
     Database* database, ///< the protein database
-    Database* decoy_database=NULL ///< the decoy protein database (can be null)
+    Database* decoy_database = NULL ///< the decoy protein database (can be null)
     );
 
   /**

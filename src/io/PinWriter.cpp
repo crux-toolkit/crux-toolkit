@@ -33,8 +33,8 @@ PinWriter::PinWriter():
   out_(NULL),
   enzyme_(get_enzyme_type_parameter("enzyme")),
   precision_(Params::GetInt("precision")),
-  mass_precision_(Params::GetInt("mass-precision"))
-{
+  mass_precision_(Params::GetInt("mass-precision")) {
+    
   features_.push_back(make_pair("SpecId", true));
   features_.push_back(make_pair("Label", true));
   features_.push_back(make_pair("ScanNr", true));
@@ -62,7 +62,7 @@ PinWriter::PinWriter():
   features_.push_back(make_pair("Proteins", true));
 }
 
-PinWriter::~PinWriter(){ 
+PinWriter::~PinWriter() { 
   closeFile(); 
 }
 
@@ -168,7 +168,7 @@ void PinWriter::printHeader() {
 
 void PinWriter::printPSM(
   Match* match
-){ 
+) { 
   Peptide* peptide = match->getPeptide();
   Spectrum* spectrum = match->getSpectrum();
   int charge = match->getCharge();

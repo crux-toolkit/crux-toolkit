@@ -18,12 +18,13 @@
 class MatchCollectionParser {
 
  protected:
-   Database* database_;
-   Database* decoy_database_;
+  Database* database_;
+  Database* decoy_database_;
+  
  public:
 
-   MatchCollectionParser();
-   ~MatchCollectionParser();
+  MatchCollectionParser();
+  ~MatchCollectionParser();
  
   /**
    * \returns a MatchCollection object using the file and protein database

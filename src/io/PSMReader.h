@@ -14,7 +14,7 @@ Abstract class for a peptide-spectrum match readers
 
 class PSMReader {
 
-public:
+ public:
   // Constructors
   PSMReader();
   PSMReader(const std::string& file_path,
@@ -31,7 +31,7 @@ public:
   void setDatabase(Database* database);
   void setDecoyDatabase(Database* decoy_database);
 
-protected:
+ protected:
   Database* database_;
   Database* decoy_database_;
   std::string file_path_;

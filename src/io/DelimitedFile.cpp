@@ -36,7 +36,7 @@ DelimitedFile::DelimitedFile(
   const char *file_name, ///< the path of the file to read 
   bool hasHeader, ///< indicate whether header exists
   char delimiter ///< the delimiter to use (default tab)
-  ){
+  ) {
   loadData(file_name, hasHeader, delimiter);
 }
 
@@ -48,7 +48,7 @@ DelimitedFile::DelimitedFile(
   const string& file_name, ///< the path of the file  to read
   bool hasHeader, ///< indicates whether header exists
   char delimiter ///< the delimiter to use (default tab)
-  ){
+  ) {
   loadData(file_name, hasHeader, delimiter);
 }
 
@@ -144,7 +144,7 @@ void DelimitedFile::loadData(
         addColumn(*iter);
       }
     } else {
-      carp(CARP_WARNING,"No data/headers found!");
+      carp(CARP_WARNING, "No data/headers found!");
       return;
     }
   }
@@ -211,7 +211,7 @@ void DelimitedFile::saveData(
   //print out the header if it exists.
   if (!column_names_.empty()) {
     fout << column_names_[0];
-    for (unsigned int col_idx=1; col_idx<column_names_.size(); col_idx++) {
+    for (unsigned int col_idx=1; col_idx < column_names_.size(); col_idx++) {
       fout << getDelimiter() << column_names_[col_idx];
     }
     fout << endl;
@@ -220,13 +220,13 @@ void DelimitedFile::saveData(
   //print out all rows, using delimiter_ when
   //the row goes past the current column
   //size.
-  for (unsigned int row_idx=0; row_idx<maxRow; row_idx++) {
+  for (unsigned int row_idx=0; row_idx < maxRow; row_idx++) {
     if (row_idx < numRows(0)) {
       fout << getString((unsigned int)0, row_idx);
     } else {
       fout << delimiter_;
     }
-    for (unsigned int col_idx=1;col_idx<numCols();col_idx++) {
+    for (unsigned int col_idx=1;col_idx < numCols();col_idx++) {
       fout << getDelimiter();
       if (row_idx < numRows(col_idx)) {
         fout << getString(col_idx, row_idx);
@@ -278,9 +278,9 @@ unsigned int DelimitedFile::addColumn() {
 void DelimitedFile::addColumns(
   vector<string>& column_names
   ) {
-  cout <<"Number of columns:"<<column_names.size()<<endl;
+  cout << "Number of columns:" << column_names.size() << endl;
   for (unsigned int col_idx = 0;col_idx < column_names.size(); col_idx++) {
-    cout <<"Adding :"<<column_names[col_idx]<<endl;
+    cout << "Adding :" << column_names[col_idx] << endl;
     //addColumn(column_names[col_idx]);
   }
 }
@@ -294,7 +294,7 @@ void DelimitedFile::addColumns(
 int DelimitedFile::findColumn(
   const string& column_name ///< the column name
   ) {
-  for (unsigned int col_idx=0;col_idx<column_names_.size();col_idx++) {
+  for (unsigned int col_idx=0;col_idx < column_names_.size();col_idx++) {
     if (column_names_[col_idx] == column_name) {
       return col_idx;
     }
@@ -323,7 +323,7 @@ vector<string>& DelimitedFile::getColumn(
   if (col_idx != -1) {
     return data_[col_idx];
   }
-  carp(CARP_ERROR,"column %s not found, returning column 0", column.c_str());
+  carp(CARP_ERROR, "column %s not found, returning column 0", column.c_str());
   return data_[0];
 }
 
@@ -359,7 +359,7 @@ vector<string>& DelimitedFile::getColumnNames() {
  */
 unsigned int DelimitedFile::addRow() {
   if (numCols() == 0) {
-    carp(CARP_FATAL,"Must have at least one column before calling add row!");
+    carp(CARP_FATAL, "Must have at least one column before calling add row!");
   }
   
   unsigned int row_idx = numRows();
@@ -399,9 +399,9 @@ string& DelimitedFile::getString(
     carp(CARP_ERROR, "Cannot find column %s", column_name);
     carp(CARP_ERROR, "Available columns");
     for (unsigned int idx = 0;idx < numCols();idx++) {
-      carp(CARP_ERROR,"%s",getColumnName(idx).c_str());
+      carp(CARP_ERROR, "%s", getColumnName(idx).c_str());
     }
-    carp(CARP_FATAL,"Calling FATAL");
+    carp(CARP_FATAL, "Calling FATAL");
   }
   return getColumn(col_idx)[row_idx];
 }
@@ -471,7 +471,7 @@ FLOAT_T DelimitedFile::getFloat(
   unsigned int col_idx, ///< the column index
   unsigned int row_idx ///< the row index
 ) {
-  string& string_ans = getString(col_idx,row_idx);
+  string& string_ans = getString(col_idx, row_idx);
   if (string_ans == "Inf") {
     return numeric_limits<FLOAT_T>::infinity();
   } else if (string_ans == "-Inf") {
@@ -492,9 +492,9 @@ FLOAT_T DelimitedFile::getFloat(
     carp(CARP_ERROR, "Cannot find column %s", column_name);
     carp(CARP_ERROR, "Available columns");
     for (unsigned int idx = 0;idx < numCols();idx++) {
-      carp(CARP_ERROR,"%s",getColumnName(idx).c_str());
+      carp(CARP_ERROR, "%s", getColumnName(idx).c_str());
     }
-    carp(CARP_FATAL,"Calling FATAL");
+    carp(CARP_FATAL, "Calling FATAL");
   }
   return getFloat(col_idx, row_idx);
 }
@@ -519,7 +519,7 @@ double DelimitedFile::getDouble(
   unsigned int col_idx, ///< the column index 
   unsigned int row_idx ///< the row index
   ) {
-  string& string_ans = getString(col_idx,row_idx);
+  string& string_ans = getString(col_idx, row_idx);
   if (string_ans == "Inf") {
     return numeric_limits<double>::infinity();
   } else if (string_ans == "-Inf") {
@@ -540,9 +540,9 @@ double DelimitedFile::getDouble(
     carp(CARP_ERROR, "Cannot find column %s", column_name);
     carp(CARP_ERROR, "Available columns");
     for (unsigned int idx = 0;idx < numCols();idx++) {
-      carp(CARP_ERROR,"%s",getColumnName(idx).c_str());
+      carp(CARP_ERROR, "%s", getColumnName(idx).c_str());
     }
-    carp(CARP_FATAL,"Calling FATAL");
+    carp(CARP_FATAL, "Calling FATAL");
   }
   return getDouble(col_idx, row_idx);
 }
@@ -676,10 +676,10 @@ void DelimitedFile::sortByFloatColumn(
   int sort_col_idx = findColumn(column_name); 
   
   if (sort_col_idx == -1) {
-    carp(CARP_FATAL,"column %s doesn't exist",column_name.c_str());
+    carp(CARP_FATAL, "column %s doesn't exist", column_name.c_str());
   }
 
-  for (unsigned int row_idx=0;row_idx<numRows();row_idx++) {
+  for (unsigned int row_idx=0;row_idx < numRows();row_idx++) {
     sort_indices.insert(pair<FLOAT_T, unsigned int>(getFloat(sort_col_idx, row_idx), row_idx));
   }
 
@@ -694,7 +694,7 @@ void DelimitedFile::sortByIntegerColumn(
   bool ascending ///< sort in ascending order?
   ) {
   multimap<int, unsigned int> sort_indices;
-  for (unsigned int row_idx=0;row_idx<numRows();row_idx++) {
+  for (unsigned int row_idx=0;row_idx < numRows();row_idx++) {
     sort_indices.insert(pair<int, unsigned int>(getInteger(col_idx, row_idx), row_idx));
   }
   reorderRows(sort_indices, ascending);
@@ -710,7 +710,7 @@ void DelimitedFile::sortByIntegerColumn(
   ) {
   int sort_col_idx = findColumn(column_name); 
   if (sort_col_idx == -1) {
-    carp(CARP_FATAL,"column %s doesn't exist",column_name.c_str());
+    carp(CARP_FATAL, "column %s doesn't exist", column_name.c_str());
   }
   sortByIntegerColumn(sort_col_idx, ascending);
 }
@@ -727,10 +727,10 @@ void DelimitedFile::sortByStringColumn(
   int sort_col_idx = findColumn(column_name); 
   
   if (sort_col_idx == -1) {
-    carp(CARP_FATAL,"column %s doesn't exist",column_name.c_str());
+    carp(CARP_FATAL, "column %s doesn't exist", column_name.c_str());
   }
 
-  for (unsigned int row_idx=0;row_idx<numRows();row_idx++) {
+  for (unsigned int row_idx=0;row_idx < numRows();row_idx++) {
     sort_indices.insert(pair<string, unsigned int>(getString(sort_col_idx, row_idx), row_idx));
   }
 
@@ -806,13 +806,13 @@ std::ostream &operator<< (
   //print out all rows, using delimiter_ when
   //the row goes past the current column
   //size.
-  for (unsigned int row_idx=0; row_idx<maxRow; row_idx++) {
+  for (unsigned int row_idx=0; row_idx < maxRow; row_idx++) {
     if (row_idx < delimited_file.numRows(0)) {
       os << delimited_file.getString((unsigned int)0, row_idx);
     } else {
       os << delimited_file.getDelimiter();
     }
-    for (unsigned int col_idx=1;col_idx<delimited_file.numCols();col_idx++) {
+    for (unsigned int col_idx=1;col_idx < delimited_file.numCols();col_idx++) {
       os <<delimited_file.getDelimiter();
       if (row_idx < delimited_file.numRows(col_idx))
         os << delimited_file.getString(col_idx, row_idx);

@@ -44,7 +44,7 @@ class DelimitedFileWriter {
    * \returns A DelimitedFileWriter object with the given file to
    * write to.
    */
-  DelimitedFileWriter(const char* filename); // full path of file
+  explicit DelimitedFileWriter(const char* filename); // full path of file
 
   /**
    * Destructor
@@ -94,12 +94,12 @@ class DelimitedFileWriter {
     (unsigned int col_idx, ///< set value for this column
      const ValueType& value, ///< the value to set
      unsigned int precision, ///<written at this precision
-     bool fixed_float=true){ ///<use fixed float notation?
+     bool fixed_float = true) { ///<use fixed float notation?
 
     // make sure the current_row_ is long enough
     size_t max_size = std::max((size_t)col_idx + 1, column_names_.size());
     
-    while( current_row_.size() < max_size ){
+    while( current_row_.size() < max_size ) {
       current_row_.push_back("");
     }
     
@@ -112,11 +112,11 @@ class DelimitedFileWriter {
   template<typename ValueType>
   void setColumnCurrentRow
     (unsigned int col_idx, ///< set value for this column
-     const ValueType& value){ ///< the value to set
+     const ValueType& value) { ///< the value to set
     // make sure the current_row_ is long enough
     size_t max_size = std::max((size_t)col_idx + 1, column_names_.size());
     
-    while( current_row_.size() < max_size ){
+    while( current_row_.size() < max_size ) {
       current_row_.push_back("");
     }
     

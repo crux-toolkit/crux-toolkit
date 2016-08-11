@@ -70,12 +70,12 @@ class DelimitedFileReader {
 
   virtual void loadData(
     const char *file_name, ///< the file path
-    bool has_header=true ///< header indicator
+    bool has_header = true ///< header indicator
   );
 
   virtual void loadData(
     const std::string& file_name, ///< the file path
-    bool has_header=true ///< header indicator
+    bool has_header = true ///< header indicator
   );
 
  public:
@@ -90,8 +90,8 @@ class DelimitedFileReader {
    */  
   DelimitedFileReader(
     const char *file_name, ///< the path of the file to read
-    bool has_header=true, ///< indicates whether the header exists (default true).
-    char delimiter='\t' ///< the delimiter to use (default tab).
+    bool has_header = true, ///< indicates whether the header exists (default true).
+    char delimiter = '\t' ///< the delimiter to use (default tab).
   );
 
   /** 
@@ -100,14 +100,14 @@ class DelimitedFileReader {
    */
   DelimitedFileReader(
     const std::string& file_name, ///< the path of the file  to read
-    bool has_header=true, ///< indicates whether the header exists (default true).
-    char delimiter='\t' ///< the delimiter to use (default tab)
+    bool has_header = true, ///< indicates whether the header exists (default true).
+    char delimiter = '\t' ///< the delimiter to use (default tab)
   );
 
   DelimitedFileReader(
     std::istream* istream_ptr, ///< the stream to be read
-    bool has_header=true, ///<indicates whether header exists
-    char delimiter='\t' ///< the delimiter to use (default tab)
+    bool has_header = true, ///<indicates whether header exists
+    char delimiter = '\t' ///< the delimiter to use (default tab)
   );
 
   /**
@@ -247,7 +247,7 @@ class DelimitedFileReader {
   void getIntegerVectorFromCell(
     const char* column_name, ///< the column name
     std::vector<int>& int_vector, ///<the vector of integers
-    char delimiter=',' ///<the delimiter to use
+    char delimiter = ',' ///<the delimiter to use
   );
 
   /**
@@ -262,7 +262,7 @@ class DelimitedFileReader {
   void getDoubleVectorFromCell(
     const char* column_name, ///< the column name
     std::vector<double>& double_vector, ///<the vector of integers
-    char delimiter=',' ///<the delimiter to use
+    char delimiter = ',' ///<the delimiter to use
   );
 
   /*Iterator functions.*/
