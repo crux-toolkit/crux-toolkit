@@ -789,15 +789,15 @@ void TideSearchApplication::search(void* threadarg) {
         aaMassInt.push_back(tmpMass);
       }
 
+      //TODO This commented code is in another spot
+      //const int minDeltaMass = aaMass[0]; //TODO not needed currently since masses are given by string aa
+                                                    //This will need to change once we decided to get string aa or 
+                                                   //go to a double version of aaMass         
+      //const int maxDeltaMass = aaMass[nAA - 1]; //TODO look above
+      int maxPrecurMassBin = floor(MaxBin::Global().CacheBinEnd() + 50.0);
+      
       if (!exact_pval_search_) {
         carp(CARP_FATAL,"This is not implemented yet.");
-
-//TODO This commented code is in another spot
-//        const int minDeltaMass = aaMass[0]; //TODO not needed currently since masses are given by string aa
-//                                          //This will need to change once we decided to get string aa or 
-//                                          //go to a double version of aaMass         
-//        const int maxDeltaMass = aaMass[nAA - 1]; //TODO look above
-        int maxPrecurMassBin = floor(MaxBin::Global().CacheBinEnd() + 50.0);
 
         //TODO Below is not implemented or tested yet
         total_candidate_peptides +=nCandPeptide;
@@ -978,16 +978,9 @@ void TideSearchApplication::search(void* threadarg) {
         delete [] pepMassInt;
         //TODO check if need to delete more stuff
 
-
         //TODO Above is not implemented or tested yet
+        
       } else { //Case RESIDUE_EVIDENCE_MATRIX
-//        const int minDeltaMass = aaMass[0]; //TODO not needed currently since masses are given by string aa
-//                                            //This will need to change once we decided to get string aa or 
-//                                            //go to a double version of aaMass         
-//        const int maxDeltaMass = aaMass[nAA - 1]; //TODO look above
-
-        int maxPrecurMassBin = floor(MaxBin::Global().CacheBinEnd() + 50.0);
-
         total_candidate_peptides += nCandPeptide;
         TideMatchSet::Arr match_arr(nCandPeptide); // scored peptides will go here.
 
@@ -1201,8 +1194,6 @@ void TideSearchApplication::search(void* threadarg) {
             MassConstants::DecodeMod(mods[i],&index,&delta);
             assert(mod_map.find(index) == mod_map.end()); 
             mod_map[index] = delta;
-//           std::cout << index << std::endl;
-//           std::cout << delta << std::endl;
           }
 
           string curPepSeq = curPeptide->Seq();
