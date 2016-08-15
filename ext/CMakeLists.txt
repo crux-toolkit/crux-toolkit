@@ -412,7 +412,6 @@ if (WIN32 AND NOT CYGWIN)
         ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.Data.WiffReader.dll
         ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.InternalRawXYProcessing.dll
         ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.Muni.dll
-        ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.ProjectUtilities.dll
         ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.RawXYProcessing.dll
         ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.StructuredStorage.dll
         ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.Utility.dll
@@ -440,7 +439,6 @@ if (WIN32 AND NOT CYGWIN)
         ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.Data.WiffReader.dll
         ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.InternalRawXYProcessing.dll
         ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.Muni.dll
-        ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.ProjectUtilities.dll
         ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.RawXYProcessing.dll
         ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.StructuredStorage.dll
         ${CMAKE_CURRENT_BINARY_DIR}/lib/Clearcore2.Utility.dll

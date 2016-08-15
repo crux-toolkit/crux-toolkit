@@ -1150,7 +1150,7 @@ void TideSearchApplication::search(void* threadarg) {
 
 //        std::cout << "Spectrum: " << sc->spectrum->SpectrumNumber() << std::endl;
 //        std::cout << "minMass: " << min_mass << std::endl;
-//        std::cout << "precursorMass: " << precursorMass << std::endl;
+        std::cout << setprecision(15) <<  "precursorMass: " << precursorMass << std::endl;
 //        std::cout << "maxMass: " << max_mass << std::endl;
 //        std::cout << "precursorMZ: " << precursor_mz << std::endl;
 //        std::cout << "nCandPeptide: " << nCandPeptide << std::endl;
@@ -1230,7 +1230,7 @@ void TideSearchApplication::search(void* threadarg) {
 //            std::cout << curPepSeq << " " << scoreResidueEvidence << std::endl;
 //            std::cout << "pvalue: " << pValue << std::endl;
 //            std::cout << curPepSeq << " " << curPepMassInt << " " << pValue << std::endl;
-            std::cout << curPepSeq << std::endl;
+            std::cout << curPepSeq << " " << pValue << std::endl;
           }
 */
           if(peptide_centric) {

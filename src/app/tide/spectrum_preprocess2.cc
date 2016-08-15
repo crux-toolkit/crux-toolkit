@@ -881,7 +881,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
    
         double ionMassDiff = ionMass[i] - yIonMass;
         double aaTolScore = residueToleranceMass - std::abs(ionMassDiff - aaMass[curAaMass]);
- 
+
         if (aaTolScore >= 0) {
           //add evidence to matrix
           //&&-1 since all mass bins are index 1 instead of index 0
@@ -927,14 +927,14 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   }
 
 
-//  std::cout << "maxEvidence: " << maxEvidence << std::endl;
+  std::cout << "maxEvidence: " << maxEvidence << std::endl;
 /*
   int cnt=0;
   for(int i =0;i<maxPrecurMassBin;i++) {
     for(int curAaMass = 0; curAaMass<nAA;curAaMass++){
       if (residueEvidenceMatrix[curAaMass][i] != 0) {
         std::cout << residueEvidenceMatrix[curAaMass][i] << std::endl;
-//        std::cout << "aa: " << curAaMass+1 << endl;
+        std::cout << "aa: " << curAaMass+1 << endl;
         std::cout << "massBin: " << i+1 << std::endl;
 //        std::cout << "evidence: " << residueEvidenceMatrix[curAaMass][i] << std::endl <<std::endl;
         cnt+=1;
