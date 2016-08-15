@@ -12,7 +12,7 @@ using namespace std;
  */
 class SpectrumRecordWriter {
 
-public:
+ public:
 
   /**
    * Converts a spectra file to spectrumrecords format for use with tide-search.
@@ -23,7 +23,7 @@ public:
     string outfile  ///< spectrumrecords file to output
   );
 
-protected:
+ protected:
 
   static int scanCounter_;
 

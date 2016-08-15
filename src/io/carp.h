@@ -53,18 +53,18 @@ static const int CARP_MAX = 100;
 /**
  * Allow for compilation to remove carp commands in the preprocessor.
  */
-#define IF_CARP(x,y) if (get_verbosity_level() >= x) {y;}
+#define IF_CARP(x, y) if (get_verbosity_level() >= x) {y;}
 #define CRUX_DEBUG 
 
 #ifdef CRUX_DEBUG
 /**
  * Allow for compilation to remove carp commands in the preprocessor.
  */
-#define IF_CARP_DEBUG(y) IF_CARP(CARP_DEBUG,y)
+#define IF_CARP_DEBUG(y) IF_CARP(CARP_DEBUG, y)
 /**
  * Allow for compilation to remove carp commands in the preprocessor.
  */
-#define IF_CARP_DETAILED_DEBUG(y) IF_CARP(CARP_DETAILED_DEBUG,y)
+#define IF_CARP_DETAILED_DEBUG(y) IF_CARP(CARP_DETAILED_DEBUG, y)
 #else
 /**
  * Allow for compilation to remove carp commands in the preprocessor.

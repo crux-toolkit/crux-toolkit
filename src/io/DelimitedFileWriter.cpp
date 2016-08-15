@@ -26,8 +26,7 @@ using namespace std;
  */
 DelimitedFileWriter::DelimitedFileWriter()
 : file_ptr_(NULL),
-  delimiter_('	') // default is tab
-{
+  delimiter_('\t') { // default is tab
 }
 
 /**
@@ -37,16 +36,15 @@ DelimitedFileWriter::DelimitedFileWriter()
 DelimitedFileWriter::DelimitedFileWriter
 (const char* filename) // full path of file
 : file_ptr_(NULL),
-  delimiter_('	') // default is tab
-{
+  delimiter_('\t') { // default is tab
   this->openFile(filename);
 }
 
 /**
  * Destructor
  */
-DelimitedFileWriter::~DelimitedFileWriter(){
-  if( file_ptr_ ){
+DelimitedFileWriter::~DelimitedFileWriter() {
+  if( file_ptr_ ) {
     file_ptr_->close();
     delete file_ptr_;
   }
@@ -56,9 +54,9 @@ DelimitedFileWriter::~DelimitedFileWriter(){
  * Writes any existing data, closes any open file and opens the
  * given file.
  */
-void DelimitedFileWriter::openFile(const char* filename){
+void DelimitedFileWriter::openFile(const char* filename) {
   // write any existing data and close file
-  if( file_ptr_ ){
+  if( file_ptr_ ) {
     writeRow();
     file_ptr_->close();
     delete file_ptr_;
@@ -66,7 +64,7 @@ void DelimitedFileWriter::openFile(const char* filename){
 
   // open the file if either it doesn't exist or if we are allowed to overwrite
   file_ptr_ = FileUtils::GetWriteStream(filename, Params::GetBool("overwrite"));
-  if( file_ptr_ == NULL ){
+  if( file_ptr_ == NULL ) {
     carp(CARP_FATAL, "Error creating file '%s'.", filename);
   }
 }
@@ -74,7 +72,7 @@ void DelimitedFileWriter::openFile(const char* filename){
 /**
  * Sets the delimeter to separate columns.
  */
-void DelimitedFileWriter::setDelimiter(char delimiter){
+void DelimitedFileWriter::setDelimiter(char delimiter) {
   delimiter_ = delimiter;
 }
 
@@ -83,8 +81,8 @@ void DelimitedFileWriter::setDelimiter(char delimiter){
  * zero.  Replaces any existing name.
  */
 void DelimitedFileWriter::setColumnName(const string& name, ///< new name to set
-                                        unsigned int col_idx){///< col to name
-  while( column_names_.size() <= col_idx ){
+                                        unsigned int col_idx) {///< col to name
+  while( column_names_.size() <= col_idx ) {
     column_names_.push_back("");
   }
   column_names_[col_idx] = name;
@@ -95,7 +93,7 @@ void DelimitedFileWriter::setColumnName(const string& name, ///< new name to set
  * empty vector as the 'names' argument to clear any existing column
  * names.
  */
-void DelimitedFileWriter::setColumnNames(const vector<string>& names){
+void DelimitedFileWriter::setColumnNames(const vector<string>& names) {
   column_names_.clear();
   column_names_ = names;
 }
@@ -105,20 +103,20 @@ void DelimitedFileWriter::setColumnNames(const vector<string>& names){
  * If there are column headers set, the line printed will have at
  * least as many fields as there are column headers.
  */
-void DelimitedFileWriter::writeRow(){
-  if( current_row_.empty() ){
+void DelimitedFileWriter::writeRow() {
+  if( current_row_.empty() ) {
     return;
   }
 
   // make the row as long as the header
-  while( current_row_.size() < column_names_.size()){
+  while( current_row_.size() < column_names_.size()) {
     current_row_.push_back("");
   }
   // TODO? warning if row is longer than non-empty header?
 
   // print each value separated by delimiter
   *file_ptr_ << current_row_[0];
-  for(size_t idx = 1; idx < current_row_.size(); idx++){
+  for(size_t idx = 1; idx < current_row_.size(); idx++) {
     *file_ptr_ << delimiter_ << current_row_[idx];
   }
   // end with newline
@@ -136,19 +134,19 @@ void DelimitedFileWriter::writeRow(){
  * headers (e.g. if columns 0 and 2 are set, but not 1) print
  * "column_#".
  */
-void DelimitedFileWriter::writeHeader(){
+void DelimitedFileWriter::writeHeader() {
   
-  if( column_names_.empty() ){
+  if( column_names_.empty() ) {
     return;
   }
   
-  if( file_ptr_ == NULL || !file_ptr_->is_open() ){
+  if( file_ptr_ == NULL || !file_ptr_->is_open() ) {
     carp(CARP_FATAL, "Cannot write to NULL delimited file.");
   }
   
   *file_ptr_ << column_names_[0];
-  for(size_t idx = 1; idx < column_names_.size(); idx++){
-    if( column_names_[idx].empty() ){
+  for(size_t idx = 1; idx < column_names_.size(); idx++) {
+    if( column_names_[idx].empty() ) {
       *file_ptr_ << delimiter_ << "column_" << (idx+1); 
     } else {
       *file_ptr_ << delimiter_ << column_names_[idx]; 

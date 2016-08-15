@@ -1,7 +1,7 @@
-/*************************************************************************//**
+/*************************************************************************
  * \file PepXMLReader.cpp
  * \brief Object for parsing pepxml files
- ****************************************************************************/
+ *************************************************************************/
 
 #include "expat.h"
 #include "PepXMLReader.h"
@@ -394,7 +394,7 @@ void PepXMLReader::modAminoAcidMassOpen(
   for (int idx = 0; attr[idx]; idx += 2) {
     if (strcmp(attr[idx], "position") == 0) {
       position = atoi(attr[idx+1]);
-    } else if (strcmp(attr[idx],"mass") == 0) {
+    } else if (strcmp(attr[idx], "mass") == 0) {
       mod_mass = atof(attr[idx+1]);
       have_mod_mass = true;
     }
@@ -562,7 +562,7 @@ void PepXMLReader::peptideProphetResultOpen(
 
   FLOAT_T probability = 0;
   bool probability_parsed = false;
-   for (int idx = 0; attr[idx]; idx += 2) {
+  for (int idx = 0; attr[idx]; idx += 2) {
     if (strcmp(attr[idx], "probability") == 0) {
       probability = atof(attr[idx+1]);
       probability_parsed = true;

@@ -30,7 +30,7 @@ using namespace std;
  */
 PWIZSpectrumCollection::PWIZSpectrumCollection(
   const string& filename   ///< The spectrum collection filename.
-) : SpectrumCollection(filename){
+) : SpectrumCollection(filename) {
 #if defined(_MSC_VER) && defined(INCLUDE_VENDOR_LIBRARIES)
   pwiz::msdata::DefaultReaderList readerList;
   //readerList.push_back(pwiz::msdata::ReaderPtr(new pwiz::msdata::Reader_ABI));
@@ -43,10 +43,9 @@ PWIZSpectrumCollection::PWIZSpectrumCollection(
   carp(CARP_DETAILED_INFO, "Support for vendor specific formats enabled.");  
   try {
      reader_ = new pwiz::msdata::MSDataFile(filename_, &readerList);
-   }
-   catch (const runtime_error& error) {
+  } catch (const runtime_error& error) {
     carp(CARP_FATAL, "Unable to parse spectrum file %s. Error: %s.", filename_.c_str(), error.what());
-   }
+  }
 #else
   carp(CARP_DETAILED_INFO, "Support for vendor specific formats not enabled.");  
   try {
@@ -56,7 +55,7 @@ PWIZSpectrumCollection::PWIZSpectrumCollection(
     carp(CARP_FATAL, "Unable to parse spectrum file %s. Error: %s.", filename_.c_str(), error.what());  
   }
 #endif
-  if( reader_ == NULL ){
+  if( reader_ == NULL ) {
     carp(CARP_FATAL, "PWIZSpectrumCollection unable to open '%s'.", 
          filename_.c_str());
   }
@@ -99,7 +98,7 @@ bool PWIZSpectrumCollection::parseFirstLastScanFromTitle(
     if (success) {
       //okay we parsed the three numbers, fill in the results.
       carp(CARP_DETAILED_DEBUG, "Title first scan:%i", title_first_scan);
-      carp(CARP_DETAILED_DEBUG, "Title last scan:%i" ,title_last_scan);
+      carp(CARP_DETAILED_DEBUG, "Title last scan:%i" , title_last_scan);
       carp(CARP_DETAILED_DEBUG, "Title charge:%i", title_charge);
       first_scan = title_first_scan;
       last_scan = title_last_scan;
@@ -116,7 +115,7 @@ bool PWIZSpectrumCollection::parseFirstLastScanFromTitle(
 bool PWIZSpectrumCollection::parse() {
 
   // spectrum_collection has already been parsed
-  if(is_parsed_){
+  if(is_parsed_) {
     return false;
   }
 
@@ -146,7 +145,7 @@ bool PWIZSpectrumCollection::parse() {
   pwiz::msdata::SpectrumListPtr all_spectra = reader_->run.spectrumListPtr;
   
   int num_spec = all_spectra->size();
-  carp(CARP_DEBUG, "PWIZ:Number of spectra:%i",num_spec);
+  carp(CARP_DEBUG, "PWIZ:Number of spectra:%i", num_spec);
   bool assign_new_scans = false;
   int scan_counter = 0;
   for (int spec_idx = 0; spec_idx < num_spec; spec_idx++) {
@@ -204,9 +203,9 @@ bool PWIZSpectrumCollection::parse() {
       scan_number_end = scan_number_begin;
     }
     carp(CARP_DETAILED_DEBUG, "found scan:%i %i-%i", scan_number_begin, first_scan, last_scan);
-    if( scan_number_end < first_scan ){
+    if( scan_number_end < first_scan ) {
       continue;
-    } else if( scan_number_begin > last_scan ){
+    } else if( scan_number_begin > last_scan ) {
       break;
     }
 
@@ -231,8 +230,7 @@ bool PWIZSpectrumCollection::parse() {
 bool PWIZSpectrumCollection::getSpectrum(
   int first_scan,      ///< The first scan of the spectrum to retrieve -in
   Crux::Spectrum* spectrum   ///< Put the spectrum info here
-  )
-{
+  ) {
   parse();
   return SpectrumCollection::getSpectrum(first_scan, spectrum);
 }
@@ -244,15 +242,14 @@ bool PWIZSpectrumCollection::getSpectrum(
  */
 Crux::Spectrum* PWIZSpectrumCollection::getSpectrum(
   int first_scan      ///< The first scan of the spectrum to retrieve -in
-  )
-{
+  ) {
 
   parse();
   return SpectrumCollection::getSpectrum(first_scan);
 }
 
 /*
-void getFilters(){  
+void getFilters() {  
   // select only the MS2 level spectra and only those in the given scan range
   ostringstream string_builder;
   vector<string> spectrum_filters;

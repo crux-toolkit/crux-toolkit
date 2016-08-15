@@ -1,7 +1,7 @@
-/*************************************************************************//**
+/*************************************************************************
  * \file MatchFileReader.cpp
  * \brief Object for parsing the tab-delimited files
- ****************************************************************************/
+ *************************************************************************/
 
 #include "MatchColumns.h"
 #include "MatchFileReader.h"
@@ -55,9 +55,9 @@ MatchFileReader::~MatchFileReader() {
 void MatchFileReader::loadData(
   const char* file_name, ///< new file to open
   bool hasHeader
-){
+) {
   DelimitedFileReader::loadData(file_name, hasHeader);
-  if( hasHeader ){
+  if( hasHeader ) {
     parseHeader();
   }
 }
@@ -69,7 +69,7 @@ void MatchFileReader::loadData(
   const string& file_name, ///< new file to open
   bool hasHeader) {
   DelimitedFileReader::loadData(file_name, hasHeader);
-  if( hasHeader ){
+  if( hasHeader ) {
     parseHeader();
   }
 }
@@ -134,7 +134,7 @@ int MatchFileReader::getInteger(
 string MatchFileReader::getString(
   MATCH_COLUMNS_T col_type ///<the column type
 ) {
-  carp(CARP_DETAILED_DEBUG, "Getting string from column %s",get_column_header(col_type));
+  carp(CARP_DETAILED_DEBUG, "Getting string from column %s", get_column_header(col_type));
   int idx = match_indices_[col_type];
   if (idx == -1) {
     carp(CARP_DEBUG, "column \"%s\" not found for getString", get_column_header(col_type));
@@ -164,12 +164,12 @@ void MatchFileReader::getMatchColumnsPresent(
   col_is_present.clear();
 
   // has a header been parsed? 
-  if( column_names_.empty() ){
+  if( column_names_.empty() ) {
     return;
   }
   col_is_present.assign(NUMBER_MATCH_COLUMNS, false);
 
-  for(int col_idx = 0; col_idx < NUMBER_MATCH_COLUMNS; col_idx++){
+  for(int col_idx = 0; col_idx < NUMBER_MATCH_COLUMNS; col_idx++) {
     col_is_present[col_idx] = (match_indices_[col_idx] > -1);
   }
 }

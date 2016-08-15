@@ -1,7 +1,7 @@
-/*************************************************************************//**
+/*************************************************************************
  * \file carp.cpp
  * \brief Object for representing a single protein.
- ****************************************************************************/
+ *************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -21,11 +21,11 @@ static FILE* log_file = NULL;
 
 unsigned int hash_size_ = 1000;
 
-void set_verbosity_level(int verbosity){
+void set_verbosity_level(int verbosity) {
   G_verbosity = verbosity;
 }
 
-int get_verbosity_level(void){
+int get_verbosity_level(void) {
   return G_verbosity;
 }
 
@@ -78,31 +78,24 @@ static void carp_print(const char *string) {
  *
  */
 void carp( int verbosity, const char* format, ...) {
-  if (verbosity <= G_verbosity){
+  if (verbosity <= G_verbosity) {
     va_list  argp;
 
-    if (verbosity == CARP_WARNING){
+    if (verbosity == CARP_WARNING) {
       carp_print("WARNING: ");
-    }
-    else if (verbosity == CARP_ERROR){
+    } else if (verbosity == CARP_ERROR) {
       carp_print("ERROR: ");
-    }
-    else if (verbosity == CARP_FATAL){
+    } else if (verbosity == CARP_FATAL) {
       carp_print("FATAL: ");
-    }
-    else if (verbosity == CARP_INFO){
+    } else if (verbosity == CARP_INFO) {
       carp_print("INFO: ");
-    }
-    else if (verbosity == CARP_DETAILED_INFO){
+    } else if (verbosity == CARP_DETAILED_INFO) {
       carp_print("DETAILED INFO: ");
-    }
-    else if (verbosity == CARP_DEBUG){
+    } else if (verbosity == CARP_DEBUG) {
       carp_print("DEBUG: ");
-    }
-    else if (verbosity == CARP_DETAILED_DEBUG){
+    } else if (verbosity == CARP_DETAILED_DEBUG) {
       carp_print("DETAILED DEBUG: ");
-    } 
-    else {
+    } else {
       carp_print("UNKNOWN: ");
     }
 

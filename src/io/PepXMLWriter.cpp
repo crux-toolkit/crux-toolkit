@@ -26,14 +26,14 @@ PepXMLWriter::~PepXMLWriter() {
  * Open a file of the given name.  Replace an existing file if
  * overwrite is true, else exit if an existing file is found.
  */
-void PepXMLWriter::openFile(const char* filename, bool overwrite){
+void PepXMLWriter::openFile(const char* filename, bool overwrite) {
   file_ = create_file_in_path(filename, "", overwrite);
 }
 
 /**
  * Close the file, if open.
  */
-void PepXMLWriter::closeFile(){
+void PepXMLWriter::closeFile() {
   if (file_) {
     fclose(file_);
     file_ = NULL;
@@ -45,7 +45,7 @@ void PepXMLWriter::closeFile(){
  * elements.
  * Requires OpenFile has been called without CloseFile.
  */
-void PepXMLWriter::writeHeader(){
+void PepXMLWriter::writeHeader() {
   MatchCollection::printXmlHeader(file_, "");
 }
 
@@ -53,7 +53,7 @@ void PepXMLWriter::writeHeader(){
  * Close the msms_run_summaryand msms_pipeline_analysis tags.
  * Requires OpenFile has been called without CloseFile.
  */
-void PepXMLWriter::writeFooter(){
+void PepXMLWriter::writeFooter() {
   closeSpectrumElement();
   MatchCollection::printXmlFooter(file_);
 }
@@ -88,7 +88,7 @@ void PepXMLWriter::writePSM(
   bool* scores_computed,
   double* scores, ///< indexed by score type
   unsigned cur_num_matches
-){
+) {
   string spectrum_title = getSpectrumTitle(spectrum_scan_number, filename, charge);
   //cerr<<"by_ion_fraction_matched: "<<by_ion_fraction_matched<<endl;
   // close the last spec element if this is a new spectrum and not the first
@@ -124,7 +124,7 @@ void PepXMLWriter::writePSM(
 void PepXMLWriter::printSpectrumElement(int spectrum_scan_number, 
                                         const char* spectrum_title,
                                         double spectrum_neutral_mass, 
-                                        int charge){
+                                        int charge) {
   fprintf(file_, "    <spectrum_query spectrum=\"%s\" start_scan=\"%i\""
           " end_scan=\"%i\" precursor_neutral_mass=\"%.*f\""
           " assumed_charge=\"%i\" index=\"%i\">\n"
@@ -153,7 +153,7 @@ string PepXMLWriter::getSpectrumTitle(int spectrum_scan_number,
   return spectrum_id.str();
 }
 
-void PepXMLWriter::closeSpectrumElement(){
+void PepXMLWriter::closeSpectrumElement() {
   fprintf(file_, "    </search_result>\n    </spectrum_query>\n");
 }
 
@@ -172,7 +172,7 @@ void PepXMLWriter::printPeptideElement(int *ranks,
   bool* scores_computed,
   double* scores,
   unsigned current_num_matches  
-){
+) {
   // get values
   char flanking_aas_prev = flanking_aas[0];
   char flanking_aas_next = flanking_aas[1];
@@ -235,7 +235,7 @@ void PepXMLWriter::printPeptideElement(int *ranks,
   fprintf(file_, "protein_descr=\"%s\">\n", protein_annotation.c_str());
 
   // print additonal proteins
-  for(int prot_idx = 1; prot_idx < num_proteins; prot_idx++){
+  for(int prot_idx = 1; prot_idx < num_proteins; prot_idx++) {
     int flank_idx = strlen("XX,") * prot_idx;
     flanking_aas_prev = flanking_aas[flank_idx];
     flanking_aas_next = flanking_aas[flank_idx + 1];
@@ -261,7 +261,7 @@ void PepXMLWriter::printPeptideElement(int *ranks,
   print_modifications_xml(modified_peptide_sequence, peptide_sequence, file_);
 
   // print scores
-  printScores(scores, scores_computed,ranks);
+  printScores(scores, scores_computed, ranks);
 
   // print post-search (analysis) fields
   printAnalysis(scores, scores_computed);
@@ -274,7 +274,7 @@ void PepXMLWriter::printScores(
   double* scores, 
   bool* scores_computed,
   int* ranks
- ){
+) {
   string ranks_to_string[2] = {"sprank", "xcorr_rank"};
   for (int i = 0; i < NUMBER_SCORER_TYPES; i++) {
     if (i == BY_IONS_MATCHED || i == BY_IONS_TOTAL) {
@@ -293,17 +293,17 @@ void PepXMLWriter::printScores(
 
 
 void PepXMLWriter::printAnalysis(double* scores,
-                                 bool* scores_computed){
+                                 bool* scores_computed) {
   // only write the analysis_result section for post-search psms
   bool post_search = false;
   if( scores_computed[PERCOLATOR_SCORE] 
       || scores_computed[QRANKER_SCORE]
       || scores_computed[DECOY_XCORR_QVALUE] 
-      || scores_computed[LOGP_QVALUE_WEIBULL_XCORR] ){
+      || scores_computed[LOGP_QVALUE_WEIBULL_XCORR] ) {
     post_search = true;
   }
 
-  if( !post_search ){
+  if( !post_search ) {
     return;
   }
 
@@ -312,17 +312,17 @@ void PepXMLWriter::printAnalysis(double* scores,
   SCORER_TYPE_T pep = INVALID_SCORER_TYPE;
   string score_name;
   
-  if (scores_computed[PERCOLATOR_SCORE]){
+  if (scores_computed[PERCOLATOR_SCORE]) {
     score = PERCOLATOR_SCORE;
     qval = PERCOLATOR_QVALUE;
     pep = PERCOLATOR_PEP;
     score_name = "percolator_score";
-  } else if (scores_computed[QRANKER_SCORE]){
+  } else if (scores_computed[QRANKER_SCORE]) {
     score =  QRANKER_SCORE; 
     qval = QRANKER_QVALUE;
     pep = QRANKER_PEP;
     score_name = "q-ranker_score";
-  } else if (scores_computed[LOGP_QVALUE_WEIBULL_XCORR]){
+  } else if (scores_computed[LOGP_QVALUE_WEIBULL_XCORR]) {
     qval = LOGP_QVALUE_WEIBULL_XCORR;
     pep = LOGP_WEIBULL_PEP;
   }
@@ -352,8 +352,8 @@ void PepXMLWriter::print_modifications_xml(
   const char* mod_seq,
   const char* pep_seq,
   FILE* output_file
-){
-  carp(CARP_DEBUG,"print_modifications_xml:%s %s", mod_seq, pep_seq);
+) {
+  carp(CARP_DEBUG, "print_modifications_xml:%s %s", mod_seq, pep_seq);
   // variable modifications
   int mod_precision = Params::GetInt("mod-precision");
   map<int, double> var_mods = find_variable_modifications(mod_seq);
@@ -394,11 +394,11 @@ map<int, double> PepXMLWriter::find_variable_modifications(const char* mod_seq) 
   const char* end = NULL;
   const char* start = NULL;
   // Parse returned string to find modifications within brackets
-  while (*(amino) != '\0' && *(amino+1) != '\0'){
-    if (*(amino+1) =='['){
+  while (*(amino) != '\0' && *(amino+1) != '\0') {
+    if (*(amino+1) =='[') {
       start = amino+2;
       end = amino+2;
-      while (*end != ']'){
+      while (*end != ']') {
         end++;
       }
       char* mass  = (char*)mymalloc(sizeof(char)*(end-start+1));
@@ -407,10 +407,10 @@ map<int, double> PepXMLWriter::find_variable_modifications(const char* mod_seq) 
       mods[seq_index] = atof(mass) + AminoAcidUtil::GetMass(*amino, monoisotopic);
       amino = end;
       free(mass);
-    } else if (*(amino+1) < 'A' || *(amino+1) > 'Z'){ // a mod symbol
+    } else if (*(amino+1) < 'A' || *(amino+1) > 'Z') { // a mod symbol
       double mass = 0; // sum up all adjacent symbols
       end = amino + 1;
-      while( *end < 'A' || *end > 'Z' ){
+      while( *end < 'A' || *end > 'Z' ) {
         mass += get_mod_mass_from_symbol(*end);
         end++;
       }
@@ -429,7 +429,7 @@ map<int, double> PepXMLWriter::find_variable_modifications(const char* mod_seq) 
  */
 map<int, double> PepXMLWriter::find_static_modifications(
   const char* peptide_sequence
-){
+) {
   map<int, double> static_mods;
   const char* seq_iter = peptide_sequence;
   MASS_TYPE_T isotopic_type = get_mass_type_parameter("isotopic-mass");

@@ -514,6 +514,7 @@ void TideSearchApplication::search(void* threadarg) {
       spectrum_id = spectrum_flag->find(pair<string, unsigned int>(
         spectrum_filename, scan_num * 10 + charge));
       if (spectrum_id != spectrum_flag->end()) {
+        locks_array[1]->unlock();
         continue;
       }
       locks_array[1]->unlock();

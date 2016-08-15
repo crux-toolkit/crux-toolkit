@@ -25,7 +25,7 @@ using namespace std;
 
 class PMCDelimitedFileWriter : public MatchFileWriter, public PSMWriter {
 
-public:
+ public:
   /**
    * Defines the type of match file being written
    */
@@ -90,7 +90,7 @@ public:
     */
   void setWriteHTML(bool write_html);
 
-private:
+ private:
 
   bool write_html_; // this determines whether we want to write in html format. Default value = false;
   CruxApplication* application_; // pointer to the application using this program

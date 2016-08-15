@@ -65,7 +65,7 @@ void MzIdentMLWriter::openFile(
 /**
  * Close the file, if open.
  */
-void MzIdentMLWriter::closeFile(){
+void MzIdentMLWriter::closeFile() {
   if (mzid_ != NULL && fout_ != NULL) {
     // Add modification information to AnalysisProtocolCollection -> ModificationParams
     AnalysisProtocolCollection& apc = mzid_->analysisProtocolCollection;
@@ -244,11 +244,11 @@ DBSequencePtr MzIdentMLWriter::getDBSequence(
   DBSequencePtr dbs_ptr(new DBSequence("DBS_"+boost::lexical_cast<string>(dbs_idx_++)));
   dbs_ptr->accession = protein_id;
   if (is_post_process) {
-    dbs_ptr->length=sequence_str.length();
-    dbs_ptr->seq=sequence_str;
+    dbs_ptr->length = sequence_str.length();
+    dbs_ptr->seq = sequence_str;
   } else {
-    dbs_ptr->length=src->getParentProtein()->getLength();
-    dbs_ptr->seq=src->getParentProtein()->getSequencePointer();
+    dbs_ptr->length = src->getParentProtein()->getLength();
+    dbs_ptr->seq = src->getParentProtein()->getSequencePointer();
     //TODO add description
   }
   
@@ -315,11 +315,11 @@ PeptideEvidencePtr MzIdentMLWriter::getPeptideEvidence(
     "PE_" + StringUtils::ToString(peptide_evidence_idx_++)));
 
   if (src->getParentProtein()->isPostProcess()) {
-    pe_ptr->start=0;
-    pe_ptr->end=peptide->getLength();
+    pe_ptr->start = 0;
+    pe_ptr->end = peptide->getLength();
   } else {
-    pe_ptr->start=src->getStartIdx();
-    pe_ptr->end=src->getStartIdx()+peptide->getLength();
+    pe_ptr->start = src->getStartIdx();
+    pe_ptr->end = src->getStartIdx()+peptide->getLength();
   }
   pe_ptr->dbSequencePtr = dbs_ptr;
   pe_ptr->peptidePtr = getPeptide(peptide);
@@ -459,8 +459,7 @@ SpectrumIdentificationResultPtr MzIdentMLWriter::getSpectrumIdentificationResult
     }
   }
 
-  SpectrumIdentificationResultPtr sirp(
-   new SpectrumIdentificationResult());
+  SpectrumIdentificationResultPtr sirp(new SpectrumIdentificationResult());
   
   sirp->id = "SIR_"+boost::lexical_cast<string>(sir_idx_++);
   sirp->spectrumID = spectrum_idStr;
@@ -498,7 +497,7 @@ SpectrumIdentificationItemPtr MzIdentMLWriter::getSpectrumIdentificationItem(
 
   addSpectrumScores(spectrum_match, siip);
   siip->passThreshold = true;
-  siip->peptidePtr=peptide_ptr;
+  siip->peptidePtr = peptide_ptr;
   addPeptideEvidences(crux_peptide, false, siip);
   sirp->spectrumIdentificationItem.push_back(siip);
   return siip;

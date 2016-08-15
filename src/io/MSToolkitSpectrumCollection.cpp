@@ -17,7 +17,7 @@
  */
 MSToolkitSpectrumCollection::MSToolkitSpectrumCollection(
   const string& filename   ///< The spectrum collection filename.
- ) : SpectrumCollection(filename){
+) : SpectrumCollection(filename) {
 
 }
 
@@ -29,7 +29,7 @@ MSToolkitSpectrumCollection::MSToolkitSpectrumCollection(
 bool MSToolkitSpectrumCollection::parse() {
 
   // spectrum_collection has already been parsed
-  if(is_parsed_){
+  if(is_parsed_) {
     return false;
   }
 
@@ -40,7 +40,7 @@ bool MSToolkitSpectrumCollection::parse() {
   
   bool success = get_range_from_string(range_string, first_scan, last_scan);
   
-  if( !success ){
+  if( !success ) {
     carp(CARP_FATAL, "The scan number range '%s' is invalid. "
          "Must be of the form <first>-<last>.", range_string.c_str());
   }
@@ -57,12 +57,12 @@ bool MSToolkitSpectrumCollection::parse() {
   
   while(mst_spectrum->getScanNumber() != 0) {
     // is this a scan to include? if not skip it
-    if( mst_spectrum->getScanNumber() < first_scan ){
+    if( mst_spectrum->getScanNumber() < first_scan ) {
       mst_reader->readFile(NULL, *mst_spectrum);
       continue;
     } 
     // are we past the last scan?
-    if( mst_spectrum->getScanNumber() > last_scan ){
+    if( mst_spectrum->getScanNumber() > last_scan ) {
       break;
     }
     Crux::Spectrum* parsed_spectrum = new Crux::Spectrum();
@@ -87,8 +87,7 @@ bool MSToolkitSpectrumCollection::parse() {
 bool MSToolkitSpectrumCollection::getSpectrum(
   int first_scan,      ///< The first scan of the spectrum to retrieve -in
   Crux::Spectrum* spectrum   ///< Put the spectrum info here
-  )
-{
+  ) {
   carp(CARP_DEBUG, "Using mstoolkit to parse spectrum");
   MSToolkit::MSReader* mst_reader = new MSToolkit::MSReader();
   MSToolkit::Spectrum* mst_spectrum = new MSToolkit::Spectrum();
@@ -116,8 +115,7 @@ bool MSToolkitSpectrumCollection::getSpectrum(
  */
 Crux::Spectrum* MSToolkitSpectrumCollection::getSpectrum(
   int first_scan      ///< The first scan of the spectrum to retrieve -in
-  )
-{
+  ) {
   carp(CARP_DEBUG, "Using mstoolkit to parse spectrum");
   MSToolkit::MSReader* mst_reader = new MSToolkit::MSReader();
   MSToolkit::Spectrum* mst_spectrum = new MSToolkit::Spectrum();

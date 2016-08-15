@@ -145,7 +145,7 @@ void PMCSQTWriter::writePSMs(
   }
 }
 
-string PMCSQTWriter::getSpectrumTitle(int spectrum_scan_number, int charge){
+string PMCSQTWriter::getSpectrumTitle(int spectrum_scan_number, int charge) {
   std::ostringstream spectrum_id;
   spectrum_id << spectrum_scan_number << "." << spectrum_scan_number << "." << charge;
   return spectrum_id.str();
