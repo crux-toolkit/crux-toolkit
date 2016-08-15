@@ -7,7 +7,7 @@
 
 class HTMLWriter : public PMCDelimitedFileWriter {
 
-public:
+ public:
 
   HTMLWriter();
 

@@ -21,7 +21,7 @@ using namespace Crux;
 
 MatchCollectionParser::MatchCollectionParser() {
     database_ = NULL;
-    decoy_database_= NULL;
+    decoy_database_ = NULL;
 }
 
 MatchCollectionParser::~MatchCollectionParser() {
@@ -48,7 +48,7 @@ void MatchCollectionParser::loadDatabase(
   } else {
     bool use_index = FileUtils::IsDir(fasta_file);
     // get binary fasta file name with path to crux directory 
-    if (use_index == true){ 
+    if (use_index == true) {
       //We aren't supporting search-for-matches anymore, so we won't be
       //building any indices.  We could use tide-indices for this, but
       //comet doesn't use an index.  In the future we can support tide
@@ -97,7 +97,7 @@ Protein* MatchCollectionParser::getProtein(
   }
 
   //try creating it and adding it to the database as a postprocess protein
-  carp(CARP_DEBUG, "Creating new protein for %s",protein_id.c_str());
+  carp(CARP_DEBUG, "Creating new protein for %s", protein_id.c_str());
   protein = new PostProcessProtein();
   protein->setId(protein_id.c_str());
   string decoy_prefix = Params::GetString("decoy-prefix");
@@ -141,8 +141,8 @@ Protein* MatchCollectionParser::getProtein(
   }
 
   //try creating it and adding it to the database as a postprocess protein
-  carp(CARP_DEBUG, "Creating new protein for %s",protein_id.c_str());
-  carp(CARP_DEBUG, "Sequence :%s",sequence.c_str());
+  carp(CARP_DEBUG, "Creating new protein for %s", protein_id.c_str());
+  carp(CARP_DEBUG, "Sequence :%s", sequence.c_str());
 
   protein = new PostProcessProtein();
 

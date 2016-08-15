@@ -20,7 +20,7 @@
 #include "PSMReader.h"
 
 class MatchFileReader: public DelimitedFileReader, public PSMReader {
-  protected:
+ protected:
     void parseHeader();
     Crux::Match* parseMatch();
     Crux::Peptide* parsePeptide();
@@ -28,7 +28,7 @@ class MatchFileReader: public DelimitedFileReader, public PSMReader {
 
     int match_indices_[NUMBER_MATCH_COLUMNS];
 
-  public:
+ public:
    /**
     * \returns a blank MatchFileReader object 
     */
@@ -53,7 +53,7 @@ class MatchFileReader: public DelimitedFileReader, public PSMReader {
     MatchFileReader(
       const std::string& file_name,
       Database* database,
-      Database* decoy_database=NULL);
+      Database* decoy_database = NULL);
 
     /**
      * \returns a MatchFileReader object and load the tab-delimited

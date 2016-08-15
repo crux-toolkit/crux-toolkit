@@ -40,7 +40,7 @@ class MatchFileWriter : public DelimitedFileWriter {
   /**
    * \returns A MatchFileWriter object and opens a file for writing.
    */
-  MatchFileWriter(const char* filename);
+  explicit MatchFileWriter(const char* filename);
 
   /**
    * Destructor
@@ -86,11 +86,11 @@ class MatchFileWriter : public DelimitedFileWriter {
   template<typename ValueType>
     void setColumnCurrentRow
     (MATCH_COLUMNS_T col_type,
-     const ValueType& value){
+     const ValueType& value) {
 
     int file_column = match_indices_[col_type];
     // ignore if this column isn't being printed
-    if( file_column == -1 ){
+    if( file_column == -1 ) {
       return;
     }
     current_row_.at(file_column) =
