@@ -205,7 +205,8 @@ def makePerformancePlot(title, listOfMethods):
   gnuplotFile.write("set title \"%s\"\n" % title)
   gnuplotFile.write("set xlabel \"q-value threshold\"\n")
   gnuplotFile.write("set ylabel \"Number of accepted PSMs\"\n")
-  gnuplotFile.write("set xrange [0:0.1]\n")
+#  gnuplotFile.write("set xrange [0:0.1]\n")
+  gnuplotFile.write("set xrange [0:1]\n") # While debugging
   gnuplotFile.write("set key bottom right\n")
   firstOne = True
   for myTuple in listOfMethods:
@@ -242,12 +243,15 @@ concatenatedDatabase = "targets-and-decoys.fasta"
 runCommand("cat %s/tide-index.decoy.fasta %s.fa > %s"
            % (database, database, concatenatedDatabase), "")
 
-# Run three searches (Comet, Tide XCorr, and Tide p-value).
+# Run four searches (Comet, and Tide XCorr, XCorr p-value, and residue evidence p-value).
 runSearch("tide-xcorr", "tide-search", "", database,
           concatenatedDatabase, "tide-xcorr/tide-search.txt",
           "xcorr score", "")
 runSearch("tide-p-value", "tide-search", "--exact-p-value T",
           database, concatenatedDatabase, "tide-p-value/tide-search.txt",
+          "refactored xcorr", "--score \"exact p-value\"")
+runSearch("tide-resev", "tide-search", "--exact-p-value T --score-function residue-evidence",
+          database, concatenatedDatabase, "tide-resev/tide-search.txt",
           "refactored xcorr", "--score \"exact p-value\"")
 runSearch("comet", "comet", "", "%s.fa" % database,
           concatenatedDatabase, "comet/comet.target.txt",
@@ -268,6 +272,11 @@ makePerformancePlot("tide.xcorr",
                      ("tide-xcorr/tide-search.percolator.q.txt", "Tide XCorr Percolator"),
                      ("tide-xcorr/tide-search.q-ranker.q.txt", "Tide XCorr q-ranker"),
                      ("tide-xcorr/tide-search.barista.q.txt", "Tide XCorr barista")])
+makePerformancePlot("tide.resev",
+                    [("tide-resev/tide-search.q.txt", "Tide resev"),
+                     ("tide-resev/tide-search.percolator.q.txt", "Tide resev Percolator"),
+                     ("tide-resev/tide-search.q-ranker.q.txt", "Tide resev q-ranker"),
+                     ("tide-resev/tide-search.barista.q.txt", "Tide resev barista")])
 
 # Make the performance plots, segregated by post-processor.
 makePerformancePlot("assign-confidence",
@@ -286,13 +295,6 @@ makePerformancePlot("barista",
                     [("comet/comet.barista.q.txt", "Comet barista"),
                      ("tide-p-value/tide-search.barista.q.txt", "Tide p-value barista"),
                      ("tide-xcorr/tide-search.barista.q.txt", "Tide XCorr barista")])
-
-
-# Assign-confidence
-# Percolator
-# q-ranker
-# Barista
-
 
 
 # Make the XCorr scatter plots.
