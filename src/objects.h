@@ -512,6 +512,9 @@ enum _scorer_type {
   TIDE_SEARCH_EXACT_PVAL,       ///< exact p-value from Tide
   TIDE_SEARCH_REFACTORED_XCORR, ///< raw score corresponding to exact p-value
 
+  RESIDUE_EVIDENCE_SCORE, //score from residue evidence matrix
+  RESIDUE_EVIDENCE_PVAL, //p-value using residue evidence matrix
+
   // The following are computed by assign-confidence.
   SIDAK_ADJUSTED,             ///< Sidak adjusted p-value
   TIDE_SEARCH_EXACT_SMOOTHED, ///< smoothed p-value

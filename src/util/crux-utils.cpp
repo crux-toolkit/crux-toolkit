@@ -489,7 +489,9 @@ static const char* scorer_type_strings[NUMBER_SCORER_TYPES] = {
   "by_ions_matched",
   "by_ions_total",
   "exact_pvalue",
-  "refactored_xcorr"
+  "refactored_xcorr",
+  "res-ev score",
+  "res-ev p-value"
 };
 
 bool string_to_scorer_type(const string& name, SCORER_TYPE_T* result) {
