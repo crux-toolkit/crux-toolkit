@@ -186,6 +186,14 @@ void MatchCollection::sort(
   case TIDE_SEARCH_REFACTORED_XCORR:
     smaller_is_better = false;
     break;
+
+  case RESIDUE_EVIDENCE_SCORE:
+    smaller_is_better = false;
+    break;
+  case RESIDUE_EVIDENCE_PVAL:
+    smaller_is_better = true;
+    break;
+
   case SIDAK_ADJUSTED:
   case TIDE_SEARCH_EXACT_SMOOTHED:
     smaller_is_better = true;

@@ -200,6 +200,8 @@ MatchCollection* MatchFileReader::parse() {
     match_collection->setScoredType(XCORR, !empty(XCORR_SCORE_COL));
     match_collection->setScoredType(TIDE_SEARCH_EXACT_PVAL, !empty(EXACT_PVALUE_COL));
     match_collection->setScoredType(TIDE_SEARCH_REFACTORED_XCORR, !empty(REFACTORED_SCORE_COL));
+    match_collection->setScoredType(RESIDUE_EVIDENCE_PVAL, !empty(RESIDUE_PVALUE_COL)); //Added by Andy Lin for residue evidence
+    match_collection->setScoredType(RESIDUE_EVIDENCE_SCORE, !empty(RESIDUE_EVIDENCE_COL)); //Added by Andy Lin for residue evidence
     match_collection->setScoredType(EVALUE, !empty(EVALUE_COL));
     match_collection->setScoredType(DECOY_XCORR_QVALUE, !empty(DECOY_XCORR_QVALUE_COL));
     match_collection->setScoredType(LOGP_BONF_WEIBULL_XCORR, !empty(PVALUE_COL));

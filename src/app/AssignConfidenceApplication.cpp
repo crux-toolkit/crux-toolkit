@@ -152,6 +152,12 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
     case REFACTORED_SCORE_COL:
       score_type = TIDE_SEARCH_REFACTORED_XCORR;
       break;
+    case RESIDUE_PVALUE_COL:
+      score_type = RESIDUE_EVIDENCE_PVAL;
+      break;
+    case RESIDUE_EVIDENCE_COL:
+      score_type = RESIDUE_EVIDENCE_SCORE;
+      break;
     case ELUTION_WINDOW_COL:
       score_type = TIDE_SEARCH_EXACT_SMOOTHED;
       break;      
@@ -1080,11 +1086,13 @@ int AssignConfidenceApplication::getDirection(SCORER_TYPE_T scoreType) {
     case XCORR:
     case LOGP_BONF_WEIBULL_XCORR: // negative log p-values
     case TIDE_SEARCH_REFACTORED_XCORR:
+    case RESIDUE_EVIDENCE_SCORE:
       // higher score better, ascending = false
       return -1;
     case EVALUE:
     case TIDE_SEARCH_EXACT_PVAL:
     case TIDE_SEARCH_EXACT_SMOOTHED:
+    case RESIDUE_EVIDENCE_PVAL:
       // lower score better, ascending = true
       return 1;
     default:
