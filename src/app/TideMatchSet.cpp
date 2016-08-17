@@ -403,7 +403,7 @@ void TideMatchSet::writeHeaders(ofstream* file, bool decoyFile, bool sp) {
   const int headers[] = {
     FILE_COL, SCAN_COL, CHARGE_COL, SPECTRUM_PRECURSOR_MZ_COL, SPECTRUM_NEUTRAL_MASS_COL,
     PEPTIDE_MASS_COL, DELTA_CN_COL, DELTA_LCN_COL, SP_SCORE_COL, SP_RANK_COL,
-    XCORR_SCORE_COL, XCORR_RANK_COL, BY_IONS_MATCHED_COL, BY_IONS_TOTAL_COL,
+    XCORR_SCORE_COL, BY_IONS_MATCHED_COL, BY_IONS_TOTAL_COL,
     DISTINCT_MATCHES_SPECTRUM_COL, SEQUENCE_COL, MODIFICATIONS_COL, CLEAVAGE_TYPE_COL,
     PROTEIN_ID_COL, FLANKING_AA_COL, ORIGINAL_TARGET_SEQUENCE_COL
   };
@@ -427,15 +427,38 @@ void TideMatchSet::writeHeaders(ofstream* file, bool decoyFile, bool sp) {
         (!Params::GetBool("file-column") || Params::GetBool("peptide-centric-search"))) {
       continue;
     }
-    if (header == XCORR_SCORE_COL && Params::GetBool("exact-p-value")) {
-      *file << get_column_header(EXACT_PVALUE_COL) << '\t'
-            << get_column_header(REFACTORED_SCORE_COL);
+
+    if (header == XCORR_SCORE_COL) { 
+      if(Params::GetString("score-function") == "xcorr") {
+        if (Params::GetBool("exact-p-value")) {
+          *file << get_column_header(EXACT_PVALUE_COL) << '\t'
+                << get_column_header(REFACTORED_SCORE_COL);
+        }
+        else {
+          *file << get_column_header(XCORR_SCORE_COL);
+        }
+        *file << '\t' << get_column_header(XCORR_RANK_COL);
+      }
+      else if (Params::GetString("score-function") == "residue-evidence") {
+        if(Params::GetBool("exact-p-value")) {
+          *file << get_column_header(RESIDUE_PVALUE_COL) << '\t' << get_column_header(RESIDUE_EVIDENCE_COL);
+        }
+        else {
+          *file << get_column_header(RESIDUE_EVIDENCE_COL);
+        }
+        *file << '\t' << get_column_header(RESIDUE_RANK_COL);
+      }
+      else if (Params::GetString("score-function") == "both") {
+        continue;
+      }
+
       if (Params::GetInt("elution-window-size") > 0) {
-        *file << '\t' << get_column_header(ELUTION_WINDOW_COL);
+          *file << '\t' << get_column_header(ELUTION_WINDOW_COL);
       }
       writtenHeader = true;
       continue;
     }
+
     if (header == DISTINCT_MATCHES_SPECTRUM_COL) {
       if (Params::GetBool("peptide-centric-search")) {
         *file << get_column_header(DISTINCT_MATCHES_PEPTIDE_COL) << '\t';

@@ -927,7 +927,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   }
 
 
-  std::cout << "maxEvidence: " << maxEvidence << std::endl;
+//  std::cout << "maxEvidence: " << maxEvidence << std::endl;
 /*
   int cnt=0;
   for(int i =0;i<maxPrecurMassBin;i++) {
