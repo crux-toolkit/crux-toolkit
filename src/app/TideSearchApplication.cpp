@@ -742,7 +742,7 @@ void TideSearchApplication::search(void* threadarg) {
           matches.report(target_file, decoy_file, top_matches, spectrum_filename,
                        spectrum, charge, active_peptide_queue, proteins,
                        locations, compute_sp, false, locks_array[0]);
-        } // end peptide_centric == true
+        } // end peptide_centric == false
       }
       break;
     case RESIDUE_EVIDENCE_MATRIX: //Following case written by Andy Lin in Feb 2016
@@ -798,11 +798,9 @@ void TideSearchApplication::search(void* threadarg) {
       int maxPrecurMassBin = floor(MaxBin::Global().CacheBinEnd() + 50.0);
       
       if (!exact_pval_search_) {
-        carp(CARP_FATAL,"This is not implemented yet.");
-
         //TODO Below is not implemented or tested yet
         total_candidate_peptides +=nCandPeptide;
-        TideMatchSet::Arr2 match_arr2(nCandPeptide); //TODO -- check if this is right arr to use
+        TideMatchSet::Arr match_arr(nCandPeptide); //TODO -- check if this is right arr to use
 
         //For one spectrum calculates:
         // 1) residue evidence matrix 
@@ -885,7 +883,7 @@ void TideSearchApplication::search(void* threadarg) {
         }
 
         /**************Find Best Target Peptide Match *******************/
-        double scoreResidueEvidence;
+        int scoreResidueEvidence;
         deque<Peptide*>::const_iterator iter_ = active_peptide_queue->iter_;
         deque<TheoreticalPeakSetBIons>::const_iterator iter1_ = active_peptide_queue->iter1_;
         vector<int>::const_iterator iter_int;
@@ -918,7 +916,9 @@ void TideSearchApplication::search(void* threadarg) {
           }
 
           //Make sure the number of theoretical peaks match pepLen-1
-          assert(intensArrayTheor.size() == pepLen -1);
+//          std::cout << "pepLen-1: " << pepLen - 1 <<std::endl;
+//          std::cout << "intensArrayTheor.size(): " << intensArrayTheor.size() << std::endl;
+          assert(intensArrayTheor.size() == pepLen - 1);
 
           //TODO assume 1 mod per amino acid is specified in arguments
           const ModCoder::Mod* mods;
@@ -956,19 +956,11 @@ void TideSearchApplication::search(void* threadarg) {
             carp(CARP_FATAL, "residue-evidence has not been implemented with 'peptide-centric-search T' yet.");
           }
           else {
-            continue;
-/*
-            //TODO need to fix this part
-            for (TideMatchSet::Arr2::iterator it = match_arr2.begin();
-                 it != match_arr2.end();
-                 it++) {
-              TideMatchSet::Pair pair;
-              pair.first.first = (double)(it->first);
-              pair.first.second = 0.0;
-              pair.second = it->second;
-              match_arr.push_back(pair);
-            }
-*/
+            TideMatchSet::Pair pair;
+            pair.first.first = (double)scoreResidueEvidence;
+            pair.first.second = 0.0;
+            pair.second = nCandPeptide - pe; //TODO ugly hack to conform with the way these indices are generated in standard tide-search
+            match_arr.push_back(pair);
           }
 
           ++iter_;
@@ -978,10 +970,22 @@ void TideSearchApplication::search(void* threadarg) {
         //clean up
         delete [] pepMassInt;
         //TODO check if need to delete more stuff
+        
+
+        if (!peptide_centric) { // peptide_centric=false
+          // matches will arrange the results in a heap by score, return the top
+          // few, and recover the association between counter and peptide. We output
+          // the top matches.
+          TideMatchSet matches(&match_arr, highest_mz);
+          matches.exact_pval_search_ = exact_pval_search;
+          matches.report(target_file, decoy_file, top_matches, spectrum_filename,
+                         spectrum, charge, active_peptide_queue, proteins,
+                         locations, compute_sp, true, locks_array[0]);
+        } //end peptide_centric=false
 
         //TODO Above is not implemented or tested yet
         
-      } else { //Case RESIDUE_EVIDENCE_MATRIX
+      } else { //Case RESIDUE_EVIDENCE_MATRIX and p-value = True
         total_candidate_peptides += nCandPeptide;
         TideMatchSet::Arr match_arr(nCandPeptide); // scored peptides will go here.
 
@@ -1143,7 +1147,7 @@ void TideSearchApplication::search(void* threadarg) {
         }
 
         /**************Find Best Target Peptide Match *******************/
-        double scoreResidueEvidence;
+        int scoreResidueEvidence;
         deque<Peptide*>::const_iterator iter_ = active_peptide_queue->iter_;
         deque<TheoreticalPeakSetBIons>::const_iterator iter1_ = active_peptide_queue->iter1_;
         vector<int>::const_iterator iter_int;
@@ -1151,7 +1155,7 @@ void TideSearchApplication::search(void* threadarg) {
 
 //        std::cout << "Spectrum: " << sc->spectrum->SpectrumNumber() << std::endl;
 //        std::cout << "minMass: " << min_mass << std::endl;
-        std::cout << setprecision(15) <<  "precursorMass: " << precursorMass << std::endl;
+//        std::cout << setprecision(15) <<  "precursorMass: " << precursorMass << std::endl;
 //        std::cout << "maxMass: " << max_mass << std::endl;
 //        std::cout << "precursorMZ: " << precursor_mz << std::endl;
 //        std::cout << "nCandPeptide: " << nCandPeptide << std::endl;
@@ -1183,7 +1187,7 @@ void TideSearchApplication::search(void* threadarg) {
           }
 
           //Make sure the number of theoretical peaks match pepLen-1
-          assert(intensArrayTheor.size() == pepLen -1);
+          assert(intensArrayTheor.size() == pepLen - 1);
 
           //TODO assume 1 mod per amino acid is specified in arguments
           const ModCoder::Mod* mods;
