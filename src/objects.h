@@ -545,6 +545,24 @@ enum _protein_scorer_type { PROTEIN_SCORER_PVALUE,
 typedef enum _protein_scorer_type PROTEIN_SCORER_TYPE_T;
 
 /**
+ * The enum for SCORE_FUNCTION_TYPE
+ * The typedef for score function
+ * added by Andy Lin
+ */
+enum _score_function { INVALID_SCORE_FUNCTION, //Added by Andy Lin
+                       XCORR_SCORE, //original SEQUEST score fxn
+                       RESIDUE_EVIDENCE_MATRIX, //score fxn which can be used high-res MS2 data
+                       BOTH_SCORE, //use both score fxns from above
+                       NUMBER_SCORE_FUNCTIONS };
+
+/**
+ * \typedef SCORE_FUNCTION_T
+ * \brief The typedef for score function type
+ * \added by Andy Lin
+ */
+typedef enum _score_function SCORE_FUNCTION_T;
+
+/**
  *\class Match
  *\brief An object that contains the information of a peptide and the scoring of multiple types
  */

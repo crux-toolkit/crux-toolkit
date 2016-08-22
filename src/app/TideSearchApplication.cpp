@@ -155,7 +155,8 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
   double* aaFreqN = NULL;
   double* aaFreqI = NULL;
   double* aaFreqC = NULL;
-  int* aaMass = NULL;
+  int* aaMass = NULL; //for XCORR
+  double* doubleAaMass = NULL; //for RESIDUE-EVIDENCE
   int nAA = 0;
   
   if (exact_pval_search_) {
@@ -172,6 +173,11 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
                         bin_width_, bin_offset_);
     ActivePeptideQueue* active_peptide_queue =
       new ActivePeptideQueue(aaf_peptide_reader.Reader(), proteins);
+
+
+
+
+
     nAA = active_peptide_queue->CountAAFrequency(bin_width_, bin_offset_,
                                                  &aaFreqN, &aaFreqI, &aaFreqC, &aaMass);
     delete active_peptide_queue;
@@ -473,20 +479,7 @@ void TideSearchApplication::search(void* threadarg) {
 
   //Added by Andy Lin on 2/9/2016
   //Determines which score function to use for scoring PSMs and store in SCORE_FUNCTION enum
-  SCORE_FUNCTION curScoreFunction;
-  string tmpScoreFunction = Params::GetString("score-function");
-  if (tmpScoreFunction == "xcorr") {
-    curScoreFunction = XCORR;
-  }
-  else if (tmpScoreFunction == "residue-evidence") {
-    curScoreFunction = RESIDUE_EVIDENCE_MATRIX;
-  }
-  else if (tmpScoreFunction == "both") {
-    curScoreFunction = BOTH;
-  }
-  else { 
-    carp(CARP_FATAL,"This score function \"%s\" is not supported.",tmpScoreFunction.c_str());
-  }
+  SCORE_FUNCTION_T curScoreFunction = string_to_score_function_type(Params::GetString("score-function"));
   //END -- added by Andy Lin
 
   for (vector<SpectrumCollection::SpecCharge>::const_iterator sc = spec_charges->begin()+thread_num;
@@ -535,7 +528,10 @@ void TideSearchApplication::search(void* threadarg) {
     //Switch statment added by Andy Lin on 2/10/2016
     //Original code is placed in case named XCORR
     switch (curScoreFunction) {
-    case XCORR: 
+    case XCORR_SCORE: 
+    {
+      //TODO throw error when fragment-tolerance and evidence-granularity parameters are defined 
+
       if (!exact_pval_search_) {  //execute original tide-search program
   
         // Normalize the observed spectrum and compute the cache of
@@ -587,7 +583,7 @@ void TideSearchApplication::search(void* threadarg) {
                          spectrum, charge, active_peptide_queue, proteins,
                          locations, compute_sp, true, locks_array[0]);
         }  //end peptide_centric == false
-      } else { //execute exact-pval-search for case: XCORR
+      } else { //execute exact-pval-search for case: XCORR_SCORE
 
         const int minDeltaMass = aaMass[0];
         const int maxDeltaMass = aaMass[nAA - 1];
@@ -745,6 +741,7 @@ void TideSearchApplication::search(void* threadarg) {
         } // end peptide_centric == false
       }
       break;
+    }
     case RESIDUE_EVIDENCE_MATRIX: //Following case written by Andy Lin in Feb 2016
     { 
       //TODO section below can be removed when options have been
@@ -1276,7 +1273,7 @@ void TideSearchApplication::search(void* threadarg) {
       } //end peptide_centric == true
       break; //End Case RESIDUE_EVIDENCE_MATRIX
     }
-    case BOTH:
+    case BOTH_SCORE:
       if (!exact_pval_search_){
         carp(CARP_FATAL,"Using the residueEvidenceMatrix score function with XCorr requires the exact-p-value option to be true.");
       }
@@ -1881,11 +1878,6 @@ void TideSearchApplication::calcResidueScoreCount (
   int colBuffer = maxAaMass;
   int colStart = NTermMass;
   int nRow = bottomRowBuffer - minScore + 1 + maxScore + topRowBuffer;
-//  std::cout << nRow << std::endl;
-//  std::cout << bottomRowBuffer << std::endl;
-//  std::cout << minScore << std::endl;
-//  std::cout << maxScore << std::endl;
-//  std::cout << topRowBuffer << std::endl;
   int nCol = colBuffer + pepMassInt;
   int rowFirst = bottomRowBuffer + 1;
   int rowLast = rowFirst - minScore + maxScore;

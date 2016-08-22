@@ -362,6 +362,8 @@ DECOY_TYPE_T string_to_tide_decoy_type(const std::string& name);
 char* decoy_type_to_string(DECOY_TYPE_T type);
 MASS_FORMAT_T string_to_mass_format(const std::string& name);
 char* mass_format_type_to_string(MASS_FORMAT_T type);
+SCORE_FUNCTION_T string_to_score_function_type(const std::string& name);
+char* score_function_type_to_string(SCORE_FUNCTION_T type);
 
 HARDKLOR_ALGORITHM_T string_to_hardklor_algorithm_type(const std::string& name);
 std::string hardklor_hardklor_algorithm_type_to_string(HARDKLOR_ALGORITHM_T type);
