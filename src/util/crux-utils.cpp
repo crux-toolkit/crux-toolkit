@@ -51,6 +51,29 @@ static const unsigned int DECOY_STRING_LENGTH = 5; // The length of string "deco
 
 static const int INVALID_ENUM_STRING = -10;
 /**
+ * The string version of the score functions
+ * Added by Andy Lin
+ */
+
+static const char* score_function_strings[NUMBER_SCORE_FUNCTIONS] = {
+  "invalid", "xcorr", "residue-evidence", "both"
+};
+
+SCORE_FUNCTION_T string_to_score_function_type(const string& name) {
+  int score_function_int = convert_enum_type_str(name.c_str(), INVALID_ENUM_STRING,
+                                                 score_function_strings,
+                                                 NUMBER_SCORE_FUNCTIONS);
+  if (score_function_int < 0) {
+    score_function_int = 0;
+  }
+  return (SCORE_FUNCTION_T)score_function_int;
+}
+
+char* score_function_type_to_string(SCORE_FUNCTION_T type) {
+  return my_copy_string(score_function_strings[type]);
+}
+
+/**
  * The string version of the decoy types
  */
 static const char* decoy_type_strings[NUMBER_DECOY_TYPES] = {

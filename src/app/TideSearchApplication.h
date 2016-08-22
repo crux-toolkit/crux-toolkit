@@ -53,13 +53,6 @@ private:
   static bool HAS_DECOYS;
   static bool PROTEIN_LEVEL_DECOYS;
 
-  enum SCORE_FUNCTION { //Added by Andy Lin on 2/9/2016
-    INVALID_SCORE_FUNCTION, //invalid score function
-    XCORR, //score function is original SEQUEST implementation 
-    RESIDUE_EVIDENCE_MATRIX, //score function can be used with high-res MS2 data
-    BOTH //use both score functions from above
-  };
-
   /**
    * Function that contains the search algorithm and performs the search
    */
