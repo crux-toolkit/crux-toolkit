@@ -33,6 +33,11 @@ class StringUtils {
   }
 
   // Convert to a string
+  // Description added by Andy Lin
+  // If fixedFloat is true, then the enum (most likely defined in objects.h)
+  // will be printed out with the precision stored in variable 'decimals'
+  // If fixedFloat is false, then enum (obj) will be printed out in scientic notation 
+  // If decimals is not given, then enum (obj) will be printed with a precision of 8
   template<typename T>
   static std::string ToString(const T& obj, int decimals = -1, bool fixedFloat = true) {
     std::stringstream converter;
