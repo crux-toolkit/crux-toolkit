@@ -54,6 +54,9 @@ class ActivePeptideQueue {
  
   int CountAAFrequency(double binWidth, double binOffset, double** dAAFreqN,
                        double** dAAFreqI, double** dAAFreqC, int** dAAMass);
+  //Added by Andy Lin for RESIDUE_EVIDENCE_MATRIX
+  int CountAAFrequencyRes(double binWidth, double binOffset, vector<double>& dAAFreqN,
+                          vector<double>& dAAFreqI, vector<double>& dAAFreqC, vector<double>& dAAMass);
   
   int ActiveTargets() const { return active_targets_; }
   int ActiveDecoys() const { return active_decoys_; }

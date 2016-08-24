@@ -358,7 +358,7 @@ void TideMatchSet::writeToFile(
       *file << StringUtils::ToString(sp_data->sp_score, precision) << '\t'
             << sp_map->at(*i).second << '\t';
     }
-    *file << StringUtils::ToString((*i)->first.first, precision) << '\t';
+    *file << StringUtils::ToString((*i)->first.first, precision,false) << '\t';
     if (exact_pval_search_) {
       *file << (*i)->first.second << '\t';
     }

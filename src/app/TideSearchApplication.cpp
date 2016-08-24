@@ -152,35 +152,51 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
   carp(CARP_DEBUG, "Read %d proteins", proteins.size());
 
   //open a copy of peptide buffer for Amino Acid Frequency (AAF) calculation.
+  //for XCORR_SCORE
   double* aaFreqN = NULL;
   double* aaFreqI = NULL;
   double* aaFreqC = NULL;
   int* aaMass = NULL; //for XCORR
-  double* doubleAaMass = NULL; //for RESIDUE-EVIDENCE
   int nAA = 0;
-  
+
+  //for RESIDUE_EVIDENCE_MATRIX
+  vector<double> dAAFreqN;
+  vector<double> dAAFreqI;
+  vector<double> dAAFreqC;
+  vector<double> dAAMass;
+  int nAARes = 0;
+ 
+  SCORE_FUNCTION_T curScoreFunction = string_to_score_function_type(Params::GetString("score-function")); 
   if (exact_pval_search_) {
     pb::Header aaf_peptides_header;
     HeadedRecordReader aaf_peptide_reader(peptides_file, &aaf_peptides_header);
 
     if ((aaf_peptides_header.file_type() != pb::Header::PEPTIDES) ||
-        !aaf_peptides_header.has_peptides_header()) {
-      carp(CARP_FATAL, "Error reading index (%s)", peptides_file.c_str());
+    !aaf_peptides_header.has_peptides_header()) {
+    carp(CARP_FATAL, "Error reading index (%s)", peptides_file.c_str());
     }
+
     MassConstants::Init(&aaf_peptides_header.peptides_header().mods(), 
-      &aaf_peptides_header.peptides_header().nterm_mods(), 
-      &aaf_peptides_header.peptides_header().cterm_mods(),
+                        &aaf_peptides_header.peptides_header().nterm_mods(), 
+                        &aaf_peptides_header.peptides_header().cterm_mods(),
                         bin_width_, bin_offset_);
-    ActivePeptideQueue* active_peptide_queue =
+ 
+    if (curScoreFunction == XCORR_SCORE || curScoreFunction == BOTH_SCORE) {
+      ActivePeptideQueue* active_peptide_queue =
+      new ActivePeptideQueue(aaf_peptide_reader.Reader(), proteins);
+      
+      nAA = active_peptide_queue->CountAAFrequency(bin_width_, bin_offset_,
+                                                   &aaFreqN, &aaFreqI, &aaFreqC, &aaMass);
+      delete active_peptide_queue;
+
+    } else if (curScoreFunction == RESIDUE_EVIDENCE_MATRIX) {
+      ActivePeptideQueue* active_peptide_queue =
       new ActivePeptideQueue(aaf_peptide_reader.Reader(), proteins);
 
-
-
-
-
-    nAA = active_peptide_queue->CountAAFrequency(bin_width_, bin_offset_,
-                                                 &aaFreqN, &aaFreqI, &aaFreqC, &aaMass);
-    delete active_peptide_queue;
+      nAARes = active_peptide_queue->CountAAFrequencyRes(bin_width_, bin_offset_,
+                                                dAAFreqN, dAAFreqI, dAAFreqC, dAAMass);
+      delete active_peptide_queue;
+    }
   } // End calculation AA frequencies
 
   // Read auxlocs index file
@@ -333,6 +349,7 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
            Params::GetInt("top-match"), spectra.FindHighestMZ(),
            target_file, decoy_file, compute_sp,
            nAA, aaFreqN, aaFreqI, aaFreqC, aaMass,
+           nAARes, dAAFreqN, dAAFreqI, dAAFreqC, dAAMass,
            pepHeader.mods(), pepHeader.nterm_mods(), pepHeader.cterm_mods());
 
     PSMConvertApplication converter;
@@ -444,13 +461,25 @@ void TideSearchApplication::search(void* threadarg) {
   double* aaFreqI = my_data->aaFreqI;
   double* aaFreqC = my_data->aaFreqC;
   int* aaMass = my_data->aaMass;
+  int nAARes = my_data->nAARes;
+  const vector<double>* dAAFreqN_tmp = my_data->dAAFreqN;
+  const vector<double>* dAAFreqI_tmp = my_data->dAAFreqI;
+  const vector<double>* dAAFreqC_tmp = my_data->dAAFreqC;
+  const vector<double>* dAAMass_tmp = my_data->dAAMass;
   const pb::ModTable* mod_table1 = my_data->mod_table;
   const pb::ModTable* nterm_mod_table1 = my_data->nterm_mod_table;
   const pb::ModTable* cterm_mod_table1 = my_data->cterm_mod_table;
 
+  //convert pointers to actual mod_tables
   const pb::ModTable mod_table = *mod_table1;
   const pb::ModTable nterm_mod_table = *nterm_mod_table1;
   const pb::ModTable cterm_mod_table = *cterm_mod_table1;
+
+  //convert pointers to actual double vector
+  const vector<double> dAAFreqN = *dAAFreqN_tmp;
+  const vector<double> dAAFreqI = *dAAFreqI_tmp;
+  const vector<double> dAAFreqC = *dAAFreqC_tmp;
+  const vector<double> dAAMass = *dAAMass_tmp;
 
   vector<boost::mutex*> locks_array = my_data->locks_array;
 
@@ -761,6 +790,7 @@ void TideSearchApplication::search(void* threadarg) {
         continue;
       }
 
+/*
       //Gets masses of all amino acids in double form
       //argument aaMasses are integer masses. Therefore need to create for this one
       vector<double> aaMassDouble;
@@ -786,13 +816,20 @@ void TideSearchApplication::search(void* threadarg) {
         int tmpMass = MassConstants::mass2bin(newMass);
         aaMassInt.push_back(tmpMass);
       }
+*/
+      const vector<double> aaMassDouble = dAAMass;
+      vector<int> aaMassInt;
+      for(int i = 0; i < aaMassDouble.size(); i++) {
+        int tmpMass = MassConstants::mass2bin(aaMassDouble[i]);
+        aaMassInt.push_back(tmpMass);
+      }
 
-      //TODO This commented code is in another spot
-      //const int minDeltaMass = aaMass[0]; //TODO not needed currently since masses are given by string aa
-                                                    //This will need to change once we decided to get string aa or 
-                                                   //go to a double version of aaMass         
-      //const int maxDeltaMass = aaMass[nAA - 1]; //TODO look above
+      const int minDeltaMass = aaMassInt[0];
+      const int maxDeltaMass = aaMassInt[nAARes - 1]; 
       int maxPrecurMassBin = floor(MaxBin::Global().CacheBinEnd() + 50.0);
+
+      int fragTol = Params::GetInt("fragment-tolerance");
+      int granularityScale = Params::GetInt("evidence-granularity");
       
       if (!exact_pval_search_) {
         //TODO Below is not implemented or tested yet
@@ -823,13 +860,11 @@ void TideSearchApplication::search(void* threadarg) {
         //Creates a 3D vector representing 3D matrix
         //Below are the 3 axes
         //nPepMassIntUniq: number of mass bins candidate are in
-        //nAA: number of amino acids
-        //replaced nAA with aaMassDouble.size()
-        //This is because nAA = 37 but aaMassDouble.size() = 21
+        //nAARes: number of amino acids
         //maxPrecurMassBin: max number of mass bins
         //initalize all values to 0
         vector<vector<vector<double> > > residueEvidenceMatrix(nPepMassIntUniq,
-               vector<vector<double> >(aaMassDouble.size(), vector<double>(maxPrecurMassBin,0)));
+               vector<vector<double> >(nAARes, vector<double>(maxPrecurMassBin,0)));
 
 
         //TODO assumption is that there is one nterm mod per peptide
@@ -852,20 +887,14 @@ void TideSearchApplication::search(void* threadarg) {
           CTermMassBin = MassConstants::mass2bin(MassConstants::mono_oh);
         }
  
-        int fragTol = Params::GetInt("fragment-tolerance");
-        int granularityScale = Params::GetInt("evidence-granularity");
-
         for (pe=0 ; pe<nPepMassIntUniq ; pe++) {
           int curPepMassInt = pepMassIntUnique[pe];
 
-          //TODO aaMassDouble.size() replaced nAA
           //TODO aaMassDouble replaced aaMass
           //TODO This is aaMass is int while aaMassDouble is double
-          //TODO Also because nAA does not match expected nAA (eg 37 v 21 )
-          //In jeff code -- he uses 21 amino acids instead of 37
           observed.CreateResidueEvidenceMatrix(*spectrum,charge,
                                                maxPrecurMassBin,precursorMass,
-                                               aaMassDouble.size(),aaMassDouble,
+                                               nAARes,aaMassDouble,
                                                fragTol,granularityScale,
                                                residueEvidenceMatrix[pe]);
 
@@ -913,8 +942,6 @@ void TideSearchApplication::search(void* threadarg) {
           }
 
           //Make sure the number of theoretical peaks match pepLen-1
-//          std::cout << "pepLen-1: " << pepLen - 1 <<std::endl;
-//          std::cout << "intensArrayTheor.size(): " << intensArrayTheor.size() << std::endl;
           assert(intensArrayTheor.size() == pepLen - 1);
 
           //TODO assume 1 mod per amino acid is specified in arguments
@@ -929,7 +956,7 @@ void TideSearchApplication::search(void* threadarg) {
             mod_map[index] = delta;
           }
 
-          string curPepSeq = curPeptide->Seq();
+/*          string curPepSeq = curPeptide->Seq();
           for(int res = 0; res < pepLen-1 ; res++) {
             //aa defined above - string aa = "GASPVTILNDKQEMHFRCYW";
             //determines position current residue is in string aa
@@ -948,6 +975,14 @@ void TideSearchApplication::search(void* threadarg) {
                            aaMassDouble.begin();
             scoreResidueEvidence += curResidueEvidenceMatrix[tmp][intensArrayTheor[res]-1];
           }
+*/
+
+          double* residueMasses = curPeptide->getAAMasses(); //retrieves the amino acid masses, modifications included
+          for(int res = 0; res < pepLen - 1; res++) {
+            double tmpAAMass = residueMasses[res];
+            scoreResidueEvidence += curResidueEvidenceMatrix[tmpAAMass][intensArrayTheor[res]-1];
+          }
+          delete residueMasses;
 
           if(peptide_centric) {
             carp(CARP_FATAL, "residue-evidence has not been implemented with 'peptide-centric-search T' yet.");
@@ -1013,13 +1048,11 @@ void TideSearchApplication::search(void* threadarg) {
         //Creates a 3D vector representing 3D matrix
         //Below are the 3 axes
         //nPepMassIntUniq: number of mass bins candidate are in
-        //nAA: number of amino acids
-        //replaced nAA with aaMassDouble.size()
-        //This is because nAA = 37 but aaMassDouble.size() = 21
+        //nAARes: number of amino acids
         //maxPrecurMassBin: max number of mass bins
         //initalize all values to 0
         vector<vector<vector<double> > > residueEvidenceMatrix(nPepMassIntUniq, 
-               vector<vector<double> >(aaMassDouble.size(), vector<double>(maxPrecurMassBin,0)));
+               vector<vector<double> >(nAARes, vector<double>(maxPrecurMassBin,0)));
 
 
 //        std::cout << "Spectrum: " << sc->spectrum->SpectrumNumber() << std::endl;
@@ -1058,19 +1091,14 @@ void TideSearchApplication::search(void* threadarg) {
           CTermMassBin = MassConstants::mass2bin(MassConstants::mono_oh);
         }
 
-        int fragTol = Params::GetInt("fragment-tolerance");
-        int granularityScale = Params::GetInt("evidence-granularity");
         for (pe=0 ; pe<nPepMassIntUniq ; pe++) {
           int curPepMassInt = pepMassIntUnique[pe];
 
-          //TODO aaMassDouble.size() replaced nAA
           //TODO aaMassDouble replaced aaMass
           //TODO This is aaMass is int while aaMassDouble is double
-          //TODO Also because nAA does not match expected nAA (eg 37 v 21 )
-          //In jeff code -- he uses 21 amino acids instead of 37
           observed.CreateResidueEvidenceMatrix(*spectrum,charge,
                                                maxPrecurMassBin,precursorMass,
-                                               aaMassDouble.size(),aaMassDouble,
+                                               nAARes,aaMassDouble,
                                                fragTol,granularityScale,
                                                residueEvidenceMatrix[pe]);
 
@@ -1098,15 +1126,11 @@ void TideSearchApplication::search(void* threadarg) {
           //initalized and populated in calcResidueScoreCount function
           vector<double> scoreResidueCount;
 
-          //TODO in this version replaced nAA with aaMassDouble.size()
-          //This is because aaMassDouble.size() = 21 matches Jeff code
-          //but does not match nAA =27
-          calcResidueScoreCount(aaMassDouble.size(),curPepMassInt,
+          calcResidueScoreCount(nAARes,curPepMassInt,
                                 curResidueEvidenceMatrix,aaMassInt,
-                                aaFreqN, aaFreqI, aaFreqC,
+                                dAAFreqN, dAAFreqI, dAAFreqC,
                                 NTermMassBin,CTermMassBin,
-                                //minDeltaMass,maxDeltaMass, original line
-                                *std::min_element(aaMassInt.begin(),aaMassInt.end()), *std::max_element(aaMassInt.begin(),aaMassInt.end()),
+                                minDeltaMass,maxDeltaMass,
                                 maxEvidence,maxScore,
                                 scoreResidueCount,scoreOffset);
 /*
@@ -1186,7 +1210,7 @@ void TideSearchApplication::search(void* threadarg) {
           //Make sure the number of theoretical peaks match pepLen-1
           assert(intensArrayTheor.size() == pepLen - 1);
 
-          //TODO assume 1 mod per amino acid is specified in arguments
+/*          //TODO assume 1 mod per amino acid is specified in arguments
           const ModCoder::Mod* mods;
           int numMods = curPeptide->Mods(&mods);
           map<int,double> mod_map;
@@ -1217,6 +1241,15 @@ void TideSearchApplication::search(void* threadarg) {
                            aaMassDouble.begin();
             scoreResidueEvidence += curResidueEvidenceMatrix[tmp][intensArrayTheor[res]-1];
           }
+*/
+          double* residueMasses = curPeptide->getAAMasses(); //retrieves the amino acid masses, modifications included
+          for(int res = 0; res < pepLen - 1; res++) {
+            double tmpAAMass = residueMasses[res];
+            scoreResidueEvidence += curResidueEvidenceMatrix[tmpAAMass][intensArrayTheor[res]-1];
+          }
+          delete residueMasses;
+
+
           int scoreCountIdx = scoreResidueEvidence + scoreResidueOffsetObs[curPepMassInt];
           double pValue = pValuesResidueObs[curPepMassInt][scoreCountIdx];
 /*
@@ -1311,6 +1344,11 @@ void TideSearchApplication::search(
   double* aaFreqI,
   double* aaFreqC,
   int* aaMass,
+  int nAARes,
+  const vector<double>& dAAFreqN,
+  const vector<double>& dAAFreqI,
+  const vector<double>& dAAFreqC,
+  const vector<double>& dAAMass,
   const pb::ModTable& mod_table,
   const pb::ModTable& nterm_mod_table,
   const pb::ModTable& cterm_mod_table
@@ -1371,7 +1409,8 @@ void TideSearchApplication::search(
       spectrum_max_mz, min_scan, max_scan, min_peaks, search_charge, top_matches,
       highest_mz, target_file, decoy_file, compute_sp,
       i, NUM_THREADS, nAA, aaFreqN, aaFreqI, aaFreqC, aaMass, 
-      &mod_table, &nterm_mod_table, &cterm_mod_table, locks_array, //TODO do I need to delete pointer somewhere????
+      nAARes, &dAAFreqN, &dAAFreqI, &dAAFreqC, &dAAMass,
+      &mod_table, &nterm_mod_table, &cterm_mod_table, locks_array, //TODO do I need to delete pointer somewhere?
       bin_width_, bin_offset_, exact_pval_search_, spectrum_flag_, sc_index, total_candidate_peptides));
   }
 
@@ -1840,9 +1879,9 @@ void TideSearchApplication::calcResidueScoreCount (
   int pepMassInt,
   vector<vector<double> >& residueEvidenceMatrix,
   vector<int>& aaMass, 
-  double* probN, //not being used at present
-  double* probI, //not being used at present
-  double* probC, //not being used at present
+  const vector<double>& probN, //not being used at present
+  const vector<double>& probI, //not being used at present
+  const vector<double>& probC, //not being used at present
   int NTermMass, //this is NTermMassBin
   int CTermMass, //this is CTermMassBin
   int minAaMass,
