@@ -381,9 +381,9 @@ int ActivePeptideQueue::CountAAFrequencyRes(
   }
 
   for(i = 0; i < dAAMass.size(); i++) {
-    dAAFreqN.push_back((double)(nMap[dAAMass[i]] / cntTerm)); 
-    dAAFreqI.push_back((double)(iMap[dAAMass[i]] / cntInside));
-    dAAFreqC.push_back((double)(cMap[dAAMass[i]] / cntTerm));
+    dAAFreqN.push_back((double)nMap[dAAMass[i]] / cntTerm); 
+    dAAFreqI.push_back((double)iMap[dAAMass[i]] / cntInside);
+    dAAFreqC.push_back((double)cMap[dAAMass[i]] / cntTerm);
   }
 
   return dAAMass.size();
