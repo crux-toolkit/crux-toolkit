@@ -980,7 +980,8 @@ void TideSearchApplication::search(void* threadarg) {
           double* residueMasses = curPeptide->getAAMasses(); //retrieves the amino acid masses, modifications included
           for(int res = 0; res < pepLen - 1; res++) {
             double tmpAAMass = residueMasses[res];
-            scoreResidueEvidence += curResidueEvidenceMatrix[tmpAAMass][intensArrayTheor[res]-1];
+            int tmpAA = find(aaMassDouble.begin(),aaMassDouble.end(),tmpAAMass) - aaMassDouble.begin();
+            scoreResidueEvidence += curResidueEvidenceMatrix[tmpAA][intensArrayTheor[res]-1];
           }
           delete residueMasses;
 
@@ -1166,7 +1167,7 @@ void TideSearchApplication::search(void* threadarg) {
           }
 */
         }
-
+ 
         /**************Find Best Target Peptide Match *******************/
         int scoreResidueEvidence;
         deque<Peptide*>::const_iterator iter_ = active_peptide_queue->iter_;
@@ -1245,10 +1246,10 @@ void TideSearchApplication::search(void* threadarg) {
           double* residueMasses = curPeptide->getAAMasses(); //retrieves the amino acid masses, modifications included
           for(int res = 0; res < pepLen - 1; res++) {
             double tmpAAMass = residueMasses[res];
-            scoreResidueEvidence += curResidueEvidenceMatrix[tmpAAMass][intensArrayTheor[res]-1];
+            int tmpAA = find(aaMassDouble.begin(),aaMassDouble.end(),tmpAAMass) - aaMassDouble.begin();
+            scoreResidueEvidence += curResidueEvidenceMatrix[tmpAA][intensArrayTheor[res]-1];
           }
           delete residueMasses;
-
 
           int scoreCountIdx = scoreResidueEvidence + scoreResidueOffsetObs[curPepMassInt];
           double pValue = pValuesResidueObs[curPepMassInt][scoreCountIdx];
@@ -1879,9 +1880,9 @@ void TideSearchApplication::calcResidueScoreCount (
   int pepMassInt,
   vector<vector<double> >& residueEvidenceMatrix,
   vector<int>& aaMass, 
-  const vector<double>& probN, //not being used at present
-  const vector<double>& probI, //not being used at present
-  const vector<double>& probC, //not being used at present
+  const vector<double>& aaFreqN, 
+  const vector<double>& aaFreqI, 
+  const vector<double>& aaFreqC, 
   int NTermMass, //this is NTermMassBin
   int CTermMass, //this is CTermMassBin
   int minAaMass,
@@ -1951,8 +1952,7 @@ void TideSearchApplication::calcResidueScoreCount (
     row = initCountRow + residEvid[ de ][ ma + NTermMass - 1 ];
     col = initCountCol + ma;
     if ( col <= maxAaMass + colLast ) {
-      //TODO && ignore aa probs for now
-      dynProgArray[ row ][ col ] += dynProgArray[ initCountRow ][ initCountCol ];
+      dynProgArray[ row ][ col ] += dynProgArray[ initCountRow ][ initCountCol ] * aaFreqN[ de ];
     }
   }
 
@@ -1970,8 +1970,7 @@ void TideSearchApplication::calcResidueScoreCount (
       sumScore = dynProgArray[ row ][ col ];
       for ( de = 0; de < nAa; de++ ) {
         evidRow = row - residEvid[ de ][ ma ];
-        //TODO && ignore aa probs for now
-        sumScore += dynProgArray[ evidRow ][ aaMassCol[ de ] ];
+        sumScore += dynProgArray[ evidRow ][ aaMassCol[ de ] ] * aaFreqI[ de ];
       }
       dynProgArray[ row ][ col ] = sumScore;
     }
@@ -1990,8 +1989,7 @@ void TideSearchApplication::calcResidueScoreCount (
     evidRow = row - evid;
     sumScore = 0.0;
     for ( de = 0; de < nAa; de++ ) {
-      //TODO && ignore aa probs for now
-      sumScore += dynProgArray[ evidRow ][ aaMassCol[ de ] ];
+      sumScore += dynProgArray[ evidRow ][ aaMassCol[ de ] ] * aaFreqC[ de ];
     }
     dynProgArray[ row ][ col ] = sumScore;
   }
