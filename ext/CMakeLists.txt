@@ -257,49 +257,20 @@ elseif (WIN32 AND NOT CYGWIN)
   )
 endif (UNIX)
 
-if (UNIX) 
 ExternalProject_Add(
-  google-gflags
+  gflags-2.1.2
+  DOWNLOAD_COMMAND
+        ${CMAKE_COMMAND} 
+          -DDOWNLOAD_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/downloads
+          -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src
+          -P  ${CMAKE_CURRENT_SOURCE_DIR}/download_gflags.cmake
   PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
-  URL http://gflags.googlecode.com/files/gflags-2.0.tar.gz
-  URL_MD5 e02268c1e90876c809ec0ffa095da864
-  DOWNLOAD_DIR downloads
-  CONFIGURE_COMMAND
-    ${CMAKE_CURRENT_BINARY_DIR}/build/src/google-gflags/configure
-    --prefix=${CMAKE_CURRENT_BINARY_DIR}
-    --enable-shared=no
-  BUILD_COMMAND make
-  INSTALL_COMMAND make install
-  BUILD_IN_SOURCE 1
+  CMAKE_ARGS -DCMAKE_VERBOSE_MAKEFILE=ON
+    -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}
+    -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}
+    -DCMAKE_BUILD_TYPE=${CMAKE_CFG_INTDIR}
+  PATCH_COMMAND ""
 )
-elseif (WIN32 AND NOT CYGWIN)
-  # Update Microsoft VS project files and build ProtocolBuffers using MSBuild
-  ExternalProject_Add(
-    google-gflags
-    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
-    URL http://gflags.googlecode.com/files/gflags-2.0.tar.gz
-    URL_MD5 e02268c1e90876c809ec0ffa095da864
-    DOWNLOAD_DIR downloads
-    PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory 
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/google-gflags/ 
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/google-gflags/vsprojects/libgflags/
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND msbuild 
-      /p:Configuration=${CMAKE_CFG_INTDIR} 
-      /p:Platform=${MSBUILD_PLATFORM} 
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/google-gflags/vsprojects/libgflags/libgflags.vcxproj
-    INSTALL_COMMAND ""
-    BUILD_IN_SOURCE 1
-  )
-  ExternalProject_Add_Step(
-    google-gflags
-    copy_gflags_library
-    COMMAND ${CMAKE_COMMAND} -E copy 
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/google-gflags/vsprojects/libgflags/${MSBUILD_PLATFORM}/${CMAKE_CFG_INTDIR}/libgflags.lib
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/gflags.lib
-    DEPENDEES install
-  )
-endif (UNIX)
 
 if (UNIX) 
   # Get Comet source from SVN and buld using it's own makefile

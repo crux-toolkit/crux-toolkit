@@ -363,6 +363,7 @@ if (WIN32 AND NOT CYGWIN)
     protobuf
     ${PWIZ_LIBRARIES}
     ws2_32
+    shlwapi
     optimized libboost_system-vc120-mt
     optimized libboost_iostreams-vc120-mt
     optimized libboost_nowide-vc120-mt
