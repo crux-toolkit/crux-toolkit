@@ -36,7 +36,7 @@ add_custom_target(
   COMMAND ${CMAKE_COMMAND} -E remove_directory ext/include/CometSearch
   COMMAND ${CMAKE_COMMAND} -E remove_directory ext/include/MSToolkit
   COMMAND ${CMAKE_COMMAND} -E remove_directory ext/include/boost
-  COMMAND ${CMAKE_COMMAND} -E remove_directory ext/include/gflags
+  COMMAND ${CMAKE_COMMAND} -E remove_directory ext/include/gflags-2.1.2
   COMMAND ${CMAKE_COMMAND} -E remove_directory ext/include/google
   COMMAND ${CMAKE_COMMAND} -E remove_directory ext/include/pwiz
   COMMAND ${CMAKE_COMMAND} -E remove_directory ext/include/xercesc
@@ -93,7 +93,7 @@ add_dependencies(crux-support percolator)
 add_dependencies(hardklor comet)
 add_dependencies(tide-support comet)
 add_dependencies(tide-support ProtocolBuffers)
-add_dependencies(tide-support google-gflags)
+add_dependencies(tide-support gflags-2.1.2)
 add_dependencies(xlink comet)
 add_dependencies(xlink percolator)
 add_dependencies(xlink ProteoWizard)
