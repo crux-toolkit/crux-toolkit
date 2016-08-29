@@ -75,7 +75,7 @@ set(
   base_download_url
   "https://teamcity.labkey.org:/guestAuth/repository/download/${build_type}/.lastSuccessful/"
 )
-string(REGEX REPLACE "^([0-9]+)\\.([0-9]+)\\.([0-9]+).*$" "\\1_\\2_\\3" version_id ${version_info})
+string(REGEX REPLACE "^([0-9]+) ([0-9]+) ([0-9]+).*$" "\\1_\\2_\\3" version_id "${version_info}")
 set(filename pwiz-src-${version_id}.tar.bz2)
 set(
   download_url 
