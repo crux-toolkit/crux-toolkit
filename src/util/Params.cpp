@@ -468,10 +468,8 @@ Params::Params() : finalized_(false) {
     "Available for search-for-xlinks and xlink-score-spectrum.", true);
 
   InitIntParam("precision", 8, 1, 100, //max is arbitrary
-    "Set the precision for scores written to sqt and text files. "
-    "Note that this parameter only takes effect when specified in the "
-    "parameter file.",
-    "Available percolator.", true);
+    "Set the precision for scores written to sqt and text files.",
+    "Available for all commands.", true);
   InitIntParam("mass-precision", 4, 1, 100, // max is arbitrary
     "Set the precision for masses and m/z written to sqt and .txt files. "
     "Note that this parameter only takes effect when specified in the "
@@ -1118,9 +1116,10 @@ Params::Params() : finalized_(false) {
     "null distribution.",
     "Used by assign-confidence, percolator and q-ranker", false);
   InitStringParam("estimation-method", "tdc", "mix-max|tdc|peptide-level",
-    "Specify the method used to estimate q-values: the mix-max procedure or target-decoy "
-    "competition. peptide-level is applied for spectrum-centric search. Eliminates any PSMS for which there "
-    "exists a better scoring PSM involving the same peptide. ",
+    "Specify the method used to estimate q-values.  The mix-max procedure or target-decoy "
+    "competition apply to PSMs. The peptide-level option eliminates any PSM for which there "
+    "exists a better scoring PSM involving the same peptide, and then uses decoys to "
+    "assign confidence estimates.",
     "Used by assign-confidence.", true);      
   InitBoolParam("sidak", false, 
     "Adjust the score using the Sidak adjustment and reports them in a new column in the "
@@ -1131,7 +1130,7 @@ Params::Params() : finalized_(false) {
   InitStringParam("score", "",
     "Specify the column (for tab-delimited input) or tag (for XML input) "
     "used as input to the q-value estimation procedure. If this parameter is unspecified, "
-    "then assign-confidence tries to seach for \"xcorr score\", \"evalue\" (comet), "
+    "then the program searches for \"xcorr score\", \"evalue\" (comet), "
     "\"exact p-value\" score fields in this order in the input file. ",
     "Used by assign-confidence.", true);
   InitBoolParam("combine-charge-states", false,
@@ -1912,6 +1911,7 @@ void Params::Categorize() {
   items.insert("column-type");
   items.insert("ascending");
   items.insert("delimiter");
+  items.insert("file-column");
   AddCategory("Input and output", items);
 }
 

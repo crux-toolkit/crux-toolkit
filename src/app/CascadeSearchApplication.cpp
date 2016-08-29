@@ -73,8 +73,12 @@ int CascadeSearchApplication::main(int argc, char** argv) {
     string outputdir = Params::GetString("output-dir");
     RemoveTempFiles(outputdir, TideSearchProgram.getName());
     RemoveTempFiles(outputdir, AssignConfidenceProgram.getName());
-  
-    if (AssignConfidenceProgram.getAcceptedPSMs() < CASCADE_TERMINATION_CONDITION) {
+
+    int numAccepted = AssignConfidenceProgram.getAcceptedPSMs();
+    if (numAccepted < CASCADE_TERMINATION_CONDITION) {
+      carp(CARP_INFO,
+           "Terminating search early because only %d PSMs were accepted.",
+           numAccepted);
       break;
     }
 
