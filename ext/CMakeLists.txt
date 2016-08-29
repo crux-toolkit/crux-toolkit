@@ -62,7 +62,7 @@ if (WIN32 AND NOT CYGWIN)
   else (USE_LATEST_PWIZ)
     ExternalProject_Add(
       ProteoWizard
-      URL http://cruxtoolkit.sourceforge.net/download/pwiz-src-3_0_7010.tar.bz2
+      URL http://cruxtoolkit.sourceforge.net/download/pwiz-src-3_0_9870.tar.bz2
       PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
       CONFIGURE_COMMAND ""
       BUILD_COMMAND 
@@ -115,7 +115,7 @@ else (WIN32 AND NOT CYGWIN)
   else (USE_LATEST_PWIZ)
     ExternalProject_Add(
       ProteoWizard
-      URL http://cruxtoolkit.sourceforge.net/download/pwiz-src-3_0_7010.tar.bz2
+      URL http://cruxtoolkit.sourceforge.net/download/pwiz-src-3_0_9870.tar.bz2
       PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
       CONFIGURE_COMMAND ""
       BUILD_COMMAND 
@@ -201,13 +201,15 @@ endif (WIN32 AND NOT CYGWIN)
 
 if (UNIX) 
   ExternalProject_Add(
-    ProtocolBuffers
+    protobuf-2.5.0
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
-    URL http://protobuf.googlecode.com/files/protobuf-2.5.0.tar.bz2
-    URL_MD5 a72001a9067a4c2c4e0e836d0f92ece4
-    DOWNLOAD_DIR downloads
+    DOWNLOAD_COMMAND
+          ${CMAKE_COMMAND} 
+            -DDOWNLOAD_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/downloads
+            -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src
+            -P  ${CMAKE_CURRENT_SOURCE_DIR}/download_pbuffers.cmake
     CONFIGURE_COMMAND
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProtocolBuffers/configure
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/protobuf-2.5.0/configure
       --prefix=${CMAKE_CURRENT_BINARY_DIR}
       --enable-shared=no
     BUILD_COMMAND make
@@ -217,41 +219,43 @@ if (UNIX)
 elseif (WIN32 AND NOT CYGWIN)
   # Update Microsoft VS project files and build ProtocolBuffers using MSBuild
   ExternalProject_Add(
-    ProtocolBuffers
+    protobuf-2.5.0
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
-    URL http://protobuf.googlecode.com/files/protobuf-2.5.0.tar.bz2
-    URL_MD5 a72001a9067a4c2c4e0e836d0f92ece4
-    DOWNLOAD_DIR downloads
+    DOWNLOAD_COMMAND
+          ${CMAKE_COMMAND} 
+            -DDOWNLOAD_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/downloads
+            -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src
+            -P  ${CMAKE_CURRENT_SOURCE_DIR}/download_pbuffers.cmake
     PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory 
       ${CMAKE_CURRENT_SOURCE_DIR}/patches/protobuf/vsprojects/ 
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProtocolBuffers/vsprojects/ &&
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/protobuf-2.5.0/vsprojects/ &&
       ${CMAKE_COMMAND} -E copy_directory 
       ${CMAKE_CURRENT_SOURCE_DIR}/patches/protobuf/src/ 
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProtocolBuffers/src/
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/protobuf-2.5.0/src/
     CONFIGURE_COMMAND ""
     BUILD_COMMAND msbuild 
       /p:Configuration=${CMAKE_CFG_INTDIR}
       /p:Platform=${MSBUILD_PLATFORM} 
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProtocolBuffers/vsprojects/libprotobuf.vcxproj &&
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/protobuf-2.5.0/vsprojects/libprotobuf.vcxproj &&
       msbuild
       /p:Configuration=${CMAKE_CFG_INTDIR}
       /p:Platform=${MSBUILD_PLATFORM} 
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProtocolBuffers/vsprojects/libprotoc.vcxproj &&
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/protobuf-2.5.0/vsprojects/libprotoc.vcxproj &&
       msbuild
       /p:Configuration=${CMAKE_CFG_INTDIR}
       /p:Platform=${MSBUILD_PLATFORM} 
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProtocolBuffers/vsprojects/protoc.vcxproj
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/protobuf-2.5.0/vsprojects/protoc.vcxproj
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE 1
   )
   ExternalProject_Add_Step(
-    ProtocolBuffers
+    protobuf-2.5.0
     copy_binaries
     COMMAND ${CMAKE_COMMAND} -E copy 
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProtocolBuffers/vsprojects/${MSBUILD_PLATFORM}/${CMAKE_CFG_INTDIR}/protoc.exe
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/protobuf-2.5.0/vsprojects/${MSBUILD_PLATFORM}/${CMAKE_CFG_INTDIR}/protoc.exe
       ${CMAKE_CURRENT_BINARY_DIR}/bin/protoc.exe
     COMMAND ${CMAKE_COMMAND} -E copy 
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProtocolBuffers/vsprojects/${MSBUILD_PLATFORM}/${CMAKE_CFG_INTDIR}/libprotobuf.lib
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/protobuf-2.5.0/vsprojects/${MSBUILD_PLATFORM}/${CMAKE_CFG_INTDIR}/libprotobuf.lib
       ${CMAKE_CURRENT_BINARY_DIR}/lib/protobuf.lib
     DEPENDEES install
   )
