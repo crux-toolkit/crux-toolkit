@@ -41,7 +41,7 @@ PercolatorApplication::~PercolatorApplication() {
  * main method for PercolatorApplication
  */
 int PercolatorApplication::main(int argc, char** argv) {
-  string input_pin = Params::GetString("pin");
+  string input_pin = Params::GetString("peptide-spectrum matches");
   carp(CARP_INFO, "Reading file %s", input_pin.c_str());
 
   // Check if we need to run make-pin first
@@ -477,7 +477,7 @@ string PercolatorApplication::getDescription() const {
  */
 vector<string> PercolatorApplication::getArgs() const {
   string arr[] = {
-    "pin"
+    "peptide-spectrum matches"
   };
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }

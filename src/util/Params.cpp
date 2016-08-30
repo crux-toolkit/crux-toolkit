@@ -92,7 +92,7 @@ Params::Params() : finalized_(false) {
     "may be in MS1 (.ms1), binary MS1 (.bms1), compressed MS1 (.cms1), or mzXML "
     "(.mzXML) format.");
   /*Percolator arguments*/
-  InitArgParam("pin",
+  InitArgParam("peptide-spectrum matches",
     "A collection of target and decoy peptide-spectrum matches (PSMs). Input may "
     "be in one of five formats: PIN, SQT, pepXML, [[html:<a href=\"../file-formats/txt-format.html\">]]"
     "Crux tab-delimited text[[html:</a>]], or a list of files (when list-of-files=T). "
