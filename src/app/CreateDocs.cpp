@@ -579,18 +579,18 @@ const string CreateDocs::TOOL_OUTPUT_TEMPLATE =
   "  <li><code><!-- #NAME# --></code> &ndash; <!-- #DESCRIPTION# --></li>\n";
 
 const string CreateDocs::TOOL_OPTION_CATEGORY_TEMPLATE =
-  "<li>\n"
+  "<li class=\"nobullet\">\n"
   "<h3><!-- #NAME# --></h3>\n"
   "<ul>\n"
   "<!-- #OPTIONS# --></ul>\n"
   "</li>\n";
 
 const string CreateDocs::TOOL_NO_OPTIONS_TEMPLATE =
-  "<li>\n"
+  "<li class=\"nobullet\">\n"
   "<p>This command does not support any optional parameters.</p>\n"
   "</li>\n";
 
 const string CreateDocs::TOOL_OPTION_TEMPLATE =
-  "  <li><code>--<!-- #NAME# --> <!-- #VALUES# --></code> &ndash; "
+  "  <li class=\"nobullet\"><code>--<!-- #NAME# --> <!-- #VALUES# --></code> &ndash; "
   "<!-- #DESCRIPTION# --> Default = <code><!-- #DEFAULT# --></code>.</li>\n";
 
