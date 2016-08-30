@@ -642,7 +642,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   int precurCharge = charge;
   double experimentalMassCutoff = precursorMass + 50.0;
 //  double proton = MassConstants::proton;
-  double residueToleranceMass = 100.0 * (double)fragTol * 0.000001; //TODO this needs to be made option
+  double residueToleranceMass = 100.0 * (double)fragTol * 0.000001;
   const double precursorMZExclude = 15.0; //also used in PreprocessSpectrum
 
   //Determining max sqrt(ion intensity)
