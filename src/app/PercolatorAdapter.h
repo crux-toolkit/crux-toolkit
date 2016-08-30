@@ -49,12 +49,12 @@ class PercolatorAdapter : public Caller {
   /**
    * Adds PSM scores from Percolator objects into a ProteinMatchCollection
    */
-  void addPsmScores();
+  void addPsmScores(Scores allScores);
 
   /**
    * Adds peptide scores from Percolator objects into a ProteinMatchCollection
    */
-  void addPeptideScores();
+  void addPeptideScores(Scores allScores);
 
   /**
    * Adds protein scores from Percolator objects into a ProteinMatchCollection
