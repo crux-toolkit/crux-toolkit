@@ -32,7 +32,6 @@ void PeptideConstraint::init() {
   num_mis_cleavage_ = 0;
   mass_type_ = (MASS_TYPE_T)0;
   num_pointers_ = 1;
-
 }
 
 PeptideConstraint::PeptideConstraint() {
@@ -44,7 +43,6 @@ PeptideConstraint::PeptideConstraint() {
  * \returns An allocated PEPTIDE_CONSTRAINT_T object.
  */
 PeptideConstraint::PeptideConstraint(
-
   ENZYME_T enzyme, 
   DIGEST_T digest,
   FLOAT_T min_mass, ///< the minimum mass -in
@@ -70,6 +68,27 @@ PeptideConstraint::PeptideConstraint(
   setMaxLength(max_length);
   setNumMisCleavage(num_mis_cleavage);
   setMassType(mass_type);
+}
+
+PeptideConstraint::PeptideConstraint(
+  ENZYME_T enzyme, 
+  DIGEST_T digest,
+  int min_length, ///< the minimum length of peptide -in
+  int max_length,  ///< the maximum lenth of peptide(max limit = 255) -in
+  int num_mis_cleavage ///< The maximum mis cleavage of the peptide -in
+) {
+  // max length must be less or equal than 255 becuase of the unsigned char limit of 255
+  if (max_length > 255) {
+    carp(CARP_FATAL, "ERROR: cannot set max length higer than 255");
+  }
+  
+  init();
+
+  setEnzyme(enzyme);
+  setDigest(digest);
+  setMinLength(min_length);
+  setMaxLength(max_length);
+  setNumMisCleavage(num_mis_cleavage);
 }
 
 /**

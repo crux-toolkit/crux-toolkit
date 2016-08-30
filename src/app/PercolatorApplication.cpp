@@ -128,6 +128,11 @@ int PercolatorApplication::main(
   string output_decoy_peptides = make_file_path(getFileStem() + ".decoy.peptides.txt");
   string output_decoy_psms = make_file_path(getFileStem() + ".decoy.psms.txt");
   string output_decoy_proteins = make_file_path(getFileStem() + ".decoy.proteins.txt");
+
+  if (Params::GetBool("only-psms")) {
+    perc_args_vec.push_back("-U");
+  }
+
   // Target peptides file is written to prevent writing to stdout
   perc_args_vec.push_back("-r");
   perc_args_vec.push_back(output_target_peptides);
@@ -258,6 +263,21 @@ int PercolatorApplication::main(
   // FIXME include schema as part of distribution and add option to turn on validation
   perc_args_vec.push_back("-s");
 
+  if (!Params::GetString("picked-protein").empty()) {
+    perc_args_vec.push_back("-f");
+    perc_args_vec.push_back(Params::GetString("picked-protein"));
+  }
+  if (!Params::GetString("protein-enzyme").empty()) {
+    perc_args_vec.push_back("-z");
+    perc_args_vec.push_back(Params::GetString("protein-enzyme"));
+  }
+  if (Params::GetBool("protein-report-fragments")) {
+    perc_args_vec.push_back("-c");
+  }
+  if (Params::GetBool("protein-report-duplicates")) {
+    perc_args_vec.push_back("-g");
+  }
+
   bool set_protein = Params::GetBool("protein");
   if (set_protein) {
     perc_args_vec.push_back("-A");
@@ -275,9 +295,6 @@ int PercolatorApplication::main(
       perc_args_vec.push_back(Params::GetString("fido-gamma"));
     }
 
-    if (Params::GetBool("fido-protein-level-pi0")) {
-      perc_args_vec.push_back("--fido-protein-level-pi0");
-    }
     if (Params::GetBool("fido-empirical-protein-q")) {
        perc_args_vec.push_back("--fido-empirical-protein-q");
     }
@@ -292,16 +309,12 @@ int PercolatorApplication::main(
     perc_args_vec.push_back("--fido-protein-truncation-threshold");
     perc_args_vec.push_back(Params::GetString("fido-protein-truncation-threshold"));
 
-    if (Params::GetBool("fido-split-large-components")) {
-      perc_args_vec.push_back("--fido-split-large-components");
+    if (Params::GetBool("fido-no-split-large-components")) {
+      perc_args_vec.push_back("--fido-no-split-large-components");
     }
 
     if (Params::GetBool("post-processing-qvality")) {
       perc_args_vec.push_back("--post-processing-qvality");
-    }
-
-    if (Params::GetBool("post-processing-tdc")) {
-      perc_args_vec.push_back("--post-processing-tdc");
     }
 
     perc_args_vec.push_back("--fido-gridsearch-mse-threshold");
@@ -338,15 +351,15 @@ int PercolatorApplication::main(
 
   /* Call percolatorMain */
   PercolatorAdapter pCaller;
-  int retVal = -1;
+  int retVal;
   if (pCaller.parseOptions(perc_args_vec.size(), (char**)&perc_argv.front())) {
-    retVal = pCaller.run();
+    // Percolator return value 1 means success
+    if ((retVal = pCaller.run()) != 1) {
+      carp(CARP_FATAL, "Error running percolator:%d", retVal);
+    }
+    retVal = 0;
   } 
   
-  if (retVal != 0) {
-    carp(CARP_FATAL, "Error running percolator:%d", retVal);
-  }
-
   // get percolator score information into crux objects
   ProteinMatchCollection* target_pmc = pCaller.getProteinMatchCollection();
   ProteinMatchCollection* decoy_pmc = pCaller.getDecoyProteinMatchCollection();
@@ -464,12 +477,14 @@ string PercolatorApplication::getDescription() const {
     "respects:</p><ul><li>In addition to the native Percolator XML file "
     "format, Crux Percolator supports additional input file formats (SQT, "
     "PepXML, tab-delimited text) and output file formats (PepXML, mzIdentML, "
-    "tab-delimited text).</li><li>To maintain consistency with the rest of the "
-    "Crux commands, Crux Percolator uses different parameter syntax than the "
-    "stand-alone version of Percolator.</li><li>Like the rest of the Crux "
-    "commands, Crux Percolator writes its files to an output directory, logs "
-    "all standard error messages to a log file, and is capable of reading "
-    "parameters from a parameter file.</li></ul>]]";
+    "tab-delimited text). The original output formats can be produced by using "
+    "the <code>original-output</code> option.</li><li>To maintain consistency "
+    "with the rest of the Crux commands, Crux Percolator uses different "
+    "parameter syntax than the stand-alone version of Percolator.</li><li>Like "
+    "the rest of the Crux commands, Crux Percolator writes its files to an "
+    "output directory, logs all standard error messages to a log file, and is "
+    "capable of reading parameters from a parameter file.</li><li>Reading from "
+    "XML and stdin are not supported at this time.</li></ul>]]";
 }
 
 /**
@@ -490,6 +505,7 @@ vector<string> PercolatorApplication::getOptions() const {
     "fileroot",
     "output-dir",
     "overwrite",
+    "original-output",
     "txt-output",
     "pout-output",
     "mzid-output",
@@ -498,6 +514,10 @@ vector<string> PercolatorApplication::getOptions() const {
     "list-of-files",
     "parameter-file",
     "feature-file-in",
+    "picked-protein",
+    "protein-enzyme",
+    "protein-report-fragments",
+    "protein-report-duplicates",
     "protein",
     "decoy-xml-output",
     "decoy-prefix",
@@ -520,14 +540,12 @@ vector<string> PercolatorApplication::getOptions() const {
     "klammer",
     "only-psms",
     //"doc",
-    "fido-protein-level-pi0",
     "fido-empirical-protein-q",
     "fido-gridsearch-depth",
-    "post-processing-tdc",
     "fido-gridsearch-mse-threshold",
     "fido-fast-gridsearch",
     "fido-protein-truncation-threshold",
-    "fido-split-large-components",
+    "fido-no-split-large-components",
     "post-processing-qvality",
     "verbosity",
     "top-match"

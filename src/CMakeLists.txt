@@ -14,6 +14,7 @@ include_directories(app/hardklor)
 include_directories(app/qranker-barista)
 include_directories(app/xlink)
 include_directories(io)
+include_directories(model)
 include_directories(${CMAKE_SOURCE_DIR}/ext)
 include_directories(${CMAKE_BINARY_DIR})
 include_directories(${CMAKE_BINARY_DIR}/ext)
@@ -24,6 +25,7 @@ include_directories(${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/libraries/boo
 include_directories(${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/libraries/boost_aux)
 include_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator/src/)
 include_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator/src/fido)
+include_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator/src/fisher)
 include_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator-build/src/)
 include_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator-build/src/fido)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/app/tide/protoobj)
@@ -198,6 +200,12 @@ add_library(
   ${crux_lib_files}
 )
 add_dependencies(crux-support tide-support)
+
+find_package(OpenMP)
+if (OPENMP_FOUND)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+endif()
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -DNDEBUG")
