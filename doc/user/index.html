@@ -36,6 +36,39 @@
 			});
 	});
 </script>
+<!--(index.html only) Start JS function for dynamically resizing the image map that links elements on schematic.png-->
+<script type="text/javascript">
+window.onload = function () {
+    var ImageMap = function (map, img) {
+		var n,
+			areas = map.getElementsByTagName('area'),
+			len = areas.length,
+			coords = [],
+			previousWidth = 1125; // width of original schematic.png
+		for (n = 0; n < len; n++) {
+			coords[n] = areas[n].coords.split(',');
+		}
+		this.resize = function () {
+			var n, m, clen,
+				x = img.offsetWidth / previousWidth;
+			for (n = 0; n < len; n++) {
+				clen = coords[n].length;
+				for (m = 0; m < clen; m++) {
+					coords[n][m] *= x;
+				}
+				areas[n].coords = coords[n].join(',');
+			}
+			previousWidth = img.width;
+			return true;
+		};
+		window.onresize = this.resize;
+	}
+
+	imageMap = new ImageMap(document.getElementById('schematic_map'), document.getElementById('schematic_image'));
+	imageMap.resize();
+}
+</script>
+<!--(index.html only) End JS -->
 </head>
 <body>
 	<div class="page-wrap">
@@ -53,28 +86,38 @@
 		<div id="content">
 		<!-- START CONTENT -->
 		<div id="schematic">
-			<img src="images/schematic.png" usemap="#commands-files">
+			<img id="schematic_image" src="images/schematic.png" usemap="#commands-files" border="0" width="100%" alt="" />
+			<map name="commands-files" id="schematic_map">
+			  <area shape="rect" coords="253,135,349,169" alt="tide-index" href="commands/tide-index.html">
+			  <area shape="rect" coords="260,247,342,278" alt="bullseye" href="commands/bullseye.html">
+			  <area shape="rect" coords="510,100,612,132" alt="tide-search" href="commands/tide-search.html">
+			  <area shape="rect" coords="528,191,595,222" alt="comet" href="commands/comet.html">
+			  <area shape="rect" coords="512,281,613,335" alt="search-for-xlinks" href="commands/search-for-xlinks.html">
+			  <area shape="rect" coords="776,100,873,132" alt="percolator" href="commands/percolator.html">
+			  <area shape="rect" coords="791,160,861,192" alt="barista" href="commands/barista.html">
+			  <area shape="rect" coords="783,222,866,252" alt="q-ranker" href="commands/q-ranker.html">
+			  <area shape="rect" coords="784,281,867,334" alt="spectral-counts" href="commands/spectral-counts.html">
+			</map>
 			<img src="images/crux-logo.png" style="width:200px; float:left; padding:10px;">
 			<p>The Crux mass spectrometry analysis toolkit is an open source project that aims to provide users with a cross-platform suite of analysis tools for interpreting protein mass spectrometry data.  The toolkit includes several search engines for both standard and cross-linked database search, as well as a variety of pre- and post-processing engines for assigning high-resolution precursor masses to spectra, assigning statistical confidence estimates to spectra, peptides and proteins, and performing label free quantification. Crux comes pre-complied for the Linux, Windows and MacOS operating systems. It is implemented as a single program that offers a wide variety of commands. If you use Crux in your research, please cite:
 			<br />
-			<br />
-			Christopher Y. Park, Aaron A. Klammer, Lukas K&auml;ll, Michael
+			<span class="indentcitation">Christopher Y. Park, Aaron A. Klammer, Lukas K&auml;ll, Michael
 			J. MacCoss and William Stafford
 			Noble.  <a href="http://noble.gs.washington.edu/papers/park2008rapid.html">"Rapid
 			and accurate peptide identification from tandem mass spectra."</a>
-			<i>Journal of Proteome Research.</i> 7(7):3022-3027, 2008.</li>
-			<br />
-			<br />
+			<i>Journal of Proteome Research.</i> 7(7):3022-3027, 2008.</li></span>
+			<br /><br />
+		
 			For a more up-to-date description of Crux, please read:<br />
 
-			Sean McIlwain, Kaipo Tamura, Attila Kertesz-Farkas,
+			<span class="indentcitation">Sean McIlwain, Kaipo Tamura, Attila Kertesz-Farkas,
 			Charles E.  Grant, Benjamin Diament, Barbara Frewen, J. Jeffry
 			Howbert, Michael R. Hoopmann, Lukas K&auml;ll, Jimmy K. Eng, Michael
 			J. MacCoss and William Stafford
 			Noble.  <a href="http://pubs.acs.org/doi/abs/10.1021/pr500741y">"Crux:
 			rapid open source protein tandem mass spectrometry
 			analysis."</a> <i>Journal of Proteome Research.</i>
-			13(10):4488-4491, 2014.
+			13(10):4488-4491, 2014.</span>
 			</p>
 		</div>
 
