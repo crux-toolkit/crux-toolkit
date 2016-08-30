@@ -140,13 +140,12 @@ def runSearch(outputDirectory, searchName, searchParam, database,
                 searchParam, ms2, database),
              psmFile)
 
-# FIXME: Broken till Andy gets the score columns sorted out.
-#  confidenceFile = "%s/assign-confidence.target.txt" % outputDirectory
-#  runCommand("%s assign-confidence --output-dir %s %s %s" % 
-#             (CRUX, outputDirectory, confidenceParam, psmFile), confidenceFile)
+  confidenceFile = "%s/assign-confidence.target.txt" % outputDirectory
+  runCommand("%s assign-confidence --output-dir %s %s %s" % 
+             (CRUX, outputDirectory, confidenceParam, psmFile), confidenceFile)
 
-#  qFile = "%s/%s.q.txt" % (outputDirectory, searchName)
-#  extractData(confidenceFile, "tdc q-value", qFile)
+  qFile = "%s/%s.q.txt" % (outputDirectory, searchName)
+  extractData(confidenceFile, "tdc q-value", qFile)
 
   percolatorFile = "%s/percolator.target.psms.txt" % outputDirectory
   runCommand("%s percolator --output-dir %s %s"
@@ -250,7 +249,7 @@ runSearch("tide-xcorr", "tide-search", "", database,
           "xcorr score", "")
 runSearch("tide-p-value", "tide-search", "--exact-p-value T",
           database, concatenatedDatabase, "tide-p-value/tide-search.txt",
-          "exact p-value", "--score \"exact p-value\"")
+          "refactored xcorr", "--score \"exact p-value\"")
 runSearch("tide-res-ev", "tide-search",
           "--exact-p-value T --score-function residue-evidence",
           database, concatenatedDatabase, "tide-res-ev/tide-search.txt",
@@ -274,19 +273,17 @@ makePerformancePlot("tide.xcorr",
                      ("tide-xcorr/tide-search.percolator.q.txt", "Tide XCorr Percolator"),
                      ("tide-xcorr/tide-search.q-ranker.q.txt", "Tide XCorr q-ranker"),
                      ("tide-xcorr/tide-search.barista.q.txt", "Tide XCorr barista")])
-# FIXME: Broken till Andy gets the score columns sorted out.
-#makePerformancePlot("tide.res-ev",
-#                    [("tide-res-ev/tide-search.q.txt", "Tide res-ev"),
-#                     ("tide-res-ev/tide-search.percolator.q.txt", "Tide res-ev Percolator"),
-#                     ("tide-res-ev/tide-search.q-ranker.q.txt", "Tide res-ev q-ranker"),
-#                    ("tide-res-ev/tide-search.barista.q.txt", "Tide res-ev barista")])
+makePerformancePlot("tide.res-ev",
+                    [("tide-res-ev/tide-search.q.txt", "Tide res-ev"),
+                     ("tide-res-ev/tide-search.percolator.q.txt", "Tide res-ev Percolator"),
+                     ("tide-res-ev/tide-search.q-ranker.q.txt", "Tide res-ev q-ranker"),
+                    ("tide-res-ev/tide-search.barista.q.txt", "Tide res-ev barista")])
 
 # Make the performance plots, segregated by post-processor.
-# FIXME: Broken till Andy gets the score columns sorted out.
-#makePerformancePlot("assign-confidence",
-#                    [("comet/comet.q.txt", "Comet E-value"),
-#                     ("tide-p-value/tide-search.q.txt", "Tide p-value"),
-#                     ("tide-xcorr/tide-search.q.txt", "Tide XCorr")])
+makePerformancePlot("assign-confidence",
+                    [("comet/comet.q.txt", "Comet E-value"),
+                     ("tide-p-value/tide-search.q.txt", "Tide p-value"),
+                     ("tide-xcorr/tide-search.q.txt", "Tide XCorr")])
 makePerformancePlot("percolator",
                     [("comet/comet.percolator.q.txt", "Comet Percolator"),
                      ("tide-p-value/tide-search.percolator.q.txt", "Tide p-value Percolator"),
