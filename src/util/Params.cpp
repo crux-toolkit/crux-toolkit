@@ -1156,11 +1156,11 @@ Params::Params() : finalized_(false) {
     "Used by assign-confidence.", true);
   InitBoolParam("combine-charge-states", false,
     "Specify this parameter to T in order to combine charge states with peptide sequences"
-    "in peptide-centric search. Works only if peptide-level=T.",
+    "in peptide-centric search. Works only if estimation-method = peptide-level.",
     "Used by assign-confidence.", true);
   InitBoolParam("combine-modified-peptides", false,
     "Specify this parameter to T in order to treat peptides carrying different or "
-    "no modifications as being the same. Works only if peptide-level=T.",
+    "no modifications as being the same. Works only if estimation = peptide-level.",
     "Used by assign-confidence.", true);
   InitStringParam("percolator-intraset-features", "F",
     "Set a feature for percolator that in later versions is not an option.",
