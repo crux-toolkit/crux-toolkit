@@ -57,7 +57,7 @@ void PercolatorAdapter::deleteCollections() {
 /**
  * Adds PSM scores from Percolator objects into a ProteinMatchCollection
  */
-void PercolatorAdapter::addPsmScores() {
+void PercolatorAdapter::addPsmScores(Scores allScores) {
   if (collection_ == NULL || decoy_collection_ == NULL) {
     return;
   }
@@ -88,8 +88,8 @@ void PercolatorAdapter::addPsmScores() {
   }
 
   // Iterate over each ScoreHolder in Scores object
-  for (vector<ScoreHolder>::iterator score_itr = allScores_.begin();
-       score_itr != allScores_.end();
+  for (vector<ScoreHolder>::iterator score_itr = allScores.begin();
+       score_itr != allScores.end();
        score_itr++) {
     bool is_decoy = score_itr->isDecoy();
 
@@ -97,7 +97,7 @@ void PercolatorAdapter::addPsmScores() {
 
     int psm_file_idx = -1;
     int psm_charge;
-    parsePSMId(psm->id, psm_file_idx, psm_charge);
+    parsePSMId(psm->id_, psm_file_idx, psm_charge);
 
     // Try to look up charge state in map
     int charge_state = -1;
@@ -172,7 +172,7 @@ void PercolatorAdapter::addPsmScores() {
 /**
  * Adds peptide scores from Percolator objects into a ProteinMatchCollection
  */
-void PercolatorAdapter::addPeptideScores() {
+void PercolatorAdapter::addPeptideScores(Scores allScores) {
   if (collection_ == NULL || decoy_collection_ == NULL) {
     return;
   }
@@ -180,8 +180,8 @@ void PercolatorAdapter::addPeptideScores() {
   carp(CARP_DEBUG, "Setting peptide scores");
 
   // Iterate over each ScoreHolder in Scores object
-  for (vector<ScoreHolder>::iterator score_itr = allScores_.begin();
-       score_itr != allScores_.end();
+  for (vector<ScoreHolder>::iterator score_itr = allScores.begin();
+       score_itr != allScores.end();
        score_itr++) {
 
     PSMDescription* psm = score_itr->pPSM;
@@ -353,7 +353,7 @@ Crux::Peptide* PercolatorAdapter::extractPeptide(
 
   // add proteins
   Crux::Peptide* peptide = NULL;
-  for (set<string>::const_iterator i = psm->proteinIds.begin();
+  for (vector<string>::const_iterator i = psm->proteinIds.begin();
        i != psm->proteinIds.end();
        ++i) {
     PostProcessProtein* protein = new PostProcessProtein();
@@ -420,69 +420,154 @@ MODIFIED_AA_T* PercolatorAdapter::getModifiedAASequence(
  * 5. (optional) calculate protein probabilities
  */
 int PercolatorAdapter::run() {
-
-  time(&startTime_);
-  startClock_ = clock();
+  time_t startTime;
+  time(&startTime);
+  clock_t startClock = clock();
   if (VERB > 0) {
-    cerr << extendedGreeter();
+    cerr << extendedGreeter(startTime);
+  }
+  
+  int success = 0;
+  std::ifstream fileStream;
+  if (!readStdIn_) {
+    if (!tabInput_) fileStream.exceptions(ifstream::badbit | ifstream::failbit);
+    fileStream.open(inputFN_.c_str(), ios::in);
+    if (VERB > 1) {
+      std::cerr << "Reading input from datafile " << inputFN_ << std::endl;
+    }
+  } else if (maxPSMs_ > 0u) {
+    maxPSMs_ = 0u;
+    std::cerr << "Warning: cannot use subset-max-train (-N flag) when reading "
+              << "from stdin, training on all data instead" << std::endl;
+  }
+  
+  std::istream &dataStream = readStdIn_ ? std::cin : fileStream;
+  
+  XMLInterface xmlInterface(xmlOutputFN_, xmlSchemaValidation_, 
+                            xmlPrintDecoys_, xmlPrintExpMass_);
+  SetHandler setHandler(maxPSMs_);
+  if (!tabInput_) {
+    success = xmlInterface.readPin(dataStream, inputFN_, setHandler, pCheck_, protEstimator_);
+  } else {
+    success = setHandler.readTab(dataStream, pCheck_);
   }
   
   // Reading input files (pin or temporary file)
-  if (!readFiles()) {
+  if (!success) {
     std::cerr << "ERROR: Failed to read in file, check if the correct " <<
                  "file-format was used.";
-    //return 0; don't know why percolator returns 0 here, but we'll return 1
-    return 1;
+    return 0;
   }
-  // Copy feature data to Scores object
-  fillFeatureSets();
   
   if (VERB > 2) {
     std::cerr << "FeatureNames::getNumFeatures(): "<< FeatureNames::getNumFeatures() << endl;
   }
-  int firstNumberOfPositives = crossValidation_.preIterationSetup(allScores_, pCheck_, pNorm_);
+  
+  setHandler.normalizeFeatures(pNorm_);
+  
+  // Copy feature data pointers to Scores object
+  Scores allScores(usePi0_);
+  allScores.fillFeatures(setHandler);
+  
+  CrossValidation crossValidation(quickValidation_, reportEachIteration_, 
+                                  testFdr_, selectionFdr_, selectedCpos_, 
+                                  selectedCneg_, numIterations_, usePi0_);
+  int firstNumberOfPositives = crossValidation.preIterationSetup(allScores, pCheck_, pNorm_, setHandler.getFeaturePool());
   if (VERB > 0) {
     cerr << "Estimating " << firstNumberOfPositives << " over q="
         << testFdr_ << " in initial direction" << endl;
   }
   
+  if (DataSet::getCalcDoc()) {
+    setHandler.normalizeDOCFeatures(pNorm_);
+  }
+  
   time_t procStart;
   clock_t procStartClock = clock();
   time(&procStart);
-  double diff = difftime(procStart, startTime_);
+  double diff = difftime(procStart, startTime);
   if (VERB > 1) cerr << "Reading in data and feature calculation took "
-      << ((double)(procStartClock - startClock_)) / (double)CLOCKS_PER_SEC
+      << ((double)(procStartClock - startClock)) / (double)CLOCKS_PER_SEC
       << " cpu seconds or " << diff << " seconds wall time" << endl;
   
-  // Do the SVM training
-  crossValidation_.train(pNorm_);
-  crossValidation_.postIterationProcessing(allScores_, pCheck_);
-  // calculate psms level probabilities
+  if (tabOutputFN_.length() > 0) {
+    setHandler.writeTab(tabOutputFN_, pCheck_);
+  }
   
-  //PSM probabilities TDA or TDC
-  calculatePSMProb(false, procStart, procStartClock, diff);
-  addPsmScores();
-  if (xmlInterface_.getXmlOutputFN().size() > 0) {
-    xmlInterface_.writeXML_PSMs(allScores_);
+  // Do the SVM training
+  crossValidation.train(pNorm_);
+  
+  if (weightOutputFN_.size() > 0) {
+    ofstream weightStream(weightOutputFN_.c_str(), ios::out);
+    crossValidation.printAllWeights(weightStream, pNorm_);
+    weightStream.close();
+  }
+  
+  // Calculate the final SVM scores and clean up structures
+  crossValidation.postIterationProcessing(allScores, pCheck_);
+  
+  if (VERB > 0 && DataSet::getCalcDoc()) {
+    crossValidation.printDOC();
+  }
+  
+  if (setHandler.getMaxPSMs() > 0u) {
+    if (VERB > 0) {
+      cerr << "Scoring full list of PSMs with trained SVMs." << endl;
+    }
+    std::vector<double> rawWeights;
+    crossValidation.getAvgWeights(rawWeights, pNorm_);
+    setHandler.reset();
+    allScores.reset();
+    
+    fileStream.clear();
+    fileStream.seekg(0, ios::beg);
+    if (!tabInput_) {
+      success = xmlInterface.readAndScorePin(fileStream, rawWeights, allScores, inputFN_, setHandler, pCheck_, protEstimator_);
+    } else {
+      success = setHandler.readAndScoreTab(fileStream, rawWeights, allScores, pCheck_);
+    }
+    allScores.postMergeStep();
+    allScores.calcQ(selectionFdr_);
+    allScores.normalizeScores(selectionFdr_);
+    
+    // Reading input files (pin or temporary file)
+    if (!success) {
+      std::cerr << "ERROR: Failed to read in file, check if the correct " <<
+                   "file-format was used.";
+      return 0;
+    }
+  }
+  
+  // calculate psms level probabilities TDA or TDC
+  bool isUniquePeptideRun = false;
+  calculatePSMProb(allScores, isUniquePeptideRun, procStart, procStartClock, diff);
+  addPsmScores(allScores);
+  if (xmlInterface.getXmlOutputFN().size() > 0){
+    xmlInterface.writeXML_PSMs(allScores);
   }
   
   // calculate unique peptides level probabilities WOTE
-  if (reportUniquePeptides_) {
-    calculatePSMProb(true, procStart, procStartClock, diff);
-    addPeptideScores();
-    if (xmlInterface_.getXmlOutputFN().size() > 0) {
-      xmlInterface_.writeXML_Peptides(allScores_);
+  if (reportUniquePeptides_){
+    isUniquePeptideRun = true;
+    calculatePSMProb(allScores, isUniquePeptideRun, procStart, procStartClock, diff);
+    addPeptideScores(allScores);
+    if (xmlInterface.getXmlOutputFN().size() > 0){
+      xmlInterface.writeXML_Peptides(allScores);
     }
   }
+  
   // calculate protein level probabilities with FIDO
-  if(ProteinProbEstimator::getCalcProteinLevelProb()) {
-    calculateProteinProbabilitiesFido();
+  if (ProteinProbEstimator::getCalcProteinLevelProb()){
+    calculateProteinProbabilities(allScores);
     addProteinScores();
+    if (xmlInterface.getXmlOutputFN().size() > 0) {
+      xmlInterface.writeXML_Proteins(protEstimator_);
+    }
   }
   // write output to file
-  xmlInterface_.writeXML(allScores_, protEstimator_, call_);  
-  //return 1; don't know why percolator returns 1 here, but we'll return 0
-  return 0;
+  xmlInterface.writeXML(allScores, protEstimator_, call_);
+  Enzyme::destroy();
+  return 1;
 }
 
 /*

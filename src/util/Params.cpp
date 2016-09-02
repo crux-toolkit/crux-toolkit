@@ -92,7 +92,7 @@ Params::Params() : finalized_(false) {
     "may be in MS1 (.ms1), binary MS1 (.bms1), compressed MS1 (.cms1), or mzXML "
     "(.mzXML) format.");
   /*Percolator arguments*/
-  InitArgParam("pin",
+  InitArgParam("peptide-spectrum matches",
     "A collection of target and decoy peptide-spectrum matches (PSMs). Input may "
     "be in one of five formats: PIN, SQT, pepXML, [[html:<a href=\"../file-formats/txt-format.html\">]]"
     "Crux tab-delimited text[[html:</a>]], or a list of files (when list-of-files=T). "
@@ -468,10 +468,8 @@ Params::Params() : finalized_(false) {
     "Available for search-for-xlinks and xlink-score-spectrum.", true);
 
   InitIntParam("precision", 8, 1, 100, //max is arbitrary
-    "Set the precision for scores written to sqt and text files. "
-    "Note that this parameter only takes effect when specified in the "
-    "parameter file.",
-    "Available percolator.", true);
+    "Set the precision for scores written to sqt and text files.",
+    "Available for all commands.", true);
   InitIntParam("mass-precision", 4, 1, 100, // max is arbitrary
     "Set the precision for masses and m/z written to sqt and .txt files. "
     "Note that this parameter only takes effect when specified in the "
@@ -542,8 +540,8 @@ Params::Params() : finalized_(false) {
     "Apply the specified threshold to PSM, peptide and protein probabilities to "
     "obtain a faster estimate of the alpha, beta and gamma parameters.",
     "Available for crux percolator.", true);
-  InitBoolParam("fido-split-large-components", false,
-    "Approximate the posterior distribution by allowing large graph "
+  InitBoolParam("fido-no-split-large-components", false,
+    "Do not approximate the posterior distribution by allowing large graph "
     "components to be split into subgraphs. The splitting is done by "
     "duplicating peptides with low probabilities. Splitting continues "
     "until the number of possible configurations of each subgraph is "
@@ -585,6 +583,31 @@ Params::Params() : finalized_(false) {
   InitBoolParam("feature-file-in", false,
     "When set to T, interpret the input file as a PIN file.",
     "Available for crux percolator.", true);
+  InitStringParam("picked-protein", "",
+    "Use the picked protein-level FDR to infer protein probabilities, provide the "
+    "fasta file as the argument to this flag.",
+    "Available for crux percolator", true);
+  InitStringParam("protein-enzyme", "trypsin", "no_enzyme|elastase|pepsin|proteinasek|"
+    "thermolysin|trypsinp|chymotrypsin|lys-n|lys-c|arg-c|asp-n|glu-c|trypsin",
+    "Type of enzyme",
+    "Available for crux percolator", true);
+  InitBoolParam("protein-report-fragments", false,
+    "By default, if the peptides associated with protein A are a proper subset "
+    "of the peptides associated with protein B, then protein A is eliminated and "
+    "all the peptides are considered as evidence for protein B. Note that this "
+    "filtering is done based on the complete set of peptides in the database, not "
+    "based on the identified peptides in the search results. Alternatively, if this "
+    "option is set and if all of the identified peptides associated with protein B "
+    "are also associated with protein A, then Percolator will report a comma-"
+    "separated list of protein IDs, where the full-length protein B is first in the "
+    "list and the fragment protein A is listed second. Not available for Fido.",
+    "Available for crux percolator", true);
+  InitBoolParam("protein-report-duplicates", false,
+    "If multiple database proteins contain exactly the same set of peptides, then "
+    "Percolator will randomly discard all but one of the proteins. If this option "
+    "is set, then the IDs of these duplicated proteins will be reported as a comma-"
+    "separated list. Not available for Fido.",
+    "Available for crux percolator", true);
   InitBoolParam("protein", false,
     "Use the Fido algorithm to infer protein probabilities. Must be true to use any of the Fido options.",
     "Available for crux percolator", true);
@@ -600,9 +623,6 @@ Params::Params() : finalized_(false) {
     "Specify the prior probability that a protein is present in the sample. Set by grid "
     "search (see --fido-gridsearch-depth parameter) if not specified.",
     "Available for crux percolator if --protein T is set.", true);
-  InitBoolParam("fido-protein-level-pi0", false,
-    "Use pi_0 value when calculating empirical q-values",
-    "Available for crux percolator if --protein T is set.", true);
   InitBoolParam("fido-empirical-protein-q", false,
     "Estimate empirical p-values and q-values for proteins using target-decoy analysis.",
     "Available for crux percolator if --protein T is set.", true);
@@ -616,9 +636,6 @@ Params::Params() : finalized_(false) {
     "0.01, 0.15, 0.030, 0.05}; gamma = {0.1, 0.5}.</li><li>3: alpha = {0.01, 0.04, 0.16, "
     "0.25, 0.36}; beta = {0.0, 0.01, 0.15, 0.030, 0.05}; gamma = {0.5}.</li></ul>]]",
     "Available for crux percolator if --protein T is set.", true);
-  InitBoolParam("post-processing-tdc", false,
-    "Use target-decoy competition to assign q-values and PEPs.",
-    "Available for crux percolator", true);
   InitDoubleParam("fido-gridsearch-mse-threshold", 0.05, 0, 1,
     "Q-value threshold that will be used in the computation of the MSE and ROC AUC "
     "score in the grid search.",
@@ -639,8 +656,10 @@ Params::Params() : finalized_(false) {
     "Do not remove redundant peptides; keep all PSMs and exclude peptide level probability.",
     "Available for crux percolator", true);
   InitBoolParam("original-output", false,
-    "Output the standalone Percolator tab-delimited output.",
-    "Available for crux percolator.", false);
+    "Output the standalone Percolator tab-delimited output for peptides, PSMs, and "
+    "proteins (if protein=T). The corresponding Percolator options are -r, -B, -m, -M, "
+    "-l, and -L.",
+    "Available for crux percolator.", true);
   // **** Tide arguments ****
   InitArgParam("spectrum records file",
     "A spectrum records file generated by a previous run of crux tide-search "
@@ -1132,9 +1151,10 @@ Params::Params() : finalized_(false) {
     "null distribution.",
     "Used by assign-confidence, percolator and q-ranker", false);
   InitStringParam("estimation-method", "tdc", "mix-max|tdc|peptide-level",
-    "Specify the method used to estimate q-values: the mix-max procedure or target-decoy "
-    "competition. peptide-level is applied for spectrum-centric search. Eliminates any PSMS for which there "
-    "exists a better scoring PSM involving the same peptide. ",
+    "Specify the method used to estimate q-values.  The mix-max procedure or target-decoy "
+    "competition apply to PSMs. The peptide-level option eliminates any PSM for which there "
+    "exists a better scoring PSM involving the same peptide, and then uses decoys to "
+    "assign confidence estimates.",
     "Used by assign-confidence.", true);      
   InitBoolParam("sidak", false, 
     "Adjust the score using the Sidak adjustment and reports them in a new column in the "
@@ -1145,16 +1165,16 @@ Params::Params() : finalized_(false) {
   InitStringParam("score", "",
     "Specify the column (for tab-delimited input) or tag (for XML input) "
     "used as input to the q-value estimation procedure. If this parameter is unspecified, "
-    "then assign-confidence tries to seach for \"xcorr score\", \"evalue\" (comet), "
+    "then the program searches for \"xcorr score\", \"evalue\" (comet), "
     "\"exact p-value\" score fields in this order in the input file. ",
     "Used by assign-confidence.", true);
   InitBoolParam("combine-charge-states", false,
     "Specify this parameter to T in order to combine charge states with peptide sequences"
-    "in peptide-centric search. Works only if peptide-level=T.",
+    "in peptide-centric search. Works only if estimation-method = peptide-level.",
     "Used by assign-confidence.", true);
   InitBoolParam("combine-modified-peptides", false,
     "Specify this parameter to T in order to treat peptides carrying different or "
-    "no modifications as being the same. Works only if peptide-level=T.",
+    "no modifications as being the same. Works only if estimation = peptide-level.",
     "Used by assign-confidence.", true);
   InitStringParam("percolator-intraset-features", "F",
     "Set a feature for percolator that in later versions is not an option.",
@@ -1768,19 +1788,25 @@ void Params::Categorize() {
   items.insert("use-y-ions");
   items.insert("use-z-ions");
   AddCategory("Fragment ion parameters", items);
+
+  items.clear();
+  items.insert("picked-protein");
+  items.insert("protein-enzyme");
+  items.insert("protein-report-fragments");
+  items.insert("protein-report-duplicates");
+  AddCategory("Protein inference options", items);
   
   items.clear();
   items.insert("protein");
   items.insert("fido-alpha");
   items.insert("fido-beta");
   items.insert("fido-gamma");
-  items.insert("fido-protein-level-pi0");
   items.insert("fido-empirical-protein-q");
   items.insert("fido-gridsearch-depth");
   items.insert("fido-gridsearch-mse-threshold");
   items.insert("fido-fast-gridsearch");
   items.insert("fido-protein-truncation-threshold");
-  items.insert("fido-split-large-components");
+  items.insert("fido-no-split-large-components");
   AddCategory("Fido options", items);
 
   items.clear();
@@ -1884,6 +1910,31 @@ void Params::Categorize() {
   AddCategory("Static modifications", items);
 
   items.clear();
+  items.insert("only-psms");
+  items.insert("post-processing-qvality");
+  AddCategory("General options", items);
+
+  items.clear();
+  items.insert("c-pos");
+  items.insert("c-neg");
+  items.insert("test-fdr");
+  items.insert("train-fdr");
+  items.insert("maxiter");
+  items.insert("quick-validation");
+  items.insert("test-each-iteration");
+  items.insert("percolator-seed");
+  AddCategory("SVM training options", items);
+
+  items.clear();
+  items.insert("override");
+  items.insert("output-weights");
+  items.insert("init-weights");
+  items.insert("default-direction");
+  items.insert("unitnorm");
+  items.insert("klammer");
+  AddCategory("SVM feature input options", items);
+
+  items.clear();
   items.insert("spectrum-format");
   items.insert("spectrum-parser");
   items.insert("list-of-files");
@@ -1917,8 +1968,7 @@ void Params::Categorize() {
   items.insert("feature-file-in");
   items.insert("feature-file-out");
   items.insert("decoy-xml-output");
-  items.insert("output-weights");
-  items.insert("init-weights");
+  items.insert("original-output");
   items.insert("parameter-file");
   items.insert("verbosity");
   items.insert("decoy-prefix");
@@ -1929,6 +1979,7 @@ void Params::Categorize() {
   items.insert("column-type");
   items.insert("ascending");
   items.insert("delimiter");
+  items.insert("file-column");
   AddCategory("Input and output", items);
 }
 
