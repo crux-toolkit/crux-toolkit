@@ -934,8 +934,8 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
     for(int curAaMass = 0; curAaMass<nAA;curAaMass++){
       if (residueEvidenceMatrix[curAaMass][i] != 0) {
         std::cout << residueEvidenceMatrix[curAaMass][i] << std::endl;
-        std::cout << "aa: " << curAaMass+1 << endl;
-        std::cout << "massBin: " << i+1 << std::endl;
+//        std::cout << "aa: " << curAaMass+1 << endl;
+//        std::cout << "massBin: " << i+1 << std::endl;
 //        std::cout << "evidence: " << residueEvidenceMatrix[curAaMass][i] << std::endl <<std::endl;
         cnt+=1;
       }

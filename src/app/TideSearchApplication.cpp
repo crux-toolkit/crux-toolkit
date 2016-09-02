@@ -571,6 +571,7 @@ void TideSearchApplication::search(void* threadarg) {
         if (nCandPeptide == 0) {
           continue;
         }
+
         locks_array[2]->lock();
         (*total_candidate_peptides) += nCandPeptide;
         locks_array[2]->unlock();
@@ -583,6 +584,7 @@ void TideSearchApplication::search(void* threadarg) {
         // match_arr. We now pass control to those programs.
         collectScoresCompiled(active_peptide_queue, spectrum, observed, &match_arr2,
                               nCandPeptide, charge);
+
    
         // matches will arrange the results in a heap by score, return the top
         // few, and recover the association between counter and peptide. We output
@@ -604,6 +606,7 @@ void TideSearchApplication::search(void* threadarg) {
             pair.second = it->second;
             match_arr.push_back(pair);
           }
+
 
           TideMatchSet matches(&match_arr, highest_mz);
           matches.exact_pval_search_ = exact_pval_search;
@@ -810,7 +813,7 @@ void TideSearchApplication::search(void* threadarg) {
       int granularityScale = Params::GetInt("evidence-granularity");
       
       if (!exact_pval_search_) {
-        TideMatchSet::Arr match_arr(nCandPeptide); //TODO -- check if this is right arr to use
+        TideMatchSet::Arr match_arr(nCandPeptide);
 
         //*******************************************************************************
         /* For one spectrum, calculates:
@@ -928,6 +931,7 @@ void TideSearchApplication::search(void* threadarg) {
             scoreResidueEvidence += curResidueEvidenceMatrix[tmpAA][intensArrayTheor[res]-1];
           }
           delete residueMasses;
+          std::cout << scoreResidueEvidence << std::endl;
 
           if(peptide_centric) {
             carp(CARP_FATAL, "residue-evidence has not been implemented with 'peptide-centric-search T' yet.");
@@ -1121,7 +1125,7 @@ void TideSearchApplication::search(void* threadarg) {
 //        std::cout << setprecision(15) <<  "precursorMass: " << precursorMass << std::endl;
 //        std::cout << "maxMass: " << max_mass << std::endl;
 //        std::cout << "precursorMZ: " << precursor_mz << std::endl;
-//        std::cout << "nCandPeptide: " << nCandPeptide << std::endl;
+        std::cout << "nCandPeptide: " << nCandPeptide << std::endl;
 //        std::cout << sc->spectrum->SpectrumNumber() << " " << precursorMass << endl;
         for(pe = 0; pe < nCandPeptide; pe++) {
           int pepMassIntIdx = 0;
@@ -1170,14 +1174,14 @@ void TideSearchApplication::search(void* threadarg) {
           std::cout << "scoreResideEvidence: " <<scoreResidueEvidence << std::endl;
           std::cout << "pValue: " << pValue << std::endl << std::endl;;
 */ 
-/*
+
           if (curPeptide->IsDecoy() == false){
-//            std::cout << curPepSeq << " " << scoreResidueEvidence << std::endl;
+            std::cout << curPeptide->SeqWithMods() << " " << scoreResidueEvidence << std::endl;
 //            std::cout << "pvalue: " << pValue << std::endl;
 //            std::cout << curPepSeq << " " << curPepMassInt << " " << pValue << std::endl;
-            std::cout << curPepSeq << " " << pValue << std::endl;
+//            std::cout << curPepSeq << " " << pValue << std::endl;
           }
-*/
+
           if(peptide_centric) {
             carp(CARP_FATAL, "residue-evidence has not been implemented with 'peptide-centric-search T' yet.");
           }

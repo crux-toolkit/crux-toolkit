@@ -63,6 +63,14 @@ class PeptideConstraint {
     MASS_TYPE_T mass_type  ///< isotopic mass type (AVERAGE, MONO) -in
     );
 
+  PeptideConstraint(
+    ENZYME_T enzyme, ///< the enzyme to use for digestion
+    DIGEST_T digest, ///< the degree of digestion
+    int min_length, ///< the minimum length of peptide -in
+    int max_length, ///< the maximum lenth of peptide -in
+    int num_mis_cleavage ///< The maximum mis cleavage of the peptide -in
+    );
+
   /**
    * \brief Create a new peptide constraint and populate its values
    * based on those in parameter.c 

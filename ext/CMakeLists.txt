@@ -62,7 +62,7 @@ if (WIN32 AND NOT CYGWIN)
   else (USE_LATEST_PWIZ)
     ExternalProject_Add(
       ProteoWizard
-      URL http://cruxtoolkit.sourceforge.net/download/pwiz-src-3_0_7010.tar.bz2
+      URL http://cruxtoolkit.sourceforge.net/download/pwiz-src-3_0_9870.tar.bz2
       PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
       CONFIGURE_COMMAND ""
       BUILD_COMMAND 
@@ -115,7 +115,7 @@ else (WIN32 AND NOT CYGWIN)
   else (USE_LATEST_PWIZ)
     ExternalProject_Add(
       ProteoWizard
-      URL http://cruxtoolkit.sourceforge.net/download/pwiz-src-3_0_7010.tar.bz2
+      URL http://cruxtoolkit.sourceforge.net/download/pwiz-src-3_0_9870.tar.bz2
       PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
       CONFIGURE_COMMAND ""
       BUILD_COMMAND 
@@ -133,81 +133,47 @@ else (WIN32 AND NOT CYGWIN)
   endif (USE_LATEST_PWIZ)
 endif (WIN32 AND NOT CYGWIN)
 
-if (WIN32 AND NOT CYGWIN)
-  ExternalProject_Add(
-    percolator
-    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
-    URL http://cruxtoolkit.sourceforge.net/download/rel-2-10.tar.gz
-    URL_MD5 a8874396962c9efd02e3076ed5f6846a
-    DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/downloads
-    CMAKE_ARGS -DCMAKE_VERBOSE_MAKEFILE=ON
-      -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}
-      -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}
-      -DCMAKE_BUILD_TYPE=${CMAKE_CFG_INTDIR}
-    PATCH_COMMAND ""
-  )
-  # On Windows we use this step to patch percolator
-  ExternalProject_Add_Step(
-    percolator
-    apple_patch
-    COMMAND ${CMAKE_COMMAND} -E copy 
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_common/CommonCMake.txt.win 
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/CommonCMake.txt
-    DEPENDEES patch
-    DEPENDERS configure
-  )
-elseif (APPLE)
-  ExternalProject_Add(
-    percolator
-    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
-    URL http://cruxtoolkit.sourceforge.net/download/rel-2-10.tar.gz
-    URL_MD5 a8874396962c9efd02e3076ed5f6846a
-    DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/downloads
-    CMAKE_ARGS -DCMAKE_VERBOSE_MAKEFILE=ON 
-      -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR} 
-      -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}
-      -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-    INSTALL_COMMAND ""
-  )
-  # On Apple we use this to patch percolator
-  ExternalProject_Add_Step(
-    percolator
-    apple_patch
-    COMMAND ${CMAKE_COMMAND} -E copy 
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_common/CommonCMake.txt 
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/CommonCMake.txt
-    COMMAND ${CMAKE_COMMAND} -E copy 
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/src/ProteinProbEstimator.cpp 
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/ProteinProbEstimator.cpp
-    DEPENDEES patch
-    DEPENDERS configure
-  )
-else(APPLE)
-  ExternalProject_Add(
-    percolator
-    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
-    URL http://cruxtoolkit.sourceforge.net/download/rel-2-10.tar.gz
-    URL_MD5 a8874396962c9efd02e3076ed5f6846a
-    DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/downloads
-    CMAKE_ARGS -DCMAKE_VERBOSE_MAKEFILE=ON
-      -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}
-      -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}
-      -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-    PATCH_COMMAND cp 
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fix_common/CommonCMake.txt
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/
-  )
-endif (WIN32 AND NOT CYGWIN)
+ExternalProject_Add(
+  percolator
+  PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
+  URL http://cruxtoolkit.sourceforge.net/download/percolator-rel-3-00.tar.gz
+  URL_MD5 d8a8e4c3ea261ae572b0f8b860ffefb4
+  DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/downloads
+  PATCH_COMMAND ${CMAKE_COMMAND} -E remove -f
+    ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/fisher/Database.h
+    ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/fisher/Database.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/fisher/objects.h
+    ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/fisher/PeptideConstraint.h
+    ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/fisher/PeptideConstraint.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/fisher/Peptide.h
+    ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/fisher/Peptide.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/fisher/PeptideSrc.h
+    ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/fisher/PeptideSrc.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/fisher/Protein.h
+    ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/fisher/Protein.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/fisher/ProteinPeptideIterator.h
+    ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/fisher/ProteinPeptideIterator.cpp
+    && ${CMAKE_COMMAND} -E copy
+       ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/src/CMakeLists.txt
+       ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/
+  CMAKE_ARGS -DCMAKE_VERBOSE_MAKEFILE=ON
+    -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}
+    -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}
+    -DCMAKE_BUILD_TYPE=${CMAKE_CFG_INTDIR}
+    -DCRUX_ROOT=${PROJECT_SOURCE_DIR}
+)
 
 if (UNIX) 
   ExternalProject_Add(
-    ProtocolBuffers
+    protobuf-2.5.0
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
-    URL http://protobuf.googlecode.com/files/protobuf-2.5.0.tar.bz2
-    URL_MD5 a72001a9067a4c2c4e0e836d0f92ece4
-    DOWNLOAD_DIR downloads
+    DOWNLOAD_COMMAND
+          ${CMAKE_COMMAND} 
+            -DDOWNLOAD_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/downloads
+            -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src
+            -P  ${CMAKE_CURRENT_SOURCE_DIR}/download_pbuffers.cmake
     CONFIGURE_COMMAND
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProtocolBuffers/configure
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/protobuf-2.5.0/configure
       --prefix=${CMAKE_CURRENT_BINARY_DIR}
       --enable-shared=no
     BUILD_COMMAND make
@@ -217,41 +183,43 @@ if (UNIX)
 elseif (WIN32 AND NOT CYGWIN)
   # Update Microsoft VS project files and build ProtocolBuffers using MSBuild
   ExternalProject_Add(
-    ProtocolBuffers
+    protobuf-2.5.0
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
-    URL http://protobuf.googlecode.com/files/protobuf-2.5.0.tar.bz2
-    URL_MD5 a72001a9067a4c2c4e0e836d0f92ece4
-    DOWNLOAD_DIR downloads
+    DOWNLOAD_COMMAND
+          ${CMAKE_COMMAND} 
+            -DDOWNLOAD_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/downloads
+            -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src
+            -P  ${CMAKE_CURRENT_SOURCE_DIR}/download_pbuffers.cmake
     PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory 
       ${CMAKE_CURRENT_SOURCE_DIR}/patches/protobuf/vsprojects/ 
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProtocolBuffers/vsprojects/ &&
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/protobuf-2.5.0/vsprojects/ &&
       ${CMAKE_COMMAND} -E copy_directory 
       ${CMAKE_CURRENT_SOURCE_DIR}/patches/protobuf/src/ 
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProtocolBuffers/src/
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/protobuf-2.5.0/src/
     CONFIGURE_COMMAND ""
     BUILD_COMMAND msbuild 
       /p:Configuration=${CMAKE_CFG_INTDIR}
       /p:Platform=${MSBUILD_PLATFORM} 
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProtocolBuffers/vsprojects/libprotobuf.vcxproj &&
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/protobuf-2.5.0/vsprojects/libprotobuf.vcxproj &&
       msbuild
       /p:Configuration=${CMAKE_CFG_INTDIR}
       /p:Platform=${MSBUILD_PLATFORM} 
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProtocolBuffers/vsprojects/libprotoc.vcxproj &&
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/protobuf-2.5.0/vsprojects/libprotoc.vcxproj &&
       msbuild
       /p:Configuration=${CMAKE_CFG_INTDIR}
       /p:Platform=${MSBUILD_PLATFORM} 
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProtocolBuffers/vsprojects/protoc.vcxproj
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/protobuf-2.5.0/vsprojects/protoc.vcxproj
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE 1
   )
   ExternalProject_Add_Step(
-    ProtocolBuffers
+    protobuf-2.5.0
     copy_binaries
     COMMAND ${CMAKE_COMMAND} -E copy 
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProtocolBuffers/vsprojects/${MSBUILD_PLATFORM}/${CMAKE_CFG_INTDIR}/protoc.exe
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/protobuf-2.5.0/vsprojects/${MSBUILD_PLATFORM}/${CMAKE_CFG_INTDIR}/protoc.exe
       ${CMAKE_CURRENT_BINARY_DIR}/bin/protoc.exe
     COMMAND ${CMAKE_COMMAND} -E copy 
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProtocolBuffers/vsprojects/${MSBUILD_PLATFORM}/${CMAKE_CFG_INTDIR}/libprotobuf.lib
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/protobuf-2.5.0/vsprojects/${MSBUILD_PLATFORM}/${CMAKE_CFG_INTDIR}/libprotobuf.lib
       ${CMAKE_CURRENT_BINARY_DIR}/lib/protobuf.lib
     DEPENDEES install
   )
