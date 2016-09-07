@@ -75,7 +75,8 @@ class TideSearchApplication : public CruxApplication {
     double* aaFreqN,
     double* aaFreqI,
     double* aaFreqC,
-    int* aaMass
+    int* aaMass,
+    vector<int>* negative_isotope_errors
   );
 
   void collectScoresCompiled(
@@ -92,8 +93,9 @@ class TideSearchApplication : public CruxApplication {
     WINDOW_TYPE_T window_type,
     double precursor_window,
     int max_charge,
-    double* out_min,
-    double* out_max,
+    vector<int>* negative_isotope_errors,
+    vector<double>* out_min,
+    vector<double>* out_max,
     double* min_range,
     double* max_range
   );
@@ -223,6 +225,7 @@ class TideSearchApplication : public CruxApplication {
     map<pair<string, unsigned int>, bool>* spectrum_flag;
     int* sc_index;
     int* total_candidate_peptides;
+    vector<int>* negative_isotope_errors;
 
     thread_data (const string& spectrum_filename_, const vector<SpectrumCollection::SpecCharge>* spec_charges_,
             ActivePeptideQueue* active_peptide_queue_, ProteinVec proteins_,
@@ -233,7 +236,7 @@ class TideSearchApplication : public CruxApplication {
             ofstream* decoy_file_, bool compute_sp_, int64_t thread_num_, int64_t num_threads_, int nAA_,
             double* aaFreqN_, double* aaFreqI_, double* aaFreqC_, int* aaMass_, vector<boost::mutex*> locks_array_,  
             double bin_width_, double bin_offset_, bool exact_pval_search_, map<pair<string, unsigned int>, bool>* spectrum_flag_,
-            int* sc_index_, int* total_candidate_peptides_) :
+            int* sc_index_, int* total_candidate_peptides_, vector<int>* negative_isotope_errors_) :
             spectrum_filename(spectrum_filename_), spec_charges(spec_charges_), active_peptide_queue(active_peptide_queue_),
             proteins(proteins_), locations(locations_), precursor_window(precursor_window_), window_type(window_type_),
             spectrum_min_mz(spectrum_min_mz_), spectrum_max_mz(spectrum_max_mz_), min_scan(min_scan_), max_scan(max_scan_),
@@ -241,7 +244,7 @@ class TideSearchApplication : public CruxApplication {
             target_file(target_file_), decoy_file(decoy_file_), compute_sp(compute_sp_),
             thread_num(thread_num_), num_threads(num_threads_), nAA(nAA_), aaFreqN(aaFreqN_), aaFreqI(aaFreqI_), aaFreqC(aaFreqC_), 
             aaMass(aaMass_), locks_array(locks_array_), bin_width(bin_width_), bin_offset(bin_offset_), exact_pval_search(exact_pval_search_), 
-            spectrum_flag(spectrum_flag_), sc_index(sc_index_), total_candidate_peptides(total_candidate_peptides_) {}
+            spectrum_flag(spectrum_flag_), sc_index(sc_index_), total_candidate_peptides(total_candidate_peptides_), negative_isotope_errors(negative_isotope_errors_) {}
   };
 
   int calcScoreCount(

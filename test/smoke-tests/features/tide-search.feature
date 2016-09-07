@@ -51,5 +51,6 @@ Examples:
   |tide-7thread   |                                                             |--num-threads 7                                         |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-default.txt   |
   |tide-exact-pval-1thread|                                                     |--exact-p-value T --num-threads 1                       |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-exact-pval.txt|
   |tide-exact-pval-7thread|                                                     |--exact-p-value T --num-threads 7                       |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-exact-pval.txt|
-  |tide-concat    |                                                             |--concat T                                              |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.txt       |tide-concat.txt |
-
+  |tide-concat    |                                                             |--concat T                                              |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.txt       |tide-concat.txt    |
+  |tide-isoerr    |                                                             |--isotope-error -1,1,2,3                                |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-isoerr.txt    |
+  |tide-isoerrpval|                                                             |--isotope-error -1,1,2,3 --exact-p-value T              |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-isoerrpval.txt|
