@@ -812,6 +812,11 @@ Params::Params() : finalized_(false) {
   InitBoolParam("skip-preprocessing", false,
     "Skip preprocessing steps on spectra. Default = F.",
     "Available for tide-search", false);
+  InitStringParam("isotope-error", "",
+                  "[[nohtml:Isotope errors to include. "
+                  "Specify a comma-separated list of isotope errors of the form: "
+                  "-1,1,...]][[html: Default = "" (No Isotope Errors)]]",
+                  "Available for tide-search", true);
   InitIntParam("num-threads", 0, 0, 64,
                "0=poll CPU to set num threads; else specify num threads directly.",
                "Available for tide-search tab-delimited files only.", true);
@@ -1760,6 +1765,7 @@ void Params::Categorize() {
   items.insert("mod-mass-format");
   items.insert("fragment-mass");
   items.insert("isotope-windows");
+  items.insert("isotope-error");
   items.insert("compute-p-values");
   AddCategory("Search parameters", items);
 

@@ -53,7 +53,19 @@ void ActivePeptideQueue::ComputeTheoreticalPeaksBack() {
                                    compiler_prog1_, compiler_prog2_);
 }
 
-int ActivePeptideQueue::SetActiveRange(double min_mass, double max_mass, double min_range, double max_range) {
+bool ActivePeptideQueue::isWithinIsotope(vector<double>* min_mass, vector<double>* max_mass, double mass, int* isotope_idx) {
+  for (int i = *isotope_idx; i < min_mass->size(); ++i) {
+    if (mass >= (*min_mass)[i] && mass <= (*max_mass)[i]) {
+      if (i > *isotope_idx) {
+        *isotope_idx = i;
+      }
+      return true;
+    }
+  }
+  return false;
+}
+
+int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>* max_mass, double min_range, double max_range, vector<bool>* candidatePeptideStatus) {
   //min_range and max_range have been introduced to fix a bug 
   //introduced by m/z selection. see #222 in sourceforge
   //this has to be true:
@@ -124,29 +136,33 @@ int ActivePeptideQueue::SetActiveRange(double min_mass, double max_mass, double 
   }
 
   iter_ = queue_.begin();
-  while (iter_ != queue_.end() && (*iter_)->Mass() < min_mass ){
+  while (iter_ != queue_.end() && (*iter_)->Mass() < min_mass->front() ){
     ++iter_;
   }
-
+  
+  int* isotope_idx = new int(0);
   end_ = iter_;
   int active = 0;
   active_targets_ = active_decoys_ = 0;
-  while (end_ != queue_.end() && (*end_)->Mass() < max_mass ){
+  while (end_ != queue_.end() && (*end_)->Mass() < max_mass->back() ){
+    if (isWithinIsotope(min_mass, max_mass, (*end_)->Mass(), isotope_idx)) {
+      ++active;
+      candidatePeptideStatus->push_back(true);
+      if (!(*end_)->IsDecoy()) {
+        ++active_targets_;
+      } else {
+        ++active_decoys_;
+      }
+    } else {
+      candidatePeptideStatus->push_back(false);
+    }
     ++end_;
-    ++active;
   }
+  delete isotope_idx;
   if (active == 0) {
     return 0;
   }
 
-  // Count active targets and decoys
-  for (deque<Peptide*>::const_iterator i = iter_; i != end_; ++i) {
-    if (!(*i)->IsDecoy()) {
-      ++active_targets_;
-    } else {
-      ++active_decoys_;
-    }
-  }
   return active;
 
 }
@@ -160,7 +176,7 @@ void ActivePeptideQueue::ComputeBTheoreticalPeaksBack() {
   b_ion_queue_.push_back(theoretical_b_peak_set_);
 }
 
-int ActivePeptideQueue::SetActiveRangeBIons(double min_mass, double max_mass, double min_range, double max_range) {
+int ActivePeptideQueue::SetActiveRangeBIons(vector<double>* min_mass, vector<double>* max_mass, double min_range, double max_range, vector<bool>* candidatePeptideStatus) {
     exact_pval_search_ = true;
   // queue front() is lightest; back() is heaviest
   
@@ -211,33 +227,36 @@ int ActivePeptideQueue::SetActiveRangeBIons(double min_mass, double max_mass, do
 
   iter1_ = b_ion_queue_.begin();
   iter_ = queue_.begin();
-  while (iter_ != queue_.end() && (*iter_)->Mass() < min_mass ){
+  while (iter_ != queue_.end() && (*iter_)->Mass() < min_mass->front() ){
     ++iter_;
     ++iter1_;
   }
 
+  int* isotope_idx = new int(0);
   end_ = iter_;
   end1_ = iter1_;
   int active = 0;
   active_targets_ = active_decoys_ = 0;
-  while (end_ != queue_.end() && (*end_)->Mass() < max_mass ){
+  while (end_ != queue_.end() && (*end_)->Mass() < max_mass->back() ){
+    if (isWithinIsotope(min_mass, max_mass, (*end_)->Mass(), isotope_idx)) {
+      ++active;
+      candidatePeptideStatus->push_back(true);
+      if (!(*end_)->IsDecoy()) {
+        ++active_targets_;
+      } else {
+        ++active_decoys_;
+      }
+    } else {
+      candidatePeptideStatus->push_back(false);
+    }
     ++end_;
     ++end1_;
-    ++active;
   }
+  delete isotope_idx;
   if (active == 0) {
     return 0;
   }
-
-  // Count active targets and decoys
-  for (deque<Peptide*>::const_iterator i = iter_; i != end_; ++i) {
-    if (!(*i)->IsDecoy()) {
-      ++active_targets_;
-    } else {
-      ++active_decoys_;
-    }
-  }
-
+  
   return active;
 }
 
