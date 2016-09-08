@@ -56,6 +56,7 @@ PinWriter::PinWriter():
   features_.push_back(make_pair("enzC", true));
   features_.push_back(make_pair("enzInt", true));
   features_.push_back(make_pair("lnNumSP", true));
+  features_.push_back(make_pair("lnNumDSP", false));
   features_.push_back(make_pair("dM", true));
   features_.push_back(make_pair("absdM", true));
   features_.push_back(make_pair("Peptide", true));
@@ -78,6 +79,15 @@ void PinWriter::openFile(const string& filename, const string& output_dir, bool 
 
 void PinWriter::openFile(CruxApplication* application, string filename, MATCH_FILE_TYPE type) {
   openFile(filename, "", Params::GetBool("overwrite"));
+}
+
+bool PinWriter::getEnabledStatus(const string& name) const {
+  for (vector< pair<string, bool> >::const_iterator i = features_.begin(); i != features_.end(); i++) {
+    if (i->first == name) {
+      return i->second;
+    }
+  }
+  return false;
 }
 
 void PinWriter::setEnabledStatus(const string& name, bool enabled) {
@@ -239,7 +249,7 @@ void PinWriter::printPSM(
       fields.push_back(enzC ? "1" : "0");
     } else if (feature == "enzInt") {
       fields.push_back(StringUtils::ToString(missedCleavages));
-    } else if (feature == "lnNumSP") {
+    } else if (feature == "lnNumSP" || feature == "lnNumDSP") {
       fields.push_back(StringUtils::ToString(match->getLnExperimentSize(), precision_));
     } else if (feature == "dM") {
       fields.push_back(StringUtils::ToString(dM, precision_));
