@@ -52,6 +52,7 @@ class PinWriter : public PSMWriter {
     MATCH_FILE_TYPE type ///< type of file to be written
   );
 
+  bool getEnabledStatus(const std::string& name) const;
   void setEnabledStatus(const std::string& name, bool enabled);
 
  protected:

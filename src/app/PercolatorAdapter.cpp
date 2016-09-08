@@ -76,10 +76,14 @@ void PercolatorAdapter::addPsmScores(Scores allScores) {
   string featureNames = features.getFeatureNames();
   vector<string> featureTokens = StringUtils::Split(featureNames, '\t');
   int lnNumSPIndex = -1;
+  bool lnNumDSP = false;
   map<int, int> chargeStates; // index of feature -> charge
   for (int i = 0; i < featureTokens.size(); ++i) {
     string featureName = StringUtils::ToLower(featureTokens[i]);
     if (featureName == "lnnumsp") {
+      lnNumSPIndex = i;
+    } else if (featureName == "lnnumdsp") {
+      lnNumDSP = true;
       lnNumSPIndex = i;
     } else if (StringUtils::StartsWith(featureName, "charge")) {
       size_t chargeNum = StringUtils::FromString<size_t>(featureName.substr(6));
@@ -149,6 +153,11 @@ void PercolatorAdapter::addPsmScores(Scores allScores) {
     }
     match->setPostProcess(true); // so spectra get deleted when match does
     Crux::Match::freeMatch(match); // so match gets deleted when collection does
+  }
+
+  if (lnNumSPIndex >= 0 && lnNumDSP) {
+    targets->setHasDistinctMatches(true);
+    decoys->setHasDistinctMatches(true);
   }
 
   targets->setScoredType(PERCOLATOR_SCORE, true);
