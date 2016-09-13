@@ -137,7 +137,7 @@ int PercolatorApplication::main(
   perc_args_vec.push_back("--results-peptides");
   perc_args_vec.push_back(output_target_peptides);
   if (Params::GetBool("original-output")) {
-    perc_args_vec.push_back("--decoy-results-psms");
+    perc_args_vec.push_back("--decoy-results-peptides");
     perc_args_vec.push_back(output_decoy_peptides);
     perc_args_vec.push_back("--results-psms");
     perc_args_vec.push_back(output_target_psms);
