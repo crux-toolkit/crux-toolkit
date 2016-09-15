@@ -1,0 +1,12 @@
+file	scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	xcorr score	xcorr rank	tdc q-value	distinct matches/spectrum	sequence	cleavage type	protein id	flanking aa	index name
+demo.ms2	85	3	497.6180	1489.8322	1488.8188	0.93693203	5.2075658	1	0	3	NFLETVELQVGLK	trypsin-full-digest	YGL135W(27)	RN	small_yeast_index
+demo.ms2	118	3	1031.9399	3092.7981	3093.4045	0.94969797	4.7620406	1	0	2	ELESAAYDHAEPVQPEDAPQDIANDELK	trypsin-full-digest	YGL009C(500)	KD	small_yeast_index
+demo.ms2	11	2	745.2690	1488.5234	1488.8188	0.822851	4.4485474	1	0	4	NFLETVELQVGLK	trypsin-full-digest	YGL135W(27)	RN	small_yeast_index
+demo.ms2	50	2	651.2890	1300.5634	1300.6511	0.79568398	3.7977431	1	0	10	LDVDELGDVAQK	trypsin-full-digest	YLR043C(55)	KN	small_yeast_index
+demo.ms2	75	2	877.2690	1752.5234	1751.7792	0.969024	3.5090985	1	0	5	LVSWYDNEYGYSTR	trypsin-full-digest	YGR192C(308)	KV	small_yeast_index
+demo.ms2	135	2	1004.9900	2007.9655	2005.0490	1.04164	3.3755114	1	0	2	SGVGICATCVLRPDLLFK	trypsin-full-digest	YEL027W(35)	KN	small_yeast_index
+demo.ms2	26	2	692.3790	1382.7435	1381.6362	0.91724002	3.2922595	1	0	6	TASEFDSAIAQDK	trypsin-full-digest	YLR043C(7)	KL	small_yeast_index
+demo.ms2	130	2	733.0290	1464.0435	1461.7902	0.94044602	3.2311451	1	0	3	NEVSAMPTLLLFK	trypsin-full-digest	YLR043C(67)	KN	small_yeast_index
+demo.ms2	22	1	1489.8500	1488.8427	1488.8188	0.986404	3.1195092	1	0	3	NFLETVELQVGLK	trypsin-full-digest	YGL135W(27)	RN	small_yeast_index
+demo.ms2	94	3	669.4380	2005.2921	2005.0490	0.75693899	2.6838036	1	0	4	SGVGICATCVLRPDLLFK	trypsin-full-digest	YEL027W(35)	KN	small_yeast_index
+demo.ms2	51	2	498.6990	995.3835	995.4673	0.864932	2.4577808	1	0	14	NGFQTGSASK	trypsin-full-digest	YLR185W(76)	KA	small_yeast_index
