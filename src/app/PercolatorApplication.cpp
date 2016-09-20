@@ -136,7 +136,7 @@ int PercolatorApplication::main(
   // Target peptides file is written to prevent writing to stdout
   perc_args_vec.push_back("--results-peptides");
   perc_args_vec.push_back(output_target_peptides);
-  if (Params::GetBool("original-output")) {
+  if (Params::GetBool("txt-output")) {
     perc_args_vec.push_back("--decoy-results-peptides");
     perc_args_vec.push_back(output_decoy_peptides);
     perc_args_vec.push_back("--results-psms");
@@ -323,7 +323,7 @@ int PercolatorApplication::main(
     // Target proteins file is written to prevent writing to stdout
     perc_args_vec.push_back("--results-proteins");
     perc_args_vec.push_back(output_target_proteins);
-    if (Params::GetBool("original-output")) {
+    if (Params::GetBool("txt-output")) {
       perc_args_vec.push_back("--decoy-results-proteins");
       perc_args_vec.push_back(output_decoy_proteins);
     }
@@ -369,31 +369,8 @@ int PercolatorApplication::main(
 
   string output_dir = Params::GetString("output-dir");
 
-  // write txt
-  if (!Params::GetBool("original-output")) {
+  if (!Params::GetBool("txt-output")) {
     FileUtils::Remove(output_target_peptides);
-    if (set_protein) {
-      FileUtils::Remove(output_target_proteins);
-    }
-
-    if (Params::GetBool("txt-output")) {
-      PMCDelimitedFileWriter txt_writer;
-      txt_writer.writeFile(this, output_target_psms,
-                           PMCDelimitedFileWriter::PSMS, target_pmc);
-      txt_writer.writeFile(this, output_decoy_psms,
-                           PMCDelimitedFileWriter::PSMS, decoy_pmc);
-      txt_writer.writeFile(this, output_target_peptides,
-                           PMCDelimitedFileWriter::PEPTIDES, target_pmc);
-      txt_writer.writeFile(this, output_decoy_peptides,
-                           PMCDelimitedFileWriter::PEPTIDES, decoy_pmc);
-
-      if (set_protein) {
-        txt_writer.writeFile(this, output_target_proteins,
-                             PMCDelimitedFileWriter::PROTEINS, target_pmc);
-        txt_writer.writeFile(this, output_decoy_proteins,
-                             PMCDelimitedFileWriter::PROTEINS, decoy_pmc);
-      }
-    }
   }
 
   // write mzid
@@ -477,14 +454,13 @@ string PercolatorApplication::getDescription() const {
     "respects:</p><ul><li>In addition to the native Percolator XML file "
     "format, Crux Percolator supports additional input file formats (SQT, "
     "PepXML, tab-delimited text) and output file formats (PepXML, mzIdentML, "
-    "tab-delimited text). The original output formats can be produced by using "
-    "the <code>original-output</code> option.</li><li>To maintain consistency "
-    "with the rest of the Crux commands, Crux Percolator uses different "
-    "parameter syntax than the stand-alone version of Percolator.</li><li>Like "
-    "the rest of the Crux commands, Crux Percolator writes its files to an "
-    "output directory, logs all standard error messages to a log file, and is "
-    "capable of reading parameters from a parameter file.</li><li>Reading from "
-    "XML and stdin are not supported at this time.</li></ul>]]";
+    "tab-delimited text). To maintain consistency with the rest of the Crux "
+    "commands, Crux Percolator uses different parameter syntax than the stand-"
+    "alone version of Percolator.</li><li>Like the rest of the Crux commands, "
+    "Crux Percolator writes its files to an output directory, logs all standard "
+    "error messages to a log file, and is capable of reading parameters from a "
+    "parameter file.</li><li>Reading from XML and stdin are not supported at "
+    "this time.</li></ul>]]";
 }
 
 /**
@@ -505,7 +481,6 @@ vector<string> PercolatorApplication::getOptions() const {
     "fileroot",
     "output-dir",
     "overwrite",
-    "original-output",
     "txt-output",
     "pout-output",
     "mzid-output",
