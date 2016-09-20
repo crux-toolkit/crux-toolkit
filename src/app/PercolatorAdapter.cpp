@@ -69,27 +69,19 @@ void PercolatorAdapter::addPsmScores(Scores allScores) {
   match_collections_made_.push_back(decoys);
 
   // Find out which feature is lnNumSP and get indices of charge state features
+  bool lnNumDSP = false;
+  int lnNumSPIndex = findFeatureIndex("lnnumsp");
+  if (lnNumSPIndex == -1) {
+    if ((lnNumSPIndex = findFeatureIndex("lnnumdsp")) != -1) {
+      lnNumDSP = true;
+    }
+  }
+
+  map<int, int> chargeStates = mapChargeFeatures();
+
   Normalizer* normalizer = Normalizer::getNormalizer();
   double* normSub = normalizer->getSub();
   double* normDiv = normalizer->getDiv();
-  FeatureNames& features = DataSet::getFeatureNames();
-  string featureNames = features.getFeatureNames();
-  vector<string> featureTokens = StringUtils::Split(featureNames, '\t');
-  int lnNumSPIndex = -1;
-  bool lnNumDSP = false;
-  map<int, int> chargeStates; // index of feature -> charge
-  for (int i = 0; i < featureTokens.size(); ++i) {
-    string featureName = StringUtils::ToLower(featureTokens[i]);
-    if (featureName == "lnnumsp") {
-      lnNumSPIndex = i;
-    } else if (featureName == "lnnumdsp") {
-      lnNumDSP = true;
-      lnNumSPIndex = i;
-    } else if (StringUtils::StartsWith(featureName, "charge")) {
-      size_t chargeNum = StringUtils::FromString<size_t>(featureName.substr(6));
-      chargeStates[i] = chargeNum;
-    }
-  }
 
   // Iterate over each ScoreHolder in Scores object
   for (vector<ScoreHolder>::iterator score_itr = allScores.begin();
@@ -141,8 +133,7 @@ void PercolatorAdapter::addPsmScores(Scores allScores) {
     if (lnNumSPIndex < 0) {
       match->setLnExperimentSize(-1);
     } else {
-      double lnNumSP = psm->getFeatures()[lnNumSPIndex]
-        * normDiv[lnNumSPIndex] + normSub[lnNumSPIndex];
+      double lnNumSP = unnormalize(psm, lnNumSPIndex, normDiv, normSub);
       match->setLnExperimentSize(lnNumSP);
     }
 
@@ -577,6 +568,49 @@ int PercolatorAdapter::run() {
   xmlInterface.writeXML(allScores, protEstimator_, call_);
   Enzyme::destroy();
   return 1;
+}
+
+// Finds the index of the given feature name (case insensitive).
+int PercolatorAdapter::findFeatureIndex(string feature) {
+  feature = StringUtils::ToLower(feature);
+  vector<string> features = StringUtils::Split(DataSet::getFeatureNames().getFeatureNames(), '\t');
+  for (int i = 0; i < features.size(); ++i) {
+    if (StringUtils::ToLower(features[i]) == feature) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+// Generate a map where the keys are feature indices and their values are the
+// charge state of that feature.
+map<int, int> PercolatorAdapter::mapChargeFeatures() {
+  map<int, int> charges;
+  vector<string> features = StringUtils::Split(DataSet::getFeatureNames().getFeatureNames(), '\t');
+  for (int i = 0; i < features.size(); ++i) {
+    if (StringUtils::StartsWith(StringUtils::ToLower(features[i]), "charge")) {
+      size_t charge = StringUtils::FromString<size_t>(features[i].substr(6));
+      charges[i] = charge;
+    }
+  }
+  return charges;
+}
+
+// Unnormalize a PSM feature to obtain its original value.
+// normDiv and normSub are optional; if they are NULL, they will be
+// automatically retrieved.
+double PercolatorAdapter::unnormalize(
+  const PSMDescription* psm,
+  int featureIndex,
+  double* normDiv,
+  double* normSub
+) {
+  if (normDiv == NULL || normSub == NULL) {
+    Normalizer* normalizer = Normalizer::getNormalizer();
+    normDiv = normalizer->getDiv();
+    normSub = normalizer->getSub();
+  }
+  return psm->features[featureIndex] * normDiv[featureIndex] + normSub[featureIndex];
 }
 
 /*
