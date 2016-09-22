@@ -1,8 +1,6 @@
 #ifndef STRINGUTILS_H
 #define STRINGUTILS_H
 
-#include "boost/lexical_cast.hpp"
-
 #include <iomanip>
 #include <string>
 #include <sstream>
@@ -14,22 +12,23 @@ class StringUtils {
   // Convert from a string
   template<typename T>
   static T FromString(const std::string& s) {
-    try {
-      return boost::lexical_cast<T>(s);
-    } catch (...) {
+    T out;
+    if (!TryFromString(s, &out)) {
       throw std::runtime_error("Could not convert string '" + s + "'");
     }
+    return out;
   }
 
   //Convert from a string, returning false if conversion fails
   template<typename T>
   static bool TryFromString(const std::string& s, T* out) {
-    try {
-      *out = boost::lexical_cast<T>(s);
-      return true;
-    } catch (...) {
-      return false;
-    }
+    std::stringstream ss(s);
+    ss >> *out;
+    return ss.eof() && !ss.fail();
+  }
+  static bool TryFromString(const std::string& s, std::string* out) {
+    *out = s;
+    return true;
   }
 
   // Convert to a string
