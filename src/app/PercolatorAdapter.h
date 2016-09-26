@@ -72,6 +72,16 @@ class PercolatorAdapter : public Caller {
   ProteinMatchCollection* getDecoyProteinMatchCollection();
 
   int run();
+
+  static int findFeatureIndex(std::string feature);
+  static std::map<int, int> mapChargeFeatures(); // map index of feature -> charge
+
+  static double unnormalize(
+    const PSMDescription* psm,
+    int featureIndex,
+    double* normDiv = NULL,
+    double* normSub = NULL
+  );
   
  protected:
     
