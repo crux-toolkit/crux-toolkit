@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href=""?>
-<msms_pipeline_analysis date="Thu Jul 21 21:38:50 2016" xmlns="http://regis-web.systemsbiology.net/pepXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://regis-web.systemsbiology.net/pepXML /usr/local/tpp/schema/pepXML_v110.xsd" summary_xml="">
+<msms_pipeline_analysis date="Tue Sep 20 11:44:42 2016" xmlns="http://regis-web.systemsbiology.net/pepXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://regis-web.systemsbiology.net/pepXML /usr/local/tpp/schema/pepXML_v110.xsd" summary_xml="">
 <msms_run_summary base_name="NA" msManufacturer="NA" msModel="NA" msIonization="NA" msAnalyzer="NA" msDectector="NA" raw_data_type="NA" raw_data="NA" >
 <sample_enzyme name="trypsin">
 </sample_enzyme>
@@ -94,12 +94,12 @@
 <parameter name="decoy-prefix" value="decoy_"/>
 <parameter name="output-weights" value="false"/>
 <parameter name="init-weights" value=""/>
-<parameter name="c-pos" value="0.01"/>
+<parameter name="c-pos" value="0"/>
 <parameter name="c-neg" value="0"/>
 <parameter name="train-fdr" value="0.01"/>
 <parameter name="test-fdr" value="0.01"/>
 <parameter name="fido-fast-gridsearch" value="0"/>
-<parameter name="fido-split-large-components" value="false"/>
+<parameter name="fido-no-split-large-components" value="false"/>
 <parameter name="fido-protein-truncation-threshold" value="0.01"/>
 <parameter name="post-processing-qvality" value="false"/>
 <parameter name="maxiter" value="10"/>
@@ -108,14 +108,16 @@
 <parameter name="unitnorm" value="false"/>
 <parameter name="test-each-iteration" value="false"/>
 <parameter name="feature-file-in" value="false"/>
+<parameter name="picked-protein" value=""/>
+<parameter name="protein-enzyme" value="trypsin"/>
+<parameter name="protein-report-fragments" value="false"/>
+<parameter name="protein-report-duplicates" value="false"/>
 <parameter name="protein" value="false"/>
 <parameter name="fido-alpha" value="0"/>
 <parameter name="fido-beta" value="0"/>
 <parameter name="fido-gamma" value="0"/>
-<parameter name="fido-protein-level-pi0" value="false"/>
 <parameter name="fido-empirical-protein-q" value="false"/>
 <parameter name="fido-gridsearch-depth" value="0"/>
-<parameter name="post-processing-tdc" value="false"/>
 <parameter name="fido-gridsearch-mse-threshold" value="0.05"/>
 <parameter name="override" value="false"/>
 <parameter name="klammer" value="false"/>
@@ -136,6 +138,7 @@
 <parameter name="use-neutral-loss-peaks" value="true"/>
 <parameter name="max-precursor-charge" value="5"/>
 <parameter name="peptide-centric-search" value="false"/>
+<parameter name="isotope-error" value=""/>
 <parameter name="num-threads" value="0"/>
 <parameter name="decoy_search" value="0"/>
 <parameter name="num_threads" value="0"/>

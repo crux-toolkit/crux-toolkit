@@ -455,9 +455,9 @@ void PMCDelimitedFileWriter::setUpPSMsColumns(
   case PERCOLATOR_COMMAND:
     addColumnName(FILE_IDX_COL);
     addColumnName(FILE_COL);
-    addColumnName(MATCHES_SPECTRUM_COL);
     addColumnName(PERCOLATOR_SCORE_COL);
     addColumnName(PERCOLATOR_RANK_COL);
+    addColumnName(PERCOLATOR_PEP_COL);
     addColumnName(PERCOLATOR_QVALUE_COL);
     break;
   }
@@ -529,6 +529,7 @@ void PMCDelimitedFileWriter::writePSMs(
     addScoreIfExists(match, TIDE_SEARCH_REFACTORED_XCORR, REFACTORED_SCORE_COL);
     addScoreIfExists(match, PERCOLATOR_SCORE, PERCOLATOR_SCORE_COL);
     addRankIfExists(match, PERCOLATOR_SCORE, PERCOLATOR_RANK_COL);
+    addScoreIfExists(match, PERCOLATOR_PEP, PERCOLATOR_PEP_COL);
     addScoreIfExists(match, PERCOLATOR_QVALUE, PERCOLATOR_QVALUE_COL);
     pair<int, int> scan_charge = make_pair(spectrum->getFirstScan(), zstate.getCharge());
     map<pair<int, int>, int>::const_iterator lookup = spectrum_counts.find(scan_charge);

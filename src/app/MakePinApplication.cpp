@@ -59,6 +59,10 @@ int MakePinApplication::main(const vector<string>& paths) {
     }
 
     MatchCollection* current_collection = parser.create(iter->c_str(), "");
+    if (!target_collection->getHasDistinctMatches() && current_collection->getHasDistinctMatches()) {
+      target_collection->setHasDistinctMatches(true);
+      decoy_collection->setHasDistinctMatches(true);
+    }
     for (int scorer_idx = (int)SP; scorer_idx < (int)NUMBER_SCORER_TYPES; scorer_idx++) {
       SCORER_TYPE_T cur_type = (SCORER_TYPE_T)scorer_idx;
       bool scored = current_collection->getScoredType(cur_type);
@@ -116,6 +120,10 @@ int MakePinApplication::main(const vector<string>& paths) {
   writer.setEnabledStatus("RefactoredXCorr", is_refactored_xcorr);
   writer.setEnabledStatus("NegLog10PValue",
                           target_collection->getScoredType(TIDE_SEARCH_EXACT_PVAL));
+  if (writer.getEnabledStatus("lnNumSP") && target_collection->getHasDistinctMatches()) {
+    writer.setEnabledStatus("lnNumSP", false);
+    writer.setEnabledStatus("lnNumDSP", true);
+  }
 
   //write .pin file 
   writer.printHeader();

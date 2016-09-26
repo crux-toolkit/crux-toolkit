@@ -35,9 +35,11 @@ class ActivePeptideQueue {
 
   ~ActivePeptideQueue();
 
+  bool isWithinIsotope(vector<double>* min_mass, vector<double>* max_mass, double mass, int* isotope_idx);
+  
   // See above for usage and .cc for implementation details.
-  int SetActiveRange(double min_mass, double max_mass, double min_range, double max_range);
-  int SetActiveRangeBIons(double min_mass, double max_mass, double min_range, double max_range);
+  int SetActiveRange(vector<double>* min_mass, vector<double>* max_mass, double min_range, double max_range, vector<bool>* candidatePeptideStatus);
+  int SetActiveRangeBIons(vector<double>* min_mass, vector<double>* max_mass, double min_range, double max_range, vector<bool>* candidatePeptideStatus);
 
   bool HasNext() const { return iter_ != end_; }
   Peptide* NextPeptide() { return *iter_; }

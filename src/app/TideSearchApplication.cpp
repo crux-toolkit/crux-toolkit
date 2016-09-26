@@ -141,6 +141,38 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
                     " (this will increase runtime).");
   }
 
+  // Check isotope-error parameter
+  string isotope_errors_string = Params::GetString("isotope-error");
+  if (isotope_errors_string[0] == ',') {
+    carp(CARP_FATAL, "CARP_FATAL: Error in isotope_error parameter formatting: (%s)", isotope_errors_string.c_str());
+  }
+  for (int i = 0; isotope_errors_string[i] != '\0'; ++i) {
+    if (isotope_errors_string[i] == ',' && (isotope_errors_string[i+1] == ',' || isotope_errors_string[i+1] == '\0')) {
+      carp(CARP_FATAL, "CARP_FATAL: Error in isotope_error parameter formatting: (%s) ", isotope_errors_string.c_str());
+    }
+  }
+  
+  stringstream isotope_errors_ss(isotope_errors_string);
+  string isotope_token;
+  vector<int>* negative_isotope_errors = new vector<int>();
+  negative_isotope_errors->push_back(0);
+  while (getline(isotope_errors_ss, isotope_token, ',')) {
+    if (isotope_token[0] == '\0') {
+      carp(CARP_FATAL, "CARP_FATAL: Error when parsing isotope_error parameter: (%s)", isotope_token.c_str());
+    }
+    for (int i = 0; isotope_token[i] != '\0'; ++i) {
+		    if (!isdigit(isotope_token[i]) && !(i == 0 && ((isotope_token[i] == '-') || isotope_token[i] == '+'))) {
+          carp(CARP_FATAL, "CARP_FATAL: Error when parsing isotope_error parameter: (%s)", isotope_token.c_str());
+        }
+    }
+    int isotope_integer = atoi(isotope_token.c_str());
+    if (find(negative_isotope_errors->begin(), negative_isotope_errors->end(), -1 * isotope_integer) != negative_isotope_errors->end()) {
+      carp(CARP_FATAL, "Found duplicate when parsing isotope_error parameter: %s", isotope_token.c_str());
+    }
+    negative_isotope_errors->push_back(-1 * isotope_integer);
+  }
+  sort(negative_isotope_errors->begin(), negative_isotope_errors->end());
+  
   carp(CARP_INFO, "Reading index %s", index.c_str());
   // Read proteins index file
   ProteinVec proteins;
@@ -350,7 +382,8 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
            target_file, decoy_file, compute_sp,
            nAA, aaFreqN, aaFreqI, aaFreqC, aaMass,
            nAARes, dAAFreqN, dAAFreqI, dAAFreqC, dAAMass,
-           pepHeader.mods(), pepHeader.nterm_mods(), pepHeader.cterm_mods());
+           pepHeader.mods(), pepHeader.nterm_mods(), pepHeader.cterm_mods(),
+           negative_isotope_errors);
 
     PSMConvertApplication converter;
     
@@ -416,6 +449,8 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
 
   } // End of spectrum file loop
 
+  delete negative_isotope_errors;
+  
   for (ProteinVec::iterator i = proteins.begin(); i != proteins.end(); ++i) {
     delete *i;
   }
@@ -482,6 +517,7 @@ void TideSearchApplication::search(void* threadarg) {
   const vector<double> dAAMass = *dAAMass_tmp;
 
   vector<boost::mutex*> locks_array = my_data->locks_array;
+  vector<int>* negative_isotope_errors = my_data->negative_isotope_errors;
 
   double bin_width = my_data->bin_width;
   double bin_offset = my_data->bin_offset;
@@ -551,8 +587,11 @@ void TideSearchApplication::search(void* threadarg) {
 
     // The active peptide queue holds the candidate peptides for spectrum.
     // Calculate and set the window, depending on the window type.
-    double min_mass, max_mass, min_range, max_range;
-    computeWindow(*sc, window_type, precursor_window, max_charge, &min_mass, &max_mass, &min_range, &max_range);
+    vector<double>* min_mass = new vector<double>();
+    vector<double>* max_mass = new vector<double>();
+    vector<bool>* candidatePeptideStatus = new vector<bool>();
+    double min_range, max_range;
+    computeWindow(*sc, window_type, precursor_window, max_charge, negative_isotope_errors, min_mass, max_mass, &min_range, &max_range);
 
     //Switch statment added by Andy Lin on 2/10/2016
     //Original code is placed in case named XCORR
@@ -567,7 +606,7 @@ void TideSearchApplication::search(void* threadarg) {
         // frequently-needed values for taking dot products with theoretical
         // spectra.
         observed.PreprocessSpectrum(*spectrum, charge);
-        int nCandPeptide = active_peptide_queue->SetActiveRange(min_mass, max_mass, min_range, max_range);
+        int nCandPeptide = active_peptide_queue->SetActiveRange(min_mass, max_mass, min_range, max_range, candidatePeptideStatus);
         if (nCandPeptide == 0) {
           continue;
         }
@@ -576,14 +615,15 @@ void TideSearchApplication::search(void* threadarg) {
         (*total_candidate_peptides) += nCandPeptide;
         locks_array[2]->unlock();
 
+        int candidatePeptideStatusSize = candidatePeptideStatus->size();
         TideMatchSet::Arr2 match_arr2(nCandPeptide); // Scored peptides will go here.
-        
+
         // Programs for taking the dot-product with the observed spectrum are laid
         // out in memory managed by the active_peptide_queue, one program for each
         // candidate peptide. The programs will store the results directly into
         // match_arr. We now pass control to those programs.
         collectScoresCompiled(active_peptide_queue, spectrum, observed, &match_arr2,
-                              nCandPeptide, charge);
+                              candidatePeptdeStatusSize, charge);
 
    
         // matches will arrange the results in a heap by score, return the top
@@ -593,20 +633,25 @@ void TideSearchApplication::search(void* threadarg) {
           deque<Peptide*>::const_iterator iter_ = active_peptide_queue->iter_;
           TideMatchSet::Arr2::iterator it = match_arr2.begin();
           for (; it != match_arr2.end(); ++iter_, ++it) {
-                   (*iter_)->AddHit(spectrum, it->first,0.0,it->second,charge);
+            int peptide_idx = candidatePeptideStatusSize - (it->second);
+            if ((*candidatePeptideStatus)[peptide_idx]) {
+              (*iter_)->AddHit(spectrum, it->first,0.0,it->second,charge);
+            }
           }
         } else {  //spectrum centric match report.
           TideMatchSet::Arr match_arr(nCandPeptide);
           for (TideMatchSet::Arr2::iterator it = match_arr2.begin();
                it != match_arr2.end();
                ++it) {
-            TideMatchSet::Pair pair;
-            pair.first.first = (double)(it->first / XCORR_SCALING);
-            pair.first.second = 0.0;
-            pair.second = it->second;
-            match_arr.push_back(pair);
+            int peptide_idx = candidatePeptideStatusSize - (it->second);
+            if ((*candidatePeptideStatus)[peptide_idx]) {
+              TideMatchSet::Pair pair;
+              pair.first.first = (double)(it->first / XCORR_SCALING);
+              pair.first.second = 0.0;
+              pair.second = it->second;
+              match_arr.push_back(pair);
+            }
           }
-
 
           TideMatchSet matches(&match_arr, highest_mz);
           matches.exact_pval_search_ = exact_pval_search;
@@ -621,7 +666,8 @@ void TideSearchApplication::search(void* threadarg) {
         const int maxDeltaMass = aaMass[nAA - 1];
 
         int maxPrecurMass = floor(MaxBin::Global().CacheBinEnd() + 50.0); //TODO is this last mass bin spectrum is in?
-        int nCandPeptide = active_peptide_queue->SetActiveRangeBIons(min_mass, max_mass, min_range, max_range);
+        int nCandPeptide = active_peptide_queue->SetActiveRangeBIons(min_mass, max_mass, min_range, max_range, candidatePeptideStatus);
+        int candidatePeptideStatusSize = candidatePeptideStatus->size();
 
         locks_array[2]->lock();
         (*total_candidate_peptides) += nCandPeptide;
@@ -644,6 +690,7 @@ void TideSearchApplication::search(void* threadarg) {
          * Ported to and integrated with Tide by Jeff Howbert, November, 2013.
          */
         
+        int peidx;
         int pe;
         int ma;    
         int pepMaInt;
@@ -652,7 +699,7 @@ void TideSearchApplication::search(void* threadarg) {
         pepMassIntUnique.reserve(nCandPeptide);
        
 	//Added by Andy Lin in Feb 2016 
-        getMassBin(pepMassInt,pepMassIntUnique,active_peptide_queue);
+        getMassBin(pepMassInt,pepMassIntUnique,active_peptide_queue,candidatePeptideStatus);
 	//End added by Andy Lin
         
         std::sort(pepMassIntUnique.begin(), pepMassIntUnique.end());
@@ -709,39 +756,43 @@ void TideSearchApplication::search(void* threadarg) {
         // ***** calculate p-values for peptide-spectrum matches **********************************
         iter_ = active_peptide_queue -> iter_;
         iter1_ = active_peptide_queue -> iter1_;
-        for (pe = 0; pe < nCandPeptide; pe++) { // TODO should probably use iterator instead
-          int pepMassIntIdx = 0;
-          for (ma = 0; ma < nPepMassIntUniq; ma++) { // TODO should probably use iterator instead
-            if (pepMassIntUnique[ma] == pepMassInt[pe]) { // TODO pepMassIntUnique should be accessed with an iterator
-              pepMassIntIdx = ma;
-              break;
+        pe = 0;
+        for (peidx = 0; peidx < candidatePeptideStatusSize; peidx++) { // TODO should probably use iterator instead
+          if ((*candidatePeptideStatus)[peidx]) {
+            int pepMassIntIdx = 0;
+            for (ma = 0; ma < nPepMassIntUniq; ma++) { // TODO should probably use iterator instead
+              if (pepMassIntUnique[ma] == pepMassInt[pe]) { // TODO pepMassIntUnique should be accessed with an iterator
+                pepMassIntIdx = ma;
+                break;
+              }
             }
-          }
 
-          // score XCorr for target peptide with integerized evidenceObs array
-          for (ma = 0; ma < maxPrecurMass; ma++) {
-            intensArrayTheor[ma] = 0;
-          }
-          for (iter_uint = iter1_->unordered_peak_list_.begin();
-               iter_uint != iter1_->unordered_peak_list_.end();
-               iter_uint++) {
-            intensArrayTheor[*iter_uint] = 1;
-          }
+            // score XCorr for target peptide with integerized evidenceObs array
+            for (ma = 0; ma < maxPrecurMass; ma++) {
+              intensArrayTheor[ma] = 0;
+            }
+            for (iter_uint = iter1_->unordered_peak_list_.begin();
+                 iter_uint != iter1_->unordered_peak_list_.end();
+                 iter_uint++) {
+              intensArrayTheor[*iter_uint] = 1;
+            }
 
-          int scoreRefactInt = 0;
-          for (ma = 0; ma < maxPrecurMass; ma++) {
-            scoreRefactInt += evidenceObs[pepMassIntIdx][ma] * intensArrayTheor[ma];
-          }
-          int scoreCountIdx = scoreRefactInt + scoreOffsetObs[pepMassIntIdx];
-          double pValue = pValueScoreObs[pepMassIntIdx][scoreCountIdx];
-          if (peptide_centric){
-            (*iter_)->AddHit(spectrum, pValue, (double)scoreRefactInt, nCandPeptide - pe, charge); 
-          } else {
-            TideMatchSet::Pair pair;
-            pair.first.first = pValue;
-            pair.first.second = (double)scoreRefactInt / RESCALE_FACTOR;
-            pair.second = nCandPeptide - pe; // TODO ugly hack to conform with the way these indices are generated in standard tide-search
-            match_arr.push_back(pair);
+            int scoreRefactInt = 0;
+            for (ma = 0; ma < maxPrecurMass; ma++) {
+              scoreRefactInt += evidenceObs[pepMassIntIdx][ma] * intensArrayTheor[ma];
+            }
+            int scoreCountIdx = scoreRefactInt + scoreOffsetObs[pepMassIntIdx];
+            double pValue = pValueScoreObs[pepMassIntIdx][scoreCountIdx];
+            if (peptide_centric){
+              (*iter_)->AddHit(spectrum, pValue, (double)scoreRefactInt, candidatePeptideStatusSize - peidx, charge); 
+            } else {
+              TideMatchSet::Pair pair;
+              pair.first.first = pValue;
+              pair.first.second = (double)scoreRefactInt / RESCALE_FACTOR;
+              pair.second = candidatePeptideStatusSize - peidx; // TODO ugly hack to conform with the way these indices are generated in standard tide-search
+              match_arr.push_back(pair);
+            }
+            pe++;
           }
 
           // move to next peptide and b ion queue
@@ -790,8 +841,8 @@ void TideSearchApplication::search(void* threadarg) {
       
       //TODO need to do a carp_fatal when fragment-tolerance and evidence-granulairty are invoked
 
-      int nCandPeptide = active_peptide_queue->SetActiveRangeBIons(min_mass, max_mass, min_range, max_range);
-      if (nCandPeptide==0) {
+      int nCandPeptide = active_peptide_queue->SetActiveRange(min_mass, max_mass, min_range, max_range, candidatePeptideStatus);
+      if (nCandPeptide == 0) {
         continue;
       }
       locks_array[2]->lock();
@@ -804,6 +855,9 @@ void TideSearchApplication::search(void* threadarg) {
         int tmpMass = MassConstants::mass2bin(aaMassDouble[i]);
         aaMassInt.push_back(tmpMass);
       }
+
+      int candidatePeptideStatusSize = candidatePeptideStatus->size();
+      TideMatchSet::Arr2 match_arr2(nCandPeptide); // Scored peptides will go here.
 
       const int minDeltaMass = aaMassInt[0];
       const int maxDeltaMass = aaMassInt[nAARes - 1]; 
@@ -821,7 +875,8 @@ void TideSearchApplication::search(void* threadarg) {
          *  - score count vectos for a range of integer masses
          *  - p-values between spectrum and all selected target and decoy peptides  
          */
-       
+
+        int peidx;       
         int pe;
         int ma;
         int* pepMassInt = new int[nCandPeptide];
@@ -829,7 +884,7 @@ void TideSearchApplication::search(void* threadarg) {
         pepMassIntUnique.reserve(nCandPeptide);
 
         //For each candidate peptide, determine which discretized mass bin it is in
-        getMassBin(pepMassInt,pepMassIntUnique,active_peptide_queue);
+        getMassBin(pepMassInt,pepMassIntUnique,active_peptide_queue,candidatePeptideStatus);
 
         //Sort vector, take unique of vector, get rid of extra space in vector
         std::sort(pepMassIntUnique.begin(), pepMassIntUnique.end());
@@ -895,53 +950,56 @@ void TideSearchApplication::search(void* threadarg) {
         vector<int>::const_iterator iter_int;
         vector<unsigned int>::const_iterator iter_uint;
 
-        for(pe = 0; pe < nCandPeptide; pe++) {
-          int pepMassIntIdx = 0;
-          int curPepMassInt;
+        pe = 0;
+        for(peidx = 0; peidx < candidatePeptideStatusSize; peidx++) {
+          if ((*candidatePeptideStatus)[peidx]) {
+            int pepMassIntIdx = 0;
+            int curPepMassInt;
 
-          //TODO should probably use iterator instead
-          for(ma = 0; ma < nPepMassIntUniq; ma++ ) {
-            //TODO pepMassIntUnique should be accessed with an interator
-            if(pepMassIntUnique[ma] == pepMassInt[pe]) {
-              pepMassIntIdx = ma;
-              curPepMassInt = pepMassIntUnique[ma];
-              break;
+            //TODO should probably use iterator instead
+            for(ma = 0; ma < nPepMassIntUniq; ma++ ) {
+              //TODO pepMassIntUnique should be accessed with an interator
+              if(pepMassIntUnique[ma] == pepMassInt[pe]) {
+                pepMassIntIdx = ma;
+                curPepMassInt = pepMassIntUnique[ma];
+                break;
+              }
             }
-          }
 
-          vector<vector<double> > curResidueEvidenceMatrix = residueEvidenceMatrix[pepMassIntIdx];
-          scoreResidueEvidence = 0;
-          Peptide* curPeptide = (*iter_);
-          int pepLen = curPeptide->Len();
+            vector<vector<double> > curResidueEvidenceMatrix = residueEvidenceMatrix[pepMassIntIdx];
+            scoreResidueEvidence = 0;
+            Peptide* curPeptide = (*iter_);
+            int pepLen = curPeptide->Len();
 
-          vector<unsigned int> intensArrayTheor;
-          for(iter_uint = iter1_->unordered_peak_list_.begin();
-              iter_uint != iter1_->unordered_peak_list_.end();
-              iter_uint++) {
-                intensArrayTheor.push_back(*iter_uint);
-          }
+            vector<unsigned int> intensArrayTheor;
+            for(iter_uint = iter1_->unordered_peak_list_.begin();
+                iter_uint != iter1_->unordered_peak_list_.end();
+                iter_uint++) {
+                  intensArrayTheor.push_back(*iter_uint);
+            }
 
-          //Make sure the number of theoretical peaks match pepLen-1
-          assert(intensArrayTheor.size() == pepLen - 1);
+            //Make sure the number of theoretical peaks match pepLen-1
+            assert(intensArrayTheor.size() == pepLen - 1);
 
-          double* residueMasses = curPeptide->getAAMasses(); //retrieves the amino acid masses, modifications included
-          for(int res = 0; res < pepLen - 1; res++) {
-            double tmpAAMass = residueMasses[res];
-            int tmpAA = find(aaMassDouble.begin(),aaMassDouble.end(),tmpAAMass) - aaMassDouble.begin();
-            scoreResidueEvidence += curResidueEvidenceMatrix[tmpAA][intensArrayTheor[res]-1];
-          }
-          delete residueMasses;
-          std::cout << scoreResidueEvidence << std::endl;
+            double* residueMasses = curPeptide->getAAMasses(); //retrieves the amino acid masses, modifications included
+            for(int res = 0; res < pepLen - 1; res++) {
+              double tmpAAMass = residueMasses[res];
+              int tmpAA = find(aaMassDouble.begin(),aaMassDouble.end(),tmpAAMass) - aaMassDouble.begin();
+              scoreResidueEvidence += curResidueEvidenceMatrix[tmpAA][intensArrayTheor[res]-1];
+            }
+            delete residueMasses;
 
-          if(peptide_centric) {
-            carp(CARP_FATAL, "residue-evidence has not been implemented with 'peptide-centric-search T' yet.");
-          }
-          else {
-            TideMatchSet::Pair pair;
-            pair.first.first = (double)scoreResidueEvidence;
-            pair.first.second = 0.0;
-            pair.second = nCandPeptide - pe; //TODO ugly hack to conform with the way these indices are generated in standard tide-search
-            match_arr.push_back(pair);
+            if(peptide_centric) {
+              carp(CARP_FATAL, "residue-evidence has not been implemented with 'peptide-centric-search T' yet.");
+            }
+            else {
+              TideMatchSet::Pair pair;
+              pair.first.first = (double)scoreResidueEvidence;
+              pair.first.second = 0.0;
+              pair.second = candidatePeptideStatusSize - peidx; //TODO ugly hack to conform with the way these indices are generated in standard tide-search
+              match_arr.push_back(pair);
+            }
+            pe++;
           }
 
           ++iter_;
@@ -975,6 +1033,7 @@ void TideSearchApplication::search(void* threadarg) {
         // 3) p-values of residue evidence match between spectrum and all selected candidate 
         //    target and decoy peptides
 
+        int idx;
         int pe;
         int ma;
         int* pepMassInt = new int[nCandPeptide];
@@ -982,7 +1041,7 @@ void TideSearchApplication::search(void* threadarg) {
         pepMassIntUnique.reserve(nCandPeptide);
 
         //For each candidate peptide, determine which discretized mass bin it is in
-        getMassBin(pepMassInt,pepMassIntUnique,active_peptide_queue);
+        getMassBin(pepMassInt,pepMassIntUnique,active_peptide_queue,candidatePeptideStatus);
  
         //Sort vector, take unique of vector, get rid of extra space in vector
         std::sort(pepMassIntUnique.begin(), pepMassIntUnique.end());
@@ -1061,6 +1120,7 @@ void TideSearchApplication::search(void* threadarg) {
           //maxColEvidence is edited by reference
           int maxEvidence = getMaxColEvidence(curResidueEvidenceMatrix,maxColEvidence,curPepMassInt);
           int maxNResidue = floor((double)curPepMassInt / 57.0);
+
           //sort maxColEvidence in descending order
           std::sort(maxColEvidence.begin(),maxColEvidence.end(),greater<int>());
           int maxScore=0;
@@ -1127,73 +1187,70 @@ void TideSearchApplication::search(void* threadarg) {
 //        std::cout << "precursorMZ: " << precursor_mz << std::endl;
         std::cout << "nCandPeptide: " << nCandPeptide << std::endl;
 //        std::cout << sc->spectrum->SpectrumNumber() << " " << precursorMass << endl;
-        for(pe = 0; pe < nCandPeptide; pe++) {
-          int pepMassIntIdx = 0;
-          int curPepMassInt;
 
-          //TODO should probably use iterator instead
-          for(ma = 0; ma < nPepMassIntUniq; ma++ ) {
-            //TODO pepMassIntUnique should be accessed with an interator
-            if(pepMassIntUnique[ma] == pepMassInt[pe]) {
-              pepMassIntIdx = ma;
-              curPepMassInt = pepMassIntUnique[ma];
-              break;
+        pe = 0;
+        for(peidx = 0; peidx < candidatePeptideStatusSize; peidx++) {
+          if ((*candidatePeptideStatus)[peidx]) {
+            int pepMassIntIdx = 0;
+            int curPepMassInt;
+
+            //TODO should probably use iterator instead
+            for(ma = 0; ma < nPepMassIntUniq; ma++ ) {
+              //TODO pepMassIntUnique should be accessed with an interator
+              if(pepMassIntUnique[ma] == pepMassInt[pe]) {
+                pepMassIntIdx = ma;
+                curPepMassInt = pepMassIntUnique[ma];
+                break;
+              }
             }
-          }
 
-          vector<vector<double> > curResidueEvidenceMatrix = residueEvidenceMatrix[pepMassIntIdx];
-          scoreResidueEvidence = 0;
-          Peptide* curPeptide = (*iter_);
-          int pepLen = curPeptide->Len();
+            vector<vector<double> > curResidueEvidenceMatrix = residueEvidenceMatrix[pepMassIntIdx];
+            scoreResidueEvidence = 0;
+            Peptide* curPeptide = (*iter_);
+            int pepLen = curPeptide->Len();
 
-          vector<unsigned int> intensArrayTheor;
-          for(iter_uint = iter1_->unordered_peak_list_.begin();
-              iter_uint != iter1_->unordered_peak_list_.end();
-              iter_uint++) {
-            intensArrayTheor.push_back(*iter_uint);
-          }
+            vector<unsigned int> intensArrayTheor;
+            for(iter_uint = iter1_->unordered_peak_list_.begin();
+                iter_uint != iter1_->unordered_peak_list_.end();
+                iter_uint++) {
+              intensArrayTheor.push_back(*iter_uint);
+            }
 
-          //Make sure the number of theoretical peaks match pepLen-1
-          assert(intensArrayTheor.size() == pepLen - 1);
+            //Make sure the number of theoretical peaks match pepLen-1
+            assert(intensArrayTheor.size() == pepLen - 1);
 
-          double* residueMasses = curPeptide->getAAMasses(); //retrieves the amino acid masses, modifications included
-          for(int res = 0; res < pepLen - 1; res++) {
-            double tmpAAMass = residueMasses[res];
-            int tmpAA = find(aaMassDouble.begin(),aaMassDouble.end(),tmpAAMass) - aaMassDouble.begin();
-            scoreResidueEvidence += curResidueEvidenceMatrix[tmpAA][intensArrayTheor[res]-1];
-          }
-          delete residueMasses;
+            double* residueMasses = curPeptide->getAAMasses(); //retrieves the amino acid masses, modifications included
+            for(int res = 0; res < pepLen - 1; res++) {
+              double tmpAAMass = residueMasses[res];
+              int tmpAA = find(aaMassDouble.begin(),aaMassDouble.end(),tmpAAMass) - aaMassDouble.begin();
+              scoreResidueEvidence += curResidueEvidenceMatrix[tmpAA][intensArrayTheor[res]-1];
+            }
+            delete residueMasses;
 
-          int scoreCountIdx = scoreResidueEvidence + scoreResidueOffsetObs[curPepMassInt];
-          double pValue = pValuesResidueObs[curPepMassInt][scoreCountIdx];
-/*
-          std::cout << "decoy: " << curPeptide->IsDecoy() << std::endl;
-          std::cout << "pepMassIntIdx: " << pepMassIntIdx << std::endl;
-          std::cout << "curPepSeq: " << curPepSeq << std::endl;
-          std::cout << "curPepMassInt: " << curPepMassInt <<std::endl;
-          std::cout << "scoreResideEvidence: " <<scoreResidueEvidence << std::endl;
-          std::cout << "pValue: " << pValue << std::endl << std::endl;;
-*/ 
+            int scoreCountIdx = scoreResidueEvidence + scoreResidueOffsetObs[curPepMassInt];
+            double pValue = pValuesResidueObs[curPepMassInt][scoreCountIdx];
 
-          if (curPeptide->IsDecoy() == false){
-            std::cout << curPeptide->SeqWithMods() << " " << scoreResidueEvidence << std::endl;
-//            std::cout << "pvalue: " << pValue << std::endl;
-//            std::cout << curPepSeq << " " << curPepMassInt << " " << pValue << std::endl;
-//            std::cout << curPepSeq << " " << pValue << std::endl;
-          }
+            if (curPeptide->IsDecoy() == false){
+              std::cout << curPeptide->SeqWithMods() << " " << scoreResidueEvidence << std::endl;
+//              std::cout << "pvalue: " << pValue << std::endl;
+//              std::cout << curPepSeq << " " << curPepMassInt << " " << pValue << std::endl;
+//              std::cout << curPepSeq << " " << pValue << std::endl;
+            }
 
-          if(peptide_centric) {
-            carp(CARP_FATAL, "residue-evidence has not been implemented with 'peptide-centric-search T' yet.");
-          }
-          else {
-            TideMatchSet::Pair pair;
-            pair.first.first = pValue;
-            //TODO do I ned a RESCALE_FACTOR?
-            pair.first.second = (double)scoreResidueEvidence;
-            //TODO ugly hack to conform with the way these indices are generated in standard tide-search
-            //TODO above comment was copied. not sure applies here
-            pair.second = nCandPeptide - pe; 
-            match_arr.push_back(pair);
+            if(peptide_centric) {
+              carp(CARP_FATAL, "residue-evidence has not been implemented with 'peptide-centric-search T' yet.");
+            }
+            else {
+              TideMatchSet::Pair pair;
+              pair.first.first = pValue;
+              //TODO do I ned a RESCALE_FACTOR?
+              pair.first.second = (double)scoreResidueEvidence;
+              //TODO ugly hack to conform with the way these indices are generated in standard tide-search
+              //TODO above comment was copied. not sure applies here
+              pair.second = candidatePeptideStatusSize - peidx;
+              match_arr.push_back(pair);
+            }
+            pe++;
           }
 
           ++iter_;
@@ -1235,7 +1292,8 @@ void TideSearchApplication::search(void* threadarg) {
 
       int maxPrecurMassBin = floor(MaxBin::Global().CacheBinEnd() + 50.0); //TODO is this last mass bin spectrum is in?
 
-      int nCandPeptide = active_peptide_queue->SetActiveRangeBIons(min_mass, max_mass, min_range, max_range);
+      int nCandPeptide = active_peptide_queue->SetActiveRangeBIons(min_mass, max_mass, min_range, max_range, candidatePeptideStatus);
+      int candidatePeptideStatusSize = candidatePeptideStatus->size();
       locks_array[2]->lock();
       (*total_candidate_peptides) += nCandPeptide;
       locks_array[2]->unlock();
@@ -1257,7 +1315,7 @@ void TideSearchApplication::search(void* threadarg) {
        *
        *
        */
-
+      int peidx;
       int pe;
       int ma;
       int pepMaInt;
@@ -1266,7 +1324,7 @@ void TideSearchApplication::search(void* threadarg) {
       pepMassIntUnique.reserve(nCandPeptide);
 
       //For each candidate peptide, determine which discretized mass bin it is in
-      getMassBin(pepMassInt,pepMassIntUnique,active_peptide_queue);
+      getMassBin(pepMassInt,pepMassIntUnique,active_peptide_queue,candidatePeptideStatus);
     
       //Sort vector, take unique of vector, get rid of extra space in vector
       std::sort(pepMassIntUnique.begin(), pepMassIntUnique.end());
@@ -1435,74 +1493,78 @@ void TideSearchApplication::search(void* threadarg) {
       //RESIDUE EVIDENCE MATRIX
       int scoreResidueEvidence;
 
-      for (pe = 0; pe < nCandPeptide; pe++) { // TODO should probably use iterator instead
-        int pepMassIntIdx = 0;
-        int curPepMassInt;
+      pe = 0;
+      for (peidx = 0; peidx < candidatePeptideStatusSize; peidx++) { // TODO should probably use iterator instead
+        if ((*candidatePeptideStatus)[peidx]) {
+          int pepMassIntIdx = 0;
+          int curPepMassInt;
 
-        for (ma = 0; ma < nPepMassIntUniq; ma++) { // TODO should probably use iterator instead
-          if (pepMassIntUnique[ma] == pepMassInt[pe]) { // TODO pepMassIntUnique should be accessed with an iterator
-            pepMassIntIdx = ma;
-            curPepMassInt = pepMassIntUnique[ma];
-            break;
+          for (ma = 0; ma < nPepMassIntUniq; ma++) { // TODO should probably use iterator instead
+            if (pepMassIntUnique[ma] == pepMassInt[pe]) { // TODO pepMassIntUnique should be accessed with an iterator
+              pepMassIntIdx = ma;
+              curPepMassInt = pepMassIntUnique[ma];
+              break;
+            }
           }
+
+          //XCORR
+          for (ma = 0; ma < maxPrecurMassBin; ma++) {
+            intensArrayTheor[ma] = 0;
+          }
+
+          for (iter_uint = iter1_->unordered_peak_list_.begin();
+               iter_uint != iter1_->unordered_peak_list_.end();
+               iter_uint++) {
+            intensArrayTheor[*iter_uint] = 1;
+          }
+          //XCORR end
+
+          //RESIDUE_EVIDENCE_MATRIX
+          vector<vector<double> > curResidueEvidenceMatrix = residueEvidenceMatrix[pepMassIntIdx];
+          scoreResidueEvidence = 0;
+          Peptide* curPeptide = (*iter_);
+          int pepLen = curPeptide->Len();
+
+          vector<unsigned int> intensArrayTheorRes;
+          for(iter_uint = iter1_->unordered_peak_list_.begin();
+              iter_uint != iter1_->unordered_peak_list_.end();
+              iter_uint++) {
+            intensArrayTheorRes.push_back(*iter_uint);
+          }
+          //RESIDUE_EVIDENCE_MATRIX end
+
+          //XCORR
+          int scoreRefactInt = 0;
+          for (ma = 0; ma < maxPrecurMassBin; ma++) {
+            scoreRefactInt += evidenceObs[pepMassIntIdx][ma] * intensArrayTheor[ma];
+          }
+
+          int scoreCountIdx = scoreRefactInt + scoreOffsetObs[pepMassIntIdx];
+          double pValue = pValueScoreObs[pepMassIntIdx][scoreCountIdx];
+          if (peptide_centric){
+            (*iter_)->AddHit(spectrum, pValue, (double)scoreRefactInt, nCandPeptide - pe, charge);
+          } else {
+            TideMatchSet::Pair pair;
+            pair.first.first = pValue;
+            pair.first.second = (double)scoreRefactInt / RESCALE_FACTOR;
+            pair.second = candidatePeptideStatusSize - peidx; // TODO ugly hack to conform with the way these indices are generated in standard tide-search
+            match_arr.push_back(pair);
+          }
+          //XCORR end
+
+          //RESIDUE EVIDENCE MATRIX
+          double* residueMasses = curPeptide->getAAMasses(); //retrieves the amino acid masses, modifications included
+
+          //TODO USE intensArrayTheorRes
+          //RESIDUE EVIDENCE MATRIX end
+
+          pe++;
         }
-
-        //XCORR
-        for (ma = 0; ma < maxPrecurMassBin; ma++) {
-          intensArrayTheor[ma] = 0;
-        }
-
-        for (iter_uint = iter1_->unordered_peak_list_.begin();
-             iter_uint != iter1_->unordered_peak_list_.end();
-             iter_uint++) {
-          intensArrayTheor[*iter_uint] = 1;
-        }
-        //XCORR end
-
-        //RESIDUE_EVIDENCE_MATRIX
-        vector<vector<double> > curResidueEvidenceMatrix = residueEvidenceMatrix[pepMassIntIdx];
-        scoreResidueEvidence = 0;
-        Peptide* curPeptide = (*iter_);
-        int pepLen = curPeptide->Len();
-
-        vector<unsigned int> intensArrayTheorRes;
-        for(iter_uint = iter1_->unordered_peak_list_.begin();
-            iter_uint != iter1_->unordered_peak_list_.end();
-            iter_uint++) {
-          intensArrayTheorRes.push_back(*iter_uint);
-        }
-        //RESIDUE_EVIDENCE_MATRIX end
-
-        //XCORR
-        int scoreRefactInt = 0;
-        for (ma = 0; ma < maxPrecurMassBin; ma++) {
-          scoreRefactInt += evidenceObs[pepMassIntIdx][ma] * intensArrayTheor[ma];
-        }
-
-        int scoreCountIdx = scoreRefactInt + scoreOffsetObs[pepMassIntIdx];
-        double pValue = pValueScoreObs[pepMassIntIdx][scoreCountIdx];
-        if (peptide_centric){
-          (*iter_)->AddHit(spectrum, pValue, (double)scoreRefactInt, nCandPeptide - pe, charge);
-        } else {
-          TideMatchSet::Pair pair;
-          pair.first.first = pValue;
-          pair.first.second = (double)scoreRefactInt / RESCALE_FACTOR;
-          pair.second = nCandPeptide - pe; // TODO ugly hack to conform with the way these indices are generated in standard tide-search
-          match_arr.push_back(pair);
-        }
-        //XCORR end
-
-        //RESIDUE EVIDENCE MATRIX
-        double* residueMasses = curPeptide->getAAMasses(); //retrieves the amino acid masses, modifications included
-
-        //TODO USE intensArrayTheorRes
-        //RESIDUE EVIDENCE MATRIX end
  
         // move to next peptide and b ion queue
         ++iter_; // TODO need to add test to make sure haven't gone past available peptides
         ++iter1_; // TODO need to add test to make sure haven't gone past available b ion queues
       }
-
       break;
     }
     case INVALID_SCORE_FUNCTION:
@@ -1510,6 +1572,9 @@ void TideSearchApplication::search(void* threadarg) {
       break;
 
     } //End bracket for switch statement
+    delete min_mass;
+    delete max_mass;
+    delete candidatePeptideStatus;
   }  
 }
 
@@ -1545,7 +1610,7 @@ void TideSearchApplication::search(
   const pb::ModTable& mod_table,
   const pb::ModTable& nterm_mod_table,
   const pb::ModTable& cterm_mod_table
-
+  vector<int>* negative_isotope_errors
 ) {
   // Create an array of 4 locks.
   // Lock #0: Results file output
@@ -1604,7 +1669,7 @@ void TideSearchApplication::search(
       i, NUM_THREADS, nAA, aaFreqN, aaFreqI, aaFreqC, aaMass, 
       nAARes, &dAAFreqN, &dAAFreqI, &dAAFreqC, &dAAMass,
       &mod_table, &nterm_mod_table, &cterm_mod_table, locks_array, //TODO do I need to delete pointer somewhere?
-      bin_width_, bin_offset_, exact_pval_search_, spectrum_flag_, sc_index, total_candidate_peptides));
+      bin_width_, bin_offset_, exact_pval_search_, spectrum_flag_, sc_index, total_candidate_peptides, negative_isotope_errors));
   }
 
   boost::thread_group threadgroup;
@@ -1749,39 +1814,49 @@ void TideSearchApplication::computeWindow(
   WINDOW_TYPE_T window_type,
   double precursor_window,
   int max_charge,
-  double* out_min,
-  double* out_max,
+  vector<int>* negative_isotope_errors,
+  vector<double>* out_min,
+  vector<double>* out_max,
   double* min_range,
   double* max_range
 ) {
+  
+  double unit_dalton = BIN_WIDTH;
+  
   switch (window_type) {
   case WINDOW_MASS:
-    *out_min = sc.neutral_mass - precursor_window;
-    *out_max = sc.neutral_mass + precursor_window;
-    *min_range = *out_min;
-    *max_range = *out_max;
+    for (vector<int>::const_iterator ie = negative_isotope_errors->begin(); ie != negative_isotope_errors->end(); ++ie) {
+      out_min->push_back(sc.neutral_mass + (*ie * unit_dalton) - precursor_window);
+      out_max->push_back(sc.neutral_mass + (*ie * unit_dalton) + precursor_window);
+    }
+    *min_range = (sc.neutral_mass + (negative_isotope_errors->front() * unit_dalton)) - precursor_window;
+    *max_range = (sc.neutral_mass + (negative_isotope_errors->back() * unit_dalton)) + precursor_window;
     break;
   case WINDOW_MZ: {
     double mz_minus_proton = sc.spectrum->PrecursorMZ() - MASS_PROTON;
-    *out_min = (mz_minus_proton - precursor_window) * sc.charge;
-    *out_max = (mz_minus_proton + precursor_window) * sc.charge;
-    *min_range = mz_minus_proton*sc.charge - precursor_window*max_charge;
-    *max_range = mz_minus_proton*sc.charge + precursor_window*max_charge;
+    for (vector<int>::const_iterator ie = negative_isotope_errors->begin(); ie != negative_isotope_errors->end(); ++ie) {
+      out_min->push_back((mz_minus_proton - precursor_window) * sc.charge + (*ie * unit_dalton));
+      out_max->push_back((mz_minus_proton + precursor_window) * sc.charge + (*ie * unit_dalton));
+    }
+    *min_range = (mz_minus_proton*sc.charge + (negative_isotope_errors->front() * unit_dalton)) - precursor_window*max_charge;
+    *max_range = (mz_minus_proton*sc.charge + (negative_isotope_errors->back() * unit_dalton)) + precursor_window*max_charge;
     break;
   }
   case WINDOW_PPM: {
     double tiny_precursor = precursor_window * 1e-6;
-    *out_min = sc.neutral_mass * (1.0 - tiny_precursor);
-    *out_max = sc.neutral_mass * (1.0 + tiny_precursor);
-    *min_range = *out_min;
-    *max_range = *out_max;
+    for (vector<int>::const_iterator ie = negative_isotope_errors->begin(); ie != negative_isotope_errors->end(); ++ie) {
+      out_min->push_back((sc.neutral_mass + (*ie * unit_dalton)) * (1.0 - tiny_precursor));
+      out_max->push_back((sc.neutral_mass + (*ie * unit_dalton)) * (1.0 + tiny_precursor));
+    }
+    *min_range = (sc.neutral_mass + (negative_isotope_errors->front() * unit_dalton)) * (1.0 - tiny_precursor);
+    *max_range = (sc.neutral_mass + (negative_isotope_errors->back() * unit_dalton)) * (1.0 + tiny_precursor);
     break;
   }
   default:
     carp(CARP_FATAL, "Invalid window type");
   }
   carp(CARP_DETAILED_DEBUG, "Scan %d.%d mass window is [%f, %f]",
-       sc.spectrum->SpectrumNumber(), sc.charge, *out_min, *out_max);
+       sc.spectrum->SpectrumNumber(), sc.charge, (*out_min)[0], (*out_max)[0]);
 }
 
 bool TideSearchApplication::hasDecoys() {
@@ -2260,9 +2335,11 @@ string TideSearchApplication::getOutputFileName() {
 void TideSearchApplication::getMassBin(
   int* pepMassInt,
   vector<int>& pepMassIntUnique,
-  ActivePeptideQueue* active_peptide_queue
+  ActivePeptideQueue* active_peptide_queue,
+  vector<bool>* candidatePeptideStatus
 ) {
   int pe = 0;
+  int peidx = 0;
   int pepMaInt;
 
   deque<Peptide*>::const_iterator iter_ = active_peptide_queue->iter_;
@@ -2270,13 +2347,15 @@ void TideSearchApplication::getMassBin(
   for (iter_ = active_peptide_queue->iter_;
        iter_ != active_peptide_queue->end_;
        ++iter_) {
-    double pepMass = (*iter_)->Mass();
-//    std::cout << pepMass << std::endl;
-    pepMaInt = MassConstants::mass2bin(pepMass);
-    pepMassInt[pe] = pepMaInt;
-    pepMassIntUnique.push_back(pepMaInt);
-    pe++;
-  }
+    if ((*candidatePeptideStatus)[peidx]) {
+      double pepMass = (*iter_)->Mass();
+      pepMaInt = MassConstants::mass2bin(pepMass);
+      pepMassInt[pe] = pepMaInt;
+      pepMassIntUnique.push_back(pepMaInt);
+      pe++;
+    }
+    peidx++;
+  } 
 }
 
 //Added by Andy Lin in March 2016
