@@ -102,7 +102,7 @@ private:
     const vector<double>& dAAMass,
     const pb::ModTable& mod_table,
     const pb::ModTable& nterm_mod_table,
-    const pb::ModTable& cterm_mod_table
+    const pb::ModTable& cterm_mod_table,
     vector<int>* negative_isotope_errors
   );
 
@@ -274,7 +274,7 @@ private:
             const vector<double>* dAAFreqC_, const vector<double>* dAAMass_,
             const pb::ModTable* mod_table_, const pb::ModTable* nterm_mod_table_, const pb::ModTable* cterm_mod_table_,
             vector<boost::mutex*> locks_array_, double bin_width_, double bin_offset_, bool exact_pval_search_, 
-            map<pair<string, unsigned int>, bool>* spectrum_flag_, int* sc_index_, int* total_candidate_peptides_
+            map<pair<string, unsigned int>, bool>* spectrum_flag_, int* sc_index_, int* total_candidate_peptides_,
             vector<int>* negative_isotope_errors_) :
             spectrum_filename(spectrum_filename_), spec_charges(spec_charges_), active_peptide_queue(active_peptide_queue_),
             proteins(proteins_), locations(locations_), precursor_window(precursor_window_), window_type(window_type_),
