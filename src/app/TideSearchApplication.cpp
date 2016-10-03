@@ -1165,7 +1165,7 @@ void TideSearchApplication::search(void* threadarg) {
 	      scoreResidueCount[i] = scoreResidueCount[i] + scoreResidueCount[i+1];
 	    }
 	    for(int i = 0; i < scoreResidueCount.size(); i++) {
-	      scoreResidueCount[i] -= scoreResidueCountAdjust[i];
+//	      scoreResidueCount[i] -= scoreResidueCountAdjust[i];
 
 	      //Avoid potential underflow
 	      scoreResidueCount[i] = exp(log(scoreResidueCount[i]) - log(totalCount));
@@ -1484,7 +1484,7 @@ void TideSearchApplication::search(void* threadarg) {
 	  }
 
 	  for(int i = 0; i < scoreResidueCount.size(); i++) {
-	    scoreResidueCount[i] -= scoreResidueCountAdjust[i];
+//	    scoreResidueCount[i] -= scoreResidueCountAdjust[i];
 	    //Avoid potential underflow
 	    scoreResidueCount[i] = exp(log(scoreResidueCount[i]) - log(totalCount));
 	  }
