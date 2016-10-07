@@ -889,7 +889,7 @@ FLOAT_T* AssignConfidenceApplication::compute_decoy_qvalues_mixmax(
          num_targets, num_decoys);
   }
   if (num_targets != num_decoys) {
-    carp(CARP_WARN, "The mix-max procedure is not well behaved when # targets (%d) != # of decoys (%d).",
+    carp(CARP_WARNING, "The mix-max procedure is not well behaved when # targets (%d) != # of decoys (%d).",
          num_targets, num_decoys);
   }
   //estimate pi0 from data if it is not given.
