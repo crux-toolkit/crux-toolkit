@@ -53,6 +53,7 @@ int ParamMedicApplication::main(int argc, char** argv) {
   }
 
   // calculate mass error distributions
+  string precursorFailure, fragmentFailure;
   double precursorSigmaPpm = 0;
   double fragmentSigmaPpm = 0;
   double fragmentSigmaTh = 0;
@@ -60,20 +61,26 @@ int ParamMedicApplication::main(int argc, char** argv) {
   double fragmentPredictionPpm = 0;
   double fragmentPredictionTh = 0;
   errCalc.calcMassErrorDist(
+    &precursorFailure,
+    &fragmentFailure,
     &precursorSigmaPpm,
     &fragmentSigmaPpm,
-    &fragmentSigmaTh,
     &precursorPredictionPpm,
-    &fragmentPredictionPpm,
     &fragmentPredictionTh
   );
 
-  carp(CARP_DEBUG, "precursor ppm standard deviation: %f", precursorSigmaPpm);
-  carp(CARP_DEBUG, "fragment standard deviation (Th): %f", fragmentSigmaTh);
-  carp(CARP_DEBUG, "fragment standard deviation (ppm): %f", fragmentSigmaPpm);
-  carp(CARP_INFO, "Precursor error estimate (ppm): %.2f", precursorPredictionPpm);
-  carp(CARP_INFO, "Fragment bin size estimate (Th): %.4f", fragmentPredictionTh);
-  carp(CARP_INFO, "Fragment bin size estimate (ppm): %.2f", fragmentPredictionPpm);
+  if (precursorFailure.empty()) {
+    carp(CARP_INFO, "precursor ppm standard deviation: %f", precursorSigmaPpm);
+    carp(CARP_INFO, "Precursor error estimate (ppm): %.2f", precursorPredictionPpm);
+  } else {
+    carp(CARP_ERROR, "failed to calculate precursor error: %s", precursorFailure.c_str());
+  }
+  if (fragmentFailure.empty()) {
+    carp(CARP_INFO, "fragment standard deviation (ppm): %f", fragmentSigmaPpm);
+    carp(CARP_INFO, "Fragment bin size estimate (Th): %.4f", fragmentPredictionTh);
+  } else {
+    carp(CARP_ERROR, "failed to calculate fragment error: %s", fragmentFailure.c_str());
+  }
   return 0;
 }
 
@@ -200,26 +207,27 @@ void ParamMedicErrorCalculator::clearBins() {
 }
 
 void ParamMedicErrorCalculator::calcMassErrorDist(
+  string* precursorFailure,
+  string* fragmentFailure,
   double* precursorSigmaPpm,
   double* fragmentSigmaPpm,
-  double* fragmentSigmaTh,
   double* precursorPredictionPpm,
-  double* fragmentPredictionPpm,
   double* fragmentPredictionTh
 ) {
+  precursorFailure->clear();
+  fragmentFailure->clear();
   carp(CARP_INFO, "Processed %d total spectra", numTotalSpectra_);
   carp(CARP_INFO, "Processed %d qualifying spectra", numPassingSpectra_);
   carp(CARP_INFO, "Precursor pairs: %d", pairedPrecursorMzs_.size());
   carp(CARP_INFO, "Fragment pairs: %d", pairedFragmentPeaks_.size());
 
   if (pairedPrecursorMzs_.size() > MAX_PEAKPAIRS) {
-    carp(CARP_INFO, "Using %d of %d peak pairs for precursor...",
+    carp(CARP_DEBUG, "Using %d of %d peak pairs for precursor...",
          MAX_PEAKPAIRS, pairedPrecursorMzs_.size());
     random_shuffle(pairedPrecursorMzs_.begin(), pairedPrecursorMzs_.end(), myrandom_limit);
     pairedPrecursorMzs_.resize(MAX_PEAKPAIRS);
   }
 
-  vector<double> precursorDistancesTh;
   vector<double> precursorDistancesPpm;
   int numZeroPrecursorDeltas = 0;
   for (vector< pair<double, double> >::const_iterator i = pairedPrecursorMzs_.begin();
@@ -229,74 +237,102 @@ void ParamMedicErrorCalculator::calcMassErrorDist(
     if (diffTh == 0) {
       ++numZeroPrecursorDeltas;
     }
-    precursorDistancesTh.push_back(diffTh);
     precursorDistancesPpm.push_back(diffTh * MILLION / i->first);
   }
 
   // check for conditions that would cause us to bomb out
-  if (precursorDistancesTh.size() < Params::GetInt("min-peak-pairs")) {
-    carp(CARP_FATAL, "Need >= %d peak pairs to fit mixed distribution. Got only %d",
-         Params::GetInt("min-peak-pairs"), precursorDistancesTh.size());
+  if (precursorDistancesPpm.size() < Params::GetInt("min-peak-pairs")) {
+    *precursorFailure = 
+      "Need >= " + Params::GetString("min-peak-pairs") + " peak pairs to fit mixed distribution. "
+      "Got only " + StringUtils::ToString(precursorDistancesPpm.size());
   }
-  double proportionPrecursorMzsZero = (double)numZeroPrecursorDeltas / pairedPrecursorMzs_.size();
-  carp(CARP_DEBUG, "proportion zero: %f", proportionPrecursorMzsZero);
-  if (proportionPrecursorMzsZero > MAX_PROPORTION_PRECURSOR_DELTAS_ZERO) {
-    carp(CARP_FATAL, "Too high a proportion of precursor mass differences (%f) are exactly 0. "
-                     "Some processing has been done on this run that param-medic can't handle. "
-                     "You should investigate what that processing might be.",
-         proportionPrecursorMzsZero);
-  }
-
-  if (pairedFragmentPeaks_.size() > MAX_PEAKPAIRS) {
-    carp(CARP_INFO, "Using %d of %d peak pairs for fragment...",
-         MAX_PEAKPAIRS, pairedFragmentPeaks_.size());
-    random_shuffle(pairedFragmentPeaks_.begin(), pairedFragmentPeaks_.end(), myrandom_limit);
-    pairedFragmentPeaks_.resize(MAX_PEAKPAIRS);
+  if (precursorFailure->empty()) {
+    double proportionPrecursorMzsZero = (double)numZeroPrecursorDeltas / pairedPrecursorMzs_.size();
+    carp(CARP_DEBUG, "proportion zero: %f", proportionPrecursorMzsZero);
+    if (proportionPrecursorMzsZero > MAX_PROPORTION_PRECURSOR_DELTAS_ZERO) {
+      *precursorFailure =
+        "Too high a proportion of precursor mass differences (" +
+        StringUtils::ToString(proportionPrecursorMzsZero) + ") are exactly 0. "
+        "Some processing has been done on this run that param-medic can't handle. "
+        "You should investigate what that processing might be.";
+    }
   }
 
-  vector<double> fragmentDistancesTh;
-  vector<double> fragmentDistancesPpm;
-  for (vector< pair<const Peak*, const Peak*> >::const_iterator i = pairedFragmentPeaks_.begin();
-       i != pairedFragmentPeaks_.end();
-       i++) {
-    double diffTh = i->first->getLocation() - i->second->getLocation();
-    fragmentDistancesTh.push_back(diffTh);
-    fragmentDistancesPpm.push_back(diffTh * MILLION / i->first->getLocation());
+  double precursorMuPpm2Measures = numeric_limits<double>::quiet_NaN();
+  double precursorSigmaPpm2Measures = numeric_limits<double>::quiet_NaN();
+  if (precursorFailure->empty()) {
+    estimateMuSigma(precursorDistancesPpm, MIN_SIGMA_PPM,
+                    &precursorMuPpm2Measures, &precursorSigmaPpm2Measures);
   }
 
-  // estimate the parameters of the component distributions for each of the mixed distributions
-  double precursorMuPpm2Measures, precursorSigmaPpm2Measures;
-  estimateMuSigma(precursorDistancesPpm, MIN_SIGMA_PPM,
-                  &precursorMuPpm2Measures, &precursorSigmaPpm2Measures);
-  double fragmentMuPpm2Measures, fragmentSigmaPpm2Measures;
-  estimateMuSigma(fragmentDistancesPpm, MIN_SIGMA_PPM,
-                  &fragmentMuPpm2Measures, &fragmentSigmaPpm2Measures);
-  double fragmentMuTh2Measures, fragmentSigmaTh2Measures;
-  estimateMuSigma(fragmentDistancesTh, MIN_SIGMA_TH,
-                  &fragmentMuTh2Measures, &fragmentSigmaTh2Measures);
+  if (pairedFragmentPeaks_.size() < Params::GetInt("min-peak-pairs")) {
+    *fragmentFailure =
+      "Need >= " + Params::GetString("min-peak-pairs") + " peak pairs to fit mixed distribution. "
+      "Got only " + StringUtils::ToString(pairedFragmentPeaks_.size());
+  }
 
-  carp(CARP_DEBUG, "precursor_mu_ppm_2measures: %f", precursorMuPpm2Measures);
-  carp(CARP_DEBUG, "precursor_sigma_ppm_2measures: %f", precursorSigmaPpm2Measures);
-  carp(CARP_DEBUG, "fragment_mu_ppm_2measures: %f", fragmentMuPpm2Measures);
-  carp(CARP_DEBUG, "fragment_sigma_ppm_2measures: %f", fragmentSigmaPpm2Measures);
-  carp(CARP_DEBUG, "fragment_mu_th_2measures: %f", fragmentMuTh2Measures);
-  carp(CARP_DEBUG, "fragment_sigma_th_2measures: %f", fragmentSigmaTh2Measures);
+  double fragmentMuPpm2Measures = numeric_limits<double>::quiet_NaN();
+  double fragmentSigmaPpm2Measures = numeric_limits<double>::quiet_NaN();
+  if (fragmentFailure->empty()) {
+    if (pairedFragmentPeaks_.size() > MAX_PEAKPAIRS) {
+      carp(CARP_DEBUG, "Using %d of %d peak pairs for fragment...",
+           MAX_PEAKPAIRS, pairedFragmentPeaks_.size());
+      random_shuffle(pairedFragmentPeaks_.begin(), pairedFragmentPeaks_.end(), myrandom_limit);
+      pairedFragmentPeaks_.resize(MAX_PEAKPAIRS);
+    }
+    vector<double> fragmentDistancesTh;
+    vector<double> fragmentDistancesPpm;
+    for (vector< pair<const Peak*, const Peak*> >::const_iterator i = pairedFragmentPeaks_.begin();
+         i != pairedFragmentPeaks_.end();
+         i++) {
+      double diffTh = i->first->getLocation() - i->second->getLocation();
+      fragmentDistancesTh.push_back(diffTh);
+      fragmentDistancesPpm.push_back(diffTh * MILLION / i->first->getLocation());
+    }
+    // estimate the parameters of the component distributions for each of the mixed distributions
+    estimateMuSigma(fragmentDistancesPpm, MIN_SIGMA_PPM,
+                    &fragmentMuPpm2Measures, &fragmentSigmaPpm2Measures);
+  }
 
-  // what we have now measured, in the fit Gaussians, is the sum of two errors.
-  // "the sum of two independent normally distributed random variables is normal,
-  // with its mean being the sum of the two means, and its variance being the sum of the two variances
-  // (i.e., the square of the standard deviation is the sum of the squares of the standard deviations)."
-  // https://en.wikipedia.org/wiki/Sum_of_normally_distributed_random_variables
-  // Practically speaking, this distinction doesn't matter one bit. I'm just doing it for interpretability
-  // of the sigma value
-  *precursorSigmaPpm = sqrt(pow(precursorSigmaPpm2Measures, 2));
-  *fragmentSigmaPpm = sqrt(pow(fragmentSigmaPpm2Measures, 2));
-  *fragmentSigmaTh = sqrt(pow(fragmentSigmaTh2Measures, 2));
+  if (!precursorFailure->empty()) {
+    carp(CARP_DEBUG, "Failed precursor! %s", precursorFailure->c_str());
+  } else {
+    carp(CARP_DEBUG, "precursor_mu_ppm_2measures: %f", precursorMuPpm2Measures);
+    carp(CARP_DEBUG, "precursor_sigma_ppm_2measures: %f", precursorSigmaPpm2Measures);
+  }
 
-  // generate predictions by multiplying by empirically-derived values
-  *precursorPredictionPpm = PRECURSOR_SIGMA_MULTIPLIER * *precursorSigmaPpm;
-  *fragmentPredictionTh = FRAGMENT_SIGMA_MULTIPLIER * *fragmentSigmaTh;
-  *fragmentPredictionPpm = FRAGMENT_SIGMA_MULTIPLIER * *fragmentSigmaPpm;
+  if (!fragmentFailure->empty()) {
+    carp(CARP_DEBUG, "Failed fragment! %s", fragmentFailure->c_str());
+  } else {
+    carp(CARP_DEBUG, "fragment_mu_ppm_2measures: %f", fragmentMuPpm2Measures);
+    carp(CARP_DEBUG, "fragment_sigma_ppm_2measures: %f", fragmentSigmaPpm2Measures);
+  }
+
+  // what we have now measured, in the fit Gaussians, is the distribution of the difference
+  // of two values drawn from the distribution of error values.
+  // Assuming the error values are normally distributed with mean 0 and variance s^2, the
+  // differences are normally distributed with mean 0 and variance 2*s^2:
+  // http://mathworld.wolfram.com/NormalDifferenceDistribution.html
+  // i.e., differences are normally distributed with mean=0 and sd=sqrt(2)*s
+  // hence, if differences have sd=diff_sigma, then errors have sd diff_sigma/sqrt(2)
+  //
+  // incidentally, this transformation doesn't matter one bit, practically, since we're
+  // inferring a multiplier for this value empirically. But it lets us report something
+  // with an easily-interpretable meaning as an intermediate value
+  *precursorSigmaPpm = numeric_limits<double>::quiet_NaN();
+  *precursorPredictionPpm = numeric_limits<double>::quiet_NaN();
+  if (precursorFailure->empty()) {
+    *precursorSigmaPpm = precursorSigmaPpm2Measures / sqrt(2);
+    // generate prediction by multiplying by empirically-derived value
+    *precursorPredictionPpm = PRECURSOR_SIGMA_MULTIPLIER * *precursorSigmaPpm;
+  }
+  *fragmentSigmaPpm = numeric_limits<double>::quiet_NaN();
+  *fragmentPredictionTh = numeric_limits<double>::quiet_NaN();
+  if (fragmentFailure->empty()) {
+    *fragmentSigmaPpm = fragmentSigmaPpm2Measures / sqrt(2);
+    // generate prediction by multiplying by empirically-derived value
+    *fragmentPredictionTh = FRAGMENT_SIGMA_MULTIPLIER * *fragmentSigmaPpm;
+  }
 }
 
 void ParamMedicErrorCalculator::estimateMuSigma(
@@ -434,7 +470,6 @@ double ParamMedicModel::fit(const vector<double>& data) {
     lastLogProbSum = logProbSum;
   }
   clearSummaries();
-  carp(CARP_DEBUG, "Total Improvement: %f", lastLogProbSum - initialLogProbSum);
   return lastLogProbSum - initialLogProbSum;
 }
 
