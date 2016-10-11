@@ -28,11 +28,11 @@ class ParamMedicErrorCalculator {
   // this is to be run after all spectra have been processed;
   // fits the mixed model to the mixed distributions of m/z differences
   void calcMassErrorDist(
+    std::string* precursorFailure,
+    std::string* fragmentFailure,
     double* precursorSigmaPpm,
     double* fragmentSigmaPpm,
-    double* fragmentSigmaTh,
     double* precursorPredictionPpm,
-    double* fragmentPredictionPpm,
     double* fragmentPredictionTh
   );
 
