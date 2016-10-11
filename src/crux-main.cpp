@@ -23,6 +23,7 @@
 #include "app/PrintProcessedSpectra.h"
 #include "app/GeneratePeptides.h"
 #include "app/GetMs2Spectrum.h"
+#include "app/ParamMedicApplication.h"
 #include "app/Pipeline.h"
 #include "app/PredictPeptideIons.h"
 #include "app/xlink/SearchForXLinks.h"
@@ -84,6 +85,7 @@ int main(int argc, char** argv) {
     applications.add(new MakePinApplication());
     applications.add(new PredictPeptideIons());
     applications.add(new CruxHardklorApplication());
+    applications.add(new ParamMedicApplication());
     applications.add(new PrintProcessedSpectra());
     applications.add(new GeneratePeptides());
     applications.add(new GetMs2Spectrum());

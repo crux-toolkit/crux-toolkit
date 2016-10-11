@@ -133,6 +133,7 @@ set (
   io/MzIdentMLWriter.cpp
   io/OutputFiles.cpp
   parameter.cpp
+  app/ParamMedicApplication.cpp
   util/Params.cpp
   model/Peak.cpp
   model/Peptide.cpp
