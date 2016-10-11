@@ -21,6 +21,7 @@
 #include "GeneratePeptides.h"
 #include "GetMs2Spectrum.h"
 #include "MakePinApplication.h"
+#include "ParamMedicApplication.h"
 #include "PercolatorApplication.h"
 #include "Pipeline.h"
 #include "PredictPeptideIons.h"
@@ -61,6 +62,7 @@ int CreateDocs::main(int argc, char** argv) {
   apps.add(new GeneratePeptides());
   apps.add(new GetMs2Spectrum());
   apps.add(new MakePinApplication());
+  apps.add(new ParamMedicApplication());
   apps.add(new PercolatorApplication());
   apps.add(new PipelineApplication());
   apps.add(new PredictPeptideIons());

@@ -109,7 +109,7 @@ class ParamMedicModel {
   void clearSummaries();
 
   // perform log-sum-exp on a pair of numbers in a log space.
-  // this is calculated as z = log( e^x + e^y).
+  // this is calculated as z = log( e^x + e^y ).
   // however, this causes underflow sometimes when x or y are too negative.
   // a simplification of this is thus z = x + log( e^(y-x) + 1 ), where x is the
   // greater number.

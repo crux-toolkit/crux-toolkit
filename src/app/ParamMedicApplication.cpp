@@ -11,15 +11,20 @@ using namespace Crux;
 using namespace std;
 
 const double SQRT_2_PI = 2.50662827463;
+
 // maximum proportion of precursor delta-masses that can be 0, otherwise we give up
 const double MAX_PROPORTION_PRECURSOR_DELTAS_ZERO = 0.5;
+
 // maximum peaks to use to fit a mixed distribution
 const int MAX_PEAKPAIRS = 100000;
+
 // multipliers to transform standard error values into algorithm parameters
 const double PRECURSOR_SIGMA_MULTIPLIER = 11.130897;
 const double FRAGMENT_SIGMA_MULTIPLIER = 4.763766;
+
 // separation between averagine peaks used for binning spectra
 const double AVERAGINE_PEAK_SEPARATION = 1.000495;
+
 // minimum allowed values for sigma of the estimated normal
 const double MIN_SIGMA_PPM = 0.01;
 const double MIN_SIGMA_TH = 0.00001;
@@ -446,7 +451,7 @@ double ParamMedicModel::summarize(const vector<double>& x) {
   r.reserve(x.size() * 2);
   normal_.logProbability(x, &r);
   uniform_.logProbability(x, &r);
-
+ 
   double logProbSum = 0;
   for (size_t i = 0; i < x.size(); i++) {
     double total = -numeric_limits<double>::infinity();
