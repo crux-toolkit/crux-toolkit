@@ -19,11 +19,11 @@ const double MAX_PROPORTION_PRECURSOR_DELTAS_ZERO = 0.5;
 const int MAX_PEAKPAIRS = 100000;
 
 // multipliers to transform standard error values into algorithm parameters
-const double PRECURSOR_SIGMA_MULTIPLIER = 11.130897;
-const double FRAGMENT_SIGMA_MULTIPLIER = 4.763766;
+const double PRECURSOR_SIGMA_MULTIPLIER = 15.720249;
+const double FRAGMENT_SIGMA_MULTIPLIER = 0.003543;
 
 // separation between averagine peaks used for binning spectra
-const double AVERAGINE_PEAK_SEPARATION = 1.000495;
+const double AVERAGINE_PEAK_SEPARATION = 1.000507;
 
 // minimum allowed values for sigma of the estimated normal
 const double MIN_SIGMA_PPM = 0.01;
@@ -342,8 +342,8 @@ void ParamMedicErrorCalculator::estimateMuSigma(
   double* sigmaFit
 ) {
   double dataMin = data[0];
-  double dataMax = dataMin;
-  double muMixedDist = dataMin;
+  double dataMax = data[0];
+  double muMixedDist = data[0];
   for (vector<double>::const_iterator i = data.begin() + 1; i != data.end(); i++) {
     muMixedDist += *i;
     if (*i < dataMin) {
@@ -460,13 +460,12 @@ double ParamMedicModel::fit(const vector<double>& data) {
     fromSummaries();
     double logProbSum = summarize(data);
 
-    if (i == 0) {
+    if (i++ == 0) {
       initialLogProbSum = logProbSum;
     } else {
       improvement = logProbSum - lastLogProbSum;
       carp(CARP_DETAILED_DEBUG, "Improvement: %f", improvement);
     }
-    ++i;
     lastLogProbSum = logProbSum;
   }
   clearSummaries();
@@ -486,7 +485,7 @@ double ParamMedicModel::summarize(const vector<double>& x) {
   r.reserve(x.size() * 2);
   normal_.logProbability(x, &r);
   uniform_.logProbability(x, &r);
- 
+
   double logProbSum = 0;
   for (size_t i = 0; i < x.size(); i++) {
     double total = -numeric_limits<double>::infinity();
@@ -497,7 +496,7 @@ double ParamMedicModel::summarize(const vector<double>& x) {
     }
 
     for (size_t j = 0; j < 2; j++) {
-      r[j * x.size() + i] = exp(r[j * x.size() + i]);
+      r[j * x.size() + i] = exp(r[j * x.size() + i] - total);
       summaries_[j] += r[j * x.size() + i];
     }
 
@@ -505,7 +504,7 @@ double ParamMedicModel::summarize(const vector<double>& x) {
   }
 
   normal_.summarize(x, &r[0]);
-  uniform_.summarize(x, &r[r.size() / 2]);
+  uniform_.summarize(x, &r[x.size()]);
   return logProbSum;
 }
 
@@ -583,13 +582,13 @@ void ParamMedicModel::NormalDistribution::fromSummaries() {
     return;
   }
   mu_ = summaries_[1] / summaries_[0];
-  double sigma = sqrt(
-    summaries_[2] / summaries_[0] - pow(summaries_[1], 2) / pow(summaries_[0], 2));
-  if (sigma < minStd_) {
-    sigma = minStd_;
+  sigma_ = sqrt(summaries_[2] / summaries_[0] - pow(summaries_[1], 2) / pow(summaries_[0], 2));
+  if (sigma_ < minStd_) {
+    sigma_ = minStd_;
   }
-  sigma_ = sigma;
   clearSummaries();
+  logSigmaSqrt2Pi_ = -log(sigma_ * SQRT_2_PI);
+  twoSigmaSquared_ = 2 * pow(sigma_, 2);
 }
 
 void ParamMedicModel::NormalDistribution::clearSummaries() {
