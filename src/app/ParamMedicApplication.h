@@ -123,7 +123,7 @@ class ParamMedicModel {
     virtual ~NormalDistribution();
     double getMu() const;
     double getSigma() const;
-    void logProbability(const std::vector<double>& x, std::vector<double>* weights) const;
+    void logProbability(const std::vector<double>& x, std::vector<double>* r) const;
     void summarize(const std::vector<double>& x, double* r);
     void fromSummaries();
     void clearSummaries();
@@ -140,7 +140,7 @@ class ParamMedicModel {
    public:
     UniformDistribution(double start, double end);
     virtual ~UniformDistribution();
-    void logProbability(const std::vector<double>& x, std::vector<double>* weights) const;
+    void logProbability(const std::vector<double>& x, std::vector<double>* r) const;
     void summarize(const std::vector<double>& x, double* r);
     void summarize();
     void fromSummaries();
