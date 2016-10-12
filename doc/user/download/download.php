@@ -73,6 +73,6 @@
 	  $filename = $FileNameBaseArray[$downloadType];
     $filepath = $directory . $filename;
     log_download($filepath);
-    header("Location: http://cruxtoolkit.sourceforge.net/download/" . $filepath);
+    header("Location: http://noble.gs.washington.edu/crux-downloads/" . $filepath);
     exit;
  ?> 
