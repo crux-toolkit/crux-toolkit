@@ -11,6 +11,7 @@ class ParamMedicApplication : public CruxApplication {
   virtual int main(int argc, char** argv);
   virtual std::string getName() const;
   virtual std::string getDescription() const;
+  virtual bool hidden() const;
   virtual std::vector<std::string> getArgs() const;
   virtual std::vector<std::string> getOptions() const;
   virtual std::vector< std::pair<std::string, std::string> > getOutputs() const;
