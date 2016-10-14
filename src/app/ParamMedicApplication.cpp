@@ -89,7 +89,13 @@ string ParamMedicApplication::getName() const {
 }
 
 string ParamMedicApplication::getDescription() const {
-  return "";
+  return
+    "[[html:<p>]]Examine the spectra in a file to estimate the best precursor "
+    "and fragment error tolerances for database search.[[html:</p>]]";
+}
+
+bool ParamMedicApplication::hidden() const {
+  return true;
 }
 
 vector<string> ParamMedicApplication::getArgs() const {
