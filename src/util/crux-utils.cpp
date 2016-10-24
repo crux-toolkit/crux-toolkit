@@ -169,6 +169,32 @@ char* digest_type_to_string(DIGEST_T type) {
 }
 
 /**
+ * The string version of observed preprocessing types
+ */
+static const char* observed_preprocess_step_strings[NUMBER_PREPROCESS_STEPS] =
+  {"invalid", "discretize", "remove-precursor", "square-root", "remove-grass",
+   "ten-bin", "xcorr"};
+
+OBSERVED_PREPROCESS_STEP_T string_to_observed_preprocess_step(const string& name) {
+
+  int obs_int = convert_enum_type_str(name.c_str(), INVALID_ENUM_STRING,
+				      observed_preprocess_step_strings,
+				      NUMBER_PREPROCESS_STEPS);
+  if ( obs_int < 0 ){
+    obs_int = 0;
+  }
+  return (OBSERVED_PREPROCESS_STEP_T)obs_int;
+}
+
+char* observed_preproces_step_to_string(OBSERVED_PREPROCESS_STEP_T type) {
+  if ( (int)type > NUMBER_PREPROCESS_STEPS) {
+    return NULL;
+  }
+  char* obs_str = my_copy_string(observed_preprocess_step_strings[type]);
+  return(obs_str);
+}
+
+/**
  * The string version of enzyme types
  */
 static const char* enzyme_type_strings[NUMBER_ENZYME_TYPES] = {
