@@ -12,6 +12,7 @@
 #include "PrintProcessedSpectra.h"
 #include "io/SpectrumCollectionFactory.h"
 #include "util/Params.h"
+#include "util/GlobalParams.h"
 
 using namespace std;
 
@@ -38,15 +39,7 @@ int PrintProcessedSpectra::main(int argc, char** argv) {
   output_ms2_name = prefix_fileroot_to_name(output_ms2_name);
   string output_dir = Params::GetString("output-dir");
   bool overwrite = Params::GetBool("overwrite");
-  string stop_after = Params::GetString("stop-after");
-
-  if (stop_after != "discretize" && stop_after != "remove-precursor" &&
-      stop_after != "square-root" && stop_after != "remove-grass" &&
-      stop_after != "ten-bin" && stop_after != "xcorr") {
-    carp(CARP_FATAL, "Invalid value '%s' for stop-after. Must be discretize, "
-         "remove-precursor, square-root, remove-grass, ten-bin, or xcorr.",
-         stop_after.c_str());
-  }
+  OBSERVED_PREPROCESS_STEP_T stop_after = GlobalParams::getStopAfter();
 
   // open output file
   create_output_directory(output_dir, overwrite);

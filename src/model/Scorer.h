@@ -368,7 +368,7 @@ class Scorer {
     SCORER_TYPE_T score_type,
     FLOAT_T** intensities, ///< pointer to array of intensities
     int* mz_bins,
-    const std::string& stop_after);
+    OBSERVED_PREPROCESS_STEP_T stop_after);
 
   /**
    * create the intensity arrays for both observed and theoretical spectrum
@@ -395,7 +395,7 @@ class Scorer {
   bool createIntensityArrayObserved(
     Crux::Spectrum* spectrum,    ///< the spectrum to score(observed) -in
     int charge,              ///< the peptide charge -in 
-    const std::string& stop_after = "xcorr" ///< the preprocessing step to stop after -in
+    OBSERVED_PREPROCESS_STEP_T stop_after = XCORR_STEP ///< the preprocessing step to stop after -in
     );
 
   /**

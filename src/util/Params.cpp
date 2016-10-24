@@ -1333,10 +1333,25 @@ Params::Params() : finalized_(false) {
     "from the precursor-window and precursor-window-type parameters. This option is only "
     "available when use-old-xlink=F.",
     "Used for crux search-for-xlinks", true);
+
+  InitIntParam("xlink-top-n", 250, 0, BILLION,
+               "Top-n open-mod peptides to consider in the second pass, value of 0 will search all candiates.",
+               "Available for crux search-for-xlinks",
+               true);
+
   InitBoolParam("xlink-print-db", false,
     "Prints out the generated database of xlink products to the file xlink_peptides.txt in "
     "the output directory.",
     "Used for testing the candidate generatation.", false);
+  InitBoolParam("require-xlink-candidate", false,
+     "If there is no cross-link candidate found, then don't bother looking for linear, "
+     "self-loop, and dead-link candidates.",
+     "Available for crux search-for-xlinks program.", true);
+  
+  InitBoolParam("xlink-use-ion-cache", false,
+		"Use an ion cache for the xlinkable peptides",
+		"May not be scalable for large databases", false);
+
   InitBoolParam("xlink-include-linears", true, 
     "Include linear peptides in the search.",
     "Available for crux search-for-xlinks program.", true);

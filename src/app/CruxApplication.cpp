@@ -13,6 +13,7 @@
 #include "util/FileUtils.h"
 #include "util/Params.h"
 #include "util/StringUtils.h"
+#include "util/GlobalParams.h"
 #include "util/WinCrux.h"
 
 #include <iostream>
@@ -70,7 +71,7 @@ void CruxApplication::initialize(int argc, char** argv) {
   initializeParams(getName(), getArgs(), getOptions(), argc, argv);
   processParams();
   Params::Finalize();
-
+  GlobalParams::set();
   if (!Params::GetBool("no-analytics")) {
     // Post data to Google Analytics using a separate thread
     boost::thread analytics_thread(postToAnalytics, getName());
