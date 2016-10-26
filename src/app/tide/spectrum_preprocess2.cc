@@ -926,6 +926,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
     }
   }
 
+std::cout << "resEvMatrix[3][454]: " << residueEvidenceMatrix[3][454] << std::endl;
 
 //  std::cout << "maxEvidence: " << maxEvidence << std::endl;
 /*
@@ -933,16 +934,13 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   for(int i =0;i<maxPrecurMassBin;i++) {
     for(int curAaMass = 0; curAaMass<nAA;curAaMass++){
       if (residueEvidenceMatrix[curAaMass][i] != 0) {
-        std::cout << residueEvidenceMatrix[curAaMass][i] << std::endl;
-//        std::cout << "aa: " << curAaMass+1 << endl;
-//        std::cout << "massBin: " << i+1 << std::endl;
-//        std::cout << "evidence: " << residueEvidenceMatrix[curAaMass][i] << std::endl <<std::endl;
+//        std::cout << residueEvidenceMatrix[curAaMass][i] << std::endl;
+        std::cout << "aa: " << curAaMass+1 << endl;
+        std::cout << "massBin: " << i+1 << std::endl;
+        std::cout << "evidence: " << residueEvidenceMatrix[curAaMass][i] << std::endl <<std::endl;
         cnt+=1;
       }
     }
   }
 */
-
-//  std::cout << "num bin: " << maxPrecurMassBin <<std::endl;
-//  std::cout << "ionMasses.size(): " << ionMasses.size() <<std::endl;
 }

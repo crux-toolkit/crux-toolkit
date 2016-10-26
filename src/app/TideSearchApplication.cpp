@@ -827,7 +827,11 @@ void TideSearchApplication::search(void* threadarg) {
         break;
       }
       case RESIDUE_EVIDENCE_MATRIX: //Following case written by Andy Lin in Feb 2016
-      { 
+      {
+//        for (int i=0;i<dAAFreqN.size();i++) {
+//          std::cout << dAAMass[i] << "\t" << dAAFreqC[i] << "\t" << dAAFreqI[i] << "\t" << dAAFreqC[i] << std::endl;
+//        }  
+
 	//TODO section below can be removed when options have been
 	//implemented for residue evidence
 	bool flanking_peak = Params::GetBool("use-flanking-peaks");
@@ -852,11 +856,15 @@ void TideSearchApplication::search(void* threadarg) {
 	(*total_candidate_peptides) += nCandPeptide;
 	locks_array[2]->unlock();
 
+        //TODO so this includes ALL amino acids seen (including modified, NTerm mod, CTerm Mod)
+        //as a result -- we will look for NTerm mod amino acids throughout spectrum instead of
+        //just amino acids without NTerm mod
 	const vector<double> aaMassDouble = dAAMass;
 	vector<int> aaMassInt;
 	for(int i = 0; i < aaMassDouble.size(); i++) {
 	  int tmpMass = MassConstants::mass2bin(aaMassDouble[i]);
 	  aaMassInt.push_back(tmpMass);
+//          std::cout << aaMassDouble[i] << " " << tmpMass << std::endl;
 	}
         int maxPrecurMassBin = floor(MaxBin::Global().CacheBinEnd() + 50.0);
 
@@ -868,11 +876,11 @@ void TideSearchApplication::search(void* threadarg) {
 	vector<int>::const_iterator iter_int;
 	vector<unsigned int>::const_iterator iter_uint;
 
+/*
         std::cout << (*iter_)->Seq() << std::endl;
         std::cout << iter1_->unordered_peak_list_.size() << std::endl;
-        std::cout << "awef" << std::endl;
-  
         carp(CARP_FATAL,"wefew");
+*/
 
 	if (!exact_pval_search_) {
 	  TideMatchSet::Arr match_arr(nCandPeptide);
@@ -983,9 +991,12 @@ void TideSearchApplication::search(void* threadarg) {
 	      }
 
 	      //Make sure the number of theoretical peaks match pepLen-1
+/*	      
 	      std::cout << curPeptide->Seq() << std::endl;
 	      std::cout << pepLen -1 << std::endl;
               std::cout << intensArrayTheor.size() << std::endl;
+*/
+
 	      assert(intensArrayTheor.size() == pepLen - 1);
 
 	      double* residueMasses = curPeptide->getAAMasses(); //retrieves the amino acid masses, modifications included
@@ -1146,29 +1157,23 @@ void TideSearchApplication::search(void* threadarg) {
 				  minDeltaMass,maxDeltaMass,
 				  maxEvidence,maxScore,
 				  scoreResidueCount,scoreOffset);
-  /*
-	    std::cout << "scoreOffset: " << scoreOffset+1 << std::endl;
-	    for(int i=0; i <scoreResidueCount.size(); i++) {
-  //            std::cout << "row: " << i+1 << " " << scoreResidueCount[i] << std::endl;
-	      std::cout << scoreResidueCount[i] << std::endl;
-	    }  
-  */
+//	    std::cout << "scoreOffset: " << scoreOffset+1 << std::endl;
 	    scoreResidueOffsetObs[curPepMassInt] = scoreOffset;
 
-	    vector<double> scoreResidueCountAdjust(scoreResidueCount.size());
 	    double totalCount = 0;
-	    for(int i=0 ; i<scoreResidueCount.size() ; i++) {
+	    for(int i=scoreOffset ; i<scoreResidueCount.size() ; i++) {
+//              std::cout << scientific << scoreResidueCount[i] << std::endl;
 	      totalCount += scoreResidueCount[i];
-	      scoreResidueCountAdjust[i] = scoreResidueCount[i] / 2.0;
 	    }
 	    for(int i=scoreResidueCount.size()-2 ; i>-1; i--) {
 	      scoreResidueCount[i] = scoreResidueCount[i] + scoreResidueCount[i+1];
 	    }
 	    for(int i = 0; i < scoreResidueCount.size(); i++) {
-//	      scoreResidueCount[i] -= scoreResidueCountAdjust[i];
+//              std::cout << "cdf val: " << scoreResidueCount[i] << std::endl;
 
 	      //Avoid potential underflow
 	      scoreResidueCount[i] = exp(log(scoreResidueCount[i]) - log(totalCount));
+//              std::cout << "pval: " << scientific << scoreResidueCount[i] << std::endl;
 	    }
 	    pValuesResidueObs[curPepMassInt] = scoreResidueCount;
 
@@ -1219,9 +1224,12 @@ void TideSearchApplication::search(void* threadarg) {
 		intensArrayTheor.push_back(*iter_uint);
 	      }
 
+/*
               std::cout << curPeptide->Seq() << std::endl;
               std::cout << pepLen -1 << std::endl;
               std::cout << intensArrayTheor.size() << std::endl;
+*/
+
 	      //Make sure the number of theoretical peaks match pepLen-1
 	      assert(intensArrayTheor.size() == pepLen - 1);
 
@@ -1230,20 +1238,21 @@ void TideSearchApplication::search(void* threadarg) {
 		double tmpAAMass = residueMasses[res];
 		int tmpAA = find(aaMassDouble.begin(),aaMassDouble.end(),tmpAAMass) - aaMassDouble.begin();
 		scoreResidueEvidence += curResidueEvidenceMatrix[tmpAA][intensArrayTheor[res]-1];
+/*
+                if (curPeptide->Seq() == "QPSDDDN") {
+                  std::cout << curPeptide->Seq() << " " << intensArrayTheor[res]-1 << " " << scoreResidueEvidence << std::endl;
+                }
+*/
 	      }
 	      delete residueMasses;
 
 	      int scoreCountIdx = scoreResidueEvidence + scoreResidueOffsetObs[curPepMassInt];
 	      double pValue = pValuesResidueObs[curPepMassInt][scoreCountIdx];
-  /*
-	      if (curPeptide->IsDecoy() == false){
-		std::cout << curPeptide->SeqWithMods() << " " << scoreResidueEvidence << std::endl;
-  //              std::cout << "pvalue: " << pValue << std::endl;
-  //              std::cout << curPepSeq << " " << curPepMassInt << " " << pValue << std::endl;
-  //              std::cout << curPepSeq << " " << pValue << std::endl;
-	      }
-  */
-
+              if (pValue == 0.0) {
+                std::cout << curPeptide->Seq() << std::endl;
+//                carp(CARP_FATAL,"PSM p-value should not be equal to 0.0");
+              }
+             
 	      if(peptide_centric) {
 		carp(CARP_FATAL, "residue-evidence has not been implemented with 'peptide-centric-search T' yet.");
 	      }
@@ -1484,11 +1493,10 @@ void TideSearchApplication::search(void* threadarg) {
 	  }
 
 	  for(int i = 0; i < scoreResidueCount.size(); i++) {
-//	    scoreResidueCount[i] -= scoreResidueCountAdjust[i];
 	    //Avoid potential underflow
 	    scoreResidueCount[i] = exp(log(scoreResidueCount[i]) - log(totalCount));
+//            std::cout << scoreResidueCount[i] << std::endl;
 	  }
-
 	  pValuesResidueObs[curPepMassInt] = scoreResidueCount;
 	  //END RESIDUE EVIDENCE MATRIX
 	}
@@ -2170,7 +2178,6 @@ void TideSearchApplication::calcResidueScoreCount (
   vector<double>& scoreCount, //this is returned for later use
   int& scoreOffset //this is returned for later use
 ) {
-
   int minEvidence  = 0;
   int minScore     = 0;
 
@@ -2203,6 +2210,7 @@ void TideSearchApplication::calcResidueScoreCount (
   int colLast = pepMassInt - CTermMass;
   int initCountRow = bottomRowBuffer - minScore + 1;
   int initCountCol = maxAaMass + colStart;
+
   // convert to zero-based indexing
   rowFirst = rowFirst - 1;
   rowLast = rowLast - 1;
@@ -2222,43 +2230,106 @@ void TideSearchApplication::calcResidueScoreCount (
 
   // initial count of peptides with mass = NTermMass
   dynProgArray[ initCountRow ][ initCountCol ] = 1.0;
+
   int* aaMassCol = new int[ nAa ];
   // populate matrix with scores for first (i.e. N-terminal) amino acid in sequence
   for ( de = 0; de < nAa; de++ ) {
     ma = aaMass[ de ];
     //&& -1 is to account for zero-based indexing in evidence vector
-    row = initCountRow + residEvid[ de ][ ma + NTermMass - 1 ];
-    col = initCountCol + ma;
-    if ( col <= maxAaMass + colLast ) {
+    row = initCountRow + residEvid[ de ][ ma + NTermMass - 1 ]; //original
+    //row = initCountRow + residEvid[ de ][ ma - 1 ]; //TODO not sure if below or above is correct
+
+    //col = initCountCol + ma; //original
+    col = initCountCol + ma - NTermMass; //TODO not sure if above or this one is correct
+
+    if ( col <= maxAaMass + colLast && col >= initCountCol ) { //TODO not sure if below or above is correct
+    //if ( col <= maxAaMass + colLast ) { //original
+      //dynProgArray[ row ][ col ] += dynProgArray[ initCountRow ][ initCountCol ];
       dynProgArray[ row ][ col ] += dynProgArray[ initCountRow ][ initCountCol ] * aaFreqN[ de ];
+      cout << "ma: " << ma << " " << " row: " << row << " col: " << col << " " <<dynProgArray[row][col] << std::endl;
     }
   }
+
+  int scoreCountTmp = 0;
+  std::cout << "mal: 942" << std::endl;
+  for (row=25;row<46;row++) {
+    std::cout << scoreCountTmp << " ";
+    for(ma=942;ma<=943;ma++) {
+      std::cout << dynProgArray[row][ma] <<  " ";
+    }
+    scoreCountTmp+=1;
+    std::cout << std::endl;
+  }
+/*
+  std::cout << "mal: 1268" << std::endl;
+  scoreCountTmp = 0;
+  for (row=25;row<46;row++) {
+    std::cout << scoreCountTmp << " ";
+    for(ma=1268;ma<=1270;ma++) {
+      std::cout << dynProgArray[row][ma] <<  " ";
+    }
+    scoreCountTmp+=1;
+    std::cout << std::endl;
+  }
+*/
+  std::cout << "initCountRow: " << initCountRow << std::endl;
+  std::cout << "rowFirst: " << rowFirst << std::endl;
+  std::cout << "rowLast: " << rowLast << std::endl;
+  std::cout << "initCountCol: " << initCountCol << std::endl;
+  std::cout << "colFirst: " << colFirst << std::endl;
+  std::cout << "colLast: " << colLast << std::endl;
+  std::cout << "NTermMass: " << NTermMass << std::endl;
+  std::cout << "CterMass: " << CTermMass <<std::endl;
+  std::cout << "PepMassInt: " << pepMassInt << std::endl;
 
   //set to zero now that score counts for first amino acid are in matrix
   dynProgArray[ initCountRow ][ initCountCol ] = 0.0;
 
   // populate matrix with score counts for non-terminal amino acids in sequence 
   for ( ma = colFirst; ma < colLast; ma++ ) {
-    col = maxAaMass + ma;
+    col = maxAaMass + ma - 1;
 
     for ( de = 0; de < nAa; de++ ) {
       aaMassCol[ de ] = col - aaMass[ de ];
     }
     for ( row = rowFirst; row <= rowLast; row++ ) {
       sumScore = dynProgArray[ row ][ col ];
+      if (row == 45 && ma == 454) {
+        std::cout << "de: " << de << " " << "ma: " << ma << " col: " << col << std::endl;
+      }
       for ( de = 0; de < nAa; de++ ) {
-        evidRow = row - residEvid[ de ][ ma ];
+        evidRow = row - residEvid[ de ][ ma ]; //original
+        //evidRow = row - residEvid[ de ][ ma - NTermMass ]; //TODO not sure if this line or above line correct
+        //sumScore += dynProgArray[ evidRow ][ aaMassCol[ de ] ];
         sumScore += dynProgArray[ evidRow ][ aaMassCol[ de ] ] * aaFreqI[ de ];
+        if (row == 45 && ma  == 454) {
+          std::cout << evidRow << " "<<  aaMassCol[de] << " "<< dynProgArray[ evidRow ][ aaMassCol[ de ] ] << std::endl;
+        }
       }
       dynProgArray[ row ][ col ] = sumScore;
     }
   }
+/*
+  scoreCountTmp = 0;
+  for (row=25;row<46;row++) {
+    std::cout << scoreCountTmp << " ";
+    for(ma=1268;ma<=1270;ma++) {
+      std::cout << dynProgArray[row][ma] <<  " ";
+    }
+    scoreCountTmp+=1;
+    std::cout << std::endl;
+  }
+*/
 
   // populate matrix with score counts for last (i.e. C-terminal) amino acid in sequence
   ma = colLast;
-  col = maxAaMass + ma;
+  //col = maxAaMass + ma; //original
+  col = maxAaMass + ma - 1; //TODO nots sure if this line or above line is correct
+
   //no evidence should be added for last amino acid in sequence
   evid = 0;
+  std::cout << "last col: " << col << std::endl;
+
 
   for ( de = 0; de < nAa; de++ ) {
         aaMassCol[ de ] = col - aaMass[ de ];
@@ -2267,13 +2338,38 @@ void TideSearchApplication::calcResidueScoreCount (
     evidRow = row - evid;
     sumScore = 0.0;
     for ( de = 0; de < nAa; de++ ) {
+      //sumScore += dynProgArray[ evidRow ][ aaMassCol[ de ] ];
       sumScore += dynProgArray[ evidRow ][ aaMassCol[ de ] ] * aaFreqC[ de ];
     }
     dynProgArray[ row ][ col ] = sumScore;
   }
 
+/*
+  scoreCountTmp = 0;
+  std::cout << "col: 1039" << std::endl;
+  for (row=25;row<=45;row++) {
+    std::cout << scoreCountTmp << " ";
+    for(ma=1039;ma<=1040;ma++) {
+      std::cout << dynProgArray[row][ma] <<  " ";
+    }
+    scoreCountTmp+=1;
+    std::cout << std::endl;
+  }
+*/
 
-  int colScoreCount = maxAaMass + colLast;
+  std::cout << std::endl;
+  scoreCountTmp = 0;
+  for (row=25;row<66;row++) {
+    std::cout << scoreCountTmp << " ";
+    for(ma=1585;ma<=1586;ma++) {
+      std::cout << dynProgArray[row][ma] <<  " ";
+    }
+    scoreCountTmp+=1;
+    std::cout << std::endl;
+  }
+
+  //int colScoreCount = maxAaMass + colLast; //original
+  int colScoreCount = maxAaMass + colLast - 1; //TODO not sure if this line or above line is correct
   scoreCount.resize(nRow);
   for ( int row = 0; row < nRow; row++ ) {
     scoreCount[ row ] = dynProgArray[ row ][ colScoreCount ];
