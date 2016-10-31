@@ -25,6 +25,7 @@
 #include "model/Spectrum.h"
 #include "io/SpectrumCollectionFactory.h"
 #include "model/FilteredSpectrumChargeIterator.h"
+#include "util/GlobalParams.h"
 #include "util/Params.h"
 #include "io/MatchColumns.h"
 //C++ includes
@@ -504,7 +505,7 @@ void get_ions_from_mass_range(
   double max_mass ///< max mass of ions to select -in
   ) {
 
-  MASS_TYPE_T mass_type = get_mass_type_parameter("isotopic-mass");
+  MASS_TYPE_T mass_type = GlobalParams::getIsotopicMass();
 
   filtered_ions.clear();
   for (vector <LinkedPeptide>::iterator ion = all_ions.begin();
@@ -534,7 +535,7 @@ void get_protein_ids_locations(
 
     PeptideSrc* peptide_src = *iter;
     Protein* protein = peptide_src->getParentProtein();
-    char* protein_id = protein->getIdPointer();
+    string& protein_id = protein->getIdPointer();
     int peptide_loc = peptide_src->getStartIdx();
     std::ostringstream protein_loc_stream;
     protein_loc_stream << protein_id << "(" << peptide_loc << ")";

@@ -4,6 +4,7 @@
  */
 
 #include "ProteinPeptideIterator.h"
+#include "util/GlobalParams.h"
 #include "util/Params.h"
 
 using namespace std;
@@ -20,7 +21,7 @@ FLOAT_T ProteinPeptideIterator::calculateSubsequenceMass (
   ){
 
   FLOAT_T mass_h2o = MASS_H2O_AVERAGE;
-  if(get_mass_type_parameter("isotopic-mass") == MONO){
+  if (GlobalParams::getIsotopicMass() == MONO) {
     mass_h2o = MASS_H2O_MONO;
   }
 
@@ -135,7 +136,7 @@ bool ProteinPeptideIterator::validCleavagePosition(
 
   case INVALID_ENZYME:
   case NUMBER_ENZYME_TYPES:
-    carp(CARP_FATAL, "Cannot generate peptides with invalid enzyme.");
+    carp(CARP_FATAL, "Cannot generate peptides with invalid enzyme: %d", enzyme);
     break;
 
   }// end switch
@@ -436,8 +437,8 @@ ProteinPeptideIterator::ProteinPeptideIterator(
 
   // estimate array size and reserve space to avoid resizing vector
   int max_peptides = countMaxPeptides(protein->getLength(), 
-                                      Params::GetInt("min-length"),
-                                      Params::GetInt("max-length"));
+                                      GlobalParams::getMinLength(),
+                                      GlobalParams::getMaxLength());
   nterm_cleavage_positions_->reserve(max_peptides); 
   peptide_lengths_->reserve(max_peptides);
   peptide_masses_->reserve(max_peptides);

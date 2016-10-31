@@ -158,13 +158,12 @@ DIGEST_T string_to_digest_type(const string& name) {
   return (DIGEST_T)clev_int;
 }
 
-char* digest_type_to_string(DIGEST_T type) {
-  if ((int)type > NUMBER_DIGEST_TYPES) {
+const char* digest_type_to_string(DIGEST_T type){
+  if( (int)type > NUMBER_DIGEST_TYPES){
     return NULL;
   }
 
-  char* type_str = my_copy_string(digest_type_strings[type]);
-
+  const  char* type_str = digest_type_strings[type];
   return type_str;
 }
 
@@ -216,11 +215,12 @@ ENZYME_T string_to_enzyme_type(const string& name) {
   return (ENZYME_T)enz_int;
 }
 
-char* enzyme_type_to_string(ENZYME_T type) {
+const char* enzyme_type_to_string(ENZYME_T type){
   if ((int)type > NUMBER_ENZYME_TYPES) {
     return NULL;
   }
-  return my_copy_string(enzyme_type_strings[type]);
+  const char* type_str = enzyme_type_strings[type];
+  return type_str;
 }
 
 /**

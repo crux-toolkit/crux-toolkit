@@ -10,6 +10,7 @@
 #include "util/Params.h"
 #include "util/StringUtils.h"
 #include "CometApplication.h"
+#include "ParamMedicApplication.h"
 #include "io/DelimitedFileWriter.h"
 #include "io/DelimitedFile.h"
 
@@ -475,6 +476,49 @@ void CometApplication::processParams() {
     string mod = varModPrefix + StringUtils::ToString(i);
     if (Params::GetString(mod).empty()) {
       Params::Set(mod, varModEmptyDefault);
+    }
+  }
+  // run param-medic?
+  const string autoPrecursor = Params::GetString("auto_peptide_mass_tolerance");
+  const string autoFragment = Params::GetString("auto_fragment_bin_tol");
+  if (autoPrecursor != "false" || autoFragment != "false") {
+    if (autoPrecursor != "false" && Params::GetString("precursor-window-type") != "ppm") {
+      carp(CARP_FATAL, "Automatic peptide mass tolerance detection is only supported with ppm "
+                       "units. Please rerun with either auto_peptide_mass_tolerance set to 'false' "
+                       "or peptide_mass_units set to '2'.");
+    }
+    ParamMedicErrorCalculator errCalc;
+    errCalc.processFiles(Params::GetStrings("input spectra"));
+    string precursorFailure, fragmentFailure;
+    double precursorSigmaPpm = 0;
+    double fragmentSigmaPpm = 0;
+    double fragmentSigmaTh = 0;
+    double precursorPredictionPpm = 0;
+    double fragmentPredictionPpm = 0;
+    double fragmentPredictionTh = 0;
+    errCalc.calcMassErrorDist(&precursorFailure, &fragmentFailure,
+                              &precursorSigmaPpm, &fragmentSigmaPpm,
+                              &precursorPredictionPpm, &fragmentPredictionTh);
+
+    if (autoPrecursor != "false") {
+      if (precursorFailure.empty()) {
+        carp(CARP_INFO, "precursor ppm standard deviation: %f", precursorSigmaPpm);
+        carp(CARP_INFO, "Precursor error estimate (ppm): %.2f", precursorPredictionPpm);
+        Params::Set("peptide_mass_tolerance", precursorPredictionPpm);
+      } else {
+        carp(autoPrecursor == "fail" ? CARP_FATAL : CARP_ERROR,
+             "failed to calculate precursor error: %s", precursorFailure.c_str());
+      }
+    }
+    if (autoFragment != "false") {
+      if (fragmentFailure.empty()) {
+        carp(CARP_INFO, "fragment standard deviation (ppm): %f", fragmentSigmaPpm);
+        carp(CARP_INFO, "Fragment bin size estimate (Th): %.4f", fragmentPredictionTh);
+        Params::Set("fragment_bin_tol", fragmentPredictionTh);
+      } else {
+        carp(autoFragment == "fail" ? CARP_FATAL : CARP_ERROR,
+             "failed to calculate fragment error: %s", fragmentFailure.c_str());
+      }
     }
   }
 }

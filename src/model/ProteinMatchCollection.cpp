@@ -124,7 +124,7 @@ ProteinMatch* ProteinMatchCollection::getProteinMatch(
       protein_matches_.push_back(ans);
       protein_match_map_.insert(pair<string, ProteinMatch*>(id, ans));
     } else {
-      carp(CARP_WARNING, "ProteinMatch for %s not found!", protein->getIdPointer());
+      carp(CARP_WARNING, "ProteinMatch for %s not found!", protein->getIdPointer().c_str());
     }
   }
   return ans;

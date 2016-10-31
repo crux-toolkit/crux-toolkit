@@ -4,6 +4,7 @@
  */
 #include "ModifiedPeptidesIterator.h"
 #include "SpectrumZState.h"
+#include "util/GlobalParams.h"
 #include "util/Params.h"
 
 using namespace std;
@@ -94,8 +95,8 @@ ModifiedPeptidesIterator::~ModifiedPeptidesIterator(){
  */
 pair<FLOAT_T,FLOAT_T>ModifiedPeptidesIterator::getMinMaxMass()
 {
-  return pair<FLOAT_T,FLOAT_T>(Params::GetDouble("min-mass"),
-                               Params::GetDouble("max-mass"));
+  return pair<FLOAT_T,FLOAT_T>(GlobalParams::getMinMass(),
+                               GlobalParams::getMaxMass());
 }
 
 /**
@@ -108,9 +109,9 @@ pair<FLOAT_T,FLOAT_T> ModifiedPeptidesIterator::getMinMaxMass(
   SpectrumZState& zstate, ///< charge/mass pair for peptide window
   PEPTIDE_MOD_T* pmod) ///< peptide mod with the delta mass for peptides
 {
-  WINDOW_TYPE_T precursor_window_type = 
-    string_to_window_type(Params::GetString("precursor-window-type"));
-  double window = Params::GetDouble("precursor-window");
+  WINDOW_TYPE_T precursor_window_type = GlobalParams::getPrecursorWindowType();
+
+  double window = GlobalParams::getPrecursorWindow();
   double min_mass = 0;
   double max_mass = 0;
 

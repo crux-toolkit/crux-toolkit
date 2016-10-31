@@ -7,8 +7,9 @@
 #include "io/SpectrumRecordWriter.h"
 #include "TideIndexApplication.h"
 #include "TideSearchApplication.h"
+#include "ParamMedicApplication.h"
 #include "PSMConvertApplication.h"
-#include "app/tide/mass_constants.h"
+#include "tide/mass_constants.h"
 #include "TideMatchSet.h"
 #include "util/Params.h"
 #include "util/FileUtils.h"
@@ -1330,11 +1331,53 @@ void TideSearchApplication::processParams() {
     const pb::Header::PeptidesHeader& pepHeader = peptides_header.peptides_header();
 
     Params::Set("enzyme", pepHeader.enzyme());
-    char* digestString =
+    const char* digestString =
       digest_type_to_string(pepHeader.full_digestion() ? FULL_DIGEST : PARTIAL_DIGEST);
     Params::Set("digestion", digestString);
-    free(digestString);
     Params::Set("isotopic-mass", pepHeader.monoisotopic_precursor() ? "mono" : "average");
+  }
+  // run param-medic?
+  const string autoPrecursor = Params::GetString("auto-precursor-window");
+  const string autoFragment = Params::GetString("auto-mz-bin-width");
+  if (autoPrecursor != "false" || autoFragment != "false") {
+    if (autoPrecursor != "false" && Params::GetString("precursor-window-type") != "ppm") {
+      carp(CARP_FATAL, "Automatic peptide mass tolerance detection is only supported with ppm "
+                       "units. Please rerun with either auto-precursor-window set to 'false' or "
+                       "precursor-window-type set to 'ppm'.");
+    }
+    ParamMedicErrorCalculator errCalc;
+    errCalc.processFiles(Params::GetStrings("tide spectra file"));
+    string precursorFailure, fragmentFailure;
+    double precursorSigmaPpm = 0;
+    double fragmentSigmaPpm = 0;
+    double fragmentSigmaTh = 0;
+    double precursorPredictionPpm = 0;
+    double fragmentPredictionPpm = 0;
+    double fragmentPredictionTh = 0;
+    errCalc.calcMassErrorDist(&precursorFailure, &fragmentFailure,
+                              &precursorSigmaPpm, &fragmentSigmaPpm,
+                              &precursorPredictionPpm, &fragmentPredictionTh);
+
+    if (autoPrecursor != "false") {
+      if (precursorFailure.empty()) {
+        carp(CARP_INFO, "precursor ppm standard deviation: %f", precursorSigmaPpm);
+        carp(CARP_INFO, "Precursor error estimate (ppm): %.2f", precursorPredictionPpm);
+        Params::Set("precursor-window", precursorPredictionPpm);
+      } else {
+        carp(autoPrecursor == "fail" ? CARP_FATAL : CARP_ERROR,
+             "failed to calculate precursor error: %s", precursorFailure.c_str());
+      }
+    }
+    if (autoFragment != "false") {
+      if (fragmentFailure.empty()) {
+        carp(CARP_INFO, "fragment standard deviation (ppm): %f", fragmentSigmaPpm);
+        carp(CARP_INFO, "Fragment bin size estimate (Th): %.4f", fragmentPredictionTh);
+        Params::Set("mz-bin-width", fragmentPredictionTh);
+      } else {
+        carp(autoFragment == "fail" ? CARP_FATAL : CARP_ERROR,
+             "failed to calculate fragment error: %s", fragmentFailure.c_str());
+      }
+    }
   }
 }
 

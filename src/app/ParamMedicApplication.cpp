@@ -36,21 +36,8 @@ ParamMedicApplication::~ParamMedicApplication() {
 }
 
 int ParamMedicApplication::main(int argc, char** argv) {
-  if (!numeric_limits<double>::is_iec559) {
-    carp(CARP_FATAL, "Something went wrong.");
-  }
   ParamMedicErrorCalculator errCalc;
-  vector<string> files = Params::GetStrings("spectrum-file");
-  for (vector<string>::const_iterator i = files.begin(); i != files.end(); i++) {
-    carp(CARP_INFO, "Processing input file %s...", i->c_str());
-    SpectrumCollection* collection = SpectrumCollectionFactory::create(*i);
-    collection->parse();
-    for (SpectrumIterator j = collection->begin(); j != collection->end(); j++) {
-      errCalc.processSpectrum(*j);
-    }
-    delete collection;
-    errCalc.clearBins();
-  }
+  errCalc.processFiles(Params::GetStrings("spectrum-file"));
 
   // calculate mass error distributions
   string precursorFailure, fragmentFailure;
@@ -140,6 +127,9 @@ bool ParamMedicApplication::needsOutputDirectory() const {
 
 ParamMedicErrorCalculator::ParamMedicErrorCalculator():
   numTotalSpectra_(0), numPassingSpectra_(0) {
+  if (!numeric_limits<double>::is_iec559) {
+    carp(CARP_FATAL, "Something went wrong.");
+  }
   lowestPrecursorBinStartMz_ = Params::GetDouble("min-precursor-mz") -
     fmod(Params::GetDouble("min-precursor-mz"), AVERAGINE_PEAK_SEPARATION / Params::GetInt("charge"));
   lowestFragmentBinStartMz_ = Params::GetDouble("min-frag-mz") -
@@ -154,6 +144,19 @@ ParamMedicErrorCalculator::~ParamMedicErrorCalculator() {
       i++) {
     delete i->first;
     delete i->second;
+  }
+}
+
+void ParamMedicErrorCalculator::processFiles(const vector<string>& files) {
+  for (vector<string>::const_iterator i = files.begin(); i != files.end(); i++) {
+    carp(CARP_INFO, "param-medic processing input file %s...", i->c_str());
+    SpectrumCollection* collection = SpectrumCollectionFactory::create(*i);
+    collection->parse();
+    for (SpectrumIterator j = collection->begin(); j != collection->end(); j++) {
+      processSpectrum(*j);
+    }
+    delete collection;
+    clearBins();
   }
 }
 

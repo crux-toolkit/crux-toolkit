@@ -75,7 +75,7 @@ class Match {
   int pointer_count_; 
     ///< number of pointers to this match object (when reach 0, free memory)
   bool null_peptide_; ///< Is the match a null (decoy) peptide match?
-  char* peptide_sequence_; ///< peptide sequence is that of peptide or shuffled
+  const char* peptide_sequence_; ///< peptide sequence is that of peptide or shuffled
   MODIFIED_AA_T* mod_sequence_; ///< seq of peptide or shuffled if null peptide
   SpectrumZState zstate_;
   // post_process match object features
@@ -304,7 +304,7 @@ class Match {
   
   static std::string getFilePath(int file_idx);
 
-  bool isDecoy();
+  virtual bool isDecoy();
 
   /**
    * Must ask for score that has been computed

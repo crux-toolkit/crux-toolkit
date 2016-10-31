@@ -15,6 +15,7 @@
 #include "io/SQTReader.h"
 #include "util/AminoAcidUtil.h"
 #include "util/Params.h"
+#include "util/GlobalParams.h"
 #include "util/StringUtils.h"
 #include "util/WinCrux.h"
 
@@ -443,21 +444,21 @@ void MatchCollection::printXmlHeader(
     return;
   }
   time_t hold_time;
-  ENZYME_T enzyme = get_enzyme_type_parameter("enzyme");
-  char* enz_str = enzyme_type_to_string(enzyme);
+  ENZYME_T enzyme = GlobalParams::getEnzyme();
+  const char* enz_str = enzyme_type_to_string(enzyme);
   string database = Params::GetString("protein-database");
 
-  MASS_TYPE_T isotopic_mass_type = get_mass_type_parameter("isotopic-mass");
-  MASS_TYPE_T fragment_mass_type = get_mass_type_parameter("fragment-mass");
+  MASS_TYPE_T isotopic_mass_type = GlobalParams::getIsotopicMass();
+  MASS_TYPE_T fragment_mass_type = GlobalParams::getFragmentMass();
 
   const char* isotopic_mass;
   const char* fragment_mass;
-  DIGEST_T digest = get_digest_type_parameter("digestion");
+  DIGEST_T digest = GlobalParams::getDigestion();
   int max_num_internal_cleavages;
   int min_number_termini;
-  int missed_cleavage = Params::GetInt("missed-cleavages");
+  int missed_cleavage = GlobalParams::getMissedCleavages();
   if (missed_cleavage){
-    max_num_internal_cleavages = Params::GetInt("max-length");
+    max_num_internal_cleavages = GlobalParams::getMaxLength();
   } else {
     max_num_internal_cleavages = 0;
   }
@@ -538,12 +539,12 @@ void MatchCollection::printXmlHeader(
 #ifndef DARWIN
   free(absolute_database_path);
 #endif
-  free(enz_str);
+
 
   char aa_str[2];
   aa_str[1] = '\0';
   int alphabet_size = (int)'A'+ ((int)'Z'-(int)'A');
-  MASS_TYPE_T isotopic_type = get_mass_type_parameter("isotopic-mass");
+  MASS_TYPE_T isotopic_type = GlobalParams::getIsotopicMass();
   int aa = 0;
 
   // static amino acid modifications
@@ -642,7 +643,7 @@ void MatchCollection::printSqtHeader(
   fprintf(output, "H\tDBSeqLength\t?\n");
   fprintf(output, "H\tDBLocusCount\t%d\n", num_proteins);
 
-  MASS_TYPE_T mass_type = get_mass_type_parameter("isotopic-mass");
+  MASS_TYPE_T mass_type = GlobalParams::getIsotopicMass();
   char temp_str[64];
   mass_type_to_string(mass_type, temp_str);
   fprintf(output, "H\tPrecursorMasses\t%s\n", temp_str);
@@ -667,7 +668,7 @@ void MatchCollection::printSqtHeader(
   char aa_str[2];
   aa_str[1] = '\0';
   int alphabet_size = (int)'A' + ((int)'Z'-(int)'A');
-  MASS_TYPE_T isotopic_type = get_mass_type_parameter("isotopic-mass");
+  MASS_TYPE_T isotopic_type = GlobalParams::getIsotopicMass();
 
   for(aa = (int)'A'; aa < alphabet_size -1; aa++){
     aa_str[0] = (char)aa;
@@ -726,8 +727,8 @@ void MatchCollection::printSqtHeader(
 
   ENZYME_T enzyme = get_enzyme_type_parameter("enzyme");
   DIGEST_T digestion = get_digest_type_parameter("digestion");
-  char* enz_str = enzyme_type_to_string(enzyme);
-  char* dig_str = digest_type_to_string(digestion);
+  const char* enz_str = enzyme_type_to_string(enzyme);
+  const char* dig_str = digest_type_to_string(digestion);
   char custom_str[SMALL_BUFFER];
   if( enzyme == CUSTOM_ENZYME){
     string rule = Params::GetString("custom-enzyme");
@@ -736,8 +737,6 @@ void MatchCollection::printSqtHeader(
     custom_str[0] = 0;
   }
   fprintf(output, "H\tEnzymeSpec\t%s-%s%s\n", enz_str, dig_str, custom_str);
-  free(enz_str);
-  free(dig_str);
   // write a comment that says what the scores are
   fprintf(output, "H\tLine fields: S, scan number, scan number, "
           "charge, 0, server, experimental mass, total ion intensity, "
