@@ -335,7 +335,7 @@ int ActivePeptideQueue::CountAAFrequency(
 //08/22/2016
 //Counts the AA freq for when peptides masses are in double form and
 //not in int form
-//Most of code is based/stolen from ActivePeptideQueu::CountAAFrequency
+//Most of code is based/stolen from ActivePeptideQueue::CountAAFrequency
 int ActivePeptideQueue::CountAAFrequencyRes(
   double binWidth,
   double binOffset,
