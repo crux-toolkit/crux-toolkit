@@ -246,6 +246,12 @@ Params::Params() : finalized_(false) {
     "mass / (1.0 + (precursor-window / 1000000)) and the upper bound is defined as spectrum "
     "mass / (1.0 - (precursor-window / 1000000)).",
     "Available for search-for-xlinks and tide-search.", true);
+  InitStringParam("auto-precursor-window", "false", "false|warn|fail",
+    "Automatically estimate optimal value for the precursor-window parameter "
+    "from the spectra themselves. false=no estimation, warn=try to estimate "
+    "but use the default value in case of failure, fail=try to estimate and "
+    "quit in case of failure.",
+    "Available for tide-search.", true);
   InitStringParam("spectrum-parser", "pwiz", "pwiz|mstoolkit",
     "Specify the parser to use for reading in MS/MS spectra.[[html: The default, "
     "ProteoWizard parser can read the MS/MS file formats listed <a href=\""
@@ -345,6 +351,12 @@ Params::Params() : finalized_(false) {
     "parameter specifies the location of the left edge of the first bin, relative to "
     "mass = 0 (i.e., mz-bin-offset = 0.xx means the left edge of the first bin will be "
     "located at +0.xx Da).",
+    "Available for tide-search.", true);
+  InitStringParam("auto-mz-bin-width", "false", "false|warn|fail",
+    "Automatically estimate optimal value for the mz-bin-width parameter "
+    "from the spectra themselves. false=no estimation, warn=try to estimate "
+    "but use the default value in case of failure, fail=try to estimate and "
+    "quit in case of failure.",
     "Available for tide-search.", true);
   InitBoolParam("use-flanking-peaks", false,
     "Include flanking peaks around singly charged b and y theoretical ions. Each flanking "
@@ -850,6 +862,12 @@ Params::Params() : finalized_(false) {
   InitIntParam("peptide_mass_units", 0, 0, 2,
     "0=amu, 1=mmu, 2=ppm.",
     "Available for comet.", true);
+  InitStringParam("auto_peptide_mass_tolerance", "false", "false|warn|fail",
+    "Automatically estimate optimal value for the peptide_mass_tolerancel parameter "
+    "from the spectra themselves. false=no estimation, warn=try to estimate "
+    "but use the default value in case of failure, fail=try to estimate and "
+    "quit in case of failure.",
+    "Available for comet.", true);
   InitIntParam("mass_type_parent", 1, 0, 1,
     "0=average masses, 1=monoisotopic masses.",
     "Available for comet.", true);
@@ -878,6 +896,12 @@ Params::Params() : finalized_(false) {
     "Available for comet.", true);
   InitDoubleParam("fragment_bin_offset", 0.40, 0, 1.0,
     "Offset position to start the binning (0.0 to 1.0).",
+    "Available for comet.", true);
+  InitStringParam("auto_fragment_bin_tol", "false", "false|warn|fail",
+    "Automatically estimate optimal value for the fragment_bin_tol parameter "
+    "from the spectra themselves. false=no estimation, warn=try to estimate "
+    "but use the default value in case of failure, fail=try to estimate and "
+    "quit in case of failure.",
     "Available for comet.", true);
   InitIntParam("theoretical_fragment_ions", 1, 0, 1,
     "0=default peak shape, 1=M peak only.",
