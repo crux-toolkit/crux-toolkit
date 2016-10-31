@@ -2246,32 +2246,9 @@ void TideSearchApplication::calcResidueScoreCount (
     //if ( col <= maxAaMass + colLast ) { //original
       //dynProgArray[ row ][ col ] += dynProgArray[ initCountRow ][ initCountCol ];
       dynProgArray[ row ][ col ] += dynProgArray[ initCountRow ][ initCountCol ] * aaFreqN[ de ];
-      cout << "ma: " << ma << " " << " row: " << row << " col: " << col << " " <<dynProgArray[row][col] << std::endl;
     }
   }
 
-  int scoreCountTmp = 0;
-  std::cout << "mal: 942" << std::endl;
-  for (row=25;row<46;row++) {
-    std::cout << scoreCountTmp << " ";
-    for(ma=942;ma<=943;ma++) {
-      std::cout << dynProgArray[row][ma] <<  " ";
-    }
-    scoreCountTmp+=1;
-    std::cout << std::endl;
-  }
-/*
-  std::cout << "mal: 1268" << std::endl;
-  scoreCountTmp = 0;
-  for (row=25;row<46;row++) {
-    std::cout << scoreCountTmp << " ";
-    for(ma=1268;ma<=1270;ma++) {
-      std::cout << dynProgArray[row][ma] <<  " ";
-    }
-    scoreCountTmp+=1;
-    std::cout << std::endl;
-  }
-*/
   std::cout << "initCountRow: " << initCountRow << std::endl;
   std::cout << "rowFirst: " << rowFirst << std::endl;
   std::cout << "rowLast: " << rowLast << std::endl;
@@ -2294,43 +2271,22 @@ void TideSearchApplication::calcResidueScoreCount (
     }
     for ( row = rowFirst; row <= rowLast; row++ ) {
       sumScore = dynProgArray[ row ][ col ];
-      if (row == 45 && ma == 454) {
-        std::cout << "de: " << de << " " << "ma: " << ma << " col: " << col << std::endl;
-      }
       for ( de = 0; de < nAa; de++ ) {
         evidRow = row - residEvid[ de ][ ma ]; //original
         //evidRow = row - residEvid[ de ][ ma - NTermMass ]; //TODO not sure if this line or above line correct
         //sumScore += dynProgArray[ evidRow ][ aaMassCol[ de ] ];
         sumScore += dynProgArray[ evidRow ][ aaMassCol[ de ] ] * aaFreqI[ de ];
-        if (row == 45 && ma  == 454) {
-          std::cout << evidRow << " "<<  aaMassCol[de] << " "<< dynProgArray[ evidRow ][ aaMassCol[ de ] ] << std::endl;
-        }
       }
       dynProgArray[ row ][ col ] = sumScore;
     }
   }
-/*
-  scoreCountTmp = 0;
-  for (row=25;row<46;row++) {
-    std::cout << scoreCountTmp << " ";
-    for(ma=1268;ma<=1270;ma++) {
-      std::cout << dynProgArray[row][ma] <<  " ";
-    }
-    scoreCountTmp+=1;
-    std::cout << std::endl;
-  }
-*/
 
   // populate matrix with score counts for last (i.e. C-terminal) amino acid in sequence
   ma = colLast;
-  //col = maxAaMass + ma; //original
-  col = maxAaMass + ma - 1; //TODO nots sure if this line or above line is correct
+  col = maxAaMass + ma; //original
 
   //no evidence should be added for last amino acid in sequence
   evid = 0;
-  std::cout << "last col: " << col << std::endl;
-
-
   for ( de = 0; de < nAa; de++ ) {
         aaMassCol[ de ] = col - aaMass[ de ];
     }
@@ -2344,32 +2300,7 @@ void TideSearchApplication::calcResidueScoreCount (
     dynProgArray[ row ][ col ] = sumScore;
   }
 
-/*
-  scoreCountTmp = 0;
-  std::cout << "col: 1039" << std::endl;
-  for (row=25;row<=45;row++) {
-    std::cout << scoreCountTmp << " ";
-    for(ma=1039;ma<=1040;ma++) {
-      std::cout << dynProgArray[row][ma] <<  " ";
-    }
-    scoreCountTmp+=1;
-    std::cout << std::endl;
-  }
-*/
-
-  std::cout << std::endl;
-  scoreCountTmp = 0;
-  for (row=25;row<66;row++) {
-    std::cout << scoreCountTmp << " ";
-    for(ma=1585;ma<=1586;ma++) {
-      std::cout << dynProgArray[row][ma] <<  " ";
-    }
-    scoreCountTmp+=1;
-    std::cout << std::endl;
-  }
-
-  //int colScoreCount = maxAaMass + colLast; //original
-  int colScoreCount = maxAaMass + colLast - 1; //TODO not sure if this line or above line is correct
+  int colScoreCount = maxAaMass + colLast; //original
   scoreCount.resize(nRow);
   for ( int row = 0; row < nRow; row++ ) {
     scoreCount[ row ] = dynProgArray[ row ][ colScoreCount ];

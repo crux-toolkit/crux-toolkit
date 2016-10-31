@@ -926,8 +926,6 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
     }
   }
 
-std::cout << "resEvMatrix[3][454]: " << residueEvidenceMatrix[3][454] << std::endl;
-
 //  std::cout << "maxEvidence: " << maxEvidence << std::endl;
 /*
   int cnt=0;
