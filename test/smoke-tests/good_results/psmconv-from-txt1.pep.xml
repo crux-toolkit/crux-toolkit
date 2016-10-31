@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href=""?>
-<msms_pipeline_analysis date="Tue Oct 25 14:35:32 2016" xmlns="http://regis-web.systemsbiology.net/pepXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://regis-web.systemsbiology.net/pepXML /usr/local/tpp/schema/pepXML_v110.xsd" summary_xml="">
+<msms_pipeline_analysis date="Mon Oct 31 13:47:23 2016" xmlns="http://regis-web.systemsbiology.net/pepXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://regis-web.systemsbiology.net/pepXML /usr/local/tpp/schema/pepXML_v110.xsd" summary_xml="">
 <msms_run_summary base_name="NA" msManufacturer="NA" msModel="NA" msIonization="NA" msAnalyzer="NA" msDectector="NA" raw_data_type="NA" raw_data="NA" >
 <sample_enzyme name="trypsin">
 </sample_enzyme>
@@ -48,6 +48,7 @@
 <parameter name="missed-cleavages" value="0"/>
 <parameter name="precursor-window" value="3"/>
 <parameter name="precursor-window-type" value="mass"/>
+<parameter name="auto-precursor-window" value="false"/>
 <parameter name="spectrum-parser" value="pwiz"/>
 <parameter name="use-z-line" value="true"/>
 <parameter name="keep-terminal-aminos" value="NC"/>
@@ -65,6 +66,7 @@
 <parameter name="scan-number" value=""/>
 <parameter name="mz-bin-width" value="1.0005079"/>
 <parameter name="mz-bin-offset" value="0.4"/>
+<parameter name="auto-mz-bin-width" value="false"/>
 <parameter name="use-flanking-peaks" value="false"/>
 <parameter name="spectrum-min-mz" value="0"/>
 <parameter name="spectrum-max-mz" value="1e+09"/>
@@ -144,6 +146,7 @@
 <parameter name="num_threads" value="0"/>
 <parameter name="peptide_mass_tolerance" value="3"/>
 <parameter name="peptide_mass_units" value="0"/>
+<parameter name="auto_peptide_mass_tolerance" value="false"/>
 <parameter name="mass_type_parent" value="1"/>
 <parameter name="mass_type_fragment" value="1"/>
 <parameter name="precursor_tolerance_type" value="0"/>
@@ -153,6 +156,7 @@
 <parameter name="allowed_missed_cleavage" value="2"/>
 <parameter name="fragment_bin_tol" value="1.000507"/>
 <parameter name="fragment_bin_offset" value="0.4"/>
+<parameter name="auto_fragment_bin_tol" value="false"/>
 <parameter name="theoretical_fragment_ions" value="1"/>
 <parameter name="use_A_ions" value="0"/>
 <parameter name="use_B_ions" value="1"/>

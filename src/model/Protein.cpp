@@ -12,6 +12,7 @@
 #include "util/utils.h"
 #include "util/crux-utils.h"
 #include "parameter.h"
+#include "util/GlobalParams.h"
 #include "objects.h"
 #include "Peptide.h"
 #include "Protein.h"
@@ -43,10 +44,10 @@ void Protein::init() {
   protein_idx_ = 0;
   is_light_ = false;
   is_memmap_ = false;
-  id_ = NULL;
+  id_.clear();
   sequence_ = NULL;
   length_ = 0;
-  annotation_ = NULL;
+  annotation_.clear();
 }
 
 /**
@@ -145,11 +146,8 @@ bool Protein::toLight()
   // free all char* in protein object
   free(sequence_);
   sequence_ = NULL;
-  free(annotation_);
-  annotation_ = NULL;
-  free(id_);
-  id_ = NULL;
-  
+  annotation_.clear(); 
+  id_.clear();
   return (is_light_ = true);
 }                            
 
@@ -160,14 +158,8 @@ Protein::~Protein()
 {
   // FIXME what is the point of checking this?
   if(!is_memmap_ && !is_light_){ 
-    if (id_ != NULL){
-      free(id_);
-    }
     if (sequence_ != NULL){
       free(sequence_);
-    }
-    if (annotation_ != NULL){
-      free(annotation_);
     }
   }
 }
@@ -187,10 +179,10 @@ void Protein::print(
   int   sequence_index;
   int   sequence_length = getLength();
   char* sequence = getSequence();
-  char* id = getId();
-  char* annotation = getAnnotation();
+  string& id = getIdPointer();
+  string annotation = getAnnotation();
   
-  fprintf(file, ">%s %s\n", id, annotation);
+  fprintf(file, ">%s %s\n", id.c_str(), annotation.c_str());
 
   sequence_index = 0;
   while (sequence_length - sequence_index > FASTA_LINE) {
@@ -200,8 +192,6 @@ void Protein::print(
   fprintf(file, "%s\n\n", &(sequence[sequence_index]));
 
   free(sequence);
-  free(id);
-  free(annotation);
 }
 
 /**
@@ -228,12 +218,12 @@ int Protein::findStart(
     string protein_seq = getSequencePointer();
     pos = protein_seq.find(seq);
     if (pos == string::npos) {
-      carp(CARP_DEBUG, "could not find %s in protein %s\n%s", seq.c_str(), getIdPointer(), protein_seq.c_str());
+      carp(CARP_DEBUG, "could not find %s in protein %s\n%s", seq.c_str(), getIdPointer().c_str(), protein_seq.c_str());
       //finding the sequence with the flanks failed, try finding without the flanks.
       seq = peptide_sequence;
       pos = protein_seq.find(seq);
       if (pos == string::npos) {
-        carp(CARP_ERROR, "could not %s in protein %s\n%s", seq.c_str(), getIdPointer(), protein_seq.c_str());
+        carp(CARP_ERROR, "could not %s in protein %s\n%s", seq.c_str(), getIdPointer().c_str(), protein_seq.c_str());
         return -1;
       }
       return (pos+1);
@@ -268,22 +258,22 @@ void Protein::serialize(
     toHeavy();
   }
   
-  int id_length = strlen(id_);
-  int annotation_length = strlen(annotation_);
+  int id_length = id_.length();
+  int annotation_length = annotation_.length();
 
   // write the protein id length
   fwrite(&id_length, sizeof(int), 1, file);
   
   // write the protein id 
  // include "/0"
-  fwrite(id_, sizeof(char), id_length+1, file);
+  fwrite(id_.c_str(), sizeof(char), id_length+1, file);
 
   // write the protein annotation length
   fwrite(&annotation_length, sizeof(int), 1, file);
 
   // write the protein annotation
   // include "/0"
-  fwrite(annotation_, sizeof(char), annotation_length+1, file);
+  fwrite(annotation_.c_str(), sizeof(char), annotation_length+1, file);
   
   // write the protein sequence length
   fwrite(&length_, sizeof(unsigned int), 1, file);
@@ -304,22 +294,18 @@ void Protein::copy(
   Protein* dest ///< protein to copy to -out
   )
 {
-  char* id = src->getId();
   char* sequence = src->getSequence();
-  char* annotation = src->getAnnotation();
   
-  dest->setId(id);
+  dest->setId(src->getIdPointer());
   dest->setSequence(sequence);
   dest->setLength(src->getLength());
-  dest->setAnnotation(annotation);
+  dest->setAnnotation(src->getAnnotationPointer());
   dest->setOffset(src->offset_);
   dest->setProteinIdx(src->protein_idx_);
   dest->setIsLight(src->is_light_);
   dest->database_ = src->database_;
   
-  free(id);
   free(sequence);
-  free(annotation);
 }
 
 
@@ -593,7 +579,7 @@ void Protein::shuffle(
   DECOY_TYPE_T decoy_type){ ///< method for shuffling
   char* decoy_str = decoy_type_to_string(decoy_type);
   carp(CARP_DEBUG, "Shuffling protein %s as %s", 
-       id_, decoy_str);
+       id_.c_str(), decoy_str);
   free(decoy_str);
 
   switch(decoy_type){
@@ -621,11 +607,7 @@ void Protein::shuffle(
 
   // change the protein name
   string prefix = Params::GetString("decoy-prefix");
-
-  char* new_name = cat_string(prefix.c_str(), id_);
-  free(id_);
-  id_= new_name;
-
+  id_ = prefix + id_;
 }
 
 /** 
@@ -642,27 +624,22 @@ void Protein::shuffle(
  * user must free the return id
  * assumes that the protein is heavy
  */
-char* Protein::getId()
+string Protein::getId()
 {
 
   if(is_light_){
     carp(CARP_FATAL, "Cannot get ID from light protein.");
   }
   
-  int id_length = strlen(id_) +1; // +\0
-  char* copy_id = 
-    (char *)mymalloc(sizeof(char)*id_length);
-  
-  strncpy(copy_id, id_, id_length); 
+  return id_;
 
-  return copy_id;
 }
 
 /**
  *\returns a pointer to the id of the protein
  * assumes that the protein is heavy
  */
-char* Protein::getIdPointer()
+string& Protein::getIdPointer()
 {
   if(is_light_){
     carp(CARP_FATAL, "Cannot get ID pointer from light protein.");
@@ -674,15 +651,10 @@ char* Protein::getIdPointer()
  * sets the id of the protein
  */
 void Protein::setId(
-  const char* id ///< the sequence to add -in
+  const string& id ///< the sequence to add -in
   )
 {
-  free(id_);
-  int id_length = strlen(id) +1; // +\0
-  char* copy_id = 
-    (char *)mymalloc(sizeof(char)*id_length);
-  id_ =
-    strncpy(copy_id, id, id_length);  
+  id_ = id;
 }
 
 /**
@@ -758,21 +730,19 @@ void Protein::setLength(
  * user must free the return annotation
  * assumes that the protein is heavy
  */
-char* Protein::getAnnotation()
+string Protein::getAnnotation()
 {
   if(is_light_){
     carp(CARP_FATAL, "Cannot get annotation from light protein.");
   }
-  int annotation_length = strlen(annotation_) +1; // +\0
-  char * copy_annotation = 
-    (char *)mymalloc(sizeof(char)*annotation_length);
-  return strncpy(copy_annotation, annotation_, annotation_length);  
+
+  return annotation_;
 }
 
 /**
  *\returns A const pointer to the annotation of the protein.
  */
-const char* Protein::getAnnotationPointer(){
+const string& Protein::getAnnotationPointer(){
   return annotation_;
 }
  
@@ -780,17 +750,10 @@ const char* Protein::getAnnotationPointer(){
  * sets the annotation of the protein
  */
 void Protein::setAnnotation(
-  const char* annotation ///< the sequence to add -in
+  const string& annotation ///< the sequence to add -in
   )
 {
-  free(annotation_);
-  annotation_ = NULL;
-
-  if( annotation == NULL ){
-    return;
-  }
-
-  annotation_ = my_copy_string(annotation);
+  annotation_ = annotation;
 }
 
 /**
@@ -871,8 +834,7 @@ Database* Protein::getDatabase()
  * Comparison function for sorting proteins by protein id.
  */
 bool Crux::protein_id_less_than(Protein* protein_one, Protein* protein_two){
-  int compare = strcmp(protein_one->getIdPointer(),
-                       protein_two->getIdPointer());
+  int compare = protein_one->getIdPointer().compare(protein_two->getIdPointer());
   return (compare > 0);
 }
 
@@ -894,10 +856,10 @@ void Protein::peptideShuffleSequence(){
   }
  
   // get the digest rule
-  ENZYME_T enzyme = get_enzyme_type_parameter("enzyme");
+  ENZYME_T enzyme = GlobalParams::getEnzyme();
   // cases where peptide-shuffle is really protein shuffle
   if( enzyme == NO_ENZYME 
-      || get_digest_type_parameter("digestion") == NON_SPECIFIC_DIGEST){
+      || GlobalParams::getDigestion() == NON_SPECIFIC_DIGEST){
     this->shuffle(PROTEIN_SHUFFLE_DECOYS);
     return;
   }
@@ -963,7 +925,7 @@ void Protein::shuffleRegion(
     if( !has_changed ){
         carp(CARP_WARNING, "Unable to generate a shuffled sequence "
              "different than the original for sequence %s of protein %s "
-             "at position %d.", buf, id_, start);
+             "at position %d.", buf, id_.c_str(), start);
     }
   }
   delete [] buf;

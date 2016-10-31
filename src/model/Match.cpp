@@ -24,6 +24,7 @@
 #include "util/crux-utils.h"
 #include "objects.h"
 #include "parameter.h"
+#include "util/GlobalParams.h"
 #include "Scorer.h" 
 #include "Match.h" 
 #include "MatchCollection.h" 
@@ -114,9 +115,11 @@ Match::~Match() {
   if(post_process_match_ && spectrum_ !=NULL){
     delete spectrum_;
   }
+  /*
   if (peptide_sequence_ != NULL){
     free(peptide_sequence_);
   }
+  */
   if (mod_sequence_ != NULL){
     free(mod_sequence_);
   }
@@ -218,7 +221,7 @@ void Match::printSqt(
   free(sequence);
   
   PeptideSrc* peptide_src = NULL;
-  char* protein_id = NULL;
+  string protein_id;
   Protein* protein = NULL;
   
   for(PeptideSrcIterator iter = peptide->getPeptideSrcBegin();
@@ -237,8 +240,7 @@ void Match::printSqt(
     }
 
     // print match info (locus line), add "decoy-prefix" to locus name for decoys
-    fprintf(file, "L\t%s%s\n", rand.c_str(), protein_id);      
-    free(protein_id);
+    fprintf(file, "L\t%s%s\n", rand.c_str(), protein_id.c_str());      
   }
   
   return;
@@ -488,17 +490,15 @@ void Match::printOneMatchField(
     break;
   case CLEAVAGE_TYPE_COL:
     {
-      ENZYME_T enzyme = get_enzyme_type_parameter("enzyme");
-      char* enzyme_string = enzyme_type_to_string(enzyme);
-      DIGEST_T digestion = get_digest_type_parameter("digestion");
-      char* digestion_string = digest_type_to_string(digestion);
+      ENZYME_T enzyme = GlobalParams::getEnzyme();
+      const char* enzyme_string = enzyme_type_to_string(enzyme);
+      DIGEST_T digestion = GlobalParams::getDigestion();
+      const char* digestion_string = digest_type_to_string(digestion);
       string cleavage_str = enzyme_string;
       cleavage_str += "-";
       cleavage_str += digestion_string;
       output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
                                        cleavage_str.c_str() );
-      free(enzyme_string);
-      free(digestion_string);
     }
     break;
   case PROTEIN_ID_COL:

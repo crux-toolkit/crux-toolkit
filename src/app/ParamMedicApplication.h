@@ -23,6 +23,7 @@ class ParamMedicErrorCalculator {
   ParamMedicErrorCalculator();
   virtual ~ParamMedicErrorCalculator();
 
+  void processFiles(const std::vector<std::string>& files);
   void processSpectrum(Crux::Spectrum* spectrum);
   void clearBins();
 

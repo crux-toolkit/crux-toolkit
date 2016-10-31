@@ -2,6 +2,7 @@
 #include "util/FileUtils.h"
 #include "util/Params.h"
 #include "util/StringUtils.h"
+#include "util/GlobalParams.h"
 
 using namespace Crux;
 
@@ -40,7 +41,7 @@ void SQTWriter::writeHeader(
 
   time_t hold_time = time(0);
 
-  MASS_TYPE_T mass_type = get_mass_type_parameter("isotopic-mass");
+  MASS_TYPE_T mass_type = GlobalParams::getIsotopicMass();
   char precursor_masses[64];
   mass_type_to_string(mass_type, precursor_masses);
 
@@ -121,16 +122,15 @@ void SQTWriter::writeHeader(
 
   ENZYME_T enzyme = get_enzyme_type_parameter("enzyme");
   DIGEST_T digestion = get_digest_type_parameter("digestion");
-  char* enz_str = enzyme_type_to_string(enzyme);
-  char* dig_str = digest_type_to_string(digestion);
+  const char* enz_str = enzyme_type_to_string(enzyme);
+  const char* dig_str = digest_type_to_string(digestion);
   string custom_str;
   if (enzyme == CUSTOM_ENZYME) {
     string rule = Params::GetString("custom-enzyme");
     custom_str = ", custom pattern: " + rule;
   }
   *file_ << "H\tEnzymeSpec\t" << enz_str << "-" << dig_str << custom_str << endl;
-  free(enz_str);
-  free(dig_str);
+
 
   *file_ << "H\tLine fields: S, scan number, scan number, "
          << "charge, 0, server, experimental mass, total ion intensity, "
@@ -222,9 +222,7 @@ void SQTWriter::writePSM(
        ++iter) {
     PeptideSrc* peptide_src = *iter;
     Protein* protein = peptide_src->getParentProtein();
-    char* protein_id = protein->getId();
-    string protein_id_str(protein_id);
-    free(protein_id);
+    string protein_id_str = protein->getId();
     if (is_decoy && protein->getDatabase()->getDecoyType() == NO_DECOYS) {
       protein_id_str = Params::GetString("decoy-prefix") + protein_id_str;
     }

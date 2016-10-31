@@ -53,8 +53,12 @@ bool MSToolkitSpectrumCollection::parse() {
   // only read ms2 scans
   mst_reader->setFilter(MSToolkit::MS2);
   // read first spectrum
-  mst_reader->readFile(filename_.c_str(), *mst_spectrum);
+  bool ret = mst_reader->readFile(filename_.c_str(), *mst_spectrum);
   
+  if (!ret) {
+    carp(CARP_FATAL, "MSToolkit: Error reading spectra file: %s", filename_.c_str());
+  }
+
   while(mst_spectrum->getScanNumber() != 0) {
     // is this a scan to include? if not skip it
     if( mst_spectrum->getScanNumber() < first_scan ) {
