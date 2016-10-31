@@ -86,12 +86,12 @@ char PostProcessProtein::getNTermFlankingAA(
   
   if ((offset >= prev_aas_.size()) || (prev_aas_.at(offset).length() == 0)) {
     carp_once(CARP_WARNING, "Missing nterm flanking for protein:%s offset:%d",
-      getIdPointer(), offset); 
+      getIdPointer().c_str(), offset); 
   } else {
     ans = prev_aas_.at(offset)[0];
   }
   carp(CARP_DETAILED_DEBUG, "protein:%s offset:%d pflank:%c(%d)", 
-    getIdPointer(), offset, ans,(int)ans);
+    getIdPointer().c_str(), offset, ans,(int)ans);
 
   return ans;
 }
@@ -102,10 +102,10 @@ char PostProcessProtein::getCTermFlankingAA(
 
   char ans = next_aas_.at(offset)[0];
   if (ans == '\0') {
-    carp_once(CARP_WARNING, "Missing cterm flanking aa for protein:%s offset:%d",getIdPointer(), offset);
+    carp_once(CARP_WARNING, "Missing cterm flanking aa for protein:%s offset:%d",getIdPointer().c_str(), offset);
       ans = 'X';
   }
-  carp(CARP_DETAILED_DEBUG, "protein:%s offset:%d nflank:%c(%d)", getIdPointer(), offset, ans,(int)ans);
+  carp(CARP_DETAILED_DEBUG, "protein:%s offset:%d nflank:%c(%d)", getIdPointer().c_str(), offset, ans,(int)ans);
 
   return ans;
 }
@@ -126,8 +126,8 @@ unsigned int PostProcessProtein::getLength() {
 
   if (sequence_ == NULL) {
     carp_once(CARP_WARNING, "Need protein sequence in order to calculate protein length.\n"
-                     "   Please provide protein fasta or index using the protein-database parameter\n"
-                     "   Protein %s doesn't have the full sequence", getIdPointer());
+      "   Please provide protein fasta or index using the protein-database parameter\n"
+      "   Protein %s doesn't have the full sequence", getIdPointer().c_str());
 
     return 0;
   }

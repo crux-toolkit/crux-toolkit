@@ -567,14 +567,12 @@ void PMCDelimitedFileWriter::writePSMs(
  */
 string PMCDelimitedFileWriter::getCleavageType() {
   ENZYME_T enzyme = get_enzyme_type_parameter("enzyme");
-  char* enzyme_string = enzyme_type_to_string(enzyme);
+  const char* enzyme_string = enzyme_type_to_string(enzyme);
   DIGEST_T digestion = get_digest_type_parameter("digestion");
-  char* digestion_string = digest_type_to_string(digestion);
+  const char* digestion_string = digest_type_to_string(digestion);
   string cleavage_str = enzyme_string;
   cleavage_str += "-";
   cleavage_str += digestion_string;
-  free(enzyme_string);
-  free(digestion_string);
   return cleavage_str;
 }
 

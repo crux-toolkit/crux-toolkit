@@ -51,7 +51,8 @@ void FilteredSpectrumChargeIterator::queueNextSpectrum() {
 
   // Warn if we skip due to too few peaks.
   if ( num_peaks < min_peaks_ ) {
-    carp(CARP_INFO, "Skipping scan %d with %d (< %d) peaks.",
+    num_skipped_++;
+    carp(CARP_DEBUG, "Skipping scan %d with %d (< %d) peaks.",
          spectrum_index_, num_peaks, min_peaks_);
   }
 
@@ -88,6 +89,7 @@ FilteredSpectrumChargeIterator::FilteredSpectrumChargeIterator(
   spectrum_collection_ = spectrum_collection;  
   has_next_ = false;
   spectrum_index_ = -1;
+  num_skipped_ = 0;
   zstate_index_ = -1;
   min_mz_ = Params::GetDouble("spectrum-min-mz");
   max_mz_ = Params::GetDouble("spectrum-max-mz");
@@ -113,6 +115,10 @@ FilteredSpectrumChargeIterator::~FilteredSpectrumChargeIterator() {
 
 bool FilteredSpectrumChargeIterator::hasNext() {
   return has_next_;
+}
+
+int FilteredSpectrumChargeIterator::numSkipped() {
+  return num_skipped_;
 }
 
 Spectrum* FilteredSpectrumChargeIterator::next(SpectrumZState& zstate) {
