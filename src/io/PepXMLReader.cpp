@@ -283,13 +283,13 @@ int PepXMLReader::findStart(
     string protein_seq = protein->getSequencePointer();
     pos = protein_seq.find(seq);
     if (pos == string::npos) {
-      carp(CARP_DEBUG, "could not find %s in protein %s\n%s", seq.c_str(), protein->getIdPointer(), protein_seq.c_str());
+      carp(CARP_DEBUG, "could not find %s in protein %s\n%s", seq.c_str(), protein->getIdPointer().c_str(), protein_seq.c_str());
       //finding the sequence with the flanks failed, try finding without the flanks.
       seq = peptide_sequence;
       pos = protein_seq.find(seq);
       if (pos == string::npos) {
         carp(CARP_FATAL, "could not find %s in protein %s\n%s",
-             seq.c_str(), protein->getIdPointer(), protein_seq.c_str());
+             seq.c_str(), protein->getIdPointer().c_str(), protein_seq.c_str());
       }
       case_ = 2;
       ans = (pos+1);

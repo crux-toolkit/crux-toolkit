@@ -1330,10 +1330,9 @@ void TideSearchApplication::processParams() {
     const pb::Header::PeptidesHeader& pepHeader = peptides_header.peptides_header();
 
     Params::Set("enzyme", pepHeader.enzyme());
-    char* digestString =
+    const char* digestString =
       digest_type_to_string(pepHeader.full_digestion() ? FULL_DIGEST : PARTIAL_DIGEST);
     Params::Set("digestion", digestString);
-    free(digestString);
     Params::Set("isotopic-mass", pepHeader.monoisotopic_precursor() ? "mono" : "average");
   }
 }

@@ -70,11 +70,8 @@ void PMCPepXMLWriter::writePSMs(
          ++prot_iter) {
       ProteinMatch* prot_match = *prot_iter;
       Protein* protein = prot_match->getProtein();
-      const char* tmp;
-      tmp = protein->getIdPointer();
-      protein_names.push_back((tmp != NULL) ? tmp : "");
-      tmp = protein->getAnnotationPointer();
-      protein_descriptions.push_back((tmp != NULL) ? tmp : "");
+      protein_names.push_back(protein->getIdPointer());
+      protein_descriptions.push_back(protein->getAnnotationPointer());
     }
 
     // populate scores

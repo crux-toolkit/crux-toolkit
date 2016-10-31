@@ -51,7 +51,7 @@ void Database::init(){
   file_size_ = 0;
   is_hashed_ = false;
   proteins_ = new vector<Protein*>();
-  protein_map_ = new map<char*, Protein*, cmp_str>();
+  protein_map_ = new map<const char*, Protein*, cmp_str>();
   decoys_ = NO_DECOYS;
   binary_is_temp_ = false;
 }
@@ -211,8 +211,8 @@ void Database::addProtein(
   protein->setProteinIdx(proteins_->size()-1);
 
   if (is_hashed_) {
-    char* id = protein->getIdPointer();
-    protein_map_->insert(make_pair(id, protein));
+    string& id = protein->getIdPointer();
+    protein_map_->insert(make_pair(id.c_str(), protein));
   }
 }
 
@@ -786,8 +786,8 @@ Protein* Database::getProteinByIdString(
   //this even faster if needed.
   Protein* protein = NULL;
   if (is_hashed_) {
-    map<char*, Protein*, cmp_str>::iterator find_iter;
-    find_iter = protein_map_->find((char*)protein_id);
+    map<const char*, Protein*, cmp_str>::iterator find_iter;
+    find_iter = protein_map_->find(protein_id);
 
     if (find_iter != protein_map_->end()) {
       protein = find_iter->second;
@@ -799,10 +799,10 @@ Protein* Database::getProteinByIdString(
       protein_idx++) {
 
       Protein* current_protein = proteins_->at(protein_idx);
-      char* current_id = current_protein->getIdPointer();
-      protein_map_->insert(make_pair(current_id, current_protein));
+      string& current_id = current_protein->getIdPointer();
+      protein_map_->insert(make_pair(current_id.c_str(), current_protein));
 
-      if (strcmp(current_id, protein_id)==0) {
+      if (current_id == protein_id) {
         protein = current_protein;
       }
         

@@ -23,10 +23,10 @@ class Protein {
   unsigned int protein_idx_; ///< The index of the protein in it's database.
   bool    is_light_; ///< is the protein a light protein?
   bool    is_memmap_; ///< is the protein produced from memory mapped file
-  char*              id_; ///< The protein sequence id.
+  std::string id_; ///< The protein sequence id.
   char*        sequence_; ///< The protein sequence.
   unsigned int   length_; ///< The length of the protein sequence.
-  char*      annotation_; ///< Optional protein annotation.
+  std::string      annotation_; ///< Optional protein annotation.
 
   /**
    * Find the beginning of the next sequence, and read the sequence ID
@@ -184,18 +184,18 @@ class Protein {
    * returns a heap allocated new copy of the id
    * user must free the return id
    */
-  char* getId();
+  std::string getId();
 
   /**
    *\returns a pointer to the id of the protein
    */
-  char* getIdPointer();
+  std::string& getIdPointer();
 
   /**
    * sets the id of the protein
    */
   void setId(
-    const char* id ///< the sequence to add -in
+    const std::string& id ///< the sequence to add -in
     );
 
   /**
@@ -238,18 +238,18 @@ class Protein {
    * returns a heap allocated new copy of the annotation
    * user must free the return annotation
    */
-  char* getAnnotation();
+  std::string getAnnotation();
 
   /**
    *\returns A const pointer to the annotation of the protein.
    */
-  const char* getAnnotationPointer();
+  const std::string& getAnnotationPointer();
 
    /**
    * sets the annotation of the protein
    */
   void setAnnotation(
-    const char* annotation ///< the sequence to add -in
+    const std::string& annotation ///< the sequence to add -in
   );
 
 
