@@ -529,7 +529,13 @@ Params::Params() : finalized_(false) {
     "Available for crux percolator", true);
   InitStringParam("init-weights", "",
     "Read initial weights from the given file (one per line).",
-    "Available for crux percolator ", true);
+    "Available for crux percolator", true);
+  InitIntParam("subset-max-train", 0,
+    "Only train Percolator on a subset of PSMs, and use the resulting score "
+    "vector to evaluate the other PSMs. Recommended when analyzing huge numbers "
+    "(>1 million) of PSMs. When set to 0, all PSMs are used for training as "
+    "normal.",
+    "Available for crux percolator", true);
   InitDoubleParam("c-pos", 0.00,
     "Penalty for mistakes made on positive examples. If this value is set to 0, "
     "then it is set via cross validation over the values {0.1, 1, 10}, selecting the "
@@ -563,11 +569,9 @@ Params::Params() : finalized_(false) {
     "peptides has a probability exceeding the specified threshold will "
     "be assigned probability = 0.",
     "Available for crux percolator", true);
-  InitBoolParam("post-processing-qvality", false,
-    "Replace the target-decoy competition with the method qvality to "
-    "assign q-values and PEPs. Note that this option only has an "
-    "effect if the input PSMs are from separate target and decoy "
-    "searches.", 
+  InitBoolParam("tdc", true,
+    "Use target-decoy competition to assign q-values and PEPs. When set to F, "
+    "the qvality method is used instead.",
     "Available for crux percolator", true);
   InitIntParam("maxiter", 10, 0, 100000000,
     "Maximum number of iterations for training.",
@@ -1978,10 +1982,11 @@ void Params::Categorize() {
 
   items.clear();
   items.insert("only-psms");
-  items.insert("post-processing-qvality");
+  items.insert("tdc");
   AddCategory("General options", items);
 
   items.clear();
+  items.insert("subset-max-train");
   items.insert("c-pos");
   items.insert("c-neg");
   items.insert("test-fdr");
