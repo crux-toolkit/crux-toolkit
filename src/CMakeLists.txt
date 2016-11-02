@@ -87,6 +87,7 @@ set (
   util/Alphabet.cpp
   util/AminoAcidUtil.cpp
   util/ArgParser.cpp
+  util/GlobalParams.cpp
   io/carp.cpp
   util/CarpStreamBuf.cpp
   app/CometApplication.cpp
@@ -133,6 +134,7 @@ set (
   io/MzIdentMLWriter.cpp
   io/OutputFiles.cpp
   parameter.cpp
+  app/ParamMedicApplication.cpp
   util/Params.cpp
   model/Peak.cpp
   model/Peptide.cpp

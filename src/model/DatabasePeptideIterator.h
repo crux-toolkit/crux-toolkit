@@ -26,8 +26,8 @@ class DatabasePeptideIterator : public PeptideIterator {
   bool first_passed_; 
     ///< is it ok to convert prior_protein to light?
   bool store_all_peptides_; ///< true for search so duplicates are combined
-  std::map<char*, Crux::Peptide*, cmp_str> peptide_map_; ///< store peptides by sequence
-  std::map<char*, Crux::Peptide*, cmp_str>::iterator cur_map_position_; ///< next in map to return
+  std::map<const char*, Crux::Peptide*, cmp_str> peptide_map_; ///< store peptides by sequence
+  std::map<const char*, Crux::Peptide*, cmp_str>::iterator cur_map_position_; ///< next in map to return
   bool already_initialized_; ///< flag for first call to queueNextPeptide
   bool is_decoy_; ///< transform all peptides to decoys before returning
 

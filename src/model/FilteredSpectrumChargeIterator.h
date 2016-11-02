@@ -16,6 +16,7 @@ class FilteredSpectrumChargeIterator {
   Crux::SpectrumCollection* spectrum_collection_;///< spectra to iterate over
   bool has_next_;  ///< is there a spec that passes criteria
   int spectrum_index_; ///< The index of the current spectrum
+  int num_skipped_; ///< Number of scans skipped due to too few peaks.
   std::vector<SpectrumZState> zstates_;        ///< Array of possible zstates to search
   int zstate_index_;    ///< The index of the z-state for the current spectrum
   double min_mz_;       ///< return only spec above this mz
@@ -56,6 +57,11 @@ class FilteredSpectrumChargeIterator {
    * The basic iterator function has_next.
    */
   bool hasNext();
+
+  /**
+   * Report number of skipped scans.
+   */
+  int numSkipped();
 
   /**
    * The basic iterator function next.

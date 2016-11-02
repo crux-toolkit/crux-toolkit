@@ -192,6 +192,9 @@ int PercolatorApplication::main(
     }
   }
 
+  perc_args_vec.push_back("--subset-max-train");
+  perc_args_vec.push_back(Params::GetString("subset-max-train"));
+
   if (!Params::IsDefault("c-pos")) {
     perc_args_vec.push_back("--Cpos");
     perc_args_vec.push_back(Params::GetString("c-pos"));
@@ -313,10 +316,6 @@ int PercolatorApplication::main(
       perc_args_vec.push_back("--fido-no-split-large-components");
     }
 
-    if (Params::GetBool("post-processing-qvality")) {
-      perc_args_vec.push_back("--post-processing-qvality");
-    }
-
     perc_args_vec.push_back("--fido-gridsearch-mse-threshold");
     perc_args_vec.push_back(Params::GetString("fido-gridsearch-mse-threshold"));
 
@@ -327,6 +326,12 @@ int PercolatorApplication::main(
       perc_args_vec.push_back("--decoy-results-proteins");
       perc_args_vec.push_back(output_decoy_proteins);
     }
+  }
+
+  if (Params::GetBool("tdc")) {
+    perc_args_vec.push_back("--post-processing-tdc [default]");
+  } else {
+    perc_args_vec.push_back("--post-processing-qvality");
   }
 
   perc_args_vec.push_back(input_pin);
@@ -460,7 +465,10 @@ string PercolatorApplication::getDescription() const {
     "Crux Percolator writes its files to an output directory, logs all standard "
     "error messages to a log file, and is capable of reading parameters from a "
     "parameter file.</li><li>Reading from XML and stdin are not supported at "
-    "this time.</li></ul>]]";
+    "this time.</li><li>In Crux Percolator, the two complementary flags "
+    "&quot;--post-processing-qvality&quot; and &quot;--post-processing-tdc&quot; "
+    "are combined into a single Boolean parameter &quot;--tdc "
+    "T|F&quot;.<li></ul>]]";
 }
 
 /**
@@ -496,6 +504,7 @@ vector<string> PercolatorApplication::getOptions() const {
     "protein",
     "decoy-xml-output",
     "decoy-prefix",
+    "subset-max-train",
     "c-pos",
     "c-neg",
     "train-fdr",
@@ -521,7 +530,7 @@ vector<string> PercolatorApplication::getOptions() const {
     "fido-fast-gridsearch",
     "fido-protein-truncation-threshold",
     "fido-no-split-large-components",
-    "post-processing-qvality",
+    "tdc",
     "verbosity",
     "top-match"
   };

@@ -21,6 +21,7 @@
 #include "GeneratePeptides.h"
 #include "GetMs2Spectrum.h"
 #include "MakePinApplication.h"
+#include "ParamMedicApplication.h"
 #include "PercolatorApplication.h"
 #include "Pipeline.h"
 #include "PredictPeptideIons.h"
@@ -61,6 +62,7 @@ int CreateDocs::main(int argc, char** argv) {
   apps.add(new GeneratePeptides());
   apps.add(new GetMs2Spectrum());
   apps.add(new MakePinApplication());
+  apps.add(new ParamMedicApplication());
   apps.add(new PercolatorApplication());
   apps.add(new PipelineApplication());
   apps.add(new PredictPeptideIons());
@@ -531,10 +533,10 @@ const string CreateDocs::TOOL_TEMPLATE =
   "    <div class=\"footerimportantlinks\">\n"
   "      <img src=\"../images/linkicon.png\" style=\"width:16px; height:16px\"><h3>Important links</h3>\n"
   "      <ul>\n"
-  "        <li><a href=\"../faq.html\">Crux <strong>FAQ</strong></a></li>\n"
+  "        <li><a href=\"../faq.html\">Crux FAQ</a></li>\n"
   "        <li><a href=\"../glossary.html\">Glossary of terminology</a></li>\n"
   "        <li><a href=\"http://scholar.google.com/citations?hl=en&user=Rw9S1HIAAAAJ\">Google Scholar profile</a></li>\n"
-  "        <li><a href=\"https://sourceforge.net/projects/cruxtoolkit/\">SourceForge Issue's list</a></li>\n"
+  "        <li><a href=\"https://github.com/crux-toolkit/crux-toolkit\">GitHub</a></li>\n"
   "        <li><a href=\"../release-notes.html\">Release Notes</a></li>\n"
   "        <li><a href=\"https://mailman1.u.washington.edu/mailman/listinfo/crux-users\" title=\"Receive announcements of new versions\">Join the mailing list</a></li>\n"
   "        <li><a href=\"http://www.apache.org/licenses/LICENSE-2.0\">Apache license</a></li>\n"
@@ -559,12 +561,12 @@ const string CreateDocs::TOOL_TEMPLATE =
   "        MacCoss</a>\n"
   "        and <a href=\"http://noble.gs.washington.edu/~noble\">Prof. William\n"
   "        Stafford Noble</a> in the Department of Genome Sciences at the\n"
-  "        University of Washington, Seattle. Website by <a href=\"http://www.yuvalboss.com/\">Yuval Boss</a>\n"
+  "        University of Washington, Seattle.  Website by <a href=\"http://www.yuvalboss.com/\">Yuval Boss</a>. \n"
   "        <br />The complete list of contributors\n"
   "        can be found <a href=\"../contributors.html\">here</a>.\n"
   "        <br />\n"
   "        <br />\n"
-  "        Maintenance and development of Crux is funded by the <a href=\"https://www.nih.gov/\">National Institutes of Health</a> awards R01 GM096306 and P41 GM103533. \n"
+  "        Maintenance and development of Crux is funded by the <a href=\"https://www.nih.gov/\">National Institutes of Health</a> award P41 GM103533. \n"
   "      </p>\n"
   "    </div>\n"
   "  </div>\n"

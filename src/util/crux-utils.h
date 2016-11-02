@@ -345,9 +345,11 @@ char* ion_type_to_string(ION_TYPE_T type);
 // new style of type_to_string and string_to_type functions
 // requires an invalid value for each enum
 DIGEST_T string_to_digest_type(const std::string& name);
-char* digest_type_to_string(DIGEST_T);
+const char* digest_type_to_string(DIGEST_T);
 ENZYME_T string_to_enzyme_type(const std::string& name);
-char* enzyme_type_to_string(ENZYME_T);
+const char* enzyme_type_to_string(ENZYME_T);
+OBSERVED_PREPROCESS_STEP_T string_to_observed_preprocess_step(const std::string& name);
+char* observed_preprocess_step_to_string(OBSERVED_PREPROCESS_STEP_T type);
 WINDOW_TYPE_T string_to_window_type(const std::string& name);
 PARSIMONY_TYPE_T string_to_parsimony_type(const std::string& name);
 MEASURE_TYPE_T string_to_measure_type(const std::string& name);

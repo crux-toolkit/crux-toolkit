@@ -25,6 +25,7 @@
 #include "model/IonFilteredIterator.h"
 #include "model/IonSeries.h"
 #include "util/crux-utils.h"
+#include "util/GlobalParams.h"
 #include "util/Params.h"
 #include "model/Spectrum.h"
 #include "Scorer.h"
@@ -801,31 +802,8 @@ FLOAT_T* Scorer::getIntensityArrayObserved() {
 bool Scorer::createIntensityArrayObserved(
   Spectrum* spectrum,    ///< the spectrum to score(observed) -in
   int charge,              ///< the peptide charge -in 
-  const string& stop_after ///< the preprocessing step to stop after -in
+  OBSERVED_PREPROCESS_STEP_T stop_after
   ) {
-  const int STEP_DISCRETIZE = 1;
-  const int STEP_REMOVE_PRECURSOR = 2;
-  const int STEP_SQUARE_ROOT = 3;
-  const int STEP_REMOVE_GRASS = 4;
-  const int STEP_TEN_BIN = 5;
-  const int STEP_XCORR = 6;
-  int stop_step;
-  if (stop_after == "discretize") {
-    stop_step = STEP_DISCRETIZE;
-  } else if (stop_after == "remove-precursor") {
-    stop_step = STEP_REMOVE_PRECURSOR;
-  } else if (stop_after == "square-root") {
-    stop_step = STEP_SQUARE_ROOT;
-  } else if (stop_after == "remove-grass") {
-    stop_step = STEP_REMOVE_GRASS;
-  } else if (stop_after == "ten-bin") {
-    stop_step = STEP_TEN_BIN;
-  } else if (stop_after == "xcorr") {
-    stop_step = STEP_XCORR;
-  } else {
-    carp(CARP_FATAL, "Invalid stop-after value '%s'.", stop_after.c_str());
-  }
-  
   FLOAT_T precursor_mz = spectrum->getPrecursorMz();
   FLOAT_T experimental_mass_cut_off = precursor_mz*charge + 50;
 
@@ -880,7 +858,7 @@ bool Scorer::createIntensityArrayObserved(
     // skip all peaks larger than experimental mass
     // skip all peaks within precursor ion mz +/- 15
     if (peak_location > experimental_mass_cut_off ||
-        (stop_step >= STEP_REMOVE_PRECURSOR &&
+        (stop_after >= REMOVE_PRECURSOR_STEP &&
          peak_location < precursor_mz + tolerance &&
          peak_location > precursor_mz - tolerance)) {
       continue;
@@ -901,7 +879,7 @@ bool Scorer::createIntensityArrayObserved(
 
     // get intensity
     // sqrt the original intensity
-    FLOAT_T intensity = (stop_step >= STEP_SQUARE_ROOT)
+    FLOAT_T intensity = (stop_after >= SQUARE_ROOT_STEP)
       ? sqrt(peak->getIntensity()) : peak->getIntensity();
 
     // Record the max intensity in the full spectrum
@@ -921,7 +899,7 @@ bool Scorer::createIntensityArrayObserved(
 
   // For compatibility with SEQUEST drop peaks with intensity less than 1/20 of
   // the overall max intensity.
-  if (stop_step >= STEP_REMOVE_GRASS) {
+  if (stop_after >= REMOVE_GRASS_STEP) {
     for (vector<FLOAT_T>::iterator i = observed.begin(); i != observed.end(); i++) {
       if (*i <= 0.05 * max_intensity_overall) {
         *i = 0.0;
@@ -930,14 +908,14 @@ bool Scorer::createIntensityArrayObserved(
   }
 
   // normalize each 10 regions to max intensity of 50
-  if (stop_step >= STEP_TEN_BIN) {
+  if (stop_after >= TEN_BIN_STEP) {
     normalizeEachRegion(observed, max_intensity_per_region, region_selector);
   }
 
   observed_ = (FLOAT_T*)mycalloc(observed.size(), sizeof(FLOAT_T));
   copy(observed.begin(), observed.end(), observed_);
 
-  if (stop_step == STEP_XCORR) {
+  if (stop_after == XCORR_STEP) {
     // TODO maybe replace with a faster implementation that uses cum distribution
     for (int i = 0; i < observed.size(); i++) {
       for (int j = i - MAX_XCORR_OFFSET; j <= i + MAX_XCORR_OFFSET; j++) {
@@ -963,7 +941,8 @@ void Scorer::getProcessedPeaks(
   SCORER_TYPE_T score_type,  // SP, XCORR
   FLOAT_T** intensities, ///< pointer to array of intensities
   int* max_mz_bin,
-  const string& stop_after){
+  OBSERVED_PREPROCESS_STEP_T stop_after){
+  //  const string& stop_after){
 
   // create a scorer
   Scorer scorer(score_type);

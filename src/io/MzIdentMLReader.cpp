@@ -281,7 +281,7 @@ void MzIdentMLReader::parsePSMs() {
         start_idx = protein->findStart(sequence, "", "");
 
         if (start_idx == -1) {
-          carp(CARP_FATAL, "can't find sequence %s in first protein %s", sequence.c_str(), protein->getIdPointer());
+          carp(CARP_FATAL, "can't find sequence %s in first protein %s", sequence.c_str(), protein->getIdPointer().c_str());
         }
 
         int length = sequence.length();

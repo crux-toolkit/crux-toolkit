@@ -37,7 +37,7 @@ class Database {
                          ///  A database has only one associated file.
   bool is_parsed_;  ///< Has this database been parsed yet.
   std::vector<Crux::Protein*>* proteins_; ///< Proteins in this database.
-  std::map<char*, Crux::Protein*, cmp_str>* protein_map_; //map for proteins 
+  std::map<const char*, Crux::Protein*, cmp_str>* protein_map_; //map for proteins 
   bool is_hashed_; //Indicator of whether the database has been hashed/mapped.
   unsigned long int size_; ///< The size of the database in bytes (convenience)
   bool use_light_protein_; ///< should I use the light/heavy protein option

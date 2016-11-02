@@ -328,12 +328,13 @@ class Spectrum{
   /**
    * Adds a peak to the spectrum given a intensity and location.
    * Calls update_fields.
-   * \returns TRUE if successfully added.
    */
-  bool addPeak
+  void addPeak
     (FLOAT_T intensity,  ///< the intensity of peak to add -in
      FLOAT_T location_mz ///< the location of peak to add -in
      );
+
+  void truncatePeaks(int count);
 
   /**
    * Creates and fills mz_peak_array_, the array of pointers to peaks
