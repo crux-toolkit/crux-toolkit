@@ -87,6 +87,7 @@ set (
   util/Alphabet.cpp
   util/AminoAcidUtil.cpp
   util/ArgParser.cpp
+  util/CacheableMass.cpp
   util/GlobalParams.cpp
   io/carp.cpp
   util/CarpStreamBuf.cpp

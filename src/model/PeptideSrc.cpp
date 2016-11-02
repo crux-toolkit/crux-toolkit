@@ -331,8 +331,7 @@ bool PeptideSrc::parseTabDelimited(
       } else {
         string protein_id_string = protein_id.substr(0, left_paren_index);
         string peptide_start_index_string = protein_id.substr(left_paren_index+1, 
-          protein_id.length() - left_paren_index-2);
-
+          protein_id.length() - left_paren_index - 2);
         bool is_decoy;    
         //  set fields in new peptide src
         parent_protein = MatchCollectionParser::getProtein(
@@ -396,9 +395,8 @@ void PeptideSrc::fillPeptides(
   while (iterator->hasNext()) {
 
     Peptide* peptide = iterator->next();
-    char* sequence = peptide->getSequence();
+    const char* sequence = peptide->getSequence();
     string sequence_string = string(sequence);
-    std::free(sequence);
 
     if (sequence_to_peptide_.find(sequence_string) == sequence_to_peptide_.end()) {
       sequence_to_peptide_[sequence_string] = peptide;

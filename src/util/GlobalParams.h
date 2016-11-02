@@ -61,7 +61,7 @@ class GlobalParams {
    */
   static const MASS_TYPE_T& getIsotopicMass();
   static const int& getMissedCleavages();
-  //static const int& getMaxAasModified();  TODO - Uncomment after determining whether we need this or not.
+  static const int& getMaxAasModified();
   static const FLOAT_T& getMinMass();
   static const FLOAT_T& getMaxMass();
   static const WINDOW_TYPE_T& getPrecursorWindowType();

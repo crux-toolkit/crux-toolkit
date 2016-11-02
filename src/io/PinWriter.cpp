@@ -188,11 +188,10 @@ void PinWriter::printPSM(
   FLOAT_T calcMass = peptide->calcModifiedMass() + MASS_PROTON;
   FLOAT_T dM = (obsMass - calcMass) / charge;
 
-  char* sequence = peptide->getSequence();
+  const char* sequence = peptide->getSequence();
   int missedCleavages = get_num_internal_cleavage(sequence, enzyme_);
   get_terminal_cleavages(sequence, peptide->getNTermFlankingAA(),
                          peptide->getCTermFlankingAA(), enzyme_, enzN, enzC);
-  free(sequence);
 
   vector<string> fields;
   BOOST_FOREACH(const std::string& feature, enabledFeatures_) {

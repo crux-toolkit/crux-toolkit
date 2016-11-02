@@ -131,7 +131,7 @@ Peptide::~Peptide() {
     delete *i;
   }
   if(decoy_modified_seq_){
-    std::free(decoy_modified_seq_);
+    freeModSeq(decoy_modified_seq_);
   }
 }
 
@@ -821,7 +821,7 @@ void Peptide::transformToDecoy() {
 
   // delete any existing decoy sequence
   if (decoy_modified_seq_){  
-    std::free(decoy_modified_seq_); 
+    freeModSeq(decoy_modified_seq_); 
   }
   // if the peptide is already modified, shuffle the modified sequence
   if (!varMods_.empty()) {
