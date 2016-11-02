@@ -210,10 +210,11 @@ bool PWIZSpectrumCollection::parse() {
     }
 
     Crux::Spectrum* crux_spectrum = new Crux::Spectrum();
-    crux_spectrum->parsePwizSpecInfo(spectrum, scan_number_begin, scan_number_end);
-
-    this->addSpectrumToEnd(crux_spectrum);
-    //?delete spectrum?;
+    if (crux_spectrum->parsePwizSpecInfo(spectrum, scan_number_begin, scan_number_end)) {
+      addSpectrumToEnd(crux_spectrum);
+    } else {
+      delete crux_spectrum;
+    }
   }
 
   is_parsed_ = true;

@@ -1723,6 +1723,9 @@ Params::Params() : finalized_(false) {
   // param-medic
   InitArgParam("spectrum-file",
     "File from which to parse fragmentation spectra.");
+  InitBoolParam("ignore-no-charge", false,
+    "When parsing spectra, ignore those without charge state information.",
+    "Available for param-medic", false);
   InitDoubleParam("min-precursor-mz", 400,
     "Minimum precursor m/z value to consider.",
     "Available for param-medic", true);
