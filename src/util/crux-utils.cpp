@@ -181,14 +181,39 @@ DIGEST_T string_to_digest_type(const string& name) {
   return (DIGEST_T)clev_int;
 }
 
-char* digest_type_to_string(DIGEST_T type) {
-  if ((int)type > NUMBER_DIGEST_TYPES) {
+const char* digest_type_to_string(DIGEST_T type){
+  if( (int)type > NUMBER_DIGEST_TYPES){
     return NULL;
   }
 
-  char* type_str = my_copy_string(digest_type_strings[type]);
-
+  const  char* type_str = digest_type_strings[type];
   return type_str;
+}
+
+/**
+ * The string version of observed preprocessing types
+ */
+static const char* observed_preprocess_step_strings[NUMBER_PREPROCESS_STEPS] =
+  {"invalid", "discretize", "remove-precursor", "square-root", "remove-grass",
+   "ten-bin", "xcorr"};
+
+OBSERVED_PREPROCESS_STEP_T string_to_observed_preprocess_step(const string& name) {
+
+  int obs_int = convert_enum_type_str(name.c_str(), INVALID_ENUM_STRING,
+				      observed_preprocess_step_strings,
+				      NUMBER_PREPROCESS_STEPS);
+  if ( obs_int < 0 ){
+    obs_int = 0;
+  }
+  return (OBSERVED_PREPROCESS_STEP_T)obs_int;
+}
+
+char* observed_preproces_step_to_string(OBSERVED_PREPROCESS_STEP_T type) {
+  if ( (int)type > NUMBER_PREPROCESS_STEPS) {
+    return NULL;
+  }
+  char* obs_str = my_copy_string(observed_preprocess_step_strings[type]);
+  return(obs_str);
 }
 
 /**
@@ -213,11 +238,12 @@ ENZYME_T string_to_enzyme_type(const string& name) {
   return (ENZYME_T)enz_int;
 }
 
-char* enzyme_type_to_string(ENZYME_T type) {
+const char* enzyme_type_to_string(ENZYME_T type){
   if ((int)type > NUMBER_ENZYME_TYPES) {
     return NULL;
   }
-  return my_copy_string(enzyme_type_strings[type]);
+  const char* type_str = enzyme_type_strings[type];
+  return type_str;
 }
 
 /**

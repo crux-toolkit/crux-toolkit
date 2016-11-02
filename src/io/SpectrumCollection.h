@@ -77,11 +77,9 @@ class SpectrumCollection {
    */
   virtual ~SpectrumCollection();
 
- 
   SpectrumIterator begin();
   SpectrumIterator end();
   
-
   /**
    * Parses all the spectra from file designated by the filename member
    * variable.

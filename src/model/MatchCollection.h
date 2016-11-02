@@ -181,7 +181,7 @@ class MatchCollection {
    */
   int setFilePath(
     const std::string& file_path,  ///< File path to set
-    bool overwrite ///< Overwrite existing files?
+    bool overwrite = false ///< Overwrite existing files?
   );
 
   /**

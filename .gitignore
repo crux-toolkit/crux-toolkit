@@ -1,0 +1,72 @@
+# general patterns
+*.swp
+*.a
+CMakeCache.txt
+cmake_install.cmake
+CMakeFiles
+
+# /
+/CPackConfig.cmake
+/CPackSourceConfig.cmake
+/Makefile
+/crux_version.h
+/crux_version.h.txt
+
+# /doc
+/doc/user/Makefile
+/doc/user/assign-confidence.html
+/doc/user/barista.html
+/doc/user/bullseye.html
+/doc/user/cascade-search.html
+/doc/user/cmake_install.cmake
+/doc/user/comet.html
+/doc/user/create-docs.html
+/doc/user/default.params
+/doc/user/extract-columns.html
+/doc/user/extract-rows.html
+/doc/user/generate-peptides.html
+/doc/user/get-ms2-spectrum.html
+/doc/user/hardklor.html
+/doc/user/make-pin.html
+/doc/user/param-medic.html
+/doc/user/param-table.html
+/doc/user/percolator.html
+/doc/user/pipeline.html
+/doc/user/predict-peptide-ions.html
+/doc/user/print-processed-spectra.html
+/doc/user/psm-convert.html
+/doc/user/q-ranker.html
+/doc/user/read-tide-index.html
+/doc/user/search-for-xlinks.html
+/doc/user/sort-by-column.html
+/doc/user/spectral-counts.html
+/doc/user/stat-column.html
+/doc/user/subtract-index.html
+/doc/user/tide-index.html
+/doc/user/tide-search.html
+/doc/user/xlink-assign-ions.html
+/doc/user/xlink-score-spectrum.html
+
+# /ext
+/ext/Makefile
+/ext/bin/
+/ext/build/
+/ext/downloads/
+/ext/include/
+/ext/lib/
+/ext/share/
+
+# /src
+/src/**/Makefile
+/src/app/tide/protoobj
+/src/crux
+
+# /test
+/test/performance-tests/Makefile
+/test/smoke-tests/Makefile
+/test/smoke-tests/crux-output/
+/test/smoke-tests/small_yeast_index/
+/test/smoke-tests/small_yeast_index_mc1/
+/test/smoke-tests/tide_test_index/
+/test/smoke-tests/good_results/*.observed
+

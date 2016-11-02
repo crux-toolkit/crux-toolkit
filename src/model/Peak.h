@@ -28,54 +28,54 @@ public:
      * @param location: location for the new peak
      */
     Peak(FLOAT_T intensity, FLOAT_T location);
-    
+
     /**
      * Return the intensity of this Peak
      */
     FLOAT_T getIntensity() const;
-    
+
     /**
      * Return the intensity rank of this Peak
      */
     FLOAT_T getIntensityRank() const;
-    
+
     /**
      * Return the location of this Peak
      */
     FLOAT_T getLocation() const;
-    
+
     /**
      * Set the intensity of this Peak
      */
     void setIntensity(FLOAT_T intensity);
-    
+
     /**
      * Set the intensity rank of this Peak
      */
     void setIntensityRank(FLOAT_T intensity_rank);
-    
+
     /**
      * Set the location of this Peak
      */
     void setLocation(FLOAT_T location);
-    
+
     /**
      * Print the intensity and location of this peak to stdout
      */
     void print();
-    
+
     /**
      * Compare the intensity of this Peak and another Peak
      * Return true if this Peak is greater, false otherwise
      */
     bool compareByIntensity(Peak other);
-    
+
     /**
      * Compare the mz(location) of this Peak and another Peak
      * Return true if the other Peak is greater, false otherwise
      */
     bool compareByMZ(Peak other);
-    
+
 private:
     FLOAT_T intensity_;          // The intensity of this peak
     FLOAT_T intensity_rank_;     // The rank intensity of this peak

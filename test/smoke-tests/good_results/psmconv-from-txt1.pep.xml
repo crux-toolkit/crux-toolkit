@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href=""?>
-<msms_pipeline_analysis date="Tue Sep 20 11:44:42 2016" xmlns="http://regis-web.systemsbiology.net/pepXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://regis-web.systemsbiology.net/pepXML /usr/local/tpp/schema/pepXML_v110.xsd" summary_xml="">
+<msms_pipeline_analysis date="Tue Nov  1 12:47:57 2016" xmlns="http://regis-web.systemsbiology.net/pepXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://regis-web.systemsbiology.net/pepXML /usr/local/tpp/schema/pepXML_v110.xsd" summary_xml="">
 <msms_run_summary base_name="NA" msManufacturer="NA" msModel="NA" msIonization="NA" msAnalyzer="NA" msDectector="NA" raw_data_type="NA" raw_data="NA" >
 <sample_enzyme name="trypsin">
 </sample_enzyme>
@@ -48,6 +48,7 @@
 <parameter name="missed-cleavages" value="0"/>
 <parameter name="precursor-window" value="3"/>
 <parameter name="precursor-window-type" value="mass"/>
+<parameter name="auto-precursor-window" value="false"/>
 <parameter name="spectrum-parser" value="pwiz"/>
 <parameter name="use-z-line" value="true"/>
 <parameter name="keep-terminal-aminos" value="NC"/>
@@ -65,6 +66,7 @@
 <parameter name="scan-number" value=""/>
 <parameter name="mz-bin-width" value="1.0005079"/>
 <parameter name="mz-bin-offset" value="0.4"/>
+<parameter name="auto-mz-bin-width" value="false"/>
 <parameter name="use-flanking-peaks" value="false"/>
 <parameter name="spectrum-min-mz" value="0"/>
 <parameter name="spectrum-max-mz" value="1e+09"/>
@@ -94,6 +96,7 @@
 <parameter name="decoy-prefix" value="decoy_"/>
 <parameter name="output-weights" value="false"/>
 <parameter name="init-weights" value=""/>
+<parameter name="subset-max-train" value="0"/>
 <parameter name="c-pos" value="0"/>
 <parameter name="c-neg" value="0"/>
 <parameter name="train-fdr" value="0.01"/>
@@ -101,7 +104,7 @@
 <parameter name="fido-fast-gridsearch" value="0"/>
 <parameter name="fido-no-split-large-components" value="false"/>
 <parameter name="fido-protein-truncation-threshold" value="0.01"/>
-<parameter name="post-processing-qvality" value="false"/>
+<parameter name="tdc" value="true"/>
 <parameter name="maxiter" value="10"/>
 <parameter name="quick-validation" value="false"/>
 <parameter name="default-direction" value=""/>
@@ -144,6 +147,7 @@
 <parameter name="num_threads" value="0"/>
 <parameter name="peptide_mass_tolerance" value="3"/>
 <parameter name="peptide_mass_units" value="0"/>
+<parameter name="auto_peptide_mass_tolerance" value="false"/>
 <parameter name="mass_type_parent" value="1"/>
 <parameter name="mass_type_fragment" value="1"/>
 <parameter name="precursor_tolerance_type" value="0"/>
@@ -153,6 +157,7 @@
 <parameter name="allowed_missed_cleavage" value="2"/>
 <parameter name="fragment_bin_tol" value="1.000507"/>
 <parameter name="fragment_bin_offset" value="0.4"/>
+<parameter name="auto_fragment_bin_tol" value="false"/>
 <parameter name="theoretical_fragment_ions" value="1"/>
 <parameter name="use_A_ions" value="0"/>
 <parameter name="use_B_ions" value="1"/>
@@ -289,6 +294,8 @@
 <parameter name="use-old-xlink" value="true"/>
 <parameter name="xlink-score-method" value="composite"/>
 <parameter name="isotope-windows" value="0"/>
+<parameter name="xlink-top-n" value="250"/>
+<parameter name="require-xlink-candidate" value="false"/>
 <parameter name="xlink-include-linears" value="true"/>
 <parameter name="xlink-include-deadends" value="true"/>
 <parameter name="xlink-include-selfloops" value="true"/>
@@ -346,6 +353,18 @@
 <parameter name="bullseye" value="false"/>
 <parameter name="search-engine" value="tide-search"/>
 <parameter name="post-processor" value="percolator"/>
+<parameter name="min-precursor-mz" value="400"/>
+<parameter name="max-precursor-mz" value="1800"/>
+<parameter name="min-frag-mz" value="150"/>
+<parameter name="max-frag-mz" value="1800"/>
+<parameter name="min-scan-frag-peaks" value="40"/>
+<parameter name="max-precursor-delta-ppm" value="50"/>
+<parameter name="charge" value="2"/>
+<parameter name="top-n-frag-peaks" value="30"/>
+<parameter name="pair-top-n-frag-peaks" value="5"/>
+<parameter name="min-common-frag-peaks" value="20"/>
+<parameter name="max-scan-separation" value="1000"/>
+<parameter name="min-peak-pairs" value="200"/>
 </search_summary>
     <spectrum_query spectrum="demo.00035.00035.1" start_scan="35" end_scan="35" precursor_neutral_mass="708.0627" assumed_charge="1" index="1">
     <search_result>

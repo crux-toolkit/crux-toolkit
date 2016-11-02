@@ -169,6 +169,8 @@ void TideMatchSet::writeToFile(
   getFlankingAAs(peptide, protein, pos, &n_term, &c_term);
   flankingAAs = n_term + c_term;
 
+  int precision = Params::GetInt("precision");
+
   // look for other locations
   if (peptide->HasAuxLocationsIndex()) {
       const pb::AuxLocation* aux = locations[peptide->AuxLocationsIndex()];
@@ -201,9 +203,13 @@ void TideMatchSet::writeToFile(
       *file << i->spData_.sp_score << '\t'
           << i->spData_.sp_rank << '\t';
     }
-    *file << i->score1_ << '\t';
+
+    // Use scientific notation for exact p-value, but not refactored XCorr.
     if (exact_pval_search_) {
-      *file << i->score2_<< '\t';
+      *file << StringUtils::ToString(i->score1_, precision, false) << '\t';
+      *file << StringUtils::ToString(i->score2_, precision, true) << '\t';
+    } else {
+      *file << StringUtils::ToString(i->score1_, precision, true) << '\t';
     }
     
     if (elution_window_ ) {
@@ -359,13 +365,14 @@ void TideMatchSet::writeToFile(
             << sp_map->at(*i).second << '\t';
     }
 
+    // Use scientific notation for exact p-value, but not refactored XCorr.
     if (exact_pval_search_) {
-      *file << StringUtils::ToString((*i)->first.first, 1,false) << '\t';
-      *file << (*i)->first.second << '\t';
-    }
-    else {
-      *file << StringUtils::ToString((*i)->first.first, -1,false) << '\t';
-    }
+      *file << StringUtils::ToString((*i)->first.first, precision, false) << '\t';
+      *file << StringUtils::ToString((*i)->first.second, precision, true) << '\t';
+    } else {
+      *file << StringUtils::ToString((*i)->first.first, precision, true) << '\t';
+    }      
+
     *file << ++cur << '\t';
     if (sp_map) {
       *file << sp_data->matched_ions << '\t'

@@ -11,7 +11,6 @@
 
 using namespace std;
 
-
 /**
  * \file Params.cpp
  *
@@ -247,6 +246,12 @@ Params::Params() : finalized_(false) {
     "mass / (1.0 + (precursor-window / 1000000)) and the upper bound is defined as spectrum "
     "mass / (1.0 - (precursor-window / 1000000)).",
     "Available for search-for-xlinks and tide-search.", true);
+  InitStringParam("auto-precursor-window", "false", "false|warn|fail",
+    "Automatically estimate optimal value for the precursor-window parameter "
+    "from the spectra themselves. false=no estimation, warn=try to estimate "
+    "but use the default value in case of failure, fail=try to estimate and "
+    "quit in case of failure.",
+    "Available for tide-search.", true);
   InitStringParam("spectrum-parser", "pwiz", "pwiz|mstoolkit",
     "Specify the parser to use for reading in MS/MS spectra.[[html: The default, "
     "ProteoWizard parser can read the MS/MS file formats listed <a href=\""
@@ -346,6 +351,12 @@ Params::Params() : finalized_(false) {
     "parameter specifies the location of the left edge of the first bin, relative to "
     "mass = 0 (i.e., mz-bin-offset = 0.xx means the left edge of the first bin will be "
     "located at +0.xx Da).",
+    "Available for tide-search.", true);
+  InitStringParam("auto-mz-bin-width", "false", "false|warn|fail",
+    "Automatically estimate optimal value for the mz-bin-width parameter "
+    "from the spectra themselves. false=no estimation, warn=try to estimate "
+    "but use the default value in case of failure, fail=try to estimate and "
+    "quit in case of failure.",
     "Available for tide-search.", true);
   InitBoolParam("use-flanking-peaks", false,
     "Include flanking peaks around singly charged b and y theoretical ions. Each flanking "
@@ -518,7 +529,13 @@ Params::Params() : finalized_(false) {
     "Available for crux percolator", true);
   InitStringParam("init-weights", "",
     "Read initial weights from the given file (one per line).",
-    "Available for crux percolator ", true);
+    "Available for crux percolator", true);
+  InitIntParam("subset-max-train", 0,
+    "Only train Percolator on a subset of PSMs, and use the resulting score "
+    "vector to evaluate the other PSMs. Recommended when analyzing huge numbers "
+    "(>1 million) of PSMs. When set to 0, all PSMs are used for training as "
+    "normal.",
+    "Available for crux percolator", true);
   InitDoubleParam("c-pos", 0.00,
     "Penalty for mistakes made on positive examples. If this value is set to 0, "
     "then it is set via cross validation over the values {0.1, 1, 10}, selecting the "
@@ -552,11 +569,10 @@ Params::Params() : finalized_(false) {
     "peptides has a probability exceeding the specified threshold will "
     "be assigned probability = 0.",
     "Available for crux percolator", true);
-  InitBoolParam("post-processing-qvality", false,
-    "Replace the target-decoy competition with the method qvality to "
-    "assign q-values and PEPs. Note that this option only has an "
-    "effect if the input PSMs are from separate target and decoy "
-    "searches.", 
+  InitBoolParam("tdc", true,
+    "Use target-decoy competition to assign q-values and PEPs. When set to F, "
+    "the qvality method, which estimates the proportion pi0 of incorrect target "
+    "PSMs, is used instead.",
     "Available for crux percolator", true);
   InitIntParam("maxiter", 10, 0, 100000000,
     "Maximum number of iterations for training.",
@@ -865,6 +881,12 @@ Params::Params() : finalized_(false) {
   InitIntParam("peptide_mass_units", 0, 0, 2,
     "0=amu, 1=mmu, 2=ppm.",
     "Available for comet.", true);
+  InitStringParam("auto_peptide_mass_tolerance", "false", "false|warn|fail",
+    "Automatically estimate optimal value for the peptide_mass_tolerancel parameter "
+    "from the spectra themselves. false=no estimation, warn=try to estimate "
+    "but use the default value in case of failure, fail=try to estimate and "
+    "quit in case of failure.",
+    "Available for comet.", true);
   InitIntParam("mass_type_parent", 1, 0, 1,
     "0=average masses, 1=monoisotopic masses.",
     "Available for comet.", true);
@@ -893,6 +915,12 @@ Params::Params() : finalized_(false) {
     "Available for comet.", true);
   InitDoubleParam("fragment_bin_offset", 0.40, 0, 1.0,
     "Offset position to start the binning (0.0 to 1.0).",
+    "Available for comet.", true);
+  InitStringParam("auto_fragment_bin_tol", "false", "false|warn|fail",
+    "Automatically estimate optimal value for the fragment_bin_tol parameter "
+    "from the spectra themselves. false=no estimation, warn=try to estimate "
+    "but use the default value in case of failure, fail=try to estimate and "
+    "quit in case of failure.",
     "Available for comet.", true);
   InitIntParam("theoretical_fragment_ions", 1, 0, 1,
     "0=default peak shape, 1=M peak only.",
@@ -1348,10 +1376,25 @@ Params::Params() : finalized_(false) {
     "from the precursor-window and precursor-window-type parameters. This option is only "
     "available when use-old-xlink=F.",
     "Used for crux search-for-xlinks", true);
+
+  InitIntParam("xlink-top-n", 250, 0, BILLION,
+               "Top-n open-mod peptides to consider in the second pass, value of 0 will search all candiates.",
+               "Available for crux search-for-xlinks",
+               true);
+
   InitBoolParam("xlink-print-db", false,
     "Prints out the generated database of xlink products to the file xlink_peptides.txt in "
     "the output directory.",
     "Used for testing the candidate generatation.", false);
+  InitBoolParam("require-xlink-candidate", false,
+     "If there is no cross-link candidate found, then don't bother looking for linear, "
+     "self-loop, and dead-link candidates.",
+     "Available for crux search-for-xlinks program.", true);
+  
+  InitBoolParam("xlink-use-ion-cache", false,
+		"Use an ion cache for the xlinkable peptides",
+		"May not be scalable for large databases", false);
+
   InitBoolParam("xlink-include-linears", true, 
     "Include linear peptides in the search.",
     "Available for crux search-for-xlinks program.", true);
@@ -1682,6 +1725,51 @@ Params::Params() : finalized_(false) {
     "Specifies the template to be used for options when generating "
     "documentation.",
     "Available for crux create-docs", false);
+  // param-medic
+  InitArgParam("spectrum-file",
+    "File from which to parse fragmentation spectra.");
+  InitDoubleParam("min-precursor-mz", 400,
+    "Minimum precursor m/z value to consider.",
+    "Available for param-medic", true);
+  InitDoubleParam("max-precursor-mz", 1800,
+    "Minimum precursor m/z value to consider.",
+    "Available for param-medic", true);
+  InitDoubleParam("min-frag-mz", 150,
+    "Minimum fragment m/z value to consider.",
+    "Available for param-medic", true);
+  InitDoubleParam("max-frag-mz", 1800,
+    "Maximum fragment m/z value to consider.",
+    "Available for param-medic", true);
+  InitIntParam("min-scan-frag-peaks", 40,
+    "Minimum fragment peaks an MS/MS scan must contain to be considered.",
+    "Available for param-medic", true);
+  InitDoubleParam("max-precursor-delta-ppm", 50,
+    "Maximum ppm distance between precursor m/z values to consider two scans "
+    "potentially generated by the same peptide.",
+    "Available for param-medic", true);
+  InitIntParam("charge", 2,
+    "Precursor charge state to consider MS/MS spectra from. Ideally, this "
+    "should be the most frequently occurring charge state in the given data.",
+    "Available for param-medic", true);
+  InitIntParam("top-n-frag-peaks", 30,
+    "Number of most-intense fragment peaks to consider, per MS/MS spectrum.",
+    "Available for param-medic", true);
+  InitIntParam("pair-top-n-frag-peaks", 5,
+    "Number of fragment peaks per spectrum pair to be used in fragment error "
+    "estimation.",
+    "Available for param-medic", true);
+  InitIntParam("min-common-frag-peaks", 20,
+    "Number of the most-intense peaks that two spectra must share in order to "
+    "potentially be generated by the same peptide.",
+    "Available for param-medic", true);
+  InitIntParam("max-scan-separation", 1000,
+    "Maximum number of scans two spectra can be separated by in order to be "
+    "considered potentially generated by the same peptide.",
+    "Available for param-medic", true);
+  InitIntParam("min-peak-pairs", 200,
+    "Minimum number of peak pairs (for precursor or fragment) that must be "
+    "successfully paired in order to attempt to estimate error distribution.",
+    "Available for param-medic", true);
 
   InitBoolParam("no-analytics", false, "Don't post data to Google Analytics.", "", false);
 
@@ -1912,10 +2000,11 @@ void Params::Categorize() {
 
   items.clear();
   items.insert("only-psms");
-  items.insert("post-processing-qvality");
+  items.insert("tdc");
   AddCategory("General options", items);
 
   items.clear();
+  items.insert("subset-max-train");
   items.insert("c-pos");
   items.insert("c-neg");
   items.insert("test-fdr");

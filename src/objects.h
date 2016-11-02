@@ -67,16 +67,11 @@ enum _peak_sort_type {_PEAK_LOCATION, _PEAK_INTENSITY};
  */
 typedef enum _peak_sort_type PEAK_SORT_TYPE_T;
 
-
-namespace Crux {
-
 /**
  * \class Spectrum 
  * \brief A spectrum
  */
-class Spectrum;
-
-}
+namespace Crux { class Spectrum; }
 
 /**
  * \typedef PeakIterator
@@ -88,7 +83,7 @@ typedef std::vector<Peak*>::const_iterator PeakIterator;
  * \class SpectrumCollection
  * \brief A collection of spectra
  */
-class SpectrumCollection;
+namespace Crux { class SpectrumCollection; }
 
 /**
  * \typedef SpectrumIterator
@@ -106,11 +101,7 @@ class FilteredSpectrumChargeIterator;
  * \class Peptide
  * \brief A peptide subsequence of a protein
  */
-namespace Crux {
-
-class Peptide;
-
-};
+namespace Crux { class Peptide; };
 
 /**
  * \class PeptideConstraint
@@ -297,6 +288,18 @@ enum MASS_FORMAT_T {
  */
 typedef enum _window_type WINDOW_TYPE_T;
 
+enum OBSERVED_PREPROCESS_STEP_T {
+  INVALID_STEP,
+  DISCRETIZE_STEP,
+  REMOVE_PRECURSOR_STEP,
+  SQUARE_ROOT_STEP,
+  REMOVE_GRASS_STEP,
+  TEN_BIN_STEP,
+  XCORR_STEP,
+  NUMBER_PREPROCESS_STEPS
+};
+
+
 /**
  * \class PeptideSrc
  * \brief object for mapping a peptide to it's parent protein.
@@ -304,14 +307,11 @@ typedef enum _window_type WINDOW_TYPE_T;
 class PeptideSrc;
 
 
-namespace Crux {
 /**
  * \class Protein
  * \brief A protein sequence
  */
-class Protein;
-
-}
+namespace Crux { class Protein; }
 
 /**
  * \class ProteinPeptideIterator
@@ -567,11 +567,7 @@ typedef enum _score_function SCORE_FUNCTION_T;
  *\brief An object that contains the information of a peptide and the scoring of multiple types
  */
 
-namespace Crux {
-
-class Match;
-
-}
+namespace Crux { class Match; }
 
 /**
  *\class MatchCollection
