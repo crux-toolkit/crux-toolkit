@@ -70,10 +70,12 @@ bool MSToolkitSpectrumCollection::parse() {
       break;
     }
     Crux::Spectrum* parsed_spectrum = new Crux::Spectrum();
-    parsed_spectrum->parseMstoolkitSpectrum(mst_spectrum, filename_.c_str());
-    
-    this->addSpectrumToEnd(parsed_spectrum);
-      
+    if (parsed_spectrum->parseMstoolkitSpectrum(mst_spectrum, filename_.c_str())) {
+      addSpectrumToEnd(parsed_spectrum);
+    } else {
+      delete parsed_spectrum;
+    }
+
     mst_reader->readFile(NULL, *mst_spectrum);
   }
   delete mst_spectrum;

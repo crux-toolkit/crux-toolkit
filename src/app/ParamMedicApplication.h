@@ -16,6 +16,7 @@ class ParamMedicApplication : public CruxApplication {
   virtual std::vector<std::string> getOptions() const;
   virtual std::vector< std::pair<std::string, std::string> > getOutputs() const;
   virtual bool needsOutputDirectory() const;
+  virtual void processParams();
 };
 
 class ParamMedicErrorCalculator {
