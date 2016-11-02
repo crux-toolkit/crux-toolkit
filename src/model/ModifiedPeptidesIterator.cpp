@@ -5,7 +5,6 @@
 #include "ModifiedPeptidesIterator.h"
 #include "SpectrumZState.h"
 #include "util/GlobalParams.h"
-#include "util/Params.h"
 
 using namespace std;
 using namespace Crux;
@@ -28,7 +27,7 @@ ModifiedPeptidesIterator::ModifiedPeptidesIterator(
                                                  is_decoy, dbase);
   peptide_modification_ = pmod;
   temp_peptide_list_ = new_empty_list();
-  max_aas_modified_ = Params::GetInt("max-aas-modified");
+  max_aas_modified_ = GlobalParams::getMaxAasModified();
 
   initialize();
   carp(CARP_DETAILED_DEBUG, 
@@ -50,7 +49,7 @@ ModifiedPeptidesIterator::ModifiedPeptidesIterator(
 
   peptide_modification_ = pmod;
   temp_peptide_list_ = new_empty_list();
-  max_aas_modified_ = Params::GetInt("max-aas-modified");
+  max_aas_modified_ = GlobalParams::getMaxAasModified();
   initialize();
 }
 
@@ -63,17 +62,19 @@ ModifiedPeptidesIterator::ModifiedPeptidesIterator(
   double max_mass,    ///< max-mass of peptides
   PEPTIDE_MOD_T* pmod, ///< Peptide mod to apply
   bool is_decoy, ///< generate decoy peptides
-  Database* dbase   ///< Database from which to draw peptides
+  Database* dbase,   ///< Database from which to draw peptides
+  int additional_missed_cleavages
 ) {
 
   peptide_source_ = new GeneratePeptidesIterator(
     pair<FLOAT_T,FLOAT_T>(min_mass, max_mass),
     is_decoy,
-    dbase);
+    dbase,
+    additional_missed_cleavages);
 
   peptide_modification_ = pmod;
   temp_peptide_list_ = new_empty_list();
-  max_aas_modified_ = Params::GetInt("max-aas-modified");
+  max_aas_modified_ = GlobalParams::getMaxAasModified();
   initialize();
 }
 
@@ -129,8 +130,8 @@ pair<FLOAT_T,FLOAT_T> ModifiedPeptidesIterator::getMinMaxMass(
     max_mass = (max_mz - MASS_PROTON) * (double)zstate.getCharge() - delta_mass;
   } else if (precursor_window_type == WINDOW_PPM) {
     double mass = zstate.getNeutralMass() - delta_mass;
-    min_mass = mass / (1.0 + window * 1e-6);
-    max_mass = mass / (1.0 - window * 1e-6);
+    min_mass = mass * (1.0 - window * 1e-6);
+    max_mass = mass * (1.0 + window * 1e-6);
     carp(CARP_DEBUG,"mass:%f charge:%i min_mass:%f max_mass:%f",
          mass, zstate.getCharge(), min_mass, max_mass);
   } else {
@@ -178,9 +179,8 @@ bool ModifiedPeptidesIterator::queueNextPeptide(){
   Peptide* unmod_peptide = peptide_source_->next();
   
   IF_CARP_DETAILED_DEBUG(
-    char* debugseq = unmod_peptide->getSequence();
+    const char* debugseq = unmod_peptide->getSequence();
     carp(CARP_DETAILED_DEBUG, "Next peptide in pep_gen is %s", debugseq);
-    free(debugseq);
   )
 
   // apply modifications, discard peptides that can't be modified
@@ -201,10 +201,9 @@ bool ModifiedPeptidesIterator::queueNextPeptide(){
   }
 
   IF_CARP_DETAILED_DEBUG(
-    char* umodseq = unmod_peptide->getSequence();
+    const char* umodseq = unmod_peptide->getSequence();
     carp(CARP_DETAILED_DEBUG, "Iterator is modifying peptide %s",
          umodseq);
-    free(umodseq);
   )
   modify_peptide(unmod_peptide, 
                  peptide_modification_, 

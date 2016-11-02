@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <limits>
 
 /*#ifndef linux
 #include <ieeefp.h>
@@ -22,6 +23,9 @@ typedef double FLOAT_T;
 #else
 typedef float FLOAT_T;
 #endif
+
+#define FLOAT_T_MIN numeric_limits<FLOAT_T>::min();
+
 
 typedef int VERBOSE_T;
 static const int INVALID_VERBOSE = 0;

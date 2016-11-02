@@ -57,7 +57,8 @@ class ModifiedPeptidesIterator : public PeptideIterator
     double max_mass,    ///< max-mass of peptides
     PEPTIDE_MOD_T* pmod, ///< Peptide mod to apply
     bool is_decoy, ///< generate decoy peptides
-    Database* dbase   ///< Database from which to draw peptides
+    Database* dbase,   ///< Database from which to draw peptides
+    int additional_missed_cleavages = 0
   );
 
 

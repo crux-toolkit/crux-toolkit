@@ -157,14 +157,11 @@ class Scorer {
     );
 
   /**
-   * Create the intensity arrays for theoretical spectrum.
-   * SCORER must have been created for XCORR type.
-   * \returns true if successful, else FLASE
+   * Scores the ion series directly against the observed array.
    */
-  bool createIntensityArrayTheoretical(
-    IonSeries* ion_series, ///< the ion series to score against the spectrum (theoretical) -in
-    FLOAT_T*      theoretical ///< the empty theoretical spectrum -out
-    );
+  FLOAT_T scoreIntensityIonSeries(
+    IonSeries* ion_series
+  );
 
   /*****************************************************
    * General purpose functions
@@ -408,6 +405,15 @@ class Scorer {
     int add_idx,            ///< the idex to add the intensity -in
     FLOAT_T intensity         ///< the intensity to add -in
     );
+  
+  /**
+   * \return the score using the observed[idx] * intensity
+   */
+  FLOAT_T scoreIntensity(
+    int add_idx,
+    FLOAT_T intensity
+  );
+
 };
 
 

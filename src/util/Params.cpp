@@ -438,6 +438,10 @@ Params::Params() : finalized_(false) {
     "The maximum number of modifications that can be applied to a single " 
     "peptide.",
     "Available for tide-index.", true);
+  InitIntParam("max-aas-modified", MAX_PEPTIDE_LENGTH, 0, MAX_PEPTIDE_LENGTH,
+    "The maximum number of modified amino acids that can appear in one "
+    "peptide.  Each aa can be modified multiple times.",
+    "", true);
   InitStringParam("mod-mass-format", "mod-only", "mod-only|total|separate",
     "Specify how sequence modifications are reported in various output files. Each "
     "modification is reported as a number enclosed in square braces following the "
@@ -1331,6 +1335,11 @@ Params::Params() : finalized_(false) {
     "<li>Neutral mass</li><li>Charged mass</li><li>M+H+ mass</li></ul>]]",
     "Available only for crux-get-ms2-spectrum.  Does not affect contents "
     "of the output file.", true);
+
+  InitBoolParam("write-weibull-points", false, 
+    "write out the weibull training points for the" 
+    "spectrum,charge", "Available for crux search-for-xlinks", true);
+
   // **** xlink-predict-peptide-ions options ****
   InitArgParam("peptide A",
     "The sequence of peptide A.");
@@ -1402,7 +1411,7 @@ Params::Params() : finalized_(false) {
     "List of amino acids for which the cross-linker can prevent cleavage. This option is "
     "only available when use-old-xlink=F.",
     "Available for search-for-xlinks program.", true);
-  InitIntParam("max-xlink-mods", 0, 0, BILLION,
+  InitIntParam("max-xlink-mods", 255 , 0, BILLION,
     "Specify the maximum number of modifications allowed on a crosslinked peptide. This "
     "option is only available when use-old-xlink=F.",
     "Available for crux search-for-xlinks", true);

@@ -8,7 +8,7 @@ using namespace std;
 
 MASS_TYPE_T GlobalParams::isotopic_mass_;
 int GlobalParams::missed_cleavages_;
-//int GlobalParams::max_aas_modified_;
+int GlobalParams::max_aas_modified_;
 FLOAT_T GlobalParams::min_mass_;
 FLOAT_T GlobalParams::max_mass_;
 WINDOW_TYPE_T GlobalParams::precursor_window_type_;
@@ -41,7 +41,7 @@ MASS_FORMAT_T GlobalParams::mod_mass_format_;
 void GlobalParams::set() {
   isotopic_mass_ = get_mass_type_parameter("isotopic-mass");
   missed_cleavages_ = Params::GetInt("missed-cleavages");
-  //max_aas_modified_ = Params::GetInt("max-aas-modified");
+  max_aas_modified_ = Params::GetInt("max-aas-modified");
   min_mass_ = Params::GetDouble("min-mass");
   max_mass_ = Params::GetDouble("max-mass");
   precursor_window_type_ = string_to_window_type(Params::GetString("precursor-window-type"));
@@ -80,11 +80,10 @@ const int& GlobalParams::getMissedCleavages() {
   return missed_cleavages_;
 }
 
-/*
 const int& GlobalParams::getMaxAasModified() {
   return max_aas_modified_;
 }
-*/
+
 const FLOAT_T& GlobalParams::getMinMass() {
   return min_mass_;
 }

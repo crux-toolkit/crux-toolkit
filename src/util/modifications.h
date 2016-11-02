@@ -175,7 +175,7 @@ char* modified_aa_to_unmodified_string(MODIFIED_AA_T* aa_string, int length);
  *
  * \returns The length of the mod_sequence array.
  */
-int convert_to_mod_aa_seq(const char* sequence, MODIFIED_AA_T** mod_sequence,
+int convert_to_mod_aa_seq(const std::string& sequence, MODIFIED_AA_T** mod_sequence,
                           MASS_FORMAT_T mass_format = MOD_MASS_ONLY);
 
 /**
@@ -191,6 +191,20 @@ MODIFIED_AA_T* copy_mod_aa_seq(
 MODIFIED_AA_T* copy_mod_aa_seq(
   const MODIFIED_AA_T* source ///< Sequence to copy
   );
+
+/**
+ * \return a new modification sequence array. Can be off of already allocated
+ * arrays
+ */
+MODIFIED_AA_T* newModSeq();
+
+/**
+ * Releases the modification sequence back into the cache
+ */
+void freeModSeq(
+  MODIFIED_AA_T* &mod_seq ///< Sequence to release
+  );
+
 
 /**
  * \brief Remove any characters not A-Z from a peptide sequence.
