@@ -45,8 +45,7 @@ class StringUtils {
       if (fixedFloat) {
         converter << std::fixed;
       } else {
-          converter << std::scientific; //Added by Andy Lin
-//        converter.unsetf(std::ios_base::floatfield); //original line
+        converter.unsetf(std::ios_base::floatfield);
       }
     } else {
       converter << std::setprecision(8);
