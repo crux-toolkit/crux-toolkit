@@ -1152,7 +1152,6 @@ void TideSearchApplication::search(void* threadarg) {
 
 	    double totalCount = 0;
 	    for(int i=scoreOffset ; i<scoreResidueCount.size() ; i++) {
-//              std::cout << scientific << scoreResidueCount[i] << std::endl;
 	      totalCount += scoreResidueCount[i];
 	    }
 	    for(int i=scoreResidueCount.size()-2 ; i>-1; i--) {
@@ -1167,23 +1166,15 @@ void TideSearchApplication::search(void* threadarg) {
 	    }
 	    pValuesResidueObs[curPepMassInt] = scoreResidueCount;
 
-/*  
+/* 
 	    for(int i=0; i <scoreResidueCount.size(); i++) {
-              std::cout << "row: " << i << " " << scoreResidueCount[i] << std::endl;
+              std::cout << "row: " << i-scoreOffset << " " << scoreResidueCount[i] << std::endl;
 	    }
 */
 	  }
    
 	  /************ calculate p-values for PSMs using residue evidence matrix ****************/
 	  int scoreResidueEvidence;
-
-  //        std::cout << "Spectrum: " << sc->spectrum->SpectrumNumber() << std::endl;
-  //        std::cout << "minMass: " << min_mass << std::endl;
-  //        std::cout << setprecision(15) <<  "precursorMass: " << precursorMass << std::endl;
-  //        std::cout << "maxMass: " << max_mass << std::endl;
-  //        std::cout << "precursorMZ: " << precursor_mz << std::endl;
-  //        std::cout << "nCandPeptide: " << nCandPeptide << std::endl;
-  //        std::cout << sc->spectrum->SpectrumNumber() << " " << precursorMass << endl;
 
 	  pe = 0;
 	  for(peidx = 0; peidx < candidatePeptideStatusSize; peidx++) {

@@ -731,25 +731,12 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
           //add evidence to matrix
           //&&-1 since all mass bins are index 1 istead of index 0
           residueEvidenceMatrix[curAaMass][newResMassBin-1] += aaTolScore;
-//          std::cout << "q: " << aaMass[curAaMass] << std::endl;
         }
       }
     }
   }
   ionMass.clear();
   ionMassBin.clear();
-
-/*
-  for(int i =0;i<maxPrecurMassBin;i++) {
-    for(int curAaMass = 0; curAaMass<nAA;curAaMass++){
-      if (residueEvidenceMatrix[curAaMass][i] != 0) {
-        std::cout << "massBin: " << i+1 << std::endl;
-        std::cout << "curAaMass:" << curAaMass+1 << std::endl;
-        std::cout << "evidence: " << residueEvidenceMatrix[curAaMass][i] << std::endl <<std::endl;
-      }
-    }
-  }
-*/
 
   int yIonMassBin;
   double yIonMass;
@@ -794,18 +781,6 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   ionMass.clear();
   ionMassBin.clear();
 
-/*
-  for(int i =0;i<maxPrecurMassBin;i++) {
-    for(int curAaMass = 0; curAaMass<nAA;curAaMass++){
-      if (residueEvidenceMatrix[curAaMass][i] != 0) {
-        std::cout << "massBin: " << i+1 << std::endl;
-        std::cout << "curAaMass:" << curAaMass+1 << std::endl;
-        std::cout << "evidence: " << residueEvidenceMatrix[curAaMass][i] << std::endl <<std::endl;
-      }
-    }
-  }
-*/
-
   //find pairs of b ions in 2+ charge state
   for(int ion=0 ; ion<ionMasses.size() ; ion++) {
     double tmpIonMass = 2.0 * ionMasses[ion] - massHMono;
@@ -842,18 +817,6 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   }
   ionMass.clear();
   ionMassBin.clear();
-
-/*
-  for(int i =0;i<maxPrecurMassBin;i++) {
-    for(int curAaMass = 0; curAaMass<nAA;curAaMass++){
-      if (residueEvidenceMatrix[curAaMass][i] != 0) {
-        std::cout << "massBin: " << i+1 << std::endl;
-        std::cout << "curAaMass:" << curAaMass+1 << std::endl;
-        std::cout << "evidence: " << residueEvidenceMatrix[curAaMass][i] << std::endl <<std::endl;
-      }
-    }
-  }
-*/
 
   //find pairs of y ions in 2+ charge state
   for(int ion=0 ; ion<ionMasses.size() ; ion++) {
@@ -892,18 +855,6 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   }
   ionMass.clear();
   ionMassBin.clear();
-
-/*
-  for(int i =0;i<maxPrecurMassBin;i++) {
-    for(int curAaMass = 0; curAaMass<nAA;curAaMass++){
-      if (residueEvidenceMatrix[curAaMass][i] != 0) {
-        std::cout << "aa: " << curAaMass+1 << endl;
-        std::cout << "massBin: " << i+1 << std::endl;
-        std::cout << "evidence: " << residueEvidenceMatrix[curAaMass][i] << std::endl <<std::endl;
-      }
-    }
-  }
-*/
 
   //Get maxEvidence value
   double maxEvidence = -1.0;
