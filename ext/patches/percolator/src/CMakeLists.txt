@@ -1,4 +1,7 @@
 include_directories(
+  ${CRUX_BIN_ROOT}/ext/include
+  ${CRUX_BIN_ROOT}/ext/build/src/ProteoWizard/libraries/boost_aux
+  ${CRUX_BIN_ROOT}/ext/build/src/ProteoWizard/libraries/boost_1_56_0
   ${CRUX_ROOT}
   ${CRUX_ROOT}/src
   ${CRUX_ROOT}/src/model
@@ -95,6 +98,7 @@ else(XML_SUPPORT)
                   fisher/FisherCaller.cpp)
 endif(XML_SUPPORT)
 								  
+install(TARGETS perclibrary DESTINATION "${CMAKE_INSTALL_PREFIX}/lib")
 								  
 ###############################################################################
 # COMPILE INTERNAL LIBRARIES
@@ -118,9 +122,6 @@ include_directories(fisher)
 ################################################################################
 								  
 if(APPLE)
-  set_property(TARGET percolator PROPERTY LINK_SEARCH_START_STATIC FALSE)
-  set_property(TARGET percolator PROPERTY LINK_SEARCH_END_STATIC TRUE)
-#  set_property(TARGET percolator PROPERTY MACOSX_BUNDLE ON)
 elseif(MINGW)
 #  set_target_properties(percolator PROPERTIES LINK_FLAGS "-Wl,-Bstatic -static-libgcc -lcurl -liconv")
   set_target_properties(percolator PROPERTIES LINK_FLAGS "-Wl,-Bdynamic -static-libgcc")

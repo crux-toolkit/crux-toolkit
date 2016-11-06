@@ -154,13 +154,17 @@ ExternalProject_Add(
     ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/fisher/ProteinPeptideIterator.h
     ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/fisher/ProteinPeptideIterator.cpp
     && ${CMAKE_COMMAND} -E copy_directory
-       ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/src/
-       ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/
+       ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/src
+       ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
+    && ${CMAKE_COMMAND} -E copy_directory
+       ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator
+       ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator
   CMAKE_ARGS -DCMAKE_VERBOSE_MAKEFILE=ON
     -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}
     -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}
     -DCMAKE_BUILD_TYPE=${CMAKE_CFG_INTDIR}
     -DCRUX_ROOT=${PROJECT_SOURCE_DIR}
+    -DCRUX_BIN_ROOT=${CMAKE_BINARY_DIR}
 )
 
 if (UNIX) 
@@ -330,7 +334,6 @@ elseif (WIN32 AND NOT CYGWIN)
   )
 endif (UNIX)
 
-add_dependencies(percolator ProteoWizard comet)
 
 # On Windows we have to include the vendor libraries in the package
 if (WIN32 AND NOT CYGWIN)
