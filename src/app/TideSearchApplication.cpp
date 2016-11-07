@@ -200,37 +200,71 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
   int nAARes = 0;
  
   SCORE_FUNCTION_T curScoreFunction = string_to_score_function_type(Params::GetString("score-function")); 
-  if (exact_pval_search_) {
+  if (curScoreFunction == BOTH_SCORE) {
     pb::Header aaf_peptides_header;
     HeadedRecordReader aaf_peptide_reader(peptides_file, &aaf_peptides_header);
 
-    if ((aaf_peptides_header.file_type() != pb::Header::PEPTIDES) ||
-    !aaf_peptides_header.has_peptides_header()) {
-    carp(CARP_FATAL, "Error reading index (%s)", peptides_file.c_str());
+    if (( aaf_peptides_header.file_type() != pb::Header::PEPTIDES) ||
+         !aaf_peptides_header.has_peptides_header()) {
+      carp(CARP_FATAL, "Error reading index (%s)", peptides_file.c_str());
     }
 
-    MassConstants::Init(&aaf_peptides_header.peptides_header().mods(), 
-                        &aaf_peptides_header.peptides_header().nterm_mods(), 
+    MassConstants::Init(&aaf_peptides_header.peptides_header().mods(),
+                        &aaf_peptides_header.peptides_header().nterm_mods(),
                         &aaf_peptides_header.peptides_header().cterm_mods(),
                         bin_width_, bin_offset_);
- 
-    if (curScoreFunction == XCORR_SCORE || curScoreFunction == BOTH_SCORE) {
-      ActivePeptideQueue* active_peptide_queue =
-      new ActivePeptideQueue(aaf_peptide_reader.Reader(), proteins);
-      
-      nAA = active_peptide_queue->CountAAFrequency(bin_width_, bin_offset_,
-                                                   &aaFreqN, &aaFreqI, &aaFreqC, &aaMass);
-      delete active_peptide_queue;
 
-    } else if (curScoreFunction == RESIDUE_EVIDENCE_MATRIX) {
-      ActivePeptideQueue* active_peptide_queue =
+    ActivePeptideQueue* active_peptide_queue =
       new ActivePeptideQueue(aaf_peptide_reader.Reader(), proteins);
 
-      nAARes = active_peptide_queue->CountAAFrequencyRes(bin_width_, bin_offset_,
-                                                dAAFreqN, dAAFreqI, dAAFreqC, dAAMass);
-      delete active_peptide_queue;
+    nAA    = active_peptide_queue->CountAAFrequency(bin_width_, bin_offset_,
+                                                    &aaFreqN, &aaFreqI, &aaFreqC, &aaMass);
+    nAARes = active_peptide_queue->CountAAFrequencyRes(bin_width_, bin_offset_,
+                                                       dAAFreqN, dAAFreqI, dAAFreqC, dAAMass);
+    delete active_peptide_queue;
+
+  } else if (curScoreFunction == RESIDUE_EVIDENCE_MATRIX) {
+    pb::Header aaf_peptides_header;
+    HeadedRecordReader aaf_peptide_reader(peptides_file, &aaf_peptides_header);
+
+    if (( aaf_peptides_header.file_type() != pb::Header::PEPTIDES) ||
+         !aaf_peptides_header.has_peptides_header()) {
+      carp(CARP_FATAL, "Error reading index (%s)", peptides_file.c_str());
     }
+
+    MassConstants::Init(&aaf_peptides_header.peptides_header().mods(),
+                        &aaf_peptides_header.peptides_header().nterm_mods(),
+                        &aaf_peptides_header.peptides_header().cterm_mods(),
+                        bin_width_, bin_offset_);
+
+    ActivePeptideQueue* active_peptide_queue =
+      new ActivePeptideQueue(aaf_peptide_reader.Reader(), proteins);
+
+    nAARes = active_peptide_queue->CountAAFrequencyRes(bin_width_, bin_offset_,
+                                                       dAAFreqN, dAAFreqI, dAAFreqC, dAAMass);
+    delete active_peptide_queue;
+  } else if (exact_pval_search_) { //for SCORE_FUNCTION=="XCORR"
+    pb::Header aaf_peptides_header;
+    HeadedRecordReader aaf_peptide_reader(peptides_file, &aaf_peptides_header);
+
+    if (( aaf_peptides_header.file_type() != pb::Header::PEPTIDES) ||
+         !aaf_peptides_header.has_peptides_header()) {
+      carp(CARP_FATAL, "Error reading index (%s)", peptides_file.c_str());
+    }
+
+    MassConstants::Init(&aaf_peptides_header.peptides_header().mods(),
+                        &aaf_peptides_header.peptides_header().nterm_mods(),
+                        &aaf_peptides_header.peptides_header().cterm_mods(),
+                        bin_width_, bin_offset_);
+
+    ActivePeptideQueue* active_peptide_queue =
+      new ActivePeptideQueue(aaf_peptide_reader.Reader(), proteins);
+
+    nAA = active_peptide_queue->CountAAFrequency(bin_width_, bin_offset_,
+                                                 &aaFreqN, &aaFreqI, &aaFreqC, &aaMass);
+    delete active_peptide_queue;
   } // End calculation AA frequencies
+
 
   // Read auxlocs index file
   vector<const pb::AuxLocation*> locations;
@@ -873,16 +907,15 @@ void TideSearchApplication::search(void* threadarg) {
 	vector<unsigned int>::const_iterator iter_uint;
 
 	if (!exact_pval_search_) {
-	  TideMatchSet::Arr match_arr(nCandPeptide);
+	  TideMatchSet::Arr match_arr(nCandPeptide); // scored peptides will go here.
 
-	  //*******************************************************************************
-	  /* For one spectrum, calculates:
-	   *  - residue evidence matrix
-	   *  - score count vectos for a range of integer masses
-	   *  - p-values between spectrum and all selected target and decoy peptides  
-	   */
+	  //For one spectrum calculates:
+	  // 1) residue evidence matrix
+	  // 2) score count vectors for range of integer masses
+	  // 3) p-values of residue evidence match between spectrum and all selected candidate 
+	  //    target and decoy peptides
 
-	  int peidx;       
+	  int peidx;
 	  int pe;
 	  int ma;
 	  int* pepMassInt = new int[nCandPeptide];
@@ -891,23 +924,22 @@ void TideSearchApplication::search(void* threadarg) {
 
 	  //For each candidate peptide, determine which discretized mass bin it is in
 	  getMassBin(pepMassInt,pepMassIntUnique,active_peptide_queue,candidatePeptideStatus);
-
+   
 	  //Sort vector, take unique of vector, get rid of extra space in vector
 	  std::sort(pepMassIntUnique.begin(), pepMassIntUnique.end());
 	  vector<int>::iterator last = std::unique(pepMassIntUnique.begin(),
 						   pepMassIntUnique.end());
 	  pepMassIntUnique.erase(last, pepMassIntUnique.end());
 	  int nPepMassIntUniq = (int)pepMassIntUnique.size();
-   
+
 	  //Creates a 3D vector representing 3D matrix
 	  //Below are the 3 axes
 	  //nPepMassIntUniq: number of mass bins candidate are in
 	  //nAARes: number of amino acids
 	  //maxPrecurMassBin: max number of mass bins
 	  //initalize all values to 0
-	  vector<vector<vector<double> > > residueEvidenceMatrix(nPepMassIntUniq,
+	  vector<vector<vector<double> > > residueEvidenceMatrix(nPepMassIntUniq, 
 		 vector<vector<double> >(nAARes, vector<double>(maxPrecurMassBin,0)));
-
 
 	  //TODO assumption is that there is one nterm mod per peptide
 	  int NTermMassBin;
@@ -928,7 +960,7 @@ void TideSearchApplication::search(void* threadarg) {
 	  else {
 	    CTermMassBin = MassConstants::mass2bin(MassConstants::mono_oh);
 	  }
-   
+
 	  for (pe=0 ; pe<nPepMassIntUniq ; pe++) {
 	    //aaMassDouble replaced aaMass because residue evidence requires amino
 	    //acids to be in double format
@@ -942,14 +974,15 @@ void TideSearchApplication::search(void* threadarg) {
 	    //I believe do not need to do this here because residueEvidenceMatrix
 	    //has been rounded
 	    vector<vector<double> > curResidueEvidenceMatrix = residueEvidenceMatrix[pe];
+
 	    //Get rid of values larger than curPepMassInt
 	    int curPepMassInt = pepMassIntUnique[pe];
 	    for(int i=0 ; i<curResidueEvidenceMatrix.size() ; i++){
 	      curResidueEvidenceMatrix[i].resize(curPepMassInt);
 	    }
 	  }
-
-	  /**************Find Best Target Peptide Match *******************/
+   
+	  /************ calculate p-values for PSMs using residue evidence matrix ****************/
 	  int scoreResidueEvidence;
 
 	  pe = 0;
@@ -977,16 +1010,10 @@ void TideSearchApplication::search(void* threadarg) {
 	      for(iter_uint = iter1_->unordered_peak_list_.begin();
 		  iter_uint != iter1_->unordered_peak_list_.end();
 		  iter_uint++) {
-		    intensArrayTheor.push_back(*iter_uint);
+		intensArrayTheor.push_back(*iter_uint);
 	      }
 
 	      //Make sure the number of theoretical peaks match pepLen-1
-/*	      
-	      std::cout << curPeptide->Seq() << std::endl;
-	      std::cout << pepLen -1 << std::endl;
-              std::cout << intensArrayTheor.size() << std::endl;
-*/
-
 	      assert(intensArrayTheor.size() == pepLen - 1);
 
 	      double* residueMasses = curPeptide->getAAMasses(); //retrieves the amino acid masses, modifications included
@@ -1002,9 +1029,12 @@ void TideSearchApplication::search(void* threadarg) {
 	      }
 	      else {
 		TideMatchSet::Pair pair;
-		pair.first.first = (double)scoreResidueEvidence;
-		pair.first.second = 0.0;
-		pair.second = candidatePeptideStatusSize - peidx; //TODO ugly hack to conform with the way these indices are generated in standard tide-search
+		pair.first.first = pValue;
+		//TODO do I ned a RESCALE_FACTOR?
+		pair.first.second = (double)scoreResidueEvidence;
+		//TODO ugly hack to conform with the way these indices are generated in standard tide-search
+		//TODO above comment was copied. not sure applies here
+		pair.second = candidatePeptideStatusSize - peidx;
 		match_arr.push_back(pair);
 	      }
 	      pe++;
@@ -1013,24 +1043,24 @@ void TideSearchApplication::search(void* threadarg) {
 	    ++iter_;
 	    ++iter1_;
 	  }
-
-	  //clean up
+   
+	  //clean up 
 	  delete [] pepMassInt;
 	  //TODO check if need to delete more stuff
-	  
-	  if (!peptide_centric) { // peptide_centric=false
-	    // matches will arrange the results in a heap by score, return the top
-	    // few, and recover the association between counter and peptide. We output
+
+	  if (!peptide_centric){
+	    // below text is copied from text above in the exact-p-value XCORR case
+	    // matches will arrange th results in a heap by score, return the top
+	    // few, and recover the association between counter and peptide. We output 
 	    // the top matches.
 	    TideMatchSet matches(&match_arr, highest_mz);
-	    matches.exact_pval_search_ = exact_pval_search;
-	    matches.report(target_file, decoy_file, top_matches, spectrum_filename,
-			   spectrum, charge, active_peptide_queue, proteins,
-			   locations, compute_sp, true, locks_array[0]);
-	  } //end peptide_centric=false
+	    matches.exact_pval_search_ = exact_pval_search_;
 
+	    matches.report(target_file, decoy_file, top_matches, spectrum_filename, 
+			     spectrum, charge, active_peptide_queue, proteins,
+			     locations, compute_sp, false, locks_array[0]);
+	  } //end peptide_centric == true
 	  //TODO Above is not implemented or tested yet
-	  
 	} else { //Case RESIDUE_EVIDENCE_MATRIX and p-value = True
           const int minDeltaMass = aaMassInt[0];
           const int maxDeltaMass = aaMassInt[nAARes - 1];
