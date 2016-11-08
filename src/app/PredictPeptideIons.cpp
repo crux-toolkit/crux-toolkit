@@ -23,7 +23,7 @@
 #endif
 #include "io/carp.h"
 #include "util/crux-utils.h"
-#include "objects.h"
+#include "model/objects.h"
 #include "parameter.h"
 #include "model/Ion.h"
 #include "model/IonSeries.h"

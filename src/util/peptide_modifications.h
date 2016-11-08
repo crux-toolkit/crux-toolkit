@@ -24,7 +24,7 @@
 #include <assert.h>
 #include "utils.h"
 #include "linked_list.h"
-#include "objects.h"
+#include "model/objects.h"
 #include "modifications.h"
 
 /**

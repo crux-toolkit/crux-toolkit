@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "utils.h"
-#include "objects.h"
+#include "model/objects.h"
 #include "mass.h"
 #include "model/Protein.h"
 #include "model/Peptide.h"

@@ -7,7 +7,6 @@
 #define PROTEINMATCHCOLLECTION_H_
 #include "PeptideMatch.h"
 #include "ProteinMatch.h"
-#include "objects.h"
 #include "match_objects.h"
 
 #include <deque>

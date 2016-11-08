@@ -6,7 +6,7 @@
  *****************************************************************************/
 #ifndef CRUXAPPLICATION_H
 #define CRUXAPPLICATION_H
-#include "objects.h"
+#include "model/objects.h"
 
 #include <algorithm>
 #include <string>

@@ -7,7 +7,7 @@
 #ifndef LinkedPeptide_H
 #define LinkedPeptide_H
 
-#include "objects.h"
+#include "model/objects.h"
 #include "xhhc.h"
 
 

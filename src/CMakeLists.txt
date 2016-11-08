@@ -13,8 +13,6 @@ include_directories(app/bullseye)
 include_directories(app/hardklor)
 include_directories(app/qranker-barista)
 include_directories(app/xlink)
-include_directories(io)
-include_directories(model)
 include_directories(${CMAKE_SOURCE_DIR}/ext)
 include_directories(${CMAKE_BINARY_DIR})
 include_directories(${CMAKE_BINARY_DIR}/ext)
@@ -25,7 +23,7 @@ include_directories(${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/libraries/boo
 include_directories(${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/libraries/boost_aux)
 include_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator/src/)
 include_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator/src/fido)
-include_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator/src/fisher)
+include_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator/src/picked_protein)
 include_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator-build/src/)
 include_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator-build/src/fido)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/app/tide/protoobj)
@@ -64,6 +62,7 @@ link_directories(./app/xlink)
 link_directories(${CMAKE_BINARY_DIR}/ext/lib)
 link_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator-build/src) 
 link_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator-build/src/fido)
+link_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator-build/src/picked_protein)
 if (WIN32 AND NOT Cygwin)
  # Needed for windows build of vendor libraries
   if (CMAKE_GENERATOR MATCHES "^.*Win64$")
@@ -370,6 +369,7 @@ if (WIN32 AND NOT CYGWIN)
     cometsearch
     perclibrary
     fido
+    picked_protein
     xlink
     gflags
     crux-support
@@ -410,6 +410,7 @@ else()
     mstoolkitlite
     perclibrary
     fido
+    picked_protein
     pwiz_data_identdata
     pwiz_data_identdata_version
     pwiz_data_misc

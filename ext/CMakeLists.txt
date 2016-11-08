@@ -135,36 +135,12 @@ endif (WIN32 AND NOT CYGWIN)
 
 ExternalProject_Add(
   percolator
+  GIT_REPOSITORY https://github.com/percolator/percolator.git
   PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
-  URL http://cruxtoolkit.sourceforge.net/download/percolator-rel-3-00.tar.gz
-  URL_MD5 d8a8e4c3ea261ae572b0f8b860ffefb4
-  DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/downloads
-  PATCH_COMMAND ${CMAKE_COMMAND} -E remove -f
-    ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/fisher/Database.h
-    ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/fisher/Database.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/fisher/objects.h
-    ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/fisher/PeptideConstraint.h
-    ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/fisher/PeptideConstraint.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/fisher/Peptide.h
-    ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/fisher/Peptide.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/fisher/PeptideSrc.h
-    ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/fisher/PeptideSrc.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/fisher/Protein.h
-    ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/fisher/Protein.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/fisher/ProteinPeptideIterator.h
-    ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/fisher/ProteinPeptideIterator.cpp
-    && ${CMAKE_COMMAND} -E copy_directory
-       ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/src
-       ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
-    && ${CMAKE_COMMAND} -E copy_directory
-       ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator
-       ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator
   CMAKE_ARGS -DCMAKE_VERBOSE_MAKEFILE=ON
     -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}
     -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}
     -DCMAKE_BUILD_TYPE=${CMAKE_CFG_INTDIR}
-    -DCRUX_ROOT=${PROJECT_SOURCE_DIR}
-    -DCRUX_BIN_ROOT=${CMAKE_BINARY_DIR}
 )
 
 if (UNIX) 

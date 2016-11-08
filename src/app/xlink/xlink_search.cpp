@@ -11,7 +11,7 @@
 #include "xlink_compute_qvalues.h"
 
 //CRUX INCLUDES
-#include "objects.h"
+#include "model/objects.h"
 #include "model/FilteredSpectrumChargeIterator.h"
 #include "io/OutputFiles.h"
 #include "util/Params.h"

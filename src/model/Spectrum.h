@@ -10,7 +10,7 @@
 #include <vector>
 #include <string>
 #include "util/utils.h"
-#include "objects.h"
+#include "model/objects.h"
 #include "Peak.h"
 
 #include "Spectrum.h"

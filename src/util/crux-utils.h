@@ -24,7 +24,7 @@
 #include <limits>
 #include "io/carp.h"
 #include "utils.h"
-#include "objects.h"
+#include "model/objects.h"
 #include "parameter.h"
 #include "StringUtils.h"
 #include "model/Peak.h"

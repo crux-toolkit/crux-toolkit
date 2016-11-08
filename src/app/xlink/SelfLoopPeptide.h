@@ -7,7 +7,7 @@
 #ifndef SELFLOOPPEPTIDE_H_
 #define SELFLOOPPEPTIDE_H_
 
-#include "objects.h"
+#include "model/objects.h"
 #include "util/utils.h"
 
 #include "XLinkMatch.h"

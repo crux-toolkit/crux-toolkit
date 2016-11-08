@@ -8,7 +8,6 @@
 #include <string.h>
 #include "util/utils.h"
 #include "util/crux-utils.h"
-#include "objects.h"
 #include "util/mass.h"
 #include "util/GlobalParams.h"
 #include "util/Params.h"
