@@ -11,7 +11,6 @@
 #include "util/utils.h"
 #include "util/mass.h"
 #include "util/StringUtils.h"
-#include "objects.h"
 #include "DatabasePeptideIterator.h"
 #include "Peptide.h"
 #include "Protein.h"

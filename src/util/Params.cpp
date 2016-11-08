@@ -2,7 +2,7 @@
 #include "crux_version.h"
 #include "mass.h"
 #include "model/Peptide.h"
-#include "objects.h"
+#include "model/objects.h"
 #include "parameter.h"
 #include "Params.h"
 #include "StringUtils.h"

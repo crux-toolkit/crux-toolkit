@@ -14,7 +14,7 @@
 #include <set>
 #include "util/utils.h"
 #include "io/MatchCollectionParser.h"
-#include "objects.h"
+#include "model/objects.h"
 #include "model/Peptide.h"
 #include "io/SpectrumCollection.h"
 #include "io/OutputFiles.h"

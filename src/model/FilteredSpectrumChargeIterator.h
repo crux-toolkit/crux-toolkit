@@ -5,7 +5,6 @@
 #ifndef FILTEREDSPECTRUMCHARGEITERATOR_H
 #define FILTEREDSPECTRUMCHARGEITERATOR_H
 
-//#include "objects.h"
 #include <vector>
 
 #include "Spectrum.h"

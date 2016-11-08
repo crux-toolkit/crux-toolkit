@@ -7,7 +7,7 @@
 
 #include <string>
 #include <vector>
-#include "objects.h"
+#include "model/objects.h"
 
 class PepXMLWriter {
 

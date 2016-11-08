@@ -329,7 +329,7 @@ int PercolatorApplication::main(
   }
 
   if (Params::GetBool("tdc")) {
-    perc_args_vec.push_back("--post-processing-tdc [default]");
+    perc_args_vec.push_back("--post-processing-tdc");
   } else {
     perc_args_vec.push_back("--post-processing-qvality");
   }

@@ -11,7 +11,7 @@
 
 #include "util/utils.h"
 #include "util/mass.h"
-#include "objects.h"
+#include "model/objects.h"
 #include "io/carp.h"
 #include "PeptideConstraint.h"
 

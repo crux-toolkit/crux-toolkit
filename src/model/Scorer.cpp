@@ -20,7 +20,6 @@
 #ifdef _MSC_VER
 #include "util/windirent.h"
 #endif
-#include "objects.h"
 #include "model/IonConstraint.h"
 #include "model/IonFilteredIterator.h"
 #include "model/IonSeries.h"

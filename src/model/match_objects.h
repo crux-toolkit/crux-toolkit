@@ -1,7 +1,7 @@
 #ifndef MATCHOBJECTS_H_
 #define MATCHOBJECTS_H_
 
-#include "objects.h"
+#include "model/objects.h"
 #include <deque>
 #include <map>
 #include <string>
