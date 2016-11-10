@@ -22,6 +22,7 @@
 #include "util/Params.h"
 #include "util/FileUtils.h"
 #include "util/StringUtils.h"
+#include "MassHandler.h"
 #include <boost/foreach.hpp>
 
 using namespace std;
@@ -186,7 +187,7 @@ void PinWriter::printPSM(
   bool enzN = false;
   double obsMass = match->getZState().getSinglyChargedMass();
   FLOAT_T calcMass = peptide->calcModifiedMass() + MASS_PROTON;
-  FLOAT_T dM = (obsMass - calcMass) / charge;
+  FLOAT_T dM = MassHandler::massDiff(obsMass, calcMass, charge);
 
   const char* sequence = peptide->getSequence();
   int missedCleavages = get_num_internal_cleavage(sequence, enzyme_);
