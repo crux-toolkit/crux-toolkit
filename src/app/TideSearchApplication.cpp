@@ -399,8 +399,10 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
 
     double highest_mz = spectra.FindHighestMZ();
     unsigned int spectrum_num = spectra.SpecCharges()->size();
-    if (spectrum_num > 0 && exact_pval_search_) {
-      highest_mz = spectra.SpecCharges()->at(spectrum_num - 1).neutral_mass;
+    if (spectrum_num > 0) {
+      if(exact_pval_search_ || curScoreFunction == RESIDUE_EVIDENCE_MATRIX) {
+        highest_mz = spectra.SpecCharges()->at(spectrum_num - 1).neutral_mass;
+      }
     }
     carp(CARP_DEBUG, "Max m/z %f", highest_mz);
     MaxBin::SetGlobalMax(highest_mz);
@@ -875,8 +877,8 @@ void TideSearchApplication::search(void* threadarg) {
 	}
 	//END TODO
 	
-	//TODO need to do a carp_fatal when fragment-tolerance and evidence-granulairty are invoked
-	
+	//TODO need to do a carp_fatal when fragment-tolerance and evidence-granulairty are not invoked
+
 	int nCandPeptide = active_peptide_queue->SetActiveRangeBIons(min_mass, max_mass, min_range, max_range, candidatePeptideStatus);
 	int candidatePeptideStatusSize = candidatePeptideStatus->size();
 	if (nCandPeptide == 0) {
@@ -905,7 +907,7 @@ void TideSearchApplication::search(void* threadarg) {
 	deque<TheoreticalPeakSetBIons>::const_iterator iter1_ = active_peptide_queue->iter1_;
 	vector<int>::const_iterator iter_int;
 	vector<unsigned int>::const_iterator iter_uint;
-
+ 
 	if (!exact_pval_search_) {
 	  TideMatchSet::Arr match_arr(nCandPeptide); // scored peptides will go here.
 
@@ -980,9 +982,9 @@ void TideSearchApplication::search(void* threadarg) {
 	    for(int i=0 ; i<curResidueEvidenceMatrix.size() ; i++){
 	      curResidueEvidenceMatrix[i].resize(curPepMassInt);
 	    }
-	  }
-   
-	  /************ calculate p-values for PSMs using residue evidence matrix ****************/
+	  } 
+
+	  /************ calculate res-ev scores for PSMs using residue evidence matrix ****************/
 	  int scoreResidueEvidence;
 
 	  pe = 0;
@@ -1007,13 +1009,13 @@ void TideSearchApplication::search(void* threadarg) {
 	      int pepLen = curPeptide->Len();
 
 	      vector<unsigned int> intensArrayTheor;
-	      for(iter_uint = iter1_->unordered_peak_list_.begin();
+	      for(iter_uint  = iter1_->unordered_peak_list_.begin();
 		  iter_uint != iter1_->unordered_peak_list_.end();
 		  iter_uint++) {
 		intensArrayTheor.push_back(*iter_uint);
 	      }
 
-	      //Make sure the number of theoretical peaks match pepLen-1
+	      //Make sure the number of theoretical peaks match pepLen
 	      assert(intensArrayTheor.size() == pepLen - 1);
 
 	      double* residueMasses = curPeptide->getAAMasses(); //retrieves the amino acid masses, modifications included
@@ -1028,22 +1030,18 @@ void TideSearchApplication::search(void* threadarg) {
 		carp(CARP_FATAL, "residue-evidence has not been implemented with 'peptide-centric-search T' yet.");
 	      }
 	      else {
-		TideMatchSet::Pair pair;
-		pair.first.first = pValue;
-		//TODO do I ned a RESCALE_FACTOR?
-		pair.first.second = (double)scoreResidueEvidence;
-		//TODO ugly hack to conform with the way these indices are generated in standard tide-search
-		//TODO above comment was copied. not sure applies here
-		pair.second = candidatePeptideStatusSize - peidx;
-		match_arr.push_back(pair);
+                TideMatchSet::Pair pair;
+                pair.first.first = (double)scoreResidueEvidence;
+                pair.first.second = 0.0;
+                pair.second = candidatePeptideStatusSize - peidx; //TODO ugly hack to conform with the way these indices are generated in standard tide-search
+                match_arr.push_back(pair);
 	      }
 	      pe++;
 	    }
-
 	    ++iter_;
 	    ++iter1_;
 	  }
-   
+ 
 	  //clean up 
 	  delete [] pepMassInt;
 	  //TODO check if need to delete more stuff
@@ -1242,14 +1240,6 @@ void TideSearchApplication::search(void* threadarg) {
 		double tmpAAMass = residueMasses[res];
 		int tmpAA = find(aaMassDouble.begin(),aaMassDouble.end(),tmpAAMass) - aaMassDouble.begin();
 		scoreResidueEvidence += curResidueEvidenceMatrix[tmpAA][intensArrayTheor[res]-1];
-
-//                if (curPeptide->Seq() == "LIEDHK") {
-//                  std::cout << curPeptide->Seq()[res] << std::endl;
-//                  std::cout << "row: " << tmpAA << std::endl;
-//                  std::cout << "col: " << intensArrayTheor[res] - 1 << std::endl;
-//                  std::cout << "evid: " << curResidueEvidenceMatrix[tmpAA][intensArrayTheor[res]-1] << std::endl;
-//                  std::cout << std::endl;
-//                }
 	      }
 	      delete residueMasses;
 
@@ -1260,7 +1250,7 @@ void TideSearchApplication::search(void* threadarg) {
                 std::cout << "Spectrum: " << sc->spectrum->SpectrumNumber() << std::endl;
                 std::cout << curPeptide->Seq() << std::endl;
                 std::cout << scoreResidueEvidence << std::endl;
-//                carp(CARP_FATAL,"PSM p-value should not be equal to 0.0");
+                carp(CARP_FATAL,"PSM p-value should not be equal to 0.0");
               }
              
 	      if(peptide_centric) {
