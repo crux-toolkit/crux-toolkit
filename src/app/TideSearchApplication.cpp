@@ -900,7 +900,7 @@ void TideSearchApplication::search(void* threadarg) {
 	}
         int maxPrecurMassBin = floor(MaxBin::Global().CacheBinEnd() + 50.0);
 
-	int fragTol = Params::GetInt("fragment-tolerance");
+	double fragTol = Params::GetDouble("fragment-tolerance");
 	int granularityScale = Params::GetInt("evidence-granularity");
 
 	deque<Peptide*>::const_iterator iter_ = active_peptide_queue->iter_;

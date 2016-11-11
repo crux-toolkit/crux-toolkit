@@ -621,7 +621,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   double precursorMass,
   int nAA, //TODO different than one used in CreateEvidenceVector
   const vector<double> aaMass, //TODO different aaMass then one used in CreateEvidenceVector
-  int fragTol,
+  double fragTol,
   int granularityScale,
   vector<vector<double> >& residueEvidenceMatrix
   ) {
@@ -642,7 +642,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   int precurCharge = charge;
   double experimentalMassCutoff = precursorMass + 50.0;
 //  double proton = MassConstants::proton;
-  double residueToleranceMass = 100.0 * (double)fragTol * 0.000001;
+  double residueToleranceMass = fragTol;
   const double precursorMZExclude = 15.0; //also used in PreprocessSpectrum
 
   //Determining max sqrt(ion intensity)
