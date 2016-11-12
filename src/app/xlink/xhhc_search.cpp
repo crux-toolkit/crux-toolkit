@@ -21,7 +21,7 @@
 #include "XHHC_Peptide.h"
 
 //CRUX INCLUDES
-#include "objects.h"
+#include "model/objects.h"
 #include "model/Spectrum.h"
 #include "io/SpectrumCollectionFactory.h"
 #include "model/FilteredSpectrumChargeIterator.h"

@@ -10,7 +10,6 @@
 #include <string.h>
 #include <assert.h>
 #include <ctype.h>
-#include "objects.h"
 #include "Ion.h"
 #include "IonSeries.h"
 #include "util/Params.h"
@@ -201,7 +200,7 @@ IonSeries::~IonSeries()
     free(peptide_);
   }
   if(modified_aa_seq_){
-    free(modified_aa_seq_);
+    freeModSeq(modified_aa_seq_);
   }
   if(loss_limit_){
     free(loss_limit_);

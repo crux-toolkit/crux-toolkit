@@ -217,9 +217,9 @@ void PercolatorAdapter::addProteinScores() {
 
   vector<ProteinMatch*> matches;
   vector<ProteinMatch*> decoy_matches;
-  map<const string, Protein*> protein_scores = protEstimator_->getProteins();
+  map<const string, ProteinScoreHolder*> protein_scores = protEstimator_->getProteins();
   
-  for (map<const string, Protein*>::iterator score_iter = protein_scores.begin();
+  for (map<const string, ProteinScoreHolder*>::iterator score_iter = protein_scores.begin();
        score_iter != protein_scores.end();
        score_iter++) {
     if (score_iter->second == NULL) {

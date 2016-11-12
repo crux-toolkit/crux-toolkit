@@ -246,7 +246,7 @@ void ProteinPeptideIterator::selectPeptides(
  */
 void ProteinPeptideIterator::prepare()
 {
-  prepareMc(Params::GetInt("missed-cleavages"));
+  prepareMc(num_mis_cleavage_);
 }
 
 void ProteinPeptideIterator::prepareMc(

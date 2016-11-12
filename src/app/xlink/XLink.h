@@ -6,7 +6,7 @@
  *****************************************************************************/
 #ifndef XLINK_H_
 #define XLINK_H_
-#include "objects.h"
+#include "model/objects.h"
 #include "XLinkBondMap.h"
 #include "XLinkablePeptide.h"
 

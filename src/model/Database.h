@@ -8,7 +8,7 @@
 
 #include <stdio.h>
 #include "util/utils.h"
-#include "objects.h"
+#include "model/objects.h"
 #include "Peptide.h"
 #include "Protein.h"
 #include "io/carp.h"

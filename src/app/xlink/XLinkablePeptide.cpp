@@ -6,7 +6,6 @@
  ****************************************************************************/
 #include "XLinkablePeptide.h"
 
-#include "objects.h"
 #include "util/modifications.h"
 #include "util/Params.h"
 #include "model/Ion.h"

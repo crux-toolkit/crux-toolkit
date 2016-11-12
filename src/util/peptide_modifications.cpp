@@ -530,7 +530,7 @@ int modify_peptide(
 
     Peptide* cur_peptide = new Peptide(peptide);
     cur_peptide->setMod(cur_mod_seq, peptide_mod);
-
+    freeModSeq(cur_mod_seq);
     push_back_linked_list(modified_peptides, cur_peptide );
     total_count++;
   }
@@ -606,7 +606,7 @@ int apply_mod_to_list(
                                            completed_seqs);
 
       //printf("Now there are %d seqs to return\n", return_seq_count);
-      free(cur_seq);
+      freeModSeq(cur_seq);
     }// apply to next seq until list is empty
 
     // make the collected results the input to the next application
@@ -634,7 +634,7 @@ int apply_mod_to_list(
     if (count_modified_aas(cur_seq) > max_aas_modified) {
       // delete cur, set cur to node after prev
       cur_node = delete_next_list_node(prev_node);
-      free(cur_seq);  // list delete doesn't remove data
+      freeModSeq(cur_seq);  // list delete doesn't remove data
     } else
       prev_node = cur_node;
       cur_node = get_next_linked_list(prev_node);

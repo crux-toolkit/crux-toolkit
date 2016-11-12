@@ -7,7 +7,7 @@
 #ifndef IONCONSTRAINT_H
 #define IONCONSTRAINT_H
 
-#include "objects.h"
+#include "model/objects.h"
 
 #include "IonSeries.h"
 #include "Ion.h"

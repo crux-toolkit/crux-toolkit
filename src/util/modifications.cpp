@@ -21,9 +21,87 @@
 
 #include "modifications.h"
 #include "mass.h"
+#include "GlobalParams.h"
 #include "Params.h"
+#include <stack>
+#include <iostream>
 
 using namespace std;
+
+/**
+ * \brief Keeps a stack of allocated modification sequences
+ */
+class MODIFIED_AA_T_Cache {
+ protected:
+  stack<MODIFIED_AA_T*> cache_; ///< Cache itself
+ public:
+  
+  /**
+   * Constructor
+   */
+  MODIFIED_AA_T_Cache() {;}
+
+  /**
+   * Destructor, deletes all objects in cache
+   */
+  ~MODIFIED_AA_T_Cache() {
+    size_t objects_in_cache = cache_.size();
+    while(!cache_.empty()) {
+      MODIFIED_AA_T *element = cache_.top();
+      cache_.pop();
+      delete []element;
+    }
+  }
+
+  /**
+   * checks out a object out of the cache
+   */
+  MODIFIED_AA_T* checkout(bool clear=false) {
+    MODIFIED_AA_T* new_element;
+    if (cache_.empty()) {
+      new_element = new MODIFIED_AA_T[GlobalParams::getMaxLength()+1];
+    } else {
+      new_element = cache_.top();
+      cache_.pop();
+    }
+    if (clear) {
+      memset(new_element, 0, sizeof(MODIFIED_AA_T)*GlobalParams::getMaxLength()+1);
+    }
+    return (new_element);
+  }
+  
+  
+  /**
+   * checks in a object into the cache
+   */
+  void checkin(
+    MODIFIED_AA_T* array
+  ) {
+    cache_.push(array);
+  }
+  
+};
+
+MODIFIED_AA_T_Cache modified_aa_cache; ///< The cache of modified sequences
+
+/**
+ * \return a new modification sequence array. Can be off of already allocated
+ * arrays
+ */
+MODIFIED_AA_T* newModSeq() {
+  MODIFIED_AA_T* ans = modified_aa_cache.checkout();
+  return(ans);
+}
+
+/**
+ * Releases the modification sequence back into the cache
+ */
+void freeModSeq(
+  MODIFIED_AA_T* &seq  ///< sequence to release
+  ) {
+  modified_aa_cache.checkin(seq);
+  seq=NULL;
+}
 
 /* Private constants */
 //enum { MAX_PROTEIN_SEQ_LENGTH = 40000 };
@@ -211,7 +289,7 @@ char* modified_aa_to_string_with_masses(MODIFIED_AA_T aa,
   FLOAT_T summed_masses = 0;
   if (mass_format == AA_PLUS_MOD) {
     summed_masses = 
-      get_mass_mod_amino_acid(aa, get_mass_type_parameter("isotopic-mass"));
+      get_mass_mod_amino_acid(aa, GlobalParams::getIsotopicMass());
   } else {
 
     for (int mod_idx = 0; mod_idx < total_mods; mod_idx++) {
@@ -281,7 +359,7 @@ char* modified_aa_string_to_string_with_masses(
     }
   }
 
-  int precision = Params::GetInt("mod-precision");
+  int precision = GlobalParams::getModPrecision();
   // max total length = #aas + ( #mods * (strlen("[000.,]")+precision) ) + '/0'
   int buffer_size = length + (count * (9 + precision)) + 1;
   char* return_string = (char*)mymalloc(buffer_size * sizeof(char));
@@ -382,28 +460,27 @@ char* modified_aa_to_unmodified_string(MODIFIED_AA_T* aa_string, int length) {
  *
  * \returns The length of the mod_sequence array.
  */
-int convert_to_mod_aa_seq(const char* sequence, 
+int convert_to_mod_aa_seq(const string& sequence, 
                           MODIFIED_AA_T** mod_sequence,
                           MASS_FORMAT_T mass_format) {
 
-  if (sequence == NULL) {
+  if( sequence.empty() ){
     carp(CARP_ERROR, "Cannot convert NULL sequence to modifiable characters"); 
     return 0;
   }
 
-  MASS_TYPE_T mass_type = get_mass_type_parameter("isotopic-mass");
+  MASS_TYPE_T mass_type = GlobalParams::getIsotopicMass();
+  const char* csequence = sequence.c_str();
 
-  int seq_len = strlen(sequence);
-  MODIFIED_AA_T* new_sequence = 
-    (MODIFIED_AA_T*)mycalloc( seq_len + 1, sizeof(MODIFIED_AA_T) );
-
+  int seq_len = sequence.length();
+  MODIFIED_AA_T* new_sequence = newModSeq(); 
   unsigned int seq_idx = 0;  // current position in given sequence
   unsigned int mod_idx = 0;  // current position in the new_sequence
-  for (seq_idx = 0; seq_idx < strlen(sequence); seq_idx++) {
+  for(seq_idx = 0; seq_idx < seq_len; seq_idx++){
     // is the character a residue?
-    if (sequence[seq_idx] >= 'A' && sequence[seq_idx] <= 'Z') { 
+    if( csequence[seq_idx] >= 'A' && csequence[seq_idx] <= 'Z' ){ 
       // add to the new sequence
-      new_sequence[mod_idx] = char_aa_to_modified( sequence[seq_idx] );
+      new_sequence[mod_idx] = char_aa_to_modified( csequence[seq_idx] );
       mod_idx++;
       continue;
     } 
@@ -413,10 +490,11 @@ int convert_to_mod_aa_seq(const char* sequence,
 
     if (sequence[seq_idx] == '[' || sequence[seq_idx] == ',') {//mod mass
       seq_idx++;
-      FLOAT_T delta_mass = atof(sequence + seq_idx);
+      FLOAT_T delta_mass = atof(csequence + seq_idx);
       if (mass_format == AA_PLUS_MOD) {
         assert(mod_idx > 0);
-        delta_mass -= get_mass_mod_amino_acid(new_sequence[mod_idx - 1], mass_type);
+        delta_mass -= get_mass_mod_amino_acid(new_sequence[mod_idx - 1], 
+                                              mass_type);
       }
       // translate mass into aa_mod
       aa_mod = get_aa_mod_from_mass(delta_mass);
@@ -436,11 +514,11 @@ int convert_to_mod_aa_seq(const char* sequence,
     if (mod_idx == 0) {
       //This can happen with nterminal modifications from comet.
       seq_idx++;
-      if (seq_idx < strlen(sequence) && sequence[seq_idx] >= 'A'  && sequence[seq_idx] <= 'Z') {
+      if (seq_idx < seq_len && sequence[seq_idx] >= 'A'  && sequence[seq_idx] <= 'Z') {
         new_sequence[mod_idx] = char_aa_to_modified( sequence[seq_idx] );
         mod_idx++;
       } else {
-        carp(CARP_FATAL, "Cannot parse sequence %s", sequence);
+        carp(CARP_FATAL, "Cannot parse sequence %s", csequence);
       }
       
       
@@ -448,7 +526,7 @@ int convert_to_mod_aa_seq(const char* sequence,
     // apply the modification
     if (aa_mod == NULL) {
       carp(CARP_WARNING, "There is an unidentifiable modification in sequence "
-           "<%s> at position %d.", sequence, seq_idx - 1);
+           "<%s> at position %d.", csequence, seq_idx - 1);
     } else {
       // apply modification
       modify_aa(&new_sequence[mod_idx-1], aa_mod);
@@ -472,7 +550,7 @@ MODIFIED_AA_T* copy_mod_aa_seq(const MODIFIED_AA_T* source, int length) {
     return NULL;
   }
 
-  MODIFIED_AA_T* new_seq = (MODIFIED_AA_T*)mycalloc( length + 1, sizeof(MODIFIED_AA_T) );
+  MODIFIED_AA_T* new_seq = newModSeq();
   memcpy( new_seq, source, length * sizeof(MODIFIED_AA_T));
   new_seq[length] = MOD_SEQ_NULL;
 
@@ -490,13 +568,18 @@ MODIFIED_AA_T* copy_mod_aa_seq(
     return NULL;
   }
 
+  MODIFIED_AA_T* new_seq = newModSeq();
   size_t length = 0;
   while (source[length] != MOD_SEQ_NULL) {
+    new_seq[length] = source[length];
     length++;
   }
-  return copy_mod_aa_seq(source, length);
+  new_seq[length] = MOD_SEQ_NULL;
+  return(new_seq);
 
 }
+
+
 
 /**
  * \brief Remove any characters not A-Z from a peptide sequence.

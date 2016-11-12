@@ -3,12 +3,12 @@
  * $Revision: 1.25 $
  * \brief Object for representing one protein sequence.
  *****************************************************************************/
-#ifndef PROTEIN__H 
-#define PROTEIN__H
+#ifndef CRUX_PROTEIN_H 
+#define CRUX_PROTEIN_H
 
 #include <stdio.h>
 #include "util/utils.h"
-#include "objects.h"
+#include "model/objects.h"
 #include "Peptide.h"
 #include "PeptideSrc.h"
 #include "io/carp.h"

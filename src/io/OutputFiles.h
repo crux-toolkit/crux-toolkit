@@ -19,7 +19,7 @@
 #include <sstream>
 #include "carp.h"
 #include "parameter.h"
-#include "objects.h"
+#include "model/objects.h"
 #include "model/MatchCollection.h"
 #include "MatchFileWriter.h"
 #include "PepXMLWriter.h"

@@ -13,8 +13,6 @@ include_directories(app/bullseye)
 include_directories(app/hardklor)
 include_directories(app/qranker-barista)
 include_directories(app/xlink)
-include_directories(io)
-include_directories(model)
 include_directories(${CMAKE_SOURCE_DIR}/ext)
 include_directories(${CMAKE_BINARY_DIR})
 include_directories(${CMAKE_BINARY_DIR}/ext)
@@ -25,7 +23,7 @@ include_directories(${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/libraries/boo
 include_directories(${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/libraries/boost_aux)
 include_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator/src/)
 include_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator/src/fido)
-include_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator/src/fisher)
+include_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator/src/picked_protein)
 include_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator-build/src/)
 include_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator-build/src/fido)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/app/tide/protoobj)
@@ -64,6 +62,7 @@ link_directories(./app/xlink)
 link_directories(${CMAKE_BINARY_DIR}/ext/lib)
 link_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator-build/src) 
 link_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator-build/src/fido)
+link_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator-build/src/picked_protein)
 if (WIN32 AND NOT Cygwin)
  # Needed for windows build of vendor libraries
   if (CMAKE_GENERATOR MATCHES "^.*Win64$")
@@ -87,6 +86,7 @@ set (
   util/Alphabet.cpp
   util/AminoAcidUtil.cpp
   util/ArgParser.cpp
+  util/CacheableMass.cpp
   util/GlobalParams.cpp
   io/carp.cpp
   util/CarpStreamBuf.cpp
@@ -203,11 +203,15 @@ add_library(
 )
 add_dependencies(crux-support tide-support)
 
-find_package(OpenMP)
-if (OPENMP_FOUND)
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-endif()
+if (APPLE)
+  set(OPENMP_FOUND FALSE)
+else(APPLE)
+  find_package(OpenMP)
+  if (OPENMP_FOUND)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+  endif(OPENMP_FOUND)
+endif(APPLE)
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -DNDEBUG")
@@ -365,6 +369,7 @@ if (WIN32 AND NOT CYGWIN)
     cometsearch
     perclibrary
     fido
+    picked_protein
     xlink
     gflags
     crux-support
@@ -405,6 +410,7 @@ else()
     mstoolkitlite
     perclibrary
     fido
+    picked_protein
     pwiz_data_identdata
     pwiz_data_identdata_version
     pwiz_data_misc

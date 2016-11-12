@@ -7,7 +7,7 @@
 #ifndef DATABASEPEPTIDEITERATOR_H
 #define DATABASEPEPTIDEITERATOR_H
 
-#include "objects.h"
+#include "model/objects.h"
 #include "DatabaseProteinIterator.h"
 #include "ProteinPeptideIterator.h"
 #include "PeptideConstraint.h"

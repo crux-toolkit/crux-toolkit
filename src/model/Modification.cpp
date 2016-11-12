@@ -462,8 +462,9 @@ void Modification::FromSeq(MODIFIED_AA_T* seq, int length,
 // Turns an unmodified sequence and vector of mods into a MODIFIED_AA_T*
 // TODO Remove this
 MODIFIED_AA_T* Modification::ToSeq(const string& seq, const vector<Modification>& mods) {
-  MODIFIED_AA_T* modSeq = (MODIFIED_AA_T*)mycalloc(seq.length() + 1, sizeof(MODIFIED_AA_T));
-
+  
+  MODIFIED_AA_T* modSeq = newModSeq();
+  
   for (unsigned i = 0; i < seq.length(); i++) {
     modSeq[i] = char_aa_to_modified(seq[i]);
   }

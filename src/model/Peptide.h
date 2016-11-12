@@ -3,8 +3,8 @@
  * $Revision: 1.52 $
  * \brief Object for representing one peptide.
  */
-#ifndef CRUX_PEPTIDE_H 
-#define CRUX_PEPTIDE_H
+#ifndef CRUX_PEPTIDE_H_
+#define CRUX_PEPTIDE_H_
 
 #include <math.h>
 #include <stdio.h>
@@ -16,7 +16,7 @@
 #include "util/mass.h"
 #include "Modification.h"
 #include "Protein.h"
-#include "objects.h"
+#include "model/objects.h"
 #include "io/carp.h"
 #include "PeptideConstraint.h"
 #include "Database.h"

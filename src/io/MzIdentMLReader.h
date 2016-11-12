@@ -15,7 +15,7 @@
 
 #include "PSMReader.h"
 #include "pwiz/data/identdata/IdentDataFile.hpp"
-#include "objects.h"
+#include "model/objects.h"
 
 class MzIdentMLReader : public PSMReader {
 

@@ -11,7 +11,6 @@
 #include <string.h>
 #include <assert.h>
 #include <ctype.h>
-#include "objects.h"
 #include "Spectrum.h"
 #include "util/utils.h"
 #include "util/mass.h"
@@ -360,8 +359,10 @@ bool Spectrum::parseMstoolkitSpectrum
         mst_real_spectrum->atZ(z_idx).z);
       zstates_.push_back(zstate);
     }
-  } else { // if no charge states detected, decide based on spectrum
+  } else if (!Params::GetBool("ignore-no-charge")) { // if no charge states detected, decide based on spectrum
     assignZState(); 
+  } else {
+    return false;
   }
 
   return true;
@@ -492,8 +493,10 @@ bool Spectrum::parsePwizSpecInfo(
           zstate.setMZ(precursor_mz_, charges[charge_idx].valueAs<int>());
           zstates_.push_back(zstate);
         }
-      } else { // we have no charge information
+      } else if (!Params::GetBool("ignore-no-charge")) { // we have no charge information
         assignZState(); //do choose charge and add +1 or +2,+3
+      } else {
+        return false;
       }
     }
   }

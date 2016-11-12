@@ -8,7 +8,7 @@
 #ifndef XHHC_PEPTIDE_H
 #define XHHC_PEPTIDE_H
 
-#include "objects.h"
+#include "model/objects.h"
 
 
 #include <string>
