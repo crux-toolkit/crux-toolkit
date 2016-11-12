@@ -12,7 +12,7 @@
 #include <string.h>
 #include "util/utils.h"
 #include "util/crux-utils.h"
-#include "objects.h"
+#include "model/objects.h"
 #include "util/mass.h"
 #include "Peptide.h"
 #include "Protein.h"

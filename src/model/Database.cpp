@@ -19,7 +19,6 @@
 #include "ProteinPeptideIterator.h"
 #include "Database.h"
 #include "io/carp.h"
-#include "objects.h"
 #include "PeptideConstraint.h"
 #include "ProteinIndex.h"
 #include "ProteinIndexIterator.h"

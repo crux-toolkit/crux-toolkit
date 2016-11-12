@@ -22,7 +22,6 @@
 #include "Ion.h"
 #include "IonSeries.h"
 #include "util/crux-utils.h"
-#include "objects.h"
 #include "parameter.h"
 #include "util/GlobalParams.h"
 #include "Scorer.h" 

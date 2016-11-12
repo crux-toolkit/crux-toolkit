@@ -697,12 +697,11 @@ void OutputFiles::writeRankedPeptides(const vector<pair<FLOAT_T, Peptide*> >& sc
       it != scoreToPeptide.end(); ++it) {
     Peptide* peptide = it->second;
     FLOAT_T score = it->first;
-    char* seq = peptide->getSequence();
+    const char* seq = peptide->getSequence();
 
     file->setColumnCurrentRow(SEQUENCE_COL, seq);
     file->setColumnCurrentRow(score_col, score);
     file->writeRow();
-    free(seq);
   }
 
 }

@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "PSMWriter.h"
-#include "objects.h"
+#include "model/objects.h"
 #include "model/match_objects.h"
 #include "pwiz/data/identdata/IdentData.hpp"
 

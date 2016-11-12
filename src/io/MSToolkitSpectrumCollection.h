@@ -7,8 +7,6 @@
 #ifndef MSTOOLKIT_SPECTRUM_COLLECTION_H
 #define MSTOOLKIT_SPECTRUM_COLLECTION_H
 
-//#include <stdio.h>
-//#include "objects.h"
 #include "SpectrumCollection.h"
 
 /**

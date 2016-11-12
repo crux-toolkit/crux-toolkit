@@ -6,7 +6,7 @@
 #ifndef XLINKABLEPEPTIDE_H_
 #define XLINKABLEPEPTIDE_H_
 
-#include "objects.h"
+#include "model/objects.h"
 #include "model/Peptide.h"
 
 #include <vector>

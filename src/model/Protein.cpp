@@ -13,7 +13,6 @@
 #include "util/crux-utils.h"
 #include "parameter.h"
 #include "util/GlobalParams.h"
-#include "objects.h"
 #include "Peptide.h"
 #include "Protein.h"
 #include "PeptideSrc.h"

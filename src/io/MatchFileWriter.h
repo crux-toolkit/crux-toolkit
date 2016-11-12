@@ -16,7 +16,7 @@
 #include "app/CruxApplication.h"
 #include "DelimitedFileWriter.h"
 #include "MatchColumns.h"
-#include "objects.h"
+#include "model/objects.h"
 #include "util/StringUtils.h"
 #include <iostream>
 

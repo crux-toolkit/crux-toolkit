@@ -23,7 +23,8 @@ class GeneratePeptidesIterator : public PeptideIterator
   GeneratePeptidesIterator(
     std::pair<FLOAT_T,FLOAT_T> min_max_mass, ///< max target mass of peptides
     bool is_decoy,  ///< generate target or decoy peptides
-    Database* database ///< database to provide peptides
+    Database* database,  ///< database to provide peptides
+    int additional_missed_cleavages = 0
   );
 
   ~GeneratePeptidesIterator();

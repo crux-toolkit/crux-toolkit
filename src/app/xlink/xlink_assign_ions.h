@@ -4,7 +4,7 @@
 #include "app/CruxApplication.h"
 #include "model/Spectrum.h"
 #include "LinkedIonSeries.h"
-#include "objects.h"
+#include "model/objects.h"
 
 class XLinkAssignIons : public CruxApplication {
  public:

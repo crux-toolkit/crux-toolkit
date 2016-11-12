@@ -6,7 +6,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "objects.h"
 #include "Ion.h"
 #include "util/Alphabet.h"
 #include "Peptide.h"

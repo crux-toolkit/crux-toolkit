@@ -14,12 +14,16 @@ GeneratePeptidesIterator::GeneratePeptidesIterator()
 GeneratePeptidesIterator::GeneratePeptidesIterator(
   pair<FLOAT_T,FLOAT_T> min_max_mass, ///< precursor m/z of spectrum
   bool is_decoy,  ///< generate target or decoy peptides
-  Database* database ///< database to provide peptides
+  Database* database, ///< database to provide peptides
+  int additional_missed_cleavages
   )
 {
   PeptideConstraint* constraint = PeptideConstraint::newFromParameters();
   constraint->setMinMass(min_max_mass.first);
   constraint->setMaxMass(min_max_mass.second);
+  constraint->setNumMisCleavage(constraint->getNumMisCleavage()+additional_missed_cleavages);
+
+
 
   // Check that database exists
   if (database == NULL){
