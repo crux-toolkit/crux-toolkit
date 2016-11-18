@@ -7,8 +7,10 @@
 
 #include "XLinkablePeptideIterator.h"
 #include "XLink.h"
-#include "util/Params.h"
+#include "LinearPeptide.h"
+#include "util/GlobalParams.h"
 #include <iostream>
+#include "XLinkDatabase.h"
 
 using namespace std;
 
@@ -19,56 +21,36 @@ XLinkablePeptideIterator::XLinkablePeptideIterator(
     double min_mass, ///< min mass of candidates
     double max_mass, ///< max mass of candidates
     Database* database, ///< protein database
-    PEPTIDE_MOD_T* peptide_mod, ///<current peptide mod
+    PEPTIDE_MOD_T** peptide_mods, ///<current peptide mod
+    int num_peptide_mods,
     bool is_decoy, ///< generate decoy candidates
     XLinkBondMap& bondmap ///< map of valid links
     ) {
 
   is_decoy_ = is_decoy;
 
-  bondmap_ = bondmap;
+  iter_ = XLinkDatabase::getXLinkableBegin(min_mass);
+  eiter_ = XLinkDatabase::getXLinkableEnd();
 
-  peptide_iterator_ =     
-    new ModifiedPeptidesIterator(
-      min_mass, 
-      max_mass,
-      peptide_mod, 
-      is_decoy,
-      database);
-  queueNextPeptide();
+  min_mass_ = min_mass;
+  max_mass_ = max_mass;
+  has_next_ = iter_ != eiter_ && iter_->getMass(GlobalParams::getIsotopicMass()) <= max_mass_;
 }
 
 /**
  * Destructor
  */
 XLinkablePeptideIterator::~XLinkablePeptideIterator() {
-  delete peptide_iterator_;
+  ;
 }
 
 /**
  * queues the next linkable peptide
  */
 void XLinkablePeptideIterator::queueNextPeptide() {
-
-  has_next_ = false;
-  int max_mod_xlink = Params::GetInt("max-xlink-mods");
-  while (peptide_iterator_->hasNext() && !has_next_) {
-
-    Crux::Peptide* peptide = peptide_iterator_->next();
-    //cerr << "peptide is:"<<peptide->getSequence()<<endl;  
-    if (peptide->countModifiedAAs() <= max_mod_xlink) {
-      XLinkablePeptide::findLinkSites(peptide, bondmap_, link_sites_);
-      if (link_sites_.size() > 0) {
-        has_next_ = true;
-        current_ = XLinkablePeptide(peptide, link_sites_);
-        current_.setDecoy(is_decoy_);
-        XLink::addAllocatedPeptide(peptide);
-      }
-    } 
-    if (!has_next_) {
-      delete peptide;
-    }
-  }
+  
+  iter_++;
+  has_next_ = iter_ != eiter_ && iter_->getMass(GlobalParams::getIsotopicMass()) <= max_mass_;
 }
 
 /**
@@ -82,13 +64,13 @@ bool XLinkablePeptideIterator::hasNext() {
 /**
  *\returns the next peptide
  */
-XLinkablePeptide XLinkablePeptideIterator::next() {
+XLinkablePeptide& XLinkablePeptideIterator::next() {
 
   if (!has_next_) {
     carp(CARP_WARNING, "next called on empty iterator!");
   }
-
-  XLinkablePeptide ans = current_;
+  
+  XLinkablePeptide& ans = *iter_;
   queueNextPeptide();
   return ans;
 }

@@ -97,10 +97,10 @@ int XLinkScoreSpectrum::main(int argc, char** argv) {
   } else if (scoremethod == "modification") {
     
     XLinkPeptide* xlp = (XLinkPeptide*)candidate;
-    FLOAT_T deltaB = xlp->getXLinkablePeptide(1).getMass() + link_mass;
+    FLOAT_T deltaB = xlp->getXLinkablePeptide(1).getMass(MONO) + link_mass;
     FLOAT_T scoreA = xlink_scorer.scoreXLinkablePeptide(xlp->getXLinkablePeptide(0), 0, deltaB);
     
-    FLOAT_T deltaA = xlp->getXLinkablePeptide(0).getMass() + link_mass;
+    FLOAT_T deltaA = xlp->getXLinkablePeptide(0).getMass(MONO) + link_mass;
     FLOAT_T scoreB = xlink_scorer.scoreXLinkablePeptide(xlp->getXLinkablePeptide(1), 0, deltaA);
 
     if (scoreA > scoreB)

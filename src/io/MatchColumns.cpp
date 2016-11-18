@@ -107,7 +107,8 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "xcorr 1",
   "xcorr 2",
   "protein id x",
-  "index name"
+  "index name",
+  "xlink type"
 };
 
 /**

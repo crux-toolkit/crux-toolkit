@@ -8,31 +8,35 @@
 
 #include "parameter.h"
 #include "model/Scorer.h"
+#include "util/GlobalParams.h"
 #include <sstream>
 #include <ios>
 #include <iomanip>
 #include <iostream>
-
-
+#include "XLinkPeptide.h"
+#include "XLinkablePeptide.h"
+#include "io/OutputFiles.h"
 using namespace std;
 
 /**
  * Constructor for XLinkMatch
  */
-XLinkMatch::XLinkMatch() {
+XLinkMatch::XLinkMatch() : Match() {
+  cached_sequence_ = "";
   parent_ = NULL;
-  pvalue_ = 1;
+  pvalue_= 1;
   for (int idx = 0;idx < NUMBER_MASS_TYPES;idx++) {
     mass_calculated_[idx] = false;
     mass_[idx] = 0;
   }
+  is_decoy_ = false;
 }
 
 /**
  * Default destrcutor for XLinkMatch
  */
 XLinkMatch::~XLinkMatch() {
-
+  //TODO deleted cached ions
 }
 
 void XLinkMatch::decrementPointerCount() {
@@ -50,8 +54,16 @@ void XLinkMatch::computeWeibullPvalue(
   ) {
 
   pvalue_ = compute_weibull_pvalue(getScore(XCORR), eta, beta, shift);
-  cerr << "eta:" << eta<< " beta:"<< beta << " shift:" << shift << endl;
-  cerr << "xcorr:" << getScore(XCORR) << " pvalue:" << pvalue_ << endl;
+}
+
+void XLinkMatch::setPValue(FLOAT_T pvalue) {
+  pvalue_ = pvalue;
+}
+
+FLOAT_T XLinkMatch::getPValue() {
+
+  return(pvalue_);
+
 }
 
 /**
@@ -80,6 +92,16 @@ string XLinkMatch::getProteinIdXString() {
   }
 
 }
+
+string XLinkMatch::getUnshuffledSequence() {
+  Crux::Peptide* peptide = this->getPeptide(0);
+  if (peptide == NULL) {
+    return string("");
+  } else {
+    return peptide->getUnshuffledSequence();
+  }
+}
+
 
 /**
  *\returns the flanking amino acids for the match
@@ -127,6 +149,14 @@ string XLinkMatch::getCandidateTypeString() {
   return getCandidateTypeString(getCandidateType());
 }
 
+const string& XLinkMatch::getSequenceStringConst() {
+  if (cached_sequence_ == "") {
+    cached_sequence_ = getSequenceString();
+  }
+  return(cached_sequence_);
+}
+
+
 /**
  *\returns the string value of the given candidate type
  */
@@ -163,18 +193,39 @@ string XLinkMatch::getCandidateTypeString(
 
 }
 
-/**
- * \returns the mass of the match
- */
-FLOAT_T XLinkMatch::getMass(
-  MASS_TYPE_T mass_type /// MONO or AVERAGE?
-  ) {
+vector<IonConstraint*> XLinkMatch::ion_constraint_xcorr_;
 
-  if (!mass_calculated_[mass_type]) {
-    mass_[mass_type] = calcMass(mass_type);
-    mass_calculated_[mass_type] = true;
+IonConstraint* XLinkMatch::getIonConstraintXCORR(int charge) {
+  int idx = charge-1;
+  while(ion_constraint_xcorr_.size() < charge) {
+    ion_constraint_xcorr_.push_back(NULL);
   }
-  return mass_[mass_type];
+  if (ion_constraint_xcorr_[idx] == NULL) {
+    ion_constraint_xcorr_[idx] = 
+      IonConstraint::newIonConstraintSmart(XCORR, charge);
+  } else {
+    //    carp(CARP_INFO, "IonConstraint cache hit!");
+  }
+  return(ion_constraint_xcorr_[idx]);
+}
+
+IonSeries* XLinkMatch::getIonSeriesXCORR(int charge) {
+
+  int idx = charge-1;
+  while(ion_series_xcorr_.size() < charge) {
+    ion_series_xcorr_.push_back(NULL);
+  }
+
+  if (ion_series_xcorr_[idx] == NULL) {
+    IonSeries* ion_series_xcorr = new IonSeries(getIonConstraintXCORR(charge), charge); 
+    predictIons(ion_series_xcorr, charge);
+    ion_series_xcorr_[idx] = ion_series_xcorr;
+  } else {
+    carp(CARP_INFO, "Cache hit!");
+  }
+  
+  return(ion_series_xcorr_[idx]);
+
 }
 
 /**
@@ -206,6 +257,25 @@ void XLinkMatch::setParent(XLinkMatchCollection* parent) {
   parent_ = parent;
 }
 
+const vector<XLinkMatch*>& XLinkMatch::getDecoys() {
+  decoys_.clear();
+  shuffle(decoys_);
+  return(decoys_);
+  /*
+  if (decoys_.size() == 0) {
+    shuffle(decoys_);
+    if (decoys_.size() == 0) {
+      carp(CARP_FATAL, "Can't get decoy(s) for XLinkMatch!");
+    }
+  } else {
+    carp(CARP_INFO, "XLinkMatch::Using cached decoys");
+  }
+  
+  return(decoys_);
+  */
+}
+
+
 /**
  * Print one field in the tab-delimited output file, based on column index.
  */
@@ -225,14 +295,14 @@ void XLinkMatch::printOneMatchField(
   switch ((MATCH_COLUMNS_T)column_idx) {
 
   case PEPTIDE_MASS_COL:
-    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, getMass(MONO));
+    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, getMass(GlobalParams::getIsotopicMass()));
     break;
   case PVALUE_COL:
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, pvalue_);
     break;
   case SEQUENCE_COL:
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
-      getSequenceString());
+      getSequenceStringConst());
     break;
   case PROTEIN_ID_COL:
     output_file->setColumnCurrentRow(
@@ -255,21 +325,55 @@ void XLinkMatch::printOneMatchField(
       getPPMError());
     break;
   case XCORR_FIRST_COL:
-    output_file->setColumnCurrentRow(
-    (MATCH_COLUMNS_T)column_idx,
-    getScore(XCORR_FIRST));
+    if ((Params::GetInt("xlink-top-n") != 0) &&
+        (getCandidateType() == XLINK_INTER_CANDIDATE || 
+        getCandidateType() == XLINK_INTRA_CANDIDATE || 
+        getCandidateType() == XLINK_INTER_INTRA_CANDIDATE)) {
+      XLinkPeptide *xpep = (XLinkPeptide*)this;
+      XLinkablePeptide& lpep = xpep->getXLinkablePeptide(0);
+      output_file->setColumnCurrentRow(
+        (MATCH_COLUMNS_T)column_idx,
+        lpep.getXCorr());
+    } else {
+      output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 0);
+    }
     break;
   case XCORR_SECOND_COL:
-    output_file->setColumnCurrentRow(
-    (MATCH_COLUMNS_T)column_idx,
-    getScore(XCORR_SECOND));
+    if ((Params::GetInt("xlink-top-n") != 0) && 
+        (getCandidateType() == XLINK_INTER_CANDIDATE ||
+        getCandidateType() == XLINK_INTRA_CANDIDATE ||
+        getCandidateType() == XLINK_INTER_INTRA_CANDIDATE)) {
+      XLinkPeptide *xpep = (XLinkPeptide*)this;
+      XLinkablePeptide& lpep = xpep->getXLinkablePeptide(1);
+      output_file->setColumnCurrentRow(
+        (MATCH_COLUMNS_T)column_idx,
+        lpep.getXCorr());
+    } else {
+      output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 0);
+    }
     break;
   case PROTEIN_ID_X_COL:
     output_file->setColumnCurrentRow(
       (MATCH_COLUMNS_T)column_idx,
       getProteinIdXString());
     break;
-
+  case XLINK_TYPE_COL:
+    output_file->setColumnCurrentRow(
+      (MATCH_COLUMNS_T)column_idx,
+      getCandidateTypeString());
+    break;
+  case ORIGINAL_TARGET_SEQUENCE_COL:
+    if (null_peptide_ == true || Params::GetBool("concat")) {
+      string seq = getUnshuffledSequence();
+      output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, seq);
+    }
+    break;
+  case MODIFICATIONS_COL:
+    //TODO FIX!
+    break;
+  case ENZ_INT_COL:
+    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, getNumMissedCleavages());
+    break;
   default:
     Match::printOneMatchField(column_idx,
       collection,

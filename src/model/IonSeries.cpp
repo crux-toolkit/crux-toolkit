@@ -19,9 +19,11 @@
 #include "parameter.h"
 #include "Peptide.h"
 #include "util/mass.h"
-
+#include "util/GlobalParams.h"
 #include "IonFilteredIterator.h"
 #include "Spectrum.h"
+
+#include <stack>
 
 using namespace Crux;
 
@@ -29,6 +31,7 @@ static const int BINARY_GMTK = 1;
 static const int PRINT_NULL_IONS = 1;
 static const int MIN_FRAMES = 3;
 
+FLOAT_T* IonSeries::mass_matrix_ = NULL;
 
 
 /**
@@ -46,18 +49,55 @@ struct loss_limit{
 };
 
 
+//Test cache for speeding up loss limit allocations
+class LossLimitCache {
+ protected:
+  stack<LOSS_LIMIT_T*> cache_;
+ public:
+  LossLimitCache() {
+  }
+
+  ~LossLimitCache() {
+    while(!cache_.empty()) {
+      LOSS_LIMIT_T *element = cache_.top();
+      cache_.pop();
+      delete []element;
+    }
+  }
+
+  LOSS_LIMIT_T* checkout() {
+    LOSS_LIMIT_T* new_element;
+    if (cache_.empty()) {
+      new_element = new LOSS_LIMIT_T[GlobalParams::getMaxLength()];
+    } else {
+      new_element = cache_.top();
+      cache_.pop();
+    }
+    return (new_element);
+  }
+  void checkin(LOSS_LIMIT_T* array) {
+    cache_.push(array);
+  }
+
+};
+
+static LossLimitCache loss_limit_cache;
+
+
+
+
 /**
  * Initializes an (empty) ion_series object, only called by constructors.
  */
 void IonSeries::init() {
 
-  peptide_ = NULL;
+  peptide_.clear();
   modified_aa_seq_ = NULL;
-  peptide_mass_ = 0;
+  modified_aa_seq_owner_ = false;
   charge_ = 0;
   constraint_ = NULL;
   is_predicted_ = false;
-  
+  pointer_count_ = 1;
   loss_limit_ = NULL;
   peptide_length_ = 0;
 }
@@ -91,16 +131,17 @@ IonSeries::IonSeries(
 
   init();
   // copy the peptide sequence
-  peptide_ = my_copy_string(peptide.c_str());
+  peptide_ = peptide;
   convert_to_mod_aa_seq(peptide_, &(modified_aa_seq_));
-  peptide_mass_ = Peptide::calcSequenceMass(peptide_, MONO);
+  modified_aa_seq_owner_ = true;
   charge_ = charge;
   constraint_ = constraint;
-  peptide_length_ = strlen(peptide_);
+  peptide_length_ = peptide_.length();
   
   // create the loss limit array
-  loss_limit_ = 
-    (LOSS_LIMIT_T*)mycalloc(peptide_length_, sizeof(LOSS_LIMIT_T));
+  loss_limit_ = loss_limit_cache.checkout();
+  //loss_limit_ = new LOSS_LIMIT_T[GlobalParams::getMaxLength()];
+  memset(loss_limit_, 0, sizeof(LOSS_LIMIT_T) * peptide_length_);
 }
 
 /**
@@ -117,10 +158,8 @@ IonSeries::IonSeries(
   init();
   constraint_ = constraint;
   charge_ = charge;
-  // use max peptide len so loss_limit array can be used for any peptide
-  loss_limit_ = 
-    (LOSS_LIMIT_T*)mycalloc(Params::GetInt("max-length"), 
-                            sizeof(LOSS_LIMIT_T));
+  loss_limit_ = loss_limit_cache.checkout();
+  //loss_limit_ = new LOSS_LIMIT_T[GlobalParams::getMaxLength()];
 }
 
 /**
@@ -131,7 +170,7 @@ IonSeries::IonSeries(
  * peptide sequence. 
  */
 void IonSeries::update(
-  char* peptide, ///< The peptide sequence with no mod characters. -in
+  const char* peptide, ///< The peptide sequence with no mod characters. -in
   const MODIFIED_AA_T* mod_seq ///< modified version of char* sequence -in
   ) 
 {
@@ -140,19 +179,15 @@ void IonSeries::update(
   // Initialize the ion_series object for the new peptide sequence
   
   // free old peptide sequence
-  if(peptide_){
-    free(peptide_);
-  }
-  if(modified_aa_seq_){
-    free(modified_aa_seq_);
-  }
-  if(loss_limit_){
-    free(loss_limit_);
+  
+  if(modified_aa_seq_owner_ && modified_aa_seq_){
+    freeModSeq(modified_aa_seq_);
+    modified_aa_seq_owner_ = false;
   }
   
   // iterate over all ions, and free them
   for (unsigned int idx=0;idx<ions_.size();idx++) {
-    delete ions_[idx];
+    Ion::freeIon(ions_[idx]);
   }
   ions_.clear();
   
@@ -168,17 +203,26 @@ void IonSeries::update(
   // set ion_series for new instance of peptide
   
   // copy the peptide sequence
-  peptide_ = my_copy_string(peptide);
-  peptide_length_ = strlen(peptide);
-  modified_aa_seq_ = copy_mod_aa_seq(mod_seq, peptide_length_);
-  
+  peptide_ = peptide;
+  peptide_length_ = peptide_.length();
+
+  modified_aa_seq_ = (MODIFIED_AA_T*)mod_seq;
+
   // Initialize the loss limit array for the new peptide
-  loss_limit_ = 
-    (LOSS_LIMIT_T*)mycalloc(peptide_length_, sizeof(LOSS_LIMIT_T));
-  for(ion_idx =0; ion_idx < peptide_length_; ++ion_idx){
-    loss_limit_->h2o = 0;
-    loss_limit_->nh3 = 0;
-    // add more initialize count if more added
+  //carp(CARP_INFO, "loss_limit_:%d peptide_length:%d", loss_limit_, peptide_length_);
+  memset(loss_limit_, 0, sizeof(LOSS_LIMIT_T) * peptide_length_);
+}
+
+int IonSeries::incrementPointerCount() {
+  pointer_count_++;
+  return (pointer_count_);
+}
+
+void IonSeries::freeIonSeries(IonSeries* ions) {
+
+  ions->pointer_count_--;
+  if (ions->pointer_count_ <= 0) {
+    delete ions;
   }
 }
 
@@ -188,6 +232,7 @@ void IonSeries::clear() {
   }
   ions_.clear();
 
+  // initialize all specific_ions back to 0
   for(size_t ion_type_idx=0; ion_type_idx < MAX_NUM_ION_TYPE; ++ion_type_idx){
     specific_ions_[ion_type_idx].clear();
   }
@@ -197,14 +242,11 @@ void IonSeries::clear() {
  */
 IonSeries::~IonSeries()
 {
-  if(peptide_){
-    free(peptide_);
-  }
-  if(modified_aa_seq_){
+  if(modified_aa_seq_owner_ && modified_aa_seq_){
     freeModSeq(modified_aa_seq_);
   }
   if(loss_limit_){
-    free(loss_limit_);
+    loss_limit_cache.checkin(loss_limit_);
   }
   // free constraint?
 
@@ -214,6 +256,11 @@ IonSeries::~IonSeries()
     Ion::freeIon(ions_[idx]);
   }
   ions_.clear();
+
+}
+
+void IonSeries::finalize() {
+  delete []mass_matrix_;
 
 }
 
@@ -344,15 +391,11 @@ void IonSeries::printPairedGmtk(
 void IonSeries::scanForAAForNeutralLoss()
 {
   int peptide_length = peptide_length_;
-  char* sequence = peptide_;
+  string sequence = peptide_;
 
   // make sure loss_limit array is the right size
-  if (peptide_length_ != strlen(sequence)){
-    if (loss_limit_){
-      free(loss_limit_);
-    }
-    loss_limit_ = 
-      (LOSS_LIMIT_T*)mycalloc(peptide_length_, sizeof(LOSS_LIMIT_T));
+  if (peptide_length_ != sequence.length()){
+    memset(loss_limit_, 0, sizeof(LOSS_LIMIT_T) * peptide_length_);
   }
 
   int h2o_aa = 0;
@@ -407,7 +450,12 @@ FLOAT_T* IonSeries::createIonMassMatrix(
     return NULL;
   }
 
-  FLOAT_T* mass_matrix = (FLOAT_T*)mymalloc(sizeof(FLOAT_T)*(peptide_length+1));
+  if (mass_matrix_ == NULL) {
+    //Allocate the static mass_matrix_
+    mass_matrix_ = new FLOAT_T[sizeof(FLOAT_T)*(GlobalParams::getMaxLength()+1)];
+  }
+
+  FLOAT_T* mass_matrix = mass_matrix_;
   
   // at index 0, the length of the peptide is stored
   mass_matrix[0] = peptide_length;
@@ -488,12 +536,13 @@ bool IonSeries::addIonsByCharge(
   // iterate over all different charge
   for(; charge_idx <= max_charge; ++charge_idx){
     // create ion
-    ion = new Ion(ion_type, 
-                  cleavage_idx, 
-                  charge_idx, 
-                  peptide_, 
-                  constraint->getMassType(), 
-                  mass); 
+    ion = Ion::newIon();
+    ion->init(ion_type, 
+              cleavage_idx, 
+              charge_idx, 
+              peptide_, 
+              constraint->getMassType(), 
+              mass); 
     // add ion to ion series
     this->addIon(ion);
   }
@@ -816,7 +865,7 @@ bool IonSeries::generateIons(
     // add/sub thorugh all mod_type modifications!!!
     for(type_idx = type_increment; abs(type_idx) <= abs(modifications[mod_type]); ){
       // copy the src ion, into new ion
-      new_ion = new Ion();
+      new_ion = Ion::newIon();
       Ion::copy(working_ion, new_ion, working_ion->getPeptideSequence());
       
       // add the modification to the new ion
@@ -873,8 +922,8 @@ bool IonSeries::generateIonsFlank()
     // add/sub thorugh all mod_type modifications!!!
     for(type_idx = type_increment; type_idx <= modifications[FLANK]; type_idx += type_increment){
       // copy the src ion, into new ion
-      new_ion = new Ion();
-      new_ion2 = new Ion();
+      new_ion = Ion::newIon();
+      new_ion2 = Ion::newIon();
       Ion::copy(working_ion, new_ion, working_ion->getPeptideSequence());
       Ion::copy(working_ion, new_ion2, working_ion->getPeptideSequence());
       
@@ -962,8 +1011,6 @@ void IonSeries::predictIons()
   
   // ion series now been predicted
   is_predicted_ = true;
-  // free mass matrix
-  free(mass_matrix);
 
 }
 
@@ -974,13 +1021,14 @@ void IonSeries::predictIons()
  */
 void IonSeries::copy(
   IonSeries* src,///< ion to copy from -in
-  IonSeries* dest///< ion to copy to -out
+  IonSeries* dest,///< ion to copy to -out
+  bool create_ions ///< should we create new ions or copy the pointers?
   )
 {
   Ion* src_ion = NULL;
   Ion* dest_ion = NULL;
   
-  dest->peptide_ = my_copy_string(src->peptide_);
+  dest->peptide_ = src->peptide_;
   dest->charge_ = src->charge_;
   dest->peptide_length_ = src->peptide_length_;
   //mod seq???
@@ -996,8 +1044,13 @@ void IonSeries::copy(
 
     src_ion = *iterator;
     // add ion
-    dest_ion = new Ion();
-    Ion::copy(src_ion, dest_ion, dest->peptide_);
+    if (create_ions) {
+      dest_ion = Ion::newIon();
+      Ion::copy(src_ion, dest_ion, dest->peptide_);
+    }  else {
+      dest_ion = src_ion;
+      
+    }
     dest->addIon(dest_ion);
   }
 
@@ -1069,7 +1122,7 @@ int IonSeries::getPeptideLength()
  * User should not free the peptide sequence seperate from the ion_series
  *\returns a pointer to the original parent peptide sequence of the ion_series object
  */
-char* IonSeries::getPeptide()
+string& IonSeries::getPeptide()
 {
   return peptide_;
 }
@@ -1082,11 +1135,7 @@ void IonSeries::setPeptide(
   char* peptide///< the peptide sequence to set -in
   )
 {
-  // free previous sequence
-  if(peptide_ != NULL){
-    free(peptide_);
-  }
-  peptide_ = my_copy_string(peptide);
+  peptide_ = peptide;
 }
 
 /**
