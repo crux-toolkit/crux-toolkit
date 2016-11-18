@@ -8,7 +8,7 @@
 
 #include "objects.h"
 #include "model/Peptide.h"
-
+#include "util/CacheableMass.h"
 #include <vector>
 #include <string>
 
@@ -18,15 +18,20 @@
  * \class XLinkablePeptide
  * \brief object for finding and defining the link sites on a peptide
  */
-class XLinkablePeptide {
-
+class XLinkablePeptide : public CacheableMass {
  protected:
   Crux::Peptide* peptide_; ///< the peptide object of this XLinkablePeptide (can be null)
+  XLinkablePeptide* decoy_; ///< a saved decoy of the XLinkablePeptide.
   char* sequence_; ///< the sequence 
   std::vector<int> link_sites_; ///< the sequence indices where linking is possible
   bool is_decoy_; //Is this from the decoy database?
+  size_t xcorr_link_idx_;
+  FLOAT_T xcorr_;
+  int index_;
 
   MODIFIED_AA_T* mod_seq_;
+
+  int predict_ions_call_count_;
   /**
    * Initialize object
    */
@@ -68,13 +73,14 @@ class XLinkablePeptide {
    */
   XLinkablePeptide(
     Crux::Peptide* peptide, ///< the peptide object 
-    XLinkBondMap& bondmap ///< the bond map
+    XLinkBondMap& bondmap, ///< the bond map
+    int additional_cleavages = 0 ///< 1 - for selfloop peptides
   );
   
   /**
    * Default destructor
    */
-  virtual ~XLinkablePeptide() {}
+  virtual ~XLinkablePeptide();
  
   /**
    * given a peptide and a XLinkBondMap object,
@@ -83,8 +89,11 @@ class XLinkablePeptide {
   static void findLinkSites(
     Crux::Peptide* peptide,  ///< the peptide object -in
     XLinkBondMap& bondmap,  ///< the bond map -in 
-    std::vector<int>& link_sites ///< the found link sites -out
+    std::vector<int>& link_sites, ///< the found link sites -out
+    int additional_cleavages=0 ///< 0 for xlinks, 1 for selfloops
   );
+
+  void clearSites();
 
   /**
    * \returns whether a link at this index in the sequence
@@ -128,6 +137,9 @@ class XLinkablePeptide {
    * \returns the shuffled XlinkablePeptide
    */
   XLinkablePeptide shuffle();
+
+  XLinkablePeptide* getCachedDecoy();
+  
 
   /**
    * \returns the number of link sites on this peptide
@@ -187,14 +199,14 @@ class XLinkablePeptide {
   /**
    * \returns the mass of the xlinkable peptide
    */
-  FLOAT_T getMass(
-    MASS_TYPE_T mass_type = MONO ///< MONO or AVERAGE
-  ) const;
+  virtual FLOAT_T calcMass(
+    MASS_TYPE_T mass_type=MONO ///< MONO or AVERAGE
+  );
 
   /**
    * \returns an allocated sequence c-string.  Must be freed
    */
-  char* getSequence();
+  const char* getSequence();
 
   /**
    * \returns the allocated modified sequence. Must be freed.
@@ -215,6 +227,16 @@ class XLinkablePeptide {
     FLOAT_T mod_mass,
     bool clear = true
     );
+
+  FLOAT_T getXCorr() const;  
+  void setXCorr( 
+    size_t link_idx,
+    FLOAT_T xcorr
+  );
+
+  bool hasXCorr() const;
+  
+  
   /**
    * Is the linkable peptide modified?
    */
@@ -225,12 +247,32 @@ class XLinkablePeptide {
   bool operator < (
     XLinkablePeptide other ///< the other XLinkablePeptide to compare to.
   ) const;
+
+  void setIndex(int idx) {index_ = idx;}
+  int getIndex() {return index_;}
+
   
 };
 
 bool compareXLinkablePeptideMass(const XLinkablePeptide& xpep1, const XLinkablePeptide& xpep2);
+bool compareXLinkablePeptideMassToFLOAT(
+  const XLinkablePeptide& xpep1, 
+  const FLOAT_T& mass);
+
+bool compareXLinkablePeptideMassToFLOAT2(
+					 const FLOAT_T& mass,
+					 const XLinkablePeptide& xpep1);
 
 
+bool compareXLinkableXCorr(
+  const XLinkablePeptide& xpep1,
+  const XLinkablePeptide& xpep2
+  );
+
+bool compareXLinkableXCorrPtr(
+  const XLinkablePeptide* xpep1,
+  const XLinkablePeptide* xpep2
+  );
 
 #endif
 

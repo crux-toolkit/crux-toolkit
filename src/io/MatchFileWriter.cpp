@@ -97,6 +97,8 @@ void MatchFileWriter::setPrecision() {
     case DELTA_CN_COL:
     case SP_SCORE_COL:
     case XCORR_SCORE_COL:
+    case XCORR_FIRST_COL:
+    case XCORR_SECOND_COL:
     case EVALUE_COL:
     case PVALUE_COL:
     case WEIBULL_QVALUE_COL:
@@ -235,6 +237,16 @@ void MatchFileWriter::addColumnNames(CruxApplication* application,
       addColumnName(SHIFT_COL);
       addColumnName(CORR_COL);
     }
+    if ((!Params::GetBool("use-old-xlink")) && 
+        (Params::GetInt("xlink-top-n") != 0)) {
+      addColumnName(XCORR_FIRST_COL);
+      addColumnName(XCORR_SECOND_COL);
+    }
+    if (!Params::GetBool("use-old-xlink")) {
+      addColumnName(ENZ_INT_COL);  
+    }
+    
+    addColumnName(XLINK_TYPE_COL);
     break;
 
   case SPECTRAL_COUNTS_COMMAND:

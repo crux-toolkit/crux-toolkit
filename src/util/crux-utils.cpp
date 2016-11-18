@@ -1281,8 +1281,13 @@ void fit_three_parameter_weibull(
 
     fit_two_parameter_weibull(data, fit_data_points, total_data_points, 
                               cur_shift, &cur_eta, &cur_beta, &cur_correlation);
-
-    if (cur_correlation > best_correlation) {
+    //According to the definition of the weibull distribution,
+    //https://en.wikipedia.org/wiki/Weibull_distribution
+    //the eta and beta parameters both have to be >0.
+    //Put in a check here so that any fit needs to satisfy these constraints
+    //In order to be considered.
+    //SJM 2016_03_03
+    if (cur_beta > 0 && cur_eta > 0 && cur_correlation > best_correlation){
       best_eta = cur_eta;
       best_beta = cur_beta;
       best_shift = cur_shift;
@@ -1303,6 +1308,7 @@ void fit_three_parameter_weibull(
     *beta = 0.0;
     *shift = 0.0;
   }
+  carp(CARP_DEBUG, "e:%g b:%g s:%g c:%g", *eta, *beta, *shift, *correlation);
 }
 
 /**
