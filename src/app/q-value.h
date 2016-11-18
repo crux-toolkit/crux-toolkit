@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include "io/carp.h"
 #include "util/crux-utils.h"
-#include "objects.h"
+#include "model/objects.h"
 #include "parameter.h"
 #include "model/Protein.h"
 #include "model/Peptide.h"

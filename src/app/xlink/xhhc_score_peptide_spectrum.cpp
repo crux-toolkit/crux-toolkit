@@ -9,7 +9,6 @@
 #include "SelfLoopPeptide.h"
 #include "XLinkScorer.h"
 
-#include "objects.h"
 #include "model/IonConstraint.h"
 #include "model/Scorer.h"
 #include "io/SpectrumCollectionFactory.h"

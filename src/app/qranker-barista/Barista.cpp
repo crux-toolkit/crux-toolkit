@@ -1,5 +1,5 @@
 #include "Barista.h"
-#include "objects.h"
+#include "model/objects.h"
 #include "app/ComputeQValues.h"
 #include "util/Params.h"
 

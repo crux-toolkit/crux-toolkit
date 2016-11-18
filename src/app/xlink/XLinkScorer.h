@@ -7,7 +7,7 @@
 
 #ifndef XLINKSCORER_H_
 #define XLINKSCORER_H_
-#include "objects.h"
+#include "model/objects.h"
 #include "XLinkMatch.h"
 
 class XLinkScorer {

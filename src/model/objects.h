@@ -4,8 +4,8 @@
  * $Revision: 1.62 $
  * \brief The defined objects
  *****************************************************************************/
-#ifndef OBJECTS_H 
-#define OBJECTS_H
+#ifndef CRUX_OBJECTS_H 
+#define CRUX_OBJECTS_H
 
 #include <stdio.h>
 #include <vector>

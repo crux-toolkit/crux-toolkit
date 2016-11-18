@@ -11,7 +11,7 @@
 #ifndef CACHEABLEMASS_H_
 #define CACHEABLEMASS_H_
 
-#include "objects.h"
+#include "model/objects.h"
 
 class CacheableMass {
 

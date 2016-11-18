@@ -14,7 +14,7 @@
 #include "Weibull.h"
 
 //CRUX INCLUDES
-#include "objects.h"
+#include "model/objects.h"
 #include "model/FilteredSpectrumChargeIterator.h"
 #include "io/OutputFiles.h"
 #include "io/SpectrumCollectionFactory.h"

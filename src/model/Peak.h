@@ -18,7 +18,7 @@
 #include <stdlib.h>
 #include "util/utils.h"
 #include <vector>
-#include "objects.h"
+#include "model/objects.h"
 
 class Peak {
 public:

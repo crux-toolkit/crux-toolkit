@@ -6,7 +6,7 @@
 #include "SelfLoopPeptide.h"
 #include "XLinkPeptide.h"
 
-#include "objects.h"
+#include "model/objects.h"
 #include "model/Scorer.h"
 #include "model/IonSeries.h"
 #include "model/Ion.h"

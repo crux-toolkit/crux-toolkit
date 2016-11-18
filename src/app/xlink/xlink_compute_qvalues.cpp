@@ -7,7 +7,7 @@
 
 #include "util/crux-utils.h"
 #include "util/Params.h"
-#include "objects.h"
+#include "model/objects.h"
 #include "model/Scorer.h"
 #include "io/DelimitedFile.h"
 #include "io/MatchColumns.h"

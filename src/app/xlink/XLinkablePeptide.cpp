@@ -8,7 +8,7 @@
 
 #include "XLinkIonSeriesCache.h"
 
-#include "objects.h"
+#include "model/objects.h"
 #include "util/modifications.h"
 #include "util/Params.h"
 #include "util/GlobalParams.h"

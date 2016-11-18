@@ -26,7 +26,7 @@ using namespace std;
 #include "TabDelimParser.h"
 #include "app/CruxApplication.h"
 #include "util/mass.h"
-#include "objects.h"
+#include "model/objects.h"
 
 double* compute_PEP(double* target_scores, ///< scores for target matches
   int num_targets,       ///< size of target_scores
