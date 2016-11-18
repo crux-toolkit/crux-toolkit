@@ -8,7 +8,7 @@
 #define XLINKMATCHCOLLECTION_H_
 
 /* Crux Includes */
-#include "objects.h"
+#include "model/objects.h"
 #include "model/MatchCollection.h"
 #include "model/Database.h"
 #include "model/Spectrum.h"

@@ -8,7 +8,7 @@
 #define CRUX_SPECTRUM_COLLECTION_H
 
 #include <stdio.h>
-#include "objects.h"
+#include "model/objects.h"
 #include "model/Spectrum.h"
 
 #include <deque>

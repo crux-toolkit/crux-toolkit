@@ -2,7 +2,7 @@
 #include <set>
 #include <vector>
 #include <string>
-#include "objects.h"
+#include "model/objects.h"
 
 class Weibull {
     

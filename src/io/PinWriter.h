@@ -8,7 +8,7 @@
 #include <set>
 #include <string>
 #include <vector>
-#include "objects.h"
+#include "model/objects.h"
 #include "model/Spectrum.h"
 #include "util/mass.h"
 #include "model/Match.h"

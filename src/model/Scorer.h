@@ -19,7 +19,7 @@
 #ifdef _MSC_VER
 #include "util/windirent.h"
 #endif
-#include "objects.h"
+#include "model/objects.h"
 #include "model/Spectrum.h"
 #include "model/Peptide.h"
 #include "model/Ion.h"

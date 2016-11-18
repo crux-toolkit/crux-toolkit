@@ -26,7 +26,7 @@
 #include "model/Database.h"
 #include "model/DatabaseProteinIterator.h"
 #include "parameter.h"
-#include "objects.h"
+#include "model/objects.h"
 #include "util/crux-utils.h"
 #include "model/Ion.h"
 

@@ -9,7 +9,7 @@
 
 #include <stdio.h>
 #include <vector>
-#include "objects.h"
+#include "model/objects.h"
 #include "Peptide.h"
 #include "Ion.h"
 #include "IonConstraint.h"

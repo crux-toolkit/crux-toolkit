@@ -25,7 +25,7 @@
 #include "util/utils.h"
 #include "util/crux-utils.h"
 #include "io/carp.h"
-#include "objects.h"
+#include "model/objects.h"
 
 #include "util/modifications.h"
 

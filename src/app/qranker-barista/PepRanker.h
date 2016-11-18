@@ -27,7 +27,7 @@ using namespace std;
 #include "TabDelimParser.h"
 #include "app/CruxApplication.h"
 #include "util/mass.h"
-#include "objects.h"
+#include "model/objects.h"
 
 class PepRanker: public CruxApplication
 {

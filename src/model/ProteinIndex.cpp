@@ -12,7 +12,6 @@
 #include "Protein.h"
 #include "Database.h"
 #include "io/carp.h"
-#include "objects.h"
 #include "PeptideConstraint.h"
 #include "ProteinIndex.h"
 #include "util/WinCrux.h"

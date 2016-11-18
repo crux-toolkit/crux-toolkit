@@ -1,4 +1,4 @@
-#include "objects.h"
+#include "model/objects.h"
 #include "model/Peptide.h"
 #include "model/Database.h"
 #include "XLinkablePeptide.h"

@@ -7,7 +7,7 @@
 
 #include <assert.h>
 #include "util/utils.h"
-#include "objects.h"
+#include "model/objects.h"
 #include "io/carp.h"
 
 /**
