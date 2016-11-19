@@ -152,7 +152,7 @@ def runSearch(outputDirectory, searchName, searchParam, database,
              % (CRUX, outputDirectory, psmFile), percolatorFile)
 
   qFile = "%s/%s.percolator.q.txt" % (outputDirectory, searchName)
-  extractData(percolatorFile, "percolator q-value", qFile)
+  extractData(percolatorFile, "q-value", qFile)
 
   qrankerFile = "%s/q-ranker.target.psms.txt" % outputDirectory
   runCommand("%s q-ranker --decoy-prefix decoy_ --output-dir %s %s %s"
