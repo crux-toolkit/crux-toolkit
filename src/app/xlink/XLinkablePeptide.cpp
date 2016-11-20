@@ -6,8 +6,12 @@
  ****************************************************************************/
 #include "XLinkablePeptide.h"
 
+#include "XLinkIonSeriesCache.h"
+
+#include "model/objects.h"
 #include "util/modifications.h"
 #include "util/Params.h"
+#include "util/GlobalParams.h"
 #include "model/Ion.h"
 #include "model/IonSeries.h"
 
@@ -26,7 +30,10 @@ void XLinkablePeptide::init() {
   sequence_ = NULL;
   is_decoy_ = false;
   link_sites_.clear();
-  
+  xcorr_link_idx_ = -1;
+  predict_ions_call_count_ = 0;
+  index_ = -1;
+  mod_seq_ = NULL;
 }
 
 /**
@@ -52,26 +59,42 @@ XLinkablePeptide::XLinkablePeptide(
   const XLinkablePeptide& xlinkablepeptide
   ) {
   init();
-  if (xlinkablepeptide.peptide_) {
-    peptide_ = xlinkablepeptide.peptide_->copyPtr();
-  } else {
-    sequence_ = xlinkablepeptide.sequence_;
-  }
+  peptide_ = xlinkablepeptide.peptide_->copyPtr();
   is_decoy_ = xlinkablepeptide.is_decoy_;
   link_sites_ = xlinkablepeptide.link_sites_;
+  xcorr_link_idx_ = xlinkablepeptide.xcorr_link_idx_;
+  xcorr_ = xlinkablepeptide.xcorr_;
+  index_ = xlinkablepeptide.index_;
+  for (size_t idx=0;idx<NUMBER_MASS_TYPES;idx++) {
+    if (xlinkablepeptide.mass_calculated_[idx]) {
+      mass_[idx] = xlinkablepeptide.mass_[idx];
+      mass_calculated_[idx] = true;
+    } else {
+      mass_calculated_[idx] = false;
+    }
+  }
 }
 
 XLinkablePeptide::XLinkablePeptide(
   XLinkablePeptide& xlinkablepeptide
 ) {
   init();
-  if (xlinkablepeptide.peptide_) {
-    peptide_ = xlinkablepeptide.peptide_->copyPtr();
-  } else {
-    sequence_ = xlinkablepeptide.sequence_;
-  }
+  peptide_ = xlinkablepeptide.peptide_->copyPtr();
   is_decoy_ = xlinkablepeptide.is_decoy_;
   link_sites_ = xlinkablepeptide.link_sites_;
+  xcorr_link_idx_ = xlinkablepeptide.xcorr_link_idx_;
+  xcorr_ = xlinkablepeptide.xcorr_;
+  index_ = xlinkablepeptide.index_;
+    for (size_t idx=0;idx<NUMBER_MASS_TYPES;idx++) {
+    if (xlinkablepeptide.mass_calculated_[idx]) {
+      mass_[idx] = xlinkablepeptide.mass_[idx];
+      mass_calculated_[idx] = true;
+    } else {
+      mass_calculated_[idx] = false;
+    }
+  }  
+
+
 }
 
 /**
@@ -96,11 +119,19 @@ XLinkablePeptide::XLinkablePeptide(
  */
 XLinkablePeptide::XLinkablePeptide(
   Peptide* peptide, ///< the peptide object 
-  XLinkBondMap& bondmap ///< the bond map
+  XLinkBondMap& bondmap, ///< the bond map
+  int additional_cleavages
   ) {
   init();
   peptide_ = peptide->copyPtr();
-  findLinkSites(peptide_, bondmap, link_sites_);
+  findLinkSites(peptide_, bondmap, link_sites_, additional_cleavages);
+}
+
+XLinkablePeptide::~XLinkablePeptide() {
+  //cerr <<"XLinkablePeptide::~XLinkablePeptide"<<endl;
+  if (mod_seq_ != NULL) {
+    freeModSeq(mod_seq_);
+  }
 }
 
 
@@ -125,7 +156,7 @@ bool XLinkablePeptide::linkSeqPreventsCleavage(
 
       char aa = peptide->getSequencePointer()[seq_idx];
 
-      string xlink_prevents_cleavage = Params::GetString("xlink-prevents-cleavage");
+      const string& xlink_prevents_cleavage = GlobalParams::getXLinkPreventsCleavage();
       for (string::const_iterator i = xlink_prevents_cleavage.begin();
            i != xlink_prevents_cleavage.end();
            i++) {
@@ -198,12 +229,13 @@ bool XLinkablePeptide::isCleavageSite(
 void XLinkablePeptide::findLinkSites(
   Peptide* peptide,  ///< the peptide object -in
   XLinkBondMap& bondmap,  ///< the bond map -in 
-  vector<int>& link_sites ///< the found link sites -out
+  vector<int>& link_sites, ///< the found link sites -out
+  int additional_cleavages ///< 0 for xlink, 1 for self-loops
   ) {
 
   int missed_cleavages = getMissedCleavageSites(peptide);
-  int max_missed_cleavages = Params::GetInt("missed-cleavages")+
-    2; // +2 because a self loop can prevent two cleavages from happening
+  int max_missed_cleavages = GlobalParams::getMissedCleavages() +
+    additional_cleavages; // +1 because a self loop can prevent two cleavages from happening
 
   link_sites.clear();
 
@@ -271,7 +303,7 @@ void XLinkablePeptide::findLinkSites(
       }
     }
   }
-  free(mod_seq);
+  freeModSeq(mod_seq);
 }
 
 /**
@@ -352,6 +384,12 @@ int XLinkablePeptide::addLinkSite(
   return link_sites_.size()-1;
 }
 
+
+void XLinkablePeptide::clearSites() {
+  link_sites_.clear();
+}
+
+
 /**
  * \returns the peptide object associated with this XLinkablePeptide
  */
@@ -362,9 +400,9 @@ Peptide* XLinkablePeptide::getPeptide() {
 /**
  * \returns the mass of the xlinkable peptide
  */
-FLOAT_T XLinkablePeptide::getMass(
+FLOAT_T XLinkablePeptide::calcMass(
   MASS_TYPE_T mass_type
-  ) const {
+  ) {
   if (peptide_ == NULL) {
     return Peptide::calcSequenceMass(sequence_, mass_type);
   } else {
@@ -375,12 +413,11 @@ FLOAT_T XLinkablePeptide::getMass(
 /**
  * \returns an allocated sequence c-string.  Must be freed
  */
-char* XLinkablePeptide::getSequence() {
+const char* XLinkablePeptide::getSequence() {
   if (peptide_ == NULL) {
-    return my_copy_string(sequence_);
+    return(sequence_);
   } else {
-    char* seq = peptide_->getSequence();
-    return seq;
+    return(peptide_->getSequence());
   }
 }
 
@@ -525,9 +562,24 @@ XLinkablePeptide XLinkablePeptide::shuffle() {
   }
   //cerr<<"Creating new linkable peptide"<<endl;
   XLinkablePeptide ans(peptide, link_sites);
-  //cerr <<"XLinkablePeptide::shufle():done."<<endl;
+  for (size_t idx=0;idx<NUMBER_MASS_TYPES;idx++) {
+    if (mass_calculated_[idx]) {
+      ans.mass_calculated_[idx] = true;
+      ans.mass_[idx] = mass_[idx];
+    }
+  }
+  ans.is_decoy_ = true;
   return ans;
 } 
+
+XLinkablePeptide* XLinkablePeptide::getCachedDecoy() {
+  if (decoy_ == NULL) {
+    
+    decoy_ = new XLinkablePeptide(shuffle());
+  }
+  return decoy_;
+}
+
 
 /*
 string getAASequence() {
@@ -553,14 +605,64 @@ bool XLinkablePeptide::isModified() {
   return peptide_->isModified();
 }
 
+void XLinkablePeptide::setXCorr(size_t link_idx, FLOAT_T xcorr) {
+
+  xcorr_link_idx_ = link_idx;
+  xcorr_ = xcorr;
+
+}
+
+FLOAT_T XLinkablePeptide::getXCorr() const {
+  if (xcorr_link_idx_ != -1) {
+    return xcorr_;
+  }
+  carp(CARP_FATAL, "Xcorr not set!");
+  return 0;
+
+}
+
+bool XLinkablePeptide::hasXCorr() const {
+  //return (xcorr_link_idx_ != -1);
+  return false;
+}
+
+
+bool compareXLinkableXCorr(
+  const XLinkablePeptide& xpep1,
+  const XLinkablePeptide& xpep2
+  ) {
+  return xpep1.getXCorr() > xpep2.getXCorr();
+}
+
+bool compareXLinkableXCorrPtr(
+  const XLinkablePeptide* xpep1,
+  const XLinkablePeptide* xpep2
+  ) {
+  return xpep1 -> getXCorr() > xpep2 -> getXCorr();
+}
+
+
 
 bool compareXLinkablePeptideMass(
   const XLinkablePeptide& xpep1,
   const XLinkablePeptide& xpep2
 ) {
 
-  return xpep1.getMass() < xpep2.getMass();
+  return xpep1.getMassConst(MONO) < xpep2.getMassConst(MONO);
 }
+
+bool compareXLinkablePeptideMassToFLOAT(
+					const XLinkablePeptide& xpep1,
+					const FLOAT_T& mass) {
+  return xpep1.getMassConst(MONO) < mass;
+}
+
+bool compareXLinkablePeptideMassToFLOAT2(
+					 const FLOAT_T& mass,
+					 const XLinkablePeptide& xpep1) {
+  return xpep1.getMassConst(MONO) > mass;
+}
+
 /**
  * \returns whether the peptide is less than (by lexical modified sequence)
  */
@@ -582,12 +684,11 @@ void XLinkablePeptide::predictIons(
   ) {
   IonSeries* cached_ions = NULL;
   bool cached = false;
-  /* TODO UNCOMMENT WHEN XLINKIONSERIESCACHE is in the trunk
-  if (get_boolean_parameter("xlink-use-ion-cache")) {
+  if (GlobalParams::getXLinkUseIonCache()) {
+
     cached_ions = XLinkIonSeriesCache::getXLinkablePeptideIonSeries(*this, charge);
     bool cached = cached_ions != NULL;
   }
-  */
   if (!cached) {
     cached_ions = new IonSeries(ion_series->getIonConstraint(), charge);
     cached_ions->update(getSequence(), getModifiedSequencePtr());
@@ -598,16 +699,18 @@ void XLinkablePeptide::predictIons(
   if (clear) {
     ion_series->clear();
   }
+  //modify the necessary ions and add to the ion_series
+  IonIterator eiter = cached_ions->end();
   for (IonIterator ion_iter = cached_ions->begin(); 
-    ion_iter != cached_ions->end(); 
+    ion_iter != eiter; 
     ++ion_iter) { 
     Ion* src_ion = *ion_iter; 
     Ion* ion = src_ion;
     unsigned int cleavage_idx = ion->getCleavageIdx(); 
     if (ion->isForwardType()) { 
       if (cleavage_idx > (unsigned int)link_pos) {
-        ion = new Ion();
-        Ion::copy(src_ion, ion, (char *)"");
+        ion = Ion::newIon();
+	Ion::copy(src_ion, ion, "");
         FLOAT_T mass = ion->getMassFromMassZ() + mod_mass;
         ion->setMassZFromMass(mass); 
         if (isnan(ion->getMassZ())) { 
@@ -616,8 +719,8 @@ void XLinkablePeptide::predictIons(
       } 
     } else { 
       if (cleavage_idx >= (seq_len-(unsigned int)link_pos)) { 
-        ion = new Ion();
-        Ion::copy(src_ion, ion, (char *)"");
+        ion = Ion::newIon();
+	Ion::copy(src_ion, ion, "");
         FLOAT_T mass = ion->getMassFromMassZ() + mod_mass;
         ion->setMassZFromMass(mass); 
         if (isnan(ion->getMassZ())) { 

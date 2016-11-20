@@ -25,10 +25,8 @@ class XLinkPeptide : public XLinkMatch {
   std::vector<XLinkablePeptide> linked_peptides_; ///< contains the two peptides in the match
   std::vector<int> link_pos_idx_; ///< contains the link positions for the two peptides
   
-  bool mass_calculated_[NUMBER_MASS_TYPES]; ///< indicator determining whether the mass has been calculated already
-  FLOAT_T mass_[NUMBER_MASS_TYPES]; ///< hold the mass of the xlink peptide
+  XLinkPeptide* target_;
   
-  bool is_decoy_; ///< indicates whether the peptide is a decoy
   static FLOAT_T pmin_;  ///< contains the minimum mass that a peptide from a crosslink product can take
   static bool pmin_set_; ///< has the pmin been set?
   /**
@@ -40,14 +38,15 @@ class XLinkPeptide : public XLinkMatch {
  
   /*
    * Iterates through all linkable sites and adds valid xlink peptide candidates
+   * \returns the number of candidates added.
    */
-  static void addXLinkPeptides(
+  static int addXLinkPeptides(
     XLinkablePeptide& pep1, ///< First linkable peptide
     XLinkablePeptide& pep2, ///< Second linkable peptide
-    XLinkBondMap& bondmap, ///< bondmap describing valid linkages
     XLinkMatchCollection& candidates ///< XLinkable Candidates -out
   );
 
+  virtual bool isDecoy();
 
  public:
   
@@ -87,6 +86,12 @@ class XLinkPeptide : public XLinkMatch {
    */
   void doSort();
 
+  int getLinkIdx(
+    int peptide_idx ///< 0 - first peptide, 1 -second peptide
+  );
+
+  
+  
   /**
    * \returns whether the cross-link is from peptides from two different
    * proteins
@@ -121,41 +126,24 @@ class XLinkPeptide : public XLinkMatch {
    * adds crosslink candidates to the XLinkMatchCollection using
    * the passed in iterator for the 1st peptide
    */
-  static void addCandidates(
+  static int addCandidates(
     FLOAT_T min_mass, ///< min mass of crosslinks
     FLOAT_T max_mass, ///< max mass of crosslinks
-    XLinkBondMap& bondmap, ///< valid crosslink map
-    Database* database, ///< protein database
-    PEPTIDE_MOD_T* peptide_mod2, ///< modifications for the second peptide
-    bool decoy2, ///< is the second peptide a decoy?
-    XLinkablePeptideIterator& iter1, ///< 1st peptide iterator
+    vector<XLinkablePeptide>&, ///< 1st peptide iterator
     XLinkMatchCollection& candidates ///< candidates in/out
     );
 
   /**
    * adds crosslink candidates by iterating through all possible masses
    */
-  static void addCandidates(
+  static int addCandidates(
+			    Crux::Spectrum* spectrum,
+			    FLOAT_T precursor_mass,
+			    int precursor_charge,
     FLOAT_T min_mass, ///< min mass of crosslinks
     FLOAT_T max_mass, ///< max mass of crosslinks
-    XLinkBondMap& bondmap, ///< valid crosslink map
-    Database* database, ///< protein database
-    PEPTIDE_MOD_T** peptide_mods, ///< available variable mods
-    int num_peptide_mods, ///< number of available modifications
+			    bool decoy,
     XLinkMatchCollection& candidates ///< candidates -in/out
-    );
-
-  /**
-   * Gets all peptides that are linkable, i.e. have link sites
-   */
-  static void addLinkablePeptides(
-    double min_mass, ///< min mass of peptides
-    double max_mass, ///< max mass of peptides
-    Database* database, ///< protein database 
-    PEPTIDE_MOD_T* peptide_mod, ///< modifications
-    bool is_decoy, ///< are the peptides decoys
-    XLinkBondMap& bondmap, ///<valid crosslink map
-    std::vector<XLinkablePeptide>& linkable_peptides ///< list of linkable peptides -out
     );
 
   /**
@@ -168,6 +156,8 @@ class XLinkPeptide : public XLinkMatch {
    */
   virtual std::string getSequenceString();
   
+  virtual std::string getUnshuffledSequence();
+  
   /**
    * \returns the mass of the xlink peptide
    */
@@ -178,7 +168,9 @@ class XLinkPeptide : public XLinkMatch {
   /**
    * \returns a shuffled xlink peptide
    */
-  virtual XLinkMatch* shuffle();
+  virtual void shuffle(
+    std::vector<XLinkMatch*>& decoys
+  );
 
   /**
    * fills the ion series with the predicted ions for the cross linked candidate

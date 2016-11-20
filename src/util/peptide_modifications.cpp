@@ -236,7 +236,7 @@ int generate_peptide_mod_list_TESTER(
         (QSORT_COMPARE_METHOD)compare_peptide_mod_num_aa_mods);
 
   // find the index of the first peptide mod with too many aa mods
-  int max = Params::GetInt("max-mods");
+  int max = 1; //Params::GetInt("max-mods");
   // should use binary search...
   int mod_idx = 0;
   for(mod_idx = 0; mod_idx < final_counter; mod_idx++) {

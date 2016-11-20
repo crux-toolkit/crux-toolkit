@@ -18,10 +18,9 @@
 
 class SelfLoopPeptide : public XLinkMatch {
  protected:
-
+  SelfLoopPeptide* target_;
   XLinkablePeptide linked_peptide_; ///< linkable peptide
   std::vector<int> link_pos_idx_; ///< the two link indices on the peptide
-  bool is_decoy_; ///< indicate whether this is a decoy
  public:
   
   /**
@@ -65,10 +64,7 @@ class SelfLoopPeptide : public XLinkMatch {
   static void addCandidates(
     FLOAT_T min_mass, ///< min mass
     FLOAT_T max_mass, ///< max mass
-    XLinkBondMap& bondmap,  ///< valid link sites
-    Database* database, ///< protein database
-    PEPTIDE_MOD_T** peptide_mods, ///< allowable modifications
-    int num_peptide_mods, ///< number of allowable modifications
+    bool is_decoy,
     XLinkMatchCollection& candidates ///< collection to add candidates
     );
 
@@ -92,7 +88,9 @@ class SelfLoopPeptide : public XLinkMatch {
   /**
    * \returns a shuffled version of self-loop candidate
    */
-  virtual XLinkMatch* shuffle();
+  virtual void shuffle(
+    std::vector<XLinkMatch*>& decoys
+  );
   
   /**
    *  Predictes the ions for the self loop candidate
@@ -125,8 +123,20 @@ class SelfLoopPeptide : public XLinkMatch {
    *\returns whether the peptide is modified by a variable mod
    */
   virtual bool isModified();
+  
+  
+  virtual std::string getUnshuffledSequence();
+  
+  SelfLoopPeptide* getUnshuffledTarget();
+  
 
 };
+
+bool compareSelfLoopPeptideMass(
+				const SelfLoopPeptide& spep1,
+				const SelfLoopPeptide& spep2);
+bool compareSelfLoopPeptideMassToFLOAT(const SelfLoopPeptide& spep1, FLOAT_T mass);
+
 
 #endif
 

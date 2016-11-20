@@ -21,7 +21,6 @@ class LinearPeptide : public XLinkMatch {
 
   Crux::Peptide* peptide_; ///< Peptide this linear peptide referes to
   char* sequence_; ///< sequence of the peptide
-  bool is_decoy_; ///< indicator of whether the peptide is a decoy or not
  public:
   /**
    * Default constructor
@@ -45,7 +44,7 @@ class LinearPeptide : public XLinkMatch {
   /**
    * Default destructor
    */
-  virtual ~LinearPeptide() {}
+  virtual ~LinearPeptide();
   
   /**
    *Add candidates to the XLinkMatchCollection that are linear
@@ -53,9 +52,7 @@ class LinearPeptide : public XLinkMatch {
   static void addCandidates(
     FLOAT_T min_mass, ///< min mass
     FLOAT_T max_mass, ///< max mass
-    Database* database, ///< protein database
-    PEPTIDE_MOD_T** peptide_mods, ///< modifications peptide can take
-    int num_peptide_mods, ///< Number of possible peptide mods
+    bool is_decoy,
     XLinkMatchCollection& candidates ///< Vector of possible candidate -inout
     );
 
@@ -79,8 +76,10 @@ class LinearPeptide : public XLinkMatch {
   /**
    *\returns a shuffled version of the peptide
    */
-  virtual XLinkMatch* shuffle();
-  
+  virtual void shuffle(
+    std::vector<XLinkMatch*>& decoys
+  );
+
   /**
    * predicts the ions for this peptide
    */
@@ -114,6 +113,27 @@ class LinearPeptide : public XLinkMatch {
   virtual bool isModified();
 
 };
+
+/**
+ * Comparison function of two linear peptide masses
+ */
+bool compareLinearPeptideMass(
+  const LinearPeptide& xpep1, ///< linear peptide 1
+  const LinearPeptide& xpep2  ///< linear peptide 2
+  );
+
+/**
+ * Comparison functions for lower_bound and upper_bound
+ */
+bool compareLinearPeptideMassToFLOAT(
+  const LinearPeptide& xpep1, 
+  FLOAT_T mass
+  );
+
+
+bool compareFLOATToLinearPeptideMass(
+  const FLOAT_T& mass,
+  const LinearPeptide& pep1);
 
 #endif
 

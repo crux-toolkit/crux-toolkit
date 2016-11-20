@@ -58,18 +58,29 @@ XLINKMATCH_TYPE_T getCrossLinkCandidateType(
 
   bool is_intra = false;
   bool is_inter = false;
-  
+  size_t id1 = -1;
+  size_t id2 = -1;
+
   for (PeptideSrcIterator src_iterator1 = pep1->getPeptideSrcBegin();
     src_iterator1 != pep1->getPeptideSrcEnd();
     ++src_iterator1) {
     PeptideSrc* src1 = *src_iterator1;
-    size_t id1 = src1->getParentProtein()->getProteinIdx();
-
+    size_t id1t = src1->getParentProtein()->getProteinIdx();
+    if (id1 == -1) {
+      id1 = id1t;
+    } else if (id1 != id1t) {
+      return XLINK_INTER_INTRA_CANDIDATE;
+    }
     for (PeptideSrcIterator src_iterator2 = pep2->getPeptideSrcBegin();
       src_iterator2 != pep2->getPeptideSrcEnd();
       ++src_iterator2) {
       PeptideSrc* src2 = *src_iterator2;
-      size_t id2 = src2->getParentProtein()->getProteinIdx();
+      size_t id2t = src2->getParentProtein()->getProteinIdx();
+      if (id2 == -1) {
+        id2 = id2t;
+      } else if (id2 != id2t) {
+        return XLINK_INTER_INTRA_CANDIDATE;
+      }
       if (id1 == id2) {
         is_intra = true;
         if (is_inter) {
@@ -139,6 +150,7 @@ void addAllocatedPeptide(
  * delete all peptides that are allocated
  */
 void deleteAllocatedPeptides() {
+  carp(CARP_DEBUG, "deleting %d peptides", allocated_peptides_.size());
   for (set<Crux::Peptide*>::iterator iter =
     allocated_peptides_.begin();
     iter != allocated_peptides_.end();

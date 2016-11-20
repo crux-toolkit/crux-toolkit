@@ -16,10 +16,11 @@
 #include "util/utils.h"
 #include "util/mass.h"
 #include "Peak.h"
+#include "util/CacheableMass.h"
 
 static const int MAX_MODIFICATIONS = 4; ///< maximum modifications allowed per ion
 
-class Ion {
+class Ion : public CacheableMass {
 
  protected:
   ION_TYPE_T type_;  ///< type of the ion 
@@ -27,8 +28,7 @@ class Ion {
   // N.b. this is different than the b1,y1 index, in that it always starts
   // from the N-term
   int charge_; ///< the ion charge
-  char* peptide_sequence_; ///< the peptide sequence that fragments to form this ion
-  FLOAT_T peptide_mass_; ///< the mass of the peptide. For efficiency
+  std::string peptide_sequence_;
   int modification_counts_[MAX_MODIFICATIONS]; ///< an array of the number of different ion modifications
   FLOAT_T ion_mass_z_;   ///< The mass/z of the ion. 
   Peak * peak_;  ///< The assigned peak. NULL if no peak // TODO add ptr count
@@ -51,10 +51,14 @@ class Ion {
     ION_TYPE_T type,   ///< intensity for the new ion -in 
     int cleavage_idx, ///< index into the peptide amide bonds of this ion
     int charge, ///< charge of the ion
-    char* peptide ///< location for the new ion -in
+    const std::string& peptide ///< location for the new ion -in
     ); 
 
   
+  // Override calcMass
+  virtual FLOAT_T calcMass(MASS_TYPE_T mass_type);
+
+
   /**
    * initializes the mass array
    */
@@ -96,7 +100,14 @@ class Ion {
    * initializes an Ion object.
    */
   void init();
-
+  void init(
+    ION_TYPE_T type,   ///< intensity for the new ion -in 
+    int cleavage_idx, ///< index into the peptide amide bonds of this ion
+    int charge, ///< charge of the ion
+    const std::string& peptide, ///< location for the new ion -in
+    MASS_TYPE_T mass_type, ///< mass type (average, mono) -in
+    FLOAT_T base_mass ///< the base mass of the ion -in
+  );
 
   /**
    * \returns An (empty) ion object.
@@ -113,7 +124,7 @@ class Ion {
     ION_TYPE_T type,   ///< intensity for the new ion -in 
     int cleavage_idx, ///< index into the peptide amide bonds of this ion
     int charge, ///< charge of the ion
-    char* peptide, ///< location for the new ion -in
+    const std::string& peptide, ///< location for the new ion -in
     MASS_TYPE_T mass_type ///< mass type (average, mono) -in
     ); 
 
@@ -126,7 +137,7 @@ class Ion {
     ION_TYPE_T type,   ///< intensity for the new ion -in 
     int cleavage_idx, ///< index into the peptide amide bonds of this ion
     int charge, ///< charge of the ion
-    char* peptide, ///< location for the new ion -in
+    const std::string& peptide, ///< location for the new ion -in
     MASS_TYPE_T mass_type, ///< mass type (average, mono) -in
     int* modification_counts ///< an array of modification counts for each modification -in
     );
@@ -141,7 +152,7 @@ class Ion {
     ION_TYPE_T type,   ///< intensity for the new ion -in 
     int cleavage_idx, ///< index into the peptide amide bonds of this ion
     int charge, ///< charge of the ion
-    char* peptide, ///< location for the new ion -in
+    const std::string& peptide, ///< location for the new ion -in
     MASS_TYPE_T mass_type, ///< mass type (average, mono) -in
     FLOAT_T base_mass, ///< the base mass of the ion -in
     int* modification_counts ///< an array of modification counts for each modification -in
@@ -156,7 +167,7 @@ class Ion {
     ION_TYPE_T type,   ///< intensity for the new ion -in 
     int cleavage_idx, ///< index into the peptide amide bonds of this ion
     int charge, ///< charge of the ion
-    char* peptide, ///< location for the new ion -in
+    const std::string& peptide, ///< location for the new ion -in
     MASS_TYPE_T mass_type, ///< mass type (average, mono) -in
     FLOAT_T base_mass ///< the base mass of the ion -in
     );
@@ -165,6 +176,8 @@ class Ion {
    * frees A ION_T object
    */
   ~Ion();
+
+  static Ion* newIon();
 
   /**
    * decrements the pointer and free the ion
@@ -320,7 +333,7 @@ class Ion {
   static void copy(
     Ion* src,///< ion to copy from -in
     Ion* dest,///< ion to copy to -out
-    char* peptide_sequence ///< the peptide sequence that the dest should refer to -in
+    const std::string& peptide_sequence ///< the peptide sequence that the dest should refer to -in
     );
 
   /**
@@ -399,7 +412,7 @@ class Ion {
    * return the parent peptide sequence of the ion object
    * returns a pointer to the sequence, should not free
    */
-  char* getPeptideSequence();
+  const std::string& getPeptideSequence();
 
   /**
    * return a pointer to the modification_count array of the ion object
