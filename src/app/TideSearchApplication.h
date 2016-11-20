@@ -36,6 +36,17 @@ private:
     int pepMassInt
   );
 
+  //Added by Andy Lin in Nov 2016
+  //Calculatse a residue evidence score given a
+  //residue evidence matrix and a theoretical spectrum
+  int calcResEvScore(
+    const vector<vector<double> >& curResidueEvidenceMatrix,
+    const vector<unsigned int>& intensArrayTheor,
+    const vector<double> aaMassDouble,
+    Peptide* curPeptide
+  );
+//
+
   friend class SubtractIndexApplication;
 
  protected:
