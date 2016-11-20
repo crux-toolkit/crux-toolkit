@@ -986,7 +986,6 @@ void TideSearchApplication::search(void* threadarg) {
 
 	  /************ calculate res-ev scores for PSMs using residue evidence matrix ****************/
 	  int scoreResidueEvidence;
-
 	  pe = 0;
 	  for(peidx = 0; peidx < candidatePeptideStatusSize; peidx++) {
 	    if ((*candidatePeptideStatus)[peidx]) {
@@ -1004,9 +1003,7 @@ void TideSearchApplication::search(void* threadarg) {
 	      }
 
 	      vector<vector<double> > curResidueEvidenceMatrix = residueEvidenceMatrix[pepMassIntIdx];
-	      scoreResidueEvidence = 0;
 	      Peptide* curPeptide = (*iter_);
-	      int pepLen = curPeptide->Len();
 
 	      vector<unsigned int> intensArrayTheor;
 	      for(iter_uint  = iter1_->unordered_peak_list_.begin();
@@ -1015,16 +1012,7 @@ void TideSearchApplication::search(void* threadarg) {
 		intensArrayTheor.push_back(*iter_uint);
 	      }
 
-	      //Make sure the number of theoretical peaks match pepLen
-	      assert(intensArrayTheor.size() == pepLen - 1);
-
-	      double* residueMasses = curPeptide->getAAMasses(); //retrieves the amino acid masses, modifications included
-	      for(int res = 0; res < pepLen - 1; res++) {
-		double tmpAAMass = residueMasses[res];
-		int tmpAA = find(aaMassDouble.begin(),aaMassDouble.end(),tmpAAMass) - aaMassDouble.begin();
-		scoreResidueEvidence += curResidueEvidenceMatrix[tmpAA][intensArrayTheor[res]-1];
-	      }
-	      delete residueMasses;
+              scoreResidueEvidence = calcResEvScore(curResidueEvidenceMatrix,intensArrayTheor,aaMassDouble,curPeptide);
 
 	      if(peptide_centric) {
 		carp(CARP_FATAL, "residue-evidence has not been implemented with 'peptide-centric-search T' yet.");
@@ -1203,7 +1191,6 @@ void TideSearchApplication::search(void* threadarg) {
    
 	  /************ calculate p-values for PSMs using residue evidence matrix ****************/
 	  int scoreResidueEvidence;
-
 	  pe = 0;
 	  for(peidx = 0; peidx < candidatePeptideStatusSize; peidx++) {
 	    if ((*candidatePeptideStatus)[peidx]) {
@@ -1221,9 +1208,7 @@ void TideSearchApplication::search(void* threadarg) {
 	      }
 
 	      vector<vector<double> > curResidueEvidenceMatrix = residueEvidenceMatrix[pepMassIntIdx];
-	      scoreResidueEvidence = 0;
 	      Peptide* curPeptide = (*iter_);
-	      int pepLen = curPeptide->Len();
 
 	      vector<unsigned int> intensArrayTheor;
 	      for(iter_uint = iter1_->unordered_peak_list_.begin();
@@ -1232,16 +1217,8 @@ void TideSearchApplication::search(void* threadarg) {
 		intensArrayTheor.push_back(*iter_uint);
 	      }
 
-	      //Make sure the number of theoretical peaks match pepLen-1
-	      assert(intensArrayTheor.size() == pepLen - 1);
 
-	      double* residueMasses = curPeptide->getAAMasses(); //retrieves the amino acid masses, modifications included
-	      for(int res = 0; res < pepLen - 1; res++) {
-		double tmpAAMass = residueMasses[res];
-		int tmpAA = find(aaMassDouble.begin(),aaMassDouble.end(),tmpAAMass) - aaMassDouble.begin();
-		scoreResidueEvidence += curResidueEvidenceMatrix[tmpAA][intensArrayTheor[res]-1];
-	      }
-	      delete residueMasses;
+              scoreResidueEvidence = calcResEvScore(curResidueEvidenceMatrix,intensArrayTheor,aaMassDouble,curPeptide);
 
 	      int scoreCountIdx = scoreResidueEvidence + scoreResidueOffsetObs[curPepMassInt];
 	      double pValue = pValuesResidueObs[curPepMassInt][scoreCountIdx];
@@ -1268,7 +1245,6 @@ void TideSearchApplication::search(void* threadarg) {
 	      }
 	      pe++;
 	    }
-
 	    ++iter_;
 	    ++iter1_;
 	  }
@@ -2463,6 +2439,29 @@ int TideSearchApplication::getMaxColEvidence(
   return maxEvidence;
 }
 
+//Added by Andy Lin in Nov 2016
+//Calculatse a residue evidence score given a
+//residue evidence matrix and a theoretical spectrum
+int TideSearchApplication::calcResEvScore(
+  const vector<vector<double> >& curResidueEvidenceMatrix,
+  const vector<unsigned int>& intensArrayTheor,
+  const vector<double> aaMassDouble,
+  Peptide* curPeptide
+) {
+  //Make sure the number of theoretical peaks match pepLen
+  int pepLen = curPeptide->Len();
+  assert(intensArrayTheor.size() == pepLen - 1);
+
+  int scoreResidueEvidence = 0;
+  double* residueMasses = curPeptide->getAAMasses(); //retrieves the amino acid masses, modifications included
+  for(int res = 0; res < pepLen - 1; res++) {
+    double tmpAAMass = residueMasses[res];
+    int tmpAA = find(aaMassDouble.begin(),aaMassDouble.end(),tmpAAMass) - aaMassDouble.begin();
+    scoreResidueEvidence += curResidueEvidenceMatrix[tmpAA][intensArrayTheor[res]-1];
+  }
+  delete residueMasses;
+  return scoreResidueEvidence;
+}
 
 /*
  * Local Variables:
