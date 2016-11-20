@@ -45,13 +45,17 @@ add_library(
   xlink_compute_qvalues.cpp
   LinearPeptide.cpp
   SelfLoopPeptide.cpp
+  XLinkDatabase.cpp
+  XLinkIonSeriesCache.cpp
   XLink.cpp
   XLinkScorer.cpp
   XLinkSite.cpp
   XLinkBondMap.cpp
   XLinkablePeptide.cpp
   XLinkablePeptideIterator.cpp
+  XLinkablePeptideIteratorTopN.cpp
   XLinkMatch.cpp
   XLinkMatchCollection.cpp
   XLinkPeptide.cpp
+  Weibull.cpp
 )

@@ -12,6 +12,7 @@
 #include "XLinkScorer.h"
 
 #include "model/Spectrum.h"
+#include "util/GlobalParams.h"
 #include "util/Params.h"
 #include "util/StringUtils.h"
 
@@ -21,7 +22,7 @@
 static const FLOAT_T MIN_XCORR_SHIFT = -5.0;
 static const FLOAT_T MAX_XCORR_SHIFT  = 5.0;
 //#define CORR_THRESHOLD 0.995   // Must achieve this correlation, else punt.
-static const FLOAT_T CORR_THRESHOLD = 0.0;       // For now, turn off the threshold.
+static const FLOAT_T CORR_THRESHOLD = 0.5;
 static const FLOAT_T XCORR_SHIFT = 0.05;
 
 using namespace std;
@@ -33,7 +34,8 @@ void get_min_max_mass(
   FLOAT_T window,
   WINDOW_TYPE_T precursor_window_type,
   FLOAT_T& min_mass, 
-  FLOAT_T& max_mass) {
+  FLOAT_T& max_mass,
+  FLOAT_T& precursor_mass) {
 
   //cerr <<"mz: "
   //     <<precursor_mz
@@ -41,10 +43,13 @@ void get_min_max_mass(
   //     <<charge
   //     <<" mass:"<<mass
   //     <<" window:"<<window<<endl;
+
+  precursor_mass = zstate.getNeutralMass() + (double)isotope*MASS_NEUTRON;
+
   if (precursor_window_type == WINDOW_MASS) {
     //cerr<<"WINDOW_MASS"<<endl;
-    min_mass = zstate.getNeutralMass() + (double)isotope*MASS_NEUTRON - window;
-    max_mass = zstate.getNeutralMass() + (double)isotope*MASS_NEUTRON + window;
+    min_mass = precursor_mass - window;
+    max_mass = precursor_mass + window;
   } else if (precursor_window_type == WINDOW_MZ) {
     //cerr<<"WINDOW_MZ"<<endl;
     double min_mz = precursor_mz - window;
@@ -53,8 +58,8 @@ void get_min_max_mass(
     max_mass = (max_mz - MASS_PROTON) * (double)zstate.getCharge();
   } else if (precursor_window_type == WINDOW_PPM) {
     //cerr<<"WINDOW_PPM"<<endl;
-    min_mass = (zstate.getNeutralMass() + (double)isotope*MASS_NEUTRON) / (1.0 + window * 1e-6);
-    max_mass = (zstate.getNeutralMass() + (double)isotope*MASS_NEUTRON)/ (1.0 - window * 1e-6);
+    min_mass = precursor_mass * (1.0 - window * 1e-6);
+    max_mass = precursor_mass * (1.0 + window * 1e-6);
   }
   
   //cerr<<"min:"<<min_mass<<" "<<"max: "<<max_mass<<endl;
@@ -67,7 +72,8 @@ void get_min_max_mass(
   int isotope,
   bool use_decoy_window,
   FLOAT_T& min_mass, 
-  FLOAT_T& max_mass) {
+  FLOAT_T& max_mass,
+  FLOAT_T& precursor_mass) {
   
   if (use_decoy_window) {
     get_min_max_mass(precursor_mz,
@@ -76,15 +82,16 @@ void get_min_max_mass(
          Params::GetDouble("precursor-window-weibull"),
          string_to_window_type(Params::GetString("precursor-window-type-weibull")),
          min_mass,
-         max_mass);
+		     max_mass, precursor_mass);
   } else {
     get_min_max_mass(precursor_mz,
          zstate,
                      isotope,
-         Params::GetDouble("precursor-window"),
-         string_to_window_type(Params::GetString("precursor-window-type")),
-         min_mass,
-         max_mass);
+      GlobalParams::getPrecursorWindow(),
+      GlobalParams::getPrecursorWindowType(),		     
+      min_mass,
+      max_mass, 
+      precursor_mass);
   }
 }
 
@@ -140,12 +147,8 @@ XLinkMatchCollection::XLinkMatchCollection(
 /**
  * Constructor that finds all possible candidates
  */
-XLinkMatchCollection::XLinkMatchCollection(
-  XLinkBondMap& bondmap, ///< allowable links
-  PEPTIDE_MOD_T** peptide_mods, ///< list of possible modifications
-  int num_peptide_mods, ///< number of possible modifications
-  Database* database ///< protein database
-  ) {
+/*
+XLinkMatchCollection::XLinkMatchCollection() {
   
   carp(CARP_DEBUG, "XLinkMatchCollection(...)");
 
@@ -153,51 +156,62 @@ XLinkMatchCollection::XLinkMatchCollection(
   FLOAT_T max_mass = Params::GetDouble("max-mass");
 
   addCandidates(
-    min_mass, 
-    max_mass, 
-    bondmap, 
-    database, 
-    peptide_mods, 
-    num_peptide_mods);
-  
+		NULL,
+		0,
+		1,
+		min_mass, 
+		max_mass,
+		false);
+
 }
+*/
 
 /**
  * Constructor that finds all candidates within a mass range
  */
 void XLinkMatchCollection::addCandidates(
+  Crux::Spectrum *spectrum,
+  FLOAT_T precursor_mass,
+  int precursor_charge,
   FLOAT_T min_mass, ///< min mass
   FLOAT_T max_mass, ///< max mass
-  XLinkBondMap& bondmap, ///< allowable links
-  Database* database, ///< protein database
-  PEPTIDE_MOD_T** peptide_mods, ///< list of possible modifications
-  int num_peptide_mods ///< number of possible modifications
+  bool decoy
   ) {
 
-  carp(CARP_DEBUG, "XLinkMatchCollection.addCandidates() start");
+  //carp(CARP_INFO, "XLinkMatchCollection.addCandidates() start");
 
   include_linear_peptides_ = Params::GetBool("xlink-include-linears");
   include_self_loops_ = Params::GetBool("xlink-include-selfloops");
-
-  carp(CARP_INFO, "Adding xlink candidates");
-
-  XLinkPeptide::addCandidates(
-    min_mass, 
-    max_mass,
-    bondmap,
-    database,
-    peptide_mods,
-    num_peptide_mods,
-    *this);
-
+ 
+  if (GlobalParams::getXLinkIncludeInter() ||
+      GlobalParams::getXLinkIncludeIntra() ||
+      GlobalParams::getXLinkIncludeInterIntra()) {
+    int num_xlink_candidates = 0;
+    carp(CARP_DEBUG, "Adding xlink candidates");
+    carp(CARP_DEBUG, "precursor:%g", precursor_mass);
+    carp(CARP_DEBUG, "min:%g", min_mass);
+    carp(CARP_DEBUG, "max:%g", max_mass);
+    num_xlink_candidates = XLinkPeptide::addCandidates(
+      spectrum,
+      precursor_mass,
+      precursor_charge,
+      min_mass, 
+      max_mass,
+      decoy,
+      *this);
+    carp(CARP_DETAILED_DEBUG,"Number of xlink candidates:%d", num_xlink_candidates);
+    if (num_xlink_candidates == 0 && Params::GetBool("require-xlink-candidate")) {
+      carp(CARP_DEBUG, "no xlink candidate, returning");
+      return;
+    }
+    
+  }
   if (include_linear_peptides_) {
 
     LinearPeptide::addCandidates(
       min_mass,
       max_mass,
-      database,
-      peptide_mods,
-      num_peptide_mods,
+      decoy,
       *this);
 
   }
@@ -207,10 +221,7 @@ void XLinkMatchCollection::addCandidates(
     SelfLoopPeptide::addCandidates(
       min_mass,
       max_mass,
-      bondmap,
-      database,
-      peptide_mods,
-      num_peptide_mods,
+      decoy,
       *this);
   }
 }
@@ -220,28 +231,27 @@ void XLinkMatchCollection::addCandidates(
  * Constructor for finding all candidates within a mass range
  */
 XLinkMatchCollection::XLinkMatchCollection(
-  FLOAT_T precursor_mz,  ///< precursor m/z
+  Crux::Spectrum *spectrum, ///< spectrum
   SpectrumZState& zstate, ///< z-state
-  XLinkBondMap& bondmap, ///< allowable links
-  Database* database,  ///< protein database
-  PEPTIDE_MOD_T** peptide_mods,  ///< list of allowable peptide mods
-  int num_peptide_mods,  ///< number of allowable peptides
+  bool decoy,
   bool use_decoy_window  
   ) {
 
   carp(CARP_DEBUG, "Inside XLinkMatchCollection....");
 
-  precursor_mz_ = precursor_mz;
+  precursor_mz_ = spectrum->getPrecursorMz();
   setZState(zstate);  
 
 
   FLOAT_T min_mass;
   FLOAT_T max_mass;
-  vector<int> isotopes = StringUtils::Split<int>(Params::GetString("isotope-windows"), ',');
+  const vector<int>& isotopes = GlobalParams::getIsotopeWindows(); 
   for (int idx = 0; idx < isotopes.size();idx++) {
-    get_min_max_mass(precursor_mz, zstate, isotopes[idx], use_decoy_window, min_mass, max_mass);
-    carp(CARP_INFO, "isotope %i min:%g max:%g", isotopes[idx], min_mass, max_mass);
-    addCandidates(min_mass, max_mass, bondmap, database, peptide_mods, num_peptide_mods);
+    FLOAT_T precursor_mass;
+    get_min_max_mass(precursor_mz_, zstate, isotopes[idx], use_decoy_window, min_mass, max_mass, precursor_mass);
+    carp(CARP_DEBUG, "isotope %i precursor: %g min:%g max:%g", isotopes[idx], precursor_mass, min_mass, max_mass);
+    addCandidates(spectrum, precursor_mass, zstate.getCharge(), 
+		  min_mass, max_mass, decoy);
   }
 }
 
@@ -249,15 +259,30 @@ XLinkMatchCollection::XLinkMatchCollection(
  * adds a candidate to the list
  */
 void XLinkMatchCollection::add(
-  XLinkMatch* candidate ///< candidate to add
+  XLinkMatch* candidate, ///< candidate to add
+  bool copy
   ) {
 
   candidate->setZState(zstate_);
   candidate->setParent(this);
   addMatch(candidate);
-  candidate->decrementPointerCount();
+  if (!copy) {
+    candidate->decrementPointerCount();
+  }
   experiment_size_++;
 
+}
+
+void XLinkMatchCollection::add(
+  const vector<XLinkMatch*>& candidates,
+  bool copy
+  ) {
+
+  for (size_t idx = 0;idx < candidates.size();idx++) {
+    //carp(CARP_INFO, "Adding %s", candidates.at(idx)->getSequenceString().c_str());
+    add(candidates.at(idx), copy);
+  }
+  
 }
 
 /**
@@ -295,8 +320,7 @@ void XLinkMatchCollection::shuffle(
   decoy_vector.scan_ = scan_;
 
   for (int idx = 0; idx < getMatchTotal(); idx++) {
-    //cerr << "shuffling:" << at(idx)->getSequenceString()<<endl;
-    decoy_vector.add(at(idx)->shuffle());
+    decoy_vector.add(at(idx)->getDecoys());
   }
 
 }

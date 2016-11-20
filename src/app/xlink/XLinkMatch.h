@@ -12,16 +12,24 @@
 #include "XLinkMatchCollection.h"
 #include <string>
 #include "model/Match.h"
+#include "util/CacheableMass.h"
 
-
-class XLinkMatch : public Crux::Match {
+class XLinkMatch : public Crux::Match, public CacheableMass {
 
  protected:
   XLinkMatchCollection* parent_; ///< Owner of this match
   FLOAT_T pvalue_; ///< p-value of the match
-  bool mass_calculated_[NUMBER_MASS_TYPES]; ///< is mass calculated?
-  FLOAT_T mass_[NUMBER_MASS_TYPES]; ///<calculated mass
 
+  std::vector<IonSeries*> ion_series_xcorr_;
+  std::vector<IonSeries*> ion_series_sp_;
+  std::vector<XLinkMatch*> decoys_;
+  std::string cached_sequence_;
+  
+  static std::vector<IonConstraint*> ion_constraint_xcorr_;
+  static IonConstraint* getIonConstraintXCORR(int charge); 
+
+  bool is_decoy_;
+  
  public:
   
   /**
@@ -38,18 +46,17 @@ class XLinkMatch : public Crux::Match {
   virtual int getNumMissedCleavages() = 0;
   virtual bool isModified() = 0;
   virtual std::string getSequenceString() = 0;
-  virtual FLOAT_T calcMass(MASS_TYPE_T mass_type) = 0;
-  virtual XLinkMatch* shuffle() = 0;
+  virtual void shuffle(std::vector<XLinkMatch*>& decoys) = 0;
+  
   virtual void predictIons(IonSeries* ion_series, int charge) = 0;
   virtual std::string getIonSequence(Ion* ion) = 0;
   virtual Crux::Peptide* getPeptide(int peptide_idx) = 0;
 
-  /**
-   * \returns the mass of the match
-   */
-  FLOAT_T getMass(
-    MASS_TYPE_T mass_type /// MONO or AVERAGE?
-  );
+  const std::string& getSequenceStringConst();
+  const std::vector<XLinkMatch*>& getDecoys();
+
+  virtual IonSeries* getIonSeriesXCORR(int charge);
+
 
   std::string getCandidateTypeString();
 
@@ -65,6 +72,12 @@ class XLinkMatch : public Crux::Match {
     FLOAT_T beta ///< beta parameter for weibull
     );
 
+  FLOAT_T getPValue();
+
+  void setPValue(
+    FLOAT_T pvalue
+  );
+  
   /**
    * \returns the mass error in part-per-million (ppm)
    */
@@ -91,6 +104,12 @@ class XLinkMatch : public Crux::Match {
    */
   virtual std::string getFlankingAAString();
 
+  /**
+   *\returns unshuffled version of the sequence
+   */
+  virtual std::string getUnshuffledSequence();
+  
+  
  /**
    * Print one field in the tab-delimited output file, based on column index.
    * overridden from Match

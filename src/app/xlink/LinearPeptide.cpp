@@ -3,7 +3,8 @@
 #include "XLink.h"
 #include "model/ModifiedPeptidesIterator.h"
 #include "model/IonSeries.h"
-#include "util/Params.h"
+#include "util/GlobalParams.h"
+#include "XLinkDatabase.h"
 
 #include <iostream>
 
@@ -12,7 +13,7 @@ using namespace std;
 /**
  * Default constructor
  */
-LinearPeptide::LinearPeptide() {
+LinearPeptide::LinearPeptide() : XLinkMatch() {
   peptide_ = NULL;
   sequence_ = NULL;
 }
@@ -22,7 +23,7 @@ LinearPeptide::LinearPeptide() {
  */
 LinearPeptide::LinearPeptide(
   char* sequence ///< sequence string
-  ) {
+  ) : XLinkMatch() {
   peptide_ = NULL;
   sequence_ = sequence;
 }
@@ -32,10 +33,15 @@ LinearPeptide::LinearPeptide(
  */
 LinearPeptide::LinearPeptide(
   Crux::Peptide* peptide ///< peptide object
-  ) {
+  ) : XLinkMatch() {
   peptide_ = peptide;
   sequence_ = NULL;
+  this->setNullPeptide(peptide_->isDecoy());
 }
+
+LinearPeptide::~LinearPeptide() {
+}
+
 
 /**
  *Add candidates to the XLinkMatchCollection that are linear
@@ -43,59 +49,32 @@ LinearPeptide::LinearPeptide(
 void LinearPeptide::addCandidates(
   FLOAT_T min_mass,  ///< min mass
   FLOAT_T max_mass,  ///< max mass
-  Database* database, ///< protein database
-  PEPTIDE_MOD_T** peptide_mods, ///< modifications peptide can take
-  int num_peptide_mods, ///< Number of possible peptide mods
+  bool is_decoy, ///< generate decoy canidates
   XLinkMatchCollection& candidates ///< Vector of candidate -inout
   ) {
 
-  int max_missed_cleavages = Params::GetInt("missed-cleavages");
+  vector<LinearPeptide>::iterator siter = XLinkDatabase::getLinearBegin(is_decoy, min_mass);
+  if (siter == XLinkDatabase::getLinearEnd(is_decoy) ||
+      siter->getMassConst(GlobalParams::getIsotopicMass()) > max_mass) {
+    return;
+  } else {
+    vector<LinearPeptide>::iterator eiter = XLinkDatabase::getLinearEnd(is_decoy, siter, max_mass);
 
-  for (int mod_idx=0;mod_idx < num_peptide_mods; mod_idx++) {
-    PEPTIDE_MOD_T* peptide_mod = peptide_mods[mod_idx];
-    double delta_mass = peptide_mod_get_mass_change(peptide_mod);
-    //
-    ModifiedPeptidesIterator* peptide_iterator =
-      new ModifiedPeptidesIterator(min_mass - delta_mass, max_mass - delta_mass, peptide_mod, 
-        false, database);
-
-    //add the targets
-    while (peptide_iterator->hasNext()) {
-      Crux::Peptide* peptide = peptide_iterator->next();
-      XLinkMatch* new_candidate = new LinearPeptide(peptide);
-      if (new_candidate->getNumMissedCleavages() <= max_missed_cleavages) {
-        //cerr <<"Adding Linear Peptide:"<<new_candidate -> getSequenceString()<<" "<<new_candidate->getMass(MONO)<<endl;
-        candidates.add(new_candidate);
-        XLink::addAllocatedPeptide(peptide);
+    while (siter != eiter && siter->getMassConst() <= max_mass) {
+      siter->incrementPointerCount();
+      LinearPeptide& lpeptide = *siter;
+      if (lpeptide.getMassConst() < min_mass || lpeptide.getMassConst() > max_mass) {
+        carp(CARP_DEBUG,
+             "The mass %g of peptide %s is outside the precursor range of %g-%g.",
+             lpeptide.getMass(), lpeptide.getSequenceString().c_str(),
+             min_mass, max_mass);
+        return;
       } else {
-        delete new_candidate;
-        delete peptide;
+        //carp(CARP_INFO, "Add linear candidate");
+        candidates.add(&(*siter));
+        ++siter;
       }
     }
-    delete peptide_iterator;
-
-
-    //add the decoys
-    /*
-    peptide_iterator = new
-      ModifiedPeptidesIterator(min_mass - delta_mass, max_mass - delta_mass, peptide_mod,
-        true, database);
-
-    while (peptide_iterator->hasNext()) {
-      Crux::Peptide* peptide = peptide_iterator->next();
-      XLinkMatch* new_candidate = new LinearPeptide(peptide);
-      if (new_candidate->getNumMissedCleavages() <= max_missed_cleavages) {
-        candidates.add(new_candidate);
-        XLink::addAllocatedPeptide(peptide);
-      } else {
-        delete new_candidate;
-        delete peptide;
-      }
-    }
-
-    delete peptide_iterator;
-    */
-
   }
 }
 
@@ -122,7 +101,7 @@ string LinearPeptide::getSequenceString() {
     oss << peptide_->getModifiedSequenceWithMasses();
   }
 
-  oss << " ()";
+  //oss << " ()";
   return oss.str();
 
 }
@@ -144,9 +123,8 @@ FLOAT_T LinearPeptide::calcMass(
 /**
  *\returns a shuffled version of the peptide
  */
-XLinkMatch* LinearPeptide::shuffle() {
+void LinearPeptide::shuffle(vector<XLinkMatch*>& decoys) {
   string seq = getSequenceString();
-  carp(CARP_DEBUG, "LinearPeptide::shuffle %s", seq.c_str());
   Crux::Peptide* decoy_peptide = new Crux::Peptide(peptide_);
 
   decoy_peptide->transformToDecoy();
@@ -154,8 +132,12 @@ XLinkMatch* LinearPeptide::shuffle() {
   XLink::addAllocatedPeptide(decoy_peptide);
 
   LinearPeptide* decoy = new LinearPeptide(decoy_peptide);
-
-  return (XLinkMatch*)decoy;
+  
+  string decoy_seq = decoy->getSequenceString();
+  //  carp(CARP_INFO, "Shuffled: %s", decoy_seq.c_str());
+  
+  decoy->setNullPeptide(true);
+  decoys.push_back(decoy);
 }
 
 /**
@@ -166,20 +148,27 @@ void LinearPeptide::predictIons(
   int charge ///< charge state of the peptide
   ) {
 
-  char* seq = NULL;
+  const char* seq = NULL;
   MODIFIED_AA_T* mod_seq = NULL;
   if (peptide_ == NULL) {
-    seq = my_copy_string(sequence_);
+    seq = sequence_;
     convert_to_mod_aa_seq(seq, &mod_seq); 
   } else {
     seq = peptide_->getSequence();
     mod_seq = peptide_->getModifiedAASequence();
   }
+  
+  //carp(CARP_INFO, "predicting ions for :%s", seq);
+  /*
+  char* mseq = peptide_->getModifiedSequenceWithMasses(MOD_MASSES_SEPARATE);
+  carp(CARP_INFO, "mod seq:%s", mseq);
+  free(mseq);
+  */
   ion_series->setCharge(charge);
   ion_series->update(seq, mod_seq);
   ion_series->predictIons();
-  free(seq);
-  free(mod_seq);
+
+  freeModSeq(mod_seq);
 
 }
 
@@ -225,6 +214,27 @@ int LinearPeptide::getNumMissedCleavages() {
 bool LinearPeptide::isModified() {
 
   return peptide_->isModified();
+}
+
+bool compareLinearPeptideMass(
+  const LinearPeptide& pep1, 
+  const LinearPeptide& pep2) {
+
+  return pep1.getMassConst(MONO) < pep2.getMassConst(MONO);
+
+}
+bool compareLinearPeptideMassToFLOAT(
+  const LinearPeptide& pep1,
+  FLOAT_T mass
+  ) {
+
+  return pep1.getMassConst(MONO) < mass;
+}
+
+bool compareFLOATToLinearPeptideMass(
+  const FLOAT_T& mass,
+  const LinearPeptide& pep1) {
+  return pep1.getMassConst(MONO) > mass;
 }
 
 /*

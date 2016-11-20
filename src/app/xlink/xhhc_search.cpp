@@ -484,8 +484,8 @@ void get_ions_from_window(
     min_mass = precursor_mass - window;
     max_mass = precursor_mass + window;
   } else if (window_type == WINDOW_PPM) {
-    min_mass = precursor_mass / (1.0 + window * 1e-6);
-    max_mass = precursor_mass / (1.0 - window * 1e-6);
+    min_mass = precursor_mass * (1.0 - window * 1e-6);
+    max_mass = precursor_mass * (1.0 + window * 1e-6);
   } else {
     carp(CARP_FATAL, "Precursor m/z window type not supported!");
   }

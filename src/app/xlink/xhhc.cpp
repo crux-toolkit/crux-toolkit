@@ -120,9 +120,8 @@ void get_linkable_peptides(
     while (peptide_iterator->hasNext()) {
       //peptide = database_peptide_iterator_next(peptide_iterator);
       peptide = peptide_iterator->next();
-      char* seq = peptide->getSequence();
+      const char* seq = peptide->getSequence();
       sequence = seq;
-      free(seq);
  
       map<string, vector<Peptide*> >::iterator find_iter;
 
@@ -138,8 +137,8 @@ void get_linkable_peptides(
         find_iter -> second.push_back(peptide);
       }
 
-      XLinkablePeptide xlinkable(peptide, bondmap);
-  
+      XLinkablePeptide xlinkable(peptide, bondmap, 1);
+
       if (xlinkable.isLinkable()) {
         peptides.insert(xlinkable);
       }
@@ -196,7 +195,8 @@ void find_all_precursor_ions(
 
   set<XLinkablePeptide> peptides;
   carp(CARP_DEBUG, "get_linkable_peptides");
-  XLinkBondMap bondmap;
+  string link_string = Params::GetString("link sites");
+  XLinkBondMap bondmap(link_string);
   get_linkable_peptides(peptides, bondmap, protein_iterator, peptide_constraint);
   carp(CARP_DEBUG, "add_linked_peptides");
   add_linked_peptides(all_ions, peptides, bondmap, 1);

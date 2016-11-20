@@ -26,14 +26,18 @@ static const int MAX_NUM_ION_TYPE = 8; // number of different ion_types
 class IonSeries {
   friend class XLinkPeptide;
   friend class XLinkablePeptide;
+  friend class XLinkIonSeriesCache;
  protected:
+
+  static FLOAT_T* mass_matrix_; /// < Pre-allocated mass matrix
   // TODO change name to unmodified_char_seq
-  char* peptide_; ///< The peptide sequence for this ion series
+  std::string peptide_; ///< The peptide sequence for this ion series
   MODIFIED_AA_T* modified_aa_seq_; ///< sequence of the peptide
-  FLOAT_T peptide_mass_; ///< The peptide neutral mass. For efficiency. 
+  bool modified_aa_seq_owner_;
   int charge_; ///< /<The charge state of the peptide for this ion series
   IonConstraint* constraint_; ///< The constraints which these ions obey
   std::vector<Ion*> ions_; ///< The ions in this series
+  int num_ions_; ///< number of ions
   bool is_predicted_; ///< has this ion_series been predicted already?
   std::vector<Ion*> specific_ions_[MAX_NUM_ION_TYPE]; 
     ///< specific ions in the series, reference to master array of ions
@@ -43,6 +47,8 @@ class IonSeries {
   int peptide_length_;   ///< the length of the peptide
 
   // ??? what is the difference between peptide_length and num_ions
+
+  int pointer_count_;
 
   /**
    * \brief Creates an array in which element i is the sum of the masses
@@ -64,6 +70,8 @@ class IonSeries {
   void addIon(
     Ion* ion ///< ion to add -in
   );
+
+  int incrementPointerCount();
 
   /**
    * helper function: add_ions
@@ -135,7 +143,7 @@ class IonSeries {
  * and re-initialize for the new peptide sequence.
  */
  void update(
-  char* peptide, ///< The peptide sequence for this ion series. -in
+  const char* peptide, ///< The peptide sequence for this ion series. -in
   const MODIFIED_AA_T* mod_seq ///< modified version of seq -in
   );
 
@@ -144,6 +152,10 @@ class IonSeries {
    * Frees an allocated ion_series object.
    */
   virtual ~IonSeries();
+
+  static void freeIonSeries(IonSeries* ions);
+
+  static void finalize();
 
   /**
    *Iterator access
@@ -228,7 +240,8 @@ class IonSeries {
    */
   static void copy(
     IonSeries* src,///< ion to copy from -in
-    IonSeries* dest///< ion to copy to -out
+    IonSeries* dest,///< ion to copy to -out
+    bool create_ions ///< Create a copy of the ions?
     );
 
   /**
@@ -255,7 +268,7 @@ class IonSeries {
    * User should not free the peptide sequence seperate from the ion_series
    *\returns a pointer to the original parent peptide sequence of the ion_series object
    */
-  char* getPeptide();
+  std::string& getPeptide();
 
   /**
    *\returns the peptide length of which the ions are made

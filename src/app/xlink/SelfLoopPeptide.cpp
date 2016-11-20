@@ -6,8 +6,11 @@
  *****************************************************************************/
 #include "SelfLoopPeptide.h"
 #include "XLinkablePeptide.h"
+#include "XLinkablePeptideIterator.h"
 #include "XLinkPeptide.h"
 #include "XLink.h"
+#include "XLinkDatabase.h"
+#include "util/GlobalParams.h"
 
 #include "model/IonSeries.h"
 #include "model/Ion.h"
@@ -36,6 +39,7 @@ SelfLoopPeptide::SelfLoopPeptide(
   
   is_decoy_ = false;
   linked_peptide_ = XLinkablePeptide(peptide);
+  linked_peptide_.clearSites();
   linked_peptide_.addLinkSite(posA);
   linked_peptide_.addLinkSite(posB);
 
@@ -65,57 +69,22 @@ SelfLoopPeptide::SelfLoopPeptide(
 void SelfLoopPeptide::addCandidates(
   FLOAT_T min_mass, ///< min mass
   FLOAT_T max_mass, ///< max mass
-  XLinkBondMap& bondmap,  ///< valid link sites
-  Database* database, ///< protein database
-  PEPTIDE_MOD_T** peptide_mods, ///< allowable modifications
-  int num_peptide_mods, ///< number of allowable modifications
+  bool is_decoy, ///< is decoy.
   XLinkMatchCollection& candidates ///< collection to add candidates
   ) {
-  
-  vector<XLinkablePeptide> linkable_peptides;
-  int cur_aa_mods = 0;
-  //loop over modifications.
-  for (int mod_idx = 0; mod_idx < num_peptide_mods; mod_idx++) {
-  
-    PEPTIDE_MOD_T* peptide_mod = peptide_mods[mod_idx];
-    int this_aa_mods = peptide_mod_get_num_aa_mods(peptide_mod);
-    if (this_aa_mods > cur_aa_mods) {
-      cur_aa_mods = this_aa_mods;
-    }
 
-    FLOAT_T delta_mass = peptide_mod_get_mass_change(peptide_mod);
 
-    XLinkPeptide::addLinkablePeptides(
-      min_mass - XLinkPeptide::getLinkerMass() - delta_mass,
-      max_mass - XLinkPeptide::getLinkerMass() - delta_mass,
-      database,
-      peptide_mod,
-      false,
-      bondmap,
-      linkable_peptides);
-    XLinkPeptide::addLinkablePeptides(
-      min_mass - XLinkPeptide::getLinkerMass() - delta_mass,
-      max_mass - XLinkPeptide::getLinkerMass() - delta_mass,
-      database,
-      peptide_mod,
-      true,
-      bondmap,
-      linkable_peptides);
-  }
+  vector<SelfLoopPeptide>::iterator biter = XLinkDatabase::getSelfLoopBegin(is_decoy, min_mass);
+  if (biter == XLinkDatabase::getSelfLoopEnd(is_decoy) ||
+      biter -> getMassConst(GlobalParams::getIsotopicMass()) > max_mass) {
+    return;
+  } else {
+    vector<SelfLoopPeptide>::iterator eiter = XLinkDatabase::getSelfLoopEnd(is_decoy);
 
-  //find linkable peptides that can have links to themselves.
-  for (unsigned int idx =0;idx < linkable_peptides.size();idx++) {
-    XLinkablePeptide &pep = linkable_peptides[idx];
-
-    for (unsigned int link1_idx = 0; link1_idx < pep.numLinkSites()-1; link1_idx++) {
-      for (unsigned int link2_idx = link1_idx+1; link2_idx < pep.numLinkSites(); link2_idx++) {
-        if (bondmap.canLink(pep, link1_idx, link2_idx)) {
-          //create the candidate.
-          XLinkMatch* new_candidate = 
-            new SelfLoopPeptide(pep, link1_idx, link2_idx);
-          candidates.add(new_candidate);
-        }
-      }
+    while (biter != eiter && biter->getMass(GlobalParams::getIsotopicMass()) <= max_mass) {
+      biter->incrementPointerCount();
+      candidates.add(&(*biter));
+      ++biter;
     }
   }
 }
@@ -162,17 +131,30 @@ FLOAT_T SelfLoopPeptide::calcMass(
 /**
  * \returns a shuffled version of self-loop candidate
  */
-XLinkMatch* SelfLoopPeptide::shuffle() {
+void SelfLoopPeptide::shuffle(vector<XLinkMatch*>& decoys) {
   carp(CARP_DEBUG, "SelfLoopPeptide::shuffle");
   SelfLoopPeptide* decoy = new SelfLoopPeptide();
 
   decoy->linked_peptide_ = linked_peptide_.shuffle();
   decoy->link_pos_idx_.push_back(link_pos_idx_[0]);
   decoy->link_pos_idx_.push_back(link_pos_idx_[1]);
+  decoy->is_decoy_ = true;
+  decoy->target_ = this;
+  decoys.push_back(decoy);
+}
 
-  return (XLinkMatch*)decoy;
+SelfLoopPeptide* SelfLoopPeptide::getUnshuffledTarget() {
+  return(target_);  
+}
 
-
+std::string SelfLoopPeptide::getUnshuffledSequence() {
+  
+  if (is_decoy_) {
+    //carp(CARP_INFO, "returning unshuffled target");
+    return(getUnshuffledTarget()->getSequenceString());
+  } else {
+    return(getSequenceString());
+  }
 }
 
 /**
@@ -183,18 +165,16 @@ void SelfLoopPeptide::predictIons(
   int charge ///< charge state
   ) {
   
-  char* seq = linked_peptide_.getSequence();
-  MODIFIED_AA_T* mod_seq = linked_peptide_.getModifiedSequence();
+  const char* seq = linked_peptide_.getSequence();
+  const MODIFIED_AA_T* mod_seq = linked_peptide_.getModifiedSequencePtr();
   ion_series->setCharge(charge);
   ion_series->update(seq, mod_seq);
   ion_series->predictIons();
-  
-  free(mod_seq);
 
   unsigned int first_site = min(getLinkPos(0), getLinkPos(1));
   unsigned int second_site = max(getLinkPos(0), getLinkPos(1));
   unsigned int N = strlen(seq);
-  free(seq);
+
 
   //iterate through the ions and modify the ones that have the linker 
   //attached.
@@ -345,6 +325,23 @@ bool SelfLoopPeptide::isModified() {
 
   return linked_peptide_.isModified();
 }
+
+
+bool compareSelfLoopPeptideMass(
+				const SelfLoopPeptide& spep1,
+				const SelfLoopPeptide& spep2) {
+
+  return spep1.getMassConst(MONO) < spep2.getMassConst(MONO);
+
+}
+
+bool compareSelfLoopPeptideMassToFLOAT(
+				       const SelfLoopPeptide& spep1,
+				       FLOAT_T mass) {
+
+  return spep1.getMassConst(MONO) < mass;
+}
+
 
 /*                                                                                                                                                                                                                          
  * Local Variables:                                                                                                                                                                                                         
