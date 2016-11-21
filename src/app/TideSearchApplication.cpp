@@ -1235,7 +1235,7 @@ void TideSearchApplication::search(void* threadarg) {
 	  pe = 0;
 	  for(peidx = 0; peidx < candidatePeptideStatusSize; peidx++) {
 	    if ((*candidatePeptideStatus)[peidx]) {
-              if(nonZerResEvScore == true) {
+              if(nonZeroResEvScore == true) {
                 int pepMassIntIdx = 0;
 	        int curPepMassInt;
 
