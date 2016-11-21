@@ -1139,58 +1139,99 @@ void TideSearchApplication::search(void* threadarg) {
 	    for(int i=0 ; i<curResidueEvidenceMatrix.size() ; i++){
 	      curResidueEvidenceMatrix[i].resize(curPepMassInt);
 	    }
-	    vector<int> maxColEvidence(curPepMassInt,0);
+          }
 
-	    //maxColEvidence is edited by reference
-	    int maxEvidence = getMaxColEvidence(curResidueEvidenceMatrix,maxColEvidence,curPepMassInt);
-	    int maxNResidue = floor((double)curPepMassInt / 57.0);
 
-	    //sort maxColEvidence in descending order
-	    std::sort(maxColEvidence.begin(),maxColEvidence.end(),greater<int>());
-	    int maxScore=0;
-	    for(int i=0 ; i<maxNResidue ; i++) { //maxColEvidence has been sorted
-	      maxScore += maxColEvidence[i];
+	  /************ calculate p-values for PSMs using residue evidence matrix ****************/
+          bool nonZeroResEvScore = false;
+	  int scoreResidueEvidence;
+//	  pe = 0;
+	  for(peidx = 0; peidx < candidatePeptideStatusSize; peidx++) {
+	    if ((*candidatePeptideStatus)[peidx]) {
+	      int pepMassIntIdx = 0;
+	      int curPepMassInt;
+
+	      //TODO should probably use iterator instead
+	      for(ma = 0; ma < nPepMassIntUniq; ma++ ) {
+		//TODO pepMassIntUnique should be accessed with an interator
+		if(pepMassIntUnique[ma] == pepMassInt[pe]) {
+                  pepMassIntIdx = ma;
+                  curPepMassInt = pepMassIntUnique[ma];
+                  break;
+		}
+	      }
+
+	      vector<vector<double> > curResidueEvidenceMatrix = residueEvidenceMatrix[pepMassIntIdx];
+	      Peptide* curPeptide = (*iter_);
+
+	      vector<unsigned int> intensArrayTheor;
+	      for(iter_uint = iter1_->unordered_peak_list_.begin();
+                  iter_uint != iter1_->unordered_peak_list_.end();
+                  iter_uint++) {
+                intensArrayTheor.push_back(*iter_uint);
+	      }
+
+              scoreResidueEvidence = calcResEvScore(curResidueEvidenceMatrix,intensArrayTheor,aaMassDouble,curPeptide);
+              if (scoreResidueEvidence > 0) {
+                nonZeroResEvScore = true;
+                break;
+              }
+//              pe++;
 	    }
-
-	    int scoreOffset; //set in calcResidueScoreCount function
-	    //initalized and populated in calcResidueScoreCount function
-	    vector<double> scoreResidueCount;
-
-	    calcResidueScoreCount(nAARes,curPepMassInt,
-				  curResidueEvidenceMatrix,aaMassInt,
-				  dAAFreqN, dAAFreqI, dAAFreqC,
-				  NTermMassBin,CTermMassBin,
-				  minDeltaMass,maxDeltaMass,
-				  maxEvidence,maxScore,
-				  scoreResidueCount,scoreOffset);
-//	    std::cout << "scoreOffset: " << scoreOffset << std::endl;
-	    scoreResidueOffsetObs[curPepMassInt] = scoreOffset;
-
-	    double totalCount = 0;
-	    for(int i=scoreOffset ; i<scoreResidueCount.size() ; i++) {
-	      totalCount += scoreResidueCount[i];
-	    }
-	    for(int i=scoreResidueCount.size()-2 ; i>-1; i--) {
-	      scoreResidueCount[i] = scoreResidueCount[i] + scoreResidueCount[i+1];
-	    }
-	    for(int i = 0; i < scoreResidueCount.size(); i++) {
-//              std::cout << "cdf val: " << scoreResidueCount[i] << std::endl;
-
-	      //Avoid potential underflow
-	      scoreResidueCount[i] = exp(log(scoreResidueCount[i]) - log(totalCount));
-//              std::cout << "pval: " << scientific << scoreResidueCount[i] << std::endl;
-	    }
-	    pValuesResidueObs[curPepMassInt] = scoreResidueCount;
-
-/* 
-	    for(int i=0; i <scoreResidueCount.size(); i++) {
-              std::cout << "row: " << i-scoreOffset << " " << scoreResidueCount[i] << std::endl;
-	    }
-*/
+	    ++iter_;
+	    ++iter1_;
 	  }
+
+          //Create dyanamic programming matrix if there is a 
+          //res-ev score greater than 0
+          if (nonZeroResEvScore == true) {
+            for (pe=0 ; pe<nPepMassIntUniq ; pe++) {
+              vector<vector<double> > curResidueEvidenceMatrix = residueEvidenceMatrix[pe];
+              int curPepMassInt = pepMassIntUnique[pe];
+  	      vector<int> maxColEvidence(curPepMassInt,0);
+
+              //maxColEvidence is edited by reference
+	      int maxEvidence = getMaxColEvidence(curResidueEvidenceMatrix,maxColEvidence,curPepMassInt);
+	      int maxNResidue = floor((double)curPepMassInt / 57.0);
+
+              //sort maxColEvidence in descending order
+	      std::sort(maxColEvidence.begin(),maxColEvidence.end(),greater<int>());
+	      int maxScore=0;
+	      for(int i=0 ; i<maxNResidue ; i++) { //maxColEvidence has been sorted
+	        maxScore += maxColEvidence[i];
+	      }
+
+              int scoreOffset; //set in calcResidueScoreCount function
+	      //initalized and populated in calcResidueScoreCount function
+	      vector<double> scoreResidueCount;
+
+              calcResidueScoreCount(nAARes,curPepMassInt,
+                                    curResidueEvidenceMatrix,aaMassInt,
+                                    dAAFreqN, dAAFreqI, dAAFreqC,
+                                    NTermMassBin,CTermMassBin,
+                                    minDeltaMass,maxDeltaMass,
+                                    maxEvidence,maxScore,
+                                    scoreResidueCount,scoreOffset);
+	      scoreResidueOffsetObs[curPepMassInt] = scoreOffset;
+
+	      double totalCount = 0;
+	      for(int i=scoreOffset ; i<scoreResidueCount.size() ; i++) {
+	        totalCount += scoreResidueCount[i];
+	      }
+	      for(int i=scoreResidueCount.size()-2 ; i>-1; i--) {
+	        scoreResidueCount[i] = scoreResidueCount[i] + scoreResidueCount[i+1];
+	      }
+	      for(int i = 0; i < scoreResidueCount.size(); i++) {
+	        //Avoid potential underflow
+	        scoreResidueCount[i] = exp(log(scoreResidueCount[i]) - log(totalCount));
+	      }
+	      pValuesResidueObs[curPepMassInt] = scoreResidueCount;
+	    }
+          } 
    
 	  /************ calculate p-values for PSMs using residue evidence matrix ****************/
-	  int scoreResidueEvidence;
+          iter_ = active_peptide_queue->iter_;
+          iter1_ = active_peptide_queue->iter1_;
 	  pe = 0;
 	  for(peidx = 0; peidx < candidatePeptideStatusSize; peidx++) {
 	    if ((*candidatePeptideStatus)[peidx]) {
