@@ -1145,7 +1145,7 @@ void TideSearchApplication::search(void* threadarg) {
 	  /************ calculate p-values for PSMs using residue evidence matrix ****************/
           bool nonZeroResEvScore = false;
 	  int scoreResidueEvidence;
-//	  pe = 0;
+	  pe = 0;
 	  for(peidx = 0; peidx < candidatePeptideStatusSize; peidx++) {
 	    if ((*candidatePeptideStatus)[peidx]) {
 	      int pepMassIntIdx = 0;
@@ -1176,7 +1176,7 @@ void TideSearchApplication::search(void* threadarg) {
                 nonZeroResEvScore = true;
                 break;
               }
-//              pe++;
+              pe++;
 	    }
 	    ++iter_;
 	    ++iter1_;
