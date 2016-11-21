@@ -1235,60 +1235,73 @@ void TideSearchApplication::search(void* threadarg) {
 	  pe = 0;
 	  for(peidx = 0; peidx < candidatePeptideStatusSize; peidx++) {
 	    if ((*candidatePeptideStatus)[peidx]) {
-	      int pepMassIntIdx = 0;
-	      int curPepMassInt;
+              if(nonZerResEvScore == true) {
+                int pepMassIntIdx = 0;
+	        int curPepMassInt;
 
-	      //TODO should probably use iterator instead
-	      for(ma = 0; ma < nPepMassIntUniq; ma++ ) {
-		//TODO pepMassIntUnique should be accessed with an interator
-		if(pepMassIntUnique[ma] == pepMassInt[pe]) {
-		  pepMassIntIdx = ma;
-		  curPepMassInt = pepMassIntUnique[ma];
-		  break;
-		}
-	      }
+                //TODO should probably use iterator instead
+	        for(ma = 0; ma < nPepMassIntUniq; ma++ ) {
+                  //TODO pepMassIntUnique should be accessed with an interator
+	          if(pepMassIntUnique[ma] == pepMassInt[pe]) {
+	            pepMassIntIdx = ma;
+                    curPepMassInt = pepMassIntUnique[ma];
+                    break;
+                  }
+                }
 
-	      vector<vector<double> > curResidueEvidenceMatrix = residueEvidenceMatrix[pepMassIntIdx];
-	      Peptide* curPeptide = (*iter_);
+	        vector<vector<double> > curResidueEvidenceMatrix = residueEvidenceMatrix[pepMassIntIdx];
+	        Peptide* curPeptide = (*iter_);
 
-	      vector<unsigned int> intensArrayTheor;
-	      for(iter_uint = iter1_->unordered_peak_list_.begin();
-		  iter_uint != iter1_->unordered_peak_list_.end();
-		  iter_uint++) {
-		intensArrayTheor.push_back(*iter_uint);
-	      }
+                vector<unsigned int> intensArrayTheor;
+	        for(iter_uint = iter1_->unordered_peak_list_.begin();
+                    iter_uint != iter1_->unordered_peak_list_.end();
+  		    iter_uint++) {
+                  intensArrayTheor.push_back(*iter_uint);
+                }
 
+                scoreResidueEvidence = calcResEvScore(curResidueEvidenceMatrix,intensArrayTheor,aaMassDouble,curPeptide);
 
-              scoreResidueEvidence = calcResEvScore(curResidueEvidenceMatrix,intensArrayTheor,aaMassDouble,curPeptide);
+	        int scoreCountIdx = scoreResidueEvidence + scoreResidueOffsetObs[curPepMassInt];
+	        double pValue = pValuesResidueObs[curPepMassInt][scoreCountIdx];
 
-	      int scoreCountIdx = scoreResidueEvidence + scoreResidueOffsetObs[curPepMassInt];
-	      double pValue = pValuesResidueObs[curPepMassInt][scoreCountIdx];
-
-              if (pValue == 0.0) {
-                std::cout << "Spectrum: " << sc->spectrum->SpectrumNumber() << std::endl;
-                std::cout << curPeptide->Seq() << std::endl;
-                std::cout << scoreResidueEvidence << std::endl;
-                carp(CARP_FATAL,"PSM p-value should not be equal to 0.0");
-              }
+                if (pValue == 0.0) {
+                  std::cout << "Spectrum: " << sc->spectrum->SpectrumNumber() << std::endl;
+                  std::cout << curPeptide->Seq() << std::endl;
+                  std::cout << scoreResidueEvidence << std::endl;
+                  carp(CARP_FATAL,"PSM p-value should not be equal to 0.0");
+                }
              
-	      if(peptide_centric) {
-		carp(CARP_FATAL, "residue-evidence has not been implemented with 'peptide-centric-search T' yet.");
-	      }
-	      else {
-		TideMatchSet::Pair pair;
-		pair.first.first = pValue;
-		//TODO do I ned a RESCALE_FACTOR?
-		pair.first.second = (double)scoreResidueEvidence;
-		//TODO ugly hack to conform with the way these indices are generated in standard tide-search
-		//TODO above comment was copied. not sure applies here
-		pair.second = candidatePeptideStatusSize - peidx;
-		match_arr.push_back(pair);
-	      }
-	      pe++;
-	    }
+	        if(peptide_centric) {
+                  carp(CARP_FATAL, "residue-evidence has not been implemented with 'peptide-centric-search T' yet.");
+  	        }
+  	        else {
+                  TideMatchSet::Pair pair;
+                  pair.first.first = pValue;
+                  pair.first.second = (double)scoreResidueEvidence;
+                  //TODO ugly hack to conform with the way these indices are generated in standard tide-search
+                  //TODO above comment was copied. not sure applies here
+                  pair.second = candidatePeptideStatusSize - peidx;
+                  match_arr.push_back(pair);
+                }
+	      } else {
+                if(peptide_centric) {
+                  carp(CARP_FATAL, "residue-evidence has not been implemented with 'peptide-centric-search T' yet.");
+                }
+                else {
+                  TideMatchSet::Pair pair;
+                  pair.first.first = 1.0;
+                  pair.first.second = (double)scoreResidueEvidence;
+                  //TODO ugly hack to conform with the way these indices are generated in standard tide-search
+                  //TODO above comment was copied. not sure applies here
+                  pair.second = candidatePeptideStatusSize - peidx;
+                  match_arr.push_back(pair);
+                }
+              }
+              pe++;
+            }
 	    ++iter_;
 	    ++iter1_;
-	  }
+          }
    
 	  //clean up 
 	  delete [] pepMassInt;
