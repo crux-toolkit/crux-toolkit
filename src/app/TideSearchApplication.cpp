@@ -737,9 +737,7 @@ void TideSearchApplication::search(void* threadarg) {
           vector<int> pepMassIntUnique;
           pepMassIntUnique.reserve(nCandPeptide);
        
-          //Added by Andy Lin in Feb 2016 
-          getMassBin(pepMassInt,pepMassIntUnique,active_peptide_queue,candidatePeptideStatus);
-          //End added by Andy Lin
+          getMassBin(pepMassInt,pepMassIntUnique,active_peptide_queue,candidatePeptideStatus); //Added by Andy Lin in Feb 2016 
         
           std::sort(pepMassIntUnique.begin(), pepMassIntUnique.end());
           vector<int>::iterator last = std::unique(pepMassIntUnique.begin(),
@@ -1145,6 +1143,7 @@ void TideSearchApplication::search(void* threadarg) {
 	  /************ calculate p-values for PSMs using residue evidence matrix ****************/
           bool nonZeroResEvScore = false;
 	  int scoreResidueEvidence;
+          vector<int> resEvScores;
 	  pe = 0;
 	  for(peidx = 0; peidx < candidatePeptideStatusSize; peidx++) {
 	    if ((*candidatePeptideStatus)[peidx]) {
@@ -1172,15 +1171,17 @@ void TideSearchApplication::search(void* threadarg) {
 	      }
 
               scoreResidueEvidence = calcResEvScore(curResidueEvidenceMatrix,intensArrayTheor,aaMassDouble,curPeptide);
+              resEvScores.push_back(scoreResidueEvidence);
+
               if (scoreResidueEvidence > 0) {
                 nonZeroResEvScore = true;
-                break;
               }
               pe++;
 	    }
 	    ++iter_;
 	    ++iter1_;
 	  }
+          assert(resEvScores.size() == nCandPeptide);
 
           //Create dyanamic programming matrix if there is a 
           //res-ev score greater than 0
@@ -1237,37 +1238,24 @@ void TideSearchApplication::search(void* threadarg) {
 	    if ((*candidatePeptideStatus)[peidx]) {
               if(nonZeroResEvScore == true) {
                 int pepMassIntIdx = 0;
-	        int curPepMassInt;
+                int curPepMassInt;
 
                 //TODO should probably use iterator instead
-	        for(ma = 0; ma < nPepMassIntUniq; ma++ ) {
+                for(ma = 0; ma < nPepMassIntUniq; ma++ ) {
                   //TODO pepMassIntUnique should be accessed with an interator
-	          if(pepMassIntUnique[ma] == pepMassInt[pe]) {
-	            pepMassIntIdx = ma;
+                  if(pepMassIntUnique[ma] == pepMassInt[pe]) {
+                    pepMassIntIdx = ma;
                     curPepMassInt = pepMassIntUnique[ma];
                     break;
                   }
                 }
 
-	        vector<vector<double> > curResidueEvidenceMatrix = residueEvidenceMatrix[pepMassIntIdx];
-	        Peptide* curPeptide = (*iter_);
-
-                vector<unsigned int> intensArrayTheor;
-	        for(iter_uint = iter1_->unordered_peak_list_.begin();
-                    iter_uint != iter1_->unordered_peak_list_.end();
-  		    iter_uint++) {
-                  intensArrayTheor.push_back(*iter_uint);
-                }
-
-                scoreResidueEvidence = calcResEvScore(curResidueEvidenceMatrix,intensArrayTheor,aaMassDouble,curPeptide);
-
+                scoreResidueEvidence = resEvScores[pe];
 	        int scoreCountIdx = scoreResidueEvidence + scoreResidueOffsetObs[curPepMassInt];
 	        double pValue = pValuesResidueObs[curPepMassInt][scoreCountIdx];
 
                 if (pValue == 0.0) {
                   std::cout << "Spectrum: " << sc->spectrum->SpectrumNumber() << std::endl;
-                  std::cout << curPeptide->Seq() << std::endl;
-                  std::cout << scoreResidueEvidence << std::endl;
                   carp(CARP_FATAL,"PSM p-value should not be equal to 0.0");
                 }
              
@@ -1449,11 +1437,11 @@ void TideSearchApplication::search(void* threadarg) {
 	  std::sort(sortEvidenceObs.begin(), sortEvidenceObs.end(), greater<int>());
 
 	  int maxScore = 0;
-	  int minScore = 0;
-
 	  for (int sc = 0; sc < maxNResidue; sc++) {
 	    maxScore += sortEvidenceObs[sc];
 	  }
+
+          int minScore = 0;
 	  for (int sc = maxPrecurMassBin - maxNResidue; sc < maxPrecurMassBin; sc++) {
 	    minScore += sortEvidenceObs[sc];
 	  }
