@@ -197,8 +197,9 @@ bool PWIZSpectrumCollection::parse() {
       }
     }
     if (assign_new_scans) {
-      carp(CARP_INFO, "Proteowizard parser could not determine scan numbers "
-           "for this file, assigning new scan numbers.");
+      carp_once(CARP_WARNING,
+           "Proteowizard parser could not determine scan numbers "
+           "for this file. Assigning new scan numbers.");
       scan_number_begin = ++scan_counter;
       scan_number_end = scan_number_begin;
     }
