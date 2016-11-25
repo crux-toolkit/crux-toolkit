@@ -606,7 +606,8 @@ void TideSearchApplication::search(void* threadarg) {
       (*total_candidate_peptides) += nCandPeptide;
       locks_array[2]->unlock();
 
-      TideMatchSet::Arr match_arr(nCandPeptide); // scored peptides will go here.
+//      TideMatchSet::Arr match_arr(nCandPeptide); // scored peptides will go here.
+      TideMatchSet::ScoresArr match_arr(nCandPeptide); //scored peptides will go here
   
       // iterators needed at multiple places in following code
       deque<Peptide*>::const_iterator iter_ = active_peptide_queue->iter_;
@@ -724,11 +725,15 @@ void TideSearchApplication::search(void* threadarg) {
           if (peptide_centric) {
               (*iter_)->AddHit(spectrum, pValue, (double)scoreRefactInt, candidatePeptideStatusSize - peidx, charge);
           } else {
-            TideMatchSet::Pair pair;
-            pair.first.first = pValue;
-            pair.first.second = (double)scoreRefactInt / RESCALE_FACTOR;
-            pair.second = candidatePeptideStatusSize - peidx; // TODO ugly hack to conform with the way these indices are generated in standard tide-search
-            match_arr.push_back(pair);
+            TideMatchSet::Scores curScores;
+            curScores.xcorr_pval = pValue;
+            curScores.xcorr_score = (double)scoreRefactInt / RESCALE_FACTOR;
+            curScores.rank = candidatePeptideStatusSize - peidx; // TODO ugly hack to conform with the way these indices are generated in standard tide-search
+//            TideMatchSet::Pair pair;
+//            pair.first.first = pValue;
+//            pair.first.second = (double)scoreRefactInt / RESCALE_FACTOR;
+//            pair.second = candidatePeptideStatusSize - peidx; // TODO ugly hack to conform with the way these indices are generated in standard tide-search
+//            match_arr.push_back(pair);
           }
           ++pe;
         }
