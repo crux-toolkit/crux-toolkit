@@ -27,8 +27,18 @@ class TideMatchSet {
   typedef pair<int, int> Pair2;
   typedef FixedCapacityArray<Pair2> Arr2;
 
-  typedef pair<pair<double, double>, int> Pair;   //store results for exact_pval calculations
-  typedef FixedCapacityArray<Pair> Arr;
+//  typedef pair<pair<double, double>, int> Pair;   //store results for exact_pval calculations
+//  typedef FixedCapacityArray<Pair> Arr;
+
+  struct Scores {
+    double xcorr_score;
+    double xcorr_pval;
+    int resEv_score;
+    double resEv_pval;
+    double combinedPval;
+    int rank;
+  };
+  typedef FixedCapacityArray<Scores> Arr;
 
   // Matches will be an array of pairs, (score, counter), where counter refers
   // to the index within the ActivePeptideQueue, counting from the back.  This
