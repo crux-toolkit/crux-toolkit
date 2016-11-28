@@ -574,6 +574,19 @@ void TideSearchApplication::search(void* threadarg) {
             }
           }
       } else {  //spectrum centric match report.
+        TideMatchSet::Arr match_arr(nCandPeptide); 
+        for (TideMatchSet::Arr2::iterator it = match_arr2.begin();
+             it != match_arr2.end();
+             ++it) {
+          int peptide_idx = candidatePeptideStatusSize - (it->second);
+          if ((*candidatePeptideStatus)[peptide_idx]) {
+            TideMatchSet::Scores curScore;
+            curScore.xcorr_score = (double)(it->first / XCORR_SCALING);
+            curScore.rank = it->second;
+            match_arr.push_back(curScore);
+          }
+        }
+/*
         TideMatchSet::Arr match_arr(nCandPeptide);
         for (TideMatchSet::Arr2::iterator it = match_arr2.begin();
              it != match_arr2.end();
@@ -587,6 +600,7 @@ void TideSearchApplication::search(void* threadarg) {
             match_arr.push_back(pair);
           }
         }
+*/
         TideMatchSet matches(&match_arr, highest_mz);
         matches.exact_pval_search_ = exact_pval_search;
 
@@ -607,7 +621,7 @@ void TideSearchApplication::search(void* threadarg) {
       locks_array[2]->unlock();
 
 //      TideMatchSet::Arr match_arr(nCandPeptide); // scored peptides will go here.
-      TideMatchSet::ScoresArr match_arr(nCandPeptide); //scored peptides will go here
+      TideMatchSet::Arr match_arr(nCandPeptide); //scored peptides will go here
   
       // iterators needed at multiple places in following code
       deque<Peptide*>::const_iterator iter_ = active_peptide_queue->iter_;
