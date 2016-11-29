@@ -601,7 +601,11 @@ void TideMatchSet::computeDeltaCns(
 ) {
   vector<FLOAT_T> scores;
   for (vector<Arr::iterator>::const_iterator i = vec.begin(); i != vec.end(); i++) {
-    scores.push_back((*i)->xcorr_pval);
+    if (Params::GetBool("exact-p-value")) {
+      scores.push_back((*i)->xcorr_pval);
+    } else {
+      scores.push_back((*i)->xcorr_score);
+    }
   }
   vector< pair<FLOAT_T, FLOAT_T> > deltaCns = MatchCollection::calculateDeltaCns(
     scores, !Params::GetBool("exact-p-value") ? XCORR : TIDE_SEARCH_EXACT_PVAL);
