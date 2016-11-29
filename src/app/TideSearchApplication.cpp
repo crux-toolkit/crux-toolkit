@@ -743,6 +743,7 @@ void TideSearchApplication::search(void* threadarg) {
             curScores.xcorr_pval = pValue;
             curScores.xcorr_score = (double)scoreRefactInt / RESCALE_FACTOR;
             curScores.rank = candidatePeptideStatusSize - peidx; // TODO ugly hack to conform with the way these indices are generated in standard tide-search
+            match_arr.push_back(curScores);
 //            TideMatchSet::Pair pair;
 //            pair.first.first = pValue;
 //            pair.first.second = (double)scoreRefactInt / RESCALE_FACTOR;
