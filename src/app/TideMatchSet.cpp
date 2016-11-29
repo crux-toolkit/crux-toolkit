@@ -534,6 +534,8 @@ void TideMatchSet::gatherTargetsAndDecoys(
     for (int i = 0; i < toAdd; ) {
       if (exact_pval_search_) {
         pop_heap(matches_->begin(), matches_->end() - i, highScoreBest ? lessXcorrPvalScore : moreXcorrPvalScore); 
+      } else {
+        pop_heap(matches_->begin(), matches_->end() - i, highScoreBest ? lessXcorrScore : moreXcorrScore);
       }
       targetsOut.push_back(matches_->end() - (++i));
     }
