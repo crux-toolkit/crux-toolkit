@@ -1342,9 +1342,11 @@ void TideSearchApplication::search(void* threadarg) {
           int tmpMass = MassConstants::mass2bin(aaMassDouble[i]);
           aaMassInt.push_back(tmpMass);
         }
-        const int minDeltaMass = aaMassInt[0];
-        const int maxDeltaMass = aaMassInt[nAARes - 1];
+        //TODO compare minDeltaMass/maxDeltaMass from XCorr p-val and res-ev p-val
+        assert(minDeltaMass = aaMassInt[0]);
+        assert(maxDeltaMass = aaMassInt[nAARes - 1]);
 
+        int maxPrecurMassBin = floor(MaxBin::Global().CacheBinEnd() + 50.0);
         double fragTol = Params::GetDouble("fragment-tolerance");
         int granularityScale = Params::GetInt("evidence-granularity");
         //End RES-EV
@@ -1430,7 +1432,7 @@ void TideSearchApplication::search(void* threadarg) {
            evidenceObs[pe][ma] = 0;
          }
          scoreOffsetObs[pe] = 0;
-         pepMaInt = pepMassIntUnique[pe]; // TODO should be accessed with an iterator
+         int pepMaInt = pepMassIntUnique[pe]; // TODO should be accessed with an iterator
 
          //preprocess to create one integerized evidence vector for each cluster of masses among selected peptides
          double pepMassMonoMean = (pepMaInt - 0.5 + bin_offset_) * bin_width_;
@@ -1485,6 +1487,7 @@ void TideSearchApplication::search(void* threadarg) {
        iter1_ = active_peptide_queue -> iter1_;
        int curPepMassInt;
        bool nonZeroResEvScore = false;
+       int scoreResidueEvidence;
        vector<double> xcorrScores;
        vector<int> resEvScores;
        pe = 0;
@@ -1590,7 +1593,6 @@ void TideSearchApplication::search(void* threadarg) {
        /************ calculate p-values for PSMs using residue evidence matrix ****************/
         iter_ = active_peptide_queue->iter_;
         iter1_ = active_peptide_queue->iter1_;
-        int curPepMassInt;
         pe = 0;
         for(peidx = 0; peidx < candidatePeptideStatusSize; peidx++) {
           if ((*candidatePeptideStatus)[peidx]) {
@@ -1619,22 +1621,22 @@ void TideSearchApplication::search(void* threadarg) {
               if(peptide_centric) {
                 carp(CARP_FATAL, "residue-evidence has not been implemented with 'peptide-centric-search T' yet.");
               } else {
-                TideMatchSet::Pair pair;
-                pair.first.first = pValue;
-                pair.first.second = (double)scoreResidueEvidence;
+//                TideMatchSet::Pair pair;
+//                pair.first.first = pValue;
+//                pair.first.second = (double)scoreResidueEvidence;
                 //TODO ugly hack to conform with the way these indices are generated in standard tide-search
                 //TODO above comment was copied. not sure applies here
-                pair.second = candidatePeptideStatusSize - peidx;
-                match_arr.push_back(pair);
+//                pair.second = candidatePeptideStatusSize - peidx;
+//                match_arr.push_back(pair);
               }
             }  else {
-              TideMatchSet::Pair pair;
-              pair.first.first = 1.0;
-              pair.first.second = (double)scoreResidueEvidence;
+//              TideMatchSet::Pair pair;
+//              pair.first.first = 1.0;
+//              pair.first.second = (double)scoreResidueEvidence;
               //TODO ugly hack to conform with the way these indices are generated in standard tide-search
               //TODO above comment was copied. not sure applies here
-              pair.second = candidatePeptideStatusSize - peidx;
-              match_arr.push_back(pair);
+//              pair.second = candidatePeptideStatusSize - peidx;
+//              match_arr.push_back(pair);
             }
             pe++;
           }
@@ -1649,11 +1651,11 @@ void TideSearchApplication::search(void* threadarg) {
           // matches will arrange th results in a heap by score, return the top
           // few, and recover the association between counter and peptide. We output 
           // the top matches.
-          TideMatchSet matches(&match_arr, highest_mz);
-          matches.exact_pval_search_ = exact_pval_search_;
-          matches.report(target_file, decoy_file, top_matches, spectrum_filename,
-                         spectrum, charge, active_peptide_queue, proteins,
-                         locations, compute_sp, false, locks_array[0]);
+//          TideMatchSet matches(&match_arr, highest_mz);
+//          matches.exact_pval_search_ = exact_pval_search_;
+//          matches.report(target_file, decoy_file, top_matches, spectrum_filename,
+//                         spectrum, charge, active_peptide_queue, proteins,
+//                         locations, compute_sp, false, locks_array[0]);
         }
         break;
       }
