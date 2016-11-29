@@ -368,7 +368,7 @@ void TideMatchSet::writeToFile(
     // Use scientific notation for exact p-value, but not refactored XCorr.
     if (exact_pval_search_) {
       *file << StringUtils::ToString((*i)->first.first, precision, false) << '\t';
-      *file << StringUtils::ToString((*i)->first.second, 0, true) << '\t';
+      *file << StringUtils::ToString((*i)->first.second, precision, true) << '\t';
     } else {
       *file << StringUtils::ToString((*i)->first.first, precision, true) << '\t';
     }      
