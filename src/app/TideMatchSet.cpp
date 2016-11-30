@@ -323,7 +323,7 @@ void TideMatchSet::writeToFile(
     (vec.size() >= top_n) ? vec.begin() + top_n : vec.end();
 
   for (vector<Arr::iterator>::const_iterator i = vec.begin(); i != cutoff; ++i) {
-    const Peptide* peptide = peptides->GetPeptide((*i)->second);
+    const Peptide* peptide = peptides->GetPeptide((*i)->rank);
     const pb::Protein* protein = proteins[peptide->FirstLocProteinId()];
     int pos = peptide->FirstLocPos();
     string proteinNames = getProteinName(*protein,
@@ -367,10 +367,10 @@ void TideMatchSet::writeToFile(
 
     // Use scientific notation for exact p-value, but not refactored XCorr.
     if (exact_pval_search_) {
-      *file << StringUtils::ToString((*i)->first.first, precision, false) << '\t';
-      *file << StringUtils::ToString((*i)->first.second, precision, true) << '\t';
+      *file << StringUtils::ToString((*i)->xcorr_pval, precision, false) << '\t';
+      *file << StringUtils::ToString((*i)->xcorr_score, precision, true) << '\t';
     } else {
-      *file << StringUtils::ToString((*i)->first.first, precision, true) << '\t';
+      *file << StringUtils::ToString((*i)->xcorr_score, precision, true) << '\t';
     }      
 
     *file << ++cur << '\t';
@@ -532,11 +532,21 @@ void TideMatchSet::gatherTargetsAndDecoys(
   int top_n,
   bool highScoreBest // indicates semantics of score magnitude
 ) {
-  make_heap(matches_->begin(), matches_->end(), highScoreBest ? lessScore : moreScore);
+  if (exact_pval_search_) {
+    make_heap(matches_->begin(), matches_->end(), highScoreBest ? lessXcorrPvalScore : moreXcorrPvalScore);
+  } else {
+    make_heap(matches_->begin(), matches_->end(), highScoreBest ? lessXcorrScore : moreXcorrScore);
+  }
+  
   if (!Params::GetBool("concat") && TideSearchApplication::hasDecoys()) {
     for (Arr::iterator i = matches_->end(); i != matches_->begin(); ) {
-      pop_heap(matches_->begin(), i--, highScoreBest ? lessScore : moreScore);
-      const Peptide& peptide = *(peptides->GetPeptide(i->second));
+      if (exact_pval_search_) {
+        pop_heap(matches_->begin(), i--, highScoreBest ? lessXcorrPvalScore : moreXcorrPvalScore);
+      } else {
+        pop_heap(matches_->begin(), i--, highScoreBest ? lessXcorrScore : moreXcorrScore);
+      }
+
+      const Peptide& peptide = *(peptides->GetPeptide(i->rank));
       const pb::Protein& protein = *(proteins[peptide.FirstLocProteinId()]);
       vector<Arr::iterator>* vec_ptr = !peptide.IsDecoy() ? &targetsOut : &decoysOut;
       if (vec_ptr->size() < top_n + 1) {
@@ -546,7 +556,11 @@ void TideMatchSet::gatherTargetsAndDecoys(
   } else {
     int toAdd = min(top_n + 1, matches_->size());
     for (int i = 0; i < toAdd; ) {
-      pop_heap(matches_->begin(), matches_->end() - i, highScoreBest ? lessScore : moreScore);
+      if (exact_pval_search_) {
+        pop_heap(matches_->begin(), matches_->end() - i, highScoreBest ? lessXcorrPvalScore : moreXcorrPvalScore); 
+      } else {
+        pop_heap(matches_->begin(), matches_->end() - i, highScoreBest ? lessXcorrScore : moreXcorrScore);
+      }
       targetsOut.push_back(matches_->end() - (++i));
     }
   }
@@ -613,7 +627,11 @@ void TideMatchSet::computeDeltaCns(
 ) {
   vector<FLOAT_T> scores;
   for (vector<Arr::iterator>::const_iterator i = vec.begin(); i != vec.end(); i++) {
-    scores.push_back((*i)->first.first);
+    if (Params::GetBool("exact-p-value")) {
+      scores.push_back((*i)->xcorr_pval);
+    } else {
+      scores.push_back((*i)->xcorr_score);
+    }
   }
   vector< pair<FLOAT_T, FLOAT_T> > deltaCns = MatchCollection::calculateDeltaCns(
     scores, !Params::GetBool("exact-p-value") ? XCORR : TIDE_SEARCH_EXACT_PVAL);
@@ -633,7 +651,7 @@ void TideMatchSet::computeSpData(
   spData.reserve(vec.size());
   for (vector<Arr::iterator>::const_iterator i = vec.begin(); i != vec.end(); ++i) {
     spData.push_back(make_pair(*i, SpScorer::SpScoreData()));
-    const Peptide& peptide = *(peptides->GetPeptide((*i)->second));
+    const Peptide& peptide = *(peptides->GetPeptide((*i)->rank));
     pb::Peptide* pb_peptide = getPbPeptide(peptide);
     sp_scorer->Score(*pb_peptide, spData.back().second);
     delete pb_peptide;
