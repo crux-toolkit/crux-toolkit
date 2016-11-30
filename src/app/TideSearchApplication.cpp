@@ -682,11 +682,17 @@ void TideSearchApplication::search(void* threadarg) {
                  ++it) {
               int peptide_idx = candidatePeptideStatusSize - (it->second);
               if ((*candidatePeptideStatus)[peptide_idx]) {
+                TideMatchSet::Scores curScore;
+                curScore.xcorr_score = (double)(it->first / XCORR_SCALING);
+                curScore.rank = it->second;
+                match_arr.push_back(curScore);
+/*
                 TideMatchSet::Pair pair;
                 pair.first.first = (double)(it->first / XCORR_SCALING);
                 pair.first.second = 0.0;
                 pair.second = it->second;
                 match_arr.push_back(pair);
+*/
               }
             }
 
@@ -817,14 +823,22 @@ void TideSearchApplication::search(void* threadarg) {
               }
               int scoreCountIdx = scoreRefactInt + scoreOffsetObs[pepMassIntIdx];
               double pValue = pValueScoreObs[pepMassIntIdx][scoreCountIdx];
+
               if (peptide_centric){
                 (*iter_)->AddHit(spectrum, pValue, (double)scoreRefactInt, candidatePeptideStatusSize - peidx, charge); 
               } else {
+                TideMatchSet::Scores curScores;
+                curScores.xcorr_pval = pValue;
+                curScores.xcorr_score = (double)scoreRefactInt / RESCALE_FACTOR;
+                curScores.rank = candidatePeptideStatusSize - peidx; // TODO ugly hack to conform with the way these indices are generated in standard tide-search
+                match_arr.push_back(pair);
+/*
                 TideMatchSet::Pair pair;
                 pair.first.first = pValue;
                 pair.first.second = (double)scoreRefactInt / RESCALE_FACTOR;
                 pair.second = candidatePeptideStatusSize - peidx; // TODO ugly hack to conform with the way these indices are generated in standard tide-search
                 match_arr.push_back(pair);
+*/
               }
               pe++;
             } 
@@ -1014,11 +1028,17 @@ void TideSearchApplication::search(void* threadarg) {
 		carp(CARP_FATAL, "residue-evidence has not been implemented with 'peptide-centric-search T' yet.");
 	      }
 	      else {
+                TideMatchSet::Scores curScore;
+                curScore.resEv_score = (double)scoreResidueEvidence;
+                curScore.rank = candidatePeptideStatusSize - peidx; //TODO ugly hack to conform with the way these indices are generated in standard tide-search
+                match_arr.push_back(curScore);
+/*
                 TideMatchSet::Pair pair;
                 pair.first.first = (double)scoreResidueEvidence;
                 pair.first.second = 0.0;
                 pair.second = candidatePeptideStatusSize - peidx; //TODO ugly hack to conform with the way these indices are generated in standard tide-search
                 match_arr.push_back(pair);
+*/
 	      }
 	      pe++;
 	    }
@@ -1260,6 +1280,12 @@ void TideSearchApplication::search(void* threadarg) {
                   carp(CARP_FATAL, "residue-evidence has not been implemented with 'peptide-centric-search T' yet.");
   	        }
   	        else {
+                  TideMatchSet::Scores curScore;
+                  curScore.resEv_pval = pValue;
+                  curScore.resEv_score = (double)scoreResidueEvidence;
+                  curScore.rank = candidatePeptideStatusSize - peidx;
+                  match_arr.push_back(pair);
+/*
                   TideMatchSet::Pair pair;
                   pair.first.first = pValue;
                   pair.first.second = (double)scoreResidueEvidence;
@@ -1267,12 +1293,19 @@ void TideSearchApplication::search(void* threadarg) {
                   //TODO above comment was copied. not sure applies here
                   pair.second = candidatePeptideStatusSize - peidx;
                   match_arr.push_back(pair);
+*/
                 }
 	      } else {
                 if(peptide_centric) {
                   carp(CARP_FATAL, "residue-evidence has not been implemented with 'peptide-centric-search T' yet.");
                 }
                 else {
+                  TideMatchSet::Scores curScore;
+                  curScore.resEv_pval = pValue;
+                  curScore.resEv_score = (double)scoreResidueEvidence;
+                  curScore.rank = candidatePeptideStatusSize - peidx;
+                  match_arr.push_back(pair);
+/*
                   TideMatchSet::Pair pair;
                   pair.first.first = 1.0;
                   pair.first.second = (double)scoreResidueEvidence;
@@ -1280,6 +1313,7 @@ void TideSearchApplication::search(void* threadarg) {
                   //TODO above comment was copied. not sure applies here
                   pair.second = candidatePeptideStatusSize - peidx;
                   match_arr.push_back(pair);
+*/
                 }
               }
               pe++;
