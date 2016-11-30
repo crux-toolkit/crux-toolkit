@@ -452,7 +452,8 @@ void TideMatchSet::writeHeaders(ofstream* file, bool decoyFile, bool sp) {
       }
       else if (Params::GetString("score-function") == "residue-evidence") {
         if(Params::GetBool("exact-p-value")) {
-          *file << get_column_header(RESIDUE_PVALUE_COL) << '\t' << get_column_header(RESIDUE_EVIDENCE_COL);
+          *file << get_column_header(RESIDUE_PVALUE_COL) << '\t' 
+                << get_column_header(RESIDUE_EVIDENCE_COL);
         }
         else {
           *file << get_column_header(RESIDUE_EVIDENCE_COL);
@@ -460,7 +461,12 @@ void TideMatchSet::writeHeaders(ofstream* file, bool decoyFile, bool sp) {
         *file << '\t' << get_column_header(RESIDUE_RANK_COL);
       }
       else if (Params::GetString("score-function") == "both") {
-        continue;
+        *file << get_column_header(EXACT_PVALUE_COL) << '\t'
+              << get_column_header(REFACTORED_SCORE_COL) << '\t'
+              << get_column_header(RESIDUE_PVALUE_COL) << '\t' 
+              << get_column_header(RESIDUE_EVIDENCE_COL) <<  '\t'
+              << get_column_header(BOTH_PVALUE_COL) << '\t'
+              << get_column_header(BOTH_PVALUE_RANK);
       }
 
       if (Params::GetInt("elution-window-size") > 0) {

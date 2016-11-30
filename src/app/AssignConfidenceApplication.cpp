@@ -158,6 +158,9 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
     case RESIDUE_EVIDENCE_COL:
       score_type = RESIDUE_EVIDENCE_SCORE;
       break;
+    case BOTH_PVALUE_COL:
+      score_type = BOTH_PVALUE;
+      break;
     case ELUTION_WINDOW_COL:
       score_type = TIDE_SEARCH_EXACT_SMOOTHED;
       break;      

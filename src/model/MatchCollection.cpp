@@ -194,6 +194,9 @@ void MatchCollection::sort(
   case RESIDUE_EVIDENCE_PVAL:
     smaller_is_better = true;
     break;
+  case BOTH_PVALUE:
+    smaller_is_better = true;
+    break;
 
   case SIDAK_ADJUSTED:
   case TIDE_SEARCH_EXACT_SMOOTHED:

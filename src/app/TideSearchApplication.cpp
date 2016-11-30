@@ -827,11 +827,11 @@ void TideSearchApplication::search(void* threadarg) {
               if (peptide_centric){
                 (*iter_)->AddHit(spectrum, pValue, (double)scoreRefactInt, candidatePeptideStatusSize - peidx, charge); 
               } else {
-                TideMatchSet::Scores curScores;
-                curScores.xcorr_pval = pValue;
-                curScores.xcorr_score = (double)scoreRefactInt / RESCALE_FACTOR;
-                curScores.rank = candidatePeptideStatusSize - peidx; // TODO ugly hack to conform with the way these indices are generated in standard tide-search
-                match_arr.push_back(pair);
+                TideMatchSet::Scores curScore;
+                curScore.xcorr_pval = pValue;
+                curScore.xcorr_score = (double)scoreRefactInt / RESCALE_FACTOR;
+                curScore.rank = candidatePeptideStatusSize - peidx; // TODO ugly hack to conform with the way these indices are generated in standard tide-search
+                match_arr.push_back(curScore);
 /*
                 TideMatchSet::Pair pair;
                 pair.first.first = pValue;
@@ -1282,9 +1282,9 @@ void TideSearchApplication::search(void* threadarg) {
   	        else {
                   TideMatchSet::Scores curScore;
                   curScore.resEv_pval = pValue;
-                  curScore.resEv_score = (double)scoreResidueEvidence;
+                  curScore.resEv_score = scoreResidueEvidence;
                   curScore.rank = candidatePeptideStatusSize - peidx;
-                  match_arr.push_back(pair);
+                  match_arr.push_back(curScore);
 /*
                   TideMatchSet::Pair pair;
                   pair.first.first = pValue;
@@ -1301,10 +1301,10 @@ void TideSearchApplication::search(void* threadarg) {
                 }
                 else {
                   TideMatchSet::Scores curScore;
-                  curScore.resEv_pval = pValue;
-                  curScore.resEv_score = (double)scoreResidueEvidence;
+                  curScore.resEv_pval = 1;
+                  curScore.resEv_score = scoreResidueEvidence;
                   curScore.rank = candidatePeptideStatusSize - peidx;
-                  match_arr.push_back(pair);
+                  match_arr.push_back(curScore);
 /*
                   TideMatchSet::Pair pair;
                   pair.first.first = 1.0;
@@ -1343,8 +1343,6 @@ void TideSearchApplication::search(void* threadarg) {
       }
       case BOTH_SCORE:
       {
-	carp(CARP_FATAL,"This is not implemented yet");
-
 	//TODO what to do if neutral_loss_peak and flanking_peak are used?
 	//     neutral_loss_peak and flanking_peak are defined for XCORR but not RESIDUE_EVIDENCE_MATRIX
 	
@@ -1385,9 +1383,7 @@ void TideSearchApplication::search(void* threadarg) {
         int granularityScale = Params::GetInt("evidence-granularity");
         //End RES-EV
 
-        //TODO
-        //score peptidees will go here!
-        //TODO
+        TideMatchSet::Arr match_arr(nCandPeptide); // scored peptides will go here.
 
         deque<Peptide*>::const_iterator iter_ = active_peptide_queue->iter_;
         deque<TheoreticalPeakSetBIons>::const_iterator iter1_ = active_peptide_queue->iter1_;
@@ -1523,6 +1519,7 @@ void TideSearchApplication::search(void* threadarg) {
        bool nonZeroResEvScore = false;
        int scoreResidueEvidence;
        vector<double> xcorrScores;
+       vector<double> xcorrPvalScores;
        vector<int> resEvScores;
        pe = 0;
        for (peidx = 0; peidx < candidatePeptideStatusSize; peidx++) {
@@ -1551,21 +1548,25 @@ void TideSearchApplication::search(void* threadarg) {
            for (ma = 0; ma < maxPrecurMass; ma++) {
              scoreRefactInt += evidenceObs[pepMassIntIdx][ma] * intensArrayTheor[ma];
            }
+           int scoreCountIdx = scoreRefactInt + scoreOffsetObs[pepMassIntIdx];
+           double xcorrPValue = pValueScoreObs[pepMassIntIdx][scoreCountIdx];
+        
            xcorrScores.push_back(scoreRefactInt);
+           xcorrPvalScores.push_back(xcorrPValue);
            //END XCORR
            
            //RES-EV
+           vector<unsigned int> intensArrayTheorResEv;
+           for(iter_uint  = iter1_->unordered_peak_list_.begin();
+               iter_uint != iter1_->unordered_peak_list_.end();
+               iter_uint++) {
+             intensArrayTheorResEv.push_back(*iter_uint);
+           }
+
            vector<vector<double> > curResidueEvidenceMatrix = residueEvidenceMatrix[pepMassIntIdx];
            Peptide* curPeptide = (*iter_);
 
-           vector<unsigned int> intensArrayTheor;
-           for(iter_uint = iter1_->unordered_peak_list_.begin();
-               iter_uint != iter1_->unordered_peak_list_.end();
-               iter_uint++) {
-             intensArrayTheor.push_back(*iter_uint);
-           }
-
-           scoreResidueEvidence = calcResEvScore(curResidueEvidenceMatrix,intensArrayTheor,aaMassDouble,curPeptide);
+           scoreResidueEvidence = calcResEvScore(curResidueEvidenceMatrix,intensArrayTheorResEv,aaMassDouble,curPeptide);
            resEvScores.push_back(scoreResidueEvidence);
 
            if (scoreResidueEvidence > 0) {
@@ -1655,22 +1656,38 @@ void TideSearchApplication::search(void* threadarg) {
               if(peptide_centric) {
                 carp(CARP_FATAL, "residue-evidence has not been implemented with 'peptide-centric-search T' yet.");
               } else {
-//                TideMatchSet::Pair pair;
-//                pair.first.first = pValue;
-//                pair.first.second = (double)scoreResidueEvidence;
+                TideMatchSet::Scores curScore;
+                curScore.xcorr_score = xcorrScores[pe] / RESCALE_FACTOR;
+                curScore.xcorr_pval = xcorrPvalScores[pe];
+                curScore.resEv_score = scoreResidueEvidence;
+                curScore.resEv_pval = pValue;
+                match_arr.push_back(curScore);
+/*
+                TideMatchSet::Pair pair;
+                pair.first.first = pValue;
+                pair.first.second = (double)scoreResidueEvidence;
                 //TODO ugly hack to conform with the way these indices are generated in standard tide-search
                 //TODO above comment was copied. not sure applies here
-//                pair.second = candidatePeptideStatusSize - peidx;
-//                match_arr.push_back(pair);
+                pair.second = candidatePeptideStatusSize - peidx;
+                match_arr.push_back(pair);
+*/
               }
             }  else {
-//              TideMatchSet::Pair pair;
-//              pair.first.first = 1.0;
-//              pair.first.second = (double)scoreResidueEvidence;
+              TideMatchSet::Scores curScore;
+              curScore.xcorr_score = xcorrScores[pe] / RESCALE_FACTOR;
+              curScore.xcorr_pval = xcorrPvalScores[pe];
+              curScore.resEv_score = scoreResidueEvidence;
+              curScore.resEv_pval = 1;
+              match_arr.push_back(curScore);
+/*
+              TideMatchSet::Pair pair;
+              pair.first.first = 1.0;
+              pair.first.second = (double)scoreResidueEvidence;
               //TODO ugly hack to conform with the way these indices are generated in standard tide-search
               //TODO above comment was copied. not sure applies here
-//              pair.second = candidatePeptideStatusSize - peidx;
-//              match_arr.push_back(pair);
+              pair.second = candidatePeptideStatusSize - peidx;
+              match_arr.push_back(pair);
+*/
             }
             pe++;
           }
@@ -1678,18 +1695,28 @@ void TideSearchApplication::search(void* threadarg) {
           ++iter1_;
         }
 
+        //clean up
         delete [] pepMassInt;
+        delete [] scoreOffsetObs;
+        delete [] pepMassInt;
+        for (pe = 0; pe < nPepMassIntUniq; pe++) {
+          delete [] evidenceObs[pe];
+          delete [] pValueScoreObs[pe];
+        }
+        delete [] evidenceObs;
+        delete [] pValueScoreObs;
+        delete [] intensArrayTheor;
 
         if (!peptide_centric){
           //below text is copied from text above in the exact-p-value XCORR case
           // matches will arrange th results in a heap by score, return the top
           // few, and recover the association between counter and peptide. We output 
           // the top matches.
-//          TideMatchSet matches(&match_arr, highest_mz);
-//          matches.exact_pval_search_ = exact_pval_search_;
-//          matches.report(target_file, decoy_file, top_matches, spectrum_filename,
-//                         spectrum, charge, active_peptide_queue, proteins,
-//                         locations, compute_sp, false, locks_array[0]);
+          TideMatchSet matches(&match_arr, highest_mz);
+          matches.exact_pval_search_ = exact_pval_search_;
+          matches.report(target_file, decoy_file, top_matches, spectrum_filename,
+                         spectrum, charge, active_peptide_queue, proteins,
+                         locations, compute_sp, false, locks_array[0]);
         }
         break;
       }
