@@ -23,9 +23,11 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "xcorr rank",
   "exact p-value",
   "refactored xcorr",
-  "res-ev p-value",
-  "res-ev score",
-  "res-ev rank",
+  "res-ev p-value", //Added by Andy Lin
+  "res-ev score", //Added by Andy Lin
+  "res-ev rank", //Added by Andy Lin
+  "combined p-value", //Added by Andy Lin
+  "combined p-value rank", //Added by Andy Lin
   "Sidak adjusted p-value",  
   "e-value",
   "p-value",
