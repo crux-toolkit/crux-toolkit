@@ -15,8 +15,7 @@
 #include "util/FileUtils.h"
 #include "util/StringUtils.h"
 #include <math.h> //Added by Andy Lin
-
-#include <iomanip> //TODO delete when residue evidence is done
+#include <map> //Added by Andy Lin
 
 bool TideSearchApplication::HAS_DECOYS = false;
 bool TideSearchApplication::PROTEIN_LEVEL_DECOYS = false;
@@ -686,13 +685,6 @@ void TideSearchApplication::search(void* threadarg) {
                 curScore.xcorr_score = (double)(it->first / XCORR_SCALING);
                 curScore.rank = it->second;
                 match_arr.push_back(curScore);
-/*
-                TideMatchSet::Pair pair;
-                pair.first.first = (double)(it->first / XCORR_SCALING);
-                pair.first.second = 0.0;
-                pair.second = it->second;
-                match_arr.push_back(pair);
-*/
               }
             }
 
@@ -1032,13 +1024,6 @@ void TideSearchApplication::search(void* threadarg) {
                 curScore.resEv_score = (double)scoreResidueEvidence;
                 curScore.rank = candidatePeptideStatusSize - peidx; //TODO ugly hack to conform with the way these indices are generated in standard tide-search
                 match_arr.push_back(curScore);
-/*
-                TideMatchSet::Pair pair;
-                pair.first.first = (double)scoreResidueEvidence;
-                pair.first.second = 0.0;
-                pair.second = candidatePeptideStatusSize - peidx; //TODO ugly hack to conform with the way these indices are generated in standard tide-search
-                match_arr.push_back(pair);
-*/
 	      }
 	      pe++;
 	    }
@@ -1092,17 +1077,11 @@ void TideSearchApplication::search(void* threadarg) {
 	  int nPepMassIntUniq = (int)pepMassIntUnique.size();
 
 	  //Creates a 3D vector representing 3D matrix
-	  //Below are the 3 axes
 	  //nPepMassIntUniq: number of mass bins candidate are in
 	  //nAARes: number of amino acids
 	  //maxPrecurMassBin: max number of mass bins
-	  //initalize all values to 0
 	  vector<vector<vector<double> > > residueEvidenceMatrix(nPepMassIntUniq, 
 		 vector<vector<double> >(nAARes, vector<double>(maxPrecurMassBin,0)));
-
-  //        std::cout << "Spectrum: " << sc->spectrum->SpectrumNumber() << std::endl;
-  //        std::cout << "charge: " << sc->charge << std::endl;
-  //        std::cout << "precursorMz: "  << sc->spectrum->PrecursorMZ() << std::endl;
 
 	  //Initalize to -1 for length of vector (maxPrecurMassBin)
 	  //scoreOffset will be placed into corresponding mass bin 
@@ -1133,16 +1112,14 @@ void TideSearchApplication::search(void* threadarg) {
 	    CTermMassBin = MassConstants::mass2bin(MassConstants::mono_oh);
 	  }
 
-          //Create a residue evidence matrix for each mass bin the candidate
-          //peptides are in
+          //Create a residue evidence matrix for each mass bin the candidate peptides are in
+          map<int, bool> calcDPMatrix; //for each precursor mass bin, bool determines whether to calc DP matrix
 	  for (pe=0 ; pe<nPepMassIntUniq ; pe++) {
 	    //aaMassDouble replaced aaMass because residue evidence requires amino
 	    //acids to be in double format
-	    observed.CreateResidueEvidenceMatrix(*spectrum,charge,
-						 maxPrecurMassBin,precursorMass,
-						 nAARes,aaMassDouble,
-						 fragTol,granularityScale,
-						 residueEvidenceMatrix[pe]);
+	    observed.CreateResidueEvidenceMatrix(*spectrum,charge,maxPrecurMassBin,precursorMass,
+						 nAARes,aaMassDouble,fragTol,granularityScale,
+                                                 residueEvidenceMatrix[pe]);
 
 	    //In Matlab code. This is converted to an int matrix.
 	    //I believe do not need to do this here because residueEvidenceMatrix
@@ -1154,11 +1131,11 @@ void TideSearchApplication::search(void* threadarg) {
 	    for(int i=0 ; i<curResidueEvidenceMatrix.size() ; i++){
 	      curResidueEvidenceMatrix[i].resize(curPepMassInt);
 	    }
+            calcDPMatrix[curPepMassInt] = false;
           }
 
           //Calculate a residue evidence score between a spectrum and all possible peptide candidates
           //based upon the residue evidence matrix and the theoretical spectrum
-          bool nonZeroResEvScore = false;
 	  int scoreResidueEvidence;
           vector<int> resEvScores;
 	  pe = 0;
@@ -1191,7 +1168,7 @@ void TideSearchApplication::search(void* threadarg) {
               resEvScores.push_back(scoreResidueEvidence);
 
               if (scoreResidueEvidence > 0) {
-                nonZeroResEvScore = true;
+                calcDPMatrix[curPepMassInt] = true;
               }
               pe++;
 	    }
@@ -1202,50 +1179,48 @@ void TideSearchApplication::search(void* threadarg) {
 
           //Create dyanamic programming matrix if there is a 
           //res-ev score greater than 0
-          if (nonZeroResEvScore == true) {
-            for (pe=0 ; pe<nPepMassIntUniq ; pe++) {
-              vector<vector<double> > curResidueEvidenceMatrix = residueEvidenceMatrix[pe];
-              int curPepMassInt = pepMassIntUnique[pe];
-  	      vector<int> maxColEvidence(curPepMassInt,0);
+          for (pe=0 ; pe<nPepMassIntUniq ; pe++) {
+            int curPepMassInt = pepMassIntUnique[pe];
+            if (calcDPMatrix[curPepMassInt] == false)
+              continue; 
 
-              //maxColEvidence is edited by reference
-	      int maxEvidence = getMaxColEvidence(curResidueEvidenceMatrix,maxColEvidence,curPepMassInt);
-	      int maxNResidue = floor((double)curPepMassInt / 57.0);
+            vector<vector<double> > curResidueEvidenceMatrix = residueEvidenceMatrix[pe];
+            vector<int> maxColEvidence(curPepMassInt,0);
 
-              //sort maxColEvidence in descending order
-	      std::sort(maxColEvidence.begin(),maxColEvidence.end(),greater<int>());
-	      int maxScore=0;
-	      for(int i=0 ; i<maxNResidue ; i++) { //maxColEvidence has been sorted
-	        maxScore += maxColEvidence[i];
-	      }
+            //maxColEvidence is edited by reference
+	    int maxEvidence = getMaxColEvidence(curResidueEvidenceMatrix,maxColEvidence,curPepMassInt);
+	    int maxNResidue = floor((double)curPepMassInt / 57.0);
 
-              int scoreOffset; //set in calcResidueScoreCount function
-	      //initalized and populated in calcResidueScoreCount function
-	      vector<double> scoreResidueCount;
-
-              calcResidueScoreCount(nAARes,curPepMassInt,
-                                    curResidueEvidenceMatrix,aaMassInt,
-                                    dAAFreqN, dAAFreqI, dAAFreqC,
-                                    NTermMassBin,CTermMassBin,
-                                    minDeltaMass,maxDeltaMass,
-                                    maxEvidence,maxScore,
-                                    scoreResidueCount,scoreOffset);
-	      scoreResidueOffsetObs[curPepMassInt] = scoreOffset;
-
-	      double totalCount = 0;
-	      for(int i=scoreOffset ; i<scoreResidueCount.size() ; i++) {
-	        totalCount += scoreResidueCount[i];
-	      }
-	      for(int i=scoreResidueCount.size()-2 ; i>-1; i--) {
-	        scoreResidueCount[i] = scoreResidueCount[i] + scoreResidueCount[i+1];
-	      }
-	      for(int i = 0; i < scoreResidueCount.size(); i++) {
-	        //Avoid potential underflow
-	        scoreResidueCount[i] = exp(log(scoreResidueCount[i]) - log(totalCount));
-	      }
-	      pValuesResidueObs[curPepMassInt] = scoreResidueCount;
+            //sort maxColEvidence in descending order
+	    std::sort(maxColEvidence.begin(),maxColEvidence.end(),greater<int>());
+	    int maxScore = 0;
+	    for(int i=0 ; i<maxNResidue ; i++) { //maxColEvidence has been sorted
+	      maxScore += maxColEvidence[i];
 	    }
-          } 
+
+            int scoreOffset; //set in calcResidueScoreCount function
+	    //initalized and populated in calcResidueScoreCount function
+	    vector<double> scoreResidueCount;
+
+            calcResidueScoreCount(nAARes,curPepMassInt,curResidueEvidenceMatrix,aaMassInt,
+                                  dAAFreqN, dAAFreqI, dAAFreqC,NTermMassBin,CTermMassBin,
+                                  minDeltaMass,maxDeltaMass,maxEvidence,maxScore,
+                                  scoreResidueCount,scoreOffset);
+	    scoreResidueOffsetObs[curPepMassInt] = scoreOffset;
+
+	    double totalCount = 0;
+	    for(int i=scoreOffset ; i<scoreResidueCount.size() ; i++) {
+	      totalCount += scoreResidueCount[i];
+	    }
+	    for(int i=scoreResidueCount.size()-2 ; i>-1; i--) {
+	     scoreResidueCount[i] = scoreResidueCount[i] + scoreResidueCount[i+1];
+	    }
+	    for(int i = 0; i < scoreResidueCount.size(); i++) {
+	      //Avoid potential underflow
+	      scoreResidueCount[i] = exp(log(scoreResidueCount[i]) - log(totalCount));
+	    }
+	    pValuesResidueObs[curPepMassInt] = scoreResidueCount;
+	  }
    
 	  /************ calculate p-values for PSMs using residue evidence matrix ****************/
           iter_ = active_peptide_queue->iter_;
@@ -1254,67 +1229,43 @@ void TideSearchApplication::search(void* threadarg) {
 	  pe = 0;
 	  for(peidx = 0; peidx < candidatePeptideStatusSize; peidx++) {
 	    if ((*candidatePeptideStatus)[peidx]) {
-              if(nonZeroResEvScore == true) {
-                int pepMassIntIdx = 0;
+              int pepMassIntIdx = 0;
 
-                //TODO should probably use iterator instead
-                for(ma = 0; ma < nPepMassIntUniq; ma++ ) {
-                  //TODO pepMassIntUnique should be accessed with an interator
-                  if(pepMassIntUnique[ma] == pepMassInt[pe]) {
-                    pepMassIntIdx = ma;
-                    curPepMassInt = pepMassIntUnique[ma];
-                    break;
-                  }
+              //TODO should probably use iterator instead
+              for(ma = 0; ma < nPepMassIntUniq; ma++ ) {
+                //TODO pepMassIntUnique should be accessed with an interator
+                if(pepMassIntUnique[ma] == pepMassInt[pe]) {
+                  pepMassIntIdx = ma;
+                  curPepMassInt = pepMassIntUnique[ma];
+                  break;
                 }
+              }
 
-                scoreResidueEvidence = resEvScores[pe];
-	        int scoreCountIdx = scoreResidueEvidence + scoreResidueOffsetObs[curPepMassInt];
-	        double pValue = pValuesResidueObs[curPepMassInt][scoreCountIdx];
+              scoreResidueEvidence = resEvScores[pe];
+              int scoreCountIdx;
+              double pValue;
+              if (calcDPMatrix[curPepMassInt]) {
+                scoreCountIdx = scoreResidueEvidence + scoreResidueOffsetObs[curPepMassInt];
+                pValue = pValuesResidueObs[curPepMassInt][scoreCountIdx];
+              } else {
+                pValue = 1.0;
+              }
 
-                if (pValue == 0.0) {
-                  std::cout << "Spectrum: " << sc->spectrum->SpectrumNumber() << std::endl;
-                  carp(CARP_FATAL,"PSM p-value should not be equal to 0.0");
-                }
+              if (pValue == 0.0) {
+                std::cout << "Spectrum: " << sc->spectrum->SpectrumNumber() << std::endl;
+                carp(CARP_FATAL,"PSM p-value should not be equal to 0.0");
+              }
              
-	        if(peptide_centric) {
-                  carp(CARP_FATAL, "residue-evidence has not been implemented with 'peptide-centric-search T' yet.");
-  	        }
-  	        else {
-                  TideMatchSet::Scores curScore;
-                  curScore.resEv_pval = pValue;
-                  curScore.resEv_score = scoreResidueEvidence;
-                  curScore.rank = candidatePeptideStatusSize - peidx;
-                  match_arr.push_back(curScore);
-/*
-                  TideMatchSet::Pair pair;
-                  pair.first.first = pValue;
-                  pair.first.second = (double)scoreResidueEvidence;
-                  //TODO ugly hack to conform with the way these indices are generated in standard tide-search
-                  //TODO above comment was copied. not sure applies here
-                  pair.second = candidatePeptideStatusSize - peidx;
-                  match_arr.push_back(pair);
-*/
-                }
-	      } else {
-                if(peptide_centric) {
-                  carp(CARP_FATAL, "residue-evidence has not been implemented with 'peptide-centric-search T' yet.");
-                }
-                else {
-                  TideMatchSet::Scores curScore;
-                  curScore.resEv_pval = 1;
-                  curScore.resEv_score = scoreResidueEvidence;
-                  curScore.rank = candidatePeptideStatusSize - peidx;
-                  match_arr.push_back(curScore);
-/*
-                  TideMatchSet::Pair pair;
-                  pair.first.first = 1.0;
-                  pair.first.second = (double)scoreResidueEvidence;
-                  //TODO ugly hack to conform with the way these indices are generated in standard tide-search
-                  //TODO above comment was copied. not sure applies here
-                  pair.second = candidatePeptideStatusSize - peidx;
-                  match_arr.push_back(pair);
-*/
-                }
+              if(peptide_centric) {
+                carp(CARP_FATAL, "residue-evidence has not been implemented with 'peptide-centric-search T' yet.");
+              }
+              else {
+                TideMatchSet::Scores curScore;
+                curScore.resEv_pval = pValue;
+                curScore.resEv_score = scoreResidueEvidence;
+                //TODO ugly hack to conform with the way these indices are generated in standard tide-search
+                curScore.rank = candidatePeptideStatusSize - peidx;
+                match_arr.push_back(curScore);
               }
               pe++;
             }

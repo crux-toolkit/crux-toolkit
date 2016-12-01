@@ -366,12 +366,28 @@ void TideMatchSet::writeToFile(
     }
 
     // Use scientific notation for exact p-value, but not refactored XCorr.
-    if (exact_pval_search_) {
-      *file << StringUtils::ToString((*i)->xcorr_pval, precision, false) << '\t';
-      *file << StringUtils::ToString((*i)->xcorr_score, precision, true) << '\t';
-    } else {
-      *file << StringUtils::ToString((*i)->xcorr_score, precision, true) << '\t';
-    }      
+    if(Params::GetString("score-function") == "xcorr") {
+      if (exact_pval_search_) {
+        *file << StringUtils::ToString((*i)->xcorr_pval, precision, false) << '\t';
+        *file << StringUtils::ToString((*i)->xcorr_score, precision, true) << '\t';
+      } else {
+        *file << StringUtils::ToString((*i)->xcorr_score, precision, true) << '\t';
+      }
+    } else if (Params::GetString("score-function") == "residue-evidence") {
+      if (exact_pval_search_) {
+        *file << StringUtils::ToString((*i)->resEv_pval, precision, false) << '\t';
+        *file << StringUtils::ToString((*i)->resEv_score, 1, true) << '\t';
+      } else {
+        *file << StringUtils::ToString((*i)->resEv_score, 1, true) << '\t';
+      }
+    } else if (Params::GetString("score-function") == "both") {
+       *file << StringUtils::ToString((*i)->xcorr_pval, precision, false) << '\t';
+       *file << StringUtils::ToString((*i)->xcorr_score, precision, true) << '\t';
+       *file << StringUtils::ToString((*i)->resEv_pval, precision, false) << '\t';
+       *file << StringUtils::ToString((*i)->resEv_score, 1, true) << '\t';
+       *file << StringUtils::ToString((*i)->combinedPval, precision, true) << '\t';
+    }
+
 
     *file << ++cur << '\t';
     if (sp_map) {
