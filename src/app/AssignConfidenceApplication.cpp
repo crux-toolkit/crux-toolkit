@@ -516,7 +516,7 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
   // get from the input files which columns to print in the output files
   if (iteration_cnt_ == 0) {
     vector<bool> cols_to_print(NUMBER_MATCH_COLUMNS);
-    cols_to_print[FILE_COL] = true;
+    cols_to_print[FILE_COL] = Params::GetBool("file-column");
     cols_to_print[SCAN_COL] = true;
     cols_to_print[CHARGE_COL] = true;
     cols_to_print[SPECTRUM_PRECURSOR_MZ_COL] = true;
@@ -826,17 +826,16 @@ FLOAT_T* AssignConfidenceApplication::compute_decoy_qvalues_tdc(
       }
     }
 
-    // FDR = #decoys / #targets
-    FLOAT_T fdr = /*pi_zero * targets_to_decoys * */
-      ((FLOAT_T)decoy_idx / (FLOAT_T)(target_idx + 1));
+    // FDR = (#decoys + 1)/ #targets
+    FLOAT_T fdr = 
+      ((FLOAT_T)(decoy_idx + 1)/ (FLOAT_T)(target_idx + 1));
     
     if ( fdr > 1.0 ) {
       fdr = 1.0;
     }
     
     carp(CARP_DEBUG, "FDR for score %g = min(1,%d/%d) = %g",
-         target_score, decoy_idx, target_idx + 1,
-         (FLOAT_T)decoy_idx / (FLOAT_T)(target_idx + 1), fdr);
+         target_score, decoy_idx, target_idx + 1, fdr);
 
     qvalues[target_idx] = fdr;
   }
