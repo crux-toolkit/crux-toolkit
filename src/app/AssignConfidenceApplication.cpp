@@ -507,7 +507,7 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
   // get from the input files which columns to print in the output files
   if (iteration_cnt_ == 0) {
     vector<bool> cols_to_print(NUMBER_MATCH_COLUMNS);
-    cols_to_print[FILE_COL] = true;
+    cols_to_print[FILE_COL] = Params::GetBool("file-column");
     cols_to_print[SCAN_COL] = true;
     cols_to_print[CHARGE_COL] = true;
     cols_to_print[SPECTRUM_PRECURSOR_MZ_COL] = true;
