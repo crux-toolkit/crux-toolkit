@@ -23,6 +23,7 @@ class TideMatchSet {
  public:
   bool exact_pval_search_;
   int elution_window_;
+  SCORE_FUNCTION_T cur_score_function;
   
   typedef pair<int, int> Pair2;
   typedef FixedCapacityArray<Pair2> Arr2;
