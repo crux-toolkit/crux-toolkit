@@ -3,7 +3,7 @@
 #include <vector>
 #include <algorithm>
 using namespace std;
-#include "DataSet.h"
+#include "DataSetCrux.h"
 
 
 class PepScoreHolder{

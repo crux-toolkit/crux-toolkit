@@ -40,7 +40,7 @@ add_library(
   Barista.cpp
   BipartiteGraph.cpp
   CruxParser.cpp
-  DataSet.cpp
+  DataSetCrux.cpp
   NeuralNet.cpp
   PepRanker.cpp
   PepScores.cpp

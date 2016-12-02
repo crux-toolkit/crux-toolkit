@@ -166,7 +166,7 @@ int PercolatorApplication::main(
     perc_args_vec.push_back("5");
   }
 
-  perc_args_vec.push_back("--fido-pattern");
+  perc_args_vec.push_back("--protein-decoy-pattern");
   string decoy_pre = Params::GetString("decoy-prefix");
   perc_args_vec.push_back(!decoy_pre.empty() ? decoy_pre : "random_");
 
@@ -331,7 +331,7 @@ int PercolatorApplication::main(
   if (Params::GetBool("tdc")) {
     perc_args_vec.push_back("--post-processing-tdc");
   } else {
-    perc_args_vec.push_back("--post-processing-qvality");
+    perc_args_vec.push_back("--post-processing-mix-max");
   }
 
   perc_args_vec.push_back(input_pin);
@@ -465,10 +465,7 @@ string PercolatorApplication::getDescription() const {
     "Crux Percolator writes its files to an output directory, logs all standard "
     "error messages to a log file, and is capable of reading parameters from a "
     "parameter file.</li><li>Reading from XML and stdin are not supported at "
-    "this time.</li><li>In Crux Percolator, the two complementary flags "
-    "&quot;--post-processing-qvality&quot; and &quot;--post-processing-tdc&quot; "
-    "are combined into a single Boolean parameter &quot;--tdc "
-    "T|F&quot;.<li></ul>]]";
+    "this time.</li></ul>]]";
 }
 
 /**
