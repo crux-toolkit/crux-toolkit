@@ -18,7 +18,7 @@
 #include "util/crux-utils.h"
 #include "parameter.h"
 #include "io/PepXMLWriter.h"
-#include "DataSet.h"
+#include "DataSetCrux.h"
 #include "ProtScores.h"
 #include "PSMScores.h"
 #include "PepScores.h"
