@@ -575,7 +575,7 @@ Params::Params() : finalized_(false) {
     "Available for crux percolator", true);
   InitBoolParam("tdc", true,
     "Use target-decoy competition to assign q-values and PEPs. When set to F, "
-    "the qvality method, which estimates the proportion pi0 of incorrect target "
+    "the mix-max method, which estimates the proportion pi0 of incorrect target "
     "PSMs, is used instead.",
     "Available for crux percolator", true);
   InitIntParam("maxiter", 10, 0, 100000000,

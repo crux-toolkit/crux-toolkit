@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <string>
 using namespace std;
-#include "DataSet.h"
+#include "DataSetCrux.h"
 
 class ProtScoreHolder{
 public:
