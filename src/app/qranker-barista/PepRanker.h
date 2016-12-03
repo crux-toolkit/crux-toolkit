@@ -19,7 +19,7 @@ using namespace std;
 
 #include "io/PepXMLWriter.h"
 #include "NeuralNet.h"
-#include "DataSet.h"
+#include "DataSetCrux.h"
 #include "PSMScores.h"
 #include "PepScores.h"
 #include "SQTParser.h"
