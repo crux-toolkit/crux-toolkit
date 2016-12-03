@@ -5,7 +5,7 @@
  */
 
 #include "PercolatorAdapter.h"
-#include "build/src/percolator/src/DataSet.h"
+#include "DataSet.h"
 #include "util/StringUtils.h"
 #include "FeatureNames.h"
 
@@ -217,26 +217,23 @@ void PercolatorAdapter::addProteinScores() {
 
   vector<ProteinMatch*> matches;
   vector<ProteinMatch*> decoy_matches;
-  map<const string, ProteinScoreHolder*> protein_scores = protEstimator_->getProteins();
+  const vector<ProteinScoreHolder>& protein_scores = protEstimator_->getProteins();
   
-  for (map<const string, ProteinScoreHolder*>::iterator score_iter = protein_scores.begin();
+  for (vector<ProteinScoreHolder>::const_iterator score_iter = protein_scores.begin();
        score_iter != protein_scores.end();
        score_iter++) {
-    if (score_iter->second == NULL) {
-      continue;
-    }
     // Set scores
     ProteinMatch* protein_match;
-    if (!score_iter->second->getIsDecoy()) {
-      protein_match = collection_->getProteinMatch(score_iter->second->getName());
+    if (!score_iter->isDecoy()) {
+      protein_match = collection_->getProteinMatch(score_iter->getName());
       matches.push_back(protein_match);
     } else {
-      protein_match = decoy_collection_->getProteinMatch(score_iter->second->getName());
+      protein_match = decoy_collection_->getProteinMatch(score_iter->getName());
       decoy_matches.push_back(protein_match);
     }
-    protein_match->setScore(PERCOLATOR_SCORE, -log(score_iter->second->getP()));
-    protein_match->setScore(PERCOLATOR_QVALUE, score_iter->second->getQ());
-    protein_match->setScore(PERCOLATOR_PEP, score_iter->second->getPEP());
+    protein_match->setScore(PERCOLATOR_SCORE, -log(score_iter->getP()));
+    protein_match->setScore(PERCOLATOR_QVALUE, score_iter->getQ());
+    protein_match->setScore(PERCOLATOR_PEP, score_iter->getPEP());
   }
 
   // set percolator score ranks
@@ -432,13 +429,10 @@ int PercolatorAdapter::run() {
   if (!readStdIn_) {
     if (!tabInput_) fileStream.exceptions(ifstream::badbit | ifstream::failbit);
     fileStream.open(inputFN_.c_str(), ios::in);
-    if (VERB > 1) {
-      std::cerr << "Reading input from datafile " << inputFN_ << std::endl;
-    }
   } else if (maxPSMs_ > 0u) {
     maxPSMs_ = 0u;
     std::cerr << "Warning: cannot use subset-max-train (-N flag) when reading "
-              << "from stdin, training on all data instead" << std::endl;
+              << "from stdin, training on all data instead." << std::endl;
   }
   
   std::istream &dataStream = readStdIn_ ? std::cin : fileStream;
@@ -447,8 +441,14 @@ int PercolatorAdapter::run() {
                             xmlPrintDecoys_, xmlPrintExpMass_);
   SetHandler setHandler(maxPSMs_);
   if (!tabInput_) {
+    if (VERB > 1) {
+      std::cerr << "Reading pin-xml input from datafile " << inputFN_ << std::endl;
+    }
     success = xmlInterface.readPin(dataStream, inputFN_, setHandler, pCheck_, protEstimator_);
   } else {
+    if (VERB > 1) {
+      std::cerr << "Reading tab-delimited input from datafile " << inputFN_ << std::endl;
+    }
     success = setHandler.readTab(dataStream, pCheck_);
   }
   
@@ -465,16 +465,59 @@ int PercolatorAdapter::run() {
   
   setHandler.normalizeFeatures(pNorm_);
   
+  /*
+  true search   detected search  mix-max  tdc  flag for mix-max       flag for tdc
+  separate      separate         yes      yes  none (but -y allowed)  -Y
+  separate      concatenated     yes      yes  -y (force)             -Y
+  concatenated  concatenated     no       yes  NA                     none (but -Y allowed)
+  concatenated  separate         no       yes  NA                     -Y (force)
+  */
+  if (pCheck_->concatenatedSearch()) {
+    if (useMixMax_) {
+      if (VERB > 0) {
+        std::cerr << "Warning: concatenated search input detected, "
+          << "but overridden by -y flag: using mix-max anyway." << std::endl;
+      }
+    } else {
+      if (VERB > 0) {
+        std::cerr << "Concatenated search input detected, skipping both " 
+          << "target-decoy competition and mix-max." << std::endl;
+      }
+    }
+  } else { // separate searches detected
+    if (targetDecoyCompetition_) { // this also captures the case where input was in reality from concatenated search
+      if (VERB > 0) {
+        std::cerr << "Separate target and decoy search inputs detected, "
+          << "using target-decoy competition on Percolator scores." << std::endl;
+      }
+    } else {
+      useMixMax_ = true;
+      if (VERB > 0) {
+        std::cerr << "Separate target and decoy search inputs detected, "
+          << "using mix-max method." << std::endl;
+      }
+    }
+  }
+  assert(!(useMixMax_ && targetDecoyCompetition_));
+  
   // Copy feature data pointers to Scores object
-  Scores allScores(usePi0_);
+  Scores allScores(useMixMax_);
   allScores.fillFeatures(setHandler);
+  
+  if (VERB > 0 && useMixMax_ && 
+        abs(1.0 - allScores.getTargetDecoySizeRatio()) > 0.1) {
+    std::cerr << "Warning: The mix-max procedure is not well behaved when "
+      << "# targets (" << allScores.posSize() << ") != "
+      << "# decoys (" << allScores.negSize() << "). "
+      << "Consider using target-decoy competition (-Y flag)." << std::endl;
+  }
   
   CrossValidation crossValidation(quickValidation_, reportEachIteration_, 
                                   testFdr_, selectionFdr_, selectedCpos_, 
-                                  selectedCneg_, numIterations_, usePi0_);
+                                  selectedCneg_, numIterations_, useMixMax_);
   int firstNumberOfPositives = crossValidation.preIterationSetup(allScores, pCheck_, pNorm_, setHandler.getFeaturePool());
   if (VERB > 0) {
-    cerr << "Estimating " << firstNumberOfPositives << " over q="
+    cerr << "Found " << firstNumberOfPositives << " test set positives with q<"
         << testFdr_ << " in initial direction" << endl;
   }
   
@@ -488,7 +531,7 @@ int PercolatorAdapter::run() {
   double diff = difftime(procStart, startTime);
   if (VERB > 1) cerr << "Reading in data and feature calculation took "
       << ((double)(procStartClock - startClock)) / (double)CLOCKS_PER_SEC
-      << " cpu seconds or " << diff << " seconds wall time" << endl;
+      << " cpu seconds or " << diff << " seconds wall clock time." << endl;
   
   if (tabOutputFN_.length() > 0) {
     setHandler.writeTab(tabOutputFN_, pCheck_);
@@ -526,16 +569,22 @@ int PercolatorAdapter::run() {
     } else {
       success = setHandler.readAndScoreTab(fileStream, rawWeights, allScores, pCheck_);
     }
-    allScores.postMergeStep();
-    allScores.calcQ(selectionFdr_);
-    allScores.normalizeScores(selectionFdr_);
-    
+        
     // Reading input files (pin or temporary file)
     if (!success) {
       std::cerr << "ERROR: Failed to read in file, check if the correct " <<
                    "file-format was used.";
       return 0;
     }
+    
+    if (VERB > 1) {
+      cerr << "Evaluated set contained " << allScores.posSize()
+          << " positives and " << allScores.negSize() << " negatives." << endl;
+    }
+    
+    allScores.postMergeStep();
+    allScores.calcQ(selectionFdr_);
+    allScores.normalizeScores(selectionFdr_);
   }
   
   // calculate psms level probabilities TDA or TDC
