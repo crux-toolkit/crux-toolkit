@@ -1,3 +1,5 @@
+#ifndef XLINKDATABASE_H_
+#define XLINKDATABASE_H_
 #include "model/objects.h"
 #include "model/Peptide.h"
 #include "model/Database.h"
@@ -23,12 +25,12 @@ class XLinkDatabase {
   static std::vector<LinearPeptide> target_linear_peptides_;
   static std::vector<LinearPeptide> decoy_linear_peptides_;
 
+
   static std::vector<SelfLoopPeptide> target_selfloop_peptides_;
   static std::vector<SelfLoopPeptide> decoy_selfloop_peptides_;
 
   static std::vector<XLinkablePeptide> target_xlinkable_peptides_;
   static std::vector<XLinkablePeptide> decoy_xlinkable_peptides_;
-  static std::vector<XLinkablePeptide&> target_decoy_xlinkable_peptides_;
 
   static std::vector<XLinkablePeptide> target_xlinkable_peptides_flatten_;
   static std::vector<XLinkablePeptide> target_xlinkable_peptides2_; //Peptides that could be selfloops.
@@ -139,3 +141,4 @@ class XLinkDatabase {
   static void print();
 
 };
+#endif
