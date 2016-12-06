@@ -106,34 +106,21 @@ class TideMatchSet {
   static char match_collection_loc_[sizeof(MatchCollection)];
   static char decoy_match_collection_loc_[sizeof(MatchCollection)];
 
-  static bool lessXcorrScore(Scores x, Scores y) {
+  static bool lessXcorrScore(const Scores& x, const Scores& y) {
     return x.xcorr_score < y.xcorr_score;
   }
   
-  static bool moreXcorrScore(Scores x, Scores y) {
+  static bool moreXcorrScore(const Scores& x, const Scores& y) {
     return x.xcorr_score > y.xcorr_score;
   }
 
-  static bool lessXcorrPvalScore(Scores x, Scores y) {
+  static bool lessXcorrPvalScore(const Scores& x, const Scores& y) {
     return x.xcorr_pval < y.xcorr_pval;
   }
 
-  static bool moreXcorrPvalScore(Scores x, Scores y) {
+  static bool moreXcorrPvalScore(const Scores& x, const Scores& y) {
     return x.xcorr_pval > y.xcorr_pval;
   }
-
-
-
-/*
-  static bool lessScore(Pair x, Pair y) {
-    // Compare scores, ignore counters.
-    return x.first.first < y.first.first;
-  }
-  static bool moreScore(Pair x, Pair y) {
-    // Compare scores, ignore counters.
-    return x.first.first > y.first.first;
-  }
-*/
 
 /**
    * Helper function for tab delimited report function for peptide centric

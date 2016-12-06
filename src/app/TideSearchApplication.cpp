@@ -586,21 +586,7 @@ void TideSearchApplication::search(void* threadarg) {
             match_arr.push_back(curScore);
           }
         }
-/*
-        TideMatchSet::Arr match_arr(nCandPeptide);
-        for (TideMatchSet::Arr2::iterator it = match_arr2.begin();
-             it != match_arr2.end();
-             ++it) {
-          int peptide_idx = candidatePeptideStatusSize - (it->second);
-          if ((*candidatePeptideStatus)[peptide_idx]) {
-            TideMatchSet::Pair pair;
-            pair.first.first = (double)(it->first / XCORR_SCALING);
-            pair.first.second = 0.0;
-            pair.second = it->second;
-            match_arr.push_back(pair);
-          }
-        }
-*/
+
         TideMatchSet matches(&match_arr, highest_mz);
         matches.exact_pval_search_ = exact_pval_search;
 
@@ -620,7 +606,6 @@ void TideSearchApplication::search(void* threadarg) {
       (*total_candidate_peptides) += nCandPeptide;
       locks_array[2]->unlock();
 
-//      TideMatchSet::Arr match_arr(nCandPeptide); // scored peptides will go here.
       TideMatchSet::Arr match_arr(nCandPeptide); //scored peptides will go here
   
       // iterators needed at multiple places in following code
@@ -744,11 +729,6 @@ void TideSearchApplication::search(void* threadarg) {
             curScores.xcorr_score = (double)scoreRefactInt / RESCALE_FACTOR;
             curScores.rank = candidatePeptideStatusSize - peidx; // TODO ugly hack to conform with the way these indices are generated in standard tide-search
             match_arr.push_back(curScores);
-//            TideMatchSet::Pair pair;
-//            pair.first.first = pValue;
-//            pair.first.second = (double)scoreRefactInt / RESCALE_FACTOR;
-//            pair.second = candidatePeptideStatusSize - peidx; // TODO ugly hack to conform with the way these indices are generated in standard tide-search
-//            match_arr.push_back(pair);
           }
           ++pe;
         }
