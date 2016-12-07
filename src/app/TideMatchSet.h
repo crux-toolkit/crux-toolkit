@@ -27,8 +27,18 @@ class TideMatchSet {
   typedef pair<int, int> Pair2;
   typedef FixedCapacityArray<Pair2> Arr2;
 
-  typedef pair<pair<double, double>, int> Pair;   //store results for exact_pval calculations
-  typedef FixedCapacityArray<Pair> Arr;
+//  typedef pair<pair<double, double>, int> Pair;   //store results for exact_pval calculations
+//  typedef FixedCapacityArray<Pair> Arr;
+
+  struct Scores {
+    double xcorr_score;
+    double xcorr_pval;
+    int resEv_score;
+    double resEv_pval;
+    double combinedPval;
+    int rank;
+  };
+  typedef FixedCapacityArray<Scores> Arr;
 
   // Matches will be an array of pairs, (score, counter), where counter refers
   // to the index within the ActivePeptideQueue, counting from the back.  This
@@ -96,14 +106,22 @@ class TideMatchSet {
   static char match_collection_loc_[sizeof(MatchCollection)];
   static char decoy_match_collection_loc_[sizeof(MatchCollection)];
 
-  static bool lessScore(Pair x, Pair y) {
-    // Compare scores, ignore counters.
-    return x.first.first < y.first.first;
+  static bool lessXcorrScore(const Scores& x, const Scores& y) {
+    return x.xcorr_score < y.xcorr_score;
   }
-  static bool moreScore(Pair x, Pair y) {
-    // Compare scores, ignore counters.
-    return x.first.first > y.first.first;
+  
+  static bool moreXcorrScore(const Scores& x, const Scores& y) {
+    return x.xcorr_score > y.xcorr_score;
   }
+
+  static bool lessXcorrPvalScore(const Scores& x, const Scores& y) {
+    return x.xcorr_pval < y.xcorr_pval;
+  }
+
+  static bool moreXcorrPvalScore(const Scores& x, const Scores& y) {
+    return x.xcorr_pval > y.xcorr_pval;
+  }
+
 /**
    * Helper function for tab delimited report function for peptide centric
    */
