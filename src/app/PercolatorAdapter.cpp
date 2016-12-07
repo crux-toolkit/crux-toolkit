@@ -6,6 +6,7 @@
 
 #include "PercolatorAdapter.h"
 #include "DataSet.h"
+#include "util/AminoAcidUtil.h"
 #include "util/StringUtils.h"
 #include "FeatureNames.h"
 
@@ -57,7 +58,7 @@ void PercolatorAdapter::deleteCollections() {
 /**
  * Adds PSM scores from Percolator objects into a ProteinMatchCollection
  */
-void PercolatorAdapter::addPsmScores(Scores allScores) {
+void PercolatorAdapter::processPsmScores(Scores& allScores) {
   if (collection_ == NULL || decoy_collection_ == NULL) {
     return;
   }
@@ -172,7 +173,7 @@ void PercolatorAdapter::addPsmScores(Scores allScores) {
 /**
  * Adds peptide scores from Percolator objects into a ProteinMatchCollection
  */
-void PercolatorAdapter::addPeptideScores(Scores allScores) {
+void PercolatorAdapter::processPeptideScores(Scores& allScores) {
   if (collection_ == NULL || decoy_collection_ == NULL) {
     return;
   }
@@ -210,14 +211,14 @@ void PercolatorAdapter::addPeptideScores(Scores allScores) {
 /**
  * Adds protein scores from Percolator objects into a ProteinMatchCollection
  */
-void PercolatorAdapter::addProteinScores() {
+void PercolatorAdapter::processProteinScores(ProteinProbEstimator* protEstimator) {
   if (collection_ == NULL || decoy_collection_ == NULL) {
     return;
   }
 
   vector<ProteinMatch*> matches;
   vector<ProteinMatch*> decoy_matches;
-  const vector<ProteinScoreHolder>& protein_scores = protEstimator_->getProteins();
+  const vector<ProteinScoreHolder>& protein_scores = protEstimator->getProteins();
   
   for (vector<ProteinScoreHolder>::const_iterator score_iter = protein_scores.begin();
        score_iter != protein_scores.end();
@@ -408,217 +409,6 @@ MODIFIED_AA_T* PercolatorAdapter::getModifiedAASequence(
   return mod_seq;
 }
 
-/** 
- * Executes the flow of the percolator process:
- * 1. reads in the input file
- * 2. trains the SVM
- * 3. calculate PSM probabilities
- * 4. (optional) calculate peptide probabilities
- * 5. (optional) calculate protein probabilities
- */
-int PercolatorAdapter::run() {
-  time_t startTime;
-  time(&startTime);
-  clock_t startClock = clock();
-  if (VERB > 0) {
-    cerr << extendedGreeter(startTime);
-  }
-  
-  int success = 0;
-  std::ifstream fileStream;
-  if (!readStdIn_) {
-    if (!tabInput_) fileStream.exceptions(ifstream::badbit | ifstream::failbit);
-    fileStream.open(inputFN_.c_str(), ios::in);
-  } else if (maxPSMs_ > 0u) {
-    maxPSMs_ = 0u;
-    std::cerr << "Warning: cannot use subset-max-train (-N flag) when reading "
-              << "from stdin, training on all data instead." << std::endl;
-  }
-  
-  std::istream &dataStream = readStdIn_ ? std::cin : fileStream;
-  
-  XMLInterface xmlInterface(xmlOutputFN_, xmlSchemaValidation_, 
-                            xmlPrintDecoys_, xmlPrintExpMass_);
-  SetHandler setHandler(maxPSMs_);
-  if (!tabInput_) {
-    if (VERB > 1) {
-      std::cerr << "Reading pin-xml input from datafile " << inputFN_ << std::endl;
-    }
-    success = xmlInterface.readPin(dataStream, inputFN_, setHandler, pCheck_, protEstimator_);
-  } else {
-    if (VERB > 1) {
-      std::cerr << "Reading tab-delimited input from datafile " << inputFN_ << std::endl;
-    }
-    success = setHandler.readTab(dataStream, pCheck_);
-  }
-  
-  // Reading input files (pin or temporary file)
-  if (!success) {
-    std::cerr << "ERROR: Failed to read in file, check if the correct " <<
-                 "file-format was used.";
-    return 0;
-  }
-  
-  if (VERB > 2) {
-    std::cerr << "FeatureNames::getNumFeatures(): "<< FeatureNames::getNumFeatures() << endl;
-  }
-  
-  setHandler.normalizeFeatures(pNorm_);
-  
-  /*
-  true search   detected search  mix-max  tdc  flag for mix-max       flag for tdc
-  separate      separate         yes      yes  none (but -y allowed)  -Y
-  separate      concatenated     yes      yes  -y (force)             -Y
-  concatenated  concatenated     no       yes  NA                     none (but -Y allowed)
-  concatenated  separate         no       yes  NA                     -Y (force)
-  */
-  if (pCheck_->concatenatedSearch()) {
-    if (useMixMax_) {
-      if (VERB > 0) {
-        std::cerr << "Warning: concatenated search input detected, "
-          << "but overridden by -y flag: using mix-max anyway." << std::endl;
-      }
-    } else {
-      if (VERB > 0) {
-        std::cerr << "Concatenated search input detected, skipping both " 
-          << "target-decoy competition and mix-max." << std::endl;
-      }
-    }
-  } else { // separate searches detected
-    if (targetDecoyCompetition_) { // this also captures the case where input was in reality from concatenated search
-      if (VERB > 0) {
-        std::cerr << "Separate target and decoy search inputs detected, "
-          << "using target-decoy competition on Percolator scores." << std::endl;
-      }
-    } else {
-      useMixMax_ = true;
-      if (VERB > 0) {
-        std::cerr << "Separate target and decoy search inputs detected, "
-          << "using mix-max method." << std::endl;
-      }
-    }
-  }
-  assert(!(useMixMax_ && targetDecoyCompetition_));
-  
-  // Copy feature data pointers to Scores object
-  Scores allScores(useMixMax_);
-  allScores.fillFeatures(setHandler);
-  
-  if (VERB > 0 && useMixMax_ && 
-        abs(1.0 - allScores.getTargetDecoySizeRatio()) > 0.1) {
-    std::cerr << "Warning: The mix-max procedure is not well behaved when "
-      << "# targets (" << allScores.posSize() << ") != "
-      << "# decoys (" << allScores.negSize() << "). "
-      << "Consider using target-decoy competition (-Y flag)." << std::endl;
-  }
-  
-  CrossValidation crossValidation(quickValidation_, reportEachIteration_, 
-                                  testFdr_, selectionFdr_, selectedCpos_, 
-                                  selectedCneg_, numIterations_, useMixMax_);
-  int firstNumberOfPositives = crossValidation.preIterationSetup(allScores, pCheck_, pNorm_, setHandler.getFeaturePool());
-  if (VERB > 0) {
-    cerr << "Found " << firstNumberOfPositives << " test set positives with q<"
-        << testFdr_ << " in initial direction" << endl;
-  }
-  
-  if (DataSet::getCalcDoc()) {
-    setHandler.normalizeDOCFeatures(pNorm_);
-  }
-  
-  time_t procStart;
-  clock_t procStartClock = clock();
-  time(&procStart);
-  double diff = difftime(procStart, startTime);
-  if (VERB > 1) cerr << "Reading in data and feature calculation took "
-      << ((double)(procStartClock - startClock)) / (double)CLOCKS_PER_SEC
-      << " cpu seconds or " << diff << " seconds wall clock time." << endl;
-  
-  if (tabOutputFN_.length() > 0) {
-    setHandler.writeTab(tabOutputFN_, pCheck_);
-  }
-  
-  // Do the SVM training
-  crossValidation.train(pNorm_);
-  
-  if (weightOutputFN_.size() > 0) {
-    ofstream weightStream(weightOutputFN_.c_str(), ios::out);
-    crossValidation.printAllWeights(weightStream, pNorm_);
-    weightStream.close();
-  }
-  
-  // Calculate the final SVM scores and clean up structures
-  crossValidation.postIterationProcessing(allScores, pCheck_);
-  
-  if (VERB > 0 && DataSet::getCalcDoc()) {
-    crossValidation.printDOC();
-  }
-  
-  if (setHandler.getMaxPSMs() > 0u) {
-    if (VERB > 0) {
-      cerr << "Scoring full list of PSMs with trained SVMs." << endl;
-    }
-    std::vector<double> rawWeights;
-    crossValidation.getAvgWeights(rawWeights, pNorm_);
-    setHandler.reset();
-    allScores.reset();
-    
-    fileStream.clear();
-    fileStream.seekg(0, ios::beg);
-    if (!tabInput_) {
-      success = xmlInterface.readAndScorePin(fileStream, rawWeights, allScores, inputFN_, setHandler, pCheck_, protEstimator_);
-    } else {
-      success = setHandler.readAndScoreTab(fileStream, rawWeights, allScores, pCheck_);
-    }
-        
-    // Reading input files (pin or temporary file)
-    if (!success) {
-      std::cerr << "ERROR: Failed to read in file, check if the correct " <<
-                   "file-format was used.";
-      return 0;
-    }
-    
-    if (VERB > 1) {
-      cerr << "Evaluated set contained " << allScores.posSize()
-          << " positives and " << allScores.negSize() << " negatives." << endl;
-    }
-    
-    allScores.postMergeStep();
-    allScores.calcQ(selectionFdr_);
-    allScores.normalizeScores(selectionFdr_);
-  }
-  
-  // calculate psms level probabilities TDA or TDC
-  bool isUniquePeptideRun = false;
-  calculatePSMProb(allScores, isUniquePeptideRun, procStart, procStartClock, diff);
-  addPsmScores(allScores);
-  if (xmlInterface.getXmlOutputFN().size() > 0){
-    xmlInterface.writeXML_PSMs(allScores);
-  }
-  
-  // calculate unique peptides level probabilities WOTE
-  if (reportUniquePeptides_){
-    isUniquePeptideRun = true;
-    calculatePSMProb(allScores, isUniquePeptideRun, procStart, procStartClock, diff);
-    addPeptideScores(allScores);
-    if (xmlInterface.getXmlOutputFN().size() > 0){
-      xmlInterface.writeXML_Peptides(allScores);
-    }
-  }
-  
-  // calculate protein level probabilities with FIDO
-  if (ProteinProbEstimator::getCalcProteinLevelProb()){
-    calculateProteinProbabilities(allScores);
-    addProteinScores();
-    if (xmlInterface.getXmlOutputFN().size() > 0) {
-      xmlInterface.writeXML_Proteins(protEstimator_);
-    }
-  }
-  // write output to file
-  xmlInterface.writeXML(allScores, protEstimator_, call_);
-  Enzyme::destroy();
-  return 1;
-}
-
 // Finds the index of the given feature name (case insensitive).
 int PercolatorAdapter::findFeatureIndex(string feature) {
   feature = StringUtils::ToLower(feature);
@@ -660,6 +450,101 @@ double PercolatorAdapter::unnormalize(
     normSub = normalizer->getSub();
   }
   return psm->features[featureIndex] * normDiv[featureIndex] + normSub[featureIndex];
+}
+
+void PercolatorAdapter::printScores(Scores* scores, int label, ostream& os) {
+  std::vector<ScoreHolder>::iterator scoreIt = scores->begin();
+
+  bool lnNumDSP = false;
+  int lnNumSPIdx = PercolatorAdapter::findFeatureIndex("lnnumsp");
+  if (lnNumSPIdx == -1) {
+    if ((lnNumSPIdx = PercolatorAdapter::findFeatureIndex("lnnumdsp")) != -1) {
+      lnNumDSP = true;
+    }
+  }
+
+  os //<< "file\t"
+     << "file_idx\t"
+     << "scan\t"
+     << "charge\t"
+     << "spectrum precursor m/z\t"
+     << "spectrum neutral mass\t"
+     << "peptide mass\t"
+     << "percolator score\t"
+     << "percolator q-value\t"
+     << "percolator PEP\t"
+     << (lnNumDSP ? "distinct matches/spectrum" : "total matches/spectrum") << '\t'
+     << "sequence\t"
+     //<< "modifications\t"
+     << "protein id\t"
+     << "flanking aa\n";
+
+  Normalizer* normalizer = Normalizer::getNormalizer();
+  double* nSub = normalizer->getSub();
+  double* nDiv = normalizer->getDiv();
+
+  for ( ; scoreIt != scores->end(); ++scoreIt) {
+    if (scoreIt->label != label) {
+      continue;
+    }
+    std::string fileIdxStr, chargeStr;
+    int charge = 0;
+    const std::string& psmId = scoreIt->pPSM->getId();
+    std::vector<std::string> idPieces = StringUtils::Split(psmId, '_');
+    if (idPieces.size() == 5) {
+      fileIdxStr = idPieces[1];
+      chargeStr = idPieces[3];
+      StringUtils::TryFromString(chargeStr, &charge);
+    }
+
+    std::string flankingStr = "XX";
+    std::string seq = scoreIt->pPSM->peptide;
+    if (seq.length() >= 5 && seq[1] == '.' && seq[seq.length() - 2] == '.') {
+      flankingStr[0] = seq[0];
+      flankingStr[1] = seq[seq.length() - 1];
+      seq = seq.substr(2, seq.length() - 4);
+    }
+
+    double neutralMass = scoreIt->pPSM->expMass - MASS_PROTON;
+    double peptideMass = MASS_H2O_MONO; // Reported as 0 if a problem occurs
+    for (size_t i = 0; i < seq.length(); i++) {
+      if (seq[i] == '[') {
+        double modMass = 0.0;
+        size_t j = seq.find(']', ++i);
+        if (j == string::npos || !StringUtils::TryFromString(seq.substr(i, j - i), &modMass)) {
+          peptideMass = 0;
+          break;
+        }
+        peptideMass += modMass;
+        i = j;
+      } else {
+        try {
+          peptideMass += AminoAcidUtil::GetMass(seq[i], true);
+        } catch (...) {
+          peptideMass = 0;
+          break;
+        }
+      }
+    }
+
+    int precision = Params::GetInt("precision");
+    int massPrecision = Params::GetInt("mass-precision");
+    os //<< "" << '\t' // file
+       << fileIdxStr << '\t'
+       << scoreIt->pPSM->scan << '\t'
+       << chargeStr << '\t'
+       << StringUtils::ToString((charge > 0 ? neutralMass/charge + MASS_PROTON : 0), massPrecision) << '\t'
+       << StringUtils::ToString(neutralMass, massPrecision) << '\t'
+       << StringUtils::ToString(peptideMass, massPrecision) << '\t'
+       << StringUtils::ToString(scoreIt->score, precision) << '\t'
+       << StringUtils::ToString(scoreIt->q, precision, false) << '\t'
+       << StringUtils::ToString(scoreIt->pep, precision, false) << '\t'
+       << (lnNumSPIdx >= 0 ? exp(PercolatorAdapter::unnormalize(scoreIt->pPSM, lnNumSPIdx, nDiv, nSub)) : 0) << '\t'
+       << seq << '\t'
+       //<< "" << '\t' // mods
+       << StringUtils::Join(scoreIt->pPSM->proteinIds, ',') << '\t'
+       << flankingStr << std::endl;
+  }
 }
 
 /*
