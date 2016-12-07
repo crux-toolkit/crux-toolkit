@@ -123,19 +123,6 @@ class TideMatchSet {
     return x.xcorr_pval > y.xcorr_pval;
   }
 
-
-
-/*
-  static bool lessScore(Pair x, Pair y) {
-    // Compare scores, ignore counters.
-    return x.first.first < y.first.first;
-  }
-  static bool moreScore(Pair x, Pair y) {
-    // Compare scores, ignore counters.
-    return x.first.first > y.first.first;
-  }
-*/
-
 /**
    * Helper function for tab delimited report function for peptide centric
    */

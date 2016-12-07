@@ -388,7 +388,6 @@ void TideMatchSet::writeToFile(
        *file << StringUtils::ToString((*i)->combinedPval, precision, true) << '\t';
     }
 
-
     *file << ++cur << '\t';
     if (sp_map) {
       *file << sp_data->matched_ions << '\t'
