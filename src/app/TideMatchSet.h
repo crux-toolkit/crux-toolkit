@@ -107,20 +107,44 @@ class TideMatchSet {
   static char match_collection_loc_[sizeof(MatchCollection)];
   static char decoy_match_collection_loc_[sizeof(MatchCollection)];
 
-  static bool lessXcorrScore(Scores x, Scores y) {
+  static bool lessXcorrScore(const Scores& x, const Scores& y) {
     return x.xcorr_score < y.xcorr_score;
   }
   
-  static bool moreXcorrScore(Scores x, Scores y) {
+  static bool moreXcorrScore(const Scores& x, const Scores& y) {
     return x.xcorr_score > y.xcorr_score;
   }
 
-  static bool lessXcorrPvalScore(Scores x, Scores y) {
+  static bool lessXcorrPvalScore(const Scores& x, const Scores& y) {
     return x.xcorr_pval < y.xcorr_pval;
   }
 
-  static bool moreXcorrPvalScore(Scores x, Scores y) {
+  static bool moreXcorrPvalScore(const Scores& x, const Scores& y) {
     return x.xcorr_pval > y.xcorr_pval;
+  }
+
+  static bool lessResEvScore(const Scores& x, const Scores& y) {
+    return x.resEv_score < y.resEv_score;
+  }
+
+  static bool moreResEvScore(const Scores& x, const Scores& y) {
+    return x.resEv_score > y.resEv_score;
+  }
+
+  static bool lessResEvPvalScore(const Scores& x, const Scores& y) {
+    return x.resEv_pval < y.resEv_pval;
+  }
+
+  static bool moreResEvPvalScore(const Scores& x, const Scores& y) {
+    return x.resEv_pval > y.resEv_pval;
+  }
+ 
+  static bool lessCombinedPvalScore(const Scores& x, const Scores& y) {
+    return x.combinedPval < y.combinedPval;
+  }
+
+  static bool moreCombinedPvalScore(const Scores& x, const Scores& y) {
+    return x.combinedPval > y.combinedPval;
   }
 
 /**

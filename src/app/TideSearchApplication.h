@@ -332,6 +332,14 @@ private:
     vector<double>& scoreCount, //this is returned for later use
     int& scoreOffSet //this is returned for later use
   );
+
+  double calcCombinedPval( //calculates combined p-value
+    double m,
+    double p,
+    int numPval
+  );
+
+  int factorial(int N);
   
   void setSpectrumFlag(map<pair<string, unsigned int>, bool>* spectrum_flag);
   virtual void processParams();
