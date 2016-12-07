@@ -366,21 +366,21 @@ void TideMatchSet::writeToFile(
     }
 
     // Use scientific notation for exact p-value, but not refactored XCorr.
-    if(Params::GetString("score-function") == "xcorr") {
+    if(cur_score_function == XCORR_SCORE) {
       if (exact_pval_search_) {
         *file << StringUtils::ToString((*i)->xcorr_pval, precision, false) << '\t';
         *file << StringUtils::ToString((*i)->xcorr_score, precision, true) << '\t';
       } else {
         *file << StringUtils::ToString((*i)->xcorr_score, precision, true) << '\t';
       }
-    } else if (Params::GetString("score-function") == "residue-evidence") {
+    } else if (cur_score_function == RESIDUE_EVIDENCE_MATRIX) {
       if (exact_pval_search_) {
         *file << StringUtils::ToString((*i)->resEv_pval, precision, false) << '\t';
         *file << StringUtils::ToString((*i)->resEv_score, 1, true) << '\t';
       } else {
         *file << StringUtils::ToString((*i)->resEv_score, 1, true) << '\t';
       }
-    } else if (Params::GetString("score-function") == "both") {
+    } else if (cur_score_function == BOTH_SCORE) {
        *file << StringUtils::ToString((*i)->xcorr_pval, precision, false) << '\t';
        *file << StringUtils::ToString((*i)->xcorr_score, precision, true) << '\t';
        *file << StringUtils::ToString((*i)->resEv_pval, precision, false) << '\t';
@@ -553,18 +553,38 @@ void TideMatchSet::gatherTargetsAndDecoys(
   int top_n,
   bool highScoreBest // indicates semantics of score magnitude
 ) {
-  if (exact_pval_search_) {
-    make_heap(matches_->begin(), matches_->end(), highScoreBest ? lessXcorrPvalScore : moreXcorrPvalScore);
-  } else {
-    make_heap(matches_->begin(), matches_->end(), highScoreBest ? lessXcorrScore : moreXcorrScore);
+  if (cur_score_function == XCORR_SCORE) {
+    if (exact_pval_search_) {
+      make_heap(matches_->begin(), matches_->end(), highScoreBest ? lessXcorrPvalScore : moreXcorrPvalScore);
+    } else {
+      make_heap(matches_->begin(), matches_->end(), highScoreBest ? lessXcorrScore : moreXcorrScore);
+    }
+  } else if (cur_score_function == RESIDUE_EVIDENCE_MATRIX) {
+    if (exact_pval_search_) {
+      make_heap(matches_->begin(), matches_->end(), highScoreBest ? lessResEvPvalScore : moreResEvPvalScore);
+    } else {
+      make_heap(matches_->begin(), matches_->end(), highScoreBest ? lessResEvScore : moreResEvScore);
+    }
+  } else if (cur_score_function == BOTH_SCORE) {
+      make_heap(matches_->begin(), matches_->end(), highScoreBest ? lessCombinedPvalScore : moreCombinedPvalScore);
   }
-  
+
   if (!Params::GetBool("concat") && TideSearchApplication::hasDecoys()) {
     for (Arr::iterator i = matches_->end(); i != matches_->begin(); ) {
-      if (exact_pval_search_) {
-        pop_heap(matches_->begin(), i--, highScoreBest ? lessXcorrPvalScore : moreXcorrPvalScore);
-      } else {
-        pop_heap(matches_->begin(), i--, highScoreBest ? lessXcorrScore : moreXcorrScore);
+      if (cur_score_function == XCORR_SCORE) {
+        if (exact_pval_search_) {
+          pop_heap(matches_->begin(), i--, highScoreBest ? lessXcorrPvalScore : moreXcorrPvalScore);
+        } else {
+          pop_heap(matches_->begin(), i--, highScoreBest ? lessXcorrScore : moreXcorrScore);
+        }
+      } else if (cur_score_function == RESIDUE_EVIDENCE_MATRIX) {
+        if (exact_pval_search_) {
+          pop_heap(matches_->begin(), i--, highScoreBest ? lessResEvPvalScore : moreResEvPvalScore);
+        } else {
+          pop_heap(matches_->begin(), i--, highScoreBest ? lessResEvScore : moreResEvScore);
+        }
+      } else if (cur_score_function == BOTH_SCORE) {
+        pop_heap(matches_->begin(), i--, highScoreBest ? lessCombinedPvalScore : moreCombinedPvalScore);
       }
 
       const Peptide& peptide = *(peptides->GetPeptide(i->rank));
@@ -577,11 +597,22 @@ void TideMatchSet::gatherTargetsAndDecoys(
   } else {
     int toAdd = min(top_n + 1, matches_->size());
     for (int i = 0; i < toAdd; ) {
-      if (exact_pval_search_) {
-        pop_heap(matches_->begin(), matches_->end() - i, highScoreBest ? lessXcorrPvalScore : moreXcorrPvalScore); 
-      } else {
-        pop_heap(matches_->begin(), matches_->end() - i, highScoreBest ? lessXcorrScore : moreXcorrScore);
+      if (cur_score_function == XCORR_SCORE) {
+        if (exact_pval_search_) {
+          pop_heap(matches_->begin(), matches_->end() - i, highScoreBest ? lessXcorrPvalScore : moreXcorrPvalScore); 
+        } else {
+          pop_heap(matches_->begin(), matches_->end() - i, highScoreBest ? lessXcorrScore : moreXcorrScore);
+        }
+      } else if (cur_score_function == RESIDUE_EVIDENCE_MATRIX) {
+        if (exact_pval_search_) {
+          pop_heap(matches_->begin(), matches_->end() - i, highScoreBest ? lessResEvPvalScore : moreResEvPvalScore);
+        } else {
+          pop_heap(matches_->begin(), matches_->end() - i, highScoreBest ? lessResEvScore : moreResEvScore);
+        }
+      } else if (cur_score_function == BOTH_SCORE) {
+        pop_heap(matches_->begin(), matches_->end() - i, highScoreBest ? lessCombinedPvalScore : moreCombinedPvalScore);
       }
+
       targetsOut.push_back(matches_->end() - (++i));
     }
   }
