@@ -49,17 +49,17 @@ class PercolatorAdapter : public Caller {
   /**
    * Adds PSM scores from Percolator objects into a ProteinMatchCollection
    */
-  void addPsmScores(Scores allScores);
+  void processPsmScores(Scores& allScores);
 
   /**
    * Adds peptide scores from Percolator objects into a ProteinMatchCollection
    */
-  void addPeptideScores(Scores allScores);
+  void processPeptideScores(Scores& allScores);
 
   /**
    * Adds protein scores from Percolator objects into a ProteinMatchCollection
    */
-  void addProteinScores();
+  void processProteinScores(ProteinProbEstimator* protEstimator);
 
   /*
    *\returns the ProteinMatchCollection, to be called after Caller::run() is finished
@@ -71,8 +71,6 @@ class PercolatorAdapter : public Caller {
    */
   ProteinMatchCollection* getDecoyProteinMatchCollection();
 
-  int run();
-
   static int findFeatureIndex(std::string feature);
   static std::map<int, int> mapChargeFeatures(); // map index of feature -> charge
 
@@ -82,6 +80,8 @@ class PercolatorAdapter : public Caller {
     double* normDiv = NULL,
     double* normSub = NULL
   );
+
+  static void printScores(Scores* scores, int label, std::ostream& os);
   
  protected:
     
