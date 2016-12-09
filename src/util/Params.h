@@ -7,6 +7,12 @@
 #include <set>
 #include <vector>
 
+#ifdef _MSC_VER
+// Turn off Microsoft min and max macros
+#undef max
+#undef min
+#endif
+
 class Param;
 
 class Params {
