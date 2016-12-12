@@ -26,6 +26,7 @@
 #define snprintf _snprintf
 
 #undef NO_ERROR
+// Turn off Microsoft min and max macros
 #undef max
 #undef min
 
