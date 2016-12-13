@@ -333,6 +333,19 @@
 		Earlier versions of <span class=prog>Crux</span> 
 		had to be built using the GCC compilers.
 		which are no supported by Apple.
+    If you have the both the GCC and Apple compilers installed, you'll need to
+    adjust the <span class=prog>PATH</span> environment variable so that the
+    Apple compilers are found first.
+    Alternatively, you can specify which compilers should be used by setting
+    the <span class=prog>CC</span>, and <span class=prog>CXX</span>.
+    For example,
+		<div class=code>
+    <code>
+    export CC=/usr/bin/gcc
+    <br />
+    export CXX=/usr/bin/g++
+    </code>
+		</div>
 		<p/>
 		The programs
 		<span class=prog>cmake</span>,
