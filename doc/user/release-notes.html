@@ -566,15 +566,15 @@ version 2.04.</li>
 
 <li>
 <p>The formula that is used to convert fragment m/z values from real
-numbers into integers was modified.  Previously, the conversion was
+numbers into integers was modified.  Previously, the conversion was<br>
 <pre>
   floor( (x / mz-bin-size) + 0.5 + mz-bin-offset )
 </pre>
-The new conversion formula is 
+<br>The new conversion formula is <br>
 <pre>
   floor( (x / mz-bin-size) + 1.0 - mz-bin-offset )
 </pre>
-The default values of the two parameters (mz-bin-size and
+<br>The default values of the two parameters (mz-bin-size and
 mz-bin-offset) have not changed.  The allowed range of the
 mz-bin-offset parameter was previously [-1,1], but has been changed to
 [0,1].</p>
