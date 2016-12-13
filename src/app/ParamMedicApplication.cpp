@@ -19,8 +19,8 @@ const double MAX_PROPORTION_PRECURSOR_DELTAS_ZERO = 0.5;
 const int MAX_PEAKPAIRS = 100000;
 
 // multipliers to transform standard error values into algorithm parameters
-const double PRECURSOR_SIGMA_MULTIPLIER = 15.699435;
-const double FRAGMENT_SIGMA_MULTIPLIER = 0.003752;
+const double PRECURSOR_SIGMA_MULTIPLIER = 37.404067;
+const double FRAGMENT_SIGMA_MULTIPLIER = 0.004662;
 
 // separation between averagine peaks used for binning spectra
 const double AVERAGINE_PEAK_SEPARATION = 1.0005079;
