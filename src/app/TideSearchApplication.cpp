@@ -1095,6 +1095,7 @@ vector<string> TideSearchApplication::getArgs() const {
 vector<string> TideSearchApplication::getOptions() const {
   string arr[] = {
     "precursor-window",
+    "auto-precursor-window",
     "precursor-window-type",
     "spectrum-min-mz",
     "spectrum-max-mz",
@@ -1125,6 +1126,7 @@ vector<string> TideSearchApplication::getOptions() const {
     "use-neutral-loss-peaks",
     "use-flanking-peaks",
     "mz-bin-width",
+    "auto-mz-bin-width",
     "mz-bin-offset",
     "max-precursor-charge",
     "peptide-centric-search",

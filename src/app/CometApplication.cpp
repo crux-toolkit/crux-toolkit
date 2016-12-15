@@ -337,6 +337,7 @@ vector<string> CometApplication::getOptions() const {
     "num_threads",
     // Masses
     "peptide_mass_tolerance",
+    "auto_peptide_mass_tolerance",
     "peptide_mass_units",
     "mass_type_parent",
     "mass_type_fragment",
@@ -349,6 +350,7 @@ vector<string> CometApplication::getOptions() const {
     // Fragment ions
     "fragment_bin_tol",
     "fragment_bin_offset",
+    "auto_fragment_bin_tol",
     "theoretical_fragment_ions",
     "use_A_ions",
     "use_B_ions",
