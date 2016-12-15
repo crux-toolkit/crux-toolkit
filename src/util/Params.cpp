@@ -1841,6 +1841,7 @@ void Params::Categorize() {
   items.insert("peptide-centric-search");
   items.insert("exact-p-value");
   items.insert("precursor-window");
+  items.insert("auto-precursor-window");
   items.insert("precursor-window-type");
   items.insert("compute-sp");
   items.insert("spectrum-min-mz");
@@ -1853,6 +1854,7 @@ void Params::Categorize() {
   items.insert("use-flanking-peaks");
   items.insert("use-neutral-loss-peaks");
   items.insert("mz-bin-width");
+  items.insert("auto-mz-bin-width");
   items.insert("mz-bin-offset");
   items.insert("precursor-window-weibull");
   items.insert("precursor-window-type-weibull");
@@ -1916,6 +1918,7 @@ void Params::Categorize() {
 
   items.clear();
   items.insert("peptide_mass_tolerance");
+  items.insert("auto_peptide_mass_tolerance");
   items.insert("peptide_mass_units");
   items.insert("mass_type_parent");
   items.insert("mass_type_fragment");
@@ -1931,6 +1934,7 @@ void Params::Categorize() {
 
   items.clear();
   items.insert("fragment_bin_tol");
+  items.insert("auto_fragment_bin_tol");
   items.insert("fragment_bin_offset");
   items.insert("theoretical_fragment_ions");
   items.insert("use_A_ions");
