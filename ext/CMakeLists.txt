@@ -106,10 +106,21 @@ else (WIN32 AND NOT CYGWIN)
           -DPREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
           -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
           -P  ${CMAKE_CURRENT_SOURCE_DIR}/build_pwiz.cmake
-      INSTALL_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/create_links.sh 
-        --prefix=${CMAKE_CURRENT_BINARY_DIR} &&
-        ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost ${CMAKE_CURRENT_BINARY_DIR}/include/boost
-      INSTALL_COMMAND ""
+      INSTALL_COMMAND
+        ${CMAKE_CURRENT_SOURCE_DIR}/create_links.sh 
+           --prefix=${CMAKE_CURRENT_BINARY_DIR}
+        COMMAND ${CMAKE_COMMAND} -E copy
+          ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/asio.hpp
+          ${CMAKE_CURRENT_BINARY_DIR}/include/boost
+        COMMAND ${CMAKE_COMMAND} -E copy_directory 
+          ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/asio 
+          ${CMAKE_CURRENT_BINARY_DIR}/include/boost/asio
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+          ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_aux/boost/utility
+          ${CMAKE_CURRENT_BINARY_DIR}/include/boost/utility
+        COMMAND ${CMAKE_COMMAND} -E copy
+          ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_1_56_0/boost/date_time/gregorian_calendar.ipp
+          ${CMAKE_CURRENT_BINARY_DIR}/include/boost/date_time
       BUILD_IN_SOURCE 1
     )
   else (USE_LATEST_PWIZ)
@@ -124,10 +135,21 @@ else (WIN32 AND NOT CYGWIN)
           -DPREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
           -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
           -P  ${CMAKE_CURRENT_SOURCE_DIR}/build_pwiz.cmake
-      INSTALL_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/create_links.sh 
-        --prefix=${CMAKE_CURRENT_BINARY_DIR} &&
-        ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost ${CMAKE_CURRENT_BINARY_DIR}/include/boost
-      INSTALL_COMMAND ""
+      INSTALL_COMMAND
+        ${CMAKE_CURRENT_SOURCE_DIR}/create_links.sh 
+           --prefix=${CMAKE_CURRENT_BINARY_DIR}
+        COMMAND ${CMAKE_COMMAND} -E copy
+          ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/asio.hpp
+          ${CMAKE_CURRENT_BINARY_DIR}/include/boost
+        COMMAND ${CMAKE_COMMAND} -E copy_directory 
+          ${CMAKE_CURREN_SOURCE_DIR}/patches/boost 
+          ${CMAKE_CURRENT_BINARY_DIR}/include/boost
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+          ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_aux/boost/utility
+          ${CMAKE_CURRENT_BINARY_DIR}/include/boost/utility
+        COMMAND ${CMAKE_COMMAND} -E copy
+          ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_1_56_0/boost/date_time/gregorian_calendar.ipp
+          ${CMAKE_CURRENT_BINARY_DIR}/include/boost/date_time
       BUILD_IN_SOURCE 1
     )
   endif (USE_LATEST_PWIZ)
