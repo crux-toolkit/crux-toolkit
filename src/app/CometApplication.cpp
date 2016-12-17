@@ -484,7 +484,7 @@ void CometApplication::processParams() {
   const string autoPrecursor = Params::GetString("auto_peptide_mass_tolerance");
   const string autoFragment = Params::GetString("auto_fragment_bin_tol");
   if (autoPrecursor != "false" || autoFragment != "false") {
-    if (autoPrecursor != "false" && Params::GetString("peptide_mass_units") != "ppm") {
+    if (autoPrecursor != "false" && Params::GetInt("peptide_mass_units") != 2) {
       carp(CARP_FATAL, "Automatic peptide mass tolerance detection is only supported with ppm "
                        "units. Please rerun with either auto_peptide_mass_tolerance set to 'false' "
                        "or peptide_mass_units set to '2'.");
