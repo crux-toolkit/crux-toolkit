@@ -131,7 +131,7 @@ void ParamMedicApplication::processParams() {
     Params::Set("use-z-line", true);
   }
   if (!Params::GetBool("pm-ignore-no-charge")) {
-    carp(CARP_DEBUG, "Forcing ignore-no-charge=T");
+    carp(CARP_DEBUG, "Forcing pm-ignore-no-charge=T");
     Params::Set("pm-ignore-no-charge", true);
   }
 }
