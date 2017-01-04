@@ -96,18 +96,18 @@ vector<string> ParamMedicApplication::getOptions() const {
   string arr[] = {
     "verbosity",
     "spectrum-parser",
-    "min-precursor-mz",
-    "max-precursor-mz",
-    "min-frag-mz",
-    "max-frag-mz",
-    "min-scan-frag-peaks",
-    "max-precursor-delta-ppm",
-    "charge",
-    "top-n-frag-peaks",
-    "pair-top-n-frag-peaks",
-    "min-common-frag-peaks",
-    "max-scan-separation",
-    "min-peak-pairs"
+    "pm-min-precursor-mz",
+    "pm-max-precursor-mz",
+    "pm-min-frag-mz",
+    "pm-max-frag-mz",
+    "pm-min-scan-frag-peaks",
+    "pm-max-precursor-delta-ppm",
+    "pm-charge",
+    "pm-top-n-frag-peaks",
+    "pm-pair-top-n-frag-peaks",
+    "pm-min-common-frag-peaks",
+    "pm-max-scan-separation",
+    "pm-min-peak-pairs"
   };
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }
@@ -130,9 +130,9 @@ void ParamMedicApplication::processParams() {
     carp(CARP_DEBUG, "Forcing use-z-line=T");
     Params::Set("use-z-line", true);
   }
-  if (!Params::GetBool("ignore-no-charge")) {
+  if (!Params::GetBool("pm-ignore-no-charge")) {
     carp(CARP_DEBUG, "Forcing ignore-no-charge=T");
-    Params::Set("ignore-no-charge", true);
+    Params::Set("pm-ignore-no-charge", true);
   }
 }
 
@@ -141,12 +141,12 @@ ParamMedicErrorCalculator::ParamMedicErrorCalculator():
   if (!numeric_limits<double>::is_iec559) {
     carp(CARP_FATAL, "Something went wrong.");
   }
-  lowestPrecursorBinStartMz_ = Params::GetDouble("min-precursor-mz") -
-    fmod(Params::GetDouble("min-precursor-mz"), AVERAGINE_PEAK_SEPARATION / Params::GetInt("charge"));
-  lowestFragmentBinStartMz_ = Params::GetDouble("min-frag-mz") -
-    fmod(Params::GetDouble("min-frag-mz"), AVERAGINE_PEAK_SEPARATION);
-  numPrecursorBins_ = getBinIndexPrecursor(Params::GetDouble("max-precursor-mz")) + 1;
-  numFragmentBins_ = getBinIndexFragment(Params::GetDouble("max-frag-mz")) + 1;
+  lowestPrecursorBinStartMz_ = Params::GetDouble("pm-min-precursor-mz") -
+    fmod(Params::GetDouble("pm-min-precursor-mz"), AVERAGINE_PEAK_SEPARATION / Params::GetInt("pm-charge"));
+  lowestFragmentBinStartMz_ = Params::GetDouble("pm-min-frag-mz") -
+    fmod(Params::GetDouble("pm-min-frag-mz"), AVERAGINE_PEAK_SEPARATION);
+  numPrecursorBins_ = getBinIndexPrecursor(Params::GetDouble("pm-max-precursor-mz")) + 1;
+  numFragmentBins_ = getBinIndexFragment(Params::GetDouble("pm-max-frag-mz")) + 1;
 }
 
 ParamMedicErrorCalculator::~ParamMedicErrorCalculator() {
@@ -174,19 +174,19 @@ void ParamMedicErrorCalculator::processFiles(const vector<string>& files) {
 void ParamMedicErrorCalculator::processSpectrum(Spectrum* spectrum) {
   ++numTotalSpectra_;
 
-  if (spectrum->getNumPeaks() < Params::GetInt("min-scan-frag-peaks")) {
+  if (spectrum->getNumPeaks() < Params::GetInt("pm-min-scan-frag-peaks")) {
     return;
   }
 
   double precursorMz = getPrecursorMz(spectrum);
-  if (!(Params::GetDouble("min-precursor-mz") <= precursorMz && precursorMz <= Params::GetDouble("max-precursor-mz"))) {
+  if (!(Params::GetDouble("pm-min-precursor-mz") <= precursorMz && precursorMz <= Params::GetDouble("pm-max-precursor-mz"))) {
     return;
   }
 
   ++numPassingSpectra_;
   // pull out the top fragments by intensity
   spectrum->sortPeaks(_PEAK_INTENSITY);
-  spectrum->truncatePeaks(Params::GetInt("top-n-frag-peaks"));
+  spectrum->truncatePeaks(Params::GetInt("pm-top-n-frag-peaks"));
 
   int precursorBinIndex = getBinIndexPrecursor(precursorMz);
   map<int, Spectrum*>::const_iterator prevIter = spectra_.find(precursorBinIndex);
@@ -196,16 +196,16 @@ void ParamMedicErrorCalculator::processSpectrum(Spectrum* spectrum) {
     const double precursorMzPrev = getPrecursorMz(prev);
     const double precursorMzDiffPpm = (precursorMz - precursorMzPrev) * MILLION / precursorMz;
     // check precursor and scan count between the scans
-    if (abs(precursorMzDiffPpm) <= Params::GetDouble("max-precursor-delta-ppm") &&
-        abs(spectrum->getFirstScan() - prev->getFirstScan()) <= Params::GetInt("max-scan-separation")) {
+    if (abs(precursorMzDiffPpm) <= Params::GetDouble("pm-max-precursor-delta-ppm") &&
+        abs(spectrum->getFirstScan() - prev->getFirstScan()) <= Params::GetInt("pm-max-scan-separation")) {
       // count the fragment peaks in common
       vector< pair<const Peak*, const Peak*> > pairedFragments = pairFragments(prev, spectrum);
-      if (pairedFragments.size() >= Params::GetInt("min-common-frag-peaks")) {
+      if (pairedFragments.size() >= Params::GetInt("pm-min-common-frag-peaks")) {
         // we've got a pair! record everything
         sort(pairedFragments.begin(), pairedFragments.end(), sortPairedFragments);
         vector< pair<const Peak*, const Peak*> >::const_iterator stop =
-          pairedFragments.size() >= Params::GetInt("pair-top-n-frag-peaks")
-            ? pairedFragments.begin() + Params::GetInt("pair-top-n-frag-peaks")
+          pairedFragments.size() >= Params::GetInt("pm-pair-top-n-frag-peaks")
+            ? pairedFragments.begin() + Params::GetInt("pm-pair-top-n-frag-peaks")
             : pairedFragments.end();
         for (vector< pair<const Peak*, const Peak*> >::const_iterator i = pairedFragments.begin();
             i != stop;
@@ -261,9 +261,9 @@ void ParamMedicErrorCalculator::calcMassErrorDist(
   }
 
   // check for conditions that would cause us to bomb out
-  if (precursorDistancesPpm.size() < Params::GetInt("min-peak-pairs")) {
+  if (precursorDistancesPpm.size() < Params::GetInt("pm-min-peak-pairs")) {
     *precursorFailure = 
-      "Need >= " + Params::GetString("min-peak-pairs") + " peak pairs to fit mixed distribution. "
+      "Need >= " + Params::GetString("pm-min-peak-pairs") + " peak pairs to fit mixed distribution. "
       "Got only " + StringUtils::ToString(precursorDistancesPpm.size());
   }
   if (precursorFailure->empty()) {
@@ -285,9 +285,9 @@ void ParamMedicErrorCalculator::calcMassErrorDist(
                     &precursorMuPpm2Measures, &precursorSigmaPpm2Measures);
   }
 
-  if (pairedFragmentPeaks_.size() < Params::GetInt("min-peak-pairs")) {
+  if (pairedFragmentPeaks_.size() < Params::GetInt("pm-min-peak-pairs")) {
     *fragmentFailure =
-      "Need >= " + Params::GetString("min-peak-pairs") + " peak pairs to fit mixed distribution. "
+      "Need >= " + Params::GetString("pm-min-peak-pairs") + " peak pairs to fit mixed distribution. "
       "Got only " + StringUtils::ToString(pairedFragmentPeaks_.size());
   }
 
@@ -396,7 +396,7 @@ void ParamMedicErrorCalculator::estimateMuSigma(
 }
 
 int ParamMedicErrorCalculator::getBinIndexPrecursor(double mz) const {
-  return (int)((mz - lowestPrecursorBinStartMz_) / (AVERAGINE_PEAK_SEPARATION / Params::GetInt("charge")));
+  return (int)((mz - lowestPrecursorBinStartMz_) / (AVERAGINE_PEAK_SEPARATION / Params::GetInt("pm-charge")));
 }
 
 int ParamMedicErrorCalculator::getBinIndexFragment(double mz) const {
@@ -406,7 +406,7 @@ int ParamMedicErrorCalculator::getBinIndexFragment(double mz) const {
 double ParamMedicErrorCalculator::getPrecursorMz(const Spectrum* spectrum) const {
   const vector<SpectrumZState>& zStates = spectrum->getZStates();
   for (vector<SpectrumZState>::const_iterator i = zStates.begin(); i != zStates.end(); i++) {
-    if (i->getCharge() == Params::GetInt("charge")) {
+    if (i->getCharge() == Params::GetInt("pm-charge")) {
       return i->getMZ();
     }
   }
@@ -435,7 +435,7 @@ map<int, const Peak*> ParamMedicErrorCalculator::binFragments(const Spectrum* sp
   for (PeakIterator i = spectrum->begin(); i != spectrum->end(); i++) {
     FLOAT_T mz = (*i)->getLocation();
     FLOAT_T intensity = (*i)->getIntensity();
-    if (mz < Params::GetDouble("min-frag-mz")) {
+    if (mz < Params::GetDouble("pm-min-frag-mz")) {
       continue;
     }
     int binIndex = getBinIndexFragment(mz);
