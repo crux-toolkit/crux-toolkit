@@ -1132,7 +1132,19 @@ vector<string> TideSearchApplication::getOptions() const {
     "peptide-centric-search",
     "elution-window-size",
     "num-threads",
-    "verbosity"
+    "verbosity",
+    "pm-min-precursor-mz",
+    "pm-max-precursor-mz",
+    "pm-min-frag-mz",
+    "pm-max-frag-mz",
+    "pm-min-scan-frag-peaks",
+    "pm-max-precursor-delta-ppm",
+    "pm-charge",
+    "pm-top-n-frag-peaks",
+    "pm-pair-top-n-frag-peaks",
+    "pm-min-common-frag-peaks",
+    "pm-max-scan-separation",
+    "pm-min-peak-pairs"
   };
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }
