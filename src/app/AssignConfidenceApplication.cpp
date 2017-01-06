@@ -200,6 +200,7 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
 
     if (!FileUtils::Exists(decoy_path)) {
       if (estimation_method == MIXMAX_METHOD) {
+        carp(CARP_FATAL, "Cannot find file %s.", decoy_path.c_str());
         carp(CARP_FATAL, "Decoy file from separate target-decoy search is required "
           "for mix-max q-value calculation");
       }
@@ -222,6 +223,7 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
       scoreTypes.push_back(TIDE_SEARCH_EXACT_PVAL);
       scoreTypes.push_back(TIDE_SEARCH_EXACT_SMOOTHED);
       scoreTypes.push_back(LOGP_BONF_WEIBULL_XCORR);
+      scoreTypes.push_back(PERCOLATOR_SCORE);
       for (vector<SCORER_TYPE_T>::const_iterator i = scoreTypes.begin();
            i != scoreTypes.end();
            i++) {
@@ -1093,6 +1095,7 @@ int AssignConfidenceApplication::getDirection(SCORER_TYPE_T scoreType) {
     case LOGP_BONF_WEIBULL_XCORR: // negative log p-values
     case TIDE_SEARCH_REFACTORED_XCORR:
     case RESIDUE_EVIDENCE_SCORE:
+    case PERCOLATOR_SCORE:
       // higher score better, ascending = false
       return -1;
     case EVALUE:
@@ -1102,6 +1105,7 @@ int AssignConfidenceApplication::getDirection(SCORER_TYPE_T scoreType) {
       // lower score better, ascending = true
       return 1;
     default:
+      carp(CARP_FATAL, "Unknown score type %s", scorer_type_to_string(scoreType));
       // unknown score type
       return 0;
   }

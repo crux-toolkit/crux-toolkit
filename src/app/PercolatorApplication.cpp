@@ -356,14 +356,20 @@ int PercolatorApplication::main(
 
   /* Call percolatorMain */
   PercolatorAdapter pCaller;
-  int retVal;
-  if (pCaller.parseOptions(perc_args_vec.size(), (char**)&perc_argv.front())) {
-    // Percolator return value 1 means success
-    if ((retVal = pCaller.run()) != 1) {
+  try {
+    int retVal;
+    if (pCaller.parseOptions(perc_args_vec.size(), (char**)&perc_argv.front()) &&
+        (retVal = pCaller.run()) != 1) { // Percolator return value 1 means success
       carp(CARP_FATAL, "Error running percolator:%d", retVal);
     }
-    retVal = 0;
-  } 
+  } catch (const std::exception& e) {
+    /* Recover stderr */
+    std::cerr.rdbuf(old);
+    throw runtime_error(e.what());
+  }
+
+  /* Recover stderr */
+  std::cerr.rdbuf(old);
   
   // get percolator score information into crux objects
   ProteinMatchCollection* target_pmc = pCaller.getProteinMatchCollection();
@@ -406,10 +412,7 @@ int PercolatorApplication::main(
 
   Globals::clean();
 
-  /* Recover stderr */
-  std::cerr.rdbuf(old);
-
-  return retVal;
+  return 0;
 }
 
 COMMAND_T PercolatorApplication::getCommand() const {

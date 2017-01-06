@@ -1449,6 +1449,7 @@ vector<string> TideSearchApplication::getArgs() const {
 vector<string> TideSearchApplication::getOptions() const {
   string arr[] = {
     "precursor-window",
+    "auto-precursor-window",
     "precursor-window-type",
     "spectrum-min-mz",
     "spectrum-max-mz",
@@ -1479,6 +1480,7 @@ vector<string> TideSearchApplication::getOptions() const {
     "use-neutral-loss-peaks",
     "use-flanking-peaks",
     "mz-bin-width",
+    "auto-mz-bin-width",
     "mz-bin-offset",
     "max-precursor-charge",
     "peptide-centric-search",
@@ -1488,6 +1490,18 @@ vector<string> TideSearchApplication::getOptions() const {
     "score-function",
     "fragment-tolerance",
     "evidence-granularity"
+    "pm-min-precursor-mz",
+    "pm-max-precursor-mz",
+    "pm-min-frag-mz",
+    "pm-max-frag-mz",
+    "pm-min-scan-frag-peaks",
+    "pm-max-precursor-delta-ppm",
+    "pm-charge",
+    "pm-top-n-frag-peaks",
+    "pm-pair-top-n-frag-peaks",
+    "pm-min-common-frag-peaks",
+    "pm-max-scan-separation",
+    "pm-min-peak-pairs"
   };
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }
