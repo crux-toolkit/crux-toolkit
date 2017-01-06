@@ -359,7 +359,7 @@ bool Spectrum::parseMstoolkitSpectrum
         mst_real_spectrum->atZ(z_idx).z);
       zstates_.push_back(zstate);
     }
-  } else if (!Params::GetBool("ignore-no-charge")) { // if no charge states detected, decide based on spectrum
+  } else if (!Params::GetBool("pm-ignore-no-charge")) { // if no charge states detected, decide based on spectrum
     assignZState(); 
   } else {
     return false;
@@ -493,7 +493,7 @@ bool Spectrum::parsePwizSpecInfo(
           zstate.setMZ(precursor_mz_, charges[charge_idx].valueAs<int>());
           zstates_.push_back(zstate);
         }
-      } else if (!Params::GetBool("ignore-no-charge")) { // we have no charge information
+      } else if (!Params::GetBool("pm-ignore-no-charge")) { // we have no charge information
         assignZState(); //do choose charge and add +1 or +2,+3
       } else {
         return false;

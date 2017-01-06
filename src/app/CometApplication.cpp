@@ -337,6 +337,7 @@ vector<string> CometApplication::getOptions() const {
     "num_threads",
     // Masses
     "peptide_mass_tolerance",
+    "auto_peptide_mass_tolerance",
     "peptide_mass_units",
     "mass_type_parent",
     "mass_type_fragment",
@@ -349,6 +350,7 @@ vector<string> CometApplication::getOptions() const {
     // Fragment ions
     "fragment_bin_tol",
     "fragment_bin_offset",
+    "auto_fragment_bin_tol",
     "theoretical_fragment_ions",
     "use_A_ions",
     "use_B_ions",
@@ -433,7 +435,20 @@ vector<string> CometApplication::getOptions() const {
     "add_W_tryptophan",
     "add_X_user_amino_acid",
     "add_Y_tyrosine",
-    "add_Z_user_amino_acid"
+    "add_Z_user_amino_acid",
+    // param-medic
+    "pm-min-precursor-mz",
+    "pm-max-precursor-mz",
+    "pm-min-frag-mz",
+    "pm-max-frag-mz",
+    "pm-min-scan-frag-peaks",
+    "pm-max-precursor-delta-ppm",
+    "pm-charge",
+    "pm-top-n-frag-peaks",
+    "pm-pair-top-n-frag-peaks",
+    "pm-min-common-frag-peaks",
+    "pm-max-scan-separation",
+    "pm-min-peak-pairs"
   };
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }
@@ -482,7 +497,7 @@ void CometApplication::processParams() {
   const string autoPrecursor = Params::GetString("auto_peptide_mass_tolerance");
   const string autoFragment = Params::GetString("auto_fragment_bin_tol");
   if (autoPrecursor != "false" || autoFragment != "false") {
-    if (autoPrecursor != "false" && Params::GetString("precursor-window-type") != "ppm") {
+    if (autoPrecursor != "false" && Params::GetInt("peptide_mass_units") != 2) {
       carp(CARP_FATAL, "Automatic peptide mass tolerance detection is only supported with ppm "
                        "units. Please rerun with either auto_peptide_mass_tolerance set to 'false' "
                        "or peptide_mass_units set to '2'.");

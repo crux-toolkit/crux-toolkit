@@ -75,7 +75,7 @@
     proposed by Barber and
     Candes, <a href="https://arxiv.org/abs/1404.5609"><i>Annals of
     Statistics</i></a>, 2015, as well as by He et al.,
-    <a href="http://arxiv.org/abs/1501.00537</a>arXiv:1501.00537</a>,
+    <a href="http://arxiv.org/abs/1501.00537"</a>arXiv:1501.00537</a>,
     2015.</li>
        
   <li>
@@ -84,7 +84,7 @@
 
 </ul>
 
-<hr></hr>
+<hr/>
 
 <h3>Version 3.0</h3> August 1, 2016
 
@@ -566,15 +566,15 @@ version 2.04.</li>
 
 <li>
 <p>The formula that is used to convert fragment m/z values from real
-numbers into integers was modified.  Previously, the conversion was
+numbers into integers was modified.  Previously, the conversion was<br>
 <pre>
   floor( (x / mz-bin-size) + 0.5 + mz-bin-offset )
 </pre>
-The new conversion formula is 
+<br>The new conversion formula is <br>
 <pre>
   floor( (x / mz-bin-size) + 1.0 - mz-bin-offset )
 </pre>
-The default values of the two parameters (mz-bin-size and
+<br>The default values of the two parameters (mz-bin-size and
 mz-bin-offset) have not changed.  The allowed range of the
 mz-bin-offset parameter was previously [-1,1], but has been changed to
 [0,1].</p>
