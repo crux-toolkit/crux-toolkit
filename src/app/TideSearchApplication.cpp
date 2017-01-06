@@ -984,7 +984,7 @@ void TideSearchApplication::search(void* threadarg) {
 	  }
 	  for(int i = 0; i < scoreResidueCount.size(); i++) {
 	    //Avoid potential underflow
-	    scoreResidueCount[i] = exp(log(scoreResidueCount[i]) - log(totalCount));
+            scoreResidueCount[i] = exp(log(scoreResidueCount[i]) - log(totalCount));
 	  }
 	  pValuesResidueObs[curPepMassInt] = scoreResidueCount;
 	}
@@ -1761,7 +1761,7 @@ void TideSearchApplication::calcResidueScoreCount (
       col = initCountCol + ma - NTermMass + 1;
     }
 
-    //if ( col <= maxAaMass + colLast ) { //original
+//    if ( col <= maxAaMass + colLast ) { //original
     if ( col <= maxAaMass + colLast && col >= initCountCol ) { //TODO not sure if below or above is correct
       //dynProgArray[ row ][ col ] += dynProgArray[ initCountRow ][ initCountCol ];
       dynProgArray[ row ][ col ] += dynProgArray[ initCountRow ][ initCountCol ] * aaFreqN[ de ];
