@@ -514,6 +514,12 @@ Params::Params() : finalized_(false) {
     " undefined behavior. Using 'none' will turn the binary .csm files "
     "into text.", false);
   // **** percolator options. ****
+  InitStringParam("search-input", "auto", "auto|separate|concatenated",
+    "Specify the type of target-decoy search. Using 'auto', percolator attempts "
+    "to detect the search type automatically.  Using 'separate' specifies two searches: "
+    "one against target and one against decoy protein db. Using 'concatenated' "
+    "specifies a single search on concatenated target-decoy protein db.",
+    "Available for percolator", true);
   InitStringParam("percolator-seed", "1",
     "When given a unsigned integer value seeds the random number generator with that value. "
     "When given the string \"time\" seeds the random number generator with the system time.",
@@ -2003,6 +2009,7 @@ void Params::Categorize() {
   items.clear();
   items.insert("only-psms");
   items.insert("tdc");
+  items.insert("search-input");
   AddCategory("General options", items);
 
   items.clear();

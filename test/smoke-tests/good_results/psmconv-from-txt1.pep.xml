@@ -91,6 +91,7 @@
 <parameter name="precision" value="8"/>
 <parameter name="mass-precision" value="4"/>
 <parameter name="print-search-progress" value="1000"/>
+<parameter name="search-input" value="auto"/>
 <parameter name="percolator-seed" value="1"/>
 <parameter name="feature-file-out" value="false"/>
 <parameter name="decoy-xml-output" value="false"/>
