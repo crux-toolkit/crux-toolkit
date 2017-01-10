@@ -136,17 +136,17 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
   if (Params::GetBool("sqt-output") && !compute_sp) {
     compute_sp = true;
     carp(CARP_INFO, "Enabling parameter compute-sp since SQT output is enabled "
-                    " (this will increase runtime).");
+                    "(this will increase runtime).");
   }
 
   // Check isotope-error parameter
   string isotope_errors_string = Params::GetString("isotope-error");
   if (isotope_errors_string[0] == ',') {
-    carp(CARP_FATAL, "CARP_FATAL: Error in isotope_error parameter formatting: (%s)", isotope_errors_string.c_str());
+    carp(CARP_FATAL, "Error in isotope_error parameter formatting: (%s)", isotope_errors_string.c_str());
   }
   for (int i = 0; isotope_errors_string[i] != '\0'; ++i) {
     if (isotope_errors_string[i] == ',' && (isotope_errors_string[i+1] == ',' || isotope_errors_string[i+1] == '\0')) {
-      carp(CARP_FATAL, "CARP_FATAL: Error in isotope_error parameter formatting: (%s) ", isotope_errors_string.c_str());
+      carp(CARP_FATAL, "Error in isotope_error parameter formatting: (%s) ", isotope_errors_string.c_str());
     }
   }
   
@@ -156,11 +156,11 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
   negative_isotope_errors->push_back(0);
   while (getline(isotope_errors_ss, isotope_token, ',')) {
     if (isotope_token[0] == '\0') {
-      carp(CARP_FATAL, "CARP_FATAL: Error when parsing isotope_error parameter: (%s)", isotope_token.c_str());
+      carp(CARP_FATAL, "Error when parsing isotope_error parameter: (%s)", isotope_token.c_str());
     }
     for (int i = 0; isotope_token[i] != '\0'; ++i) {
 		    if (!isdigit(isotope_token[i]) && !(i == 0 && ((isotope_token[i] == '-') || isotope_token[i] == '+'))) {
-          carp(CARP_FATAL, "CARP_FATAL: Error when parsing isotope_error parameter: (%s)", isotope_token.c_str());
+          carp(CARP_FATAL, "Error when parsing isotope_error parameter: (%s)", isotope_token.c_str());
         }
     }
     int isotope_integer = atoi(isotope_token.c_str());
@@ -1130,6 +1130,7 @@ vector<string> TideSearchApplication::getOptions() const {
     "mz-bin-offset",
     "max-precursor-charge",
     "peptide-centric-search",
+    "skip-preprocessing",
     "elution-window-size",
     "num-threads",
     "verbosity",

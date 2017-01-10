@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href=""?>
-<msms_pipeline_analysis date="Tue Nov  1 19:00:54 2016" xmlns="http://regis-web.systemsbiology.net/pepXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://regis-web.systemsbiology.net/pepXML /usr/local/tpp/schema/pepXML_v110.xsd" summary_xml="">
+<msms_pipeline_analysis date="Tue Jan 10 14:19:47 2017" xmlns="http://regis-web.systemsbiology.net/pepXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://regis-web.systemsbiology.net/pepXML /usr/local/tpp/schema/pepXML_v110.xsd" summary_xml="">
 <msms_run_summary base_name="NA" msManufacturer="NA" msModel="NA" msIonization="NA" msAnalyzer="NA" msDectector="NA" raw_data_type="NA" raw_data="NA" >
 <sample_enzyme name="trypsin">
 </sample_enzyme>
@@ -143,6 +143,7 @@
 <parameter name="use-neutral-loss-peaks" value="true"/>
 <parameter name="max-precursor-charge" value="5"/>
 <parameter name="peptide-centric-search" value="false"/>
+<parameter name="skip-preprocessing" value="false"/>
 <parameter name="isotope-error" value=""/>
 <parameter name="num-threads" value="0"/>
 <parameter name="decoy_search" value="0"/>
@@ -356,18 +357,18 @@
 <parameter name="bullseye" value="false"/>
 <parameter name="search-engine" value="tide-search"/>
 <parameter name="post-processor" value="percolator"/>
-<parameter name="min-precursor-mz" value="400"/>
-<parameter name="max-precursor-mz" value="1800"/>
-<parameter name="min-frag-mz" value="150"/>
-<parameter name="max-frag-mz" value="1800"/>
-<parameter name="min-scan-frag-peaks" value="40"/>
-<parameter name="max-precursor-delta-ppm" value="50"/>
-<parameter name="charge" value="2"/>
-<parameter name="top-n-frag-peaks" value="30"/>
-<parameter name="pair-top-n-frag-peaks" value="5"/>
-<parameter name="min-common-frag-peaks" value="20"/>
-<parameter name="max-scan-separation" value="1000"/>
-<parameter name="min-peak-pairs" value="200"/>
+<parameter name="pm-min-precursor-mz" value="400"/>
+<parameter name="pm-max-precursor-mz" value="1800"/>
+<parameter name="pm-min-frag-mz" value="150"/>
+<parameter name="pm-max-frag-mz" value="1800"/>
+<parameter name="pm-min-scan-frag-peaks" value="40"/>
+<parameter name="pm-max-precursor-delta-ppm" value="50"/>
+<parameter name="pm-charge" value="2"/>
+<parameter name="pm-top-n-frag-peaks" value="30"/>
+<parameter name="pm-pair-top-n-frag-peaks" value="5"/>
+<parameter name="pm-min-common-frag-peaks" value="20"/>
+<parameter name="pm-max-scan-separation" value="1000"/>
+<parameter name="pm-min-peak-pairs" value="100"/>
 </search_summary>
     <spectrum_query spectrum="demo.00035.00035.1" start_scan="35" end_scan="35" precursor_neutral_mass="708.0627" assumed_charge="1" index="1">
     <search_result>
