@@ -385,7 +385,7 @@ void TideMatchSet::writeToFile(
        *file << StringUtils::ToString((*i)->xcorr_score, precision, true) << '\t';
        *file << StringUtils::ToString((*i)->resEv_pval, precision, false) << '\t';
        *file << StringUtils::ToString((*i)->resEv_score, 1, true) << '\t';
-       *file << StringUtils::ToString((*i)->combinedPval, precision, true) << '\t';
+       *file << StringUtils::ToString((*i)->combinedPval, precision, false) << '\t';
     }
 
     *file << ++cur << '\t';
