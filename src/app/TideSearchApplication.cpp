@@ -1489,7 +1489,7 @@ vector<string> TideSearchApplication::getOptions() const {
     "verbosity",
     "score-function",
     "fragment-tolerance",
-    "evidence-granularity"
+    "evidence-granularity",
     "pm-min-precursor-mz",
     "pm-max-precursor-mz",
     "pm-min-frag-mz",
