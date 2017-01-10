@@ -832,7 +832,7 @@ Params::Params() : finalized_(false) {
     "Available for read-tide-index", false);
   InitBoolParam("skip-preprocessing", false,
     "Skip preprocessing steps on spectra. Default = F.",
-    "Available for tide-search", false);
+    "Available for tide-search", true);
   InitStringParam("isotope-error", "",
                   "[[nohtml:Isotope errors to include. "
                   "Specify a comma-separated list of isotope errors of the form: "
@@ -1872,6 +1872,7 @@ void Params::Categorize() {
   items.insert("fragment-mass");
   items.insert("isotope-windows");
   items.insert("isotope-error");
+  items.insert("skip-preprocessing");
   items.insert("compute-p-values");
   AddCategory("Search parameters", items);
 
