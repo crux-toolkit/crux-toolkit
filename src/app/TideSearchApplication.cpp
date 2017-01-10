@@ -1130,6 +1130,7 @@ vector<string> TideSearchApplication::getOptions() const {
     "mz-bin-offset",
     "max-precursor-charge",
     "peptide-centric-search",
+    "isotope-error",
     "skip-preprocessing",
     "elution-window-size",
     "num-threads",
