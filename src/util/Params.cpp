@@ -834,9 +834,10 @@ Params::Params() : finalized_(false) {
     "Skip preprocessing steps on spectra. Default = F.",
     "Available for tide-search", true);
   InitStringParam("isotope-error", "",
-                  "[[nohtml:Isotope errors to include. "
+                  "List of positive, non-zero integers.",
+                  "Isotope errors to include. "
                   "Specify a comma-separated list of isotope errors of the form: "
-                  "-1,1,...]][[html: Default = "" (No Isotope Errors)]]",
+                  "1,2,3,..."
                   "Available for tide-search", true);
   InitIntParam("num-threads", 0, 0, 64,
                "0=poll CPU to set num threads; else specify num threads directly.",
