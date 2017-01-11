@@ -36,47 +36,23 @@ endif (WIN32 AND NOT CYGWIN)
 # Download and build a partial distribution of the pwiz source
 # from the ProteoWizard TeamCity repository.
 if (WIN32 AND NOT CYGWIN)
-  if (USE_LATEST_PWIZ)
     ExternalProject_Add(
       ProteoWizard
-      DOWNLOAD_COMMAND 
-        ${CMAKE_COMMAND} 
-          -DDOWNLOAD_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/downloads
-          -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
-          -P  ${CMAKE_CURRENT_SOURCE_DIR}/download_pwiz.cmake
-      DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/downloads
-      PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
-      CONFIGURE_COMMAND ""
-      BUILD_COMMAND 
-        ${CMAKE_COMMAND} 
-          -DMSBUILD_PLATFORM=${MSBUILD_PLATFORM}
-          -DBUILD_TYPE:STRING=${CMAKE_CFG_INTDIR}
-          -DPREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
-          -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
-          -DINCLUDE_VENDOR_LIBRARIES:BOOLEAN=${INCLUDE_VENDOR_LIBRARIES}
-          -P  ${CMAKE_CURRENT_SOURCE_DIR}/build_pwiz.cmake
-      INSTALL_COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost ${CMAKE_CURRENT_BINARY_DIR}/include/boost
-      BUILD_IN_SOURCE 1
-    )
-  else (USE_LATEST_PWIZ)
-    ExternalProject_Add(
-      ProteoWizard
-      URL http://cruxtoolkit.sourceforge.net/download/pwiz-src-3_0_9870.tar.bz2
-      PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
-      CONFIGURE_COMMAND ""
-      BUILD_COMMAND 
-        ${CMAKE_COMMAND} 
-          -DBUILD_TYPE:STRING=${CMAKE_CFG_INTDIR}
-          -DPREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
-          -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
-          -DINCLUDE_VENDOR_LIBRARIES:BOOLEAN=${INCLUDE_VENDOR_LIBRARIES}
-          -P  ${CMAKE_CURRENT_SOURCE_DIR}/build_pwiz.cmake
-      INSTALL_COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost ${CMAKE_CURRENT_BINARY_DIR}/include/boost
-      BUILD_IN_SOURCE 1
-    )
-  endif (USE_LATEST_PWIZ)
+    URL http://noble.gs.washington.edu/crux-downloads/pwiz-src-3_0_10273.tar.bz2
+    DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/downloads
+    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND 
+      ${CMAKE_COMMAND} 
+        -DBUILD_TYPE:STRING=${CMAKE_CFG_INTDIR}
+        -DPREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
+        -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
+        -DINCLUDE_VENDOR_LIBRARIES:BOOLEAN=${INCLUDE_VENDOR_LIBRARIES}
+        -P  ${CMAKE_CURRENT_SOURCE_DIR}/build_pwiz.cmake
+    INSTALL_COMMAND ${CMAKE_COMMAND} -E copy_directory
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost ${CMAKE_CURRENT_BINARY_DIR}/include/boost
+    BUILD_IN_SOURCE 1
+  )
   # On Windows we have to do some extra house keeping
   ExternalProject_Add_Step(
     ProteoWizard
@@ -89,23 +65,18 @@ if (WIN32 AND NOT CYGWIN)
     DEPENDEES install
   )
 else (WIN32 AND NOT CYGWIN)
-  if (USE_LATEST_PWIZ)
-    ExternalProject_Add(
-      ProteoWizard
-      DOWNLOAD_COMMAND 
-        ${CMAKE_COMMAND} 
-          -DDOWNLOAD_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/downloads
-          -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
-          -P  ${CMAKE_CURRENT_SOURCE_DIR}/download_pwiz.cmake
-      DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/downloads
-      PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
-      CONFIGURE_COMMAND ""
-      BUILD_COMMAND 
-        ${CMAKE_COMMAND} 
-          -DBUILD_TYPE:STRING=${CMAKE_CFG_INTDIR}
-          -DPREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
-          -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
-          -P  ${CMAKE_CURRENT_SOURCE_DIR}/build_pwiz.cmake
+  ExternalProject_Add(
+    ProteoWizard
+    URL http://noble.gs.washington.edu/crux-downloads/pwiz-src-3_0_10273.tar.bz2
+    DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/downloads
+    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND 
+      ${CMAKE_COMMAND} 
+        -DBUILD_TYPE:STRING=${CMAKE_CFG_INTDIR}
+        -DPREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
+        -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
+        -P  ${CMAKE_CURRENT_SOURCE_DIR}/build_pwiz.cmake
       INSTALL_COMMAND
         ${CMAKE_CURRENT_SOURCE_DIR}/create_links.sh 
            --prefix=${CMAKE_CURRENT_BINARY_DIR}
@@ -122,43 +93,13 @@ else (WIN32 AND NOT CYGWIN)
           ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_1_56_0/boost/date_time/gregorian_calendar.ipp
           ${CMAKE_CURRENT_BINARY_DIR}/include/boost/date_time
       BUILD_IN_SOURCE 1
-    )
-  else (USE_LATEST_PWIZ)
-    ExternalProject_Add(
-      ProteoWizard
-      URL http://cruxtoolkit.sourceforge.net/download/pwiz-src-3_0_9870.tar.bz2
-      PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
-      CONFIGURE_COMMAND ""
-      BUILD_COMMAND 
-        ${CMAKE_COMMAND} 
-          -DBUILD_TYPE:STRING=${CMAKE_CFG_INTDIR}
-          -DPREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
-          -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
-          -P  ${CMAKE_CURRENT_SOURCE_DIR}/build_pwiz.cmake
-      INSTALL_COMMAND
-        ${CMAKE_CURRENT_SOURCE_DIR}/create_links.sh 
-           --prefix=${CMAKE_CURRENT_BINARY_DIR}
-        COMMAND ${CMAKE_COMMAND} -E copy
-          ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/asio.hpp
-          ${CMAKE_CURRENT_BINARY_DIR}/include/boost
-        COMMAND ${CMAKE_COMMAND} -E copy_directory 
-          ${CMAKE_CURREN_SOURCE_DIR}/patches/boost 
-          ${CMAKE_CURRENT_BINARY_DIR}/include/boost
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-          ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_aux/boost/utility
-          ${CMAKE_CURRENT_BINARY_DIR}/include/boost/utility
-        COMMAND ${CMAKE_COMMAND} -E copy
-          ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_1_56_0/boost/date_time/gregorian_calendar.ipp
-          ${CMAKE_CURRENT_BINARY_DIR}/include/boost/date_time
-      BUILD_IN_SOURCE 1
-    )
-  endif (USE_LATEST_PWIZ)
+  )
 endif (WIN32 AND NOT CYGWIN)
 
 ExternalProject_Add(
   percolator
   GIT_REPOSITORY https://github.com/percolator/percolator.git
-  GIT_TAG ${PERCOLATOR_GIT_VERSION}
+  GIT_TAG "6f20e6b"
   PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
   CMAKE_ARGS -DCMAKE_VERBOSE_MAKEFILE=ON
     -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}
