@@ -12,4 +12,5 @@ Scenario Outline: User runs percolator
 Examples:
   |test_name        |args                            |pin_file                     |actual_output                 |expected_output                       |
   |percolator-simple|--train-fdr 0.05 --test-fdr 0.05|sample2.search.target.txt.pin|percolator.target.peptides.txt|percolator.txt.pin.target.peptides.txt|
+  |percolator-search-output|--search-input separate --train-fdr 0.05 --test-fdr 0.05|sample2.search.target.txt.pin|percolator.target.peptides.txt|percolator.txt.pin.target.peptides.txt|
 

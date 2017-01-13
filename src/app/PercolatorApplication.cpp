@@ -214,6 +214,11 @@ int PercolatorApplication::main(
   perc_args_vec.push_back("--maxiter");
   perc_args_vec.push_back(Params::GetString("maxiter"));
 
+  if (!Params::GetString("search-input").empty()) {
+    perc_args_vec.push_back("--search-input");
+    perc_args_vec.push_back(Params::GetString("search-input"));
+  }
+
   if (Params::GetBool("quick-validation")) {
     perc_args_vec.push_back("--quick-validation");
   }
@@ -532,7 +537,8 @@ vector<string> PercolatorApplication::getOptions() const {
     "fido-no-split-large-components",
     "tdc",
     "verbosity",
-    "top-match"
+    "top-match",
+    "search-input"
   };
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }

@@ -138,39 +138,35 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
   if (Params::GetBool("sqt-output") && !compute_sp) {
     compute_sp = true;
     carp(CARP_INFO, "Enabling parameter compute-sp since SQT output is enabled "
-                    " (this will increase runtime).");
+                    "(this will increase runtime).");
   }
 
   // Check isotope-error parameter
   string isotope_errors_string = Params::GetString("isotope-error");
   if (isotope_errors_string[0] == ',') {
-    carp(CARP_FATAL, "CARP_FATAL: Error in isotope_error parameter formatting: (%s)", isotope_errors_string.c_str());
+    carp(CARP_FATAL, "Error in isotope_error parameter formatting: (%s)", isotope_errors_string.c_str());
   }
   for (int i = 0; isotope_errors_string[i] != '\0'; ++i) {
     if (isotope_errors_string[i] == ',' && (isotope_errors_string[i+1] == ',' || isotope_errors_string[i+1] == '\0')) {
-      carp(CARP_FATAL, "CARP_FATAL: Error in isotope_error parameter formatting: (%s) ", isotope_errors_string.c_str());
+      carp(CARP_FATAL, "Error in isotope_error parameter formatting: (%s) ", isotope_errors_string.c_str());
     }
   }
   
-  stringstream isotope_errors_ss(isotope_errors_string);
-  string isotope_token;
   vector<int>* negative_isotope_errors = new vector<int>();
   negative_isotope_errors->push_back(0);
-  while (getline(isotope_errors_ss, isotope_token, ',')) {
-    if (isotope_token[0] == '\0') {
-      carp(CARP_FATAL, "CARP_FATAL: Error when parsing isotope_error parameter: (%s)", isotope_token.c_str());
+  
+  if (isotope_errors_string != "") {
+    vector<int> isotope_errors = StringUtils::Split<int>(Params::GetString("isotope-error"), ',');
+    for (vector<int>::iterator it = isotope_errors.begin(); it != isotope_errors.end(); ++it) {
+      if (*it < 0) {
+        carp(CARP_FATAL, "Found a negative isotope error: %d. There should not be any legitimate reasons to use negative isotope errors. Try modeling with a modification instead.", *it);
+      } else if (find(negative_isotope_errors->begin(), negative_isotope_errors->end(), -1 * *it) != negative_isotope_errors->end()) {
+        carp(CARP_FATAL, "Found duplicate when parsing isotope_error parameter: %d", *it);
+      }
+      negative_isotope_errors->push_back(-1 * *it);
     }
-    for (int i = 0; isotope_token[i] != '\0'; ++i) {
-		    if (!isdigit(isotope_token[i]) && !(i == 0 && ((isotope_token[i] == '-') || isotope_token[i] == '+'))) {
-          carp(CARP_FATAL, "CARP_FATAL: Error when parsing isotope_error parameter: (%s)", isotope_token.c_str());
-        }
-    }
-    int isotope_integer = atoi(isotope_token.c_str());
-    if (find(negative_isotope_errors->begin(), negative_isotope_errors->end(), -1 * isotope_integer) != negative_isotope_errors->end()) {
-      carp(CARP_FATAL, "Found duplicate when parsing isotope_error parameter: %s", isotope_token.c_str());
-    }
-    negative_isotope_errors->push_back(-1 * isotope_integer);
   }
+  
   sort(negative_isotope_errors->begin(), negative_isotope_errors->end());
   
   carp(CARP_INFO, "Reading index %s", index.c_str());
@@ -1484,6 +1480,8 @@ vector<string> TideSearchApplication::getOptions() const {
     "mz-bin-offset",
     "max-precursor-charge",
     "peptide-centric-search",
+    "isotope-error",
+    "skip-preprocessing",
     "elution-window-size",
     "num-threads",
     "verbosity",
