@@ -514,6 +514,12 @@ Params::Params() : finalized_(false) {
     " undefined behavior. Using 'none' will turn the binary .csm files "
     "into text.", false);
   // **** percolator options. ****
+  InitStringParam("search-input", "auto", "auto|separate|concatenated",
+    "Specify the type of target-decoy search. Using 'auto', percolator attempts "
+    "to detect the search type automatically.  Using 'separate' specifies two searches: "
+    "one against target and one against decoy protein db. Using 'concatenated' "
+    "specifies a single search on concatenated target-decoy protein db.",
+    "Available for percolator", true);
   InitStringParam("percolator-seed", "1",
     "When given a unsigned integer value seeds the random number generator with that value. "
     "When given the string \"time\" seeds the random number generator with the system time.",
@@ -841,10 +847,12 @@ Params::Params() : finalized_(false) {
     "programming matrix.  Smaller values make the program run faster but give less exact p-values; "
     "larger values make the program run more slowly but give more exact p-values.",
     "Available for tide-search",true);
+    "Available for tide-search", true);
   InitStringParam("isotope-error", "",
-                  "[[nohtml:Isotope errors to include. "
+                  "List of positive, non-zero integers.",
+                  "Isotope errors to include. "
                   "Specify a comma-separated list of isotope errors of the form: "
-                  "-1,1,...]][[html: Default = "" (No Isotope Errors)]]",
+                  "1,2,3,..."
                   "Available for tide-search", true);
   InitIntParam("num-threads", 0, 0, 64,
                "0=poll CPU to set num threads; else specify num threads directly.",
@@ -1880,6 +1888,7 @@ void Params::Categorize() {
   items.insert("fragment-mass");
   items.insert("isotope-windows");
   items.insert("isotope-error");
+  items.insert("skip-preprocessing");
   items.insert("compute-p-values");
   items.insert("score-function");
   items.insert("fragment-tolerance");
@@ -2020,6 +2029,7 @@ void Params::Categorize() {
   items.clear();
   items.insert("only-psms");
   items.insert("tdc");
+  items.insert("search-input");
   AddCategory("General options", items);
 
   items.clear();
