@@ -60,11 +60,14 @@
 
 <ul>
 
-  <li>8 Nov 2016: Updated Percolator to use the latest version on GitHub.</li>
-  <li>31 Oct 2016: Added param-medic options to Comet and Tide</li>
-  <li>11 Oct 2016: Added the param-medic command.</li>
-  <li>07 Sept 2016: Added isotope-error parameter to Tide.</li>
-  <li>30 Aug 2016: Updated Percolator to version 3.00.</li>
+  <li>Updated Crux to always use the latest version of Percolator on
+      GitHub, rather than the most recent tagged release.</li>
+
+  <li>Added the Param-medic command to perform automated inference of
+    precursor and fragment m/z parameters.  Param-medic options are
+    also available for Comet and Tide.</li>
+
+  <li>Added the isotope-error parameter to Tide.</li>
 
 </ul>
 
@@ -73,20 +76,14 @@
 <ul>
 
   <li>
-    9 Jan 2017: Added search-input option to Percolator.</li>
+    Added support for several new options to Percolator (search-input,
+    tdc, subset-max-train).</li>
 
   <li>
-    29 Dec 2016: Allow assign-confidence to rank by Percolator score.</li>
+    Allow assign-confidence to rank by Percolator score.</li>
 
   <li>
-    1 Nov 2016: Added tdc and subset-max-train options to Percolator.</li>
-
-  <li>
-    20 Sept 2016: Percolator changed to use a modified version of its
-    native output.</li>
-
-  <li>
-    30 Nov 2016: Added +1 to the numerator of the FDR estimation when
+    Added +1 to the numerator of the FDR estimation when
     carrying out target-decoy competition.  This correction was
     proposed by Barber and
     Candes, <a href="https://arxiv.org/abs/1404.5609"><i>Annals of
@@ -95,8 +92,8 @@
     2015.</li>
        
   <li>
-    8 Aug 2016: Fixed incorrect default value for the cpos parameter
-    to percolator.</li>
+    Fixed incorrect default value for the cpos parameter to
+    percolator.</li>
 
   <li>Many other minor bug fixes and enhancements.</li>
 
