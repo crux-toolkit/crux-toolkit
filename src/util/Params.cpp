@@ -847,7 +847,6 @@ Params::Params() : finalized_(false) {
     "programming matrix.  Smaller values make the program run faster but give less exact p-values; "
     "larger values make the program run more slowly but give more exact p-values.",
     "Available for tide-search",true);
-    "Available for tide-search", true);
   InitStringParam("isotope-error", "",
                   "List of positive, non-zero integers.",
                   "Isotope errors to include. "
