@@ -111,12 +111,12 @@ int SubtractIndexApplication::main(int argc, char** argv) {
   }
   ofstream* out_target_list = NULL;
   ofstream* out_decoy_list = NULL;
-  if (write_peptides) {
+  if (Params::GetBool("peptide-list")) {
     out_target_list = create_stream_in_path(make_file_path(
-      "tide-index.peptides.target.txt").c_str(), NULL, overwrite);
+      "subtract-index.peptides.target.txt").c_str(), NULL, overwrite);
     if (has_decoys) {
       out_decoy_list = create_stream_in_path(make_file_path(
-        "tide-index.peptides.decoy.txt").c_str(), NULL, overwrite);
+        "subtract-index.peptides.decoy.txt").c_str(), NULL, overwrite);
     }
   }
   //copy aux and protein files;
