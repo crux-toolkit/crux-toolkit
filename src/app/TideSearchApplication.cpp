@@ -157,11 +157,15 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
     vector<int> isotope_errors = StringUtils::Split<int>(Params::GetString("isotope-error"), ',');
     for (vector<int>::iterator it = isotope_errors.begin(); it != isotope_errors.end(); ++it) {
       if (*it < 0) {
-        carp(CARP_FATAL, "Found a negative isotope error: %d. There should not be any legitimate reasons to use negative isotope errors. Try modeling with a modification instead.", *it);
+        carp(CARP_FATAL, "Found a negative isotope error: (%d). Negative isotope errors are not allowed. Try modeling with a modification instead.", *it);
+      } else if (*it == 0) {
+        carp(CARP_WARNING, "There is no need to include 0 in the isotope-error list.  Zero offsets are always included.");
       } else if (find(negative_isotope_errors->begin(), negative_isotope_errors->end(), -1 * *it) != negative_isotope_errors->end()) {
         carp(CARP_FATAL, "Found duplicate when parsing isotope_error parameter: %d", *it);
       }
-      negative_isotope_errors->push_back(-1 * *it);
+      if (*it != 0) {
+        negative_isotope_errors->push_back(-1 * *it);
+      }
     }
   }
   
