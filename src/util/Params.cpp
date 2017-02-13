@@ -834,11 +834,7 @@ Params::Params() : finalized_(false) {
     "Skip preprocessing steps on spectra. Default = F.",
     "Available for tide-search", true);
   InitStringParam("isotope-error", "",
-                  "When identifying candidate peptides, consider candidates with various, "
-                  "specified m/z offsets to account for errors in identifying the "
-                  "monoisotopic peak. The argument to this option is a list of "
-                  "comma-separated, positive integers representing the specific ions you "
-                  "want to include.",
+                  "List of positive, non-zero integers.",
                   "Isotope errors to include. "
                   "Specify a comma-separated list of isotope errors of the form: "
                   "1,2,3,..."
@@ -1851,7 +1847,6 @@ void Params::Categorize() {
   items.insert("precursor-window");
   items.insert("auto-precursor-window");
   items.insert("precursor-window-type");
-  items.insert("isotope-error");
   AddCategory("Precursor selection", items);
 
   items.clear();
@@ -1877,6 +1872,7 @@ void Params::Categorize() {
   items.insert("mod-mass-format");
   items.insert("fragment-mass");
   items.insert("isotope-windows");
+  items.insert("isotope-error");
   items.insert("skip-preprocessing");
   items.insert("compute-p-values");
   AddCategory("Search parameters", items);
