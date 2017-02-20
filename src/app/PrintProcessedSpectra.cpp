@@ -115,8 +115,8 @@ string PrintProcessedSpectra::getDescription() const {
     "computing XCorr. The pre-processing steps are described in detail in this "
     "paper:</p><blockquote>J. K. Eng, B. Fischer, J. Grossman and M. J. "
     "MacCoss. <a href=\"http://pubs.acs.org/doi/abs/10.1021/pr800420s\">&quot;A "
-    "fast SEQUEST cross correlation algorithm process the peaks as for "
-    "computing.&quot;</a> <em>Journal of Proteome Research</em>. "
+    "fast SEQUEST cross correlation algorithm"
+    ".&quot;</a> <em>Journal of Proteome Research</em>. "
     "7(10):4598-4602, 2008.</blockquote><p>The output of this program is "
     "equivalent to the spectrum shown in Figure 1D of the above paper.</p>]]";
 }

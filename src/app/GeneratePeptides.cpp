@@ -339,8 +339,7 @@ vector<GeneratePeptides::CleavedPeptide> GeneratePeptides::cleaveProtein(
       peptides.push_back(CleavedPeptide(sequence.substr(pepStart, i + 1 - pepStart), pepStart));
       if (Params::GetBool("clip-nterm-methionine") && sequence[0] == 'M' &&
           pepStart == 0 && digest != PARTIAL_DIGEST) {
-        peptides.push_back(CleavedPeptide(
-          sequence.substr(pepStart + 1, i + 1 - pepStart - 1), pepStart + 1));
+        peptides.push_back(CleavedPeptide(sequence.substr(1, i), 1));
       }
       if (++cleaveSites == 1) {
         // This is the first cleavage position, remember it
@@ -374,6 +373,11 @@ vector<GeneratePeptides::CleavedPeptide> GeneratePeptides::cleaveProtein(
       i = pepStart - 1;
       cleaveSites = 0;
     }
+  }
+  //For peptides that do not have an internal cleavage 
+  if (Params::GetBool("clip-nterm-methionine") && sequence[0] == 'M' &&
+      pepStart == 0 && digest != PARTIAL_DIGEST) {
+    peptides.push_back(CleavedPeptide(sequence.substr(1), 1));
   }
   // Add the last peptide
   peptides.push_back(CleavedPeptide(sequence.substr(nextPepStart), nextPepStart));
