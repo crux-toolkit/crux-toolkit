@@ -111,12 +111,12 @@ int SubtractIndexApplication::main(int argc, char** argv) {
   }
   ofstream* out_target_list = NULL;
   ofstream* out_decoy_list = NULL;
-  if (write_peptides) {
+  if (Params::GetBool("peptide-list")) {
     out_target_list = create_stream_in_path(make_file_path(
-      "tide-index.peptides.target.txt").c_str(), NULL, overwrite);
+      "subtract-index.peptides.target.txt").c_str(), NULL, overwrite);
     if (has_decoys) {
       out_decoy_list = create_stream_in_path(make_file_path(
-        "tide-index.peptides.decoy.txt").c_str(), NULL, overwrite);
+        "subtract-index.peptides.decoy.txt").c_str(), NULL, overwrite);
     }
   }
   //copy aux and protein files;
@@ -137,60 +137,126 @@ int SubtractIndexApplication::main(int argc, char** argv) {
   CHECK(peptide_reader2.OK());
   CHECK(writer.OK());
 
-  pb::Peptide pb_peptide1, pb_peptide2;
-  double pep_mass1, pre_pep_mass1, pep_mass2, pre_pep_mass2;
-  string pep_str1, pep_str2;
-    
-  vector<pb::Peptide> peptide_container;
-  pep_mass2 = pre_pep_mass2 = 0.0;
-  pre_pep_mass1 = 0.0;
-  bool found;
-
+  vector< pair<pb::Peptide, bool> > pepList1;
+  vector<pb::Peptide> pepList2;
+  bool done = false;
   while (!peptide_reader1.Done()) {
-    peptide_reader1.Read(&pb_peptide1);
-    pep_mass1 = pb_peptide1.mass();
-    found = false;
-
-    if (pre_pep_mass1 < pep_mass1) {
-      peptide_container.clear();
-      pre_pep_mass1 = pep_mass1;
-    }
-
-    while (pep_mass2 < pep_mass1) {
-      if (!peptide_reader2.Done()) {
-        peptide_reader2.Read(&pb_peptide2);
-        pep_mass2 = pb_peptide2.mass();
-      } else { 
-        break; 
-      }
-    }
-    while (pep_mass2 == pep_mass1) {
-      peptide_container.push_back(pb_peptide2);
-      if (!peptide_reader2.Done()) {
-        peptide_reader2.Read(&pb_peptide2);
-        pep_mass2 = pb_peptide2.mass();
-      } else {
+    // populate lists of peptides
+    pb::Peptide pep1;
+    peptide_reader1.Read(&pep1);
+    pepList1.push_back(make_pair(pep1, false));
+    while (pepList1.front().first.mass() == pepList1.back().first.mass()) {
+      if (peptide_reader1.Done()) {
+        done = true;
         break;
       }
+      peptide_reader1.Read(&pep1);
+      pepList1.push_back(make_pair(pep1, false));
     }
-    pep_str1 = getModifiedPeptideSeq(&pb_peptide1, &proteins1);
-    for (vector<pb::Peptide>::iterator it = peptide_container.begin(); it != peptide_container.end(); ++it) {
-      pep_str2 = getModifiedPeptideSeq(&(*it), &proteins2);
-      if (pep_str1 == pep_str2) {
-        found = true;
-        break;
-      }
+    if (done) {
+      break;
     }
-    if (!found) {
-      CHECK(writer.Write(&pb_peptide1));
-      carp(CARP_DEBUG, "%s\t%lf\n", pep_str1.c_str(), pep_mass1);
-
-      if (write_peptides) {
-        if (!pb_peptide1.is_decoy()) {
-          *out_target_list << pep_str1 << '\t' << pb_peptide1.mass() << endl;
-        } else {
-          *out_decoy_list << pep_str1 << '\t' << pb_peptide1.mass() << endl;
+    double curMass = pepList1.front().first.mass();
+    if (!pepList2.empty() && pepList2.back().mass() < curMass) {
+      pepList2.clear();
+    }
+    if (pepList2.empty() || pepList2.front().mass() == curMass) {
+      while (!peptide_reader2.Done()) {
+        pb::Peptide pep2;
+        peptide_reader2.Read(&pep2);
+        if (pep2.mass() < curMass) {
+          continue;
         }
+        pepList2.push_back(pep2);
+        if (pep2.mass() > curMass) {
+          break;
+        }
+      }
+    }
+
+    // match targets to decoys
+    map<vector< pair<pb::Peptide, bool> >::iterator, vector< pair<pb::Peptide, bool> >::iterator> targetToDecoy;
+    for (vector< pair<pb::Peptide, bool> >::iterator i = pepList1.begin(); i != pepList1.end(); i++) {
+      if (i->first.is_decoy()) {
+        continue;
+      }
+      Peptide iPep(i->first, proteins1);
+      for (vector< pair<pb::Peptide, bool> >::iterator j = pepList1.begin(); j != pepList1.end(); j++) {
+        if (!j->first.is_decoy()) {
+          continue;
+        }
+        Peptide jPep(j->first, proteins1);
+        const pb::Protein* jProtein = proteins1[jPep.FirstLocProteinId()];
+        const string& residues = jProtein->residues();
+        const string originalTarget = residues.substr(residues.length() - jPep.Len());
+        if (iPep.Seq() == originalTarget) {
+          targetToDecoy[i] = j;
+          break;
+        }
+      }
+    }
+
+    // match peptides in lists
+    for (vector< pair<pb::Peptide, bool> >::iterator i = pepList1.begin(); i != pepList1.end(); i++) {
+      if (i->first.mass() > curMass) {
+        break;
+      } else if (i->first.is_decoy()) {
+        continue; // don't match decoys
+      }
+      string pepStr1 = getModifiedPeptideSeq(&i->first, &proteins1);
+      for (vector<pb::Peptide>::const_iterator j = pepList2.begin(); j != pepList2.end(); j++) {
+        if (j->mass() > curMass) {
+          break;
+        } else if (j->is_decoy()) {
+          continue;
+        }
+        string pepStr2 = getModifiedPeptideSeq(&*j, &proteins2);
+        if (pepStr1 == pepStr2) {
+          i->second = true;
+          map<vector< pair<pb::Peptide, bool> >::iterator, vector< pair<pb::Peptide, bool> >::iterator>::iterator lookup = targetToDecoy.find(i);
+          if (lookup != targetToDecoy.end()) {
+            lookup->second->second = true; // mark decoy as matched
+          }
+          break;
+        }
+      }
+    }
+
+    // write peptides
+    for (vector< pair<pb::Peptide, bool> >::iterator i = pepList1.begin(); i != pepList1.end(); i++) {
+      if (i->first.mass() > curMass) {
+        break;
+      } else if (!i->second) {
+        CHECK(writer.Write(&i->first));
+        if (write_peptides) {
+          string pepStr = getModifiedPeptideSeq(&i->first, &proteins1);
+          double mass = i->first.mass();
+          if (!i->first.is_decoy()) {
+            if (out_target_list) {
+              *out_target_list << pepStr << '\t' << mass << endl;
+            }
+          } else {
+            if (out_decoy_list) {
+              *out_decoy_list << pepStr << '\t' << mass << endl;
+            }
+          }
+        }
+      }
+    }
+
+    // clean up peptide lists
+    if (!pepList1.empty()) {
+      if (pepList1.back().first.mass() == curMass) {
+        pepList1.clear();
+      } else {
+        pepList1.erase(pepList1.begin(), pepList1.end() - 1);
+      }
+    }
+    if (!pepList2.empty()) {
+      if (pepList2.back().mass() == curMass) {
+        pepList2.clear();
+      } else {
+        pepList2.erase(pepList2.begin(), pepList2.end() - 1);
       }
     }
   }
