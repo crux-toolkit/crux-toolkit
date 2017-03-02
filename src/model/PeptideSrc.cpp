@@ -341,8 +341,7 @@ bool PeptideSrc::parseTabDelimited(
         char* unmodified_sequence = modified_aa_to_unmodified_string(mod_seq, seq_length);
         string sequence = unmodified_sequence;
         std::free(unmodified_sequence);
-        std::free(mod_seq);
-
+        delete[] mod_seq;
 
         if (parent_protein -> isPostProcess()) {
           // Attempting to store protein_id location in start_idx_original of peptide src [Please check
