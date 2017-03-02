@@ -140,6 +140,8 @@ string SearchForXLinks::getDescription() const {
     "    <td>--mod 12.0,30.010565:K,W,nterm:1:T:T</td>"
     "  </tr>"
     "</table>"
+    "<p>Note that, unlike Tide, search-for-xlinks does not have a "
+    "decoy-format option; instead, shuffled decoys are always created.</p>"
     "]]";
 }
 

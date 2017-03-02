@@ -817,7 +817,7 @@ int Peptide::getNDistance(){
  * sequence. 
  */
 void Peptide::transformToDecoy() {
-  bool reverse_seq = (get_decoy_type_parameter("decoys") == PROTEIN_REVERSE_DECOYS);
+  bool reverse_seq = false; // For now, only generate shuffled decoy
 
   // delete any existing decoy sequence
   if (decoy_modified_seq_){  
