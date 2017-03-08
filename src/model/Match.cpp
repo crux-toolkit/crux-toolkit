@@ -858,6 +858,7 @@ int Match::setFilePath(
   if (file_idx_ == -1) {
     file_idx_ = file_paths_.size();
     file_paths_.push_back(file_path);
+    carp(CARP_INFO, "Assigning index %d to %s.", file_idx_, file_path.c_str());
   }
   return file_idx_;
 }
