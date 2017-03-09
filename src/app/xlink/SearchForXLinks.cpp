@@ -216,6 +216,7 @@ vector<string> SearchForXLinks::getOptions() const {
     "spectrum-parser",
     "use-z-line",
     "top-match",
+    "print-search-progress",
     "output-dir",
     "overwrite",
     "parameter-file",
