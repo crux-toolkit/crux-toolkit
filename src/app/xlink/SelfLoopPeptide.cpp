@@ -150,7 +150,6 @@ SelfLoopPeptide* SelfLoopPeptide::getUnshuffledTarget() {
 std::string SelfLoopPeptide::getUnshuffledSequence() {
   
   if (is_decoy_) {
-    //carp(CARP_INFO, "returning unshuffled target");
     return(getUnshuffledTarget()->getSequenceString());
   } else {
     return(getSequenceString());
@@ -326,6 +325,16 @@ bool SelfLoopPeptide::isModified() {
   return linked_peptide_.isModified();
 }
 
+/**
+ *\returns "target" or "decoy"
+ */
+string SelfLoopPeptide::getDecoyType() {
+  string returnValue = "target";
+  if (is_decoy_) {
+    returnValue = "decoy";
+  }
+  return(returnValue);
+}
 
 bool compareSelfLoopPeptideMass(
 				const SelfLoopPeptide& spep1,
@@ -343,9 +352,9 @@ bool compareSelfLoopPeptideMassToFLOAT(
 }
 
 
-/*                                                                                                                                                                                                                          
- * Local Variables:                                                                                                                                                                                                         
- * mode: c                                                                                                                                                                                                                  
- * c-basic-offset: 2                                                                                                                                                                                                        
- * End:                                                                                                                                                                                                                     
+/*
+ * Local Variables:
+ * mode: c
+ * c-basic-offset: 2
+ * End:
  */

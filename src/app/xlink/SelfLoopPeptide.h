@@ -128,7 +128,11 @@ class SelfLoopPeptide : public XLinkMatch {
   virtual std::string getUnshuffledSequence();
   
   SelfLoopPeptide* getUnshuffledTarget();
-  
+
+  /**
+   *\returns "target" or "decoy"
+   */
+  string getDecoyType();
 
 };
 

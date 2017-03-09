@@ -46,7 +46,16 @@ class XLinkPeptide : public XLinkMatch {
     XLinkMatchCollection& candidates ///< XLinkable Candidates -out
   );
 
+  /*
+   * Is either of the participating peptides a decoy?
+   */
   virtual bool isDecoy();
+
+  /*
+   * Distinguish between full targets, half target / half decoy, and
+   * full decoy cross-linked pairs.
+   */
+  string getDecoyType();
 
  public:
   

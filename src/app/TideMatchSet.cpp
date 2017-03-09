@@ -232,7 +232,8 @@ void TideMatchSet::writeToFile(
           << cruxPep.getModsString() << '\t'
           << CleavageType << '\t'
           << proteinNames << '\t'
-          << flankingAAs;
+          << flankingAAs  << '\t'
+          << cruxPep.getDecoyType();
     if (peptide->IsDecoy() && !TideSearchApplication::proteinLevelDecoys()) {
       // write target sequence
       const string& residues = protein->residues();
@@ -389,6 +390,11 @@ void TideMatchSet::writeToFile(
           << CleavageType << '\t'
           << proteinNames << '\t'
           << flankingAAs;
+    if (peptide->IsDecoy()) {
+      *file << "\tdecoy";
+    } else {
+      *file << "\ttarget";
+    }
     if (peptide->IsDecoy() && !TideSearchApplication::proteinLevelDecoys()) {
       // write target sequence
       const string& residues = protein->residues();
@@ -415,7 +421,7 @@ void TideMatchSet::writeHeaders(ofstream* file, bool decoyFile, bool sp) {
     PEPTIDE_MASS_COL, DELTA_CN_COL, DELTA_LCN_COL, SP_SCORE_COL, SP_RANK_COL,
     XCORR_SCORE_COL, XCORR_RANK_COL, BY_IONS_MATCHED_COL, BY_IONS_TOTAL_COL,
     DISTINCT_MATCHES_SPECTRUM_COL, SEQUENCE_COL, MODIFICATIONS_COL, CLEAVAGE_TYPE_COL,
-    PROTEIN_ID_COL, FLANKING_AA_COL, ORIGINAL_TARGET_SEQUENCE_COL
+    PROTEIN_ID_COL, FLANKING_AA_COL, TARGET_DECOY_COL, ORIGINAL_TARGET_SEQUENCE_COL
   };
   size_t numHeaders = sizeof(headers) / sizeof(int);
   bool writtenHeader = false;
