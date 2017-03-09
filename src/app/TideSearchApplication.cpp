@@ -66,8 +66,7 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
     // (Meaning just main thread) Do not make this value below 1.
   // make sure that number of threads are reasonable, e.g. user did not specify millions of threads...
   } else if (NUM_THREADS > 64) {
-    carp(CARP_INFO, "Requested Threads > 64, Will not thread.");
-    NUM_THREADS = 1;    
+    carp(CARP_FATAL, "Requested more than 64 threads.");
   }
   carp(CARP_INFO, "Number of Threads: %d", NUM_THREADS); // prints the number of threads
 

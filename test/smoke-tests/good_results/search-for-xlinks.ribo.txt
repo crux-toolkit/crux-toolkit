@@ -1,0 +1,4 @@
+scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	xcorr score	xcorr rank	distinct matches/spectrum	sequence	modifications	cleavage type	protein id	flanking aa	target/decoy	original target sequence	enzInt	xlink type
+1	5	637.7568	3183.7476	3183.7517	0.27305165	4.9209666	1	64	KNIEFFEAR, RAELEAKLAEVLAAANAR (1,7)		trypsin/p-full-digest	sp|P0A7R1|RL9_ECOLI;sp|P0A7R1|RL9_ECOLI	KR;RA	target-target	KNIEFFEAR, RAELEAKLAEVLAAANAR (1,7)	1	xlink-intra
+2	5	474.4818	2367.3726	2367.3750	0.17610927	4.1853118	1	32	KSDQNVR, PTQAKGVYIK[154.110610]K (1,5)		trypsin/p-full-digest	sp|P0A7L0|RL1_ECOLI;sp|P0A7L0|RL1_ECOLI	RG;KV	target-target	KSDQNVR, PTQAKGVYIK[154.110610]K (1,5)	0	xlink-intra
+3	4	772.9114	3087.6165	3087.6177	0.28218597	4.8216691	1	8	AAAQKAFNEMQPIVDR, KVYAAIEAGDK (5,1)		trypsin/p-full-digest	sp|P0A7U7|RS20_ECOLI;sp|P0A7U7|RS20_ECOLI	KQ;KA	target-target	AAAQKAFNEMQPIVDR, KVYAAIEAGDK (5,1)	0	xlink-intra

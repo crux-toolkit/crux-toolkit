@@ -144,6 +144,18 @@ bool XLinkPeptide::isDecoy() {
 
 }
 
+string XLinkPeptide::getDecoyType() {
+  string returnValue = "target-target";
+  
+  if (linked_peptides_.at(0).isDecoy() && linked_peptides_.at(1).isDecoy()) {
+    returnValue = "decoy-decoy";
+  } else if (not linked_peptides_.at(0).isDecoy() && linked_peptides_.at(1).isDecoy()) {
+    returnValue = "target-decoy";
+  } else if (linked_peptides_.at(0).isDecoy() && not linked_peptides_.at(1).isDecoy()) {
+    returnValue = "decoy-target";
+  }
+  return(returnValue);
+}
 
 /**
  * \returns whether the cross-link is from peptides from two different

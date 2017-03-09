@@ -478,6 +478,14 @@ bool Peptide::isDecoy() {
   return decoy_modified_seq_ != NULL;
 }
 
+std::string Peptide::getDecoyType() {
+  string returnValue = "target";
+  if (decoy_modified_seq_ != NULL) {
+    returnValue = "decoy";
+  }
+  return(returnValue);
+}
+
 /**
  * \brief Get the modified peptide sequence
  *

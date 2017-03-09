@@ -216,6 +216,17 @@ bool LinearPeptide::isModified() {
   return peptide_->isModified();
 }
 
+/**
+ *\returns "target" or "decoy"
+ */
+std::string LinearPeptide::getDecoyType() {
+  string returnValue = "target";
+  if (is_decoy_) {
+    returnValue = "decoy";
+  }
+  return(returnValue);
+}
+
 bool compareLinearPeptideMass(
   const LinearPeptide& pep1, 
   const LinearPeptide& pep2) {
