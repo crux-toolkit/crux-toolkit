@@ -496,7 +496,7 @@ void TideSearchApplication::search(void* threadarg) {
     
     locks_array[3]->lock();
     ++(*sc_index);
-    if (print_interval > 0 && *sc_index % print_interval == 0) {
+    if (print_interval > 0 && *sc_index > 0 && *sc_index % print_interval == 0) {
       carp(CARP_INFO, "%d spectrum-charge combinations searched, %.0f%% complete",
            *sc_index, *sc_index / sc_total * 100);
     }
