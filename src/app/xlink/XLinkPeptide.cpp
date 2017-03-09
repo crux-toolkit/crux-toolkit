@@ -148,9 +148,9 @@ string XLinkPeptide::getDecoyType() {
   
   if (linked_peptides_.at(0).isDecoy() && linked_peptides_.at(1).isDecoy()) {
     returnValue = "decoy-decoy";
-  } else if (not linked_peptides_.at(0).isDecoy() && linked_peptides_.at(1).isDecoy()) {
+  } else if (!linked_peptides_.at(0).isDecoy() && linked_peptides_.at(1).isDecoy()) {
     returnValue = "target-decoy";
-  } else if (linked_peptides_.at(0).isDecoy() && not linked_peptides_.at(1).isDecoy()) {
+  } else if (linked_peptides_.at(0).isDecoy() && !linked_peptides_.at(1).isDecoy()) {
     returnValue = "decoy-target";
   }
   return(returnValue);
