@@ -66,12 +66,14 @@ XLinkPeptide::XLinkPeptide(
   mass_calculated_[AVERAGE] = false;
 
   XLinkablePeptide A(peptideA);
-  linked_peptides_.push_back(A);
-  XLinkablePeptide B(peptideB);
-  linked_peptides_.push_back(B);
   A.addLinkSite(posA);
-  link_pos_idx_.push_back(0);
+  linked_peptides_.push_back(A);
+
+  XLinkablePeptide B(peptideB);
   B.addLinkSite(posB);
+  linked_peptides_.push_back(B);
+
+  link_pos_idx_.push_back(0);
   link_pos_idx_.push_back(0);
   doSort();
 }
@@ -82,7 +84,6 @@ XLinkPeptide::XLinkPeptide(
  * sequence 2
  */
 void XLinkPeptide::doSort() {
-
   string seq1 = linked_peptides_[0].getModifiedSequenceString();
   
   string seq2 = linked_peptides_[1].getModifiedSequenceString();
@@ -101,8 +102,6 @@ void XLinkPeptide::doSort() {
   seq2 = linked_peptides_[1].getModifiedSequenceString();
 
   assert(seq1 <= seq2);
-
-
 
 }
 
@@ -282,15 +281,15 @@ int XLinkPeptide::addCandidates(
     carp(CARP_DEBUG, "pep_idx1:%d %d %f %s",
          pep_idx1,
          xpeptide_count-1,
-         linkable_peptides[pep_idx1].getMassConst(MONO),
+         linkable_peptides[pep_idx1].getMass(MONO),
          pep1.getModifiedSequenceString().c_str()
          );
-    FLOAT_T pep1_mass = pep1.getMassConst(MONO);
+    FLOAT_T pep1_mass = pep1.getMass(MONO);
     FLOAT_T pep2_min_mass = min_mass - pep1_mass - linker_mass_;
     FLOAT_T pep2_max_mass = max_mass - pep1_mass - linker_mass_;
     int start_idx2 = pep_idx1+1;
       
-    if (pep1_mass + linker_mass_ + linkable_peptides[start_idx2].getMassConst(MONO) > max_mass) {
+    if (pep1_mass + linker_mass_ + linkable_peptides[start_idx2].getMass(MONO) > max_mass) {
       break;
     }
     for (size_t pep_idx2=start_idx2;pep_idx2 < xpeptide_count;pep_idx2++) {
@@ -299,10 +298,10 @@ int XLinkPeptide::addCandidates(
       carp(CARP_DEBUG, "pep_idx2:%d %d %f %s",
          pep_idx2,
          xpeptide_count,
-         linkable_peptides[pep_idx2].getMassConst(MONO),
+         linkable_peptides[pep_idx2].getMass(MONO),
          pep2.getModifiedSequenceString().c_str()
          );
-      FLOAT_T current_mass = pep2.getMassConst(MONO);
+      FLOAT_T current_mass = pep2.getMass(MONO);
       if (current_mass > pep2_max_mass) {
 	      if (pep_idx2 == start_idx2) {
 	        //done = true;
@@ -394,8 +393,8 @@ string XLinkPeptide::getUnshuffledSequence() {
  * \returns the mass of the xlink peptide
  */
 FLOAT_T XLinkPeptide::calcMass(MASS_TYPE_T mass_type) {
-  return linked_peptides_[0].getMassConst(mass_type) + 
-    linked_peptides_[1].getMassConst(mass_type) + 
+  return linked_peptides_[0].getMass(mass_type) + 
+    linked_peptides_[1].getMass(mass_type) + 
     linker_mass_;
 }
 
@@ -463,11 +462,11 @@ void XLinkPeptide::predictIons(
   if (first) {
     linked_peptides_[0].predictIons(
       ion_series, charge, getLinkIdx(0), 
-      linker_mass_ + linked_peptides_[0].getMassConst(fragment_mass_type)); 
+      linker_mass_ + linked_peptides_[0].getMass(fragment_mass_type)); 
   } else {
     linked_peptides_[1].predictIons(
       ion_series, charge, getLinkIdx(1),
-      linker_mass_ + linked_peptides_[1].getMassConst(fragment_mass_type));
+      linker_mass_ + linked_peptides_[1].getMass(fragment_mass_type));
   }
 } 
 
@@ -480,8 +479,8 @@ void XLinkPeptide::predictIons(
   ) {
 
   MASS_TYPE_T fragment_mass_type = GlobalParams::getFragmentMass();
-  FLOAT_T delta_mass0 =  linked_peptides_[0].getMassConst(fragment_mass_type) + linker_mass_;
-  FLOAT_T delta_mass1 =  linked_peptides_[1].getMassConst(fragment_mass_type) + linker_mass_;
+  FLOAT_T delta_mass0 =  linked_peptides_[0].getMass(fragment_mass_type) + linker_mass_;
+  FLOAT_T delta_mass1 =  linked_peptides_[1].getMass(fragment_mass_type) + linker_mass_;
 
   //predict the ion_series of the first peptide.
   linked_peptides_[0].predictIons(ion_series, charge, getLinkIdx(0), delta_mass1, true);
@@ -500,15 +499,13 @@ string XLinkPeptide::getIonSequence(
   int peptide_idx = 0;
 
   string ion_sequence = ion->getPeptideSequence();
-
   if (ion_sequence == linked_peptides_[0].getSequence()) {
     peptide_idx = 0;
   } else {
     peptide_idx = 1;
   }
-
+  
   unsigned int cleavage_idx = ion->getCleavageIdx();
-
   bool is_linked = false;
 
   if (ion->isForwardType()) {
@@ -516,7 +513,7 @@ string XLinkPeptide::getIonSequence(
   } else {
     is_linked = (cleavage_idx >= (ion_sequence.length() - getLinkPos(peptide_idx)));
   }
-
+  
   string subseq;
   if (ion->isForwardType()) {
     subseq = ion_sequence.substr(0, cleavage_idx);
