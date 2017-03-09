@@ -39,7 +39,6 @@ FLOAT_T CacheableMass::getMass(
   ) {
  
   if (!mass_calculated_[mass_type]) {
-    //carp(CARP_DEBUG, "Calculating mass");
     mass_[mass_type] = calcMass(mass_type);
     mass_calculated_[mass_type] = true;
   }

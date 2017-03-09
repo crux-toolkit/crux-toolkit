@@ -50,7 +50,7 @@ XLinkablePeptide::XLinkablePeptide(
   char* sequence ///< the peptide sequence
   ) {
   init();
-  sequence_ = sequence;
+  sequence_ = my_copy_string(sequence);
   peptide_ = NULL;
   is_decoy_ = false;
 }
@@ -59,7 +59,11 @@ XLinkablePeptide::XLinkablePeptide(
   const XLinkablePeptide& xlinkablepeptide
   ) {
   init();
-  peptide_ = xlinkablepeptide.peptide_->copyPtr();
+  if (xlinkablepeptide.peptide_) {
+    peptide_ = xlinkablepeptide.peptide_->copyPtr();
+  } else if (sequence_) {
+    sequence_ = my_copy_string(xlinkablepeptide.sequence_);
+  }
   is_decoy_ = xlinkablepeptide.is_decoy_;
   link_sites_ = xlinkablepeptide.link_sites_;
   xcorr_link_idx_ = xlinkablepeptide.xcorr_link_idx_;
@@ -131,6 +135,9 @@ XLinkablePeptide::~XLinkablePeptide() {
   //cerr <<"XLinkablePeptide::~XLinkablePeptide"<<endl;
   if (mod_seq_ != NULL) {
     freeModSeq(mod_seq_);
+  }
+  if (sequence_) {
+    std::free(sequence_);
   }
 }
 
@@ -647,20 +654,20 @@ bool compareXLinkablePeptideMass(
   const XLinkablePeptide& xpep1,
   const XLinkablePeptide& xpep2
 ) {
-
-  return xpep1.getMassConst(MONO) < xpep2.getMassConst(MONO);
+  bool ret = xpep1.getMassConst(GlobalParams::getIsotopicMass()) < xpep2.getMassConst(GlobalParams::getIsotopicMass());
+  return(ret);
 }
 
 bool compareXLinkablePeptideMassToFLOAT(
 					const XLinkablePeptide& xpep1,
 					const FLOAT_T& mass) {
-  return xpep1.getMassConst(MONO) < mass;
+  return xpep1.getMassConst(GlobalParams::getIsotopicMass()) < mass;
 }
 
 bool compareXLinkablePeptideMassToFLOAT2(
 					 const FLOAT_T& mass,
 					 const XLinkablePeptide& xpep1) {
-  return xpep1.getMassConst(MONO) > mass;
+  return xpep1.getMassConst(GlobalParams::getIsotopicMass()) > mass;
 }
 
 /**
@@ -685,7 +692,6 @@ void XLinkablePeptide::predictIons(
   IonSeries* cached_ions = NULL;
   bool cached = false;
   if (GlobalParams::getXLinkUseIonCache()) {
-
     cached_ions = XLinkIonSeriesCache::getXLinkablePeptideIonSeries(*this, charge);
     bool cached = cached_ions != NULL;
   }
@@ -694,8 +700,13 @@ void XLinkablePeptide::predictIons(
     cached_ions->update(getSequence(), getModifiedSequencePtr());
     cached_ions->predictIons();
   }
-  int link_pos = link_sites_[link_idx];
-  int seq_len = peptide_->getLength();
+  int link_pos = link_sites_.at(link_idx);
+  int seq_len;
+  if (peptide_) {
+    seq_len = peptide_->getLength();
+  } else {
+    seq_len = strlen(sequence_);
+  }
   if (clear) {
     ion_series->clear();
   }
@@ -710,7 +721,7 @@ void XLinkablePeptide::predictIons(
     if (ion->isForwardType()) { 
       if (cleavage_idx > (unsigned int)link_pos) {
         ion = Ion::newIon();
-	Ion::copy(src_ion, ion, "");
+        Ion::copy(src_ion, ion, getSequence());
         FLOAT_T mass = ion->getMassFromMassZ() + mod_mass;
         ion->setMassZFromMass(mass); 
         if (isnan(ion->getMassZ())) { 
@@ -720,7 +731,7 @@ void XLinkablePeptide::predictIons(
     } else { 
       if (cleavage_idx >= (seq_len-(unsigned int)link_pos)) { 
         ion = Ion::newIon();
-	Ion::copy(src_ion, ion, "");
+	      Ion::copy(src_ion, ion, getSequence());
         FLOAT_T mass = ion->getMassFromMassZ() + mod_mass;
         ion->setMassZFromMass(mass); 
         if (isnan(ion->getMassZ())) { 
