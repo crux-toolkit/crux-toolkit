@@ -76,7 +76,7 @@ void SelfLoopPeptide::addCandidates(
 
   vector<SelfLoopPeptide>::iterator biter = XLinkDatabase::getSelfLoopBegin(is_decoy, min_mass);
   if (biter == XLinkDatabase::getSelfLoopEnd(is_decoy) ||
-      biter -> getMassConst(GlobalParams::getIsotopicMass()) > max_mass) {
+      biter -> getMass(GlobalParams::getIsotopicMass()) > max_mass) {
     return;
   } else {
     vector<SelfLoopPeptide>::iterator eiter = XLinkDatabase::getSelfLoopEnd(is_decoy);
@@ -330,8 +330,7 @@ bool SelfLoopPeptide::isModified() {
 bool compareSelfLoopPeptideMass(
 				const SelfLoopPeptide& spep1,
 				const SelfLoopPeptide& spep2) {
-
-  return spep1.getMassConst(MONO) < spep2.getMassConst(MONO);
+  return spep1.getMassConst(GlobalParams::getIsotopicMass()) < spep2.getMassConst(GlobalParams::getIsotopicMass());
 
 }
 
@@ -339,7 +338,7 @@ bool compareSelfLoopPeptideMassToFLOAT(
 				       const SelfLoopPeptide& spep1,
 				       FLOAT_T mass) {
 
-  return spep1.getMassConst(MONO) < mass;
+  return spep1.getMassConst(GlobalParams::getIsotopicMass()) < mass;
 }
 
 

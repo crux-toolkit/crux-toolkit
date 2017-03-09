@@ -1045,7 +1045,7 @@ void IonSeries::copy(
     // add ion
     if (create_ions) {
       dest_ion = Ion::newIon();
-      Ion::copy(src_ion, dest_ion, dest->peptide_);
+      Ion::copy(src_ion, dest_ion, src_ion->getPeptideSequence());
     }  else {
       dest_ion = src_ion;
       
