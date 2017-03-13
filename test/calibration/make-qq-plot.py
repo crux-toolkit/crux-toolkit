@@ -8,19 +8,19 @@ import math
 usage = """USAGE: make-qq-plot.py <p-values> <root>
 
 Compare a given set of p-values to the uniform distribution by
-creating a QQ plot with log-log axes.  The input p-values are one per
-line.  The program outputs three files: a gnuplot script
-(<root>.gnuplot), the data to be plotted (<root>.txt) and the plot
-itself (<root>.png).  Note that the stored values are downsampled to
-avoid having too many points in the plot.
+creating a QQ plot with log-log axes.  The program outputs three
+files: a gnuplot script (<root>.gnuplot), the data to be plotted
+(<root>.txt) and the plot itself (<root>.png).  Note that the stored
+values are downsampled to avoid having too many points in the plot.
 
 
 Options:
-  -no-log-scale
-  -minus-natural-log       Input values are negative log base e.
-  -format png|eps          (default=png)
-  -fontsize <int>          (only effective with "-format eps")
-  -notitle
+  --no-log-scale
+  --column-header <string>  Header of column from which to get p-values.
+  --minus-natural-log       Input values are negative log base e.
+  --format png|eps          (default=png)
+  --fontsize <int>          (only effective with "-format eps")
+  --title <title>
 
 If the p-value file is specified as "-", then the program reads from
 standard input.
@@ -28,33 +28,50 @@ standard input.
 """
 
 ###############################################################################
+# Find a given word in a tab-delimited string of words.
+# Return the index.
+def findWord(header, word):
+
+  words = header.split("\t")
+  for index in range(0, len(words)):
+    if (words[index] == word):
+      return(index)
+  sys.stderr.write("Can't find %s in %s.\n" % (word, header))
+  sys.exit(1)
+
+###############################################################################
 # MAIN
 ###############################################################################
 
 # Set default values.
 log_scale = 1
+column_header = ""
 log_values = 0
 file_format = "png"
 font_size = 24
-print_title = 1
+title = ""
 
 # Parse the command line.
 sys.argv = sys.argv[1:]
 while (len(sys.argv) > 2):
   next_arg = sys.argv[0]
   sys.argv = sys.argv[1:]
-  if (next_arg == "-no-log-scale"):
+  if (next_arg == "--no-log-scale"):
     log_scale = 0
-  elif (next_arg == "-minus-natural-log"):
+  elif (next_arg == "--column-header"):
+    column_header = sys.argv[0]
+    sys.argv = sys.argv[1:]
+  elif (next_arg == "--minus-natural-log"):
     log_values = 1
-  elif (next_arg == "-format"):
+  elif (next_arg == "--format"):
     file_format = sys.argv[0]
     sys.argv = sys.argv[1:]
-  elif (next_arg == "-fontsize"):
+  elif (next_arg == "--fontsize"):
     font_size = int(sys.argv[0])
     sys.argv = sys.argv[1:]
-  elif (next_arg == "-notitle"):
-    print_title = 0
+  elif (next_arg == "--title"):
+    title = sys.argv[0]
+    sys.argv = sys.argv[1:]
   else:
     sys.stderr.write("Invalid option (%s).\n" % next_arg)
     sys.exit(1)
@@ -70,28 +87,51 @@ if (pvalue_filename == "-"):
 else:
   pvalue_file = open(pvalue_filename, "r")
 
-# Read the p-values.
+# If a header string was specified, find the relevant column.
+if (column_header != ""):
+  header = pvalue_file.readline().rstrip()
+  column_index = findWord(header, column_header)
+  sys.stderr.write("Reading p-values from column %d.\n" % column_index)
+else:
+  column_index = 0
+
+# Read the p-values from the specified column.
 pvalues = []
+numZeroes = 0
 for line in pvalue_file:
   line = line.rstrip()
+  words = line.split("\t")
 
-  # Skip empty and comment lines.
-  if ((len(line) == 0) or (line[0] == "#")):
+  # Skip comment lines.
+  if (line[0] == "#"):
     continue
+
+  # Crash if the line is too short.
+  if (len(words) <= column_index):
+    sys.stderr.write("Too few columns (%d < %d).\n%s\n" 
+                     % (len(words), column_index, line))
+    sys.exit(1)
 
   # Skip NaNs.
-  if ((line == "NaN") or
-      (line == "nan")):
+  if ((words[column_index] == "NaN") or
+      (words[column_index] == "nan")):
     continue
 
-  # Store this p-value.
-  pvalue = float(line)
+  pvalue = float(words[column_index])
   if (log_values):
     pvalue = math.exp(-1.0 * pvalue)
+
+  # Count zero p-values.
+  if (pvalue == 0):
+    numZeroes += 1
+
+  # Store this p-value.
   pvalues.append(pvalue)
 
 pvalue_file.close()
 num_pvalues = len(pvalues)
+if (numZeroes != 0):
+  sys.stderr.write("Warning: Found %d zero p-values.\n" % numZeroes)
 sys.stderr.write("Read %d p-values from %s.\n" % (num_pvalues, 
                                                   pvalue_filename))
 
@@ -166,8 +206,8 @@ gnuplot_file.write("set xrange [%s:1]\n" % min_value)
 gnuplot_file.write("set yrange [%s:1]\n" % min_value)
 if (log_scale):
   gnuplot_file.write("set logscale xy\n")
-if (print_title):
-  gnuplot_file.write("set title '%s'\n" % fileroot)
+if (title != ""):
+  gnuplot_file.write("set title '%s'\n" % title)
 gnuplot_file.write("plot x notitle with lines lt 1\n")
 gnuplot_file.write("replot 0.5*x notitle with lines lt 2\n")
 gnuplot_file.write("replot 2.0*x notitle with lines lt 2\n")

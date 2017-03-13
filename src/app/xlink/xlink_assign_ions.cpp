@@ -103,10 +103,8 @@ int XLinkAssignIons::main(int argc, char** argv) {
   ion_constraint->setUseIonType(X_ION, Params::GetBool("use-x-ions"));
   ion_constraint->setUseIonType(Y_ION, Params::GetBool("use-y-ions"));
   ion_constraint->setUseIonType(Z_ION, Params::GetBool("use-z-ions"));
-  
   IonSeries* ion_series = new IonSeries(ion_constraint, charge);
   xlp->predictIons(ion_series, charge);
-
   print_spectrum(spectrum, xlp, ion_series);
 
   // free heap

@@ -314,6 +314,29 @@ void XLinkMatch::printOneMatchField(
       (MATCH_COLUMNS_T)column_idx,
       getFlankingAAString());
     break;
+  case TARGET_DECOY_COL:
+    switch (getCandidateType()) {
+      case LINEAR_CANDIDATE:
+      case DEADLINK_CANDIDATE:
+      case SELFLOOP_CANDIDATE:
+        if (this->getPeptide(0)->isDecoy()) {
+          output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx,
+                                           "decoy");
+        } else {
+          output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx,
+                                           "target");
+        }
+        break;
+      case XLINK_INTER_CANDIDATE:
+      case XLINK_INTRA_CANDIDATE:
+      case XLINK_INTER_INTRA_CANDIDATE:
+        output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx,
+                                         getDecoyType());
+        break;
+      case INVALID_CANDIDATE:
+        carp(CARP_FATAL, "Encountered invalid candidate type.");
+    }
+    break;
   case XLINK_PRODUCT_TYPE_COL:
     output_file->setColumnCurrentRow(
       (MATCH_COLUMNS_T)column_idx,

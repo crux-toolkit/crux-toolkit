@@ -76,7 +76,7 @@ void SelfLoopPeptide::addCandidates(
 
   vector<SelfLoopPeptide>::iterator biter = XLinkDatabase::getSelfLoopBegin(is_decoy, min_mass);
   if (biter == XLinkDatabase::getSelfLoopEnd(is_decoy) ||
-      biter -> getMassConst(GlobalParams::getIsotopicMass()) > max_mass) {
+      biter -> getMass(GlobalParams::getIsotopicMass()) > max_mass) {
     return;
   } else {
     vector<SelfLoopPeptide>::iterator eiter = XLinkDatabase::getSelfLoopEnd(is_decoy);
@@ -150,7 +150,6 @@ SelfLoopPeptide* SelfLoopPeptide::getUnshuffledTarget() {
 std::string SelfLoopPeptide::getUnshuffledSequence() {
   
   if (is_decoy_) {
-    //carp(CARP_INFO, "returning unshuffled target");
     return(getUnshuffledTarget()->getSequenceString());
   } else {
     return(getSequenceString());
@@ -326,12 +325,21 @@ bool SelfLoopPeptide::isModified() {
   return linked_peptide_.isModified();
 }
 
+/**
+ *\returns "target" or "decoy"
+ */
+string SelfLoopPeptide::getDecoyType() {
+  string returnValue = "target";
+  if (is_decoy_) {
+    returnValue = "decoy";
+  }
+  return(returnValue);
+}
 
 bool compareSelfLoopPeptideMass(
 				const SelfLoopPeptide& spep1,
 				const SelfLoopPeptide& spep2) {
-
-  return spep1.getMassConst(MONO) < spep2.getMassConst(MONO);
+  return spep1.getMassConst(GlobalParams::getIsotopicMass()) < spep2.getMassConst(GlobalParams::getIsotopicMass());
 
 }
 
@@ -339,13 +347,13 @@ bool compareSelfLoopPeptideMassToFLOAT(
 				       const SelfLoopPeptide& spep1,
 				       FLOAT_T mass) {
 
-  return spep1.getMassConst(MONO) < mass;
+  return spep1.getMassConst(GlobalParams::getIsotopicMass()) < mass;
 }
 
 
-/*                                                                                                                                                                                                                          
- * Local Variables:                                                                                                                                                                                                         
- * mode: c                                                                                                                                                                                                                  
- * c-basic-offset: 2                                                                                                                                                                                                        
- * End:                                                                                                                                                                                                                     
+/*
+ * Local Variables:
+ * mode: c
+ * c-basic-offset: 2
+ * End:
  */

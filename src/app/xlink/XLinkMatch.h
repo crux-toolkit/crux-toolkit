@@ -51,6 +51,7 @@ class XLinkMatch : public Crux::Match, public CacheableMass {
   virtual void predictIons(IonSeries* ion_series, int charge) = 0;
   virtual std::string getIonSequence(Ion* ion) = 0;
   virtual Crux::Peptide* getPeptide(int peptide_idx) = 0;
+  virtual string getDecoyType() = 0;
 
   const std::string& getSequenceStringConst();
   const std::vector<XLinkMatch*>& getDecoys();

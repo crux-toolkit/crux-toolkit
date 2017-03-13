@@ -55,15 +55,15 @@ void LinearPeptide::addCandidates(
 
   vector<LinearPeptide>::iterator siter = XLinkDatabase::getLinearBegin(is_decoy, min_mass);
   if (siter == XLinkDatabase::getLinearEnd(is_decoy) ||
-      siter->getMassConst(GlobalParams::getIsotopicMass()) > max_mass) {
+      siter->getMass(GlobalParams::getIsotopicMass()) > max_mass) {
     return;
   } else {
     vector<LinearPeptide>::iterator eiter = XLinkDatabase::getLinearEnd(is_decoy, siter, max_mass);
 
-    while (siter != eiter && siter->getMassConst() <= max_mass) {
+    while (siter != eiter && siter->getMass() <= max_mass) {
       siter->incrementPointerCount();
       LinearPeptide& lpeptide = *siter;
-      if (lpeptide.getMassConst() < min_mass || lpeptide.getMassConst() > max_mass) {
+      if (lpeptide.getMass() < min_mass || lpeptide.getMass() > max_mass) {
         carp(CARP_DEBUG,
              "The mass %g of peptide %s is outside the precursor range of %g-%g.",
              lpeptide.getMass(), lpeptide.getSequenceString().c_str(),
@@ -216,18 +216,28 @@ bool LinearPeptide::isModified() {
   return peptide_->isModified();
 }
 
+/**
+ *\returns "target" or "decoy"
+ */
+std::string LinearPeptide::getDecoyType() {
+  string returnValue = "target";
+  if (is_decoy_) {
+    returnValue = "decoy";
+  }
+  return(returnValue);
+}
+
 bool compareLinearPeptideMass(
   const LinearPeptide& pep1, 
   const LinearPeptide& pep2) {
 
-  return pep1.getMassConst(MONO) < pep2.getMassConst(MONO);
+  return pep1.getMassConst(GlobalParams::getIsotopicMass()) < pep2.getMassConst(GlobalParams::getIsotopicMass());
 
 }
 bool compareLinearPeptideMassToFLOAT(
   const LinearPeptide& pep1,
   FLOAT_T mass
   ) {
-
   return pep1.getMassConst(MONO) < mass;
 }
 

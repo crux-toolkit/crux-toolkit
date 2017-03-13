@@ -136,8 +136,8 @@ FLOAT_T XLinkScorer::scoreCandidate(
     XLinkablePeptide& xpep1 = xpep->getXLinkablePeptide(0);
     XLinkablePeptide& xpep2 = xpep->getXLinkablePeptide(1);
     FLOAT_T link_mass = XLinkPeptide::getLinkerMass();
-    FLOAT_T mod_mass1 = xpep1.getMassConst(GlobalParams::getIsotopicMass()) + link_mass;
-    FLOAT_T mod_mass2 = xpep2.getMassConst(GlobalParams::getIsotopicMass()) + link_mass;
+    FLOAT_T mod_mass1 = xpep1.getMass(GlobalParams::getIsotopicMass()) + link_mass;
+    FLOAT_T mod_mass2 = xpep2.getMass(GlobalParams::getIsotopicMass()) + link_mass;
     size_t link_idx1 = xpep->getLinkIdx(0);
     size_t link_idx2 = xpep->getLinkIdx(1);
     

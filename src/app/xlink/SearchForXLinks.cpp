@@ -140,6 +140,42 @@ string SearchForXLinks::getDescription() const {
     "    <td>--mod 12.0,30.010565:K,W,nterm:1:T:T</td>"
     "  </tr>"
     "</table>"
+
+    "<ul>"
+    "<li>"
+    "Note that, unlike Tide, search-for-xlinks does not have a "
+    "\"decoy-format\" option; instead, shuffled decoy peptides "
+    "are always created.  In particular, the decoy database contains "
+    "three copies of each target cross-linked species: one in which "
+    "both peptides are shuffled, one in which only the first peptide "
+    "is shuffled, and one in which only the second peptide is shuffled. "
+    "In the tab-delimited output, these different types are indicated "
+    "in the \"target/decoy\" column as \"target-target,\" "
+    "\"target-decoy,\" \"decoy-target\" or \"decoy-decoy.\"</li>"
+
+    "<li>"
+    "In addition to the primary XCorr score, search-for-xlinks reports "
+    "separate scores for the two cross-linked peptides. The way this "
+    "calculation is done depends on whether the \"top-n\" parameter is "
+    "set to 0 or not.  In the top-n=0 case, the XCorr scores of the "
+    "two participating peptides are computed exactly.  When top-n is "
+    "non-zero, then each peptide's score is calculated by using as "
+    "the mass shift on the link site the remainder of the precursor "
+    "mass. The crosslink peptide score is then calculated using the "
+    "sum of the two peptide scores. In this approach, the true mass "
+    "shift assigned to each peptide within a crosslinked pair can be "
+    "different from that peptide's calculated mass shift. This mass "
+    "shift affects the way the ions masses are calculated around the "
+    "crosslink sites and will affect the final XCorr score. In "
+    "particular, the smaller the precursor tolerance window, the closer "
+    "the \"full, slower\" XCorr value calculated directly from the "
+    "crosslinked peptides and the \"fast, inaccurate\" XCorr value "
+    "calculated by summing the individual peptide scores using the "
+    "remainder precursor mass shift will be. This is because the pairs "
+    "of peptides chosen will have a \"precursor remainder\" mass shift "
+    "closer to the true mass shift calculated directly from the "
+    "crosslinked peptide.</li>"
+    "</ul>"
     "]]";
 }
 
@@ -214,6 +250,7 @@ vector<string> SearchForXLinks::getOptions() const {
     "spectrum-parser",
     "use-z-line",
     "top-match",
+    "print-search-progress",
     "output-dir",
     "overwrite",
     "parameter-file",
