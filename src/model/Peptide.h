@@ -246,6 +246,8 @@ class Peptide {
 
   bool isDecoy();
 
+  std::string getDecoyType();
+
   /**
    * \brief Get the modified aa sequence
    *

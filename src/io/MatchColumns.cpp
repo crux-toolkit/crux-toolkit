@@ -3,6 +3,38 @@
  * \brief Just keeps track of column names for match files.
  *************************************************************************/
 
+/**************************************************************************
+ * Steps for adding a new column to Crux tab-delimited output files.
+ *
+ * o Add the header string for the column to the match_column_strings
+ *   list in MatchColumns.cpp.
+ *
+ * o Add a corresponding const for the column index to enum
+ *   MATCH_COLUMNS_T in MatchColumns.h
+ *
+ * o Add a case statement to handle this column in printOneMatchField
+ *   in model/Match.cpp and in printOneMatchField in
+ *   app/xlink/XLinkMatch.cpp.
+ *
+ * o Add logic to addColumnNames in io/MatchFileWriter.cpp to ensure
+ *   that the column gets included for the appropriate commands.
+ *
+ * o If necessary, add the column to the headers array in
+ *   app/TideMatchSet.cpp and the cols_to_print array in
+ *   app/AssignConfidenceApplication.cpp.
+ *
+ * o If necessary, modify the writeToFile function in
+ *   app/TideMatchSet.cpp to print the new column.  Be sure to modify
+ *   both variants of the function.
+ *
+ * o Update the smoke tests to include the new column in the stored
+ *   results files.
+ *
+ * o Update doc/user/file-formats/txt-format.html to be sure that
+ *   every column listed in MatchColumns.h appears there, in the
+ *   correct order.
+ **************************************************************************/
+
 #include "MatchColumns.h"
 #include "io/carp.h"
 #include <string.h>
@@ -74,6 +106,7 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "protein id",
   "peptides",
   "flanking aa",
+  "target/decoy",
   "original target sequence",
   "eta",
   "beta",

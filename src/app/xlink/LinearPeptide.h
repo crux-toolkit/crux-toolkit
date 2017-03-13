@@ -112,6 +112,11 @@ class LinearPeptide : public XLinkMatch {
    */
   virtual bool isModified();
 
+  /**
+   *\returns "target" or "decoy"
+   */
+  string getDecoyType();
+
 };
 
 /**

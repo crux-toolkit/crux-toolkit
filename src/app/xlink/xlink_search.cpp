@@ -163,15 +163,16 @@ int SearchForXLinks::xlinkSearchMain() {
   
   // for every observed spectrum 
   carp(CARP_DEBUG, "Searching Spectra");
-
+  int print_interval = Params::GetInt("print-search-progress");
 
   while (spectrum_iterator->hasNext()) {
 
     spectrum = spectrum_iterator->next(zstate);
     scan_num = spectrum->getFirstScan();
 
-    carp(CARP_DEBUG,"count %d scan %d charge %d", search_count, scan_num, zstate.getCharge());
-    if (search_count > 0 && search_count % 1000 == 0) {
+    carp(CARP_DEBUG,"%d: scan=%d charge=%d",
+         search_count, scan_num, zstate.getCharge());
+    if (print_interval > 0 && search_count > 0 && search_count % print_interval == 0) {
       carp(CARP_INFO, 
 	   "%d spectrum-charge combinations searched, %.0f%% complete",
 	   search_count + spectrum_iterator->numSkipped(),

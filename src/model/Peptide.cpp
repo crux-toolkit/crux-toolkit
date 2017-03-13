@@ -478,6 +478,14 @@ bool Peptide::isDecoy() {
   return decoy_modified_seq_ != NULL;
 }
 
+std::string Peptide::getDecoyType() {
+  string returnValue = "target";
+  if (decoy_modified_seq_ != NULL) {
+    returnValue = "decoy";
+  }
+  return(returnValue);
+}
+
 /**
  * \brief Get the modified peptide sequence
  *
@@ -817,7 +825,7 @@ int Peptide::getNDistance(){
  * sequence. 
  */
 void Peptide::transformToDecoy() {
-  bool reverse_seq = (get_decoy_type_parameter("decoys") == PROTEIN_REVERSE_DECOYS);
+  bool reverse_seq = false; // For now, only generate shuffled decoy
 
   // delete any existing decoy sequence
   if (decoy_modified_seq_){  

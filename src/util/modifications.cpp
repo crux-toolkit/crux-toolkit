@@ -19,6 +19,7 @@
  * $Revision: 1.8 $
  */
 
+#include "model/Peptide.h"
 #include "modifications.h"
 #include "mass.h"
 #include "GlobalParams.h"
@@ -59,13 +60,13 @@ class MODIFIED_AA_T_Cache {
   MODIFIED_AA_T* checkout(bool clear=false) {
     MODIFIED_AA_T* new_element;
     if (cache_.empty()) {
-      new_element = new MODIFIED_AA_T[GlobalParams::getMaxLength()+1];
+      new_element = new MODIFIED_AA_T[MAX_PEPTIDE_LENGTH + 1];
     } else {
       new_element = cache_.top();
       cache_.pop();
     }
     if (clear) {
-      memset(new_element, 0, sizeof(MODIFIED_AA_T)*GlobalParams::getMaxLength()+1);
+      memset(new_element, 0, sizeof(MODIFIED_AA_T)*MAX_PEPTIDE_LENGTH+1);
     }
     return (new_element);
   }
