@@ -76,7 +76,7 @@ string get_protein_ids_locations(
  */
 int SearchForXLinks::xhhcSearchMain() {
 
-  carp(CARP_INFO, "Beginning crux xlink-search (original)");
+  carp(CARP_INFO, "Beginning crux xlink-search (old code)");
 
   //Get parameters
   string ms2_file = Params::GetString("ms2 file");

@@ -66,7 +66,7 @@ class MODIFIED_AA_T_Cache {
       cache_.pop();
     }
     if (clear) {
-      memset(new_element, 0, sizeof(MODIFIED_AA_T)*MAX_PEPTIDE_LENGTH+1);
+      memset(new_element, 0, sizeof(MODIFIED_AA_T)*(MAX_PEPTIDE_LENGTH+1));
     }
     return (new_element);
   }
