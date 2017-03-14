@@ -104,10 +104,10 @@ void writeTrainingCandidates(XLinkMatchCollection* training_candidates, int scan
  */
 int SearchForXLinks::xlinkSearchMain() {
   
-  carp(CARP_INFO, "Beginning crux search-for-xlinks (new code)");
+  carp(CARP_INFO, "Beginning crux search-for-xlinks.");
 
   /* Get parameters */
-  carp(CARP_INFO, "Getting parameters");
+  carp(CARP_DETAILED_INFO, "Getting parameters.");
   string ms2_file = Params::GetString("ms2 file");
   string input_file = Params::GetString("protein fasta file");
   string output_directory = Params::GetString("output-dir");
@@ -119,19 +119,18 @@ int SearchForXLinks::xlinkSearchMain() {
   XLinkBondMap bondmap;
 
   /* Prepare input fasta  */
-  carp(CARP_DEBUG, "Preparing database");
+  carp(CARP_INFO, "Preparing database.");
   XLinkDatabase::initialize();
   Database* database = NULL;
   int num_proteins = 0;//prepare_protein_input(input_file, &database);
-  //carp(CARP_DEBUG, "Number of proteins:%d",num_proteins);
+  carp(CARP_DETAILED_INFO, "Number of proteins: %d",num_proteins);
   PEPTIDE_MOD_T** peptide_mods = NULL;
   int num_peptide_mods = 0;
 
   /* Usually for debugging purposes, print out the database of canddiates */
   if (Params::GetBool("xlink-print-db")) {
-    carp(CARP_INFO, "generating and printing xlink database");
+    carp(CARP_INFO, "Generating and printing xlink database.");
     XLinkDatabase::print();
-    //return 0;
   }
 
   int scan_num = 0;
@@ -139,7 +138,7 @@ int SearchForXLinks::xlinkSearchMain() {
 
   SpectrumZState zstate;
 
-  carp(CARP_DEBUG, "Loading Spectra");
+  carp(CARP_INFO, "Loading spectra.");
   Crux::Spectrum* spectrum = NULL;
   Crux::SpectrumCollection* spectra = SpectrumCollectionFactory::create(ms2_file);
   spectra->parse();
@@ -148,7 +147,7 @@ int SearchForXLinks::xlinkSearchMain() {
     new FilteredSpectrumChargeIterator(spectra);
 
   /* Prepare output files */
-  carp(CARP_DEBUG, "Preparing output files");
+  carp(CARP_DETAILED_INFO, "Preparing output files.");
   OutputFiles output_files(this);
   output_files.writeHeaders(num_proteins);
 
@@ -162,7 +161,7 @@ int SearchForXLinks::xlinkSearchMain() {
   Weibull weibull;
   
   // for every observed spectrum 
-  carp(CARP_DEBUG, "Searching Spectra");
+  carp(CARP_INFO, "Beginning search.");
   int print_interval = Params::GetInt("print-search-progress");
 
   while (spectrum_iterator->hasNext()) {
@@ -170,8 +169,6 @@ int SearchForXLinks::xlinkSearchMain() {
     spectrum = spectrum_iterator->next(zstate);
     scan_num = spectrum->getFirstScan();
 
-    carp(CARP_DEBUG,"%d: scan=%d charge=%d",
-         search_count, scan_num, zstate.getCharge());
     if (print_interval > 0 && search_count > 0 && search_count % print_interval == 0) {
       carp(CARP_INFO, 
 	   "%d spectrum-charge combinations searched, %.0f%% complete",
@@ -189,18 +186,12 @@ int SearchForXLinks::xlinkSearchMain() {
                        false
     );
 
-    carp(CARP_DEBUG, "Scan=%d charge=%d mass=%lg candidates=%d", 
-      scan_num, 
-      zstate.getCharge(), 
-      zstate.getNeutralMass(), 
-      target_candidates->getMatchTotal());   
-
     if (target_candidates->getMatchTotal() < 0) {
       carp(CARP_ERROR, "Scan %d has %d candidates.", scan_num, 
 	   target_candidates->getMatchTotal());
     } else if (target_candidates->getMatchTotal() == 0) {
       skipped_no_candidates++;
-      carp(CARP_DEBUG, "Skipping scan %d charge %d mass %lg", 
+      carp(CARP_DETAILED_INFO, "Skipping scan %d charge %d mass %lg", 
         scan_num, 
 	zstate.getCharge(),
 	zstate.getNeutralMass()
@@ -210,24 +201,20 @@ int SearchForXLinks::xlinkSearchMain() {
       continue;
     }
 
-    //score targets
-    target_candidates->scoreSpectrum(spectrum);
-    
-    carp(CARP_DEBUG, "Getting decoy candidates");
+    carp(CARP_DETAILED_INFO, "Scan=%d charge=%d mass=%lg candidates=%d", 
+      scan_num, 
+      zstate.getCharge(), 
+      zstate.getNeutralMass(), 
+      target_candidates->getMatchTotal());   
 
+    // Score targets.
+    target_candidates->scoreSpectrum(spectrum);
+
+    // Score decoys.
+    carp(CARP_DEBUG, "Getting decoy candidates.");
     XLinkMatchCollection* decoy_candidates = new XLinkMatchCollection();
     target_candidates->shuffle(*decoy_candidates);
-
-    
-    /*
-    XLinkMatchCollection* decoy_candidates = new XLinkMatchCollection(
-								      spectrum,
-								      zstate,
-								      true,
-								      false);
-
-    */
-    carp(CARP_DEBUG, "scoring decoys");
+    carp(CARP_DEBUG, "Scoring decoys.");
     decoy_candidates->scoreSpectrum(spectrum);
 
     if (compute_pvalues) {
@@ -257,31 +244,21 @@ int SearchForXLinks::xlinkSearchMain() {
         weibull.addPoint(sequence, score);
       }
       bool write_weibull_points = !weibull.fit();
-      //train_candidates->fitWeibull();
-      //MatchCollection::transferWeibull(train_candidates, target_candidates);
-      //MatchCollection::transferWeibull(train_candidates, decoy_candidates);
-	
 
       target_candidates->sort(XCORR);
 
-
-      int nprint = min(top_match,target_candidates->getMatchTotal());
-
-      carp(CARP_DEBUG, "Calculating %d target p-values", nprint);
  
-      //calculate pvalues.
+      // Calculate pvalues.
+      int nprint = min(top_match,target_candidates->getMatchTotal());
+      carp(CARP_DEBUG, "Calculating %d target p-values.", nprint);
       for (int idx=0;idx < nprint;idx++) {
         FLOAT_T score = (*target_candidates)[idx]->getScore(XCORR);
         (*target_candidates)[idx]->setPValue(weibull.getPValue(score));
-        //target_candidates->computeWeibullPValue(idx);
       }
 
       nprint = min(top_match, (int)decoy_candidates->getMatchTotal());
-
-      carp(CARP_DEBUG, "Calculating %d decoy p-values", nprint);
-
+      carp(CARP_DEBUG, "Calculating %d decoy p-values.", nprint);
       decoy_candidates->sort(XCORR);
-
       for (int idx=0;idx < nprint;idx++) {
         FLOAT_T score = (*decoy_candidates)[idx]->getScore(XCORR);
         (*decoy_candidates)[idx]->setPValue(weibull.getPValue(score));
@@ -298,9 +275,9 @@ int SearchForXLinks::xlinkSearchMain() {
       if (write_weibull_points || Params::GetBool("write-weibull-points")) {
         writeTrainingCandidates(train_candidates, scan_num, weibull);
       }
-      carp(CARP_DEBUG, "delete train candidates");
+      carp(CARP_DEBUG, "Delete train candidates.");
       delete train_candidates;
-      carp(CARP_DEBUG, "delete target train candidates");
+      carp(CARP_DEBUG, "Delete target train candidates.");
       delete target_train_candidates;
 
     } // if (compute_p_values)
@@ -325,7 +302,7 @@ int SearchForXLinks::xlinkSearchMain() {
       decoy_candidates->sort(XCORR);
     }
 
-    carp(CARP_DEBUG, "Ranking");
+    carp(CARP_DEBUG, "Ranking.");
 
     if (target_candidates->getScoredType(SP) == true) {
       target_candidates->populateMatchRank(SP);
@@ -334,7 +311,7 @@ int SearchForXLinks::xlinkSearchMain() {
     target_candidates->sort(XCORR);
 
     
-    carp(CARP_DEBUG, "Writing results");
+    carp(CARP_DEBUG, "Writing results.");
     output_files.writeMatches(
       (MatchCollection*)target_candidates, 
       decoy_vec,
@@ -342,15 +319,15 @@ int SearchForXLinks::xlinkSearchMain() {
       spectrum);
 
     /* Clean up */
-    carp(CARP_DEBUG, "Delete decoy candidates");
+    carp(CARP_DEBUG, "Deleting decoy candidates.");
     delete decoy_candidates;
-    carp(CARP_DEBUG, "Delete target candidates");
+    carp(CARP_DEBUG, "Deleting target candidates.");
     delete target_candidates;
     XLink::deleteAllocatedPeptides();
     
     //free_spectrum(spectrum);
 
-    carp(CARP_DEBUG, "Done with spectrum %d", scan_num);
+    carp(CARP_DEBUG, "Done with spectrum %d.", scan_num);
     carp(CARP_DEBUG, "=====================================");
   } // get next spectrum
 
@@ -380,9 +357,10 @@ int SearchForXLinks::xlinkSearchMain() {
   IonSeries::finalize();
   XLinkDatabase::finalize();
   //modifications_finalize(); TODO - Figure where to free the modification cache.
+
   //Calculate q-values via p-values from weibull fit.
   if (compute_pvalues) {
-    carp(CARP_DEBUG, "Computing Q-Values using P-values");
+    carp(CARP_DEBUG, "Computing q-values using p-values.");
     if (Params::GetBool("concat")) {
       carp(CARP_WARNING, "Computing Q-Values with concatenated target-decoy files not implemented yet!");
     } else {
@@ -390,15 +368,12 @@ int SearchForXLinks::xlinkSearchMain() {
     }
   }
 
-  carp(CARP_INFO, "Elapsed time: %.3g s", wall_clock() / 1e6);
-  carp(CARP_INFO, "Finished crux search-for-xlinks (new).");
-
   return(0);
 }
 
-/*                                                                                                                                                                                                                          
- * Local Variables:                                                                                                                                                                                                         
- * mode: c                                                                                                                                                                                                                  
- * c-basic-offset: 2                                                                                                                                                                                                        
- * End:                                                                                                                                                                                                                     
+/*
+ * Local Variables:
+ * mode: c
+ * c-basic-offset: 2
+ * End:
  */
