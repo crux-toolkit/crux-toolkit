@@ -777,8 +777,10 @@ Params::Params() : finalized_(false) {
   InitBoolParam("concat", false,
     "When set to T, target and decoy search results are reported in a single file, and only "
     "the top-scoring N matches (as specified via --top-match) are reported for each spectrum, "
-    "irrespective of whether the matches involve target or decoy peptides.",
-    "Available for tide-search", true);
+    "irrespective of whether the matches involve target or decoy peptides."
+    "Note that when used with search-for-xlinks, this parameter only has an "
+    "effect if use-old-xlink=F.",
+    "Available for tide-search and search-for-xlinks", true);
   InitBoolParam("file-column", true,
     "Include the file column in tab-delimited output.",
     "Available for tide-search", true);
