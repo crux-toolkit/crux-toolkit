@@ -246,6 +246,7 @@ vector<string> SearchForXLinks::getOptions() const {
     "isotope-windows",
     "compute-p-values",
     "seed",
+    "concat",
     "xlink-print-db",
     "spectrum-parser",
     "use-z-line",

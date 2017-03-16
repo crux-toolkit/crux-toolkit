@@ -178,7 +178,7 @@ void XLinkMatchCollection::addCandidates(
   bool decoy
   ) {
 
-  //carp(CARP_INFO, "XLinkMatchCollection.addCandidates() start");
+  carp(CARP_DETAILED_DEBUG, "XLinkMatchCollection.addCandidates() start");
 
   include_linear_peptides_ = Params::GetBool("xlink-include-linears");
   include_self_loops_ = Params::GetBool("xlink-include-selfloops");
@@ -207,7 +207,7 @@ void XLinkMatchCollection::addCandidates(
     
   }
   if (include_linear_peptides_) {
-
+    carp(CARP_DETAILED_DEBUG, "adding Linear Candidates");
     LinearPeptide::addCandidates(
       min_mass,
       max_mass,
@@ -217,13 +217,15 @@ void XLinkMatchCollection::addCandidates(
   }
 
   if (include_self_loops_) {
-  
+    carp(CARP_DETAILED_DEBUG, "adding selfloop candidates");
     SelfLoopPeptide::addCandidates(
       min_mass,
       max_mass,
       decoy,
       *this);
   }
+  carp(CARP_DETAILED_DEBUG, "XLinkMatchCollection.addCandidates() done.");
+
 }
 
 

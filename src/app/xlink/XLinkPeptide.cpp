@@ -49,7 +49,7 @@ XLinkPeptide::XLinkPeptide(
   link_pos_idx_.push_back(posB);
 
   doSort();
-
+  getMass(GlobalParams::getIsotopicMass());
 }
 
 /**
@@ -76,6 +76,7 @@ XLinkPeptide::XLinkPeptide(
   link_pos_idx_.push_back(0);
   link_pos_idx_.push_back(0);
   doSort();
+  getMass(GlobalParams::getIsotopicMass());
 }
 
 
@@ -417,7 +418,7 @@ void XLinkPeptide::shuffle(vector<XLinkMatch*>& decoys) {
   decoy_ff->is_decoy_ = true;
   decoy_ff->target_ = this;
   decoy_ff->setZState(getZState());
-
+  
   //cerr<<"decoy_ff:"<<decoy_ff->getSequenceString()<<endl;
   
   XLinkPeptide* decoy_tf = new XLinkPeptide();
@@ -441,7 +442,17 @@ void XLinkPeptide::shuffle(vector<XLinkMatch*>& decoys) {
   decoy_ft->setZState(getZState());
 
   //cerr <<"decoy_ft:"<<decoy_ft->getSequenceString()<<endl;
-  
+
+  for (size_t idx=0;idx<NUMBER_MASS_TYPES;idx++) {
+    if (mass_calculated_[idx]) {
+      decoy_ff->mass_calculated_[idx] = true;
+      decoy_ff->mass_[idx] = mass_[idx];
+      decoy_ft->mass_calculated_[idx] = true;
+      decoy_ft->mass_[idx] = mass_[idx];
+      decoy_tf->mass_calculated_[idx] = true;
+      decoy_tf->mass_[idx] = mass_[idx];
+    }
+  }
   decoys.push_back(decoy_ff);
   decoys.push_back(decoy_tf);
   decoys.push_back(decoy_ft);
