@@ -19,7 +19,7 @@ bool SpScorer::IonLookup(double mass, int charge, bool previous_ion_matched,
   sp_score_data.total_ions++;
   int bin = GetBin(mass, charge);
   double intensity = 0.0;
-  if (bin < max_mz_)
+  if (bin < (int)max_mz_)
     intensity = sp_spectrum_.Intensity(bin);  
   if (intensity > 0) {
     // We have a match
