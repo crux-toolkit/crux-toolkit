@@ -15,7 +15,7 @@ Examples:
   |test_name        |args                            |spectra  |fasta         |sites  |mass  |actual_output     |expected_output        |
   |xlink-db         |--parameter-file params/xlink.db|xlink.ms2|xlink.db.fasta|K:K    |222   |xlink_peptides.txt|xlink_peptides.txt     |
   |search-for-xlinks|--parameter-file params/xlink   |xlink.ms2|xlink.fasta   |E:K,D:K|-18.01|search-for-xlinks.target.txt|search-xlink.target.txt|
-  |search-for-xlinks-new|--parameter-file params/xlink-new|xlink.ms2|xlink.fasta   |E:K,D:K|-18.01|search-for-xlinks.txt|search-for-xlinks.new.txt|
+  #|search-for-xlinks-new|--parameter-file params/xlink-new|xlink.ms2|xlink.fasta   |E:K,D:K|-18.01|search-for-xlinks.txt|search-for-xlinks.new.txt|
   |search-for-xlinks-cz-ions|--parameter-file params/xlink-cz|xlink.ms2|xlink.fasta   |E:K,D:K|-18.01|search-for-xlinks.target.txt|search-for-xlinks.cz.txt|
   #|search-for-xlinks-ribo|--parameter-file params/xlink-ribo|good3.mgf|good3.fasta|K:K,K:nterm,nterm:nterm|136.100049|search-for-xlinks.txt|search-for-xlinks.ribo.txt|
 
