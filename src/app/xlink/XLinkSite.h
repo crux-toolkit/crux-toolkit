@@ -36,7 +36,7 @@ class XLinkSite {
    * Constructor that determines the type from the supplied site string 
    */
   XLinkSite(
-    std::string& site_string ///<string desscribing the cross-linkable site
+    const std::string& site_string ///<string describing the cross-linkable site
     );
 
   /**

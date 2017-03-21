@@ -420,13 +420,13 @@ Params::Params() : finalized_(false) {
     "Available for search-for-xlinks.", true);
   InitStringParam("cmod", "NO MODS",
     "Specify a variable modification to apply to C-terminus of peptides. " 
-    "<mass change>:<max distance from protein c-term (-1 for no max)>. "
+    "[[html:&gt;mass change&gt;:&lt;max distance from protein c-term (-1 for no max)&gt;]]. "
     "Note that this parameter only takes effect when specified in the "
     "parameter file.",
     "Available for search-for-xlinks.", true);
   InitStringParam("nmod", "NO MODS",
     "Specify a variable modification to apply to N-terminus of peptides.  " 
-    "<mass change>:<max distance from protein n-term (-1 for no max)> "
+    "[[html:&gt;mass change&gt;:&lt;max distance from protein c-term (-1 for no max)&gt;]]. "
     "Note that this parameter only takes effect when specified in the "
     "parameter file.",
     "Available for search-for-xlinks.", true);
@@ -1437,11 +1437,14 @@ Params::Params() : finalized_(false) {
     "weibull fitting (using targets and decoys) is achieved.",
     "Available for crux search-for-xlinks", true);
   InitArgParam("link sites",
-    "A comma delimited list of the amino acids to allow cross-links with. For example, "
-    "\"A:K,A:D\" means that the cross linker can attach A to K or A to D. Cross-links "
-    "involving the N-terminus of a protein can be specified as a link site by using "
-    "\"nterm\". For example, \"nterm:K\" means that a cross-link can attach a protein's "
-    "N-terminus to a lysine.");
+    "Specification of the the two sets of amino acids that the cross-linker can "
+    "connect. These are specified as two comma-separated sets of amino acids, "
+    "with the two sets separated by a colon. Cross-links involving the terminus "
+    "of a protein can be specified by using \"nterm\" or \"cterm\". For example, "
+    "\"K,nterm:Q\" means that the cross linker can attach K to Q or the protein "
+    "N-terminus to Q. Note that the vast majority of cross-linkers will "
+    "operate on the following reactive groups: amine (K,nterm), "
+    "carboxyl (D,E,cterm), sulfhydrl (C), acyl (Q) or amine+ (K,S,T,Y,nterm).");
   InitArgParam("link mass",
     "The mass modification of the linker when attached to a peptide.");
   /* hardklor parameters */

@@ -35,25 +35,39 @@ XLinkBondMap::XLinkBondMap(
  * Format: A:B,C:D,... which means that a link can occur between residue
  * A and B, or C and D.
  */
+/**
+ * link sites - Specify the two sets of amino acids that the cross-linker can 
+ * connect. These are specified as two comma-separated sets of amino acids, 
+ * with the two sets separated by a colon. Cross-links involving the terminus 
+ * of a protein can be specified by using "nterm" or "cterm". For example, 
+ * "K,nterm:Q" means that the cross linker can attach K to Q or the protein 
+ * N-terminus to Q. Note that the vast majority of cross-linkers will 
+ * operate on the following reactive groups: amine (K,nterm), 
+ * carboxyl (D,E,cterm), sulfhydrl (C), acyl (Q) or amine+ (K,S,T,Y,nterm).
+ */
+
 void XLinkBondMap::init(
   string& links_string ///< links string
   ) {
 
-  vector<string> bond_strings = StringUtils::Split(links_string, ',');
+  vector<string> bond_strings = StringUtils::Split(links_string, ':');
+  if (bond_strings.size() != 2) {
+    carp(CARP_FATAL, "invalid links string format:%s",links_string.c_str());
+  }
+  
+  vector<string> link1_sites = StringUtils::Split(bond_strings[0], ',');
+  vector<string> link2_sites = StringUtils::Split(bond_strings[1], ',');
 
-  for (vector<string>::const_iterator i = bond_strings.begin(); i != bond_strings.end(); i++) {
-    vector<string> link_site_strings = StringUtils::Split(*i, ':');
-
-    if (link_site_strings.size() == 2) {
-      XLinkSite site1(link_site_strings[0]);
-      XLinkSite site2(link_site_strings[1]);
+  for (vector<string>::const_iterator idx1 = link1_sites.begin();
+        idx1 != link1_sites.end();
+       ++idx1) {
+    XLinkSite site1(*idx1);
+    for (vector<string>::const_iterator idx2 = link2_sites.begin();
+	 idx2 != link2_sites.end();
+	 ++idx2) {
+      XLinkSite site2(*idx2);
       (*this)[site1].insert(site2);
       (*this)[site2].insert(site1);
-    } else {
-      carp(CARP_FATAL,
-        "bad format in %s when parsing %s",
-        links_string.c_str(),
-        i->c_str());
     }
   }
 }
