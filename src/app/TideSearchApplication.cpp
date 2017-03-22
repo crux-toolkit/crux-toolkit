@@ -665,7 +665,7 @@ void TideSearchApplication::search(void* threadarg) {
 		       spectrum, charge, active_peptide_queue, proteins,
 		       locations, compute_sp, true, locks_array[0]);
       }  //end peptide_centric == false
-    } else { //This runs curScoreFunction=BOTH_SCORE, curScoreFunction=RESIUDUE_EVIDENCE_MATRix, and xcorr w p-val
+    } else { //This runs curScoreFunction=BOTH_SCORE, curScoreFunction=RESIUDUE_EVIDENCE_MATRIX, and xcorr  p-val
 
       //TODO section below can be removed when options have been
       //implemented for residue evidence
