@@ -43,6 +43,7 @@ class AssignConfidenceApplication : public CruxApplication {
   OutputFiles* output_;
   unsigned int accepted_psms_;
   string index_name_;
+  bool is_final_;
 
  public:
   map<pair<string, unsigned int>, bool>* getSpectrumFlag();
@@ -56,6 +57,11 @@ class AssignConfidenceApplication : public CruxApplication {
   * stores the name of the index file used in an iteration in Cascade Search.
   */
   void setIndexName(string index_name);
+
+  /**
+  * Stores a Boolean indicating whether this is the last iteration of the cascade.
+  */
+  void setFinalIteration(bool is_final);
 
   /**
   * \returns a blank ComputeQValues object
