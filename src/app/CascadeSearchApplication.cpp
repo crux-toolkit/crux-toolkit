@@ -38,16 +38,16 @@ int CascadeSearchApplication::main(int argc, char** argv) {
   carp(CARP_INFO, "Running cascade-search...");
 
   string database_string = Params::GetString("database-series");
-  vector<string> database_indeces = StringUtils::Split(database_string, ',');
+  vector<string> database_indices = StringUtils::Split(database_string, ',');
   OutputFiles* output = new OutputFiles(this);
 
   int return_code;
-  for (unsigned int cascade_cnt = 0; cascade_cnt < database_indeces.size(); ++cascade_cnt) {
+  for (unsigned int cascade_cnt = 0; cascade_cnt < database_indices.size(); ++cascade_cnt) {
 
     //carry out tide-search
     TideSearchApplication TideSearchProgram;
     TideSearchProgram.setSpectrumFlag(spectrum_flag);
-    return_code = TideSearchProgram.main(Params::GetStrings("tide spectra file"), database_indeces[cascade_cnt]);
+    return_code = TideSearchProgram.main(Params::GetStrings("tide spectra file"), database_indices[cascade_cnt]);
     if (return_code != 0) {
       return return_code;
     }
@@ -61,7 +61,8 @@ int CascadeSearchApplication::main(int argc, char** argv) {
     AssignConfidenceProgram.setSpectrumFlag(spectrum_flag);
     AssignConfidenceProgram.setIterationCnt(cascade_cnt);
     AssignConfidenceProgram.setOutput(output);
-    AssignConfidenceProgram.setIndexName(database_indeces[cascade_cnt]);
+    AssignConfidenceProgram.setIndexName(database_indices[cascade_cnt]);
+    AssignConfidenceProgram.setFinalIteration(cascade_cnt + 1 == database_indices.size());
 
     return_code = AssignConfidenceProgram.main(bridge_file_name);
     if (return_code != 0) {
@@ -81,6 +82,7 @@ int CascadeSearchApplication::main(int argc, char** argv) {
            numAccepted);
       break;
     }
+    carp(CARP_INFO, "Finished cascade-search of database %d.\n", cascade_cnt + 1);
 
   }
   delete output;
