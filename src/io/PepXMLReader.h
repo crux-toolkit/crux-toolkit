@@ -87,6 +87,8 @@ class PepXMLReader : public PSMReader {
    */
   void searchHitClose();
 
+  void modificationInfoOpen(const char** attr);
+
   /**
    * Handles the mod_aminoacid_mass open tag event
    */
