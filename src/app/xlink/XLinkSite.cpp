@@ -22,7 +22,7 @@ XLinkSite::XLinkSite() {
  * Constructor that determines the type from the supplied site string 
  */
 XLinkSite::XLinkSite(
-  string& site_string ///<string describing the cross-linkable site
+  const string& site_string ///<string describing the cross-linkable site
   ) {
 
   if (site_string == "cterm") {
@@ -66,12 +66,9 @@ bool XLinkSite::hasSite(
     case XLINKSITE_CTERM:
       
       if (idx == peptide->getLength() - 1) {
-        //cerr <<"Cterm peptide:"<<peptide->getSequence()<<" "<<idx<<":"<<(int)peptide->getLength()<<endl;
         vector<PeptideSrc*>& srcs = peptide->getPeptideSrcVector();
         for (size_t idx2 = 0 ; idx2 < srcs.size() ; idx2++ ) {
           int start_idx = srcs[idx2]->getStartIdx();
-          //cerr << "start:"<<start_idx<<" "<<(start_idx+idx)<<" "<<srcs[idx2]->getParentProtein()->getLength()<<endl;
-
 
           if ((idx + start_idx) >= srcs[idx2]->getParentProtein()->getLength()) {
             return true;

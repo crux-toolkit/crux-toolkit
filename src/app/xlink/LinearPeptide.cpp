@@ -238,13 +238,13 @@ bool compareLinearPeptideMassToFLOAT(
   const LinearPeptide& pep1,
   FLOAT_T mass
   ) {
-  return pep1.getMassConst(MONO) < mass;
+  return pep1.getMassConst(GlobalParams::getIsotopicMass()) < mass;
 }
 
 bool compareFLOATToLinearPeptideMass(
   const FLOAT_T& mass,
   const LinearPeptide& pep1) {
-  return pep1.getMassConst(MONO) > mass;
+  return pep1.getMassConst(GlobalParams::getIsotopicMass()) > mass;
 }
 
 /*

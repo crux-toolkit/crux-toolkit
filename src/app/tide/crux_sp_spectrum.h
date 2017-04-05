@@ -52,7 +52,7 @@ class SpSpectrum {
   SpSpectrum(const Spectrum& spectrum, int charge, double max_mz);
   ~SpSpectrum();
 
-  double Intensity(int index) const { return intensity_array_[index]; }
+  double Intensity(int index) const { return index < IntensityArraySize() ? intensity_array_[index] : 0; }
   double Beta() const { return beta_; }
   double TotalIonIntensity() {
     double total_ion_intensity = 0.0;
@@ -97,7 +97,7 @@ class SpSpectrum {
   // affect the following peaks.
   void ZeroPeakMeanStdev(int step, double* new_array);
 
-  int IntensityArraySize() {
+  int IntensityArraySize() const {
     return (int)max_mz_ + 1;
   }
 
