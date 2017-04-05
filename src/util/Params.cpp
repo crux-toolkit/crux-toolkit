@@ -842,7 +842,7 @@ Params::Params() : finalized_(false) {
     "Mass tolerance (in Da) for scoring pairs of peaks when creating the residue evidence matrix. "
     "This parameter only makes sense when score-fuction is 'residue-evidence' or 'both'.",
     "Available for tide-search.", true);
-  InitIntParam("evidence-granularity", 25, 5, 100,
+  InitIntParam("evidence-granularity", 25, 1, 100,
     "When exact-pvalue=T, this parameter controls the granularity of the entries in the dynamic "
     "programming matrix.  Smaller values make the program run faster but give less exact p-values; "
     "larger values make the program run more slowly but give more exact p-values.",
