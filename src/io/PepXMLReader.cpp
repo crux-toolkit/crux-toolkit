@@ -32,6 +32,8 @@ void open_handler(void *data, const char *el, const char **attr) {
     reader->searchResultOpen();
   } else if (strcmp(el, "search_hit") == 0) {
     reader->searchHitOpen(attr);
+  } else if (strcmp(el, "modification_info") == 0) {
+    reader->modificationInfoOpen(attr);
   } else if (strcmp(el, "mod_aminoacid_mass") == 0) {
     reader->modAminoAcidMassOpen(attr);
   } else if (strcmp(el, "alternative_protein") == 0) {
@@ -378,6 +380,51 @@ void PepXMLReader::searchHitClose() {
   search_hit_open_ = false;
   //We should have all the information needed to add the match object.
   current_match_collection_->addMatch(current_match_);
+}
+
+void PepXMLReader::modificationInfoOpen(const char** attr) {
+  double modMass = 0.0;
+  ModPosition modPosition = UNKNOWN;
+  for (int i = 0; attr[i]; i += 2) {
+    if (strcmp(attr[i], "mod_nterm_mass") == 0) {
+      // mass of modification + n-terminus
+      modPosition = PEPTIDE_N;
+      modMass = atof(attr[i+1]) - MASS_H;
+    } else if (strcmp(attr[i], "mod_cterm_mass") == 0) {
+      // mass of modification + c-terminus
+      modPosition = PEPTIDE_C;
+      modMass = atof(attr[i+1]) - MASS_O - MASS_H;
+    }
+
+    if (modPosition == UNKNOWN || MathUtil::Round(modMass, Params::GetInt("mod-precision")) == 0.0) {
+      continue;
+    }
+
+    char* seq = current_match_->getPeptide()->getSequence();
+    unsigned char position = 0;
+    if (modPosition == PEPTIDE_C) {
+      position = strlen(seq) - 1;
+    }
+    char aa = seq[position];
+    free(seq);
+
+    // look for a variable mod with this mass
+    const ModificationDefinition* mod = ModificationDefinition::Find(modMass, false);
+    if (mod == NULL) {
+      // no variable mod with this mass, try finding a static one
+      mod = ModificationDefinition::Find(modMass, true);
+    }
+    if (mod != NULL) {
+      if (!mod->Static()) {
+        current_match_->getPeptide()->addMod(mod, position);
+      }
+    } else {
+      // mod was not defined at top of file, add it as a variable modification
+      modMass = MathUtil::Round(modMass, Params::GetInt("mod-precision"));
+      mod = ModificationDefinition::NewVarMod(string(1, aa), modMass, modPosition);
+      current_match_->getPeptide()->addMod(mod, position);
+    }
+  }
 }
 
 /**

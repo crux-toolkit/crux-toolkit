@@ -642,10 +642,15 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
     MatchIterator* match_iterator =
       new MatchIterator(target_matches, score_type, false);
 
+    FLOAT_T qValueThreshold = Params::GetDouble("q-value-threshold");
+    if (is_final_) {
+      qValueThreshold = 1.0;
+    }
+    
     while (match_iterator->hasNext()) {
       Match* match = match_iterator->next();
 
-      if (match->getScore(QVALUE_TDC) > Params::GetDouble("q-value-threshold")) {
+      if (match->getScore(QVALUE_TDC) > qValueThreshold) {
         break;
       }
       spectrum_flag_->insert(make_pair(pair<string, unsigned int>(
@@ -657,6 +662,8 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
       accepted_matches->addMatch(match);
       ++accepted_psms_;
     }
+    carp(CARP_INFO, "Accepted %d PSMs at q < %g.", accepted_matches->getMatchTotal(),
+         qValueThreshold);
     output_->writeMatches(accepted_matches);
     delete accepted_matches;
     delete match_iterator;
@@ -1081,6 +1088,10 @@ void AssignConfidenceApplication::setOutput(OutputFiles *output) {
 
 void AssignConfidenceApplication::setIndexName(string index_name) {
   index_name_ = index_name;
+}
+
+void AssignConfidenceApplication::setFinalIteration(bool is_final) {
+  is_final_ = is_final;
 }
 
 unsigned int AssignConfidenceApplication::getAcceptedPSMs() {

@@ -689,6 +689,7 @@ void XLinkablePeptide::predictIons(
   FLOAT_T mod_mass,
   bool clear
   ) {
+  const char* seq = NULL;
   IonSeries* cached_ions = NULL;
   bool cached = false;
   if (GlobalParams::getXLinkUseIonCache()) {
@@ -697,7 +698,8 @@ void XLinkablePeptide::predictIons(
   }
   if (!cached) {
     cached_ions = new IonSeries(ion_series->getIonConstraint(), charge);
-    cached_ions->update(getSequence(), getModifiedSequencePtr());
+    seq = getSequence();
+    cached_ions->update(seq, getModifiedSequencePtr());
     cached_ions->predictIons();
   }
   int link_pos = link_sites_.at(link_idx);
@@ -721,7 +723,11 @@ void XLinkablePeptide::predictIons(
     if (ion->isForwardType()) { 
       if (cleavage_idx > (unsigned int)link_pos) {
         ion = Ion::newIon();
-        Ion::copy(src_ion, ion, getSequence());
+	if (seq) {
+	  Ion::copy(src_ion, ion, seq);
+	} else {
+          Ion::copy(src_ion, ion, sequence_);
+	}
         FLOAT_T mass = ion->getMassFromMassZ() + mod_mass;
         ion->setMassZFromMass(mass); 
         if (isnan(ion->getMassZ())) { 
@@ -731,7 +737,11 @@ void XLinkablePeptide::predictIons(
     } else { 
       if (cleavage_idx >= (seq_len-(unsigned int)link_pos)) { 
         ion = Ion::newIon();
-	      Ion::copy(src_ion, ion, getSequence());
+	if (seq) {
+	  Ion::copy(src_ion, ion, seq);
+	} else {
+	  Ion::copy(src_ion, ion, sequence_);
+	}
         FLOAT_T mass = ion->getMassFromMassZ() + mod_mass;
         ion->setMassZFromMass(mass); 
         if (isnan(ion->getMassZ())) { 
@@ -741,8 +751,12 @@ void XLinkablePeptide::predictIons(
     }
     ion_series->addIon(ion);
   }
+  
   if (!cached) {
     delete cached_ions;
+  }
+  if (seq) {
+    std::free((char*)seq);
   }
 }
 /*
