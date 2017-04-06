@@ -671,9 +671,9 @@ void TideSearchApplication::search(void* threadarg) {
       //implemented for residue evidence
       bool flanking_peak = Params::GetBool("use-flanking-peaks");
       bool neutral_loss_peak = Params::GetBool("use-neutral-loss-peaks");
-      if (neutral_loss_peak == true && curScoreFunction != XCORR_SCORE) {
-	carp(CARP_FATAL,"--score-function residue-evidence with --use-neutral-loss-peaks true not implemented yet");
-      }
+//      if (neutral_loss_peak == true && curScoreFunction != XCORR_SCORE) {
+//	carp(CARP_FATAL,"--score-function residue-evidence with --use-neutral-loss-peaks true not implemented yet");
+//      }
       if (flanking_peak == true && curScoreFunction != XCORR_SCORE) {
 	carp(CARP_FATAL,"--score-function residue-evidence with --use-flanking-peaks true not implemented yet");
       }
