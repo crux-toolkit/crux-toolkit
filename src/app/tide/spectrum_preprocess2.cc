@@ -734,7 +734,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
         if (aaTolScore >= 0) {
           //add evidence to matrix
           //&&-1 since all mass bins are index 1 instead of index 0
-          double score = aaTolScore * (ionIntens[ion] + ionIntens[i]);
+          double score = aaTolScore * (ionIntens[ion] * ionIntens[i]);
           residueEvidenceMatrix[curAaMass][newResMassBin-1] += score;
         }
       }
@@ -783,7 +783,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
         if (aaTolScore >= 0) {
           //add evidence to matrix
           //&&-1 since all mass bins are index 1 istead of index 0
-          double score = aaTolScore * (ionIntens[ion] + ionIntens[i]);
+          double score = aaTolScore * (ionIntens[ion] * ionIntens[i]);
           residueEvidenceMatrix[curAaMass][newResMassBin-1] += score;
         }
       }
@@ -822,7 +822,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
         if(aaTolScore >= 0) {
           //add evidence to matrix
           //&&-1 since all mass bins are index 1 instead of index 0
-          double score = aaTolScore * (ionIntens[ion] + ionIntens[i]);       
+          double score = aaTolScore * (ionIntens[ion] * ionIntens[i]);       
           residueEvidenceMatrix[curAaMass][newResMassBin-1] += score;
         }
       }
@@ -864,7 +864,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
         if (aaTolScore >= 0) {
           //add evidence to matrix
           //&&-1 since all mass bins are index 1 instead of index 0
-          double score = aaTolScore * (ionIntens[ion] + ionIntens[i]);
+          double score = aaTolScore * (ionIntens[ion] * ionIntens[i]);
           residueEvidenceMatrix[curAaMass][newResMassBin-1] += score;
         }
       }
