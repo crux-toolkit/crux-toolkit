@@ -744,7 +744,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
           //determine rank intensity
           double rank1 = (double)loc1 / numSpecPeaks;
           double rank2 = (double)loc2 / numSpecPeaks;
-          double score = aaTolScore * (rank1 * rank2);
+          double score = aaTolScore * std::max(rank1,rank2);
 
           //add evidence to matrix
           //&&-1 since all mass bins are index 1 instead of index 0
@@ -801,7 +801,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
           //determine rank intensity
           double rank1 = (double)loc1 / numSpecPeaks;
           double rank2 = (double)loc2 / numSpecPeaks;
-          double score = aaTolScore * (rank1 * rank2);
+          double score = aaTolScore * std::max(rank1,rank2);
 
           //add evidence to matrix
           //&&-1 since all mass bins are index 1 istead of index 0
@@ -848,7 +848,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
           //determine rank intensity
           double rank1 = (double)loc1 / numSpecPeaks;
           double rank2 = (double)loc2 / numSpecPeaks;
-          double score = aaTolScore * (rank1 * rank2);
+          double score = aaTolScore * std::max(rank1,rank2);
 
           //add evidence to matrix
           //&&-1 since all mass bins are index 1 instead of index 0
@@ -898,7 +898,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
           //determine rank intensity
           double rank1 = (double)loc1 / numSpecPeaks;
           double rank2 = (double)loc2 / numSpecPeaks;
-          double score = aaTolScore * (rank1 * rank2);
+          double score = aaTolScore * std::max(rank1,rank2);
 
           //add evidence to matrix
           //&&-1 since all mass bins are index 1 instead of index 0
