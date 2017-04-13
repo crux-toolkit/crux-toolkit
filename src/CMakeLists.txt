@@ -197,6 +197,8 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   )
 endif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
+add_definitions(-DCRUX)
+
 add_library(
   crux-support
   STATIC
@@ -240,7 +242,6 @@ else (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	  _FILE_OFFSET_BITS=64
 	  _GNU_SOURCE
 	  GCC
-	  CRUX
 	  HAVE_EXPAT_CONFIG_H
 	)
 	if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
