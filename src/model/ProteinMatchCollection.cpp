@@ -49,7 +49,7 @@ ProteinMatchCollection::~ProteinMatchCollection() {
   for (map<MODIFIED_AA_T*, PeptideMatch*, cmpSeq>::iterator iter = peptide_match_map_.begin();
        iter != peptide_match_map_.end();
        ++iter) {
-      free(iter->first);
+      delete[] iter->first;
       delete iter->second;
   }
 
@@ -150,12 +150,12 @@ PeptideMatch* ProteinMatchCollection::getPeptideMatch(
       peptide_matches_.push_back(ans);
       peptide_match_map_.insert(pair<MODIFIED_AA_T*, PeptideMatch*>(mod_seq, ans));
     } else {
-      free(mod_seq);
+      delete[] mod_seq;
       carp(CARP_FATAL, "Could not find peptidematch for sequence %s",
         peptide->getSequence());
     }
   } else {
-    free(mod_seq);
+    delete[] mod_seq;
   }
 
   return ans;
