@@ -69,17 +69,8 @@ bool CruxApplication::needsOutputDirectory() const {
 
 void CruxApplication::initialize(int argc, char** argv) {
   initializeParams(getName(), getArgs(), getOptions(), argc, argv);
-  processParams();
-  Params::Finalize();
-  GlobalParams::set();
-  if (!Params::GetBool("no-analytics")) {
-    // Post data to Google Analytics using a separate thread
-    boost::thread analytics_thread(postToAnalytics, getName());
-  }
 
   set_verbosity_level(Params::GetInt("verbosity"));
-
-  carp(CARP_INFO, "Beginning %s.", getName().c_str());
 
   // Set seed for random number generation 
   if (Params::GetString("seed") == "time") {
@@ -89,7 +80,17 @@ void CruxApplication::initialize(int argc, char** argv) {
   } else {
     mysrandom(StringUtils::FromString<unsigned>(Params::GetString("seed")));
   }
-  
+
+  processParams();
+  Params::Finalize();
+  GlobalParams::set();
+  if (!Params::GetBool("no-analytics")) {
+    // Post data to Google Analytics using a separate thread
+    boost::thread analytics_thread(postToAnalytics, getName());
+  }
+
+  carp(CARP_INFO, "Beginning %s.", getName().c_str());
+
   // Start the timer.
   wall_clock();
 
