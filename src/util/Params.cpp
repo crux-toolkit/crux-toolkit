@@ -226,7 +226,7 @@ Params::Params() : finalized_(false) {
     "Available from command line or parameter file for crux-generate-peptides. "
     "When used with enzyme=<trypsin|elastase|chymotrypsin> "
     "includes peptides containing one or more potential cleavage sites.", true);
-  InitDoubleParam("precursor-window", 3.0, 0, 100, 
+  InitDoubleParam("precursor-window", 3.0, 0, BILLION, 
     "Tolerance used for matching peptides to spectra. Peptides must be within +/- "
     "'precursor-window' of the spectrum value. The precursor window units depend upon "
     "precursor-window-type.",
