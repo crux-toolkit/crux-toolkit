@@ -26,6 +26,9 @@ std::vector<SelfLoopPeptide> XLinkDatabase::decoy_selfloop_peptides_;
 std::vector<XLinkablePeptide> XLinkDatabase::target_xlinkable_peptides_;
 std::vector<XLinkablePeptide> XLinkDatabase::decoy_xlinkable_peptides_;
 
+std::vector<XLinkablePeptide> XLinkDatabase::decoy_xlinkable_peptides2_;
+std::vector<XLinkablePeptide> XLinkDatabase::target_xlinkable_peptides2_;
+
 std::vector<XLinkablePeptide> XLinkDatabase::target_xlinkable_peptides_flatten_;
 std::vector<XLinkablePeptide> XLinkDatabase::decoy_xlinkable_peptides_flatten_;
 
