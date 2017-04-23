@@ -646,10 +646,10 @@ typedef enum _command COMMAND_T;
 typedef uint16_t MODIFIED_AA_T; 
 
 /**
- * \typedef AA_MOD_T
- * \brief The struct _aa_mod is typdefed as AA_MOD_T
+ * \class AA_MOD_T
+ * \brief The Definitiion of an amino acid's mod
  */
-typedef struct _aa_mod AA_MOD_T;
+class AA_MOD_T;
 
 /**
  * \typedef PEPTIDE_MOD_T

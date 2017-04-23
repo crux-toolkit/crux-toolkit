@@ -687,9 +687,9 @@ void MatchCollection::printSqtHeader(
   for(mod_idx = 0; mod_idx < num_mods; mod_idx++){
     
     AA_MOD_T* aamod = aa_mod_list[mod_idx];
-    string aa_list_str = aa_mod_get_aa_list_string(aamod);
-    char aa_symbol = aa_mod_get_symbol(aamod);
-    double mass_dif = aa_mod_get_mass_change(aamod);
+    string aa_list_str = aamod->getAAListString();
+    char aa_symbol = aamod->getSymbol();
+    double mass_dif = aamod->getMassChange();
 
     fprintf(output, "H\tDiffMod\t%s%c=%+.2f\n", aa_list_str.c_str(), 
             aa_symbol, mass_dif);
@@ -697,7 +697,7 @@ void MatchCollection::printSqtHeader(
   num_mods = get_c_mod_list(&aa_mod_list);
   for(mod_idx = 0; mod_idx < num_mods; mod_idx++){
     AA_MOD_T* aamod = aa_mod_list[mod_idx];
-    char aa_symbol = aa_mod_get_symbol(aamod);
+    char aa_symbol = aamod->getSymbol();
 
     fprintf(output, "H\tComment\tMod %c is a C-terminal modification\n",
             aa_symbol);
@@ -706,7 +706,7 @@ void MatchCollection::printSqtHeader(
   num_mods = get_n_mod_list(&aa_mod_list);
   for(mod_idx = 0; mod_idx < num_mods; mod_idx++){
     AA_MOD_T* aamod = aa_mod_list[mod_idx];
-    char aa_symbol = aa_mod_get_symbol(aamod);
+    char aa_symbol = aamod->getSymbol();
 
     fprintf(output, "H\tComment\tMod %c is a N-terminal modification\n",
             aa_symbol);

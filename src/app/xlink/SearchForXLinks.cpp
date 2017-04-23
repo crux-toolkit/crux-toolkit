@@ -41,10 +41,7 @@ int SearchForXLinks::main(int argc, char** argv) {
 }
 
 void SearchForXLinks::processParams() {
-  for (char c = 'A'; c <= 'Z'; c++) {
-    double deltaMass = Params::GetDouble(string(1, c));
-    increase_amino_acid_mass(c, deltaMass);
-  }
+  set_modspec();
 }
 
 /**

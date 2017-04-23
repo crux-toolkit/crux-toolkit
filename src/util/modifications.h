@@ -44,17 +44,199 @@ static const int MOD_MASS_PRECISION = 2;  // printed as X[1.23]X
  *  assigned at runtime to be used in the sqt result file and an
  *  integer bitmask to be used to give each aa_mod a unique identifier.
  */
-struct _aa_mod{ 
-  double mass_change;  ///< the amount by which the mass of the residue changes
-  bool aa_list[AA_LIST_LENGTH];
+class AA_MOD_T{
+ private:
+  double mass_change_;  ///< the amount by which the mass of the residue changes
+  bool aa_list_[AA_LIST_LENGTH];
                        ///< an array indexed by AA, true if can be modified
-  int max_per_peptide; ///< the maximum number of mods per peptide
-  MOD_POSITION_T position; ///< where the mod can occur in the pep/prot
-  int max_distance;        ///< the max distance from the protein terminus
-  char symbol;         ///< the character to represent the mod in sqt files
-  bool prevents_cleavage; ///< can modification prevent cleavage?
-  bool prevents_xlink; ///< can modification prevent xlink?
-  MODIFIED_AA_T identifier; ///< the bitmask assigned for unique ID
+  int max_per_peptide_; ///< the maximum number of mods per peptide
+  MOD_POSITION_T position_; ///< where the mod can occur in the pep/prot
+  int max_distance_;        ///< the max distance from the protein terminus
+  char symbol_;         ///< the character to represent the mod in sqt files
+  bool prevents_cleavage_; ///< can modification prevent cleavage?
+  bool prevents_xlink_; ///< can modification prevent xlink?
+  bool mono_link_; ///< Is modification a mono link?
+  MODIFIED_AA_T identifier_; ///< the bitmask assigned for unique ID
+ 
+ public:
+  /**
+   * \brief Allocate an AA_MOD, including space for the aa_list and
+   * initialize all fields to default values.  Symbol and unique
+   * identifier are set according to index.  
+   * \returns A heap allocated AA_MOD with default values.
+   */
+  AA_MOD_T(int mod_idx=0);
+ 
+  /**
+   * \brief Free the memory for an AA_MOD including the aa_list.
+   */
+  ~AA_MOD_T();
+
+  /**
+   * Set bitmask id
+   */
+  void setModIdx(int mod_idx);
+  
+  /**
+   * \returns bitmask id
+   */
+  int getIdentifier();
+  
+  void setIdentifier(int identifier);
+  
+  /**
+   * \brief checks to see if an amino acid is modified by a given mod
+   * \returns TRUE if aa is modified by mod
+   */
+  bool isModified(MODIFIED_AA_T aa);
+  
+  /**
+   * \brief Determine if this modified amino acid can be modified by
+   * this modification.
+   *
+   * Checks the mod list of modifiable residues to see if aa is in the
+   * list.  Also checks to see if aa has already been modified by this
+   * mod.  
+   * \returns TRUE if it can be modified, else FALSE
+   */
+  bool isModifiable(MODIFIED_AA_T aa);
+
+  
+  
+  void print();
+
+  /**
+   * \brief Adds a modification to a MODIFIED_AA_T.
+   *
+   * Assumes that the aa is modifiable, no explicit check.  If the aa is
+   * already modified for the mod, no change to aa.
+   */
+  void modify(MODIFIED_AA_T* aa) const;
+
+  
+  /* Setters and Getters */
+
+  /**
+   * \brief Set the symbol used by this modification.
+   * \returns void
+   */
+  void setSymbol(char symbol);
+
+  /**
+   * \brief Set the mass change caused by this modification.
+   * \returns void
+   */
+  void setMassChange(double mass_change);
+  /**
+   * \brief Get the mass change caused by this modification.
+   * \returns The mass change caused by this modification.
+   */
+  double getMassChange() const;
+
+  /**
+   * \brief Access to the aa_list of the AA_MOD_T struct.  This pointer
+   * can be used to get or set the list of residues on which this mod
+   * can be placed.
+   * \returns A pointer to the list of amino acids on which this mod can
+   * be placed.
+   */
+  bool* getAAList();
+  
+  void setAminoAcids(const char* aas, int num_aas);
+  void setAminoAcid(const char aa);
+  
+  /**
+   * \brief Set the maximum number of times this modification can be
+   * placed on one peptide.
+   * \returns void
+   */
+  void setMaxPerPeptide(int max);
+  /**
+   * \brief Get the maximum number of times this modification can be
+   * placed on one peptide.  
+   * \returns The max times per peptide this mod can be placed.
+   */
+  int getMaxPerPeptide();
+
+  /**
+   * \brief Set the maximum distance from the protein terminus that the
+   * modification can be placed.  Which terminus (C or N) is determined
+   * by the position type.  To indicate no position restriction, set to
+   * MAX_PROTEIN_SEQ_LENGTH. 
+   * \returns void
+   */
+  void setMaxDistance(int distance);
+  /**
+   * \brief Get the maximum distance from the protein end that the
+   * modification can be placed.  Will be MAX_PROTEIN_SEQ_LENGTH if
+   * position type is ANY_POSITION.
+   * \returns Maximum distance from protein terminus at which mod can be
+   * placed. 
+   */
+  int getMaxDistance();
+
+  /**
+   * \brief Set the position type of an aa_mod.
+   * \returns void
+   */
+  void setPosition(MOD_POSITION_T position);
+
+  /**
+   * \brief Where in the peptide can the modification be placed.
+   * \returns ANY_POSITION for standard mods; C_TERM or N_TERM for those
+   * that can only be placed at the ends of the peptide.
+   */
+  MOD_POSITION_T getPosition();
+
+  /**
+   * \brief Sets whether the modification can prevent cleavage.
+   * \returns void
+   */
+  void setPreventsCleavage(bool prevents_cleavage);
+
+  /**
+   * \brief gets whether the modification can prevent cleavage
+   * \returns TRUE or FALSE
+   */
+  bool getPreventsCleavage();
+
+  /**
+   * \brief Sets whether the modifications can prevent cross-linking.
+   * \returns void
+   */
+  void setPreventsXLink(bool prevents_xlink);
+  
+  /**
+   * \brief gets whether the modification can prevent cross-linking.
+   * \returns TRUE or FALSE
+   */
+  bool getPreventsXLink();
+
+  /**
+   * \brief The character used to uniquely identify the mod in the sqt file.
+   * \returns The character identifier.
+   */
+  char getSymbol();
+
+  /**
+   * \brief tells whether the modification is a mono link.  Used by sfx
+   */
+  void setMonoLink(bool mono_link);
+  bool getMonoLink();
+  
+  /**
+   * \brief Generates a string representation of an aa_mod and returns a
+   * pointer to that newly allocated string.
+   */
+  char* toCString();
+
+  /**
+   * \brief Create a string containing all of the amino acids that can
+   * be modified by this aa_mod.  E.g. if S, T, and Y can be modified,
+   * returns "STY".
+   * \returns A newly allocated string.
+   */
+  std::string getAAListString();
 };
 
 // this was moved to object.h b/c methods in peptide.h weren't compiling
@@ -79,18 +261,6 @@ struct _aa_mod{
    If we ask again, answer == 0100_0000_0000_0000 
  */
 
-/**
- * \brief Allocate an AA_MOD, including space for the aa_list and
- * initialize all fields to default values.  Symbol and unique
- * identifier are set according to index.  
- * \returns A heap allocated AA_MOD with default values.
- */
-AA_MOD_T* new_aa_mod(int mod_idx);
-
-/**
- * \brief Free the memory for an AA_MOD including the aa_list.
- */
-void free_aa_mod(AA_MOD_T* mod);
 
 /**
  * \brief Converts a MODIFIED_AA into a char, effectively unmodifying it.
@@ -235,31 +405,6 @@ bool modified_aa_seq_is_palindrome(MODIFIED_AA_T* seq, int length);
 void free_mod_aa_seq(MODIFIED_AA_T* seq);
 
 /**
- * \brief checks to see if an amino acid is modified by a given mod
- * \returns TRUE if aa is modified by mod
- */
-bool is_aa_modified(MODIFIED_AA_T aa, AA_MOD_T* mod);
-
-/**
- * \brief Determine if this modified amino acid can be modified by
- * this modification.
- *
- * Checks the mod list of modifiable residues to see if aa is in the
- * list.  Also checks to see if aa has already been modified by this
- * mod.  
- * \returns TRUE if it can be modified, else FALSE
- */
-bool is_aa_modifiable(MODIFIED_AA_T aa, AA_MOD_T* mod);
-
-/**
- * \brief Adds a modification to a MODIFIED_AA_T.
- *
- * Assumes that the aa is modifiable, no explicit check.  If the aa is
- * already modified for the mod, no change to aa.
- */
-void modify_aa(MODIFIED_AA_T* aa, const AA_MOD_T* mod);
-
-/**
  * \brief Return the AA_MOD_T associated with the given symbol.  If
  * the symbol does not represent a modification, returns null.
  * Requires that parameters have been initialized.
@@ -281,126 +426,6 @@ FLOAT_T get_mod_mass_from_symbol(const char symbol);
  * Requires that parameters have been initialized.
  */
 const AA_MOD_T* get_aa_mod_from_mass(FLOAT_T mass);
-
-/**
- * print all fields in mod.  For debugging
- */
-void print_a_mod(AA_MOD_T* mod);
-
-/* Setters and Getters */
-
-/**
- * \brief Set the symbol used by this modification.
- * \returns void
- */
-void aa_mod_set_symbol(AA_MOD_T* mod, char symbol);
-
-/**
- * \brief Set the mass change caused by this modification.
- * \returns void
- */
-void aa_mod_set_mass_change(AA_MOD_T* mod, double mass_change);
-/**
- * \brief Get the mass change caused by this modification.
- * \returns The mass change caused by this modification.
- */
-double aa_mod_get_mass_change(const AA_MOD_T* mod);
-
-/**
- * \brief Access to the aa_list of the AA_MOD_T struct.  This pointer
- * can be used to get or set the list of residues on which this mod
- * can be placed.
- * \returns A pointer to the list of amino acids on which this mod can
- * be placed.
- */
-bool* aa_mod_get_aa_list(AA_MOD_T* mod);
-
-/**
- * \brief Set the maximum number of times this modification can be
- * placed on one peptide.
- * \returns void
- */
-void aa_mod_set_max_per_peptide(AA_MOD_T* mod, int max);
-/**
- * \brief Get the maximum number of times this modification can be
- * placed on one peptide.  
- * \returns The max times per peptide this mod can be placed.
- */
-int aa_mod_get_max_per_peptide(AA_MOD_T* mod);
-
-/**
- * \brief Set the maximum distance from the protein terminus that the
- * modification can be placed.  Which terminus (C or N) is determined
- * by the position type.  To indicate no position restriction, set to
- * MAX_PROTEIN_SEQ_LENGTH. 
- * \returns void
- */
-void aa_mod_set_max_distance(AA_MOD_T* mod, int distance);
-/**
- * \brief Get the maximum distance from the protein end that the
- * modification can be placed.  Will be MAX_PROTEIN_SEQ_LENGTH if
- * position type is ANY_POSITION.
- * \returns Maximum distance from protein terminus at which mod can be
- * placed. 
- */
-int aa_mod_get_max_distance(AA_MOD_T* mod);
-
-/**
- * \brief Set the position type of an aa_mod.
- * \returns void
- */
-void aa_mod_set_position(AA_MOD_T* mod, MOD_POSITION_T position);
-
-/**
- * \brief Where in the peptide can the modification be placed.
- * \returns ANY_POSITION for standard mods; C_TERM or N_TERM for those
- * that can only be placed at the ends of the peptide.
- */
-MOD_POSITION_T aa_mod_get_position(AA_MOD_T* mod);
-
-/**
- * \brief Sets whether the modification can prevent cleavage.
- * \returns void
- */
-void aa_mod_set_prevents_cleavage(AA_MOD_T* mod, bool prevents_cleavage);
-
-/**
- * \brief gets whether the modification can prevent cleavage
- * \returns TRUE or FALSE
- */
-bool aa_mod_get_prevents_cleavage(AA_MOD_T* mod);
-
-/**
- * \brief Sets whether the modifications can prevent cross-linking.
- * \returns void
- */
-void aa_mod_set_prevents_xlink(AA_MOD_T* mod, bool prevents_xlink);
-
-/**
- * \brief gets whether the modification can prevent cross-linking.
- * \returns TRUE or FALSE
- */
-bool aa_mod_get_prevents_xlink(AA_MOD_T* mod);
-
-/**
- * \brief The character used to uniquely identify the mod in the sqt file.
- * \returns The character identifier.
- */
-char aa_mod_get_symbol(const AA_MOD_T* mod);
-
-/**
- * \brief Generates a string representation of an aa_mod and returns a
- * pointer to that newly allocated string.
- */
-char* aa_mod_to_string(const AA_MOD_T* mod);
-
-/**
- * \brief Create a string containing all of the amino acids that can
- * be modified by this aa_mod.  E.g. if S, T, and Y can be modified,
- * returns "STY".
- * \returns A newly allocated string.
- */
-std::string aa_mod_get_aa_list_string(AA_MOD_T* mod);
 
 /**
  * Count the number of modified aas in the string.

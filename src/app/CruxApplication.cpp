@@ -151,7 +151,6 @@ void CruxApplication::initializeParams(
     string parameter_file = argParser.GetOption("parameter-file");
     if (!parameter_file.empty()) {
       parse_parameter_file(parameter_file.c_str());
-      read_mods_from_file(parameter_file.c_str());
     }
     // Process command line options
     const map<string, string>& options = argParser.GetOptions();

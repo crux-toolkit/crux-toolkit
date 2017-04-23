@@ -140,7 +140,7 @@ void initialize_aa_mod_combinations_array() {
       while (write_num > 0 && entry_idx < NUM_MOD_MASSES) {
         //printf("write at %i from %.3f", entry_idx, aa_mod_masses[entry_idx]);
 
-        aa_mod_masses[entry_idx] += aa_mod_get_mass_change(amod_list[mod_idx]);
+        aa_mod_masses[entry_idx] += amod_list[mod_idx]->getMassChange();
         //printf(" to  %.3f\n", aa_mod_masses[entry_idx]);
         entry_idx++;
         write_num--;

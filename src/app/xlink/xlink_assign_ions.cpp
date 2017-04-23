@@ -224,10 +224,7 @@ void XLinkAssignIons::print_spectrum(
 }
 
 void XLinkAssignIons::processParams() {
-  for (char c = 'A'; c <= 'Z'; c++) {
-    double deltaMass = Params::GetDouble(string(1, c));
-    increase_amino_acid_mass(c, deltaMass);
-  }
+  set_modspec();
 }
 
 string XLinkAssignIons::getName() const {
