@@ -44,6 +44,7 @@ add_library(
   SearchForXLinks.cpp
   xlink_compute_qvalues.cpp
   LinearPeptide.cpp
+  MonoLinkPeptide.cpp
   SelfLoopPeptide.cpp
   XLinkDatabase.cpp
   XLinkIonSeriesCache.cpp

@@ -1382,6 +1382,12 @@ Params::Params() : finalized_(false) {
     "available when use-old-xlink=F.",
     "Used for crux search-for-xlinks", true);
 
+  InitStringParam("mono-link", "",
+    "Provides a list of amino acids and their mass modifications to consider as candidate for "
+    "mono-/dead- links.  Format is the same as mods-spec",
+    "Available for crux search-for-xlinks (new code)",
+    true);
+    
   InitIntParam("xlink-top-n", 250, 0, BILLION,
                "Top-n open-mod peptides to consider in the second pass, value of 0 will search all candiates.",
                "Available for crux search-for-xlinks",

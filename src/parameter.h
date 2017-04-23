@@ -263,4 +263,7 @@ void print_mods_parameter_file(std::ostream* param_file,
                                const char* name,
                                int (*mod_getter)(AA_MOD_T***));
 
+
+void set_modspec();
+
 #endif

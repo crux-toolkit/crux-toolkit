@@ -38,6 +38,8 @@ AA_MOD_T* list_of_mods[MAX_AA_MODS]; // list containing all aa mods
 AA_MOD_T** list_of_variable_mods = NULL; // pointer to first non-fixed mod
 AA_MOD_T** list_of_c_mods = NULL; // pointer to first c_term mod in list
 AA_MOD_T** list_of_n_mods = NULL; //pointer to first n_term mod in list
+
+
 int fixed_c_mod = -1; // position in list_of_mods or -1 if not present
 int fixed_n_mod = -1; // position in list_of_mods or -1 if not present
 int num_fixed_mods = 0;
@@ -87,7 +89,7 @@ void initialize_parameters(void){
   /* initialize the list of mods */                           
   for (int mod_idx = 0; mod_idx < MAX_AA_MODS; mod_idx++) {
     //initialize_aa_mod(&list_of_mods[mod_idx], mod_idx);     
-    list_of_mods[mod_idx] = new_aa_mod(mod_idx);              
+    list_of_mods[mod_idx] = new AA_MOD_T(mod_idx);              
   }                                                           
 
   /* initialize custom enzyme variables */
@@ -247,12 +249,12 @@ void print_mods_parameter_file(ostream* param_file,
   AA_MOD_T** mod_list = NULL;
   int total_mods = (*mod_getter)(&mod_list);
   for( int mod_idx = 0 ; mod_idx < total_mods; mod_idx++){
-    float mass = aa_mod_get_mass_change(mod_list[mod_idx]);
+    float mass = mod_list[mod_idx]->getMassChange();
 
     // standard mods have the format mass:aa_list:max
     if( strcmp(name, "mod") == 0 ){
-      int max = aa_mod_get_max_per_peptide(mod_list[mod_idx]);
-      bool* aas_modified = aa_mod_get_aa_list(mod_list[mod_idx]);
+      int max = mod_list[mod_idx]->getMaxPerPeptide();
+      bool* aas_modified = mod_list[mod_idx]->getAAList();
       char aa_str[PARAMETER_BUFFER] = "";
       char* aa_str_ptr = aa_str;
       for(int aa_idx = 0; aa_idx < AA_LIST_LENGTH; aa_idx++){
@@ -266,7 +268,7 @@ void print_mods_parameter_file(ostream* param_file,
               mass, aa_str, max); 
       *param_file << buffer << endl << endl;
     } else { // nmod, cmod have the format mass:end_distance
-      int distance = aa_mod_get_max_distance(mod_list[mod_idx]);
+      int distance = mod_list[mod_idx]->getMaxDistance();
       char buffer[1024];
       sprintf(buffer, "%s%s=%.*f:%i", comments, name, precision, 
               mass, distance);
@@ -580,8 +582,8 @@ char* read_mass_change(AA_MOD_T* mod, char* line, char separator,
                        int& max_precision){
   //carp(CARP_DEBUG, "token points to %s", line);
 
-  aa_mod_set_mass_change(mod, atof(line));
-  if( aa_mod_get_mass_change(mod) == 0){
+  mod->setMassChange(atof(line));
+  if( mod->getMassChange() == 0){
     carp(CARP_FATAL, "The mass change is not valid for mod %s", line);
   }
   char* next = line;
@@ -619,7 +621,7 @@ char* read_mass_change(AA_MOD_T* mod, char* line, char separator,
 char* set_aa_list(AA_MOD_T* mod, char* line, char separator){
   carp(CARP_DETAILED_DEBUG, "token points to %s", line);
 
-  bool* aa_list = aa_mod_get_aa_list(mod);
+  bool* aa_list = mod->getAAList();
   while( *line != '\0' && *line != ':'){
     char aa = toupper( *line );
     carp(CARP_DETAILED_DEBUG, "aa is %c", aa);
@@ -653,8 +655,8 @@ char* read_max_per_peptide(AA_MOD_T* mod, char* line, char separator){
     carp(CARP_FATAL, "Missing maximum mods per peptide for mod %s", line);
   }
 
-  aa_mod_set_max_per_peptide(mod, atoi(line));
-  if( aa_mod_get_max_per_peptide(mod) == 0 ){
+  mod->setMaxPerPeptide(atoi(line));
+  if( mod->getMaxPerPeptide() == 0 ){
     carp(CARP_FATAL, "Maximum mods per peptide is invalid for mod %s", line);
   }
 
@@ -679,12 +681,12 @@ char* read_prevents_cleavage(AA_MOD_T* mod, char* line, char separator) {
     case 'T':
     case 't':
       carp(CARP_DEBUG, "prevents_cleavage set to true %s",line);
-      aa_mod_set_prevents_cleavage(mod, true);
+      mod->setPreventsCleavage(true);
       break;
     case 'F':
     case 'f':
       carp(CARP_DEBUG, "prevents_cleavage set to false %s", line);
-      aa_mod_set_prevents_cleavage(mod, false);
+      mod->setPreventsCleavage(false);
       break;
   }
 
@@ -709,12 +711,12 @@ char* read_prevents_xlink(AA_MOD_T* mod, char* line, char separator) {
     case 'T':
     case 't':
       carp(CARP_DEBUG, "prevents_xlink set to true %s",line);
-      aa_mod_set_prevents_xlink(mod, true);
+      mod->setPreventsXLink(true);
       break;
     case 'F':
     case 'f':
       carp(CARP_DEBUG, "prevents_xlink set to false %s",line);
-      aa_mod_set_prevents_xlink(mod, false);
+      mod->setPreventsXLink(false);
       break;
   }
 
@@ -742,7 +744,7 @@ void read_max_distance(AA_MOD_T* mod, char* line){
   if( max_distance == 0 && *line != '0' ){
     max_distance = MAX_PROTEIN_SEQ_LENGTH;
   }
-  aa_mod_set_max_distance(mod, max_distance);
+  mod->setMaxDistance(max_distance);
 
   return;
 }
@@ -818,13 +820,13 @@ int read_mods(
 
       // set all bools to true
       int i = 0;
-      bool* aa_list = aa_mod_get_aa_list(cur_mod);
+      bool* aa_list = cur_mod->getAAList();
       for(i=0; i<AA_LIST_LENGTH; i++){
         aa_list[i] = true;
       }
       // set type to c-/n-term and max to 1
-      aa_mod_set_position(cur_mod, position);
-      aa_mod_set_max_per_peptide(cur_mod, 1);
+      cur_mod->setPosition(position);
+      cur_mod->setMaxPerPeptide(1);
     }
 
     //  increment counter and get next mod
@@ -835,6 +837,175 @@ int read_mods(
   free(line);
   return cur_index;
 }
+
+
+void parse_modspec_line(
+  const std::string& line,
+  vector<AA_MOD_T*>& static_mods,
+  vector<AA_MOD_T*>& variable_mods,
+  MOD_POSITION_T position = ANY_POSITION
+  ) {
+
+  static_mods.clear();
+  variable_mods.clear();
+  if (line == "") {
+    return;
+  }
+  int pos = 0;
+  bool terminus = position != ANY_POSITION;
+  const char* spec_text = line.c_str();
+
+  while (true) {
+    char c;
+    int next_pos = -1;
+    sscanf(spec_text + pos, " %c%n", &c, &next_pos);
+    if (next_pos == -1) {
+      carp(CARP_FATAL, "Expected modification specification. %s %i", spec_text, pos);
+    }
+    pos += next_pos - 1;
+    unsigned int limit = 0;
+    if (c >= '1' && c <= '9') {
+      sscanf(spec_text + pos, "%u%n", &limit, &next_pos);
+      if (limit == UINT_MAX) {
+        carp(CARP_FATAL, "Limit too big. %s %i", spec_text, pos);
+      }
+      pos += next_pos;
+    }
+    int aa_len = -1, plus_pos = -1, delta_pos = -1, end_pos = -1;
+    if (!terminus)
+      sscanf(spec_text + pos, "%*[ACDEFGHIKLMNPQRSTVWY]%n%n%*[+-]%n%*[0-9.]%n",
+	     &aa_len, &plus_pos, &delta_pos, &end_pos);
+    else 
+      sscanf(spec_text + pos, "%*[ACDEFGHIKLMNPQRSTVWYX]%n%n%*[+-]%n%*[0-9.]%n",
+	     &aa_len, &plus_pos, &delta_pos, &end_pos);
+
+    if (aa_len == -1) {
+      carp(CARP_FATAL, "Expected amino acid symbol. %s %i", spec_text, pos);
+    }
+    assert(plus_pos != -1);
+    if (delta_pos == -1) {
+      carp(CARP_FATAL, "Expected '+' 'or' - and modification amount. %s %i", spec_text, pos + plus_pos);
+    }
+    if (end_pos == -1) {
+      carp(CARP_FATAL, "Expected modification amount. %s %i", spec_text, pos+delta_pos);
+    }
+    if ((limit == 0) && (aa_len != 1))
+      carp(CARP_FATAL, "Static modifications must be specified "
+		   "for one amino acid at a time. %s %i", spec_text, pos);
+    int confirm_end_pos = -1;
+    double delta;
+    sscanf(spec_text + pos + delta_pos, "%lg%n", &delta, &confirm_end_pos);
+    if (delta_pos + confirm_end_pos != end_pos) {
+      carp(CARP_FATAL, "Cannot parse modification amount. %s %i", spec_text, pos + delta_pos);
+    }
+    if (*(spec_text + pos + plus_pos) == '-') {
+      delta *= -1;
+    }
+    
+    AA_MOD_T *mod = new AA_MOD_T();
+    mod->setMaxPerPeptide(limit);
+    mod->setMassChange(delta);
+    mod->setAminoAcids(spec_text + pos, aa_len);
+    
+    bool prevents_xlink = false;
+    bool prevents_cleavage = false;
+    //* Optional prevents xlink, prevent cleavage.
+    //first T indicates prvents cleavage
+    pos += end_pos;
+    if (spec_text[pos] == ':') {
+      pos++;
+      if (spec_text[pos] == 'T') {
+        prevents_cleavage = true;
+      } else if (spec_text[pos] != 'F') {
+        carp(CARP_FATAL, "Cannot parse T|F for prevents cleavage %s %i", spec_text, pos);
+      }
+      pos++;
+    }
+    if (spec_text[pos] == ':') {
+      pos++;
+      if (spec_text[pos] == 'T') {
+        prevents_xlink = true;
+      } else if (spec_text[pos] != 'F') {
+        carp(CARP_FATAL, "Cannot parse T|F for prevents xlink %s %i", spec_text, pos);
+      }
+      pos++;
+    }
+    
+        
+    mod->setPosition(position);
+    mod->setPreventsXLink(prevents_xlink);
+    mod->setPreventsCleavage(prevents_cleavage);
+    mod->print();
+
+    if (limit == 0) {
+      static_mods.push_back(mod);
+    } else {
+      variable_mods.push_back(mod);
+    }
+      
+    if (spec_text[pos] == '\0') {
+      break;
+    }
+    if (spec_text[pos] == ',') {
+      ++pos;
+    }
+    
+  }
+}
+
+void set_modspec() {
+
+  vector<AA_MOD_T*> variable_mods;
+  vector<AA_MOD_T*> static_mods;
+  
+  parse_modspec_line(
+    Params::GetString("mods-spec"),
+    static_mods,
+    variable_mods
+  );
+
+  //Use the static mods as increases in the amino acid mass  
+  for (size_t idx=0;idx<static_mods.size();idx++) {
+    AA_MOD_T* static_mod = static_mods[idx];
+    double delta_mass = static_mod->getMassChange();
+    bool* aa_list = static_mod->getAAList();
+    for (int aa_idx=0;aa_idx < AA_LIST_LENGTH;aa_idx++) {
+      if (aa_list[aa_idx]) {
+        carp(CARP_DEBUG, "increasing %c by %lf", (aa_idx+'A'), delta_mass);
+        increase_amino_acid_mass(aa_idx+'A', delta_mass);
+      }
+    }
+  }
+  
+  vector<AA_MOD_T*> monolink_mods;
+  vector<AA_MOD_T*> static_mods2;
+  string mono_link_str = Params::GetString("mono-link");
+  parse_modspec_line(
+    mono_link_str,
+    static_mods2,
+    monolink_mods
+  );
+  if (static_mods2.size() != 0) {
+    carp(CARP_FATAL, "Cannot define monolink as a static mod:%s", mono_link_str.c_str());
+  }
+
+  for (size_t idx = 0;idx < monolink_mods.size();idx++) {
+    monolink_mods[idx]->setMonoLink(true);
+    variable_mods.push_back(monolink_mods[idx]);
+  }
+
+  carp(CARP_DEBUG, "Number of static:%d variable:%d", static_mods.size(), variable_mods.size());
+  
+  //Fill up expected list of modifications.
+  for (size_t idx=0;idx<variable_mods.size();idx++) {
+    list_of_mods[idx] = variable_mods[idx];
+    list_of_mods[idx]->setModIdx(idx);
+  }
+  
+  num_mods = variable_mods.size();
+  list_of_variable_mods = &(list_of_mods[0]);
+}
+
 
 /**
  * \brief Read the paramter file and populate the static parameter
@@ -932,8 +1103,8 @@ void incrementNumMods() {
 
 void resetMods() {
   for (int i = 0; i < MAX_AA_MODS; i++) {
-    free_aa_mod(list_of_mods[i]);
-    list_of_mods[i] = new_aa_mod(i);
+    delete list_of_mods[i];
+    list_of_mods[i] = new AA_MOD_T(i);
   }
   num_mods = 0;
 }

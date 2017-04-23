@@ -82,11 +82,7 @@ void LinearPeptide::addCandidates(
  * returns the candidate type, either a deadlink or a linear candidate
  */
 XLINKMATCH_TYPE_T LinearPeptide::getCandidateType() {
-  if (isModified()) {
-    return DEADLINK_CANDIDATE;
-  } else {
-    return LINEAR_CANDIDATE;
-  }
+  return LINEAR_CANDIDATE;
 }
 
 /**
