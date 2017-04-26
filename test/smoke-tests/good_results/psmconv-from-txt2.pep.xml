@@ -275,6 +275,7 @@
 <parameter name="use-old-xlink" value="true"/>
 <parameter name="xlink-score-method" value="composite"/>
 <parameter name="isotope-windows" value="0"/>
+<parameter name="mono-link" value=""/>
 <parameter name="xlink-top-n" value="250"/>
 <parameter name="require-xlink-candidate" value="false"/>
 <parameter name="xlink-include-linears" value="true"/>
