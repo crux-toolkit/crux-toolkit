@@ -181,7 +181,7 @@ string SearchForXLinks::getDescription() const {
  */
 vector<string> SearchForXLinks::getArgs() const {
   string arr[] = {
-    "ms2 file", 
+    "ms2 file+", 
     "protein fasta file", 
     "link sites", 
     "link mass"
@@ -232,6 +232,7 @@ vector<string> SearchForXLinks::getOptions() const {
     "use-x-ions",
     "use-y-ions",
     "use-z-ions",
+    "file-column",
     "max-ion-charge",
     "scan-number",
     "mz-bin-width",

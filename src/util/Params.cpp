@@ -68,7 +68,8 @@ Params::Params() : finalized_(false) {
   InitArgParam("index name",
     "The desired name of the binary index.");
   InitArgParam("ms2 file",
-    "File containing spectra to be searched.");
+    "The name of one or more files from which to parse the fragmentation "
+    "spectra, in any of the file formats supported by ProteoWizard.");
   /* psm-convert arguments */
   InitArgParam("input PSM file",
     "The name of a PSM file in tab-delimited text, SQT, pepXML or mzIdentML format");
