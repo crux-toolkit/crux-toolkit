@@ -213,6 +213,7 @@ vector<string> SearchForXLinks::getOptions() const {
     "cmod",
     "nmod",
     "max-mods",
+    "mod-precision",
     "enzyme",
     "custom-enzyme",
     "digestion",

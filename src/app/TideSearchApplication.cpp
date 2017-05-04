@@ -1107,6 +1107,7 @@ vector<string> TideSearchApplication::getOptions() const {
     "print-search-progress",
     "spectrum-parser",
     "use-z-line",
+    "mod-precision",
     "txt-output",
     "sqt-output",
     "pepxml-output",
