@@ -458,9 +458,11 @@ Params::Params() : finalized_(false) {
     "Available for generate-peptides.", true);
   InitIntParam("mod-precision", 2, 0, 20,//arbitrary
     "Set the precision for modifications as written to .txt files.",
-    "Also changes mods written to parameter file. Set internally based on "
-    "the max mod precision in the param file.",
-    false);
+    "Also changes mods written to parameter file. By default, this "
+    "value is set equal to the maximum modification precision in the "
+    "specification of modifications.  Available for "
+    "tide-index, tide-search, search-for-xlinks and generate-peptides.",
+    true);
 
   InitBoolParam("use-a-ions", false,
     "Consider a-ions in the search? Note that an a-ion is equivalent to a "

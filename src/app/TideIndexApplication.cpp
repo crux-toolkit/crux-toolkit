@@ -368,6 +368,7 @@ vector<string> TideIndexApplication::getOptions() const {
     "nterm-peptide-mods-spec",
     "max-mods",
     "min-mods",
+    "mod-precision",
     "output-dir",
     "overwrite",
     "peptide-list",
