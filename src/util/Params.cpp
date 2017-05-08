@@ -1838,6 +1838,7 @@ void Params::Categorize() {
   items.insert("min-mods");
   items.insert("max-mods");
   items.insert("mod");
+  items.insert("mod-precision");
   for (char c = 'A'; c <= 'Z'; c++) {
     items.insert(string(1, c));
   }
