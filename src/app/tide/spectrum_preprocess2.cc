@@ -710,6 +710,10 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   vector<int> ionMassBin;
   vector<double> ionIntens;
 
+  ionMass.push_back(MassConstants::mono_h);
+  ionMassBin.push_back(MassConstants::mass2bin(MassConstants::mono_h));
+  ionIntens.push_back(0.0);
+
   for(int ion=0 ; ion<ionMasses.size() ; ion++) {
     double tmpIonMass = ionMasses[ion];
     int binTmpIonMass = (int)floor(MassConstants::mass2bin(tmpIonMass));
@@ -718,6 +722,9 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
     ionMassBin.push_back(binTmpIonMass);
     ionIntens.push_back(ionIntensities[ion]);
   }
+  ionMass.push_back(precursorMass-MassConstants::mono_oh);
+  ionMassBin.push_back(MassConstants::mass2bin(precursorMass-MassConstants::mono_oh));
+  ionIntens.push_back(0.0);
 
   //find pairs of b ions in 1+ charge state
   for (int ion=0 ; ion<ionMasses.size() ; ion++) {
@@ -744,7 +751,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
           //determine rank intensity
           double rank1 = (double)loc1 / numSpecPeaks;
           double rank2 = (double)loc2 / numSpecPeaks;
-          double score = aaTolScore * std::max(rank1,rank2);
+          double score = aaTolScore * (rank1 + rank2);
 
           //add evidence to matrix
           //&&-1 since all mass bins are index 1 instead of index 0
@@ -762,6 +769,10 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   double yIonIntens;
 
   //find pairs of y ions in 1+ charge state
+  ionMass.push_back(MassConstants::mono_h);
+  ionMassBin.push_back(MassConstants::mass2bin(MassConstants::mono_h));
+  ionIntens.push_back(0.0);
+
   for(int ion=0 ; ion<ionMasses.size() ; ion++) {
     //convert to equivalent b ion masses for ease of processing
     double tmpIonMass = precursorMass - ionMasses[ion] + (2.0 * massHMono);
@@ -773,6 +784,10 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
 
     ionIntens.push_back(ionIntensities[ion]);
   }
+  ionMass.push_back(precursorMass-MassConstants::mono_oh);
+  ionMassBin.push_back(MassConstants::mass2bin(precursorMass-MassConstants::mono_oh));
+  ionIntens.push_back(0.0);
+
   reverse(ionMass.begin(),ionMass.end());
   reverse(ionMassBin.begin(), ionMassBin.end());
   reverse(ionIntens.begin(), ionIntens.end());
@@ -801,7 +816,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
           //determine rank intensity
           double rank1 = (double)loc1 / numSpecPeaks;
           double rank2 = (double)loc2 / numSpecPeaks;
-          double score = aaTolScore * std::max(rank1,rank2);
+          double score = aaTolScore * (rank1 + rank2);
 
           //add evidence to matrix
           //&&-1 since all mass bins are index 1 istead of index 0
@@ -815,6 +830,10 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   ionIntens.clear();
 
   //find pairs of b ions in 2+ charge state
+  ionMass.push_back(MassConstants::mono_h);
+  ionMassBin.push_back(MassConstants::mass2bin(MassConstants::mono_h));
+  ionIntens.push_back(0.0);
+
   for(int ion=0 ; ion<ionMasses.size() ; ion++) {
     double tmpIonMass = 2.0 * ionMasses[ion] - massHMono;
     int binTmpIonMass = (int)floor(MassConstants::mass2bin(tmpIonMass));
@@ -823,6 +842,9 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
     ionMassBin.push_back(binTmpIonMass);
     ionIntens.push_back(ionIntensities[ion]);
   }
+  ionMass.push_back(precursorMass-MassConstants::mono_oh);
+  ionMassBin.push_back(MassConstants::mass2bin(precursorMass-MassConstants::mono_oh));
+  ionIntens.push_back(0.0);
 
   for(int ion=0 ; ion<ionMasses.size() ; ion++) {
     bIonMass = ionMass[ion];
@@ -848,7 +870,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
           //determine rank intensity
           double rank1 = (double)loc1 / numSpecPeaks;
           double rank2 = (double)loc2 / numSpecPeaks;
-          double score = aaTolScore * std::max(rank1,rank2);
+          double score = aaTolScore * (rank1 + rank2);
 
           //add evidence to matrix
           //&&-1 since all mass bins are index 1 instead of index 0
@@ -862,6 +884,10 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   ionIntens.clear();
 
   //find pairs of y ions in 2+ charge state
+  ionMass.push_back(MassConstants::mono_h);
+  ionMassBin.push_back(MassConstants::mass2bin(MassConstants::mono_h));
+  ionIntens.push_back(0.0);
+
   for(int ion=0 ; ion<ionMasses.size() ; ion++) {
     double tmpIonMass = precursorMass - (2.0 * ionMasses[ion] - massHMono) + (2.0 * massHMono);
     int binTmpIonMass = (int)floor(MassConstants::mass2bin(tmpIonMass));
@@ -870,6 +896,10 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
     ionMassBin.push_back(binTmpIonMass);
     ionIntens.push_back(ionIntensities[ion]);
   }
+  ionMass.push_back(precursorMass-MassConstants::mono_oh);
+  ionMassBin.push_back(MassConstants::mass2bin(precursorMass-MassConstants::mono_oh));
+  ionIntens.push_back(0.0);
+
   reverse(ionMass.begin(), ionMass.end());
   reverse(ionMassBin.begin(),ionMassBin.end());
   reverse(ionIntens.begin(), ionIntens.end());
@@ -898,7 +928,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
           //determine rank intensity
           double rank1 = (double)loc1 / numSpecPeaks;
           double rank2 = (double)loc2 / numSpecPeaks;
-          double score = aaTolScore * std::max(rank1,rank2);
+          double score = aaTolScore * (rank1 + rank2);
 
           //add evidence to matrix
           //&&-1 since all mass bins are index 1 instead of index 0
