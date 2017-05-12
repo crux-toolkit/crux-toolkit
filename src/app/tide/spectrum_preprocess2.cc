@@ -727,7 +727,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
         double ionMassDiff = ionMass[i] - bIonMass;
         double aaTolScore = residueToleranceMass - std::abs(ionMassDiff - aaMass[curAaMass]);
 
-        if (aaTolScore >= 0) {
+        if (aaTolScore > 0) {
           //add evidence to matrix
           //&&-1 since all mass bins are index 1 istead of index 0
           residueEvidenceMatrix[curAaMass][newResMassBin-1] += aaTolScore;
@@ -770,7 +770,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
         double ionMassDiff = ionMass[i] - yIonMass;
         double aaTolScore = residueToleranceMass - std::abs(ionMassDiff - aaMass[curAaMass]);
 
-        if (aaTolScore >= 0) {
+        if (aaTolScore > 0) {
           //add evidence to matrix
           //&&-1 since all mass bins are index 1 istead of index 0
           residueEvidenceMatrix[curAaMass][newResMassBin-1] += aaTolScore;
@@ -806,7 +806,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
         double ionMassDiff = ionMass[i] - bIonMass;
         double aaTolScore = residueToleranceMass - std::abs(ionMassDiff - aaMass[curAaMass]);
 
-        if(aaTolScore >= 0) {
+        if(aaTolScore > 0) {
           //add evidence to matrix
           //&&-1 since all mass bins are index 1 instead of index 0
           
@@ -845,7 +845,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
         double ionMassDiff = ionMass[i] - yIonMass;
         double aaTolScore = residueToleranceMass - std::abs(ionMassDiff - aaMass[curAaMass]);
 
-        if (aaTolScore >= 0) {
+        if (aaTolScore > 0) {
           //add evidence to matrix
           //&&-1 since all mass bins are index 1 instead of index 0
           residueEvidenceMatrix[curAaMass][newResMassBin-1] += aaTolScore;
