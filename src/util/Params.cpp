@@ -421,13 +421,13 @@ Params::Params() : finalized_(false) {
     "Available for search-for-xlinks.", true);
   InitStringParam("cmod", "NO MODS",
     "Specify a variable modification to apply to C-terminus of peptides. " 
-    "[[html:&gt;mass change&gt;:&lt;max distance from protein c-term (-1 for no max)&gt;]]. "
+    "[[html:&lt;mass change&gt;:&lt;max distance from protein c-term (-1 for no max)&gt;]]. "
     "Note that this parameter only takes effect when specified in the "
     "parameter file.",
     "Available for search-for-xlinks.", true);
   InitStringParam("nmod", "NO MODS",
     "Specify a variable modification to apply to N-terminus of peptides.  " 
-    "[[html:&gt;mass change&gt;:&lt;max distance from protein c-term (-1 for no max)&gt;]]. "
+    "[[html:&lt;mass change&gt;:&lt;max distance from protein c-term (-1 for no max)&gt;]]. "
     "Note that this parameter only takes effect when specified in the "
     "parameter file.",
     "Available for search-for-xlinks.", true);
@@ -725,8 +725,13 @@ Params::Params() : finalized_(false) {
     "style=\"color: blue;\">57.02146</span> specifies a static modification of 57.02146 "
     "Da to cysteine. Note that Tide allows at most one modification per amino "
     "acid.  Also, the default modification (C+57.02146) will be added to "
-    "every mods-spec string unless an explicit C+0 is included.]]",
-    "Available for tide-index", true);
+    "every mods-spec string unless an explicit C+0 is included. "
+    "Also note that search-for-xlinks allows two optional Boolean parameters "
+    "with each modification, indicating whether the modification will (1) prevent "
+    "enzymatic cleavage at its site, and (2) prevent cross-linking. "
+    "These are specified like \"K+156.0786:T:T\".  "
+    "By default, both of these Booleans are set to false.]]",
+    "Available for tide-index and search-for-xlinks.", true);
   InitStringParam("nterm-peptide-mods-spec", "",
     "[[nohtml:Specifies N-terminal static and variable mass modifications on peptides. "
     "Specify a comma-separated list of N-terminal modification sequences of the form: "
@@ -1371,7 +1376,7 @@ Params::Params() : finalized_(false) {
     "code is run. The new version supports variable modifications and can handle more "
     "complex databases. This new code is still in development and should be considered a "
     "beta release.",
-    "Available for search-for-xlinks program.", true);
+    "Available for search-for-xlinks.", true);
   // **** xlink-score-spectrum options ****
   InitStringParam("xlink-score-method", "composite", "composite|modification|concatenated",
     "Score method for xlink {composite, modification, concatenated}.",
@@ -1383,50 +1388,52 @@ Params::Params() : finalized_(false) {
     "+/- window, and (3) precursor_mass + neutron_mass +/- window. The window size is defined "
     "from the precursor-window and precursor-window-type parameters. This option is only "
     "available when use-old-xlink=F.",
-    "Used for crux search-for-xlinks", true);
+    "Available for search-for-xlinks", true);
 
   InitStringParam("mono-link", "",
     "Provides a list of amino acids and their mass modifications to consider as candidate for "
-    "mono-/dead- links.  Format is the same as mods-spec",
-    "Available for crux search-for-xlinks (new code)",
+    "mono-/dead- links.  Format is the same as mods-spec.",
+    "Available for search-for-xlinks (new code)",
     true);
     
   InitIntParam("xlink-top-n", 250, 0, BILLION,
-               "Top-n open-mod peptides to consider in the second pass, value of 0 will search all candiates.",
-               "Available for crux search-for-xlinks",
+               "Specify the number of open-mod peptides to consider in the second pass. "
+               "A value of 0 will search all candiates.",
+               "Available for search-for-xlinks",
                true);
 
   InitBoolParam("xlink-print-db", false,
-    "Prints out the generated database of xlink products to the file xlink_peptides.txt in "
+    "Prints the generated database of xlink products to the file xlink_peptides.txt in "
     "the output directory.",
-    "Used for testing the candidate generatation.", false);
+    "Available for search-for-xlinks.", false);
   InitBoolParam("require-xlink-candidate", false,
      "If there is no cross-link candidate found, then don't bother looking for linear, "
      "self-loop, and dead-link candidates.",
-     "Available for crux search-for-xlinks program.", true);
+     "Available for search-for-xlinks.", true);
   
   InitBoolParam("xlink-use-ion-cache", false,
-		"Use an ion cache for the xlinkable peptides",
-		"May not be scalable for large databases", false);
+		"Use an ion cache for the xlinkable peptides.  "
+                "May not be scalable for large databases.",
+		"Available for search-for-xlinks.", false);
 
   InitBoolParam("xlink-include-linears", true, 
     "Include linear peptides in the search.",
-    "Available for crux search-for-xlinks program.", true);
+    "Available for search-for-xlinks.", true);
   InitBoolParam("xlink-include-deadends", true, 
     "Include dead-end peptides in the search.",
-    "Available for crux search-for-xlinks program.", true);
+    "Available for search-for-xlinks.", true);
   InitBoolParam("xlink-include-selfloops", true, 
     "Include self-loop peptides in the search.",
-    "Available for crux search-for-xlinks program.", true);
+    "Available for search-for-xlinks.", true);
   InitBoolParam("xlink-include-intra", true,
     "Include intra-protein cross-link candiates within the search.",
-    "Available for crux search-for-xlinks program.", true);
+    "Available for search-for-xlinks.", true);
   InitBoolParam("xlink-include-inter", true,
     "Include inter-protein cross-link candidates within the search.",
-    "Available for crux search-for-xlinks program.", true);
+    "Available for search-for-xlinks.", true);
   InitBoolParam("xlink-include-inter-intra", true,
     "Include crosslink candidates that are both inter and intra.",
-    "Available for crux search-for-xlinks program.", true);
+    "Available for search-for-xlinks.", true);
   InitStringParam("xlink-prevents-cleavage", "K",
     "List of amino acids for which the cross-linker can prevent cleavage. This option is "
     "only available when use-old-xlink=F.",
@@ -1838,6 +1845,8 @@ void Params::Categorize() {
   items.insert("min-mods");
   items.insert("max-mods");
   items.insert("mod");
+  items.insert("cmod");
+  items.insert("nmod");
   items.insert("mod-precision");
   for (char c = 'A'; c <= 'Z'; c++) {
     items.insert(string(1, c));
@@ -1932,6 +1941,7 @@ void Params::Categorize() {
   items.insert("xlink-include-selfloops");
   items.insert("xlink-prevents-cleavage");
   items.insert("max-xlink-mods");
+  items.insert("mono-link");
   AddCategory("Cross-linking parameters", items);
 
   items.clear();
