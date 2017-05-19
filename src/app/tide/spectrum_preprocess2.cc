@@ -736,6 +736,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
 
       //Find all ion mass bins that match newResMassBin
       int index = find(ionMassBin.begin(), ionMassBin.end(),newResMassBin) - ionMassBin.begin();
+      double score = 0.0;
       for(int i = index ; i<ionMasses.size() ; i++) {
         if (newResMassBin != ionMassBin[i])
           continue;
@@ -743,7 +744,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
         double ionMassDiff = ionMass[i] - bIonMass;
         double aaTolScore = residueToleranceMass - std::abs(ionMassDiff - aaMass[curAaMass]);
 
-        if (aaTolScore >= 0) {
+        if (aaTolScore > 0) {
           //find where intensities are in sorted vector
           int loc1 = std::find(ionIntensitiesSort.begin(), ionIntensitiesSort.end(), ionIntens[ion]) - ionIntensitiesSort.begin();
           int loc2 = std::find(ionIntensitiesSort.begin(), ionIntensitiesSort.end(), ionIntens[i]) - ionIntensitiesSort.begin();
@@ -751,13 +752,16 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
           //determine rank intensity
           double rank1 = (double)loc1 / numSpecPeaks;
           double rank2 = (double)loc2 / numSpecPeaks;
-          double score = aaTolScore * (rank1 + rank2);
+          double tmpScore = aaTolScore * (rank1 + rank2);
 
-          //add evidence to matrix
-          //&&-1 since all mass bins are index 1 instead of index 0
-          residueEvidenceMatrix[curAaMass][newResMassBin-1] += score;
+          if (tmpScore > score) {
+            score = tmpScore; 
+          }
         }
       }
+      //add evidence to matrix
+      //&&-1 since all mass bins are index 1 instead of index 0
+      residueEvidenceMatrix[curAaMass][newResMassBin-1] += score;
     }
   }
   ionMass.clear();
@@ -801,6 +805,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
  
       //Find all ion mass bins that match newResMassBin
       int index = find(ionMassBin.begin(),ionMassBin.end(),newResMassBin) - ionMassBin.begin();
+      double score = 0.0;
       for(int i=index ; i<ionMasses.size() ; i++) {
         if (newResMassBin != ionMassBin[i])
           continue;
@@ -808,7 +813,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
         double ionMassDiff = ionMass[i] - yIonMass;
         double aaTolScore = residueToleranceMass - std::abs(ionMassDiff - aaMass[curAaMass]);
 
-        if (aaTolScore >= 0) {
+        if (aaTolScore > 0) {
           //find where intensities are in sorted vector
           int loc1 = std::find(ionIntensitiesSort.begin(), ionIntensitiesSort.end(), ionIntens[ion]) - ionIntensitiesSort.begin();
           int loc2 = std::find(ionIntensitiesSort.begin(), ionIntensitiesSort.end(), ionIntens[i]) - ionIntensitiesSort.begin();
@@ -816,12 +821,15 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
           //determine rank intensity
           double rank1 = (double)loc1 / numSpecPeaks;
           double rank2 = (double)loc2 / numSpecPeaks;
-          double score = aaTolScore * (rank1 + rank2);
+          double tmpScore = aaTolScore * (rank1 + rank2);
 
-          //add evidence to matrix
-          //&&-1 since all mass bins are index 1 istead of index 0
-          residueEvidenceMatrix[curAaMass][newResMassBin-1] += score;
+          if (tmpScore > score) {
+             score = tmpScore;
+          }
         }
+        //add evidence to matrix
+        //&&-1 since all mass bins are index 1 istead of index 0
+        residueEvidenceMatrix[curAaMass][newResMassBin-1] += score;
       }
     }
   }
@@ -855,6 +863,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
       
       //Find all ion mass bins that match newResMassBin
       int index = find(ionMassBin.begin(),ionMassBin.end(),newResMassBin) - ionMassBin.begin();
+      double score = 0.0;
       for(int i=index ; i<ionMasses.size() ; i++) {
         if (newResMassBin != ionMassBin[i])
           continue;
@@ -862,7 +871,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
         double ionMassDiff = ionMass[i] - bIonMass;
         double aaTolScore = residueToleranceMass - std::abs(ionMassDiff - aaMass[curAaMass]);
 
-        if(aaTolScore >= 0) {
+        if(aaTolScore > 0) {
           //find where intensities are in sorted vector
           int loc1 = std::find(ionIntensitiesSort.begin(), ionIntensitiesSort.end(), ionIntens[ion]) - ionIntensitiesSort.begin();
           int loc2 = std::find(ionIntensitiesSort.begin(), ionIntensitiesSort.end(), ionIntens[i]) - ionIntensitiesSort.begin();
@@ -870,12 +879,15 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
           //determine rank intensity
           double rank1 = (double)loc1 / numSpecPeaks;
           double rank2 = (double)loc2 / numSpecPeaks;
-          double score = aaTolScore * (rank1 + rank2);
-
-          //add evidence to matrix
-          //&&-1 since all mass bins are index 1 instead of index 0
-          residueEvidenceMatrix[curAaMass][newResMassBin-1] += score;
+          double tmpScore = aaTolScore * (rank1 + rank2);
+          
+          if (tmpScore > score) {
+            score = tmpScore;
+          }
         }
+        //add evidence to matrix
+        //&&-1 since all mass bins are index 1 instead of index 0
+        residueEvidenceMatrix[curAaMass][newResMassBin-1] += score;
       }
     }
   }
@@ -913,6 +925,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
  
       //Find all ion mass bins that match newResMassBin
       int index = find(ionMassBin.begin(), ionMassBin.end(), newResMassBin) - ionMassBin.begin();
+      double score = 0.0;
       for(int i=index ; i<ionMasses.size() ; i++) {
         if(newResMassBin != ionMassBin[i])
           continue;
@@ -920,7 +933,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
         double ionMassDiff = ionMass[i] - yIonMass;
         double aaTolScore = residueToleranceMass - std::abs(ionMassDiff - aaMass[curAaMass]);
 
-        if (aaTolScore >= 0) {
+        if (aaTolScore > 0) {
           //find where intensities are in sorted vector
           int loc1 = std::find(ionIntensitiesSort.begin(), ionIntensitiesSort.end(), ionIntens[ion]) - ionIntensitiesSort.begin();
           int loc2 = std::find(ionIntensitiesSort.begin(), ionIntensitiesSort.end(), ionIntens[i]) - ionIntensitiesSort.begin();
@@ -928,12 +941,15 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
           //determine rank intensity
           double rank1 = (double)loc1 / numSpecPeaks;
           double rank2 = (double)loc2 / numSpecPeaks;
-          double score = aaTolScore * (rank1 + rank2);
+          double tmpScore = aaTolScore * (rank1 + rank2);
 
-          //add evidence to matrix
-          //&&-1 since all mass bins are index 1 instead of index 0
-          residueEvidenceMatrix[curAaMass][newResMassBin-1] += score;
+          if (tmpScore > score) {
+            score = tmpScore;
+          }
         }
+        //add evidence to matrix
+        //&&-1 since all mass bins are index 1 instead of index 0
+        residueEvidenceMatrix[curAaMass][newResMassBin-1] += score;
       }
     }
   }
