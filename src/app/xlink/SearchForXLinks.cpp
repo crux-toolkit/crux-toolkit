@@ -96,13 +96,13 @@ string SearchForXLinks::getDescription() const {
     "    <td>BS2</td></td>"
     "    <td>96.0211296</td>"
     "    <td>K,nterm:K,nterm</td>"
-    "    <td>--mod 114.0316942,113.0476524:K,nterm:1:T:T</td>"
+    "    <td>--mono-link 1K+114.0316942:T:T,1K+113.0476524:T:T</td>"
     "  </tr>"
     "  <tr>"
     "    <td>BS3</td>"
     "    <td>138.0680742</td>"
     "    <td>K,nterm:K,nterm</td>"
-    "    <td>--mod 156.0786,155.0946278:K,nterm:1:T:T</td>"
+    "    <td>--mono-link 1K+156.0786:T:T,1K+155.0946278:T:T</td>"
     "  </tr>"
     /* Need to find out the right parameters for SDA.
     "  <tr>"
@@ -116,25 +116,25 @@ string SearchForXLinks::getDescription() const {
     "    <td>DSS</td>"
     "    <td>138.0680796</td>"
     "    <td>K,nterm:K,nterm</td>"
-    "    <td>--mod 156.0786,155.0946278:K,nterm:1:T:T</td>"
+    "    <td>--mono-link 1K+156.0786:T:T,1K+155.0946278</td>"
     "  </tr>"
     "  <tr>"
     "    <td>AMAS</td>"
     "    <td>137.011</td>"
     "    <td>K,nterm:C</td>"
-    "    <td>--mod 155.02156:K,nterm,C:1:T:T</td>"
+    "    <td>--mono-link 1KC+155.02156:T:T</td>"
     "  </tr>"
     "  <tr>"
     "    <td>GMBS</td>"
     "    <td>165.0422</td>"
     "    <td>K,nterm:C</td>"
-    "    <td>--mod 183.05276:K,nterm,C:1:T:T</td>"
+    "    <td>--mono-link 1KC+183.05276:T:T</td>"
     "  </tr>"
     "  <tr>"
     "    <td>formaldehyde</td>"
     "    <td>9.98435</td>"
     "    <td>K,W,nterm:H,N,Y,K,W,R,nterm</td>"
-    "    <td>--mod 12.0,30.010565:K,W,nterm:1:T:T</td>"
+    "    <td>--mono-link 1KW+12.0:T:T,1KW+30.010565:T:T</td>"
     "  </tr>"
     "</table>"
 
@@ -209,10 +209,11 @@ vector<string> SearchForXLinks::getOptions() const {
     "max-mass",
     "min-length",
     "max-length",
-    "mod",
+    "mods-spec",
     "cmod",
     "nmod",
     "max-mods",
+    "mono-link",
     "mod-precision",
     "enzyme",
     "custom-enzyme",
@@ -254,27 +255,7 @@ vector<string> SearchForXLinks::getOptions() const {
     "output-dir",
     "overwrite",
     "parameter-file",
-    "verbosity",
-    "A",
-    "C",
-    "D",
-    "E",
-    "F",
-    "G",
-    "H",
-    "I",
-    "K",
-    "L",
-    "M",
-    "N",
-    "P",
-    "Q",
-    "R",
-    "S",
-    "T",
-    "V",
-    "W",
-    "Y",
+    "verbosity"
   };
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }
