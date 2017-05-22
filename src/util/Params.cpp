@@ -1055,11 +1055,37 @@ Params::Params() : finalized_(false) {
     "For iTRAQ/TMT type data; will clear out all peaks in the specified m/z range.",
     "Available for comet.", true);
   /* Comet - Variable modifications */
-  for (int i = 1; i <= 9; i++) {
+  InitStringParam("variable_mod01", "0.0 null 0 4 -1 0 0",
+                  "Up to 9 variable modifications are supported. Each modification "
+                  "is specified using seven entries: "
+                  "\"[[html:&lt;mass&gt;]][[nohtml:<mass>]] "
+                  "[[html:&lt;residues&gt;]][[nohtml:<residues>]] "
+                  "[[html:&lt;type&gt;]][[nohtml:<type>]] "
+                  "[[html:&lt;max&gt;]][[nohtml:<max>]] "
+                  "[[html:&lt;terminus&gt;]][[nohtml:<terminus>]] "
+                  "[[html:&lt;distance&gt;]][[nohtml:<distance>]] "
+                  "[[html:&lt;force&gt;]][[nohtml:<force>]].\" "
+                  "Type is 0 for static mods and non-zero for variable mods. "
+                  "Note that that if you set the same type value on multiple "
+                  "modification entries, Comet will treat those variable modifications "
+                  "as a binary set. This means that all modifiable residues in the "
+                  "binary set must be unmodified or modified. Multiple binary sets "
+                  "can be specified by setting a different binary modification value. "
+                  "Max is an integer specifying the maximum number of modified "
+                  "residues possible in a peptide for this modification entry. "
+                  "Distance specifies the distance the modification is applied to "
+                  "from the respective terminus: -1 = no distance contraint; "
+                  "0 = only applies to terminal residue; N = only applies to "
+                  "terminal residue through next N residues. "
+                  "Terminus specifies which terminus the distance constraint is "
+                  "applied to: 0 = protein N-terminus; 1 = protein C-terminus; "
+                  "2 = peptide N-terminus; 3 = peptide C-terminus."
+                  "Force specifies whether peptides must contain this modification: "
+                  "0 = not forced to be present; 1 = modification is required.",
+                  "Available for comet.", true);
+  for (int i = 2; i <= 9; i++) {
     InitStringParam("variable_mod0" + StringUtils::ToString(i), "0.0 null 0 4 -1 0 0",
-                    "Up to 9 variable modifications are supported; format: "
-                    "\"<mass> <residues> <0=variable/1=binary> <max mods per a peptide>\" "
-                    "e.g. 79.966331 STY 0 3.",
+                    "See syntax for variable_mod01.",
                     "Available for comet.", true);
   }
   InitIntParam("max_variable_mods_in_peptide", 5, 0, BILLION,
