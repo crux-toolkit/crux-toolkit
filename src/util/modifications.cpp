@@ -162,41 +162,49 @@ uint16_t mod_id_masks[MAX_AA_MODS] = {
  * according to index.  
  * \returns A heap allocated AA_MOD with default values.
  */
-AA_MOD_T* new_aa_mod(int mod_idx) {
-
+AA_MOD_T::AA_MOD_T(int mod_idx) {
   assert(mod_idx > -1 && mod_idx < MAX_AA_MODS );
 
-  AA_MOD_T* mod = (AA_MOD_T*)mymalloc(sizeof(AA_MOD_T));
-
-  mod->mass_change = 0;
-  mod->max_per_peptide = 0;
-  mod->position = ANY_POSITION;
-  mod->max_distance = MAX_PROTEIN_SEQ_LENGTH;
-  mod->symbol = mod_sqt_symbols[mod_idx];
-  mod->identifier = mod_id_masks[mod_idx];
-  mod->prevents_cleavage = false;
-  mod->prevents_xlink = false;
-  // allocate the aa lists for mods 
-  /*
-  mod->aa_list =                        // all 0's?
-    (bool*)mycalloc(AA_LIST_LENGTH, sizeof(bool)); 
-  */
+  mass_change_ = 0;
+  max_per_peptide_ = 0;
+  position_ = ANY_POSITION;
+  max_distance_ = MAX_PROTEIN_SEQ_LENGTH;
+  symbol_ = mod_sqt_symbols[mod_idx];
+  identifier_ = mod_id_masks[mod_idx];
+  prevents_cleavage_ = false;
+  prevents_xlink_ = false;
+  mono_link_ = false;
   // initialize to false
-  int aa_idx = 0;
-  for (aa_idx = 0; aa_idx < AA_LIST_LENGTH; aa_idx++) {
-    mod->aa_list[aa_idx] = false;
+  for (int aa_idx = 0; aa_idx < AA_LIST_LENGTH; aa_idx++) {
+    aa_list_[aa_idx] = false;
   }
-  return mod;
 }
 
 /**
  * \brief Free the memory for an AA_MOD including the aa_list.
  */
-void free_aa_mod(AA_MOD_T* mod) {
-  if (mod) {
-    //if( mod->aa_list ) {free(mod->aa_list);}
-    free(mod);
-  }
+AA_MOD_T::~AA_MOD_T() {
+  ;
+}
+
+/**
+ * Set bitmask id
+ */
+void AA_MOD_T::setModIdx(int mod_idx) {
+  assert(mod_idx > -1 && mod_idx < MAX_AA_MODS );
+  identifier_ = mod_id_masks[mod_idx];
+  symbol_ = mod_sqt_symbols[mod_idx];
+}
+  
+/**
+ * \returns bitmask id
+ */
+int AA_MOD_T::getIdentifier() {
+  return(identifier_);
+}
+
+void AA_MOD_T::setIdentifier(int identifier) {
+  identifier_ = identifier;
 }
 
 /**
@@ -232,7 +240,7 @@ char* modified_aa_to_string_with_symbols(MODIFIED_AA_T aa) {
   AA_MOD_T** mod_list = NULL;
   int total_mods = get_all_aa_mod_list(&mod_list);
   for (int mod_idx = 0; mod_idx < total_mods; mod_idx++) {
-    if (is_aa_modified(aa, mod_list[mod_idx])) {
+    if (mod_list[mod_idx]->isModified(aa)) {
       modified_by++;
     }
   }
@@ -242,8 +250,8 @@ char* modified_aa_to_string_with_symbols(MODIFIED_AA_T aa) {
   return_string[return_idx] = modified_aa_to_char(aa);
   return_idx++;
   for (int mod_idx = 0; mod_idx < total_mods; mod_idx++) {
-    if (is_aa_modified(aa, mod_list[mod_idx])) {
-      return_string[return_idx] = aa_mod_get_symbol(mod_list[mod_idx]);
+    if (mod_list[mod_idx]->isModified(aa)) {
+      return_string[return_idx] = mod_list[mod_idx]->getSymbol();
       return_idx++;
     }
   }
@@ -270,7 +278,7 @@ char* modified_aa_to_string_with_masses(MODIFIED_AA_T aa,
   AA_MOD_T** mod_list = NULL;
   int total_mods = get_all_aa_mod_list(&mod_list);
   for (int mod_idx = 0; mod_idx < total_mods; mod_idx++) {
-    if (is_aa_modified(aa, mod_list[mod_idx])) {
+    if (mod_list[mod_idx]->isModified(aa)) {
       modified_by++;
     }
   }
@@ -294,13 +302,13 @@ char* modified_aa_to_string_with_masses(MODIFIED_AA_T aa,
   } else {
 
     for (int mod_idx = 0; mod_idx < total_mods; mod_idx++) {
-      if (is_aa_modified(aa, mod_list[mod_idx])) {
+      if (mod_list[mod_idx]->isModified(aa)) {
         // either add to the sum or to the string
         if (mass_format == MOD_MASS_ONLY) {
-          summed_masses += aa_mod_get_mass_change(mod_list[mod_idx]);
+          summed_masses += mod_list[mod_idx]->getMassChange();
         } else {
           sprintf(mass_string_ptr, "%.*f,", precision,
-                  aa_mod_get_mass_change(mod_list[mod_idx]));
+                  mod_list[mod_idx]->getMassChange());
           mass_string_ptr += strlen(mass_string_ptr);
         }
       }
@@ -354,7 +362,7 @@ char* modified_aa_string_to_string_with_masses(
   for (int mod_str_idx = 0; mod_str_idx < length; mod_str_idx++) {
     // check each mod in list
     for(int global_idx = 0; global_idx < mod_list_length; global_idx++) {
-      if (is_aa_modified(aa_string[mod_str_idx], global_mod_list[global_idx])) {
+      if (global_mod_list[global_idx]->isModified(aa_string[mod_str_idx])) {
         count++;  // count all mods
       }
     }
@@ -404,7 +412,7 @@ char* modified_aa_string_to_string_with_symbols(
   for (mod_str_idx = 0; mod_str_idx < length; mod_str_idx++) {
     count++;      // count the aas
     for (global_idx = 0; global_idx < mod_list_length; global_idx++) {
-      if (is_aa_modified(aa_string[mod_str_idx], global_mod_list[global_idx])) {
+      if (global_mod_list[global_idx]->isModified(aa_string[mod_str_idx])) {
         count++;  // count all mods
       }
     }
@@ -530,7 +538,7 @@ int convert_to_mod_aa_seq(const string& sequence,
            "<%s> at position %d.", csequence, seq_idx - 1);
     } else {
       // apply modification
-      modify_aa(&new_sequence[mod_idx-1], aa_mod);
+      aa_mod->modify(&new_sequence[mod_idx-1]);
     }
   } // next character in given sequence
 
@@ -644,8 +652,8 @@ bool modified_aa_seq_is_palindrome(MODIFIED_AA_T* seq, int length) {
 }
 
 // FIXME: implement this
-bool is_aa_modified(MODIFIED_AA_T aa, AA_MOD_T* mod) {
-  return (aa & mod->identifier) != 0;
+bool AA_MOD_T::isModified(MODIFIED_AA_T aa) {
+  return (aa & identifier_) != 0;
 }
 
 /**
@@ -657,15 +665,14 @@ bool is_aa_modified(MODIFIED_AA_T aa, AA_MOD_T* mod) {
  * mod.  
  * \returns true if it can be modified, else false
  */
-bool is_aa_modifiable(
-  MODIFIED_AA_T aa, ///< The sequence amino acid to be modified
-  AA_MOD_T* mod) {   ///< The aa_mod to modify it with
+bool AA_MOD_T::isModifiable(
+  MODIFIED_AA_T aa ///< The sequence amino acid to be modified
+  ) { 
 
-  if (is_aa_modified(aa, mod)) {
+  if (isModified(aa)) {
     return false;
   }
-  if (mod->aa_list[(int)modified_aa_to_char(aa) - 'A']) {
-  //if (mod->aa_list[(int)modified_aa_to_char(aa)] && !is_aa_modified(aa, mod)) {
+  if (aa_list_[(int)modified_aa_to_char(aa) - 'A']) {
     return true;
   }
   // else not in list or already modified by this mod
@@ -678,12 +685,12 @@ bool is_aa_modifiable(
  * Assumes that the aa is modifiable, no explicit check.  If the aa is
  * already modified for the mod, no change to aa.
  */
-void modify_aa(MODIFIED_AA_T* aa, const AA_MOD_T* mod) {
-  if (aa == NULL || mod == NULL) {
-    carp(CARP_ERROR, "Cannot modify aa.  Either aa or mod is NULL.");
+void AA_MOD_T::modify(MODIFIED_AA_T* aa) const {
+  if (aa == NULL) {
+    carp(CARP_ERROR, "Cannot modify aa.  aa is NULL.");
     return;
   }
-  *aa = *aa | mod->identifier;
+  *aa = *aa | identifier_;
 }
 
 /**
@@ -696,7 +703,7 @@ const AA_MOD_T* get_aa_mod_from_symbol(const char symbol) {
   int total_mods = get_all_aa_mod_list(&mod_list);
   for (int mod_idx = 0; mod_idx < total_mods; mod_idx++) {
     AA_MOD_T* cur_mod = mod_list[mod_idx];
-    if (cur_mod->symbol == symbol) {
+    if (cur_mod->getSymbol() == symbol) {
       return cur_mod;
     }
   }
@@ -718,7 +725,7 @@ FLOAT_T get_mod_mass_from_symbol(const char symbol) {
     return 0;
   }
 
-  return aa_mod_get_mass_change(mod);
+  return mod->getMassChange();
 }
 
 // a temporary AA_MOD_T with identifier and mass for (potentially)
@@ -745,32 +752,40 @@ const AA_MOD_T* get_aa_mod_from_mass(FLOAT_T mass) {
     carp(CARP_INFO, "Creating modification for %f", mass);
     AA_MOD_T** mods = NULL;
     int num_mods = get_all_aa_mod_list(&mods);
-    mods[num_mods]->mass_change = mass;
+    mods[num_mods]->setMassChange(mass);
     incrementNumMods(); 
     initialize_aa_mod_combinations_array();
     return get_aa_mod_from_mass(mass);
   } else {
     // set multi_mod_identifier to that id and mass
-    multi_mod.identifier = id;
+    multi_mod.setIdentifier(id);
   }
-  multi_mod.mass_change = mass;
-  carp(CARP_DETAILED_DEBUG, "Returning %i %f", multi_mod.identifier, multi_mod.mass_change);
+  multi_mod.setMassChange(mass);
   return &multi_mod;
 }
 
 /**
  * print all fields in aa mod.  For debugging
  */
-void print_a_mod(AA_MOD_T* mod) {
+void AA_MOD_T::print() {
   printf("AMOD: mass %.2f, max per %d, max dist %d, symb %c, aa list ",
-         mod->mass_change, mod->max_per_peptide, mod->max_distance,
-         mod->symbol);
+         mass_change_, max_per_peptide_, max_distance_,
+         symbol_);
 
   int i = 0;
   for (i = 0; i < AA_LIST_LENGTH; i++) {
-    if (mod->aa_list[i]) {
+    if (aa_list_[i]) {
       printf("%c", (i + 'A'));
     }
+  }
+  if (prevents_xlink_) {
+    printf(" prevents-xlink");
+  }
+  if (prevents_cleavage_) {
+    printf(" prevents-cleavage");
+  }
+  if (mono_link_) {
+    printf(" mono");
   }
   printf("\n");
 }
@@ -779,7 +794,7 @@ void print_a_mod(AA_MOD_T* mod) {
  * \brief Generates a string representation of an aa_mod and returns a
  * pointer to that newly allocated string.
  */
-char* aa_mod_to_string(const AA_MOD_T* mod) {
+char* AA_MOD_T::toCString() {
   const char* format_str = 
     "mass change=%.2f, symbol=%c, max=%d, position=%s, apply to ";
   char* return_str = (char*)mycalloc( strlen(format_str) + 50, sizeof(char));
@@ -788,24 +803,24 @@ char* aa_mod_to_string(const AA_MOD_T* mod) {
   // get position info
   const char* pos_format = "%c-term most %d from end";
   char* pos_buffer = (char*)mycalloc(strlen(pos_format) + 9, sizeof(char));
-  switch (mod->position) {
+  switch (position_) {
   case ANY_POSITION:
     strcpy(pos_buffer, "any");
     break;
   case C_TERM:
-    sprintf(pos_buffer, pos_format, 'C', mod->max_distance);
+    sprintf(pos_buffer, pos_format, 'C', max_distance_);
     break;
   case N_TERM:
-    sprintf(pos_buffer, pos_format, 'N', mod->max_distance);
+    sprintf(pos_buffer, pos_format, 'N', max_distance_);
     break;
   }
-  int length = sprintf(return_str, format_str, mod->mass_change, 
-                       mod->symbol, mod->max_per_peptide, pos_buffer);
+  int length = sprintf(return_str, format_str, mass_change_, 
+                       symbol_, max_per_peptide_, pos_buffer);
 
   char* str_ptr = return_str + length;
   int i = 0;
   for (i = 0; i < AA_LIST_LENGTH; i++) {
-    if (mod->aa_list[i]) {
+    if (aa_list_[i]) {
       sprintf(str_ptr, "%c", (i + 'A'));
       str_ptr++;
     }
@@ -820,24 +835,24 @@ char* aa_mod_to_string(const AA_MOD_T* mod) {
  * \brief Set the symbol used by this modification.
  * \returns void
  */
-void aa_mod_set_symbol(AA_MOD_T* mod, char symbol) {
-  mod->symbol = symbol;
+void AA_MOD_T::setSymbol(char symbol) {
+  symbol_ = symbol;
 }
 
 /**
  * \brief Set the mass change caused by this modification.
  * \returns void
  */
-void aa_mod_set_mass_change(AA_MOD_T* mod, double mass_change) {
-  mod->mass_change = mass_change;
+void AA_MOD_T::setMassChange(double mass_change) {
+  mass_change_ = mass_change;
 }
 
 /**
  * \brief Get the mass change caused by this modification.
  * \returns The mass change caused by this modification.
  */
-double aa_mod_get_mass_change(const AA_MOD_T* mod) {
-  return mod->mass_change;
+double AA_MOD_T::getMassChange() const {
+  return mass_change_;
 }
 
 /**
@@ -847,17 +862,28 @@ double aa_mod_get_mass_change(const AA_MOD_T* mod) {
  * \returns A pointer to the list of amino acids on which this mod can
  * be placed.
  */
-bool* aa_mod_get_aa_list(AA_MOD_T* mod) {
-  return mod->aa_list;
+bool* AA_MOD_T::getAAList() {
+  return aa_list_;
 }
+
+void AA_MOD_T::setAminoAcids(const char* aas, int num_aas) {
+  for (int idx = 0;idx < num_aas;idx++) {
+    setAminoAcid(aas[idx]);
+  }
+}
+
+void AA_MOD_T::setAminoAcid(const char aa) {
+  aa_list_[aa - 'A'] = true;
+}
+
 
 /**
  * \brief Set the maximum number of times this modification can be
  * placed on one peptide.
  * \returns void
  */
-void aa_mod_set_max_per_peptide(AA_MOD_T* mod, int max) {
-  mod->max_per_peptide = max;
+void AA_MOD_T::setMaxPerPeptide(int max) {
+  max_per_peptide_ = max;
 }
 
 /**
@@ -865,8 +891,8 @@ void aa_mod_set_max_per_peptide(AA_MOD_T* mod, int max) {
  * placed on one peptide.  
  * \returns The max times per peptide this mod can be placed.
  */
-int aa_mod_get_max_per_peptide(AA_MOD_T* mod) {
-  return mod->max_per_peptide;
+int AA_MOD_T::getMaxPerPeptide() {
+  return max_per_peptide_;
 }
 
 /**
@@ -876,8 +902,8 @@ int aa_mod_get_max_per_peptide(AA_MOD_T* mod) {
  * MAX_PROTEIN_SEQ_LENGTH. 
  * \returns void
  */
-void aa_mod_set_max_distance(AA_MOD_T* mod, int distance) {
-  mod->max_distance = (distance == -1) ? MAX_PROTEIN_SEQ_LENGTH : 
+void AA_MOD_T::setMaxDistance(int distance) {
+  max_distance_ = (distance == -1) ? MAX_PROTEIN_SEQ_LENGTH : 
                                          distance;
 }
 
@@ -888,16 +914,16 @@ void aa_mod_set_max_distance(AA_MOD_T* mod, int distance) {
  * \returns Maximum distance from protein terminus at which mod can be
  * placed. 
  */
-int aa_mod_get_max_distance(AA_MOD_T* mod) {
-  return mod->max_distance;
+int AA_MOD_T::getMaxDistance() {
+  return max_distance_;
 }
 
 /**
  * \brief Set the position type of an aa_mod.
  * \returns void
  */
-void aa_mod_set_position(AA_MOD_T* mod, MOD_POSITION_T position) {
-  mod->position = position;
+void AA_MOD_T::setPosition(MOD_POSITION_T position) {
+  position_ = position;
 }
 
 /**
@@ -905,48 +931,59 @@ void aa_mod_set_position(AA_MOD_T* mod, MOD_POSITION_T position) {
  * \returns ANY_POSITION for standard mods; C_TERM or N_TERM for those
  * that can only be placed at the ends of the peptide.
  */
-MOD_POSITION_T aa_mod_get_position(AA_MOD_T* mod) {
-  return mod->position;
+MOD_POSITION_T AA_MOD_T::getPosition() {
+  return position_;
 }
 
 /**
  * \brief Sets whether the modification can prevent cleavage.
  * \returns void
  */
-void aa_mod_set_prevents_cleavage(AA_MOD_T* mod, bool prevents_cleavage) {
-  mod->prevents_cleavage = prevents_cleavage;
+void AA_MOD_T::setPreventsCleavage(bool prevents_cleavage) {
+  prevents_cleavage_ = prevents_cleavage;
 }
 
 /**
  * \brief gets whether the modification can prevent cleavage
  * \returns true or false
  */
-bool aa_mod_get_prevents_cleavage(AA_MOD_T* mod) {
-  return mod->prevents_cleavage;
+bool AA_MOD_T::getPreventsCleavage() {
+  return prevents_cleavage_;
 }
 
 /**
  * \brief Sets whether the modifications can prevent cross-linking.
  * \returns void
  */
-void aa_mod_set_prevents_xlink(AA_MOD_T* mod, bool prevents_xlink) {
-  mod->prevents_xlink = prevents_xlink;
+void AA_MOD_T::setPreventsXLink(bool prevents_xlink) {
+  prevents_xlink_ = prevents_xlink;
 }
 
 /**
  * \brief gets whether the modification can prevent cross-linking.
  * \returns true or false
  */
-bool aa_mod_get_prevents_xlink(AA_MOD_T* mod) {
-  return mod->prevents_xlink;
+bool AA_MOD_T::getPreventsXLink() {
+  return prevents_xlink_;
+}
+
+/**
+ * \brief tells whether the modification is a mono link.  Used by sfx
+ */
+void AA_MOD_T::setMonoLink(bool mono_link) {
+  mono_link_ = mono_link;
+}
+
+bool AA_MOD_T::getMonoLink() {
+  return(mono_link_);
 }
 
 /**
  * \brief The character used to uniquely identify the mod in the sqt file.
  * \returns The character identifier.
  */
-char aa_mod_get_symbol(const AA_MOD_T* mod) {
-  return mod->symbol;
+char AA_MOD_T::getSymbol() {
+  return symbol_;
 }
 
 /**
@@ -955,10 +992,10 @@ char aa_mod_get_symbol(const AA_MOD_T* mod) {
  * returns "STY".
  * \returns A newly allocated string.
  */
-string aa_mod_get_aa_list_string(AA_MOD_T* mod) {
+string AA_MOD_T::getAAListString() {
   string s;
   for (int i = 0; i < AA_LIST_LENGTH; i++) {
-    if (mod->aa_list[i]) {
+    if (aa_list_[i]) {
       s += (char)('A' + i);
     }
   }

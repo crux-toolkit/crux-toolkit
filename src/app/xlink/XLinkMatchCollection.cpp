@@ -9,6 +9,7 @@
 #include "XLinkPeptide.h"
 #include "LinearPeptide.h"
 #include "SelfLoopPeptide.h"
+#include "MonoLinkPeptide.h"
 #include "XLinkScorer.h"
 
 #include "model/Spectrum.h"
@@ -120,9 +121,12 @@ XLinkMatchCollection::XLinkMatchCollection(
     XLinkMatch* copyCandidate = NULL;
     switch (currentCandidate -> getCandidateType()) {
     case LINEAR_CANDIDATE:
+      copyCandidate = 
+      new LinearPeptide(*(LinearPeptide*)currentCandidate);
+      break;
     case DEADLINK_CANDIDATE:
       copyCandidate = 
-  new LinearPeptide(*(LinearPeptide*)currentCandidate);
+      new MonoLinkPeptide(*(MonoLinkPeptide*)currentCandidate);
       break;
     case SELFLOOP_CANDIDATE:
       copyCandidate =
@@ -180,9 +184,9 @@ void XLinkMatchCollection::addCandidates(
 
   carp(CARP_DETAILED_DEBUG, "XLinkMatchCollection.addCandidates() start");
 
-  include_linear_peptides_ = Params::GetBool("xlink-include-linears");
-  include_self_loops_ = Params::GetBool("xlink-include-selfloops");
- 
+  include_linear_peptides_ = GlobalParams::getXLinkIncludeLinears();
+  include_self_loops_ = GlobalParams::getXLinkIncludeSelfloops();
+  bool include_monolink_peptides = GlobalParams::getXLinkIncludeDeadends();
   if (GlobalParams::getXLinkIncludeInter() ||
       GlobalParams::getXLinkIncludeIntra() ||
       GlobalParams::getXLinkIncludeInterIntra()) {
@@ -215,6 +219,13 @@ void XLinkMatchCollection::addCandidates(
       *this);
 
   }
+  
+  if (include_monolink_peptides) {
+    carp(CARP_DETAILED_DEBUG, "adding monolink candidates");
+    MonoLinkPeptide::addCandidates(
+      min_mass, max_mass, decoy, *this);
+  }
+  
 
   if (include_self_loops_) {
     carp(CARP_DETAILED_DEBUG, "adding selfloop candidates");

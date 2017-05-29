@@ -19,17 +19,18 @@ vector<vector<Crux::Peptide*> > XLinkDatabase::decoy_peptides_;
 std::vector<LinearPeptide> XLinkDatabase::target_linear_peptides_;
 std::vector<LinearPeptide> XLinkDatabase::decoy_linear_peptides_;
 
+std::vector<MonoLinkPeptide> XLinkDatabase::target_monolink_peptides_;
 std::vector<SelfLoopPeptide> XLinkDatabase::target_selfloop_peptides_;
 std::vector<SelfLoopPeptide> XLinkDatabase::decoy_selfloop_peptides_;
 
 std::vector<XLinkablePeptide> XLinkDatabase::target_xlinkable_peptides_;
 std::vector<XLinkablePeptide> XLinkDatabase::decoy_xlinkable_peptides_;
-std::vector<XLinkablePeptide> XLinkDatabase::target_xlinkable_peptides2_; //Peptides that could be selfloops.
+
 std::vector<XLinkablePeptide> XLinkDatabase::decoy_xlinkable_peptides2_;
+std::vector<XLinkablePeptide> XLinkDatabase::target_xlinkable_peptides2_;
 
 std::vector<XLinkablePeptide> XLinkDatabase::target_xlinkable_peptides_flatten_;
 std::vector<XLinkablePeptide> XLinkDatabase::decoy_xlinkable_peptides_flatten_;
-//vector<pair<int, vector<XLinkablePeptide> > > XLinkDatabase::protein_idx_to_xpeptides_;
 
 bool XLinkDatabase::addPeptideToDatabase(Crux::Peptide* peptide) {
   
@@ -37,13 +38,23 @@ bool XLinkDatabase::addPeptideToDatabase(Crux::Peptide* peptide) {
   vector<int> link_sites;
   set<int> skip;
   
-  if (GlobalParams::getXLinkIncludeLinears()) {
+  bool dead = GlobalParams::getXLinkIncludeDeadends();
+  bool linear = GlobalParams::getXLinkIncludeLinears();
+    
+  if (dead || linear) {
     set<int> skip;
     if (peptide->getMissedCleavageSites(skip) <= GlobalParams::getMissedCleavages()) {
-      LinearPeptide lpeptide(peptide);
-      lpeptide.getMass(GlobalParams::getIsotopicMass());
-      target_linear_peptides_.push_back(lpeptide);
-      added = true;
+      if (peptide->hasMonoLink()) {  //this is implicit
+        MonoLinkPeptide mpeptide(peptide);
+        mpeptide.getMass(GlobalParams::getIsotopicMass());
+        target_monolink_peptides_.push_back(mpeptide);
+        added = true;
+      } else if (linear) {
+        LinearPeptide lpeptide(peptide);
+        lpeptide.getMass(GlobalParams::getIsotopicMass());
+        target_linear_peptides_.push_back(lpeptide);
+        added = true;
+      }
     }
   }
   
@@ -80,6 +91,9 @@ bool XLinkDatabase::addPeptideToDatabase(Crux::Peptide* peptide) {
       }
     }
   }
+  
+  
+  
   return(added);
 }
 
@@ -92,7 +106,7 @@ void XLinkDatabase::initialize() {
   bondmap_ = XLinkBondMap(link_string);
   protein_database_ = NULL;
   int num_protein = prepare_protein_input(input_file, &protein_database_);
-  
+    
   PEPTIDE_MOD_T** peptide_mods = NULL;
   int num_peptide_mods = generate_peptide_mod_list( &peptide_mods );
 
@@ -101,9 +115,8 @@ void XLinkDatabase::initialize() {
 
   bool generate_xlinkable = Params::GetBool("xlink-include-inter-intra") ||
            Params::GetBool("xlink-include-inter") ||
-           Params::GetBool("xlink-include-intra") ||
-           Params::GetBool("xlink-include-deadends");
-  
+           Params::GetBool("xlink-include-intra");
+
   if (generate_xlinkable) {
     additional_cleavages = 1;
   }
@@ -111,9 +124,33 @@ void XLinkDatabase::initialize() {
   if (Params::GetBool("xlink-include-selfloops")) {
     additional_cleavages = 2;
   }
+  
+  //determine the maximum number of missed cleavages can be caused by modifications
+  //This includes mono-links and normal mods.
+  int blocked_cleavages = 0;
+  
+  vector<AA_MOD_T*> current_aa_mods;
+  for (int mod_idx=0;mod_idx<num_peptide_mods; mod_idx++) {
+    PEPTIDE_MOD_T* peptide_mod = peptide_mods[mod_idx];
+    peptide_mod_get_aa_mods(peptide_mod, current_aa_mods);
+    int current_blocked_cleavages = 0;
+    for (vector<AA_MOD_T*>::iterator iter = current_aa_mods.begin();
+         iter != current_aa_mods.end();
+         ++iter) {
+      if ((*iter)->getPreventsCleavage()) {
+        current_blocked_cleavages++;
+      }
+    }
+    blocked_cleavages = max(blocked_cleavages, current_blocked_cleavages);
+  }
+  
+  int total_missed_cleavages = GlobalParams::getMissedCleavages()+additional_cleavages+blocked_cleavages;
 
-  int total_missed_cleavages = GlobalParams::getMissedCleavages()+additional_cleavages;
-
+  carp(CARP_INFO, "Missed cleavages from user:%d", GlobalParams::getMissedCleavages());
+  carp(CARP_INFO, "Blocked cleavages from xlink/selfloops:%d", additional_cleavages);
+  carp(CARP_INFO, "Blocked cleavages from mods/mono-links:%d", blocked_cleavages);
+  carp(CARP_INFO, "Total missed cleavages to consider:%d", total_missed_cleavages);
+  
   for (size_t idx=0;idx<=total_missed_cleavages;idx++) {
     target_peptides_.push_back(vector<Crux::Peptide*>());
     decoy_peptides_.push_back(vector<Crux::Peptide*>());
@@ -127,7 +164,7 @@ void XLinkDatabase::initialize() {
     PEPTIDE_MOD_T* peptide_mod = peptide_mods[mod_idx];
     double delta_mass = peptide_mod_get_mass_change(peptide_mod);
     carp(CARP_INFO, "Modification %d has delta mass of %g Da.", mod_idx + 1, delta_mass);
-    //
+
     ModifiedPeptidesIterator* peptide_iterator =
       new ModifiedPeptidesIterator(
         GlobalParams::getMinMass(), 
@@ -135,7 +172,7 @@ void XLinkDatabase::initialize() {
         peptide_mod, 
         false, 
         protein_database_,
-        additional_cleavages);
+        additional_cleavages+blocked_cleavages);
 
     //add the targets
     while (peptide_iterator->hasNext()) {
@@ -159,6 +196,11 @@ void XLinkDatabase::initialize() {
   if (Params::GetBool("xlink-include-linears")) {
     carp(CARP_INFO, "  The database contains %d linear peptides.", target_linear_peptides_.size());
     sort(target_linear_peptides_.begin(), target_linear_peptides_.end(), compareLinearPeptideMass);
+  }
+  
+  if (GlobalParams::getXLinkIncludeDeadends()) {
+    carp(CARP_INFO, "  The database contains %d mono-link peptides.", target_monolink_peptides_.size());
+    sort(target_monolink_peptides_.begin(), target_monolink_peptides_.end(), compareMonoLinkPeptideMass);
   }
   
   if (Params::GetBool("xlink-include-selfloops")) {
@@ -370,7 +412,27 @@ void XLinkDatabase::print() {
       
       peptides_file.flush();
     }
+    if (target_monolink_peptides_.size()) {
+      ostringstream oss;
+      oss << output_directory << "/" << "xlink_peptides.monolink.txt";
+      string temp = oss.str();
+      ofstream peptides_file(temp.c_str());
 
+      peptides_file << setprecision(8);
+
+      peptides_file << "mass\tsequence\tprotein id\tmissed cleavages\tunshuffled sequence"<<endl;
+
+      for (int idx=0;idx < target_monolink_peptides_.size();idx++) {
+     
+        peptides_file << target_monolink_peptides_[idx].getMass(MONO) << "\t";
+        peptides_file << target_monolink_peptides_[idx].getSequenceString() << "\t";
+        peptides_file << target_monolink_peptides_[idx].getProteinIdString() << "\t";
+        peptides_file << target_monolink_peptides_[idx].getNumMissedCleavages() << "\t";
+        peptides_file << "" << endl;
+      }
+      peptides_file.flush();
+      
+    }
     if (Params::GetBool("xlink-include-selfloops")) {
       ostringstream oss;
       oss << output_directory << "/" << "xlink_peptides.selfloops.txt";
@@ -405,7 +467,6 @@ void XLinkDatabase::print() {
      
       peptides_file << target_xlinkable_peptides_[idx].getMass(MONO) << "\t";
       peptides_file << target_xlinkable_peptides_[idx].getModifiedSequenceString() << "\t";
-      //peptides_file << target_xlinkable_peptides_[idx].getProteinIdString() << endl;
       
       peptides_file << target_xlinkable_peptides_[idx].getLinkSite(0)+1;
       for (size_t idx2 = 1;idx2 < target_xlinkable_peptides_[idx].numLinkSites();idx2++) {
@@ -478,6 +539,53 @@ vector<LinearPeptide>::iterator XLinkDatabase::getLinearEnd(
                             compareFLOATToLinearPeptideMass));  
   
 }
+
+
+vector<MonoLinkPeptide>::iterator XLinkDatabase::getMonoLinkBegin(
+  bool decoy,
+  FLOAT_T min_mass
+  ) {
+  return (lower_bound(target_monolink_peptides_.begin(), 
+                      target_monolink_peptides_.end(), 
+                      min_mass, 
+                      compareMonoLinkPeptideMassToFLOAT)); 
+}
+
+vector<MonoLinkPeptide>::iterator XLinkDatabase::getMonoLinkBegin(
+  bool decoy
+) {
+  return (target_monolink_peptides_.begin());
+}
+
+vector<MonoLinkPeptide>::iterator XLinkDatabase::getMonoLinkEnd(
+  bool decoy
+) {
+
+  return (target_monolink_peptides_.end());
+}
+
+vector<MonoLinkPeptide>::iterator XLinkDatabase::getMonoLinkEnd(
+  bool decoy,
+  FLOAT_T max_mass
+  ) {
+  return(std::upper_bound(getMonoLinkBegin(decoy),
+                          getMonoLinkEnd(decoy),
+                          max_mass,
+                          compareFLOATToMonoLinkPeptideMass));
+}
+
+vector<MonoLinkPeptide>::iterator XLinkDatabase::getMonoLinkEnd(
+  bool decoy,
+  std::vector<MonoLinkPeptide>::iterator& siter,
+  FLOAT_T max_mass
+) {
+   return(std::upper_bound(siter,
+                            getMonoLinkEnd(decoy),
+                            max_mass,
+                            compareFLOATToMonoLinkPeptideMass));  
+}
+
+
 
 vector<SelfLoopPeptide>::iterator XLinkDatabase::getSelfLoopBegin(
   bool decoy,
@@ -580,12 +688,6 @@ vector<XLinkablePeptide>::iterator XLinkDatabase::getXLinkableFlattenEnd(
   }
 }
 
-/*
-vector<pair<int, vector<XLinkablePeptide> > >& XLinkDatabase::getTargetProteinIdxToXPeptides() {
-  return protein_idx_to_xpeptides_;
-
-}
-*/
 
 int XLinkDatabase::getNLinkable() {
   return(target_xlinkable_peptides_.size());
