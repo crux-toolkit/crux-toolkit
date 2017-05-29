@@ -177,6 +177,7 @@ set (
   io/SpectrumCollection.cpp
   io/SpectrumCollectionFactory.cpp
   model/Spectrum.cpp
+  io/SpectrumRecordSpectrumCollection.cpp
   io/SpectrumRecordWriter.cpp
   model/SpectrumZState.cpp
   app/StatColumn.cpp
@@ -196,6 +197,8 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     util/WinCrux.cpp
   )
 endif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+
+add_definitions(-DCRUX)
 
 add_library(
   crux-support
@@ -240,7 +243,6 @@ else (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	  _FILE_OFFSET_BITS=64
 	  _GNU_SOURCE
 	  GCC
-	  CRUX
 	  HAVE_EXPAT_CONFIG_H
 	)
 	if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")

@@ -376,17 +376,17 @@ void SQTReader::readSymbols(const string& file, bool append) {
 
       AA_MOD_T* mod = NULL;
       for (int i = 0; i < num_mods; ++i) {
-        if (aa_mod_get_mass_change(list_of_mods[i]) == mass) {
+        if (list_of_mods[i]->getMassChange() == mass) {
           mod = list_of_mods[i];
-          aa_mod_get_aa_list(mod)[residue - 'A'] = true;
+          mod->getAAList()[residue - 'A'] = true;
           break;
         }
       }
       if (!mod) {
-        mod = new_aa_mod(num_mods);
-        aa_mod_set_mass_change(mod, mass);
-        aa_mod_set_symbol(mod, symbol);
-        aa_mod_get_aa_list(mod)[residue - 'A'] = true;
+        mod = new AA_MOD_T(num_mods);
+        mod->setMassChange(mass);
+        mod->setSymbol(symbol);
+        mod->getAAList()[residue - 'A'] = true;
         list_of_mods[num_mods] = mod;
         incrementNumMods();
         ++num_mods;

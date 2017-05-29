@@ -557,6 +557,7 @@ vector<string> GeneratePeptides::getOptions() const {
     "decoy-format",
     "decoy-prefix",
     "keep-terminal-aminos",
+    "mod-precision",
     "overwrite",
     "fileroot",
     "output-dir",

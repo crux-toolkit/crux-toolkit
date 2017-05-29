@@ -29,6 +29,10 @@ const double AVERAGINE_PEAK_SEPARATION = 1.0005079;
 const double MIN_SIGMA_PPM = 0.01;
 const double MIN_SIGMA_TH = 0.00001;
 
+// if more than this proportion of mass bins have more than one peak,
+// we might be looking at profile-mode data
+const double PROPORTION_MASSBINS_MULTIPEAK_PROFILE = 0.5;
+
 ParamMedicApplication::ParamMedicApplication() {
 }
 
@@ -137,7 +141,9 @@ void ParamMedicApplication::processParams() {
 }
 
 ParamMedicErrorCalculator::ParamMedicErrorCalculator():
-  numTotalSpectra_(0), numPassingSpectra_(0) {
+  numTotalSpectra_(0), numPassingSpectra_(0),
+  numSpectraSameBin_(0), numSpectraWithinPpm_(0), numSpectraWithinPpmAndScans_(0),
+  numMultipleFragBins_(0), numSingleFragBins_(0) {
   if (!numeric_limits<double>::is_iec559) {
     carp(CARP_FATAL, "Something went wrong.");
   }
@@ -195,26 +201,31 @@ void ParamMedicErrorCalculator::processSpectrum(Spectrum* spectrum) {
     const Spectrum* prev = prevIter->second;
     const double precursorMzPrev = getPrecursorMz(prev);
     const double precursorMzDiffPpm = (precursorMz - precursorMzPrev) * MILLION / precursorMz;
-    // check precursor and scan count between the scans
-    if (abs(precursorMzDiffPpm) <= Params::GetDouble("pm-max-precursor-delta-ppm") &&
-        abs(spectrum->getFirstScan() - prev->getFirstScan()) <= Params::GetInt("pm-max-scan-separation")) {
-      // count the fragment peaks in common
-      vector< pair<const Peak*, const Peak*> > pairedFragments = pairFragments(prev, spectrum);
-      if (pairedFragments.size() >= Params::GetInt("pm-min-common-frag-peaks")) {
-        // we've got a pair! record everything
-        sort(pairedFragments.begin(), pairedFragments.end(), sortPairedFragments);
-        vector< pair<const Peak*, const Peak*> >::const_iterator stop =
-          pairedFragments.size() >= Params::GetInt("pm-pair-top-n-frag-peaks")
-            ? pairedFragments.begin() + Params::GetInt("pm-pair-top-n-frag-peaks")
-            : pairedFragments.end();
-        for (vector< pair<const Peak*, const Peak*> >::const_iterator i = pairedFragments.begin();
-            i != stop;
-            i++) {
-          pairedFragmentPeaks_.push_back(make_pair(
-            new Peak(i->first->getIntensity(), i->first->getLocation()),
-            new Peak(i->second->getIntensity(), i->second->getLocation())));
+    ++numSpectraSameBin_;
+    // check precursor
+    if (abs(precursorMzDiffPpm) <= Params::GetDouble("pm-max-precursor-delta-ppm")) {
+      // check scan count between the scans
+      ++numSpectraWithinPpm_;
+      if (abs(spectrum->getFirstScan() - prev->getFirstScan()) <= Params::GetInt("pm-max-scan-separation")) {
+        // count the fragment peaks in common
+        ++numSpectraWithinPpmAndScans_;
+        vector< pair<const Peak*, const Peak*> > pairedFragments = pairFragments(prev, spectrum);
+        if (pairedFragments.size() >= Params::GetInt("pm-min-common-frag-peaks")) {
+          // we've got a pair! record everything
+          sort(pairedFragments.begin(), pairedFragments.end(), sortPairedFragments);
+          vector< pair<const Peak*, const Peak*> >::const_iterator stop =
+            pairedFragments.size() >= Params::GetInt("pm-pair-top-n-frag-peaks")
+              ? pairedFragments.begin() + Params::GetInt("pm-pair-top-n-frag-peaks")
+              : pairedFragments.end();
+          for (vector< pair<const Peak*, const Peak*> >::const_iterator i = pairedFragments.begin();
+              i != stop;
+              i++) {
+            pairedFragmentPeaks_.push_back(make_pair(
+              new Peak(i->first->getIntensity(), i->first->getLocation()),
+              new Peak(i->second->getIntensity(), i->second->getLocation())));
+          }
+          pairedPrecursorMzs_.push_back(make_pair(precursorMzPrev, precursorMz));
         }
-        pairedPrecursorMzs_.push_back(make_pair(precursorMzPrev, precursorMz));
       }
     }
   }
@@ -241,6 +252,18 @@ void ParamMedicErrorCalculator::calcMassErrorDist(
   carp(CARP_INFO, "Precursor pairs: %d", pairedPrecursorMzs_.size());
   carp(CARP_INFO, "Fragment pairs: %d", pairedFragmentPeaks_.size());
 
+  carp(CARP_INFO, "Total spectra in the same bin as another: %d",
+       numSpectraSameBin_);
+  carp(CARP_INFO, "Total spectra in the same bin as another and within m/z tol: %d",
+       numSpectraWithinPpm_);
+  carp(CARP_INFO, "Total spectra in the same bin as another and within m/z tol and within scan range: %d",
+       numSpectraWithinPpmAndScans_);
+  // check the proportion of mass bins, in the whole file, that have multipl fragments.
+  // If that's high, we might be looking at profile-mode data.
+  double proportionMultipleFrags =
+    (double)numMultipleFragBins_ / (double)(numSingleFragBins_ + numMultipleFragBins_);
+  carp(CARP_INFO, "Proportion of bins with multiple fragments: %.02f", proportionMultipleFrags);
+
   if (pairedPrecursorMzs_.size() > MAX_PEAKPAIRS) {
     carp(CARP_DEBUG, "Using %d of %d peak pairs for precursor...",
          MAX_PEAKPAIRS, pairedPrecursorMzs_.size());
@@ -260,11 +283,27 @@ void ParamMedicErrorCalculator::calcMassErrorDist(
     precursorDistancesPpm.push_back(diffTh * MILLION / i->first);
   }
 
+  if (proportionMultipleFrags > PROPORTION_MASSBINS_MULTIPEAK_PROFILE) {
+    carp(CARP_WARNING, "Is this profile-mode data? Proportion of mass bins with multiple "
+                    "peaks is quite high (%.02f)", proportionMultipleFrags);
+    carp(CARP_WARNING, "Param-Medic will not perform well on profile-mode data.");
+  }
+
   // check for conditions that would cause us to bomb out
   if (precursorDistancesPpm.size() < Params::GetInt("pm-min-peak-pairs")) {
     *precursorFailure = 
       "Need >= " + Params::GetString("pm-min-peak-pairs") + " peak pairs to fit mixed distribution. "
-      "Got only " + StringUtils::ToString(precursorDistancesPpm.size());
+      "Got only " + StringUtils::ToString(precursorDistancesPpm.size()) + ".\nDetails:\n"
+      "Spectra in same averagine bin as another: " + StringUtils::ToString(numSpectraSameBin_) + "\n"
+      "    ... and also within m/z tolerance: " + StringUtils::ToString(numSpectraWithinPpm_) + "\n"
+      "    ... and also within scan range: " + StringUtils::ToString(numSpectraWithinPpmAndScans_) + "\n"
+      "    ... and also with sufficient in-common fragments: " + StringUtils::ToString(precursorDistancesPpm.size());
+      if (proportionMultipleFrags > PROPORTION_MASSBINS_MULTIPEAK_PROFILE) {
+        *precursorFailure +=
+          "\nIs this profile-mode data? Proportion of mass bins with multiple peaks "
+          "is quite high (" + StringUtils::ToString(proportionMultipleFrags, 2) + ")\n"
+          "Param-Medic will not perform well on profile-mode data.";
+      }
   }
   if (precursorFailure->empty()) {
     double proportionPrecursorMzsZero = (double)numZeroPrecursorDeltas / pairedPrecursorMzs_.size();
@@ -288,7 +327,17 @@ void ParamMedicErrorCalculator::calcMassErrorDist(
   if (pairedFragmentPeaks_.size() < Params::GetInt("pm-min-peak-pairs")) {
     *fragmentFailure =
       "Need >= " + Params::GetString("pm-min-peak-pairs") + " peak pairs to fit mixed distribution. "
-      "Got only " + StringUtils::ToString(pairedFragmentPeaks_.size());
+      "Got only " + StringUtils::ToString(pairedFragmentPeaks_.size()) + ".\nDetails:\n"
+      "Spectra in same averagine bin as another: " + StringUtils::ToString(numSpectraSameBin_) + "\n"
+      "    ... and also within m/z tolerance: " + StringUtils::ToString(numSpectraWithinPpm_) + "\n"
+      "    ... and also within scan range: " + StringUtils::ToString(numSpectraWithinPpmAndScans_) + "\n"
+      "    ... and also with sufficient in-common fragments: " + StringUtils::ToString(precursorDistancesPpm.size());
+      if (proportionMultipleFrags > PROPORTION_MASSBINS_MULTIPEAK_PROFILE) {
+        *fragmentFailure +=
+          "\nIs this profile-mode data? Proportion of mass bins with multiple peaks "
+          "is quite high (" + StringUtils::ToString(proportionMultipleFrags, 2) + ")\n"
+          "Param-Medic will not perform well on profile-mode data.";
+      }
   }
 
   double fragmentMuPpm2Measures = numeric_limits<double>::quiet_NaN();
@@ -416,7 +465,7 @@ double ParamMedicErrorCalculator::getPrecursorMz(const Spectrum* spectrum) const
 vector< pair<const Peak*, const Peak*> > ParamMedicErrorCalculator::pairFragments(
   const Spectrum* prev,
   const Spectrum* cur
-) const {
+) {
   map<int, const Peak*> mapPrev = binFragments(prev);
   map<int, const Peak*> mapCur = binFragments(cur);
   vector< pair<const Peak*, const Peak*> > pairs;
@@ -429,7 +478,7 @@ vector< pair<const Peak*, const Peak*> > ParamMedicErrorCalculator::pairFragment
   return pairs;
 }
 
-map<int, const Peak*> ParamMedicErrorCalculator::binFragments(const Spectrum* spectrum) const {
+map<int, const Peak*> ParamMedicErrorCalculator::binFragments(const Spectrum* spectrum) {
   map<int, const Peak*> binFragmentMap;
   set<int> binsToRemove;
   for (PeakIterator i = spectrum->begin(); i != spectrum->end(); i++) {
@@ -448,6 +497,8 @@ map<int, const Peak*> ParamMedicErrorCalculator::binFragments(const Spectrum* sp
   for (set<int>::const_iterator i = binsToRemove.begin(); i != binsToRemove.end(); i++) {
     binFragmentMap.erase(*i);
   }
+  numMultipleFragBins_ += binsToRemove.size();
+  numSingleFragBins_ += binFragmentMap.size();
   return binFragmentMap;
 }
 

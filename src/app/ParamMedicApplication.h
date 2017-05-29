@@ -55,11 +55,11 @@ class ParamMedicErrorCalculator {
   std::vector< std::pair<const Peak*, const Peak*> > pairFragments(
     const Crux::Spectrum* prev,
     const Crux::Spectrum* cur
-  ) const;
+  );
 
   // keep only one fragment per bin; if another fragment wants to be in the bin,
   // toss them both out - this reduces ambiguity
-  std::map<int, const Peak*> binFragments(const Crux::Spectrum* spectrum) const;
+  std::map<int, const Peak*> binFragments(const Crux::Spectrum* spectrum);
 
   static bool sortPairedFragments(
     const std::pair<const Peak*, const Peak*> x,
@@ -69,11 +69,16 @@ class ParamMedicErrorCalculator {
   // count the spectra that go by
   int numTotalSpectra_;
   int numPassingSpectra_;
+  int numSpectraSameBin_;
+  int numSpectraWithinPpm_;
+  int numSpectraWithinPpmAndScans_;
   // number and position of bins
   double lowestPrecursorBinStartMz_;
   double lowestFragmentBinStartMz_;
   int numPrecursorBins_;
   int numFragmentBins_;
+  int numMultipleFragBins_;
+  int numSingleFragBins_;
   // map from bin index to current spectrum
   std::map<int, Crux::Spectrum*> spectra_;
   // the paired peak values that we'll use to estimate mass error

@@ -252,7 +252,7 @@ void XLinkablePeptide::findLinkSites(
   vector<AA_MOD_T*> prevents_xlink;
 
   for (int mod_idx = 0;mod_idx < total_mods; mod_idx++) {
-    if (aa_mod_get_prevents_xlink(mod_list[mod_idx])) {
+    if (mod_list[mod_idx]->getPreventsXLink()) {
       prevents_xlink.push_back(mod_list[mod_idx]);
     }
   }
@@ -281,7 +281,7 @@ void XLinkablePeptide::findLinkSites(
         for (unsigned int mod_idx = 0; mod_idx < prevents_xlink.size(); mod_idx++) {
           //if aa is modified by any modification that can prevent
           //cross-linking, then don't add the site as a link_site.
-          if (is_aa_modified(mod_seq[seq_idx], prevents_xlink[mod_idx])) {
+          if (prevents_xlink[mod_idx]->isModified(mod_seq[seq_idx])) {
             link_prevented = true;
             break;
           }

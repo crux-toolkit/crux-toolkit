@@ -6,6 +6,7 @@
 #include "XLinkablePeptide.h"
 #include "SelfLoopPeptide.h"
 #include "LinearPeptide.h"
+#include "MonoLinkPeptide.h"
 
 #include <vector>
 
@@ -25,6 +26,7 @@ class XLinkDatabase {
   static std::vector<LinearPeptide> target_linear_peptides_;
   static std::vector<LinearPeptide> decoy_linear_peptides_;
 
+  static std::vector<MonoLinkPeptide> target_monolink_peptides_;
 
   static std::vector<SelfLoopPeptide> target_selfloop_peptides_;
   static std::vector<SelfLoopPeptide> decoy_selfloop_peptides_;
@@ -134,6 +136,33 @@ class XLinkDatabase {
     std::vector<LinearPeptide>::iterator &siter,
     FLOAT_T max_mass
   );
+
+
+  static std::vector<MonoLinkPeptide>::iterator getMonoLinkBegin(
+    bool decoy
+  );
+  
+  static std::vector<MonoLinkPeptide>::iterator getMonoLinkBegin(
+    bool decoy,
+    FLOAT_T min_mass
+  );
+
+  static std::vector<MonoLinkPeptide>::iterator getMonoLinkEnd(
+    bool decoy
+  );
+
+  static std::vector<MonoLinkPeptide>::iterator getMonoLinkEnd(
+    bool decoy,
+    FLOAT_T max_mass
+  );
+  
+  static std::vector<MonoLinkPeptide>::iterator getMonoLinkEnd(
+    bool decoy,
+    std::vector<MonoLinkPeptide>::iterator &siter,
+    FLOAT_T max_mass
+  );
+
+
   
   //static std::vector<std::pair<int, vector<XLinkablePeptide> > >& getTargetProteinIdxToXPeptides();
 
