@@ -68,7 +68,8 @@ Params::Params() : finalized_(false) {
   InitArgParam("index name",
     "The desired name of the binary index.");
   InitArgParam("ms2 file",
-    "File containing spectra to be searched.");
+    "The name of one or more files from which to parse the fragmentation "
+    "spectra, in any of the file formats supported by ProteoWizard.");
   /* psm-convert arguments */
   InitArgParam("input PSM file",
     "The name of a PSM file in tab-delimited text, SQT, pepXML or mzIdentML format");
@@ -226,7 +227,7 @@ Params::Params() : finalized_(false) {
     "Available from command line or parameter file for crux-generate-peptides. "
     "When used with enzyme=<trypsin|elastase|chymotrypsin> "
     "includes peptides containing one or more potential cleavage sites.", true);
-  InitDoubleParam("precursor-window", 3.0, 0, 100, 
+  InitDoubleParam("precursor-window", 3.0, 0, BILLION, 
     "Tolerance used for matching peptides to spectra. Peptides must be within +/- "
     "'precursor-window' of the spectrum value. The precursor window units depend upon "
     "precursor-window-type.",
@@ -420,13 +421,13 @@ Params::Params() : finalized_(false) {
     "Available for search-for-xlinks.", true);
   InitStringParam("cmod", "NO MODS",
     "Specify a variable modification to apply to C-terminus of peptides. " 
-    "[[html:&gt;mass change&gt;:&lt;max distance from protein c-term (-1 for no max)&gt;]]. "
+    "[[html:&lt;mass change&gt;:&lt;max distance from protein c-term (-1 for no max)&gt;]]. "
     "Note that this parameter only takes effect when specified in the "
     "parameter file.",
     "Available for search-for-xlinks.", true);
   InitStringParam("nmod", "NO MODS",
     "Specify a variable modification to apply to N-terminus of peptides.  " 
-    "[[html:&gt;mass change&gt;:&lt;max distance from protein c-term (-1 for no max)&gt;]]. "
+    "[[html:&lt;mass change&gt;:&lt;max distance from protein c-term (-1 for no max)&gt;]]. "
     "Note that this parameter only takes effect when specified in the "
     "parameter file.",
     "Available for search-for-xlinks.", true);
@@ -457,9 +458,11 @@ Params::Params() : finalized_(false) {
     "Available for generate-peptides.", true);
   InitIntParam("mod-precision", 2, 0, 20,//arbitrary
     "Set the precision for modifications as written to .txt files.",
-    "Also changes mods written to parameter file. Set internally based on "
-    "the max mod precision in the param file.",
-    false);
+    "Also changes mods written to parameter file. By default, this "
+    "value is set equal to the maximum modification precision in the "
+    "specification of modifications.  Available for "
+    "tide-index, tide-search, search-for-xlinks and generate-peptides.",
+    true);
 
   InitBoolParam("use-a-ions", false,
     "Consider a-ions in the search? Note that an a-ion is equivalent to a "
@@ -722,8 +725,13 @@ Params::Params() : finalized_(false) {
     "style=\"color: blue;\">57.02146</span> specifies a static modification of 57.02146 "
     "Da to cysteine. Note that Tide allows at most one modification per amino "
     "acid.  Also, the default modification (C+57.02146) will be added to "
-    "every mods-spec string unless an explicit C+0 is included.]]",
-    "Available for tide-index", true);
+    "every mods-spec string unless an explicit C+0 is included. "
+    "Also note that search-for-xlinks allows two optional Boolean parameters "
+    "with each modification, indicating whether the modification will (1) prevent "
+    "enzymatic cleavage at its site, and (2) prevent cross-linking. "
+    "These are specified like \"K+156.0786:T:T\".  "
+    "By default, both of these Booleans are set to false.]]",
+    "Available for tide-index and search-for-xlinks.", true);
   InitStringParam("nterm-peptide-mods-spec", "",
     "[[nohtml:Specifies N-terminal static and variable mass modifications on peptides. "
     "Specify a comma-separated list of N-terminal modification sequences of the form: "
@@ -1061,11 +1069,37 @@ Params::Params() : finalized_(false) {
     "For iTRAQ/TMT type data; will clear out all peaks in the specified m/z range.",
     "Available for comet.", true);
   /* Comet - Variable modifications */
-  for (int i = 1; i <= 9; i++) {
+  InitStringParam("variable_mod01", "0.0 null 0 4 -1 0 0",
+                  "Up to 9 variable modifications are supported. Each modification "
+                  "is specified using seven entries: "
+                  "\"[[html:&lt;mass&gt;]][[nohtml:<mass>]] "
+                  "[[html:&lt;residues&gt;]][[nohtml:<residues>]] "
+                  "[[html:&lt;type&gt;]][[nohtml:<type>]] "
+                  "[[html:&lt;max&gt;]][[nohtml:<max>]] "
+                  "[[html:&lt;terminus&gt;]][[nohtml:<terminus>]] "
+                  "[[html:&lt;distance&gt;]][[nohtml:<distance>]] "
+                  "[[html:&lt;force&gt;]][[nohtml:<force>]].\" "
+                  "Type is 0 for static mods and non-zero for variable mods. "
+                  "Note that that if you set the same type value on multiple "
+                  "modification entries, Comet will treat those variable modifications "
+                  "as a binary set. This means that all modifiable residues in the "
+                  "binary set must be unmodified or modified. Multiple binary sets "
+                  "can be specified by setting a different binary modification value. "
+                  "Max is an integer specifying the maximum number of modified "
+                  "residues possible in a peptide for this modification entry. "
+                  "Distance specifies the distance the modification is applied to "
+                  "from the respective terminus: -1 = no distance contraint; "
+                  "0 = only applies to terminal residue; N = only applies to "
+                  "terminal residue through next N residues. "
+                  "Terminus specifies which terminus the distance constraint is "
+                  "applied to: 0 = protein N-terminus; 1 = protein C-terminus; "
+                  "2 = peptide N-terminus; 3 = peptide C-terminus."
+                  "Force specifies whether peptides must contain this modification: "
+                  "0 = not forced to be present; 1 = modification is required.",
+                  "Available for comet.", true);
+  for (int i = 2; i <= 9; i++) {
     InitStringParam("variable_mod0" + StringUtils::ToString(i), "0.0 null 0 4 -1 0 0",
-                    "Up to 9 variable modifications are supported; format: "
-                    "\"<mass> <residues> <0=variable/1=binary> <max mods per a peptide>\" "
-                    "e.g. 79.966331 STY 0 3.",
+                    "See syntax for variable_mod01.",
                     "Available for comet.", true);
   }
   InitIntParam("max_variable_mods_in_peptide", 5, 0, BILLION,
@@ -1382,7 +1416,7 @@ Params::Params() : finalized_(false) {
     "code is run. The new version supports variable modifications and can handle more "
     "complex databases. This new code is still in development and should be considered a "
     "beta release.",
-    "Available for search-for-xlinks program.", true);
+    "Available for search-for-xlinks.", true);
   // **** xlink-score-spectrum options ****
   InitStringParam("xlink-score-method", "composite", "composite|modification|concatenated",
     "Score method for xlink {composite, modification, concatenated}.",
@@ -1394,44 +1428,52 @@ Params::Params() : finalized_(false) {
     "+/- window, and (3) precursor_mass + neutron_mass +/- window. The window size is defined "
     "from the precursor-window and precursor-window-type parameters. This option is only "
     "available when use-old-xlink=F.",
-    "Used for crux search-for-xlinks", true);
+    "Available for search-for-xlinks", true);
 
+  InitStringParam("mono-link", "",
+    "Provides a list of amino acids and their mass modifications to consider as candidate for "
+    "mono-/dead- links.  Format is the same as mods-spec.",
+    "Available for search-for-xlinks (new code)",
+    true);
+    
   InitIntParam("xlink-top-n", 250, 0, BILLION,
-               "Top-n open-mod peptides to consider in the second pass, value of 0 will search all candiates.",
-               "Available for crux search-for-xlinks",
+               "Specify the number of open-mod peptides to consider in the second pass. "
+               "A value of 0 will search all candiates.",
+               "Available for search-for-xlinks",
                true);
 
   InitBoolParam("xlink-print-db", false,
-    "Prints out the generated database of xlink products to the file xlink_peptides.txt in "
+    "Prints the generated database of xlink products to the file xlink_peptides.txt in "
     "the output directory.",
-    "Used for testing the candidate generatation.", false);
+    "Available for search-for-xlinks.", false);
   InitBoolParam("require-xlink-candidate", false,
      "If there is no cross-link candidate found, then don't bother looking for linear, "
      "self-loop, and dead-link candidates.",
-     "Available for crux search-for-xlinks program.", true);
+     "Available for search-for-xlinks.", true);
   
   InitBoolParam("xlink-use-ion-cache", false,
-		"Use an ion cache for the xlinkable peptides",
-		"May not be scalable for large databases", false);
+		"Use an ion cache for the xlinkable peptides.  "
+                "May not be scalable for large databases.",
+		"Available for search-for-xlinks.", false);
 
   InitBoolParam("xlink-include-linears", true, 
     "Include linear peptides in the search.",
-    "Available for crux search-for-xlinks program.", true);
+    "Available for search-for-xlinks.", true);
   InitBoolParam("xlink-include-deadends", true, 
     "Include dead-end peptides in the search.",
-    "Available for crux search-for-xlinks program.", true);
+    "Available for search-for-xlinks.", true);
   InitBoolParam("xlink-include-selfloops", true, 
     "Include self-loop peptides in the search.",
-    "Available for crux search-for-xlinks program.", true);
+    "Available for search-for-xlinks.", true);
   InitBoolParam("xlink-include-intra", true,
     "Include intra-protein cross-link candiates within the search.",
-    "Available for crux search-for-xlinks program.", true);
+    "Available for search-for-xlinks.", true);
   InitBoolParam("xlink-include-inter", true,
     "Include inter-protein cross-link candidates within the search.",
-    "Available for crux search-for-xlinks program.", true);
+    "Available for search-for-xlinks.", true);
   InitBoolParam("xlink-include-inter-intra", true,
     "Include crosslink candidates that are both inter and intra.",
-    "Available for crux search-for-xlinks program.", true);
+    "Available for search-for-xlinks.", true);
   InitStringParam("xlink-prevents-cleavage", "K",
     "List of amino acids for which the cross-linker can prevent cleavage. This option is "
     "only available when use-old-xlink=F.",
@@ -1811,12 +1853,12 @@ void Params::Categorize() {
   set<string> items;
 
   items.clear();
+  items.insert("bullseye-max-mass");
+  items.insert("bullseye-min-mass");
+  items.insert("gap-tolerance");
   items.insert("max-persist");
   items.insert("persist-tolerance");
   items.insert("scan-tolerance");
-  items.insert("gap-tolerance");
-  items.insert("bullseye-max-mass");
-  items.insert("bullseye-min-mass");
   AddCategory("Identifying PPIDs in MS1 spectra", items);
 
   items.clear();
@@ -1826,75 +1868,78 @@ void Params::Categorize() {
   AddCategory("Matching PPIDs to MS2 spectra", items);
 
   items.clear();
-  items.insert("max-length");
-  items.insert("min-length");
-  items.insert("max-mass");
-  items.insert("min-mass");
-  items.insert("isotopic-mass");
   items.insert("clip-nterm-methionine");
+  items.insert("isotopic-mass");
+  items.insert("max-length");
+  items.insert("max-mass");
+  items.insert("min-length");
+  items.insert("min-mass");
   AddCategory("Peptide properties", items);
 
   items.clear();
-  items.insert("mods-spec");
-  items.insert("nterm-peptide-mods-spec");
+  items.insert("cmod");
   items.insert("cterm-peptide-mods-spec");
-  items.insert("nterm-protein-mods-spec");
   items.insert("cterm-protein-mods-spec");
-  items.insert("min-mods");
   items.insert("max-mods");
+  items.insert("min-mods");
   items.insert("mod");
+  items.insert("mod-precision");
+  items.insert("mods-spec");
+  items.insert("nmod");
+  items.insert("nterm-peptide-mods-spec");
+  items.insert("nterm-protein-mods-spec");
   for (char c = 'A'; c <= 'Z'; c++) {
     items.insert(string(1, c));
   }
   AddCategory("Amino acid modifications", items);
 
   items.clear();
+  items.insert("allow-dups");
   items.insert("decoy-format");
   items.insert("keep-terminal-aminos");
   items.insert("seed");
-  items.insert("allow-dups");
   AddCategory("Decoy database generation", items);
 
   items.clear();
-  items.insert("enzyme");
   items.insert("custom-enzyme");
   items.insert("digestion");
+  items.insert("enzyme");
   items.insert("missed-cleavages");
   AddCategory("Enzymatic digestion", items);
 
   items.clear();
+  items.insert("auto-precursor-window");
   items.insert("max-precursor-charge");
   items.insert("precursor-window");
-  items.insert("auto-precursor-window");
   items.insert("precursor-window-type");
   AddCategory("Precursor selection", items);
 
   items.clear();
-  items.insert("max-ion-charge");
-  items.insert("peptide-centric-search");
-  items.insert("exact-p-value");
-  items.insert("compute-sp");
-  items.insert("spectrum-min-mz");
-  items.insert("spectrum-max-mz");
-  items.insert("min-peaks");
-  items.insert("spectrum-charge");
-  items.insert("scan-number");
-  items.insert("remove-precursor-peak");
-  items.insert("remove-precursor-tolerance");
-  items.insert("use-flanking-peaks");
-  items.insert("use-neutral-loss-peaks");
-  items.insert("mz-bin-width");
   items.insert("auto-mz-bin-width");
-  items.insert("mz-bin-offset");
-  items.insert("precursor-window-weibull");
-  items.insert("precursor-window-type-weibull");
+  items.insert("compute-p-values");
+  items.insert("compute-sp");
+  items.insert("exact-p-value");
+  items.insert("fragment-mass");
+  items.insert("isotope-error");
+  items.insert("isotope-windows");
+  items.insert("max-ion-charge");
+  items.insert("min-peaks");
   items.insert("min-weibull-points");
   items.insert("mod-mass-format");
-  items.insert("fragment-mass");
-  items.insert("isotope-windows");
-  items.insert("isotope-error");
+  items.insert("mz-bin-offset");
+  items.insert("mz-bin-width");
+  items.insert("peptide-centric-search");
+  items.insert("precursor-window-type-weibull");
+  items.insert("precursor-window-weibull");
+  items.insert("remove-precursor-peak");
+  items.insert("remove-precursor-tolerance");
+  items.insert("scan-number");
   items.insert("skip-preprocessing");
-  items.insert("compute-p-values");
+  items.insert("spectrum-charge");
+  items.insert("spectrum-max-mz");
+  items.insert("spectrum-min-mz");
+  items.insert("use-flanking-peaks");
+  items.insert("use-neutral-loss-peaks");
   items.insert("score-function");
   items.insert("fragment-tolerance");
   items.insert("evidence-granularity");
@@ -1912,33 +1957,34 @@ void Params::Categorize() {
   items.clear();
   items.insert("picked-protein");
   items.insert("protein-enzyme");
-  items.insert("protein-report-fragments");
   items.insert("protein-report-duplicates");
+  items.insert("protein-report-fragments");
   AddCategory("Protein inference options", items);
   
   items.clear();
   items.insert("protein");
   items.insert("fido-alpha");
   items.insert("fido-beta");
-  items.insert("fido-gamma");
   items.insert("fido-empirical-protein-q");
+  items.insert("fido-fast-gridsearch");
+  items.insert("fido-gamma");
   items.insert("fido-gridsearch-depth");
   items.insert("fido-gridsearch-mse-threshold");
-  items.insert("fido-fast-gridsearch");
-  items.insert("fido-protein-truncation-threshold");
   items.insert("fido-no-split-large-components");
+  items.insert("fido-protein-truncation-threshold");
   AddCategory("Fido options", items);
 
   items.clear();
+  items.insert("max-xlink-mods");
+  items.insert("mono-link");
   items.insert("use-old-xlink");
-  items.insert("xlink-include-inter");
-  items.insert("xlink-include-intra");
-  items.insert("xlink-include-inter-intra");
-  items.insert("xlink-include-linears");
   items.insert("xlink-include-deadends");
+  items.insert("xlink-include-inter");
+  items.insert("xlink-include-inter-intra");
+  items.insert("xlink-include-intra");
+  items.insert("xlink-include-linears");
   items.insert("xlink-include-selfloops");
   items.insert("xlink-prevents-cleavage");
-  items.insert("max-xlink-mods");
   AddCategory("Cross-linking parameters", items);
 
   items.clear();
@@ -1951,25 +1997,25 @@ void Params::Categorize() {
   AddCategory("CPU threads", items);
 
   items.clear();
-  items.insert("peptide_mass_tolerance");
   items.insert("auto_peptide_mass_tolerance");
-  items.insert("peptide_mass_units");
-  items.insert("mass_type_parent");
-  items.insert("mass_type_fragment");
-  items.insert("precursor_tolerance_type");
   items.insert("isotope_error");
+  items.insert("mass_type_fragment");
+  items.insert("mass_type_parent");
+  items.insert("peptide_mass_tolerance");
+  items.insert("peptide_mass_units");
+  items.insert("precursor_tolerance_type");
   AddCategory("Masses", items);
 
   items.clear();
-  items.insert("search_enzyme_number");
-  items.insert("num_enzyme_termini");
   items.insert("allowed_missed_cleavage");
+  items.insert("num_enzyme_termini");
+  items.insert("search_enzyme_number");
   AddCategory("Search enzyme", items);
 
   items.clear();
-  items.insert("fragment_bin_tol");
   items.insert("auto_fragment_bin_tol");
   items.insert("fragment_bin_offset");
+  items.insert("fragment_bin_tol");
   items.insert("theoretical_fragment_ions");
   items.insert("use_A_ions");
   items.insert("use_B_ions");
@@ -1981,33 +2027,33 @@ void Params::Categorize() {
   AddCategory("Fragment ions", items);
 
   items.clear();
-  items.insert("scan_range");
-  items.insert("precursor_charge");
-  items.insert("override_charge");
-  items.insert("ms_level");
   items.insert("activation_method");
+  items.insert("ms_level");
+  items.insert("override_charge");
+  items.insert("precursor_charge");
+  items.insert("scan_range");
   AddCategory("mzXML/mzML parameters", items);
 
   items.clear();
+  items.insert("clip_nterm_methionine");
+  items.insert("decoy_prefix");
   items.insert("digest_mass_range");
-  items.insert("num_results");
-  items.insert("skip_researching");
+  items.insert("mass_offsets");
   items.insert("max_fragment_charge");
   items.insert("max_precursor_charge");
   items.insert("nucleotide_reading_frame");
-  items.insert("clip_nterm_methionine");
-  items.insert("spectrum_batch_size");
-  items.insert("decoy_prefix");
+  items.insert("num_results");
   items.insert("output_suffix");
-  items.insert("mass_offsets");
+  items.insert("skip_researching");
+  items.insert("spectrum_batch_size");
   AddCategory("Miscellaneous parameters", items);
 
   items.clear();
-  items.insert("minimum_peaks");
+  items.insert("clear_mz_range");
   items.insert("minimum_intensity");
+  items.insert("minimum_peaks");
   items.insert("remove_precursor_peak");
   items.insert("remove_precursor_tolerance");
-  items.insert("clear_mz_range");
   AddCategory("Spectral processing", items);
 
   items.clear();
@@ -2038,86 +2084,87 @@ void Params::Categorize() {
   AddCategory("General options", items);
 
   items.clear();
-  items.insert("subset-max-train");
-  items.insert("c-pos");
   items.insert("c-neg");
+  items.insert("c-pos");
+  items.insert("maxiter");
+  items.insert("percolator-seed");
+  items.insert("quick-validation");
+  items.insert("subset-max-train");
+  items.insert("test-each-iteration");
   items.insert("test-fdr");
   items.insert("train-fdr");
-  items.insert("maxiter");
-  items.insert("quick-validation");
-  items.insert("test-each-iteration");
-  items.insert("percolator-seed");
   AddCategory("SVM training options", items);
 
   items.clear();
-  items.insert("override");
-  items.insert("output-weights");
-  items.insert("init-weights");
   items.insert("default-direction");
-  items.insert("unitnorm");
+  items.insert("init-weights");
   items.insert("klammer");
+  items.insert("output-weights");
+  items.insert("override");
+  items.insert("unitnorm");
   AddCategory("SVM feature input options", items);
 
   items.clear();
-  items.insert("pm-min-precursor-mz");
-  items.insert("pm-max-precursor-mz");
-  items.insert("pm-min-frag-mz");
-  items.insert("pm-max-frag-mz");
-  items.insert("pm-min-scan-frag-peaks");
-  items.insert("pm-max-precursor-delta-ppm");
   items.insert("pm-charge");
-  items.insert("pm-top-n-frag-peaks");
-  items.insert("pm-pair-top-n-frag-peaks");
-  items.insert("pm-min-common-frag-peaks");
+  items.insert("pm-max-frag-mz");
+  items.insert("pm-max-precursor-delta-ppm");
+  items.insert("pm-max-precursor-mz");
   items.insert("pm-max-scan-separation");
+  items.insert("pm-min-common-frag-peaks");
+  items.insert("pm-min-frag-mz");
   items.insert("pm-min-peak-pairs");
+  items.insert("pm-min-precursor-mz");
+  items.insert("pm-min-scan-frag-peaks");
+  items.insert("pm-pair-top-n-frag-peaks");
+  items.insert("pm-top-n-frag-peaks");
   AddCategory("param-medic options", items);
 
   items.clear();
-  items.insert("spectrum-format");
-  items.insert("spectrum-parser");
-  items.insert("list-of-files");
-  items.insert("print-search-progress");
-  items.insert("use-z-line");
-  items.insert("top-match");
+  items.insert("ascending");
+  items.insert("column-type");
+  items.insert("comparison");
   items.insert("concat");
-  items.insert("store-spectra");
-  items.insert("store-index");
-  items.insert("xlink-print-db");
-  items.insert("fileroot");
-  items.insert("temp-dir");
-  items.insert("output-dir");
-  items.insert("output-file");
-  items.insert("overwrite");
-  items.insert("txt-output");
-  items.insert("sqt-output");
-  items.insert("pepxml-output");
-  items.insert("mzid-output");
-  items.insert("pin-output");
-  items.insert("pout-output");
-  items.insert("output_sqtfile");
-  items.insert("output_txtfile");
-  items.insert("output_pepxmlfile");
-  items.insert("output_percolatorfile");
-  items.insert("output_outfiles");
-  items.insert("print_expect_score");
-  items.insert("num_output_lines");
-  items.insert("show_fragment_ions");
-  items.insert("sample_enzyme_number");
+  items.insert("decoy-prefix");
+  items.insert("decoy-xml-output");
+  items.insert("delimiter");
   items.insert("feature-file-in");
   items.insert("feature-file-out");
-  items.insert("decoy-xml-output");
-  items.insert("parameter-file");
-  items.insert("verbosity");
-  items.insert("decoy-prefix");
-  items.insert("precision");
-  items.insert("peptide-list");
-  items.insert("comparison");
-  items.insert("header");
-  items.insert("column-type");
-  items.insert("ascending");
-  items.insert("delimiter");
   items.insert("file-column");
+  items.insert("fileroot");
+  items.insert("header");
+  items.insert("list-of-files");
+  items.insert("mass-precision");
+  items.insert("mzid-output");
+  items.insert("num_output_lines");
+  items.insert("output-dir");
+  items.insert("output-file");
+  items.insert("output_outfiles");
+  items.insert("output_pepxmlfile");
+  items.insert("output_percolatorfile");
+  items.insert("output_sqtfile");
+  items.insert("output_txtfile");
+  items.insert("overwrite");
+  items.insert("parameter-file");
+  items.insert("peptide-list");
+  items.insert("pepxml-output");
+  items.insert("pin-output");
+  items.insert("pout-output");
+  items.insert("precision");
+  items.insert("print-search-progress");
+  items.insert("print_expect_score");
+  items.insert("sample_enzyme_number");
+  items.insert("show_fragment_ions");
+  items.insert("spectrum-format");
+  items.insert("spectrum-parser");
+  items.insert("sqt-output");
+  items.insert("store-index");
+  items.insert("store-spectra");
+  items.insert("temp-dir");
+  items.insert("top-match");
+  items.insert("txt-output");
+  items.insert("use-z-line");
+  items.insert("verbosity");
+  items.insert("xlink-print-db");
   AddCategory("Input and output", items);
 
 }

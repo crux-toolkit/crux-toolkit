@@ -16,9 +16,10 @@ using namespace Crux;
 
 ModificationDefinition::ModificationDefinition(
   const string& aminoAcids, double deltaMass, ModPosition position,
-  bool preventsCleavage, bool preventsXLink, char symbol)
+  bool preventsCleavage, bool preventsXLink, bool monoLink, char symbol)
   : deltaMass_(deltaMass), position_(position),
-    symbol_(symbol), preventsCleavage_(preventsCleavage), preventsXLink_(preventsXLink) {
+    symbol_(symbol), preventsCleavage_(preventsCleavage), preventsXLink_(preventsXLink),
+    monoLink_(monoLink) {
   AddAminoAcids(aminoAcids);
 }
 
@@ -27,10 +28,10 @@ ModificationDefinition::~ModificationDefinition() {
 
 const ModificationDefinition* ModificationDefinition::New(
   const string& aminoAcids, double deltaMass, ModPosition position,
-  bool isStatic, bool preventsCleavage, bool preventsXLink) {
+  bool isStatic, bool preventsCleavage, bool preventsXLink, bool monoLink) {
   return isStatic
     ? NewStaticMod(aminoAcids, deltaMass, position, preventsCleavage, preventsXLink)
-    : NewVarMod(aminoAcids, deltaMass, position, preventsCleavage, preventsXLink, '\0');
+    : NewVarMod(aminoAcids, deltaMass, position, preventsCleavage, preventsXLink, monoLink, '\0');
 }
 
 const ModificationDefinition* ModificationDefinition::NewStaticMod(
@@ -57,14 +58,14 @@ const ModificationDefinition* ModificationDefinition::NewStaticMod(
   }
   // Does not exist yet
   ModificationDefinition* mod = new ModificationDefinition(
-    aminoAcids, deltaMass, position, '\0', preventsCleavage, preventsXLink);
+    aminoAcids, deltaMass, position, '\0', preventsCleavage, preventsXLink, false);
   modContainer_.Add(mod);
   return mod;
 }
 
 const ModificationDefinition* ModificationDefinition::NewVarMod(
   const string& aminoAcids, double deltaMass, ModPosition position,
-  bool preventsCleavage, bool preventsXLink, char symbol) {
+  bool preventsCleavage, bool preventsXLink, bool monoLink, char symbol) {
   // Look for existing
   for (vector<ModificationDefinition*>::const_iterator i = modContainer_.varMods_.begin();
        i != modContainer_.varMods_.end();
@@ -73,6 +74,7 @@ const ModificationDefinition* ModificationDefinition::NewVarMod(
         (position == UNKNOWN || (*i)->position_ == UNKNOWN || (*i)->position_ == position) &&
         (*i)->preventsCleavage_ == preventsCleavage &&
         (*i)->preventsXLink_ == preventsXLink &&
+        (*i)->monoLink_ == monoLink &&
         (symbol == '\0' || (*i)->symbol_ == symbol)) {
       (*i)->AddAminoAcids(aminoAcids);
       if (position != UNKNOWN && (*i)->position_ == UNKNOWN) {
@@ -88,7 +90,7 @@ const ModificationDefinition* ModificationDefinition::NewVarMod(
     modContainer_.ConsumeSymbol(symbol);
   }
   ModificationDefinition* mod = new ModificationDefinition(
-    aminoAcids, deltaMass, position, preventsCleavage, preventsXLink, symbol);
+    aminoAcids, deltaMass, position, preventsCleavage, preventsXLink, monoLink, symbol);
   modContainer_.Add(mod);
   return mod;
 }
@@ -239,6 +241,10 @@ bool ModificationDefinition::PreventsCleavage() const {
 
 bool ModificationDefinition::PreventsXLink() const {
   return preventsXLink_;
+}
+
+bool ModificationDefinition::MonoLink() const {
+  return monoLink_;
 }
 
 const ModificationDefinition* ModificationDefinition::Find(char symbol) {
@@ -418,6 +424,10 @@ bool Modification::PreventsXLink() const {
   return mod_->PreventsXLink();
 }
 
+bool Modification::MonoLink() const {
+  return mod_->MonoLink();
+}
+
 // Turns a MODIFIED_AA_T* and its length into a sequence and vector of Modification
 // TODO Remove this
 void Modification::FromSeq(MODIFIED_AA_T* seq, int length,
@@ -435,22 +445,23 @@ void Modification::FromSeq(MODIFIED_AA_T* seq, int length,
         continue;
       }
       for (int j = 0; j < modCount; j++) {
-        if (is_aa_modified(seq[i], allMods[j])) {
+        if (allMods[j]->isModified(seq[i])) {
           ModPosition position = UNKNOWN;
-          switch (aa_mod_get_position(allMods[j])) {
+          switch (allMods[j]->getPosition()) {
           case N_TERM: position = PEPTIDE_N; break;
           case C_TERM: position = PEPTIDE_C; break;
           }
-          string aaList = aa_mod_get_aa_list_string(allMods[j]);
-          bool preventsCleavage = aa_mod_get_prevents_cleavage(allMods[j]);
-          bool preventsXLink = aa_mod_get_prevents_xlink(allMods[j]);
-          double massChange = aa_mod_get_mass_change(allMods[j]);
+          string aaList = allMods[j]->getAAListString();
+          bool preventsCleavage = allMods[j]->getPreventsCleavage();
+          bool preventsXLink = allMods[j]->getPreventsXLink();
+          bool monoLink = allMods[j]->getMonoLink();
+          double massChange = allMods[j]->getMassChange();
           const ModificationDefinition* def =
             ModificationDefinition::Find(massChange, false, position);
           if (!def) {
-            char symbol = aa_mod_get_symbol(allMods[j]);
+            char symbol = allMods[j]->getSymbol();
             def = ModificationDefinition::NewVarMod(
-              aaList, massChange, position, preventsCleavage, preventsXLink, symbol);
+              aaList, massChange, position, preventsCleavage, preventsXLink, monoLink, symbol);
           }
           outMods->push_back(Modification(def, (unsigned char)i));
         }
@@ -472,7 +483,8 @@ MODIFIED_AA_T* Modification::ToSeq(const string& seq, const vector<Modification>
 
   for (vector<Modification>::const_iterator i = mods.begin(); i != mods.end(); i++) {
     if (!i->Static()) {
-      modify_aa(&modSeq[i->Index()], get_aa_mod_from_mass((FLOAT_T)i->DeltaMass()));
+      
+      get_aa_mod_from_mass((FLOAT_T)i->DeltaMass())->modify(&modSeq[i->Index()]);
     }
   }
 

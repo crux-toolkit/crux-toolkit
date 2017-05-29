@@ -238,6 +238,7 @@ int TideIndexApplication::main(
     if (!ReadRecordsToVector<pb::AuxLocation>(&locations, out_aux)) {
       carp(CARP_FATAL, "Error reading auxlocs file");
     }
+    int mass_precision = Params::GetInt("mass-precision");
     // Iterate over all protocol buffer peptides
     unsigned int writeCountTargets = 0, writeCountDecoys = 0;
     HeadedRecordReader reader(peakless_peptides, NULL);
@@ -257,7 +258,9 @@ int TideIndexApplication::main(
       if (writeTarget) {
         // This is a target, output it
         targetPepStrs.insert(pep_str);
-        *out_target_list << pep_str << '\t' << peptide->mass() << endl;
+        *out_target_list << pep_str << '\t'
+                         << StringUtils::ToString(peptide->mass(),
+                                                  mass_precision) << endl;
         ++writeCountTargets;
       }
       if (writeDecoy) {
@@ -272,7 +275,8 @@ int TideIndexApplication::main(
     for (vector< pair<string, double> >::iterator i = decoyPepStrs.begin();
          i != decoyPepStrs.end();
          ++i) {
-      *out_decoy_list << i->first << '\t' << i->second;
+      *out_decoy_list << i->first << '\t'
+                      << StringUtils::ToString(i->second, mass_precision);
       if (targetPepStrs.find(i->first) != targetPepStrs.end()) {
         *out_decoy_list << "\t*";
       }
@@ -351,32 +355,36 @@ vector<string> TideIndexApplication::getArgs() const {
 
 vector<string> TideIndexApplication::getOptions() const {
   string arr[] = {
-    "decoy-format",
-    "keep-terminal-aminos",
-    "decoy-prefix",
-    "enzyme",
+    "allow-dups",
+    "clip-nterm-methionine",
+    "cterm-peptide-mods-spec",
+    "cterm-protein-mods-spec",
     "custom-enzyme",
+    "decoy-format",
+    "decoy-prefix",
     "digestion",
-    "missed-cleavages",
+    "enzyme",
+    "isotopic-mass",
+    "keep-terminal-aminos",
+    "mass-precision",
     "max-length",
     "max-mass",
+    "max-mods",
     "min-length",
     "min-mass",
-    "isotopic-mass",
-    "mods-spec",
-    "cterm-peptide-mods-spec",
-    "nterm-peptide-mods-spec",
-    "max-mods",
     "min-mods",
+    "missed-cleavages",
+    "mod-precision",
+    "mods-spec",
+    "nterm-peptide-mods-spec",
+    "nterm-protein-mods-spec",
     "output-dir",
     "overwrite",
-    "peptide-list",
     "parameter-file",
+    "peptide-list",
     "seed",
-    "clip-nterm-methionine",
-    "verbosity",
-    "allow-dups",
-    "temp-dir"
+    "temp-dir",
+    "verbosity"
   };
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }

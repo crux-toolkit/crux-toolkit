@@ -24,6 +24,7 @@
 #include "Params.h"
 
 using namespace Crux;
+using namespace std;
 
 /* Private data types, typedefed in objects.h */
 /**
@@ -78,13 +79,13 @@ PEPTIDE_MOD_T* new_peptide_mod() {
   if( index > -1 ) {
     new_mod->aa_mod_counts[index] = 1;
     new_mod->num_mods++;
-    new_mod->mass_change += aa_mod_get_mass_change(list[index]);
+    new_mod->mass_change += list[index]->getMassChange();
   }
   index = get_fixed_mod_index(C_TERM); 
   if( index > -1 ) {
     new_mod->aa_mod_counts[index] = 1;
     new_mod->num_mods++;
-    new_mod->mass_change += aa_mod_get_mass_change(list[index]);
+    new_mod->mass_change += list[index]->getMassChange();
   }
 
   return new_mod;
@@ -153,6 +154,8 @@ int generate_peptide_mod_list(
   return count; 
 }
 
+
+
 int generate_peptide_mod_list_TESTER(
   PEPTIDE_MOD_T*** peptide_mod_list,
   AA_MOD_T** aa_mod_list,
@@ -168,8 +171,8 @@ int generate_peptide_mod_list_TESTER(
       mod_list_idx++) {
 
     AA_MOD_T* cur_aa_mod = aa_mod_list[mod_list_idx];
-    int cur_mod_max = aa_mod_get_max_per_peptide(cur_aa_mod);
-    char cur_mod_id = aa_mod_get_symbol(cur_aa_mod);
+    int cur_mod_max = cur_aa_mod->getMaxPerPeptide();
+    char cur_mod_id = cur_aa_mod->getSymbol();
     carp(CARP_DETAILED_DEBUG, "cur max %d, id %c", cur_mod_max, cur_mod_id);
 
     // initialize temp list 
@@ -236,7 +239,7 @@ int generate_peptide_mod_list_TESTER(
         (QSORT_COMPARE_METHOD)compare_peptide_mod_num_aa_mods);
 
   // find the index of the first peptide mod with too many aa mods
-  int max = 1; //Params::GetInt("max-mods");
+  int max = Params::GetInt("max-mods");
   // should use binary search...
   int mod_idx = 0;
   for(mod_idx = 0; mod_idx < final_counter; mod_idx++) {
@@ -283,9 +286,9 @@ bool is_sequence_position_modifiable(
   int position, 
   AA_MOD_T* mod) {
 
-  if(is_aa_modifiable(char_aa_to_modified(sequence[position]), mod)) {
+  if(mod->isModifiable(char_aa_to_modified(sequence[position]))) {
 
-    if (aa_mod_get_prevents_cleavage(mod)) {
+    if (mod->getPreventsCleavage()) {
       //make sure that position is not the beginning or end.
       if (position == 0 || sequence[position+1] == '\0') {
         return false;
@@ -312,9 +315,9 @@ bool is_sequence_position_modifiable(
   int position,
   AA_MOD_T* mod) {
   
-  if( is_aa_modifiable( sequence[position], mod )) {
+  if( mod->isModifiable( sequence[position] )) {
 
-    if (aa_mod_get_prevents_cleavage(mod)) {
+    if (mod->getPreventsCleavage()) {
       //make sure that position is not the beginning or end.
       if (position == 0 || sequence[position+1] == MOD_SEQ_NULL) {
         return false;
@@ -371,10 +374,10 @@ bool is_peptide_modifiable(
     // SECOND: check modifyability based on type
     AA_MOD_T* cur_aa_mod = all_mods[amod_idx];
     // for position-based mods, check distance from protein end
-    int max_distance = aa_mod_get_max_distance(cur_aa_mod);
+    int max_distance = cur_aa_mod->getMaxDistance();
     int locations_count = 0;
     int cur_seq_idx = 0;  
-    switch( aa_mod_get_position(cur_aa_mod) ) {
+    switch( cur_aa_mod->getPosition() ) {
     case C_TERM: 
       if( max_distance < peptide->getCDistance()) { 
         success = false;
@@ -689,14 +692,14 @@ int apply_mod_to_seq(
   }
 
   // special case: positional mods
-  if( N_TERM == aa_mod_get_position(mod) ) {
+  if( N_TERM == mod->getPosition() ) {
     //MODIFIED_AA_T* seq_copy = copy_mod_aa_seq(seq);
     MODIFIED_AA_T* seq_copy = copy_mod_aa_seq(seq, seq_len);
-    modify_aa( &seq_copy[0], mod );
+    mod->modify( &seq_copy[0] );
     push_back_linked_list(return_list, seq_copy);
     return 1;  // one added to list
   }
-  if( C_TERM == aa_mod_get_position(mod)) {
+  if( C_TERM == mod->getPosition()) {
     //MODIFIED_AA_T* seq_copy = copy_mod_aa_seq(seq);
     MODIFIED_AA_T* seq_copy = copy_mod_aa_seq(seq, seq_len);
     /*
@@ -707,7 +710,7 @@ int apply_mod_to_seq(
     }
     */
     //modify_aa( &seq_copy[seq_idx-1], mod );
-    modify_aa( &seq_copy[seq_len-1], mod );
+    mod->modify( &seq_copy[seq_len-1] );
     push_back_linked_list(return_list, seq_copy);
     return 1;  // one added to list
   }
@@ -715,7 +718,7 @@ int apply_mod_to_seq(
   // first loop, skip over n modified aas in the seq
   int seq_idx = 0;
   while( seq[seq_idx] != MOD_SEQ_NULL  && skip_n != 0) {
-    if( is_aa_modified( seq[seq_idx], mod ) ) {
+    if( mod->isModified( seq[seq_idx] ) ) {
       skip_n--;
     }
     seq_idx++;
@@ -730,7 +733,7 @@ int apply_mod_to_seq(
     if (is_sequence_position_modifiable(seq, seq_idx, mod)) {
       //      MODIFIED_AA_T* seq_copy = copy_mod_aa_seq(seq);
       MODIFIED_AA_T* seq_copy = copy_mod_aa_seq(seq, seq_len);
-      modify_aa( &seq_copy[seq_idx], mod );
+      mod->modify( &seq_copy[seq_idx] );
 
       push_back_linked_list(return_list, seq_copy);
       count++;
@@ -752,7 +755,7 @@ void print_p_mod(PEPTIDE_MOD_T* mod) {
   int num_aa_mods = get_all_aa_mod_list( &all_mods );
   assert( num_aa_mods < MAX_AA_MODS );
   for(int i = 0; i < num_aa_mods; i++) {
-    print_a_mod( all_mods[i] );
+    all_mods[i]->print();
     printf("  ");
   }
   printf("\n");
@@ -775,7 +778,7 @@ void peptide_mod_add_aa_mod(
   assert( num_aa_mods < MAX_AA_MODS );
 
   //printf("mass change for amod of index %d is %.2f\n", aa_mod_idx, aa_mod_get_mass_change(all_mods[aa_mod_idx]));
-  pep_mod->mass_change += aa_mod_get_mass_change(all_mods[aa_mod_idx])
+  pep_mod->mass_change += all_mods[aa_mod_idx]->getMassChange()
                             * copies;
   //printf("pep mod mass change is now %.2f\n", pep_mod->mass_change );
   pep_mod->num_mods += copies;
@@ -797,6 +800,20 @@ double peptide_mod_get_mass_change(PEPTIDE_MOD_T* mod) {
  */
 int peptide_mod_get_num_aa_mods(PEPTIDE_MOD_T* mod) {
   return mod->num_mods;
+}
+
+void peptide_mod_get_aa_mods(PEPTIDE_MOD_T* mod, vector<AA_MOD_T*>& aa_mods) {
+  aa_mods.clear();
+  
+  AA_MOD_T** all_mods = NULL;
+  int num_aa_mods = get_all_aa_mod_list( &all_mods );
+  assert( num_aa_mods < MAX_AA_MODS );
+  for (int aa_mod_idx = 0;aa_mod_idx < num_aa_mods;aa_mod_idx++) {
+    for (int copies = 0;copies < mod->aa_mod_counts[aa_mod_idx];copies++) {
+      aa_mods.push_back(all_mods[aa_mod_idx]);
+    }
+  }
+  
 }
 
 /**
