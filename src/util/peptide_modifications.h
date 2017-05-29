@@ -125,6 +125,8 @@ int peptide_mod_get_num_aa_mods(PEPTIDE_MOD_T* mod);
  */
 LINKED_LIST_T* peptide_mod_get_aa_mod_list(PEPTIDE_MOD_T* mod);
 
+void peptide_mod_get_aa_mods(PEPTIDE_MOD_T* mod, std::vector<AA_MOD_T*>& aa_mods);
+
 /**
  * \brief Compares the number of aa mods in two peptide mods for
  * sorting.

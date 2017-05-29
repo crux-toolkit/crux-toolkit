@@ -20,18 +20,20 @@ class ModificationDefinition {
 public:
   ModificationDefinition(
     const std::string& aminoAcids, double deltaMass, ModPosition position,
-    bool preventsCleavage, bool preventsXLink, char symbol);
+    bool preventsCleavage, bool preventsXLink, bool monoLink, char symbol);
   virtual ~ModificationDefinition();
 
   static const ModificationDefinition* New(
     const std::string& aminoAcids, double deltaMass, ModPosition position,
-    bool isStatic, bool preventsCleavage = false, bool preventsXLink = false);
+    bool isStatic, bool preventsCleavage = false, bool preventsXLink = false,
+    bool monoLink = false);
   static const ModificationDefinition* NewStaticMod(
     const std::string& aminoAcids, double deltaMass, ModPosition position,
     bool preventsCleavage = false, bool preventsXLink = false);
   static const ModificationDefinition* NewVarMod(
     const std::string& aminoAcids, double deltaMass, ModPosition position,
-    bool preventsCleavage = false, bool preventsXLink = false, char symbol = '\0');
+    bool preventsCleavage = false, bool preventsXLink = false, bool monoLink = false,
+    char symbol = '\0');
 
   std::string String() const;
   static void ListAll();
@@ -54,7 +56,7 @@ public:
   char Symbol() const;
   bool PreventsCleavage() const;
   bool PreventsXLink() const;
-
+  bool MonoLink() const;
   static const ModificationDefinition* Find(char symbol);
   static const ModificationDefinition* Find(double deltaMass,
     bool isStatic, ModPosition position = UNKNOWN);
@@ -67,6 +69,7 @@ protected:
   char symbol_;
   bool preventsCleavage_;
   bool preventsXLink_;
+  bool monoLink_;
 };
 
 namespace Crux { class Modification; }
@@ -97,6 +100,7 @@ public:
   char Symbol() const;
   bool PreventsCleavage() const;
   bool PreventsXLink() const;
+  bool MonoLink() const;
 
   static void FromSeq(MODIFIED_AA_T* seq, int length,
                       std::string* outSeq, std::vector<Modification>* outMods);

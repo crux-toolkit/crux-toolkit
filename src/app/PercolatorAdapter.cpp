@@ -49,10 +49,14 @@ PercolatorAdapter::~PercolatorAdapter() {
 }
 
 void PercolatorAdapter::deleteCollections() {
-  delete collection_;
-  delete decoy_collection_;
-  collection_ = NULL;
-  decoy_collection_ = NULL;
+  if (collection_) {
+    delete collection_;
+    collection_ = NULL;
+  }
+  if (decoy_collection_) {
+    delete decoy_collection_;
+    decoy_collection_ = NULL;
+  }
 }
 
 /**
@@ -197,7 +201,7 @@ void PercolatorAdapter::processPeptideScores(Scores& allScores) {
     PeptideMatch* peptide_match = !score_itr->isDecoy()
       ? collection_->getPeptideMatch(mod_seq)
       : decoy_collection_->getPeptideMatch(mod_seq);
-    free(mod_seq);
+    delete[] mod_seq;
     if (peptide_match == NULL) {
       deleteCollections();
       return;
@@ -361,7 +365,7 @@ Crux::Peptide* PercolatorAdapter::extractPeptide(
     if (peptide == NULL) {
       peptide = new Crux::Peptide(seq.length(), protein, start_idx);
       peptide->setModifiedAASequence(mod_seq, is_decoy);
-      free(mod_seq);
+      delete[] mod_seq;
     } else {
       peptide->addPeptideSrc(new PeptideSrc(NON_SPECIFIC_DIGEST, protein, start_idx));
     }
