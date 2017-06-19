@@ -177,6 +177,7 @@ set (
   io/SpectrumCollection.cpp
   io/SpectrumCollectionFactory.cpp
   model/Spectrum.cpp
+  io/SpectrumRecordSpectrumCollection.cpp
   io/SpectrumRecordWriter.cpp
   model/SpectrumZState.cpp
   app/StatColumn.cpp
