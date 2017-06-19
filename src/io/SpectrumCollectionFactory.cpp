@@ -9,6 +9,7 @@
 #include "SpectrumCollectionFactory.h"
 #include "MSToolkitSpectrumCollection.h"
 #include "PWIZSpectrumCollection.h"
+#include "SpectrumRecordSpectrumCollection.h"
 #include "util/FileUtils.h"
 #include "util/Params.h"
 
@@ -23,6 +24,10 @@ Crux::SpectrumCollection* SpectrumCollectionFactory::create(const string& filena
   if (FileUtils::IsDir(filename)) {
     carp(CARP_FATAL, "Path %s is a directory. \n Please enter a spectrum filename\
 (.ms2, .mgf, or .mzXML)", filename.c_str());
+  }
+
+  if (SpectrumRecordSpectrumCollection::IsSpectrumRecordFile(filename)) {
+    return new SpectrumRecordSpectrumCollection(filename);
   }
 
   string parser = Params::GetString("spectrum-parser");

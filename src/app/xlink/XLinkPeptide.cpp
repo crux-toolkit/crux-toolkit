@@ -245,8 +245,12 @@ int XLinkPeptide::addXLinkPeptides(
         //create the candidate
         XLinkMatch* newCandidate = 
           new XLinkPeptide(pep1, pep2, link1_idx, link2_idx);
-        candidates.add(newCandidate);
-        num_candidates++;
+	if (newCandidate->getNumMissedCleavages() <= GlobalParams::getMissedCleavages()) {
+          candidates.add(newCandidate);
+          num_candidates++;
+	} else {
+	  delete newCandidate;
+	}
       }
     }
   }
@@ -592,7 +596,7 @@ int XLinkPeptide::getNumMissedCleavages() {
   
   int missed2 = pep2->getMissedCleavageSites(skip);
 
-  return max(missed1, missed2);
+  return missed1 + missed2;
 
 }
 
