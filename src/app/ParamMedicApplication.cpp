@@ -61,14 +61,14 @@ int ParamMedicApplication::main(int argc, char** argv) {
   );
 
   if (precursorFailure.empty()) {
-    carp(CARP_INFO, "precursor ppm standard deviation: %f", precursorSigmaPpm);
-    carp(CARP_INFO, "Precursor error estimate (ppm): %.2f", precursorPredictionPpm);
+    printf("Precursor standard deviation (ppm): %f\n", precursorSigmaPpm);
+    printf("Precursor error estimate (ppm): %.2f\n", precursorPredictionPpm);
   } else {
     carp(CARP_ERROR, "failed to calculate precursor error: %s", precursorFailure.c_str());
   }
   if (fragmentFailure.empty()) {
-    carp(CARP_INFO, "fragment standard deviation (ppm): %f", fragmentSigmaPpm);
-    carp(CARP_INFO, "Fragment bin size estimate (Th): %.4f", fragmentPredictionTh);
+    printf("Fragment standard deviation (ppm): %f\n", fragmentSigmaPpm);
+    printf("Fragment bin size estimate (Th): %.4f\n", fragmentPredictionTh);
   } else {
     carp(CARP_ERROR, "failed to calculate fragment error: %s", fragmentFailure.c_str());
   }
