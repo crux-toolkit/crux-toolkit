@@ -137,6 +137,7 @@ int SubtractIndexApplication::main(int argc, char** argv) {
   CHECK(peptide_reader2.OK());
   CHECK(writer.OK());
 
+  int mass_precision = Params::GetInt("mass-precision");
   vector< pair<pb::Peptide, bool> > pepList1;
   vector<pb::Peptide> pepList2;
   bool done = false;
@@ -233,11 +234,15 @@ int SubtractIndexApplication::main(int argc, char** argv) {
           double mass = i->first.mass();
           if (!i->first.is_decoy()) {
             if (out_target_list) {
-              *out_target_list << pepStr << '\t' << mass << endl;
+              *out_target_list << pepStr << '\t'
+                               << StringUtils::ToString(mass, mass_precision)
+                               << endl;
             }
           } else {
             if (out_decoy_list) {
-              *out_decoy_list << pepStr << '\t' << mass << endl;
+              *out_decoy_list << pepStr << '\t'
+                              << StringUtils::ToString(mass, mass_precision)
+                              << endl;
             }
           }
         }
@@ -301,11 +306,12 @@ vector<string> SubtractIndexApplication::getArgs() const {
  */
 vector<string> SubtractIndexApplication::getOptions() const {
   string arr[] = {
-    "verbosity",
-    "parameter-file",
+    "mass-precision",
+    "output-dir",
     "overwrite",
+    "parameter-file",
     "peptide-list",
-    "output-dir"
+    "verbosity"
   };
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }
