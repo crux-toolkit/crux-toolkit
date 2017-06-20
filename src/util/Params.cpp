@@ -489,9 +489,7 @@ Params::Params() : finalized_(false) {
     "Set the precision for scores written to sqt and text files.",
     "Available for all commands.", true);
   InitIntParam("mass-precision", 4, 1, 100, // max is arbitrary
-    "Set the precision for masses and m/z written to sqt and .txt files. "
-    "Note that this parameter only takes effect when specified in the "
-    "parameter file.",
+    "Set the precision for masses and m/z written to sqt and text files.",
     "Available for all commands.", true);
   InitIntParam("print-search-progress", 1000, 0, BILLION,
     "Show search progress by printing every n spectra searched. Set to 0 to show no "
