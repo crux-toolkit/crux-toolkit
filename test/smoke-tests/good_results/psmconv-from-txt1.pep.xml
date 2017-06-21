@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href=""?>
-<msms_pipeline_analysis date="Thu May  4 01:48:16 2017" xmlns="http://regis-web.systemsbiology.net/pepXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://regis-web.systemsbiology.net/pepXML /usr/local/tpp/schema/pepXML_v110.xsd" summary_xml="">
+<msms_pipeline_analysis date="Tue Jun 20 05:03:46 2017" xmlns="http://regis-web.systemsbiology.net/pepXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://regis-web.systemsbiology.net/pepXML /usr/local/tpp/schema/pepXML_v110.xsd" summary_xml="">
 <msms_run_summary base_name="NA" msManufacturer="NA" msModel="NA" msIonization="NA" msAnalyzer="NA" msDectector="NA" raw_data_type="NA" raw_data="NA" >
 <sample_enzyme name="trypsin">
 </sample_enzyme>
@@ -33,6 +33,7 @@
 <aminoacid_modification aminoacid="W" mass="187.7793" massdiff="1.70" variable="N" peptide_terminus="n" />
 <aminoacid_modification aminoacid="Y" mass="164.7633" massdiff="1.70" variable="N" peptide_terminus="n" />
 <aminoacid_modification aminoacid="M" mass="147.0305" massdiff="15.99" variable="Y" />
+<parameter name="max-charge-feature" value="0"/>
 <parameter name="output-file" value=""/>
 <parameter name="verbosity" value="30"/>
 <parameter name="parameter-file" value=""/>
