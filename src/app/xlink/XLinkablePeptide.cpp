@@ -60,7 +60,7 @@ XLinkablePeptide::XLinkablePeptide(
   ) {
   init();
   if (xlinkablepeptide.peptide_) {
-    peptide_ = xlinkablepeptide.peptide_->copyPtr();
+    peptide_ = xlinkablepeptide.peptide_;
   } else if (sequence_) {
     sequence_ = my_copy_string(xlinkablepeptide.sequence_);
   }
@@ -83,7 +83,7 @@ XLinkablePeptide::XLinkablePeptide(
   XLinkablePeptide& xlinkablepeptide
 ) {
   init();
-  peptide_ = xlinkablepeptide.peptide_->copyPtr();
+  peptide_ = xlinkablepeptide.peptide_;
   is_decoy_ = xlinkablepeptide.is_decoy_;
   link_sites_ = xlinkablepeptide.link_sites_;
   xcorr_link_idx_ = xlinkablepeptide.xcorr_link_idx_;
@@ -109,7 +109,7 @@ XLinkablePeptide::XLinkablePeptide(
   vector<int>& link_sites ///< the linking sites
   ) {
   init();
-  peptide_ = peptide->copyPtr();
+  peptide_ = peptide;
 
   for (unsigned int idx = 0; idx < link_sites.size(); idx++) {
     addLinkSite(link_sites[idx]);
@@ -127,7 +127,7 @@ XLinkablePeptide::XLinkablePeptide(
   int additional_cleavages
   ) {
   init();
-  peptide_ = peptide->copyPtr();
+  peptide_ = peptide;
   findLinkSites(peptide_, bondmap, link_sites_, additional_cleavages);
 }
 

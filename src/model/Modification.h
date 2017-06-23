@@ -1,7 +1,6 @@
 #ifndef CRUX_MODIFICATION_H
 #define CRUX_MODIFICATION_H
 
-#include "model/Peptide.h"
 #include "util/modifications.h"
 
 #include <deque>
@@ -90,7 +89,8 @@ public:
   bool operator!=(const Modification& other) const;
 
   std::string String() const;
-  static Modification Parse(const std::string& modString, Peptide* peptide);
+  static std::vector<Modification> Parse(const std::string& modString, const std::string* unmodifiedSequence);
+  static Modification ParseOne(const std::string& modString, const std::string* unmodifiedSequence);
 
   unsigned char Index() const;
   const ModificationDefinition* Definition() const;
@@ -102,9 +102,13 @@ public:
   bool PreventsXLink() const;
   bool MonoLink() const;
 
+  static void FromSeq(const std::string& seq,
+                      std::string* outSeq, std::vector<Modification>* outMods);
   static void FromSeq(MODIFIED_AA_T* seq, int length,
                       std::string* outSeq, std::vector<Modification>* outMods);
   static MODIFIED_AA_T* ToSeq(const std::string& seq, const std::vector<Modification>& mods);
+
+  static bool SortFunction(const Modification& x, const Modification& y);
 protected:
   unsigned char index_; // 0 based position
   const ModificationDefinition* mod_;

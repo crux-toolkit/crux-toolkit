@@ -377,18 +377,6 @@ void freeModSeq(
 
 
 /**
- * \brief Remove any characters not A-Z from a peptide sequence.
- * \returns A newly allocated string with the given sequence less any
- * modififcation symbols or masses.
- */
-char* unmodify_sequence(const char* modified_seqeunce);
-
-/**
- * \brief Remove any characters not A-Z from a peptide sequence.
- */
-void unmodify_sequence_in_place(char* modified_seqeunce);
-
-/**
  * \brief Determine if an array of MODIFIED_AA_T is a palindrome.  
  * Used by reverse_sequence to avoid returning a reversed sequence
  * that is the same as the target.  Ignores the first and last

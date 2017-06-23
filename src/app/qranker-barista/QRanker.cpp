@@ -1,4 +1,5 @@
 #include "QRanker.h"
+#include "model/Peptide.h"
 #include "util/modifications.h"
 #include "util/Params.h"
 #include "app/ComputeQValues.h"
@@ -319,7 +320,7 @@ void QRanker ::write_results_psm_xml(
       string pep = d.ind2pep(pepind);
       string modified_sequence, n,c;
       get_pep_seq(pep, modified_sequence, n, c);
-      char* sequence = unmodify_sequence(modified_sequence.c_str());
+      string sequence = Crux::Peptide::unmodifySequence(modified_sequence);
       string flanking_aas = n + c;
       double peptide_mass = d.psmind2peptide_mass(psmind);
       
@@ -354,13 +355,12 @@ void QRanker ::write_results_psm_xml(
 
       PepXMLWriter& xmlfile = (fullset[i].label == 1) ? xmlfileTarget : xmlfileDecoy;
       xmlfile.writePSM(scan, filename, spectrum_mass, charge, psm_ranks,
-                       sequence, modified_sequence.c_str(),
+                       sequence.c_str(), modified_sequence.c_str(),
                        peptide_mass, num_proteins,
                        flanking_aas.c_str(), protein_names, 
                        protein_descriptions, scores_to_print, scores,
                        d.psmind2matches_spectrum(psmind));
 
-      free(sequence);
       if( path_name[0] ){
         free(path_name[0]);
       }
