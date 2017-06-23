@@ -8,6 +8,7 @@
 #include "DelimitedFile.h"
 
 #include "model/MatchCollection.h"
+#include "model/Modification.h"
 
 using namespace std;
 
@@ -352,35 +353,28 @@ Crux::Match* MatchFileReader::parseMatch() {
 }
 
 Crux::Peptide* MatchFileReader::parsePeptide() {
-  Crux::Peptide* peptide = new Crux::Peptide();
+  Crux::Peptide* peptide = NULL;
   string seq = getString(SEQUENCE_COL);
   if (!seq.empty()) {
-    //In cases where the sequence is in X.seq.X format, parse out the seq part
+    // In cases where the sequence is in X.seq.X format, parse out the seq part
     if (seq.length() > 4 && seq[1] == '.' && seq[seq.length() - 2] == '.') {
       seq = seq.substr(2, seq.length() - 4);
     }
 
-    // string length may include mod symbols and be longer than the peptide seq
-    MODIFIED_AA_T* modified_seq;
-    peptide->setLength(convert_to_mod_aa_seq(seq.c_str(), &modified_seq));
-    peptide->setModifiedAASequence(modified_seq, false);
+    peptide = new Crux::Peptide();
+    string unmodSeq = Crux::Peptide::unmodifySequence(seq);
+    vector<Crux::Modification> mods;
 
+    // Parse modifications column first! It has more details about modifications.
     string modsString = getString(MODIFICATIONS_COL);
     if (!modsString.empty()) {
-      vector<string> modStrings = StringUtils::Split(getString(MODIFICATIONS_COL), ',');
-      vector<Crux::Modification> mods;
-      for (vector<string>::const_iterator i = modStrings.begin(); i != modStrings.end(); i++) {
-        try {
-          Crux::Modification mod = Crux::Modification::Parse(StringUtils::Trim(*i), peptide);
-          if (!mod.Static()) {
-            mods.push_back(mod);
-          }
-        } catch (runtime_error& e) {
-          carp(CARP_ERROR, "Error parsing modification string: %s", e.what());
-        }
-      }
-      peptide->setMods(mods);
+      mods = Crux::Modification::Parse(modsString, &unmodSeq);
+    } else {
+      Crux::Modification::FromSeq(seq, NULL, &mods);
     }
+
+    peptide->setUnmodifiedSequence(unmodSeq);
+    peptide->setMods(mods);
 
     if (!PeptideSrc::parseTabDelimited(peptide, *this, database_, decoy_database_)) {
       carp(CARP_ERROR, "Failed to parse peptide src.");

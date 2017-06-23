@@ -29,7 +29,6 @@ ProteinMatchCollection::ProteinMatchCollection(
   ) {
   distinct_matches_ = true;
   addMatches(match_collection);
-
 }
 
   
@@ -37,7 +36,6 @@ ProteinMatchCollection::ProteinMatchCollection(
  * Default destructor
  */
 ProteinMatchCollection::~ProteinMatchCollection() {
-
   // delete protein matches
   for (ProteinMatchIterator iter = proteinMatchBegin();
        iter != proteinMatchEnd();
@@ -45,11 +43,10 @@ ProteinMatchCollection::~ProteinMatchCollection() {
     delete *iter;
   }
 
-  // delete modified aa strings + peptide matches
-  for (map<MODIFIED_AA_T*, PeptideMatch*, cmpSeq>::iterator iter = peptide_match_map_.begin();
+  // delete peptide matches
+  for (map<string, PeptideMatch*>::iterator iter = peptide_match_map_.begin();
        iter != peptide_match_map_.end();
        ++iter) {
-      delete[] iter->first;
       delete iter->second;
   }
 
@@ -59,7 +56,6 @@ ProteinMatchCollection::~ProteinMatchCollection() {
        ++iter) {
     delete *iter;
   }
-
 }
 
 /**
@@ -138,24 +134,17 @@ PeptideMatch* ProteinMatchCollection::getPeptideMatch(
   Peptide* peptide, ///< peptide to find
   bool create ///< create if it doesn't exist?
   ) {
-
-
-  MODIFIED_AA_T* mod_seq = peptide->getModifiedAASequence();
-
-  PeptideMatch* ans = getPeptideMatch(mod_seq);
+  PeptideMatch* ans = getPeptideMatch(peptide->getId());
 
   if (ans == NULL) {
     if (create) {
       ans = new PeptideMatch(peptide);
       peptide_matches_.push_back(ans);
-      peptide_match_map_.insert(pair<MODIFIED_AA_T*, PeptideMatch*>(mod_seq, ans));
+      peptide_match_map_.insert(pair<string, PeptideMatch*>(peptide->getId(), ans));
     } else {
-      delete[] mod_seq;
       carp(CARP_FATAL, "Could not find peptidematch for sequence %s",
         peptide->getSequence());
     }
-  } else {
-    delete[] mod_seq;
   }
 
   return ans;
@@ -175,13 +164,11 @@ ProteinMatch* ProteinMatchCollection::getProteinMatch(
  * \returns the PeptideMatch for the sequence, null if it doesn't exist.
  */
 PeptideMatch* ProteinMatchCollection::getPeptideMatch(
-  MODIFIED_AA_T* mod_seq ///< Modified Sequence to find
+  const string& id ///< peptide id to find
   ) {
-  map<MODIFIED_AA_T*, PeptideMatch*, cmpSeq>::iterator iter = peptide_match_map_.find(mod_seq);
+  map<string, PeptideMatch*>::iterator iter = peptide_match_map_.find(id);
   return (iter != peptide_match_map_.end()) ? iter->second : NULL;
 }
-
-
 
 /**
  * Helper method that adds a Crux match to the ProteinCollection,
@@ -244,7 +231,6 @@ void ProteinMatchCollection::addMatch(
 void ProteinMatchCollection::addMatches(
   MatchCollection* match_collection ///< collection to add
   ) {
-
   carp(CARP_DEBUG, "Adding %d matches to ProteinMatchCollection",
        match_collection->getMatchTotal());
   distinct_matches_ = match_collection->getHasDistinctMatches();
@@ -253,7 +239,6 @@ void ProteinMatchCollection::addMatches(
   while(match_iter.hasNext()) {
     addMatch(match_collection, match_iter.next());
   }
-
 }
 
 /**
@@ -263,9 +248,8 @@ const map<pair<int, int>, int>& ProteinMatchCollection::getMatchesSpectrum() {
   return spectrum_counts_;
 }
 
-
-/**                                                                                                                                                                                                      
- * \returns whether matches are distinct are not                                                                                                                                                         
+/**
+ * \returns whether matches are distinct are not
  */
 bool ProteinMatchCollection::hasDistinctMatches() {
   return distinct_matches_;

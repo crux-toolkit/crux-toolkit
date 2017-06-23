@@ -588,41 +588,6 @@ MODIFIED_AA_T* copy_mod_aa_seq(
 
 }
 
-
-
-/**
- * \brief Remove any characters not A-Z from a peptide sequence.
- * \returns A newly allocated string with the given sequence less any
- * modififcation symbols or masses.
- */
-char* unmodify_sequence(const char* modified_sequence) {
-  if (modified_sequence == NULL) {
-    return NULL;
-  }
-  char* new_seq = my_copy_string(modified_sequence);
-  unmodify_sequence_in_place(new_seq);
-  return new_seq;
-}
-
-/**
- * \brief Remove any characters that are not A-Z from a given peptide
- * seqeunce.
- */
-void unmodify_sequence_in_place(char* sequence) {
-  int seq_len = strlen(sequence);
-  int next_aa_idx = 0;
-  int move_to_here = 0;
-  while (next_aa_idx < seq_len) {
-    if (sequence[next_aa_idx] >= 'A' && sequence[next_aa_idx] <= 'Z') {
-      sequence[move_to_here] = sequence[next_aa_idx];
-      move_to_here++;
-    }
-    next_aa_idx++;
-  }
-  sequence[move_to_here] = '\0';
-}
-
-
 /**
  * \brief Determine if an array of MODIFIED_AA_T is a palindrome.  
  * Used by reverse_sequence to avoid returning a reversed sequence

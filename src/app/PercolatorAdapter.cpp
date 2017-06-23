@@ -191,17 +191,14 @@ void PercolatorAdapter::processPeptideScores(Scores& allScores) {
 
     PSMDescription* psm = score_itr->pPSM;
     string sequence;
-    MODIFIED_AA_T* mod_seq = getModifiedAASequence(psm, sequence);
-    if (mod_seq == NULL) {
-      deleteCollections();
-      return;
-    }
+    vector<Crux::Modification> mods;
+    Crux::Modification::FromSeq(psm->getFullPeptideSequence(), &sequence, &mods);
+    string peptideId = Crux::Peptide::getId(sequence, mods);
 
     // Set scores
     PeptideMatch* peptide_match = !score_itr->isDecoy()
-      ? collection_->getPeptideMatch(mod_seq)
-      : decoy_collection_->getPeptideMatch(mod_seq);
-    delete[] mod_seq;
+      ? collection_->getPeptideMatch(peptideId)
+      : decoy_collection_->getPeptideMatch(peptideId);
     if (peptide_match == NULL) {
       deleteCollections();
       return;
@@ -337,21 +334,18 @@ Crux::Peptide* PercolatorAdapter::extractPeptide(
   int charge_state, ///< charge state
   bool is_decoy ///< is psm a decoy?
 ) {
-  string seq;
-  MODIFIED_AA_T* mod_seq = getModifiedAASequence(psm, seq);
-  if (mod_seq == NULL) {
-    return NULL;
+  string sequence = psm->getFullPeptideSequence();
+  string n_term = "", c_term = "";
+  // Get flanking AA if they exist
+  if (sequence.length() >= 5 &&
+      sequence[1] == '.' && sequence[sequence.length() - 2] == '.') {
+    n_term += sequence[0];
+    c_term += sequence[sequence.length() - 1];
   }
 
-  string full_peptide(psm->getFullPeptide());
-  carp(CARP_DEBUG, "full peptide:%s", full_peptide.c_str());
-  carp(CARP_DEBUG, "=======================");
-  string n_term = "";
-  string c_term = "";
-  if (!full_peptide.empty()) {
-    n_term += full_peptide[0];
-    c_term += full_peptide[full_peptide.length() - 1];
-  }
+  string unmodifiedSeq;
+  vector<Crux::Modification> mods;
+  Crux::Modification::FromSeq(sequence, &unmodifiedSeq, &mods);
 
   // add proteins
   Crux::Peptide* peptide = NULL;
@@ -361,56 +355,17 @@ Crux::Peptide* PercolatorAdapter::extractPeptide(
     PostProcessProtein* protein = new PostProcessProtein();
     proteins_made_.push_back(protein);
     protein->setId(i->c_str());
-    int start_idx = protein->findStart(seq, n_term, c_term);
+    int start_idx = protein->findStart(unmodifiedSeq, n_term, c_term);
     if (peptide == NULL) {
-      peptide = new Crux::Peptide(seq.length(), protein, start_idx);
-      peptide->setModifiedAASequence(mod_seq, is_decoy);
-      delete[] mod_seq;
+      peptide = new Crux::Peptide(unmodifiedSeq.length(), protein, start_idx);
+      peptide->setMods(mods);
+      // TODO peptide->setModifiedAASequence(mod_seq, is_decoy);
     } else {
       peptide->addPeptideSrc(new PeptideSrc(NON_SPECIFIC_DIGEST, protein, start_idx));
     }
   }
 
   return peptide;
-}
-
-/**
- * \returns the modified and unmodified peptide sequence
- * for the psm
- */
-MODIFIED_AA_T* PercolatorAdapter::getModifiedAASequence(
-  PSMDescription* psm, ///< psm -in
-  string& seq ///< sequence -out
-) {
-  string perc_seq = psm->getFullPeptideSequence();
-  if (perc_seq.length() >= 5 &&
-      perc_seq[1] == '.' && perc_seq[perc_seq.length() - 2] == '.') {
-    // Trim off flanking AA if they exist
-    perc_seq = perc_seq.substr(2, perc_seq.length() - 4);
-  }
-  
-  if (perc_seq.find("UNIMOD") != string::npos) {
-    // UNIMOD modifications currently not supported
-    return NULL;
-  }
-
-  MODIFIED_AA_T* mod_seq = NULL;
-  carp(CARP_DEBUG, "PercolatorAdapter::getModifiedAASequence(): seq:%s", perc_seq.c_str());
-
-  // Turn off warnings
-  int verbosity = get_verbosity_level();
-  set_verbosity_level(0);
-
-  int mod_len = convert_to_mod_aa_seq(perc_seq.c_str(), &mod_seq, MOD_MASS_ONLY);
-  seq = string(mod_len, '\0');
-  for (int i = 0; i < mod_len; i++) {
-    seq[i] = modified_aa_to_char(mod_seq[i]);
-  }
-
-  // Restore verbosity
-  set_verbosity_level(verbosity);
-
-  return mod_seq;
 }
 
 // Finds the index of the given feature name (case insensitive).
