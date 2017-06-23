@@ -129,17 +129,6 @@ bool ParamMedicApplication::needsOutputDirectory() const {
   return false;
 }
 
-void ParamMedicApplication::processParams() {
-  if (!Params::GetBool("use-z-line")) {
-    carp(CARP_DEBUG, "Forcing use-z-line=T");
-    Params::Set("use-z-line", true);
-  }
-  if (!Params::GetBool("pm-ignore-no-charge")) {
-    carp(CARP_DEBUG, "Forcing pm-ignore-no-charge=T");
-    Params::Set("pm-ignore-no-charge", true);
-  }
-}
-
 ParamMedicErrorCalculator::ParamMedicErrorCalculator():
   numTotalSpectra_(0), numPassingSpectra_(0),
   numSpectraSameBin_(0), numSpectraWithinPpm_(0), numSpectraWithinPpmAndScans_(0),
