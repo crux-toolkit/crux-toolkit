@@ -13,7 +13,7 @@ message Location {
 message Peptide {
   // Comments below refer to usual practice when peptides appear in a file of
   // records sorted by mass.
-  optional int32 id = 1; // Numbered sequentially.
+  optional int64 id = 1; // Numbered sequentially.
   optional double mass = 2; // Neutral mass.
   optional int32 length = 3; // Number of amino acids.
   optional Location first_location = 4; // First location within protein

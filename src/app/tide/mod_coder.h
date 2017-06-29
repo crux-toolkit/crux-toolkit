@@ -12,11 +12,11 @@ class ModCoder {
     mask_ = (1 << log_unique_deltas_) - 1;
   }
 
-  int EncodeMod(int aa_index, int unique_delta_index) {
+  int EncodeMod(int aa_index, int unique_delta_index) const {
     return (aa_index << log_unique_deltas_) + unique_delta_index;
   }
 
-  void DecodeMod(int code, int* aa_index, int* unique_delta_index) {
+  void DecodeMod(int code, int* aa_index, int* unique_delta_index) const {
     *aa_index = code >> log_unique_deltas_;
     *unique_delta_index = code & mask_;
   }
