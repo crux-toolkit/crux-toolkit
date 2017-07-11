@@ -249,6 +249,10 @@ class VariableModTable {
     return 0;
   }
 
+  double PossDelta(int possDeltIx) const {
+    return unique_delta_[possDeltIx];
+  }
+
   double PossDelta(char aa, int index) const {
     return unique_delta_[PossDeltIx(aa, index)];
   }
@@ -303,8 +307,12 @@ class VariableModTable {
   const vector<int>* MaxCounts() const { return &max_counts_; }
   const vector<double>* OriginalDeltas() const { return &original_deltas_; }
 
-  int EncodeMod(int aa_index, int unique_delta_index) {
+  int EncodeMod(int aa_index, int unique_delta_index) const {
     return coder_.EncodeMod(aa_index, unique_delta_index);
+  }
+
+  void DecodeMod(int code, int* aa_index, int* unique_delta_index) const {
+    coder_.DecodeMod(code, aa_index, unique_delta_index);
   }
 
   void Show() {

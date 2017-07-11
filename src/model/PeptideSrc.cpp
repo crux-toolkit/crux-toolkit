@@ -222,7 +222,6 @@ bool PeptideSrc::parseTabDelimited(
   Database* database, ///< database containing proteins
   Database* decoy_database ///< database containing decoy proteins
 ) {
-
   if( peptide == NULL ){
     carp(CARP_ERROR, "Cannot parse peptide src with NULL peptide.");
     return false;
@@ -314,12 +313,7 @@ bool PeptideSrc::parseTabDelimited(
         }
 
         //find the start index
-        MODIFIED_AA_T* mod_seq;
-        int seq_length = convert_to_mod_aa_seq(file.getString(SEQUENCE_COL).c_str(), &mod_seq);
-        char* unmodified_sequence = modified_aa_to_unmodified_string(mod_seq, seq_length);
-        string sequence = unmodified_sequence;
-        std::free(unmodified_sequence);
-        std::free(mod_seq);
+        string sequence = Peptide::unmodifySequence(file.getString(SEQUENCE_COL));
 
         start_index = parent_protein->findStart(sequence, prev_aa, next_aa);
         if (start_index == -1) {
@@ -336,12 +330,7 @@ bool PeptideSrc::parseTabDelimited(
         parent_protein = MatchCollectionParser::getProtein(
           database, decoy_database, protein_id_string, is_decoy);
 
-        MODIFIED_AA_T* mod_seq;
-        int seq_length = convert_to_mod_aa_seq(file.getString(SEQUENCE_COL).c_str(), &mod_seq);
-        char* unmodified_sequence = modified_aa_to_unmodified_string(mod_seq, seq_length);
-        string sequence = unmodified_sequence;
-        std::free(unmodified_sequence);
-        delete[] mod_seq;
+        string sequence = Peptide::unmodifySequence(file.getString(SEQUENCE_COL));
 
         if (parent_protein -> isPostProcess()) {
           // Attempting to store protein_id location in start_idx_original of peptide src [Please check

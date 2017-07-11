@@ -87,6 +87,11 @@ int MakePinApplication::main(const vector<string>& paths) {
 
   carp(CARP_INFO, "There are %d target matches and %d decoys",
        target_collection->getMatchTotal(), decoy_collection->getMatchTotal());
+  carp(CARP_INFO, "Maximum observed charge is %d.", max_charge);
+  if (Params::GetInt("max-charge-feature") != 0) {
+    max_charge = Params::GetInt("max-charge-feature");
+    carp(CARP_INFO, "Maximum charge feature set to %d.", max_charge);
+  }    
   if (target_collection->getMatchTotal() == 0) {
     carp(CARP_FATAL, "No target matches found!");
   } else if (decoy_collection->getMatchTotal() == 0) {
@@ -186,15 +191,16 @@ vector<string> MakePinApplication::getArgs() const {
  */
 vector<string> MakePinApplication::getOptions() const {
   string arr[] = {
-    "top-match",
-    "list-of-files",
-    "filestem-prefixes",
     "decoy-prefix",
     "fileroot",
+    "filestem-prefixes",
+    "list-of-files",
+    "max-charge-feature",
     "output-dir",
     "output-file",
     "overwrite",
     "parameter-file",
+    "top-match",
     "verbosity"
   };
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));

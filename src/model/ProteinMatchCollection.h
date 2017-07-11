@@ -16,25 +16,8 @@
 class ProteinMatchCollection {
 
  protected:
-
-  struct cmpSeq {
-    bool operator() (const MODIFIED_AA_T* lhs, const MODIFIED_AA_T* rhs) const {
-      size_t idx = -1;
-      MODIFIED_AA_T lhs_aa, rhs_aa;
-      do {
-        ++idx;
-        lhs_aa = lhs[idx];
-        rhs_aa = rhs[idx];
-        if (lhs_aa != rhs_aa) {
-          return lhs_aa < rhs_aa;
-        }
-      } while (lhs_aa != MOD_SEQ_NULL && rhs_aa != MOD_SEQ_NULL);
-      return rhs_aa != MOD_SEQ_NULL;
-    }
-  };
-
   std::map<std::string, ProteinMatch*> protein_match_map_;
-  std::map<MODIFIED_AA_T*, PeptideMatch*, cmpSeq> peptide_match_map_;
+  std::map<std::string, PeptideMatch*> peptide_match_map_;
   std::deque<ProteinMatch*> protein_matches_; ///< All protein matches
   std::deque<PeptideMatch*> peptide_matches_; ///< All peptide matches
   std::deque<SpectrumMatch*> spectrum_matches_; ///< All spectrum matches
@@ -120,7 +103,7 @@ class ProteinMatchCollection {
    * \returns the PeptideMatch for the sequence, null if it doesn't exist
    */
   PeptideMatch* getPeptideMatch(
-    MODIFIED_AA_T* mod_seq ///< modified sequence to find
+    const std::string& id ///< peptide id to find
     );
 
   /**

@@ -48,11 +48,6 @@ Peptide::Peptide(string sequence, vector<Modification> mods)
     decoy_modified_seq_(NULL) {
 }
 
-Peptide* Peptide::copyPtr() {
-  pointer_count_++;
-  return this;
-}
-
 // FIXME association part might be need to change
 /**
  * \returns A new peptide object, populated with the user specified parameters.
@@ -402,7 +397,12 @@ void Peptide::addMod(const ModificationDefinition* mod, unsigned char index) {
 }
 
 void Peptide::setMods(const vector<Modification>& mods) {
-  varMods_ = mods;
+  varMods_.clear();
+  for (vector<Modification>::const_iterator i = mods.begin(); i != mods.end(); i++) {
+    if (!i->Static()) {
+      varMods_.push_back(*i);
+    }
+  }
 }
 
 vector<Modification> Peptide::getMods() const {
@@ -514,6 +514,39 @@ MODIFIED_AA_T* Peptide::getModifiedAASequence() {
   }
   std::free(seq);
   return seq_copy;
+}
+
+string Peptide::unmodifySequence(const string& seq) {
+  string outSeq;
+  outSeq.reserve(seq.length());
+
+  size_t i = 0, end = seq.length();
+  bool flanks = seq.length() >= 5 && seq[1] == '.' && seq[seq.length() - 2] == '.';
+  for (size_t i = 0; i < seq.length(); i++) {
+    char c = seq[i];
+    if ((flanks && (i < 2 || i >= seq.length() - 2)) || ('A' <= c && c <= 'Z')) {
+      outSeq.push_back(c);
+      continue;
+    } else if (c == '[') {
+      // Bracket mod
+      size_t j = i;
+      do {
+        if (++j >= seq.length()) {
+          throw runtime_error("Unclosed '[' in sequence '" + seq + "'");
+        }
+      } while (seq[j] != ']');
+      i = j;
+    } else {
+      // Symbol mod
+    }
+  }
+  outSeq.reserve(outSeq.length());
+  return outSeq;
+}
+
+void Peptide::setUnmodifiedSequence(const string& sequence) {
+  sequence_ = sequence;
+  setLength(sequence.length());
 }
 
 /**
@@ -996,6 +1029,24 @@ MODIFIED_AA_T* Peptide::generateReversedModSequence() {
   return sequence;
 }
 
+string Peptide::getId() const {
+  char* seqChars = getSequence();
+  string seq(seqChars);
+  free(seqChars);
+  return getId(seq, varMods_);
+}
+
+string Peptide::getId(const string& unmodifiedSeq, const vector<Modification>& mods) {
+  string id = unmodifiedSeq;
+  vector<Modification> modsSorted(mods);
+  std::sort(modsSorted.begin(), modsSorted.end(), Modification::SortFunction);
+  for (vector<Modification>::const_iterator i = modsSorted.begin(); i != modsSorted.end(); i++) {
+    char buf[64];
+    sprintf(buf, " %x %d", i->Definition(), i->Index());
+    id += buf;
+  }
+  return id;
+}
 
 /* Comparisons for sorting */
 
@@ -1267,7 +1318,6 @@ char* Peptide::getFlankingAAs() {
       flanking_string += (start_idx > 1) ? protein_seq[start_idx - 2] : '-';
       flanking_string += (end_idx < protein_length) ? protein_seq[end_idx] : '-';
     } else {
-
       // post process, get flanking AAs from the protein object
       PostProcessProtein* post_process_protein = (PostProcessProtein*)protein;
       flanking_string += post_process_protein->getNTermFlankingAA(start_idx - 1);
