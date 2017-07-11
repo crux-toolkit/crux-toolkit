@@ -23,7 +23,8 @@ extern void AddMods(HeadedRecordReader* reader,
                     string out_file,
                     string tmpDir,                    
                     const pb::Header& header,
-                    const vector<const pb::Protein*>& proteins, VariableModTable& var_mod_table);
+                    const vector<const pb::Protein*>& proteins,
+                    VariableModTable* var_mod_table);
 DECLARE_int32(max_mods);
 DECLARE_int32(min_mods);
 
@@ -222,7 +223,7 @@ int TideIndexApplication::main(
   if (need_mods) {
     carp(CARP_INFO, "Computing modified peptides...");
     HeadedRecordReader reader(modless_peptides, NULL, 1024 << 10); // 1024kb buffer
-    AddMods(&reader, peakless_peptides, Params::GetString("temp-dir"), header_with_mods, proteins, var_mod_table);
+    AddMods(&reader, peakless_peptides, Params::GetString("temp-dir"), header_with_mods, proteins, &var_mod_table);
   }
 
   if (out_target_list) {
@@ -272,7 +273,7 @@ int TideIndexApplication::main(
     }
 
     // Iterate over saved decoys and output them
-    for (vector< pair<string, double> >::iterator i = decoyPepStrs.begin();
+    for (vector< pair<string, double> >::const_iterator i = decoyPepStrs.begin();
          i != decoyPepStrs.end();
          ++i) {
       *out_decoy_list << i->first << '\t'
@@ -866,11 +867,12 @@ string getModifiedPeptideSeq(const pb::Peptide* peptide,
     mod_indices.insert(mod_index);
     mod_map[mod_index] = mod_delta;
   }
+  int modPrecision = Params::GetInt("mod-precision");
   for (set<int>::const_reverse_iterator j = mod_indices.rbegin();
     j != mod_indices.rend();
     ++j) {
     // Insert the modification string into the peptide sequence
-    mod_stream << '[' << mod_map[*j] << ']';
+    mod_stream << '[' << StringUtils::ToString(mod_map[*j], modPrecision) << ']';
     pep_str.insert(*j + 1, mod_stream.str());
     mod_stream.str("");
   }

@@ -343,7 +343,20 @@ string Modification::String() const {
   return string(buffer);
 }
 
-Modification Modification::Parse(const string& modString, Peptide* peptide) {
+vector<Modification> Modification::Parse(const string& modString, const string* unmodifiedSequence) {
+  vector<Modification> mods;
+  vector<string> all = StringUtils::Split(modString, ',');
+  for (vector<string>::const_iterator i = all.begin(); i != all.end(); i++) {
+    try {
+      mods.push_back(ParseOne(StringUtils::Trim(*i), unmodifiedSequence));
+    } catch (runtime_error& e) {
+      carp(CARP_ERROR, "Error parsing modification string: %s", e.what());
+    }
+  }
+  return mods;
+}
+
+Modification Modification::ParseOne(const string& modString, const string* unmodifiedSequence) {
   vector<string> pieces = StringUtils::Split(modString, '_');
   if (3 > pieces.size() || pieces.size() > 4) {
     throw runtime_error("Could not parse modification string '" + modString + "'");
@@ -355,7 +368,7 @@ Modification Modification::Parse(const string& modString, Peptide* peptide) {
   } else if (!StringUtils::IEquals(pieces[1], "V")) {
     throw runtime_error("Could not parse modification string '" + modString + "'");
   }
-  double deltaMass = StringUtils::FromString<double>(pieces[2]);
+  double mass = StringUtils::FromString<double>(pieces[2]);
   ModPosition position = ANY;
   if (pieces.size() == 4) {
     if (pieces[3] == "n") {
@@ -370,26 +383,25 @@ Modification Modification::Parse(const string& modString, Peptide* peptide) {
       throw runtime_error("Could not parse modification string '" + modString + "'");
     }
   }
-  const ModificationDefinition* definition =
-    ModificationDefinition::Find(deltaMass, isStatic, position);
+  const ModificationDefinition* mod = ModificationDefinition::Find(mass, isStatic, position);
   string aa;
-  if (peptide) {
-    char* seq = peptide->getSequence();
-    aa.push_back(seq[index]);
-    free(seq);
+  if (unmodifiedSequence != NULL) {
+    if (unmodifiedSequence->length() > index) {
+      aa = string(1, unmodifiedSequence->at(index));
+    } else {
+      throw runtime_error("Index " + StringUtils::ToString(index) +
+                          " is out of bounds for sequence '" + *unmodifiedSequence + "'");
+    }
   }
-  if (definition == NULL) {
+  if (mod == NULL) {
     // Create new modification
-    definition = ModificationDefinition::New(
-      !aa.empty() ? aa : "X", deltaMass, position, isStatic);
-  } else if (!aa.empty() &&
-             definition->AminoAcids().find(aa[0]) == definition->AminoAcids().end()) {
-    definition = ModificationDefinition::New(
-      aa, definition->DeltaMass(), definition->Position(), definition->Static(),
-      definition->PreventsCleavage(), definition->PreventsXLink());
+    mod = ModificationDefinition::New(!aa.empty() ? aa : "X", mass, position, isStatic);
+  } else if (!aa.empty() && mod->AminoAcids().find(aa[0]) == mod->AminoAcids().end()) {
+    mod = ModificationDefinition::New(
+      aa, mod->DeltaMass(), mod->Position(), mod->Static(),
+      mod->PreventsCleavage(), mod->PreventsXLink());
   }
-
-  return Modification(definition, index);
+  return Modification(mod, index);
 }
 
 unsigned char Modification::Index() const {
@@ -428,11 +440,80 @@ bool Modification::MonoLink() const {
   return mod_->MonoLink();
 }
 
+void Modification::FromSeq(const string& seq,
+                           string* outSeq, vector<Modification>* outMods) {
+  size_t i = 0, end = seq.length();
+  if (seq.length() >= 5 && seq[1] == '.' && seq[seq.length() - 2] == '.') {
+    i += 2;
+    end -= 2;
+  }
+  if (outSeq != NULL) {
+    *outSeq = "";
+    outSeq->reserve(end - i);
+  }
+  if (outMods != NULL) {
+    *outMods = vector<Modification>();
+  }
+  int aaCount = 0;
+  for (; i < end; i++) {
+    char c = seq[i];
+    if ('A' <= c && c <= 'Z') {
+      ++aaCount;
+      if (outSeq != NULL) {
+        *outSeq += c;
+      }
+      continue;
+    }
+    const ModificationDefinition* mod;
+    string aa = i > 0 ? string(1, seq[i - 1]) : "";
+    if (c == '[') {
+      // Bracket mod
+      size_t j = i;
+      do {
+        if (++j >= seq.length()) {
+          throw runtime_error("Unclosed '[' in sequence '" + seq + "'");
+        }
+      } while (seq[j] != ']');
+      string massStr = seq.substr(i + 1, j - (i + 1));
+      double mass;
+      if (!StringUtils::TryFromString(massStr, &mass)) {
+        throw runtime_error("Could not convert '" + massStr + "' to double in sequence '" + seq + "'");
+      }
+      if ((mod = ModificationDefinition::Find(mass, false)) == NULL) {
+        // Maybe it is static?
+        if ((mod = ModificationDefinition::Find(mass, true)) == NULL) {
+          mod = ModificationDefinition::NewVarMod(aa, mass, ANY); // TODO N/C mods?
+        }
+      }
+      i = j;
+    } else {
+      // Symbol mod
+      if ((mod = ModificationDefinition::Find(c)) == NULL) {
+        throw runtime_error("Invalid character '" + string(1, c) + "' in sequence '" + seq + "'");
+      }
+    }
+    // Add AA
+    if (!aa.empty() && mod->AminoAcids().find(aa[0]) == mod->AminoAcids().end()) {
+      mod = ModificationDefinition::New(
+        aa, mod->DeltaMass(), mod->Position(), mod->Static(),
+        mod->PreventsCleavage(), mod->PreventsXLink());
+    }
+    if (outMods != NULL && !mod->Static()) {
+      outMods->push_back(Modification(mod, aaCount > 0 ? aaCount - 1 : 0));
+    }
+  }
+  if (outSeq != NULL) {
+    outSeq->reserve(outSeq->length());
+  }
+}
+
 // Turns a MODIFIED_AA_T* and its length into a sequence and vector of Modification
 // TODO Remove this
 void Modification::FromSeq(MODIFIED_AA_T* seq, int length,
                            string* outSeq, vector<Modification>* outMods) {
-  *outSeq = string(length, 'X');
+  if (outSeq != NULL) {
+    *outSeq = string(length, 'X');
+  }
   if (outMods != NULL) {
     *outMods = vector<Modification>();
   }
@@ -440,7 +521,9 @@ void Modification::FromSeq(MODIFIED_AA_T* seq, int length,
     AA_MOD_T** allMods = NULL;
     int modCount = get_all_aa_mod_list(&allMods);
     for (int i = 0; i < length; i++) {
-      (*outSeq)[i] = modified_aa_to_char(seq[i]);
+      if (outSeq != NULL) {
+        (*outSeq)[i] = modified_aa_to_char(seq[i]);
+      }
       if (outMods == NULL) {
         continue;
       }
@@ -473,9 +556,7 @@ void Modification::FromSeq(MODIFIED_AA_T* seq, int length,
 // Turns an unmodified sequence and vector of mods into a MODIFIED_AA_T*
 // TODO Remove this
 MODIFIED_AA_T* Modification::ToSeq(const string& seq, const vector<Modification>& mods) {
-  
   MODIFIED_AA_T* modSeq = newModSeq();
-  
   for (unsigned i = 0; i < seq.length(); i++) {
     modSeq[i] = char_aa_to_modified(seq[i]);
   }
@@ -483,12 +564,15 @@ MODIFIED_AA_T* Modification::ToSeq(const string& seq, const vector<Modification>
 
   for (vector<Modification>::const_iterator i = mods.begin(); i != mods.end(); i++) {
     if (!i->Static()) {
-      
       get_aa_mod_from_mass((FLOAT_T)i->DeltaMass())->modify(&modSeq[i->Index()]);
     }
   }
 
   return modSeq;
+}
+
+bool Modification::SortFunction(const Modification& x, const Modification& y) {
+  return x.mod_ != y.mod_ ? x.mod_ < y.mod_ : x.index_ < y.index_;
 }
 
 ModificationDefinitionContainer::ModificationDefinitionContainer() {
@@ -560,7 +644,7 @@ void ModificationDefinitionContainer::Add(ModificationDefinition* def) {
   }
   carp(CARP_DEBUG, "Added new modification [%x]: aa[%s] dM[%f] static[%d] symbol[%c]",
        def, StringUtils::Join(def->AminoAcids()).c_str(), def->DeltaMass(),
-       def->Static(), def->Symbol());
+       def->Static(), !def->Static() ? def->Symbol() : ' ');
 }
 
 char ModificationDefinitionContainer::NextSymbol() {

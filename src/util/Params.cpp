@@ -111,6 +111,10 @@ Params::Params() : finalized_(false) {
     "contains a mix of target and decoy PSMs. Within this file, decoys are identified "
     "using a prefix (specified via --decoy-prefix) on the protein name.]]");
   /*make-pin arguments*/
+  InitIntParam("max-charge-feature", 0, 0, BILLION,
+    "Specifies the maximum charge state feature.  When set to zero, use the "
+    "maximum observed charge state.",
+    "Available for make-pin and percolator.", true);
   InitArgParam("psm results",
     "A collection of target and decoy peptide-spectrum matches (PSMs). Input may be in "
     "one of four formats: SQT, PepXML (obtained from SEQUEST), [[html:<a href=\""
@@ -489,9 +493,7 @@ Params::Params() : finalized_(false) {
     "Set the precision for scores written to sqt and text files.",
     "Available for all commands.", true);
   InitIntParam("mass-precision", 4, 1, 100, // max is arbitrary
-    "Set the precision for masses and m/z written to sqt and .txt files. "
-    "Note that this parameter only takes effect when specified in the "
-    "parameter file.",
+    "Set the precision for masses and m/z written to sqt and text files.",
     "Available for all commands.", true);
   InitIntParam("print-search-progress", 1000, 0, BILLION,
     "Show search progress by printing every n spectra searched. Set to 0 to show no "

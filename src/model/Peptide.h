@@ -42,7 +42,6 @@ class Modification;
 class Peptide {
 
  protected:
-  int pointer_count_;
   unsigned char length_; ///< The length of the peptide
   std::vector<PeptideSrc*> peptide_srcs_; ///< a vector of peptide_srcs_
 
@@ -96,8 +95,6 @@ class Peptide {
    * This decision is made by global variable PEPTIDE_SRC_USE_LINK_LIST
    */
   ~Peptide();
-
-  Crux::Peptide* copyPtr();
 
   /*  Getters and Setters  */
 
@@ -259,6 +256,9 @@ class Peptide {
    */
   //MODIFIED_AA_T* get_peptide_modified_sequence( // why is this not working??!!
   unsigned short* getModifiedAASequence();
+
+  static std::string unmodifySequence(const std::string& seq);
+  void setUnmodifiedSequence(const std::string& sequence);
   
   /**
    * sets the modified sequence for the peptide
@@ -392,6 +392,9 @@ class Peptide {
    * \returns A newly-allocated MODIFIED_AA_T array of the reversed sequence.
    */
   MODIFIED_AA_T* generateReversedModSequence();
+
+  std::string getId() const;
+  static std::string getId(const std::string& unmodifiedSeq, const std::vector<Modification>& mods);
 
   /*  Comparisons for sorting  */
 
