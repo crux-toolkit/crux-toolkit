@@ -640,7 +640,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   double precurMz = spectrum.PrecursorMZ();
   int nIon = spectrum.Size();
   int precurCharge = charge;
-  double experimentalMassCutoff = precursorMass + 50.0;
+  double experimentalMassCutoff = precursorMass; // + 50.0;
 //  double proton = MassConstants::proton;
   double residueToleranceMass = fragTol;
   const double precursorMZExclude = 15.0; //also used in PreprocessSpectrum
@@ -727,7 +727,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   ionIntens.push_back(0.0);
 
   //find pairs of b ions in 1+ charge state
-  for (int ion=0 ; ion<ionMasses.size() ; ion++) {
+  for (int ion=0 ; ion<ionMass.size() ; ion++) {
     bIonMass = ionMass[ion];
     bIonMassBin = ionMassBin[ion];
 
@@ -773,30 +773,31 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   double yIonIntens;
 
   //find pairs of y ions in 1+ charge state
-  ionMass.push_back(MassConstants::mono_h);
-  ionMassBin.push_back(MassConstants::mass2bin(MassConstants::mono_h));
+  ionMass.push_back(precursorMass-MassConstants::mono_oh);
+  ionMassBin.push_back(MassConstants::mass2bin(precursorMass-MassConstants::mono_oh));
   ionIntens.push_back(0.0);
 
   for(int ion=0 ; ion<ionMasses.size() ; ion++) {
     //convert to equivalent b ion masses for ease of processing
     double tmpIonMass = precursorMass - ionMasses[ion] + (2.0 * massHMono);
-    ionMass.push_back(tmpIonMass);
-
     //Determine which bin each ion mass is in
     int binTmpIonMass = (int)floor(MassConstants::mass2bin(tmpIonMass));
-    ionMassBin.push_back(binTmpIonMass);
 
-    ionIntens.push_back(ionIntensities[ion]);
+    if(tmpIonMass > 0) {
+      ionMass.push_back(tmpIonMass);
+      ionMassBin.push_back(binTmpIonMass);
+      ionIntens.push_back(ionIntensities[ion]);
+    }
   }
-  ionMass.push_back(precursorMass-MassConstants::mono_oh);
-  ionMassBin.push_back(MassConstants::mass2bin(precursorMass-MassConstants::mono_oh));
+  ionMass.push_back(MassConstants::mono_h);
+  ionMassBin.push_back(MassConstants::mass2bin(MassConstants::mono_h));
   ionIntens.push_back(0.0);
 
   reverse(ionMass.begin(),ionMass.end());
   reverse(ionMassBin.begin(), ionMassBin.end());
   reverse(ionIntens.begin(), ionIntens.end());
 
-  for(int ion=0 ; ion<ionMasses.size() ; ion++) {
+  for(int ion=0 ; ion<ionMass.size() ; ion++) {
     yIonMass = ionMass[ion];
     yIonMassBin = ionMassBin[ion];
 
@@ -827,10 +828,10 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
              score = tmpScore;
           }
         }
-        //add evidence to matrix
-        //&&-1 since all mass bins are index 1 istead of index 0
-        residueEvidenceMatrix[curAaMass][newResMassBin-1] += score;
       }
+      //add evidence to matrix
+      //&&-1 since all mass bins are index 1 istead of index 0
+      residueEvidenceMatrix[curAaMass][newResMassBin-1] += score;
     }
   }
   ionMass.clear();
@@ -854,7 +855,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   ionMassBin.push_back(MassConstants::mass2bin(precursorMass-MassConstants::mono_oh));
   ionIntens.push_back(0.0);
 
-  for(int ion=0 ; ion<ionMasses.size() ; ion++) {
+  for(int ion=0 ; ion<ionMass.size() ; ion++) {
     bIonMass = ionMass[ion];
     bIonMassBin = ionMassBin[ion];
 
@@ -885,10 +886,10 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
             score = tmpScore;
           }
         }
-        //add evidence to matrix
-        //&&-1 since all mass bins are index 1 instead of index 0
-        residueEvidenceMatrix[curAaMass][newResMassBin-1] += score;
       }
+      //add evidence to matrix
+      //&&-1 since all mass bins are index 1 instead of index 0
+      residueEvidenceMatrix[curAaMass][newResMassBin-1] += score;
     }
   }
   ionMass.clear();
@@ -896,27 +897,29 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   ionIntens.clear();
 
   //find pairs of y ions in 2+ charge state
-  ionMass.push_back(MassConstants::mono_h);
-  ionMassBin.push_back(MassConstants::mass2bin(MassConstants::mono_h));
+  ionMass.push_back(precursorMass-MassConstants::mono_oh);
+  ionMassBin.push_back(MassConstants::mass2bin(precursorMass-MassConstants::mono_oh));
   ionIntens.push_back(0.0);
 
   for(int ion=0 ; ion<ionMasses.size() ; ion++) {
     double tmpIonMass = precursorMass - (2.0 * ionMasses[ion] - massHMono) + (2.0 * massHMono);
     int binTmpIonMass = (int)floor(MassConstants::mass2bin(tmpIonMass));
 
-    ionMass.push_back(tmpIonMass);
-    ionMassBin.push_back(binTmpIonMass);
-    ionIntens.push_back(ionIntensities[ion]);
+    if(tmpIonMass > 0.0) {
+      ionMass.push_back(tmpIonMass);
+      ionMassBin.push_back(binTmpIonMass);
+      ionIntens.push_back(ionIntensities[ion]);
+    }
   }
-  ionMass.push_back(precursorMass-MassConstants::mono_oh);
-  ionMassBin.push_back(MassConstants::mass2bin(precursorMass-MassConstants::mono_oh));
+  ionMass.push_back(MassConstants::mono_h);
+  ionMassBin.push_back(MassConstants::mass2bin(MassConstants::mono_h));
   ionIntens.push_back(0.0);
 
   reverse(ionMass.begin(), ionMass.end());
   reverse(ionMassBin.begin(),ionMassBin.end());
   reverse(ionIntens.begin(), ionIntens.end());
 
-  for(int ion=0 ; ion<ionMasses.size() ; ion++) {
+  for(int ion=0 ; ion<ionMass.size() ; ion++) {
     yIonMass = ionMass[ion];
     yIonMassBin = ionMassBin[ion];
 
@@ -947,10 +950,10 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
             score = tmpScore;
           }
         }
-        //add evidence to matrix
-        //&&-1 since all mass bins are index 1 instead of index 0
-        residueEvidenceMatrix[curAaMass][newResMassBin-1] += score;
       }
+      //add evidence to matrix
+      //&&-1 since all mass bins are index 1 instead of index 0
+      residueEvidenceMatrix[curAaMass][newResMassBin-1] += score;
     }
   }
   ionMass.clear();
