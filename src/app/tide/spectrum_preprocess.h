@@ -152,6 +152,7 @@ class ObservedPeakSet {
                                    int nAA,
                                    const vector<double> aaMass,
                                    double fragTol,int granularityScale,
+                                   double NTermMass, double CTermMass,
                                    vector< vector<double> >& residueEvidenceMatrix);
   //END -- added by Andy Lin
 

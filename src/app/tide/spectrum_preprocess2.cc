@@ -623,6 +623,8 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   const vector<double> aaMass, //TODO different aaMass then one used in CreateEvidenceVector
   double fragTol,
   int granularityScale,
+  double NTermMass,
+  double CTermMass,
   vector<vector<double> >& residueEvidenceMatrix
   ) {
 
@@ -710,8 +712,8 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   vector<int> ionMassBin;
   vector<double> ionIntens;
 
-  ionMass.push_back(MassConstants::mono_h);
-  ionMassBin.push_back(MassConstants::mass2bin(MassConstants::mono_h));
+  ionMass.push_back(NTermMass);
+  ionMassBin.push_back(MassConstants::mass2bin(NTermMass));
   ionIntens.push_back(0.0);
 
   for(int ion=0 ; ion<ionMasses.size() ; ion++) {
@@ -722,8 +724,8 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
     ionMassBin.push_back(binTmpIonMass);
     ionIntens.push_back(ionIntensities[ion]);
   }
-  ionMass.push_back(precursorMass-MassConstants::mono_oh);
-  ionMassBin.push_back(MassConstants::mass2bin(precursorMass-MassConstants::mono_oh));
+  ionMass.push_back(precursorMass-CTermMass);
+  ionMassBin.push_back(MassConstants::mass2bin(precursorMass-CTermMass));
   ionIntens.push_back(0.0);
 
   //find pairs of b ions in 1+ charge state
@@ -803,8 +805,8 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   double yIonIntens;
 
   //find pairs of y ions in 1+ charge state
-  ionMass.push_back(precursorMass-MassConstants::mono_oh);
-  ionMassBin.push_back(MassConstants::mass2bin(precursorMass-MassConstants::mono_oh));
+  ionMass.push_back(precursorMass-CTermMass);
+  ionMassBin.push_back(MassConstants::mass2bin(precursorMass-CTermMass));
   ionIntens.push_back(0.0);
 
   for(int ion=0 ; ion<ionMasses.size() ; ion++) {
@@ -819,8 +821,8 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
       ionIntens.push_back(ionIntensities[ion]);
     }
   }
-  ionMass.push_back(MassConstants::mono_h);
-  ionMassBin.push_back(MassConstants::mass2bin(MassConstants::mono_h));
+  ionMass.push_back(NTermMass);
+  ionMassBin.push_back(MassConstants::mass2bin(NTermMass));
   ionIntens.push_back(0.0);
 
   reverse(ionMass.begin(),ionMass.end());
@@ -899,8 +901,8 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   ionIntens.clear();
 
   //find pairs of b ions in 2+ charge state
-  ionMass.push_back(MassConstants::mono_h);
-  ionMassBin.push_back(MassConstants::mass2bin(MassConstants::mono_h));
+  ionMass.push_back(NTermMass);
+  ionMassBin.push_back(MassConstants::mass2bin(NTermMass));
   ionIntens.push_back(0.0);
 
   for(int ion=0 ; ion<ionMasses.size() ; ion++) {
@@ -911,8 +913,8 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
     ionMassBin.push_back(binTmpIonMass);
     ionIntens.push_back(ionIntensities[ion]);
   }
-  ionMass.push_back(precursorMass-MassConstants::mono_oh);
-  ionMassBin.push_back(MassConstants::mass2bin(precursorMass-MassConstants::mono_oh));
+  ionMass.push_back(precursorMass-CTermMass);
+  ionMassBin.push_back(MassConstants::mass2bin(precursorMass-CTermMass));
   ionIntens.push_back(0.0);
 
   for(int ion=0 ; ion<ionMass.size() ; ion++) {
@@ -987,8 +989,8 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   ionIntens.clear();
 
   //find pairs of y ions in 2+ charge state
-  ionMass.push_back(precursorMass-MassConstants::mono_oh);
-  ionMassBin.push_back(MassConstants::mass2bin(precursorMass-MassConstants::mono_oh));
+  ionMass.push_back(precursorMass-CTermMass);
+  ionMassBin.push_back(MassConstants::mass2bin(precursorMass-CTermMass));
   ionIntens.push_back(0.0);
 
   for(int ion=0 ; ion<ionMasses.size() ; ion++) {
@@ -1001,8 +1003,8 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
       ionIntens.push_back(ionIntensities[ion]);
     }
   }
-  ionMass.push_back(MassConstants::mono_h);
-  ionMassBin.push_back(MassConstants::mass2bin(MassConstants::mono_h));
+  ionMass.push_back(NTermMass);
+  ionMassBin.push_back(MassConstants::mass2bin(NTermMass));
   ionIntens.push_back(0.0);
 
   reverse(ionMass.begin(), ionMass.end());
