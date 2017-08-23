@@ -776,20 +776,26 @@ void TideSearchApplication::search(void* threadarg) {
 
       //TODO assumption is that there is one nterm mod per peptide
       int NTermMassBin;
+      double NTermMass;
       if (nterm_mod_table.static_mod_size() > 0) {
 	NTermMassBin = MassConstants::mass2bin(
 		       MassConstants::mono_h + nterm_mod_table.static_mod(0).delta());
+        NTermMass = MassConstants::mono_h + nterm_mod_table.static_mod(0).delta();
       } else {
 	NTermMassBin = MassConstants::mass2bin(MassConstants::mono_h);
+        NTermMass = MassConstants::mono_h;
       }
 
       //TODO assumption is that there is one cterm mod per peptide
       int CTermMassBin;
+      double CTermMass;
       if (cterm_mod_table.static_mod_size() > 0) {
 	CTermMassBin = MassConstants::mass2bin(
 		       MassConstants::mono_oh + cterm_mod_table.static_mod(0).delta());
+        CTermMass = MassConstants::mono_oh + cterm_mod_table.static_mod(0).delta();
       } else {
 	CTermMassBin = MassConstants::mass2bin(MassConstants::mono_oh);
+        CTermMass = MassConstants::mono_oh;
       }
 
       map<int, bool> calcDPMatrix; //for each precursor mass bin, bool determines whether to calc DP matrix
@@ -818,6 +824,7 @@ void TideSearchApplication::search(void* threadarg) {
 	  //note: aaMassDouble differs from aaMass
 	  observed.CreateResidueEvidenceMatrix(*spectrum,charge,maxPrecurMassBin,precursorMass,
 					       nAARes,aaMassDouble,fragTol,granularityScale,
+                                               NTermMass,CTermMass,
 					       residueEvidenceMatrix[pe]);
 	  vector<vector<double> > curResidueEvidenceMatrix = residueEvidenceMatrix[pe];
 
