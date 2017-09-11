@@ -877,7 +877,7 @@ int create_output_directory(
     }
   }
   return result;
-} 
+}
 
 /**
  * \brief Take a filename, strip its leading path information (if

@@ -263,6 +263,7 @@ void TideMatchSet::report(
   const vector<const pb::AuxLocation*>& locations,  ///< auxiliary locations
   bool compute_sp, ///< whether to compute sp or not
   bool highScoreBest, //< indicates semantics of score magnitude
+  const map<string, string>* spectrumFilesOverride,
   boost::mutex * rwlock
 ) {
   if (matches_->size() == 0) {
@@ -287,9 +288,11 @@ void TideMatchSet::report(
     computeSpData(decoys, &sp_map, &sp_scorer, peptides);
   }
   writeToFile(target_file, top_n, targets, spectrum_filename, spectrum, charge,
-              peptides, proteins, locations, delta_cn_map, delta_lcn_map, compute_sp ? &sp_map : NULL, rwlock);
+              peptides, proteins, locations, delta_cn_map, delta_lcn_map,
+              compute_sp ? &sp_map : NULL, spectrumFilesOverride, rwlock);
   writeToFile(decoy_file, top_n, decoys, spectrum_filename, spectrum, charge,
-              peptides, proteins, locations, delta_cn_map, delta_lcn_map, compute_sp ? &sp_map : NULL, rwlock);
+              peptides, proteins, locations, delta_cn_map, delta_lcn_map,
+              compute_sp ? &sp_map : NULL, spectrumFilesOverride, rwlock);
 }
 
 /**
@@ -308,6 +311,7 @@ void TideMatchSet::writeToFile(
   const map<Arr::iterator, FLOAT_T>& delta_cn_map,
   const map<Arr::iterator, FLOAT_T>& delta_lcn_map,
   const map<Arr::iterator, pair<const SpScorer::SpScoreData, int> >* sp_map,
+  const map<string, string>* spectrumFilesOverride,
   boost::mutex * rwlock
 ) {
   if (!file) {
@@ -352,7 +356,14 @@ void TideMatchSet::writeToFile(
 
     rwlock->lock();
     if (Params::GetBool("file-column")) {
-      *file << spectrum_filename << '\t';
+      string filename_display = spectrum_filename;
+      if (spectrumFilesOverride != NULL) {
+        map<string, string>::const_iterator fileLookup = spectrumFilesOverride->find(spectrum_filename);
+        if (fileLookup != spectrumFilesOverride->end()) {
+          filename_display = fileLookup->second;
+        }
+      }
+      *file << filename_display << '\t';
     }
     *file << spectrum->SpectrumNumber() << '\t'
           << charge << '\t'

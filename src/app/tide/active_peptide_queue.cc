@@ -72,7 +72,7 @@ int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>*
   // min_range <= min_mass <= max_mass <= max_range
 
   // queue front() is lightest; back() is heaviest
-  
+
   // delete anything already loaded that falls below min_range
   while (!queue_.empty() && queue_.front()->Mass() < min_range) {
     Peptide* peptide = queue_.front();
@@ -99,7 +99,7 @@ int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>*
     fifo_alloc_peptides_.Release(peptide); 
     peptide->ReleaseFifo(&fifo_alloc_prog1_, &fifo_alloc_prog2_);
   }
-  
+
   // Enqueue all peptides that are not yet queued but are lighter than
   // max_range. For each new enqueued peptide compute the corresponding
   // theoretical peaks. Data associated with each peptide is allocated by
@@ -128,18 +128,18 @@ int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>*
   // by now, if not EOF, then the last (and only the last) enqueued
   // peptide is too heavy
   assert(!queue_.empty() || done);
-  
+
   // Set up iterator for use with HasNext(),
   // GetPeptide(), and NextPeptide(). Return the number of enqueued peptides.
- if (queue_.empty()) {
+  if (queue_.empty()) {
     return 0;
   }
 
   iter_ = queue_.begin();
-  while (iter_ != queue_.end() && (*iter_)->Mass() < min_mass->front() ){
+  while (iter_ != queue_.end() && (*iter_)->Mass() < min_mass->front()) {
     ++iter_;
   }
-  
+
   int* isotope_idx = new int(0);
   end_ = iter_;
   int active = 0;
@@ -179,7 +179,7 @@ void ActivePeptideQueue::ComputeBTheoreticalPeaksBack() {
 int ActivePeptideQueue::SetActiveRangeBIons(vector<double>* min_mass, vector<double>* max_mass, double min_range, double max_range, vector<bool>* candidatePeptideStatus) {
     exact_pval_search_ = true;
   // queue front() is lightest; back() is heaviest
-  
+
   // delete anything already loaded that falls below min_range
   while (!queue_.empty() && queue_.front()->Mass() < min_range) {
     Peptide* peptide = queue_.front();
@@ -198,7 +198,7 @@ int ActivePeptideQueue::SetActiveRangeBIons(vector<double>* min_mass, vector<dou
     // Free all peptides up to, but not including peptide.
     fifo_alloc_peptides_.Release(peptide); 
   }
-  
+
   // Enqueue all peptides that are not yet queued but are lighter than
   // max_range. For each new enqueued peptide compute the corresponding
   // theoretical peaks. Data associated with each peptide is allocated by
@@ -256,7 +256,7 @@ int ActivePeptideQueue::SetActiveRangeBIons(vector<double>* min_mass, vector<dou
   if (active == 0) {
     return 0;
   }
-  
+
   return active;
 }
 

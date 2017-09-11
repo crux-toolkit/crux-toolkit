@@ -17,6 +17,11 @@ bool FileUtils::IsDir(const string& path) {
   return boost::filesystem::is_directory(path);
 }
 
+// returns true if a new directory was created, otherwise false
+bool FileUtils::Mkdir(const string& path) {
+  return boost::filesystem::create_directory(path);
+}
+
 void FileUtils::Rename(const string& from, const string& to) {
   if (Exists(from)) {
     boost::filesystem::rename(from, to);

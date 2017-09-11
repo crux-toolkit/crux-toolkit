@@ -1,5 +1,8 @@
 // Benjamin Diament
 
+#ifndef TIDE_MODIFICATIONS_H
+#define TIDE_MODIFICATIONS_H
+
 #include<climits>
 #include<algorithm>
 #include<iostream>
@@ -9,6 +12,7 @@
 #else
 #include<tr1/unordered_map>
 #endif
+#include "app/tide/protoobj/header.pb.h"
 #include "mod_coder.h"
 #include "io/carp.h"
 
@@ -357,4 +361,6 @@ class VariableModTable {
   pb::ModTable pb_ntpro_mod_table_; //modification table for n-terminal protein modifications
   pb::ModTable pb_ctpro_mod_table_; //modification table for c-terminal protein modifications
 };
+
+#endif
 
