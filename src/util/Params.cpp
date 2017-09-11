@@ -530,8 +530,10 @@ Params::Params() : finalized_(false) {
     "When given the string \"time\" seeds the random number generator with the system time.",
     "Available for all percolator", true);
   InitBoolParam("feature-file-out", false,
-    "Output the computed features in [[html:<a href=\"../file-formats/features.html\">]]tab-delimited "
-    "text format[[html:</a>]].",
+    "Output the computed features in [[html:<a href=\"../file-formats/features.html\">]]"
+    "tab-delimited Percolator input (.pin) format[[html:</a>]]. The features will be "
+    "normalized, using either unit norm or standard deviation normalization (depending "
+    "upon the value of the unit-norm option).",
     "Available for percolator and q-ranker.", true);
   InitBoolParam("decoy-xml-output", false,
     "Include decoys (PSMs, peptides, and/or proteins) in the XML output.",
@@ -610,9 +612,6 @@ Params::Params() : finalized_(false) {
     "Available for crux percolator.", true);
   InitBoolParam("test-each-iteration", false,
     "Measure performance on test set each iteration.",
-    "Available for crux percolator.", true);
-  InitBoolParam("feature-file-in", false,
-    "When set to T, interpret the input file as a PIN file.",
     "Available for crux percolator.", true);
   InitStringParam("picked-protein", "",
     "Use the picked protein-level FDR to infer protein probabilities, provide the "
@@ -2112,7 +2111,6 @@ void Params::Categorize() {
   items.insert("decoy-prefix");
   items.insert("decoy-xml-output");
   items.insert("delimiter");
-  items.insert("feature-file-in");
   items.insert("feature-file-out");
   items.insert("file-column");
   items.insert("fileroot");

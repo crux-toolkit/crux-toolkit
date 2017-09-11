@@ -45,12 +45,11 @@ int PercolatorApplication::main(int argc, char** argv) {
   carp(CARP_INFO, "Reading file %s", input_pin.c_str());
 
   // Check if we need to run make-pin first
-  if (!Params::GetBool("feature-file-in") &&
-      (Params::GetBool("list-of-files") ||
-       StringUtils::IEndsWith(input_pin, ".txt") ||
-       StringUtils::IEndsWith(input_pin, ".sqt") ||
-       StringUtils::IEndsWith(input_pin, ".pep.xml") ||
-       StringUtils::IEndsWith(input_pin, ".mzid"))) {
+  if (Params::GetBool("list-of-files") ||
+      StringUtils::IEndsWith(input_pin, ".txt") ||
+      StringUtils::IEndsWith(input_pin, ".sqt") ||
+      StringUtils::IEndsWith(input_pin, ".pep.xml") ||
+      StringUtils::IEndsWith(input_pin, ".mzid")) {
     vector<string> result_files;
     get_search_result_paths(input_pin, result_files);
 
@@ -496,7 +495,6 @@ vector<string> PercolatorApplication::getOptions() const {
     "decoy-prefix",
     "decoy-xml-output",
     "default-direction",
-    "feature-file-in",
     "feature-file-out",
     "fido-alpha",
     "fido-beta",
