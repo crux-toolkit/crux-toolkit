@@ -23,6 +23,7 @@
 #include "app/PrintProcessedSpectra.h"
 #include "app/GeneratePeptides.h"
 #include "app/GetMs2Spectrum.h"
+#include "app/LocalizeModification.h"
 #include "app/ParamMedicApplication.h"
 #include "app/Pipeline.h"
 #include "app/PredictPeptideIons.h"
@@ -95,6 +96,7 @@ int main(int argc, char** argv) {
     applications.add(new SubtractIndexApplication());
     applications.add(new XLinkAssignIons());
     applications.add(new XLinkScoreSpectrum());
+    applications.add(new LocalizeModificationApplication());
 
     // Utilities for processing tab-delimited text files
     applications.add(new ExtractColumns());

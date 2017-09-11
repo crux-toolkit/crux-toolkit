@@ -819,7 +819,7 @@ void TideIndexApplication::getPbPeptide(
   outPbPeptide.set_mass(peptide.getMass());
   outPbPeptide.set_length(peptide.getLength());
   outPbPeptide.mutable_first_location()->set_protein_id(peptide.getProteinId());
-  outPbPeptide.mutable_first_location()->set_pos(peptide.getProteinPos());;
+  outPbPeptide.mutable_first_location()->set_pos(peptide.getProteinPos());
   outPbPeptide.set_is_decoy(peptide.isDecoy());
 }
 

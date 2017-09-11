@@ -116,6 +116,7 @@ set (
   model/IonSeries.cpp
   util/linked_list.cpp
   io/LineFileReader.cpp
+  app/LocalizeModification.cpp
   util/mass.cpp
   app/MakePinApplication.cpp
   model/Match.cpp
@@ -123,7 +124,6 @@ set (
   io/MatchFileReader.cpp
   io/MatchFileWriter.cpp
   model/MatchCollection.cpp
-  model/MatchCollectionIterator.cpp
   io/MatchCollectionParser.cpp
   model/MatchIterator.cpp
   util/MathUtil.cpp
