@@ -844,6 +844,14 @@ void TideIndexApplication::processParams() {
          default_cysteine.c_str(), mods_spec.c_str());
   }
   Params::Set("mods-spec", mods_spec);
+
+  // Override enzyme if it is something other than "custom-enzyme"
+  // when a custom enzyme is specified
+  if (!Params::GetString("custom-enzyme").empty() &&
+      Params::GetString("enzyme") != "custom-enzyme") {
+    Params::Set("enzyme", "custom-enzyme");
+    carp(CARP_WARNING, "'custom-enzyme' was set: setting 'enzyme' to 'custom-enzyme'");
+  }
 }
 
 
