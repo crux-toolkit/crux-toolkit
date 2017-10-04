@@ -388,12 +388,14 @@ if (WIN32 AND NOT CYGWIN)
     optimized libboost_filesystem-vc120-mt
     optimized libboost_thread-vc120-mt
     optimized libboost_chrono-vc120-mt
+    optimized libboost_regex-vc120-mt
     debug libboost_system-vc120-mt-gd
     debug libboost_iostreams-vc120-mt-gd
     debug libboost_nowide-vc120-mt-gd
     debug libboost_filesystem-vc120-mt-gd
     debug libboost_thread-vc120-mt-gd
     debug libboost_chrono-vc120-mt-gd
+    debug libboost_regex-vc120-mt-gd
   )
 else()
   target_link_libraries(

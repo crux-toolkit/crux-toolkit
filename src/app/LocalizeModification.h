@@ -4,7 +4,7 @@
 #include "CruxApplication.h"
 #include "model/Modification.h"
 #include "tide/modifications.h"
-#include "tide/protoobj/raw_proteins.pb.h"
+#include "raw_proteins.pb.h"
 
 class LocalizeModificationApplication : public CruxApplication {
  public:
