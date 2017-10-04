@@ -12,7 +12,7 @@
 #else
 #include<tr1/unordered_map>
 #endif
-#include "app/tide/protoobj/header.pb.h"
+#include "header.pb.h"
 #include "mod_coder.h"
 #include "io/carp.h"
 
