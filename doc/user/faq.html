@@ -581,7 +581,7 @@
     <code>precursor-window-type</code> options.</p>
 
     <li>
-      <b>How can I run many jobs in parallel?</b>
+    <b>How can I run many jobs in parallel?</b></li>
 
 
       <p>
@@ -603,7 +603,115 @@ parallel --xapply crux tide-search &lt;options&gt; --fileroot {1} {2} database.d
 
       <p>
         <i>Thanks to Ben Temperton for this answer.</i></p>
-        
+
+    <li>
+    <b>How can I search my isotopically labeled data with Tide or Comet?</b></li>
+    <p>
+    Isotopically labeled data is accommodated by specifying various static or
+    variable modifications. The specific types of modifications differ according
+    to the labeling scheme, and the syntax for specifying the modifications
+    differs between Tide (which uses options like <code>--mods-spec</code>) and
+    Comet (which uses options like <code>add_Nterm_peptide</code>). In each of
+    the following entries, we provide first the Tide options, followed by the
+    Comet options.</p>
+    <p style="color: #00f;">iTRAQ 4-plex:</p>
+    <p><code>
+    --mods-spec K+144.10253 --nterm-peptide-mods-spec X+144.10253</code></p>
+    <p><code>
+    add_Nterm_peptide = 144.10253<br>
+    add_K_lysine = 144.10253<br>
+    clear_mz_range = 113.5 117.5</code></p>
+    <p>
+    The 4-plex reagent has different  monoisotopic mass values for 114
+    (144.105918), 115 (144.09599), and 116/117 (144.102063).  The mass value
+    used above is derived from averaging the three monoisotopic masses.</p>
+    <p style="color: #00f;">iTRAQ 8-plex:</p>
+    <p><code>
+    --mods-spec K+304.2022 --nterm-peptide-mods-spec X+304.2022</code></p>
+    <p><code>
+    add_Nterm_peptide = 304.2022<br>
+    add_K_lysine = 304.2022<br>
+    clear_mz_range = 112.5 121.5</code></p>
+    <p>
+    The mass modification above is the average of the two different set of
+    masses for 115/118/119/121 (304.199040) and 113/114/116/117
+    (304.205360).</p>
+    <p style="color: #00f;">TMT 2-plex:</code></p>
+    <p><code>
+    --mods-spec K+225.155833 --nterm-peptide-mods-spec X+225.155833</code></p>
+    <p><code>
+    add_Nterm_peptide = 225.155833<br>
+    add_K_lysine = 225.155833<br>
+    clear_mz_range = 125.5 127.5</code></p>
+    <p style="color: #00f;">TMT 6-plex:</code></p>
+    <p><code>
+    --mods-spec K+229.162932 --nterm-peptide-mods-spec X+229.162932</code></p>
+    <p><code>
+    add_Nterm_peptide = 229.162932<br>
+    add_K_lysine = 229.162932<br>
+    clear_mz_range = 127.5 131.5</code></p>
+    <p style="color: #00f;">SILAC 4Da:</p>
+    <p>
+    There are a number of different SILAC reagents with a ~4 Da modification
+    (based on combinations of C13 and N15), each with different sites of
+    specificity.  The example below is for the 15N(4) reagent applied to R
+    residues.  You should adjust the modification mass and residue(s) applied
+    to as necessary.</p>
+    <p>
+    To perform a mixed light/heavy search using a variable modification
+    search:</p>
+    <p><code>
+    --mods-spec 3R+3.988140</code></p>
+    <p><code>
+    variable_mod01 = 3.988140 R 1 3 -1 0 0</code></p>
+    <p>
+    Note that, in the example above, Comet operates in “binary” mode, which
+    means that it only considers peptides in which all or none of the lysine
+    residues are light/heavy. Tide does not support binary mode searching, so it
+    will consider all peptides with up to 3 (in the above specification) heavy
+    lysines.</p>
+    <p>
+    To search just the heavy labeled sample, you can apply a static
+    modification:</p>
+    <p><code>
+    --mods-spec R+3.988140</code></p>
+    <p><code>
+    add_K_lysine = 3.988140</code></p>
+    <p style="color: #00f;">SILAC 6Da:</p>
+    <p>
+    This example uses the 13C(6) SILAC mass, assuming it is applied to both K
+    and R. You should adjust as necessary.  There is at least one more SILAC
+    reagent with ~6 Da modification mass and different residue specificity:
+    13C(5) 15N(1)</p>
+    <p>
+    To perform a mixed light/heavy search using a variable modification:</p>
+    <p><code>
+    --mods-spec 3KR+6.020129</code></p>
+    <p><code>
+    variable_mod01 = 6.020129 KR 1 3 -1 0 0</code></p>
+    <p>
+    To search just the heavy labeled sample, you can apply a static
+    modification:</p>
+    <p><code>
+    --mods-spec KR+6.020129</code></p>
+    <p><code>
+    add_K_lysine = 6.020129<br>
+    add_R_arginine = 6.020129</code></p>
+    <p style="color: #00f;">SILAC 8Da:</p>
+    <p>
+    The example below is for 13C(6) 15N(2) on K residues. Variable modification
+    search:</p>
+    <p><code>
+    --mods-spec 3K+8.014199</code></p>
+    <p><code>
+    variable_mod01 = 8.014199 K 1 3 -1 0 0</code></p>
+    <p>
+    Static modification for just the heavy labeled search:</p>
+    <p><code>
+    --mods-spec K+8.014199</code></p>
+    <p><code>
+    add_K_lysine = 8.014199</code></p>
+
     <li>
     <b>How can I contribute to Crux?</b></li>
 
