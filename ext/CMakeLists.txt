@@ -33,22 +33,35 @@ if (WIN32 AND NOT CYGWIN)
   endif (INCLUDE_VENDOR_LIBRARIES)
 endif (WIN32 AND NOT CYGWIN)
 
-# Download and build a partial distribution of the pwiz source
-# from the ProteoWizard TeamCity repository.
-if (WIN32 AND NOT CYGWIN)
-  if (USE_LATEST_PWIZ)
-    ExternalProject_Add(
-      ProteoWizard
-      DOWNLOAD_COMMAND 
-        ${CMAKE_COMMAND} 
+# Set up which source to use for ProteoWizard
+if (USE_LATEST_PWIZ)
+  # Use the ProteoWizard TeamCity repository.
+  set(
+      PWIZ_SOURCE
+      DOWNLOAD_COMMAND
+        ${CMAKE_COMMAND}
           -DDOWNLOAD_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/downloads
           -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
           -P  ${CMAKE_CURRENT_SOURCE_DIR}/download_pwiz.cmake
       DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/downloads
+  )
+else (USE_LATEST_PWIZ)
+  # Use tarball cached on our server
+  set(
+      PWIZ_SOURCE
+      URL http://cruxtoolkit.sourceforge.net/download/pwiz-src-3_0_9870.tar.bz2
+  )
+endif (USE_LATEST_PWIZ)
+
+# Download and build a partial distribution of the pwiz source
+if (WIN32 AND NOT CYGWIN)
+    ExternalProject_Add(
+      ProteoWizard
+      ${PWIZ_SOURCE}
       PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
       CONFIGURE_COMMAND ""
-      BUILD_COMMAND 
-        ${CMAKE_COMMAND} 
+      BUILD_COMMAND
+        ${CMAKE_COMMAND}
           -DMSBUILD_PLATFORM=${MSBUILD_PLATFORM}
           -DBUILD_TYPE:STRING=${CMAKE_CFG_INTDIR}
           -DPREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
@@ -59,100 +72,82 @@ if (WIN32 AND NOT CYGWIN)
         ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost ${CMAKE_CURRENT_BINARY_DIR}/include/boost
       BUILD_IN_SOURCE 1
     )
-  else (USE_LATEST_PWIZ)
-    ExternalProject_Add(
-      ProteoWizard
-      URL http://cruxtoolkit.sourceforge.net/download/pwiz-src-3_0_9870.tar.bz2
-      PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
-      CONFIGURE_COMMAND ""
-      BUILD_COMMAND 
-        ${CMAKE_COMMAND} 
-          -DBUILD_TYPE:STRING=${CMAKE_CFG_INTDIR}
-          -DPREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
-          -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
-          -DINCLUDE_VENDOR_LIBRARIES:BOOLEAN=${INCLUDE_VENDOR_LIBRARIES}
-          -P  ${CMAKE_CURRENT_SOURCE_DIR}/build_pwiz.cmake
-      INSTALL_COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost ${CMAKE_CURRENT_BINARY_DIR}/include/boost
-      BUILD_IN_SOURCE 1
-    )
-  endif (USE_LATEST_PWIZ)
   # On Windows we have to do some extra house keeping
   ExternalProject_Add_Step(
     ProteoWizard
     windows_post_install
     COMMAND
-      ${CMAKE_COMMAND} 
+      ${CMAKE_COMMAND}
         -DBUILD_TYPE:STRING=${CMAKE_CFG_INTDIR}
         -DPREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
         -P  ${CMAKE_CURRENT_SOURCE_DIR}/post_install_pwiz.cmake
     DEPENDEES install
   )
-else (WIN32 AND NOT CYGWIN)
-  if (USE_LATEST_PWIZ)
-    ExternalProject_Add(
-      ProteoWizard
-      DOWNLOAD_COMMAND 
-        ${CMAKE_COMMAND} 
-          -DDOWNLOAD_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/downloads
-          -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
-          -P  ${CMAKE_CURRENT_SOURCE_DIR}/download_pwiz.cmake
-      DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/downloads
-      PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
-      CONFIGURE_COMMAND ""
-      BUILD_COMMAND 
-        ${CMAKE_COMMAND} 
-          -DBUILD_TYPE:STRING=${CMAKE_CFG_INTDIR}
-          -DPREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
-          -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
-          -P  ${CMAKE_CURRENT_SOURCE_DIR}/build_pwiz.cmake
-      INSTALL_COMMAND
-        ${CMAKE_CURRENT_SOURCE_DIR}/create_links.sh 
-           --prefix=${CMAKE_CURRENT_BINARY_DIR}
-        COMMAND ${CMAKE_COMMAND} -E copy
-          ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/asio.hpp
-          ${CMAKE_CURRENT_BINARY_DIR}/include/boost
-        COMMAND ${CMAKE_COMMAND} -E copy_directory 
-          ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/asio 
-          ${CMAKE_CURRENT_BINARY_DIR}/include/boost/asio
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-          ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_aux/boost/utility
-          ${CMAKE_CURRENT_BINARY_DIR}/include/boost/utility
-        COMMAND ${CMAKE_COMMAND} -E copy
-          ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_1_56_0/boost/date_time/gregorian_calendar.ipp
-          ${CMAKE_CURRENT_BINARY_DIR}/include/boost/date_time
-      BUILD_IN_SOURCE 1
-    )
-  else (USE_LATEST_PWIZ)
-    ExternalProject_Add(
-      ProteoWizard
-      URL http://cruxtoolkit.sourceforge.net/download/pwiz-src-3_0_9870.tar.bz2
-      PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
-      CONFIGURE_COMMAND ""
-      BUILD_COMMAND 
-        ${CMAKE_COMMAND} 
-          -DBUILD_TYPE:STRING=${CMAKE_CFG_INTDIR}
-          -DPREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
-          -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
-          -P  ${CMAKE_CURRENT_SOURCE_DIR}/build_pwiz.cmake
-      INSTALL_COMMAND
-        ${CMAKE_CURRENT_SOURCE_DIR}/create_links.sh 
-           --prefix=${CMAKE_CURRENT_BINARY_DIR}
-        COMMAND ${CMAKE_COMMAND} -E copy
-          ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/asio.hpp
-          ${CMAKE_CURRENT_BINARY_DIR}/include/boost
-        COMMAND ${CMAKE_COMMAND} -E copy_directory 
-          ${CMAKE_CURREN_SOURCE_DIR}/patches/boost 
-          ${CMAKE_CURRENT_BINARY_DIR}/include/boost
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-          ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_aux/boost/utility
-          ${CMAKE_CURRENT_BINARY_DIR}/include/boost/utility
-        COMMAND ${CMAKE_COMMAND} -E copy
-          ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_1_56_0/boost/date_time/gregorian_calendar.ipp
-          ${CMAKE_CURRENT_BINARY_DIR}/include/boost/date_time
-      BUILD_IN_SOURCE 1
-    )
-  endif (USE_LATEST_PWIZ)
+elseif (APPLE)
+  ExternalProject_Add(
+    ProteoWizard
+    ${PWIZ_SOURCE}
+    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
+    PATCH_COMMAND
+      ${CMAKE_COMMAND}  -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/patches/pwiz/tar.jam
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries &&
+      ${CMAKE_COMMAND}  -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/patches/pwiz/WhittakerSmoother.cpp
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/pwiz/analysis/common
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND
+      ${CMAKE_COMMAND}
+        -DBUILD_TYPE:STRING=${CMAKE_CFG_INTDIR}
+        -DPREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
+        -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
+        -P  ${CMAKE_CURRENT_SOURCE_DIR}/build_pwiz.cmake
+    INSTALL_COMMAND
+      ${CMAKE_CURRENT_SOURCE_DIR}/create_links.sh
+         --prefix=${CMAKE_CURRENT_BINARY_DIR}
+      COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/asio.hpp
+        ${CMAKE_CURRENT_BINARY_DIR}/include/boost
+      COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/asio
+        ${CMAKE_CURRENT_BINARY_DIR}/include/boost/asio
+      COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_aux/boost/utility
+        ${CMAKE_CURRENT_BINARY_DIR}/include/boost/utility
+      COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_1_56_0/boost/date_time/gregorian_calendar.ipp
+        ${CMAKE_CURRENT_BINARY_DIR}/include/boost/date_time
+    BUILD_IN_SOURCE 1
+  )
+else (UNIX)
+  ExternalProject_Add(
+    ProteoWizard
+    ${PWIZ_SOURCE}
+    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND
+      ${CMAKE_COMMAND}
+        -DBUILD_TYPE:STRING=${CMAKE_CFG_INTDIR}
+        -DPREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
+        -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
+        -P  ${CMAKE_CURRENT_SOURCE_DIR}/build_pwiz.cmake
+    INSTALL_COMMAND
+      ${CMAKE_CURRENT_SOURCE_DIR}/create_links.sh
+         --prefix=${CMAKE_CURRENT_BINARY_DIR}
+      COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/asio.hpp
+        ${CMAKE_CURRENT_BINARY_DIR}/include/boost
+      COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/asio
+        ${CMAKE_CURRENT_BINARY_DIR}/include/boost/asio
+      COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_aux/boost/utility
+        ${CMAKE_CURRENT_BINARY_DIR}/include/boost/utility
+      COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_1_56_0/boost/date_time/gregorian_calendar.ipp
+        ${CMAKE_CURRENT_BINARY_DIR}/include/boost/date_time
+    BUILD_IN_SOURCE 1
+  )
 endif (WIN32 AND NOT CYGWIN)
 
 ExternalProject_Add(
@@ -169,12 +164,12 @@ ExternalProject_Add(
   INSTALL_COMMAND ""
 )
 
-if (UNIX) 
+if (UNIX)
   ExternalProject_Add(
     protobuf-2.5.0
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     DOWNLOAD_COMMAND
-          ${CMAKE_COMMAND} 
+          ${CMAKE_COMMAND}
             -DDOWNLOAD_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/downloads
             -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src
             -P  ${CMAKE_CURRENT_SOURCE_DIR}/download_pbuffers.cmake
@@ -192,28 +187,28 @@ elseif (WIN32 AND NOT CYGWIN)
     protobuf-2.5.0
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     DOWNLOAD_COMMAND
-          ${CMAKE_COMMAND} 
+          ${CMAKE_COMMAND}
             -DDOWNLOAD_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/downloads
             -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src
             -P  ${CMAKE_CURRENT_SOURCE_DIR}/download_pbuffers.cmake
-    PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory 
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/protobuf/vsprojects/ 
+    PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/protobuf/vsprojects/
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/protobuf-2.5.0/vsprojects/ &&
-      ${CMAKE_COMMAND} -E copy_directory 
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/protobuf/src/ 
+      ${CMAKE_COMMAND} -E copy_directory
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/protobuf/src/
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/protobuf-2.5.0/src/
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND msbuild 
+    BUILD_COMMAND msbuild
       /p:Configuration=${CMAKE_CFG_INTDIR}
-      /p:Platform=${MSBUILD_PLATFORM} 
+      /p:Platform=${MSBUILD_PLATFORM}
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/protobuf-2.5.0/vsprojects/libprotobuf.vcxproj &&
       msbuild
       /p:Configuration=${CMAKE_CFG_INTDIR}
-      /p:Platform=${MSBUILD_PLATFORM} 
+      /p:Platform=${MSBUILD_PLATFORM}
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/protobuf-2.5.0/vsprojects/libprotoc.vcxproj &&
       msbuild
       /p:Configuration=${CMAKE_CFG_INTDIR}
-      /p:Platform=${MSBUILD_PLATFORM} 
+      /p:Platform=${MSBUILD_PLATFORM}
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/protobuf-2.5.0/vsprojects/protoc.vcxproj
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE 1
@@ -221,10 +216,10 @@ elseif (WIN32 AND NOT CYGWIN)
   ExternalProject_Add_Step(
     protobuf-2.5.0
     copy_binaries
-    COMMAND ${CMAKE_COMMAND} -E copy 
+    COMMAND ${CMAKE_COMMAND} -E copy
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/protobuf-2.5.0/vsprojects/${MSBUILD_PLATFORM}/${CMAKE_CFG_INTDIR}/protoc.exe
       ${CMAKE_CURRENT_BINARY_DIR}/bin/protoc.exe
-    COMMAND ${CMAKE_COMMAND} -E copy 
+    COMMAND ${CMAKE_COMMAND} -E copy
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/protobuf-2.5.0/vsprojects/${MSBUILD_PLATFORM}/${CMAKE_CFG_INTDIR}/libprotobuf.lib
       ${CMAKE_CURRENT_BINARY_DIR}/lib/protobuf.lib
     DEPENDEES install
@@ -234,7 +229,7 @@ endif (UNIX)
 ExternalProject_Add(
   gflags-2.1.2
   DOWNLOAD_COMMAND
-        ${CMAKE_COMMAND} 
+        ${CMAKE_COMMAND}
           -DDOWNLOAD_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/downloads
           -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src
           -P  ${CMAKE_CURRENT_SOURCE_DIR}/download_gflags.cmake
@@ -246,7 +241,7 @@ ExternalProject_Add(
   PATCH_COMMAND ""
 )
 
-if (UNIX) 
+if (UNIX)
   # Get Comet source from SVN and buld using it's own makefile
   ExternalProject_Add(
     comet
@@ -258,28 +253,28 @@ if (UNIX)
       ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CometSearch/CometSearchManager.cpp
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/
     BUILD_COMMAND make -C MSToolkit
-      COMMAND make -C CometSearch CXXFLAGS=-DCRUX 
+      COMMAND make -C CometSearch CXXFLAGS=-DCRUX
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE 1
-  )  
+  ) 
   # Copy the Comet and MSToolkit include files and libraries to
   # the desired directories.
   add_custom_command(
     TARGET comet
     POST_BUILD
-    COMMAND 
+    COMMAND
       [ -d ${CMAKE_CURRENT_BINARY_DIR}/include/MSToolkit ] ||
         mkdir ${CMAKE_CURRENT_BINARY_DIR}/include/MSToolkit
-    COMMAND 
+    COMMAND
       cp -p
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/MSToolkit/include/*
       ${CMAKE_CURRENT_BINARY_DIR}/include/MSToolkit
-    COMMAND 
+    COMMAND
       cp -p
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/MSToolkit/libmstoolkitlite.a
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/libcometsearch.a
       ${CMAKE_CURRENT_BINARY_DIR}/lib
-    COMMAND 
+    COMMAND
       [ -d ${CMAKE_CURRENT_BINARY_DIR}/include/CometSearch ] ||
         mkdir ${CMAKE_CURRENT_BINARY_DIR}/include/CometSearch
     COMMAND
@@ -304,17 +299,17 @@ elseif (WIN32 AND NOT CYGWIN)
     UPDATE_COMMAND ""
     # Copy the Comet and MSToolkit include files and libraries to
     # the desired directories.
-    CONFIGURE_COMMAND 
-      ${CMAKE_COMMAND} -E copy_directory 
+    CONFIGURE_COMMAND
+      ${CMAKE_COMMAND} -E copy_directory
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/MSToolkit/include
       ${CMAKE_CURRENT_BINARY_DIR}/include/MSToolkit/
-    PATCH_COMMAND 
-      ${CMAKE_COMMAND} 
+    PATCH_COMMAND
+      ${CMAKE_COMMAND}
         -DSOURCE_DIR:STRING=${CMAKE_CURRENT_SOURCE_DIR}
         -DBINARY_DIR:STRING=${CMAKE_CURRENT_BINARY_DIR}
         -P ${CMAKE_CURRENT_SOURCE_DIR}/patch-comet.cmake
-    BUILD_COMMAND 
-      ${CMAKE_COMMAND} 
+    BUILD_COMMAND
+      ${CMAKE_COMMAND}
         -DLIBPATH:STRING="${LIBPATH}"
         -DMSBUILD_ARGS:STRING=/p:Configuration=${CMAKE_CFG_INTDIR}
         -DMSBUILD_PLATFORM=${MSBUILD_PLATFORM}
@@ -322,14 +317,14 @@ elseif (WIN32 AND NOT CYGWIN)
         -P ${CMAKE_CURRENT_SOURCE_DIR}/build-comet.cmake
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE 1
-  )  
+  ) 
   ExternalProject_Add_Step(
     comet
     copy_comet_library
-    COMMAND ${CMAKE_COMMAND} -E copy 
+    COMMAND ${CMAKE_COMMAND} -E copy
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/${MSBUILD_PLATFORM}/${CMAKE_CFG_INTDIR}/CometSearch.lib
       ${CMAKE_CURRENT_BINARY_DIR}/lib/CometSearch.lib
-    COMMAND ${CMAKE_COMMAND} -E copy 
+    COMMAND ${CMAKE_COMMAND} -E copy
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/${MSBUILD_PLATFORM}/${CMAKE_CFG_INTDIR}/MSToolkitLite.lib
       ${CMAKE_CURRENT_BINARY_DIR}/lib/MSToolkitLite.lib
     DEPENDEES install
