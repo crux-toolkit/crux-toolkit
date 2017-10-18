@@ -320,7 +320,7 @@ void ParamMedicErrorCalculator::calcMassErrorDist(
       "Spectra in same averagine bin as another: " + StringUtils::ToString(numSpectraSameBin_) + "\n"
       "    ... and also within m/z tolerance: " + StringUtils::ToString(numSpectraWithinPpm_) + "\n"
       "    ... and also within scan range: " + StringUtils::ToString(numSpectraWithinPpmAndScans_) + "\n"
-      "    ... and also with sufficient in-common fragments: " + StringUtils::ToString(precursorDistancesPpm.size());
+      "    ... and also with sufficient in-common fragments: " + StringUtils::ToString(pairedFragmentPeaks_.size());
       if (proportionMultipleFrags > PROPORTION_MASSBINS_MULTIPEAK_PROFILE) {
         *fragmentFailure +=
           "\nIs this profile-mode data? Proportion of mass bins with multiple peaks "
