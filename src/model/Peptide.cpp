@@ -224,7 +224,7 @@ void Peptide::setLength(
 /**
  *\returns the sequence length of the peptide
  */
-unsigned char Peptide::getLength() {
+unsigned char Peptide::getLength() const {
   return length_;
 }
 

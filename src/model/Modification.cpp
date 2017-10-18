@@ -653,7 +653,7 @@ char ModificationDefinitionContainer::NextSymbol() {
     symbolPool_.pop_front();
     return symbol;
   }
-  carp(CARP_WARNING, "No more symbols for variable modifications available");
+  carp_once(CARP_WARNING, "No more symbols for variable modifications available");
   return '+';
 }
 

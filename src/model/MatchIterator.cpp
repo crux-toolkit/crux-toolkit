@@ -10,7 +10,6 @@
  * Initializes a match iterator object.
  */
 void MatchIterator::init() {
-
   match_collection_ = NULL;
   match_mode_ = (SCORER_TYPE_T)0;
   match_idx_ = 0;

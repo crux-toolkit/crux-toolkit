@@ -166,7 +166,7 @@ class Peptide {
   /**
    *\returns the sequence length of the peptide
    */
-  unsigned char getLength();
+  unsigned char getLength() const;
 
   /**
    * \brief Get the sequence of a peptide.
