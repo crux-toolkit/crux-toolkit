@@ -81,19 +81,6 @@ void CruxApplication::initialize(int argc, char** argv) {
     mysrandom(StringUtils::FromString<unsigned>(Params::GetString("seed")));
   }
 
-  processParams();
-  Params::Finalize();
-  GlobalParams::set();
-  if (!Params::GetBool("no-analytics")) {
-    // Post data to Google Analytics using a separate thread
-    boost::thread analytics_thread(postToAnalytics, getName());
-  }
-
-  carp(CARP_INFO, "Beginning %s.", getName().c_str());
-
-  // Start the timer.
-  wall_clock();
-
   // Create output directory if appliation needs it.
   if (needsOutputDirectory()) {
     // Create output directory 
@@ -110,7 +97,21 @@ void CruxApplication::initialize(int argc, char** argv) {
     carp(CARP_INFO, "Crux version: %s", CRUX_VERSION);
     carp(CARP_INFO, date_and_time());
     log_command_line(argc, argv);
+  }
 
+  // Start the timer.
+  carp(CARP_INFO, "Beginning %s.", getName().c_str());
+  wall_clock();
+
+  processParams();
+  Params::Finalize();
+  GlobalParams::set();
+  if (!Params::GetBool("no-analytics")) {
+    // Post data to Google Analytics using a separate thread
+    boost::thread analytics_thread(postToAnalytics, getName());
+  }
+
+  if (needsOutputDirectory()) {
     // Write the parameter file
     string paramFile = make_file_path(getFileStem() + ".params.txt");
     ofstream* file = FileUtils::GetWriteStream(paramFile, Params::GetBool("overwrite"));

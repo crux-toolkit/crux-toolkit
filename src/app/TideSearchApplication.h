@@ -47,9 +47,21 @@ private:
   );
 //
 
+  friend class LocalizeModificationApplication;
   friend class SubtractIndexApplication;
 
  protected:
+
+  struct InputFile {
+    std::string OriginalName;
+    std::string SpectrumRecords;
+    bool Keep;
+    InputFile(const std::string& name,
+              const std::string& spectrumrecords,
+              bool keep):
+      OriginalName(name), SpectrumRecords(spectrumrecords), Keep(keep) {}
+  };
+
   /**
   brief This variable is used with Cascade Search.
   This map contains a flag for each spectrum whether
@@ -64,6 +76,10 @@ private:
 
   static bool HAS_DECOYS;
   static bool PROTEIN_LEVEL_DECOYS;
+
+  vector<int> getNegativeIsotopeErrors() const;
+  vector<InputFile> getInputFiles(const vector<string>& filepaths) const;
+  static SpectrumCollection* loadSpectra(const std::string& file);
 
   /**
    * Function that contains the search algorithm and performs the search
@@ -126,6 +142,8 @@ private:
     int charge
   );
 
+  void convertResults() const;
+
   void computeWindow(
     const SpectrumCollection::SpecCharge& sc,
     WINDOW_TYPE_T window_type,
@@ -152,15 +170,15 @@ private:
 
   std::string remove_index_;
 
-  struct InputFile {
-    std::string OriginalName;
-    std::string SpectrumRecords;
-    bool Keep;
-    InputFile(const std::string& name,
-              const std::string& spectrumrecords,
-              bool keep):
-      OriginalName(name), SpectrumRecords(spectrumrecords), Keep(keep) {}
-  };
+  // if these are set they will be used
+  bool localizeMod_;
+  ofstream* targetFile_;
+  std::string scanNumber_;
+  const std::map<std::string, std::string>* spectrumFilesOverride_;
+  // this map can be used to preload spectra
+  // <spectrumrecords file> -> SpectrumCollection
+  // the SpectrumCollection must be sorted
+  std::map<std::string, SpectrumCollection*> spectra_;
 
  public:
 

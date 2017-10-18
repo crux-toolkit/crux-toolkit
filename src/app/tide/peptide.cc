@@ -30,7 +30,7 @@ string Peptide::SeqWithMods() const {
     MassConstants::DecodeMod(mods_[i], &index, &delta);
     while (residue_pos <= index)
       *buf_pos++ = residues_[residue_pos++];
-    buf_pos += sprintf(buf_pos, "[+%.1f]", delta);
+    buf_pos += sprintf(buf_pos, "[%s%.1f]", delta >= 0 ? "+" : "", delta);
   }
   while (residue_pos < Len())
     *buf_pos++ = residues_[residue_pos++];

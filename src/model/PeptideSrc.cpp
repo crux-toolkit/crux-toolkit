@@ -260,8 +260,8 @@ bool PeptideSrc::parseTabDelimited(
     return true;
   } else {
     vector<string> protein_ids = StringUtils::Split(file.getString(PROTEIN_ID_COL), ',');
-  
-    if (protein_ids.size() == 0) {
+
+    if (protein_ids.empty()) {
       carp(CARP_ERROR, "No protein ids found!");
       return false;
     }
@@ -305,10 +305,10 @@ bool PeptideSrc::parseTabDelimited(
         //protein id is the string.
         bool is_decoy;
 
-        parent_protein=MatchCollectionParser::getProtein(
+        parent_protein = MatchCollectionParser::getProtein(
           database, decoy_database, protein_id, is_decoy);
         if (parent_protein == NULL) {
-          carp(CARP_WARNING, "Can't find protein %s",protein_id.c_str());
+          carp(CARP_WARNING, "Can't find protein %s", protein_id.c_str());
           continue;
         }
 
@@ -332,7 +332,7 @@ bool PeptideSrc::parseTabDelimited(
 
         string sequence = Peptide::unmodifySequence(file.getString(SEQUENCE_COL));
 
-        if (parent_protein -> isPostProcess()) {
+        if (parent_protein->isPostProcess()) {
           // Attempting to store protein_id location in start_idx_original of peptide src [Please check
           // if this is valid usage, since PMCDelimitedFileWriter uses startidxoriginal to print protein
           // id location] so I am making an assumption that this is the purpose of start_idx_original.

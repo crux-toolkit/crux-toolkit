@@ -116,6 +116,7 @@ set (
   model/IonSeries.cpp
   util/linked_list.cpp
   io/LineFileReader.cpp
+  app/LocalizeModification.cpp
   util/mass.cpp
   app/MakePinApplication.cpp
   model/Match.cpp
@@ -123,7 +124,6 @@ set (
   io/MatchFileReader.cpp
   io/MatchFileWriter.cpp
   model/MatchCollection.cpp
-  model/MatchCollectionIterator.cpp
   io/MatchCollectionParser.cpp
   model/MatchIterator.cpp
   util/MathUtil.cpp
@@ -388,12 +388,14 @@ if (WIN32 AND NOT CYGWIN)
     optimized libboost_filesystem-vc120-mt
     optimized libboost_thread-vc120-mt
     optimized libboost_chrono-vc120-mt
+    optimized libboost_regex-vc120-mt
     debug libboost_system-vc120-mt-gd
     debug libboost_iostreams-vc120-mt-gd
     debug libboost_nowide-vc120-mt-gd
     debug libboost_filesystem-vc120-mt-gd
     debug libboost_thread-vc120-mt-gd
     debug libboost_chrono-vc120-mt-gd
+    debug libboost_regex-vc120-mt-gd
   )
 else()
   target_link_libraries(
