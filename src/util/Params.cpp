@@ -284,6 +284,10 @@ Params::Params() : finalized_(false) {
     "then a second file will be created containing the decoy peptides. Decoys that also "
     "appear in the target database are marked with an asterisk in a third column.",
     "Available for tide-index.", true);
+  InitIntParam("modsoutputter-threshold", 1000, 0, BILLION,
+    "Maximum number of temporary files that would be opened by ModsOutputter "
+    "before switching to ModsOutputterAlt.",
+    "Available for tide-index.", false);
   // print-processed-spectra option
   InitStringParam("stop-after", "xcorr", "remove-precursor|square-root|"
     "remove-grass|ten-bin|xcorr",
