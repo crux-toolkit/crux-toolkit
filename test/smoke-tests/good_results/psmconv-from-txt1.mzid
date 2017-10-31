@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<MzIdentML id="" creationDate="2016-06-07T20:02:07Z" version="1.1.0" xsi:schemaLocation="http://psidev.info/psi/pi/mzIdentML/1.1 http://psidev.info/files/mzIdentML1.1.0.xsd" xmlns="http://psidev.info/psi/pi/mzIdentML/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<MzIdentML id="" creationDate="2017-10-31T02:09:07Z" version="1.1.0" xsi:schemaLocation="http://psidev.info/psi/pi/mzIdentML/1.1 http://psidev.info/files/mzIdentML1.1.0.xsd" xmlns="http://psidev.info/psi/pi/mzIdentML/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <SequenceCollection>
     <DBSequence id="DBS_0" length="6" accession="YMR309C">
       <Seq>IPYSPK</Seq>
@@ -2290,8 +2290,13 @@
     <PeptideEvidence id="PE_298" peptide_ref="PEP_398" dBSequence_ref="DBS_298" start="0" end="28" isDecoy="false"/>
     <PeptideEvidence id="PE_299" peptide_ref="PEP_399" dBSequence_ref="DBS_299" start="0" end="29" isDecoy="false"/>
   </SequenceCollection>
+  <AnalysisCollection>
+    <SpectrumIdentification id="SpecIdent_1" spectrumIdentificationProtocol_ref="SearchProtocol_1" spectrumIdentificationList_ref="SIL_0" activityDate="">
+      <InputSpectra spectraData_ref="demo.ms2"/>
+    </SpectrumIdentification>
+  </AnalysisCollection>
   <AnalysisProtocolCollection>
-    <SpectrumIdentificationProtocol id="">
+    <SpectrumIdentificationProtocol id="SearchProtocol_1">
       <ModificationParams>
         <SearchModification fixedMod="true" massDelta="1.7" residues="A C D E F G H I K L M N Q S T V W Y">
           <SpecificityRules><cvParam cvRef="MS" accession="MS:1001189" name="modification specificity peptide N-term" value=""/></SpecificityRules>
@@ -2311,6 +2316,8 @@
   </AnalysisProtocolCollection>
   <DataCollection>
     <Inputs>
+      <SpectraData id="demo.ms2" name="demo.ms2" location="">
+      </SpectraData>
     </Inputs>
     <AnalysisData>
       <SpectrumIdentificationList id="SIL_0" numSequencesSearched="0">
