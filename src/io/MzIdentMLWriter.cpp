@@ -66,41 +66,54 @@ void MzIdentMLWriter::openFile(
  * Close the file, if open.
  */
 void MzIdentMLWriter::closeFile() {
-  if (mzid_ != NULL && fout_ != NULL) {
-    // Add modification information to AnalysisProtocolCollection -> ModificationParams
-    AnalysisProtocolCollection& apc = mzid_->analysisProtocolCollection;
-    SpectrumIdentificationProtocolPtr sipp(new SpectrumIdentificationProtocol());
-    apc.spectrumIdentificationProtocol.push_back(sipp);
-
-    vector<const ModificationDefinition*> mods = ModificationDefinition::AllMods();
-    for (vector<const ModificationDefinition*>::const_iterator i = mods.begin();
-         i != mods.end();
-         i++) {
-      SearchModificationPtr smp(new SearchModification());
-      smp->fixedMod = (*i)->Static();
-      smp->massDelta = MathUtil::Round((*i)->DeltaMass(), Params::GetInt("mod-precision"));
-      smp->residues = vector<char>((*i)->AminoAcids().begin(), (*i)->AminoAcids().end());
-      switch ((*i)->Position()) {
-        case PEPTIDE_N:
-          smp->specificityRules = CVParam(MS_modification_specificity_peptide_N_term);
-          break;
-        case PEPTIDE_C:
-          smp->specificityRules = CVParam(MS_modification_specificity_peptide_C_term);
-          break;
-        case PROTEIN_N:
-          smp->specificityRules = CVParam(MS_modification_specificity_protein_N_term);
-          break;
-        case PROTEIN_C:
-          smp->specificityRules = CVParam(MS_modification_specificity_protein_C_term);
-          break;
-      }
-      sipp->modificationParams.push_back(smp);
-    }
-
-    Serializer_mzIdentML serializer;
-    serializer.write(*fout_, *mzid_);
-    fout_->close();
+  if (mzid_ == NULL || fout_ == NULL) {
+    return;
   }
+  AnalysisCollection& ac = mzid_->analysisCollection;
+  SpectrumIdentificationPtr sip(new SpectrumIdentification("SpecIdent_1"));
+  ac.spectrumIdentification.push_back(sip);
+  sip->spectrumIdentificationListPtr = getSpectrumIdentificationList();
+  for (map<string, SpectraDataPtr>::const_iterator i = spectrumFiles_.begin();
+       i != spectrumFiles_.end();
+       i++) {
+    sip->inputSpectra.push_back(i->second);
+    mzid_->dataCollection.inputs.spectraData.push_back(i->second);
+  }
+
+  // Add modification information to AnalysisProtocolCollection -> ModificationParams
+  AnalysisProtocolCollection& apc = mzid_->analysisProtocolCollection;
+  SpectrumIdentificationProtocolPtr sipp(new SpectrumIdentificationProtocol("SearchProtocol_1"));
+  apc.spectrumIdentificationProtocol.push_back(sipp);
+  sip->spectrumIdentificationProtocolPtr = sipp;
+
+  vector<const ModificationDefinition*> mods = ModificationDefinition::AllMods();
+  for (vector<const ModificationDefinition*>::const_iterator i = mods.begin();
+       i != mods.end();
+       i++) {
+    SearchModificationPtr smp(new SearchModification());
+    smp->fixedMod = (*i)->Static();
+    smp->massDelta = MathUtil::Round((*i)->DeltaMass(), Params::GetInt("mod-precision"));
+    smp->residues = vector<char>((*i)->AminoAcids().begin(), (*i)->AminoAcids().end());
+    switch ((*i)->Position()) {
+      case PEPTIDE_N:
+        smp->specificityRules = CVParam(MS_modification_specificity_peptide_N_term);
+        break;
+      case PEPTIDE_C:
+        smp->specificityRules = CVParam(MS_modification_specificity_peptide_C_term);
+        break;
+      case PROTEIN_N:
+        smp->specificityRules = CVParam(MS_modification_specificity_protein_N_term);
+        break;
+      case PROTEIN_C:
+        smp->specificityRules = CVParam(MS_modification_specificity_protein_C_term);
+        break;
+    }
+    sipp->modificationParams.push_back(smp);
+  }
+
+  Serializer_mzIdentML serializer;
+  serializer.write(*fout_, *mzid_);
+  fout_->close();
   delete fout_;
   fout_ = NULL;
 }
@@ -439,6 +452,13 @@ PeptideHypothesis& MzIdentMLWriter::getPeptideHypothesis(
 SpectrumIdentificationResultPtr MzIdentMLWriter::getSpectrumIdentificationResult(
   Crux::Spectrum* spectrum ///< Crux spectrum object -in
   ) {
+  string spectrumFile(spectrum->getFullFilename());
+  map<string, SpectraDataPtr>::iterator sdpLookup = spectrumFiles_.find(spectrumFile);
+  if (sdpLookup == spectrumFiles_.end()) {
+    // add new SpectraData
+    SpectraDataPtr sdp(new SpectraData(spectrumFile, spectrumFile));
+    sdpLookup = spectrumFiles_.insert(make_pair(spectrumFile, sdp)).first;
+  }
 
   string spectrum_idStr = 
     StringUtils::ToString(spectrum->getFirstScan()) + 
@@ -463,6 +483,7 @@ SpectrumIdentificationResultPtr MzIdentMLWriter::getSpectrumIdentificationResult
   
   sirp->id = "SIR_"+boost::lexical_cast<string>(sir_idx_++);
   sirp->spectrumID = spectrum_idStr;
+  sirp->spectraDataPtr = sdpLookup->second;
   silp->spectrumIdentificationResult.push_back(sirp);
   return sirp;
 }
