@@ -28,6 +28,8 @@ class MzIdentMLWriter : public PSMWriter {
   size_t pag_idx_; ///< counter for ProteinAmbiguityGroups
   size_t pdh_idx_; ///< counter for ProteinDetectionHypothesis
 
+  std::map<std::string, pwiz::identdata::SpectraDataPtr> spectrumFiles_;
+
   /**
    * \returns DBSequence for the protein source.  If it doesn't exist, 
    * then first create the object in the mzid object
