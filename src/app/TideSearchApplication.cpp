@@ -1012,22 +1012,22 @@ void TideSearchApplication::search(void* threadarg) {
 	  }
 	  //END RES-EV
 
-          //BOTH SCORE
+    //BOTH SCORE
 	  if (curScoreFunction == BOTH_SCORE) {
 	    double cPval = pValue_xcorr * pValue_resEv;
 
 	    double m = 1.2; // This value has be empircally determined
 	    pValue_both = calcCombinedPval(m,cPval,2); //2 is the # of p-values that are combined
 	  }
-          //END BOTH_SCORE
+    //END BOTH_SCORE
 
-          if (curScoreFunction == XCORR_SCORE && pValue_xcorr == 0.0) {
-            std::cout << "Spectrum: " << sc->spectrum->SpectrumNumber() << std::endl;
-            carp(CARP_FATAL,"PSM p-value should not be equal to 0.0");
-          } else if (curScoreFunction == RESIDUE_EVIDENCE_MATRIX && pValue_resEv == 0.0) {
-            std::cout << "Spectrum: " << sc->spectrum->SpectrumNumber() << std::endl;
-            carp(CARP_FATAL,"PSM p-value should not be equal to 0.0");
-          } else if (curScoreFunction == BOTH_SCORE && pValue_both == 0.0) {
+    if (curScoreFunction == XCORR_SCORE && pValue_xcorr == 0.0) {
+      std::cout << "Spectrum: " << sc->spectrum->SpectrumNumber() << std::endl;
+      carp(CARP_FATAL,"PSM p-value should not be equal to 0.0");
+    } else if (curScoreFunction == RESIDUE_EVIDENCE_MATRIX && pValue_resEv == 0.0) {
+      std::cout << "Spectrum: " << sc->spectrum->SpectrumNumber() << std::endl;
+      carp(CARP_FATAL,"PSM p-value should not be equal to 0.0");
+    } else if (curScoreFunction == BOTH_SCORE && pValue_both == 0.0) {
 	    std::cout << "Spectrum: " << sc->spectrum->SpectrumNumber() << std::endl;
 	    carp(CARP_FATAL,"PSM p-value should not be equal to 0.0");
 	  }
