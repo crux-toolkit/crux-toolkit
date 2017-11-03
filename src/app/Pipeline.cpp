@@ -319,10 +319,17 @@ void PipelineApplication::processParams() {
     apps_.push_back(new CruxBullseyeApplication());
   }
 
+  const vector<string>& spectra = Params::GetStrings("mass spectra");
   if (Params::GetString("search-engine") == "comet") {
     Params::Set("database_name", Params::GetString("peptide source"));
+    for (vector<string>::const_iterator i = spectra.begin(); i != spectra.end(); i++) {
+      Params::AddArgValue("input spectra", *i);
+    }
     apps_.push_back(new CometApplication());
   } else {
+    for (vector<string>::const_iterator i = spectra.begin(); i != spectra.end(); i++) {
+      Params::AddArgValue("tide spectra file", *i);
+    }
     Params::Set("tide database", Params::GetString("peptide source"));
     apps_.push_back(new TideSearchApplication());
   }
