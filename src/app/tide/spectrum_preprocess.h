@@ -138,7 +138,18 @@ class ObservedPeakSet {
 #ifdef DEBUG
   int DebugDotProd(const TheoreticalPeakArr& theoretical);
 #endif
-  void PreprocessSpectrum(const Spectrum& spectrum, int charge);
+
+  void PreprocessSpectrum(const Spectrum& spectrum, int charge) {
+    int dummy1, dummy2, dummy3, dummy4;
+    PreprocessSpectrum(spectrum, charge, &dummy1, &dummy2, &dummy3, &dummy4);
+  }
+
+  void PreprocessSpectrum(const Spectrum& spectrum, int charge,
+                          int* num_range_skipped,
+                          int* num_precursors_skipped,
+                          int* num_isotopes_skipped,
+                          int* num_retained);
+
   void CreateEvidenceVector(const Spectrum& spectrum, double binWidth,
     double binOffset, int charge, double pepMassMonoMean,
     int maxPrecurMass, int* evidenceInt);

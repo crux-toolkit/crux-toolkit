@@ -27,6 +27,12 @@
 #define MASS_H_MONO 1.0078246 ///< Mass of hydrogen (monoisotopic)
 #define MASS_H_AVERAGE 1.00794 ///< Mass of hydrogen (average)
 
+/**
+ * Mass difference between C12 and C13. Corresponds to difference
+ * between peaks in an isotope distribution.
+ */
+#define ISOTOPE_SPACING 1.003355
+
 /* As for the constants, these are for supporting mono-isotopic and
  * average masses.  When I was collaborating with Pragya with
  * cross-linking code, she wanted more accurate calculations on the

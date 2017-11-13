@@ -63,6 +63,9 @@ class Spectrum {
   void SortIfNecessary();
   void InferChargeStatesIfNecessary();
 
+  int MaxCharge() const;
+  double MaxPeakInRange( double min_range, double max_range ) const;
+  
  private:
   int spectrum_number_;
   double rtime_;
@@ -83,6 +86,7 @@ class SpectrumCollection {
   void ReadMS(istream& in, bool ms1);
   bool ReadSpectrumRecords(const string& filename, pb::Header* header = NULL);
   void Sort();
+  int Size() const { return(spectra_.size()); } // number of spectra
 
   template<typename BinaryPredicate>
   void Sort(BinaryPredicate Predicate) {
