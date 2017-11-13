@@ -44,7 +44,7 @@ using namespace std;
  *   add the name of your new parameter to the list of options there.
 
  * - In the same file, add a call to
- *   Params::get{Bool,Int,String,Double}() to retrieve the value
+ *   Params::Get{Bool,Int,String,Double}() to retrieve the value
  *   associated with the parameter.  In general, these methods can be
  *   used anywhere in the source code in order to retrieve parameters.
  *   However, it's good form, when feasible, to access parameters in
@@ -220,6 +220,14 @@ Params::Params() : finalized_(false) {
     "K but not before P which is represented as [RK]|{P}. AspN cuts after any residue "
     "but only before D which is represented as [X]|[D].",
     "", true);
+  InitDoubleParam("deisotope", 0, 0, 1000,
+    "Perform a simple deisotoping operation. For each peak, consider lower m/z peaks. "
+    "If the current peak occurs where an expected peak would lie for any charge state "
+    "less than the charge state of the precursor, within mass tolerance, and if the "
+    "current peak is of lower abundance, then the peak is removed.  The value of this "
+    "parameter is the mass tolerance, in units of parts-per-million.  If set to 0, no "
+    "deisotoping is performed.",
+    "Available for tide-search.", true);
   InitStringParam("digestion", "full-digest",
     "full-digest|partial-digest|non-specific-digest",
     "Specify whether every peptide in the database must have two enzymatic termini "
@@ -1909,6 +1917,7 @@ void Params::Categorize() {
   items.insert("auto-mz-bin-width");
   items.insert("compute-p-values");
   items.insert("compute-sp");
+  items.insert("deisotope");
   items.insert("exact-p-value");
   items.insert("fragment-mass");
   items.insert("isotope-error");

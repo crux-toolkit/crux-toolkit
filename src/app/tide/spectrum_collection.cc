@@ -38,6 +38,29 @@ Spectrum::Spectrum(const pb::Spectrum& spec) {
   }
 }
 
+// A spectrum can have multiple precursor charges assigned.  This
+// reports the maximum such charge state.
+int Spectrum::MaxCharge() const {
+  vector<int>::const_iterator i = max_element(charge_states_.begin(), charge_states_.end());
+  return i != charge_states_.end() ? *i : 1;
+}
+
+// Report maximum intensity peak in the given m/z range.
+double Spectrum::MaxPeakInRange( double min_range, double max_range ) const {
+  double return_value = 0.0;
+
+  for (int i = 0; i < this->Size(); ++i) {
+    double mz = peak_m_z_[i];
+    if ( (min_range <= mz) && (mz <= max_range) ) {
+      double intensity = peak_intensity_[i];
+      if (intensity > return_value) {
+        return_value = intensity;
+      }
+    }
+  }
+  return(return_value);
+}
+
 static inline bool IsInt(double x) {
   // See whether x is quite close to an integer (within 0.001).
   return fabs(x - uint64(x+0.5)) < 0.001;

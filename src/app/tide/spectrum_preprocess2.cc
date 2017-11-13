@@ -22,6 +22,7 @@
 #include "spectrum_preprocess.h"
 #include "mass_constants.h"
 #include "max_mz.h"
+#include "util/mass.h"
 #include "util/Params.h"
 
 using namespace std;
@@ -61,8 +62,11 @@ static void SubtractBackground(double* observed, int end) {
   }
 }
 
-void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum,
-                                       int charge ) {
+void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
+                                         int* num_range_skipped,
+                                         int* num_precursors_skipped,
+                                         int* num_isotopes_skipped,
+                                         int* num_retained) {
 #ifdef DEBUG
   bool debug = (FLAGS_debug_spectrum_id == spectrum.SpectrumNumber()
                 && (FLAGS_debug_charge == 0 || FLAGS_debug_charge == charge));
@@ -96,18 +100,62 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum,
   } else {
     bool remove_precursor = Params::GetBool("remove-precursor-peak");
     double precursor_tolerance = Params::GetDouble("remove-precursor-tolerance");
+    double deisotope_threshold = Params::GetDouble("deisotope");
+    int max_charge = spectrum.MaxCharge();
 
     // Fill peaks
     int largest_mz = 0;
     double highest_intensity = 0;
-    for (int i = 0; i < spectrum.Size(); ++i) {
+    for (int i = spectrum.Size() - 1; i >= 0; --i) {
       double peak_location = spectrum.M_Z(i);
-      if (peak_location >= experimental_mass_cut_off ||
-          (remove_precursor && fabs(peak_location - precursor_mz) <= precursor_tolerance)) {
+
+      // Get rid of peaks beyond the possible range, given charge and precursor.
+      if (peak_location >= experimental_mass_cut_off) {
+        (*num_range_skipped)++;
         continue;
       }
 
+      // Remove precursor peaks.
+      if (remove_precursor &&
+          fabs(peak_location - precursor_mz) <= precursor_tolerance ) {
+        (*num_precursors_skipped)++;
+        continue;
+      }
+
+      // Do Morpheus-style simple(-istic?) deisotoping.  "For each
+      // peak, lower m/z peaks are considered. If the reference peak
+      // lies where an expected peak would lie for a charge state from
+      // one to the charge state of the precursor, within mass
+      // tolerance, and is of lower abundance, the reference peak is
+      // considered to be an isotopic peak and removed."
       double intensity = spectrum.Intensity(i);
+
+      bool skip_peak = false;
+      if (deisotope_threshold != 0.0) {
+        for (int fragCharge = 1; fragCharge < max_charge; ++fragCharge) {
+          double isotopic_peak = peak_location - (ISOTOPE_SPACING / fragCharge);
+          double ppm_difference = ( peak_location * deisotope_threshold ) / 1e6;
+          double isotopic_intensity = spectrum.MaxPeakInRange(isotopic_peak - ppm_difference,
+                                                              isotopic_peak + ppm_difference);
+        
+          if (intensity < isotopic_intensity) {
+            carp(CARP_DETAILED_DEBUG,
+                 "Removing isotopic peak (%g, %g) because of peak in [%g, %g] with intensity %g.",
+                 peak_location, intensity, isotopic_peak - ppm_difference,
+                 isotopic_peak + ppm_difference, isotopic_intensity);
+            skip_peak = true;
+            break;
+          }
+        }
+      }
+
+      if (skip_peak) {
+        (*num_isotopes_skipped)++;
+        continue;
+      } else {
+        (*num_retained)++;
+      }
+
       int mz = MassConstants::mass2bin(peak_location);
       if ((mz > largest_mz) && (intensity > 0)) {
         largest_mz = mz;
