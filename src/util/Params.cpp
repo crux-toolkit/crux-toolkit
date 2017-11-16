@@ -218,7 +218,8 @@ Params::Params() : finalized_(false) {
     "']'. If the residues prevent digestion, then they are enclosed in curly braces, "
     "'{' and '}'. Use X to indicate all residues. For example, trypsin cuts after R or "
     "K but not before P which is represented as [RK]|{P}. AspN cuts after any residue "
-    "but only before D which is represented as [X]|[D].",
+    "but only before D which is represented as [X]|[D]. "
+    "To prevent the sequences from being digested at all, use [Z]|[Z].",
     "", true);
   InitDoubleParam("deisotope", 0, 0, 1000,
     "Perform a simple deisotoping operation. For each peak, consider lower m/z peaks. "
