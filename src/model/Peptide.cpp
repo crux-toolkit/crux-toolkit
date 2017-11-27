@@ -420,9 +420,9 @@ vector<Modification> Peptide::getStaticMods() const {
   char* seq = getSequence();
   vector<Modification> mods;
   for (unsigned char i = 0; seq[i] != '\0'; i++) {
-    const vector<const ModificationDefinition*>& staticMods =
+    const set<const ModificationDefinition*>& staticMods =
       ModificationDefinition::StaticMods(seq[i]);
-    for (vector<const ModificationDefinition*>::const_iterator j = staticMods.begin();
+    for (set<const ModificationDefinition*>::const_iterator j = staticMods.begin();
          j != staticMods.end();
          j++) {
       if ((*j)->Position() == ANY ||

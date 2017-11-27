@@ -152,7 +152,7 @@ void Peptide::AddBIonsOnly(W* workspace) const {
   }
 
   // Add all charge 1 B ions.
-  double total = MassConstants::proton + aa_masses[0];
+  double total = MASS_PROTON + aa_masses[0];
   for (int i = 1; i < Len() && total <= max_possible_peak; ++i) {
     workspace -> AddBIon(total);
     total += aa_masses[i];

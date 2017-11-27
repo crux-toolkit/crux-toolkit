@@ -6,7 +6,6 @@
 
 using namespace std;
 
-double const MassConstants::proton = 1.00727646688;
 double const MassConstants::kFixedPointScalar = 1e5;
 
 const double MassConstants::elts_mono[] = {
@@ -77,7 +76,7 @@ const FixPt MassConstants::fixp_mono_h2o = ToFixPt(MassConstants::mono_h2o);
 const FixPt MassConstants::fixp_avg_h2o  = ToFixPt(MassConstants::avg_h2o);
 const FixPt MassConstants::fixp_mono_nh3 = ToFixPt(MassConstants::mono_nh3);
 const FixPt MassConstants::fixp_mono_co  = ToFixPt(MassConstants::mono_co);
-const FixPt MassConstants::fixp_proton   = ToFixPt(MassConstants::proton);
+const FixPt MassConstants::fixp_proton   = ToFixPt(MASS_PROTON);
 
 ModCoder MassConstants::mod_coder_;
 vector<double> MassConstants::unique_deltas_;

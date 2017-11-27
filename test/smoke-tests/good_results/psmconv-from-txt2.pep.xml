@@ -349,6 +349,7 @@
 <parameter name="pm-min-common-frag-peaks" value="20"/>
 <parameter name="pm-max-scan-separation" value="1000"/>
 <parameter name="pm-min-peak-pairs" value="100"/>
+<parameter name="min-mod-mass" value="0"/>
 </search_summary>
     <spectrum_query spectrum="demo.00035.00035.1" start_scan="35" end_scan="35" precursor_neutral_mass="708.0627" assumed_charge="1" index="1">
     <search_result>

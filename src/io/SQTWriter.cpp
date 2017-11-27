@@ -82,8 +82,8 @@ void SQTWriter::writeHeader(
          << "H\tComment\tfinal algorithm " << score_type << endl;
 
   for (char aa = 'A'; aa <= 'Z'; aa++) {
-    vector<const ModificationDefinition*> staticMods = ModificationDefinition::StaticMods(aa);
-    for (vector<const ModificationDefinition*>::const_iterator i = staticMods.begin();
+    set<const ModificationDefinition*> staticMods = ModificationDefinition::StaticMods(aa);
+    for (set<const ModificationDefinition*>::const_iterator i = staticMods.begin();
          i != staticMods.end();
          i++) {
       *file_ << "H\tStaticMod\t" << aa << '='
@@ -94,8 +94,8 @@ void SQTWriter::writeHeader(
 
   // print dynamic mods, if any
   // format DiffMod <AAs><symbol>=<mass change>
-  vector<const ModificationDefinition*> varMods = ModificationDefinition::VarMods();
-  for (vector<const ModificationDefinition*>::const_iterator i = varMods.begin();
+  set<const ModificationDefinition*> varMods = ModificationDefinition::VarMods();
+  for (set<const ModificationDefinition*>::const_iterator i = varMods.begin();
        i != varMods.end();
        i++) {
     char symbol = (*i)->Symbol();

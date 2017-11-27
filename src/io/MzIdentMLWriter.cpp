@@ -86,8 +86,8 @@ void MzIdentMLWriter::closeFile() {
   apc.spectrumIdentificationProtocol.push_back(sipp);
   sip->spectrumIdentificationProtocolPtr = sipp;
 
-  vector<const ModificationDefinition*> mods = ModificationDefinition::AllMods();
-  for (vector<const ModificationDefinition*>::const_iterator i = mods.begin();
+  set<const ModificationDefinition*> mods = ModificationDefinition::AllMods();
+  for (set<const ModificationDefinition*>::const_iterator i = mods.begin();
        i != mods.end();
        i++) {
     SearchModificationPtr smp(new SearchModification());
