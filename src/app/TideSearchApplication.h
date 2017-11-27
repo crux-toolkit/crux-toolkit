@@ -17,7 +17,6 @@ using namespace std;
 
 class TideSearchApplication : public CruxApplication {
 
-  friend class LocalizeModificationApplication;
   friend class SubtractIndexApplication;
 
  protected:
@@ -132,11 +131,6 @@ class TideSearchApplication : public CruxApplication {
 
   std::string remove_index_;
 
-  // if these are set they will be used
-  bool localizeMod_;
-  ofstream* targetFile_;
-  std::string scanNumber_;
-  const std::map<std::string, std::string>* spectrumFilesOverride_;
   // this map can be used to preload spectra
   // <spectrumrecords file> -> SpectrumCollection
   // the SpectrumCollection must be sorted

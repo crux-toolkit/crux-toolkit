@@ -106,9 +106,7 @@ SpectrumIterator SpectrumCollection::end() {
  */
 Spectrum* SpectrumCollection::getSpectrum(
   int first_scan      ///< The first scan of the spectrum to retrieve -in
-  ) {
-
-
+) {
   Spectrum* spectrum = new Spectrum();
   bool success = getSpectrum(first_scan, spectrum);
   if (success) {
@@ -128,20 +126,21 @@ Spectrum* SpectrumCollection::getSpectrum(
 bool SpectrumCollection::getSpectrum(
   int first_scan,      ///< The first scan of the spectrum to retrieve -in
   Spectrum* spectrum   ///< Put the spectrum info here
-  ) {
-
+) {
+  map<int, Spectrum*>::const_iterator i = spectraByScan_.find(first_scan);
+  if (i != spectraByScan_.end()) {
+    spectrum->copyFrom(i->second);
+    return true;
+  }
   for (SpectrumIterator spectrum_iterator = this->begin();
-    spectrum_iterator != this->end();
-    ++spectrum_iterator) {
-
+       spectrum_iterator != this->end();
+       ++spectrum_iterator) {
     if ((*spectrum_iterator)->getFirstScan() == first_scan) {
-      
       spectrum->copyFrom(*spectrum_iterator);
       return true;
     }
   }
   return false;
-
 }
 
 
@@ -192,8 +191,7 @@ void SpectrumCollection::addSpectrum(
  */
 void SpectrumCollection::removeSpectrum(
   Spectrum* spectrum ///< spectrum to be removed from spectrum_collection -in
-  ) {
-    
+) {
   int scan_num = spectrum->getFirstScan();
   unsigned int spectrum_index = 0;
   
@@ -209,12 +207,7 @@ void SpectrumCollection::removeSpectrum(
   delete spectra_[spectrum_index];
   spectra_[spectrum_index] = NULL;
   spectra_.erase(spectra_.begin() + spectrum_index);
-
 } 
-
-
-
-
 
 /**
  * \returns A pointer to the name of the file from which the spectra

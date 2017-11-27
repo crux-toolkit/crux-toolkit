@@ -150,10 +150,6 @@ class ObservedPeakSet {
                           int* num_isotopes_skipped,
                           int* num_retained);
 
-  void CreateEvidenceVector(const Spectrum& spectrum, double binWidth,
-    double binOffset, int charge, double pepMassMonoMean,
-    int maxPrecurMass, int* evidenceInt);
-
   // For debugging
   void Show(const string& name, TheoreticalPeakType peak_type, bool cache_end) {
     int end = cache_end ? max_mz_.CacheBinEnd() : max_mz_.BackgroundBinEnd();

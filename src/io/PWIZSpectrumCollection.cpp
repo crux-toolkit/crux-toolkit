@@ -113,7 +113,6 @@ bool PWIZSpectrumCollection::parseFirstLastScanFromTitle(
  * \returns True if the spectra are parsed successfully. False if otherwise.
  */
 bool PWIZSpectrumCollection::parse() {
-
   // spectrum_collection has already been parsed
   if(is_parsed_) {
     return false;
@@ -213,6 +212,7 @@ bool PWIZSpectrumCollection::parse() {
     Crux::Spectrum* crux_spectrum = new Crux::Spectrum();
     if (crux_spectrum->parsePwizSpecInfo(spectrum, scan_number_begin, scan_number_end)) {
       addSpectrumToEnd(crux_spectrum);
+      spectraByScan_[scan_number_begin] = crux_spectrum;
     } else {
       delete crux_spectrum;
     }
@@ -245,7 +245,6 @@ bool PWIZSpectrumCollection::getSpectrum(
 Crux::Spectrum* PWIZSpectrumCollection::getSpectrum(
   int first_scan      ///< The first scan of the spectrum to retrieve -in
   ) {
-
   parse();
   return SpectrumCollection::getSpectrum(first_scan);
 }

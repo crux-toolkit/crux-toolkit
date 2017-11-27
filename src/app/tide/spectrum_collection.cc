@@ -10,13 +10,19 @@
 #include "spectrum.pb.h"
 #include "spectrum_collection.h"
 #include "mass_constants.h"
+#include "max_mz.h"
 #include "records.h"
 #include "records_to_vector-inl.h"
+#include "util/mass.h"
+#include "util/Params.h"
 
 using namespace std;
 using google::protobuf::uint64;
 
 #define CHECK(x) GOOGLE_CHECK((x))
+
+// Integerization constant for the XCorr p-value calculation.
+#define EVIDENCE_INT_SCALE 500.0
 
 Spectrum::Spectrum(const pb::Spectrum& spec) {
   spectrum_number_ = spec.spectrum_number();
@@ -128,8 +134,198 @@ void Spectrum::SortIfNecessary() {
   }
 }
 
+/* Calculates vector of cleavage evidence for an observed spectrum, using XCorr
+ * b/y/neutral peak sets and heights.
+ *
+ * Written by Jeff Howbert, May, 2013 (as function createEvidenceArrayObserved).
+ * Extended and modified by Jeff Howbert, October, 2013.
+ * Ported to and integrated with Tide by Jeff Howbert, November, 2013.
+ */
+vector<double> Spectrum::CreateEvidenceVector(
+  double binWidth,
+  double binOffset,
+  int charge,
+  double pepMassMonoMean,
+  int maxPrecurMass
+) const {
+  // TODO need to review these constants, decide which can be moved to parameter file
+  const double maxIntensPerRegion = 50.0;
+  const double precursorMZExclude = 15.0;
+  const double BYHeight = 50.0;
+  const double NH3LossHeight = 10.0;
+  const double COLossHeight = 10.0;    // for creating a ions on the fly from b ions
+  const double H2OLossHeight = 10.0;
+  const double FlankingHeight = BYHeight / 2;;
+  // TODO end need to review
+  int numPeaks = Size();
+  double experimentalMassCutoff = PrecursorMZ() * charge + 50.0;
+  double maxIonMass = 0.0;
+  double maxIonIntens = 0.0;
+  for (int ion = 0; ion < numPeaks; ion++) {
+    double ionMass = M_Z(ion);
+    double ionIntens = Intensity(ion);
+    if (ionMass >= experimentalMassCutoff) {
+      continue;
+    }
+    if (maxIonMass < ionMass) {
+      maxIonMass = ionMass;
+    }
+    if (maxIonIntens < ionIntens) {
+      maxIonIntens = ionIntens;
+    }
+  }
+  int regionSelector = (int)floor(MassConstants::mass2bin(maxIonMass) / (double)NUM_SPECTRUM_REGIONS);
+  vector<double> intensObs(maxPrecurMass, 0);
+  vector<int> intensRegion(maxPrecurMass, -1);
+  for (int ion = 0; ion < numPeaks; ion++) {
+    double ionMass = M_Z(ion);
+    double ionIntens = Intensity(ion);
+    if (ionMass >= experimentalMassCutoff ||
+        (ionMass > PrecursorMZ() - precursorMZExclude && ionMass < PrecursorMZ() + precursorMZExclude)) {
+      continue;
+    }
+    int ionBin = MassConstants::mass2bin(ionMass);
+    int region = (int)floor((double)(ionBin) / (double)regionSelector);
+    if (region >= NUM_SPECTRUM_REGIONS) {
+      region = NUM_SPECTRUM_REGIONS - 1;
+    }
+    intensRegion[ionBin] = region;
+    if (intensObs[ionBin] < ionIntens) {
+      intensObs[ionBin] = ionIntens;
+    }
+  }
+
+  maxIonIntens = sqrt(maxIonIntens);
+  for (vector<double>::iterator i = intensObs.begin(); i != intensObs.end(); i++) {
+    *i = sqrt(*i);
+    if (*i <= 0.05 * maxIonIntens) {
+      *i = 0.0;
+    }
+  }
+
+  vector<double> maxRegion(NUM_SPECTRUM_REGIONS, 0);
+  for (int i = 0; i < maxPrecurMass; i++) {
+    int reg = intensRegion[i];
+    if (reg >= 0 && maxRegion[reg] < intensObs[i]) {
+      maxRegion[reg] = intensObs[i];
+    }
+  }
+  for (int i = 0; i < maxPrecurMass; i++) {
+    int reg = intensRegion[i];
+    if (reg >= 0 && maxRegion[reg] > 0.0) {
+      intensObs[i] *= (maxIntensPerRegion / maxRegion[reg]);
+    }
+  }
+
+  // ***** Adapted from tide/spectrum_preprocess2.cc.
+  // TODO replace, if possible, with call to
+  // static void SubtractBackground(double* observed, int end).
+  // Note numerous small changes from Tide code.
+  vector<double> partial_sums;
+  partial_sums.reserve(maxPrecurMass);
+  double total = 0.0;
+  for (vector<double>::const_iterator i = intensObs.begin(); i != intensObs.end(); i++) {
+    partial_sums.push_back(total += *i);
+  }
+  const double multiplier = 1.0 / (MAX_XCORR_OFFSET * 2.0 + 1.0);
+  for (int i = 0; i < maxPrecurMass; ++i) {
+    int right = std::min(maxPrecurMass - 1, i + MAX_XCORR_OFFSET);
+    int left = std::max(0, i - MAX_XCORR_OFFSET - 1);
+    intensObs[i] -= multiplier * (partial_sums[right] - partial_sums[left]);
+  }
+
+  bool flankingPeaks = Params::GetBool("use-flanking-peaks");
+  bool nlPeaks = Params::GetBool("use-neutral-loss-peaks");
+  int binFirst = MassConstants::mass2bin(30);
+  int binLast = MassConstants::mass2bin(pepMassMonoMean - 47);
+  vector<double> evidence(maxPrecurMass, 0);
+  for (int i = binFirst; i <= binLast; i++) {
+    // b ion
+    double bIonMass = (i - 0.5 + binOffset) * binWidth;
+    int ionBin = MassConstants::mass2bin(bIonMass);
+    evidence[i] += intensObs[ionBin] * BYHeight;
+    for (int j = 2; j < charge; j++) {
+      evidence[i] += intensObs[MassConstants::mass2bin(bIonMass, j)] * BYHeight;
+    }
+    // y ion
+    double yIonMass = pepMassMonoMean + 2 * MASS_H_MONO - bIonMass;
+    ionBin = MassConstants::mass2bin(yIonMass);
+    evidence[i] += intensObs[ionBin] * BYHeight;
+    for (int j = 2; j < charge; j++) {
+      evidence[i] += intensObs[MassConstants::mass2bin(yIonMass, j)] * BYHeight;
+    }
+    if (flankingPeaks) {
+      // flanking peaks for b ions
+      ionBin = MassConstants::mass2bin(bIonMass, 1);
+      evidence[i] += intensObs[ionBin + 1] * FlankingHeight;
+      evidence[i] += intensObs[ionBin - 1] * FlankingHeight;
+      for (int j = 2; j < charge; j++) {
+        evidence[i] += intensObs[MassConstants::mass2bin(bIonMass, j) + 1] * FlankingHeight;
+        evidence[i] += intensObs[MassConstants::mass2bin(bIonMass, j) - 1] * FlankingHeight;
+      }
+      // flanking peaks for y ions
+      ionBin = MassConstants::mass2bin(yIonMass, charge);
+      evidence[i] += intensObs[ionBin + 1] * FlankingHeight;
+      evidence[i] += intensObs[ionBin - 1] * FlankingHeight;
+      for (int j = 2; j < charge; j++) {
+        evidence[i] += intensObs[MassConstants::mass2bin(yIonMass, j) + 1] * FlankingHeight;
+        evidence[i] += intensObs[MassConstants::mass2bin(yIonMass, j) - 1] * FlankingHeight;
+      }
+    }
+    if (nlPeaks) {
+      // NH3 loss from b ion
+      double ionMassNH3Loss = bIonMass - MASS_NH3_MONO;
+      ionBin = MassConstants::mass2bin(ionMassNH3Loss);
+      evidence[i] += intensObs[ionBin] * NH3LossHeight;
+      for (int j = 2; j < charge; j++) {
+        evidence[i] += intensObs[MassConstants::mass2bin(ionMassNH3Loss, j)] * NH3LossHeight;
+      }
+      // NH3 loss from y ion
+      ionMassNH3Loss = yIonMass - MASS_NH3_MONO;
+      ionBin = MassConstants::mass2bin(ionMassNH3Loss);
+      evidence[i] += intensObs[ionBin] * NH3LossHeight;
+      for (int j = 2; j < charge; j++) {
+        evidence[i] += intensObs[MassConstants::mass2bin(ionMassNH3Loss, j)] * NH3LossHeight;
+      }
+      // CO and H2O loss from b ion
+      double ionMassCOLoss = bIonMass - MASS_CO_MONO;
+      double ionMassH2OLoss = bIonMass - MASS_H2O_MONO;
+      evidence[i] += intensObs[MassConstants::mass2bin(ionMassCOLoss)] * COLossHeight;
+      evidence[i] += intensObs[MassConstants::mass2bin(ionMassH2OLoss)] * H2OLossHeight;
+      for (int j = 2; j < charge; j++) {
+        evidence[i] += intensObs[MassConstants::mass2bin(ionMassCOLoss, j)] * COLossHeight;
+        evidence[i] += intensObs[MassConstants::mass2bin(ionMassH2OLoss, j)] * H2OLossHeight;
+      }
+      // H2O loss from y ion
+      ionMassH2OLoss = yIonMass - MASS_H2O_MONO;
+      evidence[i] += intensObs[MassConstants::mass2bin(ionMassH2OLoss)] * H2OLossHeight;
+      for (int j = 2; j < charge; j++) {
+        evidence[i] += intensObs[MassConstants::mass2bin(ionMassH2OLoss, j)] * H2OLossHeight;
+      }
+    }
+  }
+  return evidence;
+}
+
+vector<int> Spectrum::CreateEvidenceVectorDiscretized(
+  double binWidth,
+  double binOffset,
+  int charge,
+  double pepMassMonoMean,
+  int maxPrecurMass
+) const {
+  vector<double> evidence =
+    CreateEvidenceVector(binWidth, binOffset, charge, pepMassMonoMean, maxPrecurMass);
+  vector<int> discretized;
+  discretized.reserve(evidence.size());
+  for (vector<double>::const_iterator i = evidence.begin(); i != evidence.end(); i++) {
+    discretized.push_back((int)floor(*i / EVIDENCE_INT_SCALE + 0.5));
+  }
+  return discretized;
+}
+
 void SpectrumCollection::ReadMS(istream& in, bool ms1) {
-  // Parse MS2 file format. 
+  // Parse MS2 file format.
   // Not very fast: uses scanf. CONSIDER speed-up.
   static const int kMaxLine = 1000;
   char line[kMaxLine];
@@ -205,16 +401,16 @@ bool SpectrumCollection::ReadSpectrumRecords(const string& filename,
 }
 
 void SpectrumCollection::MakeSpecCharges() {
-  // Create one entry in the spec_charges_ array for each 
+  // Create one entry in the spec_charges_ array for each
   // (spectrum, charge) pair.
   int spectrum_index = 0;
   vector<Spectrum*>::iterator i = spectra_.begin();
   for (; i != spectra_.end(); ++i) {
     for (int j = 0; j < (*i)->NumChargeStates(); ++j) {
       int charge = (*i)->ChargeState(j);
-      double neutral_mass = (((*i)->PrecursorMZ() - MassConstants::proton)
+      double neutral_mass = (((*i)->PrecursorMZ() - MASS_PROTON)
 			     * charge);
-      spec_charges_.push_back(SpecCharge(neutral_mass, charge, *i, 
+      spec_charges_.push_back(SpecCharge(neutral_mass, charge, *i,
                                          spectrum_index));
     }
     spectrum_index++;

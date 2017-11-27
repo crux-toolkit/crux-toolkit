@@ -1837,6 +1837,11 @@ Params::Params() : finalized_(false) {
     "Minimum number of peak pairs (for precursor or fragment) that must be "
     "successfully paired in order to attempt to estimate measurement error distribution.",
     "Available for param-medic and tide-search and comet", true);
+  // localize-modification
+  InitDoubleParam("min-mod-mass", 0, 0, BILLION,
+    "Ignore implied modifications where the absolute value of its mass is "
+    "below this value and only score the unmodified peptide.",
+    "Available for localize-modification", true);
 
   InitBoolParam("no-analytics", false, "Don't post data to Google Analytics.", "", false);
 

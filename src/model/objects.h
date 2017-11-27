@@ -627,6 +627,7 @@ enum _command {
   PREDICT_PEPTIDE_IONS_COMMAND, ///< predict-peptide-ions
   PIPELINE_COMMAND,     ///< pipeline
   CASCADE_COMMAND,      ///< Cascade Search   
+  LOCALIZE_MODIFICATION_COMMAND, ///< localize-modification
   VERSION_COMMAND,      ///< just print the version number
   MISC_COMMAND,         ///< miscellaneous command
   NUMBER_COMMAND_TYPES  ///< always keep this last so the value

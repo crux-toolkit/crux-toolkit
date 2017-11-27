@@ -338,7 +338,9 @@ Crux::Match* MatchFileReader::parseMatch() {
   }
   match->setTargetExperimentSize(experimentSize);
   if (experimentSize == 0) {
-    carp_once(CARP_WARNING, "num target matches=0, suppressing warning");
+    carp_once(CARP_WARNING, "Matches/spectrum column not found ('%s' or '%s')",
+              get_column_header(DISTINCT_MATCHES_SPECTRUM_COL),
+              get_column_header(MATCHES_SPECTRUM_COL));
     match->setLnExperimentSize(0);
   } else {
     match->setLnExperimentSize(log((FLOAT_T) experimentSize));
