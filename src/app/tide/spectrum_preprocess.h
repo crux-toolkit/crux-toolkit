@@ -140,15 +140,15 @@ class ObservedPeakSet {
 #endif
 
   void PreprocessSpectrum(const Spectrum& spectrum, int charge) {
-    int dummy1, dummy2, dummy3, dummy4;
+    long int dummy1, dummy2, dummy3, dummy4;
     PreprocessSpectrum(spectrum, charge, &dummy1, &dummy2, &dummy3, &dummy4);
   }
 
   void PreprocessSpectrum(const Spectrum& spectrum, int charge,
-                          int* num_range_skipped,
-                          int* num_precursors_skipped,
-                          int* num_isotopes_skipped,
-                          int* num_retained);
+                          long int* num_range_skipped,
+                          long int* num_precursors_skipped,
+                          long int* num_isotopes_skipped,
+                          long int* num_retained);
 
   // For debugging
   void Show(const string& name, TheoreticalPeakType peak_type, bool cache_end) {
