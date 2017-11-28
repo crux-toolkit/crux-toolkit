@@ -57,10 +57,10 @@ static void SubtractBackground(double* observed, int end) {
 }
 
 void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
-                                         int* num_range_skipped,
-                                         int* num_precursors_skipped,
-                                         int* num_isotopes_skipped,
-                                         int* num_retained) {
+                                         long int* num_range_skipped,
+                                         long int* num_precursors_skipped,
+                                         long int* num_isotopes_skipped,
+                                         long int* num_retained) {
 #ifdef DEBUG
   bool debug = (FLAGS_debug_spectrum_id == spectrum.SpectrumNumber()
                 && (FLAGS_debug_charge == 0 || FLAGS_debug_charge == charge));

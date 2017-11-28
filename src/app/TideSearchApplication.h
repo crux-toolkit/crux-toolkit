@@ -15,6 +15,20 @@
 
 using namespace std; 
 
+/**
+ * Locks for multi-threading in Tide.
+ */
+enum _tide_search_lock {
+  LOCK_RESULTS,       // Results file output
+  LOCK_CASCADE,       // Only used by cascade-search on spectrum_flag (map)
+  LOCK_CANDIDATES,    // Updating # of candidate peptides
+  LOCK_REPORTING,     // Updating sc_index and reporting progress
+  NUMBER_LOCK_TYPES   // always keep this last so the value
+                      // changes as cmds are added
+};
+
+typedef enum _tide_search_lock TIDE_SEARCH_LOCK_T;
+
 class TideSearchApplication : public CruxApplication {
 
   friend class SubtractIndexApplication;

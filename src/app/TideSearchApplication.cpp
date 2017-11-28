@@ -447,10 +447,10 @@ void TideSearchApplication::search(void* threadarg) {
                            use_flanking_peaks);    
 
   // Keep track of observed peaks that get filtered out in various ways.
-  int num_range_skipped = 0;
-  int num_precursors_skipped = 0;
-  int num_isotopes_skipped = 0;
-  int num_retained = 0;
+  long int num_range_skipped = 0;
+  long int num_precursors_skipped = 0;
+  long int num_isotopes_skipped = 0;
+  long int num_retained = 0;
 
   // cycle through spectrum-charge pairs, sorted by neutral mass
   FLOAT_T sc_total = (FLOAT_T)spec_charges->size();
@@ -459,28 +459,28 @@ void TideSearchApplication::search(void* threadarg) {
   for (vector<SpectrumCollection::SpecCharge>::const_iterator sc = spec_charges->begin()+thread_num;
        sc < spec_charges->begin() + (spec_charges->size());
        sc = sc + num_threads) {
-    locks_array[3]->lock();
+    locks_array[LOCK_REPORTING]->lock();
     ++(*sc_index);
     if (print_interval > 0 && *sc_index > 0 && *sc_index % print_interval == 0) {
       carp(CARP_INFO, "%d spectrum-charge combinations searched, %.0f%% complete",
            *sc_index, *sc_index / sc_total * 100);
     }
-    locks_array[3]->unlock();
+    locks_array[LOCK_REPORTING]->unlock();
 
     Spectrum* spectrum = sc->spectrum;
     double precursor_mz = spectrum->PrecursorMZ();
     int charge = sc->charge;
     int scan_num = spectrum->SpectrumNumber();
     if (spectrum_flag != NULL) {
-      locks_array[1]->lock();
+      locks_array[LOCK_CASCADE]->lock();
       map<pair<string, unsigned int>, bool>::iterator spectrum_id;
       spectrum_id = spectrum_flag->find(pair<string, unsigned int>(
         spectrum_filename, scan_num * 10 + charge));
       if (spectrum_id != spectrum_flag->end()) {
-        locks_array[1]->unlock();
+        locks_array[LOCK_CASCADE]->unlock();
         continue;
       }
-      locks_array[1]->unlock();
+      locks_array[LOCK_CASCADE]->unlock();
     }
 
     if (precursor_mz < spectrum_min_mz || precursor_mz > spectrum_max_mz ||
@@ -509,9 +509,9 @@ void TideSearchApplication::search(void* threadarg) {
       if (nCandPeptide == 0) {
         continue;
       }
-      locks_array[2]->lock();
+      locks_array[LOCK_CANDIDATES]->lock();
       *total_candidate_peptides += nCandPeptide;
-      locks_array[2]->unlock();
+      locks_array[LOCK_CANDIDATES]->unlock();
 
       int candidatePeptideStatusSize = candidatePeptideStatus->size();
       TideMatchSet::Arr2 match_arr2(candidatePeptideStatusSize); // Scored peptides will go here.
@@ -553,7 +553,7 @@ void TideSearchApplication::search(void* threadarg) {
         matches.exact_pval_search_ = exact_pval_search;
         matches.report(target_file, decoy_file, top_matches, spectrum_filename,
                        spectrum, charge, active_peptide_queue, proteins,
-                       locations, compute_sp, true, locks_array[0]);
+                       locations, compute_sp, true, locks_array[LOCK_RESULTS]);
       }  //end peptide_centric == true
     } else {  // execute exact-pval-search
       const int minDeltaMass = aaMass[0];
@@ -567,9 +567,9 @@ void TideSearchApplication::search(void* threadarg) {
       int maxPrecurMass = floor(MaxBin::Global().CacheBinEnd() + 50.0); // TODO works, but is this the best way to get?
       int nCandPeptide = active_peptide_queue->SetActiveRangeBIons(min_mass, max_mass, min_range, max_range, candidatePeptideStatus);
       int candidatePeptideStatusSize = candidatePeptideStatus->size();
-      locks_array[2]->lock();
+      locks_array[LOCK_CANDIDATES]->lock();
       *total_candidate_peptides += nCandPeptide;
-      locks_array[2]->unlock();
+      locks_array[LOCK_CANDIDATES]->unlock();
 
       TideMatchSet::Arr match_arr(nCandPeptide); //scored peptides will go here
 
@@ -706,7 +706,7 @@ void TideSearchApplication::search(void* threadarg) {
 
         matches.report(target_file, decoy_file, top_matches, spectrum_filename,
                        spectrum, charge, active_peptide_queue, proteins,
-                       locations, compute_sp, false, locks_array[0]);
+                       locations, compute_sp, false, locks_array[LOCK_RESULTS]);
 
       } // end peptide_centric == true
     } // end exact-pval-search
@@ -715,12 +715,24 @@ void TideSearchApplication::search(void* threadarg) {
     delete candidatePeptideStatus;
   }
 
-  carp(CARP_INFO, "Deleted %d precursor, %d isotope and %d out-of-range peaks.",
-       num_precursors_skipped, num_isotopes_skipped, num_range_skipped);
-  carp(CARP_INFO, "Retained %g%% of peaks.",
-       (100.0 * num_retained) /
-       (num_precursors_skipped + num_isotopes_skipped + num_range_skipped + num_retained));
-
+  if ( !Params::GetBool("skip-preprocessing") ) {
+    locks_array[LOCK_REPORTING]->lock();
+    long int total_peaks = num_precursors_skipped + num_isotopes_skipped + num_range_skipped + num_retained;
+    if ( total_peaks == 0 ){
+      carp(CARP_INFO, "[Thread %d]: Warning: no peaks found.", thread_num);
+    } else {
+      carp(CARP_INFO,
+           "[Thread %d]: Deleted %d precursor, %d isotope and %d out-of-range peaks.",
+           thread_num, num_precursors_skipped, num_isotopes_skipped, num_range_skipped);
+    }
+    if ( num_retained == 0 ) {
+      carp(CARP_INFO, "[Thread %d]: Warning: no peaks retained.", thread_num);
+    } else {
+      carp(CARP_INFO, "[Thread %d]: Retained %g%% of peaks.",
+           thread_num, (100.0 * num_retained) / total_peaks);
+    }
+    locks_array[LOCK_REPORTING]->unlock();
+  }
 
 }
 
@@ -750,15 +762,9 @@ void TideSearchApplication::search(
   int* aaMass,
   vector<int>* negative_isotope_errors
 ) {
-  // Create an array of 4 locks.
-  // Lock #0: Results file output
-  // Lock #1: Only used by cascade-search on spectrum_flag (map)
-  // Lock #2: Updating # of candidate peptides
-  // Lock #3: Updating sc_index and reporting progress
-  int num_locks = 4;
+  // Create an array of locks.
   vector<boost::mutex *> locks_array;
-
-  for (int i = 0; i < num_locks; i++) {
+  for (int i = 0; i < NUMBER_LOCK_TYPES; i++) {
     locks_array.push_back(new boost::mutex());
   }
 
@@ -826,7 +832,7 @@ void TideSearchApplication::search(
   carp(CARP_INFO, "Time per spectrum-charge combination: %lf s.", wall_clock() / (1e6*sc_total));
   carp(CARP_INFO, "Average number of candidates per spectrum-charge combination: %lf ",
                   (*total_candidate_peptides) / sc_total);
-  for (int i = 0; i < num_locks; i++) {
+  for (int i = 0; i < NUMBER_LOCK_TYPES; i++) {
     delete locks_array[i];
   }
   delete sc_index;
