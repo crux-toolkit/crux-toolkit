@@ -74,6 +74,7 @@ void close_handler(void *data, const char *el) {
  * Initializes the object
  */
 void PepXMLReader::init() {
+  maxRank_ = Params::GetInt("top-match-in");
   aminoacid_modification_open_ = false;
   spectrum_query_open_ = false;
   search_result_open_ = false;
@@ -199,7 +200,7 @@ void PepXMLReader::aminoacidModificationClose() {
 }
 
 /**
- * Handles the spectrum_query open tag event 
+ * Handles the spectrum_query open tag event
  */
 void PepXMLReader::spectrumQueryOpen(
   const char** attr ///< attribute array for element
@@ -261,7 +262,7 @@ void PepXMLReader::searchResultClose() {
  * /returns the start position of the peptide sequence within the protein
  */
 int PepXMLReader::findStart(
-  Protein* protein,  ///< the protein to find the sequence 
+  Protein* protein,  ///< the protein to find the sequence
   string peptide_sequence, ///< the peptide sequence to find
   string prev_aa, ///< the amino acid before the sequence in the protein
   string next_aa ///< the next amino acid after the sequence in the protein
@@ -278,9 +279,9 @@ int PepXMLReader::findStart(
   } else if (next_aa == "-") {
     case_ = 1;
     ans = protein->getLength() - peptide_sequence.length() + 1;
-  } else { 
+  } else {
     //use the flanking amino acids to further constrain our search in the sequence
-    size_t pos = string::npos; 
+    size_t pos = string::npos;
     string seq = prev_aa + peptide_sequence + next_aa;
     string protein_seq = protein->getSequencePointer();
     pos = protein_seq.find(seq);
@@ -331,10 +332,10 @@ void PepXMLReader::searchHitOpen(
       ; // do nothing.
     } else if (strcmp(attr[i], "num_matched_ions") == 0) {
       current_match_collection_->setScoredType(BY_IONS_MATCHED, true);
-      by_ions_matched = atoi(attr[i+1]);  
+      by_ions_matched = atoi(attr[i+1]);
     } else if (strcmp(attr[i], "tot_num_ions") == 0) {
       current_match_collection_->setScoredType(BY_IONS_TOTAL, true);
-      by_ions_total = atoi(attr[i+1]); 
+      by_ions_total = atoi(attr[i+1]);
     } else if (strcmp(attr[i], "peptide_prev_aa") == 0) {
       prev_aa = attr[i+1];
     } else if (strcmp(attr[i], "peptide_next_aa") == 0) {
@@ -357,7 +358,7 @@ void PepXMLReader::searchHitOpen(
     current_match_->setNullPeptide(true);
   }
 
-  if ((hit_rank > 0) && (current_match_->getRank(XCORR) == 0)) {
+  if (hit_rank > 0 && current_match_->getRank(XCORR) == 0) {
     current_match_->setRank(XCORR, hit_rank);
   }
   if (by_ions_total > 0) {
@@ -368,7 +369,7 @@ void PepXMLReader::searchHitOpen(
   if (current_num_matches > 0) {
     current_match_->setLnExperimentSize(logf(current_num_matches));
     current_match_collection_->setHasDistinctMatches(true);
-  } else { 
+  } else {
     current_match_->setLnExperimentSize(0);
   }
 }
@@ -379,7 +380,9 @@ void PepXMLReader::searchHitOpen(
 void PepXMLReader::searchHitClose() {
   search_hit_open_ = false;
   //We should have all the information needed to add the match object.
-  current_match_collection_->addMatch(current_match_);
+  if (maxRank_ == 0 || current_match_->getRank(XCORR) <= maxRank_) {
+    current_match_collection_->addMatch(current_match_);
+  }
 }
 
 void PepXMLReader::modificationInfoOpen(const char** attr) {
@@ -437,7 +440,7 @@ void PepXMLReader::modAminoAcidMassOpen(
   int position = -1;
   FLOAT_T mod_mass = 0;
   bool have_mod_mass = false;
-  
+
   for (int idx = 0; attr[idx]; idx += 2) {
     if (strcmp(attr[idx], "position") == 0) {
       position = atoi(attr[idx+1]);
@@ -512,10 +515,10 @@ void PepXMLReader::alternativeProteinOpen(
       next_aa = attr[i+1];
     }
   }
-  
+
   bool is_decoy;
 
-  Protein* protein = 
+  Protein* protein =
     MatchCollectionParser::getProtein(database_, decoy_database_, protein_string, is_decoy);
   if (is_decoy) {
     current_match_->setNullPeptide(true);
@@ -583,7 +586,7 @@ void PepXMLReader::searchScoreOpen(
   } else if (name == "qranker_PEP") {
     current_match_collection_->setScoredType(QRANKER_PEP, true);
     current_match_->setScore(QRANKER_PEP, value);
-  } 
+  }
   //set the custom score
   current_match_->setCustomScore(name, value);
 }
@@ -603,7 +606,7 @@ void PepXMLReader::peptideProphetResultOpen(
   ) {
   if (peptideprophet_result_open_) {
     carp(CARP_FATAL, "peptideprophet_result_open_ before close!");
-  }  
+  }
 
   peptideprophet_result_open_ = true;
 
@@ -615,7 +618,7 @@ void PepXMLReader::peptideProphetResultOpen(
       probability_parsed = true;
     }
   }
-  
+
   //Place the peptideprophet probability score as a custom score.
   if (probability_parsed) {
     current_match_->setCustomScore("peptideprophet", probability);

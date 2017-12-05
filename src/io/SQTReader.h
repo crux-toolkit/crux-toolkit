@@ -30,6 +30,7 @@ enum SQT_LINE_T {
 class SQTReader : public PSMReader {
 
  protected:
+  int maxRank_;
   SpectrumZState current_zstate_; ///< keeps track of the current zstate
   Crux::Spectrum* current_spectrum_; ///< Keeps track of the current spectrum object
   FLOAT_T current_ln_experiment_size_;

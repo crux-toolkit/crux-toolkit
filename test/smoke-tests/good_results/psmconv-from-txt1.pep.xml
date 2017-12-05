@@ -77,6 +77,7 @@
 <parameter name="output-dir" value="crux-output"/>
 <parameter name="temp-dir" value=""/>
 <parameter name="top-match" value="5"/>
+<parameter name="top-match-in" value="0"/>
 <parameter name="seed" value="1"/>
 <parameter name="fragment-mass" value="mono"/>
 <parameter name="isotopic-mass" value="mono"/>

@@ -412,6 +412,10 @@ Params::Params() : finalized_(false) {
   InitIntParam("top-match", 5, 1, BILLION, 
     "Specify the number of matches to report for each spectrum.",
     "Available for tide-search and crux percolator", true);
+  InitIntParam("top-match-in", 0, 0, BILLION,
+    "Specify the maximum rank to allow when parsing results files. Matches with "
+    "ranks higher than this value will be ignored (a value of zero allows matches with any rank).",
+    "", true);
   InitStringParam("seed", "1",
     "When given a unsigned integer value seeds the random number generator with that value. "
     "When given the string \"time\" seeds the random number generator with the system time.",

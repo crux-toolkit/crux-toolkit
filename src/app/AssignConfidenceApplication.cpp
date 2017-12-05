@@ -250,7 +250,7 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
     }
 
     // Find and keep the best score for each peptide.
-    if (estimation_method == PEPTIDE_LEVEL_METHOD) { 
+    if (estimation_method == PEPTIDE_LEVEL_METHOD) {
       peptide_level_filtering(match_collection, &BestPeptideScore, score_type, ascending);
       carp(CARP_INFO, "%d distinct target peptides.", BestPeptideScore.size());
     }
@@ -363,67 +363,68 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
             numLostDecoys++;
           }
 
-    if (estimation_method == PEPTIDE_LEVEL_METHOD) {
-      if (decoy_idx > 0) {
-        decoy_match = decoy_iter->getMatch(decoy_idx - 1);
-        numCandidates = target_match->getTargetExperimentSize() + decoy_match->getTargetExperimentSize();
-        target_match->setTargetExperimentSize(numCandidates);
-        decoy_match->setTargetExperimentSize(numCandidates);
-        tdc_collection->addMatch(target_match);
-        tdc_collection->addMatch(decoy_match);
-      } else {
-        numCandidates = target_match->getTargetExperimentSize();
-        target_match->setTargetExperimentSize(numCandidates);
-        tdc_collection->addMatch(target_match);
-      }
-    } else {
-      if (decoy_idx > 0) {
-        decoy_match = decoy_iter->getMatch(decoy_idx - 1);
-      } else {
-        tdc_collection->addMatch(target_match);
-        continue;
-      }
-      numCandidates = target_match->getTargetExperimentSize() + decoy_match->getTargetExperimentSize();
-      target_match->setTargetExperimentSize(numCandidates);
-      decoy_match->setTargetExperimentSize(numCandidates);
+          if (estimation_method == PEPTIDE_LEVEL_METHOD) {
+            if (decoy_idx > 0) {
+              decoy_match = decoy_iter->getMatch(decoy_idx - 1);
+              numCandidates = target_match->getTargetExperimentSize() + decoy_match->getTargetExperimentSize();
+              target_match->setTargetExperimentSize(numCandidates);
+              decoy_match->setTargetExperimentSize(numCandidates);
+              tdc_collection->addMatch(target_match);
+              tdc_collection->addMatch(decoy_match);
+            } else {
+              numCandidates = target_match->getTargetExperimentSize();
+              target_match->setTargetExperimentSize(numCandidates);
+              tdc_collection->addMatch(target_match);
+            }
+          } else {
+            if (decoy_idx > 0) {
+              decoy_match = decoy_iter->getMatch(decoy_idx - 1);
+            } else {
+              tdc_collection->addMatch(target_match);
+              continue;
+            }
+            numCandidates = target_match->getTargetExperimentSize() + decoy_match->getTargetExperimentSize();
+            target_match->setTargetExperimentSize(numCandidates);
+            decoy_match->setTargetExperimentSize(numCandidates);
 
-      // This is where the target-decoy competition happens.
-      carp(CARP_DEBUG, "TDC: Comparing target (%d, +%d) with score %g to decoy (%d, +%d) with score %g.",
-           target_match->getSpectrum()->getFirstScan(),
-           target_match->getCharge(),
-           target_match->getScore(score_type),
-           decoy_match->getSpectrum()->getFirstScan(),
-           decoy_match->getCharge(),
-           decoy_match->getScore(score_type));
+            // This is where the target-decoy competition happens.
+            carp(CARP_DEBUG, "TDC: Comparing target (%d, +%d) with score %g to decoy (%d, +%d) with score %g.",
+                 target_match->getSpectrum()->getFirstScan(),
+                 target_match->getCharge(),
+                 target_match->getScore(score_type),
+                 decoy_match->getSpectrum()->getFirstScan(),
+                 decoy_match->getCharge(),
+                 decoy_match->getScore(score_type));
 
-      float score_difference = target_match->getScore(score_type) - decoy_match->getScore(score_type);
-      numCompetitions++;
-      // Randomly break ties.
-      if (fabs(score_difference) < 1e-10) {
-        numTies++;
-        score_difference += 0.5 - ((double)myrandom() / UNIFORM_INT_DISTRIBUTION_MAX);
-      }
-      if (ascending) { // smaller scores are better
-        score_difference *= -1.0;
-      }
-      if (score_difference >= 0.0) {
-        tdc_collection->addMatch(target_match);
-      } else {
-        tdc_collection->addMatch(decoy_match);
-      }
-    }
-  }
-  delete target_iter;
-  delete decoy_iter;
-  delete match_collection;
-  match_collection = tdc_collection;
-  if (numCompetitions > 0) {
-    carp(CARP_INFO, "Randomly broke %d ties in %d target-decoy competitions.",
-         numTies, numCompetitions);
-  }
-  if (numLostDecoys > 0) {
-    carp(CARP_INFO, "Failed to find %d decoys.", numLostDecoys);
-  }
+            float score_difference = target_match->getScore(score_type) - decoy_match->getScore(score_type);
+            numCompetitions++;
+            // Randomly break ties.
+            if (fabs(score_difference) < 1e-10) {
+              numTies++;
+              score_difference += 0.5 - ((double)myrandom() / UNIFORM_INT_DISTRIBUTION_MAX);
+            }
+            if (ascending) { // smaller scores are better
+              score_difference *= -1.0;
+            }
+            if (score_difference >= 0.0) {
+              tdc_collection->addMatch(target_match);
+            } else {
+              tdc_collection->addMatch(decoy_match);
+            }
+          }
+        }
+        delete target_iter;
+        delete decoy_iter;
+        delete match_collection;
+        match_collection = tdc_collection;
+        carp(CARP_INFO, "%d tdc_collection", match_collection->getMatchTotal());
+        if (numCompetitions > 0) {
+          carp(CARP_INFO, "Randomly broke %d ties in %d target-decoy competitions.",
+               numTies, numCompetitions);
+        }
+        if (numLostDecoys > 0) {
+          carp(CARP_INFO, "Failed to find %d decoys.", numLostDecoys);
+        }
       }
       delete temp_collection;
     }
@@ -1191,6 +1192,7 @@ vector<string> AssignConfidenceApplication::getOptions() const {
     "decoy-prefix",
     "score",
     "sidak",
+    "top-match-in",
     "verbosity",
     "parameter-file",
     "overwrite",
