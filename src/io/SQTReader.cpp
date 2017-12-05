@@ -21,6 +21,7 @@ using namespace Crux;
  * Initializes the object
  */
 void SQTReader::init() {
+  maxRank_ = Params::GetInt("top-match-in");
   last_parsed_ = SQT_LINE_NONE;
   current_spectrum_ = NULL;
   current_match_ = NULL;
@@ -93,7 +94,8 @@ MatchCollection* SQTReader::parse() {
   }
 
   //add the last match
-  if (current_match_ != NULL) {
+  if (current_match_ != NULL &&
+      (maxRank_ == 0 || current_match_->getRank(XCORR) <= maxRank_)) {
     current_match_collection_->addMatchToPostMatchCollection(current_match_);
   }
   return current_match_collection_;
@@ -198,56 +200,59 @@ void SQTReader::parseMatch(const string& line) {
   vector<string> tokens = StringUtils::Split(line, '\t');
 
   int xcorr_rank = StringUtils::FromString<int>(tokens[match_xcorr_rank_idx]);
-  int sp_rank = StringUtils::FromString<int>(tokens[match_sp_rank_idx]);
-  double calculated_mass = StringUtils::FromString<double>(tokens[match_calculated_mass_idx]);
-  double delta_cn = StringUtils::FromString<double>(tokens[match_delta_cn_idx]);
-  double xcorr = StringUtils::FromString<double>(tokens[match_xcorr_idx]);
-  double sp = StringUtils::FromString<double>(tokens[match_sp_idx]);
-  int matched_ions = StringUtils::FromString<int>(tokens[match_matched_ions_idx]);
-  int expected_ions = StringUtils::FromString<int>(tokens[match_expected_ions_idx]);
 
-  string sqt_sequence = tokens[match_sequence_idx];
-  vector<string> sequence_tokens = StringUtils::Split(sqt_sequence, '.');
+  if (maxRank_ == 0 || xcorr_rank <= maxRank_) {
+    int sp_rank = StringUtils::FromString<int>(tokens[match_sp_rank_idx]);
+    double calculated_mass = StringUtils::FromString<double>(tokens[match_calculated_mass_idx]);
+    double delta_cn = StringUtils::FromString<double>(tokens[match_delta_cn_idx]);
+    double xcorr = StringUtils::FromString<double>(tokens[match_xcorr_idx]);
+    double sp = StringUtils::FromString<double>(tokens[match_sp_idx]);
+    int matched_ions = StringUtils::FromString<int>(tokens[match_matched_ions_idx]);
+    int expected_ions = StringUtils::FromString<int>(tokens[match_expected_ions_idx]);
 
-  current_prev_aa_ = sequence_tokens.front();
-  current_next_aa_ = sequence_tokens.back();
-  sequence_tokens.erase(sequence_tokens.begin());
-  sequence_tokens.pop_back();
-  current_peptide_sequence_ = StringUtils::Join(sequence_tokens, '.');
-  if (current_match_ != NULL) {
-    current_match_collection_->addMatchToPostMatchCollection(current_match_);
-  }
+    string sqt_sequence = tokens[match_sequence_idx];
+    vector<string> sequence_tokens = StringUtils::Split(sqt_sequence, '.');
 
-  string unmodifiedSequence;
-  vector<Modification> mods;
-  for (size_t i = 0; i < current_peptide_sequence_.size(); i++) {
-    char c = current_peptide_sequence_[i];
-    if ('A' <= c && c <= 'Z') {
-      unmodifiedSequence.push_back(c);
-    } else {
-      const ModificationDefinition* modDef = ModificationDefinition::Find(c);
-      if (modDef != NULL) {
-        mods.push_back(Modification(modDef, (i > 0) ? i - 1 : 0));
-      } else {
-        carp(CARP_ERROR, "Unknown modification in %s: %c",
-             current_peptide_sequence_.c_str(), c);
-      }
-
+    current_prev_aa_ = sequence_tokens.front();
+    current_next_aa_ = sequence_tokens.back();
+    sequence_tokens.erase(sequence_tokens.begin());
+    sequence_tokens.pop_back();
+    current_peptide_sequence_ = StringUtils::Join(sequence_tokens, '.');
+    if (current_match_ != NULL) {
+      current_match_collection_->addMatchToPostMatchCollection(current_match_);
     }
+
+    string unmodifiedSequence;
+    vector<Modification> mods;
+    for (size_t i = 0; i < current_peptide_sequence_.size(); i++) {
+      char c = current_peptide_sequence_[i];
+      if ('A' <= c && c <= 'Z') {
+        unmodifiedSequence.push_back(c);
+      } else {
+        const ModificationDefinition* modDef = ModificationDefinition::Find(c);
+        if (modDef != NULL) {
+          mods.push_back(Modification(modDef, (i > 0) ? i - 1 : 0));
+        } else {
+          carp(CARP_ERROR, "Unknown modification in %s: %c",
+               current_peptide_sequence_.c_str(), c);
+        }
+
+      }
+    }
+    Peptide* peptide = new Peptide(unmodifiedSequence, mods);
+    current_peptide_sequence_ = unmodifiedSequence;
+
+    current_match_ = new Match(peptide, current_spectrum_, current_zstate_, false);
+    current_match_->setScore(XCORR, xcorr);
+    current_match_->setScore(SP, sp);
+    current_match_->setScore(DELTA_CN, delta_cn);
+    current_match_->setRank(XCORR, xcorr_rank);
+    current_match_->setRank(SP, sp_rank);
+
+    current_match_->setScore(BY_IONS_MATCHED, matched_ions);
+    current_match_->setScore(BY_IONS_TOTAL, expected_ions);
+    current_match_->setLnExperimentSize(current_ln_experiment_size_);
   }
-  Peptide* peptide = new Peptide(unmodifiedSequence, mods);
-  current_peptide_sequence_ = unmodifiedSequence;
-
-  current_match_ = new Match(peptide, current_spectrum_, current_zstate_, false);
-  current_match_->setScore(XCORR, xcorr);
-  current_match_->setScore(SP, sp);
-  current_match_->setScore(DELTA_CN, delta_cn);
-  current_match_->setRank(XCORR, xcorr_rank);
-  current_match_->setRank(SP, sp_rank);
-
-  current_match_->setScore(BY_IONS_MATCHED, matched_ions);
-  current_match_->setScore(BY_IONS_TOTAL, expected_ions);
-  current_match_->setLnExperimentSize(current_ln_experiment_size_);
 
   last_parsed_ = SQT_LINE_MATCH;
 }
@@ -281,7 +286,7 @@ void SQTReader::parseLocus(const string& line) {
  * /returns the start position of the peptide sequence within the protein
  */
 int SQTReader::findStart(
-  Protein* protein,  ///< the protein to find the sequence 
+  Protein* protein,  ///< the protein to find the sequence
   string peptide_sequence, ///< the peptide sequence to find
   string prev_aa, ///< the amino acid before the sequence in the protein
   string next_aa ///< the next amino acid after the sequence in the protein
@@ -292,7 +297,7 @@ int SQTReader::findStart(
     return protein->getLength() - peptide_sequence.length() + 1;
   } else {
     //use the flanking amino acids to further constrain our search in the sequence
-    size_t pos = string::npos; 
+    size_t pos = string::npos;
     string seq = prev_aa + peptide_sequence + next_aa;
     string protein_seq = protein->getSequencePointer();
     pos = protein_seq.find(seq);
