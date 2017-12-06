@@ -1334,27 +1334,20 @@ bool MatchCollection::setZState(
 }
 
 /**
- * Extract a given type of score into an array.  The array is
- * allocated here and must be freed by the caller.
+ * Extract a given type of score into a vector.
  */
-FLOAT_T* MatchCollection::extractScores(
-  SCORER_TYPE_T       score_type ///< Type of score to extract.
-)
-{
-  FLOAT_T* return_value = (FLOAT_T*)mycalloc(match_.size(),
-                                             sizeof(FLOAT_T));
-
-  MatchIterator* match_iterator =
-    new MatchIterator(this, score_type, false);
-  int idx = 0;
-  while(match_iterator->hasNext()){
+vector<FLOAT_T> MatchCollection::extractScores(
+  SCORER_TYPE_T score_type ///< Type of score to extract.
+) {
+  vector<FLOAT_T> scores;
+  scores.reserve(match_.size());
+  MatchIterator* match_iterator = new MatchIterator(this, score_type, false);
+  while (match_iterator->hasNext()) {
     Match* match = match_iterator->next();
-    return_value[idx] = match->getScore(score_type);
-    idx++;
+    scores.push_back(match->getScore(score_type));
   }
   delete match_iterator;
-
-  return(return_value);
+  return scores;
 }
 
 /**

@@ -5,6 +5,7 @@
 ****************************************************************************/
 
 #include "AssignConfidenceApplication.h"
+#include "ComputeQValues.h"
 #include "io/MatchCollectionParser.h"
 #include "PosteriorEstimator.h"
 #include "util/FileUtils.h"
@@ -23,18 +24,6 @@ using namespace Crux;
 static const int MAX_PSMS = 10000000;
 // 14th decimal place
 static const double EPSILON = 0.00000000000001;
-
-#ifdef _MSC_VER
-// The Microsoft 10.0 C++ compiler has trouble resolving the proper virtual
-// function call when the STL make_pair is combined with the STL ptr_fun.
-// They promise to fix this in v11, but until then we create our own wrapper
-// for this use of make_pair. (See corresponding ifdef block in compute_PEP)
-pair<double, bool> make_pair(double db, bool b);
-// pair<double,bool> make_pair(double db, bool b) {
-//     return std::pair<double,bool>(db, b);
-// }
-#endif
-
 
 /**
 * \returns a blank ComputeQValues object
@@ -572,26 +561,20 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
   }
 
   // Compute q-values.
-  FLOAT_T* target_scores = target_matches->extractScores(score_type);
-  int num_targets = target_matches->getMatchTotal();
-  FLOAT_T* decoy_scores = decoy_matches->extractScores(score_type);
-  int num_decoys = decoy_matches->getMatchTotal();
-  carp(CARP_INFO,
-       "There are %d target and %d decoy PSMs for q-value computation.",
-       num_targets, num_decoys);
+  vector<FLOAT_T> target_scores = target_matches->extractScores(score_type);
+  vector<FLOAT_T> decoy_scores = decoy_matches->extractScores(score_type);
+  carp(CARP_INFO, "There are %d target and %d decoy PSMs for q-value computation.",
+       target_scores.size(), decoy_scores.size());
 
-  FLOAT_T* qvalues = NULL;
+  vector<FLOAT_T> qvalues;
   switch (estimation_method) {
   case TDC_METHOD:
   case PEPTIDE_LEVEL_METHOD:
-    qvalues = compute_decoy_qvalues_tdc(target_scores, num_targets,
-      decoy_scores, num_decoys, ascending, 1.0);
+    qvalues = compute_decoy_qvalues_tdc(target_scores, decoy_scores, ascending, 1.0);
     break;
   case MIXMAX_METHOD:
-    qvalues = compute_decoy_qvalues_mixmax(target_scores, num_targets,
-      decoy_scores, num_decoys,
-      ascending,
-      Params::GetDouble("pi-zero"));
+    qvalues = compute_decoy_qvalues_mixmax(
+      target_scores, decoy_scores, ascending, Params::GetDouble("pi-zero"));
     break;
   case NUMBER_METHOD_TYPES:
   case INVALID_METHOD:
@@ -601,26 +584,20 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
   unsigned int fdr1 = 0;
   unsigned int fdr5 = 0;
   unsigned int fdr10 = 0;
-  for (unsigned int i = 0; i < num_targets; ++i) {
-    if (qvalues[i] < 0.01) ++fdr1;
-    if (qvalues[i] < 0.05) ++fdr5;
-    if (qvalues[i] < 0.10) ++fdr10;
+  for (vector<FLOAT_T>::const_iterator i = qvalues.begin(); i != qvalues.end(); i++) {
+    if (*i < 0.01) ++fdr1;
+    if (*i < 0.05) ++fdr5;
+    if (*i < 0.10) ++fdr10;
   }
   carp(CARP_INFO, "Number of PSMs at 1%% FDR = %d.", fdr1);
   carp(CARP_INFO, "Number of PSMs at 5%% FDR = %d.", fdr5);
   carp(CARP_INFO, "Number of PSMs at 10%% FDR = %d.", fdr10);
 
-  free(decoy_scores);
-
   // Store p-values to q-values as a hash, and then assign them.
-  map<FLOAT_T, FLOAT_T> qvalue_hash
-    = store_arrays_as_hash(target_scores, qvalues, num_targets);
+  map<FLOAT_T, FLOAT_T> qvalue_hash = store_arrays_as_hash(target_scores, qvalues);
 
   target_matches->assignQValues(&qvalue_hash, score_type, derived_score_type);
 
-  free(target_scores);
-  free(qvalues);
-  
   // Store targets by score.
   target_matches->sort(score_type);
   if (spectrum_flag_ == NULL) {
@@ -743,12 +720,10 @@ void AssignConfidenceApplication::identify_best_psm_per_peptide(
  * lowest to highest, sorted according to the underlying score.
  */
 void AssignConfidenceApplication::convert_fdr_to_qvalue(
-  FLOAT_T* qvalues,     ///< Come in as FDRs, go out as q-values.
-  int      num_values
+  vector<FLOAT_T>& qvalues ///< Come in as FDRs, go out as q-values.
 ) {
-  FLOAT_T prev_fdr = qvalues[num_values - 1];
-  int idx;
-  for (idx=num_values - 2; idx >= 0; idx--) {
+  FLOAT_T prev_fdr = qvalues[qvalues.size() - 1];
+  for (int idx = qvalues.size() - 2; idx >= 0; idx--) {
     carp(CARP_DETAILED_DEBUG, "fdr[%i] = %.10f", idx, qvalues[idx]);
     FLOAT_T this_fdr = qvalues[idx];
     if (prev_fdr < this_fdr) {
@@ -763,16 +738,15 @@ void AssignConfidenceApplication::convert_fdr_to_qvalue(
  * Store two parallel arrays of floats in a hash table.
  */
 map<FLOAT_T, FLOAT_T> AssignConfidenceApplication::store_arrays_as_hash(
-  FLOAT_T* keys, 
-  FLOAT_T* values,
-  int      num_values
+  const vector<FLOAT_T>& keys,
+  const vector<FLOAT_T>& values
 ) {
   map<FLOAT_T, FLOAT_T> return_value;
-  for (int idx=0; idx < num_values; idx++) {
-    carp(CARP_DETAILED_DEBUG, "%g maps to %g", keys[idx], values[idx]);
-    return_value[keys[idx]] = values[idx];
+  for (size_t i = 0; i < keys.size(); i++) {
+    carp(CARP_DETAILED_DEBUG, "%g maps to %g", keys[i], values[i]);
+    return_value[keys[i]] = values[i];
   }
-  return(return_value);
+  return return_value;
 }
 
 /**
@@ -782,45 +756,43 @@ map<FLOAT_T, FLOAT_T> AssignConfidenceApplication::store_arrays_as_hash(
  *
  * This function is only exported to allow unit testing.
  */
-FLOAT_T* AssignConfidenceApplication::compute_decoy_qvalues_tdc(
-  FLOAT_T* target_scores,
-  int      num_targets,
-  FLOAT_T* decoy_scores,
-  int      num_decoys,
-  bool     ascending,
-  FLOAT_T  pi_zero
+vector<FLOAT_T> AssignConfidenceApplication::compute_decoy_qvalues_tdc(
+  vector<FLOAT_T>& target_scores,
+  vector<FLOAT_T>& decoy_scores,
+  bool ascending,
+  FLOAT_T pi_zero
 ) {
-  if ((num_targets == 0) || (num_decoys == 0)) {
-    carp(CARP_FATAL, "Cannot compute q-values (%d targets, %d nulls).",
-         num_targets, num_decoys);
+  if (target_scores.empty() || decoy_scores.empty()) {
+    carp(CARP_FATAL, "Cannot compute q-values (0 targets, 0 nulls).");
   }
   carp(CARP_DEBUG, "Computing decoy q-values with %d targets and %d decoys.",
-       num_targets, num_decoys);
+       target_scores.size(), decoy_scores.size());
 
   // Sort both sets of scores.
   if (ascending) {
-    sort(target_scores, target_scores + num_targets, Match::ScoreLess);
-    sort(decoy_scores, decoy_scores + num_decoys, Match::ScoreLess);
+    sort(target_scores.begin(), target_scores.end(), Match::ScoreLess);
+    sort(decoy_scores.begin(), decoy_scores.end(), Match::ScoreLess);
   } else {
-    sort(target_scores, target_scores + num_targets, Match::ScoreGreater);
-    sort(decoy_scores, decoy_scores + num_decoys, Match::ScoreGreater);
+    sort(target_scores.begin(), target_scores.end(), Match::ScoreGreater);
+    sort(decoy_scores.begin(), decoy_scores.end(), Match::ScoreGreater);
   }
 
   // Compute false discovery rate for each target score.
-  FLOAT_T* qvalues = (FLOAT_T*)mycalloc(num_targets, sizeof(FLOAT_T));
+  vector<FLOAT_T> qvalues;
+  qvalues.reserve(target_scores.size());
   int decoy_idx = 0;
-  for (int target_idx = 0; target_idx < num_targets; target_idx++) {
-    FLOAT_T target_score = target_scores[target_idx];
+  for (int target_idx = 0; target_idx < target_scores.size(); target_idx++) {
+    double target_score = target_scores[target_idx];
 
     // Find the index of the first decoy score greater than this target score.
     if (ascending) {
-      while (decoy_idx < num_decoys &&
+      while (decoy_idx < decoy_scores.size() &&
              Match::ScoreLess(decoy_scores[decoy_idx], target_score)) {
         carp(CARP_DEBUG, "Decoy score %g.", decoy_scores[decoy_idx]);
         decoy_idx++;
       }
     } else {   
-      while (decoy_idx < num_decoys &&
+      while (decoy_idx < decoy_scores.size() &&
              Match::ScoreGreater(decoy_scores[decoy_idx], target_score)) {
         carp(CARP_DEBUG, "Decoy score %g.", decoy_scores[decoy_idx]);
         decoy_idx++;
@@ -828,56 +800,19 @@ FLOAT_T* AssignConfidenceApplication::compute_decoy_qvalues_tdc(
     }
 
     // FDR = (#decoys + 1)/ #targets
-    FLOAT_T fdr = 
-      ((FLOAT_T)(decoy_idx + 1)/ (FLOAT_T)(target_idx + 1));
-    
-    if ( fdr > 1.0 ) {
+    FLOAT_T fdr = ((FLOAT_T)(decoy_idx + 1)/(FLOAT_T)(target_idx + 1));
+    if (fdr > 1.0) {
       fdr = 1.0;
     }
-    
     carp(CARP_DEBUG, "FDR for score %g = min(1,%d/%d) = %g",
          target_score, decoy_idx, target_idx + 1, fdr);
-
-    qvalues[target_idx] = fdr;
+    qvalues.push_back(fdr);
   }
   
   // Convert the FDRs into q-values.
-  convert_fdr_to_qvalue(qvalues, num_targets);
+  convert_fdr_to_qvalue(qvalues);
 
   return qvalues;
-}
-
-FLOAT_T AssignConfidenceApplication::estimate_pi0(FLOAT_T* target_scores,
-  int      num_targets,
-  FLOAT_T* decoy_scores,
-  int      num_decoys,
-  bool     ascending
-) {
-  vector<pair<double, bool> > score_labels;
-  transform(target_scores, target_scores + num_targets,
-            back_inserter(score_labels),
-            bind2nd(ptr_fun<double, bool, pair<double, bool> >(make_pair), true));
-  transform(decoy_scores, decoy_scores + num_decoys,
-            back_inserter(score_labels),
-            bind2nd(ptr_fun<double, bool, pair<double, bool> >(make_pair), false));
-
-  // sort them 
-  if (ascending) {
-    sort(score_labels.begin(), score_labels.end());
-    PosteriorEstimator::setReversed(true);
-  } else {
-    sort(score_labels.begin(), score_labels.end(),
-       greater<pair<double, bool> > ());  
-  }
-  // get p-values
-  vector<double> pvals;
-  PosteriorEstimator::getPValues(score_labels, pvals);
-  
-  // estimate pi_zero
-  FLOAT_T pi_zero = PosteriorEstimator::estimatePi0(pvals);
-
-  carp(CARP_INFO, "Estimated pi_zero = %f", pi_zero);
-  return pi_zero;
 }
 
 /**
@@ -885,51 +820,28 @@ FLOAT_T AssignConfidenceApplication::estimate_pi0(FLOAT_T* target_scores,
  * reimplementation of Uri Keich's code written in R.
  *
  */
-FLOAT_T* AssignConfidenceApplication::compute_decoy_qvalues_mixmax(
-  FLOAT_T* target_scores,
-  int      num_targets,
-  FLOAT_T* decoy_scores,
-  int      num_decoys,
-  bool     ascending,
-  FLOAT_T  pi_zero
+vector<FLOAT_T> AssignConfidenceApplication::compute_decoy_qvalues_mixmax(
+  vector<FLOAT_T>& target_scores,
+  vector<FLOAT_T>& decoy_scores,
+  bool ascending,
+  FLOAT_T pi_zero
 ) {
-  if ((num_targets == 0) || (num_decoys == 0)) {
-    carp(CARP_FATAL, "Cannot compute q-values (%d targets, %d decoys).",
-         num_targets, num_decoys);
+  if (target_scores.empty() || decoy_scores.empty()) {
+    carp(CARP_FATAL, "Cannot compute q-values (0 targets, 0 decoys).");
   }
-  if (num_targets != num_decoys) {
+  size_t num_targets = target_scores.size();
+  size_t num_decoys = decoy_scores.size();
+  if (target_scores.size() != decoy_scores.size()) {
     carp(CARP_WARNING, "The mix-max procedure is not well behaved when # targets (%d) != # of decoys (%d).",
          num_targets, num_decoys);
   }
   //estimate pi0 from data if it is not given.
   if (pi_zero == 1.0) {
-    
-      // put all of the scores in a single vector of pairs: score, is_target
-      vector<pair<double, bool> > score_labels;
-      transform(target_scores, target_scores + num_targets,
-                back_inserter(score_labels),
-                bind2nd(ptr_fun<double, bool, pair<double, bool> >(make_pair), true));
-      transform(decoy_scores, decoy_scores + num_decoys,
-                back_inserter(score_labels),
-                bind2nd(ptr_fun<double, bool, pair<double, bool> >(make_pair), false));
+    vector< pair<double, bool> > score_labels =
+      ComputeQValues::getScoreVector(target_scores, decoy_scores, ascending);
+    pi_zero = ComputeQValues::estimatePi0(score_labels);
 
-      // sort them 
-      if (ascending) {
-        sort(score_labels.begin(), score_labels.end());
-        PosteriorEstimator::setReversed(true);
-      } else {
-        sort(score_labels.begin(), score_labels.end(),
-           greater<pair<double, bool> > ());  
-      }
-      // get p-values
-      vector<double> pvals;
-      PosteriorEstimator::getPValues(score_labels, pvals);
-      
-      // estimate pi_zero
-      pi_zero = PosteriorEstimator::estimatePi0(pvals);
-
-      carp(CARP_INFO, "Estimated pi_zero = %f", pi_zero);
-
+    carp(CARP_INFO, "Estimated pi_zero = %f", pi_zero);
   }
   // continue with mix-max procedure
   for (int target_idx = 0; target_idx < num_targets; ++target_idx) {
@@ -940,11 +852,11 @@ FLOAT_T* AssignConfidenceApplication::compute_decoy_qvalues_mixmax(
 
   //Sort decoy and target stores
   if (ascending) {
-    sort(target_scores, target_scores + num_targets, greater<FLOAT_T>());
-    sort(decoy_scores, decoy_scores + num_decoys, greater<FLOAT_T>());
+    sort(target_scores.begin(), target_scores.end(), greater<FLOAT_T>());
+    sort(decoy_scores.begin(), decoy_scores.end(), greater<FLOAT_T>());
   } else {
-    sort(target_scores, target_scores + num_targets);
-    sort(decoy_scores, decoy_scores + num_decoys);
+    sort(target_scores.begin(), target_scores.end());
+    sort(decoy_scores.begin(), decoy_scores.end());
   }
 
   //histogram of the target scores.
@@ -976,8 +888,8 @@ FLOAT_T* AssignConfidenceApplication::compute_decoy_qvalues_mixmax(
   }
   h_w_le_z[num_decoys] = (double)(num_targets);
   h_z_le_z[num_decoys] = (double)(num_decoys);
-  
-  FLOAT_T* fdrmod = new FLOAT_T[num_targets];
+
+  vector<FLOAT_T> fdrmod(num_targets, 0);
   double estPx_lt_zj = 0.0;
   double E_f1_mod_run_tot = 0.0;
   int j = num_decoys-1;
