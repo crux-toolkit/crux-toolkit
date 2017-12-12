@@ -212,7 +212,7 @@ INFO: Return Code:0
 
 		<li>
 		<div class=code><code>
-		$ crux percolator crux-output/tide-search.target.txt</code>
+		$ crux percolator --test-fdr 0.1 crux-output/tide-search.target.txt</code>
 		</div>
 
 		<p>While the analysis is running, you will see output like this
@@ -220,60 +220,77 @@ INFO: Return Code:0
 
 		<pre>
 INFO: CPU: pyrrolysine.gs.washington.edu
-INFO: Crux version: 2.1
-INFO: Fri Feb  5 11:25:51 PST 2016
-COMMAND LINE: ./crux percolator crux-output/tide-search.target.txt
+INFO: Crux version: 3.1-ccddffef5395314ce3a224ad5b34167229341653
+INFO: Tue Dec 12 15:47:13 PST 2017
+COMMAND LINE: ./crux percolator --test-fdr 0.1 crux-output/tide-search.target.txt
+INFO: Beginning percolator.
 INFO: Reading file crux-output/tide-search.target.txt
-INFO: Running make-pin
+INFO: Converting input to pin format.
 INFO: Parsing crux-output/tide-search.target.txt
+INFO: Assigning index 0 to demo.ms2.
 INFO: Parsing crux-output/tide-search.decoy.txt
 INFO: There are 690 target matches and 690 decoys
-INFO: Finished make-pin.
-INFO: Percolator version 2.09, Build Date Sep 22 2015 14:29:11
+INFO: Maximum observed charge is 3.
+INFO: File conversion complete.
+INFO: Percolator version 3.01.nightly-22-2f4e2a6, Build Date Nov 22 2017 10:07:29
 INFO: Copyright (c) 2006-9 University of Washington. All rights reserved.
 INFO: Written by Lukas Käll (lukall@u.washington.edu) in the
 INFO: Department of Genome Sciences at the University of Washington.
 INFO: Issued command:
-INFO: percolator -r crux-output/percolator.target.peptides.txt -v 2 -P decoy_ --seed 1 -p 0.01 -n 0 --trainFDR 0.01 --testFDR 0.01 --maxiter 10 -s crux-output/make-pin.pin
-INFO: Started Fri Feb  5 11:25:52 2016
-INFO:  on pyrrolysine.gs.washington.edu
-INFO: Hyperparameters selectionFdr=0.01, Cpos=0.01, Cneg=0, maxNiter=10
-INFO: Reading Tab delimited input from datafile crux-output/make-pin.pin
+INFO: percolator --results-peptides crux-output/percolator.target.peptides.txt --decoy-results-peptides crux-output/percolator.decoy.peptides.txt --results-psms crux-output/percolator.target.psms.txt --decoy-results-psms crux-output/percolator.decoy.psms.txt --verbose 2 --protein-decoy-pattern decoy_ --seed 1 --subset-max-train 0 --trainFDR 0.01 --testFDR 0.1 --maxiter 10 --search-input auto --no-schema-validation --protein-enzyme trypsin --post-processing-tdc crux-output/make-pin.pin
+INFO: Started Tue Dec 12 15:47:13 2017
+INFO: Hyperparameters: selectionFdr=0.01, Cpos=0, Cneg=0, maxNiter=10
+INFO: Reading tab-delimited input from datafile crux-output/make-pin.pin
 INFO: Features:
-INFO: lnrSp deltCn XCorr Sp IonFrac PepLen Charge1 Charge2 Charge3 enzN enzC enzInt lnNumSP dM absdM 
+INFO: lnrSp deltLCn deltCn XCorr Sp IonFrac PepLen Charge1 Charge2 Charge3 enzN enzC enzInt lnNumDSP dM absdM 
+INFO: Found 1380 PSMs
+INFO: Separate target and decoy search inputs detected, using target-decoy competition on Percolator scores.
 INFO: Train/test set contains 690 positives and 690 negatives, size ratio=1 and pi0=1
-INFO: selecting cneg by cross validation
-INFO: Selected feature number 4 as initial search direction, could separate 39 positives in that direction
-INFO: Selected feature number 3 as initial search direction, could separate 38 positives in that direction
-INFO: Selected feature number 3 as initial search direction, could separate 30 positives in that direction
-INFO: Estimating 53 over q=0.01 in initial direction
-INFO: Reading in data and feature calculation took 0.03 cpu seconds or 0 seconds wall time
-INFO: ---Training with Cpos=0.01, Cneg selected by cross validation, fdr=0.01
-INFO: Iteration 1 :	After the iteration step, 53 target PSMs with q<0.01 were estimated by cross validation
-INFO: Iteration 2 :	After the iteration step, 53 target PSMs with q<0.01 were estimated by cross validation
-INFO: Iteration 3 :	After the iteration step, 53 target PSMs with q<0.01 were estimated by cross validation
-INFO: Iteration 4 :	After the iteration step, 53 target PSMs with q<0.01 were estimated by cross validation
-INFO: Iteration 5 :	After the iteration step, 53 target PSMs with q<0.01 were estimated by cross validation
-INFO: Iteration 6 :	After the iteration step, 53 target PSMs with q<0.01 were estimated by cross validation
-INFO: Iteration 7 :	After the iteration step, 53 target PSMs with q<0.01 were estimated by cross validation
-INFO: Iteration 8 :	After the iteration step, 53 target PSMs with q<0.01 were estimated by cross validation
-INFO: Iteration 9 :	After the iteration step, 53 target PSMs with q<0.01 were estimated by cross validation
-INFO: Iteration 10 :	After the iteration step, 53 target PSMs with q<0.01 were estimated by cross validation
-INFO: Obtained weights (only showing weights of first cross validation set)
-INFO: # first line contains normalized weights, second line the raw weights
-INFO: lnrSp	deltCn	XCorr	Sp	IonFrac	PepLen	Charge1	Charge2	Charge3	enzN	enzC	enzInt	lnNumSP	dM	absdM	m0
-INFO: 0.0352	0.0014	0.1465	0.2956	-0.0130	0.0224	0.0051	-0.0025	-0.0020	0.0000	0.0000	-0.0001	-0.0049	-0.0055	0.0169	-0.9248
-INFO: 0.0580	0.0069	0.2096	0.0010	-0.0922	0.0052	0.0136	-0.0052	-0.0053	0.0000	0.0000	-0.0006	-0.0077	-0.0059	0.0300	-1.1931
-INFO: After all training done, 56 target PSMs with q<0.0100 were found when measuring on the test set
-INFO: Found 56 target PSMs scoring over 1.0000% FDR level on testset
-INFO: Merging results from 3 datasets
-INFO: Target Decoy Competition yielded 116 target PSMs and 50 decoy PSMs
+INFO: Selecting Cpos by cross-validation.
+INFO: Selecting Cneg by cross-validation.
+INFO: Split 1:	Selected feature 2 as initial search direction. Could separate 44 training set positives in that direction.
+INFO: Split 2:	Selected feature 5 as initial search direction. Could separate 41 training set positives in that direction.
+INFO: Split 3:	Selected feature 2 as initial search direction. Could separate 32 training set positives in that direction.
+INFO: Found 39 test set positives with q<0.1 in initial direction
+INFO: Reading in data and feature calculation took 0.077138 cpu seconds or 0 seconds wall clock time.
+INFO: ---Training with Cpos selected by cross validation, Cneg selected by cross validation, fdr=0.01
+INFO: Iteration 1:	Estimated 71 PSMs with q<0.1
+INFO: Iteration 2:	Estimated 73 PSMs with q<0.1
+INFO: Iteration 3:	Estimated 73 PSMs with q<0.1
+INFO: Iteration 4:	Estimated 73 PSMs with q<0.1
+INFO: Iteration 5:	Estimated 73 PSMs with q<0.1
+INFO: Iteration 6:	Estimated 73 PSMs with q<0.1
+INFO: Iteration 7:	Estimated 73 PSMs with q<0.1
+INFO: Iteration 8:	Estimated 73 PSMs with q<0.1
+INFO: Iteration 9:	Estimated 73 PSMs with q<0.1
+INFO: Iteration 10:	Estimated 73 PSMs with q<0.1
+INFO: Learned normalized SVM weights for the 3 cross-validation splits:
+INFO:  Split1	 Split2	 Split3	FeatureName
+INFO:  0.3140	 0.0590	 0.2375	lnrSp
+INFO:  0.1862	-0.1121	 0.1878	deltLCn
+INFO:  0.1340	 0.0416	 0.3738	deltCn
+INFO:  0.0642	 0.3209	 0.6567	XCorr
+INFO:  0.7780	 0.3290	 1.2113	Sp
+INFO:  0.2765	 0.0558	-0.4342	IonFrac
+INFO:  0.3376	 0.0918	 0.3700	PepLen
+INFO:  0.0230	 0.0536	 0.1603	Charge1
+INFO:  0.1090	 0.0586	 0.3298	Charge2
+INFO: -0.1604	-0.1274	-0.5759	Charge3
+INFO:  0.0000	 0.0000	 0.0000	enzN
+INFO:  0.0000	 0.0000	 0.0000	enzC
+INFO: -0.0195	-0.0015	 0.0231	enzInt
+INFO:  0.1450	 0.0298	 0.6177	lnNumDSP
+INFO: -0.1984	-0.0750	-0.2956	dM
+INFO: -0.1965	-0.0327	-0.1631	absdM
+INFO: -1.5185	-1.1520	-2.0882	m0
+INFO: Found 54 test set PSMs with q<0.1.
+INFO: Selected best-scoring PSM per scan+expMass (target-decoy competition): 104 target PSMs and 62 decoy PSMs.
 INFO: Tossing out "redundant" PSMs keeping only the best scoring PSM for each unique peptide.
-INFO: Calibrating statistics - calculating q values
-INFO: Merged list gives 9 peptides over q=0.0100
-INFO: Calibrating statistics - calculating Posterior error probabilities (PEPs)
-INFO: Processing took 0.67 cpu seconds or 0 seconds wall time
-INFO: Elapsed time: 0.933 s
+INFO: Calculating q values.
+INFO: Final list yields 0 target peptides with q<0.1.
+INFO: Calculating posterior error probabilities (PEPs).
+INFO: Processing took 3.472 cpu seconds or 3 seconds wall clock time.
+INFO: Elapsed time: 3.35 s
 INFO: Finished crux percolator.
 INFO: Return Code:0
 		</pre>
