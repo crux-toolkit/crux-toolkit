@@ -70,4 +70,13 @@ if (WIN32 AND NOT CYGWIN)
         RESULT_VARIABLE status
     )
     check_status(status)
+    message(${SOURCE_DIR}/patches/comet/CometSearch/CometWriteTxt.cpp)
+    message(${BINARY_DIR}/build/src/comet/CometSearch/CometWriteTxt.cpp)
+    execute_process(
+      COMMAND ${CMAKE_COMMAND} -E copy 
+        ${SOURCE_DIR}/patches/comet/CometSearch/CometWriteTxt.cpp
+        ${BINARY_DIR}/build/src/comet/CometSearch/CometWriteTxt.cpp
+        RESULT_VARIABLE status
+    )
+    check_status(status)
 endif (WIN32 AND NOT CYGWIN)
