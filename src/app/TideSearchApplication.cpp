@@ -137,7 +137,13 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
       proteins_file, &protein_header)) {
     carp(CARP_FATAL, "Error reading index (%s)", proteins_file.c_str());
   }
-  carp(CARP_INFO, "Read %d proteins", proteins.size());
+  int64_t targetProteinCount = 0;
+  for (ProteinVec::const_iterator i = proteins.begin(); i != proteins.end(); i++) {
+    if (!(*i)->has_target_pos()) {
+      ++targetProteinCount;
+    }
+  }
+  carp(CARP_INFO, "Read %d target proteins", targetProteinCount);
 
   //open a copy of peptide buffer for Amino Acid Frequency (AAF) calculation.
   double* aaFreqN = NULL;
