@@ -47,7 +47,7 @@ struct first_eq : public binary_function<pair<int, int>, pair<int, int>, bool> {
 };
 
 static bool IsAA(char c) {
-  const char* AA = "ACDEFGHIKLMNPQRSTVWYX";
+  const char* AA = "ACDEFGHIKJLMNOPQRSTUVWYX";
   for (; (*AA != '\0') && (*AA != c); ++AA);
   return (*AA == c);
 }
@@ -148,10 +148,10 @@ class VariableModTable {
       }
       int aa_len = -1, plus_pos = -1, delta_pos = -1, end_pos = -1;
       if (mod_table == MOD_SPEC)
-        sscanf(spec_text + pos, "%*[ACDEFGHIKLMNPQRSTVWY]%n%n%*[+-]%n%*[0-9.]%n",
+        sscanf(spec_text + pos, "%*[ACDEFGHIJKLMNOPQRSTUVWY]%n%n%*[+-]%n%*[0-9.]%n",
                &aa_len, &plus_pos, &delta_pos, &end_pos);
       else 
-        sscanf(spec_text + pos, "%*[ACDEFGHIKLMNPQRSTVWYX]%n%n%*[+-]%n%*[0-9.]%n",
+        sscanf(spec_text + pos, "%*[ACDEFGHIJKLMNOPQRSTUVWYX]%n%n%*[+-]%n%*[0-9.]%n",
                &aa_len, &plus_pos, &delta_pos, &end_pos);
 
       if (aa_len == -1)
@@ -324,7 +324,7 @@ class VariableModTable {
     SHOW_ALL(unique_delta_);
     SHOW_ONE(max_counts_.size());
     SHOW_ALL(max_counts_);
-    const char* aa = "ACDEFGHIKLMNPQRSTVWYX";
+    const char* aa = "ACDEFGHIJKLMNOPQRSTUVWYX";
     for (const char* c = aa; *c; ++c) {
       cout << "possibles_[" << (*c) << "] = ";
       for (IntPairVec::iterator i = possibles_[*c].begin();
