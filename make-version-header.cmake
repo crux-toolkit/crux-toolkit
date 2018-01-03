@@ -2,14 +2,14 @@ set(CRUX_VERSION_FULL "${CRUX_VERSION}")
 
 if (EXISTS "${SOURCE_DIR}/.git/HEAD")
   execute_process(
-    COMMAND "git" "show-ref" "refs/heads/master"
+    COMMAND "git" "rev-parse" "--short" "HEAD"
     WORKING_DIRECTORY ${SOURCE_DIR}
     RESULT_VARIABLE GIT_RESULT
     OUTPUT_VARIABLE PROJECT_SOURCE_VERSION
   )
   if (GIT_RESULT EQUAL 0)
     string(
-      REGEX MATCH "^.[^ ]*"
+      REGEX REPLACE "\n$" ""
       PROJECT_SOURCE_VERSION
       ${PROJECT_SOURCE_VERSION}
     )
