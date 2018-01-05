@@ -45,13 +45,11 @@ class MzIdentMLWriter : public PSMWriter {
    */
   pwiz::identdata::PeptideEvidencePtr getPeptideEvidence(
     Crux::Peptide* peptide, ///< peptide -in
-    bool is_decoy, ///< is this peptide a decoy? -in
     PeptideSrc* src ///< where the peptide is coming from -in
   );
 
   pwiz::identdata::PeptideEvidencePtr getPeptideEvidence(
     Crux::Peptide* peptide,
-    bool is_decoy,
     std::string& protein_id
   );
 
@@ -91,7 +89,6 @@ class MzIdentMLWriter : public PSMWriter {
    */
   void addPeptideEvidences(
     Crux::Peptide* peptide, ///< peptide to add evidence for
-    bool is_decoy, ///< is peptide a decoy?
     pwiz::identdata::SpectrumIdentificationItemPtr siip ///<item to add evidences to.
   );
 
