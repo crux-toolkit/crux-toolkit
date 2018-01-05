@@ -272,7 +272,6 @@ DBSequencePtr MzIdentMLWriter::getDBSequence(
 
 PeptideEvidencePtr MzIdentMLWriter::getPeptideEvidence(
   Crux::Peptide* peptide,
-  bool is_decoy,
   string& protein_id) {
 
   char* seq = peptide->getSequence();
@@ -300,7 +299,6 @@ PeptideEvidencePtr MzIdentMLWriter::getPeptideEvidence(
  */
 PeptideEvidencePtr MzIdentMLWriter::getPeptideEvidence(
   Crux::Peptide* peptide, ///< peptide -in
-  bool is_decoy,  ///< is this peptide a decoy? -in
   PeptideSrc* src ///< where to peptide comes from -in
   ) {
 
@@ -336,7 +334,9 @@ PeptideEvidencePtr MzIdentMLWriter::getPeptideEvidence(
   }
   pe_ptr->dbSequencePtr = dbs_ptr;
   pe_ptr->peptidePtr = getPeptide(peptide);
-  pe_ptr->isDecoy = is_decoy; 
+  pe_ptr->isDecoy =
+    StringUtils::StartsWith(protein_id, Params::GetString("decoy-prefix")) ||
+    peptide->isDecoy();
 
   mzid_->sequenceCollection.peptideEvidence.push_back(pe_ptr);
   return pe_ptr;  
@@ -430,7 +430,7 @@ PeptideHypothesis& MzIdentMLWriter::getPeptideHypothesis(
   string protein_id = protein_match->getId();
   PeptideSrc* src = peptide_match->getSrc(protein_match);
   ProteinDetectionHypothesisPtr pdhp = getProteinDetectionHypothesis(protein_id);
-  PeptideEvidencePtr pe_ptr = getPeptideEvidence(peptide_match->getPeptide(), true, src);
+  PeptideEvidencePtr pe_ptr = getPeptideEvidence(peptide_match->getPeptide(), src);
 
   for (size_t ph_idx = 0;ph_idx < pdhp->peptideHypothesis.size();ph_idx++) {
     if (pdhp->peptideHypothesis[ph_idx].peptideEvidencePtr == pe_ptr) {
@@ -519,7 +519,7 @@ SpectrumIdentificationItemPtr MzIdentMLWriter::getSpectrumIdentificationItem(
   addSpectrumScores(spectrum_match, siip);
   siip->passThreshold = true;
   siip->peptidePtr = peptide_ptr;
-  addPeptideEvidences(crux_peptide, false, siip);
+  addPeptideEvidences(crux_peptide, siip);
   sirp->spectrumIdentificationItem.push_back(siip);
   return siip;
 }
@@ -550,7 +550,6 @@ void MzIdentMLWriter::addSpectrumScores(
  */
 void MzIdentMLWriter::addPeptideEvidences(
   Crux::Peptide* peptide, ///< peptide to add evidence for
-  bool is_decoy, ///< is peptide a decoy?
   SpectrumIdentificationItemPtr siip ///< item to add evidences to
   ) {
 
@@ -558,7 +557,7 @@ void MzIdentMLWriter::addPeptideEvidences(
     src_iter != peptide->getPeptideSrcEnd();
     ++src_iter) {
 
-    PeptideEvidencePtr peptide_evidence = getPeptideEvidence(peptide, is_decoy, *src_iter);
+    PeptideEvidencePtr peptide_evidence = getPeptideEvidence(peptide, *src_iter);
     siip->peptideEvidencePtr.push_back(peptide_evidence);
   }
 }
@@ -709,7 +708,7 @@ void MzIdentMLWriter::addMatch(
   addRanks(collection, match, siip);
   siip->passThreshold = true;
   siip->peptidePtr = getPeptide(peptide);
-  addPeptideEvidences(peptide, match->isDecoy(), siip);
+  addPeptideEvidences(peptide, siip);
 
   SpectrumIdentificationResultPtr sirp =
     getSpectrumIdentificationResult(spectrum);
