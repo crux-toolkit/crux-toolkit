@@ -378,6 +378,7 @@ void TideMatchSet::writeToFile(
     }
 
     // Use scientific notation for exact p-value, but not refactored XCorr.
+    // Second argument to StringUtils::ToString determines number of decimals
     if(cur_score_function == XCORR_SCORE) {
       if (exact_pval_search_) {
         *file << StringUtils::ToString((*i)->xcorr_pval, precision, false) << '\t';

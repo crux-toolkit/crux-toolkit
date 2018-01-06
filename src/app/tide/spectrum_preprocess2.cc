@@ -26,9 +26,6 @@
 #include "util/mass.h"
 #include <cmath>
 
-#include <iostream> //Remove this when done -- Andy Lin
-#include <iomanip> //Remove this when done -- Andy Lin
-
 using namespace std;
 
 // Number of m/z regions in XCorr normalization.
