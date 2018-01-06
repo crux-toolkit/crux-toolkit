@@ -153,15 +153,17 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
   }
   carp(CARP_DEBUG, "Read %d proteins", proteins.size());
 
-  //open a copy of peptide buffer for Amino Acid Frequency (AAF) calculation.
-  //for XCORR_SCORE
+  // Open a copy of peptide buffer for Amino Acid Frequency (AAF) calculation.
+  // Is used for curScoreFunction = XCORR_SCORE
+  // contains frequency of amino acid masses (masses are binned)
   double* aaFreqN = NULL;
   double* aaFreqI = NULL;
   double* aaFreqC = NULL;
-  int* aaMass = NULL; //for XCORR
+  int* aaMass = NULL;
   int nAA = 0;
 
-  //for RESIDUE_EVIDENCE_MATRIX
+  // Is used for curScoreFunctino = RESIDUE_EVIDENCE_MATRIX
+  // contains frequency of amino acid masses (masses are not binned)
   vector<double> dAAFreqN;
   vector<double> dAAFreqI;
   vector<double> dAAFreqC;
@@ -800,7 +802,9 @@ void TideSearchApplication::search(void* threadarg) {
 
         //RES-EV
         if (curScoreFunction != XCORR_SCORE) {
-          //note: aaMassDouble differs from aaMass
+          // note: aaMassDouble differs from aaMass
+          // aaMassDouble contains amino acids masses in float form
+          // aaMass contains amino acid asses in integer form
           observed.CreateResidueEvidenceMatrix(*spectrum,charge,maxPrecurMassBin,precursorMass,
                                                nAARes,aaMassDouble,fragTol,granularityScale,
                                                NTermMass,CTermMass,
@@ -875,7 +879,7 @@ void TideSearchApplication::search(void* threadarg) {
             scoreResidueEvidence = calcResEvScore(curResidueEvidenceMatrix,intensArrayTheorResEv,aaMassDouble,curPeptide);
             resEvScores.push_back(scoreResidueEvidence);
 
-            if (scoreResidueEvidence > 0) { //if > 0, set bool to true to create DP matrix
+            if (scoreResidueEvidence > 0) { // if > 0, set bool to true to create DP matrix
               calcDPMatrix[curPepMassInt] = true;
             }
           }
@@ -1088,7 +1092,7 @@ void TideSearchApplication::search(void* threadarg) {
                          spectrum, charge, active_peptide_queue, proteins,
                          locations, compute_sp, false, spectrumFilesOverride_, locks_array[0]);
         }
-      } //end peptide_centric == true
+      } //end peptide_centric == false
     }
     delete min_mass;
     delete max_mass;
@@ -1722,7 +1726,7 @@ int TideSearchApplication::calcScoreCount(
  *  - uses uniform amino acid probabilities for all positions in peptide
  *
  * This used to be a MEX-file to be called in MATLAB
- *  - has been incorprated into Tide/Crus
+ *  - has been incorporated into Tide/Crux
  *
  * Written by Jeff Howbert, August, 2015.
  *

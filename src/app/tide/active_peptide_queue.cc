@@ -10,7 +10,6 @@
 #include "theoretical_peak_set.h"
 #include "compiler.h"
 #include "app/TideMatchSet.h"
-#include <iomanip> //TODO Andy - Delete when residue evidence is done 
 #include <map> //Added by Andy Lin
 #define CHECK(x) GOOGLE_CHECK((x))
 
