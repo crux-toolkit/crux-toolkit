@@ -724,13 +724,9 @@ void TideSearchApplication::search(void* threadarg) {
       pepMassIntUnique.reserve(nCandPeptide);
 
       //For each candidate peptide, determine which discretized mass bin it is in
+      //pepMassInt contains the corresponding mass bin for each candidate peptide
+      //pepMassIntUnique contains the unique set of mass bins that candidate peptides fall in
       getMassBin(pepMassInt,pepMassIntUnique,active_peptide_queue,candidatePeptideStatus);
-
-      //Sort vector, take unique of vector, get rid of extra space in vector
-      std::sort(pepMassIntUnique.begin(), pepMassIntUnique.end());
-      vector<int>::iterator last = std::unique(pepMassIntUnique.begin(),
-					       pepMassIntUnique.end());
-      pepMassIntUnique.erase(last, pepMassIntUnique.end());
       int nPepMassIntUniq = (int)pepMassIntUnique.size();
 
       //XCORR
@@ -783,7 +779,7 @@ void TideSearchApplication::search(void* threadarg) {
 
       //Create a residue evidence matrix and evidence vector
       //for each mass bin candidate peptides are in
-      for (pe=0 ; pe<nPepMassIntUniq ; pe++) {
+      for (pe = 0; pe < nPepMassIntUniq; pe++) {
         //XCORR
         if (curScoreFunction != RESIDUE_EVIDENCE_MATRIX) {
           evidenceObs[pe] = new int[maxPrecurMassBin];
@@ -813,7 +809,7 @@ void TideSearchApplication::search(void* threadarg) {
 
           //Get rid of values larger than curPepMassInt
 	      int curPepMassInt = pepMassIntUnique[pe];
-          for(int i=0 ; i<curResidueEvidenceMatrix.size() ; i++){
+          for(int i = 0; i < curResidueEvidenceMatrix.size(); i++){
             curResidueEvidenceMatrix[i].resize(curPepMassInt);
           }
           residueEvidenceMatrix[pe] = curResidueEvidenceMatrix;
@@ -822,7 +818,7 @@ void TideSearchApplication::search(void* threadarg) {
         //END RES-Ev
       }
 
-      //Calculate a residue evidence score and a xcorr score
+      //Calculates a residue evidence score and a xcorr score
       //between a spectrum and all possible peptide candidates
       //based upon the residue evidence matrix and the theoretical spectrum
       int scoreResidueEvidence;
@@ -896,7 +892,7 @@ void TideSearchApplication::search(void* threadarg) {
 
       //XCORR
       //Create a dynamic programming vector is there is a xcorr 
-      //and if user specified as a score functino either 'xcorr' or 'both'
+      //and if user specified as a score function either 'xcorr' or 'both'
       if (curScoreFunction != RESIDUE_EVIDENCE_MATRIX) {
         for (pe = 0; pe < nPepMassIntUniq; pe++) { // TODO should probably instead use iterator over pepMassIntUnique
           int pepMaInt = pepMassIntUnique[pe]; // TODO should be accessed with an iterator
@@ -952,7 +948,7 @@ void TideSearchApplication::search(void* threadarg) {
 
           std::sort(maxColEvidence.begin(),maxColEvidence.end(),greater<int>());
           int maxScore = 0;
-          for(int i=0 ; i<maxNResidue ; i++) { //maxColEvidence has been sorted
+          for(int i = 0; i < maxNResidue; i++) { //maxColEvidence has been sorted
             maxScore += maxColEvidence[i];
           }
 
@@ -1977,8 +1973,11 @@ string TideSearchApplication::getOutputFileName() {
 }
 
 //Added by Andy Lin in Feb 2016
-//Loop determines which mass bin peptide candidate is in 
-//function determines which mass bin a precursor mass is in
+//Determines the mass bin each peptide candidate (active_peptide_queue) is in
+//pepMassInt will contain the a mass bin for each peptide candidate
+//pepMassIntUnique will contain the unique set of mass bins 
+//pepMassInt and pepMassIntUnique are initalized right before call
+//The length of pepMassInt is the number of canddiate peptides
 void TideSearchApplication::getMassBin(
   int* pepMassInt,
   vector<int>& pepMassIntUnique,
@@ -2003,14 +2002,20 @@ void TideSearchApplication::getMassBin(
     }
     peidx++;
   } 
+
+  //For pepMassIntUnique vector
+  //Sort vector, take unique of vector, get rid of extra space in vector
+  std::sort(pepMassIntUnique.begin(), pepMassIntUnique.end());
+  vector<int>::iterator last = std::unique(pepMassIntUnique.begin(),
+                                           pepMassIntUnique.end());
+  pepMassIntUnique.erase(last, pepMassIntUnique.end());
 }
 
 //Added by Andy Lin in March 2016
-//Gets the max evidence of each mass bin (column) up to mass bin of candidate precursor
-//TODO for some reason in matlab code, this is done on int version even though
-//curResidueEvidenceMatrix has been rounded already
-//Assumption that all values in curResidueEvidenceMatrix have been rounded
-//Returns max value in curResidueEvidenceMatrix
+//Functions returns max value in curResidueEvidenceMatrix
+//Function assumes that all values in curResidueEvidenceMatrix have been rounded to int
+//Once function runs, maxColEvidence will contain the max evidence in 
+//each column of curResidueEvidenceMatrix
 int TideSearchApplication::getMaxColEvidence(
   const vector<vector<double> >& curResidueEvidenceMatrix,
   vector<int>& maxColEvidence,
@@ -2020,8 +2025,8 @@ int TideSearchApplication::getMaxColEvidence(
 
   int maxEvidence = -1;
   
-  for(int curAA=0 ; curAA<curResidueEvidenceMatrix.size() ; curAA++) {
-    for(int curMassBin=0 ; curMassBin<pepMassInt ; curMassBin++) {
+  for(int curAA = 0; curAA < curResidueEvidenceMatrix.size(); curAA++) {
+    for(int curMassBin = 0; curMassBin < pepMassInt; curMassBin++) {
       if(curResidueEvidenceMatrix[curAA][curMassBin] > maxColEvidence[curMassBin]) {
         maxColEvidence[curMassBin] = curResidueEvidenceMatrix[curAA][curMassBin];
       }

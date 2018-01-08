@@ -26,9 +26,6 @@
 #include "util/FileUtils.h"
 #include "util/StringUtils.h"
 
-//TODO DELETE WHEN RESIDUEEVIDENCE IS DONE - Andy
-//#include <iostream>
-
 using namespace std;
 using namespace Crux;
 namespace pzd = pwiz::msdata;
