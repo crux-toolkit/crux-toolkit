@@ -549,9 +549,9 @@ void MatchCollection::printXmlHeader(
 
   // static amino acid modifications
   for (char aa = 'A'; aa <= 'Z'; aa++) {
-    set<const ModificationDefinition*> staticMods = ModificationDefinition::StaticMods(aa);
+    vector<const ModificationDefinition*> staticMods = ModificationDefinition::StaticMods(aa);
     double aaMass = AminoAcidUtil::GetMass(aa, isotopic_type == MONO);
-    for (set<const ModificationDefinition*>::const_iterator i = staticMods.begin();
+    for (vector<const ModificationDefinition*>::const_iterator i = staticMods.begin();
          i != staticMods.end();
          i++) {
       double modMass = (*i)->DeltaMass();
@@ -571,8 +571,8 @@ void MatchCollection::printXmlHeader(
   }
 
   // variable amino acid modifications
-  set<const ModificationDefinition*> varMods = ModificationDefinition::VarMods();
-  for (set<const ModificationDefinition*>::const_iterator i = varMods.begin();
+  vector<const ModificationDefinition*> varMods = ModificationDefinition::VarMods();
+  for (vector<const ModificationDefinition*>::const_iterator i = varMods.begin();
        i != varMods.end();
        i++) {
     for (set<char>::const_iterator j = (*i)->AminoAcids().begin();

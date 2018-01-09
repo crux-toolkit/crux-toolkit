@@ -45,9 +45,9 @@ public:
   static void ClearStaticMods();
   static void ClearVarMods();
 
-  static std::set<const ModificationDefinition*> AllMods();
-  static std::set<const ModificationDefinition*> StaticMods(char c = '\0');
-  static std::set<const ModificationDefinition*> VarMods();
+  static std::vector<const ModificationDefinition*> AllMods();
+  static std::vector<const ModificationDefinition*> StaticMods(char c = '\0');
+  static std::vector<const ModificationDefinition*> VarMods();
   static double DeltaMass(char c, ModPosition position);
 
   const std::set<char>& AminoAcids() const;
@@ -61,6 +61,8 @@ public:
   static const ModificationDefinition* Find(char symbol);
   static const ModificationDefinition* Find(double deltaMass,
     bool isStatic, ModPosition position = UNKNOWN);
+
+  static bool SortFunction(const ModificationDefinition* x, const ModificationDefinition* y);
 protected:
   std::string AddAminoAcids(const std::string& aminoAcids);
 
@@ -96,6 +98,7 @@ public:
 
   unsigned char Index() const;
   const ModificationDefinition* Definition() const;
+  const std::set<char>& AminoAcids() const;
   double DeltaMass() const;
   bool Static() const;
   ModPosition Position() const;

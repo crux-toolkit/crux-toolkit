@@ -86,8 +86,8 @@ void MzIdentMLWriter::closeFile() {
   apc.spectrumIdentificationProtocol.push_back(sipp);
   sip->spectrumIdentificationProtocolPtr = sipp;
 
-  set<const ModificationDefinition*> mods = ModificationDefinition::AllMods();
-  for (set<const ModificationDefinition*>::const_iterator i = mods.begin();
+  vector<const ModificationDefinition*> mods = ModificationDefinition::AllMods();
+  for (vector<const ModificationDefinition*>::const_iterator i = mods.begin();
        i != mods.end();
        i++) {
     SearchModificationPtr smp(new SearchModification());
@@ -124,45 +124,25 @@ void MzIdentMLWriter::closeFile() {
  */
 PeptidePtr MzIdentMLWriter::getPeptide(
   Crux::Peptide* peptide ///< Peptide -in
-  ) {
+) {
   char* seqTmp = peptide->getSequence();
   string sequence(seqTmp);
   free(seqTmp);
 
   int modPrecision = Params::GetInt("mod-precision");
-
   vector<Crux::Modification> mods = peptide->getVarMods();
-  for (vector<PeptidePtr>::const_iterator i = mzid_->sequenceCollection.peptides.begin();
-       i != mzid_->sequenceCollection.peptides.end();
-       ++i) {
-    if ((*i)->peptideSequence == sequence && (*i)->modification.size() == mods.size()) {
-      if (mods.empty()) {
-        return *i;
-      }
-      bool match = true;
-      for (vector<ModificationPtr>::const_iterator j = (*i)->modification.begin();
-           j != (*i)->modification.end();
-           ++j) {
-        bool matchCur = false;
-        for (vector<Crux::Modification>::const_iterator k = mods.begin();
-             k != mods.end();
-             k++) {
-          if ((*j)->location == k->Index() &&
-              MathUtil::AlmostEqual((*j)->monoisotopicMassDelta, k->DeltaMass(), modPrecision)) {
-            matchCur = true;
-            break;
-          }
-        }
-        if (!matchCur) {
-          match = false;
-          break;
-        }
-      }
-      //all modifications match, return peptide.
-      if (match) {
-        return *i;
-      }
-    }
+  std::sort(mods.begin(), mods.end(), Crux::Modification::SortFunction);
+
+  string id = sequence;
+  for (vector<Crux::Modification>::const_iterator i = mods.begin(); i != mods.end(); i++) {
+    char buf[64];
+    sprintf(buf, " %.*f", modPrecision, i->DeltaMass());
+    id += buf;
+  }
+
+  map<string, PeptidePtr>::const_iterator i = peptides_.find(id);
+  if (i != peptides_.end()) {
+    return i->second;
   }
 
   //Okay, we didn't find a match, so create a new peptide object.
@@ -194,18 +174,14 @@ PeptidePtr MzIdentMLWriter::getPeptide(
   }
 
   mzid_->sequenceCollection.peptides.push_back(peptide_p);
+  peptides_[id] = peptide_p;
   return peptide_p;
 }
 
 DBSequencePtr MzIdentMLWriter::getDBSequence(std::string& protein_id) {
-  vector<DBSequencePtr>::iterator dbs_iter;
-  for (dbs_iter = mzid_->sequenceCollection.dbSequences.begin();
-       dbs_iter != mzid_->sequenceCollection.dbSequences.end();
-       ++dbs_iter) {
-    DBSequencePtr dbs_ptr = *dbs_iter;
-    if (protein_id == dbs_ptr->accession) {
-      return dbs_ptr;
-    }
+  map< string, map<string, DBSequencePtr> >::const_iterator i = dbSeqs_.find(protein_id);
+  if (i != dbSeqs_.end()) {
+    return i->second.begin()->second;
   }
 
   //I don't know what to do here, there is a problem if we don't have the
@@ -214,8 +190,9 @@ DBSequencePtr MzIdentMLWriter::getDBSequence(std::string& protein_id) {
   //the same protein.  Here we might not have the full sequence.
   DBSequencePtr dbs_ptr(new DBSequence("DBS_"+boost::lexical_cast<string>(dbs_idx_++)));
   dbs_ptr->accession = protein_id;
-  
-  return (dbs_ptr);
+  dbSeqs_[protein_id] = map<string, DBSequencePtr>();
+  dbSeqs_[protein_id][""] = dbs_ptr;
+  return dbs_ptr;
 }
 
 /**
@@ -225,10 +202,10 @@ DBSequencePtr MzIdentMLWriter::getDBSequence(std::string& protein_id) {
 DBSequencePtr MzIdentMLWriter::getDBSequence(
   Crux::Peptide* peptide,  ///< peptide -in
   PeptideSrc* src ///< Source of the peptide -in
-  ) {
-  string protein_id = src->getParentProtein()->getIdPointer();
-  bool is_post_process = src->getParentProtein()->isPostProcess();
-  vector<DBSequencePtr>::iterator dbs_iter;
+) {
+  Crux::Protein* protein = src->getParentProtein();
+  string protein_id = protein->getIdPointer();
+  bool is_post_process = protein->isPostProcess();
  
   string sequence_str;
   if (is_post_process) {
@@ -237,19 +214,14 @@ DBSequencePtr MzIdentMLWriter::getDBSequence(
     free(seq);
   }
 
-  for (dbs_iter = mzid_->sequenceCollection.dbSequences.begin();
-       dbs_iter != mzid_->sequenceCollection.dbSequences.end();
-       ++dbs_iter) {
-    DBSequencePtr dbs_ptr = *dbs_iter;
-    if (protein_id == dbs_ptr->accession) {
-      if (is_post_process) {
-        //sequence str should be the peptide
-        if (sequence_str == dbs_ptr->seq) {
-          return dbs_ptr;
-        }
-      } else {
-        //we have the full sequence.
-        return dbs_ptr;
+  map< string, map<string, DBSequencePtr> >::iterator i = dbSeqs_.find(protein_id);
+  if (i != dbSeqs_.end()) {
+    if (!is_post_process) {
+      return i->second.begin()->second;
+    } else {
+      map<string, DBSequencePtr>::iterator j = i->second.find(sequence_str);
+      if (j != i->second.end()) {
+        return j->second;
       }
     }
   }
@@ -260,36 +232,27 @@ DBSequencePtr MzIdentMLWriter::getDBSequence(
     dbs_ptr->length = sequence_str.length();
     dbs_ptr->seq = sequence_str;
   } else {
-    dbs_ptr->length = src->getParentProtein()->getLength();
-    dbs_ptr->seq = src->getParentProtein()->getSequencePointer();
+    dbs_ptr->length = protein->getLength();
+    dbs_ptr->seq = protein->getSequencePointer();
     //TODO add description
   }
-  
   mzid_->sequenceCollection.dbSequences.push_back(dbs_ptr);
-
+  if (i == dbSeqs_.end()) {
+    dbSeqs_[protein_id] = map<string, DBSequencePtr>();
+  }
+  dbSeqs_[protein_id][dbs_ptr->seq] = dbs_ptr;
   return dbs_ptr;
 }
 
 PeptideEvidencePtr MzIdentMLWriter::getPeptideEvidence(
   Crux::Peptide* peptide,
-  string& protein_id) {
-
-  char* seq = peptide->getSequence();
-  string sequence_str = seq;
-  free(seq);
-
-  //Is there already a peptide evidence ptr?
-  for (vector<PeptideEvidencePtr>::iterator i = mzid_->sequenceCollection.peptideEvidence.begin();
-       i != mzid_->sequenceCollection.peptideEvidence.end();
-       ++i) {
-    PeptideEvidencePtr pe_ptr = *i;
-    if (pe_ptr->peptidePtr->peptideSequence == sequence_str &&
-        pe_ptr->dbSequencePtr->accession == protein_id) {
-      return pe_ptr;
-    }
+  string& protein_id
+) {
+  map<string, PeptideEvidencePtr>::iterator i = pepEvidence_.find(peptide->getId() + protein_id);
+  if (i != pepEvidence_.end()) {
+    return i->second;
   }
-
-  carp(CARP_FATAL, "Couldn't find %s in %s", sequence_str.c_str(), protein_id.c_str());
+  carp(CARP_FATAL, "Couldn't find %s in %s", peptide->getSequence(), protein_id.c_str());
   return PeptideEvidencePtr(); // Avoid compiler warning.
 }
 
@@ -300,25 +263,12 @@ PeptideEvidencePtr MzIdentMLWriter::getPeptideEvidence(
 PeptideEvidencePtr MzIdentMLWriter::getPeptideEvidence(
   Crux::Peptide* peptide, ///< peptide -in
   PeptideSrc* src ///< where to peptide comes from -in
-  ) {
-
-  char* seq = peptide->getSequence();
-  string sequence_str = seq;
-  free(seq);
-
+) {
   string protein_id = src->getParentProtein()->getId();
 
-  //Is there already a peptide evidence ptr?
-  vector<PeptideEvidencePtr>::iterator pe_iter;
-
-  for (vector<PeptideEvidencePtr>::iterator i = mzid_->sequenceCollection.peptideEvidence.begin();
-       i != mzid_->sequenceCollection.peptideEvidence.end();
-       ++i) {
-    PeptideEvidencePtr pe_ptr = *i;
-    if (pe_ptr->peptidePtr->peptideSequence == sequence_str &&
-        pe_ptr->dbSequencePtr->accession == protein_id) {
-      return pe_ptr;
-    }
+  map<string, PeptideEvidencePtr>::iterator i = pepEvidence_.find(peptide->getId() + protein_id);
+  if (i != pepEvidence_.end()) {
+    return i->second;
   }
 
   DBSequencePtr dbs_ptr = getDBSequence(peptide, src);
@@ -451,7 +401,7 @@ PeptideHypothesis& MzIdentMLWriter::getPeptideHypothesis(
  */
 SpectrumIdentificationResultPtr MzIdentMLWriter::getSpectrumIdentificationResult(
   Crux::Spectrum* spectrum ///< Crux spectrum object -in
-  ) {
+) {
   string spectrumFile(spectrum->getFullFilename());
   map<string, SpectraDataPtr>::iterator sdpLookup = spectrumFiles_.find(spectrumFile);
   if (sdpLookup == spectrumFiles_.end()) {
@@ -465,18 +415,9 @@ SpectrumIdentificationResultPtr MzIdentMLWriter::getSpectrumIdentificationResult
     "-" +
     StringUtils::ToString(spectrum->getLastScan());
 
-  SpectrumIdentificationListPtr silp = getSpectrumIdentificationList();
-
-  vector<SpectrumIdentificationResultPtr>::iterator sirp_iter;
-
-  for (sirp_iter = silp->spectrumIdentificationResult.begin();
-       sirp_iter != silp->spectrumIdentificationResult.end();
-       ++sirp_iter) {
-  
-    SpectrumIdentificationResultPtr sirp = *sirp_iter;
-    if (sirp->spectrumID == spectrum_idStr) {
-      return sirp;
-    }
+  map<string, SpectrumIdentificationResultPtr>::const_iterator i = specIdentResults_.find(spectrum_idStr);
+  if (i != specIdentResults_.end()) {
+    return i->second;
   }
 
   SpectrumIdentificationResultPtr sirp(new SpectrumIdentificationResult());
@@ -484,7 +425,8 @@ SpectrumIdentificationResultPtr MzIdentMLWriter::getSpectrumIdentificationResult
   sirp->id = "SIR_"+boost::lexical_cast<string>(sir_idx_++);
   sirp->spectrumID = spectrum_idStr;
   sirp->spectraDataPtr = sdpLookup->second;
-  silp->spectrumIdentificationResult.push_back(sirp);
+  getSpectrumIdentificationList()->spectrumIdentificationResult.push_back(sirp);
+  specIdentResults_[spectrum_idStr] = sirp;
   return sirp;
 }
 
@@ -551,14 +493,13 @@ void MzIdentMLWriter::addSpectrumScores(
 void MzIdentMLWriter::addPeptideEvidences(
   Crux::Peptide* peptide, ///< peptide to add evidence for
   SpectrumIdentificationItemPtr siip ///< item to add evidences to
-  ) {
-
+) {
   for (PeptideSrcIterator src_iter = peptide->getPeptideSrcBegin();
-    src_iter != peptide->getPeptideSrcEnd();
-    ++src_iter) {
-
+       src_iter != peptide->getPeptideSrcEnd();
+       ++src_iter) {
     PeptideEvidencePtr peptide_evidence = getPeptideEvidence(peptide, *src_iter);
     siip->peptideEvidencePtr.push_back(peptide_evidence);
+    pepEvidence_[peptide->getId() + peptide_evidence->dbSequencePtr->accession] = peptide_evidence;
   }
 }
 

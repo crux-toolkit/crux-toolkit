@@ -29,6 +29,10 @@ class MzIdentMLWriter : public PSMWriter {
   size_t pdh_idx_; ///< counter for ProteinDetectionHypothesis
 
   std::map<std::string, pwiz::identdata::SpectraDataPtr> spectrumFiles_;
+  std::map<std::string, pwiz::identdata::PeptideEvidencePtr> pepEvidence_;
+  std::map<std::string, pwiz::identdata::PeptidePtr> peptides_;
+  std::map<std::string, pwiz::identdata::SpectrumIdentificationResultPtr> specIdentResults_;
+  std::map< std::string, std::map<std::string, pwiz::identdata::DBSequencePtr> > dbSeqs_;
 
   /**
    * \returns DBSequence for the protein source.  If it doesn't exist, 
