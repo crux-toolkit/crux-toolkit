@@ -190,38 +190,40 @@ void ModificationDefinition::ClearVarMods() {
   modContainer_.InitSymbolPool();
 }
 
-set<const ModificationDefinition*> ModificationDefinition::AllMods() {
-  set<const ModificationDefinition*> mods = StaticMods();
-  set<const ModificationDefinition*> varMods = VarMods();
-  mods.insert(varMods.begin(), varMods.end());
+vector<const ModificationDefinition*> ModificationDefinition::AllMods() {
+  vector<const ModificationDefinition*> mods = StaticMods();
+  vector<const ModificationDefinition*> varMods = VarMods();
+  std::copy(varMods.begin(), varMods.end(), std::back_inserter(mods));
   return mods;
 }
 
-set<const ModificationDefinition*> ModificationDefinition::StaticMods(char c) {
+vector<const ModificationDefinition*> ModificationDefinition::StaticMods(char c) {
   set<ModificationDefinition*> mods = modContainer_.StaticMods(c);
-  set<const ModificationDefinition*> modsConst;
+  vector<const ModificationDefinition*> modsConst;
   for (set<ModificationDefinition*>::const_iterator i = mods.begin();
        i != mods.end();
        i++) {
-    modsConst.insert(*i);
+    modsConst.push_back(*i);
   }
+  std::sort(modsConst.begin(), modsConst.end(), ModificationDefinition::SortFunction);
   return modsConst;
 }
 
-set<const ModificationDefinition*> ModificationDefinition::VarMods() {
-  set<const ModificationDefinition*> mods;
+vector<const ModificationDefinition*> ModificationDefinition::VarMods() {
+  vector<const ModificationDefinition*> mods;
   for (set<ModificationDefinition*>::const_iterator i = modContainer_.varMods_.begin();
        i != modContainer_.varMods_.end();
        i++) {
-    mods.insert(*i);
+    mods.push_back(*i);
   }
+  std::sort(mods.begin(), mods.end(), ModificationDefinition::SortFunction);
   return mods;
 }
 
 double ModificationDefinition::DeltaMass(char c, ModPosition position) {
   double mass = 0.0;
-  set<const ModificationDefinition*> staticMods = StaticMods(c);
-  for (set<const ModificationDefinition*>::const_iterator i = staticMods.begin();
+  vector<const ModificationDefinition*> staticMods = StaticMods(c);
+  for (vector<const ModificationDefinition*>::const_iterator i = staticMods.begin();
        i != staticMods.end();
        i++) {
     if ((*i)->position_ == UNKNOWN || (*i)->position_ == ANY || position == (*i)->position_) {
@@ -287,6 +289,45 @@ const ModificationDefinition* ModificationDefinition::Find(
     }
   }
   return NULL;
+}
+
+bool ModificationDefinition::SortFunction(const ModificationDefinition* x, const ModificationDefinition* y) {
+  if (x == y) {
+    return false;
+  } else if (x->Static() != y->Static()) {
+    return x->Static();
+  } else if (x->position_ != y->position_) {
+    map<ModPosition, int> posValues;
+    posValues[PROTEIN_N] = 0;
+    posValues[PEPTIDE_N] = 1;
+    posValues[ANY] = 2;
+    posValues[PEPTIDE_C] = 3;
+    posValues[PROTEIN_C] = 4;
+    posValues[UNKNOWN] = 5;
+    return posValues[x->position_] - posValues[y->position_] < 0;
+  } else if (x->deltaMass_ != y->deltaMass_) {
+    return x->deltaMass_ > y->deltaMass_;
+  }
+  const set<char>& xAminos = x->aminoAcids_;
+  const set<char>& yAminos = y->aminoAcids_;
+  if (xAminos.size() != yAminos.size()) {
+    return xAminos.size() > yAminos.size();
+  }
+  set<char>::const_iterator i = xAminos.begin();
+  set<char>::const_iterator j = yAminos.begin();
+  for ( ; i != xAminos.end(); i++, j++) {
+    if (*i != *j) {
+      return *i < *j;
+    }
+  }
+  if (x->preventsCleavage_ != y->preventsCleavage_) {
+    return x->preventsCleavage_;
+  } else if (x->preventsXLink_ != y->preventsXLink_) {
+    return x->preventsXLink_;
+  } else if (x->monoLink_ != y->monoLink_) {
+    return x->monoLink_;
+  }
+  return false;
 }
 
 string ModificationDefinition::AddAminoAcids(const string& aminoAcids) {
@@ -426,6 +467,10 @@ unsigned char Modification::Index() const {
 
 const ModificationDefinition* Modification::Definition() const {
   return mod_;
+}
+
+const set<char>& Modification::AminoAcids() const {
+  return mod_->AminoAcids();
 }
 
 double Modification::DeltaMass() const {
@@ -588,7 +633,14 @@ MODIFIED_AA_T* Modification::ToSeq(const string& seq, const vector<Modification>
 }
 
 bool Modification::SortFunction(const Modification& x, const Modification& y) {
-  return x.mod_ != y.mod_ ? x.mod_ < y.mod_ : x.index_ < y.index_;
+  if (x.mod_ == y.mod_) {
+    return x.index_ < y.index_;
+  } else if (x.Static() != y.Static()) {
+    return x.Static();
+  } else if (x.index_ != y.index_) {
+    return x.index_ < y.index_;
+  }
+  return ModificationDefinition::SortFunction(x.mod_, y.mod_);
 }
 
 ModificationDefinitionContainer::ModificationDefinitionContainer() {

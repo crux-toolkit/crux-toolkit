@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href=""?>
-<msms_pipeline_analysis date="Mon Nov 27 12:42:50 2017" xmlns="http://regis-web.systemsbiology.net/pepXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://regis-web.systemsbiology.net/pepXML /usr/local/tpp/schema/pepXML_v110.xsd" summary_xml="">
+<msms_pipeline_analysis date="Thu Jan  4 12:54:15 2018" xmlns="http://regis-web.systemsbiology.net/pepXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://regis-web.systemsbiology.net/pepXML /usr/local/tpp/schema/pepXML_v110.xsd" summary_xml="">
 <msms_run_summary base_name="NA" msManufacturer="NA" msModel="NA" msIonization="NA" msAnalyzer="NA" msDectector="NA" raw_data_type="NA" raw_data="NA" >
 <sample_enzyme name="trypsin">
 </sample_enzyme>
@@ -8,8 +8,8 @@
 <search_database local_path="(null)" type="AA" />
 <enzymatic_search_constraint enzyme="trypsin" max_num_internal_cleavages="0" min_number_termini="2"/>
 <aminoacid_modification aminoacid="A" mass="72.7371" massdiff="1.70" variable="N" peptide_terminus="n" />
-<aminoacid_modification aminoacid="C" mass="160.0307" massdiff="57.02" variable="N" />
 <aminoacid_modification aminoacid="C" mass="104.7092" massdiff="1.70" variable="N" peptide_terminus="n" />
+<aminoacid_modification aminoacid="C" mass="160.0307" massdiff="57.02" variable="N" />
 <aminoacid_modification aminoacid="D" mass="116.7269" massdiff="1.70" variable="N" peptide_terminus="n" />
 <aminoacid_modification aminoacid="D" mass="116.8269" massdiff="1.80" variable="N" peptide_terminus="c" />
 <aminoacid_modification aminoacid="E" mass="130.7426" massdiff="1.70" variable="N" peptide_terminus="n" />

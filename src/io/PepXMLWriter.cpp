@@ -437,8 +437,8 @@ map<int, double> PepXMLWriter::find_static_modifications(
     char aa = peptide_sequence[i];
     double sum = AminoAcidUtil::GetMass(aa, isotopic_type == MONO);
     int modCount = 0;
-    set<const ModificationDefinition*> staticMods = ModificationDefinition::StaticMods(aa);
-    for (set<const ModificationDefinition*>::const_iterator j = staticMods.begin();
+    vector<const ModificationDefinition*> staticMods = ModificationDefinition::StaticMods(aa);
+    for (vector<const ModificationDefinition*>::const_iterator j = staticMods.begin();
          j != staticMods.end();
          j++) {
       if ((*j)->Position() == ANY ||

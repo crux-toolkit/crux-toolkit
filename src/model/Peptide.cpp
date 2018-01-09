@@ -420,9 +420,9 @@ vector<Modification> Peptide::getStaticMods() const {
   char* seq = getSequence();
   vector<Modification> mods;
   for (unsigned char i = 0; seq[i] != '\0'; i++) {
-    const set<const ModificationDefinition*>& staticMods =
+    const vector<const ModificationDefinition*>& staticMods =
       ModificationDefinition::StaticMods(seq[i]);
-    for (set<const ModificationDefinition*>::const_iterator j = staticMods.begin();
+    for (vector<const ModificationDefinition*>::const_iterator j = staticMods.begin();
          j != staticMods.end();
          j++) {
       if ((*j)->Position() == ANY ||
@@ -469,15 +469,16 @@ void Peptide::setMod(
 }
 
 string Peptide::getModsString() const {
-  vector<string> allMods;
-  vector<Modification> staticMods = getStaticMods();
-  for (vector<Modification>::const_iterator i = staticMods.begin(); i != staticMods.end(); i++) {
-    allMods.push_back(i->String());
-  }
+  vector<Modification> allMods = getStaticMods();
   for (vector<Modification>::const_iterator i = varMods_.begin(); i != varMods_.end(); i++) {
-    allMods.push_back(i->String());
+    allMods.push_back(*i);
   }
-  return StringUtils::Join(allMods, ',');
+  std::sort(allMods.begin(), allMods.end(), Modification::SortFunction);
+  vector<string> modStrings;
+  for (vector<Modification>::const_iterator i = allMods.begin(); i != allMods.end(); i++) {
+    modStrings.push_back(i->String());
+  }
+  return StringUtils::Join(modStrings, ',');
 }
 
 bool Peptide::isModified() {
