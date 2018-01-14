@@ -20,7 +20,7 @@ private:
   //Added by Andy Lin in Feb 2016
   //function determines which mass bin a precusor mass is in
   void getMassBin (
-    int* pepMassInt,
+    vector<int>& pepMassInt,
     vector<int>& pepMassIntUnique,
     ActivePeptideQueue* active_peptide_queue,
     vector<bool>* candidatePeptideStatus

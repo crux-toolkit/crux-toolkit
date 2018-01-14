@@ -719,7 +719,8 @@ void TideSearchApplication::search(void* threadarg) {
       int peidx;
       int pe;
       int ma;
-      int* pepMassInt = new int[nCandPeptide];
+      vector<int> pepMassInt;
+      pepMassInt.reserve(nCandPeptide);
       vector<int> pepMassIntUnique;
       pepMassIntUnique.reserve(nCandPeptide);
 
@@ -1065,7 +1066,6 @@ void TideSearchApplication::search(void* threadarg) {
           delete [] pValueScoreObs[pe];
         }
       }
-      delete [] pepMassInt;
       delete [] scoreOffsetObs;
       delete [] evidenceObs;
       delete [] pValueScoreObs;
@@ -1967,7 +1967,7 @@ string TideSearchApplication::getOutputFileName() {
 //pepMassInt and pepMassIntUnique are initalized right before call
 //The length of pepMassInt is the number of canddiate peptides
 void TideSearchApplication::getMassBin(
-  int* pepMassInt,
+  vector<int>& pepMassInt,
   vector<int>& pepMassIntUnique,
   ActivePeptideQueue* active_peptide_queue,
   vector<bool>* candidatePeptideStatus

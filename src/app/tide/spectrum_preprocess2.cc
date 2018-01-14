@@ -652,6 +652,9 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
     if (ionMass >= experimentalMassCutoff) {
       continue;
     }
+    //if (ionMass > precurMz - precursorMZExclude && ionMass < precurMz + precursorMZExclude) {
+    //  continue;
+    //}
     if (maxIonIntens < ionIntens) {
       maxIonIntens = ionIntens;
     }
