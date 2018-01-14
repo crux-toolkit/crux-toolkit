@@ -615,7 +615,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   const Spectrum& spectrum,
   int charge,
   int maxPrecurMassBin,
-  double precursorMass,
+  double precursorMass, // neutral mass
   int nAA, //TODO different than one used in CreateEvidenceVector
   const vector<double> aaMass, //TODO different aaMass then one used in CreateEvidenceVector
   double fragTol,
@@ -662,7 +662,8 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   vector<double> ionIntensities;
   vector<double> ionIntensitiesSort;
   double numSpecPeaks;
-  for(int ion=0 ; ion<nIon ; ion++) {
+
+  for(int ion = 0; ion < nIon; ion++) {
     double ionMass = spectrum.M_Z(ion);
     double ionIntens = sqrt(spectrum.Intensity(ion));
 
@@ -684,7 +685,9 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
     ionIntensitiesSort.push_back(ionIntens);
   }
   sort(ionIntensitiesSort.begin(),ionIntensitiesSort.end());
-  numSpecPeaks = ionIntensities.size(); 
+  //2 is added because we artificially add to the spectrum
+  //a peak corresponding to the NTerm mass and the CTerm mass
+  numSpecPeaks = ionIntensities.size() + 2;
 
   //Determine which bin each amino acid mass is in
   vector<int> aaMassBin;
@@ -713,7 +716,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   ionMassBin.push_back(MassConstants::mass2bin(NTermMass));
   ionIntens.push_back(0.0);
 
-  for(int ion=0 ; ion<ionMasses.size() ; ion++) {
+  for(int ion = 0; ion < ionMasses.size(); ion++) {
     double tmpIonMass = ionMasses[ion];
     int binTmpIonMass = (int)floor(MassConstants::mass2bin(tmpIonMass));
 
@@ -726,11 +729,11 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   ionIntens.push_back(0.0);
 
   //find pairs of b ions in 1+ charge state
-  for (int ion=0 ; ion<ionMass.size() ; ion++) {
+  for (int ion = 0; ion < ionMass.size(); ion++) {
     bIonMass = ionMass[ion];
     bIonMassBin = ionMassBin[ion];
 
-    for(int curAaMass = 0 ; curAaMass < nAA ; curAaMass++) {
+    for(int curAaMass = 0; curAaMass < nAA; curAaMass++) {
       int newResMassBin = bIonMassBin + aaMassBin[curAaMass];
 
       //Find all ion mass bins that match newResMassBin
@@ -773,11 +776,16 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   double yIonIntens;
 
   //find pairs of y ions in 1+ charge state
-  ionMass.push_back(precursorMass-CTermMass);
-  ionMassBin.push_back(MassConstants::mass2bin(precursorMass-CTermMass));
+  ionMass.push_back(precursorMass - CTermMass);
+  std::cout << precursorMass << std::endl;
+  std::cout << NTermMass << std::endl;
+  std::cout << CTermMass << std::endl;
+  std::cout <<  precursorMass-CTermMass << std::endl;
+  std::cout << precursorMass-NTermMass + 2.0 * massHMono << std::endl << std::endl;
+  ionMassBin.push_back(MassConstants::mass2bin(precursorMass - CTermMass));
   ionIntens.push_back(0.0);
 
-  for(int ion=0 ; ion<ionMasses.size() ; ion++) {
+  for(int ion = 0; ion < ionMasses.size(); ion++) {
     //convert to equivalent b ion masses for ease of processing
     double tmpIonMass = precursorMass - ionMasses[ion] + (2.0 * massHMono);
     //Determine which bin each ion mass is in
@@ -797,7 +805,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   reverse(ionMassBin.begin(), ionMassBin.end());
   reverse(ionIntens.begin(), ionIntens.end());
 
-  for(int ion=0 ; ion<ionMass.size() ; ion++) {
+  for(int ion = 0; ion < ionMass.size(); ion++) {
     yIonMass = ionMass[ion];
     yIonMassBin = ionMassBin[ion];
 
@@ -807,7 +815,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
       //Find all ion mass bins that match newResMassBin
       int index = find(ionMassBin.begin(),ionMassBin.end(),newResMassBin) - ionMassBin.begin();
       double score = 0.0;
-      for(int i=index ; i<ionMasses.size() ; i++) {
+      for(int i = index; i < ionMasses.size(); i++) {
         if (newResMassBin != ionMassBin[i])
           continue;
         
@@ -844,7 +852,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   ionMassBin.push_back(MassConstants::mass2bin(NTermMass));
   ionIntens.push_back(0.0);
 
-  for(int ion=0 ; ion<ionMasses.size() ; ion++) {
+  for(int ion = 0; ion < ionMasses.size(); ion++) {
     double tmpIonMass = 2.0 * ionMasses[ion] - massHMono;
     int binTmpIonMass = (int)floor(MassConstants::mass2bin(tmpIonMass));
 
@@ -856,11 +864,11 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   ionMassBin.push_back(MassConstants::mass2bin(precursorMass-CTermMass));
   ionIntens.push_back(0.0);
 
-  for(int ion=0 ; ion<ionMass.size() ; ion++) {
+  for(int ion = 0; ion < ionMass.size(); ion++) {
     bIonMass = ionMass[ion];
     bIonMassBin = ionMassBin[ion];
 
-    for(int curAaMass=0 ; curAaMass<nAA ; curAaMass++) {
+    for(int curAaMass = 0; curAaMass < nAA; curAaMass++) {
       int newResMassBin = bIonMassBin + aaMassBin[curAaMass];
       
       //Find all ion mass bins that match newResMassBin
@@ -903,7 +911,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   ionMassBin.push_back(MassConstants::mass2bin(precursorMass-CTermMass));
   ionIntens.push_back(0.0);
 
-  for(int ion=0 ; ion<ionMasses.size() ; ion++) {
+  for(int ion = 0; ion < ionMasses.size(); ion++) {
     double tmpIonMass = precursorMass - (2.0 * ionMasses[ion] - massHMono) + (2.0 * massHMono);
     int binTmpIonMass = (int)floor(MassConstants::mass2bin(tmpIonMass));
 
@@ -921,7 +929,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   reverse(ionMassBin.begin(),ionMassBin.end());
   reverse(ionIntens.begin(), ionIntens.end());
 
-  for(int ion=0 ; ion<ionMass.size() ; ion++) {
+  for(int ion = 0; ion < ionMass.size(); ion++) {
     yIonMass = ionMass[ion];
     yIonMassBin = ionMassBin[ion];
 
@@ -965,7 +973,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
 
   //Get maxEvidence value
   double maxEvidence = -1.0;
-  for(int i =0 ; i<maxPrecurMassBin ; i++) {
+  for(int i = 0; i < maxPrecurMassBin; i++) {
     for(int curAaMass = 0; curAaMass<nAA;curAaMass++){
       if (residueEvidenceMatrix[curAaMass][i] > maxEvidence) {
         maxEvidence = residueEvidenceMatrix[curAaMass][i];

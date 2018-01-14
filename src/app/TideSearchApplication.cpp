@@ -649,8 +649,8 @@ void TideSearchApplication::search(void* threadarg) {
       }  //end peptide_centric == false
     } else { //This runs curScoreFunction=BOTH_SCORE, curScoreFunction=RESIUDUE_EVIDENCE_MATRIX, and xcorr p-val
 
-      //TODO section below can be removed when options have been
-      //implemented for residue evidence
+      //TODO res-ev not implemented with flanking_peak, neutral_loss_peak,
+      //and dynamic CTerm and NTerm mass
       bool flanking_peak = Params::GetBool("use-flanking-peaks");
       bool neutral_loss_peak = Params::GetBool("use-neutral-loss-peaks");
 //      if (neutral_loss_peak == true && curScoreFunction != XCORR_SCORE) {
@@ -801,6 +801,7 @@ void TideSearchApplication::search(void* threadarg) {
           // note: aaMassDouble differs from aaMass
           // aaMassDouble contains amino acids masses in float form
           // aaMass contains amino acid asses in integer form
+          // precursorMass is the neutral mass
           observed.CreateResidueEvidenceMatrix(*spectrum,charge,maxPrecurMassBin,precursorMass,
                                                nAARes,aaMassDouble,fragTol,granularityScale,
                                                NTermMass,CTermMass,
@@ -1749,15 +1750,6 @@ void TideSearchApplication::calcResidueScoreCount (
   int minEvidence  = 0;
   int minScore     = 0;
 
-  // copy residue evidence matrix to C++ memory
-  int** residEvid = new int* [ nAa ];
-  for ( int row = 0; row < nAa; row++ ) {
-    residEvid[ row ] = new int[ pepMassInt ];
-    for ( int col = 0; col < pepMassInt; col++ ) {
-      residEvid[row][col] = residueEvidenceMatrix[row][col];
-    }
-  }
-
   int row;
   int col;
   int ma;
@@ -1805,8 +1797,8 @@ void TideSearchApplication::calcResidueScoreCount (
     ma = aaMass[ de ];
 
     //&& -1 is to account for zero-based indexing in evidence vector
-    //row = initCountRow + residEvid[ de ][ ma + NTermMass - 1 ]; //original
-    row = initCountRow + residEvid[ de ][ ma + 1 - 1]; //+1 for N-Term H and -1 for 0 indexing
+    //row = initCountRow + residueEvidueMatrix[ de ][ ma + NTermMass - 1 ]; //original
+    row = initCountRow + residueEvidenceMatrix[ de ][ ma + 1 - 1]; //+1 for N-Term H and -1 for 0 indexing
 
     //TODO need to change this to based off bool
     if (NTermMass == 1) { //N-Term not modified
@@ -1836,7 +1828,7 @@ void TideSearchApplication::calcResidueScoreCount (
     for ( row = rowFirst; row <= rowLast; row++ ) {
       sumScore = dynProgArray[ row ][ col ];
       for ( de = 0; de < nAa; de++ ) {
-        evidRow = row - residEvid[ de ][ ma ];
+        evidRow = row - residueEvidenceMatrix[ de ][ ma ];
         //sumScore += dynProgArray[ evidRow ][ aaMassCol[ de ] ];
         sumScore += dynProgArray[ evidRow ][ aaMassCol[ de ] ] * aaFreqI[ de ];
       }
@@ -1876,10 +1868,6 @@ void TideSearchApplication::calcResidueScoreCount (
   }
   delete [] dynProgArray;
   delete [] aaMassCol;
-  for ( int row = 0; row < nAa; row++ ) {
-    delete [] residEvid[ row ];
-  }
-  delete [] residEvid;
 }
 
 void TideSearchApplication::processParams() {
