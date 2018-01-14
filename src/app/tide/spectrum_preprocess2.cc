@@ -777,11 +777,6 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
 
   //find pairs of y ions in 1+ charge state
   ionMass.push_back(precursorMass - CTermMass);
-  std::cout << precursorMass << std::endl;
-  std::cout << NTermMass << std::endl;
-  std::cout << CTermMass << std::endl;
-  std::cout <<  precursorMass-CTermMass << std::endl;
-  std::cout << precursorMass-NTermMass + 2.0 * massHMono << std::endl << std::endl;
   ionMassBin.push_back(MassConstants::mass2bin(precursorMass - CTermMass));
   ionIntens.push_back(0.0);
 
