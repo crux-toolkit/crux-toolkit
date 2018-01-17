@@ -249,10 +249,14 @@ if (UNIX)
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     UPDATE_COMMAND ""
     CONFIGURE_COMMAND ""
-    PATCH_COMMAND cp
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CometSearch/CometSearchManager.cpp
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CometSearch/CometWriteTxt.cpp
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/
+    PATCH_COMMAND
+      cp ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CometSearch/CometSearchManager.cpp
+         ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CometSearch/CometWriteTxt.cpp
+         ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/ &&
+      cp ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/MSToolkit/include/MSReader.h
+         ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/MSToolkit/include/ &&
+      cp ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/MSToolkit/src/MSToolkit/MSReader.cpp
+         ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/MSToolkit/src/MSToolkit/
     BUILD_COMMAND make -C MSToolkit
       COMMAND make -C CometSearch CXXFLAGS=-DCRUX
     INSTALL_COMMAND ""
