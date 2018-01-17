@@ -627,9 +627,10 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
 
   assert(MaxBin::Global().MaxBinEnd() > 0);
 
+  //TODO move to constants file?
   const double massHMono = MassConstants::mono_h;  // mass of hydrogen (monoisotopic)
 
-  //TODO used in Xcorr function..not used in residue-evidence?
+  //TODO used in Xcorr function..not used in residue-evidence
   //bool flanking_peak = Params::GetBool("use-flanking-peaks");
   //bool neutral_loss_peak = Params::GetBool("use-neutral-loss-peaks");
 
@@ -640,56 +641,91 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   int nIon = spectrum.Size();
   int precurCharge = charge;
   double experimentalMassCutoff = precursorMass; // + 50.0;
-//  double proton = MassConstants::proton;
   double residueToleranceMass = fragTol;
-  const double precursorMZExclude = 15.0; //also used in PreprocessSpectrum
+  const double maxIntensPerRegion = 50.0;
 
-  //Determining max sqrt(ion intensity)
+  //Determining max ion mass and max ion intensity
+  bool remove_precursor = Params::GetBool("remove-precursor-peak");
+  double precursorMZExclude = Params::GetDouble("remove-precursor-tolerance");
   double maxIonIntens = 0.0;
+  double maxIonMass = 0.0;
   for (int ion = 0; ion < nIon; ion++) {
     double ionMass = spectrum.M_Z(ion);
     double ionIntens = sqrt(spectrum.Intensity(ion));
     if (ionMass >= experimentalMassCutoff) {
       continue;
     }
-    if (ionMass > precurMz - precursorMZExclude && ionMass < precurMz + precursorMZExclude) {
+    if (remove_precursor && ionMass > precurMz - precursorMZExclude && ionMass < precurMz + precursorMZExclude) {
       continue;
     }
     if (maxIonIntens < ionIntens) {
       maxIonIntens = ionIntens;
     }
+    if (maxIonMass < ionMass) {
+      maxIonMass = ionMass;
+    }
   }
 
-  //MZ that pass preprocessing filters 
+  // peaks that pass preprocessing filters 
   vector<double> ionMasses;
   vector<double> ionIntensities;
   vector<double> ionIntensitiesSort;
+  vector<int> intensRegion;
   double numSpecPeaks;
 
+  // grass filtering
+  int regionSelector = (int)floor(MassConstants::mass2bin(maxIonMass) / (double)NUM_SPECTRUM_REGIONS);
   for(int ion = 0; ion < nIon; ion++) {
     double ionMass = spectrum.M_Z(ion);
     double ionIntens = sqrt(spectrum.Intensity(ion));
 
-    //remove peaks larger than experimentalMassCutoff
     if (ionMass >= experimentalMassCutoff) {
       continue;
     }
-    //remove peaks within precursorMZExclude of precurMz
-    if (ionMass > precurMz - precursorMZExclude && ionMass < precurMz + precursorMZExclude) {
+    if (remove_precursor && ionMass > precurMz - precursorMZExclude && ionMass < precurMz + precursorMZExclude) {
       continue;
     }
-    //grass removal
     if (ionIntens < 0.05 * maxIonIntens) {
       continue;
     }
     ionMasses.push_back(ionMass);
     ionIntensities.push_back(ionIntens);
     ionIntensitiesSort.push_back(ionIntens);
+
+    int ionBin = MassConstants::mass2bin(ionMass);
+    int region = (int)floor((double)(ionBin) / (double)regionSelector);
+    if (region >= NUM_SPECTRUM_REGIONS) {
+      region = NUM_SPECTRUM_REGIONS - 1;
+    }
+    intensRegion.push_back(region);
   }
-  sort(ionIntensitiesSort.begin(),ionIntensitiesSort.end());
-  //2 is added because we artificially add to the spectrum
-  //a peak corresponding to the NTerm mass and the CTerm mass
+
+  // +2 because we artificially add to the spectrum
+  // a peak corresponding to the NTerm and CTerm mass
   numSpecPeaks = ionIntensities.size() + 2;
+
+  // 10-bin intensity normalization
+  vector<double> maxRegion(NUM_SPECTRUM_REGIONS,0);
+  for (int i = 0; i < ionMasses.size(); i++) {
+    int curRegion = intensRegion[i];
+    if (curRegion > 0 && maxRegion[curRegion] < ionIntensities[i]) {
+      maxRegion[curRegion] = ionIntensities[i];
+    }
+    else {
+      carp(CARP_FATAL,"ion is in a negative region, should never happen");
+    }
+  }
+
+  for (int i = 0; i < ionMasses.size(); i++) {
+    int curRegion = intensRegion[i];
+    if (curRegion >= 0 && maxRegion[curRegion] > 0.0) { 
+      ionIntensities[i] *= (maxIntensPerRegion / maxRegion[curRegion]);
+      ionIntensitiesSort[i] *= (maxIntensPerRegion / maxRegion[curRegion]);
+    }
+  }
+
+  // sort ion intensities
+  sort(ionIntensitiesSort.begin(),ionIntensitiesSort.end());
 
   //Determine which bin each amino acid mass is in
   vector<int> aaMassBin;
