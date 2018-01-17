@@ -150,7 +150,6 @@ vector<double> Spectrum::CreateEvidenceVector(
 ) const {
   // TODO need to review these constants, decide which can be moved to parameter file
   const double maxIntensPerRegion = 50.0;
-  const double precursorMZExclude = 15.0;
   const double BYHeight = 50.0;
   const double NH3LossHeight = 10.0;
   const double COLossHeight = 10.0;    // for creating a ions on the fly from b ions
@@ -161,10 +160,18 @@ vector<double> Spectrum::CreateEvidenceVector(
   double experimentalMassCutoff = PrecursorMZ() * charge + 50.0;
   double maxIonMass = 0.0;
   double maxIonIntens = 0.0;
+
+  // Find max ion mass and max ion intensity
+  bool remove_precursor = Params::GetBool("remove-precursor-peak");
+  double precursorMZExclude = Params::GetDouble("remove-precursor-tolerance");
   for (int ion = 0; ion < numPeaks; ion++) {
     double ionMass = M_Z(ion);
     double ionIntens = Intensity(ion);
     if (ionMass >= experimentalMassCutoff) {
+      continue;
+    }
+    if (remove_precursor && ionMass > PrecursorMZ() - precursorMZExclude &&
+        ionMass < PrecursorMZ() + precursorMZExclude) {
       continue;
     }
     if (maxIonMass < ionMass) {
@@ -174,14 +181,19 @@ vector<double> Spectrum::CreateEvidenceVector(
       maxIonIntens = ionIntens;
     }
   }
+
+  // 10 bin intensity normalization 
   int regionSelector = (int)floor(MassConstants::mass2bin(maxIonMass) / (double)NUM_SPECTRUM_REGIONS);
   vector<double> intensObs(maxPrecurMass, 0);
   vector<int> intensRegion(maxPrecurMass, -1);
   for (int ion = 0; ion < numPeaks; ion++) {
     double ionMass = M_Z(ion);
     double ionIntens = Intensity(ion);
-    if (ionMass >= experimentalMassCutoff ||
-        (ionMass > PrecursorMZ() - precursorMZExclude && ionMass < PrecursorMZ() + precursorMZExclude)) {
+    if (ionMass >= experimentalMassCutoff) {
+      continue;
+    }
+    if (remove_precursor && ionMass > PrecursorMZ() - precursorMZExclude && 
+        ionMass < PrecursorMZ() + precursorMZExclude) {
       continue;
     }
     int ionBin = MassConstants::mass2bin(ionMass);
