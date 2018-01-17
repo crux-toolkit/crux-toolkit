@@ -1,0 +1,78 @@
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <title>Managing the Crux GitHub Project</title>
+  <style type="text/css" media="screen">
+    body {margin: 72px;}
+  </style>
+  <style class="code">
+    span {
+      font-family: monospace;
+      font-size: 12pt;
+    }
+  </style>
+</head>
+<body>
+<h2>Managing the Crux Web Site</h2>
+The 
+<a href="http://crux.ms">Crux web site</a> 
+is hosted on 
+<a href="https://github.com/crux-toolkit/crux-toolkit.github.io">GitHub</a>, 
+except for the downloadable releases of
+the software which are stored on the 
+<a href="http://noble.gs.washington.edu/crux-downloads">Noble lab web server</a>. 
+<p/>
+The content for the web site is stored in the <span class="code">doc/user</span>
+directory of the
+<a href="https://github.com/crux-toolkit/crux-toolkit">Crux repository</a>.
+The build target <span class="code">Deploy documenation to website</span>
+on our 
+<a href="crux-teamcity.html">TeamCity</a> server copies the content
+from the
+<a href="https://github.com/crux-toolkit/crux-toolkit">Crux repository</a>
+to the
+<a href="https://github.com/crux-toolkit/crux-toolkit.github.io">Crux website
+repository</a>.
+GitHub automatically serves the content of the
+<a href="https://github.com/crux-toolkit/crux-toolkit.github.io">Crux website
+repository</a>
+as <a href="http://crux.ms">http://crux.ms</a>.
+The association of the 
+<a href="https://github.com/crux-toolkit/crux-toolkit.github.io">Crux website
+repostory</a>
+with
+<a href="http://crux.ms">http://crux.ms</a> can be managed in the
+<span class="code">GitHub Pages</span> section of
+<a href="https://github.com/crux-toolkit/crux-toolkit.github.io/settings">settings</a> 
+for the
+<a href="https://github.com/crux-toolkit/crux-toolkit.github.io">Crux website
+repository</a>.
+More information about GitHub support for project web sites can be found
+<a href="https://pages.github.com">here</a>.
+<p/>
+The build target <span class="code">Deploy successful build to website</span>
+on our 
+<a href="crux-teamcity.html">TeamCity</a> server copies the software
+distribution files from the
+<a href="crux-teamcity.html">TeamCity</a> server to the
+<a href="http://noble.gs.washington.edu/crux-downloads">Noble lab web server</a>. 
+When users agree to the licensing terms, and click on one of the download
+buttons on the
+<a href="http://crux.ms/download.html">Crux Downloads</a> page,
+it will activate the PHP script in
+<span class="code">/noble/www/htdocs/crux-downloads/download.php</span>
+on the
+<a href="http://noble.gs.washington.edu/crux-downloads">Noble lab web server</a>. 
+This script will initiate the download of the distribution file for the chosen
+architecture onto the user's machine.
+Each formal release of Crux will have it's own directory under
+<span class="code">/noble/www/htdocs/crux-downloads</span>.
+The daily builds will be placed under
+<span class="code">/noble/www/htdocs/crux-downloads/daily</span>.
+<p/>
+<p/>
+The <a href="http://crux.ms">crux.ms</a> domain name is registered by Charles with
+<a href="http://networksolutions.com">Network Soluions</a>.
+Talk to Charles if you need changes or have questions.
+</body>
+</html>
