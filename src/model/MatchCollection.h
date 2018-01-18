@@ -354,11 +354,10 @@ class MatchCollection {
   );
 
   /**
-   * Extract a given type of score into an array.  The array is
-   * allocated here and must be freed by the caller.
+   * Extract a given type of score into a vector.
    */
-  FLOAT_T* extractScores(
-    SCORER_TYPE_T       score_type ///< Type of score to extract.
+  std::vector<FLOAT_T> extractScores(
+    SCORER_TYPE_T score_type ///< Type of score to extract.
   );
 
   /**

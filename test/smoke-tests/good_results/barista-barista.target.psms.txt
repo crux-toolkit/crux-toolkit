@@ -1,7 +1,7 @@
 scan	charge	barista q-value	barista score	barista PEP	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	sp score	sp rank	xcorr score	xcorr rank	b/y ions matched	b/y ions total	distinct matches/spectrum	sequence	cleavage type	protein id	flanking aa	filename
-62	2	0	10.9396	5.35863e-06	745.857	1489.7	1488.82	0.913711	2766.65	1	4.34057	1	21	24	3	NFLETVELQVGLK	trypsin-full-digest	YGL135W(27)	RN	barista-args/barista-tide-search.target.txt
+62	2	0	10.9396	5.35862e-06	745.857	1489.7	1488.82	0.913711	2766.65	1	4.34057	1	21	24	3	NFLETVELQVGLK	trypsin-full-digest	YGL135W(27)	RN	barista-args/barista-tide-search.target.txt
 85	3	0	10.7536	6.7059e-06	497.617	1489.83	1488.82	0.936932	2430.56	1	5.20757	1	27	48	3	NFLETVELQVGLK	trypsin-full-digest	YGL135W(27)	RN	barista-args/barista-tide-search.target.txt
-131	2	0	10.4562	9.59802e-06	745.847	1489.68	1488.82	0.898893	2776.93	1	4.13915	1	21	24	3	NFLETVELQVGLK	trypsin-full-digest	YGL135W(27)	RN	barista-args/barista-tide-search.target.txt
+131	2	0	10.4562	9.59803e-06	745.847	1489.68	1488.82	0.898893	2776.93	1	4.13915	1	21	24	3	NFLETVELQVGLK	trypsin-full-digest	YGL135W(27)	RN	barista-args/barista-tide-search.target.txt
 53	2	0	10.4235	9.98396e-06	745.747	1489.48	1488.82	0.935648	2797.78	1	4.39828	1	21	24	3	NFLETVELQVGLK	trypsin-full-digest	YGL135W(27)	RN	barista-args/barista-tide-search.target.txt
 11	2	0	9.26105	4.05493e-05	745.267	1488.52	1488.82	0.822851	2816.6	1	4.44855	1	21	24	4	NFLETVELQVGLK	trypsin-full-digest	YGL135W(27)	RN	barista-args/barista-tide-search.target.txt
 96	2	0	8.34642	0.000122152	652.237	1302.46	1300.65	0.867968	1575.9	1	3.75794	1	18	22	8	LDVDELGDVAQK	trypsin-full-digest	YLR043C(55)	KN	barista-args/barista-tide-search.target.txt
@@ -31,7 +31,7 @@ scan	charge	barista q-value	barista score	barista PEP	spectrum precursor m/z	spe
 75	2	0	5.2726	0.00495717	877.267	1752.52	1751.78	0.969024	1080.35	1	3.5091	1	16	26	5	LVSWYDNEYGYSTR	trypsin-full-digest	YGR192C(308)	KV	barista-args/barista-tide-search.target.txt
 69	2	0	5.21034	0.00534191	652.477	1302.94	1300.65	0.727494	870.573	1	2.39185	1	16	22	7	LDVDELGDVAQK	trypsin-full-digest	YLR043C(55)	KN	barista-args/barista-tide-search.target.txt
 137	3	0	5.07721	0.00626715	497.287	1488.84	1488.82	0.905435	1201.72	1	3.36949	1	22	48	3	NFLETVELQVGLK	trypsin-full-digest	YGL135W(27)	RN	barista-args/barista-tide-search.target.txt
-151	2	0	4.95245	0.00727806	651.617	1301.22	1300.65	0.845363	1205.25	1	3.27621	1	17	22	10	LDVDELGDVAQK	trypsin-full-digest	YLR043C(55)	KN	barista-args/barista-tide-search.target.txt
+151	2	0	4.95245	0.00727805	651.617	1301.22	1300.65	0.845363	1205.25	1	3.27621	1	17	22	10	LDVDELGDVAQK	trypsin-full-digest	YLR043C(55)	KN	barista-args/barista-tide-search.target.txt
 72	2	0	4.90283	0.00772364	651.627	1301.24	1300.65	0.848146	1321.52	1	3.01881	1	18	22	10	LDVDELGDVAQK	trypsin-full-digest	YLR043C(55)	KN	barista-args/barista-tide-search.target.txt
 144	3	0	4.81751	0.00855386	497.287	1488.84	1488.82	0.915496	1042.79	1	3.69424	1	21	48	3	NFLETVELQVGLK	trypsin-full-digest	YGL135W(27)	RN	barista-args/barista-tide-search.target.txt
 37	2	0	4.74831	0.00929168	652.337	1302.66	1300.65	0.8895	616.017	1	2.50098	1	18	22	8	LDVDELGDVAQK	trypsin-full-digest	YLR043C(55)	KN	barista-args/barista-tide-search.target.txt
@@ -138,7 +138,7 @@ scan	charge	barista q-value	barista score	barista PEP	spectrum precursor m/z	spe
 83	3	0.565714	-1.47794	0.625061	468.797	1403.37	1403.69	0.246077	41.155	3	0.547706	1	11	56	6	VASANATAAESDVAK	trypsin-full-digest	YIL133C(178)	KQ	barista-args/barista-tide-search.target.txt
 143	2	0.565714	-1.48152	0.625626	452.849	903.683	903.481	0.079006	83.8057	4	0.707508	1	6	14	21	VSHTVSFK	trypsin-full-digest	YOR168W(644)	KS	barista-args/barista-tide-search.target.txt
 79	2	0.565714	-1.4993	0.628497	559.097	1116.18	1116.65	0.21571	35.8137	1	0.395707	1	6	18	8	FLDGQIALLK	trypsin-full-digest	YBL076C(664)	KK	barista-args/barista-tide-search.target.txt
-116	2	0.565714	-1.51984	0.631944	613.307	1224.6	1223.62	0.159516	32.1306	1	0.522612	1	4	18	4	LAFLENQDFK	trypsin-full-digest	YBR115C(140)	RL	barista-args/barista-tide-search.target.txt
+116	2	0.565714	-1.51984	0.631943	613.307	1224.6	1223.62	0.159516	32.1306	1	0.522612	1	4	18	4	LAFLENQDFK	trypsin-full-digest	YBR115C(140)	RL	barista-args/barista-tide-search.target.txt
 10	2	0.574468	-1.56847	0.640669	636.337	1270.66	1269.73	0.253566	56.4733	1	0.638901	1	5	22	6	SGLIVEIQGVQK	trypsin-full-digest	YDR093W(866)	KE	barista-args/barista-tide-search.target.txt
 78	2	0.5875	-1.62381	0.651599	452.219	902.423	902.476	0.106058	31.5858	4	0.570985	1	4	12	19	QFWLGPR	trypsin-full-digest	YBR115C(668)	RD	barista-args/barista-tide-search.target.txt
 46	2	0.5875	-1.64922	0.656986	613.807	1225.6	1222.67	0.08623	9.45919	2	0.254344	1	2	20	3	LIDFGSAVVFR	trypsin-full-digest	YOR267C(356)	KY	barista-args/barista-tide-search.target.txt

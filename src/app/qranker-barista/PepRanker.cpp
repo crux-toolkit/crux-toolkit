@@ -1154,8 +1154,8 @@ int PepRanker :: computePepNSAF()
 
 void PepRanker :: computePEP(){
   carp(CARP_DEBUG, "Computing PEPs");
-  vector<double> target_scores_vect;
-  vector<double> decoy_scores_vect;
+  vector<FLOAT_T> target_scores_vect;
+  vector<FLOAT_T> decoy_scores_vect;
 
   // pull out the target and decoy scores
   for(int i = 0; i < psmtrainset.size(); i++){
@@ -1170,14 +1170,7 @@ void PepRanker :: computePEP(){
   int num_decoys = decoy_scores_vect.size();
   carp(CARP_DEBUG, "Found %d targets and %d decoys", num_targets, num_decoys); 
 
-  // copy them to an array as required by the compute_PEP method
-  double* target_scores = new double[num_targets];
-  copy(target_scores_vect.begin(), target_scores_vect.end(), target_scores);
-  double* decoy_scores = new double[num_decoys];
-  copy(decoy_scores_vect.begin(), decoy_scores_vect.end(), decoy_scores);
-
-  double* PEPs = ComputeQValues::compute_PEP(target_scores, num_targets, 
-                                             decoy_scores, num_decoys);
+  vector<double> PEPs = ComputeQValues::compute_PEP(target_scores_vect, decoy_scores_vect);
 
   // fill in the data set with the new scores for the targets
   int target_idx = 0;
@@ -1187,10 +1180,6 @@ void PepRanker :: computePEP(){
       target_idx++; 
     } // else, skip decoys
   }
-
-  delete target_scores;
-  delete decoy_scores;
-  delete PEPs;
 
   /** 
    * Calculate Peptide PEPs
@@ -1209,13 +1198,7 @@ void PepRanker :: computePEP(){
   num_decoys = decoy_scores_vect.size();
   carp(CARP_DEBUG, "Found %d targets and %d decoys", num_targets, num_decoys);  
 
-  // copy them to an array as required by the compute_PEP method
-  target_scores = new double[num_targets];
-  copy(target_scores_vect.begin(), target_scores_vect.end(), target_scores);
-  decoy_scores = new double[num_decoys];
-  copy(decoy_scores_vect.begin(), decoy_scores_vect.end(), decoy_scores);
-  PEPs = ComputeQValues::compute_PEP(target_scores, num_targets, 
-                                     decoy_scores, num_decoys);
+  PEPs = ComputeQValues::compute_PEP(target_scores_vect, decoy_scores_vect);
 
   // fill in the data set with the new scores for the targets
   target_idx = 0;
@@ -1225,11 +1208,6 @@ void PepRanker :: computePEP(){
       target_idx++; 
     } // else, skip decoys
   }
-
-  delete target_scores;
-  delete decoy_scores;
-  delete PEPs;
-
 }
 
 

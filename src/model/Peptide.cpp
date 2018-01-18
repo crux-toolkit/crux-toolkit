@@ -469,15 +469,16 @@ void Peptide::setMod(
 }
 
 string Peptide::getModsString() const {
-  vector<string> allMods;
-  vector<Modification> staticMods = getStaticMods();
-  for (vector<Modification>::const_iterator i = staticMods.begin(); i != staticMods.end(); i++) {
-    allMods.push_back(i->String());
-  }
+  vector<Modification> allMods = getStaticMods();
   for (vector<Modification>::const_iterator i = varMods_.begin(); i != varMods_.end(); i++) {
-    allMods.push_back(i->String());
+    allMods.push_back(*i);
   }
-  return StringUtils::Join(allMods, ',');
+  std::sort(allMods.begin(), allMods.end(), Modification::SortFunction);
+  vector<string> modStrings;
+  for (vector<Modification>::const_iterator i = allMods.begin(); i != allMods.end(); i++) {
+    modStrings.push_back(i->String());
+  }
+  return StringUtils::Join(modStrings, ',');
 }
 
 bool Peptide::isModified() {

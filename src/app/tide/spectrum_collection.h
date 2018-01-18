@@ -27,6 +27,9 @@
 
 using namespace std;
 
+// Number of m/z regions in XCorr normalization.
+#define NUM_SPECTRUM_REGIONS 10
+
 class Spectrum {
  public:
   // Manual instantiation and specification
@@ -61,8 +64,14 @@ class Spectrum {
   double Intensity(int index) const { return peak_intensity_[index]; }
 
   void SortIfNecessary();
-  void InferChargeStatesIfNecessary();
+  std::vector<double> CreateEvidenceVector(
+    double binWidth, double binOffset, int charge, double pepMassMonoMean, int maxPrecurMass) const;
+  std::vector<int> CreateEvidenceVectorDiscretized(
+    double binWidth, double binOffset, int charge, double pepMassMonoMean, int maxPrecurMass) const;
 
+  int MaxCharge() const;
+  double MaxPeakInRange( double min_range, double max_range ) const;
+  
  private:
   int spectrum_number_;
   double rtime_;
@@ -83,6 +92,7 @@ class SpectrumCollection {
   void ReadMS(istream& in, bool ms1);
   bool ReadSpectrumRecords(const string& filename, pb::Header* header = NULL);
   void Sort();
+  int Size() const { return(spectra_.size()); } // number of spectra
 
   template<typename BinaryPredicate>
   void Sort(BinaryPredicate Predicate) {

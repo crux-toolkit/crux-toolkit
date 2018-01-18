@@ -84,7 +84,6 @@ class TideMatchSet {
     const vector<const pb::AuxLocation*>& locations,  ///< auxiliary locations
     bool compute_sp, ///< whether to compute sp or not
     bool highScoreBest, //< indicates semantics of score magnitude
-    const map<string, string>* spectrumFilesOverride,
     boost::mutex * rwlock
   );
 
@@ -95,6 +94,7 @@ class TideMatchSet {
   );
 
   static void initModMap(const pb::ModTable& modTable, ModPosition position);
+  static std::vector<Crux::Modification> getMods(const Peptide* peptide);
 
   static string CleavageType;
 
@@ -175,12 +175,10 @@ class TideMatchSet {
     const map<Arr::iterator, FLOAT_T>& delta_cn_map,
     const map<Arr::iterator, FLOAT_T>& delta_lcn_map,
     const map<Arr::iterator, pair<const SpScorer::SpScoreData, int> >* sp_map,
-    const map<string, string>* spectrumFilesOverride,
     boost::mutex * rwlock
   );
 
   Crux::Peptide getCruxPeptide(const Peptide* peptide);
-  std::vector<Crux::Modification> getMods(const Peptide* peptide);
 
   void gatherTargetsAndDecoys(
     const ActivePeptideQueue* peptides,

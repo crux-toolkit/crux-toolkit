@@ -38,11 +38,17 @@ class ComputeQValues: public CruxApplication {
    * \returns A newly allocated array of PEP for the target scores
    * sorted.
    */
-  static double* compute_PEP(double* target_scores, ///< scores for target matches
-                             int num_targets,       ///< size of target_scores
-                             double* decoy_scores,  ///< scores for decoy matches
-                             int num_decoys,       ///< size of decoy_scores
-                             bool ascending = false); ///< are the scores ascending/descending?
+  static std::vector<double> compute_PEP(
+    const std::vector<FLOAT_T>& target_scores, ///< scores for target matches
+    const std::vector<FLOAT_T>& decoy_scores,  ///< scores for decoy matches
+    bool ascending = false); ///< are the scores ascending/descending?
+
+  static std::vector< std::pair<double, bool> > getScoreVector(
+    const std::vector<FLOAT_T>& targetScores,
+    const std::vector<FLOAT_T>& decoyScores,
+    bool ascending);
+
+  static double estimatePi0(const std::vector< std::pair<double, bool> >& scoreVector);
 
   /**
    * \returns the command name for ComputeQValues

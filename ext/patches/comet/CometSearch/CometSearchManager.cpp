@@ -36,6 +36,7 @@ std::vector<Query*>           g_pvQuery;
 std::vector<InputFileInfo *>  g_pvInputFiles;
 StaticParams                  g_staticParams;
 MassRange                     g_massRange;
+vector<string>                g_pvProteinNames;
 Mutex                         g_pvQueryMutex;
 Mutex                         g_preprocessMemoryPoolMutex;
 Mutex                         g_searchMemoryPoolMutex;
@@ -135,7 +136,7 @@ static bool UpdateInputFile(InputFileInfo *pFileInfo)
       fclose(fp);
    }
 
-#ifndef CRUX
+/*
    if (bUpdateBaseName) // set individual basename from input file
    {
       char *pStr;
@@ -156,7 +157,7 @@ static bool UpdateInputFile(InputFileInfo *pFileInfo)
    {
       strcpy(g_staticParams.inputFile.szBaseName, szTmpBaseName);  // set basename from command line
    }
-#endif
+*/
 
    // Create .out directory.
    if (g_staticParams.options.bOutputOutFiles)
@@ -234,14 +235,12 @@ static bool UpdateInputFile(InputFileInfo *pFileInfo)
 static void SetMSLevelFilter(MSReader &mstReader)
 {
    vector<MSSpectrumType> msLevel;
+
    if (g_staticParams.options.iMSLevel == 3)
-   {
       msLevel.push_back(MS3);
-   }
    else
-   {
       msLevel.push_back(MS2);
-   }
+
    mstReader.setFilter(msLevel);
 }
 
@@ -289,13 +288,17 @@ static bool AllocateResultsMem()
          pQuery->_pResults[j].dExpect = 0.0;
          pQuery->_pResults[j].fScoreSp = 0.0;
          pQuery->_pResults[j].fXcorr = XCORR_CUTOFF;
-         pQuery->_pResults[j].iDuplicateCount = 0;
          pQuery->_pResults[j].iLenPeptide = 0;
          pQuery->_pResults[j].iRankSp = 0;
          pQuery->_pResults[j].iMatchedIons = 0;
          pQuery->_pResults[j].iTotalIons = 0;
          pQuery->_pResults[j].szPeptide[0] = '\0';
-         pQuery->_pResults[j].szProtein[0] = '\0';
+         pQuery->_pResults[j].pWhichProtein.clear();
+         pQuery->_pResults[j].cPeffOrigResidue = '\0';
+         pQuery->_pResults[j].iPeffOrigResiduePosition = -9;
+
+         if (g_staticParams.options.iDecoySearch)
+            pQuery->_pResults[j].pWhichDecoyProtein.clear();
 
          if (g_staticParams.options.iDecoySearch==2)
          {
@@ -303,13 +306,13 @@ static bool AllocateResultsMem()
             pQuery->_pDecoys[j].dExpect = 0.0;
             pQuery->_pDecoys[j].fScoreSp = 0.0;
             pQuery->_pDecoys[j].fXcorr = XCORR_CUTOFF;
-            pQuery->_pDecoys[j].iDuplicateCount = 0;
             pQuery->_pDecoys[j].iLenPeptide = 0;
             pQuery->_pDecoys[j].iRankSp = 0;
             pQuery->_pDecoys[j].iMatchedIons = 0;
             pQuery->_pDecoys[j].iTotalIons = 0;
             pQuery->_pDecoys[j].szPeptide[0] = '\0';
-            pQuery->_pDecoys[j].szProtein[0] = '\0';
+            pQuery->_pDecoys[j].cPeffOrigResidue = '\0';
+            pQuery->_pDecoys[j].iPeffOrigResiduePosition = -9;
          }
       }
    }
@@ -320,6 +323,11 @@ static bool AllocateResultsMem()
 static bool compareByPeptideMass(Query const* a, Query const* b)
 {
    return (a->_pepMassInfo.dExpPepMass < b->_pepMassInfo.dExpPepMass);
+}
+
+static bool compareByMangoIndex(Query const* a, Query const* b)
+{
+      return (a->dMangoIndex < b->dMangoIndex);
 }
 
 static bool compareByScanNumber(Query const* a, Query const* b)
@@ -397,11 +405,14 @@ static void PrintParameters()
    else
       szReadingFrame[0]=0;
 
-   szIsotope[0]='\0';
    if (g_staticParams.tolerances.iIsotopeError==1)
       strcpy(szIsotope, "ISOTOPE1");
    else if (g_staticParams.tolerances.iIsotopeError==2)
       strcpy(szIsotope, "ISOTOPE2");
+   else if (g_staticParams.tolerances.iIsotopeError==3)
+      strcpy(szIsotope, "ISOTOPE3");
+   else if (g_staticParams.tolerances.iIsotopeError==4)
+      strcpy(szIsotope, "ISOTOPE4");
 
    szPeak[0]='\0';
    if (g_staticParams.ionInformation.iTheoreticalFragmentIons==1)
@@ -510,16 +521,14 @@ CometSearchManager::~CometSearchManager()
    Threading::DestroyMutex(g_searchMemoryPoolMutex);
 
    // Clean up the input files vector
-   for (int i=0; i<(int)g_pvInputFiles.size(); i++)
-   {
-      delete g_pvInputFiles.at(i);
-   }
+   //for (int i=0; i<(int)g_pvInputFiles.size(); i++)
+   //   delete g_pvInputFiles.at(i);
+
+   //std::vector calls destructor of every element it contains when clear() is called
    g_pvInputFiles.clear();
 
-   for (std::map<string, CometParam*>::iterator it = _mapStaticParams.begin(); it != _mapStaticParams.end(); ++it)
-   {
-      delete it->second;
-   }
+   //for (std::map<string, CometParam*>::iterator it = _mapStaticParams.begin(); it != _mapStaticParams.end(); ++it)
+   //   delete it->second;
    _mapStaticParams.clear();
 }
 
@@ -532,19 +541,18 @@ bool CometSearchManager::InitializeStaticParams()
    DoubleRange doubleRangeData;
 
    if (GetParamValue("database_name", strData))
-   {
       strcpy(g_staticParams.databaseInfo.szDatabase, strData.c_str());
-   }
 
    if (GetParamValue("decoy_prefix", strData))
-   {
       strcpy(g_staticParams.szDecoyPrefix, strData.c_str());
-   }
 
    if (GetParamValue("output_suffix", strData))
-   {
       strcpy(g_staticParams.szOutputSuffix, strData.c_str());
-   }
+
+   if (GetParamValue("peff_obo", strData))
+      strcpy(g_staticParams.peffInfo.szPeffOBO, strData.c_str());
+
+   GetParamValue("peff_format", g_staticParams.peffInfo.iPeffSearch);
 
    GetParamValue("mass_offsets", g_staticParams.vectorMassOffsets);
 
@@ -604,18 +612,14 @@ bool CometSearchManager::InitializeStaticParams()
    if (GetParamValue("max_variable_mods_in_peptide", iIntData))
    {
       if (iIntData > 0)
-      {
          g_staticParams.variableModParameters.iMaxVarModPerPeptide = iIntData;
-      }
    }
 
    GetParamValue("require_variable_mod", g_staticParams.variableModParameters.bRequireVarMod);
 
    GetParamValue("fragment_bin_tol", g_staticParams.tolerances.dFragmentBinSize);
    if (g_staticParams.tolerances.dFragmentBinSize < 0.01)
-   {
       g_staticParams.tolerances.dFragmentBinSize = 0.01;
-   }
 
    GetParamValue("fragment_bin_offset", g_staticParams.tolerances.dFragmentBinStartOffset);
 
@@ -637,7 +641,7 @@ bool CometSearchManager::InitializeStaticParams()
 
    GetParamValue("isotope_error", g_staticParams.tolerances.iIsotopeError);
    if ((g_staticParams.tolerances.iIsotopeError < 0)
-         || (g_staticParams.tolerances.iIsotopeError > 2))
+         || (g_staticParams.tolerances.iIsotopeError > 4))
    {
       g_staticParams.tolerances.iIsotopeError = 0;
    }
@@ -659,6 +663,7 @@ bool CometSearchManager::InitializeStaticParams()
       }
    }
 
+
    GetParamValue("print_expect_score", g_staticParams.options.bPrintExpectScore);
 
    GetParamValue("output_sqtstream", g_staticParams.options.bOutputSqtStream);
@@ -675,6 +680,10 @@ bool CometSearchManager::InitializeStaticParams()
 
    GetParamValue("skip_researching", g_staticParams.options.bSkipAlreadyDone);
 
+   GetParamValue("mango_search", g_staticParams.options.bMango);
+
+   GetParamValue("peff_verbose_output", g_staticParams.options.bVerboseOutput);
+
    GetParamValue("add_Cterm_peptide", g_staticParams.staticModifications.dAddCterminusPeptide);
 
    GetParamValue("add_Nterm_peptide", g_staticParams.staticModifications.dAddNterminusPeptide);
@@ -684,134 +693,82 @@ bool CometSearchManager::InitializeStaticParams()
    GetParamValue("add_Nterm_protein", g_staticParams.staticModifications.dAddNterminusProtein);
 
    if (GetParamValue("add_G_glycine", dDoubleData))
-   {
       g_staticParams.staticModifications.pdStaticMods[(int)'G'] = dDoubleData;
-   }
 
    if (GetParamValue("add_A_alanine", dDoubleData))
-   {
       g_staticParams.staticModifications.pdStaticMods[(int)'A'] = dDoubleData;
-   }
 
    if (GetParamValue("add_S_serine", dDoubleData))
-   {
       g_staticParams.staticModifications.pdStaticMods[(int)'S'] = dDoubleData;
-   }
 
    if (GetParamValue("add_P_proline", dDoubleData))
-   {
       g_staticParams.staticModifications.pdStaticMods[(int)'P'] = dDoubleData;
-   }
 
    if (GetParamValue("add_V_valine", dDoubleData))
-   {
       g_staticParams.staticModifications.pdStaticMods[(int)'V'] = dDoubleData;
-   }
 
    if (GetParamValue("add_T_threonine", dDoubleData))
-   {
       g_staticParams.staticModifications.pdStaticMods[(int)'T'] = dDoubleData;
-   }
 
    if (GetParamValue("add_C_cysteine", dDoubleData))
-   {
       g_staticParams.staticModifications.pdStaticMods[(int)'C'] = dDoubleData;
-   }
 
    if (GetParamValue("add_L_leucine", dDoubleData))
-   {
       g_staticParams.staticModifications.pdStaticMods[(int)'L'] = dDoubleData;
-   }
 
    if (GetParamValue("add_I_isoleucine", dDoubleData))
-   {
       g_staticParams.staticModifications.pdStaticMods[(int)'I'] = dDoubleData;
-   }
 
    if (GetParamValue("add_N_asparagine", dDoubleData))
-   {
       g_staticParams.staticModifications.pdStaticMods[(int)'N'] = dDoubleData;
-   }
 
    if (GetParamValue("add_O_ornithine", dDoubleData))
-   {
       g_staticParams.staticModifications.pdStaticMods[(int)'O'] = dDoubleData;
-   }
 
    if (GetParamValue("add_D_aspartic_acid", dDoubleData))
-   {
       g_staticParams.staticModifications.pdStaticMods[(int)'D'] = dDoubleData;
-   }
 
    if (GetParamValue("add_Q_glutamine", dDoubleData))
-   {
       g_staticParams.staticModifications.pdStaticMods[(int)'Q'] = dDoubleData;
-   }
 
    if (GetParamValue("add_K_lysine", dDoubleData))
-   {
       g_staticParams.staticModifications.pdStaticMods[(int)'K'] = dDoubleData;
-   }
 
    if (GetParamValue("add_E_glutamic_acid", dDoubleData))
-   {
       g_staticParams.staticModifications.pdStaticMods[(int)'E'] = dDoubleData;
-   }
 
    if (GetParamValue("add_M_methionine", dDoubleData))
-   {
       g_staticParams.staticModifications.pdStaticMods[(int)'M'] = dDoubleData;
-   }
 
    if (GetParamValue("add_H_histidine", dDoubleData))
-   {
       g_staticParams.staticModifications.pdStaticMods[(int)'H'] = dDoubleData;
-   }
 
    if (GetParamValue("add_F_phenylalanine", dDoubleData))
-   {
       g_staticParams.staticModifications.pdStaticMods[(int)'F'] = dDoubleData;
-   }
 
    if (GetParamValue("add_R_arginine", dDoubleData))
-   {
       g_staticParams.staticModifications.pdStaticMods[(int)'R'] = dDoubleData;
-   }
 
    if (GetParamValue("add_Y_tyrosine", dDoubleData))
-   {
       g_staticParams.staticModifications.pdStaticMods[(int)'Y'] = dDoubleData;
-   }
 
    if (GetParamValue("add_W_tryptophan", dDoubleData))
-   {
       g_staticParams.staticModifications.pdStaticMods[(int)'W'] = dDoubleData;
-   }
 
    if (GetParamValue("add_B_user_amino_acid", dDoubleData))
-   {
       g_staticParams.staticModifications.pdStaticMods[(int)'B'] = dDoubleData;
-   }
 
    if (GetParamValue("add_J_user_amino_acid", dDoubleData))
-   {
       g_staticParams.staticModifications.pdStaticMods[(int)'J'] = dDoubleData;
-   }
 
    if (GetParamValue("add_U_user_amino_acid", dDoubleData))
-   {
       g_staticParams.staticModifications.pdStaticMods[(int)'U'] = dDoubleData;
-   }
 
    if (GetParamValue("add_X_user_amino_acid", dDoubleData))
-   {
       g_staticParams.staticModifications.pdStaticMods[(int)'X'] = dDoubleData;
-   }
 
    if (GetParamValue("add_Z_user_amino_acid", dDoubleData))
-   {
       g_staticParams.staticModifications.pdStaticMods[(int)'Z'] = dDoubleData;
-   }
 
    GetParamValue("num_enzyme_termini", g_staticParams.options.iEnzymeTermini);
    if ((g_staticParams.options.iEnzymeTermini != 1)
@@ -832,27 +789,26 @@ bool CometSearchManager::InitializeStaticParams()
 
    if (GetParamValue("spectrum_batch_size", iIntData))
    {
-      if (iIntData > 0)
-      {
+      if (iIntData >= 0)
          g_staticParams.options.iSpectrumBatchSize = iIntData;
-      }
    }
 
    iIntData = 0;
    if (GetParamValue("minimum_peaks", iIntData))
    {
       if (iIntData > 0)
-      {
          g_staticParams.options.iMinPeaks = iIntData;
-      }
    }
 
    if (GetParamValue("override_charge", iIntData))
    {
       if (iIntData > 0)
-      {
          g_staticParams.options.bOverrideCharge = iIntData;
-      }
+   }
+
+   if (GetParamValue("equal_I_and_L", iIntData))
+   {
+      g_staticParams.options.bTreatSameIL = iIntData;
    }
 
    if (GetParamValue("precursor_charge", intRangeData))
@@ -868,14 +824,11 @@ bool CometSearchManager::InitializeStaticParams()
    if (GetParamValue("max_fragment_charge", iIntData))
    {
       if (iIntData > MAX_FRAGMENT_CHARGE)
-      {
          iIntData = MAX_FRAGMENT_CHARGE;
-      }
 
       if (iIntData > 0)
-      {
          g_staticParams.options.iMaxFragmentCharge = iIntData;
-      }
+
       // else will go to default value (3)
    }
 
@@ -883,14 +836,11 @@ bool CometSearchManager::InitializeStaticParams()
    if (GetParamValue("max_precursor_charge", iIntData))
    {
       if (iIntData > MAX_PRECURSOR_CHARGE)
-      {
          iIntData = MAX_PRECURSOR_CHARGE;
-      }
 
       if (iIntData > 0)
-      {
          g_staticParams.options.iMaxPrecursorCharge = iIntData;
-      }
+
       // else will go to default value (6)
    }
 
@@ -906,28 +856,21 @@ bool CometSearchManager::InitializeStaticParams()
    if (GetParamValue("ms_level", iIntData))
    {
       if (iIntData == 3)
-      {
          g_staticParams.options.iMSLevel = 3;
-      }
+
       // else will go to default value (2)
    }
 
    if (GetParamValue("activation_method", strData))
-   {
       strcpy(g_staticParams.options.szActivationMethod, strData.c_str());
-   }
 
    GetParamValue("minimum_intensity", g_staticParams.options.dMinIntensity);
    if (g_staticParams.options.dMinIntensity < 0.0)
-   {
       g_staticParams.options.dMinIntensity = 0.0;
-   }
 
    GetParamValue("decoy_search", g_staticParams.options.iDecoySearch);
    if ((g_staticParams.options.iDecoySearch < 0) || (g_staticParams.options.iDecoySearch > 2))
-   {
       g_staticParams.options.iDecoySearch = 0;
-   }
 
    // Set dInverseBinWidth to its inverse in order to use a multiply instead of divide in BIN macro.
    // Safe to divide by dFragmentBinSize because of check earlier where minimum value is 0.01.
@@ -993,9 +936,7 @@ bool CometSearchManager::InitializeStaticParams()
       {
          int detectedThreads = atoi(nSlots);
          if (detectedThreads > 0)
-         {
             g_staticParams.options.iNumThreads = detectedThreads;
-         }
       }
 #endif
       if (g_staticParams.options.iNumThreads < 1 || g_staticParams.options.iNumThreads > MAX_THREADS)
@@ -1044,9 +985,7 @@ bool CometSearchManager::InitializeStaticParams()
 
    GetParamValue("allowed_missed_cleavage", g_staticParams.enzymeInformation.iAllowedMissedCleavage);
    if (g_staticParams.enzymeInformation.iAllowedMissedCleavage < 0)
-   {
       g_staticParams.enzymeInformation.iAllowedMissedCleavage = 0;
-   }
 
    // Load ion series to consider, useA, useB, useY are for neutral losses.
    g_staticParams.ionInformation.iNumIonSeriesUsed = 0;
@@ -1061,6 +1000,9 @@ bool CometSearchManager::InitializeStaticParams()
    g_staticParams.variableModParameters.bVarModSearch = false;
    g_staticParams.variableModParameters.bBinaryModSearch = false;
    g_staticParams.variableModParameters.bRequireVarMod = false;
+   
+   if (g_staticParams.peffInfo.iPeffSearch)
+      g_staticParams.variableModParameters.bVarModSearch = true;
 
    for (int i=0; i<VMODS; i++)
    {
@@ -1168,9 +1110,7 @@ bool CometSearchManager::InitializeStaticParams()
    }
 
    if (!g_staticParams.options.bOutputOutFiles)
-   {
       g_staticParams.options.bSkipAlreadyDone = 0;
-   }
 
    g_staticParams.precalcMasses.dNtermProton = g_staticParams.staticModifications.dAddNterminusPeptide
       + PROTON_MASS;
@@ -1190,10 +1130,9 @@ bool CometSearchManager::InitializeStaticParams()
 void CometSearchManager::AddInputFiles(vector<InputFileInfo*> &pvInputFiles)
 {
    int numInputFiles = pvInputFiles.size();
+
    for (int i = 0; i < numInputFiles; i++)
-   {
       g_pvInputFiles.push_back(pvInputFiles.at(i));
-   }
 }
 
 void CometSearchManager::SetOutputFileBaseName(const char *pszBaseName)
@@ -1222,9 +1161,7 @@ bool CometSearchManager::GetParamValue(const string &name, string& value)
    std::map<string, CometParam*>::iterator it;
    it = _mapStaticParams.find(name);
    if (it == _mapStaticParams.end())
-   {
       return false;
-   }
 
    TypedCometParam<string> *pParam = static_cast<TypedCometParam<string>*>(it->second);
    value = pParam->GetValue();
@@ -1247,9 +1184,7 @@ bool CometSearchManager::GetParamValue(const string &name, int& value)
    std::map<string, CometParam*>::iterator it;
    it = _mapStaticParams.find(name);
    if (it == _mapStaticParams.end())
-   {
       return false;
-   }
 
    TypedCometParam<int> *pParam = static_cast<TypedCometParam<int>*>(it->second);
    value = pParam->GetValue();
@@ -1272,9 +1207,7 @@ bool CometSearchManager::GetParamValue(const string &name, double& value)
    std::map<string, CometParam*>::iterator it;
    it = _mapStaticParams.find(name);
    if (it == _mapStaticParams.end())
-   {
       return false;
-   }
 
    TypedCometParam<double> *pParam = static_cast<TypedCometParam<double>*>(it->second);
    value = pParam->GetValue();
@@ -1297,9 +1230,7 @@ bool CometSearchManager::GetParamValue(const string &name, VarMods & value)
    std::map<string, CometParam*>::iterator it;
    it = _mapStaticParams.find(name);
    if (it == _mapStaticParams.end())
-   {
       return false;
-   }
 
    TypedCometParam<VarMods> *pParam = static_cast<TypedCometParam<VarMods>*>(it->second);
    value = pParam->GetValue();
@@ -1322,9 +1253,7 @@ bool CometSearchManager::GetParamValue(const string &name, DoubleRange &value)
    std::map<string, CometParam*>::iterator it;
    it = _mapStaticParams.find(name);
    if (it == _mapStaticParams.end())
-   {
       return false;
-   }
 
    TypedCometParam<DoubleRange> *pParam = static_cast<TypedCometParam<DoubleRange>*>(it->second);
    value = pParam->GetValue();
@@ -1347,9 +1276,7 @@ bool CometSearchManager::GetParamValue(const string &name, IntRange &value)
    std::map<string, CometParam*>::iterator it;
    it = _mapStaticParams.find(name);
    if (it == _mapStaticParams.end())
-   {
       return false;
-   }
 
    TypedCometParam<IntRange> *pParam = static_cast<TypedCometParam<IntRange>*>(it->second);
    value = pParam->GetValue();
@@ -1372,9 +1299,7 @@ bool CometSearchManager::GetParamValue(const string &name, EnzymeInfo &value)
    std::map<string, CometParam*>::iterator it;
    it = _mapStaticParams.find(name);
    if (it == _mapStaticParams.end())
-   {
       return false;
-   }
 
    TypedCometParam<EnzymeInfo> *pParam = static_cast<TypedCometParam<EnzymeInfo>*>(it->second);
    value = pParam->GetValue();
@@ -1397,9 +1322,7 @@ bool CometSearchManager::GetParamValue(const string &name,  vector<double> &valu
    std::map<string, CometParam*>::iterator it;
    it = _mapStaticParams.find(name);
    if (it == _mapStaticParams.end())
-   {
       return false;
-   }
 
    TypedCometParam< vector<double> > *pParam = static_cast<TypedCometParam< vector<double> >*>(it->second);
    value = pParam->GetValue();
@@ -1444,26 +1367,18 @@ bool CometSearchManager::DoSearch()
    char szOut[256];
 
    if (!InitializeStaticParams())
-   {
       return false;
-   }
 
    PrintParameters();
 
    if (!ValidateOutputFormat())
-   {
       return false;
-   }
 
    if (!ValidateSequenceDatabaseFile())
-   {
       return false;
-   }
 
    if (!ValidateScanRange())
-   {
       return false;
-   }
 
    bool bSucceeded = true;
 
@@ -1478,9 +1393,7 @@ bool CometSearchManager::DoSearch()
    {
       bSucceeded = UpdateInputFile(g_pvInputFiles.at(i));
       if (!bSucceeded)
-      {
          break;
-      }
 
       time_t tStartTime;
       time(&tStartTime);
@@ -1617,6 +1530,7 @@ bool CometSearchManager::DoSearch()
          }
 
          CometWriteTxt::PrintTxtHeader(fpout_txt);
+         fflush(fpout_txt);
 
          if (bSucceeded && (g_staticParams.options.iDecoySearch == 2))
          {
@@ -1679,9 +1593,7 @@ bool CometSearchManager::DoSearch()
          }
 
          if (bSucceeded)
-         {
             bSucceeded = CometWritePepXML::WritePepXMLHeader(fpout_pepxml, *this);
-         }
 
          if (bSucceeded && (g_staticParams.options.iDecoySearch == 2))
          {
@@ -1707,9 +1619,7 @@ bool CometSearchManager::DoSearch()
             }
 
             if (bSucceeded)
-            {
                bSucceeded = CometWritePepXML::WritePepXMLHeader(fpoutd_pepxml, *this);
-            }
          }
       }
 
@@ -1758,16 +1668,12 @@ bool CometSearchManager::DoSearch()
          //MH: Allocate memory shared by threads during spectral processing.
          bSucceeded = CometPreprocess::AllocateMemory(g_staticParams.options.iNumThreads);
          if (!bSucceeded)
-         {
             break;
-         }
 
          // Allocate memory shared by threads during search
          bSucceeded = CometSearch::AllocateMemory(g_staticParams.options.iNumThreads);
          if (!bSucceeded)
-         {
             break;
-         }
 
          // For file access using MSToolkit.
          MSReader mstReader;
@@ -1820,14 +1726,14 @@ bool CometSearchManager::DoSearch()
             // IMPORTANT: From this point onwards, because we've loaded some
             // spectra, we MUST "goto cleanup_results" before exiting the loop,
             // or we will create a memory leak!
+
             bSucceeded = CometPreprocess::LoadAndPreprocessSpectra(mstReader,
                 iFirstScan, iLastScan, iAnalysisType,
                 g_staticParams.options.iNumThreads,  // min # threads
                 g_staticParams.options.iNumThreads); // max # threads
+
             if (!bSucceeded)
-            {
                goto cleanup_results;
-            }
 
             iPercentStart = iPercentEnd;
             iPercentEnd = mstReader.getPercent();
@@ -1853,10 +1759,9 @@ bool CometSearchManager::DoSearch()
                iTotalSpectraSearched += g_pvQuery.size();
 
             bSucceeded = AllocateResultsMem();
+
             if (!bSucceeded)
-            {
                goto cleanup_results;
-            }
 
             char szStatusMsg[256];
             sprintf(szStatusMsg, " %d\n", (int)g_pvQuery.size());
@@ -1867,6 +1772,31 @@ bool CometSearchManager::DoSearch()
                logout(szOut);
             }
             g_cometStatus.SetStatusMsg(string(szStatusMsg));
+
+            if (g_staticParams.options.bMango)
+            {
+               int iCurrentScanNumber = 0;       // used to track multiple Mango precursors from same scan number
+               int iMangoIndex=0;
+               std::vector<Query*>::iterator it;
+
+               // sort back to original spectrum order in MS2 scan in order to associate pairs
+               // based on sequential order of precursors for each scan
+               std::sort(g_pvQuery.begin(), g_pvQuery.end(), compareByMangoIndex);
+
+               for (it = g_pvQuery.begin(); it != g_pvQuery.end(); ++it)
+               {
+                  if ((*it)->_spectrumInfoInternal.iScanNumber != iCurrentScanNumber)
+                  {
+                     iCurrentScanNumber = (*it)->_spectrumInfoInternal.iScanNumber;
+                     iMangoIndex = 0;
+                  }
+                  else
+                     iMangoIndex++;
+
+                  sprintf((*it)->_spectrumInfoInternal.szMango, "%03d_%c", (int)iMangoIndex/2, (iMangoIndex % 2)?'B':'A');
+               }
+            }
+
 
             // Sort g_pvQuery vector by dExpPepMass.
             std::sort(g_pvQuery.begin(), g_pvQuery.end(), compareByPeptideMass);
@@ -1889,18 +1819,14 @@ bool CometSearchManager::DoSearch()
 
             bSucceeded = !g_cometStatus.IsError() && !g_cometStatus.IsCancel();
             if (!bSucceeded)
-            {
                goto cleanup_results;
-            }
 
             g_cometStatus.SetStatusMsg(string("Running search..."));
 
             // Now that spectra are loaded to memory and sorted, do search.
             bSucceeded = CometSearch::RunSearch(g_staticParams.options.iNumThreads, g_staticParams.options.iNumThreads, iPercentStart, iPercentEnd);
             if (!bSucceeded)
-            {
                goto cleanup_results;
-            }
 
 #ifdef PERF_DEBUG
             if (!g_staticParams.options.bOutputSqtStream)
@@ -1926,9 +1852,7 @@ bool CometSearchManager::DoSearch()
 
             bSucceeded = !g_cometStatus.IsError() && !g_cometStatus.IsCancel();
             if (!bSucceeded)
-            {
                goto cleanup_results;
-            }
 
             if (!g_staticParams.options.bOutputSqtStream)
             {
@@ -1941,9 +1865,7 @@ bool CometSearchManager::DoSearch()
             // Sort each entry by xcorr, calculate E-values, etc.
             bSucceeded = CometPostAnalysis::PostAnalysis(g_staticParams.options.iNumThreads, g_staticParams.options.iNumThreads);
             if (!bSucceeded)
-            {
                goto cleanup_results;
-            }
 
 #ifdef PERF_DEBUG
             if (!g_staticParams.options.bOutputSqtStream)
@@ -1965,6 +1887,17 @@ bool CometSearchManager::DoSearch()
 
             CalcRunTime(tStartTime);
 
+            FILE *fpdb;  // need FASTA file again to grab headers for output (currently just store file positions)
+            if ((fpdb=fopen(g_staticParams.databaseInfo.szDatabase, "rb")) == NULL)
+            {
+               char szErrorMsg[256];
+               sprintf(szErrorMsg, " Error - cannot read database file \"%s\".\n", g_staticParams.databaseInfo.szDatabase);
+               string strErrorMsg(szErrorMsg);
+               g_cometStatus.SetStatus(CometResult_Failed, strErrorMsg);
+               logerr(szErrorMsg);
+               return false;
+            }
+
             if (!g_staticParams.options.bOutputSqtStream)
             {
                logout("  done\n");
@@ -1973,81 +1906,80 @@ bool CometSearchManager::DoSearch()
 
             if (g_staticParams.options.bOutputOutFiles)
             {
-               bSucceeded = CometWriteOut::WriteOut();
+               bSucceeded = CometWriteOut::WriteOut(fpdb);
                if (!bSucceeded)
-               {
                   goto cleanup_results;
-               }
             }
 
             if (g_staticParams.options.bOutputPepXMLFile)
-               CometWritePepXML::WritePepXML(fpout_pepxml, fpoutd_pepxml);
+               CometWritePepXML::WritePepXML(fpout_pepxml, fpoutd_pepxml, fpdb);
 
             if (g_staticParams.options.bOutputPercolatorFile)
             {
-               bSucceeded = CometWritePercolator::WritePercolator(fpout_percolator);
+               bSucceeded = CometWritePercolator::WritePercolator(fpout_percolator, fpdb);
                if (!bSucceeded)
-               {
                   goto cleanup_results;
-               }
             }
 
             if (g_staticParams.options.bOutputTxtFile)
-               CometWriteTxt::WriteTxt(fpout_txt, fpoutd_txt);
+               CometWriteTxt::WriteTxt(fpout_txt, fpoutd_txt, fpdb);
 
             //// Write SQT last as I destroy the g_staticParams.szMod string during that process
             if (g_staticParams.options.bOutputSqtStream || g_staticParams.options.bOutputSqtFile)
-               CometWriteSqt::WriteSqt(fpout_sqt, fpoutd_sqt);
+               CometWriteSqt::WriteSqt(fpout_sqt, fpoutd_sqt, fpdb);
 
    cleanup_results:
             // Deleting each Query object in the vector calls its destructor, which
             // frees the spectral memory (see definition for Query in CometData.h).
             for (int i=0; i<(int)g_pvQuery.size(); i++)
                delete g_pvQuery.at(i);
-
             g_pvQuery.clear();
 
             if (!bSucceeded)
-            {
                break;
-            }
          }
 
          if (bSucceeded)
          {
             if (iTotalSpectraSearched == 0)
-            {
                logout(" Warning - no spectra searched.\n\n");
-            }
 
             if (!g_staticParams.options.bOutputSqtStream)
             {
                char szOut[128];
-#ifdef PERF_DEBUG
-               time_t tStartTimeSave = tStartTime;
-#endif
-               time(&tStartTime);
-               strftime(g_staticParams.szDate, 26, "%m/%d/%Y, %I:%M:%S %p", localtime(&tStartTime));
-               sprintf(szOut, " Search end:    %s\n\n", g_staticParams.szDate);
+               time_t tEndTime;
+
+               time(&tEndTime);
+               int iElapsedTime = (int)difftime(tEndTime, tStartTime);
+
+               strftime(g_staticParams.szDate, 26, "%m/%d/%Y, %I:%M:%S %p", localtime(&tEndTime));
+               sprintf(szOut, " Search end:    %s", g_staticParams.szDate);
+
+               int hours, mins, secs;
+
+               hours = (int)(iElapsedTime/3600);
+               mins = (int)(iElapsedTime/60) - (hours*60);
+               secs = (int)(iElapsedTime%60);
+
+               if (hours)
+                  sprintf(szOut+strlen(szOut), ", %dh:%dm:%ds", hours, mins, secs);
+               else
+                  sprintf(szOut+strlen(szOut), ", %dm:%ds", mins, secs);
+               sprintf(szOut+strlen(szOut), "\n\n");
+
                logout(szOut);
-#ifdef PERF_DEBUG
-               int iElapsedTime=(int)difftime(tStartTime, tStartTimeSave);
-               sprintf(szOut, " - Total search time:  %d seconds\n", iElapsedTime);
-               logout(szOut);
-#endif
             }
 
             if (NULL != fpout_pepxml)
-            {
                CometWritePepXML::WritePepXMLEndTags(fpout_pepxml);
-            }
 
             if (NULL != fpoutd_pepxml)
-            {
                CometWritePepXML::WritePepXMLEndTags(fpoutd_pepxml);
-            }
          }
       }
+
+      // Clean up the input files vector
+      g_staticParams.vectorMassOffsets.clear();
 
       //MH: Deallocate spectral processing memory.
       CometPreprocess::DeallocateMemory(g_staticParams.options.iNumThreads);
@@ -2098,9 +2030,7 @@ bool CometSearchManager::DoSearch()
       }
 
       if (!bSucceeded)
-      {
          break;
-      }
    }
 
    return bSucceeded;

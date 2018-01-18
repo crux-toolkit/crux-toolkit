@@ -39,6 +39,8 @@ public:
   static void ListStaticMods();
   static void ListVarMods();
 
+  static void Remove(const ModificationDefinition* mod);
+
   static void ClearAll();
   static void ClearStaticMods();
   static void ClearVarMods();
@@ -59,6 +61,8 @@ public:
   static const ModificationDefinition* Find(char symbol);
   static const ModificationDefinition* Find(double deltaMass,
     bool isStatic, ModPosition position = UNKNOWN);
+
+  static bool SortFunction(const ModificationDefinition* x, const ModificationDefinition* y);
 protected:
   std::string AddAminoAcids(const std::string& aminoAcids);
 
@@ -94,6 +98,7 @@ public:
 
   unsigned char Index() const;
   const ModificationDefinition* Definition() const;
+  const std::set<char>& AminoAcids() const;
   double DeltaMass() const;
   bool Static() const;
   ModPosition Position() const;
@@ -123,13 +128,13 @@ public:
   virtual ~ModificationDefinitionContainer();
 protected:
   void InitSymbolPool();
-  std::vector<ModificationDefinition*> StaticMods(char c = '\0');
+  std::set<ModificationDefinition*> StaticMods(char c = '\0');
   void Add(ModificationDefinition* def);
   char NextSymbol();
   void ConsumeSymbol(char c);
 
-  std::vector<ModificationDefinition*> varMods_;
-  std::map< char, std::vector<ModificationDefinition*> > staticMods_;
+  std::set<ModificationDefinition*> varMods_;
+  std::map< char, std::set<ModificationDefinition*> > staticMods_;
   std::deque<char> symbolPool_;
 };
 

@@ -97,6 +97,7 @@ SQTParser :: SQTParser()
   // set specturm file extensions
   spectrumExts_.push_back(".ms2");
   spectrumExts_.push_back(".mzXML");
+  spectrumExts_.push_back(".mzML");
   spectrumExts_.push_back(".mgf");
 }
 

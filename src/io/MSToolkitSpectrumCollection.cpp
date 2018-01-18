@@ -72,6 +72,7 @@ bool MSToolkitSpectrumCollection::parse() {
     Crux::Spectrum* parsed_spectrum = new Crux::Spectrum();
     if (parsed_spectrum->parseMstoolkitSpectrum(mst_spectrum, filename_.c_str())) {
       addSpectrumToEnd(parsed_spectrum);
+      spectraByScan_[first_scan] = parsed_spectrum;
     } else {
       delete parsed_spectrum;
     }
