@@ -1,9 +1,10 @@
 #include "LocalizeModification.h"
 #include "io/MatchCollectionParser.h"
-#include "tide/peptide.h"
+#include "tide/max_mz.h"
 #include "tide/modifications.h"
 #include "util/FileUtils.h"
 #include "util/Params.h"
+#include "io/SpectrumCollectionFactory.h"
 #include "io/SpectrumRecordSpectrumCollection.h"
 #include "io/SpectrumRecordWriter.h"
 #include "util/StringUtils.h"
@@ -24,8 +25,7 @@ LocalizeModificationApplication::~LocalizeModificationApplication() {
  * Iterates over each match in a PSM results file twice:
  *   1. Look at spectrum files for each match
  *     - Check that the file exists
- *     - Convert it to spectrumrecords format
- *     - Load spectra into memory
+ *     - Load spectra into memory as a SpectrumCollection
  *   2. Search modified peptides against spectrum
  *     - For each PSM, generate a modified version of the peptide for each residue
  *       where the modification is (spectrum neutral mass - peptide mass)
@@ -38,19 +38,16 @@ int LocalizeModificationApplication::main(int argc, char** argv) {
   MatchCollectionParser parser;
   MatchCollection* matches = parser.create(Params::GetString("input PSM file"), "");
 
-  map<string, string> spectrumFiles; // match file path -> spectrumrecords file
-  map<string, string> spectrumFilesRev; // spectrumrecords file -> match file path
-  set<string> tempSr; // temp converted spectrumrecords files
-  map<string, SpectrumCollection*> preloadedSpectra; // match file path -> SpectrumCollection*
+  map<string, string> spectrumFiles;
 
-  int numPsms = 0;
+  uint64_t numSteps = 0;
   bool hasTargets = false;
   bool hasDecoys = false;
 
   MatchIterator* matchIter = new MatchIterator(matches);
   while (matchIter->hasNext()) {
-    ++numPsms;
     Crux::Match* match = matchIter->next();
+    numSteps += match->getPeptide()->getLength() + 1;
     if (!hasTargets && !match->getNullPeptide()) {
       hasTargets = true;
     }
@@ -69,21 +66,7 @@ int LocalizeModificationApplication::main(int argc, char** argv) {
       }
       spectrumFile = basename;
     }
-    if (!SpectrumRecordSpectrumCollection::IsSpectrumRecordFile(spectrumFile)) {
-      // convert to spectrumrecords
-      carp(CARP_INFO, "Converting %s to spectrumrecords format", matchPath.c_str());
-      string convertedFile = FileUtils::Join(
-        Params::GetString("output-dir"),
-        getName() + ".spectrumrecords" + StringUtils::ToString(tempSr.size()) + ".tmp");
-      if (!SpectrumRecordWriter::convert(spectrumFile, convertedFile)) {
-        carp(CARP_FATAL, "Error converting %s to spectrumrecords format", spectrumFile.c_str());
-      }
-      spectrumFile = convertedFile;
-      tempSr.insert(convertedFile);
-    }
     spectrumFiles[matchPath] = spectrumFile;
-    spectrumFilesRev[spectrumFile] = matchPath;
-    preloadedSpectra[spectrumFile] = TideSearchApplication::loadSpectra(spectrumFile);
   }
   delete matchIter;
 
@@ -95,57 +78,125 @@ int LocalizeModificationApplication::main(int argc, char** argv) {
   } else {
     outpath = make_file_path(getName() + ".decoy.txt");
   }
-  ofstream* outfile = create_stream_in_path(outpath.c_str(), NULL, Params::GetBool("overwrite"));
+
+  map<string, Crux::SpectrumCollection*> spectrumCollections;
+  for (map<string, string>::const_iterator i = spectrumFiles.begin(); i != spectrumFiles.end(); i++) {
+    carp(CARP_INFO, "Parsing spectrum file %s", i->second.c_str());
+    spectrumCollections[i->first] = SpectrumCollectionFactory::create(i->second);
+    spectrumCollections[i->first]->parse();
+  }
 
   carp(CARP_INFO, "Scoring modified peptides (results will be written to %s)...",
        FileUtils::BaseName(outpath).c_str());
-  TideMatchSet::writeHeaders(outfile, false, Params::GetBool("compute-sp"));
+  MatchFileWriter writer(outpath.c_str());
+  writer.addColumnNames(this, hasTargets && hasDecoys);
+  writer.writeHeader();
 
-  int curPsm = 0;
+  double binWidth = Params::GetDouble("mz-bin-width");
+  double binOffset = Params::GetDouble("mz-bin-offset");
+  TheoreticalPeakSetBIons tps(200);
+  tps.binWidth_ = binWidth;
+  tps.binOffset_ = binOffset;
+
+  int topMatch = Params::GetInt("top-match");
+  uint64_t curStep = 0;
   matchIter = new MatchIterator(matches);
   while (matchIter->hasNext()) {
     Crux::Match* match = matchIter->next();
-
-    // create temp index
-    string tempIndex = FileUtils::Join(Params::GetString("output-dir"), getName() + ".tempindex");
-    FileUtils::Mkdir(tempIndex);
-    if (!FileUtils::IsDir(tempIndex)) {
-      carp(CARP_FATAL, "Couldn't create temp directory %s", tempIndex.c_str());
-    }
-    string protix = FileUtils::Join(tempIndex, "protix");
-    string pepix = FileUtils::Join(tempIndex, "pepix");
-    string auxlocs = FileUtils::Join(tempIndex, "auxlocs");
-    writeIndexProteins(protix, match->getPeptide());
-    writeIndexPeptides(pepix, auxlocs, match);
-
-    // run tide-search
+    Crux::Spectrum* cruxSpectrum = match->getSpectrum();
     int scan = match->getSpectrum()->getFirstScan();
+    string spectrumFile = match->getFilePath();
+    Crux::SpectrumCollection* collection = spectrumCollections[spectrumFile];
+    if ((cruxSpectrum = collection->getSpectrum(scan)) == NULL) {
+      carp(CARP_FATAL, "Spectrum %d not found in %s", scan, spectrumFile.c_str());
+    } else if (cruxSpectrum->getNumPeaks() == 0) {
+      delete cruxSpectrum;
+      carp(CARP_WARNING, "Spectrum %d had 0 peaks, skipping", scan);
+      continue;
+    }
+    cruxSpectrum->sortPeaks(_PEAK_LOCATION);
+    double precursorMz = cruxSpectrum->getPrecursorMz();
+    int charge = match->getCharge();
+    Spectrum spectrum(scan, precursorMz);
+    spectrum.AddChargeState(charge);
+    spectrum.ReservePeaks(cruxSpectrum->getNumPeaks());
+    for (PeakIterator i = cruxSpectrum->begin(); i != cruxSpectrum->end(); i++) {
+      spectrum.AddPeak((*i)->getLocation(), (*i)->getIntensity());
+    }
+    delete cruxSpectrum;
+
+    // Create proteins/peptides
+    VariableModTable* modTable = getModTable(match);
+    MassConstants::Init(modTable->ParsedModTable(),
+                        modTable->ParsedNtpepModTable(), modTable->ParsedCtpepModTable(),
+                        binWidth, binOffset);
+    Crux::Peptide* cruxPeptide = match->getPeptide();
+    vector<const pb::Protein*> proteins = createPbProteins(cruxPeptide);
+    vector<pb::AuxLocation> auxLocs;
+    vector<pb::Peptide> peptides = createPbPeptides(match, modTable, &auxLocs);
+
+    // Score each peptide
     carp(CARP_DETAILED_INFO, "Scoring modified forms of %s against spectrum %d",
-         match->getPeptide()->getModifiedSequenceWithMasses().c_str(), scan);
-    TideSearchApplication search;
-    search.localizeMod_ = true;
-    search.targetFile_ = outfile;
-    search.scanNumber_ = StringUtils::ToString(scan);
-    search.spectrumFilesOverride_ = &spectrumFilesRev;
-    search.spectra_ = preloadedSpectra;
-    search.main(vector<string>(1, spectrumFiles[match->getFilePath()]), tempIndex);
+         cruxPeptide->getModifiedSequenceWithMasses().c_str(), scan);
+    Results results(modTable);
+    double neutralMass = match->getNeutralMass();
+    int maxPrecursorMass = MassConstants::mass2bin(neutralMass + MAX_XCORR_OFFSET + 30) + 50;
+    vector<double> evidence = spectrum.CreateEvidenceVector(binWidth, binOffset, charge,
+      (MassConstants::mass2bin(cruxPeptide->calcModifiedMass()) - 0.5 + binOffset) * binWidth, maxPrecursorMass);
+    for (vector<pb::Peptide>::const_iterator i = peptides.begin(); i != peptides.end(); i++) {
+      Peptide peptide(*i, proteins);
+      tps.Clear();
+      peptide.ComputeBTheoreticalPeaks(&tps);
 
-    // remove temp index
-    FileUtils::Remove(tempIndex);
+      if (i == peptides.begin() + 1) {
+        // After we've scored the unmodified peptide, create new evidence vector for scoring the modified peptides
+        evidence = spectrum.CreateEvidenceVector(binWidth, binOffset, charge,
+          (MassConstants::mass2bin(neutralMass) - 0.5 + binOffset) * binWidth, maxPrecursorMass);
+      }
 
-    reportProgress(++curPsm, numPsms);
+      double xcorr = 0;
+      for (vector<unsigned int>::const_iterator j = tps.unordered_peak_list_.begin();
+          j != tps.unordered_peak_list_.end();
+          j++) {
+        xcorr += evidence[*j];
+      }
+      results.Add(cruxPeptide, &peptide, xcorr / 10000);
+    }
+    delete modTable;
+    for (vector<const pb::Protein*>::const_iterator i = proteins.begin(); i != proteins.end(); i++) {
+      delete *i;
+    }
+
+    // Write to output file
+    results.Sort();
+    for (size_t i = 0; i < topMatch && i < results.Size(); i++) {
+      Crux::Peptide& peptide = *(results.Peptide(i));
+      char* flanking = peptide.getFlankingAAs();
+      string flankingStr(flanking);
+      free(flanking);
+      writer.setColumnCurrentRow(FILE_COL,                  match->getFilePath());
+      writer.setColumnCurrentRow(SCAN_COL,                  scan);
+      writer.setColumnCurrentRow(CHARGE_COL,                charge);
+      writer.setColumnCurrentRow(SPECTRUM_PRECURSOR_MZ_COL, precursorMz);
+      writer.setColumnCurrentRow(SPECTRUM_NEUTRAL_MASS_COL, neutralMass);
+      writer.setColumnCurrentRow(PEPTIDE_MASS_COL,          peptide.calcModifiedMass());
+      writer.setColumnCurrentRow(XCORR_SCORE_COL,           results.XCorr(i));
+      writer.setColumnCurrentRow(SEQUENCE_COL,              peptide.getModifiedSequenceWithMasses());
+      writer.setColumnCurrentRow(MODIFICATIONS_COL,         peptide.getModsString());
+      writer.setColumnCurrentRow(PROTEIN_ID_COL,            peptide.getProteinIdsLocations());
+      writer.setColumnCurrentRow(FLANKING_AA_COL,           flankingStr);
+      writer.setColumnCurrentRow(TARGET_DECOY_COL,          match->isDecoy() ? "decoy" : "target");
+      writer.writeRow();
+    }
+
+    curStep += cruxPeptide->getLength() + 1;
+    reportProgress(curStep, numSteps);
   }
   delete matchIter;
   delete matches;
 
-  delete outfile;
-
-  for (set<string>::const_iterator i = tempSr.begin(); i != tempSr.end(); i++) {
-    FileUtils::Remove(*i);
-  }
-
-  for (map<string, SpectrumCollection*>::const_iterator i = preloadedSpectra.begin();
-       i != preloadedSpectra.end();
+  for (map<string, Crux::SpectrumCollection*>::const_iterator i = spectrumCollections.begin();
+       i != spectrumCollections.end();
        i++) {
     delete i->second;
   }
@@ -170,6 +221,9 @@ vector<string> LocalizeModificationApplication::getArgs() const {
 
 vector<string> LocalizeModificationApplication::getOptions() const {
   string arr[] = {
+    "min-mod-mass",
+    "mod-precision",
+    "top-match",
     "output-dir",
     "overwrite",
     "parameter-file",
@@ -197,10 +251,12 @@ vector< pair<string, string> > LocalizeModificationApplication::getOutputs() con
 
 bool LocalizeModificationApplication::needsOutputDirectory() const { return true; }
 
+COMMAND_T LocalizeModificationApplication::getCommand() const { return LOCALIZE_MODIFICATION_COMMAND; }
+
 bool LocalizeModificationApplication::hidden() const { return false; }
 
-void LocalizeModificationApplication::reportProgress(int curPsm, int numPsms) {
-  int percent = (int)((double)curPsm / (double)numPsms * 100.0);
+void LocalizeModificationApplication::reportProgress(uint64_t curStep, uint64_t totalSteps) {
+  int percent = (int)((double)curStep / (double)totalSteps * 100.0);
   set<int>::iterator i = progress_.find(percent);
   if (i != progress_.end()) {
     progress_.erase(i);
@@ -208,21 +264,18 @@ void LocalizeModificationApplication::reportProgress(int curPsm, int numPsms) {
   }
 }
 
-void LocalizeModificationApplication::writeIndexProteins(
-  const string& proteinsFile,
+vector<const pb::Protein*> LocalizeModificationApplication::createPbProteins(
   Crux::Peptide* peptide
 ) const {
-  pb::Header header;
-  header.set_file_type(pb::Header::RAW_PROTEINS);
-  HeadedRecordWriter writer(proteinsFile, header);
+  vector<const pb::Protein*> proteins;
   int proteinId = -1;
   for (PeptideSrcIterator i = peptide->getPeptideSrcBegin();
        i != peptide->getPeptideSrcEnd();
        i++) {
-    pb::Protein protein;
-    protein.set_id(++proteinId);
+    pb::Protein* protein = new pb::Protein();
+    protein->set_id(++proteinId);
     Crux::Protein* cruxProtein = (*i)->getParentProtein();
-    protein.set_name(cruxProtein->getId());
+    protein->set_name(cruxProtein->getId());
     int start = (*i)->getStartIdxOriginal();
     int length = (int)peptide->getLength();
     string residues(start + length, 'X');
@@ -242,57 +295,58 @@ void LocalizeModificationApplication::writeIndexProteins(
         residues.push_back(flankC);
       }
     }
-    protein.set_residues(residues);
-    writer.Write(&protein);
+    protein->set_residues(residues);
+    proteins.push_back(protein);
   }
+  return proteins;
 }
 
-void LocalizeModificationApplication::writeIndexPeptides(
-  const string& peptidesFile,
-  const string& auxLocsFile,
-  Crux::Match* match
+vector<pb::Peptide> LocalizeModificationApplication::createPbPeptides(
+  Crux::Match* match,
+  VariableModTable* modTable,
+  vector<pb::AuxLocation>* outAuxLocs
 ) const {
+  if (outAuxLocs) {
+    outAuxLocs->clear();
+  }
+
   Crux::Peptide* cruxPeptide = match->getPeptide();
-  VariableModTable* modTable = getModTable(match);
 
-  pb::Header header;
-  header.set_file_type(pb::Header::PEPTIDES);
-  pb::Header_PeptidesHeader& pepHeader = *(header.mutable_peptides_header());
-  pepHeader.set_min_mass(match->getNeutralMass());
-  pepHeader.set_max_mass(match->getNeutralMass());
-  pepHeader.set_min_length(cruxPeptide->getLength());
-  pepHeader.set_max_length(cruxPeptide->getLength());
-  //pepHeader.set_enzyme();
-  //pepHeader.set_full_digestion();
-  // TODO Detect mono/average from results file?
-  pepHeader.set_monoisotopic_precursor(Params::GetString("isotopic-mass") == "mono");
-  pepHeader.set_has_peaks(false);
-  pepHeader.mutable_mods()->CopyFrom(*(modTable->ParsedModTable()));
-  pepHeader.mutable_nterm_mods()->CopyFrom(*(modTable->ParsedNtpepModTable()));
-  pepHeader.mutable_cterm_mods()->CopyFrom(*(modTable->ParsedCtpepModTable()));
-  //pepHeader.mutable_peptides_header()->set_decoys()
-  HeadedRecordWriter writer(peptidesFile, header);
-
-  pb::Header auxLocsHeader;
-  auxLocsHeader.set_file_type(pb::Header::AUX_LOCATIONS);
-  pb::Header_Source* source = auxLocsHeader.add_source();
-  source->set_filename(peptidesFile);
-  source->mutable_header()->CopyFrom(header);
-
-  HeadedRecordWriter writer2(auxLocsFile, auxLocsHeader);
-  int auxLocationsIndex = -1;
-
+  vector<pb::Peptide> peptides;
   pb::Peptide peptide;
-  peptide.set_mass(match->getNeutralMass());
+  int peptideId = -1;
+  peptide.set_id(++peptideId);
   peptide.set_length(cruxPeptide->getLength());
-  peptide.set_is_decoy(false);
+  peptide.set_is_decoy(cruxPeptide->isDecoy());
 
   char* seq = cruxPeptide->getSequence();
   string sequence(seq);
   free(seq);
   
+  int proteinId = -1;
+  pb::AuxLocation locations;
+  for (PeptideSrcIterator i = cruxPeptide->getPeptideSrcBegin(); i != cruxPeptide->getPeptideSrcEnd(); i++) {
+    int start = (*i)->getStartIdxOriginal();
+    if (++proteinId == 0) {
+      // first src
+      peptide.mutable_first_location()->set_protein_id(proteinId);
+      peptide.mutable_first_location()->set_pos(start);
+    } else if (outAuxLocs) {
+      // aux location
+      pb::Location* location = locations.add_location();
+      location->set_protein_id(proteinId);
+      location->set_pos(start);
+    }
+  }
+  if (outAuxLocs && locations.location_size() > 0) {
+    peptide.set_aux_locations_index(0);
+    outAuxLocs->push_back(locations);
+  }
+
   // add existing modifications
+  double pepMass = cruxPeptide->calcModifiedMass();
   vector<Crux::Modification> existingMods = cruxPeptide->getVarMods();
+  set<unsigned char> existingIndices;
   for (vector<Crux::Modification>::const_iterator i = existingMods.begin();
        i != existingMods.end();
        i++) {
@@ -303,7 +357,9 @@ void LocalizeModificationApplication::writeIndexPeptides(
     for (int j = 0; j < numPoss; j++) {
       int modIdx = modTable->PossDeltIx(aa, j, modType);
       // TODO Is there a better way to find the right modification?
-      if (abs(i->DeltaMass() - modTable->PossDelta(modIdx)) < 0.1) {
+      double modDelta = modTable->PossDelta(modIdx);
+      if (abs(i->DeltaMass() - modDelta) < 0.1) {
+        pepMass += modDelta;
         varModIdx = modIdx;
         break;
       }
@@ -312,9 +368,21 @@ void LocalizeModificationApplication::writeIndexPeptides(
       carp(CARP_FATAL, "Couldn't find mod %.1f in VariableModTable", i->DeltaMass());
     }
     peptide.add_modifications(modTable->EncodeMod((int)i->Index(), varModIdx));
+    existingIndices.insert(i->Index());
   }
+  peptide.set_mass(pepMass);
+
+  peptides.push_back(peptide); // Add unmodified peptide
 
   double modMass = calcModMass(match);
+  carp(CARP_DETAILED_INFO, "Implied mod mass is %f", modMass);
+
+  if (fabs(modMass) < Params::GetDouble("min-mod-mass")) {
+    return peptides; // Implied modification mass too low, don't create modified peptides
+  }
+
+  peptide.set_mass(pepMass + modMass);
+
   int openModIdx = -1;
   int numPoss = modTable->NumPoss('A');
   for (int i = 0; i < numPoss; i++) {
@@ -330,46 +398,17 @@ void LocalizeModificationApplication::writeIndexPeptides(
     carp(CARP_FATAL, "Couldn't find diff mod in VariableModTable");
   }
 
-  set<unsigned char> existingIndices;
-  for (vector<Crux::Modification>::const_iterator i = existingMods.begin();
-       i != existingMods.end();
-       i++) {
-    existingIndices.insert(i->Index());
-  }
-
-  int peptideId = -1;
+  int* pbMod = peptide.mutable_modifications()->Add();
   for (unsigned char i = 0; i < cruxPeptide->getLength(); i++) {
     if (existingIndices.find(i) != existingIndices.end()) {
       continue; // don't modify same AA twice
     }
-    pb::AuxLocation locations;
     peptide.set_id(++peptideId);
-    peptide.add_modifications(modTable->EncodeMod((int)i, openModIdx));
-
-    int proteinId = -1;
-    for (PeptideSrcIterator i = cruxPeptide->getPeptideSrcBegin();
-         i != cruxPeptide->getPeptideSrcEnd();
-         i++) {
-      int start = (*i)->getStartIdxOriginal();
-      if (++proteinId == 0) {
-        // first src
-        peptide.mutable_first_location()->set_protein_id(proteinId);
-        peptide.mutable_first_location()->set_pos(start);
-      } else {
-        // aux location
-        pb::Location* location = locations.add_location();
-        location->set_protein_id(proteinId);
-        location->set_pos(start);
-      }
-    }
-    if (locations.location_size() > 0) {
-      peptide.set_aux_locations_index(++auxLocationsIndex);
-      writer2.Write(&locations);
-    }
-    writer.Write(&peptide);
-    peptide.mutable_modifications()->RemoveLast();
+    *pbMod = modTable->EncodeMod((int)i, openModIdx);
+    peptides.push_back(peptide);
   }
-  delete modTable;
+
+  return peptides;
 }
 
 MODS_SPEC_TYPE_T LocalizeModificationApplication::modTypeToTide(ModPosition position) {

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href=""?>
-<msms_pipeline_analysis date="Mon Sep 11 11:39:20 2017" xmlns="http://regis-web.systemsbiology.net/pepXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://regis-web.systemsbiology.net/pepXML /usr/local/tpp/schema/pepXML_v110.xsd" summary_xml="">
+<msms_pipeline_analysis date="Thu Jan  4 12:54:15 2018" xmlns="http://regis-web.systemsbiology.net/pepXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://regis-web.systemsbiology.net/pepXML /usr/local/tpp/schema/pepXML_v110.xsd" summary_xml="">
 <msms_run_summary base_name="NA" msManufacturer="NA" msModel="NA" msIonization="NA" msAnalyzer="NA" msDectector="NA" raw_data_type="NA" raw_data="NA" >
 <sample_enzyme name="trypsin">
 </sample_enzyme>
@@ -8,19 +8,19 @@
 <search_database local_path="(null)" type="AA" />
 <enzymatic_search_constraint enzyme="trypsin" max_num_internal_cleavages="0" min_number_termini="2"/>
 <aminoacid_modification aminoacid="A" mass="72.7371" massdiff="1.70" variable="N" peptide_terminus="n" />
-<aminoacid_modification aminoacid="C" mass="160.0307" massdiff="57.02" variable="N" />
 <aminoacid_modification aminoacid="C" mass="104.7092" massdiff="1.70" variable="N" peptide_terminus="n" />
+<aminoacid_modification aminoacid="C" mass="160.0307" massdiff="57.02" variable="N" />
 <aminoacid_modification aminoacid="D" mass="116.7269" massdiff="1.70" variable="N" peptide_terminus="n" />
 <aminoacid_modification aminoacid="D" mass="116.8269" massdiff="1.80" variable="N" peptide_terminus="c" />
 <aminoacid_modification aminoacid="E" mass="130.7426" massdiff="1.70" variable="N" peptide_terminus="n" />
 <aminoacid_modification aminoacid="F" mass="148.7684" massdiff="1.70" variable="N" peptide_terminus="n" />
 <aminoacid_modification aminoacid="F" mass="148.8684" massdiff="1.80" variable="N" peptide_terminus="c" />
-<aminoacid_modification aminoacid="G" mass="58.8215" massdiff="1.80" variable="N" peptide_terminus="c" />
 <aminoacid_modification aminoacid="G" mass="58.7215" massdiff="1.70" variable="N" peptide_terminus="n" />
+<aminoacid_modification aminoacid="G" mass="58.8215" massdiff="1.80" variable="N" peptide_terminus="c" />
 <aminoacid_modification aminoacid="H" mass="138.7589" massdiff="1.70" variable="N" peptide_terminus="n" />
 <aminoacid_modification aminoacid="I" mass="114.7841" massdiff="1.70" variable="N" peptide_terminus="n" />
-<aminoacid_modification aminoacid="K" mass="129.8950" massdiff="1.80" variable="N" peptide_terminus="c" />
 <aminoacid_modification aminoacid="K" mass="129.7950" massdiff="1.70" variable="N" peptide_terminus="n" />
+<aminoacid_modification aminoacid="K" mass="129.8950" massdiff="1.80" variable="N" peptide_terminus="c" />
 <aminoacid_modification aminoacid="L" mass="114.7841" massdiff="1.70" variable="N" peptide_terminus="n" />
 <aminoacid_modification aminoacid="M" mass="132.7405" massdiff="1.70" variable="N" peptide_terminus="n" />
 <aminoacid_modification aminoacid="N" mass="115.7429" massdiff="1.70" variable="N" peptide_terminus="n" />
@@ -45,6 +45,7 @@
 <parameter name="min-peaks" value="20"/>
 <parameter name="enzyme" value="trypsin"/>
 <parameter name="custom-enzyme" value=""/>
+<parameter name="deisotope" value="0"/>
 <parameter name="digestion" value="full-digest"/>
 <parameter name="missed-cleavages" value="0"/>
 <parameter name="precursor-window" value="3"/>
@@ -76,6 +77,7 @@
 <parameter name="output-dir" value="crux-output"/>
 <parameter name="temp-dir" value=""/>
 <parameter name="top-match" value="5"/>
+<parameter name="top-match-in" value="0"/>
 <parameter name="seed" value="1"/>
 <parameter name="fragment-mass" value="mono"/>
 <parameter name="isotopic-mass" value="mono"/>
@@ -371,6 +373,7 @@
 <parameter name="pm-min-common-frag-peaks" value="20"/>
 <parameter name="pm-max-scan-separation" value="1000"/>
 <parameter name="pm-min-peak-pairs" value="100"/>
+<parameter name="min-mod-mass" value="0"/>
 </search_summary>
     <spectrum_query spectrum="demo.00035.00035.1" start_scan="35" end_scan="35" precursor_neutral_mass="708.0627" assumed_charge="1" index="1">
     <search_result>

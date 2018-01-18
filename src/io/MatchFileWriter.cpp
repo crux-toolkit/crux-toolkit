@@ -229,6 +229,23 @@ void MatchFileWriter::addColumnNames(CruxApplication* application,
     }
     break;
 
+  case LOCALIZE_MODIFICATION_COMMAND:
+    if (Params::GetBool("file-column")) {
+      addColumnName(FILE_COL);
+    }
+    addColumnName(SCAN_COL);
+    addColumnName(CHARGE_COL);
+    addColumnName(SPECTRUM_PRECURSOR_MZ_COL);
+    addColumnName(SPECTRUM_NEUTRAL_MASS_COL);
+    addColumnName(PEPTIDE_MASS_COL);
+    addColumnName(XCORR_SCORE_COL);
+    addColumnName(SEQUENCE_COL);
+    addColumnName(MODIFICATIONS_COL);
+    addColumnName(PROTEIN_ID_COL);
+    addColumnName(FLANKING_AA_COL);
+    addColumnName(TARGET_DECOY_COL);
+    return;
+
   case XLINK_SEARCH_COMMAND:
     if (Params::GetBool("compute-p-values")) {
       addColumnName(PVALUE_COL);
@@ -239,15 +256,14 @@ void MatchFileWriter::addColumnNames(CruxApplication* application,
     }
     if (!Params::GetBool("use-old-xlink")) {
       if (Params::GetInt("xlink-top-n") != 0) {
-	addColumnName(XCORR_FIRST_COL);
-	addColumnName(XCORR_SECOND_COL);
+        addColumnName(XCORR_FIRST_COL);
+        addColumnName(XCORR_SECOND_COL);
       }
       if (Params::GetBool("file-column")) {
-	addColumnName(FILE_COL);
+        addColumnName(FILE_COL);
       }
       addColumnName(ENZ_INT_COL);
     }
-    
     addColumnName(XLINK_TYPE_COL);
     break;
 
@@ -281,9 +297,8 @@ void MatchFileWriter::addColumnNames(CruxApplication* application,
         addColumnName(EMPAI_SCORE_COL);
         break;
       default:
-        ;//do nothing  
+        break; //do nothing  
     }
-
     return; // do not add additional columns
   }
 

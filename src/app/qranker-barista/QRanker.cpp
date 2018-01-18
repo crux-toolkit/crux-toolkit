@@ -1098,8 +1098,8 @@ int QRanker :: crux_set_command_line_options(int argc, char *argv[])
  * probabilities. 
  */
 void QRanker::computePEP(){
-  vector<double> target_scores_vect;
-  vector<double> decoy_scores_vect;
+  vector<FLOAT_T> target_scores_vect;
+  vector<FLOAT_T> decoy_scores_vect;
 
   // pull out the target and decoy scores
   for(int i = 0; i < fullset.size(); i++){
@@ -1113,14 +1113,7 @@ void QRanker::computePEP(){
   int num_targets = target_scores_vect.size();
   int num_decoys = decoy_scores_vect.size(); 
 
-  // copy them to an array as required by the compute_PEP method
-  double* target_scores = new double[num_targets];
-  copy(target_scores_vect.begin(), target_scores_vect.end(), target_scores);
-  double* decoy_scores = new double[num_decoys];
-  copy(decoy_scores_vect.begin(), decoy_scores_vect.end(), decoy_scores);
-
-  double* PEPs = ComputeQValues::compute_PEP(target_scores, num_targets, 
-                                             decoy_scores, num_decoys);
+  vector<double> PEPs = ComputeQValues::compute_PEP(target_scores_vect, decoy_scores_vect);
 
   // fill in the data set with the new scores for the targets
   int target_idx = 0;
@@ -1130,10 +1123,6 @@ void QRanker::computePEP(){
       target_idx++; 
     } // else, skip decoys
   }
-
-  delete target_scores;
-  delete decoy_scores;
-  delete PEPs;
 }
 
 

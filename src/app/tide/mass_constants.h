@@ -12,6 +12,7 @@
 #define MASS_CONSTANTS_H
 
 #include "mod_coder.h"
+#include "util/mass.h"
 #include <vector>
 
 #define BIN_WIDTH 1.0005079
@@ -27,8 +28,6 @@ class MassConstants {
   // Elemental mass values are from www.unimod.org/masses.html.
   static const double elts_mono[];
   static const double elts_avg[];
-
-  static const double proton;
 
   static bool Init(const pb::ModTable* mod_table, 
     const pb::ModTable* n_mod_table, 
@@ -99,10 +98,10 @@ class MassConstants {
     *delta = unique_deltas_[unique_delta_index];
   }
   static unsigned int mass2bin(double mass, int charge = 1) {
-    return (unsigned int)((mass + (charge - 1)*proton)/(charge*bin_width_) + 1.0 - bin_offset_);
+    return (unsigned int)((mass + (charge - 1)*MASS_PROTON)/(charge*bin_width_) + 1.0 - bin_offset_);
   }
   static double bin2mass(int bin, int charge = 1) {
-    return (bin - 1.0 + bin_offset_) * charge*bin_width_ + (charge - 1)*proton;
+    return (bin - 1.0 + bin_offset_) * charge*bin_width_ + (charge - 1)*MASS_PROTON;
   }
 
   static double bin_width_;

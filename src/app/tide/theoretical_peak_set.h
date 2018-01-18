@@ -457,7 +457,7 @@ class TheoreticalPeakSetBYSparse : public TheoreticalPeakSet {
 
   void AddYIon(double mass, int charge) {
      assert(charge <= 2);
-    int index_y = MassConstants::mass2bin(mass + MassConstants::Y + MassConstants::proton, charge);
+    int index_y = MassConstants::mass2bin(mass + MassConstants::Y + MASS_PROTON, charge);
 //    cout << "index_y:  " << index_y << endl;
     TheoreticalPeakType series;
     if (charge == 1) {
@@ -479,7 +479,7 @@ class TheoreticalPeakSetBYSparse : public TheoreticalPeakSet {
 
   void AddBIon(double mass, int charge) {
      assert(charge <= 2);
-    int index_b = MassConstants::mass2bin(mass + MassConstants::B + MassConstants::proton, charge);
+    int index_b = MassConstants::mass2bin(mass + MassConstants::B + MASS_PROTON, charge);
 //    cout << "index_b:  " << index_b << endl;
     TheoreticalPeakType series;
     if (charge == 1) {
@@ -780,8 +780,10 @@ class TheoreticalPeakSetBIons {
 
   void Clear() { unordered_peak_list_.clear(); }
   void AddBIon(double mass) {
-    unsigned int index = (unsigned int)floor(mass / binWidth_ + 1.0 - binOffset_);
-    unordered_peak_list_.push_back(index);
+    int index = (int)floor(mass / binWidth_ + 1.0 - binOffset_);
+    if (index >= 0) {
+      unordered_peak_list_.push_back((unsigned int)index);
+    }
   }
   vector<unsigned int> unordered_peak_list_;
   double binWidth_;

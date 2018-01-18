@@ -38,8 +38,8 @@ const ModificationDefinition* ModificationDefinition::NewStaticMod(
   const string& aminoAcids, double deltaMass, ModPosition position,
   bool preventsCleavage, bool preventsXLink) {
   // Look for existing
-  vector<ModificationDefinition*> staticMods = modContainer_.StaticMods();
-  for (vector<ModificationDefinition*>::const_iterator i = staticMods.begin();
+  set<ModificationDefinition*> staticMods = modContainer_.StaticMods();
+  for (set<ModificationDefinition*>::const_iterator i = staticMods.begin();
        i != staticMods.end();
        i++) {
     if (MathUtil::AlmostEqual((*i)->deltaMass_, deltaMass, Params::GetInt("mod-precision")) &&
@@ -48,7 +48,7 @@ const ModificationDefinition* ModificationDefinition::NewStaticMod(
         (*i)->preventsXLink_ == preventsXLink) {
       string added = (*i)->AddAminoAcids(aminoAcids);
       for (string::const_iterator j = added.begin(); j != added.end(); j++) {
-        modContainer_.staticMods_[*j].push_back(*i);
+        modContainer_.staticMods_[*j].insert(*i);
       }
       if (position != UNKNOWN && (*i)->position_ == UNKNOWN) {
         (*i)->position_ = position;
@@ -67,7 +67,7 @@ const ModificationDefinition* ModificationDefinition::NewVarMod(
   const string& aminoAcids, double deltaMass, ModPosition position,
   bool preventsCleavage, bool preventsXLink, bool monoLink, char symbol) {
   // Look for existing
-  for (vector<ModificationDefinition*>::const_iterator i = modContainer_.varMods_.begin();
+  for (set<ModificationDefinition*>::const_iterator i = modContainer_.varMods_.begin();
        i != modContainer_.varMods_.end();
        i++) {
     if (MathUtil::AlmostEqual((*i)->deltaMass_, deltaMass, Params::GetInt("mod-precision")) &&
@@ -132,8 +132,8 @@ void ModificationDefinition::ListAll() {
 void ModificationDefinition::ListStaticMods() {
   // For debugging
   carp(CARP_INFO, "Listing static modifications");
-  vector<ModificationDefinition*> staticMods = modContainer_.StaticMods();
-  for (vector<ModificationDefinition*>::const_iterator i = staticMods.begin();
+  set<ModificationDefinition*> staticMods = modContainer_.StaticMods();
+  for (set<ModificationDefinition*>::const_iterator i = staticMods.begin();
        i != staticMods.end();
        i++) {
     carp(CARP_INFO, "%s", (*i)->String().c_str());
@@ -143,11 +143,27 @@ void ModificationDefinition::ListStaticMods() {
 void ModificationDefinition::ListVarMods() {
   // For debugging
   carp(CARP_INFO, "Listing variable modifications");
-  for (vector<ModificationDefinition*>::const_iterator i = modContainer_.varMods_.begin();
+  for (set<ModificationDefinition*>::const_iterator i = modContainer_.varMods_.begin();
        i != modContainer_.varMods_.end();
        i++) {
     carp(CARP_INFO, "%s", (*i)->String().c_str());
   }
+}
+
+void ModificationDefinition::Remove(const ModificationDefinition* mod) {
+  if (mod == NULL) {
+    return;
+  } else if (mod->symbol_ == '\0') {
+    // Static
+    for (set<char>::const_iterator i = mod->aminoAcids_.begin(); i != mod->aminoAcids_.end(); i++) {
+      modContainer_.staticMods_[*i].erase((ModificationDefinition*)mod);
+    }
+  } else {
+    // Variable
+    modContainer_.varMods_.erase((ModificationDefinition*)mod);
+    modContainer_.symbolPool_.push_front(mod->symbol_);
+  }
+  delete mod;
 }
 
 void ModificationDefinition::ClearAll() {
@@ -155,8 +171,8 @@ void ModificationDefinition::ClearAll() {
 }
 
 void ModificationDefinition::ClearStaticMods() {
-  vector<ModificationDefinition*> staticMods = modContainer_.StaticMods();
-  for (vector<ModificationDefinition*>::const_iterator i = staticMods.begin();
+  set<ModificationDefinition*> staticMods = modContainer_.StaticMods();
+  for (set<ModificationDefinition*>::const_iterator i = staticMods.begin();
        i != staticMods.end();
        i++) {
     delete *i;
@@ -165,7 +181,7 @@ void ModificationDefinition::ClearStaticMods() {
 }
 
 void ModificationDefinition::ClearVarMods() {
-  for (vector<ModificationDefinition*>::const_iterator i = modContainer_.varMods_.begin();
+  for (set<ModificationDefinition*>::const_iterator i = modContainer_.varMods_.begin();
        i != modContainer_.varMods_.end();
        i++) {
     delete *i;
@@ -177,28 +193,30 @@ void ModificationDefinition::ClearVarMods() {
 vector<const ModificationDefinition*> ModificationDefinition::AllMods() {
   vector<const ModificationDefinition*> mods = StaticMods();
   vector<const ModificationDefinition*> varMods = VarMods();
-  mods.insert(mods.end(), varMods.begin(), varMods.end());
+  std::copy(varMods.begin(), varMods.end(), std::back_inserter(mods));
   return mods;
 }
 
 vector<const ModificationDefinition*> ModificationDefinition::StaticMods(char c) {
-  vector<ModificationDefinition*> mods = modContainer_.StaticMods(c);
+  set<ModificationDefinition*> mods = modContainer_.StaticMods(c);
   vector<const ModificationDefinition*> modsConst;
-  for (vector<ModificationDefinition*>::const_iterator i = mods.begin();
+  for (set<ModificationDefinition*>::const_iterator i = mods.begin();
        i != mods.end();
        i++) {
     modsConst.push_back(*i);
   }
+  std::sort(modsConst.begin(), modsConst.end(), ModificationDefinition::SortFunction);
   return modsConst;
 }
 
 vector<const ModificationDefinition*> ModificationDefinition::VarMods() {
   vector<const ModificationDefinition*> mods;
-  for (vector<ModificationDefinition*>::const_iterator i = modContainer_.varMods_.begin();
+  for (set<ModificationDefinition*>::const_iterator i = modContainer_.varMods_.begin();
        i != modContainer_.varMods_.end();
        i++) {
     mods.push_back(*i);
   }
+  std::sort(mods.begin(), mods.end(), ModificationDefinition::SortFunction);
   return mods;
 }
 
@@ -248,7 +266,7 @@ bool ModificationDefinition::MonoLink() const {
 }
 
 const ModificationDefinition* ModificationDefinition::Find(char symbol) {
-  for (vector<ModificationDefinition*>::const_iterator i = modContainer_.varMods_.begin();
+  for (set<ModificationDefinition*>::const_iterator i = modContainer_.varMods_.begin();
        i != modContainer_.varMods_.end();
        i++) {
     if ((*i)->symbol_ == symbol) {
@@ -260,9 +278,9 @@ const ModificationDefinition* ModificationDefinition::Find(char symbol) {
 
 const ModificationDefinition* ModificationDefinition::Find(
   double deltaMass, bool isStatic, ModPosition position) {
-  vector<ModificationDefinition*> staticMods = modContainer_.StaticMods();
-  vector<ModificationDefinition*>* mods = isStatic ? &staticMods : &modContainer_.varMods_;
-  for (vector<ModificationDefinition*>::const_iterator i = mods->begin();
+  set<ModificationDefinition*> staticMods = modContainer_.StaticMods();
+  set<ModificationDefinition*>* mods = isStatic ? &staticMods : &modContainer_.varMods_;
+  for (set<ModificationDefinition*>::const_iterator i = mods->begin();
        i != mods->end();
        i++) {
     if ((position == UNKNOWN || position == (*i)->Position()) &&
@@ -271,6 +289,45 @@ const ModificationDefinition* ModificationDefinition::Find(
     }
   }
   return NULL;
+}
+
+bool ModificationDefinition::SortFunction(const ModificationDefinition* x, const ModificationDefinition* y) {
+  if (x == y) {
+    return false;
+  } else if (x->Static() != y->Static()) {
+    return x->Static();
+  } else if (x->position_ != y->position_) {
+    map<ModPosition, int> posValues;
+    posValues[PROTEIN_N] = 0;
+    posValues[PEPTIDE_N] = 1;
+    posValues[ANY] = 2;
+    posValues[PEPTIDE_C] = 3;
+    posValues[PROTEIN_C] = 4;
+    posValues[UNKNOWN] = 5;
+    return posValues[x->position_] - posValues[y->position_] < 0;
+  } else if (x->deltaMass_ != y->deltaMass_) {
+    return x->deltaMass_ > y->deltaMass_;
+  }
+  const set<char>& xAminos = x->aminoAcids_;
+  const set<char>& yAminos = y->aminoAcids_;
+  if (xAminos.size() != yAminos.size()) {
+    return xAminos.size() > yAminos.size();
+  }
+  set<char>::const_iterator i = xAminos.begin();
+  set<char>::const_iterator j = yAminos.begin();
+  for ( ; i != xAminos.end(); i++, j++) {
+    if (*i != *j) {
+      return *i < *j;
+    }
+  }
+  if (x->preventsCleavage_ != y->preventsCleavage_) {
+    return x->preventsCleavage_;
+  } else if (x->preventsXLink_ != y->preventsXLink_) {
+    return x->preventsXLink_;
+  } else if (x->monoLink_ != y->monoLink_) {
+    return x->monoLink_;
+  }
+  return false;
 }
 
 string ModificationDefinition::AddAminoAcids(const string& aminoAcids) {
@@ -410,6 +467,10 @@ unsigned char Modification::Index() const {
 
 const ModificationDefinition* Modification::Definition() const {
   return mod_;
+}
+
+const set<char>& Modification::AminoAcids() const {
+  return mod_->AminoAcids();
 }
 
 double Modification::DeltaMass() const {
@@ -572,7 +633,14 @@ MODIFIED_AA_T* Modification::ToSeq(const string& seq, const vector<Modification>
 }
 
 bool Modification::SortFunction(const Modification& x, const Modification& y) {
-  return x.mod_ != y.mod_ ? x.mod_ < y.mod_ : x.index_ < y.index_;
+  if (x.mod_ == y.mod_) {
+    return x.index_ < y.index_;
+  } else if (x.Static() != y.Static()) {
+    return x.Static();
+  } else if (x.index_ != y.index_) {
+    return x.index_ < y.index_;
+  }
+  return ModificationDefinition::SortFunction(x.mod_, y.mod_);
 }
 
 ModificationDefinitionContainer::ModificationDefinitionContainer() {
@@ -580,13 +648,13 @@ ModificationDefinitionContainer::ModificationDefinitionContainer() {
 }
 
 ModificationDefinitionContainer::~ModificationDefinitionContainer() {
-  for (vector<ModificationDefinition*>::const_iterator i = varMods_.begin();
+  for (set<ModificationDefinition*>::const_iterator i = varMods_.begin();
        i != varMods_.end();
        i++) {
     delete *i;
   }
-  vector<ModificationDefinition*> staticMods = StaticMods();
-  for (vector<ModificationDefinition*>::const_iterator i = staticMods.begin();
+  set<ModificationDefinition*> staticMods = StaticMods();
+  for (set<ModificationDefinition*>::const_iterator i = staticMods.begin();
        i != staticMods.end();
        i++) {
     delete *i;
@@ -608,19 +676,19 @@ void ModificationDefinitionContainer::InitSymbolPool() {
   symbolPool_.push_back('+');
 }
 
-vector<ModificationDefinition*> ModificationDefinitionContainer::StaticMods(char c) {
-  vector<ModificationDefinition*> mods;
-  for (map< char, vector<ModificationDefinition*> >::const_iterator i = staticMods_.begin();
+set<ModificationDefinition*> ModificationDefinitionContainer::StaticMods(char c) {
+  set<ModificationDefinition*> mods;
+  for (map< char, set<ModificationDefinition*> >::const_iterator i = staticMods_.begin();
        i != staticMods_.end();
        i++) {
     if (c != '\0' && c != i->first) {
       continue;
     }
-    for (vector<ModificationDefinition*>::const_iterator j = i->second.begin();
+    for (set<ModificationDefinition*>::const_iterator j = i->second.begin();
          j != i->second.end();
          j++) {
       if (find(mods.begin(), mods.end(), *j) == mods.end()) {
-        mods.push_back(*j);
+        mods.insert(*j);
       }
     }
   }
@@ -632,15 +700,14 @@ void ModificationDefinitionContainer::Add(ModificationDefinition* def) {
     for (set<char>::const_iterator i = def->AminoAcids().begin();
          i != def->AminoAcids().end();
          i++) {
-      map< char, vector<ModificationDefinition*> >::const_iterator j = staticMods_.find(*i);
+      map< char, set<ModificationDefinition*> >::const_iterator j = staticMods_.find(*i);
       if (j == staticMods_.end()) {
-        staticMods_[*i] = vector<ModificationDefinition*>(1, def);
-      } else {
-        staticMods_[*i].push_back(def);
+        staticMods_[*i] = set<ModificationDefinition*>();
       }
+      staticMods_[*i].insert(def);
     }
   } else {
-    varMods_.push_back(def);
+    varMods_.insert(def);
   }
   carp(CARP_DEBUG, "Added new modification [%x]: aa[%s] dM[%f] static[%d] symbol[%c]",
        def, StringUtils::Join(def->AminoAcids()).c_str(), def->DeltaMass(),
@@ -653,7 +720,7 @@ char ModificationDefinitionContainer::NextSymbol() {
     symbolPool_.pop_front();
     return symbol;
   }
-  carp_once(CARP_WARNING, "No more symbols for variable modifications available");
+  //carp_once(CARP_WARNING, "No more symbols for variable modifications available");
   return '+';
 }
 

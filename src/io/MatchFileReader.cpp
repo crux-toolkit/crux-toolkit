@@ -13,7 +13,7 @@
 using namespace std;
 
 /**
- * \returns a blank MatchFileReader object 
+ * \returns a blank MatchFileReader object
  */
 MatchFileReader::MatchFileReader() : DelimitedFileReader(), PSMReader() {
 }
@@ -21,12 +21,12 @@ MatchFileReader::MatchFileReader() : DelimitedFileReader(), PSMReader() {
 /**
  * \returns a MatchFileReader object and loads the tab-delimited
  * data specified by file_name.
- */  
+ */
 MatchFileReader::MatchFileReader(const char* file_name) : DelimitedFileReader(file_name, true) {
   parseHeader();
 }
 
-/** 
+/**
  * \returns a MatchFileReader object and loads the tab-delimited
  * data specified by file_name.
  */
@@ -164,7 +164,7 @@ void MatchFileReader::getMatchColumnsPresent(
   std::vector<bool>& col_is_present) {
   col_is_present.clear();
 
-  // has a header been parsed? 
+  // has a header been parsed?
   if( column_names_.empty() ) {
     return;
   }
@@ -185,6 +185,7 @@ MatchCollection* MatchFileReader::parse(
 MatchCollection* MatchFileReader::parse() {
   MatchCollection* match_collection = new MatchCollection();
   match_collection->preparePostProcess();
+  int maxRank = Params::GetInt("top-match-in");
 
   while (hasNext()) {
     FLOAT_T ln_experiment_size = 0;
@@ -218,19 +219,21 @@ MatchCollection* MatchFileReader::parse() {
     match_collection->setScoredType(BY_IONS_TOTAL, !empty(BY_IONS_TOTAL_COL));
 
     // parse match object
-    Crux::Match* match = parseMatch();
-    if (match == NULL) {
-      carp(CARP_ERROR, "Failed to parse tab-delimited PSM match");
-      return NULL;
-    }
+    if (maxRank == 0 || getInteger(XCORR_RANK_COL) <= maxRank) {
+      Crux::Match* match = parseMatch();
+      if (match == NULL) {
+        carp(CARP_ERROR, "Failed to parse tab-delimited PSM match");
+        return NULL;
+      }
 
-    //set all spectrum specific features to parsed match
-    SpectrumZState zState(getFloat(SPECTRUM_NEUTRAL_MASS_COL),
-                          getInteger(CHARGE_COL));
-    match->setZState(zState);
-    match->setLnExperimentSize(ln_experiment_size);    
-    //add match to match collection.
-    match_collection->addMatchToPostMatchCollection(match);
+      //set all spectrum specific features to parsed match
+      SpectrumZState zState(getFloat(SPECTRUM_NEUTRAL_MASS_COL),
+                            getInteger(CHARGE_COL));
+      match->setZState(zState);
+      match->setLnExperimentSize(ln_experiment_size);
+      //add match to match collection.
+      match_collection->addMatchToPostMatchCollection(match);
+    }
     //increment pointer.
     next();
   }
@@ -269,7 +272,7 @@ Crux::Match* MatchFileReader::parseMatch() {
   if (!empty(FILE_COL)) {
     match->setFilePath(getString(FILE_COL));
   }
-  
+
   if (empty(SP_SCORE_COL) || empty(SP_RANK_COL)) {
     match->setScore(SP, NOT_SCORED);
     match->setRank(SP, 0);
@@ -341,7 +344,9 @@ Crux::Match* MatchFileReader::parseMatch() {
   }
   match->setTargetExperimentSize(experimentSize);
   if (experimentSize == 0) {
-    carp_once(CARP_WARNING, "num target matches=0, suppressing warning");
+    carp_once(CARP_WARNING, "Matches/spectrum column not found ('%s' or '%s')",
+              get_column_header(DISTINCT_MATCHES_SPECTRUM_COL),
+              get_column_header(MATCHES_SPECTRUM_COL));
     match->setLnExperimentSize(0);
   } else {
     match->setLnExperimentSize(log((FLOAT_T) experimentSize));

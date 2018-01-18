@@ -127,23 +127,10 @@ class AssignConfidenceApplication : public CruxApplication {
   */
   virtual bool needsOutputDirectory() const;
 
-  FLOAT_T* compute_decoy_qvalues_tdc(
-    FLOAT_T* target_scores,
-    int      num_targets,
-    FLOAT_T* decoy_scores,
-    int      num_decoys,
-    bool     reverse);
-
   FLOAT_T* compute_qvalues_from_pvalues(
     FLOAT_T* pvalues,
     int      num_pvals,
     FLOAT_T  pi_zero);
-
-  FLOAT_T estimate_pi0(FLOAT_T* target_scores,
-    int      num_targets,
-    FLOAT_T* decoy_scores,
-    int      num_decoys,
-    bool     ascending);
 
   void peptide_level_filtering(
     MatchCollection* match_collection,
@@ -154,29 +141,21 @@ class AssignConfidenceApplication : public CruxApplication {
   void identify_best_psm_per_peptide
     (MatchCollection* all_matches,
     SCORER_TYPE_T score_type);
-  void convert_fdr_to_qvalue
-    (FLOAT_T* qvalues,     ///< Come in as FDRs, go out as q-values.
-    int      num_values);
-  map<FLOAT_T, FLOAT_T> store_arrays_as_hash
-    (FLOAT_T* keys,
-    FLOAT_T* values,
-    int      num_values);
-  FLOAT_T* compute_decoy_qvalues_tdc(
-    FLOAT_T* target_scores,
-    int      num_targets,
-    FLOAT_T* decoy_scores,
-    int      num_decoys,
-    bool     forward,
-    FLOAT_T  pi_zero
-    );
-  FLOAT_T* compute_decoy_qvalues_mixmax(
-    FLOAT_T* target_scores,
-    int      num_targets,
-    FLOAT_T* decoy_scores,
-    int      num_decoys,
-    bool     ascending,
-    FLOAT_T  pi_zero
-    );
+  void convert_fdr_to_qvalue(
+    std::vector<FLOAT_T>& qvalues); ///< Come in as FDRs, go out as q-values.
+  map<FLOAT_T, FLOAT_T> store_arrays_as_hash(
+    const std::vector<FLOAT_T>& keys,
+    const std::vector<FLOAT_T>& values);
+  std::vector<FLOAT_T> compute_decoy_qvalues_tdc(
+    std::vector<FLOAT_T>& target_scores,
+    std::vector<FLOAT_T>& decoy_scores,
+    bool forward,
+    FLOAT_T pi_zero);
+  std::vector<FLOAT_T> compute_decoy_qvalues_mixmax(
+    std::vector<FLOAT_T>& target_scores,
+    std::vector<FLOAT_T>& decoy_scores,
+    bool ascending,
+    FLOAT_T pi_zero);
 };
 
 #endif //ASSIGNCONFIDENCE_H

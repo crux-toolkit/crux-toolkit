@@ -1,6 +1,6 @@
 scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	xcorr score	xcorr rank	distinct matches/spectrum	sequence	modifications	cleavage type	protein id	flanking aa
 35	1	709.0699	708.0627	706.8905	0.24122301	1	0	IPYSPK	1_S_1.70_n,6_S_1.80_c	trypsin-full-digest	YMR309C	-X
-35	1	709.0699	708.0627	707.8527	0.19312476	2	0	CVLADK	1_S_57.02,1_S_1.70_n,6_S_1.80_c	trypsin-full-digest	YLR371W	-X
+35	1	709.0699	708.0627	707.8527	0.19312476	2	0	CVLADK	1_S_1.70_n,1_S_57.02,6_S_1.80_c	trypsin-full-digest	YLR371W	-X
 35	1	709.0699	708.0627	707.8340	0.12987687	3	0	DQDLSK	1_S_1.70_n,6_S_1.80_c	trypsin-full-digest	YFR053C	-X
 35	1	709.0699	708.0627	706.8687	0.100994	4	0	QMALNK	1_S_1.70_n,6_S_1.80_c	trypsin-full-digest	YDR205W	-X
 35	1	709.0699	708.0627	710.8602	0.0922902	5	0	FESAVR	1_S_1.70_n,6_S_1.80_c	trypsin-full-digest	YOR168W	-X
@@ -409,7 +409,7 @@ scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	xcorr scor
 57	2	564.6790	1127.3435	1128.0350	0.16560498	4	0	YESATASALVN	1_S_1.70_n,11_S_1.80_c	trypsin-full-digest	YDR064W	-X
 57	2	564.6790	1127.3435	1129.0455	0.071648821	5	0	DEGLFNLYR	1_S_1.70_n,9_S_1.80_c	trypsin-full-digest	YDL198C	-X
 123	2	565.0290	1128.0435	1126.1510	0.10924024	1	0	LPANLLQAQR	1_S_1.70_n,10_S_1.80_c	trypsin-full-digest	YHR183W	-X
-123	2	565.0290	1128.0435	1129.0238	0.10745996	2	0	CTINGVSYGR	1_S_57.02,1_S_1.70_n,10_S_1.80_c	trypsin-full-digest	YDR093W	-X
+123	2	565.0290	1128.0435	1129.0238	0.10745996	2	0	CTINGVSYGR	1_S_1.70_n,1_S_57.02,10_S_1.80_c	trypsin-full-digest	YDR093W	-X
 123	2	565.0290	1128.0435	1129.0455	0.099786162	3	0	DEGLFNLYR	1_S_1.70_n,9_S_1.80_c	trypsin-full-digest	YDL198C	-X
 123	2	565.0290	1128.0435	1128.0350	0.082020998	4	0	YESATASALVN	1_S_1.70_n,11_S_1.80_c	trypsin-full-digest	YDR064W	-X
 123	2	565.0290	1128.0435	1127.1600	0.068902656	5	0	VVVATSLNPPK	1_S_1.70_n,11_S_1.80_c	trypsin-full-digest	YBR115C	-X
@@ -420,7 +420,7 @@ scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	xcorr scor
 104	2	565.2189	1128.4233	1126.1510	0.11515108	5	0	LPANLLQAQR	1_S_1.70_n,10_S_1.80_c	trypsin-full-digest	YHR183W	-X
 58	2	565.6490	1129.2834	1129.0455	0.37432441	1	0	DEGLFNLYR	1_S_1.70_n,9_S_1.80_c	trypsin-full-digest	YDL198C	-X
 58	2	565.6490	1129.2834	1127.1600	0.37052593	2	0	VVVATSLNPPK	1_S_1.70_n,11_S_1.80_c	trypsin-full-digest	YBR115C	-X
-58	2	565.6490	1129.2834	1129.0238	0.21452078	3	0	CTINGVSYGR	1_S_57.02,1_S_1.70_n,10_S_1.80_c	trypsin-full-digest	YDR093W	-X
+58	2	565.6490	1129.2834	1129.0238	0.21452078	3	0	CTINGVSYGR	1_S_1.70_n,1_S_57.02,10_S_1.80_c	trypsin-full-digest	YDR093W	-X
 58	2	565.6490	1129.2834	1128.0350	0.19162706	4	0	YESATASALVN	1_S_1.70_n,11_S_1.80_c	trypsin-full-digest	YDR064W	-X
 58	2	565.6490	1129.2834	1132.0590	0.16896097	5	0	AIM[15.99]VNFGYAK	1_S_1.70_n,10_S_1.80_c,3_V_15.99	trypsin-full-digest	YOR168W	-X
 19	2	604.2889	1206.5634	1207.1110	-0.0739507	1	0	VNGDAHVISHR	1_S_1.70_n,11_S_1.80_c	trypsin-full-digest	YGR157W	-X

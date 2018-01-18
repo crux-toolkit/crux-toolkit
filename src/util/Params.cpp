@@ -44,7 +44,7 @@ using namespace std;
  *   add the name of your new parameter to the list of options there.
 
  * - In the same file, add a call to
- *   Params::get{Bool,Int,String,Double}() to retrieve the value
+ *   Params::Get{Bool,Int,String,Double}() to retrieve the value
  *   associated with the parameter.  In general, these methods can be
  *   used anywhere in the source code in order to retrieve parameters.
  *   However, it's good form, when feasible, to access parameters in
@@ -218,8 +218,17 @@ Params::Params() : finalized_(false) {
     "']'. If the residues prevent digestion, then they are enclosed in curly braces, "
     "'{' and '}'. Use X to indicate all residues. For example, trypsin cuts after R or "
     "K but not before P which is represented as [RK]|{P}. AspN cuts after any residue "
-    "but only before D which is represented as [X]|[D].",
+    "but only before D which is represented as [X]|[D]. "
+    "To prevent the sequences from being digested at all, use [Z]|[Z].",
     "", true);
+  InitDoubleParam("deisotope", 0, 0, 1000,
+    "Perform a simple deisotoping operation. For each peak, consider lower m/z peaks. "
+    "If the current peak occurs where an expected peak would lie for any charge state "
+    "less than the charge state of the precursor, within mass tolerance, and if the "
+    "current peak is of lower abundance, then the peak is removed.  The value of this "
+    "parameter is the mass tolerance, in units of parts-per-million.  If set to 0, no "
+    "deisotoping is performed.",
+    "Available for tide-search.", true);
   InitStringParam("digestion", "full-digest",
     "full-digest|partial-digest|non-specific-digest",
     "Specify whether every peptide in the database must have two enzymatic termini "
@@ -403,6 +412,10 @@ Params::Params() : finalized_(false) {
   InitIntParam("top-match", 5, 1, BILLION, 
     "Specify the number of matches to report for each spectrum.",
     "Available for tide-search and crux percolator", true);
+  InitIntParam("top-match-in", 0, 0, BILLION,
+    "Specify the maximum rank to allow when parsing results files. Matches with "
+    "ranks higher than this value will be ignored (a value of zero allows matches with any rank).",
+    "", true);
   InitStringParam("seed", "1",
     "When given a unsigned integer value seeds the random number generator with that value. "
     "When given the string \"time\" seeds the random number generator with the system time.",
@@ -1842,6 +1855,11 @@ Params::Params() : finalized_(false) {
     "Minimum number of peak pairs (for precursor or fragment) that must be "
     "successfully paired in order to attempt to estimate measurement error distribution.",
     "Available for param-medic and tide-search and comet", true);
+  // localize-modification
+  InitDoubleParam("min-mod-mass", 0, 0, BILLION,
+    "Ignore implied modifications where the absolute value of its mass is "
+    "below this value and only score the unmodified peptide.",
+    "Available for localize-modification", true);
 
   InitBoolParam("no-analytics", false, "Don't post data to Google Analytics.", "", false);
 
@@ -1923,6 +1941,7 @@ void Params::Categorize() {
   items.insert("auto-mz-bin-width");
   items.insert("compute-p-values");
   items.insert("compute-sp");
+  items.insert("deisotope");
   items.insert("exact-p-value");
   items.insert("fragment-mass");
   items.insert("isotope-error");

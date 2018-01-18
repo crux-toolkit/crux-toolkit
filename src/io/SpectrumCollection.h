@@ -25,6 +25,7 @@ class SpectrumCollection {
 
  protected:
   std::deque<Crux::Spectrum*> spectra_;  ///< spectra from the file
+  std::map<int, Crux::Spectrum*> spectraByScan_;
   std::string filename_;                  ///< filename
   bool is_parsed_;      ///< file has been read and spectra_ populated 
   int num_charged_spectra_;  ///< sum of all charge states from all spectra

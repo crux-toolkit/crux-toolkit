@@ -6,7 +6,6 @@
 
 using namespace std;
 
-double const MassConstants::proton = 1.00727646688;
 double const MassConstants::kFixedPointScalar = 1e5;
 
 const double MassConstants::elts_mono[] = {
@@ -15,7 +14,8 @@ const double MassConstants::elts_mono[] = {
   14.003074,   // N
   15.99491463, // O
   30.973762,   // P
-  31.9720707   // S
+  31.9720707,  // S
+  79.9165196   // Se
 };
 
 const double MassConstants::elts_avg[] = {
@@ -24,7 +24,8 @@ const double MassConstants::elts_avg[] = {
   14.0067,    // N
   15.9994,    // O
   30.973761,  // P
-  32.065      // S
+  32.065,     // S
+  78.96       // Se
 };
     
 double MassConstants::mono_table[256];
@@ -77,7 +78,7 @@ const FixPt MassConstants::fixp_mono_h2o = ToFixPt(MassConstants::mono_h2o);
 const FixPt MassConstants::fixp_avg_h2o  = ToFixPt(MassConstants::avg_h2o);
 const FixPt MassConstants::fixp_mono_nh3 = ToFixPt(MassConstants::mono_nh3);
 const FixPt MassConstants::fixp_mono_co  = ToFixPt(MassConstants::mono_co);
-const FixPt MassConstants::fixp_proton   = ToFixPt(MassConstants::proton);
+const FixPt MassConstants::fixp_proton   = ToFixPt(MASS_PROTON);
 
 ModCoder MassConstants::mod_coder_;
 vector<double> MassConstants::unique_deltas_;
@@ -87,7 +88,7 @@ static bool CheckModTable(const pb::ModTable& mod_table);
 
 void MassConstants::FillMassTable(const double* elements, double* table) {
   const double* e = elements;
-  double H = e[0], C = e[1], N = e[2], O = e[3], P = e[4], S = e[5];
+  double H = e[0], C = e[1], N = e[2], O = e[3], P = e[4], S = e[5], Se = e[6];
 
   for (int i = 0; i < 256; ++i)
     table[i] = numeric_limits<double>::signaling_NaN();
@@ -100,15 +101,18 @@ void MassConstants::FillMassTable(const double* elements, double* table) {
   table['G'] = C*2  + H*3  + N   + O       ;
   table['H'] = C*6  + H*7  + N*3 + O       ;
   table['I'] = C*6  + H*11 + N   + O       ;
+  table['J'] = C*6  + H*11 + N   + O       ;
   table['K'] = C*6  + H*12 + N*2 + O       ;
   table['L'] = C*6  + H*11 + N   + O       ;
   table['M'] = C*5  + H*9  + N   + O   + S ;
   table['N'] = C*4  + H*6  + N*2 + O*2     ;
+  table['O'] = C*12 + H*21 + N*3 + O*3     ;
   table['P'] = C*5  + H*7  + N   + O       ;
   table['Q'] = C*5  + H*8  + N*2 + O*2     ;
   table['R'] = C*6  + H*12 + N*4 + O       ;
   table['S'] = C*3  + H*5  + N   + O*2     ;
   table['T'] = C*4  + H*7  + N   + O*2     ;
+  table['U'] = C*3  + H*7  + N   + O*2 + Se;
   table['V'] = C*5  + H*9  + N   + O       ;
   table['W'] = C*11 + H*10 + N*2 + O       ;
   table['Y'] = C*9  + H*9  + N   + O*2     ;

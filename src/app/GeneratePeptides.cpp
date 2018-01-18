@@ -530,7 +530,7 @@ string GeneratePeptides::getDescription() const {
     "not possible. In this case, the occurrence of these target/decoy overlaps "
     "is recorded in the log file.</p><p>The program considers only the "
     "standard set of 20 amino acids. Peptides containing non-amino acid "
-    "alphanumeric characters (BJOUXZ) are skipped. Non-alphanumeric characters "
+    "alphanumeric characters (BXZ) are skipped. Non-alphanumeric characters "
     "are ignored completely.</p>]]";
 }
 

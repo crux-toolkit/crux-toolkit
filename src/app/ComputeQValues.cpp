@@ -10,14 +10,6 @@
 
 using namespace std;
 
-#ifdef _MSC_VER
-// The Microsoft C++ compiler has trouble resolving the proper virtual
-// function call when the STL make_pair is combined with the STL ptr_fun.
-// They promise to fix this a later version, but until then we create our own wrapper
-// for this use of make_pair.
-pair<double, bool> make_pair(double db, bool b);
-#endif
-
 /**
  * \returns a blank ComputeQValues object
  */
@@ -55,51 +47,18 @@ int ComputeQValues::main(const vector<string>& input_files) {
  * \returns A newly allocated array of PEP for the target scores
  * sorted.
  */
-
-#ifdef _MSC_VER
-// The Microsoft 10.0 C++ compiler has trouble resolving the proper virtual
-// function call when the STL make_pair is combined with the STL ptr_fun.
-// They promise to fix this in v11, but until then we create our own wrapper
-// for this use of make_pair. (See corresponding ifdef block in compute_PEP)
-pair<double, bool> make_pair(double db, bool b) {
-  return std::pair<double, bool>(db, b);
-}
-#endif
-double* ComputeQValues::compute_PEP(double* target_scores, ///< scores for target matches
-                        int num_targets,       ///< size of target_scores
-                        double* decoy_scores,  ///< scores for decoy matches
-                        int num_decoys,         ///< size of decoy_scores
-                        bool ascending ///< are the scores ascending or descending
+vector<double> ComputeQValues::compute_PEP(
+  const vector<FLOAT_T>& target_scores, ///< scores for target matches
+  const vector<FLOAT_T>& decoy_scores,  ///< scores for decoy matches
+  bool ascending ///< are the scores ascending or descending
 ) {
-  if (target_scores == NULL || decoy_scores == NULL || num_targets == 0 || num_decoys == 0) {
+  if (target_scores.empty() || decoy_scores.empty()) {
     carp(CARP_FATAL, "Cannot compute PEP without target or decoy scores.");
   }
-//  pi0 = estimate_pi0(target_scores, num_targets, decoy_scores, num_decoys, ascending);
 
-  // put all of the scores in a single vector of pairs: score, is_target
-  vector<pair<double, bool> > score_labels;
-
-  transform(target_scores, target_scores + num_targets,
-            back_inserter(score_labels),
-            bind2nd(ptr_fun<double, bool, pair<double, bool> >(make_pair), true));
-  transform(decoy_scores, decoy_scores + num_decoys,
-            back_inserter(score_labels),
-            bind2nd(ptr_fun<double, bool, pair<double, bool> >(make_pair), false));
-
-  // sort them 
-  if (ascending) {
-    sort(score_labels.begin(), score_labels.end());
-    PosteriorEstimator::setReversed(true);
-  } else {
-    sort(score_labels.begin(), score_labels.end(),
-       greater<pair<double, bool> > ());  
-  }
-  // get p-values
-  vector<double> pvals;
-  PosteriorEstimator::getPValues(score_labels, pvals);
-  
-  // estimate pi0
-  double pi0 = PosteriorEstimator::estimatePi0(pvals);
+  vector< pair<double, bool> > score_labels =
+    getScoreVector(target_scores, decoy_scores, ascending);
+  double pi0 = estimatePi0(score_labels);
 
   // estimate PEPs
   vector<double> PEP_vector;
@@ -112,9 +71,8 @@ double* ComputeQValues::compute_PEP(double* target_scores, ///< scores for targe
   // now score_labels and PEPs are similarly sorted
 
   // pull out the PEPs in the order that the scores were given
-  double* PEP_array = new double[PEP_vector.size()];
-
-  for (int target_idx = 0; target_idx < num_targets; target_idx++) {
+  vector<double> pep(PEP_vector.size(), 0);
+  for (int target_idx = 0; target_idx < target_scores.size(); target_idx++) {
     // the score to return next    
     double curr_target_score = target_scores[target_idx];
 
@@ -134,10 +92,43 @@ double* ComputeQValues::compute_PEP(double* target_scores, ///< scores for targe
     size_t found_index = distance(score_labels.begin(), found_score_pos);
 
     // pull out the PEP at the same position in PEP_vector
-    PEP_array[target_idx] = PEP_vector[found_index];
+    pep[target_idx] = PEP_vector[found_index];
+  }
+  return pep;
+}
+
+// put all of the scores in a single vector of pairs: score, is_target
+vector< pair<double, bool> > ComputeQValues::getScoreVector(
+  const vector<FLOAT_T>& targetScores,
+  const vector<FLOAT_T>& decoyScores,
+  bool ascending
+) {
+  vector< pair<double, bool> > scores;
+  scores.reserve(targetScores.size() + decoyScores.size());
+  for (vector<FLOAT_T>::const_iterator i = targetScores.begin(); i != targetScores.end(); i++) {
+    scores.push_back(make_pair(*i, true));
+  }
+  for (vector<FLOAT_T>::const_iterator i = decoyScores.begin(); i != decoyScores.end(); i++) {
+    scores.push_back(make_pair(*i, false));
   }
 
-  return PEP_array;
+  // sort them 
+  if (ascending) {
+    sort(scores.begin(), scores.end());
+    PosteriorEstimator::setReversed(true);
+  } else {
+    sort(scores.begin(), scores.end(), greater< pair<double, bool> > ());
+  }
+
+  return scores;
+}
+
+double ComputeQValues::estimatePi0(
+  const vector< pair<double, bool> >& scoreVector
+) {
+  vector<double> pVals;
+  PosteriorEstimator::getPValues(scoreVector, pVals);
+  return PosteriorEstimator::estimatePi0(pVals);
 }
 
 /**

@@ -366,10 +366,3 @@ class Spectrum{
  */
 
 #endif
-
-/** \mainpage The crux API documentation page.
- * \section Introduction
- * Welcome to crux, a C software package for analysis of tandem mass
- * spectrometry data. Click on the links above to see documentation for
- * crux objects and their user interfaces.
- */
