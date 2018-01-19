@@ -860,7 +860,7 @@ Params::Params() : finalized_(false) {
     "Available for read-tide-index", false);
   InitBoolParam("skip-preprocessing", false,
     "Skip preprocessing steps on spectra. Default = F.",
-    "Available for tide-search", false);
+    "Available for tide-search", true);
   InitStringParam("score-function", "xcorr","xcorr|residue-evidence|both",
     "Function used for scoring PSMs. 'xcorr' is the original scoring function used by SEQUEST; "
     "'residue-evidence' is designed to score high-resolution MS2 spectra; and 'both' calculates "
