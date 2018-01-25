@@ -222,7 +222,7 @@ Params::Params() : finalized_(false) {
     "To prevent the sequences from being digested at all, use [Z]|[Z].",
     "", true);
   InitDoubleParam("deisotope", 0, 0, 1000,
-    "Perform a simple deisotoping operation. For each peak, consider lower m/z peaks. "
+    "Perform a simple deisotoping operation across each MS2 spectrum. For each peak in an MS2 spectrum, consider lower m/z peaks. "
     "If the current peak occurs where an expected peak would lie for any charge state "
     "less than the charge state of the precursor, within mass tolerance, and if the "
     "current peak is of lower abundance, then the peak is removed.  The value of this "
