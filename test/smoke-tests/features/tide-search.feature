@@ -54,3 +54,5 @@ Examples:
   |tide-concat    |                                                             |--concat T                                              |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.txt       |tide-concat.txt    |
   |tide-isoerr    |                                                             |--isotope-error 1,2,3                                   |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-isoerr.txt    |
   |tide-isoerrpval|                                                             |--isotope-error 1,2,3 --exact-p-value T                 |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-isoerrpval.txt|
+  |tide-deiso     |                                                             |--deisotope 10                                          |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-deiso.txt     |
+  |tide-deiso-pval|                                                             |--deisotope 10 --exact-p-value t                        |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-deiso-pval.txt|
