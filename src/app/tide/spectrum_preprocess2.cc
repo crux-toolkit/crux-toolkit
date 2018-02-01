@@ -409,10 +409,10 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   vector<double> maxRegion(NUM_SPECTRUM_REGIONS,0);
   for (int i = 0; i < ionMasses.size(); i++) {
     int curRegion = intensRegion[i];
-    if (curRegion > 0 && maxRegion[curRegion] < ionIntensities[i]) {
+    if (maxRegion[curRegion] < ionIntensities[i]) {
       maxRegion[curRegion] = ionIntensities[i];
     }
-    else {
+    if (curRegion < 0) {
       carp(CARP_FATAL,"ion is in a negative region, should never happen");
     }
   }

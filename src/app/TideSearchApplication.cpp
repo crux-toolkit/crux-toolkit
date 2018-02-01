@@ -156,7 +156,7 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
   int* aaMass = NULL;
   int nAA = 0;
 
-  // Is used for curScoreFunctino = RESIDUE_EVIDENCE_MATRIX
+  // Is used for curScoreFunction = RESIDUE_EVIDENCE_MATRIX
   // contains frequency of amino acid masses (masses are not binned)
   vector<double> dAAFreqN;
   vector<double> dAAFreqI;

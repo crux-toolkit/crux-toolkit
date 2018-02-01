@@ -494,7 +494,7 @@ void TideMatchSet::writeHeaders(ofstream* file, bool decoyFile, bool sp) {
       }
 
       if (Params::GetInt("elution-window-size") > 0) {
-          *file << '\t' << get_column_header(ELUTION_WINDOW_COL);
+        *file << '\t' << get_column_header(ELUTION_WINDOW_COL);
       }
       writtenHeader = true;
       continue;
