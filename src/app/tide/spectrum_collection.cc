@@ -134,6 +134,36 @@ void Spectrum::SortIfNecessary() {
   }
 }
 
+// Do Morpheus-style simple(-istic?) deisotoping.  "For each
+// peak, lower m/z peaks are considered. If the reference peak
+// lies where an expected peak would lie for a charge state from
+// one to the charge state of the precursor, within mass
+// tolerance, and is of lower abundance, the reference peak is
+// considered to be an isotopic peak and removed."
+bool Spectrum::Deisotope(int index, double deisotope_threshold) const {
+  if (deisotope_threshold == 0.0) {
+    return false;
+  }
+  double location = M_Z(index);
+  double intensity = Intensity(index);
+  int maxCharge = MaxCharge();
+  for (int fragCharge = 1; fragCharge < maxCharge; fragCharge++) {
+    double isotopic_peak = location - (ISOTOPE_SPACING / fragCharge);
+    double ppm_difference = (location * deisotope_threshold) / 1e6;
+    double isotopic_intensity = MaxPeakInRange(isotopic_peak - ppm_difference,
+                                               isotopic_peak + ppm_difference);
+
+    if (intensity < isotopic_intensity) {
+      carp(CARP_DETAILED_DEBUG,
+           "Removing isotopic peak (%g, %g) because of peak in [%g, %g] with intensity %g.",
+           location, intensity, isotopic_peak - ppm_difference,
+           isotopic_peak + ppm_difference, isotopic_intensity);
+      return true;
+    }
+  }
+  return false;
+}
+
 /* Calculates vector of cleavage evidence for an observed spectrum, using XCorr
  * b/y/neutral peak sets and heights.
  *
@@ -146,7 +176,11 @@ vector<double> Spectrum::CreateEvidenceVector(
   double binOffset,
   int charge,
   double pepMassMonoMean,
-  int maxPrecurMass
+  int maxPrecurMass,
+  long int* num_range_skipped,
+  long int* num_precursors_skipped,
+  long int* num_isotopes_skipped,
+  long int* num_retained
 ) const {
   // TODO need to review these constants, decide which can be moved to parameter file
   const double maxIntensPerRegion = 50.0;
@@ -162,17 +196,36 @@ vector<double> Spectrum::CreateEvidenceVector(
   double maxIonIntens = 0.0;
 
   // Find max ion mass and max ion intensity
-  bool remove_precursor = Params::GetBool("remove-precursor-peak");
+  bool skipPreprocess = Params::GetBool("skip-preprocessing");
+  bool remove_precursor = !skipPreprocess && Params::GetBool("remove-precursor-peak");
   double precursorMZExclude = Params::GetDouble("remove-precursor-tolerance");
+  double deisotope_threshold = Params::GetDouble("deisotope");
+  set<int> peakSkip;
   for (int ion = 0; ion < numPeaks; ion++) {
     double ionMass = M_Z(ion);
     double ionIntens = Intensity(ion);
     if (ionMass >= experimentalMassCutoff) {
+      peakSkip.insert(ion);
+      if (num_range_skipped) {
+        (*num_range_skipped)++;
+      }
+      continue;
+    } else if (remove_precursor && ionMass > PrecursorMZ() - precursorMZExclude &&
+               ionMass < PrecursorMZ() + precursorMZExclude) {
+      peakSkip.insert(ion);
+      if (num_precursors_skipped) {
+        (*num_precursors_skipped)++;
+      }
+      continue;
+    } else if (deisotope_threshold != 0.0 && Deisotope(ion, deisotope_threshold)) {
+      peakSkip.insert(ion);
+      if (num_isotopes_skipped) {
+        (*num_isotopes_skipped)++;
+      }
       continue;
     }
-    if (remove_precursor && ionMass > PrecursorMZ() - precursorMZExclude &&
-        ionMass < PrecursorMZ() + precursorMZExclude) {
-      continue;
+    if (num_retained) {
+      (*num_retained)++;
     }
     if (maxIonMass < ionMass) {
       maxIonMass = ionMass;
@@ -187,15 +240,11 @@ vector<double> Spectrum::CreateEvidenceVector(
   vector<double> intensObs(maxPrecurMass, 0);
   vector<int> intensRegion(maxPrecurMass, -1);
   for (int ion = 0; ion < numPeaks; ion++) {
+    if (peakSkip.find(ion) != peakSkip.end()) {
+      continue;
+    }
     double ionMass = M_Z(ion);
     double ionIntens = Intensity(ion);
-    if (ionMass >= experimentalMassCutoff) {
-      continue;
-    }
-    if (remove_precursor && ionMass > PrecursorMZ() - precursorMZExclude && 
-        ionMass < PrecursorMZ() + precursorMZExclude) {
-      continue;
-    }
     int ionBin = MassConstants::mass2bin(ionMass);
     int region = (int)floor((double)(ionBin) / (double)regionSelector);
     if (region >= NUM_SPECTRUM_REGIONS) {
@@ -324,10 +373,15 @@ vector<int> Spectrum::CreateEvidenceVectorDiscretized(
   double binOffset,
   int charge,
   double pepMassMonoMean,
-  int maxPrecurMass
+  int maxPrecurMass,
+  long int* num_range_skipped,
+  long int* num_precursors_skipped,
+  long int* num_isotopes_skipped,
+  long int* num_retained
 ) const {
   vector<double> evidence =
-    CreateEvidenceVector(binWidth, binOffset, charge, pepMassMonoMean, maxPrecurMass);
+    CreateEvidenceVector(binWidth, binOffset, charge, pepMassMonoMean, maxPrecurMass,
+                         num_range_skipped, num_precursors_skipped, num_isotopes_skipped, num_retained);
   vector<int> discretized;
   discretized.reserve(evidence.size());
   for (vector<double>::const_iterator i = evidence.begin(); i != evidence.end(); i++) {

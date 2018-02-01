@@ -565,11 +565,6 @@ void TideSearchApplication::search(void* threadarg) {
       const int minDeltaMass = aaMass[0];
       const int maxDeltaMass = aaMass[nAA - 1];
 
-      // Deisotoping is not yet implemented.
-      if ( Params::GetDouble("deisotope") != 0.0 ) {
-        carp(CARP_FATAL, "Deisotoping is not yet implemented in conjunction with exact p-values.");
-      }
-
       int maxPrecurMass = floor(MaxBin::Global().CacheBinEnd() + 50.0); // TODO works, but is this the best way to get?
       int nCandPeptide = active_peptide_queue->SetActiveRangeBIons(min_mass, max_mass, min_range, max_range, candidatePeptideStatus);
       int candidatePeptideStatusSize = candidatePeptideStatus->size();
@@ -622,7 +617,8 @@ void TideSearchApplication::search(void* threadarg) {
         // preprocess to create one integerized evidence vector for each cluster of masses among selected peptides
         double pepMassMonoMean = (pepMaInt - 0.5 + bin_offset) * bin_width;
         evidenceObs[pe] = spectrum->CreateEvidenceVectorDiscretized(
-          bin_width, bin_offset, charge, pepMassMonoMean, maxPrecurMass);
+          bin_width, bin_offset, charge, pepMassMonoMean, maxPrecurMass,
+          &num_range_skipped, &num_precursors_skipped, &num_isotopes_skipped, &num_retained);
         // NOTE: will have to go back to separate dynamic programming for
         //       target and decoy if they have different probNI and probC
         int maxEvidence = *std::max_element(evidenceObs[pe].begin(), evidenceObs[pe].end());
