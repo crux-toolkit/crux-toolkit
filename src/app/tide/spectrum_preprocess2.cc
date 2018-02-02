@@ -84,6 +84,7 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
     for (int i = 0; i < spectrum.Size(); ++i) {
       double peak_location = spectrum.M_Z(i);
       if (peak_location >= experimental_mass_cut_off) {
+        (*num_range_skipped)++;
         continue;
       }
       int mz = MassConstants::mass2bin(peak_location);
@@ -117,41 +118,15 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
         continue;
       }
 
-      // Do Morpheus-style simple(-istic?) deisotoping.  "For each
-      // peak, lower m/z peaks are considered. If the reference peak
-      // lies where an expected peak would lie for a charge state from
-      // one to the charge state of the precursor, within mass
-      // tolerance, and is of lower abundance, the reference peak is
-      // considered to be an isotopic peak and removed."
-      double intensity = spectrum.Intensity(i);
-
-      bool skip_peak = false;
-      if (deisotope_threshold != 0.0) {
-        for (int fragCharge = 1; fragCharge < max_charge; ++fragCharge) {
-          double isotopic_peak = peak_location - (ISOTOPE_SPACING / fragCharge);
-          double ppm_difference = ( peak_location * deisotope_threshold ) / 1e6;
-          double isotopic_intensity = spectrum.MaxPeakInRange(isotopic_peak - ppm_difference,
-                                                              isotopic_peak + ppm_difference);
-        
-          if (intensity < isotopic_intensity) {
-            carp(CARP_DETAILED_DEBUG,
-                 "Removing isotopic peak (%g, %g) because of peak in [%g, %g] with intensity %g.",
-                 peak_location, intensity, isotopic_peak - ppm_difference,
-                 isotopic_peak + ppm_difference, isotopic_intensity);
-            skip_peak = true;
-            break;
-          }
-        }
-      }
-
-      if (skip_peak) {
+      if (deisotope_threshold != 0.0 && spectrum.Deisotope(i, deisotope_threshold)) {
         (*num_isotopes_skipped)++;
         continue;
-      } else {
-        (*num_retained)++;
       }
 
+      (*num_retained)++;
+
       int mz = MassConstants::mass2bin(peak_location);
+      double intensity = spectrum.Intensity(i);
       if ((mz > largest_mz) && (intensity > 0)) {
         largest_mz = mz;
       }

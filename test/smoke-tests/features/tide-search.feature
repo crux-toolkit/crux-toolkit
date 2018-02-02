@@ -58,3 +58,5 @@ Examples:
   |tide-combine-pval-7thread|                                                   |--score-function both --exact-p-value T --num-threads 7 |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-combine.txt   |
   |tide-resEv-pval-1thread|                                                     |--score-function residue-evidence --exact-p-value T --num-threads 1|small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-resEv.txt   |
   |tide-resEv-pval-7thread|                                                     |--score-function residue-evidence --exact-p-value T --num-threads 7|small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-resEv.txt   |
+  |tide-deiso     |                                                             |--deisotope 10                                          |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-deiso.txt     |
+  |tide-deiso-pval|                                                             |--deisotope 10 --exact-p-value t                        |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-deiso-pval.txt|

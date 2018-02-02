@@ -64,10 +64,29 @@ class Spectrum {
   double Intensity(int index) const { return peak_intensity_[index]; }
 
   void SortIfNecessary();
+
+  bool Deisotope(int index, double deisotope_threshold) const;
+
   std::vector<double> CreateEvidenceVector(
-    double binWidth, double binOffset, int charge, double pepMassMonoMean, int maxPrecurMass) const;
+    double binWidth,
+    double binOffset,
+    int charge,
+    double pepMassMonoMean,
+    int maxPrecurMass,
+    long int* num_range_skipped = NULL,
+    long int* num_precursors_skipped = NULL,
+    long int* num_isotopes_skipped = NULL,
+    long int* num_retained = NULL) const;
   std::vector<int> CreateEvidenceVectorDiscretized(
-    double binWidth, double binOffset, int charge, double pepMassMonoMean, int maxPrecurMass) const;
+    double binWidth,
+    double binOffset,
+    int charge,
+    double pepMassMonoMean,
+    int maxPrecurMass,
+    long int* num_range_skipped = NULL,
+    long int* num_precursors_skipped = NULL,
+    long int* num_isotopes_skipped = NULL,
+    long int* num_retained = NULL) const;
 
   int MaxCharge() const;
   double MaxPeakInRange( double min_range, double max_range ) const;
