@@ -649,10 +649,6 @@ void TideSearchApplication::search(void* threadarg) {
       if (flanking_peak == true && curScoreFunction != XCORR_SCORE) {
         carp(CARP_FATAL,"--score-function residue-evidence with --use-flanking-peaks true not implemented yet");
       }
-      // Deisotoping is not yet implemented.
-      if ( Params::GetDouble("deisotope") != 0.0 ) {
-        carp(CARP_FATAL, "Deisotoping is not yet implemented in conjunction with exact p-values.");
-      }
 
       int nCandPeptide = active_peptide_queue->SetActiveRangeBIons(min_mass, max_mass, min_range, max_range, candidatePeptideStatus);
       int candidatePeptideStatusSize = candidatePeptideStatus->size();
@@ -782,7 +778,8 @@ void TideSearchApplication::search(void* threadarg) {
           //preprocess to create one integerized evidence vector for each cluster of masses among selected peptides
           double pepMassMonoMean = (pepMaInt - 0.5 + bin_offset_) * bin_width_;
           evidenceObs[pe] = spectrum->CreateEvidenceVectorDiscretized(
-            bin_width, bin_offset, charge, pepMassMonoMean, maxPrecurMassBin);
+            bin_width, bin_offset, charge, pepMassMonoMean, maxPrecurMassBin,
+            &num_range_skipped, &num_precursors_skipped, &num_isotopes_skipped, &num_retained);
         }
 	    //END XCORR
 
