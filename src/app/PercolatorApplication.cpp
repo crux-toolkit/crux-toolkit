@@ -323,6 +323,11 @@ int PercolatorApplication::main(
     perc_args_vec.push_back("--fido-gridsearch-mse-threshold");
     perc_args_vec.push_back(Params::GetString("fido-gridsearch-mse-threshold"));
 
+    if (Params::GetDouble("spectral-counting-fdr") > 0.0) {
+      perc_args_vec.push_back("--spectral-counting-fdr");
+      perc_args_vec.push_back(Params::GetString("spectral-counting-fdr"));
+    }
+
     // Target proteins file is written to prevent writing to stdout
     perc_args_vec.push_back("--results-proteins");
     perc_args_vec.push_back(output_target_proteins);
@@ -336,6 +341,10 @@ int PercolatorApplication::main(
     perc_args_vec.push_back("--post-processing-tdc");
   } else {
     perc_args_vec.push_back("--post-processing-mix-max");
+  }
+
+  if (Params::GetBool("train-best-positive")) {
+    perc_args_vec.push_back("--train-best-positive");
   }
 
   perc_args_vec.push_back(input_pin);
@@ -528,11 +537,13 @@ vector<string> PercolatorApplication::getOptions() const {
     "protein-report-fragments",
     "quick-validation",
     "search-input",
+    "spectral-counting-fdr",
     "subset-max-train",
     "tdc",
     "test-each-iteration",
     "test-fdr",
     "top-match",
+    "train-best-positive",
     "train-fdr",
     "txt-output",
     "unitnorm",

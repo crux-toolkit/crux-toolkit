@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href=""?>
-<msms_pipeline_analysis date="Thu Jan  4 12:54:15 2018" xmlns="http://regis-web.systemsbiology.net/pepXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://regis-web.systemsbiology.net/pepXML /usr/local/tpp/schema/pepXML_v110.xsd" summary_xml="">
+<msms_pipeline_analysis date="Mon Feb  5 15:12:11 2018" xmlns="http://regis-web.systemsbiology.net/pepXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://regis-web.systemsbiology.net/pepXML /usr/local/tpp/schema/pepXML_v110.xsd" summary_xml="">
 <msms_run_summary base_name="NA" msManufacturer="NA" msModel="NA" msIonization="NA" msAnalyzer="NA" msDectector="NA" raw_data_type="NA" raw_data="NA" >
 <sample_enzyme name="trypsin">
 </sample_enzyme>
@@ -130,6 +130,8 @@
 <parameter name="override" value="false"/>
 <parameter name="klammer" value="false"/>
 <parameter name="only-psms" value="false"/>
+<parameter name="train-best-positive" value="false"/>
+<parameter name="spectral-counting-fdr" value="0"/>
 <parameter name="decoy-format" value="shuffle"/>
 <parameter name="mods-spec" value="C+57.02146"/>
 <parameter name="nterm-peptide-mods-spec" value=""/>
