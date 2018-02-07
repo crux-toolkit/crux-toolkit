@@ -43,8 +43,19 @@ fasta_file=../performance-tests/worm+contaminants.fa
 
 CRUX=../../src/crux
 
+# Avoid NFS overhead by using a scratch directory.
+scratch_dir=/scratch
+if [[ ! -e $scratch_dir ]]; then
+    scratch_dir=.
+else
+    cp $ms2_file $scratch_dir
+    ms2_file="$scratch_dir/$ms2_file"
+    cp $fasta_file $scratch_dir
+    fasta_file="$scratch_dir/$fasta_file"
+fi
+
 # Build the index.
-index=my_index
+index=$scratch_dir/my_index
 if [[ ! -e $index ]]; then
     $CRUX tide-index --decoy-format none \
 	  --output-dir $index \
@@ -52,7 +63,7 @@ if [[ ! -e $index ]]; then
 fi
 
 # Convert the MS2 to spectrumrecords
-spectrum_records=my_spectra
+spectrum_records=$scratch_dir/my_spectra
 if [[ ! -e $spectrum_records ]]; then
     $CRUX tide-search \
 	  --output-dir tmp \
@@ -102,7 +113,7 @@ for precursor in 3 10; do
 		fi
 
 		# Select among the four different search engines.
-		log_file=$root/tide-search.log.txt
+		log_file=$scratch_dir/$root/tide-search.log.txt
 		if [[ $engine == "tide1" ]]; then
 		    search_command="tide-search"
 		elif [[ $engine == "tide2" ]]; then
@@ -110,7 +121,7 @@ for precursor in 3 10; do
 		elif [[ $engine == "tide-p" ]]; then
 		    search_command="tide-search --exact-p-value T"
 		elif [[ $engine == "comet" ]]; then
-		    log_file=$root/comet.log.txt
+		    log_file=$scratch_dir/$root/comet.log.txt
 		    search_command="comet"
 		fi
 
@@ -121,14 +132,14 @@ for precursor in 3 10; do
 			      $comet_precursor \
 			      $comet_fragment \
 			      $comet_threads \
-			      --output-dir $root --overwrite T \
+			      --output-dir $scratch_dir/$root --overwrite T \
 			      $ms2_file $fasta_file
 		    else
   			$CRUX $search_command $tide_params \
 			      $tide_precursor \
 			      $tide_fragment \
 			      $tide_threads \
-			      --output-dir $root --overwrite T \
+			      --output-dir $scratch_dir/$root --overwrite T \
 			      $spectrum_records $index
 		    fi
 		fi
