@@ -69,48 +69,62 @@ for precursor in 3 10; do
     tide_params="--top-match 1"
 
     if [[ $precursor == 1 ]]; then
-	comet_params="$comet_params --peptide_mass_units ppm"
-	comet_params="$comet_params --peptide_mass_tolerance 10"
-	tide_params="$tide_params --precursor-window 10"
-	tide_params="$tide_params --precursor-window-type ppm"
+	comet_precursor="--peptide_mass_units ppm --peptide_mass_tolerance 10"
+	tide_precursor="--precursor-window 10 --precursor-window-type ppm"
+    else
+	comet_precursor=""
+	tide_precursor=""
     fi
     
     for fragment in 1 02; do
 
 	if [[ $fragment == 02 ]]; then
-	    comet_params="$comet_params --fragment-bin-tol 0.02"
-	    tide_params="$tide_params --mz-bin-width 0.02"
+	    comet_fragment="--fragment_bin_tol 0.02"
+	    tide_fragment="--mz-bin-width 0.02"
+	else
+	    comet_fragment=""
+	    tide_fragment=""
 	fi
 	
 	for threads in 1 4; do
-	    comet_params="$comet_params --num_threads $threads"
-	    tide_params="$tide_params --num-threads $threads"
+	    comet_threads="--num_threads $threads"
+	    tide_threads="--num-threads $threads"
 	    
 #	    for engine in tide1 tide2 tide-p comet; do
 	    for engine in tide1 tide-p comet; do
 		root=$engine.pre=$precursor.frag$fragment.threads$threads
 
+		if [[ $engine == "tide-p" && $fragment == 02 ]]; then
+		    continue
+		fi
+
 		# Select among the four different search engines.
 		log_file=$root/tide-search.log.txt
 		if [[ $engine == "tide1" ]]; then
-		    search_command="tide-search $tide_params"
+		    search_command="tide-search"
 		elif [[ $engine == "tide2" ]]; then
-		    search_command="tide-search --exact-p-value T --discretized-evidence=F"
+		    search_command="tide-search --exact-p-value T --discretized-evidence F"
 		elif [[ $engine == "tide-p" ]]; then
-		    search_command="tide-search --exact-p-value T $tide_params"
+		    search_command="tide-search --exact-p-value T"
 		elif [[ $engine == "comet" ]]; then
 		    log_file=$root/comet.log.txt
-		    search_command="comet $comet_params"
+		    search_command="comet"
 		fi
 
 		# Run the actual search.
 		if [[ ! -e $log_file ]]; then
-		    if [[ $engine == "comet" ]]; then
+		    if [[ $engine == "comet" ]] ; then
   			$CRUX $search_command $comet_params \
+			      $comet_precursor \
+			      $comet_fragment \
+			      $comet_threads \
 			      --output-dir $root --overwrite T \
 			      $ms2_file $fasta_file
 		    else
   			$CRUX $search_command $tide_params \
+			      $tide_precursor \
+			      $tide_fragment \
+			      $tide_threads \
 			      --output-dir $root --overwrite T \
 			      $spectrum_records $index
 		    fi
