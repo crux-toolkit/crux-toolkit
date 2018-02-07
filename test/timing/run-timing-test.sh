@@ -68,8 +68,8 @@ for precursor in 3 10; do
     comet_params="--decoy_search 0 --num_output_lines 1"
     tide_params="--top-match 1"
 
-    if [[ $precursor == 1 ]]; then
-	comet_precursor="--peptide_mass_units ppm --peptide_mass_tolerance 10"
+    if [[ $precursor == 10 ]]; then
+	comet_precursor="--peptide_mass_units 2 --peptide_mass_tolerance 10"
 	tide_precursor="--precursor-window 10 --precursor-window-type ppm"
     else
 	comet_precursor=""
@@ -90,11 +90,14 @@ for precursor in 3 10; do
 	    comet_threads="--num_threads $threads"
 	    tide_threads="--num-threads $threads"
 	    
-#	    for engine in tide1 tide2 tide-p comet; do
-	    for engine in tide1 tide-p comet; do
+	    for engine in tide1 tide2 tide-p comet; do
+#	    for engine in tide1 tide-p comet; do
 		root=$engine.pre=$precursor.frag$fragment.threads$threads
 
 		if [[ $engine == "tide-p" && $fragment == 02 ]]; then
+		    continue
+		fi
+		if [[ $engine == "tide2" && $fragment == 02 ]]; then
 		    continue
 		fi
 
