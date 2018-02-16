@@ -23,8 +23,8 @@ class TideMatchSet {
  public:
   bool exact_pval_search_;
   int elution_window_;
-  SCORE_FUNCTION_T cur_score_function;
-  
+  SCORE_FUNCTION_T cur_score_function_;
+
   typedef pair<int, int> Pair2;
   typedef FixedCapacityArray<Pair2> Arr2;
 
@@ -53,7 +53,7 @@ class TideMatchSet {
     Peptide* peptide,
     double max_mz
   );
-  
+
   ~TideMatchSet();
 
     /**
@@ -101,7 +101,7 @@ class TideMatchSet {
  protected:
   Arr* matches_;
   Arr2* matches2_;
-  Peptide* peptide_;  
+  Peptide* peptide_;
   double max_mz_;
 
   // For allocation
@@ -111,7 +111,7 @@ class TideMatchSet {
   static bool lessXcorrScore(const Scores& x, const Scores& y) {
     return x.xcorr_score < y.xcorr_score;
   }
-  
+
   static bool moreXcorrScore(const Scores& x, const Scores& y) {
     return x.xcorr_score > y.xcorr_score;
   }
@@ -139,7 +139,7 @@ class TideMatchSet {
   static bool moreResEvPvalScore(const Scores& x, const Scores& y) {
     return x.resEv_pval > y.resEv_pval;
   }
- 
+
   static bool lessCombinedPvalScore(const Scores& x, const Scores& y) {
     return x.combinedPval < y.combinedPval;
   }
@@ -158,7 +158,7 @@ class TideMatchSet {
     const vector<const pb::AuxLocation*>& locations,
     bool compute_sp ///< whether to compute sp or not
   );
-  
+
   /**
    * Helper function for tab delimited report function
    */
