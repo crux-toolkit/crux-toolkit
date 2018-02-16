@@ -67,8 +67,8 @@ void TideMatchSet::report(
     sort(peptide_->spectrum_matches_array.begin(),
          peptide_->spectrum_matches_array.end(),
          Peptide::spectrum_matches::compSC);
-  } 
- 
+  }
+
   for (int cnt = 0; cnt < nHit; ++cnt) {
     d_cn = 0.0;
     if (exact_pval_search_ == true) {
@@ -81,7 +81,7 @@ void TideMatchSet::report(
     } else {
       score = (double)(peptide_->spectrum_matches_array[cnt].score1_ / 100000000.0);
       if (cnt < nHit-1) {
-        d_cn = (double)( score 
+        d_cn = (double)( score
                       - (double)(peptide_->spectrum_matches_array[cnt+1].score1_ / 100000000.0)
                       / (double)max((FLOAT_T)score , FLOAT_T(1)));
       }
@@ -92,7 +92,7 @@ void TideMatchSet::report(
   }
   //smoothing primary scores in the elution window, only in DIA mode.
   if (elution_window_ > 0) {
-    sort(peptide_->spectrum_matches_array.begin(), 
+    sort(peptide_->spectrum_matches_array.begin(),
          peptide_->spectrum_matches_array.end(),
          Peptide::spectrum_matches::compRT);
     int cnt;
@@ -127,8 +127,8 @@ void TideMatchSet::report(
   if (compute_sp) {
     vector<pair<double, int> > spScoreRank;
     spScoreRank.reserve(top_matches);
-    for (int cnt = 0; cnt < top_matches; ++cnt) {  
-      SpScorer sp_scorer(proteins, *peptide_->spectrum_matches_array[cnt].spectrum_, 
+    for (int cnt = 0; cnt < top_matches; ++cnt) {
+      SpScorer sp_scorer(proteins, *peptide_->spectrum_matches_array[cnt].spectrum_,
                          peptide_->spectrum_matches_array[cnt].charge_, max_mz_);
       pb::Peptide* pb_peptide = getPbPeptide(*peptide_);
       sp_scorer.Score(*pb_peptide, peptide_->spectrum_matches_array[cnt].spData_);
@@ -138,7 +138,7 @@ void TideMatchSet::report(
     for (size_t i = 0; i < spScoreRank.size(); ++i) {
       peptide_->spectrum_matches_array[spScoreRank[i].second].spData_.sp_rank = i;
     }
-  }  
+  }
   // target peptide or concat search
   ofstream* file =
     (Params::GetBool("concat") || !peptide_->IsDecoy()) ? target_file : decoy_file;
@@ -186,12 +186,12 @@ void TideMatchSet::writeToFile(
   }
 
   Crux::Peptide cruxPep = getCruxPeptide(peptide);
-  for (vector<Peptide::spectrum_matches>::const_iterator 
-        i = peptide_->spectrum_matches_array.begin(); 
-        i != peptide_->spectrum_matches_array.end(); 
+  for (vector<Peptide::spectrum_matches>::const_iterator
+        i = peptide_->spectrum_matches_array.begin();
+        i != peptide_->spectrum_matches_array.end();
         ++i) {
     Spectrum* spectrum = i->spectrum_;
-    
+
     *file << spectrum->SpectrumNumber() << '\t'
           << i->charge_ << '\t'
           << spectrum->PrecursorMZ() << '\t'
@@ -211,7 +211,7 @@ void TideMatchSet::writeToFile(
     } else {
       *file << StringUtils::ToString(i->score1_, precision, true) << '\t';
     }
-    
+
     if (elution_window_ ) {
       *file << i->elution_score_ << '\t';
     }
@@ -370,26 +370,30 @@ void TideMatchSet::writeToFile(
 
     // Use scientific notation for exact p-value, but not refactored XCorr.
     // Second argument to StringUtils::ToString determines number of decimals
-    if(cur_score_function == XCORR_SCORE) {
+    switch (cur_score_function_) {
+    case XCORR_SCORE:
       if (exact_pval_search_) {
         *file << StringUtils::ToString((*i)->xcorr_pval, precision, false) << '\t';
         *file << StringUtils::ToString((*i)->xcorr_score, precision, true) << '\t';
       } else {
         *file << StringUtils::ToString((*i)->xcorr_score, precision, true) << '\t';
       }
-    } else if (cur_score_function == RESIDUE_EVIDENCE_MATRIX) {
+      break;
+    case RESIDUE_EVIDENCE_MATRIX:
       if (exact_pval_search_) {
         *file << StringUtils::ToString((*i)->resEv_pval, precision, false) << '\t';
         *file << StringUtils::ToString((*i)->resEv_score, 1, true) << '\t';
       } else {
         *file << StringUtils::ToString((*i)->resEv_score, 1, true) << '\t';
       }
-    } else if (cur_score_function == BOTH_SCORE) {
+      break;
+    case BOTH_SCORE:
        *file << StringUtils::ToString((*i)->xcorr_pval, precision, false) << '\t';
        *file << StringUtils::ToString((*i)->xcorr_score, precision, true) << '\t';
        *file << StringUtils::ToString((*i)->resEv_pval, precision, false) << '\t';
        *file << StringUtils::ToString((*i)->resEv_score, 1, true) << '\t';
        *file << StringUtils::ToString((*i)->combinedPval, precision, false) << '\t';
+      break;
     }
 
     *file << ++cur << '\t';
@@ -463,31 +467,27 @@ void TideMatchSet::writeHeaders(ofstream* file, bool decoyFile, bool sp) {
       continue;
     }
 
-    if (header == XCORR_SCORE_COL) { 
-      if(Params::GetString("score-function") == "xcorr") {
+    if (header == XCORR_SCORE_COL) {
+      if (Params::GetString("score-function") == "xcorr") {
         if (Params::GetBool("exact-p-value")) {
           *file << get_column_header(EXACT_PVALUE_COL) << '\t'
                 << get_column_header(REFACTORED_SCORE_COL);
-        }
-        else {
+        } else {
           *file << get_column_header(XCORR_SCORE_COL);
         }
         *file << '\t' << get_column_header(XCORR_RANK_COL);
-      }
-      else if (Params::GetString("score-function") == "residue-evidence") {
-        if(Params::GetBool("exact-p-value")) {
-          *file << get_column_header(RESIDUE_PVALUE_COL) << '\t' 
+      } else if (Params::GetString("score-function") == "residue-evidence") {
+        if (Params::GetBool("exact-p-value")) {
+          *file << get_column_header(RESIDUE_PVALUE_COL) << '\t'
                 << get_column_header(RESIDUE_EVIDENCE_COL);
-        }
-        else {
+        } else {
           *file << get_column_header(RESIDUE_EVIDENCE_COL);
         }
         *file << '\t' << get_column_header(RESIDUE_RANK_COL);
-      }
-      else if (Params::GetString("score-function") == "both") {
+      } else if (Params::GetString("score-function") == "both") {
         *file << get_column_header(EXACT_PVALUE_COL) << '\t'
               << get_column_header(REFACTORED_SCORE_COL) << '\t'
-              << get_column_header(RESIDUE_PVALUE_COL) << '\t' 
+              << get_column_header(RESIDUE_PVALUE_COL) << '\t'
               << get_column_header(RESIDUE_EVIDENCE_COL) <<  '\t'
               << get_column_header(BOTH_PVALUE_COL) << '\t'
               << get_column_header(BOTH_PVALUE_RANK);
@@ -562,38 +562,46 @@ void TideMatchSet::gatherTargetsAndDecoys(
   int top_n,
   bool highScoreBest // indicates semantics of score magnitude
 ) {
-  if (cur_score_function == XCORR_SCORE) {
+  switch (cur_score_function_) {
+  case XCORR_SCORE:
     if (exact_pval_search_) {
       make_heap(matches_->begin(), matches_->end(), highScoreBest ? lessXcorrPvalScore : moreXcorrPvalScore);
     } else {
       make_heap(matches_->begin(), matches_->end(), highScoreBest ? lessXcorrScore : moreXcorrScore);
     }
-  } else if (cur_score_function == RESIDUE_EVIDENCE_MATRIX) {
+    break;
+  case RESIDUE_EVIDENCE_MATRIX:
     if (exact_pval_search_) {
       make_heap(matches_->begin(), matches_->end(), highScoreBest ? lessResEvPvalScore : moreResEvPvalScore);
     } else {
       make_heap(matches_->begin(), matches_->end(), highScoreBest ? lessResEvScore : moreResEvScore);
     }
-  } else if (cur_score_function == BOTH_SCORE) {
-      make_heap(matches_->begin(), matches_->end(), highScoreBest ? lessCombinedPvalScore : moreCombinedPvalScore);
+    break;
+  case BOTH_SCORE:
+    make_heap(matches_->begin(), matches_->end(), highScoreBest ? lessCombinedPvalScore : moreCombinedPvalScore);
+    break;
   }
 
   if (!Params::GetBool("concat") && TideSearchApplication::hasDecoys()) {
     for (Arr::iterator i = matches_->end(); i != matches_->begin(); ) {
-      if (cur_score_function == XCORR_SCORE) {
+      switch (cur_score_function_) {
+      case XCORR_SCORE:
         if (exact_pval_search_) {
           pop_heap(matches_->begin(), i--, highScoreBest ? lessXcorrPvalScore : moreXcorrPvalScore);
         } else {
           pop_heap(matches_->begin(), i--, highScoreBest ? lessXcorrScore : moreXcorrScore);
         }
-      } else if (cur_score_function == RESIDUE_EVIDENCE_MATRIX) {
+        break;
+      case RESIDUE_EVIDENCE_MATRIX:
         if (exact_pval_search_) {
           pop_heap(matches_->begin(), i--, highScoreBest ? lessResEvPvalScore : moreResEvPvalScore);
         } else {
           pop_heap(matches_->begin(), i--, highScoreBest ? lessResEvScore : moreResEvScore);
         }
-      } else if (cur_score_function == BOTH_SCORE) {
+        break;
+      case BOTH_SCORE:
         pop_heap(matches_->begin(), i--, highScoreBest ? lessCombinedPvalScore : moreCombinedPvalScore);
+        break;
       }
 
       const Peptide& peptide = *(peptides->GetPeptide(i->rank));
@@ -606,20 +614,24 @@ void TideMatchSet::gatherTargetsAndDecoys(
   } else {
     int toAdd = min(top_n + 1, matches_->size());
     for (int i = 0; i < toAdd; ) {
-      if (cur_score_function == XCORR_SCORE) {
+      switch (cur_score_function_) {
+      case XCORR_SCORE:
         if (exact_pval_search_) {
-          pop_heap(matches_->begin(), matches_->end() - i, highScoreBest ? lessXcorrPvalScore : moreXcorrPvalScore); 
+          pop_heap(matches_->begin(), matches_->end() - i, highScoreBest ? lessXcorrPvalScore : moreXcorrPvalScore);
         } else {
           pop_heap(matches_->begin(), matches_->end() - i, highScoreBest ? lessXcorrScore : moreXcorrScore);
         }
-      } else if (cur_score_function == RESIDUE_EVIDENCE_MATRIX) {
+        break;
+      case RESIDUE_EVIDENCE_MATRIX:
         if (exact_pval_search_) {
           pop_heap(matches_->begin(), matches_->end() - i, highScoreBest ? lessResEvPvalScore : moreResEvPvalScore);
         } else {
           pop_heap(matches_->begin(), matches_->end() - i, highScoreBest ? lessResEvScore : moreResEvScore);
         }
-      } else if (cur_score_function == BOTH_SCORE) {
+        break;
+      case BOTH_SCORE:
         pop_heap(matches_->begin(), matches_->end() - i, highScoreBest ? lessCombinedPvalScore : moreCombinedPvalScore);
+        break;
       }
 
       targetsOut.push_back(matches_->end() - (++i));

@@ -67,7 +67,7 @@ bool ActivePeptideQueue::isWithinIsotope(vector<double>* min_mass, vector<double
 }
 
 int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>* max_mass, double min_range, double max_range, vector<bool>* candidatePeptideStatus) {
-  //min_range and max_range have been introduced to fix a bug 
+  //min_range and max_range have been introduced to fix a bug
   //introduced by m/z selection. see #222 in sourceforge
   //this has to be true:
   // min_range <= min_mass <= max_mass <= max_range
@@ -97,7 +97,7 @@ int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>*
   } else {
     Peptide* peptide = queue_.front();
     // Free all peptides up to, but not including peptide.
-    fifo_alloc_peptides_.Release(peptide); 
+    fifo_alloc_peptides_.Release(peptide);
     peptide->ReleaseFifo(&fifo_alloc_prog1_, &fifo_alloc_prog2_);
   }
 
@@ -197,7 +197,7 @@ int ActivePeptideQueue::SetActiveRangeBIons(vector<double>* min_mass, vector<dou
   } else {
     Peptide* peptide = queue_.front();
     // Free all peptides up to, but not including peptide.
-    fifo_alloc_peptides_.Release(peptide); 
+    fifo_alloc_peptides_.Release(peptide);
   }
 
   // Enqueue all peptides that are not yet queued but are lighter than
@@ -273,7 +273,7 @@ int ActivePeptideQueue::CountAAFrequency(
     unsigned int i = 0;
     unsigned int cntTerm = 0;
     unsigned int cntInside = 0;
-    const unsigned int MaxModifiedAAMassBin = 2000 / binWidth;   //2000 is the maximum size of a modified amino acid 
+    const unsigned int MaxModifiedAAMassBin = 2000 / binWidth;   //2000 is the maximum size of a modified amino acid
     unsigned int* nvAAMassCounterN = new unsigned int[MaxModifiedAAMassBin];   //N-terminal amino acids
     unsigned int* nvAAMassCounterC = new unsigned int[MaxModifiedAAMassBin];   //C-terminal amino acids
     unsigned int* nvAAMassCounterI = new unsigned int[MaxModifiedAAMassBin];   //inner amino acids in the peptides
@@ -289,10 +289,10 @@ int ActivePeptideQueue::CountAAFrequency(
 
       int nLen = peptide->Len(); //peptide length
       ++nvAAMassCounterN[(unsigned int)(dAAResidueMass[0] / binWidth + 1.0 - binOffset)];
-      for (i = 1; i < nLen-1; ++i) {  
+      for (i = 1; i < nLen-1; ++i) {
         ++nvAAMassCounterI[(unsigned int)(dAAResidueMass[i] / binWidth + 1.0 - binOffset)];
         ++cntInside;
-      } 
+      }
       ++nvAAMassCounterC[(unsigned int)(dAAResidueMass[nLen - 1] / binWidth + 1.0 - binOffset)];
       ++cntTerm;
 
@@ -349,8 +349,8 @@ int ActivePeptideQueue::CountAAFrequencyRes(
   map<double,int> nMap; //Nterm residues
   map<double,int> iMap; //internal residues
   map<double,int> cMap; //Cterm residues
-  map<double,int> allMap; //all residues 
-  
+  map<double,int> allMap; //all residues
+
   while (!(reader_->Done())) { //read all peptides in index
     reader_->Read(&current_pb_peptide_);
     Peptide* peptide = new(&fifo_alloc_peptides_) Peptide(current_pb_peptide_, proteins_, &fifo_alloc_peptides_);
@@ -392,13 +392,13 @@ int ActivePeptideQueue::CountAAFrequencyRes(
     }
   }
 
-  //determine the unique masses for all residues 
-  for(map<double,int>::iterator it = allMap.begin(); it != allMap.end(); it++) {
+  //determine the unique masses for all residues
+  for (map<double,int>::iterator it = allMap.begin(); it != allMap.end(); it++) {
     dAAMass.push_back(it->first);
   }
 
-  for(i = 0; i < dAAMass.size(); i++) {
-    dAAFreqN.push_back((double)nMap[dAAMass[i]] / cntTerm); 
+  for (i = 0; i < dAAMass.size(); i++) {
+    dAAFreqN.push_back((double)nMap[dAAMass[i]] / cntTerm);
     dAAFreqI.push_back((double)iMap[dAAMass[i]] / cntInside);
     dAAFreqC.push_back((double)cMap[dAAMass[i]] / cntTerm);
   }
