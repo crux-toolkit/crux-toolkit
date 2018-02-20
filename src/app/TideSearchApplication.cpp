@@ -640,9 +640,6 @@ void TideSearchApplication::search(void* threadarg) {
       //and dynamic CTerm and NTerm mass
       bool flanking_peak = Params::GetBool("use-flanking-peaks");
       bool neutral_loss_peak = Params::GetBool("use-neutral-loss-peaks");
-//      if (neutral_loss_peak == true && curScoreFunction != XCORR_SCORE) {
-//        carp(CARP_FATAL,"--score-function residue-evidence with --use-neutral-loss-peaks true not implemented yet");
-//      }
       if (flanking_peak && curScoreFunction != XCORR_SCORE) {
         carp(CARP_FATAL,"--score-function residue-evidence with --use-flanking-peaks true not implemented yet");
       }
@@ -1015,13 +1012,10 @@ void TideSearchApplication::search(void* threadarg) {
           //END BOTH_SCORE
 
           if (curScoreFunction == XCORR_SCORE && pValue_xcorr == 0.0) {
-            std::cout << "Spectrum: " << sc->spectrum->SpectrumNumber() << std::endl;
             carp(CARP_FATAL, "PSM p-value should not be equal to 0.0");
           } else if (curScoreFunction == RESIDUE_EVIDENCE_MATRIX && pValue_resEv == 0.0) {
-            std::cout << "Spectrum: " << sc->spectrum->SpectrumNumber() << std::endl;
             carp(CARP_FATAL, "PSM p-value should not be equal to 0.0");
           } else if (curScoreFunction == BOTH_SCORE && pValue_both == 0.0) {
-            std::cout << "Spectrum: " << sc->spectrum->SpectrumNumber() << std::endl;
             carp(CARP_FATAL, "PSM p-value should not be equal to 0.0");
           }
 
