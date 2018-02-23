@@ -806,6 +806,12 @@ bool CometSearchManager::InitializeStaticParams()
          g_staticParams.options.bOverrideCharge = iIntData;
    }
 
+   if (GetParamValue("correct_mass", iIntData))
+   {
+      if (iIntData > 0)
+         g_staticParams.options.bCorrectMass = iIntData;
+   }
+
    if (GetParamValue("equal_I_and_L", iIntData))
    {
       g_staticParams.options.bTreatSameIL = iIntData;
@@ -939,8 +945,19 @@ bool CometSearchManager::InitializeStaticParams()
             g_staticParams.options.iNumThreads = detectedThreads;
       }
 #endif
-      if (g_staticParams.options.iNumThreads < 1 || g_staticParams.options.iNumThreads > MAX_THREADS)
-         g_staticParams.options.iNumThreads = 2;  // Default to 2 threads.
+      if (g_staticParams.options.iNumThreads < 0)
+      {
+         g_staticParams.options.iNumThreads = 4;
+         logout(" Setting number of threads to 4");
+      }
+
+      if (g_staticParams.options.iNumThreads > MAX_THREADS)
+      {
+         char szOut[64];
+         g_staticParams.options.iNumThreads = MAX_THREADS;
+         sprintf(szOut, " Setting number of threads to %d", MAX_THREADS);
+         logout(szOut);
+      }
    }
 
    // Set masses to either average or monoisotopic.
