@@ -284,8 +284,71 @@ int ObservedPeakSet::DebugDotProd(const TheoreticalPeakArr& theoretical) {
 }
 #endif
 
-//Written by Andy Lin in Feb 2016
-//From an observed spectrum, calculate and populate the residue evidence matrix
+// Written by Andy Lin in Feb 2018
+// Helper function for CreateResidueEvidenceMatrix
+void ObservedPeakSet::addEvidToResEvMatrix(
+  vector<double>& ionMass,
+  vector<int>& ionMassBin,
+  vector<double>& ionMasses,
+  vector<double>& ionIntens,
+  vector<double>& ionIntensitiesSort,
+  int numSpecPeaks,
+  int nAA,
+  const vector<double>& aaMass,
+  const vector<int>& aaMassBin,
+  const double residueToleranceMass,
+  vector<vector<double> >& residueEvidenceMatrix
+  ) {
+  double bIonMass; int bIonMassBin;
+  for (int ion = 0; ion < ionMass.size(); ion++) {
+    // bIonMass is named correctly because we assume that all 
+    // y ions have been converted to their b ion equivalent
+    // before ionMass is passed in
+    bIonMass = ionMass[ion];
+    bIonMassBin = ionMassBin[ion];
+  
+    for (int curAaMass = 0; curAaMass < nAA; curAaMass++) {
+      int newResMassBin = bIonMassBin + aaMassBin[curAaMass];
+      
+      // Find all ion mass bins that match newResMassBin
+      int index = find(ionMassBin.begin(), ionMassBin.end(),newResMassBin) - ionMassBin.begin();
+      double score = 0.0;
+      for (int i = index; i < ionMasses.size(); i++) {
+        if (newResMassBin != ionMassBin[i]) {
+          continue;
+        } 
+       
+        double ionMassDiff = ionMass[i] - bIonMass;
+        double aaTolScore = residueToleranceMass - std::abs(ionMassDiff - aaMass[curAaMass]);
+
+        if (aaTolScore > 0.0) {
+          // Find where intensities are in sorted vector
+          // Based upon 10-bin normalized intensities
+          // If multiple peaks have the same intensity, all 
+          // peaks have the same rank
+          int loc1 = std::find(ionIntensitiesSort.begin(), ionIntensitiesSort.end(), ionIntens[ion]) - ionIntensitiesSort.begin();
+          int loc2 = std::find(ionIntensitiesSort.begin(), ionIntensitiesSort.end(), ionIntens[i]) - ionIntensitiesSort.begin();
+  
+          //determine rank intensity
+          double rank1 = (double)loc1 / numSpecPeaks;
+          double rank2 = (double)loc2 / numSpecPeaks;
+          double tmpScore = aaTolScore * (rank1 + rank2);
+
+          if (tmpScore > score) {
+            score = tmpScore;
+          }
+        }
+      }
+
+      // Add evidence to matrix
+      // Use -1 since all mass bins are index 1 instead of index 0
+      residueEvidenceMatrix[curAaMass][newResMassBin-1] += score;
+    }
+  }
+}
+
+// Written by Andy Lin in Feb 2016
+// From an observed spectrum, calculate and populate the residue evidence matrix
 void ObservedPeakSet::CreateResidueEvidenceMatrix(
   const Spectrum& spectrum,
   int charge,
@@ -319,7 +382,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   double residueToleranceMass = fragTol;
   const double maxIntensPerRegion = 50.0;
 
-  //Determining max ion mass and max ion intensity
+  // Determining max ion mass and max ion intensity
   bool remove_precursor = Params::GetBool("remove-precursor-peak");
   double precursorMZExclude = Params::GetDouble("remove-precursor-tolerance");
   double maxIonIntens = 0.0;
@@ -400,25 +463,21 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   // sort ion intensities
   sort(ionIntensitiesSort.begin(), ionIntensitiesSort.end());
 
-  //Determine which bin each amino acid mass is in
+  // Determine which bin each amino acid mass is in
   vector<int> aaMassBin;
   for (int i = 0; i < nAA; i++) {
     int binMass = (int)floor(MassConstants::mass2bin(aaMass[i]));
     aaMassBin.push_back(binMass);
   }
 
-  //Need to add lines for matlab line 56?
-  //Basically bounds the ion masses and ion mass bins so that
+  // Need to add lines for matlab line 56?
+  // Basically bounds the ion masses and ion mass bins so that
   // 1: ionMassBinB >=1
   // 2: ionMassBinB <= maxMassBin - max(aaMassBin)
   // Also need to figure out maxMassBin (currently hard coded to 8500)
   // need to do 4 times (+1/+2/B ion/ yion)
 
-  int bIonMassBin;
-  double bIonMass;
-  double bIonIntens;
-
-  //Populate ionMass and ionMassBin for b ions in 1+ charge state
+  // Populate ionMass and ionMassBin for b ions in 1+ charge state
   vector<double> ionMass;
   vector<int> ionMassBin;
   vector<double> ionIntens;
@@ -439,46 +498,9 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   ionMassBin.push_back(MassConstants::mass2bin(precursorMass - cTermMass));
   ionIntens.push_back(0.0);
 
-  //find pairs of b ions in 1+ charge state
-  for (int ion = 0; ion < ionMass.size(); ion++) {
-    bIonMass = ionMass[ion];
-    bIonMassBin = ionMassBin[ion];
-
-    for (int curAaMass = 0; curAaMass < nAA; curAaMass++) {
-      int newResMassBin = bIonMassBin + aaMassBin[curAaMass];
-
-      //Find all ion mass bins that match newResMassBin
-      int index = find(ionMassBin.begin(), ionMassBin.end(),newResMassBin) - ionMassBin.begin();
-      double score = 0.0;
-      for (int i = index; i < ionMasses.size(); i++) {
-        if (newResMassBin != ionMassBin[i]) {
-          continue;
-        }
-
-        double ionMassDiff = ionMass[i] - bIonMass;
-        double aaTolScore = residueToleranceMass - std::abs(ionMassDiff - aaMass[curAaMass]);
-
-        if (aaTolScore > 0) {
-          //find where intensities are in sorted vector
-          int loc1 = std::find(ionIntensitiesSort.begin(), ionIntensitiesSort.end(), ionIntens[ion]) - ionIntensitiesSort.begin();
-          int loc2 = std::find(ionIntensitiesSort.begin(), ionIntensitiesSort.end(), ionIntens[i]) - ionIntensitiesSort.begin();
-
-          //determine rank intensity
-          double rank1 = (double)loc1 / numSpecPeaks;
-          double rank2 = (double)loc2 / numSpecPeaks;
-          double tmpScore = aaTolScore * (rank1 + rank2);
-
-          if (tmpScore > score) {
-            score = tmpScore;
-          }
-        }
-      }
-
-      //add evidence to matrix
-      //&&-1 since all mass bins are index 1 instead of index 0
-      residueEvidenceMatrix[curAaMass][newResMassBin-1] += score;
-    }
-  }
+  addEvidToResEvMatrix(ionMass, ionMassBin, ionMasses, ionIntens, ionIntensitiesSort,
+                       numSpecPeaks, nAA, aaMass, aaMassBin, residueToleranceMass,
+                       residueEvidenceMatrix);
   ionMass.clear();
   ionMassBin.clear();
   ionIntens.clear();
@@ -487,15 +509,15 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   double yIonMass;
   double yIonIntens;
 
-  //find pairs of y ions in 1+ charge state
+  // Find pairs of y ions in 1+ charge state
   ionMass.push_back(precursorMass - cTermMass);
   ionMassBin.push_back(MassConstants::mass2bin(precursorMass - cTermMass));
   ionIntens.push_back(0.0);
 
   for (int ion = 0; ion < ionMasses.size(); ion++) {
-    //convert to equivalent b ion masses for ease of processing
+    // Convert to equivalent b ion masses for ease of processing
     double tmpIonMass = precursorMass - ionMasses[ion] + (2.0 * massHMono);
-    //Determine which bin each ion mass is in
+    // Determine which bin each ion mass is in
     int binTmpIonMass = (int)floor(MassConstants::mass2bin(tmpIonMass));
 
     if (tmpIonMass > 0) {
@@ -512,50 +534,14 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   reverse(ionMassBin.begin(), ionMassBin.end());
   reverse(ionIntens.begin(), ionIntens.end());
 
-  for (int ion = 0; ion < ionMass.size(); ion++) {
-    yIonMass = ionMass[ion];
-    yIonMassBin = ionMassBin[ion];
-
-    for (int curAaMass=0 ; curAaMass<nAA ; curAaMass++) {
-      int newResMassBin = yIonMassBin + aaMassBin[curAaMass];
-
-      //Find all ion mass bins that match newResMassBin
-      int index = find(ionMassBin.begin(),ionMassBin.end(),newResMassBin) - ionMassBin.begin();
-      double score = 0.0;
-      for (int i = index; i < ionMasses.size(); i++) {
-        if (newResMassBin != ionMassBin[i]) {
-          continue;
-        }
-
-        double ionMassDiff = ionMass[i] - yIonMass;
-        double aaTolScore = residueToleranceMass - std::abs(ionMassDiff - aaMass[curAaMass]);
-
-        if (aaTolScore > 0) {
-          //find where intensities are in sorted vector
-          int loc1 = std::find(ionIntensitiesSort.begin(), ionIntensitiesSort.end(), ionIntens[ion]) - ionIntensitiesSort.begin();
-          int loc2 = std::find(ionIntensitiesSort.begin(), ionIntensitiesSort.end(), ionIntens[i]) - ionIntensitiesSort.begin();
-
-          //determine rank intensity
-          double rank1 = (double)loc1 / numSpecPeaks;
-          double rank2 = (double)loc2 / numSpecPeaks;
-          double tmpScore = aaTolScore * (rank1 + rank2);
-
-          if (tmpScore > score) {
-             score = tmpScore;
-          }
-        }
-      }
-
-      //add evidence to matrix
-      //&&-1 since all mass bins are index 1 istead of index 0
-      residueEvidenceMatrix[curAaMass][newResMassBin-1] += score;
-    }
-  }
+  addEvidToResEvMatrix(ionMass, ionMassBin, ionMasses, ionIntens, ionIntensitiesSort,
+                       numSpecPeaks, nAA, aaMass, aaMassBin, residueToleranceMass,
+                       residueEvidenceMatrix);
   ionMass.clear();
   ionMassBin.clear();
   ionIntens.clear();
 
-  //find pairs of b ions in 2+ charge state
+  // Find pairs of b ions in 2+ charge state
   ionMass.push_back(nTermMass);
   ionMassBin.push_back(MassConstants::mass2bin(nTermMass));
   ionIntens.push_back(0.0);
@@ -572,50 +558,14 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   ionMassBin.push_back(MassConstants::mass2bin(precursorMass - cTermMass));
   ionIntens.push_back(0.0);
 
-  for (int ion = 0; ion < ionMass.size(); ion++) {
-    bIonMass = ionMass[ion];
-    bIonMassBin = ionMassBin[ion];
-
-    for (int curAaMass = 0; curAaMass < nAA; curAaMass++) {
-      int newResMassBin = bIonMassBin + aaMassBin[curAaMass];
-
-      //Find all ion mass bins that match newResMassBin
-      int index = find(ionMassBin.begin(),ionMassBin.end(),newResMassBin) - ionMassBin.begin();
-      double score = 0.0;
-      for (int i=index ; i<ionMasses.size() ; i++) {
-        if (newResMassBin != ionMassBin[i]) {
-          continue;
-        }
-
-        double ionMassDiff = ionMass[i] - bIonMass;
-        double aaTolScore = residueToleranceMass - std::abs(ionMassDiff - aaMass[curAaMass]);
-
-        if (aaTolScore > 0) {
-          //find where intensities are in sorted vector
-          int loc1 = std::find(ionIntensitiesSort.begin(), ionIntensitiesSort.end(), ionIntens[ion]) - ionIntensitiesSort.begin();
-          int loc2 = std::find(ionIntensitiesSort.begin(), ionIntensitiesSort.end(), ionIntens[i]) - ionIntensitiesSort.begin();
-
-          //determine rank intensity
-          double rank1 = (double)loc1 / numSpecPeaks;
-          double rank2 = (double)loc2 / numSpecPeaks;
-          double tmpScore = aaTolScore * (rank1 + rank2);
-
-          if (tmpScore > score) {
-            score = tmpScore;
-          }
-        }
-      }
-
-      //add evidence to matrix
-      //&&-1 since all mass bins are index 1 instead of index 0
-      residueEvidenceMatrix[curAaMass][newResMassBin-1] += score;
-    }
-  }
+  addEvidToResEvMatrix(ionMass, ionMassBin, ionMasses, ionIntens, ionIntensitiesSort,
+                       numSpecPeaks, nAA, aaMass, aaMassBin, residueToleranceMass,
+                      residueEvidenceMatrix);
   ionMass.clear();
   ionMassBin.clear();
   ionIntens.clear();
 
-  //find pairs of y ions in 2+ charge state
+  // Find pairs of y ions in 2+ charge state
   ionMass.push_back(precursorMass - cTermMass);
   ionMassBin.push_back(MassConstants::mass2bin(precursorMass - cTermMass));
   ionIntens.push_back(0.0);
@@ -638,50 +588,14 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   reverse(ionMassBin.begin(),ionMassBin.end());
   reverse(ionIntens.begin(), ionIntens.end());
 
-  for (int ion = 0; ion < ionMass.size(); ion++) {
-    yIonMass = ionMass[ion];
-    yIonMassBin = ionMassBin[ion];
-
-    for (int curAaMass = 0; curAaMass < nAA; curAaMass++) {
-      int newResMassBin = yIonMassBin + aaMassBin[curAaMass];
-
-      //Find all ion mass bins that match newResMassBin
-      int index = find(ionMassBin.begin(), ionMassBin.end(), newResMassBin) - ionMassBin.begin();
-      double score = 0.0;
-      for (int i = index; i < ionMasses.size(); i++) {
-        if (newResMassBin != ionMassBin[i]) {
-          continue;
-        }
-
-        double ionMassDiff = ionMass[i] - yIonMass;
-        double aaTolScore = residueToleranceMass - std::abs(ionMassDiff - aaMass[curAaMass]);
-
-        if (aaTolScore > 0) {
-          //find where intensities are in sorted vector
-          int loc1 = std::find(ionIntensitiesSort.begin(), ionIntensitiesSort.end(), ionIntens[ion]) - ionIntensitiesSort.begin();
-          int loc2 = std::find(ionIntensitiesSort.begin(), ionIntensitiesSort.end(), ionIntens[i]) - ionIntensitiesSort.begin();
-
-          //determine rank intensity
-          double rank1 = (double)loc1 / numSpecPeaks;
-          double rank2 = (double)loc2 / numSpecPeaks;
-          double tmpScore = aaTolScore * (rank1 + rank2);
-
-          if (tmpScore > score) {
-            score = tmpScore;
-          }
-        }
-      }
-
-      //add evidence to matrix
-      //&&-1 since all mass bins are index 1 instead of index 0
-      residueEvidenceMatrix[curAaMass][newResMassBin-1] += score;
-    }
-  }
+  addEvidToResEvMatrix(ionMass, ionMassBin, ionMasses, ionIntens, ionIntensitiesSort,
+                       numSpecPeaks, nAA, aaMass, aaMassBin, residueToleranceMass,
+                       residueEvidenceMatrix);
   ionMass.clear();
   ionMassBin.clear();
   ionIntens.clear();
 
-  //Get maxEvidence value
+  // Get maxEvidence value
   double maxEvidence = -1.0;
   for (int i = 0; i < maxPrecurMassBin; i++) {
     for (int curAaMass = 0; curAaMass < nAA; curAaMass++) {
@@ -691,7 +605,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
     }
   }
 
-  //discretize residue evidence so largest value is residueEvidenceIntScale
+  // Discretize residue evidence so largest value is residueEvidenceIntScale
   double residueEvidenceIntScale = (double)granularityScale;
   for (int i = 0; i < maxPrecurMassBin; i++) {
     for (int curAaMass = 0; curAaMass < nAA; curAaMass++) {

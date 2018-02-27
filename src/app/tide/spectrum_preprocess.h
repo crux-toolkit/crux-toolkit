@@ -150,8 +150,8 @@ class ObservedPeakSet {
                           long int* num_isotopes_skipped,
                           long int* num_retained);
 
-  //created by Andy Lin 2/11/2016
-  //Method for creating residue evidence matrix from Spectrum
+  // created by Andy Lin 2/11/2016
+  // Method for creating residue evidence matrix from Spectrum
   void CreateResidueEvidenceMatrix(const Spectrum& spectrum,
                                    int charge,
                                    int maxPrecurMassBin,
@@ -161,7 +161,19 @@ class ObservedPeakSet {
                                    double fragTol,int granularityScale,
                                    double nTermMass, double cTermMass,
                                    vector< vector<double> >& residueEvidenceMatrix);
-  //END -- added by Andy Lin
+   // created by Andy Lin in Feb 2018
+   // help method for CreateResidueEvidenceMatrix
+   void addEvidToResEvMatrix(vector<double>& ionMass,
+                    vector<int>& ionMassBin,
+                    vector<double>& ionMasses,
+                    vector<double>& ionIntens,
+                    vector<double>& ionIntensitiesSort,
+                    int numSpecPeaks,
+                    int nAA,
+                    const vector<double>& aaMass,
+                    const vector<int>& aaMassBin,
+                    const double residueToleranceMass,
+                    vector< vector<double> >& residueEvidenceMatrix);
 
   // For debugging
   void Show(const string& name, TheoreticalPeakType peak_type, bool cache_end) {
