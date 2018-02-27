@@ -11,6 +11,9 @@
 # The location of the crux binary.
 CRUX=../../src/crux
 
+# Note that the scripts make-qq-plot.py, histogram and plot-histogram
+# are taken from the 2002_wnoble_utilities bitbucket repository.
+
 # Run the search.
 $CRUX tide-search --top-match 1000000 \
        --overwrite T \
@@ -26,9 +29,9 @@ for peptide in target decoy; do
       > $peptide.pvalues.txt
 
   # Make a histogram.
-  histogram -bar-height distribution -minvalue 0 -binsize 0.01 100 \
+  ./histogram -bar-height distribution -minvalue 0 -binsize 0.01 100 \
       $peptide.pvalues.txt \
-    | plot-histogram -xlabel "$peptide p-value" -format png - \
+    | ./plot-histogram -xlabel "$peptide p-value" -format png - \
     > $peptide.histogram.png
 
   # Make a qq plot.

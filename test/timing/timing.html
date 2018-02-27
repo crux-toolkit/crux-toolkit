@@ -1,0 +1,35 @@
+<html>
+  <title>Crux timing test</title>
+  <body>
+
+    <h1>Crux timing test</h1>
+
+    <p>
+      This test runs the Crux search engines, Tide and Comet, on a
+      fixed set of spectra and a fixed database, comparing the running
+      time in a variety of parameter settings.  The parameters that
+      are varied include</p>
+    <ul>
+      <li>
+	precursor m/z (3 Th or 10 ppm),</li>
+      <li>
+	fragment bin size (1 Th or 0.02 Th),</li>
+      <li>
+	number of threads (1 or 4), and </li>
+      <li>
+	(for Tide) exact p-value computation or not.</li>
+    </ul>
+
+    <p>
+      For Tide, we use spectra that have been converted into the
+      spectrumrecords format, and the database has been indexed by
+      tide-index.</p>
+
+    <p>
+      Wall clock time is measured by Crux internally.</p>
+
+    <p>
+      The results are summarized <a href="results.html">here</a>.</p>
+    
+  </body>
+</html>
