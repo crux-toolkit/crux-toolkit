@@ -355,7 +355,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   int maxPrecurMassBin,
   double precursorMass, // neutral mass
   int nAA, //TODO different than one used in CreateEvidenceVector
-  const vector<double> aaMass, //TODO different aaMass then one used in CreateEvidenceVector
+  const vector<double>& aaMass, //TODO different aaMass then one used in CreateEvidenceVector
   double fragTol,
   int granularityScale,
   double nTermMass,
