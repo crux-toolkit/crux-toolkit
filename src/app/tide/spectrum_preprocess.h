@@ -157,7 +157,7 @@ class ObservedPeakSet {
                                    int maxPrecurMassBin,
                                    double precursorMass,
                                    int nAA,
-                                   const vector<double> aaMass,
+                                   const vector<double>& aaMass,
                                    double fragTol,int granularityScale,
                                    double nTermMass, double cTermMass,
                                    vector< vector<double> >& residueEvidenceMatrix);

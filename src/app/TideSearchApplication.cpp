@@ -2017,7 +2017,7 @@ int TideSearchApplication::getMaxColEvidence(
 int TideSearchApplication::calcResEvScore(
   const vector<vector<double> >& curResidueEvidenceMatrix,
   const vector<unsigned int>& intensArrayTheor,
-  const vector<double> aaMassDouble,
+  const vector<double>& aaMassDouble,
   Peptide* curPeptide
 ) {
   //Make sure the number of theoretical peaks match pepLen
