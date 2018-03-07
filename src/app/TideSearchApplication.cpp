@@ -473,24 +473,13 @@ void TideSearchApplication::search(void* threadarg) {
   double* aaFreqC = my_data->aaFreqC;
   int* aaMass = my_data->aaMass;
   int nAARes = my_data->nAARes;
-  const vector<double>* dAAFreqN_tmp = my_data->dAAFreqN;
-  const vector<double>* dAAFreqI_tmp = my_data->dAAFreqI;
-  const vector<double>* dAAFreqC_tmp = my_data->dAAFreqC;
-  const vector<double>* dAAMass_tmp = my_data->dAAMass;
-  const pb::ModTable* mod_table1 = my_data->mod_table;
-  const pb::ModTable* nterm_mod_table1 = my_data->nterm_mod_table;
-  const pb::ModTable* cterm_mod_table1 = my_data->cterm_mod_table;
-
-  //convert pointers to actual mod_tables
-  const pb::ModTable mod_table = *mod_table1;
-  const pb::ModTable nterm_mod_table = *nterm_mod_table1;
-  const pb::ModTable cterm_mod_table = *cterm_mod_table1;
-
-  //convert pointers to actual double vector
-  const vector<double> dAAFreqN = *dAAFreqN_tmp;
-  const vector<double> dAAFreqI = *dAAFreqI_tmp;
-  const vector<double> dAAFreqC = *dAAFreqC_tmp;
-  const vector<double> dAAMass = *dAAMass_tmp;
+  const vector<double> dAAFreqN = *(my_data->dAAFreqN);
+  const vector<double> dAAFreqI = *(my_data->dAAFreqI);
+  const vector<double> dAAFreqC = *(my_data->dAAFreqC);
+  const vector<double> aaMassDouble = *(my_data->dAAMass);
+  const pb::ModTable mod_table = *(my_data->mod_table);
+  const pb::ModTable nterm_mod_table = *(my_data->nterm_mod_table);
+  const pb::ModTable cterm_mod_table = *(my_data->cterm_mod_table);
 
   vector<boost::mutex*> locks_array = my_data->locks_array;
   vector<int>* negative_isotope_errors = my_data->negative_isotope_errors;
@@ -657,7 +646,6 @@ void TideSearchApplication::search(void* threadarg) {
       //TODO so this includes ALL amino acids seen (including modified, NTerm mod, CTerm Mod)
       //as a result -- we will look for NTerm mod amino acids throughout spectrum instead of
       //just amino acids without NTerm mod
-      const vector<double> aaMassDouble = dAAMass;
       vector<int> aaMassInt;
       if (curScoreFunction != XCORR_SCORE) {
         for (int i = 0; i < aaMassDouble.size(); i++) {
