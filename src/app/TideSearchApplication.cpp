@@ -785,7 +785,8 @@ void TideSearchApplication::search(void* threadarg) {
           // precursorMass is the neutral mass
           observed.CreateResidueEvidenceMatrix(*spectrum, charge, maxPrecurMassBin, precursorMass,
                                                nAARes, aaMassDouble, fragTol, granularityScale,
-                                               nTermMass, cTermMass,
+                                               nTermMass, cTermMass,&num_range_skipped, 
+                                               &num_precursors_skipped, &num_isotopes_skipped, &num_retained,
                                                residueEvidenceMatrix[pe]);
           vector<vector<double> > curResidueEvidenceMatrix = residueEvidenceMatrix[pe];
 
@@ -1075,6 +1076,13 @@ void TideSearchApplication::search(void* threadarg) {
 
   if (!Params::GetBool("skip-preprocessing")) {
     locks_array[LOCK_REPORTING]->lock();
+    if (curScoreFunction == BOTH_SCORE) {
+      num_precursors_skipped = num_precursors_skipped / 2;
+      num_isotopes_skipped = num_isotopes_skipped / 2;
+      num_range_skipped = num_range_skipped / 2;
+      num_retained = num_retained / 2;
+    }
+
     long int total_peaks = num_precursors_skipped + num_isotopes_skipped + num_range_skipped + num_retained;
     if (total_peaks == 0) {
       carp(CARP_INFO, "[Thread %d]: Warning: no peaks found.", thread_num);

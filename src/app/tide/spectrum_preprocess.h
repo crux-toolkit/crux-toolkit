@@ -160,6 +160,10 @@ class ObservedPeakSet {
                                    const vector<double>& aaMass,
                                    double fragTol,int granularityScale,
                                    double nTermMass, double cTermMass,
+                                   long int* num_range_skipped,
+                                   long int* num_precursors_skipped,
+                                   long int* num_isotopes_skipped,
+                                   long int* num_retained,
                                    vector< vector<double> >& residueEvidenceMatrix);
    // created by Andy Lin in Feb 2018
    // help method for CreateResidueEvidenceMatrix

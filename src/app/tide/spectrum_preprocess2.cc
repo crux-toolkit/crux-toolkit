@@ -360,6 +360,10 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   int granularityScale,
   double nTermMass,
   double cTermMass,
+  long int* num_range_skipped,
+  long int* num_precursors_skipped,
+  long int* num_isotopes_skipped,
+  long int* num_retained,
   vector<vector<double> >& residueEvidenceMatrix
   ) {
 
@@ -378,21 +382,44 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   double precurMz = spectrum.PrecursorMZ();
   int nIon = spectrum.Size();
   int precurCharge = charge;
-  double experimentalMassCutoff = precursorMass; // + 50.0;
+  double experimentalMassCutoff = precursorMass + 50.0;
   double residueToleranceMass = fragTol;
   const double maxIntensPerRegion = 50.0;
 
   // Determining max ion mass and max ion intensity
-  bool remove_precursor = Params::GetBool("remove-precursor-peak");
+  bool skipPreprocess = Params::GetBool("skip-preprocessing");
+  bool remove_precursor = !skipPreprocess && Params::GetBool("remove-precursor-peak");
   double precursorMZExclude = Params::GetDouble("remove-precursor-tolerance");
+  double deisotope_threshold = Params::GetDouble("deisotope");
   double maxIonIntens = 0.0;
   double maxIonMass = 0.0;
+  set<int> peakSkip;
   for (int ion = 0; ion < nIon; ion++) {
     double ionMass = spectrum.M_Z(ion);
     double ionIntens = sqrt(spectrum.Intensity(ion));
-    if (ionMass >= experimentalMassCutoff ||
-        (remove_precursor && ionMass > precurMz - precursorMZExclude && ionMass < precurMz + precursorMZExclude)) {
+    if (ionMass >= experimentalMassCutoff) {
+      peakSkip.insert(ion);
+      if (num_range_skipped) {
+        (*num_range_skipped)++;
+      }
       continue;
+    } else if (remove_precursor && ionMass > precurMz - precursorMZExclude && 
+               ionMass < precurMz + precursorMZExclude) {
+      peakSkip.insert(ion);
+      if (num_precursors_skipped) {
+        (*num_precursors_skipped)++;
+      }
+      continue;
+    } else if (deisotope_threshold != 0.0 && spectrum.Deisotope(ion, deisotope_threshold)) {
+      peakSkip.insert(ion);
+      if (num_isotopes_skipped) {
+        (*num_isotopes_skipped)++;
+      }
+      continue;
+    }
+
+    if (num_retained) {
+      (*num_retained)++;
     }
     if (maxIonIntens < ionIntens) {
       maxIonIntens = ionIntens;
@@ -415,12 +442,10 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
     double ionMass = spectrum.M_Z(ion);
     double ionIntens = sqrt(spectrum.Intensity(ion));
 
-    if (ionMass >= experimentalMassCutoff) {
+    if (peakSkip.find(ion) != peakSkip.end()) {
       continue;
     }
-    if (remove_precursor && ionMass > precurMz - precursorMZExclude && ionMass < precurMz + precursorMZExclude) {
-      continue;
-    }
+
     if (ionIntens < 0.05 * maxIonIntens) {
       continue;
     }
