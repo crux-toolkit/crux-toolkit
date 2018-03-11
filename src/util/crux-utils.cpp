@@ -540,7 +540,8 @@ static const char* scorer_type_strings[NUMBER_SCORER_TYPES] = {
   "exact_pvalue",
   "refactored_xcorr",
   "res-ev score",
-  "res-ev p-value"
+  "res-ev p-value",
+  "combined p-value"
 };
 
 bool string_to_scorer_type(const string& name, SCORER_TYPE_T* result) {

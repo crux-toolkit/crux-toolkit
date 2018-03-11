@@ -1026,6 +1026,7 @@ int AssignConfidenceApplication::getDirection(SCORER_TYPE_T scoreType) {
     case TIDE_SEARCH_EXACT_PVAL:
     case TIDE_SEARCH_EXACT_SMOOTHED:
     case RESIDUE_EVIDENCE_PVAL:
+    case BOTH_PVALUE:
       // lower score better, ascending = true
       return 1;
     default:
