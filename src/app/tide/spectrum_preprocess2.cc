@@ -319,7 +319,8 @@ void ObservedPeakSet::addEvidToResEvMatrix(
         } 
        
         double ionMassDiff = ionMass[i] - bIonMass;
-        double aaTolScore = residueToleranceMass - std::abs(ionMassDiff - aaMass[curAaMass]);
+        //double aaTolScore = residueToleranceMass - std::abs(ionMassDiff - aaMass[curAaMass]);
+        double aaTolScore = 1.0 - (std::abs(ionMassDiff - aaMass[curAaMass]) / residueToleranceMass);
 
         if (aaTolScore > 0.0) {
           // Find where intensities are in sorted vector
