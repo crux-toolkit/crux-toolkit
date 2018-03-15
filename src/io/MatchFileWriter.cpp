@@ -126,6 +126,8 @@ void MatchFileWriter::setPrecision() {
     case LN_NUM_SP_COL:
     case EXACT_PVALUE_COL:
     case REFACTORED_SCORE_COL:
+    case RESIDUE_EVIDENCE_COL:
+    case BOTH_PVALUE_COL:
     case SIDAK_ADJUSTED_COL:
     case QVALUE_MIXMAX_COL:
     case QVALUE_TDC_COL:
