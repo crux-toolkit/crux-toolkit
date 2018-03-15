@@ -49,6 +49,8 @@ PinWriter::PinWriter():
   features_.push_back(make_pair("IonFrac", false));
   features_.push_back(make_pair("RefactoredXCorr", false));
   features_.push_back(make_pair("NegLog10PValue", false));
+  features_.push_back(make_pair("NegLog10ResEvPValue", false));
+  features_.push_back(make_pair("NegLog10CombinePValue", false));
   features_.push_back(make_pair("PepLen", true));
   for (int i = '1'; i <= '9'; i++) {
     features_.push_back(make_pair("Charge" + string(1, i), false));
@@ -136,6 +138,11 @@ void PinWriter::write(MatchCollection* collection, string database) {
   bool sp = collection->getScoredType(SP);
   bool xcorr = collection->getScoredType(XCORR);
   bool exact_p = collection->getScoredType(TIDE_SEARCH_REFACTORED_XCORR);
+  bool combine_p = collection->getScoredType(BOTH_PVALUE);
+  if (combine_p) {
+    exact_p = true;
+  }
+
   setEnabledStatus("lnrSp", sp);
   setEnabledStatus("deltLCn", collection->getScoredType(DELTA_LCN));
   setEnabledStatus("deltCn", collection->getScoredType(DELTA_CN));
@@ -144,6 +151,9 @@ void PinWriter::write(MatchCollection* collection, string database) {
   setEnabledStatus("IonFrac", sp);
   setEnabledStatus("RefactoredXCorr", exact_p);
   setEnabledStatus("NegLog10PValue", exact_p);
+  setEnabledStatus("NegLog10ResEvPValue", combine_p);
+  setEnabledStatus("NegLog10CombinePValue", combine_p);
+
 
   int max_charge = 0;
   for (MatchIterator i = MatchIterator(collection); i.hasNext();) {
@@ -237,6 +247,12 @@ void PinWriter::printPSM(
         StringUtils::ToString(match->getScore(TIDE_SEARCH_REFACTORED_XCORR), precision_));
     } else if (feature == "NegLog10PValue") {
       FLOAT_T logP = -log10(match->getScore(TIDE_SEARCH_EXACT_PVAL));
+      fields.push_back(StringUtils::ToString(isInfinite(logP) ? MAX_LOG_P : logP, precision_));
+    } else if (feature == "NegLog10ResEvPValue") {
+      FLOAT_T logP = -log10(match->getScore(RESIDUE_EVIDENCE_PVAL));
+      fields.push_back(StringUtils::ToString(isInfinite(logP) ? MAX_LOG_P : logP, precision_));
+    } else if (feature == "NegLog10CombinePValue" ) {
+      FLOAT_T logP = -log10(match->getScore(BOTH_PVALUE));
       fields.push_back(StringUtils::ToString(isInfinite(logP) ? MAX_LOG_P : logP, precision_));
     } else if (feature == "PepLen") {
       fields.push_back(StringUtils::ToString((unsigned) peptide->getLength()));

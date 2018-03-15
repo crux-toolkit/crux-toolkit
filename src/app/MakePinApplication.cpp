@@ -120,11 +120,17 @@ int MakePinApplication::main(const vector<string>& paths) {
   writer.setEnabledStatus("lnrSp", is_sp);
   writer.setEnabledStatus("Sp", is_sp);
   writer.setEnabledStatus("IonFrac", is_sp);
+
   bool is_refactored_xcorr = target_collection->getScoredType(TIDE_SEARCH_REFACTORED_XCORR);
   writer.setEnabledStatus("XCorr", !is_refactored_xcorr);
   writer.setEnabledStatus("RefactoredXCorr", is_refactored_xcorr);
   writer.setEnabledStatus("NegLog10PValue",
                           target_collection->getScoredType(TIDE_SEARCH_EXACT_PVAL));
+  writer.setEnabledStatus("NegLog10ResEvPValue",
+                          target_collection->getScoredType(RESIDUE_EVIDENCE_PVAL));
+  writer.setEnabledStatus("NegLog10CombinePValue",
+                          target_collection->getScoredType(BOTH_PVALUE));
+
   if (writer.getEnabledStatus("lnNumSP") && target_collection->getHasDistinctMatches()) {
     writer.setEnabledStatus("lnNumSP", false);
     writer.setEnabledStatus("lnNumDSP", true);
