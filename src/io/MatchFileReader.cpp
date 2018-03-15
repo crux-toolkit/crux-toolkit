@@ -295,6 +295,15 @@ Crux::Match* MatchFileReader::parseMatch() {
     match->setScore(TIDE_SEARCH_EXACT_PVAL, getFloat(EXACT_PVALUE_COL));
     match->setScore(TIDE_SEARCH_REFACTORED_XCORR, getFloat(REFACTORED_SCORE_COL));
   }
+  if (!empty(RESIDUE_EVIDENCE_COL)) {
+    match->setScore(RESIDUE_EVIDENCE_SCORE, getFloat(RESIDUE_EVIDENCE_COL));
+    match->setScore(RESIDUE_EVIDENCE_PVAL, getFloat(RESIDUE_PVALUE_COL));
+    match->setRank(RESIDUE_EVIDENCE_PVAL, getInteger(RESIDUE_RANK_COL));
+  }
+  if (!empty(BOTH_PVALUE_COL)) {
+    match->setScore(BOTH_PVALUE, getFloat(BOTH_PVALUE_COL));
+    match->setRank(BOTH_PVALUE, getInteger(BOTH_PVALUE_RANK));
+  }
   if (!empty(DECOY_XCORR_QVALUE_COL)) {
     match->setScore(DECOY_XCORR_QVALUE, getFloat(DECOY_XCORR_QVALUE_COL));
   }
