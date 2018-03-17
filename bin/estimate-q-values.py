@@ -40,18 +40,23 @@ def estimateQvalues(estimationMethod, sortedPSMs):
 
   # Estimate FDRs using target-decoy competition.
   if (estimationMethod == "tdc"):
-    numDecoys = 0
+    numDecoys = 1
     numTargets = 0
     for index in range(0, len(sortedPSMs)):
       (score, isTarget, line) = sortedPSMs[index]
   
       if isTarget:
         numTargets += 1
-        fdr = float(numDecoys) / float(numTargets)
+        if (numTargets == 0):
+          fdr = 1.0
+        else:
+          fdr = float(numDecoys) / float(numTargets)
+#          sys.stderr.write("%d/%d=%g (%g)\n" % (numDecoys, numTargets, fdr, score));
         if (fdr > 1.0):
           fdr = 1.0
         returnValue.append((score, line, fdr))
       else:
+#        sys.stderr.write("decoy (%g)\n" % score);
         numDecoys += 1
 
   # Estimate FDRs using target-decoy competition.
@@ -65,7 +70,6 @@ def estimateQvalues(estimationMethod, sortedPSMs):
     (score, line, fdr) = returnValue[index]
     if (fdr < minFDR):
       minFDR = fdr
-#      sys.stderr.write("%g->%g\n" % (fdr, minFDR))
     returnValue[index] = (score, line, minFDR)
 
   return(returnValue)
@@ -173,11 +177,11 @@ for line in psmFile:
 
     # Check that the target and decoy scan numbers match.
     if (targetWords[scanColumnIndex] != decoyWords[scanColumnIndex]):
-      sys.stderr.write("Target-decoy scan number mismatch (%d != %d) at line %d.\n" %
+      sys.stderr.write("Target-decoy scan number mismatch (%s != %s) at line %d.\n" %
                        (targetWords[scanColumnIndex],
                         decoyWords[scanColumnIndex],
                         lineNumber))
-      sys.exit(1)
+      continue
 
     # Do the target-decoy competition.
     decoyScore = float(decoyWords[scoreColumnIndex])
