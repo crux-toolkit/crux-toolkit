@@ -10,6 +10,7 @@
 #include "theoretical_peak_set.h"
 #include "compiler.h"
 #include "app/TideMatchSet.h"
+#include <map> //Added by Andy Lin
 #define CHECK(x) GOOGLE_CHECK((x))
 
 DEFINE_int32(fifo_page_size, 1, "Page size for FIFO allocator, in megs");
@@ -66,7 +67,7 @@ bool ActivePeptideQueue::isWithinIsotope(vector<double>* min_mass, vector<double
 }
 
 int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>* max_mass, double min_range, double max_range, vector<bool>* candidatePeptideStatus) {
-  //min_range and max_range have been introduced to fix a bug 
+  //min_range and max_range have been introduced to fix a bug
   //introduced by m/z selection. see #222 in sourceforge
   //this has to be true:
   // min_range <= min_mass <= max_mass <= max_range
@@ -96,7 +97,7 @@ int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>*
   } else {
     Peptide* peptide = queue_.front();
     // Free all peptides up to, but not including peptide.
-    fifo_alloc_peptides_.Release(peptide); 
+    fifo_alloc_peptides_.Release(peptide);
     peptide->ReleaseFifo(&fifo_alloc_prog1_, &fifo_alloc_prog2_);
   }
 
@@ -196,7 +197,7 @@ int ActivePeptideQueue::SetActiveRangeBIons(vector<double>* min_mass, vector<dou
   } else {
     Peptide* peptide = queue_.front();
     // Free all peptides up to, but not including peptide.
-    fifo_alloc_peptides_.Release(peptide); 
+    fifo_alloc_peptides_.Release(peptide);
   }
 
   // Enqueue all peptides that are not yet queued but are lighter than
@@ -272,7 +273,7 @@ int ActivePeptideQueue::CountAAFrequency(
     unsigned int i = 0;
     unsigned int cntTerm = 0;
     unsigned int cntInside = 0;
-    const unsigned int MaxModifiedAAMassBin = 2000 / binWidth;   //2000 is the maximum size of a modified amino acid 
+    const unsigned int MaxModifiedAAMassBin = 2000 / binWidth;   //2000 is the maximum size of a modified amino acid
     unsigned int* nvAAMassCounterN = new unsigned int[MaxModifiedAAMassBin];   //N-terminal amino acids
     unsigned int* nvAAMassCounterC = new unsigned int[MaxModifiedAAMassBin];   //C-terminal amino acids
     unsigned int* nvAAMassCounterI = new unsigned int[MaxModifiedAAMassBin];   //inner amino acids in the peptides
@@ -288,10 +289,10 @@ int ActivePeptideQueue::CountAAFrequency(
 
       int nLen = peptide->Len(); //peptide length
       ++nvAAMassCounterN[(unsigned int)(dAAResidueMass[0] / binWidth + 1.0 - binOffset)];
-      for (i = 1; i < nLen-1; ++i) {  
+      for (i = 1; i < nLen-1; ++i) {
         ++nvAAMassCounterI[(unsigned int)(dAAResidueMass[i] / binWidth + 1.0 - binOffset)];
         ++cntInside;
-      } 
+      }
       ++nvAAMassCounterC[(unsigned int)(dAAResidueMass[nLen - 1] / binWidth + 1.0 - binOffset)];
       ++cntTerm;
 
@@ -328,6 +329,83 @@ int ActivePeptideQueue::CountAAFrequency(
   delete[] nvAAMassCounterC;
   return uiUniqueMasses;
 }
+
+//Added by Andy Lin
+//08/22/2016
+//Counts the AA freq for when peptides masses are in double form and
+//not in int form
+//Most of code is based/stolen from ActivePeptideQueue::CountAAFrequency
+int ActivePeptideQueue::CountAAFrequencyRes(
+  double binWidth,
+  double binOffset,
+  vector<double>& dAAFreqN,
+  vector<double>& dAAFreqI,
+  vector<double>& dAAFreqC,
+  vector<double>& dAAMass
+) {
+  unsigned int i = 0;
+  unsigned int cntTerm = 0; //counter for terminal residues
+  unsigned int cntInside = 0; //counter for internal residues
+  map<double,int> nMap; //Nterm residues
+  map<double,int> iMap; //internal residues
+  map<double,int> cMap; //Cterm residues
+  map<double,int> allMap; //all residues
+
+  while (!(reader_->Done())) { //read all peptides in index
+    reader_->Read(&current_pb_peptide_);
+    Peptide* peptide = new(&fifo_alloc_peptides_) Peptide(current_pb_peptide_, proteins_, &fifo_alloc_peptides_);
+
+    double* dAAResidueMass = peptide->getAAMasses(); //retrieves the amino acid massses, modifications included
+
+    int nLen = peptide->Len(); //peptide length
+
+    //N terminal
+    if (nMap.count(dAAResidueMass[0]) == 0) {
+      nMap[dAAResidueMass[0]] = 1;
+    } else {
+      nMap[dAAResidueMass[0]] += 1;
+    }
+
+    //Internal residues
+    for(i = 1; i < nLen-1; i++) {
+      if (iMap.count(dAAResidueMass[i]) == 0) {
+        iMap[dAAResidueMass[i]] = 1;
+      } else {
+        iMap[dAAResidueMass[i]] += 1;
+      }
+      cntInside += 1;
+    }
+
+    //C terminal
+    if (cMap.count(dAAResidueMass[nLen-1]) == 0) {
+      cMap[dAAResidueMass[nLen-1]] = 1;
+    } else {
+      cMap[dAAResidueMass[nLen-1]] += 1;
+    }
+    cntTerm += 1;
+
+    //determine the unique masses for all residues
+    for(i = 0; i < nLen; i++) {
+      if (allMap.count(dAAResidueMass[i]) == 0) {
+        allMap[dAAResidueMass[i]] = 1;
+      }
+    }
+  }
+
+  //determine the unique masses for all residues
+  for (map<double,int>::iterator it = allMap.begin(); it != allMap.end(); it++) {
+    dAAMass.push_back(it->first);
+  }
+
+  for (i = 0; i < dAAMass.size(); i++) {
+    dAAFreqN.push_back((double)nMap[dAAMass[i]] / cntTerm);
+    dAAFreqI.push_back((double)iMap[dAAMass[i]] / cntInside);
+    dAAFreqC.push_back((double)cMap[dAAMass[i]] / cntTerm);
+  }
+
+  return dAAMass.size();
+}
+
 
 void ActivePeptideQueue::ReportPeptideHits(Peptide* peptide) {
     if (!peptide_centric_) {

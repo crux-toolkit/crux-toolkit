@@ -306,7 +306,7 @@ void Match::printOneMatchField(
                                      getScore(SP));
     break;
   case SP_RANK_COL:
-    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
+    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx,
                                      getRank(SP));
     break;
   case XCORR_SCORE_COL:
@@ -321,6 +321,14 @@ void Match::printOneMatchField(
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
                                      getScore(TIDE_SEARCH_REFACTORED_XCORR));
     break;
+  case RESIDUE_EVIDENCE_COL:
+    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx,
+                                     getScore(RESIDUE_EVIDENCE_SCORE));
+    break;
+  case BOTH_PVALUE_COL:
+    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx,
+                                     getScore(BOTH_PVALUE));
+    break;
   case SIDAK_ADJUSTED_COL:
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
                                      getScore(SIDAK_ADJUSTED));
@@ -328,6 +336,14 @@ void Match::printOneMatchField(
   case XCORR_RANK_COL:
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
       getRank(!Params::GetBool("exact-p-value") ? XCORR : TIDE_SEARCH_EXACT_PVAL));
+    break;
+  case RESIDUE_RANK_COL:
+    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx,
+                                     getRank(RESIDUE_EVIDENCE_SCORE));
+    break;
+  case BOTH_PVALUE_RANK:
+    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx,
+                                     getRank(BOTH_PVALUE));
     break;
   case EVALUE_COL:
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx,

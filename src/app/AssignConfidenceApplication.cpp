@@ -141,6 +141,15 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
     case REFACTORED_SCORE_COL:
       score_type = TIDE_SEARCH_REFACTORED_XCORR;
       break;
+    case RESIDUE_PVALUE_COL:
+      score_type = RESIDUE_EVIDENCE_PVAL;
+      break;
+    case RESIDUE_EVIDENCE_COL:
+      score_type = RESIDUE_EVIDENCE_SCORE;
+      break;
+    case BOTH_PVALUE_COL:
+      score_type = BOTH_PVALUE;
+      break;
     case ELUTION_WINDOW_COL:
       score_type = TIDE_SEARCH_EXACT_SMOOTHED;
       break;      
@@ -427,13 +436,33 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
       bool is_decoy = match->getNullPeptide();
 
       // Only use top-ranked matches.
-      if (match->getRank(XCORR) > top_match) {
-        if (is_decoy) {
-          num_decoy_rank_skipped++;
-        } else {
-          num_target_rank_skipped++;
+      if (score_type == BOTH_PVALUE) {
+        if (match->getRank(BOTH_PVALUE) > top_match) {
+          if (is_decoy) {
+            num_decoy_rank_skipped++;
+          } else {
+            num_target_rank_skipped++;
+          }
+          continue;
         }
-        continue;
+      } else if (score_type == RESIDUE_EVIDENCE_PVAL) {
+        if (match->getRank(RESIDUE_EVIDENCE_PVAL) > top_match) {
+          if (is_decoy) {
+            num_decoy_rank_skipped++;
+          } else {
+            num_target_rank_skipped++;
+          }
+          continue;
+        }
+      } else {
+        if (match->getRank(XCORR) > top_match) {
+          if (is_decoy) {
+            num_decoy_rank_skipped++;
+          } else {
+            num_target_rank_skipped++;
+          }
+          continue;
+        }
       }
 
       // Find and keep the best score for each decoy peptide.
@@ -508,15 +537,22 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
     cols_to_print[DELTA_CN_COL] = target_matches->getScoredType(DELTA_CN);
     cols_to_print[SP_SCORE_COL] = target_matches->getScoredType(SP);
     cols_to_print[SP_RANK_COL] = target_matches->getScoredType(SP);
-    cols_to_print[XCORR_SCORE_COL] = !target_matches->getScoredType(TIDE_SEARCH_EXACT_PVAL);
-    cols_to_print[XCORR_RANK_COL] = true;
-    cols_to_print[EVALUE_COL] = target_matches->getScoredType(EVALUE);
-    cols_to_print[EXACT_PVALUE_COL] = target_matches->getScoredType(TIDE_SEARCH_EXACT_PVAL);
-    cols_to_print[PVALUE_COL] = target_matches->getScoredType(LOGP_BONF_WEIBULL_XCORR);
-    cols_to_print[SIDAK_ADJUSTED_COL] = sidak;
-    if (target_matches->getScoredType(TIDE_SEARCH_EXACT_PVAL)) {
-      cols_to_print[REFACTORED_SCORE_COL] = true;
+
+    if (score_type == BOTH_PVALUE) {
+      cols_to_print[BOTH_PVALUE_COL] = true;
+      cols_to_print[BOTH_PVALUE_RANK] = true;
+    } else {
+      cols_to_print[XCORR_SCORE_COL] = !target_matches->getScoredType(TIDE_SEARCH_EXACT_PVAL);
+      cols_to_print[XCORR_RANK_COL] = true;
+      cols_to_print[EVALUE_COL] = target_matches->getScoredType(EVALUE);
+      cols_to_print[EXACT_PVALUE_COL] = target_matches->getScoredType(TIDE_SEARCH_EXACT_PVAL);
+      cols_to_print[PVALUE_COL] = target_matches->getScoredType(LOGP_BONF_WEIBULL_XCORR);
+      cols_to_print[SIDAK_ADJUSTED_COL] = sidak;
+      if (target_matches->getScoredType(TIDE_SEARCH_EXACT_PVAL)) {
+        cols_to_print[REFACTORED_SCORE_COL] = true;
+      }
     }
+
     cols_to_print[BY_IONS_MATCHED_COL] = target_matches->getScoredType(BY_IONS_MATCHED);
     cols_to_print[BY_IONS_TOTAL_COL] = target_matches->getScoredType(BY_IONS_TOTAL);
 
@@ -525,6 +561,7 @@ int AssignConfidenceApplication::main(const vector<string> input_files) {
     } else {
       cols_to_print[MATCHES_SPECTRUM_COL] = true;
     }
+
     switch (estimation_method) {
     case TDC_METHOD:
     case PEPTIDE_LEVEL_METHOD: // FIXME: Make a peptide-level q-value column. --WSN 4 Feb 2016
@@ -1009,12 +1046,15 @@ int AssignConfidenceApplication::getDirection(SCORER_TYPE_T scoreType) {
     case XCORR:
     case LOGP_BONF_WEIBULL_XCORR: // negative log p-values
     case TIDE_SEARCH_REFACTORED_XCORR:
+    case RESIDUE_EVIDENCE_SCORE:
     case PERCOLATOR_SCORE:
       // higher score better, ascending = false
       return -1;
     case EVALUE:
     case TIDE_SEARCH_EXACT_PVAL:
     case TIDE_SEARCH_EXACT_SMOOTHED:
+    case RESIDUE_EVIDENCE_PVAL:
+    case BOTH_PVALUE:
       // lower score better, ascending = true
       return 1;
     default:

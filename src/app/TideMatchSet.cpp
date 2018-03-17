@@ -67,8 +67,8 @@ void TideMatchSet::report(
     sort(peptide_->spectrum_matches_array.begin(),
          peptide_->spectrum_matches_array.end(),
          Peptide::spectrum_matches::compSC);
-  } 
- 
+  }
+
   for (int cnt = 0; cnt < nHit; ++cnt) {
     d_cn = 0.0;
     if (exact_pval_search_ == true) {
@@ -81,7 +81,7 @@ void TideMatchSet::report(
     } else {
       score = (double)(peptide_->spectrum_matches_array[cnt].score1_ / 100000000.0);
       if (cnt < nHit-1) {
-        d_cn = (double)( score 
+        d_cn = (double)( score
                       - (double)(peptide_->spectrum_matches_array[cnt+1].score1_ / 100000000.0)
                       / (double)max((FLOAT_T)score , FLOAT_T(1)));
       }
@@ -92,7 +92,7 @@ void TideMatchSet::report(
   }
   //smoothing primary scores in the elution window, only in DIA mode.
   if (elution_window_ > 0) {
-    sort(peptide_->spectrum_matches_array.begin(), 
+    sort(peptide_->spectrum_matches_array.begin(),
          peptide_->spectrum_matches_array.end(),
          Peptide::spectrum_matches::compRT);
     int cnt;
@@ -127,8 +127,8 @@ void TideMatchSet::report(
   if (compute_sp) {
     vector<pair<double, int> > spScoreRank;
     spScoreRank.reserve(top_matches);
-    for (int cnt = 0; cnt < top_matches; ++cnt) {  
-      SpScorer sp_scorer(proteins, *peptide_->spectrum_matches_array[cnt].spectrum_, 
+    for (int cnt = 0; cnt < top_matches; ++cnt) {
+      SpScorer sp_scorer(proteins, *peptide_->spectrum_matches_array[cnt].spectrum_,
                          peptide_->spectrum_matches_array[cnt].charge_, max_mz_);
       pb::Peptide* pb_peptide = getPbPeptide(*peptide_);
       sp_scorer.Score(*pb_peptide, peptide_->spectrum_matches_array[cnt].spData_);
@@ -138,7 +138,7 @@ void TideMatchSet::report(
     for (size_t i = 0; i < spScoreRank.size(); ++i) {
       peptide_->spectrum_matches_array[spScoreRank[i].second].spData_.sp_rank = i;
     }
-  }  
+  }
   // target peptide or concat search
   ofstream* file =
     (Params::GetBool("concat") || !peptide_->IsDecoy()) ? target_file : decoy_file;
@@ -186,12 +186,12 @@ void TideMatchSet::writeToFile(
   }
 
   Crux::Peptide cruxPep = getCruxPeptide(peptide);
-  for (vector<Peptide::spectrum_matches>::const_iterator 
-        i = peptide_->spectrum_matches_array.begin(); 
-        i != peptide_->spectrum_matches_array.end(); 
+  for (vector<Peptide::spectrum_matches>::const_iterator
+        i = peptide_->spectrum_matches_array.begin();
+        i != peptide_->spectrum_matches_array.end();
         ++i) {
     Spectrum* spectrum = i->spectrum_;
-    
+
     *file << spectrum->SpectrumNumber() << '\t'
           << i->charge_ << '\t'
           << spectrum->PrecursorMZ() << '\t'
@@ -211,7 +211,7 @@ void TideMatchSet::writeToFile(
     } else {
       *file << StringUtils::ToString(i->score1_, precision, true) << '\t';
     }
-    
+
     if (elution_window_ ) {
       *file << i->elution_score_ << '\t';
     }
@@ -369,12 +369,33 @@ void TideMatchSet::writeToFile(
     }
 
     // Use scientific notation for exact p-value, but not refactored XCorr.
-    if (exact_pval_search_) {
-      *file << StringUtils::ToString((*i)->xcorr_pval, precision, false) << '\t';
-      *file << StringUtils::ToString((*i)->xcorr_score, precision, true) << '\t';
-    } else {
-      *file << StringUtils::ToString((*i)->xcorr_score, precision, true) << '\t';
-    }      
+    // Second argument to StringUtils::ToString determines number of decimals
+    switch (cur_score_function_) {
+    case XCORR_SCORE:
+      if (exact_pval_search_) {
+        *file << StringUtils::ToString((*i)->xcorr_pval, precision, false) << '\t';
+        *file << StringUtils::ToString((*i)->xcorr_score, precision, true) << '\t';
+      } else {
+        *file << StringUtils::ToString((*i)->xcorr_score, precision, true) << '\t';
+      }
+      break;
+    case RESIDUE_EVIDENCE_MATRIX:
+      if (exact_pval_search_) {
+        *file << StringUtils::ToString((*i)->resEv_pval, precision, false) << '\t';
+        *file << StringUtils::ToString((*i)->resEv_score, 1, true) << '\t';
+      } else {
+        *file << StringUtils::ToString((*i)->resEv_score, 1, true) << '\t';
+      }
+      break;
+    case BOTH_SCORE:
+       *file << StringUtils::ToString((*i)->xcorr_pval, precision, false) << '\t';
+       *file << StringUtils::ToString((*i)->xcorr_score, precision, true) << '\t';
+       *file << StringUtils::ToString((*i)->resEv_pval, precision, false) << '\t';
+       *file << StringUtils::ToString((*i)->resEv_score, 1, true) << '\t';
+       *file << StringUtils::ToString((*i)->combinedPval, precision, false) << '\t';
+      break;
+    }
+
     *file << ++cur << '\t';
     if (sp_map) {
       *file << sp_data->matched_ions << '\t'
@@ -421,7 +442,7 @@ void TideMatchSet::writeHeaders(ofstream* file, bool decoyFile, bool sp) {
   const int headers[] = {
     FILE_COL, SCAN_COL, CHARGE_COL, SPECTRUM_PRECURSOR_MZ_COL, SPECTRUM_NEUTRAL_MASS_COL,
     PEPTIDE_MASS_COL, DELTA_CN_COL, DELTA_LCN_COL, SP_SCORE_COL, SP_RANK_COL,
-    XCORR_SCORE_COL, XCORR_RANK_COL, BY_IONS_MATCHED_COL, BY_IONS_TOTAL_COL,
+    XCORR_SCORE_COL, BY_IONS_MATCHED_COL, BY_IONS_TOTAL_COL,
     DISTINCT_MATCHES_SPECTRUM_COL, SEQUENCE_COL, MODIFICATIONS_COL, CLEAVAGE_TYPE_COL,
     PROTEIN_ID_COL, FLANKING_AA_COL, TARGET_DECOY_COL, ORIGINAL_TARGET_SEQUENCE_COL
   };
@@ -445,15 +466,40 @@ void TideMatchSet::writeHeaders(ofstream* file, bool decoyFile, bool sp) {
         (!Params::GetBool("file-column") || Params::GetBool("peptide-centric-search"))) {
       continue;
     }
-    if (header == XCORR_SCORE_COL && Params::GetBool("exact-p-value")) {
-      *file << get_column_header(EXACT_PVALUE_COL) << '\t'
-            << get_column_header(REFACTORED_SCORE_COL);
+
+    if (header == XCORR_SCORE_COL) {
+      if (Params::GetString("score-function") == "xcorr") {
+        if (Params::GetBool("exact-p-value")) {
+          *file << get_column_header(EXACT_PVALUE_COL) << '\t'
+                << get_column_header(REFACTORED_SCORE_COL);
+        } else {
+          *file << get_column_header(XCORR_SCORE_COL);
+        }
+        *file << '\t' << get_column_header(XCORR_RANK_COL);
+      } else if (Params::GetString("score-function") == "residue-evidence") {
+        if (Params::GetBool("exact-p-value")) {
+          *file << get_column_header(RESIDUE_PVALUE_COL) << '\t'
+                << get_column_header(RESIDUE_EVIDENCE_COL);
+        } else {
+          *file << get_column_header(RESIDUE_EVIDENCE_COL);
+        }
+        *file << '\t' << get_column_header(RESIDUE_RANK_COL);
+      } else if (Params::GetString("score-function") == "both") {
+        *file << get_column_header(EXACT_PVALUE_COL) << '\t'
+              << get_column_header(REFACTORED_SCORE_COL) << '\t'
+              << get_column_header(RESIDUE_PVALUE_COL) << '\t'
+              << get_column_header(RESIDUE_EVIDENCE_COL) <<  '\t'
+              << get_column_header(BOTH_PVALUE_COL) << '\t'
+              << get_column_header(BOTH_PVALUE_RANK);
+      }
+
       if (Params::GetInt("elution-window-size") > 0) {
         *file << '\t' << get_column_header(ELUTION_WINDOW_COL);
       }
       writtenHeader = true;
       continue;
     }
+
     if (header == DISTINCT_MATCHES_SPECTRUM_COL) {
       if (Params::GetBool("peptide-centric-search")) {
         *file << get_column_header(DISTINCT_MATCHES_PEPTIDE_COL) << '\t';
@@ -516,18 +562,46 @@ void TideMatchSet::gatherTargetsAndDecoys(
   int top_n,
   bool highScoreBest // indicates semantics of score magnitude
 ) {
-  if (exact_pval_search_) {
-    make_heap(matches_->begin(), matches_->end(), highScoreBest ? lessXcorrPvalScore : moreXcorrPvalScore);
-  } else {
-    make_heap(matches_->begin(), matches_->end(), highScoreBest ? lessXcorrScore : moreXcorrScore);
+  switch (cur_score_function_) {
+  case XCORR_SCORE:
+    if (exact_pval_search_) {
+      make_heap(matches_->begin(), matches_->end(), highScoreBest ? lessXcorrPvalScore : moreXcorrPvalScore);
+    } else {
+      make_heap(matches_->begin(), matches_->end(), highScoreBest ? lessXcorrScore : moreXcorrScore);
+    }
+    break;
+  case RESIDUE_EVIDENCE_MATRIX:
+    if (exact_pval_search_) {
+      make_heap(matches_->begin(), matches_->end(), highScoreBest ? lessResEvPvalScore : moreResEvPvalScore);
+    } else {
+      make_heap(matches_->begin(), matches_->end(), highScoreBest ? lessResEvScore : moreResEvScore);
+    }
+    break;
+  case BOTH_SCORE:
+    make_heap(matches_->begin(), matches_->end(), highScoreBest ? lessCombinedPvalScore : moreCombinedPvalScore);
+    break;
   }
-  
+
   if (!Params::GetBool("concat") && TideSearchApplication::hasDecoys()) {
     for (Arr::iterator i = matches_->end(); i != matches_->begin(); ) {
-      if (exact_pval_search_) {
-        pop_heap(matches_->begin(), i--, highScoreBest ? lessXcorrPvalScore : moreXcorrPvalScore);
-      } else {
-        pop_heap(matches_->begin(), i--, highScoreBest ? lessXcorrScore : moreXcorrScore);
+      switch (cur_score_function_) {
+      case XCORR_SCORE:
+        if (exact_pval_search_) {
+          pop_heap(matches_->begin(), i--, highScoreBest ? lessXcorrPvalScore : moreXcorrPvalScore);
+        } else {
+          pop_heap(matches_->begin(), i--, highScoreBest ? lessXcorrScore : moreXcorrScore);
+        }
+        break;
+      case RESIDUE_EVIDENCE_MATRIX:
+        if (exact_pval_search_) {
+          pop_heap(matches_->begin(), i--, highScoreBest ? lessResEvPvalScore : moreResEvPvalScore);
+        } else {
+          pop_heap(matches_->begin(), i--, highScoreBest ? lessResEvScore : moreResEvScore);
+        }
+        break;
+      case BOTH_SCORE:
+        pop_heap(matches_->begin(), i--, highScoreBest ? lessCombinedPvalScore : moreCombinedPvalScore);
+        break;
       }
 
       const Peptide& peptide = *(peptides->GetPeptide(i->rank));
@@ -540,11 +614,26 @@ void TideMatchSet::gatherTargetsAndDecoys(
   } else {
     int toAdd = min(top_n + 1, matches_->size());
     for (int i = 0; i < toAdd; ) {
-      if (exact_pval_search_) {
-        pop_heap(matches_->begin(), matches_->end() - i, highScoreBest ? lessXcorrPvalScore : moreXcorrPvalScore); 
-      } else {
-        pop_heap(matches_->begin(), matches_->end() - i, highScoreBest ? lessXcorrScore : moreXcorrScore);
+      switch (cur_score_function_) {
+      case XCORR_SCORE:
+        if (exact_pval_search_) {
+          pop_heap(matches_->begin(), matches_->end() - i, highScoreBest ? lessXcorrPvalScore : moreXcorrPvalScore);
+        } else {
+          pop_heap(matches_->begin(), matches_->end() - i, highScoreBest ? lessXcorrScore : moreXcorrScore);
+        }
+        break;
+      case RESIDUE_EVIDENCE_MATRIX:
+        if (exact_pval_search_) {
+          pop_heap(matches_->begin(), matches_->end() - i, highScoreBest ? lessResEvPvalScore : moreResEvPvalScore);
+        } else {
+          pop_heap(matches_->begin(), matches_->end() - i, highScoreBest ? lessResEvScore : moreResEvScore);
+        }
+        break;
+      case BOTH_SCORE:
+        pop_heap(matches_->begin(), matches_->end() - i, highScoreBest ? lessCombinedPvalScore : moreCombinedPvalScore);
+        break;
       }
+
       targetsOut.push_back(matches_->end() - (++i));
     }
   }

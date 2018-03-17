@@ -13,7 +13,7 @@
 #include "tide/theoretical_peak_set.h"
 #include "tide/max_mz.h"
 
-using namespace std; 
+using namespace std;
 
 /**
  * Locks for multi-threading in Tide.
@@ -30,6 +30,35 @@ enum _tide_search_lock {
 typedef enum _tide_search_lock TIDE_SEARCH_LOCK_T;
 
 class TideSearchApplication : public CruxApplication {
+private:
+  //Added by Andy Lin in Feb 2016
+  //function determines which mass bin a precusor mass is in
+  void getMassBin (
+    vector<int>& pepMassInt,
+    vector<int>& pepMassIntUnique,
+    ActivePeptideQueue* active_peptide_queue,
+    vector<bool>* candidatePeptideStatus
+  );
+
+  //Added by Andy Lin in March 2016
+  //function gets the max evidence of each mass bin(column)
+  //up to mass bin of candidate precursor
+  //Returns max value in curResidueEvidenceMatrix
+  int getMaxColEvidence(
+    const vector<vector<double> >& curResidueEvidenceMatrix,
+    vector<int>& maxEvidence,
+    int pepMassInt
+  );
+
+  //Added by Andy Lin in Nov 2016
+  //Calculatse a residue evidence score given a
+  //residue evidence matrix and a theoretical spectrum
+  int calcResEvScore(
+    const vector<vector<double> >& curResidueEvidenceMatrix,
+    const vector<unsigned int>& intensArrayTheor,
+    const vector<double>& aaMassDouble,
+    Peptide* curPeptide
+  );
 
   friend class SubtractIndexApplication;
 
@@ -70,14 +99,14 @@ class TideSearchApplication : public CruxApplication {
   void search(void *threadarg);
 
   /**
-    * Calls search(threadarg), and if threading, creates threads calling 
+    * Calls search(threadarg), and if threading, creates threads calling
     * search(threadarg)
     *
-    * Call structure: 
+    * Call structure:
     * main -> [this function] -> search(void* threadarg)
     *                 |
     *   (if threading)|
-    *                 |        
+    *                 |
     *                 -> Per Thread:
     *                           -> search(void* threadarg)
     */
@@ -100,11 +129,19 @@ class TideSearchApplication : public CruxApplication {
     ofstream* target_file,
     ofstream* decoy_file,
     bool compute_sp,
-    int nAA, 
+    int nAA,
     double* aaFreqN,
     double* aaFreqI,
     double* aaFreqC,
     int* aaMass,
+    int nAARes,
+    const vector<double>& dAAFreqN,
+    const vector<double>& dAAFreqI,
+    const vector<double>& dAAFreqC,
+    const vector<double>& dAAMass,
+    const pb::ModTable& mod_table,
+    const pb::ModTable& nterm_mod_table,
+    const pb::ModTable& cterm_mod_table,
     vector<int>* negative_isotope_errors
   );
 
@@ -244,6 +281,14 @@ class TideSearchApplication : public CruxApplication {
     double* aaFreqI;
     double* aaFreqC;
     int* aaMass;
+    int nAARes;
+    const vector<double>* dAAFreqN;
+    const vector<double>* dAAFreqI;
+    const vector<double>* dAAFreqC;
+    const vector<double>* dAAMass;
+    const pb::ModTable* mod_table;
+    const pb::ModTable* nterm_mod_table;
+    const pb::ModTable* cterm_mod_table;
     vector<boost::mutex*> locks_array;
     double bin_width;
     double bin_offset;
@@ -260,16 +305,22 @@ class TideSearchApplication : public CruxApplication {
             int min_scan_, int max_scan_, int min_peaks_, int search_charge_, int top_matches_,
             double highest_mz_, ofstream* target_file_,
             ofstream* decoy_file_, bool compute_sp_, int64_t thread_num_, int64_t num_threads_, int nAA_,
-            double* aaFreqN_, double* aaFreqI_, double* aaFreqC_, int* aaMass_, vector<boost::mutex*> locks_array_,  
-            double bin_width_, double bin_offset_, bool exact_pval_search_, map<pair<string, unsigned int>, bool>* spectrum_flag_,
-            int* sc_index_, int* total_candidate_peptides_, vector<int>* negative_isotope_errors_) :
+            double* aaFreqN_, double* aaFreqI_, double* aaFreqC_, int* aaMass_, int nAARes_,
+            const vector<double>* dAAFreqN_, const vector<double>* dAAFreqI_,
+            const vector<double>* dAAFreqC_, const vector<double>* dAAMass_,
+            const pb::ModTable* mod_table_, const pb::ModTable* nterm_mod_table_, const pb::ModTable* cterm_mod_table_,
+            vector<boost::mutex*> locks_array_, double bin_width_, double bin_offset_, bool exact_pval_search_,
+            map<pair<string, unsigned int>, bool>* spectrum_flag_, int* sc_index_, int* total_candidate_peptides_,
+            vector<int>* negative_isotope_errors_) :
             spectrum_filename(spectrum_filename_), spec_charges(spec_charges_), active_peptide_queue(active_peptide_queue_),
             proteins(proteins_), locations(locations_), precursor_window(precursor_window_), window_type(window_type_),
             spectrum_min_mz(spectrum_min_mz_), spectrum_max_mz(spectrum_max_mz_), min_scan(min_scan_), max_scan(max_scan_),
             min_peaks(min_peaks_), search_charge(search_charge_), top_matches(top_matches_), highest_mz(highest_mz_),
             target_file(target_file_), decoy_file(decoy_file_), compute_sp(compute_sp_),
-            thread_num(thread_num_), num_threads(num_threads_), nAA(nAA_), aaFreqN(aaFreqN_), aaFreqI(aaFreqI_), aaFreqC(aaFreqC_), 
-            aaMass(aaMass_), locks_array(locks_array_), bin_width(bin_width_), bin_offset(bin_offset_), exact_pval_search(exact_pval_search_), 
+            thread_num(thread_num_), num_threads(num_threads_), nAA(nAA_), aaFreqN(aaFreqN_), aaFreqI(aaFreqI_), aaFreqC(aaFreqC_),
+            aaMass(aaMass_), nAARes(nAARes_), dAAFreqN(dAAFreqN_), dAAFreqI(dAAFreqI_), dAAFreqC(dAAFreqC_), dAAMass(dAAMass_),
+            mod_table(mod_table_), nterm_mod_table(nterm_mod_table_), cterm_mod_table(cterm_mod_table_),
+            locks_array(locks_array_), bin_width(bin_width_), bin_offset(bin_offset_), exact_pval_search(exact_pval_search_),
             spectrum_flag(spectrum_flag_), sc_index(sc_index_), total_candidate_peptides(total_candidate_peptides_), negative_isotope_errors(negative_isotope_errors_) {}
   };
 
@@ -288,7 +339,33 @@ class TideSearchApplication : public CruxApplication {
     int* aaMass,
     double* pValueScoreObs
   );
-  
+
+  void calcResidueScoreCount (
+    int nAa,
+    int pepMassInt,
+    vector<vector<double> >& residueEvidenceMatrix,
+    vector<int>& aaMass,
+    const vector<double>& aaFreqN,
+    const vector<double>& aaFreqI,
+    const vector<double>& aaFreqC,
+    int NTermMass,
+    int CTermMass,
+    int minAaMass,
+    int maxAaMass,
+    int maxEvidence,
+    int maxScore,
+    vector<double>& scoreCount, //this is returned for later use
+    int& scoreOffSet //this is returned for later use
+  );
+
+  double calcCombinedPval( //calculates combined p-value
+    double m,
+    double p,
+    int numPval
+  );
+
+  int factorial(int n);
+
   void setSpectrumFlag(map<pair<string, unsigned int>, bool>* spectrum_flag);
   virtual void processParams();
   string getOutputFileName();
