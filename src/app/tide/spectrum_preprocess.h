@@ -10,14 +10,14 @@
 //    spectra.Sort();
 //    MaxMZ::SetGlobalMax(spectra.HighestMZ());
 // If such a maximumum weren't known in advance the client would construct
-// a fresh ObervedPeakSet.) 
+// a fresh ObervedPeakSet.)
 //
 // PreprocessSpectrum() first performs a normalization procedure, then
 // performs some scaling operations and linear combinations and caches the
 // results.  The normalization procedure is as described in the XCORR
 // literature: the sqrt of each peak intensity is taken, then peaks are
 // divided into 10 regions and normalized to have a maximum intensity of 50
-// within each region. 
+// within each region.
 //
 // Notionally what we wish to do is to take a dot product of the normalized peak
 // vector with a potentially large collection of different theoretical peak
@@ -26,7 +26,7 @@
 // regularities, we can gain efficiency by caching certain results.  The cache,
 // accessed by GetCache(), consists of various transformations of the normalized
 // peak vector.
-// 
+//
 // These efficiencies are availlable because certain patterns are seen in these
 // theoretical spectra over and over. For instance, whenever we see a Y ion at a
 // particular m/z bin in the theoretical spectrum it will have intensity of 50,
@@ -45,9 +45,9 @@
 // vectors, corresponding to each of the TheoreticalPeakType's (see
 // theoretical_peak_pair.h). The first few are straightforward:
 //
-// PeakMain --> u 
-// LossPeak --> 10 * u 
-// FlankingPeak --> 25 * u  
+// PeakMain --> u
+// LossPeak --> 10 * u
+// FlankingPeak --> 25 * u
 // PrimaryPeak --> 50 * u
 //
 // Actually, instead of computing 10 * u, 25 * u, and 50 * u, we compute 2 * u,
@@ -59,7 +59,7 @@
 // The remaining cache vectors are linear combinations. The idea is that
 // multiplying the ith entry of the appropriate vector below by the ith entry in
 // a theoretical vector of only B and Y ions will capture the contribution of
-// the flanks and the neutral lossses and A ion all in one operation. 
+// the flanks and the neutral lossses and A ion all in one operation.
 //
 // PeakCombinedB1 represents a charge 1 B ion. u[i-1] and u[i+1] are the two
 // flanking bins. u[i-17] represents the loss of NH3 at charge 1, u[i-18]
@@ -70,7 +70,7 @@
 // present. Moreover, in the rare case where one or two of these displacements
 // are off by one, say, with respect to the actual TheoreticalPeakSet, a
 // difference vector reprsented by TheoreticalPeakSetDiff (q.v.) accommodates
-// the discrepancy. 
+// the discrepancy.
 // The ith entry of this cache vector is:
 //   50*u[i] + 25*u[i-1] + 25*u[i+1] + 10*u[i-17] + 10*u[i-18] + 10*u[i-28]
 //
@@ -79,17 +79,17 @@
 //
 // PeakCombinedY1 represents a charge 1 Y ion, its flanks and neutral losses.
 // The ith entry of this cache vector is:
-//   50*u[i] + 25*u[i-1] + 25*u[i+1] + 10*u[i-17] 
+//   50*u[i] + 25*u[i-1] + 25*u[i+1] + 10*u[i-17]
 //
 // Each of the charge 2 peak types below includes an 'a' version and a 'b'
 // version. In the 'a' version the loss of ammonia is 9 Da. per charge.  In the
 // 'b' version the loss of ammonia is 8 Da. per charge. This is because both of
 // these versions occur commonly.
-//    
+//
 // PeakCombinedB2a represents a charge 2 B ion, its flanks and neutral losses.
 // The ith entry of this cache vector is:
 //   50*u[i] + 25*u[i-1] + 25*u[i+1] + 10*u[i-9] + 10*u[i-14]
-//     
+//
 // PeakCombinedY2a represents a charge 2 Y ion, its flanks and neutral losses.
 // The ith entry of this cache vector is:
 //   50*u[i] + 25*u[i-1] + 25*u[i+1] + 10*u[i-9]
@@ -116,13 +116,13 @@ class Spectrum;
 
 class ObservedPeakSet {
  public:
-    
-  ObservedPeakSet(double bin_width = MassConstants::bin_width_, 
-     double bin_offset = MassConstants::bin_width_, 
+
+  ObservedPeakSet(double bin_width = MassConstants::bin_width_,
+     double bin_offset = MassConstants::bin_width_,
      bool NL = false, bool FP = false)
     : peaks_(new double[MaxBin::Global().BackgroundBinEnd()]),
     cache_(new int[MaxBin::Global().CacheBinEnd()*NUM_PEAK_TYPES]) {
-    
+
     bin_width_  = bin_width;
     bin_offset_ = bin_offset;
     NL_ = NL; //NL means neutral loss
@@ -149,6 +149,35 @@ class ObservedPeakSet {
                           long int* num_precursors_skipped,
                           long int* num_isotopes_skipped,
                           long int* num_retained);
+
+  // created by Andy Lin 2/11/2016
+  // Method for creating residue evidence matrix from Spectrum
+  void CreateResidueEvidenceMatrix(const Spectrum& spectrum,
+                                   int charge,
+                                   int maxPrecurMassBin,
+                                   double precursorMass,
+                                   int nAA,
+                                   const vector<double>& aaMass,
+                                   double fragTol,int granularityScale,
+                                   double nTermMass, double cTermMass,
+                                   long int* num_range_skipped,
+                                   long int* num_precursors_skipped,
+                                   long int* num_isotopes_skipped,
+                                   long int* num_retained,
+                                   vector< vector<double> >& residueEvidenceMatrix);
+   // created by Andy Lin in Feb 2018
+   // help method for CreateResidueEvidenceMatrix
+   void addEvidToResEvMatrix(vector<double>& ionMass,
+                    vector<int>& ionMassBin,
+                    vector<double>& ionMasses,
+                    vector<double>& ionIntens,
+                    vector<double>& ionIntensitiesSort,
+                    int numSpecPeaks,
+                    int nAA,
+                    const vector<double>& aaMass,
+                    const vector<int>& aaMassBin,
+                    const double residueToleranceMass,
+                    vector< vector<double> >& residueEvidenceMatrix);
 
   // For debugging
   void Show(const string& name, TheoreticalPeakType peak_type, bool cache_end) {
@@ -191,6 +220,8 @@ class ObservedPeakSet {
   }
   void MakeInteger();
   void ComputeCache();
+  void PreprocessSpectrum(const Spectrum& spectrum, double* intensArrayObs,
+                          int* intensRegion, int maxPrecurMass, int charge);
 
   double* peaks_;
   int* cache_;

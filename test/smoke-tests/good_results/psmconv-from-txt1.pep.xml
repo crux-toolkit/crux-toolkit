@@ -149,6 +149,9 @@
 <parameter name="max-precursor-charge" value="5"/>
 <parameter name="peptide-centric-search" value="false"/>
 <parameter name="skip-preprocessing" value="false"/>
+<parameter name="score-function" value="xcorr"/>
+<parameter name="fragment-tolerance" value="0.02"/>
+<parameter name="evidence-granularity" value="25"/>
 <parameter name="isotope-error" value=""/>
 <parameter name="num-threads" value="0"/>
 <parameter name="decoy_search" value="0"/>

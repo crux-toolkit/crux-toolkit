@@ -512,6 +512,11 @@ enum _scorer_type {
   TIDE_SEARCH_EXACT_PVAL,       ///< exact p-value from Tide
   TIDE_SEARCH_REFACTORED_XCORR, ///< raw score corresponding to exact p-value
 
+  RESIDUE_EVIDENCE_SCORE, //score from residue evidence matrix. added by Andy Lin
+  RESIDUE_EVIDENCE_PVAL, //p-value using residue evidence matrix. added by Andy Lin
+
+  BOTH_PVALUE, //combined res-ev pvalue and xcorr pvalue. added by Andy Lin
+
   // The following are computed by assign-confidence.
   SIDAK_ADJUSTED,             ///< Sidak adjusted p-value
   TIDE_SEARCH_EXACT_SMOOTHED, ///< smoothed p-value
@@ -540,6 +545,24 @@ enum _protein_scorer_type { PROTEIN_SCORER_PVALUE,
  * \brief The typedef for protein scorer type
  */
 typedef enum _protein_scorer_type PROTEIN_SCORER_TYPE_T;
+
+/**
+ * The enum for SCORE_FUNCTION_TYPE
+ * The typedef for score function
+ * added by Andy Lin
+ */
+enum _score_function { INVALID_SCORE_FUNCTION, //Added by Andy Lin
+                       XCORR_SCORE, //original SEQUEST score fxn
+                       RESIDUE_EVIDENCE_MATRIX, //score fxn which can be used high-res MS2 data
+                       BOTH_SCORE, //use both score fxns from above
+                       NUMBER_SCORE_FUNCTIONS };
+
+/**
+ * \typedef SCORE_FUNCTION_T
+ * \brief The typedef for score function type
+ * \added by Andy Lin
+ */
+typedef enum _score_function SCORE_FUNCTION_T;
 
 /**
  *\class Match
