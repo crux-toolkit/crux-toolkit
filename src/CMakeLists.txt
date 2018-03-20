@@ -344,7 +344,6 @@ if (WIN32 AND NOT CYGWIN)
       libSHA1
       libzlib
       MassLynxRaw
-      cdt
     )
   else (INCLUDE_VENDOR_LIBRARIES)
     set (
