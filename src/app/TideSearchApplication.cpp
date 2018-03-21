@@ -112,14 +112,36 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
     }
     carp(CARP_INFO, "Searching scan range %d to %d.", min_scan, max_scan);
   }
-  //check to compute exact p-value
+
+  // check to compute exact p-value
   exact_pval_search_ = Params::GetBool("exact-p-value");
   bin_width_  = Params::GetDouble("mz-bin-width");
   bin_offset_ = Params::GetDouble("mz-bin-offset");
-  // for now don't allow XCorr p-value searches with variable bin width
+  // for now don't allow XCorr p-value or combined p-values
+  // searches with variable bin width
   if (exact_pval_search_ && !Params::IsDefault("mz-bin-width")) {
-    carp(CARP_FATAL, "Tide-search with XCorr p-values and variable bin width "
+    carp(CARP_FATAL, "Tide-search with variable bin width and "
+                     "XCorr p-value or combined p-value "
                      "is not allowed in this version of Crux.");
+  }
+
+  // Check that combined p-value is with exact-p-value=T
+  SCORE_FUNCTION_T curScoreFunction = string_to_score_function_type(Params::GetString("score-function"));
+  if (curScoreFunction == BOTH_SCORE && !exact_pval_search_) {
+    carp(CARP_FATAL,"--score-function 'both' must be run with exact-p-value=T");
+  }
+
+  // TODO res-ev not implemented with flanking_peak, neutral_loss_peak,
+  // and dynamic CTerm and NTerm mass
+  bool use_neutral_loss_peaks_ = Params::GetBool("use-neutral-loss-peaks");
+  bool use_flanking_peaks_ = Params::GetBool("use-flanking-peaks");
+  if (use_flanking_peaks_ && curScoreFunction != XCORR_SCORE) {
+    carp(CARP_FATAL,"--score-function 'residue-evidence' with "
+                    "--use-flanking-peaks true is not implemented yet");
+  }
+  if (use_neutral_loss_peaks_ && curScoreFunction != XCORR_SCORE) {
+    carp(CARP_FATAL,"--score-function 'residue-evidence' with "
+                    "--use-neutral-loss-peaks 'true' is not implemented yet");
   }
 
   // Check compute-sp parameter
@@ -164,7 +186,6 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
   vector<double> dAAMass;
   int nAARes = 0;
 
-  SCORE_FUNCTION_T curScoreFunction = string_to_score_function_type(Params::GetString("score-function"));
   if (curScoreFunction == RESIDUE_EVIDENCE_MATRIX || curScoreFunction == BOTH_SCORE) {
     pb::Header aaf_peptides_header;
     HeadedRecordReader aaf_peptide_reader(peptides_file, &aaf_peptides_header);
@@ -187,7 +208,7 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
     delete active_peptide_queue;
   }
 
-  //for SCORE_FUNCTION=="XCORR_SCORE" with p-val=T or SCORE_FUNCTION=="BOTH_SCORE"
+  // For SCORE_FUNCTION=="XCORR_SCORE" with p-val=T or SCORE_FUNCTION=="BOTH_SCORE"
   if (exact_pval_search_ && (curScoreFunction == XCORR_SCORE || curScoreFunction == BOTH_SCORE)) {
     pb::Header aaf_peptides_header;
     HeadedRecordReader aaf_peptide_reader(peptides_file, &aaf_peptides_header);
@@ -497,6 +518,9 @@ void TideSearchApplication::search(void* threadarg) {
   bool use_neutral_loss_peaks = Params::GetBool("use-neutral-loss-peaks");
   bool use_flanking_peaks = Params::GetBool("use-flanking-peaks");
   int max_charge = Params::GetInt("max-precursor-charge");
+  // Added by Andy Lin on 2/9/2016
+  // Determines which score function to use for scoring PSMs and store in SCORE_FUNCTION enum
+  SCORE_FUNCTION_T curScoreFunction = string_to_score_function_type(Params::GetString("score-function"));
 
   // This is the main search loop.
   ObservedPeakSet observed(bin_width, bin_offset,
@@ -512,11 +536,6 @@ void TideSearchApplication::search(void* threadarg) {
   // cycle through spectrum-charge pairs, sorted by neutral mass
   FLOAT_T sc_total = (FLOAT_T)spec_charges->size();
   int print_interval = Params::GetInt("print-search-progress");
-
-  //Added by Andy Lin on 2/9/2016
-  //Determines which score function to use for scoring PSMs and store in SCORE_FUNCTION enum
-  SCORE_FUNCTION_T curScoreFunction = string_to_score_function_type(Params::GetString("score-function"));
-  //END -- added by Andy Lin
 
   for (vector<SpectrumCollection::SpecCharge>::const_iterator sc = spec_charges->begin()+thread_num;
        sc < spec_charges->begin() + (spec_charges->size());
@@ -624,14 +643,6 @@ void TideSearchApplication::search(void* threadarg) {
                        locations, compute_sp, true, locks_array[LOCK_RESULTS]);
       }  //end peptide_centric == false
     } else { //This runs curScoreFunction=BOTH_SCORE, curScoreFunction=RESIUDUE_EVIDENCE_MATRIX, and xcorr p-val
-
-      //TODO res-ev not implemented with flanking_peak, neutral_loss_peak,
-      //and dynamic CTerm and NTerm mass
-      bool flanking_peak = Params::GetBool("use-flanking-peaks");
-      bool neutral_loss_peak = Params::GetBool("use-neutral-loss-peaks");
-      if (flanking_peak && curScoreFunction != XCORR_SCORE) {
-        carp(CARP_FATAL,"--score-function residue-evidence with --use-flanking-peaks true not implemented yet");
-      }
 
       int nCandPeptide = active_peptide_queue->SetActiveRangeBIons(min_mass, max_mass, min_range, max_range, candidatePeptideStatus);
       int candidatePeptideStatusSize = candidatePeptideStatus->size();
