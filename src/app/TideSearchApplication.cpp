@@ -135,11 +135,11 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
   // and dynamic CTerm and NTerm mass
   bool use_neutral_loss_peaks_ = Params::GetBool("use-neutral-loss-peaks");
   bool use_flanking_peaks_ = Params::GetBool("use-flanking-peaks");
-  if (use_flanking_peaks_ && curScoreFunction != XCORR_SCORE) {
+  if (use_flanking_peaks_ && curScoreFunction == RESIDUE_EVIDENCE_MATRIX) {
     carp(CARP_FATAL,"--score-function 'residue-evidence' with "
                     "--use-flanking-peaks true is not implemented yet");
   }
-  if (use_neutral_loss_peaks_ && curScoreFunction != XCORR_SCORE) {
+  if (use_neutral_loss_peaks_ && curScoreFunction == RESIDUE_EVIDENCE_MATRIX) {
     carp(CARP_FATAL,"--score-function 'residue-evidence' with "
                     "--use-neutral-loss-peaks 'true' is not implemented yet");
   }
