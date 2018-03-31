@@ -88,6 +88,8 @@ class Match {
   int file_idx_; ///< index of where this match came from 
   string database_index_name_;
   static std::vector<std::string> file_paths_;
+  int decoy_idx_;
+
   /**
    * Print one field in the tab-delimited output file, based on column index.
    */
@@ -303,6 +305,9 @@ class Match {
   std::string getFilePath();
   
   static std::string getFilePath(int file_idx);
+
+  int decoyIndex() const;
+  void setDecoyIndex(int value);
 
   virtual bool isDecoy();
 

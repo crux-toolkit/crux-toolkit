@@ -62,6 +62,7 @@ class MatchCollection {
     ///< has an itterator been created? if TRUE can't manipulate matches
 
   bool has_distinct_matches_; ///< does the match collection have distinct matches?
+  bool has_decoy_indexes_;
 
   // Values for fitting the Weibull distribution
   FLOAT_T eta_;  ///< The eta parameter for the Weibull distribution.
@@ -342,6 +343,9 @@ class MatchCollection {
   bool getHasDistinctMatches();
   void setHasDistinctMatches(bool distinct_matches);
 
+  bool hasDecoyIndexes() const;
+  void setHasDecoyIndexes(bool value);
+
   /**
    * Try setting the match collection's zstate.  Successful if the
    * current charge is 0 (i.e. hasn't yet been set) or if the current
@@ -358,7 +362,7 @@ class MatchCollection {
    */
   std::vector<FLOAT_T> extractScores(
     SCORER_TYPE_T score_type ///< Type of score to extract.
-  );
+  ) const;
 
   /**
    * Given a hash table that maps from a score to its q-value, assign
