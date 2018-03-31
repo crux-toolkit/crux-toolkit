@@ -57,6 +57,7 @@ void MatchCollection::init() {
   top_scoring_sp_ = NULL;
   exact_pval_search_ = false;
   has_distinct_matches_ = false;
+  has_decoy_indexes_ = false;
 }
 
 /**
@@ -386,6 +387,13 @@ void MatchCollection::setHasDistinctMatches(bool distinct) {
   has_distinct_matches_ = distinct;
 }
 
+bool MatchCollection::hasDecoyIndexes() const {
+  return has_decoy_indexes_;
+}
+
+void MatchCollection::setHasDecoyIndexes(bool value) {
+  has_decoy_indexes_ = value;
+}
 
 void MatchCollection::setExperimentSize(int size) {
   experiment_size_ = size;
@@ -1349,15 +1357,12 @@ bool MatchCollection::setZState(
  */
 vector<FLOAT_T> MatchCollection::extractScores(
   SCORER_TYPE_T score_type ///< Type of score to extract.
-) {
-  vector<FLOAT_T> scores;
-  scores.reserve(match_.size());
-  MatchIterator* match_iterator = new MatchIterator(this, score_type, false);
-  while (match_iterator->hasNext()) {
-    Match* match = match_iterator->next();
-    scores.push_back(match->getScore(score_type));
+) const {
+  size_t numMatches = match_.size();
+  vector<FLOAT_T> scores(numMatches, 0);
+  for (size_t i = 0; i < numMatches; i++) {
+    scores[i] = match_[i]->getScore(score_type);
   }
-  delete match_iterator;
   return scores;
 }
 

@@ -217,6 +217,7 @@ MatchCollection* MatchFileReader::parse() {
     match_collection->setScoredType(BARISTA_QVALUE, !empty(BARISTA_QVALUE_COL));
     match_collection->setScoredType(BY_IONS_MATCHED, !empty(BY_IONS_MATCHED_COL));
     match_collection->setScoredType(BY_IONS_TOTAL, !empty(BY_IONS_TOTAL_COL));
+    match_collection->setHasDecoyIndexes(!empty(DECOY_INDEX_COL));
 
     // parse match object
     if (maxRank == 0 || getInteger(XCORR_RANK_COL) <= maxRank) {
@@ -342,6 +343,10 @@ Crux::Match* MatchFileReader::parseMatch() {
   }
   if (!empty(BY_IONS_TOTAL_COL)) {
     match->setScore(BY_IONS_TOTAL, getInteger(BY_IONS_TOTAL_COL));
+  }
+
+  if (!empty(DECOY_INDEX_COL)) {
+    match->setDecoyIndex(getInteger(DECOY_INDEX_COL));
   }
 
   // get experiment size

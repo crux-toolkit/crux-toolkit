@@ -59,6 +59,7 @@ void Match::init() {
   num_target_matches_ = 0;
   best_per_peptide_ = false;
   file_idx_ = -1;
+  decoy_idx_ = -1;
 }
 
 
@@ -903,7 +904,13 @@ string Match::getFilePath(int file_idx) {
   }
 }
 
+int Match::decoyIndex() const {
+  return decoy_idx_;
+}
 
+void Match::setDecoyIndex(int value) {
+  decoy_idx_ = value;
+}
 
 bool Match::isDecoy() {
 
@@ -971,22 +978,16 @@ void Match::setNullPeptide(
  * gets the match if it is a null_peptide match
  *\returns true if match is null peptide, else false
  */
-bool Match::getNullPeptide()
-{
+bool Match::getNullPeptide() {
   return null_peptide_;
 }
 
-void Match::setZState(
-  SpectrumZState& zstate) {
-
+void Match::setZState(SpectrumZState& zstate) {
   zstate_ = zstate;
-
 }
 
 SpectrumZState& Match::getZState() {
-
   return zstate_;
-
 }
 
 /**
@@ -1008,8 +1009,7 @@ FLOAT_T Match::getNeutralMass() {
  */
 void Match::setLnExperimentSize(
   FLOAT_T ln_experiment_size ///< the ln_experiment_size value of PSM -in
-  )
-{
+) {
   ln_experiment_size_ = ln_experiment_size;
 }
 

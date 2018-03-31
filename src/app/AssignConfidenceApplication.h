@@ -21,6 +21,8 @@
 #include "model/MatchCollection.h"
 #include "io/OutputFiles.h"
 #include "model/Peptide.h"
+#include "boost/tuple/tuple.hpp" // This will be <tuple> once we move to C++11.
+#include "boost/tuple/tuple_comparison.hpp"
 
 /**
  * Legal values for the --estimation-method option.
@@ -44,6 +46,35 @@ class AssignConfidenceApplication : public CruxApplication {
   unsigned int accepted_psms_;
   string index_name_;
   bool is_final_;
+
+  class AtdcScoreSet {
+   public:
+    AtdcScoreSet(
+      const std::vector<FLOAT_T>& targetScores,
+      const std::vector< std::vector<FLOAT_T> >& decoyScores,
+      bool ascending);
+    static void getScores(
+      MatchCollection* targets,
+      std::map<int, MatchCollection*> decoys,
+      SCORER_TYPE_T scoreType,
+      bool ascending,
+      std::vector<FLOAT_T>& outTargetScores,
+      std::vector< std::vector<FLOAT_T> >& outDecoyScores);
+    std::vector<FLOAT_T> fdps() const;
+   private:
+    void histBin(std::vector<int>& hist, FLOAT_T x) const;
+    static bool sortScoresAsc(
+      const boost::tuple<FLOAT_T, int, int, int>& x,
+      const boost::tuple<FLOAT_T, int, int, int>& y);
+    static bool sortScoresDesc(
+      const boost::tuple<FLOAT_T, int, int, int>& x,
+      const boost::tuple<FLOAT_T, int, int, int>& y);
+    static bool sortScoresByIdentifier(
+      const boost::tuple<FLOAT_T, int, int, int>& x,
+      const boost::tuple<FLOAT_T, int, int, int>& y);
+
+    std::vector< std::pair<FLOAT_T, std::vector<FLOAT_T> > > scores_; // <target score, [decoy scores]>
+  };
 
  public:
   map<pair<string, unsigned int>, bool>* getSpectrumFlag();
@@ -78,7 +109,7 @@ class AssignConfidenceApplication : public CruxApplication {
   */
   virtual int main(int argc, char** argv);
 
-  virtual int main(const vector<string> input_files);
+  virtual int main(const vector<string>& input_files);
 
   static int getDirection(SCORER_TYPE_T scoreType);
 
@@ -141,15 +172,16 @@ class AssignConfidenceApplication : public CruxApplication {
   void identify_best_psm_per_peptide
     (MatchCollection* all_matches,
     SCORER_TYPE_T score_type);
-  void convert_fdr_to_qvalue(
+  static void convert_fdr_to_qvalue(
     std::vector<FLOAT_T>& qvalues); ///< Come in as FDRs, go out as q-values.
+
   map<FLOAT_T, FLOAT_T> store_arrays_as_hash(
     const std::vector<FLOAT_T>& keys,
     const std::vector<FLOAT_T>& values);
   std::vector<FLOAT_T> compute_decoy_qvalues_tdc(
     std::vector<FLOAT_T>& target_scores,
     std::vector<FLOAT_T>& decoy_scores,
-    bool forward,
+    bool ascending,
     FLOAT_T pi_zero);
   std::vector<FLOAT_T> compute_decoy_qvalues_mixmax(
     std::vector<FLOAT_T>& target_scores,
