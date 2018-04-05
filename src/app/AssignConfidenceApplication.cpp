@@ -1102,31 +1102,26 @@ vector<FLOAT_T> AssignConfidenceApplication::compute_decoy_qvalues_mixmax(
   }
 
   //histogram of the target scores.
-  double* h_w_le_z = new double[num_decoys + 1];   //histogram for N_{w<=z}
-  double* h_z_le_z = new double[num_decoys + 1];   //histogram for N_{z<=z}
+  vector<double> h_w_le_z(num_decoys + 1, 0); //histogram for N_{w<=z}
+  vector<double> h_z_le_z(num_decoys + 1, 0); //histogram for N_{z<=z}
 
   int idx = 0;
-  int cnt = 0;
-  int i;
-  for (i = 0; i < num_decoys; ++i) {
-    while (idx < num_targets && ascending ?
+  for (int i = 0; i < num_decoys; ++i) {
+    while (idx < num_targets && (ascending ?
       decoy_scores[i] <= target_scores[idx] :
-      decoy_scores[i] >= target_scores[idx]) {
-      ++cnt;
+      decoy_scores[i] >= target_scores[idx])) {
       ++idx;
     }
-    h_w_le_z[i] = (double)cnt;
+    h_w_le_z[i] = (double)idx;
   }
-  cnt = 0;
   idx = 0;
-  for (i = 0; i < num_decoys; ++i) {
-    while (idx < num_targets && ascending ?
+  for (int i = 0; i < num_decoys; ++i) {
+    while (idx < num_targets && (ascending ?
       decoy_scores[i] <= decoy_scores[idx] :
-      decoy_scores[i] >= decoy_scores[idx]) {
-      ++cnt;
+      decoy_scores[i] >= decoy_scores[idx])) {
       ++idx;
     }
-    h_z_le_z[i] = (double)cnt;
+    h_z_le_z[i] = (double)idx;
   }
   h_w_le_z[num_decoys] = (double)(num_targets);
   h_z_le_z[num_decoys] = (double)(num_decoys);
@@ -1142,7 +1137,7 @@ vector<FLOAT_T> AssignConfidenceApplication::compute_decoy_qvalues_mixmax(
   double cnt_z, cnt_w;
   double prev_fdr = -1;
 
-  for (i = num_targets - 1; i >= 0; --i) {
+  for (int i = num_targets - 1; i >= 0; --i) {
     while (j >= 0 && (ascending ? 
       decoy_scores[j] <= target_scores[i] : 
       decoy_scores[j] >= target_scores[i])) {
@@ -1165,14 +1160,13 @@ vector<FLOAT_T> AssignConfidenceApplication::compute_decoy_qvalues_mixmax(
     fdrmod[i] = qvalue > 1.0 ? 1.0 : qvalue;
     
     //convert qvalues to fdr
-    if (prev_fdr > fdrmod[i])
+    if (prev_fdr > fdrmod[i]) {
       fdrmod[i] = prev_fdr;
+    }
 
     prev_fdr = fdrmod[i];
   }
   // Convert the FDRs into q-values.
-  delete[] h_w_le_z;
-  delete[] h_z_le_z;
   return fdrmod;
 }
 
