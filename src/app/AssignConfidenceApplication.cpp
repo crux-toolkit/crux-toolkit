@@ -199,10 +199,14 @@ int AssignConfidenceApplication::main(const vector<string>& input_files) {
     carp(CARP_INFO, "Found %d PSMs in %s.", match_collection->getMatchTotal(), target_path.c_str());
 
     // If necessary, automatically identify the score type.
+    // The score type that is used is the first one found
+    // in the list below.
     if (score_type == INVALID_SCORER_TYPE) {
       vector<SCORER_TYPE_T> scoreTypes;
       scoreTypes.push_back(XCORR);
       scoreTypes.push_back(EVALUE);
+      scoreTypes.push_back(BOTH_PVALUE);
+      scoreTypes.push_back(RESIDUE_EVIDENCE_PVAL);
       scoreTypes.push_back(TIDE_SEARCH_EXACT_PVAL);
       scoreTypes.push_back(TIDE_SEARCH_EXACT_SMOOTHED);
       scoreTypes.push_back(LOGP_BONF_WEIBULL_XCORR);
