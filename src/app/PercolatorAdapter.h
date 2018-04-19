@@ -118,14 +118,7 @@ class PercolatorAdapter : public Caller {
     bool is_decoy ///< is psm a decoy?
     );
 
-  /**
-   * \returns the modified and unmodified peptide sequence
-   * for the psm
-   */
-  static MODIFIED_AA_T* getModifiedAASequence(
-    PSMDescription* psm, ///< psm -in
-    std::string& seq ///< sequence -out
-    );
+  PostProcessProtein* makeProtein(const std::string& name);
 };
 
 #endif /* PERCOLATORADAPTER_H_ */

@@ -35,12 +35,10 @@ PercolatorAdapter::~PercolatorAdapter() {
     ++collectionsDeleted;
   }
   // delete proteins created by this adapter
-  int proteinsDeleted = 0;
   for (vector<PostProcessProtein*>::iterator iter = proteins_made_.begin();
        iter != proteins_made_.end();
        ++iter) {
     delete *iter;
-    ++proteinsDeleted;
   }
 
   deleteCollections();
@@ -225,12 +223,19 @@ void PercolatorAdapter::processProteinScores(ProteinProbEstimator* protEstimator
        score_iter != protein_scores.end();
        score_iter++) {
     // Set scores
-    ProteinMatch* protein_match;
-    if (!score_iter->isDecoy()) {
-      protein_match = collection_->getProteinMatch(score_iter->getName());
+    bool decoy = score_iter->isDecoy();
+    ProteinMatch* protein_match = !decoy
+      ? collection_->getProteinMatch(score_iter->getName())
+      : decoy_collection_->getProteinMatch(score_iter->getName());
+    if (!protein_match) {
+      PostProcessProtein* protein = makeProtein(score_iter->getName());
+      protein_match = !decoy
+        ? collection_->getProteinMatch(protein, true)
+        : decoy_collection_->getProteinMatch(protein, true);
+    }
+    if (!decoy) {
       matches.push_back(protein_match);
     } else {
-      protein_match = decoy_collection_->getProteinMatch(score_iter->getName());
       decoy_matches.push_back(protein_match);
     }
     protein_match->setScore(PERCOLATOR_SCORE, -log(score_iter->getP()));
@@ -352,9 +357,7 @@ Crux::Peptide* PercolatorAdapter::extractPeptide(
   for (vector<string>::const_iterator i = psm->proteinIds.begin();
        i != psm->proteinIds.end();
        ++i) {
-    PostProcessProtein* protein = new PostProcessProtein();
-    proteins_made_.push_back(protein);
-    protein->setId(i->c_str());
+    PostProcessProtein* protein = makeProtein(i->c_str());
     int start_idx = protein->findStart(unmodifiedSeq, n_term, c_term);
     if (peptide == NULL) {
       peptide = new Crux::Peptide(unmodifiedSeq.length(), protein, start_idx);
@@ -366,6 +369,13 @@ Crux::Peptide* PercolatorAdapter::extractPeptide(
   }
 
   return peptide;
+}
+
+PostProcessProtein* PercolatorAdapter::makeProtein(const string& name) {
+  PostProcessProtein* protein = new PostProcessProtein();
+  proteins_made_.push_back(protein);
+  protein->setId(name);
+  return protein;
 }
 
 // Finds the index of the given feature name (case insensitive).
