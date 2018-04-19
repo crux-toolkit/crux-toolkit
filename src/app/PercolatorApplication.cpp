@@ -270,7 +270,9 @@ int PercolatorApplication::main(
   // FIXME include schema as part of distribution and add option to turn on validation
   perc_args_vec.push_back("--no-schema-validation");
 
+  bool proteinOut = false;
   if (!Params::GetString("picked-protein").empty()) {
+    proteinOut = true;
     perc_args_vec.push_back("--picked-protein");
     perc_args_vec.push_back(Params::GetString("picked-protein"));
   }
@@ -287,6 +289,7 @@ int PercolatorApplication::main(
 
   bool set_protein = Params::GetBool("protein");
   if (set_protein) {
+    proteinOut = true;
     perc_args_vec.push_back("--fido-protein");
 
     if (Params::GetDouble("fido-alpha") > 0) {
@@ -327,8 +330,10 @@ int PercolatorApplication::main(
       perc_args_vec.push_back("--spectral-counting-fdr");
       perc_args_vec.push_back(Params::GetString("spectral-counting-fdr"));
     }
+  }
 
-    // Target proteins file is written to prevent writing to stdout
+  // Target proteins file is written to prevent writing to stdout
+  if (proteinOut) {
     perc_args_vec.push_back("--results-proteins");
     perc_args_vec.push_back(output_target_proteins);
     if (Params::GetBool("txt-output")) {
