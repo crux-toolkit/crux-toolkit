@@ -333,10 +333,10 @@ int AssignConfidenceApplication::main(const vector<string>& input_files) {
         int numTies = 0;
         MatchCollection* tdc_collection = new MatchCollection();
         tdc_collection->setScoredType(score_type, true);
-        MatchIterator target_iter(match_collection);
-        MatchIterator decoy_iter(temp_collection);
-        while (target_iter.hasNext()) {
-          Crux::Match* target_match = target_iter.next();
+        MatchIterator* target_iter = new MatchIterator(match_collection);
+        MatchIterator* decoy_iter = new MatchIterator(temp_collection);
+        while (target_iter->hasNext()) {
+          Crux::Match* target_match = target_iter->next();
 
           // Only use top-ranked matches.
           if (target_match->getRank(XCORR) > top_match) {
@@ -362,7 +362,7 @@ int AssignConfidenceApplication::main(const vector<string>& input_files) {
               target_match->setTargetExperimentSize(numCandidates);
               tdc_collection->addMatch(target_match);
             } else {
-              Crux::Match* decoy_match = decoy_iter.getMatch(decoy_idx - 1);
+              Crux::Match* decoy_match = decoy_iter->getMatch(decoy_idx - 1);
               int numCandidates = target_match->getTargetExperimentSize() + decoy_match->getTargetExperimentSize();
               target_match->setTargetExperimentSize(numCandidates);
               decoy_match->setTargetExperimentSize(numCandidates);
@@ -374,7 +374,7 @@ int AssignConfidenceApplication::main(const vector<string>& input_files) {
               tdc_collection->addMatch(target_match);
               continue;
             }
-            Crux::Match* decoy_match = decoy_iter.getMatch(decoy_idx - 1);
+            Crux::Match* decoy_match = decoy_iter->getMatch(decoy_idx - 1);
             int numCandidates = target_match->getTargetExperimentSize() + decoy_match->getTargetExperimentSize();
             target_match->setTargetExperimentSize(numCandidates);
             decoy_match->setTargetExperimentSize(numCandidates);
@@ -401,6 +401,8 @@ int AssignConfidenceApplication::main(const vector<string>& input_files) {
             }
           }
         }
+        delete target_iter;
+        delete decoy_iter;
         delete match_collection;
         match_collection = tdc_collection;
         carp(CARP_INFO, "%d tdc_collection", match_collection->getMatchTotal());
@@ -415,9 +417,9 @@ int AssignConfidenceApplication::main(const vector<string>& input_files) {
     }
 
     // Iterate, gathering matches into one or two collections.
-    MatchIterator match_iterator(match_collection, score_type, false);
-    while (match_iterator.hasNext()) {
-      Match* match = match_iterator.next();
+    MatchIterator* match_iterator = new MatchIterator(match_collection, score_type, false);
+    while (match_iterator->hasNext()) {
+      Match* match = match_iterator->next();
       bool is_decoy = match->getNullPeptide();
 
       // Only use top-ranked matches.
@@ -496,6 +498,7 @@ int AssignConfidenceApplication::main(const vector<string>& input_files) {
       }
       Match::freeMatch(match);
     }
+    delete match_iterator;
     delete match_collection;
     if (num_decoy_rank_skipped + num_target_rank_skipped > 0) {
       carp(CARP_INFO, "Skipped %d target and %d decoy PSMs with rank > %d.",
