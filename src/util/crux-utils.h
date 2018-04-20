@@ -457,8 +457,8 @@ void check_target_decoy_files(
 );
 
 void get_search_result_paths(
-  const std::string& infile,
-  std::vector<std::string> &outpaths ///< paths of all search results -out
+  const std::vector<std::string>& infiles,
+  std::vector<std::string>& outpaths ///< paths of all search results -out
 );
 
 

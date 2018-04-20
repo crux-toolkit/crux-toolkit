@@ -29,11 +29,9 @@ MakePinApplication::~MakePinApplication() {}
  * main method for MakePinApplication
  */
 int MakePinApplication::main(int argc, char** argv) {
-  string target_path = Params::GetString("target input");
-
+  vector<string> target_paths = Params::GetStrings("target input");
   vector<string> search_result_files;
-  get_search_result_paths(target_path, search_result_files);
-
+  get_search_result_paths(target_paths, search_result_files);
   return main(search_result_files);
 }
 
@@ -187,7 +185,7 @@ string MakePinApplication::getDescription() const {
  */
 vector<string> MakePinApplication::getArgs() const {
   string arr[] = {
-    "target input"
+    "target input+"
   };
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }
@@ -200,7 +198,6 @@ vector<string> MakePinApplication::getOptions() const {
     "decoy-prefix",
     "fileroot",
     "filestem-prefixes",
-    "list-of-files",
     "max-charge-feature",
     "output-dir",
     "output-file",

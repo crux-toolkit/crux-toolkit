@@ -93,14 +93,14 @@ Params::Params() : finalized_(false) {
     "(.mzXML) format.");
   /*Percolator arguments*/
   InitArgParam("peptide-spectrum matches",
-    "A collection of target and decoy peptide-spectrum matches (PSMs). Input may "
-    "be in one of five formats: PIN, SQT, pepXML, [[html:<a href=\"../file-formats/txt-format.html\">]]"
-    "Crux tab-delimited text[[html:</a>]], or a list of files (when list-of-files=T). "
+    "One or more collections of target and decoy peptide-spectrum matches (PSMs). Input may "
+    "be in one of four formats: PIN, SQT, pepXML, or [[html:<a href=\"../file-formats/txt-format.html\">]]"
+    "Crux tab-delimited text[[html:</a>]]. "
     "Note that if the input is provided as SQT, pepXML, or Crux "
     "tab-delimited text, then a PIN file will be generated in the output directory "
-    "prior to execution."
+    "prior to execution. "
     "Crux determines the format of the input file by examining its "
-    "filename extension.  "
+    "filename extension."
     "[[html:<br>Decoy PSMs can be provided to Percolator in two "
     "ways: either as a separate file or embedded within the same file as the target "
     "PSMs. Percolator will first search for target PSMs in a separate file. The "
@@ -1219,7 +1219,7 @@ Params::Params() : finalized_(false) {
   InitBoolParam("list-of-files", false,
     "Specify that the search results are provided as lists of files, rather than as "
     "individual files.",
-    "Available for barista and percolator.", true);
+    "Available for barista.", true);
   InitStringParam("optimization", "protein", "protein|peptide|psm",
      "Specifies whether to do optimization at the protein, peptide or psm level.",
      "Available for barista.", true);
