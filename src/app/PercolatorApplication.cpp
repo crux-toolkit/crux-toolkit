@@ -41,17 +41,17 @@ PercolatorApplication::~PercolatorApplication() {
  * main method for PercolatorApplication
  */
 int PercolatorApplication::main(int argc, char** argv) {
-  string input_pin = Params::GetString("peptide-spectrum matches");
-  carp(CARP_INFO, "Reading file %s", input_pin.c_str());
+  vector<string> inputs = Params::GetStrings("peptide-spectrum matches");
+  string input_pin = inputs.front();
 
   // Check if we need to run make-pin first
-  if (Params::GetBool("list-of-files") ||
+  if (inputs.size() > 1 ||
       StringUtils::IEndsWith(input_pin, ".txt") ||
       StringUtils::IEndsWith(input_pin, ".sqt") ||
       StringUtils::IEndsWith(input_pin, ".pep.xml") ||
       StringUtils::IEndsWith(input_pin, ".mzid")) {
     vector<string> result_files;
-    get_search_result_paths(input_pin, result_files);
+    get_search_result_paths(inputs, result_files);
 
     input_pin = make_file_path("make-pin.pin");
 
@@ -494,7 +494,7 @@ string PercolatorApplication::getDescription() const {
  */
 vector<string> PercolatorApplication::getArgs() const {
   string arr[] = {
-    "peptide-spectrum matches"
+    "peptide-spectrum matches+"
   };
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }
@@ -522,7 +522,6 @@ vector<string> PercolatorApplication::getOptions() const {
     "fileroot",
     "init-weights",
     "klammer",
-    "list-of-files",
     "max-charge-feature",
     "maxiter",
     "mzid-output",

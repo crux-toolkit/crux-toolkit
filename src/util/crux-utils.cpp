@@ -1526,38 +1526,29 @@ void check_target_decoy_files(
 }
 
 void get_search_result_paths(
-  const string &infile, ///< path of the first file.
-  std::vector<std::string> &outpaths ///< paths of all search results -out 
+  const vector<string>& infiles,
+  vector<string>& outpaths ///< paths of all search results -out 
 ) {
   outpaths.clear();
-  if (Params::GetBool("list-of-files")) {
-    LineFileReader reader(infile);
-    while(reader.hasNext()) {
-      string current = StringUtils::Trim(reader.next());
-      carp(CARP_INFO, "current is:%s", current.c_str());
-      if (FileUtils::Exists(current)) {
-        outpaths.push_back(current);
-      } else {
-        carp(CARP_ERROR, "Search file '%s' doesn't exist", current.c_str());
-      }
+  for (vector<string>::const_iterator i = infiles.begin(); i != infiles.end(); i++) {
+    if (!FileUtils::Exists(*i)) {
+      carp(CARP_ERROR, "Search file '%s' doesn't exist", i->c_str());
+      continue;
     }
-  } else {
-    string target = infile;
-    string decoy = infile;
+    outpaths.push_back(*i);
+  }
+  for (vector<string>::iterator i = outpaths.begin(); i != outpaths.end(); i++) {
+    string path = *i;
+    string target = path;
+    string decoy = path;
     check_target_decoy_files(target, decoy);
-    if (!target.empty()) {
-      if (FileUtils::Exists(target)) {
-        outpaths.push_back(target);
-      } else {
-        carp(CARP_ERROR, "Target file '%s' doesn't exist", target.c_str());
-      }
+    if (!target.empty() && target != path && FileUtils::Exists(target) &&
+        find(outpaths.begin(), outpaths.end(), target) == outpaths.end()) {
+      i = outpaths.insert(i + 1, target);
     }
-    if (!decoy.empty()) {
-      if (FileUtils::Exists(decoy)) {
-        outpaths.push_back(decoy);
-      } else {
-        carp(CARP_ERROR, "Decoy file '%s' doesn't exist", decoy.c_str());
-      }
+    if (!decoy.empty() && decoy != path && FileUtils::Exists(decoy) &&
+        find(outpaths.begin(), outpaths.end(), decoy) == outpaths.end()) {
+      i = outpaths.insert(i + 1, decoy);
     }
   }
 }
