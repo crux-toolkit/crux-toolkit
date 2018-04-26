@@ -722,7 +722,7 @@ parallel --xapply crux tide-search &lt;options&gt; --fileroot {1} {2} database.d
   this:</p>
 
 <p><code>
---mods-spec GASPVTCLIDEMFUY+0.997035,NQKOW+1.99407,H+2.99111,R+3.98814</code></p>
+--mods-spec A+0.997035,C+0.997035,D+0.997035,E+0.997035,F+0.997035,G+0.997035,H+2.99111,I+0.997035,K+1.99407,L+0.997035,M+0.997035,N+1.99407,P+0.997035,Q+1.99407,R+3.98814,S+0.997035,T+0.997035,V+0.997035,W+1.99407,Y+0.997035</code></p>
 
 <p>
 <pre>
@@ -756,10 +756,12 @@ add_Z_user_amino_acid = 0.0000         # added to Z - avg.   0.0000, mono.   0.0
 
 <p>
   If you need to adjust the cysteine mass to account for
-  carboxyamidomethylation, then do</p>
+  carboxyamidomethylation, then use 58.018499 instead of 0.997035 for
+  C. </p>
 
-<p><code>
---mods-spec GASPVTLIDEMFUY+0.997035,NQKOW+1.99407,H+2.99111,R+3.98814,C+58.018499</code></p>
+<p>
+<code>
+--mods-spec A+0.997035,C+58.018499,D+0.997035,E+0.997035,F+0.997035,G+0.997035,H+2.99111,I+0.997035,K+1.99407,L+0.997035,M+0.997035,N+1.99407,P+0.997035,Q+1.99407,R+3.98814,S+0.997035,T+0.997035,V+0.997035,W+1.99407,Y+0.997035</code></p>
 
 <p><pre>
 add_C_cysteine = 0.997035
