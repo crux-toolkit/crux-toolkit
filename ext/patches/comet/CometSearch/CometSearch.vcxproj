@@ -164,6 +164,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CometCheckForUpdates.h" />
     <ClInclude Include="CometData.h" />
     <ClInclude Include="CometDataInternal.h" />
     <ClInclude Include="CometDecoys.h" />
@@ -185,6 +186,7 @@
     <ClInclude Include="ThreadPool.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CometCheckForUpdates.cpp" />
     <ClCompile Include="CometInterfaces.cpp" />
     <ClCompile Include="CometMassSpecUtils.cpp" />
     <ClCompile Include="CometPostAnalysis.cpp" />
