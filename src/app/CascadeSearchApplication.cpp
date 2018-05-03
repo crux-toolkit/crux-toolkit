@@ -190,9 +190,18 @@ void CascadeSearchApplication::processParams() {
   }
   Params::Set("top-match", 1);
 
-  if (Params::GetBool("exact-p-value")) {
+  if (Params::GetString("score-function") == "both") {
+    Params::Set("score","combined p-value");
+  } else if (Params::GetString("score-function") == "residue-evidence") {
+    if (Params::GetBool("exact-p-value")) {
+      Params::Set("score","res-ev score");
+    } else {
+      Params::Set("score","res-ev p-value");
+    }
+  } else if (Params::GetBool("exact-p-value")) {
     Params::Set("score", "exact p-value");
   }
+
   if (Params::GetBool("pin-output")) {
     carp(CARP_FATAL, "Cascade-Search cannot work with pinxml-output=T.");
   }
