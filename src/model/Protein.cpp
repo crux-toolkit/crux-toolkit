@@ -200,42 +200,46 @@ int Protein::findStart(
   string peptide_sequence, ///< the sequence to find
   string prev_aa, ///< the previous amino acid for the sequence
   string next_aa ///< the next amino acid for the sequence
-  ) {
-
+) {
   if (getSequencePointer() == NULL) {
     return -1;
   }
-
-  if (prev_aa == "-") {
+  string protein_seq = getSequencePointer();
+  if (prev_aa == "-" && StringUtils::StartsWith(protein_seq, peptide_sequence)) {
     return 1;
-  } else if (next_aa == "-") {
+  } else if (next_aa == "-" && StringUtils::EndsWith(protein_seq, peptide_sequence)) {
     return getLength() - peptide_sequence.length();
-  } else {
-    //use the flanking amino acids to further constrain our search in the sequence
-    size_t pos = string::npos; 
-    string seq = prev_aa + peptide_sequence + next_aa;
-    string protein_seq = getSequencePointer();
-    pos = protein_seq.find(seq);
-    if (pos == string::npos) {
-      carp(CARP_DEBUG, "could not find %s in protein %s\n%s", seq.c_str(), getIdPointer().c_str(), protein_seq.c_str());
-      //finding the sequence with the flanks failed, try finding without the flanks.
-      seq = peptide_sequence;
-      pos = protein_seq.find(seq);
-      if (pos == string::npos) {
-        carp(CARP_ERROR, "could not %s in protein %s\n%s", seq.c_str(), getIdPointer().c_str(), protein_seq.c_str());
-        return -1;
-      }
-      return (pos+1);
-    }
-    return (pos+2);
   }
-
+  // find flankN + sequence + flankC
+  string seq = prev_aa + peptide_sequence + next_aa;
+  size_t pos = protein_seq.find(seq);
+  if (pos != string::npos) {
+    return pos + 2;
+  }
+  // failed, find sequence
+  seq = peptide_sequence;
+  if ((pos = protein_seq.find(seq)) != string::npos) {
+    return pos + 1;
+  }
+  // failed, find flankN + sequence + flankC with I/L equivalence
+  seq = prev_aa + peptide_sequence + next_aa;
+  std::replace(seq.begin(), seq.end(), 'L', 'I');
+  std::replace(protein_seq.begin(), protein_seq.end(), 'L', 'I');
+  if ((pos = protein_seq.find(seq)) != string::npos) {
+    return pos + 2;
+  }
+  // failed, find sequence with I/L equivalence
+  seq = peptide_sequence;
+  std::replace(seq.begin(), seq.end(), 'L', 'I');
+  if ((pos = protein_seq.find(seq)) != string::npos) {
+    return pos + 1;
+  }
+  carp(CARP_ERROR, "could not find %s in protein %s\n%s", peptide_sequence.c_str(), getIdPointer().c_str(), getSequencePointer());
+  return -1;
 }
 
 bool Protein::isPostProcess() {
-
   return false;
-
 }
 
 /**
