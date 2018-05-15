@@ -60,35 +60,108 @@
 
 <ul>
   <li>
+    Added 'equal-I-and-L' option to tide-index and spectral-ccounts commands.
+    This directs the commands to treat I and L as equivalents. </li>
+
+  <li>
     Added the localize-modification command to find the most likely locations
     of post-translational modifications on peptides from a set of
     peptide-spectrum matches.</li>
 
   <li>
+    Improved handling of modifications in tide-index, allowing for indices
+    containing many different types of modifications.</li>
+
+  <li>
     Updated Comet to version 2018.01 rev. 0.</li>
+
+  <li>
+    Added support for combined p-values to perolator and assign-confidence.</li>
 
 </ul>
 
 <h4>Minor changes</h4>
 
 <ul>
+
   <li>
-    Nov 13, 2017.  Added "deisotope" option to tide-search.</li>
+    percolator and make-pin can now accept multiple files on the command line.</li>
+
+  <li>
+    cascade-search can use combined p-value as a score function</li>
+
+  <li>
+    Fixed bug in assign-confidence sorting by 'exact p-value' when
+    'combined p-value' was available.</li>
+
+  <li>
+    Fixes to mstoolkit to allow building with more recent versions of GCC.</li>
+
+  <li>
+    Improvments to IO speed for MzIdent format</li>
+
+  <li>Crux distributions are now identified using an abbreviated unique
+    string from the version control system.</li>
+  <li>
+    Added support for exact p-values to deisotope option.</li>
+
+  <li>
+    Added support for mzML to qranker and barista.</li>
+
+  <li>
+    Fixed bug in tide-search that used total protein count in output,
+    rather than target protein count.</li>
+
+  <li>
+    Update tutorial for test-fdr in percolator</li>
+
+  <li>
+    tide-search now reports peak counts separately for each thread.</li>
+
+  <li>
+    Fixes to percolator picked-protein option.</li>
   
   <li>
-    June 20, 2017.  Added "max-charge-feature" option to make-pin so
+    Added "deisotope" option to tide-search.</li>
+
+  <li>
+    Fixed error when parma-medic was used from the pipeline command.</li>
+
+  <li>
+    Added "max-charge-feature" option to make-pin so
     that the user can control how many charge features are
     created.</li>
   
+  <li>tide-index will recognize if too many temporary files would be required
+  and to index modified peptides use an alternate method.</li>
+
   <li>
-    May 4, 2017.  Added the "mod-precision" option to control the
+    Added 'How can I search my isotopically labeled data with Tide or Comet' to
+    the FAQ.</li>
+
+  <li>
+    Added 'How do Tide and Comet handle combinations of static and variable
+    modifications, as well as n-terminal modifications?' to the FAQ.</li>
+
+  <li>
+    Fixed error in handling of the custom-enzyme option.</li>
+
+  <li>
+    Disabled forcing of param-medic parameters.</li>
+
+  <li>
+    Added the "mod-precision" option to control the
     number of digits used to represent post-translational
     modifications in various output files.</li>
 
   <li>
-    March 27, 2017.  Modified cascade-search so that the q-value
+    Modified cascade-search so that the q-value
     threshold is not applied to the final database in the
     cascade.</li>
+
+  <li>
+    Tide-index will now clip methionines at the begining of proteins that do
+    not have an internal clevage site.</li>
 
   <li>
     Fixed subtract-index so that it performs the subtraction only on the target
@@ -97,11 +170,46 @@
     targets and on the decoys.</li>
 
   <li>
-    Enabled search-for-xlinks (new code)  to search multiple spectra files,
+    Fixed error that caused subtract-index to ignore the mass-precision
+    option</li>
+
+  <li>
+    Fixed error in search-for-xlinks that allowed too many missed
+    cleavages</li>
+
+  <li>
+    Fixed error in search-for-xlinks related to average mass.</li>
+
+  <li>
+    Improved handling of the istopic-mass parameter in search-for-xlinks</li>
+
+  <li>
+    Enabled search-for-xlinks to search multiple spectra files,
     in any of the file formats supported by Proteowizard.  Support for the
     <code>file-column</code> option added.
   </li>
+
+  <li>
+    Added the mono-link option and to search-for-xlinks and simplified the mod option.</li>
+
+  <li>
+    Added the print-progress option to search-for-xlinks.</li>
+
+  <li>
+    Added the concat option to search-for-xlinks.</li>
+
+  <li>
+    Fixed error in search-for-xlinks that attempted to use reversed decoys.
+    search-for-xlinks only supports shuffled decoys.</li>
   
+  <li>
+    Changed the precursor-window option upper bound from 100 to
+    1,000,000,000</li>
+
+  <li>
+    Added PepXMLResupport for mod_nterm_mass and mod_cterm_mass on
+    modification_info.</li>
+
   <li>
     Removed the <code>feature-file-in</code> option.</li>
 
@@ -118,8 +226,18 @@
     <code>spectral-counting-fdr</code> options for Percolator.</li>
 
   <li>
+    Added target/decoy column to Tide and search-for-xlinks output files.</li>
+
+  <li>
+    Fix an error in the processing of the peptide-list option to
+    subtract-index.</li>
+
+  <li>
     Updated the average TDC protocol in <code>assign-confidence</code> so that
     it is less conservative for low FDR thresholds.</li>
+
+  <li>
+    Numerous minor bug fixes and improvements to the documentation.</li>
 
 </ul>
 
