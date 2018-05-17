@@ -12,7 +12,6 @@ if (UNIX)
 endif (UNIX)
 SET(ENV{CMAKE_PREFIX_PATH} ${CMAKE_CURRENT_BINARY_DIR})
 SET(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR})
-SET(USE_LATEST_PWIZ ON CACHE BOOL "Use lastest version of ProteoWizard")
 
 if (WIN32 AND NOT CYGWIN)
   # If windows build we need to select 32/64 bit platform
@@ -33,25 +32,11 @@ if (WIN32 AND NOT CYGWIN)
   endif (INCLUDE_VENDOR_LIBRARIES)
 endif (WIN32 AND NOT CYGWIN)
 
-# Set up which source to use for ProteoWizard
-if (USE_LATEST_PWIZ)
-  # Use the ProteoWizard TeamCity repository.
-  set(
-      PWIZ_SOURCE
-      DOWNLOAD_COMMAND
-        ${CMAKE_COMMAND}
-          -DDOWNLOAD_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/downloads
-          -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
-          -P  ${CMAKE_CURRENT_SOURCE_DIR}/download_pwiz.cmake
-      DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/downloads
-  )
-else (USE_LATEST_PWIZ)
-  # Use tarball cached on our server
-  set(
-      PWIZ_SOURCE
-      URL http://cruxtoolkit.sourceforge.net/download/pwiz-src-3_0_9870.tar.bz2
-  )
-endif (USE_LATEST_PWIZ)
+# Use tarball cached on our server
+set(
+    PWIZ_SOURCE
+    URL http://cruxtoolkit.sourceforge.net/download/pwiz-src-3_0_18137_c65b6f6.tar.bz2
+)
 
 # Download and build a partial distribution of the pwiz source
 if (WIN32 AND NOT CYGWIN)

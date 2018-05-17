@@ -12,7 +12,7 @@ build_id=$(echo $build_id| sed 's/^.*build id=.\([0-9]*\).*/\1/')
 echo "build_id=" $build_id
 version=$(wget --no-check-certificate -q -O -\
   https://teamcity.labkey.org/repository/download/bt81/$build_id:id/VERSION?guest=1)
-version=$(echo $version|sed 's/\./_/g')
+version=$(echo $version|sed 's/ /_/g')
 echo "version = " $version
 wget --no-check-certificate \
   https://teamcity.labkey.org:/guestAuth/repository/download/bt81/.lastSuccessful/pwiz-src-$version.tar.bz2
