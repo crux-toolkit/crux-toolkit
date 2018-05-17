@@ -35,7 +35,7 @@ endif (WIN32 AND NOT CYGWIN)
 # Use tarball cached on our server
 set(
     PWIZ_SOURCE
-    URL http://cruxtoolkit.sourceforge.net/download/pwiz-src-3_0_18137_c65b6f6.tar.bz2
+    URL http://noble.gs.washington.edu/crux-downloads/pwiz-src-3_0_18137_c65b6f6.tar.bz2
 )
 
 # Download and build a partial distribution of the pwiz source
