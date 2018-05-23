@@ -49,7 +49,7 @@ else (USE_LATEST_PWIZ)
   # Use tarball cached on our server
   set(
       PWIZ_SOURCE
-      URL http://cruxtoolkit.sourceforge.net/download/pwiz-src-3_0_9870.tar.bz2
+      URL https://noble.gs.washington.edu/crux-downloads/pwiz-src-3_0_18137_c65b6f6.tar.bz2
   )
 endif (USE_LATEST_PWIZ)
 
@@ -150,6 +150,7 @@ else (UNIX)
   )
 endif (WIN32 AND NOT CYGWIN)
 
+#SET(PERCOLATOR_GIT_VERSION "rel-3-02")
 ExternalProject_Add(
   percolator
   GIT_REPOSITORY https://github.com/percolator/percolator.git
@@ -168,11 +169,7 @@ if (UNIX)
   ExternalProject_Add(
     protobuf-2.5.0
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
-    DOWNLOAD_COMMAND
-          ${CMAKE_COMMAND}
-            -DDOWNLOAD_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/downloads
-            -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src
-            -P  ${CMAKE_CURRENT_SOURCE_DIR}/download_pbuffers.cmake
+    URL https://github.com/google/protobuf/releases/download/v2.5.0/protobuf-2.5.0.tar.bz2
     CONFIGURE_COMMAND
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/protobuf-2.5.0/configure
       --prefix=${CMAKE_CURRENT_BINARY_DIR}
@@ -186,11 +183,7 @@ elseif (WIN32 AND NOT CYGWIN)
   ExternalProject_Add(
     protobuf-2.5.0
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
-    DOWNLOAD_COMMAND
-          ${CMAKE_COMMAND}
-            -DDOWNLOAD_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/downloads
-            -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src
-            -P  ${CMAKE_CURRENT_SOURCE_DIR}/download_pbuffers.cmake
+    URL https://github.com/google/protobuf/releases/download/v2.5.0/protobuf-2.5.0.tar.bz2
     PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory
       ${CMAKE_CURRENT_SOURCE_DIR}/patches/protobuf/vsprojects/
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/protobuf-2.5.0/vsprojects/ &&
@@ -228,11 +221,8 @@ endif (UNIX)
 
 ExternalProject_Add(
   gflags-2.1.2
-  DOWNLOAD_COMMAND
-        ${CMAKE_COMMAND}
-          -DDOWNLOAD_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/downloads
-          -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src
-          -P  ${CMAKE_CURRENT_SOURCE_DIR}/download_gflags.cmake
+  URL https://codeload.github.com/gflags/gflags/tar.gz/v2.1.2
+  DOWNLOAD_NAME gflags-2.1.2.tar.gz
   PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
   CMAKE_ARGS -DCMAKE_VERBOSE_MAKEFILE=ON
     -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}
