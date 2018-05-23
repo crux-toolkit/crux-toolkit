@@ -141,10 +141,9 @@
 		<ul>
 		<li><code>gcc</code></li>
 		<li><code>g++</code></li>
-		<li><code>cmake</code></li>
+		<li><code>cmake</code> (Version 3.6 or later recommended)</li>
 		<li><code>make</code></li>
 		<li><code>svn</code></li>
-		<li><code>wget</code> (must support SSL, version 1.19 or later recommended)</li>
 		</ul>
 		<p/>
 		Building <span class=prog>crux</span> also requires the
@@ -311,10 +310,9 @@
 		<li><code>OS X Yosemite or later</code></li>
 		<li><code>XCode 6.3.1 or later</code></li>
 		<li><code>XCode Command Line Tools</code></li>
-		<li><code>cmake</code></li>
+		<li><code>cmake</code> (Version 3.6 or later recommended)</li>
 		<li><code>make</code></li>
 		<li><code>svn</code></li>
-		<li><code>wget</code> (must support SSL, version 1.19 or later recommended)</li>
 		<li><code>gnutar</code> (Apple's version of tar is incompatible with GNU's
     version of tar)</li>
 		</ul>
@@ -349,20 +347,12 @@
 		<p/>
 		The programs
 		<span class=prog>cmake</span>,
-		<span class=prog>svn</span>,
 		and
-		<span class=prog>wget</span>,
+		<span class=prog>svn</span>
 		can be installed from 
 		<a href="https://www.macports.org">MacPorts</a>
 		or 
 		<a href="http://brew.sh">Homebrew</a>.
-		Note that you must install the <span class=prog>ssl</span> variant of 
-		<span class=prog>wget</span>:
-		<div class=code>
-		<code>
-		$ sudo port install wget +ssl
-		</code>
-		</div>
 		<p/>
 		<li><b>Download the files</b> 
 		<p/>
@@ -562,8 +552,6 @@
 		<li><a href="http://sourceforge.net/projects/win32svn/"><code>SVN</code></a></li>
 		<li><a href="http://getgnuwin32.sourceforge.net"><code>GNU Tools for
     Windows</code></li>
-		<li><a href="https://eternallybored.org/misc/wget/"><code>wget</code> (must
-    support SSL, version 1.19 or later recommended)</a></li>
 		<li><a
 		href="https://thermo.flexnetoperations.com/control/thmo/login">
 		<code>Thermo MSFileReader</code></a> (This may be omitted if support for 
@@ -574,15 +562,6 @@
 		You must have Visual Studio 2013.
 		Visual Studio 2013 Express for Windows Desktop does work.
 		<p/>
-		<span class=code>wget</span> is available as part of the GnuWin32 package.
-		The easiest way to install this is via the 
-		<a href="http://getgnuwin32.sourceforge.net"><code>GetGnuWin32</code></a>
-		package manager.
-		<span class=code>wget</span> must support SSL, so install the optional
-		packages provided by
-		<a href="http://getgnuwin32.sourceforge.net"><code>GetGnuWin32</code></a> .
-		<p/>
-		<span class=code>wget</span> and 
 		<span class=code>svn</span> must be included in the execution PATH
 		for your system.
 		See the section <i>Setting the PATH on Windows</i> for more information.
