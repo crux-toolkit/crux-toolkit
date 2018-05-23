@@ -22,27 +22,6 @@ This document describes how to publish a versioned release.
   (<code>doc/user/release-notes.html</code>), and update the PHP script to point at the
   new packages (<code>doc/user/download/download.php</code>).
 
-<h3>Tagging</h3>
-<p>Each release of Crux should be tagged with the release number.
-By default tags are not transfered to remote servers, so you'll need
-to explicitly push the tag to GitHub.
-<pre>
-# Create tag
-git tag -a 3.2 -m "Crux release 3.2"
-# Push tag to GitHub
-git push origin 3.2
-</pre>
-If bugs are reported for the release, the tag should be checked out
-and a new branch created. The bugs are fixed in this branch and then
-merged into the default branch.
-<p/>
-For example:
-<pre>
-# Checkout tag
-git checkout 3.2
-# Create branch for bug fixes to release
-git checkout -b 3.2
-</pre>
 <h3>Version numbers</h3>
 <p>Each time new files are made available for download, the version
 number should increment by 0.01 for minor releases or by 0.1 for major
@@ -55,22 +34,38 @@ set (CPACK_PACKAGE_VERSION_MINOR "XX")
 This controls the numbering of packages and what is reported by the 
 <code>--version</code> option.
 </p>
+<p>Update <code>doc/user/download/download.php</code> to point at the new
+versions of the distribution packages.</p>
+<p>Commit these changes to the trunk.</p>
 
+<h3>Create a branch for the release</h3>
+<p>
+Because each numbered release of Crux will require some changes to the source,
+a branch should be created for each release.
+Bugs in the release are fixed in this branch and then
+merged into the default branch.
+<p/>
+For example:
+<pre>
+# Get latest code from remote origin
+git pull
+# Create branch for bug fixes to release
+git checkout -b crux-3.2
+</pre>
 <h3>Prepare a static tarball of Proteowizard</h3>
 The normal build of Crux pulls the latest version of Proteowizard 
-from the SVN repository.
+from it's TeamCity repository.
 This is a moving target, and may result in bugs or build breaks
 as the Proteowizard team makes changes. 
-For formal releases we download the current version of Proteowizard
-and save it into as a fixed tarball on our web site.
+For numbered releases we download the current version of Proteowizard
+and save it into as a static tarball on our web site.
 When users build the release from source, this tarball is downloaded,
 and used to build the Proteowizard libraries.
 <p/>
-The script <code>src/external/download-pwiz-tarball.sh</code>
+The script <code>ext/download-pwiz-tarball.sh</code>
 can be used to download a copy of the Proteowizard source tarball
 into the current directory.
-It can then be 
-<a href="crux-sourceforge.html">copied</a> into the download directory for the new release on the
+It can then be copied into the download directory for the new release on the
 <code>crux-toolkit</code> web site.
 <h3>Modify the Crux build to use the new Proteowizard tarball.</h3>
 This is done by editing <code>ext\CMakeLists.txt.</code>
@@ -79,6 +74,13 @@ on <code>USE_LATEST_PWIZ</code>.
 There will be two such blocks, one for Windows, and one for non-Windows.
 Change these blocks to use only the Proteowizard tarball on the Crux web site.
 Note that this edit should <b>not</b> be merged back into the trunk.
+<h3>Modify the Crux build to use a fixed version of Percolator</h3>
+In <code>ext/CMakeLists.txt</code> set the CMake varible <code>PERCOLATOR_GIT_VERSION</code>
+to the tag for the current release of Percolator.
+For example:
+<pre>
+SET(PERCOLATOR_GIT_VERSION "rel-3-02")
+</pre>
 <h3>Add TeamCity build tasks for the new version</h3>
 You'll need to create TeamCity tasks for building the new version of
 Crux on each of the platforms,
@@ -113,6 +115,13 @@ Edit Name
 </ul>
 </li>
 </ul>
+<li>Build Steps</li>
+<ul>
+<li>
+Update the name of the packages generated in the build.
+For example, change <code>crux-3.1.Darwin.x86_64.zip</code>
+to <code>crux-3.2.Darwin.x86_64.zip</code></li>
+</ul>
 </ul>
 <p />
 For the web site deployment task, the settings that need to be changed include:
@@ -141,6 +150,7 @@ Dependencies
 <ul>
 <li>Modify the dependencies to point at the tasks for the builds of the new
 version for each platform.</li>
+<li>Update the artifact dependencies with the new names of the artifacts (zip files and tarballs)</li>
 </ul>
 </li>
 </ul>
@@ -173,15 +183,18 @@ versions of the distribution packages.</li>
 <li>Check out a clean copy of the branch for the version.</li>
 <li>Create a tarball of the current version of Proteowizard and store a copy 
 in the download directory of the Crux web site.</li>
-<li>Update the <code>ext/download_pwiz.cmake</code> script to point at the
+<li>Update the <code>ext/CMakeLists.txt</code> script to point at the
 Proteowizard tarball you just created.</li>
+<li>Update the <code>ext/CMakeLists.txt</code> script with the
+<code>PERCOLATOR_GIT_TAG</code> for the current release of Percolator.</li>
 <li>Commit changes to the branch.
 <h4>Update TeamCity build tasks</h4>
 <li>Copy TeamCity tasks for previous release to tasks for new release.</li>
 <li>Update details of tasks for new release.</li>
+<li>Run all of the build tasks for the new release</li>
+<li>Check results of TeamCity builds and smoke tests.
 <h4>Deploy new release to web site</h4>
 <li>Run TeamCity task <code>Deploy successful build to website</code>.
-<li>Check results of TeamCity builds and smoke tests.
 <h4>Check the distribution files</h4>
 <li>Download, unpack, and build Crux from the source file tarball from the web site.
 <li>Download, unpack and run the binary files from the web site.  <i>You may want to ask someone
