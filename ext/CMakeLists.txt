@@ -206,6 +206,7 @@ endif (UNIX)
 ExternalProject_Add(
   gflags-2.1.2
   URL https://codeload.github.com/gflags/gflags/tar.gz/v2.1.2
+  DOWNLOAD_NAME gflags-2.1.2.tar.gz
   PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
   CMAKE_ARGS -DCMAKE_VERBOSE_MAKEFILE=ON
     -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}
