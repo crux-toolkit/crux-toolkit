@@ -1070,6 +1070,11 @@ vector<FLOAT_T> AssignConfidenceApplication::compute_decoy_qvalues_tdc(
     carp(CARP_DEBUG, "FDR for score %g = min(1,%d/%d) = %g",
          target_score, decoy_idx, target_idx + 1, fdr);
     qvalues.push_back(fdr);
+    // assign fdr for this and any following with same score
+    while (target_idx < target_scores.size() - 1 && target_scores[target_idx + 1] == target_score) {
+      target_idx++;
+      qvalues.push_back(fdr);
+    }
   }
   
   // Convert the FDRs into q-values.
