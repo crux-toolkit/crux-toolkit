@@ -750,6 +750,12 @@ void OutputFiles::writeRankedProteins(const vector<boost::tuple<FLOAT_T, Protein
   // print each protein
   for(vector<boost::tuple<FLOAT_T, Protein*, int> >::const_iterator it = proteins.begin();
       it != proteins.end(); ++it) {
+    if (isParsimony && it->get<2>() < 1) {
+      // Don't print out -1 ranked proteins
+      carp(CARP_DEBUG, "-1 Parsimony Rank for protein detected:%s",
+	   it->get<1>()->getIdPointer().c_str());
+      continue;
+    }
     file->setColumnCurrentRow(score_col, it->get<0>());
     file->setColumnCurrentRow(PROTEIN_ID_COL, it->get<1>()->getIdPointer());
     if (isParsimony) {

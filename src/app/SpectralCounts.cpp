@@ -773,11 +773,29 @@ void SpectralCounts::writeRankedProteins() {
        it != protein_scores_.end(); ++it) {
     int rank = -1;
     if (isParsimony) {
+      /* This find doesn't seem to work for all proteins within a metaprotein, 
+         needs to be debugged
+         if we are going to use it. For now, do a brute force find. (SJM _2018_05_26)   
       MetaToRank::const_iterator lookup =
         meta_protein_ranks_.find(protein_meta_protein_[it->first]);
       if (lookup != meta_protein_ranks_.end()) {
         rank = lookup->second;
+      } else {
+      */
+      for (MetaToRank::iterator iter = meta_protein_ranks_.begin();
+        iter != meta_protein_ranks_.end();
+	++iter) {
+	  MetaProtein proteins = iter->first;
+	  for (MetaProtein::iterator protein_it = proteins.begin();
+	       protein_it != proteins.end(); ++protein_it) {
+	    Protein* protein = (*protein_it);
+	    if (protein->getId() == it->first->getId()) {
+	      carp(CARP_DEBUG, "Found protein %s",protein->getId().c_str());
+	      rank = iter->second;
+	    }
+	  }
       }
+      // }
     }
     proteins.push_back(boost::make_tuple(it->second, it->first, rank));
   }
@@ -845,11 +863,13 @@ void SpectralCounts::getMetaScores() {
        meta_it != meta_mapping_.end(); ++meta_it) {
     MetaProtein proteins = (*meta_it).second;
     FLOAT_T top_score = -1.0;
+    carp(CARP_DEBUG, "Meta protein");
     for (MetaProtein::iterator protein_it = proteins.begin();
          protein_it != proteins.end(); ++protein_it) {
       Protein* protein = (*protein_it);
       FLOAT_T score = protein_scores_[protein];
       top_score = max(score, top_score);
+      carp(CARP_DEBUG, "   Protein %s score:%g", protein->getIdPointer().c_str(), score);
     }
     meta_protein_scores_.insert(make_pair(proteins, top_score));
   }
@@ -873,12 +893,24 @@ void SpectralCounts::getMetaRanks() {
   sort(metaVector.begin(), metaVector.end(), compareMetaScorePair);
 
   int cur_rank = 1;
-  for (vector< pair<FLOAT_T, MetaProtein> >::iterator
-         vector_it = metaVector.begin();
-       vector_it != metaVector.end(); ++vector_it) {
-    MetaProtein proteins = (*vector_it).second;
+  FLOAT_T last_score = -1;
+  for (size_t idx = 0;idx < metaVector.size();idx++) {
+    MetaProtein proteins = metaVector[idx].second;
+    FLOAT_T cur_score = metaVector[idx].first;
+    if (cur_score != last_score) {
+      cur_rank = idx+1;
+    }
+
+    carp(CARP_DEBUG, "Meta Protein score:%g rank:%i",cur_score,cur_rank);
+     for (MetaProtein::iterator protein_it = proteins.begin();
+         protein_it != proteins.end(); ++protein_it) {
+      Protein* protein = (*protein_it);
+      FLOAT_T score = protein_scores_[protein];
+      carp(CARP_DEBUG, "   Protein %s score:%g", protein->getIdPointer().c_str(), score);
+    }
+    
     meta_protein_ranks_.insert(make_pair(proteins, cur_rank));
-    cur_rank++;
+    last_score = cur_score;
   }
 
 }
