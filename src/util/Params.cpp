@@ -1355,15 +1355,22 @@ Params::Params() : finalized_(false) {
     "Quantification at protein or peptide level.",
     "Available for spectral-counts and either NSAF and SIN.", true);
   InitStringParam("parsimony", "none", "none|simple|greedy",
-    "Perform a parsimony analysis on the proteins, and report a \"parsimony rank\" column "
-    "in the output file. This column contains integers indicating the protein's rank in a "
-    "list sorted by spectral counts. If the parsimony analysis results in two proteins "
-    "being merged, then their parsimony rank is the same. In such a case, the rank is "
-    "assigned based on the largest spectral count of any protein in the merged meta-protein. "
-    "The \"simple\" parsimony algorithm only merges two proteins A and B if the peptides "
-    "identified in protein A are the same as or a subset of the peptides identified in "
-    "protein B. The \"greedy\" parsimony algorithm does additional merging, using the "
-    "peptide q-values to greedily assign each peptide to a single protein.",
+    "Perform a parsimony analysis on the proteins, and report a "
+    "\"parsimony rank\" column in the output file. This column contains "
+    "integers indicating the protein's rank in a list sorted by spectral "
+    "counts. If the parsimony analysis results in two proteins being merged, "
+    "then their parsimony rank is the same. In such a case, the rank is "
+    "assigned based on the largest spectral count of any protein in the merged "
+    "meta-protein. The \"simple\" parsimony algorithm only merges two proteins "
+    "A and B if the peptides identified in protein A are the same as or a "
+    "subset of the peptides identified in protein B. The \"greedy\" parsimony "
+    "algorithm does additional merging, by identifying the longest protein "
+    "(i.e., the protein with the most peptides) that contains one or more "
+    "shared peptides. The shared peptides are assigned to the identified "
+    "protein and removed from any other proteins that contain them, and the "
+    "process is then repeated. Note that, with this option, some proteins end "
+    "up being assigned no peptides at all; these orphan proteins are not "
+    "reported in the output.", 
     "Available for spectral-counts.", true);
   InitStringParam("threshold-type", "qvalue", "none|qvalue|custom",
     "Determines what type of threshold to use when filtering matches. none : read all "
