@@ -62,7 +62,7 @@
         "Source" => "crux-3.2.$version.Source.tar.gz",
         "Linux32" => "crux-3.2.$version.Linux.i686.zip",
         "Linux64" => "crux-3.2.$version.Linux.x86_64.zip",
-        "OSX" => "crux-3.1.$version.Darwin.x86_64.zip",
+        "OSX" => "crux-3.2.$version.Darwin.x86_64.zip",
         "Windows64" => "crux-3.2.$version.Windows.AMD64.zip",
         "Windows32" => "crux-3.2.$version.Windows.i386.zip",
       );
