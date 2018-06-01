@@ -178,12 +178,12 @@ int SubtractIndexApplication::main(int argc, char** argv) {
     // match targets to decoys
     map<vector< pair<pb::Peptide, bool> >::iterator, vector< pair<pb::Peptide, bool> >::iterator> targetToDecoy;
     for (vector< pair<pb::Peptide, bool> >::iterator i = pepList1.begin(); i != pepList1.end(); i++) {
-      if (i->first.is_decoy()) {
+      if (i->first.has_decoy_index()) {
         continue;
       }
       Peptide iPep(i->first, proteins1);
       for (vector< pair<pb::Peptide, bool> >::iterator j = pepList1.begin(); j != pepList1.end(); j++) {
-        if (!j->first.is_decoy()) {
+        if (!j->first.has_decoy_index()) {
           continue;
         }
         Peptide jPep(j->first, proteins1);
@@ -201,14 +201,14 @@ int SubtractIndexApplication::main(int argc, char** argv) {
     for (vector< pair<pb::Peptide, bool> >::iterator i = pepList1.begin(); i != pepList1.end(); i++) {
       if (i->first.mass() > curMass) {
         break;
-      } else if (i->first.is_decoy()) {
+      } else if (i->first.has_decoy_index()) {
         continue; // don't match decoys
       }
       string pepStr1 = getModifiedPeptideSeq(&i->first, &proteins1);
       for (vector<pb::Peptide>::const_iterator j = pepList2.begin(); j != pepList2.end(); j++) {
         if (j->mass() > curMass) {
           break;
-        } else if (j->is_decoy()) {
+        } else if (j->has_decoy_index()) {
           continue;
         }
         string pepStr2 = getModifiedPeptideSeq(&*j, &proteins2);
@@ -232,7 +232,7 @@ int SubtractIndexApplication::main(int argc, char** argv) {
         if (write_peptides) {
           string pepStr = getModifiedPeptideSeq(&i->first, &proteins1);
           double mass = i->first.mass();
-          if (!i->first.is_decoy()) {
+          if (!i->first.has_decoy_index()) {
             if (out_target_list) {
               *out_target_list << pepStr << '\t'
                                << StringUtils::ToString(mass, mass_precision)

@@ -40,8 +40,7 @@ message Peptide {
   repeated int32 modifications = 9 [packed = true];
   
   optional int32 aux_locations_index = 10; // Array index into AuxLocation
-  optional bool is_decoy = 11;
-
+  optional int32 decoy_index = 11;
 }
 
 message AuxLocation {

@@ -264,153 +264,162 @@ int AssignConfidenceApplication::main(const vector<string>& input_files) {
     int num_decoy_peptide_skipped = 0;
     
     if (decoy_path != "") {
-      avgTdc = false;
       MatchCollection* temp_collection = parser.create(decoy_path, Params::GetString("protein-database"));
       carp(CARP_INFO, "Found %d PSMs in %s.", temp_collection->getMatchTotal(), decoy_path.c_str());
 
-      // Mark decoy matches
-      // key = (filename, scan number, charge, rank); value = index
-      map<boost::tuple <int, int, int, int>, int> pairidx;
-      int cnt = 0;
-      MatchIterator* temp_iter = new MatchIterator(temp_collection);
-      while (temp_iter->hasNext()) {
-        Crux::Match* decoy_match = temp_iter->next();
-        cnt++;
-
-        // Only use top-ranked matches.
-        if (decoy_match->getRank(XCORR) > top_match) {
-          num_decoy_rank_skipped++;
-          continue;
-        }
-
-        decoy_match->setNullPeptide(true);
-        switch (estimation_method) {
-        case MIXMAX_METHOD:
-          {
-            // Put match directly in the final set of decoys, because no TDC.
-            int decoyIndex = decoy_match->decoyIndex();
-            map<int, MatchCollection*>::iterator lookup = decoy_matches.find(decoyIndex);
-            if (lookup == decoy_matches.end()) {
-              decoy_matches[decoyIndex] = new MatchCollection();
-              lookup = decoy_matches.find(decoyIndex);
-            }
-            lookup->second->addMatch(decoy_match);
-          }
-          break;
-        case TDC_METHOD:
-        case PEPTIDE_LEVEL_METHOD:
-          {
-            int fileIndex = stringToIndex(decoy_match->getSpectrum()->getFullFilename());
-            int scanid = decoy_match->getSpectrum()->getFirstScan();
-            int charge = decoy_match->getCharge();
-            int rank = decoy_match->getRank(XCORR);
-            boost::tuple<int, int, int, int> t(fileIndex, scanid, charge, rank);
-
-            // If the PSM is already there, that means there was a tie
-            // for top-ranked decoys.  In that case, there is no need to
-            // store a pointer to the second one.
-            if (pairidx[t] == 0) {
-              pairidx[t] = cnt;
-            }
-          }
-          break;
-        case NUMBER_METHOD_TYPES:
-        case INVALID_METHOD:
-          carp(CARP_FATAL, "No estimation method specified.");
-        }
-      }
-      delete temp_iter;
-
-      // Find and keep the best score for each decoy peptide.
-      if (estimation_method == PEPTIDE_LEVEL_METHOD) {
-        peptide_level_filtering(temp_collection, &BestPeptideScore, score_type, ascending);
-        carp(CARP_INFO, "%d distinct target+decoy peptides.", BestPeptideScore.size());
-      }
-
-      if (estimation_method != MIXMAX_METHOD) {
-        int numCompetitions = 0;
-        int numLostDecoys = 0;
-        int numTies = 0;
-        MatchCollection* tdc_collection = new MatchCollection();
-        tdc_collection->setScoredType(score_type, true);
-        MatchIterator* target_iter = new MatchIterator(match_collection);
+      if (temp_collection->hasDecoyIndexes()) {
+        avgTdc = true;
         MatchIterator* decoy_iter = new MatchIterator(temp_collection);
-        while (target_iter->hasNext()) {
-          Crux::Match* target_match = target_iter->next();
+        while (decoy_iter->hasNext()) {
+          Crux::Match* decoy_match = decoy_iter->next();
+          match_collection->addMatch(decoy_match);
+        }
+        delete decoy_iter;
+      } else {
+        // Mark decoy matches
+        // key = (filename, scan number, charge, rank); value = index
+        map<boost::tuple <int, int, int, int>, int> pairidx;
+        int cnt = 0;
+        MatchIterator* temp_iter = new MatchIterator(temp_collection);
+        while (temp_iter->hasNext()) {
+          Crux::Match* decoy_match = temp_iter->next();
+          cnt++;
 
           // Only use top-ranked matches.
-          if (target_match->getRank(XCORR) > top_match) {
-            num_target_rank_skipped++;
+          if (decoy_match->getRank(XCORR) > top_match) {
+            num_decoy_rank_skipped++;
             continue;
           }
 
-          // Retrieve the index of the corresponding decoy PSM.
-          int fileIndex = stringToIndex(target_match->getSpectrum()->getFullFilename());
-          int scanid = target_match->getSpectrum()->getFirstScan();
-          int charge = target_match->getCharge();
-          int rank = target_match->getRank(XCORR);
-          int decoy_idx = pairidx[boost::tuple <int, int, int, int>(fileIndex, scanid, charge, rank)];
-          if (decoy_idx == 0) {
-            carp(CARP_DEBUG, "Failed to find decoy for file=%s scan=%d charge=%d rank=%d.",
-                 target_match->getSpectrum()->getFullFilename(), scanid, charge, rank);
-            numLostDecoys++;
-          }
+          decoy_match->setNullPeptide(true);
+          switch (estimation_method) {
+          case MIXMAX_METHOD:
+            {
+              // Put match directly in the final set of decoys, because no TDC.
+              int decoyIndex = decoy_match->decoyIndex();
+              map<int, MatchCollection*>::iterator lookup = decoy_matches.find(decoyIndex);
+              if (lookup == decoy_matches.end()) {
+                decoy_matches[decoyIndex] = new MatchCollection();
+                lookup = decoy_matches.find(decoyIndex);
+              }
+              lookup->second->addMatch(decoy_match);
+            }
+            break;
+          case TDC_METHOD:
+          case PEPTIDE_LEVEL_METHOD:
+            {
+              int fileIndex = stringToIndex(decoy_match->getSpectrum()->getFullFilename());
+              int scanid = decoy_match->getSpectrum()->getFirstScan();
+              int charge = decoy_match->getCharge();
+              int rank = decoy_match->getRank(XCORR);
+              boost::tuple<int, int, int, int> t(fileIndex, scanid, charge, rank);
 
-          if (estimation_method == PEPTIDE_LEVEL_METHOD) {
+              // If the PSM is already there, that means there was a tie
+              // for top-ranked decoys.  In that case, there is no need to
+              // store a pointer to the second one.
+              if (pairidx[t] == 0) {
+                pairidx[t] = cnt;
+              }
+            }
+            break;
+          case NUMBER_METHOD_TYPES:
+          case INVALID_METHOD:
+            carp(CARP_FATAL, "No estimation method specified.");
+          }
+        }
+        delete temp_iter;
+
+        // Find and keep the best score for each decoy peptide.
+        if (estimation_method == PEPTIDE_LEVEL_METHOD) {
+          peptide_level_filtering(temp_collection, &BestPeptideScore, score_type, ascending);
+          carp(CARP_INFO, "%d distinct target+decoy peptides.", BestPeptideScore.size());
+        }
+
+        if (estimation_method != MIXMAX_METHOD) {
+          int numCompetitions = 0;
+          int numLostDecoys = 0;
+          int numTies = 0;
+          MatchCollection* tdc_collection = new MatchCollection();
+          tdc_collection->setScoredType(score_type, true);
+          MatchIterator* target_iter = new MatchIterator(match_collection);
+          MatchIterator* decoy_iter = new MatchIterator(temp_collection);
+          while (target_iter->hasNext()) {
+            Crux::Match* target_match = target_iter->next();
+
+            // Only use top-ranked matches.
+            if (target_match->getRank(XCORR) > top_match) {
+              num_target_rank_skipped++;
+              continue;
+            }
+
+            // Retrieve the index of the corresponding decoy PSM.
+            int fileIndex = stringToIndex(target_match->getSpectrum()->getFullFilename());
+            int scanid = target_match->getSpectrum()->getFirstScan();
+            int charge = target_match->getCharge();
+            int rank = target_match->getRank(XCORR);
+            int decoy_idx = pairidx[boost::tuple <int, int, int, int>(fileIndex, scanid, charge, rank)];
             if (decoy_idx == 0) {
-              int numCandidates = target_match->getTargetExperimentSize();
-              target_match->setTargetExperimentSize(numCandidates);
-              tdc_collection->addMatch(target_match);
+              carp(CARP_DEBUG, "Failed to find decoy for file=%s scan=%d charge=%d rank=%d.",
+                   target_match->getSpectrum()->getFullFilename(), scanid, charge, rank);
+              numLostDecoys++;
+            }
+
+            if (estimation_method == PEPTIDE_LEVEL_METHOD) {
+              if (decoy_idx == 0) {
+                int numCandidates = target_match->getTargetExperimentSize();
+                target_match->setTargetExperimentSize(numCandidates);
+                tdc_collection->addMatch(target_match);
+              } else {
+                Crux::Match* decoy_match = decoy_iter->getMatch(decoy_idx - 1);
+                int numCandidates = target_match->getTargetExperimentSize() + decoy_match->getTargetExperimentSize();
+                target_match->setTargetExperimentSize(numCandidates);
+                decoy_match->setTargetExperimentSize(numCandidates);
+                tdc_collection->addMatch(target_match);
+                tdc_collection->addMatch(decoy_match);
+              }
             } else {
+              if (decoy_idx == 0) {
+                tdc_collection->addMatch(target_match);
+                continue;
+              }
               Crux::Match* decoy_match = decoy_iter->getMatch(decoy_idx - 1);
               int numCandidates = target_match->getTargetExperimentSize() + decoy_match->getTargetExperimentSize();
               target_match->setTargetExperimentSize(numCandidates);
               decoy_match->setTargetExperimentSize(numCandidates);
-              tdc_collection->addMatch(target_match);
-              tdc_collection->addMatch(decoy_match);
-            }
-          } else {
-            if (decoy_idx == 0) {
-              tdc_collection->addMatch(target_match);
-              continue;
-            }
-            Crux::Match* decoy_match = decoy_iter->getMatch(decoy_idx - 1);
-            int numCandidates = target_match->getTargetExperimentSize() + decoy_match->getTargetExperimentSize();
-            target_match->setTargetExperimentSize(numCandidates);
-            decoy_match->setTargetExperimentSize(numCandidates);
 
-            // This is where the target-decoy competition happens.
-            carp(CARP_DEBUG, "TDC: Comparing target (%d, +%d) with score %g to decoy (%d, +%d) with score %g.",
-                 target_match->getSpectrum()->getFirstScan(), target_match->getCharge(), target_match->getScore(score_type),
-                 decoy_match->getSpectrum()->getFirstScan(), decoy_match->getCharge(), decoy_match->getScore(score_type));
+              // This is where the target-decoy competition happens.
+              carp(CARP_DEBUG, "TDC: Comparing target (%d, +%d) with score %g to decoy (%d, +%d) with score %g.",
+                   target_match->getSpectrum()->getFirstScan(), target_match->getCharge(), target_match->getScore(score_type),
+                   decoy_match->getSpectrum()->getFirstScan(), decoy_match->getCharge(), decoy_match->getScore(score_type));
 
-            FLOAT_T score_difference = target_match->getScore(score_type) - decoy_match->getScore(score_type);
-            numCompetitions++;
-            // Randomly break ties.
-            if (fabs(score_difference) < 1e-10) {
-              numTies++;
-              score_difference += 0.5 - ((double)myrandom() / UNIFORM_INT_DISTRIBUTION_MAX);
-            }
-            if (ascending) { // smaller scores are better
-              score_difference *= -1.0;
-            }
-            if (score_difference >= 0.0) {
-              tdc_collection->addMatch(target_match);
-            } else {
-              tdc_collection->addMatch(decoy_match);
+              FLOAT_T score_difference = target_match->getScore(score_type) - decoy_match->getScore(score_type);
+              numCompetitions++;
+              // Randomly break ties.
+              if (fabs(score_difference) < 1e-10) {
+                numTies++;
+                score_difference += 0.5 - ((double)myrandom() / UNIFORM_INT_DISTRIBUTION_MAX);
+              }
+              if (ascending) { // smaller scores are better
+                score_difference *= -1.0;
+              }
+              if (score_difference >= 0.0) {
+                tdc_collection->addMatch(target_match);
+              } else {
+                tdc_collection->addMatch(decoy_match);
+              }
             }
           }
-        }
-        delete target_iter;
-        delete decoy_iter;
-        delete match_collection;
-        match_collection = tdc_collection;
-        carp(CARP_INFO, "%d tdc_collection", match_collection->getMatchTotal());
-        if (numCompetitions > 0) {
-          carp(CARP_INFO, "Randomly broke %d ties in %d target-decoy competitions.", numTies, numCompetitions);
-        }
-        if (numLostDecoys > 0) {
-          carp(CARP_INFO, "Failed to find %d decoys.", numLostDecoys);
+          delete target_iter;
+          delete decoy_iter;
+          delete match_collection;
+          match_collection = tdc_collection;
+          carp(CARP_INFO, "%d tdc_collection", match_collection->getMatchTotal());
+          if (numCompetitions > 0) {
+            carp(CARP_INFO, "Randomly broke %d ties in %d target-decoy competitions.", numTies, numCompetitions);
+          }
+          if (numLostDecoys > 0) {
+            carp(CARP_INFO, "Failed to find %d decoys.", numLostDecoys);
+          }
         }
       }
       delete temp_collection;

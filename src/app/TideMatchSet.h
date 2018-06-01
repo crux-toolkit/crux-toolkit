@@ -76,6 +76,7 @@ class TideMatchSet {
     ofstream* target_file,  ///< target file to write to
     ofstream* decoy_file, ///< decoy file to write to
     int top_n,  ///< number of matches to report
+    int decoys_per_target,
     const string& spectrum_filename, ///< name of spectrum file
     const Spectrum* spectrum, ///< spectrum for matches
     int charge, ///< charge for matches
@@ -90,6 +91,7 @@ class TideMatchSet {
   static void writeHeaders(
     ofstream* file,
     bool decoyFile,
+    bool multiDecoy,
     bool sp
   );
 
@@ -165,6 +167,7 @@ class TideMatchSet {
   void writeToFile(
     ofstream* file,
     int top_n,
+    int decoys_per_target,
     const vector<Arr::iterator>& vec,
     const string& spectrum_filename,
     const Spectrum* spectrum,
@@ -186,6 +189,7 @@ class TideMatchSet {
     vector<Arr::iterator>& targetsOut,
     vector<Arr::iterator>& decoysOut,
     int top_n,
+    int numDecoys,
     bool highScoreBest // indicates semantics of score magnitude
   );
 

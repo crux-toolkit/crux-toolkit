@@ -406,6 +406,10 @@ Params::Params() : finalized_(false) {
     "Replaces number-decoy-set.  Determined by decoy-location"
     " and num-decoys-per-target",
     "", false);
+  InitIntParam("num-decoys-per-target", 1, 1, BILLION,
+    "The number of decoys to generate per target. Only applies when "
+    "decoy-format is shuffle.",
+    "", true);
   InitBoolParam("decoy-p-values", false,
     "Store all decoy p-values in a file",
     "", false);

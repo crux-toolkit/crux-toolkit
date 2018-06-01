@@ -253,6 +253,7 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
 
   const pb::Header::PeptidesHeader& pepHeader = peptides_header.peptides_header();
   DECOY_TYPE_T headerDecoyType = (DECOY_TYPE_T)pepHeader.decoys();
+  int decoysPerTarget = pepHeader.has_decoys_per_target() ? pepHeader.decoys_per_target() : 0;
   if (headerDecoyType != NO_DECOYS) {
     HAS_DECOYS = true;
     if (headerDecoyType == PROTEIN_REVERSE_DECOYS) {
@@ -289,8 +290,8 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
   }
 
   if (target_file) {
-    TideMatchSet::writeHeaders(target_file, false, compute_sp);
-    TideMatchSet::writeHeaders(decoy_file, true, compute_sp);
+    TideMatchSet::writeHeaders(target_file, false, decoysPerTarget > 1, compute_sp);
+    TideMatchSet::writeHeaders(decoy_file, true, decoysPerTarget > 1, compute_sp);
   }
 
   vector<InputFile> sr = getInputFiles(input_files);
@@ -343,7 +344,7 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
            nAA, aaFreqN, aaFreqI, aaFreqC, aaMass,
            nAARes, dAAFreqN, dAAFreqI, dAAFreqC, dAAMass,
            pepHeader.mods(), pepHeader.nterm_mods(), pepHeader.cterm_mods(),
-           &negative_isotope_errors);
+           decoysPerTarget, &negative_isotope_errors);
 
     if (spectraIter == spectra_.end()) {
       delete spectra;
@@ -501,6 +502,7 @@ void TideSearchApplication::search(void* threadarg) {
   const pb::ModTable mod_table = *(my_data->mod_table);
   const pb::ModTable nterm_mod_table = *(my_data->nterm_mod_table);
   const pb::ModTable cterm_mod_table = *(my_data->cterm_mod_table);
+  const int numDecoys = my_data->decoysPerTarget;
 
   vector<boost::mutex*> locks_array = my_data->locks_array;
   vector<int>* negative_isotope_errors = my_data->negative_isotope_errors;
@@ -638,7 +640,7 @@ void TideSearchApplication::search(void* threadarg) {
         matches.exact_pval_search_ = exact_pval_search;
         matches.cur_score_function_ = curScoreFunction;
 
-        matches.report(target_file, decoy_file, top_matches, spectrum_filename,
+        matches.report(target_file, decoy_file, top_matches, numDecoys, spectrum_filename,
                        spectrum, charge, active_peptide_queue, proteins,
                        locations, compute_sp, true, locks_array[LOCK_RESULTS]);
       }  //end peptide_centric == false
@@ -1058,11 +1060,11 @@ void TideSearchApplication::search(void* threadarg) {
         matches.cur_score_function_ = curScoreFunction;
 
         if (curScoreFunction == RESIDUE_EVIDENCE_MATRIX && exact_pval_search_ == false) {
-          matches.report(target_file, decoy_file, top_matches, spectrum_filename,
+          matches.report(target_file, decoy_file, top_matches, numDecoys, spectrum_filename,
                          spectrum, charge, active_peptide_queue, proteins,
                          locations, compute_sp, true, locks_array[LOCK_RESULTS]);
         } else {
-          matches.report(target_file, decoy_file, top_matches, spectrum_filename,
+          matches.report(target_file, decoy_file, top_matches, numDecoys, spectrum_filename,
                          spectrum, charge, active_peptide_queue, proteins,
                          locations, compute_sp, false, locks_array[LOCK_RESULTS]);
         }
@@ -1132,6 +1134,7 @@ void TideSearchApplication::search(
   const pb::ModTable& mod_table,
   const pb::ModTable& nterm_mod_table,
   const pb::ModTable& cterm_mod_table,
+  int numDecoys,
   vector<int>* negative_isotope_errors
 ) {
   // Create an array of locks.
@@ -1185,7 +1188,7 @@ void TideSearchApplication::search(
       highest_mz, target_file, decoy_file, compute_sp,
       i, NUM_THREADS, nAA, aaFreqN, aaFreqI, aaFreqC, aaMass,
       nAARes, &dAAFreqN, &dAAFreqI, &dAAFreqC, &dAAMass,
-      &mod_table, &nterm_mod_table, &cterm_mod_table, locks_array, //TODO do I need to delete pointer somewhere?
+      &mod_table, &nterm_mod_table, &cterm_mod_table, numDecoys, locks_array, //TODO do I need to delete pointer somewhere?
       bin_width_, bin_offset_, exact_pval_search_, spectrum_flag_, sc_index, total_candidate_peptides, negative_isotope_errors));
   }
 
@@ -1421,10 +1424,6 @@ void TideSearchApplication::computeWindow(
   }
   carp(CARP_DETAILED_DEBUG, "Scan=%d Charge=%d Mass window=[%f, %f]",
        sc.spectrum->SpectrumNumber(), sc.charge, (*out_min)[0], (*out_max)[0]);
-}
-
-bool TideSearchApplication::hasDecoys() {
-  return HAS_DECOYS;
 }
 
 bool TideSearchApplication::proteinLevelDecoys() {

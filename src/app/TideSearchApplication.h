@@ -142,6 +142,7 @@ private:
     const pb::ModTable& mod_table,
     const pb::ModTable& nterm_mod_table,
     const pb::ModTable& cterm_mod_table,
+    int numDecoys,
     vector<int>* negative_isotope_errors
   );
 
@@ -216,7 +217,6 @@ private:
 
   int main(const vector<string>& input_files, const string input_index);
 
-  static bool hasDecoys();
   static bool proteinLevelDecoys();
 
   /**
@@ -289,6 +289,7 @@ private:
     const pb::ModTable* mod_table;
     const pb::ModTable* nterm_mod_table;
     const pb::ModTable* cterm_mod_table;
+    int decoysPerTarget;
     vector<boost::mutex*> locks_array;
     double bin_width;
     double bin_offset;
@@ -308,7 +309,7 @@ private:
             double* aaFreqN_, double* aaFreqI_, double* aaFreqC_, int* aaMass_, int nAARes_,
             const vector<double>* dAAFreqN_, const vector<double>* dAAFreqI_,
             const vector<double>* dAAFreqC_, const vector<double>* dAAMass_,
-            const pb::ModTable* mod_table_, const pb::ModTable* nterm_mod_table_, const pb::ModTable* cterm_mod_table_,
+            const pb::ModTable* mod_table_, const pb::ModTable* nterm_mod_table_, const pb::ModTable* cterm_mod_table_, const int decoysPerTarget_,
             vector<boost::mutex*> locks_array_, double bin_width_, double bin_offset_, bool exact_pval_search_,
             map<pair<string, unsigned int>, bool>* spectrum_flag_, int* sc_index_, int* total_candidate_peptides_,
             vector<int>* negative_isotope_errors_) :
@@ -319,7 +320,7 @@ private:
             target_file(target_file_), decoy_file(decoy_file_), compute_sp(compute_sp_),
             thread_num(thread_num_), num_threads(num_threads_), nAA(nAA_), aaFreqN(aaFreqN_), aaFreqI(aaFreqI_), aaFreqC(aaFreqC_),
             aaMass(aaMass_), nAARes(nAARes_), dAAFreqN(dAAFreqN_), dAAFreqI(dAAFreqI_), dAAFreqC(dAAFreqC_), dAAMass(dAAMass_),
-            mod_table(mod_table_), nterm_mod_table(nterm_mod_table_), cterm_mod_table(cterm_mod_table_),
+            mod_table(mod_table_), nterm_mod_table(nterm_mod_table_), cterm_mod_table(cterm_mod_table_), decoysPerTarget(decoysPerTarget_),
             locks_array(locks_array_), bin_width(bin_width_), bin_offset(bin_offset_), exact_pval_search(exact_pval_search_),
             spectrum_flag(spectrum_flag_), sc_index(sc_index_), total_candidate_peptides(total_candidate_peptides_), negative_isotope_errors(negative_isotope_errors_) {}
   };

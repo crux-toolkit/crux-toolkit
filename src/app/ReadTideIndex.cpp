@@ -68,7 +68,7 @@ int ReadTideIndex::main(int argc, char** argv) {
     // Read peptide
     pb::Peptide pb_peptide;
     reader->Read(&pb_peptide);
-    if (Params::GetBool("skip-decoys") && pb_peptide.is_decoy()) {
+    if (Params::GetBool("skip-decoys") && pb_peptide.has_decoy_index()) {
       continue;
     }
     Peptide peptide(pb_peptide, proteins);

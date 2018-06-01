@@ -75,7 +75,7 @@ class Peptide {
     first_loc_pos_(peptide.first_location().pos()), 
     has_aux_locations_index_(peptide.has_aux_locations_index()),
     aux_locations_index_(peptide.aux_locations_index()),
-    mods_(NULL), num_mods_(0), decoy_(peptide.is_decoy()),
+    mods_(NULL), num_mods_(0), decoyIdx_(peptide.has_decoy_index() ? peptide.decoy_index() : -1),
     prog1_(NULL), prog2_(NULL) {
     // Set residues_ by pointing to the first occurrence in proteins.
     residues_ = proteins[first_loc_protein_id_]->residues().data() 
@@ -210,7 +210,8 @@ class Peptide {
     return num_mods_;
   }
   ModCoder::Mod* Mods() const { return mods_; }
-  bool IsDecoy() const { return decoy_; }
+  bool IsDecoy() const { return decoyIdx_ >= 0; }
+  int DecoyIdx() const { return decoyIdx_; }
   double* getAAMasses();
 
  private:
@@ -235,7 +236,7 @@ class Peptide {
   const char* residues_;
   int num_mods_;
   ModCoder::Mod* mods_;
-  bool decoy_;
+  int decoyIdx_;
 
   void* prog1_;
   void* prog2_;
