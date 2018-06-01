@@ -407,9 +407,12 @@ Params::Params() : finalized_(false) {
     " and num-decoys-per-target",
     "", false);
   InitIntParam("num-decoys-per-target", 1, 1, BILLION,
-    "The number of decoys to generate per target. Only applies when "
-    "decoy-format is shuffle.",
-    "", true);
+    "The number of decoys to generate per target. When set to a value n, then "
+    "with concat=F tide-search will output one target and n decoys. The "
+    "resulting files can be used to run the \"average target-decoy "
+    "competition\" method in assign-confidence. This parameter only applies "
+    "when decoy-format is shuffle.",
+    "Available for tide-index.", true);
   InitBoolParam("decoy-p-values", false,
     "Store all decoy p-values in a file",
     "", false);
@@ -1939,6 +1942,7 @@ void Params::Categorize() {
   items.clear();
   items.insert("allow-dups");
   items.insert("decoy-format");
+  items.insert("num-decoys-per-target");
   items.insert("keep-terminal-aminos");
   items.insert("seed");
   AddCategory("Decoy database generation", items);

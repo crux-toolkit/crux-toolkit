@@ -966,15 +966,15 @@ void TideIndexApplication::generateDecoys(
       decoySequences.push_back(outSeq);
     }
     map< const string, vector<const string*> >::iterator i =
-      targetToDecoy.insert(make_pair(setTarget, vector<const string*>(numDecoys, NULL))).first;
+      targetToDecoy.insert(make_pair(setTarget, vector<const string*>())).first;
     if (!allowDups) {
-      for (int j = 0; j < numDecoys; j++) {
-        set<string>::iterator k = setDecoys->insert(*decoySequences[j]).first;
-        i->second[j] = &*k;
+      for (vector<string*>::const_iterator j = decoySequences.begin(); j != decoySequences.end(); j++) {
+        set<string>::iterator k = setDecoys->insert(**j).first;
+        i->second.push_back(&*k);
       }
     } else {
-      for (int j = 0; j < numDecoys; j++) {
-        i->second[j] = decoySequences[j];
+      for (vector<string*>::const_iterator j = decoySequences.begin(); j != decoySequences.end(); j++) {
+        i->second.push_back(*j);
       }
     }
   }
