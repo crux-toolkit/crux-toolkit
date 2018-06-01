@@ -217,7 +217,9 @@ MatchCollection* MatchFileReader::parse() {
     match_collection->setScoredType(BARISTA_QVALUE, !empty(BARISTA_QVALUE_COL));
     match_collection->setScoredType(BY_IONS_MATCHED, !empty(BY_IONS_MATCHED_COL));
     match_collection->setScoredType(BY_IONS_TOTAL, !empty(BY_IONS_TOTAL_COL));
-    match_collection->setHasDecoyIndexes(!empty(DECOY_INDEX_COL));
+    if (!empty(DECOY_INDEX_COL)) {
+      match_collection->setHasDecoyIndexes(true);
+    }
 
     // parse match object
     if (maxRank == 0 || getInteger(XCORR_RANK_COL) <= maxRank) {

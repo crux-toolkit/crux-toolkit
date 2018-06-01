@@ -86,17 +86,17 @@ class TideIndexApplication : public CruxApplication {
     int proteinId_;
     int proteinPos_;
     const char* residues_;  // points at protein sequence
-    bool decoy_;
+    int decoyIdx_; // -1 if not a decoy
    public:
     TideIndexPeptide() {}
     TideIndexPeptide(double mass, int length, string* proteinSeq,
-                     int proteinId, int proteinPos, bool decoy) {
+                     int proteinId, int proteinPos, int decoyIdx = -1) {
       mass_ = mass;
       length_ = length;
       proteinId_ = proteinId;
       proteinPos_ = proteinPos;
       residues_ = proteinSeq->data() + proteinPos;
-      decoy_ = decoy;
+      decoyIdx_ = decoyIdx;
     }
     TideIndexPeptide(const TideIndexPeptide& other) {
       mass_ = other.mass_;
@@ -104,14 +104,15 @@ class TideIndexApplication : public CruxApplication {
       proteinId_ = other.proteinId_;
       proteinPos_ = other.proteinPos_;
       residues_ = other.residues_;
-      decoy_ = other.decoy_;
+      decoyIdx_ = other.decoyIdx_;
     }
     double getMass() const { return mass_; }
     int getLength() const { return length_; }
     int getProteinId() const { return proteinId_; }
     int getProteinPos() const { return proteinPos_; }
     string getSequence() const { return string(residues_, length_); }
-    bool isDecoy() const { return decoy_; }
+    bool isDecoy() const { return decoyIdx_ >= 0; }
+    int decoyIdx() const { return decoyIdx_; }
 
     friend bool operator >(
       const TideIndexPeptide& lhs, const TideIndexPeptide& rhs) {
@@ -127,12 +128,16 @@ class TideIndexApplication : public CruxApplication {
           return strncmpResult > 0;
         }
       }
+      if (lhs.decoyIdx_ != rhs.decoyIdx_) {
+        return lhs.decoyIdx_ > rhs.decoyIdx_;
+      }
       return false;
     }
     friend bool operator ==(
       const TideIndexPeptide& lhs, const TideIndexPeptide& rhs) {
       return (lhs.mass_ == rhs.mass_ && lhs.length_ == rhs.length_ &&
-              strncmp(lhs.residues_, rhs.residues_, lhs.length_) == 0);
+              strncmp(lhs.residues_, rhs.residues_, lhs.length_) == 0) &&
+              lhs.decoyIdx_ == rhs.decoyIdx_;
     }
   };
 
@@ -183,19 +188,20 @@ class TideIndexApplication : public CruxApplication {
     MASS_TYPE_T massType
   );
 
-  static void getPbProtein(
+  static void writePbProtein(
+    HeadedRecordWriter& writer,
     int id,
     const std::string& name,
     const std::string& residues,
-    pb::Protein& outPbProtein
+    int targetPos = -1 // -1 if not a decoy
   );
 
-  static void getDecoyPbProtein(
+  static void writeDecoyPbProtein(
     int id,
     const ProteinInfo& targetProteinInfo,
     std::string decoyPeptideSequence,
     int startLoc,
-    pb::Protein& outPbProtein
+    HeadedRecordWriter& proteinWriter
   );
 
   static void getPbPeptide(
@@ -214,9 +220,10 @@ class TideIndexApplication : public CruxApplication {
    * Generates decoy for the target peptide, writes the decoy protein to pbProtein
    * and adds decoy to the heap.
    */
-  static bool generateDecoy(
+  static void generateDecoys(
+    int numDecoys,
     const string& setTarget,
-    std::map<const string, const string*>& targetToDecoy,
+    std::map< const string, std::vector<const string*> >& targetToDecoy,
     set<string>* setTargets,
     set<string>* setDecoys,
     DECOY_TYPE_T decoyType,
@@ -226,7 +233,7 @@ class TideIndexApplication : public CruxApplication {
     int& curProtein,
     const ProteinInfo& proteinInfo,
     const int startLoc,
-    pb::Protein& pbProtein,
+    HeadedRecordWriter& proteinWriter,
     FLOAT_T pepMass,
     vector<TideIndexPeptide>& outPeptideHeap,
     vector<string*>& outProteinSequences

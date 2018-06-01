@@ -20,4 +20,5 @@ Examples:
   |tide-no-enzyme |--enzyme no-enzyme                                                          |test.fasta       |tide_test_index|tide-index.peptides.target.txt|tide-no-enzyme.target.txt  |tide-index.peptides.decoy.txt|tide-no-enzyme.decoy.txt  |
   |tide-mods      |--mods-spec 2M+15.9949,2STY+79.9663 --max-mods 2                            |small-yeast.fasta|tide_test_index|tide-index.peptides.target.txt|tide-index-mods1.target.txt|tide-index.peptides.decoy.txt|tide-index-mods1.decoy.txt|
   |tide-mods-alt  |--mods-spec 2M+15.9949,2STY+79.9663 --max-mods 2 --modsoutputter-threshold 1|small-yeast.fasta|tide_test_index|tide-index.peptides.target.txt|tide-index-mods1.target.txt|tide-index.peptides.decoy.txt|tide-index-mods1.decoy.txt|
+  |tide-multidecoy|--num-decoys-per-target 5                                                   |small-yeast.fasta|tide_test_index|tide-index.peptides.target.txt|tide-default.target.txt    |tide-index.peptides.decoy.txt|tide-index-multi.decoy.txt|
 

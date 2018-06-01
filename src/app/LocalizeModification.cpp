@@ -317,7 +317,7 @@ vector<pb::Peptide> LocalizeModificationApplication::createPbPeptides(
   int peptideId = -1;
   peptide.set_id(++peptideId);
   peptide.set_length(cruxPeptide->getLength());
-  peptide.set_is_decoy(cruxPeptide->isDecoy());
+  peptide.set_decoy_index(cruxPeptide->isDecoy() ? 0 : -1); // TODO need real decoy index if we want to write it to output
 
   char* seq = cruxPeptide->getSequence();
   string sequence(seq);

@@ -19,4 +19,5 @@ Examples:
   |exact_pval_mixmax|--score "exact p-value" --estimation-method mix-max      |assign-exactpval.target.txt|assign-confidence.target.txt|assign-confidence-mixmax.target.txt      |
   |sidak            |--score "exact p-value" --sidak T                        |assign-exactpval.target.txt|assign-confidence.target.txt|assign-confidence-sidak.target.txt       |
   |peptide-level    |--score "exact p-value" --estimation-method peptide-level|assign-exactpval.target.txt|assign-confidence.target.txt|assign-confidence-peptidelevel.target.txt|
+  |atdc             |                                                         |tide-5d.target.txt         |assign-confidence.target.txt|assign-confidence-atdc.target.txt        |
 

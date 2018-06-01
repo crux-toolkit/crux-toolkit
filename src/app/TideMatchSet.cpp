@@ -44,7 +44,7 @@ void TideMatchSet::report(
   const vector<const pb::AuxLocation*>& locations,  ///< auxiliary locations
   bool compute_sp ///< whether to compute sp or not
 ) {
-  if (peptide_->spectrum_matches_array.size() == 0) {
+  if (peptide_->spectrum_matches_array.empty()) {
     return;
   }
 
@@ -255,6 +255,7 @@ void TideMatchSet::report(
   ofstream* target_file,  ///< target file to write to
   ofstream* decoy_file, ///< decoy file to write to
   int top_n,  ///< number of matches to report
+  int decoys_per_target,
   const string& spectrum_filename, ///< name of spectrum file
   const Spectrum* spectrum, ///< spectrum for matches
   int charge, ///< charge for matches
@@ -265,7 +266,7 @@ void TideMatchSet::report(
   bool highScoreBest, //< indicates semantics of score magnitude
   boost::mutex * rwlock
 ) {
-  if (matches_->size() == 0) {
+  if (matches_->empty()) {
     return;
   }
 
@@ -273,7 +274,7 @@ void TideMatchSet::report(
        top_n, matches_->size());
 
   vector<Arr::iterator> targets, decoys;
-  gatherTargetsAndDecoys(peptides, proteins, targets, decoys, top_n, highScoreBest);
+  gatherTargetsAndDecoys(peptides, proteins, targets, decoys, top_n, decoys_per_target, highScoreBest);
 
   map<Arr::iterator, FLOAT_T> delta_cn_map;
   map<Arr::iterator, FLOAT_T> delta_lcn_map;
@@ -286,10 +287,10 @@ void TideMatchSet::report(
     computeSpData(targets, &sp_map, &sp_scorer, peptides);
     computeSpData(decoys, &sp_map, &sp_scorer, peptides);
   }
-  writeToFile(target_file, top_n, targets, spectrum_filename, spectrum, charge,
+  writeToFile(target_file, top_n, decoys_per_target, targets, spectrum_filename, spectrum, charge,
               peptides, proteins, locations, delta_cn_map, delta_lcn_map,
               compute_sp ? &sp_map : NULL, rwlock);
-  writeToFile(decoy_file, top_n, decoys, spectrum_filename, spectrum, charge,
+  writeToFile(decoy_file, top_n, decoys_per_target, decoys, spectrum_filename, spectrum, charge,
               peptides, proteins, locations, delta_cn_map, delta_lcn_map,
               compute_sp ? &sp_map : NULL, rwlock);
 }
@@ -300,6 +301,7 @@ void TideMatchSet::report(
 void TideMatchSet::writeToFile(
   ofstream* file,
   int top_n,
+  int decoys_per_target,
   const vector<Arr::iterator>& vec,
   const string& spectrum_filename,
   const Spectrum* spectrum,
@@ -312,21 +314,39 @@ void TideMatchSet::writeToFile(
   const map<Arr::iterator, pair<const SpScorer::SpScoreData, int> >* sp_map,
   boost::mutex * rwlock
 ) {
-  if (!file) {
+  if (!file || vec.empty()) {
     return;
   }
 
   int massPrecision = Params::GetInt("mass-precision");
   int precision = Params::GetInt("precision");
 
-  int cur = 0;
-  int concatDistinctMatches = peptides->ActiveTargets() + peptides->ActiveDecoys();
+  const bool concat = Params::GetBool("concat");
+  const int concatDistinctMatches = peptides->ActiveTargets() + peptides->ActiveDecoys();
+  map<int, int> decoyWriteCount;
 
-  const vector<Arr::iterator>::const_iterator cutoff =
-    (vec.size() >= top_n) ? vec.begin() + top_n : vec.end();
-
-  for (vector<Arr::iterator>::const_iterator i = vec.begin(); i != cutoff; ++i) {
-    const Peptide* peptide = peptides->GetPeptide((*i)->rank);
+  for (size_t idx = 0; idx < vec.size(); idx++) {
+    const Arr::iterator& i = vec[idx];
+    const Peptide* peptide = peptides->GetPeptide(i->rank);
+    size_t rank;
+    if (concat || !peptide->IsDecoy() || decoys_per_target <= 1) {
+      // concat, target file, or only 1 decoy per target
+      if (idx >= top_n) {
+        return;
+      }
+      rank = idx + 1;
+    } else {
+      // not concat, decoy file with multiple decoys per target
+      int decoyIdx = peptide->DecoyIdx();
+      map<int, int>::iterator j = decoyWriteCount.find(decoyIdx);
+      if (j == decoyWriteCount.end()) {
+        j = decoyWriteCount.insert(make_pair(decoyIdx, 0)).first;
+      }
+      if (j->second >= top_n) {
+        continue;
+      }
+      rank = ++(j->second);
+    }
     const pb::Protein* protein = proteins[peptide->FirstLocProteinId()];
     int pos = peptide->FirstLocPos();
     string proteinNames = getProteinName(*protein,
@@ -338,8 +358,8 @@ void TideMatchSet::writeToFile(
     // look for other locations
     if (peptide->HasAuxLocationsIndex()) {
       const pb::AuxLocation* aux = locations[peptide->AuxLocationsIndex()];
-      for (int i = 0; i < aux->location_size(); ++i) {
-        const pb::Location& location = aux->location(i);
+      for (int j = 0; j < aux->location_size(); j++) {
+        const pb::Location& location = aux->location(j);
         protein = proteins[location.protein_id()];
         pos = location.pos();
         proteinNames += "," + getProteinName(*protein,
@@ -350,7 +370,7 @@ void TideMatchSet::writeToFile(
     }
 
     Crux::Peptide cruxPep = getCruxPeptide(peptide);
-    const SpScorer::SpScoreData* sp_data = sp_map ? &(sp_map->at(*i).first) : NULL;
+    const SpScorer::SpScoreData* sp_data = sp_map ? &(sp_map->at(i).first) : NULL;
 
     rwlock->lock();
     if (Params::GetBool("file-column")) {
@@ -361,11 +381,11 @@ void TideMatchSet::writeToFile(
           << StringUtils::ToString(spectrum->PrecursorMZ(), massPrecision) << '\t'
           << StringUtils::ToString((spectrum->PrecursorMZ() - MASS_PROTON) * charge, massPrecision) << '\t'
           << StringUtils::ToString(cruxPep.calcModifiedMass(), massPrecision) << '\t'
-          << delta_cn_map.at(*i) << '\t'
-          << delta_lcn_map.at(*i) << '\t';
+          << delta_cn_map.at(i) << '\t'
+          << delta_lcn_map.at(i) << '\t';
     if (sp_map) {
       *file << StringUtils::ToString(sp_data->sp_score, precision) << '\t'
-            << sp_map->at(*i).second << '\t';
+            << sp_map->at(i).second << '\t';
     }
 
     // Use scientific notation for exact p-value, but not refactored XCorr.
@@ -373,30 +393,30 @@ void TideMatchSet::writeToFile(
     switch (cur_score_function_) {
     case XCORR_SCORE:
       if (exact_pval_search_) {
-        *file << StringUtils::ToString((*i)->xcorr_pval, precision, false) << '\t';
-        *file << StringUtils::ToString((*i)->xcorr_score, precision, true) << '\t';
+        *file << StringUtils::ToString(i->xcorr_pval, precision, false) << '\t';
+        *file << StringUtils::ToString(i->xcorr_score, precision, true) << '\t';
       } else {
-        *file << StringUtils::ToString((*i)->xcorr_score, precision, true) << '\t';
+        *file << StringUtils::ToString(i->xcorr_score, precision, true) << '\t';
       }
       break;
     case RESIDUE_EVIDENCE_MATRIX:
       if (exact_pval_search_) {
-        *file << StringUtils::ToString((*i)->resEv_pval, precision, false) << '\t';
-        *file << StringUtils::ToString((*i)->resEv_score, 1, true) << '\t';
+        *file << StringUtils::ToString(i->resEv_pval, precision, false) << '\t';
+        *file << StringUtils::ToString(i->resEv_score, 1, true) << '\t';
       } else {
-        *file << StringUtils::ToString((*i)->resEv_score, 1, true) << '\t';
+        *file << StringUtils::ToString(i->resEv_score, 1, true) << '\t';
       }
       break;
     case BOTH_SCORE:
-       *file << StringUtils::ToString((*i)->xcorr_pval, precision, false) << '\t';
-       *file << StringUtils::ToString((*i)->xcorr_score, precision, true) << '\t';
-       *file << StringUtils::ToString((*i)->resEv_pval, precision, false) << '\t';
-       *file << StringUtils::ToString((*i)->resEv_score, 1, true) << '\t';
-       *file << StringUtils::ToString((*i)->combinedPval, precision, false) << '\t';
+       *file << StringUtils::ToString(i->xcorr_pval, precision, false) << '\t';
+       *file << StringUtils::ToString(i->xcorr_score, precision, true) << '\t';
+       *file << StringUtils::ToString(i->resEv_pval, precision, false) << '\t';
+       *file << StringUtils::ToString(i->resEv_score, 1, true) << '\t';
+       *file << StringUtils::ToString(i->combinedPval, precision, false) << '\t';
       break;
     }
 
-    *file << ++cur << '\t';
+    *file << rank << '\t';
     if (sp_map) {
       *file << sp_data->matched_ions << '\t'
             << sp_data->total_ions << '\t';
@@ -427,6 +447,14 @@ void TideMatchSet::writeToFile(
       *file << '\t'
             << cruxPep.getUnshuffledSequence();
     }
+    if (decoys_per_target > 1) {
+      if (peptide->IsDecoy()) {
+        *file << '\t'
+              << peptide->DecoyIdx();
+      } else if (concat) {
+        *file << '\t';
+      }
+    }
     *file << endl;
     rwlock->unlock();
   }
@@ -435,16 +463,18 @@ void TideMatchSet::writeToFile(
 /**
  * Write headers for tab delimited file
  */
-void TideMatchSet::writeHeaders(ofstream* file, bool decoyFile, bool sp) {
+void TideMatchSet::writeHeaders(ofstream* file, bool decoyFile, bool multiDecoy, bool sp) {
   if (!file) {
     return;
   }
+  bool concat = Params::GetBool("concat");
   const int headers[] = {
     FILE_COL, SCAN_COL, CHARGE_COL, SPECTRUM_PRECURSOR_MZ_COL, SPECTRUM_NEUTRAL_MASS_COL,
     PEPTIDE_MASS_COL, DELTA_CN_COL, DELTA_LCN_COL, SP_SCORE_COL, SP_RANK_COL,
     XCORR_SCORE_COL, BY_IONS_MATCHED_COL, BY_IONS_TOTAL_COL,
     DISTINCT_MATCHES_SPECTRUM_COL, SEQUENCE_COL, MODIFICATIONS_COL, CLEAVAGE_TYPE_COL,
-    PROTEIN_ID_COL, FLANKING_AA_COL, TARGET_DECOY_COL, ORIGINAL_TARGET_SEQUENCE_COL
+    PROTEIN_ID_COL, FLANKING_AA_COL, TARGET_DECOY_COL, ORIGINAL_TARGET_SEQUENCE_COL,
+    DECOY_INDEX_COL
   };
   size_t numHeaders = sizeof(headers) / sizeof(int);
   bool writtenHeader = false;
@@ -455,10 +485,12 @@ void TideMatchSet::writeHeaders(ofstream* file, bool decoyFile, bool sp) {
          header == BY_IONS_MATCHED_COL || header == BY_IONS_TOTAL_COL)) {
       continue;
     } else if (header == ORIGINAL_TARGET_SEQUENCE_COL &&
-               (TideSearchApplication::proteinLevelDecoys() ||
-                (!decoyFile && !Params::GetBool("concat")))) {
+               (TideSearchApplication::proteinLevelDecoys() || (!decoyFile && !concat))) {
+      continue;
+    } else if (header == DECOY_INDEX_COL && (!multiDecoy || (!decoyFile && !concat))) {
       continue;
     }
+
     if (writtenHeader) {
       *file << '\t';
     }
@@ -510,6 +542,7 @@ void TideMatchSet::writeHeaders(ofstream* file, bool decoyFile, bool sp) {
       writtenHeader = true;
       continue;
     }
+
     *file << get_column_header(header);
     writtenHeader = true;
   }
@@ -560,6 +593,7 @@ void TideMatchSet::gatherTargetsAndDecoys(
   vector<Arr::iterator>& targetsOut,
   vector<Arr::iterator>& decoysOut,
   int top_n,
+  int numDecoys,
   bool highScoreBest // indicates semantics of score magnitude
 ) {
   switch (cur_score_function_) {
@@ -582,59 +616,46 @@ void TideMatchSet::gatherTargetsAndDecoys(
     break;
   }
 
-  if (!Params::GetBool("concat") && TideSearchApplication::hasDecoys()) {
-    for (Arr::iterator i = matches_->end(); i != matches_->begin(); ) {
-      switch (cur_score_function_) {
-      case XCORR_SCORE:
-        if (exact_pval_search_) {
-          pop_heap(matches_->begin(), i--, highScoreBest ? lessXcorrPvalScore : moreXcorrPvalScore);
-        } else {
-          pop_heap(matches_->begin(), i--, highScoreBest ? lessXcorrScore : moreXcorrScore);
-        }
-        break;
-      case RESIDUE_EVIDENCE_MATRIX:
-        if (exact_pval_search_) {
-          pop_heap(matches_->begin(), i--, highScoreBest ? lessResEvPvalScore : moreResEvPvalScore);
-        } else {
-          pop_heap(matches_->begin(), i--, highScoreBest ? lessResEvScore : moreResEvScore);
-        }
-        break;
-      case BOTH_SCORE:
-        pop_heap(matches_->begin(), i--, highScoreBest ? lessCombinedPvalScore : moreCombinedPvalScore);
-        break;
-      }
+  map<int, int> decoyWriteCount;
+  const bool concat = Params::GetBool("concat");
+  const int gatherSize = top_n + 1;
 
-      const Peptide& peptide = *(peptides->GetPeptide(i->rank));
-      const pb::Protein& protein = *(proteins[peptide.FirstLocProteinId()]);
-      vector<Arr::iterator>* vec_ptr = !peptide.IsDecoy() ? &targetsOut : &decoysOut;
-      if (vec_ptr->size() < top_n + 1) {
-        vec_ptr->push_back(i);
+  // decoys but not concat, populate targets and decoys
+  for (Arr::iterator i = matches_->end(); i != matches_->begin(); ) {
+    switch (cur_score_function_) {
+    case XCORR_SCORE:
+      if (exact_pval_search_) {
+        pop_heap(matches_->begin(), i--, highScoreBest ? lessXcorrPvalScore : moreXcorrPvalScore);
+      } else {
+        pop_heap(matches_->begin(), i--, highScoreBest ? lessXcorrScore : moreXcorrScore);
       }
+      break;
+    case RESIDUE_EVIDENCE_MATRIX:
+      if (exact_pval_search_) {
+        pop_heap(matches_->begin(), i--, highScoreBest ? lessResEvPvalScore : moreResEvPvalScore);
+      } else {
+        pop_heap(matches_->begin(), i--, highScoreBest ? lessResEvScore : moreResEvScore);
+      }
+      break;
+    case BOTH_SCORE:
+      pop_heap(matches_->begin(), i--, highScoreBest ? lessCombinedPvalScore : moreCombinedPvalScore);
+      break;
     }
-  } else {
-    int toAdd = min(top_n + 1, matches_->size());
-    for (int i = 0; i < toAdd; ) {
-      switch (cur_score_function_) {
-      case XCORR_SCORE:
-        if (exact_pval_search_) {
-          pop_heap(matches_->begin(), matches_->end() - i, highScoreBest ? lessXcorrPvalScore : moreXcorrPvalScore);
-        } else {
-          pop_heap(matches_->begin(), matches_->end() - i, highScoreBest ? lessXcorrScore : moreXcorrScore);
-        }
-        break;
-      case RESIDUE_EVIDENCE_MATRIX:
-        if (exact_pval_search_) {
-          pop_heap(matches_->begin(), matches_->end() - i, highScoreBest ? lessResEvPvalScore : moreResEvPvalScore);
-        } else {
-          pop_heap(matches_->begin(), matches_->end() - i, highScoreBest ? lessResEvScore : moreResEvScore);
-        }
-        break;
-      case BOTH_SCORE:
-        pop_heap(matches_->begin(), matches_->end() - i, highScoreBest ? lessCombinedPvalScore : moreCombinedPvalScore);
-        break;
+    const Peptide& peptide = *(peptides->GetPeptide(i->rank));
+    if (concat || !peptide.IsDecoy()) {
+      if (targetsOut.size() < gatherSize) {
+        targetsOut.push_back(i);
       }
-
-      targetsOut.push_back(matches_->end() - (++i));
+    } else {
+      int idx = peptide.DecoyIdx();
+      map<int, int>::iterator j = decoyWriteCount.find(idx);
+      if (j == decoyWriteCount.end()) {
+        j = decoyWriteCount.insert(make_pair(idx, 0)).first;
+      }
+      if (j->second < gatherSize) {
+        j->second++;
+        decoysOut.push_back(i);
+      }
     }
   }
 }
