@@ -615,7 +615,7 @@ void TideIndexApplication::fastaToPb(
   if (failedDecoyCnt > 0) {
     carp(CARP_INFO, "Failed to generate decoys for %d low complexity peptides", failedDecoyCnt);
   }
-  carp(CARP_DEBUG, "FASTA produced %d targets and %d decoys",
+  carp(CARP_INFO, "%d targets and %d decoys",
        targetsGenerated, decoysGenerated);
 
   // Write to decoy fasta if necessary (if protein-reverse, we already wrote it)
