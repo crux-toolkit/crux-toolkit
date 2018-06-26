@@ -330,6 +330,34 @@
     any modern operating system.  We provide pre-compiled binaries for
     Linux, MacOS and Windows.</p>
 
+    <li><b>When I try to run Crux on my Linux system I get error messages like:</b>
+    <pre>
+    /tmp/crux: /usr/lib64/libstdc++.so.6: version `CXXABI_1.3.8' not found (required by /tmp/crux)
+    /tmp/crux: /usr/lib64/libstdc++.so.6: version `GLIBCXX_3.4.20' not found (required by /tmp/crux)
+    /tmp/crux: /usr/lib64/libstdc++.so.6: version `GLIBCXX_3.4.21' not found (required by /tmp/crux)p
+    </pre>
+    <br/>
+    Crux depends on the C and C++ runtime libraries. 
+    However, newer versions of the runtime libraries 
+    aren't backwards compatible with older versions.
+    We build the Linux binary distributions for Crux using GCC 4.9.
+    If your Linux system dates from before GCC 4.9 was available, 
+    it may have versions of the runtime library incompatible with the Crux
+    binary distribution.
+    You might consider updating your operating system, but if this is
+    inconvenient, you can build Crux from the source code distribution.
+    To build Crux from source you'll ned to install the C/C++ development
+    tools, and CMake.
+    This can conveniently be done using <code>yum</code>
+    <br/>
+    <pre>
+    sudo su -
+    yum group install "Development Tools"
+    yum install cmake
+    </pre>
+    <br/>
+    Then follow the instructions in the in the 
+    <a href="tutorials/install.html#src_build">installation tutorial</a>.
     <li>
     <b>How does Crux compute the masses of peptides and peptide
       fragments?</b></li>
