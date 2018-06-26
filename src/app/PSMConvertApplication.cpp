@@ -30,10 +30,10 @@ void PSMConvertApplication::convertFile(string input_format, string output_forma
   Database* data;
   if (database_file.empty()) {
     data = new Database();
-    carp(CARP_INFO, "Database not provided, will use empty database");
+    carp(CARP_INFO, "Database not provided; will use empty database.");
   } else {
     data = new Database(database_file.c_str(), false);
-    carp(CARP_INFO, "Created Database using Fasta File");
+    carp(CARP_INFO, "Created database using %s.", database_file.c_str());
   }
   
   bool isTabDelimited = false;
@@ -56,8 +56,8 @@ void PSMConvertApplication::convertFile(string input_format, string output_forma
     } else if (input_format == "barista-xml") {
       carp(CARP_FATAL, "Barista-XML format has not been implemented yet");
     } else {
-      carp(CARP_FATAL, "Invalid Input Format, valid formats are: tsv, html, "
-           "sqt, pin, pepxml, mzidentml, barista-xml");
+      carp(CARP_FATAL, "Invalid input format. Valid formats are: tsv, html, "
+           "sqt, pin, pepxml, mzidentml, barista-xml.");
     }
   } else {
     if (StringUtils::IEndsWith(input_file, ".txt")) {
@@ -96,7 +96,7 @@ void PSMConvertApplication::convertFile(string input_format, string output_forma
          matchType);
   }
   
-  carp(CARP_INFO, "Reader has been succesfully parsed");
+  carp(CARP_INFO, "Successfully read %d PSMs.", collection->getMatchTotal());
   
   // What will be used when PSMWriter is finished.
   
@@ -125,8 +125,8 @@ void PSMConvertApplication::convertFile(string input_format, string output_forma
   } else if (output_format == "barista-xml") {
     carp(CARP_FATAL, "Barista-XML format has not been implemented yet");
   } else {
-    carp(CARP_FATAL, "Invalid Output Format, valid formats are: tsv, html, "
-         "sqt, pin, pepxml, mzidentml, barista-xml");
+    carp(CARP_FATAL, "Invalid output format.  Valid formats are: tsv, html, "
+         "sqt, pin, pepxml, mzidentml, barista-xml.");
   }
   
   string output_file_name = make_file_path(output_file_name_builder.str());
