@@ -316,7 +316,7 @@ int TideIndexApplication::main(
     out_target_list->close();
     delete out_target_list;
 
-    carp(CARP_DEBUG, "Wrote %d targets and %d decoys to peptide list",
+    carp(CARP_DETAILED_INFO, "Wrote %d targets and %d decoys to peptide list",
          writeCountTargets, writeCountDecoys);
   }
 
@@ -526,6 +526,10 @@ void TideIndexApplication::fastaToPb(
     carp(CARP_FATAL, "No target sequences generated.  Is \'%s\' a FASTA file?",
          fasta.c_str());
   }
+  if (invalidPepCnt > 0) {
+    carp(CARP_INFO, "Ignoring %d peptide sequences containing unrecognized characters.", invalidPepCnt);
+  }
+  carp(CARP_INFO, "Generated %d targets, including duplicates.", targetsGenerated);
 
   // Generate decoys
   map< const string, vector<const string*> > targetToDecoy;
@@ -608,14 +612,10 @@ void TideIndexApplication::fastaToPb(
       }
     }
   }
-  if (invalidPepCnt > 0) {
-    carp(CARP_INFO, "Ignoring %d peptide sequences containing unrecognized characters", invalidPepCnt);
-  }
   if (failedDecoyCnt > 0) {
-    carp(CARP_INFO, "Failed to generate decoys for %d low complexity peptides", failedDecoyCnt);
+    carp(CARP_INFO, "Failed to generate decoys for %d low complexity peptides.", failedDecoyCnt);
   }
-  carp(CARP_INFO, "%d targets and %d decoys",
-       targetsGenerated, decoysGenerated);
+  carp(CARP_INFO, "Generated %d decoys.", decoysGenerated);
 
   // Write to decoy fasta if necessary (if protein-reverse, we already wrote it)
   if (decoyFasta && decoyType != PROTEIN_REVERSE_DECOYS) {
@@ -705,8 +705,10 @@ void TideIndexApplication::writePeptidesAndAuxLocs(
   pb::Peptide pbPeptide;
   pb::AuxLocation pbAuxLoc;
   int auxLocIdx = -1;
-  carp(CARP_DEBUG, "%d peptides in heap", peptideHeap.size());
+  carp(CARP_DETAILED_INFO, "%d peptides in heap", peptideHeap.size());
   int count = 0;
+  int countTargets = 0;
+  int countDecoys = 0;
   int num_duplicates = 0;
   sort_heap(peptideHeap.begin(), peptideHeap.end(),
             greater<TideIndexPeptide>());
@@ -716,8 +718,7 @@ void TideIndexApplication::writePeptidesAndAuxLocs(
     // For duplicate peptides we only record the location
     while (!peptideHeap.empty() && peptideHeap.back() == curPeptide) {
       num_duplicates++;
-      carp(CARP_DETAILED_INFO, "Skipping duplicate %s.",
-           curPeptide.getSequence().c_str());
+      carp(CARP_DEBUG, "Skipping duplicate %s.", curPeptide.getSequence().c_str());
       pb::Location* location = pbAuxLoc.add_location();
       location->set_protein_id(peptideHeap.back().getProteinId());
       location->set_pos(peptideHeap.back().getProteinPos());
@@ -737,12 +738,17 @@ void TideIndexApplication::writePeptidesAndAuxLocs(
     // aux_locations_index to the peptide.
     peptideWriter.Write(&pbPeptide);
 
+    if (curPeptide.isDecoy()) {
+      countDecoys++;
+    } else {
+      countTargets++;
+    }
     if (++count % 100000 == 0) {
       carp(CARP_INFO, "Wrote %d peptides", count);
     }
   }
-  carp(CARP_INFO, "Wrote %d peptides and skipped %d duplicates.",
-       count, num_duplicates);
+  carp(CARP_INFO, "Wrote %d targets and %d decoys, and skipped %d duplicates.",
+       countTargets, countDecoys, num_duplicates);
 }
 
 FLOAT_T TideIndexApplication::calcPepMassTide(
@@ -805,6 +811,17 @@ void TideIndexApplication::writePbProtein(
   writer.Write(&p);
 }
 
+/*
+ * This is a bit tricky. We are storing decoy peptide sequences as
+ * "pseudo-proteins" in the protocol buffer.  To make this work, we
+ * have to store some additional bits of information: the identity of
+ * the preceding and following amino acids, as well as the identify of
+ * the corresponding target sequence.  All of this information gets
+ * appended together before getting put into the protocol buffer.
+ * Note that the two termini are handled differently: if there is no
+ * preceding amino acid, then nothing is prepended; but if there is no
+ * succeeding amino acid, then a hyphen is appended.
+ */
 void TideIndexApplication::writeDecoyPbProtein(
   int id,
   const ProteinInfo& targetProteinInfo,
@@ -819,15 +836,15 @@ void TideIndexApplication::writeDecoyPbProtein(
   if (startLoc > 0) {
     decoyPeptideSequence.insert(0, 1, proteinSequence->at(startLoc - 1));
   }
-  // Add C term to decoySequence, if it exists
+  // Add C term to decoySequence, if it exists, or hyphen otherwise.
   size_t cTermLoc = startLoc + pepLen;
   decoyPeptideSequence.push_back((cTermLoc < proteinSequence->length()) ?
     proteinSequence->at(cTermLoc) : '-');
+
   // Append original target sequence, unless using protein level decoys
   if (get_tide_decoy_type_parameter("decoy-format") != PROTEIN_REVERSE_DECOYS) {
     decoyPeptideSequence.append(targetProteinInfo.sequence->substr(startLoc, pepLen));
   }
-
   writePbProtein(proteinWriter, id, Params::GetString("decoy-prefix") + targetProteinInfo.name,
                  decoyPeptideSequence, startLoc);
 }
@@ -865,7 +882,7 @@ void TideIndexApplication::processParams() {
   if (mods_spec.find('C') == string::npos) {
     mods_spec = mods_spec.empty() ?
       default_cysteine : default_cysteine + ',' + mods_spec;
-    carp(CARP_DEBUG, "Using default cysteine mod '%s' ('%s')",
+    carp(CARP_DETAILED_INFO, "Using default cysteine mod '%s' ('%s')",
          default_cysteine.c_str(), mods_spec.c_str());
   }
   Params::Set("mods-spec", mods_spec);
@@ -963,7 +980,7 @@ void TideIndexApplication::generateDecoys(
         }
       }
       if (!success) {
-        carp(CARP_DETAILED_INFO, "Failed to generate decoys for sequence %s", setTarget.c_str());
+        carp(CARP_DEBUG, "Failed to generate decoys for sequence %s", setTarget.c_str());
         delete outSeq;
         ++failedDecoyCnt;
         return;
@@ -986,8 +1003,11 @@ void TideIndexApplication::generateDecoys(
 
   for (int i = 0; i < numDecoys; i++) {
     string* seq = decoySequences[i];
+    carp(CARP_DETAILED_DEBUG, "Got decoy sequence %d: %s.", i, seq->c_str());
     outProteinSequences.push_back(seq);
-    // Write pb::Protein
+    // Write pb::Protein In this subroutine, the startLoc is used to
+    // construct a longer sequence containing N- and C-term residues,
+    // plus the target.
     writeDecoyPbProtein(++curProtein, proteinInfo, *seq, startLoc, proteinWriter);
     // Add decoy to heap
     TideIndexPeptide pepDecoy(pepMass, setTarget.length(), seq, curProtein, (startLoc > 0) ? 1 : 0, i);
@@ -995,7 +1015,7 @@ void TideIndexApplication::generateDecoys(
     push_heap(outPeptideHeap.begin(), outPeptideHeap.end(), greater<TideIndexPeptide>());
   }
   decoysGenerated += decoySequences.size();
-}
+ }
 
 
 /*
