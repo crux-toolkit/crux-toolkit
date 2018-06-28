@@ -170,7 +170,7 @@ bool MassConstants::Init(const pb::ModTable* mod_table,
       nterm_avg_table[aa] += delta;
       cterm_avg_table[aa] += delta;
     }
-    carp(CARP_DEBUG, "Number of unique modification masses: %d\n", mod_table->unique_deltas_size());
+    carp(CARP_DEBUG, "Number of unique modification masses: %d", mod_table->unique_deltas_size());
 
     mod_coder_.Init(mod_table->unique_deltas_size());
     unique_deltas_.clear();
@@ -263,7 +263,7 @@ static bool CheckModTable(const pb::ModTable& mod_table) {
     } else if (aa_str[0] == 'X') {
       usingXMod = true;
     } else if (!CheckModification(mod, repeats)) {
-      carp(CARP_FATAL, "Multiple static mods on same residue detected");
+      carp(CARP_FATAL, "Multiple static mods on same residue detected.");
       return false;
     }
   }
