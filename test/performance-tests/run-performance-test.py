@@ -205,8 +205,7 @@ def makePerformancePlot(title, listOfMethods):
   gnuplotFile.write("set title \"%s\"\n" % title)
   gnuplotFile.write("set xlabel \"q-value threshold\"\n")
   gnuplotFile.write("set ylabel \"Number of accepted PSMs\"\n")
-#  gnuplotFile.write("set xrange [0:0.1]\n")
-  gnuplotFile.write("set xrange [0:1]\n") # While debugging
+  gnuplotFile.write("set xrange [0:0.1]\n")
   gnuplotFile.write("set key bottom right\n")
   firstOne = True
   for myTuple in listOfMethods:

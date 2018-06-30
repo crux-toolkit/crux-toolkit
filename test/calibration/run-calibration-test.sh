@@ -14,27 +14,54 @@ CRUX=../../src/crux
 # Note that the scripts make-qq-plot.py, histogram and plot-histogram
 # are taken from the 2002_wnoble_utilities bitbucket repository.
 
-# Run the search.
-$CRUX tide-search --top-match 1000000 \
-       --overwrite T \
-       --output-dir . \
+index=worm+contaminants
+if [[ ! -e $index ]]; then
+  $CRUX tide-index \
+      --output-dir $index \
+      ../performance-tests/worm+contaminants.fa \
+      $index
+fi
+
+for score in xcorr residue-evidence both; do
+
+  # Run the search.
+  results=$score/tide-search.target.txt
+  if [[ ! -e $results ]]; then
+    $CRUX tide-search --top-match 1000000 \
+       --use-neutral-loss-peaks F \
+       --score-function $score \
+       --output-dir $score \
        --exact-p-value T \
+       --num-threads 8 \
        ../performance-tests/051708-worm-ASMS-10.ms2 \
-       ../performance-tests/worm+contaminants.fa
+       $index
+  fi
 
-for peptide in target decoy; do
+  for peptide in target decoy; do
 
-  # Extract all the p-values.
-  $CRUX extract-columns --header F tide-search.$peptide.txt "exact p-value" \
-      > $peptide.pvalues.txt
+    if [[ $score == "xcorr" ]]; then
+      column="exact p-value"
+    elif [[ $score == "residue-evidence" ]]; then
+      column="res-ev p-value"
+    else
+      column="combined p-value"
+    fi
+      
+    # Extract all the p-values.
+    pvalues=$score/$peptide.pvalues.txt
+    if [[ ! -e $pvalues ]]; then
+      $CRUX extract-columns --header F \
+            $score/tide-search.$peptide.txt "$column" \
+        > $pvalues
+    fi
 
-  # Make a histogram.
-  ./histogram -bar-height distribution -minvalue 0 -binsize 0.01 100 \
-      $peptide.pvalues.txt \
-    | ./plot-histogram -xlabel "$peptide p-value" -format png - \
-    > $peptide.histogram.png
+    # Make a histogram.
+    ./histogram -bar-height distribution -minvalue 0 -binsize 0.01 100 $pvalues \
+      | ./plot-histogram -xlabel "$peptide p-value" -format png - \
+      > $score/$peptide.histogram.png
 
-  # Make a qq plot.
-  ./make-qq-plot.py --title $peptide $peptide.pvalues.txt $peptide.qq
+    # Make a qq plot.
+    ./make-qq-plot.py --title "$score $peptide" $score/$peptide.pvalues.txt $score/$peptide.qq
 
+  done
 done
