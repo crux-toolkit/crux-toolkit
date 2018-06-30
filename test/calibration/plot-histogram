@@ -1,0 +1,219 @@
+#!/usr/bin/perl -w
+#---------------------------------------------------------------------------
+# FILE: plot-histogram
+# AUTHOR: William Stafford Noble
+# CREATE DATE: 10/25/2000
+# DESCRIPTION: Read histogram data and produce a postscript plot thereof.
+#---------------------------------------------------------------------------
+use strict;
+
+my $usage = "plot-histogram [options] <data file 1> ... <data file n>
+
+  Options:
+         -title <title> 
+         -format [png|pdf]  (default=png)
+         -log [x|y|xy]
+         -xrange <min:max>
+         -yrange <min:max>
+         -xlabel <string>
+         -ylabel <string>
+         -xtics <incr>
+         -series-titles <string>
+         -fontsize <int> (default=12)
+         -fit <equation>
+         -weibull <eta> <beta> <shift>
+         -use lines|fillbox|emptybox (default=fillbox)
+         -size <width> <height> (default=640:480)
+         -color
+
+  The \"-series-titles\" string must be enclosed in quotes.
+  It will be split (on whitespace) into separate titles for
+  each series.
+
+  Data file can optionally be '-' for standard input.
+
+";
+
+# Read the command line.
+if (scalar(@ARGV) < 1) {
+  print(STDERR $usage);
+  exit(1);
+}
+my $title;
+my $format = "png";
+my $log_scale;
+my $xrange;
+my $yrange;
+my $xlabel = "Value";
+my $ylabel = "Frequency";
+my $xtics;
+my $series_titles;
+my $font_size = 12;
+my $equation = "";
+my $eta = 0;
+my $beta;
+my $shift;
+my $plot_with = "boxes fill solid";
+my $plot_width;
+my $plot_height;
+my $use_color = "";
+while (scalar(@ARGV) > 0) {
+  my $next_arg = shift(@ARGV);
+  if ($next_arg eq "-title") {
+    $title = shift(@ARGV);
+  } elsif ($next_arg eq "-format") {
+    $format = shift(@ARGV);
+  } elsif ($next_arg eq "-log") {
+    $log_scale = shift(@ARGV);
+  } elsif ($next_arg eq "-xrange") {
+    $xrange = shift(@ARGV);
+  } elsif ($next_arg eq "-yrange") {
+    $yrange = shift(@ARGV);
+  } elsif ($next_arg eq "-xlabel") {
+    $xlabel = shift(@ARGV);
+  } elsif ($next_arg eq "-ylabel") {
+    $ylabel = shift(@ARGV);
+  } elsif ($next_arg eq "-xtics") {
+    $xtics = shift(@ARGV);
+  } elsif ($next_arg eq "-series-titles") {
+    $series_titles = shift(@ARGV);
+  } elsif ($next_arg eq "-fontsize") {
+    $font_size = shift(@ARGV);
+  } elsif ($next_arg eq "-fit") {
+    $equation = shift(@ARGV);
+  } elsif ($next_arg eq "-weibull") {
+    $eta = shift(@ARGV);
+    $beta = shift(@ARGV);
+    $shift = shift(@ARGV);
+  } elsif ($next_arg eq "-use") {
+    $next_arg = shift(@ARGV);
+    if ($next_arg eq "lines") {
+      $plot_with = "lines";
+    } elsif ($next_arg eq "fillbox") {
+      $plot_with = "boxes fill solid";
+    } elsif ($next_arg eq "emptybox") {
+      $plot_with = "boxes";
+    } elsif ($next_arg eq "dots") {
+      $plot_with = "dots";
+    } else {
+      printf(STDERR "Invalid option (-use %s)\n", $next_arg);
+      exit(1);
+    }
+  } elsif ($next_arg eq "-size") {
+    $plot_width = shift(@ARGV);
+    $plot_height = shift(@ARGV);
+  } elsif ($next_arg eq "-color") {
+    $use_color = "color";
+  } else {
+    # put this back on the @ARGV array to be processed later
+    unshift(@ARGV, $next_arg);
+    last;
+  }
+}
+if (scalar(@ARGV) == 0) {
+  print(STDERR $usage);
+  exit(1);
+}
+
+# Use all filenames as is except for STDIN
+my @data_files = grep { $_ ne "-" } @ARGV;
+
+# Store STDIN to a temp file.
+my $stdin;
+my $data_file;
+if (grep { $_ eq "-" } @ARGV) {
+  $stdin = 1;
+  $data_file = "data.$$.tmp";
+  open(DATA_FILE, ">$data_file") || die("Can't open $data_file.");
+  while (my $line = <STDIN>) {
+    print(DATA_FILE $line);
+  }
+  close(DATA_FILE);
+
+  # Put temp file on list of files to process.
+  push @data_files, $data_file;
+}
+
+# Open gnuplot
+open(GNUPLOT, "|gnuplot"); 
+if ($format eq "png") {
+  print(GNUPLOT "set terminal png $use_color font \"LiberationSans-Regular,$font_size\"\n");
+} elsif ($format eq "pdf") {
+  print(GNUPLOT "set terminal pdfcairo $use_color font \"LiberationSans-Regular\,$font_size\"\n");
+}
+print(GNUPLOT "set output '/dev/null'\n");
+printf(GNUPLOT "set xlabel \"%s\"\n", $xlabel);
+printf(GNUPLOT "set ylabel \"%s\"\n", $ylabel);
+if (defined($xtics)) {
+  printf(GNUPLOT "set xtics %s\n", $xtics);
+}
+if (defined($title) && ($title ne "")) {
+  print(GNUPLOT "set title \"$title\"\n");
+}
+if (defined($yrange)) {
+  print(GNUPLOT "set yrange [$yrange]\n");
+}
+if (defined($xrange)) {
+  print(GNUPLOT "set xrange [$xrange]\n");
+}
+if (defined($log_scale)) {
+  print(GNUPLOT "set logscale $log_scale\n");
+  if (!defined($yrange)) {
+    print(GNUPLOT "set yrange [0.1:*]\n");
+  }
+}
+if (defined($plot_width)) {
+  print(GNUPLOT "set size $plot_width, $plot_height\n");
+}
+
+# Split the series titles.
+my @series_titles;
+if (defined($series_titles)) {
+  @series_titles = split(' ', $series_titles);
+  if (scalar(@series_titles) != scalar(@data_files)) {
+    printf(STDERR "%d series titles and %d data files.\n",
+	   scalar(@series_titles), scalar(@data_files));
+    exit(1);
+  }
+}
+
+# Add the plot to the graph.
+my $plot_command = "";
+foreach my $data_file (@data_files) {
+
+  # Only the first file uses "plot"; others use "replot."
+  if ($plot_command ne "") {
+    $plot_command .= "re";
+  }
+
+  $plot_command .= "plot \"$data_file\" using 1 : 2 ";
+  if (defined($series_titles)) {
+    my $title = shift(@series_titles);
+    $plot_command .= "title \"$title\" ";
+  } else {
+    $plot_command .= "notitle ";
+  }
+  $plot_command .= "with $plot_with\n";
+}
+
+# If an equation was given, print it.
+if ($equation ne "") {
+  $plot_command .= "replot $equation notitle with lines\n";
+}
+if ($eta != 0) {
+  my $first_term = "($beta / $eta)";
+  my $second_term = "(((x - $shift) / $eta) ** ($beta - 1))";
+  my $third_term = "exp(-1 * (((x - $shift) / $eta) ** $beta))";
+  $equation = "$first_term * $second_term * $third_term";
+  print(STDERR "$equation\n");
+  $plot_command .= "replot $equation notitle with lines\n";
+}
+
+print(GNUPLOT $plot_command);
+print(GNUPLOT "set output\n");
+print(GNUPLOT "replot");
+close(GNUPLOT);
+
+if (defined($stdin)) {
+  unlink($data_file);   
+}

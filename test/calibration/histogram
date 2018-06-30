@@ -1,0 +1,188 @@
+#!/usr/bin/perl -w
+# FILE: histogram
+# AUTHOR: Bill Grundy
+# CREATE DATE: 11-12-97
+# DESCRIPTION: Convert a data set into histogram format.
+use strict;
+
+my $usage = "USAGE: histogram [options] <numbins> <score file>
+
+ Options:
+    -bar-height count|frequency|distribution (default=count)
+    -log
+    -binsize <value>
+    -minvalue <value>
+";
+
+# Check usage:
+if (scalar(@ARGV) < 2) {
+  print(STDERR $usage);
+  exit(1);
+}
+
+# Get the command line arguments.
+my $bar_height = "count";
+my $log_scale;
+my $fixed_bin_size;
+my $fixed_min_value;
+while (scalar(@ARGV) > 2) {
+  my $next_arg = shift(@ARGV);
+  if ($next_arg eq "-bar-height") {
+    $bar_height = shift(@ARGV);
+  } elsif ($next_arg eq "-log") {
+    $log_scale = 1;
+  } elsif ($next_arg eq "-binsize") {
+    $fixed_bin_size = shift(@ARGV);
+  } elsif ($next_arg eq "-minvalue") {
+    $fixed_min_value = shift(@ARGV);
+  } else {
+    printf(STDERR "Illegal argument ($next_arg).\n");
+    exit(1);
+  }
+}
+if (scalar(@ARGV) != 2) {
+  print(STDERR $usage);
+  exit(1);
+}
+my($num_bins, $datafile) = @ARGV;
+
+# Open the data file.
+open(DATAFILE, "<$datafile") || die("Can't open $datafile.");
+
+# Read the data into an array.
+my @data;
+my $index = 0;
+while (my $line = <DATAFILE>) {
+  chomp($line);
+
+  my @words = split(' ', $line);
+
+  foreach my $word (@words) {
+    if (defined($log_scale)) {
+      if ($word != 0) {
+	$data[$index++] = log($word);
+      }
+    } else {
+      $data[$index++] = $word;
+    }
+  }
+}
+close(DATAFILE);
+
+# Quit if no data.
+if (scalar(@data) == 0) {
+  printf(STDERR "No data found.\n");
+  exit(1);
+}
+
+# Compute the minimum and maximum.
+my $min_value = $data[0];
+my $max_value = $data[0];
+for (my $i = 0; $i < scalar(@data); $i++) {
+  if ($data[$i] < $min_value) {
+    $min_value = $data[$i];
+  }
+  if ($data[$i] > $max_value) {
+    $max_value = $data[$i];
+  }
+}
+
+# Figure out how big the bins are.
+my $bin_size = ($max_value - $min_value) / $num_bins;
+printf(STDERR "minimum=%g maximum=%g bin_size=%g\n", $min_value, $max_value,
+       $bin_size);
+
+# If the user specified a bin size, use that.
+if (defined($fixed_bin_size)) {
+  printf(STDERR "Using specified bin size (%g).\n", $fixed_bin_size);
+  $bin_size = $fixed_bin_size;
+}
+
+# If the user specified a min value, use that.
+if (defined($fixed_min_value)) {
+  printf(STDERR "Using specified minimum value (%g).\n", $fixed_min_value);
+  $min_value = $fixed_min_value;
+}
+
+# Sort the data numerically.
+my @sorted_data = sort {$a <=> $b} @data;
+
+# If we're computing a frequency distribution, divide by the total
+# number of elements.
+my $divisor;
+if ($bar_height eq "frequency") {
+  $divisor = scalar(@data);
+} elsif ($bar_height eq "distribution") {
+  $divisor = scalar(@data) * $bin_size;
+} elsif ($bar_height eq "count") {
+  $divisor = 1;
+} else {
+  print(STDERR "Unknown bar-height value ($bar_height).\n");
+  exit(1);
+}
+
+# Print the histogram values.
+my $bin_index = 0;
+my $this_bin = $min_value + $bin_size;
+my $histo_value = 0;
+my $i_value = 0;
+foreach my $value (@sorted_data) {
+
+  # Print the previous bin.
+  while ($value > $this_bin) { # Use 'while' in case bin is empty.
+    &print_bin($log_scale, $this_bin, $bin_size, $histo_value, $divisor);
+    $histo_value = 0;
+    $this_bin += $bin_size;
+    $bin_index++;
+
+    # Stop when we reach the final bin, as specified by the user.
+    if ($bin_index >= $num_bins) {
+      printf(STDERR
+	     "Truncating histogram at bin %d (%d) with %d remaining points.\n",
+	     $bin_index, $this_bin, scalar(@sorted_data) - $i_value);
+      last;
+    }
+  }
+
+  if ($bin_index >= $num_bins) {
+    last;
+  }
+
+  # Increment the counter for this bin.
+  if ($value >= $min_value) {
+    $histo_value++;
+  }
+  $i_value++;
+}
+
+# Print the last data bin.
+if ($bin_index < $num_bins) {
+  &print_bin($log_scale, $this_bin, $bin_size, $histo_value, $divisor);
+  $bin_index++;
+  $this_bin += $bin_size;
+}
+
+# Print additional empty bins.
+if ($bin_index < $num_bins) {
+  printf(STDERR "Printing %d empty bins.\n", $num_bins - $bin_index);
+  while ($bin_index < $num_bins) {
+    &print_bin($log_scale, $this_bin, $bin_size, 0, $divisor);
+    $bin_index++;
+    $this_bin += $bin_size;
+  }
+}
+  
+
+###############################################################################
+sub print_bin {
+  my($log_scale, $this_bin, $bin_size, $histo_value, $divisor) = @_;
+
+  if (defined($log_scale)) {
+    printf("%g %g\n", exp($this_bin - ($bin_size / 2)),
+	   $histo_value / $divisor);
+  } elsif ($divisor == 0) {
+    printf("%g 0\n", $this_bin - ($bin_size / 2));
+  } else {
+    printf("%g %g\n", $this_bin - ($bin_size / 2), $histo_value / $divisor);
+  }
+}
