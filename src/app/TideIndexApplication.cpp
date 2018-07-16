@@ -707,9 +707,10 @@ void TideIndexApplication::writePeptidesAndAuxLocs(
   int auxLocIdx = -1;
   carp(CARP_DETAILED_INFO, "%d peptides in heap", peptideHeap.size());
   int count = 0;
-  int countTargets = 0;
-  int countDecoys = 0;
-  int num_duplicates = 0;
+  int numTargets = 0;
+  int numDecoys = 0;
+  int numDuplicateTargets = 0;
+  int numDuplicateDecoys = 0;
   sort_heap(peptideHeap.begin(), peptideHeap.end(),
             greater<TideIndexPeptide>());
   while (!peptideHeap.empty()) {
@@ -717,7 +718,11 @@ void TideIndexApplication::writePeptidesAndAuxLocs(
     peptideHeap.pop_back();
     // For duplicate peptides we only record the location
     while (!peptideHeap.empty() && peptideHeap.back() == curPeptide) {
-      num_duplicates++;
+      if (peptideHeap.back().isDecoy()) {
+        numDuplicateDecoys++;
+      } else {
+        numDuplicateTargets++;
+      }        
       carp(CARP_DEBUG, "Skipping duplicate %s.", curPeptide.getSequence().c_str());
       pb::Location* location = pbAuxLoc.add_location();
       location->set_protein_id(peptideHeap.back().getProteinId());
@@ -739,16 +744,17 @@ void TideIndexApplication::writePeptidesAndAuxLocs(
     peptideWriter.Write(&pbPeptide);
 
     if (curPeptide.isDecoy()) {
-      countDecoys++;
+      numDecoys++;
     } else {
-      countTargets++;
+      numTargets++;
     }
     if (++count % 100000 == 0) {
       carp(CARP_INFO, "Wrote %d peptides", count);
     }
   }
-  carp(CARP_INFO, "Wrote %d targets and %d decoys, and skipped %d duplicates.",
-       countTargets, countDecoys, num_duplicates);
+  carp(CARP_INFO, "Skipped %d duplicate targets and %d duplicate decoys.",
+       numDuplicateTargets, numDuplicateDecoys);
+  carp(CARP_INFO, "Wrote %d targets and %d decoys.", numTargets, numDecoys);
 }
 
 FLOAT_T TideIndexApplication::calcPepMassTide(

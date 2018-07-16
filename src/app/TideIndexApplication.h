@@ -95,7 +95,11 @@ class TideIndexApplication : public CruxApplication {
       length_ = length;
       proteinId_ = proteinId;
       proteinPos_ = proteinPos;
-      residues_ = proteinSeq->data() + proteinPos;
+      if (decoyIdx == -1) { // It's a target
+        residues_ = proteinSeq->data() + proteinPos;
+      } else { // It's a decoy.
+        residues_ = proteinSeq->data();
+      }
       decoyIdx_ = decoyIdx;
     }
     TideIndexPeptide(const TideIndexPeptide& other) {
