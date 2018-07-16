@@ -600,6 +600,11 @@ int AssignConfidenceApplication::main(const vector<string>& input_files) {
     carp(CARP_FATAL, "No estimation method specified.");
   }
 
+  // If we have a decoy index column but only one decoy per spectrum, skip averaging.
+  if (avgTdc && (decoy_matches.size() == 1)) {
+    avgTdc = false;
+  }
+
   vector<FLOAT_T> target_scores;
 
   // Compute q-values.
