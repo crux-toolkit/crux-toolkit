@@ -935,6 +935,14 @@ vector<FLOAT_T> AssignConfidenceApplication::AtdcScoreSet::fdps() const {
     }
   }
 
+  bool oldATDC = Params::GetBool("use-old-atdc");
+  if (oldATDC) {
+    for (size_t i = 0; i < numScores; i++) {
+      sumNtds[i] /= numDecoySets;
+      sumNdds[i] /= numDecoySets;
+    }
+  }
+  
   vector<bool> isTargetPsm(numScores, true);
   int numTargetPsms = 0;
   vector< vector<int> > optIdxCntMat(numDecoySets + 1, vector<int>(numScores, 0));
@@ -942,44 +950,73 @@ vector<FLOAT_T> AssignConfidenceApplication::AtdcScoreSet::fdps() const {
   size_t lowestOptIdx = numDecoySets + 1;
   for (size_t i = 0; i < numScores; i++) {
     size_t idx = optIdxCnt[i];
-    size_t idx2 = ++currentOptIdx[idx];
+    size_t idx2;
+    if (oldATDC) {
+      idx2 = currentOptIdx[idx]++;
+    } else {
+      idx2 = ++currentOptIdx[idx];
+    }
     optIdxCntMat[idx][idx2] = i;
     if (idx < lowestOptIdx) {
       lowestOptIdx = idx;
     }
-    if ((FLOAT_T)numTargetPsms <= (sumNtds[i] / numDecoySets) - 0.5) {
+    int denominator;
+    if (oldATDC) {
+      denominator = 1;
+    } else {
+      denominator = numDecoySets;
+    }
+    if ((FLOAT_T)numTargetPsms <= (sumNtds[i] / denominator) - 0.5) {
       numTargetPsms++;
       continue;
     }
-    isTargetPsm[optIdxCntMat[lowestOptIdx][currentOptIdx[lowestOptIdx]--]] = false;
+    if (oldATDC) {
+      isTargetPsm[optIdxCntMat[lowestOptIdx][--currentOptIdx[lowestOptIdx]]] = false;
+    } else {
+      isTargetPsm[optIdxCntMat[lowestOptIdx][currentOptIdx[lowestOptIdx]--]] = false;
+    }
     for ( ; lowestOptIdx < numDecoySets + 1 && currentOptIdx[lowestOptIdx] == 0; lowestOptIdx++);
   }
 
-  if (bc1 >= 0) {
+  if (oldATDC) {
+
     int targetPsmsTotal = 0;
     for (size_t i = 0; i < numScores; i++) {
       if (isTargetPsm[i]) {
         targetPsmsTotal++;
       }
-      sumNdds[i] = (bc1 + sumNdds[i] / numDecoySets) / max(1, targetPsmsTotal);
+      sumNdds[i] = (1 + sumNdds[i]) / max(1, targetPsmsTotal);
     }
+
   } else {
-    vector<FLOAT_T> ndds(numScores, 0);
-    FLOAT_T prev = 0;
-    for (size_t i = 0; i < numScores; i++) {
-      FLOAT_T current = sumNdds[i];
-      ndds[i] = current - prev;
-      prev = current;
-    }
-    int targetPsmsTotal = 0;
-    for (size_t i = 0; i < numScores; i++) {
-      if (isTargetPsm[i]) {
-        targetPsmsTotal++;
+  
+    if (bc1 >= 0) {
+      int targetPsmsTotal = 0;
+      for (size_t i = 0; i < numScores; i++) {
+        if (isTargetPsm[i]) {
+          targetPsmsTotal++;
+        }
+        sumNdds[i] = (bc1 + sumNdds[i] / numDecoySets) / max(1, targetPsmsTotal);
       }
-      sumNdds[i] = ((min((FLOAT_T)numDecoySets, max((FLOAT_T)1, ndds[i])) + sumNdds[i]) / numDecoySets) /
-                     max(1, targetPsmsTotal);
+    } else {
+      vector<FLOAT_T> ndds(numScores, 0);
+      FLOAT_T prev = 0;
+      for (size_t i = 0; i < numScores; i++) {
+        FLOAT_T current = sumNdds[i];
+        ndds[i] = current - prev;
+        prev = current;
+      }
+      int targetPsmsTotal = 0;
+      for (size_t i = 0; i < numScores; i++) {
+        if (isTargetPsm[i]) {
+          targetPsmsTotal++;
+        }
+        sumNdds[i] = ((min((FLOAT_T)numDecoySets, max((FLOAT_T)1, ndds[i])) + sumNdds[i]) / numDecoySets) /
+          max(1, targetPsmsTotal);
+      }
     }
   }
+  
   return sumNdds;
 }
 

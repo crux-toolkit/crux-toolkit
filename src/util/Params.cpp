@@ -1288,6 +1288,9 @@ Params::Params() : finalized_(false) {
   InitStringParam("percolator-intraset-features", "F",
     "Set a feature for percolator that in later versions is not an option.",
     "Shouldn't be variable; hide from user.", false);
+  InitBoolParam("use-old-atdc", false,
+                "Use the originally described version of aTDC, rather than the improved one.",
+                "Used by assign-confidence.", false);
   /* Cascade-Search parameters */
   InitDoubleParam("q-value-threshold", 0.01, 0, 1.0,
     "The q-value threshold used by cascade search. Each spectrum identified in one search "
