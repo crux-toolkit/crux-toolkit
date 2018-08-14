@@ -527,7 +527,9 @@ void Modification::FromSeq(const string& seq,
     }
     const ModificationDefinition* mod;
     string aa = i > 0 ? string(1, seq[i - 1]) : "";
-    if (c == '[') {
+    bool handledMod = false;
+    switch (c) {
+    case '[': {
       // Bracket mod
       size_t j = i;
       do {
@@ -547,7 +549,28 @@ void Modification::FromSeq(const string& seq,
         }
       }
       i = j;
-    } else {
+      handledMod = true;
+      break;
+    }
+    case 'n':
+      if (aaCount == 0) {
+        continue;
+      }
+      break;
+    case 'c':
+      bool aaRemaining = false;
+      for (size_t j = i + 1; j < end; j++) {
+        if ('A' <= seq[j] && seq[j] <= 'Z') {
+          aaRemaining = true;
+          break;
+        }
+      }
+      if (!aaRemaining) {
+        continue;
+      }
+      break;
+    }
+    if (!handledMod) {
       // Symbol mod
       if ((mod = ModificationDefinition::Find(c)) == NULL) {
         throw runtime_error("Invalid character '" + string(1, c) + "' in sequence '" + seq + "'");
