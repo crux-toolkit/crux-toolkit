@@ -94,8 +94,7 @@ void PercolatorAdapter::processPsmScores(Scores& allScores) {
 
     PSMDescription* psm = score_itr->pPSM;
 
-    int psm_file_idx = -1;
-    int psm_charge;
+    int psm_file_idx = -1, psm_charge;
     parsePSMId(psm->id_, psm_file_idx, psm_charge);
 
     // Try to look up charge state in map
@@ -123,7 +122,8 @@ void PercolatorAdapter::processPsmScores(Scores& allScores) {
     zState.setSinglyChargedMass(psm->expMass, charge_state);
     // calcMass/expMass = singly charged mass
     Crux::Spectrum* spectrum = new Crux::Spectrum(
-      psm->scan, psm->scan, zState.getMZ(), vector<int>(1, charge_state), "");
+      psm->scan, psm->scan, zState.getMZ(), vector<int>(1, charge_state),
+      Crux::Match::getFilePath(psm_file_idx));
 
     Crux::Match* match = new Crux::Match(peptide, spectrum, zState, is_decoy);
     match->setScore(PERCOLATOR_SCORE, score_itr->score);
@@ -456,14 +456,10 @@ void PercolatorAdapter::printScores(Scores* scores, int label, ostream& os) {
     if (scoreIt->label != label) {
       continue;
     }
-    std::string fileIdxStr, chargeStr;
-    int charge = 0;
-    const std::string& psmId = scoreIt->pPSM->getId();
-    std::vector<std::string> idPieces = StringUtils::Split(psmId, '_');
-    if (idPieces.size() == 5) {
-      fileIdxStr = idPieces[1];
-      chargeStr = idPieces[3];
-      StringUtils::TryFromString(chargeStr, &charge);
+    int fileIdx, charge;
+    if (!parsePSMId(scoreIt->pPSM->getId(), fileIdx, charge)) {
+      fileIdx = -1;
+      charge = -1;
     }
 
     std::string flankingStr = "XX";
@@ -499,9 +495,9 @@ void PercolatorAdapter::printScores(Scores* scores, int label, ostream& os) {
     int precision = Params::GetInt("precision");
     int massPrecision = Params::GetInt("mass-precision");
     os //<< "" << '\t' // file
-       << fileIdxStr << '\t'
+       << fileIdx << '\t'
        << scoreIt->pPSM->scan << '\t'
-       << chargeStr << '\t'
+       << charge << '\t'
        << StringUtils::ToString((charge > 0 ? neutralMass/charge + MASS_PROTON : 0), massPrecision) << '\t'
        << StringUtils::ToString(neutralMass, massPrecision) << '\t'
        << StringUtils::ToString(peptideMass, massPrecision) << '\t'
