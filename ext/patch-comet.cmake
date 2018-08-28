@@ -46,15 +46,6 @@ if (WIN32 AND NOT CYGWIN)
         RESULT_VARIABLE status
     )
     check_status(status)
-    message(${SOURCE_DIR}/patches/comet/CometSearch/CometSearchManager.cpp)
-    message(${BINARY_DIR}/build/src/comet/CometSearch/CometSearchManager.cpp)
-    execute_process(
-      COMMAND ${CMAKE_COMMAND} -E copy 
-        ${SOURCE_DIR}/patches/comet/CometSearch/CometSearchManager.cpp
-        ${BINARY_DIR}/build/src/comet/CometSearch/CometSearchManager.cpp
-        RESULT_VARIABLE status
-    )
-    check_status(status)
     message(${SOURCE_DIR}/patches/comet/MSToolkit/MSToolkitLite.vcxproj)
     message(${BINARY_DIR}/build/src/comet/MSToolkit/MSToolkitLite.vcxproj)
     execute_process(
