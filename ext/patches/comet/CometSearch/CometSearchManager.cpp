@@ -1399,8 +1399,8 @@ bool CometSearchManager::DoSearch()
    if (!g_staticParams.options.bOutputSqtStream)
    {
       sprintf(szOut, " Comet version \"%s\"", comet_version);
-      if (!g_staticParams.options.bSkipUpdateCheck)
-         CometCheckForUpdates::CheckForUpdates(szOut);
+//    if (!g_staticParams.options.bSkipUpdateCheck)
+//       CometCheckForUpdates::CheckForUpdates(szOut);
       sprintf(szOut+strlen(szOut), "\n\n");
 
       logout(szOut);
