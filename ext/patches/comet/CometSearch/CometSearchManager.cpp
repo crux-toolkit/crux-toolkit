@@ -799,13 +799,13 @@ bool CometSearchManager::InitializeStaticParams()
 
    if (GetParamValue("override_charge", iIntData))
    {
-      if (iIntData > 0)
+      if (iIntData >= 0)
          g_staticParams.options.bOverrideCharge = iIntData;
    }
 
    if (GetParamValue("correct_mass", iIntData))
    {
-      if (iIntData > 0)
+      if (iIntData >= 0)
          g_staticParams.options.bCorrectMass = iIntData;
    }
 
