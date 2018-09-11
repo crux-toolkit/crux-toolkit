@@ -218,7 +218,7 @@ void PinWriter::printPSM(
       fields.push_back(StringUtils::ToString(calcMass, mass_precision_));
     } else if (feature == "lnrSp") {
       double sp = match->getRank(SP);
-      fields.push_back(StringUtils::ToString(sp > 0 ? log(sp) : 0, precision_));
+      fields.push_back(StringUtils::ToString(log(sp + 1.0), precision_));
     } else if (feature == "deltLCn") {
       FLOAT_T delta_lcn = match->getScore(DELTA_LCN);
       if (isInfinite(delta_lcn) || isnan(delta_lcn)) {

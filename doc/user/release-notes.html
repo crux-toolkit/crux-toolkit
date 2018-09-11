@@ -68,6 +68,15 @@
 
 <ul>
   <li>
+    September 10, 2018: Fixed a bug in the calculation of the lnrSp
+    feature in make-pin.  Previously, the code took the log of the
+    rank, indexed from zero.  To avoid taking the log of zero, the
+    code inserted the value zero when the rank was equal to zero. The
+    effect was that both rank 0 and rank 1 received the same lnrSp
+    score (i.e., zero).  The fix is to do the calculation with rank
+    indexed from one instead of zero.</li>
+
+  <li>
     August 22, 2018: Fixed a bug causing filenames to be blank in
     Percolator outputs.</li>
   <li>
