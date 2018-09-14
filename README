@@ -1,8 +1,17 @@
 For a gentle introduction to Crux, please see the Crux home page at
-doc/user/crux.html or at http://crux.ms/.
+doc/user/crux.html or at http://crux.ms/.  Note that the HTML pages
+for individual Crux commands are generated automatically, so these
+will not exist in your local directory until after building the
+software.
 
 For installation instructions, see the installation tutorial linked
-from the Crux home pages listed above.
+from the Crux home page listed above.
 
-Crux source code can be found in the src/c subdirectory.
+Source code can be found in the src subdirectory.
+
+Documentation for Crux developers is at doc/developer/crux-developer.html.
+
+Various smoke and regression tests are under the test directory.  The
+primary set of tests use Cucumber, and are under test/smoke-test.  To
+run them, install cucumber and then do "cd test/smoke-test; cucumber".
 
