@@ -49,6 +49,7 @@ int num_n_mods = 0; // variable n-term mods
 //require num_mods + num_c_mods + num_n_mods + 
 //(fixed_c_mod > -1) + (fixed_n_mod > -1) <= MAX_AA_MODS
 
+// Global variables specifying enzymatic digestion rules.
 char* pre_cleavage_list;
 char* post_cleavage_list;
 int pre_list_size;
@@ -122,9 +123,12 @@ void initialize_parameters(void){
  * pre/post_for_inclusion as true if [] encloses list or false if {}
  * encloses list.  For special case of [X], set p_cleavage_list as
  * empty and inclusion as false.
+ *
+ * Global variables: pre_cleavage_list, post_cleavage_list,
+ * pre_list_size, post_list_size, pre_for_inclusion,
+ * post_for_inclusion;
+ *
  */
-// NOTE (BF mar-11-09): for testing would be nice if this returned
-// error code instead of dying
 void parse_custom_enzyme(const string& rule_str){
   bool success = true;
   int len = rule_str.length();
@@ -132,15 +136,15 @@ void parse_custom_enzyme(const string& rule_str){
   int pipe_idx = 0;
 
   // 1. find the |
-  for(idx = 0; idx < len; idx++){
-    if( rule_str[idx] == '|' ){
+  for(idx = 0; idx < len; idx++) {
+    if( rule_str[idx] == '|' ) {
       pipe_idx = idx;
       break;
     }
   }
-  // check that there isn't a second
-  for(idx = idx+1; idx < len; idx++){
-    if( rule_str[idx] == '|' ){
+  // Check that there isn't a second |.
+  for(idx = idx+1; idx < len; idx++) {
+    if( rule_str[idx] == '|' ) {
       success = false;      
       break;
     }
@@ -154,74 +158,100 @@ void parse_custom_enzyme(const string& rule_str){
   int post_first_idx = pipe_idx + 2;
   int post_end_idx = len -1;
 
-  // 3. check that braces match and set inclusion
-  // pre-list
-  if(pipe_idx < 1){
+  // 3. Check that braces match, and set inclusion
+  // pre-list.
+  if (pipe_idx < 1) {
     success = false;
-  }else if(rule_str[pre_first_idx-1] == '[' && 
-           rule_str[pre_end_idx] == ']'){
+  } else if ( (rule_str[pre_first_idx-1] == '[') && 
+              (rule_str[pre_end_idx] == ']') ) {
     pre_for_inclusion = true;
-  }else if(rule_str[pre_first_idx-1] == '{' && 
-           rule_str[pre_end_idx] == '}'){
+  } else if ( (rule_str[pre_first_idx-1] == '{') && 
+              (rule_str[pre_end_idx] == '}') ) {
     pre_for_inclusion = false;
-  }else{
+  } else {
     success = false;
   }
 
   // post list
-  if(pipe_idx + 2 >= len ){
+  if (pipe_idx + 2 >= len ) {
     success = false;
-  }else if(rule_str[post_first_idx-1] == '[' && 
-           rule_str[post_end_idx] == ']'){
+  } else if ( (rule_str[post_first_idx-1] == '[') && 
+              (rule_str[post_end_idx] == ']') ) {
     post_for_inclusion = true;
-  }else if(rule_str[post_first_idx-1] == '{' && 
-           rule_str[post_end_idx] == '}'){
+  } else if ( (rule_str[post_first_idx-1] == '{') && 
+              (rule_str[post_end_idx] == '}') ) {
     post_for_inclusion = false;
-  }else{
+  } else {
     success = false;
   }
 
   // check that braces aren't empty 
-  if(pre_first_idx >= pre_end_idx || post_first_idx >= post_end_idx ){
+  if ( (pre_first_idx >= pre_end_idx) || (post_first_idx >= post_end_idx) ) {
     success = false;
   }
 
-  if( success == false ){
+  if ( success == false ) {
     carp(CARP_FATAL, "Custom enzyme syntax '%s' is incorrect.  "
          "Must be of the form [AZ]|[AZ] or with [] replaced by {}. "
          "AZ is a list of residues (letters A-Z) required [] or prohibited {}. "
-         "Use [X] to indicate any reside is legal.",
+         "Use [X] to indicate that any residue is legal.",
          rule_str.c_str());
   }
 
   // 4. allocate lists and fill
   pre_list_size = pre_end_idx - pre_first_idx;
   pre_cleavage_list = (char*)mycalloc(pre_list_size, sizeof(char));
-  for(idx = 0; idx < pre_list_size; idx++){
+  for (idx = 0; idx < pre_list_size; idx++) {
     pre_cleavage_list[idx] = rule_str[pre_first_idx+idx];
   }
 
   post_list_size = post_end_idx - post_first_idx;
   post_cleavage_list = (char*)mycalloc(post_list_size, sizeof(char));
-  for(idx = 0; idx < post_list_size; idx++){
+  for (idx = 0; idx < post_list_size; idx++) {
     post_cleavage_list[idx] = rule_str[post_first_idx+idx];
   }
 
-
-  // 5. check special case of [X]
-  if(strncmp( rule_str.c_str(), "[X]", pre_list_size+2) == 0){
+  // 5. check special case of [X] (i.e., cleave before/after every
+  //    residue) or {X} (i.e., do not cleave before/after any residue).
+  if (strncmp( rule_str.c_str(), "[X]", pre_list_size+2) == 0) {
     free(pre_cleavage_list);
     pre_cleavage_list = NULL;
     pre_list_size = 0;
     pre_for_inclusion = false;
   }
-
-  if(strncmp( rule_str.c_str()+post_first_idx-1, "[X]", post_list_size+2) == 0){
+  if (strncmp( rule_str.c_str(), "{X}", pre_list_size+2) == 0) {
+    free(pre_cleavage_list);
+    pre_cleavage_list = NULL;
+    pre_list_size = 0;
+    pre_for_inclusion = true;
+  }
+  if (strncmp( rule_str.c_str()+post_first_idx-1, "[X]", post_list_size+2) == 0) {
     free(post_cleavage_list);
     post_cleavage_list = NULL;
     post_list_size = 0;
     post_for_inclusion = false;
   }
+  if (strncmp( rule_str.c_str()+post_first_idx-1, "{X}", post_list_size+2) == 0) {
+    free(post_cleavage_list);
+    post_cleavage_list = NULL;
+    post_list_size = 0;
+    post_for_inclusion = true;
+  }
+
+  // 6. Say what happened.
+  carp(CARP_INFO, "Pre-cleavage list: %s", pre_cleavage_list);
+  if (pre_for_inclusion) {
+    carp(CARP_INFO, "Pre-cleavage residues are included.");
+  } else {
+    carp(CARP_INFO, "Pre-cleavage residues are excluded.");
+  }
+  carp(CARP_INFO, "Post-cleavage list: %s", post_cleavage_list);
+  if (post_for_inclusion) {
+    carp(CARP_INFO, "Post-cleavage residues are included.");
+  } else {
+    carp(CARP_INFO, "Post-cleavage residues are excluded.");
+  }
+
 }
 
 /**
