@@ -219,7 +219,7 @@ Params::Params() : finalized_(false) {
     "'{' and '}'. Use X to indicate all residues. For example, trypsin cuts after R or "
     "K but not before P which is represented as [RK]|{P}. AspN cuts after any residue "
     "but only before D which is represented as [X]|[D]. "
-    "To prevent the sequences from being digested at all, use [Z]|[Z].",
+    "To prevent the sequences from being digested at all, use {X}|{X}.",
     "", true);
   InitDoubleParam("deisotope", 0, 0, 1000,
     "Perform a simple deisotoping operation across each MS2 spectrum. For each peak in an MS2 spectrum, consider lower m/z peaks. "
