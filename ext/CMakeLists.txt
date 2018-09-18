@@ -114,9 +114,8 @@ elseif (APPLE)
       COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_aux/boost/utility
         ${CMAKE_CURRENT_BINARY_DIR}/include/boost/utility
-      COMMAND ${CMAKE_COMMAND} -E copy
-        ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_1_56_0/boost/date_time/gregorian_calendar.ipp
-        ${CMAKE_CURRENT_BINARY_DIR}/include/boost/date_time
+      COMMAND find ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries -name gregorian_calendar.ipp
+        -exec cp {} ${CMAKE_CURRENT_BINARY_DIR}/include/boost/date_time $<SEMICOLON>
     BUILD_IN_SOURCE 1
   )
 else (UNIX)
@@ -143,9 +142,8 @@ else (UNIX)
       COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_aux/boost/utility
         ${CMAKE_CURRENT_BINARY_DIR}/include/boost/utility
-      COMMAND ${CMAKE_COMMAND} -E copy
-        ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_1_56_0/boost/date_time/gregorian_calendar.ipp
-        ${CMAKE_CURRENT_BINARY_DIR}/include/boost/date_time
+      COMMAND find ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries -name gregorian_calendar.ipp
+        -exec cp {} ${CMAKE_CURRENT_BINARY_DIR}/include/boost/date_time $<SEMICOLON>
     BUILD_IN_SOURCE 1
   )
 endif (WIN32 AND NOT CYGWIN)
