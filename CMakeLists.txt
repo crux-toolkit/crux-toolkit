@@ -15,6 +15,13 @@ add_subdirectory(doc/user)
 add_subdirectory(ext)
 add_subdirectory(src)
 
+OPTION(BUILD_32 "BUILD_32" OFF) 
+if (BUILD_32)
+  set(CMAKE_C_FLAGS "-m32")
+  set(CMAKE_CXX_FLAGS "-m32")
+  set(CMAKE_LD_FLAGS "-m32")
+endif(BUILD_32)
+
 # Only process smoke tests directory if it exiists
 if (EXISTS "${CMAKE_SOURCE_DIR}/test/smoke-tests/runall")
   add_subdirectory(test/smoke-tests)
