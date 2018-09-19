@@ -8,6 +8,8 @@
 #   PREFIX, the location to store binaries from the build.
 #   WORKING_DIR, the location where the expanded source files can be found
 
+OPTION(BUILD_32 "BUILD_32" OFF)
+
 # This macro checks download status codes for errors
 macro (check_status status_code)
   if (${status_code} EQUAL 0)
@@ -59,9 +61,13 @@ if (WIN32 AND NOT CYGWIN)
   set(pwiz_build_args ${pwiz_build_args} --without-mz5)
 else()
   set(pwiz_build ./quickbuild.sh)
+  if (BUILD_32)
+    set(pwiz_build_args ${pwiz_build_args} address-model=32 architecture=x86)
+  endif(BUILD_32)
   set(pwiz_build_args ${pwiz_build_args} --without-binary-msdata)
   set(pwiz_build_args ${pwiz_build_args} --layout=system)
   set(pwiz_build_args ${pwiz_build_args} runtime-link=shared)
+  message("Here is the pwiz build command line " "${pwiz_buid} ${pwiz_build_args}")
 endif (WIN32 AND NOT CYGWIN)
 
 if (${BUILD_TYPE} MATCHES "Debug")

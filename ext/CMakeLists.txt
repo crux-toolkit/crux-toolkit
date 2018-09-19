@@ -114,9 +114,8 @@ elseif (APPLE)
       COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_aux/boost/utility
         ${CMAKE_CURRENT_BINARY_DIR}/include/boost/utility
-      COMMAND ${CMAKE_COMMAND} -E copy
-        ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_1_56_0/boost/date_time/gregorian_calendar.ipp
-        ${CMAKE_CURRENT_BINARY_DIR}/include/boost/date_time
+      COMMAND find ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries -name gregorian_calendar.ipp
+        -exec cp {} ${CMAKE_CURRENT_BINARY_DIR}/include/boost/date_time $<SEMICOLON>
     BUILD_IN_SOURCE 1
   )
 else (UNIX)
@@ -127,6 +126,7 @@ else (UNIX)
     CONFIGURE_COMMAND ""
     BUILD_COMMAND
       ${CMAKE_COMMAND}
+        -DBUILD_32:BOOL=${BUILD_32}
         -DBUILD_TYPE:STRING=${CMAKE_CFG_INTDIR}
         -DPREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
         -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
@@ -143,9 +143,8 @@ else (UNIX)
       COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_aux/boost/utility
         ${CMAKE_CURRENT_BINARY_DIR}/include/boost/utility
-      COMMAND ${CMAKE_COMMAND} -E copy
-        ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_1_56_0/boost/date_time/gregorian_calendar.ipp
-        ${CMAKE_CURRENT_BINARY_DIR}/include/boost/date_time
+      COMMAND find ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries -name gregorian_calendar.ipp
+        -exec cp {} ${CMAKE_CURRENT_BINARY_DIR}/include/boost/date_time $<SEMICOLON>
     BUILD_IN_SOURCE 1
   )
 endif (WIN32 AND NOT CYGWIN)
@@ -233,6 +232,8 @@ ExternalProject_Add(
 
 if (UNIX)
   # Get Comet source from SVN and buld using it's own makefile
+  set(comet_cxx_flags ${CMAKE_CXX_FLAGS}\ -DCRUX)
+  set(mstoolkit_c_flags ${CMAKE_C_FLAGS}\ -DCRUX)
   ExternalProject_Add(
     comet
     SVN_REPOSITORY svn://svn.code.sf.net/p/comet-ms/code/tags/release_2018012/
@@ -242,12 +243,15 @@ if (UNIX)
     PATCH_COMMAND
       cp ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CometSearch/CometSearchManager.cpp
          ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/ &&
+      cp ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/MSToolkit/Makefile
+         ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/MSToolkit/ &&
       cp ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/MSToolkit/include/MSReader.h
          ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/MSToolkit/include/ &&
       cp ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/MSToolkit/src/MSToolkit/MSReader.cpp
          ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/MSToolkit/src/MSToolkit/
-    BUILD_COMMAND make -C MSToolkit
-      COMMAND make -C CometSearch CXXFLAGS=-DCRUX
+    BUILD_COMMAND 
+      COMMAND make -C MSToolkit 
+      COMMAND make -C CometSearch CXXFLAGS=${comet_cxx_flags} LDFLAGS=${CMAKE_LD_FLAGS}
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE 1
   )
