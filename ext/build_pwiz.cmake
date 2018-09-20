@@ -67,7 +67,6 @@ else()
   set(pwiz_build_args ${pwiz_build_args} --without-binary-msdata)
   set(pwiz_build_args ${pwiz_build_args} --layout=system)
   set(pwiz_build_args ${pwiz_build_args} runtime-link=shared)
-  message("Here is the pwiz build command line " "${pwiz_buid} ${pwiz_build_args}")
 endif (WIN32 AND NOT CYGWIN)
 
 if (${BUILD_TYPE} MATCHES "Debug")
