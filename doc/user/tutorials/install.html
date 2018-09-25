@@ -80,6 +80,15 @@
 		typing <code>pwd</code> or <code>echo $HOME</code>.
 		<h3>Installing Pre-compiled Crux Binaries on Linux</h3>
 		<ul>
+    <li>Current versions of Crux require that version 2.17 of the C
+    runtime library be installed.
+    You can determine which version of the C runtime library is installed
+    by running
+		<div class=code><code>
+    ldd --version
+    </div>
+		<p/>
+    </li>
 		<li><b>Download the files</b> 
 		<p/>
 		<span class=prog>Crux</span> is freely
@@ -141,9 +150,11 @@
 		following software:
 		<ul>
 		<li><code>gcc</code></li>
+    <li><code>version 2.17 or later of the C runtime libraries</code></li>
 		<li><code>g++</code></li>
 		<li><code>cmake</code> (Version 3.6 or later recommended)</li>
 		<li><code>make</code></li>
+		<li><code>git</code></li>
 		<li><code>svn</code></li>
 		</ul>
 		<p/>
@@ -215,6 +226,13 @@
 		use the command:
 		<div class=code><code>
 		cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX:PATH=&lt;install directory&gt; .
+		</code>
+    </div>
+    <p/>
+    To build a 32-bit version of Crux on a 64-bit machine use the <span
+    class=file>-DBUILD_32=ON</span> option for CMake:
+		<div class=code><code>
+		cmake -DBUILD_32=ON -DCMAKE_BUILD_TYPE=Release  .
 		</code>
 		</div>
 		</li>
