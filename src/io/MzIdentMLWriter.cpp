@@ -406,7 +406,8 @@ SpectrumIdentificationResultPtr MzIdentMLWriter::getSpectrumIdentificationResult
   map<string, SpectraDataPtr>::iterator sdpLookup = spectrumFiles_.find(spectrumFile);
   if (sdpLookup == spectrumFiles_.end()) {
     // add new SpectraData
-    SpectraDataPtr sdp(new SpectraData(spectrumFile, spectrumFile));
+    SpectraDataPtr sdp(new SpectraData("SpectraData_" + StringUtils::ToString(spectrumFiles_.size() + 1)));
+    sdp->location = spectrumFile;
     sdpLookup = spectrumFiles_.insert(make_pair(spectrumFile, sdp)).first;
   }
 
@@ -651,8 +652,7 @@ void MzIdentMLWriter::addMatch(
   siip->peptidePtr = getPeptide(peptide);
   addPeptideEvidences(peptide, siip);
 
-  SpectrumIdentificationResultPtr sirp =
-    getSpectrumIdentificationResult(spectrum);
+  SpectrumIdentificationResultPtr sirp = getSpectrumIdentificationResult(spectrum);
   sirp->spectrumIdentificationItem.push_back(siip);
 }
 

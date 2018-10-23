@@ -296,12 +296,18 @@ bool PercolatorAdapter::parsePSMId(
       // tokens[4] = rank
     } else {
       // Try to parse as <filestem>_<scan>_<charge>_<rank>
-      // tokens.back() = rank
-      tokens.pop_back();
+      tokens.pop_back(); // pop rank
       charge = StringUtils::FromString<int>(tokens.back());
-      tokens.pop_back();
-      // tokens.back() = scan
-      tokens.pop_back();
+      tokens.pop_back(); // pop charge
+      string scanStr = tokens.back();
+      tokens.pop_back(); // pop scan
+      // just <filestem> remaining
+      if (tokens.size() >= 4 &&
+          tokens[tokens.size() - 3] == "SII" &&
+          tokens[tokens.size() - 2] == scanStr) {
+        // handle msgf+ case: <filestem>_SII_<scan>_<?>
+        tokens.erase(tokens.end() - 3, tokens.end());
+      }
       stringstream ss;
       for (vector<string>::const_iterator i = tokens.begin(); i != tokens.end(); i++) {
         if (i != tokens.begin()) {
@@ -310,7 +316,7 @@ bool PercolatorAdapter::parsePSMId(
           ss << *i;
         }
       }
-      file_idx = Crux::Match::findFileIndex(ss.str(), true);
+      file_idx = Crux::Match::addUniqueFilePath(ss.str(), true);
     }
     return true;
   } catch (...) {
