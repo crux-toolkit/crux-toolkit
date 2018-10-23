@@ -277,8 +277,8 @@ class Match {
   );
 
 
-  /**                                                                                                      
-   * sets the file index for this match                                                                    
+  /**
+   * sets the file index for this match
    */
   void setFileIndex(
     int file_idx ///< file index to set
@@ -291,9 +291,11 @@ class Match {
 
   static int findFileIndex(const std::string& file_path, bool match_stem = false);
 
-  /**                                                                                                      
-   * sets the file path for this match                                                                     
-   * \returns the associated file index                                                                    
+  static int addUniqueFilePath(const std::string& path, bool match_stem = false);
+
+  /**
+   * sets the file path for this match
+   * \returns the associated file index
    */
   int setFilePath(
     const std::string& file_path ///< file path to set

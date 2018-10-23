@@ -873,6 +873,16 @@ int Match::findFileIndex(const string& file_path, bool match_stem) {
   return -1;
 }
 
+int Match::addUniqueFilePath(const string& path, bool match_stem) {
+  int idx = findFileIndex(path, match_stem);
+  if (idx == -1) {
+    idx = file_paths_.size();
+    file_paths_.push_back(path);
+    carp(CARP_INFO, "Assigning index %d to %s.", idx, path.c_str());
+  }
+  return idx;
+}
+
 /**
  * sets the file path for this match
  * \returns the associated file index
@@ -880,12 +890,7 @@ int Match::findFileIndex(const string& file_path, bool match_stem) {
 int Match::setFilePath(
   const string& file_path ///< file path to set
   ) {
-  file_idx_ = findFileIndex(file_path);
-  if (file_idx_ == -1) {
-    file_idx_ = file_paths_.size();
-    file_paths_.push_back(file_path);
-    carp(CARP_INFO, "Assigning index %d to %s.", file_idx_, file_path.c_str());
-  }
+  file_idx_ = addUniqueFilePath(file_path);
   return file_idx_;
 }
 
