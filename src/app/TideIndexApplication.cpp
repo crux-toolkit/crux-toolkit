@@ -975,12 +975,12 @@ void TideIndexApplication::generateDecoys(
       setDecoys = &decoys;
     }
     set<string> generatedDecoys;
+    set<string> dummy;
     for (int i = 0; i < numDecoys; i++) {
       string* outSeq = new string;
       bool success = false;
       for (int j = 0; j < generateAttemptsMax; j++) {
-        success = GeneratePeptides::makeDecoy(setTarget, *setTargets, *setDecoys, shuffle, *outSeq) &&
-          (allowDups || generatedDecoys.insert(*outSeq).second);
+        success = GeneratePeptides::makeDecoy(setTarget, *setTargets, dummy, shuffle, *outSeq);
         if (success) {
           break;
         }
