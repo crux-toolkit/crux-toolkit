@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.4)
 cmake_policy(VERSION 2.8.4)
 
+use_cxx11()
+
 add_subdirectory(app/bullseye)
 add_subdirectory(app/hardklor)
 add_subdirectory(app/qranker-barista)
