@@ -2696,7 +2696,7 @@ void Params::FinalizeParams() {
   // that a floating point value has not been set?
   if (new_value == 0.0) {
 #else
-  if (isnan(new_value)) {
+  if (std::isnan(new_value)) {
 #endif
     // If no width specified, choose based on mass type.
     if (get_mass_type_parameter("fragment-mass") == MONO) {
