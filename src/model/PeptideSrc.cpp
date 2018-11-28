@@ -299,9 +299,38 @@ bool PeptideSrc::parseTabDelimited(
 
       carp(CARP_DETAILED_DEBUG,"Parsing %s", protein_id.c_str());
       // get the protein and peptide index e.g. X(10)
-      size_t left_paren_index = protein_id.find('(');
+      bool parsed_pep_idx = false;
+      size_t idx_left = protein_id.rfind('(');
+      if (idx_left != string::npos) {
+        idx_left++;
+        size_t idx_right = protein_id.find(')', idx_left);
+        if (idx_right != string::npos) {
+          int pep_idx = -1;
+          if (StringUtils::TryFromString(protein_id.substr(idx_left, idx_right - idx_left), &pep_idx)) {
+            parsed_pep_idx = true;
+            //  set fields in new peptide src
+            string protein_id_string = protein_id.substr(0, idx_left - 1);
+            bool is_decoy;
+            parent_protein = MatchCollectionParser::getProtein(
+              database, decoy_database, protein_id_string, is_decoy);
 
-      if (left_paren_index == string::npos) {
+            string sequence = Peptide::unmodifySequence(file.getString(SEQUENCE_COL));
+
+            if (parent_protein->isPostProcess()) {
+              // Attempting to store protein_id location in start_idx_original of peptide src [Please check
+              // if this is valid usage, since PMCDelimitedFileWriter uses startidxoriginal to print protein
+              // id location] so I am making an assumption that this is the purpose of start_idx_original.
+              // Also, I'm not sure if I need this for all proteins or just post process ones.
+              peptide_src->setStartIdxOriginal(pep_idx);
+            }
+
+            //string sequence = file.getString(SEQUENCE_COL);
+            start_index = parent_protein->findStart(sequence, prev_aa, next_aa);
+          }
+        }
+      }
+
+      if (!parsed_pep_idx) {
         //protein id is the string.
         bool is_decoy;
 
@@ -321,28 +350,6 @@ bool PeptideSrc::parseTabDelimited(
             sequence.c_str(),
             protein_id.c_str());
         }
-      } else {
-        string protein_id_string = protein_id.substr(0, left_paren_index);
-        string peptide_start_index_string = protein_id.substr(left_paren_index+1, 
-          protein_id.length() - left_paren_index - 2);
-        bool is_decoy;    
-        //  set fields in new peptide src
-        parent_protein = MatchCollectionParser::getProtein(
-          database, decoy_database, protein_id_string, is_decoy);
-
-        string sequence = Peptide::unmodifySequence(file.getString(SEQUENCE_COL));
-
-        if (parent_protein->isPostProcess()) {
-          // Attempting to store protein_id location in start_idx_original of peptide src [Please check
-          // if this is valid usage, since PMCDelimitedFileWriter uses startidxoriginal to print protein
-          // id location] so I am making an assumption that this is the purpose of start_idx_original.
-          // Also, I'm not sure if I need this for all proteins or just post process ones.
-          int peptide_start_index_int = StringUtils::FromString<int>(peptide_start_index_string);
-          peptide_src->setStartIdxOriginal(peptide_start_index_int);
-        }
-
-        //string sequence = file.getString(SEQUENCE_COL);
-        start_index = parent_protein->findStart(sequence, prev_aa, next_aa);
       }
 
       // set parent protein of the peptide src
