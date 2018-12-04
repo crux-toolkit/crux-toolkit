@@ -153,6 +153,9 @@ window.onload = function () {
                         .attr("transform", `translate(${margin.left},${margin.top})`)
                         .call(d3.axisLeft(y).ticks(5));
 
+		d3.select(".chart-block")	
+			.style("display", "block");
+			
 		var svg = d3.select(".chart")
 				.attr("width", width)
 				.attr("height", height);
@@ -247,18 +250,20 @@ window.onload = function () {
 			var dates = [];
 			var items = [];
 			var lines = data.split('\n');
-			lines.forEach(function(row) {
-				var row_data = [];
-				row.split(',').forEach( function(str){
-						row_data.push(Number.parseInt(str));
-						});
-				 if(row_data.length > 1) {
-					var dt_str = String(row_data[0]);
-					dates.push(dt_str.substr(0, 4) + "-" + dt_str.substr(4, 2));
-					items.push([(row_data[1] - row_data[2])/1000.,row_data[2]/1000.]);
-				 }
-			})
-			buildChart(dates, items);
+			if(lines.length > 0){
+				lines.forEach(function(row) {
+					var row_data = [];
+					row.split(',').forEach( function(str){
+							row_data.push(Number.parseInt(str));
+							});
+					 if(row_data.length > 1) {
+						var dt_str = String(row_data[0]);
+						dates.push(dt_str.substr(0, 4) + "-" + dt_str.substr(4, 2));
+						items.push([(row_data[1] - row_data[2])/1000.,row_data[2]/1000.]);
+					 }
+				})
+				buildChart(dates, items);
+			}
 		});
 	}
 </script>
@@ -313,13 +318,15 @@ window.onload = function () {
 			analysis."</a> <i>Journal of Proteome Research.</i>
 			13(10):4488-4491, 2014.</span>
 			</p>
-			<p>Crux weekly usage statistics over the last 32 weeks my MS proteomics community.</p> 
-			<div id="tooltip" class="hidden">
-				<p><strong>Week:</strong><span id="dateField">100</span></p>
-				<p><strong>tide-search:</strong><span id="searchField">100</span></p>
-				<p><strong>others:</strong><span id="othersField">100</span></p>
-			 </div>    
-			<svg class="chart"></svg>
+			<div class="chart-block" style="dislpay:none">
+				<p>Crux weekly usage statistics over the last 32 weeks my MS proteomics community.</p> 
+				<div id="tooltip" class="hidden">
+					<p><strong>Week:</strong><span id="dateField">100</span></p>
+					<p><strong>tide-search:</strong><span id="searchField">100</span></p>
+					<p><strong>others:</strong><span id="othersField">100</span></p>
+				 </div>    
+				<svg class="chart"/>
+			</div>
 		</div>
 
 
