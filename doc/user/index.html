@@ -24,10 +24,10 @@
             
         #tooltip {
           position: absolute;
-          width: 200px;
+          width: auto;
           height: auto;
           padding: 10px;
-          background-color: white;
+          background-color: yellow;
           -webkit-border-radius: 10px;
           -moz-border-radius: 10px;
           border-radius: 10px;
@@ -44,8 +44,8 @@
         #tooltip p {
           margin: 0;
           font-family: Futura;
-          font-size: 16px;
-          line-height: 20px;
+          font-size: 12px;
+          line-height: 14px;
         }
 </style>	
 <script type="text/javascript">
@@ -121,7 +121,7 @@ window.onload = function () {
 		buildChart = function(dates, data){
 		
             	var colors = ['blue', 'cyan'];
-			var margin = ({top: 0, right: 0, bottom: 60, left: 30});
+			var margin = ({top: 0, right: 0, bottom: 60, left: 50});
 			var stackedData = d3.stack()
 					.keys([0, 1])(data) // stacked yz
 					.map((data, i) => data.map(([y0, y1]) => [y0, y1, i]));
@@ -129,8 +129,8 @@ window.onload = function () {
 		var yMax = d3.max(data, y => d3.max(y));
 		var y1Max = d3.max(stackedData, y => d3.max(y, d => d[1]))
 			
-		var width = 800,
-		    height = 400;
+		var width = 500,
+		    height = 250;
 
 		var x = d3.scaleBand()
 				.domain(dates)
@@ -143,13 +143,15 @@ window.onload = function () {
 
 		var xAxis = svg => svg.append("g")
 			.attr("transform", `translate(0,${height - margin.bottom})`)
-			.call(d3.axisBottom(x))
-                    .selectAll("text")
-                        .attr('class', 'vertical-text');
+			.call(d3.axisBottom(x)
+                    .tickValues(x.domain().filter(function(d,i){ return (i%2)}))
+                 )
+                .selectAll("text")
+                    .attr('class', 'vertical-text');
             
-            	var yAxisGenerator = d3.axisLeft(y).ticks(5);
+        var yAxisGenerator = d3.axisLeft(y).ticks(5);
 
-            	var yAxis = svg => svg.append("g")
+        var yAxis = svg => svg.append("g")
                         .attr("transform", `translate(${margin.left},${margin.top})`)
                         .call(d3.axisLeft(y).ticks(5));
 
@@ -163,8 +165,9 @@ window.onload = function () {
             //-----------
             tooltipHandler = function(d, i) {
                 var thisBar = d3.select(this);
-                var xPosition = parseFloat(thisBar.attr("x")) + parseFloat(thisBar.attr('width')) / 2;
-                var yPosition = parseFloat(y(data[i][0] + data[i][1]));
+        		var plot_box = d3.select(".chart")._groups[0][0].getBoundingClientRect()
+                var xPosition = window.pageXOffset + plot_box.left + parseFloat(thisBar.attr("x")) + parseFloat(thisBar.attr('width')) / 2;
+                var yPosition = window.pageYOffset + plot_box.top + parseFloat(thisBar.attr("y")) - 50;
 
                 var ttBox = d3.select("#tooltip")
                     .style("left", xPosition + "px")
@@ -214,6 +217,14 @@ window.onload = function () {
             svg.call(xAxis);
             svg.call(yAxis);
             
+            svg.append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 0 + 0.25*margin.left)
+                .attr("x",0 - (height-margin.bottom)/2)
+                .attr("dy", "1em")
+                .style("text-anchor", "middle")
+                .style("font-size", "10px")
+                .text("Crux runs (in 1,000)");            
             
             legend_data = [['tide-search', colors[0]], ['others', colors[1]]];
             var legend = d3.select('svg')
@@ -226,19 +237,19 @@ window.onload = function () {
                   .attr('transform', function(d, i) {
                     var height = 100;
                     var x = margin.left + 20;
-                    var y = margin.top + 20 + i * 40;
+                    var y = margin.top + 20 + i * 20;
                     return 'translate(' + x + ',' + y + ')';
             });
                       
              legend.append('rect')
-                .attr('width', 20)
-                .attr('height', 20)
+                .attr('width', 15)
+                .attr('height', 15)
                 .style('fill', (d)=>d[1])
                 .style('stroke', (d)=>d[1]);
 
              legend.append('text')
                 .attr('x',  30)
-                .attr('y', 15)
+                .attr('y', 12)
                 .text((d)=>d[0]);
                       
 	//-----------------------------------------------------
@@ -318,12 +329,12 @@ window.onload = function () {
 			analysis."</a> <i>Journal of Proteome Research.</i>
 			13(10):4488-4491, 2014.</span>
 			</p>
-			<div class="chart-block" style="dislpay:none">
-				<p>Crux weekly usage statistics over the last 32 weeks my MS proteomics community.</p> 
+			<div class="chart-block" style="dislpay:none" align="center">
+				<p>Crux weekly usage by MS proteomics community over the last 32 weeks  (in thousand runs).</p> 
 				<div id="tooltip" class="hidden">
-					<p><strong>Week:</strong><span id="dateField">100</span></p>
-					<p><strong>tide-search:</strong><span id="searchField">100</span></p>
-					<p><strong>others:</strong><span id="othersField">100</span></p>
+					<strong>Week:</strong><span id="dateField">100</span><br/>
+					<strong>tide-search:</strong><span id="searchField">100</span><br/>
+					<strong>others:</strong><span id="othersField">100</span>
 				 </div>    
 				<svg class="chart"/>
 			</div>

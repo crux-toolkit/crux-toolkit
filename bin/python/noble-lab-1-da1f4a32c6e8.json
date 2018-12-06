@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "noble-lab-1",
+  "private_key_id": "da1f4a32c6e8fbde725e6b4d3fb4b5706c6059af",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQCxhqKpZkjcjHaB\nemRe34jMAjMrqsMlvqy1m5H1memucVL/O9b/k70tdcCJeewCF+5UhcyFMJLVKz3l\ni6SioIJQZs2eWoisE6Qi6pocMwi5xo6UgUlGoBUkrpNSQgaQCf5dh8JigotAz9V7\n+yz5dKWqYm65goHlJ6IElpNcSse7Y6oWYLyJQnU0X2uVrmEr9n8eUHU4iXFQa64V\nsGqhf1/SMFAwxobHfrF0uoTwOapMlBaf8UMFsds7vGkeUx/HZUhaqflMpVgF1xRj\nNNVo7YwUFZxc0Nxg8VpzGqXJAIYvz6KYNXsGXeXO9688dVw+V/yNg1kZz0oLmEEM\nqU+wLc9HAgMBAAECggEATeITWt5U+O1m0Ecx4a2QBnCwome4VcbhXotx7Z4oty9g\nijlmiZn3VQpj/exPbluxY8OPhp9Yy8y8ywgIopBom31+mAqAC35SdD8YfWamXVqP\nEvflfeadYAp294+f8XFw9veogC9liHml307C3G4ggC/PA/QNqMtKeVjWLZdhKQRF\nbzbW3QoR5kOvLnceE+d9dgut2O8zTC6PS6WHY43OgAUf++BNJy5pFcHgAu31k49L\nwdze7IgDSlMZ+l5eTw8fWcgVlk09d7VQ6H4om40yKqxNogOOlFph0n4hjacnDkU+\nOAaoPj2/UAD1SB+5hB3Gj52iCM0VUBsa1TfsKk/hgQKBgQDaSb1iMws/QpCj2VZY\nB5XfKBB12NmPrVSqGD1CBp3R2OMkNAv1Fas52VT1/G4nGF+nB6MfswoQthnHuXBi\no8Pw+vLXYhSNuFg3Ily5rsPo/INeBIP/rhNUbGho8r30K9PJwL8nMgc+v8yctWL1\ntqg8dNObsp1KfObGz66Tyw0n0wKBgQDQMhpAqNV+KytUm/MQBkTVQ4YyDF/aRTFE\nt+L2YNqORzHRzSUMbaCbU8jNKhcVNifn0hEogppCT00dyKz0S0HD2U9I9u81Gnhg\nemf7llqFY/F5n4T8ZZMI5zaL8ImdpiLFEGcU9gxPd3JBUOSDjr6dExfc+MwDkkBE\nYrTqmhYmPQKBgQCT+ccLacTnFm3M1QmGVWYQyC0YZm9dyceKIzJrruaPmfKo2St9\n8jmH1r+UnZHiqNA2/6NiWtGo8HlbfmckRxYOJ2A2CAQc6mnKvl2TdljSeVNoibEd\nw1jRM0g4VM3WV1uT+jjbDjwBGq5PUVsLbM5xZVUJyDR+iVs8TQ9wmwaJBwKBgQCu\nBFLBHN1lmbub+sWM7VB3WPs/tewgSplFsNW5zXagWY2gqPGAk9kcO0mpgrbMefmc\n4I6K5678IcB5VpSJlKWhh2+nsw55umhHa8iiFygOOl1JpTXIqTXeyTNkgGbmKEkD\nohQnBwl/Gn2bbnuyIovcSms1vZb4nTOudTp2pNhCmQKBgQCbic9ccdr0lMzy9rW7\nxzV8X9PbzFeknUbyrGnDeZMBxWKW8PHhdol9qHahj+53ilGbJfcHuk1BKLpIJtWZ\nX2luQ+upaeSUC8GkZ87+ClYUi3dp13ogB30as2z4jRgumRBvGV8KgK6ajLyRNWIr\nj+G4sMUBJJOy20BmGf+bZg6FSQ==\n-----END PRIVATE KEY-----\n",
+  "client_email": "ga-for-noble-lab@noble-lab-1.iam.gserviceaccount.com",
+  "client_id": "106734812639801955479",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/ga-for-noble-lab%40noble-lab-1.iam.gserviceaccount.com"
+}
