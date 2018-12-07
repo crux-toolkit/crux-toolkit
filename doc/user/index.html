@@ -3,7 +3,51 @@
 <head>
 <title>Crux tandem mass spectrometry analysis software</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<link rel="stylesheet" type="text/css" href="styles.css">
+<link rel="stylesheet" type="text/css" href="styles.css"/>
+<style>
+        .vertical-text {
+            transform: rotate(45deg);
+            text-anchor:start;
+        }
+        .grid line {
+          stroke: lightgrey;
+          stroke-opacity: 0.7;
+          shape-rendering: crispEdges;
+        }
+
+        .grid path {
+          stroke-width: 0;
+        }
+        rect:hover {
+          fill: orange;
+        }
+            
+        #tooltip {
+          position: absolute;
+          width: auto;
+          height: auto;
+          padding: 10px;
+          background-color: yellow;
+          -webkit-border-radius: 10px;
+          -moz-border-radius: 10px;
+          border-radius: 10px;
+          -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+          -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+          box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+          pointer-events: none;
+        }
+
+        #tooltip.hidden {
+          display: none;
+        }
+
+        #tooltip p {
+          margin: 0;
+          font-family: Futura;
+          font-size: 12px;
+          line-height: 14px;
+        }
+</style>	
 <script type="text/javascript">
   var _gaq = _gaq || [];
   _gaq.push(['_setAccount', 'UA-26136956-1']);
@@ -15,7 +59,8 @@
     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
   })();
 </script>
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://d3js.org/d3.v5.min.js"></script>
 <script type="text/javascript">
 	// Main Menu
 	$( document ).ready(function() {
@@ -69,8 +114,173 @@ window.onload = function () {
 }
 </script>
 <!--(index.html only) End JS -->
+	
+<!-- Usage statistics plot -->	
+<script  type="text/javascript">
+        
+		buildChart = function(dates, data){
+		
+            	var colors = ['blue', 'cyan'];
+			var margin = ({top: 0, right: 0, bottom: 60, left: 50});
+			var stackedData = d3.stack()
+					.keys([0, 1])(data) // stacked yz
+					.map((data, i) => data.map(([y0, y1]) => [y0, y1, i]));
+					  
+		var yMax = d3.max(data, y => d3.max(y));
+		var y1Max = d3.max(stackedData, y => d3.max(y, d => d[1]))
+			
+		var width = 500,
+		    height = 250;
+
+		var x = d3.scaleBand()
+				.domain(dates)
+				.range([margin.left, width - margin.right])
+                        	.padding(0.1);
+
+            	var y = d3.scaleLinear()
+				.domain([0, y1Max])
+				.range([height - margin.bottom, margin.top]);
+
+		var xAxis = svg => svg.append("g")
+			.attr("transform", `translate(0,${height - margin.bottom})`)
+			.call(d3.axisBottom(x)
+                    .tickValues(x.domain().filter(function(d,i){ return (i%2)}))
+                 )
+                .selectAll("text")
+                    .attr('class', 'vertical-text');
+            
+        var yAxisGenerator = d3.axisLeft(y).ticks(5);
+
+        var yAxis = svg => svg.append("g")
+                        .attr("transform", `translate(${margin.left},${margin.top})`)
+                        .call(d3.axisLeft(y).ticks(5));
+
+		d3.select(".chart-block")	
+			.style("display", "block");
+			
+		var svg = d3.select(".chart")
+				.attr("width", width)
+				.attr("height", height);
+
+            //-----------
+            tooltipHandler = function(d, i) {
+                var thisBar = d3.select(this);
+        		var plot_box = d3.select(".chart")._groups[0][0].getBoundingClientRect()
+                var xPosition = window.pageXOffset + plot_box.left + parseFloat(thisBar.attr("x")) + parseFloat(thisBar.attr('width')) / 2;
+                var yPosition = window.pageYOffset + plot_box.top + parseFloat(thisBar.attr("y")) - 50;
+
+                var ttBox = d3.select("#tooltip")
+                    .style("left", xPosition + "px")
+                    .style("top", yPosition + "px");
+                
+                ttBox.select("#dateField")
+                     .text(dates[i]);
+                ttBox.select("#searchField")
+                     .text(data[i][1] * 1000);
+                ttBox.select("#othersField")
+                     .text(data[i][0] * 1000);
+
+				d3.select("#tooltip").classed("hidden", false);
+            }
+            //-----------
+            
+		rect = svg.selectAll("g")
+			.data(stackedData)
+			.enter().append("g")
+			  .attr("fill", (d, i) => colors[i])
+			.selectAll("rect")
+			.data(d => d)
+			.enter().append("rect")
+			  .attr("x", (d, i) => x(dates[i]))
+			  .attr("y", height - margin.bottom)
+			  .attr("width", x.bandwidth())
+			  .attr("height", 0)
+			  .on('mouseover', tooltipHandler)
+			  .on('mouseout', function() {
+    					d3.select("#tooltip").classed("hidden", true);
+        		   })
+			.transition()
+				.duration(500)
+				.delay((d, i) => i * 20)
+				.attr("y", d => y(d[1]))
+				.attr("height", d => y(d[0]) - y(d[1]));
+
+              // add the Y gridlines
+            svg.append("g")			
+                .attr("class", "grid")
+                .attr("transform", `translate(${margin.left},0)`)
+                .call(yAxisGenerator
+                      .tickSize(-(width - margin.right - margin.left))
+                      .tickFormat("")
+                     );
+            
+            svg.call(xAxis);
+            svg.call(yAxis);
+            
+            svg.append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 0 + 0.25*margin.left)
+                .attr("x",0 - (height-margin.bottom)/2)
+                .attr("dy", "1em")
+                .style("text-anchor", "middle")
+                .style("font-size", "10px")
+                .text("Crux runs (in 1,000)");            
+            
+            legend_data = [['tide-search', colors[0]], ['others', colors[1]]];
+            var legend = d3.select('svg')
+                .append("g")
+                .selectAll("g")
+                .data(legend_data)
+                .enter()
+                .append('g')
+                  .attr('class', 'legend')
+                  .attr('transform', function(d, i) {
+                    var height = 100;
+                    var x = margin.left + 20;
+                    var y = margin.top + 20 + i * 20;
+                    return 'translate(' + x + ',' + y + ')';
+            });
+                      
+             legend.append('rect')
+                .attr('width', 15)
+                .attr('height', 15)
+                .style('fill', (d)=>d[1])
+                .style('stroke', (d)=>d[1]);
+
+             legend.append('text')
+                .attr('x',  30)
+                .attr('y', 12)
+                .text((d)=>d[0]);
+                      
+	//-----------------------------------------------------
+	}
+	getData = function(){
+	//-- File format: week in YYYYWW, total count, tide-search count
+    	//loading and parsing the data file
+		$.get("gaData.csv", function(data) {
+			var dates = [];
+			var items = [];
+			var lines = data.split('\n');
+			if(lines.length > 0){
+				lines.forEach(function(row) {
+					var row_data = [];
+					row.split(',').forEach( function(str){
+							row_data.push(Number.parseInt(str));
+							});
+					 if(row_data.length > 1) {
+						var dt_str = String(row_data[0]);
+						dates.push(dt_str.substr(0, 4) + "-" + dt_str.substr(4, 2));
+						items.push([(row_data[1] - row_data[2])/1000.,row_data[2]/1000.]);
+					 }
+				})
+				buildChart(dates, items);
+			}
+		});
+	}
+</script>
+	
 </head>
-<body>
+<body  onload="getData()">
 	<div class="page-wrap">
 	 	<nav>
 			<div class="btn">
@@ -119,6 +329,15 @@ window.onload = function () {
 			analysis."</a> <i>Journal of Proteome Research.</i>
 			13(10):4488-4491, 2014.</span>
 			</p>
+			<div class="chart-block" style="dislpay:none" align="center">
+				<p>Crux weekly usage by MS proteomics community over the last 32 weeks  (in thousand runs).</p> 
+				<div id="tooltip" class="hidden">
+					<strong>Week:</strong><span id="dateField">100</span><br/>
+					<strong>tide-search:</strong><span id="searchField">100</span><br/>
+					<strong>others:</strong><span id="othersField">100</span>
+				 </div>    
+				<svg class="chart"/>
+			</div>
 		</div>
 
 
