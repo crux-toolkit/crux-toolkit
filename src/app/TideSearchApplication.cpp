@@ -1217,6 +1217,9 @@ void TideSearchApplication::search(
 
 }
 
+#ifdef _WIN64
+#pragma optimize( "g", off )
+#endif
 void TideSearchApplication::collectScoresCompiled(
   ActivePeptideQueue* active_peptide_queue,
   const Spectrum* spectrum,
@@ -1259,7 +1262,6 @@ void TideSearchApplication::collectScoresCompiled(
 #ifdef _WIN64
   DWORD64 rcx;
   DWORD64 rdi;
-
   volatile bool restored = false;
   CONTEXT context;
   RtlCaptureContext(&context);
@@ -1328,6 +1330,9 @@ void TideSearchApplication::collectScoresCompiled(
   // push_back(). We have to set the final size explicitly.
   match_arr->set_size(queue_size);
 }
+#ifdef _WIN64
+#pragma optimize( "g", on )
+#endif
 
 void TideSearchApplication::convertResults() const {
   PSMConvertApplication converter;

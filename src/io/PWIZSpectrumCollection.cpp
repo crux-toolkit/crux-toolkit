@@ -19,7 +19,7 @@
 #include "pwiz/data/vendor_readers/Bruker/Reader_Bruker.hpp"
 #include "pwiz/data/vendor_readers/Shimadzu/Reader_Shimadzu.hpp"
 #include "pwiz/data/vendor_readers/Thermo/Reader_Thermo.hpp"
-#include "pwiz/data/vendor_readers/Waters/Reader_Waters.hpp"
+//#include "pwiz/data/vendor_readers/Waters/Reader_Waters.hpp"
 #endif
 
 
@@ -39,7 +39,7 @@ PWIZSpectrumCollection::PWIZSpectrumCollection(
   //readerList.push_back(pwiz::msdata::ReaderPtr(new pwiz::msdata::Reader_Bruker));
   readerList.push_back(pwiz::msdata::ReaderPtr(new pwiz::msdata::Reader_Shimadzu));
   readerList.push_back(pwiz::msdata::ReaderPtr(new pwiz::msdata::Reader_Thermo));
-  readerList.push_back(pwiz::msdata::ReaderPtr(new pwiz::msdata::Reader_Waters));
+  //readerList.push_back(pwiz::msdata::ReaderPtr(new pwiz::msdata::Reader_Waters));
   carp(CARP_DETAILED_INFO, "Support for vendor specific formats enabled.");  
   try {
      reader_ = new pwiz::msdata::MSDataFile(filename_, &readerList);

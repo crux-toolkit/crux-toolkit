@@ -22,41 +22,113 @@ if (WIN32 AND NOT CYGWIN)
   if (${BUILD_TYPE} MATCHES "Debug")
     execute_process(
       COMMAND ${CMAKE_COMMAND} -E copy 
-        ${PREFIX}/lib/libboost_filesystem-vc120-mt-gd.lib
-        ${PREFIX}/lib/libboost_filesystem-vc120-mt-gd-1_56.lib
+        ${PREFIX}/lib/libboost_chrono-vc141-mt-gd.lib
+        ${PREFIX}/lib/libboost_chrono-vc141-mt-gd-x64-1_67.lib
       RESULT_VARIABLE status
     )
     execute_process(
       COMMAND ${CMAKE_COMMAND} -E copy 
-        ${PREFIX}/lib/libboost_nowide-vc120-mt-gd.lib
-        ${PREFIX}/lib/libboost_nowide-vc120-mt-gd-1_56.lib
+        ${PREFIX}/lib/libboost_date_time-vc141-mt-gd.lib
+        ${PREFIX}/lib/libboost_date_time-vc141-mt-gd-x64-1_67.lib
+      RESULT_VARIABLE status
+    )
+    execute_process(
+      COMMAND ${CMAKE_COMMAND} -E copy 
+        ${PREFIX}/lib/libboost_filesystem-vc141-mt-gd.lib
+        ${PREFIX}/lib/libboost_filesystem-vc141-mt-gd-x64-1_67.lib
+      RESULT_VARIABLE status
+    )
+    execute_process(
+      COMMAND ${CMAKE_COMMAND} -E copy 
+        ${PREFIX}/lib/libboost_iostreams-vc141-mt-gd.lib
+        ${PREFIX}/lib/libboost_iostreams-vc141-mt-gd-x64-1_67.lib
+      RESULT_VARIABLE status
+    )
+    execute_process(
+      COMMAND ${CMAKE_COMMAND} -E copy 
+        ${PREFIX}/lib/libboost_nowide-vc141-mt-gd.lib
+        ${PREFIX}/lib/libboost_nowide-vc141-mt-gd-x64-1_67.lib
+      RESULT_VARIABLE status
+    )
+    execute_process(
+      COMMAND ${CMAKE_COMMAND} -E copy 
+        ${PREFIX}/lib/libboost_program_options-vc141-mt.lib
+        ${PREFIX}/lib/libboost_program_options-vc141-mt-gd-x64-1_67.lib
+      RESULT_VARIABLE status
+    )
+    execute_process(
+      COMMAND ${CMAKE_COMMAND} -E copy 
+        ${PREFIX}/lib/libboost_system-vc141-mt-gd.lib
+        ${PREFIX}/lib/libboost_system-vc141-mt-gd-x64-1_67.lib
+      RESULT_VARIABLE status
+    )
+    execute_process(
+      COMMAND ${CMAKE_COMMAND} -E copy 
+        ${PREFIX}/lib/libboost_thread-vc141-mt-gd.lib
+        ${PREFIX}/lib/libboost_thread-vc141-mt-gd-x64-1_67.lib
+      RESULT_VARIABLE status
+    )
+    execute_process(
+      COMMAND ${CMAKE_COMMAND} -E copy 
+        ${PREFIX}/build/src/ProteoWizard/pwiz_aux/msrc/utility/vendor_api/Bruker/x64/timsdata.lib
+        ${PREFIX}/lib/timsdata.lib
       RESULT_VARIABLE status
     )
   else()
     execute_process(
       COMMAND ${CMAKE_COMMAND} -E copy 
-        ${PREFIX}/lib/libboost_filesystem-vc120-mt.lib
-        ${PREFIX}/lib/libboost_filesystem-vc120-mt-1_56.lib
+        ${PREFIX}/lib/libboost_chrono-vc141-mt.lib
+        ${PREFIX}/lib/libboost_chrono-vc141-mt-x64-1_67.lib
       RESULT_VARIABLE status
     )
     execute_process(
       COMMAND ${CMAKE_COMMAND} -E copy 
-        ${PREFIX}/lib/libboost_nowide-vc120-mt.lib
-        ${PREFIX}/lib/libboost_nowide-vc120-mt-1_56.lib
+        ${PREFIX}/lib/libboost_date_time-vc141-mt.lib
+        ${PREFIX}/lib/libboost_date_time-vc141-mt-x64-1_67.lib
       RESULT_VARIABLE status
     )
     execute_process(
       COMMAND ${CMAKE_COMMAND} -E copy 
-        ${PREFIX}/lib/libboost_chrono-vc120-mt.lib
-        ${PREFIX}/lib/libboost_chrono-vc120-mt-1_56.lib
+        ${PREFIX}/lib/libboost_filesystem-vc141-mt.lib
+        ${PREFIX}/lib/libboost_filesystem-vc141-mt-x64-1_67.lib
+      RESULT_VARIABLE status
+    )
+    execute_process(
+      COMMAND ${CMAKE_COMMAND} -E copy 
+        ${PREFIX}/lib/libboost_iostreams-vc141-mt.lib
+        ${PREFIX}/lib/libboost_iostreams-vc141-mt-x64-1_67.lib
+      RESULT_VARIABLE status
+    )
+    execute_process(
+      COMMAND ${CMAKE_COMMAND} -E copy 
+        ${PREFIX}/lib/libboost_nowide-vc141-mt.lib
+        ${PREFIX}/lib/libboost_nowide-vc141-mt-x64-1_67.lib
+      RESULT_VARIABLE status
+    )
+    execute_process(
+      COMMAND ${CMAKE_COMMAND} -E copy 
+        ${PREFIX}/lib/libboost_program_options-vc141-mt.lib
+        ${PREFIX}/lib/libboost_program_options-vc141-mt-x64-1_67.lib
+      RESULT_VARIABLE status
+    )
+    execute_process(
+      COMMAND ${CMAKE_COMMAND} -E copy 
+        ${PREFIX}/lib/libboost_system-vc141-mt.lib
+        ${PREFIX}/lib/libboost_system-vc141-mt-x64-1_67.lib
+      RESULT_VARIABLE status
+    )
+    execute_process(
+      COMMAND ${CMAKE_COMMAND} -E copy 
+        ${PREFIX}/lib/libboost_thread-vc141-mt.lib
+        ${PREFIX}/lib/libboost_thread-vc141-mt-x64-1_67.lib
+      RESULT_VARIABLE status
+    )
+    execute_process(
+      COMMAND ${CMAKE_COMMAND} -E copy 
+        ${PREFIX}/build/src/ProteoWizard/pwiz_aux/msrc/utility/vendor_api/Bruker/x64/timsdata.lib
+        ${PREFIX}/lib/timsdata.lib
       RESULT_VARIABLE status
     )
   endif (${BUILD_TYPE} MATCHES "Debug")
-  check_status(status)
-  execute_process(
-    COMMAND regsvr32 
-      /s
-      ${PREFIX}/lib/MSFileReader.XRawfile2.dll
-  )
-  # Don't care about status of regsvr32 command
+#  check_status(status)
 endif (WIN32 AND NOT CYGWIN)
