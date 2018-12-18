@@ -388,8 +388,8 @@ bool Spectrum::parsePwizSpecInfo(
 
   // get peaks
   int num_peaks = pwiz_spectrum->defaultArrayLength;
-  const vector<double>& mzs = pwiz_spectrum->getMZArray()->data;
-  const vector<double>& intensities = pwiz_spectrum->getIntensityArray()->data;
+  vector<double> mzs = pwiz_spectrum->getMZArray()->data;
+  vector<double> intensities = pwiz_spectrum->getIntensityArray()->data;
   for(int peak_idx = 0; peak_idx < num_peaks; peak_idx++){
     addPeak(intensities[peak_idx], mzs[peak_idx]);
   }

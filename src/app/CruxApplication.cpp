@@ -17,6 +17,7 @@
 #include "util/WinCrux.h"
 
 #include <iostream>
+#define  NO_BOOST_DATE_TIME_INLINE
 #include <boost/thread.hpp>
 
 using namespace std;

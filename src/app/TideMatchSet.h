@@ -1,6 +1,7 @@
 #ifndef TIDE_MATCH_SET_H
 #define TIDE_MATCH_SET_H
 
+#define  NO_BOOST_DATE_TIME_INLINE
 #include <boost/thread.hpp>
 #include <vector>
 #include "raw_proteins.pb.h"

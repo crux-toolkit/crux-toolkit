@@ -22,7 +22,8 @@ include_directories(${CMAKE_BINARY_DIR}/ext)
 include_directories(${CMAKE_BINARY_DIR}/ext/include)
 include_directories(${CMAKE_BINARY_DIR}/ext/include/CometSearch)
 include_directories(${CMAKE_BINARY_DIR}/ext/include/MSToolkit)
-include_directories(${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/libraries/boost_1_56_0)
+include_directories(${CMAKE_BINARY_DIR}/ext/include/gflags)
+include_directories(${CMAKE_BINARY_DIR}/ext/include/google/protobuf)
 include_directories(${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/libraries/boost_aux)
 include_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator/src/)
 include_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator/src/fido)
@@ -34,18 +35,13 @@ if (WIN32 AND NOT Cygwin)
   # Needed to put DLL containing type libraries
   # in include path for Windows
   include_directories(${CMAKE_BINARY_DIR}/ext/lib)
-  # Needed to include gflags/gflags.h on Windows
-  include_directories(${CMAKE_BINARY_DIR}/ext/build/src/google-gflags/src/windows)
-  # Needed to include google/protobuf on Windows
-  include_directories(${CMAKE_BINARY_DIR}/ext/build/src/protobuf-2.5.0/src)
   SET(
     CMAKE_EXE_LINKER_FLAGS 
-    "${CMAKE_EXE_LINKER_FLAGS} /VERBOSE:LIB /NODEFAULTLIB:libboost_date_time-vc120-mt-1_56 /NODEFAULTLIB:libboost_system-vc120-mt-1_56 /NODEFAULTLIB:libboost_thread-vc120-mt-1_56"
+    "${CMAKE_EXE_LINKER_FLAGS} /VERBOSE:LIB /NODEFAULTLIB:libboost_date_time-vc140-mt /NODEFAULTLIB:libboost_system-vc141-mt /NODEFAULTLIB:libboost_thread-vc141-mt"
   )
   SET(
   CMAKE_EXE_LINKER_FLAGS_DEBUG 
-  "${CMAKE_EXE_LINKER_FLAGS}
-  /VERBOSE:LIB /NODEFAULTLIB:libboost_chrono-vc120-mt-gd-1_56 /NODEFAULTLIB:libboost_date_time-vc120-mt-gd-1_56 /NODEFAULTLIB:libboost_system-vc120-mt-gd-1_56 /NODEFAULTLIB:libboost_thread-vc120-mt-gd-1_56"
+  "${CMAKE_EXE_LINKER_FLAGS} /VERBOSE:LIB /NODEFAULTLIB:libboost_chrono-vc141-gd /NODEFAULTLIB:libboost_date_time-vc141-gd /NODEFAULTLIB:libboost_system-vc141-gd /NODEFAULTLIB:libboost_thread-vc141-gd"
 )
   #  Need Comet base directory for Windows
   include_directories(${CMAKE_BINARY_DIR}/ext/build/src/comet/)
@@ -201,6 +197,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 endif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
 add_definitions(-DCRUX)
+add_definitions(-DBOOST_ALL_NO_LIB)
 
 add_library(
   crux-support
@@ -321,45 +318,81 @@ if (WIN32 AND NOT CYGWIN)
   if (INCLUDE_VENDOR_LIBRARIES)
     set (
       PWIZ_LIBRARIES
-      libpwiz_data_identdata
-      libpwiz_data_identdata_version
-      libpwiz_data_misc
-      libpwiz_data_msdata
-      libpwiz_data_msdata_version
-      libpwiz_data_proteome
-      libpwiz_data_common
-      libpwiz_data_vendor_readers
-      libpwiz_reader_abi
-      libpwiz_reader_abi_t2d
-      libpwiz_reader_agilent
-      libpwiz_reader_shimadzu
-      libpwiz_reader_thermo
-      libpwiz_reader_waters
-      libpwiz_vendor_api_abi
-      libpwiz_vendor_api_agilent
-      libpwiz_vendor_api_shimadzu
-      libpwiz_vendor_api_thermo
-      libpwiz_utility_chemistry
-      libpwiz_utility_minimxml
-      libpwiz_utility_misc
-      libpwiz_version
+      baf2sql_c.lib
+      libhdf5.lib
+      libhdf5pp.lib
+      libpwiz_analysis_chromatogram_processing.lib
+      libpwiz_analysis_common.lib
+      libpwiz_analysis_demux.lib
+      libpwiz_analysis_frequency.lib
+      libpwiz_analysis_passive.lib
+      libpwiz_analysis_passive_core.lib
+      libpwiz_analysis_peakdetect.lib
+      libpwiz_analysis_peptideid.lib
+      libpwiz_analysis_proteome_processing.lib
+      libpwiz_analysis_spectrum_processing.lib
+      libpwiz_analysis_spectrum_processing_basic.lib
+      libpwiz_analysis_version.lib
+      libpwiz_data_common.lib
+      libpwiz_data_identdata.lib
+      libpwiz_data_identdata_examples.lib
+      libpwiz_data_identdata_version.lib
+      libpwiz_data_misc.lib
+      libpwiz_data_msdata.lib
+      libpwiz_data_msdata_examples.lib
+      libpwiz_data_msdata_mz5.lib
+      libpwiz_data_msdata_version.lib
+      libpwiz_data_obo.lib
+      libpwiz_data_proteome.lib
+      libpwiz_data_proteome_examples.lib
+      libpwiz_data_proteome_version.lib
+      libpwiz_data_tradata.lib
+      libpwiz_data_tradata_examples.lib
+      libpwiz_data_tradata_version.lib
+      libpwiz_data_vendor_readers.lib
+      libpwiz_reader_agilent.lib
+      libpwiz_reader_bruker.lib
+      libpwiz_reader_shimadzu.lib
+      libpwiz_reader_thermo.lib
+      libpwiz_reader_uimf.lib
+      libpwiz_reader_unifi.lib
+      libpwiz_reader_waters.lib
+      libpwiz_tools_common.lib
+      libpwiz_utility_chemistry.lib
+      libpwiz_utility_image.lib
+      libpwiz_utility_math.lib
+      libpwiz_utility_minimxml.lib
+      libpwiz_utility_misc.lib
+      libpwiz_utility_vendor_reader_test_harness.lib
+      libpwiz_vendor_api_agilent.lib
+      libpwiz_vendor_api_bruker.lib
+      libpwiz_vendor_api_shimadzu.lib
+      libpwiz_vendor_api_thermo.lib
+      libpwiz_vendor_api_uimf.lib
+      libpwiz_vendor_api_unifi.lib
+      libpwiz_version.lib
       libSHA1
+      libsqlite3.lib
+      libsqlite3pp.lib
+      libsvm
       libzlib
-      MassLynxRaw
+      timsdata
     )
   else (INCLUDE_VENDOR_LIBRARIES)
     set (
       PWIZ_LIBRARIES
-      libpwiz_data_identdata
+      libpwiz_data_identdata_examples
       libpwiz_data_identdata_version
       libpwiz_data_misc
-      libpwiz_data_msdata
+      libpwiz_data_msdata_examples
       libpwiz_data_msdata_version
-      libpwiz_data_proteome
+      libpwiz_data_proteome_examples
+      libpwiz_data_proteome_version
       libpwiz_data_common
       libpwiz_utility_chemistry
+      libpwiz_utility_image
+      libpwiz_utility_math
       libpwiz_utility_minimxml
-      libpwiz_utility_misc
       libpwiz_version
       libSHA1
       libzlib
@@ -375,28 +408,35 @@ if (WIN32 AND NOT CYGWIN)
     fido
     picked_protein
     xlink
-    gflags
+    gflags_static
     crux-support
     tide-support
     mstoolkitlite
-    protobuf
+    optimized libprotobuf
+    debug libprotobufd
     ${PWIZ_LIBRARIES}
     ws2_32
     shlwapi
-    optimized libboost_system-vc120-mt
-    optimized libboost_iostreams-vc120-mt
-    optimized libboost_nowide-vc120-mt
-    optimized libboost_filesystem-vc120-mt
-    optimized libboost_thread-vc120-mt
-    optimized libboost_chrono-vc120-mt
-    optimized libboost_regex-vc120-mt
-    debug libboost_system-vc120-mt-gd
-    debug libboost_iostreams-vc120-mt-gd
-    debug libboost_nowide-vc120-mt-gd
-    debug libboost_filesystem-vc120-mt-gd
-    debug libboost_thread-vc120-mt-gd
-    debug libboost_chrono-vc120-mt-gd
-    debug libboost_regex-vc120-mt-gd
+    optimized libboost_chrono-vc141-mt
+    optimized libboost_date_time-vc141-mt
+    optimized libboost_filesystem-vc141-mt
+    optimized libboost_iostreams-vc141-mt
+    optimized libboost_nowide-vc141-mt
+    optimized libboost_program_options-vc141-mt
+    optimized libboost_serialization-vc141-mt
+    optimized libboost_system-vc141-mt
+    optimized libboost_thread-vc141-mt
+    optimized libfreetype-vc141-mt-2_4
+    debug libboost_system-vc141-mt-gd
+    debug libboost_iostreams-vc141-mt-gd
+    debug libboost_nowide-vc141-mt-gd
+    debug libboost_filesystem-vc141-mt-gd
+    debug libboost_thread-vc141-mt-gd
+    debug libboost_chrono-vc141-mt-gd
+    debug libfreetype-vc141-mt-gd-2_4
+    optimized libgd-vc141-mt-2_1
+    debug libgd-vc141-mt-gd-2_1
+    libpng
   )
 else()
   target_link_libraries(
@@ -404,23 +444,25 @@ else()
     xlink
     barista
     bullseye
+    xlink
     crux-support
     tide-support
-    protobuf
-    gflags
     cometsearch
-    dl
+    gflags
     hardklor
-    m
-    ${RT_LIBRARY}
     mstoolkitlite
     perclibrary
     fido
     picked_protein
+    protobuf
+    dl
+    m
+    pthread
     pwiz_data_identdata
     pwiz_data_identdata_version
     pwiz_data_misc
     pwiz_data_msdata
+    pwiz_data_msdata_mz5
     pwiz_data_msdata_version
     pwiz_data_proteome
     pwiz_data_common
@@ -428,16 +470,17 @@ else()
     pwiz_utility_minimxml
     pwiz_utility_misc
     pwiz_version
-    SHA1
-    boost_system-mt-s
-    boost_iostreams-mt-s
-    z-mt-s-1_2
-    boost_filesystem-mt-s
-    boost_thread-mt-s
     boost_chrono
     boost_filesystem
+    boost_iostreams
+    boost_serialization
     boost_system
-    pthread
+    boost_thread
+    hdf5pp
+    hdf5
+    ${RT_LIBRARY}
+    SHA1
+    zlib
   )
 endif(WIN32 AND NOT CYGWIN)
 
