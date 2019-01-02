@@ -21,6 +21,7 @@
 #include "StringUtils.h"
 #include "WinCrux.h"
 #include "io/LineFileReader.h"
+#define  NO_BOOST_DATE_TIME_INLINE
 #include <boost/filesystem.hpp>
 #include <boost/asio.hpp>
 #include "FileUtils.h"

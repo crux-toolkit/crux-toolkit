@@ -80,6 +80,7 @@ if (WIN32 AND NOT CYGWIN)
       ${CMAKE_COMMAND}
         -DBUILD_TYPE:STRING=${CMAKE_CFG_INTDIR}
         -DPREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
+        -DMSBUILD_PLATFORM:STRING=${MSBUILD_PLATFORM}
         -P  ${CMAKE_CURRENT_SOURCE_DIR}/post_install_pwiz.cmake
     DEPENDEES install
   )
@@ -114,8 +115,6 @@ elseif (APPLE)
       COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_aux/boost/utility
         ${CMAKE_CURRENT_BINARY_DIR}/include/boost/utility
-      COMMAND find ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries -name gregorian_calendar.ipp
-        -exec cp {} ${CMAKE_CURRENT_BINARY_DIR}/include/boost/date_time $<SEMICOLON>
     BUILD_IN_SOURCE 1
   )
 else (UNIX)
@@ -143,8 +142,6 @@ else (UNIX)
       COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_aux/boost/utility
         ${CMAKE_CURRENT_BINARY_DIR}/include/boost/utility
-      COMMAND find ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries -name gregorian_calendar.ipp
-        -exec cp {} ${CMAKE_CURRENT_BINARY_DIR}/include/boost/date_time $<SEMICOLON>
     BUILD_IN_SOURCE 1
   )
 endif (WIN32 AND NOT CYGWIN)
@@ -185,11 +182,11 @@ endif (UNIX)
 
 if (UNIX)
   ExternalProject_Add(
-    protobuf-2.5.0
+    protobuf-3.0.0
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
-    URL https://github.com/google/protobuf/releases/download/v2.5.0/protobuf-2.5.0.tar.bz2
+    URL https://github.com/protocolbuffers/protobuf/releases/download/v3.0.0/protobuf-cpp-3.0.0.tar.gz
     CONFIGURE_COMMAND
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/protobuf-2.5.0/configure
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/protobuf-3.0.0/configure
       --prefix=${CMAKE_CURRENT_BINARY_DIR}
       --enable-shared=no
     BUILD_COMMAND make
@@ -199,48 +196,25 @@ if (UNIX)
 elseif (WIN32 AND NOT CYGWIN)
   # Update Microsoft VS project files and build ProtocolBuffers using MSBuild
   ExternalProject_Add(
-    protobuf-2.5.0
+    protobuf-3.0.0
+    URL https://github.com/protocolbuffers/protobuf/releases/download/v3.0.0/protobuf-cpp-3.0.0.tar.gz
+    DOWNLOAD_NAME protobuf-cpp-3.0.0.tar.gz
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
-    URL https://github.com/google/protobuf/releases/download/v2.5.0/protobuf-2.5.0.tar.bz2
-    PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/protobuf/vsprojects/
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/protobuf-2.5.0/vsprojects/ &&
-      ${CMAKE_COMMAND} -E copy_directory
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/protobuf/src/
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/protobuf-2.5.0/src/
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND msbuild
-      /p:Configuration=${CMAKE_CFG_INTDIR}
-      /p:Platform=${MSBUILD_PLATFORM}
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/protobuf-2.5.0/vsprojects/libprotobuf.vcxproj &&
-      msbuild
-      /p:Configuration=${CMAKE_CFG_INTDIR}
-      /p:Platform=${MSBUILD_PLATFORM}
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/protobuf-2.5.0/vsprojects/libprotoc.vcxproj &&
-      msbuild
-      /p:Configuration=${CMAKE_CFG_INTDIR}
-      /p:Platform=${MSBUILD_PLATFORM}
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/protobuf-2.5.0/vsprojects/protoc.vcxproj
-    INSTALL_COMMAND ""
-    BUILD_IN_SOURCE 1
-  )
-  ExternalProject_Add_Step(
-    protobuf-2.5.0
-    copy_binaries
-    COMMAND ${CMAKE_COMMAND} -E copy
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/protobuf-2.5.0/vsprojects/${MSBUILD_PLATFORM}/${CMAKE_CFG_INTDIR}/protoc.exe
-      ${CMAKE_CURRENT_BINARY_DIR}/bin/protoc.exe
-    COMMAND ${CMAKE_COMMAND} -E copy
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/protobuf-2.5.0/vsprojects/${MSBUILD_PLATFORM}/${CMAKE_CFG_INTDIR}/libprotobuf.lib
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/protobuf.lib
-    DEPENDEES install
+    SOURCE_SUBDIR cmake
+    CMAKE_ARGS
+      -DCMAKE_VERBOSE_MAKEFILE=ON
+      -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}
+      -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}
+      -DCMAKE_BUILD_TYPE=${CMAKE_CFG_INTDIR}
+      -Dprotobuf_MSVC_STATIC_RUNTIME=OFF
+    PATCH_COMMAND ""
   )
 endif (UNIX)
 
 ExternalProject_Add(
-  gflags-2.1.2
-  URL https://codeload.github.com/gflags/gflags/tar.gz/v2.1.2
-  DOWNLOAD_NAME gflags-2.1.2.tar.gz
+  gflags-2.2.1
+  URL https://codeload.github.com/gflags/gflags/tar.gz/v2.2.1
+  DOWNLOAD_NAME gflags-2.2.1.tar.gz
   PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
   CMAKE_ARGS -DCMAKE_VERBOSE_MAKEFILE=ON
     -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}
