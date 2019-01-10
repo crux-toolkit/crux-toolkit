@@ -14,6 +14,12 @@ SET(ENV{CMAKE_PREFIX_PATH} ${CMAKE_CURRENT_BINARY_DIR})
 SET(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR})
 SET(USE_LATEST_PWIZ ON CACHE BOOL "Use lastest version of ProteoWizard")
 
+if (UNIX AND BUILD_32)
+  SET(TOOLCHAIN_FILE "-DCMAKE_TOOLCHAIN_FILE=${CMAKE_SOURCE_DIR}/linux_i686.toolchain.cmake")
+else (UNIX AND BUILD_32)
+  SET(TOOLCHAIN "")
+endif (UNIX AND BUILD_32)
+
 if (WIN32 AND NOT CYGWIN)
   # If windows build we need to select 32/64 bit platform
   if (CMAKE_GENERATOR MATCHES "^.*Win64$")
@@ -153,7 +159,8 @@ if (UNIX)
     GIT_REPOSITORY https://github.com/percolator/percolator.git
     GIT_TAG ${PERCOLATOR_GIT_VERSION}
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
-    CMAKE_ARGS -DCMAKE_VERBOSE_MAKEFILE=ON
+    CMAKE_ARGS ${TOOLCHAIN_FILE}
+      -DCMAKE_VERBOSE_MAKEFILE=ON
       -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}
       -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}
       -DCMAKE_BUILD_TYPE=${CMAKE_CFG_INTDIR}
@@ -183,18 +190,18 @@ endif (UNIX)
 if (UNIX)
   ExternalProject_Add(
     protobuf-3.0.0
-    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     URL https://github.com/protocolbuffers/protobuf/releases/download/v3.0.0/protobuf-cpp-3.0.0.tar.gz
-    CONFIGURE_COMMAND
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/protobuf-3.0.0/configure
-      --prefix=${CMAKE_CURRENT_BINARY_DIR}
-      --enable-shared=no
-    BUILD_COMMAND make
-    INSTALL_COMMAND make install
-    BUILD_IN_SOURCE 1
+    DOWNLOAD_NAME protobuf-cpp-3.0.0.tar.gz
+    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
+    SOURCE_SUBDIR cmake
+    CMAKE_ARGS ${TOOLCHAIN_FILE}
+      -DCMAKE_VERBOSE_MAKEFILE=ON
+      -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}
+      -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}
+      -DCMAKE_BUILD_TYPE=${CMAKE_CFG_INTDIR}
+      -Dprotobuf_BUILD_TESTS=OFF
  )
 elseif (WIN32 AND NOT CYGWIN)
-  # Update Microsoft VS project files and build ProtocolBuffers using MSBuild
   ExternalProject_Add(
     protobuf-3.0.0
     URL https://github.com/protocolbuffers/protobuf/releases/download/v3.0.0/protobuf-cpp-3.0.0.tar.gz
@@ -216,7 +223,8 @@ ExternalProject_Add(
   URL https://codeload.github.com/gflags/gflags/tar.gz/v2.2.1
   DOWNLOAD_NAME gflags-2.2.1.tar.gz
   PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
-  CMAKE_ARGS -DCMAKE_VERBOSE_MAKEFILE=ON
+  CMAKE_ARGS ${TOOLCHAIN_FILE}
+    -DCMAKE_VERBOSE_MAKEFILE=ON
     -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}
     -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}
     -DCMAKE_BUILD_TYPE=${CMAKE_CFG_INTDIR}
@@ -243,7 +251,8 @@ if (UNIX)
       cp ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/MSToolkit/src/MSToolkit/MSReader.cpp
          ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/MSToolkit/src/MSToolkit/
     BUILD_COMMAND 
-      COMMAND make -C MSToolkit 
+      COMMAND make -C MSToolkit CXXFLAGS=${comet_cxx_flags} CFLAGS=${mstoolkit_c_flags} 
+                                LDFLAGS=${CMAKE_LD_FLAGS}
       COMMAND make -C CometSearch CXXFLAGS=${comet_cxx_flags} LDFLAGS=${CMAKE_LD_FLAGS}
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE 1
