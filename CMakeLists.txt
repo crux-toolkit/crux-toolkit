@@ -2,6 +2,11 @@ project(crux)
 cmake_minimum_required(VERSION 2.8.4)
 cmake_policy(VERSION 2.8.4)
 
+if (BUILD_32)
+  message("-- 32 bit build selected")
+endif(BUILD_32)
+
+
 set (CRUX_VERSION_MAJOR "3")
 set (CRUX_VERSION_MINOR "2")
 set (CRUX_VERSION ${CRUX_VERSION_MAJOR}.${CRUX_VERSION_MINOR})
@@ -27,12 +32,6 @@ add_subdirectory(doc/user)
 add_subdirectory(ext)
 add_subdirectory(src)
 
-OPTION(BUILD_32 "BUILD_32" OFF) 
-if (BUILD_32)
-  set(CMAKE_C_FLAGS "-m32")
-  set(CMAKE_CXX_FLAGS "-m32")
-  set(CMAKE_LD_FLAGS "-m32")
-endif(BUILD_32)
 
 # Only process smoke tests directory if it exiists
 if (EXISTS "${CMAKE_SOURCE_DIR}/test/smoke-tests/runall")
