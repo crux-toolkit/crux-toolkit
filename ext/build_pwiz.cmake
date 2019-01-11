@@ -62,12 +62,12 @@ else()
   set(pwiz_build ./quickbuild.sh)
   if (BUILD_32)
     set(pwiz_build_args ${pwiz_build_args} address-model=32)
+    set(pwiz_build_args ${pwiz_build_args} architecture=x86)
   endif(BUILD_32)
 endif (WIN32 AND NOT CYGWIN)
 
-set(pwiz_build_args ${pwiz_build_args} --prefix=${PREFIX})
 set(pwiz_build_args ${pwiz_build_args} link=static)
-set(pwiz_build_args ${pwiz_build_args} runtime-link=static)
+set(pwiz_build_args ${pwiz_build_args} runtime-link=shared)
 
 if (${BUILD_TYPE} MATCHES "Debug")
   set(pwiz_build_args ${pwiz_build_args} variant=debug)
@@ -75,7 +75,7 @@ else ()
   set(pwiz_build_args ${pwiz_build_args} variant=release)
 endif (${BUILD_TYPE} MATCHES "Debug")
 
-set(pwiz_build_args ${pwiz_build_args} install-pwiz-lib install-boost-headers)
+set(pwiz_build_args ${pwiz_build_args} libraries)
 
 execute_process(
   COMMAND ${pwiz_build} ${pwiz_build_args}
