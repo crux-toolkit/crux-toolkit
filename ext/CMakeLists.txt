@@ -333,22 +333,74 @@ endif (UNIX)
 
 
 # On Windows we have to include the vendor libraries in the package
-if (WIN32 AND NOT CYGWIN)
-  if (INCLUDE_VENDOR_LIBRARIES)
-    set(
-      vendor_binaries
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/agtsampleinforw.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/baf2sql_c.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/BaseCommon.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/BaseDataAccess.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/BaseError.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/BaseTof.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/fileio_x64.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/fregistry_x64.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/MassSpecDataReader.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/MIDAC.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/MSFileReader.XRawfile2.dll
-    )
-    install (FILES ${vendor_binaries} DESTINATION bin)
-  endif (INCLUDE_VENDOR_LIBRARIES)
-endif (WIN32 AND NOT CYGWIN)
+if (WIN32 AND NOT CYGWIN AND INCLUDE_VENDOR_LIBRARIES)
+  set(
+    vendor_binaries
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/agtsampleinforw.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/agtsampleinforw.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/baf2sql_c.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/BaseCommon.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/BaseDataAccess.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/BaseError.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/BaseTof.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/BDal.BCO.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/BDal.BCO.Interfaces.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/BDal.CCO.Calibration.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/BDal.CCO.Interfaces.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/BDal.CCO.TemperatureCompensation.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/BDal.CCO.Transformation.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/BDal.CCO.Utilities.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/BDal.CXt.Lc.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/BDal.CXt.Lc.Factory.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/BDal.CXt.Lc.Interfaces.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/BDal.CXt.Lc.UntU2.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/CLFIO32.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/CompassXtractMS.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/concrt140.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/CRHAKEI2.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/DataReader.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/DualProbeInterfaceParametersCS.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/Google.Protobuf.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/HSReadWrite.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/IdentityModel.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/Interop.EDAL.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/Interop.HSREADWRITELib.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/IOModuleQTFL.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/MassCalcWrapObject.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/MassSpecDataReader.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/mfc140.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/mfc90.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/MIDAC.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/mkl_sequential.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/MSMSDBCntl.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/msvcm90.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/msvcp110.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/msvcp120.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/msvcp140.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/msvcp90.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/msvcr110.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/msvcr120.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/msvcr90.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/Newtonsoft.Json.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/ParallelExtensionsExtras.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/PeakItgLSS.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/pwiz_bindings_cli.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/pwiz_data_cli.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/QTFLDebugLog.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/QTFLProtoCS.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/Shimadzu.LabSolutions.IO.IoModule.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/System.Data.SQLite.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/System.Runtime.Caching.Generic.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/ThermoFisher.CommonCore.Data.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/ThermoFisher.CommonCore.RawFileReader.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/timsdata.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/ucrtbase.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/UIMFLibrary.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/unifi-protobuf-net.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/vcomp110.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/vcomp140.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/vcomp90.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/vcruntime140.dll
+  )
+  install (FILES ${vendor_binaries} DESTINATION bin)
+endif (WIN32 AND NOT CYGWIN AND INCLUDE_VENDOR_LIBRARIES)
