@@ -37,11 +37,11 @@ if (WIN32 AND NOT Cygwin)
   include_directories(${CMAKE_BINARY_DIR}/ext/lib)
   SET(
     CMAKE_EXE_LINKER_FLAGS 
-    "${CMAKE_EXE_LINKER_FLAGS} /VERBOSE:LIB /NODEFAULTLIB:libboost_date_time-vc140-mt /NODEFAULTLIB:libboost_system-vc141-mt /NODEFAULTLIB:libboost_thread-vc141-mt"
+    "${CMAKE_EXE_LINKER_FLAGS} /VERBOSE:LIB "
   )
   SET(
   CMAKE_EXE_LINKER_FLAGS_DEBUG 
-  "${CMAKE_EXE_LINKER_FLAGS} /VERBOSE:LIB /NODEFAULTLIB:libboost_chrono-vc141-gd /NODEFAULTLIB:libboost_date_time-vc141-gd /NODEFAULTLIB:libboost_system-vc141-gd /NODEFAULTLIB:libboost_thread-vc141-gd"
+  "${CMAKE_EXE_LINKER_FLAGS} /VERBOSE:LIB "
 )
   #  Need Comet base directory for Windows
   include_directories(${CMAKE_BINARY_DIR}/ext/build/src/comet/)
@@ -398,6 +398,38 @@ if (WIN32 AND NOT CYGWIN)
       libzlib
     )
   endif (INCLUDE_VENDOR_LIBRARIES)
+  SET(
+    BOOST_LIBRARIES
+    optimized libboost_chrono-vc141-mt
+    optimized libboost_date_time-vc141-mt
+    optimized libboost_filesystem-vc141-mt
+    optimized libboost_iostreams-vc141-mt
+    optimized libboost_nowide-vc141-mt
+    optimized libboost_program_options-vc141-mt
+    optimized libboost_serialization-vc141-mt
+    optimized libboost_system-vc141-mt
+    optimized libboost_thread-vc141-mt
+    optimized libfreetype-vc141-mt-2_4
+    debug libboost_chrono-vc141-mt-gd
+    debug libboost_date_time-vc141-mt
+    debug libboost_filesystem-vc141-mt-gd
+    debug libboost_iostreams-vc141-mt-gd
+    debug libboost_nowide-vc141-mt-gd
+    debug libboost_regex-vc141-mt
+    debug libboost_program_options-vc141-mt
+    debug libboost_system-vc141-mt-gd
+    debug libboost_thread-vc141-mt-gd
+  )
+  if (NOT CMAKE_GENERATOR MATCHES "^.*Win64$")
+    # For some reason the 32-bit build also requires the BOOST regex library
+    message(vendor libraries for win32)
+    SET(
+      BOOST_LIBRARIES
+      ${BOOST_LIBRARIES}
+      optimized libboost_regex-vc141-mt
+      debug libboost_regex-vc141-mt
+    )
+  endif (NOT CMAKE_GENERATOR MATCHES "^.*Win64$")
   target_link_libraries(
     crux
     barista
@@ -417,28 +449,14 @@ if (WIN32 AND NOT CYGWIN)
     ${PWIZ_LIBRARIES}
     ws2_32
     shlwapi
-    optimized libboost_chrono-vc141-mt
-    optimized libboost_date_time-vc141-mt
-    optimized libboost_filesystem-vc141-mt
-    optimized libboost_iostreams-vc141-mt
-    optimized libboost_nowide-vc141-mt
-    optimized libboost_program_options-vc141-mt
-    optimized libboost_serialization-vc141-mt
-    optimized libboost_system-vc141-mt
-    optimized libboost_thread-vc141-mt
-    optimized libfreetype-vc141-mt-2_4
-    debug libboost_system-vc141-mt-gd
-    debug libboost_iostreams-vc141-mt-gd
-    debug libboost_nowide-vc141-mt-gd
-    debug libboost_filesystem-vc141-mt-gd
-    debug libboost_thread-vc141-mt-gd
-    debug libboost_chrono-vc141-mt-gd
+    ${BOOST_LIBRARIES}
     debug libfreetype-vc141-mt-gd-2_4
     optimized libgd-vc141-mt-2_1
     debug libgd-vc141-mt-gd-2_1
     libpng
   )
 else()
+  # UNIX SYSTEMS
   target_link_libraries(
     crux
     xlink
