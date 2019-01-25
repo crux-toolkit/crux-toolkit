@@ -390,7 +390,6 @@ if (WIN32 AND NOT CYGWIN AND INCLUDE_VENDOR_LIBRARIES)
     ${CMAKE_CURRENT_BINARY_DIR}/lib/Shimadzu.LabSolutions.IO.IoModule.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/System.Data.SQLite.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/System.Runtime.Caching.Generic.dll
-    ${CMAKE_CURRENT_BINARY_DIR}/lib/ThermoFisher.CommonCore.Data.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/ThermoFisher.CommonCore.RawFileReader.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/timsdata.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/ucrtbase.dll
@@ -401,5 +400,13 @@ if (WIN32 AND NOT CYGWIN AND INCLUDE_VENDOR_LIBRARIES)
     ${CMAKE_CURRENT_BINARY_DIR}/lib/vcomp90.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/vcruntime140.dll
   )
+  if (NOT CMAKE_GENERATOR MATCHES "^.*Win64$")
+    # The 64-bit Windows buid needs one additional DLL
+    set(
+      vendor_binaries
+      ${vendor_binaries}
+      ${CMAKE_CURRENT_BINARY_DIR}/lib/ThermoFisher.CommonCore.Data.dll
+    )
+  endif (NOT CMAKE_GENERATOR MATCHES "^.*Win64$")
   install (FILES ${vendor_binaries} DESTINATION bin)
 endif (WIN32 AND NOT CYGWIN AND INCLUDE_VENDOR_LIBRARIES)
