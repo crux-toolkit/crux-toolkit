@@ -422,7 +422,6 @@ if (WIN32 AND NOT CYGWIN)
   )
   if (NOT CMAKE_GENERATOR MATCHES "^.*Win64$")
     # For some reason the 32-bit build also requires the BOOST regex library
-    message(vendor libraries for win32)
     SET(
       BOOST_LIBRARIES
       ${BOOST_LIBRARIES}
