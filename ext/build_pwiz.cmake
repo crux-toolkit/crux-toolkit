@@ -46,7 +46,6 @@ if (PROCESSOR_COUNT)
 endif()
 
 if (WIN32 AND NOT CYGWIN)
-  #set(pwiz_build "pwiz_tools\\build-apps.bat")
   set(pwiz_build "quickbuild.bat")
   set(pwiz_build_args ${pwiz_build_args} --i-agree-to-the-vendor-licenses)
   set(pwiz_build_args ${pwiz_build_args} --without-waters)
