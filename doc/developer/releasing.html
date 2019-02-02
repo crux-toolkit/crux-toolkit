@@ -15,6 +15,10 @@ we also publish stable, versioned releases.
 This document describes how to publish a versioned release.
 
 <h3>Before you begin</h3>
+<p>Consider updating the UNIMOD data: download the latest data in XML format from
+  <code>http://www.unimode.org/xml/unimod.xml</code>. Then, run <code>bin/unimod_parser.py
+  /path/to/xml/file &gt; src/model/Unimod.h.</code>
+
 <p>Confirm that the TeamCity server successfully built Crux from the current
   repository trunk on all platforms, and that the smoke and performance tests all 
   passed on the 64-bit Linux build.

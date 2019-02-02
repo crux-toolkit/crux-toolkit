@@ -14,6 +14,11 @@
 using namespace std;
 using namespace Crux;
 
+ModificationDefinition::ModificationDefinition()
+  : deltaMass_(numeric_limits<double>::quiet_NaN()), position_(UNKNOWN),
+    symbol_('\0'), preventsCleavage_(false), preventsXLink_(false), monoLink_(false) {
+}
+
 ModificationDefinition::ModificationDefinition(
   const string& aminoAcids, double deltaMass, ModPosition position,
   bool preventsCleavage, bool preventsXLink, bool monoLink, char symbol)
@@ -233,6 +238,10 @@ double ModificationDefinition::DeltaMass(char c, ModPosition position) {
   return mass;
 }
 
+string ModificationDefinition::Title() const {
+  return "";
+}
+
 const set<char>& ModificationDefinition::AminoAcids() const {
   return aminoAcids_;
 }
@@ -346,6 +355,58 @@ string ModificationDefinition::AddAminoAcids(const string& aminoAcids) {
     }
   }
   return added;
+}
+
+const UnimodDefinition* UnimodDefinition::Get(int unimodId) {
+  Unimod::Modification unimod = Unimod::Get(unimodId);
+  if (unimod.getTitle().empty()) {
+    throw runtime_error("Unknown Unimod ID " + StringUtils::ToString(unimodId));
+  }
+  // Look for existing
+  for (set<ModificationDefinition*>::const_iterator i = modContainer_.varMods_.begin();
+       i != modContainer_.varMods_.end();
+       i++) {
+    if ((*i)->Title() == unimod.getTitle()) {
+      return (const UnimodDefinition*)*i;
+    }
+  }
+  // Does not exist yet
+  UnimodDefinition* mod = new UnimodDefinition();
+  // Initialize modification
+  set< pair<char, Unimod::Position> > specificities = unimod.getSpecificities();
+  set<Unimod::Position> allPositions;
+  for (set< pair<char, Unimod::Position> >::const_iterator i = specificities.begin();
+       i != specificities.end();
+       i++) {
+    if (i->first != 'n' && i->first != 'c') {
+      mod->aminoAcids_.insert(i->first);
+    }
+    allPositions.insert(i->second);
+  }
+  if (mod->aminoAcids_.empty()) {
+    mod->aminoAcids_.insert('X');
+  }
+  switch (allPositions.size()) {
+    case 0: mod->position_ = UNKNOWN; break;
+    case 1:
+      switch (*allPositions.begin()) {
+        case Unimod::ANYWHERE: mod->position_ = ANY; break;
+        case Unimod::ANY_N: mod->position_ = PEPTIDE_N; break;
+        case Unimod::ANY_C: mod->position_ = PEPTIDE_C; break;
+        case Unimod::PROTEIN_N: mod->position_ = PROTEIN_N; break;
+        case Unimod::PROTEIN_C: mod->position_ = PROTEIN_C; break;
+      }
+    default: mod->position_ = ANY; break;
+  }
+  mod->deltaMass_ = unimod.getMonoMass();
+  mod->symbol_ = modContainer_.NextSymbol();
+  mod->title_ = unimod.getTitle();
+  modContainer_.Add(mod);
+  return mod;
+}
+
+string UnimodDefinition::Title() const {
+  return title_;
 }
 
 void swap(Modification& x, Modification& y) {
@@ -469,6 +530,10 @@ const ModificationDefinition* Modification::Definition() const {
   return mod_;
 }
 
+std::string Modification::Title() const {
+  return mod_->Title();
+}
+
 const set<char>& Modification::AminoAcids() const {
   return mod_->AminoAcids();
 }
@@ -537,16 +602,24 @@ void Modification::FromSeq(const string& seq,
           throw runtime_error("Unclosed '[' in sequence '" + seq + "'");
         }
       } while (seq[j] != ']');
-      string massStr = seq.substr(i + 1, j - (i + 1));
+      string contents = seq.substr(i + 1, j - (i + 1));
       double mass;
-      if (!StringUtils::TryFromString(massStr, &mass)) {
-        throw runtime_error("Could not convert '" + massStr + "' to double in sequence '" + seq + "'");
-      }
-      if ((mod = ModificationDefinition::Find(mass, false)) == NULL) {
-        // Maybe it is static?
-        if ((mod = ModificationDefinition::Find(mass, true)) == NULL) {
-          mod = ModificationDefinition::NewVarMod(aa, mass, ANY); // TODO N/C mods?
+      if (StringUtils::TryFromString(contents, &mass)) {
+        if ((mod = ModificationDefinition::Find(mass, false)) == NULL) {
+          // Maybe it is static?
+          if ((mod = ModificationDefinition::Find(mass, true)) == NULL) {
+            mod = ModificationDefinition::NewVarMod(aa, mass, ANY); // TODO N/C mods?
+          }
         }
+      } else if (StringUtils::StartsWith(contents, "UNIMOD:")) {
+          string unimodIdStr = contents.substr(7);
+          int unimodId;
+          if (!StringUtils::TryFromString(unimodIdStr, &unimodId)) {
+            throw runtime_error("Invalid Unimod ID '" + unimodIdStr + "' in sequence '" + seq + "'");
+          }
+          mod = UnimodDefinition::Get(unimodId);
+      } else {
+        throw runtime_error("Could not convert '" + contents + "' to double in sequence '" + seq + "'");
       }
       i = j;
       handledMod = true;
