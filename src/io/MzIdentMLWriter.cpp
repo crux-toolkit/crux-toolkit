@@ -13,6 +13,7 @@
 #include "model/MatchCollection.h"
 #include "model/Modification.h"
 #include "pwiz/data/identdata/Serializer_mzid.hpp"
+#include "pwiz/data/common/Unimod.hpp"
 #include "model/ProteinMatch.h"
 #include "model/ProteinMatchCollection.h"
 #include "model/PeptideMatch.h"
@@ -47,6 +48,7 @@ void MzIdentMLWriter::openFile(
   bool overwrite) {
   fout_ = create_stream_in_path(filename, NULL, overwrite);  
   mzid_ = IdentDataPtr(new IdentData());
+  mzid_->cvs = identdata::defaultCVList();
 }
 
 void MzIdentMLWriter::openFile(
@@ -167,9 +169,15 @@ PeptidePtr MzIdentMLWriter::getPeptide(
         mod_p->location = i->Index() + 1;
         break;
     }
+    if (!i->Title().empty()) {
+      const UnimodDefinition* unimod = (const UnimodDefinition*)i->Definition();
+      const data::unimod::Modification& pwizUnimod = data::unimod::modification(unimod->Title());
+      mod_p->set(pwizUnimod.cvid);
+    } else {
+      mod_p->set(MS_unknown_modification);
+    }
     mod_p->monoisotopicMassDelta = MathUtil::Round(i->DeltaMass(), modPrecision);
     mod_p->residues.push_back(sequence[i->Index()]);
-    mod_p->set(MS_unknown_modification);
     peptide_p->modification.push_back(mod_p);
   }
 

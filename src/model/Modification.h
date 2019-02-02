@@ -2,6 +2,7 @@
 #define CRUX_MODIFICATION_H
 
 #include "util/modifications.h"
+#include "Unimod.h"
 
 #include <deque>
 #include <ostream>
@@ -17,6 +18,7 @@ enum ModPosition {
 
 class ModificationDefinition {
 public:
+  ModificationDefinition();
   ModificationDefinition(
     const std::string& aminoAcids, double deltaMass, ModPosition position,
     bool preventsCleavage, bool preventsXLink, bool monoLink, char symbol);
@@ -50,6 +52,7 @@ public:
   static std::vector<const ModificationDefinition*> VarMods();
   static double DeltaMass(char c, ModPosition position);
 
+  virtual std::string Title() const;
   const std::set<char>& AminoAcids() const;
   double DeltaMass() const;
   bool Static() const;
@@ -75,6 +78,14 @@ protected:
   bool monoLink_;
 };
 
+class UnimodDefinition : public ModificationDefinition {
+public:
+  static const UnimodDefinition* Get(int unimodId);
+  virtual std::string Title() const;
+protected:
+  std::string title_;
+};
+
 namespace Crux { class Modification; }
 void swap(Crux::Modification& x, Crux::Modification& y);
 
@@ -98,6 +109,7 @@ public:
 
   unsigned char Index() const;
   const ModificationDefinition* Definition() const;
+  std::string Title() const;
   const std::set<char>& AminoAcids() const;
   double DeltaMass() const;
   bool Static() const;
@@ -123,6 +135,7 @@ protected:
 class ModificationDefinitionContainer {
 public:
   friend class ModificationDefinition;
+  friend class UnimodDefinition;
 
   ModificationDefinitionContainer();
   virtual ~ModificationDefinitionContainer();
