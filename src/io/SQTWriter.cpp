@@ -21,8 +21,14 @@ void SQTWriter::openFile(string filename) {
 }
 
 void SQTWriter::closeFile() {
-  if (file_ && file_->is_open()) {
-    file_->close();
+  if (file_)  {
+    if(file_->good())
+      file_->flush();
+
+    ofstream* proven_file = dynamic_cast<ofstream*>(file_);
+    if(proven_file != nullptr && proven_file->is_open())
+      proven_file->close();
+
     delete file_;
     file_ = NULL;
   }
@@ -33,7 +39,7 @@ void SQTWriter::writeHeader(
   int num_proteins,
   bool is_decoy
 ) {
-  if (!file_->is_open()) {
+  if (!file_->good()) {
     return;
   }
 
@@ -145,7 +151,7 @@ void SQTWriter::writeSpectrum(
   SpectrumZState& z_state,
   int num_matches
 ) {
-  if (!file_->is_open()) {
+  if (!file_->good()) {
     return;
   }
 
@@ -190,7 +196,7 @@ void SQTWriter::writePSM(
   int b_y_total,
   bool is_decoy
 ) {
-  if (!file_->is_open()) {
+  if (!file_->good()) {
     return;
   }
 

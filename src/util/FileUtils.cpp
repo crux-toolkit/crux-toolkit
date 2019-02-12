@@ -2,90 +2,108 @@
 #include "boost/filesystem.hpp"
 #include <fstream>
 #include <stdexcept>
+#include "io/fileSystems/GenericStorageSystem.h"
+#include "io/carp.h"
 
 using namespace std;
 
 bool FileUtils::Exists(const string& path) {
-  return boost::filesystem::exists(path);
-}
+  return GenericStorageSystem::getStorage(path)->Exists(path);
+  //return boost::filesystem::exists(path);
+} 
 
 bool FileUtils::IsRegularFile(const string& path) {
-  return boost::filesystem::is_regular_file(path);
+  return  GenericStorageSystem::getStorage(path)->IsRegularFile(path);
 }
 
 bool FileUtils::IsDir(const string& path) {
-  return boost::filesystem::is_directory(path);
+  return GenericStorageSystem::getStorage(path)->IsDir(path);
 }
 
 // returns true if a new directory was created, otherwise false
 bool FileUtils::Mkdir(const string& path) {
-  return boost::filesystem::create_directory(path);
+  return GenericStorageSystem::getStorage(path)->Mkdir(path);;
 }
 
 void FileUtils::Rename(const string& from, const string& to) {
-  if (Exists(from)) {
-    boost::filesystem::rename(from, to);
-  }
+  GenericStorageSystem* s_from = GenericStorageSystem::getStorage(from);
+  GenericStorageSystem* s_to = GenericStorageSystem::getStorage(to);
+  if(s_from != s_to)
+    carp(CARP_FATAL, "Rename operation must have both URIs from the same storage system. Got from: %s and to: %s.", from, to);
+  if (s_from->Exists(from)) 
+    s_from->Rename(from, to);
 }
 
 void FileUtils::Remove(const string& path) {
-  if (Exists(path)) {
-    boost::filesystem::remove_all(path);
+  GenericStorageSystem* s = GenericStorageSystem::getStorage(path);
+  if (s->Exists(path)) {
+    s->Remove(path);
   }
 }
 
 string FileUtils::Join(const string& path1, const string& path2) {
-  return (boost::filesystem::path(path1) / boost::filesystem::path(path2)).string();
+  GenericStorageSystem* s = GenericStorageSystem::getStorage(path1);
+  return s->Join(path1, path2);
 }
 
 string FileUtils::Read(const string& path) {
-  try {
-    ifstream stream(path.c_str());
-    stream.seekg(0, ios::end);
-    size_t size = stream.tellg();
-    string buffer(size, '\0');
-    stream.seekg(0);
-    stream.read(&buffer[0], size);
-    return buffer;
-  } catch (...) {
-    throw runtime_error("Error reading file '" + path + "'");
-  }
+  GenericStorageSystem* s = GenericStorageSystem::getStorage(path);
+  return s->Read(path);
 }
 
-ofstream* FileUtils::GetWriteStream(const string& path, bool overwrite) {
-  if (Exists(path) && !overwrite) {
-    return NULL;
-  }
-  ofstream* stream = new ofstream(path.c_str());
-  if (!stream->good()) {
-    delete stream;
-    return NULL;
-  }
-  return stream;
+ostream* FileUtils::GetWriteStream(const string& path, bool overwrite) {
+  GenericStorageSystem* s = GenericStorageSystem::getStorage(path);
+  ostream* res = s->GetWriteStream(path, overwrite);
+  if(!res->good())
+    carp(CARP_FATAL, "Cannot open a write stream with path %s", path);
+  return res;
+}
+
+istream* FileUtils::GetReadStream(const string& path){
+  GenericStorageSystem* s = GenericStorageSystem::getStorage(path);
+  return s->GetReadStream(path);
 }
 
 string FileUtils::BaseName(const string& path) {
-  boost::filesystem::path p(path);
-  return p.has_filename() ? p.filename().string() : "";
+  GenericStorageSystem* s = GenericStorageSystem::getStorage(path);
+
+  return s->BaseName(path);
 }
 
 string FileUtils::DirName(const string& path) {
-  boost::filesystem::path p(path);
-  return p.has_parent_path() ? p.parent_path().string() : "";
+  GenericStorageSystem* s = GenericStorageSystem::getStorage(path);
+
+  return s->DirName(path);
 }
 
 string FileUtils::Stem(const string& path) {
-  boost::filesystem::path p(path);
-  return p.has_stem() ? p.stem().string() : "";
+  GenericStorageSystem* s = GenericStorageSystem::getStorage(path);
+
+  return s->Stem(path);
 }
 
 string FileUtils::Extension(const string& path) {
-  boost::filesystem::path p(path);
-  return p.has_extension() ? p.extension().string() : "";
+  GenericStorageSystem* s = GenericStorageSystem::getStorage(path);
+
+  return s->Extension(path);
 }
+
 void FileUtils::Copy(const std::string& orig, const std::string& dest) {
-  if (Exists(orig)) {
-    boost::filesystem::copy(orig, dest);
+  GenericStorageSystem* s_from = GenericStorageSystem::getStorage(orig);
+  GenericStorageSystem* s_to = GenericStorageSystem::getStorage(dest);
+
+  if(s_from == s_to)
+    s_from->CopyLocal(orig, dest);
+  else
+  {
+    //TODO_RC: Verify that this will work efficiently.
+    istream* in_str = s_from->GetReadStream(orig);
+    ostream* out_str = s_to->GetWriteStream(dest, false);
+    *out_str << (in_str->rdbuf());
+    out_str->flush();
+    delete out_str;
+    delete in_str;
   }
+  
 }
 

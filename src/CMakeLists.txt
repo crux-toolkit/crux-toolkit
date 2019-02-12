@@ -16,6 +16,7 @@ include_directories(${CMAKE_SOURCE_DIR}/src/app/hardklor)
 include_directories(${CMAKE_SOURCE_DIR}/src/app/qranker-barista)
 include_directories(${CMAKE_SOURCE_DIR}/src/app/xlink)
 include_directories(${CMAKE_SOURCE_DIR}/src/io)
+include_directories(${CMAKE_SOURCE_DIR}/src/io/fileSystems)
 include_directories(${CMAKE_SOURCE_DIR}/src/model)
 include_directories(${CMAKE_BINARY_DIR})
 include_directories(${CMAKE_BINARY_DIR}/ext)
@@ -104,6 +105,9 @@ set (
   app/ExtractColumns.cpp
   app/ExtractRows.cpp
   util/FileUtils.cpp
+  io/fileSystems/BoostFileSystem.cpp
+  io/fileSystems/GenericStorageSystem.cpp
+  io/fileSystems/AwsS3System.cpp
   model/FilteredSpectrumChargeIterator.cpp
   model/GeneratePeptidesIterator.cpp
   app/GetMs2Spectrum.cpp
@@ -216,6 +220,21 @@ else(APPLE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
   endif(OPENMP_FOUND)
 endif(APPLE)
+
+#this will locate the aws sdk for c++ package so that we can use its targets
+set(CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/../aws-sdk/build/aws-deps")
+find_package(aws-cpp-sdk-core CONFIG REQUIRED)
+find_package(aws-cpp-sdk-s3 CONFIG REQUIRED)
+
+message( "aws-cpp-sdk-s3_FOUND is ${aws-cpp-sdk-s3_FOUND}")
+if (aws-cpp-sdk-s3_FOUND)
+  target_link_libraries(
+    crux-support
+    aws-cpp-sdk-core
+    aws-cpp-sdk-s3
+  )
+  add_definitions(-DAWS)
+endif(aws-cpp-sdk-s3_FOUND)
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -DNDEBUG")

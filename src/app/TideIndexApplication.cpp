@@ -126,6 +126,9 @@ int TideIndexApplication::main(
   if (!FileUtils::Exists(fasta)) {
     carp(CARP_FATAL, "Fasta file %s does not exist", fasta.c_str());
   }
+  else{
+    carp(CARP_INFO, "Fasta file %s is found.", fasta.c_str());
+  }
 
   string out_proteins = FileUtils::Join(index, "protix");
   string out_peptides = FileUtils::Join(index, "pepix");

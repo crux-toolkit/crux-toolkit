@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <string>
+#include "io/fileSystems/GenericStorageSystem.h"
 
 class FileUtils {
  public:
@@ -14,7 +15,8 @@ class FileUtils {
   static void Remove(const std::string& path);
   static std::string Join(const std::string& path1, const std::string& path2);
   static std::string Read(const std::string& path);
-  static std::ofstream* GetWriteStream(const std::string& path, bool overwrite);
+  static std::ostream* GetWriteStream(const std::string& path, bool overwrite);
+  static std::istream* GetReadStream(const std::string& path);
   static std::string BaseName(const std::string& path);
   static std::string DirName(const std::string& path);
   static std::string Stem(const std::string& path);

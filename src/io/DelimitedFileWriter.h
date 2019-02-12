@@ -29,7 +29,7 @@
 class DelimitedFileWriter {
 
  protected:
-  std::ofstream* file_ptr_; ///< the file to write to
+  std::ostream* file_ptr_; ///< the file to write to
   char delimiter_; ///< separate columns with this character
   std::vector<std::string> column_names_; ///< one entry per column
   std::vector<std::string> current_row_; ///< values for next row to write

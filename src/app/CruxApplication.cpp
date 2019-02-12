@@ -115,7 +115,7 @@ void CruxApplication::initialize(int argc, char** argv) {
   if (needsOutputDirectory()) {
     // Write the parameter file
     string paramFile = make_file_path(getFileStem() + ".params.txt");
-    ofstream* file = FileUtils::GetWriteStream(paramFile, Params::GetBool("overwrite"));
+    ostream* file = FileUtils::GetWriteStream(paramFile, Params::GetBool("overwrite"));
     if (file == NULL) {
       throw runtime_error("Could not open " + paramFile + " for writing");
     }
