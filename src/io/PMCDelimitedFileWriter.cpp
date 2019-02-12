@@ -47,7 +47,7 @@ void PMCDelimitedFileWriter::openFile(
 
   file_ptr_ = FileUtils::GetWriteStream(filename, Params::GetBool("overwrite"));
   application_ = application;
-  if (!file_ptr_->is_open()) {
+  if (!file_ptr_->good()) {
     carp(CARP_FATAL, "Error creating file '%s'.", filename.c_str());
   }
 
@@ -87,7 +87,14 @@ void PMCDelimitedFileWriter::openFile(
  */
 void PMCDelimitedFileWriter::closeFile() {
   if (file_ptr_) {
-    file_ptr_->close();
+
+    if(file_ptr_->good())
+      file_ptr_->flush();
+
+    ofstream* proven_file = dynamic_cast<ofstream*>(file_ptr_);
+    if(proven_file != nullptr)
+      proven_file->close();
+
     delete file_ptr_;
     file_ptr_ = NULL;
   }
@@ -660,7 +667,7 @@ void PMCDelimitedFileWriter::writeHTMLHeader() {
     return;
   }
   
-  if( file_ptr_ == NULL || !file_ptr_->is_open() ) {
+  if( file_ptr_ == NULL || !file_ptr_->good() ) {
     carp(CARP_FATAL, "Cannot write to NULL delimited file.");
   }
   *file_ptr_ << "<table border=\"1\">" << "\t<tr>" << endl
