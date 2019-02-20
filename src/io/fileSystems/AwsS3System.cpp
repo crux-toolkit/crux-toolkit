@@ -1,6 +1,9 @@
 #include <aws/s3/S3Client.h>
 #include <aws/s3/model/PutObjectRequest.h>
 #include <aws/s3/model/GetObjectRequest.h>
+#include <aws/s3/model/HeadBucketRequest.h>
+#include <aws/s3/model/HeadObjectRequest.h>
+#include <aws/s3/model/ListObjectsRequest.h>
 #include <aws/core/Aws.h>
 #include <aws/core/utils/memory/stl/AWSStringStream.h>
 
@@ -15,7 +18,9 @@ using namespace Aws::S3;
 using namespace Aws::S3::Model;
 using namespace std;
 
-const regex AwsS3System::uri_pattern{"s3:/(/[^/]+)((/[^/]+)*(([^/]+)(\\.[^/.]+)?))/?$"};
+const regex AwsS3System::uri_pattern{"s3://([^/]+)(((/[^/]+)*)(/([^/.]+)(\\.([^/.]+))?))(/)?$"  
+        , regex::icase};
+const regex AwsS3System::bucket_pattern{"s3://([^/]+)$", regex::icase};
 
 
 AwsS3System::AwsS3System(){
@@ -24,16 +29,39 @@ AwsS3System::AwsS3System(){
 }
 
 bool AwsS3System::Exists(const string &path){
-    AwsS3System::S3ObjectInfo object_info = parseUrl(path);
-    return false;
+    return IsRegularFile(path) || IsDir(path);
 }
 
 bool AwsS3System::IsRegularFile(const string &path){
-    //TODO_RC: Implement method
+    AwsS3System::S3ObjectInfo object_info = parseUrl(path);
+    if(!object_info.isFile)
+        return false;
+    //at this point we know that this is not a plain bucket and it does not have last /
+    HeadObjectRequest request;
+    request.WithBucket(object_info.bucketName)
+        .WithKey(object_info.key);
+    auto result = m_client->HeadObject(request);
+    return result.IsSuccess();
 }
 
+/**
+ * isDir in S3 means either a bucket or a prefix
+ * */
 bool AwsS3System::IsDir(const string &path){
-    //TODO_RC: Implement method
+    AwsS3System::S3ObjectInfo object_info = parseUrl(path);
+    if(object_info.isBucket){
+        HeadBucketRequest request;
+        request.WithBucket(object_info.bucketName);
+        auto response = m_client->HeadBucket(request);
+        return response.IsSuccess();    //return true if such bucket exists
+    }
+    else{
+        ListObjectsRequest request;
+        request.WithBucket(object_info.bucketName)
+            .WithPrefix(object_info.key);
+        auto response = m_client->ListObjects(request);
+        return (response.GetResult().GetContents().size() > 0);
+    }
 }
 
 bool AwsS3System::Mkdir(const string &path){
@@ -58,14 +86,18 @@ string AwsS3System::Read(const string &path){
 
 ostream* AwsS3System::GetWriteStream(const string &path, bool overwrite){
     //TODO_RC: Implement method. We have to accumulate the stream data in memory before sending it to S3
+    carp(CARP_FATAL, "Writing to S3 is not supported.");
 }
 
 istream* AwsS3System::GetReadStream(const string &path){
-    Aws::String BUCKET{"proteo"};
-    Aws::String KEY{"folder/file.gz"};
+    AwsS3System::S3ObjectInfo object_info = parseUrl(path);
+
+    if(!IsRegularFile(path))
+        carp(CARP_FATAL, "%s is not a valid S3 file URL.", path.c_str);
+
     GetObjectRequest getObjectRequest;
-    getObjectRequest.WithBucket(BUCKET)
-                .WithKey(KEY);
+    getObjectRequest.WithBucket(object_info.bucketName)
+                .WithKey(object_info.key);
 
     auto getObjectOutcome = m_client->GetObject(getObjectRequest);
 
@@ -84,20 +116,23 @@ istream* AwsS3System::GetReadStream(const string &path){
 }
 
 string AwsS3System::BaseName(const string &path){
-    
-    //TODO_RC: Implement method
+    AwsS3System::S3ObjectInfo object_info = parseUrl(path);
+    return object_info.fileName;
 }
 
 string AwsS3System::DirName(const string &path){
-    //TODO_RC: Implement method
+    AwsS3System::S3ObjectInfo object_info = parseUrl(path);
+    return object_info.bucketName + object_info.prefix;
 }
 
 string AwsS3System::Stem(const string &path){
-    //TODO_RC: Implement method
+    AwsS3System::S3ObjectInfo object_info = parseUrl(path);
+    return object_info.bucketName;
 }
 
 string AwsS3System::Extension(const string &path){
-    //TODO_RC: Implement method
+    AwsS3System::S3ObjectInfo object_info = parseUrl(path);
+    return object_info.fileExtension;
 }
 
 void AwsS3System::CopyLocal(const string &orig, const string &dest){
@@ -113,24 +148,24 @@ AwsS3System::~AwsS3System(){
 
 
 AwsS3System::S3ObjectInfo AwsS3System::parseUrl(const string& url){
-    string lower_path = boost::algorithm::to_lower_copy(url);
     smatch matches;
-    AwsS3System::S3ObjectInfo result;
 
-    //extract protocal name from the URI path
-    if(regex_search(lower_path, matches, AwsS3System::uri_pattern)){
-        result.bucketName = matches[1];
-        result.key = matches[2];
-        result.fileName = matches[3];
+    //check if this is a bucket
+    if(regex_search(url, matches, AwsS3System::bucket_pattern)){
+        return AwsS3System::S3ObjectInfo{string{matches[uriMatches::BUCKET]}};
+    }
+
+    //create complete path info
+    if(regex_search(url, matches, AwsS3System::uri_pattern)){
         vector<string> str_test;
         for(auto& m : matches){
            str_test.push_back(string{m});
         }
-        return result;
+        return  AwsS3System::S3ObjectInfo{matches};
     }    
     else
     {
-        carp(CARP_FATAL, "%s is an invalid S3 URL", &url);
+        carp(CARP_FATAL, "%s is an invalid S3 URL", url.c_str());
     }
-
 }
+
