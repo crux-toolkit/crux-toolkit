@@ -12,7 +12,8 @@
 It is similar in function to the autotools (autoconf and automake),
 but CMake is easier to use and provides more sophisticated support 
 for a wider array of platforms.
-CMake also seems to build Crux more quickly than the automake tools.
+Building Crux requires a relatively recent version of CMake,
+preferably version 3.6 or later.
 <p/>
 Documentation for CMake can be fournd <a
 href="http://www.cmake.org/cmake/help/documentation.html">here</a>.
@@ -24,12 +25,14 @@ The program <code>cmake</code> on a <code>CMakeLists.txt</code> file
 and it generates the appropriate 'make' files or Visual Studio project files
 need to perform the actual build.
 Typically a master <code>CMakeLists.txt</code> in the root directory of a project points to
-<code>CMakeLists.txt</code> files in each of the subdirectories involved in the build.
+<code>CMakeLists.txt</code> files in each of the sub-directories involved in the build.
 <p />
-On On our lab workstations CMake is already installed, you can simply load the CMake module:
+On most of our lab workstations CMake is already installed, you can simply load the CMake module:
 <pre>
 module load cmake/latest
 </pre>
+On <code>noble-web</code> version 3.11.2 of CMake is available 
+as <code>cmake3</code> without needing to load a module.
 On other computers you may need to install CMake.
 <h2>Building on computers running UNIX</h2>
 To build Crux on computers running UNIX you use CMake to generate
@@ -81,7 +84,7 @@ cmake -DCMAKE_INSTALL_PREFIX:PATH=$HOME/crux .
 </pre>
 The <code>-DCMAKE_INSTALL_PREFIX:PATH=$HOME/crux</code> option will direct
 <code>make install</code>
-to install Crux in a subdirectory of your home directory.
+to install Crux in a sub-directory of your home directory.
 <h2>Setting the build type</h2>
 On UNIX platforms CMake will default to a build with
 optimization turned off and no debugging symbols.
@@ -133,7 +136,7 @@ cmake -DCMAKE_VERBOSE_MAKEFILE=ON .
 make
 </pre>
 If typing these long configuration options seems painful CMake provides a
-custom proprerty editor that uses the <code>curese</code> library to create
+custom proprerty editor that uses the <code>curses</code> library to create
 a point and click settings editor. Use the command
 <pre>ccmake</pre> 
 (only available  on 64-bit systems).
@@ -203,11 +206,11 @@ To build Crux on computers running Windows you use CMake to generate
 <code>msbuild</code> files.
 In the root of the Crux project run
 <pre>
-cmake -G "Visual Studio 12 Win64" .
+cmake -G "Visual Studio 2017 Win64" .
 </pre>
 or
 <pre>
-cmake -G "Visual Studio 12" .
+cmake -G "Visual Studio 2017" .
 </pre>
 depending on whether you want a 64-bit or 32-bit version.
 If you would like to perform an "out of source" build,
@@ -216,7 +219,7 @@ of the Crux tree.
 You can also add definitions of any needed CMake variables to this command.
 For example, to set the installation directory:
 <pre>
-cmake -DCMAKE_INSTALL_PREFIX:PATH=c:\Users\cegrant\crux -G "Visual Studio 12 Win64" .
+cmake -DCMAKE_INSTALL_PREFIX:PATH=c:\Users\cegrant\crux -G "Visual Studio 2017 Win64" .
 </pre>
 Once CMake has generated the <code>msbuild</code> files
 you can build Crux using <code>msbuild</code> or Visual Studio,
