@@ -15,7 +15,7 @@
 We use
 <a href="http://www.jetbrains.com/teamcity/">TeamCity</a>
 to provide continuous integration services for Crux.
-Kaipo Tamura, Charles Grant, Sean McIlwain, and Bill Noble are the 
+Charles Grant, Rita Chupalov, and Bill Noble are the 
 administrators for our server.
 <h2>Accessing the TeamCity Server</h2>
 Our TeamCity server runs on <code>noble-web</code>,
@@ -92,25 +92,19 @@ width="40%">Directory</th><th width="10%">User</th></th>
 <tbody>
 <tr>
   <td>nrhel6-x64</td>
-  <td>64-bit Linux</td>
+  <td>64-bit and 32-bit Linux</td>
   <td>/data/TeamCity/buildAgent</td>
   <td>teamcity</td>
 </tr>
 <tr>
-  <td>nrhel6-i386</td>
-  <td>32-bit Linux</td>
-  <td>/data/TeamCity/buildAgent</td>
-  <td>cegrant</td>
-</tr>
-<tr>
   <td>nwin7-x64</td>
-  <td>32-bit Windows</td>
+  <td>64-bit and 32-bit Windows</td>
   <td>C:\BuildAgent</td>
   <td>cegrant</td>
 </tr>
 <tr>
   <td>Charles's Mac</td>
-  <td>OS X Snow Leopard</td>
+  <td>OS X</td>
   <td>/Users/cegrant/buildAgent</td>
   <td>cegrant</td>
 </tr>
@@ -142,7 +136,7 @@ bin/agent stop
 It can take three or four minutes for an agent to start and connect to the
 TeamCity server.
 <p/>
-To connect to the 32-bit Windows agent you'll need to use a Windows Remote
+To connect to the Windows build agent you'll need to use a Windows Remote
 Desktop Client (RDC) and your GSIT user name and password.
 If you are connecting from a machine beyond the GSIT firewall you'll need to
 set up tunneling through the firewall:
@@ -151,9 +145,7 @@ ssh -f -N -L 3389:nwin7-x64.gs.washington.edu:3389 cegrant@nexus2.gs.washington.
 </pre>
 Then, when starting the RDC, use <code>127.0.0.1</code> as the remote address.
 <p/>
-The OS X Snow Leopard Agent is currently running on the Mac Pro under Charles's
+The OS X Agent is currently running on the Mac Pro laptop on Charles's
 desk. Contact him if you need access.
-We will be moving the OS X Snow Leopard Agent to a MacBook laptop owned by the
-lab.
 </body>
 </html>

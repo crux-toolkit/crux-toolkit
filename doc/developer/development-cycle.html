@@ -11,7 +11,7 @@
 If you are reading this document, you may be new to the crux
 development team.  Welcome!  The following is an outline of a typical
 work cycle.  If you are a seasoned programmer, it will give you an
-idea of how we combine our versioning system (Subversion, or SVN) with
+idea of how we combine our versioning system (Git) with
 our code review process.  However, it is written with the junior
 developer in mind with useful tips for folks who may not be accustomed
 to working on a multi-person project.  The outline is also 
@@ -24,17 +24,18 @@ this page or others.
 <h2>Prepare your working copy</h2>
 
 <li>
-To begin work on crux, you will need a copy of the code base.  Do a
-clean 
-<a href="http://noble.gs.washington.edu/internal/cvs-instructions.html">
-check out</a> from the SVN repository or update your existing
-working copy.  Most changes can be made directly in the trunk, but if
+To begin work on crux, you will need a copy of the code base.
+<a href="https://git-scm.com/docs/git-clone">Clone</a> a clean clean 
+copy from the
+<a href="https://github.com/crux-toolkit/crux-toolkit">GitHub repository</a>
+or update your existing
+working copy.  Some changes can be made directly in the trunk, but if
 you are working on something experimental or sufficiently complicated,
-you can create a <a href="svn-branch-maintanence.html">branch</a>, do
+you can create a <a href="https://git-scm.com/docs/git-branch">branch</a>, do
 your work there, and later merge your changes into the trunk.
 
 <li>
-Run <code>svn update -u</code> to make sure you are beginning with an
+Run <code>git pull</code> to make sure you are beginning with an
 exact copy of what is in the repository.
 
 <li>
@@ -56,16 +57,15 @@ When you are ready for a <a href="code-review.html">code review</a>, do a
 final build and test to see that everything is working.
 
 <li>
-Run <code>svn status</code> to see the list of files that changed and
-to confirm that you added any new files to SVN.
+Run <code>git status</code> to see the list of files that changed and
+to confirm that you added any new files to Git.
 
 <li>
-Run <code>svn status -u</code> to see if there are any changes in the
-repository you need to incorporate into your working copy.  If there
-are, run <code>svn update</code>, build, and test.
+Run <code>git pull</code> to obtain any changes in the upstream repository.
+If necessary, run <code>git merge</code>, resolve conflicts, build, and test.
 
 <li>
-From the root of the crux project, run <code>svn diff &gt;
+From the root of the crux project, run <code>git diff &gt;
 my-changes.diff</code>.  Give <code>my-changes.diff</code> a
 short meaningful name, for example new-column.diff.  Look it over to
 make sure it has only those changes you intended. (* see below for
@@ -82,10 +82,12 @@ have agreed on the set of changes.
 
 <h2>Check in your changes</h2>
 <li>
-Commit your changes to the repository with <code>svn commit</code>.
+Commit your changes to the repository with <code>git commit</code>.
 Add a short, descriptive comment including the name of your reviewer.
 For example, "Added a new column, myscore, to the output of
 search-for-matches.  Code reviewed by Bill."
+Follow this with <code>git push</code> to send your commit to the GitHub 
+repository for Crux.
 
 </ol>
 <hr>
@@ -115,8 +117,8 @@ checked in separately.  For example, if you are writing some helper
 functions in crux-utils.cpp to be used later, you could prepare those
 files for review separately and check them in separately.
 <pre>
-$ svn diff src/c/crux-utils.cpp src/c/crux-utils.h /src/c/test/unit-tests/check-crux-utils.c > helper.diff
-$ svn commit -m 'Added a do_cool_stuff() to crux-utils. Reviewed by Bill' src/c/crux-utils.cpp src/c/crux-utils.h /src/c/test/unit-tests/check-crux-utils.c > helper.diff
+$ git diff src/c/crux-utils.cpp src/c/crux-utils.h /src/c/test/unit-tests/check-crux-utils.c > helper.diff
+$ git commit -m 'Added a do_cool_stuff() to crux-utils. Reviewed by Bill' src/c/crux-utils.cpp src/c/crux-utils.h /src/c/test/unit-tests/check-crux-utils.c
 </pre>
 <p>
 More often than not, the two projects will overlap and it's easier to
