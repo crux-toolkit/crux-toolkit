@@ -17,6 +17,7 @@ private:
   Aws::S3::S3Client* m_client;
 
   static const regex uri_pattern;
+  static const regex bucket_pattern;
 
 public:
 
@@ -39,14 +40,33 @@ public:
   AwsS3System();
   ~AwsS3System();
 
+//these positions are defined by the structure of uri_pattern regexp
+enum uriMatches{BUCKET=1, FULL_KEY=2, PREFIX=3, BASE_NAME=6, EXTENSION=8, LAST_SLASH=9};
+
 private:
   struct S3ObjectInfo{
     string bucketName;
     string key;
+    string prefix;
     string fileName;
     string fileExtension;
     bool isFile;
     bool isBucket;
+
+    S3ObjectInfo(string p_bucket): bucketName{p_bucket}, isBucket{true}{};
+    S3ObjectInfo(smatch p_matches){
+      bucketName = p_matches[uriMatches::BUCKET];
+      string key_str{p_matches[uriMatches::FULL_KEY]};
+      if(key_str.size() > 0)
+        key = key_str.substr(1);
+      string prefix_str{p_matches[uriMatches::PREFIX]};
+      if(prefix_str.size() > 0)
+        prefix = prefix_str.substr(1);
+      fileName = p_matches[uriMatches::BASE_NAME];
+      fileExtension = p_matches[uriMatches::EXTENSION];
+      isFile = (p_matches[uriMatches::LAST_SLASH] == "");
+      isBucket  = false;
+    }
   };
 
   S3ObjectInfo parseUrl(const string& url);
