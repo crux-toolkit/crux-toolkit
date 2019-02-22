@@ -15,9 +15,12 @@ class AwsS3System : public GenericStorageSystem{
 private:
   Aws::SDKOptions m_options;
   Aws::S3::S3Client* m_client;
+  std::vector<Aws::S3::Model::GetObjectOutcome*> m_inputStreams;
+  vector<Aws::S3::Model::PutObjectOutcome*> m_outputStreams;
 
   static const regex uri_pattern;
   static const regex bucket_pattern;
+  static const regex path_pattern;
 
 public:
 
@@ -28,9 +31,10 @@ public:
   void Rename(const string &from, const string &to);
   void Remove(const string &path);
   string Join(const string &path1, const string &path2);
+  string AbsPath(const string& path);
   string Read(const string &path);
   ostream *GetWriteStream(const string &path, bool overwrite);
-  istream *GetReadStream(const string &path);
+  istream& GetReadStream(const string &path);
   string BaseName(const string &path);
   string DirName(const string &path);
   string Stem(const string &path);
@@ -70,6 +74,8 @@ private:
   };
 
   S3ObjectInfo parseUrl(const string& url);
+  void _CloseStream(const StreamRecord& p_streamRec);  
+
 };
 
 

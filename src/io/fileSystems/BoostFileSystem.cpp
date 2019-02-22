@@ -1,4 +1,5 @@
 #include "BoostFileSystem.h"
+#include "io/carp.h"
 
 #include <fstream>
 
@@ -29,11 +30,15 @@ ostream* BoostFileSystem::GetWriteStream(const string& path, bool overwrite) {
   }
   return stream;
 }
-istream* BoostFileSystem::GetReadStream(const string &path){
+istream& BoostFileSystem::GetReadStream(const string &path){
   ifstream* stream = new ifstream(path);
   if(!stream->good()){
     delete stream;
-    return NULL;
+    carp(CARP_FATAL, "Cannot open input stream for the file %s", path.c_str());
   }
-  return stream;
+  StreamRecord sr{GenericStorageSystem::SystemIdEnum::FILE_SYSTEM, true, 
+      (ios_base*)stream, (void*)stream};
+  _RegisterStream(sr);
+
+  return *stream;
 }

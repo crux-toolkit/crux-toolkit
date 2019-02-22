@@ -60,6 +60,7 @@
 #include <google/protobuf/io/coded_stream.h>
 #include "header.pb.h"
 #include "io/carp.h"
+#include "util/FileUtils.h"
 
 using namespace std;
 

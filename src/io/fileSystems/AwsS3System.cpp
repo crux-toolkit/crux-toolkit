@@ -20,8 +20,8 @@ using namespace std;
 
 const regex AwsS3System::uri_pattern{"s3://([^/]+)(((/[^/]+)*)(/([^/.]+)(\\.([^/.]+))?))(/)?$"  
         , regex::icase};
-const regex AwsS3System::bucket_pattern{"s3://([^/]+)$", regex::icase};
-
+const regex AwsS3System::bucket_pattern{"s3://([^/]+)/?$", regex::icase};
+const regex AwsS3System::path_pattern{"/?([^/]+(/[^/]+)*)", regex::icase};
 
 AwsS3System::AwsS3System(){
     Aws::InitAPI(m_options);
@@ -66,22 +66,50 @@ bool AwsS3System::IsDir(const string &path){
 
 bool AwsS3System::Mkdir(const string &path){
     //TODO_RC: Implement method
+    carp(CARP_FATAL, "Writing to S3 is not supported.");
 }
 
 void AwsS3System::Rename(const string &from, const string &to){
     //TODO_RC: Implement method
+    carp(CARP_FATAL, "Writing to S3 is not supported.");
 }
 
 void AwsS3System::Remove(const string &path){
     //TODO_RC: Implement method
+    carp(CARP_FATAL, "Writing to S3 is not supported.");
+}
+/**
+ * The first path must be a valid S3 path (start with s3://), the second path 
+ * should be a regular path string to append to the first one.
+ */ 
+string AwsS3System::Join(const string &path1, const string &path2){
+    if(path2.size() == 0)
+        return path1;
+    //validate the first path
+    AwsS3System::S3ObjectInfo object_info = parseUrl(path1);
+    std::stringstream path_result;
+    smatch matches;
+    if(regex_search(path2, matches, path_pattern)){
+        string s{matches[1]}; 
+        path_result << "s3://" << object_info.bucketName;
+        if(!object_info.isBucket) 
+            path_result << "/" << object_info.key;
+        path_result << "/" << matches[1];
+        return path_result.str(); 
+    }
+    else
+        carp(CARP_FATAL, "%s is an invalid path fragment, can be added to an existing path.", path2.c_str());
+    
 }
 
-string AwsS3System::Join(const string &path1, const string &path2){
-    //TODO_RC: Implement method
+std::string AwsS3System::AbsPath(const string& path){
+    return path;
 }
 
 string AwsS3System::Read(const string &path){
-    //TODO_RC: Implement method
+    stringstream res_stream;
+    res_stream << GetReadStream(path).rdbuf();
+    return res_stream.str();
 }
 
 ostream* AwsS3System::GetWriteStream(const string &path, bool overwrite){
@@ -89,30 +117,43 @@ ostream* AwsS3System::GetWriteStream(const string &path, bool overwrite){
     carp(CARP_FATAL, "Writing to S3 is not supported.");
 }
 
-istream* AwsS3System::GetReadStream(const string &path){
+istream& AwsS3System::GetReadStream(const string &path){
     AwsS3System::S3ObjectInfo object_info = parseUrl(path);
 
     if(!IsRegularFile(path))
-        carp(CARP_FATAL, "%s is not a valid S3 file URL.", path.c_str);
+        carp(CARP_FATAL, "%s is not a valid S3 file URL.", path.c_str());
 
     GetObjectRequest getObjectRequest;
     getObjectRequest.WithBucket(object_info.bucketName)
                 .WithKey(object_info.key);
 
-    auto getObjectOutcome = m_client->GetObject(getObjectRequest);
+    //moving the return object into the free storage
+    GetObjectOutcome* getObjectOutcome = new GetObjectOutcome(m_client->GetObject(getObjectRequest));
 
-    if(getObjectOutcome.IsSuccess())
+    if(getObjectOutcome->IsSuccess())
     {
-        carp(CARP_DEBUG, "Successfully retrieved object %s from s3.", path);
-        auto& result = (istream&)(getObjectOutcome.GetResult().GetBody());
-        return &result;
+        carp(CARP_DEBUG, "Successfully retrieved object %s from s3.", path.c_str());
+        StreamRecord sr{GenericStorageSystem::SystemIdEnum::AWS_S3, true,
+                (ios_base*)&getObjectOutcome->GetResult().GetBody(), (void*)getObjectOutcome};
+        _RegisterStream(sr);
+         auto& result = (istream&)(getObjectOutcome->GetResult().GetBody());
+         result.good();
+         return result;
     }
     else
     {
-            carp(CARP_FATAL, "Error while getting object %s. Error message: %s, \n%s", path, 
-                    getObjectOutcome.GetError().GetExceptionName(),
-                    getObjectOutcome.GetError().GetMessage());
+        carp(CARP_FATAL, "Error while getting object %s. Error message: %s, \n%s", path.c_str(), 
+                getObjectOutcome->GetError().GetExceptionName(),
+                getObjectOutcome->GetError().GetMessage());
+        //delete getObjectOutcome; //aborting the process, no need to clean up
     }
+}
+
+void AwsS3System::_CloseStream(const StreamRecord& p_streamRec){
+    if(p_streamRec.is_input)
+        delete (GetObjectOutcome*)p_streamRec.object_pointer;
+    else
+        delete (PutObjectOutcome*)p_streamRec.object_pointer;
 }
 
 string AwsS3System::BaseName(const string &path){
@@ -157,10 +198,12 @@ AwsS3System::S3ObjectInfo AwsS3System::parseUrl(const string& url){
 
     //create complete path info
     if(regex_search(url, matches, AwsS3System::uri_pattern)){
+        //TODO_RC: Debug code
         vector<string> str_test;
         for(auto& m : matches){
            str_test.push_back(string{m});
         }
+        // end debug code
         return  AwsS3System::S3ObjectInfo{matches};
     }    
     else
