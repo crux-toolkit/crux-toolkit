@@ -220,6 +220,7 @@ else(APPLE)
   endif(OPENMP_FOUND)
 endif(APPLE)
 
+
 #this will locate the aws sdk for c++ package so that we can use its targets
 set(CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/../aws-sdk/build/aws-deps")
 find_package(aws-cpp-sdk-core CONFIG REQUIRED)

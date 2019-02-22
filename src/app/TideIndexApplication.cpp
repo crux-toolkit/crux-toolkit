@@ -467,7 +467,7 @@ void TideIndexApplication::fastaToPb(
   outProteinPbHeader.set_file_type(pb::Header::RAW_PROTEINS);
   outProteinPbHeader.set_command_line(commandLine);
   pb::Header_Source* headerSource = outProteinPbHeader.add_source();
-  headerSource->set_filename(AbsPath(fasta));
+  headerSource->set_filename(FileUtils::AbsPath(fasta));
   headerSource->set_filetype("fasta");
   unsigned int invalidPepCnt = 0;
   unsigned int failedDecoyCnt = 0;
@@ -476,7 +476,9 @@ void TideIndexApplication::fastaToPb(
   outProteinSequences.clear();
 
   HeadedRecordWriter proteinWriter(proteinPbFile, outProteinPbHeader);
-  ifstream fastaStream(fasta.c_str(), ifstream::in);
+  //DEBUG
+  //ifstream fastaStream(fasta.c_str(), ifstream::in);
+  istream& fastaStream = FileUtils::GetReadStream(fasta); 
   string proteinName;
   string* proteinSequence = new string;
   int curProtein = -1;
@@ -486,6 +488,7 @@ void TideIndexApplication::fastaToPb(
 
   // Iterate over all proteins in FASTA file
   unsigned int targetsGenerated = 0, decoysGenerated = 0;
+  !fastaStream.rdbuf();
   while (GeneratePeptides::getNextProtein(fastaStream, &proteinName, proteinSequence)) {
     outProteinSequences.push_back(proteinSequence);
     cleavedPeptideInfo.push_back(make_pair(
@@ -525,6 +528,7 @@ void TideIndexApplication::fastaToPb(
     proteinSequence = new string;
   }
   delete proteinSequence;
+  FileUtils::CloseStream(fastaStream);
   if (targetsGenerated == 0) {
     carp(CARP_FATAL, "No target sequences generated.  Is \'%s\' a FASTA file?",
          fasta.c_str());

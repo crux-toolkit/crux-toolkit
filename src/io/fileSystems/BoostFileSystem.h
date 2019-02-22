@@ -4,7 +4,6 @@
 #include "GenericStorageSystem.h"
 #include "boost/filesystem.hpp"
 
-
 class BoostFileSystem : public GenericStorageSystem
 {
 
@@ -32,9 +31,18 @@ public:
     return (boost::filesystem::path(path1) / boost::filesystem::path(path2)).string();
   }
 
+  // Compute an absolute path from the parameter by prepending the current
+  // working directory when the given path is a relative path.
+  // Although the result is correct (according to 'man path_resolution')
+  // no effort is made to decode symlinks or normalize /. and /..
+  std::string AbsPath(const string &path)
+  {
+    return boost::filesystem::absolute(path).string();
+  }
+
   std::string Read(const std::string &path);
   std::ostream *GetWriteStream(const std::string &path, bool overwrite);
-  std::istream *GetReadStream(const string &path);
+  std::istream &GetReadStream(const string &path);
 
   std::string BaseName(const std::string &path)
   {
@@ -64,10 +72,20 @@ public:
       boost::filesystem::copy(orig, dest);
     }
   }
-  
+
   BoostFileSystem(){};
 
   ~BoostFileSystem(){};
+
+private:
+void _CloseStream(const StreamRecord& p_streamRec){
+    if(p_streamRec.is_input)
+        delete (ifstream*)p_streamRec.object_pointer;
+    else
+        delete (ofstream*)p_streamRec.object_pointer;
+}
+
+
 };
 
 #endif

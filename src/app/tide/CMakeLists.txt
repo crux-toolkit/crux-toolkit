@@ -124,3 +124,19 @@ elseif (APPLE)
   )
 endif (WIN32 AND NOT CYGWIN)
 
+
+#this will locate the aws sdk for c++ package so that we can use its targets
+set(CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/../aws-sdk/build/aws-deps")
+find_package(aws-cpp-sdk-core CONFIG REQUIRED)
+find_package(aws-cpp-sdk-s3 CONFIG REQUIRED)
+
+message( "aws-cpp-sdk-s3_FOUND is ${aws-cpp-sdk-s3_FOUND}")
+if (aws-cpp-sdk-s3_FOUND)
+  target_link_libraries(
+    tide-support
+    aws-cpp-sdk-core
+    aws-cpp-sdk-s3
+  )
+  add_definitions(-DAWS)
+endif(aws-cpp-sdk-s3_FOUND)
+

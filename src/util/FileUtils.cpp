@@ -46,6 +46,11 @@ string FileUtils::Join(const string& path1, const string& path2) {
   return s->Join(path1, path2);
 }
 
+string FileUtils::AbsPath(const string& path){
+  GenericStorageSystem* s = GenericStorageSystem::getStorage(path);
+  return s->AbsPath(path);
+}
+
 string FileUtils::Read(const string& path) {
   GenericStorageSystem* s = GenericStorageSystem::getStorage(path);
   return s->Read(path);
@@ -59,9 +64,13 @@ ostream* FileUtils::GetWriteStream(const string& path, bool overwrite) {
   return res;
 }
 
-istream* FileUtils::GetReadStream(const string& path){
+istream& FileUtils::GetReadStream(const string& path){
   GenericStorageSystem* s = GenericStorageSystem::getStorage(path);
   return s->GetReadStream(path);
+}
+
+void FileUtils::CloseStream(ios_base& stream){
+  GenericStorageSystem::CloseStream(stream);
 }
 
 string FileUtils::BaseName(const string& path) {
@@ -97,12 +106,12 @@ void FileUtils::Copy(const std::string& orig, const std::string& dest) {
   else
   {
     //TODO_RC: Verify that this will work efficiently.
-    istream* in_str = s_from->GetReadStream(orig);
+    istream& in_str = s_from->GetReadStream(orig);
     ostream* out_str = s_to->GetWriteStream(dest, false);
-    *out_str << (in_str->rdbuf());
+    *out_str << (in_str.rdbuf());
     out_str->flush();
     delete out_str;
-    delete in_str;
+    //delete in_str;
   }
   
 }

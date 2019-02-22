@@ -32,7 +32,6 @@ add_subdirectory(doc/user)
 add_subdirectory(ext)
 add_subdirectory(src)
 
-
 # Only process smoke tests directory if it exiists
 if (EXISTS "${CMAKE_SOURCE_DIR}/test/smoke-tests/runall")
   add_subdirectory(test/smoke-tests)

@@ -5,9 +5,11 @@
 #include "io/carp.h"
 #include <string>
 #include <regex>
+#include <vector>
 
 //TODO_RC: use a map instead of plain array
 GenericStorageSystem * GenericStorageSystem::m_system[] = {nullptr, nullptr};
+std::vector<GenericStorageSystem::StreamRecord> GenericStorageSystem::m_openStreams; 
 
 GenericStorageSystem* GenericStorageSystem::getStorage(string p_path)
 {
@@ -16,16 +18,16 @@ GenericStorageSystem* GenericStorageSystem::getStorage(string p_path)
         switch(storageIndex){
             case 0:
                 m_system[storageIndex] = new BoostFileSystem();
-                carp(CARP_INFO, "Using file:// storage system for path %s.", p_path);
+                carp(CARP_INFO, "Using file:// storage system for path %s.", p_path.c_str());
                 break;
 #ifdef AWS                // build in AWS support only if the library is present at compilation time.
             case 1:
                 m_system[storageIndex] = new AwsS3System();
-                carp(CARP_INFO, "Using s3:// storage system for path %s.", p_path);
+                carp(CARP_INFO, "Using s3:// storage system for path %s.", p_path.c_str());
                 break;
 #endif                
             default:
-                carp(CARP_FATAL, "Path %s is not supported", p_path);
+                carp(CARP_FATAL, "Path %s is not supported", p_path.c_str());
         }
     return m_system[storageIndex];
 }
@@ -61,10 +63,32 @@ int GenericStorageSystem::getStorageIndex(const string &path){
         }
     }
     if(pos >= MAX_STORAGES)
-        carp(CARP_FATAL, "Unknown storage system %s in resource URI %s", protocol_name, path);
+        carp(CARP_FATAL, "Unknown storage system %s in resource URI %s", protocol_name.c_str(), path.c_str());
 
     return pos;
 }
+
+void GenericStorageSystem::CloseStream(ios_base& stream){
+    for(auto i = m_openStreams.begin(); i != m_openStreams.end(); i++)
+    {
+        if(i->stream_pointer == &stream){
+            m_system[i->system_id]->_CloseStream(*i);
+            m_openStreams.erase(i);  
+        }
+        break;
+    }
+}
+
+void GenericStorageSystem::_RegisterStream(const StreamRecord& p_streamRec){
+    for(auto s : m_openStreams){
+        if(s.stream_pointer == p_streamRec.stream_pointer){
+            carp(CARP_WARNING, "This stream is already open."); 
+            return ;
+        }
+    }
+    m_openStreams.push_back(p_streamRec);
+}
+
 
 //if paths are different it opens input and output stream and 
 // moves data over. Otherwise it delegates to CopyLocal
