@@ -18,7 +18,7 @@ using namespace Aws::S3;
 using namespace Aws::S3::Model;
 using namespace std;
 
-const regex AwsS3System::uri_pattern{"s3://([^/]+)(((/[^/]+)*)(/([^/.]+)(\\.([^/.]+))?))(/)?$"  
+const regex AwsS3System::uri_pattern{"s3://([^/]+)(((/[^/]+)*)(/([^/.]+)(\\.([^/.]*))*))(/)?$"  
         , regex::icase};
 const regex AwsS3System::bucket_pattern{"s3://([^/]+)/?$", regex::icase};
 const regex AwsS3System::path_pattern{"/?([^/]+(/[^/]+)*)", regex::icase};
@@ -60,7 +60,18 @@ bool AwsS3System::IsDir(const string &path){
         request.WithBucket(object_info.bucketName)
             .WithPrefix(object_info.key);
         auto response = m_client->ListObjects(request);
-        return (response.GetResult().GetContents().size() > 0);
+        auto results = response.GetResult().GetContents();
+        switch(results.size()){
+            case 0:
+                //if the key is not found - it's not a dir, does not exist.
+                return false;
+            case 1:
+                //if a single result, if the key size is the same, then it's a file
+                // if it's a dir, it will have at least a trailing / or more
+                return (results[0].GetKey().size() > object_info.key.size());
+            default:
+                return true;    //if more then one result - this is a dir.
+        }
     }
 }
 
@@ -200,8 +211,9 @@ AwsS3System::S3ObjectInfo AwsS3System::parseUrl(const string& url){
     if(regex_search(url, matches, AwsS3System::uri_pattern)){
         //TODO_RC: Debug code
         vector<string> str_test;
-        for(auto& m : matches){
-           str_test.push_back(string{m});
+        for(int i = 0; i < matches.size(); i++){
+           str_test.push_back(matches.str(i));
+           int p = matches.position(i);
         }
         // end debug code
         return  AwsS3System::S3ObjectInfo{matches};
