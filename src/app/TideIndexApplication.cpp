@@ -365,8 +365,8 @@ string TideIndexApplication::getDescription() const {
     "tide-index</code> command performs an optional pre-processing step on the "
     "protein database, converting it to a binary format suitable for input to "
     "the <code>tide-search</code> command.</p><p>Tide considers only the "
-    "standard set of 20 amino acids. Peptides containing non-amino acid "
-    "alphanumeric characters (BXZ) are skipped. Non-alphanumeric characters "
+    "standard set of 21 amino acids. Peptides containing non-amino acid "
+    "alphanumeric characters (BJXZ) are skipped. Non-alphanumeric characters "
     "are ignored completely.</p>]]";
 }
 
