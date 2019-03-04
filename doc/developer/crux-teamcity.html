@@ -19,19 +19,19 @@ Charles Grant, Rita Chupalov, and Bill Noble are the
 administrators for our server.
 <h2>Accessing the TeamCity Server</h2>
 Our TeamCity server runs on <code>noble-web</code>,
-and it is only accessible from machines behind the Genome Sciences' firewall.
+and it is only accessible from machines behind the Genome Sciences firewall.
 A local user account named <code>teamcity</code> is used to control the
 TeamCity server.
 <h3>Accessing the TeamCity Server Using the Command Line</h3>
 To log on to nrhel6-x64:
 <ol>
-<li>Log on to a computer beind the GSIT firewall.</li>
+<li>Log on to a computer behind the GSIT firewall.</li>
 <li>Run <code>ssh nrhel6-x64</code>.</li>
 <li>Run <code>sudo su - teamcity</code> 
 (you may need to have GSIT add you to the sudo list for this command).</li>
 </ol>
 The binaries and supporting scripts for TeamCity will be found in the
-<code>bin</code> subdirectory in the TeamCity home directory:
+<code>bin</code> subdirectory in the TeamCity home directory
 <code>/data/TeamCity</code>.
 <h4>Controlling the TeamCity Server</h4>
 The main reason to access TeamCity using the command line 
@@ -59,7 +59,7 @@ in your browser.
 Log in using the credentials for your TeamCity account.
 </li>
 </ol>
-If you are not on a computer behind the GSIT firewall the process is a little
+If you are not on a computer behind the GSIT firewall, then the process is a little
 more complex.
 You have to establish a TCP/IP tunnel from your computer, through the firewall,
 and on to nhrel6-x64.
@@ -112,14 +112,14 @@ width="40%">Directory</th><th width="10%">User</th></th>
 </table>
 <p/>
 The 64-bit Linux agent runs on the same virtual machine as the TeamCity server,
-and runs as the <code>teamcity</code>user. 
+and runs as the <code>teamcity</code> user. 
 Use the command
 <pre>
 sudo su - teamcity</code>.
 </pre>
 to switch to the <code>teamcity</code> user.
 You may need GSIT to add you to the sudo list for this command. 
-The other agents are currently run as <code>cegrant</code>,
+The other agents are currently run as <code>cegrant</code>
 but can be run by anyone in the <code>noblelab</code> group.
 <p/>
 The agents are not configured to start automatically when the host boots.
