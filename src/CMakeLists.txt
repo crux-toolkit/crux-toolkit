@@ -107,7 +107,6 @@ set (
   util/FileUtils.cpp
   io/fileSystems/BoostFileSystem.cpp
   io/fileSystems/GenericStorageSystem.cpp
-  io/fileSystems/AwsS3System.cpp
   model/FilteredSpectrumChargeIterator.cpp
   model/GeneratePeptidesIterator.cpp
   app/GetMs2Spectrum.cpp
@@ -203,6 +202,26 @@ endif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 add_definitions(-DCRUX)
 add_definitions(-DBOOST_ALL_NO_LIB)
 
+
+#finding AWS packages
+set(CMAKE_FIND_ROOT_PATH
+     "${CMAKE_SOURCE_DIR}/aws-sdk/build/aws-deps"
+   )
+
+find_package(aws-cpp-sdk-core CONFIG QUIET)
+find_package(aws-cpp-sdk-s3 CONFIG QUIET)
+
+message( "aws-cpp-sdk-s3_FOUND is ${aws-cpp-sdk-s3_FOUND}")
+if (aws-cpp-sdk-s3_FOUND)
+  set(
+    crux_lib_files
+    ${crux_lib_files}
+    io/fileSystems/AwsS3System.cpp
+    )
+  add_definitions(-DAWS)
+endif(aws-cpp-sdk-s3_FOUND)
+
+
 add_library(
   crux-support
   STATIC
@@ -220,21 +239,15 @@ else(APPLE)
   endif(OPENMP_FOUND)
 endif(APPLE)
 
-
-#this will locate the aws sdk for c++ package so that we can use its targets
-set(CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/../aws-sdk/build/aws-deps")
-find_package(aws-cpp-sdk-core CONFIG REQUIRED)
-find_package(aws-cpp-sdk-s3 CONFIG REQUIRED)
-
-message( "aws-cpp-sdk-s3_FOUND is ${aws-cpp-sdk-s3_FOUND}")
 if (aws-cpp-sdk-s3_FOUND)
   target_link_libraries(
     crux-support
     aws-cpp-sdk-core
     aws-cpp-sdk-s3
   )
-  add_definitions(-DAWS)
 endif(aws-cpp-sdk-s3_FOUND)
+
+
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -DNDEBUG")

@@ -126,9 +126,13 @@ endif (WIN32 AND NOT CYGWIN)
 
 
 #this will locate the aws sdk for c++ package so that we can use its targets
-set(CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/../aws-sdk/build/aws-deps")
-find_package(aws-cpp-sdk-core CONFIG REQUIRED)
-find_package(aws-cpp-sdk-s3 CONFIG REQUIRED)
+set(CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/aws-sdk/build/aws-deps")
+
+#message("CMAKE_SOURCE_DIR: ${CMAKE_SOURCE_DIR}")
+#set(CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/aws-sdk/build/aws-deps")
+
+find_package(aws-cpp-sdk-core CONFIG)
+find_package(aws-cpp-sdk-s3 CONFIG)
 
 message( "aws-cpp-sdk-s3_FOUND is ${aws-cpp-sdk-s3_FOUND}")
 if (aws-cpp-sdk-s3_FOUND)
@@ -138,5 +142,8 @@ if (aws-cpp-sdk-s3_FOUND)
     aws-cpp-sdk-s3
   )
   add_definitions(-DAWS)
+else(1)
+  message("AWS SDK build is not found. Building without AWS support.")
+  message("If you want to add AWS support build AWS API it first by running cmake in aws-sdk dir.")
 endif(aws-cpp-sdk-s3_FOUND)
 

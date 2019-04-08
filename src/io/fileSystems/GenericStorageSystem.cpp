@@ -1,6 +1,10 @@
 #include "io/fileSystems/GenericStorageSystem.h"
 #include "io/fileSystems/BoostFileSystem.h"
+
+#ifdef AWS      // build in AWS support only if the library is present at compilation time.
 #include "io/fileSystems/AwsS3System.h"
+#endif
+
 #include <boost/algorithm/string.hpp>
 #include "io/carp.h"
 #include <string>
