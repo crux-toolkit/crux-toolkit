@@ -3,7 +3,7 @@
 
 #include "CHardklorSetting.h"
 #include "CSpecAnalyze.h"
-#include "Spectrum.h"
+#include "MSToolkit/Spectrum.h"
 #include <vector>
 
 using namespace std;

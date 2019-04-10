@@ -11,7 +11,7 @@
 #include <string.h>
 #include <assert.h>
 #include <ctype.h>
-#include "Spectrum.h"
+#include "model/Spectrum.h"
 #include "util/utils.h"
 #include "util/mass.h"
 #include "util/Params.h"

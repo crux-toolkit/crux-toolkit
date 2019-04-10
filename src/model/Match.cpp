@@ -18,7 +18,7 @@
 #include <map>
 #include "io/carp.h"
 #include "ProteinPeptideIterator.h"
-#include "Spectrum.h"
+#include "model/Spectrum.h"
 #include "Ion.h"
 #include "IonSeries.h"
 #include "util/crux-utils.h"

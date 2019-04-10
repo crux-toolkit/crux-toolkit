@@ -20,7 +20,7 @@
 #include "util/mass.h"
 #include "util/GlobalParams.h"
 #include "IonFilteredIterator.h"
-#include "Spectrum.h"
+#include "model/Spectrum.h"
 
 #include <stack>
 
