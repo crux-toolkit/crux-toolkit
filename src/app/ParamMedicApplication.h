@@ -2,7 +2,7 @@
 #define PARAMMEDIC_H
 
 #include "CruxApplication.h"
-#include "Spectrum.h"
+#include "model/Spectrum.h"
 
 class ParamMedicApplication : public CruxApplication {
  public:

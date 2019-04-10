@@ -23,7 +23,7 @@
 #include <unistd.h>
 #endif
 #include "io/carp.h"
-#include "Spectrum.h"
+#include "model/Spectrum.h"
 #include "io/SpectrumCollection.h"
 #include "Ion.h"
 #include "IonSeries.h"

@@ -1,7 +1,7 @@
 #ifndef SPECTRUM_RECORD_WRITER_H
 #define SPECTRUM_RECORD_WRITER_H
 
-#include "Spectrum.h"
+#include "model/Spectrum.h"
 #include "spectrum.pb.h"
 
 using namespace std;
