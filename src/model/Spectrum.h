@@ -13,7 +13,6 @@
 #include "model/objects.h"
 #include "Peak.h"
 
-#include "Spectrum.h"
 #include "MSToolkit/Spectrum.h"
 #define  NO_BOOST_DATE_TIME_INLINE
 #include "pwiz/data/msdata/SpectrumInfo.hpp"

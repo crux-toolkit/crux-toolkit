@@ -13,7 +13,7 @@
 #include "CSplitSpectrum.h"
 #include "MSObject.h"
 #include "MSReader.h"
-#include "Spectrum.h"
+#include "MSToolkit/Spectrum.h"
 #include "CNoiseReduction.h"
 //#include "CHardklorFileReader.h"
 
