@@ -56,7 +56,7 @@ class StringUtils {
 
   // Joins a vector of strings into a single string separated by a delimiter
   template<typename T>
-  static std::string Join(const T values, const char delimiter ='\0') {
+  static std::string Join(const T& values, const char delimiter ='\0') {
     std::stringstream ss;
     for (typename T::const_iterator i = values.begin(); i != values.end(); i++) {
       if (i != values.begin() && delimiter != '\0') {
