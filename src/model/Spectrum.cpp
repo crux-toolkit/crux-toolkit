@@ -113,6 +113,22 @@ PeakIterator Spectrum::end() const {
   return peaks_.end();
 }
 
+const Peak* Spectrum::getPeak(size_t i) {
+  if (i >= peaks_.size()) {
+    return NULL;
+  }
+  return peaks_[i];
+}
+
+vector<Peak> Spectrum::getPeaks() const {
+  vector<Peak> peaks;
+  peaks.reserve(peaks_.size());
+  for (vector<Peak*>::const_iterator i = peaks_.begin(); i != peaks_.end(); i++) {
+    peaks.push_back(**i);
+  }
+  return peaks;
+}
+
 /**
  * Prints a spectrum object to file in ms2 format.
  */
@@ -712,7 +728,7 @@ int Spectrum::getNumPeaks() const
 /**
  * \returns The sum of intensities in all peaks.
  */
-double Spectrum::getTotalEnergy()
+double Spectrum::getTotalEnergy() const
 {
   return total_energy_;
 }

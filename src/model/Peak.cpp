@@ -13,15 +13,33 @@
 #include "io/carp.h"
 #include <algorithm>
 
+Peak::Peak():
+  intensity_(0.0), intensity_rank_(0.0), location_(0.0) {
+}
+
 /**
  * Construct a Peak object
  * @param intensity: intensity for the new peak
  * @param location: location for the new peak
  */
-Peak::Peak(FLOAT_T intensity, FLOAT_T location) {
-    this->intensity_ = intensity;
-    this->intensity_rank_ = 0.0;
-    this->location_ = location;
+Peak::Peak(FLOAT_T intensity, FLOAT_T location):
+  intensity_(intensity), intensity_rank_(0.0), location_(location) {
+}
+
+Peak::Peak(const Peak& other):
+  intensity_(other.intensity_), intensity_rank_(other.intensity_rank_), location_(other.location_) {
+}
+
+void swap(Peak& x, Peak& y) {
+  using std::swap;
+  swap(x.intensity_, y.intensity_);
+  swap(x.intensity_rank_, y.intensity_rank_);
+  swap(x.location_, y.location_);
+}
+
+Peak& Peak::operator=(Peak rhs) {
+  swap(*this, rhs);
+  return *this;
 }
 
 /**
@@ -79,16 +97,16 @@ void Peak::print() {
  * Compare the intensity of this Peak and another Peak
  * Return true if this Peak is greater, false otherwise
  */
-bool Peak::compareByIntensity(Peak other) {
-    return getIntensity() > other.getIntensity();
+bool Peak::compareByIntensity(const Peak& x, const Peak& y) {
+    return x.intensity_ > y.intensity_;
 }
 
 /**
  * Compare the mz(location) of this Peak and another Peak
  * Return true if the other Peak is greater, false otherwise
  */
-bool Peak::compareByMZ(Peak other) {
-    return getLocation() < other.getLocation();
+bool Peak::compareByMZ(const Peak& x, const Peak& y) {
+    return x.location_ < y.location_;
 }
 
 

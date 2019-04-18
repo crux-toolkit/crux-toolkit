@@ -2,7 +2,7 @@
  * \file CruxHardklorApplication.h 
  * AUTHOR: Sean McIlwain
  * CREATE DATE: 4 November 2011
- * \brief Interface for calling hardklor.
+ * \brief Interface for calling comet.
  *****************************************************************************/
 #ifndef COMETAPPLICATION_H
 #define COMETAPPLICATION_H
@@ -90,6 +90,8 @@ class CometApplication: public CruxApplication {
     const std::vector<std::string>& spec_files,
     std::vector<InputFileInfo*>& pvInputFiles ///<vector of input spectra files
     );
+
+  static std::string staticModParam(char c);
 };
 
 #endif

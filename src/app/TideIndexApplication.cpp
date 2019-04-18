@@ -11,6 +11,7 @@
 #include "TideMatchSet.h"
 #include "app/tide/modifications.h"
 #include "app/tide/records_to_vector-inl.h"
+#include "ParamMedicApplication.h"
 
 #ifdef _MSC_VER
 #include <io.h>
@@ -403,6 +404,8 @@ vector<string> TideIndexApplication::getOptions() const {
     "mods-spec",
     "nterm-peptide-mods-spec",
     "nterm-protein-mods-spec",
+    "auto-modifications",
+    "auto-modifications-spectra",
     "num-decoys-per-target",
     "output-dir",
     "overwrite",
@@ -882,6 +885,55 @@ void TideIndexApplication::addAuxLoc(
 }
 
 void TideIndexApplication::processParams() {
+  if (Params::GetBool("auto-modifications")) {
+    if (!Params::IsDefault("mods-spec")) {
+      carp(CARP_FATAL, "Automatic modification inference cannot be used with user specified "
+                       "modifications. Please rerun with either auto-modifications set to 'false' "
+                       "or with modifications turned off.");
+    }
+    vector<string> files = StringUtils::Split(Params::GetString("auto-modifications-spectra"), ',');
+    for (vector<string>::iterator i = files.begin(); i != files.end(); ) {
+      if ((*i = StringUtils::Trim(*i)).empty()) {
+        i = files.erase(i);
+      } else {
+        i++;
+      }
+    }
+    if (files.empty()) {
+      carp(CARP_FATAL, "Spectra files must be specified with the 'auto-modifications-spectra' "
+                       "parameter when 'auto-modifications' is enabled.");
+    }
+    vector<ParamMedic::RunAttributeResult> modsResult;
+    ParamMedicApplication::processFiles(files, false, true, NULL, &modsResult);
+    vector<ParamMedic::Modification> mods = ParamMedic::Modification::GetFromResults(modsResult);
+    vector<string> modStrings;
+    vector<string> modNStrings;
+    vector<string> modCStrings;
+    for (vector<ParamMedic::Modification>::const_iterator i = mods.begin(); i != mods.end(); i++) {
+      string location = i->getLocation();
+      const double mass = i->getMassDiff();
+      const bool variable = i->getVariable();
+
+      vector<string>* modStringVector;
+      string modCountStr = variable ? "4" : "";
+
+      if (location == ParamMedic::Modification::LOCATION_NTERM) {
+        modStringVector = &modNStrings;
+        location = "X";
+      } else if (location == ParamMedic::Modification::LOCATION_CTERM) {
+        modStringVector = &modCStrings;
+        location = "X";
+      } else {
+        modStringVector = &modStrings;
+      }
+      modStringVector->push_back(modCountStr + location + (mass >= 0 ? '+' : '-') +
+        StringUtils::ToString(mass));
+    }
+    Params::Set("mods-spec", StringUtils::Join(modStrings, ','));
+    Params::Set("nterm-peptide-mods-spec", StringUtils::Join(modNStrings, ','));
+    Params::Set("cterm-peptide-mods-spec", StringUtils::Join(modCStrings, ','));
+  }
+
   // Update mods-spec parameter for default cysteine mod
   string default_cysteine = "C+" + StringUtils::ToString(CYSTEINE_DEFAULT);
   string mods_spec = Params::GetString("mods-spec");

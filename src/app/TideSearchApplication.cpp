@@ -1511,7 +1511,7 @@ vector<string> TideSearchApplication::getOptions() const {
     "evidence-granularity",
     "pepxml-output",
     "pin-output",
-    "pm-charge",
+    "pm-charges",
     "pm-max-frag-mz",
     "pm-max-precursor-delta-ppm",
     "pm-max-precursor-mz",
@@ -1914,37 +1914,38 @@ void TideSearchApplication::processParams() {
                        "units. Please re-run with auto-precursor-window set to 'false' or "
                        "precursor-window-type set to 'ppm'.");
     }
-    ParamMedicErrorCalculator errCalc;
-    errCalc.processFiles(Params::GetStrings("tide spectra file"));
-    string precursorFailure, fragmentFailure;
-    double precursorSigmaPpm = 0;
-    double fragmentSigmaPpm = 0;
-    double fragmentSigmaTh = 0;
-    double precursorPredictionPpm = 0;
-    double fragmentPredictionPpm = 0;
-    double fragmentPredictionTh = 0;
-    errCalc.calcMassErrorDist(&precursorFailure, &fragmentFailure,
-                              &precursorSigmaPpm, &fragmentSigmaPpm,
-                              &precursorPredictionPpm, &fragmentPredictionTh);
+    ParamMedic::RunAttributeResult errorCalcResult;
+    ParamMedicApplication::processFiles(Params::GetStrings("tide spectra file"),
+      true, false, &errorCalcResult, NULL);
 
     if (autoPrecursor != "false") {
-      if (precursorFailure.empty()) {
-        carp(CARP_INFO, "Precursor ppm standard deviation: %f", precursorSigmaPpm);
-        carp(CARP_INFO, "Precursor error estimate (ppm): %.2f", precursorPredictionPpm);
-        Params::Set("precursor-window", precursorPredictionPpm);
+      string fail = errorCalcResult.getValue(ParamMedic::ErrorCalc::KEY_PRECURSOR_FAILURE);
+      if (fail.empty()) {
+        double sigma = StringUtils::FromString<double>(
+          errorCalcResult.getValue(ParamMedic::ErrorCalc::KEY_PRECURSOR_SIGMA));
+        double prediction = StringUtils::FromString<double>(
+          errorCalcResult.getValue(ParamMedic::ErrorCalc::KEY_PRECURSOR_PREDICTION));
+        carp(CARP_INFO, "precursor ppm standard deviation: %f", sigma);
+        carp(CARP_INFO, "precursor error estimate (ppm): %.2f", prediction);
+        Params::Set("precursor-window", prediction);
       } else {
         carp(autoPrecursor == "fail" ? CARP_FATAL : CARP_ERROR,
-             "failed to calculate precursor error: %s", precursorFailure.c_str());
+             "failed to calculate precursor error: %s", fail.c_str());
       }
     }
     if (autoFragment != "false") {
-      if (fragmentFailure.empty()) {
-        carp(CARP_INFO, "Fragment standard deviation (ppm): %f", fragmentSigmaPpm);
-        carp(CARP_INFO, "Fragment bin size estimate (Th): %.4f", fragmentPredictionTh);
-        Params::Set("mz-bin-width", fragmentPredictionTh);
+      string fail = errorCalcResult.getValue(ParamMedic::ErrorCalc::KEY_FRAGMENT_FAILURE);
+      if (fail.empty()) {
+        double sigma = StringUtils::FromString<double>(
+          errorCalcResult.getValue(ParamMedic::ErrorCalc::KEY_FRAGMENT_SIGMA));
+        double prediction = StringUtils::FromString<double>(
+          errorCalcResult.getValue(ParamMedic::ErrorCalc::KEY_FRAGMENT_PREDICTION));
+        carp(CARP_INFO, "fragment ppm standard deviation: %f", sigma);
+        carp(CARP_INFO, "Fragment bin size estimate (Th): %.4f", prediction);
+        Params::Set("mz-bin-width", prediction);
       } else {
         carp(autoFragment == "fail" ? CARP_FATAL : CARP_ERROR,
-             "failed to calculate fragment error: %s", fragmentFailure.c_str());
+             "failed to calculate fragment error: %s", fail.c_str());
       }
     }
   }

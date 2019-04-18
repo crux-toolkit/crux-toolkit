@@ -134,6 +134,7 @@ set (
   io/OutputFiles.cpp
   parameter.cpp
   app/ParamMedicApplication.cpp
+  app/ParamMedicInference.cpp
   util/Params.cpp
   model/Peak.cpp
   model/Peptide.cpp
