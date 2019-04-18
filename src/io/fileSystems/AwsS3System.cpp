@@ -6,9 +6,11 @@
 #include <aws/s3/model/ListObjectsRequest.h>
 #include <aws/core/Aws.h>
 #include <aws/core/utils/memory/stl/AWSStringStream.h>
+#include <aws/core/config/AWSProfileConfigLoader.h>
 
 #include <regex>
 #include <boost/algorithm/string.hpp>
+#include <stdio.h>
 
 #include "io/carp.h"
 
@@ -25,7 +27,31 @@ const regex AwsS3System::path_pattern{"/?([^/]+(/[^/]+)*)", regex::icase};
 
 AwsS3System::AwsS3System(){
     Aws::InitAPI(m_options);
-    m_client = new S3Client();
+    Aws::Client::ClientConfiguration clientConfig;
+
+    char* aws_region = getenv("AWS_DEFAULT_REGION");
+    if(aws_region != NULL){
+        clientConfig.region = aws_region;
+        carp(CARP_INFO, "Using AWS region %s from the environment variable.", aws_region);
+    }
+    else{
+        char* username = getenv("USERNAME");
+        if(username == NULL)
+            username = getenv("USER");
+
+        if(username != NULL){
+            stringstream configFileStream("");
+            configFileStream << "/home/" << username << "/.aws/config";
+            Aws::Config::AWSConfigFileProfileConfigLoader configLoader(configFileStream.str());
+            configLoader.Load();
+            auto profiles = configLoader.GetProfiles();
+            clientConfig.region = profiles["default"].GetRegion();
+            carp(CARP_INFO, "Using AWS region %s from the default AWS profile.", profiles["default"].GetRegion().c_str());
+        }
+        else
+            carp(CARP_INFO, "Using default AWS region %s.", clientConfig.region.c_str());
+    }
+    m_client = new S3Client(clientConfig);
 }
 
 bool AwsS3System::Exists(const string &path){
@@ -41,6 +67,10 @@ bool AwsS3System::IsRegularFile(const string &path){
     request.WithBucket(object_info.bucketName)
         .WithKey(object_info.key);
     auto result = m_client->HeadObject(request);
+    if(!result.IsSuccess()){
+        carp(CARP_ERROR, "Cannot get AWS file info. Error type: %s\n Error message: %s.\n", 
+            result.GetError().GetExceptionName().c_str(), result.GetError().GetMessage().c_str());
+    }
     return result.IsSuccess();
 }
 
@@ -53,13 +83,21 @@ bool AwsS3System::IsDir(const string &path){
         HeadBucketRequest request;
         request.WithBucket(object_info.bucketName);
         auto response = m_client->HeadBucket(request);
+        if(!response.IsSuccess()){
+            carp(CARP_ERROR, "Cannot get AWS file info. Error type: %s\n Error message: %s.\n", 
+                response.GetError().GetExceptionName().c_str(), response.GetError().GetMessage().c_str());
+        }
         return response.IsSuccess();    //return true if such bucket exists
-    }
+    } 
     else{
         ListObjectsRequest request;
         request.WithBucket(object_info.bucketName)
             .WithPrefix(object_info.key);
         auto response = m_client->ListObjects(request);
+        if(!response.IsSuccess()){
+            carp(CARP_ERROR, "Cannot get AWS file info. Error type: %s\n Error message: %s.\n", 
+                response.GetError().GetExceptionName().c_str(), response.GetError().GetMessage().c_str());
+        }
         auto results = response.GetResult().GetContents();
         switch(results.size()){
             case 0:
