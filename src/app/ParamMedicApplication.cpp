@@ -1158,8 +1158,10 @@ int processSpectra(const vector<string>& files, vector<RunAttributeDetector*> de
     }
     SpectrumCollection* collection = SpectrumCollectionFactory::create(*i);
     collection->parse();
+    bool ignoreNoCharge = Params::GetBool("pm-ignore-no-charge");
     for (SpectrumIterator j = collection->begin(); j != collection->end(); j++) {
-      if ((*j)->getNumPeaks() < Params::GetInt("pm-min-scan-frag-peaks")) {
+      if ((*j)->getNumPeaks() < Params::GetInt("pm-min-scan-frag-peaks") ||
+          (ignoreNoCharge && (*j)->getChargeStateAssigned())) {
         continue;
       }
       // bin the spectrum peaks
