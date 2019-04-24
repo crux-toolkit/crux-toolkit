@@ -57,13 +57,13 @@
 
 		<p/>
 		This page will walk you through the steps of
-		installing <span class=prog>crux<span/> on your computer.
-		Seperate sections describe the installation for 
+		installing <span class=prog>Crux<span/> on your computer.
+		Separate sections describe the installation for 
 		<a href="#LINUX">Linux</a>,
 		<a href="#OSX">OS X</a>,
 		and
 		<a href="#WINDOWS">Windows</a>.
-		You have the choice of installing precompiled binaries or building
+		You have the choice of installing pre-compiled binaries or building
 		Crux from the source code.
 		The compiled binaries offer the easiest installation option.  
 
@@ -120,11 +120,11 @@
 		should be named something like 
 		<span class=file>crux-x.xx-XXXX-GNU-Linux.zip</span>
 		where <span class=file>x.xx</span>
-		is replaced with the most current release version.
+		is replaced with the most current release version
 		and 
 		<span class=file>XXXX</span> is either i686 or x86_64.
 		Move this file 
-		to a convenient location and unpack the file with this command.
+		to a convenient location and unpack the file with this command:
 
 		<div class=code><code>
 		$ unzip crux-x.xx-XXXX-GNU-Linux.zip</code>
@@ -132,7 +132,7 @@
 		<p/>
 		You should now have a new directory,
 		<span class=file>crux-x.xx-XXXX-GNU-Linux</span>,
-		with two subdirectories <span class=file>bin</span>, and <span
+		with two subdirectories, <span class=file>bin</span> and <span
 		class=file>doc</span>.  The <span class=prog>crux</span> programs are
 		in the <span class=file>bin</span> directory. You may want to move 
 		these files somewhere
@@ -152,7 +152,7 @@
 		<li><code>gcc</code></li>
     <li><code>version 2.17 or later of the C runtime libraries</code></li>
 		<li><code>g++</code></li>
-		<li><code>cmake</code> (Version 3.6 or later recommended)</li>
+		<li><code>cmake</code> (version 3.6 or later recommended)</li>
 		<li><code>make</code></li>
 		<li><code>git</code></li>
 		<li><code>svn</code></li>
@@ -171,11 +171,11 @@
 		<p/>
 		The <span class=prog>Crux</span> source is freely
 		available for download under an
-		<a href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0 license></a>.  
+		<a href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0 license</a>.  
 		On the download page click on the link "Source (tarred, gzipped)",
 		and choose save to disk if prompted. 
 		To check that the file was
-		transfered correctly, run this command
+		transferred correctly, run this command
 
 		<div class=code><code>
 		$ md5sum <i>[downloaded file]</i></code>
@@ -283,7 +283,7 @@
 		If a window pops
 		up, select the "Save" button.
 		To check that the file was
-		transfered correctly, run this command
+		transferred correctly, run this command
 
 		<div class=code><code>
 		$ md5 <i>[downloaded file]</i></code>
@@ -329,8 +329,9 @@
 		<li><code>OS X Yosemite or later</code></li>
 		<li><code>XCode 6.3.1 or later</code></li>
 		<li><code>XCode Command Line Tools</code></li>
-		<li><code>cmake</code> (Version 3.6 or later recommended)</li>
+		<li><code>cmake</code> (version 3.6 or later recommended)</li>
 		<li><code>make</code></li>
+		<li><code>git</code></li>
 		<li><code>svn</code></li>
 		<li><code>gnutar</code> (Apple's version of tar is incompatible with GNU's
     version of tar)</li>
@@ -365,7 +366,9 @@
 		</div>
 		<p/>
 		The programs
+		<span class=prog>gnutar</span>,
 		<span class=prog>cmake</span>,
+		<span class=prog>git</span>,
 		and
 		<span class=prog>svn</span>
 		can be installed from 
@@ -381,7 +384,7 @@
 		On the download page click on the link "Source (tarred, gzipped)",
 		and choose save to disk if prompted. 
 		To check that the file was
-		transfered correctly, run this command
+		transferred correctly, run this command
 
 		<div class=code><code>
 		$ md5sum <i>[downloaded file]</i></code>
@@ -527,7 +530,7 @@
     </li>
 		<li>
 		<a href="https://www.microsoft.com/en-us/download/details.aspx?id=40784">
-		<code>Visual C++ 2013 Runtime Libraries</code></a>
+		<code>Visual C++ 2017 Runtime Libraries</code></a>
     </li>
 		</ul>
 		<p/>
@@ -566,22 +569,29 @@
 		<li><code>
 		<a
 		href="http://www.visualstudio.com/downloads/download-visual-studio-vs#DownloadFamilies_4">Microsoft
-		Visual C++ 2013</a></code></li>
-		<li><a href="http://www.cmake.org/cmake/resources/software.html"><code>CMake</code></a></li>
-		<li><a href="http://sourceforge.net/projects/win32svn/"><code>SVN</code></a></li>
-		<li><a href="http://getgnuwin32.sourceforge.net"><code>GNU Tools for
-    Windows</code></li>
+		Visual C++ 2017</a></code></li>
+		<li><a
+    href="http://www.cmake.org/cmake/resources/software.html"><code>CMake
+    (version 3.6 or later recommended)</code></a></li>
+		<li><a href="http://https://git-scm.com/download/win"><code>git</code></a></li>
+		<li><a href="http://sourceforge.net/projects/win32svn/"><code>svn</code></a></li>
+		<li><a href="https://eternallybored.org/misc/wget/"><code>Windows wget
+    (version 1.20 or later)</code></a></li>
 		<li><a
 		href="https://thermo.flexnetoperations.com/control/thmo/login">
 		<code>Thermo MSFileReader</code></a> (This may be omitted if support for 
 		vendor specific file formats is disabled.)</li>
 		</ul>
 		<p/>
-		<b>Other verions of Visual Studio will not be able to build Crux!</b>
-		You must have Visual Studio 2013.
-		Visual Studio 2013 Express for Windows Desktop does work.
+		<b>Other versions of Visual Studio will not be able to build Crux!</b>
+		You must have Visual Studio 2017.
+		Visual Studio 2017 Community Edition does work.
 		<p/>
-		<span class=code>svn</span> must be included in the execution PATH
+		<span class=code>wget</span>,
+		<span class=code>git</span>,
+    and
+		<span class=code>svn</span> 
+    must be included in the execution PATH
 		for your system.
 		See the section <i>Setting the PATH on Windows</i> for more information.
 		<p/>
@@ -611,7 +621,7 @@
 		This will cause the build to fail.
 		To avoid this problem we recommend keeping the Crux source and build trees 
 		very near the disk root (typically
-		<span class=code>C:\</span>
+		<span class=code>C:\</span>).
 
 		</li>
 		<li>
@@ -619,8 +629,8 @@
 		<b>Open the command line development environment.</b>
 		<p/>
 		Under the "Start" button
-		open the "Visual Studio 2013" folder, then open the "Visual Studio Tools"
-		folder, and double-click on "Developer Command Prompt for VS2013".
+		open the "Visual Studio 2017" folder, then open the "Visual Studio Tools"
+		folder, and double-click on "x64 Native Tools Command Prompt for VS2017".
 		This will launch a 
 		<span class=file>cmd</span> shell configured to use the 
 		Microsoft development tools.
@@ -633,20 +643,20 @@
 		Run the command
 		<div class=code><code>
 		cmake -DCMAKE_INSTALL_PREFIX:PATH=&lt;install directory&gt; -G "Visual Studio
-		12 Win64" .
+		15 Win64" .
 		</code>
 		</div>
 		<p/>
 		where <span class=file>&lt;install directory&gt;</span> is
 		the location where you wish to install the <span class=prog>crux</span> programs. 
-		Note that, somewhat confusingly, Visual Studio 2013 is version 12.
+		Note that, somewhat confusingly, Visual Studio 2017 is version 15.
 		<p/>
 		If you wish to disable support for vendor specific file formats,
 		use this command instead
 		<p/>
 		<div class=code><code>
 		cmake 
-		-DCMAKE_INSTALL_PREFIX:PATH=&lt;install directory&gt; -DINCLUDE_VENDOR_LIBRARIES=FALSE -G "Visual Studio 12 Win64" .
+		-DCMAKE_INSTALL_PREFIX:PATH=&lt;install directory&gt; -DINCLUDE_VENDOR_LIBRARIES=FALSE -G "Visual Studio 15 Win64" .
 		</code>
 		</div>
 		<p/>
@@ -690,18 +700,18 @@
 		path.  For example,</p>
 
 		<div class=code><code>
-		C:\ <em>&lt;install directory&gt;</em>\bin\crux comet</code>
+		C:\<em>&lt;install directory&gt;</em>\bin\crux comet</code>
 		</div>
 
 		<p>In this final step of the installation, we'll set things up so that
 		you can also run any of the programs by just typing its name.  This is
 		done with an environment variable called <span
 		class=code>PATH</span>.  <span class=code>PATH</span> is a list of
-		directoires that the computer looks for executable programs.  Find out what
+		directories that the computer looks for executable programs.  Find out what
 		is in the current list with this command:
 		<p/>
 		<div class=code><code>
-		C:\ echo %PATH%</code><br>
+		C:\echo %PATH%</code><br>
 		</div>
 		<p/>
 		<p>The value returned might look something like this:
@@ -720,7 +730,7 @@
 		<p>The first directory in this semicolon-separated list, <span
 		class=out>C:\Windows</span>, is the first place the computer looks
 		for a program.  If it doesn't find the program there it tries <span
-		class=out>C:\WIndows\system32</span> and so on down the list.  You can either
+		class=out>C:\Windows\system32</span> and so on down the list.  You can either
 		move the crux executable files into one of these directories already
 		in your PATH, or you can add <span
 		class=code><em>&lt;install directory&gt;</em></span> to PATH with this

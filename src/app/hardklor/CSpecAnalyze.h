@@ -5,7 +5,7 @@
 #include "CMercury8.h"
 #include "HardklorTypes.h"
 #include "SpecAnalyzeSupport.h"
-#include "Spectrum.h"
+#include "MSToolkit/Spectrum.h"
 #include "S2N.h"
 #include "CHardklorSetting.h"
 #include "FFT-HK.h"

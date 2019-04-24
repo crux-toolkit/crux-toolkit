@@ -272,14 +272,20 @@ void CometApplication::setCometParameters(
   setDouble("add_Cterm_protein");
   setDouble("add_Nterm_protein");
   for (char c = 'A'; c <= 'Z'; c++) {
-    string aaName = AminoAcidUtil::GetName(c);
-    aaName = aaName.empty() ? "user_amino_acid" : StringUtils::Replace(aaName, " ", "_");
-    string param = "add_" + string(1, c) + "_" + aaName;
-    setDouble(param);
+    setDouble(staticModParam(c));
   }
 
   setEnzyme("[COMET_ENZYME_INFO]",
             "search_enzyme_number", "sample_enzyme_number", "allowed_missed_cleavage");
+}
+
+string CometApplication::staticModParam(char c) {
+  if (c < 'A' || c > 'Z') {
+    return "";
+  }
+  string aaName = AminoAcidUtil::GetName(c);
+  aaName = aaName.empty() ? "user_amino_acid" : StringUtils::Replace(aaName, " ", "_");
+  return "add_" + string(1, c) + "_" + aaName;
 }
 
 /**
@@ -403,6 +409,7 @@ vector<string> CometApplication::getOptions() const {
     "variable_mod07",
     "variable_mod08",
     "variable_mod09",
+    "auto_modifications",
     "max_variable_mods_in_peptide",
     "require_variable_mod",
     // Static modifications
@@ -443,7 +450,7 @@ vector<string> CometApplication::getOptions() const {
     "pm-max-frag-mz",
     "pm-min-scan-frag-peaks",
     "pm-max-precursor-delta-ppm",
-    "pm-charge",
+    "pm-charges",
     "pm-top-n-frag-peaks",
     "pm-pair-top-n-frag-peaks",
     "pm-min-common-frag-peaks",
@@ -496,43 +503,103 @@ void CometApplication::processParams() {
   // run param-medic?
   const string autoPrecursor = Params::GetString("auto_peptide_mass_tolerance");
   const string autoFragment = Params::GetString("auto_fragment_bin_tol");
-  if (autoPrecursor != "false" || autoFragment != "false") {
+  const bool autoMods = Params::GetBool("auto_modifications");
+  if (autoPrecursor != "false" || autoFragment != "false" || autoMods) {
     if (autoPrecursor != "false" && Params::GetInt("peptide_mass_units") != 2) {
       carp(CARP_FATAL, "Automatic peptide mass tolerance detection is only supported with ppm "
                        "units. Please rerun with either auto_peptide_mass_tolerance set to 'false' "
                        "or peptide_mass_units set to '2'.");
+    } else if (autoMods) {
+      // user cannot specify own mods if param-medic is going to infer them
+      for (int i = 1; i <= 9; i++) {
+        string mod = varModPrefix + StringUtils::ToString(i);
+        if (!Params::IsDefault(mod)) {
+          carp(CARP_FATAL, "Automatic modification inference cannot be used with user-specified "
+                           "modifications. Please rerun with either auto_modifications set to 'false' "
+                           "or with modifications turned off.");
+        }
+      }
+      for (char c = 'A'; c <= 'Z'; c++) {
+        string param = staticModParam(c);
+        if (!Params::IsDefault(param)) {
+          carp(CARP_FATAL, "Automatic modification inference cannot be used with user-specified "
+                           "modifications. Please rerun with either auto_modifications set to 'false' "
+                           "or with modifications turned off.");
+        }
+      }
     }
-    ParamMedicErrorCalculator errCalc;
-    errCalc.processFiles(Params::GetStrings("input spectra"));
-    string precursorFailure, fragmentFailure;
-    double precursorSigmaPpm = 0;
-    double fragmentSigmaPpm = 0;
-    double fragmentSigmaTh = 0;
-    double precursorPredictionPpm = 0;
-    double fragmentPredictionPpm = 0;
-    double fragmentPredictionTh = 0;
-    errCalc.calcMassErrorDist(&precursorFailure, &fragmentFailure,
-                              &precursorSigmaPpm, &fragmentSigmaPpm,
-                              &precursorPredictionPpm, &fragmentPredictionTh);
+    ParamMedic::RunAttributeResult errorCalcResult;
+    vector<ParamMedic::RunAttributeResult> modsResult;
+    ParamMedicApplication::processFiles(Params::GetStrings("input spectra"),
+      autoPrecursor != "false" || autoFragment != "false", autoMods, &errorCalcResult, &modsResult);
 
     if (autoPrecursor != "false") {
-      if (precursorFailure.empty()) {
-        carp(CARP_INFO, "precursor ppm standard deviation: %f", precursorSigmaPpm);
-        carp(CARP_INFO, "Precursor error estimate (ppm): %.2f", precursorPredictionPpm);
-        Params::Set("peptide_mass_tolerance", precursorPredictionPpm);
+      string fail = errorCalcResult.getValue(ParamMedic::ErrorCalc::KEY_PRECURSOR_FAILURE);
+      if (fail.empty()) {
+        double sigma = StringUtils::FromString<double>(
+          errorCalcResult.getValue(ParamMedic::ErrorCalc::KEY_PRECURSOR_SIGMA));
+        double prediction = StringUtils::FromString<double>(
+          errorCalcResult.getValue(ParamMedic::ErrorCalc::KEY_PRECURSOR_PREDICTION));
+        carp(CARP_INFO, "precursor ppm standard deviation: %f", sigma);
+        carp(CARP_INFO, "Precursor error estimate (ppm): %.2f", prediction);
+        Params::Set("peptide_mass_tolerance", prediction);
       } else {
         carp(autoPrecursor == "fail" ? CARP_FATAL : CARP_ERROR,
-             "failed to calculate precursor error: %s", precursorFailure.c_str());
+             "failed to calculate precursor error: %s", fail.c_str());
       }
     }
     if (autoFragment != "false") {
-      if (fragmentFailure.empty()) {
-        carp(CARP_INFO, "fragment standard deviation (ppm): %f", fragmentSigmaPpm);
-        carp(CARP_INFO, "Fragment bin size estimate (Th): %.4f", fragmentPredictionTh);
-        Params::Set("fragment_bin_tol", fragmentPredictionTh);
+      string fail = errorCalcResult.getValue(ParamMedic::ErrorCalc::KEY_FRAGMENT_FAILURE);
+      if (fail.empty()) {
+        double sigma = StringUtils::FromString<double>(
+          errorCalcResult.getValue(ParamMedic::ErrorCalc::KEY_FRAGMENT_SIGMA));
+        double prediction = StringUtils::FromString<double>(
+          errorCalcResult.getValue(ParamMedic::ErrorCalc::KEY_FRAGMENT_PREDICTION));
+        carp(CARP_INFO, "fragment ppm standard deviation: %f", sigma);
+        carp(CARP_INFO, "Fragment bin size estimate (Th): %.4f", prediction);
+        Params::Set("fragment_bin_tol", prediction);
       } else {
         carp(autoFragment == "fail" ? CARP_FATAL : CARP_ERROR,
-             "failed to calculate fragment error: %s", fragmentFailure.c_str());
+             "failed to calculate fragment error: %s", fail.c_str());
+      }
+    }
+    if (autoMods) {
+      int modNum = 1;
+      vector<ParamMedic::Modification> mods = ParamMedic::Modification::GetFromResults(modsResult);
+      for (vector<ParamMedic::Modification>::const_iterator i = mods.begin(); i != mods.end(); i++) {
+        string location = i->getLocation();
+        const double mass = i->getMassDiff();
+        const bool variable = i->getVariable();
+        if (variable) {
+          string distance = "-1";
+          string terminus = "0";
+          if (location == ParamMedic::Modification::LOCATION_NTERM) {
+            location = "n";
+            distance = "0";
+            terminus = "2";
+          } else if (location == ParamMedic::Modification::LOCATION_CTERM) {
+            location = "c";
+            distance = "0";
+            terminus = "3";
+          }
+          Params::Set("variable_mod0" + StringUtils::ToString(modNum++),
+            StringUtils::ToString(mass) + " " + location + " 0 4 " + distance + " " + terminus + " 0");
+        } else {
+          vector<string> params;
+          if (location == ParamMedic::Modification::LOCATION_NTERM) {
+            params.push_back("add_Nterm_peptide");
+          } else if (location == ParamMedic::Modification::LOCATION_CTERM) {
+            params.push_back("add_Cterm_peptide");
+          } else {
+            for (string::const_iterator i = location.begin(); i != location.end(); i++) {
+              params.push_back(staticModParam(*i));
+            }
+          }
+          for (vector<string>::const_iterator i = params.begin(); i != params.end(); i++) {
+            double existing = Params::GetDouble(*i);
+            Params::Set(*i, existing + mass);
+          }
+        }
       }
     }
   }

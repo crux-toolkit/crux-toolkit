@@ -9,7 +9,7 @@
 
 #include "MSObject.h"
 #include "MSReader.h"
-#include "Spectrum.h"
+#include "MSToolkit/Spectrum.h"
 #include "HardklorTypes.h"
 #include "CAveragine.h"
 #include "CMercury8.h"

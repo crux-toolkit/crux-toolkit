@@ -2,7 +2,7 @@
 #define _CNOISEREDUCTION_H
 
 #include "MSReader.h"
-#include "Spectrum.h"
+#include "MSToolkit/Spectrum.h"
 #include "CHardklorSetting.h"
 #include <cmath>
 #include <iostream>
