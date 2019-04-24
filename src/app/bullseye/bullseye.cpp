@@ -1,5 +1,5 @@
 #include "CKronik2.h"
-#include "Spectrum.h"
+#include "model/Spectrum.h"
 #include "MSReader.h"
 #ifdef CRUX
 #include "CruxBullseyeApplication.h"

@@ -22,12 +22,20 @@
 
 class Peak {
 public:
+    Peak();
+
     /**
      * Construct a Peak object
      * @param intensity: intensity for the new peak
      * @param location: location for the new peak
      */
     Peak(FLOAT_T intensity, FLOAT_T location);
+
+    Peak(const Peak& other);
+
+    friend void swap(Peak& x, Peak& y);
+
+    Peak& operator=(Peak rhs);
 
     /**
      * Return the intensity of this Peak
@@ -68,13 +76,13 @@ public:
      * Compare the intensity of this Peak and another Peak
      * Return true if this Peak is greater, false otherwise
      */
-    bool compareByIntensity(Peak other);
+    static bool compareByIntensity(const Peak& x, const Peak& y);
 
     /**
      * Compare the mz(location) of this Peak and another Peak
      * Return true if the other Peak is greater, false otherwise
      */
-    bool compareByMZ(Peak other);
+    static bool compareByMZ(const Peak& x, const Peak& y);
 
 private:
     FLOAT_T intensity_;          // The intensity of this peak

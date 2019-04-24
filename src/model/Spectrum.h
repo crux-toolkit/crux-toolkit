@@ -13,7 +13,6 @@
 #include "model/objects.h"
 #include "Peak.h"
 
-#include "Spectrum.h"
 #include "MSToolkit/Spectrum.h"
 #define  NO_BOOST_DATE_TIME_INLINE
 #include "pwiz/data/msdata/SpectrumInfo.hpp"
@@ -65,6 +64,7 @@ class Spectrum{
   bool             sorted_by_intensity_; ///< ... or by intensity?
   bool             has_mz_peak_array_; ///< Is the mz_peak_array populated.
   Peak         **mz_peak_array_;  ///< Allows rapid peak retrieval by mz.
+  bool             charge_state_assigned_;
 
   // constants
   /**
@@ -124,6 +124,10 @@ class Spectrum{
    * in the spectrum
    */
   PeakIterator end() const;
+
+  const Peak* getPeak(size_t i);
+
+  std::vector<Peak> getPeaks() const;
 
   /**
    * Prints a spectrum object to file.
@@ -265,7 +269,7 @@ class Spectrum{
   /**
    * \returns The sum of intensities in all peaks.
    */
-  double getTotalEnergy();
+  double getTotalEnergy() const;
 
   /**
    * Sets the total ion current.
@@ -314,6 +318,8 @@ class Spectrum{
    * \returns The intensity of the peak with the maximum intensity.
    */
   FLOAT_T getMaxPeakIntensity();
+
+  bool getChargeStateAssigned() const;
 
   /**
    * \returns The mass of the singly charged precursor ion, according

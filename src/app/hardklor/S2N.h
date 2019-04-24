@@ -1,7 +1,7 @@
 #ifndef _S2N_H
 #define _S2N_H
 
-#include "Spectrum.h"
+#include "MSToolkit/Spectrum.h"
 #include "Smooth.h"
 #include <algorithm>
 

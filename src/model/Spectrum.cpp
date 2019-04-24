@@ -11,7 +11,7 @@
 #include <string.h>
 #include <assert.h>
 #include <ctype.h>
-#include "Spectrum.h"
+#include "model/Spectrum.h"
 #include "util/utils.h"
 #include "util/mass.h"
 #include "util/Params.h"
@@ -46,7 +46,8 @@ Spectrum::Spectrum() :
    has_peaks_(false),
    sorted_by_mz_(false),
    sorted_by_intensity_(false),
-   has_mz_peak_array_(false)
+   has_mz_peak_array_(false),
+   charge_state_assigned_(false)
 {
   mz_peak_array_ = NULL;
 }
@@ -74,7 +75,8 @@ Spectrum::Spectrum (
    has_peaks_(false),
    sorted_by_mz_(false),
    sorted_by_intensity_(false),
-   has_mz_peak_array_(false)
+   has_mz_peak_array_(false),
+   charge_state_assigned_(false)
  {
   mz_peak_array_ = NULL;
 
@@ -111,6 +113,22 @@ PeakIterator Spectrum::begin() const {
  */
 PeakIterator Spectrum::end() const {
   return peaks_.end();
+}
+
+const Peak* Spectrum::getPeak(size_t i) {
+  if (i >= peaks_.size()) {
+    return NULL;
+  }
+  return peaks_[i];
+}
+
+vector<Peak> Spectrum::getPeaks() const {
+  vector<Peak> peaks;
+  peaks.reserve(peaks_.size());
+  for (vector<Peak*>::const_iterator i = peaks_.begin(); i != peaks_.end(); i++) {
+    peaks.push_back(**i);
+  }
+  return peaks;
 }
 
 /**
@@ -269,7 +287,8 @@ void Spectrum::printSqt(
  has_peaks_(old_spectrum.has_peaks_),
  sorted_by_mz_(old_spectrum.sorted_by_mz_),
  sorted_by_intensity_(old_spectrum.sorted_by_intensity_),
- has_mz_peak_array_(old_spectrum.has_mz_peak_array_)
+ has_mz_peak_array_(old_spectrum.has_mz_peak_array_),
+ charge_state_assigned_(old_spectrum.charge_state_assigned_)
 {
 
   // copy each peak
@@ -300,6 +319,7 @@ void Spectrum::copyFrom(Spectrum *src) {
  sorted_by_mz_ = src->sorted_by_mz_;
  sorted_by_intensity_ = src->sorted_by_intensity_;
  has_mz_peak_array_ = src->has_mz_peak_array_;
+ charge_state_assigned_ = src->charge_state_assigned_;
  // copy each peak
  for(int peak_idx=0; peak_idx < (int)src->peaks_.size(); ++peak_idx){
    this->addPeak(src->peaks_[peak_idx]->getIntensity(),
@@ -356,10 +376,8 @@ bool Spectrum::parseMstoolkitSpectrum
         mst_real_spectrum->atZ(z_idx).z);
       zstates_.push_back(zstate);
     }
-  } else if (!Params::GetBool("pm-ignore-no-charge")) { // if no charge states detected, decide based on spectrum
-    assignZState(); 
-  } else {
-    return false;
+  } else { // if no charge states detected, decide based on spectrum
+    charge_state_assigned_ = assignZState();
   }
 
   return true;
@@ -484,10 +502,8 @@ bool Spectrum::parsePwizSpecInfo(
           zstate.setMZ(precursor_mz_, charges[charge_idx].valueAs<int>());
           zstates_.push_back(zstate);
         }
-      } else if (!Params::GetBool("pm-ignore-no-charge")) { // we have no charge information
-        assignZState(); //do choose charge and add +1 or +2,+3
-      } else {
-        return false;
+      } else { // we have no charge information
+        charge_state_assigned_ = assignZState(); //do choose charge and add +1 or +2,+3
       }
     }
   }
@@ -712,7 +728,7 @@ int Spectrum::getNumPeaks() const
 /**
  * \returns The sum of intensities in all peaks.
  */
-double Spectrum::getTotalEnergy()
+double Spectrum::getTotalEnergy() const
 {
   return total_energy_;
 }
@@ -846,6 +862,10 @@ FLOAT_T Spectrum::getMaxPeakIntensity()
     }
   }
   return max_intensity; 
+}
+
+bool Spectrum::getChargeStateAssigned() const {
+  return charge_state_assigned_;
 }
 
 /**

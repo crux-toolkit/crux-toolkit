@@ -627,6 +627,7 @@ bool is_equal(FLOAT_T a, FLOAT_T b, int precision) {
  * returns A[1] NULL if only a filename was passed in
  * ex) ../../file_name => returns filename , ../../
  *     file_name => returns filename, NULL
+ * 
  *\returns A heap allocated array of both filename and path
  */
 char** parse_filename_path(const string& file) {
@@ -638,7 +639,8 @@ char** parse_filename_path(const string& file) {
   char** result = (char**)mycalloc(2, sizeof(char*));
 
   for (; end_idx > 0; --end_idx) {
-    if (file[end_idx - 1] == '/') {
+    if (file[end_idx - 1] == '/' || file[end_idx -1] == '\\') { 
+	  //"\\" is for windows machines.
       end_path = end_idx;
       break;
     }
@@ -955,10 +957,8 @@ char* generate_name_path(
 
   // parse path, filename, extension
   char** name_path = parse_filename_path_extension(filename, old_suffix);
-
   // add the extension
   char* new_name = cat_string(name_path[0], new_suffix);
-
   // add path to new filename
   char* full_new_name = get_full_filename(new_path, new_name);
 
