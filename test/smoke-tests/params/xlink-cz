@@ -10,3 +10,6 @@ use-x-ions=F
 use-y-ions=F
 use-z-ions=T
 isotopic-mass=average
+mz-bin-width=1.0005079
+precursor-window=3
+precursor-window-type=mass

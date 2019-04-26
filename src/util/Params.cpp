@@ -242,12 +242,12 @@ Params::Params() : finalized_(false) {
     "Available from command line or parameter file for crux-generate-peptides. "
     "When used with enzyme=<trypsin|elastase|chymotrypsin> "
     "includes peptides containing one or more potential cleavage sites.", true);
-  InitDoubleParam("precursor-window", 3.0, 0, BILLION,
+  InitDoubleParam("precursor-window", 50.0, 0, BILLION,
     "Tolerance used for matching peptides to spectra. Peptides must be within +/- "
     "'precursor-window' of the spectrum value. The precursor window units depend upon "
     "precursor-window-type.",
     "Available for tide-search and crux-generate-peptides.", true);
-  InitStringParam("precursor-window-type", "mass", "mass|mz|ppm",
+  InitStringParam("precursor-window-type", "ppm", "mass|mz|ppm",
     "Specify the units for the window that is used to select peptides around the precursor "
     "mass location (mass, mz, ppm). The magnitude of the window is defined by the precursor-"
     "window option, and candidate peptides must fall within this window. For the mass window-"
@@ -359,7 +359,7 @@ Params::Params() : finalized_(false) {
   /* N.B. Use NaN to indicate that no user preference was specified.
    * In this case, the default value depends on the mass type.
    * S.M. Also prevent a width of 0.                                */
-  InitDoubleParam("mz-bin-width", 1.0005079, 1e-4, BILLION,
+  InitDoubleParam("mz-bin-width", 0.02, 1e-4, BILLION,
     "Before calculation of the XCorr score, the m/z axes of the observed and theoretical "
     "spectra are discretized. This parameter specifies the size of each bin. The exact "
     "formula for computing the discretized m/z value is floor((x/mz-bin-width) + 1.0 - mz-bin-offset), where x is the observed m/z "

@@ -4,3 +4,4 @@ quant-level=protein
 input-ms2=test.ms2
 parsimony=greedy
 measure=SIN
+mz-bin-width=1.0005079

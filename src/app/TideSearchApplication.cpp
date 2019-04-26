@@ -117,12 +117,11 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
   exact_pval_search_ = Params::GetBool("exact-p-value");
   bin_width_  = Params::GetDouble("mz-bin-width");
   bin_offset_ = Params::GetDouble("mz-bin-offset");
+
   // for now don't allow XCorr p-value or combined p-values
   // searches with variable bin width
-  if (exact_pval_search_ && !Params::IsDefault("mz-bin-width")) {
-    carp(CARP_FATAL, "Tide-search with variable bin width and "
-                     "XCorr p-value or combined p-value "
-                     "is not allowed in this version of Crux.");
+  if (exact_pval_search_ && bin_width_ != MassConstants::bin_width_) {
+    carp(CARP_FATAL, "Computing exact p-value (i.e setting exact-p-value=T) requires that mz-bin-width be set to 1.0005079");
   }
 
   // Check that combined p-value is with exact-p-value=T
