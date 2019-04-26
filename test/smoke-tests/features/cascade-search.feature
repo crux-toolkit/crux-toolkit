@@ -26,8 +26,8 @@ Examples:
   |cascade-q-value|--q-value-threshold 0.0005                                      |small_yeast_index,small_yeast_index_mc1|demo.ms2|cascade-search.target.txt|cascade-q-value.txt |
   |cascade-min-max|--estimation-method min-max                                     |small_yeast_index,small_yeast_index_mc1|demo.ms2|cascade-search.target.txt|cascade-min-max.txt |
   |cascade-pep-lvl|--estimation-method peptide-level                               |small_yeast_index,small_yeast_index_mc1|demo.ms2|cascade-search.target.txt|cascade-pep-lvl.txt |
-  |cascade-extpval|--score "exact p-value" --exact-p-value T                       |small_yeast_index,small_yeast_index_mc1|demo.ms2|cascade-search.target.txt|cascade-extpval.txt |
-  |cascade-sidak  |--score "exact p-value" --exact-p-value T --sidak T             |small_yeast_index,small_yeast_index_mc1|demo.ms2|cascade-search.target.txt|cascade-sidak.txt   |
+  |cascade-extpval|--score "exact p-value" --exact-p-value T --mz-bin-width 1.0005079            |small_yeast_index,small_yeast_index_mc1|demo.ms2|cascade-search.target.txt|cascade-extpval.txt |
+  |cascade-sidak  |--score "exact p-value" --exact-p-value T --sidak T --mz-bin-width 1.0005079  |small_yeast_index,small_yeast_index_mc1|demo.ms2|cascade-search.target.txt|cascade-sidak.txt   |
   |cascade-comb-cs|--estimation-method peptide-level --combine-charge-states T     |small_yeast_index,small_yeast_index_mc1|demo.ms2|cascade-search.target.txt|cascade-comb-cs.txt |
   |cascade-comb-mp|--estimation-method peptide-level --combine-modified-peptides T |small_yeast_index,small_yeast_index_mc1|demo.ms2|cascade-search.target.txt|cascade-comb-mp.txt |
   |cascade-file-column|--file-column F                                             |small_yeast_index                      |demo.ms2|cascade-search.target.txt|cascade-file-column.txt|
