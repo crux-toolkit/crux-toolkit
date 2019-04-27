@@ -374,7 +374,7 @@ const vector<Modification>& RunAttributeResult::getMods() const {
   return modifications_;
 }
 
-const string RunAttributeResult::ERROR = "ERROR";
+const string RunAttributeResult::ERROR_MESSAGE = "ERROR";
 
 ErrorCalc::ErrorCalc():
   numTotalSpectra_(0) {

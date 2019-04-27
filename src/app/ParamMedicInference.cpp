@@ -54,8 +54,8 @@ RunAttributeResult PhosphoLossProportionCalc::summarize() const {
   RunAttributeResult result;
   if (numSpectraUsed_ == 0) {
     carp(CARP_WARNING, "No spectra usable for phosphorylation detection");
-    result.setValue("phospho_present", RunAttributeResult::ERROR);
-    result.setValue("phospho_statistic", RunAttributeResult::ERROR);
+    result.setValue("phospho_present", RunAttributeResult::ERROR_MESSAGE);
+    result.setValue("phospho_statistic", RunAttributeResult::ERROR_MESSAGE);
     return result;
   }
   vector<double> values;
@@ -596,9 +596,9 @@ RunAttributeResult SilacDetector::summarize() const {
          i != modBinDistances_.end();
          i++) {
       result.setValue("SILAC_" + StringUtils::ToString(*i) + "Da_present",
-                      RunAttributeResult::ERROR);
+                      RunAttributeResult::ERROR_MESSAGE);
       result.setValue("SILAC_" + StringUtils::ToString(*i) + "Da_statistic",
-                      RunAttributeResult::ERROR);
+                      RunAttributeResult::ERROR_MESSAGE);
     }
     return result;
   }
