@@ -73,7 +73,7 @@ class RunAttributeResult {
 
   static std::string getFirstValue(const std::vector<RunAttributeResult>& results, const std::string& name);
 
-  static const std::string ERROR;
+  static const std::string ERROR_MESSAGE;
  private:
   // modifications recommended as a result of analysis
   std::vector<Modification> modifications_;
