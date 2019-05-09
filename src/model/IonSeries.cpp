@@ -140,6 +140,16 @@ IonSeries::IonSeries(
   // create the loss limit array
   loss_limit_ = loss_limit_cache.checkout();
   //loss_limit_ = new LOSS_LIMIT_T[GlobalParams::getMaxLength()];
+  if  (peptide_length_ > GlobalParams::getMaxLength()) {
+    carp(
+      CARP_FATAL, 
+      "The peptide %s has length = %d, which exceeds the max length of %d.\n"
+      "Increase the value of the max-length parameter\n",
+      peptide_.c_str(),
+      peptide_length_,
+      GlobalParams::getMaxLength()
+   );
+  }
   memset(loss_limit_, 0, sizeof(LOSS_LIMIT_T) * peptide_length_);
 }
 
@@ -209,6 +219,16 @@ void IonSeries::update(
 
   // Initialize the loss limit array for the new peptide
   //carp(CARP_INFO, "loss_limit_:%d peptide_length:%d", loss_limit_, peptide_length_);
+  if  (peptide_length_ > GlobalParams::getMaxLength()) {
+    carp(
+      CARP_FATAL, 
+      "The peptide %s has length = %d, which exceeds the max length of %d.\n"
+      "Increase the value of the max-length parameter\n",
+      peptide_.c_str(),
+      peptide_length_,
+      GlobalParams::getMaxLength()
+   );
+  }
   memset(loss_limit_, 0, sizeof(LOSS_LIMIT_T) * peptide_length_);
 }
 
