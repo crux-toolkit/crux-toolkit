@@ -56,6 +56,11 @@ string FileUtils::Read(const string& path) {
   return s->Read(path);
 }
 
+string FileUtils::Read(const string& path, int byteCount) {
+  GenericStorageSystem* s = GenericStorageSystem::getStorage(path);
+  return s->Read(path);
+}
+
 ostream* FileUtils::GetWriteStream(const string& path, bool overwrite) {
   GenericStorageSystem* s = GenericStorageSystem::getStorage(path);
   ostream* res = s->GetWriteStream(path, overwrite);

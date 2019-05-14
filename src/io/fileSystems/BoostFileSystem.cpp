@@ -1,37 +1,45 @@
 #include "BoostFileSystem.h"
 #include "io/carp.h"
+#include "pwiz/utility/misc/random_access_compressed_ifstream.hpp"
 
+#include <ios>
 #include <fstream>
 
 using namespace std;
 
 string BoostFileSystem::Read(const string& path) {
+  return BoostFileSystem::Read(path, -1);
+}
+
+string BoostFileSystem::Read(const std::string &path, int byteCount){
   try {
     ifstream stream(path.c_str());
     stream.seekg(0, ios::end);
     size_t size = stream.tellg();
-    string buffer(size, '\0');
+    int bytesToRead = byteCount > size ? size : byteCount;
+    string buffer(bytesToRead, '\0');
     stream.seekg(0);
-    stream.read(&buffer[0], size);
+    stream.read(&buffer[0], bytesToRead);
     return buffer;
   } catch (...) {
     throw runtime_error("Error reading file '" + path + "'");
   }
 }
-
+  
 ostream* BoostFileSystem::GetWriteStream(const string& path, bool overwrite) {
   if (Exists(path) && !overwrite) {
     return NULL;
   }
-  ofstream* stream = new ofstream(path.c_str());
-  if (!stream->good()) {
+  ostream* stream = (std::ostream*) new ofstream(path.c_str());
+  if (! stream -> good()) {
     delete stream;
     return NULL;
   }
   return stream;
 }
+
 istream& BoostFileSystem::GetReadStream(const string &path){
-  ifstream* stream = new ifstream(path);
+  istream* stream = new pwiz::util::random_access_compressed_ifstream(path.c_str());
   if(!stream->good()){
     delete stream;
     carp(CARP_FATAL, "Cannot open input stream for the file %s", path.c_str());

@@ -14,6 +14,12 @@
 
 #include "io/carp.h"
 
+#include <fstream>
+#include <iostream>
+#include <boost/iostreams/filtering_streambuf.hpp>
+//#include <boost/iostreams/copy.hpp>
+#include <boost/iostreams/filter/gzip.hpp>
+
 #include "AwsS3System.h"
 
 using namespace Aws::S3;
@@ -24,6 +30,9 @@ const regex AwsS3System::uri_pattern{"s3://([^/]+)(((/[^/]+)*)(/([^/.]+)(\\.([^/
         , regex::icase};
 const regex AwsS3System::bucket_pattern{"s3://([^/]+)/?$", regex::icase};
 const regex AwsS3System::path_pattern{"/?([^/]+(/[^/]+)*)", regex::icase};
+
+static int const gz_magic[2] = {0x1f, 0x8b}; /* gzip magic header */
+
 
 AwsS3System::AwsS3System(){
     Aws::InitAPI(m_options);
@@ -161,6 +170,19 @@ string AwsS3System::Read(const string &path){
     return res_stream.str();
 }
 
+string AwsS3System::Read(const string &path, int byteCount){
+    stringstream res_stream;
+    streambuf * buf = GetReadStream(path).rdbuf();
+    int i = 0;
+    do {
+        i++;
+        res_stream << (char)buf -> sgetc();
+    }while(buf-> snextc() != EOF && i < byteCount);
+
+    return res_stream.str();
+}
+
+
 ostream* AwsS3System::GetWriteStream(const string &path, bool overwrite){
     //TODO_RC: Implement method. We have to accumulate the stream data in memory before sending it to S3
     carp(CARP_FATAL, "Writing to S3 is not supported.");
@@ -186,8 +208,26 @@ istream& AwsS3System::GetReadStream(const string &path){
                 (ios_base*)&getObjectOutcome->GetResult().GetBody(), (void*)getObjectOutcome};
         _RegisterStream(sr);
          auto& result = (istream&)(getObjectOutcome->GetResult().GetBody());
-         result.good();
-         return result;
+         if(result.good()){
+             //checking if this is a gzipped file
+             if(result.rdbuf()->sbumpc() == gz_magic[0] && result.rdbuf()->sbumpc() == gz_magic[1]){
+                result.rdbuf()->pubseekpos(0);  //rewind back to the starting position.
+                //Read from the first command line argument, assume it's gzipped
+                boost::iostreams::filtering_streambuf<boost::iostreams::input> inbuf;
+                inbuf.push(boost::iostreams::gzip_decompressor());
+                inbuf.push(result);
+                //Convert streambuf to istream
+                std::istream* instream = new std::istream(&inbuf);
+                return *instream;
+             }
+             else  { //not a gzipped stream, returning as is.
+                result.rdbuf()->pubseekpos(0);  //rewind back to the starting position.
+                 return result;
+             }
+         }
+         else{
+             carp(CARP_FATAL, "Error while handling AWS data stream for the object %s", path.c_str());
+         }
     }
     else
     {

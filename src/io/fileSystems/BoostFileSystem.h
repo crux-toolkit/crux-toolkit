@@ -41,6 +41,7 @@ public:
   }
 
   std::string Read(const std::string &path);
+  std::string Read(const std::string &path, int byteCount);
   std::ostream *GetWriteStream(const std::string &path, bool overwrite);
   std::istream &GetReadStream(const string &path);
 

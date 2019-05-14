@@ -17,6 +17,7 @@
 #include "io/carp.h"
 #include "util/WinCrux.h"
 #include <iostream>
+#include "util/FileUtils.h"
 
 using namespace std;
 using namespace Crux;
@@ -35,21 +36,14 @@ SpectrumCollection::SpectrumCollection (
   char path_buffer[PATH_MAX];
   char* absolute_path_file =  realpath(filename.c_str(), path_buffer);
 #else
-  char* absolute_path_file =  realpath(filename.c_str(), NULL);
+  string absolute_path_file = FileUtils::AbsPath(filename);
 #endif
-  if (absolute_path_file == NULL) {
-    carp(CARP_FATAL, "Error from spectrum file '%s'. (%s)",
+  if (absolute_path_file.length() == 0) {
+    carp(CARP_FATAL, "Invalid path for the spectrum file '%s'. (%s)",
          filename.c_str(), strerror(errno)); 
   }
   
-  if(access(absolute_path_file, F_OK)) {
-    carp(CARP_FATAL, "File %s could not be opened\n", absolute_path_file);
-  }
   filename_ = absolute_path_file;
-
-#ifndef DARWIN
-  free(absolute_path_file);
-#endif
 }
 
 /**

@@ -16,6 +16,7 @@ class FileUtils {
   static std::string Join(const std::string& path1, const std::string& path2);
   static string AbsPath(const string& path);
   static std::string Read(const std::string& path);
+  static std::string Read(const string& path, int byteCount);
   static std::ostream* GetWriteStream(const std::string& path, bool overwrite);
   static std::istream& GetReadStream(const std::string& path);
   static void CloseStream(ios_base& stream);
