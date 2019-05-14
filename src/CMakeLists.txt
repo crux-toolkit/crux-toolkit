@@ -189,6 +189,7 @@ set (
   app/TideMatchSet.cpp
   app/TideSearchApplication.cpp
   util/utils.cpp
+  io/pwizReaders/DefaultReaderList.cpp
 )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")

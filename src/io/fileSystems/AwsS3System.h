@@ -33,6 +33,7 @@ public:
   string Join(const string &path1, const string &path2);
   string AbsPath(const string& path);
   string Read(const string &path);
+  string Read(const string &path, int byteCount);
   ostream *GetWriteStream(const string &path, bool overwrite);
   istream& GetReadStream(const string &path);
   string BaseName(const string &path);

@@ -11,6 +11,8 @@
 #include "parameter.h"
 #include <iostream>
 #include "pwiz/data/msdata/SpectrumInfo.hpp"
+#include "io/pwizReaders/MSDataFile.hpp"
+
 #if defined (_MSC_VER) &&  defined(INCLUDE_VENDOR_LIBRARIES)
 #include "pwiz/data/msdata/DefaultReaderList.hpp"
 //#include "pwiz/data/vendor_readers/ABI/Reader_ABI.hpp"
@@ -49,7 +51,7 @@ PWIZSpectrumCollection::PWIZSpectrumCollection(
 #else
   carp(CARP_DETAILED_INFO, "Support for vendor specific formats not enabled.");  
   try {
-    reader_ = new pwiz::msdata::MSDataFile(filename_);
+    reader_ = new crux::msdata::MsDataFileAws(filename_);
   }
   catch (const runtime_error& error) {
     carp(CARP_FATAL, "Unable to parse spectrum file %s. Error: %s.", filename_.c_str(), error.what());  

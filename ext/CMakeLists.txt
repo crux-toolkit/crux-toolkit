@@ -128,6 +128,10 @@ else (UNIX)
     ProteoWizard
     ${PWIZ_SOURCE}
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
+    PATCH_COMMAND
+      ${CMAKE_COMMAND}  -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/patches/pwiz/MSDataFile.hpp
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/pwiz/data/msdata/
     CONFIGURE_COMMAND ""
     BUILD_COMMAND
       ${CMAKE_COMMAND}

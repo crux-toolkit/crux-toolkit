@@ -28,6 +28,7 @@ public:
   virtual string Join(const string &path1, const string &path2) = 0;
   virtual string AbsPath(const string& path) = 0;
   virtual string Read(const string &path) = 0;
+  virtual string Read(const string &path, int byteCount) = 0;
   virtual ostream *GetWriteStream(const string &path, bool overwrite) = 0;
   virtual istream& GetReadStream(const string &path) = 0;
   virtual string BaseName(const string &path) = 0;
