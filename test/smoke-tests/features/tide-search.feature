@@ -5,7 +5,7 @@ Feature: tide-index / tide-search
     returning a collection of peptide-spectrum matches (PSMs)
 
 Scenario Outline: User runs tide-index / tide-search
-  Given the path to Crux is ../../build/src/crux
+  Given the path to Crux is ../../src/crux
   And I want to run a test named <test_name>
   And I pass the arguments --overwrite T --seed 7 <index_args> <fasta> <index>
   When I run tide-index as an intermediate step
@@ -61,6 +61,6 @@ Examples:
   |tide-resEv-pval-7thread|                                                     |--score-function residue-evidence --exact-p-value T --num-threads 7 --use-neutral-loss-peaks F |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-resEv.txt   |
   |tide-deiso     |                                                             |--deisotope 10                                          |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-deiso.txt     |
   |tide-deiso-pval|                                                             |--deisotope 10 --exact-p-value t                        |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-deiso-pval.txt|
-  |tide-s3-ms2    |                                                             |                                                        |small-yeast.fasta|tide_test_index|s3://proteo/test/demo.ms2   |tide-search.target.txt|tide-default.txt   |
-  |tide-s3-mgf    |                                                             |                                                        |small-yeast.fasta|tide_test_index|s3://proteo/test/demo.mgf   |tide-search.target.txt|tide-search.s3.mgf.txt   |
-  |tide-s3-mzML   |                                                             |                                                        |small-yeast.fasta|tide_test_index|s3://proteo/test/demo.mzML  |tide-search.target.txt|tide-default.txt   |
+  |tide-s3-ms2    |                                                             |                                                        |small-yeast.fasta|tide_test_index|s3://tide-source-data-east-1/crux-test-data/demo.ms2   |tide-search.target.txt|tide-default.txt   |
+  |tide-s3-mgf    |                                                             |                                                        |small-yeast.fasta|tide_test_index|s3://tide-source-data-east-1/crux-test-data/demo.mgf   |tide-search.target.txt|tide-search.s3.mgf.txt   |
+  |tide-s3-mzML   |                                                             |                                                        |small-yeast.fasta|tide_test_index|s3://tide-source-data-east-1/crux-test-data/demo.mzML  |tide-search.target.txt|tide-default.txt   |
