@@ -40,6 +40,15 @@ RUN git config --global user.email "you@example.com" && \
 
 COPY . /src/crux-toolkit
 
+# Build the AWS SDK separately per Rita's instructions
+###
+
+WORKDIR /src/crux-toolkit/aws-sdk
+
+RUN cmake -DCMAKE_BUILD_TYPE=Release .
+
+RUN make
+
 # Next build crux
 ###
 
