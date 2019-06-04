@@ -110,20 +110,14 @@ cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo . # Build with optimizations turned on, 
 make clean # remove any existing object files
 make
 </pre>
-<h3>Using a stable version of ProteoWizard</h3>
-By default, the trunk of Crux will obtain the latest succsesful build of
-the ProteoWizard source from the ProteoWizard SVN repository.
-Changes to the ProteoWizard source tree will sometimes keep Crux from building.
-To work around this, you can force the Crux build to use a stable copy of the
-ProteoWizard source:
-<pre>
-cmake -DUSE_LATEST_PWIZ=OFF .
-</pre>
-This will download and build ProteoWizard from a source tarball stored
-on the Crux website.
-This tarball is known to work with the latest numbered release of Crux.
+<h3>Using the latest version of ProteoWizard</h3>
+By default, the Crux build will download a static cached version
+of the Proteowizard source code from 
+<a
+href="http://noble.gs.washington.edu/crux-downloads">http://noble.gs.washington.edu/crux-downloads</a>.
 <p/>
-You can turn downloading of the latest ProteoWizard source back on with:
+You can configure the Crux build to download the latest version of the ProteoWizard source
+by setting the <code>USE_LATEST_PWIZ</code> to <code>ON</code>:
 <pre>
 cmake -DUSE_LATEST_PWIZ=ON .
 </pre>

@@ -56,15 +56,11 @@ git pull
 # Create branch for bug fixes to release
 git checkout -b crux-3.2
 </pre>
-<h3>Prepare a static tarball of Proteowizard</h3>
-The normal build of Crux pulls the latest version of Proteowizard 
-from it's TeamCity repository.
-This is a moving target, and may result in bugs or build breaks
-as the Proteowizard team makes changes. 
-For numbered releases we download the current version of Proteowizard
-and save it into as a static tarball on our web site.
-When users build the release from source, this tarball is downloaded,
-and used to build the Proteowizard libraries.
+<h3>Updating the tarball of the Proteowizard source</h3>
+The default build of Crux uses a cached version of Proteowizard 
+stored at 
+<a href="http://noble.gs.washington.edu/crux-downloads">http://noble.gs.washington.edu/crux-downloads</a>
+It may be neccesary to update this tar ball occasionally.
 <p/>
 The script <code>ext/download-pwiz-tarball.sh</code>
 can be used to download a copy of the Proteowizard source tarball
@@ -74,13 +70,13 @@ It can then be copied into the download directory for the new release on the
 <code>noble-web</code> on the GS network.
 The Crux download directory is under the Noble Lab website,
 in <code>/noble/www/htdocs/crux-downloads</code>.
-<h3>Modify the Crux build to use the new Proteowizard tarball.</h3>
+<p/>
+The Crux build will then need to be modiefied to use the new 
+Proteowizard tarball.</h3>
 This is done by editing <code>ext\CMakeLists.txt.</code>
 Look for blocks of code  in the clauses depending
 on <code>USE_LATEST_PWIZ</code>.
-There will be two such blocks, one for Windows, and one for non-Windows.
-Change these blocks to use only the Proteowizard tarball on the Crux web site.
-Note that this edit should <b>not</b> be merged back into the trunk.
+Change these blocks to point to the new Proteowizard tarball on the Crux web site.
 <h3>Modify the Crux build to use a fixed version of Percolator</h3>
 In <code>ext/CMakeLists.txt</code> set the CMake varible <code>PERCOLATOR_GIT_VERSION</code>
 to the tag for the current release of Percolator.

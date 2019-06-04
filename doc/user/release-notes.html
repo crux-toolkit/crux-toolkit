@@ -60,6 +60,13 @@
 
 <ul>
 
+  <li>June 4, 2019: The Crux automatic build process was modified to use a cached version 
+  of the Proteowizard source, rather than always using the latest version available.
+  The current cached version is Proteowizard 3.0, Git commit c172999.
+  You can configure the Crux build to use the most recent available
+  Proteowizard source code by passing the option
+  -DUSE_LATEST_PWIZ=ON on the CMake command line.
+  </li>
   <li>
     April 23, 2019: Updated Param-Medic to enable inference of the
     presence of various types of modifications, including

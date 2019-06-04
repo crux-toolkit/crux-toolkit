@@ -12,7 +12,7 @@ if (UNIX)
 endif (UNIX)
 SET(ENV{CMAKE_PREFIX_PATH} ${CMAKE_CURRENT_BINARY_DIR})
 SET(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR})
-SET(USE_LATEST_PWIZ ON CACHE BOOL "Use lastest version of ProteoWizard")
+SET(USE_LATEST_PWIZ OFF CACHE BOOL "Use lastest version of ProteoWizard")
 
 if (UNIX AND BUILD_32)
   SET(TOOLCHAIN_FILE "-DCMAKE_TOOLCHAIN_FILE=${CMAKE_SOURCE_DIR}/linux_i686.toolchain.cmake")
@@ -55,7 +55,7 @@ else (USE_LATEST_PWIZ)
   # Use tarball cached on our server
   set(
       PWIZ_SOURCE
-      URL https://noble.gs.washington.edu/crux-downloads/pwiz-src-3_0_18137_c65b6f6.tar.bz2
+      URL https://noble.gs.washington.edu/crux-downloads/pwiz-src-3_0_19149_c172999.tar.bz2
   )
 endif (USE_LATEST_PWIZ)
 
