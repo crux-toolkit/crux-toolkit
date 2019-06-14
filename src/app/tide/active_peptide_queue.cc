@@ -390,6 +390,10 @@ int ActivePeptideQueue::CountAAFrequencyRes(
         allMap[dAAResidueMass[i]] = 1;
       }
     }
+
+    //release memory
+    delete[] dAAResidueMass;
+    fifo_alloc_peptides_.ReleaseAll();
   }
 
   //determine the unique masses for all residues
