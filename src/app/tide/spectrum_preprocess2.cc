@@ -293,6 +293,7 @@ void ObservedPeakSet::addEvidToResEvMatrix(
   vector<double>& ionIntens,
   vector<double>& ionIntensitiesSort,
   int numSpecPeaks,
+  int maxPrecurMassBin,
   int nAA,
   const vector<double>& aaMass,
   const vector<int>& aaMassBin,
@@ -343,7 +344,13 @@ void ObservedPeakSet::addEvidToResEvMatrix(
 
       // Add evidence to matrix
       // Use -1 since all mass bins are index 1 instead of index 0
-      residueEvidenceMatrix[curAaMass][newResMassBin-1] += score;
+      // Bounds checks. Only add score if smaller than precursor mass bin.
+      // When assuming each fragment peak is a 2+ charge, it is possible
+      // to have a fragment peak larger than precursor mass (ie why
+      // bounds check is needed).
+      if (newResMassBin <= maxPrecurMassBin) {
+        residueEvidenceMatrix[curAaMass][newResMassBin-1] += score;
+      }
     }
   }
 }
@@ -525,8 +532,8 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   ionIntens.push_back(0.0);
 
   addEvidToResEvMatrix(ionMass, ionMassBin, ionMasses, ionIntens, ionIntensitiesSort,
-                       numSpecPeaks, nAA, aaMass, aaMassBin, residueToleranceMass,
-                       residueEvidenceMatrix);
+                       numSpecPeaks, maxPrecurMassBin, nAA, aaMass, aaMassBin,
+                       residueToleranceMass, residueEvidenceMatrix);
   ionMass.clear();
   ionMassBin.clear();
   ionIntens.clear();
@@ -561,65 +568,70 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   reverse(ionIntens.begin(), ionIntens.end());
 
   addEvidToResEvMatrix(ionMass, ionMassBin, ionMasses, ionIntens, ionIntensitiesSort,
-                       numSpecPeaks, nAA, aaMass, aaMassBin, residueToleranceMass,
-                       residueEvidenceMatrix);
+                       numSpecPeaks, maxPrecurMassBin, nAA, aaMass, aaMassBin,
+                       residueToleranceMass, residueEvidenceMatrix);
   ionMass.clear();
   ionMassBin.clear();
   ionIntens.clear();
 
-  // Find pairs of b ions in 2+ charge state
-  ionMass.push_back(nTermMass);
-  ionMassBin.push_back(MassConstants::mass2bin(nTermMass));
-  ionIntens.push_back(0.0);
+  // Assuming fragment ion peaks are 2+ charge only works if
+  // precusor mass charge is greater than 1.
+  if (precurCharge != 1) {
 
-  for (int ion = 0; ion < ionMasses.size(); ion++) {
-    double tmpIonMass = 2.0 * ionMasses[ion] - massHMono;
-    int binTmpIonMass = (int)floor(MassConstants::mass2bin(tmpIonMass));
+    // Find pairs of b ions in 2+ charge state
+    ionMass.push_back(nTermMass);
+    ionMassBin.push_back(MassConstants::mass2bin(nTermMass));
+    ionIntens.push_back(0.0);
 
-    ionMass.push_back(tmpIonMass);
-    ionMassBin.push_back(binTmpIonMass);
-    ionIntens.push_back(ionIntensities[ion]);
-  }
-  ionMass.push_back(precursorMass - cTermMass);
-  ionMassBin.push_back(MassConstants::mass2bin(precursorMass - cTermMass));
-  ionIntens.push_back(0.0);
+    for (int ion = 0; ion < ionMasses.size(); ion++) {
+      double tmpIonMass = 2.0 * ionMasses[ion] - massHMono;
+      int binTmpIonMass = (int)floor(MassConstants::mass2bin(tmpIonMass));
 
-  addEvidToResEvMatrix(ionMass, ionMassBin, ionMasses, ionIntens, ionIntensitiesSort,
-                       numSpecPeaks, nAA, aaMass, aaMassBin, residueToleranceMass,
-                      residueEvidenceMatrix);
-  ionMass.clear();
-  ionMassBin.clear();
-  ionIntens.clear();
-
-  // Find pairs of y ions in 2+ charge state
-  ionMass.push_back(precursorMass - cTermMass);
-  ionMassBin.push_back(MassConstants::mass2bin(precursorMass - cTermMass));
-  ionIntens.push_back(0.0);
-
-  for (int ion = 0; ion < ionMasses.size(); ion++) {
-    double tmpIonMass = precursorMass - (2.0 * ionMasses[ion] - massHMono) + (2.0 * massHMono);
-    int binTmpIonMass = (int)floor(MassConstants::mass2bin(tmpIonMass));
-
-    if (tmpIonMass > 0.0) {
       ionMass.push_back(tmpIonMass);
       ionMassBin.push_back(binTmpIonMass);
       ionIntens.push_back(ionIntensities[ion]);
     }
+    ionMass.push_back(precursorMass - cTermMass);
+    ionMassBin.push_back(MassConstants::mass2bin(precursorMass - cTermMass));
+    ionIntens.push_back(0.0);
+
+    addEvidToResEvMatrix(ionMass, ionMassBin, ionMasses, ionIntens, ionIntensitiesSort,
+                         numSpecPeaks, maxPrecurMassBin, nAA, aaMass, aaMassBin,
+                         residueToleranceMass, residueEvidenceMatrix);
+    ionMass.clear();
+    ionMassBin.clear();
+    ionIntens.clear();
+
+    // Find pairs of y ions in 2+ charge state
+    ionMass.push_back(precursorMass - cTermMass);
+    ionMassBin.push_back(MassConstants::mass2bin(precursorMass - cTermMass));
+    ionIntens.push_back(0.0);
+
+    for (int ion = 0; ion < ionMasses.size(); ion++) {
+      double tmpIonMass = precursorMass - (2.0 * ionMasses[ion] - massHMono) + (2.0 * massHMono);
+      int binTmpIonMass = (int)floor(MassConstants::mass2bin(tmpIonMass));
+
+      if (tmpIonMass > 0.0) {
+        ionMass.push_back(tmpIonMass);
+        ionMassBin.push_back(binTmpIonMass);
+        ionIntens.push_back(ionIntensities[ion]);
+      }
+    }
+    ionMass.push_back(nTermMass);
+    ionMassBin.push_back(MassConstants::mass2bin(nTermMass));
+    ionIntens.push_back(0.0);
+
+    reverse(ionMass.begin(), ionMass.end());
+    reverse(ionMassBin.begin(),ionMassBin.end());
+    reverse(ionIntens.begin(), ionIntens.end());
+
+    addEvidToResEvMatrix(ionMass, ionMassBin, ionMasses, ionIntens, ionIntensitiesSort,
+                         numSpecPeaks, maxPrecurMassBin, nAA, aaMass, aaMassBin,
+                         residueToleranceMass, residueEvidenceMatrix);
+    ionMass.clear();
+    ionMassBin.clear();
+    ionIntens.clear();
   }
-  ionMass.push_back(nTermMass);
-  ionMassBin.push_back(MassConstants::mass2bin(nTermMass));
-  ionIntens.push_back(0.0);
-
-  reverse(ionMass.begin(), ionMass.end());
-  reverse(ionMassBin.begin(),ionMassBin.end());
-  reverse(ionIntens.begin(), ionIntens.end());
-
-  addEvidToResEvMatrix(ionMass, ionMassBin, ionMasses, ionIntens, ionIntensitiesSort,
-                       numSpecPeaks, nAA, aaMass, aaMassBin, residueToleranceMass,
-                       residueEvidenceMatrix);
-  ionMass.clear();
-  ionMassBin.clear();
-  ionIntens.clear();
 
   // Get maxEvidence value
   double maxEvidence = -1.0;
