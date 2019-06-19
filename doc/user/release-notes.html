@@ -82,6 +82,19 @@
 
 <ul>
   <li>
+    June 9 2019: Created a separate smoke test for 1 threaded res-ev p-value 
+    and 7 threaded res-ev p-value.
+  <li>
+  <li>
+    June 9, 2019: Fixed a couple of bugs in the calculation of residue-evidence
+    and res-ev p-value. Correctly released memory when determining amino acid frequency.
+    Added a bounds check when adding evidence to the residue-evidence matrix.
+    Previously when calculating residue-evidence, all fragment ions were considered to be
+    1+ or 2+. Now fragment ions are only considered to be 2+ when the precursor charge 
+    is at least 2.
+  </li>
+
+  <li>
     April 11, 2019: Changed the default parameters for tide-search so
     that the default mz bin width is 0.02 Da instead of 1.0005079 Da 
     and the default precursor mass window is 50 ppm, rather
