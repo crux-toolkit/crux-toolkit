@@ -173,6 +173,7 @@ class ObservedPeakSet {
                     vector<double>& ionIntens,
                     vector<double>& ionIntensitiesSort,
                     int numSpecPeaks,
+                    int maxPrecurMassBin,
                     int nAA,
                     const vector<double>& aaMass,
                     const vector<int>& aaMassBin,
