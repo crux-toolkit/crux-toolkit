@@ -2042,7 +2042,7 @@ int TideSearchApplication::calcResEvScore(
     int tmpAA = find(aaMassDouble.begin(),aaMassDouble.end(),tmpAAMass) - aaMassDouble.begin();
     scoreResidueEvidence += curResidueEvidenceMatrix[tmpAA][intensArrayTheor[res]-1];
   }
-  delete residueMasses;
+  delete[] residueMasses;
   return scoreResidueEvidence;
 }
 
