@@ -101,6 +101,8 @@ char *realpath(const char * file_name, char * resolved_name) {
     = GetFullPathName(file_name, MAX_PATH, full_path_buffer, NULL);
   }
 
+//this looks like a memory leak to me. malloc-ing and returning the memory pointer,
+//relying on the client to free it. Even though there is a client-passed buffer.
   return full_path_buffer;
 }
 

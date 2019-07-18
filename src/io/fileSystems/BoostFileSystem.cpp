@@ -38,15 +38,13 @@ ostream* BoostFileSystem::GetWriteStream(const string& path, bool overwrite) {
   return stream;
 }
 
-istream& BoostFileSystem::GetReadStream(const string &path){
+istream* BoostFileSystem::getReadStreamImpl(const string &path, StreamRecord &rec){
   istream* stream = new pwiz::util::random_access_compressed_ifstream(path.c_str());
   if(!stream->good()){
     delete stream;
     carp(CARP_FATAL, "Cannot open input stream for the file %s", path.c_str());
   }
-  StreamRecord sr{GenericStorageSystem::SystemIdEnum::FILE_SYSTEM, true, 
-      (ios_base*)stream, (void*)stream};
-  _RegisterStream(sr);
+  rec.object_pointer = (void*)stream;
 
-  return *stream;
+  return stream;
 }

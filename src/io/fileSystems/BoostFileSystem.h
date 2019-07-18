@@ -43,7 +43,7 @@ public:
   std::string Read(const std::string &path);
   std::string Read(const std::string &path, int byteCount);
   std::ostream *GetWriteStream(const std::string &path, bool overwrite);
-  std::istream &GetReadStream(const string &path);
+  std::istream *getReadStreamImpl(const string &path, StreamRecord &rec);
 
   std::string BaseName(const std::string &path)
   {
@@ -74,7 +74,9 @@ public:
     }
   }
 
-  BoostFileSystem(){};
+  BoostFileSystem(){
+        m_systemId = SystemIdEnum::FILE_SYSTEM;
+  };
 
   ~BoostFileSystem(){};
 

@@ -416,7 +416,8 @@ vector<string> TideIndexApplication::getOptions() const {
     "peptide-list",
     "seed",
     "temp-dir",
-    "verbosity"
+    "verbosity",
+    "aws-profile"
   };
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }
@@ -479,8 +480,7 @@ void TideIndexApplication::fastaToPb(
   outProteinSequences.clear();
 
   HeadedRecordWriter proteinWriter(proteinPbFile, outProteinPbHeader);
-  //DEBUG
-  //ifstream fastaStream(fasta.c_str(), ifstream::in);
+
   istream& fastaStream = FileUtils::GetReadStream(fasta); 
   string proteinName;
   string* proteinSequence = new string;
@@ -491,7 +491,6 @@ void TideIndexApplication::fastaToPb(
 
   // Iterate over all proteins in FASTA file
   unsigned int targetsGenerated = 0, decoysGenerated = 0;
-  !fastaStream.rdbuf();
   while (GeneratePeptides::getNextProtein(fastaStream, &proteinName, proteinSequence)) {
     outProteinSequences.push_back(proteinSequence);
     cleavedPeptideInfo.push_back(make_pair(

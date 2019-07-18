@@ -130,12 +130,6 @@ class RecordReader {
  public:
   explicit RecordReader(const string& filename, int buf_size = -1)
     : raw_input_(NULL), coded_input_(NULL), size_(UINT32_MAX), valid_(false) {
-/*
-    fd_ = open(filename.c_str(), O_RDONLY);
-    if (fd_ < 0)
-      return;
-    raw_input_ = new google::protobuf::io::FileInputStream(fd_, buf_size);
-*/
     is_ = &FileUtils::GetReadStream(filename);
     raw_input_ = new google::protobuf::io::IstreamInputStream(is_);
 
@@ -149,10 +143,8 @@ class RecordReader {
   ~RecordReader() {
     if (coded_input_)
       delete coded_input_;
-    //delete raw_input_;
+    delete raw_input_;
     FileUtils::CloseStream(*is_);
-    if (fd_ >= 0)
-      close(fd_);
   }
 
   bool OK() const { return valid_; }
@@ -188,7 +180,6 @@ class RecordReader {
   }
 
  private:
-  int fd_;
   istream* is_;
   google::protobuf::io::ZeroCopyInputStream* raw_input_;
   google::protobuf::io::CodedInputStream* coded_input_;

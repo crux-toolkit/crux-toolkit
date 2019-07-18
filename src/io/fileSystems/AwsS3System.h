@@ -35,7 +35,7 @@ public:
   string Read(const string &path);
   string Read(const string &path, int byteCount);
   ostream *GetWriteStream(const string &path, bool overwrite);
-  istream& GetReadStream(const string &path);
+  istream *getReadStreamImpl(const string &path, StreamRecord &rec);
   string BaseName(const string &path);
   string DirName(const string &path);
   string Stem(const string &path);
@@ -80,7 +80,6 @@ private:
 
   S3ObjectInfo parseUrl(const string& url);
   void _CloseStream(const StreamRecord& p_streamRec);  
-
 };
 
 
