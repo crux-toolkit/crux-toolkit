@@ -1,5 +1,6 @@
 #include "io/fileSystems/GenericStorageSystem.h"
 #include "io/fileSystems/BoostFileSystem.h"
+#include <boost/iostreams/filtering_stream.hpp>
 
 #ifdef AWS      // build in AWS support only if the library is present at compilation time.
 #include "io/fileSystems/AwsS3System.h"
@@ -10,10 +11,13 @@
 #include <string>
 #include <regex>
 #include <vector>
+#include <thread>
 
 //TODO_RC: use a map instead of plain array
 GenericStorageSystem * GenericStorageSystem::m_system[] = {nullptr, nullptr};
-std::vector<GenericStorageSystem::StreamRecord> GenericStorageSystem::m_openStreams; 
+std::map<int, GenericStorageSystem::StreamRecord> GenericStorageSystem::m_openStreams; 
+std::mutex GenericStorageSystem::m_registerMutex;
+int GenericStorageSystem::Identifiable::globalStreamCounter{0};
 
 GenericStorageSystem* GenericStorageSystem::getStorage(string p_path)
 {
@@ -73,25 +77,46 @@ int GenericStorageSystem::getStorageIndex(const string &path){
 }
 
 void GenericStorageSystem::CloseStream(ios_base& stream){
-    for(auto i = m_openStreams.begin(); i != m_openStreams.end(); i++)
-    {
-        if(i->stream_pointer == &stream){
-            m_system[i->system_id]->_CloseStream(*i);
-            m_openStreams.erase(i);  
-        }
-        break;
+
+        Identifiable* ident = dynamic_cast<Identifiable*>(&stream);
+        if(ident == nullptr)
+            carp(CARP_FATAL, "Cannot close a stream that does not have stream ID.");
+
+        std::lock_guard<std::mutex> lg{m_registerMutex};
+
+        auto pRec = m_openStreams.find(ident->streamId);
+        if(pRec == m_openStreams.end()){
+            carp(CARP_WARNING, "The stream with ID %d is not yet open", ident->streamId);
+            return;
+        carp(CARP_INFO, "Closing %s.", pRec->second.toString().c_str());
+        m_system[pRec->second.system_id]->_CloseStream(pRec->second);
+        m_openStreams.erase(ident->streamId);  
     }
 }
 
-void GenericStorageSystem::_RegisterStream(const StreamRecord& p_streamRec){
-    for(auto s : m_openStreams){
-        if(s.stream_pointer == p_streamRec.stream_pointer){
-            carp(CARP_WARNING, "This stream is already open."); 
+void GenericStorageSystem::_RegisterStream(const GenericStorageSystem::StreamRecord& p_streamRec){
+    if(m_openStreams.find(p_streamRec.stream_id) != m_openStreams.end()) 
+    {
+            carp(CARP_WARNING, "The stream with ID is already open.", p_streamRec.stream_id); 
             return ;
-        }
     }
-    m_openStreams.push_back(p_streamRec);
+
+    carp(CARP_INFO, "Registering %d", p_streamRec.toString().c_str());
+    {
+        std::lock_guard<std::mutex> lg{m_registerMutex};
+        m_openStreams.insert({p_streamRec.stream_id, p_streamRec});
+    }
 }
+
+istream& GenericStorageSystem::GetReadStream(const string &path){
+    StreamRecord rec{m_systemId, true, 0, (void*)nullptr, path};
+    istream* str = getReadStreamImpl(path, rec);
+    IdentifiableInputStream* result = new IdentifiableInputStream(*str);
+    rec.stream_id = result->streamId;
+    _RegisterStream(rec);
+    return *result;
+  }
+
 
 
 //if paths are different it opens input and output stream and 

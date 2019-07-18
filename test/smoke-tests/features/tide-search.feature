@@ -5,7 +5,7 @@ Feature: tide-index / tide-search
     returning a collection of peptide-spectrum matches (PSMs)
 
 Scenario Outline: User runs tide-index / tide-search
-  Given the path to Crux is ../../src/crux
+  Given the path to Crux is ../../build/src/crux
   And I want to run a test named <test_name>
   And I pass the arguments --overwrite T --seed 7 <index_args> <fasta> <index>
   When I run tide-index as an intermediate step

@@ -11,14 +11,17 @@
 #include <regex>
 #include <boost/algorithm/string.hpp>
 #include <stdio.h>
+#include <map>
 
 #include "io/carp.h"
+#include "util/Params.h"
 
 #include <fstream>
 #include <iostream>
 #include <boost/iostreams/filtering_streambuf.hpp>
 //#include <boost/iostreams/copy.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
+#include <boost/filesystem.hpp>
 
 #include "AwsS3System.h"
 
@@ -35,6 +38,8 @@ static int const gz_magic[2] = {0x1f, 0x8b}; /* gzip magic header */
 
 
 AwsS3System::AwsS3System(){
+    m_systemId = SystemIdEnum::AWS_S3;
+
     Aws::InitAPI(m_options);
     Aws::Client::ClientConfiguration clientConfig;
 
@@ -44,21 +49,34 @@ AwsS3System::AwsS3System(){
         carp(CARP_INFO, "Using AWS region %s from the environment variable.", aws_region);
     }
     else{
-        char* username = getenv("USERNAME");
-        if(username == NULL)
-            username = getenv("USER");
-
-        if(username != NULL){
-            stringstream configFileStream("");
-            configFileStream << "/home/" << username << "/.aws/config";
+        stringstream configFileStream("");
+#if defined(_WIN32) || defined(_WIN64)
+        configFileStream << getenv("HOMEDRIVE") << getenv("HOMEPATH") << "\\.aws\\config";
+#endif
+#ifdef __linux__
+        configFileStream << getenv("HOME") << "/.aws/config";
+#endif
+        if(boost::filesystem::exists(configFileStream.str())){
             Aws::Config::AWSConfigFileProfileConfigLoader configLoader(configFileStream.str());
             configLoader.Load();
             auto profiles = configLoader.GetProfiles();
-            clientConfig.region = profiles["default"].GetRegion();
-            carp(CARP_INFO, "Using AWS region %s from the default AWS profile.", profiles["default"].GetRegion().c_str());
+            string aws_profile = Params::GetString("aws-profile");
+            if(profiles.find(aws_profile) != profiles.end()){
+                carp(CARP_DEBUG, "Using %s AWS profile", aws_profile.c_str());
+                //if region is not specified in this profile the system will 
+                //quietly use default.
+                //TODO: Test this assumption
+                clientConfig.region = profiles[aws_profile].GetRegion();
+            }
+            else{
+                carp(CARP_INFO, "Profile %s is not found in the AWS config file. "
+                "Using AWS region %s from the default AWS profile.", 
+                        profiles["default"].GetRegion().c_str());
+                clientConfig.region = profiles["default"].GetRegion();
+            }
         }
         else
-            carp(CARP_INFO, "Using default AWS region %s.", clientConfig.region.c_str());
+            carp(CARP_INFO, "AWS config file not found. Using default AWS region %s.", clientConfig.region.c_str());
     }
     m_client = new S3Client(clientConfig);
 }
@@ -188,7 +206,7 @@ ostream* AwsS3System::GetWriteStream(const string &path, bool overwrite){
     carp(CARP_FATAL, "Writing to S3 is not supported.");
 }
 
-istream& AwsS3System::GetReadStream(const string &path){
+istream* AwsS3System::getReadStreamImpl(const string &path, StreamRecord &rec){
     AwsS3System::S3ObjectInfo object_info = parseUrl(path);
 
     if(!IsRegularFile(path))
@@ -204,10 +222,8 @@ istream& AwsS3System::GetReadStream(const string &path){
     if(getObjectOutcome->IsSuccess())
     {
         carp(CARP_DEBUG, "Successfully retrieved object %s from s3.", path.c_str());
-        StreamRecord sr{GenericStorageSystem::SystemIdEnum::AWS_S3, true,
-                (ios_base*)&getObjectOutcome->GetResult().GetBody(), (void*)getObjectOutcome};
-        _RegisterStream(sr);
-         auto& result = (istream&)(getObjectOutcome->GetResult().GetBody());
+        auto& result = (istream&)(getObjectOutcome->GetResult().GetBody());
+        rec.object_pointer = (void*)getObjectOutcome;
          if(result.good()){
              //checking if this is a gzipped file
              if(result.rdbuf()->sbumpc() == gz_magic[0] && result.rdbuf()->sbumpc() == gz_magic[1]){
@@ -218,11 +234,11 @@ istream& AwsS3System::GetReadStream(const string &path){
                 inbuf.push(result);
                 //Convert streambuf to istream
                 std::istream* instream = new std::istream(&inbuf);
-                return *instream;
+                return instream;
              }
              else  { //not a gzipped stream, returning as is.
                 result.rdbuf()->pubseekpos(0);  //rewind back to the starting position.
-                 return result;
+                 return &result;
              }
          }
          else{
@@ -239,8 +255,9 @@ istream& AwsS3System::GetReadStream(const string &path){
 }
 
 void AwsS3System::_CloseStream(const StreamRecord& p_streamRec){
-    if(p_streamRec.is_input)
+    if(p_streamRec.is_input){
         delete (GetObjectOutcome*)p_streamRec.object_pointer;
+    }
     else
         delete (PutObjectOutcome*)p_streamRec.object_pointer;
 }
