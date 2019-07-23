@@ -30,6 +30,7 @@ enum MATCH_COLUMNS_T {
   BOTH_PVALUE_COL, //Added by Andy Lin
   BOTH_PVALUE_RANK, //Added by Andy Lin
   SIDAK_ADJUSTED_COL,  
+  TAILOR_COL,  //Added for tailor score calibration method by AKF  
   EVALUE_COL,
   PVALUE_COL,
   ELUTION_WINDOW_COL,

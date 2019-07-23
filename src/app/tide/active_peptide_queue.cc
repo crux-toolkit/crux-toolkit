@@ -67,6 +67,10 @@ bool ActivePeptideQueue::isWithinIsotope(vector<double>* min_mass, vector<double
 }
 
 int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>* max_mass, double min_range, double max_range, vector<bool>* candidatePeptideStatus) {
+  int min_candidates = 0;  //Added for tailor score calibration method by AKF
+  if (!Params::GetBool("use-tailor-calibration")){
+    min_candidates = 30;
+  }
   //min_range and max_range have been introduced to fix a bug
   //introduced by m/z selection. see #222 in sourceforge
   //this has to be true:
@@ -106,7 +110,8 @@ int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>*
   // theoretical peaks. Data associated with each peptide is allocated by
   // fifo_alloc_peptides_.
   bool done = false;
-  if (queue_.empty() || queue_.back()->Mass() <= max_range) {
+  //Modified for tailor score calibration method by AKF
+  if (queue_.empty() || queue_.back()->Mass() <= max_range || queue_.size() < min_candidates) {
     if (!queue_.empty()) {
       ComputeTheoreticalPeaksBack();
     }
@@ -120,7 +125,8 @@ int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>*
       Peptide* peptide = new(&fifo_alloc_peptides_)
         Peptide(current_pb_peptide_, proteins_, &fifo_alloc_peptides_);
       queue_.push_back(peptide);
-      if (peptide->Mass() > max_range) {
+      //Modified for tailor score calibration method by AKF
+      if (peptide->Mass() > max_range && queue_.size() > min_candidates) {
         break;
       }
       ComputeTheoreticalPeaksBack();
@@ -137,12 +143,18 @@ int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>*
   }
 
   iter_ = queue_.begin();
-  while (iter_ != queue_.end() && (*iter_)->Mass() < min_mass->front()) {
-    ++iter_;
-  }
+//  while (iter_ != queue_.end() && (*iter_)->Mass() < min_mass->front()) {
+//    ++iter_;
+//  }
+  //Added for tailor score calibration method by AKF
+  deque<Peptide*>::const_iterator iter2_ = queue_.begin();
+  while (iter2_ != queue_.end() && (*iter2_)->Mass() < min_mass->front()) {
+	candidatePeptideStatus->push_back(false);  //Added by AKF
+    ++iter2_;   //Added by AKF
+   }
 
   int* isotope_idx = new int(0);
-  end_ = iter_;
+  end_ = iter2_; //Modified by AKF
   int active = 0;
   active_targets_ = active_decoys_ = 0;
   while (end_ != queue_.end() && (*end_)->Mass() < max_mass->back() ){
@@ -163,7 +175,16 @@ int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>*
   if (active == 0) {
     return 0;
   }
-
+  //Added for tailor score calibration method by AKF
+  if (!Params::GetBool("use-tailor-calibration")){
+    while (end_ != queue_.end()) {  //Added by AKF
+      if ((*end_)->Prog(1) == NULL || candidatePeptideStatus->size() >= min_candidates-1) {
+        break;
+      }
+      candidatePeptideStatus->push_back(false);
+      ++end_;
+    }
+  }
   return active;
 
 }

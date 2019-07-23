@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href=""?>
-<msms_pipeline_analysis date="Sat Apr 20 22:09:34 2019" xmlns="http://regis-web.systemsbiology.net/pepXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://regis-web.systemsbiology.net/pepXML /usr/local/tpp/schema/pepXML_v110.xsd" summary_xml="">
+<msms_pipeline_analysis date="Tue Jul 23 15:27:27 2019" xmlns="http://regis-web.systemsbiology.net/pepXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://regis-web.systemsbiology.net/pepXML /usr/local/tpp/schema/pepXML_v110.xsd" summary_xml="">
 <msms_run_summary base_name="NA" msManufacturer="NA" msModel="NA" msIonization="NA" msAnalyzer="NA" msDectector="NA" raw_data_type="NA" raw_data="NA" >
 <sample_enzyme name="trypsin">
 </sample_enzyme>
@@ -48,8 +48,8 @@
 <parameter name="deisotope" value="0"/>
 <parameter name="digestion" value="full-digest"/>
 <parameter name="missed-cleavages" value="0"/>
-<parameter name="precursor-window" value="3"/>
-<parameter name="precursor-window-type" value="mass"/>
+<parameter name="precursor-window" value="50"/>
+<parameter name="precursor-window-type" value="ppm"/>
 <parameter name="auto-precursor-window" value="false"/>
 <parameter name="spectrum-parser" value="pwiz"/>
 <parameter name="use-z-line" value="true"/>
@@ -66,7 +66,7 @@
 <parameter name="compute-sp" value="false"/>
 <parameter name="compute-p-values" value="false"/>
 <parameter name="scan-number" value=""/>
-<parameter name="mz-bin-width" value="1.0005079"/>
+<parameter name="mz-bin-width" value="0.02"/>
 <parameter name="mz-bin-offset" value="0.4"/>
 <parameter name="auto-mz-bin-width" value="false"/>
 <parameter name="auto-modifications" value="false"/>
@@ -141,6 +141,7 @@
 <parameter name="cterm-peptide-mods-spec" value=""/>
 <parameter name="store-spectra" value=""/>
 <parameter name="exact-p-value" value="false"/>
+<parameter name="use-tailor-calibration" value="false"/>
 <parameter name="store-index" value=""/>
 <parameter name="concat" value="false"/>
 <parameter name="file-column" value="true"/>

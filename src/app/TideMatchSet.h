@@ -39,6 +39,7 @@ class TideMatchSet {
     double resEv_pval;
     double combinedPval;
     int rank;
+    double tailor;  //Added by AKF    
   };
   typedef FixedCapacityArray<Scores> Arr;
 

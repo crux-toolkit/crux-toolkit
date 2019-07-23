@@ -350,6 +350,10 @@ void Match::printOneMatchField(
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx,
                                      getScore(EVALUE));
     break;
+  case TAILOR_COL:     //Added for tailor score calibration method by AKF
+    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx,
+                                     getScore(TAILOR_SCORE));
+    break;
   case PVALUE_COL:
     {
       double log_pvalue = getScore(LOGP_BONF_WEIBULL_XCORR);

@@ -622,6 +622,24 @@ void TideSearchApplication::search(void* threadarg) {
           }
         }
       } else {  //spectrum centric match report.
+        //Implementation of the Tailor score calibration method, by AKF
+        double quantile_score = 1.0;
+        if (Params::GetBool("use-tailor-calibration")){
+          vector<double> scores;
+          double quantile_th = 0.01;
+          // Collect the scores for the score tail distribution
+          for (TideMatchSet::Arr2::iterator it = match_arr2.begin();
+            it != match_arr2.end();
+            ++it) {
+            scores.push_back((double)(it->first / XCORR_SCALING));
+          }
+          sort(scores.begin(), scores.end(), greater<double>());  //sort in decreasing order
+          int quantile_pos = (int)(quantile_th*(double)scores.size()+0.5);
+
+          if (quantile_pos < 3)
+            quantile_pos = 3;
+          quantile_score = scores[quantile_pos]+5.0; // Make sure scores positive
+        }  //End of Tailor
         TideMatchSet::Arr match_arr(nCandPeptide);
         for (TideMatchSet::Arr2::iterator it = match_arr2.begin();
              it != match_arr2.end();
@@ -631,6 +649,10 @@ void TideSearchApplication::search(void* threadarg) {
             TideMatchSet::Scores curScore;
             curScore.xcorr_score = (double)(it->first / XCORR_SCALING);
             curScore.rank = it->second;
+            //Added for tailor score calibration method by AKF
+            if (Params::GetBool("use-tailor-calibration")){
+              curScore.tailor = ((double)(it->first / XCORR_SCALING) + 5.0) / quantile_score;
+            }            
             match_arr.push_back(curScore);
           }
         }
@@ -1542,6 +1564,7 @@ vector<string> TideSearchApplication::getOptions() const {
     "use-flanking-peaks",
     "use-neutral-loss-peaks",
     "use-z-line",
+    "use-tailor-calibration",    
     "verbosity"
   };
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));

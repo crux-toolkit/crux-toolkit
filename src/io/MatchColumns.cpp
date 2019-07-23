@@ -61,6 +61,7 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "combined p-value", //Added by Andy Lin
   "combined p-value rank", //Added by Andy Lin
   "Sidak adjusted p-value",  
+  "tailor score",  //Added for tailor score calibration method by AKF  
   "e-value",
   "p-value",
   "smoothed p-value",

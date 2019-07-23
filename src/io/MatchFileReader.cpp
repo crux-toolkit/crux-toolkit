@@ -217,6 +217,7 @@ MatchCollection* MatchFileReader::parse() {
     match_collection->setScoredType(BARISTA_QVALUE, !empty(BARISTA_QVALUE_COL));
     match_collection->setScoredType(BY_IONS_MATCHED, !empty(BY_IONS_MATCHED_COL));
     match_collection->setScoredType(BY_IONS_TOTAL, !empty(BY_IONS_TOTAL_COL));
+    match_collection->setScoredType(TAILOR_SCORE, !empty(TAILOR_COL)); //Added for tailor score calibration method by AKF
     if (!empty(DECOY_INDEX_COL)) {
       match_collection->setHasDecoyIndexes(true);
     }
@@ -349,6 +350,9 @@ Crux::Match* MatchFileReader::parseMatch() {
 
   if (!empty(DECOY_INDEX_COL)) {
     match->setDecoyIndex(getInteger(DECOY_INDEX_COL));
+  }
+  if (!empty(TAILOR_COL)) { //Added for tailor score calibration method by AKF
+    match->setScore(TAILOR_SCORE, getFloat(TAILOR_COL));
   }
 
   // get experiment size
