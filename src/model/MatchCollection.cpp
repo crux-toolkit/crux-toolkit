@@ -120,6 +120,7 @@ void MatchCollection::sort(
   switch (score_type) {
   case SP:
   case XCORR:
+  case TAILOR_SCORE:   //Added for tailor score calibration method by AKF
     smaller_is_better = false;
     break;
   case EVALUE:

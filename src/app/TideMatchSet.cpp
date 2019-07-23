@@ -398,6 +398,10 @@ void TideMatchSet::writeToFile(
       } else {
         *file << StringUtils::ToString(i->xcorr_score, precision, true) << '\t';
       }
+      //Added for tailor score calibration method by AKF
+      if (Params::GetBool("use-tailor-calibration")){
+        *file << StringUtils::ToString(i->tailor, precision, true) << '\t';
+      }
       break;
     case RESIDUE_EVIDENCE_MATRIX:
       if (exact_pval_search_) {
@@ -506,6 +510,10 @@ void TideMatchSet::writeHeaders(ofstream* file, bool decoyFile, bool multiDecoy,
                 << get_column_header(REFACTORED_SCORE_COL);
         } else {
           *file << get_column_header(XCORR_SCORE_COL);
+        }
+        //Added for tailor score calibration method by AKF
+        if (Params::GetBool("use-tailor-calibration")) {
+          *file << '\t' << get_column_header(TAILOR_COL);
         }
         *file << '\t' << get_column_header(XCORR_RANK_COL);
       } else if (Params::GetString("score-function") == "residue-evidence") {

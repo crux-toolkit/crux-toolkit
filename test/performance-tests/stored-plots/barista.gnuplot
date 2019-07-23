@@ -8,5 +8,6 @@ set key bottom right
 plot "comet/comet.barista.q.txt" using 1:0 title "Comet barista" with lines lw 1
 replot "tide-p-value/tide-search.barista.q.txt" using 1:0 title "Tide p-value barista" with lines lw 1
 replot "tide-xcorr/tide-search.barista.q.txt" using 1:0 title "Tide XCorr barista" with lines lw 1
+replot "tide-tailor/tide-search.barista.q.txt" using 1:0 title "Tide Tailor barista" with lines lw 1
 set output
 replot

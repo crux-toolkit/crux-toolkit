@@ -131,6 +131,7 @@ void MatchFileWriter::setPrecision() {
     case SIDAK_ADJUSTED_COL:
     case QVALUE_MIXMAX_COL:
     case QVALUE_TDC_COL:
+    case TAILOR_COL:   //Added for tailor score calibration method by AKF    
 #ifdef NEW_COLUMNS
     case WEIBULL_PEPTIDE_QVALUE_COL:      // NEW
     case DECOY_XCORR_PEPTIDE_QVALUE_COL:  // NEW
