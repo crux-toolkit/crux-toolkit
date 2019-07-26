@@ -1287,7 +1287,7 @@ vector< pair<FLOAT_T, FLOAT_T> > MatchCollection::calculateDeltaCns(
     scorePtrs[&scores[i]] = &deltaCns[i];
   }
 
-  if (type != TIDE_SEARCH_EXACT_PVAL) {
+  if (type == XCORR || type == RESIDUE_EVIDENCE_SCORE) {
     // Higher is better - sort descending
     std::sort(scores.begin(), scores.end(), std::greater<FLOAT_T>());
   } else {
@@ -1308,6 +1308,14 @@ vector< pair<FLOAT_T, FLOAT_T> > MatchCollection::calculateDeltaCns(
         deltaLCn = (*i - last) / max(*i, (FLOAT_T)1.0);
         break;
       case TIDE_SEARCH_EXACT_PVAL:
+        deltaCn = -log10(*i) + log10(*next);
+        deltaLCn = -log10(*i) + log10(last);
+        break;
+      case RESIDUE_EVIDENCE_PVAL:
+        deltaCn = -log10(*i) + log10(*next);
+        deltaLCn = -log10(*i) + log10(last);
+        break;
+      case BOTH_PVALUE:
         deltaCn = -log10(*i) + log10(*next);
         deltaLCn = -log10(*i) + log10(last);
         break;

@@ -719,16 +719,44 @@ void TideMatchSet::computeDeltaCns(
   map<Arr::iterator, FLOAT_T>* delta_cn_map, // map to add delta cn scores to
   map<Arr::iterator, FLOAT_T>* delta_lcn_map // map to add delta cn scores to
 ) {
+  // get vectore of scores
   vector<FLOAT_T> scores;
   for (vector<Arr::iterator>::const_iterator i = vec.begin(); i != vec.end(); i++) {
-    if (Params::GetBool("exact-p-value")) {
-      scores.push_back((*i)->xcorr_pval);
-    } else {
-      scores.push_back((*i)->xcorr_score);
+    if (Params::GetBool("exact-p-value")) { // p-value scores
+      if (Params::GetString("score-function") == "both") {
+        scores.push_back((*i)->combinedPval);
+      } else if (Params::GetString("score-function") == "residue-evidence") {
+        scores.push_back((*i)->resEv_pval);
+      } else {
+        scores.push_back((*i)->xcorr_pval);
+      }
+    } else { // non p-value scores
+      if (Params::GetString("score-function") == "residue-evidence") {
+        scores.push_back((*i)->resEv_score);
+      } else {
+        scores.push_back((*i)->xcorr_score);
+      }
     }
   }
-  vector< pair<FLOAT_T, FLOAT_T> > deltaCns = MatchCollection::calculateDeltaCns(
-    scores, !Params::GetBool("exact-p-value") ? XCORR : TIDE_SEARCH_EXACT_PVAL);
+
+  // calculate DeltaCns
+  vector< pair<FLOAT_T, FLOAT_T> > deltaCns;
+  if (Params::GetBool("exact-p-value")) { // p-value scores
+    if (Params::GetString("score-function") == "both") {
+      deltaCns = MatchCollection::calculateDeltaCns(scores,BOTH_PVALUE);
+    } else if (Params::GetString("score-function") == "residue-evidence") {
+      deltaCns = MatchCollection::calculateDeltaCns(scores,RESIDUE_EVIDENCE_PVAL);
+    } else {
+      deltaCns = MatchCollection::calculateDeltaCns(scores,TIDE_SEARCH_EXACT_PVAL);
+    }
+  } else { // non p-value scores
+    if (Params::GetString("score-function") == "residue-evidence") {
+      deltaCns = MatchCollection::calculateDeltaCns(scores,RESIDUE_EVIDENCE_SCORE);
+    } else {
+      deltaCns = MatchCollection::calculateDeltaCns(scores,XCORR);
+    }
+  }
+
   for (int i = 0; i < vec.size(); i++) {
     delta_cn_map->insert(make_pair(vec[i], deltaCns[i].first));
     delta_lcn_map->insert(make_pair(vec[i], deltaCns[i].second));
