@@ -142,6 +142,15 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
     carp(CARP_FATAL,"--score-function 'residue-evidence' with "
                     "--use-neutral-loss-peaks 'true' is not implemented yet");
   }
+  
+  //Tailor score calibration does not support res-ev scores or refactored xcorrs //Added by AKF
+  if (Params::GetBool("use-tailor-calibration") && exact_pval_search_ )
+    carp(CARP_FATAL,"--exact-p-value T is not implemented with Tailor score "
+                    "calibration method");
+
+  if (Params::GetBool("use-tailor-calibration") && curScoreFunction == RESIDUE_EVIDENCE_MATRIX )
+    carp(CARP_FATAL,"--score-function 'residue-evidence' is not implemented "
+                    "with Tailor score calibration method");
 
   // Check compute-sp parameter
   bool compute_sp = Params::GetBool("compute-sp");

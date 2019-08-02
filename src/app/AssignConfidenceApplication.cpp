@@ -206,6 +206,7 @@ int AssignConfidenceApplication::main(const vector<string>& input_files) {
     // in the list below.
     if (score_type == INVALID_SCORER_TYPE) {
       vector<SCORER_TYPE_T> scoreTypes;
+      scoreTypes.push_back(TAILOR_SCORE); //Added for tailor score calibration method by AKF
       scoreTypes.push_back(XCORR);
       scoreTypes.push_back(EVALUE);
       scoreTypes.push_back(BOTH_PVALUE);
