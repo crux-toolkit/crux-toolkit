@@ -143,7 +143,6 @@ int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>*
   }
 
   iter_ = queue_.begin();
-  deque<Peptide*>::const_iterator iter2 = queue_.begin();  //Added by AKF
   while (iter_ != queue_.end() && (*iter_)->Mass() < min_mass->front()) {
     ++iter_;
     if (Params::GetBool("use-tailor-calibration")){ //Added by AKF

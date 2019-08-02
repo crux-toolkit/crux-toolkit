@@ -258,7 +258,7 @@ runSearch("comet", "comet", "", "%s.fa" % database,
           "xcorr score", "--score e-value")
 runSearch("tide-tailor", "tide-search", "--use-tailor-calibration T", "%s.fa" % database,
           concatenatedDatabase, "tide-tailor/tide-search.txt",
-          "xcorr score", "--score \"tailor score\"")
+          "xcorr score", "")
 
 # Make the performance plots, segregated by search method..
 makePerformancePlot("comet", [("comet/comet.q.txt", "Comet E-value"),
