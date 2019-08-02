@@ -143,18 +143,18 @@ int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>*
   }
 
   iter_ = queue_.begin();
-//  while (iter_ != queue_.end() && (*iter_)->Mass() < min_mass->front()) {
-//    ++iter_;
-//  }
-  //Added for tailor score calibration method by AKF
-  deque<Peptide*>::const_iterator iter2_ = queue_.begin();
-  while (iter2_ != queue_.end() && (*iter2_)->Mass() < min_mass->front()) {
-	candidatePeptideStatus->push_back(false);  //Added by AKF
-    ++iter2_;   //Added by AKF
-   }
-
+  deque<Peptide*>::const_iterator iter2 = queue_.begin();  //Added by AKF
+  while (iter_ != queue_.end() && (*iter_)->Mass() < min_mass->front()) {
+    ++iter_;
+    if (Params::GetBool("use-tailor-calibration")){ //Added by AKF
+      candidatePeptideStatus->push_back(false);  
+    }
+  }
+  end_ = iter_;
+  if (Params::GetBool("use-tailor-calibration")){ //Added by AKF
+    iter_ = queue_.begin();
+  }
   int* isotope_idx = new int(0);
-  end_ = iter2_; //Modified by AKF
   int active = 0;
   active_targets_ = active_decoys_ = 0;
   while (end_ != queue_.end() && (*end_)->Mass() < max_mass->back() ){
