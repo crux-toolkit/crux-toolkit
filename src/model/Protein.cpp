@@ -234,8 +234,12 @@ int Protein::findStart(
   if ((pos = protein_seq.find(seq)) != string::npos) {
     return pos + 1;
   }
-  carp(CARP_ERROR, "could not find %s in protein %s\n%s", peptide_sequence.c_str(), getIdPointer().c_str(), getSequencePointer());
-  return -1;
+
+  // complain if the peptide is truly required
+  if ( Params::GetBool("find-peptides") ) {
+    carp(CARP_ERROR, "could not find %s in protein %s\n%s", peptide_sequence.c_str(), getIdPointer().c_str(), getSequencePointer());
+  }
+  return 0;
 }
 
 bool Protein::isPostProcess() {
