@@ -1421,6 +1421,9 @@ Params::Params() : finalized_(false) {
   InitBoolParam("mzid-use-pass-threshold", false,
     "Use mzid's passThreshold attribute to filter matches.",
     "Used when parsing mzIdentML files.", true);
+  InitBoolParam("find-peptides", true,
+                "Validate peptides by finding them in the given FASTA file.",
+                "Only available for spectral-counts.", false);
   // ***** static mods *****
   for (char c = 'A'; c <= 'Z'; c++) {
     double deltaMass = (c != 'C') ? 0 : CYSTEINE_DEFAULT;
