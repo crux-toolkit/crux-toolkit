@@ -542,7 +542,8 @@ static const char* scorer_type_strings[NUMBER_SCORER_TYPES] = {
   "refactored_xcorr",
   "res-ev score",
   "res-ev p-value",
-  "combined p-value"
+  "combined p-value",
+  "tailor score" //Added for tailor score calibration method by AKF  
 };
 
 bool string_to_scorer_type(const string& name, SCORER_TYPE_T* result) {

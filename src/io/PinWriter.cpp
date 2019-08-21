@@ -45,6 +45,7 @@ PinWriter::PinWriter():
   features_.push_back(make_pair("deltLCn", true));
   features_.push_back(make_pair("deltCn", true));
   features_.push_back(make_pair("XCorr", true));
+  features_.push_back(make_pair("TailorScore", true));  
   features_.push_back(make_pair("Sp", false));
   features_.push_back(make_pair("IonFrac", false));
   features_.push_back(make_pair("RefactoredXCorr", false));
@@ -139,6 +140,8 @@ void PinWriter::write(MatchCollection* collection, string database) {
   bool xcorr = collection->getScoredType(XCORR);
   bool exact_p = collection->getScoredType(TIDE_SEARCH_REFACTORED_XCORR);
   bool combine_p = collection->getScoredType(BOTH_PVALUE);
+  bool tailor = collection->getScoredType(TAILOR_SCORE);
+
   if (combine_p) {
     exact_p = true;
   }
@@ -153,7 +156,7 @@ void PinWriter::write(MatchCollection* collection, string database) {
   setEnabledStatus("NegLog10PValue", exact_p);
   setEnabledStatus("NegLog10ResEvPValue", combine_p);
   setEnabledStatus("NegLog10CombinePValue", combine_p);
-
+  setEnabledStatus("TailorScore", tailor);
 
   int max_charge = 0;
   for (MatchIterator i = MatchIterator(collection); i.hasNext();) {
@@ -254,6 +257,9 @@ void PinWriter::printPSM(
     } else if (feature == "NegLog10CombinePValue" ) {
       FLOAT_T logP = -log10(match->getScore(BOTH_PVALUE));
       fields.push_back(StringUtils::ToString(isInfinite(logP) ? MAX_LOG_P : logP, precision_));
+    } else if (feature == "TailorScore" ) {
+      FLOAT_T tailor = match->getScore(TAILOR_SCORE);
+      fields.push_back(StringUtils::ToString(tailor));
     } else if (feature == "PepLen") {
       fields.push_back(StringUtils::ToString((unsigned) peptide->getLength()));
     } else if (StringUtils::StartsWith(feature, "Charge")) {
