@@ -148,7 +148,10 @@ int AssignConfidenceApplication::main(const vector<string>& input_files) {
       break;
     case ELUTION_WINDOW_COL:
       score_type = TIDE_SEARCH_EXACT_SMOOTHED;
-      break;      
+      break;    
+    case TAILOR_COL: //Added for tailor score calibration method by AKF
+      score_type = TAILOR_SCORE;      
+      break;
     default:
       carp(CARP_FATAL, "The PSM feature \"%s\" is not supported.", score_param.c_str());
     }
@@ -203,6 +206,7 @@ int AssignConfidenceApplication::main(const vector<string>& input_files) {
     // in the list below.
     if (score_type == INVALID_SCORER_TYPE) {
       vector<SCORER_TYPE_T> scoreTypes;
+      scoreTypes.push_back(TAILOR_SCORE); //Added for tailor score calibration method by AKF
       scoreTypes.push_back(XCORR);
       scoreTypes.push_back(EVALUE);
       scoreTypes.push_back(BOTH_PVALUE);
@@ -253,6 +257,8 @@ int AssignConfidenceApplication::main(const vector<string>& input_files) {
     target_matches->setScoredType(BY_IONS_MATCHED, match_collection->getScoredType(BY_IONS_MATCHED));
     target_matches->setScoredType(BY_IONS_TOTAL, match_collection->getScoredType(BY_IONS_TOTAL));
     target_matches->setScoredType(SIDAK_ADJUSTED, sidak);
+    //Added for tailor score calibration method by AKF
+    target_matches->setScoredType(TAILOR_SCORE, match_collection->getScoredType(TAILOR_SCORE));
     for (map<int, MatchCollection*>::iterator i = decoy_matches.begin(); i != decoy_matches.end(); i++) {
       i->second->setScoredType(SIDAK_ADJUSTED, sidak);
     }
@@ -555,7 +561,10 @@ int AssignConfidenceApplication::main(const vector<string>& input_files) {
         cols_to_print[REFACTORED_SCORE_COL] = true;
       }
     }
-
+    //Added for tailor score calibration method by AKF
+    if (score_type == TAILOR_SCORE) {
+        cols_to_print[TAILOR_COL] = true;
+    }
     cols_to_print[BY_IONS_MATCHED_COL] = target_matches->getScoredType(BY_IONS_MATCHED);
     cols_to_print[BY_IONS_TOTAL_COL] = target_matches->getScoredType(BY_IONS_TOTAL);
 
@@ -1319,6 +1328,7 @@ int AssignConfidenceApplication::getDirection(SCORER_TYPE_T scoreType) {
     case TIDE_SEARCH_REFACTORED_XCORR:
     case RESIDUE_EVIDENCE_SCORE:
     case PERCOLATOR_SCORE:
+    case TAILOR_SCORE:    //Added for tailor score calibration method by AKF    
       // higher score better, ascending = false
       return -1;
     case EVALUE:

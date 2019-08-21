@@ -20,12 +20,14 @@ compiled in release mode (<code>cmake -DCMAKE_BUILD_TYPE=Release
 on a 64-bit machine in release mode.</p> 
 
 <p>
-To run the tests, <a href="https://cukes.info/">Cucumber</a> must be
-installed. GSIT has made it available as a module, so running "module
+To run the tests, <a href="https://cukes.info/">Cucumber</a>, 
+<a href="https://www.ruby-lang.org/en/">Ruby</a>, and 
+<a href="https://github.com/rspec/rspec-expectations">rspec</a> must be
+installed. GSIT has made Cucumber available as a module, so running "module
 load cucumber/latest" will work. Instructions for installing Cucumber
 on Mac OS can be
 found <a href="http://watirmelon.com/2010/12/09/how-to-set-up-cucumber-and-watir-on-osx/">here</a>.
-Once Cucumber is available, the tests are run by executing the command
+Once the prerequisits are installed, the tests are run by executing the command
 "cucumber features/&lt;feature file&gt;" from the <code>
 test/smoke-tests</code> directory. This will run the set of tests in
 the specified feature file. If no feature file is specified (i.e. just

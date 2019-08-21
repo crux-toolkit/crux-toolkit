@@ -128,6 +128,8 @@ int MakePinApplication::main(const vector<string>& paths) {
                           target_collection->getScoredType(RESIDUE_EVIDENCE_PVAL));
   writer.setEnabledStatus("NegLog10CombinePValue",
                           target_collection->getScoredType(BOTH_PVALUE));
+  writer.setEnabledStatus("TailorScore",
+                          target_collection->getScoredType(TAILOR_SCORE));
 
   if (writer.getEnabledStatus("lnNumSP") && target_collection->getHasDistinctMatches()) {
     writer.setEnabledStatus("lnNumSP", false);
