@@ -214,7 +214,7 @@ int Protein::findStart(
   string seq = prev_aa + peptide_sequence + next_aa;
   size_t pos = protein_seq.find(seq);
   if (pos != string::npos) {
-    return pos + 2;
+    return pos + prev_aa.length() + 1;
   }
   // failed, find sequence
   seq = peptide_sequence;
