@@ -578,7 +578,14 @@ Params::Params() : finalized_(false) {
     "Output final weights to a file named \"percolator.weights.txt\".",
     "Available for crux percolator", true);
   InitStringParam("init-weights", "",
-    "Read initial weights from the given file (one per line).",
+    "Read the unnormalized initial weights from the third line of the given "
+    "file. This can be the output of the --output-weights option from a "
+    "previous Percolator analysis. Note that the weights must be in the same "
+    "order as features in the PSM input file(s)",
+    "Available for crux percolator", true);
+  InitBoolParam("static", false,
+    "Use the provided initial weights as a static model. If used, the "
+    "--init-weights option must be specified.",
     "Available for crux percolator", true);
   InitIntParam("subset-max-train", 0,
     "Only train Percolator on a subset of PSMs, and use the resulting score "
@@ -2163,6 +2170,7 @@ void Params::Categorize() {
   items.insert("test-each-iteration");
   items.insert("test-fdr");
   items.insert("train-fdr");
+  items.insert("static");
   AddCategory("SVM training options", items);
 
   items.clear();
