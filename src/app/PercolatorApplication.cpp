@@ -238,6 +238,10 @@ int PercolatorApplication::main(
     perc_args_vec.push_back(Params::GetString("init-weights"));
   }
 
+  if (Params::GetBool("static")) {
+    perc_args_vec.push_back("--static");
+  }
+
   if (!Params::GetString("default-direction").empty()) {  
     perc_args_vec.push_back("--default-direction");
     perc_args_vec.push_back(Params::GetString("default-direction"));
@@ -542,6 +546,7 @@ vector<string> PercolatorApplication::getOptions() const {
     "quick-validation",
     "search-input",
     "spectral-counting-fdr",
+    "static",
     "subset-max-train",
     "tdc",
     "test-each-iteration",
