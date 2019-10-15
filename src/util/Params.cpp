@@ -573,7 +573,7 @@ Params::Params() : finalized_(false) {
     "Available for crux percolator", true);
   InitStringParam("decoy-prefix", "decoy_",
     "Specifies the prefix of the protein names that indicate a decoy.",
-    "Available for percolator", true);
+    "Available for tide-index and percolator", true);
   InitBoolParam("output-weights", false,
     "Output final weights to a file named \"percolator.weights.txt\".",
     "Available for crux percolator", true);
