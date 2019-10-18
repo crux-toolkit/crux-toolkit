@@ -301,6 +301,10 @@ Crux::Match* MatchFileReader::parseMatch() {
   }
   if (!empty(RESIDUE_EVIDENCE_COL)) {
     match->setScore(RESIDUE_EVIDENCE_SCORE, getFloat(RESIDUE_EVIDENCE_COL));
+    match->setRank(RESIDUE_EVIDENCE_SCORE, getInteger(RESIDUE_RANK_COL));
+  }
+  if (!empty(RESIDUE_PVALUE_COL)) {
+    match->setScore(RESIDUE_EVIDENCE_SCORE, getFloat(RESIDUE_EVIDENCE_COL));
     match->setScore(RESIDUE_EVIDENCE_PVAL, getFloat(RESIDUE_PVALUE_COL));
     match->setRank(RESIDUE_EVIDENCE_PVAL, getInteger(RESIDUE_RANK_COL));
   }
