@@ -208,10 +208,10 @@ int PeptideSrc::sizeOfSerialized(){
 
 /**
  * \brief Read in the peptide_src objects from the given file and
- * assosiated them with the given peptide.  
- * Proteins for the pepitde_src are found in the given database.  If
+ * associated them with the given peptide.
+ * Proteins for the pepitde_src are found in the given database. If
  * database is NULL, does not set proteins.  (This option is used for
- * sorting index files while creating index.) 
+ * sorting index files while creating index.)
  *
  * \returns true if peptide_src's were successfully parsed, else
  * returns false.
@@ -227,7 +227,7 @@ bool PeptideSrc::parseTabDelimited(
     return false;
   }
 
-  carp(CARP_DETAILED_DEBUG,"Parsing id line:%s", 
+  carp(CARP_DETAILED_DEBUG,"Parsing id line:%s",
        file.getString(PROTEIN_ID_COL).c_str());
 
   //if the protein id field is empty, then we have to search the database...
