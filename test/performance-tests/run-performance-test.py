@@ -34,7 +34,7 @@ def runCommand(command, outputFileName):
     if (returnCode != 0):
       sys.stderr.write("Child was terminated by signal %d\n" % -returnCode)
       sys.exit(1)
-  except OSError, e:
+  except OSError as e:
     sys.stderr.write("Execution failed: %s\n" % e)
     sys.exit(1)
 
@@ -249,10 +249,10 @@ runSearch("tide-xcorr", "tide-search", "", database,
 runSearch("tide-p-value", "tide-search", "--exact-p-value T",
           database, concatenatedDatabase, "tide-p-value/tide-search.txt",
           "refactored xcorr", "--score \"exact p-value\"")
-#runSearch("tide-res-ev", "tide-search",
-#          "--exact-p-value T --score-function residue-evidence",
-#          database, concatenatedDatabase, "tide-res-ev/tide-search.txt",
-#          "res-ev p-value", "--score \"res-ev p-value\"")
+runSearch("tide-res-ev", "tide-search",
+          "--exact-p-value T --score-function residue-evidence",
+          database, concatenatedDatabase, "tide-res-ev/tide-search.txt",
+          "res-ev p-value", "--score \"res-ev p-value\"")
 runSearch("comet", "comet", "", "%s.fa" % database,
           concatenatedDatabase, "comet/comet.target.txt",
           "xcorr score", "--score e-value")
@@ -280,11 +280,11 @@ makePerformancePlot("tide.tailor",
                      ("tide-tailor/tide-search.percolator.q.txt", "Tide Tailor Percolator"),
                      ("tide-tailor/tide-search.q-ranker.q.txt", "Tide Tailor q-ranker"),
                      ("tide-tailor/tide-search.barista.q.txt", "Tide Tailor barista")])
-#makePerformancePlot("tide.res-ev",
-#                    [("tide-res-ev/tide-search.q.txt", "Tide res-ev"),
-#                     ("tide-res-ev/tide-search.percolator.q.txt", "Tide res-ev Percolator"),
-#                     ("tide-res-ev/tide-search.q-ranker.q.txt", "Tide res-ev q-ranker"),
-#                    ("tide-res-ev/tide-search.barista.q.txt", "Tide res-ev barista")])
+makePerformancePlot("tide.res-ev",
+                    [("tide-res-ev/tide-search.q.txt", "Tide res-ev"),
+                     ("tide-res-ev/tide-search.percolator.q.txt", "Tide res-ev Percolator"),
+                     ("tide-res-ev/tide-search.q-ranker.q.txt", "Tide res-ev q-ranker"),
+                    ("tide-res-ev/tide-search.barista.q.txt", "Tide res-ev barista")])
 
 # Make the performance plots, segregated by post-processor.
 makePerformancePlot("assign-confidence",
