@@ -157,7 +157,9 @@ int AssignConfidenceApplication::main(const vector<string>& input_files) {
     }
   }
 
-  if (sidak && score_type != TIDE_SEARCH_EXACT_PVAL) {
+  if (sidak && score_type != TIDE_SEARCH_EXACT_PVAL ||
+      sidak && score_type != BOTH_PVALUE ||
+      sidak && score_type != RESIDUE_EVIDENCE_PVAL) {
     carp(CARP_WARNING, "Sidak adjustment may not be compatible with score: %s", score_param.c_str());
   }
 
@@ -211,6 +213,7 @@ int AssignConfidenceApplication::main(const vector<string>& input_files) {
       scoreTypes.push_back(EVALUE);
       scoreTypes.push_back(BOTH_PVALUE);
       scoreTypes.push_back(RESIDUE_EVIDENCE_PVAL);
+      scoreTypes.push_back(RESIDUE_EVIDENCE_SCORE);
       scoreTypes.push_back(TIDE_SEARCH_EXACT_PVAL);
       scoreTypes.push_back(TIDE_SEARCH_EXACT_SMOOTHED);
       scoreTypes.push_back(LOGP_BONF_WEIBULL_XCORR);
@@ -550,6 +553,12 @@ int AssignConfidenceApplication::main(const vector<string>& input_files) {
     if (score_type == BOTH_PVALUE) {
       cols_to_print[BOTH_PVALUE_COL] = true;
       cols_to_print[BOTH_PVALUE_RANK] = true;
+    } else if (score_type == RESIDUE_EVIDENCE_PVAL) {
+      cols_to_print[RESIDUE_PVALUE_COL] = true;
+      cols_to_print[RESIDUE_RANK_COL] = true;
+    } else if (score_type == RESIDUE_EVIDENCE_SCORE) {
+      cols_to_print[RESIDUE_EVIDENCE_COL] = true;
+      cols_to_print[RESIDUE_RANK_COL] = true;
     } else {
       cols_to_print[XCORR_SCORE_COL] = !target_matches->getScoredType(TIDE_SEARCH_EXACT_PVAL);
       cols_to_print[XCORR_RANK_COL] = true;
