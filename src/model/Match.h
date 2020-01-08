@@ -68,7 +68,7 @@ class Match {
   Crux::Spectrum* spectrum_; ///< the spectrum we are scoring with
   Crux::Peptide* peptide_;  ///< the peptide we are scoring
   FLOAT_T match_scores_[NUMBER_SCORER_TYPES];
-  std::map<string,FLOAT_T> match_custom_scores_;
+  std::map<std::string,FLOAT_T> match_custom_scores_;
     ///< array of scores, one for each type (index with SCORER_TYPE_T) 
   int match_rank_[NUMBER_SCORER_TYPES];  
     ///< rank of this match for each type scored (index with SCORER_TYPE_T)
@@ -86,7 +86,7 @@ class Match {
   int num_target_matches_; ///< total target candidates for this spectrum
   bool best_per_peptide_; ///< Is this the best scoring PSM for this peptide?
   int file_idx_; ///< index of where this match came from 
-  string database_index_name_;
+  std::string database_index_name_;
   static std::vector<std::string> file_paths_;
   int decoy_idx_;
 
@@ -415,7 +415,7 @@ class Match {
   /**
   *Set the database index name where the peptide comes from
   */
-  void setDatabaseIndexName(string index_name);
+  void setDatabaseIndexName(std::string index_name);
 
 };
 

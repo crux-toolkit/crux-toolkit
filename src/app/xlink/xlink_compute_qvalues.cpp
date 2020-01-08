@@ -34,17 +34,17 @@ void getBestBonf(DelimitedFile& matches, int start, int stop,
     int ntests = matches.getInteger(get_column_header(DISTINCT_MATCHES_SPECTRUM_COL), best_index);
     best_bonf = bonferroni_correction(pvalue, ntests);
   } else {
-    map<int, pair<int, double> > charge_best_score; 
-    map<int, int> charge_ntests;
+    std::map<int, std::pair<int, double> > charge_best_score; 
+    std::map<int, int> charge_ntests;
 
     for (int match_idx = start;match_idx <= stop;match_idx++) {
       int charge = matches.getInteger("charge", match_idx);
       double pvalue = matches.getDouble("p-value", match_idx);
 
       if (charge_best_score.find(charge) == charge_best_score.end()) {
-        charge_best_score[charge] = make_pair(match_idx, pvalue);
+        charge_best_score[charge] = std::make_pair(match_idx, pvalue);
       } else if (pvalue < charge_best_score[charge].second) {
-        charge_best_score[charge] = make_pair(match_idx, pvalue);
+        charge_best_score[charge] = std::make_pair(match_idx, pvalue);
       }
       if (charge_ntests.find(charge) == charge_ntests.end()) {
         int ntests = matches.getInteger(get_column_header(DISTINCT_MATCHES_SPECTRUM_COL), match_idx);
@@ -60,7 +60,7 @@ void getBestBonf(DelimitedFile& matches, int start, int stop,
 
     int best_charge_idx = charge_best_score[best_charge].first;
 
-    for (map<int, pair<int, double> >::iterator iter = 
+    for (std::map<int, std::pair<int, double> >::iterator iter = 
       charge_best_score.begin();
       iter != charge_best_score.end();
       ++iter) {
@@ -77,7 +77,7 @@ void getBestBonf(DelimitedFile& matches, int start, int stop,
     }
 
     int ntests_total = 0;
-    for (map<int, int>::iterator iter =
+    for (std::map<int, int>::iterator iter =
       charge_ntests.begin();
       iter != charge_ntests.end();
       ++iter) {
@@ -94,7 +94,7 @@ void collapseScans(DelimitedFile& matches_in, DelimitedFile& matches_out) {
 
   matches_out.clear();
   //matches_out.addColumns(matches_in.getColumnNames());
-  vector<string>& column_names = matches_in.getColumnNames();
+  std::vector<std::string>& column_names = matches_in.getColumnNames();
   for (unsigned int idx = 0; idx < column_names.size(); idx++) {
     matches_out.addColumn(column_names[idx]);
   }
@@ -158,11 +158,11 @@ int xlink_compute_qvalues() {
   /* Get Arguments */
 
   carp(CARP_INFO, "reading targets");
-  string output_dir = Params::GetString("output-dir");
-  string target_filename = "search-for-xlinks.target.txt";
+  std::string output_dir = Params::GetString("output-dir");
+  std::string target_filename = "search-for-xlinks.target.txt";
 
   //Read in targets.
-  string target_path = output_dir + "/" + target_filename;
+  std::string target_path = output_dir + "/" + target_filename;
   DelimitedFile target_matches(target_path);
 
   //cout << target_matches << endl;
@@ -171,8 +171,8 @@ int xlink_compute_qvalues() {
 
   carp(CARP_INFO, "reading decoys");
 
-  string decoy_filename = "search-for-xlinks.decoy.txt";
-  string decoy_path = output_dir + "/" + decoy_filename;
+  std::string decoy_filename = "search-for-xlinks.decoy.txt";
+  std::string decoy_path = output_dir + "/" + decoy_filename;
   DelimitedFile decoy_matches(decoy_path);
 
   //cout << decoy_matches << endl;
@@ -272,7 +272,7 @@ int xlink_compute_qvalues() {
   //sort back by scans? or q-value?
   //target_matches_bonf.sortByFloatColumn("q-value decoy");
 
-  string result_file = output_dir + "/search-for-xlinks.qvalues..txt";
+  std::string result_file = output_dir + "/search-for-xlinks.qvalues..txt";
   target_matches_bonf.saveData(result_file);
 
   result_file = output_dir + "/search-for-xlinks.pvalues.decoy.txt";

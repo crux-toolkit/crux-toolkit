@@ -20,7 +20,7 @@ class LinkedIonSeries {
 
   int charge_; ///< maximum charge of the ion series
   std::vector<LinkedPeptide> all_ions_; ///< list of all ions
-  std::vector<pair<LinkedPeptide, LinkedPeptide> > fragments_; ///< for add linked ions
+  std::vector<std::pair<LinkedPeptide, LinkedPeptide> > fragments_; ///< for add linked ions
   MASS_TYPE_T fragment_mass_type_; ///< mass type of the fragments.
 
   /**
@@ -28,7 +28,7 @@ class LinkedIonSeries {
    * getObservableIons
    */
   void addIonBin(
-    map<int, bool>& observed, ///< the observed bin vector -in/out
+    std::map<int, bool>& observed, ///< the observed bin vector -in/out
     int& ions, ///< the number of ions -in/out
     int& ions_bin, ///< the number of binned ions -in/out
     FLOAT_T mz, ///< m/z of the ion
