@@ -25,6 +25,9 @@
 #include <stack>
 
 using namespace Crux;
+using std::stack;
+using std::string;
+using std::vector;
 
 static const int BINARY_GMTK = 1;
 static const int PRINT_NULL_IONS = 1;
