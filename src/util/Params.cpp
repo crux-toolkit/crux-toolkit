@@ -1911,6 +1911,135 @@ Params::Params() : finalized_(false) {
     "below this value and only score the unmodified peptide.",
     "Available for localize-modification", true);
 
+  // Kojak Parameters
+  InitStringParam("threads", "1",
+    "Number of threads to use when searching spectra. Default=1.",
+    "Available for kojak", true);
+  InitStringParam("export_percolator", "1",
+    "Exports results in Percolator text format. 0=off, 1=on. Default = 1.",
+    "Available for kojak", true);
+  InitStringParam("export_pepXML", "1",
+    "Exports results in pepXML format. 0=off, 1=on. Default = 1.",
+    "Available for kojak", true);
+  InitStringParam("MS_data_file", "1",
+    "The spectra data file to analyze. Many formats available.",
+    "Available for kojak", true);
+  InitStringParam("percolator_version", "2.08",
+    "Changes percolator output to the format necessary for different versions of Percolator. 0=off, Default = 2.08",
+    "Available for kojak", true);
+  InitStringParam("enrichment", "0",
+    "Values between 0 and 1 to describe 18O APE. For example, 0.25 equals 25 APE. Default = 0.",
+    "Available for kojak", true);
+  InitStringParam("kojak_instrument", "0",
+    "Values are: 0=Orbitrap, 1=FTICR (such as Thermo LTQ-FT). Default = 0.",
+    "Available for kojak", true);
+  InitStringParam("MS1_centroid", "1",
+    "0=no, 1=yes. Default = 1.",
+    "Available for kojak", true);
+  InitStringParam("MS2_centroid", "1",
+    "0=no, 1=yes. Default = 1.",
+    "Available for kojak", true);
+  InitStringParam("MS1_resolution", "30000",
+    "Resolution at 400 m/z, value ignored if data are already centroided. Default = 30000.",
+    "Available for kojak", true);
+  InitStringParam("MS2_resolution", "25000",
+    "Resolution at 400 m/z, value ignored if data are already centroided. Default = 25000.",
+    "Available for kojak", true);
+  InitStringParam("cross_link", "nK nK 138.068074 BS3",
+    "TBD.",
+    "Available for kojak", true);
+  InitStringParam("mono_link", "nK 156.0786",
+    "TBD.",
+    "Available for kojak", true);
+  InitStringParam("fixed_modification", "0",
+    "TBD.",
+    "Available for kojak", true);
+  InitStringParam("fixed_modification_protC", "0",
+    "TBD.",
+    "Available for kojak", true);
+  InitStringParam("fixed_modification_protN", "0",
+    "TBD.",
+    "Available for kojak", true);
+  InitStringParam("modification", "0",
+    "TBD.",
+    "Available for kojak", true);
+  InitStringParam("modification_protC", "0",
+    "TBD.",
+    "Available for kojak", true);
+  InitStringParam("modification_protN", "0",
+    "TBD.",
+    "Available for kojak", true);
+  InitStringParam("diff_mods_on_xl", "0",
+    "TBD.",
+    "Available for kojak", true);
+  InitStringParam("max_mods_per_peptide", "0",
+    "TBD.",
+    "Available for kojak", true);
+  InitStringParam("mono_links_on_xl", "0",
+    "TBD.",
+    "Available for kojak", true);
+  InitStringParam("kojak_enzyme", "0",
+    "TBD.",
+    "Available for kojak", true);
+  InitStringParam("kojak_fragment_bin_offset", "0",
+    "TBD.",
+    "Available for kojak", true);
+  InitStringParam("fragment_bin_size", "0",
+    "TBD.",
+    "Available for kojak", true);
+  InitStringParam("ion_series_A", "0",
+    "TBD.",
+    "Available for kojak", true);
+  InitStringParam("ion_series_B", "0",
+    "TBD.",
+    "Available for kojak", true);
+  InitStringParam("ion_series_C", "0",
+    "TBD.",
+    "Available for kojak", true);
+  InitStringParam("ion_series_X", "0",
+    "TBD.",
+    "Available for kojak", true);
+  InitStringParam("ion_series_Y", "0",
+    "TBD.",
+    "Available for kojak", true);
+  InitStringParam("ion_series_Z", "0",
+    "TBD.",
+    "Available for kojak", true);
+  InitStringParam("decoy_filter", "0",
+    "TBD.",
+    "Available for kojak", true);
+  InitStringParam("kojak_isotope_error", "0",
+    "TBD.",
+    "Available for kojak", true);
+  InitStringParam("max_miscleavages", "0",
+    "TBD.",
+    "Available for kojak", true);
+  InitStringParam("max_peptide_mass", "0",
+    "TBD.",
+    "Available for kojak", true);
+  InitStringParam("min_peptide_mass", "0",
+    "TBD.",
+    "Available for kojak", true);
+  InitStringParam("max_spectrum_peaks", "0",
+    "TBD.",
+    "Available for kojak", true);
+  InitStringParam("ppm_tolerance_pre", "0",
+    "TBD.",
+    "Available for kojak", true);
+  InitStringParam("prefer_percursor_pred", "0",
+    "TBD.",
+    "Available for kojak", true);
+  InitStringParam("spectrum_processing", "0",
+    "TBD.",
+    "Available for kojak", true);
+  InitStringParam("top_count", "0",
+    "TBD.",
+    "Available for kojak", true);
+  InitStringParam("truncate_prot_names", "0",
+    "TBD.",
+    "Available for kojak", true);
+
+
   InitBoolParam("no-analytics", false, "Don't post data to Google Analytics.", "", false);
 
   Categorize();

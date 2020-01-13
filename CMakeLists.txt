@@ -53,6 +53,7 @@ add_custom_target(
   COMMAND ${CMAKE_COMMAND} -E remove_directory ext/downloads
   COMMAND ${CMAKE_COMMAND} -E remove_directory ext/include/CometSearch
   COMMAND ${CMAKE_COMMAND} -E remove_directory ext/include/MSToolkit
+  COMMAND ${CMAKE_COMMAND} -E remove_directory ext/include/kojak
   COMMAND ${CMAKE_COMMAND} -E remove_directory ext/include/boost
   COMMAND ${CMAKE_COMMAND} -E remove_directory ext/include/gflags-2.1.2
   COMMAND ${CMAKE_COMMAND} -E remove_directory ext/include/google
@@ -117,6 +118,11 @@ add_dependencies(xlink comet)
 add_dependencies(xlink percolator)
 add_dependencies(xlink ProteoWizard)
 add_dependencies(create-docs crux)
+# Added by Will
+add_dependencies(comet MSToolkit)
+add_dependencies(hardklor MSToolkit)
+add_dependencies(kojak hardklor)
+add_dependencies(crux kojak)
 
 # build a CPack driven installer package
 include (InstallRequiredSystemLibraries)

@@ -23,8 +23,10 @@ include_directories(${CMAKE_BINARY_DIR}/ext)
 include_directories(${CMAKE_BINARY_DIR}/ext/include)
 include_directories(${CMAKE_BINARY_DIR}/ext/include/CometSearch)
 include_directories(${CMAKE_BINARY_DIR}/ext/include/MSToolkit)
+include_directories(${CMAKE_BINARY_DIR}/ext/include/mstoolkit_ext)
 include_directories(${CMAKE_BINARY_DIR}/ext/include/gflags)
 include_directories(${CMAKE_BINARY_DIR}/ext/include/google/protobuf)
+include_directories(${CMAKE_BINARY_DIR}/ext/include/kojak)
 include_directories(${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/libraries/boost_aux)
 include_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator/src/)
 include_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator/src/fido)
@@ -59,7 +61,7 @@ link_directories(${CMAKE_BINARY_DIR}/app/qranker-barista)
 link_directories(${CMAKE_BINARY_DIR}/app/xlink)
 link_directories(${CMAKE_BINARY_DIR}/ext/lib)
 link_directories(${CMAKE_BINARY_DIR}/ext/lib64)
-link_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator-build/src) 
+link_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator-build/src)
 link_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator-build/src/fido)
 link_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator-build/src/picked_protein)
 if (WIN32 AND NOT Cygwin)
@@ -112,6 +114,7 @@ set (
   model/IonConstraint.cpp
   model/IonFilteredIterator.cpp
   model/IonSeries.cpp
+  app/KojakApplication.cpp
   util/linked_list.cpp
   io/LineFileReader.cpp
   app/LocalizeModification.cpp
