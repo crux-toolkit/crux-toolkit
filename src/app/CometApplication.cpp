@@ -2,8 +2,6 @@
  * \file CometApplication.cpp 
  * \brief Runs comet
  *****************************************************************************/
-#include "CometSearch/Common.h"
-#include "CometSearch/CometSearchManager.h"
 #include "util/AminoAcidUtil.h"
 #include "util/CarpStreamBuf.h"
 #include "util/FileUtils.h"

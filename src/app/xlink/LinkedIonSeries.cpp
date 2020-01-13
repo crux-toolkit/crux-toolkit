@@ -12,6 +12,8 @@
 
 #include <iostream>
 
+using namespace std;
+
 /**
  * GLOBALS - TODO GET RID OF THESE!
  */

@@ -274,24 +274,23 @@ if (UNIX)
   #set(mstoolkit_c_flags ${CMAKE_C_FLAGS}\ -DCRUX)
   ExternalProject_Add(
     comet
-    SVN_REPOSITORY svn://svn.code.sf.net/p/comet-ms/code/tags/release_2018012/
+    SVN_REPOSITORY svn://svn.code.sf.net/p/comet-ms/code/tags/release_2019013/
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     UPDATE_COMMAND ""
     CONFIGURE_COMMAND ""
     PATCH_COMMAND
-      cp ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CometSearch/CometSearchManager.cpp
-         ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/ #&&
-   #   cp ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/MSToolkit/Makefile
-   #      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/MSToolkit/ &&
-   #   cp ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/MSToolkit/include/MSReader.h
-   #      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/MSToolkit/include/ &&
-   #   cp ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/MSToolkit/src/MSToolkit/MSReader.cpp
-   #      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/MSToolkit/src/MSToolkit/
-    BUILD_COMMAND
-   #   COMMAND make -C MSToolkit CXXFLAGS=${comet_cxx_flags} CFLAGS=${mstoolkit_c_flags} 
-   #                             LDFLAGS=${CMAKE_LD_FLAGS}
-      COMMAND make -C CometSearch MSTOOLKIT=${CMAKE_CURRENT_BINARY_DIR}/build/src/MSToolkit
-                                  CXXFLAGS=${comet_cxx_flags} LDFLAGS=${CMAKE_LD_FLAGS}
+      cp ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CometSearch/Common.h
+         ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/ &&
+      cp ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/MSToolkit/Makefile
+         ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/MSToolkit/ &&
+      cp ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/MSToolkit/include/MSReader.h
+         ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/MSToolkit/include/ &&
+      cp ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/MSToolkit/src/MSToolkit/MSReader.cpp
+         ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/MSToolkit/src/MSToolkit/
+    BUILD_COMMAND 
+      COMMAND make -C MSToolkit CXXFLAGS=${comet_cxx_flags} CFLAGS=${mstoolkit_c_flags} 
+                                LDFLAGS=${CMAKE_LD_FLAGS}
+      COMMAND make -C CometSearch CXXFLAGS=${comet_cxx_flags} LDFLAGS=${CMAKE_LD_FLAGS}
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE 1
   )
@@ -319,6 +318,7 @@ if (UNIX)
       cp -p
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/Common.h
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/CometData.h
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/CometDataInternal.h
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/CometSearch.h
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/CometSearchManager.h
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/CometPreprocess.h

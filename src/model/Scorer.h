@@ -142,8 +142,8 @@ class Scorer {
    * normalize each 10 regions of the observed spectrum to max 50
    */
   void normalizeEachRegion(
-    vector<FLOAT_T>& observed,  ///< intensities to normalize
-    const vector<FLOAT_T>& max_intensity_per_region, ///< the max intensity in each 10 regions -in
+    std::vector<FLOAT_T>& observed,  ///< intensities to normalize
+    const std::vector<FLOAT_T>& max_intensity_per_region, ///< the max intensity in each 10 regions -in
     int region_selector ///< the size of each regions -in
     );
 
