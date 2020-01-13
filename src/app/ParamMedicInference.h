@@ -47,7 +47,7 @@ class ReporterIonProportionCalc : public RunAttributeDetector {
  private:
   enum REPORTER_ION_TYPE { TMT_2PLEX, TMT_6PLEX, ITRAQ_4PLEX, ITRAQ_8PLEX, CONTROL };
   std::vector<double> tmt6PlexOnlyReporterIonMzs_;
-  std::map< REPORTER_ION_TYPE, vector<double> > reporterIonTypeBins_;
+  std::map< REPORTER_ION_TYPE, std::vector<double> > reporterIonTypeBins_;
   std::map< REPORTER_ION_TYPE, std::map<int, double> > reporterTypeBinSumProportion_;
   std::map<REPORTER_ION_TYPE, double> reporterIonTStatThresholds_;
   Tmt6vs10Detector tmt10Detector_;
@@ -72,7 +72,7 @@ class SilacDetector : public RunAttributeDetector {
 
 class EnzymeDetector : public RunAttributeDetector {
  public:
-  EnzymeDetector(const vector<Modification>& mods);
+  EnzymeDetector(const std::vector<Modification>& mods);
   ~EnzymeDetector();
   void processSpectrum(
     const Crux::Spectrum* spectrum,

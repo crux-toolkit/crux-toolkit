@@ -765,8 +765,8 @@ FLOAT_T Scorer::genScoreSp(
  * .
  */
 void Scorer::normalizeEachRegion(
-  vector<FLOAT_T>& observed,  ///< intensities to normalize
-  const vector<FLOAT_T>& max_intensity_per_region, ///< the max intensity in each 10 regions -in
+  std::vector<FLOAT_T>& observed,  ///< intensities to normalize
+  const std::vector<FLOAT_T>& max_intensity_per_region, ///< the max intensity in each 10 regions -in
   int region_selector ///< the size of each regions -in
   )
 {
@@ -821,12 +821,12 @@ bool Scorer::createIntensityArrayObserved(
 
   sp_max_mz_ = sp_max_mz;
 
-  vector<FLOAT_T> observed(getMaxBin(), 0);
+  std::vector<FLOAT_T> observed(getMaxBin(), 0);
 
   // Store the max intensity in entire spectrum
   FLOAT_T max_intensity_overall = 0.0;
   // store the max intensity in each 10 regions to later normalize
-  vector<FLOAT_T> max_intensity_per_region(NUM_REGIONS, 0);
+  std::vector<FLOAT_T> max_intensity_per_region(NUM_REGIONS, 0);
 
   // while there are more peaks to iterate over..
   // find the maximum peak m/z (location)
@@ -899,7 +899,7 @@ bool Scorer::createIntensityArrayObserved(
   // For compatibility with SEQUEST drop peaks with intensity less than 1/20 of
   // the overall max intensity.
   if (stop_after >= REMOVE_GRASS_STEP) {
-    for (vector<FLOAT_T>::iterator i = observed.begin(); i != observed.end(); i++) {
+    for (std::vector<FLOAT_T>::iterator i = observed.begin(); i != observed.end(); i++) {
       if (*i <= 0.05 * max_intensity_overall) {
         *i = 0.0;
       }
