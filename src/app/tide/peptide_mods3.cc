@@ -228,6 +228,8 @@ class ModsOutputter : public IModsOutputter {
     bool any_term_modification = false;
 
     //add static N-terminal modifications
+    //TODO: It looks like this code never runs. Static terminal mods are done 
+    //through mass tables and they never make it into the possibles_ tables
     char aa = residues_[0];
     int num_poss = mod_table_->NumPoss(aa, NTPEP);
     for (int i = 0; i < num_poss; ++i) {

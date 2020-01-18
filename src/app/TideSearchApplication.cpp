@@ -206,6 +206,8 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
     MassConstants::Init(&aaf_peptides_header.peptides_header().mods(),
                         &aaf_peptides_header.peptides_header().nterm_mods(),
                         &aaf_peptides_header.peptides_header().cterm_mods(),
+                        &aaf_peptides_header.peptides_header().nprotterm_mods(),
+                        &aaf_peptides_header.peptides_header().cprotterm_mods(),
                         bin_width_, bin_offset_);
 
     ActivePeptideQueue* active_peptide_queue =
@@ -229,6 +231,8 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
     MassConstants::Init(&aaf_peptides_header.peptides_header().mods(),
                         &aaf_peptides_header.peptides_header().nterm_mods(),
                         &aaf_peptides_header.peptides_header().cterm_mods(),
+                        &aaf_peptides_header.peptides_header().nprotterm_mods(),
+                        &aaf_peptides_header.peptides_header().cprotterm_mods(),
                         bin_width_, bin_offset_);
 
     ActivePeptideQueue* active_peptide_queue =
@@ -269,8 +273,10 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
     }
   }
 
-  MassConstants::Init(&pepHeader.mods(), &pepHeader.nterm_mods(),
-    &pepHeader.cterm_mods(), bin_width_, bin_offset_);
+  MassConstants::Init(&pepHeader.mods(), 
+      &pepHeader.nterm_mods(), &pepHeader.cterm_mods(),
+      &pepHeader.nprotterm_mods(), &pepHeader.cprotterm_mods(),
+      bin_width_, bin_offset_);
   ModificationDefinition::ClearAll();
   TideMatchSet::initModMap(pepHeader.mods(), ANY);
   TideMatchSet::initModMap(pepHeader.nterm_mods(), PEPTIDE_N);
