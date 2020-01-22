@@ -56,14 +56,14 @@ public:
     
   void get_tab_delim_proteins(string protein_str, vector<string> &proteins);
   void get_pep_seq(string &pep, string &seq, string &n, string &c);
-  void write_results_psm_xml(PepXMLWriter& os);
+  void write_results_psm_xml(Crux::PepXMLWriter& os);
   void computePEP();
   int computePepNSAF();
 
   void write_results_peptides_tab(ofstream &os);
   void write_results_psm_tab(ofstream &os);
   void report_results_tab();
-  void write_results_pep_xml(PepXMLWriter& xmlfile);
+  void write_results_pep_xml(Crux::PepXMLWriter& xmlfile);
   void write_results_peptides_xml(ofstream &os);
   void write_results_psm_xml(ofstream &os);
   void report_results_xml();

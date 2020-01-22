@@ -20,6 +20,8 @@
 #include "io/PSMWriter.h"
 #include "io/SQTReader.h"
 
+using namespace Crux;
+
 PSMConvertApplication::PSMConvertApplication() {
 }
 

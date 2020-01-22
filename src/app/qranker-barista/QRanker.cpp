@@ -4,6 +4,8 @@
 #include "util/Params.h"
 #include "app/ComputeQValues.h"
 
+using namespace Crux;
+
 QRanker::QRanker() :  
   seed(0),
   selectionfdr(0.01),

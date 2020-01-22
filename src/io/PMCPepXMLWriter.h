@@ -14,7 +14,7 @@
 
 using namespace std;
 
-class PMCPepXMLWriter : public PepXMLWriter, public PSMWriter {
+class PMCPepXMLWriter : public Crux::PepXMLWriter, public PSMWriter {
 
  public:
 

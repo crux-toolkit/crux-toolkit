@@ -240,13 +240,16 @@ if (UNIX)
     GIT_REPOSITORY https://github.com/mhoopmann/mstoolkit.git
     GIT_TAG 2021e7e
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
+    UPDATE_COMMAND ""
     CONFIGURE_COMMAND ""
-    PATCH_COMMAND ""
-      #cp ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/MSToolkit/include/MSReader.h
-      #   ${CMAKE_CURRENT_BINARY_DIR}/build/src/MSToolkit/include/ &&
-      #cp ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/MSToolkit/src/MSToolkit/MSReader.cpp
-      #   ${CMAKE_CURRENT_BINARY_DIR}/build/src/MSToolkit/
-    BUILD_COMMAND make LDFLAGS=${CMAKE_LD_FLAGS}
+    PATCH_COMMAND
+      cp ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/MSToolkit/include/MSReader.h
+         ${CMAKE_CURRENT_BINARY_DIR}/build/src/MSToolkit/include/ &&
+      cp ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/MSToolkit/src/MSToolkit/MSReader.cpp
+         ${CMAKE_CURRENT_BINARY_DIR}/build/src/MSToolkit/src/MSToolkit
+    BUILD_COMMAND make #CXXFLAGS=${mstoolkit_cxx_flags}
+                       #CFLAGS=${mstoolkit_c_flags}
+                       LDFLAGS=${CMAKE_LD_FLAGS}
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE 1
     )
@@ -256,7 +259,9 @@ if (UNIX)
     POST_BUILD
     COMMAND
     [ -d ${CMAKE_CURRENT_BINARY_DIR}/include/MSToolkit ] ||
-    mkdir ${CMAKE_CURRENT_BINARY_DIR}/include/MSToolkit
+    mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/include/MSToolkit &&
+    [ -d ${CMAKE_CURRENT_BINARY_DIR}/lib ] ||
+    mkdir ${CMAKE_CURRENT_BINARY_DIR}/lib
     COMMAND
     cp -p
     ${CMAKE_CURRENT_BINARY_DIR}/build/src/MSToolkit/include/*
@@ -271,7 +276,6 @@ endif (UNIX)
 if (UNIX)
   # Get Comet source from SVN and build using it's own makefile
   set(comet_cxx_flags ${CMAKE_CXX_FLAGS}\ -DCRUX)
-  #set(mstoolkit_c_flags ${CMAKE_C_FLAGS}\ -DCRUX)
   ExternalProject_Add(
     comet
     SVN_REPOSITORY svn://svn.code.sf.net/p/comet-ms/code/tags/release_2019013/
@@ -280,17 +284,10 @@ if (UNIX)
     CONFIGURE_COMMAND ""
     PATCH_COMMAND
       cp ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CometSearch/Common.h
-         ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/ &&
-      cp ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/MSToolkit/Makefile
-         ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/MSToolkit/ &&
-      cp ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/MSToolkit/include/MSReader.h
-         ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/MSToolkit/include/ &&
-      cp ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/MSToolkit/src/MSToolkit/MSReader.cpp
-         ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/MSToolkit/src/MSToolkit/
-    BUILD_COMMAND 
-      COMMAND make -C MSToolkit CXXFLAGS=${comet_cxx_flags} CFLAGS=${mstoolkit_c_flags} 
-                                LDFLAGS=${CMAKE_LD_FLAGS}
+         ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/
+    BUILD_COMMAND
       COMMAND make -C CometSearch CXXFLAGS=${comet_cxx_flags} LDFLAGS=${CMAKE_LD_FLAGS}
+                                  MSTOOLKIT=${CMAKE_CURRENT_BINARY_DIR}/build/src/MSToolkit
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE 1
   )
@@ -299,16 +296,8 @@ if (UNIX)
   add_custom_command(
     TARGET comet
     POST_BUILD
-    #COMMAND
-    #  [ -d ${CMAKE_CURRENT_BINARY_DIR}/include/MSToolkit ] ||
-    #    mkdir ${CMAKE_CURRENT_BINARY_DIR}/include/MSToolkit
-    #COMMAND
-    #  cp -p
-    #  ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/MSToolkit/include/*
-    #  ${CMAKE_CURRENT_BINARY_DIR}/include/MSToolkit
     COMMAND
       cp -p
-      #${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/MSToolkit/libmstoolkitlite.a
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/libcometsearch.a
       ${CMAKE_CURRENT_BINARY_DIR}/lib
     COMMAND
@@ -355,7 +344,7 @@ elseif (WIN32 AND NOT CYGWIN)
         -P ${CMAKE_CURRENT_SOURCE_DIR}/build-comet.cmake
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE 1
-  ) 
+  )
   ExternalProject_Add_Step(
     comet
     copy_comet_library
@@ -369,31 +358,32 @@ elseif (WIN32 AND NOT CYGWIN)
   )
 endif (UNIX)
 
-# NOTE The integration of MSToolkit and Hardklor here are a rough patch to for
-# Kojak prerequisites. I'll need Charles help to figure out how to integrate
-# them properly.
-
 # Kojak
 if (UNIX)
   # Get Kojak source from GitHub
   set(lib_path "-L${CMAKE_CURRENT_BINARY_DIR}/lib -L${CMAKE_BINARY_DIR}/src/app/hardklor")
-  set(include_path "-I${CMAKE_CURRENT_BINARY_DIR}/include/MSToolkit -I${CMAKE_SOURCE_DIR}/src/app/hardklor")
+  set(include_path "-I${CMAKE_BINARY_DIR}/ext/include/MSToolkit -I${CMAKE_SOURCE_DIR}/src/app/hardklor -I${CMAKE_BINARY_DIR}/ext/include")
   message(${include_path})
   message(${lib_path})
   ExternalProject_Add(
     kojak
-    GIT_REPOSITORY https://github.com/mhoopmann/kojak.git
-    GIT_TAG 2.0.0alpha1
+    #GIT_REPOSITORY https://github.com/mhoopmann/kojak.git
+    GIT_REPOSITORY https://github.com/wfondrie/kojak.git
+    #GIT_TAG 2.0.0alpha1
+    GIT_TAG 58cb374
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND make LIBPATH=${lib_path}
-                       INCLUDE=${include_path}
+    BUILD_COMMAND make libkojaksearch.a LIBPATH=${lib_path} INCLUDE=${include_path}
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE 1
   )
   add_custom_command(
     TARGET kojak
     POST_BUILD
+    COMMAND
+      cp -p
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/kojak/libkojaksearch.a
+      ${CMAKE_CURRENT_BINARY_DIR}/lib
     COMMAND
       [ -d ${CMAKE_CURRENT_BINARY_DIR}/include/kojak ] ||
         mkdir ${CMAKE_CURRENT_BINARY_DIR}/include/kojak
