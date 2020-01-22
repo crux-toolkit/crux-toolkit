@@ -11,6 +11,7 @@
 #include "model/MatchCollection.h"
 
 using namespace std;
+using namespace Crux;
 
 PepXMLWriter::PepXMLWriter():
   file_(NULL), current_index_(1), mass_precision_(Params::GetInt("mass-precision")),

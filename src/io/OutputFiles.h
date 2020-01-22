@@ -60,7 +60,7 @@ class OutputFiles{
                    CruxApplication* application,
                    const char* extension,
                    bool overwrite);
-  bool createFiles(PepXMLWriter*** file_array_ptr,
+  bool createFiles(Crux::PepXMLWriter*** file_array_ptr,
                    const std::string& output_dir,
                    const std::string& fileroot,
                    CruxApplication* application,
@@ -139,7 +139,7 @@ class OutputFiles{
   FILE** sqt_file_array_; ///< array of .sqt files
   MzIdentMLWriter* mzid_file_;
  
-  PepXMLWriter** xml_file_array_; ///< array of .pep.xml files
+  Crux::PepXMLWriter** xml_file_array_; ///< array of .pep.xml files
   FILE*  feature_file_;   ///< file for percolator/q-ranker to write features to 
   int matches_per_spec_;  ///< print this many matches per spec
   CruxApplication* application_;///< crux application writing these files
