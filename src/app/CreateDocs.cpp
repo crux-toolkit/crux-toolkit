@@ -37,6 +37,7 @@
 #include "TideIndexApplication.h"
 #include "TideSearchApplication.h"
 #include "CometApplication.h"
+#include "KojakApplication.h"
 #include "app/CascadeSearchApplication.h"
 #include "app/AssignConfidenceApplication.h"
 #include "app/SubtractIndexApplication.h"
@@ -62,6 +63,7 @@ int CreateDocs::main(int argc, char** argv) {
   apps.add(new ExtractRows());
   apps.add(new GeneratePeptides());
   apps.add(new GetMs2Spectrum());
+  apps.add(new KojakApplication());
   apps.add(new MakePinApplication());
   apps.add(new LocalizeModificationApplication());
   apps.add(new ParamMedicApplication());

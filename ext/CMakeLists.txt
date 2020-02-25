@@ -367,10 +367,8 @@ if (UNIX)
   message(${lib_path})
   ExternalProject_Add(
     kojak
-    #GIT_REPOSITORY https://github.com/mhoopmann/kojak.git
-    GIT_REPOSITORY https://github.com/wfondrie/kojak.git
-    #GIT_TAG 2.0.0alpha1
-    GIT_TAG 58cb374
+    GIT_REPOSITORY https://github.com/mhoopmann/kojak.git
+    GIT_TAG 6058464
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     CONFIGURE_COMMAND ""
     BUILD_COMMAND make libkojaksearch.a LIBPATH=${lib_path} INCLUDE=${include_path}
