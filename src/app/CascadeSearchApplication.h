@@ -72,10 +72,6 @@ class CascadeSearchApplication: public CruxApplication {
 
   virtual void processParams();
   void RemoveTempFiles(const std::string& path, const std::string& prefix);
-
-
-  static const int CASCADE_TERMINATION_CONDITION;
-
 };
 
 

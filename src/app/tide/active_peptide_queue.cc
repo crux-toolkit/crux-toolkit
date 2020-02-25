@@ -68,7 +68,7 @@ bool ActivePeptideQueue::isWithinIsotope(vector<double>* min_mass, vector<double
 
 int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>* max_mass, double min_range, double max_range, vector<bool>* candidatePeptideStatus) {
   int min_candidates = 0;  //Added for tailor score calibration method by AKF
-  if (!Params::GetBool("use-tailor-calibration")){
+  if (Params::GetBool("use-tailor-calibration")){
     min_candidates = 30;
   }
   //min_range and max_range have been introduced to fix a bug
@@ -175,7 +175,7 @@ int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>*
     return 0;
   }
   //Added for tailor score calibration method by AKF
-  if (!Params::GetBool("use-tailor-calibration")){
+  if (Params::GetBool("use-tailor-calibration")){
     while (end_ != queue_.end()) {  //Added by AKF
       if ((*end_)->Prog(1) == NULL || candidatePeptideStatus->size() >= min_candidates-1) {
         break;
