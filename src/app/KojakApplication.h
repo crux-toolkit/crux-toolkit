@@ -59,6 +59,11 @@ public:
   virtual bool needsOutputDirectory() const;
 
   /**
+   * Run param-medic and sets the parameters accordingly.
+   */
+  virtual void processParams();
+
+  /**
   * \brief runs kojak on the input spectra
   * \returns whether kojak was successful or not
   */
@@ -67,13 +72,6 @@ public:
 
 protected:
   KojakManager searchManager_;
-
-  //static void addArg(std::vector<char*>* args,const std::string& arg);
-  //static void addArg(std::vector<char*>* args,const std::string& name,const std::string& value);
-  //static void addArg(std::vector<char*>* args,const std::string& name,bool value);
-
-private:
-  std::vector<std::string> kojak_params;
 };
 
 

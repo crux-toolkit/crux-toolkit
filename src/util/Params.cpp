@@ -958,7 +958,7 @@ Params::Params() : finalized_(false) {
     "0=amu, 1=mmu, 2=ppm.",
     "Available for comet.", true);
   InitStringParam("auto_peptide_mass_tolerance", "false", "false|warn|fail",
-    "Automatically estimate optimal value for the peptide_mass_tolerancel parameter "
+    "Automatically estimate optimal value for the peptide_mass_tolerance parameter "
     "from the spectra themselves. false=no estimation, warn=try to estimate "
     "but use the default value in case of failure, fail=try to estimate and "
     "quit in case of failure.",
@@ -991,7 +991,7 @@ Params::Params() : finalized_(false) {
     "Available for comet.", true);
   InitDoubleParam("fragment_bin_offset", 0.40, 0, 1.0,
     "Offset position to start the binning (0.0 to 1.0).",
-    "Available for comet.", true);
+    "Available for comet and kojak.", true);
   InitStringParam("auto_fragment_bin_tol", "false", "false|warn|fail",
     "Automatically estimate optimal value for the fragment_bin_tol parameter "
     "from the spectra themselves. false=no estimation, warn=try to estimate "
@@ -1912,6 +1912,18 @@ Params::Params() : finalized_(false) {
     "Available for localize-modification", true);
 
   // Kojak Parameters
+  InitStringParam("auto_ppm_tolerance_pre", "false", "false|warn|fail",
+    "Automatically estimate optimal value for the ppm_tolerance_pre parameter "
+    "from the spectra themselves. false=no estimation, warn=try to estimate "
+    "but use the default value in case of failure, fail=try to estimate and "
+    "quit in case of failure.",
+    "Available for kojak.", true);
+  InitStringParam("auto_fragment_bin_size", "false", "false|warn|fail",
+    "Automatically estimate optimal value for the fragment_bin_size parameter "
+    "from the spectra themselves. false=no estimation, warn=try to estimate "
+    "but use the default value in case of failure, fail=try to estimate and "
+    "quit in case of failure.",
+    "Available for kojak.", true);
   InitArgParam("protein database",
    "The name of the fasta file containing the amino acid protein sequences to "
    "be searched. Kojak can generate decoy sequences internally, or they may "
@@ -1966,7 +1978,7 @@ Params::Params() : finalized_(false) {
     "data contain multiple cross-linkers, provide them as a comma-separated "
     "list and enclosed with quotation marks. For example, a sample "
     "cross-linked with both BS3 and EDC could be specified as: \"nK nK "
-    "138.068074 BS3, DE nK -18.0106 EDC\"",
+    "138.068074 BS3, DE nK -18.0106 EDC\".",
     "Available for kojak", true);
   InitStringParam("mono_link", "nK 156.0786",
     "Specifies the sites of incomplete cross-linking (i.e. a mono-link) and "
@@ -1977,7 +1989,7 @@ Params::Params() : finalized_(false) {
     "reaction. The mass can be any real number, positive or negative. If "
     "multiple mono-links are possible (e.g. with a heterobifunctional "
     "cross-linker), provide them as a comma-separated list and enclosed in "
-    "quotation marks. For example: \"nK 156.0786, nK 155.0946\"",
+    "quotation marks. For example: \"nK 156.0786, nK 155.0946\".",
     "Available for kojak", true);
   InitStringParam("fixed_modification", "C 57.02146",
     "Specifies a mass adjustment to be applied to all indicated amino acids "
@@ -1987,7 +1999,7 @@ Params::Params() : finalized_(false) {
     "positive or negative, is listed after the amino acid, separated by a "
     "space. If multiple fixed modification masses are desired, provide them as "
     "a comma-separated list and enclosed in quotation marks. For example: "
-    "\"C 57.02146, nK 42.01057\"",
+    "\"C 57.02146, nK 42.01057\".",
     "Available for kojak", true);
   InitDoubleParam("fixed_modification_protC", 0,
     "Specifies a mass adjustment to be applied to all protein C-termini prior "
@@ -2009,7 +2021,7 @@ Params::Params() : finalized_(false) {
     "listed after the amino acid, separated by a space. If multiple dynamic "
     "modification masses are desired, including to the same amino acid, provide "
     "them as a comma-separated list and enclosed with quotation marks. For "
-    "example: \"M 15.9949, STY 79.966331\"",
+    "example: \"M 15.9949, STY 79.966331\".",
     "Available for kojak", true);
   InitStringParam("modification_protC", "0",
     "Specifies a dynamic mass adjustment to be applied to protein C-terminal "
@@ -2018,7 +2030,7 @@ Params::Params() : finalized_(false) {
     "relative mass difference can be any non-zero value. If multiple dynamic "
     "protein C-terminal modification masses are desired, provide them as a "
     "comma-separated list and enclosed in quotation marks. For example, "
-    "\"56.037448, -58.005479\"",
+    "\"56.037448, -58.005479\".",
     "Available for kojak", true);
   InitStringParam("modification_protN", "0",
     "Specifies a dynamic mass adjustment to be applied to protein N-terminal "
@@ -2028,7 +2040,7 @@ Params::Params() : finalized_(false) {
     "removal of the leading amino acid. The relative mass difference can be "
     "any non-zero value. If multiple dynamic protein N-terminal modification "
     "masses are desired, provide them as a comma-separated list and enclosed "
-    "in quotation marks. For example, \"42.01055, 0.984016\"",
+    "in quotation marks. For example, \"42.01055, 0.984016\".",
     "Available for kojak", true);
   InitBoolParam("diff_mods_on_xl", false,
     "Searching for differential modifications is known to increase search "
@@ -2305,10 +2317,6 @@ void Params::Categorize() {
   items.insert("score-function");
   items.insert("fragment-tolerance");
   items.insert("evidence-granularity");
-  items.insert("ppm_tolerance_pre");
-  items.insert("kojak_fragment_bin_offset");
-  items.insert("fragment_bin_size");
-  items.insert("kojak_isotope_error");
   items.insert("top_count");
   AddCategory("Search parameters", items);
 
@@ -2319,12 +2327,6 @@ void Params::Categorize() {
   items.insert("use-x-ions");
   items.insert("use-y-ions");
   items.insert("use-z-ions");
-  items.insert("ion_series_A");
-  items.insert("ion_series_B");
-  items.insert("ion_series_C");
-  items.insert("ion_series_X");
-  items.insert("ion_series_Y");
-  items.insert("ion_series_Z");
   AddCategory("Fragment ion parameters", items);
 
   items.clear();
@@ -2387,6 +2389,9 @@ void Params::Categorize() {
   items.insert("peptide_mass_tolerance");
   items.insert("peptide_mass_units");
   items.insert("precursor_tolerance_type");
+  items.insert("ppm_tolerance_pre");
+  items.insert("auto_ppm_tolerance_pre");
+  items.insert("kojak_isotope_error");
   AddCategory("Masses", items);
 
   items.clear();
@@ -2407,6 +2412,15 @@ void Params::Categorize() {
   items.insert("use_Y_ions");
   items.insert("use_Z_ions");
   items.insert("use_NL_ions");
+  items.insert("auto_fragment_bin_size");
+  items.insert("kojak_fragment_bin_offset");
+  items.insert("fragment_bin_size");
+  items.insert("ion_series_A");
+  items.insert("ion_series_B");
+  items.insert("ion_series_C");
+  items.insert("ion_series_X");
+  items.insert("ion_series_Y");
+  items.insert("ion_series_Z");
   AddCategory("Fragment ions", items);
 
   items.clear();
