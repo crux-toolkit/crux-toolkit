@@ -1948,7 +1948,7 @@ Params::Params() : finalized_(false) {
   InitBoolParam("export_mzID", true,
     "Exports results in mzID format.",
     "Available for kojak", true);
-  InitStringParam("percolator_version", "0",
+  InitStringParam("percolator_version", "3",
     "Changes percolator output to the format necessary for different versions of Percolator.",
     "Available for kojak", false);
   InitDoubleParam("enrichment", 0,

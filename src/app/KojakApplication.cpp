@@ -100,32 +100,25 @@ int KojakApplication::main(const vector<string>& input_files) {
   streambuf* old_err = cerr.rdbuf();
   cerr.rdbuf(&buffer);
 
-
   // set string parameters
-  std::cout << "#### STRINGS ####\n";
   for(size_t i=0; i<str_params.size(); i++) {
     string param = str_params[i] + "=" + Params::GetString(str_params[i]);
-    std::cout << param << "\n";
     searchManager_.setParam(param);
   }
 
-  std::cout << "#### BOOLEANS ####";
   // set bool params
   for(size_t i=0; i<bool_params.size(); i++) {
     string param = bool_params[i] + "=" + to_string(Params::GetBool(bool_params[i]));
-    std::cout << param << "\n";
     searchManager_.setParam(param);
   }
 
   // set list params
-  std::cout << "#### LISTS ####\n";
   for(size_t i=0; i<list_params.size(); i++) {
     stringstream param_stream(Params::GetString(list_params[i]));
     while(param_stream.good()) {
       string param_value;
       getline(param_stream, param_value, ',');
       string param = list_params[i] + "=" + param_value;
-      std::cout << list_params[i] + "=" + param_value << "\n";
       searchManager_.setParam(param);
     }
   }
@@ -134,8 +127,13 @@ int KojakApplication::main(const vector<string>& input_files) {
   string instrument = string("instrument=") + Params::GetString("kojak_instrument");
   searchManager_.setParam(instrument);
 
-  string enzyme = string("enzyme=") + Params::GetString("kojak_enzyme");
-  searchManager_.setParam(enzyme);
+  stringstream enzyme_stream(Params::GetString("kojak_enzyme"));
+  while(enzyme_stream.good()) {
+    string enzyme_value;
+    getline(enzyme_stream, enzyme_value, ',');
+    string enzyme = "enzyme=" + enzyme_value;
+    searchManager_.setParam(enzyme);
+  }
 
   string isotope_error = string("isotope_error=") + Params::GetString("kojak_isotope_error");
   searchManager_.setParam(isotope_error);
@@ -153,12 +151,12 @@ int KojakApplication::main(const vector<string>& input_files) {
   for(size_t i=0;i<input_files.size();i++) fc=searchManager_.setFile(input_files[i].c_str());
 
   /* Run search */
-  bool success = searchManager_.run();
+  bool success = searchManager_.run(); // Returns 0 if successful
 
   /* Recover stderr */
   cerr.rdbuf(old_err);
 
-  return success ? 0 : 1;
+  return success ? 1 : 0;
 }
 
 
