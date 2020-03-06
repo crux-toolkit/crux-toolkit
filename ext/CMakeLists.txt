@@ -363,12 +363,10 @@ if (UNIX)
   # Get Kojak source from GitHub
   set(lib_path "-L${CMAKE_CURRENT_BINARY_DIR}/lib -L${CMAKE_BINARY_DIR}/src/app/hardklor")
   set(include_path "-I${CMAKE_BINARY_DIR}/ext/include/MSToolkit -I${CMAKE_SOURCE_DIR}/src/app/hardklor -I${CMAKE_BINARY_DIR}/ext/include")
-  message(${include_path})
-  message(${lib_path})
   ExternalProject_Add(
     kojak
     GIT_REPOSITORY https://github.com/mhoopmann/kojak.git
-    GIT_TAG 6058464
+    GIT_TAG c1acef0
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     CONFIGURE_COMMAND ""
     BUILD_COMMAND make libkojaksearch.a LIBPATH=${lib_path} INCLUDE=${include_path}
