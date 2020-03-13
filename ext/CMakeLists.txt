@@ -232,13 +232,19 @@ ExternalProject_Add(
 
 # MSToolkit
 if (UNIX)
+  # Disable static compiling for MacOS
+  message(${APPLE})
+  if (APPLE)
+    set(mstoolkit_c_flags -O3\ -I.\ -I./include\ -D_LARGEFILE_SOURCE\ -D_FILE_OFFSET_BITS=64\ -DGCC\ -DHAVE_EXPAT_CONFIG_H)
+  else ()
+    set(mstoolkit_c_flags -O3\ -static\ -I.\ -I./include\ -D_LARGEFILE_SOURCE\ -D_FILE_OFFSET_BITS=64\ -DGCC\ -DHAVE_EXPAT_CONFIG_H)
+  endif ()
+  
   # Get MSToolkit source from Github
-  set(mstoolkit_cxx_flags ${CMAKE_CXX_FLAGS}\ -DCRUX)
-  set(mstoolkit_c_flags ${CMAKE_C_FLAGS}\ -DCRUX)
   ExternalProject_Add(
     MSToolkit
-    GIT_REPOSITORY https://github.com/mhoopmann/mstoolkit.git
-    GIT_TAG 2021e7e
+    GIT_REPOSITORY https://github.com/wfondrie/mstoolkit.git
+    GIT_TAG cbfdaa5
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     UPDATE_COMMAND ""
     CONFIGURE_COMMAND ""
@@ -247,9 +253,9 @@ if (UNIX)
          ${CMAKE_CURRENT_BINARY_DIR}/build/src/MSToolkit/include/ &&
       cp ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/MSToolkit/src/MSToolkit/MSReader.cpp
          ${CMAKE_CURRENT_BINARY_DIR}/build/src/MSToolkit/src/MSToolkit
-    BUILD_COMMAND make #CXXFLAGS=${mstoolkit_cxx_flags}
-                       #CFLAGS=${mstoolkit_c_flags}
+    BUILD_COMMAND make AR_CFLAGS=${mstoolkit_c_flags}
                        LDFLAGS=${CMAKE_LD_FLAGS}
+                       arlib
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE 1
     )
@@ -291,8 +297,7 @@ if (UNIX)
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE 1
   )
-  # Copy the Comet and MSToolkit include files and libraries to
-  # the desired directories.
+  # Copy the Comet include files and libraries to the desired directories.
   add_custom_command(
     TARGET comet
     POST_BUILD
