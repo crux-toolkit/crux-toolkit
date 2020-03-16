@@ -58,5 +58,3 @@ add_library(
   SpecAnalyzeSupport.cpp
   CruxHardklorApplication.cpp
 )
-
-message(${CMAKE_INSTALL_PREFIX})

@@ -118,7 +118,6 @@ add_dependencies(xlink comet)
 add_dependencies(xlink percolator)
 add_dependencies(xlink ProteoWizard)
 add_dependencies(create-docs crux)
-# Added by Will
 add_dependencies(comet MSToolkit)
 add_dependencies(hardklor MSToolkit)
 add_dependencies(kojak hardklor)
