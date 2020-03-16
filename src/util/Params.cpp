@@ -2150,6 +2150,14 @@ Params::Params() : finalized_(false) {
     "MS/MS spectrum based on its precursor ion mass. The unit is "
     "parts-per-million (PPM).",
     "Available for kojak", true);
+  InitBoolParam("precursor_refinement", true,
+    "Some data files may filter out precursor scans to save space prior to "
+    "searching. To analyze these files, the precursor analysis algorithms in "
+    "Kojak must be disabled. It is also possible, though not always "
+    "recommended, to disable these algorithms even when precursor scans are "
+    "included in the data files. This parameter toggles the precursor analysis "
+    "algorithms.",
+    "Available for kojak", true);
   InitIntParam("prefer_precursor_pred", 2, 0, 2,
     "For some data (such as Thermo Orbitrap data), the MS/MS spectra may have a "
     "precursor mass prediction already. The Kojak algorithm can be set to "
@@ -2453,6 +2461,7 @@ void Params::Categorize() {
   items.insert("MS1_resolution");
   items.insert("MS2_resolution");
   items.insert("max_spectrum_peaks");
+  items.insert("precursor_refinement");
   items.insert("prefer_precursor_pred");
   items.insert("spectrum_processing");
   AddCategory("Spectral processing", items);

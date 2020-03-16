@@ -68,6 +68,7 @@ int KojakApplication::main(const vector<string>& input_files) {
   bool_params.push_back("ion_series_X");
   bool_params.push_back("ion_series_Y");
   bool_params.push_back("ion_series_Z");
+  bool_params.push_back("precursor_refinement");
   bool_params.push_back("spectrum_processing");
   bool_params.push_back("export_percolator");
   bool_params.push_back("export_mzID");
@@ -283,6 +284,7 @@ vector<string> KojakApplication::getOptions() const {
    "max_spectrum_peaks",
    "ppm_tolerance_pre",
    "auto_ppm_tolerance_pre",
+   "precursor_refinement",
    "prefer_precursor_pred",
    "spectrum_processing",
    "top_count",
