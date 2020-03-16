@@ -232,14 +232,12 @@ ExternalProject_Add(
 
 # MSToolkit
 if (UNIX)
-  # Disable static compiling for MacOS
-  message(${APPLE})
   if (APPLE)
     set(mstoolkit_c_flags -O3\ -I.\ -I./include\ -D_LARGEFILE_SOURCE\ -D_FILE_OFFSET_BITS=64\ -DGCC\ -DHAVE_EXPAT_CONFIG_H)
   else ()
     set(mstoolkit_c_flags -O3\ -static\ -I.\ -I./include\ -D_LARGEFILE_SOURCE\ -D_FILE_OFFSET_BITS=64\ -DGCC\ -DHAVE_EXPAT_CONFIG_H)
   endif ()
-  
+
   # Get MSToolkit source from Github
   ExternalProject_Add(
     MSToolkit
