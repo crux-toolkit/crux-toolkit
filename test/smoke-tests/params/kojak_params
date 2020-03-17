@@ -1,5 +1,6 @@
 # General
 verbosity=30
+overwrite=T
 fileroot=
 
 # Param-Medic
@@ -17,11 +18,11 @@ pm-max-scan-separation=1000
 pm-min-peak-pairs=200
 
 # Kojak
-threads=0
+threads=1
 enrichment=0
 modification=M 15.9949
-fragment_bin_offset=0.4
-auto_ppm_tolerance_pre=warn
+fragment_bin_offset=0
+auto_ppm_tolerance_pre=false
 auto_fragment_bin_size=false
 export_percolator=true
 export_pepXML=true
@@ -51,11 +52,12 @@ ion_series_Y=true
 ion_series_Z=false
 decoy_filter=DECOY_ 1
 kojak_isotope_error=1
-max_miscleavages=0
+max_miscleavages=2
 max_peptide_mass=8000
 min_peptide_mass=500
 max_spectrum_peaks=0
 ppm_tolerance_pre=39.753916
+precursor_refinement=F
 prefer_precursor_pred=2
 spectrum_processing=false
 top_count=20
