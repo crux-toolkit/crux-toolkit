@@ -1917,22 +1917,22 @@ Params::Params() : finalized_(false) {
 
   // Kojak Parameters
   InitStringParam("auto_ppm_tolerance_pre", "false", "false|warn|fail",
-    "Automatically estimate optimal value for the ppm_tolerance_pre parameter "
-    "from the spectra themselves. false=no estimation, warn=try to estimate "
-    "but use the default value in case of failure, fail=try to estimate and "
-    "quit in case of failure.",
+    "Automatically estimate optimal value for the <code>ppm_tolerance_pre</code> "
+    "parameter from the spectra themselves. false=no estimation, warn=try to "
+    "estimate but use the default value in case of failure, fail=try to estimate "
+    "and quit in case of failure.",
     "Available for kojak.", true);
   InitStringParam("auto_fragment_bin_size", "false", "false|warn|fail",
-    "Automatically estimate optimal value for the fragment_bin_size parameter "
-    "from the spectra themselves. false=no estimation, warn=try to estimate "
-    "but use the default value in case of failure, fail=try to estimate and "
-    "quit in case of failure.",
+    "Automatically estimate optimal value for the <code>fragment_bin_size</code> "
+    "parameter from the spectra themselves. false=no estimation, warn=try to "
+    "estimate but use the default value in case of failure, fail=try to estimate "
+    "and quit in case of failure.",
     "Available for kojak.", true);
   InitArgParam("protein database",
    "The name of the fasta file containing the amino acid protein sequences to "
    "be searched. Kojak can generate decoy sequences internally, or they may "
-   "be in this file (see the '--decoy_filter' option for details). It is "
-   "recommended to include the path in the name of the file.");
+   "be in this file (see the <code>decoy_filter</code> option for details). It is "
+   "recommended to include the full path in the name of the file.");
   InitIntParam("threads", 0,
    "Number of threads to use when searching spectra. A value of 0 will "
     "automatically match the number of threads to the number of processing "
@@ -1942,10 +1942,10 @@ Params::Params() : finalized_(false) {
   InitBoolParam("export_percolator", true,
     "Exports results in Percolator text format (PIN format).",
     "Available for kojak", true);
-  InitBoolParam("export_pepXML", true,
+  InitBoolParam("export_pepXML", false,
     "Exports results in pepXML format.",
     "Available for kojak", true);
-  InitBoolParam("export_mzID", true,
+  InitBoolParam("export_mzID", false,
     "Exports results in mzID format.",
     "Available for kojak", true);
   InitStringParam("percolator_version", "3",
@@ -1980,8 +1980,8 @@ Params::Params() : finalized_(false) {
     " when bound to the peptides. The mass can be any real number, positive or "
     "negative. The identifier is any name desired for the cross-linker. If the "
     "data contain multiple cross-linkers, provide them as a comma-separated "
-    "list and enclosed with quotation marks. For example, a sample "
-    "cross-linked with both BS3 and EDC could be specified as: \"nK nK "
+    "list enclosed with quotation marks. For example, a sample "
+    "cross-linked with both BS3 and EDC could be specified as \"nK nK "
     "138.068074 BS3, DE nK -18.0106 EDC\".",
     "Available for kojak", true);
   InitStringParam("mono_link", "nK 156.0786",
@@ -1992,7 +1992,7 @@ Params::Params() : finalized_(false) {
     "termini. The second value is the net mass of the incomplete cross-link "
     "reaction. The mass can be any real number, positive or negative. If "
     "multiple mono-links are possible (e.g. with a heterobifunctional "
-    "cross-linker), provide them as a comma-separated list and enclosed in "
+    "cross-linker), provide them as a comma-separated list enclosed in "
     "quotation marks. For example: \"nK 156.0786, nK 155.0946\".",
     "Available for kojak", true);
   InitStringParam("fixed_modification", "C 57.02146",
@@ -2002,7 +2002,7 @@ Params::Params() : finalized_(false) {
     "designated by n and c, respectively. The relative mass difference, "
     "positive or negative, is listed after the amino acid, separated by a "
     "space. If multiple fixed modification masses are desired, provide them as "
-    "a comma-separated list and enclosed in quotation marks. For example: "
+    "a comma-separated list enclosed in quotation marks. For example: "
     "\"C 57.02146, nK 42.01057\".",
     "Available for kojak", true);
   InitDoubleParam("fixed_modification_protC", 0,
@@ -2024,30 +2024,30 @@ Params::Params() : finalized_(false) {
     "respectively. The relative mass difference, positive or negative, is "
     "listed after the amino acid, separated by a space. If multiple dynamic "
     "modification masses are desired, including to the same amino acid, provide "
-    "them as a comma-separated list and enclosed with quotation marks. For "
+    "them as a comma-separated list enclosed with quotation marks. For "
     "example: \"M 15.9949, STY 79.966331\".",
     "Available for kojak", true);
   InitStringParam("modification_protC", "0",
     "Specifies a dynamic mass adjustment to be applied to protein C-terminal "
     "amino acids during spectral analysis. Peptides containing the protein "
-    "C-termnius are tested with and without the dynamic modification mass. The "
+    "C-terminus are tested with and without the dynamic modification mass. The "
     "relative mass difference can be any non-zero value. If multiple dynamic "
     "protein C-terminal modification masses are desired, provide them as a "
-    "comma-separated list and enclosed in quotation marks. For example, "
+    "comma-separated list enclosed in quotation marks. For example, "
     "\"56.037448, -58.005479\".",
     "Available for kojak", true);
   InitStringParam("modification_protN", "0",
     "Specifies a dynamic mass adjustment to be applied to protein N-terminal "
     "amino acids during spectral analysis. Peptides containing the protein "
-    "N-termnius are tested with and without the dynamic modification mass. The "
+    "N-terminus are tested with and without the dynamic modification mass. The "
     "N-terminus includes both the leading and 2nd amino acid, in case of "
     "removal of the leading amino acid. The relative mass difference can be "
     "any non-zero value. If multiple dynamic protein N-terminal modification "
-    "masses are desired, provide them as a comma-separated list and enclosed "
+    "masses are desired, provide them as a comma-separated list enclosed "
     "in quotation marks. For example, \"42.01055, 0.984016\".",
     "Available for kojak", true);
   InitBoolParam("diff_mods_on_xl", false,
-    "Searching for differential modifications is known to increase search "
+    "Searching for differential modifications increases search "
     "times exponentially. This increase in computation can be exacerbated "
     "when searching for differential modifications on cross-linked peptides. "
     "Such computation can be avoided if is known that the cross-linked "
@@ -2062,17 +2062,17 @@ Params::Params() : finalized_(false) {
     "When multiple sites of linkage are available on a peptide, it is possible "
     "for that peptide to be linked to a second peptide at one site and contain "
     "a mono-link at another site. If such instances are considered rare due to "
-    "the experimental conditions, this parameter can be disabled to improve "
+    "the experimental conditions, then this parameter can be disabled to improve "
     "computation time.",
     "Available for kojak", true);
   InitStringParam("kojak_enzyme", "[KR] Trypsin",
     "An enzyme string code is used to define amino acid cut sites when parsing "
     "protein sequences. Following the code, a separate label can be used to "
     "name the enzyme used. The rules for peptide parsing are similar to other "
-    "database search engines such as X!Tandem: 1) Cleavage amino acids are "
-    "specified in square braces: [], 2) A vertical line, |, indicates N- or "
-    "C-terminal to the residue, 3) Exception amino acids are specified in "
-    "french braces: {}.",
+    "database search engines such as X!Tandem: 1) cleavage amino acids are "
+    "specified in square braces: [], 2) a vertical line, |, indicates N- or "
+    "C-terminal to the residue, 3) exception amino acids are specified in "
+    "curly braces: {}.",
     "Available for kojak", true);
   InitDoubleParam("fragment_bin_size", 0.03,
     "Determines the accuracy of the scoring algorithm with smaller bins being "
@@ -2106,23 +2106,23 @@ Params::Params() : finalized_(false) {
     "This parameter requires two values. The first value is a short, "
     "case-sensitive string of characters that appears in the name of every "
     "decoy protein sequence in the database. The second value is either 0 or "
-    "1, where 0 indicates these decoy sequences are already provided in the "
+    "1, where 0 indicates that these decoy sequences are already provided in the "
     "FASTA database supplied by the user, and 1 indicates Kojak should "
     "automatically generate the decoy sequences and preface the protein names "
     "with the characters supplied in the first value. If Kojak is requested to "
-    "generate decoy sequences, it will export the full complement of target "
-    "and decoy sequences searched in the output directory at the end of "
+    "generate decoy sequences, it will save the full complement of target "
+    "and decoy sequences as a fasta file in the output directory at the end of "
     "analysis. Kojak generates decoy sequences by reversing the amino acids "
     "between enzymatic cleavage sites in the protein sequence. The sites of "
     "enzymatic cleavage are determined by the rules supplied with the "
-    "kojak_enzyme parameter. The leading methionine in the sequences, however, "
-    "remains fixed. This approach ensures that, with very few exceptions, the "
-    "number, length, and mass of the decoy peptides are identical to the target "
-    "peptides. ",
+    "<code>kojak_enzyme</code> parameter. The leading methionine in the "
+    "sequences, however, remains fixed. This approach ensures that, with very "
+    "few exceptions, the number, length, and mass of the decoy peptides are "
+    "identical to the target peptides. ",
     "Available for kojak", true);
-  InitIntParam("kojak_isotope_error", 1, 0, 2,
+  InitIntParam("kojak_isotope_error", 1, 0, 3,
     "Allows the searching of neighboring isotope peak masses for poorly "
-    "resolve precursors. Up to two alternative isotope peak masses will be "
+    "resolve precursors. Up to three alternative isotope peak masses will be "
     "searched in addition to the presumed precursor peak mass to correct for "
     "errors in monoisotopic precursor peak identification.",
     "Available for kojak", true);
@@ -2146,9 +2146,10 @@ Params::Params() : finalized_(false) {
     "the spectrum is processed",
     "Available for kojak", true);
   InitIntParam("max_spectrum_peaks", 0, 0, 100000000,
-    "Maximum number of MS/MS peaks to analyze if using the spectrum_processing "
-    "parameter. Peaks are kept in order of intensity, starting with the most "
-    "intense. Setting a value of 0 keeps all peaks.",
+    "Maximum number of MS/MS peaks to analyze if using the "
+    "<code>spectrum_processing</code> parameter. Peaks are kept in order of "
+    "intensity, starting with the most intense. Setting a value of 0 keeps all "
+    "peaks.",
     "Available for kojak", true);
   InitDoubleParam("ppm_tolerance_pre", 10, 0, 100000000,
     "Tolerance used when determining which peptides to search for a given "
@@ -2165,14 +2166,15 @@ Params::Params() : finalized_(false) {
     "Available for kojak", true);
   InitIntParam("prefer_precursor_pred", 2, 0, 2,
     "For some data (such as Thermo Orbitrap data), the MS/MS spectra may have a "
-    "precursor mass prediction already. The Kojak algorithm can be set to "
-    "either ignore, use, or supplement this information using this parameter. "
-    "There are three options for the parameter: 0 = Ignore all precursor mass "
-    "predictions and have Kojak make new predictions using its precursor "
-    "processing algorithms. 1 = Use the existing precursor mass predictions and "
-    "skip further processing with Kojak. 2 = Use the existing precursor mass "
-    "predictions and supplement these values with additional results of the "
-    "Kojak precursor processing algorithms. The recommended value to use is 2. "
+    "precursor mass prediction already. With this parameter, the Kojak algorithm "
+    "can be set to either ignore, use, or supplement the predicted precursor "
+    "information. There are three options for the parameter: 0 = Ignore all "
+    "precursor mass predictions and have Kojak make new predictions using its "
+    "precursor processing algorithms. 1 = Use the existing precursor mass "
+    "predictions and skip further processing with Kojak. 2 = Use the existing "
+    "precursor mass predictions and supplement these values with additional "
+    "results of the Kojak precursor processing algorithms. The recommended "
+    "value is 2. "
     "Supplementing the precursor values performs the following functions. "
     "First, the monoisotopic precursor mass may be refined to one determined "
     "from a point near the apex of the extracted ion chromatogram, with "
@@ -2190,15 +2192,16 @@ Params::Params() : finalized_(false) {
   InitBoolParam("spectrum_processing", false,
     "The MS/MS spectrum processing function will collapse isotope "
     "distributions to the monoisotopic peak and reduce the number of peaks to "
-    "analyze to the number specified with the max_spectrum_peaks parameter.",
+    "analyze to the number specified with the <code>max_spectrum_peaks</code> "
+    "parameter.",
     "Available for kojak", true);
   InitIntParam("top_count", 20, 1, 100000000,
     "This parameter specifies the number of top scoring peptides to store in "
-    "the first pass of the Kojak analysis. A second pass follows pairing"
+    "the first pass of the Kojak analysis. A second pass follows, pairing"
     "cross-linked peptides to these top sequences to produce the final "
     "cross-linked peptide score. Setting this number too low will cause "
     "cross-linked sequences to be missed. Setting this number too high will "
-    "degrade performance of the algorithm. Optimal settings will depend on "
+    "degrade the performance of the algorithm. Optimal settings will depend on "
     "database size and the number of modifications in the search. Recommended "
     "values are between 5 and 50 (20 is probably a good start).",
     "Available for kojak", true);

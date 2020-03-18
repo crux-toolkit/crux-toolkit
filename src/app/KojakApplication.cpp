@@ -219,10 +219,10 @@ string KojakApplication::getName() const {
 string KojakApplication::getDescription() const {
   return
     "[[nohtml:Identify cross-linked peptide sequences from shotgun mass spectra.]]"
-    "[[html:<p>Kojak is an application for the identification of cross-linked "
+    "[[html:<p>Kojak is a database search tool for the identification of cross-linked "
     "peptides from mass spectra. This search engine was developed and is "
     "maintained by Michael Hoopmann at the Institute for Systems Biology. "
-    "Additional information about kojak can be found at "
+    "Additional information about Kojak can be found at "
     "<a href=\"http://www.kojak-ms.org\">kojak-ms.org</a>.</p>"
     "<p>If you use Kojak, please cite:</p> "
     "<p><a href=\"https://doi.org/10.1021/pr501321h\">\"Kojak: Efficient "
@@ -324,8 +324,8 @@ vector< pair<string, string> > KojakApplication::getOutputs() const {
   vector< pair<string, string> > outputs;
   outputs.push_back(make_pair("*.kojak.txt",
     "a tab-delimited text file containing the PSMs. See the <a href=\""
-    "http://www.kojak-ms.org/docs/kojakresults.html\">"
-    "kojak results documentation</a> for a list of the fields. The \"*\" "
+    "../file-formats/txt-format.html\">"
+    "txt file format</a> for a list of the fields. The \"*\" "
     "indicates the root of the input spectrum file(s)."));
   outputs.push_back(make_pair("*.log", "a log file containing specific "
     "information pertaining to the analysis of the corresponding spectrum "
