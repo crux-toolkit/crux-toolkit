@@ -58,6 +58,7 @@ int KojakApplication::main(const vector<string>& input_files) {
   str_params.push_back("ppm_tolerance_pre");
   str_params.push_back("prefer_precursor_pred");
   str_params.push_back("top_count");
+  str_params.push_back("e_value_depth");
   str_params.push_back("truncate_prot_names");
   str_params.push_back("fragment_bin_offset");
 
@@ -290,6 +291,7 @@ vector<string> KojakApplication::getOptions() const {
    "prefer_precursor_pred",
    "spectrum_processing",
    "top_count",
+   "e_value_depth",
    "truncate_prot_names",
    "kojak_instrument",
    "kojak_enzyme",
