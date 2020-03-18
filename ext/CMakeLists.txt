@@ -241,8 +241,8 @@ if (UNIX)
   # Get MSToolkit source from Github
   ExternalProject_Add(
     MSToolkit
-    GIT_REPOSITORY https://github.com/wfondrie/mstoolkit.git
-    GIT_TAG cbfdaa5
+    GIT_REPOSITORY https://github.com/mhoopmann/mstoolkit.git
+    GIT_TAG 0077644
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     UPDATE_COMMAND ""
     CONFIGURE_COMMAND ""
