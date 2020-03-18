@@ -2210,7 +2210,13 @@ Params::Params() : finalized_(false) {
     "the Kojak output. Otherwise, if set to 0, all characters in the protein "
     "name are exported.",
     "Available for kojak", true);
-
+  InitIntParam("e_value_depth", 5000, 1, 100000000,
+    "Specifies the minimum number of tests to be present in the histogram for "
+    "e-value calculations. A larger number better resolves the histogram and "
+    "improves the e-value estimation for the peptide sequences in each "
+    "spectrum. However, larger numbers also increase computation time. The "
+    "recommended values are between 2000 and 10000",
+    "Available for kojak", true);
 
   InitBoolParam("no-analytics", false, "Don't post data to Google Analytics.", "", false);
 
@@ -2330,6 +2336,7 @@ void Params::Categorize() {
   items.insert("fragment-tolerance");
   items.insert("evidence-granularity");
   items.insert("top_count");
+  items.insert("e_value_depth");
   AddCategory("Search parameters", items);
 
   items.clear();
