@@ -53,6 +53,7 @@ int KojakApplication::main(const vector<string>& input_files) {
   str_params.push_back("max_miscleavages");
   str_params.push_back("max_peptide_mass");
   str_params.push_back("min_peptide_mass");
+  str_params.push_back("min_spectrum_peaks");
   str_params.push_back("max_spectrum_peaks");
   str_params.push_back("ppm_tolerance_pre");
   str_params.push_back("prefer_precursor_pred");
@@ -281,6 +282,7 @@ vector<string> KojakApplication::getOptions() const {
    "max_miscleavages",
    "max_peptide_mass",
    "min_peptide_mass",
+   "min_spectrum_peaks",
    "max_spectrum_peaks",
    "ppm_tolerance_pre",
    "auto_ppm_tolerance_pre",

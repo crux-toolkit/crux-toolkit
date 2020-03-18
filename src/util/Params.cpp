@@ -2140,6 +2140,11 @@ Params::Params() : finalized_(false) {
     "Minimum peptide mass allowed when parsing the protein sequence database. "
     "Peptides with a lower mass will be ignored in the analysis.",
     "Available for kojak", true);
+  InitIntParam("min_spectrum_peaks", 12, 0, 100000000,
+    "Minimum number of MS/MS peaks required to proceed with analysis of a "
+    "spectrum. If spectrum_processing is enabled, the peak count occurs after "
+    "the spectrum is processed",
+    "Available for kojak", true);
   InitIntParam("max_spectrum_peaks", 0, 0, 100000000,
     "Maximum number of MS/MS peaks to analyze if using the spectrum_processing "
     "parameter. Peaks are kept in order of intensity, starting with the most "
@@ -2460,6 +2465,7 @@ void Params::Categorize() {
   items.insert("MS2_centroid");
   items.insert("MS1_resolution");
   items.insert("MS2_resolution");
+  items.insert("min_spectrum_peaks");
   items.insert("max_spectrum_peaks");
   items.insert("precursor_refinement");
   items.insert("prefer_precursor_pred");
