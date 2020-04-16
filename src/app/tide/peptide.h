@@ -73,6 +73,7 @@ class Peptide {
     : len_(peptide.length()), mass_(peptide.mass()), id_(peptide.id()),
     first_loc_protein_id_(peptide.first_location().protein_id()),
     first_loc_pos_(peptide.first_location().pos()), 
+    protein_length_(proteins[first_loc_protein_id_]->residues().length()),
     has_aux_locations_index_(peptide.has_aux_locations_index()),
     aux_locations_index_(peptide.aux_locations_index()),
     mods_(NULL), num_mods_(0), decoyIdx_(peptide.has_decoy_index() ? peptide.decoy_index() : -1),
@@ -212,7 +213,7 @@ class Peptide {
   ModCoder::Mod* Mods() const { return mods_; }
   bool IsDecoy() const { return decoyIdx_ >= 0; }
   int DecoyIdx() const { return decoyIdx_; }
-  double* getAAMasses();
+  vector<double> getAAMasses() const;
 
  private:
   template<class W> void AddIons(W* workspace) const;
@@ -231,6 +232,7 @@ class Peptide {
   int id_;
   int first_loc_protein_id_;
   int first_loc_pos_;
+  int protein_length_;
   bool has_aux_locations_index_;
   int aux_locations_index_;
   const char* residues_;

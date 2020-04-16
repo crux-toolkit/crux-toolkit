@@ -305,7 +305,7 @@ int ActivePeptideQueue::CountAAFrequency(
       reader_->Read(&current_pb_peptide_);
       Peptide* peptide = new(&fifo_alloc_peptides_) Peptide(current_pb_peptide_, proteins_, &fifo_alloc_peptides_);
 
-      double* dAAResidueMass = peptide->getAAMasses(); //retrieves the amino acid masses, modifications included
+      vector<double> dAAResidueMass = peptide->getAAMasses(); //retrieves the amino acid masses, modifications included
 
       int nLen = peptide->Len(); //peptide length
       ++nvAAMassCounterN[(unsigned int)(dAAResidueMass[0] / binWidth + 1.0 - binOffset)];
@@ -316,7 +316,6 @@ int ActivePeptideQueue::CountAAFrequency(
       ++nvAAMassCounterC[(unsigned int)(dAAResidueMass[nLen - 1] / binWidth + 1.0 - binOffset)];
       ++cntTerm;
 
-      delete[] dAAResidueMass;
       fifo_alloc_peptides_.ReleaseAll();
     }
 
@@ -375,7 +374,7 @@ int ActivePeptideQueue::CountAAFrequencyRes(
     reader_->Read(&current_pb_peptide_);
     Peptide* peptide = new(&fifo_alloc_peptides_) Peptide(current_pb_peptide_, proteins_, &fifo_alloc_peptides_);
 
-    double* dAAResidueMass = peptide->getAAMasses(); //retrieves the amino acid massses, modifications included
+    vector<double> dAAResidueMass = peptide->getAAMasses(); //retrieves the amino acid massses, modifications included
 
     int nLen = peptide->Len(); //peptide length
 
@@ -412,7 +411,6 @@ int ActivePeptideQueue::CountAAFrequencyRes(
     }
 
     //release memory
-    delete[] dAAResidueMass;
     fifo_alloc_peptides_.ReleaseAll();
   }
 

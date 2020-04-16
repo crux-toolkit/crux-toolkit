@@ -194,8 +194,8 @@ int TideIndexApplication::main(
   pep_header.mutable_mods()->CopyFrom(*(var_mod_table.ParsedModTable()));
   pep_header.mutable_nterm_mods()->CopyFrom(*(var_mod_table.ParsedNtpepModTable()));
   pep_header.mutable_cterm_mods()->CopyFrom(*(var_mod_table.ParsedCtpepModTable()));
-  pep_header.mutable_nprotterm_mods->CopyFrom(*(var_mod_table.ParsedNtproModTable()));
-  pep_header.mutable_cprotterm_mods->CopyFrom(*(var_mod_table.ParsedCtproModTable()));
+  pep_header.mutable_nprotterm_mods()->CopyFrom(*(var_mod_table.ParsedNtproModTable()));
+  pep_header.mutable_cprotterm_mods()->CopyFrom(*(var_mod_table.ParsedCtproModTable()));
   int numDecoys;
   switch (decoy_type) {
     case NO_DECOYS:

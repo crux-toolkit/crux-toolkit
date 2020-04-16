@@ -442,8 +442,8 @@ map<int, double> PepXMLWriter::find_static_modifications(
          j != staticMods.end();
          j++) {
       if ((*j)->Position() == ANY ||
-          ((*j)->Position() == PEPTIDE_N && i == 0) ||
-          ((*j)->Position() == PEPTIDE_C && peptide_sequence[i + 1] == '\0')) {
+          (((*j)->Position() == PEPTIDE_N || (*j)->Position() == PROTEIN_N) && i == 0) ||
+          (((*j)->Position() == PEPTIDE_C || (*j)->Position() == PROTEIN_C) && peptide_sequence[i + 1] == '\0')) {
         ++modCount;
         sum += (*j)->DeltaMass();
       }
