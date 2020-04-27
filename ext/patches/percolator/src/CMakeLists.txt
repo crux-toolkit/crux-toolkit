@@ -100,6 +100,9 @@ endif(XML_SUPPORT)
 # COMPILE INTERNAL LIBRARIES
 ###############################################################################
 
+#COMPILE BLAS (has no header files that are necessary)
+add_subdirectory(blas)
+
 #COMPILE FIDO
 add_subdirectory(fido)
 
@@ -145,12 +148,12 @@ ELSE(CRUX)
    
   # SET LIBRARIES FOR PERCOLATOR
   if(MSVC)
-    target_link_libraries(percolator perclibrary fido picked_protein ${XERCESC_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${CURL_LIBRARIES})
+    target_link_libraries(percolator perclibrary ${BLAS_LIBRARIES} fido picked_protein ${XERCESC_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${CURL_LIBRARIES})
   else(MSVC)
     if (APPLE)
-      target_link_libraries(percolator perclibrary fido picked_protein ${XERCESC_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${CURL_LIBRARIES} )
+      target_link_libraries(percolator perclibrary ${BLAS_LIBRARIES} fido picked_protein ${XERCESC_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${CURL_LIBRARIES} )
     else(APPLE)
-      target_link_libraries(percolator perclibrary fido picked_protein ${XERCESC_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${CURL_LIBRARIES} stdc++)
+      target_link_libraries(percolator perclibrary ${BLAS_LIBRARIES} fido picked_protein ${XERCESC_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${CURL_LIBRARIES} stdc++)
     endif (APPLE)
   endif()
    
