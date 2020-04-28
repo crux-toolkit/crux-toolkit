@@ -27,6 +27,7 @@ include_directories(${CMAKE_BINARY_DIR}/ext/include/gflags)
 include_directories(${CMAKE_BINARY_DIR}/ext/include/google/protobuf)
 include_directories(${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/libraries/boost_aux)
 include_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator/src/)
+include_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator/src/blas)
 include_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator/src/fido)
 include_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator/src/picked_protein)
 include_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator-build/src/)
@@ -60,6 +61,7 @@ link_directories(${CMAKE_BINARY_DIR}/app/xlink)
 link_directories(${CMAKE_BINARY_DIR}/ext/lib)
 link_directories(${CMAKE_BINARY_DIR}/ext/lib64)
 link_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator-build/src) 
+link_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator-build/src/blas)
 link_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator-build/src/fido)
 link_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator-build/src/picked_protein)
 if (WIN32 AND NOT Cygwin)
@@ -437,6 +439,7 @@ if (WIN32 AND NOT CYGWIN)
     hardklor
     cometsearch
     perclibrary
+    blas
     fido
     picked_protein
     xlink
@@ -470,6 +473,7 @@ else()
     hardklor
     mstoolkitlite
     perclibrary
+    blas
     fido
     picked_protein
     protobuf
