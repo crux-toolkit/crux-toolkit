@@ -184,6 +184,7 @@ bool MassConstants::Init(const pb::ModTable* mod_table,
       nprotterm_mono_table[i] = cprotterm_mono_table[i] = 0;
   }
 
+  //initialize all tables with unmodified AA MW
   FillMassTable(elts_mono, mono_table);
   FillMassTable(elts_avg, avg_table);
   FillMassTable(elts_mono, nterm_mono_table);
@@ -227,12 +228,15 @@ bool MassConstants::Init(const pb::ModTable* mod_table,
   //apply peptide terminal static mods on top of regular static mods
   ApplyTerminusStaticMods(n_mod_table, nterm_mono_table, nterm_avg_table);
   ApplyTerminusStaticMods(c_mod_table, cterm_mono_table, cterm_avg_table);
+  //Apply peptide terminal mods to the protein terminal tables as well.
+  ApplyTerminusStaticMods(n_mod_table, nprotterm_mono_table, nprotterm_avg_table);
+  ApplyTerminusStaticMods(c_mod_table, cprotterm_mono_table, cprotterm_avg_table);
 
   //apply protein terminal static mods on top of everything else.
-  if(nprot_mod_table != nullptr && cprot_mod_table != nullptr){
+  if(nprot_mod_table != nullptr)
     ApplyTerminusStaticMods(nprot_mod_table, nprotterm_mono_table, nprotterm_avg_table);
+  if(cprot_mod_table != nullptr)
     ApplyTerminusStaticMods(cprot_mod_table, cprotterm_mono_table, cprotterm_avg_table);
-  }
   
   SetFixPt(mono_table, avg_table, fixp_mono_table, fixp_avg_table);
   SetFixPt(nterm_mono_table, nterm_avg_table, fixp_nterm_mono_table, fixp_nterm_avg_table);
