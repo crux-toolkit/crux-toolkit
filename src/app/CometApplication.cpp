@@ -186,7 +186,7 @@ void CometApplication::setCometParameters(
     if (spec_files.size() > 1) {
       basename += "." + FileUtils::Stem(*i);
     }
-    strcpy(pInputFile->szBaseName, basename.c_str());
+    searchManager_.SetOutputFileBaseName(basename.c_str());
     pvInputFiles.push_back(pInputFile);
   }
 

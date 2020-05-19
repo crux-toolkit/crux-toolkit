@@ -52,6 +52,13 @@ written to a file called <code>&lt;expected results&gt;.observed</code>.
 </p>
 
 <p>
+Note that if you do an out-of-source build, then not all of the
+required files get copied over into the
+corresponding <code>test/smoke-tests</code> directory.  You can get
+around this by recursively copying the original smoke-tests directory
+on top of the one under your build directory.</p>
+
+<p>
 To update all test results, run the <code>update-cucumber-tests.sh</code> script
 from the smoke-tests directory.
 </p>

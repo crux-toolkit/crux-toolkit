@@ -232,11 +232,7 @@ ExternalProject_Add(
 
 # MSToolkit
 if (UNIX)
-  if (APPLE)
     set(mstoolkit_c_flags -O3\ -I.\ -I./include\ -D_LARGEFILE_SOURCE\ -D_FILE_OFFSET_BITS=64\ -DGCC\ -DHAVE_EXPAT_CONFIG_H)
-  else ()
-    set(mstoolkit_c_flags -O3\ -static\ -I.\ -I./include\ -D_LARGEFILE_SOURCE\ -D_FILE_OFFSET_BITS=64\ -DGCC\ -DHAVE_EXPAT_CONFIG_H)
-  endif ()
 
   # Get MSToolkit source from Github
   ExternalProject_Add(
@@ -282,7 +278,7 @@ if (UNIX)
   set(comet_cxx_flags ${CMAKE_CXX_FLAGS}\ -DCRUX)
   ExternalProject_Add(
     comet
-    SVN_REPOSITORY svn://svn.code.sf.net/p/comet-ms/code/tags/release_2019013/
+    SVN_REPOSITORY svn://svn.code.sf.net/p/comet-ms/code/tags/release_2019015/
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     UPDATE_COMMAND ""
     CONFIGURE_COMMAND ""
