@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href=""?>
-<msms_pipeline_analysis date="Tue Mar 17 14:36:38 2020" xmlns="http://regis-web.systemsbiology.net/pepXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://regis-web.systemsbiology.net/pepXML /usr/local/tpp/schema/pepXML_v110.xsd" summary_xml="">
+<msms_pipeline_analysis date="Mon Apr 27 21:50:07 2020" xmlns="http://regis-web.systemsbiology.net/pepXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://regis-web.systemsbiology.net/pepXML /usr/local/tpp/schema/pepXML_v110.xsd" summary_xml="">
 <msms_run_summary base_name="NA" msManufacturer="NA" msModel="NA" msIonization="NA" msAnalyzer="NA" msDectector="NA" raw_data_type="NA" raw_data="NA" >
 <sample_enzyme name="trypsin">
 </sample_enzyme>
@@ -136,6 +136,7 @@
 <parameter name="evidence-granularity" value="25"/>
 <parameter name="isotope-error" value=""/>
 <parameter name="num-threads" value="0"/>
+<parameter name="brief-output" value="false"/>
 <parameter name="decoy_search" value="0"/>
 <parameter name="num_threads" value="0"/>
 <parameter name="peptide_mass_tolerance" value="3"/>
