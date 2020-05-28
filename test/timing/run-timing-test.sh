@@ -41,7 +41,8 @@ set -o xtrace
 ms2_file=../performance-tests/051708-worm-ASMS-10.ms2
 fasta_file=../performance-tests/worm+contaminants.fa
 
-CRUX=../../src/crux
+#CRUX=../../src/crux
+CRUX=../../build.release/src/crux
 
 # Avoid NFS overhead by using a scratch directory.
 scratch_dir=/scratch
@@ -49,8 +50,10 @@ if [[ ! -e $scratch_dir ]]; then
     scratch_dir=.
 else
     cp $ms2_file $scratch_dir
+    ms2_file=`basename $ms2_file`
     ms2_file="$scratch_dir/$ms2_file"
     cp $fasta_file $scratch_dir
+    fasta_file=`basename $fasta_file`
     fasta_file="$scratch_dir/$fasta_file"
 fi
 
@@ -88,38 +91,35 @@ for precursor in 3 10; do
     fi
     
     for fragment in 1 02; do
-
-	if [[ $fragment == 02 ]]; then
-	    comet_fragment="--fragment_bin_tol 0.02"
-	    tide_fragment="--mz-bin-width 0.02"
-	else
-	    comet_fragment=""
-	    tide_fragment=""
-	fi
-	
 	for threads in 1 4; do
 	    comet_threads="--num_threads $threads"
 	    tide_threads="--num-threads $threads"
 	    
-	    for engine in tide1 tide2 tide-p comet; do
-#	    for engine in tide1 tide-p comet; do
+	    for engine in tide-xcorr tide-p tide-combined comet; do
 		root=$engine.pre=$precursor.frag$fragment.threads$threads
 
-		if [[ $engine == "tide-p" && $fragment == 02 ]]; then
-		    continue
-		fi
-		if [[ $engine == "tide2" && $fragment == 02 ]]; then
-		    continue
-		fi
-
+                if [[ $fragment == 02 ]]; then
+                    comet_fragment="--fragment_bin_tol 0.02"
+                    if [[ $engine == "tide-p" ]]; then
+                        continue # Can't do high-res p-values.
+                    elif [[ $engine == "tide-combined" ]]; then
+	                tide_fragment="--mz-bin-width 1.0005079 --fragment-tolerance 0.02"
+                    else
+	                tide_fragment="--mz-bin-width 0.02"
+                    fi
+	        else
+	            comet_fragment="--fragment_bin_tol 1.0005079"
+	            tide_fragment="--mz-bin-width 1.0005079 --fragment-tolerance 1.0005079"
+	        fi
+	
 		# Select among the four different search engines.
 		log_file=$scratch_dir/$root/tide-search.log.txt
-		if [[ $engine == "tide1" ]]; then
+		if [[ $engine == "tide-xcorr" ]]; then
 		    search_command="tide-search"
-		elif [[ $engine == "tide2" ]]; then
-		    search_command="tide-search --exact-p-value T --discretized-evidence F"
 		elif [[ $engine == "tide-p" ]]; then
 		    search_command="tide-search --exact-p-value T"
+		elif [[ $engine == "tide-combined" ]]; then
+		    search_command="tide-search --exact-p-value T --score-function both"
 		elif [[ $engine == "comet" ]]; then
 		    log_file=$scratch_dir/$root/comet.log.txt
 		    search_command="comet"

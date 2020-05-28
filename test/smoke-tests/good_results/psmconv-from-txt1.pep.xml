@@ -159,6 +159,7 @@
 <parameter name="evidence-granularity" value="25"/>
 <parameter name="isotope-error" value=""/>
 <parameter name="num-threads" value="0"/>
+<parameter name="brief-output" value="false"/>
 <parameter name="decoy_search" value="0"/>
 <parameter name="num_threads" value="0"/>
 <parameter name="peptide_mass_tolerance" value="3"/>
