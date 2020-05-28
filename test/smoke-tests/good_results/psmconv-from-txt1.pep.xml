@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href=""?>
-<msms_pipeline_analysis date="Mon Apr 27 21:50:07 2020" xmlns="http://regis-web.systemsbiology.net/pepXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://regis-web.systemsbiology.net/pepXML /usr/local/tpp/schema/pepXML_v110.xsd" summary_xml="">
-<msms_run_summary base_name="NA" msManufacturer="NA" msModel="NA" msIonization="NA" msAnalyzer="NA" msDectector="NA" raw_data_type="NA" raw_data="NA" >
+<msms_pipeline_analysis date="2020-03-05T17:39:48" xmlns="http://regis-web.systemsbiology.net/pepXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://regis-web.systemsbiology.net/pepXML /usr/local/tpp/schema/pepXML_v110.xsd" summary_xml="">
+<msms_run_summary base_name="NA" msManufacturer="NA" msModel="NA" msIonization="NA" raw_data_type="NA" raw_data="NA" >
 <sample_enzyme name="trypsin">
 </sample_enzyme>
 <search_summary base_name="NA" search_engine="Crux" precursor_mass_type="monoisotopic" fragment_mass_type="monoisotopic" out_data_type="NA" out_data="NA" search_id="1" >
@@ -517,8 +517,6 @@
     <search_hit hit_rank="4" peptide="ASETMR" peptide_prev_aa="R" peptide_next_aa="N" protein="YGL022W" num_tot_proteins="1" calc_neutral_pep_mass="712.8016" massdiff="-0.7389" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="9" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="ASETM[15.99]R">
 <mod_aminoacid_mass position="5" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="ASETMR">
 <mod_aminoacid_mass position="1" mass="72.74"/>
 <mod_aminoacid_mass position="6" mass="157.90"/>
 </modification_info>
@@ -569,8 +567,6 @@
     <search_hit hit_rank="4" peptide="ASETMR" peptide_prev_aa="R" peptide_next_aa="N" protein="YGL022W" num_tot_proteins="1" calc_neutral_pep_mass="712.8016" massdiff="-0.7389" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="9" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="ASETM[15.99]R">
 <mod_aminoacid_mass position="5" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="ASETMR">
 <mod_aminoacid_mass position="1" mass="72.74"/>
 <mod_aminoacid_mass position="6" mass="157.90"/>
 </modification_info>
@@ -612,8 +608,6 @@
     <search_hit hit_rank="3" peptide="ASETMR" peptide_prev_aa="R" peptide_next_aa="N" protein="YGL022W" num_tot_proteins="1" calc_neutral_pep_mass="712.8016" massdiff="-0.7389" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="9" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="ASETM[15.99]R">
 <mod_aminoacid_mass position="5" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="ASETMR">
 <mod_aminoacid_mass position="1" mass="72.74"/>
 <mod_aminoacid_mass position="6" mass="157.90"/>
 </modification_info>
@@ -664,8 +658,6 @@
     <search_hit hit_rank="3" peptide="ASETMR" peptide_prev_aa="R" peptide_next_aa="N" protein="YGL022W" num_tot_proteins="1" calc_neutral_pep_mass="712.8016" massdiff="-0.7389" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="9" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="ASETM[15.99]R">
 <mod_aminoacid_mass position="5" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="ASETMR">
 <mod_aminoacid_mass position="1" mass="72.74"/>
 <mod_aminoacid_mass position="6" mass="157.90"/>
 </modification_info>
@@ -725,8 +717,6 @@
     <search_hit hit_rank="4" peptide="ASETMR" peptide_prev_aa="R" peptide_next_aa="N" protein="YGL022W" num_tot_proteins="1" calc_neutral_pep_mass="712.8016" massdiff="-0.7389" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="9" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="ASETM[15.99]R">
 <mod_aminoacid_mass position="5" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="ASETMR">
 <mod_aminoacid_mass position="1" mass="72.74"/>
 <mod_aminoacid_mass position="6" mass="157.90"/>
 </modification_info>
@@ -848,8 +838,6 @@
     <search_hit hit_rank="1" peptide="ASETMR" peptide_prev_aa="R" peptide_next_aa="N" protein="YGL022W" num_tot_proteins="1" calc_neutral_pep_mass="712.8016" massdiff="+1.2611" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="10" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="ASETM[15.99]R">
 <mod_aminoacid_mass position="5" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="ASETMR">
 <mod_aminoacid_mass position="1" mass="72.74"/>
 <mod_aminoacid_mass position="6" mass="157.90"/>
 </modification_info>
@@ -918,8 +906,6 @@
     <search_hit hit_rank="3" peptide="AMFGFK" peptide_prev_aa="K" peptide_next_aa="K" protein="YBL030C" num_tot_proteins="1" calc_neutral_pep_mass="718.8314" massdiff="-2.7787" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="10" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="AM[15.99]FGFK">
 <mod_aminoacid_mass position="2" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="AMFGFK">
 <mod_aminoacid_mass position="1" mass="72.74"/>
 <mod_aminoacid_mass position="6" mass="129.89"/>
 </modification_info>
@@ -961,8 +947,6 @@
     <search_hit hit_rank="2" peptide="AMFGFK" peptide_prev_aa="K" peptide_next_aa="K" protein="YBL030C" num_tot_proteins="1" calc_neutral_pep_mass="718.8314" massdiff="-2.7787" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="10" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="AM[15.99]FGFK">
 <mod_aminoacid_mass position="2" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="AMFGFK">
 <mod_aminoacid_mass position="1" mass="72.74"/>
 <mod_aminoacid_mass position="6" mass="129.89"/>
 </modification_info>
@@ -1004,8 +988,6 @@
     <search_hit hit_rank="1" peptide="AMFGFK" peptide_prev_aa="K" peptide_next_aa="K" protein="YBL030C" num_tot_proteins="1" calc_neutral_pep_mass="718.8314" massdiff="-2.7787" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="10" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="AM[15.99]FGFK">
 <mod_aminoacid_mass position="2" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="AMFGFK">
 <mod_aminoacid_mass position="1" mass="72.74"/>
 <mod_aminoacid_mass position="6" mass="129.89"/>
 </modification_info>
@@ -1065,8 +1047,6 @@
     <search_hit hit_rank="2" peptide="AMFGFK" peptide_prev_aa="K" peptide_next_aa="K" protein="YBL030C" num_tot_proteins="1" calc_neutral_pep_mass="718.8314" massdiff="-2.7787" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="10" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="AM[15.99]FGFK">
 <mod_aminoacid_mass position="2" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="AMFGFK">
 <mod_aminoacid_mass position="1" mass="72.74"/>
 <mod_aminoacid_mass position="6" mass="129.89"/>
 </modification_info>
@@ -1157,8 +1137,6 @@
     <search_hit hit_rank="1" peptide="AMFGFK" peptide_prev_aa="K" peptide_next_aa="K" protein="YBL030C" num_tot_proteins="1" calc_neutral_pep_mass="718.8314" massdiff="-0.7787" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="17" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="AM[15.99]FGFK">
 <mod_aminoacid_mass position="2" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="AMFGFK">
 <mod_aminoacid_mass position="1" mass="72.74"/>
 <mod_aminoacid_mass position="6" mass="129.89"/>
 </modification_info>
@@ -1294,8 +1272,6 @@
     <search_hit hit_rank="5" peptide="IEMKPK" peptide_prev_aa="K" peptide_next_aa="H" protein="YGL245W" num_tot_proteins="1" calc_neutral_pep_mass="763.9104" massdiff="-1.8077" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="14" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="IEM[15.99]KPK">
 <mod_aminoacid_mass position="3" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="IEMKPK">
 <mod_aminoacid_mass position="1" mass="114.78"/>
 <mod_aminoacid_mass position="6" mass="129.89"/>
 </modification_info>
@@ -1542,8 +1518,6 @@
     <search_hit hit_rank="5" peptide="LFEEMK" peptide_prev_aa="R" peptide_next_aa="V" protein="YPL215W" num_tot_proteins="1" calc_neutral_pep_mass="814.8737" massdiff="+1.5298" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="11" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="LFEEM[15.99]K">
 <mod_aminoacid_mass position="5" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="LFEEMK">
 <mod_aminoacid_mass position="1" mass="114.78"/>
 <mod_aminoacid_mass position="6" mass="129.89"/>
 </modification_info>
@@ -1594,8 +1568,6 @@
     <search_hit hit_rank="5" peptide="MHSDGIR" peptide_prev_aa="R" peptide_next_aa="K" protein="YLR298C" num_tot_proteins="1" calc_neutral_pep_mass="833.8656" massdiff="-2.6329" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="10" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="M[15.99]HSDGIR">
 <mod_aminoacid_mass position="1" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="MHSDGIR">
 <mod_aminoacid_mass position="1" mass="132.74"/>
 <mod_aminoacid_mass position="7" mass="157.90"/>
 </modification_info>
@@ -1668,8 +1640,6 @@
     <search_hit hit_rank="2" peptide="MHSDGIR" peptide_prev_aa="R" peptide_next_aa="K" protein="YLR298C" num_tot_proteins="1" calc_neutral_pep_mass="833.8656" massdiff="+2.7578" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="16" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="M[15.99]HSDGIR">
 <mod_aminoacid_mass position="1" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="MHSDGIR">
 <mod_aminoacid_mass position="1" mass="132.74"/>
 <mod_aminoacid_mass position="7" mass="157.90"/>
 </modification_info>
@@ -1698,8 +1668,6 @@
     <search_hit hit_rank="5" peptide="LEEAMVK" peptide_prev_aa="K" peptide_next_aa="L" protein="YMR309C" num_tot_proteins="1" calc_neutral_pep_mass="837.9108" massdiff="-1.2874" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="16" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="LEEAM[15.99]VK">
 <mod_aminoacid_mass position="5" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="LEEAMVK">
 <mod_aminoacid_mass position="1" mass="114.78"/>
 <mod_aminoacid_mass position="7" mass="129.89"/>
 </modification_info>
@@ -1741,8 +1709,6 @@
     <search_hit hit_rank="4" peptide="LEEAMVK" peptide_prev_aa="K" peptide_next_aa="L" protein="YMR309C" num_tot_proteins="1" calc_neutral_pep_mass="837.9108" massdiff="-1.2874" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="16" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="LEEAM[15.99]VK">
 <mod_aminoacid_mass position="5" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="LEEAMVK">
 <mod_aminoacid_mass position="1" mass="114.78"/>
 <mod_aminoacid_mass position="7" mass="129.89"/>
 </modification_info>
@@ -1824,8 +1790,6 @@
     <search_hit hit_rank="2" peptide="LEEAMVK" peptide_prev_aa="K" peptide_next_aa="L" protein="YMR309C" num_tot_proteins="1" calc_neutral_pep_mass="837.9108" massdiff="-1.2874" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="16" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="LEEAM[15.99]VK">
 <mod_aminoacid_mass position="5" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="LEEAMVK">
 <mod_aminoacid_mass position="1" mass="114.78"/>
 <mod_aminoacid_mass position="7" mass="129.89"/>
 </modification_info>
@@ -1894,8 +1858,6 @@
     <search_hit hit_rank="4" peptide="LSMSQLR" peptide_prev_aa="K" peptide_next_aa="S" protein="YOR267C" num_tot_proteins="1" calc_neutral_pep_mass="852.9329" massdiff="-0.1895" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="17" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="LSM[15.99]SQLR">
 <mod_aminoacid_mass position="3" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="LSMSQLR">
 <mod_aminoacid_mass position="1" mass="114.78"/>
 <mod_aminoacid_mass position="7" mass="157.90"/>
 </modification_info>
@@ -1919,8 +1881,6 @@
     <search_hit hit_rank="1" peptide="LSMSQLR" peptide_prev_aa="K" peptide_next_aa="S" protein="YOR267C" num_tot_proteins="1" calc_neutral_pep_mass="852.9329" massdiff="-0.1895" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="17" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="LSM[15.99]SQLR">
 <mod_aminoacid_mass position="3" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="LSMSQLR">
 <mod_aminoacid_mass position="1" mass="114.78"/>
 <mod_aminoacid_mass position="7" mass="157.90"/>
 </modification_info>
@@ -1940,8 +1900,6 @@
     <search_hit hit_rank="3" peptide="AAATAAMTK" peptide_prev_aa="K" peptide_next_aa="A" protein="YLR249W" num_tot_proteins="1" calc_neutral_pep_mass="853.9169" massdiff="-1.1735" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="17" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="AAATAAM[15.99]TK">
 <mod_aminoacid_mass position="7" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="AAATAAMTK">
 <mod_aminoacid_mass position="1" mass="72.74"/>
 <mod_aminoacid_mass position="9" mass="129.89"/>
 </modification_info>
@@ -1952,8 +1910,6 @@
     <search_hit hit_rank="4" peptide="SDNVMDR" peptide_prev_aa="K" peptide_next_aa="W" protein="YBL076C" num_tot_proteins="1" calc_neutral_pep_mass="854.8394" massdiff="-2.0960" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="17" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="SDNVM[15.99]DR">
 <mod_aminoacid_mass position="5" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="SDNVMDR">
 <mod_aminoacid_mass position="1" mass="88.73"/>
 <mod_aminoacid_mass position="7" mass="157.90"/>
 </modification_info>
@@ -1977,8 +1933,6 @@
     <search_hit hit_rank="1" peptide="LSMSQLR" peptide_prev_aa="K" peptide_next_aa="S" protein="YOR267C" num_tot_proteins="1" calc_neutral_pep_mass="852.9329" massdiff="-0.1895" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="17" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="LSM[15.99]SQLR">
 <mod_aminoacid_mass position="3" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="LSMSQLR">
 <mod_aminoacid_mass position="1" mass="114.78"/>
 <mod_aminoacid_mass position="7" mass="157.90"/>
 </modification_info>
@@ -1998,8 +1952,6 @@
     <search_hit hit_rank="3" peptide="SDNVMDR" peptide_prev_aa="K" peptide_next_aa="W" protein="YBL076C" num_tot_proteins="1" calc_neutral_pep_mass="854.8394" massdiff="-2.0960" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="17" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="SDNVM[15.99]DR">
 <mod_aminoacid_mass position="5" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="SDNVMDR">
 <mod_aminoacid_mass position="1" mass="88.73"/>
 <mod_aminoacid_mass position="7" mass="157.90"/>
 </modification_info>
@@ -2019,8 +1971,6 @@
     <search_hit hit_rank="5" peptide="AAATAAMTK" peptide_prev_aa="K" peptide_next_aa="A" protein="YLR249W" num_tot_proteins="1" calc_neutral_pep_mass="853.9169" massdiff="-1.1735" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="17" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="AAATAAM[15.99]TK">
 <mod_aminoacid_mass position="7" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="AAATAAMTK">
 <mod_aminoacid_mass position="1" mass="72.74"/>
 <mod_aminoacid_mass position="9" mass="129.89"/>
 </modification_info>
@@ -2035,8 +1985,6 @@
     <search_hit hit_rank="1" peptide="LSMSQLR" peptide_prev_aa="K" peptide_next_aa="S" protein="YOR267C" num_tot_proteins="1" calc_neutral_pep_mass="852.9329" massdiff="-0.1895" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="17" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="LSM[15.99]SQLR">
 <mod_aminoacid_mass position="3" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="LSMSQLR">
 <mod_aminoacid_mass position="1" mass="114.78"/>
 <mod_aminoacid_mass position="7" mass="157.90"/>
 </modification_info>
@@ -2087,8 +2035,6 @@
     <search_hit hit_rank="1" peptide="LSMSQLR" peptide_prev_aa="K" peptide_next_aa="S" protein="YOR267C" num_tot_proteins="1" calc_neutral_pep_mass="852.9329" massdiff="-0.1895" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="17" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="LSM[15.99]SQLR">
 <mod_aminoacid_mass position="3" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="LSMSQLR">
 <mod_aminoacid_mass position="1" mass="114.78"/>
 <mod_aminoacid_mass position="7" mass="157.90"/>
 </modification_info>
@@ -2117,8 +2063,6 @@
     <search_hit hit_rank="4" peptide="SDNVMDR" peptide_prev_aa="K" peptide_next_aa="W" protein="YBL076C" num_tot_proteins="1" calc_neutral_pep_mass="854.8394" massdiff="-2.0960" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="17" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="SDNVM[15.99]DR">
 <mod_aminoacid_mass position="5" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="SDNVMDR">
 <mod_aminoacid_mass position="1" mass="88.73"/>
 <mod_aminoacid_mass position="7" mass="157.90"/>
 </modification_info>
@@ -2349,8 +2293,6 @@
     <search_hit hit_rank="2" peptide="NDFIMVK" peptide_prev_aa="K" peptide_next_aa="G" protein="YOR063W" num_tot_proteins="1" calc_neutral_pep_mass="884.9268" massdiff="+1.8766" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="9" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="NDFIM[15.99]VK">
 <mod_aminoacid_mass position="5" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="NDFIMVK">
 <mod_aminoacid_mass position="1" mass="115.74"/>
 <mod_aminoacid_mass position="7" mass="129.89"/>
 </modification_info>
@@ -2379,8 +2321,6 @@
     <search_hit hit_rank="5" peptide="MANFETR" peptide_prev_aa="K" peptide_next_aa="R" protein="YNL166C" num_tot_proteins="1" calc_neutral_pep_mass="886.8809" massdiff="-0.0775" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="9" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="M[15.99]ANFETR">
 <mod_aminoacid_mass position="1" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="MANFETR">
 <mod_aminoacid_mass position="1" mass="132.74"/>
 <mod_aminoacid_mass position="7" mass="157.90"/>
 </modification_info>
@@ -2787,8 +2727,6 @@
     <search_hit hit_rank="1" peptide="MSSDGMNR" peptide_prev_aa="-" peptide_next_aa="D" protein="YMR073C" num_tot_proteins="1" calc_neutral_pep_mass="915.8380" massdiff="-2.7545" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="14" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="M[15.99]SSDGMNR">
 <mod_aminoacid_mass position="1" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="MSSDGMNR">
 <mod_aminoacid_mass position="1" mass="132.74"/>
 <mod_aminoacid_mass position="8" mass="157.90"/>
 </modification_info>
@@ -2799,8 +2737,6 @@
     <search_hit hit_rank="2" peptide="IFTEEMK" peptide_prev_aa="R" peptide_next_aa="N" protein="YGL245W" num_tot_proteins="1" calc_neutral_pep_mass="915.9213" massdiff="-2.8378" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="14" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="IFTEEM[15.99]K">
 <mod_aminoacid_mass position="6" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="IFTEEMK">
 <mod_aminoacid_mass position="1" mass="114.78"/>
 <mod_aminoacid_mass position="7" mass="129.89"/>
 </modification_info>
@@ -2811,8 +2747,6 @@
     <search_hit hit_rank="3" peptide="LDDEFMK" peptide_prev_aa="R" peptide_next_aa="S" protein="YMR309C" num_tot_proteins="1" calc_neutral_pep_mass="915.8849" massdiff="-2.8015" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="14" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="LDDEFM[15.99]K">
 <mod_aminoacid_mass position="6" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="LDDEFMK">
 <mod_aminoacid_mass position="1" mass="114.78"/>
 <mod_aminoacid_mass position="7" mass="129.89"/>
 </modification_info>
@@ -2894,8 +2828,6 @@
     <search_hit hit_rank="1" peptide="IGAPAMTTR" peptide_prev_aa="R" peptide_next_aa="G" protein="YLR058C" num_tot_proteins="1" calc_neutral_pep_mass="935.9700" massdiff="-0.3865" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="17" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="IGAPAM[15.99]TTR">
 <mod_aminoacid_mass position="6" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="IGAPAMTTR">
 <mod_aminoacid_mass position="1" mass="114.78"/>
 <mod_aminoacid_mass position="9" mass="157.90"/>
 </modification_info>
@@ -2915,8 +2847,6 @@
     <search_hit hit_rank="3" peptide="LQWMVDK" peptide_prev_aa="K" peptide_next_aa="D" protein="YGL245W" num_tot_proteins="1" calc_neutral_pep_mass="937.9533" massdiff="-2.3698" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="17" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="LQWM[15.99]VDK">
 <mod_aminoacid_mass position="4" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="LQWMVDK">
 <mod_aminoacid_mass position="1" mass="114.78"/>
 <mod_aminoacid_mass position="7" mass="129.89"/>
 </modification_info>
@@ -2949,8 +2879,6 @@
     <search_hit hit_rank="1" peptide="IGAPAMTTR" peptide_prev_aa="R" peptide_next_aa="G" protein="YLR058C" num_tot_proteins="1" calc_neutral_pep_mass="935.9700" massdiff="-0.3865" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="17" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="IGAPAM[15.99]TTR">
 <mod_aminoacid_mass position="6" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="IGAPAMTTR">
 <mod_aminoacid_mass position="1" mass="114.78"/>
 <mod_aminoacid_mass position="9" mass="157.90"/>
 </modification_info>
@@ -2979,8 +2907,6 @@
     <search_hit hit_rank="4" peptide="LQWMVDK" peptide_prev_aa="K" peptide_next_aa="D" protein="YGL245W" num_tot_proteins="1" calc_neutral_pep_mass="937.9533" massdiff="-2.3698" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="17" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="LQWM[15.99]VDK">
 <mod_aminoacid_mass position="4" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="LQWMVDK">
 <mod_aminoacid_mass position="1" mass="114.78"/>
 <mod_aminoacid_mass position="7" mass="129.89"/>
 </modification_info>
@@ -3160,8 +3086,6 @@
     <search_hit hit_rank="2" peptide="MSIPETQK" peptide_prev_aa="-" peptide_next_aa="A" protein="YMR303C" num_tot_proteins="1" calc_neutral_pep_mass="951.9537" massdiff="-2.3503" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="10" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="M[15.99]SIPETQK">
 <mod_aminoacid_mass position="1" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="MSIPETQK">
 <mod_aminoacid_mass position="1" mass="132.74"/>
 <mod_aminoacid_mass position="8" mass="129.89"/>
 </modification_info>
@@ -3240,8 +3164,6 @@
     <search_hit hit_rank="5" peptide="FFGMDSLK" peptide_prev_aa="K" peptide_next_aa="Q" protein="YGR157W" num_tot_proteins="1" calc_neutral_pep_mass="962.9373" massdiff="+1.2861" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="11" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="FFGM[15.99]DSLK">
 <mod_aminoacid_mass position="4" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="FFGMDSLK">
 <mod_aminoacid_mass position="1" mass="148.77"/>
 <mod_aminoacid_mass position="8" mass="129.89"/>
 </modification_info>
@@ -3265,8 +3187,6 @@
     <search_hit hit_rank="2" peptide="AGTELGHMK" peptide_prev_aa="K" peptide_next_aa="Y" protein="YDL223C" num_tot_proteins="1" calc_neutral_pep_mass="961.9492" massdiff="+2.2742" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="11" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="AGTELGHM[15.99]K">
 <mod_aminoacid_mass position="8" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="AGTELGHMK">
 <mod_aminoacid_mass position="1" mass="72.74"/>
 <mod_aminoacid_mass position="9" mass="129.89"/>
 </modification_info>
@@ -3296,8 +3216,6 @@
     <search_hit hit_rank="5" peptide="FFGMDSLK" peptide_prev_aa="K" peptide_next_aa="Q" protein="YGR157W" num_tot_proteins="1" calc_neutral_pep_mass="962.9373" massdiff="+1.2861" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="11" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="FFGM[15.99]DSLK">
 <mod_aminoacid_mass position="4" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="FFGMDSLK">
 <mod_aminoacid_mass position="1" mass="148.77"/>
 <mod_aminoacid_mass position="8" mass="129.89"/>
 </modification_info>
@@ -3379,8 +3297,6 @@
     <search_hit hit_rank="3" peptide="TEMFNVTK" peptide_prev_aa="K" peptide_next_aa="M" protein="YLR371W" num_tot_proteins="1" calc_neutral_pep_mass="987.9537" massdiff="+0.1497" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="4" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="TEM[15.99]FNVTK">
 <mod_aminoacid_mass position="3" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="TEMFNVTK">
 <mod_aminoacid_mass position="1" mass="102.75"/>
 <mod_aminoacid_mass position="8" mass="129.89"/>
 </modification_info>
@@ -3431,8 +3347,6 @@
     <search_hit hit_rank="4" peptide="TEMFNVTK" peptide_prev_aa="K" peptide_next_aa="M" protein="YLR371W" num_tot_proteins="1" calc_neutral_pep_mass="987.9537" massdiff="+0.5297" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="4" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="TEM[15.99]FNVTK">
 <mod_aminoacid_mass position="3" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="TEMFNVTK">
 <mod_aminoacid_mass position="1" mass="102.75"/>
 <mod_aminoacid_mass position="8" mass="129.89"/>
 </modification_info>
@@ -3634,8 +3548,6 @@
     <search_hit hit_rank="5" peptide="DTEGDVDMD" peptide_prev_aa="K" peptide_next_aa="-" protein="YPL106C" num_tot_proteins="1" calc_neutral_pep_mass="1014.8289" massdiff="+1.6946" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="5" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="DTEGDVDM[15.99]D">
 <mod_aminoacid_mass position="8" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="DTEGDVDMD">
 <mod_aminoacid_mass position="1" mass="116.73"/>
 <mod_aminoacid_mass position="9" mass="116.83"/>
 </modification_info>
@@ -3669,8 +3581,6 @@
     <search_hit hit_rank="3" peptide="DTEGDVDMD" peptide_prev_aa="K" peptide_next_aa="-" protein="YPL106C" num_tot_proteins="1" calc_neutral_pep_mass="1014.8289" massdiff="+1.7946" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="5" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="DTEGDVDM[15.99]D">
 <mod_aminoacid_mass position="8" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="DTEGDVDMD">
 <mod_aminoacid_mass position="1" mass="116.73"/>
 <mod_aminoacid_mass position="9" mass="116.83"/>
 </modification_info>
@@ -3730,8 +3640,6 @@
     <search_hit hit_rank="4" peptide="MSDSQQSIK" peptide_prev_aa="-" peptide_next_aa="V" protein="YLR249W" num_tot_proteins="1" calc_neutral_pep_mass="1041.9603" massdiff="+2.6030" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="4" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="M[15.99]SDSQQSIK">
 <mod_aminoacid_mass position="1" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="MSDSQQSIK">
 <mod_aminoacid_mass position="1" mass="132.74"/>
 <mod_aminoacid_mass position="9" mass="129.89"/>
 </modification_info>
@@ -3773,8 +3681,6 @@
     <search_hit hit_rank="4" peptide="QTHSMAELK" peptide_prev_aa="K" peptide_next_aa="R" protein="YOR267C" num_tot_proteins="1" calc_neutral_pep_mass="1062.9969" massdiff="-2.5736" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="12" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="QTHSM[15.99]AELK">
 <mod_aminoacid_mass position="5" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="QTHSMAELK">
 <mod_aminoacid_mass position="1" mass="129.76"/>
 <mod_aminoacid_mass position="9" mass="129.89"/>
 </modification_info>
@@ -3836,8 +3742,6 @@
 <modification_info modified_peptide="M[15.99]MM[15.99]TSGQAVK">
 <mod_aminoacid_mass position="1" mass="147.03"/>
 <mod_aminoacid_mass position="3" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="MMMTSGQAVK">
 <mod_aminoacid_mass position="1" mass="132.74"/>
 <mod_aminoacid_mass position="10" mass="129.89"/>
 </modification_info>
@@ -3853,8 +3757,6 @@
 <modification_info modified_peptide="M[15.99]MM[15.99]TSGQAVK">
 <mod_aminoacid_mass position="1" mass="147.03"/>
 <mod_aminoacid_mass position="3" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="MMMTSGQAVK">
 <mod_aminoacid_mass position="1" mass="132.74"/>
 <mod_aminoacid_mass position="10" mass="129.89"/>
 </modification_info>
@@ -3866,8 +3768,6 @@
 <modification_info modified_peptide="MM[15.99]M[15.99]TSGQAVK">
 <mod_aminoacid_mass position="2" mass="147.03"/>
 <mod_aminoacid_mass position="3" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="MMMTSGQAVK">
 <mod_aminoacid_mass position="1" mass="132.74"/>
 <mod_aminoacid_mass position="10" mass="129.89"/>
 </modification_info>
@@ -3879,8 +3779,6 @@
 <modification_info modified_peptide="M[15.99]M[15.99]MTSGQAVK">
 <mod_aminoacid_mass position="1" mass="147.03"/>
 <mod_aminoacid_mass position="2" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="MMMTSGQAVK">
 <mod_aminoacid_mass position="1" mass="132.74"/>
 <mod_aminoacid_mass position="10" mass="129.89"/>
 </modification_info>
@@ -3924,8 +3822,6 @@
 <modification_info modified_peptide="M[15.99]M[15.99]MTSGQAVK">
 <mod_aminoacid_mass position="1" mass="147.03"/>
 <mod_aminoacid_mass position="2" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="MMMTSGQAVK">
 <mod_aminoacid_mass position="1" mass="132.74"/>
 <mod_aminoacid_mass position="10" mass="129.89"/>
 </modification_info>
@@ -3946,8 +3842,6 @@
 <modification_info modified_peptide="M[15.99]MM[15.99]TSGQAVK">
 <mod_aminoacid_mass position="1" mass="147.03"/>
 <mod_aminoacid_mass position="3" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="MMMTSGQAVK">
 <mod_aminoacid_mass position="1" mass="132.74"/>
 <mod_aminoacid_mass position="10" mass="129.89"/>
 </modification_info>
@@ -3972,8 +3866,6 @@
     <search_hit hit_rank="1" peptide="EQFAAMNNGK" peptide_prev_aa="K" peptide_next_aa="L" protein="YGL026C" num_tot_proteins="1" calc_neutral_pep_mass="1127.9872" massdiff="-0.6437" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="9" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="EQFAAM[15.99]NNGK">
 <mod_aminoacid_mass position="6" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="EQFAAMNNGK">
 <mod_aminoacid_mass position="1" mass="130.74"/>
 <mod_aminoacid_mass position="10" mass="129.89"/>
 </modification_info>
@@ -4091,8 +3983,6 @@
     <search_hit hit_rank="3" peptide="EQFAAMNNGK" peptide_prev_aa="K" peptide_next_aa="L" protein="YGL026C" num_tot_proteins="1" calc_neutral_pep_mass="1127.9872" massdiff="+0.4362" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="9" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="EQFAAM[15.99]NNGK">
 <mod_aminoacid_mass position="6" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="EQFAAMNNGK">
 <mod_aminoacid_mass position="1" mass="130.74"/>
 <mod_aminoacid_mass position="10" mass="129.89"/>
 </modification_info>
@@ -4161,8 +4051,6 @@
     <search_hit hit_rank="5" peptide="AIMVNFGYAK" peptide_prev_aa="K" peptide_next_aa="Y" protein="YOR168W" num_tot_proteins="1" calc_neutral_pep_mass="1132.0590" massdiff="-2.7755" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="11" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="AIM[15.99]VNFGYAK">
 <mod_aminoacid_mass position="3" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="AIMVNFGYAK">
 <mod_aminoacid_mass position="1" mass="72.74"/>
 <mod_aminoacid_mass position="10" mass="129.89"/>
 </modification_info>
@@ -4328,8 +4216,6 @@
     <search_hit hit_rank="5" peptide="DTLKPMAIYR" peptide_prev_aa="R" peptide_next_aa="V" protein="YLR371W" num_tot_proteins="1" calc_neutral_pep_mass="1226.1331" massdiff="-1.7695" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="8" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="DTLKPM[15.99]AIYR">
 <mod_aminoacid_mass position="6" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="DTLKPMAIYR">
 <mod_aminoacid_mass position="1" mass="116.73"/>
 <mod_aminoacid_mass position="10" mass="157.90"/>
 </modification_info>
@@ -4429,8 +4315,6 @@
     <search_hit hit_rank="5" peptide="DTLKPMAIYR" peptide_prev_aa="R" peptide_next_aa="V" protein="YLR371W" num_tot_proteins="1" calc_neutral_pep_mass="1226.1331" massdiff="-1.5295" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="8" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="DTLKPM[15.99]AIYR">
 <mod_aminoacid_mass position="6" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="DTLKPMAIYR">
 <mod_aminoacid_mass position="1" mass="116.73"/>
 <mod_aminoacid_mass position="10" mass="157.90"/>
 </modification_info>
@@ -4463,8 +4347,6 @@
     <search_hit hit_rank="3" peptide="DTLKPMAIYR" peptide_prev_aa="R" peptide_next_aa="V" protein="YLR371W" num_tot_proteins="1" calc_neutral_pep_mass="1226.1331" massdiff="-0.5697" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="7" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="DTLKPM[15.99]AIYR">
 <mod_aminoacid_mass position="6" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="DTLKPMAIYR">
 <mod_aminoacid_mass position="1" mass="116.73"/>
 <mod_aminoacid_mass position="10" mass="157.90"/>
 </modification_info>
@@ -4524,8 +4406,6 @@
     <search_hit hit_rank="4" peptide="DTLKPMAIYR" peptide_prev_aa="R" peptide_next_aa="V" protein="YLR371W" num_tot_proteins="1" calc_neutral_pep_mass="1226.1331" massdiff="-0.5295" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="7" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="DTLKPM[15.99]AIYR">
 <mod_aminoacid_mass position="6" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="DTLKPMAIYR">
 <mod_aminoacid_mass position="1" mass="116.73"/>
 <mod_aminoacid_mass position="10" mass="157.90"/>
 </modification_info>
@@ -4567,8 +4447,6 @@
     <search_hit hit_rank="3" peptide="DTLKPMAIYR" peptide_prev_aa="R" peptide_next_aa="V" protein="YLR371W" num_tot_proteins="1" calc_neutral_pep_mass="1226.1331" massdiff="+0.3704" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="6" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="DTLKPM[15.99]AIYR">
 <mod_aminoacid_mass position="6" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="DTLKPMAIYR">
 <mod_aminoacid_mass position="1" mass="116.73"/>
 <mod_aminoacid_mass position="10" mass="157.90"/>
 </modification_info>
@@ -4628,8 +4506,6 @@
     <search_hit hit_rank="4" peptide="DTLKPMAIYR" peptide_prev_aa="R" peptide_next_aa="V" protein="YLR371W" num_tot_proteins="1" calc_neutral_pep_mass="1226.1331" massdiff="+1.0104" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="5" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="DTLKPM[15.99]AIYR">
 <mod_aminoacid_mass position="6" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="DTLKPMAIYR">
 <mod_aminoacid_mass position="1" mass="116.73"/>
 <mod_aminoacid_mass position="10" mass="157.90"/>
 </modification_info>
@@ -4680,8 +4556,6 @@
     <search_hit hit_rank="4" peptide="DTLKPMAIYR" peptide_prev_aa="R" peptide_next_aa="V" protein="YLR371W" num_tot_proteins="1" calc_neutral_pep_mass="1226.1331" massdiff="+1.4391" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="6" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="DTLKPM[15.99]AIYR">
 <mod_aminoacid_mass position="6" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="DTLKPMAIYR">
 <mod_aminoacid_mass position="1" mass="116.73"/>
 <mod_aminoacid_mass position="10" mass="157.90"/>
 </modification_info>
@@ -4741,8 +4615,6 @@
     <search_hit hit_rank="5" peptide="TTLSEMVGSVTK" peptide_prev_aa="K" peptide_next_aa="D" protein="YGR157W" num_tot_proteins="1" calc_neutral_pep_mass="1271.1282" massdiff="-0.4647" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="14" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="TTLSEM[15.99]VGSVTK">
 <mod_aminoacid_mass position="6" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="TTLSEMVGSVTK">
 <mod_aminoacid_mass position="1" mass="102.75"/>
 <mod_aminoacid_mass position="12" mass="129.89"/>
 </modification_info>
@@ -4976,8 +4848,6 @@
     <search_hit hit_rank="4" peptide="SVEDFMAAMQR" peptide_prev_aa="R" peptide_next_aa="V" protein="YGL008C" num_tot_proteins="1" calc_neutral_pep_mass="1303.0538" massdiff="-1.9104" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="8" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="SVEDFMAAM[15.99]QR">
 <mod_aminoacid_mass position="9" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="SVEDFMAAMQR">
 <mod_aminoacid_mass position="1" mass="88.73"/>
 <mod_aminoacid_mass position="11" mass="157.90"/>
 </modification_info>
@@ -5028,8 +4898,6 @@
     <search_hit hit_rank="4" peptide="SVEDFMAAMQR" peptide_prev_aa="R" peptide_next_aa="V" protein="YGL008C" num_tot_proteins="1" calc_neutral_pep_mass="1303.0538" massdiff="-1.8303" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="10" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="SVEDFMAAM[15.99]QR">
 <mod_aminoacid_mass position="9" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="SVEDFMAAMQR">
 <mod_aminoacid_mass position="1" mass="88.73"/>
 <mod_aminoacid_mass position="11" mass="157.90"/>
 </modification_info>
@@ -5396,8 +5264,6 @@
     <search_hit hit_rank="1" peptide="NLQDVVIPSSMK" peptide_prev_aa="K" peptide_next_aa="E" protein="YDL223C" num_tot_proteins="1" calc_neutral_pep_mass="1349.1863" massdiff="+0.9971" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="5" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="NLQDVVIPSSM[15.99]K">
 <mod_aminoacid_mass position="11" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="NLQDVVIPSSMK">
 <mod_aminoacid_mass position="1" mass="115.74"/>
 <mod_aminoacid_mass position="12" mass="129.89"/>
 </modification_info>
@@ -5448,8 +5314,6 @@
     <search_hit hit_rank="1" peptide="SSSPLAMSETLSK" peptide_prev_aa="K" peptide_next_aa="V" protein="YML092C" num_tot_proteins="1" calc_neutral_pep_mass="1356.1444" massdiff="-2.5123" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="3" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="SSSPLAM[15.99]SETLSK">
 <mod_aminoacid_mass position="7" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="SSSPLAMSETLSK">
 <mod_aminoacid_mass position="1" mass="88.73"/>
 <mod_aminoacid_mass position="13" mass="129.89"/>
 </modification_info>
@@ -5492,8 +5356,6 @@
     <search_hit hit_rank="2" peptide="SSSPLAMSETLSK" peptide_prev_aa="K" peptide_next_aa="V" protein="YML092C" num_tot_proteins="1" calc_neutral_pep_mass="1356.1444" massdiff="-0.6223" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="8" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="SSSPLAM[15.99]SETLSK">
 <mod_aminoacid_mass position="7" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="SSSPLAMSETLSK">
 <mod_aminoacid_mass position="1" mass="88.73"/>
 <mod_aminoacid_mass position="13" mass="129.89"/>
 </modification_info>
@@ -5573,8 +5435,6 @@
     <search_hit hit_rank="5" peptide="SSSPLAMSETLSK" peptide_prev_aa="K" peptide_next_aa="V" protein="YML092C" num_tot_proteins="1" calc_neutral_pep_mass="1356.1444" massdiff="-0.6223" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="8" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="SSSPLAM[15.99]SETLSK">
 <mod_aminoacid_mass position="7" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="SSSPLAMSETLSK">
 <mod_aminoacid_mass position="1" mass="88.73"/>
 <mod_aminoacid_mass position="13" mass="129.89"/>
 </modification_info>
@@ -5844,8 +5704,6 @@
     <search_hit hit_rank="2" peptide="MNAQGSLSMEDGK" peptide_prev_aa="K" peptide_next_aa="R" protein="YNL166C" num_tot_proteins="1" calc_neutral_pep_mass="1386.0758" massdiff="-2.7323" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="11" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="MNAQGSLSM[15.99]EDGK">
 <mod_aminoacid_mass position="9" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="MNAQGSLSMEDGK">
 <mod_aminoacid_mass position="1" mass="132.74"/>
 <mod_aminoacid_mass position="13" mass="129.89"/>
 </modification_info>
@@ -5896,8 +5754,6 @@
     <search_hit hit_rank="2" peptide="MNAQGSLSMEDGK" peptide_prev_aa="K" peptide_next_aa="R" protein="YNL166C" num_tot_proteins="1" calc_neutral_pep_mass="1386.0758" massdiff="-2.0323" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="11" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="MNAQGSLSM[15.99]EDGK">
 <mod_aminoacid_mass position="9" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="MNAQGSLSMEDGK">
 <mod_aminoacid_mass position="1" mass="132.74"/>
 <mod_aminoacid_mass position="13" mass="129.89"/>
 </modification_info>
@@ -5917,8 +5773,6 @@
     <search_hit hit_rank="4" peptide="MNAQGSLSMEDGK" peptide_prev_aa="K" peptide_next_aa="R" protein="YNL166C" num_tot_proteins="1" calc_neutral_pep_mass="1386.0758" massdiff="-2.0323" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="11" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="M[15.99]NAQGSLSMEDGK">
 <mod_aminoacid_mass position="1" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="MNAQGSLSMEDGK">
 <mod_aminoacid_mass position="1" mass="132.74"/>
 <mod_aminoacid_mass position="13" mass="129.89"/>
 </modification_info>
@@ -5960,8 +5814,6 @@
     <search_hit hit_rank="3" peptide="LAEMIPQFFYK" peptide_prev_aa="R" peptide_next_aa="N" protein="YDR093W" num_tot_proteins="1" calc_neutral_pep_mass="1405.1954" massdiff="-1.8232" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="4" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="LAEM[15.99]IPQFFYK">
 <mod_aminoacid_mass position="4" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="LAEMIPQFFYK">
 <mod_aminoacid_mass position="1" mass="114.78"/>
 <mod_aminoacid_mass position="11" mass="129.89"/>
 </modification_info>
@@ -5973,8 +5825,6 @@
 <modification_info modified_peptide="M[15.99]NAQGSLSM[15.99]EDGK">
 <mod_aminoacid_mass position="1" mass="147.03"/>
 <mod_aminoacid_mass position="9" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="MNAQGSLSMEDGK">
 <mod_aminoacid_mass position="1" mass="132.74"/>
 <mod_aminoacid_mass position="13" mass="129.89"/>
 </modification_info>
@@ -5998,8 +5848,6 @@
     <search_hit hit_rank="2" peptide="LAEMIPQFFYK" peptide_prev_aa="R" peptide_next_aa="N" protein="YDR093W" num_tot_proteins="1" calc_neutral_pep_mass="1405.1954" massdiff="-1.8232" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="4" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="LAEM[15.99]IPQFFYK">
 <mod_aminoacid_mass position="4" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="LAEMIPQFFYK">
 <mod_aminoacid_mass position="1" mass="114.78"/>
 <mod_aminoacid_mass position="11" mass="129.89"/>
 </modification_info>
@@ -6020,8 +5868,6 @@
 <modification_info modified_peptide="M[15.99]NAQGSLSM[15.99]EDGK">
 <mod_aminoacid_mass position="1" mass="147.03"/>
 <mod_aminoacid_mass position="9" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="MNAQGSLSMEDGK">
 <mod_aminoacid_mass position="1" mass="132.74"/>
 <mod_aminoacid_mass position="13" mass="129.89"/>
 </modification_info>
@@ -6045,8 +5891,6 @@
     <search_hit hit_rank="2" peptide="SCGVDAMSVDDLK" peptide_prev_aa="K" peptide_next_aa="K" protein="YGL135W" num_tot_proteins="1" calc_neutral_pep_mass="1415.0911" massdiff="-0.4388" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="10" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="SCGVDAM[15.99]SVDDLK">
 <mod_aminoacid_mass position="7" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="SCGVDAMSVDDLK">
 <mod_aminoacid_mass position="1" mass="88.73"/>
 <mod_aminoacid_mass position="2" mass="160.03"/>
 <mod_aminoacid_mass position="13" mass="129.89"/>
@@ -6116,8 +5960,6 @@
     <search_hit hit_rank="4" peptide="MTSGYYLGELLR" peptide_prev_aa="K" peptide_next_aa="L" protein="YFR053C" num_tot_proteins="1" calc_neutral_pep_mass="1421.1864" massdiff="-1.3142" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="8" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="M[15.99]TSGYYLGELLR">
 <mod_aminoacid_mass position="1" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="MTSGYYLGELLR">
 <mod_aminoacid_mass position="1" mass="132.74"/>
 <mod_aminoacid_mass position="12" mass="157.90"/>
 </modification_info>
@@ -6177,8 +6019,6 @@
     <search_hit hit_rank="5" peptide="MSMCNMAIEAGAR" peptide_prev_aa="R" peptide_next_aa="A" protein="YGL009C" num_tot_proteins="1" calc_neutral_pep_mass="1460.0883" massdiff="+1.4352" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="12" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="MSMCNM[15.99]AIEAGAR">
 <mod_aminoacid_mass position="6" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="MSMCNMAIEAGAR">
 <mod_aminoacid_mass position="1" mass="132.74"/>
 <mod_aminoacid_mass position="4" mass="160.03"/>
 <mod_aminoacid_mass position="13" mass="157.90"/>
@@ -6194,8 +6034,6 @@
     <search_hit hit_rank="1" peptide="QPYIMDTSYPAR" peptide_prev_aa="K" peptide_next_aa="I" protein="YFR053C" num_tot_proteins="1" calc_neutral_pep_mass="1460.1606" massdiff="+1.4429" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="12" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="QPYIM[15.99]DTSYPAR">
 <mod_aminoacid_mass position="5" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="QPYIMDTSYPAR">
 <mod_aminoacid_mass position="1" mass="129.76"/>
 <mod_aminoacid_mass position="12" mass="157.90"/>
 </modification_info>
@@ -6273,8 +6111,6 @@
     <search_hit hit_rank="4" peptide="QPYIMDTSYPAR" peptide_prev_aa="K" peptide_next_aa="I" protein="YFR053C" num_tot_proteins="1" calc_neutral_pep_mass="1460.1606" massdiff="+2.0829" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="10" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="QPYIM[15.99]DTSYPAR">
 <mod_aminoacid_mass position="5" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="QPYIMDTSYPAR">
 <mod_aminoacid_mass position="1" mass="129.76"/>
 <mod_aminoacid_mass position="12" mass="157.90"/>
 </modification_info>
@@ -6325,8 +6161,6 @@
     <search_hit hit_rank="4" peptide="AHSSMVGFDLPQR" peptide_prev_aa="R" peptide_next_aa="A" protein="YCR012W" num_tot_proteins="1" calc_neutral_pep_mass="1463.1829" massdiff="-0.0994" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="11" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="AHSSM[15.99]VGFDLPQR">
 <mod_aminoacid_mass position="5" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="AHSSMVGFDLPQR">
 <mod_aminoacid_mass position="1" mass="72.74"/>
 <mod_aminoacid_mass position="13" mass="157.90"/>
 </modification_info>
@@ -6387,8 +6221,6 @@
     <search_hit hit_rank="5" peptide="AHSSMVGFDLPQR" peptide_prev_aa="R" peptide_next_aa="A" protein="YCR012W" num_tot_proteins="1" calc_neutral_pep_mass="1463.1829" massdiff="+0.8606" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="6" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="AHSSM[15.99]VGFDLPQR">
 <mod_aminoacid_mass position="5" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="AHSSMVGFDLPQR">
 <mod_aminoacid_mass position="1" mass="72.74"/>
 <mod_aminoacid_mass position="13" mass="157.90"/>
 </modification_info>
@@ -6439,8 +6271,6 @@
     <search_hit hit_rank="5" peptide="AHSSMVGFDLPQR" peptide_prev_aa="R" peptide_next_aa="A" protein="YCR012W" num_tot_proteins="1" calc_neutral_pep_mass="1463.1829" massdiff="+1.2405" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="6" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="AHSSM[15.99]VGFDLPQR">
 <mod_aminoacid_mass position="5" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="AHSSMVGFDLPQR">
 <mod_aminoacid_mass position="1" mass="72.74"/>
 <mod_aminoacid_mass position="13" mass="157.90"/>
 </modification_info>
@@ -6482,8 +6312,6 @@
     <search_hit hit_rank="4" peptide="AHSSMVGFDLPQR" peptide_prev_aa="R" peptide_next_aa="A" protein="YCR012W" num_tot_proteins="1" calc_neutral_pep_mass="1463.1829" massdiff="+2.3406" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="5" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="AHSSM[15.99]VGFDLPQR">
 <mod_aminoacid_mass position="5" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="AHSSMVGFDLPQR">
 <mod_aminoacid_mass position="1" mass="72.74"/>
 <mod_aminoacid_mass position="13" mass="157.90"/>
 </modification_info>
@@ -7212,8 +7040,6 @@
     <search_hit hit_rank="3" peptide="LDNCVMTSQGILK" peptide_prev_aa="K" peptide_next_aa="L" protein="YOR267C" num_tot_proteins="1" calc_neutral_pep_mass="1497.2170" massdiff="+2.6064" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="3" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="LDNCVM[15.99]TSQGILK">
 <mod_aminoacid_mass position="6" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="LDNCVMTSQGILK">
 <mod_aminoacid_mass position="1" mass="114.78"/>
 <mod_aminoacid_mass position="4" mass="160.03"/>
 <mod_aminoacid_mass position="13" mass="129.89"/>
@@ -7247,8 +7073,6 @@
     <search_hit hit_rank="3" peptide="NSIGVELSSEYMR" peptide_prev_aa="K" peptide_next_aa="R" protein="YGR157W" num_tot_proteins="1" calc_neutral_pep_mass="1503.1877" massdiff="-2.8257" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="5" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="NSIGVELSSEYM[15.99]R">
 <mod_aminoacid_mass position="12" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="NSIGVELSSEYMR">
 <mod_aminoacid_mass position="1" mass="115.74"/>
 <mod_aminoacid_mass position="13" mass="157.90"/>
 </modification_info>
@@ -7302,8 +7126,6 @@
     <search_hit hit_rank="3" peptide="NSIGVELSSEYMR" peptide_prev_aa="K" peptide_next_aa="R" protein="YGR157W" num_tot_proteins="1" calc_neutral_pep_mass="1503.1877" massdiff="-2.8257" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="5" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="NSIGVELSSEYM[15.99]R">
 <mod_aminoacid_mass position="12" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="NSIGVELSSEYMR">
 <mod_aminoacid_mass position="1" mass="115.74"/>
 <mod_aminoacid_mass position="13" mass="157.90"/>
 </modification_info>
@@ -7360,8 +7182,6 @@
     <search_hit hit_rank="3" peptide="NSIGVELSSEYMR" peptide_prev_aa="K" peptide_next_aa="R" protein="YGR157W" num_tot_proteins="1" calc_neutral_pep_mass="1503.1877" massdiff="-2.6443" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="5" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="NSIGVELSSEYM[15.99]R">
 <mod_aminoacid_mass position="12" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="NSIGVELSSEYMR">
 <mod_aminoacid_mass position="1" mass="115.74"/>
 <mod_aminoacid_mass position="13" mass="157.90"/>
 </modification_info>
@@ -7424,8 +7244,6 @@
     <search_hit hit_rank="4" peptide="NSIGVELSSEYMR" peptide_prev_aa="K" peptide_next_aa="R" protein="YGR157W" num_tot_proteins="1" calc_neutral_pep_mass="1503.1877" massdiff="-2.5557" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="5" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="NSIGVELSSEYM[15.99]R">
 <mod_aminoacid_mass position="12" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="NSIGVELSSEYMR">
 <mod_aminoacid_mass position="1" mass="115.74"/>
 <mod_aminoacid_mass position="13" mass="157.90"/>
 </modification_info>
@@ -7467,8 +7285,6 @@
     <search_hit hit_rank="3" peptide="NSIGVELSSEYMR" peptide_prev_aa="K" peptide_next_aa="R" protein="YGR157W" num_tot_proteins="1" calc_neutral_pep_mass="1503.1877" massdiff="-2.3643" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="5" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="NSIGVELSSEYM[15.99]R">
 <mod_aminoacid_mass position="12" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="NSIGVELSSEYMR">
 <mod_aminoacid_mass position="1" mass="115.74"/>
 <mod_aminoacid_mass position="13" mass="157.90"/>
 </modification_info>
@@ -7514,8 +7330,6 @@
 <modification_info modified_peptide="LASYAM[15.99]PSLIVVM[15.99]DK">
 <mod_aminoacid_mass position="6" mass="147.03"/>
 <mod_aminoacid_mass position="13" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="LASYAMPSLIVVMDK">
 <mod_aminoacid_mass position="1" mass="114.78"/>
 <mod_aminoacid_mass position="15" mass="129.89"/>
 </modification_info>
@@ -7700,8 +7514,6 @@
     <search_hit hit_rank="2" peptide="LMLTLTPVICVSAAVALSK" peptide_prev_aa="R" peptide_next_aa="I" protein="YGL022W" num_tot_proteins="1" calc_neutral_pep_mass="2005.6156" massdiff="-2.5901" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="4" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="LM[15.99]LTLTPVICVSAAVALSK">
 <mod_aminoacid_mass position="2" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="LMLTLTPVICVSAAVALSK">
 <mod_aminoacid_mass position="1" mass="114.78"/>
 <mod_aminoacid_mass position="10" mass="160.03"/>
 <mod_aminoacid_mass position="19" mass="129.89"/>
@@ -7771,8 +7583,6 @@
     <search_hit hit_rank="5" peptide="LMLTLTPVICVSAAVALSK" peptide_prev_aa="R" peptide_next_aa="I" protein="YGL022W" num_tot_proteins="1" calc_neutral_pep_mass="2005.6156" massdiff="-0.3235" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="5" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="LM[15.99]LTLTPVICVSAAVALSK">
 <mod_aminoacid_mass position="2" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="LMLTLTPVICVSAAVALSK">
 <mod_aminoacid_mass position="1" mass="114.78"/>
 <mod_aminoacid_mass position="10" mass="160.03"/>
 <mod_aminoacid_mass position="19" mass="129.89"/>
@@ -7808,8 +7618,6 @@
     <search_hit hit_rank="3" peptide="LMLTLTPVICVSAAVALSK" peptide_prev_aa="R" peptide_next_aa="I" protein="YGL022W" num_tot_proteins="1" calc_neutral_pep_mass="2005.6156" massdiff="+0.0499" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="4" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="LM[15.99]LTLTPVICVSAAVALSK">
 <mod_aminoacid_mass position="2" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="LMLTLTPVICVSAAVALSK">
 <mod_aminoacid_mass position="1" mass="114.78"/>
 <mod_aminoacid_mass position="10" mass="160.03"/>
 <mod_aminoacid_mass position="19" mass="129.89"/>
@@ -7863,8 +7671,6 @@
     <search_hit hit_rank="4" peptide="LMLTLTPVICVSAAVALSK" peptide_prev_aa="R" peptide_next_aa="I" protein="YGL022W" num_tot_proteins="1" calc_neutral_pep_mass="2005.6156" massdiff="+1.2299" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="4" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="LM[15.99]LTLTPVICVSAAVALSK">
 <mod_aminoacid_mass position="2" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="LMLTLTPVICVSAAVALSK">
 <mod_aminoacid_mass position="1" mass="114.78"/>
 <mod_aminoacid_mass position="10" mass="160.03"/>
 <mod_aminoacid_mass position="19" mass="129.89"/>
@@ -7900,8 +7706,6 @@
     <search_hit hit_rank="3" peptide="LMLTLTPVICVSAAVALSK" peptide_prev_aa="R" peptide_next_aa="I" protein="YGL022W" num_tot_proteins="1" calc_neutral_pep_mass="2005.6156" massdiff="+1.2899" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="4" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="LM[15.99]LTLTPVICVSAAVALSK">
 <mod_aminoacid_mass position="2" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="LMLTLTPVICVSAAVALSK">
 <mod_aminoacid_mass position="1" mass="114.78"/>
 <mod_aminoacid_mass position="10" mass="160.03"/>
 <mod_aminoacid_mass position="19" mass="129.89"/>
@@ -7955,8 +7759,6 @@
     <search_hit hit_rank="4" peptide="LMLTLTPVICVSAAVALSK" peptide_prev_aa="R" peptide_next_aa="I" protein="YGL022W" num_tot_proteins="1" calc_neutral_pep_mass="2005.6156" massdiff="+2.3499" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="4" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="LM[15.99]LTLTPVICVSAAVALSK">
 <mod_aminoacid_mass position="2" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="LMLTLTPVICVSAAVALSK">
 <mod_aminoacid_mass position="1" mass="114.78"/>
 <mod_aminoacid_mass position="10" mass="160.03"/>
 <mod_aminoacid_mass position="19" mass="129.89"/>
@@ -8023,8 +7825,6 @@
     <search_hit hit_rank="2" peptide="IPDIENSVNMVPVDHVAR" peptide_prev_aa="K" peptide_next_aa="V" protein="YBR115C" num_tot_proteins="1" calc_neutral_pep_mass="2023.4998" massdiff="+1.7725" num_tol_term="2" num_missed_cleavages="0" num_matched_peptides="2" is_rejected="0" protein_descr="">
 <modification_info modified_peptide="IPDIENSVNM[15.99]VPVDHVAR">
 <mod_aminoacid_mass position="10" mass="147.03"/>
-</modification_info>
-<modification_info modified_peptide="IPDIENSVNMVPVDHVAR">
 <mod_aminoacid_mass position="1" mass="114.78"/>
 <mod_aminoacid_mass position="18" mass="157.90"/>
 </modification_info>

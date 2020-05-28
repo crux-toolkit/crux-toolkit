@@ -917,7 +917,8 @@ void Spectrum::rankPeaks()
  * came from or an empty string, if filename is unavailable.
  */
 const char* Spectrum::getFilename() {
-  return FileUtils::Stem(filename_).c_str();
+  filename_stem_ = FileUtils::Stem(filename_);
+  return filename_stem_.c_str();
 }
 
 /**
