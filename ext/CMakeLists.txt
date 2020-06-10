@@ -231,47 +231,29 @@ ExternalProject_Add(
 )
 
 # MSToolkit
-if (UNIX)
-    set(mstoolkit_c_flags -O3\ -I.\ -I./include\ -D_LARGEFILE_SOURCE\ -D_FILE_OFFSET_BITS=64\ -DGCC\ -DHAVE_EXPAT_CONFIG_H)
-
-  # Get MSToolkit source from Github
-  ExternalProject_Add(
-    MSToolkit
-    GIT_REPOSITORY https://github.com/mhoopmann/mstoolkit.git
-    GIT_TAG 0077644
-    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
-    UPDATE_COMMAND ""
-    CONFIGURE_COMMAND ""
-    PATCH_COMMAND
-      cp ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/MSToolkit/include/MSReader.h
-         ${CMAKE_CURRENT_BINARY_DIR}/build/src/MSToolkit/include/ &&
-      cp ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/MSToolkit/src/MSToolkit/MSReader.cpp
-         ${CMAKE_CURRENT_BINARY_DIR}/build/src/MSToolkit/src/MSToolkit
-    BUILD_COMMAND make AR_CFLAGS=${mstoolkit_c_flags}
-                       LDFLAGS=${CMAKE_LD_FLAGS}
-                       arlib
-    INSTALL_COMMAND ""
-    BUILD_IN_SOURCE 1
-    )
-  # Copy MSToolkit include files and libraries to the proper locations:
-  add_custom_command(
-    TARGET MSToolkit
-    POST_BUILD
-    COMMAND
-    [ -d ${CMAKE_CURRENT_BINARY_DIR}/include/MSToolkit ] ||
-    mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/include/MSToolkit &&
-    [ -d ${CMAKE_CURRENT_BINARY_DIR}/lib ] ||
-    mkdir ${CMAKE_CURRENT_BINARY_DIR}/lib
-    COMMAND
-    cp -p
-    ${CMAKE_CURRENT_BINARY_DIR}/build/src/MSToolkit/include/*
-    ${CMAKE_CURRENT_BINARY_DIR}/include/MSToolkit
-    COMMAND
-    cp -p
-    ${CMAKE_CURRENT_BINARY_DIR}/build/src/MSToolkit/libmstoolkitlite.a
-    ${CMAKE_CURRENT_BINARY_DIR}/lib/libmstoolkitlite.a
-    )
-endif (UNIX)
+# Get MSToolkit source from Github
+ExternalProject_Add(
+  MSToolkit
+  GIT_REPOSITORY https://github.com/mhoopmann/mstoolkit.git
+  GIT_TAG 0077644
+  PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
+  CMAKE_ARGS ${TOOLCHAIN_FILE}
+    -DCMAKE_VERBOSE_MAKEFILE=ON
+    -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}
+    -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}
+    -DCMAKE_BUILD_TYPE=${CMAKE_CFG_INTDIR}
+  PATCH_COMMAND
+    COMMAND ${CMAKE_COMMAND} -E copy
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/mstoolkit/CMakeLists.txt
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/MSToolkit/
+    COMMAND ${CMAKE_COMMAND} -E copy
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/MSToolkit/include/MSReader.h
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/MSToolkit/include/
+    COMMAND ${CMAKE_COMMAND} -E copy
+       ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/MSToolkit/src/MSToolkit/MSReader.cpp
+       ${CMAKE_CURRENT_BINARY_DIR}/build/src/MSToolkit/src/MSToolkit
+  BUILD_IN_SOURCE 1
+)
 
 if (UNIX)
   # Get Comet source from SVN and build using it's own makefile
