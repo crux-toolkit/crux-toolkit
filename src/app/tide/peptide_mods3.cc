@@ -226,7 +226,7 @@ class ModsOutputter : public IModsOutputter {
 
     for (int i = 0; i < num_poss; ++i) {
       int poss_max_ct = mod_table_->PossMaxCt(aa, i, mod_spec);
-      if (max_counts_[poss_max_ct] == 1) {
+      if (max_counts_[poss_max_ct] > 0 && counts[poss_max_ct] < max_counts_[poss_max_ct]) {
         ++counts[poss_max_ct];
         int delta_index = mod_table_->PossDeltIx(aa, i, mod_spec);
         peptide_->add_modifications(mod_table_->EncodeMod(pos, delta_index));
@@ -295,7 +295,7 @@ class ModsOutputter : public IModsOutputter {
       int num_poss = mod_table_->NumPoss(aa, mod_type);
       for (int i = 0; i < num_poss; ++i) {
         int poss_max_ct = mod_table_->PossMaxCt(aa, i, mod_type);
-        if (max_counts_[poss_max_ct] == 1) {
+        if (max_counts_[poss_max_ct] > 0 && counts[poss_max_ct] < max_counts_[poss_max_ct]) {
           ++counts[poss_max_ct];
           int delta_index = mod_table_->PossDeltIx(aa, i, mod_type);
           peptide_->add_modifications(mod_table_->EncodeMod(pos, delta_index));
