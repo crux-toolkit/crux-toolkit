@@ -1,0 +1,58 @@
+cmake_minimum_required(VERSION 3.6)
+project(cometsearch)
+# INCLUDE HEADER FILES IN SRC DIRECTORY
+include_directories(
+  ${BASE_INCLUDE_PATH} 
+  ${MSTOOLKIT_INCLUDE_PATH} 
+  ${CMAKE_CURRENT_BINARY_DIR}/CometSearch
+)
+
+#############################################################################
+# COMPILE MSToolkit
+###############################################################################
+
+ set(
+  COMETSEARCH
+  CometSearch/Threading.cpp 
+  CometSearch/CometInterfaces.cpp 
+  CometSearch/CometSearch.cpp 
+  CometSearch/CometPreprocess.cpp 
+  CometSearch/CometPostAnalysis.cpp 
+  CometSearch/CometMassSpecUtils.cpp 
+  CometSearch/CometWriteOut.cpp 
+  CometSearch/CometWriteSqt.cpp 
+  CometSearch/CometWritePepXML.cpp 
+  CometSearch/CometWritePercolator.cpp 
+  CometSearch/CometWriteTxt.cpp 
+  CometSearch/CometSearchManager.cpp 
+  CometSearch/CometCheckForUpdates.cpp
+)
+ 
+add_library(
+  cometsearch 
+  STATIC 
+  ${COMETSEARCH}
+)
+								  
+if (UNIX)
+  target_compile_options(
+    cometsearch
+    PUBLIC
+    -O3 -fpermissive -Wall -Wextra -Wno-write-strings -static -std=c++11 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DGCC -I. -I$(MSTOOLKIT)/include
+)
+elseif(WIN32 AND NOT CYGWIN)
+  target_compile_definitions(
+    cometsearch
+    PUBLIC
+    _CRT_SECURE_NO_WARNINGS
+  )
+endif(UNIX)
+  
+
+################################################################################
+								  
+# INSTALL cometsearch library
+install(TARGETS cometsearch EXPORT cometsearch DESTINATION lib)
+install(DIRECTORY CometSearch/ DESTINATION include/CometSearch FILES_MATCHING PATTERN "*.h") 
+
+
