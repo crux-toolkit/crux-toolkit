@@ -209,7 +209,6 @@ add_library(
   STATIC
   ${crux_lib_files}
 )
-add_dependencies(crux-support tide-support)
 
 if (APPLE)
   set(OPENMP_FOUND FALSE)

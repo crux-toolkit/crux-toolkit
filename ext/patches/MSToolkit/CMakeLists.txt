@@ -21,11 +21,12 @@ set(
 )
 set(
   MSTOOLKIT 
-  ${MST_PATH}/Spectrum.cpp 
   ${MST_PATH}/MSObject.cpp 
   ${MST_PATH}/MSReader.cpp 
   ${MST_PATH}/mzMLWriter.cpp 
   ${MST_PATH}/pepXMLWriter.cpp
+  ${MST_PATH}/RAWReader.cpp 
+  ${MST_PATH}/Spectrum.cpp 
 )
 set(
   MZIMLTOOLS

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.6)
-project(mstoolkit)
+project(kojak)
 # INCLUDE HEADER FILES IN SRC DIRECTORY
 include_directories(
   ${BASE_INCLUDE_PATH} 
@@ -42,7 +42,7 @@ if (UNIX)
   )
 elseif(WIN32 AND NOT CYGWIN)
   target_compile_definitions(
-    kojak
+    kojaksearch
     PUBLIC
     _CRT_SECURE_NO_WARNINGS
   )

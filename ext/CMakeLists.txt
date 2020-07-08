@@ -74,8 +74,10 @@ if (WIN32 AND NOT CYGWIN)
           -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
           -DINCLUDE_VENDOR_LIBRARIES:BOOLEAN=${INCLUDE_VENDOR_LIBRARIES}
           -P  ${CMAKE_CURRENT_SOURCE_DIR}/build_pwiz.cmake
-      INSTALL_COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost ${CMAKE_CURRENT_BINARY_DIR}/include/boost
+      INSTALL_COMMAND
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+          ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost 
+          ${CMAKE_CURRENT_BINARY_DIR}/include/boost
       BUILD_IN_SOURCE 1
     )
   # On Windows we have to do some extra house keeping
@@ -285,11 +287,22 @@ if (UNIX)
     BUILD_IN_SOURCE 1
   )
 elseif (WIN32 AND NOT CYGWIN)
+  set(comet_cxx_flags ${CMAKE_CXX_FLAGS}\ -DCRUX)
+  set(base_include_path ${CMAKE_BINARY_DIR}/ext/include)
+  set(mstoolkit_include_path ${CMAKE_BINARY_DIR}/ext/include/MSToolkit)
   set(LIBPATH "${CMAKE_CURRENT_BINARY_DIR}/lib;")
   ExternalProject_Add(
     comet
     SVN_REPOSITORY svn://svn.code.sf.net/p/comet-ms/code/tags/release_2019015/
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
+    CMAKE_ARGS ${TOOLCHAIN_FILE}
+      -DBASE_INCLUDE_PATH=${base_include_path}
+      -DMSTOOLKIT_INCLUDE_PATH=${mstoolkit_include_path}
+      -DCMAKE_VERBOSE_MAKEFILE=ON
+      -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}
+      -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}
+      -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}
+      -DCMAKE_BUILD_TYPE=${CMAKE_CFG_INTDIR}
     # Copy the Comet and MSToolkit include files and libraries to
     # the desired directories.
     PATCH_COMMAND
@@ -299,26 +312,7 @@ elseif (WIN32 AND NOT CYGWIN)
       COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CometSearch/Common.h
         ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/
-    BUILD_COMMAND
-      ${CMAKE_COMMAND}
-        -DLIBPATH:STRING="${LIBPATH}"
-        -DMSBUILD_ARGS:STRING=/p:Configuration=${CMAKE_CFG_INTDIR}
-        -DMSBUILD_PLATFORM=${MSBUILD_PLATFORM}
-        -DPROJ_FILE:STRING=comet.sln
-        -P ${CMAKE_CURRENT_SOURCE_DIR}/build-comet.cmake
-    INSTALL_COMMAND ""
     BUILD_IN_SOURCE 1
-  )
-  ExternalProject_Add_Step(
-    comet
-    copy_comet_library
-    COMMAND ${CMAKE_COMMAND} -E copy
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/${MSBUILD_PLATFORM}/${CMAKE_CFG_INTDIR}/CometSearch.lib
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/CometSearch.lib
-    COMMAND ${CMAKE_COMMAND} -E copy
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/${MSBUILD_PLATFORM}/${CMAKE_CFG_INTDIR}/MSToolkitLite.lib
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/MSToolkitLite.lib
-    DEPENDEES install
   )
 endif (UNIX)
 
