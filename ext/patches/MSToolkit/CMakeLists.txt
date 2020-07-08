@@ -19,15 +19,27 @@ set(
   ${EXPAT_PATH}/xmlrole.c 
   ${EXPAT_PATH}/xmltok.c
 )
-set(
-  MSTOOLKIT 
-  ${MST_PATH}/MSObject.cpp 
-  ${MST_PATH}/MSReader.cpp 
-  ${MST_PATH}/mzMLWriter.cpp 
-  ${MST_PATH}/pepXMLWriter.cpp
-  ${MST_PATH}/RAWReader.cpp 
-  ${MST_PATH}/Spectrum.cpp 
-)
+if (WIN32 AND NOT Cygwin)
+  set(
+    MSTOOLKIT 
+    ${MST_PATH}/MSObject.cpp 
+    ${MST_PATH}/MSReader.cpp 
+    ${MST_PATH}/mzMLWriter.cpp 
+    ${MST_PATH}/pepXMLWriter.cpp
+    ${MST_PATH}/RAWReader.cpp 
+    ${MST_PATH}/Spectrum.cpp 
+  )
+else (WIN32 AND NOT Cygwin)
+  set(
+    MSTOOLKIT 
+    ${MST_PATH}/MSObject.cpp 
+    ${MST_PATH}/MSReader.cpp 
+    ${MST_PATH}/mzMLWriter.cpp 
+    ${MST_PATH}/pepXMLWriter.cpp
+    ${MST_PATH}/Spectrum.cpp 
+  )
+endif (WIN32 AND NOT Cygwin)
+
 set(
   MZIMLTOOLS
   ${MZIMLTOOLS_PATH}/CAdditionalSearchParams.cpp 
