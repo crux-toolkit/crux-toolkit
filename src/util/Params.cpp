@@ -801,15 +801,17 @@ Params::Params() : finalized_(false) {
     "nterm-peptide-mods-spec for syntax.]]",
     "Available for tide-index", true);
   InitStringParam("cterm-protein-mods-spec", "",
-    "Specifies C-terminal static and variable mass modifications on proteins. "
-    "Specify a comma-separated list of C-terminal protein modification sequences of the form: "
-    ",...",
-    "Available for tide-index", false);
+    "[[nohtml:Specifies static and variable mass modifications on proteins' C-terminal. ]]"
+    "[[html:Specifies C-terminal static and variable mass modifications on proteins."
+    "Mod specification syntax is the same as for peptide mods (see nterm-peptide-mods-spec option),"
+    "but these mods are applied only to peptide C-terminals that are also protein terminals."
+    "If variable modification are provided for both peptide and protein terminal, they will be "
+    "applied one at a time. ",
+    "Available for tide-index", true);
   InitStringParam("nterm-protein-mods-spec", "",
-    "Specifies N-terminal static and variable mass modifications on proteins. "
-    "Specify a comma-separated list of N-terminal protein modification sequences of the form: "
-    ",...",
-    "Available for tide-index", false);
+    "[[nohtml:Specifies static and variable mass modifications on proteins N-terminal.]] "
+    "[[html:Same as cterm-protein-mods-spec, but for  the protein N-terminal.",
+    "Available for tide-index", true);
   InitStringParam("store-spectra", "",
     "Specify the name of the file where the binarized fragmentation spectra "
     "will be stored. Subsequent runs of crux tide-search will execute more quickly if "

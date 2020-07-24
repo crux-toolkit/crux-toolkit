@@ -52,7 +52,7 @@ int ReadTideIndex::main(int argc, char** argv) {
   }
 
   const pb::Header::PeptidesHeader& pepHeader = peptides_header.peptides_header();
-  //TODO: replace nullptr with actual tables.
+
   MassConstants::Init(&pepHeader.mods(), 
                       &pepHeader.nterm_mods(), &pepHeader.cterm_mods(), 
                       &pepHeader.nprotterm_mods(), &pepHeader.cprotterm_mods(), 

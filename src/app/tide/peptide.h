@@ -65,6 +65,7 @@ class TheoreticalPeakCompiler;
 // memory allocated for mods_ when FIFO allocation is NOT used.
 class Peptide {
  public:
+
   // The proteins parameter is presumed to live in memory all the while the
   // Peptide exists, so that residues_ can refer to the amino acid sequence.
   Peptide(const pb::Peptide& peptide,
@@ -204,6 +205,7 @@ class Peptide {
   int Id() const { return id_; }
   int FirstLocProteinId() const { return first_loc_protein_id_; }
   int FirstLocPos() const { return first_loc_pos_; }
+  int ProteinLenth() const {return protein_length_;}
   bool HasAuxLocationsIndex() const { return has_aux_locations_index_; }
   int AuxLocationsIndex() const { return aux_locations_index_; }
   int Mods(const ModCoder::Mod** mods) const {

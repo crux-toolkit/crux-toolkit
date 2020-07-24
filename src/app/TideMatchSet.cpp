@@ -573,7 +573,10 @@ void TideMatchSet::initModMap(const pb::ModTable& modTable, ModPosition position
 }
 
 Crux::Peptide TideMatchSet::getCruxPeptide(const Peptide* peptide) {
-  return Crux::Peptide(peptide->Seq(), getMods(peptide));
+  Crux::ProteinTerminal term = Crux::ProteinTerminal::PROT_TERM_NONE;
+    if(peptide->FirstLocPos() == 0) term = Crux::ProteinTerminal::PROT_TERM_N;
+    if(peptide->FirstLocPos() + peptide->Len() == peptide->ProteinLenth()) term = Crux::ProteinTerminal::PROT_TERM_C;
+  return Crux::Peptide(peptide->Seq(), term, getMods(peptide));
 }
 
 vector<Crux::Modification> TideMatchSet::getMods(const Peptide* peptide) {

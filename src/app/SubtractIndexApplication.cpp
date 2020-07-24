@@ -69,8 +69,7 @@ int SubtractIndexApplication::main(int argc, char** argv) {
       TideSearchApplication::PROTEIN_LEVEL_DECOYS = true;
     }
   }
-  //TODO: add protein terminal mods to the header protobuf definition
-  //TODO: replace nullptr with actual tables.
+
   MassConstants::Init(&peptides_header1.peptides_header().mods(), 
     &peptides_header1.peptides_header().nterm_mods(),
     &peptides_header1.peptides_header().cterm_mods(), 
