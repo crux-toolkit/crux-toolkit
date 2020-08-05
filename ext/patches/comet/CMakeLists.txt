@@ -35,16 +35,25 @@ add_library(
 )
 								  
 if (UNIX)
-  target_compile_options(
-    cometsearch
-    PUBLIC
-    -O3 -fpermissive -Wall -Wextra -Wno-write-strings -static -std=c++11 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DGCC -I. -I$(MSTOOLKIT)/include
-)
+  if (CMAKE_BUILD_TYPE MATCHES "Release")
+    target_compile_options  (
+      cometsearch
+      PUBLIC
+      -O3 -fpermissive -Wall -Wextra -Wno-write-strings -static -std=c++11 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DGCC -DCRUX -I. -I$(MSTOOLKIT)/include
+    )
+  else()
+    target_compile_options  (
+      cometsearch
+      PUBLIC
+      -g -O0 -fpermissive -Wall -Wextra -Wno-write-strings -static -std=c++11 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DGCC  -DCRUX -I. -I$(MSTOOLKIT)/include
+    )
+  endif ()
 elseif(WIN32 AND NOT CYGWIN)
   target_compile_definitions(
     cometsearch
     PUBLIC
     _CRT_SECURE_NO_WARNINGS
+    CRUX
   )
 endif(UNIX)
   
