@@ -126,12 +126,14 @@ void CometApplication::setEnzyme(
   int search = Params::GetInt(searchParam);
   if (search >= 0 && (size_t)search < get_comet_enzyme_info_lines().size()) {
     const char* szParamBuf = get_comet_enzyme_info_lines()[search].c_str();
-    sscanf(szParamBuf, "%lf %48s %d %20s %20s\n",
+    sscanf(szParamBuf, "%lf %48s %d %20s %20s %20s %20s\n",
       &temp,
       e.szSearchEnzymeName,
       &e.iSearchEnzymeOffSet,
       e.szSearchEnzymeBreakAA,
-      e.szSearchEnzymeNoBreakAA);
+      e.szSearchEnzymeNoBreakAA,
+      e.szSearchEnzyme2BreakAA,
+      e.szSearchEnzyme2NoBreakAA);
   } else {
     carp(CARP_FATAL, "search_enzyme_number=%d out of range (0-%d)",
       search, get_comet_enzyme_info_lines().size() - 1);
