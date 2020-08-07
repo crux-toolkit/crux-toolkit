@@ -200,7 +200,7 @@ Params::Params() : finalized_(false) {
   InitStringParam("enzyme", "trypsin", "no-enzyme|trypsin|trypsin/p|chymotrypsin|"
     "elastase|clostripain|cyanogen-bromide|iodosobenzoate|proline-endopeptidase|"
     "staph-protease|asp-n|lys-c|lys-n|arg-c|glu-c|pepsin-a|"
-    "elastase-trypsin-chymotrypsin|custom-enzyme",
+    "elastase-trypsin-chymotrypsin|lysarginase|custom-enzyme",
     "Specify the enzyme used to digest the proteins in silico. Available enzymes "
     "(with the corresponding digestion rules indicated in parentheses) include "
     "no-enzyme ([X]|[X]), trypsin ([RK]|{P}), trypsin/p ([RK]|[]), chymotrypsin "
@@ -208,7 +208,8 @@ Params::Params() : finalized_(false) {
     "([M]|[]), iodosobenzoate ([W]|[]), proline-endopeptidase ([P]|[]), staph-protease "
     "([E]|[]), asp-n ([]|[D]), lys-c ([K]|{P}), lys-n ([]|[K]), arg-c ([R]|{P}), "
     "glu-c ([DE]|{P}), pepsin-a ([FL]|{P}), elastase-trypsin-chymotrypsin "
-    "([ALIVKRWFY]|{P}). Specifying --enzyme no-enzyme yields a non-enzymatic digest. "
+    "([ALIVKRWFY]|{P}), lysarginase ([]|[KR]). "
+    "Specifying --enzyme no-enzyme yields a non-enzymatic digest. "
     "[[html:<strong>]]Warning:[[html:</strong>]] the resulting index may be quite large.",
     "Available for crux-generate-peptides and crux tide-index.", true);
   InitStringParam("custom-enzyme", "",
@@ -658,7 +659,7 @@ Params::Params() : finalized_(false) {
     "fasta file as the argument to this flag.",
     "Available for percolator", true);
   InitStringParam("protein-enzyme", "trypsin", "no_enzyme|elastase|pepsin|proteinasek|"
-    "thermolysin|trypsinp|chymotrypsin|lys-n|lys-c|arg-c|asp-n|glu-c|trypsin",
+    "thermolysin|trypsinp|chymotrypsin|lys-n|lys-c|arg-c|asp-n|glu-c|lysarginase|trypsin",
     "Type of enzyme",
     "Available for percolator", true);
   InitBoolParam("protein-report-fragments", false,
