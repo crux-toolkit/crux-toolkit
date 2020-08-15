@@ -433,8 +433,8 @@ vector<Modification> Peptide::getStaticMods() const {
          j != staticMods.end();
          j++) {
       if ((*j)->Position() == ANY ||
-          ((*j)->Position() == PEPTIDE_N && i == 0 && this->terminal_ == PROT_TERM_NONE) ||
-          ((*j)->Position() == PEPTIDE_C && seq[i + 1] == '\0' && this->terminal_ == PROT_TERM_NONE)
+          ((*j)->Position() == PEPTIDE_N && i == 0) ||
+          ((*j)->Position() == PEPTIDE_C && seq[i + 1] == '\0')
           || (*j)->Position() == PROTEIN_N && i == 0 && this->terminal_ == PROT_TERM_N
           || (*j)->Position() == PROTEIN_C && seq[i + 1] == '\0' && this->terminal_ == PROT_TERM_C) {
         mods.push_back(Modification(*j, (unsigned char)i));
