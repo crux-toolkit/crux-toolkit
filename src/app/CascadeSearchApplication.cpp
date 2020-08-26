@@ -14,8 +14,6 @@
 
 using namespace std;
 
-int const CascadeSearchApplication::CASCADE_TERMINATION_CONDITION = 20;
-
 /**
  * \returns a blank CascadeSearchApplication object
  */
@@ -38,6 +36,7 @@ int CascadeSearchApplication::main(int argc, char** argv) {
   carp(CARP_INFO, "Running cascade-search...");
 
   string database_string = Params::GetString("database-series");
+  int cascade_termination_condition = Params::GetInt("cascade-termination");
   vector<string> database_indices = StringUtils::Split(database_string, ',');
   OutputFiles* output = new OutputFiles(this);
 
@@ -76,7 +75,7 @@ int CascadeSearchApplication::main(int argc, char** argv) {
     RemoveTempFiles(outputdir, AssignConfidenceProgram.getName());
 
     int numAccepted = AssignConfidenceProgram.getAcceptedPSMs();
-    if (numAccepted < CASCADE_TERMINATION_CONDITION) {
+    if (numAccepted <= cascade_termination_condition) {
       carp(CARP_INFO,
            "Terminating search early because only %d PSMs were accepted.",
            numAccepted);

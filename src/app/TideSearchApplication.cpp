@@ -1579,6 +1579,7 @@ vector<string> TideSearchApplication::getOptions() const {
     "store-spectra",
     "top-match",
     "txt-output",
+    "brief-output",
     "use-flanking-peaks",
     "use-neutral-loss-peaks",
     "use-z-line",

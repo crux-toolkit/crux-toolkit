@@ -93,5 +93,11 @@ if (WIN32 AND NOT CYGWIN)
         ${PREFIX}/lib/timsdata.lib
       RESULT_VARIABLE status
     )
+    execute_process(
+      COMMAND ${CMAKE_COMMAND} -E copy 
+        ${PREFIX}/build/src/ProteoWizard/libraries/boost_1_67_0/boost/system/detail/error_code.ipp
+        ${PREFIX}/include/boost/system/detail/error_code.ipp
+      RESULT_VARIABLE status
+    )
 #  check_status(status)
 endif (WIN32 AND NOT CYGWIN)

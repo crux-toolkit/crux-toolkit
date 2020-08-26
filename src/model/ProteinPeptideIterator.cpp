@@ -116,8 +116,9 @@ bool ProteinPeptideIterator::validCleavagePosition(
             sequence[0] == 'K' || sequence[0] == 'R' ||
             sequence[0] == 'W' || sequence[0] == 'F' ||
             sequence[0] == 'Y' ) && sequence[1] != 'P';
+  case LYSARGINASE:
+    return (sequence[1] == 'K' || sequence[1] == 'R');
   case CUSTOM_ENZYME:
-    //carp(CARP_FATAL, "The custom enzyme is not yet implmented.");
 
     return ( isResidueLegal(sequence[0], 
                               pre_cleavage_list,

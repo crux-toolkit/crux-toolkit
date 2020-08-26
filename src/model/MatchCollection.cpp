@@ -514,6 +514,10 @@ void MatchCollection::printXmlHeader(
   }
   
   hold_time = time(0);
+  struct tm* time_struct = localtime(&hold_time);
+  char hold_time_str[DATE_STRING_SIZE];   //date format YYYY-MM-DDTHH:MM:SS is 19 characters
+  strftime(hold_time_str, DATE_STRING_SIZE, "%Y-%m-%dT%H:%M:%S", time_struct);
+
   const char* xsi = "http://www.w3.org/2001/XMLSchema-instance";
   const char* xmlns = "http://regis-web.systemsbiology.net/pepXML";
   const char* schema_location = "/usr/local/tpp/schema/pepXML_v110.xsd";
@@ -522,13 +526,11 @@ void MatchCollection::printXmlHeader(
   fprintf(output, "<msms_pipeline_analysis date=\"%s\" xmlns=\"%s\""
           " xmlns:xsi=\"%s\" xsi:schemaLocation=\"%s %s\""
           " summary_xml=\"\">\n",
-          StringUtils::RTrim(string(ctime(&hold_time))).c_str(),
+          hold_time_str,
           xmlns, xsi, xmlns, schema_location);
   fprintf(output, "<msms_run_summary base_name=\"%s\" msManufacturer=\"%s\" "
-          "msModel=\"%s\" msIonization=\"%s\" msAnalyzer=\"%s\" "
-          "msDectector=\"%s\" raw_data_type=\"%s\" raw_data=\"%s\" >\n",
-          "NA", // TODO, dummy value
-          "NA", // TODO, dummy value
+          "msModel=\"%s\" msIonization=\"%s\" "
+          "raw_data_type=\"%s\" raw_data=\"%s\" >\n",
           "NA", // TODO, dummy value
           "NA", // TODO, dummy value
           "NA", // TODO, dummy value
