@@ -153,11 +153,10 @@ else (UNIX)
 endif (WIN32 AND NOT CYGWIN)
 
 if (UNIX)
-  set(${PERCOLATOR_GIT_VERSION} remote/origin/rel-3-04)	
   ExternalProject_Add(
     percolator
     GIT_REPOSITORY https://github.com/percolator/percolator.git
-    GIT_TAG "rel-3-04"
+    GIT_TAG ${PERCOLATOR_GIT_VERSION}
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     CMAKE_ARGS ${TOOLCHAIN_FILE}
       -DCMAKE_VERBOSE_MAKEFILE=ON
@@ -175,7 +174,7 @@ else (UNIX)
   ExternalProject_Add(
     percolator
     GIT_REPOSITORY https://github.com/percolator/percolator.git
-    GIT_TAG "rel-3-04"
+    GIT_TAG ${PERCOLATOR_GIT_VERSION}
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     CMAKE_ARGS -DCMAKE_VERBOSE_MAKEFILE=ON
       -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}
