@@ -33,6 +33,10 @@ Examples:
   |tide-misscleave|--missed-cleavages 2                                         |--precursor-window 3 --precursor-window-type mass --mz-bin-width 1.0005079|small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-misscleave.txt|
   |tide-reverse   |--decoy-format peptide-reverse                               |--precursor-window 3 --precursor-window-type mass --mz-bin-width 1.0005079|small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-reverse.txt   |
   |tide-multidecoy|--num-decoys-per-target 5                                    |--precursor-window 3 --precursor-window-type mass --mz-bin-width 1.0005079|small-yeast.fasta|tide_test_index|demo.ms2|tide-search.decoy.txt |tide-5decoys.txt   |
+  |tide-varprmodsn|--nterm-protein-mods-spec 1M+15.9949	                        |--precursor-window 3 --precursor-window-type mass --mz-bin-width 1.0005079|small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-nprotmods.txt     |
+  |tide-varprmodsc|--cterm-protein-mods-spec 1F+31.0184	                        |--precursor-window 3 --precursor-window-type mass --mz-bin-width 1.0005079|small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-cprotmods.txt     |
+  |tide-statprmodsc|--cterm-protein-mods-spec F+31.0184	                        |--precursor-window 3 --precursor-window-type mass --mz-bin-width 1.0005079|small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-cprotstatmods.txt     |
+  |tide-statprmodsn|--nterm-protein-mods-spec M+15.9949	                        |--precursor-window 3 --precursor-window-type mass --mz-bin-width 1.0005079|small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-nprotstatmods.txt     |
 
   # Tests that vary tide-search options
   |tide-masswin   |                                                             |--precursor-window 5 --precursor-window-type mass --mz-bin-width 1.0005079     |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-masswin.txt   |

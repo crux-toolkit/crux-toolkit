@@ -129,6 +129,7 @@ int LocalizeModificationApplication::main(int argc, char** argv) {
     VariableModTable* modTable = getModTable(match);
     MassConstants::Init(modTable->ParsedModTable(),
                         modTable->ParsedNtpepModTable(), modTable->ParsedCtpepModTable(),
+                        nullptr, nullptr,
                         binWidth, binOffset);
     Crux::Peptide* cruxPeptide = match->getPeptide();
     vector<const pb::Protein*> proteins = createPbProteins(cruxPeptide);

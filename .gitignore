@@ -75,3 +75,4 @@ rules.ninja
 /test/smoke-tests/tide_test_index/
 /test/smoke-tests/good_results/*.observed
 
+/aws-sdk/build/
