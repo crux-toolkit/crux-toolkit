@@ -984,6 +984,9 @@ Params::Params() : finalized_(false) {
   InitIntParam("search_enzyme_number", 1, 0, BILLION,
     "Specify a search enzyme from the end of the parameter file.",
     "Available for comet.", true);
+  InitIntParam("search_enzyme2_number", 0, 0, BILLION,
+    "Specify a second search enzyme from the end of the parameter file.",
+    "Available for comet.", true);
   InitIntParam("num_enzyme_termini", 2, 1, 9,
     "valid values are 1 (semi-digested), 2 (fully digested), 8 N-term, 9 C-term.",
     "Available for comet.", true);
@@ -2422,6 +2425,7 @@ void Params::Categorize() {
   items.insert("allowed_missed_cleavage");
   items.insert("num_enzyme_termini");
   items.insert("search_enzyme_number");
+  items.insert("search_enzyme2_number");
   AddCategory("Search enzyme", items);
 
   items.clear();

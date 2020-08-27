@@ -119,26 +119,43 @@ void CometApplication::setVarMod(const string& param) {
 void CometApplication::setEnzyme(
   const string& param,
   const string& searchParam,
+  const string& search2Param,
   const string& sampleParam,
   const string& missedCleavageParam) {
   EnzymeInfo e;
   double temp;
+
+  // Search enzyme 1
   int search = Params::GetInt(searchParam);
   if (search >= 0 && (size_t)search < get_comet_enzyme_info_lines().size()) {
     const char* szParamBuf = get_comet_enzyme_info_lines()[search].c_str();
-    sscanf(szParamBuf, "%lf %48s %d %20s %20s %20s %20s\n",
+    sscanf(szParamBuf, "%lf %48s %d %20s %20s\n",
       &temp,
       e.szSearchEnzymeName,
       &e.iSearchEnzymeOffSet,
       e.szSearchEnzymeBreakAA,
-      e.szSearchEnzymeNoBreakAA,
+      e.szSearchEnzymeNoBreakAA);
+  } else {
+    carp(CARP_FATAL, "%s=%d out of range (0-%d)",
+      searchParam, search, get_comet_enzyme_info_lines().size() - 1);
+  }
+
+  // Search enzyme 2
+  int search2 = Params::GetInt(search2Param);
+  if (search2 >= 0 && (size_t)search2 < get_comet_enzyme_info_lines().size()) {
+    const char* szParamBuf = get_comet_enzyme_info_lines()[search2].c_str();
+    sscanf(szParamBuf, "%lf %48s %d %20s %20s\n",
+      &temp,
+      e.szSearchEnzyme2Name,
+      &e.iSearchEnzyme2OffSet,
       e.szSearchEnzyme2BreakAA,
       e.szSearchEnzyme2NoBreakAA);
   } else {
-    carp(CARP_FATAL, "search_enzyme_number=%d out of range (0-%d)",
-      search, get_comet_enzyme_info_lines().size() - 1);
+    carp(CARP_FATAL, "%s=%d out of range (0-%d)",
+      search2Param, search2, get_comet_enzyme_info_lines().size() - 1);
   }
 
+  // Sample enzyme
   int sample = Params::GetInt(sampleParam);
   if (sample >= 0 && (size_t)sample < get_comet_enzyme_info_lines().size()) {
     const char* szParamBuf = get_comet_enzyme_info_lines()[sample].c_str();
@@ -152,6 +169,7 @@ void CometApplication::setEnzyme(
     carp(CARP_FATAL, "sample_enzyme_number=%d out of range (0-%d)",
       sample, get_comet_enzyme_info_lines().size() - 1);
   }
+
   e.iAllowedMissedCleavage = Params::GetInt(missedCleavageParam);
   searchManager_.SetParam(param, "TODO", e);
 }
@@ -206,6 +224,7 @@ void CometApplication::setCometParameters(
   setInt("isotope_error");
   // Search enzyme
   setInt("search_enzyme_number");
+  setInt("search_enzyme2_number");
   setInt("num_enzyme_termini");
   setInt("allowed_missed_cleavage");
   // Fragment ions
@@ -276,7 +295,8 @@ void CometApplication::setCometParameters(
   }
 
   setEnzyme("[COMET_ENZYME_INFO]",
-            "search_enzyme_number", "sample_enzyme_number", "allowed_missed_cleavage");
+            "search_enzyme_number", "search_enzyme2_number", "sample_enzyme_number",
+            "allowed_missed_cleavage");
 }
 
 string CometApplication::staticModParam(char c) {
@@ -351,6 +371,7 @@ vector<string> CometApplication::getOptions() const {
     "isotope_error",
     // Search enzyme
     "search_enzyme_number",
+    "search_enzyme2_number",
     "num_enzyme_termini",
     "allowed_missed_cleavage",
     // Fragment ions
