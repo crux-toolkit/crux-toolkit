@@ -113,7 +113,9 @@ int TideIndexApplication::main(
 
   if (!MassConstants::Init(var_mod_table.ParsedModTable(), 
     var_mod_table.ParsedNtpepModTable(), 
-    var_mod_table.ParsedCtpepModTable(), 0, 0)) {
+    var_mod_table.ParsedCtpepModTable(),
+    var_mod_table.ParsedNtproModTable(),
+    var_mod_table.ParsedCtproModTable(), 0, 0)) {
     carp(CARP_FATAL, "Error in MassConstants::Init");
   }
 
@@ -192,6 +194,8 @@ int TideIndexApplication::main(
   pep_header.mutable_mods()->CopyFrom(*(var_mod_table.ParsedModTable()));
   pep_header.mutable_nterm_mods()->CopyFrom(*(var_mod_table.ParsedNtpepModTable()));
   pep_header.mutable_cterm_mods()->CopyFrom(*(var_mod_table.ParsedCtpepModTable()));
+  pep_header.mutable_nprotterm_mods()->CopyFrom(*(var_mod_table.ParsedNtproModTable()));
+  pep_header.mutable_cprotterm_mods()->CopyFrom(*(var_mod_table.ParsedCtproModTable()));
   int numDecoys;
   switch (decoy_type) {
     case NO_DECOYS:
@@ -499,7 +503,7 @@ void TideIndexApplication::fastaToPb(
     // Iterate over all generated peptides for this protein
     for (vector<PeptideInfo>::iterator i = cleavedPeptides.begin();
          i != cleavedPeptides.end(); ) {
-      FLOAT_T pepMass = calcPepMassTide(i->Sequence(), massType);
+      FLOAT_T pepMass = calcPepMassTide(&(*i), massType, &proteinInfo);
       if (pepMass < 0.0) {
         // Sequence contained some invalid character
         carp(CARP_DEBUG, "Ignoring invalid sequence <%s>", i->Sequence().c_str());
@@ -555,7 +559,7 @@ void TideIndexApplication::fastaToPb(
       for (vector<PeptideInfo>::iterator j = cleavedReverse.begin();
            j != cleavedReverse.end();
            ++j) {
-        FLOAT_T pepMass = calcPepMassTide(j->Sequence(), massType);
+        FLOAT_T pepMass = calcPepMassTide(&(*j), massType, &(i->first));
         if (pepMass < 0.0) {
           // Sequence contained some invalid character
           carp(CARP_DEBUG, "Ignoring invalid sequence in decoy fasta <%s>",
@@ -608,7 +612,7 @@ void TideIndexApplication::fastaToPb(
            ++j) {
         const string setTarget = j->Sequence();
         const int startLoc = j->Position();
-        FLOAT_T pepMass = calcPepMassTide(setTarget, massType);
+        FLOAT_T pepMass = calcPepMassTide(&(*j), massType, &proteinInfo);
         generateDecoys(numDecoys, setTarget, targetToDecoy, NULL, NULL, decoyType, allowDups, failedDecoyCnt,
                        decoysGenerated, curProtein, proteinInfo, startLoc, proteinWriter,
                        pepMass, outPeptideHeap, outProteinSequences);
@@ -761,43 +765,43 @@ void TideIndexApplication::writePeptidesAndAuxLocs(
 }
 
 FLOAT_T TideIndexApplication::calcPepMassTide(
-  const string& sequence,
-  MASS_TYPE_T massType
+  const GeneratePeptides::CleavedPeptide* pep,
+  MASS_TYPE_T massType,
+  const TideIndexApplication::ProteinInfo* prot
 ) {
   FixPt mass;
   FixPt aaMass;
+  const string sequence = pep->Sequence();
+  const MassConstants::FixPtTableSet *_tables;
+
   if (massType == AVERAGE) {
     mass = MassConstants::fixp_avg_h2o;
-    for (size_t i = 0; i < sequence.length(); ++i) {
-      if (i == 0) {
-        aaMass = MassConstants::fixp_nterm_avg_table[sequence[i]];
-      } else if (i == sequence.length() - 1) {
-        aaMass = MassConstants::fixp_cterm_avg_table[sequence[i]];
-      } else {
-        aaMass = MassConstants::fixp_avg_table[sequence[i]];
-      }
-      if (aaMass == 0) {
-        return -1;
-      }
-      mass += aaMass;
-    }
+    _tables = &MassConstants::avg_tables;
   } else if (massType == MONO) {
     mass = MassConstants::fixp_mono_h2o;
-    for (size_t i = 0; i < sequence.length(); ++i) {
-      if (i == 0) {
-        aaMass = MassConstants::fixp_nterm_mono_table[sequence[i]];
-      } else if (i == sequence.length() - 1) {
-        aaMass = MassConstants::fixp_cterm_mono_table[sequence[i]];
-      } else {
-        aaMass = MassConstants::fixp_mono_table[sequence[i]];
-      }
-      if (aaMass == 0) {
-        return -1;
-      }
-      mass += aaMass;
-    }
+    _tables = &MassConstants::mono_tables;
   } else {
     carp(CARP_FATAL, "Invalid mass type");
+  }
+
+  for (size_t i = 0; i < sequence.length(); ++i) {
+    if (i == 0) {
+      if(pep->Position() == 0)  //apply protein terminal mod if this is protein N-terminal
+        aaMass = _tables->nprotterm_table[sequence[i]];
+      else
+        aaMass = _tables->nterm_table[sequence[i]];
+    } else if (i == sequence.length() - 1) {
+      if((pep->Position() + pep->Length()) == prot->sequence->length())  //check if this is protein C-terminal
+        aaMass = _tables->cprotterm_table[sequence[i]];
+      else
+        aaMass = _tables->cterm_table[sequence[i]];
+    } else {
+      aaMass = _tables->_table[sequence[i]];
+    }
+    if (aaMass == 0) {
+      return -1;
+    }
+    mass += aaMass;
   }
   return MassConstants::ToDouble(mass);
 }

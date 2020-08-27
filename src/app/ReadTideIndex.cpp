@@ -52,7 +52,10 @@ int ReadTideIndex::main(int argc, char** argv) {
   }
 
   const pb::Header::PeptidesHeader& pepHeader = peptides_header.peptides_header();
-  MassConstants::Init(&pepHeader.mods(), &pepHeader.nterm_mods(), &pepHeader.cterm_mods(),
+
+  MassConstants::Init(&pepHeader.mods(), 
+                      &pepHeader.nterm_mods(), &pepHeader.cterm_mods(), 
+                      &pepHeader.nprotterm_mods(), &pepHeader.cprotterm_mods(), 
                       Params::GetDouble("mz-bin-width"),
                       Params::GetDouble("mz-bin-offset"));
 

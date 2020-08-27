@@ -582,6 +582,8 @@ void MatchCollection::printXmlHeader(
       switch ((*i)->Position()) {
         case PEPTIDE_N: termString = "peptide_terminus=\"n\" "; break;
         case PEPTIDE_C: termString = "peptide_terminus=\"c\" "; break;
+        case PROTEIN_N: termString = "protein_terminus=\"n\" "; break;
+        case PROTEIN_C: termString = "protein_terminus=\"c\" "; break;
       }
       fprintf(output, "<aminoacid_modification aminoacid=\"%c\" mass=\"%s\" "
                       "massdiff=\"%s\" variable=\"N\" %s/>\n",
@@ -607,6 +609,8 @@ void MatchCollection::printXmlHeader(
       switch ((*i)->Position()) {
         case PEPTIDE_N: termString = "peptide_terminus=\"n\" "; break;
         case PEPTIDE_C: termString = "peptide_terminus=\"c\" "; break;
+        case PROTEIN_N: termString = "protein_terminus=\"n\" "; break;
+        case PROTEIN_C: termString = "protein_terminus=\"c\" "; break;
       }
       fprintf(output, "<aminoacid_modification aminoacid=\"%c\" mass=\"%s\" "
                       "massdiff=\"%s\" variable=\"Y\" %s/>\n",
