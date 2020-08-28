@@ -876,10 +876,15 @@ Params::Params() : finalized_(false) {
     "Available for tide-index.", true);
   InitBoolParam("use-neutral-loss-peaks", true,
     "Controls whether neutral loss ions are considered in the search. "
-    "Two types of neutral losses are included and are applied only to "
-    "singly charged b- and y-ions: loss of ammonia (NH3, 17.0086343 Da) "
-    "and H2O (18.0091422). Each neutral loss peak has intensity 1/5 of "
-    "the primary peak.",
+    "For XCorr, the loss of ammonia (NH3, 17.0086343 Da) is applied to singly "
+    "charged b- and y-ions, and the loss of water (H2O; 18.0091422) is applied "
+    "to b-ions. If the precursor charge is >=3, then a doubly-charged version of "
+    "each ion is added. For XCorr p-value, three types of neutral losses are included. "
+    "Loss of ammonia and water are applied to b- and y-ions, and a carbon monoxide "
+    "loss (CO, 27.9949) is also applied to b-ions. Higher charge fragments are "
+    "included for all possible charges less than the precursor charge. All "
+    "neutral loss peaks have an intensity 1/10 of the primary peak. Neutral losses "
+    "are not yet implemented for the res-ev score function."
     "Available for tide-search.", true);
   InitIntParam("max-precursor-charge", 5, 1, BILLION,
     "The maximum charge state of a spectra to consider in search.",
