@@ -884,7 +884,7 @@ Params::Params() : finalized_(false) {
     "loss (CO, 27.9949) is also applied to b-ions. Higher charge fragments are "
     "included for all possible charges less than the precursor charge. All "
     "neutral loss peaks have an intensity 1/10 of the primary peak. Neutral losses "
-    "are not yet implemented for the res-ev score function."
+    "are not yet implemented for the res-ev score function.",
     "Available for tide-search.", true);
   InitIntParam("max-precursor-charge", 5, 1, BILLION,
     "The maximum charge state of a spectra to consider in search.",
