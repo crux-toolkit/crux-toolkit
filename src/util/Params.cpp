@@ -1049,6 +1049,9 @@ Params::Params() : finalized_(false) {
     "0=no, 1= yes to consider NH3/H2O neutral loss peak.",
     "Available for comet.", true);
   /* Comet - Output */
+  InitIntParam("output_sqtstream", 0, 0, 1,
+    "0=no, 1=yes  write sqt file.",
+    "Available for comet.", true);
   InitIntParam("output_sqtfile", 0, 0, 1,
     "0=no, 1=yes  write sqt file.",
     "Available for comet.", true);
@@ -1105,6 +1108,18 @@ Params::Params() : finalized_(false) {
   InitIntParam("max_fragment_charge", 3, 1, 5,
     "Set maximum fragment charge state to analyze (allowed max 5).",
     "Available for comet.", true);
+  InitIntParam("max_index_runtime", 0, 0, BILLION,
+    "Sets the maximum indexed database search run time for a scan/query. "
+    "Valid values are integers 0 or higher representing the maximum run time "
+    "in milliseconds. "
+    "As Comet loops through analyzing peptides from the database index file, "
+    "it checks the cummulative run time of that spectrum search after each "
+    "peptide is analyzed. If the run time exceeds the value set for this "
+    "parameter, the search is aborted and the best peptide result analyzed "
+    "up to that point is returned. "
+    "To have no maximum search time, set this parameter value to \"0\". "
+    "The default value is \"0\".",
+    "Available for comet.", true);
   InitIntParam("max_precursor_charge", 6, 1, 9,
     "Set maximum precursor charge state to analyze (allowed max 9).",
     "Available for comet.", true);
@@ -1129,11 +1144,47 @@ Params::Params() : finalized_(false) {
     "To show verbose output, set the value to 1. "
     "The default value is 0 if this parameter is missing.",
     "Available for comet.", false);
+  InitStringParam("peptide_length_range", "1 63",
+    "Defines the length range of peptides to search. "
+    "This parameter has two integer values. "
+    "The first value is the minimum length cutoff and the second value is "
+    "the maximum length cutoff. Only peptides within the specified length "
+    "range are analyzed. The maximum peptide length that Comet can analyze is 63. "
+    "The default values are \"1 63\".",
+    "Available for comet.", true);
+  InitStringParam("precursor_NL_ions", "",
+    "Controls whether or not precursor neutral loss peaks are considered in "
+    "the xcorr scoring. If left blank, this parameter is ignored.  To consider "
+    "precursor neutral loss peaks, add one or more neutral loss mass value "
+    "separated by a space.  Each entered mass value will be subtracted from "
+    "the experimentral precursor mass and resulting neutral loss m/z values "
+    "for all charge states (from 1 to precursor charge) will be analyzed. "
+    "As these neutral loss peaks are analyzed along side fragment ion peaks, "
+    "the fragment tolerance settings (fragment_bin_tol, fragment_bin_offset, "
+    "theoretical_fragment_ion) apply to the precursor neutral loss peaks. "
+    "The default value is blank/unused.",
+    "Available for comet.", true);
+  InitIntParam("equal_I_and_L", 1, 0, 1,
+    "This parameter controls whether the Comet treats isoleucine (I) and "
+    "leucine (L) as the same/equivalent with respect to a peptide identification. "
+    "0 treats I and L as different, 1 treats I and L as the same. "
+    "The default value is \"1\"",
+    "Available for comet.", true);
   InitStringParam("mass_offsets", "",
     "Specifies one or more mass offsets to apply. This value(s) are effectively "
     "subtracted from each precursor mass such that peptides that are smaller "
     "than the precursor mass by the offset value can still be matched to the "
     "respective spectrum.",
+    "Available for comet.", true);
+  InitIntParam("max_duplicate_proteins", 20, -1, BILLION,
+    "defines the maximum number of proteins (identifiers/accessions) to report. "
+    "If a peptide is present in 6 total protein sequences, there is one (first) "
+    "reference protein and 5 additional duplicate proteins. This parameter "
+    "controls how many of those 5 additional duplicate proteins are reported."
+    "If \"decoy_search = 2\" is set to report separate target and decoy results, "
+    "this parameter will be applied to the target and decoy outputs separately. "
+    "If set to \"-1\", there will be no limit on the number of reported additional proteins. "
+    "The default value is \"20\" if this parameter is missing.",
     "Available for comet.", true);
   /* Comet - Spectral processing */
   InitIntParam("minimum_peaks", 10, 1, BILLION,
@@ -2481,13 +2532,18 @@ void Params::Categorize() {
   items.insert("clip_nterm_methionine");
   items.insert("decoy_prefix");
   items.insert("digest_mass_range");
+  items.insert("equal_I_and_L");
   items.insert("mass_offsets");
+  items.insert("max_duplicate_proteins");
   items.insert("max_fragment_charge");
+  items.insert("max_index_runtime");
   items.insert("max_precursor_charge");
   items.insert("nucleotide_reading_frame");
   items.insert("num_results");
   items.insert("output_suffix");
   items.insert("peff_verbose_output");
+  items.insert("peptide_length_range");
+  items.insert("precursor_NL_ions");
   items.insert("skip_researching");
   items.insert("spectrum_batch_size");
   AddCategory("Miscellaneous parameters", items);
@@ -2597,6 +2653,7 @@ void Params::Categorize() {
   items.insert("output-file");
   items.insert("output_pepxmlfile");
   items.insert("output_percolatorfile");
+  items.insert("output_sqtstream");
   items.insert("output_sqtfile");
   items.insert("output_txtfile");
   items.insert("overwrite");
