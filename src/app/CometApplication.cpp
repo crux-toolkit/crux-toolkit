@@ -213,6 +213,8 @@ void CometApplication::setCometParameters(
   // Database
   setString("database_name");
   setInt("decoy_search");
+  setInt("peff_format");
+  setString("peff_obo");
   // CPU threads
   setInt("num_threads");
   // Masses
@@ -244,7 +246,6 @@ void CometApplication::setCometParameters(
   setInt("output_txtfile");
   setInt("output_pepxmlfile");
   setInt("output_percolatorfile");
-  setInt("output_outfiles");
   setInt("print_expect_score");
   setInt("num_output_lines");
   setInt("show_fragment_ions");
@@ -266,6 +267,7 @@ void CometApplication::setCometParameters(
   setInt("spectrum_batch_size");
   setString("decoy_prefix");
   setString("output_suffix");
+  setInt("peff_verbose_output");
   setDoubleVector("mass_offsets");
   // Spectral processing
   setInt("minimum_peaks");
@@ -359,6 +361,8 @@ vector<string> CometApplication::getOptions() const {
     "verbosity",
     // Database
     "decoy_search",
+    "peff_format",
+    "peff_obo",
     // CPU threads
     "num_threads",
     // Masses
@@ -391,7 +395,6 @@ vector<string> CometApplication::getOptions() const {
     "output_txtfile",
     "output_pepxmlfile",
     "output_percolatorfile",
-    "output_outfiles",
     "print_expect_score",
     "num_output_lines",
     "show_fragment_ions",
@@ -413,6 +416,7 @@ vector<string> CometApplication::getOptions() const {
     "spectrum_batch_size",
     "decoy_prefix",
     "output_suffix",
+    "peff_verbose_output",
     "mass_offsets",
     // Spectral processing
     "minimum_peaks",

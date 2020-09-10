@@ -937,7 +937,7 @@ Params::Params() : finalized_(false) {
   /* Comet - Database */
   InitArgParam("database_name",
     "A full or relative path to the sequence database, "
-    "in FASTA format, to search. Example databases include "
+    "in FASTA or PEFF format, to search. Example databases include "
     "RefSeq or UniProt.  The database can contain amino acid "
     "sequences or nucleic acid sequences. If sequences are "
     "amino acid sequences, set the parameter \"nucleotide_reading_frame = 0\". "
@@ -946,6 +946,21 @@ Params::Params() : finalized_(false) {
     "nucleotide_reading_frame\" to a value between 1 and 9.");
   InitIntParam("decoy_search", 0, 0, 2,
     "0=no, 1=concatenated search, 2=separate search.",
+    "Available for comet.", true);
+  InitIntParam("peff_format", 0, 0, 5,
+    "0=normal FASTA format,"
+    "1=PEFF PSI-MOD modifications and amino acid variants,"
+    "2=PEFF Unimod modifications and amino acid variants,"
+    "3=PEFF PSI-MOD modifications, skipping amino acid variants,"
+    "4=PEFF Unimod modifications, skipping amino acid variants,"
+    "5=PEFF amino acid variants, skipping PEFF modifications.",
+    "Available for comet.", true);
+  InitStringParam("peff_obo", "",
+    "A full or relative path to the OBO file used with a PEFF search. "
+    "Supported OBO formats are PSI-Mod and Unimod OBO files. "
+    "Which OBO file you use depends on your PEFF input file. "
+    "This parameter is ignored if \"peff_format = 0\". "
+    "There is no default value if this parameter is missing.",
     "Available for comet.", true);
   /* Comet - CPU threads */
   InitIntParam("num_threads", 0, -64, 64,
@@ -1046,9 +1061,6 @@ Params::Params() : finalized_(false) {
   InitIntParam("output_percolatorfile", 0, 0, 1,
     "0=no, 1=yes write percolator file.",
      "Available for comet.", true);
-  InitIntParam("output_outfiles", 0, 0, 1,
-    "0=no, 1=yes  write .out files.",
-    "Available for comet.", true);
   InitIntParam("print_expect_score", 1, 0, 1,
     "0=no, 1=yes to replace Sp with expect in out & sqt.",
     "Available for comet.", true);
@@ -1112,6 +1124,11 @@ Params::Params() : finalized_(false) {
     "Specifies the suffix string that is appended to the base output name "
     "for the pep.xml, pin.xml, txt and sqt output files.",
     "Available for comet.", true);
+  InitIntParam("peff_verbose_output", 0, 0, 1,
+    "Specifies whether the verbose output is reported during a PEFF search. "
+    "To show verbose output, set the value to 1. "
+    "The default value is 0 if this parameter is missing.",
+    "Available for comet.", false);
   InitStringParam("mass_offsets", "",
     "Specifies one or more mass offsets to apply. This value(s) are effectively "
     "subtracted from each precursor mass such that peptides that are smaller "
@@ -2396,6 +2413,8 @@ void Params::Categorize() {
 
   items.clear();
   items.insert("decoy_search");
+  items.insert("peff_format");
+  items.insert("peff_obo");
   items.insert("decoy_filter");
   items.insert("max_peptide_mass");
   items.insert("min_peptide_mass");
@@ -2468,6 +2487,7 @@ void Params::Categorize() {
   items.insert("nucleotide_reading_frame");
   items.insert("num_results");
   items.insert("output_suffix");
+  items.insert("peff_verbose_output");
   items.insert("skip_researching");
   items.insert("spectrum_batch_size");
   AddCategory("Miscellaneous parameters", items);
@@ -2575,7 +2595,6 @@ void Params::Categorize() {
   items.insert("num_output_lines");
   items.insert("output-dir");
   items.insert("output-file");
-  items.insert("output_outfiles");
   items.insert("output_pepxmlfile");
   items.insert("output_percolatorfile");
   items.insert("output_sqtfile");
