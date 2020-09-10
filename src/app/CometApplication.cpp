@@ -242,6 +242,7 @@ void CometApplication::setCometParameters(
   setInt("use_NL_ions");
   // Output
   searchManager_.SetParam("output_sqtstream", "0", 0);
+  setInt("output_sqtstream");
   setInt("output_sqtfile");
   setInt("output_txtfile");
   setInt("output_pepxmlfile");
@@ -261,6 +262,7 @@ void CometApplication::setCometParameters(
   setInt("num_results");
   setInt("skip_researching");
   setInt("max_fragment_charge");
+  setInt("max_index_runtime");
   setInt("max_precursor_charge");
   setInt("nucleotide_reading_frame");
   setInt("clip_nterm_methionine");
@@ -268,7 +270,11 @@ void CometApplication::setCometParameters(
   setString("decoy_prefix");
   setString("output_suffix");
   setInt("peff_verbose_output");
+  setIntRange("peptide_length_range");
+  setDoubleVector("precursor_NL_ions");
+  setInt("equal_I_and_L");
   setDoubleVector("mass_offsets");
+  setInt("max_duplicate_proteins");
   // Spectral processing
   setInt("minimum_peaks");
   setDouble("minimum_intensity");
@@ -391,6 +397,7 @@ vector<string> CometApplication::getOptions() const {
     "use_Z_ions",
     "use_NL_ions",
     // Output
+    "output_sqtstream",
     "output_sqtfile",
     "output_txtfile",
     "output_pepxmlfile",
@@ -410,6 +417,7 @@ vector<string> CometApplication::getOptions() const {
     "num_results",
     "skip_researching",
     "max_fragment_charge",
+    "max_index_runtime",
     "max_precursor_charge",
     "nucleotide_reading_frame",
     "clip_nterm_methionine",
@@ -417,7 +425,11 @@ vector<string> CometApplication::getOptions() const {
     "decoy_prefix",
     "output_suffix",
     "peff_verbose_output",
+    "peptide_length_range",
+    "precursor_NL_ions",
+    "equal_I_and_L",
     "mass_offsets",
+    "max_duplicate_proteins",
     // Spectral processing
     "minimum_peaks",
     "minimum_intensity",
