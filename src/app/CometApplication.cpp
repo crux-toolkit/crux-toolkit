@@ -136,8 +136,8 @@ void CometApplication::setEnzyme(
       e.szSearchEnzymeBreakAA,
       e.szSearchEnzymeNoBreakAA);
   } else {
-    carp(CARP_FATAL, "%s=%d out of range (0-%d)",
-      searchParam, search, get_comet_enzyme_info_lines().size() - 1);
+    size_t numLines = get_comet_enzyme_info_lines().size() - 1;
+    carp(CARP_FATAL, "%s=%d out of range (0-%d)", searchParam.c_str(), search, numLines);
   }
 
   // Search enzyme 2
@@ -151,8 +151,8 @@ void CometApplication::setEnzyme(
       e.szSearchEnzyme2BreakAA,
       e.szSearchEnzyme2NoBreakAA);
   } else {
-    carp(CARP_FATAL, "%s=%d out of range (0-%d)",
-      search2Param, search2, get_comet_enzyme_info_lines().size() - 1);
+    size_t numLines = get_comet_enzyme_info_lines().size() - 1;
+    carp(CARP_FATAL, "%s=%d out of range (0-%d)", search2Param.c_str(), search2, numLines);
   }
 
   // Sample enzyme
