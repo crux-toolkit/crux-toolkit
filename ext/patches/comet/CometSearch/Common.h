@@ -19,6 +19,8 @@
 
 #include <cmath>
 #include <string>
+#include <fstream>
+#include <sstream>
 #include <ctime>
 
 #ifdef __APPLE__
@@ -66,7 +68,7 @@ using namespace std;
 #include <iostream>
 #endif
 
-#define comet_version   "2019.0X rev. X"
+#define comet_version   "2020.0X rev. X"
 #define copyright "(c) University of Washington"
 
 // Redefined how the bin offset is interpreted and applied.  The valid range for the offset is
