@@ -96,7 +96,7 @@ void PMCPepXMLWriter::writePSMs(
     SpectrumZState zstate = spec_match->getZState();
     Peptide* peptide = pep_match->getPeptide();
     int spec_scan = spectrum->getFirstScan();
-    string spec_filename = spectrum->getFilename();
+    const char* spec_filename_str = spectrum->getFilename();
     FLOAT_T spec_neutral_mass = zstate.getNeutralMass();
     int spec_charge = zstate.getCharge();
 
@@ -122,7 +122,7 @@ void PMCPepXMLWriter::writePSMs(
     // write psm
     map<pair<int, int>, int>::const_iterator lookup =
       spectrum_counts.find(make_pair(spec_scan, spec_charge));
-    writePSM(spec_scan, spec_filename.c_str(),
+    writePSM(spec_scan, spec_filename_str,
              spec_neutral_mass, spec_charge,
              ranks, seq_str.c_str(), mod_seq_str.c_str(), peptide_mass,
              protein_names.size(), flanking_str.c_str(),

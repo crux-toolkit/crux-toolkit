@@ -57,6 +57,7 @@ class Spectrum{
   bool             has_total_energy_;
   bool             has_lowest_sp_;
   std::string      filename_;      ///< Optional filename
+  std::string      filename_stem_;  ///< File name only without path and extension
   std::vector<std::string> i_lines_v_;  ///< store i lines
   std::vector<std::string> d_lines_v_;  ///< store d lines
   bool             has_peaks_;  ///< Does the spectrum contain peak information

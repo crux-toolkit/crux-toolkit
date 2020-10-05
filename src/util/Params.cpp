@@ -200,7 +200,7 @@ Params::Params() : finalized_(false) {
   InitStringParam("enzyme", "trypsin", "no-enzyme|trypsin|trypsin/p|chymotrypsin|"
     "elastase|clostripain|cyanogen-bromide|iodosobenzoate|proline-endopeptidase|"
     "staph-protease|asp-n|lys-c|lys-n|arg-c|glu-c|pepsin-a|"
-    "elastase-trypsin-chymotrypsin|custom-enzyme",
+    "elastase-trypsin-chymotrypsin|lysarginase|custom-enzyme",
     "Specify the enzyme used to digest the proteins in silico. Available enzymes "
     "(with the corresponding digestion rules indicated in parentheses) include "
     "no-enzyme ([X]|[X]), trypsin ([RK]|{P}), trypsin/p ([RK]|[]), chymotrypsin "
@@ -208,7 +208,8 @@ Params::Params() : finalized_(false) {
     "([M]|[]), iodosobenzoate ([W]|[]), proline-endopeptidase ([P]|[]), staph-protease "
     "([E]|[]), asp-n ([]|[D]), lys-c ([K]|{P}), lys-n ([]|[K]), arg-c ([R]|{P}), "
     "glu-c ([DE]|{P}), pepsin-a ([FL]|{P}), elastase-trypsin-chymotrypsin "
-    "([ALIVKRWFY]|{P}). Specifying --enzyme no-enzyme yields a non-enzymatic digest. "
+    "([ALIVKRWFY]|{P}), lysarginase ([]|[KR]). "
+    "Specifying --enzyme no-enzyme yields a non-enzymatic digest. "
     "[[html:<strong>]]Warning:[[html:</strong>]] the resulting index may be quite large.",
     "Available for crux-generate-peptides and crux tide-index.", true);
   InitStringParam("custom-enzyme", "",
@@ -658,7 +659,7 @@ Params::Params() : finalized_(false) {
     "fasta file as the argument to this flag.",
     "Available for percolator", true);
   InitStringParam("protein-enzyme", "trypsin", "no_enzyme|elastase|pepsin|proteinasek|"
-    "thermolysin|trypsinp|chymotrypsin|lys-n|lys-c|arg-c|asp-n|glu-c|trypsin",
+    "thermolysin|trypsinp|chymotrypsin|lys-n|lys-c|arg-c|asp-n|glu-c|lysarginase|trypsin",
     "Type of enzyme",
     "Available for percolator", true);
   InitBoolParam("protein-report-fragments", false,
@@ -803,15 +804,17 @@ Params::Params() : finalized_(false) {
     "nterm-peptide-mods-spec for syntax.]]",
     "Available for tide-index", true);
   InitStringParam("cterm-protein-mods-spec", "",
-    "Specifies C-terminal static and variable mass modifications on proteins. "
-    "Specify a comma-separated list of C-terminal protein modification sequences of the form: "
-    ",...",
-    "Available for tide-index", false);
+    "[[nohtml:Specifies static and variable mass modifications on proteins' C-terminal. ]]"
+    "[[html:Specifies C-terminal static and variable mass modifications on proteins."
+    "Mod specification syntax is the same as for peptide mods (see nterm-peptide-mods-spec option),"
+    "but these mods are applied only to peptide C-terminals that are also protein terminals."
+    "If variable modification are provided for both peptide and protein terminal, they will be "
+    "applied one at a time. ",
+    "Available for tide-index", true);
   InitStringParam("nterm-protein-mods-spec", "",
-    "Specifies N-terminal static and variable mass modifications on proteins. "
-    "Specify a comma-separated list of N-terminal protein modification sequences of the form: "
-    ",...",
-    "Available for tide-index", false);
+    "[[nohtml:Specifies static and variable mass modifications on proteins N-terminal.]] "
+    "[[html:Same as cterm-protein-mods-spec, but for  the protein N-terminal.",
+    "Available for tide-index", true);
   InitStringParam("store-spectra", "",
     "Specify the name of the file where the binarized fragmentation spectra "
     "will be stored. Subsequent runs of crux tide-search will execute more quickly if "
@@ -873,10 +876,15 @@ Params::Params() : finalized_(false) {
     "Available for tide-index.", true);
   InitBoolParam("use-neutral-loss-peaks", true,
     "Controls whether neutral loss ions are considered in the search. "
-    "Two types of neutral losses are included and are applied only to "
-    "singly charged b- and y-ions: loss of ammonia (NH3, 17.0086343 Da) "
-    "and H2O (18.0091422). Each neutral loss peak has intensity 1/5 of "
-    "the primary peak.",
+    "For XCorr, the loss of ammonia (NH3, 17.0086343 Da) is applied to singly "
+    "charged b- and y-ions, and the loss of water (H2O; 18.0091422) is applied "
+    "to b-ions. If the precursor charge is >=3, then a doubly-charged version of "
+    "each ion is added. For XCorr p-value, three types of neutral losses are included. "
+    "Loss of ammonia and water are applied to b- and y-ions, and a carbon monoxide "
+    "loss (CO, 27.9949) is also applied to b-ions. Higher charge fragments are "
+    "included for all possible charges less than the precursor charge. All "
+    "neutral loss peaks have an intensity 1/10 of the primary peak. Neutral losses "
+    "are not yet implemented for the res-ev score function.",
     "Available for tide-search.", true);
   InitIntParam("max-precursor-charge", 5, 1, BILLION,
     "The maximum charge state of a spectra to consider in search.",

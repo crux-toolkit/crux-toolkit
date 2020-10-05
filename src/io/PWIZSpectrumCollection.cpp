@@ -69,39 +69,67 @@ PWIZSpectrumCollection::~PWIZSpectrumCollection() {
  * Parses the first/last scan from the title
  * \returns whether this was successful.
  * For MGF files that place their scan numbers in the title string
+ * Assumes format style is either TITLE=ScaffoldIDNumber_853_o100720_3prot_01.10257.10257.3.dta
+ * or
+ * TITLE=Yp_D27_P0_D3.271.271.1 File:"Yp_D27_P0_D3.raw", NativeID:"controllerType=0 controllerNumber=1 scan=271"
+ * Note that input string does not contain "TITLE="
  */
 bool PWIZSpectrumCollection::parseFirstLastScanFromTitle(
   string& scan_title_str,
   int& first_scan,
   int& last_scan
   ) {
+  int title_charge;
+  int title_first_scan;
+  int title_last_scan;
 
   first_scan = -1;
   last_scan = -1;
   vector<string> scan_title_tokens = StringUtils::Split(scan_title_str, '.');
   bool success = false;
-  //make sure we have enough tokens and that the last token is dta.
+  // make sure we have enough tokens and that the last token is dta.
+  // FOr TITLE=ScaffoldIDNumber_853_o100720_3prot_01.10257.10257.3.dta format
   if ((scan_title_tokens.size() >= 4) && (scan_title_tokens.back().find("dta") == 0)) {
     carp(CARP_DETAILED_DEBUG, "Attempting to parse title:%s", scan_title_str.c_str());
     size_t n = scan_title_tokens.size();
 
-    int title_charge;
-    int title_first_scan;
-    int title_last_scan;
-    //try to parse the first scan, last scan, and charge from the title, keeping track
-    //of whether we were successful.
-
+    // try to parse the first scan, last scan, and charge from the title, keeping track
+    // of whether we were successful.
     success = StringUtils::TryFromString(scan_title_tokens[n-2], &title_charge);
     success &= StringUtils::TryFromString(scan_title_tokens[n-3], &title_last_scan);
     success &= StringUtils::TryFromString(scan_title_tokens[n-4], &title_first_scan);
 
     if (success) {
-      //okay we parsed the three numbers, fill in the results.
+      // okay we parsed the three numbers, fill in the results.
       carp(CARP_DETAILED_DEBUG, "Title first scan:%i", title_first_scan);
       carp(CARP_DETAILED_DEBUG, "Title last scan:%i" , title_last_scan);
       carp(CARP_DETAILED_DEBUG, "Title charge:%i", title_charge);
       first_scan = title_first_scan;
       last_scan = title_last_scan;
+    }
+  }
+
+  // For TITLE=Yp_D27_P0_D3.271.271.1 File:"Yp_D27_P0_D3.raw", NativeID:"controllerType=0 controllerNumber=1 scan=271" format
+  if (success == false) {
+    scan_title_tokens = StringUtils::Split(scan_title_str, " File:");
+	string first_token = scan_title_tokens[0];
+    vector<string> first_token_tokens = StringUtils::Split(first_token, ".");
+
+    if (first_token_tokens.size() >= 4) {
+      carp(CARP_DETAILED_DEBUG, "Attempting to parse title:%s", scan_title_str.c_str());
+      size_t n = first_token_tokens.size();
+
+      success = StringUtils::TryFromString(first_token_tokens[n-1], &title_charge);
+      success &= StringUtils::TryFromString(first_token_tokens[n-2], &title_last_scan);
+      success &= StringUtils::TryFromString(first_token_tokens[n-3], &title_first_scan);
+
+      if (success) {
+        carp(CARP_DETAILED_DEBUG, "Title first scan:%i", title_first_scan);
+        carp(CARP_DETAILED_DEBUG, "Title last scan:%i" , title_last_scan);
+        carp(CARP_DETAILED_DEBUG, "Title charge:%i", title_charge);
+        first_scan = title_first_scan;
+        last_scan = title_last_scan;
+      }
     }
   }
   return success;

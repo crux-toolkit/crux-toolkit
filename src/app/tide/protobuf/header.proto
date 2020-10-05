@@ -51,6 +51,8 @@ message Header {
     optional ModTable mods = 12;
     optional ModTable nterm_mods = 15;
     optional ModTable cterm_mods = 16;
+    optional ModTable nprotterm_mods = 18;
+    optional ModTable cprotterm_mods = 19;
     optional int32 decoys = 9;
     optional int32 decoys_per_target = 17;
   }

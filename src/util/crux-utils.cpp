@@ -225,7 +225,7 @@ static const char* enzyme_type_strings[NUMBER_ENZYME_TYPES] = {
   "elastase", "clostripain", "cyanogen-bromide", "iodosobenzoate",
   "proline-endopeptidase", "staph-protease", "asp-n", "lys-c",
   "lys-n" , "arg-c" , "glu-c" , "pepsin-a", "elastase-trypsin-chymotrypsin",
-  "custom-enzyme"
+  "lysarginase", "custom-enzyme"
 };
 
 ENZYME_T string_to_enzyme_type(const string& name) {

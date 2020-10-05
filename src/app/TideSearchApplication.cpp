@@ -206,6 +206,8 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
     MassConstants::Init(&aaf_peptides_header.peptides_header().mods(),
                         &aaf_peptides_header.peptides_header().nterm_mods(),
                         &aaf_peptides_header.peptides_header().cterm_mods(),
+                        &aaf_peptides_header.peptides_header().nprotterm_mods(),
+                        &aaf_peptides_header.peptides_header().cprotterm_mods(),
                         bin_width_, bin_offset_);
 
     ActivePeptideQueue* active_peptide_queue =
@@ -229,6 +231,8 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
     MassConstants::Init(&aaf_peptides_header.peptides_header().mods(),
                         &aaf_peptides_header.peptides_header().nterm_mods(),
                         &aaf_peptides_header.peptides_header().cterm_mods(),
+                        &aaf_peptides_header.peptides_header().nprotterm_mods(),
+                        &aaf_peptides_header.peptides_header().cprotterm_mods(),
                         bin_width_, bin_offset_);
 
     ActivePeptideQueue* active_peptide_queue =
@@ -269,12 +273,16 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
     }
   }
 
-  MassConstants::Init(&pepHeader.mods(), &pepHeader.nterm_mods(),
-    &pepHeader.cterm_mods(), bin_width_, bin_offset_);
+  MassConstants::Init(&pepHeader.mods(), 
+      &pepHeader.nterm_mods(), &pepHeader.cterm_mods(),
+      &pepHeader.nprotterm_mods(), &pepHeader.cprotterm_mods(),
+      bin_width_, bin_offset_);
   ModificationDefinition::ClearAll();
   TideMatchSet::initModMap(pepHeader.mods(), ANY);
   TideMatchSet::initModMap(pepHeader.nterm_mods(), PEPTIDE_N);
   TideMatchSet::initModMap(pepHeader.cterm_mods(), PEPTIDE_C);
+  TideMatchSet::initModMap(pepHeader.nprotterm_mods(), PROTEIN_N);
+  TideMatchSet::initModMap(pepHeader.cprotterm_mods(), PROTEIN_C);
 
   ofstream* target_file = NULL;
   ofstream* decoy_file = NULL;
@@ -562,6 +570,7 @@ void TideSearchApplication::search(void* threadarg) {
     double precursor_mz = spectrum->PrecursorMZ();
     double precursorMass = sc->neutral_mass;  //Added by Andy Lin (needed for residue evidence)
     int charge = sc->charge;
+
     int scan_num = spectrum->SpectrumNumber();
     if (spectrum_flag != NULL) {
       locks_array[LOCK_CASCADE]->lock();
@@ -2069,13 +2078,12 @@ int TideSearchApplication::calcResEvScore(
   assert(intensArrayTheor.size() == pepLen - 1);
 
   int scoreResidueEvidence = 0;
-  double* residueMasses = curPeptide->getAAMasses(); //retrieves the amino acid masses, modifications included
+  vector<double> residueMasses = curPeptide->getAAMasses(); //retrieves the amino acid masses, modifications included
   for (int res = 0; res < pepLen - 1; res++) {
     double tmpAAMass = residueMasses[res];
     int tmpAA = find(aaMassDouble.begin(),aaMassDouble.end(),tmpAAMass) - aaMassDouble.begin();
     scoreResidueEvidence += curResidueEvidenceMatrix[tmpAA][intensArrayTheor[res]-1];
   }
-  delete[] residueMasses;
   return scoreResidueEvidence;
 }
 

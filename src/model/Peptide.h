@@ -39,6 +39,8 @@ namespace Crux {
 
 class Modification;
 
+enum ProteinTerminal{PROT_TERM_NONE, PROT_TERM_C, PROT_TERM_N};
+
 class Peptide {
 
  protected:
@@ -48,6 +50,7 @@ class Peptide {
   MODIFIED_AA_T* decoy_modified_seq_; ///< randomized peptide sequence
   std::string sequence_;
   std::vector<Modification> varMods_;
+  ProteinTerminal terminal_;
 
  public:
   /*  Allocators/deallocators  */
@@ -57,7 +60,9 @@ class Peptide {
    */
   Peptide();
   Peptide(std::string sequence);
+  Peptide(std::string sequence, ProteinTerminal term);
   Peptide(std::string sequence, std::vector<Modification> mods);
+  Peptide(std::string sequence, ProteinTerminal term, std::vector<Modification> mods);
 
   /**
    * \returns A new peptide object, populated with the user specified
