@@ -32,6 +32,8 @@ class MassConstants {
   static bool Init(const pb::ModTable* mod_table, 
     const pb::ModTable* n_mod_table, 
     const pb::ModTable* c_mod_table, 
+    const pb::ModTable* nprot_mod_table, 
+    const pb::ModTable* cprot_mod_table, 
     const double bin_width, const double bin_offset);
 
   static void ApplyTerminusStaticMods(const pb::ModTable* mod_table, 
@@ -46,6 +48,10 @@ class MassConstants {
   static double cterm_mono_table[];
   static double nterm_avg_table[];
   static double cterm_avg_table[];
+  static double nprotterm_avg_table[];
+  static double cprotterm_avg_table[];
+  static double nprotterm_mono_table[];
+  static double cprotterm_mono_table[];
   static const double mono_h2o;
   static const double avg_h2o;
   static const double mono_nh3;
@@ -83,6 +89,10 @@ class MassConstants {
   static FixPt fixp_cterm_mono_table[];
   static FixPt fixp_nterm_avg_table[];
   static FixPt fixp_cterm_avg_table[];
+  static FixPt fixp_nprotterm_mono_table[];
+  static FixPt fixp_cprotterm_mono_table[];
+  static FixPt fixp_nprotterm_avg_table[];
+  static FixPt fixp_cprotterm_avg_table[];
 
   static const FixPt fixp_mono_h2o;
   static const FixPt fixp_avg_h2o;
@@ -91,6 +101,18 @@ class MassConstants {
   static const FixPt fixp_mono_co;
 
   static const FixPt fixp_proton;
+
+  struct FixPtTableSet{
+    FixPt* _table;
+    FixPt* nterm_table;
+    FixPt* cterm_table;
+    FixPt* nprotterm_table;
+    FixPt* cprotterm_table;
+  };
+
+  static FixPtTableSet mono_tables;
+  static FixPtTableSet avg_tables;
+
 
   static void DecodeMod(int code, int* aa_index, double* delta) {
     int unique_delta_index;

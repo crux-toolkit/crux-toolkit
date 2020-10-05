@@ -16,6 +16,7 @@
 #include "tide/theoretical_peak_set.h"
 #include "tide/abspath.h"
 #include "TideSearchApplication.h"
+#include "GeneratePeptides.h"
 #include "util/crux-utils.h"
 
 using namespace std;
@@ -188,8 +189,9 @@ class TideIndexApplication : public CruxApplication {
   );
 
   static FLOAT_T calcPepMassTide(
-    const std::string& sequence,
-    MASS_TYPE_T massType
+    const GeneratePeptides::CleavedPeptide* pep,
+    MASS_TYPE_T massType,
+    const ProteinInfo* prot
   );
 
   static void writePbProtein(
