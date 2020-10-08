@@ -71,25 +71,7 @@ void Peptide::AddIons(W* workspace) const {
   if (MaxBin::Global().MaxBinEnd() > 0)
     max_possible_peak = MaxBin::Global().CacheBinEnd();
 
-  vector<double> aa_masses(Len());
-  const char* residue = residues_;
-  // Collect m/z values for each residue, for z = 1, 2.
-  for (int i = 0; i < Len(); ++i, ++residue) {
-    if (i == 0) { // nterm static pep
-      aa_masses[i] = MassConstants::nterm_mono_table[*residue];
-    } else if (i == Len() - 1) { // cterm static pep
-      aa_masses[i] = MassConstants::cterm_mono_table[*residue];
-    } else { // all other mods
-      aa_masses[i] = MassConstants::mono_table[*residue];
-    }
-  }
-
-  for (int i = 0; i < num_mods_; ++i) {
-    int index;
-    double delta;
-    MassConstants::DecodeMod(mods_[i], &index, &delta);
-    aa_masses[index] += delta;
-  }
+  vector<double> aa_masses = getAAMasses();
 
   // Add all charge 1 B ions.
   double total = aa_masses[0];
@@ -130,26 +112,7 @@ void Peptide::AddBIonsOnly(W* workspace) const {
     max_possible_peak = MaxBin::Global().CacheBinEnd();
   }
   
-  vector<double> aa_masses(Len());
-  const char* residue = residues_;
-  // Collect m/z values for each residue, for z = 1.
-  for (int i = 0; i < Len(); ++i, ++residue) {
-    if (i == 0) { // nterm static pep
-      aa_masses[i] = MassConstants::nterm_mono_table[*residue];
-    } else if (i == Len() - 1) { // cterm static pep
-      aa_masses[i] = MassConstants::cterm_mono_table[*residue];
-    } else { // all other mods
-      aa_masses[i] = MassConstants::mono_table[*residue];
-    }
-  }
-
-  //Add modifications to amino acids
-  for (int i = 0; i < num_mods_; ++i) {
-    int index;
-    double delta;
-    MassConstants::DecodeMod(mods_[i], &index, &delta);
-    aa_masses[index] += delta;
-  }
+  vector<double> aa_masses = getAAMasses();
 
   // Add all charge 1 B ions.
   double total = MASS_PROTON + aa_masses[0];
@@ -245,14 +208,20 @@ void Peptide::ComputeTheoreticalPeaks(ST_TheoreticalPeakSet* workspace,
 }
 
 // return the amino acid masses in the current peptide
-double* Peptide::getAAMasses(){
-  double* masses_charge = new double[Len()];
+vector<double> Peptide::getAAMasses() const {
+  vector<double> masses_charge(Len());
   const char* residue = residues_;
   for (int i = 0; i < Len(); ++i, ++residue) {
     if (i == 0) { // nterm static pep
-      masses_charge[i] = MassConstants::nterm_mono_table[*residue];
+      if(first_loc_pos_ == 0)
+        masses_charge[i] = MassConstants::nprotterm_mono_table[*residue];
+      else
+        masses_charge[i] = MassConstants::nterm_mono_table[*residue];
     } else if (i == Len() - 1) { // cterm static pep
-      masses_charge[i] = MassConstants::cterm_mono_table[*residue];
+      if(first_loc_pos_ + len_ == protein_length_ - 1)
+        masses_charge[i] = MassConstants::cprotterm_mono_table[*residue];
+      else
+        masses_charge[i] = MassConstants::cterm_mono_table[*residue];
     } else { // all other mods
       masses_charge[i] = MassConstants::mono_table[*residue];
     }

@@ -39,6 +39,7 @@ class TideMatchSet {
     double resEv_pval;
     double combinedPval;
     int rank;
+    double tailor;  //Added by AKF    
   };
   typedef FixedCapacityArray<Scores> Arr;
 
@@ -89,6 +90,12 @@ class TideMatchSet {
     boost::mutex * rwlock
   );
 
+  static void colPrint(
+    bool* printTab,
+    ofstream* file,
+    const char* myString
+  );
+ 
   static void writeHeaders(
     ofstream* file,
     bool decoyFile,

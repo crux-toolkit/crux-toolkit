@@ -126,11 +126,13 @@ void MatchFileWriter::setPrecision() {
     case LN_NUM_SP_COL:
     case EXACT_PVALUE_COL:
     case REFACTORED_SCORE_COL:
+    case RESIDUE_PVALUE_COL:
     case RESIDUE_EVIDENCE_COL:
     case BOTH_PVALUE_COL:
     case SIDAK_ADJUSTED_COL:
     case QVALUE_MIXMAX_COL:
     case QVALUE_TDC_COL:
+    case TAILOR_COL:   //Added for tailor score calibration method by AKF    
 #ifdef NEW_COLUMNS
     case WEIBULL_PEPTIDE_QVALUE_COL:      // NEW
     case DECOY_XCORR_PEPTIDE_QVALUE_COL:  // NEW

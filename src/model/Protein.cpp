@@ -211,9 +211,11 @@ int Protein::findStart(
     return getLength() - peptide_sequence.length();
   }
   // find flankN + sequence + flankC
+  // prev_aa and next_aa may be "" if no flanking aa's were input.
   string seq = prev_aa + peptide_sequence + next_aa;
   size_t pos = protein_seq.find(seq);
-  if (pos != string::npos) {
+  bool flanks_exist = prev_aa != "" && next_aa != "";
+  if (pos != string::npos && flanks_exist) {
     return pos + 2;
   }
   // failed, find sequence
@@ -225,7 +227,7 @@ int Protein::findStart(
   seq = prev_aa + peptide_sequence + next_aa;
   std::replace(seq.begin(), seq.end(), 'L', 'I');
   std::replace(protein_seq.begin(), protein_seq.end(), 'L', 'I');
-  if ((pos = protein_seq.find(seq)) != string::npos) {
+  if ((pos = protein_seq.find(seq)) != string::npos && flanks_exist) {
     return pos + 2;
   }
   // failed, find sequence with I/L equivalence
@@ -234,8 +236,12 @@ int Protein::findStart(
   if ((pos = protein_seq.find(seq)) != string::npos) {
     return pos + 1;
   }
-  carp(CARP_ERROR, "could not find %s in protein %s\n%s", peptide_sequence.c_str(), getIdPointer().c_str(), getSequencePointer());
-  return -1;
+
+  // complain if the peptide is truly required
+  if ( Params::GetBool("find-peptides") ) {
+    carp(CARP_ERROR, "could not find %s in protein %s\n%s", peptide_sequence.c_str(), getIdPointer().c_str(), getSequencePointer());
+  }
+  return 0;
 }
 
 bool Protein::isPostProcess() {

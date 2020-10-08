@@ -1079,7 +1079,8 @@ vector<string> SpectralCounts::getOptions() const {
     "custom-threshold-name",
     "custom-threshold-min",
     "mzid-use-pass-threshold",
-    "protein-database"
+    "protein-database",
+    "find-peptides"
   };
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }

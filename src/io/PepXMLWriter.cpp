@@ -220,7 +220,7 @@ void PepXMLWriter::printPeptideElement(int *ranks,
   } else {
     fprintf(file_, "calc_neutral_pep_mass=\"%.*f\" "
           "massdiff=\"%+.*f\" "
-          "num_tol_term=\"\" num_missed_cleavages=\"%i\" "
+          "num_tol_term=\"0\" num_missed_cleavages=\"%i\" "
           "num_matched_peptides=\"%i\""
           " is_rejected=\"%i\" ",
           mass_precision_,
@@ -354,24 +354,18 @@ void PepXMLWriter::print_modifications_xml(
   FILE* output_file
 ) {
   carp(CARP_DEBUG, "print_modifications_xml:%s %s", mod_seq, pep_seq);
-  // variable modifications
   int mod_precision = Params::GetInt("mod-precision");
   map<int, double> var_mods = find_variable_modifications(mod_seq);
-  if (!var_mods.empty()) {
+  map<int, double> static_mods = find_static_modifications(pep_seq);
+  if (!var_mods.empty() || !static_mods.empty()) {
     fprintf(output_file, "<modification_info modified_peptide=\"%s\">\n", mod_seq);
+    // variable modifications
     for (map<int, double>::iterator it = var_mods.begin(); it != var_mods.end(); ++it) {
       fprintf(output_file, "<mod_aminoacid_mass position=\"%i\" mass=\"%.*f\"/>\n",
               it->first,   //index
               mod_precision, it->second); //mass
     }
-    fprintf(output_file, "</modification_info>\n");
-  }
-
-  // static modifications
-  map<int, double> static_mods = find_static_modifications(pep_seq);
-  if (!static_mods.empty()) {
-    carp(CARP_DEBUG, "<modification_info modified_peptide=\"%s\">", pep_seq);
-    fprintf(output_file, "<modification_info modified_peptide=\"%s\">\n", pep_seq);
+    // static modifications
     for (map<int, double>::iterator it = static_mods.begin(); it != static_mods.end(); ++it) {
       fprintf(output_file, "<mod_aminoacid_mass position=\"%i\" mass=\"%.*f\"/>\n",
               it->first,   //index
@@ -442,8 +436,8 @@ map<int, double> PepXMLWriter::find_static_modifications(
          j != staticMods.end();
          j++) {
       if ((*j)->Position() == ANY ||
-          ((*j)->Position() == PEPTIDE_N && i == 0) ||
-          ((*j)->Position() == PEPTIDE_C && peptide_sequence[i + 1] == '\0')) {
+          (((*j)->Position() == PEPTIDE_N || (*j)->Position() == PROTEIN_N) && i == 0) ||
+          (((*j)->Position() == PEPTIDE_C || (*j)->Position() == PROTEIN_C) && peptide_sequence[i + 1] == '\0')) {
         ++modCount;
         sum += (*j)->DeltaMass();
       }

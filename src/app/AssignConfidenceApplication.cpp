@@ -148,13 +148,18 @@ int AssignConfidenceApplication::main(const vector<string>& input_files) {
       break;
     case ELUTION_WINDOW_COL:
       score_type = TIDE_SEARCH_EXACT_SMOOTHED;
-      break;      
+      break;    
+    case TAILOR_COL: //Added for tailor score calibration method by AKF
+      score_type = TAILOR_SCORE;      
+      break;
     default:
       carp(CARP_FATAL, "The PSM feature \"%s\" is not supported.", score_param.c_str());
     }
   }
 
-  if (sidak && score_type != TIDE_SEARCH_EXACT_PVAL) {
+  if (sidak && score_type != TIDE_SEARCH_EXACT_PVAL ||
+      sidak && score_type != BOTH_PVALUE ||
+      sidak && score_type != RESIDUE_EVIDENCE_PVAL) {
     carp(CARP_WARNING, "Sidak adjustment may not be compatible with score: %s", score_param.c_str());
   }
 
@@ -203,10 +208,12 @@ int AssignConfidenceApplication::main(const vector<string>& input_files) {
     // in the list below.
     if (score_type == INVALID_SCORER_TYPE) {
       vector<SCORER_TYPE_T> scoreTypes;
+      scoreTypes.push_back(TAILOR_SCORE); //Added for tailor score calibration method by AKF
       scoreTypes.push_back(XCORR);
       scoreTypes.push_back(EVALUE);
       scoreTypes.push_back(BOTH_PVALUE);
       scoreTypes.push_back(RESIDUE_EVIDENCE_PVAL);
+      scoreTypes.push_back(RESIDUE_EVIDENCE_SCORE);
       scoreTypes.push_back(TIDE_SEARCH_EXACT_PVAL);
       scoreTypes.push_back(TIDE_SEARCH_EXACT_SMOOTHED);
       scoreTypes.push_back(LOGP_BONF_WEIBULL_XCORR);
@@ -253,6 +260,8 @@ int AssignConfidenceApplication::main(const vector<string>& input_files) {
     target_matches->setScoredType(BY_IONS_MATCHED, match_collection->getScoredType(BY_IONS_MATCHED));
     target_matches->setScoredType(BY_IONS_TOTAL, match_collection->getScoredType(BY_IONS_TOTAL));
     target_matches->setScoredType(SIDAK_ADJUSTED, sidak);
+    //Added for tailor score calibration method by AKF
+    target_matches->setScoredType(TAILOR_SCORE, match_collection->getScoredType(TAILOR_SCORE));
     for (map<int, MatchCollection*>::iterator i = decoy_matches.begin(); i != decoy_matches.end(); i++) {
       i->second->setScoredType(SIDAK_ADJUSTED, sidak);
     }
@@ -544,6 +553,12 @@ int AssignConfidenceApplication::main(const vector<string>& input_files) {
     if (score_type == BOTH_PVALUE) {
       cols_to_print[BOTH_PVALUE_COL] = true;
       cols_to_print[BOTH_PVALUE_RANK] = true;
+    } else if (score_type == RESIDUE_EVIDENCE_PVAL) {
+      cols_to_print[RESIDUE_PVALUE_COL] = true;
+      cols_to_print[RESIDUE_RANK_COL] = true;
+    } else if (score_type == RESIDUE_EVIDENCE_SCORE) {
+      cols_to_print[RESIDUE_EVIDENCE_COL] = true;
+      cols_to_print[RESIDUE_RANK_COL] = true;
     } else {
       cols_to_print[XCORR_SCORE_COL] = !target_matches->getScoredType(TIDE_SEARCH_EXACT_PVAL);
       cols_to_print[XCORR_RANK_COL] = true;
@@ -555,7 +570,10 @@ int AssignConfidenceApplication::main(const vector<string>& input_files) {
         cols_to_print[REFACTORED_SCORE_COL] = true;
       }
     }
-
+    //Added for tailor score calibration method by AKF
+    if (score_type == TAILOR_SCORE) {
+        cols_to_print[TAILOR_COL] = true;
+    }
     cols_to_print[BY_IONS_MATCHED_COL] = target_matches->getScoredType(BY_IONS_MATCHED);
     cols_to_print[BY_IONS_TOTAL_COL] = target_matches->getScoredType(BY_IONS_TOTAL);
 
@@ -1319,6 +1337,7 @@ int AssignConfidenceApplication::getDirection(SCORER_TYPE_T scoreType) {
     case TIDE_SEARCH_REFACTORED_XCORR:
     case RESIDUE_EVIDENCE_SCORE:
     case PERCOLATOR_SCORE:
+    case TAILOR_SCORE:    //Added for tailor score calibration method by AKF    
       // higher score better, ascending = false
       return -1;
     case EVALUE:

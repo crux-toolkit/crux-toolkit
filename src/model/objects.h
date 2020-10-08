@@ -159,6 +159,7 @@ enum _enzyme_type {
   GLUC,                  ///< cleave after D or E, not before P
   PEPSINA,               ///< cleave after FL, not before P 
   ELASTASE_TRYPSIN_CHYMOTRYPSIN, ///< cleave after ALIVKRWFY, not before P
+  LYSARGINASE,           ///< cleave before KR
   CUSTOM_ENZYME,         ///< cleave after/before user-defined residues
   NUMBER_ENZYME_TYPES    ///< leave last, number of types
 };
@@ -516,6 +517,7 @@ enum _scorer_type {
   RESIDUE_EVIDENCE_PVAL, //p-value using residue evidence matrix. added by Andy Lin
 
   BOTH_PVALUE, //combined res-ev pvalue and xcorr pvalue. added by Andy Lin
+  TAILOR_SCORE,  //Added for tailor score calibration method by AKF
 
   // The following are computed by assign-confidence.
   SIDAK_ADJUSTED,             ///< Sidak adjusted p-value

@@ -56,6 +56,13 @@ class VariableModTable {
  public:
   VariableModTable() { offset_ = 0;}
 
+/**
+ * @brief Loads and validates possibles vector
+ * 
+ * @param pb_mod_table - the type of the vector to load - regular or one of terminals
+ * @return true if completed successfully
+ * @return false otherwise
+ */
   bool Init(const pb::ModTable& pb_mod_table) {
     IntPairVec *possibles;
     if (&pb_mod_table == &pb_mod_table_)
@@ -79,12 +86,14 @@ class VariableModTable {
     tr1::unordered_map<double, int> deltas;
 #endif
     for (int i = 0; i < UD.size(); ++i)
-      deltas[UD[i]] = i;
+      deltas[UD[i]] = i;    //lookup table delta value to its position in the _unique_deltas vector
 
     for (int i = 0; i < pb_mod_table.variable_mod_size(); ++i) {
       const pb::Modification& mod = pb_mod_table.variable_mod(i);
       const string& aa = mod.amino_acids();
       for (int j = 0; j < aa.size(); ++j) {
+        //for each AA make a list of (position in _unique_delta, global mod index) pairs
+        //global mod index is the number of the given mod in the list of mods specified on the command line.
         possibles[aa[j]].push_back(make_pair(deltas[mod.delta()], i + offset_));
       }
     }
@@ -108,6 +117,15 @@ class VariableModTable {
     return true;
   }
 
+  /**
+   * @brief Parses the modspec string from the command line and loads them into
+   * Protobuf collections. Loads all mod deltas into _unique_delta vector _without deduplication_.
+   * 
+   * @param spec_text - comma-separated modspecs from the command line
+   * @param mod_table - type of the table to parse - regular or one of terminal mods
+   * @return true - if completed successfully
+   * @return false otherwise
+   */
   bool Parse(const char* spec_text, MODS_SPEC_TYPE_T mod_table = MOD_SPEC) {
     pb::ModTable* pb_mod_table_ptr = NULL;
     switch (mod_table) {
@@ -124,7 +142,7 @@ class VariableModTable {
       pb_mod_table_ptr = &pb_ntpro_mod_table_;
       break;
     case CTPRO:
-      pb_mod_table_ptr = &pb_ntpro_mod_table_;
+      pb_mod_table_ptr = &pb_ctpro_mod_table_;
       break;
     }
     if (pb_mod_table_ptr == NULL)
@@ -266,6 +284,14 @@ class VariableModTable {
     return &possibles_[aa];
   }
 #endif
+
+  /**
+   * @brief Deduplicates the unique_deltas_ collection after reserving a copy 
+   * in the original_deltas_. Loads possibles and unique_deltas for each mod type. 
+   * 
+   * @return true 
+   * @return false 
+   */
   bool SerializeUniqueDeltas() {
     if (unique_delta_.size() == 0)
       return(0);
@@ -289,6 +315,14 @@ class VariableModTable {
     return(1);
   }
 
+  /**
+   * @brief Copies unique_deltas_ values into the protobuf mods collection. As a result each protobuf collection
+   * has all the deltas of the transforms specified on the command line.
+   * 
+   * @param pb_mod_table - protobuf table to load
+   * @return true if the load is successful
+   * @return false if the protobuf collection already contains unique deltas and they are different from that we have globally.
+   */
   bool SerializeUniqueDeltas(pb::ModTable* pb_mod_table) {
     if (pb_mod_table->unique_deltas_size() == 0) {
       vector<double>::iterator iter = unique_delta_.begin();
@@ -308,6 +342,8 @@ class VariableModTable {
   const pb::ModTable* ParsedModTable() const { return &pb_mod_table_; }
   const pb::ModTable* ParsedNtpepModTable() const { return &pb_ntpep_mod_table_; }
   const pb::ModTable* ParsedCtpepModTable() const { return &pb_ctpep_mod_table_; }
+  const pb::ModTable* ParsedNtproModTable() const { return &pb_ntpro_mod_table_; }
+  const pb::ModTable* ParsedCtproModTable() const { return &pb_ctpro_mod_table_; }
   const vector<int>* MaxCounts() const { return &max_counts_; }
   const vector<double>* OriginalDeltas() const { return &original_deltas_; }
 
@@ -345,6 +381,11 @@ class VariableModTable {
     return false;
   }
 
+  /**
+   * @brief possibles_ is an array of vectors where for each AA (indexed by the AA character as array position) 
+   * there is a list of (position in _unique_delta, global mod index) pairs.
+   * global mod index is the number of the given mod in the list of mods specified on the command line.
+   */
   typedef vector<pair<int, int> > IntPairVec;
   IntPairVec possibles_[256]; // unique_delta_, max_count_
   IntPairVec possibles_ctpe_[256]; // unique_delta_, max_count_  cterminal peptide

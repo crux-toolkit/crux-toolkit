@@ -45,6 +45,7 @@ using namespace std;
 
 static const int _PSM_SAMPLE_SIZE = 500;
 ///< max number of peptides a single match collection can hold
+static const int DATE_STRING_SIZE = 30; //date format YYYY-MM-DDTHH:MM:SS is 19 characters
 
 class MatchCollection {
  friend class MatchIterator;

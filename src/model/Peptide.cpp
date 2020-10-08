@@ -48,6 +48,13 @@ Peptide::Peptide(string sequence, vector<Modification> mods)
     decoy_modified_seq_(NULL) {
 }
 
+  Peptide::Peptide(std::string sequence, ProteinTerminal term)
+  : sequence_(sequence), length_(sequence.length()), decoy_modified_seq_(NULL), terminal_(term) {}
+
+  Peptide::Peptide(std::string sequence, ProteinTerminal term, std::vector<Modification> mods)
+  : sequence_(sequence), varMods_(mods), length_(sequence.length()),
+    decoy_modified_seq_(NULL), terminal_(term) {}
+
 // FIXME association part might be need to change
 /**
  * \returns A new peptide object, populated with the user specified parameters.
@@ -427,7 +434,9 @@ vector<Modification> Peptide::getStaticMods() const {
          j++) {
       if ((*j)->Position() == ANY ||
           ((*j)->Position() == PEPTIDE_N && i == 0) ||
-          ((*j)->Position() == PEPTIDE_C && seq[i + 1] == '\0')) {
+          ((*j)->Position() == PEPTIDE_C && seq[i + 1] == '\0')
+          || (*j)->Position() == PROTEIN_N && i == 0 && this->terminal_ == PROT_TERM_N
+          || (*j)->Position() == PROTEIN_C && seq[i + 1] == '\0' && this->terminal_ == PROT_TERM_C) {
         mods.push_back(Modification(*j, (unsigned char)i));
       }
     }

@@ -142,6 +142,15 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
     carp(CARP_FATAL,"--score-function 'residue-evidence' with "
                     "--use-neutral-loss-peaks 'true' is not implemented yet");
   }
+  
+  //Tailor score calibration does not support res-ev scores or refactored xcorrs //Added by AKF
+  if (Params::GetBool("use-tailor-calibration") && exact_pval_search_ )
+    carp(CARP_FATAL,"--exact-p-value T is not implemented with Tailor score "
+                    "calibration method");
+
+  if (Params::GetBool("use-tailor-calibration") && curScoreFunction == RESIDUE_EVIDENCE_MATRIX )
+    carp(CARP_FATAL,"--score-function 'residue-evidence' is not implemented "
+                    "with Tailor score calibration method");
 
   // Check compute-sp parameter
   bool compute_sp = Params::GetBool("compute-sp");
@@ -197,6 +206,8 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
     MassConstants::Init(&aaf_peptides_header.peptides_header().mods(),
                         &aaf_peptides_header.peptides_header().nterm_mods(),
                         &aaf_peptides_header.peptides_header().cterm_mods(),
+                        &aaf_peptides_header.peptides_header().nprotterm_mods(),
+                        &aaf_peptides_header.peptides_header().cprotterm_mods(),
                         bin_width_, bin_offset_);
 
     ActivePeptideQueue* active_peptide_queue =
@@ -220,6 +231,8 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
     MassConstants::Init(&aaf_peptides_header.peptides_header().mods(),
                         &aaf_peptides_header.peptides_header().nterm_mods(),
                         &aaf_peptides_header.peptides_header().cterm_mods(),
+                        &aaf_peptides_header.peptides_header().nprotterm_mods(),
+                        &aaf_peptides_header.peptides_header().cprotterm_mods(),
                         bin_width_, bin_offset_);
 
     ActivePeptideQueue* active_peptide_queue =
@@ -260,12 +273,16 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
     }
   }
 
-  MassConstants::Init(&pepHeader.mods(), &pepHeader.nterm_mods(),
-    &pepHeader.cterm_mods(), bin_width_, bin_offset_);
+  MassConstants::Init(&pepHeader.mods(), 
+      &pepHeader.nterm_mods(), &pepHeader.cterm_mods(),
+      &pepHeader.nprotterm_mods(), &pepHeader.cprotterm_mods(),
+      bin_width_, bin_offset_);
   ModificationDefinition::ClearAll();
   TideMatchSet::initModMap(pepHeader.mods(), ANY);
   TideMatchSet::initModMap(pepHeader.nterm_mods(), PEPTIDE_N);
   TideMatchSet::initModMap(pepHeader.cterm_mods(), PEPTIDE_C);
+  TideMatchSet::initModMap(pepHeader.nprotterm_mods(), PROTEIN_N);
+  TideMatchSet::initModMap(pepHeader.cprotterm_mods(), PROTEIN_C);
 
   ofstream* target_file = NULL;
   ofstream* decoy_file = NULL;
@@ -553,6 +570,7 @@ void TideSearchApplication::search(void* threadarg) {
     double precursor_mz = spectrum->PrecursorMZ();
     double precursorMass = sc->neutral_mass;  //Added by Andy Lin (needed for residue evidence)
     int charge = sc->charge;
+
     int scan_num = spectrum->SpectrumNumber();
     if (spectrum_flag != NULL) {
       locks_array[LOCK_CASCADE]->lock();
@@ -622,6 +640,24 @@ void TideSearchApplication::search(void* threadarg) {
           }
         }
       } else {  //spectrum centric match report.
+        //Implementation of the Tailor score calibration method, by AKF
+        double quantile_score = 1.0;
+        if (Params::GetBool("use-tailor-calibration")){
+          vector<double> scores;
+          double quantile_th = 0.01;
+          // Collect the scores for the score tail distribution
+          for (TideMatchSet::Arr2::iterator it = match_arr2.begin();
+            it != match_arr2.end();
+            ++it) {
+            scores.push_back((double)(it->first / XCORR_SCALING));
+          }
+          sort(scores.begin(), scores.end(), greater<double>());  //sort in decreasing order
+          int quantile_pos = (int)(quantile_th*(double)scores.size()+0.5);
+
+          if (quantile_pos < 3)
+            quantile_pos = 3;
+          quantile_score = scores[quantile_pos]+5.0; // Make sure scores positive
+        }  //End of Tailor
         TideMatchSet::Arr match_arr(nCandPeptide);
         for (TideMatchSet::Arr2::iterator it = match_arr2.begin();
              it != match_arr2.end();
@@ -631,6 +667,10 @@ void TideSearchApplication::search(void* threadarg) {
             TideMatchSet::Scores curScore;
             curScore.xcorr_score = (double)(it->first / XCORR_SCALING);
             curScore.rank = it->second;
+            //Added for tailor score calibration method by AKF
+            if (Params::GetBool("use-tailor-calibration")){
+              curScore.tailor = ((double)(it->first / XCORR_SCALING) + 5.0) / quantile_score;
+            }            
             match_arr.push_back(curScore);
           }
         }
@@ -1539,11 +1579,14 @@ vector<string> TideSearchApplication::getOptions() const {
     "store-spectra",
     "top-match",
     "txt-output",
+    "brief-output",
     "use-flanking-peaks",
     "use-neutral-loss-peaks",
     "use-z-line",
     "verbosity",
     "aws-profile"
+    "use-tailor-calibration",    
+    "verbosity"
   };
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }
@@ -2037,13 +2080,12 @@ int TideSearchApplication::calcResEvScore(
   assert(intensArrayTheor.size() == pepLen - 1);
 
   int scoreResidueEvidence = 0;
-  double* residueMasses = curPeptide->getAAMasses(); //retrieves the amino acid masses, modifications included
+  vector<double> residueMasses = curPeptide->getAAMasses(); //retrieves the amino acid masses, modifications included
   for (int res = 0; res < pepLen - 1; res++) {
     double tmpAAMass = residueMasses[res];
     int tmpAA = find(aaMassDouble.begin(),aaMassDouble.end(),tmpAAMass) - aaMassDouble.begin();
     scoreResidueEvidence += curResidueEvidenceMatrix[tmpAA][intensArrayTheor[res]-1];
   }
-  delete[] residueMasses;
   return scoreResidueEvidence;
 }
 

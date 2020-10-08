@@ -322,6 +322,10 @@ void Match::printOneMatchField(
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
                                      getScore(TIDE_SEARCH_REFACTORED_XCORR));
     break;
+  case RESIDUE_PVALUE_COL:
+    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx,
+                                     getScore(RESIDUE_EVIDENCE_PVAL));
+    break;
   case RESIDUE_EVIDENCE_COL:
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx,
                                      getScore(RESIDUE_EVIDENCE_SCORE));
@@ -340,7 +344,7 @@ void Match::printOneMatchField(
     break;
   case RESIDUE_RANK_COL:
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx,
-                                     getRank(RESIDUE_EVIDENCE_SCORE));
+      getRank(!Params::GetBool("exact-p-value") ? RESIDUE_EVIDENCE_SCORE : RESIDUE_EVIDENCE_PVAL));
     break;
   case BOTH_PVALUE_RANK:
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx,
@@ -349,6 +353,10 @@ void Match::printOneMatchField(
   case EVALUE_COL:
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx,
                                      getScore(EVALUE));
+    break;
+  case TAILOR_COL:     //Added for tailor score calibration method by AKF
+    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx,
+                                     getScore(TAILOR_SCORE));
     break;
   case PVALUE_COL:
     {

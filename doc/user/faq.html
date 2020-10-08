@@ -330,7 +330,7 @@
     any modern operating system.  We provide pre-compiled binaries for
     Linux, MacOS and Windows.</p>
 
-    <li><b>When I try to run Crux on my Linux system I get error messages like:</b>
+    <li><b>When I try to run Crux on my Linux system I get error messages like:</b><br/>
     <pre>
     /tmp/crux: /usr/lib64/libstdc++.so.6: version `CXXABI_1.3.8' not found (required by /tmp/crux)
     /tmp/crux: /usr/lib64/libstdc++.so.6: version `GLIBCXX_3.4.20' not found (required by /tmp/crux)
@@ -355,6 +355,7 @@
     <br/>
     Then follow the instructions in the in the 
     <a href="tutorials/install.html#src_build">installation tutorial</a>.
+    <br/>
 
     <li>
     <b>How does Crux compute the masses of peptides and peptide
@@ -536,7 +537,7 @@
 
     <li>
     <b>How do Tide and Comet handle combinations of static and
-    variable modifications, as well as n-terminal
+    variable modifications, as well as terminal
     modifications?</b></li>
 
     <p>
@@ -559,14 +560,19 @@
     workflow.</p>
 
     <p>
-    Conceptually, all static modifications (standard ones and terminal
-    ones) are applied first. Thereafter, variable modifications are
-    applied on top of static modifications.  Any side-chain or
-    terminus can harbor at most one variable modification and one
-    static modification. Hence, it is an error to (try to) specify two
-    different static modifications for the same type of residue, but
-    perfectly legal to specify multiple variable modifications for the
-    same residue.</p>
+    Conceptually, all static modifications (standard ones and terminal ones) 
+    are applied first. Thereafter, variable modifications are applied on top 
+    of static modifications. Tide applies at most one static modification and 
+    one variable modification at any location, terminal or non-terminal. Comet 
+    is similar, except that modifications can also separately be applied to 
+    terminal locations. For example, the peptide DEAGFK can have a variable 
+    modification on the side chain of the lysine residue as well as a variable 
+    modification on the peptide C-terminus.</p>
+
+    <p>
+    In practice, it is an error to (try to) specify two different static 
+    modifications for the same type of residue, but perfectly legal to specify 
+    multiple variable modifications for the same residue.</p>
 
     <p>
     In the search engine output, you will see the unmodified peptide
@@ -590,6 +596,30 @@
     modification can be required to appear on all or none of the
     residues in a given peptide.</p>
 
+    <li>
+      <b>How does Tide handle peptide and protein terminal modifications?</b></li>
+  
+      <p>
+        Peptide and protein terminal modifications are similar in their logic. 
+        The <code>(c/n)term-peptide-mods-spec</code> option applies modifications to the terminals 
+        of all peptides, whereas <code>(c/n)term-protein-mods-spec</code> applies modifications only 
+        to peptide terminals that are also protein terminals. If both peptide and protein 
+        mod specs are provided, then both will be applied. It is possible to simultaneously 
+        specify peptide and protein terminal mods for the same type of residue. If both 
+        are static then protein terminals will have both of them (sum of the mod masses). 
+        If both are variable then they will be applied one at a time.
+      </p>
+      <p>
+        Note that the Tide index does not store information about the origin of 
+        variable mods. As a result, the Tide search output, unlike Comet, does not 
+        discriminate between terminal and non-terminal mods. Thus, Tides modified 
+        sequence column always has format K[-16.9981]VLGHIR, whereas in Comet the same 
+        peptide would be specified as n[-16.9981]VLGHIR for a terminal mod and 
+        K[-16.9981]VLGHIR for a non-terminal mod.  Similarly, the modifications 
+        column in Tide search results always has the format [position]_V_[mass]. 
+        Static modifications do not have this issue: they will have a _c or _n 
+        suffix for peptide terminal mods and _C or _N for protein terminal mods.
+      </p>
     <li>
     <b>What happens if I decrease the size of the precursor window during
     searching?</b></li>

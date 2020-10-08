@@ -217,6 +217,7 @@ MatchCollection* MatchFileReader::parse() {
     match_collection->setScoredType(BARISTA_QVALUE, !empty(BARISTA_QVALUE_COL));
     match_collection->setScoredType(BY_IONS_MATCHED, !empty(BY_IONS_MATCHED_COL));
     match_collection->setScoredType(BY_IONS_TOTAL, !empty(BY_IONS_TOTAL_COL));
+    match_collection->setScoredType(TAILOR_SCORE, !empty(TAILOR_COL)); //Added for tailor score calibration method by AKF
     if (!empty(DECOY_INDEX_COL)) {
       match_collection->setHasDecoyIndexes(true);
     }
@@ -300,6 +301,10 @@ Crux::Match* MatchFileReader::parseMatch() {
   }
   if (!empty(RESIDUE_EVIDENCE_COL)) {
     match->setScore(RESIDUE_EVIDENCE_SCORE, getFloat(RESIDUE_EVIDENCE_COL));
+    match->setRank(RESIDUE_EVIDENCE_SCORE, getInteger(RESIDUE_RANK_COL));
+  }
+  if (!empty(RESIDUE_PVALUE_COL)) {
+    match->setScore(RESIDUE_EVIDENCE_SCORE, getFloat(RESIDUE_EVIDENCE_COL));
     match->setScore(RESIDUE_EVIDENCE_PVAL, getFloat(RESIDUE_PVALUE_COL));
     match->setRank(RESIDUE_EVIDENCE_PVAL, getInteger(RESIDUE_RANK_COL));
   }
@@ -349,6 +354,9 @@ Crux::Match* MatchFileReader::parseMatch() {
 
   if (!empty(DECOY_INDEX_COL)) {
     match->setDecoyIndex(getInteger(DECOY_INDEX_COL));
+  }
+  if (!empty(TAILOR_COL)) { //Added for tailor score calibration method by AKF
+    match->setScore(TAILOR_SCORE, getFloat(TAILOR_COL));
   }
 
   // get experiment size

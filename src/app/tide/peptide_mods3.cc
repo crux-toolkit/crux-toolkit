@@ -221,6 +221,22 @@ class ModsOutputter : public IModsOutputter {
     }
   }
 
+  void PlaceVariableNTermMod(int pos, char aa, mods_spec_type mod_spec, vector<int>& counts){
+    int num_poss = mod_table_->NumPoss(aa, mod_spec);
+
+    for (int i = 0; i < num_poss; ++i) {
+      int poss_max_ct = mod_table_->PossMaxCt(aa, i, mod_spec);
+      if (counts[poss_max_ct] < max_counts_[poss_max_ct]) {
+        ++counts[poss_max_ct];
+        int delta_index = mod_table_->PossDeltIx(aa, i, mod_spec);  
+        peptide_->add_modifications(mod_table_->EncodeMod(pos, delta_index));
+        OutputMods(1, counts);
+        peptide_->mutable_modifications()->RemoveLast();
+        --counts[poss_max_ct];
+      }
+    }    
+  }
+
   void OutputNtermMods(int pos, vector<int>& counts) {
     if (TotalMods(counts) > FLAGS_max_mods) {
       return;
@@ -228,62 +244,55 @@ class ModsOutputter : public IModsOutputter {
     bool any_term_modification = false;
 
     //add static N-terminal modifications
-    char aa = residues_[0];
-    int num_poss = mod_table_->NumPoss(aa, NTPEP);
-    for (int i = 0; i < num_poss; ++i) {
-      int poss_max_ct = mod_table_->PossMaxCt(aa, i, NTPEP);
-      if (max_counts_[poss_max_ct] == 0) {
-        int delta_index = mod_table_->PossDeltIx(aa, i, NTPEP);
-        peptide_->add_modifications(mod_table_->EncodeMod(pos, delta_index));
-        OutputMods(1, counts);
-        peptide_->mutable_modifications()->RemoveLast();
-        any_term_modification = true;
+    //TODO: It looks like this code never runs. Static terminal mods are done 
+    //through mass tables and they never make it into the possibles_ tables
+    vector<char> aas{residues_[0], 'X'};
+    for(auto aa = aas.begin(); aa < aas.end(); aa++){
+
+      int num_poss = mod_table_->NumPoss(*aa, NTPEP);
+      for (int i = 0; i < num_poss; ++i) {
+        int poss_max_ct = mod_table_->PossMaxCt(*aa, i, NTPEP);
+        if (max_counts_[poss_max_ct] == 0) {
+          int delta_index = mod_table_->PossDeltIx(*aa, i, NTPEP);
+          peptide_->add_modifications(mod_table_->EncodeMod(pos, delta_index));
+          OutputMods(1, counts);
+          peptide_->mutable_modifications()->RemoveLast();
+          any_term_modification = true;
+        }
       }
     }
-    aa = 'X';
-    num_poss = mod_table_->NumPoss(aa, NTPEP);
-    for (int i = 0; i < num_poss; ++i) {
-      int poss_max_ct = mod_table_->PossMaxCt(aa, i, NTPEP);
-      if (max_counts_[poss_max_ct] == 0) {
-        int delta_index = mod_table_->PossDeltIx(aa, i, NTPEP);
-        peptide_->add_modifications(mod_table_->EncodeMod(pos, delta_index));
-        OutputMods(1, counts);
-        peptide_->mutable_modifications()->RemoveLast();
-        any_term_modification = true;
-      }
-    }
+
     if (!any_term_modification) {
       //if there were no static modificatinos add variable terminal modifications
-      aa = residues_[0];
-      num_poss = mod_table_->NumPoss(aa, NTPEP);
-      for (int i = 0; i < num_poss; ++i) {
-        int poss_max_ct = mod_table_->PossMaxCt(aa, i, NTPEP);
-        if (max_counts_[poss_max_ct] == 1) {
-          ++counts[poss_max_ct];
-          int delta_index = mod_table_->PossDeltIx(aa, i, NTPEP);
-          peptide_->add_modifications(mod_table_->EncodeMod(pos, delta_index));
-          OutputMods(1, counts);
-          peptide_->mutable_modifications()->RemoveLast();
-          --counts[poss_max_ct];
-          any_term_modification = true;
-        }
+      for(auto it = aas.begin(); it < aas.end(); it++){
+        if(peptide_->first_location().pos() == 0){
+          //this is protein N-terminal
+            PlaceVariableNTermMod(pos, *it, NTPRO, counts);
+          }
+        PlaceVariableNTermMod(pos, *it, NTPEP, counts); //peptide terminal
       }
-      aa = 'X';
-      num_poss = mod_table_->NumPoss(aa, NTPEP);
-      for (int i = 0; i < num_poss; ++i) {
-        int poss_max_ct = mod_table_->PossMaxCt(aa, i, NTPEP);
-        if (max_counts_[poss_max_ct] == 1) {
-          ++counts[poss_max_ct];
-          int delta_index = mod_table_->PossDeltIx(aa, i, NTPEP);
-          peptide_->add_modifications(mod_table_->EncodeMod(pos, delta_index));
-          OutputMods(1, counts);
-          peptide_->mutable_modifications()->RemoveLast();
-          --counts[poss_max_ct];
-          any_term_modification = true;
-        }
-      }
-      OutputMods(0, counts);
+      OutputMods(0, counts);  //regular mods
     }
+  }
+
+  void PlaceCTermVariableMod(int pos, char aa, mods_spec_type mod_type, vector<int>& counts){
+      int num_poss = mod_table_->NumPoss(aa, mod_type);
+      for (int i = 0; i < num_poss; ++i) {
+        int poss_max_ct = mod_table_->PossMaxCt(aa, i, mod_type);
+        if (counts[poss_max_ct] < max_counts_[poss_max_ct]) {
+          ++counts[poss_max_ct];
+          int delta_index = mod_table_->PossDeltIx(aa, i, mod_type);
+          peptide_->add_modifications(mod_table_->EncodeMod(pos, delta_index));
+
+          if (TotalMods(counts) >= FLAGS_min_mods) {
+            peptide_->set_id(count_++);
+            Write(counts);
+          }
+
+          peptide_->mutable_modifications()->RemoveLast();
+          --counts[poss_max_ct];
+        }
+      }
   }
 
   void OutputCtermMods(int pos, vector<int>& counts) {
@@ -299,100 +308,42 @@ class ModsOutputter : public IModsOutputter {
     }
 
     bool any_term_modification = false;
-    char aa = residues_[pos];
-    int num_poss = mod_table_->NumPoss(aa, CTPEP);
-    for (int i = 0; i < num_poss; ++i) {
-      int poss_max_ct = mod_table_->PossMaxCt(aa, i, CTPEP);
-      if (max_counts_[poss_max_ct] == 0) {
-        int delta_index = mod_table_->PossDeltIx(aa, i, CTPEP);
-        peptide_->add_modifications(mod_table_->EncodeMod(pos, delta_index));
+    vector<char> aas{residues_[pos], 'X'};        //we are looking up mod definitions for the current residue or X
+    for(auto aa = aas.begin(); aa < aas.end(); aa++){
+      int num_poss = mod_table_->NumPoss(*aa, CTPEP);
+      for (int i = 0; i < num_poss; ++i) {
+        int poss_max_ct = mod_table_->PossMaxCt(*aa, i, CTPEP);
+        if (max_counts_[poss_max_ct] == 0) {                          //this condition is never satisfied because max_counts_ is initialized 
+          int delta_index = mod_table_->PossDeltIx(*aa, i, CTPEP);    //with the var mods table and var mods max count is always >0  
+          peptide_->add_modifications(mod_table_->EncodeMod(pos, delta_index));
 
-        if (TotalMods(counts) >= FLAGS_min_mods) {
-          peptide_->set_id(count_++);
-          Write(counts);
+          if (TotalMods(counts) >= FLAGS_min_mods) {
+            peptide_->set_id(count_++);
+            Write(counts);
+          }
+          peptide_->mutable_modifications()->RemoveLast();
+          any_term_modification = true;
         }
-
-        peptide_->mutable_modifications()->RemoveLast();
-        any_term_modification = true;
       }
     }
-    aa = 'X';
-    num_poss = mod_table_->NumPoss(aa, CTPEP);
-    for (int i = 0; i < num_poss; ++i) {
-      int poss_max_ct = mod_table_->PossMaxCt(aa, i, CTPEP);
-      if (max_counts_[poss_max_ct] == 0) {
-        int delta_index = mod_table_->PossDeltIx(aa, i, CTPEP);
-        peptide_->add_modifications(mod_table_->EncodeMod(pos, delta_index));
 
-        if (TotalMods(counts) >= FLAGS_min_mods) {
-          peptide_->set_id(count_++);
-          Write(counts);
-        }
-
-        peptide_->mutable_modifications()->RemoveLast();
-        any_term_modification = true;
-      }
-    }
     if (!any_term_modification) {
       //if there were no static modifications add amino acid mods
       char aa = residues_[pos];
-      int num_poss = mod_table_->NumPoss(aa);
-      for (int i = 0; i < num_poss; ++i) {
-        int poss_max_ct = mod_table_->PossMaxCt(aa, i);
-        if (counts[poss_max_ct] < max_counts_[poss_max_ct]) {
-          ++counts[poss_max_ct];
-          int delta_index = mod_table_->PossDeltIx(aa, i);
-          peptide_->add_modifications(mod_table_->EncodeMod(pos, delta_index));
-
-          if (TotalMods(counts) >= FLAGS_min_mods) {
-            peptide_->set_id(count_++);
-            Write(counts);
-          }
-
-          peptide_->mutable_modifications()->RemoveLast();
-          --counts[poss_max_ct];
-        }
-      }
+      //add any matching regular mods first
+      PlaceCTermVariableMod(pos, residues_[pos], MOD_SPEC, counts);
 
       //add variable c-terminal mods
-      aa = residues_[pos];
-      num_poss = mod_table_->NumPoss(aa, CTPEP);
-      for (int i = 0; i < num_poss; ++i) {
-        int poss_max_ct = mod_table_->PossMaxCt(aa, i, CTPEP);
-        if (max_counts_[poss_max_ct] == 1) {
-          ++counts[poss_max_ct];
-          int delta_index = mod_table_->PossDeltIx(aa, i, CTPEP);
-          peptide_->add_modifications(mod_table_->EncodeMod(pos, delta_index));
+      int prot_idx = peptide_->first_location().protein_id();
+      auto prot_len = proteins_[prot_idx]->residues().length();
 
-          if (TotalMods(counts) >= FLAGS_min_mods) {
-            peptide_->set_id(count_++);
-            Write(counts);
-          }
-
-          peptide_->mutable_modifications()->RemoveLast();
-          --counts[poss_max_ct];
-          any_term_modification = true;
-        }
+      for(auto aa = aas.begin(); aa < aas.end(); aa++) {
+        //if this is protein's C_terminal
+        if((peptide_->first_location().pos() + peptide_->length()) == prot_len)
+          PlaceCTermVariableMod(pos, *aa, CTPRO, counts);
+        PlaceCTermVariableMod(pos, *aa, CTPEP, counts);
       }
-      aa = 'X';
-      num_poss = mod_table_->NumPoss(aa, CTPEP);
-      for (int i = 0; i < num_poss; ++i) {
-        int poss_max_ct = mod_table_->PossMaxCt(aa, i, CTPEP);
-        if (max_counts_[poss_max_ct] == 1) {
-          ++counts[poss_max_ct];
-          int delta_index = mod_table_->PossDeltIx(aa, i, CTPEP);
-          peptide_->add_modifications(mod_table_->EncodeMod(pos, delta_index));
 
-          if (TotalMods(counts) >= FLAGS_min_mods) {
-            peptide_->set_id(count_++);
-            Write(counts);
-          }
-
-          peptide_->mutable_modifications()->RemoveLast();
-          --counts[poss_max_ct];
-          any_term_modification = true;
-        }
-      }
       if (TotalMods(counts) >= FLAGS_min_mods) {
         peptide_->set_id(count_++);
         Write(counts);
