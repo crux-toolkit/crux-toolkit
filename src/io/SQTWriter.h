@@ -44,7 +44,7 @@ class SQTWriter {
   );
 
  protected:
-  ofstream* file_;
+  ostream* file_;
 
 };
 

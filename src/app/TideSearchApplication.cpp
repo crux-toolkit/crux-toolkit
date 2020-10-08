@@ -1583,6 +1583,8 @@ vector<string> TideSearchApplication::getOptions() const {
     "use-flanking-peaks",
     "use-neutral-loss-peaks",
     "use-z-line",
+    "verbosity",
+    "aws-profile"
     "use-tailor-calibration",    
     "verbosity"
   };

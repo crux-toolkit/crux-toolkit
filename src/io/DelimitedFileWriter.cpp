@@ -45,7 +45,11 @@ DelimitedFileWriter::DelimitedFileWriter
  */
 DelimitedFileWriter::~DelimitedFileWriter() {
   if( file_ptr_ ) {
-    file_ptr_->close();
+    if(file_ptr_->good())
+      file_ptr_->flush();
+    ofstream* proven_file = dynamic_cast<ofstream*>(file_ptr_);
+    if(proven_file != nullptr)
+      proven_file->close();
     delete file_ptr_;
   }
 }
@@ -58,7 +62,12 @@ void DelimitedFileWriter::openFile(const char* filename) {
   // write any existing data and close file
   if( file_ptr_ ) {
     writeRow();
-    file_ptr_->close();
+    ofstream* proven_file = dynamic_cast<ofstream*>(file_ptr_);
+    if(proven_file != nullptr)
+      proven_file->close();
+    else
+      file_ptr_->flush();
+    
     delete file_ptr_;
   }
 
@@ -140,7 +149,7 @@ void DelimitedFileWriter::writeHeader() {
     return;
   }
   
-  if( file_ptr_ == NULL || !file_ptr_->is_open() ) {
+  if( file_ptr_ == NULL || !file_ptr_->good() ) {
     carp(CARP_FATAL, "Cannot write to NULL delimited file.");
   }
   

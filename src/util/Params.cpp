@@ -931,6 +931,11 @@ Params::Params() : finalized_(false) {
   InitIntParam("num-threads", 0, 0, 64,
                "0=poll CPU to set num threads; else specify num threads directly.",
                "Available for tide-search tab-delimited files only.", true);
+  InitStringParam("aws-profile", "default",
+                  "The name of AWS profile to use when specifying S3 files for input or output."
+                  " The profiles should be first configured with aws configure command and contain "
+                  "correct credentials and default region to access the S3 files.",
+                  "Available for tide-index and tide-search.", true);
   InitBoolParam("brief-output", false,
     "Output in tab-delimited text only the file name, scan number, charge, score and peptide.",
     "Available for tide-search", true);
@@ -2260,6 +2265,7 @@ void Params::Categorize() {
   items.insert("use-z-line");
   items.insert("verbosity");
   items.insert("xlink-print-db");
+  items.insert("aws-profile");                    
   AddCategory("Input and output", items);
 
 }

@@ -128,6 +128,9 @@ int TideIndexApplication::main(
   if (!FileUtils::Exists(fasta)) {
     carp(CARP_FATAL, "Fasta file %s does not exist", fasta.c_str());
   }
+  else{
+    carp(CARP_INFO, "Fasta file %s is found.", fasta.c_str());
+  }
 
   string out_proteins = FileUtils::Join(index, "protix");
   string out_peptides = FileUtils::Join(index, "pepix");
@@ -417,7 +420,8 @@ vector<string> TideIndexApplication::getOptions() const {
     "peptide-list",
     "seed",
     "temp-dir",
-    "verbosity"
+    "verbosity",
+    "aws-profile"
   };
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }
@@ -471,7 +475,7 @@ void TideIndexApplication::fastaToPb(
   outProteinPbHeader.set_file_type(pb::Header::RAW_PROTEINS);
   outProteinPbHeader.set_command_line(commandLine);
   pb::Header_Source* headerSource = outProteinPbHeader.add_source();
-  headerSource->set_filename(AbsPath(fasta));
+  headerSource->set_filename(FileUtils::AbsPath(fasta));
   headerSource->set_filetype("fasta");
   unsigned int invalidPepCnt = 0;
   unsigned int failedDecoyCnt = 0;
@@ -480,7 +484,8 @@ void TideIndexApplication::fastaToPb(
   outProteinSequences.clear();
 
   HeadedRecordWriter proteinWriter(proteinPbFile, outProteinPbHeader);
-  ifstream fastaStream(fasta.c_str(), ifstream::in);
+
+  istream& fastaStream = FileUtils::GetReadStream(fasta); 
   string proteinName;
   string* proteinSequence = new string;
   int curProtein = -1;
@@ -529,6 +534,7 @@ void TideIndexApplication::fastaToPb(
     proteinSequence = new string;
   }
   delete proteinSequence;
+  FileUtils::CloseStream(fastaStream);
   if (targetsGenerated == 0) {
     carp(CARP_FATAL, "No target sequences generated.  Is \'%s\' a FASTA file?",
          fasta.c_str());
