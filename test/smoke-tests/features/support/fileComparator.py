@@ -13,15 +13,25 @@ def assertAndDie(condition, message):
 def diffFilter(d):
     return (d["expected"] != d["actual"]) & ((pan.isna(d["expected"]) | pan.isna(d["actual"]))^True)
 
+def roundColumnToDecDigits(col, digits):
+    exp = numpy.zeros(len(col))
+    significand = col.copy()
+    while any(significand > 10):
+        exp += significand > 10
+        significand[significand > 10] = significand[significand > 10] / 10
+    return numpy.round(significand, decimals=digits - 1) * 10 ** exp
+
 def compareSorted(dataExpected, dataActual, precision):
-    epsilon = 0.1**precision
     for colName in dataExpected.columns:
         assertAndDie(dataExpected[colName].dtype == dataActual[colName].dtype, "data types do not match for column {0}".format(colName))
 
         if dataExpected[colName].dtype == numpy.float:
-            diff = (dataExpected[colName] - dataActual[colName]).abs().loc[lambda d : d > epsilon]
-            msg = "column {0} differs by more than {1} at the line {2}"
-            assertAndDie(len(diff) == 0, msg.format(colName, epsilon, diff.index[0] if len(diff.index) > 0 else 0 ))
+            roundExpected = roundColumnToDecDigits(dataExpected[colName], precision)
+            roundActual = roundColumnToDecDigits(dataActual[colName], precision)
+            #
+            diff = (roundExpected - roundActual).abs().loc[lambda d : d > 0]
+            msg = "column {0} differs by more than {1} decimal digits at the line {2}"
+            assertAndDie(len(diff) == 0, msg.format(colName, precision, diff.index[0] if len(diff.index) > 0 else 0 ))
         else:
             compFrame = pan.DataFrame({"expected": dataExpected[colName], "actual": dataActual[colName]})
             diff = compFrame.loc[diffFilter]
@@ -34,11 +44,20 @@ class ComparableRow(object):
         comp_data = []
         for val in row:
             if "dtype" in dir(val) and val.dtype == numpy.float:
-                comp_data.append(round(val, precision))
+                comp_data.append(self.roundToDecDigit(val, precision))
             else:
                 comp_data.append(val)
         self.row_hash = tuple(comp_data).__hash__()
     #
+    def roundToDecDigit(self, x, digits):
+        exp = 0
+        significand = x
+        while significand > 10:
+            exp += 1
+            significand /= 10
+        return round(significand, digits - 1) * 10 ** exp
+
+
     def __hash__(self):
         return self.row_hash
     #

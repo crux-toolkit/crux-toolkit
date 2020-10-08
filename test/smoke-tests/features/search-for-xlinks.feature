@@ -9,7 +9,7 @@ Scenario Outline: User runs search-for-xlinks
   And I pass the arguments <args> <spectra> <fasta> <sites> <mass>
   When I run search-for-xlinks
   Then the return value should be 0
-  And crux-output/<actual_output> should match good_results/<expected_output>
+  And crux-output/<actual_output> should match good_results/<expected_output> with 7 digits precision
 
 Examples:
   |test_name        |args                            |spectra  |fasta         |sites  |mass  |actual_output     |expected_output        |
