@@ -47,6 +47,8 @@
 #include "app/CascadeSearchApplication.h"
 #include "app/AssignConfidenceApplication.h"
 #include "app/SubtractIndexApplication.h"
+
+#include "app/DIAmeterApplication.h"
 /**
  * The starting point for crux.  Prints a general usage statement when
  * given no arguments.  Runs one of the crux commands, including
@@ -79,6 +81,8 @@ int main(int argc, char** argv) {
     applications.add(new PipelineApplication());
     applications.add(new CascadeSearchApplication());
     applications.add(new AssignConfidenceApplication());
+
+    applications.add(new DIAmeterApplication());
 
     // Utilities
     applications.addMessage(applications.getListName() +

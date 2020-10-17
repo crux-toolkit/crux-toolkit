@@ -29,6 +29,18 @@ enum _tide_search_lock {
 
 typedef enum _tide_search_lock TIDE_SEARCH_LOCK_T;
 
+
+struct InputFile {
+  std::string OriginalName;
+  std::string SpectrumRecords;
+  bool Keep;
+  InputFile(const std::string& name,
+            const std::string& spectrumrecords,
+            bool keep):
+    OriginalName(name), SpectrumRecords(spectrumrecords), Keep(keep) {}
+};
+
+
 class TideSearchApplication : public CruxApplication {
 private:
   //Added by Andy Lin in Feb 2016
@@ -63,16 +75,6 @@ private:
   friend class SubtractIndexApplication;
 
  protected:
-
-  struct InputFile {
-    std::string OriginalName;
-    std::string SpectrumRecords;
-    bool Keep;
-    InputFile(const std::string& name,
-              const std::string& spectrumrecords,
-              bool keep):
-      OriginalName(name), SpectrumRecords(spectrumrecords), Keep(keep) {}
-  };
 
   /**
   brief This variable is used with Cascade Search.
