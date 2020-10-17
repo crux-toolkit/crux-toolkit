@@ -76,3 +76,11 @@ rules.ninja
 /test/smoke-tests/good_results/*.observed
 
 /aws-sdk/build/
+
+# added by Yang
+Release/
+src/.cproject
+src/.project
+src/.settings/language.settings.xml
+
+
