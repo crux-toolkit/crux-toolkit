@@ -429,7 +429,7 @@ vector<int> TideSearchApplication::getNegativeIsotopeErrors() const {
   return negative_isotope_errors;
 }
 
-vector<TideSearchApplication::InputFile> TideSearchApplication::getInputFiles(
+vector<InputFile> TideSearchApplication::getInputFiles(
   const vector<string>& filepaths
 ) const {
   // Try to read all spectrum files as spectrumrecords, convert those that fail

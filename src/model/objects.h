@@ -638,6 +638,7 @@ enum _command {
   PERCOLATOR_COMMAND,   ///< percolator
   TIDE_INDEX_COMMAND,   ///< tide-index
   TIDE_SEARCH_COMMAND,  ///< tide-search
+  DIAMETER_COMMAND,  ///< tide-search
   COMET_COMMAND,        ///< comet
   PSM_CONVERT_COMMAND,  ///< psm-convert
   READ_SPECTRUMRECORDS_COMMAND, ///< read-spectrumrecords
