@@ -16,7 +16,7 @@ Scenario Outline: User runs psm-convert
   When I ignore lines matching the pattern: /<cv id="UNIMOD" .*$/
   When I ignore lines matching the pattern: /<cv id="UO" .*$/
   Then the return value should be 0
-  And crux-output/<actual_output> should match good_results/<expected_output>
+  And crux-output/<actual_output> should match good_results/<expected_output> with 7 digits precision
 
 # Generate results with static-anywhere, variable-anywhere, static-nterm, static-cterm (results1.txt)
 # tide-search --mods-spec C+57.02,2M+15.99 --nterm-peptide-mods-spec X+1.7 --cterm-peptide-mods-spec X+1.8 demo.ms2 small-yeast.fasta

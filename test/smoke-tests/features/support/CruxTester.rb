@@ -65,6 +65,12 @@ class CruxTester
       raise("cannot read file '" + actual + "'")
     end
 
+    same = cmpFiles(expected, actual)
+    copyObserved(actual, expected, same, write_observed)
+    return same
+  end
+
+  def cmpFiles(expected, actual)
     same = true
     file_expected = File.open(expected)
     file_actual = File.open(actual)
@@ -85,8 +91,17 @@ class CruxTester
     end
     file_expected.close
     file_actual.close
-    copyObserved(actual, expected, same, write_observed)
     return same
+  end
+
+  def cmpFilesPython(expected, actual, precision)
+    compRes = system("python", "./features/support/fileComparator.py", "-r", precision, expected, actual)
+    return compRes
+  end
+
+  def cmpUnorderedFilesPython(expected, actual, precision)
+    compRes = system("python", "./features/support/fileComparator.py", "-u", "-r", precision, expected, actual)
+    return compRes
   end
 
   # Compare files where line order does not matter
