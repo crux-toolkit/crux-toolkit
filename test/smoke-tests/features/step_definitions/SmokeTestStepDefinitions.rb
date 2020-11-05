@@ -34,11 +34,23 @@ Then /^the return value should be (-?[0-9]+)$/ do | ret |
   expect(@last_ret).to eq(ret.to_i)
 end
 
-Then /^(.*) should match (.*)$/ do | actual, expected |
+Then /^(.*) should match ([^\s]+)$/ do | actual, expected |
   expect(@tester.cmp(expected, actual)).to be true
+end
+
+Then /^(.*) should match ([^\s]+) with ([^\s]+) digits precision$/ do | actual, expected, precision |
+  accepted_formats = [".txt", ".pin"]
+  if accepted_formats.include? File.extname(actual)
+    expect(@tester.cmpFilesPython(expected, actual, precision)).to be true
+  else
+    expect(@tester.cmp(expected, actual)).to be true
+  end
 end
 
 Then /^(.*) should contain the same lines as (.*)$/ do | actual, expected |
   expect(@tester.cmpUnordered(expected, actual)).to be true
 end
 
+Then /^All lines in (.*) should be in (.*) with ([^\s]+) digits precision$/ do | actual, expected, precision |
+  expect(@tester. cmpUnorderedFilesPython(expected, actual, precision)).to be true
+end
