@@ -4,8 +4,6 @@ cmake_minimum_required(VERSION 2.8.4)
 cmake_policy(VERSION 2.8.4)
 
 include_directories(${CMAKE_SOURCE_DIR}/src)
-include_directories(${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/libraries/boost_1_56_0)
-include_directories(${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/libraries/boost_aux)
 include_directories(${CMAKE_BINARY_DIR}/ext/include)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")

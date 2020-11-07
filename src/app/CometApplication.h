@@ -8,6 +8,7 @@
 #define COMETAPPLICATION_H
 
 #include "CruxApplication.h"
+#include "CometSearch/Common.h"
 #include "CometSearch/CometSearchManager.h"
 #include <string>
 #include <fstream>
@@ -27,6 +28,7 @@ class CometApplication: public CruxApplication {
   void setVarMod(const std::string& param);
   void setEnzyme(const std::string& param,
                  const std::string& searchParam,
+                 const std::string& search2Param,
                  const std::string& sampleParam,
                  const std::string& missedCleavageParam);
 

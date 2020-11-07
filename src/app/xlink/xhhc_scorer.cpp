@@ -87,11 +87,11 @@ int XHHC_Scorer::getMatchedBYIons(
   LinkedIonSeries& ion_series) {
 
   FLOAT_T bin_width = BIN_WIDTH_MONO;
-  vector<LinkedPeptide>& ions = ion_series.getIons();
+  std::vector<LinkedPeptide>& ions = ion_series.getIons();
 
   int ans = 0;
 
-  for (vector<LinkedPeptide>::iterator ion = ions.begin(); ion != ions.end(); ++ion) {
+  for (std::vector<LinkedPeptide>::iterator ion = ions.begin(); ion != ions.end(); ++ion) {
     if (ion -> getMZ(MONO) >= 400 && ion -> getMZ(MONO) <= 1200) {
     if (ion -> getIonType() == B_ION || ion -> getIonType() == Y_ION) {
       Peak * peak = spectrum->getNearestPeak(ion->getMZ(AVERAGE), 
@@ -166,16 +166,16 @@ FLOAT_T XHHC_Scorer::hhcGenScoreXcorr(
  * adds an intensity in the theoretical map at peak idx
  */
 void XHHC_Scorer::addIntensityMap(
-  map<int, FLOAT_T>& theoretical, ///< the theoretical map 
+  std::map<int, FLOAT_T>& theoretical, ///< the theoretical map 
   int idx, ///< the idx to add   
   FLOAT_T intensity ///< the corresponding intensity
   ) {
   
-  map<int, FLOAT_T>::iterator iter = theoretical.find(idx);
+  std::map<int, FLOAT_T>::iterator iter = theoretical.find(idx);
   if (iter == theoretical.end())
     theoretical[idx] = intensity;
   else
-    iter -> second = max(intensity, iter -> second);
+    iter -> second = fmax(intensity, iter -> second);
 }
 
 
@@ -185,15 +185,15 @@ void XHHC_Scorer::addIntensityMap(
  */
 bool XHHC_Scorer::xlinkCreateMapTheoretical(
   LinkedIonSeries& ion_series, ///< LinkedIonSeries to create the map from -in
-  map<int, FLOAT_T>& theoretical ///< The theoretical map -out
+  std::map<int, FLOAT_T>& theoretical ///< The theoretical map -out
   ) {
 
   theoretical.clear();
   int intensity_array_idx = 0;
   FLOAT_T bin_width = BIN_WIDTH_MONO;
-  vector<LinkedPeptide>& ions = ion_series.getIons();
+  std::vector<LinkedPeptide>& ions = ion_series.getIons();
   // while there are ion's in ion iterator, add matched observed peak intensity
-  for (vector<LinkedPeptide>::iterator ion = ions.begin(); ion != ions.end(); ++ion) {
+  for (std::vector<LinkedPeptide>::iterator ion = ions.begin(); ion != ions.end(); ++ion) {
     intensity_array_idx = (int)(ion->getMZ(MONO) / bin_width + 0.5);
     //ion_type = ion->getIonType();
     //ion_charge = ion->getCharge();
@@ -241,9 +241,9 @@ bool XHHC_Scorer::hhcCreateIntensityArrayTheoretical(
 
   ION_TYPE_T ion_type;
   int intensity_array_idx = 0;
-  vector<LinkedPeptide>& ions = ion_series.getIons();
+  std::vector<LinkedPeptide>& ions = ion_series.getIons();
   // while there are ion's in ion iterator, add matched observed peak intensity
-  for (vector<LinkedPeptide>::iterator ion = ions.begin(); ion != ions.end(); ++ion) {
+  for (std::vector<LinkedPeptide>::iterator ion = ions.begin(); ion != ions.end(); ++ion) {
     intensity_array_idx = INTEGERIZE(ion->getMZ(MONO), bin_width_, bin_offset_);
     ion_type = ion->getIonType();
     //ion_charge = ion->getCharge();
@@ -311,7 +311,7 @@ FLOAT_T XHHC_Scorer::getIonCurrentExplained(
 
   FLOAT_T ans = 0.0;
 
-  map<int, bool> by_found;
+  std::map<int, bool> by_found;
 
   for (PeakIterator peak_iter = spectrum->begin();
     peak_iter != spectrum->end();
@@ -349,23 +349,23 @@ void XHHC_Scorer::printSpectrums(
   Spectrum* spectrum ///< The spectrum to print
   ) {
    
-  ofstream theoretical_file;
-  ofstream observed_file;
-  ofstream spectrums_file;
+  std::ofstream theoretical_file;
+  std::ofstream observed_file;
+  std::ofstream spectrums_file;
 
   theoretical_file.open("theoretical.out");
   observed_file.open("observed.out");
   spectrums_file.open("spectrums.out");
 
-  theoretical_file << "> theoretical" << endl;
-  observed_file << "> observed" << endl;
-  spectrums_file << "> spectrums" << endl;
+  theoretical_file << "> theoretical" << std::endl;
+  observed_file << "> observed" << std::endl;
+  spectrums_file << "> spectrums" << std::endl;
   bool noflanks = Params::GetBool("use-flanking-peaks");
   int normalize = NORMALIZE;
   int max_mz = MAX_MZ;
   int min_mz = MIN_MZ;
   // keep track of colors
-  map<Peak *, string> peak_colors;
+  std::map<Peak *, std::string> peak_colors;
   carp(CARP_DEBUG, "min mz: %d, max mz: %d\n", max_mz);
   FLOAT_T average = 0;
 
@@ -390,8 +390,8 @@ void XHHC_Scorer::printSpectrums(
       if (normalize) {
         peak_colors[peak] = "blue";
       } else {
-        observed_file << location<< "\t" << intensity << "\tnolabel\tred" << endl;
-        spectrums_file << location<< "\t" << intensity  << "\tnolabel\tblue" << endl;
+        observed_file << location<< "\t" << intensity << "\tnolabel\tred" << std::endl;
+        spectrums_file << location<< "\t" << intensity  << "\tnolabel\tblue" << std::endl;
       }
     }
   }
@@ -405,16 +405,16 @@ void XHHC_Scorer::printSpectrums(
   int mismatch_count = 0;
   while (i <= max_mz)  {
     if (((*index > 1 && !noflanks) || *index > 26) && i >= min_mz) {
-        theoretical_file << i << "\t" << *index << "\tnolabel\tred" << endl;
+        theoretical_file << i << "\t" << *index << "\tnolabel\tred" << std::endl;
       Peak * peak = spectrum->getNearestPeak(i, 1);
       if (peak != NULL) {
         ++match_count;
         peak_colors[peak] = "green";
-        spectrums_file << i << "\t" << -10000 << "\tnolabel\tgreen" << endl;
+        spectrums_file << i << "\t" << -10000 << "\tnolabel\tgreen" << std::endl;
         //spectrums_file << get_peak_location(peak) << "\t" << pow (get_peak_intensity(peak) * average * normalize, 0.2) << "\tnolabel\tgreen" << endl;
       } else {
         ++mismatch_count;
-        spectrums_file << i << "\t" << -10000 << "\tnolabel\tred" << endl;
+        spectrums_file << i << "\t" << -10000 << "\tnolabel\tred" << std::endl;
       }
     }
     ++i;
@@ -422,11 +422,11 @@ void XHHC_Scorer::printSpectrums(
   }
   FLOAT_T location;
   FLOAT_T intensity;
-  for (map<Peak *, string>::iterator it = peak_colors.begin(); it != peak_colors.end(); ++it) {
+  for (std::map<Peak *, std::string>::iterator it = peak_colors.begin(); it != peak_colors.end(); ++it) {
     location = it->first->getLocation();
     intensity = it->first->getIntensity();;
     //spectrums_file << location << "\t" << pow(intensity * average * normalize, 0.2) << "\tnolabel\t" << it->second << endl;
-    spectrums_file << location << "\t" << intensity << "\tnolabel\t" << it->second << endl;
+    spectrums_file << location << "\t" << intensity << "\tnolabel\t" << it->second << std::endl;
   }
 
   theoretical_file.close();
