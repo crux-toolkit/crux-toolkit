@@ -47,6 +47,8 @@
 #include "app/CascadeSearchApplication.h"
 #include "app/AssignConfidenceApplication.h"
 #include "app/SubtractIndexApplication.h"
+#include "app/KojakApplication.h"
+
 /**
  * The starting point for crux.  Prints a general usage statement when
  * given no arguments.  Runs one of the crux commands, including
@@ -55,10 +57,10 @@
 int main(int argc, char** argv) {
   try {
 #ifdef _MSC_VER
-    // Turn off auto-tranlation of line-feed to 
+    // Turn off auto-tranlation of line-feed to
     // carriage-return/line-feed
     _set_fmode(_O_BINARY);
-#endif 
+#endif
 
     CruxApplicationList applications("crux");
 
@@ -79,6 +81,7 @@ int main(int argc, char** argv) {
     applications.add(new PipelineApplication());
     applications.add(new CascadeSearchApplication());
     applications.add(new AssignConfidenceApplication());
+    applications.add(new KojakApplication());
 
     // Utilities
     applications.addMessage(applications.getListName() +

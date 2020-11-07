@@ -253,7 +253,7 @@ class MatchCollection {
    * the collection rather than limiting by top-match parameter. 
    */
   void printMultiSpectraXml(
-    PepXMLWriter* output
+    Crux::PepXMLWriter* output
     );
 
   /*
@@ -292,7 +292,7 @@ class MatchCollection {
    * returns true, if sucessfully print xml format of the PSMs, else false
    */
   bool printXml(
-    PepXMLWriter* output,
+    Crux::PepXMLWriter* output,
     int top_match,
     Crux::Spectrum* spectrum,
     SCORER_TYPE_T main_score
