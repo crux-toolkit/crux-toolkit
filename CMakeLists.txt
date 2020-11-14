@@ -78,7 +78,7 @@ add_custom_target(
 
 add_custom_target(
   no-externals 
-  COMMAND ${CMAKE_MAKE_PROGRAM} crux  xlink-score-spectrum xlink-assign-ions 
+  COMMAND ${CMAKE_MAKE_PROGRAM} crux  
   WORKING_DIRECTORY src
   COMMENT "Not building external dependendcies."
 )
@@ -104,8 +104,6 @@ add_dependencies(create-docs crux)
 add_dependencies(crux crux-support)
 add_dependencies(crux kojak)
 add_dependencies(crux tide-support)
-add_dependencies(crux xlink)
-add_dependencies(crux-support barista)
 add_dependencies(crux-support bullseye)
 add_dependencies(crux-support comet)
 add_dependencies(crux-support crux_version)

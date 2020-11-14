@@ -55,11 +55,9 @@ void PSMConvertApplication::convertFile(string input_format, string output_forma
       reader = new PepXMLReader(input_file.c_str(), data);
     } else if (input_format == "mzidentml") {
       reader = new MzIdentMLReader(input_file.c_str(), data);
-    } else if (input_format == "barista-xml") {
-      carp(CARP_FATAL, "Barista-XML format has not been implemented yet");
     } else {
       carp(CARP_FATAL, "Invalid input format. Valid formats are: tsv, html, "
-           "sqt, pin, pepxml, mzidentml, barista-xml.");
+           "sqt, pin, pepxml, mzidentml.");
     }
   } else {
     if (StringUtils::IEndsWith(input_file, ".txt")) {
@@ -75,12 +73,10 @@ void PSMConvertApplication::convertFile(string input_format, string output_forma
       reader = new PepXMLReader(input_file.c_str(), data);
     } else if (StringUtils::IEndsWith(input_file, ".mzid")) {
       reader = new MzIdentMLReader(input_file.c_str(), data);
-    } else if (StringUtils::IEndsWith(input_file, ".barista.xml")) {
-      carp(CARP_FATAL, "Barista-XML format has not been implemented yet");
     } else {
       carp(CARP_FATAL, "Could not determine input format, "
            "Please name your files ending with .txt, .html, .sqt, .pin, "
-           ".xml, .mzid, .barista.xml or use the --input-format option to "
+           ".xml, .mzid or use the --input-format option to "
            "specify file type");
     }
   }
@@ -124,11 +120,9 @@ void PSMConvertApplication::convertFile(string input_format, string output_forma
   } else if (output_format == "mzidentml") {
     output_file_name_builder << "mzid";
     writer = new MzIdentMLWriter();
-  } else if (output_format == "barista-xml") {
-    carp(CARP_FATAL, "Barista-XML format has not been implemented yet");
   } else {
     carp(CARP_FATAL, "Invalid output format.  Valid formats are: tsv, html, "
-         "sqt, pin, pepxml, mzidentml, barista-xml.");
+         "sqt, pin, pepxml, mzidentml.");
   }
   
   string output_file_name = make_file_path(output_file_name_builder.str());
