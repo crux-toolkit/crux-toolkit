@@ -430,7 +430,7 @@ bool ion_type_to_string(ION_TYPE_T type,
  */
 static const char* algorithm_type_strings[NUMBER_ALGORITHM_TYPES] = {
   "percolator", "rczar", "curve-fit",
-  "none", "all", "q-ranker"
+  "none", "all"
 };
 
 bool string_to_algorithm_type(char* name, ALGORITHM_TYPE_T* result) {
@@ -523,16 +523,6 @@ static const char* scorer_type_strings[NUMBER_SCORER_TYPES] = {
   "percolator_qvalue",
   "percolator_peptide_qvalue",
   "percolator_PEP",
-
-  "qranker_score", 
-  "qranker_qvalue",
-  "qranker_peptide_qvalue",
-  "qranker_PEP",
-
-  "barista_score", 
-  "barista_qvalue",
-  "barista_peptide_qvalue",
-  "barista_PEP",
 
   "deltacn",
   "deltalcn",
