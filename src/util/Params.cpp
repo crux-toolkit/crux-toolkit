@@ -154,7 +154,8 @@ Params::Params() : finalized_(false) {
     "supported by ProteoWizard[[html:</a>]]. Alteratively, with Tide-search, these files "
     "may be binary spectrum files produced by a previous run of [[html:<code>]]crux "
     "tide-search[[html:</code>]] using the [[html:<code>]]store-spectra[[html:</code>]] "
-    "parameter.");
+    "parameter. Multiple files can be included on the command line (space delimited), "
+    "prior to the name of the database.");
   InitArgParam("peptide source",
     "Either the name of a file in fasta format from which to retrieve proteins and "
     "peptides or an index created by a previous run of [[html:<code>]]crux tide-index"
@@ -745,7 +746,8 @@ Params::Params() : finalized_(false) {
     "The name of one or more files from which to parse the fragmentation spectra, in any "
     "of the file formats supported by ProteoWizard. Alternatively, the argument "
     "may be one or more binary spectrum files produced by a previous run of crux "
-    "tide-search using the store-spectra parameter.");
+    "tide-search using the store-spectra parameter. Multiple files can be included "
+    "on the command line (space delimited), prior to the name of the database.");
   InitArgParam("tide database",
     "Either a FASTA file or a directory containing a database index created by a previous "
     "run of crux tide-index.");
@@ -938,10 +940,11 @@ Params::Params() : finalized_(false) {
    * Comet parameters
    */
   InitArgParam("input spectra",
-    "The name of the file from which to parse the spectra. Valid formats include mzXML, "
+    "The name of one or more files from which to parse the spectra. Valid formats include mzXML, "
     "mzML, mz5, raw, ms2, and cms2. Files in mzML or mzXML may be compressed with gzip. "
     "RAW files can be parsed only under windows and if the appropriate libraries were "
-    "included at compile time.");
+    "included at compile time. Multiple files can be included on the command line "
+    "(space delimited), prior to the name of the database.");
   /* Comet - Database */
   InitArgParam("database_name",
     "A full or relative path to the sequence database, "

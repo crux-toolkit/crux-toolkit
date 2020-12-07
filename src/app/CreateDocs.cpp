@@ -294,9 +294,6 @@ void CreateDocs::generateToolHtml(
     bool multiArg = StringUtils::EndsWith(*i, "+");
     string argName = multiArg ? i->substr(0, i->length() - 1) : *i;
     usage += " &lt;" + argName + "&gt;";
-    if (multiArg) {
-      usage += "+";
-    }
 
     if (!Params::Exists(argName)) {
       carp(CARP_FATAL, "Invalid argument '%s' for application '%s'",
@@ -304,7 +301,7 @@ void CreateDocs::generateToolHtml(
     }
     string single = inputTemplate;
     map<string, string> replaceMap;
-    replaceMap["#NAME#"] = !multiArg ? argName : argName + "+";
+    replaceMap["#NAME#"] = argName;
     replaceMap["#DESCRIPTION#"] = Params::ProcessHtmlDocTags(Params::GetUsage(argName), true);
     makeReplacements(&single, replaceMap);
     inputs += single;

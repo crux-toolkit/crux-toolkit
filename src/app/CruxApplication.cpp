@@ -198,7 +198,7 @@ string CruxApplication::getUsage(
   vector<string> argDisplay;
   for (vector<string>::const_iterator i = args.begin(); i != args.end(); i++) {
     argDisplay.push_back(StringUtils::EndsWith(*i, "+") ?
-      "<" + i->substr(0, i->length() - 1) + ">+" :"<" + *i + ">");
+      "<" + i->substr(0, i->length() - 1) + ">" :"<" + *i + ">");
   }
 
   stringstream usage;
