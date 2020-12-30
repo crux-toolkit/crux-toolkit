@@ -132,6 +132,7 @@ include_directories(picked_protein)
 # COMPILE PERCOLATOR
 if(CRUX)
   ADD_DEFINITIONS(-DCRUX)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
   include_directories(${CRUX} ${CRUX}/src ${EXT_BINARY_DIR})
 ELSE(CRUX)
   add_executable(percolator main.cpp)
