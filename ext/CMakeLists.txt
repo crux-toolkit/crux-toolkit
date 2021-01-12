@@ -123,6 +123,9 @@ elseif (APPLE)
       COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_aux/boost/utility
         ${CMAKE_CURRENT_BINARY_DIR}/include/boost/utility
+      COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_1_67_0/boost/system/detail/error_code.ipp
+        ${CMAKE_CURRENT_BINARY_DIR}/include/boost/system/detail
     BUILD_IN_SOURCE 1
   )
 else (UNIX)
