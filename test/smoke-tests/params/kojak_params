@@ -1,0 +1,64 @@
+# General
+verbosity=30
+overwrite=T
+fileroot=
+
+# Param-Medic
+pm-min-precursor-mz=400
+pm-max-precursor-mz=1800
+pm-min-frag-mz=150
+pm-max-frag-mz=1800
+pm-min-scan-frag-peaks=40
+pm-max-precursor-delta-ppm=50
+pm-charges=0,2,3,4
+pm-top-n-frag-peaks=30
+pm-pair-top-n-frag-peaks=5
+pm-min-common-frag-peaks=20
+pm-max-scan-separation=1000
+pm-min-peak-pairs=200
+
+# Kojak
+threads=1
+enrichment=0
+modification=M 15.9949
+fragment_bin_offset=0
+auto_ppm_tolerance_pre=false
+auto_fragment_bin_size=false
+export_percolator=true
+export_pepXML=true
+export_mzID=true
+kojak_instrument=0
+MS1_centroid=true
+MS2_centroid=true
+MS1_resolution=30000
+MS2_resolution=25000
+cross_link=nK nK 138.068074 BS3
+mono_link=nK 156.0786
+fixed_modification=C 57.02146
+fixed_modification_protC=0
+fixed_modification_protN=0
+modification_protC=0
+modification_protN=0
+diff_mods_on_xl=false
+max_mods_per_peptide=2
+mono_links_on_xl=false
+kojak_enzyme=[KR] Trypsin
+fragment_bin_size=0.03
+ion_series_A=false
+ion_series_B=true
+ion_series_C=false
+ion_series_X=false
+ion_series_Y=true
+ion_series_Z=false
+decoy_filter=DECOY_ 1
+kojak_isotope_error=1
+max_miscleavages=2
+max_peptide_mass=8000
+min_peptide_mass=500
+max_spectrum_peaks=0
+ppm_tolerance_pre=39.753916
+precursor_refinement=F
+prefer_precursor_pred=2
+spectrum_processing=false
+top_count=20
+truncate_prot_names=0

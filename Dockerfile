@@ -32,6 +32,10 @@ RUN apt-get update && apt-get -y install \
   libpulse-dev
 
 RUN mkdir /app
+RUN mkdir /home/crux && \
+    groupadd -r crux && useradd --no-log-init -r -g crux crux && \
+	  chown crux:crux /home/crux
+
 
 WORKDIR /src
 
@@ -52,23 +56,10 @@ RUN make && make install
 # Gather binary and dynamic dependencies to copy over to base layer
 ###
 
-RUN mkdir /gathered
-
-RUN ldd /app/bin/crux | grep "=> /" | awk '{print $3}' |  xargs -I '{}' sh -c "cp -v --parents {} /gathered"
-
-RUN cp --parents /app/bin/crux /gathered
-
-FROM base as runtime
-
-###
-# Final image contains binary, dynamic dependencies, and SSL/TLS certs
-###
-
 LABEL description="crux-toolkit"
 
-COPY --from=builder /gathered /
 
 ENV PATH="${PATH}:/app/bin"
 
-WORKDIR /app
+WORKDIR /home/crux
 

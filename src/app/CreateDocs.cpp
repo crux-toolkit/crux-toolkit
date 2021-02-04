@@ -37,6 +37,7 @@
 #include "TideIndexApplication.h"
 #include "TideSearchApplication.h"
 #include "CometApplication.h"
+#include "KojakApplication.h"
 #include "app/CascadeSearchApplication.h"
 #include "app/AssignConfidenceApplication.h"
 #include "app/SubtractIndexApplication.h"
@@ -62,6 +63,7 @@ int CreateDocs::main(int argc, char** argv) {
   apps.add(new ExtractRows());
   apps.add(new GeneratePeptides());
   apps.add(new GetMs2Spectrum());
+  apps.add(new KojakApplication());
   apps.add(new MakePinApplication());
   apps.add(new LocalizeModificationApplication());
   apps.add(new ParamMedicApplication());
@@ -292,9 +294,6 @@ void CreateDocs::generateToolHtml(
     bool multiArg = StringUtils::EndsWith(*i, "+");
     string argName = multiArg ? i->substr(0, i->length() - 1) : *i;
     usage += " &lt;" + argName + "&gt;";
-    if (multiArg) {
-      usage += "+";
-    }
 
     if (!Params::Exists(argName)) {
       carp(CARP_FATAL, "Invalid argument '%s' for application '%s'",
@@ -302,7 +301,7 @@ void CreateDocs::generateToolHtml(
     }
     string single = inputTemplate;
     map<string, string> replaceMap;
-    replaceMap["#NAME#"] = !multiArg ? argName : argName + "+";
+    replaceMap["#NAME#"] = argName;
     replaceMap["#DESCRIPTION#"] = Params::ProcessHtmlDocTags(Params::GetUsage(argName), true);
     makeReplacements(&single, replaceMap);
     inputs += single;

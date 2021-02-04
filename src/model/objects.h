@@ -640,6 +640,7 @@ enum _command {
   TIDE_SEARCH_COMMAND,  ///< tide-search
   DIAMETER_COMMAND,  ///< tide-search
   COMET_COMMAND,        ///< comet
+  KOJAK_COMMAND,        ///< kojak
   PSM_CONVERT_COMMAND,  ///< psm-convert
   READ_SPECTRUMRECORDS_COMMAND, ///< read-spectrumrecords
   READ_TIDE_INDEX_COMMAND, ///< read-tide-index
@@ -649,10 +650,10 @@ enum _command {
   PROCESS_SPEC_COMMAND, ///< print-processed-spectra
   XLINK_SEARCH_COMMAND, ///< search-for-xlinks
   GENERATE_PEPTIDES_COMMAND, ///< generate-peptides
-  GET_MS2_SPECTRUM_COMMAND, ///<get-ms2-spectrum 
+  GET_MS2_SPECTRUM_COMMAND, ///<get-ms2-spectrum
   PREDICT_PEPTIDE_IONS_COMMAND, ///< predict-peptide-ions
   PIPELINE_COMMAND,     ///< pipeline
-  CASCADE_COMMAND,      ///< Cascade Search   
+  CASCADE_COMMAND,      ///< Cascade Search
   LOCALIZE_MODIFICATION_COMMAND, ///< localize-modification
   VERSION_COMMAND,      ///< just print the version number
   MISC_COMMAND,         ///< miscellaneous command

@@ -74,8 +74,10 @@ if (WIN32 AND NOT CYGWIN)
           -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
           -DINCLUDE_VENDOR_LIBRARIES:BOOLEAN=${INCLUDE_VENDOR_LIBRARIES}
           -P  ${CMAKE_CURRENT_SOURCE_DIR}/build_pwiz.cmake
-      INSTALL_COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost ${CMAKE_CURRENT_BINARY_DIR}/include/boost
+      INSTALL_COMMAND
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+          ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost 
+          ${CMAKE_CURRENT_BINARY_DIR}/include/boost
       BUILD_IN_SOURCE 1
     )
   # On Windows we have to do some extra house keeping
@@ -162,7 +164,7 @@ if (UNIX)
       -DCMAKE_VERBOSE_MAKEFILE=ON
       -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}
       -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}
-      -DCMAKE_BUILD_TYPE=${CMAKE_CFG_INTDIR}
+      -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
       -DCRUX=${CMAKE_CURRENT_SOURCE_DIR}/..
       -DEXT_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}/include
     PATCH_COMMAND ${CMAKE_COMMAND}  -E copy
@@ -179,7 +181,7 @@ else (UNIX)
     CMAKE_ARGS -DCMAKE_VERBOSE_MAKEFILE=ON
       -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}
       -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}
-      -DCMAKE_BUILD_TYPE=${CMAKE_CFG_INTDIR}
+      -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
       -DCRUX=${CMAKE_CURRENT_SOURCE_DIR}/..
       -DEXT_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}/include
     INSTALL_COMMAND ""
@@ -230,106 +232,119 @@ ExternalProject_Add(
   PATCH_COMMAND ""
 )
 
+# MSToolkit
+# Get MSToolkit source from Github
+ExternalProject_Add(
+  MSToolkit
+  GIT_REPOSITORY https://github.com/mhoopmann/mstoolkit.git
+  GIT_TAG 0077644
+  PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
+  CMAKE_ARGS ${TOOLCHAIN_FILE}
+    -DCMAKE_VERBOSE_MAKEFILE=ON
+    -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}
+    -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}
+    -DCMAKE_BUILD_TYPE=${CMAKE_CFG_INTDIR}
+  PATCH_COMMAND
+    COMMAND ${CMAKE_COMMAND} -E copy
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/MSToolkit/CMakeLists.txt
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/MSToolkit/
+    COMMAND ${CMAKE_COMMAND} -E copy
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/MSToolkit/include/MSReader.h
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/MSToolkit/include/
+    COMMAND ${CMAKE_COMMAND} -E copy
+       ${CMAKE_CURRENT_SOURCE_DIR}/patches/MSToolkit/src/MSReader.cpp
+       ${CMAKE_CURRENT_BINARY_DIR}/build/src/MSToolkit/src/MSToolkit
+    COMMAND ${CMAKE_COMMAND} -E copy
+       ${CMAKE_CURRENT_SOURCE_DIR}/patches/MSToolkit/src/mzMLWriter.cpp
+       ${CMAKE_CURRENT_BINARY_DIR}/build/src/MSToolkit/src/MSToolkit
+  BUILD_IN_SOURCE 1
+)
+
 if (UNIX)
-  # Get Comet source from SVN and buld using it's own makefile
+  # Get Comet source from SVN and build using a CMakeLists.txt file we created
   set(comet_cxx_flags ${CMAKE_CXX_FLAGS}\ -DCRUX)
-  set(mstoolkit_c_flags ${CMAKE_C_FLAGS}\ -DCRUX)
+  set(base_include_path ${CMAKE_BINARY_DIR}/ext/include)
+  set(mstoolkit_include_path ${CMAKE_BINARY_DIR}/ext/include/MSToolkit)
   ExternalProject_Add(
     comet
-    SVN_REPOSITORY svn://svn.code.sf.net/p/comet-ms/code/tags/release_2018012/
+    SVN_REPOSITORY svn://svn.code.sf.net/p/comet-ms/code/tags/release_2019015/
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
-    UPDATE_COMMAND ""
-    CONFIGURE_COMMAND ""
+    CMAKE_ARGS ${TOOLCHAIN_FILE}
+      -DBASE_INCLUDE_PATH=${base_include_path}
+      -DMSTOOLKIT_INCLUDE_PATH=${mstoolkit_include_path}
+      -DCMAKE_VERBOSE_MAKEFILE=ON
+      -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}
+      -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+      -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}
     PATCH_COMMAND
-      cp ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CometSearch/CometSearchManager.cpp
-         ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/ &&
-      cp ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/MSToolkit/Makefile
-         ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/MSToolkit/ &&
-      cp ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/MSToolkit/include/MSReader.h
-         ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/MSToolkit/include/ &&
-      cp ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/MSToolkit/src/MSToolkit/MSReader.cpp
-         ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/MSToolkit/src/MSToolkit/
-    BUILD_COMMAND 
-      COMMAND make -C MSToolkit CXXFLAGS=${comet_cxx_flags} CFLAGS=${mstoolkit_c_flags} 
-                                LDFLAGS=${CMAKE_LD_FLAGS}
-      COMMAND make -C CometSearch CXXFLAGS=${comet_cxx_flags} LDFLAGS=${CMAKE_LD_FLAGS}
-    INSTALL_COMMAND ""
+      COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CMakeLists.txt
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/
+      COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CometSearch/Common.h
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/
+      COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CometSearch/CometWriteTxt.cpp
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/
     BUILD_IN_SOURCE 1
   )
-  # Copy the Comet and MSToolkit include files and libraries to
-  # the desired directories.
-  add_custom_command(
-    TARGET comet
-    POST_BUILD
-    COMMAND
-      [ -d ${CMAKE_CURRENT_BINARY_DIR}/include/MSToolkit ] ||
-        mkdir ${CMAKE_CURRENT_BINARY_DIR}/include/MSToolkit
-    COMMAND
-      cp -p
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/MSToolkit/include/*
-      ${CMAKE_CURRENT_BINARY_DIR}/include/MSToolkit
-    COMMAND
-      cp -p
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/MSToolkit/libmstoolkitlite.a
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/libcometsearch.a
-      ${CMAKE_CURRENT_BINARY_DIR}/lib
-    COMMAND
-      [ -d ${CMAKE_CURRENT_BINARY_DIR}/include/CometSearch ] ||
-        mkdir ${CMAKE_CURRENT_BINARY_DIR}/include/CometSearch
-    COMMAND
-      cp -p
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/Common.h
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/CometData.h
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/CometSearch.h
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/CometSearchManager.h
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/CometPreprocess.h
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/ThreadPool.h
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/Threading.h
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/OSSpecificThreading.h
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/CometInterfaces.h
-      ${CMAKE_CURRENT_BINARY_DIR}/include/CometSearch
-  )
 elseif (WIN32 AND NOT CYGWIN)
+  set(comet_cxx_flags ${CMAKE_CXX_FLAGS}\ -DCRUX)
+  set(base_include_path ${CMAKE_BINARY_DIR}/ext/include)
+  set(mstoolkit_include_path ${CMAKE_BINARY_DIR}/ext/include/MSToolkit)
   set(LIBPATH "${CMAKE_CURRENT_BINARY_DIR}/lib;")
   ExternalProject_Add(
     comet
-    SVN_REPOSITORY http://svn.code.sf.net/p/comet-ms/code/tags/release_2018012/
+    SVN_REPOSITORY svn://svn.code.sf.net/p/comet-ms/code/tags/release_2019015/
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
-    UPDATE_COMMAND ""
+    CMAKE_ARGS ${TOOLCHAIN_FILE}
+      -DBASE_INCLUDE_PATH=${base_include_path}
+      -DMSTOOLKIT_INCLUDE_PATH=${mstoolkit_include_path}
+      -DCMAKE_VERBOSE_MAKEFILE=ON
+      -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}
+      -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}
+      -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}
+      -DCMAKE_BUILD_TYPE=${CMAKE_CFG_INTDIR}
     # Copy the Comet and MSToolkit include files and libraries to
     # the desired directories.
-    CONFIGURE_COMMAND
-      ${CMAKE_COMMAND} -E copy_directory
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/MSToolkit/include
-      ${CMAKE_CURRENT_BINARY_DIR}/include/MSToolkit/
     PATCH_COMMAND
-      ${CMAKE_COMMAND}
-        -DSOURCE_DIR:STRING=${CMAKE_CURRENT_SOURCE_DIR}
-        -DBINARY_DIR:STRING=${CMAKE_CURRENT_BINARY_DIR}
-        -P ${CMAKE_CURRENT_SOURCE_DIR}/patch-comet.cmake
-    BUILD_COMMAND
-      ${CMAKE_COMMAND}
-        -DLIBPATH:STRING="${LIBPATH}"
-        -DMSBUILD_ARGS:STRING=/p:Configuration=${CMAKE_CFG_INTDIR}
-        -DMSBUILD_PLATFORM=${MSBUILD_PLATFORM}
-        -DPROJ_FILE:STRING=comet.sln
-        -P ${CMAKE_CURRENT_SOURCE_DIR}/build-comet.cmake
-    INSTALL_COMMAND ""
+      COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CMakeLists.txt
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/
+      COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CometSearch/Common.h
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/
+      COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CometSearch/CometWriteTxt.cpp
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/
     BUILD_IN_SOURCE 1
-  ) 
-  ExternalProject_Add_Step(
-    comet
-    copy_comet_library
-    COMMAND ${CMAKE_COMMAND} -E copy
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/${MSBUILD_PLATFORM}/${CMAKE_CFG_INTDIR}/CometSearch.lib
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/CometSearch.lib
-    COMMAND ${CMAKE_COMMAND} -E copy
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/${MSBUILD_PLATFORM}/${CMAKE_CFG_INTDIR}/MSToolkitLite.lib
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/MSToolkitLite.lib
-    DEPENDEES install
   )
 endif (UNIX)
 
+# Kojak
+# Get Kojak source from GitHub
+set(base_include_path ${CMAKE_BINARY_DIR}/ext/include)
+set(mstoolkit_include_path ${CMAKE_BINARY_DIR}/ext/include/MSToolkit)
+set(hardklor_include_path ${CMAKE_SOURCE_DIR}/src/app/hardklor)
+ExternalProject_Add(
+  kojak
+  GIT_REPOSITORY https://github.com/mhoopmann/kojak.git
+  GIT_TAG c1acef0
+  PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
+  CMAKE_ARGS ${TOOLCHAIN_FILE}
+    -DBASE_INCLUDE_PATH=${base_include_path}
+    -DMSTOOLKIT_INCLUDE_PATH=${mstoolkit_include_path}
+    -DHARDKLOR_INCLUDE_PATH=${hardklor_include_path}
+    -DCMAKE_VERBOSE_MAKEFILE=ON
+    -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}
+    -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}
+    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+PATCH_COMMAND
+  COMMAND ${CMAKE_COMMAND} -E copy
+    ${CMAKE_CURRENT_SOURCE_DIR}/patches/kojak/CMakeLists.txt
+    ${CMAKE_CURRENT_BINARY_DIR}/build/src/kojak/
+  BUILD_IN_SOURCE 1
+)
 
 # On Windows we have to include the vendor libraries in the package
 if (WIN32 AND NOT CYGWIN AND INCLUDE_VENDOR_LIBRARIES)

@@ -201,7 +201,6 @@ string CruxApplicationList::getListName() const {
  * calls that applications main method with the rest of the parameters.
  */
 int CruxApplicationList::main(int argc, char** argv) {
-
   if (argc < 2) {
     usage();
     return -1;

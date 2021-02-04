@@ -154,7 +154,8 @@ Params::Params() : finalized_(false) {
     "supported by ProteoWizard[[html:</a>]]. Alteratively, with Tide-search, these files "
     "may be binary spectrum files produced by a previous run of [[html:<code>]]crux "
     "tide-search[[html:</code>]] using the [[html:<code>]]store-spectra[[html:</code>]] "
-    "parameter.");
+    "parameter. Multiple files can be included on the command line (space delimited), "
+    "prior to the name of the database.");
   InitArgParam("peptide source",
     "Either the name of a file in fasta format from which to retrieve proteins and "
     "peptides or an index created by a previous run of [[html:<code>]]crux tide-index"
@@ -745,7 +746,8 @@ Params::Params() : finalized_(false) {
     "The name of one or more files from which to parse the fragmentation spectra, in any "
     "of the file formats supported by ProteoWizard. Alternatively, the argument "
     "may be one or more binary spectrum files produced by a previous run of crux "
-    "tide-search using the store-spectra parameter.");
+    "tide-search using the store-spectra parameter. Multiple files can be included "
+    "on the command line (space delimited), prior to the name of the database.");
   InitArgParam("tide database",
     "Either a FASTA file or a directory containing a database index created by a previous "
     "run of crux tide-index.");
@@ -938,14 +940,15 @@ Params::Params() : finalized_(false) {
    * Comet parameters
    */
   InitArgParam("input spectra",
-    "The name of the file from which to parse the spectra. Valid formats include mzXML, "
+    "The name of one or more files from which to parse the spectra. Valid formats include mzXML, "
     "mzML, mz5, raw, ms2, and cms2. Files in mzML or mzXML may be compressed with gzip. "
     "RAW files can be parsed only under windows and if the appropriate libraries were "
-    "included at compile time.");
+    "included at compile time. Multiple files can be included on the command line "
+    "(space delimited), prior to the name of the database.");
   /* Comet - Database */
   InitArgParam("database_name",
     "A full or relative path to the sequence database, "
-    "in FASTA format, to search. Example databases include "
+    "in FASTA or PEFF format, to search. Example databases include "
     "RefSeq or UniProt.  The database can contain amino acid "
     "sequences or nucleic acid sequences. If sequences are "
     "amino acid sequences, set the parameter \"nucleotide_reading_frame = 0\". "
@@ -954,6 +957,21 @@ Params::Params() : finalized_(false) {
     "nucleotide_reading_frame\" to a value between 1 and 9.");
   InitIntParam("decoy_search", 0, 0, 2,
     "0=no, 1=concatenated search, 2=separate search.",
+    "Available for comet.", true);
+  InitIntParam("peff_format", 0, 0, 5,
+    "0=normal FASTA format,"
+    "1=PEFF PSI-MOD modifications and amino acid variants,"
+    "2=PEFF Unimod modifications and amino acid variants,"
+    "3=PEFF PSI-MOD modifications, skipping amino acid variants,"
+    "4=PEFF Unimod modifications, skipping amino acid variants,"
+    "5=PEFF amino acid variants, skipping PEFF modifications.",
+    "Available for comet.", true);
+  InitStringParam("peff_obo", "",
+    "A full or relative path to the OBO file used with a PEFF search. "
+    "Supported OBO formats are PSI-Mod and Unimod OBO files. "
+    "Which OBO file you use depends on your PEFF input file. "
+    "This parameter is ignored if \"peff_format = 0\". "
+    "There is no default value if this parameter is missing.",
     "Available for comet.", true);
   /* Comet - CPU threads */
   InitIntParam("num_threads", 0, -64, 64,
@@ -971,7 +989,7 @@ Params::Params() : finalized_(false) {
     "0=amu, 1=mmu, 2=ppm.",
     "Available for comet.", true);
   InitStringParam("auto_peptide_mass_tolerance", "false", "false|warn|fail",
-    "Automatically estimate optimal value for the peptide_mass_tolerancel parameter "
+    "Automatically estimate optimal value for the peptide_mass_tolerance parameter "
     "from the spectra themselves. false=no estimation, warn=try to estimate "
     "but use the default value in case of failure, fail=try to estimate and "
     "quit in case of failure.",
@@ -992,6 +1010,9 @@ Params::Params() : finalized_(false) {
   InitIntParam("search_enzyme_number", 1, 0, BILLION,
     "Specify a search enzyme from the end of the parameter file.",
     "Available for comet.", true);
+  InitIntParam("search_enzyme2_number", 0, 0, BILLION,
+    "Specify a second search enzyme from the end of the parameter file.",
+    "Available for comet.", true);
   InitIntParam("num_enzyme_termini", 2, 1, 9,
     "valid values are 1 (semi-digested), 2 (fully digested), 8 N-term, 9 C-term.",
     "Available for comet.", true);
@@ -1004,7 +1025,7 @@ Params::Params() : finalized_(false) {
     "Available for comet.", true);
   InitDoubleParam("fragment_bin_offset", 0.40, 0, 1.0,
     "Offset position to start the binning (0.0 to 1.0).",
-    "Available for comet.", true);
+    "Available for comet and kojak.", true);
   InitStringParam("auto_fragment_bin_tol", "false", "false|warn|fail",
     "Automatically estimate optimal value for the fragment_bin_tol parameter "
     "from the spectra themselves. false=no estimation, warn=try to estimate "
@@ -1039,6 +1060,9 @@ Params::Params() : finalized_(false) {
     "0=no, 1= yes to consider NH3/H2O neutral loss peak.",
     "Available for comet.", true);
   /* Comet - Output */
+  InitIntParam("output_sqtstream", 0, 0, 1,
+    "0=no, 1=yes  write sqt file.",
+    "Available for comet.", true);
   InitIntParam("output_sqtfile", 0, 0, 1,
     "0=no, 1=yes  write sqt file.",
     "Available for comet.", true);
@@ -1051,9 +1075,6 @@ Params::Params() : finalized_(false) {
   InitIntParam("output_percolatorfile", 0, 0, 1,
     "0=no, 1=yes write percolator file.",
      "Available for comet.", true);
-  InitIntParam("output_outfiles", 0, 0, 1,
-    "0=no, 1=yes  write .out files.",
-    "Available for comet.", true);
   InitIntParam("print_expect_score", 1, 0, 1,
     "0=no, 1=yes to replace Sp with expect in out & sqt.",
     "Available for comet.", true);
@@ -1098,6 +1119,18 @@ Params::Params() : finalized_(false) {
   InitIntParam("max_fragment_charge", 3, 1, 5,
     "Set maximum fragment charge state to analyze (allowed max 5).",
     "Available for comet.", true);
+  InitIntParam("max_index_runtime", 0, 0, BILLION,
+    "Sets the maximum indexed database search run time for a scan/query. "
+    "Valid values are integers 0 or higher representing the maximum run time "
+    "in milliseconds. "
+    "As Comet loops through analyzing peptides from the database index file, "
+    "it checks the cummulative run time of that spectrum search after each "
+    "peptide is analyzed. If the run time exceeds the value set for this "
+    "parameter, the search is aborted and the best peptide result analyzed "
+    "up to that point is returned. "
+    "To have no maximum search time, set this parameter value to \"0\". "
+    "The default value is \"0\".",
+    "Available for comet.", true);
   InitIntParam("max_precursor_charge", 6, 1, 9,
     "Set maximum precursor charge state to analyze (allowed max 9).",
     "Available for comet.", true);
@@ -1117,11 +1150,52 @@ Params::Params() : finalized_(false) {
     "Specifies the suffix string that is appended to the base output name "
     "for the pep.xml, pin.xml, txt and sqt output files.",
     "Available for comet.", true);
+  InitIntParam("peff_verbose_output", 0, 0, 1,
+    "Specifies whether the verbose output is reported during a PEFF search. "
+    "To show verbose output, set the value to 1. "
+    "The default value is 0 if this parameter is missing.",
+    "Available for comet.", false);
+  InitStringParam("peptide_length_range", "1 63",
+    "Defines the length range of peptides to search. "
+    "This parameter has two integer values. "
+    "The first value is the minimum length cutoff and the second value is "
+    "the maximum length cutoff. Only peptides within the specified length "
+    "range are analyzed. The maximum peptide length that Comet can analyze is 63. "
+    "The default values are \"1 63\".",
+    "Available for comet.", true);
+  InitStringParam("precursor_NL_ions", "",
+    "Controls whether or not precursor neutral loss peaks are considered in "
+    "the xcorr scoring. If left blank, this parameter is ignored.  To consider "
+    "precursor neutral loss peaks, add one or more neutral loss mass value "
+    "separated by a space.  Each entered mass value will be subtracted from "
+    "the experimentral precursor mass and resulting neutral loss m/z values "
+    "for all charge states (from 1 to precursor charge) will be analyzed. "
+    "As these neutral loss peaks are analyzed along side fragment ion peaks, "
+    "the fragment tolerance settings (fragment_bin_tol, fragment_bin_offset, "
+    "theoretical_fragment_ion) apply to the precursor neutral loss peaks. "
+    "The default value is blank/unused.",
+    "Available for comet.", true);
+  InitIntParam("equal_I_and_L", 1, 0, 1,
+    "This parameter controls whether the Comet treats isoleucine (I) and "
+    "leucine (L) as the same/equivalent with respect to a peptide identification. "
+    "0 treats I and L as different, 1 treats I and L as the same. "
+    "The default value is \"1\"",
+    "Available for comet.", true);
   InitStringParam("mass_offsets", "",
     "Specifies one or more mass offsets to apply. This value(s) are effectively "
     "subtracted from each precursor mass such that peptides that are smaller "
     "than the precursor mass by the offset value can still be matched to the "
     "respective spectrum.",
+    "Available for comet.", true);
+  InitIntParam("max_duplicate_proteins", 20, -1, BILLION,
+    "defines the maximum number of proteins (identifiers/accessions) to report. "
+    "If a peptide is present in 6 total protein sequences, there is one (first) "
+    "reference protein and 5 additional duplicate proteins. This parameter "
+    "controls how many of those 5 additional duplicate proteins are reported."
+    "If \"decoy_search = 2\" is set to report separate target and decoy results, "
+    "this parameter will be applied to the target and decoy outputs separately. "
+    "If set to \"-1\", there will be no limit on the number of reported additional proteins. "
+    "The default value is \"20\" if this parameter is missing.",
     "Available for comet.", true);
   /* Comet - Spectral processing */
   InitIntParam("minimum_peaks", 10, 1, BILLION,
@@ -1879,54 +1953,357 @@ Params::Params() : finalized_(false) {
     "File from which to parse fragmentation spectra.");
   InitBoolParam("pm-ignore-no-charge", true,
     "When parsing spectra for measurement error estimation, ignore those without charge state information.",
-    "Available for param-medic and tide-search and comet", false);
+    "Available for param-medic, tide-search, comet, and kojak", false);
   InitDoubleParam("pm-min-precursor-mz", 400,
     "Minimum precursor m/z value to use in measurement error estimation.",
-    "Available for param-medic and tide-search and comet", true);
+    "Available for param-medic, tide-search, comet, and kojak", true);
   InitDoubleParam("pm-max-precursor-mz", 1800,
     "Minimum precursor m/z value to use in measurement error estimation.",
-    "Available for param-medic and tide-search and comet", true);
+    "Available for param-medic, tide-search, comet and kojak", true);
   InitDoubleParam("pm-min-frag-mz", 150,
     "Minimum fragment m/z value to use in measurement error estimation.",
-    "Available for param-medic and tide-search and comet", true);
+    "Available for param-medic, tide-search, comet and kojak", true);
   InitDoubleParam("pm-max-frag-mz", 1800,
     "Maximum fragment m/z value to use in measurement error estimation.",
-    "Available for param-medic and tide-search and comet", true);
+    "Available for param-medic, tide-search, comet, and kojak", true);
   InitIntParam("pm-min-scan-frag-peaks", 40,
     "Minimum fragment peaks an MS/MS scan must contain to be used in measurement error estimation.",
-    "Available for param-medic and tide-search and comet", true);
+    "Available for param-medic, tide-search, comet, and kojak", true);
   InitDoubleParam("pm-max-precursor-delta-ppm", 50,
     "Maximum ppm distance between precursor m/z values to consider two scans "
     "potentially generated by the same peptide for measurement error estimation.",
-    "Available for param-medic and tide-search and comet", true);
+    "Available for param-medic, tide-search, comet, and kojak", true);
   InitStringParam("pm-charges", "0,2,3,4",
     "Precursor charge states to consider MS/MS spectra from, in measurement error estimation, "
     "provided as comma-separated values.",
-    "Available for param-medic and tide-search and comet", true);
+    "Available for param-medic, tide-search, comet, and kojak", true);
   InitIntParam("pm-top-n-frag-peaks", 30,
     "Number of most-intense fragment peaks to consider for measurement error estimation, per MS/MS spectrum.",
-    "Available for param-medic and tide-search and comet", true);
+    "Available for param-medic, tide-search, comet, and kojak", true);
   InitIntParam("pm-pair-top-n-frag-peaks", 5,
     "Number of fragment peaks per spectrum pair to be used in fragment error "
     "estimation.",
-    "Available for param-medic and tide-search and comet", true);
+    "Available for param-medic, tide-search, comet, and kojak", true);
   InitIntParam("pm-min-common-frag-peaks", 20,
     "Number of the most-intense peaks that two spectra must share in order to "
     "potentially be generated by the same peptide, for measurement error estimation.",
-    "Available for param-medic and tide-search and comet", true);
+    "Available for param-medic, tide-search, comet, and kojak", true);
   InitIntParam("pm-max-scan-separation", 1000,
     "Maximum number of scans two spectra can be separated by in order to be "
     "considered potentially generated by the same peptide, for measurement error estimation.",
-    "Available for param-medic and tide-search and comet", true);
+    "Available for param-medic, tide-search, comet, and kojak", true);
   InitIntParam("pm-min-peak-pairs", 200,
     "Minimum number of peak pairs (for precursor or fragment) that must be "
     "successfully paired in order to attempt to estimate measurement error distribution.",
-    "Available for param-medic and tide-search and comet", true);
+    "Available for param-medic, tide-search, comet, and kojak", true);
   // localize-modification
   InitDoubleParam("min-mod-mass", 0, 0, BILLION,
     "Ignore implied modifications where the absolute value of its mass is "
     "below this value and only score the unmodified peptide.",
     "Available for localize-modification", true);
+
+  // Kojak Parameters
+  InitStringParam("auto_ppm_tolerance_pre", "false", "false|warn|fail",
+    "Automatically estimate optimal value for the <code>ppm_tolerance_pre</code> "
+    "parameter from the spectra themselves. false=no estimation, warn=try to "
+    "estimate but use the default value in case of failure, fail=try to estimate "
+    "and quit in case of failure.",
+    "Available for kojak.", true);
+  InitStringParam("auto_fragment_bin_size", "false", "false|warn|fail",
+    "Automatically estimate optimal value for the <code>fragment_bin_size</code> "
+    "parameter from the spectra themselves. false=no estimation, warn=try to "
+    "estimate but use the default value in case of failure, fail=try to estimate "
+    "and quit in case of failure.",
+    "Available for kojak.", true);
+  InitArgParam("protein database",
+   "The name of the fasta file containing the amino acid protein sequences to "
+   "be searched. Kojak can generate decoy sequences internally, or they may "
+   "be in this file (see the <code>decoy_filter</code> option for details). It is "
+   "recommended to include the full path in the name of the file.");
+  InitIntParam("threads", 0,
+   "Number of threads to use when searching spectra. A value of 0 will "
+    "automatically match the number of threads to the number of processing "
+    "cores on the computer. Additionally, negative numbers can be used to "
+    "specify threads equal to all but that number of cores.",
+    "Available for kojak", true);
+  InitBoolParam("export_percolator", true,
+    "Exports results in Percolator text format (PIN format).",
+    "Available for kojak", true);
+  InitBoolParam("export_pepXML", false,
+    "Exports results in pepXML format.",
+    "Available for kojak", true);
+  InitBoolParam("export_mzID", false,
+    "Exports results in mzID format.",
+    "Available for kojak", true);
+  InitStringParam("percolator_version", "3",
+    "Changes percolator output to the format necessary for different versions of Percolator.",
+    "Available for kojak", false);
+  InitDoubleParam("enrichment", 0,
+    "Values between 0 and 1 to describe 18O atom percent excess (APE). For "
+    "example, 0.25 equals 25 APE.",
+    "Available for kojak", true);
+  InitIntParam("kojak_instrument", 0,
+    "Values are: 0=Orbitrap, 1=FTICR (such as Thermo LTQ-FT).",
+    "Available for kojak", true);
+  InitBoolParam("MS1_centroid", true,
+    "Are the precursor ion (MS1) scans centroided?",
+    "Available for kojak", true);
+  InitBoolParam("MS2_centroid", true,
+    "Are the fragment ion (MS2) scans centroided?",
+    "Available for kojak", true);
+  InitDoubleParam("MS1_resolution", 30000,
+    "Resolution at 400 m/z, value ignored if data are already centroided.",
+    "Available for kojak", true);
+  InitDoubleParam("MS2_resolution", 25000,
+    "Resolution at 400 m/z, value ignored if data are already centroided.",
+    "Available for kojak", true);
+  InitStringParam("cross_link", "nK nK 138.068074 BS3",
+    "Specifies the sites of cross-linking and mass modification. Four values "
+    "specify a cross-link. The first two values are one or more amino acid "
+    "letters (uppercase only) that can be linked. These can be the same or "
+    "different depending on whether the cross-linker is homobifunctional or "
+    "heterobifunctional. Use lowercase ‘n’ or ‘c’ if the linker can bind the "
+    "protein termini. The third value is the net mass value of the cross-linker"
+    " when bound to the peptides. The mass can be any real number, positive or "
+    "negative. The identifier is any name desired for the cross-linker. If the "
+    "data contain multiple cross-linkers, provide them as a comma-separated "
+    "list enclosed with quotation marks. For example, a sample "
+    "cross-linked with both BS3 and EDC could be specified as \"nK nK "
+    "138.068074 BS3, DE nK -18.0106 EDC\".",
+    "Available for kojak", true);
+  InitStringParam("mono_link", "nK 156.0786",
+    "Specifies the sites of incomplete cross-linking (i.e. a mono-link) and "
+    "mass modification. Two values follow this parameter, separated by spaces. "
+    "The first value is one or more amino acid letters (uppercase only) that "
+    "can be linked. Use lowercase ‘n’ or ‘c’ if the linker can bind the protein "
+    "termini. The second value is the net mass of the incomplete cross-link "
+    "reaction. The mass can be any real number, positive or negative. If "
+    "multiple mono-links are possible (e.g. with a heterobifunctional "
+    "cross-linker), provide them as a comma-separated list enclosed in "
+    "quotation marks. For example: \"nK 156.0786, nK 155.0946\".",
+    "Available for kojak", true);
+  InitStringParam("fixed_modification", "C 57.02146",
+    "Specifies a mass adjustment to be applied to all indicated amino acids "
+    "prior to spectral analysis. Amino acids are identified by their single "
+    "letter designation. N-terminal and C-terminal fixed modifications are "
+    "designated by n and c, respectively. The relative mass difference, "
+    "positive or negative, is listed after the amino acid, separated by a "
+    "space. If multiple fixed modification masses are desired, provide them as "
+    "a comma-separated list enclosed in quotation marks. For example: "
+    "\"C 57.02146, nK 42.01057\".",
+    "Available for kojak", true);
+  InitDoubleParam("fixed_modification_protC", 0,
+    "Specifies a mass adjustment to be applied to all protein C-termini prior "
+    "to spectral analysis. The relative mass difference may be any non-zero "
+    "number.",
+    "Available for kojak", true);
+  InitDoubleParam("fixed_modification_protN", 0,
+    "Specifies a mass adjustment to be applied to all protein N-termini prior "
+    "to spectral analysis. The relative mass difference may be any non-zero "
+    "number.",
+    "Available for kojak", true);
+  InitStringParam("modification", "M 15.9949",
+    "Specifies a dynamic mass adjustment to be applied to all indicated amino "
+    "acids during spectral analysis. Peptides containing the indicated amino "
+    "acids are tested with and without the dynamic modification mass. Amino "
+    "acids are identified by their single letter designation. N-terminal and "
+    "C-terminal dynamic peptide modifications are designated by n and c, "
+    "respectively. The relative mass difference, positive or negative, is "
+    "listed after the amino acid, separated by a space. If multiple dynamic "
+    "modification masses are desired, including to the same amino acid, provide "
+    "them as a comma-separated list enclosed with quotation marks. For "
+    "example: \"M 15.9949, STY 79.966331\".",
+    "Available for kojak", true);
+  InitStringParam("modification_protC", "0",
+    "Specifies a dynamic mass adjustment to be applied to protein C-terminal "
+    "amino acids during spectral analysis. Peptides containing the protein "
+    "C-terminus are tested with and without the dynamic modification mass. The "
+    "relative mass difference can be any non-zero value. If multiple dynamic "
+    "protein C-terminal modification masses are desired, provide them as a "
+    "comma-separated list enclosed in quotation marks. For example, "
+    "\"56.037448, -58.005479\".",
+    "Available for kojak", true);
+  InitStringParam("modification_protN", "0",
+    "Specifies a dynamic mass adjustment to be applied to protein N-terminal "
+    "amino acids during spectral analysis. Peptides containing the protein "
+    "N-terminus are tested with and without the dynamic modification mass. The "
+    "N-terminus includes both the leading and 2nd amino acid, in case of "
+    "removal of the leading amino acid. The relative mass difference can be "
+    "any non-zero value. If multiple dynamic protein N-terminal modification "
+    "masses are desired, provide them as a comma-separated list enclosed "
+    "in quotation marks. For example, \"42.01055, 0.984016\".",
+    "Available for kojak", true);
+  InitBoolParam("diff_mods_on_xl", false,
+    "Searching for differential modifications increases search "
+    "times exponentially. This increase in computation can be exacerbated "
+    "when searching for differential modifications on cross-linked peptides. "
+    "Such computation can be avoided if is known that the cross-linked "
+    "peptides should not have differential modifications. In these cases, this "
+    "setting can be turned off.",
+    "Available for kojak", true);
+  InitIntParam("max_mods_per_peptide", 2, 0, 100000000,
+    "Indicates the maximum number of differential mass modifications allowed "
+    "for a peptide sequence.",
+    "Available for kojak", true);
+  InitBoolParam("mono_links_on_xl", false,
+    "When multiple sites of linkage are available on a peptide, it is possible "
+    "for that peptide to be linked to a second peptide at one site and contain "
+    "a mono-link at another site. If such instances are considered rare due to "
+    "the experimental conditions, then this parameter can be disabled to improve "
+    "computation time.",
+    "Available for kojak", true);
+  InitStringParam("kojak_enzyme", "[KR] Trypsin",
+    "An enzyme string code is used to define amino acid cut sites when parsing "
+    "protein sequences. Following the code, a separate label can be used to "
+    "name the enzyme used. The rules for peptide parsing are similar to other "
+    "database search engines such as X!Tandem: 1) cleavage amino acids are "
+    "specified in square braces: [], 2) a vertical line, |, indicates N- or "
+    "C-terminal to the residue, 3) exception amino acids are specified in "
+    "curly braces: {}.",
+    "Available for kojak", true);
+  InitDoubleParam("fragment_bin_size", 0.03,
+    "Determines the accuracy of the scoring algorithm with smaller bins being "
+    "more strict in determining matches between theoretical and observed "
+    "spectral peaks. Low-resolution spectra require larger bin sizes to "
+    "accommodate errors in mass accuracy of the observed peaks. Smaller bins "
+    "also require more system memory, so caution must be exercised when setting "
+    "this value for high-resolution spectra. For ion trap (low-res) MS/MS "
+    "spectra, the recommended values is 1.0005. For high-res MS/MS, the "
+    "recommended value is 0.03.",
+    "Available for kojak", true);
+  InitBoolParam("ion_series_A", false,
+    "Should A-series fragment ions be considered?",
+    "Available for kojak", true);
+  InitBoolParam("ion_series_B", true,
+    "Should B-series fragment ions be considered?",
+    "Available for kojak", true);
+  InitBoolParam("ion_series_C", false,
+    "Should C-series fragment ions be considered?",
+    "Available for kojak", true);
+  InitBoolParam("ion_series_X", false,
+    "Should X-series fragment ions be considered?",
+    "Available for kojak", true);
+  InitBoolParam("ion_series_Y", true,
+    "Should Y-series fragment ions be considered?",
+    "Available for kojak", true);
+  InitBoolParam("ion_series_Z", false,
+    "Should Z-series fragment ions be considered",
+    "Available for kojak", true);
+  InitStringParam("decoy_filter", "DECOY_ 1",
+    "This parameter requires two values. The first value is a short, "
+    "case-sensitive string of characters that appears in the name of every "
+    "decoy protein sequence in the database. The second value is either 0 or "
+    "1, where 0 indicates that these decoy sequences are already provided in the "
+    "FASTA database supplied by the user, and 1 indicates Kojak should "
+    "automatically generate the decoy sequences and preface the protein names "
+    "with the characters supplied in the first value. If Kojak is requested to "
+    "generate decoy sequences, it will save the full complement of target "
+    "and decoy sequences as a fasta file in the output directory at the end of "
+    "analysis. Kojak generates decoy sequences by reversing the amino acids "
+    "between enzymatic cleavage sites in the protein sequence. The sites of "
+    "enzymatic cleavage are determined by the rules supplied with the "
+    "<code>kojak_enzyme</code> parameter. The leading methionine in the "
+    "sequences, however, remains fixed. This approach ensures that, with very "
+    "few exceptions, the number, length, and mass of the decoy peptides are "
+    "identical to the target peptides. ",
+    "Available for kojak", true);
+  InitIntParam("kojak_isotope_error", 1, 0, 3,
+    "Allows the searching of neighboring isotope peak masses for poorly "
+    "resolve precursors. Up to three alternative isotope peak masses will be "
+    "searched in addition to the presumed precursor peak mass to correct for "
+    "errors in monoisotopic precursor peak identification.",
+    "Available for kojak", true);
+  InitIntParam("max_miscleavages", 0, 0, 100000000,
+    "Number of missed enzyme cleavages allowed. If your digestion enzyme cuts "
+    "at the same amino acids involved in cross-linking, then this number must "
+    "be greater than 0 to identify linked peptides. In such cases, a minimum "
+    "value of 2 is required to identify loop-links.",
+    "Available for kojak", true);
+  InitDoubleParam("max_peptide_mass", 8000.0,
+    "Maximum peptide mass allowed when parsing the protein sequence database. "
+    "Peptides exceeding this mass will be ignored in the analysis.",
+    "Available for kojak", true);
+  InitDoubleParam("min_peptide_mass", 500.0,
+    "Minimum peptide mass allowed when parsing the protein sequence database. "
+    "Peptides with a lower mass will be ignored in the analysis.",
+    "Available for kojak", true);
+  InitIntParam("min_spectrum_peaks", 12, 0, 100000000,
+    "Minimum number of MS/MS peaks required to proceed with analysis of a "
+    "spectrum. If spectrum_processing is enabled, the peak count occurs after "
+    "the spectrum is processed",
+    "Available for kojak", true);
+  InitIntParam("max_spectrum_peaks", 0, 0, 100000000,
+    "Maximum number of MS/MS peaks to analyze if using the "
+    "<code>spectrum_processing</code> parameter. Peaks are kept in order of "
+    "intensity, starting with the most intense. Setting a value of 0 keeps all "
+    "peaks.",
+    "Available for kojak", true);
+  InitDoubleParam("ppm_tolerance_pre", 10, 0, 100000000,
+    "Tolerance used when determining which peptides to search for a given "
+    "MS/MS spectrum based on its precursor ion mass. The unit is "
+    "parts-per-million (PPM).",
+    "Available for kojak", true);
+  InitBoolParam("precursor_refinement", true,
+    "Some data files may filter out precursor scans to save space prior to "
+    "searching. To analyze these files, the precursor analysis algorithms in "
+    "Kojak must be disabled. It is also possible, though not always "
+    "recommended, to disable these algorithms even when precursor scans are "
+    "included in the data files. This parameter toggles the precursor analysis "
+    "algorithms.",
+    "Available for kojak", true);
+  InitIntParam("prefer_precursor_pred", 2, 0, 2,
+    "For some data (such as Thermo Orbitrap data), the MS/MS spectra may have a "
+    "precursor mass prediction already. With this parameter, the Kojak algorithm "
+    "can be set to either ignore, use, or supplement the predicted precursor "
+    "information. There are three options for the parameter: 0 = Ignore all "
+    "precursor mass predictions and have Kojak make new predictions using its "
+    "precursor processing algorithms. 1 = Use the existing precursor mass "
+    "predictions and skip further processing with Kojak. 2 = Use the existing "
+    "precursor mass predictions and supplement these values with additional "
+    "results of the Kojak precursor processing algorithms. The recommended "
+    "value is 2. "
+    "Supplementing the precursor values performs the following functions. "
+    "First, the monoisotopic precursor mass may be refined to one determined "
+    "from a point near the apex of the extracted ion chromatogram, with "
+    "potentially better mass accuracy. Second, in cases where the monoisotopic "
+    "peak mass might not have been predicted correctly in the original "
+    "analysis, a second monoisotopic mass is appended to the spectrum, "
+    "allowing database searching to proceed checking both possibilities. "
+    "Third, in cases where there is obvious chimeric signal overlap, a "
+    "spectrum will be supplemented with the potential monoisotopic peak masses "
+    "of all presumed precursor ions. Regardless of this parameter setting, "
+    "MS/MS spectra that do not have an existing precursor mass prediction will "
+    "be analyzed to identify the monoisotopic precursor mass using functions "
+    "built into Kojak.",
+    "Available for kojak", true);
+  InitBoolParam("spectrum_processing", false,
+    "The MS/MS spectrum processing function will collapse isotope "
+    "distributions to the monoisotopic peak and reduce the number of peaks to "
+    "analyze to the number specified with the <code>max_spectrum_peaks</code> "
+    "parameter.",
+    "Available for kojak", true);
+  InitIntParam("top_count", 20, 1, 100000000,
+    "This parameter specifies the number of top scoring peptides to store in "
+    "the first pass of the Kojak analysis. A second pass follows, pairing"
+    "cross-linked peptides to these top sequences to produce the final "
+    "cross-linked peptide score. Setting this number too low will cause "
+    "cross-linked sequences to be missed. Setting this number too high will "
+    "degrade the performance of the algorithm. Optimal settings will depend on "
+    "database size and the number of modifications in the search. Recommended "
+    "values are between 5 and 50 (20 is probably a good start).",
+    "Available for kojak", true);
+  InitIntParam("truncate_prot_names", 0, 0, 100000000,
+    "Exports only the specified number of characters for each protein name in "
+    "the Kojak output. Otherwise, if set to 0, all characters in the protein "
+    "name are exported.",
+    "Available for kojak", true);
+  InitIntParam("e_value_depth", 5000, 1, 100000000,
+    "Specifies the minimum number of tests to be present in the histogram for "
+    "e-value calculations. A larger number better resolves the histogram and "
+    "improves the e-value estimation for the peptide sequences in each "
+    "spectrum. However, larger numbers also increase computation time. The "
+    "recommended values are between 2000 and 10000",
+    "Available for kojak", true);
 
   InitBoolParam("no-analytics", false, "Don't post data to Google Analytics.", "", false);
 
@@ -1982,6 +2359,13 @@ void Params::Categorize() {
     items.insert(string(1, c));
   }
   items.insert("auto-modifications");
+  items.insert("fixed_modification");
+  items.insert("fixed_modification_protC");
+  items.insert("fixed_modification_protN");
+  items.insert("max_mods_per_peptide");
+  items.insert("modification");
+  items.insert("modification_protC");
+  items.insert("modification_protN");
   AddCategory("Amino acid modifications", items);
 
   items.clear();
@@ -1997,6 +2381,8 @@ void Params::Categorize() {
   items.insert("digestion");
   items.insert("enzyme");
   items.insert("missed-cleavages");
+  items.insert("kojak_enzyme");
+  items.insert("max_miscleavages");
   AddCategory("Enzymatic digestion", items);
 
   items.clear();
@@ -2036,6 +2422,8 @@ void Params::Categorize() {
   items.insert("score-function");
   items.insert("fragment-tolerance");
   items.insert("evidence-granularity");
+  items.insert("top_count");
+  items.insert("e_value_depth");
   AddCategory("Search parameters", items);
 
   items.clear();
@@ -2078,15 +2466,27 @@ void Params::Categorize() {
   items.insert("xlink-include-linears");
   items.insert("xlink-include-selfloops");
   items.insert("xlink-prevents-cleavage");
+  // Kojak
+  items.insert("cross_link");
+  items.insert("mono_link");
+  items.insert("mono_links_on_xl");
+  items.insert("diff_mods_on_xl");
   AddCategory("Cross-linking parameters", items);
 
   items.clear();
   items.insert("decoy_search");
+  items.insert("peff_format");
+  items.insert("peff_obo");
+  items.insert("decoy_filter");
+  items.insert("max_peptide_mass");
+  items.insert("min_peptide_mass");
+  items.insert("truncate_prot_names");
   AddCategory("Database", items);
 
   items.clear();
   items.insert("num-threads");
   items.insert("num_threads");
+  items.insert("threads");
   AddCategory("CPU threads", items);
 
   items.clear();
@@ -2097,12 +2497,16 @@ void Params::Categorize() {
   items.insert("peptide_mass_tolerance");
   items.insert("peptide_mass_units");
   items.insert("precursor_tolerance_type");
+  items.insert("ppm_tolerance_pre");
+  items.insert("auto_ppm_tolerance_pre");
+  items.insert("kojak_isotope_error");
   AddCategory("Masses", items);
 
   items.clear();
   items.insert("allowed_missed_cleavage");
   items.insert("num_enzyme_termini");
   items.insert("search_enzyme_number");
+  items.insert("search_enzyme2_number");
   AddCategory("Search enzyme", items);
 
   items.clear();
@@ -2117,6 +2521,14 @@ void Params::Categorize() {
   items.insert("use_Y_ions");
   items.insert("use_Z_ions");
   items.insert("use_NL_ions");
+  items.insert("auto_fragment_bin_size");
+  items.insert("fragment_bin_size");
+  items.insert("ion_series_A");
+  items.insert("ion_series_B");
+  items.insert("ion_series_C");
+  items.insert("ion_series_X");
+  items.insert("ion_series_Y");
+  items.insert("ion_series_Z");
   AddCategory("Fragment ions", items);
 
   items.clear();
@@ -2131,12 +2543,18 @@ void Params::Categorize() {
   items.insert("clip_nterm_methionine");
   items.insert("decoy_prefix");
   items.insert("digest_mass_range");
+  items.insert("equal_I_and_L");
   items.insert("mass_offsets");
+  items.insert("max_duplicate_proteins");
   items.insert("max_fragment_charge");
+  items.insert("max_index_runtime");
   items.insert("max_precursor_charge");
   items.insert("nucleotide_reading_frame");
   items.insert("num_results");
   items.insert("output_suffix");
+  items.insert("peff_verbose_output");
+  items.insert("peptide_length_range");
+  items.insert("precursor_NL_ions");
   items.insert("skip_researching");
   items.insert("spectrum_batch_size");
   AddCategory("Miscellaneous parameters", items);
@@ -2147,6 +2565,17 @@ void Params::Categorize() {
   items.insert("minimum_peaks");
   items.insert("remove_precursor_peak");
   items.insert("remove_precursor_tolerance");
+  items.insert("kojak_instrument");
+  items.insert("enrichment");
+  items.insert("MS1_centroid");
+  items.insert("MS2_centroid");
+  items.insert("MS1_resolution");
+  items.insert("MS2_resolution");
+  items.insert("min_spectrum_peaks");
+  items.insert("max_spectrum_peaks");
+  items.insert("precursor_refinement");
+  items.insert("prefer_precursor_pred");
+  items.insert("spectrum_processing");
   AddCategory("Spectral processing", items);
 
   items.clear();
@@ -2233,9 +2662,9 @@ void Params::Categorize() {
   items.insert("num_output_lines");
   items.insert("output-dir");
   items.insert("output-file");
-  items.insert("output_outfiles");
   items.insert("output_pepxmlfile");
   items.insert("output_percolatorfile");
+  items.insert("output_sqtstream");
   items.insert("output_sqtfile");
   items.insert("output_txtfile");
   items.insert("overwrite");
@@ -2260,6 +2689,9 @@ void Params::Categorize() {
   items.insert("use-z-line");
   items.insert("verbosity");
   items.insert("xlink-print-db");
+  items.insert("export_percolator");
+  items.insert("export_pepXML");
+  items.insert("export_mzID");
   AddCategory("Input and output", items);
 
 }

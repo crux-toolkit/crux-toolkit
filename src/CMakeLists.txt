@@ -22,7 +22,8 @@ include_directories(${CMAKE_BINARY_DIR}/ext)
 include_directories(${CMAKE_BINARY_DIR}/ext)
 include_directories(${CMAKE_BINARY_DIR}/ext/include)
 include_directories(${CMAKE_BINARY_DIR}/ext/include/CometSearch)
-include_directories(${CMAKE_BINARY_DIR}/ext/include/MSToolkit)
+include_directories(BEFORE ${CMAKE_BINARY_DIR}/ext/include/MSToolkit)
+include_directories(${CMAKE_BINARY_DIR}/ext/include/kojak)
 include_directories(${CMAKE_BINARY_DIR}/ext/include/gflags)
 include_directories(${CMAKE_BINARY_DIR}/ext/include/google/protobuf)
 include_directories(${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/libraries/boost_aux)
@@ -114,6 +115,7 @@ set (
   model/IonConstraint.cpp
   model/IonFilteredIterator.cpp
   model/IonSeries.cpp
+  app/KojakApplication.cpp
   util/linked_list.cpp
   io/LineFileReader.cpp
   app/LocalizeModification.cpp
@@ -208,10 +210,10 @@ add_library(
   STATIC
   ${crux_lib_files}
 )
-add_dependencies(crux-support tide-support)
 
 if (APPLE)
   set(OPENMP_FOUND FALSE)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=nonportable-include-path")
 else(APPLE)
   find_package(OpenMP)
   if (OPENMP_FOUND)
@@ -439,6 +441,7 @@ if (WIN32 AND NOT CYGWIN)
     bullseye
     hardklor
     cometsearch
+    kojaksearch
     perclibrary
     blas
     fido
@@ -470,6 +473,7 @@ else()
     crux-support
     tide-support
     cometsearch
+    kojaksearch
     gflags
     hardklor
     mstoolkitlite

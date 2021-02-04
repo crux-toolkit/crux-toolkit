@@ -9,6 +9,8 @@
 #include <vector>
 #include "model/objects.h"
 
+namespace Crux {
+
 class PepXMLWriter {
 
  public:
@@ -128,6 +130,7 @@ class PepXMLWriter {
   int precision_;
 };
 
+}
 #endif // PEPXMLWRITER_H
 
 /*
