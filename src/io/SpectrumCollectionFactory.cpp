@@ -17,7 +17,7 @@
  * Instantiates a SpectrumCollection based on the extension of the
  * given file and the use-mstoolkit and msgf options.
  */
-Crux::SpectrumCollection* SpectrumCollectionFactory::create(const string& filename) {
+Crux::SpectrumCollection* SpectrumCollectionFactory::create(const std::string& filename) {
   if (!FileUtils::Exists(filename)) {
     carp(CARP_FATAL, "The file %s does not exist. \n", filename.c_str());
   }
@@ -30,7 +30,7 @@ Crux::SpectrumCollection* SpectrumCollectionFactory::create(const string& filena
     return new SpectrumRecordSpectrumCollection(filename);
   }
 
-  string parser = Params::GetString("spectrum-parser");
+  std::string parser = Params::GetString("spectrum-parser");
   if (parser == "pwiz") {
     carp(CARP_DEBUG, "Using protewizard to parse spectra");
     return new PWIZSpectrumCollection(filename);

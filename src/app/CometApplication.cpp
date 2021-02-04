@@ -2,8 +2,6 @@
  * \file CometApplication.cpp 
  * \brief Runs comet
  *****************************************************************************/
-#include "CometSearch/Common.h"
-#include "CometSearch/CometSearchManager.h"
 #include "util/AminoAcidUtil.h"
 #include "util/CarpStreamBuf.h"
 #include "util/FileUtils.h"
@@ -121,10 +119,13 @@ void CometApplication::setVarMod(const string& param) {
 void CometApplication::setEnzyme(
   const string& param,
   const string& searchParam,
+  const string& search2Param,
   const string& sampleParam,
   const string& missedCleavageParam) {
   EnzymeInfo e;
   double temp;
+
+  // Search enzyme 1
   int search = Params::GetInt(searchParam);
   if (search >= 0 && (size_t)search < get_comet_enzyme_info_lines().size()) {
     const char* szParamBuf = get_comet_enzyme_info_lines()[search].c_str();
@@ -135,10 +136,26 @@ void CometApplication::setEnzyme(
       e.szSearchEnzymeBreakAA,
       e.szSearchEnzymeNoBreakAA);
   } else {
-    carp(CARP_FATAL, "search_enzyme_number=%d out of range (0-%d)",
-      search, get_comet_enzyme_info_lines().size() - 1);
+    size_t numLines = get_comet_enzyme_info_lines().size() - 1;
+    carp(CARP_FATAL, "%s=%d out of range (0-%d)", searchParam.c_str(), search, numLines);
   }
 
+  // Search enzyme 2
+  int search2 = Params::GetInt(search2Param);
+  if (search2 >= 0 && (size_t)search2 < get_comet_enzyme_info_lines().size()) {
+    const char* szParamBuf = get_comet_enzyme_info_lines()[search2].c_str();
+    sscanf(szParamBuf, "%lf %48s %d %20s %20s\n",
+      &temp,
+      e.szSearchEnzyme2Name,
+      &e.iSearchEnzyme2OffSet,
+      e.szSearchEnzyme2BreakAA,
+      e.szSearchEnzyme2NoBreakAA);
+  } else {
+    size_t numLines = get_comet_enzyme_info_lines().size() - 1;
+    carp(CARP_FATAL, "%s=%d out of range (0-%d)", search2Param.c_str(), search2, numLines);
+  }
+
+  // Sample enzyme
   int sample = Params::GetInt(sampleParam);
   if (sample >= 0 && (size_t)sample < get_comet_enzyme_info_lines().size()) {
     const char* szParamBuf = get_comet_enzyme_info_lines()[sample].c_str();
@@ -152,6 +169,7 @@ void CometApplication::setEnzyme(
     carp(CARP_FATAL, "sample_enzyme_number=%d out of range (0-%d)",
       sample, get_comet_enzyme_info_lines().size() - 1);
   }
+
   e.iAllowedMissedCleavage = Params::GetInt(missedCleavageParam);
   searchManager_.SetParam(param, "TODO", e);
 }
@@ -188,13 +206,15 @@ void CometApplication::setCometParameters(
     if (spec_files.size() > 1) {
       basename += "." + FileUtils::Stem(*i);
     }
-    strcpy(pInputFile->szBaseName, basename.c_str());
+    searchManager_.SetOutputFileBaseName(basename.c_str());
     pvInputFiles.push_back(pInputFile);
   }
 
   // Database
   setString("database_name");
   setInt("decoy_search");
+  setInt("peff_format");
+  setString("peff_obo");
   // CPU threads
   setInt("num_threads");
   // Masses
@@ -206,6 +226,7 @@ void CometApplication::setCometParameters(
   setInt("isotope_error");
   // Search enzyme
   setInt("search_enzyme_number");
+  setInt("search_enzyme2_number");
   setInt("num_enzyme_termini");
   setInt("allowed_missed_cleavage");
   // Fragment ions
@@ -221,11 +242,11 @@ void CometApplication::setCometParameters(
   setInt("use_NL_ions");
   // Output
   searchManager_.SetParam("output_sqtstream", "0", 0);
+  setInt("output_sqtstream");
   setInt("output_sqtfile");
   setInt("output_txtfile");
   setInt("output_pepxmlfile");
   setInt("output_percolatorfile");
-  setInt("output_outfiles");
   setInt("print_expect_score");
   setInt("num_output_lines");
   setInt("show_fragment_ions");
@@ -241,13 +262,19 @@ void CometApplication::setCometParameters(
   setInt("num_results");
   setInt("skip_researching");
   setInt("max_fragment_charge");
+  setInt("max_index_runtime");
   setInt("max_precursor_charge");
   setInt("nucleotide_reading_frame");
   setInt("clip_nterm_methionine");
   setInt("spectrum_batch_size");
   setString("decoy_prefix");
   setString("output_suffix");
+  setInt("peff_verbose_output");
+  setIntRange("peptide_length_range");
+  setDoubleVector("precursor_NL_ions");
+  setInt("equal_I_and_L");
   setDoubleVector("mass_offsets");
+  setInt("max_duplicate_proteins");
   // Spectral processing
   setInt("minimum_peaks");
   setDouble("minimum_intensity");
@@ -276,7 +303,8 @@ void CometApplication::setCometParameters(
   }
 
   setEnzyme("[COMET_ENZYME_INFO]",
-            "search_enzyme_number", "sample_enzyme_number", "allowed_missed_cleavage");
+            "search_enzyme_number", "search_enzyme2_number", "sample_enzyme_number",
+            "allowed_missed_cleavage");
 }
 
 string CometApplication::staticModParam(char c) {
@@ -339,6 +367,8 @@ vector<string> CometApplication::getOptions() const {
     "verbosity",
     // Database
     "decoy_search",
+    "peff_format",
+    "peff_obo",
     // CPU threads
     "num_threads",
     // Masses
@@ -351,6 +381,7 @@ vector<string> CometApplication::getOptions() const {
     "isotope_error",
     // Search enzyme
     "search_enzyme_number",
+    "search_enzyme2_number",
     "num_enzyme_termini",
     "allowed_missed_cleavage",
     // Fragment ions
@@ -366,11 +397,11 @@ vector<string> CometApplication::getOptions() const {
     "use_Z_ions",
     "use_NL_ions",
     // Output
+    "output_sqtstream",
     "output_sqtfile",
     "output_txtfile",
     "output_pepxmlfile",
     "output_percolatorfile",
-    "output_outfiles",
     "print_expect_score",
     "num_output_lines",
     "show_fragment_ions",
@@ -386,13 +417,19 @@ vector<string> CometApplication::getOptions() const {
     "num_results",
     "skip_researching",
     "max_fragment_charge",
+    "max_index_runtime",
     "max_precursor_charge",
     "nucleotide_reading_frame",
     "clip_nterm_methionine",
     "spectrum_batch_size",
     "decoy_prefix",
     "output_suffix",
+    "peff_verbose_output",
+    "peptide_length_range",
+    "precursor_NL_ions",
+    "equal_I_and_L",
     "mass_offsets",
+    "max_duplicate_proteins",
     // Spectral processing
     "minimum_peaks",
     "minimum_intensity",

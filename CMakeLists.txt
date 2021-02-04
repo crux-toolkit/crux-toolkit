@@ -53,6 +53,7 @@ add_custom_target(
   COMMAND ${CMAKE_COMMAND} -E remove_directory ext/downloads
   COMMAND ${CMAKE_COMMAND} -E remove_directory ext/include/CometSearch
   COMMAND ${CMAKE_COMMAND} -E remove_directory ext/include/MSToolkit
+  COMMAND ${CMAKE_COMMAND} -E remove_directory ext/include/kojak
   COMMAND ${CMAKE_COMMAND} -E remove_directory ext/include/boost
   COMMAND ${CMAKE_COMMAND} -E remove_directory ext/include/gflags-2.1.2
   COMMAND ${CMAKE_COMMAND} -E remove_directory ext/include/google
@@ -96,27 +97,30 @@ add_custom_command(
         -P ${CMAKE_CURRENT_SOURCE_DIR}/make-version-header.cmake
 )
 
-add_dependencies(barista comet)
 add_dependencies(bullseye hardklor)
+add_dependencies(comet MSToolkit)
 add_dependencies(comet ProteoWizard)
-add_dependencies(crux barista)
-add_dependencies(crux bullseye)
+add_dependencies(create-docs crux)
 add_dependencies(crux crux-support)
-add_dependencies(crux hardklor)
-add_dependencies(crux percolator)
+add_dependencies(crux kojak)
 add_dependencies(crux tide-support)
 add_dependencies(crux xlink)
+add_dependencies(crux-support barista)
+add_dependencies(crux-support bullseye)
+add_dependencies(crux-support comet)
 add_dependencies(crux-support crux_version)
+add_dependencies(crux-support hardklor)
+add_dependencies(crux-support kojak)
 add_dependencies(crux-support percolator)
-add_dependencies(hardklor comet)
-add_dependencies(percolator comet)
-add_dependencies(tide-support comet)
-add_dependencies(tide-support protobuf-3.0.0)
+add_dependencies(crux-support tide-support)
+add_dependencies(hardklor MSToolkit)
+add_dependencies(kojak hardklor)
+add_dependencies(percolator MSToolkit)
+add_dependencies(percolator ProteoWizard)
 add_dependencies(tide-support gflags-2.2.1)
-add_dependencies(xlink comet)
-add_dependencies(xlink percolator)
-add_dependencies(xlink ProteoWizard)
-add_dependencies(create-docs crux)
+add_dependencies(tide-support MSToolkit)
+add_dependencies(tide-support ProteoWizard)
+add_dependencies(tide-support protobuf-3.0.0)
 
 # build a CPack driven installer package
 include (InstallRequiredSystemLibraries)

@@ -4,7 +4,9 @@
 #include "app/ComputeQValues.h"
 #include "util/Params.h"
 
-using namespace std; 
+using namespace std;
+using namespace Crux;
+
 double Barista :: check_gradients_hinge_one_net(int protind, int label){
   int num_pep = d.protind2num_pep(protind);
   int *pepinds = d.protind2pepinds(protind);

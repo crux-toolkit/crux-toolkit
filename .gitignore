@@ -1,4 +1,5 @@
 # general patterns
+.DS_Store
 *.swp
 *.a
 CMakeCache.txt
