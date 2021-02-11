@@ -286,6 +286,9 @@ if (UNIX)
       COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CometSearch/CometWriteTxt.cpp
         ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/
+      COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CometSearch/CometSearchManager.cpp
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/
     BUILD_IN_SOURCE 1
   )
 elseif (WIN32 AND NOT CYGWIN)
@@ -316,6 +319,9 @@ elseif (WIN32 AND NOT CYGWIN)
         ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/
       COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CometSearch/CometWriteTxt.cpp
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/
+      COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CometSearch/CometSearchManager.cpp
         ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/
     BUILD_IN_SOURCE 1
   )
