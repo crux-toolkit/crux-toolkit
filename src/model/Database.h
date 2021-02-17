@@ -49,7 +49,6 @@ class Database {
   unsigned int pointer_count_; ///< number of pointers referencing this database. 
   long file_size_; ///< the size of the binary fasta file, when memory mapping
   DECOY_TYPE_T decoys_; ///< the type of decoys, none if target db
-  bool binary_is_temp_; ///< should we delete the binary fasta in destructor
 
   /**
    * Parses a database from the text based fasta file in the filename
@@ -148,8 +147,6 @@ class Database {
    * \brief Changes a database from one that reads from a fasta file to
    * one that reads from a binary/memmory mapped protein file.
    *
-   * If database already has binary source (i.e. is_memmap == TRUE), 
-   * returns TRUE.  
    * Opens the fasta file pointed to by filename for reading.  Creates a
    * file with the name given.  Reads in each protein from the text file
    * and serializes it to the output file.  Closes both files.  Changes
@@ -158,8 +155,7 @@ class Database {
    * \returns TRUE if all processes succeed, else FALSE.
    */
   bool transformTextToMemmap(
-    const char* binary_protein_filename,
-    bool binary_is_temp
+    const char* binary_protein_filename
     );
 
   /**
@@ -176,10 +172,10 @@ class Database {
   /**
    * Using the fasta file the Database was instantiated with, write a
    * binary protein file in the given directory to use for memory
-   * mapping.  If is_temp, delete the file on destruction.  Warns if
+   * mapping.  Delete the file on destruction.  Warns if
    * Database was not opened with a text file.
    */
-  void createBinaryFasta(const char* directory, bool is_temp = false);
+  void createBinaryFasta(const char* directory);
 
   /** 
    * Access routines of the form get_<object>_<field> and set_<object>_<field>. 
