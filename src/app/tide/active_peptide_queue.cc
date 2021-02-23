@@ -31,6 +31,7 @@ ActivePeptideQueue::ActivePeptideQueue(RecordReader* reader,
   compiler_prog2_ = new TheoreticalPeakCompiler(&fifo_alloc_prog2_);
   peptide_centric_ = false;
   elution_window_ = 0;
+  exact_pval_search_ = false;
 }
 
 ActivePeptideQueue::~ActivePeptideQueue() {
