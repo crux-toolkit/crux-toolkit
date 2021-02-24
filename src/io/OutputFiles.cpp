@@ -48,16 +48,6 @@ OutputFiles::OutputFiles(CruxApplication* program_name)
     num_files_ = 1;
   }
   
-  if (command == XLINK_SEARCH_COMMAND) {
-    if (Params::GetBool("concat")) {
-      num_decoy_files = 0;
-      num_files_ = 1;
-    } else {
-      num_decoy_files = 1;
-      num_files_ = 2;
-    }
-  }
-
   makeTargetDecoyList();
 
   carp(CARP_DEBUG, 
