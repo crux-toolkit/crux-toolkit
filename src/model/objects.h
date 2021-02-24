@@ -25,30 +25,6 @@ class MatchFileReader;
 class SpectrumZState;
 
 class MatchCandidate;
-/**
- * Object for defining xlinkable peptides
- */
-class XLinkablePeptide;
-
-/**
- * Object for defining valid links
- */
-class XLinkBondMap;
-
-/**
- * Object for defining a cross-link product match
- */
-class XLinkMatch;
-
-/**
- * Object for define a cross link peptide
- */
-class XLinkPeptide;
-
-/**
- * Object for defining the Xlinkable iterator
- */
-class XLinkablePeptideIterator;
 
 /**
  * \class Peak 
@@ -647,7 +623,6 @@ enum _command {
   QRANKER_COMMAND,      ///< q-ranker
   BARISTA_COMMAND,      ///< barista
   PROCESS_SPEC_COMMAND, ///< print-processed-spectra
-  XLINK_SEARCH_COMMAND, ///< search-for-xlinks
   GENERATE_PEPTIDES_COMMAND, ///< generate-peptides
   GET_MS2_SPECTRUM_COMMAND, ///<get-ms2-spectrum
   PREDICT_PEPTIDE_IONS_COMMAND, ///< predict-peptide-ions
@@ -714,30 +689,6 @@ typedef struct _linked_list_head LINKED_LIST_T;
  * list or walking through a list.  Cannot allocate a new one.
  */
 typedef struct _linked_list_node LIST_POINTER_T;
-
-/**
- * \enum _xlink_site_t (typedefed as XLINK_SITE_T)
- * \brief An indication of the type of the crosslinking site that
- * may occur in a peptide.
- * Default is UNKNOWN.
- */
-enum XLINK_SITE_T{
-  XLINKSITE_UNKNOWN,
-  XLINKSITE_CTERM,
-  XLINKSITE_NTERM,
-  XLINKSITE_ALL,
-  XLINKSITE_AA,
-  NUMBER_XLINKSITES
-};
-
-enum XLINKMATCH_TYPE_T {
-  INVALID_CANDIDATE,
-  LINEAR_CANDIDATE,
-  DEADLINK_CANDIDATE,
-  SELFLOOP_CANDIDATE, 
-  XLINK_INTER_CANDIDATE,
-  XLINK_INTRA_CANDIDATE,
-  XLINK_INTER_INTRA_CANDIDATE};
 
 /**
  * \class LinkedPeptide

@@ -250,27 +250,6 @@ void MatchFileWriter::addColumnNames(CruxApplication* application,
     addColumnName(TARGET_DECOY_COL);
     return;
 
-  case XLINK_SEARCH_COMMAND:
-    if (Params::GetBool("compute-p-values")) {
-      addColumnName(PVALUE_COL);
-      addColumnName(ETA_COL);
-      addColumnName(BETA_COL);
-      addColumnName(SHIFT_COL);
-      addColumnName(CORR_COL);
-    }
-    if (!Params::GetBool("use-old-xlink")) {
-      if (Params::GetInt("xlink-top-n") != 0) {
-        addColumnName(XCORR_FIRST_COL);
-        addColumnName(XCORR_SECOND_COL);
-      }
-      if (Params::GetBool("file-column")) {
-        addColumnName(FILE_COL);
-      }
-      addColumnName(ENZ_INT_COL);
-    }
-    addColumnName(XLINK_TYPE_COL);
-    break;
-
   case SPECTRAL_COUNTS_COMMAND:
     // protein or peptide
     if( string_to_quant_level_type(Params::GetString("quant-level")) == PEPTIDE_QUANT_LEVEL ) {
@@ -359,11 +338,6 @@ void MatchFileWriter::addColumnNames
   case INVALID_COMMAND:
     carp(CARP_FATAL, "Invalid command (%s) for creating a MatchFileWriter.",
          application->getName().c_str());
-    return;
-
-  // search commands handled elsewhere
-  case XLINK_SEARCH_COMMAND:
-    addColumnNames(application, has_decoys);
     return;
 
   // valid commands

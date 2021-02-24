@@ -12,10 +12,6 @@
  * o Add a corresponding const for the column index to enum
  *   MATCH_COLUMNS_T in MatchColumns.h
  *
- * o Add a case statement to handle this column in printOneMatchField
- *   in model/Match.cpp and in printOneMatchField in
- *   app/xlink/XLinkMatch.cpp.
- *
  * o Add logic to addColumnNames in io/MatchFileWriter.cpp to ensure
  *   that the column gets included for the appropriate commands.
  *
@@ -141,13 +137,11 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "absdM",
   "Peptide",
   "Proteins", // end for PinWriter.
-  "product type",
   "ppm",
   "xcorr 1",
   "xcorr 2",
   "protein id x",
   "index name",
-  "xlink type",
   "decoy index"
 };
 
