@@ -109,10 +109,8 @@ OutputFiles::OutputFiles(CruxApplication* program_name)
                "mzid");
   }
 
-  // only percolator and q-ranker create feature files
-  if( (command == PERCOLATOR_COMMAND 
-       || command == QRANKER_COMMAND)
-      && Params::GetBool("feature-file") ) {
+  // only percolator creates feature files
+  if( (command == PERCOLATOR_COMMAND) && Params::GetBool("feature-file") ) {
     string filename = makeFileName(fileroot, application_, 
                                    NULL, // not target or decoy
                                    "features.txt");

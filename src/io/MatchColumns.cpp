@@ -59,24 +59,16 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "Sidak adjusted p-value",  
   "tailor score",  //Added for tailor score calibration method by AKF  
   "e-value",
-  "p-value",
   "smoothed p-value",
   "distinct matches/peptide",
 #ifdef NEW_COLUMNS
-  "Weibull PSM q-value",
-  "Weibull peptide q-value",    // NEW
   "decoy PSM q-value",
   "decoy peptide q-value",      // NEW
   "percolator score",
   "percolator rank",
   "percolator PSM q-value",
   "percolator peptide q-value", // NEW
-  "q-ranker score",
-  "q-ranker PSM q-value",
-  "q-ranker peptide q-value",   // NEW
 #else
-  "Weibull est. q-value",
-  "Weibull est. PEP",
   "decoy q-value (xcorr)",
   "decoy PEP (xcorr)",
   "decoy q-value (e-value)",
@@ -85,11 +77,6 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "percolator rank",
   "percolator q-value",
   "percolator PEP",
-  "q-ranker score",
-  "q-ranker q-value",
-  "q-ranker PEP",
-  "barista score",
-  "barista q-value",
 #endif
   "tdc q-value",
   "mix-max q-value",
@@ -105,10 +92,6 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "flanking aa",
   "target/decoy",
   "original target sequence",
-  "eta",
-  "beta",
-  "shift",
-  "corr",
   "RAW",
   "SIN",
   "NSAF",

@@ -65,13 +65,6 @@ class MatchCollection {
   bool has_distinct_matches_; ///< does the match collection have distinct matches?
   bool has_decoy_indexes_;
 
-  // Values for fitting the Weibull distribution
-  FLOAT_T eta_;  ///< The eta parameter for the Weibull distribution.
-  FLOAT_T beta_; ///< The beta parameter for the Weibull distribution.
-  FLOAT_T shift_; ///< The location parameter for the Weibull distribution.
-  FLOAT_T correlation_; ///< The correlation parameter for the Weibull distribution.
-  vector<FLOAT_T> xcorrs_; ///< xcorrs to be used for weibull
-
   // The following features (post_*) are only valid when
   // post_process_collection boolean is true 
   bool post_process_collection_; 
@@ -202,16 +195,6 @@ class MatchCollection {
   // Take a vector of scores and return a vector of <deltaCn, deltaLCn>
   static std::vector< std::pair<FLOAT_T, FLOAT_T> > calculateDeltaCns(
     std::vector<FLOAT_T>, SCORER_TYPE_T type);
-
-  /**
-   * \brief Transfer the Weibull distribution parameters, including the
-   * correlation from one match_collection to another.  No check to see
-   * that the parameters have been estimated.
-   */
-  static void transferWeibull(
-    MatchCollection* from_collection,
-    MatchCollection* to_collection
-    );
 
   /**
    * \brief Add a single match to a collection.
