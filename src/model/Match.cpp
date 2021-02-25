@@ -358,36 +358,6 @@ void Match::printOneMatchField(
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx,
                                      getScore(TAILOR_SCORE));
     break;
-  case PVALUE_COL:
-    {
-      double log_pvalue = getScore(LOGP_BONF_WEIBULL_XCORR);
-      if (P_VALUE_NA == log_pvalue) {
-        output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, "NaN");
-      } else {
-        double p_value = log_pvalue != numeric_limits<FLOAT_T>::infinity() ?
-          exp(-1 * log_pvalue) : 0;
-        output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx,
-                                         p_value);
-      }
-    }
-    break;
-  case WEIBULL_QVALUE_COL:
-    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
-                             getScore(LOGP_QVALUE_WEIBULL_XCORR));
-    break;
-  case WEIBULL_PEP_COL:
-    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx,
-                                     getScore(LOGP_WEIBULL_PEP));
-    break;
-#ifdef NEW_COLUMNS
-  case WEIBULL_PEPTIDE_QVALUE_COL:
-    if ((scores_computed[LOGP_QVALUE_WEIBULL_XCORR] == true) &&
-        (match->best_per_peptide == true)) {
-      double qvalue = getScore(LOGP_PEPTIDE_QVALUE_WEIBULL);
-      output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, qvalue);
-    }
-    break;
-#endif
   case QVALUE_TDC_COL:
 //    if (null_peptide_ == false) {
       output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
@@ -454,26 +424,6 @@ void Match::printOneMatchField(
     if ( match->best_per_peptide == true) {
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
               getScore(PERCOLATOR_PEPTIDE_QVALUE));
-    }
-    break;
-#endif
-  case QRANKER_SCORE_COL:
-    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
-                                     getScore(QRANKER_SCORE));
-    break;
-  case QRANKER_QVALUE_COL:
-    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
-                                     getScore(QRANKER_QVALUE));
-    break;
-  case QRANKER_PEP_COL:
-    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
-                                     getScore(QRANKER_PEP));
-    break;
-#ifdef NEW_COLUMNS
-  case QRANKER_PEPTIDE_QVALUE_COL:
-    if (match->best_per_peptide == true) {
-    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
-              getScore(QRANKER_PEPTIDE_QVALUE));
     }
     break;
 #endif
@@ -556,22 +506,6 @@ void Match::printOneMatchField(
       output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx,
                                        peptide_->getUnshuffledSequence());
     }
-    break;
-  case ETA_COL:
-    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
-                                     collection->getCalibrationEta());
-    break;
-  case BETA_COL:
-    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
-                                     collection->getCalibrationBeta());
-    break;
-  case SHIFT_COL:
-    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
-                                     collection->getCalibrationShift());
-    break;
-  case CORR_COL:
-    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
-                                     collection->getCalibrationCorr());
     break;
   case INDEX_NAME_COL:
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx,

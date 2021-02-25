@@ -458,27 +458,10 @@ enum _scorer_type {
   DECOY_EVALUE_PEPTIDE_QVALUE,
   DECOY_EVALUE_PEP, ///< posterior error prob for e-value (target/decoy)
 
-  // N.B. Despite the name, these are actually NEGATIVE log p-values.
-  LOGP_WEIBULL_XCORR,    ///< p-value from Weibull fit
-  LOGP_BONF_WEIBULL_XCORR, ///< Bonferroni adjusted Weibull p-value
-  LOGP_QVALUE_WEIBULL_XCORR, ///< q-value from Weibull p-value
-  LOGP_WEIBULL_PEP,    ///< posterior error prob from weibull p-values
-  LOGP_PEPTIDE_QVALUE_WEIBULL, ///< peptide-level q-value for Weibull p-value
-
   PERCOLATOR_SCORE,
   PERCOLATOR_QVALUE,
   PERCOLATOR_PEPTIDE_QVALUE,
   PERCOLATOR_PEP,      ///< posterior error prob from percolator scores
-
-  QRANKER_SCORE,
-  QRANKER_QVALUE,
-  QRANKER_PEPTIDE_QVALUE,
-  QRANKER_PEP,        ///< posterior error prob from q-ranker scores
-
-  BARISTA_SCORE,
-  BARISTA_QVALUE,
-  BARISTA_PEPTIDE_QVALUE,
-  BARISTA_PEP,        ///< posterior error prob from barista scores
 
   // Various auxiliary scores.
   DELTA_CN,
@@ -581,7 +564,6 @@ enum _algorithm {PERCOLATOR_ALGORITHM,
                  QVALUE_ALGORITHM, 
                  NO_ALGORITHM, 
                  ALL_ALGORITHM, 
-                 QRANKER_ALGORITHM, 
                  NUMBER_ALGORITHM_TYPES };
 
 /**
@@ -620,8 +602,6 @@ enum _command {
   READ_SPECTRUMRECORDS_COMMAND, ///< read-spectrumrecords
   READ_TIDE_INDEX_COMMAND, ///< read-tide-index
   SPECTRAL_COUNTS_COMMAND, ///< spectral counts
-  QRANKER_COMMAND,      ///< q-ranker
-  BARISTA_COMMAND,      ///< barista
   PROCESS_SPEC_COMMAND, ///< print-processed-spectra
   GENERATE_PEPTIDES_COMMAND, ///< generate-peptides
   GET_MS2_SPECTRUM_COMMAND, ///<get-ms2-spectrum
