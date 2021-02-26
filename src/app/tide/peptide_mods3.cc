@@ -5,6 +5,7 @@
 #ifndef _MSC_VER
 #include <unistd.h>
 #else
+#include <process.h>
 #include <windows.h>
 #endif
 #include <string>
