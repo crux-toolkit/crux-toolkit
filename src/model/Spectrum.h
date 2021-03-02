@@ -67,6 +67,12 @@ class Spectrum{
   Peak         **mz_peak_array_;  ///< Allows rapid peak retrieval by mz.
   bool             charge_state_assigned_;
 
+  /// Added by Yang
+  FLOAT_T iso_window_lower_mz_;
+  FLOAT_T iso_window_upper_mz_;
+  int ms1_scan_;
+
+
   // constants
   /**
    * m/z resolution.  I.e., 5 == 0.2 m/z units
@@ -129,6 +135,14 @@ class Spectrum{
   const Peak* getPeak(size_t i);
 
   std::vector<Peak> getPeaks() const;
+
+
+  /// Added by Yang
+  void setMS1Scan(int ms1scan);
+  int getMS1Scan() const;
+  FLOAT_T getIsoWindowLowerMZ() const;
+  FLOAT_T getIsoWindowUpperMZ() const;
+  bool assignZStateDIA();
 
   /**
    * Prints a spectrum object to file.

@@ -23,13 +23,19 @@ int SpectrumRecordWriter::scanCounter_ = 0;
  */
 bool SpectrumRecordWriter::convert(
   const string& infile, ///< spectra file to convert
-  string outfile  ///< spectrumrecords file to output
+  string outfile,  ///< spectrumrecords file to output
+  int ms_level   /// MS level to extract (1 or 2)
 ) {
+  carp(CARP_INFO, "Converting ms_level %d ... ", ms_level);
   auto_ptr<Crux::SpectrumCollection> spectra(SpectrumCollectionFactory::create(infile.c_str()));
+
+  /// added by Yang
+  if ( ms_level < 1 || ms_level > 2 ) { carp(CARP_FATAL, "ms_level must be 1 or 2 instead of %d.", ms_level); }
+
 
   // Open infile
   try {
-    if (!spectra->parse()) {
+    if (!spectra->parse(ms_level)) {
       return false;
     }
   } catch (const std::exception& e) {
@@ -60,7 +66,13 @@ bool SpectrumRecordWriter::convert(
 
   // Go through the spectrum list and write each spectrum
   for (SpectrumIterator i = spectra->begin(); i != spectra->end(); ++i) {
-    (*i)->sortPeaks(_PEAK_LOCATION); // Sort by m/z
+
+	/// added by Yang
+	if (ms_level == 2) { (*i)->sortPeaks(_PEAK_LOCATION); } // Sort by m/z if MS2
+	else if (ms_level == 1) {
+
+	} // Sort by scan number if MS1
+
     vector<pb::Spectrum> pb_spectra = getPbSpectra(*i);
     for (vector<pb::Spectrum>::const_iterator j = pb_spectra.begin();
          j != pb_spectra.end();
@@ -97,6 +109,14 @@ vector<pb::Spectrum> SpectrumRecordWriter::getPbSpectra(
   for (vector<SpectrumZState>::const_iterator i = zStates.begin(); i != zStates.end(); ++i) {
     spectra.push_back(pb::Spectrum());
     pb::Spectrum& newSpectrum = spectra.back();
+
+    /// added by Yang
+    newSpectrum.set_ms1_spectrum_number(s->getMS1Scan());
+    newSpectrum.set_iso_window_lower_mz(s->getIsoWindowLowerMZ());
+    newSpectrum.set_iso_window_upper_mz(s->getIsoWindowUpperMZ());
+    // plot charge and mz
+    // carp(CARP_DETAILED_DEBUG, "getPbSpectra \t precursor_m_z:%f \t charge:%d", i->getMZ(), i->getCharge() );
+
     newSpectrum.set_spectrum_number(scan_num);
     newSpectrum.set_precursor_m_z(i->getMZ());
     newSpectrum.mutable_charge_state()->Add(i->getCharge());

@@ -91,6 +91,11 @@ class Spectrum {
   int MaxCharge() const;
   double MaxPeakInRange( double min_range, double max_range ) const;
   
+  /// added by Yang
+  int MS1SpectrumNum() const;
+  double IsoWindowLowerMZ() const;
+  double IsoWindowUpperMZ() const;
+
  private:
   int spectrum_number_;
   double rtime_;
@@ -99,6 +104,12 @@ class Spectrum {
 
   vector<double> peak_m_z_;
   vector<double> peak_intensity_;
+
+  /// added by Yang
+  int ms1_spectrum_number_;
+  double iso_window_lower_mz_;
+  double iso_window_upper_mz_;
+
 };
 
 class SpectrumCollection {
@@ -140,6 +151,10 @@ class SpectrumCollection {
 
   const vector<SpecCharge>* SpecCharges() const { return &spec_charges_; }
   vector<Spectrum*>* Spectra() { return &spectra_; }
+
+  /// added by Yang
+  void SortByMS1SpectrumNum();
+
 
  private:
   void MakeSpecCharges();

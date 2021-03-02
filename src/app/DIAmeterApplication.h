@@ -20,19 +20,14 @@ class DIAmeterApplication : public CruxApplication {
 
  protected:
   string output_file_name_;
+  double bin_width_;
+  double bin_offset_;
 
   static bool HAS_DECOYS;
   static bool PROTEIN_LEVEL_DECOYS;
 
-  vector<InputFile> getInputFiles(const vector<string>& filepaths) const;
+  vector<InputFile> getInputFiles(const vector<string>& filepaths, int ms_level) const;
 
-  double bin_width_;
-  double bin_offset_;
-
-  // this map can be used to preload spectra
-  // <spectrumrecords file> -> SpectrumCollection
-  // the SpectrumCollection must be sorted
-  std::map<std::string, SpectrumCollection*> spectra_;
 
  public:
   static const double XCORR_SCALING;
@@ -48,7 +43,6 @@ class DIAmeterApplication : public CruxApplication {
    */
   ~DIAmeterApplication();
 
-  unsigned int NUM_THREADS;
 
   /**
    * Main method
@@ -98,8 +92,6 @@ class DIAmeterApplication : public CruxApplication {
 #endif
 
 /*
- * Local Variables:
- * mode: c
- * c-basic-offset: 2
- * End:
+ * src/./crux diameter --spectrum-parser pwiz --overwrite T --output-dir /media/ylu465/Data/proj/data/dia_search/diameter-output /media/ylu465/Data/proj/data/dia_search/e01306.mzXML /media/ylu465/Data/proj/data/dia_search/cerevisiae_orf_trans_all-origin --verbosity 60
+*  src/./crux diameter --spectrum-parser pwiz --overwrite T --output-dir /media/ylu465/Data/proj/data/dia_search/diameter-output /media/ylu465/Data/proj/data/dia_search/HYE124_TTOF5600_32fix_lgillet_L150206_001_cwt2.mzXML /media/ylu465/Data/proj/data/dia_search/cerevisiae_orf_trans_all-origin --verbosity 60
  */

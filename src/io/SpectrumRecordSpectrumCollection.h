@@ -8,7 +8,7 @@ class SpectrumRecordSpectrumCollection : public Crux::SpectrumCollection {
   SpectrumRecordSpectrumCollection(const std::string& filename);
   virtual ~SpectrumRecordSpectrumCollection();
   static bool IsSpectrumRecordFile(const std::string& filename);
-  virtual bool parse();
+  virtual bool parse(int ms_level=2);
   virtual Crux::Spectrum* getSpectrum(int first_scan);
   virtual bool getSpectrum(int first_scan, Crux::Spectrum* spectrum);
 };

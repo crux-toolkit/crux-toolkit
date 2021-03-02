@@ -47,7 +47,10 @@ Spectrum::Spectrum() :
    sorted_by_mz_(false),
    sorted_by_intensity_(false),
    has_mz_peak_array_(false),
-   charge_state_assigned_(false)
+   charge_state_assigned_(false),
+   iso_window_lower_mz_(0),
+   iso_window_upper_mz_(0),
+   ms1_scan_(0)
 {
   mz_peak_array_ = NULL;
 }
@@ -377,7 +380,7 @@ bool Spectrum::parseMstoolkitSpectrum
       zstates_.push_back(zstate);
     }
   } else { // if no charge states detected, decide based on spectrum
-    charge_state_assigned_ = assignZState();
+	  charge_state_assigned_ = assignZState();
   }
 
   return true;
@@ -412,27 +415,34 @@ bool Spectrum::parsePwizSpecInfo(
     addPeak(intensities[peak_idx], mzs[peak_idx]);
   }
   has_peaks_ = true;
+  carp(CARP_DETAILED_DEBUG, "num of peaks: %d ", getNumPeaks() );
 
+  /// added by Yang
+  if ( pwiz_spectrum->precursors.size() <= 0 ) { return true; } // parsing MS1 scan
+  else if ( pwiz_spectrum->precursors.size() > 1 ) { carp(CARP_FATAL, "Spectrum %d has more than one precursor.", first_scan_); }
+
+  // parsing MS2 scan
   // get precursor m/z and charge
   // is there exactly one precursor?
-  if( pwiz_spectrum->precursors.size() != 1 ){  
-    carp(CARP_FATAL, "Spectrum %d has more than one precursor.", first_scan_);
-  }
+
   // get the isolation window as the precursor m/z
-  pzd::IsolationWindow iso_window = 
-                       pwiz_spectrum->precursors[0].isolationWindow;
+  pzd::IsolationWindow iso_window = pwiz_spectrum->precursors[0].isolationWindow;
   bool have_precursor_mz = iso_window.hasCVParam(pzd::MS_isolation_window_target_m_z);
-  if (have_precursor_mz) {
-    precursor_mz_ =
-      iso_window.cvParam(pzd::MS_isolation_window_target_m_z).valueAs<double>();
-  }
+  if (have_precursor_mz) { precursor_mz_ =iso_window.cvParam(pzd::MS_isolation_window_target_m_z).valueAs<double>(); }
 
   // each charge state(s) stored in selectedIon(s)
-  // is there at least one selected ion?
   vector<pzd::SelectedIon> ions = pwiz_spectrum->precursors[0].selectedIons;
-  if (ions.empty()) {
-    carp(CARP_FATAL, "No selected ions in spectrum %d.", first_scan_);
-  }
+  if (ions.empty()) { carp(CARP_FATAL, "No selected ions in spectrum %d.", first_scan_); }
+
+
+  /// added by Yang
+  FLOAT_T selected_ion_m_z = ions[0].cvParam(pzd::MS_selected_ion_m_z).valueAs<double>();
+  iso_window_lower_mz_ = selected_ion_m_z - iso_window.cvParam(pzd::MS_isolation_window_lower_offset).valueAs<double>();
+  iso_window_upper_mz_ = selected_ion_m_z + iso_window.cvParam(pzd::MS_isolation_window_upper_offset).valueAs<double>();
+  if (!have_precursor_mz) { precursor_mz_ = selected_ion_m_z; }
+  carp(CARP_DETAILED_DEBUG, "selected_ion_m_z: %f ", selected_ion_m_z );
+  carp(CARP_DETAILED_DEBUG, "iso_window_lower_mz_: %f \t iso_window_lower_mz_: %f", iso_window_lower_mz_, iso_window_upper_mz_ );
+
 
   // determined charge states will be stored
   // one per selected ion
@@ -503,13 +513,39 @@ bool Spectrum::parsePwizSpecInfo(
           zstates_.push_back(zstate);
         }
       } else { // we have no charge information
-        charge_state_assigned_ = assignZState(); //do choose charge and add +1 or +2,+3
+        // charge_state_assigned_ = assignZState(); //do choose charge and add +1 or +2,+3
+        /// added by Yang
+        // assignZState() is inconsistent with the tide-search description.
+        // Specifically, in tide-search, unless spectrum-charge is specified,
+        // spectra with multiple charge states will be searched from charge 1 up to max-precursor-charge (by default, 5)
+        // However, it's not the case in implementation. assignZState() will consistently generate charge 1,2,3
+        // and the spectra will be searched only among these 3 charge states.
+    	// I just simply replace assignZState() with assignZStateDIA() because Andy told me it's unlikely for DDA data not showing encoding charge state
+    	charge_state_assigned_ = assignZStateDIA();
+
       }
     }
   }
 
   return true;
 }
+
+/// added by Yang
+void Spectrum::setMS1Scan(int ms1scan) { ms1_scan_ = ms1scan; }
+int Spectrum::getMS1Scan() const { return ms1_scan_; }
+FLOAT_T Spectrum::getIsoWindowLowerMZ() const { return iso_window_lower_mz_; }
+FLOAT_T Spectrum::getIsoWindowUpperMZ() const { return iso_window_upper_mz_; }
+
+bool Spectrum::assignZStateDIA() {
+	int max_charge = Params::GetInt("max-precursor-charge");
+	for (size_t curr_charge = 1; curr_charge <= max_charge; curr_charge++) {
+		SpectrumZState zstate;
+		zstate.setMZ(precursor_mz_, curr_charge);
+		zstates_.push_back(zstate);
+	}
+	return true;
+}
+
 
 /**
  * Adds a peak to the spectrum given a intensity and location
