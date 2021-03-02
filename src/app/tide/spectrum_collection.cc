@@ -42,6 +42,17 @@ Spectrum::Spectrum(const pb::Spectrum& spec) {
     peak_m_z_.push_back(total / m_z_denom);
     peak_intensity_.push_back(spec.peak_intensity(i) / intensity_denom);
   }
+
+  /// added by Yang
+  ms1_spectrum_number_ = spec.ms1_spectrum_number();
+  iso_window_lower_mz_ = spec.iso_window_lower_mz();
+  iso_window_upper_mz_ = spec.iso_window_upper_mz();
+
+  carp(CARP_DETAILED_DEBUG, "spectrum_number_:%d \t ms1_spectrum_number_:%d", spectrum_number_, ms1_spectrum_number_);
+  carp(CARP_DETAILED_DEBUG, "precursor_m_z_:%f \t iso_window:[%f, %f]", precursor_m_z_, iso_window_lower_mz_, iso_window_upper_mz_);
+  carp(CARP_DETAILED_DEBUG, "numChargeStates:%d \t maxCharge:%d", NumChargeStates(), MaxCharge());
+//  for (int j = 0; j < NumChargeStates(); ++j) { carp(CARP_DETAILED_DEBUG, "charge:%d / %d", ChargeState(j), MaxCharge()); }
+
 }
 
 // A spectrum can have multiple precursor charges assigned.  This
@@ -115,6 +126,12 @@ void Spectrum::FillPB(pb::Spectrum* spec) {
     last = val;
     spec->add_peak_intensity(uint64(peak_intensity_[i]*intensity_denom + 0.5));
   }
+
+  /// added by Yang
+  spec->set_ms1_spectrum_number(ms1_spectrum_number_);
+  spec->set_iso_window_lower_mz(iso_window_lower_mz_);
+  spec->set_iso_window_upper_mz(iso_window_upper_mz_);
+
 }
 
 void Spectrum::SortIfNecessary() {
@@ -390,6 +407,30 @@ vector<int> Spectrum::CreateEvidenceVectorDiscretized(
   return discretized;
 }
 
+/// added by Yang
+int Spectrum::MS1SpectrumNum() const { return ms1_spectrum_number_; }
+double Spectrum::IsoWindowLowerMZ() const { return iso_window_lower_mz_; }
+double Spectrum::IsoWindowUpperMZ() const { return iso_window_upper_mz_; }
+
+void SpectrumCollection::SortByMS1SpectrumNum() {
+	// This is for MS1 spectra only!
+	// Adopt MakeSpecCharges() with following changes:
+	// (1) We don't actually need neutral_mass, by which spec_charges_ is sorted
+	// (2) We re-purpose the neutral_mass with ms1_spectrum_number_
+	// (3) Fix charge as 1, which is useless.
+
+	int spectrum_index = 0;
+	vector<Spectrum*>::iterator i = spectra_.begin();
+	for (; i != spectra_.end(); ++i) {
+		int ms1_scan = (*i)->MS1SpectrumNum();
+		spec_charges_.push_back(SpecCharge(ms1_scan, 1, *i, spectrum_index));
+		spectrum_index++;
+	}
+	sort(spec_charges_.begin(), spec_charges_.end());
+
+}
+
+
 void SpectrumCollection::ReadMS(istream& in, bool ms1) {
   // Parse MS2 file format.
   // Not very fast: uses scanf. CONSIDER speed-up.
@@ -501,3 +542,5 @@ void SpectrumCollection::Sort() {
   MakeSpecCharges();
   sort(spec_charges_.begin(), spec_charges_.end());
 }
+
+

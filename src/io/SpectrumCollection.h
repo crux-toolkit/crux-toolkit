@@ -86,7 +86,7 @@ class SpectrumCollection {
    * variable.
    * \returns TRUE if the spectra are parsed successfully. FALSE if otherwise.
    */
-  virtual bool parse() = 0;
+  virtual bool parse(int ms_level=2) = 0;
 
   /**
    * Parses a single spectrum from a spectrum_collection with first scan
