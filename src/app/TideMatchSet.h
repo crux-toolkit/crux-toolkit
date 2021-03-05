@@ -40,6 +40,13 @@ class TideMatchSet {
     double combinedPval;
     int rank;
     double tailor;  //Added by AKF    
+
+    /// added by Yang
+    double prec_intensity_rank;
+    double rt_diff;
+    double frag_pval;
+    double prec_frag_coelu;
+    double ensemble_score;
   };
   typedef FixedCapacityArray<Scores> Arr;
 

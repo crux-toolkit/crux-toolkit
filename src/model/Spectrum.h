@@ -182,7 +182,8 @@ class Spectrum{
   bool parsePwizSpecInfo(
     const pwiz::msdata::SpectrumPtr& pwiz_spectrum,
     int firstScan,
-    int lastScan
+    int lastScan,
+	bool dia_mode = false
   );
   
   /**

@@ -102,7 +102,24 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
   TideMatchSet::writeHeaders(target_file, false, decoysPerTarget > 1, true);
   TideMatchSet::writeHeaders(decoy_file, true, decoysPerTarget > 1, true);
 
-  vector<InputFile> sr = getInputFiles(input_files, 2);
+  vector<InputFile> ms1_spectra_files = getInputFiles(input_files, 1);
+  vector<InputFile> ms2_spectra_files = getInputFiles(input_files, 2);
+  // Loop through spectrum files
+  for (vector<InputFile>::const_iterator f = ms2_spectra_files.begin(); f != ms2_spectra_files.end(); f++) {
+	  string spectra_file = f->SpectrumRecords;
+	  SpectrumCollection* spectra = loadMS2Spectra(spectra_file);
+
+	  double highest_ms2_mz = spectra->FindHighestMZ();
+	  carp(CARP_DEBUG, "Maximum observed MS2 m/z = %f.", highest_ms2_mz);
+	  MaxBin::SetGlobalMax(highest_ms2_mz);
+
+	  // Active queue to process the indexed peptides
+	  ActivePeptideQueue* active_peptide_queue = new ActivePeptideQueue(peptide_reader->Reader(), proteins);
+	  active_peptide_queue->SetBinSize(bin_width_, bin_offset_);
+	  active_peptide_queue->SetOutputs(NULL, &locations, Params::GetInt("top-match"), true, target_file, decoy_file, highest_ms2_mz);
+
+	  delete spectra;
+  }
 
 
   return 0;
@@ -117,24 +134,40 @@ vector<InputFile> DIAmeterApplication::getInputFiles(const vector<string>& filep
 	  string spectrum_input_url = *f;
 	  string spectrumrecords_url = make_file_path(FileUtils::BaseName(spectrum_input_url) + ".spectrumrecords.ms" + to_string(ms_level));
 	  carp(CARP_INFO, "Converting %s to spectrumrecords %s", spectrum_input_url.c_str(), spectrumrecords_url.c_str());
+      carp(CARP_DEBUG, "New MS%d spectrumrecords filename: %s", ms_level, spectrumrecords_url.c_str());
 
-	  SpectrumCollection spectra;
-	  pb::Header spectrum_header;
-
-      carp(CARP_DEBUG, "New MS2 spectrumrecords filename: %s", spectrumrecords_url.c_str());
-      if (!SpectrumRecordWriter::convert(spectrum_input_url, spectrumrecords_url, ms_level)) {
-    	  carp(CARP_FATAL, "Error converting MS2 spectrumrecords from %s", spectrumrecords_url.c_str());
+      if (!FileUtils::Exists(spectrumrecords_url)) {
+    	  if (!SpectrumRecordWriter::convert(spectrum_input_url, spectrumrecords_url, ms_level, true)) {
+    		  carp(CARP_FATAL, "Error converting MS2 spectrumrecords from %s", spectrumrecords_url.c_str());
+    	  }
       }
 
+      /*SpectrumCollection spectra;
+	  pb::Header spectrum_header;
       if (!spectra.ReadSpectrumRecords(spectrumrecords_url, &spectrum_header)) {
     	  FileUtils::Remove(spectrumrecords_url);
-    	  carp(CARP_FATAL, "Error reading MS2 spectrumrecords: %s", spectrumrecords_url.c_str());
+    	  carp(CARP_FATAL, "Error reading spectrumrecords: %s", spectrumrecords_url.c_str());
     	  continue;
-      }
+      }*/
       input_sr.push_back(InputFile(*f, spectrumrecords_url, true));
   }
 
   return input_sr;
+}
+
+SpectrumCollection* DIAmeterApplication::loadMS2Spectra(const std::string& file) {
+	SpectrumCollection* spectra = new SpectrumCollection();
+	pb::Header spectrum_header;
+
+	if (!spectra->ReadSpectrumRecords(file, &spectrum_header)) {
+	    carp(CARP_FATAL, "Error reading spectrum file %s", file.c_str());
+	}
+	if (string_to_window_type(Params::GetString("precursor-window-type")) == WINDOW_MZ) {
+		carp(CARP_FATAL, "Precursor-window-type doesn't support mz in DIAmeter!");
+	}
+	spectra->Sort();
+
+	return spectra;
 }
 
 

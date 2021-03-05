@@ -24,7 +24,8 @@ int SpectrumRecordWriter::scanCounter_ = 0;
 bool SpectrumRecordWriter::convert(
   const string& infile, ///< spectra file to convert
   string outfile,  ///< spectrumrecords file to output
-  int ms_level   /// MS level to extract (1 or 2)
+  int ms_level,   /// MS level to extract (1 or 2)
+  bool dia_mode  /// whether it's used in DIAmeter
 ) {
   carp(CARP_INFO, "Converting ms_level %d ... ", ms_level);
   auto_ptr<Crux::SpectrumCollection> spectra(SpectrumCollectionFactory::create(infile.c_str()));
@@ -35,7 +36,7 @@ bool SpectrumRecordWriter::convert(
 
   // Open infile
   try {
-    if (!spectra->parse(ms_level)) {
+    if (!spectra->parse(ms_level, dia_mode)) {
       return false;
     }
   } catch (const std::exception& e) {
@@ -63,15 +64,10 @@ bool SpectrumRecordWriter::convert(
   }
 
   scanCounter_ = 0;
-
+  carp(CARP_DETAILED_DEBUG, "Starting to convert spectrum to pb..." );
   // Go through the spectrum list and write each spectrum
   for (SpectrumIterator i = spectra->begin(); i != spectra->end(); ++i) {
-
-	/// added by Yang
-	if (ms_level == 2) { (*i)->sortPeaks(_PEAK_LOCATION); } // Sort by m/z if MS2
-	else if (ms_level == 1) {
-
-	} // Sort by scan number if MS1
+	(*i)->sortPeaks(_PEAK_LOCATION);
 
     vector<pb::Spectrum> pb_spectra = getPbSpectra(*i);
     for (vector<pb::Spectrum>::const_iterator j = pb_spectra.begin();
@@ -94,6 +90,7 @@ vector<pb::Spectrum> SpectrumRecordWriter::getPbSpectra(
   vector<pb::Spectrum> spectra;
 
   if (s->getNumZStates() == 0 || s->getNumPeaks() == 0) {
+	carp(CARP_DETAILED_DEBUG, "numZStates: %d \t numPeaks: %d", s->getNumZStates(), s->getNumPeaks() );
     return spectra;
   }
 
