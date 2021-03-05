@@ -393,7 +393,8 @@ bool Spectrum::parseMstoolkitSpectrum
 bool Spectrum::parsePwizSpecInfo(
   const pzd::SpectrumPtr& pwiz_spectrum,
   int firstScan,
-  int lastScan
+  int lastScan,
+  bool dia_mode
 ){
   // clear any existing values
   zstates_.clear();
@@ -418,7 +419,12 @@ bool Spectrum::parsePwizSpecInfo(
   carp(CARP_DETAILED_DEBUG, "num of peaks: %d ", getNumPeaks() );
 
   /// added by Yang
-  if ( pwiz_spectrum->precursors.size() <= 0 ) { return true; } // parsing MS1 scan
+  if ( pwiz_spectrum->precursors.size() <= 0 ) {
+	  SpectrumZState zstate;
+	  zstate.setMZ(precursor_mz_, 1);
+	  zstates_.push_back(zstate);
+	  return true;
+  } // parsing MS1 scan
   else if ( pwiz_spectrum->precursors.size() > 1 ) { carp(CARP_FATAL, "Spectrum %d has more than one precursor.", first_scan_); }
 
   // parsing MS2 scan
@@ -513,18 +519,12 @@ bool Spectrum::parsePwizSpecInfo(
           zstates_.push_back(zstate);
         }
       } else { // we have no charge information
-        // charge_state_assigned_ = assignZState(); //do choose charge and add +1 or +2,+3
         /// added by Yang
-        // assignZState() is inconsistent with the tide-search description.
-        // Specifically, in tide-search, unless spectrum-charge is specified,
-        // spectra with multiple charge states will be searched from charge 1 up to max-precursor-charge (by default, 5)
-        // However, it's not the case in implementation. assignZState() will consistently generate charge 1,2,3
-        // and the spectra will be searched only among these 3 charge states.
-    	// I just simply replace assignZState() with assignZStateDIA() because Andy told me it's unlikely for DDA data not showing encoding charge state
-    	charge_state_assigned_ = assignZStateDIA();
-
+    	if (dia_mode) { charge_state_assigned_ = assignZStateDIA(); } //add +1, +2, ... max-precursor-charge
+    	else { charge_state_assigned_ = assignZState(); } //do choose charge and add +1 or +2,+3
       }
     }
+
   }
 
   return true;

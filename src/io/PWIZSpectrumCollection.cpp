@@ -140,7 +140,7 @@ bool PWIZSpectrumCollection::parseFirstLastScanFromTitle(
  * variable.
  * \returns True if the spectra are parsed successfully. False if otherwise.
  */
-bool PWIZSpectrumCollection::parse(int ms_level) {
+bool PWIZSpectrumCollection::parse(int ms_level, bool dia_mode) {
   // spectrum_collection has already been parsed
   if(is_parsed_) {
     return false;
@@ -253,10 +253,10 @@ bool PWIZSpectrumCollection::parse(int ms_level) {
 
 
     Crux::Spectrum* crux_spectrum = new Crux::Spectrum();
-    if (crux_spectrum->parsePwizSpecInfo(spectrum, scan_number_begin, scan_number_end)) {
+    if (crux_spectrum->parsePwizSpecInfo(spectrum, scan_number_begin, scan_number_end, dia_mode)) {
     	/// added by Yang
     	crux_spectrum->setMS1Scan(curr_ms1_scan);
-    	carp(CARP_DEBUG, "curr_ms1_scan: %d ", curr_ms1_scan );
+    	carp(CARP_DETAILED_DEBUG, "curr_ms1_scan: %d ", curr_ms1_scan );
 
     	addSpectrumToEnd(crux_spectrum);
     	spectraByScan_[scan_number_begin] = crux_spectrum;
@@ -265,8 +265,8 @@ bool PWIZSpectrumCollection::parse(int ms_level) {
     }
   }
 
+  // carp(CARP_DETAILED_DEBUG, "spectra_ size:%d", spectra_.size() );
   is_parsed_ = true;
-
   return true;
 }
 

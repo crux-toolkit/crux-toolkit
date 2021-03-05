@@ -48,10 +48,9 @@ Spectrum::Spectrum(const pb::Spectrum& spec) {
   iso_window_lower_mz_ = spec.iso_window_lower_mz();
   iso_window_upper_mz_ = spec.iso_window_upper_mz();
 
-  carp(CARP_DETAILED_DEBUG, "spectrum_number_:%d \t ms1_spectrum_number_:%d", spectrum_number_, ms1_spectrum_number_);
-  carp(CARP_DETAILED_DEBUG, "precursor_m_z_:%f \t iso_window:[%f, %f]", precursor_m_z_, iso_window_lower_mz_, iso_window_upper_mz_);
-  carp(CARP_DETAILED_DEBUG, "numChargeStates:%d \t maxCharge:%d", NumChargeStates(), MaxCharge());
-//  for (int j = 0; j < NumChargeStates(); ++j) { carp(CARP_DETAILED_DEBUG, "charge:%d / %d", ChargeState(j), MaxCharge()); }
+  // carp(CARP_DETAILED_DEBUG, "spectrum_number_:%d \t ms1_spectrum_number_:%d", spectrum_number_, ms1_spectrum_number_);
+  // carp(CARP_DETAILED_DEBUG, "precursor_m_z_:%f \t iso_window:[%f, %f]", precursor_m_z_, iso_window_lower_mz_, iso_window_upper_mz_);
+  // carp(CARP_DETAILED_DEBUG, "numChargeStates:%d \t maxCharge:%d", NumChargeStates(), MaxCharge());
 
 }
 

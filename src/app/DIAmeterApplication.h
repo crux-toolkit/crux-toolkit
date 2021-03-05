@@ -27,6 +27,8 @@ class DIAmeterApplication : public CruxApplication {
   static bool PROTEIN_LEVEL_DECOYS;
 
   vector<InputFile> getInputFiles(const vector<string>& filepaths, int ms_level) const;
+  SpectrumCollection* loadMS2Spectra(const std::string& file);
+
 
 
  public:

@@ -49,7 +49,7 @@ class PWIZSpectrumCollection : public Crux::SpectrumCollection {
    * variable.
    * \returns TRUE if the spectra are parsed successfully. FALSE if otherwise.
    */
-  virtual bool parse(int ms_level=2);
+  virtual bool parse(int ms_level=2, bool dia_mode = false);
 
   /**
    * Parses a single spectrum from a spectrum_collection with first scan
