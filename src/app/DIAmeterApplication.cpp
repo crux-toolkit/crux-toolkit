@@ -17,9 +17,6 @@
 #include "util/StringUtils.h"
 
 
-bool DIAmeterApplication::HAS_DECOYS = true;
-bool DIAmeterApplication::PROTEIN_LEVEL_DECOYS = false;
-
 const double DIAmeterApplication::XCORR_SCALING = 100000000.0;
 const double DIAmeterApplication::RESCALE_FACTOR = 20.0;
 
@@ -43,7 +40,7 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
   string auxlocs_file = FileUtils::Join(index, "auxlocs");
 
   // Check spectrum-charge parameter
-  string charge_string = Params::GetString("spectrum-charge");
+  /*string charge_string = Params::GetString("spectrum-charge");
   int charge_to_search;
   if (charge_string == "all") {
     carp(CARP_DEBUG, "Searching all charge states");
@@ -54,13 +51,15 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
       carp(CARP_FATAL, "Invalid spectrum-charge value %s", charge_string.c_str());
     }
     carp(CARP_INFO, "Searching charge state %d", charge_to_search);
-  }
+  }*/
 
-  bin_width_  = Params::GetDouble("mz-bin-width");
-  bin_offset_ = Params::GetDouble("mz-bin-offset");
-
-  bool use_neutral_loss_peaks_ = Params::GetBool("use-neutral-loss-peaks");
-  bool use_flanking_peaks_ = Params::GetBool("use-flanking-peaks");
+  // params
+  bool overwrite = Params::GetBool("overwrite");
+  double bin_width_  = Params::GetDouble("mz-bin-width");
+  double bin_offset_ = Params::GetDouble("mz-bin-offset");
+  vector<int> negative_isotope_errors = TideSearchApplication::getNegativeIsotopeErrors();
+  // bool use_neutral_loss_peaks_ = Params::GetBool("use-neutral-loss-peaks");
+  // bool use_flanking_peaks_ = Params::GetBool("use-flanking-peaks");
 
   // Read proteins index file
   ProteinVec proteins;
@@ -77,7 +76,9 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
   if ((peptides_header.file_type() != pb::Header::PEPTIDES) || !peptides_header.has_peptides_header()) { carp(CARP_FATAL, "Error reading index (%s)", peptides_file.c_str()); }
 
   const pb::Header::PeptidesHeader& pepHeader = peptides_header.peptides_header();
+  DECOY_TYPE_T headerDecoyType = (DECOY_TYPE_T)pepHeader.decoys();
   int decoysPerTarget = pepHeader.has_decoys_per_target() ? pepHeader.decoys_per_target() : 0;
+  carp(CARP_DEBUG, "decoysPerTarget = %d \t headerDecoyType=%d.", decoysPerTarget, headerDecoyType);
 
   MassConstants::Init(&pepHeader.mods(), &pepHeader.nterm_mods(), &pepHeader.cterm_mods(), &pepHeader.nprotterm_mods(), &pepHeader.cprotterm_mods(), bin_width_, bin_offset_);
   ModificationDefinition::ClearAll();
@@ -88,27 +89,30 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
   TideMatchSet::initModMap(pepHeader.cprotterm_mods(), PROTEIN_C);
 
 
-  bool overwrite = Params::GetBool("overwrite");
   ofstream* target_file = NULL;
   ofstream* decoy_file = NULL;
 
   string target_file_name = make_file_path("tide-search.target.txt");
   target_file = create_stream_in_path(target_file_name.c_str(), NULL, overwrite);
-  output_file_name_ = target_file_name;
-  if (HAS_DECOYS) {
-	 string decoy_file_name = make_file_path("tide-search.decoy.txt");
-	 decoy_file = create_stream_in_path(decoy_file_name.c_str(), NULL, overwrite);
+  // output_file_name_ = target_file_name;
+  if (headerDecoyType != NO_DECOYS) {
+	  string decoy_file_name = make_file_path("tide-search.decoy.txt");
+	  decoy_file = create_stream_in_path(decoy_file_name.c_str(), NULL, overwrite);
   }
-  TideMatchSet::writeHeaders(target_file, false, decoysPerTarget > 1, true);
-  TideMatchSet::writeHeaders(decoy_file, true, decoysPerTarget > 1, true);
+
+
+  TideMatchSet::writeHeaders(target_file, false, decoysPerTarget > 1, Params::GetBool("compute-sp"));
+  TideMatchSet::writeHeaders(decoy_file, true, decoysPerTarget > 1, Params::GetBool("compute-sp"));
 
   vector<InputFile> ms1_spectra_files = getInputFiles(input_files, 1);
   vector<InputFile> ms2_spectra_files = getInputFiles(input_files, 2);
+
   // Loop through spectrum files
   for (vector<InputFile>::const_iterator f = ms2_spectra_files.begin(); f != ms2_spectra_files.end(); f++) {
 	  string spectra_file = f->SpectrumRecords;
 	  SpectrumCollection* spectra = loadMS2Spectra(spectra_file);
 
+	  // insert the search code here and will split into a new function later
 	  double highest_ms2_mz = spectra->FindHighestMZ();
 	  carp(CARP_DEBUG, "Maximum observed MS2 m/z = %f.", highest_ms2_mz);
 	  MaxBin::SetGlobalMax(highest_ms2_mz);
@@ -118,7 +122,89 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
 	  active_peptide_queue->SetBinSize(bin_width_, bin_offset_);
 	  active_peptide_queue->SetOutputs(NULL, &locations, Params::GetInt("top-match"), true, target_file, decoy_file, highest_ms2_mz);
 
+	  // initialize fields required for output
+	  // Not sure if it is necessary, will check later
+	  const vector<SpectrumCollection::SpecCharge>* spec_charges = spectra->SpecCharges();
+	  int* sc_index = new int(-1);
+	  FLOAT_T sc_total = (FLOAT_T)spec_charges->size();
+	  int print_interval = Params::GetInt("print-search-progress");
+	  // Keep track of observed peaks that get filtered out in various ways.
+	  long int num_range_skipped = 0;
+	  long int num_precursors_skipped = 0;
+	  long int num_isotopes_skipped = 0;
+	  long int num_retained = 0;
+
+
+	  // This is the main search loop.
+	  // DIAmeter supports spectrum centric match report only
+	  ObservedPeakSet observed(bin_width_, bin_offset_, Params::GetBool("use-neutral-loss-peaks"), Params::GetBool("use-flanking-peaks") );
+
+	  for (vector<SpectrumCollection::SpecCharge>::const_iterator sc = spec_charges->begin();sc < spec_charges->begin() + (spec_charges->size()); sc++) {
+		  ++(*sc_index);
+		  if (print_interval > 0 && *sc_index > 0 && *sc_index % print_interval == 0) { carp(CARP_INFO, "%d spectrum-charge combinations searched, %.0f%% complete", *sc_index, *sc_index / sc_total * 100); }
+
+		  Spectrum* spectrum = sc->spectrum;
+		  double precursor_mz = spectrum->PrecursorMZ();
+		  int scan_num = spectrum->SpectrumNumber();
+		  int charge = sc->charge;
+
+		  /*double iso_window_lower_mz = spectrum->IsoWindowLowerMZ();
+		  double iso_window_upper_mz = spectrum->IsoWindowUpperMZ();
+		  if (fabs(iso_window_upper_mz-iso_window_lower_mz) < 0.001) { carp(CARP_FATAL, "iso_window cannot be zero! Observed [%f,%f]", iso_window_lower_mz, iso_window_upper_mz ); } */
+		  // carp(CARP_DETAILED_DEBUG, "spectrum_number_:%d \t precursor_mz:%f \t charge:%d", scan_num, precursor_mz, charge);
+
+		  // The active peptide queue holds the candidate peptides for spectrum.
+		  // Calculate and set the window, depending on the window type.
+		  vector<double>* min_mass = new vector<double>();
+		  vector<double>* max_mass = new vector<double>();
+		  vector<bool>* candidatePeptideStatus = new vector<bool>();
+		  double min_range, max_range;
+
+		  // TideSearchApplication::computeWindow(*sc, string_to_window_type(Params::GetString("precursor-window-type")), Params::GetDouble("precursor-window"), Params::GetInt("max-precursor-charge"), &negative_isotope_errors, min_mass, max_mass, &min_range, &max_range);
+		  computeWindowDIA(*sc, Params::GetInt("max-precursor-charge"), &negative_isotope_errors, min_mass, max_mass, &min_range, &max_range);
+
+		  // Normalize the observed spectrum and compute the cache of frequently-needed
+		  // values for taking dot products with theoretical spectra.
+		  observed.PreprocessSpectrum(*spectrum, charge, &num_range_skipped, &num_precursors_skipped, &num_isotopes_skipped, &num_retained);
+		  int nCandPeptide = active_peptide_queue->SetActiveRange(min_mass, max_mass, min_range, max_range, candidatePeptideStatus);
+		  int candidatePeptideStatusSize = candidatePeptideStatus->size();
+		  carp(CARP_DETAILED_DEBUG, "nCandPeptide:%d \t candidatePeptideStatusSize:%d \t mass range:[%f,%f]", nCandPeptide, candidatePeptideStatusSize, min_range, max_range);
+		  if (nCandPeptide == 0) { continue; }
+
+		  TideMatchSet::Arr2 match_arr2(candidatePeptideStatusSize); // Scored peptides will go here.
+		  // Programs for taking the dot-product with the observed spectrum are laid
+		  // out in memory managed by the active_peptide_queue, one program for each
+		  // candidate peptide. The programs will store the results directly into
+		  // match_arr. We now pass control to those programs.
+		  TideSearchApplication::collectScoresCompiled(active_peptide_queue, spectrum, observed, &match_arr2, candidatePeptideStatusSize, charge);
+
+		  // The denominator used in the Tailor score calibration method
+		  double quantile_score = getTailorQuantile(&match_arr2);
+		  carp(CARP_DETAILED_DEBUG, "Tailor quantile_score:%f", quantile_score);
+
+		  TideMatchSet::Arr match_arr(nCandPeptide);
+		  for (TideMatchSet::Arr2::iterator it = match_arr2.begin(); it != match_arr2.end(); ++it) {
+			  /// Yang: I cannot understand here that the peptide index and the rank is complement.
+			  /// More attention is needed.
+			  int peptide_idx = candidatePeptideStatusSize - (it->second);
+			  if ((*candidatePeptideStatus)[peptide_idx]) {
+				  TideMatchSet::Scores curScore;
+			      curScore.xcorr_score = (double)(it->first / XCORR_SCALING);
+			      curScore.rank = it->second;
+			      curScore.tailor = ((double)(it->first / XCORR_SCALING) + 5.0) / quantile_score;
+			      match_arr.push_back(curScore);
+			      // carp(CARP_DETAILED_DEBUG, "peptide_idx:%d \t xcorr_score:%f \t rank:%d", peptide_idx, curScore.xcorr_score, curScore.rank);
+			  }
+		  }
+		  TideMatchSet matches(&match_arr, highest_ms2_mz);
+		  matches.report(target_file, decoy_file, Params::GetInt("top-match"), decoysPerTarget, f->OriginalName,
+				  spectrum, charge, active_peptide_queue, proteins, locations, Params::GetBool("compute-sp"), true);
+
+	  }
+
+
 	  delete spectra;
+	  delete sc_index;
   }
 
 
@@ -162,14 +248,59 @@ SpectrumCollection* DIAmeterApplication::loadMS2Spectra(const std::string& file)
 	if (!spectra->ReadSpectrumRecords(file, &spectrum_header)) {
 	    carp(CARP_FATAL, "Error reading spectrum file %s", file.c_str());
 	}
-	if (string_to_window_type(Params::GetString("precursor-window-type")) == WINDOW_MZ) {
-		carp(CARP_FATAL, "Precursor-window-type doesn't support mz in DIAmeter!");
-	}
-	spectra->Sort();
+	// if (string_to_window_type(Params::GetString("precursor-window-type")) != WINDOW_MZ) {
+	//	carp(CARP_FATAL, "Precursor-window-type must be mz in DIAmeter!");
+	// }
+	// spectra->Sort();
+	// spectra->Sort<ScSortByMz>(ScSortByMz(Params::GetDouble("precursor-window")));
+
+	// Precursor-window-type must be mz in DIAmeter, based upon which spectra are sorted
+	// Precursor-window is the half size of isolation window
+	spectra->Sort<ScSortByMzDIA>(ScSortByMzDIA());
 
 	return spectra;
 }
 
+void DIAmeterApplication::computeWindowDIA(
+  const SpectrumCollection::SpecCharge& sc,
+  int max_charge,
+  vector<int>* negative_isotope_errors,
+  vector<double>* out_min,
+  vector<double>* out_max,
+  double* min_range,
+  double* max_range
+) {
+	double unit_dalton = BIN_WIDTH;
+	double mz_minus_proton = sc.spectrum->PrecursorMZ() - MASS_PROTON;
+	double precursor_window = fabs(sc.spectrum->IsoWindowUpperMZ()-sc.spectrum->IsoWindowLowerMZ()) / 2;
+
+	for (vector<int>::const_iterator ie = negative_isotope_errors->begin(); ie != negative_isotope_errors->end(); ++ie) {
+		out_min->push_back((mz_minus_proton - precursor_window) * sc.charge + (*ie * unit_dalton));
+		out_max->push_back((mz_minus_proton + precursor_window) * sc.charge + (*ie * unit_dalton));
+	}
+	*min_range = (mz_minus_proton*sc.charge + (negative_isotope_errors->front() * unit_dalton)) - precursor_window*max_charge;
+	*max_range = (mz_minus_proton*sc.charge + (negative_isotope_errors->back() * unit_dalton)) + precursor_window*max_charge;
+
+	// carp(CARP_DETAILED_DEBUG, "Scan=%d Charge=%d Mass window=[%f, %f]", sc.spectrum->SpectrumNumber(), sc.charge, (*out_min)[0], (*out_max)[0]);
+}
+
+double DIAmeterApplication::getTailorQuantile(TideMatchSet::Arr2* match_arr2) {
+	//Implementation of the Tailor score calibration method
+	double quantile_score = 1.0;
+	vector<double> scores;
+	double quantile_th = 0.01;
+	// Collect the scores for the score tail distribution
+	for (TideMatchSet::Arr2::iterator it = match_arr2->begin(); it != match_arr2->end(); ++it) {
+		scores.push_back((double)(it->first / XCORR_SCALING));
+	}
+	sort(scores.begin(), scores.end(), greater<double>());  //sort in decreasing order
+	int quantile_pos = (int)(quantile_th*(double)scores.size()+0.5);
+
+	if (quantile_pos < 3) { quantile_pos = 3; }
+	quantile_score = scores[quantile_pos]+5.0; // Make sure scores positive
+
+	return quantile_score;
+}
 
 string DIAmeterApplication::getName() const {
   return "diameter";
@@ -200,9 +331,9 @@ vector<string> DIAmeterApplication::getOptions() const {
     "overwrite",
     "fragment-tolerance",
     "precursor-window",
-    "precursor-window-type",
-    "spectrum-charge",
-//    "spectrum-parser",
+	// "precursor-window-type",
+	// "spectrum-charge",
+    // "spectrum-parser",
     "top-match",
     "use-flanking-peaks",
     "use-neutral-loss-peaks",
