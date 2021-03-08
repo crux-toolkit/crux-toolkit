@@ -400,7 +400,7 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
   return 0;
 }
 
-vector<int> TideSearchApplication::getNegativeIsotopeErrors() const {
+vector<int> TideSearchApplication::getNegativeIsotopeErrors() {
   string isotope_errors_string = Params::GetString("isotope-error");
   if (isotope_errors_string[0] == ',') {
     carp(CARP_FATAL, "Error in isotope_error parameter formatting: (%s)",

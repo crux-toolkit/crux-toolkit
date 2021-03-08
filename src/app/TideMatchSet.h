@@ -94,7 +94,7 @@ class TideMatchSet {
     const vector<const pb::AuxLocation*>& locations,  ///< auxiliary locations
     bool compute_sp, ///< whether to compute sp or not
     bool highScoreBest, //< indicates semantics of score magnitude
-    boost::mutex * rwlock
+    boost::mutex * rwlock = NULL
   );
 
   static void colPrint(

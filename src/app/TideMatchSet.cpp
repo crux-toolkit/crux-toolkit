@@ -21,11 +21,11 @@ char TideMatchSet::match_collection_loc_[] = {0};
 char TideMatchSet::decoy_match_collection_loc_[] = {0};
 
 TideMatchSet::TideMatchSet(Arr* matches, double max_mz)
-  : matches_(matches), max_mz_(max_mz), exact_pval_search_(false), elution_window_(0) {
+  : matches_(matches), max_mz_(max_mz), exact_pval_search_(false), elution_window_(0), cur_score_function_(XCORR_SCORE) {
 }
 
 TideMatchSet::TideMatchSet(Peptide* peptide, double max_mz)
-  : peptide_(peptide), max_mz_(max_mz), exact_pval_search_(false), elution_window_(0) {
+  : peptide_(peptide), max_mz_(max_mz), exact_pval_search_(false), elution_window_(0), cur_score_function_(XCORR_SCORE) {
 }
 
 TideMatchSet::~TideMatchSet() {
@@ -384,7 +384,7 @@ void TideMatchSet::writeToFile(
     Crux::Peptide cruxPep = getCruxPeptide(peptide);
     const SpScorer::SpScoreData* sp_data = sp_map ? &(sp_map->at(i).first) : NULL;
 
-    rwlock->lock();
+    if (rwlock != NULL) { rwlock->lock(); }
     if (Params::GetBool("file-column")) {
       *file << spectrum_filename << '\t';
     }
@@ -489,7 +489,7 @@ void TideMatchSet::writeToFile(
       }
     }
     *file << endl;
-    rwlock->unlock();
+    if (rwlock != NULL) { rwlock->unlock(); }
   }
 }
 

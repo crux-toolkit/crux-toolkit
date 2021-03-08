@@ -40,6 +40,14 @@ struct InputFile {
     OriginalName(name), SpectrumRecords(spectrumrecords), Keep(keep) {}
 };
 
+struct ScSortByMz {
+	explicit ScSortByMz(double precursor_window) { precursor_window_ = precursor_window; }
+	bool operator() (const SpectrumCollection::SpecCharge x, const SpectrumCollection::SpecCharge y) {
+		return (x.spectrum->PrecursorMZ() - MASS_PROTON - precursor_window_) * x.charge <
+				(y.spectrum->PrecursorMZ() - MASS_PROTON - precursor_window_) * y.charge;
+	}
+	double precursor_window_;
+};
 
 class TideSearchApplication : public CruxApplication {
 private:
@@ -91,7 +99,6 @@ private:
   static bool HAS_DECOYS;
   static bool PROTEIN_LEVEL_DECOYS;
 
-  vector<int> getNegativeIsotopeErrors() const;
   vector<InputFile> getInputFiles(const vector<string>& filepaths) const;
   static SpectrumCollection* loadSpectra(const std::string& file);
 
@@ -148,38 +155,11 @@ private:
     vector<int>* negative_isotope_errors
   );
 
-  void collectScoresCompiled(
-    ActivePeptideQueue* active_peptide_queue,
-    const Spectrum* spectrum,
-    const ObservedPeakSet& observed,
-    TideMatchSet::Arr2* match_arr,
-    int queue_size,
-    int charge
-  );
+
 
   void convertResults() const;
 
-  void computeWindow(
-    const SpectrumCollection::SpecCharge& sc,
-    WINDOW_TYPE_T window_type,
-    double precursor_window,
-    int max_charge,
-    vector<int>* negative_isotope_errors,
-    vector<double>* out_min,
-    vector<double>* out_max,
-    double* min_range,
-    double* max_range
-  );
 
-  struct ScSortByMz {
-    explicit ScSortByMz(double precursor_window) { precursor_window_ = precursor_window; }
-    bool operator() (const SpectrumCollection::SpecCharge x,
-                     const SpectrumCollection::SpecCharge y) {
-      return (x.spectrum->PrecursorMZ() - MASS_PROTON - precursor_window_) * x.charge <
-             (y.spectrum->PrecursorMZ() - MASS_PROTON - precursor_window_) * y.charge;
-    }
-    double precursor_window_;
-  };
   double bin_width_;
   double bin_offset_;
 
@@ -197,6 +177,7 @@ private:
   static const double RESCALE_FACTOR;
 
   bool exact_pval_search_;
+
 
   /**
    * Constructor
@@ -220,6 +201,29 @@ private:
   int main(const vector<string>& input_files, const string input_index);
 
   static bool proteinLevelDecoys();
+
+  static vector<int> getNegativeIsotopeErrors();
+
+  static void computeWindow(
+      const SpectrumCollection::SpecCharge& sc,
+      WINDOW_TYPE_T window_type,
+      double precursor_window,
+      int max_charge,
+      vector<int>* negative_isotope_errors,
+      vector<double>* out_min,
+      vector<double>* out_max,
+      double* min_range,
+      double* max_range
+    );
+
+  static void collectScoresCompiled(
+      ActivePeptideQueue* active_peptide_queue,
+      const Spectrum* spectrum,
+      const ObservedPeakSet& observed,
+      TideMatchSet::Arr2* match_arr,
+      int queue_size,
+      int charge
+    );
 
   /**
    * Returns the command name
