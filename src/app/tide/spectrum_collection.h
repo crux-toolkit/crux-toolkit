@@ -95,6 +95,8 @@ class Spectrum {
   int MS1SpectrumNum() const;
   double IsoWindowLowerMZ() const;
   double IsoWindowUpperMZ() const;
+  double MaxPeakMz() const;
+  vector<double> DescendingSortedPeakIntensity();
 
  private:
   int spectrum_number_;
