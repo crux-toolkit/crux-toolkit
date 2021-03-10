@@ -410,6 +410,14 @@ vector<int> Spectrum::CreateEvidenceVectorDiscretized(
 int Spectrum::MS1SpectrumNum() const { return ms1_spectrum_number_; }
 double Spectrum::IsoWindowLowerMZ() const { return iso_window_lower_mz_; }
 double Spectrum::IsoWindowUpperMZ() const { return iso_window_upper_mz_; }
+double Spectrum::MaxPeakMz() const {
+	return *max_element(peak_m_z_.begin(), peak_m_z_.end());
+}
+vector<double> Spectrum::DescendingSortedPeakIntensity() {
+	vector<double> sorted_intensity_vec(peak_intensity_);
+	std::sort(sorted_intensity_vec.begin(), sorted_intensity_vec.end(), greater<double>());
+	return sorted_intensity_vec;
+}
 
 void SpectrumCollection::SortByMS1SpectrumNum() {
 	// This is for MS1 spectra only!
