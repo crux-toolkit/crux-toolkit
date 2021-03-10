@@ -298,40 +298,6 @@ int get_number_digits(
   int number ///< the number to count digits
   );
 
-/**
- * Fits a three-parameter Weibull distribution to the input data. 
- * \returns eta, beta, c (which in this case is the amount the data should
- * be shifted by) and the best correlation coefficient
- */
-
-void fit_three_parameter_weibull(
-    FLOAT_T* data, ///< the data to be fit. should be in descending order -in
-    int fit_data_points, ///< the number of data points to fit -in
-    int total_data_points, ///< the total number of data points -in
-    FLOAT_T min_shift, ///< the minimum shift to allow -in
-    FLOAT_T max_shift, ///< the maximum shift to allow -in
-    FLOAT_T step, ///< the step for shift modification -in
-    FLOAT_T corr_threshold, ///< minimum correlation, else no fit -in
-    FLOAT_T* eta,      ///< the eta parameter of the Weibull dist -out
-    FLOAT_T* beta,      ///< the beta parameter of the Weibull dist -out
-    FLOAT_T* shift,     ///< the best shift -out
-    FLOAT_T* correlation   ///< the best correlation -out
-    );
-
-/**
- * Fits a two-parameter Weibull distribution to the input data. 
- * \returns eta, beta and the correlation coefficient
- */
-void fit_two_parameter_weibull(
-    FLOAT_T* data, ///< the data to be fit -in
-    int fit_data_points, ///< the number of data points to fit -in
-    int total_data_points, ///< the total number of data points -in
-    FLOAT_T shift, ///< the amount by which to shift our data -in
-    FLOAT_T* eta,      ///< the eta parameter of the Weibull dist -out
-    FLOAT_T* beta,      ///< the beta parameter of the Weibull dist -out
-    FLOAT_T* correlation ///< the best correlation -out
-    );
-
 bool string_to_mass_type(const std::string& name, MASS_TYPE_T*);
 bool mass_type_to_string(MASS_TYPE_T, char*);
 bool string_to_algorithm_type(char*, ALGORITHM_TYPE_T*);

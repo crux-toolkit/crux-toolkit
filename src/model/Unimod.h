@@ -717,18 +717,6 @@ static Modification Get(int unimodId) {
       mod.addSpecificity('D', ANYWHERE);
       return mod;
     }
-    case 126: {
-      Modification mod("Xlink:DTSSP[88]", "Cleaved and reduced DSP/DTSSP crosslinker", 87.998285, 88.128300);
-      mod.addSpecificity('n', PROTEIN_N);
-      mod.addSpecificity('K', ANYWHERE);
-      return mod;
-    }
-    case 1897: {
-      Modification mod("Xlink:EGS[226]", "Intact EGS cross-linker", 226.047738, 226.182800);
-      mod.addSpecificity('K', ANYWHERE);
-      mod.addSpecificity('n', PROTEIN_N);
-      return mod;
-    }
     case 127: {
       Modification mod("Fluoro", "fluorination", 17.990578, 17.990500);
       mod.addSpecificity('Y', ANYWHERE);
@@ -1236,12 +1224,6 @@ static Modification Get(int unimodId) {
       mod.addSpecificity('n', ANY_N);
       return mod;
     }
-    case 1905: {
-      Modification mod("Xlink:BS2G[96]", "Intact BS2-G crosslinker", 96.021129, 96.084100);
-      mod.addSpecificity('n', PROTEIN_N);
-      mod.addSpecificity('K', ANYWHERE);
-      return mod;
-    }
     case 275: {
       Modification mod("Nitrosyl", "S-nitrosylation", 28.990164, 28.998200);
       mod.addSpecificity('C', ANYWHERE);
@@ -1485,17 +1467,6 @@ static Modification Get(int unimodId) {
     }
     case 768: {
       Modification mod("Methyl+Acetyl:2H(3)", "Mono-methylated lysine labelled with Acetyl_heavy", 59.045045, 59.081700);
-      mod.addSpecificity('K', ANYWHERE);
-      return mod;
-    }
-    case 323: {
-      Modification mod("Xlink:B10621", "bis-((N-iodoacetyl)piperazinyl)sulfonerhodamine", 713.093079, 713.562600);
-      mod.addSpecificity('C', ANYWHERE);
-      return mod;
-    }
-    case 324: {
-      Modification mod("Xlink:DTBP[87]", "Cleaved and reduced DTBP crosslinker", 87.014270, 87.143500);
-      mod.addSpecificity('n', PROTEIN_N);
       mod.addSpecificity('K', ANYWHERE);
       return mod;
     }
@@ -1991,12 +1962,6 @@ static Modification Get(int unimodId) {
       mod.addSpecificity('T', ANYWHERE);
       mod.addSpecificity('S', ANYWHERE);
       mod.addSpecificity('N', ANYWHERE);
-      mod.addSpecificity('K', ANYWHERE);
-      return mod;
-    }
-    case 455: {
-      Modification mod("Xlink:DMP[154]", "Free monolink of DMP crosslinker", 154.110613, 154.209600);
-      mod.addSpecificity('n', PROTEIN_N);
       mod.addSpecificity('K', ANYWHERE);
       return mod;
     }
@@ -3304,14 +3269,6 @@ static Modification Get(int unimodId) {
       mod.addSpecificity('R', ANYWHERE);
       return mod;
     }
-    case 825: {
-      Modification mod("Xlink:DFDNB", "Intact DFDNB crosslinker", 163.985807, 164.075200);
-      mod.addSpecificity('N', ANYWHERE);
-      mod.addSpecificity('Q', ANYWHERE);
-      mod.addSpecificity('R', ANYWHERE);
-      mod.addSpecificity('K', ANYWHERE);
-      return mod;
-    }
     case 821: {
       Modification mod("Cy3b-maleimide", "fluorescent dye that labels cysteines", 682.246120, 682.785200);
       mod.addSpecificity('C', ANYWHERE);
@@ -3328,11 +3285,6 @@ static Modification Get(int unimodId) {
       Modification mod("AEC-MAEC:2H(4)", "deuterium cysteamine modification to S or T", 63.044462, 63.158000);
       mod.addSpecificity('S', ANYWHERE);
       mod.addSpecificity('T', ANYWHERE);
-      return mod;
-    }
-    case 824: {
-      Modification mod("Xlink:BMOE", "Intact or monolink BMOE crosslinker", 220.048407, 220.181500);
-      mod.addSpecificity('C', ANYWHERE);
       return mod;
     }
     case 811: {
@@ -3540,11 +3492,6 @@ static Modification Get(int unimodId) {
       Modification mod("Galactosyl", "Gluconoylation", 178.047738, 178.140000);
       mod.addSpecificity('n', ANY_N);
       mod.addSpecificity('K', ANYWHERE);
-      return mod;
-    }
-    case 908: {
-      Modification mod("Xlink:SMCC[321]", "Monolink of SMCC terminated with 3-(dimethylamino)-1-propylamine", 321.205242, 321.414600);
-      mod.addSpecificity('C', ANYWHERE);
       return mod;
     }
     case 910: {
@@ -3955,12 +3902,6 @@ static Modification Get(int unimodId) {
       mod.addSpecificity('C', ANYWHERE);
       return mod;
     }
-    case 1020: {
-      Modification mod("Xlink:DSS[156]", "Water-quenched monolink of DSS/BS3 crosslinker", 156.078644, 156.179100);
-      mod.addSpecificity('K', ANYWHERE);
-      mod.addSpecificity('n', PROTEIN_N);
-      return mod;
-    }
     case 1017: {
       Modification mod("DMPO", "DMPO spin-trap nitrone adduct", 111.068414, 111.141800);
       mod.addSpecificity('H', ANYWHERE);
@@ -3989,46 +3930,9 @@ static Modification Get(int unimodId) {
       mod.addSpecificity('C', ANYWHERE);
       return mod;
     }
-    case 1021: {
-      Modification mod("Xlink:EGS[244]", "Water quenched monolink of EGS cross-linker", 244.058303, 244.198100);
-      mod.addSpecificity('n', PROTEIN_N);
-      mod.addSpecificity('K', ANYWHERE);
-      return mod;
-    }
-    case 1022: {
-      Modification mod("Xlink:DST[132]", "Water quenched monolink of DST crosslinker", 132.005873, 132.071600);
-      mod.addSpecificity('n', PROTEIN_N);
-      mod.addSpecificity('K', ANYWHERE);
-      return mod;
-    }
-    case 1023: {
-      Modification mod("Xlink:DTSSP[192]", "Water quenched monolink of DSP/DTSSP crosslinker", 191.991486, 192.255900);
-      mod.addSpecificity('n', PROTEIN_N);
-      mod.addSpecificity('K', ANYWHERE);
-      return mod;
-    }
-    case 1024: {
-      Modification mod("Xlink:SMCC[237]", "Water quenched monolink of SMCC", 237.100108, 237.251800);
-      mod.addSpecificity('C', ANYWHERE);
-      mod.addSpecificity('K', ANYWHERE);
-      mod.addSpecificity('n', PROTEIN_N);
-      return mod;
-    }
     case 1032: {
       Modification mod("2-nitrobenzyl", "Tyrosine caged with 2-nitrobenzyl (ONB)", 135.032028, 135.120100);
       mod.addSpecificity('Y', ANYWHERE);
-      return mod;
-    }
-    case 1027: {
-      Modification mod("Xlink:DMP[140]", "Water quenched monolink of DMP crosslinker", 140.094963, 140.183000);
-      mod.addSpecificity('n', PROTEIN_N);
-      mod.addSpecificity('K', ANYWHERE);
-      return mod;
-    }
-    case 1028: {
-      Modification mod("Xlink:EGS[115]", "Cleavage product of EGS protein crosslinks by hydroylamine treatment", 115.026943, 115.087400);
-      mod.addSpecificity('n', PROTEIN_N);
-      mod.addSpecificity('K', ANYWHERE);
       return mod;
     }
     case 1033: {
@@ -5460,12 +5364,6 @@ static Modification Get(int unimodId) {
       mod.addSpecificity('Y', ANYWHERE);
       return mod;
     }
-    case 1887: {
-      Modification mod("Xlink:BuUrBu[213]", "Ammonia quenched monolink of BuUrBu crosslinker", 213.111341, 213.233700);
-      mod.addSpecificity('K', ANYWHERE);
-      mod.addSpecificity('n', PROTEIN_N);
-      return mod;
-    }
     case 1330: {
       Modification mod("bisANS-sulfonates", "BisANS with loss of both sulfonates", 437.201774, 437.554300);
       mod.addSpecificity('S', ANYWHERE);
@@ -5910,12 +5808,6 @@ static Modification Get(int unimodId) {
       Modification mod("Hex(1)HexNAc(1)dHex(1)Me(2)", "Hex HexNAc dHex Me(2)", 539.221405, 539.527500);
       mod.addSpecificity('T', ANYWHERE);
       mod.addSpecificity('S', ANYWHERE);
-      return mod;
-    }
-    case 1789: {
-      Modification mod("Xlink:DSS[155]", "Ammonium-quenched monolink of DSS/BS3 crosslinker", 155.094629, 155.194300);
-      mod.addSpecificity('n', PROTEIN_N);
-      mod.addSpecificity('K', ANYWHERE);
       return mod;
     }
     case 1438: {
@@ -8008,22 +7900,10 @@ static Modification Get(int unimodId) {
       mod.addSpecificity('C', ANYWHERE);
       return mod;
     }
-    case 1878: {
-      Modification mod("Xlink:DSSO[176]", "Water-quenched monolink of DSSO crosslinker", 176.014330, 176.190300);
-      mod.addSpecificity('K', ANYWHERE);
-      mod.addSpecificity('n', PROTEIN_N);
-      return mod;
-    }
     case 1873: {
       Modification mod("MesitylOxide", "Acetone chemical artifact", 98.073165, 98.143000);
       mod.addSpecificity('K', ANYWHERE);
       mod.addSpecificity('H', ANYWHERE);
-      mod.addSpecificity('n', PROTEIN_N);
-      return mod;
-    }
-    case 1877: {
-      Modification mod("Xlink:DSS[259]", "Tris-quenched monolink of DSS/BS3 crosslinker", 259.141973, 259.298800);
-      mod.addSpecificity('K', ANYWHERE);
       mod.addSpecificity('n', PROTEIN_N);
       return mod;
     }
@@ -8034,138 +7914,11 @@ static Modification Get(int unimodId) {
       mod.addSpecificity('K', ANYWHERE);
       return mod;
     }
-    case 1879: {
-      Modification mod("Xlink:DSSO[175]", "Ammonia-quenched monolink of DSSO crosslinker", 175.030314, 175.205600);
-      mod.addSpecificity('K', ANYWHERE);
-      mod.addSpecificity('n', PROTEIN_N);
-      return mod;
-    }
-    case 1880: {
-      Modification mod("Xlink:DSSO[279]", "Tris-quenched monolink of DSSO crosslinker", 279.077658, 279.310100);
-      mod.addSpecificity('K', ANYWHERE);
-      mod.addSpecificity('n', PROTEIN_N);
-      return mod;
-    }
-    case 1881: {
-      Modification mod("Xlink:DSSO[54]", "Alkene fragment of DSSO crosslinker", 54.010565, 54.047400);
-      mod.addSpecificity('n', PROTEIN_N);
-      mod.addSpecificity('K', ANYWHERE);
-      return mod;
-    }
-    case 1882: {
-      Modification mod("Xlink:DSSO[86]", "Thiol fragment of DSSO crosslinker", 85.982635, 86.112400);
-      mod.addSpecificity('K', ANYWHERE);
-      mod.addSpecificity('n', PROTEIN_N);
-      return mod;
-    }
-    case 1883: {
-      Modification mod("Xlink:DSSO[104]", "Sulfenic acid fragment of DSSO crosslinker", 103.993200, 104.127700);
-      mod.addSpecificity('K', ANYWHERE);
-      mod.addSpecificity('n', PROTEIN_N);
-      return mod;
-    }
-    case 1885: {
-      Modification mod("Xlink:BuUrBu[111]", "BuUr fragment of BuUrBu crosslinker", 111.032028, 111.098700);
-      mod.addSpecificity('K', ANYWHERE);
-      mod.addSpecificity('n', PROTEIN_N);
-      return mod;
-    }
-    case 1886: {
-      Modification mod("Xlink:BuUrBu[85]", "Bu fragment of BuUrBu crosslinker", 85.052764, 85.104500);
-      mod.addSpecificity('K', ANYWHERE);
-      mod.addSpecificity('n', PROTEIN_N);
-      return mod;
-    }
-    case 1888: {
-      Modification mod("Xlink:BuUrBu[214]", "Water quenched monolink of BuUrBu crosslinker", 214.095357, 214.218500);
-      mod.addSpecificity('n', PROTEIN_N);
-      mod.addSpecificity('K', ANYWHERE);
-      return mod;
-    }
-    case 1889: {
-      Modification mod("Xlink:BuUrBu[317]", "Tris quenched monolink of BuUrBu crosslinker", 317.158686, 317.338200);
-      mod.addSpecificity('n', PROTEIN_N);
-      mod.addSpecificity('K', ANYWHERE);
-      return mod;
-    }
-    case 1896: {
-      Modification mod("Xlink:DSSO[158]", "Intact DSSO crosslinker", 158.003765, 158.175000);
-      mod.addSpecificity('K', ANYWHERE);
-      mod.addSpecificity('n', PROTEIN_N);
-      return mod;
-    }
-    case 1898: {
-      Modification mod("Xlink:DSS[138]", "Intact DSS/BS3 crosslinker", 138.068080, 138.163800);
-      mod.addSpecificity('K', ANYWHERE);
-      mod.addSpecificity('n', PROTEIN_N);
-      return mod;
-    }
-    case 1899: {
-      Modification mod("Xlink:BuUrBu[196]", "Intact BuUrBu crosslinker", 196.084792, 196.203200);
-      mod.addSpecificity('n', PROTEIN_N);
-      mod.addSpecificity('K', ANYWHERE);
-      return mod;
-    }
-    case 1900: {
-      Modification mod("Xlink:DTBP[172]", "Intact DTBP crosslinker", 172.012890, 172.271100);
-      mod.addSpecificity('K', ANYWHERE);
-      mod.addSpecificity('n', PROTEIN_N);
-      return mod;
-    }
-    case 1901: {
-      Modification mod("Xlink:DST[114]", "Intact DST crosslinker", 113.995309, 114.056300);
-      mod.addSpecificity('K', ANYWHERE);
-      mod.addSpecificity('n', PROTEIN_N);
-      return mod;
-    }
-    case 1902: {
-      Modification mod("Xlink:DTSSP[174]", "Intact DSP/DTSSP crosslinker", 173.980921, 174.240600);
-      mod.addSpecificity('K', ANYWHERE);
-      mod.addSpecificity('n', PROTEIN_N);
-      return mod;
-    }
-    case 1903: {
-      Modification mod("Xlink:SMCC[219]", "Intact SMCC cross-link", 219.089543, 219.236500);
-      mod.addSpecificity('C', ANYWHERE);
-      mod.addSpecificity('K', ANYWHERE);
-      mod.addSpecificity('n', PROTEIN_N);
-      return mod;
-    }
     case 1910: {
       Modification mod("Cation:Al[III]", "Replacement of 3 protons by aluminium", 23.958063, 23.957700);
       mod.addSpecificity('D', ANYWHERE);
       mod.addSpecificity('E', ANYWHERE);
       mod.addSpecificity('c', ANY_C);
-      return mod;
-    }
-    case 1906: {
-      Modification mod("Xlink:BS2G[113]", "Ammonium-quenched monolink of BS2-G crosslinker", 113.047679, 113.114600);
-      mod.addSpecificity('n', PROTEIN_N);
-      mod.addSpecificity('K', ANYWHERE);
-      return mod;
-    }
-    case 1907: {
-      Modification mod("Xlink:BS2G[114]", "Water-quenched monolink of BS2-G crosslinker", 114.031694, 114.099300);
-      mod.addSpecificity('n', PROTEIN_N);
-      mod.addSpecificity('K', ANYWHERE);
-      return mod;
-    }
-    case 1908: {
-      Modification mod("Xlink:BS2G[217]", "Tris-quenched monolink of BS2-G crosslinker", 217.095023, 217.219100);
-      mod.addSpecificity('n', PROTEIN_N);
-      mod.addSpecificity('K', ANYWHERE);
-      return mod;
-    }
-    case 1911: {
-      Modification mod("Xlink:DMP[139]", "Ammonia quenched monolink of DMP crosslinker", 139.110947, 139.198200);
-      mod.addSpecificity('K', ANYWHERE);
-      mod.addSpecificity('n', PROTEIN_N);
-      return mod;
-    }
-    case 1912: {
-      Modification mod("Xlink:DMP[122]", "Intact DMP crosslinker", 122.084398, 122.167700);
-      mod.addSpecificity('K', ANYWHERE);
-      mod.addSpecificity('n', PROTEIN_N);
       return mod;
     }
     case 1913: {
@@ -8611,12 +8364,6 @@ static Modification Get(int unimodId) {
     }
     case 2001: {
       Modification mod("ZQG", "Lys conjugation to carbobenzoxy-L-glutaminyl-glycine", 320.100836, 320.297300);
-      mod.addSpecificity('K', ANYWHERE);
-      return mod;
-    }
-    case 1999: {
-      Modification mod("Xlink:DST[56]", "DST crosslinker cleaved by sodium periodate", 55.989829, 56.020200);
-      mod.addSpecificity('n', PROTEIN_N);
       mod.addSpecificity('K', ANYWHERE);
       return mod;
     }

@@ -54,7 +54,6 @@ class AA_MOD_T{
   int max_distance_;        ///< the max distance from the protein terminus
   char symbol_;         ///< the character to represent the mod in sqt files
   bool prevents_cleavage_; ///< can modification prevent cleavage?
-  bool prevents_xlink_; ///< can modification prevent xlink?
   bool mono_link_; ///< Is modification a mono link?
   MODIFIED_AA_T identifier_; ///< the bitmask assigned for unique ID
  
@@ -199,18 +198,6 @@ class AA_MOD_T{
    * \returns TRUE or FALSE
    */
   bool getPreventsCleavage();
-
-  /**
-   * \brief Sets whether the modifications can prevent cross-linking.
-   * \returns void
-   */
-  void setPreventsXLink(bool prevents_xlink);
-  
-  /**
-   * \brief gets whether the modification can prevent cross-linking.
-   * \returns TRUE or FALSE
-   */
-  bool getPreventsXLink();
 
   /**
    * \brief The character used to uniquely identify the mod in the sqt file.
