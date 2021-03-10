@@ -25,30 +25,6 @@ class MatchFileReader;
 class SpectrumZState;
 
 class MatchCandidate;
-/**
- * Object for defining xlinkable peptides
- */
-class XLinkablePeptide;
-
-/**
- * Object for defining valid links
- */
-class XLinkBondMap;
-
-/**
- * Object for defining a cross-link product match
- */
-class XLinkMatch;
-
-/**
- * Object for define a cross link peptide
- */
-class XLinkPeptide;
-
-/**
- * Object for defining the Xlinkable iterator
- */
-class XLinkablePeptideIterator;
 
 /**
  * \class Peak 
@@ -482,27 +458,10 @@ enum _scorer_type {
   DECOY_EVALUE_PEPTIDE_QVALUE,
   DECOY_EVALUE_PEP, ///< posterior error prob for e-value (target/decoy)
 
-  // N.B. Despite the name, these are actually NEGATIVE log p-values.
-  LOGP_WEIBULL_XCORR,    ///< p-value from Weibull fit
-  LOGP_BONF_WEIBULL_XCORR, ///< Bonferroni adjusted Weibull p-value
-  LOGP_QVALUE_WEIBULL_XCORR, ///< q-value from Weibull p-value
-  LOGP_WEIBULL_PEP,    ///< posterior error prob from weibull p-values
-  LOGP_PEPTIDE_QVALUE_WEIBULL, ///< peptide-level q-value for Weibull p-value
-
   PERCOLATOR_SCORE,
   PERCOLATOR_QVALUE,
   PERCOLATOR_PEPTIDE_QVALUE,
   PERCOLATOR_PEP,      ///< posterior error prob from percolator scores
-
-  QRANKER_SCORE,
-  QRANKER_QVALUE,
-  QRANKER_PEPTIDE_QVALUE,
-  QRANKER_PEP,        ///< posterior error prob from q-ranker scores
-
-  BARISTA_SCORE,
-  BARISTA_QVALUE,
-  BARISTA_PEPTIDE_QVALUE,
-  BARISTA_PEP,        ///< posterior error prob from barista scores
 
   // Various auxiliary scores.
   DELTA_CN,
@@ -605,7 +564,6 @@ enum _algorithm {PERCOLATOR_ALGORITHM,
                  QVALUE_ALGORITHM, 
                  NO_ALGORITHM, 
                  ALL_ALGORITHM, 
-                 QRANKER_ALGORITHM, 
                  NUMBER_ALGORITHM_TYPES };
 
 /**
@@ -644,10 +602,7 @@ enum _command {
   READ_SPECTRUMRECORDS_COMMAND, ///< read-spectrumrecords
   READ_TIDE_INDEX_COMMAND, ///< read-tide-index
   SPECTRAL_COUNTS_COMMAND, ///< spectral counts
-  QRANKER_COMMAND,      ///< q-ranker
-  BARISTA_COMMAND,      ///< barista
   PROCESS_SPEC_COMMAND, ///< print-processed-spectra
-  XLINK_SEARCH_COMMAND, ///< search-for-xlinks
   GENERATE_PEPTIDES_COMMAND, ///< generate-peptides
   GET_MS2_SPECTRUM_COMMAND, ///<get-ms2-spectrum
   PREDICT_PEPTIDE_IONS_COMMAND, ///< predict-peptide-ions
@@ -714,30 +669,6 @@ typedef struct _linked_list_head LINKED_LIST_T;
  * list or walking through a list.  Cannot allocate a new one.
  */
 typedef struct _linked_list_node LIST_POINTER_T;
-
-/**
- * \enum _xlink_site_t (typedefed as XLINK_SITE_T)
- * \brief An indication of the type of the crosslinking site that
- * may occur in a peptide.
- * Default is UNKNOWN.
- */
-enum XLINK_SITE_T{
-  XLINKSITE_UNKNOWN,
-  XLINKSITE_CTERM,
-  XLINKSITE_NTERM,
-  XLINKSITE_ALL,
-  XLINKSITE_AA,
-  NUMBER_XLINKSITES
-};
-
-enum XLINKMATCH_TYPE_T {
-  INVALID_CANDIDATE,
-  LINEAR_CANDIDATE,
-  DEADLINK_CANDIDATE,
-  SELFLOOP_CANDIDATE, 
-  XLINK_INTER_CANDIDATE,
-  XLINK_INTRA_CANDIDATE,
-  XLINK_INTER_INTRA_CANDIDATE};
 
 /**
  * \class LinkedPeptide

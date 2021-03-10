@@ -100,9 +100,6 @@ void MatchFileWriter::setPrecision() {
     case XCORR_FIRST_COL:
     case XCORR_SECOND_COL:
     case EVALUE_COL:
-    case PVALUE_COL:
-    case WEIBULL_QVALUE_COL:
-    case WEIBULL_PEP_COL:
     case DECOY_XCORR_QVALUE_COL:
     case DECOY_XCORR_PEP_COL:
     case DECOY_EVALUE_QVALUE_COL:
@@ -110,9 +107,6 @@ void MatchFileWriter::setPrecision() {
     case PERCOLATOR_SCORE_COL:
     case PERCOLATOR_QVALUE_COL:
     case PERCOLATOR_PEP_COL:
-    case QRANKER_SCORE_COL:
-    case QRANKER_QVALUE_COL:
-    case QRANKER_PEP_COL:
     case SIN_SCORE_COL:
     case NSAF_SCORE_COL:
     case DNSAF_SCORE_COL:
@@ -134,21 +128,10 @@ void MatchFileWriter::setPrecision() {
     case QVALUE_TDC_COL:
     case TAILOR_COL:   //Added for tailor score calibration method by AKF    
 #ifdef NEW_COLUMNS
-    case WEIBULL_PEPTIDE_QVALUE_COL:      // NEW
     case DECOY_XCORR_PEPTIDE_QVALUE_COL:  // NEW
     case PERCOLATOR_PEPTIDE_QVALUE_COL:   // NEW
-    case QRANKER_PEPTIDE_QVALUE_COL:      // NEW
 #endif
       match_precision_[col_idx] = Params::GetInt("precision");
-      match_fixed_float_[col_idx] = false;
-      break;
-
-      // special cases
-    case ETA_COL:
-    case BETA_COL:
-    case SHIFT_COL:
-    case CORR_COL:
-      match_precision_[col_idx] = 6;
       match_fixed_float_[col_idx] = false;
       break;
 
@@ -208,8 +191,6 @@ void MatchFileWriter::addColumnNames(CruxApplication* application,
   // commands that also require list of cols to print
   case QVALUE_COMMAND:       ///< compute-q-values
   case PERCOLATOR_COMMAND:
-  case QRANKER_COMMAND:
-  case BARISTA_COMMAND:
     carp(CARP_FATAL, 
          "Post-search command %s requires a list of columns to print.",
          application->getName().c_str());
@@ -249,27 +230,6 @@ void MatchFileWriter::addColumnNames(CruxApplication* application,
     addColumnName(FLANKING_AA_COL);
     addColumnName(TARGET_DECOY_COL);
     return;
-
-  case XLINK_SEARCH_COMMAND:
-    if (Params::GetBool("compute-p-values")) {
-      addColumnName(PVALUE_COL);
-      addColumnName(ETA_COL);
-      addColumnName(BETA_COL);
-      addColumnName(SHIFT_COL);
-      addColumnName(CORR_COL);
-    }
-    if (!Params::GetBool("use-old-xlink")) {
-      if (Params::GetInt("xlink-top-n") != 0) {
-        addColumnName(XCORR_FIRST_COL);
-        addColumnName(XCORR_SECOND_COL);
-      }
-      if (Params::GetBool("file-column")) {
-        addColumnName(FILE_COL);
-      }
-      addColumnName(ENZ_INT_COL);
-    }
-    addColumnName(XLINK_TYPE_COL);
-    break;
 
   case SPECTRAL_COUNTS_COMMAND:
     // protein or peptide
@@ -361,43 +321,12 @@ void MatchFileWriter::addColumnNames
          application->getName().c_str());
     return;
 
-  // search commands handled elsewhere
-  case XLINK_SEARCH_COMMAND:
-    addColumnNames(application, has_decoys);
-    return;
-
   // valid commands
-  case QVALUE_COMMAND:       ///< compute-q-values
-    if( cols_to_print[PVALUE_COL] ) {
-      addColumnName(WEIBULL_QVALUE_COL);
-//      addColumnName(WEIBULL_PEP_COL);
-      //addColumnName(WEIBULL_PEPTIDE_QVALUE_COL);
-    } else {
-      if ( cols_to_print[EVALUE_COL]) {
-//        addColumnName(DECOY_EVALUE_QVALUE_COL);
-//        addColumnName(DECOY_EVALUE_PEP_COL);
-      }
-//     addColumnName(DECOY_XCORR_QVALUE_COL);
-//     addColumnName(DECOY_XCORR_PEP_COL);
-      //addColumnName(DECOY_XCORR_PEPTIDE_QVALUE_COL);
-    }
-    break;
-
   case PERCOLATOR_COMMAND:
     addColumnName(PERCOLATOR_SCORE_COL);
     addColumnName(PERCOLATOR_RANK_COL);
     addColumnName(PERCOLATOR_QVALUE_COL);
     addColumnName(PERCOLATOR_PEP_COL);
-    break;
-
-  case QRANKER_COMMAND:
-    addColumnName(QRANKER_SCORE_COL);
-    addColumnName(QRANKER_QVALUE_COL);
-    addColumnName(QRANKER_PEP_COL);
-    break;
-
-  case BARISTA_COMMAND:
-    // place holder
     break;
   }
 
@@ -410,7 +339,6 @@ void MatchFileWriter::addColumnNames
 
   // FIXME (BF 10-27-10): where do these go?
   //  PERCOLATOR_PEPTIDE_QVALUE_COL,   
-  //  QRANKER_PEPTIDE_QVALUE_COL,      
 
 }
 

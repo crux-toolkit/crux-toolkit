@@ -297,10 +297,7 @@ void PepXMLWriter::printAnalysis(double* scores,
                                  bool* scores_computed) {
   // only write the analysis_result section for post-search psms
   bool post_search = false;
-  if( scores_computed[PERCOLATOR_SCORE] 
-      || scores_computed[QRANKER_SCORE]
-      || scores_computed[DECOY_XCORR_QVALUE] 
-      || scores_computed[LOGP_QVALUE_WEIBULL_XCORR] ) {
+  if( scores_computed[PERCOLATOR_SCORE] || scores_computed[DECOY_XCORR_QVALUE] ) {
     post_search = true;
   }
 
@@ -318,14 +315,6 @@ void PepXMLWriter::printAnalysis(double* scores,
     qval = PERCOLATOR_QVALUE;
     pep = PERCOLATOR_PEP;
     score_name = "percolator_score";
-  } else if (scores_computed[QRANKER_SCORE]) {
-    score =  QRANKER_SCORE; 
-    qval = QRANKER_QVALUE;
-    pep = QRANKER_PEP;
-    score_name = "q-ranker_score";
-  } else if (scores_computed[LOGP_QVALUE_WEIBULL_XCORR]) {
-    qval = LOGP_QVALUE_WEIBULL_XCORR;
-    pep = LOGP_WEIBULL_PEP;
   }
 
   fprintf(file_, "<analysis_result analysis=\"peptideprophet\">\n");

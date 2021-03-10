@@ -1,9 +1,0 @@
-overwrite=T
-seed=5
-missed-cleavages=1
-mz-bin-offset=0
-remove-precursor-tolerance=15
-isotopic-mass=average
-mz-bin-width=1.0005079
-precursor-window=3
-precursor-window-type=mass

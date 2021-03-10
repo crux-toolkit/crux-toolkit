@@ -12,10 +12,6 @@
  * o Add a corresponding const for the column index to enum
  *   MATCH_COLUMNS_T in MatchColumns.h
  *
- * o Add a case statement to handle this column in printOneMatchField
- *   in model/Match.cpp and in printOneMatchField in
- *   app/xlink/XLinkMatch.cpp.
- *
  * o Add logic to addColumnNames in io/MatchFileWriter.cpp to ensure
  *   that the column gets included for the appropriate commands.
  *
@@ -63,24 +59,16 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "Sidak adjusted p-value",  
   "tailor score",  //Added for tailor score calibration method by AKF  
   "e-value",
-  "p-value",
   "smoothed p-value",
   "distinct matches/peptide",
 #ifdef NEW_COLUMNS
-  "Weibull PSM q-value",
-  "Weibull peptide q-value",    // NEW
   "decoy PSM q-value",
   "decoy peptide q-value",      // NEW
   "percolator score",
   "percolator rank",
   "percolator PSM q-value",
   "percolator peptide q-value", // NEW
-  "q-ranker score",
-  "q-ranker PSM q-value",
-  "q-ranker peptide q-value",   // NEW
 #else
-  "Weibull est. q-value",
-  "Weibull est. PEP",
   "decoy q-value (xcorr)",
   "decoy PEP (xcorr)",
   "decoy q-value (e-value)",
@@ -89,11 +77,6 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "percolator rank",
   "percolator q-value",
   "percolator PEP",
-  "q-ranker score",
-  "q-ranker q-value",
-  "q-ranker PEP",
-  "barista score",
-  "barista q-value",
 #endif
   "tdc q-value",
   "mix-max q-value",
@@ -109,10 +92,6 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "flanking aa",
   "target/decoy",
   "original target sequence",
-  "eta",
-  "beta",
-  "shift",
-  "corr",
   "RAW",
   "SIN",
   "NSAF",
@@ -141,13 +120,11 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "absdM",
   "Peptide",
   "Proteins", // end for PinWriter.
-  "product type",
   "ppm",
   "xcorr 1",
   "xcorr 2",
   "protein id x",
   "index name",
-  "xlink type",
   "decoy index"
 };
 

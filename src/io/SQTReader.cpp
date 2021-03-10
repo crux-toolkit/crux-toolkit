@@ -121,7 +121,7 @@ void SQTReader::parseHeader(const string& line) {
       char symbol = t0[t0.length() - 1];
       double deltaMass = StringUtils::FromString<double>(tokens[1]);
       ModificationDefinition::NewVarMod(
-        aminoAcids, deltaMass, UNKNOWN /*TODO*/, false, false, symbol);
+        aminoAcids, deltaMass, UNKNOWN /*TODO*/, false, symbol);
     }
   }
 }

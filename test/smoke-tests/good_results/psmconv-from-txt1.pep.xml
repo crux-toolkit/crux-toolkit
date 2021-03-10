@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href=""?>
-<msms_pipeline_analysis date="2020-10-05T16:02:55" xmlns="http://regis-web.systemsbiology.net/pepXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://regis-web.systemsbiology.net/pepXML /usr/local/tpp/schema/pepXML_v110.xsd" summary_xml="">
+<msms_pipeline_analysis date="2021-02-24T21:27:57" xmlns="http://regis-web.systemsbiology.net/pepXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://regis-web.systemsbiology.net/pepXML /usr/local/tpp/schema/pepXML_v110.xsd" summary_xml="">
 <msms_run_summary base_name="NA" msManufacturer="NA" msModel="NA" msIonization="NA" raw_data_type="NA" raw_data="NA" >
 <sample_enzyme name="trypsin">
 </sample_enzyme>
@@ -64,7 +64,6 @@
 <parameter name="pepxml-output" value="false"/>
 <parameter name="txt-output" value="true"/>
 <parameter name="compute-sp" value="false"/>
-<parameter name="compute-p-values" value="false"/>
 <parameter name="scan-number" value=""/>
 <parameter name="mz-bin-width" value="0.02"/>
 <parameter name="mz-bin-offset" value="0.4"/>
@@ -89,12 +88,6 @@
 <parameter name="max-aas-modified" value="255"/>
 <parameter name="mod-mass-format" value="mod-only"/>
 <parameter name="mod-precision" value="2"/>
-<parameter name="use-a-ions" value="false"/>
-<parameter name="use-b-ions" value="true"/>
-<parameter name="use-c-ions" value="false"/>
-<parameter name="use-x-ions" value="false"/>
-<parameter name="use-y-ions" value="true"/>
-<parameter name="use-z-ions" value="false"/>
 <parameter name="precision" value="8"/>
 <parameter name="mass-precision" value="4"/>
 <parameter name="print-search-progress" value="1000"/>
@@ -265,12 +258,7 @@
 <parameter name="add_X_user_amino_acid" value="0"/>
 <parameter name="add_Y_tyrosine" value="0"/>
 <parameter name="add_Z_user_amino_acid" value="0"/>
-<parameter name="skip-cleanup" value="false"/>
-<parameter name="re-run" value=""/>
-<parameter name="use-spec-features" value="true"/>
-<parameter name="separate-searches" value=""/>
 <parameter name="list-of-files" value="false"/>
-<parameter name="optimization" value="protein"/>
 <parameter name="estimation-method" value="tdc"/>
 <parameter name="sidak" value="false"/>
 <parameter name="score" value=""/>
@@ -318,25 +306,6 @@
 <parameter name="input-format" value="auto"/>
 <parameter name="distinct-matches" value="true"/>
 <parameter name="stats" value="false"/>
-<parameter name="write-weibull-points" value="false"/>
-<parameter name="print-theoretical-spectrum" value="false"/>
-<parameter name="use-old-xlink" value="true"/>
-<parameter name="xlink-score-method" value="composite"/>
-<parameter name="isotope-windows" value="0"/>
-<parameter name="mono-link" value=""/>
-<parameter name="xlink-top-n" value="250"/>
-<parameter name="require-xlink-candidate" value="false"/>
-<parameter name="xlink-include-linears" value="true"/>
-<parameter name="xlink-include-deadends" value="true"/>
-<parameter name="xlink-include-selfloops" value="true"/>
-<parameter name="xlink-include-intra" value="true"/>
-<parameter name="xlink-include-inter" value="true"/>
-<parameter name="xlink-include-inter-intra" value="true"/>
-<parameter name="xlink-prevents-cleavage" value="K"/>
-<parameter name="max-xlink-mods" value="255"/>
-<parameter name="precursor-window-weibull" value="20"/>
-<parameter name="precursor-window-type-weibull" value="mass"/>
-<parameter name="min-weibull-points" value="4000"/>
 <parameter name="hardklor-algorithm" value="version1"/>
 <parameter name="averagine-mod" value=""/>
 <parameter name="boxcar-averaging" value="0"/>
@@ -375,11 +344,6 @@
 <parameter name="scan-tolerance" value="3"/>
 <parameter name="retention-tolerance" value="0.5"/>
 <parameter name="spectrum-format" value=""/>
-<parameter name="ascending" value="true"/>
-<parameter name="delimiter" value="tab"/>
-<parameter name="header" value="true"/>
-<parameter name="column-type" value="string"/>
-<parameter name="comparison" value="eq"/>
 <parameter name="bullseye" value="false"/>
 <parameter name="search-engine" value="tide-search"/>
 <parameter name="post-processor" value="percolator"/>
@@ -400,34 +364,34 @@
 <parameter name="auto_fragment_bin_size" value="false"/>
 <parameter name="threads" value="0"/>
 <parameter name="export_percolator" value="true"/>
-<parameter name="export_pepxml" value="false"/>
-<parameter name="export_mzid" value="false"/>
+<parameter name="export_pepXML" value="false"/>
+<parameter name="export_mzID" value="false"/>
 <parameter name="enrichment" value="0"/>
 <parameter name="kojak_instrument" value="0"/>
-<parameter name="ms1_centroid" value="true"/>
-<parameter name="ms2_centroid" value="true"/>
-<parameter name="ms1_resolution" value="30000"/>
-<parameter name="ms2_resolution" value="25000"/>
-<parameter name="cross_link" value="nk nk 138.068074 bs3"/>
-<parameter name="mono_link" value="nk 156.0786"/>
-<parameter name="fixed_modification" value="c 57.02146"/>
-<parameter name="fixed_modification_protc" value="0"/>
-<parameter name="fixed_modification_protn" value="0"/>
-<parameter name="modification" value="m 15.9949"/>
-<parameter name="modification_protc" value="0"/>
-<parameter name="modification_protn" value="0"/>
+<parameter name="MS1_centroid" value="true"/>
+<parameter name="MS2_centroid" value="true"/>
+<parameter name="MS1_resolution" value="30000"/>
+<parameter name="MS2_resolution" value="25000"/>
+<parameter name="cross_link" value="nK nK 138.068074 BS3"/>
+<parameter name="mono_link" value="nK 156.0786"/>
+<parameter name="fixed_modification" value="C 57.02146"/>
+<parameter name="fixed_modification_protC" value="0"/>
+<parameter name="fixed_modification_protN" value="0"/>
+<parameter name="modification" value="M 15.9949"/>
+<parameter name="modification_protC" value="0"/>
+<parameter name="modification_protN" value="0"/>
 <parameter name="diff_mods_on_xl" value="false"/>
 <parameter name="max_mods_per_peptide" value="2"/>
 <parameter name="mono_links_on_xl" value="false"/>
-<parameter name="kojak_enzyme" value="[kr] trypsin"/>
+<parameter name="kojak_enzyme" value="[KR] Trypsin"/>
 <parameter name="fragment_bin_size" value="0.03"/>
-<parameter name="ion_series_a" value="false"/>
-<parameter name="ion_series_b" value="true"/>
-<parameter name="ion_series_c" value="false"/>
-<parameter name="ion_series_x" value="false"/>
-<parameter name="ion_series_y" value="true"/>
-<parameter name="ion_series_z" value="false"/>
-<parameter name="decoy_filter" value="decoy_ 1"/>
+<parameter name="ion_series_A" value="false"/>
+<parameter name="ion_series_B" value="true"/>
+<parameter name="ion_series_C" value="false"/>
+<parameter name="ion_series_X" value="false"/>
+<parameter name="ion_series_Y" value="true"/>
+<parameter name="ion_series_Z" value="false"/>
+<parameter name="decoy_filter" value="DECOY_ 1"/>
 <parameter name="kojak_isotope_error" value="1"/>
 <parameter name="max_miscleavages" value="0"/>
 <parameter name="max_peptide_mass" value="8000"/>

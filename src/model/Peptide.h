@@ -230,8 +230,6 @@ class Peptide {
   std::vector<Modification> getVarMods() const;
   std::vector<Modification> getStaticMods() const;
 
-  bool hasMonoLink() const;
-  
   /**
    * \brief Add a modification to a peptide.
    *

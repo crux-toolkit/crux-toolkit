@@ -445,16 +445,6 @@ vector<Modification> Peptide::getStaticMods() const {
   return mods;
 }
 
-bool Peptide::hasMonoLink() const {
-  for (vector<Modification>::const_iterator iter = varMods_.begin(); iter != varMods_.end(); iter++) {
-    if (iter->MonoLink()) {
-      return true;
-    }
-  }
-  return false;
-}
-
-
 /**
  * \brief Add a modification to a peptide.
  *

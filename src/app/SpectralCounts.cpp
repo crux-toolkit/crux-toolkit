@@ -717,7 +717,7 @@ void SpectralCounts::filterMatchesQValue() {
     if (match->isDecoy()) {
       continue;
     } 
-    if ((qval_type == DECOY_XCORR_QVALUE || qval_type == LOGP_QVALUE_WEIBULL_XCORR) && 
+    if ((qval_type == DECOY_XCORR_QVALUE) && 
       (match->getRank(XCORR) != 1)) {
       continue;
     }
@@ -733,7 +733,7 @@ void SpectralCounts::filterMatchesQValue() {
 
 /**
  * Figures out which kind of q-value was scored for this match collection.
- * \returns PERCOLATOR_QVALUE, QRANKER_QVALUE, or DECOY_XCORR_QVALUE
+ * \returns PERCOLATOR_QVALUE, or DECOY_XCORR_QVALUE
  * if any of those were scored or INVALID_SCORER_TYPE if none were scored. 
  */
 SCORER_TYPE_T SpectralCounts::get_qval_type(
@@ -742,12 +742,8 @@ SCORER_TYPE_T SpectralCounts::get_qval_type(
 
   if (match_collection->getScoredType(PERCOLATOR_QVALUE)) {
     scored_type =  PERCOLATOR_QVALUE;
-  } else if (match_collection->getScoredType(QRANKER_QVALUE)) {
-    scored_type = QRANKER_QVALUE;
   } else if (match_collection->getScoredType(DECOY_XCORR_QVALUE)) {
     scored_type = DECOY_XCORR_QVALUE;
-  } else if(match_collection->getScoredType(BARISTA_QVALUE)) {
-    scored_type = BARISTA_QVALUE;
   }
 
   return scored_type;

@@ -48,16 +48,6 @@ OutputFiles::OutputFiles(CruxApplication* program_name)
     num_files_ = 1;
   }
   
-  if (command == XLINK_SEARCH_COMMAND) {
-    if (Params::GetBool("concat")) {
-      num_decoy_files = 0;
-      num_files_ = 1;
-    } else {
-      num_decoy_files = 1;
-      num_files_ = 2;
-    }
-  }
-
   makeTargetDecoyList();
 
   carp(CARP_DEBUG, 
@@ -119,10 +109,8 @@ OutputFiles::OutputFiles(CruxApplication* program_name)
                "mzid");
   }
 
-  // only percolator and q-ranker create feature files
-  if( (command == PERCOLATOR_COMMAND 
-       || command == QRANKER_COMMAND)
-      && Params::GetBool("feature-file") ) {
+  // only percolator creates feature files
+  if( (command == PERCOLATOR_COMMAND) && Params::GetBool("feature-file") ) {
     string filename = makeFileName(fileroot, application_, 
                                    NULL, // not target or decoy
                                    "features.txt");

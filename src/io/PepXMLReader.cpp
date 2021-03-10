@@ -577,15 +577,6 @@ void PepXMLReader::searchScoreOpen(
   } else if (name == "percolator_PEP") {
     current_match_collection_->setScoredType(PERCOLATOR_PEP, true);
     current_match_->setScore(PERCOLATOR_PEP, value);
-  } else if (name == "qranker_score") {
-    current_match_collection_->setScoredType(QRANKER_SCORE, true);
-    current_match_->setScore(QRANKER_SCORE, value);
-  } else if (name == "qranker_qvalue") {
-    current_match_collection_->setScoredType(QRANKER_QVALUE, true);
-    current_match_->setScore(QRANKER_QVALUE, value);
-  } else if (name == "qranker_PEP") {
-    current_match_collection_->setScoredType(QRANKER_PEP, true);
-    current_match_->setScore(QRANKER_PEP, value);
   }
   //set the custom score
   current_match_->setCustomScore(name, value);

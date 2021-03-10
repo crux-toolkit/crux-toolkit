@@ -730,36 +730,6 @@ char* read_prevents_cleavage(AA_MOD_T* mod, char* line, char separator) {
   return next;
 }
 
-char* read_prevents_xlink(AA_MOD_T* mod, char* line, char separator) {
-  char* next = line;
-  switch(*line) {
-    case ':':
-      next++;
-    case '\0':
-      carp(CARP_DEBUG, "No prevents_xlink property found %s",line);
-      break;
-    case 'T':
-    case 't':
-      carp(CARP_DEBUG, "prevents_xlink set to true %s",line);
-      mod->setPreventsXLink(true);
-      break;
-    case 'F':
-    case 'f':
-      carp(CARP_DEBUG, "prevents_xlink set to false %s",line);
-      mod->setPreventsXLink(false);
-      break;
-  }
-
-  while (*next != '\0' && *next != separator) {
-    next++;
-  }
-  if (*next != '\0') {
-    next++; //points past the separator
-  }
-
-  return next;
-}
-
 /**
  * \brief Set the max_distance field in the mod with the value
  * pointed to by line.
@@ -839,10 +809,6 @@ int read_mods(
 
       // read whether this modification prevents cleavage (OPTIONAL)
       token = read_prevents_cleavage(cur_mod, token, ':');
-
-      // read whether this modification prevents xlink (OPTIONAL)
-      token = read_prevents_xlink(cur_mod, token, ':');
-
 
     } else { // fill in values for c- or n-mod
       // get the max distance
@@ -937,9 +903,8 @@ void parse_modspec_line(
     mod->setMassChange(delta);
     mod->setAminoAcids(spec_text + pos, aa_len);
     
-    bool prevents_xlink = false;
     bool prevents_cleavage = false;
-    //* Optional prevents xlink, prevent cleavage.
+    //* Optional prevents prevent cleavage.
     //first T indicates prvents cleavage
     pos += end_pos;
     if (spec_text[pos] == ':') {
@@ -951,19 +916,9 @@ void parse_modspec_line(
       }
       pos++;
     }
-    if (spec_text[pos] == ':') {
-      pos++;
-      if (spec_text[pos] == 'T') {
-        prevents_xlink = true;
-      } else if (spec_text[pos] != 'F') {
-        carp(CARP_FATAL, "Cannot parse T|F for prevents xlink %s %i", spec_text, pos);
-      }
-      pos++;
-    }
     
         
     mod->setPosition(position);
-    mod->setPreventsXLink(prevents_xlink);
     mod->setPreventsCleavage(prevents_cleavage);
     mod->print();
 
@@ -1007,23 +962,6 @@ void set_modspec() {
     }
   }
   
-  vector<AA_MOD_T*> monolink_mods;
-  vector<AA_MOD_T*> static_mods2;
-  string mono_link_str = Params::GetString("mono-link");
-  parse_modspec_line(
-    mono_link_str,
-    static_mods2,
-    monolink_mods
-  );
-  if (static_mods2.size() != 0) {
-    carp(CARP_FATAL, "Cannot define monolink as a static mod:%s", mono_link_str.c_str());
-  }
-
-  for (size_t idx = 0;idx < monolink_mods.size();idx++) {
-    monolink_mods[idx]->setMonoLink(true);
-    variable_mods.push_back(monolink_mods[idx]);
-  }
-
   carp(CARP_DEBUG, "Number of static:%d variable:%d", static_mods.size(), variable_mods.size());
   
   //Fill up expected list of modifications.
