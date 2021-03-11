@@ -867,7 +867,7 @@ Params::Params() : finalized_(false) {
                   "Specify a comma-separated list of isotope errors of the form: "
                   "1,2,3,..."
                   "Available for tide-search", true);
-  InitIntParam("num-threads", 0, 0, 64,
+  InitIntParam("num-threads", 1, 0, 64,
                "0=poll CPU to set num threads; else specify num threads directly.",
                "Available for tide-search tab-delimited files only.", true);
   InitBoolParam("brief-output", false,
