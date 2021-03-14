@@ -74,20 +74,10 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
   TideMatchSet::initModMap(pepHeader.cprotterm_mods(), PROTEIN_C);
 
 
-  ofstream* target_file = NULL;
-  ofstream* decoy_file = NULL;
+  string output_file_name_ = make_file_path("tide-search.txt");
+  ofstream* output_file = create_stream_in_path(output_file_name_.c_str(), NULL, Params::GetBool("overwrite"));
+  TideMatchSet::writeHeadersDIA(output_file, Params::GetBool("compute-sp"));
 
-  string target_file_name = make_file_path("tide-search.target.txt");
-  target_file = create_stream_in_path(target_file_name.c_str(), NULL, Params::GetBool("overwrite"));
-  // output_file_name_ = target_file_name;
-  if (headerDecoyType != NO_DECOYS) {
-	  string decoy_file_name = make_file_path("tide-search.decoy.txt");
-	  decoy_file = create_stream_in_path(decoy_file_name.c_str(), NULL, Params::GetBool("overwrite"));
-  }
-
-
-  TideMatchSet::writeHeaders(target_file, false, decoysPerTarget > 1, Params::GetBool("compute-sp"));
-  TideMatchSet::writeHeaders(decoy_file, true, decoysPerTarget > 1, Params::GetBool("compute-sp"));
 
   vector<InputFile> ms1_spectra_files = getInputFiles(input_files, 1);
   vector<InputFile> ms2_spectra_files = getInputFiles(input_files, 2);
@@ -101,7 +91,7 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
 	  string origin_file = (f.second)->OriginalName;
 
 	  map<int, pair<double*, double*>> ms1scan_intensity_rank_map;
-	  loadMS1Spectra(ms1_spectra_file, &ms1scan_intensity_rank_map);
+	  avg_noise_intensity_logrank_ = loadMS1Spectra(ms1_spectra_file, &ms1scan_intensity_rank_map);
 	  SpectrumCollection* spectra = loadSpectra(ms2_spectra_file);
 
 	  // insert the search code here and will split into a new function later
@@ -112,7 +102,7 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
 	  // Active queue to process the indexed peptides
 	  ActivePeptideQueue* active_peptide_queue = new ActivePeptideQueue(peptide_reader->Reader(), proteins);
 	  active_peptide_queue->SetBinSize(bin_width_, bin_offset_);
-	  active_peptide_queue->SetOutputs(NULL, &locations, Params::GetInt("top-match"), true, target_file, decoy_file, highest_ms2_mz);
+	  active_peptide_queue->SetOutputs(NULL, &locations, Params::GetInt("top-match"), true, output_file, NULL, highest_ms2_mz);
 
 	  // initialize fields required for output
 	  // Not sure if it is necessary, will check later
@@ -149,7 +139,7 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
 
 		  // TideSearchApplication::computeWindow(*sc, string_to_window_type(Params::GetString("precursor-window-type")), Params::GetDouble("precursor-window"), Params::GetInt("max-precursor-charge"), &negative_isotope_errors, min_mass, max_mass, &min_range, &max_range);
 		  computeWindowDIA(*sc, Params::GetInt("max-precursor-charge"), &negative_isotope_errors, min_mass, max_mass, &min_range, &max_range);
-		  // carp(CARP_DETAILED_DEBUG, "MS1Scan:%d \t MS2Scan:%d \t precursor_mz:%f \t charge:%d \t mass_range:[%f,%f]", ms1_scan_num, scan_num, precursor_mz, charge, min_range, max_range);
+		  carp(CARP_DETAILED_DEBUG, "MS1Scan:%d \t MS2Scan:%d \t precursor_mz:%f \t charge:%d \t mass_range:[%f,%f]", ms1_scan_num, scan_num, precursor_mz, charge, min_range, max_range);
 
 
 		  // Normalize the observed spectrum and compute the cache of frequently-needed
@@ -169,7 +159,7 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
 
 		  // The denominator used in the Tailor score calibration method
 		  double quantile_score = getTailorQuantile(&match_arr2);
-		  carp(CARP_DETAILED_DEBUG, "Tailor quantile_score:%f", quantile_score);
+		  // carp(CARP_DETAILED_DEBUG, "Tailor quantile_score:%f", quantile_score);
 
 		  TideMatchSet::Arr match_arr(nCandPeptide);
 		  for (TideMatchSet::Arr2::iterator it = match_arr2.begin(); it != match_arr2.end(); ++it) {
@@ -186,8 +176,7 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
 			  }
 		  }
 		  TideMatchSet matches(&match_arr, highest_ms2_mz);
-		  matches.report(target_file, decoy_file, Params::GetInt("top-match"), decoysPerTarget, origin_file,
-				  spectrum, charge, active_peptide_queue, proteins, locations, Params::GetBool("compute-sp"), true);
+		  if (!match_arr.empty()) { reportDIA(output_file, origin_file, *sc, active_peptide_queue, proteins, locations, &matches, &ms1scan_intensity_rank_map); }
 
 	  }
 
@@ -203,6 +192,92 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
 
   return 0;
 }
+
+void DIAmeterApplication::reportDIA(
+	ofstream* output_file,  ///< output file to write to
+	const string& spectrum_filename, ///< name of spectrum file
+	const SpectrumCollection::SpecCharge& sc, ///< spectrum and charge for matches
+	const ActivePeptideQueue* peptides, ///< peptide queue
+	const ProteinVec& proteins, ///< proteins corresponding with peptides
+	const vector<const pb::AuxLocation*>& locations,  ///< auxiliary locations
+	TideMatchSet* matches, ///< object to manage PSMs
+	map<int, pair<double*, double*>>* ms1scan_intensity_rank_map
+) {
+	Spectrum* spectrum = sc.spectrum;
+	int charge = sc.charge;
+	int ms1_scan_num = spectrum->MS1SpectrumNum();
+
+	// get top-n targets and decoys by the heap
+	vector<TideMatchSet::Arr::iterator> targets, decoys;
+	matches->gatherTargetsAndDecoys(peptides, proteins, targets, decoys, Params::GetInt("top-match"), true);
+	carp(CARP_DETAILED_DEBUG, "Gathered targets:%d \t decoy:%d", targets.size(), decoys.size());
+
+	// calculate precursor intensity logrank
+	double *intensity_arr = NULL, *intensity_rank_arr = NULL;
+	map<int, pair<double*, double*>>::iterator intensityIter = ms1scan_intensity_rank_map->find(ms1_scan_num);
+	if (intensityIter == ms1scan_intensity_rank_map->end()) {
+		carp(CARP_DETAILED_DEBUG, "No intensity found in MS1 scan:%d !!!", ms1_scan_num);
+	}
+	else {
+		intensity_arr = (intensityIter->second).first;
+		intensity_rank_arr = (intensityIter->second).second;
+	}
+	map<TideMatchSet::Arr::iterator, boost::tuple<double, double, double>> intensity_map;
+	computePrecIntRank(targets, peptides, intensity_rank_arr, &intensity_map, charge);
+	computePrecIntRank(decoys, peptides, intensity_rank_arr, &intensity_map, charge);
+
+	// calculate delta_cn and delta_lcn
+	map<TideMatchSet::Arr::iterator, FLOAT_T> delta_cn_map;
+	map<TideMatchSet::Arr::iterator, FLOAT_T> delta_lcn_map;
+	TideMatchSet::computeDeltaCns(targets, &delta_cn_map, &delta_lcn_map);
+	TideMatchSet::computeDeltaCns(decoys, &delta_cn_map, &delta_lcn_map);
+
+	// calculate SpScore if necessary
+	map<TideMatchSet::Arr::iterator, pair<const SpScorer::SpScoreData, int> > sp_map;
+	if (Params::GetBool("compute-sp")) {
+		SpScorer sp_scorer(proteins, *spectrum, charge, matches->max_mz_);
+		TideMatchSet::computeSpData(targets, &sp_map, &sp_scorer, peptides);
+		TideMatchSet::computeSpData(decoys, &sp_map, &sp_scorer, peptides);
+	}
+
+	matches->writeToFileDIA(output_file, Params::GetInt("top-match"), targets, spectrum_filename, spectrum, charge, peptides, proteins, locations,
+			&delta_cn_map, &delta_lcn_map, Params::GetBool("compute-sp")? &sp_map : NULL, &intensity_map);
+
+	matches->writeToFileDIA(output_file, Params::GetInt("top-match"), decoys, spectrum_filename, spectrum, charge, peptides, proteins, locations,
+				&delta_cn_map, &delta_lcn_map, Params::GetBool("compute-sp")? &sp_map : NULL, &intensity_map);
+
+}
+
+
+void DIAmeterApplication::computePrecIntRank(
+	const vector<TideMatchSet::Arr::iterator>& vec,
+	const ActivePeptideQueue* peptides,
+	const double* intensity_rank_arr,
+	map<TideMatchSet::Arr::iterator, boost::tuple<double, double, double>>* intensity_map,
+	int charge
+) {
+	for (vector<TideMatchSet::Arr::iterator>::const_iterator i = vec.begin(); i != vec.end(); ++i) {
+		const Peptide& peptide = *(peptides->GetPeptide((*i)->rank));
+		double peptide_mz_m0 = peptide.Mass() / (charge * 1.0) + MASS_PROTON;
+		unsigned int peptide_mzbin_m0 = MassConstants::mz2bin(peptide_mz_m0);
+		unsigned int peptide_mzbin_m1 = MassConstants::mz2bin(peptide_mz_m0 + 1.0/(charge * 1.0));
+		unsigned int peptide_mzbin_m2 = MassConstants::mz2bin(peptide_mz_m0 + 2.0/(charge * 1.0));
+
+		double intensity_rank_m0 = avg_noise_intensity_logrank_;
+		double intensity_rank_m1 = avg_noise_intensity_logrank_;
+		double intensity_rank_m2 = avg_noise_intensity_logrank_;
+
+		if (intensity_rank_arr != NULL) {
+			intensity_rank_m0 = intensity_rank_arr[peptide_mzbin_m0];
+			intensity_rank_m1 = intensity_rank_arr[peptide_mzbin_m1];
+			intensity_rank_m2 = intensity_rank_arr[peptide_mzbin_m2];
+		}
+		carp(CARP_DETAILED_DEBUG, "Peptide: %s \t mass:%f \t mz:%f \t intensity_rank:%f,%f,%f \t rank:%d \t xcorr:%f", peptide.Seq().c_str(), peptide.Mass(), peptide_mz_m0, intensity_rank_m0, intensity_rank_m1, intensity_rank_m2, (*i)->rank, (*i)->xcorr_score );
+		intensity_map->insert(make_pair((*i), boost::make_tuple(intensity_rank_m0, intensity_rank_m1, intensity_rank_m2)));
+	}
+
+}
+
 
 vector<InputFile> DIAmeterApplication::getInputFiles(const vector<string>& filepaths, int ms_level) const {
   vector<InputFile> input_sr;
@@ -234,11 +309,12 @@ vector<InputFile> DIAmeterApplication::getInputFiles(const vector<string>& filep
   return input_sr;
 }
 
-void DIAmeterApplication::loadMS1Spectra(const std::string& file, map<int, pair<double*, double*>>* ms1scan_intensity_rank_map) {
+double DIAmeterApplication::loadMS1Spectra(const std::string& file, map<int, pair<double*, double*>>* ms1scan_intensity_rank_map) {
 	SpectrumCollection* spectra = loadSpectra(file);
 	double highest_mz = spectra->FindHighestMZ();
 	unsigned int highest_mzbin = MassConstants::mz2bin(highest_mz+1.0);
 
+	double accumulated_intensity_logrank = 0.0;
 	const vector<SpectrumCollection::SpecCharge>* spec_charges = spectra->SpecCharges();
 	for (vector<SpectrumCollection::SpecCharge>::const_iterator sc = spec_charges->begin();sc < spec_charges->begin() + (spec_charges->size()); sc++) {
 		Spectrum* spectrum = sc->spectrum;
@@ -253,6 +329,7 @@ void DIAmeterApplication::loadMS1Spectra(const std::string& file, map<int, pair<
 
 		fill_n(intensity_arr, highest_mzbin, 0);
 		fill_n(intensity_rank_arr, highest_mzbin, noise_intensity_logrank);
+		accumulated_intensity_logrank += noise_intensity_logrank;
 
 		for (int peak_idx=0; peak_idx<peak_num; ++peak_idx) {
 			double peak_mz = spectrum->M_Z(peak_idx);
@@ -276,8 +353,10 @@ void DIAmeterApplication::loadMS1Spectra(const std::string& file, map<int, pair<
 		}
 		(*ms1scan_intensity_rank_map)[ms1_scan_num] = make_pair(intensity_arr, intensity_rank_arr);
 	}
-
 	delete spectra;
+
+	// calculate the average noise intensity logrank, which is used as default value when MS1 scan is empty.
+	return accumulated_intensity_logrank / max(1.0, 1.0*spec_charges->size());
 }
 
 SpectrumCollection* DIAmeterApplication::loadSpectra(const std::string& file) {
@@ -339,6 +418,7 @@ double DIAmeterApplication::getTailorQuantile(TideMatchSet::Arr2* match_arr2) {
 
 	return quantile_score;
 }
+
 
 string DIAmeterApplication::getName() const {
   return "diameter";

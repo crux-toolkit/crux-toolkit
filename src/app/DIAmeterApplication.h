@@ -41,10 +41,32 @@ class DIAmeterApplication : public CruxApplication {
 
  protected:
   // string output_file_name_;
+  double avg_noise_intensity_logrank_;
 
   vector<InputFile> getInputFiles(const vector<string>& filepaths, int ms_level) const;
+
   SpectrumCollection* loadSpectra(const std::string& file);
-  void loadMS1Spectra(const std::string& file, map<int, pair<double*, double*>>* ms1scan_intensity_rank_map);
+
+  double loadMS1Spectra(const std::string& file, map<int, pair<double*, double*>>* ms1scan_intensity_rank_map);
+
+  void reportDIA(
+	ofstream* output_file,  ///< output file to write to
+	const string& spectrum_filename, ///< name of spectrum file
+	const SpectrumCollection::SpecCharge& sc, ///< spectrum and charge for matches
+	const ActivePeptideQueue* peptides, ///< peptide queue
+	const ProteinVec& proteins, ///< proteins corresponding with peptides
+	const vector<const pb::AuxLocation*>& locations,  ///< auxiliary locations
+	TideMatchSet* matches, ///< object to manage PSMs
+	map<int, pair<double*, double*>>* ms1scan_intensity_rank_map
+  );
+
+  void computePrecIntRank(
+	const vector<TideMatchSet::Arr::iterator>& vec,
+	const ActivePeptideQueue* peptides,
+	const double* intensity_rank_arr,
+	map<TideMatchSet::Arr::iterator, boost::tuple<double, double, double>>* intensity_map,
+	int charge
+  );
 
   void computeWindowDIA(
 		  const SpectrumCollection::SpecCharge& sc,

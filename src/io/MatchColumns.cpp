@@ -66,6 +66,13 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "p-value",
   "smoothed p-value",
   "distinct matches/peptide",
+  "precursor intensity logrank M0", ///Added by Yang
+  "precursor intensity logrank M1", ///Added by Yang
+  "precursor intensity logrank M2", ///Added by Yang
+  "rt-diff", ///Added by Yang
+  "fragment p-value", ///Added by Yang
+  "precursor fragment coelution", ///Added by Yang
+  "ensemble score", ///Added by Yang
 #ifdef NEW_COLUMNS
   "Weibull PSM q-value",
   "Weibull peptide q-value",    // NEW
