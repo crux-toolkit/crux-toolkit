@@ -24,9 +24,6 @@ static const int MAX_NUM_ION_TYPE = 8; // number of different ion_types
  * check that it is not NULL.
  */
 class IonSeries {
-  friend class XLinkPeptide;
-  friend class XLinkablePeptide;
-  friend class XLinkIonSeriesCache;
  protected:
 
   static FLOAT_T* mass_matrix_; /// < Pre-allocated mass matrix

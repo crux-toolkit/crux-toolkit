@@ -11,15 +11,10 @@
 #include "crux-main.h"
 #include "util/crux-utils.h" // Need to get definition of NUM_FEATURES.
 
-#include "app/xlink/xlink_assign_ions.h"
-#include "app/xlink/xhhc_score_peptide_spectrum.h"
-#include "app/xlink/xlink_search.h"
 #include "app/CruxApplicationList.h"
 #include "app/ComputeQValues.h"
 #include "app/ComputeQValuesLegacy.h"
 #include "app/CreateDocs.h"
-#include "app/qranker-barista/QRanker.h"
-#include "app/qranker-barista/Barista.h"
 #include "app/PrintProcessedSpectra.h"
 #include "app/GeneratePeptides.h"
 #include "app/GetMs2Spectrum.h"
@@ -27,13 +22,8 @@
 #include "app/ParamMedicApplication.h"
 #include "app/Pipeline.h"
 #include "app/PredictPeptideIons.h"
-#include "app/xlink/SearchForXLinks.h"
-#include "app/ExtractColumns.h"
 #include "app/SpectralCounts.h"
-#include "app/ExtractRows.h"
 #include "app/PrintVersion.h"
-#include "app/StatColumn.h"
-#include "app/SortColumn.h"
 #include "app/hardklor/CruxHardklorApplication.h"
 #include "app/bullseye/CruxBullseyeApplication.h"
 #include "app/PercolatorApplication.h"
@@ -76,9 +66,6 @@ int main(int argc, char** argv) {
     applications.add(new ReadTideIndex());
     applications.add(new CometApplication());
     applications.add(new PercolatorApplication());
-    applications.add(new QRanker());
-    applications.add(new Barista());
-    applications.add(new SearchForXLinks());
     applications.add(new SpectralCounts());
     applications.add(new PipelineApplication());
     applications.add(new CascadeSearchApplication());
@@ -101,15 +88,7 @@ int main(int argc, char** argv) {
     applications.add(new PrintVersion());
     applications.add(new PSMConvertApplication());
     applications.add(new SubtractIndexApplication());
-    applications.add(new XLinkAssignIons());
-    applications.add(new XLinkScoreSpectrum());
     applications.add(new LocalizeModificationApplication());
-
-    // Utilities for processing tab-delimited text files
-    applications.add(new ExtractColumns());
-    applications.add(new ExtractRows());
-    applications.add(new StatColumn());
-    applications.add(new SortColumn());
 
     int ret = applications.main(argc, argv);
     google::protobuf::ShutdownProtobufLibrary();

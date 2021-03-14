@@ -57,7 +57,7 @@ void MatchCollectionParser::loadDatabase(
         " supported.\nPlease use the original fasta file instead.");
     } else {
       database = new Database(fasta_file, false);// not memmapped
-      database->transformTextToMemmap(".", true);// is temp
+      database->transformTextToMemmap(".");
       decoy_database = new Database();
     }
     database->parse();

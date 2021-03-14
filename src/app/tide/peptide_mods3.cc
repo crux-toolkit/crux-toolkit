@@ -5,6 +5,7 @@
 #ifndef _MSC_VER
 #include <unistd.h>
 #else
+#include <process.h>
 #include <windows.h>
 #endif
 #include <string>
@@ -42,7 +43,7 @@ DEFINE_int32(modsoutputter_file_threshold, 1000,
 
 static string GetTempName(const string& tempDir, int filenum) {
   char buf[64];
-  sprintf(buf, "modified_peptides_partial_%d", filenum);
+  sprintf(buf, "modified_peptides_partial_%d_%d", getpid(), filenum);
   if (!tempDir.empty()) {
     return FileUtils::Join(tempDir, buf);
   }
