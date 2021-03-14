@@ -143,7 +143,19 @@ void MatchFileWriter::setPrecision() {
       match_fixed_float_[col_idx] = false;
       break;
 
-      // special cases
+    /// added by Yang
+    case PRECURSOR_INTENSITY_RANK_M0_COL:
+    case PRECURSOR_INTENSITY_RANK_M1_COL:
+    case PRECURSOR_INTENSITY_RANK_M2_COL:
+    case RT_DIFF_COL:
+    case FRAGMENT_PVALUE_COL:
+    case PRECURSOR_FRAGMENT_COELUTE_COL:
+    case ENSEMBLE_SCORE_COL:
+    	match_precision_[col_idx] = 4;
+    	match_fixed_float_[col_idx] = false;
+    	break;
+
+    // special cases
     case ETA_COL:
     case BETA_COL:
     case SHIFT_COL:

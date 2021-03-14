@@ -217,6 +217,12 @@ class Peptide {
   int DecoyIdx() const { return decoyIdx_; }
   vector<double> getAAMasses() const;
 
+  /// added by Yang
+  double MassToMz(int charge) {
+	  return mass_ / (charge * 1.0) + MASS_PROTON;
+  }
+
+
  private:
   template<class W> void AddIons(W* workspace) const;
   template<class W> void AddBIonsOnly(W* workspace) const;
