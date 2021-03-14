@@ -172,7 +172,6 @@ AA_MOD_T::AA_MOD_T(int mod_idx) {
   symbol_ = mod_sqt_symbols[mod_idx];
   identifier_ = mod_id_masks[mod_idx];
   prevents_cleavage_ = false;
-  prevents_xlink_ = false;
   mono_link_ = false;
   // initialize to false
   for (int aa_idx = 0; aa_idx < AA_LIST_LENGTH; aa_idx++) {
@@ -743,9 +742,6 @@ void AA_MOD_T::print() {
       printf("%c", (i + 'A'));
     }
   }
-  if (prevents_xlink_) {
-    printf(" prevents-xlink");
-  }
   if (prevents_cleavage_) {
     printf(" prevents-cleavage");
   }
@@ -914,22 +910,6 @@ void AA_MOD_T::setPreventsCleavage(bool prevents_cleavage) {
  */
 bool AA_MOD_T::getPreventsCleavage() {
   return prevents_cleavage_;
-}
-
-/**
- * \brief Sets whether the modifications can prevent cross-linking.
- * \returns void
- */
-void AA_MOD_T::setPreventsXLink(bool prevents_xlink) {
-  prevents_xlink_ = prevents_xlink;
-}
-
-/**
- * \brief gets whether the modification can prevent cross-linking.
- * \returns true or false
- */
-bool AA_MOD_T::getPreventsXLink() {
-  return prevents_xlink_;
 }
 
 /**

@@ -52,7 +52,6 @@ void Database::init(){
   proteins_ = new vector<Protein*>();
   protein_map_ = new map<const char*, Protein*, cmp_str>();
   decoys_ = NO_DECOYS;
-  binary_is_temp_ = false;
 }
 
 /**
@@ -145,7 +144,7 @@ Database::~Database() {
     }
   }
 
-  if( binary_is_temp_ && !binary_filename_.empty() ){
+  if( !binary_filename_.empty() ){
     carp(CARP_DEBUG, "Deleting temp binary fasta %s.", 
          binary_filename_.c_str());
     remove(binary_filename_.c_str());
@@ -508,11 +507,10 @@ bool Database::parse()
  * \returns true if all processes succeed, else false.
  */
 bool Database::transformTextToMemmap(
-  const char* output_dir,
-  bool binary_is_temp
+  const char* output_dir
   ){
 
-  createBinaryFasta(output_dir, binary_is_temp);
+  createBinaryFasta(output_dir);
 
   // set is_memmap to true
   setMemmap(true);
@@ -526,14 +524,13 @@ bool Database::transformTextToMemmap(
 /**
  * Using the fasta file the Database was instantiated with, write a
  * binary protein file in the given directory to use for memory
- * mapping.  If is_temp, delete the file on destruction.  Warns if
+ * mapping.  Delete the file on destruction.  Warns if
  * Database was not opened with a text file.  If the database is to
  * contain decoy proteins, randomizes each protein before
  * serializing.  Also prints a new fasta file of the decoy proteins in
  * the same directory as the binary file.
  */
-void Database::createBinaryFasta(const char* directory, bool is_temp){
-  binary_is_temp_ = is_temp;
+void Database::createBinaryFasta(const char* directory){
 
   if( fasta_filename_.empty() ){
     carp(CARP_WARNING, "No fasta file to transform to binary.");
@@ -763,8 +760,6 @@ Protein* Database::getProteinAtIdx(
   unsigned int protein_idx ///< The index of the protein to retrieve -in
   )
 {
-  //carp(CARP_DETAILED_DEBUG, "Getting db protein idx = %i, num proteins %i", 
-  //     protein_idx, database->proteins.size());
   if( protein_idx >= proteins_->size()){
     carp(CARP_FATAL, 
          "Protein index %i out of bounds.  %i proteins in the database",

@@ -207,14 +207,8 @@ MatchCollection* MatchFileReader::parse() {
     match_collection->setScoredType(BOTH_PVALUE, !empty(BOTH_PVALUE_COL)); //Added by Andy Lin for residue evidence
     match_collection->setScoredType(EVALUE, !empty(EVALUE_COL));
     match_collection->setScoredType(DECOY_XCORR_QVALUE, !empty(DECOY_XCORR_QVALUE_COL));
-    match_collection->setScoredType(LOGP_BONF_WEIBULL_XCORR, !empty(PVALUE_COL));
     match_collection->setScoredType(PERCOLATOR_QVALUE, !empty(PERCOLATOR_QVALUE_COL));
     match_collection->setScoredType(PERCOLATOR_SCORE, !empty(PERCOLATOR_SCORE_COL));
-    match_collection->setScoredType(LOGP_QVALUE_WEIBULL_XCORR, !empty(WEIBULL_QVALUE_COL));
-    match_collection->setScoredType(QRANKER_SCORE, !empty(QRANKER_SCORE_COL));
-    match_collection->setScoredType(QRANKER_QVALUE, !empty(QRANKER_QVALUE_COL));
-    match_collection->setScoredType(BARISTA_SCORE, !empty(BARISTA_SCORE_COL));
-    match_collection->setScoredType(BARISTA_QVALUE, !empty(BARISTA_QVALUE_COL));
     match_collection->setScoredType(BY_IONS_MATCHED, !empty(BY_IONS_MATCHED_COL));
     match_collection->setScoredType(BY_IONS_TOTAL, !empty(BY_IONS_TOTAL_COL));
     match_collection->setScoredType(TAILOR_SCORE, !empty(TAILOR_COL)); //Added for tailor score calibration method by AKF
@@ -315,14 +309,6 @@ Crux::Match* MatchFileReader::parseMatch() {
   if (!empty(DECOY_XCORR_QVALUE_COL)) {
     match->setScore(DECOY_XCORR_QVALUE, getFloat(DECOY_XCORR_QVALUE_COL));
   }
-  /* TODO I personally would like access to the raw p-value as well as the bonferonni corrected one (SJM).
-  match -> match_scores[LOGP_WEIBULL_XCORR] = getFloat("logp weibull xcorr");
-  */
-  if (!empty(PVALUE_COL)) {
-    FLOAT_T pval = getFloat(PVALUE_COL);
-    match->setScore(LOGP_BONF_WEIBULL_XCORR,
-                    pval > 0 ? -log(pval) : numeric_limits<FLOAT_T>::infinity());
-  }
   if (!empty(EVALUE_COL)) {
     match->setScore(EVALUE, getFloat(EVALUE_COL));
   }
@@ -332,17 +318,6 @@ Crux::Match* MatchFileReader::parseMatch() {
   if (!empty(PERCOLATOR_SCORE_COL)) {
     match->setScore(PERCOLATOR_SCORE, getFloat(PERCOLATOR_SCORE_COL));
     match->setRank(PERCOLATOR_SCORE, getInteger(PERCOLATOR_RANK_COL));
-  }
-  if (!empty(WEIBULL_QVALUE_COL)) {
-    match->setScore(LOGP_QVALUE_WEIBULL_XCORR, getFloat(WEIBULL_QVALUE_COL));
-  }
-  if (!empty(QRANKER_SCORE_COL)) {
-    match->setScore(QRANKER_SCORE, getFloat(QRANKER_SCORE_COL));
-    match->setScore(QRANKER_QVALUE, getFloat(QRANKER_QVALUE_COL));
-  }
-  if (!empty(BARISTA_SCORE_COL)) {
-    match->setScore(BARISTA_SCORE, getFloat(BARISTA_SCORE_COL));
-    match->setScore(BARISTA_QVALUE, getFloat(BARISTA_QVALUE_COL));
   }
 
   if (!empty(BY_IONS_MATCHED_COL)) {

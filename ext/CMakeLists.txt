@@ -123,6 +123,9 @@ elseif (APPLE)
       COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_aux/boost/utility
         ${CMAKE_CURRENT_BINARY_DIR}/include/boost/utility
+      COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_1_67_0/boost/system/detail/error_code.ipp
+        ${CMAKE_CURRENT_BINARY_DIR}/include/boost/system/detail
     BUILD_IN_SOURCE 1
   )
 else (UNIX)
@@ -150,6 +153,9 @@ else (UNIX)
       COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_aux/boost/utility
         ${CMAKE_CURRENT_BINARY_DIR}/include/boost/utility
+      COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_1_67_0/boost/system/detail/error_code.ipp
+        ${CMAKE_CURRENT_BINARY_DIR}/include/boost/system/detail
     BUILD_IN_SOURCE 1
   )
 endif (WIN32 AND NOT CYGWIN)
@@ -286,6 +292,9 @@ if (UNIX)
       COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CometSearch/CometWriteTxt.cpp
         ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/
+      COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CometSearch/CometSearchManager.cpp
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/
     BUILD_IN_SOURCE 1
   )
 elseif (WIN32 AND NOT CYGWIN)
@@ -316,6 +325,9 @@ elseif (WIN32 AND NOT CYGWIN)
         ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/
       COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CometSearch/CometWriteTxt.cpp
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/
+      COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CometSearch/CometSearchManager.cpp
         ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/
     BUILD_IN_SOURCE 1
   )

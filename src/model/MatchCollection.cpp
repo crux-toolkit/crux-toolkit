@@ -47,11 +47,6 @@ void MatchCollection::init() {
   // set last score to -1, thus nothing has been done yet
   last_sorted_ = (SCORER_TYPE_T)-1;
   iterator_lock_ = false;
-  eta_ = 0;
-  beta_ = 0;
-  shift_ = 0;
-  correlation_ = 0;
-  xcorrs_.reserve(10 * MILLION);
 
   post_process_collection_ = false;
   top_scoring_sp_ = NULL;
@@ -141,38 +136,12 @@ void MatchCollection::sort(
     sort_by = EVALUE;
     break;
 
-  // N.B. These are actually NEGATIVE log p-values.
-  case LOGP_WEIBULL_XCORR:
-  case LOGP_BONF_WEIBULL_XCORR:
-  case LOGP_QVALUE_WEIBULL_XCORR:
-  case LOGP_WEIBULL_PEP:
-  case LOGP_PEPTIDE_QVALUE_WEIBULL:
-    smaller_is_better = false;
-    sort_by = LOGP_BONF_WEIBULL_XCORR;
-    break;
-
   case PERCOLATOR_SCORE:
   case PERCOLATOR_QVALUE:
   case PERCOLATOR_PEPTIDE_QVALUE:
   case PERCOLATOR_PEP:
     smaller_is_better = false;
     sort_by = PERCOLATOR_SCORE;
-    break;
-
-  case QRANKER_SCORE:
-  case QRANKER_QVALUE:
-  case QRANKER_PEPTIDE_QVALUE:
-  case QRANKER_PEP:
-    smaller_is_better = false;
-    sort_by = QRANKER_SCORE;
-    break;
-
-  case BARISTA_SCORE:
-  case BARISTA_QVALUE:
-  case BARISTA_PEPTIDE_QVALUE:
-  case BARISTA_PEP:
-    smaller_is_better = false;
-    sort_by = BARISTA_SCORE;
     break;
 
   case DELTA_CN:
@@ -298,18 +267,6 @@ bool MatchCollection::populateMatchRank(
   return true;
 }
 
-/**
- * For the #top_count ranked peptides, calculate the Weibull parameters
- *\returns true, if successfully calculates the Weibull parameters
- */
-static const FLOAT_T MIN_XCORR_SHIFT = -5.0;
-static const FLOAT_T MAX_XCORR_SHIFT  = 5.0;
-//#define CORR_THRESHOLD 0.995   // Must achieve this correlation, else punt.
-static const FLOAT_T CORR_THRESHOLD = 0.0;       // For now, turn off the threshold.
-static const FLOAT_T XCORR_SHIFT = 0.05;
-static const FLOAT_T MIN_SP_SHIFT = -100.0;
-static const FLOAT_T MAX_SP_SHIFT = 300.0;
-static const FLOAT_T SP_SHIFT = 5.0;
 
 /**
  * match_collection get, set method
@@ -434,21 +391,6 @@ int MatchCollection::getTargetExperimentSize() {
 int MatchCollection::getCharge()
 {
   return zstate_.getCharge();
-}
-
-/**
- * \brief Transfer the Weibull distribution parameters, including the
- * correlation from one match_collection to another.  No check to see
- * that the parameters have been estimated.
- */
-void MatchCollection::transferWeibull(
-  MatchCollection* from_collection,
-  MatchCollection* to_collection
-  ){
-  to_collection->eta_ = from_collection->eta_;
-  to_collection->beta_ = from_collection->beta_;
-  to_collection->shift_ = from_collection->shift_;
-  to_collection->correlation_ = from_collection->correlation_;
 }
 
 /**
@@ -1120,38 +1062,6 @@ bool MatchCollection::printTabDelimited(
   delete match_iterator;
   
   return true;
-}
-
-/**
- * Retrieve the calibration parameter eta.
- */
-FLOAT_T MatchCollection::getCalibrationEta()
-{
-  return eta_;
-}
-
-/**
- * Retrieve the calibration parameter beta.
- */
-FLOAT_T MatchCollection::getCalibrationBeta()
-{
-  return beta_;
-}
-
-/**
- * Retrieve the calibration parameter shift.
- */
-FLOAT_T MatchCollection::getCalibrationShift()
-{
-  return shift_;
-}
-
-/**
- * Retrieve the calibration correlation.
- */
-FLOAT_T MatchCollection::getCalibrationCorr()
-{
-  return correlation_;
 }
 
 /**

@@ -10,14 +10,9 @@
 #include "util/Params.h"
 #include "util/StringUtils.h"
 
-#include "xlink/xlink_assign_ions.h"
-#include "xlink/xhhc_score_peptide_spectrum.h"
-#include "qranker-barista/Barista.h"
 #include "ComputeQValues.h"
 #include "CruxBullseyeApplication.h"
 #include "CruxHardklorApplication.h"
-#include "ExtractColumns.h"
-#include "ExtractRows.h"
 #include "GeneratePeptides.h"
 #include "GetMs2Spectrum.h"
 #include "MakePinApplication.h"
@@ -28,12 +23,8 @@
 #include "PredictPeptideIons.h"
 #include "PrintProcessedSpectra.h"
 #include "PSMConvertApplication.h"
-#include "qranker-barista/QRanker.h"
 #include "ReadTideIndex.h"
-#include "xlink/SearchForXLinks.h"
-#include "SortColumn.h"
 #include "SpectralCounts.h"
-#include "StatColumn.h"
 #include "TideIndexApplication.h"
 #include "TideSearchApplication.h"
 #include "CometApplication.h"
@@ -53,14 +44,11 @@ CreateDocs::~CreateDocs() {
 int CreateDocs::main(int argc, char** argv) {
   CruxApplicationList apps("crux");
   apps.add(new AssignConfidenceApplication());
-  apps.add(new Barista());
   apps.add(new CascadeSearchApplication());  
   apps.add(new CometApplication());
   apps.add(new CreateDocs());
   apps.add(new CruxBullseyeApplication());
   apps.add(new CruxHardklorApplication());
-  apps.add(new ExtractColumns());
-  apps.add(new ExtractRows());
   apps.add(new GeneratePeptides());
   apps.add(new GetMs2Spectrum());
   apps.add(new KojakApplication());
@@ -72,17 +60,11 @@ int CreateDocs::main(int argc, char** argv) {
   apps.add(new PredictPeptideIons());
   apps.add(new PrintProcessedSpectra());
   apps.add(new PSMConvertApplication());
-  apps.add(new QRanker());
   apps.add(new ReadTideIndex());
-  apps.add(new SearchForXLinks());
-  apps.add(new SortColumn());
   apps.add(new SpectralCounts());
-  apps.add(new StatColumn());
   apps.add(new SubtractIndexApplication());
   apps.add(new TideIndexApplication());
   apps.add(new TideSearchApplication());
-  apps.add(new XLinkAssignIons());
-  apps.add(new XLinkScoreSpectrum());
   
   string targetApp = Params::GetString("tool-name");
   if (targetApp == "list") {

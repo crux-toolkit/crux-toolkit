@@ -5,16 +5,12 @@ use_cxx11()
 
 add_subdirectory(app/bullseye)
 add_subdirectory(app/hardklor)
-add_subdirectory(app/qranker-barista)
-add_subdirectory(app/xlink)
 add_subdirectory(app/tide)
 
 include_directories(${CMAKE_SOURCE_DIR}/ext)
 include_directories(${CMAKE_SOURCE_DIR}/src)
 include_directories(${CMAKE_SOURCE_DIR}/src/app/bullseye)
 include_directories(${CMAKE_SOURCE_DIR}/src/app/hardklor)
-include_directories(${CMAKE_SOURCE_DIR}/src/app/qranker-barista)
-include_directories(${CMAKE_SOURCE_DIR}/src/app/xlink)
 include_directories(${CMAKE_SOURCE_DIR}/src/io)
 include_directories(${CMAKE_SOURCE_DIR}/src/model)
 include_directories(${CMAKE_BINARY_DIR})
@@ -57,8 +53,6 @@ endif (WIN32 AND NOT Cygwin)
 
 link_directories(${CMAKE_BINARY_DIR}/app/bullseye)
 link_directories(${CMAKE_BINARY_DIR}/app/hardklor)
-link_directories(${CMAKE_BINARY_DIR}/app/qranker-barista)
-link_directories(${CMAKE_BINARY_DIR}/app/xlink)
 link_directories(${CMAKE_BINARY_DIR}/ext/lib)
 link_directories(${CMAKE_BINARY_DIR}/ext/lib64)
 link_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator-build/src) 
@@ -104,8 +98,6 @@ set (
   io/DelimitedFile.cpp
   io/DelimitedFileReader.cpp
   io/DelimitedFileWriter.cpp
-  app/ExtractColumns.cpp
-  app/ExtractRows.cpp
   util/FileUtils.cpp
   model/FilteredSpectrumChargeIterator.cpp
   model/GeneratePeptidesIterator.cpp
@@ -174,7 +166,6 @@ set (
   io/PWIZSpectrumCollection.cpp
   app/ReadSpectrumRecordsApplication.cpp
   app/ReadTideIndex.cpp
-  app/SortColumn.cpp
   model/Scorer.cpp
   app/SpectralCounts.cpp
   io/SpectrumCollection.cpp
@@ -183,7 +174,6 @@ set (
   io/SpectrumRecordSpectrumCollection.cpp
   io/SpectrumRecordWriter.cpp
   model/SpectrumZState.cpp
-  app/StatColumn.cpp
   util/StringUtils.cpp
   io/SQTReader.cpp
   io/SQTWriter.cpp
@@ -437,7 +427,6 @@ if (WIN32 AND NOT CYGWIN)
   endif (NOT CMAKE_GENERATOR MATCHES "^.*Win64$")
   target_link_libraries(
     crux
-    barista
     bullseye
     hardklor
     cometsearch
@@ -446,7 +435,6 @@ if (WIN32 AND NOT CYGWIN)
     blas
     fido
     picked_protein
-    xlink
     gflags_static
     crux-support
     tide-support
@@ -466,10 +454,7 @@ else()
   # UNIX SYSTEMS
   target_link_libraries(
     crux
-    xlink
-    barista
     bullseye
-    xlink
     crux-support
     tide-support
     cometsearch
