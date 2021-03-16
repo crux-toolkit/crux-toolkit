@@ -111,6 +111,7 @@ class Spectrum {
   int ms1_spectrum_number_;
   double iso_window_lower_mz_;
   double iso_window_upper_mz_;
+  double obv_rt_;
 
 };
 
@@ -156,6 +157,8 @@ class SpectrumCollection {
 
   /// added by Yang
   void SortByMS1SpectrumNum();
+  int FindHighestSpectrumNum() const;
+  void SetNormalizedObvRTime();
 
 
  private:

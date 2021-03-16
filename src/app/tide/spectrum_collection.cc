@@ -437,6 +437,28 @@ void SpectrumCollection::SortByMS1SpectrumNum() {
 
 }
 
+int SpectrumCollection::FindHighestSpectrumNum() const {
+	// Return the maximum MS2 scan number seen across all input spectra.
+	int highest_scannum = 0;
+	vector<Spectrum*>::const_iterator i = spectra_.begin();
+	for (; i != spectra_.end(); ++i) {
+		int curr_scannum = (*i)->SpectrumNumber();
+		if (curr_scannum > highest_scannum) { highest_scannum = curr_scannum; }
+		// carp(CARP_DETAILED_DEBUG, "scannum:%d \t rt:%f ", curr_scannum, (*i)->RTime() );
+	}
+	return highest_scannum;
+}
+
+void SpectrumCollection::SetNormalizedObvRTime() {
+	double highest_scannum = FindHighestSpectrumNum() * 1.0;
+
+	vector<Spectrum*>::const_iterator i = spectra_.begin();
+	for (; i != spectra_.end(); ++i) {
+		(*i)->SetRTime(1.0 * (*i)->SpectrumNumber() / highest_scannum);
+		//carp(CARP_DETAILED_DEBUG, "set scannum:%d \t rt:%f ", (*i)->SpectrumNumber(), (*i)->RTime() );
+	}
+}
+
 
 void SpectrumCollection::ReadMS(istream& in, bool ms1) {
   // Parse MS2 file format.
