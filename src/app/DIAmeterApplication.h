@@ -80,7 +80,7 @@ class DIAmeterApplication : public CruxApplication {
 
   double getTailorQuantile(TideMatchSet::Arr2* match_arr2);
 
-  void getPeptidePredRTMapping(map<string, double>* peptide_predrt_map);
+  void getPeptidePredRTMapping(map<string, double>* peptide_predrt_map, int percent_bins=200);
 
 
  public:

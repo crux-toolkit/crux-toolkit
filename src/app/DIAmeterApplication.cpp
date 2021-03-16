@@ -81,7 +81,7 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
   map<string, double> peptide_predrt_map;
   getPeptidePredRTMapping(&peptide_predrt_map);
 
-
+  /*
   vector<InputFile> ms1_spectra_files = getInputFiles(input_files, 1);
   vector<InputFile> ms2_spectra_files = getInputFiles(input_files, 2);
 
@@ -191,10 +191,9 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
 		  delete[] (i->second).first;
 		  delete[] (i->second).second;
 	  }
-	  /* */
+
   }
-
-
+   */
   return 0;
 }
 
@@ -316,11 +315,11 @@ vector<InputFile> DIAmeterApplication::getInputFiles(const vector<string>& filep
 }
 
 
-void DIAmeterApplication::getPeptidePredRTMapping(map<string, double>* peptide_predrt_map) {
+void DIAmeterApplication::getPeptidePredRTMapping(map<string, double>* peptide_predrt_map, int percent_bins) {
 	carp(CARP_INFO, "predrt-files: %s ", Params::GetString("predrt-files").c_str());
 
-	double max_predrt=-10000.0, min_predrt=10000.0;
 	map<string, double> tmp_map;
+	vector<double> predrt_vec;
 
 	// it's possible that multiple mapping files are provided and concatenated by comma
 	vector<string> mapping_paths = StringUtils::Split(Params::GetString("predrt-files"), ",");
@@ -342,22 +341,35 @@ void DIAmeterApplication::getPeptidePredRTMapping(map<string, double>* peptide_p
 
 				double predrt = stod(column_values.at(1));
 				tmp_map.insert(make_pair(column_values.at(0), predrt));
+				predrt_vec.push_back(predrt);
 				// carp(CARP_DETAILED_DEBUG, "Peptide:%s \t predrt:%f", column_values.at(0).c_str(), predrt );
-
-				if (predrt > max_predrt) { max_predrt=predrt; }
-				if (predrt < min_predrt) { min_predrt=predrt; }
 			}
 			file_stream.close();
 		}
-		carp(CARP_DETAILED_DEBUG, "min_predrt:%f \t max_predrt:%f", min_predrt, max_predrt );
-
-		for (map<string, double>::iterator it = tmp_map.begin(); it != tmp_map.end(); it++) {
-			peptide_predrt_map->insert(make_pair(it->first, (it->second - min_predrt)/(max_predrt - min_predrt) ));
-		}
-		/*for (map<string, double>::iterator it = peptide_predrt_map->begin(); it != peptide_predrt_map->end(); it++) {
-			carp(CARP_DETAILED_DEBUG, "Peptide:%s \t predrt:%f", it->first.c_str(), it->second );
-		}*/
 	}
+
+	if (predrt_vec.size() <= 0) { return; }
+
+	vector<double> rt_percent_vec;
+	sort(predrt_vec.begin(), predrt_vec.end());
+
+	for (int percent_idx=0; percent_idx<percent_bins; ++percent_idx) {
+		int percent_pos = (int)((1.0*percent_idx/100.0)*(double)predrt_vec.size());
+		if (percent_pos >= predrt_vec.size()) { percent_pos = predrt_vec.size()-1; }
+		rt_percent_vec.push_back(predrt_vec[percent_pos]);
+		// carp(CARP_DETAILED_DEBUG, "percent_pos:%d \t rt_percent:%f", percent_pos, predrt_vec[percent_pos] );
+	}
+
+	for (map<string, double>::iterator it = tmp_map.begin(); it != tmp_map.end(); it++) {
+		double predrt = it->second;
+		int cnt_below = std::count_if(rt_percent_vec.begin(), rt_percent_vec.end(),[&](int val){ return val <= predrt; });
+		peptide_predrt_map->insert(make_pair(it->first, 1.0*cnt_below/percent_bins ));
+
+	}
+
+	/*for (map<string, double>::iterator it = peptide_predrt_map->begin(); it != peptide_predrt_map->end(); it++) {
+		carp(CARP_DETAILED_DEBUG, "Peptide:%s \t predrt:%f", it->first.c_str(), it->second );
+	}*/
 	carp(CARP_DETAILED_DEBUG, "peptide_predrt_map size:%d", peptide_predrt_map->size());
 }
 
