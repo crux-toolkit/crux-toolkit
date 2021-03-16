@@ -57,7 +57,8 @@ class DIAmeterApplication : public CruxApplication {
 	const ProteinVec& proteins, ///< proteins corresponding with peptides
 	const vector<const pb::AuxLocation*>& locations,  ///< auxiliary locations
 	TideMatchSet* matches, ///< object to manage PSMs
-	map<int, pair<double*, double*>>* ms1scan_intensity_rank_map
+	map<int, pair<double*, double*>>* ms1scan_intensity_rank_map,
+	map<string, double>* peptide_predrt_map
   );
 
   void computePrecIntRank(
@@ -78,6 +79,8 @@ class DIAmeterApplication : public CruxApplication {
 		  double* max_range );
 
   double getTailorQuantile(TideMatchSet::Arr2* match_arr2);
+
+  void getPeptidePredRTMapping(map<string, double>* peptide_predrt_map);
 
 
  public:
@@ -144,6 +147,6 @@ class DIAmeterApplication : public CruxApplication {
 /*
  * src/./crux tide-index --peptide-list T --decoy-format peptide-reverse --missed-cleavages 2 --enzyme trypsin --max-mass 6000 --output-dir /media/ylu465/Data/proj/data/dia_search/ /media/ylu465/Data/proj/data/dia_search/cerevisiae_orf_trans_all.fasta cerevisiae_orf_trans_all
  * gdb -ex=r --args src/./crux diameter --precursor-window 10 --top-match 5 --overwrite T --output-dir /media/ylu465/Data/proj/data/dia_search/crux-output /media/ylu465/Data/proj/data/dia_search/e01306.mzXML /media/ylu465/Data/proj/data/dia_search/cerevisiae_orf_trans_all --verbosity 60 > log.txt 2> error.txt 1> output.txt
-  * src/./crux tide-search --precursor-window-type mz --precursor-window 10 --top-match 5 --overwrite T --output-dir /media/ylu465/Data/proj/data/dia_search/crux-output1 /media/ylu465/Data/proj/data/dia_search/e01306.mzXML /media/ylu465/Data/proj/data/dia_search/cerevisiae_orf_trans_all
+ * src/./crux diameter --precursor-window 10 --top-match 5 --overwrite T --output-dir /media/ylu465/Data/proj/data/dia_search/crux-output /media/ylu465/Data/proj/data/dia_search/e01306.mzXML /media/ylu465/Data/proj/data/dia_search/cerevisiae_orf_trans_all --predrt-files /media/ylu465/Data/proj/data/dia_search/cerevisiae_orf_trans_all/deeprt.peptides.target.txt,/media/ylu465/Data/proj/data/dia_search/cerevisiae_orf_trans_all/deeprt.peptides.decoy.txt --verbosity 60 > log.txt 2> error.txt 1> output.txt
  *
  */

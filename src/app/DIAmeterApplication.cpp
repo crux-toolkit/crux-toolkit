@@ -78,9 +78,13 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
   ofstream* output_file = create_stream_in_path(output_file_name_.c_str(), NULL, Params::GetBool("overwrite"));
   TideMatchSet::writeHeadersDIA(output_file, Params::GetBool("compute-sp"));
 
+  map<string, double> peptide_predrt_map;
+  getPeptidePredRTMapping(&peptide_predrt_map);
+
 
   vector<InputFile> ms1_spectra_files = getInputFiles(input_files, 1);
   vector<InputFile> ms2_spectra_files = getInputFiles(input_files, 2);
+
 
   // Loop through spectrum files
   for (pair<vector<InputFile>::const_iterator, vector<InputFile>::const_iterator> f(ms1_spectra_files.begin(), ms2_spectra_files.begin());
@@ -98,6 +102,7 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
 	  double highest_ms2_mz = spectra->FindHighestMZ();
 	  carp(CARP_DEBUG, "Maximum observed MS2 m/z = %f.", highest_ms2_mz);
 	  MaxBin::SetGlobalMax(highest_ms2_mz);
+
 
 	  // Active queue to process the indexed peptides
 	  ActivePeptideQueue* active_peptide_queue = new ActivePeptideQueue(peptide_reader->Reader(), proteins);
@@ -176,7 +181,7 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
 			  }
 		  }
 		  TideMatchSet matches(&match_arr, highest_ms2_mz);
-		  if (!match_arr.empty()) { reportDIA(output_file, origin_file, *sc, active_peptide_queue, proteins, locations, &matches, &ms1scan_intensity_rank_map); }
+		  if (!match_arr.empty()) { reportDIA(output_file, origin_file, *sc, active_peptide_queue, proteins, locations, &matches, &ms1scan_intensity_rank_map, &peptide_predrt_map); }
 
 	  }
 
@@ -186,7 +191,7 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
 		  delete[] (i->second).first;
 		  delete[] (i->second).second;
 	  }
-
+	  /* */
   }
 
 
@@ -201,7 +206,8 @@ void DIAmeterApplication::reportDIA(
 	const ProteinVec& proteins, ///< proteins corresponding with peptides
 	const vector<const pb::AuxLocation*>& locations,  ///< auxiliary locations
 	TideMatchSet* matches, ///< object to manage PSMs
-	map<int, pair<double*, double*>>* ms1scan_intensity_rank_map
+	map<int, pair<double*, double*>>* ms1scan_intensity_rank_map,
+	map<string, double>* peptide_predrt_map
 ) {
 	Spectrum* spectrum = sc.spectrum;
 	int charge = sc.charge;
@@ -241,10 +247,10 @@ void DIAmeterApplication::reportDIA(
 	}
 
 	matches->writeToFileDIA(output_file, Params::GetInt("top-match"), targets, spectrum_filename, spectrum, charge, peptides, proteins, locations,
-			&delta_cn_map, &delta_lcn_map, Params::GetBool("compute-sp")? &sp_map : NULL, &intensity_map);
+			&delta_cn_map, &delta_lcn_map, Params::GetBool("compute-sp")? &sp_map : NULL, &intensity_map, peptide_predrt_map);
 
 	matches->writeToFileDIA(output_file, Params::GetInt("top-match"), decoys, spectrum_filename, spectrum, charge, peptides, proteins, locations,
-				&delta_cn_map, &delta_lcn_map, Params::GetBool("compute-sp")? &sp_map : NULL, &intensity_map);
+				&delta_cn_map, &delta_lcn_map, Params::GetBool("compute-sp")? &sp_map : NULL, &intensity_map, peptide_predrt_map);
 
 }
 
@@ -308,6 +314,53 @@ vector<InputFile> DIAmeterApplication::getInputFiles(const vector<string>& filep
 
   return input_sr;
 }
+
+
+void DIAmeterApplication::getPeptidePredRTMapping(map<string, double>* peptide_predrt_map) {
+	carp(CARP_INFO, "predrt-files: %s ", Params::GetString("predrt-files").c_str());
+
+	double max_predrt=-10000.0, min_predrt=10000.0;
+	map<string, double> tmp_map;
+
+	// it's possible that multiple mapping files are provided and concatenated by comma
+	vector<string> mapping_paths = StringUtils::Split(Params::GetString("predrt-files"), ",");
+	for(int file_idx = 0; file_idx<mapping_paths.size(); file_idx++) {
+		if (!FileUtils::Exists(mapping_paths.at(file_idx))) { carp(CARP_FATAL, "The mapping file %s does not exist! \n", mapping_paths.at(file_idx).c_str()); }
+		else { carp(CARP_DEBUG, "parsing the mapping file: %s", mapping_paths.at(file_idx).c_str()); }
+
+		std::ifstream file_stream(mapping_paths.at(file_idx).c_str());
+		string next_data_string;
+		if (file_stream.is_open()) {
+			unsigned int line_cnt = 0;
+			while (getline(file_stream, next_data_string)) {
+				vector<string> column_values = StringUtils::Split(StringUtils::Trim(next_data_string), "\t");
+				if (column_values.size() < 2) { carp(CARP_FATAL, "Each row should contains two columns! (observed %d) \n", column_values.size()); }
+
+				line_cnt++;
+				// check if the first row is the header or the real mapping
+				if (line_cnt <= 1 && !StringUtils::IsNumeric(column_values.at(1), true, true)) { continue; }
+
+				double predrt = stod(column_values.at(1));
+				tmp_map.insert(make_pair(column_values.at(0), predrt));
+				// carp(CARP_DETAILED_DEBUG, "Peptide:%s \t predrt:%f", column_values.at(0).c_str(), predrt );
+
+				if (predrt > max_predrt) { max_predrt=predrt; }
+				if (predrt < min_predrt) { min_predrt=predrt; }
+			}
+			file_stream.close();
+		}
+		carp(CARP_DETAILED_DEBUG, "min_predrt:%f \t max_predrt:%f", min_predrt, max_predrt );
+
+		for (map<string, double>::iterator it = tmp_map.begin(); it != tmp_map.end(); it++) {
+			peptide_predrt_map->insert(make_pair(it->first, (it->second - min_predrt)/(max_predrt - min_predrt) ));
+		}
+		/*for (map<string, double>::iterator it = peptide_predrt_map->begin(); it != peptide_predrt_map->end(); it++) {
+			carp(CARP_DETAILED_DEBUG, "Peptide:%s \t predrt:%f", it->first.c_str(), it->second );
+		}*/
+	}
+	carp(CARP_DETAILED_DEBUG, "peptide_predrt_map size:%d", peptide_predrt_map->size());
+}
+
 
 double DIAmeterApplication::loadMS1Spectra(const std::string& file, map<int, pair<double*, double*>>* ms1scan_intensity_rank_map) {
 	SpectrumCollection* spectra = loadSpectra(file);
@@ -375,7 +428,7 @@ SpectrumCollection* DIAmeterApplication::loadSpectra(const std::string& file) {
 	// Precursor-window-type must be mz in DIAmeter, based upon which spectra are sorted
 	// Precursor-window is the half size of isolation window
 	spectra->Sort<ScSortByMzDIA>(ScSortByMzDIA());
-
+	spectra->SetNormalizedObvRTime();
 	return spectra;
 }
 
@@ -438,8 +491,8 @@ vector<string> DIAmeterApplication::getArgs() const {
 
 vector<string> DIAmeterApplication::getOptions() const {
   string arr[] = {
-    "file-column",
-    "fileroot",
+    // "file-column",
+    // "fileroot",
     "max-precursor-charge",
     "min-peaks",
     "mod-precision",
@@ -452,6 +505,7 @@ vector<string> DIAmeterApplication::getOptions() const {
 	// "precursor-window-type",
 	// "spectrum-charge",
     // "spectrum-parser",
+	"predrt-files",
     "top-match",
     "use-flanking-peaks",
     "use-neutral-loss-peaks",
