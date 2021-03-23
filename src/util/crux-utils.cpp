@@ -15,6 +15,8 @@
 #include <unistd.h>
 #include <sys/dir.h>
 #include <dirent.h>
+#else
+#include <stdint.h>
 #endif
 #include <iostream>
 #include "crux-utils.h"
@@ -1483,6 +1485,7 @@ std::string generate_uuid_v4() {
     auto ticks = tNow.time_since_epoch().count();
     randomPool << ticks;
 
+    extern char **environ;
     const char* var = *environ;
     for(int i = 0; var; i++){
       randomPool << var;
@@ -1499,7 +1502,11 @@ std::string generate_uuid_v4() {
 
     unsigned char hashBytes[30];
     enviroHash.GetHash(hashBytes);
+#ifndef _MSC_VER
     u_int64_t seed = 0; //take the first 8 bytes for the seed
+#else
+    uint64_t seed = 0; //take the first 8 bytes for the seed
+#endif
     for(int i = 0; i < 8; i++)
       seed = (seed << 8) + hashBytes[i];
 
