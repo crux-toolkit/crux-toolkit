@@ -14,48 +14,49 @@
 #include <iostream>
 
 class KojakApplication: public CruxApplication {
-public:
+ public:
 
   /**
-  * \Default constructor
-  */
+   * \Default constructor
+   */
   KojakApplication();
 
   /**
-  * \Default destructor
-  */
+   * \Default destructor
+   */
   ~KojakApplication();
 
   /**
-  * \returns the command name for KojakApplication
-  */
+   * \returns the command name for KojakApplication
+   */
   virtual std::string getName() const;
 
   /**
-  * \returns the description for KojakApplication
-  */
+   * \returns the description for KojakApplication
+   */
   virtual std::string getDescription() const;
 
   /**
-  * \returns the command arguments
-  */
+   * \returns the command arguments
+   */
   virtual std::vector<std::string> getArgs() const;
 
   /**
-  * \returns the command options
-  */
+   * \returns the command options
+   */
   virtual std::vector<std::string> getOptions() const;
 
   /**
-  * \returns the command outputs
-  */
+   * \returns the command outputs
+   */
   virtual std::vector< std::pair<std::string, std::string> > getOutputs() const;
 
   virtual COMMAND_T getCommand() const;
 
   /**
-  * \returns whether the application needs the output directory or not. (default false).
-  */
+   * \returns whether the application needs the output directory or not.
+   * (default false).
+   */
   virtual bool needsOutputDirectory() const;
 
   /**
@@ -64,16 +65,15 @@ public:
   virtual void processParams();
 
   /**
-  * \brief runs kojak on the input spectra
-  * \returns whether kojak was successful or not
-  */
+   * \brief runs kojak on the input spectra
+   * \returns whether kojak was successful or not
+   */
   virtual int main(int argc, char** argv);
   int main(const std::vector<std::string>& input_files);
 
-protected:
+ protected:
   KojakManager searchManager_;
 };
-
 
 #endif
 
