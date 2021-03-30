@@ -36,7 +36,7 @@ def get_args():
         help=(
             "Lint only modified C++ files as found by performing a "
             "'git diff' against 'origin/master'."
-        )
+        ),
     )
 
     parser.add_argument(
@@ -44,17 +44,14 @@ def get_args():
         "--lenient",
         default=False,
         action="store_true",
-        help=(
-            "Enable lenient linting. This excludes rules from"
-            "'--lenient-include'"
-        )
+        help=("Enable lenient linting. This excludes rules from" "'--lenient-include'"),
     )
     parser.add_argument(
         "-e",
         "--exclude",
         default="exclude_rules.txt",
         type=str,
-        help="A file indicating cpplint rules to exclude, one per line."
+        help="A file indicating cpplint rules to exclude, one per line.",
     )
 
     parser.add_argument(
@@ -62,7 +59,7 @@ def get_args():
         "--include",
         default="include_lax_rules.txt",
         type=str,
-        help="A file indicating cpplint rules to always include, one per line."
+        help="A file indicating cpplint rules to always include, one per line.",
     )
 
     parser.add_argument(
@@ -73,7 +70,7 @@ def get_args():
         help=(
             "A file indicating cpplint rules to include, one per line. "
             "These rules are excluded when '--lenient' is used."
-        )
+        ),
     )
 
     return parser.parse_args()
@@ -198,10 +195,7 @@ def cpplint(cpp_files, filters=None):
 
 def main():
     """The main function"""
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(levelname)s: %(message)s"
-    )
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
     # Parse command line arguments:
     args = get_args()
