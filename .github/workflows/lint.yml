@@ -1,4 +1,4 @@
-name: Check release notes
+name: Lint and Check Release Notes
 
 on: [push, pull_request]
 
