@@ -33,4 +33,4 @@ jobs:
       - name: Lint the proposed changes using cpplint
         shell: bash
         run: |
-          cd test/lint && python lint.py -l -d
+          cd test/lint && python lint.py -d

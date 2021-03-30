@@ -202,9 +202,9 @@ def main():
 
     # Parse the linting rules:
     rules = [
-        parse_rules(Path(args.exclude), False),
         parse_rules(Path(args.include), True),
         parse_rules(Path(args.lenient_include), (not args.lenient)),
+        parse_rules(Path(args.exclude), False),
     ]
     rules = ",".join(rules)
 
@@ -225,7 +225,7 @@ def main():
         sys.exit(0)
 
     # Run cpplint
-    cpplint(cpp_files)
+    cpplint(cpp_files, filters=rules)
     LOGGER.info("Great job! Linting was completed successfully :D")
 
 
