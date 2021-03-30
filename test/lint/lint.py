@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-"""Lint the C++ files under the src/app directory"""
+"""Lint the C++ files under the src/app directory
+
+Note that to run this script, you'll need the following dependencies:
+  - Python 3.6+
+  - git
+  - cpplint (Install with 'pip install cpplint')
+"""
 import os
 import sys
 import logging
