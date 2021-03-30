@@ -54,7 +54,8 @@ public:
   virtual COMMAND_T getCommand() const;
 
   /**
-  * \returns whether the application needs the output directory or not. (default false).
+  * \returns whether the application needs the output directory or not.
+  * (default false).
   */
   virtual bool needsOutputDirectory() const;
 
