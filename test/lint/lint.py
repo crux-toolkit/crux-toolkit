@@ -44,7 +44,10 @@ def get_args():
         "--lenient",
         default=False,
         action="store_true",
-        help=("Enable lenient linting. This excludes rules from" "'--lenient-include'"),
+        help=(
+            "Enable lenient linting. This excludes rules from"
+            "'--lenient-include'"
+        ),
     )
     parser.add_argument(
         "-e",
@@ -195,7 +198,10 @@ def cpplint(cpp_files, filters=None):
 
 def main():
     """The main function"""
-    logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(levelname)s: %(message)s",
+    )
 
     # Parse command line arguments:
     args = get_args()
