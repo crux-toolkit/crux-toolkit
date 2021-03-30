@@ -166,7 +166,7 @@ def find_cpp_files(diff_files=None):
     cpp_files = []
     for diff_file in diff_files:
         is_cpp = diff_file.name.lower().endswith(cpp_exts)
-        in_src = src in diff_file.parents
+        in_src = src in diff_file.resolve().parents
         if is_cpp and in_src:
             cpp_files.append(diff_file)
 
