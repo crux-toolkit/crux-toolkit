@@ -54,7 +54,7 @@
     <blockquote> 
     <h2>Release notes for Crux</h2>
 
-<h3>Unversioned updates</h3>
+<h3>Version 4.0</h3> April 06, 2021
 
 <h4>Major changes</h3>
 
@@ -63,11 +63,13 @@
   barista, q-ranker, extract-columns, extract-rows, stat-column, sort-by-column.
   </li>
 
-  <li>March 18, 2020: Add kojak module.
+  <li>Nov. 6, 2020: Crux updated to use Comet 2019.05.</li>
+
+  <li>Nov. 6, 2020: Added Kojak module for searching for cross-linked peptides.
   </li>
 
   <li>July 23, 2019: Added the Tailor PSM score calibration method to Tide-search as
-  an option. Updated the performance and smoke-tests.
+  an option.
   </li>
 
   <li>June 4, 2019: The Crux automatic build process was modified to use a cached version 
@@ -92,13 +94,37 @@
 
 <ul>
   <li>
+    Mar 10, 2021: Changed num-threads default to 1.
+  </li>
+  <li>
+    Feb. 12, 2021: Added date of latest commit to version string.
+  </li>
+  <li>
+    Feb. 11, 2021: Fixed bug in support for comet. Output files were
+    being stored in the wrong directory when multiple spectra files
+    were provided.
+  </li>
+  <li>
     Feb 9, 2021: Added process ID number to the names of temporary
     files created by Tide, to avoid conflicts.</li>
+  <li>
+    Jan. 11, 2021: Fixed break in build of Percolator.
+  </li>
   <li>
     December 7, 2020: Updated documentation to remove "+" from the usage statement.
   </li>
   <li>
+    December 4, 2020: Updated schematic diagram of Crux tools.
+  </li>
+  <li>
+    December 3, 2020: Fixed bug in peptide-centric search that caused
+    mis-scaling of XCORR score on some Linux systems.
+  </li>
+  <li>
     September 16, 2020: Add an additional parser to parse scan number out of the “TITLE” line in MGF files. Now the TITLE line can consist of two formats. The first format is TITLE=fileName.scanNumber.scanNumber.charge.dta. The second format is TITLE=fileName.scanNumber.scanNumber.charge File:"fileNameWithExtension", NativeID:"controllerType=0 controllerNumber=1 scan=scanNumber"
+  </li>
+  <li>
+    Sept. 18, 2020: Updated MGF file parser to handle title line.
   </li>
   <li>
     August 28, 2020: Updated documentation for --use-neutral-loss-peaks.
@@ -114,8 +140,20 @@
   </li>
 
   <li>
+    May 28, 2020: Added fixes for pepXML schema validation failures.
+  </li>
+
+  <li>
     April 28, 2020: Added the --brief-output option to tide-search,
-    which prints only a subset of fields to the output file.</li>
+    which prints only a subset of fields to the output file.
+  </li>
+  <li>
+    April 27, 2020: Fixed build of Percolator to use BLAS libraries.
+  </li>
+  <li>
+    March 18, 2020: Crux now builds MSTookit from original repository
+    rather than a fork.
+  </li>
 
   <li>
     December 16, 2019: Fixed a bug in Tailor method where minimal number of candidate
@@ -144,7 +182,7 @@
   </li>
 
   <li>
-    June 9, 2019: Fixed a couple of bugs in the calculation of residue-evidence
+    June 19, 2019: Fixed a couple of bugs in the calculation of residue-evidence
     and res-ev p-value. Correctly released memory when determining amino acid frequency.
     Added a bounds check when adding evidence to the residue-evidence matrix.
     Previously when calculating residue-evidence, all fragment ions were considered to be
@@ -153,10 +191,19 @@
   </li>
 
   <li>
+    April 16, 20219: Fixed Windows path parsing bug in spectral-counts.
+  </li>
+
+  <li>
     April 11, 2019: Changed the default parameters for tide-search so
     that the default mz bin width is 0.02 Da instead of 1.0005079 Da 
     and the default precursor mass window is 50 ppm, rather
     than the previous default of 3 Da.
+  </li>
+
+  <li>
+    November 6, 2018: Decoy generation will now allow duplicate decoy peptides 
+    within a decoy database and bewteen decoy databases.
   </li>
 
   <li>
