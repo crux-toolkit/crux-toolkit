@@ -5,12 +5,18 @@
 
 #include <sys/types.h>
 #include <fstream>
+#include <cstdlib>
+#include <random>
+#include <chrono>
+#include <string>
 #include <errno.h>
 #include <sys/stat.h>
 #ifndef _MSC_VER
 #include <unistd.h>
 #include <sys/dir.h>
 #include <dirent.h>
+#else
+#include <stdint.h>
 #endif
 #include <iostream>
 #include "crux-utils.h"
@@ -24,6 +30,8 @@
 #define  NO_BOOST_DATE_TIME_INLINE
 #include <boost/filesystem.hpp>
 #include <boost/asio.hpp>
+#include <regex>
+#include <pwiz/utility/misc/SHA1.h>
 #include "FileUtils.h"
 #include "crux_version.h"
 
@@ -1466,17 +1474,133 @@ string httpRequest(const string& url, const std::string& data, bool waitForRespo
   return response.str();
 }
 
+std::string generate_uuid_v4() {
+
+    //accumulate some random data in the stream
+    // and hash it to obtain a seed for the random sequence
+    wall_clock();
+    std::stringstream randomPool;
+
+    auto tNow = std::chrono::system_clock::now();
+    auto ticks = tNow.time_since_epoch().count();
+    randomPool << ticks;
+
+    extern char **environ;
+    const char* var = *environ;
+    for(int i = 0; var; i++){
+      randomPool << var;
+      var = environ[i];
+    }
+
+    static std::random_device              rd;
+    randomPool << rd()  << wall_clock();
+    auto seedString = randomPool.str();
+
+    CSHA1 enviroHash;
+    enviroHash.Update((uint8_t *) seedString.c_str(), seedString.size());
+    enviroHash.Final();
+
+    unsigned char hashBytes[30];
+    enviroHash.GetHash(hashBytes);
+#ifndef _MSC_VER
+    u_int64_t seed = 0; //take the first 8 bytes for the seed
+#else
+    uint64_t seed = 0; //take the first 8 bytes for the seed
+#endif
+    for(int i = 0; i < 8; i++)
+      seed = (seed << 8) + hashBytes[i];
+
+    //now we need to compact the hash into 64 bits using XOR to feed it into
+    // the pseudo-random generator
+    static std::mt19937_64                    gen(seed);
+    static std::uniform_int_distribution<> dis(0, 15);
+    static std::uniform_int_distribution<> dis2(8, 11);
+
+    std::stringstream ss;
+    int i;
+    ss << std::hex;
+    for (i = 0; i < 8; i++) {
+        ss << dis(gen);
+    }
+    ss << "-";
+    for (i = 0; i < 4; i++) {
+        ss << dis(gen);
+    }
+    ss << "-4";
+    for (i = 0; i < 3; i++) {
+        ss << dis(gen);
+    }
+    ss << "-";
+    ss << dis2(gen);
+    for (i = 0; i < 3; i++) {
+        ss << dis(gen);
+    }
+    ss << "-";
+    for (i = 0; i < 12; i++) {
+        ss << dis(gen);
+    };
+    return ss.str();
+}
+
+#ifdef _MSC_VER
+  #define PATH_SEPARATOR "\\"
+#else
+  #define PATH_SEPARATOR "/"
+#endif
+
+
+string ensureClientId(){
+  const string cruxHomeDir{".crux"};
+  const string cruxClientIdFileName{"client_id"};
+  stringstream filePath;
+
+#ifdef _MSC_VER
+  filePath << std::getenv("HOMEDRIVE") << std::getenv("HOMEPATH");
+#else
+  filePath << std::getenv("HOME");
+#endif
+
+  filePath << PATH_SEPARATOR << cruxHomeDir;
+  if(FileUtils::Exists(filePath.str())){
+    if(!FileUtils::IsDir(filePath.str())){
+      FileUtils::Remove(filePath.str());
+      FileUtils::Mkdir(filePath.str());
+    }
+  }
+  else
+    FileUtils::Mkdir(filePath.str());
+  
+  filePath << PATH_SEPARATOR << cruxClientIdFileName;
+
+
+  // If the ID file exists and it contents looks like an UUID then return the contents
+  string clientId{""};
+  if(FileUtils::Exists(filePath.str()) && FileUtils::IsRegularFile(filePath.str())){
+    clientId = FileUtils::Read(filePath.str());
+    static const std::regex e("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
+    if(std::regex_match(clientId, e))
+      return clientId;
+  }
+  auto uuid = generate_uuid_v4();
+  auto idFileStream = FileUtils::GetWriteStream(filePath.str(), true);
+  *idFileStream << uuid.c_str();
+  idFileStream->close();
+  return uuid;
+}
+
 void postToAnalytics(const string& appName) {
   // Post data to Google Analytics
   // For more information, see: https://developers.google.com/analytics/devguides/collection/protocol/v1/devguide
   try {
+    auto clientId = ensureClientId();
+
     stringstream paramBuilder;
     paramBuilder << "v=1"                // Protocol verison
                  << "&tid=UA-26136956-1" // Tracking ID
                  // TODO Generate UUID for cid
                  // The Client ID (cid) anonymously identifies a particular user
                  // or device and should be a random UUID
-                 << "&cid=35009a79-1a05-49d7-b876-2b884d0f825b"
+                 << "&cid=" << clientId
                  << "&t=event"           // Hit type
                  << "&ec=crux"           // Event category
                  << "&ea=" << appName    // Event action
