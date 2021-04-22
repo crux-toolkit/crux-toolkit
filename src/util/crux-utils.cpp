@@ -1497,7 +1497,7 @@ std::string generate_uuid_v4() {
     auto seedString = randomPool.str();
 
     CSHA1 enviroHash;
-    enviroHash.Update((uint8_t *) seedString.c_str(), seedString.size());
+    enviroHash.Update((const uint8_t *) seedString.c_str(), seedString.size());
     enviroHash.Final();
 
     unsigned char hashBytes[30];
