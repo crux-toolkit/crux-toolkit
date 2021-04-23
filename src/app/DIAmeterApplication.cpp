@@ -235,7 +235,6 @@ void DIAmeterApplication::reportDIA(
    computeMS2Pval(targets, peptides, observed, &ms2pval_map);
    computeMS2Pval(decoys, peptides, observed, &ms2pval_map);
 
-
    // calculate delta_cn and delta_lcn
    map<TideMatchSet::Arr::iterator, FLOAT_T> delta_cn_map;
    map<TideMatchSet::Arr::iterator, FLOAT_T> delta_lcn_map;
@@ -251,10 +250,10 @@ void DIAmeterApplication::reportDIA(
    }
 
    matches->writeToFileDIA(output_file, Params::GetInt("top-match"), targets, spectrum_filename, spectrum, charge, peptides, proteins, locations,
-         &delta_cn_map, &delta_lcn_map, Params::GetBool("compute-sp")? &sp_map : NULL, &intensity_map, peptide_predrt_map);
+         &delta_cn_map, &delta_lcn_map, Params::GetBool("compute-sp")? &sp_map : NULL, &intensity_map, &ms2pval_map, peptide_predrt_map);
 
    matches->writeToFileDIA(output_file, Params::GetInt("top-match"), decoys, spectrum_filename, spectrum, charge, peptides, proteins, locations,
-            &delta_cn_map, &delta_lcn_map, Params::GetBool("compute-sp")? &sp_map : NULL, &intensity_map, peptide_predrt_map);
+            &delta_cn_map, &delta_lcn_map, Params::GetBool("compute-sp")? &sp_map : NULL, &intensity_map, &ms2pval_map, peptide_predrt_map);
 
 }
 
@@ -293,12 +292,10 @@ void DIAmeterApplication::computeMS2Pval(
     	  pvalue_binomial_probs.push_back(binomial_prob);
       }
 
-      double logsumexp = MathUtil::LogSumExp(&pvalue_binomial_probs);
-      carp(CARP_DETAILED_DEBUG, "pvalue_binomial_probs: size=%d \t logsumexp=%f \t %s ", pvalue_binomial_probs.size(), logsumexp, StringUtils::Join(pvalue_binomial_probs, ',').c_str() );
-
-
+      double ms2pval = -MathUtil::LogSumExp(&pvalue_binomial_probs);
+      ms2pval_map->insert(make_pair((*i), ms2pval));
+      // carp(CARP_DETAILED_DEBUG, "pvalue_binomial_probs: size=%d \t ms2pval=%f \t %s ", pvalue_binomial_probs.size(), ms2pval, StringUtils::Join(pvalue_binomial_probs, ',').c_str() );
    }
-
 }
 
 
@@ -329,7 +326,6 @@ void DIAmeterApplication::computePrecIntRank(
       carp(CARP_DETAILED_DEBUG, "Peptide: %s \t mass:%f \t mz:%f \t intensity_rank:%f,%f,%f \t rank:%d \t xcorr:%f", peptide.Seq().c_str(), peptide.Mass(), peptide_mz_m0, intensity_rank_m0, intensity_rank_m1, intensity_rank_m2, (*i)->rank, (*i)->xcorr_score );
       intensity_map->insert(make_pair((*i), boost::make_tuple(intensity_rank_m0, intensity_rank_m1, intensity_rank_m2)));
    }
-
 }
 
 
