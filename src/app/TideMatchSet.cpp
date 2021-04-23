@@ -344,6 +344,7 @@ void TideMatchSet::writeToFileDIA(
    const map<Arr::iterator, FLOAT_T>* delta_lcn_map,
    const map<Arr::iterator, pair<const SpScorer::SpScoreData, int> >* sp_map,
    const map<Arr::iterator, boost::tuple<double, double, double>>* intensity_map,
+   const map<Arr::iterator, double>* ms2pval_map,
    map<string, double>* peptide_predrt_map
 ) {
    if (!file || vec.empty()) { return; }
@@ -412,19 +413,16 @@ void TideMatchSet::writeToFileDIA(
            << StringUtils::ToString(intensity_tuple.get<1>(), precision, true) << '\t'
            << StringUtils::ToString(intensity_tuple.get<2>(), precision, true) << '\t';
 
-      // TODO
       // RT_DIFF_COL
-
       double predrt = 0.5;
       map<string, double>::iterator predrtIter = peptide_predrt_map->find(cruxPep.getModifiedSequenceWithMasses());
       if (predrtIter != peptide_predrt_map->end()) { predrt = predrtIter->second; }
       // carp(CARP_DETAILED_DEBUG, "Peptide: %s \t pred_rt:%f \t obv_rt:%f", cruxPep.getModifiedSequenceWithMasses().c_str(), predrt, spectrum->RTime() );
       *file << StringUtils::ToString(fabs(predrt - spectrum->RTime()), precision, true) << '\t';
 
-
-      // TODO
       // FRAGMENT_PVALUE_COL
-      *file << StringUtils::ToString(0.0, precision, true) << '\t';
+      double ms2pval = ms2pval_map->at(i);
+      *file << StringUtils::ToString(ms2pval, precision, true) << '\t';
 
       // TODO
       // PRECURSOR_FRAGMENT_COELUTE_COL
